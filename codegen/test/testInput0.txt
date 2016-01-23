@@ -1,4 +1,4 @@
-component IsometricCharacterComponent {
+component IsometricCharacterComponent = {
 	members = {
 		input : InputDevice*
 		jumpTime : Time
@@ -16,7 +16,7 @@ component IsometricCharacterComponent {
 	}
 }
 
-system IsometricCharacterSystem {
+system IsometricCharacterSystem = {
 	family = {
 		IsometricCharacterComponent
 		MovableComponent

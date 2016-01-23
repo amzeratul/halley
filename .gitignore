@@ -11,6 +11,8 @@ Thumbs.db
 *.ncb
 *.suo
 *.bak
+*.sdf
+*.opensdf
 
 # Binaries
 *.dll

@@ -7,34 +7,64 @@ data GenDefinition = ComponentDefinition String [GenEntryDefinition]
                    | SystemDefinition String [GenEntryDefinition]
                    deriving(Show, Eq)
 
-data GenEntryDefinition = MemberList [MemberEntry]
+data GenEntryDefinition = MemberList [VariableDeclaration]
                         | FunctionList [FunctionEntry]
                         | Family [FamilyComponentEntry]
                         | Option String String
                         deriving(Show, Eq)
                         
-type MemberEntry = (String, String)
-type FunctionEntry = (String, String)
+type VariableDeclaration = (String, String)
+type FunctionSignature = ([VariableDeclaration], String)
+type FunctionEntry = (String, FunctionSignature)
 type FamilyComponentEntry = String
 
-whiteSpaceChars = " \n\r\t"
+nonBreakingChars = " \t"
+newLineChars = "\n\r"
+whiteSpaceChars = nonBreakingChars ++ newLineChars
+reservedChars = "{}:=(),"
 
-identifier = many1 (noneOf (whiteSpaceChars ++ "{}:="))
-restOfLine = many1 (noneOf ("\r\n{}"))
-            
+identifier = many1 (noneOf (whiteSpaceChars ++ reservedChars))
+typeName = many1 (noneOf (newLineChars ++ reservedChars))
+restOfLine = many1 (noneOf (newLineChars ++ "{}"))
+
 whiteSpace = many (oneOf whiteSpaceChars)
-nonBreakingWhiteSpace = many (oneOf " \t")
+nonBreakingWhiteSpace = many (oneOf nonBreakingChars)
 
 eol =   try (string "\n\r")
     <|> try (string "\r\n")
     <|> string "\n"
     <|> string "\r"
 
-innerBlock :: GenParser Char st a -> GenParser Char st [a]
-innerBlock c = do
+outerEntry typeName c f = do
+    whiteSpace
+    string typeName
+    whiteSpace
+    genName <- identifier
+    whiteSpace
+    char '='
+    whiteSpace
+    contents <- block c
+    nonBreakingWhiteSpace
+    many eol
+    return $ f genName contents
+
+innerEntry typeName p = do
+    whiteSpace
+    string typeName
+    whiteSpace
+    char '='
+    whiteSpace
+    result <- p
+    nonBreakingWhiteSpace
+    many eol
+    return result
+
+block :: GenParser Char st a -> GenParser Char st [a]
+block c = do
     char '{'
     contents <- many p
     char '}'
+    whiteSpace
     return contents
     where
         p = do
@@ -43,87 +73,54 @@ innerBlock c = do
             whiteSpace
             return result
 
-genDefGeneric genTypeName c f = do
+variable = do
     whiteSpace
-    string genTypeName
-    whiteSpace
-    genName <- identifier
-    whiteSpace
-    char '{'
-    contents <- many p
-    char '}'
-    whiteSpace
-    return $ f genName contents
-    where
-        p = do
-            whiteSpace
-            result <- c
-            whiteSpace
-            return result
-
-entry name p = do
-    string name
-    whiteSpace
-    char '='
-    whiteSpace
-    result <- p
-    nonBreakingWhiteSpace
-    eol <?> "end of line after block"
-    return result
-
-member = do
-    name <- identifier <?> "identifier (member name)"
+    name <- identifier <?> "identifier (name)"
     whiteSpace
     char ':'
     whiteSpace
-    memberType <- identifier <?> "identifier (member type)"
+    varType <- typeName <?> "identifier (type)"
     nonBreakingWhiteSpace
-    eol <?> "end of line after member"
-    return (name, memberType)
+    return (name, varType)
     
+member = do
+    result <- variable
+    eol <?> "end of line after member"
+    return result
+
 function = do
+    whiteSpace
     name <- identifier <?> "identifier (function name)"
     whiteSpace
     char ':'
     whiteSpace
-    memberType <- restOfLine
+    signature <- functionSignature
     nonBreakingWhiteSpace
     eol <?> "end of line after function"
-    return (name, memberType)
+    return (name, signature)
+    
+functionSignature = do
+    whiteSpace
+    char '('
+    args <- sepBy variable (char ',')
+    char ')'
+    whiteSpace
+    string "->"
+    whiteSpace
+    returnType <- typeName <?> "function return type"
+    return (args, returnType)
     
 componentInFamily = do
+    whiteSpace
     name <- restOfLine
     nonBreakingWhiteSpace
     eol <?> "end of line after component"
     return name
     
-memberList = do
-    entry "members" p
-    where
-        p = do
-            block <- innerBlock member
-            return $ MemberList block
-
-functionList = do
-    entry "functions" p
-    where
-        p = do
-            block <- innerBlock function
-            return $ FunctionList block
-            
-familyList = do
-    entry "family" p
-    where
-        p = do
-            block <- innerBlock componentInFamily
-            return $ Family block
-
-specificOption n = do
-    entry n p
-    where
-        p = do
-            opt <- identifier
-            return $ Option n opt
+memberList = innerEntry "members" (do { block <- block member ; return $ MemberList block })
+functionList = innerEntry "functions" (do { block <- block function ; return $ FunctionList block })
+familyList = innerEntry "family" (do { block <- block componentInFamily ; return $ Family block })
+specificOption n = innerEntry n (do { opt <- identifier; return $ Option n opt })
 
 optionEntry = do
     try (specificOption "strategy")
@@ -139,10 +136,10 @@ componentEntries = do
 systemEntries = do
     try familyList
     <|> optionEntry
-        
-componentDef = genDefGeneric "component" (componentEntries) (\n ges -> ComponentDefinition n ges)
-systemDef = genDefGeneric "system" (systemEntries) (\n ges -> SystemDefinition n ges)
-    
+
+componentDef = outerEntry "component" (componentEntries) (\n ges -> ComponentDefinition n ges)
+systemDef = outerEntry "system" (systemEntries) (\n ges -> SystemDefinition n ges)
+
 genDef = do
     try componentDef
     <|> systemDef
