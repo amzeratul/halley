@@ -1,7 +1,8 @@
 import System.Environment
 import Data.List
-
 import Text.ParserCombinators.Parsec
+
+---------------------------
 
 data GenDefinition = ComponentDefinition String [GenEntryDefinition]
                    | SystemDefinition String [GenEntryDefinition]
@@ -18,14 +19,14 @@ type FunctionSignature = ([VariableDeclaration], String)
 type FunctionEntry = (String, FunctionSignature)
 type FamilyComponentEntry = String
 
+
+---------------------------
+
+
 nonBreakingChars = " \t"
 newLineChars = "\n\r"
 whiteSpaceChars = nonBreakingChars ++ newLineChars
 reservedChars = "{}:=(),"
-
-identifier = many1 (noneOf (whiteSpaceChars ++ reservedChars))
-typeName = many1 (noneOf (newLineChars ++ reservedChars))
-restOfLine = many1 (noneOf (newLineChars ++ "{}"))
 
 whiteSpace = many (oneOf whiteSpaceChars)
 nonBreakingWhiteSpace = many (oneOf nonBreakingChars)
@@ -34,92 +35,64 @@ eol =   try (string "\n\r")
     <|> try (string "\r\n")
     <|> string "\n"
     <|> string "\r"
+    <?> "end of line"
+
+-- Matches whitespace, but must contain at least one EOF    
+whiteSpaceWithEol = do
+    nonBreakingWhiteSpace
+    eol
+    whiteSpace
+    
+-- Trims whitespace around p
+trim p = try (do
+    whiteSpace
+    p <* whiteSpace)
+
+    
+---------------------------
+
+
+identifier = many1 (noneOf (whiteSpaceChars ++ reservedChars)) <?> "identifier"
+typeName = many1 (noneOf (newLineChars ++ reservedChars)) <?> "type name"
 
 outerEntry typeName c f = do
-    whiteSpace
     string typeName
-    whiteSpace
-    genName <- identifier
-    whiteSpace
-    char '='
-    whiteSpace
+    genName <- trim (identifier)
+    trim (char '=')
     contents <- block c
-    nonBreakingWhiteSpace
-    many eol
     return $ f genName contents
 
 innerEntry typeName p = do
-    whiteSpace
     string typeName
-    whiteSpace
-    char '='
-    whiteSpace
-    result <- p
-    nonBreakingWhiteSpace
-    many eol
-    return result
+    trim (char '=')
+    p
 
-block :: GenParser Char st a -> GenParser Char st [a]
-block c = do
-    char '{'
-    contents <- many p
-    char '}'
-    whiteSpace
-    return contents
-    where
-        p = do
-            whiteSpace
-            result <- c
-            whiteSpace
-            return result
+block c = char '{' >> (entrySequence c) <* (char '}')
+entrySequence c = whiteSpace >> many (c <* whiteSpaceWithEol)
 
 variable = do
-    whiteSpace
-    name <- identifier <?> "identifier (name)"
-    whiteSpace
-    char ':'
-    whiteSpace
-    varType <- typeName <?> "identifier (type)"
-    nonBreakingWhiteSpace
+    name <- identifier
+    trim (char ':')
+    varType <- typeName
     return (name, varType)
     
-member = do
-    result <- variable
-    eol <?> "end of line after member"
-    return result
-
 function = do
-    whiteSpace
-    name <- identifier <?> "identifier (function name)"
-    whiteSpace
-    char ':'
-    whiteSpace
+    name <- identifier
+    trim (char ':')
     signature <- functionSignature
-    nonBreakingWhiteSpace
-    eol <?> "end of line after function"
     return (name, signature)
-    
+
 functionSignature = do
-    whiteSpace
     char '('
-    args <- sepBy variable (char ',')
+    args <- sepBy (trim variable) (char ',')
     char ')'
-    whiteSpace
-    string "->"
-    whiteSpace
-    returnType <- typeName <?> "function return type"
+    trim (string "->")
+    returnType <- typeName
     return (args, returnType)
     
-componentInFamily = do
-    whiteSpace
-    name <- restOfLine
-    nonBreakingWhiteSpace
-    eol <?> "end of line after component"
-    return name
-    
-memberList = innerEntry "members" (do { block <- block member ; return $ MemberList block })
+memberList = innerEntry "members" (do { block <- block variable ; return $ MemberList block })
 functionList = innerEntry "functions" (do { block <- block function ; return $ FunctionList block })
-familyList = innerEntry "family" (do { block <- block componentInFamily ; return $ Family block })
+familyList = innerEntry "family" (do { block <- block typeName ; return $ Family block })
 specificOption n = innerEntry n (do { opt <- identifier; return $ Option n opt })
 
 optionEntry = do
@@ -132,9 +105,9 @@ optionEntry = do
 componentEntries = do
     memberList
     <|> functionList
-    
+
 systemEntries = do
-    try familyList
+    familyList
     <|> optionEntry
 
 componentDef = outerEntry "component" (componentEntries) (\n ges -> ComponentDefinition n ges)
@@ -144,13 +117,14 @@ genDef = do
     try componentDef
     <|> systemDef
 
-genDefs = do
-    result <- many genDef
-    eof
-    return result
+genDefs = (entrySequence genDef) <* eof
 
 parseFile :: String -> Either ParseError [GenDefinition]
 parseFile input = parse genDefs "(unknown)" input
+
+
+---------------------------
+
 
 main = do
     args <- getArgs

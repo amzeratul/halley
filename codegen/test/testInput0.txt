@@ -13,6 +13,8 @@ component IsometricCharacterComponent = {
 
 	functions = {
 		sampleFunction : (intArg : int, boolArg : bool) -> int
+		anotherFunction : () -> int
+		blah : (hello : int) -> void
 	}
 }
 
