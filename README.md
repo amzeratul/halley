@@ -9,3 +9,14 @@ Halley is divided in a few sub-projects:
 * **runner**: Provides an entry point for execution and dynamic reloading
 * **utils**: Utilities library
 * **sample**: Sample game
+
+## Installation
+
+### Dependencies
+* Haskell Platform (to build codegen)
+* Visual Studio 2015
+* Rest: TODO
+
+### Set up
+* Compile codegen by running "cabal build" on its folder.
+* Rest: TODO :D
