@@ -1,0 +1,1 @@
+bin\halley_codegen.exe test/testInput0.txt

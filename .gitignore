@@ -1,0 +1,32 @@
+# Windows
+Thumbs.db
+
+# Visual Studio
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.bak
+
+# Binaries
+*.dll
+*.hi
+*.o
+[Bb]in
+[Bb]in64
+
+# Intermediate files
+[Dd]ebug*/
+[Rr]elease*/
+obj/
+
+# Misc
+*.cache
+*.ilk
+*.log
+_ReSharper*/
+*.sbr

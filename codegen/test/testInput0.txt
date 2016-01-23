@@ -1,0 +1,31 @@
+component IsometricCharacterComponent {
+	members = {
+		input : InputDevice*
+		jumpTime : Time
+		airTime : Time
+		nJumps : int
+		faceDir : int
+		jumpReleased : bool
+		speed : float
+		movingTowards : Vector2f
+		lookingTowards : Vector2f
+	}
+
+	functions = {
+		sampleFunction : (intArg : int, boolArg : bool) -> int
+	}
+}
+
+system IsometricCharacterSystem {
+	family = {
+		IsometricCharacterComponent
+		MovableComponent
+		const GravityComponent
+	}
+	
+	strategy = individual
+	access = pure
+	language = C++
+	time = variable
+	subDivide = 1
+}
