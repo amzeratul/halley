@@ -1,1 +1,1 @@
-bin\halley_codegen.exe test/testInput0.txt
+cabal run -- test/testInput0.txt

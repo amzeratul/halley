@@ -1,27 +1,35 @@
-import System.Environment
-import Data.List
+{-
+   Copyright 2016 Rodrigo Braz Monteiro
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-}
+module Halley.Parser
+( parseFile
+) where
+
+import Halley.AST
 import Text.ParserCombinators.Parsec
-
----------------------------
-
-data GenDefinition = ComponentDefinition String [GenEntryDefinition]
-                   | SystemDefinition String [GenEntryDefinition]
-                   deriving(Show, Eq)
-
-data GenEntryDefinition = MemberList [VariableDeclaration]
-                        | FunctionList [FunctionEntry]
-                        | Family [FamilyComponentEntry]
-                        | Option String String
-                        deriving(Show, Eq)
-                        
-type VariableDeclaration = (String, String)
-type FunctionSignature = ([VariableDeclaration], String)
-type FunctionEntry = (String, FunctionSignature)
-type FamilyComponentEntry = String
+import Data.List
 
 
----------------------------
+--------------------------
 
+
+parseFile :: String -> Either ParseError [GenDefinition]
+parseFile input = parse genDefs "(unknown)" input
+
+
+-------------------------
 
 nonBreakingChars = " \t"
 newLineChars = "\n\r"
@@ -42,14 +50,15 @@ whiteSpaceWithEol = do
     nonBreakingWhiteSpace
     eol
     whiteSpace
-    
+
 -- Trims whitespace around p
 trim p = try (do
-    whiteSpace
-    p <* whiteSpace)
+    nonBreakingWhiteSpace
+    p <* nonBreakingWhiteSpace)
 
-    
----------------------------
+
+
+-------------------------
 
 
 identifier = many1 (noneOf (whiteSpaceChars ++ reservedChars)) <?> "identifier"
@@ -118,17 +127,3 @@ genDef = do
     <|> systemDef
 
 genDefs = (entrySequence genDef) <* eof
-
-parseFile :: String -> Either ParseError [GenDefinition]
-parseFile input = parse genDefs "(unknown)" input
-
-
----------------------------
-
-
-main = do
-    args <- getArgs
-    rawFile <- readFile (head args)
-    putStrLn $ case parseFile rawFile of
-        Left error -> "Error: " ++ (show error)
-        Right defs -> show defs
