@@ -25,8 +25,8 @@ import Data.List
 --------------------------
 
 
-parseFile :: String -> Either ParseError [GenDefinition]
-parseFile input = parse genDefs "(unknown)" input
+parseFile :: String -> String -> Either ParseError [GenDefinition]
+parseFile filename input = parse genDefs filename input
 
 
 -------------------------

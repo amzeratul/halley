@@ -1,0 +1,9 @@
+component MovableComponent = {
+	members = {
+	}
+}
+
+component GravityComponent = {
+	members = {
+	}
+}

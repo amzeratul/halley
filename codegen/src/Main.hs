@@ -18,9 +18,14 @@ module Main where
 
 import System.Environment
 import Data.List
+import Control.Monad
 
 import Halley.Parser
 import Halley.AST
+import Halley.SemanticAnalysis
+import Halley.CodeGenCpp
+
+import Text.ParserCombinators.Parsec
 
 
 ---------------------------
@@ -28,8 +33,30 @@ import Halley.AST
 
 main = do
     args <- getArgs
-    let filename = head args
-    rawFile <- readFile filename
-    putStrLn $ case parseFile rawFile of
-        Left error -> "Error parsing file \"" ++ filename ++ "\":\n" ++ (show error)
-        Right defs -> show defs
+    parseStage args
+
+parseStage args = do
+    parseResult <- parseFiles args
+    case parseResult of
+        Left error -> putStrLn $ show error
+        Right defs -> semanticStage defs
+
+semanticStage :: [GenDefinition] -> IO ()
+semanticStage defs = do
+    case semanticAnalysis defs of
+        Left error -> putStrLn error
+        Right defs -> codeGenStage defs
+
+codeGenStage :: [String] -> IO ()
+codeGenStage defs = do
+    printStage $ map (generateCodeCpp) defs
+
+printStage :: [String] -> IO ()
+printStage defs = mapM_ (\x -> putStrLn $ '\n' : x) defs
+
+parseFiles fs = do
+    fmap (foldEither) (mapM (parse) fs)
+    where
+        parse f = fmap (parseFile f) (readFile f)
+
+foldEither vs = foldl' (\a b -> (++) <$> a <*> b) (Right []) vs

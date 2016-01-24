@@ -18,7 +18,7 @@ cabal-version:       >=1.10
 
 executable halley-codegen
   main-is:             Main.hs
-  other-modules:       Halley.AST, Halley.Parser
+  other-modules:       Halley.AST, Halley.Parser, Halley.SemanticAnalysis, Halley.CodeGenCpp
   -- other-extensions:    
   build-depends:       parsec, base >=4.8 && <4.9
   hs-source-dirs:      src
