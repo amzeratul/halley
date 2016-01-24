@@ -18,9 +18,9 @@ module Halley.CodeGenCpp
 ) where
 
 import Halley.AST
+import Halley.SemanticAnalysis
 
 ---------------------
 
-generateCodeCpp :: String -> String
-generateCodeCpp gen = gen
-
+generateCodeCpp :: CodeGenData -> [String]
+generateCodeCpp gen = [show gen]

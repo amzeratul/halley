@@ -45,11 +45,11 @@ semanticStage :: [GenDefinition] -> IO ()
 semanticStage defs = do
     case semanticAnalysis defs of
         Left error -> putStrLn error
-        Right defs -> codeGenStage defs
+        Right dataToGen -> codeGenStage dataToGen
 
-codeGenStage :: [String] -> IO ()
-codeGenStage defs = do
-    printStage $ map (generateCodeCpp) defs
+codeGenStage :: CodeGenData -> IO ()
+codeGenStage dataToGen = do
+    printStage $ generateCodeCpp dataToGen
 
 printStage :: [String] -> IO ()
 printStage defs = mapM_ (\x -> putStrLn $ '\n' : x) defs
