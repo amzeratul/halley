@@ -6,4 +6,6 @@ component MovableComponent = {
 component GravityComponent = {
 	members = {
 	}
+	
+	functions = {}
 }

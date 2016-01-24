@@ -18,6 +18,8 @@ module Halley.SemanticAnalysis
 , CodeGenData
 , ComponentData
 , SystemData
+, components
+, systems
 ) where
 
 import Halley.AST
@@ -55,40 +57,88 @@ data VariableTypeData = VariableTypeData { typeName :: String
 
 
 semanticAnalysis :: [GenDefinition] -> Either String CodeGenData
-semanticAnalysis gens = case doValidate loadedData of
+semanticAnalysis gens = case doValidate of
     Just error -> Left error
     Nothing -> Right loadedData
     where
-        cs = map (loadComponent) gens
-        sys = map (loadSystem) gens
-        loadedData = CodeGenData { components = clean cs, systems = clean sys }
-        doValidate x = case lefts cs ++ lefts sys of
-            [] -> validate x
-            e:_ -> Just e
+        cs = map (loadComponent) [(name, entries) | ComponentDefinition name entries <- gens]
+        sys = map (loadSystem) [(name, entries) | SystemDefinition name entries <- gens]
+        loadedData = CodeGenData { components = rights cs, systems = rights sys }
+        doValidate = case lefts cs ++ lefts sys of
+            [] -> validate loadedData
+            es -> Just (intercalate "\n\n" es)
 
-loadComponent :: GenDefinition -> Either String (Maybe ComponentData)
-loadComponent (ComponentDefinition name entries) = case getError of
+loadComponent :: (String, [GenEntryDefinition]) -> Either String ComponentData
+loadComponent (name, entries) = case getError of
     Just e -> Left ("Error with component " ++ name ++ ": " ++ e)
-    Nothing -> Right $ Just ComponentData { componentName = name, members = getMembers, functions = getFunctions }
+    Nothing -> Right ComponentData { componentName = name, members = rights getMembers, functions = rights getFunctions }
     where
-        getMembers = []
+        memberLists = [vars | MemberList vars <- entries]
+        functionLists = [funcs | FunctionList funcs <- entries]
+        getMembers = map (loadVariable) $ tryHead memberLists
         getFunctions = []
+        errorList = lefts getMembers ++ lefts getFunctions
         getError
-            | False = Just "test"
+            | length memberLists > 1 = Just "Multiple member lists declared"
+            | length functionLists > 1 = Just "Multiple function lists declared"
+            | not $ null errorList = Just (intercalate "\n\n" errorList)
             | otherwise = Nothing
-loadComponent _ = Right Nothing
 
-loadSystem :: GenDefinition -> Either String (Maybe SystemData)
-loadSystem (SystemDefinition name entries) = case getError of
+loadSystem :: (String, [GenEntryDefinition]) -> Either String SystemData
+loadSystem (name, entries) = case getError of
     Just e -> Left ("Error with system " ++ name ++ ": " ++ e)
-    Nothing -> Right $ Just SystemData { systemName = name, family = getFamily }
+    Nothing -> Right SystemData { systemName = name, family = rights getFamily }
     where
-        getFamily = []
-        getError = Nothing
-loadSystem _ = Right Nothing
+        familyLists = [vars | Family vars <- entries]
+        getFamily = map (loadVariableType) $ tryHead familyLists
+        errorList = lefts getFamily
+        getError
+            | not $ null errorList = Just (intercalate "\n\n" errorList)
+            | otherwise = Nothing
 
-clean = catMaybes . rights
+loadVariable :: VariableDeclaration -> Either String VariableData
+loadVariable (rawName, varType) = case loadVariableType varType of 
+    Left e -> Left ("Invalid type on variable " ++ rawName ++ ": " ++ e)
+    Right t -> case getError of
+        Just e -> Left ("Invalid name on variable " ++ rawName ++ ": " ++ e)
+        Nothing -> Right VariableData { variableName = name, variableType = t }
+        where
+            name = tryHead (words rawName)
+            getError
+                | name == "" = Just "Empty variable name"
+                | otherwise = Nothing
+
+loadVariableType :: String -> Either String VariableTypeData
+loadVariableType rawName = case getError of
+    Just e -> Left ("Invalid type on variable " ++ rawName ++ ": " ++ e)
+    Nothing -> Right VariableTypeData { typeName = name, Halley.SemanticAnalysis.const = isConst }
+    where
+        decorList = ["const"]
+        name = tryHead undecor
+        undecor = (words rawName) \\ decorList
+        decors = (words rawName) `intersect` decorList
+        isConst = "const" `elem` decors 
+        getError
+            | name == "" = Just "Empty type name"
+            | length undecor /= 1 = Just $ "Variable type name seems to contain spaces: " ++ (intercalate " " undecor)
+            | otherwise = Nothing
 
 validate :: CodeGenData -> Maybe String
-validate d = Nothing -- TODO
+validate d
+    | not $ null systemErrors = Just (intercalate "\n\n" systemErrors)
+    | otherwise = Nothing
+    where
+        cs = components d
+        sys = systems d
+        systemErrors = catMaybes $ map (validateSystem cs) sys
 
+validateSystem :: [ComponentData] -> SystemData -> Maybe String
+validateSystem cs system
+    | not $ null missingComponents = Just $ "Missing component in system " ++ (systemName system) ++ ": " ++ (intercalate " " missingComponents)
+    | otherwise = Nothing
+    where
+        componentNames = map (componentName) cs
+        missingComponents = map (typeName) (family system) \\ componentNames
+        
+tryHead [] = []
+tryHead (x:_) = x

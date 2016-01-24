@@ -22,8 +22,8 @@ import Control.Monad
 
 import Halley.Parser
 import Halley.AST
-import Halley.SemanticAnalysis
-import Halley.CodeGenCpp
+import qualified Halley.SemanticAnalysis as Semantics
+import qualified Halley.CodeGenCpp as CodeGen
 
 import Text.ParserCombinators.Parsec
 
@@ -43,16 +43,19 @@ parseStage args = do
 
 semanticStage :: [GenDefinition] -> IO ()
 semanticStage defs = do
-    case semanticAnalysis defs of
+    case Semantics.semanticAnalysis defs of
         Left error -> putStrLn error
-        Right dataToGen -> codeGenStage dataToGen
+        Right dataToGen -> do
+            putStrLn("----------\nComponents:\n")
+            mapM_ (\x -> putStrLn $ show x ++ "\n") $ Semantics.components dataToGen
+            putStrLn("----------\nSystems:\n")
+            mapM_ (\x -> putStrLn $ show x ++ "\n") $ Semantics.systems dataToGen
+            codeGenStage dataToGen
 
-codeGenStage :: CodeGenData -> IO ()
+codeGenStage :: Semantics.CodeGenData -> IO ()
 codeGenStage dataToGen = do
-    printStage $ generateCodeCpp dataToGen
-
-printStage :: [String] -> IO ()
-printStage defs = mapM_ (\x -> putStrLn $ '\n' : x) defs
+    putStrLn("----------\nData generated:\n")
+    mapM_ (\x -> putStrLn (x ++ "\n")) (CodeGen.generateCodeCpp dataToGen)
 
 parseFiles fs = do
     fmap (foldEither) (mapM (parse) fs)

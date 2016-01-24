@@ -23,4 +23,4 @@ import Halley.SemanticAnalysis
 ---------------------
 
 generateCodeCpp :: CodeGenData -> [String]
-generateCodeCpp gen = [show gen]
+generateCodeCpp gen = ["TODO"]
