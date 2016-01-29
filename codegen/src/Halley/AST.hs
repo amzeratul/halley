@@ -21,7 +21,7 @@ data GenDefinition = ComponentDefinition String [GenEntryDefinition]
 
 data GenEntryDefinition = MemberList [VariableDeclaration]
                         | FunctionList [FunctionEntry]
-                        | Family [FamilyComponentEntry]
+                        | Family String [FamilyComponentEntry]
                         | Option String String
                         deriving(Show, Eq)
                         

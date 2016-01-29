@@ -64,14 +64,19 @@ trim p = try (do
 identifier = many1 (noneOf (whiteSpaceChars ++ reservedChars)) <?> "identifier"
 typeName = many1 (noneOf (newLineChars ++ reservedChars)) <?> "type name"
 
-outerEntry typeName c f = do
+namedBlock typeName c f = do
     string typeName
     genName <- trim (identifier)
-    trim (char '=')
     contents <- block c
     return $ f genName contents
 
-innerEntry typeName p = do
+anonymousBlock typeName c f = do
+    string typeName
+    whiteSpace
+    contents <- block c
+    return $ f contents
+
+equalsEntry typeName p = do
     string typeName
     trim (char '=')
     p
@@ -98,11 +103,22 @@ functionSignature = do
     trim (string "->")
     returnType <- typeName
     return (args, returnType)
-    
-memberList = innerEntry "members" (do { block <- block variable ; return $ MemberList block })
-functionList = innerEntry "functions" (do { block <- block function ; return $ FunctionList block })
-familyList = innerEntry "family" (do { block <- block typeName ; return $ Family block })
-specificOption n = innerEntry n (do { opt <- identifier; return $ Option n opt })
+
+componentDef = namedBlock "component" (componentEntries) (\n ges -> ComponentDefinition n ges)
+systemDef = namedBlock "system" (systemEntries) (\n ges -> SystemDefinition n ges)
+memberList = anonymousBlock "members" (variable) (\ges -> MemberList ges)
+functionList = anonymousBlock "functions" (function) (\ges -> FunctionList ges)
+specificOption n = equalsEntry n (do { opt <- identifier; return $ Option n opt })
+familyList = namedBlock "family" (typeName) (\n ges -> Family n ges)
+
+{-
+familyList = do
+    string "family"
+    whiteSpace
+    name <- trim (identifier)
+    block <- block typeName
+    return $ Family name block
+-}
 
 optionEntry = do
     try (specificOption "strategy")
@@ -119,8 +135,6 @@ systemEntries = do
     familyList
     <|> optionEntry
 
-componentDef = outerEntry "component" (componentEntries) (\n ges -> ComponentDefinition n ges)
-systemDef = outerEntry "system" (systemEntries) (\n ges -> SystemDefinition n ges)
 
 genDef = do
     try componentDef

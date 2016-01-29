@@ -1,11 +1,11 @@
-component MovableComponent = {
-	members = {
+component MovableComponent {
+	members {
 	}
 }
 
-component GravityComponent = {
-	members = {
+component GravityComponent {
+	members {
 	}
 	
-	functions = {}
+	functions {}
 }

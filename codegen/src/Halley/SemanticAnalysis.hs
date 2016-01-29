@@ -15,11 +15,13 @@
 -}
 module Halley.SemanticAnalysis
 ( semanticAnalysis
-, CodeGenData
-, ComponentData
-, SystemData
-, components
-, systems
+, CodeGenData(components, systems)
+, ComponentData(componentName, componentIndex, members, functions)
+, SystemData(systemName, families)
+, VariableData(variableName, variableType)
+, VariableTypeData(typeName, const)
+, FunctionData(functionName, returnType, arguments)
+, FamilyData(familyName, familyComponents)
 ) where
 
 import Halley.AST
@@ -33,12 +35,17 @@ data CodeGenData = CodeGenData { components :: [ComponentData]
                                } deriving (Show)
 
 data ComponentData = ComponentData { componentName :: String
+                                   , componentIndex :: Int
                                    , members :: [VariableData]
                                    , functions :: [FunctionData]
                                    } deriving (Show)
 
 data SystemData = SystemData { systemName :: String
-                             , family :: [VariableTypeData]
+                             , families :: [FamilyData]
+                             } deriving (Show)
+
+data FamilyData = FamilyData { familyName :: String
+                             , familyComponents :: [VariableTypeData]
                              } deriving (Show)
 
 data VariableData = VariableData { variableName :: String
@@ -63,20 +70,23 @@ semanticAnalysis gens = case doValidate of
     where
         cs = map (loadComponent) [(name, entries) | ComponentDefinition name entries <- gens]
         sys = map (loadSystem) [(name, entries) | SystemDefinition name entries <- gens]
-        loadedData = CodeGenData { components = rights cs, systems = rights sys }
+        loadedData = CodeGenData { components = indexComponents $ rights cs, systems = rights sys }
         doValidate = case lefts cs ++ lefts sys of
             [] -> validate loadedData
             es -> Just (intercalate "\n\n" es)
 
+indexComponents :: [ComponentData] -> [ComponentData]
+indexComponents cs = [c { componentIndex = i } | (c, i) <- zip cs [0..]]
+
 loadComponent :: (String, [GenEntryDefinition]) -> Either String ComponentData
 loadComponent (name, entries) = case getError of
     Just e -> Left ("Error with component " ++ name ++ ": " ++ e)
-    Nothing -> Right ComponentData { componentName = name, members = rights getMembers, functions = rights getFunctions }
+    Nothing -> Right ComponentData { componentName = name, componentIndex = -1, members = rights getMembers, functions = rights getFunctions }
     where
         memberLists = [vars | MemberList vars <- entries]
         functionLists = [funcs | FunctionList funcs <- entries]
         getMembers = map (loadVariable) $ tryHead memberLists
-        getFunctions = []
+        getFunctions = [] -- TODO
         errorList = lefts getMembers ++ lefts getFunctions
         getError
             | length memberLists > 1 = Just "Multiple member lists declared"
@@ -87,11 +97,22 @@ loadComponent (name, entries) = case getError of
 loadSystem :: (String, [GenEntryDefinition]) -> Either String SystemData
 loadSystem (name, entries) = case getError of
     Just e -> Left ("Error with system " ++ name ++ ": " ++ e)
-    Nothing -> Right SystemData { systemName = name, family = rights getFamily }
+    Nothing -> Right SystemData { systemName = name, families = rights getFamilies }
     where
-        familyLists = [vars | Family vars <- entries]
-        getFamily = map (loadVariableType) $ tryHead familyLists
-        errorList = lefts getFamily
+        familyLists = [(name, vars) | Family name vars <- entries]
+        getFamilies = map (loadFamily) familyLists
+        errorList = lefts getFamilies
+        getError
+            | not $ null errorList = Just (intercalate "\n\n" errorList)
+            | otherwise = Nothing
+
+loadFamily :: (String, [FamilyComponentEntry]) -> Either String FamilyData
+loadFamily (name, comps) = case getError of
+    Just e -> Left e
+    Nothing -> Right FamilyData { familyName = name, familyComponents = rights compTypes }
+    where
+        compTypes = map (loadVariableType) comps
+        errorList = lefts compTypes
         getError
             | not $ null errorList = Just (intercalate "\n\n" errorList)
             | otherwise = Nothing
@@ -138,7 +159,7 @@ validateSystem cs system
     | otherwise = Nothing
     where
         componentNames = map (componentName) cs
-        missingComponents = map (typeName) (family system) \\ componentNames
+        missingComponents = map (typeName) (concat $ map (familyComponents) (families system)) \\ componentNames
         
 tryHead [] = []
 tryHead (x:_) = x

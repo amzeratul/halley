@@ -17,13 +17,18 @@
 module Main where
 
 import System.Environment
-import Data.List
+import System.Directory
+import qualified Filesystem.Path.CurrentOS as Path
+
 import Control.Monad
+import Data.List
+import Data.String.Utils
 
 import Halley.Parser
 import Halley.AST
 import qualified Halley.SemanticAnalysis as Semantics
-import qualified Halley.CodeGenCpp as CodeGen
+import qualified Halley.CodeGenCpp as CodeGenCpp
+import qualified Halley.CodeGen as CodeGen
 
 import Text.ParserCombinators.Parsec
 
@@ -33,16 +38,21 @@ import Text.ParserCombinators.Parsec
 
 main = do
     args <- getArgs
-    parseStage args
+    let inDir = args !! 0
+    let outDir = args !! 1
+    dirContents <- getDirectoryContents inDir
+    let inFiles = map (\x -> inDir ++ "/" ++ x) (filter (endswith ".txt") dirContents)
+    parseStage outDir inFiles
 
-parseStage args = do
-    parseResult <- parseFiles args
+parseStage :: String -> [String] -> IO ()
+parseStage outDir files = do
+    parseResult <- parseFiles files
     case parseResult of
         Left error -> putStrLn $ show error
-        Right defs -> semanticStage defs
+        Right defs -> semanticStage outDir defs
 
-semanticStage :: [GenDefinition] -> IO ()
-semanticStage defs = do
+semanticStage :: String -> [GenDefinition] -> IO ()
+semanticStage outDir defs = do
     case Semantics.semanticAnalysis defs of
         Left error -> putStrLn error
         Right dataToGen -> do
@@ -50,12 +60,29 @@ semanticStage defs = do
             mapM_ (\x -> putStrLn $ show x ++ "\n") $ Semantics.components dataToGen
             putStrLn("----------\nSystems:\n")
             mapM_ (\x -> putStrLn $ show x ++ "\n") $ Semantics.systems dataToGen
-            codeGenStage dataToGen
+            codeGenStage outDir dataToGen
 
-codeGenStage :: Semantics.CodeGenData -> IO ()
-codeGenStage dataToGen = do
+codeGenStage :: String -> Semantics.CodeGenData -> IO ()
+codeGenStage outDir dataToGen = do
     putStrLn("----------\nData generated:\n")
-    mapM_ (\x -> putStrLn (x ++ "\n")) (CodeGen.generateCodeCpp dataToGen)
+    mapM_ (\x -> writeAndPrint outDir True x) results
+    where
+        results = CodeGenCpp.generateCodeCpp dataToGen
+
+writeAndPrint :: FilePath -> Bool -> CodeGen.GeneratedSource -> IO()
+writeAndPrint fileRoot doPrint file = do
+    if doPrint then do
+        putStrLn "============="
+        putStrLn $ CodeGen.filename file
+        putStrLn "-------------"
+        putStrLn $ CodeGen.code file
+        putStrLn ""
+    else
+        return ()
+    createDirectoryIfMissing True (Path.encodeString $ Path.directory $ Path.decodeString path)
+    writeFile path (CodeGen.code file)
+    where
+        path = fileRoot ++ "/" ++ (CodeGen.filename file)
 
 parseFiles fs = do
     fmap (foldEither) (mapM (parse) fs)

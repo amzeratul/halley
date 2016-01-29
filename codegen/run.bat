@@ -1,1 +1,1 @@
-cabal run -- test/testInput0.txt test/testInput1.txt
+cabal run -- test testOut
