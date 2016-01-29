@@ -24,11 +24,38 @@ import Data.List
 
 ---------------------
 
+
 generateCodeCpp :: CodeGenData -> [GeneratedSource]
 generateCodeCpp gen = comps ++ sys
     where
         comps = concat (map (genComponent) (components gen))
         sys = concat (map (genSystem) (systems gen))
+
+
+---------------------
+
+
+genVariable :: VariableData -> String
+genVariable var = genType (variableType var) ++ " " ++ (variableName var)
+
+genType :: VariableTypeData -> String
+genType t = (if Halley.SemanticAnalysis.const t then "const " else "") ++ typeName t
+
+genFunctionDeclaration :: FunctionData -> String
+genFunctionDeclaration f = concat [genType (returnType f)
+                                  ," "
+                                  ,(functionName f)
+                                  ," ("
+                                  ,");"]
+
+genMember :: VariableData -> String
+genMember var = concat ["    "
+                       ,genVariable var
+                       ,";"]
+
+
+---------------------
+
 
 genComponent :: ComponentData -> [GeneratedSource]
 genComponent compData = [ GeneratedSource { filename = basePath ++ ".h", code = header } ]
@@ -45,24 +72,6 @@ genComponent compData = [ GeneratedSource { filename = basePath ++ ".h", code = 
                      ["};"]
         memberList = map (genMember) (members compData)
         functionList = map (genFunctionDeclaration) (functions compData)
-
-genMember :: VariableData -> String
-genMember var = concat ["    "
-                       ,genVariable var
-                       ,";"]
-
-genVariable :: VariableData -> String
-genVariable var = genType (variableType var) ++ " " ++ (variableName var)
-
-genType :: VariableTypeData -> String
-genType t = (if Halley.SemanticAnalysis.const t then "const " else "") ++ typeName t
-
-genFunctionDeclaration :: FunctionData -> String
-genFunctionDeclaration f = concat [genType (returnType f)
-                                  ," "
-                                  ,(functionName f)
-                                  ," ("
-                                  ,");"]
 
 genSystem :: SystemData -> [GeneratedSource]
 genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}]
