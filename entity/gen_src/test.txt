@@ -1,0 +1,18 @@
+component TestComponent {
+	members {
+		elapsed : float
+		test : int
+	}
+}
+
+system TestSystem {
+	family main {
+		TestComponent
+	}
+	
+	strategy = individual
+	access = pure
+	language = C++
+	time = variable
+	subDivide = 1
+}

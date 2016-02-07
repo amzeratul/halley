@@ -13,6 +13,7 @@ Thumbs.db
 *.bak
 *.sdf
 *.opensdf
+*.opendb
 
 # Binaries
 *.dll

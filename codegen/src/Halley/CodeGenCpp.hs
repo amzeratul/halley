@@ -21,6 +21,7 @@ import Halley.CodeGen
 import Halley.AST
 import Halley.SemanticAnalysis
 import Data.List
+import Data.Char
 
 ---------------------
 
@@ -60,10 +61,12 @@ genMember var = concat ["    "
 genComponent :: ComponentData -> [GeneratedSource]
 genComponent compData = [ GeneratedSource { filename = basePath ++ ".h", code = header } ]
     where
-        basePath = "cpp/components/" ++ (componentName compData)
+        name = componentName compData
+        basePath = "cpp/components/" ++ (makeUnderscores name)
         header = intercalate "\n" headerCode
-        headerCode = ["class " ++ (componentName compData) ++ " : public Component {"
-                     ,"  public:"
+        headerCode = ["#include \"component.h\""
+                     ,"class " ++ name ++ " : public Component {"
+                     ,"public:"
                      ,"    constexpr static int componentIndex = " ++ (show $ componentIndex compData) ++ ";"
                      ,""]
                      ++ memberList ++
@@ -77,9 +80,23 @@ genSystem :: SystemData -> [GeneratedSource]
 genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}]
     where
         baseSystemClass = "System"
-        basePath = "cpp/systems/" ++ (systemName sysData)
+        name = systemName sysData
+        basePath = "cpp/systems/" ++ (makeUnderscores name)
         header = intercalate "\n" headerCode
-        headerCode = ["class " ++ (systemName sysData) ++ " : public " ++ baseSystemClass ++ " {"
-                     ,"  public:"
+        headerCode = ["#include \"system.h\""
+                     ,"class " ++ name ++ " : public " ++ baseSystemClass ++ " {"
+                     ,"public:"
                      ,"    // TODO: this requires " ++ (show $ length $ families sysData) ++ " families."
+                     ,"protected:"
+                     ,"    void doStep() override;"
                      ,"};"]
+
+
+---------------------
+
+
+makeUnderscores :: String -> String
+makeUnderscores [] = []
+makeUnderscores (c:cs) = (toLower c) : (concat $ map (processChar) cs)
+    where
+        processChar c' = if isAsciiUpper c' then '_' : [toLower c'] else [c']

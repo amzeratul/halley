@@ -42,8 +42,12 @@ main = do
     args <- getArgs
     let inDir = args !! 0
     let outDir = args !! 1
-    dirContents <- getDirectoryContents inDir
-    let inFiles = sort $ map (\x -> inDir ++ "/" ++ x) (filter (endswith ".txt") dirContents)
+    isInputFile <- doesFileExist inDir
+    inFiles <- if isInputFile then do
+        return [inDir]
+    else do
+        dirContents <- getDirectoryContents inDir
+        return $ sort $ map (\x -> inDir ++ "/" ++ x) (filter (endswith ".txt") dirContents)
     putStrLn $ "Parsing files: " ++ (intercalate ", " inFiles)
     parseStage outDir inFiles
 
