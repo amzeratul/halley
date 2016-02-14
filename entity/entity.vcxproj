@@ -162,15 +162,20 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\family_binding.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\system.cpp" />
     <ClCompile Include="src\test_system.cpp" />
     <ClCompile Include="src\world.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="gen\cpp\components\bar_component.h" />
+    <ClInclude Include="gen\cpp\components\foo_component.h" />
     <ClInclude Include="gen\cpp\components\test_component.h" />
     <ClInclude Include="gen\cpp\systems\test_system.h" />
     <ClInclude Include="src\component.h" />
+    <ClInclude Include="src\family_binding.h" />
+    <ClInclude Include="src\family_type.h" />
     <ClInclude Include="src\system.h" />
     <ClInclude Include="src\world.h" />
   </ItemGroup>

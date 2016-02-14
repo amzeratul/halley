@@ -3,16 +3,15 @@
 #include "system.h"
 #include <chrono>
 
-World::World()
-{
-}
+World::World() = default;
 
 World::~World() = default;
 
 System& World::addSystem(std::unique_ptr<System> system)
 {
+	auto& ref = *system.get();
 	systems.emplace_back(std::move(system));
-	return *system;
+	return ref;
 }
 
 void World::step()

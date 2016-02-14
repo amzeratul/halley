@@ -5,9 +5,27 @@ component TestComponent {
 	}
 }
 
+component FooComponent {
+	members {
+		foo : float
+	}
+}
+
+component BarComponent {
+	members {
+		bar : float
+	}
+}
+
 system TestSystem {
 	family main {
 		TestComponent
+		FooComponent
+	}
+
+	family aux {
+		TestComponent
+		BarComponent
 	}
 	
 	strategy = individual

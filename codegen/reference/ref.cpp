@@ -12,21 +12,23 @@ struct EntityReference {
 
 class IsometricCharacterSystem : public System {
   public:
-    IsometricCharacterSystem() : System({MainFamilyMask}) {
+    IsometricCharacterSystem() : System({MainFamily::mask}) {
     }
 
   protected:
     // One of these:
-    void Tick(Time elapsed); // Implement me
-    void Tick(Time elapsed, EntityReference<MainFamilyType>& entity);
+    void Tick(Time elapsed) override; // Implement me
+    void Tick(Time elapsed, EntityReference<MainFamily>& entity) override; // Implement me
 
   private:
 
-    struct MainFamilyType {
+    struct MainFamily {
+        constexpr FamilyMask mask = /*...*/;
+
         IsometricCharacterComponent* const isometricCharacter;
         MovableComponent* const movable;
         const GravityComponent* const gravity;
-    }
+    };
 
-    FamilyBinding<MainFamilyType> mainFamily(MainFamilyMask);
+    FamilyBinding<MainFamilyType> mainFamily;
 }

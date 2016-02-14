@@ -59,7 +59,7 @@ data FunctionData = FunctionData { functionName :: String
 
 data VariableTypeData = VariableTypeData { typeName :: String
                                          , const :: Bool
-                                         } deriving (Show)
+                                         } deriving (Show, Eq)
 ---------------------
 
 
@@ -159,7 +159,7 @@ validateSystem cs system
     | otherwise = Nothing
     where
         componentNames = map (componentName) cs
-        missingComponents = map (typeName) (concat $ map (familyComponents) (families system)) \\ componentNames
+        missingComponents = map (typeName) (nub $ concat $ map (familyComponents) (families system)) \\ componentNames
         
 tryHead [] = []
 tryHead (x:_) = x

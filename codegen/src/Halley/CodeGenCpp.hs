@@ -54,6 +54,8 @@ genMember var = concat ["    "
                        ,genVariable var
                        ,";"]
 
+genFamilyMember :: VariableTypeData -> String
+genFamilyMember varType = "        " ++ (genType varType) ++ "* const " ++ (removeSuffix "Component" $ lowerFirst $ typeName varType) ++ ";"
 
 ---------------------
 
@@ -72,7 +74,8 @@ genComponent compData = [ GeneratedSource { filename = basePath ++ ".h", code = 
                      ++ memberList ++
                      [""]
                      ++ functionList ++
-                     ["};"]
+                     ["};"
+                     ,""]
         memberList = map (genMember) (members compData)
         functionList = map (genFunctionDeclaration) (functions compData)
 
@@ -81,15 +84,46 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
     where
         baseSystemClass = "System"
         name = systemName sysData
+        fams = families sysData
         basePath = "cpp/systems/" ++ (makeUnderscores name)
         header = intercalate "\n" headerCode
-        headerCode = ["#include \"system.h\""
+        headerCode = ["#include \"system.h\""]
+                     ++ componentIncludes ++
+                     [""
                      ,"class " ++ name ++ " : public " ++ baseSystemClass ++ " {"
                      ,"public:"
-                     ,"    // TODO: this requires " ++ (show $ length $ families sysData) ++ " families."
+                     ,"    " ++ name ++ "() : " ++ baseSystemClass ++ "({" ++ maskInitializers ++ "}) {}"
+                     ,""
                      ,"protected:"
-                     ,"    void doStep() override;"
-                     ,"};"]
+                     ,"    void tick(" ++ tickSignature ++ ") override; // Implement me"
+                     ,""
+                     ,"private:"]
+                     ++ familyTypeDecls ++
+                     ["};"
+                     ,""]
+        familyTypeDecls = concat $ map (familyTypeDecl) $ fams
+        familyTypeDecl fam = ["    class " ++ fName ++ " {"
+                             ,"    public:"]
+                             ++ memberList ++
+                             [""
+                             ,"        using Type = FamilyType<" ++ typeList ++ ">;"
+                             ,"        static constexpr FamilyMaskType familyMaskValue = Type::getMask();" -- TODO: compute mask
+                             ,"    private:"
+                             ,"        " ++ fName ++ "() = delete;"
+                             ,"        ~" ++ fName ++ "() = delete;"
+                             ,"    };"
+                             ,"    FamilyBinding<" ++ fName ++ "> " ++ (familyName fam) ++ "Family;"
+                             ,""]
+                             where
+                                memberList = map (genFamilyMember) (familyComponents fam)
+                                typeList = intercalate ", " $ map (typeName) (familyComponents fam)
+                                fName = familyTypeName fam
+        familyTypeName fam = (upperFirst $ familyName fam) ++ "Family"
+        componentIncludes = map (\c -> "#include \"../components/" ++ (makeUnderscores $ typeName c) ++ ".h\"") components
+            where
+                components = nub $ concat $ map (familyComponents) fams
+        maskInitializers = intercalate ", " $ map (\f -> familyTypeName f ++ "::familyMaskValue") fams
+        tickSignature = "Time time" -- TODO: generate signature based on configuration
 
 
 ---------------------
@@ -100,3 +134,14 @@ makeUnderscores [] = []
 makeUnderscores (c:cs) = (toLower c) : (concat $ map (processChar) cs)
     where
         processChar c' = if isAsciiUpper c' then '_' : [toLower c'] else [c']
+
+upperFirst :: String -> String
+upperFirst [] = []
+upperFirst (c:cs) = (toUpper c) : cs
+
+lowerFirst :: String -> String
+lowerFirst [] = []
+lowerFirst (c:cs) = (toLower c) : cs
+
+removeSuffix :: String -> String -> String
+removeSuffix suffix str = if isSuffixOf suffix str then take (length str - length suffix) str else str
