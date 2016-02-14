@@ -5,7 +5,7 @@
 
 class TestSystem : public System {
 public:
-    TestSystem() : System({MainFamily::familyMaskValue, AuxFamily::familyMaskValue}) {}
+    TestSystem() : System({&mainFamily, &auxFamily}) {}
 
 protected:
     void tick(Time time) override; // Implement me
@@ -13,11 +13,13 @@ protected:
 private:
     class MainFamily {
     public:
-        TestComponent* const test;
-        FooComponent* const foo;
+        EntityId entityId;
+
+        TestComponent& test;
+        FooComponent& foo;
 
         using Type = FamilyType<TestComponent, FooComponent>;
-        static constexpr FamilyMaskType familyMaskValue = Type::getMask();
+        static constexpr FamilyMaskType familyMaskValue = Type::mask;
     private:
         MainFamily() = delete;
         ~MainFamily() = delete;
@@ -26,11 +28,13 @@ private:
 
     class AuxFamily {
     public:
-        TestComponent* const test;
-        BarComponent* const bar;
+        EntityId entityId;
+
+        TestComponent& test;
+        BarComponent& bar;
 
         using Type = FamilyType<TestComponent, BarComponent>;
-        static constexpr FamilyMaskType familyMaskValue = Type::getMask();
+        static constexpr FamilyMaskType familyMaskValue = Type::mask;
     private:
         AuxFamily() = delete;
         ~AuxFamily() = delete;

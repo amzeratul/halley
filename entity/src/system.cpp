@@ -2,12 +2,18 @@
 #include "system.h"
 #include <iostream>
 
-System::System(std::initializer_list<FamilyMaskType>) {
-	// TODO
+System::System(std::initializer_list<FamilyBindingBase*> uninitializedFamilies)
+	: families(uninitializedFamilies)
+{
 }
 
-void System::step()
-{
+void System::onAddedToWorld() {
+	for (auto f : families) {
+		std::cout << "Family with masks: " << f->readMask << ", " << f->writeMask << std::endl;
+	}
+}
+
+void System::step() {
 	using namespace std::chrono;
 	auto start = high_resolution_clock::now();
 	

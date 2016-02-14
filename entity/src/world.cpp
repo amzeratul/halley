@@ -11,6 +11,7 @@ System& World::addSystem(std::unique_ptr<System> system)
 {
 	auto& ref = *system.get();
 	systems.emplace_back(std::move(system));
+	ref.onAddedToWorld();
 	return ref;
 }
 

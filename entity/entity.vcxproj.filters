@@ -28,6 +28,9 @@
     <Filter Include="test\systems">
       <UniqueIdentifier>{2b16563d-7538-4485-abff-61b6661418e1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="entities">
+      <UniqueIdentifier>{fe7c04bf-3a8b-4e2f-aa31-8243c8fd8232}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -42,8 +45,11 @@
     <ClCompile Include="src\test_system.cpp">
       <Filter>test\systems</Filter>
     </ClCompile>
+    <ClCompile Include="src\family.cpp">
+      <Filter>entities</Filter>
+    </ClCompile>
     <ClCompile Include="src\family_binding.cpp">
-      <Filter>systems</Filter>
+      <Filter>entities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -68,11 +74,17 @@
     <ClInclude Include="gen\cpp\components\foo_component.h">
       <Filter>gen\components</Filter>
     </ClInclude>
+    <ClInclude Include="src\family.h">
+      <Filter>entities</Filter>
+    </ClInclude>
     <ClInclude Include="src\family_binding.h">
-      <Filter>systems</Filter>
+      <Filter>entities</Filter>
     </ClInclude>
     <ClInclude Include="src\family_type.h">
-      <Filter>systems</Filter>
+      <Filter>entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entity.h">
+      <Filter>entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

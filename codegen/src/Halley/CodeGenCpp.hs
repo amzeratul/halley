@@ -55,7 +55,7 @@ genMember var = concat ["    "
                        ,";"]
 
 genFamilyMember :: VariableTypeData -> String
-genFamilyMember varType = "        " ++ (genType varType) ++ "* const " ++ (removeSuffix "Component" $ lowerFirst $ typeName varType) ++ ";"
+genFamilyMember varType = "        " ++ (genType varType) ++ "& " ++ (removeSuffix "Component" $ lowerFirst $ typeName varType) ++ ";"
 
 ---------------------
 
@@ -92,7 +92,7 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
                      [""
                      ,"class " ++ name ++ " : public " ++ baseSystemClass ++ " {"
                      ,"public:"
-                     ,"    " ++ name ++ "() : " ++ baseSystemClass ++ "({" ++ maskInitializers ++ "}) {}"
+                     ,"    " ++ name ++ "() : " ++ baseSystemClass ++ "({" ++ familyInitializers ++ "}) {}"
                      ,""
                      ,"protected:"
                      ,"    void tick(" ++ tickSignature ++ ") override; // Implement me"
@@ -103,11 +103,13 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
                      ,""]
         familyTypeDecls = concat $ map (familyTypeDecl) $ fams
         familyTypeDecl fam = ["    class " ++ fName ++ " {"
-                             ,"    public:"]
+                             ,"    public:"
+                             ,"        EntityId entityId;"
+                             ,""]
                              ++ memberList ++
                              [""
                              ,"        using Type = FamilyType<" ++ typeList ++ ">;"
-                             ,"        static constexpr FamilyMaskType familyMaskValue = Type::getMask();" -- TODO: compute mask
+                             ,"        static constexpr FamilyMaskType familyMaskValue = Type::mask;"
                              ,"    private:"
                              ,"        " ++ fName ++ "() = delete;"
                              ,"        ~" ++ fName ++ "() = delete;"
@@ -122,7 +124,7 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
         componentIncludes = map (\c -> "#include \"../components/" ++ (makeUnderscores $ typeName c) ++ ".h\"") components
             where
                 components = nub $ concat $ map (familyComponents) fams
-        maskInitializers = intercalate ", " $ map (\f -> familyTypeName f ++ "::familyMaskValue") fams
+        familyInitializers = intercalate ", " $ map (\f -> '&' : familyName f ++ "Family") fams
         tickSignature = "Time time" -- TODO: generate signature based on configuration
 
 
