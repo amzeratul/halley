@@ -25,6 +25,8 @@
 #include <iostream>
 #include <sstream>
 #include <boost/noncopyable.hpp>
+#include <ctime>
+#include "../os/os.h"
 
 using namespace Halley;
 
@@ -319,7 +321,7 @@ LONG onUnhandledException(LPEXCEPTION_POINTERS e)
 	time(&rawtime);
 	char buffer[128];
 	strftime (buffer, 100, "%Y-%m-%d-%H-%M-%S", localtime(&rawtime));
-	String path = Game::getDataPath() + "minidump-" + buffer + ".dmp";
+	String path = OS::get().getUserDataDir() + "minidump-" + buffer + ".dmp";
 	std::cout << "Writing minidump to \"" << path << "\"..." << std::endl;
 	CreateMiniDump(e, path.getUTF16().c_str());
 
@@ -347,11 +349,11 @@ BOOL PreventSetUnhandledExceptionFilter()
 	void *pOrgEntry = GetProcAddress(hKernel32, "SetUnhandledExceptionFilter");
 	if(pOrgEntry == NULL) return FALSE;
 	unsigned char newJump[ 100 ];
-	DWORD dwOrgEntryAddr = (DWORD) pOrgEntry;
+	size_t dwOrgEntryAddr = (size_t) pOrgEntry;
 	dwOrgEntryAddr += 5; // add 5 for 5 op-codes for jmp far
 	void *pNewFunc = &MyDummySetUnhandledExceptionFilter;
-	DWORD dwNewEntryAddr = (DWORD) pNewFunc;
-	DWORD dwRelativeAddr = dwNewEntryAddr - dwOrgEntryAddr;
+	size_t dwNewEntryAddr = (size_t) pNewFunc;
+	size_t dwRelativeAddr = dwNewEntryAddr - dwOrgEntryAddr;
 
 	newJump[ 0 ] = 0xE9;  // JMP absolute
 	memcpy(&newJump[ 1 ], &dwRelativeAddr, sizeof(pNewFunc));
