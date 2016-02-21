@@ -124,6 +124,7 @@
     <ClCompile Include="src\debug\StackWalker\StackWalker.cpp" />
     <ClCompile Include="src\halleystring.cpp" />
     <ClCompile Include="src\maths\aabb.cpp" />
+    <ClCompile Include="src\maths\polygon.cpp" />
     <ClCompile Include="src\maths\random.cpp" />
     <ClCompile Include="src\memory_pool.cpp" />
     <ClCompile Include="src\os\os.cpp" />
@@ -144,9 +145,11 @@
     <ClInclude Include="src\halleytime.h" />
     <ClInclude Include="src\maths\aabb.h" />
     <ClInclude Include="src\maths\angle.h" />
+    <ClInclude Include="src\maths\base_transform.h" />
     <ClInclude Include="src\maths\box.h" />
     <ClInclude Include="src\maths\colour.h" />
     <ClInclude Include="src\maths\fixed_point.h" />
+    <ClInclude Include="src\maths\polygon.h" />
     <ClInclude Include="src\maths\random.h" />
     <ClInclude Include="src\maths\range.h" />
     <ClInclude Include="src\maths\rect.h" />
