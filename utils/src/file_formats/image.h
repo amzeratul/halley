@@ -47,7 +47,7 @@ namespace Halley {
 	private:
 		String filename;
 
-		shared_ptr<char> px;
+		std::unique_ptr<char, void(*)(void*)> px;
 		size_t dataLen;
 		unsigned int w;
 		unsigned int h;
@@ -56,5 +56,4 @@ namespace Halley {
 		
 		void preMultiply();
 	};
-	typedef shared_ptr<Image> spImage;
 }

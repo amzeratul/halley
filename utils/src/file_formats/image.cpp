@@ -25,29 +25,30 @@
 #include "../debug/exception.h"
 
 Halley::Image::Image(unsigned int _w, unsigned int _h)
-	: dataLen(0)
-	, nComponents(0)
+	: px(nullptr, free)
+	, dataLen(0)
 	, w(_w)
 	, h(_h)
+	, nComponents(0)
 	, preMultiplied(false)
 {
 	if (w > 0 && h > 0)	{
 		nComponents = 4;
 		dataLen = w * h * nComponents;
-		px = shared_ptr<char>(static_cast<char*>(malloc(dataLen)), free);
+		px.reset(static_cast<char*>(malloc(dataLen)));
 	}
 }
 
 Halley::Image::Image(String _filename, const Byte* bytes, size_t nBytes, bool _preMultiply)
-	: preMultiplied(false)
-	, filename(_filename)
+	: filename(_filename)
+	, px(nullptr, free)
+	, preMultiplied(false)
 {
 	load(filename, bytes, nBytes, _preMultiply);
 }
 
 int Halley::Image::getRGBA(int r, int g, int b, int a)
 {
-	//return (r << 24) | (g << 16) | (b << 8) | a;
 	return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
@@ -60,7 +61,7 @@ void Halley::Image::load(String name, const Byte* bytes, size_t nBytes, bool sho
 		unsigned char* pixels;
 		unsigned int x, y;
 		lodepng_decode_memory(&pixels, &x, &y, bytes, nBytes, LCT_RGBA, 8);
-		px = shared_ptr<char>(reinterpret_cast<char*>(pixels), free);
+		px.reset(reinterpret_cast<char*>(pixels));
 		w = x;
 		h = y;
 		nComponents = 4;
@@ -72,7 +73,7 @@ void Halley::Image::load(String name, const Byte* bytes, size_t nBytes, bool sho
 		if (!pixels) {
 			throw Exception("Unable to load image data.");
 		}
-		px = shared_ptr<char>(pixels, free);
+		px.reset(static_cast<char*>(pixels));
 		w = x;
 		h = y;
 		dataLen = w * h * nComponents;
