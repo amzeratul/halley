@@ -2,18 +2,20 @@
 #include "system.h"
 #include <iostream>
 
-System::System(std::initializer_list<FamilyBindingBase*> uninitializedFamilies)
+using namespace Halley;
+
+Halley::System::System(std::initializer_list<FamilyBindingBase*> uninitializedFamilies)
 	: families(uninitializedFamilies)
 {
 }
 
-void System::onAddedToWorld() {
+void Halley::System::onAddedToWorld() {
 	for (auto f : families) {
 		std::cout << "Family with masks: " << f->readMask << ", " << f->writeMask << std::endl;
 	}
 }
 
-void System::step() {
+void Halley::System::step() {
 	using namespace std::chrono;
 	auto start = high_resolution_clock::now();
 	

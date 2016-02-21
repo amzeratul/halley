@@ -15,6 +15,7 @@ Thumbs.db
 *.opensdf
 *.opendb
 *.VC.db
+*.ipch
 
 # Binaries
 *.dll

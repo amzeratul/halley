@@ -1,6 +1,8 @@
 #include "world.h"
 #include "../gen/cpp/systems/test_system.h"
 
+using namespace Halley;
+
 int main()
 {
 	World world;

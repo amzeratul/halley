@@ -7,24 +7,24 @@
 #include "family_type.h"
 #include "entity.h"
 
-using Time = float;
+namespace Halley {
+	class System
+	{
+	public:
+		System(std::initializer_list<FamilyBindingBase*> uninitializedFamilies);
+		virtual ~System() {}
+		void step();
 
-class System
-{
-public:
-	System(std::initializer_list<FamilyBindingBase*> uninitializedFamilies);
-	virtual ~System() {}
-	void step();
+	protected:
+		virtual void tick(Time time) = 0;
 
-protected:
-	virtual void tick(Time time) = 0;
+	private:
+		friend class World;
 
-private:
-	friend class World;
+		int nsTaken;
+		std::vector<FamilyBindingBase*> families;
 
-	int nsTaken;
-	std::vector<FamilyBindingBase*> families;
+		void onAddedToWorld();
+	};
 
-	void onAddedToWorld();
-};
-
+}

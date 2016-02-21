@@ -31,6 +31,12 @@
     <Filter Include="entities">
       <UniqueIdentifier>{fe7c04bf-3a8b-4e2f-aa31-8243c8fd8232}</UniqueIdentifier>
     </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{0aed0199-085a-4e3c-91ac-1a08174f7e36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="precompiled">
+      <UniqueIdentifier>{28b6613f-7ea4-4a3d-a856-ef4595d614af}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -50,6 +56,12 @@
     </ClCompile>
     <ClCompile Include="src\family_binding.cpp">
       <Filter>entities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\entity.cpp">
+      <Filter>entities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\prec.cpp">
+      <Filter>precompiled</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +97,15 @@
     </ClInclude>
     <ClInclude Include="src\entity.h">
       <Filter>entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\type_deleter.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entity_id.h">
+      <Filter>entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\prec.h">
+      <Filter>precompiled</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

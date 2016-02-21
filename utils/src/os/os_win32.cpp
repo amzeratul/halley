@@ -1,0 +1,245 @@
+/*****************************************************************\
+           __
+          / /
+		 / /                     __  __
+		/ /______    _______    / / / / ________   __       __
+	   / ______  \  /_____  \  / / / / / _____  | / /      / /
+	  / /      | / _______| / / / / / / /____/ / / /      / /
+	 / /      / / / _____  / / / / / / _______/ / /      / /
+	/ /      / / / /____/ / / / / / / |______  / |______/ /
+   /_/      /_/ |________/ / / / /  \_______/  \_______  /
+                          /_/ /_/                     / /
+			                                         / /
+		       High Level Game Framework            /_/
+
+  ---------------------------------------------------------------
+
+  Copyright (c) 2007-2011 - Rodrigo Braz Monteiro.
+  This file is subject to the terms of halley_license.txt.
+
+\*****************************************************************/
+
+#include <iostream>
+#ifdef _WIN32
+#include "../debug/exception.h"
+
+#pragma warning(disable: 6387)
+#include "os_win32.h"
+#include <Lmcons.h>
+#include <Shlobj.h>
+#include <fcntl.h>
+#include <io.h>
+#include <comutil.h>
+#include <objbase.h>
+#include <atlbase.h>
+
+#pragma comment(lib, "wbemuuid.lib")
+//#pragma comment(lib, "comsupp.lib")
+#pragma comment(lib, "comsuppw.lib")
+
+
+using namespace Halley;
+
+Halley::OSWin32::OSWin32()
+	: pSvc(nullptr)
+	, pLoc(nullptr)
+{
+	// From http://msdn.microsoft.com/en-us/library/aa389762(v=VS.85).aspx
+	// "Creating a WMI Application Using C++"
+
+	try {
+		// Initialize COM
+		HRESULT hr;
+		hr = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
+		if (FAILED(hr)) throw Exception("Unable to initialize COM.");
+		hr = CoInitializeSecurity(nullptr, -1, nullptr, nullptr, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE, nullptr);
+		if (FAILED(hr)) throw Exception("Unable to initialize COM security.");
+
+		// Initialize WMI
+		hr = CoCreateInstance(CLSID_WbemAdministrativeLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (void**) &pLoc);
+		if (FAILED(hr)) throw Exception("Unable to obtain locator");
+		//hr = pLoc->ConnectServer(BSTR(L"ROOT\\DEFAULT"), nullptr, nullptr, 0, 0, 0, 0, &pSvc);
+		hr = pLoc->ConnectServer( L"root\\cimv2", NULL, NULL, NULL, WBEM_FLAG_CONNECT_USE_MAX_WAIT, NULL, NULL, &pSvc);
+		if (FAILED(hr)) throw Exception("Unable to connect to WMI service");
+
+		// Set security on WMI connection
+		CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE);
+		if (FAILED(hr)) throw Exception("Unable to set WMI security");
+	} catch (std::exception& e) {
+		std::cout << "Exception initializing COM/WMI: " << e.what() << std::endl;
+		pSvc = nullptr;
+		pLoc = nullptr;
+	} catch (...) {
+		std::cout << "Unknown exception initializing COM/WMI.";
+		pSvc = nullptr;
+		pLoc = nullptr;
+	}
+}
+
+Halley::OSWin32::~OSWin32()
+{
+	if (pSvc) {
+		pSvc->Release();
+		pLoc->Release();
+		CoUninitialize();
+	}
+}
+
+static String getCOMError(int hr)
+{
+	IErrorInfo* info;
+	HRESULT hr2 = GetErrorInfo(0, &info);
+	if (FAILED(hr2)) return "Failed getting COM error.";
+	BSTR str;
+	info->GetDescription(&str);
+	_bstr_t tmp(str);
+	return "\"" + String((LPCSTR)tmp) + "\", code 0x"+ String::integerToString(hr, 16);
+}
+
+Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter)
+{
+	// See:
+	// http://www.codeproject.com/KB/system/UsingWMI.aspx
+	// http://www.codeproject.com/KB/system/Using_WMI_in_Visual_C__.aspx
+
+	if (pSvc) {
+		try {
+			HRESULT hr;
+			CComPtr<IEnumWbemClassObject> enumerator;
+			BSTR lang = CComBSTR(L"WQL");
+			BSTR q = CComBSTR(query.c_str());
+			hr = pSvc->ExecQuery(lang, q, WBEM_FLAG_FORWARD_ONLY, NULL, &enumerator);
+			if (FAILED(hr)) throw Exception("Error running WMI query: "+getCOMError(hr));
+
+			ULONG retcnt;
+			CComPtr<IWbemClassObject> result;
+			hr = enumerator->Next(WBEM_INFINITE, 1L, &result, &retcnt);
+			if (retcnt == 0) return "Unknown";
+			if (FAILED(hr)) throw Exception("Error obtaining WMI enumeration");
+
+			_variant_t var_val;
+			hr = result->Get(parameter.getUTF16().c_str(), 0, &var_val, nullptr, nullptr);
+			if (FAILED(hr)) throw Exception("Error retrieving name from WMI query result");
+
+			return String((const char*)((_bstr_t)var_val));
+		} catch (std::exception& e) {
+			std::cout << "Exception running WMI query: " << e.what() << std::endl;
+		} catch (...) {
+			std::cout << "Unknown exception running WMI query." << std::endl;
+		}
+	}
+	return "Unknown";
+}
+
+
+
+struct MonitorInfo {
+public:
+	int n;
+	int x, y, w, h;
+};
+
+BOOL CALLBACK onMonitorInfo(HMONITOR /*hMonitor*/, HDC /*hdcMonitor*/, LPRECT lprcMonitor, LPARAM dwData)
+{
+	MonitorInfo* info = (MonitorInfo*) dwData;
+	info->n++;
+	info->x = lprcMonitor->left;
+	info->y = lprcMonitor->top;
+	info->w = lprcMonitor->right - lprcMonitor->left;
+	info->h = lprcMonitor->bottom - lprcMonitor->top;
+	return (info->n != 2);
+}
+
+void Halley::OSWin32::createLogConsole(String winTitle)
+{
+	AllocConsole();
+	SetConsoleTitle(winTitle.getUTF16().c_str());
+
+	int hConHandle;
+	intptr_t lStdHandle;
+	FILE *fp;
+
+	// redirect unbuffered STDOUT to the console
+	lStdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_OUTPUT_HANDLE));
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	fp = _fdopen( hConHandle, "w" );
+	*stdout = *fp;
+	setvbuf( stdout, NULL, _IONBF, 0 );
+
+	// redirect unbuffered STDIN to the console
+	lStdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_INPUT_HANDLE));
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	fp = _fdopen( hConHandle, "r" );
+	*stdin = *fp;
+	setvbuf( stdin, NULL, _IONBF, 0 );
+
+	// redirect unbuffered STDERR to the console
+	lStdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_ERROR_HANDLE));
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	fp = _fdopen( hConHandle, "w" );
+	*stderr = *fp;
+	setvbuf( stderr, NULL, _IONBF, 0 );
+
+	// Position console
+	MonitorInfo info;
+	info.n = 0;
+	EnumDisplayMonitors(NULL, NULL, onMonitorInfo, (LPARAM) &info);
+	if (info.n > 1) {
+		HWND con = GetConsoleWindow();
+		RECT rect;
+		GetWindowRect(con, &rect);
+		int w = rect.right - rect.left;
+		int h = info.h;
+		//MoveWindow(con, (info.w - w)/2 + info.x, (info.h - h)/2 + info.h, w, h, true);
+		SetWindowPos(con, HWND_TOP, (info.w - w)/2 + info.x, (info.h - h)/2 + info.y, w, h, 0);
+	}
+}
+
+Halley::ComputerData Halley::OSWin32::getComputerData()
+{
+	ComputerData data;
+
+	TCHAR chrComputerName[MAX_COMPUTERNAME_LENGTH + 1];
+	DWORD dwBufferSize = MAX_COMPUTERNAME_LENGTH + 1;
+	if (GetComputerName(chrComputerName, &dwBufferSize)) data.computerName = String(chrComputerName);
+
+	TCHAR name[UNLEN + 1];
+	DWORD dwBufferSize2 = UNLEN + 1;
+	if (GetUserName(name, &dwBufferSize2)) data.userName = String(name);
+
+	String os = runWMIQuery("SELECT * FROM Win32_OperatingSystem", "Caption");
+	String servPack = runWMIQuery("SELECT * FROM Win32_OperatingSystem", "CSDVersion");
+	String osArch = "Unknown";
+	if (!os.contains("Windows XP") && !os.contains("2003") && !os.contains("2000")) osArch = runWMIQuery("SELECT * FROM Win32_OperatingSystem", "OSArchitecture");
+	data.osName = os.trimBoth();
+	if (osArch != "Unknown") data.osName += " " + osArch.trimBoth();
+	if (servPack != "Unknown") data.osName += " " + servPack.trimBoth();
+	data.cpuName = runWMIQuery("SELECT * FROM Win32_Processor", "Name");
+	data.gpuName = runWMIQuery("SELECT * FROM Win32_DisplayConfiguration", "DeviceName");
+	data.RAM = runWMIQuery("SELECT * FROM Win32_OperatingSystem", "TotalVisibleMemorySize").toInteger64() * 1024;
+
+	return data;
+}
+
+Halley::String Halley::OSWin32::getUserDataDir()
+{
+	TCHAR path[MAX_PATH];
+	SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, path);
+	return String(path) + "\\";
+}
+
+void Halley::OSWin32::setConsoleColor(int foreground, int background)
+{
+	if (foreground == -1) {
+		foreground = 7;
+	}
+	if (background == -1) {
+		background = 0;
+	}
+
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, WORD(foreground | (background << 4)));
+}
+
+
+#endif

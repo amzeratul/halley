@@ -1,9 +1,11 @@
 #include "family.h"
 
-size_t Family::count() const {
+using namespace Halley;
+
+size_t Halley::Family::count() const {
 	return 0;
 }
 
-void* Family::getElement(size_t) {
+void* Halley::Family::getElement(size_t) {
 	return nullptr;
 }

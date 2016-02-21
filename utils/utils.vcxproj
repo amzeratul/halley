@@ -38,17 +38,17 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -118,6 +118,48 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\debug\console.cpp" />
+    <ClCompile Include="src\debug\debug.cpp" />
+    <ClCompile Include="src\debug\exception.cpp" />
+    <ClCompile Include="src\debug\StackWalker\StackWalker.cpp" />
+    <ClCompile Include="src\halleystring.cpp" />
+    <ClCompile Include="src\maths\aabb.cpp" />
+    <ClCompile Include="src\maths\random.cpp" />
+    <ClCompile Include="src\memory_pool.cpp" />
+    <ClCompile Include="src\os\os.cpp" />
+    <ClCompile Include="src\os\os_android.cpp" />
+    <ClCompile Include="src\os\os_ios.cpp" />
+    <ClCompile Include="src\os\os_mac.cpp" />
+    <ClCompile Include="src\os\os_unix.cpp" />
+    <ClCompile Include="src\os\os_win32.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\halley_utils.h" />
+    <ClInclude Include="src\debug\assert.h" />
+    <ClInclude Include="src\debug\console.h" />
+    <ClInclude Include="src\debug\debug.h" />
+    <ClInclude Include="src\debug\exception.h" />
+    <ClInclude Include="src\debug\StackWalker\StackWalker.h" />
+    <ClInclude Include="src\halleystring.h" />
+    <ClInclude Include="src\halleytime.h" />
+    <ClInclude Include="src\maths\aabb.h" />
+    <ClInclude Include="src\maths\angle.h" />
+    <ClInclude Include="src\maths\box.h" />
+    <ClInclude Include="src\maths\colour.h" />
+    <ClInclude Include="src\maths\fixed_point.h" />
+    <ClInclude Include="src\maths\random.h" />
+    <ClInclude Include="src\maths\range.h" />
+    <ClInclude Include="src\maths\rect.h" />
+    <ClInclude Include="src\maths\utils.h" />
+    <ClInclude Include="src\maths\vector2d.h" />
+    <ClInclude Include="src\maths\vector3d.h" />
+    <ClInclude Include="src\memory_pool.h" />
+    <ClInclude Include="src\os\os.h" />
+    <ClInclude Include="src\os\os_android.h" />
+    <ClInclude Include="src\os\os_ios.h" />
+    <ClInclude Include="src\os\os_mac.h" />
+    <ClInclude Include="src\os\os_unix.h" />
+    <ClInclude Include="src\os\os_win32.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

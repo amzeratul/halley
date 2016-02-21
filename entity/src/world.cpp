@@ -3,11 +3,13 @@
 #include "system.h"
 #include <chrono>
 
-World::World() = default;
+using namespace Halley;
 
-World::~World() = default;
+Halley::World::World() = default;
 
-System& World::addSystem(std::unique_ptr<System> system)
+Halley::World::~World() = default;
+
+Halley::System& Halley::World::addSystem(std::unique_ptr<System> system)
 {
 	auto& ref = *system.get();
 	systems.emplace_back(std::move(system));
@@ -15,7 +17,7 @@ System& World::addSystem(std::unique_ptr<System> system)
 	return ref;
 }
 
-void World::step()
+void Halley::World::step()
 {
 	using namespace std::chrono;
 	auto start = high_resolution_clock::now();

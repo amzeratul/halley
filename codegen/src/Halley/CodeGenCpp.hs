@@ -90,7 +90,8 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
         headerCode = ["#include \"system.h\""]
                      ++ componentIncludes ++
                      [""
-                     ,"class " ++ name ++ " : public " ++ baseSystemClass ++ " {"
+                     ,"// Generated file; do not modify."
+                     ,"class " ++ name ++ " : public Halley::" ++ baseSystemClass ++ " {"
                      ,"public:"
                      ,"    " ++ name ++ "() : " ++ baseSystemClass ++ "({" ++ familyInitializers ++ "}) {}"
                      ,""
@@ -99,6 +100,7 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
                      ,""
                      ,"private:"]
                      ++ familyTypeDecls ++
+                     familyBindings ++
                      ["};"
                      ,""]
         familyTypeDecls = concat $ map (familyTypeDecl) $ fams
@@ -109,23 +111,20 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
                              ++ memberList ++
                              [""
                              ,"        using Type = FamilyType<" ++ typeList ++ ">;"
-                             ,"        static constexpr FamilyMaskType familyMaskValue = Type::mask;"
-                             ,"    private:"
-                             ,"        " ++ fName ++ "() = delete;"
-                             ,"        ~" ++ fName ++ "() = delete;"
                              ,"    };"
-                             ,"    FamilyBinding<" ++ fName ++ "> " ++ (familyName fam) ++ "Family;"
                              ,""]
                              where
                                 memberList = map (genFamilyMember) (familyComponents fam)
                                 typeList = intercalate ", " $ map (typeName) (familyComponents fam)
                                 fName = familyTypeName fam
+        familyBindings = map (familyBinding) $ fams
+        familyBinding fam = "    Halley::FamilyBinding<" ++ (familyTypeName fam) ++ "> " ++ (familyName fam) ++ "Family;"
         familyTypeName fam = (upperFirst $ familyName fam) ++ "Family"
         componentIncludes = map (\c -> "#include \"../components/" ++ (makeUnderscores $ typeName c) ++ ".h\"") components
             where
                 components = nub $ concat $ map (familyComponents) fams
         familyInitializers = intercalate ", " $ map (\f -> '&' : familyName f ++ "Family") fams
-        tickSignature = "Time time" -- TODO: generate signature based on configuration
+        tickSignature = "Halley::Time time" -- TODO: generate signature based on configuration
 
 
 ---------------------

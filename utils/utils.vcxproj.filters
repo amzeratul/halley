@@ -1,2 +1,153 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" />
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="memory">
+      <UniqueIdentifier>{4737eab8-5767-4370-9767-c05fe7a7e0ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{268525e8-262d-48c8-b51a-7e189c8cd816}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="text">
+      <UniqueIdentifier>{a8763722-1739-48bd-85ea-7f2c39dc3cb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="maths">
+      <UniqueIdentifier>{63d38d70-78f3-44fc-98db-b431175f5bfb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="misc">
+      <UniqueIdentifier>{31c7240c-8faa-440b-b413-2679b469cc98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="debug">
+      <UniqueIdentifier>{64e38a54-6cff-4f65-85de-2128e63d1fde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="debug\StackWalker">
+      <UniqueIdentifier>{a50bc32d-1f9b-47ff-9c3f-ce52b9a703d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="os">
+      <UniqueIdentifier>{a43009a7-93f4-4360-83df-a5db52892dee}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\memory_pool.cpp">
+      <Filter>memory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\maths\aabb.cpp">
+      <Filter>maths</Filter>
+    </ClCompile>
+    <ClCompile Include="src\maths\random.cpp">
+      <Filter>maths</Filter>
+    </ClCompile>
+    <ClCompile Include="src\halleystring.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\debug\debug.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="src\debug\exception.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="src\debug\StackWalker\StackWalker.cpp">
+      <Filter>debug\StackWalker</Filter>
+    </ClCompile>
+    <ClCompile Include="src\debug\console.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="src\os\os.cpp">
+      <Filter>os</Filter>
+    </ClCompile>
+    <ClCompile Include="src\os\os_android.cpp">
+      <Filter>os</Filter>
+    </ClCompile>
+    <ClCompile Include="src\os\os_ios.cpp">
+      <Filter>os</Filter>
+    </ClCompile>
+    <ClCompile Include="src\os\os_mac.cpp">
+      <Filter>os</Filter>
+    </ClCompile>
+    <ClCompile Include="src\os\os_unix.cpp">
+      <Filter>os</Filter>
+    </ClCompile>
+    <ClCompile Include="src\os\os_win32.cpp">
+      <Filter>os</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\memory_pool.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\halley_utils.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\aabb.h">
+      <Filter>maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\angle.h">
+      <Filter>maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\box.h">
+      <Filter>maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\random.h">
+      <Filter>maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\range.h">
+      <Filter>maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\rect.h">
+      <Filter>maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\utils.h">
+      <Filter>maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\vector2d.h">
+      <Filter>maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\vector3d.h">
+      <Filter>maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\halleystring.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="src\halleytime.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\debug\debug.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\fixed_point.h">
+      <Filter>maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\debug\assert.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="src\debug\exception.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="src\debug\StackWalker\StackWalker.h">
+      <Filter>debug\StackWalker</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\colour.h">
+      <Filter>maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\debug\console.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="src\os\os.h">
+      <Filter>os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\os\os_android.h">
+      <Filter>os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\os\os_ios.h">
+      <Filter>os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\os\os_mac.h">
+      <Filter>os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\os\os_unix.h">
+      <Filter>os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\os\os_win32.h">
+      <Filter>os</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
