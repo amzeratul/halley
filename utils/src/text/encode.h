@@ -21,29 +21,16 @@
 
 #pragma once
 
-#include "../text/halleystring.h"
+#include "halleystring.h"
 
 namespace Halley {
-	class ComputerData {
-	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
+	namespace Encode {
+		// I hope you guys have an r-value reference aware compiler
 
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
+		String encodeBase64(const std::vector<char>& in);
+		std::vector<char> decodeBase64(const String& in);
 
-		virtual void createLogConsole(String name);
-
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
-	};
+		std::vector<char> encodeRLE(const std::vector<char>& in);
+		std::vector<char> decodeRLE(const std::vector<char>& in);
+	}
 }

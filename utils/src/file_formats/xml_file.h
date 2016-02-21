@@ -21,29 +21,24 @@
 
 #pragma once
 
+#include "xml_forward.h"
+#include <memory>
 #include "../text/halleystring.h"
 
 namespace Halley {
-	class ComputerData {
+	class XMLFile {
 	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
+		XMLFile(String filename);
+		XmlElement* getRoot() const;
+		String getFileName() const { return filename; }
 
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
+		int getNumberFlushes() const { return nFlushes; }
 
-		virtual void createLogConsole(String name);
+	private:
+		void load();
 
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
+		std::shared_ptr<ticpp::Document> doc;
+		String filename;
+		int nFlushes;
 	};
 }

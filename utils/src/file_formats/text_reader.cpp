@@ -19,31 +19,23 @@
 
 \*****************************************************************/
 
-#pragma once
-
 #include "../text/halleystring.h"
+#include "text_reader.h"
+#include <fstream>
+#include <algorithm>
+using namespace Halley;
 
-namespace Halley {
-	class ComputerData {
-	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
+StringArray TextReader::ReadFile(String filename)
+{
+	StringArray result;
+	std::ifstream stream(filename.c_str(), std::ios::in);
+	if (stream.is_open()) {
+		std::string line;
+		while (!stream.eof()) {
+			getline(stream, line);
+			result.push_back(line);
+		}
+	}
 
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
-
-		virtual void createLogConsole(String name);
-
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
-	};
+	return result;
 }

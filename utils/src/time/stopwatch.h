@@ -1,3 +1,5 @@
+#pragma once
+
 /*****************************************************************\
            __
           / /
@@ -14,36 +16,28 @@
 
   ---------------------------------------------------------------
 
-  Copyright (c) 2007-2011 - Rodrigo Braz Monteiro.
+  Copyright (c) 2007-2014 - Rodrigo Braz Monteiro.
   This file is subject to the terms of halley_license.txt.
 
 \*****************************************************************/
 
-#pragma once
-
-#include "../text/halleystring.h"
+#include "halleytime.h"
 
 namespace Halley {
-	class ComputerData {
+	class Stopwatch {
 	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
+		Stopwatch(bool start = true);
 
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
+		void start();
+		void stop();
+		void reset();
 
-		virtual void createLogConsole(String name);
+		Time elapsed();
+		int elapsedUs();
 
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
+	private:
+		bool running = false;
+		long long startTime = 0;
+		long long extraTime = 0;
 	};
 }

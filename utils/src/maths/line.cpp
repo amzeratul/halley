@@ -19,31 +19,45 @@
 
 \*****************************************************************/
 
-#pragma once
+#include "line.h"
 
-#include "../text/halleystring.h"
+using namespace Halley;
 
-namespace Halley {
-	class ComputerData {
-	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
 
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
+void Halley::Line::doLine(Vector2i p0, Vector2i p1, std::function<void(Vector2i)> callback)
+{
+	// Using Bresenham's line algorithm
+	// http://en.wikipedia.org/wiki/Bresenham's_line_algorithm
 
-		virtual void createLogConsole(String name);
+	const int x0 = p0.x;
+	const int y0 = p0.y;
+	const int x1 = p1.x;
+	const int y1 = p1.y;
 
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
-	};
+	int x = x0;
+	int y = y0;
+	//callback(Vector2i(x, y));
+
+	const int dx = abs(x1-x0);
+	const int dy = abs(y1-y0);
+	const int sx = (x0 < x1) ? 1 : -1;
+	const int sy = (y0 < y1) ? 1 : -1;
+	int err = dx-dy;
+
+	while (true) {
+		callback(Vector2i(x, y));
+
+		// End of line
+		if (x == x1 && y == y1)	return;
+
+		int e2 = 2*err;
+		if (e2 > -dy) {
+			err -= dy;
+			x += sx;
+		}
+		if (e2 < dx) {
+			err += dx;
+			y += sy;
+		}
+	}
 }

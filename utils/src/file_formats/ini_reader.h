@@ -22,28 +22,33 @@
 #pragma once
 
 #include "../text/halleystring.h"
+#include <map>
 
 namespace Halley {
-	class ComputerData {
+	class INIHandle {
 	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
+		INIHandle(String str);
+
+		operator String() const;
+		operator int() const;
+		operator float() const;
+
+	private:
+		String data;
 	};
 
-	class OS {
+	class INIFile {
 	public:
-		virtual ~OS() {}
-		static OS& get();
+		INIFile(String data);
+		void parse(String data);
 
-		virtual void createLogConsole(String name);
+		String getString(String key) const;
+		int getInt(String key) const;
+		float getFloat(String key) const;
+		INIHandle get(String key) const;
 
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
+	private:
+		String filename;
+		std::map<String, String> entries;
 	};
 }

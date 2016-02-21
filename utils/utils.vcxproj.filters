@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="memory">
-      <UniqueIdentifier>{4737eab8-5767-4370-9767-c05fe7a7e0ea}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include">
       <UniqueIdentifier>{268525e8-262d-48c8-b51a-7e189c8cd816}</UniqueIdentifier>
     </Filter>
@@ -12,9 +9,6 @@
     </Filter>
     <Filter Include="maths">
       <UniqueIdentifier>{63d38d70-78f3-44fc-98db-b431175f5bfb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="misc">
-      <UniqueIdentifier>{31c7240c-8faa-440b-b413-2679b469cc98}</UniqueIdentifier>
     </Filter>
     <Filter Include="debug">
       <UniqueIdentifier>{64e38a54-6cff-4f65-85de-2128e63d1fde}</UniqueIdentifier>
@@ -25,19 +19,40 @@
     <Filter Include="os">
       <UniqueIdentifier>{a43009a7-93f4-4360-83df-a5db52892dee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="data_structures">
+      <UniqueIdentifier>{ee4b7996-7902-4989-9291-1e5ef084dd4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="concurrency">
+      <UniqueIdentifier>{9261d4a4-2386-49bf-a977-ff1cad7b15b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="web">
+      <UniqueIdentifier>{5b2f027a-6dba-4d04-8fa3-a1b562918a1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="file_formats">
+      <UniqueIdentifier>{ef565789-0c80-4caa-a430-045e5ed927e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="time">
+      <UniqueIdentifier>{b7c4d30e-6151-4184-a3d8-2099a78accf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="file_formats\json">
+      <UniqueIdentifier>{84aa6deb-ae29-4953-8de8-788c874c5147}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="file_formats\lodepng">
+      <UniqueIdentifier>{d198b2b9-e5cb-4112-a833-dcea4fa47504}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="file_formats\stb_image">
+      <UniqueIdentifier>{1af93199-7436-469d-b255-c9d0363c2795}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="file_formats\tinyxml">
+      <UniqueIdentifier>{a4cc8370-9847-4d2f-9c45-a7866e642b9f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\memory_pool.cpp">
-      <Filter>memory</Filter>
-    </ClCompile>
     <ClCompile Include="src\maths\aabb.cpp">
       <Filter>maths</Filter>
     </ClCompile>
     <ClCompile Include="src\maths\random.cpp">
       <Filter>maths</Filter>
-    </ClCompile>
-    <ClCompile Include="src\halleystring.cpp">
-      <Filter>text</Filter>
     </ClCompile>
     <ClCompile Include="src\debug\debug.cpp">
       <Filter>debug</Filter>
@@ -72,11 +87,77 @@
     <ClCompile Include="src\maths\polygon.cpp">
       <Filter>maths</Filter>
     </ClCompile>
+    <ClCompile Include="src\data_structures\memory_pool.cpp">
+      <Filter>data_structures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\concurrency\concurrent.cpp">
+      <Filter>concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="src\text\encode.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\web\http.cpp">
+      <Filter>web</Filter>
+    </ClCompile>
+    <ClCompile Include="src\concurrency\jobs.cpp">
+      <Filter>concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\ini_reader.cpp">
+      <Filter>file_formats</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\json_file.cpp">
+      <Filter>file_formats</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\image.cpp">
+      <Filter>file_formats</Filter>
+    </ClCompile>
+    <ClCompile Include="src\time\stopwatch.cpp">
+      <Filter>time</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\serializer.cpp">
+      <Filter>file_formats</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\string_serializer.cpp">
+      <Filter>file_formats</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\text_reader.cpp">
+      <Filter>file_formats</Filter>
+    </ClCompile>
+    <ClCompile Include="src\concurrency\thread_pool.cpp">
+      <Filter>concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\xml_file.cpp">
+      <Filter>file_formats</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\json\jsoncpp.cpp">
+      <Filter>file_formats\json</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\lodepng\lodepng.cpp">
+      <Filter>file_formats\lodepng</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\stb_image\stb_image.c">
+      <Filter>file_formats\stb_image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\tinyxml\tinyxml.cpp">
+      <Filter>file_formats\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\tinyxml\tinyxmlerror.cpp">
+      <Filter>file_formats\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\tinyxml\tinyxmlparser.cpp">
+      <Filter>file_formats\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\tinyxml\tinystr.cpp">
+      <Filter>file_formats\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_formats\tinyxml\ticpp.cpp">
+      <Filter>file_formats\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="src\text\halleystring.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\memory_pool.h">
-      <Filter>memory</Filter>
-    </ClInclude>
     <ClInclude Include="include\halley_utils.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -109,9 +190,6 @@
     </ClInclude>
     <ClInclude Include="src\halleystring.h">
       <Filter>text</Filter>
-    </ClInclude>
-    <ClInclude Include="src\halleytime.h">
-      <Filter>misc</Filter>
     </ClInclude>
     <ClInclude Include="src\debug\debug.h">
       <Filter>debug</Filter>
@@ -157,6 +235,87 @@
     </ClInclude>
     <ClInclude Include="src\maths\polygon.h">
       <Filter>maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data_structures\circular_buffer.h">
+      <Filter>data_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data_structures\memory_pool.h">
+      <Filter>data_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\concurrency\concurrent.h">
+      <Filter>concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="src\text\encode.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="src\web\http.h">
+      <Filter>web</Filter>
+    </ClInclude>
+    <ClInclude Include="src\concurrency\jobs.h">
+      <Filter>concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data_structures\mapped_pool.h">
+      <Filter>data_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\image.h">
+      <Filter>file_formats</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\ini_reader.h">
+      <Filter>file_formats</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\json_file.h">
+      <Filter>file_formats</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\json_forward.h">
+      <Filter>file_formats</Filter>
+    </ClInclude>
+    <ClInclude Include="src\time\halleytime.h">
+      <Filter>time</Filter>
+    </ClInclude>
+    <ClInclude Include="src\time\stopwatch.h">
+      <Filter>time</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\serializer.h">
+      <Filter>file_formats</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\string_serializer.h">
+      <Filter>file_formats</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\text_reader.h">
+      <Filter>file_formats</Filter>
+    </ClInclude>
+    <ClInclude Include="src\concurrency\thread_pool.h">
+      <Filter>concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\xml_file.h">
+      <Filter>file_formats</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\xml_forward.h">
+      <Filter>file_formats</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\json\json.h">
+      <Filter>file_formats\json</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\json\json-forwards.h">
+      <Filter>file_formats\json</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\lodepng\lodepng.h">
+      <Filter>file_formats\lodepng</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\stb_image\stb_image.h">
+      <Filter>file_formats\stb_image</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\tinyxml\tinyxml.h">
+      <Filter>file_formats\tinyxml</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\tinyxml\tinystr.h">
+      <Filter>file_formats\tinyxml</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\tinyxml\ticpp.h">
+      <Filter>file_formats\tinyxml</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\tinyxml\ticpprc.h">
+      <Filter>file_formats\tinyxml</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

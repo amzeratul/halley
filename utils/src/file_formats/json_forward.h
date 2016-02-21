@@ -14,36 +14,17 @@
 
   ---------------------------------------------------------------
 
-  Copyright (c) 2007-2011 - Rodrigo Braz Monteiro.
+  Copyright (c) 2007-2014 - Rodrigo Braz Monteiro.
   This file is subject to the terms of halley_license.txt.
 
 \*****************************************************************/
 
 #pragma once
 
-#include "../text/halleystring.h"
+namespace Json {
+	class Value;
+}
 
 namespace Halley {
-	class ComputerData {
-	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
-
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
-
-		virtual void createLogConsole(String name);
-
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
-	};
+	typedef Json::Value JSONValue;
 }

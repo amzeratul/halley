@@ -24,8 +24,8 @@
 #endif
 
 #include "halleystring.h"
-#include "debug/exception.h"
-#include "debug/assert.h"
+#include "../debug/exception.h"
+#include "../debug/assert.h"
 #include <sstream>
 #include <iomanip>
 
@@ -430,10 +430,10 @@ String String::asciiUpper() const {
 void String::asciiMakeUpper()
 {
 	if (length() > 0) {
-		char* str = getCharPointer(0);
-		for (int i=0; str[i]; str++) {
-			char cur = str[i];
-			if (cur >= 'a' && cur <= 'z') str[i] -= 32;
+		char* s = getCharPointer(0);
+		for (int i=0; s[i]; s++) {
+			char cur = s[i];
+			if (cur >= 'a' && cur <= 'z') s[i] -= 32;
 		}
 	}
 }
@@ -441,10 +441,10 @@ void String::asciiMakeUpper()
 void String::asciiMakeLower() 
 {
 	if (length() > 0) {
-		char* str = getCharPointer(0);
-		for (int i=0; str[i]; str++) {
-			char cur = str[i];
-			if (cur >= 'A' && cur <= 'Z') str[i] += 32;
+		char* s = getCharPointer(0);
+		for (int i=0; s[i]; s++) {
+			char cur = s[i];
+			if (cur >= 'A' && cur <= 'Z') s[i] += 32;
 		}
 	}
 }

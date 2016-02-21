@@ -21,29 +21,38 @@
 
 #pragma once
 
+#include <thread>
+#include <mutex>
+#include <future>
 #include "../text/halleystring.h"
 
 namespace Halley {
-	class ComputerData {
-	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
+	using std::thread;
+	using std::mutex;
+	typedef std::condition_variable condition;
+	typedef std::unique_lock<mutex> mutex_locker;
+	using std::future;
 
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
+	namespace Concurrent {
+		template <typename T>
+		inline thread run(T function)
+		{
+			return thread(function);
+		}
 
-		virtual void createLogConsole(String name);
+		template <typename V, typename T>
+		inline future<V> runFuture(T function)
+		{
+			std::packaged_task<T> pt(function);
+			thread t(boost::move(pt));
+			return pt.get_future();
+		}
 
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
-	};
+		void setThreadName(String name);
+		String getThreadName();
+	}
 }
+
+/*
+#define synchronized(M) for (Halley::MutexLocker synchronized_mutexlocker(M); !synchronized_mutexlocker.__tapped(); synchronized_mutexlocker.__tap())
+*/

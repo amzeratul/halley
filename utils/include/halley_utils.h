@@ -19,8 +19,11 @@
 #include "../src/debug/debug.h"
 #include "../src/debug/exception.h"
 
-#include "../src/halleystring.h"
-#include "../src/halleytime.h"
-#include "../src/memory_pool.h"
+#include "../src/text/halleystring.h"
+
+#include "../src/time/halleytime.h"
+
+#include "../src/data_structures/memory_pool.h"
+#include "../src/data_structures/circular_buffer.h"
 
 #include "../src/os/os.h"

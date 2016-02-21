@@ -21,29 +21,11 @@
 
 #pragma once
 
-#include "../text/halleystring.h"
+#include "vector2d.h"
 
 namespace Halley {
-	class ComputerData {
+	class Line {
 	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
-
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
-
-		virtual void createLogConsole(String name);
-
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
+		static void doLine(Vector2i p0, Vector2i p1, std::function<void(Vector2i)> callback);
 	};
 }

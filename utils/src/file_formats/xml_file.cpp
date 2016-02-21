@@ -19,31 +19,28 @@
 
 \*****************************************************************/
 
-#pragma once
+#include "xml_file.h"
+#include "tinyxml/ticpp.h"
 
-#include "../text/halleystring.h"
+using namespace Halley;
 
-namespace Halley {
-	class ComputerData {
-	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
+Halley::XMLFile::XMLFile(String name)
+	: filename(name)
+	, nFlushes(0)
+{
+	load();
+}
 
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
+XmlElement* Halley::XMLFile::getRoot() const
+{
+	return doc->FirstChildElement();
+}
 
-		virtual void createLogConsole(String name);
-
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
-	};
+void Halley::XMLFile::load()
+{
+	/*
+	auto res = ResourceLocator::getStatic(filename);
+	doc = std::shared_ptr<ticpp::Document>(new ticpp::Document());
+	doc->Parse(res->getString());
+	*/
 }

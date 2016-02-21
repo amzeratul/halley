@@ -22,7 +22,7 @@
 #pragma once
 
 #include <exception>
-#include "../halleystring.h"
+#include "../text/halleystring.h"
 
 #ifdef _MSC_VER
 #define GCC_THROW

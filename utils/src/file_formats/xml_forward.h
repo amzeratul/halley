@@ -21,29 +21,12 @@
 
 #pragma once
 
-#include "../text/halleystring.h"
+namespace ticpp {
+	class Element;
+	class Document;
+	class XmlElement;
+}
 
 namespace Halley {
-	class ComputerData {
-	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
-
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
-
-		virtual void createLogConsole(String name);
-
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
-	};
+	typedef ticpp::Element XmlElement;
 }

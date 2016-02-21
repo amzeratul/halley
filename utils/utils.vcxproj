@@ -81,9 +81,10 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -105,11 +106,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -118,31 +120,74 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\concurrency\concurrent.cpp" />
+    <ClCompile Include="src\concurrency\jobs.cpp" />
+    <ClCompile Include="src\concurrency\thread_pool.cpp" />
+    <ClCompile Include="src\data_structures\memory_pool.cpp" />
     <ClCompile Include="src\debug\console.cpp" />
     <ClCompile Include="src\debug\debug.cpp" />
     <ClCompile Include="src\debug\exception.cpp" />
     <ClCompile Include="src\debug\StackWalker\StackWalker.cpp" />
-    <ClCompile Include="src\halleystring.cpp" />
+    <ClCompile Include="src\file_formats\image.cpp" />
+    <ClCompile Include="src\file_formats\ini_reader.cpp" />
+    <ClCompile Include="src\file_formats\json\jsoncpp.cpp" />
+    <ClCompile Include="src\file_formats\json_file.cpp" />
+    <ClCompile Include="src\file_formats\lodepng\lodepng.cpp" />
+    <ClCompile Include="src\file_formats\serializer.cpp" />
+    <ClCompile Include="src\file_formats\stb_image\stb_image.c" />
+    <ClCompile Include="src\file_formats\string_serializer.cpp" />
+    <ClCompile Include="src\file_formats\text_reader.cpp" />
+    <ClCompile Include="src\file_formats\tinyxml\ticpp.cpp" />
+    <ClCompile Include="src\file_formats\tinyxml\tinystr.cpp" />
+    <ClCompile Include="src\file_formats\tinyxml\tinyxml.cpp" />
+    <ClCompile Include="src\file_formats\tinyxml\tinyxmlerror.cpp" />
+    <ClCompile Include="src\file_formats\tinyxml\tinyxmlparser.cpp" />
+    <ClCompile Include="src\file_formats\xml_file.cpp" />
     <ClCompile Include="src\maths\aabb.cpp" />
     <ClCompile Include="src\maths\polygon.cpp" />
     <ClCompile Include="src\maths\random.cpp" />
-    <ClCompile Include="src\memory_pool.cpp" />
     <ClCompile Include="src\os\os.cpp" />
     <ClCompile Include="src\os\os_android.cpp" />
     <ClCompile Include="src\os\os_ios.cpp" />
     <ClCompile Include="src\os\os_mac.cpp" />
     <ClCompile Include="src\os\os_unix.cpp" />
     <ClCompile Include="src\os\os_win32.cpp" />
+    <ClCompile Include="src\text\encode.cpp" />
+    <ClCompile Include="src\text\halleystring.cpp" />
+    <ClCompile Include="src\time\stopwatch.cpp" />
+    <ClCompile Include="src\web\http.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\halley_utils.h" />
+    <ClInclude Include="src\concurrency\concurrent.h" />
+    <ClInclude Include="src\concurrency\jobs.h" />
+    <ClInclude Include="src\concurrency\thread_pool.h" />
+    <ClInclude Include="src\data_structures\circular_buffer.h" />
+    <ClInclude Include="src\data_structures\mapped_pool.h" />
+    <ClInclude Include="src\data_structures\memory_pool.h" />
     <ClInclude Include="src\debug\assert.h" />
     <ClInclude Include="src\debug\console.h" />
     <ClInclude Include="src\debug\debug.h" />
     <ClInclude Include="src\debug\exception.h" />
     <ClInclude Include="src\debug\StackWalker\StackWalker.h" />
+    <ClInclude Include="src\file_formats\image.h" />
+    <ClInclude Include="src\file_formats\ini_reader.h" />
+    <ClInclude Include="src\file_formats\json\json-forwards.h" />
+    <ClInclude Include="src\file_formats\json\json.h" />
+    <ClInclude Include="src\file_formats\json_file.h" />
+    <ClInclude Include="src\file_formats\json_forward.h" />
+    <ClInclude Include="src\file_formats\lodepng\lodepng.h" />
+    <ClInclude Include="src\file_formats\serializer.h" />
+    <ClInclude Include="src\file_formats\stb_image\stb_image.h" />
+    <ClInclude Include="src\file_formats\string_serializer.h" />
+    <ClInclude Include="src\file_formats\text_reader.h" />
+    <ClInclude Include="src\file_formats\tinyxml\ticpp.h" />
+    <ClInclude Include="src\file_formats\tinyxml\ticpprc.h" />
+    <ClInclude Include="src\file_formats\tinyxml\tinystr.h" />
+    <ClInclude Include="src\file_formats\tinyxml\tinyxml.h" />
+    <ClInclude Include="src\file_formats\xml_file.h" />
+    <ClInclude Include="src\file_formats\xml_forward.h" />
     <ClInclude Include="src\halleystring.h" />
-    <ClInclude Include="src\halleytime.h" />
     <ClInclude Include="src\maths\aabb.h" />
     <ClInclude Include="src\maths\angle.h" />
     <ClInclude Include="src\maths\base_transform.h" />
@@ -156,13 +201,16 @@
     <ClInclude Include="src\maths\utils.h" />
     <ClInclude Include="src\maths\vector2d.h" />
     <ClInclude Include="src\maths\vector3d.h" />
-    <ClInclude Include="src\memory_pool.h" />
     <ClInclude Include="src\os\os.h" />
     <ClInclude Include="src\os\os_android.h" />
     <ClInclude Include="src\os\os_ios.h" />
     <ClInclude Include="src\os\os_mac.h" />
     <ClInclude Include="src\os\os_unix.h" />
     <ClInclude Include="src\os\os_win32.h" />
+    <ClInclude Include="src\text\encode.h" />
+    <ClInclude Include="src\time\halleytime.h" />
+    <ClInclude Include="src\time\stopwatch.h" />
+    <ClInclude Include="src\web\http.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

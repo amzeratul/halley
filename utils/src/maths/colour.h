@@ -23,7 +23,9 @@
 
 #include <iostream>
 #include <iomanip>
-#include "../halleystring.h"
+#include <sstream>
+#include "../text/halleystring.h"
+#include "../debug/assert.h"
 
 namespace Halley {
 	template <typename T>

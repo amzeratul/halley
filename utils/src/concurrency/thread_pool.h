@@ -21,29 +21,25 @@
 
 #pragma once
 
-#include "../text/halleystring.h"
+#include "jobs.h"
+#include "../maths/utils.h"
 
 namespace Halley {
-	class ComputerData {
+	class ThreadPool {
 	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
+		ThreadPool(int n=-1);
+		~ThreadPool();
+		void add(std::function<void()> f, int priority=0);
+		void stop();
 
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
+		static ThreadPool& get();
+		static void run(std::function<void()> f, int priority=0);
 
-		virtual void createLogConsole(String name);
+	private:
+		std::vector<thread> threads;
+		std::atomic<bool> running;
+		JobExecuter jobs;
 
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
+		static shared_ptr<ThreadPool> instance;
 	};
 }

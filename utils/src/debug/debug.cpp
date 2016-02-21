@@ -21,7 +21,7 @@
 
 #include "debug.h"
 #include "console.h"
-#include "../halleystring.h"
+#include "../text/halleystring.h"
 #include <iostream>
 #include <sstream>
 #include <boost/noncopyable.hpp>

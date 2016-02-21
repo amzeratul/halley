@@ -29,20 +29,10 @@
 #include <memory>
 #include <array>
 #include <functional>
-
-#ifdef _MSC_VER
-	#pragma warning (disable: 4127)
-#else
-	#define nullptr NULL
-#endif
-
-//#include <boost/foreach.hpp>
-//#define foreach         BOOST_FOREACH
-//#define reverse_foreach BOOST_REVERSE_FOREACH
+#include <vector>
 
 
 namespace Halley {
-	// Boost
 	using std::shared_ptr;
 	using std::weak_ptr;
 	using std::dynamic_pointer_cast;
@@ -54,38 +44,11 @@ namespace Halley {
 	using std::min;
 	using std::max;
 	using std::swap;
-
-
-
-	// Forward references
-	class Frame;
-	class Sprite;
-	class InputKeyboard;
-	class Thread;
-	class Texture;
-
-
-	// Smart pointers
-	typedef shared_ptr<Frame> spFrame;
-	typedef weak_ptr<Frame> wpFrame;
-	typedef shared_ptr<Sprite> spSprite;
-	typedef weak_ptr<Sprite> wpSprite;
-	typedef shared_ptr<InputKeyboard> spInputKeyboard;
-	typedef weak_ptr<InputKeyboard> wpInputKeyboard;
-	typedef shared_ptr<Thread> spThread;
-	typedef weak_ptr<Thread> wpThread;
-	typedef shared_ptr<Texture> spTexture;
-	typedef weak_ptr<Texture> wpTexture;
-
-	//#include <boost/pool/pool_alloc.hpp>
-	//typedef std::list<spSprite, boost::fast_pool_allocator<spSprite> > SpriteList;
-	typedef std::list<spSprite> SpriteList;
-	typedef SpriteList::iterator SpriteIter;
-
-
+	
 	// General aliases
-	typedef std::vector<char> Bytes;
-
+	using Byte = unsigned char;
+	using Bytes = std::vector<Byte>;
+	
 	// Mid function
 	template <typename T>
 	inline T mid(T minValue, T value, T maxValue)

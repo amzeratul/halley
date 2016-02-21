@@ -14,7 +14,7 @@
 
   ---------------------------------------------------------------
 
-  Copyright (c) 2007-2011 - Rodrigo Braz Monteiro.
+  Copyright (c) 2007-2012 - Rodrigo Braz Monteiro.
   This file is subject to the terms of halley_license.txt.
 
 \*****************************************************************/
@@ -22,28 +22,27 @@
 #pragma once
 
 #include "../text/halleystring.h"
+//#include "halley_config.h"
+
+#ifdef WITH_BOOST_ASIO
 
 namespace Halley {
-	class ComputerData {
+	class HTTPPostEntry {
 	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
+		String name;
+		String filename;
+		String contentType;
+		std::vector<char> data;
 	};
 
-	class OS {
+	class HTTP {
 	public:
-		virtual ~OS() {}
-		static OS& get();
+		static std::vector<char> get(String host, String path);
+		static std::vector<char> post(String host, String path, std::vector<HTTPPostEntry>& entries);
 
-		virtual void createLogConsole(String name);
-
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
+	private:
+		static std::vector<char> request(String host, String path, bool isPost, String& content, String boundary);
 	};
 }
+
+#endif

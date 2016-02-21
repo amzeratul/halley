@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "../halleystring.h"
+#include "../text/halleystring.h"
 #include <list>
 
 namespace Halley {

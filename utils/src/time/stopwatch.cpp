@@ -14,36 +14,56 @@
 
   ---------------------------------------------------------------
 
-  Copyright (c) 2007-2011 - Rodrigo Braz Monteiro.
+  Copyright (c) 2007-2014 - Rodrigo Braz Monteiro.
   This file is subject to the terms of halley_license.txt.
 
 \*****************************************************************/
 
-#pragma once
+#include "stopwatch.h"
 
-#include "../text/halleystring.h"
+using namespace Halley;
 
-namespace Halley {
-	class ComputerData {
-	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
-
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
-
-		virtual void createLogConsole(String name);
-
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
-	};
+/*
+Stopwatch::Stopwatch(bool _start)
+{
+	if (_start) {
+		start();
+	}
 }
+
+Time Stopwatch::elapsed()
+{
+	long long t = extraTime;
+	if (running) {
+		t += SDL_GetPerformanceCounter() - startTime;
+	}
+	return Time(t) / Time(SDL_GetPerformanceFrequency());
+}
+
+int Halley::Stopwatch::elapsedUs()
+{
+	return int(elapsed() * 1000000);
+}
+
+void Halley::Stopwatch::start()
+{
+	if (!running) {
+		running = true;
+		startTime = SDL_GetPerformanceCounter();
+	}
+}
+
+void Halley::Stopwatch::stop()
+{
+	if (running) {
+		running = false;
+		extraTime += SDL_GetPerformanceCounter() - startTime;
+	}
+}
+
+void Halley::Stopwatch::reset()
+{
+	startTime = SDL_GetPerformanceCounter();
+	extraTime = 0;
+}
+*/

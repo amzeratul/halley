@@ -14,36 +14,34 @@
 
   ---------------------------------------------------------------
 
-  Copyright (c) 2007-2011 - Rodrigo Braz Monteiro.
+  Copyright (c) 2007-2012 - Rodrigo Braz Monteiro.
   This file is subject to the terms of halley_license.txt.
 
 \*****************************************************************/
 
 #pragma once
 
-#include "../text/halleystring.h"
+#include "halleystring.h"
 
 namespace Halley {
-	class ComputerData {
+	typedef std::pair<String, int> HighScoreEntry;
+
+	class HighScore {
 	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
+		HighScore(size_t maxEntries);
 
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
+		const HighScoreEntry& getEntry(size_t n) const;
+		size_t getNumEntries() const;
+		size_t getMaxEntries() const;
+		
+		void addScore(String data, int value);
+		bool isHighScore(int value) const;
 
-		virtual void createLogConsole(String name);
+		std::vector<char> save() const;
+		void load(std::vector<char>& data);
 
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
+	private:
+		size_t maxEntries;
+		std::vector<HighScoreEntry> entries;
 	};
 }

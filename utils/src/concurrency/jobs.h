@@ -21,29 +21,47 @@
 
 #pragma once
 
-#include "../text/halleystring.h"
+#include <queue>
+#include "concurrent.h"
+#include <boost/optional/optional.hpp>
 
 namespace Halley {
-	class ComputerData {
+	typedef long long PriorityType;
+
+	class Job {
 	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
+		Job(std::function<void()> f, int priority=0);
+		void run();
+		PriorityType getPriority() const;
+
+		bool operator<(const Job& j) const { return priority < j.priority; }
+
+	private:
+		std::function<void()> f;
+		PriorityType priority;
 	};
 
-	class OS {
+	class JobExecuter {
 	public:
-		virtual ~OS() {}
-		static OS& get();
+		JobExecuter();
 
-		virtual void createLogConsole(String name);
+		void add(Job j);
+		void add(std::function<void()> f, int priority=0);
 
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
+		boost::optional<Job> getNext();
+		boost::optional<Job> waitNext();
+		void runNext();
+		bool tryRunNext();
+
+		void stop();
+
+	private:
+		bool running;
+		mutex m;
+		condition c;
+		std::priority_queue<Job> jobs;
+	};
+
+	class JobTerminatedException : public std::exception {
 	};
 }

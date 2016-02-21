@@ -14,36 +14,31 @@
 
   ---------------------------------------------------------------
 
-  Copyright (c) 2007-2011 - Rodrigo Braz Monteiro.
+  Copyright (c) 2007-2014 - Rodrigo Braz Monteiro.
   This file is subject to the terms of halley_license.txt.
 
 \*****************************************************************/
 
 #pragma once
 
+#include "json_forward.h"
+#include <memory>
 #include "../text/halleystring.h"
 
 namespace Halley {
-	class ComputerData {
+	class JSONFile {
 	public:
-		String computerName;
-		String userName;
-		String cpuName;
-		String gpuName;
-		String osName;
-		long long RAM = 0;
-	};
+		JSONFile(String filename);
+		JSONValue& getRoot();
+		String getFileName() const { return filename; }
 
-	class OS {
-	public:
-		virtual ~OS() {}
-		static OS& get();
+		int getNumberFlushes() const { return nFlushes; }
 
-		virtual void createLogConsole(String name);
+	private:
+		void load();
 
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
-		virtual String makeDataPath(String appDataPath, String userProvidedPath);
-		virtual void setConsoleColor(int foreground, int background);
+		std::unique_ptr<JSONValue> root;
+		String filename;
+		int nFlushes;
 	};
 }
