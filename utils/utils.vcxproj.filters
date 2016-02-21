@@ -317,5 +317,8 @@
     <ClInclude Include="src\file_formats\tinyxml\ticpprc.h">
       <Filter>file_formats\tinyxml</Filter>
     </ClInclude>
+    <ClInclude Include="src\includes.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -188,6 +188,7 @@
     <ClInclude Include="src\file_formats\xml_file.h" />
     <ClInclude Include="src\file_formats\xml_forward.h" />
     <ClInclude Include="src\halleystring.h" />
+    <ClInclude Include="src\includes.h" />
     <ClInclude Include="src\maths\aabb.h" />
     <ClInclude Include="src\maths\angle.h" />
     <ClInclude Include="src\maths\base_transform.h" />
