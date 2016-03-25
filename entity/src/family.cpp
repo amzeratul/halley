@@ -2,7 +2,7 @@
 
 using namespace Halley;
 
-Family::Family(FamilyMask::Type mask) 
+Family::Family(FamilyMaskType mask) 
 	: inclusionMask(mask)
 {}
 

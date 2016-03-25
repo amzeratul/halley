@@ -1,5 +1,4 @@
 #include "entity.h"
-#include "type_deleter.h"
 //#include "../../exception.h"
 
 using namespace Halley;
@@ -33,7 +32,7 @@ void Entity::addComponent(Component* component, int id, int fastId)
 
 void Entity::deleteComponent(Component* component, int id, int fastId)
 {
-	TypeDeleterBase* deleter = TypeUIDSizeTable::get(id);
+	TypeDeleterBase* deleter = ComponentDeleterTable::get(id);
 	deleter->callDestructor(component);
 	PoolPool::getPool(deleter->getSize())->free(component);
 	if (fastId >= 0) {

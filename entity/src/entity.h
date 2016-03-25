@@ -5,6 +5,7 @@
 #include "component.h"
 #include "family_mask.h"
 #include "entity_id.h"
+#include "type_deleter.h"
 
 namespace Halley {
 	class Entity
@@ -23,6 +24,7 @@ namespace Halley {
 			static_assert(!std::is_polymorphic<T>::value, "Components cannot be polymorphic (i.e. they can't have virtual methods)");
 			static_assert(std::is_default_constructible<T>::value, "Components must have a default constructor");
 			addComponent(component, T::componentIndex, getFastAccessSlot<T>(0));
+			TypeDeleter<T>::initialize();
 
 			return *this;
 		}
@@ -64,7 +66,7 @@ namespace Halley {
 		template <typename T>
 		bool hasComponent()
 		{
-			return ((ComponentMask(1) << T::componentIndex) & mask) != 0;
+			return ((FamilyMaskType(1) << T::componentIndex) & mask) != 0;
 		}
 
 		bool needsRefresh() const

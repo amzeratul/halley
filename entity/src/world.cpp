@@ -72,6 +72,7 @@ Entity& World::createEntity()
 		throw Exception("Error creating entity - out of memory?");
 	}
 	entitiesPendingCreation.push_back(entity);
+	allocateEntity(entity);
 	return *entity;
 }
 
@@ -123,15 +124,15 @@ void Halley::World::step(Time elapsed)
 	std::cout << "Step took " << length << " milliseconds." << std::endl;
 }
 
+void World::allocateEntity(Entity* entity) {
+	auto res = entityMap.alloc();
+	*res.first = entity;
+	entity->uid = res.second;
+}
+
 void World::spawnPending()
 {
 	if (!entitiesPendingCreation.empty()) {
-		for (size_t i = 0; i < entitiesPendingCreation.size(); i++) {
-			auto entity = entitiesPendingCreation[i];
-			auto res = entityMap.alloc();
-			*res.first = entity;
-			entity->uid = res.second;
-		}
 		std::move(entitiesPendingCreation.begin(), entitiesPendingCreation.end(), std::insert_iterator<decltype(entities)>(entities, entities.end()));
 		entitiesPendingCreation.clear();
 	}
@@ -156,7 +157,7 @@ void World::updateEntities()
 				// Remove from systems
 				for (auto& iter : families) {
 					auto& family = *iter.second;
-					FamilyMask::Type famMask = family.inclusionMask;
+					FamilyMaskType famMask = family.inclusionMask;
 					if ((famMask & entity.getMask()) == famMask) {
 						family.removeEntity(entity);
 					}
@@ -175,16 +176,16 @@ void World::updateEntities()
 			}
 			else {
 				// It's alive, so check old and new system inclusions
-				FamilyMask::Type oldMask = entity.getMask();
+				FamilyMaskType oldMask = entity.getMask();
 				entity.refresh();
-				FamilyMask::Type newMask = entity.getMask();
+				FamilyMaskType newMask = entity.getMask();
 
 				// Did it change?
 				if (oldMask != newMask) {
 					// Let the systems know about it
 					for (auto& iter : families) {
 						auto& family = *iter.second;
-						FamilyMask::Type famMask = family.inclusionMask;
+						FamilyMaskType famMask = family.inclusionMask;
 						bool matchOld = (famMask & oldMask) == famMask;
 						bool matchNew = (famMask & newMask) == famMask;
 

@@ -1,0 +1,24 @@
+entity
+- single-entity systems
+- timelines (update, fixed update, render, etc)
+- staggered systems
+- parallel systems
+- load from text files
+- defragment memory
+- Lua systems
+- Haskell systems
+
+core
+- bring core into solution
+- refactor graphics front-end
+- decouple OpenGL back-end from the graphics front-end
+- rewrite text rendering system
+
+utils
+- better HTTP library
+
+tools
+- asset/prefab editor
+- scene editor?
+- animation editor
+- system/component editor

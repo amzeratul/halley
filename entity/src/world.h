@@ -17,7 +17,6 @@ namespace Halley {
 		~World();
 
 		void step(Time elapsed);
-
 		System& addSystemName(String name);
 		System& addSystem(std::unique_ptr<System> system);
 		void removeSystem(System& system);
@@ -33,7 +32,7 @@ namespace Halley {
 		template <typename T>
 		Family& getFamily()
 		{
-			FamilyMask::Type mask = T::Type::readMask;
+			FamilyMaskType mask = T::Type::readMask;
 			auto iter = families.find(mask);
 			if (iter != families.end()) {
 				return *iter->second;
@@ -55,9 +54,10 @@ namespace Halley {
 		std::vector<Entity*> entitiesPendingCreation;
 		MappedPool<Entity*> entityMap;
 
-		std::map<FamilyMask::Type, std::unique_ptr<Family>> families;
+		std::map<FamilyMaskType, std::unique_ptr<Family>> families;
 		//std::shared_ptr<EntityRegistry> registry;
 
+		void allocateEntity(Entity* entity);
 		void spawnPending();
 		void updateEntities();
 		void deleteEntity(Entity* entity);

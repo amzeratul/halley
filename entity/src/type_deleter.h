@@ -1,46 +1,61 @@
 #pragma once
 
-class TypeDeleterBase
-{
-public:
-	virtual size_t getSize() = 0;
-	virtual void callDestructor(void* ptr) = 0;
-};
-
-template <typename T>
-class TypeDeleter : public TypeDeleterBase
-{
-public:
-	size_t getSize()
+namespace Halley {
+	class TypeDeleterBase
 	{
-		return sizeof(T);
-	}
+	public:
+		virtual size_t getSize() = 0;
+		virtual void callDestructor(void* ptr) = 0;
+	};
 
-	void callDestructor(void* ptr)
+	template <typename T>
+	class TypeDeleter : public TypeDeleterBase
 	{
-		ptr = ptr; // Make it shut up about unused
-		((T*)ptr)->~T();
-	}
-};
+	public:
+		static void initialize()
+		{
+			static bool initialized = false;
+			if (!initialized) {
+				initialized = true;
+				ComponentDeleterTable::set(T::componentIndex, new TypeDeleter<T>());
+			}
+		}
 
-class TypeUIDSizeTable
-{
-public:
-	static void set(int uid, TypeDeleterBase* deleter)
+		size_t getSize() override
+		{
+			return sizeof(T);
+		}
+
+		void callDestructor(void* ptr) override
+		{
+			ptr = ptr; // Make it shut up about unused
+			static_cast<T*>(ptr)->~T();
+		}
+	};
+
+	class ComponentDeleterTable
 	{
-		getMap()[uid] = deleter;
-	}
+	public:
+		static void set(int idx, TypeDeleterBase* deleter)
+		{
+			auto& m = getDeleters();
+			if (m.size() <= idx) {
+				m.resize(static_cast<size_t>(idx * 1.5f + 1));
+			}
+			m[idx] = deleter;
+		}
 
-	static TypeDeleterBase* get(int uid)
-	{
-		return getMap()[uid];
-	}
+		static TypeDeleterBase* get(int uid)
+		{
+			return getDeleters()[uid];
+		}
 
-private:
+	private:
 
-	static std::map<int, TypeDeleterBase*>& getMap()
-	{
-		static std::map<int, TypeDeleterBase*> map;
-		return map;
-	}
-};
+		static std::vector<TypeDeleterBase*>& getDeleters()
+		{
+			static std::vector<TypeDeleterBase*> map;
+			return map;
+		}
+	};
+}

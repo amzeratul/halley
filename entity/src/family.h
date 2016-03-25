@@ -10,7 +10,7 @@ namespace Halley {
 		friend class World;
 
 	public:
-		Family(FamilyMask::Type mask);
+		Family(FamilyMaskType mask);
 		virtual ~Family() = default;
 
 		size_t count() const
@@ -34,7 +34,7 @@ namespace Halley {
 		std::vector<EntityId> toRemove;
 
 	private:
-		FamilyMask::Type inclusionMask;
+		FamilyMaskType inclusionMask;
 	};
 
 	template <typename T>
