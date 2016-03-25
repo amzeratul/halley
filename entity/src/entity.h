@@ -17,7 +17,7 @@ namespace Halley {
 		~Entity();
 
 		template <typename T>
-		Entity& addComponent(T* component)
+		Entity& addComponent(World& world, T* component)
 		{
 			static_assert(!std::is_same<T, Component>::value, "Cannot add base class Component to entity, make sure type isn't being erased");
 			static_assert(std::is_base_of<Component, T>::value, "Components must extend the Component class");
@@ -26,18 +26,19 @@ namespace Halley {
 			addComponent(component, T::componentIndex, getFastAccessSlot<T>(0));
 			TypeDeleter<T>::initialize();
 
+			markDirty(world);
 			return *this;
 		}
 
 		template <typename T>
-		Entity& removeComponent()
+		Entity& removeComponent(World& world)
 		{
 			int id = T::componentIndex;
 			for (size_t i = 0; i < components.size(); i++) {
 				if (components[i].first == id) {
-					deleteComponent(i->second, i->first, getFastAccessSlot<T>(0));
+					deleteComponent(components[i].second, components[i].first, getFastAccessSlot<T>(0));
 					components.erase(components.begin() + i);
-					dirty = true;
+					markDirty(world);
 					return *this;
 				}
 			}
@@ -79,7 +80,7 @@ namespace Halley {
 		}
 
 		FamilyMaskType getMask() const;
-		EntityId getUID() const;
+		EntityId getEntityId() const;
 
 		void refresh();
 		void destroy();
@@ -87,10 +88,10 @@ namespace Halley {
 	private:
 		std::vector<std::pair<int, Component*>> components;
 		std::array<Component*, numFastComponents> fastComponents;
-		FamilyMaskType mask;
-		EntityId uid = 0;
-		bool dirty;
-		bool alive;
+		FamilyMaskType mask = 0;
+		EntityId uid = -1;
+		bool dirty = false;
+		bool alive = true;
 
 		Entity();
 
@@ -106,5 +107,47 @@ namespace Halley {
 
 		void addComponent(Component* component, int id, int fastId);
 		void deleteComponent(Component* component, int id, int fastId);
+		void onReady();
+
+		void markDirty(World& world);
+	};
+
+	class EntityRef
+	{
+	public:
+		template <typename T>
+		EntityRef& addComponent(T* component)
+		{
+			entity.addComponent(world, component);
+			return *this;
+		}
+
+		template <typename T>
+		EntityRef& removeComponent()
+		{
+			entity.removeComponent<T>(world);
+			return *this;
+		}
+
+		template <typename T>
+		T* getComponent()
+		{
+			return entity.getComponent<T>();
+		}
+
+		EntityId getEntityId() const
+		{
+			return entity.getEntityId();
+		}
+
+	private:
+		friend class World;
+		EntityRef(Entity& e, World& w)
+			: entity(e)
+			, world(w)
+		{}
+
+		Entity& entity;
+		World& world;
 	};
 }

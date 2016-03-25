@@ -1,13 +1,10 @@
 #include "entity.h"
+#include "world.h"
 //#include "../../exception.h"
 
 using namespace Halley;
 
 Entity::Entity()
-	: mask(0)
-	, uid(-1)
-	, dirty(false)
-	, alive(true)
 {
 	for (size_t i = 0; i < numFastComponents; i++) {
 		fastComponents[i] = nullptr;
@@ -24,7 +21,6 @@ Entity::~Entity()
 void Entity::addComponent(Component* component, int id, int fastId)
 {
 	components.push_back(std::pair<int, Component*>(id, component));
-	dirty = true;
 	if (fastId >= 0) {
 		fastComponents[fastId] = component;
 	}
@@ -37,6 +33,18 @@ void Entity::deleteComponent(Component* component, int id, int fastId)
 	PoolPool::getPool(deleter->getSize())->free(component);
 	if (fastId >= 0) {
 		fastComponents[fastId] = nullptr;
+	}
+}
+
+void Entity::onReady()
+{
+}
+
+void Entity::markDirty(World& world)
+{
+	if (!dirty) {
+		dirty = true;
+		world.onEntityDirty();
 	}
 }
 
@@ -56,7 +64,7 @@ void Entity::refresh()
 	}
 }
 
-EntityId Entity::getUID() const
+EntityId Entity::getEntityId() const
 {
 	if (uid == -1) {
 		//throw Exception("Entity ID not yet assigned - are you using this before it's spawned?");

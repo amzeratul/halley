@@ -14,7 +14,6 @@ namespace Halley {
 	public:
 		System(std::initializer_list<FamilyBindingBase*> uninitializedFamilies);
 		virtual ~System() {}
-		void step();
 
 	protected:
 		virtual void tick(Time time) = 0;
@@ -27,6 +26,7 @@ namespace Halley {
 		World* world;
 		String name;
 
+		void step(Time time);
 		void onAddedToWorld(World& world);
 	};
 

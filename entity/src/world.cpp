@@ -19,19 +19,10 @@ Halley::System& Halley::World::addSystem(std::unique_ptr<System> system)
 	return ref;
 }
 
-System& Halley::World::addSystemName(String name)
+System& Halley::World::addSystemByName(String)
 {
 	// TODO
-	System* system = nullptr; //registry->createSystem(name);
-	doAddSystem(system, name);
-	return *system;
-}
-
-void World::doAddSystem(System* system, String name)
-{
-	systems.push_back(std::unique_ptr<System>(system));
-	system->name = name;
-	systemsDirty = true;
+	return addSystem(std::unique_ptr<System>(nullptr));
 }
 
 void World::removeSystem(System& system)
@@ -65,7 +56,7 @@ System& World::getSystem(String name)
 	throw new Exception("System not found: " + name);
 }
 
-Entity& World::createEntity()
+EntityRef World::createEntity()
 {
 	Entity* entity = new(PoolAllocator<Entity>::alloc()) Entity();
 	if (entity == nullptr) {
@@ -73,21 +64,22 @@ Entity& World::createEntity()
 	}
 	entitiesPendingCreation.push_back(entity);
 	allocateEntity(entity);
-	return *entity;
+	return EntityRef(*entity, *this);
 }
 
 void World::destroyEntity(EntityId id)
 {
-	getEntity(id).destroy();
+	getEntity(id).entity.destroy();
+	entityDirty = true;
 }
 
-Entity& World::getEntity(EntityId id)
+EntityRef World::getEntity(EntityId id)
 {
 	Entity* entity = tryGetEntity(id);
 	if (entity == nullptr) {
 		throw Exception("Entity does not exist: " + String::integerToString(id));
 	}
-	return *entity;
+	return EntityRef(*entity, *this);
 }
 
 Entity* World::tryGetEntity(EntityId id)
@@ -104,24 +96,34 @@ size_t World::numEntities() const
 	return entities.size();
 }
 
+void World::onEntityDirty()
+{
+	entityDirty = true;
+}
+
 void World::deleteEntity(Entity* entity)
 {
 	entity->~Entity();
 	PoolAllocator<Entity>::free(entity);
 }
 
-void Halley::World::step(Time elapsed)
+bool World::hasSystemsOnTimeLine(TimeLine) const
+{
+	// TODO: use timeline
+	return true;
+}
+
+void Halley::World::step(TimeLine timeline, Time elapsed)
 {
 	using namespace std::chrono;
 	auto start = high_resolution_clock::now();
 
 	spawnPending();
 	updateEntities();
-	updateSystems(elapsed);
+	updateSystems(timeline, elapsed);
 
 	auto end = high_resolution_clock::now();
-	auto length = duration_cast<duration<double, std::milli>>(end - start).count();
-	std::cout << "Step took " << length << " milliseconds." << std::endl;
+	lastStepLength = duration_cast<duration<double, std::milli>>(end - start).count();
 }
 
 void World::allocateEntity(Entity* entity) {
@@ -133,13 +135,21 @@ void World::allocateEntity(Entity* entity) {
 void World::spawnPending()
 {
 	if (!entitiesPendingCreation.empty()) {
+		for (auto& e : entitiesPendingCreation) {
+			e->onReady();
+		}
 		std::move(entitiesPendingCreation.begin(), entitiesPendingCreation.end(), std::insert_iterator<decltype(entities)>(entities, entities.end()));
 		entitiesPendingCreation.clear();
+		entityDirty = true;
 	}
 }
 
 void World::updateEntities()
 {
+	if (!entityDirty) {
+		return;
+	}
+
 	size_t nEntities = entities.size();
 
 	// Update all entities
@@ -164,8 +174,8 @@ void World::updateEntities()
 				}
 
 				// Remove from map
-				//std::cout << "-" << entity.getUID() << " ";
-				entityMap.freeId(entity.getUID());
+				//std::cout << "-" << entity.getEntityId() << " ";
+				entityMap.freeId(entity.getEntityId());
 
 				// Swap with last, then pop
 				std::swap(entities[i], entities[nEntities - 1]);
@@ -203,19 +213,21 @@ void World::updateEntities()
 			}
 		}
 	}
-}
 
-void World::updateSystems(Time)
-{
 	// Update families
 	for (auto& iter : families) {
 		auto& family = iter.second;
 		family->removeDeadEntities();
 	}
 
+	entityDirty = false;
+}
+
+void World::updateSystems(TimeLine, Time time)
+{
 	// Update systems
 	for (auto& system : systems) {
-		system->step();
+		system->step(time);
 	}
 }
 

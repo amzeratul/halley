@@ -8,5 +8,5 @@ Family::Family(FamilyMaskType mask)
 
 void Family::removeEntity(Entity& entity)
 {
-	toRemove.push_back(entity.getUID());
+	toRemove.push_back(entity.getEntityId());
 }

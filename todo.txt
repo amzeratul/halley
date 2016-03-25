@@ -1,16 +1,17 @@
 entity
-- single-entity systems
-- timelines (update, fixed update, render, etc)
+* single-entity systems
+* timelines (update, fixed update, render, etc)
+* load from text files
+* query other entities
 - staggered systems
 - parallel systems
-- load from text files
 - defragment memory
 - Lua systems
 - Haskell systems
 
 core
-- bring core into solution
-- refactor graphics front-end
+* bring core into solution
+* refactor graphics front-end
 - decouple OpenGL back-end from the graphics front-end
 - rewrite text rendering system
 

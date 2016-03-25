@@ -5,6 +5,8 @@
 #include "entity_id.h"
 #include "family_mask.h"
 #include "family.h"
+#include <allocators>
+#include <chrono>
 
 namespace Halley {
 	class Entity;
@@ -16,18 +18,23 @@ namespace Halley {
 		World();
 		~World();
 
-		void step(Time elapsed);
-		System& addSystemName(String name);
+		bool hasSystemsOnTimeLine(TimeLine timeline) const;
+		void step(TimeLine timeline, Time elapsed);
+		double getLastStepLength() const { return lastStepLength; }
+
+		System& addSystemByName(String name);
 		System& addSystem(std::unique_ptr<System> system);
 		void removeSystem(System& system);
 		std::vector<System*> getSystems();
 		System& getSystem(String name);
 
-		Entity& createEntity();
+		EntityRef createEntity();
 		void destroyEntity(EntityId id);
-		Entity& getEntity(EntityId id);
+		EntityRef getEntity(EntityId id);
 		Entity* tryGetEntity(EntityId id);
 		size_t numEntities() const;
+
+		void onEntityDirty();
 
 		template <typename T>
 		Family& getFamily()
@@ -48,6 +55,9 @@ namespace Halley {
 	private:
 		std::vector<std::unique_ptr<System>> systems;
 		bool systemsDirty = false;
+		bool entityDirty = false;
+
+		double lastStepLength;
 
 		EntityId nextUid = 0;
 		std::vector<Entity*> entities;
@@ -62,8 +72,7 @@ namespace Halley {
 		void updateEntities();
 		void deleteEntity(Entity* entity);
 
-		void updateSystems(Time elapsed);
-		void doAddSystem(System* system, String name);
+		void updateSystems(TimeLine timeline, Time elapsed);
 		void onAddFamily(Family& family);
 	};
 }

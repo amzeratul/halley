@@ -57,7 +57,7 @@ namespace Halley {
 		{
 			entities.push_back(StorageType());
 			auto& e = entities.back();
-			e.entityId = entity.getUID();
+			e.entityId = entity.getEntityId();
 			T::Type::loadComponents(entity, &e.data[0]);
 
 			updateElems();
@@ -84,8 +84,8 @@ namespace Halley {
 					}
 				}
 				toRemove.clear();
+				updateElems();
 			}
-			updateElems();
 		}
 
 	private:

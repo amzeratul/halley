@@ -16,11 +16,11 @@ void Halley::System::onAddedToWorld(World& w) {
 	}
 }
 
-void Halley::System::step() {
+void Halley::System::step(Time time) {
 	using namespace std::chrono;
 	auto start = high_resolution_clock::now();
 	
-	tick(0.016667f); // TODO: get correct time
+	tick(time);
 	
 	auto end = high_resolution_clock::now();
 	auto duration = duration_cast<nanoseconds>(end - start).count();
