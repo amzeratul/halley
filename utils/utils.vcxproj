@@ -124,6 +124,7 @@
     <ClCompile Include="src\concurrency\jobs.cpp" />
     <ClCompile Include="src\concurrency\thread_pool.cpp" />
     <ClCompile Include="src\data_structures\memory_pool.cpp" />
+    <ClCompile Include="src\data_structures\rect_spatial_checker.cpp" />
     <ClCompile Include="src\debug\console.cpp" />
     <ClCompile Include="src\debug\debug.cpp" />
     <ClCompile Include="src\debug\exception.cpp" />
@@ -163,8 +164,10 @@
     <ClInclude Include="src\concurrency\jobs.h" />
     <ClInclude Include="src\concurrency\thread_pool.h" />
     <ClInclude Include="src\data_structures\circular_buffer.h" />
+    <ClInclude Include="src\data_structures\dynamic_grid.h" />
     <ClInclude Include="src\data_structures\mapped_pool.h" />
     <ClInclude Include="src\data_structures\memory_pool.h" />
+    <ClInclude Include="src\data_structures\rect_spatial_checker.h" />
     <ClInclude Include="src\debug\assert.h" />
     <ClInclude Include="src\debug\console.h" />
     <ClInclude Include="src\debug\debug.h" />

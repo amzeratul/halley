@@ -156,6 +156,9 @@
     <ClCompile Include="src\text\halleystring.cpp">
       <Filter>text</Filter>
     </ClCompile>
+    <ClCompile Include="src\data_structures\rect_spatial_checker.cpp">
+      <Filter>data_structures</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\halley_utils.h">
@@ -319,6 +322,12 @@
     </ClInclude>
     <ClInclude Include="src\text\halleystring.h">
       <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data_structures\dynamic_grid.h">
+      <Filter>data_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data_structures\rect_spatial_checker.h">
+      <Filter>data_structures</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
