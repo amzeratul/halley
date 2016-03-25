@@ -4,8 +4,9 @@
 
 using namespace Halley;
 
-Halley::System::System(std::initializer_list<FamilyBindingBase*> uninitializedFamilies)
+Halley::System::System(std::initializer_list<FamilyBindingBase*> uninitializedFamilies, TimeLine tl)
 	: families(uninitializedFamilies)
+	, timeline(tl)
 {
 }
 

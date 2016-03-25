@@ -6,7 +6,7 @@
 // Generated file; do not modify.
 class TestSystem : public Halley::System {
 public:
-    TestSystem() : System({&mainFamily, &auxFamily}) {}
+    TestSystem() : System({&mainFamily, &auxFamily}, Halley::TimeLine::FixedUpdate) {}
 
 protected:
     void tick(Halley::Time time) override; // Implement me

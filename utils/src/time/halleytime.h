@@ -29,7 +29,8 @@ namespace Halley {
 	{
 		FixedUpdate,
 		VariableUpdate,
-		Render
+		Render,
+		NUMBER_OF_TIMELINES
 	};
 	
 }

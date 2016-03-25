@@ -13,9 +13,8 @@ Halley::World::~World() = default;
 Halley::System& Halley::World::addSystem(std::unique_ptr<System> system)
 {
 	auto& ref = *system.get();
-	systems.emplace_back(std::move(system));
+	getSystems(system->timeline).emplace_back(std::move(system));
 	ref.onAddedToWorld(*this);
-	systemsDirty = true;
 	return ref;
 }
 
@@ -27,30 +26,44 @@ System& Halley::World::addSystemByName(String)
 
 void World::removeSystem(System& system)
 {
-	for (size_t i = 0; i < systems.size(); i++) {
-		if (systems[i].get() == &system) {
-			systems.erase(systems.begin() + i);
+	auto& sys = getSystems(system.timeline);
+	for (size_t i = 0; i < sys.size(); i++) {
+		if (sys[i].get() == &system) {
+			sys.erase(sys.begin() + i);
 			break;
 		}
 	}
-	systemsDirty = true;
+}
+
+std::vector<std::unique_ptr<System>>& World::getSystems(TimeLine timeline)
+{
+	return systems[static_cast<int>(timeline)];
 }
 
 std::vector<System*> World::getSystems()
 {
-	std::vector<System*> result(systems.size());
+	size_t n = 0;
+	for (auto& tl : systems) {
+		n += tl.size();
+	}
+	std::vector<System*> result(n);
+
 	int i = 0;
-	for (auto& s : systems) {
-		result[i++] = s.get();
+	for (auto& tl : systems) {
+		for (auto& s : tl) {
+			result[i++] = s.get();
+		}
 	}
 	return std::move(result);
 }
 
 System& World::getSystem(String name)
 {
-	for (auto& s : systems) {
-		if (s->name == name) {
-			return *s.get();
+	for (auto& tl : systems) {
+		for (auto& s : tl) {
+			if (s->name == name) {
+				return *s.get();
+			}
 		}
 	}
 	throw new Exception("System not found: " + name);
@@ -223,10 +236,10 @@ void World::updateEntities()
 	entityDirty = false;
 }
 
-void World::updateSystems(TimeLine, Time time)
+void World::updateSystems(TimeLine timeline, Time time)
 {
 	// Update systems
-	for (auto& system : systems) {
+	for (auto& system : getSystems(timeline)) {
 		system->step(time);
 	}
 }

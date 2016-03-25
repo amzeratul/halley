@@ -93,7 +93,7 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
                      ,"// Generated file; do not modify."
                      ,"class " ++ name ++ " : public Halley::" ++ baseSystemClass ++ " {"
                      ,"public:"
-                     ,"    " ++ name ++ "() : " ++ baseSystemClass ++ "({" ++ familyInitializers ++ "}) {}"
+                     ,"    " ++ name ++ "() : " ++ baseSystemClass ++ "({" ++ familyInitializers ++ "}, " ++ timeline ++ ") {}"
                      ,""
                      ,"protected:"
                      ,"    void tick(" ++ tickSignature ++ ") override; // Implement me"
@@ -125,6 +125,7 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
                 components = nub $ concat $ map (familyComponents) fams
         familyInitializers = intercalate ", " $ map (\f -> '&' : familyName f ++ "Family") fams
         tickSignature = "Halley::Time time" -- TODO: generate signature based on configuration
+        timeline = "Halley::TimeLine::FixedUpdate" -- TODO: generate timeline based on configuration
 
 
 ---------------------

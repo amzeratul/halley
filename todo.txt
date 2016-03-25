@@ -1,6 +1,6 @@
 entity
 * single-entity systems
-* timelines (update, fixed update, render, etc)
+* specify timelines from code gen
 * load from text files
 * query other entities
 - staggered systems

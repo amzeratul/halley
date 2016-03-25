@@ -33,7 +33,9 @@ int main()
 		if (i == 80) {
 			world.destroyEntity(id2);
 		}
-		world.step(TimeLine::VariableUpdate, 0.016667f);
+		
+		world.step(TimeLine::FixedUpdate, 0.016667f);
+		
 		std::cout << "Took " << world.getLastStepLength() << " ms.\n";
 	}
 

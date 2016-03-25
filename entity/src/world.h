@@ -53,8 +53,7 @@ namespace Halley {
 		}
 		
 	private:
-		std::vector<std::unique_ptr<System>> systems;
-		bool systemsDirty = false;
+		std::array<std::vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
 		bool entityDirty = false;
 
 		double lastStepLength;
@@ -72,6 +71,7 @@ namespace Halley {
 		void updateEntities();
 		void deleteEntity(Entity* entity);
 
+		std::vector<std::unique_ptr<System>>& getSystems(TimeLine timeline);
 		void updateSystems(TimeLine timeline, Time elapsed);
 		void onAddFamily(Family& family);
 	};
