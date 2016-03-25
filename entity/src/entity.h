@@ -3,7 +3,7 @@
 #include <array>
 #include <vector>
 #include "component.h"
-#include "family_type.h"
+#include "family_mask.h"
 #include "entity_id.h"
 
 namespace Halley {
@@ -51,7 +51,7 @@ namespace Halley {
 				return static_cast<T*>(fastComponents[fastAccessId]);
 			}
 			else {
-				const int id = TypeUIDHelper<T>::get();
+				const int id = T::componentIndex;
 				for (size_t i = 0; i < components.size(); i++) {
 					if (components[i].first == id) {
 						return static_cast<T*>(components[i].second);
@@ -64,7 +64,7 @@ namespace Halley {
 		template <typename T>
 		bool hasComponent()
 		{
-			return ((ComponentMask(1) << TypeUIDHelper<T>::get()) & mask) != 0;
+			return ((ComponentMask(1) << T::componentIndex) & mask) != 0;
 		}
 
 		bool needsRefresh() const

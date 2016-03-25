@@ -24,5 +24,8 @@ int main()
 	for (int i = 0; i < 100; i++) {
 		world.step(0.016667f);
 	}
+
+	std::cout << "Final bar: " << e0.getComponent<BarComponent>()->bar << std::endl;
+
 	return 0;
 }

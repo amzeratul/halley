@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 #include "entity_id.h"
-#include "family_type.h"
+#include "family_mask.h"
 #include "family.h"
 
 namespace Halley {

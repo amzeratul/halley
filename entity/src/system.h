@@ -4,6 +4,7 @@
 #include <initializer_list>
 
 #include "family_binding.h"
+#include "family_mask.h"
 #include "family_type.h"
 #include "entity.h"
 

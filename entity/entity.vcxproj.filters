@@ -107,6 +107,12 @@
     <ClInclude Include="src\prec.h">
       <Filter>precompiled</Filter>
     </ClInclude>
+    <ClInclude Include="src\family_extractor.h">
+      <Filter>entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\family_mask.h">
+      <Filter>entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="gen_src\test.txt">

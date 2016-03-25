@@ -55,7 +55,7 @@ genMember var = concat ["    "
                        ,";"]
 
 genFamilyMember :: VariableTypeData -> String
-genFamilyMember varType = "        " ++ (genType varType) ++ "& " ++ (removeSuffix "Component" $ lowerFirst $ typeName varType) ++ ";"
+genFamilyMember varType = "        " ++ (genType varType) ++ "* const " ++ (removeSuffix "Component" $ lowerFirst $ typeName varType) ++ ";"
 
 ---------------------
 
@@ -106,11 +106,11 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
         familyTypeDecls = concat $ map (familyTypeDecl) $ fams
         familyTypeDecl fam = ["    class " ++ fName ++ " {"
                              ,"    public:"
-                             ,"        EntityId entityId;"
+                             ,"        const EntityId entityId;"
                              ,""]
                              ++ memberList ++
                              [""
-                             ,"        using Type = FamilyType<" ++ typeList ++ ">;"
+                             ,"        using Type = Halley::FamilyType<" ++ typeList ++ ">;"
                              ,"    };"
                              ,""]
                              where

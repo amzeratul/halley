@@ -186,6 +186,8 @@
     <ClInclude Include="src\entity_id.h" />
     <ClInclude Include="src\family.h" />
     <ClInclude Include="src\family_binding.h" />
+    <ClInclude Include="src\family_extractor.h" />
+    <ClInclude Include="src\family_mask.h" />
     <ClInclude Include="src\family_type.h" />
     <ClInclude Include="src\prec.h" />
     <ClInclude Include="src\system.h" />

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "family_type.h"
+#include "family_mask.h"
 #include "world.h"
 
 namespace Halley {

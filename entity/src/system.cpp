@@ -20,7 +20,7 @@ void Halley::System::step() {
 	using namespace std::chrono;
 	auto start = high_resolution_clock::now();
 	
-	tick(0.0f);
+	tick(0.016667f); // TODO: get correct time
 	
 	auto end = high_resolution_clock::now();
 	auto duration = duration_cast<nanoseconds>(end - start).count();

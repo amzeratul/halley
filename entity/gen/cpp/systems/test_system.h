@@ -14,22 +14,22 @@ protected:
 private:
     class MainFamily {
     public:
-        EntityId entityId;
+        const EntityId entityId;
 
-        TestComponent& test;
-        FooComponent& foo;
+        TestComponent* const test;
+        FooComponent* const foo;
 
-        using Type = FamilyType<TestComponent, FooComponent>;
+        using Type = Halley::FamilyType<TestComponent, FooComponent>;
     };
 
     class AuxFamily {
     public:
-        EntityId entityId;
+        const EntityId entityId;
 
-        TestComponent& test;
-        BarComponent& bar;
+        TestComponent* const test;
+        BarComponent* const bar;
 
-        using Type = FamilyType<TestComponent, BarComponent>;
+        using Type = Halley::FamilyType<TestComponent, BarComponent>;
     };
 
     Halley::FamilyBinding<MainFamily> mainFamily;
