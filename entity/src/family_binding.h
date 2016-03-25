@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "family_type.h"
+#include "world.h"
 
 namespace Halley {
 	class Family;
@@ -8,14 +9,16 @@ namespace Halley {
 	class FamilyBindingBase {
 	public:
 		size_t count() const;
+		~FamilyBindingBase() = default;
 
 	protected:
 		FamilyBindingBase(FamilyMaskType readMask, FamilyMaskType writeMask);
 		void* getElement(size_t index) const;
+		virtual void bindFamily(World& world) = 0;
+		void setFamily(Family* family);
 
 	private:
 		friend class System;
-		void setFamily(Family* family);
 
 		Family* family;
 		const FamilyMaskType readMask;
@@ -29,6 +32,11 @@ namespace Halley {
 
 		T& operator[](size_t index) {
 			return *reinterpret_cast<T*>(getElement(index));
+		}
+
+	protected:
+		void bindFamily(World& world) override {
+			setFamily(&world.getFamily<T>());
 		}
 	};
 }

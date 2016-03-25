@@ -2,10 +2,23 @@
 
 using namespace Halley;
 
-size_t Halley::Family::count() const {
-	return 0;
+Family::Family(FamilyMask::Type read, FamilyMask::Type write) 
+	: inclusionMask(read | write)
+	, writeMask(write)
+	, readMask(read)
+{}
+
+FamilyMask::Type Family::getInclusionMask() const
+{
+	return inclusionMask;
 }
 
-void* Halley::Family::getElement(size_t) {
-	return nullptr;
+FamilyMask::Type Family::getMutableMask() const
+{
+	return writeMask;
+}
+
+FamilyMask::Type Family::getConstMask() const
+{
+	return readMask;
 }

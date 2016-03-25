@@ -22,7 +22,7 @@
 \*****************************************************************/
 
 namespace Halley {
-	template <typename T, int blockLen = 16384>
+	template <typename T, size_t blockLen = 16384>
 	class MappedPool {
 		struct Entry {
 			std::array<char, sizeof(T)> data;
@@ -33,11 +33,11 @@ namespace Halley {
 		struct Block {
 			std::vector<Entry> data;
 
-			Block(int n)
+			Block(size_t n)
 				: data(blockLen)
 			{
-				int base = n * blockLen;
-				for (int i = 0; i < blockLen - 1; i++) {
+				size_t base = n * blockLen;
+				for (size_t i = 0; i < blockLen - 1; i++) {
 					data[i].index = static_cast<unsigned short>(i + 1 + base);
 					data[i].revision = 0;
 				}

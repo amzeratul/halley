@@ -9,6 +9,7 @@
 namespace Halley {
 	class Entity
 	{
+		friend class World;
 		static const int numFastComponents = 3;
 
 	public:
@@ -21,7 +22,7 @@ namespace Halley {
 			static_assert(std::is_base_of<Component, T>::value, "Components must extend the Component class");
 			static_assert(!std::is_polymorphic<T>::value, "Components cannot be polymorphic (i.e. they can't have virtual methods)");
 			static_assert(std::is_default_constructible<T>::value, "Components must have a default constructor");
-			addComponent(component, TypeUIDHelper<T>::get(), getFastAccessSlot<T>(0));
+			addComponent(component, T::componentIndex, getFastAccessSlot<T>(0));
 
 			return *this;
 		}
@@ -29,7 +30,7 @@ namespace Halley {
 		template <typename T>
 		Entity& removeComponent()
 		{
-			int id = TypeUIDHelper<T>::get();
+			int id = T::componentIndex;
 			for (size_t i = 0; i < components.size(); i++) {
 				if (components[i].first == id) {
 					deleteComponent(i->second, i->first, getFastAccessSlot<T>(0));
@@ -85,7 +86,7 @@ namespace Halley {
 		std::vector<std::pair<int, Component*>> components;
 		std::array<Component*, numFastComponents> fastComponents;
 		FamilyMaskType mask;
-		EntityId uid;
+		EntityId uid = 0;
 		bool dirty;
 		bool alive;
 

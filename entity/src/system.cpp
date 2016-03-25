@@ -9,9 +9,10 @@ Halley::System::System(std::initializer_list<FamilyBindingBase*> uninitializedFa
 {
 }
 
-void Halley::System::onAddedToWorld() {
+void Halley::System::onAddedToWorld(World& w) {
+	this->world = &w;
 	for (auto f : families) {
-		std::cout << "Family with masks: " << f->readMask << ", " << f->writeMask << std::endl;
+		f->bindFamily(w);
 	}
 }
 

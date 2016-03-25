@@ -23,8 +23,10 @@ namespace Halley {
 
 		int nsTaken;
 		std::vector<FamilyBindingBase*> families;
+		World* world;
+		String name;
 
-		void onAddedToWorld();
+		void onAddedToWorld(World& world);
 	};
 
 }
