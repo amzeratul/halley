@@ -33,7 +33,7 @@ namespace Halley {
 		template <typename T>
 		Family& getFamily()
 		{
-			FamilyMask::Type mask = T::Type::mask;
+			FamilyMask::Type mask = T::Type::readMask;
 			auto iter = families.find(mask);
 			if (iter != families.end()) {
 				return *iter->second;

@@ -10,7 +10,7 @@ namespace Halley {
 		friend class World;
 
 	public:
-		Family(FamilyMask::Type readMask, FamilyMask::Type writeMask);
+		Family(FamilyMask::Type mask);
 		virtual ~Family() = default;
 
 		size_t count() const
@@ -25,22 +25,16 @@ namespace Halley {
 
 	protected:
 		virtual void addEntity(Entity& entity) = 0;
-		virtual void removeEntity(Entity& entity) = 0;
+		void removeEntity(Entity& entity);
 		virtual void removeDeadEntities() = 0;
-		virtual bool hasDeadEntities() const = 0;
-
-		FamilyMask::Type getInclusionMask() const;
-		FamilyMask::Type getMutableMask() const;
-		FamilyMask::Type getConstMask() const;
-
+		
 		void* elems;
 		size_t elemCount;
 		size_t elemSize;
+		std::vector<EntityId> toRemove;
 
 	private:
 		FamilyMask::Type inclusionMask;
-		FamilyMask::Type writeMask;
-		FamilyMask::Type readMask;
 	};
 
 	template <typename T>
@@ -56,7 +50,7 @@ namespace Halley {
 		};
 
 	public:
-		FamilyImpl() : Family(T::Type::mask, T::Type::mask) {}
+		FamilyImpl() : Family(T::Type::readMask) {}
 		
 	protected:
 		void addEntity(Entity& entity) override
@@ -69,24 +63,14 @@ namespace Halley {
 			updateElems();
 		}
 
-		void removeEntity(Entity& entity) override
-		{
-			toRemove.push_back(entity.getUID());
-		}
-
-		bool hasDeadEntities() const override
-		{
-			return !toRemove.empty();
-		}
-
 		void removeDeadEntities() override
 		{
 			// Performance-critical code
 			// Benchmarks suggest that using a std::vector is faster than std::set and std::unordered_set
-			size_t size = entities.size();
 			if (!toRemove.empty()) {
 				std::sort(toRemove.begin(), toRemove.end());
 
+				size_t size = entities.size();
 				for (size_t i = 0; i < size; i++) {
 					EntityId id = entities[i].entityId;
 					auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
@@ -106,7 +90,6 @@ namespace Halley {
 
 	private:
 		std::vector<StorageType> entities;
-		std::vector<EntityId> toRemove;
 
 		void updateElems()
 		{

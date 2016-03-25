@@ -156,7 +156,7 @@ void World::updateEntities()
 				// Remove from systems
 				for (auto& iter : families) {
 					auto& family = *iter.second;
-					FamilyMask::Type famMask = family.getInclusionMask();
+					FamilyMask::Type famMask = family.inclusionMask;
 					if ((famMask & entity.getMask()) == famMask) {
 						family.removeEntity(entity);
 					}
@@ -184,7 +184,7 @@ void World::updateEntities()
 					// Let the systems know about it
 					for (auto& iter : families) {
 						auto& family = *iter.second;
-						FamilyMask::Type famMask = family.getInclusionMask();
+						FamilyMask::Type famMask = family.inclusionMask;
 						bool matchOld = (famMask & oldMask) == famMask;
 						bool matchNew = (famMask & newMask) == famMask;
 
@@ -225,7 +225,7 @@ void World::onAddFamily(Family& family)
 	for (size_t i = 0; i < nEntities; i++) {
 		auto& entity = *entities[i];
 		auto eMask = entity.getMask();
-		auto fMask = family.getInclusionMask();
+		auto fMask = family.inclusionMask;
 		if ((eMask & fMask) == fMask) {
 			family.addEntity(entity);
 		}

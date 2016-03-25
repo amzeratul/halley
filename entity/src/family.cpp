@@ -2,23 +2,11 @@
 
 using namespace Halley;
 
-Family::Family(FamilyMask::Type read, FamilyMask::Type write) 
-	: inclusionMask(read | write)
-	, writeMask(write)
-	, readMask(read)
+Family::Family(FamilyMask::Type mask) 
+	: inclusionMask(mask)
 {}
 
-FamilyMask::Type Family::getInclusionMask() const
+void Family::removeEntity(Entity& entity)
 {
-	return inclusionMask;
-}
-
-FamilyMask::Type Family::getMutableMask() const
-{
-	return writeMask;
-}
-
-FamilyMask::Type Family::getConstMask() const
-{
-	return readMask;
+	toRemove.push_back(entity.getUID());
 }

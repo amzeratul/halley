@@ -6,7 +6,8 @@ namespace Halley {
 	template <typename... Ts>
 	class FamilyType {
 	public:
-		constexpr static FamilyMaskType mask = FamilyMask::Evaluator<Ts...>::getMask(0);
+		constexpr static FamilyMaskType writeMask = FamilyMask::MutableEvaluator<Ts...>::getMask(0);
+		constexpr static FamilyMaskType readMask = FamilyMask::Evaluator<Ts...>::getMask(0);
 
 		static void loadComponents(Entity& entity, char* data)
 		{

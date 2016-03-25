@@ -28,7 +28,7 @@ namespace Halley {
 	template <typename T>
 	class FamilyBinding : public FamilyBindingBase {
 	public:
-		FamilyBinding() : FamilyBindingBase(T::Type::mask, T::Type::mask) {}
+		FamilyBinding() : FamilyBindingBase(T::Type::readMask, T::Type::writeMask) {}
 
 		T& operator[](size_t index) {
 			return *reinterpret_cast<T*>(getElement(index));
