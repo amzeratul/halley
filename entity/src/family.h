@@ -50,7 +50,7 @@ namespace Halley {
 		{
 			EntityId entityId;
 			union {
-				std::array<char, sizeof(T) - sizeof(void*)> data;
+				std::array<char, sizeof(T) - std::max(sizeof(EntityId), sizeof(void*))> data;
 				void* alignDummy;
 			};
 		};
