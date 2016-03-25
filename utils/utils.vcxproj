@@ -187,7 +187,6 @@
     <ClInclude Include="src\file_formats\tinyxml\tinyxml.h" />
     <ClInclude Include="src\file_formats\xml_file.h" />
     <ClInclude Include="src\file_formats\xml_forward.h" />
-    <ClInclude Include="src\halleystring.h" />
     <ClInclude Include="src\includes.h" />
     <ClInclude Include="src\maths\aabb.h" />
     <ClInclude Include="src\maths\angle.h" />
@@ -209,6 +208,7 @@
     <ClInclude Include="src\os\os_unix.h" />
     <ClInclude Include="src\os\os_win32.h" />
     <ClInclude Include="src\text\encode.h" />
+    <ClInclude Include="src\text\halleystring.h" />
     <ClInclude Include="src\time\halleytime.h" />
     <ClInclude Include="src\time\stopwatch.h" />
     <ClInclude Include="src\web\http.h" />

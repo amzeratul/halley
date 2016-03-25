@@ -188,9 +188,6 @@
     <ClInclude Include="src\maths\vector3d.h">
       <Filter>maths</Filter>
     </ClInclude>
-    <ClInclude Include="src\halleystring.h">
-      <Filter>text</Filter>
-    </ClInclude>
     <ClInclude Include="src\debug\debug.h">
       <Filter>debug</Filter>
     </ClInclude>
@@ -319,6 +316,9 @@
     </ClInclude>
     <ClInclude Include="src\includes.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\text\halleystring.h">
+      <Filter>text</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
