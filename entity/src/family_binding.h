@@ -9,7 +9,7 @@ namespace Halley {
 	class FamilyBindingBase {
 	public:
 		size_t count() const { return family->count(); }
-		~FamilyBindingBase() = default;
+		virtual ~FamilyBindingBase() = default;
 
 	protected:
 		FamilyBindingBase(FamilyMaskType readMask, FamilyMaskType writeMask);
@@ -29,7 +29,7 @@ namespace Halley {
 	class FamilyBinding : public FamilyBindingBase
 	{
 	public:
-		FamilyBinding() : FamilyBindingBase(T::Type::readMask, T::Type::writeMask) {}
+		FamilyBinding() : FamilyBindingBase(T::Type::readMask(), T::Type::writeMask()) {}
 
 		T& operator[](size_t index) {
 			return *reinterpret_cast<T*>(getElement(index));

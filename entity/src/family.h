@@ -50,7 +50,7 @@ namespace Halley {
 		};
 
 	public:
-		FamilyImpl() : Family(T::Type::readMask) {}
+		FamilyImpl() : Family(T::Type::readMask()) {}
 		
 	protected:
 		void addEntity(Entity& entity) override

@@ -17,6 +17,7 @@ entity
 core
 * stages <
 * painter
+* materials
 * input
 * audio
 * resources

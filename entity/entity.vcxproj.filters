@@ -66,6 +66,9 @@
     <ClCompile Include="src\prec.cpp">
       <Filter>precompiled</Filter>
     </ClCompile>
+    <ClCompile Include="src\family_mask.cpp">
+      <Filter>entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\world.h">

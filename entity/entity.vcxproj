@@ -167,6 +167,7 @@
     <ClCompile Include="src\entity.cpp" />
     <ClCompile Include="src\family.cpp" />
     <ClCompile Include="src\family_binding.cpp" />
+    <ClCompile Include="src\family_mask.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\prec.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

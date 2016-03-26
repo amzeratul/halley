@@ -56,11 +56,12 @@ FamilyMaskType Entity::getMask() const
 void Entity::refresh()
 {
 	if (dirty) {
-		mask = 0;
+		auto m = FamilyMask::RealType();
 		dirty = false;
 		for (auto i : components) {
-			mask = FamilyMask::make(i.first, mask);
+			m = FamilyMask::make(i.first, m);
 		}
+		mask = FamilyMask::getHandle(m);
 	}
 }
 

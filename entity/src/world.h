@@ -39,7 +39,7 @@ namespace Halley {
 		template <typename T>
 		Family& getFamily()
 		{
-			FamilyMaskType mask = T::Type::readMask;
+			FamilyMaskType mask = T::Type::readMask();
 			auto iter = families.find(mask);
 			if (iter != families.end()) {
 				return *iter->second;
@@ -72,6 +72,7 @@ namespace Halley {
 		void deleteEntity(Entity* entity);
 
 		std::vector<std::unique_ptr<System>>& getSystems(TimeLine timeline);
+		const std::vector<std::unique_ptr<System>>& getSystems(TimeLine timeline) const;
 		void updateSystems(TimeLine timeline, Time elapsed);
 		void onAddFamily(Family& family);
 	};

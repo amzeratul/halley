@@ -40,6 +40,11 @@ std::vector<std::unique_ptr<System>>& World::getSystems(TimeLine timeline)
 	return systems[static_cast<int>(timeline)];
 }
 
+const std::vector<std::unique_ptr<System>>& World::getSystems(TimeLine timeline) const
+{
+	return systems[static_cast<int>(timeline)];
+}
+
 std::vector<System*> World::getSystems()
 {
 	size_t n = 0;
@@ -120,10 +125,9 @@ void World::deleteEntity(Entity* entity)
 	PoolAllocator<Entity>::free(entity);
 }
 
-bool World::hasSystemsOnTimeLine(TimeLine) const
+bool World::hasSystemsOnTimeLine(TimeLine timeline) const
 {
-	// TODO: use timeline
-	return true;
+	return getSystems(timeline).size() > 0;
 }
 
 void Halley::World::step(TimeLine timeline, Time elapsed)

@@ -88,7 +88,7 @@ namespace Halley {
 	private:
 		std::vector<std::pair<int, Component*>> components;
 		std::array<Component*, numFastComponents> fastComponents;
-		FamilyMaskType mask = 0;
+		FamilyMaskType mask;
 		EntityId uid = -1;
 		bool dirty = false;
 		bool alive = true;
