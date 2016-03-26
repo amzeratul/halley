@@ -1,14 +1,16 @@
 #include "../../core/include/halley_main.h"
 
-class SampleGame : public Halley::Game
+using namespace Halley;
+
+class SampleGame : public Game
 {
 public:
-	Halley::String getName() const override
+	String getName() const override
 	{
 		return "Sample game";
 	}
 
-	Halley::String getDataPath() const override
+	String getDataPath() const override
 	{
 		return "halley/sample";
 	}
@@ -16,6 +18,11 @@ public:
 	bool isDevBuild() const override
 	{
 		return true;
+	}
+
+	void init(HalleyAPI* api) override
+	{
+		api->video->setVideo(WindowType::Window, Vector2i(1280, 720), Vector2i(1280, 720));
 	}
 };
 

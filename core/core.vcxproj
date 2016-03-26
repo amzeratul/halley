@@ -30,12 +30,15 @@
     <ClInclude Include="src\core\game.h" />
     <ClInclude Include="src\external\irunner.h" />
     <ClInclude Include="src\halley_core_includes.h" />
+    <ClInclude Include="src\opengl\gl_util.h" />
+    <ClInclude Include="src\opengl\halley_gl.h" />
     <ClInclude Include="src\prec.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\api\halley_api.cpp" />
     <ClCompile Include="src\core\core_runner.cpp" />
     <ClCompile Include="src\core\environment.cpp" />
+    <ClCompile Include="src\opengl\gl_util.cpp" />
     <ClCompile Include="src\opengl\video_opengl.cpp" />
     <ClCompile Include="src\prec.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

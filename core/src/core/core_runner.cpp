@@ -90,10 +90,19 @@ void CoreRunner::init(std::vector<String> args)
 
 	// API
 	api = HalleyAPI::create(HalleyAPIFlags::Core | HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input);
+
+	// Init game
+	game->init(&*api);
 }
 
 void CoreRunner::deInit()
 {
+	// Deinit game
+	game->deInit();
+
+	// Deinit API
+	api.reset();
+
 	// Deinit console redirector
 	std::cout << "Goodbye!" << std::endl;
 	std::cout.flush();

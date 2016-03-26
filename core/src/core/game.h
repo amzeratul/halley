@@ -11,7 +11,7 @@ namespace Halley
 		virtual String getDataPath() const = 0;
 		virtual bool isDevBuild() const = 0;
 
-		virtual void init() {}
+		virtual void init(HalleyAPI*) {}
 		virtual void deInit() {}
 	};
 }
