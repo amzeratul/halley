@@ -115,9 +115,18 @@ void CoreRunner::deInit()
 #endif
 }
 
-void CoreRunner::onFixedUpdate() {}
+void CoreRunner::onFixedUpdate()
+{
+	running = api->core->processEvents(&*api->video, &*api->input);
+	if (running) {
+		
+	}
+}
 
-void CoreRunner::onVariableUpdate() {}
+void CoreRunner::onVariableUpdate()
+{
+	
+}
 
 void CoreRunner::onRender()
 {
@@ -179,20 +188,29 @@ void CoreRunner::runMainLoop(bool capFrameRate, int fps)
 		if (curTime >= targetTime) {
 			// Step until we're up-to-date
 			for (int i = 0; i < 10 && curTime >= targetTime; i++) {
-				// Update and check if it's OK to keep running
-				onFixedUpdate();
+				// Fixed step
+				if (running) {
+					onFixedUpdate();
+				}
+
 				nSteps++;
 				curTime = api->core->getTicks();
 				targetTime = startTime + Uint32(((long long)nSteps * 1000) / fps);
 			}
-		}
-		else {
+		} else {
 			// Nope, release CPU
 			api->core->delay(1);
 		}
 
+		// Variable step
+		if (running) {
+			onVariableUpdate();
+		}
+
 		// Render screen
-		onRender();
+		if (running) {
+			onRender();
+		}
 	}
 
 	Debug::trace("Game::runMainLoop end");

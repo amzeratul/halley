@@ -16,6 +16,7 @@ namespace Halley
 	{
 	public:
 		VideoAPI();
+
 		void flip();
 
 		void setVideo(WindowType windowType, Vector2i fullscreenSize, Vector2i windowedSize, Vector2f virtualSize = Vector2f(), int screen = 0);
@@ -37,6 +38,7 @@ namespace Halley
 
 	private:
 		friend class HalleyAPI;
+		friend class CoreAPI;
 
 		void init();
 		void deInit();

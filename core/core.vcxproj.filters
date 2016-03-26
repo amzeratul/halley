@@ -66,6 +66,9 @@
     <ClInclude Include="src\opengl\halley_gl.h">
       <Filter>opengl</Filter>
     </ClInclude>
+    <ClInclude Include="src\api\input_api.h">
+      <Filter>api</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
@@ -88,6 +91,9 @@
     </ClCompile>
     <ClCompile Include="src\opengl\gl_util.cpp">
       <Filter>opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sdl\input_sdl.cpp">
+      <Filter>sdl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

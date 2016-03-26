@@ -2,6 +2,9 @@
 
 namespace Halley
 {
+	class VideoAPI;
+	class InputAPI;
+
 	class CoreAPI
 	{
 	public:
@@ -10,8 +13,10 @@ namespace Halley
 
 	private:
 		friend class HalleyAPI;
+		friend class CoreRunner;
 
 		void init();
 		void deInit();
+		bool processEvents(VideoAPI* video, InputAPI* input);
 	};
 }

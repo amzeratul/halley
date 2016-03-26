@@ -24,6 +24,7 @@
     <ClInclude Include="include\main_wrapper.h" />
     <ClInclude Include="src\api\core_api.h" />
     <ClInclude Include="src\api\halley_api.h" />
+    <ClInclude Include="src\api\input_api.h" />
     <ClInclude Include="src\api\video_api.h" />
     <ClInclude Include="src\core\core_runner.h" />
     <ClInclude Include="src\core\environment.h" />
@@ -45,6 +46,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\sdl\core_sdl.cpp" />
+    <ClCompile Include="src\sdl\input_sdl.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1DAB1A07-DB05-4CA6-984A-843043D1D93B}</ProjectGuid>

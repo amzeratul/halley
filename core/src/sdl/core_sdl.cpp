@@ -1,5 +1,7 @@
 #include "../api/core_api.h"
 #include <SDL.h>
+#include <api/video_api.h>
+#include <api/input_api.h>
 
 using namespace Halley;
 
@@ -47,4 +49,48 @@ unsigned int CoreAPI::getTicks()
 void CoreAPI::delay(unsigned int ms)
 {
 	SDL_Delay(ms);
+}
+
+bool CoreAPI::processEvents(VideoAPI* video, InputAPI* input)
+{
+	SDL_Event event;
+	SDL_PumpEvents();
+	while (SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT) > 0) {
+		switch (event.type) {
+		case SDL_KEYDOWN:
+		case SDL_KEYUP:
+		case SDL_TEXTINPUT:
+		case SDL_TEXTEDITING:
+		case SDL_JOYAXISMOTION:
+		case SDL_JOYBUTTONDOWN:
+		case SDL_JOYBUTTONUP:
+		case SDL_JOYHATMOTION:
+		case SDL_JOYBALLMOTION:
+		case SDL_MOUSEMOTION:
+		case SDL_MOUSEBUTTONUP:
+		case SDL_MOUSEBUTTONDOWN:
+		case SDL_FINGERUP:
+		case SDL_FINGERDOWN:
+		case SDL_FINGERMOTION:
+		{
+			if (input) {
+				input->processEvent(event);
+			}
+			break;
+		}
+		case SDL_QUIT:
+		{
+			std::cout << "SDL_QUIT received." << std::endl;
+			return false;
+		}
+		case SDL_WINDOWEVENT:
+		{
+			if (video) {
+				video->processEvent(event);
+			}
+			break;
+		}
+		}
+	}
+	return true;
 }
