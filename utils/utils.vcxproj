@@ -128,6 +128,7 @@
     <ClCompile Include="src\debug\console.cpp" />
     <ClCompile Include="src\debug\debug.cpp" />
     <ClCompile Include="src\debug\exception.cpp" />
+    <ClCompile Include="src\debug\redirect_stream.cpp" />
     <ClCompile Include="src\debug\StackWalker\StackWalker.cpp" />
     <ClCompile Include="src\file_formats\image.cpp" />
     <ClCompile Include="src\file_formats\ini_reader.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="src\debug\console.h" />
     <ClInclude Include="src\debug\debug.h" />
     <ClInclude Include="src\debug\exception.h" />
+    <ClInclude Include="src\debug\redirect_stream.h" />
     <ClInclude Include="src\debug\StackWalker\StackWalker.h" />
     <ClInclude Include="src\file_formats\image.h" />
     <ClInclude Include="src\file_formats\ini_reader.h" />

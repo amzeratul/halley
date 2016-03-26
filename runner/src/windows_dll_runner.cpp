@@ -38,17 +38,17 @@ void WindowsDLLRunner::CheckForModifications()
 	});
 }
 
-PrivateEngineData* WindowsDLLRunner::Initialize(std::vector<std::string> args)
+PrivateEngineData* WindowsDLLRunner::initialize(std::vector<std::string> args)
 {
-	return runner->Initialize(args);
+	return runner->initialize(args);
 }
 
-void WindowsDLLRunner::Terminate(PrivateEngineData* data)
+void WindowsDLLRunner::terminate(PrivateEngineData* data)
 {
-	runner->Terminate(data);
+	runner->terminate(data);
 }
 
-bool WindowsDLLRunner::Step(PrivateEngineData* data)
+bool WindowsDLLRunner::step(PrivateEngineData* data)
 {
 	bool needRefresh = false;
 	{
@@ -60,7 +60,7 @@ bool WindowsDLLRunner::Step(PrivateEngineData* data)
 		RefreshLibrary();
 	}
 
-	runner->Step(data);
+	runner->step(data);
 	return true;
 }
 

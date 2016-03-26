@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include "../../core/src/irunner.h"
+#include "../../core/src/external/irunner.h"
 
 class TestData : public PrivateEngineData
 {
@@ -11,18 +11,18 @@ public:
 class TestRunner : public IRunner
 {
 public:
-	PrivateEngineData* Initialize(std::vector<std::string>) override
+	PrivateEngineData* initialize(std::vector<std::string>) override
 	{
 		return new TestData();
 	}
 
-	bool Step(PrivateEngineData* data) override
+	bool step(PrivateEngineData* data) override
 	{
 		std::cout << ".";
 		return true;
 	}
 
-	void Terminate(PrivateEngineData* data) override
+	void terminate(PrivateEngineData* data) override
 	{
 		delete data;
 	}

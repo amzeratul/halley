@@ -159,6 +159,9 @@
     <ClCompile Include="src\data_structures\rect_spatial_checker.cpp">
       <Filter>data_structures</Filter>
     </ClCompile>
+    <ClCompile Include="src\debug\redirect_stream.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\halley_utils.h">
@@ -328,6 +331,9 @@
     </ClInclude>
     <ClInclude Include="src\data_structures\rect_spatial_checker.h">
       <Filter>data_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\debug\redirect_stream.h">
+      <Filter>debug</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

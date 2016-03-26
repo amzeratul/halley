@@ -181,6 +181,7 @@
     <ClInclude Include="gen\cpp\components\foo_component.h" />
     <ClInclude Include="gen\cpp\components\test_component.h" />
     <ClInclude Include="gen\cpp\systems\test_system.h" />
+    <ClInclude Include="include\halley_entity.h" />
     <ClInclude Include="src\component.h" />
     <ClInclude Include="src\entity.h" />
     <ClInclude Include="src\entity_id.h" />
@@ -189,6 +190,7 @@
     <ClInclude Include="src\family_extractor.h" />
     <ClInclude Include="src\family_mask.h" />
     <ClInclude Include="src\family_type.h" />
+    <ClInclude Include="src\halley_entity_inc.h" />
     <ClInclude Include="src\prec.h" />
     <ClInclude Include="src\system.h" />
     <ClInclude Include="src\type_deleter.h" />

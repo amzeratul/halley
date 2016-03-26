@@ -1,6 +1,8 @@
-entity
+codegen
 * single-entity systems
-* specify timelines from code gen
+* timelines
+
+entity
 * load from text files
 * query other entities
 - staggered systems
@@ -11,7 +13,13 @@ entity
 
 core
 * bring core into solution
+  - video
+  - input
+  - audio
+  - resources
+  - animation
 * refactor graphics front-end
+* have core use entity system
 - decouple OpenGL back-end from the graphics front-end
 - rewrite text rendering system
 

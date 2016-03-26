@@ -1,13 +1,57 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Runner">
-      <UniqueIdentifier>{30a4f8e6-36d4-43f1-9e34-922cab64e901}</UniqueIdentifier>
+    <Filter Include="external">
+      <UniqueIdentifier>{aee45e7e-d07c-4a31-b01e-4c47a87481f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{d4aaa936-2b58-4f0e-afcd-f9c58ff1b402}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{457c0a45-d492-4f34-8e32-35aaf3e94590}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="precompiled">
+      <UniqueIdentifier>{ddec351c-7035-4e57-bf23-5a9433a4ea3e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\irunner.h">
-      <Filter>Runner</Filter>
+    <ClInclude Include="src\external\irunner.h">
+      <Filter>external</Filter>
     </ClInclude>
+    <ClInclude Include="include\halley_core.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\core_runner.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\halley_core_includes.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\halley_main.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\main_wrapper.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\game.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\environment.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\prec.h">
+      <Filter>precompiled</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\core\core_runner.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\environment.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\prec.cpp">
+      <Filter>precompiled</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

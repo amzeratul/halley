@@ -8,7 +8,7 @@
 #include <atomic>
 #include <mutex>
 #include <boost/filesystem/path.hpp>
-#include "../../core/src/irunner.h"
+#include "../../core/src/external/irunner.h"
 
 class WindowsDLLRunner : public IRunner
 {
@@ -16,9 +16,9 @@ public:
 	WindowsDLLRunner(std::string dll);
 	~WindowsDLLRunner();
 	void CheckForModifications();
-	PrivateEngineData* Initialize(std::vector<std::string> args) override;
-	void Terminate(PrivateEngineData* data) override;
-	bool Step(PrivateEngineData* data) override;
+	PrivateEngineData* initialize(std::vector<std::string> args) override;
+	void terminate(PrivateEngineData* data) override;
+	bool step(PrivateEngineData* data) override;
 
 private:
 	std::string binPath;

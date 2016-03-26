@@ -37,6 +37,9 @@
     <Filter Include="precompiled">
       <UniqueIdentifier>{28b6613f-7ea4-4a3d-a856-ef4595d614af}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{6a3dd4bf-2e6b-4e10-af17-4993a6e211d2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -104,14 +107,20 @@
     <ClInclude Include="src\entity_id.h">
       <Filter>entities</Filter>
     </ClInclude>
-    <ClInclude Include="src\prec.h">
-      <Filter>precompiled</Filter>
-    </ClInclude>
     <ClInclude Include="src\family_extractor.h">
       <Filter>entities</Filter>
     </ClInclude>
     <ClInclude Include="src\family_mask.h">
       <Filter>entities</Filter>
+    </ClInclude>
+    <ClInclude Include="include\halley_entity.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\halley_entity_inc.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\prec.h">
+      <Filter>precompiled</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

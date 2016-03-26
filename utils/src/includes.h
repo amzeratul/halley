@@ -14,6 +14,7 @@
 #include "debug/console.h"
 #include "debug/debug.h"
 #include "debug/exception.h"
+#include "debug/redirect_stream.h"
 
 #include "file_formats/image.h"
 #include "file_formats/ini_reader.h"
