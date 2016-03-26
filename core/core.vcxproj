@@ -22,6 +22,9 @@
     <ClInclude Include="include\halley_core.h" />
     <ClInclude Include="include\halley_main.h" />
     <ClInclude Include="include\main_wrapper.h" />
+    <ClInclude Include="src\api\core_api.h" />
+    <ClInclude Include="src\api\halley_api.h" />
+    <ClInclude Include="src\api\video_api.h" />
     <ClInclude Include="src\core\core_runner.h" />
     <ClInclude Include="src\core\environment.h" />
     <ClInclude Include="src\core\game.h" />
@@ -30,6 +33,7 @@
     <ClInclude Include="src\prec.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\api\halley_api.cpp" />
     <ClCompile Include="src\core\core_runner.cpp" />
     <ClCompile Include="src\core\environment.cpp" />
     <ClCompile Include="src\prec.cpp">

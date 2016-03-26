@@ -3,6 +3,7 @@
 #include "core_runner.h"
 #include "game.h"
 #include "environment.h"
+#include "../api/halley_api.h"
 #include "../prec.h"
 
 #pragma warning(disable: 4996)
@@ -56,6 +57,12 @@ int CoreRunner::run(std::unique_ptr<Game> g, std::vector<String> args)
 
 void CoreRunner::init(std::vector<String> args)
 {
+	// Console
+	if (game->isDevBuild()) {
+		OS::get().createLogConsole(game->getName());
+	}
+	std::cout << ConsoleColor(Console::GREEN) << "Halley is initializing..." << ConsoleColor() << std::endl;
+
 	// Debugging initialization
 	Debug::setErrorHandling();
 	Concurrent::setThreadName("main");
@@ -63,15 +70,9 @@ void CoreRunner::init(std::vector<String> args)
 	// Seed RNG
 	time_t curTime = time(nullptr);
 	clock_t curClock = clock();
-	int seed = (int)curTime ^ (int)curClock ^ 0x3F29AB51;
+	int seed = static_cast<int>(curTime) ^ static_cast<int>(curClock) ^ 0x3F29AB51;
 	srand(seed);
-
-	if (game->isDevBuild()) {
-		OS::get().createLogConsole(game->getName());
-	}
-	std::cout << ConsoleColor(Console::GREEN) << "Halley is initializing..." << ConsoleColor() << std::endl;
-
-	// Parse program path
+	// Paths
 	if (args.size() > 0) {
 		Environment::parseProgramPath(args[0]);
 	}
@@ -83,31 +84,37 @@ void CoreRunner::init(std::vector<String> args)
 	std::cout << "Data path is " << ConsoleColor(Console::DARK_GREY) << Environment::getDataPath() << ConsoleColor() << std::endl;
 
 	// Computer info
-	bool showComputerData = true;
-#ifdef _DEBUG
-	showComputerData = false;
+#ifndef _DEBUG
+	showComputerInfo();
 #endif
-	if (showComputerData) {
-		time_t rawtime;
-		time(&rawtime);
-		String curTime = asctime(localtime(&rawtime));
-		curTime.trim(true);
 
-		auto computerData = OS::get().getComputerData();
-		std::cout << "Computer data:" << "\n";
-		//std::cout << "\tName: " << computerData.computerName << "\n";
-		//std::cout << "\tUser: " << computerData.userName << "\n";
-		std::cout << "\tOS:   " << ConsoleColor(Console::DARK_GREY) << computerData.osName << ConsoleColor() << "\n";
-		std::cout << "\tCPU:  " << ConsoleColor(Console::DARK_GREY) << computerData.cpuName << ConsoleColor() << "\n";
-		std::cout << "\tGPU:  " << ConsoleColor(Console::DARK_GREY) << computerData.gpuName << ConsoleColor() << "\n";
-		std::cout << "\tRAM:  " << ConsoleColor(Console::DARK_GREY) << String::prettySize(computerData.RAM) << ConsoleColor() << "\n";
-		std::cout << "\tTime: " << ConsoleColor(Console::DARK_GREY) << curTime << ConsoleColor() << "\n" << std::endl;
-	}
+	// API
+	api = HalleyAPI::create(HalleyAPIFlags::Core | HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input);
 }
 
 void CoreRunner::deInit()
 {
-	std::cout << ConsoleColor(Console::GREEN) << "Goodbye!" << ConsoleColor() << std::endl;
+	// Deinit console redirector
+	std::cout << "Goodbye!" << std::endl;
+	std::cout.flush();
+	out.reset();
+
+#ifdef _WIN32
+	if (crashed) {
+		system("pause");
+	}
+#endif
+}
+
+void CoreRunner::onFixedUpdate() {}
+
+void CoreRunner::onVariableUpdate() {}
+
+void CoreRunner::onRender()
+{
+	if (api->video) {
+		api->video->flip();
+	}
 }
 
 void CoreRunner::handleException(std::exception& e)
@@ -116,7 +123,69 @@ void CoreRunner::handleException(std::exception& e)
 	crashed = true;
 }
 
+void CoreRunner::showComputerInfo() const
+{
+	time_t rawtime;
+	time(&rawtime);
+	String curTime = asctime(localtime(&rawtime));
+	curTime.trim(true);
+
+	auto computerData = OS::get().getComputerData();
+	std::cout << "Computer data:" << "\n";
+	//std::cout << "\tName: " << computerData.computerName << "\n";
+	//std::cout << "\tUser: " << computerData.userName << "\n";
+	std::cout << "\tOS:   " << ConsoleColor(Console::DARK_GREY) << computerData.osName << ConsoleColor() << "\n";
+	std::cout << "\tCPU:  " << ConsoleColor(Console::DARK_GREY) << computerData.cpuName << ConsoleColor() << "\n";
+	std::cout << "\tGPU:  " << ConsoleColor(Console::DARK_GREY) << computerData.gpuName << ConsoleColor() << "\n";
+	std::cout << "\tRAM:  " << ConsoleColor(Console::DARK_GREY) << String::prettySize(computerData.RAM) << ConsoleColor() << "\n";
+	std::cout << "\tTime: " << ConsoleColor(Console::DARK_GREY) << curTime << ConsoleColor() << "\n" << std::endl;
+}
+
 void CoreRunner::runMainLoop(bool capFrameRate, int fps)
 {
 	running = true;
+
+	std::cout << ConsoleColor(Console::GREEN) << "\nStarting main loop." << ConsoleColor() << std::endl;
+	Debug::trace("Game::runMainLoop begin");
+
+	using Uint32 = unsigned int;
+
+	// Set up the counters
+	if (api->video) {
+		api->video->flip();
+	}
+	Uint32 startTime = api->core->getTicks();
+	Uint32 targetTime = startTime;
+	Uint32 nSteps = 0;
+
+	while (running) {
+		if (delay > 0) {
+			startTime += delay;
+			targetTime += delay;
+			delay = 0;
+		}
+		Uint32 curTime = api->core->getTicks();
+
+		// Got anything to do?
+		if (curTime >= targetTime) {
+			// Step until we're up-to-date
+			for (int i = 0; i < 10 && curTime >= targetTime; i++) {
+				// Update and check if it's OK to keep running
+				onFixedUpdate();
+				nSteps++;
+				curTime = api->core->getTicks();
+				targetTime = startTime + Uint32(((long long)nSteps * 1000) / fps);
+			}
+		}
+		else {
+			// Nope, release CPU
+			api->core->delay(1);
+		}
+
+		// Render screen
+		onRender();
+	}
+
+	Debug::trace("Game::runMainLoop end");
+	std::cout << ConsoleColor(Console::GREEN) << "Main loop terminated." << ConsoleColor() << std::endl;
 }

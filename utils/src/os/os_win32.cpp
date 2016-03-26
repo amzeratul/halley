@@ -121,7 +121,11 @@ Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter)
 			hr = result->Get(parameter.getUTF16().c_str(), 0, &var_val, nullptr, nullptr);
 			if (FAILED(hr)) throw Exception("Error retrieving name from WMI query result");
 
-			return String((const char*)((_bstr_t)var_val));
+			if (var_val.vt == VT_NULL) {
+				return "";
+			} else {
+				return String((const char*)((_bstr_t)var_val));
+			}
 		} catch (std::exception& e) {
 			std::cout << "Exception running WMI query: " << e.what() << std::endl;
 		} catch (...) {

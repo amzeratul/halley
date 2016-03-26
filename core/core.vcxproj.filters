@@ -13,6 +13,9 @@
     <Filter Include="precompiled">
       <UniqueIdentifier>{ddec351c-7035-4e57-bf23-5a9433a4ea3e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="api">
+      <UniqueIdentifier>{0c32fa53-6e54-4906-baf5-0b714387c351}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\external\irunner.h">
@@ -42,6 +45,15 @@
     <ClInclude Include="src\prec.h">
       <Filter>precompiled</Filter>
     </ClInclude>
+    <ClInclude Include="src\api\halley_api.h">
+      <Filter>api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\api\video_api.h">
+      <Filter>api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\api\core_api.h">
+      <Filter>api</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
@@ -52,6 +64,9 @@
     </ClCompile>
     <ClCompile Include="src\prec.cpp">
       <Filter>precompiled</Filter>
+    </ClCompile>
+    <ClCompile Include="src\api\halley_api.cpp">
+      <Filter>api</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
