@@ -119,19 +119,26 @@ void CoreRunner::onFixedUpdate()
 {
 	running = api->core->processEvents(&*api->video, &*api->input);
 	if (running) {
-		
+		// TODO
 	}
 }
 
 void CoreRunner::onVariableUpdate()
 {
-	
+	running = api->core->processEvents(&*api->video, &*api->input);
+	if (running) {
+		// TODO
+	}
 }
 
 void CoreRunner::onRender()
 {
 	if (api->video) {
-		api->video->flip();
+		api->video->startRender();
+
+		// TODO
+
+		api->video->finishRender();
 	}
 }
 

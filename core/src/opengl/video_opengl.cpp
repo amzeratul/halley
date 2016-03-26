@@ -243,19 +243,19 @@ void VideoAPI::setVideo(WindowType _windowType, const Vector2i _fullscreenSize, 
 	std::cout << ConsoleColor(Console::GREEN) << "Video init done.\n" << ConsoleColor() << std::endl;
 }
 
-void Halley::VideoAPI::setWindowSize(Vector2i winSize)
+void VideoAPI::setWindowSize(Vector2i winSize)
 {
 	windowSize = winSize;
 	updateWindowDimensions();
 }
 
-void Halley::VideoAPI::setVirtualSize(Vector2f vs)
+void VideoAPI::setVirtualSize(Vector2f vs)
 {
 	virtualSize = vs;
 	updateWindowDimensions();
 }
 
-void Halley::VideoAPI::updateWindowDimensions()
+void VideoAPI::updateWindowDimensions()
 {
 	border = 0;
 	if (virtualSize.x == 0 || virtualSize.y == 0) {
@@ -295,24 +295,24 @@ Vector2i VideoAPI::getScreenSize(int n) const
 	return Vector2i(info.w, info.h);
 }
 
-void Halley::VideoAPI::flip()
+void VideoAPI::flip()
 {
 	SDL_GL_SwapWindow(window);
 }
 
-void Halley::VideoAPI::setFullscreen(bool fs)
+void VideoAPI::setFullscreen(bool fs)
 {
 	if (fs != (windowType == WindowType::Fullscreen)) {
 		setVideo(fs ? WindowType::Fullscreen : WindowType::Window, fullscreenSize, windowedSize, virtualSize);
 	}
 }
 
-void Halley::VideoAPI::toggleFullscreen()
+void VideoAPI::toggleFullscreen()
 {
 	setFullscreen(!isFullscreen());
 }
 
-void Halley::VideoAPI::processEvent(SDL_Event& event)
+void VideoAPI::processEvent(SDL_Event& event)
 {
 	if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
 		Vector2i size = Vector2i(event.window.data1, event.window.data2);
@@ -320,7 +320,7 @@ void Halley::VideoAPI::processEvent(SDL_Event& event)
 	}
 }
 
-Halley::Rect4i Halley::VideoAPI::getWindowRect() const
+Rect4i VideoAPI::getWindowRect() const
 {
 	int x, y, w, h;
 	SDL_GetWindowPosition(window, &x, &y);
@@ -328,9 +328,92 @@ Halley::Rect4i Halley::VideoAPI::getWindowRect() const
 	return Rect4i(x, y, w, h);
 }
 
-Halley::Rect4i Halley::VideoAPI::getDisplayRect() const
+Rect4i VideoAPI::getDisplayRect() const
 {
 	SDL_Rect rect;
 	SDL_GetDisplayBounds(0, &rect);
 	return Rect4i(rect.x, rect.y, rect.w, rect.h);
+}
+
+
+/*
+static void drawBox(spPainter painter, float x, float y, float w, float h)
+{
+	GLUtils glUtils;
+	glUtils.setNumberOfTextureUnits(1);
+	glUtils.setTextureUnit(0);
+	glUtils.bindTexture(0);
+	glUtils.setBlendType(Blend::Opaque);
+	float vs[] = { x, y, x + w + 1, y, x + w + 1, y + h + 1, x, y + h + 1 };
+	painter->drawQuad(Shader::getDefault(), vs);
+}
+*/
+
+static void drawLetterbox() {
+	// TODO
+	/*
+	Debug::trace("Game::RenderScreen drawing letterboxes");
+	Camera::bindScreen();
+	Vector2f p = Video::getOrigin();
+
+	// Check if there's any need for it, i.e. window doesn't match game AR
+	if (p.y > 0 || p.x > 0) {
+		GLUtils glUtils;
+		Vector2f s = Video::getVirtualSize();
+		Rect4i oldView = glUtils.getViewPort();
+		Rect4i view = Rect4i(0, 0, Video::getWindowSize().x, Video::getWindowSize().y);
+
+		// Setting the viewport is necessary to draw outside game bounds, will work on certain drivers even with this off, so be careful
+		glUtils.setViewPort(view, false);
+
+		float border = Video::getBorder() / Video::getScale();
+
+		if (p.y > 0) {
+			// Top and bottom
+			border *= float(oldView.getHeight()) / view.getHeight();
+			drawBox(painter, 0, 0, s.x, border);
+			drawBox(painter, 0, s.y + 1 - border, s.x, border);
+		}
+		if (p.x > 0) {
+			// Left and right
+			border *= float(oldView.getWidth()) / view.getWidth();
+			drawBox(painter, 0, 0, border, s.y);
+			drawBox(painter, s.x + 1 - border, 0, border, s.y);
+		}
+
+		glUtils.setViewPort(oldView);
+	}
+	Camera::resetBind();
+	*/
+}
+
+void VideoAPI::startRender()
+{
+	Debug::trace("Game::RenderScreen begin");
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	// TODO
+	/*
+	painter->resetDrawCalls();
+
+	if (!TextureLoadQueue::hasLoaderThread()) {
+		Debug::trace("Game::RenderScreen loading texture");
+		TextureLoadQueue::get()->load(1);
+		Debug::trace("Game::RenderScreen loaded texture");
+	}
+	*/
+}
+
+void VideoAPI::finishRender()
+{
+	// TODO
+	// painter->flushQueue();
+
+	drawLetterbox();
+
+	Debug::trace("Game::RenderScreen flipping");
+	flip();
+	Debug::trace("Game::RenderScreen end");
+
+	glCheckError();
 }

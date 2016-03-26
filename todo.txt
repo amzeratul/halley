@@ -1,10 +1,13 @@
 codegen
 * single-entity systems
 * timelines
+- codegen Lua
+- codegen Haskell
 
 entity
 * load from text files
 * query other entities
+* figure out how to handle >64 component types efficiently (target: 512~1024)
 - staggered systems
 - parallel systems
 - defragment memory
@@ -12,14 +15,13 @@ entity
 - Haskell systems
 
 core
-* bring core into solution
-  - video
-  - input
-  - audio
-  - resources
-  - animation
+* stages <
+* painter
+* input
+* audio
+* resources
+* animation
 * refactor graphics front-end
-* have core use entity system
 - decouple OpenGL back-end from the graphics front-end
 - rewrite text rendering system
 
