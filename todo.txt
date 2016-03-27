@@ -1,5 +1,4 @@
 core
-* stages
 * painter
 * materials
 * input

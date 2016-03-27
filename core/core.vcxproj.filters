@@ -75,6 +75,9 @@
     <ClInclude Include="src\stage\stage.h">
       <Filter>stage</Filter>
     </ClInclude>
+    <ClInclude Include="include\halley.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">

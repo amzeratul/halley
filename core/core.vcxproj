@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\halley.h" />
     <ClInclude Include="include\halley_core.h" />
     <ClInclude Include="include\halley_main.h" />
     <ClInclude Include="include\main_wrapper.h" />

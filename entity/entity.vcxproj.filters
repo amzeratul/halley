@@ -1,32 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="gen">
-      <UniqueIdentifier>{fd622caa-b267-4830-9082-f3ffad2255e9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="gen\components">
-      <UniqueIdentifier>{1ce57045-89b6-4530-839d-5b862080c5de}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="gen\systems">
-      <UniqueIdentifier>{ba5fdd1d-e046-4326-a845-0afdf6d1e779}</UniqueIdentifier>
-    </Filter>
     <Filter Include="systems">
       <UniqueIdentifier>{8eaffd31-1dfc-45aa-989a-6d63d477abbe}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="test">
-      <UniqueIdentifier>{0274ca59-8bed-4f33-abae-68a2739e2d27}</UniqueIdentifier>
     </Filter>
     <Filter Include="world">
       <UniqueIdentifier>{d39d0ae6-6e1c-498e-8eee-9cd243e61631}</UniqueIdentifier>
     </Filter>
     <Filter Include="components">
       <UniqueIdentifier>{1b7cbc1f-c90d-4f67-b681-72a3dba4d910}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="gen_src">
-      <UniqueIdentifier>{c2f31200-8afe-4850-bb13-24c5b3a0ce97}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="test\systems">
-      <UniqueIdentifier>{2b16563d-7538-4485-abff-61b6661418e1}</UniqueIdentifier>
     </Filter>
     <Filter Include="entities">
       <UniqueIdentifier>{fe7c04bf-3a8b-4e2f-aa31-8243c8fd8232}</UniqueIdentifier>
@@ -42,17 +24,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="src\world.cpp">
       <Filter>world</Filter>
     </ClCompile>
     <ClCompile Include="src\system.cpp">
       <Filter>systems</Filter>
-    </ClCompile>
-    <ClCompile Include="src\test_system.cpp">
-      <Filter>test\systems</Filter>
     </ClCompile>
     <ClCompile Include="src\family.cpp">
       <Filter>entities</Filter>
@@ -79,18 +55,6 @@
     </ClInclude>
     <ClInclude Include="src\component.h">
       <Filter>components</Filter>
-    </ClInclude>
-    <ClInclude Include="gen\cpp\components\test_component.h">
-      <Filter>gen\components</Filter>
-    </ClInclude>
-    <ClInclude Include="gen\cpp\systems\test_system.h">
-      <Filter>gen\systems</Filter>
-    </ClInclude>
-    <ClInclude Include="gen\cpp\components\bar_component.h">
-      <Filter>gen\components</Filter>
-    </ClInclude>
-    <ClInclude Include="gen\cpp\components\foo_component.h">
-      <Filter>gen\components</Filter>
     </ClInclude>
     <ClInclude Include="src\family.h">
       <Filter>entities</Filter>
@@ -125,10 +89,5 @@
     <ClInclude Include="src\prec.h">
       <Filter>precompiled</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="gen_src\test.txt">
-      <Filter>gen_src</Filter>
-    </Text>
   </ItemGroup>
 </Project>

@@ -66,7 +66,7 @@ genComponent compData = [ GeneratedSource { filename = basePath ++ ".h", code = 
         name = componentName compData
         basePath = "cpp/components/" ++ (makeUnderscores name)
         header = intercalate "\n" headerCode
-        headerCode = ["#include \"component.h\""
+        headerCode = ["//#include \"component.h\""
                      ,"class " ++ name ++ " : public Component {"
                      ,"public:"
                      ,"    constexpr static int componentIndex = " ++ (show $ componentIndex compData) ++ ";"
@@ -87,7 +87,7 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
         fams = families sysData
         basePath = "cpp/systems/" ++ (makeUnderscores name)
         header = intercalate "\n" headerCode
-        headerCode = ["#include \"system.h\""]
+        headerCode = ["//#include \"system.h\""]
                      ++ componentIncludes ++
                      [""
                      ,"// Generated file; do not modify."

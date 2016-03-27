@@ -28,6 +28,5 @@ system IsometricCharacterSystem {
 	strategy = individual
 	access = pure
 	language = C++
-	time = variable
 	subDivide = 1
 }

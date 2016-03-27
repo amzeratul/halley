@@ -39,13 +39,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -111,7 +111,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>build\codegen.bat</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <CustomBuildStep>
       <Command>
@@ -156,7 +157,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>build\codegen.bat</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <CustomBuildStep>
       <Command>
@@ -168,20 +170,14 @@
     <ClCompile Include="src\family.cpp" />
     <ClCompile Include="src\family_binding.cpp" />
     <ClCompile Include="src\family_mask.cpp" />
-    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\prec.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\system.cpp" />
-    <ClCompile Include="src\test_system.cpp" />
     <ClCompile Include="src\world.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="gen\cpp\components\bar_component.h" />
-    <ClInclude Include="gen\cpp\components\foo_component.h" />
-    <ClInclude Include="gen\cpp\components\test_component.h" />
-    <ClInclude Include="gen\cpp\systems\test_system.h" />
     <ClInclude Include="include\halley_entity.h" />
     <ClInclude Include="src\component.h" />
     <ClInclude Include="src\entity.h" />
@@ -196,14 +192,6 @@
     <ClInclude Include="src\system.h" />
     <ClInclude Include="src\type_deleter.h" />
     <ClInclude Include="src\world.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="gen_src\test.txt">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">build\codegen.bat %(FullPath)</Command>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">build\codegen.bat %(FullPath)</Command>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
-    </Text>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\utils\utils.vcxproj">
