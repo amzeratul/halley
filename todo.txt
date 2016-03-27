@@ -50,3 +50,7 @@ samples
 * sort out the build system mess T_T
 * make a minimal "template" sample
 
+CMake
+* x64 target by default
+* sort files into neat filters
+* precompiled headers

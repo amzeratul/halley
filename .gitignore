@@ -36,3 +36,6 @@ obj/
 *.log
 _ReSharper*/
 *.sbr
+
+# Build system
+build
