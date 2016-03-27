@@ -1,20 +1,5 @@
-codegen
-* single-entity systems
-* timelines
-- codegen Lua
-- codegen Haskell
-
-entity
-* load from text files
-* query other entities
-- staggered systems
-- parallel systems
-- defragment memory
-- Lua systems
-- Haskell systems
-
 core
-* stages <
+* stages
 * painter
 * materials
 * input
@@ -24,12 +9,30 @@ core
 * refactor graphics front-end
 - decouple OpenGL back-end from the graphics front-end
 - rewrite text rendering system
+- hot reloading
 
-utils
-- better HTTP library
+entity
+* load from text files
+* query other entities
+- staggered systems
+- parallel systems
+- Lua systems
+- Haskell systems
+- defragment/optimize memory
+
+codegen
+* single-entity systems
+* remove timelines (should be at registry-time)
+* registry
+- codegen parallel systems
+- codegen Lua
+- codegen Haskell
 
 tools
 - asset/prefab editor
 - scene editor?
 - animation editor
 - system/component editor
+
+utils
+- better HTTP library?
