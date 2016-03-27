@@ -1,3 +1,5 @@
+/*
+
 #include <iostream>
 #include <vector>
 #include "prec.h"
@@ -42,3 +44,5 @@ void _stdcall HalleyDestroyRunner(IRunner* runner)
 {
 	delete runner;
 }
+
+*/

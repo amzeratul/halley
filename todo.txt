@@ -1,14 +1,24 @@
 core
+* resources
+* refactor graphics front-end
+* figure out how to organize APIs
+- hot reloading
+- child stages
+
+video
+* bring library into engine
 * painter
 * materials
-* input
-* audio
-* resources
-* animation
-* refactor graphics front-end
 - decouple OpenGL back-end from the graphics front-end
-- rewrite text rendering system
-- hot reloading
+- rewrite text rendering system to use pre-baked distance fields
+- animation?
+- fix threaded load (TODOs in core_runner.cpp)
+
+input
+* bring library into engine
+
+audio
+* bring library into engine
 
 entity
 * load from text files
@@ -18,6 +28,7 @@ entity
 - Lua systems
 - Haskell systems
 - defragment/optimize memory
+- universal hierarchical transforms?
 
 codegen
 * single-entity systems
@@ -35,6 +46,7 @@ tools
 utils
 - better HTTP library?
 
-sample
+samples
 * sort out the build system mess T_T
-* refactor into a samples folder, with a minimal "template" sample, and more elaborate ones
+* make a minimal "template" sample
+
