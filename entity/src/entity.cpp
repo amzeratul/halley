@@ -59,7 +59,7 @@ void Entity::refresh()
 		auto m = FamilyMask::RealType();
 		dirty = false;
 		for (auto i : components) {
-			m = FamilyMask::make(i.first, m);
+			FamilyMask::setBit(m, i.first);
 		}
 		mask = FamilyMask::getHandle(m);
 	}

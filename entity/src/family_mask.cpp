@@ -1,5 +1,6 @@
 #include "family_mask.h"
 #include <set>
+#include <unordered_set>
 
 using namespace Halley;
 using namespace FamilyMask;
@@ -19,14 +20,26 @@ struct MaskEntry
 		, idx(i)
 	{}
 
+	/*
 	bool operator<(const MaskEntry& o) const {
 		return mask < o.mask;
 	}
+	*/
 
 	bool operator==(const MaskEntry& o) const {
 		return mask == o.mask;
 	}
 };
+
+namespace std {
+	template <class T> struct hash;
+	template<> struct hash<MaskEntry>
+	{
+		std::size_t operator()(MaskEntry const& s) const {
+			return std::hash<RealType>()(s.mask);
+		}
+	};
+}
 
 class MaskStorage
 {
@@ -41,7 +54,7 @@ public:
 	}
 
 	std::vector<MaskEntry*> values;
-	std::set<MaskEntry> entries;
+	std::unordered_set<MaskEntry> entries;
 
 	static int getHandle(const RealType& value)
 	{

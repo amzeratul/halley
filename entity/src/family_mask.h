@@ -1,8 +1,10 @@
 #pragma once
 
+#include <bitset>
+
 namespace Halley {
 	namespace FamilyMask {
-		using RealType = unsigned long long;
+		using RealType = std::bitset<128>;
 
 
 		class Handle
@@ -30,9 +32,19 @@ namespace Halley {
 		using HandleType = Handle;
 
 
+		/*
+		static RealType make(int index, RealType mask) {
+			// TODO
+			//return (static_cast<RealType>(1) << static_cast<RealType>(index)) | mask;
+			return RealType();
+		}
+		*/
+		inline void setBit(RealType& mask, int bit) {
+			mask[bit] = true;
+		}
 
-		constexpr static RealType make(int index, RealType mask = 0) {
-			return (static_cast<RealType>(1) << static_cast<RealType>(index)) | mask;
+		inline bool hasBit(HandleType handle, int bit) {
+			return handle.getRealValue()[bit];
 		}
 
 
@@ -46,19 +58,22 @@ namespace Halley {
 
 		template <>
 		struct Evaluator <> {
-			static constexpr RealType makeMask(RealType startValue) {
+			static RealType makeMask(RealType startValue) {
 				return startValue;
 			}
 		};
 
 		template <typename T, typename... Ts>
 		struct Evaluator <T, Ts...> {
-			static constexpr RealType makeMask(RealType startValue) {
-				return Evaluator<Ts...>::makeMask(FamilyMask::make(T::componentIndex, startValue));
+			static void makeMask(RealType& mask) {
+				FamilyMask::setBit(mask, T::componentIndex);
+				Evaluator<Ts...>::makeMask(mask);
 			}
 
 			static HandleType getMask() {
-				return getHandle(makeMask(0));
+				RealType mask;
+				makeMask(mask);
+				return getHandle(mask);
 			}
 		};
 
@@ -69,19 +84,24 @@ namespace Halley {
 
 		template <>
 		struct MutableEvaluator <> {
-			static constexpr RealType makeMask(RealType startValue) {
+			static RealType makeMask(RealType startValue) {
 				return startValue;
 			}
 		};
 
 		template <typename T, typename... Ts>
 		struct MutableEvaluator <T, Ts...> {
-			static constexpr RealType makeMask(RealType startValue) {
-				return Evaluator<Ts...>::makeMask(FamilyMask::make(std::is_const<T>::value ? 0 : T::componentIndex, startValue));
+			static void makeMask(RealType& mask) {
+				if (std::is_const<T>::value) {
+					FamilyMask::setBit(mask, T::componentIndex);
+				}
+				Evaluator<Ts...>::makeMask(mask);
 			}
 
 			static HandleType getMask() {
-				return getHandle(makeMask(0));
+				RealType mask;
+				makeMask(mask);
+				return getHandle(mask);
 			}
 		};
 	}
