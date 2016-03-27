@@ -25,7 +25,6 @@ namespace Halley {
 		std::vector<FamilyBindingBase*> families;
 		World* world;
 		String name;
-		TimeLine timeline = TimeLine::VariableUpdate;
 
 		void step(Time time);
 		void onAddedToWorld(World& world);

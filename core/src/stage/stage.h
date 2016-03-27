@@ -10,8 +10,8 @@ namespace Halley
 		virtual ~Stage() {}
 
 		virtual void onFixedUpdate(Time) {}
-		virtual void onUpdate(Time) {}
-		virtual void onRender(Time) const {}
+		virtual void onVariableUpdate(Time) {}
+		virtual void onRender(Time) {}
 
 		virtual void init() {}
 		virtual void deInit() {}

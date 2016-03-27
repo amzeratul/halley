@@ -134,7 +134,7 @@ void CoreRunner::onVariableUpdate(Time time)
 	running = api->system->processEvents(&*api->video, &*api->input);
 	if (running) {
 		if (currentStage) {
-			currentStage->onUpdate(time);
+			currentStage->onVariableUpdate(time);
 		}
 	}
 }

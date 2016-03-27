@@ -9,7 +9,7 @@ class TestStage : public Stage
 public:
 	void init() override
 	{
-		world.addSystem(std::make_unique<TestSystem>());
+		world.addSystem(std::make_unique<TestSystem>(), TimeLine::FixedUpdate);
 		id0 = world.createEntity()
 			.addComponent(new TestComponent())
 			.addComponent(new FooComponent())
@@ -22,7 +22,7 @@ public:
 		std::cout << "Final bar: " << world.getEntity(id0).getComponent<BarComponent>()->bar << std::endl;
 	}
 
-	void onUpdate(Time time) override
+	void onFixedUpdate(Time time) override
 	{
 		if (i == 20) {
 			world.createEntity()
@@ -42,13 +42,17 @@ public:
 			world.destroyEntity(id2);
 		}
 
-		world.step(TimeLine::VariableUpdate, time);
-		std::cout << "Step took " << world.getLastStepLength() << " ms" << std::endl;
+		world.step(TimeLine::FixedUpdate, time);
 		i++;
 
 		if (i == 100) {
 			getAPI().core->quit();
 		}
+	}
+
+	void onRender(Time time) override
+	{
+		world.step(TimeLine::Render, time);
 	}
 
 private:

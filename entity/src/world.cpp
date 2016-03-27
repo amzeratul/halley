@@ -10,27 +10,28 @@ Halley::World::World() = default;
 
 Halley::World::~World() = default;
 
-Halley::System& Halley::World::addSystem(std::unique_ptr<System> system)
+Halley::System& Halley::World::addSystem(std::unique_ptr<System> system, TimeLine timeline)
 {
 	auto& ref = *system.get();
-	getSystems(system->timeline).emplace_back(std::move(system));
+	getSystems(timeline).emplace_back(std::move(system));
 	ref.onAddedToWorld(*this);
 	return ref;
 }
 
-System& Halley::World::addSystemByName(String)
+System& Halley::World::addSystemByName(String, TimeLine timeline)
 {
 	// TODO
-	return addSystem(std::unique_ptr<System>(nullptr));
+	return addSystem(std::unique_ptr<System>(nullptr), timeline);
 }
 
 void World::removeSystem(System& system)
 {
-	auto& sys = getSystems(system.timeline);
-	for (size_t i = 0; i < sys.size(); i++) {
-		if (sys[i].get() == &system) {
-			sys.erase(sys.begin() + i);
-			break;
+	for (auto& sys : systems) {
+		for (size_t i = 0; i < sys.size(); i++) {
+			if (sys[i].get() == &system) {
+				sys.erase(sys.begin() + i);
+				return;
+			}
 		}
 	}
 }

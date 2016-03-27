@@ -21,7 +21,6 @@ entity
 
 codegen
 * single-entity systems
-* remove timelines (should be at registry-time)
 * registry
 - codegen parallel systems
 - codegen Lua
