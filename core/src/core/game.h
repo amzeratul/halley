@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../stage/stage.h"
+
 namespace Halley
 {
 	class Game
@@ -13,5 +15,8 @@ namespace Halley
 
 		virtual void init(HalleyAPI*) {}
 		virtual void deInit() {}
+
+		virtual std::unique_ptr<Stage> makeStage(StageID id) = 0;
+		virtual StageID getInitialStage() const = 0;
 	};
 }

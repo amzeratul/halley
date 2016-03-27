@@ -93,6 +93,9 @@ void CoreRunner::init(std::vector<String> args)
 
 	// Init game
 	game->init(&*api);
+
+	// Create frame
+	setStage(game->makeStage(game->getInitialStage()));
 }
 
 void CoreRunner::deInit()
@@ -115,28 +118,34 @@ void CoreRunner::deInit()
 #endif
 }
 
-void CoreRunner::onFixedUpdate()
+void CoreRunner::onFixedUpdate(Time time)
 {
 	running = api->core->processEvents(&*api->video, &*api->input);
 	if (running) {
-		// TODO
+		if (currentStage) {
+			currentStage->onFixedUpdate(time);
+		}
 	}
 }
 
-void CoreRunner::onVariableUpdate()
+void CoreRunner::onVariableUpdate(Time time)
 {
 	running = api->core->processEvents(&*api->video, &*api->input);
 	if (running) {
-		// TODO
+		if (currentStage) {
+			currentStage->onUpdate(time);
+		}
 	}
 }
 
-void CoreRunner::onRender()
+void CoreRunner::onRender(Time time)
 {
 	if (api->video) {
 		api->video->startRender();
 
-		// TODO
+		if (currentStage) {
+			currentStage->onRender(time);
+		}
 
 		api->video->finishRender();
 	}
@@ -166,9 +175,36 @@ void CoreRunner::showComputerInfo() const
 	std::cout << "\tTime: " << ConsoleColor(Console::DARK_GREY) << curTime << ConsoleColor() << "\n" << std::endl;
 }
 
+void CoreRunner::setStage(std::unique_ptr<Stage> next)
+{
+	nextStage = std::move(next);
+	pendingStageTransition = true;
+}
+
+void CoreRunner::transitionStage()
+{
+	if (pendingStageTransition) {
+		if (currentStage) {
+			currentStage->deInit();
+			currentStage.reset();
+		}
+
+		currentStage = std::move(nextStage);
+
+		if (currentStage) {
+			currentStage->init();
+		} else {
+			running = false;
+		}
+
+		pendingStageTransition = false;
+	}
+}
+
 void CoreRunner::runMainLoop(bool capFrameRate, int fps)
 {
 	running = true;
+	transitionStage();
 
 	std::cout << ConsoleColor(Console::GREEN) << "\nStarting main loop." << ConsoleColor() << std::endl;
 	Debug::trace("Game::runMainLoop begin");
@@ -184,6 +220,8 @@ void CoreRunner::runMainLoop(bool capFrameRate, int fps)
 	Uint32 nSteps = 0;
 
 	while (running) {
+		Time delta = 1.0 / fps;
+
 		if (delay > 0) {
 			startTime += delay;
 			targetTime += delay;
@@ -197,7 +235,7 @@ void CoreRunner::runMainLoop(bool capFrameRate, int fps)
 			for (int i = 0; i < 10 && curTime >= targetTime; i++) {
 				// Fixed step
 				if (running) {
-					onFixedUpdate();
+					onFixedUpdate(delta);
 				}
 
 				nSteps++;
@@ -211,13 +249,16 @@ void CoreRunner::runMainLoop(bool capFrameRate, int fps)
 
 		// Variable step
 		if (running) {
-			onVariableUpdate();
+			onVariableUpdate(delta);
 		}
 
 		// Render screen
 		if (running) {
-			onRender();
+			onRender(delta);
 		}
+
+		// Switch stage
+		transitionStage();
 	}
 
 	Debug::trace("Game::runMainLoop end");

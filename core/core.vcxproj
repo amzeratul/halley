@@ -34,6 +34,7 @@
     <ClInclude Include="src\opengl\gl_util.h" />
     <ClInclude Include="src\opengl\halley_gl.h" />
     <ClInclude Include="src\prec.h" />
+    <ClInclude Include="src\stage\stage.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\api\halley_api.cpp" />
@@ -47,6 +48,7 @@
     </ClCompile>
     <ClCompile Include="src\sdl\core_sdl.cpp" />
     <ClCompile Include="src\sdl\input_sdl.cpp" />
+    <ClCompile Include="src\stage\stage.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1DAB1A07-DB05-4CA6-984A-843043D1D93B}</ProjectGuid>
