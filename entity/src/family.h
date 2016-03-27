@@ -28,9 +28,9 @@ namespace Halley {
 		void removeEntity(Entity& entity);
 		virtual void removeDeadEntities() = 0;
 		
-		void* elems;
-		size_t elemCount;
-		size_t elemSize;
+		void* elems = nullptr;
+		size_t elemCount = 0;
+		size_t elemSize = 0;
 		std::vector<EntityId> toRemove;
 
 	private:

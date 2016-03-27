@@ -20,7 +20,7 @@ namespace Halley {
 	private:
 		friend class System;
 
-		Family* family;
+		Family* family = nullptr;
 		const FamilyMaskType readMask;
 		const FamilyMaskType writeMask;
 	};
@@ -37,12 +37,12 @@ namespace Halley {
 
 		T* begin()
 		{
-			return &((*this)[0]);
+			return reinterpret_cast<T*>(getElement(0));
 		}
 
 		T* end()
 		{
-			return &((*this)[count()]);
+			return reinterpret_cast<T*>(getElement(count()));
 		}
 
 	protected:

@@ -43,17 +43,18 @@ public:
 	std::vector<MaskEntry*> values;
 	std::set<MaskEntry> entries;
 
-	static int getHandle(RealType& value)
+	static int getHandle(const RealType& value)
 	{
 		auto& instance = getInstance();
 		auto entry = MaskEntry(value, 0);
 		auto i = instance.entries.find(entry);
 		if (i == instance.entries.end()) {
 			// Not found
-			entry.idx = static_cast<int>(instance.values.size());
+			int idx = static_cast<int>(instance.values.size());
+			entry.idx = idx;
 			auto result = instance.entries.insert(std::move(entry));
 			instance.values.push_back(const_cast<MaskEntry*>(&*result.first));
-			return entry.idx;
+			return idx;
 		} else {
 			// Found
 			return i->idx;
@@ -62,13 +63,18 @@ public:
 
 	static RealType& retrieve(int handle)
 	{
-		return getInstance().values[handle]->mask;
+		static RealType dummy;
+		if (handle == -1) {
+			return dummy;
+		} else {
+			return getInstance().values[handle]->mask;
+		}
 	}
 };
 
 
 Handle::Handle()
-	: value(0)
+	: value(-1)
 {
 }
 
@@ -83,12 +89,12 @@ Handle::Handle(Handle&& h)
 }
 
 Handle::Handle(const RealType& mask)
-	: value(mask)
+	: value(MaskStorage::getHandle(mask))
 {
 }
 
 Handle::Handle(RealType&& mask)
-	: value(mask)
+	: value(MaskStorage::getHandle(mask))
 {
 }
 
@@ -114,12 +120,12 @@ bool Handle::operator<(const Handle& h) const
 
 Handle Handle::operator&(const Handle& h) const
 {
-	return Handle(value & h.value);
+	return Handle(getRealValue() & h.getRealValue());
 }
 
 const RealType& Handle::getRealValue() const
 {
-	return value;
+	return MaskStorage::retrieve(value);
 }
 
 HandleType FamilyMask::getHandle(RealType mask)

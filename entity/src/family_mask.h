@@ -24,7 +24,7 @@ namespace Halley {
 			const RealType& getRealValue() const;
 
 		private:
-			RealType value;
+			int value = -1;
 		};
 
 		using HandleType = Handle;

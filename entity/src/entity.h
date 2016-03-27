@@ -67,7 +67,7 @@ namespace Halley {
 		template <typename T>
 		bool hasComponent()
 		{
-			return ((FamilyMaskType(1) << T::componentIndex) & mask) != 0;
+			return FamilyMask::hasBit(mask, T::componentIndex);
 		}
 
 		bool needsRefresh() const
