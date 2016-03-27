@@ -69,12 +69,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)bin64\</OutDir>
-    <TargetName>halleygame</TargetName>
+    <OutDir>$(SolutionDir)\bin64\</OutDir>
+    <TargetName>sample</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)bin64\</OutDir>
-    <TargetName>halleygame</TargetName>
+    <OutDir>$(SolutionDir)\bin64\</OutDir>
+    <TargetName>sample</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -146,17 +146,6 @@
     </ClCompile>
     <ClCompile Include="src\sample_entry.cpp" />
     <ClCompile Include="src\test_system.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\core\core.vcxproj">
-      <Project>{1dab1a07-db05-4ca6-984a-843043d1d93b}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\entity\entity.vcxproj">
-      <Project>{68fcc000-ee8d-47e3-a050-7f7b46c4f5a9}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\utils\utils.vcxproj">
-      <Project>{d7abf112-ea58-4b90-9caa-872d6a311520}</Project>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gen\cpp\components\bar_component.h" />

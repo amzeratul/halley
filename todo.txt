@@ -34,3 +34,7 @@ tools
 
 utils
 - better HTTP library?
+
+sample
+* sort out the build system mess T_T
+* refactor into a samples folder, with a minimal "template" sample, and more elaborate ones

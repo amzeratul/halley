@@ -1,4 +1,4 @@
-#include "../../core/include/halley.h"
+#include "prec.h"
 #include "../gen/cpp/systems/test_system.h"
 
 using namespace Halley;

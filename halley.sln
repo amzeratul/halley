@@ -27,6 +27,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "core\core.vcxproj",
 		{D7ABF112-EA58-4B90-9CAA-872D6A311520} = {D7ABF112-EA58-4B90-9CAA-872D6A311520}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "include", "include", "{F27210FF-EB08-458F-AC8B-77794B657524}"
+	ProjectSection(SolutionItems) = preProject
+		include\halley.hpp = include\halley.hpp
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -78,5 +83,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F27210FF-EB08-458F-AC8B-77794B657524} = {AD813A88-7558-4DFB-BEC1-3B16498D3553}
 	EndGlobalSection
 EndGlobal

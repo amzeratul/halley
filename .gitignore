@@ -21,6 +21,7 @@ Thumbs.db
 *.dll
 *.hi
 *.o
+*.lib
 [Bb]in
 [Bb]in64
 

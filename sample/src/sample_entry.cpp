@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include "../../core/src/external/irunner.h"
+#include "prec.h"
 
 class TestData : public PrivateEngineData
 {
