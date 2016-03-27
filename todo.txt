@@ -7,7 +7,6 @@ codegen
 entity
 * load from text files
 * query other entities
-* figure out how to handle >64 component types efficiently (target: 512~1024)
 - staggered systems
 - parallel systems
 - defragment memory
