@@ -2,13 +2,14 @@
 
 using namespace Halley;
 
-HalleyAPI::HalleyAPI(std::unique_ptr<CoreAPI> _core, std::unique_ptr<VideoAPI> _video, std::unique_ptr<InputAPI> _input)
-	: core(std::move(_core))
+HalleyAPI::HalleyAPI(CoreAPI* _core, std::unique_ptr<SystemAPI> _system, std::unique_ptr<VideoAPI> _video, std::unique_ptr<InputAPI> _input)
+	: core(_core)
+	, system(std::move(_system))
 	, video(std::move(_video))
 	, input(std::move(_input))
 {
-	if (core) {
-		core->init();
+	if (system) {
+		system->init();
 	}
 	if (video) {
 		video->init();
@@ -26,15 +27,16 @@ HalleyAPI::~HalleyAPI()
 	if (video) {
 		video->deInit();
 	}
-	if (core) {
-		core->deInit();
+	if (system) {
+		system->deInit();
 	}
 }
 
-std::unique_ptr<HalleyAPI> HalleyAPI::create(int flags)
+std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPI* core, int flags)
 {
 	return std::unique_ptr<HalleyAPI>(new HalleyAPI(
-		(flags & HalleyAPIFlags::Core) ? std::make_unique<CoreAPI>() : std::unique_ptr<CoreAPI>(),
+		core,
+		std::make_unique<SystemAPI>(),
 		(flags & HalleyAPIFlags::Video) ? std::make_unique<VideoAPI>() : std::unique_ptr<VideoAPI>(),
 		(flags & HalleyAPIFlags::Input) ? std::make_unique<InputAPI>() : std::unique_ptr<InputAPI>()
 	));

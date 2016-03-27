@@ -10,8 +10,9 @@
 
 using namespace Halley;
 
-CoreRunner::CoreRunner()
+CoreRunner::CoreRunner(std::unique_ptr<Game> game, std::vector<String> args)
 {
+	run(std::move(game), args);
 }
 
 CoreRunner::~CoreRunner()
@@ -89,7 +90,7 @@ void CoreRunner::init(std::vector<String> args)
 #endif
 
 	// API
-	api = HalleyAPI::create(HalleyAPIFlags::Core | HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input);
+	api = HalleyAPI::create(this, HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input);
 
 	// Init game
 	game->init(&*api);
@@ -120,7 +121,7 @@ void CoreRunner::deInit()
 
 void CoreRunner::onFixedUpdate(Time time)
 {
-	running = api->core->processEvents(&*api->video, &*api->input);
+	running = api->system->processEvents(&*api->video, &*api->input);
 	if (running) {
 		if (currentStage) {
 			currentStage->onFixedUpdate(time);
@@ -130,7 +131,7 @@ void CoreRunner::onFixedUpdate(Time time)
 
 void CoreRunner::onVariableUpdate(Time time)
 {
-	running = api->core->processEvents(&*api->video, &*api->input);
+	running = api->system->processEvents(&*api->video, &*api->input);
 	if (running) {
 		if (currentStage) {
 			currentStage->onUpdate(time);
@@ -181,17 +182,34 @@ void CoreRunner::setStage(std::unique_ptr<Stage> next)
 	pendingStageTransition = true;
 }
 
+void CoreRunner::quit()
+{
+	std::cout << "Game terminating via CoreAPI::quit()." << std::endl;
+	running = false;
+}
+
 void CoreRunner::transitionStage()
 {
+	// If it's not running anymore, reset stage
+	if (!running && currentStage) {
+		pendingStageTransition = true;
+		nextStage.reset();
+	}
+
+	// Check if there's a stage waiting to be switched to
 	if (pendingStageTransition) {
+		// Get rid of current stage
 		if (currentStage) {
 			currentStage->deInit();
 			currentStage.reset();
 		}
 
+		// Update stage
 		currentStage = std::move(nextStage);
 
+		// Prepare next stage
 		if (currentStage) {
+			currentStage->api = &*api;
 			currentStage->init();
 		} else {
 			running = false;
@@ -215,7 +233,7 @@ void CoreRunner::runMainLoop(bool capFrameRate, int fps)
 	if (api->video) {
 		api->video->flip();
 	}
-	Uint32 startTime = api->core->getTicks();
+	Uint32 startTime = api->system->getTicks();
 	Uint32 targetTime = startTime;
 	Uint32 nSteps = 0;
 
@@ -227,7 +245,7 @@ void CoreRunner::runMainLoop(bool capFrameRate, int fps)
 			targetTime += delay;
 			delay = 0;
 		}
-		Uint32 curTime = api->core->getTicks();
+		Uint32 curTime = api->system->getTicks();
 
 		// Got anything to do?
 		if (curTime >= targetTime) {
@@ -239,12 +257,12 @@ void CoreRunner::runMainLoop(bool capFrameRate, int fps)
 				}
 
 				nSteps++;
-				curTime = api->core->getTicks();
+				curTime = api->system->getTicks();
 				targetTime = startTime + Uint32(((long long)nSteps * 1000) / fps);
 			}
 		} else {
 			// Nope, release CPU
-			api->core->delay(1);
+			api->system->delay(1);
 		}
 
 		// Variable step

@@ -1,17 +1,17 @@
 #pragma once
 #include "video_api.h"
-#include "core_api.h"
+#include "system_api.h"
 #include "input_api.h"
+#include "core_api.h"
 
 namespace Halley
 {
 	namespace HalleyAPIFlags {
 		enum Flags
 		{
-			Core = 1,
-			Video = 2,
-			Audio = 4,
-			Input = 8
+			Video = 1,
+			Audio = 2,
+			Input = 4
 		};
 	}
 
@@ -19,15 +19,16 @@ namespace Halley
 	{
 	public:
 		~HalleyAPI();
-		const std::unique_ptr<CoreAPI> core;
+		CoreAPI* const core;
+		const std::unique_ptr<SystemAPI> system;
 		const std::unique_ptr<VideoAPI> video;
 		const std::unique_ptr<InputAPI> input;
 
 	private:
 		friend class CoreRunner;
 
-		HalleyAPI(std::unique_ptr<CoreAPI> core, std::unique_ptr<VideoAPI> video, std::unique_ptr<InputAPI> input);
+		HalleyAPI(CoreAPI* core, std::unique_ptr<SystemAPI> system, std::unique_ptr<VideoAPI> video, std::unique_ptr<InputAPI> input);
 
-		static std::unique_ptr<HalleyAPI> create(int flags);
+		static std::unique_ptr<HalleyAPI> create(CoreAPI* core, int flags);
 	};
 }

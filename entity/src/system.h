@@ -12,7 +12,7 @@ namespace Halley {
 	class System
 	{
 	public:
-		System(std::initializer_list<FamilyBindingBase*> uninitializedFamilies, TimeLine timeline);
+		System(std::initializer_list<FamilyBindingBase*> uninitializedFamilies);
 		virtual ~System() {}
 
 	protected:
@@ -25,7 +25,7 @@ namespace Halley {
 		std::vector<FamilyBindingBase*> families;
 		World* world;
 		String name;
-		TimeLine timeline;
+		TimeLine timeline = TimeLine::VariableUpdate;
 
 		void step(Time time);
 		void onAddedToWorld(World& world);

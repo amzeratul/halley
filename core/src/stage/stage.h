@@ -23,6 +23,8 @@ namespace Halley
 		const HalleyAPI& getAPI() const { return *api; }
 
 	private:
+		friend class CoreRunner;
+
 		void doInit(HalleyAPI* api);
 		void doDeInit();
 

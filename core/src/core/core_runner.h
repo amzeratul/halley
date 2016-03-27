@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <vector>
+#include "../api/core_api.h"
+#include "../stage/stage.h"
 
 namespace Halley
 {
@@ -9,16 +11,18 @@ namespace Halley
 	class HalleyAPI;
 	class Stage;
 
-	class CoreRunner
+	class CoreRunner : public CoreAPI
 	{
 	public:
-		CoreRunner();
+		CoreRunner(std::unique_ptr<Game> game, std::vector<String> args);
 		~CoreRunner();
 
-		int run(std::unique_ptr<Game> game, std::vector<String> args);
+		void setStage(StageID stage);
 		void setStage(std::unique_ptr<Stage> stage);
+		void quit();
 
 	private:
+		int run(std::unique_ptr<Game> game, std::vector<String> args);
 		void runMainLoop(bool capFrameRate, int fps);
 		void init(std::vector<String> args);
 		void deInit();

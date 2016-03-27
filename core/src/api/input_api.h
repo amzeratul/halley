@@ -10,7 +10,7 @@ namespace Halley
 
 	private:
 		friend class HalleyAPI;
-		friend class CoreAPI;
+		friend class SystemAPI;
 
 		void init();
 		void deInit();

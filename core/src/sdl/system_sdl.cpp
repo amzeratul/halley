@@ -1,4 +1,4 @@
-#include "../api/core_api.h"
+#include "../api/system_api.h"
 #include <SDL.h>
 #include <api/video_api.h>
 #include <api/input_api.h>
@@ -9,7 +9,7 @@ using namespace Halley;
 #pragma comment(lib, "SDL2.lib")
 #endif
 
-void CoreAPI::init()
+void SystemAPI::init()
 {
 	// SDL version
 	SDL_version compiled;
@@ -35,23 +35,23 @@ void CoreAPI::init()
 	SDL_ShowCursor(SDL_DISABLE);
 }
 
-void CoreAPI::deInit()
+void SystemAPI::deInit()
 {
 	// Close SDL
 	SDL_Quit();
 }
 
-unsigned int CoreAPI::getTicks()
+unsigned int SystemAPI::getTicks()
 {
 	return SDL_GetTicks();
 }
 
-void CoreAPI::delay(unsigned int ms)
+void SystemAPI::delay(unsigned int ms)
 {
 	SDL_Delay(ms);
 }
 
-bool CoreAPI::processEvents(VideoAPI* video, InputAPI* input)
+bool SystemAPI::processEvents(VideoAPI* video, InputAPI* input)
 {
 	SDL_Event event;
 	SDL_PumpEvents();
@@ -74,6 +74,7 @@ bool CoreAPI::processEvents(VideoAPI* video, InputAPI* input)
 		case SDL_FINGERMOTION:
 		{
 			if (input) {
+				// TODO: convert to internal event format?
 				input->processEvent(event);
 			}
 			break;
@@ -86,6 +87,7 @@ bool CoreAPI::processEvents(VideoAPI* video, InputAPI* input)
 		case SDL_WINDOWEVENT:
 		{
 			if (video) {
+				// TODO: convert to internal event format?
 				video->processEvent(event);
 			}
 			break;

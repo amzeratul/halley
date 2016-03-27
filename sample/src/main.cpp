@@ -47,7 +47,7 @@ public:
 		i++;
 
 		if (i == 100) {
-			//getAPI().core->quit();
+			getAPI().core->quit();
 		}
 	}
 
