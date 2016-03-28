@@ -43,7 +43,7 @@ namespace Halley
 		std::unique_ptr<Stage> nextStage;
 		bool pendingStageTransition = false;
 
-		unsigned int delay;
+		unsigned int delay = 0;
 		bool running = false;
 		bool crashed = false;
 
