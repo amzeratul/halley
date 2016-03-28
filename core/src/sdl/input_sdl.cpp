@@ -2,6 +2,7 @@
 
 using namespace Halley;
 
+/*
 void InputAPI::init()
 {
 	
@@ -16,3 +17,4 @@ void InputAPI::processEvent(SDL_Event&)
 {
 	
 }
+*/

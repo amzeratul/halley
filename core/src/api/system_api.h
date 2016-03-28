@@ -4,19 +4,20 @@ namespace Halley
 {
 	class VideoAPI;
 	class InputAPI;
+	class HalleyAPIInternal;
 
 	class SystemAPI
 	{
 	public:
-		unsigned int getTicks();
-		void delay(unsigned int ms);
+		virtual ~SystemAPI() {}
+
+		virtual unsigned int getTicks() = 0;
+		virtual void delay(unsigned int ms) = 0;
 
 	private:
 		friend class HalleyAPI;
 		friend class CoreRunner;
 
-		void init();
-		void deInit();
-		bool processEvents(VideoAPI* video, InputAPI* input);
+		virtual bool generateEvents(HalleyAPIInternal* video, HalleyAPIInternal* input) = 0;
 	};
 }

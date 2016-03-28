@@ -1,7 +1,6 @@
-#include "../api/system_api.h"
+#include "system_sdl.h"
 #include <SDL.h>
-#include <api/video_api.h>
-#include <api/input_api.h>
+#include "../api/halley_api_internal.h"
 
 using namespace Halley;
 
@@ -9,7 +8,7 @@ using namespace Halley;
 #pragma comment(lib, "SDL2.lib")
 #endif
 
-void SystemAPI::init()
+void SystemSDL::init()
 {
 	// SDL version
 	SDL_version compiled;
@@ -35,23 +34,27 @@ void SystemAPI::init()
 	SDL_ShowCursor(SDL_DISABLE);
 }
 
-void SystemAPI::deInit()
+void SystemSDL::deInit()
 {
 	// Close SDL
 	SDL_Quit();
 }
 
-unsigned int SystemAPI::getTicks()
+unsigned int SystemSDL::getTicks()
 {
 	return SDL_GetTicks();
 }
 
-void SystemAPI::delay(unsigned int ms)
+void SystemSDL::delay(unsigned int ms)
 {
 	SDL_Delay(ms);
 }
 
-bool SystemAPI::processEvents(VideoAPI* video, InputAPI* input)
+void SystemSDL::processEvent(SDL_Event& evt)
+{
+}
+
+bool SystemSDL::generateEvents(HalleyAPIInternal* video, HalleyAPIInternal* input)
 {
 	SDL_Event event;
 	SDL_PumpEvents();

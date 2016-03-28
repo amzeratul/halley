@@ -1,7 +1,5 @@
 #pragma once
 
-union SDL_Event;
-
 namespace Halley
 {
 	enum class WindowType {
@@ -36,15 +34,5 @@ namespace Halley
 		virtual void toggleFullscreen() = 0;
 
 		virtual void setVirtualSize(Vector2f virtualSize) = 0;
-
-	protected:
-		friend class HalleyAPI;
-		friend class SystemAPI;
-
-		virtual void init() = 0;
-		virtual void deInit() = 0;
-		virtual void processEvent(SDL_Event& event) = 0;
-
-		virtual void setWindowSize(Vector2i windowSize) = 0;
 	};
 }

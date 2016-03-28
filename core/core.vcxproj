@@ -23,6 +23,7 @@
     <ClInclude Include="include\halley_main.h" />
     <ClInclude Include="include\main_wrapper.h" />
     <ClInclude Include="src\api\core_api.h" />
+    <ClInclude Include="src\api\halley_api_internal.h" />
     <ClInclude Include="src\api\system_api.h" />
     <ClInclude Include="src\api\halley_api.h" />
     <ClInclude Include="src\api\input_api.h" />
@@ -36,6 +37,7 @@
     <ClInclude Include="src\opengl\halley_gl.h" />
     <ClInclude Include="src\opengl\video_opengl.h" />
     <ClInclude Include="src\prec.h" />
+    <ClInclude Include="src\sdl\system_sdl.h" />
     <ClInclude Include="src\stage\stage.h" />
   </ItemGroup>
   <ItemGroup>

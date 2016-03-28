@@ -1,44 +1,50 @@
 #include "halley_api.h"
+#include "halley_api_internal.h"
 #include "../opengl/video_opengl.h"
+#include "../sdl/system_sdl.h"
 
 using namespace Halley;
 
-HalleyAPI::HalleyAPI(CoreAPI* _core, std::unique_ptr<SystemAPI> _system, std::unique_ptr<VideoAPI> _video, std::unique_ptr<InputAPI> _input)
-	: core(_core)
-	, system(std::move(_system))
-	, video(std::move(_video))
-	, input(std::move(_input))
+HalleyAPI::HalleyAPI(CoreAPIInternal* _core, std::unique_ptr<SystemAPIInternal> _system, std::unique_ptr<VideoAPIInternal> _video, std::unique_ptr<InputAPIInternal> _input)
+	: coreInternal(_core)
+	, systemInternal(std::move(_system))
+	, videoInternal(std::move(_video))
+	, inputInternal(std::move(_input))
+	, core(coreInternal)
+	, system(&*systemInternal)
+	, video(&*videoInternal)
+	, input(&*inputInternal)
 {
-	if (system) {
-		system->init();
+	if (systemInternal) {
+		systemInternal->init();
 	}
-	if (video) {
-		video->init();
+	if (videoInternal) {
+		videoInternal->init();
 	}
-	if (input) {
-		input->init();
+	if (inputInternal) {
+		inputInternal->init();
 	}
 }
 
 HalleyAPI::~HalleyAPI()
 {
-	if (input) {
-		input->deInit();
+	if (inputInternal) {
+		inputInternal->deInit();
 	}
-	if (video) {
-		video->deInit();
+	if (videoInternal) {
+		videoInternal->deInit();
 	}
-	if (system) {
-		system->deInit();
-	}
+	if (systemInternal) {
+		systemInternal->deInit();
+	}	
 }
 
-std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPI* core, int flags)
+std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 {
 	return std::unique_ptr<HalleyAPI>(new HalleyAPI(
 		core,
-		std::make_unique<SystemAPI>(),
-		(flags & HalleyAPIFlags::Video) ? std::unique_ptr<VideoAPI>(new VideoOpenGL()) : std::unique_ptr<VideoAPI>(),
-		(flags & HalleyAPIFlags::Input) ? std::make_unique<InputAPI>() : std::unique_ptr<InputAPI>()
+		std::unique_ptr<SystemSDL>(new SystemSDL()),
+		(flags & HalleyAPIFlags::Video) ? std::unique_ptr<VideoAPIInternal>(new VideoOpenGL()) : std::unique_ptr<VideoAPIInternal>(),
+		(flags & HalleyAPIFlags::Input) ? std::unique_ptr<InputAPIInternal>(/*todo*/) : std::unique_ptr<InputAPIInternal>()
 	));
 }

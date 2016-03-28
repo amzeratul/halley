@@ -81,6 +81,12 @@
     <ClInclude Include="src\opengl\video_opengl.h">
       <Filter>opengl</Filter>
     </ClInclude>
+    <ClInclude Include="src\sdl\system_sdl.h">
+      <Filter>sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\api\halley_api_internal.h">
+      <Filter>api</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">

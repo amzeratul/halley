@@ -1,8 +1,5 @@
 #pragma once
-#include "video_api.h"
-#include "system_api.h"
-#include "input_api.h"
-#include "core_api.h"
+#include "halley_api_internal.h"
 
 namespace Halley
 {
@@ -17,18 +14,23 @@ namespace Halley
 
 	class HalleyAPI
 	{
+		// Beware of member order
+		CoreAPIInternal* coreInternal;
+		const std::unique_ptr<SystemAPIInternal> systemInternal;
+		const std::unique_ptr<VideoAPIInternal> videoInternal;
+		const std::unique_ptr<InputAPIInternal> inputInternal;
+
 	public:
 		~HalleyAPI();
 		CoreAPI* const core;
-		const std::unique_ptr<SystemAPI> system;
-		const std::unique_ptr<VideoAPI> video;
-		const std::unique_ptr<InputAPI> input;
+		SystemAPI* const system;
+		VideoAPI* const video;
+		InputAPI* const input;
 
 	private:
 		friend class CoreRunner;
 
-		HalleyAPI(CoreAPI* core, std::unique_ptr<SystemAPI> system, std::unique_ptr<VideoAPI> video, std::unique_ptr<InputAPI> input);
-
-		static std::unique_ptr<HalleyAPI> create(CoreAPI* core, int flags);
+		HalleyAPI(CoreAPIInternal* core, std::unique_ptr<SystemAPIInternal> system, std::unique_ptr<VideoAPIInternal> video, std::unique_ptr<InputAPIInternal> input);
+		static std::unique_ptr<HalleyAPI> create(CoreAPIInternal* core, int flags);
 	};
 }
