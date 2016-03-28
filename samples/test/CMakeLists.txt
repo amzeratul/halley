@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.10)
+cmake_minimum_required (VERSION 2.8.12)
 
 project (halley-sample-test)
 
@@ -8,6 +8,9 @@ set (${PROJECT_NAME}_sources "src/prec.cpp" "src/main.cpp" "src/test_system.cpp"
 add_executable (${PROJECT_NAME} ${${PROJECT_NAME}_headers}
 								${${PROJECT_NAME}_sources})
 
+add_precompiled_header(${PROJECT_NAME} src/prec.h FORCEINCLUDE)
+include_directories(".")
+								
 # From http://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake
 function(assign_source_group)
 	foreach(_source IN ITEMS ${ARGN})
@@ -24,7 +27,6 @@ endfunction(assign_source_group)
 
 assign_source_group(${${PROJECT_NAME}_sources})
 assign_source_group(${${PROJECT_NAME}_headers})
-
 
 #target_link_libraries(${PROJECT_NAME} halley-core)
 

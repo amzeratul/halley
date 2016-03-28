@@ -6,4 +6,6 @@ SET(HALLEY_VERSION_MINOR "0")
 SET(HALLEY_VERSION_PATCH "0")
 SET(HALLEY_VERSION "${HALLEY_VERSION_MAJOR}.${HALLEY_VERSION_MINOR}.${HALLEY_VERSION_PATCH}")
 
+include(cmake_modules/PrecompiledHeader.cmake)
+
 add_subdirectory(samples)
