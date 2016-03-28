@@ -5,7 +5,8 @@ A lightweight game engine written in modern C++. I'm currently re-architecting t
 
 ## Modules
 Halley is divided in a few sub-projects:
-* **core**: Core features of the engine, such as input, graphics, audio, etc
+* **core**: Core features of the engine, including looper, API management
+* **opengl**: OpenGL backend
 * **entity**: Framework for dealing with entities, components, and systems
 * **codegen**: Generates code for the entity system (written in Haskell)
 * **runner**: Provides an entry point for execution and dynamic reloading. Highly experimental.
@@ -15,6 +16,7 @@ Halley is divided in a few sub-projects:
 ## Installation
 
 ### Dependencies
+* CMake 3.0+
 * Haskell Platform (to build codegen)
 * Visual Studio 2015
 * Boost 1.59.0+
@@ -24,5 +26,5 @@ Halley is divided in a few sub-projects:
 * Make sure that SDL and Boost are accessible.
 * Compile codegen by running "cabal build" on its folder. You may need to download and install dependencies.
 * Add [repo]/include and [repo]/lib/x64 to your global include and library lookup paths, respectively.
-* Open halley.sln
+* Open halley.sln [Soon CMake will replace this]
 * Compile!
