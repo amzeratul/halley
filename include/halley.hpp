@@ -9,4 +9,5 @@
 #pragma comment(lib, "halley_utils.lib")
 #pragma comment(lib, "halley_entity.lib")
 #pragma comment(lib, "halley_core.lib")
+#pragma comment(lib, "halley_opengl.lib")
 #endif

@@ -2,6 +2,7 @@
 
 union SDL_Event;
 
+#include "../../utils/include/halley_utils.h"
 #include "core_api.h"
 #include "video_api.h"
 #include "system_api.h"

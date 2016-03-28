@@ -1,7 +1,7 @@
 core
 * resources
 * refactor graphics front-end
-* figure out how to organize APIs
+* figure out a better way to load/register plugins
 - hot reloading
 - child stages
 

@@ -1,11 +1,11 @@
-#include "../api/halley_api_internal.h"
-
 struct SDL_Window;
 
 namespace Halley {
 	class VideoOpenGL : public VideoAPIInternal
 	{
 	public:
+		VideoOpenGL();
+
 		void startRender() override;
 		void finishRender() override;
 		void flip() override;
@@ -33,9 +33,6 @@ namespace Halley {
 		void processEvent(SDL_Event& event) override;
 
 	private:
-		friend class HalleyAPI;
-
-		VideoOpenGL();
 		void updateWindowDimensions();
 		void setWindowSize(Vector2i windowSize);
 

@@ -46,6 +46,9 @@
     <Filter Include="file_formats\tinyxml">
       <UniqueIdentifier>{a4cc8370-9847-4d2f-9c45-a7866e642b9f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="plugin">
+      <UniqueIdentifier>{ed2504ce-7514-4994-aa3e-f2de5e827214}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\maths\aabb.cpp">
@@ -161,6 +164,9 @@
     </ClCompile>
     <ClCompile Include="src\debug\redirect_stream.cpp">
       <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugin\plugin.cpp">
+      <Filter>plugin</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -334,6 +340,9 @@
     </ClInclude>
     <ClInclude Include="src\debug\redirect_stream.h">
       <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugin\plugin.h">
+      <Filter>plugin</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

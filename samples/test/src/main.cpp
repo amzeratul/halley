@@ -3,6 +3,7 @@
 
 using namespace Halley;
 
+void initOpenGLPlugin();
 
 class TestStage : public Stage
 {
@@ -76,6 +77,12 @@ namespace Stages {
 class SampleGame : public Game
 {
 public:
+	int initPlugins() override
+	{
+		initOpenGLPlugin();
+		return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input;
+	}
+
 	std::unique_ptr<Stage> makeStage(StageID id) override
 	{
 		switch (id) {

@@ -19,9 +19,6 @@
     <Filter Include="sdl">
       <UniqueIdentifier>{ce1f56b1-dbe8-4e60-b800-d0749254cd0e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="opengl">
-      <UniqueIdentifier>{c0c3c319-9e11-4d96-88cc-2bd8b1466653}</UniqueIdentifier>
-    </Filter>
     <Filter Include="stage">
       <UniqueIdentifier>{1df7e3d3-5baf-4694-8561-f774ed373226}</UniqueIdentifier>
     </Filter>
@@ -60,12 +57,6 @@
     <ClInclude Include="src\api\video_api.h">
       <Filter>api</Filter>
     </ClInclude>
-    <ClInclude Include="src\opengl\gl_util.h">
-      <Filter>opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="src\opengl\halley_gl.h">
-      <Filter>opengl</Filter>
-    </ClInclude>
     <ClInclude Include="src\api\input_api.h">
       <Filter>api</Filter>
     </ClInclude>
@@ -77,9 +68,6 @@
     </ClInclude>
     <ClInclude Include="src\api\core_api.h">
       <Filter>api</Filter>
-    </ClInclude>
-    <ClInclude Include="src\opengl\video_opengl.h">
-      <Filter>opengl</Filter>
     </ClInclude>
     <ClInclude Include="src\sdl\system_sdl.h">
       <Filter>sdl</Filter>
@@ -100,12 +88,6 @@
     </ClCompile>
     <ClCompile Include="src\api\halley_api.cpp">
       <Filter>api</Filter>
-    </ClCompile>
-    <ClCompile Include="src\opengl\video_opengl.cpp">
-      <Filter>opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\opengl\gl_util.cpp">
-      <Filter>opengl</Filter>
     </ClCompile>
     <ClCompile Include="src\sdl\input_sdl.cpp">
       <Filter>sdl</Filter>

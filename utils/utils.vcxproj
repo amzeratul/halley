@@ -22,6 +22,7 @@
     <ProjectGuid>{D7ABF112-EA58-4B90-9CAA-872D6A311520}</ProjectGuid>
     <RootNamespace>utils</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>halley-utils</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -161,6 +162,7 @@
     <ClCompile Include="src\os\os_mac.cpp" />
     <ClCompile Include="src\os\os_unix.cpp" />
     <ClCompile Include="src\os\os_win32.cpp" />
+    <ClCompile Include="src\plugin\plugin.cpp" />
     <ClCompile Include="src\text\encode.cpp" />
     <ClCompile Include="src\text\halleystring.cpp" />
     <ClCompile Include="src\time\stopwatch.cpp" />
@@ -219,6 +221,7 @@
     <ClInclude Include="src\os\os_mac.h" />
     <ClInclude Include="src\os\os_unix.h" />
     <ClInclude Include="src\os\os_win32.h" />
+    <ClInclude Include="src\plugin\plugin.h" />
     <ClInclude Include="src\text\encode.h" />
     <ClInclude Include="src\text\halleystring.h" />
     <ClInclude Include="src\time\halleytime.h" />

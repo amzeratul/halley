@@ -40,6 +40,8 @@
 
 #include "os/os.h"
 
+#include "plugin/plugin.h"
+
 #include "text/encode.h"
 #include "text/halleystring.h"
 

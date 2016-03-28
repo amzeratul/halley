@@ -1,6 +1,5 @@
 #include "halley_api.h"
 #include "halley_api_internal.h"
-#include "../opengl/video_opengl.h"
 #include "../sdl/system_sdl.h"
 
 using namespace Halley;
@@ -41,10 +40,17 @@ HalleyAPI::~HalleyAPI()
 
 std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 {
-	return std::unique_ptr<HalleyAPI>(new HalleyAPI(
-		core,
-		std::unique_ptr<SystemSDL>(new SystemSDL()),
-		(flags & HalleyAPIFlags::Video) ? std::unique_ptr<VideoAPIInternal>(new VideoOpenGL()) : std::unique_ptr<VideoAPIInternal>(),
-		(flags & HalleyAPIFlags::Input) ? std::unique_ptr<InputAPIInternal>(/*todo*/) : std::unique_ptr<InputAPIInternal>()
-	));
+	std::unique_ptr<VideoAPIInternal> video;
+	if (flags & HalleyAPIFlags::Video) {
+		auto plugins = Plugin::getPlugins(PluginType::GraphicsAPI);
+		if (plugins.size() > 0) {
+			video.reset(static_cast<VideoAPIInternal*>(plugins[0]->createAPI()));
+		} else {
+			throw Exception("No suitable video plugins found.");
+		}
+	}
+
+	std::unique_ptr<InputAPIInternal> input;
+
+	return std::unique_ptr<HalleyAPI>(new HalleyAPI(core, std::unique_ptr<SystemSDL>(new SystemSDL()), std::move(video), std::move(input)));
 }

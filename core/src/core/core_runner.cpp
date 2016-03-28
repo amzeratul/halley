@@ -90,7 +90,7 @@ void CoreRunner::init(std::vector<String> args)
 #endif
 
 	// API
-	api = HalleyAPI::create(this, HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input);
+	api = HalleyAPI::create(this, game->initPlugins());
 
 	// Init game
 	game->init(&*api);

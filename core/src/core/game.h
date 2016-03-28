@@ -9,6 +9,8 @@ namespace Halley
 	public:
 		virtual ~Game() = default;
 
+		virtual int initPlugins() = 0;
+
 		virtual String getName() const = 0;
 		virtual String getDataPath() const = 0;
 		virtual bool isDevBuild() const = 0;
