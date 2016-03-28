@@ -151,7 +151,6 @@ function(add_precompiled_header _target _input)
 	  endif()
 	endif()
 
-	message("Compile flags for ${_source}: ${_pch_compile_flags}")
 	set_source_files_properties(${_source} PROPERTIES
 	  COMPILE_FLAGS "${_pch_compile_flags}"
 	  OBJECT_DEPENDS "${_object_depends}")

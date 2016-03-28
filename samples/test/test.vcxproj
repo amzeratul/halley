@@ -95,6 +95,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>prec.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles>prec.h</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>.</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

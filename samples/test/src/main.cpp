@@ -22,6 +22,10 @@ public:
 		std::cout << "Final bar: " << world.getEntity(id0).getComponent<BarComponent>()->bar << std::endl;
 	}
 
+	void onVariableUpdate(Time) override
+	{
+	}
+
 	void onFixedUpdate(Time time) override
 	{
 		if (i == 20) {
