@@ -34,6 +34,7 @@
     <ClInclude Include="src\halley_core_includes.h" />
     <ClInclude Include="src\opengl\gl_util.h" />
     <ClInclude Include="src\opengl\halley_gl.h" />
+    <ClInclude Include="src\opengl\video_opengl.h" />
     <ClInclude Include="src\prec.h" />
     <ClInclude Include="src\stage\stage.h" />
   </ItemGroup>

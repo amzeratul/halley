@@ -47,10 +47,11 @@ utils
 - better HTTP library?
 
 samples
-* sort out the build system mess T_T
+* refactor "test" sample
+* expand "test" sample
 * make a minimal "template" sample
 
 CMake
-* x64 target by default
-* sort files into neat filters
-* precompiled headers
+* lists for all libraries
+* boost/SDL dependencies
+* clean up

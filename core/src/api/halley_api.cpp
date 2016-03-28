@@ -1,4 +1,5 @@
 #include "halley_api.h"
+#include "../opengl/video_opengl.h"
 
 using namespace Halley;
 
@@ -37,7 +38,7 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPI* core, int flags)
 	return std::unique_ptr<HalleyAPI>(new HalleyAPI(
 		core,
 		std::make_unique<SystemAPI>(),
-		(flags & HalleyAPIFlags::Video) ? std::make_unique<VideoAPI>() : std::unique_ptr<VideoAPI>(),
+		(flags & HalleyAPIFlags::Video) ? std::unique_ptr<VideoAPI>(new VideoOpenGL()) : std::unique_ptr<VideoAPI>(),
 		(flags & HalleyAPIFlags::Input) ? std::make_unique<InputAPI>() : std::unique_ptr<InputAPI>()
 	));
 }

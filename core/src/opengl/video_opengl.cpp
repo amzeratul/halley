@@ -1,7 +1,7 @@
 #include <SDL.h>
 #include <GL/glew.h>
 #include "halley_gl.h"
-#include "../api/video_api.h"
+#include "video_opengl.h"
 #include "SDL_syswm.h"
 #include "gl_util.h"
 using namespace Halley;
@@ -11,12 +11,12 @@ using namespace Halley;
 #pragma comment(lib, "opengl32.lib")
 #endif
 
-void VideoAPI::init()
+void VideoOpenGL::init()
 {
 	
 }
 
-void VideoAPI::deInit()
+void VideoOpenGL::deInit()
 {
 	if (running) {
 		running = false;
@@ -36,7 +36,7 @@ void VideoAPI::deInit()
 
 ///////////////
 // Constructor
-VideoAPI::VideoAPI()
+VideoOpenGL::VideoOpenGL()
 	: border(0)
 	, windowType(WindowType::None)
 	, initialized(false)
@@ -47,7 +47,7 @@ VideoAPI::VideoAPI()
 
 /////////////
 // Set video
-void VideoAPI::setVideo(WindowType _windowType, const Vector2i _fullscreenSize, const Vector2i _windowedSize, const Vector2f _virtualSize, int screen)
+void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSize, const Vector2i _windowedSize, const Vector2f _virtualSize, int screen)
 {
 	bool wasInit = initialized;
 
@@ -62,7 +62,7 @@ void VideoAPI::setVideo(WindowType _windowType, const Vector2i _fullscreenSize, 
 #ifdef __ANDROID__
 	// Android-specific overrides, since it should always be fullscreen and on the actual window size
 	_fullscreen = true;
-	windowSize = VideoAPI::getScreenSize();
+	windowSize = VideoOpenGL::getScreenSize();
 #endif
 
 	// Debug info
@@ -243,19 +243,19 @@ void VideoAPI::setVideo(WindowType _windowType, const Vector2i _fullscreenSize, 
 	std::cout << ConsoleColor(Console::GREEN) << "Video init done.\n" << ConsoleColor() << std::endl;
 }
 
-void VideoAPI::setWindowSize(Vector2i winSize)
+void VideoOpenGL::setWindowSize(Vector2i winSize)
 {
 	windowSize = winSize;
 	updateWindowDimensions();
 }
 
-void VideoAPI::setVirtualSize(Vector2f vs)
+void VideoOpenGL::setVirtualSize(Vector2f vs)
 {
 	virtualSize = vs;
 	updateWindowDimensions();
 }
 
-void VideoAPI::updateWindowDimensions()
+void VideoOpenGL::updateWindowDimensions()
 {
 	border = 0;
 	if (virtualSize.x == 0 || virtualSize.y == 0) {
@@ -285,7 +285,7 @@ void VideoAPI::updateWindowDimensions()
 	}
 }
 
-Vector2i VideoAPI::getScreenSize(int n) const
+Vector2i VideoOpenGL::getScreenSize(int n) const
 {
 	if (n >= SDL_GetNumVideoDisplays()) {
 		return Vector2i();
@@ -295,24 +295,24 @@ Vector2i VideoAPI::getScreenSize(int n) const
 	return Vector2i(info.w, info.h);
 }
 
-void VideoAPI::flip()
+void VideoOpenGL::flip()
 {
 	SDL_GL_SwapWindow(window);
 }
 
-void VideoAPI::setFullscreen(bool fs)
+void VideoOpenGL::setFullscreen(bool fs)
 {
 	if (fs != (windowType == WindowType::Fullscreen)) {
 		setVideo(fs ? WindowType::Fullscreen : WindowType::Window, fullscreenSize, windowedSize, virtualSize);
 	}
 }
 
-void VideoAPI::toggleFullscreen()
+void VideoOpenGL::toggleFullscreen()
 {
 	setFullscreen(!isFullscreen());
 }
 
-void VideoAPI::processEvent(SDL_Event& event)
+void VideoOpenGL::processEvent(SDL_Event& event)
 {
 	if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
 		Vector2i size = Vector2i(event.window.data1, event.window.data2);
@@ -320,7 +320,7 @@ void VideoAPI::processEvent(SDL_Event& event)
 	}
 }
 
-Rect4i VideoAPI::getWindowRect() const
+Rect4i VideoOpenGL::getWindowRect() const
 {
 	int x, y, w, h;
 	SDL_GetWindowPosition(window, &x, &y);
@@ -328,7 +328,7 @@ Rect4i VideoAPI::getWindowRect() const
 	return Rect4i(x, y, w, h);
 }
 
-Rect4i VideoAPI::getDisplayRect() const
+Rect4i VideoOpenGL::getDisplayRect() const
 {
 	SDL_Rect rect;
 	SDL_GetDisplayBounds(0, &rect);
@@ -387,7 +387,7 @@ static void drawLetterbox() {
 	*/
 }
 
-void VideoAPI::startRender()
+void VideoOpenGL::startRender()
 {
 	Debug::trace("Game::RenderScreen begin");
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -404,7 +404,7 @@ void VideoAPI::startRender()
 	*/
 }
 
-void VideoAPI::finishRender()
+void VideoOpenGL::finishRender()
 {
 	// TODO
 	// painter->flushQueue();

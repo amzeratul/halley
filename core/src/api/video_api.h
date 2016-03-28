@@ -1,7 +1,6 @@
 #pragma once
 
 union SDL_Event;
-struct SDL_Window;
 
 namespace Halley
 {
@@ -15,51 +14,37 @@ namespace Halley
 	class VideoAPI
 	{
 	public:
-		VideoAPI();
+		virtual ~VideoAPI() {}
 
-		void startRender();
-		void finishRender();
-		void flip();
+		virtual void startRender() = 0;
+		virtual void finishRender() = 0;
+		virtual void flip() = 0;
 
-		void setVideo(WindowType windowType, Vector2i fullscreenSize, Vector2i windowedSize, Vector2f virtualSize = Vector2f(), int screen = 0);
-		Vector2i getWindowSize() const { return windowSize; }
-		Vector2f getVirtualSize() const { return virtualSize; }
-		Vector2f getDisplaySize() const { return p2 - p1; }
-		Vector2f getOrigin() const { return p1; }
-		Vector2i getScreenSize(int n = 0) const;
-		Rect4i getWindowRect() const;
-		Rect4i getDisplayRect() const;
-		float getBorder() const { return border; }
+		virtual void setVideo(WindowType windowType, Vector2i fullscreenSize, Vector2i windowedSize, Vector2f virtualSize = Vector2f(), int screen = 0) = 0;
+		virtual Vector2i getWindowSize() const = 0;
+		virtual Vector2f getVirtualSize() const = 0;
+		virtual Vector2f getDisplaySize() const = 0;
+		virtual Vector2f getOrigin() const = 0;
+		virtual Vector2i getScreenSize(int n = 0) const = 0;
+		virtual Rect4i getWindowRect() const = 0;
+		virtual Rect4i getDisplayRect() const = 0;
+		virtual float getBorder() const = 0;
 
-		float getScale() const { return scale; }
-		bool isFullscreen() const { return windowType == WindowType::Fullscreen; }
-		void setFullscreen(bool isFullscreen);
-		void toggleFullscreen();
+		virtual float getScale() const = 0;
+		virtual bool isFullscreen() const = 0;
+		virtual void setFullscreen(bool isFullscreen) = 0;
+		virtual void toggleFullscreen() = 0;
 
-		void setVirtualSize(Vector2f virtualSize);
+		virtual void setVirtualSize(Vector2f virtualSize) = 0;
 
-	private:
+	protected:
 		friend class HalleyAPI;
 		friend class SystemAPI;
 
-		void init();
-		void deInit();
-		void processEvent(SDL_Event& event);
+		virtual void init() = 0;
+		virtual void deInit() = 0;
+		virtual void processEvent(SDL_Event& event) = 0;
 
-		void setWindowSize(Vector2i windowSize);
-		void updateWindowDimensions();
-
-		void* context;
-		Vector2i windowSize;
-		Vector2i windowedSize;
-		Vector2i fullscreenSize;
-		Vector2f virtualSize;
-		Vector2f p1, p2;
-		WindowType windowType;
-		bool initialized;
-		bool running;
-		float scale;
-		float border;
-		SDL_Window* window;
+		virtual void setWindowSize(Vector2i windowSize) = 0;
 	};
 }

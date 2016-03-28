@@ -78,6 +78,9 @@
     <ClInclude Include="src\api\core_api.h">
       <Filter>api</Filter>
     </ClInclude>
+    <ClInclude Include="src\opengl\video_opengl.h">
+      <Filter>opengl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
