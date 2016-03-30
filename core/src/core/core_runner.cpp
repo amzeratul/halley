@@ -5,6 +5,7 @@
 #include "environment.h"
 #include "../api/halley_api.h"
 #include "../prec.h"
+#include "../graphics/painter.h"
 
 #pragma warning(disable: 4996)
 
@@ -91,6 +92,11 @@ void CoreRunner::init(std::vector<String> args)
 
 	// API
 	api = HalleyAPI::create(this, game->initPlugins());
+	
+	// Get painter
+	if (api->video) {
+		painter = std::move(api->videoInternal->makePainter());
+	}
 
 	// Init game
 	game->init(&*api);
@@ -144,13 +150,13 @@ void CoreRunner::onVariableUpdate(Time time)
 	}
 }
 
-void CoreRunner::onRender(Time time)
+void CoreRunner::onRender(Time)
 {
 	if (api->video) {
 		api->video->startRender();
 
 		if (currentStage) {
-			currentStage->onRender(time);
+			currentStage->onRender(*painter);
 		}
 
 		api->video->finishRender();
@@ -179,6 +185,11 @@ void CoreRunner::showComputerInfo() const
 	std::cout << "\tGPU:  " << ConsoleColor(Console::DARK_GREY) << computerData.gpuName << ConsoleColor() << "\n";
 	std::cout << "\tRAM:  " << ConsoleColor(Console::DARK_GREY) << String::prettySize(computerData.RAM) << ConsoleColor() << "\n";
 	std::cout << "\tTime: " << ConsoleColor(Console::DARK_GREY) << curTime << ConsoleColor() << "\n" << std::endl;
+}
+
+void CoreRunner::setStage(StageID stage)
+{
+	setStage(game->makeStage(stage));
 }
 
 void CoreRunner::setStage(std::unique_ptr<Stage> next)

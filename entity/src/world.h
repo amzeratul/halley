@@ -11,6 +11,7 @@
 namespace Halley {
 	class Entity;
 	class System;
+	class Painter;
 
 	class World
 	{
@@ -18,9 +19,10 @@ namespace Halley {
 		World();
 		~World();
 
-		bool hasSystemsOnTimeLine(TimeLine timeline) const;
 		void step(TimeLine timeline, Time elapsed);
+		void render(Painter& painter) const;
 		double getLastStepLength() const { return lastStepLength; }
+		bool hasSystemsOnTimeLine(TimeLine timeline) const;
 
 		System& addSystemByName(String name, TimeLine timeline);
 		System& addSystem(std::unique_ptr<System> system, TimeLine timeline);
@@ -56,7 +58,7 @@ namespace Halley {
 		std::array<std::vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
 		bool entityDirty = false;
 
-		double lastStepLength;
+		mutable double lastStepLength;
 
 		EntityId nextUid = 0;
 		std::vector<Entity*> entities;
@@ -73,7 +75,10 @@ namespace Halley {
 
 		std::vector<std::unique_ptr<System>>& getSystems(TimeLine timeline);
 		const std::vector<std::unique_ptr<System>>& getSystems(TimeLine timeline) const;
+
 		void updateSystems(TimeLine timeline, Time elapsed);
+		void renderSystems(Painter& painter) const;
+		
 		void onAddFamily(Family& family);
 	};
 }

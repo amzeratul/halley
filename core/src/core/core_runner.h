@@ -10,6 +10,7 @@ namespace Halley
 	class Game;
 	class HalleyAPI;
 	class Stage;
+	class Painter;
 
 	class CoreRunner : public CoreAPI
 	{
@@ -17,9 +18,9 @@ namespace Halley
 		CoreRunner(std::unique_ptr<Game> game, std::vector<String> args);
 		~CoreRunner();
 
-		void setStage(StageID stage);
+		void setStage(StageID stage) override;
 		void setStage(std::unique_ptr<Stage> stage);
-		void quit();
+		void quit() override;
 
 	private:
 		int run(std::unique_ptr<Game> game, std::vector<String> args);
@@ -39,6 +40,7 @@ namespace Halley
 
 		std::unique_ptr<Game> game;
 		std::unique_ptr<HalleyAPI> api;
+		std::unique_ptr<Painter> painter;
 
 		std::unique_ptr<Stage> currentStage;
 		std::unique_ptr<Stage> nextStage;

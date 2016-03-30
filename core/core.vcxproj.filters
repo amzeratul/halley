@@ -93,6 +93,9 @@
     <ClInclude Include="src\graphics\texture_descriptor.h">
       <Filter>graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\stage\stage_id.h">
+      <Filter>stage</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">

@@ -144,6 +144,17 @@ void Halley::World::step(TimeLine timeline, Time elapsed)
 	lastStepLength = duration_cast<duration<double, std::milli>>(end - start).count();
 }
 
+void World::render(Painter& painter) const
+{
+	using namespace std::chrono;
+	auto start = high_resolution_clock::now();
+
+	renderSystems(painter);
+
+	auto end = high_resolution_clock::now();
+	lastStepLength = duration_cast<duration<double, std::milli>>(end - start).count();
+}
+
 void World::allocateEntity(Entity* entity) {
 	auto res = entityMap.alloc();
 	*res.first = entity;
@@ -246,6 +257,14 @@ void World::updateSystems(TimeLine timeline, Time time)
 	// Update systems
 	for (auto& system : getSystems(timeline)) {
 		system->step(time);
+	}
+}
+
+void World::renderSystems(Painter& painter) const
+{
+	// Update systems
+	for (auto& system : getSystems(TimeLine::Render)) {
+		system->render(painter);
 	}
 }
 

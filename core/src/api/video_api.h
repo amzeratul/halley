@@ -41,7 +41,6 @@ namespace Halley
 		virtual void setVirtualSize(Vector2f virtualSize) = 0;
 
 		// TODO: do I like this API? Time will tell.
-		virtual std::unique_ptr<Painter> makePainter() = 0;
 		virtual std::unique_ptr<Texture> loadTexture(TextureDescriptor& descriptor) = 0;
 		virtual void loadShader(Shader& shader) = 0;
 	};

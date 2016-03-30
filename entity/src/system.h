@@ -16,7 +16,8 @@ namespace Halley {
 		virtual ~System() {}
 
 	protected:
-		virtual void tick(Time time) = 0;
+		virtual void tick(Time) {}
+		virtual void render(Painter&) const {}
 
 	private:
 		friend class World;

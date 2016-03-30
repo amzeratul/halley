@@ -5,10 +5,11 @@ core
 - hot reloading
 - child stages
 
-core/video (?)
-* figure out which project this lives on
+core/graphics (?)
 * materials
-* painter API
+* painter
+* shader
+* texture
 - rewrite text rendering system to use pre-baked distance fields
 - animation?
 - fix threaded load (TODOs in core_runner.cpp)
@@ -16,6 +17,8 @@ core/video (?)
 opengl
 * bring rest of OpenGL backend into engine
 * painter
+* shader
+* texture
 - decouple OpenGL back-end from the graphics front-end
 
 input

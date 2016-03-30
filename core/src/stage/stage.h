@@ -1,8 +1,11 @@
 #pragma once
 
+#include "stage_id.h"
+
 namespace Halley
 {
 	class HalleyAPI;
+	class Painter;
 
 	class Stage
 	{
@@ -11,7 +14,7 @@ namespace Halley
 
 		virtual void onFixedUpdate(Time) {}
 		virtual void onVariableUpdate(Time) {}
-		virtual void onRender(Time) {}
+		virtual void onRender(Painter&) const {}
 
 		virtual void init() {}
 		virtual void deInit() {}
@@ -32,5 +35,4 @@ namespace Halley
 		HalleyAPI* api;
 	};
 
-	using StageID = int;
 }

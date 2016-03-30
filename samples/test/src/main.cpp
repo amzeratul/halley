@@ -55,9 +55,9 @@ public:
 		}
 	}
 
-	void onRender(Time time) override
+	void onRender(Painter& painter) const override
 	{
-		world.step(TimeLine::Render, time);
+		world.render(painter);
 	}
 
 private:

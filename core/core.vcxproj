@@ -41,6 +41,7 @@
     <ClInclude Include="src\prec.h" />
     <ClInclude Include="src\sdl\system_sdl.h" />
     <ClInclude Include="src\stage\stage.h" />
+    <ClInclude Include="src\stage\stage_id.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\api\halley_api.cpp" />
