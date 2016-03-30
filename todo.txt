@@ -15,17 +15,23 @@ core/graphics (?)
 - fix threaded load (TODOs in core_runner.cpp)
 
 opengl
-* bring rest of OpenGL backend into engine
 * painter
 * shader
 * texture
 - decouple OpenGL back-end from the graphics front-end
+
+directx?
+- future support?
+
+vulkan?
+- future support?
 
 input
 * bring library into engine
 
 audio
 * bring library into engine
+* figure out which backend to use (OpenAL still?)
 
 entity
 * load from text files
@@ -38,6 +44,7 @@ entity
 - universal hierarchical transforms?
 
 codegen
+* render call
 * single-entity systems
 * registry
 - codegen parallel systems

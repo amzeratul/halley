@@ -3,16 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25008.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "entity", "entity\entity.vcxproj", "{68FCC000-EE8D-47E3-A050-7F7B46C4F5A9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "halley-entity", "entity\entity.vcxproj", "{68FCC000-EE8D-47E3-A050-7F7B46C4F5A9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utils", "utils\utils.vcxproj", "{D7ABF112-EA58-4B90-9CAA-872D6A311520}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "halley-utils", "utils\utils.vcxproj", "{D7ABF112-EA58-4B90-9CAA-872D6A311520}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AD813A88-7558-4DFB-BEC1-3B16498D3553}"
 	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
 		todo.txt = todo.txt
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "core\core.vcxproj", "{1DAB1A07-DB05-4CA6-984A-843043D1D93B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "halley-core", "core\core.vcxproj", "{1DAB1A07-DB05-4CA6-984A-843043D1D93B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{68FCC000-EE8D-47E3-A050-7F7B46C4F5A9} = {68FCC000-EE8D-47E3-A050-7F7B46C4F5A9}
 		{D7ABF112-EA58-4B90-9CAA-872D6A311520} = {D7ABF112-EA58-4B90-9CAA-872D6A311520}
@@ -23,14 +24,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "include", "include", "{F272
 		include\halley.hpp = include\halley.hpp
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sample-test", "samples\test\test.vcxproj", "{95452B9E-5A75-4123-94EA-24F56F9338AD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "halley-sample-test", "samples\test\test.vcxproj", "{95452B9E-5A75-4123-94EA-24F56F9338AD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{68FCC000-EE8D-47E3-A050-7F7B46C4F5A9} = {68FCC000-EE8D-47E3-A050-7F7B46C4F5A9}
 		{1DAB1A07-DB05-4CA6-984A-843043D1D93B} = {1DAB1A07-DB05-4CA6-984A-843043D1D93B}
 		{D7ABF112-EA58-4B90-9CAA-872D6A311520} = {D7ABF112-EA58-4B90-9CAA-872D6A311520}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "opengl", "opengl\opengl.vcxproj", "{0D285C69-E7FE-4740-B172-24BD7E42D639}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "halley-opengl", "opengl\opengl.vcxproj", "{0D285C69-E7FE-4740-B172-24BD7E42D639}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D7ABF112-EA58-4B90-9CAA-872D6A311520} = {D7ABF112-EA58-4B90-9CAA-872D6A311520}
 	EndProjectSection
