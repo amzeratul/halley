@@ -7,4 +7,10 @@
 
 //#include "external/irunner.h"
 
+#include "graphics/material.h"
+#include "graphics/painter.h"
+#include "graphics/shader.h"
+#include "graphics/texture.h"
+#include "graphics/texture_descriptor.h"
+
 #include "stage/stage.h"

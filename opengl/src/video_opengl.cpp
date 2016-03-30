@@ -255,6 +255,23 @@ void VideoOpenGL::setVirtualSize(Vector2f vs)
 	updateWindowDimensions();
 }
 
+std::unique_ptr<Painter> VideoOpenGL::makePainter()
+{
+	// TODO
+	return std::unique_ptr<Painter>();
+}
+
+std::unique_ptr<Texture> VideoOpenGL::loadTexture(TextureDescriptor&)
+{
+	// TODO
+	return std::unique_ptr<Texture>();
+}
+
+void VideoOpenGL::loadShader(Shader&)
+{
+	// TODO
+}
+
 void VideoOpenGL::updateWindowDimensions()
 {
 	border = 0;

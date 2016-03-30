@@ -22,6 +22,9 @@
     <Filter Include="stage">
       <UniqueIdentifier>{1df7e3d3-5baf-4694-8561-f774ed373226}</UniqueIdentifier>
     </Filter>
+    <Filter Include="graphics">
+      <UniqueIdentifier>{ec28eb65-4ef6-4ca7-8b77-e7e66bc3aedd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\external\irunner.h">
@@ -74,6 +77,21 @@
     </ClInclude>
     <ClInclude Include="src\api\halley_api_internal.h">
       <Filter>api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\painter.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\material.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\shader.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\texture.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\texture_descriptor.h">
+      <Filter>graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
