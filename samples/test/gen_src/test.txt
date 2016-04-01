@@ -28,7 +28,7 @@ system TestSystem {
 		BarComponent
 	}
 	
-	strategy = individual
+	strategy = default
 	access = pure
 	language = C++
 	timeline = variable

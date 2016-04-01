@@ -46,7 +46,6 @@ entity
 - onAddEntity/onRemoveEntity on systems
 
 codegen
-* single-entity systems
 * registry
 - codegen parallel systems
 - codegen Lua

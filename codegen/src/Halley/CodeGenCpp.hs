@@ -96,17 +96,19 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
                      ++ componentIncludes ++
                      [""
                      ,"// Generated file; do not modify."
-                     ,"class " ++ name ++ " : public Halley::" ++ baseSystemClass ++ " {"
+                     ,"class " ++ name ++ " : public Halley::" ++ baseSystemClass ++ " {"]
+                     ++ familyTypeDecls
+                     ++ familyBindings ++
+                     [""
+                     ,baseMethod
+                     ,""
+                     ,"protected:"
+                     ,stubMethod
+                     ,""
                      ,"public:"
                      ,"    " ++ name ++ "() : " ++ baseSystemClass ++ "({" ++ familyInitializers ++ "}) {}"
                      ,""
-                     ,"protected:"
-                     ,method
-                     ,""
-                     ,"private:"]
-                     ++ familyTypeDecls ++
-                     familyBindings ++
-                     ["};"
+                     ,"};"
                      ,""]
         familyTypeDecls = concat $ map (familyTypeDecl) $ fams
         familyTypeDecl fam = ["    class " ++ fName ++ " {"
@@ -131,9 +133,20 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
         familyInitializers = intercalate ", " $ map (\f -> '&' : familyName f ++ "Family") fams
         options = configurationOptions sysData
         methodSignature = "" -- TODO: generate signature based on strategy
-        method = if (Map.findWithDefault "update" "method" options) == "update" then updateMethod else renderMethod
-        updateMethod = "    void update(Halley::Time time" ++ methodSignature ++ ") override; // Implement me"
-        renderMethod = "    void render(Halley::Painter& painter" ++ methodSignature ++ ") const override; // Implement me"
+        (baseMethod, stubMethod) = (makeBase, makeStub)
+            where
+                strategy = Map.findWithDefault "default" "strategy" options
+                method = Map.findWithDefault "update" "method" options
+                isUpdate = method == "update"
+                isDefault = strategy == "default"
+                makeBase = "    void " ++ method ++ "Base(" ++ methodSignature ++ ") override { " ++ baseBody ++ " }"
+                baseBody = if isDefault then method ++ "(p);" else "invoke" ++ (upperFirst strategy) ++ "(this, &" ++ name ++ "::" ++ method ++ ", p, mainFamily);"
+                makeStub = "    void " ++ method ++ "(" ++ stubSignature ++ ")" ++ methodConst ++ "; // Implement me"
+                methodConst = if isUpdate then "" else " const"
+                methodOverride = if isDefault then " override" else ""
+                methodSignature = if isUpdate then "Halley::Time p" else "Halley::Painter& p"
+                stubSignature = methodSignature ++ if isDefault then "" else ", " ++ individualType ++ "& entity"
+                individualType = familyTypeName (head (filter (\f -> familyName f == "main") fams))
 
 
 ---------------------

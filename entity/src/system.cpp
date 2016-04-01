@@ -20,18 +20,18 @@ void Halley::System::doUpdate(Time time) {
 	using namespace std::chrono;
 	auto start = high_resolution_clock::now();
 	
-	update(time);
+	updateBase(time);
 	
 	auto end = high_resolution_clock::now();
 	auto duration = duration_cast<nanoseconds>(end - start).count();
 	nsTaken = static_cast<int>(duration);
 }
 
-void Halley::System::doRender(Painter& painter) const {
+void Halley::System::doRender(Painter& painter) {
 	using namespace std::chrono;
 	auto start = high_resolution_clock::now();
 
-	render(painter);
+	renderBase(painter);
 
 	auto end = high_resolution_clock::now();
 	auto duration = duration_cast<nanoseconds>(end - start).count();
