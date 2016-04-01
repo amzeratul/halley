@@ -41,7 +41,7 @@ JSONValue& Halley::JSONFile::getRoot()
 void Halley::JSONFile::load()
 {
 	/*
-	auto res = ResourceLocator::getStatic(filename);
+	auto res = IResourceLocator::getStatic(filename);
 	Json::Reader reader;
 	reader.parse((const char*)res->getData(), (const char*)res->getData() + res->getSize(), *root);
 	*/

@@ -20,7 +20,7 @@ namespace Halley {
 		virtual void renderBase(Painter&) {}
 
 		template <typename T, typename M, typename U, typename V>
-		inline void invokeIndividual(T* obj, M method, U& p, V& fam)
+		static void invokeIndividual(T* obj, M method, U& p, V& fam)
 		{
 			for (auto& e : fam) {
 				(obj->*method)(p, e);

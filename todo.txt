@@ -1,7 +1,6 @@
 core
-* resources
+* resources <<
 * refactor graphics front-end
-* figure out a better way to load/register plugins
 - hot reloading
 - child stages
 
@@ -47,6 +46,7 @@ entity
 
 codegen
 * registry
+* messages?
 - codegen parallel systems
 - codegen Lua
 - codegen Haskell
@@ -61,11 +61,11 @@ utils
 - better HTTP library?
 
 samples
-* refactor "test" sample
-* expand "test" sample
-* make a minimal "template" sample
+- refactor "test" sample
+- expand "test" sample
+- make a minimal "template" sample
 
 CMake
-* lists for all libraries
-* boost/SDL dependencies
-* clean up
+- lists for all libraries
+- boost/SDL dependencies
+- clean up

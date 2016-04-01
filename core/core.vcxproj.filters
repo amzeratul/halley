@@ -25,6 +25,9 @@
     <Filter Include="graphics">
       <UniqueIdentifier>{ec28eb65-4ef6-4ca7-8b77-e7e66bc3aedd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{55c95698-2a7c-4613-b585-5fee554b5bd6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\external\irunner.h">
@@ -96,6 +99,21 @@
     <ClInclude Include="src\stage\stage_id.h">
       <Filter>stage</Filter>
     </ClInclude>
+    <ClInclude Include="src\resources\resource_data.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\resource_filesystem.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\resource_locator.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\resource_manager.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\resource_pack.h">
+      <Filter>resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
@@ -118,6 +136,18 @@
     </ClCompile>
     <ClCompile Include="src\sdl\system_sdl.cpp">
       <Filter>sdl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\resource_data.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\resource_filesystem.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\resource_locator.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\resource_pack.cpp">
+      <Filter>resources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

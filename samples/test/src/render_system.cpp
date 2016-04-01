@@ -2,4 +2,5 @@
 
 void RenderSystem::render(Halley::Painter& painter, MainFamily& e) const
 {
+	std::cout << e.entityId << " ";
 }

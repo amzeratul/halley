@@ -19,28 +19,21 @@
 
 \*****************************************************************/
 
-#include "xml_file.h"
-#include "tinyxml/ticpp.h"
+#pragma once
 
-using namespace Halley;
+#include "resource_locator.h"
 
-Halley::XMLFile::XMLFile(String name)
-	: filename(name)
-	, nFlushes(0)
-{
-	load();
-}
+namespace Halley {
+	class FileSystemResourceLocator : public IResourceLocator {
+	public:
+		FileSystemResourceLocator(String basePath);
 
-XmlElement* Halley::XMLFile::getRoot() const
-{
-	return doc->FirstChildElement();
-}
+	protected:
+		std::unique_ptr<ResourceData> doGet(String resource, bool stream) override;
+		std::time_t doGetTimestamp(String resource) override;
+		std::vector<String> getResourceList() override;
+		int getPriority() override { return -1; }
 
-void Halley::XMLFile::load()
-{
-	/*
-	auto res = IResourceLocator::getStatic(filename);
-	doc = std::shared_ptr<ticpp::Document>(new ticpp::Document());
-	doc->Parse(res->getString());
-	*/
+		String basePath;
+	};
 }

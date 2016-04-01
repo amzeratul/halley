@@ -39,6 +39,11 @@
     <ClInclude Include="src\graphics\texture_descriptor.h" />
     <ClInclude Include="src\halley_core_includes.h" />
     <ClInclude Include="src\prec.h" />
+    <ClInclude Include="src\resources\resource_data.h" />
+    <ClInclude Include="src\resources\resource_filesystem.h" />
+    <ClInclude Include="src\resources\resource_locator.h" />
+    <ClInclude Include="src\resources\resource_manager.h" />
+    <ClInclude Include="src\resources\resource_pack.h" />
     <ClInclude Include="src\sdl\system_sdl.h" />
     <ClInclude Include="src\stage\stage.h" />
     <ClInclude Include="src\stage\stage_id.h" />
@@ -51,6 +56,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\resources\resource_data.cpp" />
+    <ClCompile Include="src\resources\resource_filesystem.cpp" />
+    <ClCompile Include="src\resources\resource_locator.cpp" />
+    <ClCompile Include="src\resources\resource_pack.cpp" />
     <ClCompile Include="src\sdl\system_sdl.cpp" />
     <ClCompile Include="src\sdl\input_sdl.cpp" />
     <ClCompile Include="src\stage\stage.cpp" />
