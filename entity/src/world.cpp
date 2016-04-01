@@ -256,7 +256,7 @@ void World::updateSystems(TimeLine timeline, Time time)
 {
 	// Update systems
 	for (auto& system : getSystems(timeline)) {
-		system->step(time);
+		system->doUpdate(time);
 	}
 }
 
@@ -264,7 +264,7 @@ void World::renderSystems(Painter& painter) const
 {
 	// Update systems
 	for (auto& system : getSystems(TimeLine::Render)) {
-		system->render(painter);
+		system->doRender(painter);
 	}
 }
 

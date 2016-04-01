@@ -24,7 +24,8 @@ system IsometricCharacterSystem {
 		MovableComponent
 		const GravityComponent
 	}
-	
+
+	method = update
 	strategy = individual
 	access = pure
 	language = C++

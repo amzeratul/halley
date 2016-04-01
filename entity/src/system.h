@@ -16,18 +16,19 @@ namespace Halley {
 		virtual ~System() {}
 
 	protected:
-		virtual void tick(Time) {}
+		virtual void update(Time) {}
 		virtual void render(Painter&) const {}
 
 	private:
 		friend class World;
 
-		int nsTaken;
+		mutable int nsTaken = 0;
 		std::vector<FamilyBindingBase*> families;
 		World* world;
 		String name;
 
-		void step(Time time);
+		void doUpdate(Time time);
+		void doRender(Painter& painter) const;
 		void onAddedToWorld(World& world);
 	};
 

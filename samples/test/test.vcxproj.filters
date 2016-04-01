@@ -13,6 +13,9 @@
     <Filter Include="gen\systems">
       <UniqueIdentifier>{4ecb760c-c960-4964-a8c1-3a51a223a716}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gen_src">
+      <UniqueIdentifier>{a3b6bb26-c100-4b43-bc02-7895b81af96d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -25,6 +28,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\prec.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_system.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -44,5 +50,13 @@
     <ClInclude Include="src\prec.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="gen\cpp\systems\render_system.h">
+      <Filter>gen\systems</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="gen_src\test.txt">
+      <Filter>gen_src</Filter>
+    </Text>
   </ItemGroup>
 </Project>

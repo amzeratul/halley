@@ -1,5 +1,6 @@
 #include "prec.h"
 #include "../gen/cpp/systems/test_system.h"
+#include "../gen/cpp/systems/render_system.h"
 
 using namespace Halley;
 
@@ -11,6 +12,8 @@ public:
 	void init() override
 	{
 		world.addSystem(std::make_unique<TestSystem>(), TimeLine::FixedUpdate);
+		world.addSystem(std::make_unique<RenderSystem>(), TimeLine::Render);
+
 		id0 = world.createEntity()
 			.addComponent(new TestComponent())
 			.addComponent(new FooComponent())
@@ -26,7 +29,7 @@ public:
 	void onVariableUpdate(Time) override
 	{
 	}
-
+	
 	void onFixedUpdate(Time time) override
 	{
 		if (i == 20) {

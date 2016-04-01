@@ -1,6 +1,6 @@
 #include "../gen/cpp/systems/test_system.h"
 
-void TestSystem::tick(Halley::Time time)
+void TestSystem::update(Halley::Time time)
 {
 	for (auto& e : mainFamily) {
 		e.test->test++;

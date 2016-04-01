@@ -122,9 +122,10 @@ familyList = do
 
 optionEntry = do
     try (specificOption "strategy")
+    <|> try (specificOption "method")
     <|> try (specificOption "access")
     <|> try (specificOption "language")
-    <|> try (specificOption "time")
+    <|> try (specificOption "timeline")
     <|> specificOption "subDivide"
 
 componentEntries = do

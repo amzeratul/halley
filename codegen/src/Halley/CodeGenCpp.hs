@@ -22,6 +22,7 @@ import Halley.AST
 import Halley.SemanticAnalysis
 import Data.List
 import Data.Char
+import qualified Data.Map as Map
 
 ---------------------
 
@@ -66,7 +67,9 @@ genComponent compData = [ GeneratedSource { filename = basePath ++ ".h", code = 
         name = componentName compData
         basePath = "cpp/components/" ++ (makeUnderscores name)
         header = intercalate "\n" headerCode
-        headerCode = ["//#include \"component.h\""
+        headerCode = ["#pragma once"
+                     ,""
+                     ,"//#include \"component.h\""
                      ,"class " ++ name ++ " : public Component {"
                      ,"public:"
                      ,"    constexpr static int componentIndex = " ++ (show $ componentIndex compData) ++ ";"
@@ -87,7 +90,9 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
         fams = families sysData
         basePath = "cpp/systems/" ++ (makeUnderscores name)
         header = intercalate "\n" headerCode
-        headerCode = ["//#include \"system.h\""]
+        headerCode = ["#pragma once"
+                     ,""
+                     ,"//#include \"system.h\""]
                      ++ componentIncludes ++
                      [""
                      ,"// Generated file; do not modify."
@@ -96,7 +101,7 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
                      ,"    " ++ name ++ "() : " ++ baseSystemClass ++ "({" ++ familyInitializers ++ "}) {}"
                      ,""
                      ,"protected:"
-                     ,"    void tick(" ++ tickSignature ++ ") override; // Implement me"
+                     ,method
                      ,""
                      ,"private:"]
                      ++ familyTypeDecls ++
@@ -124,7 +129,11 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
             where
                 components = nub $ concat $ map (familyComponents) fams
         familyInitializers = intercalate ", " $ map (\f -> '&' : familyName f ++ "Family") fams
-        tickSignature = "Halley::Time time" -- TODO: generate signature based on configuration
+        options = configurationOptions sysData
+        methodSignature = "" -- TODO: generate signature based on strategy
+        method = if (Map.findWithDefault "update" "method" options) == "update" then updateMethod else renderMethod
+        updateMethod = "    void update(Halley::Time time" ++ methodSignature ++ ") override; // Implement me"
+        renderMethod = "    void render(Halley::Painter& painter" ++ methodSignature ++ ") const override; // Implement me"
 
 
 ---------------------

@@ -31,6 +31,20 @@ system TestSystem {
 	strategy = individual
 	access = pure
 	language = C++
-	time = variable
+	timeline = variable
+	subDivide = 1
+}
+
+system RenderSystem {
+	family main {
+		TestComponent
+		FooComponent
+	}
+
+	method = render
+	strategy = individual
+	access = pure
+	language = C++
+	timeline = variable
 	subDivide = 1
 }

@@ -36,15 +36,16 @@ audio
 entity
 * load from text files
 * query other entities
+* messaging system
 - staggered systems
 - parallel systems
 - Lua systems
 - Haskell systems
 - defragment/optimize memory
 - universal hierarchical transforms?
+- onAddEntity/onRemoveEntity on systems
 
 codegen
-* render call
 * single-entity systems
 * registry
 - codegen parallel systems

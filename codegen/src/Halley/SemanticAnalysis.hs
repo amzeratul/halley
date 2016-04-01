@@ -17,7 +17,7 @@ module Halley.SemanticAnalysis
 ( semanticAnalysis
 , CodeGenData(components, systems)
 , ComponentData(componentName, componentIndex, members, functions)
-, SystemData(systemName, families)
+, SystemData(systemName, families, configurationOptions)
 , VariableData(variableName, variableType)
 , VariableTypeData(typeName, const)
 , FunctionData(functionName, returnType, arguments)
@@ -29,6 +29,7 @@ import Control.Monad
 import Data.Maybe
 import Data.List
 import Data.Either
+import qualified Data.Map as Map
 
 data CodeGenData = CodeGenData { components :: [ComponentData]
                                , systems :: [SystemData]
@@ -42,6 +43,7 @@ data ComponentData = ComponentData { componentName :: String
 
 data SystemData = SystemData { systemName :: String
                              , families :: [FamilyData]
+                             , configurationOptions :: Map.Map String String
                              } deriving (Show)
 
 data FamilyData = FamilyData { familyName :: String
@@ -60,6 +62,7 @@ data FunctionData = FunctionData { functionName :: String
 data VariableTypeData = VariableTypeData { typeName :: String
                                          , const :: Bool
                                          } deriving (Show, Eq)
+
 ---------------------
 
 
@@ -97,10 +100,12 @@ loadComponent (name, entries) = case getError of
 loadSystem :: (String, [GenEntryDefinition]) -> Either String SystemData
 loadSystem (name, entries) = case getError of
     Just e -> Left ("Error with system " ++ name ++ ": " ++ e)
-    Nothing -> Right SystemData { systemName = name, families = rights getFamilies }
+    Nothing -> Right SystemData { systemName = name, families = rights getFamilies, configurationOptions = getOptions }
     where
         familyLists = [(name, vars) | Family name vars <- entries]
+        configurationList = [(key, value) | Option key value <- entries]
         getFamilies = map (loadFamily) familyLists
+        getOptions = Map.fromList configurationList
         errorList = lefts getFamilies
         getError
             | not $ null errorList = Just (intercalate "\n\n" errorList)

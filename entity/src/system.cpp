@@ -16,12 +16,23 @@ void Halley::System::onAddedToWorld(World& w) {
 	}
 }
 
-void Halley::System::step(Time time) {
+void Halley::System::doUpdate(Time time) {
 	using namespace std::chrono;
 	auto start = high_resolution_clock::now();
 	
-	tick(time);
+	update(time);
 	
+	auto end = high_resolution_clock::now();
+	auto duration = duration_cast<nanoseconds>(end - start).count();
+	nsTaken = static_cast<int>(duration);
+}
+
+void Halley::System::doRender(Painter& painter) const {
+	using namespace std::chrono;
+	auto start = high_resolution_clock::now();
+
+	render(painter);
+
 	auto end = high_resolution_clock::now();
 	auto duration = duration_cast<nanoseconds>(end - start).count();
 	nsTaken = static_cast<int>(duration);
