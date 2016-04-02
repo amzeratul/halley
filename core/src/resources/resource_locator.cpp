@@ -22,7 +22,6 @@
 #include "../core/environment.h"
 #include "resource_locator.h"
 #include "resource_filesystem.h"
-#include "resource_data.h"
 #include <iostream>
 #include <set>
 

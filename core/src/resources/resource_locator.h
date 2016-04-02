@@ -23,8 +23,6 @@
 
 #include <map>
 #include <ctime>
-#include "resource_data.h"
-#include "resource_manager.h"
 
 namespace Halley {
 	class IResourceLocator {

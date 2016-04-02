@@ -163,6 +163,7 @@
     <ClCompile Include="src\os\os_unix.cpp" />
     <ClCompile Include="src\os\os_win32.cpp" />
     <ClCompile Include="src\plugin\plugin.cpp" />
+    <ClCompile Include="src\resources\resource_data.cpp" />
     <ClCompile Include="src\text\encode.cpp" />
     <ClCompile Include="src\text\halleystring.cpp" />
     <ClCompile Include="src\time\stopwatch.cpp" />
@@ -222,6 +223,7 @@
     <ClInclude Include="src\os\os_unix.h" />
     <ClInclude Include="src\os\os_win32.h" />
     <ClInclude Include="src\plugin\plugin.h" />
+    <ClInclude Include="src\resources\resource_data.h" />
     <ClInclude Include="src\text\encode.h" />
     <ClInclude Include="src\text\halleystring.h" />
     <ClInclude Include="src\time\halleytime.h" />

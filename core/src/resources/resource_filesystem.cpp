@@ -23,6 +23,7 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include <SDL.h>
+#include "resource_data_reader.h"
 
 using namespace Halley;
 

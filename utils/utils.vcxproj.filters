@@ -49,6 +49,9 @@
     <Filter Include="plugin">
       <UniqueIdentifier>{ed2504ce-7514-4994-aa3e-f2de5e827214}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{6c93d872-906a-46af-8031-4f2ef64e6f7d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\maths\aabb.cpp">
@@ -167,6 +170,9 @@
     </ClCompile>
     <ClCompile Include="src\plugin\plugin.cpp">
       <Filter>plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\resource_data.cpp">
+      <Filter>resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -343,6 +349,9 @@
     </ClInclude>
     <ClInclude Include="src\plugin\plugin.h">
       <Filter>plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\resource_data.h">
+      <Filter>resources</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

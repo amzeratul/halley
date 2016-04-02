@@ -99,9 +99,6 @@
     <ClInclude Include="src\stage\stage_id.h">
       <Filter>stage</Filter>
     </ClInclude>
-    <ClInclude Include="src\resources\resource_data.h">
-      <Filter>resources</Filter>
-    </ClInclude>
     <ClInclude Include="src\resources\resource_filesystem.h">
       <Filter>resources</Filter>
     </ClInclude>
@@ -112,6 +109,9 @@
       <Filter>resources</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\resource_pack.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\resource_data_reader.h">
       <Filter>resources</Filter>
     </ClInclude>
   </ItemGroup>
@@ -137,9 +137,6 @@
     <ClCompile Include="src\sdl\system_sdl.cpp">
       <Filter>sdl</Filter>
     </ClCompile>
-    <ClCompile Include="src\resources\resource_data.cpp">
-      <Filter>resources</Filter>
-    </ClCompile>
     <ClCompile Include="src\resources\resource_filesystem.cpp">
       <Filter>resources</Filter>
     </ClCompile>
@@ -147,6 +144,9 @@
       <Filter>resources</Filter>
     </ClCompile>
     <ClCompile Include="src\resources\resource_pack.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\resource_data_reader.cpp">
       <Filter>resources</Filter>
     </ClCompile>
   </ItemGroup>

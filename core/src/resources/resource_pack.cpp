@@ -26,6 +26,7 @@
 #endif
 #include <iostream>
 #include <SDL.h>
+#include "resource_data_reader.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
@@ -248,7 +249,7 @@ namespace Halley {
 
 			return std::make_unique<ResourceDataStream>(path, [=] () -> std::unique_ptr<ResourceDataReader> {
 				SDL_RWops* fp = SDL_RWFromFile(name.c_str(), "rb");
-				return std::make_unique<ResourceDataReaderFile>(fp, (int)start, int(start+sz), true);
+				return std::make_unique<ResourceDataReaderFile>(fp, static_cast<int>(start), static_cast<int>(start+sz), true);
 			});
 		}
 
@@ -265,7 +266,7 @@ namespace Halley {
 			// Decrypt
 			if (entry.encrypted) decrypt(buf, sz);
 
-			return std::unique_ptr<ResourceData>(new ResourceDataStatic(buf, sz, path));
+			return std::make_unique<ResourceDataStatic>(buf, sz, path);
 		}
 	}
 
