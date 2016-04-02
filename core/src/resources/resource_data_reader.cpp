@@ -40,7 +40,7 @@ int Halley::ResourceDataReaderFile::read(void* dst, size_t size)
 
 	size_t toRead = std::min(size, size_t(end-pos));
 	SDL_RWseek(fp, pos, SEEK_SET);
-	int n = static_cast<int>(SDL_RWread(fp, dst, 1, (int)toRead));
+	int n = static_cast<int>(SDL_RWread(fp, dst, 1, static_cast<int>(toRead)));
 	if (n > 0) pos += n;
 	return n;
 }

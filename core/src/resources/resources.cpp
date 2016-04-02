@@ -3,7 +3,33 @@
 
 using namespace Halley;
 
-Resources::Resources() = default;
+ResourceLoader::ResourceLoader(ResourceLoader&& loader)
+	: locator(loader.locator)
+	, name(std::move(loader.name))
+	, priority(loader.priority)
+{
+}
+
+ResourceLoader::ResourceLoader(ResourceLocator& locator, String name, ResourceLoadPriority priority)
+	: locator(locator)
+	, name(name)
+	, priority(priority)
+{}
+
+std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic() const
+{
+	return locator.getStatic(name);
+}
+
+std::unique_ptr<ResourceDataStream> ResourceLoader::getStream() const
+{
+	return locator.getStream(name);
+}
+
+Resources::Resources(std::unique_ptr<ResourceLocator> locator)
+	: locator(std::move(locator))
+{}
+
 Resources::~Resources() = default;
 
 void Resources::setBasePath(String path)
@@ -85,7 +111,7 @@ String Resources::resolveName(String name) const
 	return basePath + name;
 }
 
-std::shared_ptr<Resource> Resources::doGet(String _name, ResourceLoadPriority::Type priority, std::function<std::unique_ptr<Resource>(String, ResourceLoadPriority::Type)> loader)
+std::shared_ptr<Resource> Resources::doGet(String _name, ResourceLoadPriority priority, std::function<std::unique_ptr<Resource>(Resources*, String, ResourceLoadPriority)> loader)
 {
 	String name = resolveName(_name);
 
@@ -94,9 +120,9 @@ std::shared_ptr<Resource> Resources::doGet(String _name, ResourceLoadPriority::T
 	if (res != resources.end()) return res->second.res;
 
 	// Not found, load it from disk
-	auto newRes = loader(name, priority);
+	auto newRes = loader(this, name, priority);
 	if (!newRes) throw Exception("Unable to find resource: "+name);
-	auto sharedResource = std::shared_ptr<Resource>(move(newRes));
+	auto sharedResource = std::shared_ptr<Resource>(std::move(newRes));
 
 	// Store in cache
 	time_t time = getFileWriteTime(name);

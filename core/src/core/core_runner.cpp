@@ -7,6 +7,7 @@
 #include "../prec.h"
 #include "../graphics/painter.h"
 #include "../resources/resources.h"
+#include "../resources/resource_locator.h"
 
 #pragma warning(disable: 4996)
 
@@ -95,7 +96,8 @@ void CoreRunner::init(std::vector<String> args)
 	api = HalleyAPI::create(this, game->initPlugins());
 
 	// Resources
-	resources = std::make_unique<Resources>();
+	auto locator = std::make_unique<ResourceLocator>();
+	resources = std::make_unique<Resources>(std::move(locator));
 	
 	// Get painter
 	if (api->video) {

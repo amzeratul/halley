@@ -26,15 +26,30 @@
 
 namespace Halley {
 	
-	namespace ResourceLoadPriority {
-		enum Type {
-			Low = 0,
-			Normal = 1,
-			High = 2
-		};
-	}
+	enum class ResourceLoadPriority {
+		Low = 0,
+		Normal = 1,
+		High = 2
+	};
 
 	class ResourceLocator;
+
+	class ResourceLoader
+	{
+	public:
+		ResourceLoader(ResourceLoader&& loader);
+		ResourceLoader(ResourceLocator& locator, String name, ResourceLoadPriority priority);
+
+		String getName() const { return name; }
+		ResourceLoadPriority getPriority() const { return priority; }
+		std::unique_ptr<ResourceDataStatic> getStatic() const;
+		std::unique_ptr<ResourceDataStream> getStream() const;
+
+	private:
+		ResourceLocator& locator;
+		String name;
+		ResourceLoadPriority priority;
+	};
 
 	class Resources {
 		class Wrapper
@@ -63,28 +78,15 @@ namespace Halley {
 		};
 
 	public:
-		Resources();
+		Resources(std::unique_ptr<ResourceLocator> locator);
 		~Resources();
 
 		template <typename T>
-		std::shared_ptr<T> get(String name, ResourceLoadPriority::Type priority = ResourceLoadPriority::Normal)
-		{
-			return static_pointer_cast<T>(doGet(name, priority, loader<T>));
-		}
+		std::shared_ptr<T> get(String name, ResourceLoadPriority priority = ResourceLoadPriority::Normal) { return std::static_pointer_cast<T>(doGet(name, priority, &Resources::loader<T>)); }
 
 		template <typename T>
-		void preLoad(String name)
-		{
-			doGet(name, ResourceLoadPriority::Low, loader<T>);
-		}
-
-		template <typename T>
-		static std::unique_ptr<Resource> loader(String name, ResourceLoadPriority::Type priority)
-		{
-			// TODO
-			return std::unique_ptr<Resource>();
-		}
-
+		void preLoad(String name) {	doGet(name, ResourceLoadPriority::Low, loader<T>); }
+		
 		void setResource(String _name, std::shared_ptr<Resource> resource);
 
 		String getFullName(String name) const;
@@ -101,8 +103,14 @@ namespace Halley {
 
 	private:
 		String resolveName(String name) const;
-		std::shared_ptr<Resource> doGet(String _name, ResourceLoadPriority::Type priority, std::function<std::unique_ptr<Resource>(String, ResourceLoadPriority::Type)> loader);
+		std::shared_ptr<Resource> doGet(String _name, ResourceLoadPriority priority, std::function<std::unique_ptr<Resource>(Resources*, String, ResourceLoadPriority)> loader);
 		time_t getFileWriteTime(String name);
+
+		template <typename T>
+		static std::unique_ptr<Resource> loader(Resources* res, String name, ResourceLoadPriority priority)
+		{
+			return T::loadResource(ResourceLoader(*res->locator, name, priority));
+		}
 
 		std::unique_ptr<ResourceLocator> locator;
 		std::map<String, Wrapper> resources;
