@@ -6,6 +6,7 @@
 #include "../api/halley_api.h"
 #include "../prec.h"
 #include "../graphics/painter.h"
+#include "../resources/resources.h"
 
 #pragma warning(disable: 4996)
 
@@ -92,6 +93,9 @@ void CoreRunner::init(std::vector<String> args)
 
 	// API
 	api = HalleyAPI::create(this, game->initPlugins());
+
+	// Resources
+	resources = std::make_unique<Resources>();
 	
 	// Get painter
 	if (api->video) {
@@ -110,6 +114,12 @@ void CoreRunner::deInit()
 	// Deinit game
 	game->deInit();
 
+	// Deinit painter
+	painter.reset();
+
+	// Deinit resources
+	resources.reset();
+	
 	// Deinit API
 	api.reset();
 
@@ -202,6 +212,11 @@ void CoreRunner::quit()
 {
 	std::cout << "Game terminating via CoreAPI::quit()." << std::endl;
 	running = false;
+}
+
+Resources& CoreRunner::getResources()
+{
+	return *resources;
 }
 
 void CoreRunner::transitionStage()

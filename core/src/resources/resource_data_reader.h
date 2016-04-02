@@ -32,6 +32,8 @@ namespace Halley {
 		size_t tell() override;
 		void close() override;
 
+		static SDL_RWops* getRWOpsFromStaticData(ResourceDataStatic& data);
+
 	private:
 		SDL_RWops* fp;
 		int pos;

@@ -33,18 +33,6 @@
 
 
 namespace Halley {
-	using std::shared_ptr;
-	using std::weak_ptr;
-	using std::dynamic_pointer_cast;
-	using std::static_pointer_cast;
-	using std::function;
-	using std::array;
-
-	// Standard
-	using std::min;
-	using std::max;
-	using std::swap;
-	
 	// General aliases
 	using Byte = unsigned char;
 	using Bytes = std::vector<Byte>;

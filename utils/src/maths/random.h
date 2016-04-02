@@ -60,7 +60,7 @@ namespace Halley {
 		template <typename T>
 		T getFloat(T min, T max)
 		{
-			if (min > max) swap(min, max);
+			if (min > max) std::swap(min, max);
 #ifdef __ANDROID__
 			// Hack
 			int range = 1000000;

@@ -353,5 +353,8 @@
     <ClInclude Include="src\resources\resource_data.h">
       <Filter>resources</Filter>
     </ClInclude>
+    <ClInclude Include="src\resources\resource.h">
+      <Filter>resources</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

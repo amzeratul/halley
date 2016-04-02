@@ -40,6 +40,6 @@ namespace Halley {
 		std::atomic<bool> running;
 		JobExecuter jobs;
 
-		static shared_ptr<ThreadPool> instance;
+		static std::shared_ptr<ThreadPool> instance;
 	};
 }

@@ -42,6 +42,7 @@
 
 #include "plugin/plugin.h"
 
+#include "resources/resource.h"
 #include "resources/resource_data.h"
 
 #include "text/encode.h"

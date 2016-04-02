@@ -8,8 +8,8 @@ namespace Halley
 	class Material
 	{
 	public:
-		Material(shared_ptr<Shader> shader);
+		Material(std::shared_ptr<Shader> shader);
 
-		void setTexture(shared_ptr<Texture> texture);
+		void setTexture(std::shared_ptr<Texture> texture);
 	};
 }

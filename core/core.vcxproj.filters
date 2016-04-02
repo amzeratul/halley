@@ -105,13 +105,13 @@
     <ClInclude Include="src\resources\resource_locator.h">
       <Filter>resources</Filter>
     </ClInclude>
-    <ClInclude Include="src\resources\resource_manager.h">
-      <Filter>resources</Filter>
-    </ClInclude>
     <ClInclude Include="src\resources\resource_pack.h">
       <Filter>resources</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\resource_data_reader.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\resources.h">
       <Filter>resources</Filter>
     </ClInclude>
   </ItemGroup>
@@ -147,6 +147,9 @@
       <Filter>resources</Filter>
     </ClCompile>
     <ClCompile Include="src\resources\resource_data_reader.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\resources.cpp">
       <Filter>resources</Filter>
     </ClCompile>
   </ItemGroup>

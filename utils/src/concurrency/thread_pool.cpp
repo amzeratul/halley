@@ -66,7 +66,7 @@ void Halley::ThreadPool::stop()
 
 ThreadPool& Halley::ThreadPool::get()
 {
-	if (!instance) instance = shared_ptr<ThreadPool>(new ThreadPool());
+	if (!instance) instance = std::shared_ptr<ThreadPool>(new ThreadPool());
 	return *instance;
 }
 
@@ -75,4 +75,4 @@ void Halley::ThreadPool::run(std::function<void()> f, int priority/*=0*/)
 	get().add(f, priority);
 }
 
-shared_ptr<ThreadPool> Halley::ThreadPool::instance;
+std::shared_ptr<ThreadPool> Halley::ThreadPool::instance;

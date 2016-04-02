@@ -42,7 +42,7 @@
     <ClInclude Include="src\resources\resource_data_reader.h" />
     <ClInclude Include="src\resources\resource_filesystem.h" />
     <ClInclude Include="src\resources\resource_locator.h" />
-    <ClInclude Include="src\resources\resource_manager.h" />
+    <ClInclude Include="src\resources\resources.h" />
     <ClInclude Include="src\resources\resource_pack.h" />
     <ClInclude Include="src\sdl\system_sdl.h" />
     <ClInclude Include="src\stage\stage.h" />
@@ -56,6 +56,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\resources\resources.cpp" />
     <ClCompile Include="src\resources\resource_data_reader.cpp" />
     <ClCompile Include="src\resources\resource_filesystem.cpp" />
     <ClCompile Include="src\resources\resource_locator.cpp" />

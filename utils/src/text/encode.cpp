@@ -48,7 +48,7 @@ Halley::String Halley::Encode::encodeBase64(const std::vector<char>& in)
 
 	for (size_t i=0; i<sz; i+=3) {
 		// Input bytes
-		int available = min(int(sz-i), 3);
+		int available = std::min(int(sz-i), 3);
 		assert (available >= 1);
 		unsigned int inByte = (uchar(in[i]) << 16) | (available >= 2 ? uchar(in[i+1]) << 8 : 0u) | (available >= 3 ? uchar(in[i+2]) : 0u);
 

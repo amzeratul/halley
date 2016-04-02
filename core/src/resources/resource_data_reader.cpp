@@ -40,7 +40,7 @@ int Halley::ResourceDataReaderFile::read(void* dst, size_t size)
 
 	size_t toRead = std::min(size, size_t(end-pos));
 	SDL_RWseek(fp, pos, SEEK_SET);
-	int n = (int)SDL_RWread(fp, dst, 1, (int)toRead);
+	int n = static_cast<int>(SDL_RWread(fp, dst, 1, (int)toRead));
 	if (n > 0) pos += n;
 	return n;
 }
@@ -52,6 +52,11 @@ void Halley::ResourceDataReaderFile::close()
 		fp = nullptr;
 		pos = end;
 	}
+}
+
+SDL_RWops* ResourceDataReaderFile::getRWOpsFromStaticData(ResourceDataStatic& data) 
+{
+	return SDL_RWFromConstMem(data.getData(), static_cast<int>(data.getSize()));
 }
 
 void Halley::ResourceDataReaderFile::seek(long long offset, int whence)

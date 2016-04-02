@@ -21,6 +21,7 @@ namespace Halley
 		void setStage(StageID stage) override;
 		void setStage(std::unique_ptr<Stage> stage);
 		void quit() override;
+		Resources& getResources() override;
 
 	private:
 		int run(std::unique_ptr<Game> game, std::vector<String> args);
@@ -41,6 +42,7 @@ namespace Halley
 		std::unique_ptr<Game> game;
 		std::unique_ptr<HalleyAPI> api;
 		std::unique_ptr<Painter> painter;
+		std::unique_ptr<Resources> resources;
 
 		std::unique_ptr<Stage> currentStage;
 		std::unique_ptr<Stage> nextStage;

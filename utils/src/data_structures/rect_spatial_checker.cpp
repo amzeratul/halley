@@ -84,10 +84,10 @@ bool RectangleSpatialChecker::updateData(Entry& entry, Rect4i prev, Rect4i next)
 		Vector2i p2 = pointToCell(next.getP2());
 		addRect = Rect4i(p1, p2);
 		hasAdd = true;
-		x0 = min(x0, p1.x);
-		x1 = max(x1, p2.x);
-		y0 = min(y0, p1.y);
-		y1 = max(y1, p2.y);
+		x0 = std::min(x0, p1.x);
+		x1 = std::max(x1, p2.x);
+		y0 = std::min(y0, p1.y);
+		y1 = std::max(y1, p2.y);
 	}
 	
 	for (int y = y0; y <= y1; y++) {

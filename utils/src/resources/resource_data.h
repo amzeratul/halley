@@ -53,12 +53,11 @@ namespace Halley {
 		ResourceDataStatic(void* data, size_t size, String path);
 
 		void set(void* data, size_t size);
-		bool isLoaded();
+		bool isLoaded() const;
 
 		void* getData();
 		const void* getData() const;
 		size_t getSize() const;
-		SDL_RWops* getRWOps();
 		String getString() const;
 
 	private:
