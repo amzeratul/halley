@@ -13,4 +13,6 @@
 #include "graphics/texture.h"
 #include "graphics/texture_descriptor.h"
 
+#include "resources/resource_locator.h"
+
 #include "stage/stage.h"

@@ -4,12 +4,15 @@
 
 namespace Halley
 {
+	class ResourceLocator;
+
 	class Game
 	{
 	public:
 		virtual ~Game() = default;
 
 		virtual int initPlugins() = 0;
+		virtual void initResourceLocator(ResourceLocator&) {}
 
 		virtual String getName() const = 0;
 		virtual String getDataPath() const = 0;

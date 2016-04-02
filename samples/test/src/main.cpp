@@ -86,6 +86,11 @@ public:
 		return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input;
 	}
 
+	void initResourceLocator(ResourceLocator& locator) override
+	{
+		locator.addStandardFileSystem();
+	}
+
 	std::unique_ptr<Stage> makeStage(StageID id) override
 	{
 		switch (id) {

@@ -67,11 +67,7 @@ namespace Halley {
 				, depth(loadDepth)
 			{}
 
-			void flush()
-			{
-				// TODO
-			}
-
+			void flush();
 			std::shared_ptr<Resource> res;
 			time_t lastWriteTime;
 			int depth;

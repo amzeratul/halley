@@ -26,6 +26,11 @@ std::unique_ptr<ResourceDataStream> ResourceLoader::getStream() const
 	return locator.getStream(name);
 }
 
+void Resources::Wrapper::flush()
+{
+	// TODO
+}
+
 Resources::Resources(std::unique_ptr<ResourceLocator> locator)
 	: locator(std::move(locator))
 {}

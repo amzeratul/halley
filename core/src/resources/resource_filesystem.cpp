@@ -91,18 +91,26 @@ std::time_t Halley::FileSystemResourceLocator::doGetTimestamp(String resource)
 static void enumDir(StringArray& files, String root, String prefix)
 {
 	namespace fs = boost::filesystem;
-	fs::path rootPath = fs::path((root + prefix + "/").c_str());
-	for (fs::directory_iterator end, dir(rootPath.string().c_str()); dir != end; ++dir) {
-		fs::path curPath = (*dir).path();
-		String name = curPath.filename().generic_string();
-		fs::file_type type = (*dir).status().type();
-		if (type == fs::directory_file) {
-			if (!name.startsWith(".")) {
-				enumDir(files, root, prefix + name + "/");
+	String basePath = (root + prefix + "/");
+	basePath.replace("//", "/");
+	basePath.replace("\\\\", "\\");
+	fs::path rootPath = fs::path(basePath.c_str()).make_preferred();
+	try {
+		for (fs::directory_iterator end, dir(rootPath.string().c_str()); dir != end; ++dir) {
+			fs::path curPath = (*dir).path();
+			String name = curPath.filename().generic_string();
+			fs::file_type type = (*dir).status().type();
+			if (type == fs::directory_file) {
+				if (!name.startsWith(".")) {
+					enumDir(files, root, prefix + name + "/");
+				}
 			}
-		} else {
-			files.push_back(prefix + name);
-		}		
+			else {
+				files.push_back(prefix + name);
+			}
+		}
+	} catch (std::exception &e) {
+		std::cout << ConsoleColor(Console::YELLOW) << "Unable to enumerate resources folder: " << rootPath << ConsoleColor() << std::endl;
 	}
 }
 	
@@ -112,7 +120,7 @@ std::vector<String> FileSystemResourceLocator::getResourceList()
 	res.push_back("*");
 
 #ifndef __ANDROID__
-	enumDir(res, basePath, "data/");
+	enumDir(res, basePath, "assets/");
 #endif
 
 	return res;

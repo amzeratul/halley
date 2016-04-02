@@ -28,6 +28,13 @@ int CoreRunner::run(std::unique_ptr<Game> g, std::vector<String> args)
 	
 	bool initing = true;
 	try {
+		// Set paths
+		if (args.size() > 0) {
+			Environment::parseProgramPath(args[0]);
+		}
+		Environment::setDataPath(game->getDataPath());
+
+		// Initialize
 		init(StringArray(args.begin() + 1, args.end()));
 		initing = false;
 		runMainLoop(true, 60);
@@ -76,11 +83,6 @@ void CoreRunner::init(std::vector<String> args)
 	clock_t curClock = clock();
 	int seed = static_cast<int>(curTime) ^ static_cast<int>(curClock) ^ 0x3F29AB51;
 	srand(seed);
-	// Paths
-	if (args.size() > 0) {
-		Environment::parseProgramPath(args[0]);
-	}
-	Environment::setDataPath(game->getDataPath());
 
 	// Redirect output
 	auto outStream = std::make_shared<std::ofstream>(Environment::getDataPath() + "log.txt", std::ios::out);
@@ -97,6 +99,7 @@ void CoreRunner::init(std::vector<String> args)
 
 	// Resources
 	auto locator = std::make_unique<ResourceLocator>();
+	game->initResourceLocator(*locator);
 	resources = std::make_unique<Resources>(std::move(locator));
 	
 	// Get painter

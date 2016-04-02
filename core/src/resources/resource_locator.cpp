@@ -115,14 +115,19 @@ namespace Halley {
 		}
 
 		StringArray result2;
-		for (auto iter=result.begin(); iter != result.end(); iter++) {
+		for (auto iter=result.begin(); iter != result.end(); ++iter) {
 			result2.push_back(*iter);
 		}
 		return result2;
 	}
 
-	void ResourceLocator::addFileSystem()
+	void ResourceLocator::addFileSystem(String path)
 	{
-		add(std::unique_ptr<IResourceLocator>(new FileSystemResourceLocator(Environment::getProgramPath())));
+		add(std::make_unique<FileSystemResourceLocator>(path));
+	}
+
+	void ResourceLocator::addStandardFileSystem()
+	{
+		addFileSystem(Environment::getProgramPath());
 	}
 }

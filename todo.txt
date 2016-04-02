@@ -1,5 +1,4 @@
 core
-* resources <<
 * refactor graphics front-end
 - hot reloading
 - child stages
