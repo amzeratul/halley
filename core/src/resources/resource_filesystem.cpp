@@ -109,7 +109,7 @@ static void enumDir(StringArray& files, String root, String prefix)
 				files.push_back(prefix + name);
 			}
 		}
-	} catch (std::exception &e) {
+	} catch (std::exception &) {
 		std::cout << ConsoleColor(Console::YELLOW) << "Unable to enumerate resources folder: " << rootPath << ConsoleColor() << std::endl;
 	}
 }
