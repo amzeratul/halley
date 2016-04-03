@@ -8,7 +8,8 @@ namespace Halley
 	{
 	public:
 		static std::unique_ptr<Texture> loadResource(ResourceLoader loader);
-		
+		unsigned int getNativeId() const { return privateImpl; }
+
 	private:
 		unsigned int privateImpl;
 	};

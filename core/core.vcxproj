@@ -33,11 +33,11 @@
     <ClInclude Include="src\core\game.h" />
     <ClInclude Include="src\external\irunner.h" />
     <ClInclude Include="src\graphics\material.h" />
-    <ClInclude Include="src\graphics\material_parameter_binding.h" />
     <ClInclude Include="src\graphics\painter.h" />
     <ClInclude Include="src\graphics\shader.h" />
     <ClInclude Include="src\graphics\texture.h" />
     <ClInclude Include="src\graphics\texture_descriptor.h" />
+    <ClInclude Include="src\graphics\uniform_type.h" />
     <ClInclude Include="src\halley_core_includes.h" />
     <ClInclude Include="src\prec.h" />
     <ClInclude Include="src\resources\resource_data_reader.h" />

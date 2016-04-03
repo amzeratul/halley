@@ -72,7 +72,7 @@ System& World::getSystem(String name)
 			}
 		}
 	}
-	throw new Exception("System not found: " + name);
+	throw Exception("System not found: " + name);
 }
 
 EntityRef World::createEntity()

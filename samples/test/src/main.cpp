@@ -65,7 +65,7 @@ public:
 
 		auto texture = getResource<Texture>("test_sprite.png");
 		auto shader = getResource<Shader>("sprite");
-		Material material(shader);
+		Material material(shader, getAPI().video);
 		material["main"] = texture;
 		painter.drawSprite(material, Vector2f(100, 100));
 	}

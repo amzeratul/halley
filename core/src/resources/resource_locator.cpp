@@ -84,7 +84,7 @@ namespace Halley {
 	{
 		auto ptr = dynamic_cast<ResourceDataStatic*>(getResource(resource, false).release());
 		if (!ptr) {
-			throw new Exception("Resource " + resource + " obtained, but is not static data. Memory leak has ocurred.");
+			throw Exception("Resource " + resource + " obtained, but is not static data. Memory leak has ocurred.");
 		}
 		return std::unique_ptr<ResourceDataStatic>(ptr);
 	}
@@ -93,7 +93,7 @@ namespace Halley {
 	{
 		auto ptr = dynamic_cast<ResourceDataStream*>(getResource(resource, true).release());
 		if (!ptr) {
-			throw new Exception("Resource " + resource + " obtained, but is not dynamic data. Memory leak has ocurred.");
+			throw Exception("Resource " + resource + " obtained, but is not dynamic data. Memory leak has ocurred.");
 		}
 		return std::unique_ptr<ResourceDataStream>(ptr);
 	}

@@ -7,6 +7,7 @@ union SDL_Event;
 #include "video_api.h"
 #include "system_api.h"
 #include "input_api.h"
+#include "../graphics/uniform_type.h"
 
 namespace Halley
 {
@@ -29,6 +30,7 @@ namespace Halley
 		virtual ~VideoAPIInternal() {}
 
 		virtual std::unique_ptr<Painter> makePainter() = 0;
+		virtual std::function<void()> getUniformBinding(unsigned int address, UniformType type, int n, void* data) = 0;
 	};
 
 	class SystemAPIInternal : public SystemAPI, public HalleyAPIInternal
