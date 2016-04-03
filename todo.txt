@@ -4,18 +4,14 @@ core
 
 core/graphics (?)
 * painter
-* shader
-* texture
 - rewrite text rendering system to use pre-baked distance fields
 - animation?
 - fix threaded load (TODOs in core_runner.cpp)
 
 opengl
-* figure out the dependency between core and opengl
-* painter
 * shader
 * texture
-- decouple OpenGL back-end from the graphics front-end
+* painter
 
 directx?
 - future support?
