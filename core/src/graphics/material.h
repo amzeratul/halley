@@ -2,14 +2,17 @@
 
 namespace Halley
 {
+	class ResourceLoader;
 	class Shader;
 	class Texture;
 
-	class Material
+	class Material : public Resource
 	{
 	public:
 		Material(std::shared_ptr<Shader> shader);
 
-		void setTexture(std::shared_ptr<Texture> texture);
+		void setTexture(String name, std::shared_ptr<Texture> texture);
+		
+		static std::unique_ptr<Material> loadResource(ResourceLoader loader);
 	};
 }

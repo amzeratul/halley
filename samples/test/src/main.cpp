@@ -60,7 +60,14 @@ public:
 
 	void onRender(Painter& painter) const override
 	{
+		painter.clear(Colour(0.2f, 0.2f, 0.3f));
 		world.render(painter);
+
+		auto texture = getResource<Texture>("test_sprite.png");
+		auto shader = getResource<Shader>("sprite");
+		Material material(shader);
+		material.setTexture("main", texture);
+		painter.drawSprite(material, Vector2f(100, 100));
 	}
 
 private:

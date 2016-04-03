@@ -18,6 +18,9 @@
     <ClCompile Include="src\opengl_plugin.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\gl_painter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\video_opengl.h">
@@ -30,6 +33,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\prec.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gl_painter.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

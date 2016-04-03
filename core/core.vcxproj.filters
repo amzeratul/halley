@@ -152,5 +152,14 @@
     <ClCompile Include="src\resources\resources.cpp">
       <Filter>resources</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\shader.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\texture.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\material.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

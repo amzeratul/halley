@@ -4,6 +4,7 @@
 #include "video_opengl.h"
 #include "SDL_syswm.h"
 #include "gl_util.h"
+#include "gl_painter.h"
 using namespace Halley;
 
 #ifdef _MSC_VER
@@ -257,8 +258,7 @@ void VideoOpenGL::setVirtualSize(Vector2f vs)
 
 std::unique_ptr<Painter> VideoOpenGL::makePainter()
 {
-	// TODO
-	return std::unique_ptr<Painter>();
+	return std::make_unique<PainterOpenGL>();
 }
 
 std::unique_ptr<Texture> VideoOpenGL::loadTexture(TextureDescriptor&)

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "stage_id.h"
+#include "../resources/resources.h"
+#include "../api/halley_api.h"
 
 namespace Halley
 {
@@ -24,6 +26,11 @@ namespace Halley
 
 		HalleyAPI& getAPI() { return *api; }
 		const HalleyAPI& getAPI() const { return *api; }
+
+		template <typename T>
+		std::shared_ptr<T> getResource(String name) const {
+			return getAPI().core->getResources().get<T>(name);
+		}
 
 	private:
 		friend class CoreRunner;

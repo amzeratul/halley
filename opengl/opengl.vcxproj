@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\gl_painter.cpp" />
     <ClCompile Include="src\gl_util.cpp" />
     <ClCompile Include="src\opengl_plugin.cpp" />
     <ClCompile Include="src\prec.cpp">
@@ -150,6 +151,7 @@
     <ClCompile Include="src\video_opengl.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\gl_painter.h" />
     <ClInclude Include="src\gl_util.h" />
     <ClInclude Include="src\halley_gl.h" />
     <ClInclude Include="src\prec.h" />

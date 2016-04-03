@@ -9,6 +9,7 @@ namespace Halley
 	public:
 		virtual ~Painter() {}
 
-		void drawSprite(Material& material, Vector2f pos);
+		virtual void drawSprite(Material& material, Vector2f pos) = 0;
+		virtual void clear(Colour colour) = 0;
 	};
 }

@@ -2,9 +2,12 @@
 
 namespace Halley
 {
-	class Texture
+	class ResourceLoader;
+
+	class Texture : public Resource
 	{
 	public:
+		static std::unique_ptr<Texture> loadResource(ResourceLoader loader);
 		
 	private:
 		unsigned int privateImpl;
