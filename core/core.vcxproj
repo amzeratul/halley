@@ -33,6 +33,7 @@
     <ClInclude Include="src\core\game.h" />
     <ClInclude Include="src\external\irunner.h" />
     <ClInclude Include="src\graphics\material.h" />
+    <ClInclude Include="src\graphics\material_parameter_binding.h" />
     <ClInclude Include="src\graphics\painter.h" />
     <ClInclude Include="src\graphics\shader.h" />
     <ClInclude Include="src\graphics\texture.h" />

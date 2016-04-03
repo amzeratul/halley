@@ -5,7 +5,7 @@
 
 void Halley::PainterOpenGL::drawSprite(Material& material, Vector2f pos)
 {
-	material.ensureLoaded();
+	material.bind();
 
 	// TODO
 }

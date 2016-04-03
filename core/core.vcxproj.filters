@@ -114,6 +114,9 @@
     <ClInclude Include="src\resources\resources.h">
       <Filter>resources</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics\material_parameter_binding.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
