@@ -15,12 +15,15 @@ Halley is divided in a few sub-projects:
 
 ## Installation
 
+### Tools
+* Visual C++ 14 Update 2 (Visual Studio 2015)
+* Haskell Platform 7.10.3 (to build codegen)
+* CMake 3.x
+
 ### Dependencies
-* CMake 3.0+
-* Haskell Platform (to build codegen)
-* Visual Studio 2015
-* Boost 1.59.0+
-* SDL 2.0.4+
+* Boost 1.59.0
+* SDL 2.0.4
+* GLEW 1.13.0
 
 ### Set up
 * Make sure that SDL and Boost are accessible.
