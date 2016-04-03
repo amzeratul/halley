@@ -1,11 +1,19 @@
 #include "material.h"
 #include "../resources/resources.h"
+#include "shader.h"
 
 using namespace Halley;
 
-Material::Material(std::shared_ptr<Shader> shader)
+Material::Material(std::shared_ptr<Shader> _shader)
+	: shader(_shader)
 {
-	// TODO
+}
+
+void Material::ensureLoaded()
+{
+	if (shader) {
+		shader->ensureLoaded();
+	}
 }
 
 void Material::setTexture(String name, std::shared_ptr<Texture> texture)
