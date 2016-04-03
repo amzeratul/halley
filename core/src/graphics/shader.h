@@ -7,7 +7,7 @@ namespace Halley
 	class Shader : public Resource
 	{
 	public:
-		virtual ~Shader() {}
+		void ensureLoaded();
 
 		static std::unique_ptr<Shader> loadResource(ResourceLoader loader);
 	};

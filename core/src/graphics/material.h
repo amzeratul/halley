@@ -11,8 +11,12 @@ namespace Halley
 	public:
 		Material(std::shared_ptr<Shader> shader);
 
+		void ensureLoaded();
 		void setTexture(String name, std::shared_ptr<Texture> texture);
 		
 		static std::unique_ptr<Material> loadResource(ResourceLoader loader);
+
+	private:
+		std::shared_ptr<Shader> shader;
 	};
 }

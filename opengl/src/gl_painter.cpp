@@ -1,9 +1,12 @@
 #include "gl_painter.h"
 #include <GL/glew.h>
 #include <GL/GL.h>
+#include "../../core/src/graphics/material.h"
 
 void Halley::PainterOpenGL::drawSprite(Material& material, Vector2f pos)
 {
+	material.ensureLoaded();
+
 	// TODO
 }
 
