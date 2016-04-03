@@ -6,7 +6,15 @@ using namespace Halley;
 
 std::unique_ptr<Shader> Shader::loadResource(ResourceLoader& loader)
 {
+	auto data = loader.getStatic();
+	auto shaderStrData = data->getString();
+	// TODO: parse string data
+
 	auto shader = loader.getAPI().video->createShader();
-	// TODO: do stuff
+
+	// TODO: read sources
+	//shader->addVertexSource("");
+	//shader->addPixelSource("");
+
 	return shader;
 }
