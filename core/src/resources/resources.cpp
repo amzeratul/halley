@@ -18,14 +18,22 @@ ResourceLoader::ResourceLoader(ResourceLocator& locator, String name, ResourceLo
 	, api(api)
 {}
 
-std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic() const
+std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
 {
-	return locator.getStatic(name);
+	auto result = locator.getStatic(name);
+	if (result) {
+		loaded = true;
+	}
+	return result;
 }
 
-std::unique_ptr<ResourceDataStream> ResourceLoader::getStream() const
+std::unique_ptr<ResourceDataStream> ResourceLoader::getStream()
 {
-	return locator.getStream(name);
+	auto result = locator.getStream(name);
+	if (result) {
+		loaded = true;
+	}
+	return result;
 }
 
 void Resources::Wrapper::flush()
@@ -36,6 +44,7 @@ void Resources::Wrapper::flush()
 Resources::Resources(std::unique_ptr<ResourceLocator> locator, HalleyAPI* api)
 	: locator(std::move(locator))
 	, api(api)
+	, basePath("assets/")
 {}
 
 Resources::~Resources() = default;
@@ -119,7 +128,7 @@ String Resources::resolveName(String name) const
 	return basePath + name;
 }
 
-std::shared_ptr<Resource> Resources::doGet(String _name, ResourceLoadPriority priority, std::function<std::unique_ptr<Resource>(Resources*, String, ResourceLoadPriority)> loader)
+std::shared_ptr<Resource> Resources::doGet(String _name, ResourceLoadPriority priority, std::function<std::unique_ptr<Resource>(ResourceLoader&)> loader)
 {
 	String name = resolveName(_name);
 
@@ -128,8 +137,15 @@ std::shared_ptr<Resource> Resources::doGet(String _name, ResourceLoadPriority pr
 	if (res != resources.end()) return res->second.res;
 
 	// Not found, load it from disk
-	auto newRes = loader(this, name, priority);
-	if (!newRes) throw Exception("Unable to find resource: "+name);
+	auto resLoader = ResourceLoader(*locator, name, priority, api);
+	auto newRes = loader(resLoader);
+	if (!newRes) {
+		if (resLoader.loaded) {
+			throw Exception("Unable to construct resource from data: " + name);
+		} else {
+			throw Exception("Unable to load resource data: " + name);
+		}
+	}
 	auto sharedResource = std::shared_ptr<Resource>(std::move(newRes));
 
 	// Store in cache

@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-std::unique_ptr<Shader> Shader::loadResource(ResourceLoader loader)
+std::unique_ptr<Shader> Shader::loadResource(ResourceLoader& loader)
 {
 	auto shader = loader.getAPI().video->createShader();
 	// TODO: do stuff

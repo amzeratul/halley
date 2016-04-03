@@ -19,6 +19,6 @@ namespace Halley
 		virtual unsigned int getUniformLocation(String name) = 0;
 		virtual unsigned int getAttributeLocation(String name) = 0;
 
-		static std::unique_ptr<Shader> loadResource(ResourceLoader loader);
+		static std::unique_ptr<Shader> loadResource(ResourceLoader& loader);
 	};
 }

@@ -37,21 +37,24 @@ namespace Halley {
 
 	class ResourceLoader
 	{
-	public:
-		ResourceLoader(ResourceLoader&& loader);
-		ResourceLoader(ResourceLocator& locator, String name, ResourceLoadPriority priority, HalleyAPI* api);
+		friend class Resources;
 
+	public:
 		String getName() const { return name; }
 		ResourceLoadPriority getPriority() const { return priority; }
-		std::unique_ptr<ResourceDataStatic> getStatic() const;
-		std::unique_ptr<ResourceDataStream> getStream() const;
+		std::unique_ptr<ResourceDataStatic> getStatic();
+		std::unique_ptr<ResourceDataStream> getStream();
 		HalleyAPI& getAPI() const { return *api; }
 
 	private:
+		ResourceLoader(ResourceLoader&& loader);
+		ResourceLoader(ResourceLocator& locator, String name, ResourceLoadPriority priority, HalleyAPI* api);
+
 		ResourceLocator& locator;
 		String name;
 		ResourceLoadPriority priority;
 		HalleyAPI* api;
+		bool loaded = false;
 	};
 
 	class Resources {
@@ -102,13 +105,13 @@ namespace Halley {
 
 	private:
 		String resolveName(String name) const;
-		std::shared_ptr<Resource> doGet(String _name, ResourceLoadPriority priority, std::function<std::unique_ptr<Resource>(Resources*, String, ResourceLoadPriority)> loader);
+		std::shared_ptr<Resource> doGet(String _name, ResourceLoadPriority priority, std::function<std::unique_ptr<Resource>(ResourceLoader&)> loader);
 		time_t getFileWriteTime(String name);
 
 		template <typename T>
-		static std::unique_ptr<Resource> loader(Resources* res, String name, ResourceLoadPriority priority)
+		static std::unique_ptr<Resource> loader(ResourceLoader& loader)
 		{
-			return T::loadResource(ResourceLoader(*res->locator, name, priority, res->api));
+			return T::loadResource(loader);
 		}
 
 		std::unique_ptr<ResourceLocator> locator;
