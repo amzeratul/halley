@@ -8,11 +8,12 @@ using namespace Halley;
 std::unique_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 {
 	auto data = loader.getStatic();
-	std::cout << "Loading image with " << data->getSize() << " bytes.\n";
-
-	// TODO: descriptor
+	auto img = std::make_unique<Image>(data->getPath(), static_cast<Byte*>(data->getData()), data->getSize(), true);
+	
 	TextureDescriptor descriptor;
-	auto tex = loader.getAPI().video->createTexture(descriptor);
-	// TODO: do stuff
-	return tex;
+	descriptor.w = img->getWidth();
+	descriptor.h = img->getHeight();
+	descriptor.pixelData = img->getPixels();
+
+	return loader.getAPI().video->createTexture(descriptor);
 }

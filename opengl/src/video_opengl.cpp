@@ -329,14 +329,12 @@ std::unique_ptr<Painter> VideoOpenGL::makePainter()
 
 std::unique_ptr<Texture> VideoOpenGL::createTexture(TextureDescriptor&)
 {
-	// TODO
-	return std::unique_ptr<Texture>();
+	throw Exception("TODO: VideoOpenGL::createTexture()");
 }
 
 std::unique_ptr<Shader> VideoOpenGL::createShader()
 {
-	// TODO
-	return std::unique_ptr<Shader>();
+	throw Exception("TODO: VideoOpenGL::createShader()");
 }
 
 void VideoOpenGL::updateWindowDimensions()
