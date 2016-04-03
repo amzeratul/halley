@@ -33,22 +33,25 @@ namespace Halley {
 	};
 
 	class ResourceLocator;
+	class HalleyAPI;
 
 	class ResourceLoader
 	{
 	public:
 		ResourceLoader(ResourceLoader&& loader);
-		ResourceLoader(ResourceLocator& locator, String name, ResourceLoadPriority priority);
+		ResourceLoader(ResourceLocator& locator, String name, ResourceLoadPriority priority, HalleyAPI* api);
 
 		String getName() const { return name; }
 		ResourceLoadPriority getPriority() const { return priority; }
 		std::unique_ptr<ResourceDataStatic> getStatic() const;
 		std::unique_ptr<ResourceDataStream> getStream() const;
+		HalleyAPI& getAPI() const { return *api; }
 
 	private:
 		ResourceLocator& locator;
 		String name;
 		ResourceLoadPriority priority;
+		HalleyAPI* api;
 	};
 
 	class Resources {
@@ -74,7 +77,7 @@ namespace Halley {
 		};
 
 	public:
-		Resources(std::unique_ptr<ResourceLocator> locator);
+		Resources(std::unique_ptr<ResourceLocator> locator, HalleyAPI* api);
 		~Resources();
 
 		template <typename T>
@@ -105,11 +108,12 @@ namespace Halley {
 		template <typename T>
 		static std::unique_ptr<Resource> loader(Resources* res, String name, ResourceLoadPriority priority)
 		{
-			return T::loadResource(ResourceLoader(*res->locator, name, priority));
+			return T::loadResource(ResourceLoader(*res->locator, name, priority, res->api));
 		}
 
 		std::unique_ptr<ResourceLocator> locator;
 		std::map<String, Wrapper> resources;
+		HalleyAPI* api;
 
 		int curDepth = 0;
 		String basePath;

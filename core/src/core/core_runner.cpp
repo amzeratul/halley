@@ -97,15 +97,15 @@ void CoreRunner::init(std::vector<String> args)
 	// API
 	api = HalleyAPI::create(this, game->initPlugins());
 
-	// Resources
-	auto locator = std::make_unique<ResourceLocator>();
-	game->initResourceLocator(*locator);
-	resources = std::make_unique<Resources>(std::move(locator));
-	
 	// Get painter
 	if (api->video) {
 		painter = std::move(api->videoInternal->makePainter());
 	}
+
+	// Resources
+	auto locator = std::make_unique<ResourceLocator>();
+	game->initResourceLocator(*locator);
+	resources = std::make_unique<Resources>(std::move(locator), &*api);
 
 	// Init game
 	game->init(&*api);

@@ -7,13 +7,15 @@ ResourceLoader::ResourceLoader(ResourceLoader&& loader)
 	: locator(loader.locator)
 	, name(std::move(loader.name))
 	, priority(loader.priority)
+	, api(loader.api)
 {
 }
 
-ResourceLoader::ResourceLoader(ResourceLocator& locator, String name, ResourceLoadPriority priority)
+ResourceLoader::ResourceLoader(ResourceLocator& locator, String name, ResourceLoadPriority priority, HalleyAPI* api)
 	: locator(locator)
 	, name(name)
 	, priority(priority)
+	, api(api)
 {}
 
 std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic() const
@@ -31,8 +33,9 @@ void Resources::Wrapper::flush()
 	// TODO
 }
 
-Resources::Resources(std::unique_ptr<ResourceLocator> locator)
+Resources::Resources(std::unique_ptr<ResourceLocator> locator, HalleyAPI* api)
 	: locator(std::move(locator))
+	, api(api)
 {}
 
 Resources::~Resources() = default;

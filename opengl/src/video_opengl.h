@@ -28,8 +28,8 @@ namespace Halley {
 		void setVirtualSize(Vector2f virtualSize) override;
 
 		std::unique_ptr<Painter> makePainter() override;
-		std::unique_ptr<Texture> loadTexture(TextureDescriptor& descriptor) override;
-		void loadShader(Shader& shader) override;
+		std::unique_ptr<Texture> createTexture(TextureDescriptor& descriptor) override;
+		std::unique_ptr<Shader> createShader() override;
 
 	protected:
 		void init() override;

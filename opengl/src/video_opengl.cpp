@@ -261,15 +261,16 @@ std::unique_ptr<Painter> VideoOpenGL::makePainter()
 	return std::make_unique<PainterOpenGL>();
 }
 
-std::unique_ptr<Texture> VideoOpenGL::loadTexture(TextureDescriptor&)
+std::unique_ptr<Texture> VideoOpenGL::createTexture(TextureDescriptor&)
 {
 	// TODO
 	return std::unique_ptr<Texture>();
 }
 
-void VideoOpenGL::loadShader(Shader&)
+std::unique_ptr<Shader> VideoOpenGL::createShader()
 {
 	// TODO
+	return std::unique_ptr<Shader>();
 }
 
 void VideoOpenGL::updateWindowDimensions()
