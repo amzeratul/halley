@@ -13,10 +13,18 @@ namespace Halley
 
 	public:
 		void operator=(std::shared_ptr<Texture> texture);
+		void operator=(Colour colour);
+		void operator=(float p);
+		void operator=(Vector2f p);
+		void operator=(int p);
+		void operator=(Vector2i p);
+
+		// TODO: other bindings
 
 	private:
 		MaterialParameter(Material& material, String name);
 		VideoAPIInternal& getAPI();
+		unsigned int getAddress();
 		void apply();
 		void bind();
 

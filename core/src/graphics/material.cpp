@@ -70,6 +70,11 @@ VideoAPIInternal& MaterialParameter::getAPI()
 	return *static_cast<VideoAPIInternal*>(material.api);
 }
 
+unsigned int MaterialParameter::getAddress()
+{
+	return material.shader->getUniformLocation(name);
+}
+
 void MaterialParameter::apply()
 {
 	toApply();
@@ -83,8 +88,47 @@ void MaterialParameter::bind()
 void MaterialParameter::operator=(std::shared_ptr<Texture> texture)
 {
 	toApply = [=]() {
-		auto address = material.shader->getUniformLocation(name);
 		int id = texture->getNativeId();
-		toBind = getAPI().getUniformBinding(address, UniformType::Int, 1, &id);
+		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Int, 1, &id);
+	};
+}
+
+void MaterialParameter::operator=(Colour colour)
+{
+	toApply = [=]() {
+		std::array<float, 4> col = { colour.r, colour.g, colour.b, colour.a };
+		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Float, 4, col.data());
+	};
+}
+
+void MaterialParameter::operator=(float p)
+{
+	toApply = [=]() {
+		auto v = p;
+		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Float, 1, &v);
+	};
+}
+
+void MaterialParameter::operator=(Vector2f p)
+{
+	toApply = [=]() {
+		auto v = p;
+		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Float, 2, &v);
+	};
+}
+
+void MaterialParameter::operator=(int p)
+{
+	toApply = [=]() {
+		auto v = p;
+		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Int, 1, &v);
+	};
+}
+
+void MaterialParameter::operator=(Vector2i p)
+{
+	toApply = [=]() {
+		auto v = p;
+		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Int, 2, &v);
 	};
 }
