@@ -23,6 +23,7 @@
 
 #define WITH_OPENGL
 
+#include <GL/glew.h>
 #if defined(WITH_OPENGL)
 	#include <SDL_opengl.h>
 #elif defined(WITH_OPENGL_ES2)
@@ -30,3 +31,5 @@
 #elif defined(WITH_OPENGL_ES)
 	#include <SDL_opengles.h>
 #endif
+
+#include "gl_util.h"

@@ -1,6 +1,5 @@
 #include "painter_opengl.h"
-#include <GL/glew.h>
-#include <GL/GL.h>
+#include "halley_gl.h"
 #include "../../core/src/graphics/material.h"
 
 void Halley::PainterOpenGL::drawSprite(Material& material, Vector2f pos)
