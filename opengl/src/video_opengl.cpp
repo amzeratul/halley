@@ -2,9 +2,9 @@
 #include <GL/glew.h>
 #include "halley_gl.h"
 #include "video_opengl.h"
-#include "SDL_syswm.h"
 #include "gl_util.h"
-#include "gl_painter.h"
+#include "painter_opengl.h"
+#include "texture_opengl.h"
 using namespace Halley;
 
 #ifdef _MSC_VER
@@ -327,9 +327,9 @@ std::unique_ptr<Painter> VideoOpenGL::makePainter()
 	return std::make_unique<PainterOpenGL>();
 }
 
-std::unique_ptr<Texture> VideoOpenGL::createTexture(TextureDescriptor&)
+std::unique_ptr<Texture> VideoOpenGL::createTexture(TextureDescriptor& descriptor)
 {
-	throw Exception("TODO: VideoOpenGL::createTexture()");
+	return std::make_unique<TextureOpenGL>(descriptor);
 }
 
 std::unique_ptr<Shader> VideoOpenGL::createShader()

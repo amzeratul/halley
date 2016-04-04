@@ -141,20 +141,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\gl_painter.cpp" />
+    <ClCompile Include="src\painter_opengl.cpp" />
     <ClCompile Include="src\gl_util.cpp" />
     <ClCompile Include="src\opengl_plugin.cpp" />
     <ClCompile Include="src\prec.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\texture_opengl.cpp" />
     <ClCompile Include="src\video_opengl.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\gl_painter.h" />
+    <ClInclude Include="src\painter_opengl.h" />
     <ClInclude Include="src\gl_util.h" />
     <ClInclude Include="src\halley_gl.h" />
     <ClInclude Include="src\prec.h" />
+    <ClInclude Include="src\texture_opengl.h" />
     <ClInclude Include="src\video_opengl.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

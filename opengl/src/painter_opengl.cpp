@@ -1,4 +1,4 @@
-#include "gl_painter.h"
+#include "painter_opengl.h"
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include "../../core/src/graphics/material.h"
