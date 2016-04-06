@@ -2,6 +2,16 @@
 #include "halley_gl.h"
 #include "../../core/src/graphics/material.h"
 
+void Halley::PainterOpenGL::startRender()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void Halley::PainterOpenGL::endRender()
+{
+	
+}
+
 void Halley::PainterOpenGL::drawSprite(Material& material, Vector2f pos)
 {
 	material.bind();

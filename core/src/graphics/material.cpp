@@ -40,8 +40,8 @@ void Material::ensureLoaded()
 
 MaterialParameter& Material::operator[](String name)
 {
+	shader->bind();
 	dirty = true;
-	bind();
 
 	for (auto& u : uniforms) {
 		if (u.name == name) {

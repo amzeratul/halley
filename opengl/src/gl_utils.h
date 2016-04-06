@@ -26,10 +26,43 @@
 
 namespace Halley {
 
-	void doGlCheckError(const char* file="", long line=0);
-//#ifdef _MSC_VER
-	#define glCheckError() doGlCheckError(__FILE__, __LINE__)
-//#else
-//	#define glCheckError() doGlCheckError()
-//#endif
+	namespace Blend {
+		enum Type {
+			Opaque,
+			Test,
+			Alpha,
+			Alpha_Premultiplied,
+			Add,
+			Multiply,
+			Darken,
+			Undefined
+		};
+	}
+
+	class Texture;
+	class GLInternals;
+
+	class GLUtils : boost::noncopyable {
+	public:
+		GLUtils();
+		GLUtils(GLUtils& other);
+
+		void setBlendType(Blend::Type type);
+
+		void bindTexture(int id);
+		void setTextureUnit(int n);
+		void setNumberOfTextureUnits(int n);
+		void resetState();
+
+		void setViewPort(Rect4i rect, bool scissor = false);
+		Rect4i getViewPort();
+
+		void clear(Colour col);
+		static void doGlCheckError(const char* file = "", long line = 0);
+		
+	private:
+		GLInternals& state;
+	};
 }
+
+#define glCheckError() Halley::GLUtils::doGlCheckError(__FILE__, __LINE__)

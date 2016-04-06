@@ -2,9 +2,9 @@
 #include <GL/glew.h>
 #include "halley_gl.h"
 #include "video_opengl.h"
-#include "gl_util.h"
 #include "painter_opengl.h"
 #include "texture_opengl.h"
+#include "shader_opengl.h"
 using namespace Halley;
 
 #ifdef _MSC_VER
@@ -334,7 +334,7 @@ std::unique_ptr<Texture> VideoOpenGL::createTexture(TextureDescriptor& descripto
 
 std::unique_ptr<Shader> VideoOpenGL::createShader()
 {
-	throw Exception("TODO: VideoOpenGL::createShader()");
+	return std::make_unique<ShaderOpenGL>();
 }
 
 void VideoOpenGL::updateWindowDimensions()
@@ -471,13 +471,10 @@ static void drawLetterbox() {
 
 void VideoOpenGL::startRender()
 {
-	Debug::trace("Game::RenderScreen begin");
-	glClear(GL_COLOR_BUFFER_BIT);
+	Debug::trace("VideoOpenGL::startRender");
 
 	// TODO
 	/*
-	painter->resetDrawCalls();
-
 	if (!TextureLoadQueue::hasLoaderThread()) {
 		Debug::trace("Game::RenderScreen loading texture");
 		TextureLoadQueue::get()->load(1);
@@ -488,14 +485,11 @@ void VideoOpenGL::startRender()
 
 void VideoOpenGL::finishRender()
 {
-	// TODO
-	// painter->flushQueue();
-
 	drawLetterbox();
 
-	Debug::trace("Game::RenderScreen flipping");
+	Debug::trace("VideoOpenGL::finishRender flipping");
 	flip();
-	Debug::trace("Game::RenderScreen end");
+	Debug::trace("VideoOpenGL::finishRender end");
 
 	glCheckError();
 }

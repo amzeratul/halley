@@ -164,5 +164,8 @@
     <ClCompile Include="src\graphics\material.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\texture_descriptor.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

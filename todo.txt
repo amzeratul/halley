@@ -1,16 +1,17 @@
 core
+* resource paths and filenames
 - hot reloading
 - child stages
 
 core/graphics (?)
 * painter
+- multipass materials?
 - rewrite text rendering system to use pre-baked distance fields
 - animation?
 - fix threaded load (TODOs in core_runner.cpp)
 
 opengl
 * shader
-* texture
 * painter
 
 directx?
@@ -41,6 +42,8 @@ entity
 codegen
 * registry
 * messages?
+- switch to yaml-based format for component/system/message specs?
+- rewrite in C++?
 - codegen parallel systems
 - codegen Lua
 - codegen Haskell
@@ -49,7 +52,7 @@ tools
 - asset/prefab editor
 - scene editor?
 - animation editor
-- system/component editor
+- system/component/message editor
 
 utils
 - better HTTP library?

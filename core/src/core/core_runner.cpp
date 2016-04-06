@@ -169,11 +169,13 @@ void CoreRunner::onRender(Time)
 {
 	if (api->video) {
 		api->video->startRender();
+		painter->startRender();
 
 		if (currentStage) {
 			currentStage->onRender(*painter);
 		}
 
+		painter->endRender();
 		api->video->finishRender();
 	}
 }

@@ -9,9 +9,6 @@
     <ClCompile Include="src\video_opengl.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\gl_util.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\prec.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -24,12 +21,15 @@
     <ClCompile Include="src\texture_opengl.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\gl_utils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shader_opengl.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\video_opengl.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gl_util.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\halley_gl.h">
@@ -42,6 +42,12 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\texture_opengl.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gl_utils.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\shader_opengl.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

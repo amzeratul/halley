@@ -63,8 +63,8 @@ public:
 		painter.clear(Colour(0.2f, 0.2f, 0.3f));
 		world.render(painter);
 
-		auto texture = getResource<Texture>("test_sprite.png");
-		auto shader = getResource<Shader>("sprite");
+		auto texture = getResource<Texture>("sprites/test.png");
+		auto shader = getResource<Shader>("shaders/sprite.yaml");
 		Material material(shader, getAPI().video);
 		material["main"] = texture;
 		painter.drawSprite(material, Vector2f(100, 100));

@@ -32,4 +32,4 @@
 	#include <SDL_opengles.h>
 #endif
 
-#include "gl_util.h"
+#include "gl_utils.h"
