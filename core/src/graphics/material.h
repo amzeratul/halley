@@ -33,6 +33,8 @@ namespace Halley
 
 		Material& material;
 		String name;
+		bool needsTextureUnit = false;
+		int textureUnit = -1;
 	};
 
 	class Material : public Resource

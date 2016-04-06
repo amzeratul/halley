@@ -7,9 +7,14 @@ namespace Halley
 	class ShaderOpenGL : public Shader
 	{
 	public:
-		ShaderOpenGL();
+		ShaderOpenGL(String name);
+		~ShaderOpenGL();
 
 		void bind() override;
+		void unbind();
+		void compile() override;
+		void destroy();
+
 		void addVertexSource(String src) override;
 		void addGeometrySource(String src) override;
 		void addPixelSource(String src) override;

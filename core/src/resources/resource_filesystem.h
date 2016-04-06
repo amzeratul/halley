@@ -24,7 +24,7 @@
 #include "resource_locator.h"
 
 namespace Halley {
-	class FileSystemResourceLocator : public IResourceLocator {
+	class FileSystemResourceLocator : public IResourceLocatorProvider {
 	public:
 		FileSystemResourceLocator(String basePath);
 

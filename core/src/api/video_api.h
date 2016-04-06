@@ -42,6 +42,6 @@ namespace Halley
 
 		// TODO: do I like this API? Time will tell.
 		virtual std::unique_ptr<Texture> createTexture(TextureDescriptor& descriptor) = 0;
-		virtual std::unique_ptr<Shader> createShader() = 0;
+		virtual std::unique_ptr<Shader> createShader(String name) = 0;
 	};
 }

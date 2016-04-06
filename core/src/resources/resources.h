@@ -26,36 +26,8 @@
 
 namespace Halley {
 	
-	enum class ResourceLoadPriority {
-		Low = 0,
-		Normal = 1,
-		High = 2
-	};
-
 	class ResourceLocator;
 	class HalleyAPI;
-
-	class ResourceLoader
-	{
-		friend class Resources;
-
-	public:
-		String getName() const { return name; }
-		ResourceLoadPriority getPriority() const { return priority; }
-		std::unique_ptr<ResourceDataStatic> getStatic();
-		std::unique_ptr<ResourceDataStream> getStream();
-		HalleyAPI& getAPI() const { return *api; }
-
-	private:
-		ResourceLoader(ResourceLoader&& loader);
-		ResourceLoader(ResourceLocator& locator, String name, ResourceLoadPriority priority, HalleyAPI* api);
-
-		ResourceLocator& locator;
-		String name;
-		ResourceLoadPriority priority;
-		HalleyAPI* api;
-		bool loaded = false;
-	};
 
 	class Resources {
 		class Wrapper

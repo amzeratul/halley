@@ -332,9 +332,9 @@ std::unique_ptr<Texture> VideoOpenGL::createTexture(TextureDescriptor& descripto
 	return std::make_unique<TextureOpenGL>(descriptor);
 }
 
-std::unique_ptr<Shader> VideoOpenGL::createShader()
+std::unique_ptr<Shader> VideoOpenGL::createShader(String name)
 {
-	return std::make_unique<ShaderOpenGL>();
+	return std::make_unique<ShaderOpenGL>(name);
 }
 
 void VideoOpenGL::updateWindowDimensions()

@@ -6,10 +6,17 @@ using namespace Halley;
 
 TextureOpenGL::TextureOpenGL(TextureDescriptor& d)
 {
-	privateImpl = create(d.w, d.h, d.format, d.useMipMap, d.useFiltering);
+	textureId = create(d.w, d.h, d.format, d.useMipMap, d.useFiltering);
 	if (d.pixelData != nullptr) {
 		loadImage(reinterpret_cast<const char*>(d.pixelData), d.w, d.h, d.w, d.format, d.useMipMap);
 	}
+}
+
+void TextureOpenGL::bind(int textureUnit)
+{
+	GLUtils glUtils;
+	glUtils.setTextureUnit(textureUnit);
+	glUtils.bindTexture(textureId);
 }
 
 unsigned int TextureOpenGL::create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering)
@@ -28,7 +35,6 @@ unsigned int TextureOpenGL::create(size_t w, size_t h, TextureFormat format, boo
 	glGenTextures(1, &id);
 	
 	GLUtils glUtils;
-	glCheckError();
 	glUtils.bindTexture(id);
 
 	//loader = TextureLoadQueue::getCurrent();

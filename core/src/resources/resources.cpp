@@ -3,39 +3,6 @@
 
 using namespace Halley;
 
-ResourceLoader::ResourceLoader(ResourceLoader&& loader)
-	: locator(loader.locator)
-	, name(std::move(loader.name))
-	, priority(loader.priority)
-	, api(loader.api)
-{
-}
-
-ResourceLoader::ResourceLoader(ResourceLocator& locator, String name, ResourceLoadPriority priority, HalleyAPI* api)
-	: locator(locator)
-	, name(name)
-	, priority(priority)
-	, api(api)
-{}
-
-std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
-{
-	auto result = locator.getStatic(name);
-	if (result) {
-		loaded = true;
-	}
-	return result;
-}
-
-std::unique_ptr<ResourceDataStream> ResourceLoader::getStream()
-{
-	auto result = locator.getStream(name);
-	if (result) {
-		loaded = true;
-	}
-	return result;
-}
-
 void Resources::Wrapper::flush()
 {
 	// TODO

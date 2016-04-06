@@ -132,13 +132,13 @@ GLInternals& getState()
 GLUtils::GLUtils()
 	: state(getState())
 {
-
+	glCheckError();
 }
 
 GLUtils::GLUtils(GLUtils& other)
 	: state(other.state)
 {
-
+	glCheckError();
 }
 
 void GLUtils::setBlendType(Blend::Type type)

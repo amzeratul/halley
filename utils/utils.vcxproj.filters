@@ -174,6 +174,9 @@
     <ClCompile Include="src\resources\resource_data.cpp">
       <Filter>resources</Filter>
     </ClCompile>
+    <ClCompile Include="src\file_formats\text_file.cpp">
+      <Filter>file_formats</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\halley_utils.h">
@@ -355,6 +358,9 @@
     </ClInclude>
     <ClInclude Include="src\resources\resource.h">
       <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\text_file.h">
+      <Filter>file_formats</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

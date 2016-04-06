@@ -7,6 +7,8 @@ namespace Halley
 	class Texture : public Resource
 	{
 	public:
+		virtual void bind(int textureUnit) = 0;
+
 		static std::unique_ptr<Texture> loadResource(ResourceLoader& loader);
 		unsigned int getNativeId() const { return privateImpl; }
 

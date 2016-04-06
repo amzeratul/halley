@@ -7,6 +7,8 @@
 
 using namespace Halley;
 
+static Material* currentMaterial = nullptr;
+
 Material::Material(std::shared_ptr<Shader> _shader, VideoAPI* api)
 	: api(api)
 	, shader(_shader)
@@ -15,12 +17,24 @@ Material::Material(std::shared_ptr<Shader> _shader, VideoAPI* api)
 
 void Material::bind()
 {
+	// Avoid redundant work
+	if (currentMaterial == this && !dirty) {
+		return;
+	}
+	currentMaterial = this;
+
 	if (!shader) {
 		throw Exception("Material has no shader.");
 	}
 
 	if (dirty) {
+		int tu = 0;
 		for (auto& u : uniforms) {
+			if (u.needsTextureUnit) {
+				u.textureUnit = tu++;
+			} else {
+				u.textureUnit = -1;
+			}
 			u.apply();
 		}
 		dirty = false;
@@ -87,14 +101,18 @@ void MaterialParameter::bind()
 
 void MaterialParameter::operator=(std::shared_ptr<Texture> texture)
 {
+	needsTextureUnit = true;
 	toApply = [=]() {
-		int id = texture->getNativeId();
-		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Int, 1, &id);
+		toBind = [=]() {
+			texture->bind(textureUnit);
+			getAPI().getUniformBinding(getAddress(), UniformType::Int, 1, &textureUnit);
+		};
 	};
 }
 
 void MaterialParameter::operator=(Colour colour)
 {
+	needsTextureUnit = false;
 	toApply = [=]() {
 		std::array<float, 4> col = { colour.r, colour.g, colour.b, colour.a };
 		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Float, 4, col.data());
@@ -103,6 +121,7 @@ void MaterialParameter::operator=(Colour colour)
 
 void MaterialParameter::operator=(float p)
 {
+	needsTextureUnit = false;
 	toApply = [=]() {
 		auto v = p;
 		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Float, 1, &v);
@@ -111,6 +130,7 @@ void MaterialParameter::operator=(float p)
 
 void MaterialParameter::operator=(Vector2f p)
 {
+	needsTextureUnit = false;
 	toApply = [=]() {
 		auto v = p;
 		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Float, 2, &v);
@@ -119,6 +139,7 @@ void MaterialParameter::operator=(Vector2f p)
 
 void MaterialParameter::operator=(int p)
 {
+	needsTextureUnit = false;
 	toApply = [=]() {
 		auto v = p;
 		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Int, 1, &v);
@@ -127,6 +148,7 @@ void MaterialParameter::operator=(int p)
 
 void MaterialParameter::operator=(Vector2i p)
 {
+	needsTextureUnit = false;
 	toApply = [=]() {
 		auto v = p;
 		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Int, 2, &v);

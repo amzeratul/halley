@@ -36,7 +36,7 @@ namespace Halley {
 		bool zipped;
 	};
 
-	class ResourcePack : public IResourceLocator {
+	class ResourcePack : public IResourceLocatorProvider {
 	public:
 		ResourcePack(String name="");
 		~ResourcePack();

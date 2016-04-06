@@ -30,7 +30,7 @@ namespace Halley {
 		std::function<void()> getUniformBinding(unsigned int address, UniformType type, int n, void* data) override;
 		std::unique_ptr<Painter> makePainter() override;
 		std::unique_ptr<Texture> createTexture(TextureDescriptor& descriptor) override;
-		std::unique_ptr<Shader> createShader() override;
+		std::unique_ptr<Shader> createShader(String name) override;
 
 	protected:
 		void init() override;

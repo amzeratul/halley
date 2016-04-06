@@ -21,6 +21,7 @@
 #include "file_formats/json_file.h"
 #include "file_formats/serializer.h"
 #include "file_formats/string_serializer.h"
+#include "file_formats/text_file.h"
 #include "file_formats/text_reader.h"
 #include "file_formats/xml_file.h"
 

@@ -146,6 +146,7 @@
     <ClCompile Include="src\file_formats\serializer.cpp" />
     <ClCompile Include="src\file_formats\stb_image\stb_image.c" />
     <ClCompile Include="src\file_formats\string_serializer.cpp" />
+    <ClCompile Include="src\file_formats\text_file.cpp" />
     <ClCompile Include="src\file_formats\text_reader.cpp" />
     <ClCompile Include="src\file_formats\tinyxml\ticpp.cpp" />
     <ClCompile Include="src\file_formats\tinyxml\tinystr.cpp" />
@@ -195,6 +196,7 @@
     <ClInclude Include="src\file_formats\serializer.h" />
     <ClInclude Include="src\file_formats\stb_image\stb_image.h" />
     <ClInclude Include="src\file_formats\string_serializer.h" />
+    <ClInclude Include="src\file_formats\text_file.h" />
     <ClInclude Include="src\file_formats\text_reader.h" />
     <ClInclude Include="src\file_formats\tinyxml\ticpp.h" />
     <ClInclude Include="src\file_formats\tinyxml\ticpprc.h" />

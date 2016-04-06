@@ -26,7 +26,7 @@
 #include <set>
 
 namespace Halley {
-	void ResourceLocator::add(std::unique_ptr<IResourceLocator> locator)
+	void ResourceLocator::add(std::unique_ptr<IResourceLocatorProvider> locator)
 	{
 		auto res = locator->getResourceList();
 		for (size_t i=0; i<res.size(); i++) {

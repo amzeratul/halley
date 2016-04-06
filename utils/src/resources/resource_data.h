@@ -75,4 +75,43 @@ namespace Halley {
 	private:
 		ResourceDataMakeReader make;
 	};
+
+	class IResourceLocator
+	{
+	public:
+		virtual ~IResourceLocator() {}
+		virtual std::unique_ptr<ResourceDataStatic> getStatic(String resource) = 0;
+		virtual std::unique_ptr<ResourceDataStream> getStream(String resource) = 0;
+	};
+
+
+	enum class ResourceLoadPriority {
+		Low = 0,
+		Normal = 1,
+		High = 2
+	};
+
+	class HalleyAPI;
+	class ResourceLoader
+	{
+		friend class Resources;
+
+	public:
+		String getName() const { return name; }
+		ResourceLoadPriority getPriority() const { return priority; }
+		std::unique_ptr<ResourceDataStatic> getStatic();
+		std::unique_ptr<ResourceDataStream> getStream();
+		HalleyAPI& getAPI() const { return *api; }
+
+	private:
+		ResourceLoader(ResourceLoader&& loader);
+		ResourceLoader(IResourceLocator& locator, String name, ResourceLoadPriority priority, HalleyAPI* api);
+
+		IResourceLocator& locator;
+		String name;
+		ResourceLoadPriority priority;
+		HalleyAPI* api;
+		bool loaded = false;
+	};
+
 }
