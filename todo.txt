@@ -1,9 +1,10 @@
 core
-* resource paths and filenames
+- resource paths and filenames
 - hot reloading
 - child stages
 
 core/graphics (?)
+* parse YAML shader definition
 * painter
 - multipass materials?
 - rewrite text rendering system to use pre-baked distance fields
@@ -13,12 +14,6 @@ core/graphics (?)
 opengl
 * shader
 * painter
-
-directx?
-- future support?
-
-vulkan?
-- future support?
 
 input
 * bring library into engine
@@ -55,6 +50,7 @@ tools
 - system/component/message editor
 
 utils
+* YAML parser
 - better HTTP library?
 
 samples
@@ -66,3 +62,9 @@ CMake
 - lists for all libraries
 - boost/SDL dependencies
 - clean up
+
+directx?
+- future support?
+
+vulkan?
+- future support?
