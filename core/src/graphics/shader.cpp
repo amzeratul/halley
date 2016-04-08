@@ -15,15 +15,25 @@ std::unique_ptr<Shader> Shader::loadResource(ResourceLoader& loader)
 
 	auto data = loader.getStatic();
 	auto shaderStrData = data->getString();
-	// TODO: parse
+	// TODO: parse YAML
 
 	String vertex;
 	String pixel;
 	String geometry;
 
-	// TODO: read these from the right place
-	vertex = api.core->getResources().get<TextFile>("shaders/sprite.vertex.glsl")->data;
-	pixel = api.core->getResources().get<TextFile>("shaders/sprite.pixel.glsl")->data;
+	String vertexFile = "shaders/sprite.vertex.glsl";
+	String pixelFile = "shaders/sprite.pixel.glsl";
+	String geometryFile = "";
+
+	if (vertex == "" && vertexFile != "") {
+		vertex = api.core->getResources().get<TextFile>(vertexFile)->data;
+	}
+	if (pixel == "" && pixelFile != "") {
+		pixel = api.core->getResources().get<TextFile>(pixelFile)->data;
+	}
+	if (geometryFile == "" && geometryFile != "") {
+		geometry = api.core->getResources().get<TextFile>(geometryFile)->data;
+	}
 
 	auto shader = api.video->createShader(loader.getName());
 	if (vertex != "") {
