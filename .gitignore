@@ -16,14 +16,16 @@ Thumbs.db
 *.opendb
 *.VC.db
 *.ipch
+*.iobj
+*.pdb
+*.ipdb
 
 # Binaries
 *.dll
 *.hi
 *.o
 *.lib
-[Bb]in
-[Bb]in64
+*.exe
 
 # Intermediate files
 [Dd]ebug*/

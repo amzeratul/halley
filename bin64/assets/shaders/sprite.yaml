@@ -1,0 +1,4 @@
+---
+vertex: sprite.vert.glsl
+pixel: sprite.pixel.glsl
+...
