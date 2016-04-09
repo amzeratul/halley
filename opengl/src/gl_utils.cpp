@@ -143,13 +143,13 @@ GLUtils::GLUtils(GLUtils& other)
 
 void GLUtils::setBlendType(Blend::Type type)
 {
-	assert(type == Blend::Alpha || type == Blend::Alpha_Premultiplied || type == Blend::Add || type == Blend::Opaque || type == Blend::Test || type == Blend::Multiply || type == Blend::Darken);
+	assert(type == Blend::Alpha || type == Blend::AlphaPremultiplied || type == Blend::Add || type == Blend::Opaque || type == Blend::Test || type == Blend::Multiply || type == Blend::Darken);
 	glCheckError();
 
 	const Blend::Type curType = state.curBlend;
 	if (!CHECKED || curType != type) {
-		bool hasBlend = curType == Blend::Alpha || curType == Blend::Alpha_Premultiplied || curType == Blend::Add || curType == Blend::Multiply || curType == Blend::Darken;
-		bool needsBlend = type == Blend::Alpha || type == Blend::Alpha_Premultiplied || type == Blend::Add || type == Blend::Multiply || type == Blend::Darken;
+		bool hasBlend = curType == Blend::Alpha || curType == Blend::AlphaPremultiplied || curType == Blend::Add || curType == Blend::Multiply || curType == Blend::Darken;
+		bool needsBlend = type == Blend::Alpha || type == Blend::AlphaPremultiplied || type == Blend::Add || type == Blend::Multiply || type == Blend::Darken;
 		bool hasTest = curType == Blend::Test;
 		bool needsTest = type == Blend::Test;
 
@@ -174,7 +174,7 @@ void GLUtils::setBlendType(Blend::Type type)
 		}
 
 		if (needsBlend) {
-			if (type == Blend::Alpha_Premultiplied) {
+			if (type == Blend::AlphaPremultiplied) {
 				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 				glCheckError();
 			}

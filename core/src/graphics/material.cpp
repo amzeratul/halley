@@ -18,9 +18,46 @@ static Material* currentMaterial = nullptr;
 #endif
 #endif
 
+Material::Material(ResourceLoader& loader)
+	: api(loader.getAPI().video)
+{
+	auto& api = loader.getAPI();
+
+	String basePath = loader.getName();
+	size_t lastSlash = basePath.find_last_of('/');
+	if (lastSlash != std::string::npos) {
+		basePath = basePath.left(lastSlash + 1);
+	}
+
+	auto root = YAML::Load(loader.getStatic()->getString());
+	for (auto& passNode : root["passes"]) {
+		auto pass = passNode.as<YAML::Node>();
+
+		// Blending
+		blend = Blend::AlphaPremultiplied;
+
+		// Load shader
+		shader = api.video->createShader(loader.getName());
+		auto load = [&](std::string name, std::function<void(String)> f)
+		{
+			if (pass[name + "Source"]) {
+				f(pass[name + "Source"].as<std::string>());
+			}
+			else if (pass[name]) {
+				f(api.core->getResources().get<TextFile>(basePath + pass[name].as<std::string>())->data);
+			}
+		};
+		load("vertex", [&](String src) { shader->addVertexSource(src); });
+		load("pixel", [&](String src) { shader->addPixelSource(src); });
+		load("geometry", [&](String src) { shader->addGeometrySource(src); });
+		shader->compile();
+	}
+}
+
 Material::Material(std::shared_ptr<Shader> _shader, VideoAPI* api)
 	: api(api)
 	, shader(_shader)
+	, blend(Blend::AlphaPremultiplied)
 {
 }
 
@@ -80,43 +117,7 @@ MaterialParameter& Material::operator[](String name)
 	return uniforms.back();
 }
 
-Blend::Type Material::getBlend() const
-{
-	// TODO
-	return Blend::Alpha_Premultiplied;
-}
-
 std::unique_ptr<Material> Material::loadResource(ResourceLoader& loader)
 {
-	auto& api = loader.getAPI();
-
-	String basePath = loader.getName();
-	size_t lastSlash = basePath.find_last_of('/');
-	if (lastSlash != std::string::npos) {
-		basePath = basePath.left(lastSlash + 1);
-	}
-
-	YAML::Node root = YAML::Load(loader.getStatic()->getString());
-	for (auto& passNode : root["passes"]) {
-		auto pass = passNode.as<YAML::Node>();
-
-		// Load shader
-		auto shader = api.video->createShader(loader.getName());
-		auto load = [&] (std::string name, std::function<void(String)> f)
-		{
-			if (pass[name + "Source"]) {
-				f(pass[name + "Source"].as<std::string>());
-			} else if (pass[name]) {
-				f(api.core->getResources().get<TextFile>(basePath + pass[name].as<std::string>())->data);
-			}
-		};
-		load("vertex", [&](String src) { shader->addVertexSource(src); });
-		load("pixel", [&](String src) { shader->addPixelSource(src); });
-		load("geometry", [&](String src) { shader->addGeometrySource(src); });
-		shader->compile();
-
-		return std::make_unique<Material>(std::move(shader), loader.getAPI().video);
-	}
-
-	throw Exception("No passes found in shader.");
+	return std::make_unique<Material>(loader);
 }

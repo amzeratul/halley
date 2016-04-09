@@ -8,6 +8,7 @@ attributes:
   a_color: vec4      # rgba
   a_vertPos: vec2    # xy = relative position of vertex [0..1]
 passes:
-  - vertex: sprite.vertex.glsl
+  - blend: AlphaPremultiplied
+    vertex: sprite.vertex.glsl
     pixel: sprite.pixel.glsl
 ...

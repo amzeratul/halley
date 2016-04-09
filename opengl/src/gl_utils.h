@@ -31,7 +31,7 @@ namespace Halley {
 			Opaque,
 			Test,
 			Alpha,
-			Alpha_Premultiplied,
+			AlphaPremultiplied,
 			Add,
 			Multiply,
 			Darken,

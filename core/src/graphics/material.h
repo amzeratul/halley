@@ -12,13 +12,14 @@ namespace Halley
 		friend class MaterialParameter;
 
 	public:
+		explicit Material(ResourceLoader& loader);
 		Material(std::shared_ptr<Shader> shader, VideoAPI* api);
 
 		void bind();
 		Shader& getShader() const;
 
 		MaterialParameter& operator[](String name);
-		Blend::Type getBlend() const;
+		Blend::Type getBlend() const { return blend; }
 		static std::unique_ptr<Material> loadResource(ResourceLoader& loader);
 
 	private:
@@ -26,6 +27,7 @@ namespace Halley
 		std::shared_ptr<Shader> shader;
 		std::vector<MaterialParameter> uniforms;
 		bool dirty = false;
+		Blend::Type blend;
 
 		void ensureLoaded();
 	};

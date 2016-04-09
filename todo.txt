@@ -9,14 +9,13 @@ core/graphics (?)
 * fix uniform binding
 * fix attribute binding
 * cameras
-- multipass materials?
+- multipass materials
 - rewrite text rendering system to use pre-baked distance fields
 - animation?
 - fix threaded load (TODOs in core_runner.cpp)
 
 opengl
 * painter
-- shader warnings
 
 input
 * bring library into engine
@@ -53,7 +52,6 @@ tools
 - system/component/message editor
 
 utils
-* YAML parser
 - better HTTP library?
 
 samples
