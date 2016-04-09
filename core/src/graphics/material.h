@@ -1,8 +1,14 @@
 #pragma once
 #include "../../../opengl/src/gl_utils.h"
 
+namespace YAML
+{
+	class Node;
+}
+
 namespace Halley
 {
+	class MaterialPass;
 	class ResourceLoader;
 	class Shader;
 	class VideoAPI;
@@ -13,22 +19,40 @@ namespace Halley
 
 	public:
 		explicit Material(ResourceLoader& loader);
-		Material(std::shared_ptr<Shader> shader, VideoAPI* api);
 
-		void bind();
-		Shader& getShader() const;
+		void bind(size_t pass);
+
+		size_t getNumPasses() const;
+		MaterialPass& getPass(size_t n);
 
 		MaterialParameter& operator[](String name);
-		Blend::Type getBlend() const { return blend; }
 		static std::unique_ptr<Material> loadResource(ResourceLoader& loader);
 
 	private:
 		VideoAPI* api;
-		std::shared_ptr<Shader> shader;
 		std::vector<MaterialParameter> uniforms;
 		bool dirty = false;
-		Blend::Type blend;
+		String name;
+		std::vector<MaterialPass> passes;
 
 		void ensureLoaded();
+		void loadPass(YAML::Node node, std::function<String(String)> retriever);
+	};
+
+	class MaterialPass
+	{
+		friend class Material;
+
+	public:
+		MaterialPass(std::shared_ptr<Shader> shader, Blend::Type blend);
+
+		void bind();
+
+		Blend::Type getBlend() const { return blend; }
+		Shader& getShader() const { return *shader; }
+
+	private:
+		std::shared_ptr<Shader> shader;
+		Blend::Type blend;
 	};
 }

@@ -38,7 +38,7 @@ void ShaderOpenGL::unbind()
 	glCheckError();
 }
 
-static GLuint loadShader(String src, GLenum type)
+static GLuint loadShader(String src, GLenum type, String name)
 {
 	// Create shader
 	GLuint shader = glCreateShader(type);
@@ -69,7 +69,7 @@ static GLuint loadShader(String src, GLenum type)
 		glCheckError();
 		char* log = new char[infolen];
 		glGetShaderInfoLog(shader, infolen, &infolen, log);
-		String msg = String("Error compiling shader: ") + log;
+		String msg = String("Error compiling shader \"" + name + "\":\n") + log;
 		delete[] log;
 		glCheckError();
 		throw Exception(msg);
@@ -83,15 +83,15 @@ void ShaderOpenGL::compile()
 	if (!ready) {
 		// Compile shaders
 		for (size_t i = 0; i<vertexSources.size(); i++) {
-			shaders.push_back(loadShader(vertexSources[i], GL_VERTEX_SHADER));
+			shaders.push_back(loadShader(vertexSources[i], GL_VERTEX_SHADER, name + "/vertex"));
 		}
 #ifndef WITH_OPENGL_ES
 		for (size_t i = 0; i<geometrySources.size(); i++) {
-			shaders.push_back(loadShader(geometrySources[i], GL_GEOMETRY_SHADER_ARB));
+			shaders.push_back(loadShader(geometrySources[i], GL_GEOMETRY_SHADER_ARB, name + "/geometry"));
 		}
 #endif
 		for (size_t i = 0; i<pixelSources.size(); i++) {
-			shaders.push_back(loadShader(pixelSources[i], GL_FRAGMENT_SHADER));
+			shaders.push_back(loadShader(pixelSources[i], GL_FRAGMENT_SHADER, name + "/pixel"));
 		}
 
 		// Create program

@@ -1,4 +1,5 @@
 ---
+name: Sprite
 uniforms:
   u_mvp: mat4
 attributes:
@@ -8,6 +9,9 @@ attributes:
   a_color: vec4      # rgba
   a_vertPos: vec2    # xy = relative position of vertex [0..1]
 passes:
+  - blend: AlphaPremultiplied
+    vertex: sprite_test.vertex.glsl
+    pixel: sprite_test.pixel.glsl
   - blend: AlphaPremultiplied
     vertex: sprite.vertex.glsl
     pixel: sprite.pixel.glsl

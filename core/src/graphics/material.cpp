@@ -9,6 +9,7 @@
 using namespace Halley;
 
 static Material* currentMaterial = nullptr;
+static size_t currentPass = 0;
 
 #ifdef _MSC_VER
 #ifdef _DEBUG
@@ -29,49 +30,52 @@ Material::Material(ResourceLoader& loader)
 		basePath = basePath.left(lastSlash + 1);
 	}
 
-	auto root = YAML::Load(loader.getStatic()->getString());
+	YAML::Node root;
+	try {
+		root = YAML::Load(loader.getStatic()->getString());
+	} catch (std::exception& e) {
+		throw Exception("Exception parsing material " + loader.getName() + ": " + e.what());
+	}
+
+	// Load name
+	name = root["name"] ? root["name"].as<std::string>() : "Unknown";
+
+	// Load passes
 	for (auto& passNode : root["passes"]) {
-		auto pass = passNode.as<YAML::Node>();
-
-		// Blending
-		blend = Blend::AlphaPremultiplied;
-
-		// Load shader
-		shader = api.video->createShader(loader.getName());
-		auto load = [&](std::string name, std::function<void(String)> f)
-		{
-			if (pass[name + "Source"]) {
-				f(pass[name + "Source"].as<std::string>());
-			}
-			else if (pass[name]) {
-				f(api.core->getResources().get<TextFile>(basePath + pass[name].as<std::string>())->data);
-			}
-		};
-		load("vertex", [&](String src) { shader->addVertexSource(src); });
-		load("pixel", [&](String src) { shader->addPixelSource(src); });
-		load("geometry", [&](String src) { shader->addGeometrySource(src); });
-		shader->compile();
+		loadPass(passNode.as<YAML::Node>(), [&] (String path) {
+			return api.core->getResources().get<TextFile>(basePath + path)->data;
+		});
 	}
 }
 
-Material::Material(std::shared_ptr<Shader> _shader, VideoAPI* api)
-	: api(api)
-	, shader(_shader)
-	, blend(Blend::AlphaPremultiplied)
+void Material::loadPass(YAML::Node node, std::function<String(String)> retriever)
 {
+	// Load shader
+	auto shader = api->createShader(name + "/pass" + String::integerToString(passes.size()));
+	auto load = [&](std::string name, std::function<void(String)> f)
+	{
+		if (node[name + "Source"]) {
+			f(node[name + "Source"].as<std::string>());
+		} else if (node[name]) {
+			f(retriever(node[name].as<std::string>()));
+		}
+	};
+	load("vertex", [&](String src) { shader->addVertexSource(src); });
+	load("pixel", [&](String src) { shader->addPixelSource(src); });
+	load("geometry", [&](String src) { shader->addGeometrySource(src); });
+	shader->compile();
+
+	passes.emplace_back(MaterialPass(std::move(shader), Blend::AlphaPremultiplied));	
 }
 
-void Material::bind()
+void Material::bind(size_t pass)
 {
 	// Avoid redundant work
-	if (currentMaterial == this && !dirty) {
+	if (currentMaterial == this && currentPass == pass && !dirty) {
 		return;
 	}
 	currentMaterial = this;
-
-	if (!shader) {
-		throw Exception("Material has no shader.");
-	}
+	currentPass = pass;
 
 	if (dirty) {
 		int tu = 0;
@@ -86,16 +90,21 @@ void Material::bind()
 		dirty = false;
 	}
 
-	shader->bind();
+	passes[pass].bind();
 
 	for (auto& u : uniforms) {
 		u.bind();
 	}
 }
 
-Shader& Material::getShader() const
+size_t Material::getNumPasses() const
 {
-	return *shader;
+	return passes.size();
+}
+
+MaterialPass& Material::getPass(size_t n)
+{
+	return passes[n];
 }
 
 void Material::ensureLoaded()
@@ -105,7 +114,7 @@ void Material::ensureLoaded()
 
 MaterialParameter& Material::operator[](String name)
 {
-	shader->bind();
+	passes[0].bind();
 	dirty = true;
 
 	for (auto& u : uniforms) {
@@ -120,4 +129,15 @@ MaterialParameter& Material::operator[](String name)
 std::unique_ptr<Material> Material::loadResource(ResourceLoader& loader)
 {
 	return std::make_unique<Material>(loader);
+}
+
+MaterialPass::MaterialPass(std::shared_ptr<Shader> shader, Blend::Type blend)
+	: shader(shader)
+	, blend(blend)
+{
+}
+
+void MaterialPass::bind()
+{
+	shader->bind();
 }

@@ -41,7 +41,20 @@ void PainterOpenGL::clear(Colour colour)
 
 void PainterOpenGL::drawSprite(Material& material, Vector2f pos)
 {
-	draw(material, pos);
+	init();
+
+	// TODO: get current camera
+	auto proj = Matrix4f::makeOrtho2D(0, 1280, 720, 0, -1000, 1000);
+
+	for (size_t i = 0; i < material.getNumPasses(); i++) {
+		// Bind camera and material
+		material["u_mvp"] = proj;
+		material.bind(i);
+
+		// Set blend
+		glUtils->setBlendType(material.getPass(i).getBlend());
+		drawPass(material.getPass(i).getShader(), pos);
+	}
 }
 
 void PainterOpenGL::init()
@@ -51,20 +64,8 @@ void PainterOpenGL::init()
 	}
 }
 
-void PainterOpenGL::draw(Material& material, Vector2f pos)
+void PainterOpenGL::drawPass(Shader& shader, Vector2f pos)
 {
-	init();
-
-	// TODO: get current camera
-	auto proj = Matrix4f::makeOrtho2D(0, 1280, 720, 0, -1000, 1000);
-
-	// Bind camera and material
-	material["u_mvp"] = proj;
-	material.bind();
-
-	// Set blend
-	glUtils->setBlendType(material.getBlend());
-
 	// TODO: read this elsewhere
 	// Vertex attributes
 	struct VertexAttrib
@@ -106,7 +107,6 @@ void PainterOpenGL::draw(Material& material, Vector2f pos)
 	glCheckError();
 
 	// Set vertex attribute pointers in VBO
-	auto& shader = material.getShader();
 	auto bindAttrib = [&] (const char* name, size_t count, GLuint type, size_t offset) {
 		int loc = shader.getAttributeLocation(name);
 		glEnableVertexAttribArray(loc);

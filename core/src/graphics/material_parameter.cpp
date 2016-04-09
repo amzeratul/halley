@@ -21,7 +21,7 @@ VideoAPIInternal& MaterialParameter::getAPI()
 
 unsigned int MaterialParameter::getAddress()
 {
-	return material.shader->getUniformLocation(name);
+	return material.passes[0].getShader().getUniformLocation(name);
 }
 
 void MaterialParameter::apply()

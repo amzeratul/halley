@@ -4,6 +4,8 @@
 
 namespace Halley
 {
+	class MaterialPass;
+
 	class PainterOpenGL : public Painter
 	{
 	public:
@@ -22,7 +24,7 @@ namespace Halley
 		std::unique_ptr<GLUtils> glUtils;
 
 		void init();
-		void draw(Material& material, Vector2f pos);
+		void drawPass(Shader& material, Vector2f pos);
 		void drawArraysQuads(int n);
 		char* setupVBO(size_t size);
 	};
