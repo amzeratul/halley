@@ -319,8 +319,8 @@ std::function<void(MaterialParameter&)> VideoOpenGL::getUniformBinding(unsigned 
 		}
 		case UniformType::Mat4:
 		{
-			auto vs = reinterpret_cast<float*>(data);
-			std::vector<float> d(vs, vs + 16);
+			auto vs = reinterpret_cast<Matrix4f*>(data);
+			std::vector<float> d(vs->getElements(), vs->getElements() + 16);
 			return [=](MaterialParameter&) { glUniformMatrix4fv(address, 1, false, d.data()); };
 		}
 		default:

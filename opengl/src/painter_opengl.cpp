@@ -5,9 +5,13 @@
 
 using namespace Halley;
 
+PainterOpenGL::PainterOpenGL()
+{}
+
+PainterOpenGL::~PainterOpenGL() = default;
+
 void PainterOpenGL::startRender()
 {
-	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void PainterOpenGL::endRender()
@@ -26,11 +30,18 @@ void PainterOpenGL::drawSprite(Material& material, Vector2f pos)
 	draw(material, pos);
 }
 
+void PainterOpenGL::init()
+{
+	if (!glUtils) {
+		glUtils = std::make_unique<GLUtils>();
+	}
+}
+
 void PainterOpenGL::draw(Material& material, Vector2f pos)
 {
+	init();
+
 	// TODO: get current camera
-	GLUtils utils;
-	utils.setViewPort(Rect4i(0, 0, 1280, 720), false);
 	auto proj = Matrix4f::makeOrtho2D(0, 1280, 720, 0, -1000, 1000);
 
 	// Bind camera and material
@@ -38,7 +49,8 @@ void PainterOpenGL::draw(Material& material, Vector2f pos)
 	material.bind();
 	auto& shader = material.getShader();
 
-	// TODO: set blending mode
+	// Set blend
+	glUtils->setBlendType(Blend::Alpha_Premultiplied);
 
 	// TODO: read this elsewhere
 	// Vertex attributes
@@ -84,7 +96,7 @@ void PainterOpenGL::draw(Material& material, Vector2f pos)
 	auto bindAttrib = [&] (const char* name, size_t count, GLuint type, size_t offset) {
 		int loc = shader.getAttributeLocation(name);
 		glEnableVertexAttribArray(loc);
-		glVertexAttribPointer(loc, count, type, GL_FALSE, vertexStride, reinterpret_cast<GLvoid*>(offset));
+		glVertexAttribPointer(loc, int(count), type, GL_FALSE, int(vertexStride), reinterpret_cast<GLvoid*>(offset));
 		glCheckError();
 	};
 

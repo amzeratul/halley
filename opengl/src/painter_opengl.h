@@ -7,6 +7,9 @@ namespace Halley
 	class PainterOpenGL : public Painter
 	{
 	public:
+		PainterOpenGL();
+		~PainterOpenGL();
+
 		void startRender() override;
 		void endRender() override;
 
@@ -15,7 +18,9 @@ namespace Halley
 
 	private:
 		GLuint vbo;
+		std::unique_ptr<GLUtils> glUtils;
 
+		void init();
 		void draw(Material& material, Vector2f pos);
 		void drawArraysQuads(int n);
 		char* setupVBO(size_t size);

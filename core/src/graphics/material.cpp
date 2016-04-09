@@ -164,7 +164,7 @@ void MaterialParameter::operator=(Matrix4f m)
 {
 	needsTextureUnit = false;
 	toApply = [m](MaterialParameter& t) {
-		auto v = m.getElements();
+		auto v = m;
 		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Mat4, 1, &v);
 	};
 }
