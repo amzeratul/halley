@@ -177,6 +177,9 @@
     <ClCompile Include="src\support\StackWalker\StackWalker.cpp">
       <Filter>support\StackWalker</Filter>
     </ClCompile>
+    <ClCompile Include="src\maths\matrix4.cpp">
+      <Filter>maths</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\halley_utils.h">
@@ -361,6 +364,9 @@
     </ClInclude>
     <ClInclude Include="src\support\StackWalker\StackWalker.h">
       <Filter>support\StackWalker</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\matrix4.h">
+      <Filter>maths</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

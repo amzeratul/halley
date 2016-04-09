@@ -2,9 +2,9 @@ uniform mat4 u_mvp;
 attribute vec4 a_position;
 attribute vec4 a_size;
 attribute vec4 a_color;
+attribute vec4 a_texCoord0;
 attribute vec2 a_vertPos;
 
-attribute vec4 a_texCoord0;
 varying vec4 v_texCoord0;
 varying vec4 v_color;
 

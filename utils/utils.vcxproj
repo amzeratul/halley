@@ -150,6 +150,7 @@
     <ClCompile Include="src\file_formats\tinyxml\tinyxmlparser.cpp" />
     <ClCompile Include="src\file_formats\xml_file.cpp" />
     <ClCompile Include="src\maths\aabb.cpp" />
+    <ClCompile Include="src\maths\matrix4.cpp" />
     <ClCompile Include="src\maths\polygon.cpp" />
     <ClCompile Include="src\maths\random.cpp" />
     <ClCompile Include="src\os\os.cpp" />
@@ -205,6 +206,7 @@
     <ClInclude Include="src\maths\box.h" />
     <ClInclude Include="src\maths\colour.h" />
     <ClInclude Include="src\maths\fixed_point.h" />
+    <ClInclude Include="src\maths\matrix4.h" />
     <ClInclude Include="src\maths\polygon.h" />
     <ClInclude Include="src\maths\random.h" />
     <ClInclude Include="src\maths\range.h" />

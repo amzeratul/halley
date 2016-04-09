@@ -25,6 +25,7 @@
 #include "maths/box.h"
 #include "maths/colour.h"
 #include "maths/fixed_point.h"
+#include "maths/matrix4.h"
 #include "maths/polygon.h"
 #include "maths/random.h"
 #include "maths/range.h"

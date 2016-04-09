@@ -117,6 +117,9 @@
     <ClInclude Include="src\graphics\uniform_type.h">
       <Filter>graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics\camera.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
@@ -165,6 +168,9 @@
       <Filter>graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\texture_descriptor.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\camera.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
   </ItemGroup>

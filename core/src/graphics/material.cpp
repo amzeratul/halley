@@ -47,6 +47,11 @@ void Material::bind()
 	}
 }
 
+Shader& Material::getShader() const
+{
+	return *shader;
+}
+
 void Material::ensureLoaded()
 {
 	// TODO?
@@ -91,21 +96,21 @@ unsigned int MaterialParameter::getAddress()
 
 void MaterialParameter::apply()
 {
-	toApply();
+	toApply(*this);
 }
 
 void MaterialParameter::bind()
 {
-	toBind();
+	toBind(*this);
 }
 
 void MaterialParameter::operator=(std::shared_ptr<Texture> texture)
 {
 	needsTextureUnit = true;
-	toApply = [=]() {
-		toBind = [=]() {
-			texture->bind(textureUnit);
-			getAPI().getUniformBinding(getAddress(), UniformType::Int, 1, &textureUnit);
+	toApply = [texture](MaterialParameter& p0) {
+		p0.toBind = [texture](MaterialParameter& p) {
+			texture->bind(p.textureUnit);
+			p.getAPI().getUniformBinding(p.getAddress(), UniformType::Int, 1, &p.textureUnit);
 		};
 	};
 }
@@ -113,44 +118,53 @@ void MaterialParameter::operator=(std::shared_ptr<Texture> texture)
 void MaterialParameter::operator=(Colour colour)
 {
 	needsTextureUnit = false;
-	toApply = [=]() {
+	toApply = [colour](MaterialParameter& p) {
 		std::array<float, 4> col = { colour.r, colour.g, colour.b, colour.a };
-		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Float, 4, col.data());
+		p.toBind = p.getAPI().getUniformBinding(p.getAddress(), UniformType::Float, 4, col.data());
 	};
 }
 
 void MaterialParameter::operator=(float p)
 {
 	needsTextureUnit = false;
-	toApply = [=]() {
+	toApply = [p](MaterialParameter& t) {
 		auto v = p;
-		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Float, 1, &v);
+		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Float, 1, &v);
 	};
 }
 
 void MaterialParameter::operator=(Vector2f p)
 {
 	needsTextureUnit = false;
-	toApply = [=]() {
+	toApply = [p](MaterialParameter& t) {
 		auto v = p;
-		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Float, 2, &v);
+		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Float, 2, &v);
 	};
 }
 
 void MaterialParameter::operator=(int p)
 {
 	needsTextureUnit = false;
-	toApply = [=]() {
+	toApply = [p](MaterialParameter& t) {
 		auto v = p;
-		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Int, 1, &v);
+		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Int, 1, &v);
 	};
 }
 
 void MaterialParameter::operator=(Vector2i p)
 {
 	needsTextureUnit = false;
-	toApply = [=]() {
+	toApply = [p](MaterialParameter& t) {
 		auto v = p;
-		toBind = getAPI().getUniformBinding(getAddress(), UniformType::Int, 2, &v);
+		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Int, 2, &v);
+	};
+}
+
+void MaterialParameter::operator=(Matrix4f m)
+{
+	needsTextureUnit = false;
+	toApply = [m](MaterialParameter& t) {
+		auto v = m.getElements();
+		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Mat4, 1, &v);
 	};
 }

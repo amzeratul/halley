@@ -256,7 +256,7 @@ void VideoOpenGL::setVirtualSize(Vector2f vs)
 	updateWindowDimensions();
 }
 
-std::function<void()> VideoOpenGL::getUniformBinding(unsigned int address, UniformType type, int n, void* data)
+std::function<void(MaterialParameter&)> VideoOpenGL::getUniformBinding(unsigned int address, UniformType type, int n, void* data)
 {
 	switch (type) {
 		case UniformType::Int:
@@ -264,58 +264,64 @@ std::function<void()> VideoOpenGL::getUniformBinding(unsigned int address, Unifo
 			auto vs = reinterpret_cast<int*>(data);
 			if (n == 1) {
 				auto v0 = vs[0];
-				return [=]() { glUniform1i(address, v0); };
+				return [=](MaterialParameter&) { glUniform1i(address, v0); };
 			} else if (n == 2) {
 				auto v0 = vs[0];
 				auto v1 = vs[1];
-				return [=]() { glUniform2i(address, v0, v1); };
+				return [=](MaterialParameter&) { glUniform2i(address, v0, v1); };
 			} else if (n == 2) {
 				auto v0 = vs[0];
 				auto v1 = vs[1];
 				auto v2 = vs[2];
-				return [=]() { glUniform3i(address, v0, v1, v2); };
+				return [=](MaterialParameter&) { glUniform3i(address, v0, v1, v2); };
 			} else if (n == 2) {
 				auto v0 = vs[0];
 				auto v1 = vs[1];
 				auto v2 = vs[2];
 				auto v3 = vs[3];
-				return [=]() { glUniform4i(address, v0, v1, v2, v3); };
+				return [=](MaterialParameter&) { glUniform4i(address, v0, v1, v2, v3); };
 			}
 		}
 		case UniformType::IntArray:
 		{
 			auto vs = reinterpret_cast<int*>(data);
 			std::vector<int> d(vs, vs + n);
-			return [=]() { glUniform1iv(address, n, d.data()); };
+			return [=](MaterialParameter&) { glUniform1iv(address, n, d.data()); };
 		}
 		case UniformType::Float:
 		{
 			auto vs = reinterpret_cast<float*>(data);
 			if (n == 1) {
 				auto v0 = vs[0];
-				return [=]() { glUniform1f(address, v0); };
+				return [=](MaterialParameter&) { glUniform1f(address, v0); };
 			} else if (n == 2) {
 				auto v0 = vs[0];
 				auto v1 = vs[1];
-				return [=]() { glUniform2f(address, v0, v1); };
+				return [=](MaterialParameter&) { glUniform2f(address, v0, v1); };
 			} else if (n == 2) {
 				auto v0 = vs[0];
 				auto v1 = vs[1];
 				auto v2 = vs[2];
-				return [=]() { glUniform3f(address, v0, v1, v2); };
+				return [=](MaterialParameter&) { glUniform3f(address, v0, v1, v2); };
 			} else if (n == 2) {
 				auto v0 = vs[0];
 				auto v1 = vs[1];
 				auto v2 = vs[2];
 				auto v3 = vs[3];
-				return [=]() { glUniform4f(address, v0, v1, v2, v3); };
+				return [=](MaterialParameter&) { glUniform4f(address, v0, v1, v2, v3); };
 			}
 		}
 		case UniformType::FloatArray:
 		{
 			auto vs = reinterpret_cast<float*>(data);
 			std::vector<float> d(vs, vs + n);
-			return [=]() { glUniform1fv(address, n, d.data()); };
+			return [=](MaterialParameter&) { glUniform1fv(address, n, d.data()); };
+		}
+		case UniformType::Mat4:
+		{
+			auto vs = reinterpret_cast<float*>(data);
+			std::vector<float> d(vs, vs + 16);
+			return [=](MaterialParameter&) { glUniformMatrix4fv(address, 1, false, d.data()); };
 		}
 		default:
 			throw Exception("Unsupported uniform type: " + String::integerToString(static_cast<int>(type)));

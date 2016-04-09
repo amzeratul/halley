@@ -32,6 +32,7 @@
     <ClInclude Include="src\core\environment.h" />
     <ClInclude Include="src\core\game.h" />
     <ClInclude Include="src\external\irunner.h" />
+    <ClInclude Include="src\graphics\camera.h" />
     <ClInclude Include="src\graphics\material.h" />
     <ClInclude Include="src\graphics\painter.h" />
     <ClInclude Include="src\graphics\shader.h" />
@@ -53,6 +54,7 @@
     <ClCompile Include="src\api\halley_api.cpp" />
     <ClCompile Include="src\core\core_runner.cpp" />
     <ClCompile Include="src\core\environment.cpp" />
+    <ClCompile Include="src\graphics\camera.cpp" />
     <ClCompile Include="src\graphics\material.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\graphics\texture.cpp" />

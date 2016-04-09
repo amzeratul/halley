@@ -18,8 +18,7 @@ namespace Halley
 		void operator=(Vector2f p);
 		void operator=(int p);
 		void operator=(Vector2i p);
-
-		// TODO: other bindings
+		void operator=(Matrix4f m);
 
 	private:
 		MaterialParameter(Material& material, String name);
@@ -28,8 +27,8 @@ namespace Halley
 		void apply();
 		void bind();
 
-		std::function<void()> toApply;
-		std::function<void()> toBind;
+		std::function<void(MaterialParameter&)> toApply;
+		std::function<void(MaterialParameter&)> toBind;
 
 		Material& material;
 		String name;
@@ -45,6 +44,7 @@ namespace Halley
 		Material(std::shared_ptr<Shader> shader, VideoAPI* api);
 
 		void bind();
+		Shader& getShader() const;
 
 		MaterialParameter& operator[](String name);
 		
