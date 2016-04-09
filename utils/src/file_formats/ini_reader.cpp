@@ -21,7 +21,7 @@
 
 #include "ini_reader.h"
 #include <memory>
-#include "../debug/exception.h"
+#include "../support/exception.h"
 using namespace Halley;
 
 #ifdef _MSC_VER

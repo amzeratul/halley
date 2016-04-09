@@ -24,8 +24,8 @@
 #endif
 
 #include "halleystring.h"
-#include "../debug/exception.h"
-#include "../debug/assert.h"
+#include "../support/exception.h"
+#include "../support/assert.h"
 #include <sstream>
 #include <iomanip>
 

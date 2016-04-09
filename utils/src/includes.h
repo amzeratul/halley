@@ -10,12 +10,6 @@
 #include "data_structures/memory_pool.h"
 #include "data_structures/rect_spatial_checker.h"
 
-#include "debug/assert.h"
-#include "debug/console.h"
-#include "debug/debug.h"
-#include "debug/exception.h"
-#include "debug/redirect_stream.h"
-
 #include "file_formats/image.h"
 #include "file_formats/ini_reader.h"
 #include "file_formats/json_file.h"
@@ -45,6 +39,12 @@
 
 #include "resources/resource.h"
 #include "resources/resource_data.h"
+
+#include "support/assert.h"
+#include "support/console.h"
+#include "support/debug.h"
+#include "support/exception.h"
+#include "support/redirect_stream.h"
 
 #include "text/encode.h"
 #include "text/halleystring.h"

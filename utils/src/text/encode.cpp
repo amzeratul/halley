@@ -21,7 +21,7 @@
 
 #include "encode.h"
 #include "../maths/utils.h"
-#include "../debug/assert.h"
+#include "../support/assert.h"
 
 static const char* base64dict = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static std::vector<char> base64reverse;

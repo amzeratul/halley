@@ -10,12 +10,6 @@
     <Filter Include="maths">
       <UniqueIdentifier>{63d38d70-78f3-44fc-98db-b431175f5bfb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="debug">
-      <UniqueIdentifier>{64e38a54-6cff-4f65-85de-2128e63d1fde}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="debug\StackWalker">
-      <UniqueIdentifier>{a50bc32d-1f9b-47ff-9c3f-ce52b9a703d2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="os">
       <UniqueIdentifier>{a43009a7-93f4-4360-83df-a5db52892dee}</UniqueIdentifier>
     </Filter>
@@ -52,6 +46,12 @@
     <Filter Include="resources">
       <UniqueIdentifier>{6c93d872-906a-46af-8031-4f2ef64e6f7d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="support">
+      <UniqueIdentifier>{64e38a54-6cff-4f65-85de-2128e63d1fde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="support\StackWalker">
+      <UniqueIdentifier>{acebb828-d563-4f70-afca-4a067b9b016c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\maths\aabb.cpp">
@@ -59,18 +59,6 @@
     </ClCompile>
     <ClCompile Include="src\maths\random.cpp">
       <Filter>maths</Filter>
-    </ClCompile>
-    <ClCompile Include="src\debug\debug.cpp">
-      <Filter>debug</Filter>
-    </ClCompile>
-    <ClCompile Include="src\debug\exception.cpp">
-      <Filter>debug</Filter>
-    </ClCompile>
-    <ClCompile Include="src\debug\StackWalker\StackWalker.cpp">
-      <Filter>debug\StackWalker</Filter>
-    </ClCompile>
-    <ClCompile Include="src\debug\console.cpp">
-      <Filter>debug</Filter>
     </ClCompile>
     <ClCompile Include="src\os\os.cpp">
       <Filter>os</Filter>
@@ -165,9 +153,6 @@
     <ClCompile Include="src\data_structures\rect_spatial_checker.cpp">
       <Filter>data_structures</Filter>
     </ClCompile>
-    <ClCompile Include="src\debug\redirect_stream.cpp">
-      <Filter>debug</Filter>
-    </ClCompile>
     <ClCompile Include="src\plugin\plugin.cpp">
       <Filter>plugin</Filter>
     </ClCompile>
@@ -176,6 +161,21 @@
     </ClCompile>
     <ClCompile Include="src\file_formats\text_file.cpp">
       <Filter>file_formats</Filter>
+    </ClCompile>
+    <ClCompile Include="src\support\console.cpp">
+      <Filter>support</Filter>
+    </ClCompile>
+    <ClCompile Include="src\support\debug.cpp">
+      <Filter>support</Filter>
+    </ClCompile>
+    <ClCompile Include="src\support\exception.cpp">
+      <Filter>support</Filter>
+    </ClCompile>
+    <ClCompile Include="src\support\redirect_stream.cpp">
+      <Filter>support</Filter>
+    </ClCompile>
+    <ClCompile Include="src\support\StackWalker\StackWalker.cpp">
+      <Filter>support\StackWalker</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -209,26 +209,11 @@
     <ClInclude Include="src\maths\vector3d.h">
       <Filter>maths</Filter>
     </ClInclude>
-    <ClInclude Include="src\debug\debug.h">
-      <Filter>debug</Filter>
-    </ClInclude>
     <ClInclude Include="src\maths\fixed_point.h">
       <Filter>maths</Filter>
     </ClInclude>
-    <ClInclude Include="src\debug\assert.h">
-      <Filter>debug</Filter>
-    </ClInclude>
-    <ClInclude Include="src\debug\exception.h">
-      <Filter>debug</Filter>
-    </ClInclude>
-    <ClInclude Include="src\debug\StackWalker\StackWalker.h">
-      <Filter>debug\StackWalker</Filter>
-    </ClInclude>
     <ClInclude Include="src\maths\colour.h">
       <Filter>maths</Filter>
-    </ClInclude>
-    <ClInclude Include="src\debug\console.h">
-      <Filter>debug</Filter>
     </ClInclude>
     <ClInclude Include="src\os\os.h">
       <Filter>os</Filter>
@@ -347,9 +332,6 @@
     <ClInclude Include="src\data_structures\rect_spatial_checker.h">
       <Filter>data_structures</Filter>
     </ClInclude>
-    <ClInclude Include="src\debug\redirect_stream.h">
-      <Filter>debug</Filter>
-    </ClInclude>
     <ClInclude Include="src\plugin\plugin.h">
       <Filter>plugin</Filter>
     </ClInclude>
@@ -362,5 +344,28 @@
     <ClInclude Include="src\file_formats\text_file.h">
       <Filter>file_formats</Filter>
     </ClInclude>
+    <ClInclude Include="src\support\assert.h">
+      <Filter>support</Filter>
+    </ClInclude>
+    <ClInclude Include="src\support\console.h">
+      <Filter>support</Filter>
+    </ClInclude>
+    <ClInclude Include="src\support\debug.h">
+      <Filter>support</Filter>
+    </ClInclude>
+    <ClInclude Include="src\support\exception.h">
+      <Filter>support</Filter>
+    </ClInclude>
+    <ClInclude Include="src\support\redirect_stream.h">
+      <Filter>support</Filter>
+    </ClInclude>
+    <ClInclude Include="src\support\StackWalker\StackWalker.h">
+      <Filter>support\StackWalker</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\support\StackWalker\StackWalker.htm">
+      <Filter>support\StackWalker</Filter>
+    </None>
   </ItemGroup>
 </Project>

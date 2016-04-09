@@ -133,11 +133,6 @@
     <ClCompile Include="src\concurrency\thread_pool.cpp" />
     <ClCompile Include="src\data_structures\memory_pool.cpp" />
     <ClCompile Include="src\data_structures\rect_spatial_checker.cpp" />
-    <ClCompile Include="src\debug\console.cpp" />
-    <ClCompile Include="src\debug\debug.cpp" />
-    <ClCompile Include="src\debug\exception.cpp" />
-    <ClCompile Include="src\debug\redirect_stream.cpp" />
-    <ClCompile Include="src\debug\StackWalker\StackWalker.cpp" />
     <ClCompile Include="src\file_formats\image.cpp" />
     <ClCompile Include="src\file_formats\ini_reader.cpp" />
     <ClCompile Include="src\file_formats\json\jsoncpp.cpp" />
@@ -165,6 +160,11 @@
     <ClCompile Include="src\os\os_win32.cpp" />
     <ClCompile Include="src\plugin\plugin.cpp" />
     <ClCompile Include="src\resources\resource_data.cpp" />
+    <ClCompile Include="src\support\console.cpp" />
+    <ClCompile Include="src\support\debug.cpp" />
+    <ClCompile Include="src\support\exception.cpp" />
+    <ClCompile Include="src\support\redirect_stream.cpp" />
+    <ClCompile Include="src\support\StackWalker\StackWalker.cpp" />
     <ClCompile Include="src\text\encode.cpp" />
     <ClCompile Include="src\text\halleystring.cpp" />
     <ClCompile Include="src\time\stopwatch.cpp" />
@@ -180,12 +180,6 @@
     <ClInclude Include="src\data_structures\mapped_pool.h" />
     <ClInclude Include="src\data_structures\memory_pool.h" />
     <ClInclude Include="src\data_structures\rect_spatial_checker.h" />
-    <ClInclude Include="src\debug\assert.h" />
-    <ClInclude Include="src\debug\console.h" />
-    <ClInclude Include="src\debug\debug.h" />
-    <ClInclude Include="src\debug\exception.h" />
-    <ClInclude Include="src\debug\redirect_stream.h" />
-    <ClInclude Include="src\debug\StackWalker\StackWalker.h" />
     <ClInclude Include="src\file_formats\image.h" />
     <ClInclude Include="src\file_formats\ini_reader.h" />
     <ClInclude Include="src\file_formats\json\json-forwards.h" />
@@ -227,11 +221,22 @@
     <ClInclude Include="src\plugin\plugin.h" />
     <ClInclude Include="src\resources\resource.h" />
     <ClInclude Include="src\resources\resource_data.h" />
+    <ClInclude Include="src\support\assert.h" />
+    <ClInclude Include="src\support\console.h" />
+    <ClInclude Include="src\support\debug.h" />
+    <ClInclude Include="src\support\exception.h" />
+    <ClInclude Include="src\support\redirect_stream.h" />
+    <ClInclude Include="src\support\StackWalker\StackWalker.h" />
     <ClInclude Include="src\text\encode.h" />
     <ClInclude Include="src\text\halleystring.h" />
     <ClInclude Include="src\time\halleytime.h" />
     <ClInclude Include="src\time\stopwatch.h" />
     <ClInclude Include="src\web\http.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\support\StackWalker\StackWalker.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

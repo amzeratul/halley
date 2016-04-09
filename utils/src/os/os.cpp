@@ -24,7 +24,7 @@
 #include "os_mac.h"
 #include "os_android.h"
 #include "os_ios.h"
-#include "../debug/exception.h"
+#include "../support/exception.h"
 
 using namespace Halley;
 

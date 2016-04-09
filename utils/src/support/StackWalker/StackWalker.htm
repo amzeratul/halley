@@ -1,0 +1,555 @@
+<!-- HTML for article "Walking the callstack" by Jochen Kalmbach [MVP VC++]
+     URL: http://www.codeproject.com/threads/StackWalker.asp
+     URL: http://www.codeguru.com/article-preview.php/10317/
+
+     Article content copyright Jochen Kalmbach [MVP VC++]
+
+     Description:
+     This article describes a documented and most portable way to walk a
+	 callstack for any thread (current, other and remote). It has an abstraction
+	 layer, so the calling app does not need to know the internals.
+-->
+<!----------------------------- Ignore ----------------------------->
+<link rel="stylesheet" type="text/css" href="http://www.codeproject.com/styles/global.css">
+  <p><b>Please choose 'View Source' in your browser to view the HTML, or File | Save 
+      to save this file to your hard drive for editing.</b></p>
+  <hr size="1" noshade>
+  <!----------------------------- Ignore ----------------------------->
+  <!----------------------------- Article Starts ----------------------------->
+  <UL class="download">
+    <LI>
+      <A href="http://www.codeproject.com/threads/StackWalker/StackWalker.zip">Download 
+        demo project with source - 64 Kb</A>
+    </LI>
+  </UL>
+  <P><IMG height="300" alt="Sample Image - StackWalker.gif" src="http://www.codeproject.com/threads/StackWalker/StackWalker.gif"
+      width="600"></P>
+  <H2>Introduction</H2>
+  <P>In some cases you need to display the callstack of the current thread or your 
+    are just interested in the callstack of other threads / processes. Therefore I 
+    wrote this project.</P>
+  <P>The goal for this project was the following:</P>
+  <UL>
+    <LI>
+    Simple interface to generate a callstack
+    <LI>
+    C++ based to allow overwrites of several methods
+    <LI>
+    Hiding the implementation details (API) from the class' interface
+    <LI>
+    Support of x86, x64 and IA64 architecture
+    <LI>
+    Default output to debugger-output window (but can be customized)
+    <LI>
+    Support of user-provided read-memory-function
+    <LI>
+    Support of the widest range of development-IDEs (VC5-VC8)
+    <LI>
+      Most portable solution to walk the callstack</LI></UL>
+  <H2>Background</H2>
+  <P>To walk the callstack there is a documented interface: <A href="http://msdn.microsoft.com/library/en-us/debug/base/stackwalk64.asp" target="_blank">
+      <CODE>StackWalk64</CODE></A>. Starting with Win9x/W2K, this interface is in 
+    the <I>dbghelp.dll</I> library (on NT, it is in <I>imagehlp.dll</I>). But the 
+    function name (<CODE>StackWalk64</CODE>) has changed starting with W2K (before 
+    it was called <CODE>StackWalk</CODE> (without the <CODE>64</CODE>)! This 
+    project only supports the newer Xxx64-funtions. If you need to use it on older 
+    systems, you can download the <A href="http://www.microsoft.com/downloads/release.asp?releaseid=30682" target="_blank">
+      redistributable for NT/W9x</A>.</P>
+  <P>The latest <I>dbghelp.dll</I> can always be downloaded with the <A href="http://www.microsoft.com/whdc/devtools/debugging/" target="_blank">
+      Debugging Tools for Windows</A>. This also contains the <I>symsrv.dll</I> which 
+    enables the use of the public Microsoft symbols-server (can be used to retrieve 
+    debugging information for system-files; see below).</P>
+  <H2>Using the code</H2>
+  <P>The usage of the class is very simple. For example if you want to display the 
+    callstack of the current thread, just instantiate a <CODE>StackWalk</CODE> object 
+    and call the <CODE>ShowCallstack</CODE> member:</P>
+  <PRE>#include &lt;windows.h&gt;
+#include "StackWalker.h"
+
+void Func5() { StackWalker sw; sw.ShowCallstack(); }
+void Func4() { Func5(); }
+void Func3() { Func4(); }
+void Func2() { Func3(); }
+void Func1() { Func2(); }
+
+int main()
+{
+  Func1();
+  return 0;
+}</PRE>
+  <P>This produces the following output in the debugger-output window:</P>
+  <PRE lang="text">[...] (output stripped)
+d:\privat\Articles\stackwalker\stackwalker.cpp (736): StackWalker::ShowCallstack
+d:\privat\Articles\stackwalker\main.cpp (4): Func5
+d:\privat\Articles\stackwalker\main.cpp (5): Func4
+d:\privat\Articles\stackwalker\main.cpp (6): Func3
+d:\privat\Articles\stackwalker\main.cpp (7): Func2
+d:\privat\Articles\stackwalker\main.cpp (8): Func1
+d:\privat\Articles\stackwalker\main.cpp (13): main
+f:\vs70builds\3077\vc\crtbld\crt\src\crt0.c (259): mainCRTStartup
+77E614C7 (kernel32): (filename not available): _BaseProcessStart@4</PRE>
+  <P>You can now double-click on a line and the IDE will automatically jump to the 
+    desired file/line.</P>
+  <H3>Providing an own output-mechanism</H3>
+  <P>If you want to direct the output in a file or want to use some other 
+    output-mechanism, you simply need to derive from the <CODE>StackWalker</CODE> class. 
+    You have two options to do this: only overwrite the <CODE>OnOutput</CODE> method 
+    or overwrite each <CODE>OnXxx</CODE>-function. The first solution (<CODE>OnOutput</CODE>) 
+    is very easy and uses the default-implementation of the other <CODE>OnXxx</CODE>-functions 
+    (which should be enough for most of the cases). To output also the the console, 
+    you need to do the following:</P>
+  <PRE>class MyStackWalker : public StackWalker
+{
+public:
+  MyStackWalker() : StackWalker() {}
+protected:
+  virtual void OnOutput(LPCSTR szText)
+    { printf(szText); StackWalker::OnOutput(szText); }
+};</PRE>
+  <H3>Retrieving detailed callstack info</H3>
+  <P>If you want detailed info about the callstack (like loaded-modules, addresses, 
+    errors, ...) you can overwrite the corresponding methods. The following methods 
+    are provided:</P>
+  <PRE>class StackWalker
+{
+protected:
+  virtual void OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUserName);
+  virtual void OnLoadModule(LPCSTR img, LPCSTR mod, DWORD64 baseAddr, DWORD size,
+    DWORD result, LPCSTR symType, LPCSTR pdbName, ULONGLONG fileVersion);
+  virtual void OnCallstackEntry(CallstackEntryType eType, CallstackEntry &amp;entry);
+  virtual void OnDbgHelpErr(LPCSTR szFuncName, DWORD gle, DWORD64 addr);
+};</PRE>
+  <P>These methods are called during the generation of the callstack.</P>
+  <H3>Various kinds of callstacks</H3>
+  <P>In the constructor of the class, you need to specify if you want to generate 
+    callstacks for the current process or for another process. The following 
+    constructors are available:</P>
+  <PRE>class StackWalker
+{
+public:
+  StackWalker(
+    int options = OptionsAll,
+    LPCSTR szSymPath = NULL,
+    DWORD dwProcessId = GetCurrentProcessId(),
+    HANDLE hProcess = GetCurrentProcess()
+    );
+  // Just for other processes with default-values for options and symPath
+  StackWalker(
+    DWORD dwProcessId,
+    HANDLE hProcess
+    );
+};</PRE>
+  <P>To do the actual stack-walking you need to call the following functions:</P>
+  <PRE>class StackWalker
+{
+public:
+  BOOL ShowCallstack(
+    HANDLE hThread = GetCurrentThread(),
+    CONTEXT *context = NULL,
+    PReadProcessMemoryRoutine readMemoryFunction = NULL,
+    LPVOID pUserData = NULL
+    );
+};</PRE>
+  <H3>Dislaying the callstack of an exception</H3>
+  <P>With this <CODE>StackWalker</CODE> you can also display the callstack inside 
+    an exception handler. You only need to write an filter-function which does the 
+    stack-walking:
+  </P>
+  <PRE>// The exception filter function:
+LONG WINAPI ExpFilter(EXCEPTION_POINTERS* pExp, DWORD dwExpCode)
+{
+  StackWalker sw;
+  sw.ShowCallstack(GetCurrentThread(), pExp-&gt;ContextRecord);
+  return EXCEPTION_EXECUTE_HANDLER;
+}
+
+// This is how to catch an exception:
+__try
+{
+  // do some ugly stuff...
+}
+__except (ExpFilter(GetExceptionInformation(), GetExceptionCode()))
+{
+}</PRE>
+  <P></P>
+  <H2>Points of Interest</H2>
+  <H3>Context and callstack</H3>
+  <P>To walk the callstack of a given thread, you need at least two facts:</P>
+  <UL>
+    <LI>
+      <P><B>The context of the thread</B>
+      <P>The context is used to retrieve the current <I>Instruction Pointer</I> and the 
+        values for the <I>Stack Pointer (SP)</I> and sometimes the <I>Frame Pointer (FP)</I>. 
+        The difference between SP and FP is in short: SP points to the latest address 
+        on the stack. FP is used to reference the arguments for a function. See also <A href="http://www.embeddedrelated.com/usenet/embedded/show/31646-1.php" target="_blank">
+          Difference Between Stack Pointer and Frame Pointer</A>. But only the SP is 
+        essential for the processor. The FP is only used by the compiler. You can also 
+        disable the usage of FP (see: <A href="http://msdn.microsoft.com/library/en-us/vccore/html/_core_.2f.oy.asp" target="_blank">
+          /Oy (Frame-Pointer Omission)</A>).</P>
+    <LI>
+      <P><B>The callstack</B>
+      <P>The callstack is a memory-region which contains all the data/addresses of the 
+        callers. This data must be used to retrieve the callstack (as the name says). 
+        The most important part is: This data-region <B>must not change</B> until the 
+        stack-walking is finished! This is also the reason why the thread must be in 
+        state <I>Suspended</I> to retrieve a valid callstack. If you want to do a 
+        stack-walking for the current thread, then you must not change the callstack 
+        memory after the addresses which are declared in the context record.</P>
+    </LI>
+  </UL>
+  <H3>Initializing the <A href="http://msdn.microsoft.com/library/en-us/debug/base/stackframe64_str.asp" target="_blank">
+      <CODE>STACKFRAME64</CODE></A>-structure</H3>
+  <P>To successfully walk the callstack with <A href="http://msdn.microsoft.com/library/en-us/debug/base/stackwalk64.asp" target="_blank">
+      <CODE>StackWalk64</CODE></A> you need to initialize the <A href="http://msdn.microsoft.com/library/en-us/debug/base/stackframe64_str.asp" target="_blank">
+      <CODE>STACKFRAME64</CODE></A>-structure with <I>meaningfull</I> values. In 
+    the documentation to <A href="http://msdn.microsoft.com/library/en-us/debug/base/stackwalk64.asp" target="_blank">
+      <CODE>StackWalk64</CODE></A> there is only a small note about this structure:
+    <UL>
+      <LI>
+        <I>The first call to this function will fail if the AddrPC and AddrFrame members 
+          of the <CODE>STACKFRAME64</CODE> structure passed in the StackFrame parameter 
+          are not initialized.</I></LI></UL>
+    According to this documentation, most programs only initialize <CODE>AddrPC</CODE>
+    and <CODE>AddrFrame</CODE>; and this had worked until the newest <I>dbhhelp.dll</I>
+    (v5.6.3.7). Now you also need to initialize <CODE>AddrStack</CODE>. After 
+    having some trouble with this (and other problems) I talked to the dbghelp-team 
+    and got the following answer (2005-08-02; my own comments are written <I>italic</I>!):
+    <UL>
+      <LI>
+      AddrStack should always be set to the stack pointer value for all platforms. 
+      You can certainly publish that AddrStack should be set. You're also welcome to 
+      say that new releases of dbghelp are now requiring this.
+      <LI>
+        Given a current dbghelp your code should:
+        <OL>
+      <LI>
+        Always use <A href="http://msdn.microsoft.com/library/en-us/debug/base/stackwalk64.asp" target="_blank">
+          <CODE>StackWalk64</CODE></A>
+      <LI>
+        Always set <CODE>AddrPC</CODE> to the current instruction pointer (<I><CODE>Eip</CODE>
+          on x86, <CODE>Rip</CODE> on x64 and <CODE>StIIP</CODE> on IA64</I>)
+      <LI>
+        Always set <CODE>AddrStack</CODE> to the current stack pointer (<I><CODE>Esp</CODE>
+          on x86, <CODE>Rsp</CODE> on x64 and <CODE>IntSp</CODE> on IA64</I>)
+      <LI>
+        Set <CODE>AddrFrame</CODE> to the current frame pointer when meaningful. On x86 
+        this is <CODE>Ebp</CODE>, on x64 you can use <CODE>Rbp</CODE> (<I>but is not used 
+          by VC2005B2; instead it uses Rdi!</I>) and on IA64 you can use <CODE>RsBSP</CODE>.
+        <A href="http://msdn.microsoft.com/library/en-us/debug/base/stackwalk64.asp" target="_blank">
+          <CODE>StackWalk64</CODE></A>
+      will ignore the value when it isn't needed for unwinding.
+      <LI>
+        Set <CODE>AddrBStore</CODE> to <CODE>RsBSP</CODE> for IA64</LI>
+      </OL> </LI></UL>
+  <P></P>
+  <H3>Walking the callstack of the current thread</H3>
+  <P>On x86 systems (prior to XP), there is no direct supported function to 
+    retrieve the context of the current thread. The recommended way is to throw an 
+    exception and catch it. Now you will have a valid context-record. The default 
+    way of capturing the context of the current thread is by doing some 
+    inline-assembler to retrieve <CODE lang="asm">EIP</CODE>, <CODE lang="asm">ESP</CODE>
+    and <CODE lang="asm">EBP</CODE>. If you want to use the <I>documented</I> way, 
+    then you need to define <CODE>CURRENT_THREAD_VIA_EXCEPTION</CODE> for the 
+    project. But you should be aware of the fact, that <CODE>GET_CURRENT_CONTEXT</CODE>
+    is a macro which internally uses <A href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vccelng/htm/key_s-z_4.asp"
+      target="_blank"><CODE>__try __except</CODE></A>. Your function must be able 
+    to contain these statements.</P>
+  <P>Starting with XP and on x64 and IA64 systems there is a documented function to 
+    retrieve the context of the current thread: <A href="http://msdn.microsoft.com/library/en-us/debug/base/rtlcapturecontext.asp"
+      target="_blank"><CODE>RtlCaptureContext</CODE></A>.</P>
+  <P>To do a stack-walking of the current thread you simply need to do:</P>
+  <PRE>  StackWalker sw;
+  sw.ShowCallstack();</PRE>
+  <H3>Walking the callstack of other threads in the same process</H3>
+  <P>To walk the callstack of another thread inside the same process, you need to 
+    suspend the target thread (so the callstack will not change during the 
+    stack-walking). But you should be aware that suspending a thread in the same 
+    process might lead to dead-locks! (See: <A href="http://blog.kalmbachnet.de/?postid=6" target="_blank">
+      Why you never should call Suspend/TerminateThread (Part I</A>, <A href="http://blog.kalmbachnet.de/?postid=16" target="_blank">
+      Part II</A>, <A href="http://blog.kalmbachnet.de/?postid=17" target="_blank">Part 
+      III</A>.)</P>
+  <P>If you have the handle to the thread, you can do the following to retrieve the 
+    callstack:</P>
+  <PRE>  MyStackWalker sw;
+  sw.ShowCallstack(hThread);</PRE>
+  <P>For a complete sample to retrieve the callstack of another thread you can take 
+    a look into the demo-project.</P>
+  <H3>Walking the callstack of other threads in other processes</H3>
+  <P>The approach is almost the same as for walking the callstack for the current 
+    process. You only need to provide the <CODE>ProcessID</CODE> and a handle to 
+    the process (<CODE>hProcess</CODE>). Then you also need to suspend the thread 
+    to do the stack-walking. A complete sample to retrieve the callstack of another 
+    process is in the demo-project.</P>
+  <H3>Reusing the <CODE>StackWalk</CODE> instance</H3>
+  <P>It is no problem to reuse the <CODE>StackWalk</CODE> instance, as long as you 
+    want to do the stack-walking for the same process. If you want to do a lot of 
+    stack-walking it is recommended to reuse the instance. The reason is simple: if 
+    you create a new instance, then the symbol-files must be re-loaded for each 
+    instance. And this is really time-consuming. Also it is not allowed to access 
+    the <CODE>StackWalk</CODE> functions from different threads (the <I>dbghelp.dll</I>
+    is <B>not</B> thread-safe!). Therefore it makes no sense to create more than 
+    one instance...</P>
+  <H3>Symbol-Search-Path</H3>
+  <P>
+    By default (<CODE>SymBuildPath</CODE> and <CODE>SymUseSymSrv</CODE>, a 
+    symbol-search path is provided to the <I>dbghelp.dll</I>. This path contains 
+    the following directories:
+    <UL>
+      <LI>
+        The optional provided <CODE>szSymPath</CODE>. If this parameter is provided, 
+        the option <CODE>SymBuildPath</CODE>
+      is automatically set. Each path must be separated with an ";"
+      <LI>
+      The current directory
+      <LI>
+      The directory of the EXE
+      <LI>
+        The environment variable <CODE>_NT_SYMBOL_PATH</CODE>
+      <LI>
+        The environment variable <CODE>_NT_ALTERNATE_SYMBOL_PATH</CODE>
+      <LI>
+        The environment variable <CODE>SYSTEMROOT</CODE>
+      <LI>
+        The environment variable <CODE>SYSTEMROOT</CODE>
+      appended with "\system32"
+      <LI>
+        The public Microsoft symbol-server: <CODE>SRV*%SYSTEMDRIVE%\websymbols*http://msdl.microsoft.com/download/symbols</CODE></LI>
+    </UL>
+  <P></P>
+  <H3>Symbol-Server</H3>
+  <P>If you want to use the public symbols for the OS-files from the <A href="http://support.microsoft.com/?kbid=311503" target="_blank">
+      Microsoft-Symbol-Server</A>, you either need the <A href="http://www.microsoft.com/whdc/devtools/debugging/" target="_blank">
+      Debugging Tools for Windows</A> (then <I>symsrv.dll</I> and the latest <I>dbghelp.dll</I>
+    will be found automatically) or you need to redistribute "<I>dbghelp.dll</I>" <B>and</B>
+    "<I>smysrv.dll</I>" from this package!</P>
+  <H3>Loading the modules and symbols</H3>
+  <P>To succesfully walk the callstack of a thread, <I>dbghelp.dll</I> requires 
+    that the modules are known by the library. Therefor you need to "register" each 
+    module of the process via <A href="http://msdn.microsoft.com/library/en-us/debug/base/symloadmodule64.asp" target="_blank">
+      SymLoadModule64</A>. To accomplish this you need to enumerate the modules of 
+    the given process.
+  </P>
+  <P>Starting with Win9x and W2k it is possible to use the <A href="http://msdn.microsoft.com/library/en-us/perfmon/base/tool_help_library.asp"
+      target="_blank">ToolHelp32-API</A>. You need to make a <A href="http://msdn.microsoft.com/library/en-us/perfmon/base/createtoolhelp32snapshot.asp"
+      target="_blank">snapshot (CreateToolhelp32Snapshot)</A> of the process and 
+    the you can enumerate the modules via <A href="http://msdn.microsoft.com/library/en-us/perfmon/base/module32first.asp" target="_blank">
+      Module32First</A> and <A href="http://msdn.microsoft.com/library/en-us/perfmon/base/module32next.asp" target="_blank">
+      Module32Next</A>.<BR>
+    Normally the ToolHelp functions are located in the <I>kernel32.dll</I> but on 
+    Win9x it is located in a separate DLL: <I>tlhelp32.dll</I>. Therefor we need to 
+    check the functions in both DLLs.</P>
+  <P></P>
+  <P>
+    If you have NT4, then <A href="http://msdn.microsoft.com/library/en-us/perfmon/base/tool_help_library.asp"
+      target="_blank">ToolHelp32-API</A> is not available. But in NT4 you can use 
+    the PSAPI. To enumerate all modules you need to call <A href="" target="_blank">EnumProcessModules</A>, 
+    but you only get the handles to the modules. To feed <A href="http://msdn.microsoft.com/library/en-us/debug/base/symloadmodule64.asp" target="_blank">
+      SymLoadModule64</A> you also need to query the <I>ModuleBaseAddr</I>, <I>SizeOfImage</I>
+    (via <A href="http://msdn.microsoft.com/library/en-us/perfmon/base/getmoduleinformation.asp"
+      target="_blank">GetModuleInformation</A>), <I>ModuleBaseName</I> (via <A href="http://msdn.microsoft.com/library/en-us/perfmon/base/getmodulebasename.asp"
+      target="_blank">GetModuleBaseName</A>) and <I>ModuleFileName(Path)</I> (via <A href="http://msdn.microsoft.com/library/en-us/perfmon/base/getmodulefilenameex.asp"
+      target="_blank">GetModuleFileNameEx</A>).
+    <H3><I>dbghelp.dll</I></H3>
+  <P>
+    There are a couple of issues with <I>dbghelp.dll</I>.<BR>
+    <UL>
+      <LI>
+        The first is, there are two "teams" at Microsoft which redistribute the <I>dbghelp.dll</I>. 
+        One team is the <I>OS-team</I>, the other is the <I>Debugging-Tools-Team</I> (I 
+        don´t know the reall names...). In general you can say: The <I>dbghelp.dll</I> provided 
+        with the <A href="http://www.microsoft.com/whdc/devtools/debugging/" target="_blank">
+          Debugging Tools for Windows</A> is the most recent version.<BR>
+        One problem of this two teams is the different versioning of the <I>dbghelp.dll</I>. 
+        For example for XP-SP1 the version is <I>5.1.2600.1106</I> dated <I>2002-08-29</I>. 
+        The version <I>6.0.0017.0</I> which was redistributed from the <I>debug-team</I>
+        is dated <I>2002-04-31</I>. So there is at least a conflict in the date (the 
+      newer version is older). And it is even harder to decide which version is 
+      "better" (or has more functionality).
+      <LI>
+        Starting with Me/W2k, the <I>dbghelp.dll</I>-file in the <I>system32</I> is 
+        protected by the <A href="http://support.microsoft.com/?kbid=222193" target="_blank">
+          System File Protection</A>. So if you want to use a newer <I>dbghelp.dll</I> you 
+        need to redistribute the version from the <A href="http://www.microsoft.com/whdc/devtools/debugging/" target="_blank">
+          Debugging Tools for Windows</A> (put it in the same directory as your EXE).<BR>
+        This leads to a problem on W2k if you want to walk the callstack for an app, 
+        which was build using VC7 or later. The VC7 compiler generates a new PDB-format 
+        (called <A href="http://msdn.microsoft.com/library/en-us/diasdk/html/vsoriDebugInterfaceAccessSDK.asp"
+          target="_blank">DIA</A>). This PDB-format cannot be read with the <I>dbghelp.dll</I>
+        which is installed with the OS. Therefor you will not get very usefully 
+        callstacks (or at least with no debugging info like filename, line, function 
+        name, ...). To overcome this problem, you need to redistribute a newer <I>dbghelp.dll</I>.
+      <LI>
+        The <I>dbghelp.dll</I> version <I>6.5.3.7</I> has a <I>bug</I> or at least a <I>documentation 
+          change</I> of the <A href="http://msdn.microsoft.com/library/en-us/debug/base/stackwalk64.asp" target="_blank">
+          StackWalk64</A> function. In the documentation you can read:
+        <BR>
+        <I>The first call to this function will fail if the AddrPC and AddrFrame members 
+          of the STACKFRAME64 structure passed in the StackFrame parameter are not 
+          initialized.</I><BR>
+        and<BR>
+        <I>[The ContextRecord] parameter is required only when the MachineType parameter 
+          is not IMAGE_FILE_MACHINE_I386.</I><BR>
+        <B>But this is not true anymore.</B> Now the callstack on x86-systems cannot be 
+        retrieved if you pass <CODE>NULL</CODE> as <I>ContextRecord</I>. From my point 
+        of view this is a major documentation change. Now you either need to initialize 
+        the <CODE>AddrStack</CODE> as well, or provide a valid <I>ContextRecord</I> which 
+        contains the <CODE>EIP</CODE>, <CODE>EBP</CODE> and <CODE>ESP</CODE>
+      registers!
+      <LI>
+        See also comments in the <I>Initializing the STACKFRAME64-structure</I> chapter...</LI>
+    </UL>
+  <P></P>
+  <H3>Options</H3>
+  <P>To do some kind of modification of the behaviour, you can optionally specify 
+    some options. Here is the list of the available options:</P>
+  <PRE>  typedef enum StackWalkOptions
+  {
+    // No addition info will be retrived
+    // (only the address is available)
+    RetrieveNone = 0,
+
+    // Try to get the symbol-name
+    RetrieveSymbol = 1,
+
+    // Try to get the line for this symbol
+    RetrieveLine = 2,
+
+    // Try to retrieve the module-infos
+    RetrieveModuleInfo = 4,
+
+    // Also retrieve the version for the DLL/EXE
+    RetrieveFileVersion = 8,
+
+    // Contains all the abouve
+    RetrieveVerbose = 0xF,
+
+    // Generate a "good" symbol-search-path
+    SymBuildPath = 0x10,
+
+    // Also use the public Microsoft-Symbol-Server
+    SymUseSymSrv = 0x20,
+
+    // Contains all the abouve "Sym"-options
+    SymAll = 0x30,
+
+    // Contains all options (default)
+    OptionsAll = 0x3F
+  } StackWalkOptions;</PRE>
+  <H2>Known issues</H2>
+  <UL>
+    <LI>
+      NT/Win9x: This project only support the <CODE>StackWalk64</CODE> function. If 
+      you need to use it on NT4/Win9x, you need to <A href="http://www.microsoft.com/downloads/release.asp?releaseid=30682" target="_blank">
+        redistribute the dbghelp.dll</A>
+    for this platform.
+    <LI>
+    Currently only supports ANSI-names in callbacks (of course, the project can be 
+    compiled with UNICODE...)
+    <LI>
+      To open a remote thread I used "<CODE>OpenThread</CODE>" which is not available 
+      on NT4/W9x. To have an example of doing this in NT4/Win9x please refer to <A href="http://www.codeproject.com/win32/Remote.asp" target="_blank">
+        Remote Library</A>.
+    <LI>
+      Walking mixed-mode callstacks (managed/unmanaged) does only return the 
+      unmanaged functions.
+    </LI>
+  </UL>
+  <H2>History</H2>
+  <UL>
+    <LI>
+      <B>2005-07-27</B>
+      <UL>
+        <LI>
+        First public release
+        <LI>
+          Supports x86, x64 and IA64.
+        </LI>
+      </UL>
+    <LI>
+      <B>2005-07-28</B>
+      <UL>
+        <LI>
+          Changed the description, so it does not make the impression that this is <I>the 
+            only</I>
+        documented way to walk the callstack...
+        <LI>
+          ShowCallstack(hThread, ...) now accepts a <code>NULL</code>
+        CONTEXT (this forces to capture the context of this thread); it also was 
+        simplified (now only one function for all situations)
+        <LI>
+          Added chapter: <I>Symbol-Search-Path</I>, <I>Loading the modules and symbols</I>
+          and <I>dbghelp.dll</I>
+        </LI>
+      </UL>
+    <LI>
+      <B>2005-08-01</B>
+      <UL>
+        <LI>
+        Added VC7.0 project/solution files
+        <LI>
+          Added more comment to the <CODE>GET_CURRENT_CONTEXT</CODE> define regarding the 
+          use of <CODE>RtlCaptureContext</CODE>
+        function
+        <LI>
+          Problem with uninitialized <CODE>cnt</CODE>
+        variable solved
+        <LI>
+          Workaround for wrongly defined <CODE>GetFileVersionInfoSize</CODE> and <CODE>GetFileVersionInfo</CODE>
+          (on older PSDK-Version (VC7 and before) the first parameter was declared as <CODE>
+            LPTSTR</CODE> instead of <CODE>LPCTSTR</CODE>)
+        <LI>
+          Changed the used <CODE>ContextFlags</CODE> parameter from <CODE>CONTEX_ALL</CODE>
+          to <CODE>CONTEXT_FULL</CODE>
+        (this also works correctly and is supported in older PSDK-versions)
+        <LI>
+        Now compiles on VC5/6 without installing a newer Platform-SDK (all missing 
+        declarations are now embedded)
+        <LI>
+        Added VC6 project/solution files
+        <LI>
+          Added a <CODE>pUserData</CODE> member to the <CODE>ShowCallstack</CODE> function 
+          and the <CODE>PReadProcessMemoryRoutine</CODE> declaration (to pass some 
+          user-defined data, which can be used in the <CODE>readMemoryFunction</CODE>-callback)</LI>
+      </UL>
+    <LI>
+      <B>2005-08-02</B>
+      <UL>
+        <LI>
+        OnSymInit now also outputs the OS-Version by default
+        <LI>
+          Added example for doing an exception-callstack-walking in main.cpp (thanks to <A href="http://www.codeproject.com/script/profile/whos_who.asp?id=536268" target="_blank">
+            owillebo</A>)
+        <LI>
+          Correction in article about <A href="http://msdn.microsoft.com/library/en-us/debug/base/rtlcapturecontext.asp"
+            target="_blank"><CODE>RtlCaptureContext</CODE></A>. This function is also 
+          available starting with XP (thanks to <A href="http://www.codeproject.com/script/profile/whos_who.asp?id=1773366" target="_blank">
+            Dan Moulding</A>)
+        <LI>
+          Added chapter: <I>Initializing the STACKFRAME64-structure</I>, <I>Dislaying the 
+            callstack of an exception</I></LI>
+      </UL>
+    <LI>
+      <B>2005-08-05</B>
+      <UL>
+        <LI>
+          Removed some <A href="http://www.gimpel.com/" target="_blank">Lint</A>
+        issues... thanks to Okko Willeboordse!
+        <LI>
+          Removed all warnings with /analyze switch from VC8</LI>
+      </UL>
+    <LI>
+      <B>2005-09-06</B>
+      <UL>
+        <LI>
+          Fixed a small bug regarding VC5/6 and old PSDK version (OSVERSIONINFOEX is not 
+          present)</LI>
+      </UL>
+    <LI>
+      <B>2005-11-07</B>
+      <UL>
+        <LI>Detects an "endless-callstack" and terminates the stackwalking
+        <LI>Usage of <A href="http://msdn.microsoft.com/library/en-us/debug/base/rtlcapturecontext.asp" target="_blank"><CODE>RtlCaptureContext</CODE></A> only on x64 and IA64 platforms
+      </UL>
+    </LI>
+  </UL>
+<!----------------------------- Article Ends ----------------------------->

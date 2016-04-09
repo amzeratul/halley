@@ -21,7 +21,7 @@
 
 #include <iostream>
 #ifdef _WIN32
-#include "../debug/exception.h"
+#include "../support/exception.h"
 
 #pragma warning(disable: 6387)
 #include "os_win32.h"

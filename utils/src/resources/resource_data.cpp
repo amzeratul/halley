@@ -1,6 +1,6 @@
 #include "resource_data.h"
 #include <SDL.h>
-#include "../debug/exception.h"
+#include "../support/exception.h"
 
 using namespace Halley;
 

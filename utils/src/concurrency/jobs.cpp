@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 #include "jobs.h"
-#include "../debug/exception.h"
+#include "../support/exception.h"
 #include <ctime>
 
 using namespace Halley;

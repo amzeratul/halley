@@ -22,7 +22,7 @@
 #include "image.h"
 #include "stb_image/stb_image.h"
 #include "lodepng/lodepng.h"
-#include "../debug/exception.h"
+#include "../support/exception.h"
 
 Halley::Image::Image(unsigned int _w, unsigned int _h)
 	: px(nullptr, free)
