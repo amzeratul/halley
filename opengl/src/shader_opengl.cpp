@@ -104,20 +104,24 @@ void ShaderOpenGL::compile()
 		glLinkProgram(program);
 		glCheckError();
 
+		// Collect log
+		int infolen;
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infolen);
+		glCheckError();
+		char* logRaw = new char[infolen];
+		glGetProgramInfoLog(program, infolen, &infolen, logRaw);
+		String log = logRaw;
+		delete[] logRaw;
+		glCheckError();
+
 		// Verify result
 		int result;
 		glGetProgramiv(program, GL_LINK_STATUS, &result);
 		glCheckError();
 		if (result == GL_FALSE) {
-			int infolen;
-			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infolen);
-			glCheckError();
-			char* log = new char[infolen];
-			glGetProgramInfoLog(program, infolen, &infolen, log);
-			String msg = String("Error loading shader: ") + log;
-			delete[] log;
-			glCheckError();
-			throw Exception(msg);
+			throw Exception("Error loading shader: " + log);
+		} else if (infolen > 0) {
+			std::cout << ConsoleColor(Console::YELLOW) << "\nIn shader \"" << name << "\":\n==========\n" << log << "\n==========" << ConsoleColor() << std::endl;
 		}
 
 		id = program;

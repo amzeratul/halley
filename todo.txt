@@ -16,6 +16,7 @@ core/graphics (?)
 
 opengl
 * painter
+- shader warnings
 
 input
 * bring library into engine
