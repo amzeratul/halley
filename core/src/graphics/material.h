@@ -1,4 +1,5 @@
 #pragma once
+#include "../../../opengl/src/gl_utils.h"
 
 namespace Halley
 {
@@ -47,7 +48,7 @@ namespace Halley
 		Shader& getShader() const;
 
 		MaterialParameter& operator[](String name);
-		
+		Blend::Type getBlend() const;
 		static std::unique_ptr<Material> loadResource(ResourceLoader loader);
 
 	private:

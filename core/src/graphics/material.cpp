@@ -71,6 +71,12 @@ MaterialParameter& Material::operator[](String name)
 	return uniforms.back();
 }
 
+Blend::Type Material::getBlend() const
+{
+	// TODO
+	return Blend::Alpha_Premultiplied;
+}
+
 std::unique_ptr<Material> Material::loadResource(ResourceLoader loader)
 {
 	// TODO: read shader

@@ -47,10 +47,9 @@ void PainterOpenGL::draw(Material& material, Vector2f pos)
 	// Bind camera and material
 	material["u_mvp"] = proj;
 	material.bind();
-	auto& shader = material.getShader();
 
 	// Set blend
-	glUtils->setBlendType(Blend::Alpha_Premultiplied);
+	glUtils->setBlendType(material.getBlend());
 
 	// TODO: read this elsewhere
 	// Vertex attributes
@@ -93,6 +92,7 @@ void PainterOpenGL::draw(Material& material, Vector2f pos)
 	glCheckError();
 
 	// Set vertex attribute pointers in VBO
+	auto& shader = material.getShader();
 	auto bindAttrib = [&] (const char* name, size_t count, GLuint type, size_t offset) {
 		int loc = shader.getAttributeLocation(name);
 		glEnableVertexAttribArray(loc);
