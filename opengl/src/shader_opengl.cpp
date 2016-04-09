@@ -12,6 +12,8 @@ static ShaderOpenGL* currentShader = nullptr;
 ShaderOpenGL::ShaderOpenGL(String name)
 	: Shader(name)
 {
+	id = glCreateProgram();
+	glCheckError();
 }
 
 ShaderOpenGL::~ShaderOpenGL()
@@ -95,28 +97,26 @@ void ShaderOpenGL::compile()
 		}
 
 		// Create program
-		GLuint program = glCreateProgram();
-		glCheckError();
 		for (size_t i = 0; i<shaders.size(); i++) {
-			glAttachShader(program, shaders[i]);
+			glAttachShader(id, shaders[i]);
 			glCheckError();
 		}
-		glLinkProgram(program);
+		glLinkProgram(id);
 		glCheckError();
 
 		// Collect log
 		int infolen;
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infolen);
+		glGetProgramiv(id, GL_INFO_LOG_LENGTH, &infolen);
 		glCheckError();
 		char* logRaw = new char[infolen];
-		glGetProgramInfoLog(program, infolen, &infolen, logRaw);
+		glGetProgramInfoLog(id, infolen, &infolen, logRaw);
 		String log = logRaw;
 		delete[] logRaw;
 		glCheckError();
 
 		// Verify result
 		int result;
-		glGetProgramiv(program, GL_LINK_STATUS, &result);
+		glGetProgramiv(id, GL_LINK_STATUS, &result);
 		glCheckError();
 		if (result == GL_FALSE) {
 			throw Exception("Error loading shader: " + log);
@@ -124,7 +124,6 @@ void ShaderOpenGL::compile()
 			std::cout << ConsoleColor(Console::YELLOW) << "\nIn shader \"" << name << "\":\n==========\n" << log << "\n==========" << ConsoleColor() << std::endl;
 		}
 
-		id = program;
 		uniformLocations.clear();
 		attributeLocations.clear();
 		ready = true;
@@ -138,14 +137,18 @@ void ShaderOpenGL::destroy()
 		unbind();
 		ready = false;
 
-		for (size_t i = 0; i<shaders.size(); i++) {
+		for (size_t i = 0; i < shaders.size(); i++) {
 			glDetachShader(id, shaders[i]);
 			glCheckError();
 			glDeleteShader(shaders[i]);
 			glCheckError();
 		}
+	}
+
+	if (id != 0) {
 		glDeleteProgram(id);
 		glCheckError();
+		id = 0;
 	}
 }
 
@@ -194,4 +197,12 @@ unsigned ShaderOpenGL::getAttributeLocation(String name)
 	}
 	attributeLocations[name] = result;
 	return result;
+}
+
+void ShaderOpenGL::setAttributes(const std::vector<MaterialAttribute>& attributes)
+{
+	for (auto& attribute : attributes) {
+		glBindAttribLocation(id, attribute.location, attribute.name.c_str());
+		glCheckError();
+	}
 }

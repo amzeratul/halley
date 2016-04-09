@@ -53,7 +53,7 @@ void PainterOpenGL::drawSprite(Material& material, Vector2f pos)
 
 		// Set blend
 		glUtils->setBlendType(material.getPass(i).getBlend());
-		drawPass(material.getPass(i).getShader(), pos);
+		drawSpritePass(material.getAttributes(), pos);
 	}
 }
 
@@ -64,9 +64,12 @@ void PainterOpenGL::init()
 	}
 }
 
-void PainterOpenGL::drawPass(Shader& shader, Vector2f pos)
+void PainterOpenGL::drawSpritePass(const std::vector<MaterialAttribute>& attributes, Vector2f pos)
 {
-	// TODO: read this elsewhere
+	constexpr size_t numVertices = 4;
+	const size_t numElements = 1;
+
+	// HACK: read this elsewhere
 	// Vertex attributes
 	struct VertexAttrib
 	{
@@ -79,49 +82,70 @@ void PainterOpenGL::drawPass(Shader& shader, Vector2f pos)
 		Vector2f texCoordMax;
 		Vector2f vertPos;
 	};
-	VertexAttrib vert;
-	vert.pos = pos;
-	vert.offset = Vector2f(0.5f, 0.5f);
-	vert.size = Vector2f(64, 64);
-	vert.rotation = Vector2f(0, 0);
-	vert.colour = Colour4f(1, 1, 1, 1);
-	vert.texCoordMin = Vector2f(0, 0);
-	vert.texCoordMax = Vector2f(1, 1);
+	VertexAttrib verts[numVertices];
+	for (int v = 0; v < numVertices; v++) {
+		auto& vert = verts[v];
+		vert.pos = pos;
+		vert.offset = Vector2f(0.5f, 0.5f);
+		vert.size = Vector2f(64, 64);
+		vert.rotation = Vector2f(0, 0);
+		vert.colour = Colour4f(1, 1, 1, 1);
+		vert.texCoordMin = Vector2f(0, 0);
+		vert.texCoordMax = Vector2f(1, 1);
+		const float vertPosX[] = { 0, 1, 1, 0 };
+		const float vertPosY[] = { 0, 0, 1, 1 };
+		vert.vertPos = Vector2f(vertPosX[v], vertPosY[v]);
+	}
 
 	// Compute data size and request VBO
-	const size_t elements = 1;
 	const size_t vertexStride = sizeof(VertexAttrib);
-	const size_t spriteStride = vertexStride * 4;
-	const size_t bytesSize = spriteStride * elements;
-	char* data = setupVBO(bytesSize);
+	const size_t elementStride = vertexStride * 4;
+	const size_t bytesSize = elementStride * numElements;
 
-	// Load vertex data into VBO
-	const float vertPosX[] = { 0, 1, 1, 0 };
-	const float vertPosY[] = { 0, 0, 1, 1 };
-	for (int v = 0; v < 4; v++) {
+	char* data = setupVBO(bytesSize);
+	for (int v = 0; v < numVertices; v++) {
 		char* dst = data + v * vertexStride;
-		vert.vertPos = Vector2f(vertPosX[v], vertPosY[v]);
-		memcpy(dst, &vert, vertexStride);
+		memcpy(dst, &verts[v], vertexStride);
 	}
-	glBufferData(GL_ARRAY_BUFFER, bytesSize, data, GL_STREAM_DRAW);
+
+	setupVertexAttributes(attributes, numVertices, vertexStride, data);
+	drawArraysQuads(numElements);
+}
+
+void PainterOpenGL::setupVertexAttributes(const std::vector<MaterialAttribute>& attributes, size_t numVertices, size_t vertexStride, char* vertexData)
+{
+	const size_t bytesSize = vertexStride * numVertices;
+
+	// Load data into VBO
+	glBufferData(GL_ARRAY_BUFFER, bytesSize, vertexData, GL_STREAM_DRAW);
 	glCheckError();
 
 	// Set vertex attribute pointers in VBO
-	auto bindAttrib = [&] (const char* name, size_t count, GLuint type, size_t offset) {
-		int loc = shader.getAttributeLocation(name);
-		glEnableVertexAttribArray(loc);
-		glVertexAttribPointer(loc, int(count), type, GL_FALSE, int(vertexStride), reinterpret_cast<GLvoid*>(offset));
+	for (auto& attribute : attributes) {
+		int count = 0;
+		int type = 0;
+		switch (attribute.type) {
+		case AttributeType::Float:
+			count = 1;
+			type = GL_FLOAT;
+			break;
+		case AttributeType::Float2:
+			count = 2;
+			type = GL_FLOAT;
+			break;
+		case AttributeType::Float3:
+			count = 3;
+			type = GL_FLOAT;
+			break;
+		case AttributeType::Float4:
+			count = 4;
+			type = GL_FLOAT;
+			break;
+		}
+		glEnableVertexAttribArray(attribute.location);
+		glVertexAttribPointer(attribute.location, count, type, GL_FALSE, int(vertexStride), reinterpret_cast<GLvoid*>(attribute.offset));
 		glCheckError();
-	};
-
-	bindAttrib("a_position", 4, GL_FLOAT, 0);
-	bindAttrib("a_size", 4, GL_FLOAT, 4 * sizeof(float));
-	bindAttrib("a_color", 4, GL_FLOAT, 8 * sizeof(float));
-	bindAttrib("a_texCoord0", 4, GL_FLOAT, 12 * sizeof(float));
-	bindAttrib("a_vertPos", 2, GL_FLOAT, 16 * sizeof(float));
-
-	// Draw quads
-	drawArraysQuads(elements);
+	}
 }
 
 void PainterOpenGL::drawArraysQuads(int n)

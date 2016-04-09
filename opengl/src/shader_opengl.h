@@ -18,11 +18,13 @@ namespace Halley
 		void addVertexSource(String src) override;
 		void addGeometrySource(String src) override;
 		void addPixelSource(String src) override;
+		
 		unsigned getUniformLocation(String name) override;
 		unsigned getAttributeLocation(String name) override;
+		void setAttributes(const std::vector<MaterialAttribute>& attributes) override;
 
 	private:
-		unsigned int id = -1;
+		unsigned int id = 0;
 		bool ready = false;
 		std::vector<String> vertexSources;
 		std::vector<String> pixelSources;

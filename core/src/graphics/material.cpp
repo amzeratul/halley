@@ -39,6 +39,14 @@ Material::Material(ResourceLoader& loader)
 
 	// Load name
 	name = root["name"] ? root["name"].as<std::string>() : "Unknown";
+	
+	// Load attributes & uniforms
+	if (root["attributes"]) {
+		loadAttributes(root["attributes"]);
+	}
+	if (root["uniforms"]) {
+		loadUniforms(root["uniforms"]);
+	}
 
 	// Load passes
 	for (auto& passNode : root["passes"]) {
@@ -51,7 +59,7 @@ Material::Material(ResourceLoader& loader)
 void Material::loadPass(YAML::Node node, std::function<String(String)> retriever)
 {
 	// Load shader
-	auto shader = api->createShader(name + "/pass" + String::integerToString(passes.size()));
+	auto shader = api->createShader(name + "/pass" + String::integerToString(int(passes.size())));
 	auto load = [&](std::string name, std::function<void(String)> f)
 	{
 		if (node[name + "Source"]) {
@@ -60,12 +68,66 @@ void Material::loadPass(YAML::Node node, std::function<String(String)> retriever
 			f(retriever(node[name].as<std::string>()));
 		}
 	};
+	shader->setAttributes(attributes);
 	load("vertex", [&](String src) { shader->addVertexSource(src); });
 	load("pixel", [&](String src) { shader->addPixelSource(src); });
 	load("geometry", [&](String src) { shader->addGeometrySource(src); });
 	shader->compile();
 
 	passes.emplace_back(MaterialPass(std::move(shader), Blend::AlphaPremultiplied));	
+}
+
+void Material::loadUniforms(YAML::Node topNode)
+{
+}
+
+void Material::loadAttributes(YAML::Node topNode)
+{
+	int location = 0;
+	int offset = 0;
+
+	auto attribSeqNode = topNode.as<YAML::Node>();
+	for (auto& attribEntry : attribSeqNode) {
+		for (YAML::const_iterator it = attribEntry.begin(); it != attribEntry.end(); ++it) {
+			String name = it->first.as<std::string>();
+			String rawType = it->second.as<std::string>();
+			AttributeType type;
+			if (rawType == "float") {
+				type = AttributeType::Float;
+			} if (rawType == "vec2") {
+				type = AttributeType::Float2;
+			} else if (rawType == "vec3") {
+				type = AttributeType::Float3;
+			} else if (rawType == "vec4") {
+				type = AttributeType::Float4;
+			} else {
+				throw Exception("Unknown attribute type: " + rawType);
+			}
+
+			attributes.push_back(MaterialAttribute());
+			auto& a = attributes.back();
+			a.name = name;
+			a.type = type;
+			a.location = location++;
+			a.offset = offset;
+
+			int size = getAttributeSize(type);
+			offset += size;
+		}
+	}
+
+	vertexStride = offset;
+}
+
+int Material::getAttributeSize(AttributeType type)
+{
+	switch (type) {
+	case AttributeType::Float: return 4;
+	case AttributeType::Float2: return 8;
+	case AttributeType::Float3: return 12;
+	case AttributeType::Float4: return 16;
+	default: throw Exception("Unknown type: " + String::integerToString(int(type)));
+	}
 }
 
 void Material::bind(size_t pass)
