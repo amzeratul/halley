@@ -180,6 +180,9 @@
     <ClCompile Include="src\maths\matrix4.cpp">
       <Filter>maths</Filter>
     </ClCompile>
+    <ClCompile Include="src\file_formats\yaml_file.cpp">
+      <Filter>file_formats</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\halley_utils.h">
@@ -367,6 +370,9 @@
     </ClInclude>
     <ClInclude Include="src\maths\matrix4.h">
       <Filter>maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_formats\yaml_file.h">
+      <Filter>file_formats</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

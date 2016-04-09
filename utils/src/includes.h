@@ -18,6 +18,7 @@
 #include "file_formats/text_file.h"
 #include "file_formats/text_reader.h"
 #include "file_formats/xml_file.h"
+#include "file_formats/yaml_file.h"
 
 #include "maths/aabb.h"
 #include "maths/angle.h"

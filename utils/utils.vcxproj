@@ -149,6 +149,7 @@
     <ClCompile Include="src\file_formats\tinyxml\tinyxmlerror.cpp" />
     <ClCompile Include="src\file_formats\tinyxml\tinyxmlparser.cpp" />
     <ClCompile Include="src\file_formats\xml_file.cpp" />
+    <ClCompile Include="src\file_formats\yaml_file.cpp" />
     <ClCompile Include="src\maths\aabb.cpp" />
     <ClCompile Include="src\maths\matrix4.cpp" />
     <ClCompile Include="src\maths\polygon.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="src\file_formats\tinyxml\tinyxml.h" />
     <ClInclude Include="src\file_formats\xml_file.h" />
     <ClInclude Include="src\file_formats\xml_forward.h" />
+    <ClInclude Include="src\file_formats\yaml_file.h" />
     <ClInclude Include="src\includes.h" />
     <ClInclude Include="src\maths\aabb.h" />
     <ClInclude Include="src\maths\angle.h" />

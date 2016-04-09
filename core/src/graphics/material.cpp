@@ -2,12 +2,21 @@
 #include "../api/halley_api_internal.h"
 #include "../api/halley_api.h"
 #include "material.h"
-#include "texture.h"
 #include "shader.h"
+#include "material_parameter.h"
+#include <yaml-cpp/yaml.h>
 
 using namespace Halley;
 
 static Material* currentMaterial = nullptr;
+
+#ifdef _MSC_VER
+#ifdef _DEBUG
+#pragma comment(lib, "libyaml-cppmdd.lib")
+#else
+#pragma comment(lib, "libyaml-cppmd.lib")
+#endif
+#endif
 
 Material::Material(std::shared_ptr<Shader> _shader, VideoAPI* api)
 	: api(api)
@@ -77,100 +86,37 @@ Blend::Type Material::getBlend() const
 	return Blend::Alpha_Premultiplied;
 }
 
-std::unique_ptr<Material> Material::loadResource(ResourceLoader loader)
+std::unique_ptr<Material> Material::loadResource(ResourceLoader& loader)
 {
-	// TODO: read shader
-	// TODO: read parameters
-	return std::make_unique<Material>(std::shared_ptr<Shader>(), loader.getAPI().video);
-}
+	auto& api = loader.getAPI();
 
-MaterialParameter::MaterialParameter(Material& material, String name)
-	: material(material)
-	, name(name)
-{
-}
+	String basePath = loader.getName();
+	size_t lastSlash = basePath.find_last_of('/');
+	if (lastSlash != std::string::npos) {
+		basePath = basePath.left(lastSlash + 1);
+	}
 
-VideoAPIInternal& MaterialParameter::getAPI()
-{
-	return *static_cast<VideoAPIInternal*>(material.api);
-}
+	YAML::Node root = YAML::Load(loader.getStatic()->getString());
+	for (auto& passNode : root["passes"]) {
+		auto pass = passNode.as<YAML::Node>();
 
-unsigned int MaterialParameter::getAddress()
-{
-	return material.shader->getUniformLocation(name);
-}
-
-void MaterialParameter::apply()
-{
-	toApply(*this);
-}
-
-void MaterialParameter::bind()
-{
-	toBind(*this);
-}
-
-void MaterialParameter::operator=(std::shared_ptr<Texture> texture)
-{
-	needsTextureUnit = true;
-	toApply = [texture](MaterialParameter& p0) {
-		p0.toBind = [texture](MaterialParameter& p) {
-			texture->bind(p.textureUnit);
-			p.getAPI().getUniformBinding(p.getAddress(), UniformType::Int, 1, &p.textureUnit);
+		// Load shader
+		auto shader = api.video->createShader(loader.getName());
+		auto load = [&] (std::string name, std::function<void(String)> f)
+		{
+			if (pass[name + "Source"]) {
+				f(pass[name + "Source"].as<std::string>());
+			} else if (pass[name]) {
+				f(api.core->getResources().get<TextFile>(basePath + pass[name].as<std::string>())->data);
+			}
 		};
-	};
-}
+		load("vertex", [&](String src) { shader->addVertexSource(src); });
+		load("pixel", [&](String src) { shader->addPixelSource(src); });
+		load("geometry", [&](String src) { shader->addGeometrySource(src); });
+		shader->compile();
 
-void MaterialParameter::operator=(Colour colour)
-{
-	needsTextureUnit = false;
-	toApply = [colour](MaterialParameter& p) {
-		std::array<float, 4> col = { colour.r, colour.g, colour.b, colour.a };
-		p.toBind = p.getAPI().getUniformBinding(p.getAddress(), UniformType::Float, 4, col.data());
-	};
-}
+		return std::make_unique<Material>(std::move(shader), loader.getAPI().video);
+	}
 
-void MaterialParameter::operator=(float p)
-{
-	needsTextureUnit = false;
-	toApply = [p](MaterialParameter& t) {
-		auto v = p;
-		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Float, 1, &v);
-	};
-}
-
-void MaterialParameter::operator=(Vector2f p)
-{
-	needsTextureUnit = false;
-	toApply = [p](MaterialParameter& t) {
-		auto v = p;
-		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Float, 2, &v);
-	};
-}
-
-void MaterialParameter::operator=(int p)
-{
-	needsTextureUnit = false;
-	toApply = [p](MaterialParameter& t) {
-		auto v = p;
-		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Int, 1, &v);
-	};
-}
-
-void MaterialParameter::operator=(Vector2i p)
-{
-	needsTextureUnit = false;
-	toApply = [p](MaterialParameter& t) {
-		auto v = p;
-		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Int, 2, &v);
-	};
-}
-
-void MaterialParameter::operator=(Matrix4f m)
-{
-	needsTextureUnit = false;
-	toApply = [m](MaterialParameter& t) {
-		auto v = m;
-		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Mat4, 1, &v);
-	};
+	throw Exception("No passes found in shader.");
 }

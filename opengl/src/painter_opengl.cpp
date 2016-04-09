@@ -1,6 +1,7 @@
 #include "painter_opengl.h"
 #include "halley_gl.h"
 #include "../../core/src/graphics/material.h"
+#include "../../core/src/graphics/material_parameter.h"
 #include "../../core/src/graphics/camera.h"
 
 using namespace Halley;

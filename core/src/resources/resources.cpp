@@ -95,16 +95,16 @@ String Resources::resolveName(String name) const
 	return basePath + name;
 }
 
-std::shared_ptr<Resource> Resources::doGet(String _name, ResourceLoadPriority priority, std::function<std::unique_ptr<Resource>(ResourceLoader&)> loader)
+std::shared_ptr<Resource> Resources::doGet(String rawName, ResourceLoadPriority priority, std::function<std::unique_ptr<Resource>(ResourceLoader&)> loader)
 {
-	String name = resolveName(_name);
+	String name = resolveName(rawName);
 
 	// Look in cache
 	auto res = resources.find(name);
 	if (res != resources.end()) return res->second.res;
 
 	// Not found, load it from disk
-	auto resLoader = ResourceLoader(*locator, name, priority, api);
+	auto resLoader = ResourceLoader(*locator, rawName, name, priority, api);
 	auto newRes = loader(resLoader);
 	if (!newRes) {
 		if (resLoader.loaded) {

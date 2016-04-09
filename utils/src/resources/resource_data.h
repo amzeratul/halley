@@ -98,6 +98,7 @@ namespace Halley {
 
 	public:
 		String getName() const { return name; }
+		String getResolvedName() const { return resolvedName; }
 		ResourceLoadPriority getPriority() const { return priority; }
 		std::unique_ptr<ResourceDataStatic> getStatic();
 		std::unique_ptr<ResourceDataStream> getStream();
@@ -105,10 +106,11 @@ namespace Halley {
 
 	private:
 		ResourceLoader(ResourceLoader&& loader);
-		ResourceLoader(IResourceLocator& locator, String name, ResourceLoadPriority priority, HalleyAPI* api);
+		ResourceLoader(IResourceLocator& locator, String name, String resolvedName, ResourceLoadPriority priority, HalleyAPI* api);
 
 		IResourceLocator& locator;
 		String name;
+		String resolvedName;
 		ResourceLoadPriority priority;
 		HalleyAPI* api;
 		bool loaded = false;

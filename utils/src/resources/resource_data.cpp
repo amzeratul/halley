@@ -76,16 +76,17 @@ ResourceLoader::ResourceLoader(ResourceLoader&& loader)
 {
 }
 
-ResourceLoader::ResourceLoader(IResourceLocator& locator, String name, ResourceLoadPriority priority, HalleyAPI* api)
+ResourceLoader::ResourceLoader(IResourceLocator& locator, String name, String resolvedName, ResourceLoadPriority priority, HalleyAPI* api)
 	: locator(locator)
 	, name(name)
+	, resolvedName(resolvedName)
 	, priority(priority)
 	, api(api)
 {}
 
 std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
 {
-	auto result = locator.getStatic(name);
+	auto result = locator.getStatic(resolvedName);
 	if (result) {
 		loaded = true;
 	}
@@ -94,7 +95,7 @@ std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
 
 std::unique_ptr<ResourceDataStream> ResourceLoader::getStream()
 {
-	auto result = locator.getStream(name);
+	auto result = locator.getStream(resolvedName);
 	if (result) {
 		loaded = true;
 	}

@@ -59,8 +59,7 @@ void TestStage::onRender(Painter& painter) const
 	world.render(painter);
 
 	auto texture = getResource<Texture>("sprites/test.png");
-	auto shader = getResource<Shader>("shaders/sprite.yaml");
-	Material material(shader, getAPI().video);
+	auto material = *getResource<Material>("shaders/sprite.yaml");
 	material["tex0"] = texture;
 	painter.drawSprite(material, Vector2f(100, 100));
 }

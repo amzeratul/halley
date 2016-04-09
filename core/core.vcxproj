@@ -34,6 +34,7 @@
     <ClInclude Include="src\external\irunner.h" />
     <ClInclude Include="src\graphics\camera.h" />
     <ClInclude Include="src\graphics\material.h" />
+    <ClInclude Include="src\graphics\material_parameter.h" />
     <ClInclude Include="src\graphics\painter.h" />
     <ClInclude Include="src\graphics\shader.h" />
     <ClInclude Include="src\graphics\texture.h" />
@@ -56,6 +57,7 @@
     <ClCompile Include="src\core\environment.cpp" />
     <ClCompile Include="src\graphics\camera.cpp" />
     <ClCompile Include="src\graphics\material.cpp" />
+    <ClCompile Include="src\graphics\material_parameter.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\graphics\texture.cpp" />
     <ClCompile Include="src\graphics\texture_descriptor.cpp" />

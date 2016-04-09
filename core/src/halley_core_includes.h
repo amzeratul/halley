@@ -8,6 +8,7 @@
 //#include "external/irunner.h"
 
 #include "graphics/material.h"
+#include "graphics/material_parameter.h"
 #include "graphics/painter.h"
 #include "graphics/shader.h"
 #include "graphics/texture.h"

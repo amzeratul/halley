@@ -5,7 +5,7 @@ namespace Halley
 	class ResourceLoader;
 	class MaterialParameterBinding;
 
-	class Shader : public Resource
+	class Shader
 	{
 	public:
 		explicit Shader(String name);
@@ -20,8 +20,6 @@ namespace Halley
 
 		virtual unsigned int getUniformLocation(String name) = 0;
 		virtual unsigned int getAttributeLocation(String name) = 0;
-
-		static std::unique_ptr<Shader> loadResource(ResourceLoader& loader);
 
 	protected:
 		String name;
