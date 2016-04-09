@@ -17,7 +17,8 @@ namespace Halley
 		void clear(Colour colour) override;
 
 	private:
-		GLuint vbo;
+		GLuint vbo = 0;
+		GLuint vao = 0;
 		std::unique_ptr<GLUtils> glUtils;
 
 		void init();

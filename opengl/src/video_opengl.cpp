@@ -38,10 +38,10 @@ void VideoOpenGL::deInit()
 ///////////////
 // Constructor
 VideoOpenGL::VideoOpenGL()
-	: border(0)
-	, windowType(WindowType::None)
+	: windowType(WindowType::None)
 	, initialized(false)
 	, running(false)
+	, border(0)
 {
 }
 
@@ -118,7 +118,7 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 #endif
 		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 #endif
 
 		// Window position
@@ -157,24 +157,21 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 
 		// Initialize GLEW
 #ifdef WITH_OPENGL
+		glewExperimental = true;
 		GLenum err = glewInit();
 		if (err != GLEW_OK) {
 			throw Exception(String("Error initializing GLEW: ") + reinterpret_cast<const char*>(glewGetErrorString(err)));
 		}
+		glGetError(); // discard error
 		glCheckError();
 #endif
 
 		// Print OpenGL data
-		bool extsOK = true;
 		std::cout << "OpenGL initialized." << std::endl;
 		std::cout << "\tVersion: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_VERSION) << ConsoleColor() << std::endl;
 		std::cout << "\tVendor: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_VENDOR) << ConsoleColor() << std::endl;
 		std::cout << "\tRenderer: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_RENDERER) << ConsoleColor() << std::endl;
-		
-		// Retrieve and print shader data
-		std::cout << "\tShaders: " << ConsoleColor(Console::DARK_GREY) << "enabled" << ConsoleColor() << std::endl;
-		const char* glslVer = (const char*) glGetString(GL_SHADING_LANGUAGE_VERSION);
-		std::cout << "\tGLSL Version: " << ConsoleColor(Console::DARK_GREY) << glslVer << ConsoleColor() << std::endl;
+		std::cout << "\tGLSL Version: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_SHADING_LANGUAGE_VERSION) << ConsoleColor() << std::endl;
 
 		// Render-to-texture support
 		bool fboSupport = true;//TextureRenderTargetFBO::isSupported();
@@ -186,20 +183,14 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 #endif
 
 		// Print extensions
-		if (!extsOK) {
-			std::cout << "\tExtensions: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_EXTENSIONS) << ConsoleColor() << std::endl;
-
-			/*
-			std::cout << "\tExtensions: " << ConsoleColor(Console::DARK_GREY);
-			int nExtensions;
-			glGetIntegerv(GL_NUM_EXTENSIONS, &nExtensions);
-			for (int i = 0; i < n; i++) {
-				String str = (const char*) glGetStringi(GL_EXTENSIONS, i);
-				std::cout << str << " ";
-			}
-			std::cout << ConsoleColor() << std::endl;
-			*/
+		std::cout << "\tExtensions: " << ConsoleColor(Console::DARK_GREY);
+		int nExtensions;
+		glGetIntegerv(GL_NUM_EXTENSIONS, &nExtensions);
+		for (int i = 0; i < n; i++) {
+			String str = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+			std::cout << str << " ";
 		}
+		std::cout << ConsoleColor() << std::endl;
 	} else {
 		// Re-initializing
 
@@ -247,64 +238,108 @@ std::function<void(MaterialParameter&)> VideoOpenGL::getUniformBinding(unsigned 
 			auto vs = reinterpret_cast<int*>(data);
 			if (n == 1) {
 				auto v0 = vs[0];
-				return [=](MaterialParameter&) { glUniform1i(address, v0); };
+				return [=](MaterialParameter&)
+				{
+					glUniform1i(address, v0);
+					glCheckError();
+				};
 			} else if (n == 2) {
 				auto v0 = vs[0];
 				auto v1 = vs[1];
-				return [=](MaterialParameter&) { glUniform2i(address, v0, v1); };
+				return [=](MaterialParameter&)
+				{
+					glUniform2i(address, v0, v1);
+					glCheckError();
+				};
 			} else if (n == 2) {
 				auto v0 = vs[0];
 				auto v1 = vs[1];
 				auto v2 = vs[2];
-				return [=](MaterialParameter&) { glUniform3i(address, v0, v1, v2); };
+				return [=](MaterialParameter&)
+				{
+					glUniform3i(address, v0, v1, v2);
+					glCheckError();
+				};
 			} else if (n == 2) {
 				auto v0 = vs[0];
 				auto v1 = vs[1];
 				auto v2 = vs[2];
 				auto v3 = vs[3];
-				return [=](MaterialParameter&) { glUniform4i(address, v0, v1, v2, v3); };
+				return [=](MaterialParameter&)
+				{
+					glUniform4i(address, v0, v1, v2, v3);
+					glCheckError();
+				};
 			}
 		}
 		case UniformType::IntArray:
 		{
 			auto vs = reinterpret_cast<int*>(data);
 			std::vector<int> d(vs, vs + n);
-			return [=](MaterialParameter&) { glUniform1iv(address, n, d.data()); };
+			return [=](MaterialParameter&)
+			{
+				glUniform1iv(address, n, d.data());
+				glCheckError();
+			};
 		}
 		case UniformType::Float:
 		{
 			auto vs = reinterpret_cast<float*>(data);
 			if (n == 1) {
 				auto v0 = vs[0];
-				return [=](MaterialParameter&) { glUniform1f(address, v0); };
+				return [=](MaterialParameter&)
+				{
+					glUniform1f(address, v0);
+					glCheckError();
+				};
 			} else if (n == 2) {
 				auto v0 = vs[0];
 				auto v1 = vs[1];
-				return [=](MaterialParameter&) { glUniform2f(address, v0, v1); };
+				return [=](MaterialParameter&)
+				{
+					glUniform2f(address, v0, v1);
+					glCheckError();
+				};
 			} else if (n == 2) {
 				auto v0 = vs[0];
 				auto v1 = vs[1];
 				auto v2 = vs[2];
-				return [=](MaterialParameter&) { glUniform3f(address, v0, v1, v2); };
+				return [=](MaterialParameter&)
+				{
+					glUniform3f(address, v0, v1, v2);
+					glCheckError();
+				};
 			} else if (n == 2) {
 				auto v0 = vs[0];
 				auto v1 = vs[1];
 				auto v2 = vs[2];
 				auto v3 = vs[3];
-				return [=](MaterialParameter&) { glUniform4f(address, v0, v1, v2, v3); };
+				return [=](MaterialParameter&)
+				{
+					glUniform4f(address, v0, v1, v2, v3);
+					glCheckError();
+				};
 			}
 		}
 		case UniformType::FloatArray:
 		{
 			auto vs = reinterpret_cast<float*>(data);
 			std::vector<float> d(vs, vs + n);
-			return [=](MaterialParameter&) { glUniform1fv(address, n, d.data()); };
+			return [=](MaterialParameter&)
+			{
+				glUniform1fv(address, n, d.data());
+				glCheckError();
+			};
 		}
 		case UniformType::Mat4:
 		{
 			auto vs = reinterpret_cast<Matrix4f*>(data);
 			std::vector<float> d(vs->getElements(), vs->getElements() + 16);
-			return [=](MaterialParameter&) { glUniformMatrix4fv(address, 1, false, d.data()); };
+			return [=](MaterialParameter&)
+			{
+				glUniformMatrix4fv(address, 1, false, d.data());
+				glCheckError();
+			};
 		}
 		default:
 			throw Exception("Unsupported uniform type: " + String::integerToString(static_cast<int>(type)));

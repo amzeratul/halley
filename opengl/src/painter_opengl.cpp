@@ -8,21 +8,34 @@ using namespace Halley;
 PainterOpenGL::PainterOpenGL()
 {}
 
-PainterOpenGL::~PainterOpenGL() = default;
+PainterOpenGL::~PainterOpenGL()
+{
+	if (vbo != 0) {
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDeleteBuffers(1, &vbo);
+	}
+	if (vao != 0) {
+		glBindVertexArray(0);
+		glDeleteVertexArrays(1, &vao);
+	}
+}
 
 void PainterOpenGL::startRender()
 {
+	glCheckError();
 }
 
 void PainterOpenGL::endRender()
 {
-	
+	glCheckError();
 }
 
 void PainterOpenGL::clear(Colour colour)
 {
+	glCheckError();
 	glClearColor(colour.r, colour.g, colour.b, colour.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glCheckError();
 }
 
 void PainterOpenGL::drawSprite(Material& material, Vector2f pos)
@@ -140,12 +153,19 @@ char* PainterOpenGL::setupVBO(size_t size)
 		glCheckError();
 	}
 
+	if (vao == 0) {
+		glGenVertexArrays(1, &vao);
+		glCheckError();
+	}
+
 	static std::vector<char> tmpData;
 	if (tmpData.size() < size) {
 		tmpData.resize(size * 2);
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glCheckError();
+	glBindVertexArray(vao);
 	glCheckError();
 
 	return tmpData.data();
