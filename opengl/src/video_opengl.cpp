@@ -117,8 +117,8 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 		//SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 #endif
 		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 #endif
 
 		// Window position
@@ -158,8 +158,10 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 		// Initialize GLEW
 #ifdef WITH_OPENGL
 		GLenum err = glewInit();
-		if (err != GLEW_OK)
-			throw Exception(String("Error initializing GLEW: ") + (char*)(glewGetErrorString(err)));
+		if (err != GLEW_OK) {
+			throw Exception(String("Error initializing GLEW: ") + reinterpret_cast<const char*>(glewGetErrorString(err)));
+		}
+		glCheckError();
 #endif
 
 		// Print OpenGL data
@@ -168,31 +170,11 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 		std::cout << "\tVersion: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_VERSION) << ConsoleColor() << std::endl;
 		std::cout << "\tVendor: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_VENDOR) << ConsoleColor() << std::endl;
 		std::cout << "\tRenderer: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_RENDERER) << ConsoleColor() << std::endl;
-
-		// Check for shader support
-#if defined(WITH_OPENGL_ES2)
-		bool shaderSupport = true;
-#elif defined(WITH_OPENGL_ES)
-		bool shaderSupport = false;
-#else
-		bool shaderSupport = GLEW_ARB_shading_language_100 != 0;
-#endif
-
+		
 		// Retrieve and print shader data
-		if (shaderSupport) {
-			std::cout << "\tShaders: " << ConsoleColor(Console::DARK_GREY) << "enabled" << ConsoleColor() << std::endl;
-#if defined(WITH_OPENGL)
-			const char* glslVer = (const char*) glGetString(GL_SHADING_LANGUAGE_VERSION_ARB);
-			std::cout << "\tGLSL Version: " << ConsoleColor(Console::DARK_GREY) << glslVer << ConsoleColor() << std::endl;
-#elif defined(WITH_OPENGL_ES2)
-			const char* glslVer = (const char*) glGetString(GL_SHADING_LANGUAGE_VERSION);
-			std::cout << "\tGLSL Version: " << ConsoleColor(Console::DARK_GREY) << glslVer << ConsoleColor() << std::endl;
-#endif
-		} else {
-			std::cout << "\tShaders: " << ConsoleColor(Console::DARK_GREY) << "disabled" << ConsoleColor() << std::endl;
-			extsOK = false;
-			throw Exception("Halley requires shader support.");
-		}
+		std::cout << "\tShaders: " << ConsoleColor(Console::DARK_GREY) << "enabled" << ConsoleColor() << std::endl;
+		const char* glslVer = (const char*) glGetString(GL_SHADING_LANGUAGE_VERSION);
+		std::cout << "\tGLSL Version: " << ConsoleColor(Console::DARK_GREY) << glslVer << ConsoleColor() << std::endl;
 
 		// Render-to-texture support
 		bool fboSupport = true;//TextureRenderTargetFBO::isSupported();
@@ -231,6 +213,7 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 	}
 
 	// Clear buffer
+	glCheckError();
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glCheckError();
