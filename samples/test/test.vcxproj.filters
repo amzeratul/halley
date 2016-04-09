@@ -33,6 +33,9 @@
     <ClCompile Include="src\render_system.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\test_stage.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gen\cpp\components\bar_component.h">
@@ -52,6 +55,9 @@
     </ClInclude>
     <ClInclude Include="gen\cpp\systems\render_system.h">
       <Filter>gen\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\test_stage.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

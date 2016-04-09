@@ -149,6 +149,7 @@
     </ClCompile>
     <ClCompile Include="src\render_system.cpp" />
     <ClCompile Include="src\sample_entry.cpp" />
+    <ClCompile Include="src\test_stage.cpp" />
     <ClCompile Include="src\test_system.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -158,6 +159,7 @@
     <ClInclude Include="gen\cpp\systems\render_system.h" />
     <ClInclude Include="gen\cpp\systems\test_system.h" />
     <ClInclude Include="src\prec.h" />
+    <ClInclude Include="src\test_stage.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="gen_src\test.txt" />
