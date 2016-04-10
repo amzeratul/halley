@@ -15,9 +15,10 @@ out vec4 v_colorAdd;
 void main() {
 	v_texCoord0 = vec4(mix(a_texCoord0.x, a_texCoord0.z, a_vertPos.x), mix(a_texCoord0.y, a_texCoord0.w, a_vertPos.y), 0.0, 0.0);
 	
-	vec4 baseCol = clamp(a_color, vec4(0, 0, 0, 0), vec4(1, 1, 1, 1));
+	vec4 inputCol = vec4(a_color.rgb * a_color.a, a_color.a); // Premultiply alpha
+	vec4 baseCol = clamp(inputCol, vec4(0, 0, 0, 0), vec4(1, 1, 1, 1));
 	v_color = baseCol;
-	v_colorAdd = clamp(a_color - baseCol, vec4(0, 0, 0, 0), vec4(1, 1, 1, 0));
+	v_colorAdd = clamp(inputCol - baseCol, vec4(0, 0, 0, 0), vec4(1, 1, 1, 0));
 	
 	float c = cos(a_size.z);
 	float s = sin(a_size.z);

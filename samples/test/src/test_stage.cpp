@@ -64,8 +64,7 @@ void TestStage::onFixedUpdate(Time time)
 	curTime += time;
 
 	sprite.setPos(Vector2f(640, 360) + Vector2f(500, 0) * ::sin(curTime * 0.2f));
-	float a = ::sin(curTime * 2) * 0.5f + 0.5f;
-	sprite.setColour(Colour4f(a, a, a, a));
+	sprite.setColour(Colour4f(1, 1, 1, ::sin(curTime * 2) * 0.5f + 0.5f));
 }
 
 void TestStage::onRender(Painter& painter) const
