@@ -125,25 +125,26 @@ void PainterOpenGL::setupVertexAttributes(const std::vector<MaterialAttribute>& 
 		int count = 0;
 		int type = 0;
 		switch (attribute.type) {
-		case AttributeType::Float:
+		case ShaderParameterType::Float:
 			count = 1;
 			type = GL_FLOAT;
 			break;
-		case AttributeType::Float2:
+		case ShaderParameterType::Float2:
 			count = 2;
 			type = GL_FLOAT;
 			break;
-		case AttributeType::Float3:
+		case ShaderParameterType::Float3:
 			count = 3;
 			type = GL_FLOAT;
 			break;
-		case AttributeType::Float4:
+		case ShaderParameterType::Float4:
 			count = 4;
 			type = GL_FLOAT;
 			break;
 		}
 		glEnableVertexAttribArray(attribute.location);
-		glVertexAttribPointer(attribute.location, count, type, GL_FALSE, int(vertexStride), reinterpret_cast<GLvoid*>(attribute.offset));
+		size_t offset = attribute.offset;
+		glVertexAttribPointer(attribute.location, count, type, GL_FALSE, int(vertexStride), reinterpret_cast<GLvoid*>(offset));
 		glCheckError();
 	}
 

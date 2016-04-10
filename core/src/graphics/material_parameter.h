@@ -4,6 +4,7 @@ namespace Halley
 {
 	class Texture;
 	class VideoAPIInternal;
+	enum class ShaderParameterType;
 
 	class MaterialParameter
 	{
@@ -19,7 +20,7 @@ namespace Halley
 		void operator=(Matrix4f m);
 
 	private:
-		MaterialParameter(Material& material, String name);
+		MaterialParameter(Material& material, String name, ShaderParameterType type);
 		VideoAPIInternal& getAPI();
 		unsigned int getAddress();
 		void apply();
@@ -30,6 +31,7 @@ namespace Halley
 
 		Material& material;
 		String name;
+		ShaderParameterType type;
 		bool needsTextureUnit = false;
 		int textureUnit = -1;
 	};

@@ -7,11 +7,12 @@
 
 using namespace Halley;
 
-
-MaterialParameter::MaterialParameter(Material& material, String name)
+MaterialParameter::MaterialParameter(Material& material, String name, ShaderParameterType type)
 	: material(material)
 	, name(name)
+	, type(type)
 {
+	needsTextureUnit = type == ShaderParameterType::Texture2D;
 }
 
 VideoAPIInternal& MaterialParameter::getAPI()
@@ -36,7 +37,7 @@ void MaterialParameter::bind()
 
 void MaterialParameter::operator=(std::shared_ptr<Texture> texture)
 {
-	needsTextureUnit = true;
+	assert(type == ShaderParameterType::Texture2D);
 	toApply = [texture](MaterialParameter& p0) {
 		p0.toBind = [texture](MaterialParameter& p) {
 			texture->bind(p.textureUnit);
@@ -47,7 +48,7 @@ void MaterialParameter::operator=(std::shared_ptr<Texture> texture)
 
 void MaterialParameter::operator=(Colour colour)
 {
-	needsTextureUnit = false;
+	assert(type == ShaderParameterType::Float4);
 	toApply = [colour](MaterialParameter& p) {
 		std::array<float, 4> col = { colour.r, colour.g, colour.b, colour.a };
 		p.toBind = p.getAPI().getUniformBinding(p.getAddress(), UniformType::Float, 4, col.data());
@@ -56,7 +57,7 @@ void MaterialParameter::operator=(Colour colour)
 
 void MaterialParameter::operator=(float p)
 {
-	needsTextureUnit = false;
+	assert(type == ShaderParameterType::Float);
 	toApply = [p](MaterialParameter& t) {
 		auto v = p;
 		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Float, 1, &v);
@@ -65,7 +66,7 @@ void MaterialParameter::operator=(float p)
 
 void MaterialParameter::operator=(Vector2f p)
 {
-	needsTextureUnit = false;
+	assert(type == ShaderParameterType::Float2);
 	toApply = [p](MaterialParameter& t) {
 		auto v = p;
 		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Float, 2, &v);
@@ -74,7 +75,7 @@ void MaterialParameter::operator=(Vector2f p)
 
 void MaterialParameter::operator=(int p)
 {
-	needsTextureUnit = false;
+	assert(type == ShaderParameterType::Int);
 	toApply = [p](MaterialParameter& t) {
 		auto v = p;
 		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Int, 1, &v);
@@ -83,7 +84,7 @@ void MaterialParameter::operator=(int p)
 
 void MaterialParameter::operator=(Vector2i p)
 {
-	needsTextureUnit = false;
+	assert(type == ShaderParameterType::Int2);
 	toApply = [p](MaterialParameter& t) {
 		auto v = p;
 		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Int, 2, &v);
@@ -92,7 +93,7 @@ void MaterialParameter::operator=(Vector2i p)
 
 void MaterialParameter::operator=(Matrix4f m)
 {
-	needsTextureUnit = false;
+	assert(type == ShaderParameterType::Matrix4);
 	toApply = [m](MaterialParameter& t) {
 		auto v = m;
 		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Mat4, 1, &v);

@@ -79,6 +79,34 @@ void Material::loadPass(YAML::Node node, std::function<String(String)> retriever
 
 void Material::loadUniforms(YAML::Node topNode)
 {
+	auto attribSeqNode = topNode.as<YAML::Node>();
+	for (auto& attribEntry : attribSeqNode) {
+		for (YAML::const_iterator it = attribEntry.begin(); it != attribEntry.end(); ++it) {
+			String name = it->first.as<std::string>();
+			ShaderParameterType type = parseParameterType(it->second.as<std::string>());
+
+			uniforms.push_back(MaterialParameter(*this, name, type));
+		}
+	}
+}
+
+ShaderParameterType Material::parseParameterType(String rawType)
+{
+	if (rawType == "float") {
+		return ShaderParameterType::Float;
+	} if (rawType == "vec2") {
+		return ShaderParameterType::Float2;
+	} else if (rawType == "vec3") {
+		return ShaderParameterType::Float3;
+	} else if (rawType == "vec4") {
+		return ShaderParameterType::Float4;
+	} else if (rawType == "mat4") {
+		return ShaderParameterType::Matrix4;
+	} else if (rawType == "sampler2D") {
+		return ShaderParameterType::Texture2D;
+	} else {
+		throw Exception("Unknown attribute type: " + rawType);
+	}
 }
 
 void Material::loadAttributes(YAML::Node topNode)
@@ -90,19 +118,7 @@ void Material::loadAttributes(YAML::Node topNode)
 	for (auto& attribEntry : attribSeqNode) {
 		for (YAML::const_iterator it = attribEntry.begin(); it != attribEntry.end(); ++it) {
 			String name = it->first.as<std::string>();
-			String rawType = it->second.as<std::string>();
-			AttributeType type;
-			if (rawType == "float") {
-				type = AttributeType::Float;
-			} if (rawType == "vec2") {
-				type = AttributeType::Float2;
-			} else if (rawType == "vec3") {
-				type = AttributeType::Float3;
-			} else if (rawType == "vec4") {
-				type = AttributeType::Float4;
-			} else {
-				throw Exception("Unknown attribute type: " + rawType);
-			}
+			ShaderParameterType type = parseParameterType(it->second.as<std::string>());
 
 			attributes.push_back(MaterialAttribute());
 			auto& a = attributes.back();
@@ -119,13 +135,13 @@ void Material::loadAttributes(YAML::Node topNode)
 	vertexStride = offset;
 }
 
-int Material::getAttributeSize(AttributeType type)
+int Material::getAttributeSize(ShaderParameterType type)
 {
 	switch (type) {
-	case AttributeType::Float: return 4;
-	case AttributeType::Float2: return 8;
-	case AttributeType::Float3: return 12;
-	case AttributeType::Float4: return 16;
+	case ShaderParameterType::Float: return 4;
+	case ShaderParameterType::Float2: return 8;
+	case ShaderParameterType::Float3: return 12;
+	case ShaderParameterType::Float4: return 16;
 	default: throw Exception("Unknown type: " + String::integerToString(int(type)));
 	}
 }
@@ -184,8 +200,7 @@ MaterialParameter& Material::operator[](String name)
 			return u;
 		}
 	}
-	uniforms.push_back(MaterialParameter(*this, name));
-	return uniforms.back();
+	throw Exception("Uniform not available: " + name);
 }
 
 std::unique_ptr<Material> Material::loadResource(ResourceLoader& loader)

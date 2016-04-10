@@ -13,19 +13,27 @@ namespace Halley
 	class Shader;
 	class VideoAPI;
 
-	enum class AttributeType
+	enum class ShaderParameterType
 	{
 		Float,
 		Float2,
 		Float3,
-		Float4
+		Float4,
+		Int,
+		Int2,
+		Int3,
+		Int4,
+		Matrix2,
+		Matrix3,
+		Matrix4,
+		Texture2D
 	};
 
 	class MaterialAttribute
 	{
 	public:
 		String name;
-		AttributeType type;
+		ShaderParameterType type;
 		int location;
 		int offset;
 	};
@@ -48,8 +56,8 @@ namespace Halley
 
 	private:
 		VideoAPI* api;
-		std::vector<MaterialParameter> uniforms;
 		std::vector<MaterialPass> passes;
+		std::vector<MaterialParameter> uniforms;
 		std::vector<MaterialAttribute> attributes;
 		int vertexStride;
 		bool dirty = false;
@@ -60,7 +68,8 @@ namespace Halley
 		void loadUniforms(YAML::Node node);
 		void loadAttributes(YAML::Node node);
 
-		static int getAttributeSize(AttributeType type);
+		static ShaderParameterType parseParameterType(String string);
+		static int getAttributeSize(ShaderParameterType type);
 	};
 
 	class MaterialPass
