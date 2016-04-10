@@ -17,4 +17,6 @@ private:
 	EntityId id0;
 	EntityId id2;
 	float curTime = 0;
+
+	Halley::Sprite sprite;
 };

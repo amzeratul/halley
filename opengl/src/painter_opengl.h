@@ -15,7 +15,7 @@ namespace Halley
 		void startRender() override;
 		void endRender() override;
 
-		void drawSprite(Material& material, Vector2f pos) override;
+		void drawVertices(Material& material, size_t numVertices, size_t vertexStride, void* vertexData) override;
 		void clear(Colour colour) override;
 
 	private:
@@ -24,7 +24,6 @@ namespace Halley
 		std::unique_ptr<GLUtils> glUtils;
 
 		void init();
-		void setupSpritePass(const std::vector<MaterialAttribute>& attributes, Vector2f pos);
 		void setupVertexAttributes(const std::vector<MaterialAttribute>& attributes, size_t numVertices, size_t elementStride, char* vertexData);
 		void drawArraysQuads(int n);
 		char* setupVBO(size_t size);

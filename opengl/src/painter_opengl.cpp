@@ -39,7 +39,7 @@ void PainterOpenGL::clear(Colour colour)
 	glCheckError();
 }
 
-void PainterOpenGL::drawSprite(Material& material, Vector2f pos)
+void PainterOpenGL::drawVertices(Material& material, size_t numVertices, size_t vertexStride, void* vertexData)
 {
 	init();
 
@@ -48,9 +48,13 @@ void PainterOpenGL::drawSprite(Material& material, Vector2f pos)
 	auto proj = Matrix4f::makeOrtho2D(0, 1280, 720, 0, -1000, 1000);
 	material["u_mvp"] = proj;
 
-	// Setup VBOs
-	setupSpritePass(material.getAttributes(), pos);
+	// Setup vertices
+	size_t bytesSize = numVertices * vertexStride;
+	char* data = setupVBO(bytesSize);
+	memcpy(data, vertexData, bytesSize);
+	setupVertexAttributes(material.getAttributes(), numVertices, vertexStride, data);
 
+	// Go through each pass
 	for (size_t i = 0; i < material.getNumPasses(); i++) {
 		// Bind pass
 		material.bind(i);
@@ -66,52 +70,6 @@ void PainterOpenGL::init()
 	if (!glUtils) {
 		glUtils = std::make_unique<GLUtils>();
 	}
-}
-
-void PainterOpenGL::setupSpritePass(const std::vector<MaterialAttribute>& attributes, Vector2f pos)
-{
-	constexpr size_t numVertices = 4;
-
-	// HACK: read this elsewhere
-	// Vertex attributes
-	struct VertexAttrib
-	{
-		Vector2f pos;
-		Vector2f offset;
-		Vector2f size;
-		Vector2f rotation;
-		Colour4f colour;
-		Vector2f texCoordMin;
-		Vector2f texCoordMax;
-		Vector2f vertPos;
-	};
-	VertexAttrib verts[numVertices];
-	for (int v = 0; v < numVertices; v++) {
-		auto& vert = verts[v];
-		vert.pos = pos;
-		vert.offset = Vector2f(0.5f, 0.5f);
-		vert.size = Vector2f(64, 64);
-		vert.rotation = Vector2f(0, 0);
-		vert.colour = Colour4f(1, 1, 1, 1);
-		vert.texCoordMin = Vector2f(0, 0);
-		vert.texCoordMax = Vector2f(1, 1);
-		const float vertPosX[] = { 0, 1, 1, 0 };
-		const float vertPosY[] = { 0, 0, 1, 1 };
-		vert.vertPos = Vector2f(vertPosX[v], vertPosY[v]);
-	}
-
-	// Compute data size and request VBO
-	const size_t vertexStride = sizeof(VertexAttrib);
-	const size_t elementStride = vertexStride * 4;
-	const size_t bytesSize = elementStride;
-
-	char* data = setupVBO(bytesSize);
-	for (int v = 0; v < numVertices; v++) {
-		char* dst = data + v * vertexStride;
-		memcpy(dst, &verts[v], vertexStride);
-	}
-
-	setupVertexAttributes(attributes, numVertices, vertexStride, data);
 }
 
 void PainterOpenGL::setupVertexAttributes(const std::vector<MaterialAttribute>& attributes, size_t numVertices, size_t vertexStride, char* vertexData)

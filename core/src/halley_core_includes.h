@@ -11,6 +11,7 @@
 #include "graphics/material_parameter.h"
 #include "graphics/painter.h"
 #include "graphics/shader.h"
+#include "graphics/sprite.h"
 #include "graphics/texture.h"
 #include "graphics/texture_descriptor.h"
 

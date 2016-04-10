@@ -123,6 +123,9 @@
     <ClInclude Include="src\graphics\material_parameter.h">
       <Filter>graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics\sprite.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
@@ -177,6 +180,9 @@
       <Filter>graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\material_parameter.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\sprite.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
   </ItemGroup>

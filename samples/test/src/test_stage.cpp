@@ -14,6 +14,16 @@ void TestStage::init()
 		.addComponent(new FooComponent())
 		.addComponent(new BarComponent())
 		.getEntityId();
+
+	auto texture = getResource<Texture>("sprites/test.png");
+	auto material = getResource<Material>("shaders/sprite.yaml");
+	(*material)["tex0"] = texture;
+	sprite.setMaterial(material);
+	sprite.setPos(Vector2f(100, 100));
+
+	sprite.setSize(Vector2f(64, 64));
+	sprite.setTexRect(Rect4f(0, 0, 1, 1));
+	sprite.setOffset(Vector2f(0.5f, 0.5f));
 }
 
 void TestStage::deInit()
@@ -53,16 +63,14 @@ void TestStage::onFixedUpdate(Time time)
 	}
 
 	curTime += time;
+
+	sprite.setPos(Vector2f(100, 100) + Vector2f(100, 0) * curTime);
 }
 
 void TestStage::onRender(Painter& painter) const
 {
+	(*sprite.getMaterial())["u_time"] = curTime;
 	painter.clear(Colour(0.2f, 0.2f, 0.3f));
 	world.render(painter);
-
-	auto texture = getResource<Texture>("sprites/test.png");
-	auto material = *getResource<Material>("shaders/sprite.yaml");
-	material["tex0"] = texture;
-	material["u_time"] = curTime;
-	painter.drawSprite(material, Vector2f(100, 100));
+	sprite.draw(painter);
 }

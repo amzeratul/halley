@@ -4,16 +4,14 @@ core
 - child stages
 
 core/graphics (?)
-* parse YAML shader definition
-* painter
-* fix attribute binding
 * cameras
+- extra painter tools?
 - rewrite text rendering system to use pre-baked distance fields
 - animation?
 - fix threaded load (TODOs in core_runner.cpp)
 
 opengl
-* painter
+- ?
 
 input
 * bring library into engine

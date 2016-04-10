@@ -12,7 +12,7 @@ namespace Halley
 		virtual void startRender() = 0;
 		virtual void endRender() = 0;
 
-		virtual void drawSprite(Material& material, Vector2f pos) = 0;
+		virtual void drawVertices(Material& material, size_t numVertices, size_t vertexStride, void* vertexData) = 0;
 		virtual void clear(Colour colour) = 0;
 	};
 }
