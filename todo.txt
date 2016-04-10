@@ -5,13 +5,17 @@ core
 
 core/graphics (?)
 * cameras
-- extra painter tools?
+- sprite sheets
+- render target [from old Halley]
+- render graph [from old Halley]
+- animation
 - rewrite text rendering system to use pre-baked distance fields
-- animation?
+- extra painter tools?
+- dynamic batching
 - fix threaded load (TODOs in core_runner.cpp)
 
 opengl
-- ?
+- render target [from old Halley]
 
 input
 * bring library into engine
@@ -21,7 +25,7 @@ audio
 * figure out which backend to use (OpenAL still?)
 
 entity
-* load from text files
+* load from YAML files
 * query other entities
 * messaging system
 - staggered systems
@@ -29,7 +33,7 @@ entity
 - Lua systems
 - Haskell systems
 - defragment/optimize memory
-- universal hierarchical transforms?
+- universal hierarchical transforms? :(
 - onAddEntity/onRemoveEntity on systems
 
 codegen
@@ -46,8 +50,11 @@ tools
 - scene editor?
 - animation editor
 - system/component/message editor
+- render graph editor
+- state machine editor?
 
 utils
+- collision detection & triggers
 - better HTTP library?
 
 samples
@@ -59,6 +66,14 @@ CMake
 - lists for all libraries
 - boost/SDL dependencies
 - clean up
+
+platforms
+* Mac
+- Linux
+- Android?
+- iOS?
+- PS4?
+- XBox One?
 
 directx?
 - future support?

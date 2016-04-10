@@ -15,9 +15,8 @@ void TestStage::init()
 		.addComponent(new BarComponent())
 		.getEntityId();
 
-	auto texture = getResource<Texture>("sprites/test.png");
 	auto material = getResource<Material>("shaders/sprite.yaml");
-	(*material)["tex0"] = texture;
+	(*material)["tex0"] = getResource<Texture>("sprites/test.png");
 	sprite.setMaterial(material);
 	sprite.setPos(Vector2f(100, 100));
 
