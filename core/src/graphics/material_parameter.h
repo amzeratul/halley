@@ -22,6 +22,8 @@ namespace Halley
 	private:
 		MaterialParameter(Material& material, String name, ShaderParameterType type);
 		VideoAPIInternal& getAPI();
+
+		void updateAddresses();
 		unsigned int getAddress();
 		void apply();
 		void bind();
@@ -29,6 +31,7 @@ namespace Halley
 		std::function<void(MaterialParameter&)> toApply;
 		std::function<void(MaterialParameter&)> toBind;
 
+		std::vector<int> addresses;
 		Material& material;
 		String name;
 		ShaderParameterType type;

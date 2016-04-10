@@ -20,9 +20,17 @@ VideoAPIInternal& MaterialParameter::getAPI()
 	return *static_cast<VideoAPIInternal*>(material.api);
 }
 
+void MaterialParameter::updateAddresses()
+{
+	addresses.resize(material.passes.size());
+	for (size_t i = 0; i < addresses.size(); i++) {
+		addresses[i] = material.passes[i].getShader().getUniformLocation(name);
+	}
+}
+
 unsigned int MaterialParameter::getAddress()
 {
-	return material.passes[0].getShader().getUniformLocation(name);
+	return addresses[0];
 }
 
 void MaterialParameter::apply()
@@ -41,7 +49,7 @@ void MaterialParameter::operator=(std::shared_ptr<Texture> texture)
 	toApply = [texture](MaterialParameter& p0) {
 		p0.toBind = [texture](MaterialParameter& p) {
 			texture->bind(p.textureUnit);
-			p.getAPI().getUniformBinding(p.getAddress(), UniformType::Int, 1, &p.textureUnit);
+			p.getAPI().getUniformBinding(p.getAddress(), UniformType::Int, 1, &p.textureUnit)(p);
 		};
 	};
 }

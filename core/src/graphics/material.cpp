@@ -54,6 +54,11 @@ Material::Material(ResourceLoader& loader)
 			return api.core->getResources().get<TextFile>(basePath + path)->data;
 		});
 	}
+
+	// Update uniforms
+	for (auto& u : uniforms) {
+		u.updateAddresses();
+	}
 }
 
 void Material::loadPass(YAML::Node node, std::function<String(String)> retriever)
