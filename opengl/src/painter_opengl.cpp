@@ -60,7 +60,7 @@ void PainterOpenGL::drawVertices(Material& material, size_t numVertices, void* v
 	setupVertexAttributes(material);
 
 	// Go through each pass
-	for (size_t i = 0; i < material.getNumPasses(); i++) {
+	for (int i = 0; i < material.getNumPasses(); i++) {
 		// Bind pass
 		material.bind(i);
 		glUtils->setBlendType(material.getPass(i).getBlend());

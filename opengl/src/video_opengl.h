@@ -31,6 +31,7 @@ namespace Halley {
 		std::unique_ptr<Painter> makePainter() override;
 		std::unique_ptr<Texture> createTexture(TextureDescriptor& descriptor) override;
 		std::unique_ptr<Shader> createShader(String name) override;
+		std::unique_ptr<TextureRenderTarget> createRenderTarget() override;
 
 	protected:
 		void init() override;

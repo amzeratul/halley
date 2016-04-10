@@ -39,6 +39,7 @@
     <ClInclude Include="src\graphics\painter.h" />
     <ClInclude Include="src\graphics\render_target\render_target.h" />
     <ClInclude Include="src\graphics\render_target\render_target_screen.h" />
+    <ClInclude Include="src\graphics\render_target\render_target_texture.h" />
     <ClInclude Include="src\graphics\shader.h" />
     <ClInclude Include="src\graphics\sprite.h" />
     <ClInclude Include="src\graphics\texture.h" />
@@ -63,6 +64,7 @@
     <ClCompile Include="src\graphics\material.cpp" />
     <ClCompile Include="src\graphics\material_parameter.cpp" />
     <ClCompile Include="src\graphics\render_target\render_target_screen.cpp" />
+    <ClCompile Include="src\graphics\render_target\render_target_texture.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\graphics\sprite.cpp" />
     <ClCompile Include="src\graphics\texture.cpp" />

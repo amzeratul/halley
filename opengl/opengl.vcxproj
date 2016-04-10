@@ -148,6 +148,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\render_target_opengl.cpp" />
     <ClCompile Include="src\shader_opengl.cpp" />
     <ClCompile Include="src\texture_opengl.cpp" />
     <ClCompile Include="src\video_opengl.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="src\painter_opengl.h" />
     <ClInclude Include="src\halley_gl.h" />
     <ClInclude Include="src\prec.h" />
+    <ClInclude Include="src\render_target_opengl.h" />
     <ClInclude Include="src\shader_opengl.h" />
     <ClInclude Include="src\texture_opengl.h" />
     <ClInclude Include="src\video_opengl.h" />

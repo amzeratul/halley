@@ -12,6 +12,7 @@ namespace Halley
 	class Painter;
 	class Texture;
 	class TextureDescriptor;
+	class TextureRenderTarget;
 	class Shader;
 
 	class VideoAPI
@@ -40,8 +41,8 @@ namespace Halley
 
 		virtual void setVirtualSize(Vector2f virtualSize) = 0;
 
-		// TODO: do I like this API? Time will tell.
 		virtual std::unique_ptr<Texture> createTexture(TextureDescriptor& descriptor) = 0;
 		virtual std::unique_ptr<Shader> createShader(String name) = 0;
+		virtual std::unique_ptr<TextureRenderTarget> createRenderTarget() = 0;
 	};
 }

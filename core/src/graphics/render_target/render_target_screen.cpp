@@ -23,32 +23,16 @@
 
 using namespace Halley;
 
-void ScreenRenderTarget::bind(int /*attachment*/, bool /*preserveCurrent*/)
+ScreenRenderTarget::ScreenRenderTarget(Vector2f size, Rect4f viewPort)
+	: size(size)
+	, viewPort(viewPort)
+{
+}
+
+void ScreenRenderTarget::bind()
 {
 }
 
 void ScreenRenderTarget::unbind()
 {
 }
-
-Vector2f ScreenRenderTarget::getSize() const
-{
-	// TODO
-	return Vector2f();
-	//return Video::getDisplaySize();
-}
-
-Vector2f ScreenRenderTarget::getViewSize() const
-{
-	// TODO
-	return Vector2f();
-	//return Video::getVirtualSize();
-}
-
-Vector2f ScreenRenderTarget::getOrigin() const
-{
-	// TODO
-	return Vector2f();
-	//return Video::getOrigin();
-}
-

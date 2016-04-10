@@ -5,6 +5,7 @@
 #include "painter_opengl.h"
 #include "texture_opengl.h"
 #include "shader_opengl.h"
+#include "render_target_opengl.h"
 using namespace Halley;
 
 #ifdef _MSC_VER
@@ -343,6 +344,11 @@ std::unique_ptr<Texture> VideoOpenGL::createTexture(TextureDescriptor& descripto
 std::unique_ptr<Shader> VideoOpenGL::createShader(String name)
 {
 	return std::make_unique<ShaderOpenGL>(name);
+}
+
+std::unique_ptr<TextureRenderTarget> VideoOpenGL::createRenderTarget()
+{
+	return std::make_unique<RenderTargetOpenGL>();
 }
 
 void VideoOpenGL::updateWindowDimensions()

@@ -31,6 +31,9 @@
     <Filter Include="graphics\render_target">
       <UniqueIdentifier>{523eb056-f106-4ac3-b95f-82151aea27cf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="graphics\render_graph">
+      <UniqueIdentifier>{f104040a-5e6d-4829-87b3-041b3ddf3df6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\external\irunner.h">
@@ -138,6 +141,9 @@
     <ClInclude Include="src\graphics\blend.h">
       <Filter>graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics\render_target\render_target_texture.h">
+      <Filter>graphics\render_target</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
@@ -198,6 +204,9 @@
       <Filter>graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\render_target\render_target_screen.cpp">
+      <Filter>graphics\render_target</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\render_target\render_target_texture.cpp">
       <Filter>graphics\render_target</Filter>
     </ClCompile>
   </ItemGroup>
