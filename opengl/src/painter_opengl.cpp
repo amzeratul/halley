@@ -146,6 +146,8 @@ void PainterOpenGL::setupVertexAttributes(const std::vector<MaterialAttribute>& 
 		glVertexAttribPointer(attribute.location, count, type, GL_FALSE, int(vertexStride), reinterpret_cast<GLvoid*>(attribute.offset));
 		glCheckError();
 	}
+
+	// TODO: disable positions not used by this program
 }
 
 void PainterOpenGL::drawArraysQuads(int n)

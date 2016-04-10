@@ -4,16 +4,14 @@ uniform mat4 u_mvp;
 
 in vec4 a_position;
 in vec4 a_size;
-in vec4 a_color;
 in vec4 a_texCoord0;
 in vec2 a_vertPos;
 
 out vec4 v_texCoord0;
-out vec4 v_color;
+//out vec4 v_color;
 
 void main() {
 	v_texCoord0 = vec4(mix(a_texCoord0.x, a_texCoord0.z, a_vertPos.x), mix(a_texCoord0.y, a_texCoord0.w, a_vertPos.y), 0.0, 0.0);
-	v_color = a_color;
 	
 	float c = cos(a_size.z);
 	float s = sin(a_size.z);
