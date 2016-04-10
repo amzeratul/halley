@@ -158,17 +158,10 @@ void Material::bind(size_t pass)
 	currentMaterial = this;
 	currentPass = pass;
 
-	if (dirty) {
-		for (auto& u : uniforms) {
-			u.apply();
-		}
-		dirty = false;
-	}
-
 	passes[pass].bind();
 
 	for (auto& u : uniforms) {
-		u.bind();
+		u.bind(pass);
 	}
 }
 
@@ -202,8 +195,6 @@ void Material::updateUniforms()
 
 MaterialParameter& Material::operator[](String name)
 {
-	dirty = true;
-
 	for (auto& u : uniforms) {
 		if (u.name == name) {
 			return u;

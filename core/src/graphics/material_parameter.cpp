@@ -28,82 +28,84 @@ void MaterialParameter::updateAddresses()
 	}
 }
 
-unsigned int MaterialParameter::getAddress()
+unsigned int MaterialParameter::getAddress(int pass)
 {
-	return addresses[0];
+	return addresses[pass];
 }
 
-void MaterialParameter::apply()
+void MaterialParameter::bind(int pass)
 {
-	toApply(*this);
-}
-
-void MaterialParameter::bind()
-{
-	toBind(*this);
+	if (toBind) {
+		toBind(pass);
+	}
 }
 
 void MaterialParameter::operator=(std::shared_ptr<Texture> texture)
 {
 	assert(type == ShaderParameterType::Texture2D);
-	toApply = [texture](MaterialParameter& p0) {
-		p0.toBind = [texture](MaterialParameter& p) {
-			texture->bind(p.textureUnit);
-			p.getAPI().getUniformBinding(p.getAddress(), UniformType::Int, 1, &p.textureUnit)(p);
-		};
+	bindFunc = getAPI().getUniformBinding(UniformType::Int, 1);
+	toBind = [texture, this](int pass) {
+		texture->bind(textureUnit);
+		bindFunc(getAddress(pass), &textureUnit);
 	};
 }
 
 void MaterialParameter::operator=(Colour colour)
 {
 	assert(type == ShaderParameterType::Float4);
-	toApply = [colour](MaterialParameter& p) {
-		std::array<float, 4> col = { colour.r, colour.g, colour.b, colour.a };
-		p.toBind = p.getAPI().getUniformBinding(p.getAddress(), UniformType::Float, 4, col.data());
+	bindFunc = getAPI().getUniformBinding(UniformType::Float, 4);
+	toBind = [=](int pass) {
+		Colour c = colour;
+		bindFunc(getAddress(pass), &c);
 	};
 }
 
 void MaterialParameter::operator=(float p)
 {
 	assert(type == ShaderParameterType::Float);
-	toApply = [p](MaterialParameter& t) {
-		auto v = p;
-		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Float, 1, &v);
+	bindFunc = getAPI().getUniformBinding(UniformType::Float, 1);
+	toBind = [=](int pass) {
+		auto l = p;
+		bindFunc(getAddress(pass), &l);
 	};
 }
 
 void MaterialParameter::operator=(Vector2f p)
 {
 	assert(type == ShaderParameterType::Float2);
-	toApply = [p](MaterialParameter& t) {
-		auto v = p;
-		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Float, 2, &v);
+	bindFunc = getAPI().getUniformBinding(UniformType::Float, 2);
+	toBind = [=](int pass) {
+		auto l = p;
+		bindFunc(getAddress(pass), &l);
 	};
 }
 
 void MaterialParameter::operator=(int p)
 {
 	assert(type == ShaderParameterType::Int);
-	toApply = [p](MaterialParameter& t) {
-		auto v = p;
-		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Int, 1, &v);
+	bindFunc = getAPI().getUniformBinding(UniformType::Int, 1);
+	toBind = [=](int pass) {
+		auto l = p;
+		bindFunc(getAddress(pass), &l);
 	};
 }
 
 void MaterialParameter::operator=(Vector2i p)
 {
 	assert(type == ShaderParameterType::Int2);
-	toApply = [p](MaterialParameter& t) {
-		auto v = p;
-		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Int, 2, &v);
+	bindFunc = getAPI().getUniformBinding(UniformType::Int, 2);
+	toBind = [=](int pass) {
+		auto l = p;
+		bindFunc(getAddress(pass), &l);
 	};
 }
 
 void MaterialParameter::operator=(Matrix4f m)
 {
 	assert(type == ShaderParameterType::Matrix4);
-	toApply = [m](MaterialParameter& t) {
-		auto v = m;
-		t.toBind = t.getAPI().getUniformBinding(t.getAddress(), UniformType::Mat4, 1, &v);
+	bindFunc = getAPI().getUniformBinding(UniformType::Mat4, 1);
+	toBind = [=](int pass) {
+		auto l = m;
+		bindFunc(getAddress(pass), l.getElements());
 	};
 }

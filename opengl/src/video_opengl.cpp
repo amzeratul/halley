@@ -230,114 +230,98 @@ void VideoOpenGL::setVirtualSize(Vector2f vs)
 	updateWindowDimensions();
 }
 
-std::function<void(MaterialParameter&)> VideoOpenGL::getUniformBinding(unsigned int address, UniformType type, int n, void* data)
+std::function<void(int, void*)> VideoOpenGL::getUniformBinding(UniformType type, int n)
 {
 	switch (type) {
 		case UniformType::Int:
 		{
-			auto vs = reinterpret_cast<int*>(data);
 			if (n == 1) {
-				auto v0 = vs[0];
-				return [=](MaterialParameter&)
+				return [](int address, void* data)
 				{
-					glUniform1i(address, v0);
+					glUniform1i(address, reinterpret_cast<int*>(data)[0]);
 					glCheckError();
 				};
 			} else if (n == 2) {
-				auto v0 = vs[0];
-				auto v1 = vs[1];
-				return [=](MaterialParameter&)
+				return [](int address, void* data)
 				{
-					glUniform2i(address, v0, v1);
+					auto vs = reinterpret_cast<int*>(data);
+					glUniform2i(address, vs[0], vs[1]);
 					glCheckError();
 				};
 			} else if (n == 2) {
-				auto v0 = vs[0];
-				auto v1 = vs[1];
-				auto v2 = vs[2];
-				return [=](MaterialParameter&)
+				return [](int address, void* data)
 				{
-					glUniform3i(address, v0, v1, v2);
+					auto vs = reinterpret_cast<int*>(data);
+					glUniform3i(address, vs[0], vs[1], vs[2]);
 					glCheckError();
 				};
 			} else if (n == 2) {
-				auto v0 = vs[0];
-				auto v1 = vs[1];
-				auto v2 = vs[2];
-				auto v3 = vs[3];
-				return [=](MaterialParameter&)
+				return [](int address, void* data)
 				{
-					glUniform4i(address, v0, v1, v2, v3);
+					auto vs = reinterpret_cast<int*>(data);
+					glUniform4i(address, vs[0], vs[1], vs[2], vs[3]);
 					glCheckError();
 				};
 			}
 		}
 		case UniformType::IntArray:
 		{
-			auto vs = reinterpret_cast<int*>(data);
-			std::vector<int> d(vs, vs + n);
-			return [=](MaterialParameter&)
+			return [n](int address, void* data)
 			{
-				glUniform1iv(address, n, d.data());
+				auto vs = reinterpret_cast<int*>(data);
+				glUniform1iv(address, n, vs);
 				glCheckError();
 			};
 		}
 		case UniformType::Float:
 		{
-			auto vs = reinterpret_cast<float*>(data);
 			if (n == 1) {
-				auto v0 = vs[0];
-				return [=](MaterialParameter&)
+				return [](int address, void* data)
 				{
-					glUniform1f(address, v0);
+					glUniform1f(address, reinterpret_cast<float*>(data)[0]);
 					glCheckError();
 				};
-			} else if (n == 2) {
-				auto v0 = vs[0];
-				auto v1 = vs[1];
-				return [=](MaterialParameter&)
+			}
+			else if (n == 2) {
+				return [](int address, void* data)
 				{
-					glUniform2f(address, v0, v1);
+					auto vs = reinterpret_cast<float*>(data);
+					glUniform2f(address, vs[0], vs[1]);
 					glCheckError();
 				};
-			} else if (n == 2) {
-				auto v0 = vs[0];
-				auto v1 = vs[1];
-				auto v2 = vs[2];
-				return [=](MaterialParameter&)
+			}
+			else if (n == 2) {
+				return [](int address, void* data)
 				{
-					glUniform3f(address, v0, v1, v2);
+					auto vs = reinterpret_cast<float*>(data);
+					glUniform3f(address, vs[0], vs[1], vs[2]);
 					glCheckError();
 				};
-			} else if (n == 2) {
-				auto v0 = vs[0];
-				auto v1 = vs[1];
-				auto v2 = vs[2];
-				auto v3 = vs[3];
-				return [=](MaterialParameter&)
+			}
+			else if (n == 2) {
+				return [](int address, void* data)
 				{
-					glUniform4f(address, v0, v1, v2, v3);
+					auto vs = reinterpret_cast<float*>(data);
+					glUniform4f(address, vs[0], vs[1], vs[2], vs[3]);
 					glCheckError();
 				};
 			}
 		}
 		case UniformType::FloatArray:
 		{
-			auto vs = reinterpret_cast<float*>(data);
-			std::vector<float> d(vs, vs + n);
-			return [=](MaterialParameter&)
+			return [=](int address, void* data)
 			{
-				glUniform1fv(address, n, d.data());
+				auto vs = reinterpret_cast<float*>(data);
+				glUniform1fv(address, n, vs);
 				glCheckError();
 			};
 		}
 		case UniformType::Mat4:
 		{
-			auto vs = reinterpret_cast<Matrix4f*>(data);
-			std::vector<float> d(vs->getElements(), vs->getElements() + 16);
-			return [=](MaterialParameter&)
+			return [](int address, void* data)
 			{
-				glUniformMatrix4fv(address, 1, false, d.data());
+				auto vs = reinterpret_cast<Matrix4f*>(data);
+				glUniformMatrix4fv(address, 1, false, vs->getElements());
 				glCheckError();
 			};
 		}

@@ -6,10 +6,8 @@ core
 core/graphics (?)
 * parse YAML shader definition
 * painter
-* fix uniform binding
 * fix attribute binding
 * cameras
-- multipass materials
 - rewrite text rendering system to use pre-baked distance fields
 - animation?
 - fix threaded load (TODOs in core_runner.cpp)

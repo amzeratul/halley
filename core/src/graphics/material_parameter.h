@@ -24,12 +24,11 @@ namespace Halley
 		VideoAPIInternal& getAPI();
 
 		void updateAddresses();
-		unsigned int getAddress();
-		void apply();
-		void bind();
+		unsigned int getAddress(int pass);
+		void bind(int pass);
 
-		std::function<void(MaterialParameter&)> toApply;
-		std::function<void(MaterialParameter&)> toBind;
+		std::function<void(int)> toBind;
+		std::function<void(int, void*)> bindFunc;
 
 		std::vector<int> addresses;
 		Material& material;

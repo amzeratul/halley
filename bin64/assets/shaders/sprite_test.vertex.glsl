@@ -1,6 +1,7 @@
 #version 140
 
 uniform mat4 u_mvp;
+uniform float u_time;
 
 in vec4 a_position;
 in vec4 a_size;
@@ -16,6 +17,6 @@ void main() {
 	float c = cos(a_size.z);
 	float s = sin(a_size.z);
 	mat2 m = mat2(c, s, -s, c);
-	vec2 pos = a_position.xy + m * ((a_vertPos - a_position.zw) * a_size.xy) + vec2(10, 10);
+	vec2 pos = a_position.xy + m * ((a_vertPos - a_position.zw) * a_size.xy) + vec2(cos(u_time) * 10, sin(u_time) * 10);
 	gl_Position = u_mvp * vec4(pos.x, pos.y, 0.0, 1.0);
 }

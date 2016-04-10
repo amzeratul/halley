@@ -16,4 +16,5 @@ private:
 	int i = 0;
 	EntityId id0;
 	EntityId id2;
+	float curTime = 0;
 };

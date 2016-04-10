@@ -51,6 +51,8 @@ void TestStage::onFixedUpdate(Time time)
 	if (i == 100) {
 		//getAPI().core->quit();
 	}
+
+	curTime += time;
 }
 
 void TestStage::onRender(Painter& painter) const
@@ -61,5 +63,6 @@ void TestStage::onRender(Painter& painter) const
 	auto texture = getResource<Texture>("sprites/test.png");
 	auto material = *getResource<Material>("shaders/sprite.yaml");
 	material["tex0"] = texture;
+	material["u_time"] = curTime;
 	painter.drawSprite(material, Vector2f(100, 100));
 }

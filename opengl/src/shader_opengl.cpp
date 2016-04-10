@@ -176,9 +176,7 @@ unsigned ShaderOpenGL::getUniformLocation(String name)
 
 	unsigned int result = glGetUniformLocation(id, name.c_str());
 	glCheckError();
-	if (result == static_cast<unsigned int>(-1)) {
-		throw Exception("Invalid shader uniform name: \"" + String(name) + "\"");
-	}
+
 	uniformLocations[name] = result;
 	return result;
 }
@@ -192,9 +190,7 @@ unsigned ShaderOpenGL::getAttributeLocation(String name)
 
 	unsigned int result = glGetAttribLocation(id, name.c_str());
 	glCheckError();
-	if (result == static_cast<unsigned int>(-1)) {
-		throw Exception("Invalid shader attribute name: \"" + name + "\" in shader \"" + this->name + "\"");
-	}
+
 	attributeLocations[name] = result;
 	return result;
 }
