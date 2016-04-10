@@ -56,9 +56,7 @@ Material::Material(ResourceLoader& loader)
 	}
 
 	// Update uniforms
-	for (auto& u : uniforms) {
-		u.updateAddresses();
-	}
+	updateUniforms();
 }
 
 void Material::loadPass(YAML::Node node, std::function<String(String)> retriever)
@@ -161,13 +159,7 @@ void Material::bind(size_t pass)
 	currentPass = pass;
 
 	if (dirty) {
-		int tu = 0;
 		for (auto& u : uniforms) {
-			if (u.needsTextureUnit) {
-				u.textureUnit = tu++;
-			} else {
-				u.textureUnit = -1;
-			}
 			u.apply();
 		}
 		dirty = false;
@@ -195,9 +187,21 @@ void Material::ensureLoaded()
 	// TODO?
 }
 
+void Material::updateUniforms()
+{
+	int tu = 0;
+	for (auto& u : uniforms) {
+		u.updateAddresses();
+		if (u.needsTextureUnit) {
+			u.textureUnit = tu++;
+		} else {
+			u.textureUnit = -1;
+		}
+	}
+}
+
 MaterialParameter& Material::operator[](String name)
 {
-	passes[0].bind();
 	dirty = true;
 
 	for (auto& u : uniforms) {

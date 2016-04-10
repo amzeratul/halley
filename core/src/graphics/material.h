@@ -64,6 +64,8 @@ namespace Halley
 		String name;
 
 		void ensureLoaded();
+		void updateUniforms();
+
 		void loadPass(YAML::Node node, std::function<String(String)> retriever);
 		void loadUniforms(YAML::Node node);
 		void loadAttributes(YAML::Node node);
