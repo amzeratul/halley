@@ -1,5 +1,6 @@
 #include "sprite.h"
 #include "painter.h"
+#include "material.h"
 
 using namespace Halley;
 
@@ -20,10 +21,11 @@ void Sprite::draw(Painter& painter) const
 		dirty = false;
 	}
 
-	painter.drawVertices(*material, 4, sizeof(SpriteVertexAttrib), vertices.data());
+	assert(material->getVertexStride() == sizeof(SpriteVertexAttrib));
+	painter.drawVertices(*material, 4, vertices.data());
 }
 
-void Sprite::update() const
+void Sprite::update() const // Not really "const", but needs to be called from draw()
 {
 	// Don't copy the last Vector2f (vertPos)
 	constexpr size_t size = sizeof(SpriteVertexAttrib) - sizeof(Vector2f);

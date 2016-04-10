@@ -6,10 +6,12 @@ namespace Halley
 
 	struct SpriteVertexAttrib
 	{
+		// This structure must match the layout of the shader
+		// See sprite.yaml for reference
 		Vector2f pos;
-		Vector2f offset;
+		Vector2f offset;     // pos and offset are a single vec4 on the shader
 		Vector2f size;
-		Vector2f rotation;
+		Vector2f rotation;   // size and rotation are a single vec4 on the shader
 		Colour4f colour;
 		Rect4f texRect;
 		Vector2f vertPos;

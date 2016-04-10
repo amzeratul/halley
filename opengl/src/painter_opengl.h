@@ -15,7 +15,7 @@ namespace Halley
 		void startRender() override;
 		void endRender() override;
 
-		void drawVertices(Material& material, size_t numVertices, size_t vertexStride, void* vertexData) override;
+		void drawVertices(Material& material, size_t numVertices, void* vertexData) override;
 		void clear(Colour colour) override;
 
 	private:
@@ -24,7 +24,7 @@ namespace Halley
 		std::unique_ptr<GLUtils> glUtils;
 
 		void init();
-		void setupVertexAttributes(const std::vector<MaterialAttribute>& attributes, size_t numVertices, size_t elementStride, char* vertexData);
+		void setupVertexAttributes(Material& material);
 		void drawArraysQuads(int n);
 		char* setupVBO(size_t size);
 	};

@@ -39,7 +39,7 @@ void PainterOpenGL::clear(Colour colour)
 	glCheckError();
 }
 
-void PainterOpenGL::drawVertices(Material& material, size_t numVertices, size_t vertexStride, void* vertexData)
+void PainterOpenGL::drawVertices(Material& material, size_t numVertices, void* vertexData)
 {
 	init();
 
@@ -48,11 +48,16 @@ void PainterOpenGL::drawVertices(Material& material, size_t numVertices, size_t 
 	auto proj = Matrix4f::makeOrtho2D(0, 1280, 720, 0, -1000, 1000);
 	material["u_mvp"] = proj;
 
-	// Setup vertices
+	// Load vertices into VBO
+	size_t vertexStride = material.getVertexStride();
 	size_t bytesSize = numVertices * vertexStride;
 	char* data = setupVBO(bytesSize);
 	memcpy(data, vertexData, bytesSize);
-	setupVertexAttributes(material.getAttributes(), numVertices, vertexStride, data);
+	glBufferData(GL_ARRAY_BUFFER, bytesSize, vertexData, GL_STREAM_DRAW);
+	glCheckError();
+
+	// Set attributes
+	setupVertexAttributes(material);
 
 	// Go through each pass
 	for (size_t i = 0; i < material.getNumPasses(); i++) {
@@ -72,16 +77,11 @@ void PainterOpenGL::init()
 	}
 }
 
-void PainterOpenGL::setupVertexAttributes(const std::vector<MaterialAttribute>& attributes, size_t numVertices, size_t vertexStride, char* vertexData)
+void PainterOpenGL::setupVertexAttributes(Material& material)
 {
-	const size_t bytesSize = vertexStride * numVertices;
-
-	// Load data into VBO
-	glBufferData(GL_ARRAY_BUFFER, bytesSize, vertexData, GL_STREAM_DRAW);
-	glCheckError();
-
 	// Set vertex attribute pointers in VBO
-	for (auto& attribute : attributes) {
+	int vertexStride = material.getVertexStride();
+	for (auto& attribute : material.getAttributes()) {
 		int count = 0;
 		int type = 0;
 		switch (attribute.type) {
@@ -104,7 +104,7 @@ void PainterOpenGL::setupVertexAttributes(const std::vector<MaterialAttribute>& 
 		}
 		glEnableVertexAttribArray(attribute.location);
 		size_t offset = attribute.offset;
-		glVertexAttribPointer(attribute.location, count, type, GL_FALSE, int(vertexStride), reinterpret_cast<GLvoid*>(offset));
+		glVertexAttribPointer(attribute.location, count, type, GL_FALSE, vertexStride, reinterpret_cast<GLvoid*>(offset));
 		glCheckError();
 	}
 

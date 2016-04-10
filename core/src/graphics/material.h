@@ -49,6 +49,8 @@ namespace Halley
 
 		size_t getNumPasses() const;
 		MaterialPass& getPass(size_t n);
+
+		int getVertexStride() const { return vertexStride; }
 		const std::vector<MaterialAttribute>& getAttributes() const { return attributes; }
 
 		MaterialParameter& operator[](String name);
