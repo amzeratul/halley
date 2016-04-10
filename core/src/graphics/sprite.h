@@ -26,7 +26,7 @@ namespace Halley
 		bool isInView(Rect4f rect) const;
 		
 		void setMaterial(std::shared_ptr<Material> m) { material = m; }
-		std::shared_ptr<Material> getMaterial() const { return material; }
+		Material& getMaterial() const { return *material; }
 
 		void setPos(Vector2f pos);
 		void setRotation(Angle1f angle);

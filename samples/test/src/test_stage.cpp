@@ -64,13 +64,16 @@ void TestStage::onFixedUpdate(Time time)
 
 	curTime += time;
 
-	sprite.setPos(Vector2f(100, 100) + Vector2f(100, 0) * curTime);
+	sprite.setPos(Vector2f(640, 360) + Vector2f(500, 0) * ::sin(curTime * 0.2f));
+	float a = ::sin(curTime * 2) * 0.5f + 0.5f;
+	sprite.setColour(Colour4f(a, a, a, a));
 }
 
 void TestStage::onRender(Painter& painter) const
 {
-	(*sprite.getMaterial())["u_time"] = curTime;
 	painter.clear(Colour(0.2f, 0.2f, 0.3f));
 	world.render(painter);
+
+	sprite.getMaterial()["u_time"] = curTime;
 	sprite.draw(painter);
 }
