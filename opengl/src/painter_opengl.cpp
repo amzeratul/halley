@@ -43,17 +43,21 @@ void PainterOpenGL::drawSprite(Material& material, Vector2f pos)
 {
 	init();
 
+	// Bind projection
 	// TODO: get current camera
 	auto proj = Matrix4f::makeOrtho2D(0, 1280, 720, 0, -1000, 1000);
+	material["u_mvp"] = proj;
+
+	// Setup VBOs
+	setupSpritePass(material.getAttributes(), pos);
 
 	for (size_t i = 0; i < material.getNumPasses(); i++) {
-		// Bind camera and material
-		material["u_mvp"] = proj;
+		// Bind pass
 		material.bind(i);
-
-		// Set blend
 		glUtils->setBlendType(material.getPass(i).getBlend());
-		drawSpritePass(material.getAttributes(), pos);
+
+		// Draw
+		drawArraysQuads(1);
 	}
 }
 
@@ -64,10 +68,9 @@ void PainterOpenGL::init()
 	}
 }
 
-void PainterOpenGL::drawSpritePass(const std::vector<MaterialAttribute>& attributes, Vector2f pos)
+void PainterOpenGL::setupSpritePass(const std::vector<MaterialAttribute>& attributes, Vector2f pos)
 {
 	constexpr size_t numVertices = 4;
-	const size_t numElements = 1;
 
 	// HACK: read this elsewhere
 	// Vertex attributes
@@ -100,7 +103,7 @@ void PainterOpenGL::drawSpritePass(const std::vector<MaterialAttribute>& attribu
 	// Compute data size and request VBO
 	const size_t vertexStride = sizeof(VertexAttrib);
 	const size_t elementStride = vertexStride * 4;
-	const size_t bytesSize = elementStride * numElements;
+	const size_t bytesSize = elementStride;
 
 	char* data = setupVBO(bytesSize);
 	for (int v = 0; v < numVertices; v++) {
@@ -109,7 +112,6 @@ void PainterOpenGL::drawSpritePass(const std::vector<MaterialAttribute>& attribu
 	}
 
 	setupVertexAttributes(attributes, numVertices, vertexStride, data);
-	drawArraysQuads(numElements);
 }
 
 void PainterOpenGL::setupVertexAttributes(const std::vector<MaterialAttribute>& attributes, size_t numVertices, size_t vertexStride, char* vertexData)

@@ -14,8 +14,8 @@ out vec4 v_texCoord0;
 void main() {
 	v_texCoord0 = vec4(mix(a_texCoord0.x, a_texCoord0.z, a_vertPos.x), mix(a_texCoord0.y, a_texCoord0.w, a_vertPos.y), 0.0, 0.0);
 	
-	float c = cos(a_size.z);
-	float s = sin(a_size.z);
+	float c = cos(a_size.z + u_time * 1.32);
+	float s = sin(a_size.z + u_time * 1.32);
 	mat2 m = mat2(c, s, -s, c);
 	vec2 pos = a_position.xy + m * ((a_vertPos - a_position.zw) * a_size.xy) + vec2(cos(u_time) * 10, sin(u_time) * 10);
 	gl_Position = u_mvp * vec4(pos.x, pos.y, 0.0, 1.0);

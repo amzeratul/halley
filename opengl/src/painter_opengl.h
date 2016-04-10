@@ -24,7 +24,7 @@ namespace Halley
 		std::unique_ptr<GLUtils> glUtils;
 
 		void init();
-		void drawSpritePass(const std::vector<MaterialAttribute>& attributes, Vector2f pos);
+		void setupSpritePass(const std::vector<MaterialAttribute>& attributes, Vector2f pos);
 		void setupVertexAttributes(const std::vector<MaterialAttribute>& attributes, size_t numVertices, size_t elementStride, char* vertexData);
 		void drawArraysQuads(int n);
 		char* setupVBO(size_t size);
