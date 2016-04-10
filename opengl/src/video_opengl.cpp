@@ -433,7 +433,7 @@ static void drawBox(spPainter painter, float x, float y, float w, float h)
 	glUtils.setNumberOfTextureUnits(1);
 	glUtils.setTextureUnit(0);
 	glUtils.bindTexture(0);
-	glUtils.setBlendType(Blend::Opaque);
+	glUtils.setBlendType(BlendType::Opaque);
 	float vs[] = { x, y, x + w + 1, y, x + w + 1, y + h + 1, x, y + h + 1 };
 	painter->drawQuad(Shader::getDefault(), vs);
 }

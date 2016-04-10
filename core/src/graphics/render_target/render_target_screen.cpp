@@ -19,38 +19,36 @@
 
 \*****************************************************************/
 
+#include "render_target_screen.h"
 
-#pragma once
+using namespace Halley;
 
-#include "halley_gl.h"
-#include "../../core/src/graphics/blend.h"
-
-namespace Halley {
-
-	class Texture;
-	class GLInternals;
-
-	class GLUtils : boost::noncopyable {
-	public:
-		GLUtils();
-		GLUtils(GLUtils& other);
-
-		void setBlendType(BlendType type);
-
-		void bindTexture(int id);
-		void setTextureUnit(int n);
-		void setNumberOfTextureUnits(int n);
-		void resetState();
-
-		void setViewPort(Rect4i rect, bool scissor = false);
-		Rect4i getViewPort();
-
-		void clear(Colour col);
-		static void doGlCheckError(const char* file = "", long line = 0);
-		
-	private:
-		GLInternals& state;
-	};
+void ScreenRenderTarget::bind(int /*attachment*/, bool /*preserveCurrent*/)
+{
 }
 
-#define glCheckError() Halley::GLUtils::doGlCheckError(__FILE__, __LINE__)
+void ScreenRenderTarget::unbind()
+{
+}
+
+Vector2f ScreenRenderTarget::getSize() const
+{
+	// TODO
+	return Vector2f();
+	//return Video::getDisplaySize();
+}
+
+Vector2f ScreenRenderTarget::getViewSize() const
+{
+	// TODO
+	return Vector2f();
+	//return Video::getVirtualSize();
+}
+
+Vector2f ScreenRenderTarget::getOrigin() const
+{
+	// TODO
+	return Vector2f();
+	//return Video::getOrigin();
+}
+

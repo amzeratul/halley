@@ -9,7 +9,7 @@
 using namespace Halley;
 
 static Material* currentMaterial = nullptr;
-static size_t currentPass = 0;
+static int currentPass = 0;
 
 #ifdef _MSC_VER
 #ifdef _DEBUG
@@ -77,7 +77,7 @@ void Material::loadPass(YAML::Node node, std::function<String(String)> retriever
 	load("geometry", [&](String src) { shader->addGeometrySource(src); });
 	shader->compile();
 
-	passes.emplace_back(MaterialPass(std::move(shader), Blend::AlphaPremultiplied));	
+	passes.emplace_back(MaterialPass(std::move(shader), BlendType::AlphaPremultiplied));	
 }
 
 void Material::loadUniforms(YAML::Node topNode)
@@ -149,7 +149,7 @@ int Material::getAttributeSize(ShaderParameterType type)
 	}
 }
 
-void Material::bind(size_t pass)
+void Material::bind(int pass)
 {
 	// Avoid redundant work
 	if (currentMaterial == this && currentPass == pass && !dirty) {
@@ -165,12 +165,12 @@ void Material::bind(size_t pass)
 	}
 }
 
-size_t Material::getNumPasses() const
+int Material::getNumPasses() const
 {
-	return passes.size();
+	return int(passes.size());
 }
 
-MaterialPass& Material::getPass(size_t n)
+MaterialPass& Material::getPass(int n)
 {
 	return passes[n];
 }
@@ -208,7 +208,7 @@ std::unique_ptr<Material> Material::loadResource(ResourceLoader& loader)
 	return std::make_unique<Material>(loader);
 }
 
-MaterialPass::MaterialPass(std::shared_ptr<Shader> shader, Blend::Type blend)
+MaterialPass::MaterialPass(std::shared_ptr<Shader> shader, BlendType blend)
 	: shader(shader)
 	, blend(blend)
 {

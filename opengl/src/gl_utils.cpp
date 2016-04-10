@@ -87,14 +87,14 @@ namespace Halley {
 			numUnits = 0;
 			curTexUnit = 0;
 			scissoring = false;
-			curBlend = Blend::Opaque;
+			curBlend = BlendType::Opaque;
 			hasClearCol = false;
 		}
 
 		int curTexUnit;
 		int numUnits;
 		std::array<int, 8> curTex;
-		Blend::Type curBlend;
+		BlendType curBlend;
 		Rect4i viewport;
 		Colour clearCol;
 		bool scissoring;
@@ -141,17 +141,17 @@ GLUtils::GLUtils(GLUtils& other)
 	glCheckError();
 }
 
-void GLUtils::setBlendType(Blend::Type type)
+void GLUtils::setBlendType(BlendType type)
 {
-	assert(type == Blend::Alpha || type == Blend::AlphaPremultiplied || type == Blend::Add || type == Blend::Opaque || type == Blend::Test || type == Blend::Multiply || type == Blend::Darken);
+	assert(type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Opaque || type == BlendType::Test || type == BlendType::Multiply || type == BlendType::Darken);
 	glCheckError();
 
-	const Blend::Type curType = state.curBlend;
+	const BlendType curType = state.curBlend;
 	if (!CHECKED || curType != type) {
-		bool hasBlend = curType == Blend::Alpha || curType == Blend::AlphaPremultiplied || curType == Blend::Add || curType == Blend::Multiply || curType == Blend::Darken;
-		bool needsBlend = type == Blend::Alpha || type == Blend::AlphaPremultiplied || type == Blend::Add || type == Blend::Multiply || type == Blend::Darken;
-		bool hasTest = curType == Blend::Test;
-		bool needsTest = type == Blend::Test;
+		bool hasBlend = curType == BlendType::Alpha || curType == BlendType::AlphaPremultiplied || curType == BlendType::Add || curType == BlendType::Multiply || curType == BlendType::Darken;
+		bool needsBlend = type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Multiply || type == BlendType::Darken;
+		bool hasTest = curType == BlendType::Test;
+		bool needsTest = type == BlendType::Test;
 
 		// Disable current
 		if (hasBlend && !needsBlend) {
@@ -174,15 +174,15 @@ void GLUtils::setBlendType(Blend::Type type)
 		}
 
 		if (needsBlend) {
-			if (type == Blend::AlphaPremultiplied) {
+			if (type == BlendType::AlphaPremultiplied) {
 				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 				glCheckError();
 			}
-			else if (type == Blend::Alpha) {
+			else if (type == BlendType::Alpha) {
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				glCheckError();
 			}
-			else if (type == Blend::Multiply) {
+			else if (type == BlendType::Multiply) {
 				glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 				glCheckError();
 			}

@@ -28,6 +28,9 @@
     <Filter Include="resources">
       <UniqueIdentifier>{55c95698-2a7c-4613-b585-5fee554b5bd6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="graphics\render_target">
+      <UniqueIdentifier>{523eb056-f106-4ac3-b95f-82151aea27cf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\external\irunner.h">
@@ -126,6 +129,15 @@
     <ClInclude Include="src\graphics\sprite.h">
       <Filter>graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics\render_target\render_target_screen.h">
+      <Filter>graphics\render_target</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\render_target\render_target.h">
+      <Filter>graphics\render_target</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\blend.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
@@ -184,6 +196,9 @@
     </ClCompile>
     <ClCompile Include="src\graphics\sprite.cpp">
       <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\render_target\render_target_screen.cpp">
+      <Filter>graphics\render_target</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

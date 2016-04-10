@@ -19,38 +19,31 @@
 
 \*****************************************************************/
 
-
 #pragma once
 
-#include "halley_gl.h"
-#include "../../core/src/graphics/blend.h"
+#include "../texture.h"
 
 namespace Halley {
-
-	class Texture;
-	class GLInternals;
-
-	class GLUtils : boost::noncopyable {
+	class RenderTarget {
 	public:
-		GLUtils();
-		GLUtils(GLUtils& other);
+		virtual ~RenderTarget() {}
 
-		void setBlendType(BlendType type);
+		virtual Vector2f getSize() const = 0;
+		virtual Vector2f getViewSize() const = 0;
+		virtual Vector2f getOrigin() const = 0;
 
-		void bindTexture(int id);
-		void setTextureUnit(int n);
-		void setNumberOfTextureUnits(int n);
-		void resetState();
+	protected:
+		virtual void bind(int attachment, bool preserveCurrent) = 0;
+		virtual void unbind() = 0;
 
-		void setViewPort(Rect4i rect, bool scissor = false);
-		Rect4i getViewPort();
+		static std::shared_ptr<RenderTarget> curTarget;
+	};
 
-		void clear(Colour col);
-		static void doGlCheckError(const char* file = "", long line = 0);
-		
-	private:
-		GLInternals& state;
+	class TextureRenderTarget : public RenderTarget {
+	public:
+		virtual ~TextureRenderTarget() {}
+		virtual void setTarget(std::shared_ptr<Texture> tex)=0;
+		virtual std::shared_ptr<Texture> getTexture() const=0;
+		virtual std::shared_ptr<Texture> getDepthTexture() const = 0;
 	};
 }
-
-#define glCheckError() Halley::GLUtils::doGlCheckError(__FILE__, __LINE__)

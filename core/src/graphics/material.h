@@ -1,5 +1,6 @@
 #pragma once
 #include "../../../opengl/src/gl_utils.h"
+#include "blend.h"
 
 namespace YAML
 {
@@ -45,10 +46,9 @@ namespace Halley
 	public:
 		explicit Material(ResourceLoader& loader);
 
-		void bind(size_t pass);
-
-		size_t getNumPasses() const;
-		MaterialPass& getPass(size_t n);
+		void bind(int pass);
+		int getNumPasses() const;
+		MaterialPass& getPass(int n);
 
 		int getVertexStride() const { return vertexStride; }
 		const std::vector<MaterialAttribute>& getAttributes() const { return attributes; }
@@ -81,15 +81,15 @@ namespace Halley
 		friend class Material;
 
 	public:
-		MaterialPass(std::shared_ptr<Shader> shader, Blend::Type blend);
+		MaterialPass(std::shared_ptr<Shader> shader, BlendType blend);
 
 		void bind();
 
-		Blend::Type getBlend() const { return blend; }
+		BlendType getBlend() const { return blend; }
 		Shader& getShader() const { return *shader; }
 
 	private:
 		std::shared_ptr<Shader> shader;
-		Blend::Type blend;
+		BlendType blend;
 	};
 }

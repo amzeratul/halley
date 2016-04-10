@@ -19,38 +19,19 @@
 
 \*****************************************************************/
 
-
 #pragma once
 
-#include "halley_gl.h"
-#include "../../core/src/graphics/blend.h"
+#include "render_target.h"
 
 namespace Halley {
-
-	class Texture;
-	class GLInternals;
-
-	class GLUtils : boost::noncopyable {
+	class ScreenRenderTarget : public RenderTarget {
 	public:
-		GLUtils();
-		GLUtils(GLUtils& other);
+		Vector2f getSize() const override;
+		Vector2f getViewSize() const override;
+		Vector2f getOrigin() const override;
 
-		void setBlendType(BlendType type);
-
-		void bindTexture(int id);
-		void setTextureUnit(int n);
-		void setNumberOfTextureUnits(int n);
-		void resetState();
-
-		void setViewPort(Rect4i rect, bool scissor = false);
-		Rect4i getViewPort();
-
-		void clear(Colour col);
-		static void doGlCheckError(const char* file = "", long line = 0);
-		
-	private:
-		GLInternals& state;
+	protected:
+		void bind(int attachment, bool preserveCurrent) override;
+		void unbind() override;
 	};
 }
-
-#define glCheckError() Halley::GLUtils::doGlCheckError(__FILE__, __LINE__)
