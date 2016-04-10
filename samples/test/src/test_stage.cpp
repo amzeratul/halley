@@ -23,6 +23,14 @@ void TestStage::init()
 	sprite.setSize(Vector2f(64, 64));
 	sprite.setTexRect(Rect4f(0, 0, 1, 1));
 	sprite.setOffset(Vector2f(0.5f, 0.5f));
+
+	target = getAPI().video->createRenderTarget();
+	TextureDescriptor desc;
+	desc.w = 1280;
+	desc.h = 720;
+	desc.format = TextureFormat::RGBA;
+	target->setTarget(0, getAPI().video->createTexture(desc));
+	target->unbind();
 }
 
 void TestStage::deInit()
@@ -69,6 +77,8 @@ void TestStage::onFixedUpdate(Time time)
 
 void TestStage::onRender(Painter& painter) const
 {
+	//target->bind();
+
 	painter.clear(Colour(0.2f, 0.2f, 0.3f));
 	world.render(painter);
 

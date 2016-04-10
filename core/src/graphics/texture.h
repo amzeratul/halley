@@ -10,12 +10,12 @@ namespace Halley
 		virtual void bind(int textureUnit) = 0;
 
 		static std::unique_ptr<Texture> loadResource(ResourceLoader& loader);
-		unsigned int getNativeId() const { return privateImpl; }
+		unsigned int getNativeId() const { return textureId; }
 
 		Vector2i getSize() const { return size; }
 
 	protected:
-		unsigned int privateImpl;
+		unsigned int textureId;
 		Vector2i size;
 	};
 }

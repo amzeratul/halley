@@ -16,7 +16,5 @@ namespace Halley
 		unsigned int create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering);
 
 		static unsigned int getGLFormat(TextureFormat format);
-
-		GLuint textureId;
 	};
 }

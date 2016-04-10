@@ -31,7 +31,6 @@ namespace Halley {
 		virtual Vector2f getSize() const = 0;
 		virtual Rect4f getViewPort() const = 0;
 
-	protected:
 		virtual void bind() = 0;
 		virtual void unbind() = 0;
 	};

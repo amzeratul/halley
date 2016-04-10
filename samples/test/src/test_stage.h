@@ -19,4 +19,6 @@ private:
 	float curTime = 0;
 
 	Halley::Sprite sprite;
+
+	std::shared_ptr<Halley::TextureRenderTarget> target;
 };
