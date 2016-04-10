@@ -41,6 +41,8 @@ void PainterOpenGL::clear(Colour colour)
 
 void PainterOpenGL::drawVertices(Material& material, size_t numVertices, void* vertexData)
 {
+	assert(numVertices % 4 == 0);
+
 	init();
 
 	// Bind projection
@@ -66,7 +68,7 @@ void PainterOpenGL::drawVertices(Material& material, size_t numVertices, void* v
 		glUtils->setBlendType(material.getPass(i).getBlend());
 
 		// Draw
-		drawArraysQuads(1);
+		drawArraysQuads(int(numVertices / 4));
 	}
 }
 
