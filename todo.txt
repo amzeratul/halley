@@ -4,6 +4,8 @@ core
 - child stages
 
 core/graphics (?)
+* have a real implementation in core, calling simple opengl backend
+* target rendering support
 * cameras
 - sprite sheets
 - render target [from old Halley]
@@ -45,7 +47,8 @@ codegen
 - codegen Lua
 - codegen Haskell
 
-tools
+tools/editor
+- decide how this is going to work (overlay? separate tool?)
 - asset/prefab editor
 - scene editor?
 - animation editor
