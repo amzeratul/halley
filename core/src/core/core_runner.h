@@ -11,6 +11,8 @@ namespace Halley
 	class HalleyAPI;
 	class Stage;
 	class Painter;
+	class Camera;
+	class RenderTarget;
 
 	class CoreRunner : public CoreAPI
 	{
@@ -41,8 +43,11 @@ namespace Halley
 
 		std::unique_ptr<Game> game;
 		std::unique_ptr<HalleyAPI> api;
-		std::unique_ptr<Painter> painter;
 		std::unique_ptr<Resources> resources;
+
+		std::unique_ptr<Painter> painter;
+		std::unique_ptr<Camera> camera;
+		std::unique_ptr<RenderTarget> screenTarget;
 
 		std::unique_ptr<Stage> currentStage;
 		std::unique_ptr<Stage> nextStage;

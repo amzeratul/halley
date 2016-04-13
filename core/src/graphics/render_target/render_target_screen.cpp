@@ -23,10 +23,15 @@
 
 using namespace Halley;
 
-ScreenRenderTarget::ScreenRenderTarget(Vector2f size, Rect4f viewPort)
-	: size(size)
-	, viewPort(viewPort)
+ScreenRenderTarget::ScreenRenderTarget(Rect4f viewPort)
+	: viewPort(viewPort)
 {
+}
+
+std::unique_ptr<RenderTarget> ScreenRenderTarget::makeSubArea(Rect4f area)
+{
+	Rect4f newViewPort(viewPort.getP1() + area.getP1(), area.getWidth(), area.getHeight());
+	return std::make_unique<ScreenRenderTarget>(newViewPort);
 }
 
 void ScreenRenderTarget::bind()

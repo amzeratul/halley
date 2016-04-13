@@ -9,10 +9,10 @@ namespace Halley
 	public:
 		~RenderTargetOpenGL();
 
-		Vector2f getSize() const override;
 		Rect4f getViewPort() const override;
 		void bind() override;
 		void unbind() override;
+		std::unique_ptr<RenderTarget> makeSubArea(Rect4f area) override;
 
 	private:
 		void init();

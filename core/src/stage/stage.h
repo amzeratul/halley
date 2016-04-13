@@ -7,7 +7,7 @@
 namespace Halley
 {
 	class HalleyAPI;
-	class Painter;
+	class RenderContext;
 
 	class Stage
 	{
@@ -16,7 +16,7 @@ namespace Halley
 
 		virtual void onFixedUpdate(Time) {}
 		virtual void onVariableUpdate(Time) {}
-		virtual void onRender(Painter&) const {}
+		virtual void onRender(RenderContext&) const {}
 
 		virtual void init() {}
 		virtual void deInit() {}

@@ -1,4 +1,6 @@
 #pragma once
+#include "camera.h"
+#include <condition_variable>
 
 namespace Halley
 {
@@ -14,5 +16,7 @@ namespace Halley
 
 		virtual void drawVertices(Material& material, size_t numVertices, void* vertexData) = 0;
 		virtual void clear(Colour colour) = 0;
+		
+		void bind(Camera& camera, RenderTarget& renderTarget);
 	};
 }

@@ -75,13 +75,14 @@ void TestStage::onFixedUpdate(Time time)
 	sprite.setColour(Colour4f(1, 1, 1, ::sin(curTime * 2) * 0.5f + 0.5f));
 }
 
-void TestStage::onRender(Painter& painter) const
+void TestStage::onRender(RenderContext& context) const
 {
-	//target->bind();
+	context.bind([&] (Painter& painter)
+	{
+		painter.clear(Colour(0.2f, 0.2f, 0.3f));
+		world.render(painter);
 
-	painter.clear(Colour(0.2f, 0.2f, 0.3f));
-	world.render(painter);
-
-	sprite.getMaterial()["u_time"] = curTime;
-	sprite.draw(painter);
+		sprite.getMaterial()["u_time"] = curTime;
+		sprite.draw(painter);
+	});
 }

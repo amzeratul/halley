@@ -9,7 +9,7 @@ public:
 	void deInit() override;
 	void onVariableUpdate(Halley::Time time) override;
 	void onFixedUpdate(Halley::Time time) override;
-	void onRender(Halley::Painter& painter) const override;
+	void onRender(Halley::RenderContext& context) const override;
 
 private:
 	Halley::World world;

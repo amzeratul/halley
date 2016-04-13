@@ -5,7 +5,9 @@
 #include "environment.h"
 #include "../api/halley_api.h"
 #include "../prec.h"
-#include "../graphics/painter.h"
+#include "../graphics/camera.h"
+#include "../graphics/render_context.h"
+#include "../graphics/render_target/render_target_screen.h"
 #include "../resources/resources.h"
 #include "../resources/resource_locator.h"
 
@@ -97,9 +99,10 @@ void CoreRunner::init(std::vector<String> args)
 	// API
 	api = HalleyAPI::create(this, game->initPlugins());
 
-	// Get painter
+	// Get video resources
 	if (api->video) {
 		painter = std::move(api->videoInternal->makePainter());
+		screenTarget = std::make_unique<ScreenRenderTarget>(Rect4f(Vector2f(), api->video->getDisplaySize()));
 	}
 
 	// Resources
@@ -172,7 +175,8 @@ void CoreRunner::onRender(Time)
 		painter->startRender();
 
 		if (currentStage) {
-			currentStage->onRender(*painter);
+			RenderContext context(*painter, *camera, *screenTarget);
+			currentStage->onRender(context);
 		}
 
 		painter->endRender();
