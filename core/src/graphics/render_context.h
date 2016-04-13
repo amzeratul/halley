@@ -11,10 +11,12 @@ namespace Halley
 		friend class CoreRunner;
 
 	public:
-		void bind(std::function<void(Painter&)> f) const
+		void bind(std::function<void(Painter&)> f)
 		{
-			painter.bind(camera, renderTarget);
+			pushContext();
+			setActive();
 			f(painter);
+			popContext();
 		}
 
 		RenderContext(RenderContext&& context);
@@ -28,6 +30,11 @@ namespace Halley
 		Camera& camera;
 		RenderTarget& renderTarget;
 
+		RenderContext* restore = nullptr;
+
 		RenderContext(Painter& painter, Camera& camera, RenderTarget& renderTarget);
+		void setActive();
+		void pushContext();
+		void popContext();
 	};
 }

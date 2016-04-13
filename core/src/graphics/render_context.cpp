@@ -9,6 +9,25 @@ RenderContext::RenderContext(Painter& painter, Camera& camera, RenderTarget& ren
 	, renderTarget(renderTarget)
 {}
 
+void RenderContext::setActive()
+{
+	painter.activeContext = this;
+	painter.bind(camera, renderTarget);
+}
+
+void RenderContext::pushContext()
+{
+	restore = painter.activeContext;
+}
+
+void RenderContext::popContext()
+{
+	if (restore) {
+		restore->setActive();
+		restore = nullptr;
+	}
+}
+
 RenderContext RenderContext::with(Camera& v) const
 {
 	return RenderContext(painter, v, renderTarget);
