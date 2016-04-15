@@ -31,9 +31,10 @@ void Painter::bind(RenderContext& context)
 	// Set render target
 	auto& rt = context.getRenderTarget();
 	rt.bind();
-
+	
 	// Set viewport
-	setViewPort(context.getViewPort(), context.getViewPort() != rt.getViewPort());
+	auto viewPort = context.getViewPort();
+	setViewPort(viewPort, viewPort != rt.getViewPort());
 
 	// Set camera
 	auto& cam = context.getCamera();

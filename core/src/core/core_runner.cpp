@@ -99,13 +99,6 @@ void CoreRunner::init(std::vector<String> args)
 	// API
 	api = HalleyAPI::create(this, game->initPlugins());
 
-	// Get video resources
-	if (api->video) {
-		painter = std::move(api->videoInternal->makePainter());
-		screenTarget = std::make_unique<ScreenRenderTarget>(Rect4i(Vector2i(), api->video->getWindowSize()));
-		camera = std::make_unique<Camera>(Vector2f(640, 360), Vector2f(1280, 720));
-	}
-
 	// Resources
 	auto locator = std::make_unique<ResourceLocator>();
 	game->initResourceLocator(*locator);
@@ -116,6 +109,13 @@ void CoreRunner::init(std::vector<String> args)
 
 	// Create frame
 	setStage(game->makeStage(game->getInitialStage()));
+
+	// Get video resources
+	if (api->video) {
+		painter = std::move(api->videoInternal->makePainter());
+		screenTarget = std::make_unique<ScreenRenderTarget>(Rect4i(Vector2i(), api->video->getWindowSize()));
+		camera = std::make_unique<Camera>(Vector2f(640, 360), Vector2f(1280, 720));
+	}
 }
 
 void CoreRunner::deInit()
