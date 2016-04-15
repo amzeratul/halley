@@ -25,6 +25,8 @@ namespace Halley
 	protected:
 		virtual void setVertices(Material& material, size_t numVertices, void* vertexData) = 0;
 		virtual void drawQuads(size_t n) = 0;
+
+		virtual void setViewPort(Rect4i rect, bool enableScissor) = 0;
 		
 	private:
 		void bind(RenderContext& context);

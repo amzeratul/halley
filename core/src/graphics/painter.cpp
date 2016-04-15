@@ -28,7 +28,14 @@ void Painter::drawQuads(Material& material, size_t numVertices, void* vertexData
 
 void Painter::bind(RenderContext& context)
 {
-	context.getRenderTarget().bind();
+	// Set render target
+	auto& rt = context.getRenderTarget();
+	rt.bind();
+
+	// Set viewport
+	setViewPort(context.getViewPort(), context.getViewPort() != rt.getViewPort());
+
+	// Set camera
 	auto& cam = context.getCamera();
 	cam.updateProjection();
 	projection = cam.getProjection();

@@ -26,16 +26,15 @@
 namespace Halley {
 	class ScreenRenderTarget : public RenderTarget {
 	public:
-		ScreenRenderTarget(Rect4f viewPort);
+		ScreenRenderTarget(Rect4i viewPort);
 
-		Rect4f getViewPort() const override { return viewPort; }
-		std::unique_ptr<RenderTarget> makeSubArea(Rect4f area) override;
+		Rect4i getViewPort() const override { return viewPort; }
 
 	protected:
 		void bind() override;
 		void unbind() override;
 
 		Vector2f size;
-		Rect4f viewPort;
+		Rect4i viewPort;
 	};
 }

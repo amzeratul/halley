@@ -24,6 +24,7 @@ PainterOpenGL::~PainterOpenGL()
 void PainterOpenGL::startRender()
 {
 	glCheckError();
+	init();
 }
 
 void PainterOpenGL::endRender()
@@ -46,8 +47,6 @@ void PainterOpenGL::setBlend(BlendType blend)
 
 void PainterOpenGL::setVertices(Material& material, size_t numVertices, void* vertexData)
 {
-	init();
-
 	// Load vertices into VBO
 	size_t vertexStride = material.getVertexStride();
 	size_t bytesSize = numVertices * vertexStride;
@@ -122,6 +121,11 @@ void PainterOpenGL::drawQuads(size_t n)
 	}
 	glDrawElements(GL_TRIANGLES, int(sz), GL_UNSIGNED_SHORT, indices.data());
 	glCheckError();
+}
+
+void PainterOpenGL::setViewPort(Rect4i rect, bool enableScissor)
+{
+	glUtils->setViewPort(rect, enableScissor);
 }
 
 char* PainterOpenGL::setupVBO(size_t size)

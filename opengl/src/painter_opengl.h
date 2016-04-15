@@ -21,7 +21,8 @@ namespace Halley
 	protected:
 		void setVertices(Material& material, size_t numVertices, void* vertexData) override;
 		void drawQuads(size_t n) override;
-	
+		void setViewPort(Rect4i rect, bool enableScissor) override;
+
 	private:
 		GLuint vbo = 0;
 		GLuint vao = 0;

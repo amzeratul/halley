@@ -28,11 +28,9 @@ namespace Halley {
 	public:
 		virtual ~RenderTarget() {}
 
-		virtual Rect4f getViewPort() const = 0;
+		virtual Rect4i getViewPort() const = 0;
 
 		virtual void bind() = 0;
 		virtual void unbind() = 0;
-		
-		virtual std::unique_ptr<RenderTarget> makeSubArea(Rect4f area) = 0;
 	};
 }

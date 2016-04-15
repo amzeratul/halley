@@ -69,12 +69,9 @@ void Camera::setZoom(float _zoom)
 
 void Camera::updateProjection()
 {
-	Debug::trace("Camera::doBind begin");
-
+	// Setup projection
 	float w = area.x;
 	float h = area.y;
-
-	// Setup projection
 	projection = Matrix4f::makeOrtho2D(-w/2, w/2, h/2, -h/2, -1000, 1000);
 
 	// Camera properties
@@ -87,8 +84,6 @@ void Camera::updateProjection()
 	if (pos != Vector2f()) {
 		projection.translate2D(-pos.x, -pos.y);
 	}
-
-	Debug::trace("Camera::doBind end");
 }
 
 void Halley::Camera::setRelativeViewPort(Vector2f origin, Vector2f ws)
@@ -101,16 +96,6 @@ void Halley::Camera::prepareViewPort(RenderTarget& target)
 {
 	/*
 	// TODO
-	Vector2f origin = target.getOrigin();
-	Vector2f ws = target.getSize();
-	int vx = int(origin.x + ws.x * relativeViewPort.getX());
-	int vy = int(origin.y + ws.y * relativeViewPort.getY());
-	int vw = int(ws.x * relativeViewPort.getWidth());
-	int vh = int(ws.y * relativeViewPort.getHeight());
-	
-	bool enableScissor = vx > 0 || vy > 0 || vx + vw < int(ws.x) || vy + vh < int(ws.y);
-	GLUtils utils;
-	utils.setViewPort(Rect4i(vx, vy, vw, vh), enableScissor);
 	*/
 }
 

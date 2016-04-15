@@ -7,9 +7,9 @@ RenderTargetOpenGL::~RenderTargetOpenGL()
 	deInit();
 }
 
-Rect4f RenderTargetOpenGL::getViewPort() const
+Rect4i RenderTargetOpenGL::getViewPort() const
 {
-	return Rect4f(Vector2f(0, 0), Vector2f(attachments[0]->getSize()));
+	return Rect4i(Vector2i(0, 0), attachments[0]->getSize());
 }
 
 void RenderTargetOpenGL::bind()
@@ -35,11 +35,6 @@ void RenderTargetOpenGL::unbind()
 	glDrawBuffer(GL_BACK);
 	glCheckError();
 	Debug::trace("RenderTargetOpenGL::unbind end");
-}
-
-std::unique_ptr<RenderTarget> RenderTargetOpenGL::makeSubArea(Rect4f area)
-{
-	throw Exception("TODO");
 }
 
 void RenderTargetOpenGL::init()
