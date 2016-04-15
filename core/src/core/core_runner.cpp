@@ -103,6 +103,7 @@ void CoreRunner::init(std::vector<String> args)
 	if (api->video) {
 		painter = std::move(api->videoInternal->makePainter());
 		screenTarget = std::make_unique<ScreenRenderTarget>(Rect4f(Vector2f(), api->video->getDisplaySize()));
+		camera = std::make_unique<Camera>(Vector2f(640, 360), Vector2f(1280, 720));
 	}
 
 	// Resources

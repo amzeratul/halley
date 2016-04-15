@@ -13,6 +13,7 @@ namespace Halley
 	class ResourceLoader;
 	class Shader;
 	class VideoAPI;
+	class Painter;
 
 	enum class ShaderParameterType
 	{
@@ -46,7 +47,7 @@ namespace Halley
 	public:
 		explicit Material(ResourceLoader& loader);
 
-		void bind(int pass);
+		void bind(int pass, Painter& painter);
 		int getNumPasses() const;
 		MaterialPass& getPass(int n);
 
@@ -83,7 +84,7 @@ namespace Halley
 	public:
 		MaterialPass(std::shared_ptr<Shader> shader, BlendType blend);
 
-		void bind();
+		void bind(Painter& painter);
 
 		BlendType getBlend() const { return blend; }
 		Shader& getShader() const { return *shader; }

@@ -15,9 +15,13 @@ namespace Halley
 		void startRender() override;
 		void endRender() override;
 
-		void drawVertices(Material& material, size_t numVertices, void* vertexData) override;
 		void clear(Colour colour) override;
+		void setBlend(BlendType blend) override;
 
+	protected:
+		void setVertices(Material& material, size_t numVertices, void* vertexData) override;
+		void drawQuads(size_t n) override;
+	
 	private:
 		GLuint vbo = 0;
 		GLuint vao = 0;
@@ -25,7 +29,6 @@ namespace Halley
 
 		void init();
 		void setupVertexAttributes(Material& material);
-		void drawArraysQuads(int n);
 		char* setupVBO(size_t size);
 	};
 }

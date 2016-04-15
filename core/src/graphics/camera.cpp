@@ -24,39 +24,6 @@
 using namespace Halley;
 
 
-static std::shared_ptr<Camera> boundCamera;
-
-
-void Halley::Camera::bind(std::shared_ptr<Camera> cam, RenderTarget& target)
-{
-	resetBind();
-	boundCamera = cam;
-	cam->doBind(target);
-}
-
-void Halley::Camera::bindScreen(RenderTarget& target)
-{
-	bind(std::make_shared<Camera>(), target);
-}
-
-void Halley::Camera::resetBind()
-{
-	boundCamera.reset();
-}
-
-void Halley::Camera::rebind(RenderTarget& target)
-{
-	if (boundCamera) {
-		boundCamera->doBind(target);
-	}
-}
-
-std::shared_ptr<Camera> Halley::Camera::getCurrentCamera()
-{
-	return boundCamera;
-}
-
-
 Camera::Camera()
 	: zoom(1.0f)
 {
@@ -100,16 +67,15 @@ void Camera::setZoom(float _zoom)
 }
 
 
-void Camera::doBind(RenderTarget& target)
+void Camera::updateProjection()
 {
 	Debug::trace("Camera::doBind begin");
-	prepareViewPort(target);
 
 	float w = area.x;
 	float h = area.y;
 
 	// Setup projection
-	projection = Matrix4f::makeOrtho2D(-w/2, w/2, -h/2, h/2, -1000, 1000);
+	projection = Matrix4f::makeOrtho2D(-w/2, w/2, h/2, -h/2, -1000, 1000);
 
 	// Camera properties
 	if (zoom != 1.0f) {
@@ -121,13 +87,7 @@ void Camera::doBind(RenderTarget& target)
 	if (pos != Vector2f()) {
 		projection.translate2D(-pos.x, -pos.y);
 	}
-	
-	// FIXED PIPELINE
-	/*
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glMultMatrixf(projection.getElements());
-	*/
+
 	Debug::trace("Camera::doBind end");
 }
 

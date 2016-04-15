@@ -4,6 +4,7 @@
 #include "material.h"
 #include "shader.h"
 #include "material_parameter.h"
+#include "painter.h"
 #include <yaml-cpp/yaml.h>
 
 using namespace Halley;
@@ -149,7 +150,7 @@ int Material::getAttributeSize(ShaderParameterType type)
 	}
 }
 
-void Material::bind(int pass)
+void Material::bind(int pass, Painter& painter)
 {
 	// Avoid redundant work
 	if (currentMaterial == this && currentPass == pass && !dirty) {
@@ -158,7 +159,7 @@ void Material::bind(int pass)
 	currentMaterial = this;
 	currentPass = pass;
 
-	passes[pass].bind();
+	passes[pass].bind(painter);
 
 	for (auto& u : uniforms) {
 		u.bind(pass);
@@ -214,7 +215,8 @@ MaterialPass::MaterialPass(std::shared_ptr<Shader> shader, BlendType blend)
 {
 }
 
-void MaterialPass::bind()
+void MaterialPass::bind(Painter& painter)
 {
 	shader->bind();
+	painter.setBlend(getBlend());
 }

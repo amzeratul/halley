@@ -27,12 +27,6 @@ namespace Halley {
 
 	class Camera {
 	public:
-		static void bind(std::shared_ptr<Camera> cam, RenderTarget& target);
-		static void bindScreen(RenderTarget& target);
-		static void rebind(RenderTarget& target);
-		static void resetBind();
-		static std::shared_ptr<Camera> getCurrentCamera();
-
 		Camera();
 		Camera(Vector2f pos, Vector2f area, Angle1f angle=Angle1f::fromDegrees(0));
 
@@ -53,6 +47,9 @@ namespace Halley {
 
 		Matrix4f getProjection() const { return projection; }
 
+		void prepareViewPort(RenderTarget& target);
+		void updateProjection();
+
 	private:
 		Vector2f pos;
 		Vector2f area;
@@ -61,7 +58,5 @@ namespace Halley {
 		Rect4f relativeViewPort;
 		float zoom;
 
-		void prepareViewPort(RenderTarget& target);
-		void doBind(RenderTarget& target);
 	};
 }

@@ -39,16 +39,14 @@ void PainterOpenGL::clear(Colour colour)
 	glCheckError();
 }
 
-void PainterOpenGL::drawVertices(Material& material, size_t numVertices, void* vertexData)
+void PainterOpenGL::setBlend(BlendType blend)
 {
-	assert(numVertices % 4 == 0);
+	glUtils->setBlendType(blend);
+}
 
+void PainterOpenGL::setVertices(Material& material, size_t numVertices, void* vertexData)
+{
 	init();
-
-	// Bind projection
-	// TODO: get current camera
-	auto proj = Matrix4f::makeOrtho2D(0, 1280, 720, 0, -1000, 1000);
-	material["u_mvp"] = proj;
 
 	// Load vertices into VBO
 	size_t vertexStride = material.getVertexStride();
@@ -60,16 +58,6 @@ void PainterOpenGL::drawVertices(Material& material, size_t numVertices, void* v
 
 	// Set attributes
 	setupVertexAttributes(material);
-
-	// Go through each pass
-	for (int i = 0; i < material.getNumPasses(); i++) {
-		// Bind pass
-		material.bind(i);
-		glUtils->setBlendType(material.getPass(i).getBlend());
-
-		// Draw
-		drawArraysQuads(int(numVertices / 4));
-	}
 }
 
 void PainterOpenGL::init()
@@ -113,7 +101,7 @@ void PainterOpenGL::setupVertexAttributes(Material& material)
 	// TODO: disable positions not used by this program
 }
 
-void PainterOpenGL::drawArraysQuads(int n)
+void PainterOpenGL::drawQuads(size_t n)
 {
 	size_t sz = n * 6;
 	std::vector<unsigned short> indices(sz);
