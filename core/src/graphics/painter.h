@@ -20,7 +20,7 @@ namespace Halley
 		virtual void clear(Colour colour) = 0;
 		
 	private:
-		void bind(Camera& camera, RenderTarget& renderTarget);
+		void bind(RenderContext& context);
 		RenderContext* activeContext = nullptr;
 	};
 }
