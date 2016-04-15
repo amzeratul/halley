@@ -92,13 +92,6 @@ void Halley::Camera::setRelativeViewPort(Vector2f origin, Vector2f ws)
 	relativeViewPort = Rect4f(origin, origin + ws);
 }
 
-void Halley::Camera::prepareViewPort(RenderTarget& target)
-{
-	/*
-	// TODO
-	*/
-}
-
 Halley::Rect4f Halley::Camera::getViewRect() const
 {
 	Vector2f area = getViewArea();

@@ -47,7 +47,6 @@ namespace Halley {
 
 		Matrix4f getProjection() const { return projection; }
 
-		void prepareViewPort(RenderTarget& target);
 		void updateProjection();
 
 	private:

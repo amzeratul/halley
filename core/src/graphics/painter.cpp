@@ -38,6 +38,7 @@ void Painter::bind(RenderContext& context)
 
 	// Set camera
 	auto& cam = context.getCamera();
+	cam.setViewArea(Vector2f(viewPort.getSize()));
 	cam.updateProjection();
 	projection = cam.getProjection();
 }

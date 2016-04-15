@@ -77,7 +77,7 @@ void TestStage::onFixedUpdate(Time time)
 
 void TestStage::onRender(RenderContext& context) const
 {
-	context.bind([&] (Painter& painter)
+	context.subArea(Rect4i(Vector2i(0, 0), Vector2i(640, 720))).bind([&] (Painter& painter)
 	{
 		painter.clear(Colour(0.2f, 0.2f, 0.3f));
 		world.render(painter);
