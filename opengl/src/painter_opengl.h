@@ -28,8 +28,10 @@ namespace Halley
 		GLuint vao = 0;
 		std::unique_ptr<GLUtils> glUtils;
 
-		void init();
+		std::vector<char> vboData;
+		std::vector<unsigned short> indexData;
+
 		void setupVertexAttributes(Material& material);
-		char* setupVBO(size_t size);
+		char* getVBOBuffer(size_t size);
 	};
 }

@@ -24,7 +24,25 @@ PainterOpenGL::~PainterOpenGL()
 void PainterOpenGL::startRender()
 {
 	glCheckError();
-	init();
+
+	if (!glUtils) {
+		glUtils = std::make_unique<GLUtils>();
+	}
+
+	if (vbo == 0) {
+		glGenBuffers(1, &vbo);
+		glCheckError();
+	}
+
+	if (vao == 0) {
+		glGenVertexArrays(1, &vao);
+		glCheckError();
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glCheckError();
+	glBindVertexArray(vao);
+	glCheckError();
 }
 
 void PainterOpenGL::endRender()
@@ -50,20 +68,13 @@ void PainterOpenGL::setVertices(Material& material, size_t numVertices, void* ve
 	// Load vertices into VBO
 	size_t vertexStride = material.getVertexStride();
 	size_t bytesSize = numVertices * vertexStride;
-	char* data = setupVBO(bytesSize);
+	char* data = getVBOBuffer(bytesSize);
 	memcpy(data, vertexData, bytesSize);
 	glBufferData(GL_ARRAY_BUFFER, bytesSize, vertexData, GL_STREAM_DRAW);
 	glCheckError();
 
 	// Set attributes
 	setupVertexAttributes(material);
-}
-
-void PainterOpenGL::init()
-{
-	if (!glUtils) {
-		glUtils = std::make_unique<GLUtils>();
-	}
 }
 
 void PainterOpenGL::setupVertexAttributes(Material& material)
@@ -103,23 +114,27 @@ void PainterOpenGL::setupVertexAttributes(Material& material)
 void PainterOpenGL::drawQuads(size_t n)
 {
 	size_t sz = n * 6;
-	std::vector<unsigned short> indices(sz);
-	unsigned short pos = 0;
-	for (size_t i = 0; i<sz; i += 6) {
-		// B-----C
-		// |     |
-		// A-----D
-		// ABC
-		indices[i] = pos;
-		indices[i + 1] = pos + 1;
-		indices[i + 2] = pos + 2;
-		// CDA
-		indices[i + 3] = pos + 2;
-		indices[i + 4] = pos + 3;
-		indices[i + 5] = pos;
-		pos += 4;
+	size_t oldSize = indexData.size();
+	if (oldSize < sz) {
+		indexData.resize(sz);
+		unsigned short pos = oldSize * 2 / 3;
+		for (size_t i = oldSize; i < sz; i += 6) {
+			// B-----C
+			// |     |
+			// A-----D
+			// ABC
+			indexData[i] = pos;
+			indexData[i + 1] = pos + 1;
+			indexData[i + 2] = pos + 2;
+			// CDA
+			indexData[i + 3] = pos + 2;
+			indexData[i + 4] = pos + 3;
+			indexData[i + 5] = pos;
+			pos += 4;
+		}
 	}
-	glDrawElements(GL_TRIANGLES, int(sz), GL_UNSIGNED_SHORT, indices.data());
+
+	glDrawElements(GL_TRIANGLES, int(sz), GL_UNSIGNED_SHORT, indexData.data());
 	glCheckError();
 }
 
@@ -128,27 +143,10 @@ void PainterOpenGL::setViewPort(Rect4i rect, bool enableScissor)
 	glUtils->setViewPort(rect, enableScissor);
 }
 
-char* PainterOpenGL::setupVBO(size_t size)
+char* PainterOpenGL::getVBOBuffer(size_t size)
 {
-	if (vbo == 0) {
-		glGenBuffers(1, &vbo);
-		glCheckError();
+	if (vboData.size() < size) {
+		vboData.resize(size * 2);
 	}
-
-	if (vao == 0) {
-		glGenVertexArrays(1, &vao);
-		glCheckError();
-	}
-
-	static std::vector<char> tmpData;
-	if (tmpData.size() < size) {
-		tmpData.resize(size * 2);
-	}
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glCheckError();
-	glBindVertexArray(vao);
-	glCheckError();
-
-	return tmpData.data();
+	return vboData.data();
 }

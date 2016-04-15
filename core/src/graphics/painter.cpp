@@ -8,7 +8,9 @@ using namespace Halley;
 
 void Painter::drawQuads(Material& material, size_t numVertices, void* vertexData)
 {
+	assert(numVertices > 0);
 	assert(numVertices % 4 == 0);
+	assert(vertexData != nullptr);
 
 	// Bind projection
 	material["u_mvp"] = projection;
