@@ -10,7 +10,7 @@ namespace Halley {
 		void finishRender() override;
 		void flip() override;
 
-		void setVideo(WindowType windowType, Vector2i fullscreenSize, Vector2i windowedSize, Vector2f virtualSize = Vector2f(), int screen = 0) override;
+		void setVideo(WindowType windowType, Vector2i fullscreenSize, Vector2i windowedSize, Vector2f virtualSize = Vector2f(), bool vsync = true, int screen = 0) override;
 		Vector2i getWindowSize() const override { return windowSize; }
 		Vector2f getVirtualSize() const override { return virtualSize; }
 		Vector2f getDisplaySize() const override { return p2 - p1; }

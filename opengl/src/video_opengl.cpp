@@ -49,7 +49,7 @@ VideoOpenGL::VideoOpenGL()
 
 /////////////
 // Set video
-void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSize, const Vector2i _windowedSize, const Vector2f _virtualSize, int screen)
+void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSize, const Vector2i _windowedSize, const Vector2f _virtualSize, bool vsync, int screen)
 {
 	bool wasInit = initialized;
 
@@ -146,7 +146,9 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 		if (SDL_GL_MakeCurrent(window, context) < 0)
 			throw Exception(String("Error setting OpenGL context: ") + SDL_GetError());
 		context = context;
-		SDL_GL_SetSwapInterval(0);
+
+		// VSync
+		SDL_GL_SetSwapInterval(vsync ? 1 : 0);
 
 		// Start loader thread
 		if (!running) {

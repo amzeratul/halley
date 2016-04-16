@@ -4,10 +4,11 @@ core
 - child stages
 
 core/graphics (?)
+* animation
+* rewrite text rendering system to use pre-baked distance fields
+- separate materials and material bindings?
 - render graph [from old Halley]
-- animation
-- rewrite text rendering system to use pre-baked distance fields
-- extra painter tools?
+- sliced sprites
 - fix threaded load (TODOs in core_runner.cpp)
 
 opengl
@@ -26,6 +27,7 @@ entity
 * messaging system
 - staggered systems
 - parallel systems
+- better timelines
 - Lua systems
 - Haskell systems
 - defragment/optimize memory
