@@ -27,11 +27,7 @@ static T readSize(JSONValue value)
 std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 {
 	// Find base path
-	String basePath = loader.getName();
-	size_t lastSlash = basePath.find_last_of('/');
-	if (lastSlash != std::string::npos) {
-		basePath = basePath.left(lastSlash + 1);
-	}
+	String basePath = loader.getBasePath();
 
 	// Read data
 	auto data = loader.getStatic();

@@ -84,6 +84,16 @@ ResourceLoader::ResourceLoader(IResourceLocator& locator, String name, String re
 	, api(api)
 {}
 
+String ResourceLoader::getBasePath() const
+{
+	auto basePath = getName();
+	size_t lastSlash = basePath.find_last_of('/');
+	if (lastSlash != std::string::npos) {
+		basePath = basePath.left(lastSlash + 1);
+	};
+	return basePath;
+}
+
 std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
 {
 	auto result = locator.getStatic(resolvedName);

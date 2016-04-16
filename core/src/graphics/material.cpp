@@ -24,12 +24,7 @@ Material::Material(ResourceLoader& loader)
 	: api(loader.getAPI().video)
 {
 	auto& api = loader.getAPI();
-
-	String basePath = loader.getName();
-	size_t lastSlash = basePath.find_last_of('/');
-	if (lastSlash != std::string::npos) {
-		basePath = basePath.left(lastSlash + 1);
-	}
+	String basePath = loader.getBasePath();
 
 	YAML::Node root;
 	try {

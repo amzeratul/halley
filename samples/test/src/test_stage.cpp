@@ -20,7 +20,6 @@ void TestStage::init()
 	(*material)["tex0"] = spriteSheet->getTexture();
 	sprite.setMaterial(material);
 	sprite.setPos(Vector2f(100, 100));
-	sprite.setSprite(*spriteSheet, "die/05.png");
 
 	target = getAPI().video->createRenderTarget();
 	TextureDescriptor desc;

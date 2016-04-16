@@ -99,6 +99,7 @@ namespace Halley {
 	public:
 		String getName() const { return name; }
 		String getResolvedName() const { return resolvedName; }
+		String getBasePath() const;
 		ResourceLoadPriority getPriority() const { return priority; }
 		std::unique_ptr<ResourceDataStatic> getStatic();
 		std::unique_ptr<ResourceDataStream> getStream();
