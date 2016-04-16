@@ -15,14 +15,12 @@ void TestStage::init()
 		.addComponent(new BarComponent())
 		.getEntityId();
 
+	auto spriteSheet = getResource<SpriteSheet>("sprites/ella.json");
 	auto material = getResource<Material>("shaders/sprite.yaml");
-	(*material)["tex0"] = getResource<Texture>("sprites/test.png");
+	(*material)["tex0"] = spriteSheet->getTexture();
 	sprite.setMaterial(material);
 	sprite.setPos(Vector2f(100, 100));
-
-	sprite.setSize(Vector2f(64, 64));
-	sprite.setTexRect(Rect4f(0, 0, 1, 1));
-	sprite.setOffset(Vector2f(0.5f, 0.5f));
+	sprite.setSprite(*spriteSheet, "die/05.png");
 
 	target = getAPI().video->createRenderTarget();
 	TextureDescriptor desc;
@@ -79,7 +77,7 @@ void TestStage::onRender(RenderContext& context) const
 {
 	sprite.getMaterial()["u_time"] = curTime;
 
-	context.subArea(Rect4i(Vector2i(0, 0), Vector2i(640, 720))).bind([&] (Painter& painter)
+	context.bind([&] (Painter& painter)
 	{
 		painter.clear(Colour(0.2f, 0.2f, 0.3f));
 		world.render(painter);

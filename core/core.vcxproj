@@ -42,7 +42,8 @@
     <ClInclude Include="src\graphics\render_target\render_target_screen.h" />
     <ClInclude Include="src\graphics\render_target\render_target_texture.h" />
     <ClInclude Include="src\graphics\shader.h" />
-    <ClInclude Include="src\graphics\sprite.h" />
+    <ClInclude Include="src\graphics\sprite\sprite.h" />
+    <ClInclude Include="src\graphics\sprite\sprite_sheet.h" />
     <ClInclude Include="src\graphics\texture.h" />
     <ClInclude Include="src\graphics\texture_descriptor.h" />
     <ClInclude Include="src\graphics\uniform_type.h" />
@@ -69,7 +70,8 @@
     <ClCompile Include="src\graphics\render_target\render_target_screen.cpp" />
     <ClCompile Include="src\graphics\render_target\render_target_texture.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
-    <ClCompile Include="src\graphics\sprite.cpp" />
+    <ClCompile Include="src\graphics\sprite\sprite.cpp" />
+    <ClCompile Include="src\graphics\sprite\sprite_sheet.cpp" />
     <ClCompile Include="src\graphics\texture.cpp" />
     <ClCompile Include="src\graphics\texture_descriptor.cpp" />
     <ClCompile Include="src\prec.cpp">

@@ -2,6 +2,7 @@
 
 namespace Halley
 {
+	class SpriteSheet;
 	class Material;
 
 	struct SpriteVertexAttrib
@@ -9,7 +10,7 @@ namespace Halley
 		// This structure must match the layout of the shader
 		// See sprite.yaml for reference
 		Vector2f pos;
-		Vector2f offset;     // pos and offset are a single vec4 on the shader
+		Vector2f pivot;     // pos and offset are a single vec4 on the shader
 		Vector2f size;
 		Vector2f rotation;   // size and rotation are a single vec4 on the shader
 		Colour4f colour;
@@ -33,9 +34,11 @@ namespace Halley
 		void setColour(Colour4f colour);
 		void setScale(Vector2f scale);
 
-		void setOffset(Vector2f offset);
+		void setPivot(Vector2f offset);
 		void setSize(Vector2f size);
 		void setTexRect(Rect4f texRect);
+
+		void setSprite(SpriteSheet& sheet, String name);
 
 	private:
 		std::shared_ptr<Material> material;

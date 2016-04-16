@@ -1,6 +1,7 @@
 #include "sprite.h"
-#include "painter.h"
-#include "material.h"
+#include "sprite_sheet.h"
+#include "../painter.h"
+#include "../material.h"
 
 using namespace Halley;
 
@@ -65,10 +66,10 @@ void Sprite::setScale(Vector2f v)
 	vertices[0].size = scale * size;
 }
 
-void Sprite::setOffset(Vector2f v)
+void Sprite::setPivot(Vector2f v)
 {
 	dirty = true;
-	vertices[0].offset = v;
+	vertices[0].pivot = v;
 }
 
 void Sprite::setSize(Vector2f v)
@@ -82,4 +83,14 @@ void Sprite::setTexRect(Rect4f v)
 {
 	dirty = true;
 	vertices[0].texRect = v;
+}
+
+void Sprite::setSprite(SpriteSheet& sheet, String name)
+{
+	auto& sprite = sheet.getSprite(name);
+	vertices[0].pivot = sprite.pivot;
+	vertices[0].size = sprite.size;
+	vertices[0].texRect = sprite.coords;
+	vertices[0].rotation.y = sprite.rotated ? (-M_PI / 2) : 0;
+	dirty = true;
 }

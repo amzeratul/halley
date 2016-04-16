@@ -34,6 +34,9 @@
     <Filter Include="graphics\render_graph">
       <UniqueIdentifier>{f104040a-5e6d-4829-87b3-041b3ddf3df6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="graphics\sprite">
+      <UniqueIdentifier>{ae3d4eb8-3eab-4ab8-950b-f71ee70d8f51}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\external\irunner.h">
@@ -129,9 +132,6 @@
     <ClInclude Include="src\graphics\material_parameter.h">
       <Filter>graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\sprite.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
     <ClInclude Include="src\graphics\render_target\render_target_screen.h">
       <Filter>graphics\render_target</Filter>
     </ClInclude>
@@ -146,6 +146,12 @@
     </ClInclude>
     <ClInclude Include="src\graphics\render_context.h">
       <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\sprite\sprite.h">
+      <Filter>graphics\sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\sprite\sprite_sheet.h">
+      <Filter>graphics\sprite</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -203,9 +209,6 @@
     <ClCompile Include="src\graphics\material_parameter.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\sprite.cpp">
-      <Filter>graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\graphics\render_target\render_target_screen.cpp">
       <Filter>graphics\render_target</Filter>
     </ClCompile>
@@ -217,6 +220,12 @@
     </ClCompile>
     <ClCompile Include="src\graphics\painter.cpp">
       <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\sprite\sprite.cpp">
+      <Filter>graphics\sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\sprite\sprite_sheet.cpp">
+      <Filter>graphics\sprite</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

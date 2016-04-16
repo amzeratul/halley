@@ -82,6 +82,7 @@ namespace Halley {
 		}
 		void setWidth(T w) { p2.x = p1.x + w; }
 		void setHeight(T h) { p2.y = p1.y + h; }
+		void setSize(Vector2D<T> size) { p2 = p1 + size; }
 
 		Vector2D<T> getP1() const { return p1; }
 		Vector2D<T> getP2() const { return p2; }

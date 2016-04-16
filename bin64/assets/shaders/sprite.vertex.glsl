@@ -20,8 +20,9 @@ void main() {
 	v_color = baseCol;
 	v_colorAdd = clamp(inputCol - baseCol, vec4(0, 0, 0, 0), vec4(1, 1, 1, 0));
 	
-	float c = cos(a_size.z);
-	float s = sin(a_size.z);
+	float angle = a_size.z + a_size.w;
+	float c = cos(angle);
+	float s = sin(angle);
 	mat2 m = mat2(c, s, -s, c);
 	vec2 pos = a_position.xy + m * ((a_vertPos - a_position.zw) * a_size.xy);
 	gl_Position = u_mvp * vec4(pos.x, pos.y, 0.0, 1.0);

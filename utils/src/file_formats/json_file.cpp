@@ -26,9 +26,9 @@ using namespace Halley;
 
 
 Halley::JSONFile::JSONFile(String name)
-	: filename(name)
+	: root(std::make_unique<JSONValue>())
+	, filename(name)
 	, nFlushes(0)
-	, root(std::make_unique<JSONValue>())
 {
 	load();
 }
