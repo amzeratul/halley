@@ -14,4 +14,6 @@ public:
 private:
 	std::unique_ptr<Halley::World> world;
 	std::shared_ptr<Halley::TextureRenderTarget> target;
+
+	void spawnTestSprite();
 };

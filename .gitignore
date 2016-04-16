@@ -19,6 +19,8 @@ Thumbs.db
 *.iobj
 *.pdb
 *.ipdb
+*.psess
+*.vspx
 
 # Binaries
 *.dll

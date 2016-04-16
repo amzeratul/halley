@@ -12,8 +12,8 @@ namespace Halley
 		PainterOpenGL();
 		~PainterOpenGL();
 
-		void startRender() override;
-		void endRender() override;
+		void doStartRender() override;
+		void doEndRender() override;
 
 		void clear(Colour colour) override;
 		void setBlend(BlendType blend) override;

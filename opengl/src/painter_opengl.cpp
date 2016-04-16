@@ -20,7 +20,7 @@ PainterOpenGL::~PainterOpenGL()
 	}
 }
 
-void PainterOpenGL::startRender()
+void PainterOpenGL::doStartRender()
 {
 	glCheckError();
 
@@ -44,7 +44,7 @@ void PainterOpenGL::startRender()
 	glCheckError();
 }
 
-void PainterOpenGL::endRender()
+void PainterOpenGL::doEndRender()
 {
 	glCheckError();
 }

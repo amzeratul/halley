@@ -14,15 +14,17 @@ namespace Halley
 	public:
 		virtual ~Painter() {}
 
-		virtual void startRender() = 0;
-		virtual void endRender() = 0;
+		void startRender();
+		void endRender();
 
 		virtual void clear(Colour colour) = 0;
 		virtual void setBlend(BlendType blend) = 0;
 
-		void drawQuads(Material& material, size_t numVertices, void* vertexData);
+		void drawQuads(std::shared_ptr<Material> material, size_t numVertices, void* vertexData);
 
 	protected:
+		virtual void doStartRender() = 0;
+		virtual void doEndRender() = 0;
 		virtual void setVertices(Material& material, size_t numVertices, void* vertexData) = 0;
 		virtual void drawQuads(size_t n) = 0;
 
@@ -32,5 +34,12 @@ namespace Halley
 		void bind(RenderContext& context);
 		RenderContext* activeContext = nullptr;
 		Matrix4f projection;
+
+		size_t verticesPending = 0;
+		size_t bytesPending = 0;
+		std::vector<char> vertexBuffer;
+		std::shared_ptr<Material> materialPending;
+
+		void flushPending();
 	};
 }

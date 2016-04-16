@@ -14,31 +14,8 @@ void TestStage::init()
 	world->addSystem(std::make_unique<SpriteAnimationSystem>(), TimeLine::FixedUpdate);
 	world->addSystem(std::make_unique<RenderSystem>(), TimeLine::Render);
 
-	for (int i = 0; i < 100; i++) {
-		auto& r = Random::getGlobal();
-
-		auto posComp = new PositionComponent();
-		posComp->position = Vector2f(r.getFloat(0.0f, 1280.0f), r.getFloat(0.0f, 720.0f));
-
-		auto velComp = new VelocityComponent();
-		velComp->velocity = Vector2f(r.getFloat(200.0f, 300.0f), 0.0f).rotate(Angle1f::fromDegrees(r.getFloat(0.0f, 360.0f)));
-
-		auto spriteComp = new SpriteComponent();
-		auto& sprite = spriteComp->sprite;
-		auto spriteSheet = getResource<SpriteSheet>("sprites/ella.json");
-		auto material = getResource<Material>("shaders/sprite.yaml");
-		(*material)["tex0"] = spriteSheet->getTexture();
-		sprite.setMaterial(material);
-
-		auto timeComp = new TimeComponent();
-		timeComp->elapsed = r.getFloat(0.0f, 1.0f);
-
-		world->createEntity()
-			.addComponent(posComp)
-			.addComponent(velComp)
-			.addComponent(spriteComp)
-			.addComponent(timeComp)
-			.getEntityId();
+	for (int i = 0; i < 2000; i++) {
+		spawnTestSprite();
 	}
 
 	target = getAPI().video->createRenderTarget();
@@ -70,4 +47,32 @@ void TestStage::onRender(RenderContext& context) const
 		painter.clear(Colour(0.2f, 0.2f, 0.3f));
 		world->render(painter);
 	});
+}
+
+void TestStage::spawnTestSprite()
+{
+	auto& r = Random::getGlobal();
+
+	auto posComp = new PositionComponent();
+	posComp->position = Vector2f(r.getFloat(0.0f, 1280.0f), r.getFloat(0.0f, 720.0f));
+
+	auto velComp = new VelocityComponent();
+	velComp->velocity = Vector2f(r.getFloat(200.0f, 300.0f), 0.0f).rotate(Angle1f::fromDegrees(r.getFloat(0.0f, 360.0f)));
+
+	auto spriteComp = new SpriteComponent();
+	auto& sprite = spriteComp->sprite;
+	auto spriteSheet = getResource<SpriteSheet>("sprites/ella.json");
+	auto material = getResource<Material>("shaders/sprite.yaml");
+	(*material)["tex0"] = spriteSheet->getTexture();
+	sprite.setMaterial(material);
+
+	auto timeComp = new TimeComponent();
+	timeComp->elapsed = r.getFloat(0.0f, 1.0f);
+
+	world->createEntity()
+		.addComponent(posComp)
+		.addComponent(velComp)
+		.addComponent(spriteComp)
+		.addComponent(timeComp)
+		.getEntityId();
 }

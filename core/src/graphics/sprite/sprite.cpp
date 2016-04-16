@@ -23,7 +23,7 @@ void Sprite::draw(Painter& painter) const
 	}
 
 	assert(material->getVertexStride() == sizeof(SpriteVertexAttrib));
-	painter.drawQuads(*material, 4, vertices.data());
+	painter.drawQuads(material, 4, vertices.data());
 }
 
 void Sprite::update() const // Not really "const", but needs to be called from draw()
