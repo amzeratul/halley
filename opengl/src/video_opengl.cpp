@@ -94,7 +94,7 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 		int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS;
 		if (_windowType == WindowType::BorderlessWindow) {
 			flags |= SDL_WINDOW_BORDERLESS;
-		} else {
+		} else if (_windowType == WindowType::ResizableWindow) {
 			flags |= SDL_WINDOW_RESIZABLE;
 		}
 		//if (_fullscreen) flags |= SDL_WINDOW_FULLSCREEN;

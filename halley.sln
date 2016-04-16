@@ -9,6 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "halley-utils", "utils\utils
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AD813A88-7558-4DFB-BEC1-3B16498D3553}"
 	ProjectSection(SolutionItems) = preProject
+		Performance2.psess = Performance2.psess
 		README.md = README.md
 		todo.txt = todo.txt
 	EndProjectSection
@@ -38,6 +39,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "halley-opengl", "opengl\ope
 	EndProjectSection
 EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86

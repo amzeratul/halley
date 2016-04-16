@@ -58,7 +58,7 @@ public:
 
 	void init(HalleyAPI* api) override
 	{
-		api->video->setVideo(WindowType::Window, Vector2i(1280, 720), Vector2i(1280, 720));
+		api->video->setVideo(WindowType::Window, Vector2i(1280, 720), Vector2i(1280, 720), Vector2f(), false);
 	}
 };
 

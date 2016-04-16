@@ -6,6 +6,7 @@ namespace Halley
 		None,
 		Fullscreen,
 		Window,
+		ResizableWindow,
 		BorderlessWindow
 	};
 
