@@ -62,7 +62,9 @@ void Painter::bind(RenderContext& context)
 
 void Painter::flushPending()
 {
-	executeDrawQuads(*materialPending, verticesPending, vertexBuffer.data());
+	if (verticesPending > 0) {
+		executeDrawQuads(*materialPending, verticesPending, vertexBuffer.data());
+	}
 
 	// Reset
 	bytesPending = 0;
