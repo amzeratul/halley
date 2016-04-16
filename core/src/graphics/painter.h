@@ -16,6 +16,7 @@ namespace Halley
 
 		void startRender();
 		void endRender();
+		void flush();
 
 		virtual void clear(Colour colour) = 0;
 		virtual void setBlend(BlendType blend) = 0;

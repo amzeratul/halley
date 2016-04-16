@@ -31,6 +31,7 @@ void RenderContext::pushContext()
 
 void RenderContext::popContext()
 {
+	painter.flush();
 	if (restore) {
 		restore->setActive();
 		restore = nullptr;

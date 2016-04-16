@@ -22,6 +22,12 @@ component SpriteComponent {
 	}
 }
 
+component SpriteAnimationComponent {
+	members {
+		player : Halley::AnimationPlayer
+	}
+}
+
 system TimeSystem {
 	family main {
 		TimeComponent
@@ -47,9 +53,10 @@ system MovementSystem {
 
 system SpriteAnimationSystem {
 	family main {
+		SpriteComponent
+		SpriteAnimationComponent
 		const PositionComponent
 		const TimeComponent
-		SpriteComponent
 	}
 
 	strategy = individual

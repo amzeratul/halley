@@ -3,6 +3,7 @@
 namespace Halley
 {
 	class Texture;
+	class ResourceLoader;
 
 	class SpriteSheetEntry
 	{

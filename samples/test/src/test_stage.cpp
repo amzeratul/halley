@@ -17,7 +17,7 @@ void TestStage::init()
 #ifdef _DEBUG
 	const int nToSpawn = 20;
 #else
-	const int nToSpawn = 2000;
+	const int nToSpawn = 5000;
 #endif
 
 	for (int i = 0; i < nToSpawn; i++) {
@@ -66,19 +66,17 @@ void TestStage::spawnTestSprite()
 	velComp->velocity = Vector2f(r.getFloat(200.0f, 300.0f), 0.0f).rotate(Angle1f::fromDegrees(r.getFloat(0.0f, 360.0f)));
 
 	auto spriteComp = new SpriteComponent();
-	auto& sprite = spriteComp->sprite;
-	auto spriteSheet = getResource<SpriteSheet>("sprites/ella.json");
-	auto material = getResource<Material>("shaders/sprite.yaml");
-	(*material)["tex0"] = spriteSheet->getTexture();
-	sprite.setMaterial(material);
 
 	auto timeComp = new TimeComponent();
 	timeComp->elapsed = r.getFloat(0.0f, 1.0f);
+
+	auto animComp = new SpriteAnimationComponent();
+	animComp->player.setAnimation(getResource<Animation>("animations/ella.yaml"));
 
 	world->createEntity()
 		.addComponent(posComp)
 		.addComponent(velComp)
 		.addComponent(spriteComp)
 		.addComponent(timeComp)
-		.getEntityId();
+		.addComponent(animComp);
 }

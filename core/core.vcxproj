@@ -42,6 +42,8 @@
     <ClInclude Include="src\graphics\render_target\render_target_screen.h" />
     <ClInclude Include="src\graphics\render_target\render_target_texture.h" />
     <ClInclude Include="src\graphics\shader.h" />
+    <ClInclude Include="src\graphics\sprite\animation.h" />
+    <ClInclude Include="src\graphics\sprite\animation_player.h" />
     <ClInclude Include="src\graphics\sprite\sprite.h" />
     <ClInclude Include="src\graphics\sprite\sprite_sheet.h" />
     <ClInclude Include="src\graphics\texture.h" />
@@ -70,6 +72,8 @@
     <ClCompile Include="src\graphics\render_target\render_target_screen.cpp" />
     <ClCompile Include="src\graphics\render_target\render_target_texture.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
+    <ClCompile Include="src\graphics\sprite\animation.cpp" />
+    <ClCompile Include="src\graphics\sprite\animation_player.cpp" />
     <ClCompile Include="src\graphics\sprite\sprite.cpp" />
     <ClCompile Include="src\graphics\sprite\sprite_sheet.cpp" />
     <ClCompile Include="src\graphics\texture.cpp" />

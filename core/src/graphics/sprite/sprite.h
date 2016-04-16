@@ -2,6 +2,7 @@
 
 namespace Halley
 {
+	class SpriteSheetEntry;
 	class SpriteSheet;
 	class Material;
 
@@ -39,7 +40,8 @@ namespace Halley
 		void setSize(Vector2f size);
 		void setTexRect(Rect4f texRect);
 
-		void setSprite(SpriteSheet& sheet, String name);
+		void setSprite(const SpriteSheet& sheet, String name);
+		void setSprite(const SpriteSheetEntry& entry);
 
 	private:
 		std::shared_ptr<Material> material;

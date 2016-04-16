@@ -1,0 +1,26 @@
+---
+name: Ella
+spriteSheet: "../sprites/ella.json"
+shader: "../shaders/sprite.yaml"
+sequences:
+  - name: idle
+    directions:
+      - name: front
+        fps: 12
+        frames:
+          - idle_front/01.png
+          - idle_front/02.png
+          - idle_front/03.png
+      - name: back
+        fps: 12
+        frames:
+          - idle_back/01.png
+          - idle_back/02.png
+          - idle_back/03.png
+      - name: right
+        fps: 12
+        frames:
+          - idle_side/01.png
+          - idle_side/02.png
+          - idle_side/03.png
+...

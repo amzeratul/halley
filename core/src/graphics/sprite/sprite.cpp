@@ -116,13 +116,17 @@ void Sprite::setTexRect(Rect4f v)
 	}
 }
 
-void Sprite::setSprite(SpriteSheet& sheet, String name)
+void Sprite::setSprite(const SpriteSheet& sheet, String name)
 {
-	auto& sprite = sheet.getSprite(name);
-	size = sprite.size;
-	vertices[0].pivot = sprite.pivot;
-	vertices[0].texRect = sprite.coords;
-	vertices[0].rotation.y = sprite.rotated ? 1.0f : 0.0f;
+	setSprite(sheet.getSprite(name));
+}
+
+void Sprite::setSprite(const SpriteSheetEntry& entry)
+{
+	size = entry.size;
+	vertices[0].pivot = entry.pivot;
+	vertices[0].texRect = entry.coords;
+	vertices[0].rotation.y = entry.rotated ? 1.0f : 0.0f;
 	dirty = true;
 	computeSize();
 }

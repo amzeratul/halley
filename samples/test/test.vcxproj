@@ -156,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gen\cpp\components\position_component.h" />
+    <ClInclude Include="gen\cpp\components\sprite_animation_component.h" />
     <ClInclude Include="gen\cpp\components\sprite_component.h" />
     <ClInclude Include="gen\cpp\components\time_component.h" />
     <ClInclude Include="gen\cpp\components\velocity_component.h" />

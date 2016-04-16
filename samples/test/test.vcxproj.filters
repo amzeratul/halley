@@ -74,6 +74,9 @@
     <ClInclude Include="gen\cpp\components\velocity_component.h">
       <Filter>gen\components</Filter>
     </ClInclude>
+    <ClInclude Include="gen\cpp\components\sprite_animation_component.h">
+      <Filter>gen\components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="gen_src\test.txt">

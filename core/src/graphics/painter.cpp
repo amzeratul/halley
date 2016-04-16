@@ -15,8 +15,13 @@ void Painter::startRender()
 
 void Painter::endRender()
 {
-	flushPending();
+	flush();
 	doEndRender();
+}
+
+void Painter::flush()
+{
+	flushPending();
 }
 
 void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, void* vertexData)
