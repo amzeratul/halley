@@ -6,12 +6,16 @@
 
 using namespace Halley;
 
-Halley::World::World() = default;
+Halley::World::World(HalleyAPI* api)
+	: api(api)
+{	
+}
 
 Halley::World::~World() = default;
 
 Halley::System& Halley::World::addSystem(std::unique_ptr<System> system, TimeLine timeline)
 {
+	system->api = api;
 	auto& ref = *system.get();
 	getSystems(timeline).emplace_back(std::move(system));
 	ref.onAddedToWorld(*this);

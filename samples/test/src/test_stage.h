@@ -12,13 +12,11 @@ public:
 	void onRender(Halley::RenderContext& context) const override;
 
 private:
-	Halley::World world;
+	std::unique_ptr<Halley::World> world;
 	int i = 0;
 	EntityId id0;
 	EntityId id2;
 	float curTime = 0;
-
-	Halley::Sprite sprite;
 
 	std::shared_ptr<Halley::TextureRenderTarget> target;
 };

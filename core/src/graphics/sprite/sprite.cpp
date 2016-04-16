@@ -51,53 +51,69 @@ bool Sprite::isInView(Rect4f v) const
 
 void Sprite::setPos(Vector2f v)
 {
-	dirty = true;
-	vertices[0].pos = v;
+	if (v != vertices[0].pos) {
+		dirty = true;
+		vertices[0].pos = v;
+	}
 }
 
 void Sprite::setRotation(Angle1f v)
 {
-	dirty = true;
-	vertices[0].rotation.x = v.getRadians();
+	if (v != vertices[0].rotation.x) {
+		dirty = true;
+		vertices[0].rotation.x = v.getRadians();
+	}
 }
 
 void Sprite::setColour(Colour4f v)
 {
-	dirty = true;
-	vertices[0].colour = v;
+	if (vertices[0].colour != v) {
+		dirty = true;
+		vertices[0].colour = v;
+	}
 }
 
 void Sprite::setScale(Vector2f v)
 {
-	dirty = true;
-	scale = v;
-	computeSize();
+	if (scale != v) {
+		dirty = true;
+		scale = v;
+		computeSize();
+	}
 }
 
 void Sprite::setFlip(bool v)
 {
-	dirty = true;
-	flip = v;
-	computeSize();
+	if (flip != v) {
+		dirty = true;
+		flip = v;
+		computeSize();
+	}
 }
 
 void Sprite::setPivot(Vector2f v)
 {
-	dirty = true;
-	vertices[0].pivot = v;
+	if (vertices[0].pivot != v) {
+		dirty = true;
+		vertices[0].pivot = v;
+	}
 }
 
 void Sprite::setSize(Vector2f v)
 {
-	dirty = true;
-	size = v;
-	computeSize();
+	if (size != v) {
+		dirty = true;
+		size = v;
+		computeSize();
+	}
 }
 
 void Sprite::setTexRect(Rect4f v)
 {
-	dirty = true;
-	vertices[0].texRect = v;
+	if (vertices[0].texRect != v) {
+		dirty = true;
+		vertices[0].texRect = v;
+	}
 }
 
 void Sprite::setSprite(SpriteSheet& sheet, String name)
@@ -106,7 +122,7 @@ void Sprite::setSprite(SpriteSheet& sheet, String name)
 	size = sprite.size;
 	vertices[0].pivot = sprite.pivot;
 	vertices[0].texRect = sprite.coords;
-	vertices[0].rotation.y = sprite.rotated ? 1 : 0;
+	vertices[0].rotation.y = sprite.rotated ? 1.0f : 0.0f;
 	dirty = true;
 	computeSize();
 }

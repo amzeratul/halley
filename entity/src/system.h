@@ -9,6 +9,8 @@
 #include "entity.h"
 
 namespace Halley {
+	class HalleyAPI;
+
 	class System
 	{
 	public:
@@ -16,6 +18,8 @@ namespace Halley {
 		virtual ~System() {}
 
 	protected:
+		HalleyAPI& getAPI() const { return *api; }
+
 		virtual void updateBase(Time) {}
 		virtual void renderBase(Painter&) {}
 
@@ -34,6 +38,7 @@ namespace Halley {
 		std::vector<FamilyBindingBase*> families;
 		World* world;
 		String name;
+		HalleyAPI* api;
 
 		void doUpdate(Time time);
 		void doRender(Painter& painter);

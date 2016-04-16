@@ -24,9 +24,6 @@
     <ClCompile Include="src\sample_entry.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\test_system.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\prec.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -36,20 +33,17 @@
     <ClCompile Include="src\test_stage.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\sprite_animation_system.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\movement_system.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\time_system.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="gen\cpp\components\bar_component.h">
-      <Filter>gen\components</Filter>
-    </ClInclude>
-    <ClInclude Include="gen\cpp\components\foo_component.h">
-      <Filter>gen\components</Filter>
-    </ClInclude>
-    <ClInclude Include="gen\cpp\components\test_component.h">
-      <Filter>gen\components</Filter>
-    </ClInclude>
-    <ClInclude Include="gen\cpp\systems\test_system.h">
-      <Filter>gen\systems</Filter>
-    </ClInclude>
     <ClInclude Include="src\prec.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -58,6 +52,27 @@
     </ClInclude>
     <ClInclude Include="src\test_stage.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="gen\cpp\systems\movement_system.h">
+      <Filter>gen\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="gen\cpp\systems\sprite_animation_system.h">
+      <Filter>gen\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="gen\cpp\systems\time_system.h">
+      <Filter>gen\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="gen\cpp\components\position_component.h">
+      <Filter>gen\components</Filter>
+    </ClInclude>
+    <ClInclude Include="gen\cpp\components\sprite_component.h">
+      <Filter>gen\components</Filter>
+    </ClInclude>
+    <ClInclude Include="gen\cpp\components\time_component.h">
+      <Filter>gen\components</Filter>
+    </ClInclude>
+    <ClInclude Include="gen\cpp\components\velocity_component.h">
+      <Filter>gen\components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

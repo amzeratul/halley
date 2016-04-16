@@ -143,6 +143,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\movement_system.cpp" />
     <ClCompile Include="src\prec.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -150,14 +151,18 @@
     <ClCompile Include="src\render_system.cpp" />
     <ClCompile Include="src\sample_entry.cpp" />
     <ClCompile Include="src\test_stage.cpp" />
-    <ClCompile Include="src\test_system.cpp" />
+    <ClCompile Include="src\sprite_animation_system.cpp" />
+    <ClCompile Include="src\time_system.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="gen\cpp\components\bar_component.h" />
-    <ClInclude Include="gen\cpp\components\foo_component.h" />
-    <ClInclude Include="gen\cpp\components\test_component.h" />
+    <ClInclude Include="gen\cpp\components\position_component.h" />
+    <ClInclude Include="gen\cpp\components\sprite_component.h" />
+    <ClInclude Include="gen\cpp\components\time_component.h" />
+    <ClInclude Include="gen\cpp\components\velocity_component.h" />
+    <ClInclude Include="gen\cpp\systems\movement_system.h" />
     <ClInclude Include="gen\cpp\systems\render_system.h" />
-    <ClInclude Include="gen\cpp\systems\test_system.h" />
+    <ClInclude Include="gen\cpp\systems\sprite_animation_system.h" />
+    <ClInclude Include="gen\cpp\systems\time_system.h" />
     <ClInclude Include="src\prec.h" />
     <ClInclude Include="src\test_stage.h" />
   </ItemGroup>

@@ -2,4 +2,5 @@
 
 void RenderSystem::render(Halley::Painter& painter, MainFamily& e) const
 {
+	e.sprite->sprite.draw(painter);
 }

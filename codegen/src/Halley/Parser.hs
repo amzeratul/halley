@@ -34,7 +34,7 @@ parseFile filename input = parse genDefs filename input
 nonBreakingChars = " \t"
 newLineChars = "\n\r"
 whiteSpaceChars = nonBreakingChars ++ newLineChars
-reservedChars = "{}:=(),"
+reservedChars = "{}=(),"
 
 whiteSpace = many (oneOf whiteSpaceChars)
 nonBreakingWhiteSpace = many (oneOf nonBreakingChars)

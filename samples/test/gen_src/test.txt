@@ -1,50 +1,72 @@
-component TestComponent {
+component PositionComponent {
+	members {
+		position : Halley::Vector2f
+	}
+}
+
+component VelocityComponent {
+	members {
+		velocity : Halley::Vector2f
+	}
+}
+
+component TimeComponent {
 	members {
 		elapsed : float
-		test : int
 	}
 }
 
-component FooComponent {
+component SpriteComponent {
 	members {
-		foo : float
+		sprite : Halley::Sprite
 	}
 }
 
-component BarComponent {
-	members {
-		bar : float
-	}
-}
-
-system TestSystem {
+system TimeSystem {
 	family main {
-		TestComponent
-		FooComponent
+		TimeComponent
 	}
 
-	family aux {
-		TestComponent
-		BarComponent
-	}
-	
-	strategy = default
+	strategy = individual
 	access = pure
 	language = C++
-	timeline = variable
+	subDivide = 1
+}
+
+system MovementSystem {
+	family main {
+		PositionComponent
+		VelocityComponent
+	}
+
+	strategy = individual
+	access = pure
+	language = C++
+	subDivide = 1
+}
+
+system SpriteAnimationSystem {
+	family main {
+		const PositionComponent
+		const TimeComponent
+		SpriteComponent
+	}
+
+	strategy = individual
+	access = pure
+	language = C++
 	subDivide = 1
 }
 
 system RenderSystem {
 	family main {
-		TestComponent
-		FooComponent
+		PositionComponent
+		SpriteComponent
 	}
 
 	method = render
 	strategy = individual
 	access = pure
 	language = C++
-	timeline = variable
 	subDivide = 1
 }
