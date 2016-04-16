@@ -2,9 +2,9 @@
 
 void SpriteAnimationSystem::update(Halley::Time, MainFamily& e)
 {
-	const char* ellaFrames[] = { "die/01.png", "die/02.png", "die/03.png", "die/04.png", "die/05.png" };
+	const char* ellaFrames[] = { "run_side/01.png", "run_side/02.png", "run_side/03.png", "run_side/04.png" };
 	size_t nFrames = sizeof(ellaFrames) / sizeof(const char*);
-	size_t curFrame = size_t(e.time->elapsed * 5) % nFrames;
+	size_t curFrame = size_t(e.time->elapsed * 8) % nFrames;
 	
 	auto& sprite = e.sprite->sprite;
 	sprite.setPos(e.position->position);

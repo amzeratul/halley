@@ -14,28 +14,32 @@ void TestStage::init()
 	world->addSystem(std::make_unique<SpriteAnimationSystem>(), TimeLine::FixedUpdate);
 	world->addSystem(std::make_unique<RenderSystem>(), TimeLine::Render);
 
-	auto posComp = new PositionComponent();
-	posComp->position = Vector2f(100, 100);
+	for (int i = 0; i < 100; i++) {
+		auto& r = Random::getGlobal();
 
-	auto velComp = new VelocityComponent();
-	velComp->velocity = Vector2f(200, 200);
+		auto posComp = new PositionComponent();
+		posComp->position = Vector2f(r.getFloat(0.0f, 1280.0f), r.getFloat(0.0f, 720.0f));
 
-	auto spriteComp = new SpriteComponent();
-	auto& sprite = spriteComp->sprite;
-	auto spriteSheet = getResource<SpriteSheet>("sprites/ella.json");
-	auto material = getResource<Material>("shaders/sprite.yaml");
-	(*material)["tex0"] = spriteSheet->getTexture();
-	sprite.setMaterial(material);
+		auto velComp = new VelocityComponent();
+		velComp->velocity = Vector2f(r.getFloat(200.0f, 300.0f), 0.0f).rotate(Angle1f::fromDegrees(r.getFloat(0.0f, 360.0f)));
 
-	auto timeComp = new TimeComponent();
-	timeComp->elapsed = 0;
+		auto spriteComp = new SpriteComponent();
+		auto& sprite = spriteComp->sprite;
+		auto spriteSheet = getResource<SpriteSheet>("sprites/ella.json");
+		auto material = getResource<Material>("shaders/sprite.yaml");
+		(*material)["tex0"] = spriteSheet->getTexture();
+		sprite.setMaterial(material);
 
-	id0 = world->createEntity()
-		.addComponent(posComp)
-		.addComponent(velComp)
-		.addComponent(spriteComp)
-		.addComponent(timeComp)
-		.getEntityId();
+		auto timeComp = new TimeComponent();
+		timeComp->elapsed = r.getFloat(0.0f, 1.0f);
+
+		world->createEntity()
+			.addComponent(posComp)
+			.addComponent(velComp)
+			.addComponent(spriteComp)
+			.addComponent(timeComp)
+			.getEntityId();
+	}
 
 	target = getAPI().video->createRenderTarget();
 	TextureDescriptor desc;
@@ -57,12 +61,6 @@ void TestStage::onVariableUpdate(Time)
 void TestStage::onFixedUpdate(Time time)
 {
 	world->step(TimeLine::FixedUpdate, time);
-	i++;
-
-	if (i == 100) {
-	}
-
-	curTime += float(time);
 }
 
 void TestStage::onRender(RenderContext& context) const
