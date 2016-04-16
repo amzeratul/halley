@@ -35,6 +35,14 @@ void Sprite::update() const // Not really "const", but needs to be called from d
 	memcpy(&vertices[3], &vertices[0], size);
 }
 
+void Sprite::computeSize()
+{
+	vertices[0].size = scale * size;
+	if (flip) {
+		vertices[0].size.x *= -1;
+	}
+}
+
 bool Sprite::isInView(Rect4f v) const
 {
 	// TODO
@@ -63,7 +71,14 @@ void Sprite::setScale(Vector2f v)
 {
 	dirty = true;
 	scale = v;
-	vertices[0].size = scale * size;
+	computeSize();
+}
+
+void Sprite::setFlip(bool v)
+{
+	dirty = true;
+	flip = v;
+	computeSize();
 }
 
 void Sprite::setPivot(Vector2f v)
@@ -76,7 +91,7 @@ void Sprite::setSize(Vector2f v)
 {
 	dirty = true;
 	size = v;
-	vertices[0].size = scale * size;
+	computeSize();
 }
 
 void Sprite::setTexRect(Rect4f v)
@@ -88,9 +103,10 @@ void Sprite::setTexRect(Rect4f v)
 void Sprite::setSprite(SpriteSheet& sheet, String name)
 {
 	auto& sprite = sheet.getSprite(name);
+	size = sprite.size;
 	vertices[0].pivot = sprite.pivot;
-	vertices[0].size = sprite.size;
 	vertices[0].texRect = sprite.coords;
-	vertices[0].rotation.y = sprite.rotated ? (-M_PI / 2) : 0;
+	vertices[0].rotation.y = sprite.rotated ? 1 : 0;
 	dirty = true;
+	computeSize();
 }

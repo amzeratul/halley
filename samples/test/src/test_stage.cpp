@@ -64,19 +64,23 @@ void TestStage::onFixedUpdate(Time time)
 	i++;
 
 	if (i == 100) {
-		//getAPI().core->quit();
 	}
 
 	curTime += float(time);
 
-	sprite.setPos(Vector2f(640, 360) + Vector2f(500, 0) * ::sin(curTime * 0.2f));
-	sprite.setColour(Colour4f(1, 1, 1, ::sin(curTime * 2) * 0.5f + 0.5f));
+
+	//const char* ellaFrames[] = { "die/01.png", "die/02.png", "die/03.png", "die/04.png", "die/05.png", "idle_back/01.png", "idle_back/02.png", "idle_back/03.png", "idle_front/01.png", "idle_front/02.png", "idle_front/03.png", "idle_side/01.png", "idle_side/02.png", "idle_side/03.png", "run_back/01.png", "run_back/02.png", "run_back/03.png", "run_back/04.png", "run_front/01.png", "run_front/02.png", "run_front/03.png", "run_front/04.png", "run_side/01.png", "run_side/02.png", "run_side/03.png", "run_side/04.png" };
+	//const char* ellaFrames[] = { "run_side/01.png", "run_side/02.png", "run_side/03.png", "run_side/04.png" };
+	const char* ellaFrames[] = { "die/01.png", "die/02.png", "die/03.png", "die/04.png", "die/05.png" };
+	size_t nFrames = sizeof(ellaFrames) / sizeof(const char*);
+	size_t curFrame = size_t(curTime * 5) % nFrames;
+	sprite.setFlip(int(curTime) % 2 == 0);
+
+	sprite.setSprite(*getResource<SpriteSheet>("sprites/ella.json"), ellaFrames[curFrame]);
 }
 
 void TestStage::onRender(RenderContext& context) const
 {
-	sprite.getMaterial()["u_time"] = curTime;
-
 	context.bind([&] (Painter& painter)
 	{
 		painter.clear(Colour(0.2f, 0.2f, 0.3f));

@@ -33,6 +33,7 @@ namespace Halley
 		void setRotation(Angle1f angle);
 		void setColour(Colour4f colour);
 		void setScale(Vector2f scale);
+		void setFlip(bool flip);
 
 		void setPivot(Vector2f offset);
 		void setSize(Vector2f size);
@@ -46,8 +47,10 @@ namespace Halley
 
 		Vector2f scale;
 		Vector2f size;
+		bool flip = false;
 		mutable bool dirty = false;
 
 		void update() const;
+		void computeSize();
 	};
 }

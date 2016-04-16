@@ -3,17 +3,17 @@ name: Sprite
 uniforms:
   - u_mvp: mat4
   - tex0: sampler2D
-  - u_time: float
+#  - u_time: float
 attributes:
-  - a_position: vec4   # xy = position, zw = offset
-  - a_size: vec4       # xy = size (px), z = rotation (radians)
+  - a_position: vec4   # xy = position, zw = relative pivot [0..1]
+  - a_size: vec4       # xy = size (px), z = rotation (radians), w = sprite rotated? (1 if 90 degrees rotated)
   - a_color: vec4      # rgba
   - a_texCoord0: vec4  # xy = top-left, zw = bottom-right
   - a_vertPos: vec2    # xy = relative position of vertex [0..1]
 passes:
-  - blend: AlphaPremultiplied
-    vertex: sprite_test.vertex.glsl
-    pixel: sprite_test.pixel.glsl
+#  - blend: AlphaPremultiplied
+#    vertex: sprite_test.vertex.glsl
+#    pixel: sprite_test.pixel.glsl
   - blend: AlphaPremultiplied
     vertex: sprite.vertex.glsl
     pixel: sprite.pixel.glsl
