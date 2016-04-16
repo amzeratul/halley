@@ -2,7 +2,6 @@
 #include "halley_gl.h"
 #include "../../core/src/graphics/material.h"
 #include "../../core/src/graphics/material_parameter.h"
-#include "../../core/src/graphics/camera.h"
 
 using namespace Halley;
 
@@ -66,10 +65,7 @@ void PainterOpenGL::setBlend(BlendType blend)
 void PainterOpenGL::setVertices(Material& material, size_t numVertices, void* vertexData)
 {
 	// Load vertices into VBO
-	size_t vertexStride = material.getVertexStride();
-	size_t bytesSize = numVertices * vertexStride;
-	char* data = getVBOBuffer(bytesSize);
-	memcpy(data, vertexData, bytesSize);
+	size_t bytesSize = numVertices * material.getVertexStride();
 	glBufferData(GL_ARRAY_BUFFER, bytesSize, vertexData, GL_STREAM_DRAW);
 	glCheckError();
 
@@ -101,6 +97,24 @@ void PainterOpenGL::setupVertexAttributes(Material& material)
 			count = 4;
 			type = GL_FLOAT;
 			break;
+		case ShaderParameterType::Int:
+			count = 1;
+			type = GL_INT;
+			break;
+		case ShaderParameterType::Int2:
+			count = 2;
+			type = GL_INT;
+			break;
+		case ShaderParameterType::Int3:
+			count = 3;
+			type = GL_INT;
+			break;
+		case ShaderParameterType::Int4:
+			count = 4;
+			type = GL_INT;
+			break;
+		default:
+			break;
 		}
 		glEnableVertexAttribArray(attribute.location);
 		size_t offset = attribute.offset;
@@ -117,7 +131,7 @@ void PainterOpenGL::drawQuads(size_t n)
 	size_t oldSize = indexData.size();
 	if (oldSize < sz) {
 		indexData.resize(sz);
-		unsigned short pos = oldSize * 2 / 3;
+		unsigned short pos = static_cast<unsigned short>(oldSize * 2 / 3);
 		for (size_t i = oldSize; i < sz; i += 6) {
 			// B-----C
 			// |     |
@@ -141,12 +155,4 @@ void PainterOpenGL::drawQuads(size_t n)
 void PainterOpenGL::setViewPort(Rect4i rect, bool enableScissor)
 {
 	glUtils->setViewPort(rect, enableScissor);
-}
-
-char* PainterOpenGL::getVBOBuffer(size_t size)
-{
-	if (vboData.size() < size) {
-		vboData.resize(size * 2);
-	}
-	return vboData.data();
 }
