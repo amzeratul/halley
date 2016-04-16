@@ -4,20 +4,14 @@ core
 - child stages
 
 core/graphics (?)
-* have a real implementation in core, calling simple opengl backend
-* target rendering support
-* cameras
-- sprite sheets
-- render target [from old Halley]
 - render graph [from old Halley]
 - animation
 - rewrite text rendering system to use pre-baked distance fields
 - extra painter tools?
-- dynamic batching
 - fix threaded load (TODOs in core_runner.cpp)
 
 opengl
-- render target [from old Halley]
+- ?
 
 input
 * bring library into engine
@@ -41,6 +35,9 @@ entity
 codegen
 * registry
 * messages?
+- system base class
+- figure out how to import custom types in components
+- component initialization?
 - switch to yaml-based format for component/system/message specs?
 - rewrite in C++?
 - codegen parallel systems
@@ -61,7 +58,6 @@ utils
 - better HTTP library?
 
 samples
-- refactor "test" sample
 - expand "test" sample
 - make a minimal "template" sample
 

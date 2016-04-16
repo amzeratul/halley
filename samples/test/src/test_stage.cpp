@@ -14,7 +14,13 @@ void TestStage::init()
 	world->addSystem(std::make_unique<SpriteAnimationSystem>(), TimeLine::FixedUpdate);
 	world->addSystem(std::make_unique<RenderSystem>(), TimeLine::Render);
 
-	for (int i = 0; i < 2000; i++) {
+#ifdef _DEBUG
+	const int nToSpawn = 20;
+#else
+	const int nToSpawn = 2000;
+#endif
+
+	for (int i = 0; i < nToSpawn; i++) {
 		spawnTestSprite();
 	}
 
