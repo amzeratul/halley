@@ -62,23 +62,28 @@ void Painter::bind(RenderContext& context)
 
 void Painter::flushPending()
 {
-	// Bind projection
-	(*materialPending)["u_mvp"] = projection;
-
-	// Load vertices
-	setVertices(*materialPending, verticesPending, vertexBuffer.data());
-
-	// Go through each pass
-	for (int i = 0; i < materialPending->getNumPasses(); i++) {
-		// Bind pass
-		materialPending->bind(i, *this);
-
-		// Draw
-		drawQuads(int(verticesPending / 4));
-	}
+	executeDrawQuads(*materialPending, verticesPending, vertexBuffer.data());
 
 	// Reset
 	bytesPending = 0;
 	verticesPending = 0;
 	materialPending.reset();
+}
+
+void Painter::executeDrawQuads(Material& material, size_t numVertices, void* vertexData)
+{
+	// Bind projection
+	material["u_mvp"] = projection;
+
+	// Load vertices
+	setVertices(material, numVertices, vertexData);
+
+	// Go through each pass
+	for (int i = 0; i < material.getNumPasses(); i++) {
+		// Bind pass
+		material.bind(i, *this);
+
+		// Draw
+		drawQuads(int(numVertices / 4));
+	}
 }

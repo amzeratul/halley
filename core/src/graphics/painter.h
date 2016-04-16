@@ -41,5 +41,6 @@ namespace Halley
 		std::shared_ptr<Material> materialPending;
 
 		void flushPending();
+		void executeDrawQuads(Material& material, size_t numVertices, void* vertexData);
 	};
 }
