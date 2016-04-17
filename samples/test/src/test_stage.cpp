@@ -38,7 +38,7 @@ void TestStage::onFixedUpdate(Time time)
 #else
 	const int targetEntities = 10000;
 #endif
-	const int nToSpawn = std::min(targetEntities - int(world->numEntities()), targetEntities / 60);
+	const int nToSpawn = std::min(targetEntities - int(world->numEntities()), std::max(1, targetEntities / 60));
 	for (int i = 0; i < nToSpawn; i++) {
 		spawnTestSprite();
 	}
