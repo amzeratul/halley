@@ -18,7 +18,7 @@ namespace Halley
 	{
 	public:
 		std::shared_ptr<Texture> getTexture() const { return texture; }
-		const SpriteSheetEntry& getSprite(String name) const { return sprites.at(name); }
+		const SpriteSheetEntry& getSprite(String name) const;
 
 		static std::unique_ptr<SpriteSheet> loadResource(ResourceLoader& loader);
 

@@ -24,6 +24,16 @@ static T readSize(JSONValue value)
 	return T(value["w"], value["h"]);
 }
 
+const SpriteSheetEntry& SpriteSheet::getSprite(String name) const
+{
+	auto iter = sprites.find(name);
+	if (iter == sprites.end()) {
+		throw Exception("Spritesheet does not contain sprite \"" + name + "\".");
+	} else {
+		return iter->second;
+	}
+}
+
 std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 {
 	// Find base path

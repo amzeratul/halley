@@ -123,10 +123,11 @@ void Sprite::setSprite(const SpriteSheet& sheet, String name)
 
 void Sprite::setSprite(const SpriteSheetEntry& entry)
 {
-	size = entry.size;
-	vertices[0].pivot = entry.pivot;
-	vertices[0].texRect = entry.coords;
-	vertices[0].rotation.y = entry.rotated ? 1.0f : 0.0f;
-	dirty = true;
-	computeSize();
+	if (vertices[0].texRect != entry.coords) {
+		setSize(entry.size);
+		vertices[0].pivot = entry.pivot;
+		vertices[0].texRect = entry.coords;
+		vertices[0].rotation.y = entry.rotated ? 1.0f : 0.0f;
+		dirty = true;
+	}
 }

@@ -42,6 +42,7 @@ void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, 
 	if (vertexBuffer.size() < requiredSize) {
 		vertexBuffer.resize(requiredSize * 2);
 	}
+	
 	memcpy(vertexBuffer.data() + bytesPending, vertexData, dataSize);
 
 	verticesPending += numVertices;

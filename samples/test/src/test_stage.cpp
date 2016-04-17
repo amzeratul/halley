@@ -17,7 +17,7 @@ void TestStage::init()
 #ifdef _DEBUG
 	const int nToSpawn = 20;
 #else
-	const int nToSpawn = 5000;
+	const int nToSpawn = 10000;
 #endif
 
 	for (int i = 0; i < nToSpawn; i++) {
@@ -72,6 +72,7 @@ void TestStage::spawnTestSprite()
 
 	auto animComp = new SpriteAnimationComponent();
 	animComp->player.setAnimation(getResource<Animation>("animations/ella.yaml"));
+	animComp->player.setSequence("run");
 
 	world->createEntity()
 		.addComponent(posComp)
