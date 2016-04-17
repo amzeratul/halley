@@ -21,6 +21,8 @@
 
 #pragma once
 
+namespace Halley {} // Get GitHub to realise this is C++ :3
+
 #define WITH_OPENGL
 
 #include <GL/glew.h>

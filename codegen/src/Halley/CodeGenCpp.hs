@@ -113,7 +113,7 @@ genSystem sysData = [GeneratedSource{filename = basePath ++ ".h", code = header}
         familyTypeDecls = concat $ map (familyTypeDecl) $ fams
         familyTypeDecl fam = ["    class " ++ fName ++ " {"
                              ,"    public:"
-                             ,"        const EntityId entityId;"
+                             ,"        const Halley::EntityId entityId;"
                              ,""]
                              ++ memberList ++
                              [""

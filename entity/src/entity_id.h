@@ -1,3 +1,6 @@
 #pragma once
 
-using EntityId = int;
+namespace Halley {
+	using EntityId = int;
+}
+
