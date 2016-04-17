@@ -15,6 +15,7 @@ void AnimationPlayer::setAnimation(std::shared_ptr<Animation> v, String sequence
 		animation = v;
 		curDir = nullptr;
 		curSeq = nullptr;
+		dirId = -1;
 	}
 
 	if (animation) {
@@ -42,9 +43,11 @@ void AnimationPlayer::setSequence(String sequence)
 
 void AnimationPlayer::setDirection(int direction)
 {
-	if (!curDir || curDir->getId() != direction) {
+	if (dirId != direction) {
 		assert(animation);
 		curDir = &animation->getDirection(direction);
+		dirFlip = curDir->shouldFlip();
+		dirId = curDir->getId();
 		dirty = true;
 	}
 }
@@ -54,6 +57,8 @@ void AnimationPlayer::setDirection(String direction)
 	if (!curDir || curDir->getName() != direction) {
 		assert(animation);
 		curDir = &animation->getDirection(direction);
+		dirFlip = curDir->shouldFlip();
+		dirId = curDir->getId();
 		dirty = true;
 	}
 }
@@ -85,14 +90,16 @@ void AnimationPlayer::update(Time time)
 
 void AnimationPlayer::updateSprite(Sprite& sprite) const
 {
-	if (animation) {
+	if (hasUpdate) {
 		sprite.setMaterial(animation->getMaterial());
 		sprite.setSprite(*spriteData);
-		sprite.setFlip(curDir->shouldFlip());
+		sprite.setFlip(dirFlip);
+		hasUpdate = false;
 	}
 }
 
 void AnimationPlayer::resolveSprite()
 {
-	spriteData = &curSeq->getFrame(curFrame).getSprite(curDir->getId());
+	spriteData = &curSeq->getFrame(curFrame).getSprite(dirId);
+	hasUpdate = true;
 }

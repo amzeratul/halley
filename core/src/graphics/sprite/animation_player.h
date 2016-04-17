@@ -25,16 +25,22 @@ namespace Halley
 		std::shared_ptr<Animation> animation;
 		const SpriteSheetEntry* spriteData = nullptr;
 
-		bool dirty;
-
-		bool seqLooping;
-		float seqFPS;
-		size_t seqLen;
-		Time seqTimeLen;
-
-		int curFrame;
-		Time curTime;
 		const AnimationSequence* curSeq;
 		const AnimationDirection* curDir;
+
+		Time seqTimeLen;
+		Time curTime;
+
+		size_t seqLen;
+
+		int dirId;
+		int curFrame;
+		float seqFPS;
+
+		bool dirty;
+		bool seqLooping;
+		bool dirFlip;
+
+		mutable bool hasUpdate = true;
 	};
 }

@@ -14,16 +14,6 @@ void TestStage::init()
 	world->addSystem(std::make_unique<SpriteAnimationSystem>(), TimeLine::FixedUpdate);
 	world->addSystem(std::make_unique<RenderSystem>(), TimeLine::Render);
 
-#ifdef _DEBUG
-	const int nToSpawn = 20;
-#else
-	const int nToSpawn = 10000;
-#endif
-
-	for (int i = 0; i < nToSpawn; i++) {
-		spawnTestSprite();
-	}
-
 	target = getAPI().video->createRenderTarget();
 	TextureDescriptor desc;
 	desc.w = 1280;
@@ -43,6 +33,16 @@ void TestStage::onVariableUpdate(Time)
 
 void TestStage::onFixedUpdate(Time time)
 {
+#ifdef _DEBUG
+	const int targetEntities = 20;
+#else
+	const int targetEntities = 10000;
+#endif
+	const int nToSpawn = std::min(targetEntities - int(world->numEntities()), targetEntities / 60);
+	for (int i = 0; i < nToSpawn; i++) {
+		spawnTestSprite();
+	}
+
 	world->step(TimeLine::FixedUpdate, time);
 }
 
