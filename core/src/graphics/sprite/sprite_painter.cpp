@@ -24,6 +24,10 @@ void SpritePainter::add(Sprite& sprite, int layer, int tieBreaker)
 
 void SpritePainter::draw(Painter& painter)
 {
+	// TODO: implement hierarchical bucketing.
+	// - one bucket per layer
+	// - for each layer, one bucket per vertical band of the screen (32px or so)
+	// - sort each leaf bucket
 	std::sort(sprites.begin(), sprites.end()); // lol
 	for (auto& s : sprites) {
 		s.getSprite().draw(painter);

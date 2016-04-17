@@ -1,12 +1,12 @@
 core
-- resource paths and filenames
 - hot reloading
 - child stages
+- resource paths and filenames?
 
 core/graphics (?)
-* animation
 * rewrite text rendering system to use pre-baked distance fields
-- separate materials and material bindings?
+* separate materials and material bindings
+- optimise SpritePainter
 - render graph [from old Halley]
 - sliced sprites
 - fix threaded load (TODOs in core_runner.cpp)
