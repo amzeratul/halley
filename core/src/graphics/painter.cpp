@@ -24,6 +24,28 @@ void Painter::flush()
 	flushPending();
 }
 
+template <typename T>
+static void doMemcpyAlign(void* dstBytes, const void* srcBytes, size_t bytes)
+{
+	T* dst = reinterpret_cast<T*>(dstBytes);
+	const T* src = reinterpret_cast<const T*>(srcBytes);
+	const T* srcEnd = src + (bytes / sizeof(T));
+	for (; src != srcEnd; ++src, ++dst) {
+		*dst = *src;
+	}
+}
+
+inline void memcpyAlign(void* dstBytes, const void* srcBytes, size_t bytes)
+{
+	if (bytes % sizeof(size_t) == 0) {
+		// Use size_t aligned if possible
+		doMemcpyAlign<size_t>(dstBytes, srcBytes, bytes);
+	} else {
+		// Data is always int-aligned, since numVertices % 4 == 0
+		doMemcpyAlign<int>(dstBytes, srcBytes, bytes);
+	}
+}
+
 void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, void* vertexData)
 {
 	assert(numVertices > 0);
@@ -43,7 +65,7 @@ void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, 
 		vertexBuffer.resize(requiredSize * 2);
 	}
 	
-	memcpy(vertexBuffer.data() + bytesPending, vertexData, dataSize);
+	memcpyAlign(vertexBuffer.data() + bytesPending, vertexData, dataSize);
 
 	verticesPending += numVertices;
 	bytesPending += dataSize;
