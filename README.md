@@ -3,7 +3,7 @@
 # Halley Game Engine
 A lightweight game engine written in modern C++. I'm currently re-architecting the whole engine, while experimenting with some crazy ideas, so it's not usable at all right now (some basic components, such as input, are not there at all).
 
-Design guidelines:
+Design guidelines & objectives:
 * Modern graphics pipelines, with first-class shader support
 * Written in modern C++
 * "True" entity system based, with components that store data and systems that operate on families of components
@@ -14,6 +14,7 @@ Design guidelines:
 * Cross-platform: support as many platforms as possible
 * No legacy: don't bother supporting legacy systems, such as Windows XP or older Android/iOS devices
 * Rich tools: where possible, provide tools to assist in development and debugging
+* Support scripting in other languages, such as Lua
 
 ## Modules
 Halley is divided in a few sub-projects:
