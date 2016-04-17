@@ -11,6 +11,8 @@ AnimationPlayer::AnimationPlayer(std::shared_ptr<Animation> animation, String se
 
 void AnimationPlayer::setAnimation(std::shared_ptr<Animation> v, String sequence, String direction)
 {
+	assert(animation);
+
 	if (animation != v) {
 		animation = v;
 		curDir = nullptr;

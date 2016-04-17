@@ -1,5 +1,7 @@
 #pragma once
 
+namespace Halley {} // Get GitHub to realise this is C++ :3
+
 #include "api/halley_api.h"
 
 #include "core/core_runner.h"

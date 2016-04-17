@@ -1,5 +1,7 @@
 #pragma once
 
+namespace Halley {} // Get GitHub to realise this is C++ :3
+
 #include "concurrency/concurrent.h"
 #include "concurrency/jobs.h"
 #include "concurrency/thread_pool.h"
