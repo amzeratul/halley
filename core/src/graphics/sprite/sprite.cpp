@@ -45,8 +45,12 @@ void Sprite::computeSize()
 
 bool Sprite::isInView(Rect4f v) const
 {
-	// TODO
-	return true;
+	// This is a coarse test; will give a few false positives
+	Vector2f pos = vertices[0].pos;
+	Vector2f sz = vertices[0].size * 1.4142136f; // sqrt(2)
+	Rect4f rect(pos - sz, pos + sz); // Could use offset here, but that would also need to take rotation into account
+
+	return rect.intersects(v);
 }
 
 void Sprite::setPos(Vector2f v)

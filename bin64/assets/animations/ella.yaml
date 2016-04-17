@@ -21,4 +21,8 @@ sequences:
     fileName: die/%f:02%.png
     frames: [1-5]
     loop: false
+    noFlip: true
+  - name: dead
+    fileName: die/05.png
+    noFlip: true
 ...

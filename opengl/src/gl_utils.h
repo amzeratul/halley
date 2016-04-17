@@ -30,10 +30,12 @@ namespace Halley {
 	class Texture;
 	class GLInternals;
 
-	class GLUtils : boost::noncopyable {
+	class GLUtils {
 	public:
 		GLUtils();
 		GLUtils(GLUtils& other);
+
+		GLUtils& operator=(const GLUtils&) = delete;
 
 		void setBlendType(BlendType type);
 

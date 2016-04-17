@@ -17,6 +17,8 @@ void Painter::endRender()
 {
 	flush();
 	doEndRender();
+	camera = nullptr;
+	viewPort = Rect4i(0, 0, 0, 0);
 }
 
 void Painter::flush()
@@ -78,14 +80,14 @@ void Painter::bind(RenderContext& context)
 	rt.bind();
 	
 	// Set viewport
-	auto viewPort = context.getViewPort();
+	viewPort = context.getViewPort();
 	setViewPort(viewPort, viewPort != rt.getViewPort());
 
 	// Set camera
-	auto& cam = context.getCamera();
-	cam.setViewArea(Vector2f(viewPort.getSize()));
-	cam.updateProjection();
-	projection = cam.getProjection();
+	camera = &context.getCamera();
+	camera->setViewArea(Vector2f(viewPort.getSize()));
+	camera->updateProjection();
+	projection = camera->getProjection();
 }
 
 void Painter::flushPending()

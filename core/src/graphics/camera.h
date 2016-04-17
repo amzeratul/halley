@@ -34,7 +34,6 @@ namespace Halley {
 		void setViewArea(Vector2f area);
 		void setAngle(Angle1f angle);
 		void setZoom(float zoom);
-		void setRelativeViewPort(Vector2f origin, Vector2f size);
 
 		Vector2f getPosition() const { return pos; }
 		Vector2f getViewArea() const { return area; }
@@ -52,10 +51,8 @@ namespace Halley {
 	private:
 		Vector2f pos;
 		Vector2f area;
-		Angle1f angle;
 		Matrix4f projection;
-		Rect4f relativeViewPort;
+		Angle1f angle;
 		float zoom;
-
 	};
 }

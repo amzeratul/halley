@@ -27,12 +27,14 @@ namespace Halley
 		const AnimationFrame& getFrame(size_t n) const { return frames[n]; }
 		String getName() const { return name; }
 		bool isLooping() const { return loop; }
+		bool isNoFlip() const { return noFlip; }
 
 	private:
 		std::vector<AnimationFrame> frames;
 		String name;
 		float fps;
 		bool loop;
+		bool noFlip;
 	};
 
 	class AnimationDirection

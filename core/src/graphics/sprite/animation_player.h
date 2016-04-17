@@ -39,6 +39,7 @@ namespace Halley
 
 		bool dirty;
 		bool seqLooping;
+		bool seqNoFlip;
 		bool dirFlip;
 
 		mutable bool hasUpdate = true;

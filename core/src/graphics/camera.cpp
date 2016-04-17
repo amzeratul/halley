@@ -29,7 +29,6 @@ Camera::Camera()
 {
 	area = Vector2f(1280, 720);
 	pos = 0.5*area;
-	relativeViewPort = Rect4f(0, 0, 1, 1);
 }
 
 
@@ -39,7 +38,6 @@ Camera::Camera(Vector2f _pos, Vector2f _area, Angle1f _angle)
 	, angle(_angle)
 	, zoom(1.0f)
 {
-	relativeViewPort = Rect4f(0, 0, 1, 1);
 }
 
 
@@ -84,12 +82,6 @@ void Camera::updateProjection()
 	if (pos != Vector2f()) {
 		projection.translate2D(-pos.x, -pos.y);
 	}
-}
-
-void Halley::Camera::setRelativeViewPort(Vector2f origin, Vector2f ws)
-{
-	// Setup viewport
-	relativeViewPort = Rect4f(origin, origin + ws);
 }
 
 Halley::Rect4f Halley::Camera::getViewRect() const

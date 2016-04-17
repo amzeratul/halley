@@ -36,6 +36,7 @@ void AnimationPlayer::setSequence(String sequence)
 		seqLen = curSeq->numFrames();
 		seqLooping = curSeq->isLooping();
 		seqTimeLen = seqLen / seqFPS;
+		seqNoFlip = curSeq->isNoFlip();
 
 		dirty = true;
 	}
@@ -93,7 +94,7 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 	if (hasUpdate) {
 		sprite.setMaterial(animation->getMaterial());
 		sprite.setSprite(*spriteData);
-		sprite.setFlip(dirFlip);
+		sprite.setFlip(dirFlip && !seqNoFlip);
 		hasUpdate = false;
 	}
 }

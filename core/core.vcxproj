@@ -45,6 +45,7 @@
     <ClInclude Include="src\graphics\sprite\animation.h" />
     <ClInclude Include="src\graphics\sprite\animation_player.h" />
     <ClInclude Include="src\graphics\sprite\sprite.h" />
+    <ClInclude Include="src\graphics\sprite\sprite_painter.h" />
     <ClInclude Include="src\graphics\sprite\sprite_sheet.h" />
     <ClInclude Include="src\graphics\texture.h" />
     <ClInclude Include="src\graphics\texture_descriptor.h" />
@@ -75,6 +76,7 @@
     <ClCompile Include="src\graphics\sprite\animation.cpp" />
     <ClCompile Include="src\graphics\sprite\animation_player.cpp" />
     <ClCompile Include="src\graphics\sprite\sprite.cpp" />
+    <ClCompile Include="src\graphics\sprite\sprite_painter.cpp" />
     <ClCompile Include="src\graphics\sprite\sprite_sheet.cpp" />
     <ClCompile Include="src\graphics\texture.cpp" />
     <ClCompile Include="src\graphics\texture_descriptor.cpp" />

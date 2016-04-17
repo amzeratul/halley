@@ -34,13 +34,27 @@ namespace Halley {
 		T& operator[](size_t index) {
 			return *reinterpret_cast<T*>(getElement(index));
 		}
+		
+		const T& operator[](size_t index) const {
+			return *reinterpret_cast<T*>(getElement(index));
+		}
 
 		T* begin()
 		{
 			return reinterpret_cast<T*>(getElement(0));
 		}
 
+		const T* begin() const
+		{
+			return reinterpret_cast<T*>(getElement(0));
+		}
+
 		T* end()
+		{
+			return reinterpret_cast<T*>(getElement(count()));
+		}
+
+		const T* end() const
 		{
 			return reinterpret_cast<T*>(getElement(count()));
 		}

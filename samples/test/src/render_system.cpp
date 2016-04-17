@@ -1,6 +1,20 @@
 #include "../gen/cpp/systems/render_system.h"
 
-void RenderSystem::render(Halley::Painter& painter, MainFamily& e) const
+using namespace Halley;
+
+void RenderSystem::render(Halley::Painter& painter) const
 {
-	e.sprite->sprite.draw(painter);
+	Camera& cam = painter.getCurrentCamera();
+	Rect4i viewPort = painter.getViewPort();
+
+	Vector2f size = Vector2f(viewPort.getSize()) / cam.getZoom();
+	assert(cam.getAngle().getRadians() == 0); // Camera rotation not accounted by following line
+	Rect4f worldView(cam.getPosition() - size * 0.5f, size);
+
+	for (auto& e : mainFamily) {
+		auto& sprite = e.sprite->sprite;
+		if (sprite.isInView(worldView)) {
+			sprite.draw(painter);
+		}
+	}
 }

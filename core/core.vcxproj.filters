@@ -159,6 +159,9 @@
     <ClInclude Include="src\graphics\sprite\animation_player.h">
       <Filter>graphics\sprite</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics\sprite\sprite_painter.h">
+      <Filter>graphics\sprite</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
@@ -237,6 +240,9 @@
       <Filter>graphics\sprite</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\sprite\animation_player.cpp">
+      <Filter>graphics\sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\sprite\sprite_painter.cpp">
       <Filter>graphics\sprite</Filter>
     </ClCompile>
   </ItemGroup>

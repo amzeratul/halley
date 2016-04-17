@@ -72,7 +72,7 @@ system RenderSystem {
 	}
 
 	method = render
-	strategy = individual
+	strategy = default
 	access = pure
 	language = C++
 	subDivide = 1

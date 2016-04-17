@@ -6,6 +6,7 @@
 namespace Halley
 {
 	class Material;
+	class Camera;
 
 	class Painter
 	{
@@ -17,6 +18,9 @@ namespace Halley
 		void startRender();
 		void endRender();
 		void flush();
+
+		Rect4i getViewPort() const { return viewPort; }
+		Camera& getCurrentCamera() const { return *camera; }
 
 		virtual void clear(Colour colour) = 0;
 		virtual void setBlend(BlendType blend) = 0;
@@ -33,8 +37,11 @@ namespace Halley
 		
 	private:
 		void bind(RenderContext& context);
+
 		RenderContext* activeContext = nullptr;
 		Matrix4f projection;
+		Rect4i viewPort;
+		Camera* camera = nullptr;
 
 		size_t verticesPending = 0;
 		size_t bytesPending = 0;

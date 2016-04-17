@@ -101,7 +101,7 @@ Animation::Animation(ResourceLoader& loader)
 
 		if (root["directions"].IsDefined()) {
 			for (auto& directionNode : root["directions"]) {
-				String name = directionNode["name"].as<std::string>();
+				String name = directionNode["name"].as<std::string>("default");
 				String fileName = directionNode["fileName"].as<std::string>(name);
 				bool flip = directionNode["flip"].as<bool>(false);
 				size_t idx = directions.size();
@@ -113,34 +113,42 @@ Animation::Animation(ResourceLoader& loader)
 
 		for (auto& sequenceNode : root["sequences"]) {
 			AnimationSequence sequence;
-			sequence.name = sequenceNode["name"].as<std::string>();
-			sequence.fps = sequenceNode["fps"].as<float>();
+			sequence.name = sequenceNode["name"].as<std::string>("default");
+			sequence.fps = sequenceNode["fps"].as<float>(0.0f);
 			sequence.loop = sequenceNode["loop"].as<bool>(true);
-
+			sequence.noFlip = sequenceNode["noFlip"].as<bool>(false);
 			String fileName = sequenceNode["fileName"].as<std::string>();
-			for (auto& frameNode : sequenceNode["frames"]) {
-				String value = frameNode.as<std::string>();
-				std::vector<int> values;
-				if (value.isInteger()) {
-					values.push_back(value.toInteger());
-				} else if (value.contains("-")) {
-					auto split = value.split('-');
-					if (split.size() == 2 && split[0].isInteger() && split[1].isInteger()) {
-						int a = split[0].toInteger();
-						int b = split[1].toInteger();
-						int dir = a < b ? 1 : -1;
-						for (int i = a; i != b + dir; i += dir) {
-							values.push_back(i);
+
+			// Load frames
+			if (sequenceNode["frames"].IsDefined()) {
+				for (auto& frameNode : sequenceNode["frames"]) {
+					String value = frameNode.as<std::string>();
+					std::vector<int> values;
+					if (value.isInteger()) {
+						values.push_back(value.toInteger());
+					} else if (value.contains("-")) {
+						auto split = value.split('-');
+						if (split.size() == 2 && split[0].isInteger() && split[1].isInteger()) {
+							int a = split[0].toInteger();
+							int b = split[1].toInteger();
+							int dir = a < b ? 1 : -1;
+							for (int i = a; i != b + dir; i += dir) {
+								values.push_back(i);
+							}
+						} else {
+							throw Exception("Invalid frame token: " + value);
 						}
-					} else {
-						throw Exception("Invalid frame token: " + value);
+					}
+
+					for (int number : values) {
+						sequence.frames.emplace_back(AnimationFrame(number, fileName, *spriteSheet, directions));
 					}
 				}
+			}
 
-				for (int number : values) {
-					AnimationFrame frame(number, fileName, *spriteSheet, directions);
-					sequence.frames.emplace_back(frame);
-				}
+			// No frames listed, 
+			if (sequence.frames.size() == 0) {
+				sequence.frames.emplace_back(AnimationFrame(0, fileName, *spriteSheet, directions));
 			}
 
 			sequences.emplace_back(sequence);
