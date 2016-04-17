@@ -4,44 +4,63 @@
 
 using namespace Halley;
 
-void AnimationPlayer::setAnimation(std::shared_ptr<Animation> v)
+AnimationPlayer::AnimationPlayer(std::shared_ptr<Animation> animation, String sequence, String direction)
 {
-	animation = v;
-	setSequence("default");
-	setDirection("default");
+	setAnimation(animation, sequence, direction);
+}
+
+void AnimationPlayer::setAnimation(std::shared_ptr<Animation> v, String sequence, String direction)
+{
+	if (animation != v) {
+		animation = v;
+		curDir = nullptr;
+		curSeq = nullptr;
+	}
+
+	if (animation) {
+		setSequence(sequence);
+		setDirection(direction);
+	}
 }
 
 void AnimationPlayer::setSequence(String sequence)
 {
-	assert(animation);
-	curTime = 0;
-	curFrame = 0;
-	curSeq = &animation->getSequence(sequence);
-	
-	seqFPS = curSeq->getFPS();
-	seqLen = curSeq->numFrames();
+	if (!curSeq || curSeq->getName() != sequence) {
+		assert(animation);
+		curTime = 0;
+		curFrame = 0;
+		curSeq = &animation->getSequence(sequence);
 
-	dirty = true;
+		seqFPS = curSeq->getFPS();
+		seqLen = curSeq->numFrames();
+		seqTimeLen = seqLen / seqFPS;
+
+		dirty = true;
+	}
 }
 
 void AnimationPlayer::setDirection(String direction)
 {
-	assert(animation);
-	curDir = &animation->getDirection(direction);
-	dirty = true;
+	if (!curDir || curDir->getName() != direction) {
+		assert(animation);
+		curDir = &animation->getDirection(direction);
+		dirty = true;
+	}
 }
 
 void AnimationPlayer::update(Time time)
 {
 	if (animation) {
 		int prevFrame = curFrame;
-		curFrame = int(curTime * seqFPS) % seqLen;
+		curFrame = std::min(int(curTime * seqFPS), int(seqLen - 1));
+
 		dirty |= curFrame != prevFrame;
 		if (dirty) {
 			resolveSprite();
 			dirty = false;
 		}
-		curTime += time;
+		
+		curTime = ::fmod(curTime + time, seqTimeLen);
 	}
 }
 
@@ -50,6 +69,7 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 	if (animation) {
 		sprite.setMaterial(animation->getMaterial());
 		sprite.setSprite(*spriteData);
+		sprite.setFlip(curDir->shouldFlip());
 	}
 }
 

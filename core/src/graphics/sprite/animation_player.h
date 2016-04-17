@@ -9,7 +9,8 @@ namespace Halley
 	class AnimationPlayer
 	{
 	public:
-		void setAnimation(std::shared_ptr<Animation> animation);
+		explicit AnimationPlayer(std::shared_ptr<Animation> animation = std::shared_ptr<Animation>(), String sequence = "default", String direction = "default");
+		void setAnimation(std::shared_ptr<Animation> animation, String sequence = "default", String direction = "default");
 		void setSequence(String sequence);
 		void setDirection(String direction);
 
@@ -27,9 +28,10 @@ namespace Halley
 
 		float seqFPS;
 		size_t seqLen;
+		float seqTimeLen;
 
 		int curFrame;
-		float curTime;
+		Time curTime;
 		const AnimationSequence* curSeq;
 		const AnimationDirection* curDir;
 	};

@@ -25,6 +25,7 @@ namespace Halley
 		float getFPS() const { return fps; }
 		size_t numFrames() const { return frames.size(); }
 		const AnimationFrame& getFrame(size_t n) const { return frames[n]; }
+		String getName() const { return name; }
 
 	private:
 		std::vector<AnimationFrame> frames;
