@@ -105,7 +105,7 @@ Animation::Animation(ResourceLoader& loader)
 				String fileName = directionNode["fileName"].as<std::string>(name);
 				bool flip = directionNode["flip"].as<bool>(false);
 				size_t idx = directions.size();
-				directions.emplace_back(AnimationDirection(name, fileName, flip, idx));
+				directions.emplace_back(AnimationDirection(name, fileName, flip, int(idx)));
 			}
 		} else {
 			directions.emplace_back(AnimationDirection("default", "default", false, 0));
@@ -115,6 +115,7 @@ Animation::Animation(ResourceLoader& loader)
 			AnimationSequence sequence;
 			sequence.name = sequenceNode["name"].as<std::string>();
 			sequence.fps = sequenceNode["fps"].as<float>();
+			sequence.loop = sequenceNode["loop"].as<bool>(true);
 
 			String fileName = sequenceNode["fileName"].as<std::string>();
 			for (auto& frameNode : sequenceNode["frames"]) {

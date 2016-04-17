@@ -33,6 +33,7 @@ void AnimationPlayer::setSequence(String sequence)
 
 		seqFPS = curSeq->getFPS();
 		seqLen = curSeq->numFrames();
+		seqLooping = curSeq->isLooping();
 		seqTimeLen = seqLen / seqFPS;
 
 		dirty = true;
@@ -69,7 +70,16 @@ void AnimationPlayer::update(Time time)
 			dirty = false;
 		}
 		
-		curTime = ::fmod(curTime + time, seqTimeLen);
+		curTime += time;
+
+		if (curTime > seqTimeLen) {
+			// Reached end of sequence			
+			if (seqLooping) {
+				curTime = ::fmod(curTime, seqTimeLen);
+			} else {
+				curTime = seqTimeLen;
+			}
+		}
 	}
 }
 

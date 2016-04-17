@@ -27,9 +27,10 @@ namespace Halley
 
 		bool dirty;
 
+		bool seqLooping;
 		float seqFPS;
 		size_t seqLen;
-		float seqTimeLen;
+		Time seqTimeLen;
 
 		int curFrame;
 		Time curTime;

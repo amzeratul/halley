@@ -20,4 +20,5 @@ sequences:
     fps: 12
     fileName: die/%f:02%.png
     frames: [1-5]
+    loop: false
 ...
