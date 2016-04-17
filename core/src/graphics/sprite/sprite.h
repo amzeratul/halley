@@ -30,6 +30,8 @@ namespace Halley
 		void setMaterial(std::shared_ptr<Material> m) { material = m; }
 		Material& getMaterial() const { return *material; }
 
+		Vector2f getPosition() const;
+
 		void setPos(Vector2f pos);
 		void setRotation(Angle1f angle);
 		void setColour(Colour4f colour);

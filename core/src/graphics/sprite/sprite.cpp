@@ -53,6 +53,11 @@ bool Sprite::isInView(Rect4f v) const
 	return rect.intersects(v);
 }
 
+Vector2f Sprite::getPosition() const
+{
+	return vertices[0].pos;
+}
+
 void Sprite::setPos(Vector2f v)
 {
 	if (v != vertices[0].pos) {

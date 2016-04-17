@@ -19,6 +19,7 @@ component TimeComponent {
 component SpriteComponent {
 	members {
 		sprite : Halley::Sprite
+		layer : int
 	}
 }
 
