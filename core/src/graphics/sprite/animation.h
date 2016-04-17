@@ -60,6 +60,7 @@ namespace Halley
 		std::shared_ptr<Material> getMaterial() const { return material; }
 		const AnimationSequence& getSequence(String name) const;
 		const AnimationDirection& getDirection(String name) const;
+		const AnimationDirection& getDirection(int id) const { return directions[id]; }
 
 	private:
 		explicit Animation(ResourceLoader& loader);

@@ -3,21 +3,21 @@ name: Ella
 spriteSheet: "../sprites/ella.json"
 shader: "../shaders/sprite.yaml"
 directions:
-  - { name: front }
   - { name: back }
-  - { name: right, fileName: side }
-  - { name: left, fileName: side, flip: true }
+  - { name: right, fileName: side, flip: true }
+  - { name: front }
+  - { name: left, fileName: side }
 sequences:
   - name: idle
     fps: 12
     fileName: idle_%dir%/%f:02%.png
-    frames: [1, 2, 3]
+    frames: [1-3]
   - name: run
     fps: 12
     fileName: run_%dir%/%f:02%.png
-    frames: [1, 2, 3, 4]
+    frames: [1-4]
   - name: die
     fps: 12
     fileName: die/%f:02%.png
-    frames: [1, 2, 3, 4, 5]
+    frames: [1-5]
 ...

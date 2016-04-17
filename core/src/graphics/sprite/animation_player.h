@@ -12,6 +12,7 @@ namespace Halley
 		explicit AnimationPlayer(std::shared_ptr<Animation> animation = std::shared_ptr<Animation>(), String sequence = "default", String direction = "default");
 		void setAnimation(std::shared_ptr<Animation> animation, String sequence = "default", String direction = "default");
 		void setSequence(String sequence);
+		void setDirection(int direction);
 		void setDirection(String direction);
 
 		void update(Time time);

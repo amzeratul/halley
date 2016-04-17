@@ -56,7 +56,7 @@ system SpriteAnimationSystem {
 		SpriteComponent
 		SpriteAnimationComponent
 		const PositionComponent
-		const TimeComponent
+		const VelocityComponent
 	}
 
 	strategy = individual

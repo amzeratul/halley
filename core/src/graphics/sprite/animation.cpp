@@ -99,12 +99,16 @@ Animation::Animation(ResourceLoader& loader)
 			(*material)["tex0"] = spriteSheet->getTexture();
 		}
 
-		for (auto& directionNode : root["directions"]) {
-			String name = directionNode["name"].as<std::string>();
-			String fileName = directionNode["fileName"].as<std::string>(name);
-			bool flip = directionNode["flip"].as<bool>(false);
-			size_t idx = directions.size();
-			directions.emplace_back(AnimationDirection(name, fileName, flip, idx));
+		if (root["directions"].IsDefined()) {
+			for (auto& directionNode : root["directions"]) {
+				String name = directionNode["name"].as<std::string>();
+				String fileName = directionNode["fileName"].as<std::string>(name);
+				bool flip = directionNode["flip"].as<bool>(false);
+				size_t idx = directions.size();
+				directions.emplace_back(AnimationDirection(name, fileName, flip, idx));
+			}
+		} else {
+			directions.emplace_back(AnimationDirection("default", "default", false, 0));
 		}
 
 		for (auto& sequenceNode : root["sequences"]) {
@@ -114,9 +118,28 @@ Animation::Animation(ResourceLoader& loader)
 
 			String fileName = sequenceNode["fileName"].as<std::string>();
 			for (auto& frameNode : sequenceNode["frames"]) {
-				int number = frameNode.as<int>();
-				AnimationFrame frame(number, fileName, *spriteSheet, directions);
-				sequence.frames.emplace_back(frame);
+				String value = frameNode.as<std::string>();
+				std::vector<int> values;
+				if (value.isInteger()) {
+					values.push_back(value.toInteger());
+				} else if (value.contains("-")) {
+					auto split = value.split('-');
+					if (split.size() == 2 && split[0].isInteger() && split[1].isInteger()) {
+						int a = split[0].toInteger();
+						int b = split[1].toInteger();
+						int dir = a < b ? 1 : -1;
+						for (int i = a; i != b + dir; i += dir) {
+							values.push_back(i);
+						}
+					} else {
+						throw Exception("Invalid frame token: " + value);
+					}
+				}
+
+				for (int number : values) {
+					AnimationFrame frame(number, fileName, *spriteSheet, directions);
+					sequence.frames.emplace_back(frame);
+				}
 			}
 
 			sequences.emplace_back(sequence);

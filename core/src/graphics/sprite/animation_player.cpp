@@ -39,6 +39,15 @@ void AnimationPlayer::setSequence(String sequence)
 	}
 }
 
+void AnimationPlayer::setDirection(int direction)
+{
+	if (!curDir || curDir->getId() != direction) {
+		assert(animation);
+		curDir = &animation->getDirection(direction);
+		dirty = true;
+	}
+}
+
 void AnimationPlayer::setDirection(String direction)
 {
 	if (!curDir || curDir->getName() != direction) {
