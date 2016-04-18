@@ -1,28 +1,28 @@
 ---
-name: Ella
+name: "Ella"
 spriteSheet: "../sprites/ella.json"
 shader: "../shaders/sprite.yaml"
 directions:
-  - { name: back }
-  - { name: right, fileName: side, flip: true }
-  - { name: front }
-  - { name: left, fileName: side }
+  - { name: "back" }
+  - { name: "right", fileName: "side", flip: true }
+  - { name: "front" }
+  - { name: "left", fileName: "side" }
 sequences:
-  - name: idle
+  - name: "idle"
     fps: 12
-    fileName: idle_%dir%/%f:02%.png
+    fileName: "idle_%dir%/%f:02%.png"
     frames: [1-3]
-  - name: run
+  - name: "run"
     fps: 12
-    fileName: run_%dir%/%f:02%.png
+    fileName: "run_%dir%/%f:02%.png"
     frames: [1-4]
-  - name: die
+  - name: "die"
     fps: 12
-    fileName: die/%f:02%.png
+    fileName: "die/%f:02%.png"
     frames: [1-5]
     loop: false
     noFlip: true
-  - name: dead
-    fileName: die/05.png
+  - name: "dead"
+    fileName: "die/05.png"
     noFlip: true
 ...
