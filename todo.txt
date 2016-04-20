@@ -47,7 +47,7 @@ codegen
 - codegen Haskell
 
 tools/editor
-- decide how this is going to work (overlay? separate tool?)
+- decide how this is going to work (overlay? separate tool? do we allow remote connection?)
 - asset/prefab editor
 - scene editor?
 - animation editor
