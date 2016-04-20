@@ -14,6 +14,7 @@ std::unique_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	descriptor.w = img->getWidth();
 	descriptor.h = img->getHeight();
 	descriptor.pixelData = img->getPixels();
+	descriptor.useFiltering = true;
 
 	return loader.getAPI().video->createTexture(descriptor);
 }

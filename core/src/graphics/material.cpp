@@ -73,7 +73,19 @@ void Material::loadPass(YAML::Node node, std::function<String(String)> retriever
 	load("geometry", [&](String src) { shader->addGeometrySource(src); });
 	shader->compile();
 
-	passes.emplace_back(MaterialPass(std::move(shader), BlendType::AlphaPremultiplied));	
+	String blend = node["blend"].as<std::string>("Opaque");
+	BlendType blendType;
+	if (blend == "Opaque") {
+		blendType = BlendType::Opaque;
+	} else if (blend == "Alpha") {
+		blendType = BlendType::Alpha;
+	} else if (blend == "AlphaPremultiplied") {
+		blendType = BlendType::AlphaPremultiplied;
+	} else {
+		throw Exception("Unknown blend type: " + blend);
+	}
+
+	passes.emplace_back(MaterialPass(std::move(shader), blendType));
 }
 
 void Material::loadUniforms(YAML::Node topNode)
