@@ -1,9 +1,13 @@
 core
-- hot reloading
 - child stages
-- resource paths and filenames?
 
-core/graphics (?)
+core/resources
+* metafiles? (need to figure out how to specify texture options)
+- hot reloading
+- resource paths and filenames?
+- auto-atlasing
+
+core/graphics
 * rewrite text rendering system to use pre-baked distance fields
 * separate materials and material bindings
 - optimise SpritePainter
@@ -48,6 +52,7 @@ codegen
 
 tools/editor
 - decide how this is going to work (overlay? separate tool? do we allow remote connection?)
+- distance field generator
 - asset/prefab editor
 - scene editor?
 - animation editor

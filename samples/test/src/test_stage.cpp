@@ -57,6 +57,7 @@ void TestStage::onRender(RenderContext& context) const
 	sprite.setPos(Vector2f(640, 360));
 	sprite.setSize(Vector2f(1024, 1024));
 	sprite.setTexRect(Rect4f(0, 0, 1, 1));
+	sprite.setColour(Colour4f(0.6f, 0.1f, 0.1f, 1));
 
 	context.bind([&] (Painter& painter)
 	{

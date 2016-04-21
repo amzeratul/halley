@@ -10,9 +10,9 @@ out vec4 outCol;
 
 void main() {
 	float a = texture(tex0, v_texCoord0.xy).a;
-	float edge = smoothstep(0.27, 0.33, a);
+	float edge = smoothstep(0.27, 0.33, a) * v_color.a;
 	float outline = 1.0 - smoothstep(0.47, 0.53, a);
-	vec3 colFill = vec3(1, 1, 1);
+	vec3 colFill = v_color.rgb;
 	vec3 colOutline = vec3(0, 0, 0);
 	outCol = vec4(mix(colFill, colOutline, outline), edge);
 }
