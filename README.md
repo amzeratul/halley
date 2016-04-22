@@ -24,13 +24,14 @@ Halley is divided in a few sub-projects:
 * **codegen**: Generates code for the entity system (written in Haskell)
 * **runner**: Provides an entry point for execution and dynamic reloading. Highly experimental.
 * **utils**: Utilities library
+* **tools**: Editor tools to generate files and assets
+* **cmd**: Command-line interface to tools
 * **samples/test**: Sample game
 
 ## Installation
 
 ### Tools
 * Visual C++ 14 Update 2 (Visual Studio 2015)
-* Haskell Platform 7.10.3 (to build codegen)
 * CMake 3.x
 
 ### Dependencies
@@ -41,7 +42,6 @@ Halley is divided in a few sub-projects:
 
 ### Set up
 * Make sure that all dependencies are installed and accessible to the compiler
-* Compile codegen by running "cabal build" on its folder. You may need to download and install dependencies.
 * Add [repo]/include and [repo]/lib/x64 to your global include and library lookup paths, respectively.
 * Open halley.sln [Soon CMake will replace this]
 * Compile!
