@@ -13,7 +13,7 @@ namespace Halley
 		static std::vector<std::string> getToolNames();
 		static std::unique_ptr<CommandLineTool> getTool(std::string name);
 
-		void runRaw(int argc, char** argv);
-		virtual void run(std::vector<std::string> args) = 0;
+		int runRaw(int argc, char** argv);
+		virtual int run(std::vector<std::string> args) = 0;
 	};
 }

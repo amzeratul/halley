@@ -1,9 +1,16 @@
 #include "codegen_tool.h"
+#include "codegen.h"
 #include <iostream>
 
 using namespace Halley;
 
-void CodegenTool::run(std::vector<std::string> args)
+int CodegenTool::run(std::vector<std::string> args)
 {
-	std::cout << "Codegen!" << std::endl;
+	if (args.size() == 2) {
+		Codegen::processFolder(args[0], args[1]);
+		return 0;
+	} else {
+		std::cout << "Usage: halley codegen srcDir dstDir" << std::endl;
+		return 1;
+	}
 }

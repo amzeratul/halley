@@ -15,6 +15,10 @@
     <ClInclude Include="src\tool\cli_tool.h">
       <Filter>tool</Filter>
     </ClInclude>
+    <ClInclude Include="src\codegen\codegen.h">
+      <Filter>codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\prec.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\codegen\codegen_tool.cpp">
@@ -23,5 +27,9 @@
     <ClCompile Include="src\tool\cli_tool.cpp">
       <Filter>tool</Filter>
     </ClCompile>
+    <ClCompile Include="src\codegen\codegen.cpp">
+      <Filter>codegen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\prec.cpp" />
   </ItemGroup>
 </Project>

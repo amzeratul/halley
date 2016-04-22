@@ -18,11 +18,11 @@ std::unique_ptr<CommandLineTool> CommandLineTool::getTool(std::string name)
 	}
 }
 
-void CommandLineTool::runRaw(int argc, char** argv)
+int CommandLineTool::runRaw(int argc, char** argv)
 {
 	std::vector<std::string> args(argc);
 	for (int i = 0; i < argc; i++) {
 		args[i] = argv[i];
 	}
-	run(args);
+	return run(args);
 }

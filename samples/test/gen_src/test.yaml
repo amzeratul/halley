@@ -2,24 +2,24 @@
 component: Position
 members:
   - position: 'Halley::Vector2f'
-...
+---
 component: Velocity
 members:
   - velocity: 'Halley::Vector2f'
-...
+---
 component: Time
 members:
   - elapsed: float
-...
+---
 component: Sprite
 members:
   - sprite: 'Halley::Sprite'
   - layer: int
-...
+---
 component: SpriteAnimation
 members:
   - player: 'Halley::AnimationPlayer'
-...
+---
 system: Time
 families:
   - main: ['write Time']
@@ -27,7 +27,7 @@ strategy: individual
 access: pure
 language: C++
 subDivide: 1
-...
+---
 system: Movement
 families:
   - main: ['write Position', 'write Velocity']
@@ -35,7 +35,7 @@ strategy: individual
 access: pure
 language: C++
 subDivide: 1
-...
+---
 system: SpriteAnimation
 families:
   - main: ['write Sprite', 'write SpriteAnimation', 'read Position', 'read Velocity']
@@ -43,7 +43,7 @@ strategy: individual
 access: pure
 language: C++
 subDivide: 1
-...
+---
 system: Render
 families:
   - main: ['read Position', 'write Sprite']

@@ -12,12 +12,14 @@ int main(int argc, char** argv)
 		for (auto& n : names) {
 			std::cout << "- " << n << std::endl;
 		}
+		return 1;
 	} else {
 		try {
 			auto tool = Halley::CommandLineTool::getTool(argv[1]);
-			tool->runRaw(argc - 2, argv + 2);
+			return tool->runRaw(argc - 2, argv + 2);
 		} catch (...) {
 			std::cout << "Unknown tool: " << argv[1] << std::endl;
+			return 1;
 		}
 	}
 }
