@@ -64,7 +64,7 @@ void TestStage::onRender(RenderContext& context) const
 		painter.clear(Colour(0.2f, 0.2f, 0.3f));
 		world->render(painter);
 
-		sprite.draw(painter);
+		//sprite.draw(painter);
 	});
 }
 

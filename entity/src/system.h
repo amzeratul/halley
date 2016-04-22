@@ -23,6 +23,8 @@ namespace Halley {
 		virtual void updateBase(Time) {}
 		virtual void renderBase(Painter&) {}
 
+		World& getWorld() const { return *world; }
+
 		template <typename T, typename M, typename U, typename V>
 		static void invokeIndividual(T* obj, M method, U& p, V& fam)
 		{

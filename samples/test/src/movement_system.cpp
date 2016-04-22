@@ -19,4 +19,8 @@ void MovementSystem::update(Halley::Time time, MainFamily& e)
 	else if (pos.y > 720) {
 		vel.y = -abs(vel.y);
 	}
+
+	if (Halley::Random::getGlobal().getFloat(0.0f, 1.0f) < 0.001f) {
+		getWorld().destroyEntity(e.entityId);
+	}
 }
