@@ -1,12 +1,10 @@
 #include <iostream>
-#include "../../tools/src/tool/clitool.h"
 #include <vector>
+#include "../../tools/src/tool/cli_tool.h"
 
 int main(int argc, char** argv)
 {
 	std::vector<std::string> names = Halley::CommandLineTool::getToolNames();
-
-	std::cout << "Halley Commandline Tools" << std::endl;
 
 	if (argc < 2) {
 		std::cout << "Usage: halley [tool]" << std::endl;

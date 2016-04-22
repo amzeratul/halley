@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../tool/clitool.h"
+#include "../tool/cli_tool.h"
 
 namespace Halley
 {

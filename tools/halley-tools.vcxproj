@@ -19,12 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\codegen\codegen.h" />
-    <ClInclude Include="src\tool\clitool.h" />
+    <ClInclude Include="src\codegen\codegen_tool.h" />
+    <ClInclude Include="src\tool\cli_tool.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\codegen\codegen.cpp" />
-    <ClCompile Include="src\tool\clitool.cpp" />
+    <ClCompile Include="src\codegen\codegen_tool.cpp" />
+    <ClCompile Include="src\tool\cli_tool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\utils\utils.vcxproj">

@@ -9,18 +9,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\codegen\codegen.h">
+    <ClInclude Include="src\codegen\codegen_tool.h">
       <Filter>codegen</Filter>
     </ClInclude>
-    <ClInclude Include="src\tool\clitool.h">
+    <ClInclude Include="src\tool\cli_tool.h">
       <Filter>tool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\codegen\codegen.cpp">
+    <ClCompile Include="src\codegen\codegen_tool.cpp">
       <Filter>codegen</Filter>
     </ClCompile>
-    <ClCompile Include="src\tool\clitool.cpp">
+    <ClCompile Include="src\tool\cli_tool.cpp">
       <Filter>tool</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,5 +1,5 @@
-#include "clitool.h"
-#include "../codegen/codegen.h"
+#include "cli_tool.h"
+#include "../codegen/codegen_tool.h"
 #include <exception>
 
 using namespace Halley;
