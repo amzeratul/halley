@@ -19,6 +19,12 @@
       <Filter>codegen</Filter>
     </ClInclude>
     <ClInclude Include="src\prec.h" />
+    <ClInclude Include="src\codegen\component_schema.h">
+      <Filter>codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\codegen\system_schema.h">
+      <Filter>codegen</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\codegen\codegen_tool.cpp">
@@ -31,5 +37,11 @@
       <Filter>codegen</Filter>
     </ClCompile>
     <ClCompile Include="src\prec.cpp" />
+    <ClCompile Include="src\codegen\system_schema.cpp">
+      <Filter>codegen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\codegen\component_schema.cpp">
+      <Filter>codegen</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
