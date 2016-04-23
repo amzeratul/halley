@@ -13,3 +13,5 @@ void SpriteAnimationSystem::update(Halley::Time time, MainFamily& e)
 	player.update(time);
 	player.updateSprite(sprite);
 }
+
+REGISTER_SYSTEM(SpriteAnimationSystem)

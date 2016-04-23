@@ -44,8 +44,6 @@ codegen
 - system base class
 - figure out how to import custom types in components
 - component initialization?
-- switch to yaml-based format for component/system/message specs?
-- rewrite in C++?
 - codegen parallel systems
 - codegen Lua
 - codegen Haskell

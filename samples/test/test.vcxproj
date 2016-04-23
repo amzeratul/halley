@@ -144,6 +144,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="gen\cpp\registry.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\movement_system.cpp" />
     <ClCompile Include="src\prec.cpp">
@@ -162,6 +163,7 @@
     <ClInclude Include="gen\cpp\components\sprite_component.h" />
     <ClInclude Include="gen\cpp\components\time_component.h" />
     <ClInclude Include="gen\cpp\components\velocity_component.h" />
+    <ClInclude Include="gen\cpp\registry.h" />
     <ClInclude Include="gen\cpp\systems\movement_system.h" />
     <ClInclude Include="gen\cpp\systems\render_system.h" />
     <ClInclude Include="gen\cpp\systems\sprite_animation_system.h" />

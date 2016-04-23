@@ -154,15 +154,21 @@ void Codegen::generateCode(String directory)
 
 	for (auto& gen : gens) {
 		String genDir = directory + "/" + gen->getDirectory();
+		std::vector<ComponentSchema> comps;
+		std::vector<SystemSchema> syss;
 
 		for (auto& comp : components) {
 			writeFiles(genDir, gen->generateComponent(comp.second));
+			comps.push_back(comp.second);
 		}
 		for (auto& sys : systems) {
 			if (sys.second.language == gen->getLanguage()) {
 				writeFiles(genDir, gen->generateSystem(sys.second));
 			}
+			syss.push_back(sys.second);
 		}
+
+		writeFiles(genDir, gen->generateRegistry(comps, syss));
 	}
 }
 

@@ -1,18 +1,20 @@
 #include "test_stage.h"
-#include <gen/cpp/systems/movement_system.h>
-#include <gen/cpp/systems/sprite_animation_system.h>
-#include <gen/cpp/systems/time_system.h>
-#include <gen/cpp/systems/render_system.h>
+#include "../gen/cpp/registry.h"
+#include "../gen/cpp/components/position_component.h"
+#include "../gen/cpp/components/sprite_animation_component.h"
+#include "../gen/cpp/components/sprite_component.h"
+#include "../gen/cpp/components/time_component.h"
+#include "../gen/cpp/components/velocity_component.h"
 
 using namespace Halley;
 
 void TestStage::init()
 {
-	world = std::make_unique<Halley::World>(&getAPI());
-	world->addSystem(std::make_unique<TimeSystem>(), TimeLine::FixedUpdate);
-	world->addSystem(std::make_unique<MovementSystem>(), TimeLine::FixedUpdate);
-	world->addSystem(std::make_unique<SpriteAnimationSystem>(), TimeLine::FixedUpdate);
-	world->addSystem(std::make_unique<RenderSystem>(), TimeLine::Render);
+	world = std::make_unique<World>(&getAPI());
+	world->addSystem(createSystem("TimeSystem"), TimeLine::FixedUpdate);
+	world->addSystem(createSystem("MovementSystem"), TimeLine::FixedUpdate);
+	world->addSystem(createSystem("SpriteAnimationSystem"), TimeLine::FixedUpdate);
+	world->addSystem(createSystem("RenderSystem"), TimeLine::Render);
 
 	target = getAPI().video->createRenderTarget();
 	TextureDescriptor desc;

@@ -23,3 +23,5 @@ void RenderSystem::render(Halley::Painter& painter) const
 
 	spritePainter.draw(painter);
 }
+
+REGISTER_SYSTEM(RenderSystem)

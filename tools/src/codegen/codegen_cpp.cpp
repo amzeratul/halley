@@ -52,6 +52,59 @@ CodeGenResult CodegenCPP::generateSystem(SystemSchema system)
 	return result;
 }
 
+CodeGenResult CodegenCPP::generateRegistry(const std::vector<ComponentSchema>& components, const std::vector<SystemSchema>& systems)
+{
+	std::vector<String> registryCpp {
+		"#include <halley.hpp>",
+		"using namespace Halley;",
+		"",
+		"// System factory functions"
+	};
+
+	for (auto& sys: systems) {
+		registryCpp.push_back("System* halleyCreate" + sys.name + "System();");
+	}
+
+	registryCpp.insert(registryCpp.end(), {
+		"",
+		"",
+		"using SystemFactoryPtr = System* (*)();",
+		"using SystemFactoryMap = std::map<String, SystemFactoryPtr>;",
+		"",
+		"static SystemFactoryMap makeSystemFactories() {",
+		"	SystemFactoryMap result;"
+	});
+
+	for (auto& sys : systems) {
+		registryCpp.push_back("	result[\"" + sys.name + "System\"] = &halleyCreate" + sys.name + "System;");
+	}
+
+	registryCpp.insert(registryCpp.end(), { 
+		"	return result;",
+		"}",
+		"",
+		"namespace Halley {",
+		"	std::unique_ptr<System> createSystem(String name) {",
+		"		static SystemFactoryMap factories = makeSystemFactories();",
+		"		return std::unique_ptr<System>(factories.at(name)());",
+		"	}",
+		"}"
+	});
+
+	std::vector<String> registryH{
+		"#pragma once",
+		"",
+		"namespace Halley {",
+		"	std::unique_ptr<System> createSystem(String name);",
+		"}"
+	};
+
+	CodeGenResult result;
+	result.emplace_back(CodeGenFile("registry.cpp", registryCpp));
+	result.emplace_back(CodeGenFile("registry.h", registryH));
+	return result;
+}
+
 std::vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 {
 	String className = component.name + "Component";

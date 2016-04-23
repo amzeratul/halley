@@ -24,3 +24,5 @@ void MovementSystem::update(Halley::Time time, MainFamily& e)
 		getWorld().destroyEntity(e.entityId);
 	}
 }
+
+REGISTER_SYSTEM(MovementSystem)

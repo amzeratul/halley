@@ -30,5 +30,7 @@ namespace Halley
 
 		virtual CodeGenResult generateComponent(ComponentSchema component) = 0;
 		virtual CodeGenResult generateSystem(SystemSchema system) = 0;
+
+		virtual CodeGenResult generateRegistry(const std::vector<ComponentSchema>& components, const std::vector<SystemSchema>& systems) = 0;
 	};
 }

@@ -42,6 +42,9 @@
     <ClCompile Include="src\time_system.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="gen\cpp\registry.cpp">
+      <Filter>gen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\prec.h">
@@ -76,6 +79,9 @@
     </ClInclude>
     <ClInclude Include="gen\cpp\components\sprite_animation_component.h">
       <Filter>gen\components</Filter>
+    </ClInclude>
+    <ClInclude Include="gen\cpp\registry.h">
+      <Filter>gen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
