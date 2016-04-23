@@ -46,10 +46,32 @@ void Codegen::loadSources(String directory)
 void Codegen::validate()
 {
 	for (auto& sys : systems) {
+		bool hasMain = false;
+		std::set<String> famNames;
+
 		for (auto& fam : sys.second.families) {
+			if (fam.name == "main") {
+				hasMain = true;
+			}
+			if (famNames.find(fam.name) != famNames.end()) {
+				throw Exception("System " + sys.second.name + " already has a family named " + fam.name);
+			}
+			famNames.emplace(fam.name);
+
 			for (auto& comp : fam.components) {
 				if (components.find(comp.name) == components.end()) {
 					throw Exception("Unknown component \"" + comp.name + "\" in family \"" + fam.name + "\" of system \"" + sys.second.name + "\".");
+				}
+			}
+		}
+
+		if (sys.second.strategy == SystemStrategy::Individual || sys.second.strategy == SystemStrategy::Parallel) {
+			if (!hasMain) {
+				throw Exception("System " + sys.second.name + " needs to have a main family due to its strategy.");
+			}
+			if (sys.second.strategy == SystemStrategy::Parallel) {
+				if (sys.second.families.size() != 1) {
+					throw Exception("System " + sys.second.name + " can only have one family due to its strategy.");
 				}
 			}
 		}

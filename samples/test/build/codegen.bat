@@ -1,1 +1,1 @@
-halley-codegen gen_src gen
+halley-cmd codegen gen_src gen

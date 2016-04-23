@@ -15,6 +15,7 @@ ComponentSchema::ComponentSchema(YAML::Node node)
 
 			member.name = m->first.as<std::string>();
 			member.type = m->second.as<std::string>();
+			member.isConst = false;
 
 			members.push_back(member);
 		}
