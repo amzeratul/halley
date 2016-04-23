@@ -22,6 +22,7 @@ namespace Halley
 		void loadSources(String directory);
 		void validate();
 		void process();
+		bool writeFile(String path, const char* data, size_t dataSize);
 		void writeFiles(String directory, const CodeGenResult& files);
 		void generateCode(String directory);
 

@@ -1,5 +1,7 @@
 #include <experimental/filesystem>
 #include <yaml-cpp/yaml.h>
+#include <fstream>
+#include <sstream>
 #include "codegen.h"
 #include "component_schema.h"
 #include "system_schema.h"
@@ -62,9 +64,65 @@ void Codegen::process()
 	}
 }
 
+bool Codegen::writeFile(String dstPath, const char* data, size_t dataSize)
+{
+	using namespace std::experimental::filesystem;
+	path filePath(dstPath.cppStr());
+	if (exists(filePath) && file_size(filePath) == dataSize) {
+		// Size matches, check if contents are identical
+		std::ifstream in(dstPath, std::ofstream::in | std::ofstream::binary);
+		std::vector<char> buffer(dataSize);
+		in.read(&buffer[0], dataSize);
+		in.close();
+
+		bool identical = true;
+		for (size_t i = 0; i < dataSize; i++) {
+			if (buffer[i] != data[i]) {
+				identical = false;
+				break;
+			}
+		}
+
+		if (identical) {
+			return false;
+		}
+	}
+
+	// Write file
+	std::ofstream out(dstPath, std::ofstream::out | std::ofstream::binary);
+	out.write(data, dataSize);
+	out.close();
+
+	return true;
+}
+
 void Codegen::writeFiles(String directory, const CodeGenResult& files)
 {
-	// TODO
+	using namespace std::experimental::filesystem;
+
+	path dir(directory.cppStr());
+	if (!exists(dir)) {
+		create_directories(dir);
+		std::cout << "Created directory " << dir << std::endl;
+	}
+
+	for (auto& f : files) {
+		path filePath = dir;
+		filePath.append(f.fileName.cppStr());
+		std::stringstream ss;
+		for (auto& line: f.fileContents) {
+			ss << line;
+			ss << "\n";
+		}
+		auto finalData = ss.str();
+
+		bool wrote = writeFile(filePath.string(), &finalData[0], finalData.size());
+		if (wrote) {
+			std::cout << "* Written " << filePath << std::endl;
+		} else {
+			std::cout << "  Skipped " << filePath << std::endl;
+		}
+	}
 }
 
 void Codegen::generateCode(String directory)
@@ -73,12 +131,14 @@ void Codegen::generateCode(String directory)
 	gens.emplace_back(std::make_unique<CodegenCPP>());
 
 	for (auto& gen : gens) {
+		String genDir = directory + "/" + gen->getDirectory();
+
 		for (auto& comp : components) {
-			writeFiles(directory, gen->generateComponent(comp.second));
+			writeFiles(genDir, gen->generateComponent(comp.second));
 		}
 		for (auto& sys : systems) {
 			if (sys.second.language == gen->getLanguage()) {
-				writeFiles(directory, gen->generateSystem(sys.second));
+				writeFiles(genDir, gen->generateSystem(sys.second));
 			}
 		}
 	}
