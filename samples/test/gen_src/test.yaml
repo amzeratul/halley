@@ -23,33 +23,19 @@ members:
 system: Time
 families:
   - main: ['write Time']
-strategy: individual
-access: pure
-language: C++
-subDivide: 1
 ---
 system: Movement
 families:
   - main: ['write Position', 'write Velocity']
-strategy: individual
-access: pure
-language: C++
-subDivide: 1
+access: ['world']
 ---
 system: SpriteAnimation
 families:
   - main: ['write Sprite', 'write SpriteAnimation', 'read Position', 'read Velocity']
-strategy: individual
-access: pure
-language: C++
-subDivide: 1
 ---
 system: Render
 families:
   - main: ['read Position', 'write Sprite']
 method: render
-strategy: default
-access: pure
-language: C++
-subDivide: 1
+strategy: global
 ...

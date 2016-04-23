@@ -14,12 +14,18 @@ int main(int argc, char** argv)
 		}
 		return 1;
 	} else {
+		std::unique_ptr<Halley::CommandLineTool> tool;
 		try {
-			auto tool = Halley::CommandLineTool::getTool(argv[1]);
-			return tool->runRaw(argc - 2, argv + 2);
+			tool = Halley::CommandLineTool::getTool(argv[1]);
 		} catch (...) {
 			std::cout << "Unknown tool: " << argv[1] << std::endl;
 			return 1;
+		}
+
+		try {
+			return tool->runRaw(argc - 2, argv + 2);
+		} catch (std::exception& e) {
+			std::cout << "Exception: " << e.what() << std::endl;
 		}
 	}
 }
