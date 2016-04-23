@@ -2,61 +2,62 @@ core
 - child stages
 
 core/resources
-* metafiles? (need to figure out how to specify texture options)
-- hot reloading
-- resource paths and filenames?
-- auto-atlasing
+* metafiles? [RESEARCH]
+* resource paths [RESEARCH]
+- hot reloading [RESEARCH]
 
 core/graphics
 * rewrite text rendering system to use pre-baked distance fields
-* separate materials and material bindings
+* separate materials and material bindings [RESEARCH]
 - optimise SpritePainter
 - render graph [from old Halley]
-- sliced sprites
+- sliced sprites [RESEARCH]
 - fix threaded load (TODOs in core_runner.cpp)
 
 opengl
-- ?
+- instanced rendering?
 
 input
 * bring library into engine
+- input context system [RESEARCH]
 
 audio
 * bring library into engine
-* figure out which backend to use (OpenAL still?)
+* figure out which backend to use (OpenAL still?) [RESEARCH]
 
 entity
-* load from YAML files
-* query other entities
-* messaging system
+* query other entities [RESEARCH]
+* messaging system [RESEARCH]
+- load prefabs
 - staggered systems
 - parallel systems
 - better timelines
 - Lua systems
-- Haskell systems
-- defragment/optimize memory
-- universal hierarchical transforms? :(
+- defragment/optimize memory? [RESEARCH]
+- universal hierarchical transforms? [RESEARCH]
 - onAddEntity/onRemoveEntity on systems
 
 codegen
-* registry
-* messages?
-- system base class
-- figure out how to import custom types in components
-- component initialization?
+* components registry [RESEARCH]
+* messages? [RESEARCH]
+- system base classes [RESEARCH]
+- import custom types in components [RESEARCH]
 - codegen parallel systems
 - codegen Lua
-- codegen Haskell
 
-tools/editor
-- decide how this is going to work (overlay? separate tool? do we allow remote connection?)
-- distance field generator
+cli tools
+* distance field generator
+- packer
+- atlas generator?
+
+editor
+- decide how this is going to work (overlay? separate tool? do we allow remote connection?) [RESEARCH]
 - asset/prefab editor
-- scene editor?
+- scene editor? [RESEARCH]
 - animation editor
 - system/component/message editor
 - render graph editor
-- state machine editor?
+- state machine editor? [RESEARCH]
 
 utils
 - collision detection & triggers
@@ -67,19 +68,19 @@ samples
 - make a minimal "template" sample
 
 CMake
-- lists for all libraries
-- boost/SDL dependencies
+- lists for all libraries [RESEARCH]
+- boost/SDL dependencies [RESEARCH]
 - clean up
 
 platforms
 * Mac
 - Linux
-- Android?
-- iOS?
 - PS4?
 - XBox One?
+- Android?
+- iOS?
 
-directx?
+directx 11/12?
 - future support?
 
 vulkan?
