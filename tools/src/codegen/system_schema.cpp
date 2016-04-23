@@ -26,6 +26,8 @@ SystemSchema::SystemSchema(YAML::Node node)
 
 					family.components.push_back(component);
 				}
+
+				families.push_back(family);
 			}
 		}
 	}
@@ -53,4 +55,6 @@ SystemSchema::SystemSchema(YAML::Node node)
 	smearing = node["smearing"].as<int>(1);
 
 	// TODO: access
+
+	// TODO: language
 }

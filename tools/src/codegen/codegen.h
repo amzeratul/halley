@@ -2,6 +2,7 @@
 
 #include <experimental/filesystem>
 #include <map>
+#include "icode_generator.h"
 
 namespace YAML
 {
@@ -13,20 +14,16 @@ namespace Halley
 	class ComponentSchema;
 	class SystemSchema;
 
-	enum class CodegenLanguage
-	{
-		CPlusPlus,
-		Lua
-	};
-
 	class Codegen
 	{
 	public:
 		static void run(String inDir, String outDir);
 
 		void loadSources(String directory);
+		void validate();
 		void process();
-		void generateCode(String directory, CodegenLanguage language);
+		void writeFiles(String directory, const CodeGenResult& files);
+		void generateCode(String directory);
 
 	private:
 		void addSource(std::experimental::filesystem::path path);

@@ -20,14 +20,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\codegen\codegen.h" />
+    <ClInclude Include="src\codegen\codegen_cpp.h" />
     <ClInclude Include="src\codegen\codegen_tool.h" />
     <ClInclude Include="src\codegen\component_schema.h" />
+    <ClInclude Include="src\codegen\icode_generator.h" />
     <ClInclude Include="src\codegen\system_schema.h" />
     <ClInclude Include="src\prec.h" />
     <ClInclude Include="src\tool\cli_tool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\codegen\codegen.cpp" />
+    <ClCompile Include="src\codegen\codegen_cpp.cpp" />
     <ClCompile Include="src\codegen\codegen_tool.cpp" />
     <ClCompile Include="src\codegen\component_schema.cpp" />
     <ClCompile Include="src\codegen\system_schema.cpp" />

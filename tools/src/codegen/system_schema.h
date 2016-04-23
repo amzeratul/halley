@@ -41,6 +41,12 @@ namespace Halley
 		std::vector<ComponentReferenceSchema> components;
 	};
 
+	enum class CodegenLanguage
+	{
+		CPlusPlus,
+		Lua
+	};
+
 	class SystemSchema
 	{
 	public:
@@ -51,6 +57,7 @@ namespace Halley
 		SystemStrategy strategy = SystemStrategy::Individual;
 		SystemAccess access = SystemAccess::Pure;
 		SystemMethod method = SystemMethod::Update;
+		CodegenLanguage language = CodegenLanguage::CPlusPlus;
 		int smearing = 0;
 		std::vector<FamilySchema> families;
 	};

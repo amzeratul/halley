@@ -3,6 +3,8 @@
 #include "codegen.h"
 #include "component_schema.h"
 #include "system_schema.h"
+#include "icode_generator.h"
+#include "codegen_cpp.h"
 
 #ifdef _MSC_VER
 #ifdef _DEBUG
@@ -20,9 +22,9 @@ void Codegen::run(String inDir, String outDir)
 
 	Codegen codegen;
 	codegen.loadSources(inDir);
+	codegen.validate();
 	codegen.process();
-	codegen.generateCode(outDir, CodegenLanguage::CPlusPlus);
-	codegen.generateCode(outDir, CodegenLanguage::Lua);
+	codegen.generateCode(outDir);
 }
 
 void Codegen::loadSources(String directory)
@@ -39,14 +41,47 @@ void Codegen::loadSources(String directory)
 	}
 }
 
+void Codegen::validate()
+{
+	for (auto& sys : systems) {
+		for (auto& fam : sys.second.families) {
+			for (auto& comp : fam.components) {
+				if (components.find(comp.name) == components.end()) {
+					throw Exception("Unknown component \"" + comp.name + "\" in family \"" + fam.name + "\" of system \"" + sys.second.name + "\".");
+				}
+			}
+		}
+	}
+}
+
 void Codegen::process()
+{
+	int id = 0;
+	for (auto& comp: components) {
+		comp.second.id = id++;
+	}
+}
+
+void Codegen::writeFiles(String directory, const CodeGenResult& files)
 {
 	// TODO
 }
 
-void Codegen::generateCode(String directory, CodegenLanguage language)
+void Codegen::generateCode(String directory)
 {
-	// TODO
+	std::vector<std::unique_ptr<ICodeGenerator>> gens;
+	gens.emplace_back(std::make_unique<CodegenCPP>());
+
+	for (auto& gen : gens) {
+		for (auto& comp : components) {
+			writeFiles(directory, gen->generateComponent(comp.second));
+		}
+		for (auto& sys : systems) {
+			if (sys.second.language == gen->getLanguage()) {
+				writeFiles(directory, gen->generateSystem(sys.second));
+			}
+		}
+	}
 }
 
 void Codegen::addSource(std::experimental::filesystem::path path)

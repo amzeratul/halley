@@ -25,6 +25,12 @@
     <ClInclude Include="src\codegen\system_schema.h">
       <Filter>codegen</Filter>
     </ClInclude>
+    <ClInclude Include="src\codegen\icode_generator.h">
+      <Filter>codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\codegen\codegen_cpp.h">
+      <Filter>codegen</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\codegen\codegen_tool.cpp">
@@ -41,6 +47,9 @@
       <Filter>codegen</Filter>
     </ClCompile>
     <ClCompile Include="src\codegen\component_schema.cpp">
+      <Filter>codegen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\codegen\codegen_cpp.cpp">
       <Filter>codegen</Filter>
     </ClCompile>
   </ItemGroup>
