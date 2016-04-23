@@ -21,7 +21,6 @@ Halley is divided in a few sub-projects:
 * **core**: Core features of the engine, including looper, API management
 * **opengl**: OpenGL backend
 * **entity**: Framework for dealing with entities, components, and systems
-* **codegen**: Generates code for the entity system (written in Haskell)
 * **runner**: Provides an entry point for execution and dynamic reloading. Highly experimental.
 * **utils**: Utilities library
 * **tools**: Editor tools to generate files and assets
