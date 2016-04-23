@@ -17,7 +17,7 @@ void RenderSystem::render(Halley::Painter& painter) const
 	for (auto& e : mainFamily) {
 		auto& sprite = e.sprite->sprite;
 		if (sprite.isInView(worldView)) {
-			spritePainter.add(sprite, e.sprite->layer, sprite.getPosition().y - worldView.getY());
+			spritePainter.add(sprite, e.sprite->layer, int(sprite.getPosition().y - worldView.getY()));
 		}
 	}
 
