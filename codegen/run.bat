@@ -1,1 +1,0 @@
-cabal run -- test testOut
