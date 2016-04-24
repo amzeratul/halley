@@ -45,6 +45,8 @@ namespace Halley
 	{
 	public:
 		virtual ~InputAPIInternal() {}
+
+		virtual void beginEvents(Time t) = 0;
 	};
 
 	using CoreAPIInternal = CoreAPI;

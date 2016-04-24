@@ -21,14 +21,16 @@
 
 #pragma once
 
-#include "../api/input_api.h"
+#include "../api/halley_api_internal.h"
 
 namespace Halley {
 
 	class InputKeyboardConcrete;
 	class InputMouseConcrete;
 
-	class Input : public InputAPI {
+	class Input : public InputAPIInternal {
+		friend class HalleyAPI;
+
 	public:
 		size_t getNumberOfKeyboards() const override;
 		InputKeyboard& getKeyboard(int id=0) const override;
@@ -46,8 +48,10 @@ namespace Halley {
 		Input();
 		~Input();
 
-		void beginEvents(Time t);
-		void processEvent(SDL_Event& event);
+		void init() override;
+		void deInit() override;
+		void beginEvents(Time t) override;
+		void processEvent(SDL_Event& event) override;
 
 		void processJoyEvent(int n, SDL_Event& event);
 		void processTouch(int type, long long touchId, long long fingerId, float x, float y);

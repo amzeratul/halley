@@ -144,14 +144,17 @@ void CoreRunner::deInit()
 #endif
 }
 
-void CoreRunner::pumpEvents()
+void CoreRunner::pumpEvents(Time time)
 {
-	running = api->system->generateEvents(dynamic_cast<HalleyAPIInternal*>(&*api->video), dynamic_cast<HalleyAPIInternal*>(&*api->input));
+	auto video = dynamic_cast<VideoAPIInternal*>(&*api->video);
+	auto input = dynamic_cast<InputAPIInternal*>(&*api->input);
+	input->beginEvents(time);
+	running = api->system->generateEvents(video, input);
 }
 
 void CoreRunner::onFixedUpdate(Time time)
 {
-	pumpEvents();
+	pumpEvents(time);
 	if (running) {
 		if (currentStage) {
 			currentStage->onFixedUpdate(time);
@@ -161,7 +164,7 @@ void CoreRunner::onFixedUpdate(Time time)
 
 void CoreRunner::onVariableUpdate(Time time)
 {
-	pumpEvents();
+	//pumpEvents();
 	if (running) {
 		if (currentStage) {
 			currentStage->onVariableUpdate(time);

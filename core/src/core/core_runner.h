@@ -39,7 +39,7 @@ namespace Halley
 		void showComputerInfo() const;
 
 		void transitionStage();
-		void pumpEvents();
+		void pumpEvents(Time time);
 
 		std::unique_ptr<Game> game;
 		std::unique_ptr<HalleyAPI> api;

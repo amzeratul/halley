@@ -46,6 +46,10 @@ void TestStage::onFixedUpdate(Time time)
 	}
 
 	world->step(TimeLine::FixedUpdate, time);
+
+	if (getAPI().input->getKeyboard().isButtonDown(Keys::Esc)) {
+		getAPI().core->quit();
+	}
 }
 
 void TestStage::onRender(RenderContext& context) const

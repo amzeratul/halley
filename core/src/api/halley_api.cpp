@@ -1,6 +1,7 @@
 #include "halley_api.h"
 #include "halley_api_internal.h"
 #include "../sdl/system_sdl.h"
+#include "../input/input.h"
 
 using namespace Halley;
 
@@ -49,8 +50,6 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 			throw Exception("No suitable video plugins found.");
 		}
 	}
-
-	std::unique_ptr<InputAPIInternal> input;
-
-	return std::unique_ptr<HalleyAPI>(new HalleyAPI(core, std::unique_ptr<SystemSDL>(new SystemSDL()), std::move(video), std::move(input)));
+	
+	return std::unique_ptr<HalleyAPI>(new HalleyAPI(core, std::unique_ptr<SystemSDL>(new SystemSDL()), std::move(video), std::unique_ptr<InputAPIInternal>(new Input())));
 }

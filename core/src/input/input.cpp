@@ -32,7 +32,10 @@
 
 using namespace Halley;
 
-Input::Input()
+Input::Input() = default;
+Input::~Input() = default;
+
+void Input::init()
 {
 	keyboards.push_back(std::unique_ptr<InputKeyboardConcrete>(new InputKeyboardConcrete()));
 	mice.push_back(std::unique_ptr<InputMouseConcrete>(new InputMouseConcrete()));
@@ -40,7 +43,7 @@ Input::Input()
 	// XInput controllers
 #ifdef XINPUT_AVAILABLE
 	const bool hasXInput = true;
-	for (int i=0; i<4; i++) {
+	for (int i = 0; i<4; i++) {
 		auto joy = std::unique_ptr<InputJoystick>(new InputJoystickXInput(i));
 		joy->update(Time(0));
 		joysticks.push_back(std::move(joy));
@@ -51,7 +54,7 @@ Input::Input()
 
 	// SDL joysticks
 	int nJoy = SDL_NumJoysticks();
-	for (int i=0; i<nJoy; i++) {
+	for (int i = 0; i<nJoy; i++) {
 		auto joy = std::unique_ptr<InputJoystick>(new InputJoystickSDL(i));
 		String name = joy->getName();
 		// Don't add if it's a 360 controller
@@ -65,7 +68,13 @@ Input::Input()
 	SDL_JoystickEventState(SDL_ENABLE);
 }
 
-Input::~Input() = default;
+void Input::deInit()
+{
+	keyboards.clear();
+	mice.clear();
+	sdlJoys.clear();
+	joysticks.clear();
+}
 
 InputKeyboard& Input::getKeyboard(int id) const
 {
