@@ -20,15 +20,12 @@
 \*****************************************************************/
 
 #include "concurrent.h"
+#include <thread>
+#include <sstream>
 
 using namespace Halley;
 
-#ifdef _MSC_VER
-#pragma warning(disable: 4100)
-#endif
-
-#include <boost/thread.hpp>
-static boost::thread_specific_ptr<String> threadName;
+static thread_local String threadName;
 
 #ifdef _WIN32
 #include <windows.h>
@@ -75,16 +72,15 @@ namespace Concurrent {
 		SetThreadName((DWORD)-1, name.c_str());
 #endif
 #endif
-		threadName.reset(new String(name));
+		threadName = name;
 	}
 
 	String getThreadName()
 	{
-		String *name = threadName.get();
-		if (name) return *name;
+		if (threadName != "") return threadName;
 
 		std::stringstream ss;
-		ss << boost::this_thread::get_id();
+		ss << std::this_thread::get_id();
 
 		String n = String("thread_") + ss.str();
 		setThreadName(n);

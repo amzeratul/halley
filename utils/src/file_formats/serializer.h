@@ -1,12 +1,11 @@
 #pragma once
 
 #include "../maths/utils.h"
-#include <boost/noncopyable.hpp>
 #include <vector>
 
 namespace Halley {
 
-	class Serializer : boost::noncopyable {
+	class Serializer {
 	public:
 		Serializer(Bytes& data);
 
@@ -30,6 +29,8 @@ namespace Halley {
 			}
 			return *this;
 		}
+
+		Serializer& operator=(const Serializer&) = delete;
 
 	private:
 		Bytes& data;

@@ -24,7 +24,6 @@
 #include "../text/halleystring.h"
 #include <iostream>
 #include <sstream>
-#include <boost/noncopyable.hpp>
 #include <ctime>
 #include "../os/os.h"
 
@@ -79,7 +78,7 @@ protected:
 	}
 };
 
-class StringStackWalker : public StackWalker, public boost::noncopyable
+class StringStackWalker : public StackWalker
 {
 public:
 	StringStackWalker(std::stringstream& s, size_t skipFrames=0)
@@ -88,6 +87,8 @@ public:
 		, skip(skipFrames)
 	{
 	}
+
+	StringStackWalker& operator=(const StringStackWalker&) = delete;
 
 protected:
 	void OnLoadModule(LPCSTR, LPCSTR, DWORD64, DWORD, DWORD, LPCSTR, LPCSTR, ULONGLONG)

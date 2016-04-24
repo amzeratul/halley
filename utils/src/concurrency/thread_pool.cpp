@@ -21,12 +21,12 @@
 
 #include <iostream>
 #include "thread_pool.h"
-#include <boost/thread/thread.hpp>
+#include <thread>
 using namespace Halley;
 
 Halley::ThreadPool::ThreadPool(int n)
 {
-	if (n == -1) n = boost::thread::hardware_concurrency() * 3 / 2;
+	if (n == -1) n = std::thread::hardware_concurrency() * 3 / 2;
 	n = std::max(2, n);
 
 	running = true;

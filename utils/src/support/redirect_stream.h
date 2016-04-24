@@ -21,20 +21,21 @@
 
 #pragma once
 
-#include <boost/noncopyable.hpp>
 #include <iostream>
 #include <memory>
 
 namespace Halley {
-	class RedirectStream : public std::streambuf, public boost::noncopyable {
+	class RedirectStream : public std::streambuf {
 	public:
 		RedirectStream(std::ostream& source, bool exclusive);
 		virtual ~RedirectStream();
 
+		RedirectStream& operator=(const RedirectStream&) = delete;
+
 	protected:
-		std::streamsize xsputn(const char *msg, std::streamsize count);
-		int sync() { return 0; }
-		int overflow(int c);
+		std::streamsize xsputn(const char *msg, std::streamsize count) override;
+		int sync() override { return 0; }
+		int overflow(int c) override;
 
 		virtual void onText(const char* /*msg*/, std::streamsize /*count*/) {}
 		virtual void onFlush() {}
@@ -52,8 +53,8 @@ namespace Halley {
 		~RedirectStreamToStream();
 
 	protected:
-		void onText(const char *msg, std::streamsize count);
-		void onFlush();
+		void onText(const char *msg, std::streamsize count) override;
+		void onFlush() override;
 
 		std::shared_ptr<std::ostream> dst;
 	};

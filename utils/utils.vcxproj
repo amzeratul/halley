@@ -207,7 +207,6 @@
     <ClInclude Include="src\maths\base_transform.h" />
     <ClInclude Include="src\maths\box.h" />
     <ClInclude Include="src\maths\colour.h" />
-    <ClInclude Include="src\maths\fixed_point.h" />
     <ClInclude Include="src\maths\matrix4.h" />
     <ClInclude Include="src\maths\polygon.h" />
     <ClInclude Include="src\maths\random.h" />
