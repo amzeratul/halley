@@ -183,6 +183,9 @@
     <ClCompile Include="src\file_formats\yaml_file.cpp">
       <Filter>file_formats</Filter>
     </ClCompile>
+    <ClCompile Include="src\data_structures\bin_pack.cpp">
+      <Filter>data_structures</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\halley_utils.h">
@@ -372,6 +375,12 @@
       <Filter>file_formats</Filter>
     </ClInclude>
     <ClInclude Include="src\data_structures\maybe.h">
+      <Filter>data_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data_structures\binpack2d.hpp">
+      <Filter>data_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data_structures\bin_pack.h">
       <Filter>data_structures</Filter>
     </ClInclude>
   </ItemGroup>

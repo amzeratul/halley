@@ -11,18 +11,19 @@ namespace Halley
 	public:
 		Maybe()
 			: defined(false)
-		{}
+		{
+		}
 
 		Maybe(const T& v)
 			: defined(true)
 		{
-			*getData() = v;
+			new(getData()) T(v);
 		}
 
 		Maybe(T&& v)
 			: defined(true)
 		{
-			*getData() = v;
+			new(getData()) T(v);
 		}
 
 		~Maybe()
@@ -32,14 +33,14 @@ namespace Halley
 
 		Maybe& operator=(const T& o) {
 			reset();
-			*getData() = o;
+			new(getData()) T(o);
 			defined = true;
 			return *this;
 		}
 
 		Maybe& operator=(T&& o) {
 			reset();
-			*getData() = o;
+			new(getData()) T(o);
 			defined = true;
 			return *this;
 		}
@@ -47,7 +48,7 @@ namespace Halley
 		Maybe& operator=(const Maybe& o) {
 			reset();
 			if (o.defined) {
-				*getData() = *o.getData();
+				new(getData()) T(o.get());
 				defined = true;
 			} else {
 				defined = false;
@@ -78,6 +79,29 @@ namespace Halley
 		{
 			if (defined) {
 				success(*getData());
+			}
+		}
+
+		operator bool() const {
+			return defined;
+		}
+
+		T& get()
+		{
+			if (defined) {
+				return *getData();
+			} else {
+				throw Exception("Data not defined.");
+			}
+		}
+		
+		const T& get() const
+		{
+			if (defined) {
+				return *getData();
+			}
+			else {
+				throw Exception("Data not defined.");
 			}
 		}
 		

@@ -13,7 +13,7 @@ int DistanceFieldTool::run(std::vector<std::string> args)
 	// Properties
 	auto res = String(args[2]).split('x');
 	Vector2i size(res[0].toInteger(), res[1].toInteger());
-	float radius = String(args[3]).toInteger();
+	float radius = String(args[3]).toFloat();
 
 	// Load image
 	auto data = ResourceDataStatic::loadFromFileSystem(args[0]);
@@ -25,8 +25,6 @@ int DistanceFieldTool::run(std::vector<std::string> args)
 
 	// Output image
 	result->savePNG(args[1]);
-	
-	system(args[1].c_str());
 	
 	return 0;
 }

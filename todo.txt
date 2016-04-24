@@ -46,7 +46,7 @@ codegen
 - codegen Lua
 
 cli tools
-* distance field generator
+* bitmap text generator
 - packer
 - atlas generator?
 

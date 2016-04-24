@@ -6,6 +6,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "concurrency/jobs.h"
 #include "concurrency/thread_pool.h"
 
+#include "data_structures/bin_pack.h"
 #include "data_structures/circular_buffer.h"
 #include "data_structures/dynamic_grid.h"
 #include "data_structures/mapped_pool.h"

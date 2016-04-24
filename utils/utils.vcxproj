@@ -131,6 +131,7 @@
     <ClCompile Include="src\concurrency\concurrent.cpp" />
     <ClCompile Include="src\concurrency\jobs.cpp" />
     <ClCompile Include="src\concurrency\thread_pool.cpp" />
+    <ClCompile Include="src\data_structures\bin_pack.cpp" />
     <ClCompile Include="src\data_structures\memory_pool.cpp" />
     <ClCompile Include="src\data_structures\rect_spatial_checker.cpp" />
     <ClCompile Include="src\file_formats\image.cpp" />
@@ -177,6 +178,8 @@
     <ClInclude Include="src\concurrency\concurrent.h" />
     <ClInclude Include="src\concurrency\jobs.h" />
     <ClInclude Include="src\concurrency\thread_pool.h" />
+    <ClInclude Include="src\data_structures\binpack2d.hpp" />
+    <ClInclude Include="src\data_structures\bin_pack.h" />
     <ClInclude Include="src\data_structures\circular_buffer.h" />
     <ClInclude Include="src\data_structures\dynamic_grid.h" />
     <ClInclude Include="src\data_structures\mapped_pool.h" />

@@ -130,7 +130,32 @@ namespace Halley {
 
 		bool operator==(const Rect2D<T>& p) const { return p1 == p.p1 && p2 == p.p2; }
 		bool operator!=(const Rect2D<T>& p) const { return p1 != p.p1 || p2 != p.p2; }
+
+		template <typename V>
+		inline Rect2D operator * (const V param) const { return Rect2D(p1 * param, p2 * param); }
+
+		template <typename V>
+		inline Rect2D operator / (const V param) const { return Rect2D(p1 / param, p2 / param); }
 	};
+
+	template <typename T>
+	std::ostream& operator<< (std::ostream& ostream, const Rect2D<T>& v)
+	{
+		ostream << "(" << v.getP1().x << ", " << v.getP1().y << ", " << v.getWidth() << ", " << v.getHeight() << ")";
+		return ostream;
+	}
+
+	template <typename T, typename V>
+	inline Rect2D<T> operator * (V f, const Rect2D<T> &v)
+	{
+		return v * f;
+	}
+
+	template <typename T, typename V>
+	inline Rect2D<T> operator / (V f, const Rect2D<T> &v)
+	{
+		return v / f;
+	}
 
 	typedef Rect2D<float> Rect4f;
 	typedef Rect2D<int> Rect4i;

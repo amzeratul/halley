@@ -57,6 +57,20 @@ int Halley::Image::getRGBA(int r, int g, int b, int a)
 	return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
+void Halley::Image::blitFrom(const char* buffer, size_t width, size_t height, size_t pitch)
+{
+	size_t xMax = std::min(size_t(w), width);
+	size_t yMax = std::min(size_t(h), height);
+
+	const int* src = reinterpret_cast<const int*>(buffer);
+	int* dst = reinterpret_cast<int*>(px.get());
+	for (size_t y = 0; y < yMax; y++) {
+		for (size_t x = 0; x < xMax; x++) {
+			dst[x + y * w] = src[x + y * pitch];
+		}
+	}
+}
+
 std::unique_ptr<Halley::Image> Halley::Image::loadResource(ResourceLoader& loader)
 {
 	auto data = loader.getStatic();
