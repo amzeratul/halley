@@ -18,3 +18,11 @@
 		#pragma comment(lib, "halley_opengl_d.lib")
 	#endif
 #endif
+
+#ifdef __glew_h__
+#error "Glew cannot be included in halley.hpp"
+#endif
+
+#ifdef _SDL_H
+#error "SDL cannot be included in halley.hpp"
+#endif
