@@ -102,6 +102,11 @@ void Halley::Image::blitFrom(Vector2i pos, const char* buffer, size_t width, siz
 	}
 }
 
+void Halley::Image::blitFrom(Vector2i pos, Image& img)
+{
+	blitFrom(pos, img.getPixels(), img.getWidth(), img.getHeight(), img.getWidth(), 32);
+}
+
 std::unique_ptr<Halley::Image> Halley::Image::loadResource(ResourceLoader& loader)
 {
 	auto data = loader.getStatic();

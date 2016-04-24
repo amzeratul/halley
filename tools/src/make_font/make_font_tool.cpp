@@ -1,5 +1,6 @@
 #include "make_font_tool.h"
 #include "font_face.h"
+#include "../distance_field/distance_field_generator.h"
 
 using namespace Halley;
 
@@ -82,6 +83,7 @@ int MakeFontTool::run(std::vector<std::string> args)
 	}, minFont, maxFont);
 
 	auto dstImg = std::make_unique<Image>(size.x, size.y);
+	dstImg->clear(0);
 
 	if (result) {
 		auto pack = result.get();
@@ -93,9 +95,13 @@ int MakeFontTool::run(std::vector<std::string> args)
 			auto tmpImg = std::make_unique<Image>(srcRect.getWidth(), srcRect.getHeight());
 			tmpImg->clear(0);
 			font.drawGlyph(*tmpImg, charcode, Vector2i(border, border));
-			tmpImg->savePNG("tmp/" + args[1] + "_" + String::integerToString(charcode) + ".png");
+
+			auto finalGlyphImg = DistanceFieldGenerator::generate(*tmpImg, dstRect.getSize(), border);
+			dstImg->blitFrom(dstRect.getP1(), *finalGlyphImg);
 		}
 	}
+
+	dstImg->savePNG(args[1] + ".png");
 
 	return 0;
 }

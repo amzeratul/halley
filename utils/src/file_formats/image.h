@@ -51,6 +51,7 @@ namespace Halley {
 
 		void clear(int colour);
 		void blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp);
+		void blitFrom(Vector2i pos, Image& img);
 
 		static std::unique_ptr<Image> loadResource(ResourceLoader& loader);
 
