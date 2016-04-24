@@ -55,22 +55,22 @@ void TestStage::onFixedUpdate(Time time)
 void TestStage::onRender(RenderContext& context) const
 {
 	Sprite sprite;
-	auto texture = getResource<Texture>("sprites/test_distance_field.png");
+	auto texture = getResource<Texture>("sprites/halley_logo_dist.png");
 	auto material = getResource<Material>("shaders/distance_field_sprite.yaml");
 	(*material)["tex0"] = texture;
 	sprite.setMaterial(material);
-	sprite.setPivot(Vector2f(0.5f, 0.5f));
-	sprite.setPos(Vector2f(640, 360));
-	sprite.setSize(Vector2f(1024, 1024));
+	sprite.setPivot(Vector2f(0.0f, 1.0f));
+	sprite.setPos(Vector2f(0, 720) + Vector2f(32, 32));
+	sprite.setSize(Vector2f(512, 256));
 	sprite.setTexRect(Rect4f(0, 0, 1, 1));
-	sprite.setColour(Colour4f(0.6f, 0.1f, 0.1f, 1));
+	sprite.setColour(Colour4f(0.9882f, 0.15686f, 0.27843f, 1));
 
 	context.bind([&] (Painter& painter)
 	{
 		painter.clear(Colour(0.2f, 0.2f, 0.3f));
 		world->render(painter);
 
-		//sprite.draw(painter);
+		sprite.draw(painter);
 	});
 }
 

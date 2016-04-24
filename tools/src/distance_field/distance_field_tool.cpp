@@ -5,14 +5,15 @@ using namespace Halley;
 
 int DistanceFieldTool::run(std::vector<std::string> args)
 {
-	if (args.size() != 3) {
-		std::cout << "Usage: halley-cmd distField srcFile dstFile WxH" << std::endl;
+	if (args.size() != 4) {
+		std::cout << "Usage: halley-cmd distField srcFile dstFile WxH radius" << std::endl;
 		return 1;
 	}
 
 	// Properties
-	Vector2i size(256, 128); // TODO
-	float radius = 5; // TODO
+	auto res = String(args[2]).split('x');
+	Vector2i size(res[0].toInteger(), res[1].toInteger());
+	float radius = String(args[3]).toInteger();
 
 	// Load image
 	auto data = ResourceDataStatic::loadFromFileSystem(args[0]);
