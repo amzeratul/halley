@@ -85,8 +85,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="gen_src\test.txt">
-      <Filter>gen_src</Filter>
-    </Text>
+    <None Include="gen_src\test.yaml" />
   </ItemGroup>
 </Project>

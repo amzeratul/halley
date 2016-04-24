@@ -7,6 +7,12 @@
     <Filter Include="tool">
       <UniqueIdentifier>{014fb14c-b972-426b-bf20-a72b2d35c694}</UniqueIdentifier>
     </Filter>
+    <Filter Include="distance_field">
+      <UniqueIdentifier>{71bb14a5-031b-447c-b44b-d04cb5d83bfd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="make_font">
+      <UniqueIdentifier>{395a9e7b-6176-4526-81a2-811290bced05}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\codegen\codegen_tool.h">
@@ -31,6 +37,12 @@
     <ClInclude Include="src\codegen\codegen_cpp.h">
       <Filter>codegen</Filter>
     </ClInclude>
+    <ClInclude Include="src\distance_field\distance_field_tool.h">
+      <Filter>distance_field</Filter>
+    </ClInclude>
+    <ClInclude Include="src\make_font\make_font_tool.h">
+      <Filter>make_font</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\codegen\codegen_tool.cpp">
@@ -51,6 +63,12 @@
     </ClCompile>
     <ClCompile Include="src\codegen\codegen_cpp.cpp">
       <Filter>codegen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\distance_field\distance_field_tool.cpp">
+      <Filter>distance_field</Filter>
+    </ClCompile>
+    <ClCompile Include="src\make_font\make_font_tool.cpp">
+      <Filter>make_font</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

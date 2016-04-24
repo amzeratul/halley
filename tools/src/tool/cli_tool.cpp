@@ -1,18 +1,24 @@
 #include "cli_tool.h"
 #include "../codegen/codegen_tool.h"
+#include "../distance_field/distance_field_tool.h"
+#include "../make_font/make_font_tool.h"
 #include <exception>
 
 using namespace Halley;
 
 std::vector<std::string> CommandLineTool::getToolNames()
 {
-	return {"codegen"};
+	return {"codegen", "distField", "makeFont"};
 }
 
 std::unique_ptr<CommandLineTool> CommandLineTool::getTool(std::string name)
 {
 	if (name == "codegen") {
 		return std::make_unique<CodegenTool>();
+	} else if (name == "distField") {
+		return std::make_unique<DistanceFieldTool>();
+	} else if (name == "makeFont") {
+		return std::make_unique<MakeFontTool>();
 	} else {
 		throw std::exception("Unknown tool name");
 	}
