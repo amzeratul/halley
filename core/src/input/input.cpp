@@ -21,6 +21,9 @@
 
 #include "input.h"
 #include "input_joystick_sdl.h"
+#include "input_mouse_concrete.h"
+#include "input_keyboard_concrete.h"
+#include "input_touch.h"
 #include <SDL.h>
 
 #ifdef _MSC_VER
@@ -31,16 +34,16 @@ using namespace Halley;
 
 Input::Input()
 {
-	keyboards.push_back(spInputKeyboardConcrete(new InputKeyboardConcrete()));
-	mice.push_back(spInputMouseConcrete(new InputMouseConcrete()));
+	keyboards.push_back(std::unique_ptr<InputKeyboardConcrete>(new InputKeyboardConcrete()));
+	mice.push_back(std::unique_ptr<InputMouseConcrete>(new InputMouseConcrete()));
 
 	// XInput controllers
 #ifdef XINPUT_AVAILABLE
 	const bool hasXInput = true;
 	for (int i=0; i<4; i++) {
-		auto joy = spInputJoystick(new InputJoystickXInput(i));
+		auto joy = std::unique_ptr<InputJoystick>(new InputJoystickXInput(i));
 		joy->update(Time(0));
-		joysticks.push_back(joy);
+		joysticks.push_back(std::move(joy));
 	}
 #else
 	const bool hasXInput = false;
@@ -49,12 +52,12 @@ Input::Input()
 	// SDL joysticks
 	int nJoy = SDL_NumJoysticks();
 	for (int i=0; i<nJoy; i++) {
-		auto joy = spInputJoystick(new InputJoystickSDL(i));
+		auto joy = std::unique_ptr<InputJoystick>(new InputJoystickSDL(i));
 		String name = joy->getName();
 		// Don't add if it's a 360 controller
 		if (!hasXInput || name.asciiLower().find("xbox 360") == String::npos) {
-			joysticks.push_back(joy);
-			sdlJoys[i] = joy;
+			sdlJoys[i] = joy.get();
+			joysticks.push_back(std::move(joy));
 		}
 	}
 
@@ -62,57 +65,34 @@ Input::Input()
 	SDL_JoystickEventState(SDL_ENABLE);
 }
 
-spInputKeyboard Input::getKeyboard(int id)
+Input::~Input() = default;
+
+InputKeyboard& Input::getKeyboard(int id) const
 {
-	if (id < 0 || id >= (int)getNumberOfKeyboards()) return spInputKeyboard();
-	return keyboards[id];
+	return *keyboards.at(id);
 }
 
-spInputJoystick Input::getJoystick(int id)
+InputJoystick& Input::getJoystick(int id) const
 {
-	if (id < 0 || id >= (int)getNumberOfJoysticks()) {
-		return spInputJoystick();
-	} else {
-		return joysticks[id];
-	}
+	return *joysticks.at(id);
 }
 
-spInputJoystick Input::getFirstJoystick()
+InputMouse& Input::getMouse(int id) const
 {
-	size_t n = getNumberOfJoysticks();
-
-	// Look for an active joystick
-	for (size_t i = 0; i < n; i++) {
-		auto& joy = joysticks[i];
-		if (joy->isEnabled()) return joy;
-	}
-
-	// Not found, return first joystick
-	if (joysticks.size() > 0) {
-		return joysticks[0];
-	}
-
-	// Don't have anything, return a null pointer
-	return spInputJoystick();
+	return *mice.at(id);
 }
 
-spInputMouse Input::getMouse(int id)
-{
-	if (id < 0 || id >= (int)getNumberOfMice()) return spInputMouse();
-	return mice[id];
-}
-
-size_t Input::getNumberOfKeyboards()
+size_t Input::getNumberOfKeyboards() const
 {
 	return keyboards.size();
 }
 
-size_t Input::getNumberOfJoysticks()
+size_t Input::getNumberOfJoysticks() const
 {
 	return joysticks.size();
 }
 
-size_t Input::getNumberOfMice()
+size_t Input::getNumberOfMice() const
 {
 	return mice.size();
 }
@@ -143,7 +123,7 @@ void Input::beginEvents(Time t)
 	// Touch events
 	for (auto i=touchEvents.begin(); i!=touchEvents.end(); ) {
 		auto next = i;
-		next++;
+		++next;
 
 		i->second->update(t);
 		if (i->second->isReleased()) {
@@ -208,8 +188,10 @@ void Input::processEvent(SDL_Event& event)
 
 void Input::processJoyEvent(int n, SDL_Event& event)
 {
-	auto& joy = sdlJoys[n];
-	if (joy) joy->processEvent(event);
+	auto iter = sdlJoys.find(n);
+	if (iter != sdlJoys.end()) {
+		iter->second->processEvent(event);
+	}
 }
 
 void Halley::Input::processTouch(int type, long long /*touchDeviceId*/, long long fingerId, float x, float y)
@@ -224,11 +206,11 @@ void Halley::Input::processTouch(int type, long long /*touchDeviceId*/, long lon
 	if (type == SDL_FINGERDOWN) {
 		// New event
 		touch = spInputTouch(new InputTouch(pos));
-		touchEvents[(int)fingerId] = touch;
+		touchEvents[static_cast<int>(fingerId)] = touch;
 	} else {
 		// Update existing
-		auto i = touchEvents.find((int)fingerId);
-		if (i == touchEvents.end()) throw Exception("Unknown touchId: "+String::integerToString((int)fingerId));
+		auto i = touchEvents.find(static_cast<int>(fingerId));
+		if (i == touchEvents.end()) throw Exception("Unknown touchId: "+String::integerToString(static_cast<int>(fingerId)));
 		touch = i->second;
 		touch->setPos(pos);
 		if (type == SDL_FINGERUP) {
@@ -240,9 +222,9 @@ void Halley::Input::processTouch(int type, long long /*touchDeviceId*/, long lon
 std::vector<spInputTouch> Halley::Input::getNewTouchEvents()
 {
 	std::vector<spInputTouch> result;
-	for (auto i=touchEvents.begin(); i!=touchEvents.end(); i++) {
-		if (i->second->isPressed()) {
-			result.push_back(i->second);
+	for (auto i : touchEvents) {
+		if (i.second->isPressed()) {
+			result.push_back(i.second);
 		}
 	}
 	return result;
@@ -251,8 +233,8 @@ std::vector<spInputTouch> Halley::Input::getNewTouchEvents()
 std::vector<spInputTouch> Halley::Input::getTouchEvents()
 {
 	std::vector<spInputTouch> result;
-	for (auto i=touchEvents.begin(); i!=touchEvents.end(); i++) {
-		result.push_back(i->second);
+	for (auto i : touchEvents) {
+		result.push_back(i.second);
 	}
 	return result;
 }

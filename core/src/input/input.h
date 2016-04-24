@@ -21,43 +21,43 @@
 
 #pragma once
 
-#include "input_keyboard.h"
-#include "input_joystick.h"
-#include "input_mouse.h"
-#include "input_virtual.h"
-#include "input_manual.h"
-#include "input_touch.h"
+#include "../api/input_api.h"
 
 namespace Halley {
 
-	class Input {
-	public:
-		spInputKeyboard getKeyboard(int id=0);
-		spInputJoystick getJoystick(int id=0);
-		spInputJoystick getFirstJoystick();
-		spInputMouse getMouse(int id=0);
-		size_t getNumberOfKeyboards();
-		size_t getNumberOfJoysticks();
-		size_t getNumberOfMice();
+	class InputKeyboardConcrete;
+	class InputMouseConcrete;
 
-		std::vector<spInputTouch> getNewTouchEvents();
-		std::vector<spInputTouch> getTouchEvents();
+	class Input : public InputAPI {
+	public:
+		size_t getNumberOfKeyboards() const override;
+		InputKeyboard& getKeyboard(int id=0) const override;
+
+		size_t getNumberOfJoysticks() const override;
+		InputJoystick& getJoystick(int id=0) const override;
+
+		size_t getNumberOfMice() const override;
+		InputMouse& getMouse(int id=0) const override;
+
+		std::vector<std::shared_ptr<InputTouch>> getNewTouchEvents() override;
+		std::vector<std::shared_ptr<InputTouch>> getTouchEvents() override;
+
+	private:
+		Input();
+		~Input();
 
 		void beginEvents(Time t);
 		void processEvent(SDL_Event& event);
 
-	private:
-		Input();
-
 		void processJoyEvent(int n, SDL_Event& event);
 		void processTouch(int type, long long touchId, long long fingerId, float x, float y);
 		
-		std::vector<spInputKeyboardConcrete> keyboards;
-		std::vector<spInputJoystick> joysticks;
-		std::vector<spInputMouseConcrete> mice;
+		std::vector<std::unique_ptr<InputKeyboardConcrete>> keyboards;
+		std::vector<std::unique_ptr<InputJoystick>> joysticks;
+		std::vector<std::unique_ptr<InputMouseConcrete>> mice;
 
-		std::map<int, spInputJoystick> sdlJoys;
-		std::map<int, spInputTouch> touchEvents;
+		std::map<int, InputJoystick*> sdlJoys;
+		std::map<int, std::shared_ptr<InputTouch>> touchEvents;
 	};
 
 };

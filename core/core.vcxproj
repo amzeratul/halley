@@ -58,9 +58,11 @@
     <ClInclude Include="src\input\input_joystick_sdl.h" />
     <ClInclude Include="src\input\input_joystick_xinput.h" />
     <ClInclude Include="src\input\input_keyboard.h" />
+    <ClInclude Include="src\input\input_keyboard_concrete.h" />
     <ClInclude Include="src\input\input_keys.h" />
     <ClInclude Include="src\input\input_manual.h" />
     <ClInclude Include="src\input\input_mouse.h" />
+    <ClInclude Include="src\input\input_mouse_concrete.h" />
     <ClInclude Include="src\input\input_touch.h" />
     <ClInclude Include="src\input\input_vibration.h" />
     <ClInclude Include="src\input\input_virtual.h" />
@@ -98,10 +100,10 @@
     <ClCompile Include="src\input\input_joystick.cpp" />
     <ClCompile Include="src\input\input_joystick_sdl.cpp" />
     <ClCompile Include="src\input\input_joystick_xinput.cpp" />
-    <ClCompile Include="src\input\input_keyboard.cpp" />
+    <ClCompile Include="src\input\input_keyboard_concrete.cpp" />
     <ClCompile Include="src\input\input_keys.cpp" />
     <ClCompile Include="src\input\input_manual.cpp" />
-    <ClCompile Include="src\input\input_mouse.cpp" />
+    <ClCompile Include="src\input\input_mouse_concrete.cpp" />
     <ClCompile Include="src\input\input_touch.cpp" />
     <ClCompile Include="src\input\input_vibration.cpp" />
     <ClCompile Include="src\input\input_virtual.cpp" />
@@ -115,7 +117,6 @@
     <ClCompile Include="src\resources\resource_locator.cpp" />
     <ClCompile Include="src\resources\resource_pack.cpp" />
     <ClCompile Include="src\sdl\system_sdl.cpp" />
-    <ClCompile Include="src\sdl\input_sdl.cpp" />
     <ClCompile Include="src\stage\stage.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -175,6 +175,8 @@
     <ClInclude Include="src\input\input_touch.h" />
     <ClInclude Include="src\input\input_vibration.h" />
     <ClInclude Include="src\input\input_virtual.h" />
+    <ClInclude Include="src\input\input_keyboard_concrete.h" />
+    <ClInclude Include="src\input\input_mouse_concrete.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
@@ -188,9 +190,6 @@
     </ClCompile>
     <ClCompile Include="src\api\halley_api.cpp">
       <Filter>api</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sdl\input_sdl.cpp">
-      <Filter>sdl</Filter>
     </ClCompile>
     <ClCompile Include="src\stage\stage.cpp">
       <Filter>stage</Filter>
@@ -263,12 +262,12 @@
     <ClCompile Include="src\input\input_joystick.cpp" />
     <ClCompile Include="src\input\input_joystick_sdl.cpp" />
     <ClCompile Include="src\input\input_joystick_xinput.cpp" />
-    <ClCompile Include="src\input\input_keyboard.cpp" />
     <ClCompile Include="src\input\input_keys.cpp" />
     <ClCompile Include="src\input\input_manual.cpp" />
-    <ClCompile Include="src\input\input_mouse.cpp" />
     <ClCompile Include="src\input\input_touch.cpp" />
     <ClCompile Include="src\input\input_vibration.cpp" />
     <ClCompile Include="src\input\input_virtual.cpp" />
+    <ClCompile Include="src\input\input_keyboard_concrete.cpp" />
+    <ClCompile Include="src\input\input_mouse_concrete.cpp" />
   </ItemGroup>
 </Project>

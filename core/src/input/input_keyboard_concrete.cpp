@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 #include <SDL.h>
-#include "input_keyboard.h"
+#include "input_keyboard_concrete.h"
 #include "input_keys.h"
 using namespace Halley;
 
@@ -82,5 +82,5 @@ int InputKeyboardConcrete::getNextLetter()
 
 Halley::String Halley::InputKeyboardConcrete::getButtonName(int code)
 {
-	return Keys::getName((Keys::Key) code);
+	return Keys::getName(static_cast<Keys::Key>(code));
 }
