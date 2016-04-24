@@ -1,5 +1,4 @@
 #pragma once
-#include "../../../opengl/src/gl_utils.h"
 #include "blend.h"
 
 namespace YAML

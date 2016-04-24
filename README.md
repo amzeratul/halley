@@ -34,7 +34,7 @@ Halley is divided in a few sub-projects:
 * CMake 3.x
 
 ### Dependencies
-* Boost 1.59.0 (should we get rid of this?)
+* Boost 1.59.0 (Can we get rid of this? Only two files in Utils use it)
 * SDL 2.0.4
 * GLEW 1.13.0
 * yaml-cpp 0.5.3
