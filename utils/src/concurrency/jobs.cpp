@@ -63,25 +63,25 @@ void Halley::JobExecuter::add(std::function<void()> f, int priority/*=0*/)
 	add(Job(f, priority));
 }
 
-boost::optional<Job> Halley::JobExecuter::getNext()
+Maybe<Job> Halley::JobExecuter::getNext()
 {
 	mutex_locker lock(m);
-	if (!running || jobs.empty()) return boost::optional<Job>();
-	boost::optional<Job> result = boost::optional<Job>(jobs.top());
+	if (!running || jobs.empty()) return Maybe<Job>();
+	auto result = Maybe<Job>(jobs.top());
 	jobs.pop();
 	return result;
 }
 
-boost::optional<Job> Halley::JobExecuter::waitNext()
+Maybe<Job> Halley::JobExecuter::waitNext()
 {
 	mutex_locker lock(m);
 	while (running && jobs.empty()) {
 		c.wait(lock);
 	}
 	if (!running) {
-		return boost::optional<Job>();
+		return Maybe<Job>();
 	}
-	auto j = boost::optional<Job>(jobs.top());
+	auto j = Maybe<Job>(jobs.top());
 	jobs.pop();
 	return j;
 }
@@ -89,19 +89,20 @@ boost::optional<Job> Halley::JobExecuter::waitNext()
 void Halley::JobExecuter::runNext()
 {
 	auto job = waitNext();
-	if (job) {
-		job->run();
-	}
+	job.match([&] (Job& j) {
+		j.run();
+	});
 }
 
 bool Halley::JobExecuter::tryRunNext()
 {
-	boost::optional<Job> job = getNext();
-	if (job) {
-		job->run();
-		return true;
-	}
-	return false;
+	auto job = getNext();
+	bool success = false;
+	job.match([&](Job& j) {
+		j.run();
+		success = true;
+	});
+	return success;
 }
 
 void Halley::JobExecuter::stop()

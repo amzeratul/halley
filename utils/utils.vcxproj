@@ -180,6 +180,7 @@
     <ClInclude Include="src\data_structures\circular_buffer.h" />
     <ClInclude Include="src\data_structures\dynamic_grid.h" />
     <ClInclude Include="src\data_structures\mapped_pool.h" />
+    <ClInclude Include="src\data_structures\maybe.h" />
     <ClInclude Include="src\data_structures\memory_pool.h" />
     <ClInclude Include="src\data_structures\rect_spatial_checker.h" />
     <ClInclude Include="src\file_formats\image.h" />

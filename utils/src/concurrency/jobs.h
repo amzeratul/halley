@@ -23,7 +23,7 @@
 
 #include <queue>
 #include "concurrent.h"
-#include <boost/optional/optional.hpp>
+#include "../data_structures/maybe.h"
 
 namespace Halley {
 	typedef long long PriorityType;
@@ -48,8 +48,8 @@ namespace Halley {
 		void add(Job j);
 		void add(std::function<void()> f, int priority=0);
 
-		boost::optional<Job> getNext();
-		boost::optional<Job> waitNext();
+		Maybe<Job> getNext();
+		Maybe<Job> waitNext();
 		void runNext();
 		bool tryRunNext();
 

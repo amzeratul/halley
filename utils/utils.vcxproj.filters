@@ -371,6 +371,9 @@
     <ClInclude Include="src\file_formats\yaml_file.h">
       <Filter>file_formats</Filter>
     </ClInclude>
+    <ClInclude Include="src\data_structures\maybe.h">
+      <Filter>data_structures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\support\StackWalker\StackWalker.htm">

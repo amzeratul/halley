@@ -1,20 +1,33 @@
 #pragma once
 
-#include <boost/pool/pool.hpp>
+#include <map>
 
 namespace Halley {
-	typedef boost::pool<boost::default_user_allocator_malloc_free> PoolType;
+	class SizePool
+	{
+	public:
+		explicit SizePool(size_t size);
+		~SizePool();
+
+		size_t getSize() const { return size; }
+		void* alloc();
+		void free(void* p);
+
+	private:
+		void* pimpl;
+		size_t size;
+	};
 
 	// yo dawg
 	class PoolPool
 	{
 	public:
-		static PoolType* getPool(size_t size);
+		static SizePool* getPool(size_t size);
 
 	private:
 		static PoolPool& get();
 
-		std::map<size_t, PoolType*> pools;
+		std::map<size_t, SizePool*> pools;
 	};
 
 	template <typename T>
@@ -23,7 +36,7 @@ namespace Halley {
 	public:
 		static void* alloc()
 		{
-			return get().pool->malloc();
+			return get().pool->alloc();
 		}
 
 		static void free(void* p)
@@ -34,8 +47,7 @@ namespace Halley {
 	private:
 		PoolAllocator()
 		{
-			//pool = PoolPool::getPool(sizeof(T));
-			pool = new PoolType(sizeof(T));
+			pool = new SizePool(sizeof(T));
 		}
 
 		static PoolAllocator& get()
@@ -44,26 +56,7 @@ namespace Halley {
 			return instance;
 		}
 
-		boost::pool<boost::default_user_allocator_malloc_free>* pool;
+		SizePool* pool;
 	};
-
-	/*
-	template <typename T>
-	struct PoolAllocator
-	{
-		static void* alloc()
-		{
-			return PoolManager<sizeof(T)>::alloc();
-		}
-
-		static void free(void* p)
-		{
-			PoolManager<sizeof(T)>::free(p);
-		}
-
-	private:
-		PoolAllocator() {}
-	};
-	*/
-
+	
 }

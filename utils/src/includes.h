@@ -9,6 +9,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "data_structures/circular_buffer.h"
 #include "data_structures/dynamic_grid.h"
 #include "data_structures/mapped_pool.h"
+#include "data_structures/maybe.h"
 #include "data_structures/memory_pool.h"
 #include "data_structures/rect_spatial_checker.h"
 
