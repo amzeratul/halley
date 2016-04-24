@@ -43,6 +43,7 @@
     <ClInclude Include="src\make_font\make_font_tool.h">
       <Filter>make_font</Filter>
     </ClInclude>
+    <ClInclude Include="src\distance_field\distance_field_generator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\codegen\codegen_tool.cpp">
@@ -70,5 +71,6 @@
     <ClCompile Include="src\make_font\make_font_tool.cpp">
       <Filter>make_font</Filter>
     </ClCompile>
+    <ClCompile Include="src\distance_field\distance_field_generator.cpp" />
   </ItemGroup>
 </Project>

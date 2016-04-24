@@ -23,6 +23,7 @@
 #include "stb_image/stb_image.h"
 #include "lodepng/lodepng.h"
 #include "../support/exception.h"
+#include "../resources/resource_data.h"
 
 Halley::Image::Image(unsigned int _w, unsigned int _h)
 	: px(nullptr, free)
@@ -47,9 +48,19 @@ Halley::Image::Image(String _filename, const Byte* bytes, size_t nBytes, bool _p
 	load(filename, bytes, nBytes, _preMultiply);
 }
 
+Halley::Image::~Image()
+{
+}
+
 int Halley::Image::getRGBA(int r, int g, int b, int a)
 {
 	return (a << 24) | (b << 16) | (g << 8) | r;
+}
+
+std::unique_ptr<Halley::Image> Halley::Image::loadResource(ResourceLoader& loader)
+{
+	auto data = loader.getStatic();
+	return std::make_unique<Image>(loader.getName(), reinterpret_cast<const Byte*>(data->getData()), data->getSize(), false);
 }
 
 void Halley::Image::load(String name, const Byte* bytes, size_t nBytes, bool shouldPreMultiply)

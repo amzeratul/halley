@@ -1,5 +1,5 @@
+#include <fstream>
 #include "resource_data.h"
-#include <SDL.h>
 #include "../support/exception.h"
 
 using namespace Halley;
@@ -60,6 +60,30 @@ bool Halley::ResourceDataStatic::isLoaded() const
 Halley::String Halley::ResourceDataStatic::getString() const
 {
 	return String(static_cast<const char*>(getData()), getSize());
+}
+
+std::unique_ptr<ResourceDataStatic> ResourceDataStatic::loadFromFileSystem(String path)
+{
+	std::ifstream fp(path, std::ios::binary | std::ios::in);
+	fp.seekg(0, std::ios::end);
+	size_t size = fp.tellg();
+	fp.seekg(0, std::ios::beg);
+	char* buffer = new char[size];
+	try {
+		fp.read(buffer, size);
+		fp.close();
+		return std::make_unique<ResourceDataStatic>(buffer, size, path);
+	} catch (...) {
+		delete[] buffer;
+		throw;
+	}
+}
+
+void ResourceDataStatic::writeToFileSystem(String filePath) const
+{
+	std::ofstream fp(filePath, std::ios::binary | std::ios::out);
+	fp.write(data.get(), size);
+	fp.close();
 }
 
 Halley::ResourceDataStream::ResourceDataStream(String path, ResourceDataMakeReader makeReader)

@@ -60,6 +60,9 @@ namespace Halley {
 		size_t getSize() const;
 		String getString() const;
 
+		static std::unique_ptr<ResourceDataStatic> loadFromFileSystem(String path);
+		void writeToFileSystem(String path) const;
+
 	private:
 		std::shared_ptr<char> data;
 		size_t size;

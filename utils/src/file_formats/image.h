@@ -23,12 +23,17 @@
 
 #include "../maths/vector2d.h"
 #include "../text/halleystring.h"
+#include "../resources/resource.h"
 
 namespace Halley {
-	class Image {
+	class ResourceDataStatic;
+	class ResourceLoader;
+
+	class Image : public Resource {
 	public:
 		Image(unsigned int w=0, unsigned int h=0);
 		Image(String filename, const Byte* bytes, size_t nBytes, bool preMultiply);
+		~Image();
 
 		void load(String filename, const Byte* bytes, size_t nBytes, bool preMultiply);
 		void savePNG(String filename="");
@@ -43,6 +48,10 @@ namespace Halley {
 		unsigned int getWidth() const { return w; }
 		unsigned int getHeight() const { return h; }
 		int getNComponents() const { return nComponents; }
+
+		static std::unique_ptr<Image> loadResource(ResourceLoader& loader);
+
+		Image& operator=(const Image& o) = delete;
 
 	private:
 		String filename;
