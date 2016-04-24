@@ -37,11 +37,10 @@ namespace Halley {
 	using Byte = unsigned char;
 	using Bytes = std::vector<Byte>;
 	
-	// Mid function
 	template <typename T>
-	inline T mid(T minValue, T value, T maxValue)
+	inline T clamp(T value, T minValue, T maxValue)
 	{
-		return min(max(minValue, value), maxValue);
+		return std::min(std::max(minValue, value), maxValue);
 	}
 
 	template <typename T>

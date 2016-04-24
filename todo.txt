@@ -18,7 +18,8 @@ opengl
 - instanced rendering?
 
 input
-* bring library into engine
+* clean up and hook up to InputAPI
+- isolate SDL events to SDL-specific file?
 - input context system [RESEARCH]
 
 audio
