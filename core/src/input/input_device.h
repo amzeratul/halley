@@ -49,12 +49,10 @@ namespace Halley {
 
 		virtual float getAxis(int n)=0;
 		virtual int getAxisRepeat(int n)=0;
-		virtual std::shared_ptr<InputDevice> getHat(int n)=0;
+		virtual InputDevice& getHat(int n)=0;
 
 		virtual void vibrate(spInputVibration vib)=0;
 		virtual void stopVibrating()=0;
 	};
-
-	typedef std::shared_ptr<InputDevice> spInputDevice;
-
+	
 }

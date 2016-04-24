@@ -55,13 +55,9 @@ size_t InputJoystick::getNumberHats()
 	return hats.size();
 }
 
-std::shared_ptr<InputDevice> InputJoystick::getHat(int n)
+InputDevice& InputJoystick::getHat(int n)
 {
-	try {
-		return hats.at(n);
-	} catch (...) {
-		return std::shared_ptr<InputDevice>();
-	}
+	return *hats.at(n);
 }
 
 int InputJoystick::getButtonAtPosition(char c) const

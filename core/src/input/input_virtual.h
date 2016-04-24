@@ -24,13 +24,15 @@
 #include "input_button_base.h"
 
 namespace Halley {
+	using spInputDevice = std::shared_ptr<InputDevice>;
+
 	class InputVirtual : public InputDevice {
 	public:
 		InputVirtual(int nButtons, int nAxes);
 		
 		bool isEnabled() const override { return true; }
 		virtual size_t getNumberHats() override { return 0; }
-		virtual std::shared_ptr<InputDevice> getHat(int /*n*/) override { return std::shared_ptr<InputDevice>(); };
+		virtual InputDevice& getHat(int /*n*/) override { throw Exception("Hat not available"); }
 
 		size_t getNumberButtons() override;
 		size_t getNumberAxes() override;
