@@ -72,14 +72,22 @@ Vector2i FontFace::getGlyphSize(int charCode)
 	return Vector2i(metrics.width, metrics.height) / 64;
 }
 
-void FontFace::drawGlyph(Image& image, int charcode, Rect4i rect2D)
+void FontFace::drawGlyph(Image& image, int charcode, Vector2i pos)
 {
 	auto glyph = pimpl->face->glyph;
-	int error = FT_Render_Glyph(glyph, FT_RENDER_MODE_MONO);
+	
+	int index = FT_Get_Char_Index(pimpl->face, charcode);
+	
+	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
+	if (error) {
+		throw Exception("Unable to load glyph " + String::integerToString(charcode));
+	}
+	
+	error = FT_Render_Glyph(glyph, FT_RENDER_MODE_MONO);
 	if (error != 0) {
 		throw Exception("Unable to render glyph " + String::integerToString(charcode));
 	}
-
+	
 	auto bmp = glyph->bitmap;
-	image.blitFrom(reinterpret_cast<char*>(bmp.buffer), bmp.width, bmp.rows, bmp.pitch);
+	image.blitFrom(pos, reinterpret_cast<char*>(bmp.buffer), bmp.width, bmp.rows, bmp.pitch, 1);
 }

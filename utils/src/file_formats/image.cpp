@@ -57,17 +57,48 @@ int Halley::Image::getRGBA(int r, int g, int b, int a)
 	return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
-void Halley::Image::blitFrom(const char* buffer, size_t width, size_t height, size_t pitch)
+void Halley::Image::clear(int colour)
+{
+	int* dst = reinterpret_cast<int*>(px.get());
+	for (size_t y = 0; y < h; y++) {
+		for (size_t x = 0; x < w; x++) {
+			*dst++ = colour;
+		}
+	}
+}
+
+void Halley::Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp)
 {
 	size_t xMax = std::min(size_t(w), width);
 	size_t yMax = std::min(size_t(h), height);
+	int* dst = reinterpret_cast<int*>(px.get()) + pos.x + pos.y * w;
 
-	const int* src = reinterpret_cast<const int*>(buffer);
-	int* dst = reinterpret_cast<int*>(px.get());
-	for (size_t y = 0; y < yMax; y++) {
-		for (size_t x = 0; x < xMax; x++) {
-			dst[x + y * w] = src[x + y * pitch];
+	if (bpp == 1) {
+		const char* src = reinterpret_cast<const char*>(buffer);
+		for (size_t y = 0; y < yMax; y++) {
+			for (size_t x = 0; x < xMax; x++) {
+				size_t pxPos = (x >> 3) + y * pitch;
+				int bit = 1 << (int(7 - x) & 7);
+				bool active = (src[pxPos] & bit) != 0;
+				dst[x + y * w] = getRGBA(255, 255, 255, active ? 255 : 0);
+			}
 		}
+	} else if (bpp == 8) {
+		const char* src = reinterpret_cast<const char*>(buffer);
+		for (size_t y = 0; y < yMax; y++) {
+			for (size_t x = 0; x < xMax; x++) {
+				dst[x + y * w] = getRGBA(255, 255, 255, src[x + y * pitch]);
+			}
+		}
+	} else if (bpp == 32) {
+		const int* src = reinterpret_cast<const int*>(buffer);
+		for (size_t y = 0; y < yMax; y++) {
+			for (size_t x = 0; x < xMax; x++) {
+				dst[x + y * w] = src[x + y * pitch];
+			}
+		}
+	} else {
+		throw Exception("Unknown amount of bits per pixel: " + String::integerToString(int(bpp)));
 	}
 }
 

@@ -91,7 +91,8 @@ int MakeFontTool::run(std::vector<std::string> args)
 			Rect4i srcRect = dstRect * downsample;
 
 			auto tmpImg = std::make_unique<Image>(srcRect.getWidth(), srcRect.getHeight());
-			font.drawGlyph(*tmpImg, charcode, srcRect);
+			tmpImg->clear(0);
+			font.drawGlyph(*tmpImg, charcode, Vector2i(border, border));
 			tmpImg->savePNG("tmp/" + args[1] + "_" + String::integerToString(charcode) + ".png");
 		}
 	}

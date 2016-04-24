@@ -16,7 +16,7 @@ namespace Halley
 		std::vector<int> getCharCodes() const;
 		Vector2i getGlyphSize(int charCode);
 		
-		void drawGlyph(Image& image, int charcode, Rect4i rect2D);
+		void drawGlyph(Image& image, int charcode, Vector2i pos);
 
 	private:
 		std::unique_ptr<FontFacePimpl> pimpl;

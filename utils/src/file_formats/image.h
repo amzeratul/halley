@@ -49,7 +49,8 @@ namespace Halley {
 		unsigned int getHeight() const { return h; }
 		int getNComponents() const { return nComponents; }
 
-		void blitFrom(const char* buffer, size_t width, size_t height, size_t pitch);
+		void clear(int colour);
+		void blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp);
 
 		static std::unique_ptr<Image> loadResource(ResourceLoader& loader);
 
