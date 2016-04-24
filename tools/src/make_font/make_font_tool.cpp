@@ -15,6 +15,12 @@ static Maybe<std::vector<BinPackResult>> tryPacking(FontFace& font, float fontSi
 			Vector2i finalSize((Vector2f(glyphSize) + Vector2f(2 * border, 2 * border)) * scale + Vector2f(1, 1));
 			size_t payload = size_t(code);
 			entries.push_back(BinPackEntry(finalSize, reinterpret_cast<void*>(payload)));
+
+#ifdef _DEBUG
+			if (entries.size() > 50) {
+				break;
+			}
+#endif
 		}
 	}
 
@@ -32,12 +38,12 @@ static Maybe<std::vector<BinPackResult>> binarySearch(std::function<Maybe<std::v
 	
 	while (v0 <= v1) {
 		int v = (v0 + v1) / 2;
-		auto result = f(v);
+		Maybe<std::vector<BinPackResult>> result = f(v);
 
 		if (result) {
 			// Midpoint is good, try increasing
 			lastGood = v;
-			bestResult = result.get();
+			bestResult = result;
 			v0 = v + 1;
 		} else {
 			// Midpoint is too big, try decreasing
@@ -64,10 +70,16 @@ int MakeFontTool::run(std::vector<std::string> args)
 	float scale = 1.0f / downsample;
 	float border = 2;
 
+	int minFont = 0;
+	int maxFont = 200;
+#ifdef _DEBUG
+	minFont = maxFont = 50;
+#endif
+
 	FontFace font(args[0]);
 	auto result = binarySearch([&] (int fontSize) -> Maybe<std::vector<BinPackResult>> {
 		return tryPacking(font, float(fontSize), size, scale, border);
-	}, 0, 200);
+	}, minFont, maxFont);
 
 	auto dstImg = std::make_unique<Image>(size.x, size.y);
 

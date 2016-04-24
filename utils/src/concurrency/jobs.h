@@ -30,6 +30,7 @@ namespace Halley {
 
 	class Job {
 	public:
+		Job();
 		Job(std::function<void()> f, int priority=0);
 		void run();
 		PriorityType getPriority() const;

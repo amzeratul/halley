@@ -26,6 +26,10 @@
 using namespace Halley;
 
 
+Job::Job()
+{	
+}
+
 Halley::Job::Job(std::function<void()> _f, int _priority)
 	: f(_f)
 {
