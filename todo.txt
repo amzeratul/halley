@@ -2,13 +2,14 @@ core
 - child stages
 
 core/resources
-* metafiles? [RESEARCH]
-* resource paths [RESEARCH]
+* metafiles, next to each file [RESEARCH]
+* texture metafiles, storing size, filtering, format?
+* resource paths
 - hot reloading [RESEARCH]
 
 core/graphics
 * rewrite text rendering system to use pre-baked distance fields
-* separate materials and material bindings [RESEARCH]
+* separate materials and material bindings
 - optimise SpritePainter
 - render graph [from old Halley]
 - sliced sprites [RESEARCH]
