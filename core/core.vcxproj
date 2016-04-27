@@ -35,6 +35,7 @@
     <ClInclude Include="src\graphics\blend.h" />
     <ClInclude Include="src\graphics\camera.h" />
     <ClInclude Include="src\graphics\material.h" />
+    <ClInclude Include="src\graphics\material_definition.h" />
     <ClInclude Include="src\graphics\material_parameter.h" />
     <ClInclude Include="src\graphics\painter.h" />
     <ClInclude Include="src\graphics\render_context.h" />
@@ -82,6 +83,7 @@
     <ClCompile Include="src\core\environment.cpp" />
     <ClCompile Include="src\graphics\camera.cpp" />
     <ClCompile Include="src\graphics\material.cpp" />
+    <ClCompile Include="src\graphics\material_definition.cpp" />
     <ClCompile Include="src\graphics\material_parameter.cpp" />
     <ClCompile Include="src\graphics\painter.cpp" />
     <ClCompile Include="src\graphics\render_context.cpp" />

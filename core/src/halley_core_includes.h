@@ -9,6 +9,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "graphics/blend.h"
 #include "graphics/material.h"
+#include "graphics/material_definition.h"
 #include "graphics/material_parameter.h"
 #include "graphics/painter.h"
 #include "graphics/render_context.h"

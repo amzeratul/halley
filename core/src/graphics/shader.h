@@ -6,6 +6,7 @@ namespace Halley
 {
 	class ResourceLoader;
 	class MaterialParameterBinding;
+	class MaterialAttribute;
 
 	class Shader
 	{

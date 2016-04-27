@@ -1,7 +1,7 @@
 #include "painter_opengl.h"
 #include "halley_gl.h"
 #include "../../core/src/graphics/material.h"
-#include "../../core/src/graphics/material_parameter.h"
+#include "../../core/src/graphics/material_definition.h"
 
 using namespace Halley;
 
@@ -62,7 +62,7 @@ void PainterOpenGL::setBlend(BlendType blend)
 	glUtils->setBlendType(blend);
 }
 
-void PainterOpenGL::setVertices(Material& material, size_t numVertices, void* vertexData)
+void PainterOpenGL::setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData)
 {
 	// Load vertices into VBO
 	size_t bytesSize = numVertices * material.getVertexStride();
@@ -73,7 +73,7 @@ void PainterOpenGL::setVertices(Material& material, size_t numVertices, void* ve
 	setupVertexAttributes(material);
 }
 
-void PainterOpenGL::setupVertexAttributes(Material& material)
+void PainterOpenGL::setupVertexAttributes(MaterialDefinition& material)
 {
 	// Set vertex attribute pointers in VBO
 	int vertexStride = material.getVertexStride();

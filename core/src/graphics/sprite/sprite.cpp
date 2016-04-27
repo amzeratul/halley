@@ -2,6 +2,7 @@
 #include "sprite_sheet.h"
 #include "../painter.h"
 #include "../material.h"
+#include "../material_definition.h"
 
 using namespace Halley;
 
@@ -22,7 +23,7 @@ void Sprite::draw(Painter& painter) const
 		dirty = false;
 	}
 
-	assert(material->getVertexStride() == sizeof(SpriteVertexAttrib));
+	assert(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	painter.drawQuads(material, 4, vertices.data());
 }
 

@@ -2,6 +2,7 @@
 #include "render_context.h"
 #include "render_target/render_target.h"
 #include "material.h"
+#include "material_definition.h"
 #include "material_parameter.h"
 
 using namespace Halley;
@@ -61,7 +62,7 @@ void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, 
 		materialPending = material;
 	}
 
-	size_t dataSize = numVertices * material->getVertexStride();
+	size_t dataSize = numVertices * material->getDefinition().getVertexStride();
 	size_t requiredSize = dataSize + bytesPending;
 	if (vertexBuffer.size() < requiredSize) {
 		vertexBuffer.resize(requiredSize * 2);
@@ -108,10 +109,10 @@ void Painter::executeDrawQuads(Material& material, size_t numVertices, void* ver
 	material["u_mvp"] = projection;
 
 	// Load vertices
-	setVertices(material, numVertices, vertexData);
+	setVertices(material.getDefinition(), numVertices, vertexData);
 
 	// Go through each pass
-	for (int i = 0; i < material.getNumPasses(); i++) {
+	for (int i = 0; i < material.getDefinition().getNumPasses(); i++) {
 		// Bind pass
 		material.bind(i, *this);
 

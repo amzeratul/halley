@@ -1,6 +1,7 @@
 #include "material_parameter.h"
 #include "uniform_type.h"
 #include "material.h"
+#include "material_definition.h"
 #include "../api/halley_api.h"
 #include "shader.h"
 #include "texture.h"
@@ -17,14 +18,14 @@ MaterialParameter::MaterialParameter(Material& material, String name, ShaderPara
 
 VideoAPIInternal& MaterialParameter::getAPI()
 {
-	return *static_cast<VideoAPIInternal*>(material.api);
+	return *static_cast<VideoAPIInternal*>(material.getDefinition().api);
 }
 
 void MaterialParameter::updateAddresses()
 {
-	addresses.resize(material.passes.size());
+	addresses.resize(material.getDefinition().passes.size());
 	for (size_t i = 0; i < addresses.size(); i++) {
-		addresses[i] = material.passes[i].getShader().getUniformLocation(name);
+		addresses[i] = material.getDefinition().passes[i].getShader().getUniformLocation(name);
 	}
 }
 

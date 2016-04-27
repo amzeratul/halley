@@ -6,6 +6,7 @@
 namespace Halley
 {
 	class Material;
+	class MaterialDefinition;
 	class Camera;
 
 	class Painter
@@ -30,7 +31,7 @@ namespace Halley
 	protected:
 		virtual void doStartRender() = 0;
 		virtual void doEndRender() = 0;
-		virtual void setVertices(Material& material, size_t numVertices, void* vertexData) = 0;
+		virtual void setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData) = 0;
 		virtual void drawQuads(size_t n) = 0;
 
 		virtual void setViewPort(Rect4i rect, bool enableScissor) = 0;

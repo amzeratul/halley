@@ -56,7 +56,8 @@ void TestStage::onRender(RenderContext& context) const
 {
 	Sprite sprite;
 	auto texture = getResource<Texture>("sprites/halley_logo_dist.png");
-	auto material = getResource<Material>("shaders/distance_field_sprite.yaml");
+	auto matDef = getResource<MaterialDefinition>("shaders/distance_field_sprite.yaml");
+	auto material = std::make_shared<Material>(matDef);
 	(*material)["tex0"] = texture;
 	sprite.setMaterial(material);
 	sprite.setSize(Vector2f(512, 256));

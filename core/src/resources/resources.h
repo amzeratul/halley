@@ -56,7 +56,11 @@ namespace Halley {
 		~Resources();
 
 		template <typename T>
-		std::shared_ptr<T> get(String name, ResourceLoadPriority priority = ResourceLoadPriority::Normal) { return std::static_pointer_cast<T>(doGet(name, priority, &Resources::loader<T>)); }
+		std::shared_ptr<T> get(String name, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
+		{
+			static_assert(std::is_base_of<Resource, T>::value, "Trying to load a type which does not extend Resource");
+			return std::static_pointer_cast<T>(doGet(name, priority, &Resources::loader<T>));
+		}
 
 		template <typename T>
 		void preLoad(String name) {	doGet(name, ResourceLoadPriority::Low, loader<T>); }

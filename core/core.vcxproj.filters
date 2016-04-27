@@ -177,6 +177,7 @@
     <ClInclude Include="src\input\input_virtual.h" />
     <ClInclude Include="src\input\input_keyboard_concrete.h" />
     <ClInclude Include="src\input\input_mouse_concrete.h" />
+    <ClInclude Include="src\graphics\material_definition.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
@@ -269,5 +270,6 @@
     <ClCompile Include="src\input\input_virtual.cpp" />
     <ClCompile Include="src\input\input_keyboard_concrete.cpp" />
     <ClCompile Include="src\input\input_mouse_concrete.cpp" />
+    <ClCompile Include="src\graphics\material_definition.cpp" />
   </ItemGroup>
 </Project>

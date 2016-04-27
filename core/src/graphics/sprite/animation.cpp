@@ -1,6 +1,7 @@
 #include "animation.h"
 #include "sprite_sheet.h"
 #include "../material.h"
+#include "../material_definition.h"
 #include "../material_parameter.h"
 #include "../../core/src/api/halley_api.h"
 #include "../../core/src/resources/resources.h"
@@ -95,7 +96,8 @@ Animation::Animation(ResourceLoader& loader)
 
 		if (root["shader"].IsDefined()) {
 			String path = basePath + root["shader"].as<std::string>();
-			material = resources.get<Material>(path);
+			auto matDef = resources.get<MaterialDefinition>(path);
+			material = std::make_shared<Material>(matDef);
 			(*material)["tex0"] = spriteSheet->getTexture();
 		}
 

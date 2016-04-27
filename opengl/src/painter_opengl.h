@@ -19,7 +19,7 @@ namespace Halley
 		void setBlend(BlendType blend) override;
 
 	protected:
-		void setVertices(Material& material, size_t numVertices, void* vertexData) override;
+		void setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData) override;
 		void drawQuads(size_t n) override;
 		void setViewPort(Rect4i rect, bool enableScissor) override;
 
@@ -30,6 +30,6 @@ namespace Halley
 
 		std::vector<unsigned short> indexData;
 
-		void setupVertexAttributes(Material& material);
+		void setupVertexAttributes(MaterialDefinition& material);
 	};
 }
