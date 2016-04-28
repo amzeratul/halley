@@ -5,12 +5,7 @@ using namespace Halley;
 
 void TestStage::init()
 {
-	world = std::make_unique<World>(&getAPI());
-	world->addSystem(createSystem("SpawnSpriteSystem"), TimeLine::FixedUpdate);
-	world->addSystem(createSystem("TimeSystem"), TimeLine::FixedUpdate);
-	world->addSystem(createSystem("MovementSystem"), TimeLine::FixedUpdate);
-	world->addSystem(createSystem("SpriteAnimationSystem"), TimeLine::FixedUpdate);
-	world->addSystem(createSystem("RenderSystem"), TimeLine::Render);
+	world = createWorld("sample_test_world.yaml", createSystem);
 
 	target = getAPI().video->createRenderTarget();
 	TextureDescriptor desc;

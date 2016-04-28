@@ -2,7 +2,7 @@
 
 #include "prec.h"
 
-class TestStage : public Halley::Stage
+class TestStage : public Halley::EntityStage
 {
 public:
 	void init() override;

@@ -12,8 +12,8 @@ using namespace Halley;
 
 YAMLFile::YAMLFile(String string)
 {
-	auto orig = YAML::Load(string);
 	root = std::make_unique<YAML::Node>();
+	*root = YAML::Load(string);
 }
 
 YAMLFile::YAMLFile(std::unique_ptr<YAML::Node> node)

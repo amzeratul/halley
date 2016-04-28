@@ -14,4 +14,5 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<Texture>("image");
 	resources.init<MaterialDefinition>("material");
 	resources.init<TextFile>("");
+	resources.init<YAMLFile>("");
 }

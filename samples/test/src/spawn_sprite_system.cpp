@@ -8,11 +8,11 @@
 
 using namespace Halley;
 
-void SpawnSpriteSystem::update(Halley::Time)
+void SpawnSpriteSystem::update(Time)
 {
 	auto& world = getWorld();
 	auto& resources = getAPI().core->getResources();
-	const int targetEntities = Halley::Debug::isDebug() ? 20 : 10000;
+	const int targetEntities = Debug::isDebug() ? 200 : 10000;
 	const int nToSpawn = std::min(targetEntities - int(world.numEntities()), std::max(1, targetEntities / 60));
 	for (int i = 0; i < nToSpawn; i++) {
 		auto& r = Random::getGlobal();

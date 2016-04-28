@@ -1,0 +1,10 @@
+---
+timelines:
+  fixedUpdate:
+    - SpawnSprite
+    - Time
+    - Movement
+    - SpriteAnimation
+  render:
+    - Render
+...

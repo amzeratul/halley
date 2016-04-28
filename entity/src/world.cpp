@@ -22,12 +22,6 @@ Halley::System& Halley::World::addSystem(std::unique_ptr<System> system, TimeLin
 	return ref;
 }
 
-System& Halley::World::addSystemByName(String, TimeLine timeline)
-{
-	// TODO
-	return addSystem(std::unique_ptr<System>(nullptr), timeline);
-}
-
 void World::removeSystem(System& system)
 {
 	for (auto& sys : systems) {

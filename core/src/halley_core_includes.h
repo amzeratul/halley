@@ -40,3 +40,4 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "resources/resource_locator.h"
 
 #include "stage/stage.h"
+#include "stage/entity_stage.h"

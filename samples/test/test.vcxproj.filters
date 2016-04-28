@@ -84,6 +84,7 @@
     <ClInclude Include="gen\cpp\registry.h">
       <Filter>gen</Filter>
     </ClInclude>
+    <ClInclude Include="gen\cpp\systems\spawn_sprite_system.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="gen_src\test.yaml" />

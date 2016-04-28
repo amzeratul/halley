@@ -8,6 +8,7 @@ namespace Halley
 {
 	class HalleyAPI;
 	class RenderContext;
+	class World;
 
 	class Stage
 	{

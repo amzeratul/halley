@@ -24,7 +24,6 @@ namespace Halley {
 		double getLastStepLength() const { return lastStepLength; }
 		bool hasSystemsOnTimeLine(TimeLine timeline) const;
 
-		System& addSystemByName(String name, TimeLine timeline);
 		System& addSystem(std::unique_ptr<System> system, TimeLine timeline);
 		void removeSystem(System& system);
 		std::vector<System*> getSystems();

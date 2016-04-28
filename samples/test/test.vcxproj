@@ -167,6 +167,7 @@
     <ClInclude Include="gen\cpp\registry.h" />
     <ClInclude Include="gen\cpp\systems\movement_system.h" />
     <ClInclude Include="gen\cpp\systems\render_system.h" />
+    <ClInclude Include="gen\cpp\systems\spawn_sprite_system.h" />
     <ClInclude Include="gen\cpp\systems\sprite_animation_system.h" />
     <ClInclude Include="gen\cpp\systems\time_system.h" />
     <ClInclude Include="src\prec.h" />
