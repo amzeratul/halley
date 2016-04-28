@@ -1,7 +1,7 @@
 ![Halley Logo](http://higherorderfun.com/stuff/halley/halley_scarlet.png)
 
 # Halley Game Engine
-A lightweight game engine written in modern C++. I'm currently re-architecting the whole engine, while experimenting with some crazy ideas, so it's not usable at all right now (some basic components, such as input, are not there at all).
+A lightweight game engine written in C++14. I'm currently re-architecting the whole engine, while experimenting with some crazy ideas, so it's not usable at all right now (some basic components, such as input, are not there at all).
 
 Design guidelines & objectives:
 * Modern graphics pipelines, with first-class shader support
