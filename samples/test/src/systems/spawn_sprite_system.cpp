@@ -1,10 +1,10 @@
-#include "../gen/cpp/systems/spawn_sprite_system.h"
+#include "../../gen/cpp/systems/spawn_sprite_system.h"
 
-#include "../gen/cpp/components/position_component.h"
-#include "../gen/cpp/components/sprite_animation_component.h"
-#include "../gen/cpp/components/sprite_component.h"
-#include "../gen/cpp/components/time_component.h"
-#include "../gen/cpp/components/velocity_component.h"
+#include "../../gen/cpp/components/position_component.h"
+#include "../../gen/cpp/components/sprite_animation_component.h"
+#include "../../gen/cpp/components/sprite_component.h"
+#include "../../gen/cpp/components/time_component.h"
+#include "../../gen/cpp/components/velocity_component.h"
 
 using namespace Halley;
 

@@ -21,31 +21,28 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\sample_entry.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\prec.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render_system.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\test_stage.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\sprite_animation_system.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\movement_system.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\time_system.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="gen\cpp\registry.cpp">
       <Filter>gen</Filter>
     </ClCompile>
-    <ClCompile Include="src\spawn_sprite_system.cpp" />
+    <ClCompile Include="src\systems\movement_system.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\render_system.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\spawn_sprite_system.cpp" />
+    <ClCompile Include="src\systems\sprite_animation_system.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\time_system.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\prec.h">

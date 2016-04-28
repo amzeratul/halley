@@ -1,4 +1,4 @@
-#include "../gen/cpp/systems/sprite_animation_system.h"
+#include "../../gen/cpp/systems/sprite_animation_system.h"
 
 void SpriteAnimationSystem::update(Halley::Time time, MainFamily& e)
 {

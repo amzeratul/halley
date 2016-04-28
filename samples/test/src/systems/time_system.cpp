@@ -1,4 +1,4 @@
-#include "../gen/cpp/systems/time_system.h"
+#include "../../gen/cpp/systems/time_system.h"
 
 void TimeSystem::update(Halley::Time time, MainFamily& e)
 {

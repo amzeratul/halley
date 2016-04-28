@@ -146,17 +146,16 @@
   <ItemGroup>
     <ClCompile Include="gen\cpp\registry.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\movement_system.cpp" />
+    <ClCompile Include="src\systems\movement_system.cpp" />
     <ClCompile Include="src\prec.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\render_system.cpp" />
-    <ClCompile Include="src\sample_entry.cpp" />
-    <ClCompile Include="src\spawn_sprite_system.cpp" />
+    <ClCompile Include="src\systems\render_system.cpp" />
+    <ClCompile Include="src\systems\spawn_sprite_system.cpp" />
     <ClCompile Include="src\test_stage.cpp" />
-    <ClCompile Include="src\sprite_animation_system.cpp" />
-    <ClCompile Include="src\time_system.cpp" />
+    <ClCompile Include="src\systems\sprite_animation_system.cpp" />
+    <ClCompile Include="src\systems\time_system.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gen\cpp\components\position_component.h" />
