@@ -933,6 +933,18 @@ std::vector<String> Halley::String::split(char delimiter) const
 	return result;
 }
 
+String String::concatList(const std::vector<String>& list, String separator)
+{
+	std::stringstream ss;
+	for (size_t i = 0; i < list.size(); i++) {
+		if (i != 0) {
+			ss << separator.cppStr();
+		}
+		ss << list[i].cppStr();
+	}
+	return ss.str();
+}
+
 void String::appendCharacter(int unicode)
 {
 	// Backspace

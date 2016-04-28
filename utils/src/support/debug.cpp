@@ -29,21 +29,13 @@
 
 using namespace Halley;
 
-bool Halley::Debug::debugging = false;
-
-void Halley::Debug::setDebugMode(bool enabled)
+bool Halley::Debug::isDebug()
 {
-	debugging = enabled;
-}
-
-void Halley::Debug::toggleDebugMode()
-{
-	debugging = !debugging;
-}
-
-bool Halley::Debug::isDebugMode()
-{
-	return debugging;
+#ifdef _DEBUG
+	return true;
+#else
+	return false;
+#endif
 }
 
 Halley::Debug::Debug()

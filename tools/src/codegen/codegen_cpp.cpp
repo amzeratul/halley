@@ -118,9 +118,29 @@ std::vector<String> CodegenCPP::generateComponentHeader(ComponentSchema componen
 		"	constexpr static int componentIndex = " + String::integerToString(component.id) + ";",
 		"",
 	};
+
+	// Members
+	std::vector<String> members;
 	for (auto& member : component.members) {
-		contents.emplace_back(String("\t") + (member.isConst ? "const " : "") + member.type + " " + member.name + ";");
+		String decl = member.type + " " + member.name;
+		contents.emplace_back(String("\t") + (member.isConst ? "const " : "") + decl + ";");
+		members.push_back(decl);
 	}
+
+	// Default constructor
+	contents.emplace_back("");
+	contents.emplace_back("\t" + className + "() {}");
+
+	// Initializing constructor
+	contents.emplace_back("");
+	contents.emplace_back("\t" + className + "(" + String::concatList(members, ", ") + ")");
+	bool first = true;
+	for (auto& member : component.members) {
+		contents.emplace_back(String("\t\t") + (first ? ": " : ", ") + member.name + "(" + member.name + ")");
+		first = false;
+	}
+	contents.emplace_back("\t{}");
+	
 	contents.emplace_back("};");
 	return contents;
 }

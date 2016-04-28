@@ -28,17 +28,9 @@ void TestStage::deInit()
 {
 }
 
-void TestStage::onVariableUpdate(Time)
-{
-}
-
 void TestStage::onFixedUpdate(Time time)
 {
-#ifdef _DEBUG
-	const int targetEntities = 20;
-#else
-	const int targetEntities = 10000;
-#endif
+	const int targetEntities = Debug::isDebug() ? 20 : 10000;
 	const int nToSpawn = std::min(targetEntities - int(world->numEntities()), std::max(1, targetEntities / 60));
 	for (int i = 0; i < nToSpawn; i++) {
 		spawnTestSprite();
@@ -72,26 +64,11 @@ void TestStage::onRender(RenderContext& context) const
 void TestStage::spawnTestSprite()
 {
 	auto& r = Random::getGlobal();
-
-	auto posComp = new PositionComponent();
-	posComp->position = Vector2f(r.getFloat(0.0f, 1280.0f), r.getFloat(0.0f, 720.0f));
-
-	auto velComp = new VelocityComponent();
-	velComp->velocity = Vector2f(r.getFloat(200.0f, 300.0f), 0.0f).rotate(Angle1f::fromDegrees(r.getFloat(0.0f, 360.0f)));
-
-	auto spriteComp = new SpriteComponent();
-
-	auto timeComp = new TimeComponent();
-	timeComp->elapsed = r.getFloat(0.0f, 1.0f);
-
-	auto animComp = new SpriteAnimationComponent();
-	animComp->player.setAnimation(getResource<Animation>("ella.yaml"));
-	animComp->player.setSequence("run");
-
+	
 	world->createEntity()
-		.addComponent(posComp)
-		.addComponent(velComp)
-		.addComponent(spriteComp)
-		.addComponent(timeComp)
-		.addComponent(animComp);
+		.addComponent(new PositionComponent(Vector2f(r.getFloat(0.0f, 1280.0f), r.getFloat(0.0f, 720.0f))))
+		.addComponent(new VelocityComponent(Vector2f(r.getFloat(200.0f, 300.0f), 0.0f).rotate(Angle1f::fromDegrees(r.getFloat(0.0f, 360.0f)))))
+		.addComponent(new SpriteComponent())
+		.addComponent(new TimeComponent(r.getFloat(0.0f, 1.0f)))
+		.addComponent(new SpriteAnimationComponent(AnimationPlayer(getResource<Animation>("ella.yaml"), "run")));
 }

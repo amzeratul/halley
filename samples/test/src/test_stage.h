@@ -7,7 +7,6 @@ class TestStage : public Halley::Stage
 public:
 	void init() override;
 	void deInit() override;
-	void onVariableUpdate(Halley::Time time) override;
 	void onFixedUpdate(Halley::Time time) override;
 	void onRender(Halley::RenderContext& context) const override;
 

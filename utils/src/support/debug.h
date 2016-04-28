@@ -27,9 +27,7 @@
 namespace Halley {
 	class Debug {
 	public:
-		static void setDebugMode(bool enabled);
-		static void toggleDebugMode();
-		static bool isDebugMode();
+		static bool isDebug();
 
 		static void setErrorHandling();
 		static void printCallStack();
