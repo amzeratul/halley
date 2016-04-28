@@ -45,6 +45,7 @@
     <ClCompile Include="gen\cpp\registry.cpp">
       <Filter>gen</Filter>
     </ClCompile>
+    <ClCompile Include="src\spawn_sprite_system.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\prec.h">

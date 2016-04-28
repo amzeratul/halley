@@ -38,4 +38,8 @@ families:
   - main: ['read Position', 'write Sprite']
 method: render
 strategy: global
+---
+system: SpawnSprite
+method: update
+strategy: global
 ...

@@ -153,6 +153,7 @@
     </ClCompile>
     <ClCompile Include="src\render_system.cpp" />
     <ClCompile Include="src\sample_entry.cpp" />
+    <ClCompile Include="src\spawn_sprite_system.cpp" />
     <ClCompile Include="src\test_stage.cpp" />
     <ClCompile Include="src\sprite_animation_system.cpp" />
     <ClCompile Include="src\time_system.cpp" />

@@ -1,16 +1,12 @@
 #include "test_stage.h"
 #include "../gen/cpp/registry.h"
-#include "../gen/cpp/components/position_component.h"
-#include "../gen/cpp/components/sprite_animation_component.h"
-#include "../gen/cpp/components/sprite_component.h"
-#include "../gen/cpp/components/time_component.h"
-#include "../gen/cpp/components/velocity_component.h"
 
 using namespace Halley;
 
 void TestStage::init()
 {
 	world = std::make_unique<World>(&getAPI());
+	world->addSystem(createSystem("SpawnSpriteSystem"), TimeLine::FixedUpdate);
 	world->addSystem(createSystem("TimeSystem"), TimeLine::FixedUpdate);
 	world->addSystem(createSystem("MovementSystem"), TimeLine::FixedUpdate);
 	world->addSystem(createSystem("SpriteAnimationSystem"), TimeLine::FixedUpdate);
@@ -22,6 +18,13 @@ void TestStage::init()
 	desc.h = 720;
 	desc.format = TextureFormat::RGBA;
 	target->setTarget(0, getAPI().video->createTexture(desc));
+
+	halleyLogo = Sprite()
+		.setImage(getAPI().core->getResources(), "halley_logo_dist.png", "distance_field_sprite.yaml")
+		.setPivot(Vector2f(0.0f, 1.0f))
+		.setPos(Vector2f(0, 720) + Vector2f(32, 32))
+		.setColour(Colour4f(0.9882f, 0.15686f, 0.27843f, 1))
+		.setScale(Vector2f(2, 2));
 }
 
 void TestStage::deInit()
@@ -30,12 +33,6 @@ void TestStage::deInit()
 
 void TestStage::onFixedUpdate(Time time)
 {
-	const int targetEntities = Debug::isDebug() ? 20 : 10000;
-	const int nToSpawn = std::min(targetEntities - int(world->numEntities()), std::max(1, targetEntities / 60));
-	for (int i = 0; i < nToSpawn; i++) {
-		spawnTestSprite();
-	}
-
 	world->step(TimeLine::FixedUpdate, time);
 
 	if (getAPI().input->getKeyboard().isButtonDown(Keys::Esc)) {
@@ -45,30 +42,10 @@ void TestStage::onFixedUpdate(Time time)
 
 void TestStage::onRender(RenderContext& context) const
 {
-	Sprite sprite = Sprite()
-		.setImage(getAPI().core->getResources(), "halley_logo_dist.png", "distance_field_sprite.yaml")
-		.setPivot(Vector2f(0.0f, 1.0f))
-		.setPos(Vector2f(0, 720) + Vector2f(32, 32))
-		.setColour(Colour4f(0.9882f, 0.15686f, 0.27843f, 1))
-		.setScale(Vector2f(2, 2));
-
 	context.bind([&] (Painter& painter)
 	{
 		painter.clear(Colour(0.2f, 0.2f, 0.3f));
 		world->render(painter);
-
-		sprite.draw(painter);
+		halleyLogo.draw(painter);
 	});
-}
-
-void TestStage::spawnTestSprite()
-{
-	auto& r = Random::getGlobal();
-	
-	world->createEntity()
-		.addComponent(new PositionComponent(Vector2f(r.getFloat(0.0f, 1280.0f), r.getFloat(0.0f, 720.0f))))
-		.addComponent(new VelocityComponent(Vector2f(r.getFloat(200.0f, 300.0f), 0.0f).rotate(Angle1f::fromDegrees(r.getFloat(0.0f, 360.0f)))))
-		.addComponent(new SpriteComponent())
-		.addComponent(new TimeComponent(r.getFloat(0.0f, 1.0f)))
-		.addComponent(new SpriteAnimationComponent(AnimationPlayer(getResource<Animation>("ella.yaml"), "run")));
 }
