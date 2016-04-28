@@ -8,11 +8,7 @@ void TestStage::init()
 	world = createWorld("sample_test_world.yaml", createSystem);
 
 	target = getAPI().video->createRenderTarget();
-	TextureDescriptor desc;
-	desc.w = 1280;
-	desc.h = 720;
-	desc.format = TextureFormat::RGBA;
-	target->setTarget(0, getAPI().video->createTexture(desc));
+	target->setTarget(0, getAPI().video->createTexture(TextureDescriptor(Vector2i(1280, 720))));
 
 	halleyLogo = Sprite()
 		.setImage(getAPI().core->getResources(), "halley_logo_dist.png", "distance_field_sprite.yaml")

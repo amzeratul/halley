@@ -10,9 +10,7 @@ std::unique_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	auto& meta = loader.getMeta();
 	auto img = std::make_unique<Image>(data->getPath(), static_cast<Byte*>(data->getData()), data->getSize(), meta.getBool("premultiply", true));
 	
-	TextureDescriptor descriptor;
-	descriptor.w = img->getWidth();
-	descriptor.h = img->getHeight();
+	TextureDescriptor descriptor(Vector2i(img->getWidth(), img->getHeight()));
 	descriptor.pixelData = img->getPixels();
 	
 	descriptor.useFiltering = meta.getBool("filtering", false);

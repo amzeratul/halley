@@ -4,11 +4,11 @@
 
 using namespace Halley;
 
-TextureOpenGL::TextureOpenGL(TextureDescriptor& d)
+TextureOpenGL::TextureOpenGL(const TextureDescriptor& d)
 {
-	textureId = create(d.w, d.h, d.format, d.useMipMap, d.useFiltering);
+	textureId = create(d.size.x, d.size.y, d.format, d.useMipMap, d.useFiltering);
 	if (d.pixelData != nullptr) {
-		loadImage(reinterpret_cast<const char*>(d.pixelData), d.w, d.h, d.w, d.format, d.useMipMap);
+		loadImage(reinterpret_cast<const char*>(d.pixelData), d.size.x, d.size.y, d.size.x, d.format, d.useMipMap);
 	}
 }
 

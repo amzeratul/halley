@@ -12,8 +12,7 @@ namespace Halley
 	class TextureDescriptor
 	{
 	public:
-		size_t w = 0;
-		size_t h = 0;
+		Vector2i size;
 		size_t padding = 0;
 		TextureFormat format = TextureFormat::RGBA;
 		bool useMipMap = false;
@@ -21,5 +20,11 @@ namespace Halley
 		void* pixelData = nullptr;
 
 		static int getBitsPerPixel(TextureFormat format);
+
+		TextureDescriptor() {}
+		TextureDescriptor(Vector2i size, TextureFormat format = TextureFormat::RGBA)
+			: size(size)
+			, format(format)
+		{}
 	};
 }

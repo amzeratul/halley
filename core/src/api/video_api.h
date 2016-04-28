@@ -42,7 +42,7 @@ namespace Halley
 
 		virtual void setVirtualSize(Vector2f virtualSize) = 0;
 
-		virtual std::unique_ptr<Texture> createTexture(TextureDescriptor& descriptor) = 0;
+		virtual std::unique_ptr<Texture> createTexture(const TextureDescriptor& descriptor) = 0;
 		virtual std::unique_ptr<Shader> createShader(String name) = 0;
 		virtual std::unique_ptr<TextureRenderTarget> createRenderTarget() = 0;
 	};

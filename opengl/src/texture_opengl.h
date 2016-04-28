@@ -7,7 +7,7 @@ namespace Halley
 	class TextureOpenGL : public Texture
 	{
 	public:
-		explicit TextureOpenGL(TextureDescriptor& descriptor);
+		explicit TextureOpenGL(const TextureDescriptor& descriptor);
 
 		void bind(int textureUnit) override;
 
