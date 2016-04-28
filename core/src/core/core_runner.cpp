@@ -10,6 +10,7 @@
 #include "../graphics/render_target/render_target_screen.h"
 #include "../resources/resources.h"
 #include "../resources/resource_locator.h"
+#include "../resources/standard_resources.h"
 
 #pragma warning(disable: 4996)
 
@@ -100,9 +101,7 @@ void CoreRunner::init(std::vector<String> args)
 	api = HalleyAPI::create(this, game->initPlugins());
 
 	// Resources
-	auto locator = std::make_unique<ResourceLocator>();
-	game->initResourceLocator(*locator);
-	resources = std::make_unique<Resources>(std::move(locator), &*api);
+	initResources();
 
 	// Init game
 	game->init(&*api);
@@ -142,6 +141,14 @@ void CoreRunner::deInit()
 		system("pause");
 	}
 #endif
+}
+
+void CoreRunner::initResources()
+{
+	auto locator = std::make_unique<ResourceLocator>();
+	game->initResourceLocator(*locator);
+	resources = std::make_unique<Resources>(std::move(locator), &*api);
+	StandardResources::initialize(*resources);
 }
 
 void CoreRunner::pumpEvents(Time time)

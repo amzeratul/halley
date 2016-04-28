@@ -9,7 +9,6 @@ core/resources
 
 core/graphics
 * rewrite text rendering system to use pre-baked distance fields
-* separate materials and material bindings
 - optimise SpritePainter
 - render graph [from old Halley]
 - sliced sprites [RESEARCH]

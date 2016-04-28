@@ -55,8 +55,8 @@ void TestStage::onFixedUpdate(Time time)
 void TestStage::onRender(RenderContext& context) const
 {
 	Sprite sprite;
-	auto texture = getResource<Texture>("sprites/halley_logo_dist.png");
-	auto matDef = getResource<MaterialDefinition>("shaders/distance_field_sprite.yaml");
+	auto texture = getResource<Texture>("halley_logo_dist.png");
+	auto matDef = getResource<MaterialDefinition>("distance_field_sprite.yaml");
 	auto material = std::make_shared<Material>(matDef);
 	(*material)["tex0"] = texture;
 	sprite.setMaterial(material);
@@ -92,7 +92,7 @@ void TestStage::spawnTestSprite()
 	timeComp->elapsed = r.getFloat(0.0f, 1.0f);
 
 	auto animComp = new SpriteAnimationComponent();
-	animComp->player.setAnimation(getResource<Animation>("animations/ella.yaml"));
+	animComp->player.setAnimation(getResource<Animation>("ella.yaml"));
 	animComp->player.setSequence("run");
 
 	world->createEntity()

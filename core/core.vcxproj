@@ -68,11 +68,13 @@
     <ClInclude Include="src\input\input_vibration.h" />
     <ClInclude Include="src\input\input_virtual.h" />
     <ClInclude Include="src\prec.h" />
+    <ClInclude Include="src\resources\resource_collection.h" />
     <ClInclude Include="src\resources\resource_data_reader.h" />
     <ClInclude Include="src\resources\resource_filesystem.h" />
     <ClInclude Include="src\resources\resource_locator.h" />
     <ClInclude Include="src\resources\resources.h" />
     <ClInclude Include="src\resources\resource_pack.h" />
+    <ClInclude Include="src\resources\standard_resources.h" />
     <ClInclude Include="src\sdl\system_sdl.h" />
     <ClInclude Include="src\stage\stage.h" />
     <ClInclude Include="src\stage\stage_id.h" />
@@ -114,10 +116,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\resources\resources.cpp" />
+    <ClCompile Include="src\resources\resource_collection.cpp" />
     <ClCompile Include="src\resources\resource_data_reader.cpp" />
     <ClCompile Include="src\resources\resource_filesystem.cpp" />
     <ClCompile Include="src\resources\resource_locator.cpp" />
     <ClCompile Include="src\resources\resource_pack.cpp" />
+    <ClCompile Include="src\resources\standard_resources.cpp" />
     <ClCompile Include="src\sdl\system_sdl.cpp" />
     <ClCompile Include="src\stage\stage.cpp" />
   </ItemGroup>

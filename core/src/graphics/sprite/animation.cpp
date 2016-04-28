@@ -90,13 +90,13 @@ Animation::Animation(ResourceLoader& loader)
 		name = root["name"].as<std::string>();
 
 		if (root["spriteSheet"].IsDefined()) {
-			String path = basePath + root["spriteSheet"].as<std::string>();
-			spriteSheet = resources.get<SpriteSheet>(path);
+			String path = root["spriteSheet"].as<std::string>();
+			spriteSheet = resources.of<SpriteSheet>().get(path);
 		}
 
 		if (root["shader"].IsDefined()) {
-			String path = basePath + root["shader"].as<std::string>();
-			auto matDef = resources.get<MaterialDefinition>(path);
+			String path = root["shader"].as<std::string>();
+			auto matDef = resources.of<MaterialDefinition>().get(path);
 			material = std::make_shared<Material>(matDef);
 			(*material)["tex0"] = spriteSheet->getTexture();
 		}

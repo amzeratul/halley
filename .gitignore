@@ -40,6 +40,7 @@ obj/
 *.log
 _ReSharper*/
 *.sbr
+*.ttf
 
 # Build system
 build

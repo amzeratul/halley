@@ -36,9 +36,6 @@ const SpriteSheetEntry& SpriteSheet::getSprite(String name) const
 
 std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 {
-	// Find base path
-	String basePath = loader.getBasePath();
-
 	// Read data
 	auto data = loader.getStatic();
 	auto src = static_cast<const char*>(data->getData());
@@ -53,10 +50,10 @@ std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 	
 	// Read Metadata
 	auto meta = root["meta"];
-	String textureName = basePath + meta["image"].asString();
+	String textureName = meta["image"].asString();
 	Vector2f textureSize = readSize<Vector2f>(meta["size"]);
 	Vector2f scale = Vector2f(1.0f / textureSize.x, 1.0f / textureSize.y);
-	result->texture = loader.getAPI().core->getResources().get<Texture>(textureName);
+	result->texture = loader.getAPI().core->getResources().of<Texture>().get(textureName);
 
 	// Read sprites
 	auto frames = root["frames"];

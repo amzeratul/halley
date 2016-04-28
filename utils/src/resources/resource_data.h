@@ -97,7 +97,7 @@ namespace Halley {
 	class HalleyAPI;
 	class ResourceLoader
 	{
-		friend class Resources;
+		friend class ResourceCollectionBase;
 
 	public:
 		String getName() const { return name; }
@@ -107,6 +107,12 @@ namespace Halley {
 		std::unique_ptr<ResourceDataStatic> getStatic();
 		std::unique_ptr<ResourceDataStream> getStream();
 		HalleyAPI& getAPI() const { return *api; }
+
+		template <typename T>
+		std::shared_ptr<T> getResource(String name)
+		{
+			return api->core->getResources().of<T>().get(name);
+		}
 
 	private:
 		ResourceLoader(ResourceLoader&& loader);

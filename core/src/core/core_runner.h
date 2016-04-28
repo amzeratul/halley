@@ -31,6 +31,8 @@ namespace Halley
 		void init(std::vector<String> args);
 		void deInit();
 
+		void initResources();
+
 		void onFixedUpdate(Time time);
 		void onVariableUpdate(Time time);
 		void onRender(Time time);

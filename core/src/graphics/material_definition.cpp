@@ -48,7 +48,7 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	// Load passes
 	for (auto& passNode : root["passes"]) {
 		loadPass(passNode.as<YAML::Node>(), [&](String path) {
-			return api.core->getResources().get<TextFile>(basePath + path)->data;
+			return loader.getResource<TextFile>("shader/" + path)->data;
 		});
 	}
 }

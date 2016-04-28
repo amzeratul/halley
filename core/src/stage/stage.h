@@ -29,7 +29,7 @@ namespace Halley
 
 		template <typename T>
 		std::shared_ptr<T> getResource(String name) const {
-			return getAPI().core->getResources().get<T>(name);
+			return getAPI().core->getResources().of<T>().get(name);
 		}
 
 	private:

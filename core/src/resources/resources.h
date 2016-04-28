@@ -23,75 +23,82 @@
 
 #include <map>
 #include <ctime>
+#include "resource_collection.h"
 
 namespace Halley {
 	
 	class ResourceLocator;
 	class HalleyAPI;
+	
+	template <typename T>
+	class ResourceTypeId
+	{
+	public:
+		static int getId(const std::map<std::string, int>& ids)
+		{
+			static int id = -1;
+			if (id == -1) {
+				std::string name = typeid(T).name();
+				auto iter = ids.find(name);
+				if (iter != ids.end()) {
+					id = iter->second;
+				} else {
+					throw Exception("Type " + String(typeid(T).name()) + " has not been initialized.");
+				}
+			}
+			return id;
+		}
+
+		static int makeId(std::map<std::string, int>& ids)
+		{
+			std::string name = typeid(T).name();
+			auto iter = ids.find(name);
+			if (iter != ids.end()) {
+				throw Exception("Type " + String(typeid(T).name()) + " has already been initialized.");
+			}
+
+			int id = int(ids.size());
+			ids[name] = id;
+			return id;
+		}
+	};
 
 	class Resources {
-		class Wrapper
-		{
-		public:
-			Wrapper(Wrapper&& other)
-				: res(std::move(other.res))
-				, lastWriteTime(other.lastWriteTime)
-				, depth(other.depth)
-			{}
-
-			Wrapper(std::shared_ptr<Resource> resource, int loadDepth, time_t time)
-				: res(resource)
-				, lastWriteTime(time)
-				, depth(loadDepth)
-			{}
-
-			void flush();
-			std::shared_ptr<Resource> res;
-			time_t lastWriteTime;
-			int depth;
-		};
+		friend class ResourceCollectionBase;
 
 	public:
 		Resources(std::unique_ptr<ResourceLocator> locator, HalleyAPI* api);
 		~Resources();
 
 		template <typename T>
-		std::shared_ptr<T> get(String name, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
+		void init(String path)
 		{
-			static_assert(std::is_base_of<Resource, T>::value, "Trying to load a type which does not extend Resource");
-			return std::static_pointer_cast<T>(doGet(name, priority, &Resources::loader<T>));
+			int id = ResourceTypeId<T>::makeId(resourceTypeIds);
+			resources.resize(std::max(resources.size(), size_t(id + 1)));
+			resources[id] = std::make_unique<ResourceCollection<T>>(*this, path);
 		}
 
 		template <typename T>
-		void preLoad(String name) {	doGet(name, ResourceLoadPriority::Low, loader<T>); }
-		
-		void setResource(String _name, std::shared_ptr<Resource> resource);
+		ResourceCollection<T>& of()
+		{
+			return static_cast<ResourceCollection<T>&>(*resources.at(ResourceTypeId<T>::getId(resourceTypeIds)));
+		}
 
-		String getFullName(String name) const;
 		void setBasePath(String path);
 		String getBasePath() const;
 
 		void clear();
-		void unload(String name);
 		void unloadAll(int minDepth = 0);
-		void flush(String name);
 		void flushAll(int minDepth = 0);
-		
+
 		void setDepth(int depth);
 
 	private:
-		String resolveName(String name) const;
-		std::shared_ptr<Resource> doGet(String _name, ResourceLoadPriority priority, std::function<std::unique_ptr<Resource>(ResourceLoader&)> loader);
 		time_t getFileWriteTime(String name);
 
-		template <typename T>
-		static std::unique_ptr<Resource> loader(ResourceLoader& loader)
-		{
-			return T::loadResource(loader);
-		}
-
 		std::unique_ptr<ResourceLocator> locator;
-		std::map<String, Wrapper> resources;
+		std::map<std::string, int> resourceTypeIds;
+		std::vector<std::unique_ptr<ResourceCollectionBase>> resources;
 		HalleyAPI* api;
 
 		int curDepth = 0;
