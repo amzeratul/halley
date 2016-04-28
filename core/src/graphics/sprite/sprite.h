@@ -2,9 +2,12 @@
 
 namespace Halley
 {
+	class Resources;
 	class SpriteSheetEntry;
 	class SpriteSheet;
 	class Material;
+	class Texture;
+	class MaterialDefinition;
 
 	struct SpriteVertexAttrib
 	{
@@ -27,23 +30,27 @@ namespace Halley
 		void draw(Painter& painter) const;
 		bool isInView(Rect4f rect) const;
 		
-		void setMaterial(std::shared_ptr<Material> m) { material = m; }
+		Sprite& setMaterial(std::shared_ptr<Material> m) { material = m; return *this; }
 		Material& getMaterial() const { return *material; }
+
+		Sprite& setImage(Resources& resources, String imageName, String materialName = "");
+		Sprite& setImage(std::shared_ptr<Texture> image, std::shared_ptr<MaterialDefinition> material);
 
 		Vector2f getPosition() const;
 
-		void setPos(Vector2f pos);
-		void setRotation(Angle1f angle);
-		void setColour(Colour4f colour);
-		void setScale(Vector2f scale);
-		void setFlip(bool flip);
+		Sprite& setPos(Vector2f pos);
+		Sprite& setRotation(Angle1f angle);
+		Sprite& setColour(Colour4f colour);
+		Sprite& setScale(Vector2f scale);
+		Sprite& setScale(float scale);
+		Sprite& setFlip(bool flip);
 
-		void setPivot(Vector2f offset);
-		void setSize(Vector2f size);
-		void setTexRect(Rect4f texRect);
+		Sprite& setPivot(Vector2f offset);
+		Sprite& setSize(Vector2f size);
+		Sprite& setTexRect(Rect4f texRect);
 
-		void setSprite(const SpriteSheet& sheet, String name);
-		void setSprite(const SpriteSheetEntry& entry);
+		Sprite& setSprite(const SpriteSheet& sheet, String name);
+		Sprite& setSprite(const SpriteSheetEntry& entry);
 
 	private:
 		std::shared_ptr<Material> material;

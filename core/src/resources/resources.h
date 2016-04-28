@@ -84,6 +84,12 @@ namespace Halley {
 			return static_cast<ResourceCollection<T>&>(*resources.at(ResourceTypeId<T>::getId(resourceTypeIds)));
 		}
 
+		template <typename T>
+		std::shared_ptr<T> get(String name, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
+		{
+			return of<T>().get(name, priority);
+		}
+
 		void setBasePath(String path);
 		String getBasePath() const;
 

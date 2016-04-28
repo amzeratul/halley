@@ -3,6 +3,9 @@
 #include "../painter.h"
 #include "../material.h"
 #include "../material_definition.h"
+#include "../material_parameter.h"
+#include "../texture.h"
+#include "../../resources/resources.h"
 
 using namespace Halley;
 
@@ -54,84 +57,117 @@ bool Sprite::isInView(Rect4f v) const
 	return rect.intersects(v);
 }
 
+Sprite& Sprite::setImage(Resources& resources, String imageName, String materialName)
+{
+	if (materialName == "") {
+		materialName = "sprite.yaml";
+	}
+	setImage(resources.get<Texture>(imageName), resources.get<MaterialDefinition>(materialName));
+	return *this;
+}
+
+Sprite& Sprite::setImage(std::shared_ptr<Texture> image, std::shared_ptr<MaterialDefinition> materialDefinition)
+{
+	auto mat = std::make_shared<Material>(materialDefinition);
+	(*mat)["tex0"] = image;
+	setMaterial(mat);
+	setSize(Vector2f(image->getSize()));
+	setTexRect(Rect4f(0, 0, 1, 1));
+	return *this;
+}
+
 Vector2f Sprite::getPosition() const
 {
 	return vertices[0].pos;
 }
 
-void Sprite::setPos(Vector2f v)
+Sprite& Sprite::setPos(Vector2f v)
 {
 	if (v != vertices[0].pos) {
 		dirty = true;
 		vertices[0].pos = v;
 	}
+	return *this;
 }
 
-void Sprite::setRotation(Angle1f v)
+Sprite& Sprite::setRotation(Angle1f v)
 {
 	if (v != vertices[0].rotation.x) {
 		dirty = true;
 		vertices[0].rotation.x = v.getRadians();
 	}
+	return *this;
 }
 
-void Sprite::setColour(Colour4f v)
+Sprite& Sprite::setColour(Colour4f v)
 {
 	if (vertices[0].colour != v) {
 		dirty = true;
 		vertices[0].colour = v;
 	}
+	return *this;
 }
 
-void Sprite::setScale(Vector2f v)
+Sprite& Sprite::setScale(Vector2f v)
 {
 	if (scale != v) {
 		dirty = true;
 		scale = v;
 		computeSize();
 	}
+	return *this;
 }
 
-void Sprite::setFlip(bool v)
+Sprite& Sprite::setScale(float scale)
+{
+	return setScale(Vector2f(scale, scale));
+}
+
+Sprite& Sprite::setFlip(bool v)
 {
 	if (flip != v) {
 		dirty = true;
 		flip = v;
 		computeSize();
 	}
+	return *this;
 }
 
-void Sprite::setPivot(Vector2f v)
+Sprite& Sprite::setPivot(Vector2f v)
 {
 	if (vertices[0].pivot != v) {
 		dirty = true;
 		vertices[0].pivot = v;
 	}
+	return *this;
 }
 
-void Sprite::setSize(Vector2f v)
+Sprite& Sprite::setSize(Vector2f v)
 {
 	if (size != v) {
 		dirty = true;
 		size = v;
 		computeSize();
 	}
+	return *this;
 }
 
-void Sprite::setTexRect(Rect4f v)
+Sprite& Sprite::setTexRect(Rect4f v)
 {
 	if (vertices[0].texRect != v) {
 		dirty = true;
 		vertices[0].texRect = v;
 	}
+	return *this;
 }
 
-void Sprite::setSprite(const SpriteSheet& sheet, String name)
+Sprite& Sprite::setSprite(const SpriteSheet& sheet, String name)
 {
 	setSprite(sheet.getSprite(name));
+	return *this;
 }
 
-void Sprite::setSprite(const SpriteSheetEntry& entry)
+Sprite& Sprite::setSprite(const SpriteSheetEntry& entry)
 {
 	if (vertices[0].texRect != entry.coords) {
 		setSize(entry.size);
@@ -140,4 +176,5 @@ void Sprite::setSprite(const SpriteSheetEntry& entry)
 		vertices[0].rotation.y = entry.rotated ? 1.0f : 0.0f;
 		dirty = true;
 	}
+	return *this;
 }

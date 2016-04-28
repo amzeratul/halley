@@ -32,7 +32,7 @@ entity
 - Lua systems
 - defragment/optimize memory? [RESEARCH]
 - universal hierarchical transforms? [RESEARCH]
-- onAddEntity/onRemoveEntity on systems
+- onAddEntity/onRemoveEntity on systems [RESEARCH]
 
 codegen
 * components registry [RESEARCH]
