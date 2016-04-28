@@ -1,5 +1,4 @@
 #include "texture.h"
-#include "../resources/resources.h"
 #include "../api/halley_api.h"
 #include "texture_descriptor.h"
 

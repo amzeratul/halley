@@ -73,11 +73,13 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(String rawName, Resource
 {
 	String name = resolveName(rawName);
 
-	// Look in cache
+	// Look in cache and return if it's there
 	auto res = resources.find(name);
-	if (res != resources.end()) return res->second.res;
+	if (res != resources.end()) {
+		return res->second.res;
+	}
 
-	// Check if metafile exists
+	// Load metadata
 	auto metaData = parent.locator->tryGetResource(name + ".meta.yaml", false);
 	std::unique_ptr<Metadata> meta;
 	if (metaData) {
@@ -86,14 +88,13 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(String rawName, Resource
 		meta.reset(new Metadata());
 	}
 
-	// Not found, load it from disk
+	// Load resource from disk
 	auto resLoader = ResourceLoader(*(parent.locator), rawName, name, priority, parent.api, std::move(meta));
 	auto newRes = loadResource(resLoader);
 	if (!newRes) {
 		if (resLoader.loaded) {
 			throw Exception("Unable to construct resource from data: " + name);
-		}
-		else {
+		} else {
 			throw Exception("Unable to load resource data: " + name);
 		}
 	}

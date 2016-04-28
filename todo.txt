@@ -2,8 +2,6 @@ core
 - child stages
 
 core/resources
-* metafiles, next to each file [RESEARCH]
-* texture metafiles, storing size, filtering, format?
 - hot reloading [RESEARCH]
 
 core/graphics
