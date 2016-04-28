@@ -31,7 +31,7 @@ access: ['world']
 ---
 system: SpriteAnimation
 families:
-  - main: ['write Sprite', 'write SpriteAnimation', 'read Position', 'read Velocity']
+  - main: ['write Sprite', 'write SpriteAnimation', 'read Velocity']
 ---
 system: Render
 families:
