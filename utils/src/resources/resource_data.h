@@ -95,6 +95,8 @@ namespace Halley {
 	};
 
 	class HalleyAPI;
+	class Metadata;
+
 	class ResourceLoader
 	{
 		friend class ResourceCollectionBase;
@@ -107,6 +109,7 @@ namespace Halley {
 		std::unique_ptr<ResourceDataStatic> getStatic();
 		std::unique_ptr<ResourceDataStream> getStream();
 		HalleyAPI& getAPI() const { return *api; }
+		Metadata& getMeta() { return *metadata; }
 
 		template <typename T>
 		std::shared_ptr<T> getResource(String name)
@@ -116,13 +119,15 @@ namespace Halley {
 
 	private:
 		ResourceLoader(ResourceLoader&& loader);
-		ResourceLoader(IResourceLocator& locator, String name, String resolvedName, ResourceLoadPriority priority, HalleyAPI* api);
+		ResourceLoader(IResourceLocator& locator, String name, String resolvedName, ResourceLoadPriority priority, HalleyAPI* api, std::unique_ptr<Metadata> metadata);
+		~ResourceLoader();
 
 		IResourceLocator& locator;
 		String name;
 		String resolvedName;
 		ResourceLoadPriority priority;
 		HalleyAPI* api;
+		std::unique_ptr<Metadata> metadata;
 		bool loaded = false;
 	};
 

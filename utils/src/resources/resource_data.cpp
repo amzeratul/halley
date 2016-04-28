@@ -1,5 +1,6 @@
 #include <fstream>
 #include "resource_data.h"
+#include "metadata.h"
 #include "../support/exception.h"
 
 using namespace Halley;
@@ -100,12 +101,17 @@ ResourceLoader::ResourceLoader(ResourceLoader&& loader)
 {
 }
 
-ResourceLoader::ResourceLoader(IResourceLocator& locator, String name, String resolvedName, ResourceLoadPriority priority, HalleyAPI* api)
+ResourceLoader::~ResourceLoader()
+{
+}
+
+ResourceLoader::ResourceLoader(IResourceLocator& locator, String name, String resolvedName, ResourceLoadPriority priority, HalleyAPI* api, std::unique_ptr<Metadata> metadata)
 	: locator(locator)
 	, name(name)
 	, resolvedName(resolvedName)
 	, priority(priority)
 	, api(api)
+	, metadata(std::move(metadata))
 {}
 
 String ResourceLoader::getBasePath() const

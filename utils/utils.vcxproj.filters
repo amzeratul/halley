@@ -186,6 +186,9 @@
     <ClCompile Include="src\data_structures\bin_pack.cpp">
       <Filter>data_structures</Filter>
     </ClCompile>
+    <ClCompile Include="src\resources\metadata.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\halley_utils.h">
@@ -382,6 +385,9 @@
     </ClInclude>
     <ClInclude Include="src\data_structures\bin_pack.h">
       <Filter>data_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\metadata.h">
+      <Filter>resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -77,8 +77,17 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(String rawName, Resource
 	auto res = resources.find(name);
 	if (res != resources.end()) return res->second.res;
 
+	// Check if metafile exists
+	auto metaData = parent.locator->tryGetResource(name + ".meta.yaml", false);
+	std::unique_ptr<Metadata> meta;
+	if (metaData) {
+		meta.reset(new Metadata(*static_cast<ResourceDataStatic*>(metaData.get())));
+	} else {
+		meta.reset(new Metadata());
+	}
+
 	// Not found, load it from disk
-	auto resLoader = ResourceLoader(*(parent.locator), rawName, name, priority, parent.api);
+	auto resLoader = ResourceLoader(*(parent.locator), rawName, name, priority, parent.api, std::move(meta));
 	auto newRes = loadResource(resLoader);
 	if (!newRes) {
 		if (resLoader.loaded) {

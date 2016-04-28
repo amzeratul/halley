@@ -4,7 +4,6 @@ core
 core/resources
 * metafiles, next to each file [RESEARCH]
 * texture metafiles, storing size, filtering, format?
-* resource paths
 - hot reloading [RESEARCH]
 
 core/graphics

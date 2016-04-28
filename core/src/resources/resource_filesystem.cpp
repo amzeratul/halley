@@ -33,13 +33,13 @@ FileSystemResourceLocator::FileSystemResourceLocator(String _basePath)
 
 std::unique_ptr<ResourceData> FileSystemResourceLocator::doGet(String resource, bool stream)
 {
-	String path = basePath+resource;
+	String path = basePath + resource;
 	
 	if (stream) {
 		return std::make_unique<ResourceDataStream>(path, [=] () -> std::unique_ptr<ResourceDataReader> {
 			SDL_RWops* fp = SDL_RWFromFile(path.c_str(), "rb");
 			if (!fp) {
-				throw Exception("Unable to open resource (FileSystem/Stream): "+resource);
+				return std::unique_ptr<ResourceDataReader>();
 			}
 
 			SDL_RWseek(fp, 0, SEEK_END);
@@ -52,7 +52,7 @@ std::unique_ptr<ResourceData> FileSystemResourceLocator::doGet(String resource, 
 	else {
 		SDL_RWops* fp = SDL_RWFromFile(path.c_str(), "rb");
 		if (!fp) {
-			throw Exception("Unable to open resource (FileSystem/Static): "+resource);
+			return std::unique_ptr<ResourceData>();
 		}
 
 		SDL_RWseek(fp, 0, RW_SEEK_END);

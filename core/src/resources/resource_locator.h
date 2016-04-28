@@ -45,13 +45,14 @@ namespace Halley {
 		void addFileSystem(String path);
 		void addStandardFileSystem();
 		
+		std::unique_ptr<ResourceData> getResource(String resource, bool stream);
+		std::unique_ptr<ResourceData> tryGetResource(String resource, bool stream);
 		std::unique_ptr<ResourceDataStatic> getStatic(String resource) override;
 		std::unique_ptr<ResourceDataStream> getStream(String resource) override;
 		std::time_t getTimestamp(String resource);
 		StringArray enumerate(String prefix = "", bool removePrefix = false, String suffixMatch = "");
 
 	private:
-		std::unique_ptr<ResourceData> getResource(String resource, bool stream);
 		std::map<String, IResourceLocatorProvider*> locators;
 		std::vector<std::unique_ptr<IResourceLocatorProvider>> locatorList;
 	};

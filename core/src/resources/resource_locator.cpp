@@ -44,6 +44,17 @@ namespace Halley {
 	
 	std::unique_ptr<ResourceData> ResourceLocator::getResource(String resource, bool stream)
 	{
+		auto result = tryGetResource(resource, stream);
+		if (result) {
+			return std::move(result);
+		} else {
+			// Not found
+			throw Exception("Unable to locate resource: " + resource);
+		}
+	}
+
+	std::unique_ptr<ResourceData> ResourceLocator::tryGetResource(String resource, bool stream)
+	{
 		auto result = locators.find(resource);
 		if (result != locators.end()) {
 			// Found a locator
@@ -57,7 +68,7 @@ namespace Halley {
 			} else {
 				// No generic locator, give up
 				std::cout << "Resource Locator giving up on resource: " << resource << std::endl;
-				throw Exception("Unable to locate resource: "+resource);
+				return std::unique_ptr<ResourceData>();
 			}
 		}
 	}
@@ -93,7 +104,7 @@ namespace Halley {
 	{
 		auto ptr = dynamic_cast<ResourceDataStream*>(getResource(resource, true).release());
 		if (!ptr) {
-			throw Exception("Resource " + resource + " obtained, but is not dynamic data. Memory leak has ocurred.");
+			throw Exception("Resource " + resource + " obtained, but is not stream data. Memory leak has ocurred.");
 		}
 		return std::unique_ptr<ResourceDataStream>(ptr);
 	}

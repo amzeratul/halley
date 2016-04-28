@@ -85,18 +85,17 @@ Animation::Animation(ResourceLoader& loader)
 		YAML::Node root = YAML::Load(loader.getStatic()->getString());
 
 		String basePath = loader.getBasePath();
-		auto& resources = loader.getAPI().core->getResources();
 
 		name = root["name"].as<std::string>();
 
 		if (root["spriteSheet"].IsDefined()) {
 			String path = root["spriteSheet"].as<std::string>();
-			spriteSheet = resources.of<SpriteSheet>().get(path);
+			spriteSheet = loader.getResource<SpriteSheet>(path);
 		}
 
 		if (root["shader"].IsDefined()) {
 			String path = root["shader"].as<std::string>();
-			auto matDef = resources.of<MaterialDefinition>().get(path);
+			auto matDef = loader.getResource<MaterialDefinition>(path);
 			material = std::make_shared<Material>(matDef);
 			(*material)["tex0"] = spriteSheet->getTexture();
 		}

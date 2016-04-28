@@ -42,6 +42,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "plugin/plugin.h"
 
+#include "resources/metadata.h"
 #include "resources/resource.h"
 #include "resources/resource_data.h"
 
