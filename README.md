@@ -38,9 +38,10 @@ Halley is divided in a few sub-projects:
 * SDL 2.0.4
 * GLEW 1.13.0
 * yaml-cpp 0.5.3
+* Freetype 2.6.3
 
 ### Set up
 * Make sure that all dependencies are installed and accessible to the compiler
-* Add [repo]/include and [repo]/lib/x64 to your global include and library lookup paths, respectively.
+* Add [repo]/include, [repo]/lib/x64 and [repo]/bin64 to your global include, library and executable lookup paths, respectively.
 * Open halley.sln [Soon CMake will replace this]
 * Compile!
