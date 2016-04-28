@@ -7,6 +7,26 @@ Stage::Stage(String _name)
 {
 }
 
+InputAPI& Stage::getInputAPI() const
+{
+	return *api->input;
+}
+
+VideoAPI& Stage::getVideoAPI() const
+{
+	return *api->video;
+}
+
+CoreAPI& Stage::getCoreAPI() const
+{
+	return *api->core;
+}
+
+Resources& Stage::getResources() const
+{
+	return api->core->getResources();
+}
+
 void Stage::doInit(HalleyAPI* _api)
 {
 	api = _api;

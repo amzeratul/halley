@@ -28,9 +28,14 @@ namespace Halley
 		HalleyAPI& getAPI() { return *api; }
 		const HalleyAPI& getAPI() const { return *api; }
 
+		InputAPI& getInputAPI() const;
+		VideoAPI& getVideoAPI() const;
+		CoreAPI& getCoreAPI() const;
+		Resources& getResources() const;
+
 		template <typename T>
 		std::shared_ptr<T> getResource(String name) const {
-			return getAPI().core->getResources().of<T>().get(name);
+			return getResources().of<T>().get(name);
 		}
 
 	private:
