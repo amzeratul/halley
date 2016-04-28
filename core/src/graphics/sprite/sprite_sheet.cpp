@@ -53,7 +53,7 @@ std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 	String textureName = meta["image"].asString();
 	Vector2f textureSize = readSize<Vector2f>(meta["size"]);
 	Vector2f scale = Vector2f(1.0f / textureSize.x, 1.0f / textureSize.y);
-	result->texture = loader.getAPI().core->getResources().of<Texture>().get(textureName);
+	result->texture = loader.getResource<Texture>(textureName);
 
 	// Read sprites
 	auto frames = root["frames"];
