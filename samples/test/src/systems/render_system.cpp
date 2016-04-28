@@ -1,4 +1,4 @@
-#include "../../gen/cpp/systems/render_system.h"
+#include "systems/render_system.h"
 
 using namespace Halley;
 
