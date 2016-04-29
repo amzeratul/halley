@@ -14,17 +14,14 @@ SystemSchema::SystemSchema(YAML::Node node)
 			for (auto iter = familyEntry.begin(); iter != familyEntry.end(); ++iter) {
 				FamilySchema family;
 				family.name = iter->first.as<std::string>();
-				for (auto comp: iter->second) {
-					auto splitStr = String(comp.as<std::string>()).split(' ');
+				for (auto compList : iter->second) {
+					for (auto comp = compList.begin(); comp != compList.end(); ++comp) {
+						ComponentReferenceSchema component;
+						component.write = comp->second.as<std::string>() == "write";
+						component.name = comp->first.as<std::string>();
 
-					ComponentReferenceSchema component;
-					if (splitStr.size() != 2 || (splitStr[0] != "write" && splitStr[0] != "read")) {
-						throw Exception("Invalid family declaration, must be \"read compName\" or \"write compName\".");
+						family.components.push_back(component);
 					}
-					component.write = splitStr[0] == "write";
-					component.name = splitStr[1];
-
-					family.components.push_back(component);
 				}
 
 				families.push_back(family);
@@ -60,7 +57,20 @@ SystemSchema::SystemSchema(YAML::Node node)
 
 	smearing = node["smearing"].as<int>(1);
 
-	// TODO: access
+	if (node["access"].IsDefined()) {
+		int accessValue = 0;
+		for(auto& accessOpt : node["access"]) {
+			String name = accessOpt.as<std::string>();
+			if (name == "api") {
+				accessValue |= int(SystemAccess::API);
+			} else if (name == "world") {
+				accessValue |= int(SystemAccess::World);
+			} else {
+				throw Exception("Unknown access type: " + name);
+			}
+		}
+		access = SystemAccess(accessValue);
+	}
 
 	// TODO: language
 }

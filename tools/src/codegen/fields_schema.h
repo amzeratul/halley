@@ -41,14 +41,16 @@ namespace Halley
 		bool isConst = false;
 		bool isVirtual = false;
 		bool isOverride = false;
+		bool isFinal = false;
 
-		MethodSchema(TypeSchema returnType, std::vector<VariableSchema> arguments, String name, bool isConst = false, bool isVirtual = false, bool isOverride = false)
+		MethodSchema(TypeSchema returnType, std::vector<VariableSchema> arguments, String name, bool isConst = false, bool isVirtual = false, bool isOverride = false, bool isFinal = false)
 			: returnType(returnType)
 			, arguments(arguments)
 			, name(name)
 			, isConst(isConst)
 			, isVirtual(isVirtual)
 			, isOverride(isOverride)
+			, isFinal(isFinal)
 		{}
 	};
 }

@@ -22,26 +22,35 @@ members:
 ---
 system: Time
 families:
-  - main: ['write Time']
+  - main:
+    - Time: write
 messages:
   - Expire: send
 ---
 system: Movement
 families:
-  - main: ['write Position', 'write Velocity']
+  - main:
+    - Position: write
+    - Velocity: write
 access: ['world']
 ---
 system: SpriteAnimation
 families:
-  - main: ['write Sprite', 'write SpriteAnimation', 'read Velocity']
+  - main:
+    - Sprite: write
+    - SpriteAnimation: write
+    - Velocity: read
 ---
 system: Render
 families:
-  - main: ['read Position', 'write Sprite']
+  - main:
+    - Position: read
+    - Sprite: write
 method: render
 strategy: global
 ---
 system: SpawnSprite
+access: ['world', 'api']
 messages:
   - Expire: receive
 ---

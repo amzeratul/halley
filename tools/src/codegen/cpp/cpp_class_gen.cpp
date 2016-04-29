@@ -2,10 +2,10 @@
 
 using namespace Halley;
 
-CPPClassGenerator::CPPClassGenerator(String name, bool isFinal)
+CPPClassGenerator::CPPClassGenerator(String name)
 	: className(name) 
 {
-	results.push_back("class " + name + (isFinal ? " final" : "") + " {");
+	results.push_back("class " + name + " {");
 }
 
 CPPClassGenerator::CPPClassGenerator(String name, String baseClass, CPPAccess inheritanceType, bool isFinal)
@@ -203,6 +203,6 @@ String CPPClassGenerator::getMethodSignatureString(MethodSchema method)
 		returnType += " ";
 	}
 
-	return returnType + method.name + "(" + String::concatList(args, ", ") + ")" + (method.isConst ? " const" : "") + (method.isOverride ? " override" : "");
+	return returnType + method.name + "(" + String::concatList(args, ", ") + ")" + (method.isConst ? " const" : "") + (method.isOverride ? " override" : "") + (method.isFinal ? " final" : "");
 
 }

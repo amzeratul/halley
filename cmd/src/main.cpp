@@ -26,6 +26,7 @@ int main(int argc, char** argv)
 			return tool->runRaw(argc - 2, argv + 2);
 		} catch (std::exception& e) {
 			std::cout << "Exception: " << e.what() << std::endl;
+			return 2;
 		}
 	}
 }

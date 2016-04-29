@@ -14,7 +14,7 @@ namespace Halley
 	class CPPClassGenerator
 	{
 	public:
-		explicit CPPClassGenerator(String name, bool isFinal = false);
+		explicit CPPClassGenerator(String name);
 		explicit CPPClassGenerator(String name, String baseClass, CPPAccess inheritanceType = CPPAccess::Public, bool isFinal = false);
 
 		CPPClassGenerator& addClass(CPPClassGenerator& otherClass);

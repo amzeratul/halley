@@ -18,12 +18,11 @@ namespace Halley {
 		virtual ~System() {}
 
 	protected:
-		HalleyAPI& getAPI() const { return *api; }
+		HalleyAPI& doGetAPI() const { return *api; }
+		World& doGetWorld() const { return *world; }
 
 		virtual void updateBase(Time) {}
 		virtual void renderBase(Painter&) {}
-
-		World& getWorld() const { return *world; }
 
 		template <typename T, typename M, typename U, typename V>
 		static void invokeIndividual(T* obj, M method, U& p, V& fam)
@@ -49,4 +48,4 @@ namespace Halley {
 
 }
 
-#define REGISTER_SYSTEM(sys) Halley::System* halleyCreate##sys##() { return new sys(); }
+#define REGISTER_SYSTEM(sys) Halley::System* halleyCreate##sys##() { return reinterpret_cast<Halley::System*>(new sys()); }

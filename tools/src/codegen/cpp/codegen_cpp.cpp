@@ -171,10 +171,10 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 	std::vector<VariableSchema> familyArgs = { VariableSchema(TypeSchema(methodArgType), "p") };
 	String stratImpl;
 	if (system.strategy == SystemStrategy::Global) {
-		stratImpl = methodName + "(p);";
+		stratImpl = "static_cast<T*>(this)->" + methodName + "(p);";
 	} else if (system.strategy == SystemStrategy::Individual) {
 		familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "entity"));
-		stratImpl = "invokeIndividual(this, &" + system.name + "System::" + methodName + ", p, mainFamily);";
+		stratImpl = "invokeIndividual(static_cast<T*>(this), &T::" + methodName + ", p, mainFamily);";
 	} else {
 		throw Exception("Unsupported strategy in " + system.name + "System");
 	}
@@ -199,10 +199,12 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 
 	contents.insert(contents.end(), {
 		"",
-		"// Generated file; do not modify."
+		"// Generated file; do not modify.",
+		"template <typename T>"
 	});
 
-	auto sysClassGen = CPPClassGenerator(system.name + "System", "Halley::System", CPPAccess::Public, true);
+	auto sysClassGen = CPPClassGenerator(system.name + "SystemBase", "Halley::System", CPPAccess::Private)
+		.addAccessLevelSection(CPPAccess::Protected);
 
 	for (auto& fam : system.families) {
 		sysClassGen
@@ -220,15 +222,33 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 
 	sysClassGen
 		.addMembers(convert<FamilySchema, VariableSchema>(system.families, [](auto& fam) { return VariableSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); }))
-		.addBlankLine()
-		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(methodArgType), "p") }, methodName + "Base", false, false, true), stratImpl)
-		.addBlankLine()
-		.addAccessLevelSection(CPPAccess::Protected)
-		.addComment("Implement me:")
-		.addMethodDeclaration(MethodSchema(TypeSchema("void"), familyArgs, methodName, methodConst))
+		.addBlankLine();
+
+	if ((int(system.access) & int(SystemAccess::API)) != 0) {
+		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::HalleyAPI&"), {}, "getAPI", true), "return doGetAPI();");
+	}
+	if ((int(system.access) & int(SystemAccess::World)) != 0) {
+		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::World&"), {}, "getWorld", true), "return doGetWorld();");
+	}
+	if (system.access != SystemAccess::Pure) {
+		sysClassGen.addBlankLine();
+	}
+
+	sysClassGen
+		.addAccessLevelSection(CPPAccess::Private)
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(methodArgType), "p") }, methodName + "Base", false, false, true, true), stratImpl)
 		.addBlankLine()
 		.addAccessLevelSection(CPPAccess::Public)
 		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}") })
+		.finish()
+		.writeTo(contents);
+
+	contents.push_back("");
+
+	CPPClassGenerator(system.name + "System", system.name + "SystemBase<" + system.name + "System>", CPPAccess::Public, true)
+		.addAccessLevelSection(CPPAccess::Public)
+		.addComment("Implement me:")
+		.addMethodDeclaration(MethodSchema(TypeSchema("void"), familyArgs, methodName, methodConst))
 		.finish()
 		.writeTo(contents);
 
