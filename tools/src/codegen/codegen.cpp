@@ -118,7 +118,7 @@ bool Codegen::writeFile(String dstPath, const char* data, size_t dataSize)
 	return true;
 }
 
-void Codegen::writeFiles(String directory, const CodeGenResult& files)
+void Codegen::writeFiles(String directory, const CodeGenResult& files, Stats& stats)
 {
 	using namespace std::experimental::filesystem;
 
@@ -127,6 +127,9 @@ void Codegen::writeFiles(String directory, const CodeGenResult& files)
 		create_directories(dir);
 		std::cout << "Created directory " << dir << std::endl;
 	}
+
+	int skipped = 0;
+	int written = 0;
 
 	for (auto& f : files) {
 		path filePath = dir;
@@ -140,9 +143,10 @@ void Codegen::writeFiles(String directory, const CodeGenResult& files)
 
 		bool wrote = writeFile(filePath.string(), &finalData[0], finalData.size());
 		if (wrote) {
+			stats.written++;
 			std::cout << "* Written " << filePath << std::endl;
 		} else {
-			std::cout << "  Skipped " << filePath << std::endl;
+			stats.skipped++;
 		}
 	}
 }
@@ -151,6 +155,7 @@ void Codegen::generateCode(String directory)
 {
 	std::vector<std::unique_ptr<ICodeGenerator>> gens;
 	gens.emplace_back(std::make_unique<CodegenCPP>());
+	Stats stats;
 
 	for (auto& gen : gens) {
 		String genDir = directory + "/" + gen->getDirectory();
@@ -158,18 +163,20 @@ void Codegen::generateCode(String directory)
 		std::vector<SystemSchema> syss;
 
 		for (auto& comp : components) {
-			writeFiles(genDir, gen->generateComponent(comp.second));
+			writeFiles(genDir, gen->generateComponent(comp.second), stats);
 			comps.push_back(comp.second);
 		}
 		for (auto& sys : systems) {
 			if (sys.second.language == gen->getLanguage()) {
-				writeFiles(genDir, gen->generateSystem(sys.second));
+				writeFiles(genDir, gen->generateSystem(sys.second), stats);
 			}
 			syss.push_back(sys.second);
 		}
 
-		writeFiles(genDir, gen->generateRegistry(comps, syss));
+		writeFiles(genDir, gen->generateRegistry(comps, syss), stats);
 	}
+
+	std::cout << "Codegen: " << stats.written << " written, " << stats.skipped << " skipped." << std::endl;
 }
 
 void Codegen::addSource(std::experimental::filesystem::path path)

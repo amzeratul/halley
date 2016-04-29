@@ -1,6 +1,7 @@
 #include <sstream>
 #include "codegen_cpp.h"
 #include "cpp_class_gen.h"
+#include <set>
 using namespace Halley;
 
 static String toFileName(String className)
@@ -129,6 +130,18 @@ std::vector<String> CodegenCPP::generateComponentHeader(ComponentSchema componen
 	return contents;
 }
 
+template <typename T, typename U>
+std::vector<U> convert(std::vector<T> in, U(*f)(const T&))
+{
+	size_t sz = in.size();
+	std::vector<U> result;
+	result.reserve(sz);
+	for (size_t i = 0; i < sz; i++) {
+		result.emplace_back(f(in[i]));
+	}
+	return result;
+}
+
 std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 {
 	std::vector<String> contents = {
@@ -139,10 +152,13 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 	};
 
 	// Family headers
+	std::set<String> included;
 	for (auto& fam : system.families) {
 		for (auto& comp : fam.components) {
-			String compName = comp.name + "Component";
-			contents.emplace_back("#include \"../components/" + toFileName(compName) + ".h\"");
+			if (included.find(comp.name) == included.end()) {
+				contents.emplace_back("#include \"../components/" + toFileName(comp.name + "Component") + ".h\"");
+				included.emplace(comp.name);
+			}
 		}
 	}
 
@@ -157,28 +173,18 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 		auto famGen = CPPClassGenerator(upperFirst(fam.name) + "Family")
 			.addAccessLevelSection(CPPAccess::Public)
 			.addMember(VariableSchema(TypeSchema("Halley::EntityId", true), "entityId"))
-			.addBlankLine();
-
-		std::vector<String> compNames;
-		for (auto& comp : fam.components) {
-			famGen.addMember(VariableSchema(TypeSchema(comp.name + "Component* const"), lowerFirst(comp.name)));
-			compNames.push_back(comp.name + "Component");
-		}
-		
-		famGen
 			.addBlankLine()
-			.addTypeDefinition("Type", "Halley::FamilyType<" + String::concatList(compNames, ", ") + ">");
+			.addMembers(convert<ComponentReferenceSchema, VariableSchema>(fam.components, [](auto& comp) { return VariableSchema(TypeSchema(comp.name + "Component* const"), lowerFirst(comp.name)); }))
+			//.addMembers(from(fam.components) >> select([](auto& comp) { return VariableSchema(TypeSchema(comp.name + "Component* const"), lowerFirst(comp.name)); }) >> to_vector())
+			.addBlankLine()
+			.addTypeDefinition("Type", "Halley::FamilyType<" + String::concatList(convert<ComponentReferenceSchema, String>(fam.components, [](auto& comp) { return comp.name + "Component"; }), ", ") + ">");
 
 		sysClassGen
 			.addClass(famGen)
 			.addBlankLine();
 	}
 
-	std::vector<String> families;
-	for (auto& fam : system.families) {
-		sysClassGen.addMember(VariableSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"));
-		families.push_back("&" + fam.name + "Family");
-	}
+	sysClassGen.addMembers(convert<FamilySchema, VariableSchema>(system.families, [](auto& fam) { return VariableSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); }));
 
 	String methodName, methodArgType, stratImpl;
 	bool methodConst;
@@ -214,7 +220,7 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 		.addMethodDeclaration(MethodSchema(TypeSchema("void"), familyArgs, methodName, methodConst))
 		.addBlankLine()
 		.addAccessLevelSection(CPPAccess::Public)
-		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(families, ", ") + "}") });
+		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}") });
 
 	sysClassGen.writeTo(contents);
 	return contents;

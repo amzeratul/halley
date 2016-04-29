@@ -16,6 +16,12 @@ namespace Halley
 
 	class Codegen
 	{
+		struct Stats
+		{
+			int written = 0;
+			int skipped = 0;
+		};
+
 	public:
 		static void run(String inDir, String outDir);
 
@@ -23,7 +29,7 @@ namespace Halley
 		void validate();
 		void process();
 		bool writeFile(String path, const char* data, size_t dataSize);
-		void writeFiles(String directory, const CodeGenResult& files);
+		void writeFiles(String directory, const CodeGenResult& files, Stats& stats);
 		void generateCode(String directory);
 
 	private:
