@@ -77,7 +77,9 @@ CPPClassGenerator& CPPClassGenerator::addMethodDeclarations(const std::vector<Me
 CPPClassGenerator& CPPClassGenerator::addMethodDefinition(MethodSchema method, String body)
 {
 	ensureOK();
-	results.push_back("\t" + getMethodSignatureString(method) + " { " + body + " }");
+	results.push_back("\t" + getMethodSignatureString(method) + " {");
+	results.push_back("\t\t" + body);
+	results.push_back("\t}");
 	return *this;
 }
 
@@ -203,6 +205,6 @@ String CPPClassGenerator::getMethodSignatureString(MethodSchema method)
 		returnType += " ";
 	}
 
-	return returnType + method.name + "(" + String::concatList(args, ", ") + ")" + (method.isConst ? " const" : "") + (method.isOverride ? " override" : "") + (method.isFinal ? " final" : "");
+	return (method.isFriend ? "friend " : "") + returnType + method.name + "(" + String::concatList(args, ", ") + ")" + (method.isConst ? " const" : "") + (method.isOverride ? " override" : "") + (method.isFinal ? " final" : "");
 
 }

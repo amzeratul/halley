@@ -48,4 +48,4 @@ namespace Halley {
 
 }
 
-#define REGISTER_SYSTEM(sys) Halley::System* halleyCreate##sys##() { return reinterpret_cast<Halley::System*>(new sys()); }
+#define REGISTER_SYSTEM(sys) Halley::System* halleyCreate##sys##() { return new sys(); }

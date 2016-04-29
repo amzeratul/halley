@@ -204,6 +204,8 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 	});
 
 	auto sysClassGen = CPPClassGenerator(system.name + "SystemBase", "Halley::System", CPPAccess::Private)
+		.addMethodDeclaration(MethodSchema(TypeSchema("Halley::System*"), {}, "halleyCreate" + system.name + "System", false, false, false, false, true))
+		.addBlankLine()
 		.addAccessLevelSection(CPPAccess::Protected);
 
 	for (auto& fam : system.families) {
