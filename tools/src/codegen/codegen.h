@@ -13,6 +13,7 @@ namespace Halley
 {
 	class ComponentSchema;
 	class SystemSchema;
+	class MessageSchema;
 
 	class Codegen
 	{
@@ -36,8 +37,10 @@ namespace Halley
 		void addSource(std::experimental::filesystem::path path);
 		void addComponent(YAML::Node rootNode);
 		void addSystem(YAML::Node rootNode);
+		void addMessage(YAML::Node rootNode);
 
 		std::map<String, ComponentSchema> components;
 		std::map<String, SystemSchema> systems;
+		std::map<String, MessageSchema> messages;
 	};
 }

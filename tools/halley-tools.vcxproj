@@ -26,6 +26,7 @@
     <ClInclude Include="src\codegen\component_schema.h" />
     <ClInclude Include="src\codegen\fields_schema.h" />
     <ClInclude Include="src\codegen\icode_generator.h" />
+    <ClInclude Include="src\codegen\message_schema.h" />
     <ClInclude Include="src\codegen\system_schema.h" />
     <ClInclude Include="src\distance_field\distance_field_generator.h" />
     <ClInclude Include="src\distance_field\distance_field_tool.h" />
@@ -40,6 +41,7 @@
     <ClCompile Include="src\codegen\codegen_tool.cpp" />
     <ClCompile Include="src\codegen\component_schema.cpp" />
     <ClCompile Include="src\codegen\cpp\cpp_class_gen.cpp" />
+    <ClCompile Include="src\codegen\message_schema.cpp" />
     <ClCompile Include="src\codegen\system_schema.cpp" />
     <ClCompile Include="src\distance_field\distance_field_generator.cpp" />
     <ClCompile Include="src\distance_field\distance_field_tool.cpp" />

@@ -16,36 +16,42 @@ CPPClassGenerator::CPPClassGenerator(String name, String baseClass, CPPAccess in
 
 CPPClassGenerator& CPPClassGenerator::addClass(CPPClassGenerator& otherClass)
 {
+	ensureOK();
 	otherClass.writeTo(results, 1);
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::addBlankLine()
 {
+	ensureOK();
 	results.push_back("");
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::addComment(String comment)
 {
+	ensureOK();
 	results.push_back("\t// " + comment);
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::addAccessLevelSection(CPPAccess access)
 {
+	ensureOK();
 	results.push_back(getAccessString(access) + ":");
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::addMember(VariableSchema member)
 {
+	ensureOK();
 	results.push_back("\t" + getVariableString(member) + ";");
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::addMembers(const std::vector<VariableSchema>& members)
 {
+	ensureOK();
 	for (auto& m : members) {
 		addMember(m);
 	}
@@ -54,12 +60,14 @@ CPPClassGenerator& CPPClassGenerator::addMembers(const std::vector<VariableSchem
 
 CPPClassGenerator& CPPClassGenerator::addMethodDeclaration(MethodSchema method)
 {
+	ensureOK();
 	results.push_back("\t" + getMethodSignatureString(method) + ";");
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::addMethodDeclarations(const std::vector<MethodSchema>& methods)
 {
+	ensureOK();
 	for (auto& m : methods) {
 		addMethodDeclaration(m);
 	}
@@ -68,13 +76,23 @@ CPPClassGenerator& CPPClassGenerator::addMethodDeclarations(const std::vector<Me
 
 CPPClassGenerator& CPPClassGenerator::addMethodDefinition(MethodSchema method, String body)
 {
+	ensureOK();
 	results.push_back("\t" + getMethodSignatureString(method) + " { " + body + " }");
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::addTypeDefinition(String name, String type)
 {
+	ensureOK();
 	results.push_back("\tusing " + name + " = " + type + ";");
+	return *this;
+}
+
+CPPClassGenerator& CPPClassGenerator::finish()
+{
+	ensureOK();
+	results.push_back("};");
+	finished = true;
 	return *this;
 }
 
@@ -115,7 +133,9 @@ CPPClassGenerator& CPPClassGenerator::addCustomConstructor(const std::vector<Var
 
 void CPPClassGenerator::writeTo(std::vector<String>& out, int nTabs)
 {
-	results.push_back("};");
+	if (!finished) {
+		throw Exception("Class not finished yet.");
+	}
 
 	String prefix;
 	for (int i = 0; i < nTabs; i++) {
@@ -124,6 +144,13 @@ void CPPClassGenerator::writeTo(std::vector<String>& out, int nTabs)
 
 	for (size_t i = 0; i < results.size(); i++) {
 		out.push_back(prefix + results[i]);
+	}
+}
+
+void CPPClassGenerator::ensureOK()
+{
+	if (finished) {
+		throw Exception("finish() has already been called!");
 	}
 }
 

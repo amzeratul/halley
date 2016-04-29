@@ -5,6 +5,7 @@
 #include "codegen.h"
 #include "component_schema.h"
 #include "system_schema.h"
+#include "message_schema.h"
 #include "icode_generator.h"
 #include "cpp/codegen_cpp.h"
 
@@ -194,6 +195,8 @@ void Codegen::addSource(std::experimental::filesystem::path path)
 			addComponent(document);
 		} else if (document["system"].IsDefined()) {
 			addSystem(document);
+		} else if (document["message"].IsDefined()) {
+			addMessage(document);
 		} else {
 			std::cout << "Warning: unknown document in stream." << std::endl;
 		}
@@ -217,5 +220,15 @@ void Codegen::addSystem(YAML::Node rootNode)
 		systems[name] = SystemSchema(rootNode);
 	} else {
 		throw Exception("System already declared: " + name);
+	}
+}
+
+void Codegen::addMessage(YAML::Node rootNode)
+{
+	String name = rootNode["message"].as<std::string>();
+	if (messages.find(name) == messages.end()) {
+		messages[name] = MessageSchema(rootNode);
+	} else {
+		throw Exception("Message already declared: " + name);
 	}
 }

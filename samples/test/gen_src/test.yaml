@@ -40,6 +40,8 @@ method: render
 strategy: global
 ---
 system: SpawnSprite
-method: update
-strategy: global
+---
+message: Expire
+members:
+  - time: float
 ...

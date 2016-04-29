@@ -125,6 +125,7 @@ std::vector<String> CodegenCPP::generateComponentHeader(ComponentSchema componen
 		.addDefaultConstructor()
 		.addBlankLine()
 		.addConstructor(component.members)
+		.finish()
 		.writeTo(contents);
 
 	return contents;
@@ -144,6 +145,31 @@ std::vector<U> convert(std::vector<T> in, U(*f)(const T&))
 
 std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 {
+	String methodName, methodArgType;
+	bool methodConst;
+	if (system.method == SystemMethod::Update) {
+		methodName = "update";
+		methodArgType = "Halley::Time";
+		methodConst = false;
+	} else if (system.method == SystemMethod::Render) {
+		methodName = "render";
+		methodArgType = "Halley::Painter&";
+		methodConst = true;
+	} else {
+		throw Exception("Unsupported method in " + system.name + "System");
+	}
+
+	std::vector<VariableSchema> familyArgs = { VariableSchema(TypeSchema(methodArgType), "p") };
+	String stratImpl;
+	if (system.strategy == SystemStrategy::Global) {
+		stratImpl = methodName + "(p);";
+	} else if (system.strategy == SystemStrategy::Individual) {
+		familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "entity"));
+		stratImpl = "invokeIndividual(this, &" + system.name + "System::" + methodName + ", p, mainFamily);";
+	} else {
+		throw Exception("Unsupported strategy in " + system.name + "System");
+	}
+
 	std::vector<String> contents = {
 		"#pragma once",
 		"",
@@ -170,48 +196,21 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 	auto sysClassGen = CPPClassGenerator(system.name + "System", "Halley::System");
 
 	for (auto& fam : system.families) {
-		auto famGen = CPPClassGenerator(upperFirst(fam.name) + "Family")
-			.addAccessLevelSection(CPPAccess::Public)
-			.addMember(VariableSchema(TypeSchema("Halley::EntityId", true), "entityId"))
-			.addBlankLine()
-			.addMembers(convert<ComponentReferenceSchema, VariableSchema>(fam.components, [](auto& comp) { return VariableSchema(TypeSchema(comp.name + "Component* const"), lowerFirst(comp.name)); }))
-			//.addMembers(from(fam.components) >> select([](auto& comp) { return VariableSchema(TypeSchema(comp.name + "Component* const"), lowerFirst(comp.name)); }) >> to_vector())
-			.addBlankLine()
-			.addTypeDefinition("Type", "Halley::FamilyType<" + String::concatList(convert<ComponentReferenceSchema, String>(fam.components, [](auto& comp) { return comp.name + "Component"; }), ", ") + ">");
-
 		sysClassGen
-			.addClass(famGen)
+			.addClass(CPPClassGenerator(upperFirst(fam.name) + "Family")
+				.addAccessLevelSection(CPPAccess::Public)
+				.addMember(VariableSchema(TypeSchema("Halley::EntityId", true), "entityId"))
+				.addBlankLine()
+				.addMembers(convert<ComponentReferenceSchema, VariableSchema>(fam.components, [](auto& comp) { return VariableSchema(TypeSchema(comp.name + "Component* const"), lowerFirst(comp.name)); }))
+				//.addMembers(from(fam.components) >> select([](auto& comp) { return VariableSchema(TypeSchema(comp.name + "Component* const"), lowerFirst(comp.name)); }) >> to_vector())
+				.addBlankLine()
+				.addTypeDefinition("Type", "Halley::FamilyType<" + String::concatList(convert<ComponentReferenceSchema, String>(fam.components, [](auto& comp) { return comp.name + "Component"; }), ", ") + ">")
+				.finish())
 			.addBlankLine();
 	}
 
-	sysClassGen.addMembers(convert<FamilySchema, VariableSchema>(system.families, [](auto& fam) { return VariableSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); }));
-
-	String methodName, methodArgType, stratImpl;
-	bool methodConst;
-	if (system.method == SystemMethod::Update) {
-		methodName = "update";
-		methodArgType = "Halley::Time";
-		methodConst = false;
-	} else if (system.method == SystemMethod::Render) {
-		methodName = "render";
-		methodArgType = "Halley::Painter&";
-		methodConst = true;
-	} else {
-		throw Exception("Unsupported method in " + system.name + "System");
-	}
-
-	std::vector<VariableSchema> familyArgs = { VariableSchema(TypeSchema(methodArgType), "p") };
-
-	if (system.strategy == SystemStrategy::Global) {
-		stratImpl = methodName + "(p);";
-	} else if (system.strategy == SystemStrategy::Individual) {
-		familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "entity"));
-		stratImpl = "invokeIndividual(this, &" + system.name + "System::" + methodName + ", p, mainFamily);";
-	} else {
-		throw Exception("Unsupported strategy in " + system.name + "System");
-	}
-
 	sysClassGen
+		.addMembers(convert<FamilySchema, VariableSchema>(system.families, [](auto& fam) { return VariableSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); }))
 		.addBlankLine()
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(methodArgType), "p") }, methodName + "Base", false, false, true), stratImpl)
 		.addBlankLine()
@@ -220,8 +219,9 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 		.addMethodDeclaration(MethodSchema(TypeSchema("void"), familyArgs, methodName, methodConst))
 		.addBlankLine()
 		.addAccessLevelSection(CPPAccess::Public)
-		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}") });
+		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}") })
+		.finish()
+		.writeTo(contents);
 
-	sysClassGen.writeTo(contents);
 	return contents;
 }

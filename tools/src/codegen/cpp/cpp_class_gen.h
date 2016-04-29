@@ -27,6 +27,7 @@ namespace Halley
 		CPPClassGenerator& addMethodDeclarations(const std::vector<MethodSchema>& methods);
 		CPPClassGenerator& addMethodDefinition(MethodSchema method, String body);
 		CPPClassGenerator& addTypeDefinition(String name, String type);
+		CPPClassGenerator& finish();
 		
 		CPPClassGenerator& addDefaultConstructor();
 		CPPClassGenerator& addConstructor(const std::vector<VariableSchema>& variables);
@@ -35,9 +36,11 @@ namespace Halley
 		void writeTo(std::vector<String>& out, int nTabs = 0);
 	private:
 		String className;
+		bool finished = false;
 
 		std::vector<String> results;
 
+		void ensureOK();
 		static String getAccessString(CPPAccess access);
 		static String getTypeString(TypeSchema type);
 		static String getVariableString(VariableSchema var);

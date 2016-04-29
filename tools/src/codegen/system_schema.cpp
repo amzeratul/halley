@@ -41,15 +41,21 @@ SystemSchema::SystemSchema(YAML::Node node)
 		throw Exception("Unknown method type: " + methodStr);
 	}
 
-	String strategyStr = node["strategy"].as<std::string>("individual");
-	if (strategyStr == "individual") {
-		strategy = SystemStrategy::Individual;
-	} else if (strategyStr == "global") {
+	String strategyStr = node["strategy"].as<std::string>(families.empty() ? "global" : "individual");
+	if (strategyStr == "global") {
 		strategy = SystemStrategy::Global;
-	} else if (strategyStr == "parallel") {
-		strategy = SystemStrategy::Parallel;
 	} else {
-		throw Exception("Unknown strategy type: " + strategyStr);
+		if (families.empty()) {
+			throw Exception("Systems with no families must use the global strategy.");
+		}
+
+		if (strategyStr == "individual") {
+			strategy = SystemStrategy::Individual;
+		} else if (strategyStr == "parallel") {
+			strategy = SystemStrategy::Parallel;
+		} else {
+			throw Exception("Unknown strategy type: " + strategyStr);
+		}
 	}
 
 	smearing = node["smearing"].as<int>(1);
