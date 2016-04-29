@@ -1,5 +1,5 @@
 ---
-name: Sprite
+name: Distance field sprite
 uniforms:
   - u_mvp: mat4
   - tex0: sampler2D

@@ -1,5 +1,5 @@
 #pragma once
-#include "icode_generator.h"
+#include "../icode_generator.h"
 
 namespace Halley
 {

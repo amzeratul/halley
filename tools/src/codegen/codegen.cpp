@@ -6,7 +6,7 @@
 #include "component_schema.h"
 #include "system_schema.h"
 #include "icode_generator.h"
-#include "codegen_cpp.h"
+#include "cpp/codegen_cpp.h"
 
 #ifdef _MSC_VER
 #ifdef _DEBUG

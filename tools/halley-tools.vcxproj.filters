@@ -34,9 +34,6 @@
     <ClInclude Include="src\codegen\icode_generator.h">
       <Filter>codegen</Filter>
     </ClInclude>
-    <ClInclude Include="src\codegen\codegen_cpp.h">
-      <Filter>codegen</Filter>
-    </ClInclude>
     <ClInclude Include="src\distance_field\distance_field_tool.h">
       <Filter>distance_field</Filter>
     </ClInclude>
@@ -45,6 +42,9 @@
     </ClInclude>
     <ClInclude Include="src\distance_field\distance_field_generator.h" />
     <ClInclude Include="src\make_font\font_face.h" />
+    <ClInclude Include="src\codegen\cpp\codegen_cpp.h">
+      <Filter>codegen</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\codegen\codegen_tool.cpp">
@@ -63,9 +63,6 @@
     <ClCompile Include="src\codegen\component_schema.cpp">
       <Filter>codegen</Filter>
     </ClCompile>
-    <ClCompile Include="src\codegen\codegen_cpp.cpp">
-      <Filter>codegen</Filter>
-    </ClCompile>
     <ClCompile Include="src\distance_field\distance_field_tool.cpp">
       <Filter>distance_field</Filter>
     </ClCompile>
@@ -74,5 +71,8 @@
     </ClCompile>
     <ClCompile Include="src\distance_field\distance_field_generator.cpp" />
     <ClCompile Include="src\make_font\font_face.cpp" />
+    <ClCompile Include="src\codegen\cpp\codegen_cpp.cpp">
+      <Filter>codegen</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
