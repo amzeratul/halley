@@ -4,7 +4,7 @@ namespace Halley
 {
 	enum class TextureFormat;
 
-	class TextureOpenGL : public Texture
+	class TextureOpenGL final : public Texture
 	{
 	public:
 		explicit TextureOpenGL(const TextureDescriptor& descriptor);

@@ -6,7 +6,7 @@ namespace Halley
 {
 	class MaterialPass;
 
-	class PainterOpenGL : public Painter
+	class PainterOpenGL final : public Painter
 	{
 	public:
 		PainterOpenGL();

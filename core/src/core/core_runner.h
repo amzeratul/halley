@@ -14,7 +14,7 @@ namespace Halley
 	class Camera;
 	class RenderTarget;
 
-	class CoreRunner : public CoreAPI
+	class CoreRunner final : public CoreAPI
 	{
 	public:
 		CoreRunner(std::unique_ptr<Game> game, std::vector<String> args);

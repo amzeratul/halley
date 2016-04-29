@@ -4,7 +4,7 @@
 
 namespace Halley
 {
-	class SystemSDL : public SystemAPIInternal
+	class SystemSDL final : public SystemAPIInternal
 	{
 	public:
 		unsigned int getTicks() override;

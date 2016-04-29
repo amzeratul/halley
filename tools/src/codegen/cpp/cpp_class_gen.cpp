@@ -2,16 +2,16 @@
 
 using namespace Halley;
 
-CPPClassGenerator::CPPClassGenerator(String name)
+CPPClassGenerator::CPPClassGenerator(String name, bool isFinal)
 	: className(name) 
 {
-	results.push_back("class " + name + " {");
+	results.push_back("class " + name + (isFinal ? " final" : "") + " {");
 }
 
-CPPClassGenerator::CPPClassGenerator(String name, String baseClass, CPPAccess inheritanceType)
+CPPClassGenerator::CPPClassGenerator(String name, String baseClass, CPPAccess inheritanceType, bool isFinal)
 	: className(name)
 {
-	results.push_back("class " + name + " : " + getAccessString(inheritanceType) + " " + baseClass + " {");
+	results.push_back("class " + name + (isFinal ? " final" : "") + " : " + getAccessString(inheritanceType) + " " + baseClass + " {");
 }
 
 CPPClassGenerator& CPPClassGenerator::addClass(CPPClassGenerator& otherClass)

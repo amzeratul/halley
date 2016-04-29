@@ -4,7 +4,7 @@
 
 namespace Halley
 {
-	class ShaderOpenGL : public Shader
+	class ShaderOpenGL final : public Shader
 	{
 	public:
 		ShaderOpenGL(String name);

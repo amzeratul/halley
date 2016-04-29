@@ -12,7 +12,7 @@ namespace Stages {
 	};
 }
 
-class SampleGame : public Game
+class SampleGame final : public Game
 {
 public:
 	int initPlugins() override

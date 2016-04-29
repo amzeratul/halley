@@ -5,7 +5,7 @@
 
 namespace Halley
 {
-	class RenderTargetOpenGL : public TextureRenderTarget
+	class RenderTargetOpenGL final : public TextureRenderTarget
 	{
 	public:
 		~RenderTargetOpenGL();

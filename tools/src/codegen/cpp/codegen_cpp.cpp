@@ -125,7 +125,7 @@ std::vector<String> CodegenCPP::generateComponentHeader(ComponentSchema componen
 		""
 	};
 
-	CPPClassGenerator(component.name + "Component", "Halley::Component")
+	CPPClassGenerator(component.name + "Component", "Halley::Component", CPPAccess::Public, true)
 		.addAccessLevelSection(CPPAccess::Public)
 		.addMember(VariableSchema(TypeSchema("int", false, true, true), "componentIndex", String::integerToString(component.id)))
 		.addBlankLine()
@@ -202,7 +202,7 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 		"// Generated file; do not modify."
 	});
 
-	auto sysClassGen = CPPClassGenerator(system.name + "System", "Halley::System");
+	auto sysClassGen = CPPClassGenerator(system.name + "System", "Halley::System", CPPAccess::Public, true);
 
 	for (auto& fam : system.families) {
 		sysClassGen
@@ -244,7 +244,7 @@ std::vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
 		""
 	};
 
-	CPPClassGenerator(message.name + "Message", "Halley::Message")
+	CPPClassGenerator(message.name + "Message", "Halley::Message", CPPAccess::Public, true)
 		.addAccessLevelSection(CPPAccess::Public)
 		.addMember(VariableSchema(TypeSchema("int", false, true, true), "messageIndex", String::integerToString(message.id)))
 		.addBlankLine()

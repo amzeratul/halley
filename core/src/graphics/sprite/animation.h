@@ -56,7 +56,7 @@ namespace Halley
 		bool flip;
 	};
 	
-	class Animation : public Resource
+	class Animation final : public Resource
 	{
 	public:
 		static std::unique_ptr<Animation> loadResource(ResourceLoader& loader);

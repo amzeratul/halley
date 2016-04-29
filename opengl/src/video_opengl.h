@@ -1,7 +1,7 @@
 struct SDL_Window;
 
 namespace Halley {
-	class VideoOpenGL : public VideoAPIInternal
+	class VideoOpenGL final : public VideoAPIInternal
 	{
 	public:
 		VideoOpenGL();
