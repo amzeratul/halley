@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fields_schema.h"
+
 namespace YAML
 {
 	class Node;
@@ -7,14 +9,6 @@ namespace YAML
 
 namespace Halley
 {
-	class ComponentMemberSchema
-	{
-	public:
-		String name;
-		String type;
-		bool isConst;
-	};
-
 	class ComponentSchema
 	{
 	public:
@@ -23,6 +17,6 @@ namespace Halley
 
 		int id = -1;
 		String name;
-		std::vector<ComponentMemberSchema> members;
+		std::vector<VariableSchema> members;
 	};
 }

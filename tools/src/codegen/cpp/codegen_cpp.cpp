@@ -1,5 +1,6 @@
 #include <sstream>
 #include "codegen_cpp.h"
+#include "cpp_class_gen.h"
 using namespace Halley;
 
 static String toFileName(String className)
@@ -107,56 +108,39 @@ CodeGenResult CodegenCPP::generateRegistry(const std::vector<ComponentSchema>& c
 
 std::vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 {
-	String className = component.name + "Component";
 	std::vector<String> contents = {
 		"#pragma once",
 		"",
 		"#include <halley.hpp>",
-		"",
-		"class " + className + " : public Component {",
-		"public:",
-		"	constexpr static int componentIndex = " + String::integerToString(component.id) + ";",
-		"",
+		""
 	};
 
-	// Members
-	std::vector<String> members;
-	for (auto& member : component.members) {
-		String decl = member.type + " " + member.name;
-		contents.emplace_back(String("\t") + (member.isConst ? "const " : "") + decl + ";");
-		members.push_back(decl);
-	}
+	CPPClassGenerator(component.name + "Component", "Component")
+		.addAccessLevelSection(CPPAccess::Public)
+		.addMember(VariableSchema(TypeSchema("int", false, true, true), "componentIndex", String::integerToString(component.id)))
+		.addBlankLine()
+		.addMembers(component.members)
+		.addBlankLine()
+		.addDefaultConstructor()
+		.addBlankLine()
+		.addConstructor(component.members)
+		.writeTo(contents);
 
-	// Default constructor
-	contents.emplace_back("");
-	contents.emplace_back("\t" + className + "() {}");
-
-	// Initializing constructor
-	contents.emplace_back("");
-	contents.emplace_back("\t" + className + "(" + String::concatList(members, ", ") + ")");
-	bool first = true;
-	for (auto& member : component.members) {
-		contents.emplace_back(String("\t\t") + (first ? ": " : ", ") + member.name + "(" + member.name + ")");
-		first = false;
-	}
-	contents.emplace_back("\t{}");
-	
-	contents.emplace_back("};");
 	return contents;
 }
 
 std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 {
-	String className = system.name + "System";
 	std::vector<String> contents = {
 		"#pragma once",
 		"",
-		"#include <halley.hpp>"
+		"#include <halley.hpp>",
+		""
 	};
 
 	// Family headers
-	for (auto& fam: system.families) {
-		for (auto& comp: fam.components) {
+	for (auto& fam : system.families) {
+		for (auto& comp : fam.components) {
 			String compName = comp.name + "Component";
 			contents.emplace_back("#include \"../components/" + toFileName(compName) + ".h\"");
 		}
@@ -164,81 +148,74 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 
 	contents.insert(contents.end(), {
 		"",
-		"// Generated file; do not modify.",
-		"class " + className + " : public Halley::System {"
+		"// Generated file; do not modify."
 	});
 
-	// Family declarations
-	String familyList;
-	for (auto& fam: system.families) {
-		if (familyList.size() != 0) {
-			familyList += ", ";
-		}
-		familyList += "&" + fam.name + "Family";
+	auto sysClassGen = CPPClassGenerator(system.name + "System", "Halley::System");
 
-		contents.insert(contents.end(), {
-			"	class " + upperFirst(fam.name) + "Family {",
-			"	public:",
-			"		const Halley::EntityId entityId;",
-			"		"
-		});
-
-		String compsList;
-		for (auto& comp: fam.components) {
-			if (compsList.size() != 0) {
-				compsList += ", ";
-			}
-			compsList += comp.name + "Component";
-			contents.emplace_back("		" + comp.name + "Component* const " + lowerFirst(comp.name) + ";");
-		}
-
-		contents.insert(contents.end(), {
-			"		",
-			"		using Type = Halley::FamilyType<" + compsList + ">;",
-			"	};",
-			"	"
-		});
-	}
-
-	// Family bindings
 	for (auto& fam : system.families) {
-		contents.emplace_back("	Halley::FamilyBinding<" + upperFirst(fam.name) + "Family> " + fam.name + "Family;");
+		auto famGen = CPPClassGenerator(upperFirst(fam.name) + "Family")
+			.addAccessLevelSection(CPPAccess::Public)
+			.addMember(VariableSchema(TypeSchema("Halley::EntityId", true), "entityId"))
+			.addBlankLine();
+
+		std::vector<String> compNames;
+		for (auto& comp : fam.components) {
+			famGen.addMember(VariableSchema(TypeSchema(comp.name + "Component* const"), lowerFirst(comp.name)));
+			compNames.push_back(comp.name + "Component");
+		}
+		
+		famGen
+			.addBlankLine()
+			.addTypeDefinition("Type", "Halley::FamilyType<" + String::concatList(compNames, ", ") + ">");
+
+		sysClassGen
+			.addClass(famGen)
+			.addBlankLine();
 	}
-	
-	String methodName, methodArgType, familyArg, methodConst, stratImpl;
+
+	std::vector<String> families;
+	for (auto& fam : system.families) {
+		sysClassGen.addMember(VariableSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"));
+		families.push_back("&" + fam.name + "Family");
+	}
+
+	String methodName, methodArgType, stratImpl;
+	bool methodConst;
 	if (system.method == SystemMethod::Update) {
 		methodName = "update";
 		methodArgType = "Halley::Time";
-		methodConst = "";
+		methodConst = false;
 	} else if (system.method == SystemMethod::Render) {
 		methodName = "render";
 		methodArgType = "Halley::Painter&";
-		methodConst = " const";
+		methodConst = true;
 	} else {
 		throw Exception("Unsupported method in " + system.name + "System");
 	}
 
+	std::vector<VariableSchema> familyArgs = { VariableSchema(TypeSchema(methodArgType), "p") };
+
 	if (system.strategy == SystemStrategy::Global) {
-		familyArg = "";
 		stratImpl = methodName + "(p);";
 	} else if (system.strategy == SystemStrategy::Individual) {
-		familyArg = ", MainFamily& entity";
+		familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "entity"));
 		stratImpl = "invokeIndividual(this, &" + system.name + "System::" + methodName + ", p, mainFamily);";
 	} else {
 		throw Exception("Unsupported strategy in " + system.name + "System");
 	}
 
-	contents.insert(contents.end(), {
-		"",
-		"	void " + methodName + "Base(" + methodArgType + " p) override { " + stratImpl + " };",
-		"",
-		"protected:",
-		"	void " + methodName + "(" + methodArgType + " p" + familyArg + ")" + methodConst + "; // Implement me",
-		"",
-		"public:",
-		"	" + system.name + "System() : System({" + familyList + "}) {}",
-		"};"
-	});
+	sysClassGen
+		.addBlankLine()
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(methodArgType), "p") }, methodName + "Base", false, false, true), stratImpl)
+		.addBlankLine()
+		.addAccessLevelSection(CPPAccess::Protected)
+		.addComment("Implement me:")
+		.addMethodDeclaration(MethodSchema(TypeSchema("void"), familyArgs, methodName, methodConst))
+		.addBlankLine()
+		.addAccessLevelSection(CPPAccess::Public)
+		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(families, ", ") + "}") });
 
+	sysClassGen.writeTo(contents);
 	return contents;
 }

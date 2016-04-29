@@ -11,13 +11,7 @@ ComponentSchema::ComponentSchema(YAML::Node node)
 
 	for (auto& memberEntry : node["members"]) {
 		for (auto m = memberEntry.begin(); m != memberEntry.end(); ++m) {
-			ComponentMemberSchema member;
-
-			member.name = m->first.as<std::string>();
-			member.type = m->second.as<std::string>();
-			member.isConst = false;
-
-			members.push_back(member);
+			members.emplace_back(VariableSchema(TypeSchema(m->second.as<std::string>()), m->first.as<std::string>()));
 		}
 	}
 }

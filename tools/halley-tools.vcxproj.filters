@@ -45,6 +45,8 @@
     <ClInclude Include="src\codegen\cpp\codegen_cpp.h">
       <Filter>codegen</Filter>
     </ClInclude>
+    <ClInclude Include="src\codegen\cpp\cpp_class_gen.h" />
+    <ClInclude Include="src\codegen\fields_schema.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\codegen\codegen_tool.cpp">
@@ -74,5 +76,6 @@
     <ClCompile Include="src\codegen\cpp\codegen_cpp.cpp">
       <Filter>codegen</Filter>
     </ClCompile>
+    <ClCompile Include="src\codegen\cpp\cpp_class_gen.cpp" />
   </ItemGroup>
 </Project>
