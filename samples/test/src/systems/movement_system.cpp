@@ -23,6 +23,11 @@ void MovementSystem::update(Halley::Time time, MainFamily& e)
 	if (Halley::Random::getGlobal().getFloat(0.0f, 1.0f) < 0.001f) {
 		getWorld().destroyEntity(e.entityId);
 	}
-} 
+}
+
+void MovementSystem::onMessageReceived(const ExpireMessage& msg, MainFamily& e)
+{
+	std::cout << "Received message!" << std::endl;
+}
 
 REGISTER_SYSTEM(MovementSystem)

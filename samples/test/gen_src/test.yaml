@@ -33,6 +33,8 @@ families:
     - Position: write
     - Velocity: write
 access: ['world']
+messages:
+  - Expire: receive
 ---
 system: SpriteAnimation
 families:
@@ -51,8 +53,6 @@ strategy: global
 ---
 system: SpawnSprite
 access: ['world', 'api']
-messages:
-  - Expire: receive
 ---
 message: Expire
 members:

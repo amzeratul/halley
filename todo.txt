@@ -36,8 +36,7 @@ entity
 
 codegen
 * components registry [RESEARCH]
-* messages? [RESEARCH]
-- system base classes [RESEARCH]
+- system custom base classes [RESEARCH]
 - import custom types in components [RESEARCH]
 - codegen parallel systems
 - codegen Lua

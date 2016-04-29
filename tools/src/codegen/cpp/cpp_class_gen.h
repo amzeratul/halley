@@ -17,8 +17,10 @@ namespace Halley
 		explicit CPPClassGenerator(String name);
 		explicit CPPClassGenerator(String name, String baseClass, CPPAccess inheritanceType = CPPAccess::Public, bool isFinal = false);
 
-		CPPClassGenerator& addClass(CPPClassGenerator& otherClass);
 		CPPClassGenerator& addBlankLine();
+		CPPClassGenerator& addLine(String line);
+
+		CPPClassGenerator& addClass(CPPClassGenerator& otherClass);
 		CPPClassGenerator& addComment(String comment);
 		CPPClassGenerator& addAccessLevelSection(CPPAccess access);
 		CPPClassGenerator& addMember(VariableSchema member);
@@ -26,6 +28,7 @@ namespace Halley
 		CPPClassGenerator& addMethodDeclaration(MethodSchema method);
 		CPPClassGenerator& addMethodDeclarations(const std::vector<MethodSchema>& methods);
 		CPPClassGenerator& addMethodDefinition(MethodSchema method, String body);
+		CPPClassGenerator& addMethodDefinition(MethodSchema method, const std::vector<String>& body);
 		CPPClassGenerator& addTypeDefinition(String name, String type);
 		CPPClassGenerator& finish();
 		
@@ -37,6 +40,7 @@ namespace Halley
 	private:
 		String className;
 		bool finished = false;
+		CPPAccess currentAccess = CPPAccess::Private;
 
 		std::vector<String> results;
 

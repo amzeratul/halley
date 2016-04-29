@@ -23,8 +23,13 @@ CPPClassGenerator& CPPClassGenerator::addClass(CPPClassGenerator& otherClass)
 
 CPPClassGenerator& CPPClassGenerator::addBlankLine()
 {
+	return addLine("");
+}
+
+CPPClassGenerator& CPPClassGenerator::addLine(String line)
+{
 	ensureOK();
-	results.push_back("");
+	results.push_back("\t" + line);
 	return *this;
 }
 
@@ -38,7 +43,10 @@ CPPClassGenerator& CPPClassGenerator::addComment(String comment)
 CPPClassGenerator& CPPClassGenerator::addAccessLevelSection(CPPAccess access)
 {
 	ensureOK();
-	results.push_back(getAccessString(access) + ":");
+	if (currentAccess != access) {
+		currentAccess = access;
+		results.push_back(getAccessString(access) + ":");
+	}
 	return *this;
 }
 
@@ -76,9 +84,16 @@ CPPClassGenerator& CPPClassGenerator::addMethodDeclarations(const std::vector<Me
 
 CPPClassGenerator& CPPClassGenerator::addMethodDefinition(MethodSchema method, String body)
 {
+	return addMethodDefinition(method, std::vector<String>{ body });
+}
+
+CPPClassGenerator& CPPClassGenerator::addMethodDefinition(MethodSchema method, const std::vector<String>& body)
+{
 	ensureOK();
 	results.push_back("\t" + getMethodSignatureString(method) + " {");
-	results.push_back("\t\t" + body);
+	for (auto& line : body) {
+		results.push_back("\t\t" + line);
+	}
 	results.push_back("\t}");
 	return *this;
 }

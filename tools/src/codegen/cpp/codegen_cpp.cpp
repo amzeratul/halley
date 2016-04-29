@@ -196,6 +196,9 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 			}
 		}
 	}
+	for (auto& msg : system.messages) {
+		contents.emplace_back("#include \"../messages/" + toFileName(msg.name + "Message") + ".h\"");
+	}
 
 	contents.insert(contents.end(), {
 		"",
@@ -222,24 +225,48 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 			.addBlankLine();
 	}
 
-	sysClassGen
-		.addMembers(convert<FamilySchema, VariableSchema>(system.families, [](auto& fam) { return VariableSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); }))
-		.addBlankLine();
-
 	if ((int(system.access) & int(SystemAccess::API)) != 0) {
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::HalleyAPI&"), {}, "getAPI", true), "return doGetAPI();");
 	}
 	if ((int(system.access) & int(SystemAccess::World)) != 0) {
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::World&"), {}, "getWorld", true), "return doGetWorld();");
 	}
-	if (system.access != SystemAccess::Pure) {
-		sysClassGen.addBlankLine();
+	bool hasReceive = false;
+	for (auto& msg : system.messages) {
+		if (msg.send) {
+			sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::EntityId"), "entityId"), VariableSchema(TypeSchema(msg.name + "Message&", true), "msg") }, "sendMessage"), "sendMessageGeneric(entityId, msg);");
+		}
+		if (msg.receive) {
+			hasReceive = true;
+		}
 	}
 
 	sysClassGen
+		.addBlankLine()
+		.addAccessLevelSection(system.strategy == SystemStrategy::Global ? CPPAccess::Protected : CPPAccess::Private)
+		.addMembers(convert<FamilySchema, VariableSchema>(system.families, [](auto& fam) { return VariableSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); }))
+		.addBlankLine()
 		.addAccessLevelSection(CPPAccess::Private)
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(methodArgType), "p") }, methodName + "Base", false, false, true, true), stratImpl)
-		.addBlankLine()
+		.addBlankLine();
+
+	if (hasReceive) {
+		std::vector<String> body = { "switch (msgIndex) {" };
+		for (auto& msg : system.messages) {
+			if (msg.receive) {
+				body.emplace_back("case " + msg.name + "Message::messageIndex: onMessagesReceived(static_cast<" + msg.name + "Message*>(msgs), idx, n); break;");
+			}
+		}
+		body.emplace_back("}");
+		sysClassGen
+			.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("int"), "msgIndex"), VariableSchema(TypeSchema("Halley::Message*"), "msgs"), VariableSchema(TypeSchema("size_t*"), "idx"), VariableSchema(TypeSchema("size_t"), "n") }, "onMessagesReceived", false, false, true, true), body)
+			.addBlankLine()
+			.addLine("template <typename M>")
+			.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("M*"), "msgs"), VariableSchema(TypeSchema("size_t*"), "idx"), VariableSchema(TypeSchema("size_t"), "n") }, "onMessagesReceived"), "for (size_t i = 0; i < n; i++) static_cast<T*>(this)->onMessageReceived(msgs[i], mainFamily[idx[i]]);")
+			.addBlankLine();
+	}
+
+	sysClassGen
 		.addAccessLevelSection(CPPAccess::Public)
 		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}") })
 		.finish()
@@ -247,10 +274,18 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 
 	contents.push_back("");
 
-	CPPClassGenerator(system.name + "System", system.name + "SystemBase<" + system.name + "System>", CPPAccess::Public, true)
+	auto actualSys = CPPClassGenerator(system.name + "System", system.name + "SystemBase<" + system.name + "System>", CPPAccess::Public, true)
 		.addAccessLevelSection(CPPAccess::Public)
-		.addComment("Implement me:")
-		.addMethodDeclaration(MethodSchema(TypeSchema("void"), familyArgs, methodName, methodConst))
+		.addComment("Implement these:")
+		.addMethodDeclaration(MethodSchema(TypeSchema("void"), familyArgs, methodName, methodConst));
+
+	for (auto& msg : system.messages) {
+		if (msg.receive) {
+			actualSys.addMethodDeclaration(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(msg.name + "Message&", true), "msg"), VariableSchema(TypeSchema("MainFamily&"), "entity") }, "onMessageReceived"));
+		}
+	}
+
+	actualSys
 		.finish()
 		.writeTo(contents);
 

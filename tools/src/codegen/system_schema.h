@@ -34,6 +34,14 @@ namespace Halley
 		bool write = false;
 	};
 
+	class MessageReferenceSchema
+	{
+	public:
+		String name;
+		bool send = false;
+		bool receive = false;
+	};
+
 	class FamilySchema
 	{
 	public:
@@ -59,6 +67,8 @@ namespace Halley
 		SystemMethod method = SystemMethod::Update;
 		CodegenLanguage language = CodegenLanguage::CPlusPlus;
 		int smearing = 0;
+
 		std::vector<FamilySchema> families;
+		std::vector<MessageReferenceSchema> messages;
 	};
 }

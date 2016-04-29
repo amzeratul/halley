@@ -72,5 +72,27 @@ SystemSchema::SystemSchema(YAML::Node node)
 		access = SystemAccess(accessValue);
 	}
 
-	// TODO: language
+	if (node["language"].IsDefined()) {
+		String lang = node["language"].as<std::string>();
+		if (lang == "cpp") {
+			language = CodegenLanguage::CPlusPlus;
+		} else if (lang == "lua") {
+			language = CodegenLanguage::Lua;
+		} else {
+			throw Exception("Unknown language: " + lang);
+		}
+	}
+
+	if (node["messages"].IsDefined()) {
+		for (auto messageEntry : node["messages"]) {
+			for (auto iter = messageEntry.begin(); iter != messageEntry.end(); ++iter) {
+				MessageReferenceSchema msg;
+				msg.name = iter->first.as<std::string>();
+				String type = iter->second.as<std::string>();
+				msg.receive = type == "receive";
+				msg.send = type == "send";
+				messages.push_back(msg);
+			}
+		}
+	}
 }
