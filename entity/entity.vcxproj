@@ -193,6 +193,7 @@
     <ClInclude Include="src\family_mask.h" />
     <ClInclude Include="src\family_type.h" />
     <ClInclude Include="src\halley_entity_inc.h" />
+    <ClInclude Include="src\message.h" />
     <ClInclude Include="src\prec.h" />
     <ClInclude Include="src\system.h" />
     <ClInclude Include="src\type_deleter.h" />

@@ -54,6 +54,15 @@ CodeGenResult CodegenCPP::generateSystem(SystemSchema system)
 	return result;
 }
 
+CodeGenResult CodegenCPP::generateMessage(MessageSchema message)
+{
+	String className = message.name + "Message";
+
+	CodeGenResult result;
+	result.emplace_back(CodeGenFile("messages/" + toFileName(className) + ".h", generateMessageHeader(message)));
+	return result;
+}
+
 CodeGenResult CodegenCPP::generateRegistry(const std::vector<ComponentSchema>& components, const std::vector<SystemSchema>& systems)
 {
 	std::vector<String> registryCpp {
@@ -116,7 +125,7 @@ std::vector<String> CodegenCPP::generateComponentHeader(ComponentSchema componen
 		""
 	};
 
-	CPPClassGenerator(component.name + "Component", "Component")
+	CPPClassGenerator(component.name + "Component", "Halley::Component")
 		.addAccessLevelSection(CPPAccess::Public)
 		.addMember(VariableSchema(TypeSchema("int", false, true, true), "componentIndex", String::integerToString(component.id)))
 		.addBlankLine()
@@ -220,6 +229,30 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 		.addBlankLine()
 		.addAccessLevelSection(CPPAccess::Public)
 		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}") })
+		.finish()
+		.writeTo(contents);
+
+	return contents;
+}
+
+std::vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
+{
+	std::vector<String> contents = {
+		"#pragma once",
+		"",
+		"#include <halley.hpp>",
+		""
+	};
+
+	CPPClassGenerator(message.name + "Message", "Halley::Message")
+		.addAccessLevelSection(CPPAccess::Public)
+		.addMember(VariableSchema(TypeSchema("int", false, true, true), "messageIndex", String::integerToString(message.id)))
+		.addBlankLine()
+		.addMembers(message.members)
+		.addBlankLine()
+		.addDefaultConstructor()
+		.addBlankLine()
+		.addConstructor(message.members)
 		.finish()
 		.writeTo(contents);
 

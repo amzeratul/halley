@@ -23,6 +23,8 @@ members:
 system: Time
 families:
   - main: ['write Time']
+messages:
+  - Expire: send
 ---
 system: Movement
 families:
@@ -40,6 +42,8 @@ method: render
 strategy: global
 ---
 system: SpawnSprite
+messages:
+  - Expire: receive
 ---
 message: Expire
 members:

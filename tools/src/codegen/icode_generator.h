@@ -2,6 +2,7 @@
 
 #include "component_schema.h"
 #include "system_schema.h"
+#include "message_schema.h"
 
 namespace Halley
 {
@@ -30,6 +31,7 @@ namespace Halley
 
 		virtual CodeGenResult generateComponent(ComponentSchema component) = 0;
 		virtual CodeGenResult generateSystem(SystemSchema system) = 0;
+		virtual CodeGenResult generateMessage(MessageSchema message) = 0;
 
 		virtual CodeGenResult generateRegistry(const std::vector<ComponentSchema>& components, const std::vector<SystemSchema>& systems) = 0;
 	};

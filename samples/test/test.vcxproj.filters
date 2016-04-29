@@ -82,6 +82,7 @@
       <Filter>gen</Filter>
     </ClInclude>
     <ClInclude Include="gen\cpp\systems\spawn_sprite_system.h" />
+    <ClInclude Include="gen\cpp\messages\expire_message.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="gen_src\test.yaml" />

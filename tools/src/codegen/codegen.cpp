@@ -81,9 +81,16 @@ void Codegen::validate()
 
 void Codegen::process()
 {
-	int id = 0;
-	for (auto& comp: components) {
-		comp.second.id = id++;
+	{
+		int id = 0;
+		for (auto& comp : components) {
+			comp.second.id = id++;
+		}
+	}{
+		int id = 0;
+		for (auto& msg : messages) {
+			msg.second.id = id++;
+		}
 	}
 }
 
@@ -109,6 +116,12 @@ bool Codegen::writeFile(String dstPath, const char* data, size_t dataSize)
 		if (identical) {
 			return false;
 		}
+	}
+
+	// Ensure directory existance
+	path dir = filePath.parent_path();
+	if (!exists(dir)) {
+		create_directories(dir);
 	}
 
 	// Write file
@@ -172,6 +185,9 @@ void Codegen::generateCode(String directory)
 				writeFiles(genDir, gen->generateSystem(sys.second), stats);
 			}
 			syss.push_back(sys.second);
+		}
+		for (auto& msg : messages) {
+			writeFiles(genDir, gen->generateMessage(msg.second), stats);
 		}
 
 		writeFiles(genDir, gen->generateRegistry(comps, syss), stats);

@@ -22,6 +22,9 @@
     <Filter Include="include">
       <UniqueIdentifier>{6a3dd4bf-2e6b-4e10-af17-4993a6e211d2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="messages">
+      <UniqueIdentifier>{00711b2b-52b7-423f-8556-373eeb8fcc15}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\world.cpp">
@@ -88,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="src\prec.h">
       <Filter>precompiled</Filter>
+    </ClInclude>
+    <ClInclude Include="src\message.h">
+      <Filter>messages</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

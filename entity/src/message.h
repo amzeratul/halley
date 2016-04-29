@@ -2,6 +2,5 @@
 
 namespace Halley
 {
-	class Component {};
+	class Message {};
 }
-
