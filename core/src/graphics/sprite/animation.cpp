@@ -1,8 +1,8 @@
 #include "animation.h"
 #include "sprite_sheet.h"
-#include "../material.h"
-#include "../material_definition.h"
-#include "../material_parameter.h"
+#include "../material/material.h"
+#include "../material/material_definition.h"
+#include "../material/material_parameter.h"
 #include "../../core/src/api/halley_api.h"
 #include "../../core/src/resources/resources.h"
 #include <yaml-cpp/yaml.h>

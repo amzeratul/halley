@@ -2,9 +2,9 @@
 #include "uniform_type.h"
 #include "material.h"
 #include "material_definition.h"
-#include "../api/halley_api.h"
-#include "shader.h"
-#include "texture.h"
+#include "../../api/halley_api.h"
+#include "../shader.h"
+#include "../texture.h"
 
 using namespace Halley;
 

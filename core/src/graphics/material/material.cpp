@@ -1,7 +1,7 @@
 #include "material.h"
 #include "material_definition.h"
 #include "material_parameter.h"
-#include "painter.h"
+#include "../painter.h"
 
 using namespace Halley;
 

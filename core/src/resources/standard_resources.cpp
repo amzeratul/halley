@@ -3,7 +3,8 @@
 #include "../graphics/sprite/animation.h"
 #include "../graphics/sprite/sprite_sheet.h"
 #include "../graphics/texture.h"
-#include "../graphics/material_definition.h"
+#include "../graphics/material/material_definition.h"
+#include "../graphics/text/font.h"
 
 using namespace Halley;
 
@@ -15,4 +16,5 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<MaterialDefinition>("material");
 	resources.init<TextFile>("");
 	resources.init<YAMLFile>("");
+	resources.init<Font>("fonts");
 }

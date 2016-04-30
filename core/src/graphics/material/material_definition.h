@@ -1,5 +1,5 @@
 #pragma once
-#include "blend.h"
+#include "../blend.h"
 
 namespace YAML
 {

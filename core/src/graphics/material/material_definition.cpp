@@ -1,10 +1,10 @@
-#include "../resources/resources.h"
-#include "../api/halley_api_internal.h"
-#include "../api/halley_api.h"
+#include "../../resources/resources.h"
+#include "../../api/halley_api_internal.h"
+#include "../../api/halley_api.h"
+#include "../shader.h"
+#include "../painter.h"
 #include "material_definition.h"
-#include "shader.h"
 #include "material_parameter.h"
-#include "painter.h"
 #include <yaml-cpp/yaml.h>
 
 using namespace Halley;

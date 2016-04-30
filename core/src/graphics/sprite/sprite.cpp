@@ -1,9 +1,9 @@
 #include "sprite.h"
 #include "sprite_sheet.h"
 #include "../painter.h"
-#include "../material.h"
-#include "../material_definition.h"
-#include "../material_parameter.h"
+#include "../material/material.h"
+#include "../material/material_definition.h"
+#include "../material/material_parameter.h"
 #include "../texture.h"
 #include "../../resources/resources.h"
 

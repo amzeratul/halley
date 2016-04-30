@@ -1,5 +1,5 @@
 #pragma once
-#include "material.h"
+#include "material/material.h"
 #include <vector>
 
 namespace Halley

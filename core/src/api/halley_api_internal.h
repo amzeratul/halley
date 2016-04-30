@@ -7,7 +7,7 @@ union SDL_Event;
 #include "video_api.h"
 #include "system_api.h"
 #include "input_api.h"
-#include "../graphics/uniform_type.h"
+#include "../graphics/material/uniform_type.h"
 
 namespace Halley
 {
