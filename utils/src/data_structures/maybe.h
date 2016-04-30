@@ -114,20 +114,17 @@ namespace Halley
 		}
 		
 	private:
-		union {
-			T* align;
-			std::array<char, sizeof(T)> data;
-		} u;
+		alignas(alignof(T)) std::array<char, sizeof(T)> data;
 		bool defined;
 
 		T* getData()
 		{
-			return reinterpret_cast<T*>(&u.data[0]);
+			return reinterpret_cast<T*>(&data[0]);
 		}
 
 		const T* getData() const
 		{
-			return reinterpret_cast<const T*>(&u.data[0]);
+			return reinterpret_cast<const T*>(&data[0]);
 		}
 	};
 	*/

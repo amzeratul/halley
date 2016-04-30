@@ -2,5 +2,9 @@
 
 namespace Halley
 {
-	class Message {};
+	class Message
+	{
+	public:
+		virtual ~Message() {}
+	};
 }

@@ -11,11 +11,11 @@
 namespace Halley {
 	class Message;
 	class HalleyAPI;
-
+	
 	class System
 	{
 	public:
-		System(std::initializer_list<FamilyBindingBase*> uninitializedFamilies);
+		System(std::initializer_list<FamilyBindingBase*> families, std::initializer_list<int> messageTypesReceived);
 		virtual ~System() {}
 
 	protected:
@@ -24,7 +24,7 @@ namespace Halley {
 
 		virtual void updateBase(Time) {}
 		virtual void renderBase(Painter&) {}
-		virtual void onMessagesReceived(int, Message*, size_t*, size_t) {}
+		virtual void onMessagesReceived(int, Message**, size_t*, size_t) {}
 
 		template <typename T, typename M, typename U, typename V>
 		static void invokeIndividual(T* obj, M method, U& p, V& fam)
@@ -37,23 +37,30 @@ namespace Halley {
 		template <typename T>
 		void sendMessageGeneric(EntityId entityId, const T& msg)
 		{
-			doSendMessage(entityId, msg, sizeof(T), T::messageIndex);
+			auto toSend = std::make_unique<T>();
+			*toSend = msg;
+			doSendMessage(entityId, std::move(toSend), sizeof(T), T::messageIndex);
 		}
 
 	private:
 		friend class World;
 
-		int nsTaken = 0;
 		std::vector<FamilyBindingBase*> families;
+		std::vector<int> messageTypesReceived;
+
 		World* world;
-		String name;
 		HalleyAPI* api;
+		String name;
+		int nsTaken = 0;
+		int systemId = -1;
 
 		void doUpdate(Time time);
 		void doRender(Painter& painter);
-		void onAddedToWorld(World& world);
+		void onAddedToWorld(World& world, int id);
 
-		void doSendMessage(EntityId target, const Message& msg, size_t msgSize, int msgId);
+		void purgeMessages();
+		void processMessages();
+		void doSendMessage(EntityId target, std::unique_ptr<Message> msg, size_t msgSize, int msgId);
 	};
 
 }

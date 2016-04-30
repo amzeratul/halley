@@ -3,14 +3,27 @@
 #include <array>
 #include <vector>
 #include "component.h"
+#include "message.h"
 #include "family_mask.h"
 #include "entity_id.h"
 #include "type_deleter.h"
 
 namespace Halley {
+	class MessageEntry
+	{
+	public:
+		std::unique_ptr<Message> msg;
+		int type;
+		int age;
+
+		MessageEntry() {}
+		MessageEntry(std::unique_ptr<Message> msg, int type, int age) : msg(std::move(msg)), type(type), age(age) {}
+	};
+
 	class Entity
 	{
 		friend class World;
+		friend class System;
 		static const int numFastComponents = 3;
 
 	public:
@@ -87,6 +100,7 @@ namespace Halley {
 
 	private:
 		std::vector<std::pair<int, Component*>> components;
+		std::vector<MessageEntry> inbox;
 		std::array<Component*, numFastComponents> fastComponents;
 		FamilyMaskType mask;
 		EntityId uid = -1;

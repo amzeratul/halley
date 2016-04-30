@@ -13,12 +13,13 @@ Halley::World::World(HalleyAPI* api)
 
 Halley::World::~World() = default;
 
-Halley::System& Halley::World::addSystem(std::unique_ptr<System> system, TimeLine timeline)
+Halley::System& Halley::World::addSystem(std::unique_ptr<System> system, TimeLine timelineType)
 {
 	system->api = api;
 	auto& ref = *system.get();
-	getSystems(timeline).emplace_back(std::move(system));
-	ref.onAddedToWorld(*this);
+	auto& timeline = getSystems(timelineType);
+	timeline.emplace_back(std::move(system));
+	ref.onAddedToWorld(*this, int(timeline.size()));
 	return ref;
 }
 

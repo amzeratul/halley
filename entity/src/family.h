@@ -43,10 +43,7 @@ namespace Halley {
 		struct StorageType
 		{
 			EntityId entityId;
-			union {
-				std::array<char, sizeof(T) - std::max(sizeof(EntityId), sizeof(void*))> data;
-				void* alignDummy;
-			};
+			alignas(alignof(void*)) std::array<char, sizeof(T) - std::max(sizeof(EntityId), sizeof(void*))> data;
 		};
 
 	public:

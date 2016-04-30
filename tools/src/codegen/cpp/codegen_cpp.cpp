@@ -232,12 +232,14 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::World&"), {}, "getWorld", true), "return doGetWorld();");
 	}
 	bool hasReceive = false;
+	std::vector<String> msgsReceived;
 	for (auto& msg : system.messages) {
 		if (msg.send) {
 			sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::EntityId"), "entityId"), VariableSchema(TypeSchema(msg.name + "Message&", true), "msg") }, "sendMessage"), "sendMessageGeneric(entityId, msg);");
 		}
 		if (msg.receive) {
 			hasReceive = true;
+			msgsReceived.push_back(msg.name + "Message::messageIndex");
 		}
 	}
 
@@ -254,21 +256,21 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 		std::vector<String> body = { "switch (msgIndex) {" };
 		for (auto& msg : system.messages) {
 			if (msg.receive) {
-				body.emplace_back("case " + msg.name + "Message::messageIndex: onMessagesReceived(static_cast<" + msg.name + "Message*>(msgs), idx, n); break;");
+				body.emplace_back("case " + msg.name + "Message::messageIndex: onMessagesReceived(reinterpret_cast<" + msg.name + "Message**>(msgs), idx, n); break;");
 			}
 		}
 		body.emplace_back("}");
 		sysClassGen
-			.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("int"), "msgIndex"), VariableSchema(TypeSchema("Halley::Message*"), "msgs"), VariableSchema(TypeSchema("size_t*"), "idx"), VariableSchema(TypeSchema("size_t"), "n") }, "onMessagesReceived", false, false, true, true), body)
+			.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("int"), "msgIndex"), VariableSchema(TypeSchema("Halley::Message**"), "msgs"), VariableSchema(TypeSchema("size_t*"), "idx"), VariableSchema(TypeSchema("size_t"), "n") }, "onMessagesReceived", false, false, true, true), body)
 			.addBlankLine()
 			.addLine("template <typename M>")
-			.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("M*"), "msgs"), VariableSchema(TypeSchema("size_t*"), "idx"), VariableSchema(TypeSchema("size_t"), "n") }, "onMessagesReceived"), "for (size_t i = 0; i < n; i++) static_cast<T*>(this)->onMessageReceived(msgs[i], mainFamily[idx[i]]);")
+			.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("M**"), "msgs"), VariableSchema(TypeSchema("size_t*"), "idx"), VariableSchema(TypeSchema("size_t"), "n") }, "onMessagesReceived"), "for (size_t i = 0; i < n; i++) static_cast<T*>(this)->onMessageReceived(*msgs[i], mainFamily[idx[i]]);")
 			.addBlankLine();
 	}
 
 	sysClassGen
 		.addAccessLevelSection(CPPAccess::Public)
-		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}") })
+		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}, {" + String::concatList(msgsReceived, ", ") + "}") })
 		.finish()
 		.writeTo(contents);
 
