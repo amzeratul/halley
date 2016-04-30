@@ -4,20 +4,24 @@
 
 using namespace Halley;
 
-static Maybe<std::vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float border)
+#ifdef _DEBUG
+//#define FAST_MODE
+#endif
+
+static Maybe<std::vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float border, Range<int> range)
 {
 	font.setSize(fontSize);
 	std::cout << "Trying " << fontSize << " pt... ";
 
 	std::vector<BinPackEntry> entries;
 	for (int code : font.getCharCodes()) {
-		if (code != 0) {
+		if (range.contains(code)) {
 			Vector2i glyphSize = font.getGlyphSize(code);
 			Vector2i finalSize((Vector2f(glyphSize) + Vector2f(2 * border, 2 * border)) * scale + Vector2f(1, 1));
 			size_t payload = size_t(code);
 			entries.push_back(BinPackEntry(finalSize, reinterpret_cast<void*>(payload)));
 
-#ifdef _DEBUG
+#ifdef FAST_MODE
 			if (entries.size() > 50) {
 				break;
 			}
@@ -68,25 +72,29 @@ int MakeFontTool::run(std::vector<std::string> args)
 	auto res = String(args[2]).split('x');
 	Vector2i size(res[0].toInteger(), res[1].toInteger());
 	int downsample = 4;
+	Range<int> range(32, 255);
 	float scale = 1.0f / downsample;
-	float border = 2;
+	float radius = 3;
+	float border = radius + 1 + downsample;
 
 	int minFont = 0;
 	int maxFont = 200;
-#ifdef _DEBUG
+#ifdef FAST_MODE
 	minFont = maxFont = 50;
 #endif
 
 	FontFace font(args[0]);
 	auto result = binarySearch([&] (int fontSize) -> Maybe<std::vector<BinPackResult>> {
-		return tryPacking(font, float(fontSize), size, scale, border);
+		return tryPacking(font, float(fontSize), size, scale, border, range);
 	}, minFont, maxFont);
 
 	auto dstImg = std::make_unique<Image>(size.x, size.y);
 	dstImg->clear(0);
 
 	if (result) {
-		auto pack = result.get();
+		auto& pack = result.get();
+		std::cout << "Rendering " << pack.size() << " glyphs." << std::endl;
+
 		for (auto& r: pack) {
 			int charcode = int(reinterpret_cast<size_t>(r.data));
 			Rect4i dstRect = r.rect;
@@ -96,8 +104,11 @@ int MakeFontTool::run(std::vector<std::string> args)
 			tmpImg->clear(0);
 			font.drawGlyph(*tmpImg, charcode, Vector2i(int(border), int(border)));
 
-			auto finalGlyphImg = DistanceFieldGenerator::generate(*tmpImg, dstRect.getSize(), border);
+			auto finalGlyphImg = DistanceFieldGenerator::generate(*tmpImg, dstRect.getSize(), radius);
 			dstImg->blitFrom(dstRect.getP1(), *finalGlyphImg);
+
+			tmpImg.reset();
+			finalGlyphImg.reset();
 		}
 	}
 

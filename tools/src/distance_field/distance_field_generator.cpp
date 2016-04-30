@@ -1,4 +1,5 @@
 #include "distance_field_generator.h"
+#include <cassert>
 
 using namespace Halley;
 
@@ -36,6 +37,7 @@ static int getDistanceAt(int* src, int srcW, int srcH, int xCentre, int yCentre,
 
 std::unique_ptr<Image> DistanceFieldGenerator::generate(Image& srcImg, Vector2i size, float radius)
 {
+	assert(srcImg.getPixels() != nullptr);
 	int srcW = srcImg.getWidth();
 	int srcH = srcImg.getHeight();
 	int* src = reinterpret_cast<int*>(srcImg.getPixels());

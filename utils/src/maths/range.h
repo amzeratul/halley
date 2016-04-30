@@ -40,6 +40,11 @@ namespace Halley {
 			}
 		}
 
+		bool contains(T elem) const
+		{
+			return elem >= s && elem < e;
+		}
+
 		inline T getLength() { return e - s; }
 
 		inline bool overlaps(const Range &p) const

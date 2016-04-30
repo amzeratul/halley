@@ -5,7 +5,7 @@ core/resources
 - hot reloading [RESEARCH]
 
 core/graphics
-* rewrite text rendering system to use pre-baked distance fields
+* text rendering
 - optimise SpritePainter
 - render graph [from old Halley]
 - sliced sprites [RESEARCH]

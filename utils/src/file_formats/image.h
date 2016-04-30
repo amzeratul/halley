@@ -60,7 +60,7 @@ namespace Halley {
 	private:
 		String filename;
 
-		std::unique_ptr<char, void(*)(void*)> px;
+		std::unique_ptr<char, void(*)(char*)> px;
 		size_t dataLen;
 		unsigned int w;
 		unsigned int h;

@@ -19,6 +19,7 @@
 
 \*****************************************************************/
 
+#include <cassert>
 #include "image.h"
 #include "stb_image/stb_image.h"
 #include "lodepng/lodepng.h"
@@ -26,7 +27,7 @@
 #include "../resources/resource_data.h"
 
 Halley::Image::Image(unsigned int _w, unsigned int _h)
-	: px(nullptr, free)
+	: px(nullptr, [](char*){})
 	, dataLen(0)
 	, w(_w)
 	, h(_h)
@@ -36,13 +37,15 @@ Halley::Image::Image(unsigned int _w, unsigned int _h)
 	if (w > 0 && h > 0)	{
 		nComponents = 4;
 		dataLen = w * h * nComponents;
-		px.reset(static_cast<char*>(malloc(dataLen)));
+		dataLen += (16 - (dataLen % 16)) % 16;
+		px = std::unique_ptr<char, void(*)(char*)>(new char[dataLen], [](char* data) { delete[] data; });
+		assert(px.get() != nullptr);
 	}
 }
 
 Halley::Image::Image(String _filename, const Byte* bytes, size_t nBytes, bool _preMultiply)
 	: filename(_filename)
-	, px(nullptr, free)
+	, px(nullptr, [](char*) {})
 	, preMultiplied(false)
 {
 	load(filename, bytes, nBytes, _preMultiply);
@@ -50,6 +53,7 @@ Halley::Image::Image(String _filename, const Byte* bytes, size_t nBytes, bool _p
 
 Halley::Image::~Image()
 {
+	px.reset();
 }
 
 int Halley::Image::getRGBA(int r, int g, int b, int a)
@@ -69,14 +73,16 @@ void Halley::Image::clear(int colour)
 
 void Halley::Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp)
 {
-	size_t xMax = std::min(size_t(w), width);
-	size_t yMax = std::min(size_t(h), height);
+	size_t xMin = std::max(0, -pos.x);
+	size_t yMin = std::max(0, -pos.y);
+	size_t xMax = std::min(size_t(w) - pos.x, width);
+	size_t yMax = std::min(size_t(h) - pos.y, height);
 	int* dst = reinterpret_cast<int*>(px.get()) + pos.x + pos.y * w;
 
 	if (bpp == 1) {
 		const char* src = reinterpret_cast<const char*>(buffer);
-		for (size_t y = 0; y < yMax; y++) {
-			for (size_t x = 0; x < xMax; x++) {
+		for (size_t y = yMin; y < yMax; y++) {
+			for (size_t x = xMin; x < xMax; x++) {
 				size_t pxPos = (x >> 3) + y * pitch;
 				int bit = 1 << (int(7 - x) & 7);
 				bool active = (src[pxPos] & bit) != 0;
@@ -85,15 +91,15 @@ void Halley::Image::blitFrom(Vector2i pos, const char* buffer, size_t width, siz
 		}
 	} else if (bpp == 8) {
 		const char* src = reinterpret_cast<const char*>(buffer);
-		for (size_t y = 0; y < yMax; y++) {
-			for (size_t x = 0; x < xMax; x++) {
+		for (size_t y = yMin; y < yMax; y++) {
+			for (size_t x = xMin; x < xMax; x++) {
 				dst[x + y * w] = getRGBA(255, 255, 255, src[x + y * pitch]);
 			}
 		}
 	} else if (bpp == 32) {
 		const int* src = reinterpret_cast<const int*>(buffer);
-		for (size_t y = 0; y < yMax; y++) {
-			for (size_t x = 0; x < xMax; x++) {
+		for (size_t y = yMin; y < yMax; y++) {
+			for (size_t x = xMin; x < xMax; x++) {
 				dst[x + y * w] = src[x + y * pitch];
 			}
 		}
@@ -122,7 +128,7 @@ void Halley::Image::load(String name, const Byte* bytes, size_t nBytes, bool sho
 		unsigned char* pixels;
 		unsigned int x, y;
 		lodepng_decode_memory(&pixels, &x, &y, bytes, nBytes, LCT_RGBA, 8);
-		px.reset(reinterpret_cast<char*>(pixels));
+		px = std::unique_ptr<char, void(*)(char*)>(reinterpret_cast<char*>(pixels), [](char* data) { ::free(data); });
 		w = x;
 		h = y;
 		nComponents = 4;
@@ -134,7 +140,7 @@ void Halley::Image::load(String name, const Byte* bytes, size_t nBytes, bool sho
 		if (!pixels) {
 			throw Exception("Unable to load image data.");
 		}
-		px.reset(static_cast<char*>(pixels));
+		px = std::unique_ptr<char, void(*)(char*)>(pixels, [](char* data) { stbi_image_free(data); });
 		w = x;
 		h = y;
 		dataLen = w * h * nComponents;
