@@ -16,5 +16,5 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<MaterialDefinition>("material");
 	resources.init<TextFile>("");
 	resources.init<YAMLFile>("");
-	resources.init<Font>("fonts");
+	resources.init<Font>("font");
 }

@@ -23,6 +23,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "graphics/render_target/render_target_texture.h"
 
 #include "graphics/text/font.h"
+#include "graphics/text/text_renderer.h"
 
 #include "graphics/sprite/animation.h"
 #include "graphics/sprite/animation_player.h"

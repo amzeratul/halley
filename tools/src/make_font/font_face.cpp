@@ -79,7 +79,7 @@ std::vector<int> FontFace::getCharCodes() const
 
 Vector2i FontFace::getGlyphSize(int charCode)
 {
-	int index = FT_Get_Char_Index(pimpl->face, charCode);
+	int index = charCode == 0 ? 0 : FT_Get_Char_Index(pimpl->face, charCode);
 	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
 	if (error) {
 		throw Exception("Unable to load glyph " + String::integerToString(charCode));
@@ -92,7 +92,7 @@ void FontFace::drawGlyph(Image& image, int charcode, Vector2i pos)
 {
 	auto glyph = pimpl->face->glyph;
 	
-	int index = FT_Get_Char_Index(pimpl->face, charcode);
+	int index = charcode == 0 ? 0 : FT_Get_Char_Index(pimpl->face, charcode);
 	
 	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
 	if (error) {

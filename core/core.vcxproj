@@ -52,6 +52,7 @@
     <ClInclude Include="src\graphics\texture_descriptor.h" />
     <ClInclude Include="src\graphics\material\uniform_type.h" />
     <ClInclude Include="src\graphics\text\font.h" />
+    <ClInclude Include="src\graphics\text\text_renderer.h" />
     <ClInclude Include="src\halley_core_includes.h" />
     <ClInclude Include="src\input\input.h" />
     <ClInclude Include="src\input\input_button_base.h" />
@@ -102,6 +103,7 @@
     <ClCompile Include="src\graphics\texture.cpp" />
     <ClCompile Include="src\graphics\texture_descriptor.cpp" />
     <ClCompile Include="src\graphics\text\font.cpp" />
+    <ClCompile Include="src\graphics\text\text_renderer.cpp" />
     <ClCompile Include="src\input\input.cpp" />
     <ClCompile Include="src\input\input_button_base.cpp" />
     <ClCompile Include="src\input\input_joystick.cpp" />

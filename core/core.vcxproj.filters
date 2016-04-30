@@ -182,6 +182,7 @@
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\text\font.h" />
+    <ClInclude Include="src\graphics\text\text_renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
@@ -279,5 +280,6 @@
       <Filter>graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\text\font.cpp" />
+    <ClCompile Include="src\graphics\text\text_renderer.cpp" />
   </ItemGroup>
 </Project>

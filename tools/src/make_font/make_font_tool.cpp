@@ -3,6 +3,7 @@
 #include "../distance_field/distance_field_generator.h"
 #include <yaml-cpp/yaml.h>
 #include <fstream>
+#include <filesystem>
 
 using namespace Halley;
 
@@ -74,7 +75,7 @@ int MakeFontTool::run(std::vector<std::string> args)
 	auto res = String(args[2]).split('x');
 	Vector2i size(res[0].toInteger(), res[1].toInteger());
 	int downsample = 4;
-	Range<int> range(32, 256);
+	Range<int> range(0, 256);
 	float scale = 1.0f / downsample;
 	float radius = 3;
 	float border = radius + 1 + downsample;
@@ -121,14 +122,18 @@ int MakeFontTool::run(std::vector<std::string> args)
 		std::cout << " Done." << std::endl;
 	}
 
-	dstImg->savePNG(args[1] + ".png");
-
-	generateYAML(font, codes, args[1] + ".yaml", scale);
+	using std::experimental::filesystem::path;
+	path target = args[1];
+	String fileName = target.filename().string();
+	String dir = target.parent_path().string();
+	String imgName = fileName + ".png";
+	dstImg->savePNG(dir + "/" + imgName);
+	generateYAML(imgName, font, codes, dir + "/" + fileName + ".yaml", scale);
 
 	return 0;
 }
 
-void MakeFontTool::generateYAML(FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale) {
+void MakeFontTool::generateYAML(String imgName, FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale) {
 	std::sort(entries.begin(), entries.end(), [](const CharcodeEntry& a, const CharcodeEntry& b) { return a.charcode < b.charcode; });
 
 	YAML::Emitter yaml;
@@ -136,6 +141,7 @@ void MakeFontTool::generateYAML(FontFace& font, std::vector<CharcodeEntry>& entr
 	yaml << YAML::Key << "font";
 	yaml << YAML::BeginMap;
 	yaml << YAML::Key << "name" << YAML::Value << font.getName();
+	yaml << YAML::Key << "image" << YAML::Value << imgName;
 	yaml << YAML::Key << "sizePt" << YAML::Value << font.getSize();
 	yaml << YAML::Key << "height" << YAML::Value << (font.getHeight() * scale);
 	yaml << YAML::EndMap;

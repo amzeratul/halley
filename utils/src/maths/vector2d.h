@@ -171,12 +171,6 @@ namespace Halley {
 	{
 		return Vector2D<T,U>(T(v.x * f),T(v.y * f));
 	}
-	
-	template <typename T,class U,typename V>
-	inline Vector2D<T,U> operator / (V f, const Vector2D<T,U> &v)
-	{
-		return Vector2D<T,U>(T(f / v.x),T(f / v.y));
-	}
 
 	template <typename T,class U>
 	std::ostream& operator<< (std::ostream& ostream, const Vector2D<T, U>& v)
