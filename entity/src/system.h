@@ -34,6 +34,13 @@ namespace Halley {
 			}
 		}
 
+		template <typename T, typename M, typename U, typename V>
+		static void invokeParallel(T* obj, M method, U& p, V& fam)
+		{
+			// TODO, fallback to invokeIndividual for now
+			invokeIndividual<T, M, U, V>(obj, method, p, fam);
+		}
+
 		template <typename T>
 		void sendMessageGeneric(EntityId entityId, const T& msg)
 		{

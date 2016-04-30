@@ -12,7 +12,7 @@ core/graphics
 - fix threaded load (TODOs in core_runner.cpp)
 
 opengl
-- instanced rendering?
+- instanced rendering? do we care?
 
 input
 - isolate SDL events to SDL-specific file?
@@ -24,21 +24,20 @@ audio
 
 entity
 * query other entities [RESEARCH]
-* messaging system [RESEARCH]
 - load prefabs
-- staggered systems
+- smearing systems
 - parallel systems
 - better timelines
-- Lua systems
+- foreign language [Lua] systems
 - defragment/optimize memory? [RESEARCH]
 - universal hierarchical transforms? [RESEARCH]
 - onAddEntity/onRemoveEntity on systems [RESEARCH]
 
 codegen
 * components registry [RESEARCH]
+* components serialization [RESEARCH]
 - system custom base classes [RESEARCH]
 - import custom types in components [RESEARCH]
-- codegen parallel systems
 - codegen Lua
 
 cli tools
@@ -57,7 +56,8 @@ editor
 
 utils
 - collision detection & triggers
-- better HTTP library?
+- better HTTP library/replace boost::asio
+- write my own memory pool/replace boost::pool
 
 samples
 - expand "test" sample

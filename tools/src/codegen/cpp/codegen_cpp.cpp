@@ -175,6 +175,9 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
 	} else if (system.strategy == SystemStrategy::Individual) {
 		familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "entity"));
 		stratImpl = "invokeIndividual(static_cast<T*>(this), &T::" + methodName + ", p, mainFamily);";
+	} else if (system.strategy == SystemStrategy::Parallel) {
+		familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "entity"));
+		stratImpl = "invokeParallel(static_cast<T*>(this), &T::" + methodName + ", p, mainFamily);";
 	} else {
 		throw Exception("Unsupported strategy in " + system.name + "System");
 	}
