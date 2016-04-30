@@ -10,6 +10,7 @@ namespace Halley
 		friend class MaterialParameter;
 
 	public:
+		Material(const Material& other);
 		explicit Material(std::shared_ptr<MaterialDefinition> materialDefinition);
 		void bind(int pass, Painter& painter);
 
@@ -17,6 +18,8 @@ namespace Halley
 
 		MaterialDefinition& getDefinition() { return *materialDefinition; }
 		const MaterialDefinition& getDefinition() const { return *materialDefinition; }
+
+		std::shared_ptr<Material> clone() const;
 
 	private:
 		bool dirty = false;

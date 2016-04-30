@@ -54,10 +54,11 @@ TextRenderer& TextRenderer::setOutline(float v0, Colour v1)
 void TextRenderer::draw(Painter& painter, Vector2f position, Vector2f align) const
 {
 	assert(font);
-	auto material = font->getMaterial();
+	auto material = font->getMaterial()->clone();
 	float scale = 4 * size / font->getSizePoints();
+	float smooth = clamp(1.0f / (scale * font->getSmoothDistance()), 0.01f, 0.99f);
 
-	(*material)["u_smoothness"] = 0.2f;
+	(*material)["u_smoothness"] = smooth;
 	(*material)["u_outline"] = outline;
 	(*material)["u_outlineColour"] = outlineColour;
 

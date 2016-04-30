@@ -36,6 +36,7 @@ Font::Font(ResourceLoader& loader)
 	name = fontNode["name"].as<std::string>();
 	height = fontNode["height"].as<float>();
 	sizePt = fontNode["sizePt"].as<float>();
+	smoothDistance = 8; // TODO
 
 	auto texture = loader.getResource<Texture>("../font/" + fontNode["image"].as<std::string>());
 	auto matDef = loader.getResource<MaterialDefinition>("distance_field_sprite.yaml");
@@ -73,7 +74,7 @@ const Font::Glyph& Font::getGlyph(int code) const
 	return iter->second;
 }
 
-std::shared_ptr<Material> Font::getMaterial() const
+std::shared_ptr<const Material> Font::getMaterial() const
 {
 	return material;
 }

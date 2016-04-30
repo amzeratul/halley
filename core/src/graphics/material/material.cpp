@@ -8,6 +8,12 @@ using namespace Halley;
 static Material* currentMaterial = nullptr;
 static int currentPass = 0;
 
+Material::Material(const Material& other)
+	: materialDefinition(other.materialDefinition)
+	, uniforms(other.uniforms)
+{	
+}
+
 Material::Material(std::shared_ptr<MaterialDefinition> materialDefinition)
 	: materialDefinition(materialDefinition)
 {
@@ -55,4 +61,9 @@ MaterialParameter& Material::operator[](String name)
 		}
 	}
 	throw Exception("Uniform not available: " + name);
+}
+
+std::shared_ptr<Material> Material::clone() const
+{
+	return std::make_shared<Material>(*this);
 }
