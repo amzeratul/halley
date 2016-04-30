@@ -21,6 +21,6 @@ namespace Halley
 
 	public:
 		int run(std::vector<std::string> args) override;
-		void generateYAML(String imgName, FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale);
+		void generateYAML(String imgName, FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale, float radius);
 	};
 }

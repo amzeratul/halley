@@ -132,12 +132,12 @@ int MakeFontTool::run(std::vector<std::string> args)
 	String dir = target.parent_path().string();
 	String imgName = fileName + ".png";
 	dstImg->savePNG(dir + "/" + imgName);
-	generateYAML(imgName, font, codes, dir + "/" + fileName + ".yaml", scale);
+	generateYAML(imgName, font, codes, dir + "/" + fileName + ".yaml", scale, radius);
 
 	return 0;
 }
 
-void MakeFontTool::generateYAML(String imgName, FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale) {
+void MakeFontTool::generateYAML(String imgName, FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale, float radius) {
 	std::sort(entries.begin(), entries.end(), [](const CharcodeEntry& a, const CharcodeEntry& b) { return a.charcode < b.charcode; });
 
 	YAML::Emitter yaml;
@@ -148,6 +148,7 @@ void MakeFontTool::generateYAML(String imgName, FontFace& font, std::vector<Char
 	yaml << YAML::Key << "image" << YAML::Value << imgName;
 	yaml << YAML::Key << "sizePt" << YAML::Value << font.getSize();
 	yaml << YAML::Key << "height" << YAML::Value << (font.getHeight() * scale);
+	yaml << YAML::Key << "radius" << YAML::Value << radius;
 	yaml << YAML::EndMap;
 	yaml << YAML::Key << "glyphs";
 	yaml << YAML::BeginSeq;
@@ -175,6 +176,16 @@ void MakeFontTool::generateYAML(String imgName, FontFace& font, std::vector<Char
 
 	yaml << YAML::EndSeq;
 	yaml << YAML::EndMap;
+
+	std::vector<int> codes;
+	for (int code: font.getCharCodes()) {
+		if (code < 256) {
+			codes.push_back(code);
+		}
+	}
+	for (auto& kern : font.getKerning(codes)) {
+		std::cout << "Kerning: " << char(kern.left) << " " << char(kern.right) << ": " << kern.kerning << std::endl;
+	}
 
 	std::ofstream out(outPath, std::ios::out);
 	out << yaml.c_str();

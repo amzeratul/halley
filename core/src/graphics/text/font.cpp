@@ -36,7 +36,7 @@ Font::Font(ResourceLoader& loader)
 	name = fontNode["name"].as<std::string>();
 	height = fontNode["height"].as<float>();
 	sizePt = fontNode["sizePt"].as<float>();
-	smoothDistance = 8; // TODO
+	smoothRadius = fontNode["radius"].as<float>();
 
 	auto texture = loader.getResource<Texture>("../font/" + fontNode["image"].as<std::string>());
 	auto matDef = loader.getResource<MaterialDefinition>("distance_field_sprite.yaml");

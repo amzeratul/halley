@@ -28,7 +28,7 @@ namespace Halley
 		const Glyph& getGlyph(int code) const;
 		float getLineDistance() const { return height; }
 		float getSizePoints() const { return sizePt; }
-		float getSmoothDistance() const { return smoothDistance; }
+		float getSmoothRadius() const { return smoothRadius; }
 		String getName() const { return name; }
 
 		std::shared_ptr<const Material> getMaterial() const;
@@ -37,7 +37,7 @@ namespace Halley
 		String name;
 		float height;
 		float sizePt;
-		float smoothDistance;
+		float smoothRadius;
 
 		std::shared_ptr<Material> material;
 		std::map<int, Glyph> glyphs;

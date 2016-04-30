@@ -12,6 +12,15 @@ namespace Halley
 		Vector2f bearingVertical;
 	};
 
+	struct KerningPair
+	{
+		int left;
+		int right;
+		Vector2f kerning;
+
+		KerningPair(int left, int right, Vector2f kerning) : left(left), right(right), kerning(kerning) {}
+	};
+
 	class FontFace
 	{
 	public:
@@ -28,6 +37,8 @@ namespace Halley
 		
 		void drawGlyph(Image& image, int charcode, Vector2i pos);
 		FontMetrics getMetrics(int charcode, float scale = 1.0f);
+
+		std::vector<KerningPair> getKerning(const std::vector<int>& codes);
 
 	private:
 		std::unique_ptr<FontFacePimpl> pimpl;

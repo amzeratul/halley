@@ -127,3 +127,31 @@ FontMetrics FontFace::getMetrics(int charcode, float scale)
 	
 	return result;
 }
+
+std::vector<KerningPair> FontFace::getKerning(const std::vector<int>& codes)
+{
+	std::vector<KerningPair> results;
+	if (!FT_HAS_KERNING(pimpl->face)) {
+		return results;
+	}
+	
+	std::vector<int> indices;
+	for (int code: codes) {
+		int index = FT_Get_Char_Index(pimpl->face, code);
+		if (code != 0) {
+			indices.push_back(index);
+		}
+	}
+	
+	for (int left: indices) {
+		for (int right: indices) {
+			FT_Vector result;
+			FT_Get_Kerning(pimpl->face, left, right, FT_KERNING_UNFITTED, &result);
+			if (result.x != 0 || result.y != 0) {
+				results.emplace_back(KerningPair(left, right, Vector2f(result.x / 64.0f, result.y / 64.0f)));
+			}
+		}
+	}
+
+	return results;
+}
