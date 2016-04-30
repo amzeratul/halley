@@ -11,7 +11,7 @@ using namespace Halley;
 #define FAST_MODE
 #endif
 
-static Maybe<std::vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float border, Range<int> range)
+static Maybe<std::vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float borderSuperSampled, Range<int> range)
 {
 	font.setSize(fontSize);
 	std::cout << "Trying " << fontSize << " pt... ";
@@ -20,7 +20,10 @@ static Maybe<std::vector<BinPackResult>> tryPacking(FontFace& font, float fontSi
 	for (int code : font.getCharCodes()) {
 		if (range.contains(code)) {
 			Vector2i glyphSize = font.getGlyphSize(code);
-			Vector2i finalSize((Vector2f(glyphSize) + Vector2f(2 * border, 2 * border)) * scale + Vector2f(1, 1));
+			int padding = int(2 * borderSuperSampled);
+			Vector2i superSampleSize = glyphSize + Vector2i(padding, padding);
+			Vector2i finalSize(Vector2f(superSampleSize) * scale + Vector2f(1, 1));
+
 			size_t payload = size_t(code);
 			entries.push_back(BinPackEntry(finalSize, reinterpret_cast<void*>(payload)));
 
@@ -74,11 +77,12 @@ int MakeFontTool::run(std::vector<std::string> args)
 
 	auto res = String(args[2]).split('x');
 	Vector2i size(res[0].toInteger(), res[1].toInteger());
-	int downsample = 4;
+	int superSample = 4;
 	Range<int> range(0, 256);
-	float scale = 1.0f / downsample;
-	float radius = 3;
-	float border = radius + 1 + downsample;
+	float scale = 1.0f / superSample;
+	float radius = String(args[3]).toFloat();
+	float borderFinal = ceil(radius);
+	float borderSuperSample = borderFinal * superSample;
 
 	int minFont = 0;
 	int maxFont = 200;
@@ -88,7 +92,7 @@ int MakeFontTool::run(std::vector<std::string> args)
 
 	FontFace font(args[0]);
 	auto result = binarySearch([&] (int fontSize) -> Maybe<std::vector<BinPackResult>> {
-		return tryPacking(font, float(fontSize), size, scale, border, range);
+		return tryPacking(font, float(fontSize), size, scale, borderSuperSample, range);
 	}, minFont, maxFont);
 
 	auto dstImg = std::make_unique<Image>(size.x, size.y);
@@ -103,11 +107,11 @@ int MakeFontTool::run(std::vector<std::string> args)
 		for (auto& r: pack) {
 			int charcode = int(reinterpret_cast<size_t>(r.data));
 			Rect4i dstRect = r.rect;
-			Rect4i srcRect = dstRect * downsample;
+			Rect4i srcRect = dstRect * superSample;
 
 			auto tmpImg = std::make_unique<Image>(srcRect.getWidth(), srcRect.getHeight());
 			tmpImg->clear(0);
-			font.drawGlyph(*tmpImg, charcode, Vector2i(int(border), int(border)));
+			font.drawGlyph(*tmpImg, charcode, Vector2i(int(borderSuperSample), int(borderSuperSample)));
 
 			auto finalGlyphImg = DistanceFieldGenerator::generate(*tmpImg, dstRect.getSize(), radius);
 			dstImg->blitFrom(dstRect.getP1(), *finalGlyphImg);

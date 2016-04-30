@@ -57,7 +57,7 @@ void TextRenderer::draw(Painter& painter, Vector2f position, Vector2f align) con
 	auto material = font->getMaterial();
 	float scale = 4 * size / font->getSizePoints();
 
-	(*material)["u_smoothness"] = 0.5f;
+	(*material)["u_smoothness"] = 0.2f;
 	(*material)["u_outline"] = outline;
 	(*material)["u_outlineColour"] = outlineColour;
 
@@ -65,19 +65,25 @@ void TextRenderer::draw(Painter& painter, Vector2f position, Vector2f align) con
 
 	auto chars = text.getUTF32();
 	for (auto& c : chars) {
-		auto& glyph = font->getGlyph(c);
-		
-		auto sprite = Sprite()
-			.setTexRect(glyph.area)
-			.setMaterial(material)
-			.setColour(colour)
-			.setPivot(glyph.horizontalBearing / glyph.size * Vector2f(-1, 1))
-			.setSize(glyph.size)
-			.setScale(scale)
-			.setPos(p);
+		if (c == '\n') {
+			// Line break!
+			p.x = position.x;
+			p.y += font->getLineDistance() * scale;
+		} else {
+			auto& glyph = font->getGlyph(c);
 
-		sprite.draw(painter);
+			auto sprite = Sprite()
+				.setTexRect(glyph.area)
+				.setMaterial(material)
+				.setColour(colour)
+				.setPivot(glyph.horizontalBearing / glyph.size * Vector2f(-1, 1))
+				.setSize(glyph.size)
+				.setScale(scale)
+				.setPos(p);
 
-		p += Vector2f(glyph.advance.x, 0) * scale;
+			sprite.draw(painter);
+
+			p += Vector2f(glyph.advance.x, 0) * scale;
+		}
 	}
 }
