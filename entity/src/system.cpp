@@ -20,7 +20,25 @@ void System::onAddedToWorld(World& w, int id) {
 
 void System::purgeMessages()
 {
-	// TODO
+	if (messagesSentTo.size() > 0) {
+		for (auto& target: messagesSentTo) {
+			// Purge all messages of this age
+			Entity* entity = world->tryGetEntity(target);
+
+			if (entity) {
+				auto& inbox = entity->inbox;
+				size_t inboxSize = inbox.size();
+				for (size_t i = 0; i < inboxSize; i++) {
+					if (inbox[i].age == systemId) {
+						inbox.erase(inbox.begin() + i);
+						i--;
+						inboxSize--;
+					}
+				}
+			}
+		}
+		messagesSentTo.clear();
+	}
 }
 
 void System::processMessages()
@@ -66,6 +84,7 @@ void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, size
 	Entity* entity = world->tryGetEntity(entityId);
 	if (entity) {
 		entity->inbox.emplace_back(MessageEntry(std::move(msg), id, systemId));
+		messagesSentTo.push_back(entityId);
 	}
 }
 

@@ -47,6 +47,7 @@ namespace Halley {
 
 		std::vector<FamilyBindingBase*> families;
 		std::vector<int> messageTypesReceived;
+		std::vector<EntityId> messagesSentTo;
 
 		World* world;
 		HalleyAPI* api;
