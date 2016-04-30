@@ -32,13 +32,6 @@ namespace Halley {
 		using HandleType = Handle;
 
 
-		/*
-		static RealType make(int index, RealType mask) {
-			// TODO
-			//return (static_cast<RealType>(1) << static_cast<RealType>(index)) | mask;
-			return RealType();
-		}
-		*/
 		inline void setBit(RealType& mask, int bit) {
 			mask[bit] = true;
 		}

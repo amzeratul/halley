@@ -51,32 +51,32 @@ namespace Halley {
 		{
 			Angle final;
 			final.value = value + param.value;
-			final.Limit();
+			final.limit();
 			return final;
 		}
 		inline Angle operator- (const Angle &param) const
 		{
 			Angle final;
 			final.value = value - param.value;
-			final.Limit();
+			final.limit();
 			return final;
 		}
 		inline Angle operator- () const
 		{
 			Angle final;
 			final.value = -value;
-			final.Limit();
+			final.limit();
 			return final;
 		}
 
 		// In-place operations
 		inline Angle& operator= (const Angle &angle) { value = angle.value; return *this; }
-		inline void operator+= (const Angle &angle) { value += angle.value; Limit(); }
-		inline void operator-= (const Angle &angle) { value -= angle.value; Limit(); }
+		inline void operator+= (const Angle &angle) { value += angle.value; limit(); }
+		inline void operator-= (const Angle &angle) { value -= angle.value; limit(); }
 
 		// Accessors
-		inline void setDegrees(const T degrees) { value = degToRad(degrees); Limit(); }
-		inline void setRadians(const T radian) { value = radian; Limit();}
+		inline void setDegrees(const T degrees) { value = degToRad(degrees); limit(); }
+		inline void setRadians(const T radian) { value = radian; limit();}
 		inline T getDegrees() const { return radToDeg(value); }
 		inline T getRadians() const { return value; }
 		inline T toDegrees() const { return radToDeg(value); }
@@ -95,7 +95,7 @@ namespace Halley {
 		{
 			float side = turnSide(angle);
 			value += radians * side;
-			Limit();
+			limit();
 			float newSide = turnSide(angle);
 			if (side != newSide) value = angle.value;
 		}
@@ -146,11 +146,8 @@ namespace Halley {
 		// Angle value in radians
 		T value;
 
-		// TODO: rewrite this
-		inline void Limit()
+		inline void limit()
 		{
-			//while (value < 0.0f) value += 2*PI_CONSTANT_F;
-			//while (value >= 2*PI_CONSTANT_F) value -= 2*PI_CONSTANT_F;
 			value = modulo(value, 2*PI_CONSTANT_F);
 		}
 	};
