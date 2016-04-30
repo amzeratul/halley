@@ -251,14 +251,14 @@ std::function<void(int, void*)> VideoOpenGL::getUniformBinding(UniformType type,
 					glUniform2i(address, vs[0], vs[1]);
 					glCheckError();
 				};
-			} else if (n == 2) {
+			} else if (n == 3) {
 				return [](int address, void* data)
 				{
 					auto vs = reinterpret_cast<int*>(data);
 					glUniform3i(address, vs[0], vs[1], vs[2]);
 					glCheckError();
 				};
-			} else if (n == 2) {
+			} else if (n == 4) {
 				return [](int address, void* data)
 				{
 					auto vs = reinterpret_cast<int*>(data);
@@ -293,7 +293,7 @@ std::function<void(int, void*)> VideoOpenGL::getUniformBinding(UniformType type,
 					glCheckError();
 				};
 			}
-			else if (n == 2) {
+			else if (n == 3) {
 				return [](int address, void* data)
 				{
 					auto vs = reinterpret_cast<float*>(data);
@@ -301,7 +301,7 @@ std::function<void(int, void*)> VideoOpenGL::getUniformBinding(UniformType type,
 					glCheckError();
 				};
 			}
-			else if (n == 2) {
+			else if (n == 4) {
 				return [](int address, void* data)
 				{
 					auto vs = reinterpret_cast<float*>(data);

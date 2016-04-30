@@ -3,6 +3,9 @@ name: Distance field sprite
 uniforms:
   - u_mvp: mat4
   - tex0: sampler2D
+  - u_smoothness: float
+  - u_outline: float
+  - u_outlineColour: vec4
 attributes:
   - a_position: vec4   # xy = position, zw = relative pivot [0..1]
   - a_size: vec4       # xy = size (px), z = rotation (radians), w = sprite rotated? (1 if 90 degrees rotated)

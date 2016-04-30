@@ -11,15 +11,17 @@ using namespace Halley;
 Font::Glyph::Glyph(Glyph&& o)
 	: charcode(o.charcode)
 	, area(o.area)
+	, size(o.size)
 	, horizontalBearing(o.horizontalBearing)
 	, verticalBearing(o.verticalBearing)
 	, advance(o.advance)
 {
 }
 
-Font::Glyph::Glyph(int charcode, Rect4f area, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance)
+Font::Glyph::Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance)
 	: charcode(charcode)
 	, area(area)
+	, size(size)
 	, horizontalBearing(horizontalBearing)
 	, verticalBearing(verticalBearing)
 	, advance(advance)
@@ -49,7 +51,7 @@ Font::Font(ResourceLoader& loader)
 		Vector2f vBearing = Vector2f(node["verticalBearingX"].as<float>(), node["verticalBearingY"].as<float>());
 		Vector2f advance = Vector2f(node["advanceX"].as<float>(), node["advanceY"].as<float>());
 
-		glyphs.emplace(code, Glyph(code, rect, hBearing, vBearing, advance));
+		glyphs.emplace(code, Glyph(code, rect, Vector2f(iRect.getSize()), hBearing, vBearing, advance));
 	}
 }
 
@@ -71,7 +73,7 @@ const Font::Glyph& Font::getGlyph(int code) const
 	return iter->second;
 }
 
-std::shared_ptr<const Material> Font::getMaterial() const
+std::shared_ptr<Material> Font::getMaterial() const
 {
 	return material;
 }

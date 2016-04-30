@@ -13,12 +13,13 @@ namespace Halley
 		public:
 			int charcode;
 			Rect4f area;
+			Vector2f size;
 			Vector2f horizontalBearing;
 			Vector2f verticalBearing;
 			Vector2f advance;
 			
 			Glyph(Glyph&& other);
-			Glyph(int charcode, Rect4f area, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance);
+			Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance);
 		};
 
 		explicit Font(ResourceLoader& loader);
@@ -29,7 +30,7 @@ namespace Halley
 		float getSizePoints() const { return sizePt; }
 		String getName() const { return name; }
 
-		std::shared_ptr<const Material> getMaterial() const;
+		std::shared_ptr<Material> getMaterial() const;
 
 	private:
 		String name;
