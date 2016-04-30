@@ -41,7 +41,6 @@ codegen
 - codegen Lua
 
 cli tools
-* bitmap text generator
 - packer
 - atlas generator?
 

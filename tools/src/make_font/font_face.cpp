@@ -46,9 +46,25 @@ FontFace::~FontFace()
 	}
 }
 
-void FontFace::setSize(float size)
+void FontFace::setSize(float sz)
 {
-	FT_Set_Char_Size(pimpl->face, int(size * 64), 0, 90, 0);
+	size = sz;
+	FT_Set_Char_Size(pimpl->face, int(size * 64), 0, 72, 0);
+}
+
+String FontFace::getName()
+{
+	return pimpl->face->family_name + String(" ") + pimpl->face->style_name;
+}
+
+float FontFace::getSize()
+{
+	return size;
+}
+
+float FontFace::getHeight()
+{
+	return pimpl->face->height * size / pimpl->face->units_per_EM;
 }
 
 std::vector<int> FontFace::getCharCodes() const
@@ -90,4 +106,24 @@ void FontFace::drawGlyph(Image& image, int charcode, Vector2i pos)
 	
 	auto bmp = glyph->bitmap;
 	image.blitFrom(pos, reinterpret_cast<char*>(bmp.buffer), bmp.width, bmp.rows, bmp.pitch, 1);
+}
+
+FontMetrics FontFace::getMetrics(int charcode, float scale)
+{
+	int index = FT_Get_Char_Index(pimpl->face, charcode);
+
+	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
+	if (error) {
+		throw Exception("Unable to load glyph " + String::integerToString(charcode));
+	}
+
+	FontMetrics result;
+
+	float multiplier = scale / 64.0f;
+	auto& metrics = pimpl->face->glyph->metrics;
+	result.advance = Vector2f(Vector2i(metrics.horiAdvance, metrics.vertAdvance)) * multiplier;
+	result.bearingHorizontal = Vector2f(Vector2i(metrics.horiBearingX, metrics.horiBearingY)) * multiplier;
+	result.bearingVertical = Vector2f(Vector2i(metrics.vertBearingX, metrics.vertBearingY)) * multiplier;
+	
+	return result;
 }

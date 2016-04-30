@@ -1,11 +1,13 @@
 #include "make_font_tool.h"
 #include "font_face.h"
 #include "../distance_field/distance_field_generator.h"
+#include <yaml-cpp/yaml.h>
+#include <fstream>
 
 using namespace Halley;
 
 #ifdef _DEBUG
-//#define FAST_MODE
+#define FAST_MODE
 #endif
 
 static Maybe<std::vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float border, Range<int> range)
@@ -72,7 +74,7 @@ int MakeFontTool::run(std::vector<std::string> args)
 	auto res = String(args[2]).split('x');
 	Vector2i size(res[0].toInteger(), res[1].toInteger());
 	int downsample = 4;
-	Range<int> range(32, 255);
+	Range<int> range(32, 256);
 	float scale = 1.0f / downsample;
 	float radius = 3;
 	float border = radius + 1 + downsample;
@@ -91,9 +93,11 @@ int MakeFontTool::run(std::vector<std::string> args)
 	auto dstImg = std::make_unique<Image>(size.x, size.y);
 	dstImg->clear(0);
 
+	std::vector<CharcodeEntry> codes;
+
 	if (result) {
 		auto& pack = result.get();
-		std::cout << "Rendering " << pack.size() << " glyphs." << std::endl;
+		std::cout << "Rendering " << pack.size() << " glyphs";
 
 		for (auto& r: pack) {
 			int charcode = int(reinterpret_cast<size_t>(r.data));
@@ -109,10 +113,60 @@ int MakeFontTool::run(std::vector<std::string> args)
 
 			tmpImg.reset();
 			finalGlyphImg.reset();
+
+			std::cout << ".";
+
+			codes.push_back(CharcodeEntry(charcode, dstRect));
 		}
+		std::cout << " Done." << std::endl;
 	}
 
 	dstImg->savePNG(args[1] + ".png");
 
+	generateYAML(font, codes, args[1] + ".yaml", scale);
+
 	return 0;
+}
+
+void MakeFontTool::generateYAML(FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale) {
+	std::sort(entries.begin(), entries.end(), [](const CharcodeEntry& a, const CharcodeEntry& b) { return a.charcode < b.charcode; });
+
+	YAML::Emitter yaml;
+	yaml << YAML::BeginMap;
+	yaml << YAML::Key << "font";
+	yaml << YAML::BeginMap;
+	yaml << YAML::Key << "name" << YAML::Value << font.getName();
+	yaml << YAML::Key << "sizePt" << YAML::Value << font.getSize();
+	yaml << YAML::Key << "height" << YAML::Value << (font.getHeight() * scale);
+	yaml << YAML::EndMap;
+	yaml << YAML::Key << "glyphs";
+	yaml << YAML::BeginSeq;
+
+	for (auto& c : entries) {
+		auto metrics = font.getMetrics(c.charcode, scale);
+		String printable;
+		printable.appendCharacter(c.charcode);
+
+		yaml << YAML::BeginMap;
+		yaml << YAML::Key << "code" << YAML::Value << c.charcode;
+		yaml << YAML::Key << "character" << YAML::Value << YAML::DoubleQuoted << printable.c_str();
+		yaml << YAML::Key << "x" << YAML::Value << c.rect.getX();
+		yaml << YAML::Key << "y" << YAML::Value << c.rect.getY();
+		yaml << YAML::Key << "w" << YAML::Value << c.rect.getWidth();
+		yaml << YAML::Key << "h" << YAML::Value << c.rect.getHeight();
+		yaml << YAML::Key << "horizontalBearingX" << YAML::Value << metrics.bearingHorizontal.x;
+		yaml << YAML::Key << "horizontalBearingY" << YAML::Value << metrics.bearingHorizontal.y;
+		yaml << YAML::Key << "verticalBearingX" << YAML::Value << metrics.bearingVertical.x;
+		yaml << YAML::Key << "verticalBearingY" << YAML::Value << metrics.bearingVertical.y;
+		yaml << YAML::Key << "advanceX" << YAML::Value << metrics.advance.x;
+		yaml << YAML::Key << "advanceY" << YAML::Value << metrics.advance.y;
+		yaml << YAML::EndMap;
+	}
+
+	yaml << YAML::EndSeq;
+	yaml << YAML::EndMap;
+
+	std::ofstream out(outPath, std::ios::out);
+	out << yaml.c_str();
+	out.close();
 }
