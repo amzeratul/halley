@@ -312,6 +312,8 @@ std::vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
 		.addDefaultConstructor()
 		.addBlankLine()
 		.addConstructor(message.members)
+		.addBlankLine()
+		.addMethodDefinition(MethodSchema(TypeSchema("size_t"), {}, "getSize", true, false, true, true), "return sizeof(" + message.name + "Message);")
 		.finish()
 		.writeTo(contents);
 

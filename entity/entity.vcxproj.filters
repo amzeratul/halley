@@ -48,6 +48,12 @@
     <ClCompile Include="src\family_mask.cpp">
       <Filter>entities</Filter>
     </ClCompile>
+    <ClCompile Include="src\component.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\message.cpp">
+      <Filter>messages</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\world.h">

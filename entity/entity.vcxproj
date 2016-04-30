@@ -171,10 +171,12 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\component.cpp" />
     <ClCompile Include="src\entity.cpp" />
     <ClCompile Include="src\family.cpp" />
     <ClCompile Include="src\family_binding.cpp" />
     <ClCompile Include="src\family_mask.cpp" />
+    <ClCompile Include="src\message.cpp" />
     <ClCompile Include="src\prec.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
