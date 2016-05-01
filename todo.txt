@@ -36,6 +36,7 @@ entity
 - defragment/optimize memory? [RESEARCH]
 - universal hierarchical transforms? [RESEARCH]
 - onAddEntity/onRemoveEntity on systems [RESEARCH]
+- store references to other components [RESEARCH]
 
 codegen
 * components registry [RESEARCH]
@@ -47,6 +48,8 @@ codegen
 cli tools
 - packer
 - atlas generator?
+- texture converter?
+- auto-generate project?
 
 editor
 - decide how this is going to work (overlay? separate tool? do we allow remote connection?) [RESEARCH]
@@ -58,18 +61,21 @@ editor
 - state machine editor? [RESEARCH]
 
 utils
-- collision detection & triggers
+* collision detection & triggers
 - better HTTP library/replace boost::asio
 - write my own memory pool/replace boost::pool
+- fix Maybe<T>
 
 samples
 - expand "test" sample
 - make a minimal "template" sample
 
-CMake
-- lists for all libraries [RESEARCH]
-- boost/SDL dependencies [RESEARCH]
+build
+- CMake lists for all libraries and samples [RESEARCH]
+- external library dependencies [RESEARCH]
 - clean up
+- ensure gcc compatibility
+- ensure clang compatibility
 
 platforms
 * Mac

@@ -16,6 +16,7 @@ passes:
   - blend: Alpha
     vertex: sprite.vertex.glsl
     pixel: distance_field_sprite_outline.pixel.glsl
+    condition: u_outline > 0
   - blend: Alpha
     vertex: sprite.vertex.glsl
     pixel: distance_field_sprite_fill.pixel.glsl
