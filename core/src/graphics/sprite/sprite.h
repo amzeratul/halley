@@ -28,6 +28,8 @@ namespace Halley
 		Sprite();
 
 		void draw(Painter& painter) const;
+		static void draw(const Sprite* sprites, size_t n, Painter& painter);
+
 		bool isInView(Rect4f rect) const;
 		
 		Sprite& setMaterial(std::shared_ptr<Material> m) { material = m; return *this; }

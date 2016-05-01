@@ -39,7 +39,7 @@ Font::Font(ResourceLoader& loader)
 	smoothRadius = fontNode["radius"].as<float>();
 
 	auto texture = loader.getResource<Texture>("../font/" + fontNode["image"].as<std::string>());
-	auto matDef = loader.getResource<MaterialDefinition>("distance_field_sprite.yaml");
+	auto matDef = loader.getResource<MaterialDefinition>("text.yaml");
 	material = std::make_unique<Material>(matDef);
 	(*material)["tex0"] = texture;
 

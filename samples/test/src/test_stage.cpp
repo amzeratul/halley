@@ -47,7 +47,7 @@ void TestStage::onRender(RenderContext& context) const
 		text.setSize(10).setOutline(0.5f).draw(painter, Vector2f(100, 100));
 		text.setSize(20).setOutline(1).draw(painter, Vector2f(100, 200));
 		text.setSize(30).setOutline(2.5f).draw(painter, Vector2f(100, 300));
-		text.setSize(60).draw(painter, Vector2f(100, 400));
+		text.setSize(60).setOutline(10).draw(painter, Vector2f(100, 400));
 		text.setSize(300).setOutline(8).draw(painter, Vector2f(700, 100));
 	});
 }

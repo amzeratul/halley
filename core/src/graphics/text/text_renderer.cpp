@@ -70,6 +70,8 @@ void TextRenderer::draw(Painter& painter, Vector2f position, Vector2f align) con
 
 	Vector2f p = position;
 
+	std::vector<Sprite> sprites;
+
 	auto chars = text.getUTF32();
 	for (auto& c : chars) {
 		if (c == '\n') {
@@ -79,18 +81,18 @@ void TextRenderer::draw(Painter& painter, Vector2f position, Vector2f align) con
 		} else {
 			auto& glyph = font->getGlyph(c);
 
-			auto sprite = Sprite()
+			sprites.push_back(Sprite()
 				.setTexRect(glyph.area)
 				.setMaterial(material)
 				.setColour(colour)
 				.setPivot(glyph.horizontalBearing / glyph.size * Vector2f(-1, 1))
 				.setSize(glyph.size)
 				.setScale(scale)
-				.setPos(p);
-
-			sprite.draw(painter);
+				.setPos(p));
 
 			p += Vector2f(glyph.advance.x, 0) * scale;
 		}
 	}
+
+	Sprite::draw(sprites.data(), sprites.size(), painter);
 }

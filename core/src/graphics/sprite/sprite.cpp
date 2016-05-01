@@ -21,22 +21,45 @@ Sprite::Sprite()
 
 void Sprite::draw(Painter& painter) const
 {
-	if (dirty) {
-		update();
-		dirty = false;
-	}
+	update();
 
 	assert(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	painter.drawQuads(material, 4, vertices.data());
 }
 
+void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter)
+{
+	if (n == 0) {
+		return;
+	}
+
+	auto& material = sprites[0].material;
+	assert(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+
+	size_t spriteSize = 4 * sizeof(SpriteVertexAttrib);
+	std::vector<char> vertices(n * spriteSize);
+
+	for (size_t i = 0; i < n; i++) {
+		auto& sprite = sprites[i];
+		assert(sprite.material == material);
+		sprite.update();
+		memcpy(&vertices[i * spriteSize], &sprite.vertices[0], spriteSize);
+	}
+
+	painter.drawQuads(material, 4 * n, vertices.data());
+}
+
 void Sprite::update() const // Not really "const", but needs to be called from draw()
 {
-	// Don't copy the last Vector2f (vertPos)
-	constexpr size_t size = sizeof(SpriteVertexAttrib) - sizeof(Vector2f);
-	memcpy(&vertices[1], &vertices[0], size);
-	memcpy(&vertices[2], &vertices[0], size);
-	memcpy(&vertices[3], &vertices[0], size);
+	if (dirty) {
+		// Don't copy the last Vector2f (vertPos)
+		constexpr size_t size = sizeof(SpriteVertexAttrib) - sizeof(Vector2f);
+		memcpy(&vertices[1], &vertices[0], size);
+		memcpy(&vertices[2], &vertices[0], size);
+		memcpy(&vertices[3], &vertices[0], size);
+
+		dirty = false;
+	}
 }
 
 void Sprite::computeSize()

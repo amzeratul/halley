@@ -6,12 +6,14 @@ core/resources
 
 core/graphics
 - consider replacing text format with binary format (current one is super slow)
-- fix outlines overlapping text
 - convert uniforms into attributes for distance_field_sprite?
 - optimise SpritePainter
 - render graph [from old Halley]
 - sliced sprites [RESEARCH]
 - fix threaded load (TODOs in core_runner.cpp)
+- generalize Sprite for more attributes [RESEARCH]
+- multi-pass conditional enabling of pass
+- multi-pass disable batching
 
 opengl
 - instanced rendering? do we care?
