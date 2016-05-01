@@ -15,7 +15,8 @@ namespace Halley
 		TextRenderer& setText(String text);
 		TextRenderer& setSize(float size);
 		TextRenderer& setColour(Colour colour);
-		TextRenderer& setOutline(float width, Colour colour);
+		TextRenderer& setOutlineColour(Colour colour);
+		TextRenderer& setOutline(float width);
 
 		void draw(Painter& painter, Vector2f position, Vector2f align = Vector2f(0, 0)) const;
 

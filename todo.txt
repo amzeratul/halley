@@ -6,7 +6,7 @@ core/resources
 
 core/graphics
 - consider replacing text format with binary format (current one is super slow)
-- automatic smoothness detection for text rendering
+- fix outlines overlapping text
 - convert uniforms into attributes for distance_field_sprite?
 - optimise SpritePainter
 - render graph [from old Halley]

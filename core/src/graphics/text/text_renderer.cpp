@@ -44,10 +44,15 @@ TextRenderer& TextRenderer::setColour(Colour v)
 	return *this;
 }
 
-TextRenderer& TextRenderer::setOutline(float v0, Colour v1)
+TextRenderer& TextRenderer::setOutline(float v)
 {
-	outline = v0;
-	outlineColour = v1;
+	outline = v;
+	return *this;
+}
+
+TextRenderer& TextRenderer::setOutlineColour(Colour v)
+{
+	outlineColour = v;
 	return *this;
 }
 
@@ -57,9 +62,10 @@ void TextRenderer::draw(Painter& painter, Vector2f position, Vector2f align) con
 	auto material = font->getMaterial()->clone();
 	float scale = 4 * size / font->getSizePoints();
 	float smooth = clamp(1.0f / (scale * font->getSmoothRadius()), 0.01f, 0.99f);
+	float outlineSize = clamp(outline / (scale * font->getSmoothRadius()), 0.0f, 0.95f);
 
 	(*material)["u_smoothness"] = smooth;
-	(*material)["u_outline"] = outline;
+	(*material)["u_outline"] = outlineSize;
 	(*material)["u_outlineColour"] = outlineColour;
 
 	Vector2f p = position;
