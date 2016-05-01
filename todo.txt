@@ -11,6 +11,7 @@ core/graphics
 - render graph [from old Halley]
 - sliced sprites [RESEARCH]
 - fix threaded load (TODOs in core_runner.cpp)
+- run rendering on another thread?
 - generalize Sprite for more attributes [RESEARCH]
 - multi-pass conditional enabling of pass
 - multi-pass disable batching
@@ -32,14 +33,16 @@ entity
 - smearing systems
 - parallel systems
 - better timelines
-- foreign language [Lua] systems
+- foreign language systems
+- Lua systems
 - defragment/optimize memory? [RESEARCH]
 - universal hierarchical transforms? [RESEARCH]
 - onAddEntity/onRemoveEntity on systems [RESEARCH]
 - store references to other components [RESEARCH]
+- auto-threading systems with no depencies on? [RESEARCH]
 
 codegen
-* components registry [RESEARCH]
+* components registry [RESEARCH] (does this even make sense?)
 * components serialization [RESEARCH]
 - system custom base classes [RESEARCH]
 - import custom types in components [RESEARCH]
