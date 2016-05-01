@@ -80,7 +80,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(String rawName, Resource
 	}
 
 	// Load metadata
-	auto metaData = parent.locator->tryGetResource(name + ".meta.yaml", false);
+	auto metaData = parent.locator->tryGetResource(name + ".meta", false);
 	std::unique_ptr<Metadata> meta;
 	if (metaData) {
 		meta.reset(new Metadata(*static_cast<ResourceDataStatic*>(metaData.get())));

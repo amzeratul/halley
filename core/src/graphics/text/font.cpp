@@ -46,11 +46,15 @@ Font::Font(ResourceLoader& loader)
 	auto glyphsNode = root["glyphs"];
 	for (auto& node: glyphsNode) {
 		int code = node["code"].as<int>();
-		Rect4i iRect(node["x"].as<int>(), node["y"].as<int>(), node["w"].as<int>(), node["h"].as<int>());
+		auto bearingNode = node["bearing"];
+		auto advanceNode = node["advance"];
+		auto rectNode = node["rect"];
+
+		Rect4i iRect(rectNode[0].as<int>(), rectNode[1].as<int>(), rectNode[2].as<int>(), rectNode[3].as<int>());
 		Rect4f rect = Rect4f(iRect) / Vector2f(texture->getSize());
-		Vector2f hBearing = Vector2f(node["horizontalBearingX"].as<float>(), node["horizontalBearingY"].as<float>());
-		Vector2f vBearing = Vector2f(node["verticalBearingX"].as<float>(), node["verticalBearingY"].as<float>());
-		Vector2f advance = Vector2f(node["advanceX"].as<float>(), node["advanceY"].as<float>());
+		Vector2f hBearing = Vector2f(bearingNode[0].as<float>(), bearingNode[1].as<float>());
+		Vector2f vBearing = Vector2f(bearingNode[2].as<float>(), bearingNode[3].as<float>());
+		Vector2f advance = Vector2f(advanceNode[0].as<float>(), advanceNode[1].as<float>());
 
 		glyphs.emplace(code, Glyph(code, rect, Vector2f(iRect.getSize()), hBearing, vBearing, advance));
 	}

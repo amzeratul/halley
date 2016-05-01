@@ -132,12 +132,13 @@ int MakeFontTool::run(std::vector<std::string> args)
 	String dir = target.parent_path().string();
 	String imgName = fileName + ".png";
 	dstImg->savePNG(dir + "/" + imgName);
-	generateYAML(imgName, font, codes, dir + "/" + fileName + ".yaml", scale, radius);
+	generateFontMap(imgName, font, codes, dir + "/" + fileName + ".yaml", scale, radius);
+	generateTextureMeta(dir + "/" + imgName + ".meta");
 
 	return 0;
 }
 
-void MakeFontTool::generateYAML(String imgName, FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale, float radius) {
+void MakeFontTool::generateFontMap(String imgName, FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale, float radius) {
 	std::sort(entries.begin(), entries.end(), [](const CharcodeEntry& a, const CharcodeEntry& b) { return a.charcode < b.charcode; });
 
 	YAML::Emitter yaml;
@@ -161,16 +162,9 @@ void MakeFontTool::generateYAML(String imgName, FontFace& font, std::vector<Char
 		yaml << YAML::BeginMap;
 		yaml << YAML::Key << "code" << YAML::Value << c.charcode;
 		yaml << YAML::Key << "character" << YAML::Value << YAML::DoubleQuoted << printable.c_str();
-		yaml << YAML::Key << "x" << YAML::Value << c.rect.getX();
-		yaml << YAML::Key << "y" << YAML::Value << c.rect.getY();
-		yaml << YAML::Key << "w" << YAML::Value << c.rect.getWidth();
-		yaml << YAML::Key << "h" << YAML::Value << c.rect.getHeight();
-		yaml << YAML::Key << "horizontalBearingX" << YAML::Value << metrics.bearingHorizontal.x;
-		yaml << YAML::Key << "horizontalBearingY" << YAML::Value << metrics.bearingHorizontal.y;
-		yaml << YAML::Key << "verticalBearingX" << YAML::Value << metrics.bearingVertical.x;
-		yaml << YAML::Key << "verticalBearingY" << YAML::Value << metrics.bearingVertical.y;
-		yaml << YAML::Key << "advanceX" << YAML::Value << metrics.advance.x;
-		yaml << YAML::Key << "advanceY" << YAML::Value << metrics.advance.y;
+		yaml << YAML::Key << "rect" << YAML::Value << YAML::Flow << YAML::BeginSeq << c.rect.getX() << c.rect.getY() << c.rect.getWidth() << c.rect.getHeight() << YAML::EndSeq;
+		yaml << YAML::Key << "bearing" << YAML::Value << YAML::Flow << YAML::BeginSeq << metrics.bearingHorizontal.x << metrics.bearingHorizontal.y << metrics.bearingVertical.x << metrics.bearingVertical.y << YAML::EndSeq;
+		yaml << YAML::Key << "advance" << YAML::Value << YAML::Flow << YAML::BeginSeq << metrics.advance.x << metrics.advance.y << YAML::EndSeq;
 		yaml << YAML::EndMap;
 	}
 
@@ -188,6 +182,25 @@ void MakeFontTool::generateYAML(String imgName, FontFace& font, std::vector<Char
 	}
 
 	std::ofstream out(outPath, std::ios::out);
+	out << "---\n";
 	out << yaml.c_str();
+	out << "\n...\n";
+	out.close();
+}
+
+void MakeFontTool::generateTextureMeta(String outPath)
+{
+	YAML::Emitter yaml;
+	yaml << YAML::BeginMap;
+	yaml << YAML::Key << "filtering" << YAML::Value << true;
+	yaml << YAML::Key << "mipmap" << YAML::Value << false;
+	yaml << YAML::Key << "premultiply" << YAML::Value << false;
+	yaml << YAML::Key << "format" << YAML::Value << "RGBA";
+	yaml << YAML::EndMap;
+
+	std::ofstream out(outPath, std::ios::out);
+	out << "---\n";
+	out << yaml.c_str();
+	out << "\n...\n";
 	out.close();
 }
