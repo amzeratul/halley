@@ -4,6 +4,7 @@ font:
   image: ubuntub.png
   sizePt: 31.25
   height: 35.90625
+  ascender: 29.125
   radius: 8
 glyphs:
   - code: 0

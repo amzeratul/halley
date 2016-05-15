@@ -67,6 +67,11 @@ float FontFace::getHeight()
 	return pimpl->face->height * size / pimpl->face->units_per_EM;
 }
 
+float FontFace::getAscender()
+{
+	return pimpl->face->ascender * size / pimpl->face->units_per_EM;
+}
+
 std::vector<int> FontFace::getCharCodes() const
 {
 	std::vector<int> result;

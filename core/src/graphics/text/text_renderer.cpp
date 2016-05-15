@@ -12,7 +12,7 @@ TextRenderer::TextRenderer()
 
 TextRenderer::TextRenderer(std::shared_ptr<Font> font, String text, float size, Colour colour, float outline, Colour outlineColour)
 	: font(font)
-	, text(text)
+	, text(text.getUTF32())
 	, size(size)
 	, outline(outline)
 	, colour(colour)
@@ -28,7 +28,8 @@ TextRenderer& TextRenderer::setFont(std::shared_ptr<Font> v)
 
 TextRenderer& TextRenderer::setText(String v)
 {
-	text = v;
+	text = v.getUTF32();
+	text.push_back('\n');
 	return *this;
 }
 
@@ -50,13 +51,25 @@ TextRenderer& TextRenderer::setOutline(float v)
 	return *this;
 }
 
+TextRenderer& TextRenderer::setAlignment(float v)
+{
+	align = v;
+	return *this;
+}
+
+TextRenderer& TextRenderer::setOffset(Vector2f v)
+{
+	offset = v;
+	return *this;
+}
+
 TextRenderer& TextRenderer::setOutlineColour(Colour v)
 {
 	outlineColour = v;
 	return *this;
 }
 
-void TextRenderer::draw(Painter& painter, Vector2f position, Vector2f align) const
+void TextRenderer::draw(Painter& painter, Vector2f position) const
 {
 	assert(font);
 	auto material = font->getMaterial()->clone();
@@ -68,16 +81,35 @@ void TextRenderer::draw(Painter& painter, Vector2f position, Vector2f align) con
 	(*material)["u_outline"] = outlineSize;
 	(*material)["u_outlineColour"] = outlineColour;
 
-	Vector2f p = position;
+	Vector2f p = position + Vector2f(0, font->getAscenderDistance() * scale);
+	if (offset != Vector2f(0, 0)) {
+		p -= getExtents() * offset;
+	}
 
 	std::vector<Sprite> sprites;
 
-	auto chars = text.getUTF32();
-	for (auto& c : chars) {
+	size_t startPos = 0;
+	Vector2f lineOffset;
+
+	const size_t n = text.size();
+	for (size_t i = 0; i < n; i++) {
+		int c = text[i];
+		
 		if (c == '\n') {
-			// Line break!
-			p.x = position.x;
-			p.y += font->getLineDistance() * scale;
+			// Line break, update previous characters!
+			if (align != 0) {
+				for (size_t j = startPos; j < sprites.size(); j++) {
+					auto& sprite = sprites[j];
+					sprite.setPos(sprite.getPosition() - lineOffset * align);
+				}
+			}
+
+			// Move pen
+			p.y += font->getHeight() * scale;
+
+			// Reset
+			startPos = sprites.size();
+			lineOffset.x = 0;
 		} else {
 			auto& glyph = font->getGlyph(c);
 
@@ -88,11 +120,35 @@ void TextRenderer::draw(Painter& painter, Vector2f position, Vector2f align) con
 				.setPivot(glyph.horizontalBearing / glyph.size * Vector2f(-1, 1))
 				.setSize(glyph.size)
 				.setScale(scale)
-				.setPos(p));
+				.setPos(p + lineOffset));
 
-			p += Vector2f(glyph.advance.x, 0) * scale;
+			lineOffset.x += glyph.advance.x * scale;
 		}
 	}
 
 	Sprite::draw(sprites.data(), sprites.size(), painter);
+}
+
+Vector2f TextRenderer::getExtents() const
+{
+	Vector2f p;
+	float w = 0;
+	float scale = size / font->getSizePoints();
+	float lineH = font->getHeight() * scale;
+
+	for (auto& c : text) {
+		if (c == '\n') {
+			// Line break!
+			w = std::max(w, p.x);
+			p.x = 0;
+			p.y += lineH;
+		}
+		else {
+			auto& glyph = font->getGlyph(c);
+			p += Vector2f(glyph.advance.x, 0) * scale;
+		}
+	}
+	w = std::max(w, p.x);
+
+	return Vector2f(w, p.y);
 }

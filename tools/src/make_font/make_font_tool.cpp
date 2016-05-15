@@ -161,6 +161,7 @@ void MakeFontTool::generateFontMap(String imgName, FontFace& font, std::vector<C
 	yaml << YAML::Key << "image" << YAML::Value << imgName;
 	yaml << YAML::Key << "sizePt" << YAML::Value << (font.getSize() * scale);
 	yaml << YAML::Key << "height" << YAML::Value << (font.getHeight() * scale);
+	yaml << YAML::Key << "ascender" << YAML::Value << (font.getAscender() * scale);
 	yaml << YAML::Key << "radius" << YAML::Value << radius;
 	yaml << YAML::EndMap;
 	yaml << YAML::Key << "glyphs";

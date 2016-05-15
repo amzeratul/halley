@@ -26,7 +26,8 @@ namespace Halley
 		static std::unique_ptr<Font> loadResource(ResourceLoader& loader);
 
 		const Glyph& getGlyph(int code) const;
-		float getLineDistance() const { return height; }
+		float getAscenderDistance() const { return ascender; }
+		float getHeight() const { return height; }
 		float getSizePoints() const { return sizePt; }
 		float getSmoothRadius() const { return smoothRadius; }
 		String getName() const { return name; }
@@ -35,6 +36,7 @@ namespace Halley
 
 	private:
 		String name;
+		float ascender;
 		float height;
 		float sizePt;
 		float smoothRadius;

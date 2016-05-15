@@ -34,6 +34,7 @@ Font::Font(ResourceLoader& loader)
 
 	auto fontNode = root["font"];
 	name = fontNode["name"].as<std::string>();
+	ascender = fontNode["ascender"].as<float>();
 	height = fontNode["height"].as<float>();
 	sizePt = fontNode["sizePt"].as<float>();
 	smoothRadius = fontNode["radius"].as<float>();

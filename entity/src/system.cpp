@@ -9,6 +9,15 @@ System::System(std::initializer_list<FamilyBindingBase*> uninitializedFamilies, 
 {
 }
 
+size_t System::getEntityCount() const
+{
+	size_t n = 0;
+	for (auto f : families) {
+		n += f->count();
+	}
+	return n;
+}
+
 void System::onAddedToWorld(World& w, int id) {
 	world = &w;
 	systemId = id;

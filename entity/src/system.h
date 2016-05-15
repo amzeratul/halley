@@ -20,8 +20,9 @@ namespace Halley {
 
 		String getName() const { return name; }
 		void setName(String n) { name = n; }
-		int getNanoSecondsTaken() const { return int(timer.lastElapsedNanoSeconds()); }
-		int getNanoSecondsTakenAvg() const { return int(timer.averageElapsedNanoSeconds()); }
+		long long getNanoSecondsTaken() const { return timer.lastElapsedNanoSeconds(); }
+		long long getNanoSecondsTakenAvg() const { return timer.averageElapsedNanoSeconds(); }
+		size_t getEntityCount() const;
 
 	protected:
 		HalleyAPI& doGetAPI() const { return *api; }

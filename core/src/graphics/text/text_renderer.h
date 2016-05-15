@@ -17,14 +17,19 @@ namespace Halley
 		TextRenderer& setColour(Colour colour);
 		TextRenderer& setOutlineColour(Colour colour);
 		TextRenderer& setOutline(float width);
+		TextRenderer& setAlignment(float align);
+		TextRenderer& setOffset(Vector2f align);
 
-		void draw(Painter& painter, Vector2f position, Vector2f align = Vector2f(0, 0)) const;
+		void draw(Painter& painter, Vector2f position) const;
+		Vector2f getExtents() const;
 
 	private:
 		std::shared_ptr<Font> font;
-		String text;
+		StringUTF32 text;
 		float size = 20;
 		float outline = 0;
+		float align;
+		Vector2f offset;
 		Colour colour;
 		Colour outlineColour;
 	};

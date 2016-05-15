@@ -31,6 +31,7 @@ namespace Halley
 		String getName();
 		float getSize();
 		float getHeight();
+		float getAscender();
 
 		std::vector<int> getCharCodes() const;
 		Vector2i getGlyphSize(int charCode);
