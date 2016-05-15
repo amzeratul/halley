@@ -101,7 +101,7 @@ void System::doUpdate(Time time) {
 	
 	auto end = high_resolution_clock::now();
 	auto duration = duration_cast<nanoseconds>(end - start).count();
-	nsTaken = static_cast<int>(duration);
+	onTimingInformation(static_cast<int>(duration));
 }
 
 void System::doRender(Painter& painter) {
@@ -112,5 +112,18 @@ void System::doRender(Painter& painter) {
 
 	auto end = high_resolution_clock::now();
 	auto duration = duration_cast<nanoseconds>(end - start).count();
-	nsTaken = static_cast<int>(duration);
+	onTimingInformation(static_cast<int>(duration));
+}
+
+void System::onTimingInformation(int ns)
+{
+	nsTaken = ns;
+
+	nsTakenAvgAccum += nsTaken;
+	nsTakenAvgSamples++;
+	if (nsTakenAvgSamples >= 30) {
+		nsTakenAvg = int(nsTakenAvgAccum / nsTakenAvgSamples);
+		nsTakenAvgSamples = 0;
+		nsTakenAvgAccum = 0;
+	}
 }

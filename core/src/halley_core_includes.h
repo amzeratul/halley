@@ -45,3 +45,5 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "stage/stage.h"
 #include "stage/entity_stage.h"
+
+#include "utils/world_stats.h"

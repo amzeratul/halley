@@ -81,6 +81,7 @@
     <ClInclude Include="src\stage\entity_stage.h" />
     <ClInclude Include="src\stage\stage.h" />
     <ClInclude Include="src\stage\stage_id.h" />
+    <ClInclude Include="src\utils\world_stats.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\api\halley_api.cpp" />
@@ -130,6 +131,7 @@
     <ClCompile Include="src\sdl\system_sdl.cpp" />
     <ClCompile Include="src\stage\entity_stage.cpp" />
     <ClCompile Include="src\stage\stage.cpp" />
+    <ClCompile Include="src\utils\world_stats.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opengl\opengl.vcxproj">

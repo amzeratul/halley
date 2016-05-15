@@ -28,6 +28,8 @@ namespace Halley {
 		void removeSystem(System& system);
 		std::vector<System*> getSystems();
 		System& getSystem(String name);
+		std::vector<std::unique_ptr<System>>& getSystems(TimeLine timeline);
+		const std::vector<std::unique_ptr<System>>& getSystems(TimeLine timeline) const;
 
 		EntityRef createEntity();
 		void destroyEntity(EntityId id);
@@ -72,9 +74,6 @@ namespace Halley {
 		void spawnPending();
 		void updateEntities();
 		void deleteEntity(Entity* entity);
-
-		std::vector<std::unique_ptr<System>>& getSystems(TimeLine timeline);
-		const std::vector<std::unique_ptr<System>>& getSystems(TimeLine timeline) const;
 
 		void updateSystems(TimeLine timeline, Time elapsed);
 		void renderSystems(Painter& painter) const;

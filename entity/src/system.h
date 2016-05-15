@@ -18,6 +18,11 @@ namespace Halley {
 		System(std::initializer_list<FamilyBindingBase*> families, std::initializer_list<int> messageTypesReceived);
 		virtual ~System() {}
 
+		String getName() const { return name; }
+		void setName(String n) { name = n; }
+		int getNanoSecondsTaken() const { return nsTaken; }
+		int getNanoSecondsTakenAvg() const { return nsTakenAvg; }
+
 	protected:
 		HalleyAPI& doGetAPI() const { return *api; }
 		World& doGetWorld() const { return *world; }
@@ -59,8 +64,12 @@ namespace Halley {
 		World* world;
 		HalleyAPI* api;
 		String name;
-		int nsTaken = 0;
 		int systemId = -1;
+
+		int nsTaken = 0;
+		int nsTakenAvg = 0;
+		int nsTakenAvgAccum = 0;
+		int nsTakenAvgSamples = 0;
 
 		void doUpdate(Time time);
 		void doRender(Painter& painter);
@@ -69,6 +78,8 @@ namespace Halley {
 		void purgeMessages();
 		void processMessages();
 		void doSendMessage(EntityId target, std::unique_ptr<Message> msg, size_t msgSize, int msgId);
+
+		void onTimingInformation(int ns);
 	};
 
 }

@@ -183,6 +183,7 @@
     </ClInclude>
     <ClInclude Include="src\graphics\text\font.h" />
     <ClInclude Include="src\graphics\text\text_renderer.h" />
+    <ClInclude Include="src\utils\world_stats.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\core_runner.cpp">
@@ -281,5 +282,6 @@
     </ClCompile>
     <ClCompile Include="src\graphics\text\font.cpp" />
     <ClCompile Include="src\graphics\text\text_renderer.cpp" />
+    <ClCompile Include="src\utils\world_stats.cpp" />
   </ItemGroup>
 </Project>

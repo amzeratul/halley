@@ -11,5 +11,6 @@ public:
 
 private:
 	std::unique_ptr<Halley::World> world;
+	std::unique_ptr<Halley::WorldStatsView> statsView;
 	//std::shared_ptr<Halley::TextureRenderTarget> target;
 };

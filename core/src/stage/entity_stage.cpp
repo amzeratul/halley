@@ -23,7 +23,8 @@ std::unique_ptr<World> EntityStage::createWorld(String configName, std::function
 		}
 
 		for (auto sysName : iter->second) {
-			world->addSystem(createFunction(sysName.as<std::string>() + "System"), timeline);
+			String name = sysName.as<std::string>();
+			world->addSystem(createFunction(name + "System"), timeline).setName(name);
 		}
 	}
 
