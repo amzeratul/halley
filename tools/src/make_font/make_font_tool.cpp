@@ -77,7 +77,7 @@ int MakeFontTool::run(std::vector<std::string> args)
 
 	auto res = String(args[2]).split('x');
 	Vector2i size(res[0].toInteger(), res[1].toInteger());
-	int superSample = 4;
+	int superSample = 8;
 	Range<int> range(0, 256);
 	float scale = 1.0f / superSample;
 	float radius = String(args[3]).toFloat();
@@ -85,7 +85,7 @@ int MakeFontTool::run(std::vector<std::string> args)
 	float borderSuperSample = borderFinal * superSample;
 
 	int minFont = 0;
-	int maxFont = 200;
+	int maxFont = 1000;
 #ifdef FAST_MODE
 	minFont = maxFont = 50;
 #endif
@@ -99,6 +99,8 @@ int MakeFontTool::run(std::vector<std::string> args)
 	dstImg->clear(0);
 
 	std::vector<CharcodeEntry> codes;
+	std::vector<std::future<void>> futures;
+	std::mutex m;
 
 	if (result) {
 		auto& pack = result.get();
@@ -108,23 +110,33 @@ int MakeFontTool::run(std::vector<std::string> args)
 			int charcode = int(reinterpret_cast<size_t>(r.data));
 			Rect4i dstRect = r.rect;
 			Rect4i srcRect = dstRect * superSample;
-
-			auto tmpImg = std::make_unique<Image>(srcRect.getWidth(), srcRect.getHeight());
-			tmpImg->clear(0);
-			font.drawGlyph(*tmpImg, charcode, Vector2i(int(borderSuperSample), int(borderSuperSample)));
-
-			auto finalGlyphImg = DistanceFieldGenerator::generate(*tmpImg, dstRect.getSize(), radius);
-			dstImg->blitFrom(dstRect.getP1(), *finalGlyphImg);
-
-			tmpImg.reset();
-			finalGlyphImg.reset();
-
-			std::cout << ".";
-
 			codes.push_back(CharcodeEntry(charcode, dstRect));
+
+			futures.push_back(std::async(std::launch::async, [=, &m, &font, &dstImg] {
+				std::cout << "+";
+
+				auto tmpImg = std::make_unique<Image>(srcRect.getWidth(), srcRect.getHeight());
+				tmpImg->clear(0);
+				{
+					std::lock_guard<std::mutex> g(m);
+					font.drawGlyph(*tmpImg, charcode, Vector2i(int(borderSuperSample), int(borderSuperSample)));
+				}
+
+				auto finalGlyphImg = DistanceFieldGenerator::generate(*tmpImg, dstRect.getSize(), radius);
+				dstImg->blitFrom(dstRect.getP1(), *finalGlyphImg);
+
+				tmpImg.reset();
+				finalGlyphImg.reset();
+
+				std::cout << "-";
+			}));
 		}
-		std::cout << " Done." << std::endl;
 	}
+
+	for (auto& f: futures) {
+		f.get();
+	}
+	std::cout << " Done." << std::endl;
 
 	using std::experimental::filesystem::path;
 	path target = args[1];
@@ -147,7 +159,7 @@ void MakeFontTool::generateFontMap(String imgName, FontFace& font, std::vector<C
 	yaml << YAML::BeginMap;
 	yaml << YAML::Key << "name" << YAML::Value << font.getName();
 	yaml << YAML::Key << "image" << YAML::Value << imgName;
-	yaml << YAML::Key << "sizePt" << YAML::Value << font.getSize();
+	yaml << YAML::Key << "sizePt" << YAML::Value << (font.getSize() * scale);
 	yaml << YAML::Key << "height" << YAML::Value << (font.getHeight() * scale);
 	yaml << YAML::Key << "radius" << YAML::Value << radius;
 	yaml << YAML::EndMap;
@@ -177,9 +189,11 @@ void MakeFontTool::generateFontMap(String imgName, FontFace& font, std::vector<C
 			codes.push_back(code);
 		}
 	}
+	/*
 	for (auto& kern : font.getKerning(codes)) {
 		std::cout << "Kerning: " << char(kern.left) << " " << char(kern.right) << ": " << kern.kerning << std::endl;
 	}
+	*/
 
 	std::ofstream out(outPath, std::ios::out);
 	out << "---\n";

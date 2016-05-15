@@ -43,8 +43,9 @@ void TestStage::onRender(RenderContext& context) const
 		painter.clear(Colour(0.2f, 0.2f, 0.3f));
 		world->render(painter);
 
-		auto text = TextRenderer(getResource<Font>("verdana.yaml"), "Hello Halley world!\nWith line breaks!", 10, Colour(0.9f, 0.9f, 1.0f), 0.4f, Colour(0.1f, 0.1f, 0.2f));
+		auto text = TextRenderer(getResource<Font>("ubuntub.yaml"), "Hello Halley world!\nVAWWT.", 10, Colour(0.9f, 0.9f, 1.0f), 0.4f, Colour(0, 0, 0));
 		text.setSize(10).setOutline(0.5f).draw(painter, Vector2f(100, 100));
+		text.setSize(14).setOutline(1).draw(painter, Vector2f(100, 140));
 		text.setSize(20).setOutline(1).draw(painter, Vector2f(100, 200));
 		text.setSize(30).setOutline(2.5f).draw(painter, Vector2f(100, 300));
 		text.setSize(60).setOutline(10).draw(painter, Vector2f(100, 400));

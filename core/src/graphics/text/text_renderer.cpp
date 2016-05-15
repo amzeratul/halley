@@ -60,7 +60,7 @@ void TextRenderer::draw(Painter& painter, Vector2f position, Vector2f align) con
 {
 	assert(font);
 	auto material = font->getMaterial()->clone();
-	float scale = 4 * size / font->getSizePoints();
+	float scale = size / font->getSizePoints();
 	float smooth = clamp(1.0f / (scale * font->getSmoothRadius()), 0.01f, 0.99f);
 	float outlineSize = clamp(outline / (scale * font->getSmoothRadius()), 0.0f, 0.95f);
 
