@@ -21,8 +21,9 @@ namespace Halley {
 
 		void step(TimeLine timeline, Time elapsed);
 		void render(Painter& painter) const;
-		double getLastStepLength() const { return lastStepLength; }
 		bool hasSystemsOnTimeLine(TimeLine timeline) const;
+		
+		long long getAverageTime(TimeLine timeline) const;
 
 		System& addSystem(std::unique_ptr<System> system, TimeLine timeline);
 		void removeSystem(System& system);
@@ -59,9 +60,7 @@ namespace Halley {
 		HalleyAPI* api;
 		std::array<std::vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
 		bool entityDirty = false;
-
-		mutable double lastStepLength;
-
+		
 		EntityId nextUid = 0;
 		std::vector<Entity*> entities;
 		std::vector<Entity*> entitiesPendingCreation;
@@ -69,6 +68,8 @@ namespace Halley {
 
 		std::map<FamilyMaskType, std::unique_ptr<Family>> families;
 		//std::shared_ptr<EntityRegistry> registry;
+
+		mutable std::array<StopwatchAveraging, 3> timer;
 
 		void allocateEntity(Entity* entity);
 		void spawnPending();

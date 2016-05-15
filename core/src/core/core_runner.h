@@ -24,6 +24,8 @@ namespace Halley
 		void setStage(std::unique_ptr<Stage> stage);
 		void quit() override;
 		Resources& getResources() override;
+		long long getAverageTime(TimeLine tl) const override;
+		long long getElapsedTime(TimeLine tl) const override;
 
 	private:
 		int run(std::unique_ptr<Game> game, std::vector<String> args);
@@ -42,6 +44,8 @@ namespace Halley
 
 		void transitionStage();
 		void pumpEvents(Time time);
+
+		std::array<StopwatchAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> timers;
 
 		std::unique_ptr<Game> game;
 		std::unique_ptr<HalleyAPI> api;

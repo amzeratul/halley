@@ -130,28 +130,31 @@ bool World::hasSystemsOnTimeLine(TimeLine timeline) const
 	return getSystems(timeline).size() > 0;
 }
 
+long long World::getAverageTime(TimeLine timeline) const
+{
+	return timer[int(timeline)].averageElapsedNanoSeconds();
+}
+
 void Halley::World::step(TimeLine timeline, Time elapsed)
 {
-	using namespace std::chrono;
-	auto start = high_resolution_clock::now();
+	auto& t = timer[int(timeline)];
+	t.beginSample();
 
 	spawnPending();
 	updateEntities();
 	updateSystems(timeline, elapsed);
 
-	auto end = high_resolution_clock::now();
-	lastStepLength = duration_cast<duration<double, std::milli>>(end - start).count();
+	t.endSample();
 }
 
 void World::render(Painter& painter) const
 {
-	using namespace std::chrono;
-	auto start = high_resolution_clock::now();
+	auto& t = timer[int(TimeLine::Render)];
+	t.beginSample();
 
 	renderSystems(painter);
 
-	auto end = high_resolution_clock::now();
-	lastStepLength = duration_cast<duration<double, std::milli>>(end - start).count();
+	t.endSample();
 }
 
 void World::allocateEntity(Entity* entity) {

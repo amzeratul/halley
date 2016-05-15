@@ -161,26 +161,38 @@ void CoreRunner::pumpEvents(Time time)
 
 void CoreRunner::onFixedUpdate(Time time)
 {
+	auto& t = timers[int(TimeLine::FixedUpdate)];
+	t.beginSample();
+
 	pumpEvents(time);
 	if (running) {
 		if (currentStage) {
 			currentStage->onFixedUpdate(time);
 		}
 	}
+
+	t.endSample();
 }
 
 void CoreRunner::onVariableUpdate(Time time)
 {
-	//pumpEvents();
+	auto& t = timers[int(TimeLine::VariableUpdate)];
+	t.beginSample();
+
 	if (running) {
 		if (currentStage) {
 			currentStage->onVariableUpdate(time);
 		}
 	}
+
+	t.endSample();
 }
 
 void CoreRunner::onRender(Time)
 {
+	auto& t = timers[int(TimeLine::Render)];
+	t.beginSample();
+
 	if (api->video) {
 		api->video->startRender();
 		painter->startRender();
@@ -193,6 +205,8 @@ void CoreRunner::onRender(Time)
 		painter->endRender();
 		api->video->finishRender();
 	}
+
+	t.endSample();
 }
 
 void CoreRunner::handleException(std::exception& e)
@@ -239,6 +253,16 @@ void CoreRunner::quit()
 Resources& CoreRunner::getResources()
 {
 	return *resources;
+}
+
+long long CoreRunner::getAverageTime(TimeLine tl) const
+{
+	return timers[int(tl)].averageElapsedNanoSeconds();
+}
+
+long long CoreRunner::getElapsedTime(TimeLine tl) const
+{
+	return timers[int(tl)].lastElapsedNanoSeconds();
 }
 
 void CoreRunner::transitionStage()

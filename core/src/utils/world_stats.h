@@ -3,6 +3,7 @@
 
 namespace Halley
 {
+	class CoreAPI;
 	class Resources;
 	class RenderContext;
 	class World;
@@ -10,10 +11,13 @@ namespace Halley
 	class WorldStatsView
 	{
 	public:
-		WorldStatsView(Resources& resources, const World& world);
+		WorldStatsView(CoreAPI& coreApi, const World& world);
 		void draw(RenderContext& context);
 
 	private:
+		String formatTime(long long ns) const;
+
+		const CoreAPI& coreAPI;
 		const World& world;
 		TextRenderer text;
 	};
