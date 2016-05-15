@@ -28,6 +28,10 @@ namespace Halley
 
 		void drawQuads(std::shared_ptr<Material> material, size_t numVertices, void* vertexData);
 
+		size_t getNumDrawCalls() const { return nDrawCalls; }
+		size_t getNumVertices() const { return nVertices; }
+		size_t getNumTriangles() const { return nTriangles; }
+
 	protected:
 		virtual void doStartRender() = 0;
 		virtual void doEndRender() = 0;
@@ -48,6 +52,10 @@ namespace Halley
 		size_t bytesPending = 0;
 		std::vector<char> vertexBuffer;
 		std::shared_ptr<Material> materialPending;
+
+		size_t nDrawCalls;
+		size_t nVertices;
+		size_t nTriangles;
 
 		void flushPending();
 		void executeDrawQuads(Material& material, size_t numVertices, void* vertexData);

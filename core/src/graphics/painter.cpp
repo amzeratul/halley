@@ -9,6 +9,8 @@ using namespace Halley;
 
 void Painter::startRender()
 {
+	nDrawCalls = nTriangles = nVertices = 0;
+
 	verticesPending = 0;
 	bytesPending = 0;
 	doStartRender();
@@ -118,5 +120,10 @@ void Painter::executeDrawQuads(Material& material, size_t numVertices, void* ver
 
 		// Draw
 		drawQuads(int(numVertices / 4));
+
+		// Log stats
+		nDrawCalls++;
+		nTriangles += numVertices / 2;
+		nVertices += numVertices;
 	}
 }

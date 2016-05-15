@@ -94,6 +94,11 @@ namespace Halley {
 		T getX() const { return p1.x; }
 		T getY() const { return p1.y; }
 
+		T getLeft() const { return p1.x; }
+		T getRight() const { return p2.x; }
+		T getTop() const { return p1.y; }
+		T getBottom() const { return p2.y; }
+
 		bool isInside(Vector2D<T> p) const
 		{
 			return (p.x >= p1.x && p.x <= p2.x && p.y >= p1.y && p.y <= p2.y);

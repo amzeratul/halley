@@ -7,16 +7,19 @@ void MovementSystem::update(Halley::Time time, MainFamily& e)
 	
 	pos += vel * time;
 
-	if (pos.x < 0) {
+	float margin = 1000;
+	Halley::Rect4f bounds(-margin, -margin, 1280 + 2 * margin, 720 + 2 * margin);
+
+	if (pos.x < bounds.getLeft()) {
 		vel.x = abs(vel.x);
-	} else if (pos.x > 1280) {
+	} else if (pos.x > bounds.getRight()) {
 		vel.x = -abs(vel.x);
 	}
 
-	if (pos.y < 0) {
+	if (pos.y < bounds.getTop()) {
 		vel.y = abs(vel.y);
 	}
-	else if (pos.y > 720) {
+	else if (pos.y > bounds.getBottom()) {
 		vel.y = -abs(vel.y);
 	}
 }
