@@ -1,4 +1,3 @@
-#include <chrono>
 #include "system.h"
 #include <iostream>
 
@@ -89,8 +88,7 @@ void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, size
 }
 
 void System::doUpdate(Time time) {
-	using namespace std::chrono;
-	auto start = high_resolution_clock::now();
+	timer.beginSample();
 
 	purgeMessages();
 	if (!messageTypesReceived.empty()) {
@@ -99,31 +97,13 @@ void System::doUpdate(Time time) {
 	
 	updateBase(time);
 	
-	auto end = high_resolution_clock::now();
-	auto duration = duration_cast<nanoseconds>(end - start).count();
-	onTimingInformation(static_cast<int>(duration));
+	timer.endSample();
 }
 
 void System::doRender(Painter& painter) {
-	using namespace std::chrono;
-	auto start = high_resolution_clock::now();
+	timer.beginSample();
 
 	renderBase(painter);
 
-	auto end = high_resolution_clock::now();
-	auto duration = duration_cast<nanoseconds>(end - start).count();
-	onTimingInformation(static_cast<int>(duration));
-}
-
-void System::onTimingInformation(int ns)
-{
-	nsTaken = ns;
-
-	nsTakenAvgAccum += nsTaken;
-	nsTakenAvgSamples++;
-	if (nsTakenAvgSamples >= 30) {
-		nsTakenAvg = int(nsTakenAvgAccum / nsTakenAvgSamples);
-		nsTakenAvgSamples = 0;
-		nsTakenAvgAccum = 0;
-	}
+	timer.endSample();
 }

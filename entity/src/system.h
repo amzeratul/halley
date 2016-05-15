@@ -20,8 +20,8 @@ namespace Halley {
 
 		String getName() const { return name; }
 		void setName(String n) { name = n; }
-		int getNanoSecondsTaken() const { return nsTaken; }
-		int getNanoSecondsTakenAvg() const { return nsTakenAvg; }
+		int getNanoSecondsTaken() const { return int(timer.lastElapsedNanoSeconds()); }
+		int getNanoSecondsTakenAvg() const { return int(timer.averageElapsedNanoSeconds()); }
 
 	protected:
 		HalleyAPI& doGetAPI() const { return *api; }
@@ -66,10 +66,7 @@ namespace Halley {
 		String name;
 		int systemId = -1;
 
-		int nsTaken = 0;
-		int nsTakenAvg = 0;
-		int nsTakenAvgAccum = 0;
-		int nsTakenAvgSamples = 0;
+		StopwatchAveraging timer;
 
 		void doUpdate(Time time);
 		void doRender(Painter& painter);
@@ -78,8 +75,6 @@ namespace Halley {
 		void purgeMessages();
 		void processMessages();
 		void doSendMessage(EntityId target, std::unique_ptr<Message> msg, size_t msgSize, int msgId);
-
-		void onTimingInformation(int ns);
 	};
 
 }

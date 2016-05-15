@@ -22,6 +22,7 @@
 \*****************************************************************/
 
 #include "halleytime.h"
+#include <chrono>
 
 namespace Halley {
 	class Stopwatch {
@@ -29,15 +30,37 @@ namespace Halley {
 		Stopwatch(bool start = true);
 
 		void start();
-		void stop();
+		void pause();
 		void reset();
 
-		Time elapsed();
-		int elapsedUs();
+		Time elapsedSeconds() const;
+		long long elapsedMicroSeconds() const;
+		long long elapsedNanoSeconds() const;
 
 	private:
+		std::chrono::time_point<std::chrono::steady_clock> startTime;
+		long long measuredTime = 0;
 		bool running = false;
-		long long startTime = 0;
-		long long extraTime = 0;
+	};
+
+	class StopwatchAveraging
+	{
+	public:
+		explicit StopwatchAveraging(int nSamples = 30);
+		void beginSample();
+		void endSample();
+
+		long long averageElapsedNanoSeconds() const;
+		long long lastElapsedNanoSeconds() const;
+
+	private:
+		int nSamples;
+		int nsTakenAvgSamples = 0;
+
+		std::chrono::time_point<std::chrono::steady_clock> startTime;
+
+		long long nsTaken = 0;
+		long long nsTakenAvg = 0;
+		long long nsTakenAvgAccum = 0;
 	};
 }

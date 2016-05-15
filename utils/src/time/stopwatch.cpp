@@ -22,8 +22,8 @@
 #include "stopwatch.h"
 
 using namespace Halley;
+using namespace std::chrono;
 
-/*
 Stopwatch::Stopwatch(bool _start)
 {
 	if (_start) {
@@ -31,39 +31,74 @@ Stopwatch::Stopwatch(bool _start)
 	}
 }
 
-Time Stopwatch::elapsed()
+void Stopwatch::start()
 {
-	long long t = extraTime;
-	if (running) {
-		t += SDL_GetPerformanceCounter() - startTime;
-	}
-	return Time(t) / Time(SDL_GetPerformanceFrequency());
-}
-
-int Halley::Stopwatch::elapsedUs()
-{
-	return int(elapsed() * 1000000);
-}
-
-void Halley::Stopwatch::start()
-{
+	auto now = high_resolution_clock::now();
 	if (!running) {
 		running = true;
-		startTime = SDL_GetPerformanceCounter();
+		startTime = now;
 	}
 }
 
-void Halley::Stopwatch::stop()
+void Stopwatch::pause()
 {
+	auto now = high_resolution_clock::now();
 	if (running) {
 		running = false;
-		extraTime += SDL_GetPerformanceCounter() - startTime;
+		measuredTime += duration_cast<nanoseconds>(now - startTime).count();
 	}
 }
 
-void Halley::Stopwatch::reset()
+void Stopwatch::reset()
 {
-	startTime = SDL_GetPerformanceCounter();
-	extraTime = 0;
+	measuredTime = 0;
 }
-*/
+
+Time Stopwatch::elapsedSeconds() const
+{
+	return measuredTime / 1'000'000'000.0;
+}
+
+long long Stopwatch::elapsedMicroSeconds() const
+{
+	return (measuredTime + 500) / 1000;
+}
+
+long long Stopwatch::elapsedNanoSeconds() const
+{
+	return measuredTime;
+}
+
+StopwatchAveraging::StopwatchAveraging(int nSamples)
+	: nSamples(nSamples)
+{	
+}
+
+void StopwatchAveraging::beginSample()
+{
+	startTime = high_resolution_clock::now();
+}
+
+void StopwatchAveraging::endSample()
+{
+	auto now = high_resolution_clock::now();
+	nsTaken = duration_cast<nanoseconds>(now - startTime).count();
+
+	nsTakenAvgAccum += nsTaken;
+	nsTakenAvgSamples++;
+	if (nsTakenAvgSamples >= 30) {
+		nsTakenAvg = int(nsTakenAvgAccum / nsTakenAvgSamples);
+		nsTakenAvgSamples = 0;
+		nsTakenAvgAccum = 0;
+	}
+}
+
+long long StopwatchAveraging::averageElapsedNanoSeconds() const
+{
+	return nsTakenAvg;
+}
+
+long long StopwatchAveraging::lastElapsedNanoSeconds() const
+{
+	return nsTaken;
+}
