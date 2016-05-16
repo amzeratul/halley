@@ -4,7 +4,7 @@ void TimeSystem::update(Halley::Time time, MainFamily& e)
 {
 	e.time->elapsed += float(time);
 
-	if (e.time->elapsed > 2) {
+	if (e.time->elapsed > 5) {
 		sendMessage(e.entityId, ExpireMessage(e.time->elapsed));
 	}
 }
