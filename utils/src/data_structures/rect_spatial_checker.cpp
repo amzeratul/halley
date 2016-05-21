@@ -1,4 +1,5 @@
 #include "rect_spatial_checker.h"
+#include <climits>
 
 using namespace Halley;
 
@@ -59,10 +60,10 @@ bool RectangleSpatialChecker::updateData(Entry& entry, Rect4i prev, Rect4i next)
 		return false; // Nothing to do here
 	}
 	
-	int x0 = 0x7FFFFFFF;
-	int x1 = -0x80000000;
-	int y0 = 0x7FFFFFFF;
-	int y1 = -0x80000000;
+	int x0 = INT_MAX;
+	int x1 = INT_MIN;
+	int y0 = INT_MAX;
+	int y1 = INT_MIN;
 	Rect4i addRect;
 	Rect4i delRect;
 	bool hasAdd = false;
