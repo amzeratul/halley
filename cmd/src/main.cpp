@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include "../../tools/src/tool/cli_tool.h"
+#include <halley/tools/cli_tool.h>
 
 int main(int argc, char** argv)
 {

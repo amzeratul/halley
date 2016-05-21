@@ -22,6 +22,7 @@ set(SOURCES
         "src/file_formats/json/jsoncpp.cpp"
         "src/file_formats/lodepng/lodepng.cpp"
         "src/file_formats/serializer.cpp"
+        "src/file_formats/stb_image/stb_image.c"
         "src/file_formats/string_serializer.cpp"
         "src/file_formats/text_file.cpp"
         "src/file_formats/text_reader.cpp"
