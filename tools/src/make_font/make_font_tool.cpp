@@ -1,6 +1,6 @@
-#include "make_font_tool.h"
+#include "make_font/make_font_tool.h"
 #include "font_face.h"
-#include "../distance_field/distance_field_generator.h"
+#include "distance_field/distance_field_generator.h"
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <experimental/filesystem>

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <halley/maths/rect.h>
-#include "../tool/cli_tool.h"
-#include "font_face.h"
+#include "../../../src/tool/cli_tool.h"
+#include "../../../src/make_font/font_face.h"
 
 namespace Halley
 {

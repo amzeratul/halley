@@ -1,5 +1,5 @@
-#include "codegen_tool.h"
-#include "codegen.h"
+#include "codegen/codegen_tool.h"
+#include "codegen/codegen.h"
 #include <iostream>
 
 using namespace Halley;

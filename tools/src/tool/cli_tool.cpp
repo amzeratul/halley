@@ -1,8 +1,8 @@
 #include <halley/support/exception.h>
 #include "cli_tool.h"
-#include "../codegen/codegen_tool.h"
-#include "../distance_field/distance_field_tool.h"
-#include "../make_font/make_font_tool.h"
+#include "codegen/codegen_tool.h"
+#include "distance_field/distance_field_tool.h"
+#include "make_font/make_font_tool.h"
 
 using namespace Halley;
 
