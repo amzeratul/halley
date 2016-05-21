@@ -23,6 +23,8 @@
 
 struct SDL_RWops;
 
+#include <halley/resources/resource_data.h>
+
 namespace Halley {
 	class ResourceDataReaderFile : public ResourceDataReader {
 	public:

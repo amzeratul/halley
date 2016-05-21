@@ -23,8 +23,12 @@
 
 #include <map>
 #include <ctime>
+#include <halley/text/halleystring.h>
+#include <halley/resources/resource_data.h>
 
 namespace Halley {
+	class ResourceData;
+
 	class IResourceLocatorProvider {
 		friend class ResourceLocator;
 

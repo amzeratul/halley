@@ -21,6 +21,9 @@
 
 #pragma once
 
+#include <halley/maths/vector2d.h>
+#include <halley/time/halleytime.h>
+
 namespace Halley {
 	class InputTouch {
 		friend class Input;

@@ -26,6 +26,7 @@
 #endif
 #include <iostream>
 #include <SDL.h>
+#include <halley/support/exception.h>
 #include "resources/resource_data_reader.h"
 
 #ifdef _MSC_VER

@@ -23,6 +23,9 @@
 #include <SDL_joystick.h>
 #include "input/input_joystick_sdl.h"
 #include <iostream>
+#include <halley/support/console.h>
+#include <halley/maths/utils.h>
+
 using namespace Halley;
 
 

@@ -21,6 +21,9 @@
 
 #pragma once
 
+#include <halley/time/halleytime.h>
+#include <memory>
+
 namespace Halley {
 	class InputVibration {
 	public:

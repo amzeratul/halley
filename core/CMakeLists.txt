@@ -1,6 +1,7 @@
 project (halley-core)
 
-include_directories("include" "include/halley" "../utils/include" "../entity/include")
+find_Package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIR} "include" "include/halley" "../utils/include" "../entity/include")
 
 set(SOURCES
         "src/api/halley_api.cpp"
@@ -36,7 +37,6 @@ set(SOURCES
         "src/input/input_touch.cpp"
         "src/input/input_vibration.cpp"
         "src/input/input_virtual.cpp"
-        "src/prec.cpp"
         "src/resources/resource_collection.cpp"
         "src/resources/resource_data_reader.cpp"
         "src/resources/resource_filesystem.cpp"

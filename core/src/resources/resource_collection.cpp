@@ -1,6 +1,10 @@
+#include <iostream>
+#include <halley/support/console.h>
 #include "resources/resource_collection.h"
 #include "resources/resource_locator.h"
 #include "resources/resources.h"
+#include <halley/resources/metadata.h>
+#include <halley/resources/resource.h>
 
 using namespace Halley;
 

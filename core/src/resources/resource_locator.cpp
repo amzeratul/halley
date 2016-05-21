@@ -24,6 +24,7 @@
 #include "resources/resource_filesystem.h"
 #include <iostream>
 #include <set>
+#include <halley/support/exception.h>
 
 namespace Halley {
 	void ResourceLocator::add(std::unique_ptr<IResourceLocatorProvider> locator)

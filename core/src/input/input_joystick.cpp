@@ -20,6 +20,7 @@
 \*****************************************************************/
 
 #include <SDL_joystick.h>
+#include <cmath>
 #include "input/input_joystick.h"
 using namespace Halley;
 
@@ -35,7 +36,7 @@ float InputJoystick::getAxis(int n)
 
 float InputJoystick::defaultAxisAdjust(float value)
 {
-	float absVal = abs(value);
+	float absVal = std::abs(value);
 	float sign = value >= 0 ? 1.0f : -1.0f;
 
 	const float cutOff = 0.2f;

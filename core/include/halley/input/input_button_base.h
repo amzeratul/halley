@@ -22,7 +22,7 @@
 #pragma once
 
 #include "input_device.h"
-
+#include <halley/support/exception.h>
 
 namespace Halley {
 	class InputButtonBase : public virtual InputDevice {

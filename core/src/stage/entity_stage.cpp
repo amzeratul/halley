@@ -1,5 +1,6 @@
 #include "stage/entity_stage.h"
 #include <yaml-cpp/yaml.h>
+#include <halley/entity/world.h>
 using namespace Halley;
 
 std::unique_ptr<World> EntityStage::createWorld(String configName, std::function<std::unique_ptr<System>(String)> createFunction)

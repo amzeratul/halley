@@ -1,3 +1,5 @@
+#include <halley/file_formats/text_file.h>
+#include <halley/file_formats/yaml_file.h>
 #include "resources/standard_resources.h"
 #include "resources/resources.h"
 #include "graphics/sprite/animation.h"

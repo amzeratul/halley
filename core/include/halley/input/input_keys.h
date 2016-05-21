@@ -21,6 +21,9 @@
 
 #pragma once
 
+#include <map>
+#include <halley/text/halleystring.h>
+
 namespace Halley {
 	class Keys {
 	public:

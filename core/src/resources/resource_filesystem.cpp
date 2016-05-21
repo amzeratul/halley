@@ -21,6 +21,10 @@
 
 #include <SDL.h>
 #include <experimental/filesystem>
+#include <halley/support/exception.h>
+#include <cassert>
+#include <iostream>
+#include <halley/support/console.h>
 #include "resources/resource_filesystem.h"
 #include "resources/resource_data_reader.h"
 
