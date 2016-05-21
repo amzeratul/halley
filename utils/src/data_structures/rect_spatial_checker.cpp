@@ -60,9 +60,9 @@ bool RectangleSpatialChecker::updateData(Entry& entry, Rect4i prev, Rect4i next)
 	}
 	
 	int x0 = 0x7FFFFFFF;
-	int x1 = -(int)0x80000000;
+	int x1 = -0x80000000;
 	int y0 = 0x7FFFFFFF;
-	int y1 = -(int)0x80000000;
+	int y1 = -0x80000000;
 	Rect4i addRect;
 	Rect4i delRect;
 	bool hasAdd = false;
