@@ -39,8 +39,8 @@ Font::Font(ResourceLoader& loader)
 	sizePt = fontNode["sizePt"].as<float>();
 	smoothRadius = fontNode["radius"].as<float>();
 
-	auto texture = loader.getResource<Texture>("../font/" + fontNode["image"].as<std::string>());
-	auto matDef = loader.getResource<MaterialDefinition>("text.yaml");
+	auto texture = loader.getAPI().getResource<Texture>("../font/" + fontNode["image"].as<std::string>());
+	auto matDef = loader.getAPI().getResource<MaterialDefinition>("text.yaml");
 	material = std::make_unique<Material>(matDef);
 	(*material)["tex0"] = texture;
 

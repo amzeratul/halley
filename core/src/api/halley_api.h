@@ -26,6 +26,12 @@ namespace Halley
 		SystemAPI* const system;
 		VideoAPI* const video;
 		InputAPI* const input;
+		
+		template <typename T>
+		std::shared_ptr<T> getResource(String name)
+		{
+			return core->getResources().of<T>().get(name);
+		}
 
 	private:
 		friend class CoreRunner;

@@ -90,12 +90,12 @@ Animation::Animation(ResourceLoader& loader)
 
 		if (root["spriteSheet"].IsDefined()) {
 			String path = root["spriteSheet"].as<std::string>();
-			spriteSheet = loader.getResource<SpriteSheet>(path);
+			spriteSheet = loader.getAPI().getResource<SpriteSheet>(path);
 		}
 
 		if (root["shader"].IsDefined()) {
 			String path = root["shader"].as<std::string>();
-			auto matDef = loader.getResource<MaterialDefinition>(path);
+			auto matDef = loader.getAPI().getResource<MaterialDefinition>(path);
 			material = std::make_shared<Material>(matDef);
 			(*material)["tex0"] = spriteSheet->getTexture();
 		}

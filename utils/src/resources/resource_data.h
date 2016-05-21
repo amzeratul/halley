@@ -111,12 +111,6 @@ namespace Halley {
 		HalleyAPI& getAPI() const { return *api; }
 		Metadata& getMeta() { return *metadata; }
 
-		template <typename T>
-		std::shared_ptr<T> getResource(String name)
-		{
-			return api->core->getResources().of<T>().get(name);
-		}
-
 	private:
 		ResourceLoader(ResourceLoader&& loader);
 		ResourceLoader(IResourceLocator& locator, String name, String resolvedName, ResourceLoadPriority priority, HalleyAPI* api, std::unique_ptr<Metadata> metadata);
