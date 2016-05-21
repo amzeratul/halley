@@ -3,6 +3,7 @@
 #include <array>
 #include <functional>
 #include <cassert>
+#include "../support/exception.h"
 
 namespace Halley
 {

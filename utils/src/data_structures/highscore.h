@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "halleystring.h"
+#include "../text/halleystring.h"
 
 namespace Halley {
 	typedef std::pair<String, int> HighScoreEntry;

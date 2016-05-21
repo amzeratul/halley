@@ -44,7 +44,7 @@ namespace Halley {
 		inline future<V> runFuture(T function)
 		{
 			std::packaged_task<T> pt(function);
-			thread t(boost::move(pt));
+			thread t(std::move(pt));
 			return pt.get_future();
 		}
 

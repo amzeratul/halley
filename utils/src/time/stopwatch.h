@@ -38,7 +38,7 @@ namespace Halley {
 		long long elapsedNanoSeconds() const;
 
 	private:
-		std::chrono::time_point<std::chrono::steady_clock> startTime;
+		std::chrono::time_point<std::chrono::system_clock> startTime;
 		long long measuredTime = 0;
 		bool running = false;
 	};
@@ -57,7 +57,7 @@ namespace Halley {
 		int nSamples;
 		int nsTakenAvgSamples = 0;
 
-		std::chrono::time_point<std::chrono::steady_clock> startTime;
+		std::chrono::time_point<std::chrono::system_clock> startTime;
 
 		long long nsTaken = 0;
 		long long nsTakenAvg = 0;

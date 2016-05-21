@@ -2,8 +2,8 @@
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4456 4458)
-#include "binpack2d.hpp"
 #endif
+#include "binpack2d.hpp"
 
 using namespace Halley;
 

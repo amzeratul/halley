@@ -1,6 +1,9 @@
 # Windows
 Thumbs.db
 
+# CLion/IntelliJ
+.idea
+
 # Visual Studio
 *.user
 *.aps

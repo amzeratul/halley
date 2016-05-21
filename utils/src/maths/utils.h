@@ -64,7 +64,7 @@ namespace Halley {
 
 	// Endianness conversion
 	//const bool IS_BIG_ENDIAN = *((short*)"AB") == 0x4243;
-	const bool IS_BIG_ENDIAN = false;
+	constexpr bool IS_BIG_ENDIAN = false;
 
 	template <typename T>
 	inline T FixEndian(T t)
@@ -73,7 +73,7 @@ namespace Halley {
 			T temp = t;
 			unsigned char *v = reinterpret_cast<unsigned char*>(&temp);
 			for (size_t i=0; i<sizeof(T)/2; i++) {
-				swap(v[i], v[sizeof(T)-1-i]);
+				std::swap(v[i], v[sizeof(T)-1-i]);
 			}
 			return temp;
 		} else {
