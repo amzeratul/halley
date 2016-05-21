@@ -22,7 +22,7 @@
 #pragma once
 
 #ifdef _WIN32
-#include "os.h"
+#include <halley/os/os.h>
 #define _WIN32_DCOM
 #include <Windows.h>
 #include <wbemidl.h>

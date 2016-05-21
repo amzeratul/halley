@@ -24,6 +24,7 @@
 #include "os_mac.h"
 #include "os_android.h"
 #include "os_ios.h"
+#include "os_linux.h"
 #include "../../include/halley/support/exception.h"
 
 using namespace Halley;
@@ -40,6 +41,8 @@ OS& Halley::OS::get()
 		instance = new OSAndroid();
 #elif defined(__IPHONEOS__)
 		instance = new OSiOS();
+#elif defined(linux)
+        instance = new OSLinux();
 #else
 		throw Exception("Unknown OS - please update os.cpp on Halley.");
 #endif

@@ -18,4 +18,4 @@ set(SOURCES
         )
 
 add_library (halley-opengl ${SOURCES})
-target_link_libraries(halley-opengl ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES})
+target_link_libraries(halley-opengl halley-core ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES})

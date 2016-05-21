@@ -41,6 +41,7 @@ set(SOURCES
         "src/os/os_android.cpp"
         "src/os/os.cpp"
         "src/os/os_ios.cpp"
+        "src/os/os_linux.cpp"
         "src/os/os_mac.cpp"
         "src/os/os_unix.cpp"
         "src/os/os_win32.cpp"

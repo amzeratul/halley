@@ -22,10 +22,10 @@
 #pragma once
 
 
-#if defined(__APPLE__) || defined(__ANDROID__)
+#if defined(__APPLE__) || defined(__ANDROID__) || defined(linux)
 #define IS_UNIX
 
-#include "os.h"
+#include <halley/os/os.h>
 
 namespace Halley {
 	class OSUnix : public OS {
