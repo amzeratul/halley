@@ -15,7 +15,7 @@ namespace Halley {
 		Serializer& operator<<(int val);
 		Serializer& operator<<(size_t val);
 		Serializer& operator<<(float val);
-		Serializer& operator<<(__int64 val);
+		Serializer& operator<<(long long val);
 		Serializer& operator<<(const std::string& str);
 		Serializer& operator<<(Bytes& str);
 
@@ -48,7 +48,7 @@ namespace Halley {
 		Deserializer& operator>>(int& val);
 		Deserializer& operator>>(size_t& val);
 		Deserializer& operator>>(float& val);
-		Deserializer& operator>>(__int64& val);
+		Deserializer& operator>>(long long& val);
 		Deserializer& operator>>(std::string& str);
 		Deserializer& operator>>(Bytes& str);
 

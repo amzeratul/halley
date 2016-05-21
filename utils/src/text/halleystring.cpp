@@ -28,6 +28,7 @@
 #include "../support/assert.h"
 #include <sstream>
 #include <iomanip>
+#include <cstring>
 
 using namespace Halley;
 
@@ -627,22 +628,11 @@ String String::floatToString(double src, int prec)
 // Int to string
 String String::integerToString(int value, int base)
 {
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4996)
-#endif
-	char buffer[32];
-	return String(_itoa(value, buffer, base));
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-	/*
 	std::stringstream ss;
 	if (base == 16) ss.setf(std::ios::hex, std::ios::basefield);
 	else if (base == 8) ss.setf(std::ios::oct, std::ios::basefield);
 	ss << value;
 	return ss.str();
-	*/
 }
 
 

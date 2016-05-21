@@ -19,6 +19,7 @@
 
 \*****************************************************************/
 
+#include <cstring>
 #include "matrix4.h"
 using namespace Halley;
 

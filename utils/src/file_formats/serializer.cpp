@@ -1,5 +1,13 @@
+#include <cstring>
 #include "serializer.h"
 using namespace Halley;
+
+#ifndef _MSC_VER
+void memcpy_s(void* dst, size_t size, const void* src, size_t)
+{
+	memcpy(dst, src, size);
+}
+#endif
 
 Serializer::Serializer(Bytes& _data)
 	: data(_data)
@@ -16,11 +24,11 @@ Serializer& Serializer::operator<<(const std::string& str)
 	return *this;
 }
 
-Serializer& Serializer::operator<<(__int64 val)
+Serializer& Serializer::operator<<(long long val)
 {
 	size_t pos = data.size();
 	increaseBy(8);
-	*(reinterpret_cast<__int64*>(data.data() + pos)) = val;
+	*(reinterpret_cast<long long*>(data.data() + pos)) = val;
 	return *this;
 }
 
@@ -130,9 +138,9 @@ Deserializer& Deserializer::operator>>(size_t& val)
 	return *this;
 }
 
-Deserializer& Deserializer::operator>>(__int64& val)
+Deserializer& Deserializer::operator>>(long long& val)
 {
-	val = *(reinterpret_cast<__int64*>(data.data() + pos));
+	val = *(reinterpret_cast<long long*>(data.data() + pos));
 	pos += 8;
 	return *this;
 }

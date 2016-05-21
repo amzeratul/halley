@@ -21,6 +21,7 @@
 
 #include "ini_reader.h"
 #include <memory>
+#include <cstring>
 #include "../support/exception.h"
 using namespace Halley;
 

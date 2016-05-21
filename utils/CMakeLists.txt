@@ -48,7 +48,7 @@ set(SOURCES
         "src/support/debug.cpp"
         "src/support/exception.cpp"
         "src/support/redirect_stream.cpp"
-        "src/support/StackWalker/StackWalker.cpp"
+        #"src/support/StackWalker/StackWalker.cpp"
         "src/text/encode.cpp"
         "src/text/halleystring.cpp"
         "src/time/stopwatch.cpp"

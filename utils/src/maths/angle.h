@@ -26,6 +26,7 @@
 #define PI_CONSTANT_F 3.1415926535897932384626433832795f
 #endif
 
+#include <cmath>
 
 namespace Halley {
 	///////////////
