@@ -31,6 +31,7 @@ Thumbs.db
 *.o
 *.lib
 *.exe
+halley-cmd
 
 # Intermediate files
 [Dd]ebug*/

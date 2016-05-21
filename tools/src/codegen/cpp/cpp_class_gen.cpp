@@ -1,3 +1,4 @@
+#include <halley/support/exception.h>
 #include "cpp_class_gen.h"
 
 using namespace Halley;

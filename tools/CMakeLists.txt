@@ -4,6 +4,8 @@ find_Package(Freetype REQUIRED)
 include_directories(${FREETYPE_INCLUDE_DIRS} "include/halley" "../utils/include")
 
 set(SOURCES
+        "src/codegen/cpp/codegen_cpp.cpp"
+        "src/codegen/cpp/cpp_class_gen.cpp"
         "src/codegen/codegen.cpp"
         "src/codegen/codegen_tool.cpp"
         "src/codegen/component_schema.cpp"

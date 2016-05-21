@@ -2,6 +2,8 @@
 #include "codegen_cpp.h"
 #include "cpp_class_gen.h"
 #include <set>
+#include <halley/support/exception.h>
+
 using namespace Halley;
 
 static String toFileName(String className)
