@@ -1,4 +1,4 @@
-#include "family.h"
+#include "../include/halley/entity/family.h"
 
 using namespace Halley;
 

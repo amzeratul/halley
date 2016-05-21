@@ -17,4 +17,5 @@ SET(HALLEY_VERSION "${HALLEY_VERSION_MAJOR}.${HALLEY_VERSION_MINOR}.${HALLEY_VER
 include(cmake_modules/PrecompiledHeader.cmake)
 
 add_subdirectory(utils)
+add_subdirectory(entity)
 add_subdirectory(opengl)

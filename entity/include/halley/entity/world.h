@@ -5,13 +5,18 @@
 #include "entity_id.h"
 #include "family_mask.h"
 #include "family.h"
-#include <allocators>
 #include <chrono>
+#include <halley/time/halleytime.h>
+#include <halley/text/halleystring.h>
+#include <halley/data_structures/mapped_pool.h>
+#include <map>
+#include <halley/time/stopwatch.h>
 
 namespace Halley {
 	class Entity;
 	class System;
 	class Painter;
+	class HalleyAPI;
 
 	class World
 	{

@@ -1,6 +1,6 @@
-#include "entity.h"
-#include "world.h"
-//#include "../../exception.h"
+#include <halley/data_structures/memory_pool.h>
+#include "../include/halley/entity/entity.h"
+#include "../include/halley/entity/world.h"
 
 using namespace Halley;
 

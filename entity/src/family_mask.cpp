@@ -1,6 +1,7 @@
-#include "family_mask.h"
+#include "../include/halley/entity/family_mask.h"
 #include <set>
 #include <unordered_set>
+#include <vector>
 
 using namespace Halley;
 using namespace FamilyMask;

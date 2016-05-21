@@ -1,4 +1,6 @@
 #pragma once
+
+#include <algorithm>
 #include "family_type.h"
 #include "family_mask.h"
 #include "entity_id.h"

@@ -1,5 +1,5 @@
-﻿#include "family_binding.h"
-#include "family.h"
+﻿#include "../include/halley/entity/family_binding.h"
+#include "../include/halley/entity/family.h"
 
 using namespace Halley;
 

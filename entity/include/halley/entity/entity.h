@@ -2,6 +2,7 @@
 
 #include <array>
 #include <vector>
+#include <memory>
 #include "component.h"
 #include "message.h"
 #include "family_mask.h"
@@ -9,6 +10,9 @@
 #include "type_deleter.h"
 
 namespace Halley {
+	class World;
+	class System;
+
 	class MessageEntry
 	{
 	public:

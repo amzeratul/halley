@@ -8,31 +8,6 @@ namespace Halley {
 		virtual void callDestructor(void* ptr) = 0;
 	};
 
-	template <typename T>
-	class TypeDeleter : public TypeDeleterBase
-	{
-	public:
-		static void initialize()
-		{
-			static bool initialized = false;
-			if (!initialized) {
-				initialized = true;
-				ComponentDeleterTable::set(T::componentIndex, new TypeDeleter<T>());
-			}
-		}
-
-		size_t getSize() override
-		{
-			return sizeof(T);
-		}
-
-		void callDestructor(void* ptr) override
-		{
-			ptr = ptr; // Make it shut up about unused
-			static_cast<T*>(ptr)->~T();
-		}
-	};
-
 	class ComponentDeleterTable
 	{
 	public:
@@ -56,6 +31,31 @@ namespace Halley {
 		{
 			static std::vector<TypeDeleterBase*> map;
 			return map;
+		}
+	};
+
+	template <typename T>
+	class TypeDeleter : public TypeDeleterBase
+	{
+	public:
+		static void initialize()
+		{
+			static bool initialized = false;
+			if (!initialized) {
+				initialized = true;
+				ComponentDeleterTable::set(T::componentIndex, new TypeDeleter<T>());
+			}
+		}
+
+		size_t getSize() override
+		{
+			return sizeof(T);
+		}
+
+		void callDestructor(void* ptr) override
+		{
+			ptr = ptr; // Make it shut up about unused
+			static_cast<T*>(ptr)->~T();
 		}
 	};
 }

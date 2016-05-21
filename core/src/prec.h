@@ -5,4 +5,4 @@
 #endif
 
 #include "../../utils/include/halley/halley_utils.h"
-#include "../../entity/include/halley_entity.h"
+#include "../../entity/include/halley/halley_entity.h"

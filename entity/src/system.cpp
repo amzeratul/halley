@@ -1,4 +1,4 @@
-#include "system.h"
+#include "../include/halley/entity/system.h"
 #include <iostream>
 
 using namespace Halley;
