@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/stage/stage_id.h"
+#include <halley/time/halleytime.h>
 
 namespace Halley
 {

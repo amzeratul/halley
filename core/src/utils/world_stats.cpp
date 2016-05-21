@@ -4,6 +4,8 @@
 #include "graphics/text/font.h"
 #include "resources/resources.h"
 #include "halley/api/core_api.h"
+#include <halley/entity/world.h>
+#include <halley/entity/system.h>
 
 using namespace Halley;
 
