@@ -1,6 +1,7 @@
 #pragma once
 #include "camera.h"
 #include "blend.h"
+#include "maths/colour.h"
 #include <condition_variable>
 
 namespace Halley
@@ -8,6 +9,7 @@ namespace Halley
 	class Material;
 	class MaterialDefinition;
 	class Camera;
+	class RenderContext;
 
 	class Painter
 	{

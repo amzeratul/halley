@@ -1,5 +1,9 @@
 #pragma once
 
+#include "resources/resource.h"
+#include "maths/vector2d.h"
+#include <memory>
+
 namespace Halley
 {
 	class ResourceLoader;

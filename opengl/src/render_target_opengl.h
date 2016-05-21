@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../core/src/graphics/render_target/render_target_texture.h"
+#include "graphics/render_target/render_target_texture.h"
 #include "halley_gl.h"
 
 namespace Halley

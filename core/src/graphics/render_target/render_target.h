@@ -22,6 +22,7 @@
 #pragma once
 
 #include "../texture.h"
+#include "maths/rect.h"
 
 namespace Halley {
 	class RenderTarget {

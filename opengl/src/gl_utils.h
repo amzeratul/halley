@@ -22,8 +22,10 @@
 
 #pragma once
 
+#include "maths/rect.h"
+#include "maths/colour.h"
 #include "halley_gl.h"
-#include "../../core/src/graphics/blend.h"
+#include "graphics/blend.h"
 
 namespace Halley {
 

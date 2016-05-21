@@ -21,6 +21,11 @@
 
 #pragma once
 
+#include "maths/vector2d.h"
+#include "maths/angle.h"
+#include "maths/rect.h"
+#include "maths/matrix4.h"
+
 namespace Halley {
 
 	class RenderTarget;

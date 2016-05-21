@@ -1,9 +1,13 @@
 #pragma once
 
+#include <memory>
+#include "text/halleystring.h"
+
 namespace Halley
 {
 	class Painter;
 	class MaterialDefinition;
+	class MaterialParameter;
 	
 	class Material
 	{

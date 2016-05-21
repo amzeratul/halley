@@ -1,5 +1,8 @@
 #pragma once
 
+#include <graphics/texture.h>
+#include <graphics/texture_descriptor.h>
+
 namespace Halley
 {
 	enum class TextureFormat;

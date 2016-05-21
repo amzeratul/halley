@@ -21,6 +21,8 @@
 
 #include "gl_utils.h"
 #include <set>
+#include "support/exception.h"
+#include "concurrency/concurrent.h"
 
 using namespace Halley;
 
@@ -103,28 +105,14 @@ namespace Halley {
 
 }
 
-#ifndef _MSC_VER
-thread_specific_ptr<GLInternals> glState;
-#endif
-
 GLInternals& getState()
 {
-#ifdef _MSC_VER
-	static _declspec(thread) GLInternals* glState;
+	static thread_local GLInternals* glState;
 	if (!glState) {
 		glState = new GLInternals();
 		std::cout << "GL state created on thread " << Concurrent::getThreadName() << std::endl;
 	}
 	return *glState;
-#else
-	auto result = glState.get();
-	if (!result) {
-		glState.reset(new GLInternals());
-		std::cout << "GL state created on thread " << Concurrent::getThreadName() << std::endl;
-		return *glState;
-	}
-	return *result;
-#endif
 }
 
 ////////////////////
