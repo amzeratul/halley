@@ -1,4 +1,4 @@
-#include "shader.h"
+#include "halley/graphics/shader.h"
 
 using namespace Halley;
 

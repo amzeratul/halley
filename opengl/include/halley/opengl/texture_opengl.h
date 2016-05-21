@@ -1,7 +1,7 @@
 #pragma once
 
-#include <graphics/texture.h>
-#include <graphics/texture_descriptor.h>
+#include <halley/graphics/texture.h>
+#include <halley/graphics/texture_descriptor.h>
 
 namespace Halley
 {

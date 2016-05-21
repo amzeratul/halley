@@ -1,8 +1,8 @@
 #include "text_renderer.h"
 #include "font.h"
-#include "../painter.h"
-#include "../material/material.h"
-#include "../material/material_parameter.h"
+#include "halley/graphics/painter.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_parameter.h"
 
 using namespace Halley;
 

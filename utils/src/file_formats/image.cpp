@@ -20,11 +20,11 @@
 \*****************************************************************/
 
 #include <cassert>
-#include "image.h"
+#include "../../include/halley/file_formats/image.h"
 #include "stb_image/stb_image.h"
 #include "lodepng/lodepng.h"
-#include "../support/exception.h"
-#include "../resources/resource_data.h"
+#include "../../include/halley/support/exception.h"
+#include "../../include/halley/resources/resource_data.h"
 
 Halley::Image::Image(unsigned int _w, unsigned int _h)
 	: px(nullptr, [](char*){})

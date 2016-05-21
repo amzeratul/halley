@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/shader.h"
+#include "halley/graphics/shader.h"
 #include <map>
 
 namespace Halley

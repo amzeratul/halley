@@ -1,8 +1,8 @@
 #include <cstring>
-#include <support/exception.h>
-#include <support/console.h>
+#include "halley/support/exception.h"
+#include "halley/support/console.h"
 #include "shader_opengl.h"
-#include "graphics/material/material_definition.h"
+#include "halley/graphics/material/material_definition.h"
 #include "gl_utils.h"
 
 using namespace Halley;

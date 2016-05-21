@@ -2,25 +2,25 @@
 
 namespace Halley {} // Get GitHub to realise this is C++ :3
 
-#include "api/halley_api.h"
+#include "halley/api/halley_api.h"
 
 #include "core/core_runner.h"
 #include "core/game.h"
 
-#include "graphics/blend.h"
-#include "graphics/painter.h"
-#include "graphics/render_context.h"
-#include "graphics/shader.h"
-#include "graphics/texture.h"
-#include "graphics/texture_descriptor.h"
+#include "halley/graphics/blend.h"
+#include "halley/graphics/painter.h"
+#include "halley/graphics/render_context.h"
+#include "halley/graphics/shader.h"
+#include "halley/graphics/texture.h"
+#include "halley/graphics/texture_descriptor.h"
 
-#include "graphics/material/material.h"
-#include "graphics/material/material_definition.h"
-#include "graphics/material/material_parameter.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_parameter.h"
 
-#include "graphics/render_target/render_target.h"
-#include "graphics/render_target/render_target_screen.h"
-#include "graphics/render_target/render_target_texture.h"
+#include "halley/graphics/render_target/render_target.h"
+#include "halley/graphics/render_target/render_target_screen.h"
+#include "halley/graphics/render_target/render_target_texture.h"
 
 #include "graphics/text/font.h"
 #include "graphics/text/text_renderer.h"

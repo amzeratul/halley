@@ -23,9 +23,9 @@
 #pragma warning(disable: 4748)
 #endif
 
-#include "halleystring.h"
-#include "../support/exception.h"
-#include "../support/assert.h"
+#include "../../include/halley/text/halleystring.h"
+#include "../../include/halley/support/exception.h"
+#include "../../include/halley/support/assert.h"
 #include <sstream>
 #include <iomanip>
 #include <cstring>

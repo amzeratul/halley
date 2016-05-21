@@ -19,8 +19,8 @@
 
 \*****************************************************************/
 
-#include "../text/halleystring.h"
-#include "text_reader.h"
+#include "../../include/halley/text/halleystring.h"
+#include "../../include/halley/file_formats/text_reader.h"
 #include <fstream>
 #include <algorithm>
 using namespace Halley;

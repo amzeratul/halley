@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "json_file.h"
+#include "../../include/halley/file_formats/json_file.h"
 #include "json/json.h"
 
 using namespace Halley;

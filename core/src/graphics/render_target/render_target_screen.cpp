@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "render_target_screen.h"
+#include "halley/graphics/render_target/render_target_screen.h"
 
 using namespace Halley;
 

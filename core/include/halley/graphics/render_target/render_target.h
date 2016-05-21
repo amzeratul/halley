@@ -19,42 +19,19 @@
 
 \*****************************************************************/
 
-
 #pragma once
 
-#include "maths/rect.h"
-#include "maths/colour.h"
-#include "halley_gl.h"
-#include "graphics/blend.h"
+#include "halley/graphics/texture.h"
+#include "halley/maths/rect.h"
 
 namespace Halley {
-
-	class Texture;
-	class GLInternals;
-
-	class GLUtils {
+	class RenderTarget {
 	public:
-		GLUtils();
-		GLUtils(GLUtils& other);
+		virtual ~RenderTarget() {}
 
-		GLUtils& operator=(const GLUtils&) = delete;
+		virtual Rect4i getViewPort() const = 0;
 
-		void setBlendType(BlendType type);
-
-		void bindTexture(int id);
-		void setTextureUnit(int n);
-		void setNumberOfTextureUnits(int n);
-		void resetState();
-
-		void setViewPort(Rect4i rect, bool scissor = false);
-		Rect4i getViewPort();
-
-		void clear(Colour col);
-		static void doGlCheckError(const char* file = "", long line = 0);
-		
-	private:
-		GLInternals& state;
+		virtual void bind() = 0;
+		virtual void unbind() = 0;
 	};
 }
-
-#define glCheckError() Halley::GLUtils::doGlCheckError(__FILE__, __LINE__)

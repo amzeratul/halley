@@ -1,4 +1,4 @@
-#include "rect_spatial_checker.h"
+#include "../../include/halley/data_structures/rect_spatial_checker.h"
 #include <climits>
 
 using namespace Halley;

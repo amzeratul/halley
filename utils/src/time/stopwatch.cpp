@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "stopwatch.h"
+#include "../../include/halley/time/stopwatch.h"
 
 using namespace Halley;
 using namespace std::chrono;

@@ -19,9 +19,9 @@
 
 \*****************************************************************/
 
-#include "encode.h"
-#include "../maths/utils.h"
-#include "../support/assert.h"
+#include "../../include/halley/text/encode.h"
+#include "../../include/halley/maths/utils.h"
+#include "../../include/halley/support/assert.h"
 
 static const char* base64dict = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static std::vector<char> base64reverse;

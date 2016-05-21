@@ -1,5 +1,5 @@
 #include "painter_opengl.h"
-#include "graphics/material/material_definition.h"
+#include "halley/graphics/material/material_definition.h"
 
 using namespace Halley;
 

@@ -1,5 +1,5 @@
-#include "yaml_file.h"
-#include "../resources/resource_data.h"
+#include "../../include/halley/file_formats/yaml_file.h"
+#include "../../include/halley/resources/resource_data.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4127)

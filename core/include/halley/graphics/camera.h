@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "maths/vector2d.h"
-#include "maths/angle.h"
-#include "maths/rect.h"
-#include "maths/matrix4.h"
+#include "halley/maths/vector2d.h"
+#include "halley/maths/angle.h"
+#include "halley/maths/rect.h"
+#include "halley/maths/matrix4.h"
 
 namespace Halley {
 

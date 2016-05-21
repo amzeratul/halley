@@ -1,11 +1,11 @@
 #include <SDL.h>
 #include <GL/glew.h>
-#include "halley_gl.h"
-#include "video_opengl.h"
-#include "painter_opengl.h"
-#include "texture_opengl.h"
-#include "shader_opengl.h"
-#include "render_target_opengl.h"
+#include "../include/halley/opengl/halley_gl.h"
+#include "../include/halley/opengl/video_opengl.h"
+#include "../include/halley/opengl/painter_opengl.h"
+#include "../include/halley/opengl/texture_opengl.h"
+#include "../include/halley/opengl/shader_opengl.h"
+#include "../include/halley/opengl/render_target_opengl.h"
 using namespace Halley;
 
 #ifdef _MSC_VER

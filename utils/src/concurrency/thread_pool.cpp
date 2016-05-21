@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 #include <iostream>
-#include "thread_pool.h"
+#include "../../include/halley/concurrency/thread_pool.h"
 #include <thread>
 using namespace Halley;
 

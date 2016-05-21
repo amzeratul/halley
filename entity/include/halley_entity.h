@@ -2,5 +2,5 @@
 
 namespace Halley {} // Get GitHub to realise this is C++ :3
 
-#include "../../utils/include/halley_utils.h"
+#include "../../utils/include/halley/halley_utils.h"
 #include "../src/halley_entity_inc.h"

@@ -1,10 +1,10 @@
-#include "material_parameter.h"
-#include "uniform_type.h"
-#include "material.h"
-#include "material_definition.h"
-#include "../../api/halley_api.h"
-#include "../shader.h"
-#include "../texture.h"
+#include "halley/graphics/material/material_parameter.h"
+#include "halley/graphics/material/uniform_type.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_definition.h"
+#include "halley/api/halley_api.h"
+#include "halley/graphics/shader.h"
+#include "halley/graphics/texture.h"
 
 using namespace Halley;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../texture.h"
+#include "halley/graphics/texture.h"
 #include "../sprite/sprite.h"
 
 namespace Halley

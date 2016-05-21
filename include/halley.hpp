@@ -3,7 +3,7 @@
 #include "../core/include/halley_core.h"
 #include "../core/include/halley_main.h"
 #include "../entity/include/halley_entity.h"
-#include "../utils/include/halley_utils.h"
+#include "../utils/include/halley/halley_utils.h"
 
 #ifdef _MSC_VER
 	#ifndef _DEBUG

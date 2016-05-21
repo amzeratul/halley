@@ -1,8 +1,8 @@
-#include <concurrency/concurrent.h>
-#include <support/exception.h>
+#include "halley/concurrency/concurrent.h"
+#include "halley/support/exception.h"
 #include "halley_gl.h"
 #include "texture_opengl.h"
-#include "graphics/texture_descriptor.h"
+#include "halley/graphics/texture_descriptor.h"
 
 using namespace Halley;
 

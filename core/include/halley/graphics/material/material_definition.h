@@ -1,6 +1,6 @@
 #pragma once
-#include "../blend.h"
-#include "resources/resource.h"
+#include "halley/graphics/blend.h"
+#include "halley/resources/resource.h"
 
 namespace YAML
 {

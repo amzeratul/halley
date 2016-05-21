@@ -1,9 +1,9 @@
-#include "painter.h"
-#include "render_context.h"
-#include "render_target/render_target.h"
-#include "material/material.h"
-#include "material/material_definition.h"
-#include "material/material_parameter.h"
+#include "halley/graphics/painter.h"
+#include "halley/graphics/render_context.h"
+#include "halley/graphics/render_target/render_target.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_parameter.h"
 
 using namespace Halley;
 

@@ -1,9 +1,9 @@
 #include "world_stats.h"
 #include "../graphics/text/text_renderer.h"
-#include "../graphics/render_context.h"
+#include "halley/graphics/render_context.h"
 #include "../graphics/text/font.h"
 #include "../resources/resources.h"
-#include "../api/core_api.h"
+#include "halley/api/core_api.h"
 
 using namespace Halley;
 

@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "redirect_stream.h"
+#include "../../include/halley/support/redirect_stream.h"
 #ifdef __ANDROID__
 #include <android/log.h>
 #endif

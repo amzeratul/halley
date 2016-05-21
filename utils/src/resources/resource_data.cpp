@@ -1,7 +1,7 @@
 #include <fstream>
-#include "resource_data.h"
-#include "metadata.h"
-#include "../support/exception.h"
+#include "../../include/halley/resources/resource_data.h"
+#include "../../include/halley/resources/metadata.h"
+#include "../../include/halley/support/exception.h"
 
 using namespace Halley;
 

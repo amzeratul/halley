@@ -1,7 +1,7 @@
 #pragma once
 #include "camera.h"
-#include "blend.h"
-#include "maths/colour.h"
+#include "halley/graphics/blend.h"
+#include "halley/maths/colour.h"
 #include <condition_variable>
 
 namespace Halley

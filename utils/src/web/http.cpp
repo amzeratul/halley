@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "http.h"
+#include "../../include/halley/web/http.h"
 using namespace Halley;
 
 #ifdef WITH_BOOST_ASIO

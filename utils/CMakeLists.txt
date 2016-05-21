@@ -6,6 +6,8 @@ if (Boost_FOUND)
     add_definitions("-DHAS_BOOST")
 endif ()
 
+include_directories("include/halley")
+
 set(SOURCES
         "src/concurrency/concurrent.cpp"
         "src/concurrency/jobs.cpp"

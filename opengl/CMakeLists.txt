@@ -3,7 +3,7 @@ project (halley-opengl)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
 
 find_Package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIR} "../utils/src" "../core/src")
+include_directories(${SDL2_INCLUDE_DIR} "include/halley/opengl" "../utils/include" "../core/include")
 
 set(SOURCES
         "src/gl_utils.cpp"

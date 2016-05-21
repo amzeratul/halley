@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <vector>
-#include "../api/core_api.h"
+#include "halley/api/core_api.h"
 #include "../stage/stage.h"
 
 namespace Halley

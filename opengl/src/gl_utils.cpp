@@ -19,10 +19,10 @@
 
 \*****************************************************************/
 
-#include "gl_utils.h"
+#include "../include/halley/opengl/gl_utils.h"
 #include <set>
-#include "support/exception.h"
-#include "concurrency/concurrent.h"
+#include "../../utils/include/halley/support/exception.h"
+#include "../../utils/include/halley/concurrency/concurrent.h"
 
 using namespace Halley;
 

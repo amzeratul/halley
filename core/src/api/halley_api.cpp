@@ -1,5 +1,5 @@
-#include "halley_api.h"
-#include "halley_api_internal.h"
+#include "halley/api/halley_api.h"
+#include "halley/api/halley_api_internal.h"
 #include "../sdl/system_sdl.h"
 #include "../input/input.h"
 
