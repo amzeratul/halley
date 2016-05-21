@@ -1,8 +1,8 @@
+#include <halley/support/exception.h>
 #include "cli_tool.h"
 #include "../codegen/codegen_tool.h"
 #include "../distance_field/distance_field_tool.h"
 #include "../make_font/make_font_tool.h"
-#include <exception>
 
 using namespace Halley;
 
@@ -20,7 +20,7 @@ std::unique_ptr<CommandLineTool> CommandLineTool::getTool(std::string name)
 	} else if (name == "makeFont") {
 		return std::make_unique<MakeFontTool>();
 	} else {
-		throw std::exception("Unknown tool name");
+		throw Exception("Unknown tool name");
 	}
 }
 

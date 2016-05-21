@@ -1,6 +1,7 @@
 project (halley-tools)
 
-include_directories("../utils/include")
+find_Package(Freetype REQUIRED)
+include_directories(${FREETYPE_INCLUDE_DIRS} "../utils/include")
 
 set(SOURCES
         "src/codegen/codegen.cpp"
@@ -15,4 +16,4 @@ set(SOURCES
         "src/tool/cli_tool.cpp"
         )
 
-add_executable (halley-tools ${SOURCES})
+add_library (halley-tools ${SOURCES})

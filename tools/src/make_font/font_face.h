@@ -1,9 +1,12 @@
 #pragma once
 #include <type_traits>
+#include <halley/maths/vector2d.h>
+#include <halley/text/halleystring.h>
 
 namespace Halley
 {
 	class FontFacePimpl;
+	class Image;
 
 	struct FontMetrics
 	{

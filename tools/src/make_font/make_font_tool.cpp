@@ -3,7 +3,10 @@
 #include "../distance_field/distance_field_generator.h"
 #include <yaml-cpp/yaml.h>
 #include <fstream>
-#include <filesystem>
+#include <experimental/filesystem>
+#include <halley/data_structures/bin_pack.h>
+#include <halley/file_formats/image.h>
+#include <future>
 
 using namespace Halley;
 
