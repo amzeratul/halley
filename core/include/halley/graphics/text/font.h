@@ -1,7 +1,7 @@
 #pragma once
 
 #include "halley/graphics/texture.h"
-#include "graphics/sprite/sprite.h"
+#include "halley/graphics/sprite/sprite.h"
 #include <map>
 #include <memory>
 

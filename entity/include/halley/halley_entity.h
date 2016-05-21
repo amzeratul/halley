@@ -2,8 +2,8 @@
 
 namespace Halley {} // Get GitHub to realise this is C++ :3
 
-#include "component.h"
-#include "message.h"
-#include "system.h"
-#include "world.h"
-#include "family_binding.h"
+#include "entity/component.h"
+#include "entity/message.h"
+#include "entity/system.h"
+#include "entity/world.h"
+#include "entity/family_binding.h"

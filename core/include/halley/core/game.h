@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stage/stage.h"
+#include "halley/stage/stage.h"
 
 namespace Halley
 {

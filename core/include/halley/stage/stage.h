@@ -1,8 +1,8 @@
 #pragma once
 
 #include "stage_id.h"
-#include "resources/resources.h"
-#include "api/halley_api.h"
+#include "halley/resources/resources.h"
+#include "halley/api/halley_api.h"
 
 namespace Halley
 {

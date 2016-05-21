@@ -1,5 +1,4 @@
 #include "utils/world_stats.h"
-#include "graphics/text/text_renderer.h"
 #include "halley/graphics/render_context.h"
 #include "graphics/text/font.h"
 #include "resources/resources.h"

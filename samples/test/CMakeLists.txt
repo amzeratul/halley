@@ -2,15 +2,21 @@ cmake_minimum_required (VERSION 2.8.12)
 
 project (halley-sample-test)
 
-set (${PROJECT_NAME}_headers "src/prec.h")
-set (${PROJECT_NAME}_sources "src/prec.cpp" "src/main.cpp" "src/test_system.cpp")
+set (${PROJECT_NAME}_sources
+		"src/main.cpp"
+		"src/test_stage.cpp"
 
-add_executable (${PROJECT_NAME} ${${PROJECT_NAME}_headers}
-								${${PROJECT_NAME}_sources})
+		"src/systems/movement_system.cpp"
+		"src/systems/render_system.cpp"
+		"src/systems/spawn_sprite_system.cpp"
+		"src/systems/sprite_animation_system.cpp"
+		"src/systems/time_system.cpp"
+		)
 
-add_precompiled_header(${PROJECT_NAME} src/prec.h FORCEINCLUDE)
-include_directories(".")
-								
+include_directories("../../include" "../../core/include" "../../entity/include" "../../utils/include" "../../opengl/include")
+
+#add_precompiled_header(${PROJECT_NAME} src/prec.h FORCEINCLUDE)
+
 # From http://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake
 function(assign_source_group)
 	foreach(_source IN ITEMS ${ARGN})
@@ -25,9 +31,10 @@ function(assign_source_group)
 	endforeach()
 endfunction(assign_source_group)
 
-assign_source_group(${${PROJECT_NAME}_sources})
-assign_source_group(${${PROJECT_NAME}_headers})
+#assign_source_group(${${PROJECT_NAME}_sources})
+#assign_source_group(${${PROJECT_NAME}_headers})
 
+add_executable (${PROJECT_NAME} ${${PROJECT_NAME}_sources})
 #target_link_libraries(${PROJECT_NAME} halley-core)
 
 install(TARGETS ${PROJECT_NAME}
