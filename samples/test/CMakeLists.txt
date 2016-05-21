@@ -3,6 +3,8 @@ cmake_minimum_required (VERSION 2.8.12)
 project (halley-sample-test)
 
 set (${PROJECT_NAME}_sources
+		"gen/cpp/registry.cpp"
+
 		"src/main.cpp"
 		"src/test_stage.cpp"
 
@@ -34,9 +36,12 @@ endfunction(assign_source_group)
 #assign_source_group(${${PROJECT_NAME}_sources})
 #assign_source_group(${${PROJECT_NAME}_headers})
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
+find_Package(SDL2 REQUIRED)
+
 add_custom_target(codegen ALL ${CMAKE_HOME_DIRECTORY}/bin64/halley-cmd codegen gen_src gen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_executable (${PROJECT_NAME} ${${PROJECT_NAME}_sources})
-#target_link_libraries(${PROJECT_NAME} halley-core)
+target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} halley-core halley-utils halley-opengl halley-entity yaml-cpp stdc++fs pthread)
 
 install(TARGETS ${PROJECT_NAME}
 		RUNTIME DESTINATION ${CMAKE_HOME_DIRECTORY}/bin64

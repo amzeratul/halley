@@ -3,6 +3,8 @@ project (halley-opengl)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
 
 find_Package(SDL2 REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
 include_directories(${SDL2_INCLUDE_DIR} "include/halley/opengl" "../utils/include" "../core/include")
 
 set(SOURCES
@@ -16,3 +18,4 @@ set(SOURCES
         )
 
 add_library (halley-opengl ${SOURCES})
+target_link_libraries(halley-opengl ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES})

@@ -1,6 +1,8 @@
 project (halley-core)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
 find_Package(SDL2 REQUIRED)
+
 include_directories(${SDL2_INCLUDE_DIR} "include" "include/halley" "../utils/include" "../entity/include")
 
 set(SOURCES

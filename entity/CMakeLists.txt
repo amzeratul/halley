@@ -16,3 +16,4 @@ set(SOURCES
 
 
 add_library (halley-entity ${SOURCES})
+target_link_libraries(halley-entity halley-utils)
