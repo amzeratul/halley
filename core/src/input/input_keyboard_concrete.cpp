@@ -20,8 +20,8 @@
 \*****************************************************************/
 
 #include <SDL.h>
-#include "input_keyboard_concrete.h"
-#include "input_keys.h"
+#include "input/input_keyboard_concrete.h"
+#include "input/input_keys.h"
 using namespace Halley;
 
 #if (SDL_MAJOR_VERSION >= 1 && SDL_MINOR_VERSION >= 3) || SDL_MAJOR_VERSION >= 2

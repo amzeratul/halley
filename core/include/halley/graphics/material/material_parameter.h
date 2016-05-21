@@ -1,9 +1,15 @@
 #pragma once
 
+#include <halley/maths/colour.h>
+#include <halley/maths/vector2d.h>
+#include <halley/maths/matrix4.h>
+#include <memory>
+
 namespace Halley
 {
 	class Texture;
 	class VideoAPIInternal;
+	class Material;
 	enum class ShaderParameterType;
 
 	class MaterialParameter

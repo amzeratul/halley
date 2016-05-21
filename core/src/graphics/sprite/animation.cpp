@@ -1,10 +1,10 @@
-#include "animation.h"
-#include "sprite_sheet.h"
+#include "graphics/sprite/animation.h"
+#include "graphics/sprite/sprite_sheet.h"
 #include "halley/graphics/material/material.h"
 #include "halley/graphics/material/material_definition.h"
 #include "halley/graphics/material/material_parameter.h"
 #include "halley/api/halley_api.h"
-#include "../../core/src/resources/resources.h"
+#include "resources/resources.h"
 #include <yaml-cpp/yaml.h>
 
 using namespace Halley;
@@ -101,7 +101,7 @@ Animation::Animation(ResourceLoader& loader)
 		}
 
 		if (root["directions"].IsDefined()) {
-			for (auto& directionNode : root["directions"]) {
+			for (auto directionNode : root["directions"]) {
 				String name = directionNode["name"].as<std::string>("default");
 				String fileName = directionNode["fileName"].as<std::string>(name);
 				bool flip = directionNode["flip"].as<bool>(false);
@@ -112,7 +112,7 @@ Animation::Animation(ResourceLoader& loader)
 			directions.emplace_back(AnimationDirection("default", "default", false, 0));
 		}
 
-		for (auto& sequenceNode : root["sequences"]) {
+		for (auto sequenceNode : root["sequences"]) {
 			AnimationSequence sequence;
 			sequence.name = sequenceNode["name"].as<std::string>("default");
 			sequence.fps = sequenceNode["fps"].as<float>(0.0f);
@@ -122,7 +122,7 @@ Animation::Animation(ResourceLoader& loader)
 
 			// Load frames
 			if (sequenceNode["frames"].IsDefined()) {
-				for (auto& frameNode : sequenceNode["frames"]) {
+				for (auto frameNode : sequenceNode["frames"]) {
 					String value = frameNode.as<std::string>();
 					std::vector<int> values;
 					if (value.isInteger()) {

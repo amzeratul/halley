@@ -1,11 +1,12 @@
-#include "sprite.h"
-#include "sprite_sheet.h"
+#include <cstring>
+#include "graphics/sprite/sprite.h"
+#include "graphics/sprite/sprite_sheet.h"
 #include "halley/graphics/painter.h"
 #include "halley/graphics/material/material.h"
 #include "halley/graphics/material/material_definition.h"
 #include "halley/graphics/material/material_parameter.h"
 #include "halley/graphics/texture.h"
-#include "../../resources/resources.h"
+#include "resources/resources.h"
 
 using namespace Halley;
 

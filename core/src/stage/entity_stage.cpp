@@ -1,4 +1,4 @@
-#include "entity_stage.h"
+#include "stage/entity_stage.h"
 #include <yaml-cpp/yaml.h>
 using namespace Halley;
 

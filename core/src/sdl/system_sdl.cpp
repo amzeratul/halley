@@ -1,4 +1,4 @@
-#include "system_sdl.h"
+#include "sdl/system_sdl.h"
 #include <SDL.h>
 #include "halley/api/halley_api_internal.h"
 

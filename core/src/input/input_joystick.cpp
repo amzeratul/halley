@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 #include <SDL_joystick.h>
-#include "input_joystick.h"
+#include "input/input_joystick.h"
 using namespace Halley;
 
 

@@ -19,8 +19,8 @@
 
 \*****************************************************************/
 
-#include "input_virtual.h"
-#include "input_manual.h"
+#include "input/input_virtual.h"
+#include "input/input_manual.h"
 #include <set>
 
 using namespace Halley;

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <halley/maths/vector2d.h>
+#include <halley/maths/rect.h>
+#include <halley/maths/colour.h>
+
 namespace Halley
 {
 	class Resources;
@@ -8,6 +12,7 @@ namespace Halley
 	class Material;
 	class Texture;
 	class MaterialDefinition;
+	class Painter;
 
 	struct SpriteVertexAttrib
 	{

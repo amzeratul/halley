@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "resource_data_reader.h"
+#include "resources/resource_data_reader.h"
 #include <SDL.h>
 
 using namespace Halley;

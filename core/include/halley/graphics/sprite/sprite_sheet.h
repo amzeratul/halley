@@ -1,5 +1,12 @@
 #pragma once
 
+#include <halley/maths/vector2d.h>
+#include <halley/maths/rect.h>
+#include <map>
+#include <memory>
+#include <halley/resources/resource.h>
+#include <halley/text/halleystring.h>
+
 namespace Halley
 {
 	class Texture;

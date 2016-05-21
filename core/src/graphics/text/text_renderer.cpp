@@ -1,5 +1,5 @@
-#include "text_renderer.h"
-#include "font.h"
+#include "graphics/text/text_renderer.h"
+#include "graphics/text/font.h"
 #include "halley/graphics/painter.h"
 #include "halley/graphics/material/material.h"
 #include "halley/graphics/material/material_parameter.h"

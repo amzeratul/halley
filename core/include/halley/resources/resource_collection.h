@@ -1,8 +1,16 @@
 #pragma once
 
+#include <utility>
+#include <memory>
+#include <halley/text/halleystring.h>
+#include <halley/resources/resource_data.h>
+#include <map>
+
 namespace Halley
 {
+	class Resource;
 	class Resources;
+	class ResourceLoader;
 
 	class ResourceCollectionBase
 	{

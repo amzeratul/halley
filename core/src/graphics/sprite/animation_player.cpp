@@ -1,6 +1,6 @@
-#include "animation.h"
-#include "animation_player.h"
-#include "sprite.h"
+#include "graphics/sprite/animation.h"
+#include "graphics/sprite/animation_player.h"
+#include "graphics/sprite/sprite.h"
 
 using namespace Halley;
 

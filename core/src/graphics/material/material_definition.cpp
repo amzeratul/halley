@@ -1,4 +1,4 @@
-#include "../../resources/resources.h"
+#include "resources/resources.h"
 #include "halley/api/halley_api_internal.h"
 #include "halley/api/halley_api.h"
 #include "halley/graphics/shader.h"
@@ -46,7 +46,7 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	}
 
 	// Load passes
-	for (auto& passNode : root["passes"]) {
+	for (auto passNode : root["passes"]) {
 		loadPass(passNode.as<YAML::Node>(), [&](String path) {
 			return loader.getAPI().getResource<TextFile>("shader/" + path)->data;
 		});
@@ -93,7 +93,7 @@ void MaterialDefinition::loadPass(YAML::Node node, std::function<String(String)>
 void MaterialDefinition::loadUniforms(YAML::Node topNode)
 {
 	auto attribSeqNode = topNode.as<YAML::Node>();
-	for (auto& attribEntry : attribSeqNode) {
+	for (auto attribEntry : attribSeqNode) {
 		for (YAML::const_iterator it = attribEntry.begin(); it != attribEntry.end(); ++it) {
 			String name = it->first.as<std::string>();
 			ShaderParameterType type = parseParameterType(it->second.as<std::string>());
@@ -133,7 +133,7 @@ void MaterialDefinition::loadAttributes(YAML::Node topNode)
 	int offset = 0;
 
 	auto attribSeqNode = topNode.as<YAML::Node>();
-	for (auto& attribEntry : attribSeqNode) {
+	for (auto attribEntry : attribSeqNode) {
 		for (YAML::const_iterator it = attribEntry.begin(); it != attribEntry.end(); ++it) {
 			String name = it->first.as<std::string>();
 			ShaderParameterType type = parseParameterType(it->second.as<std::string>());

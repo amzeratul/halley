@@ -1,5 +1,5 @@
 #pragma once
-#include "../graphics/text/text_renderer.h"
+#include "graphics/text/text_renderer.h"
 
 namespace Halley
 {

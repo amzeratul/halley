@@ -19,14 +19,14 @@
 
 \*****************************************************************/
 
-#include "resource_pack.h"
+#include "resources/resource_pack.h"
 #ifdef _MSC_VER
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #endif
 #include <iostream>
 #include <SDL.h>
-#include "resource_data_reader.h"
+#include "resources/resource_data_reader.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)

@@ -1,5 +1,5 @@
-#include "sprite_painter.h"
-#include "sprite.h"
+#include "graphics/sprite/sprite_painter.h"
+#include "graphics/sprite/sprite.h"
 
 using namespace Halley;
 

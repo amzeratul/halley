@@ -1,3 +1,4 @@
+#include <cassert>
 #include "halley/graphics/render_target/render_target_texture.h"
 
 using namespace Halley;

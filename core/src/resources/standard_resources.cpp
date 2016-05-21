@@ -1,10 +1,10 @@
-#include "standard_resources.h"
-#include "resources.h"
-#include "../graphics/sprite/animation.h"
-#include "../graphics/sprite/sprite_sheet.h"
+#include "resources/standard_resources.h"
+#include "resources/resources.h"
+#include "graphics/sprite/animation.h"
+#include "graphics/sprite/sprite_sheet.h"
 #include "halley/graphics/texture.h"
 #include "halley/graphics/material/material_definition.h"
-#include "../graphics/text/font.h"
+#include "graphics/text/font.h"
 
 using namespace Halley;
 

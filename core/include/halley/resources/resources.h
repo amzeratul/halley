@@ -23,6 +23,7 @@
 
 #include <map>
 #include <ctime>
+#include <halley/support/exception.h>
 #include "resource_collection.h"
 
 namespace Halley {

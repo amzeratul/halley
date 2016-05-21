@@ -21,7 +21,7 @@
 
 #include <SDL.h>
 #include <SDL_joystick.h>
-#include "input_joystick_sdl.h"
+#include "input/input_joystick_sdl.h"
 #include <iostream>
 using namespace Halley;
 

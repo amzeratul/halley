@@ -1,8 +1,12 @@
 #pragma once
 
+#include <vector>
+#include <cstddef>
+
 namespace Halley
 {
 	class Sprite;
+	class Painter;
 
 	class SpritePainterEntry
 	{

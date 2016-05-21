@@ -1,6 +1,6 @@
-#include "resource_collection.h"
-#include "resource_locator.h"
-#include "resources.h"
+#include "resources/resource_collection.h"
+#include "resources/resource_locator.h"
+#include "resources/resources.h"
 
 using namespace Halley;
 

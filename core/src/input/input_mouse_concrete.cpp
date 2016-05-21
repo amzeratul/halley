@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 #include <SDL.h>
-#include "input_mouse_concrete.h"
+#include "input/input_mouse_concrete.h"
 
 using namespace Halley;
 

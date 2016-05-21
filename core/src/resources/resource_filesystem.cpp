@@ -21,8 +21,8 @@
 
 #include <SDL.h>
 #include <experimental/filesystem>
-#include "resource_filesystem.h"
-#include "resource_data_reader.h"
+#include "resources/resource_filesystem.h"
+#include "resources/resource_data_reader.h"
 
 using namespace Halley;
 

@@ -1,16 +1,15 @@
 #include <iostream>
 #include <fstream>
-#include "core_runner.h"
-#include "game.h"
-#include "environment.h"
-#include "halley/api/halley_api.h"
-#include "../prec.h"
-#include "halley/graphics/camera.h"
-#include "halley/graphics/render_context.h"
-#include "halley/graphics/render_target/render_target_screen.h"
-#include "../resources/resources.h"
-#include "../resources/resource_locator.h"
-#include "../resources/standard_resources.h"
+#include "core/core_runner.h"
+#include "core/game.h"
+#include "core/environment.h"
+#include "api/halley_api.h"
+#include "graphics/camera.h"
+#include "graphics/render_context.h"
+#include "graphics/render_target/render_target_screen.h"
+#include "resources/resources.h"
+#include "resources/resource_locator.h"
+#include "resources/standard_resources.h"
 
 #pragma warning(disable: 4996)
 

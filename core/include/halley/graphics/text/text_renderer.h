@@ -1,5 +1,9 @@
 #pragma once
 
+#include <memory>
+#include <halley/maths/colour.h>
+#include <halley/maths/vector2d.h>
+
 namespace Halley
 {
 	class Font;

@@ -1,14 +1,17 @@
 #pragma once
 
 #include "stage_id.h"
-#include "../resources/resources.h"
-#include "halley/api/halley_api.h"
+#include "resources/resources.h"
+#include "api/halley_api.h"
 
 namespace Halley
 {
 	class HalleyAPI;
 	class RenderContext;
 	class World;
+	class InputAPI;
+	class VideoAPI;
+	class CoreAPI;
 
 	class Stage
 	{

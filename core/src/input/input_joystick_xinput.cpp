@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "input_joystick_xinput.h"
+#include "input/input_joystick_xinput.h"
 #ifdef XINPUT_AVAILABLE
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>

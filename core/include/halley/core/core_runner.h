@@ -2,8 +2,12 @@
 
 #include <memory>
 #include <vector>
-#include "halley/api/core_api.h"
-#include "../stage/stage.h"
+#include <halley/text/halleystring.h>
+#include <halley/time/halleytime.h>
+#include <halley/time/stopwatch.h>
+#include <halley/support/redirect_stream.h>
+#include "api/core_api.h"
+#include "stage/stage.h"
 
 namespace Halley
 {

@@ -1,5 +1,6 @@
 #pragma once
 #include "halley_api_internal.h"
+#include "resources/resources.h"
 
 namespace Halley
 {

@@ -1,9 +1,9 @@
-#include "font.h"
+#include "graphics/text/font.h"
 #include "halley/graphics/material/material.h"
 #include "halley/graphics/material/material_definition.h"
 #include "halley/graphics/material/material_parameter.h"
 #include "halley/api/halley_api.h"
-#include "../../resources/resources.h"
+#include "resources/resources.h"
 #include <yaml-cpp/yaml.h>
 
 using namespace Halley;
@@ -45,7 +45,7 @@ Font::Font(ResourceLoader& loader)
 	(*material)["tex0"] = texture;
 
 	auto glyphsNode = root["glyphs"];
-	for (auto& node: glyphsNode) {
+	for (auto node: glyphsNode) {
 		int code = node["code"].as<int>();
 		auto bearingNode = node["bearing"];
 		auto advanceNode = node["advance"];

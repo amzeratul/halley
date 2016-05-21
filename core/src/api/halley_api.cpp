@@ -1,7 +1,7 @@
-#include "halley/api/halley_api.h"
-#include "halley/api/halley_api_internal.h"
-#include "../sdl/system_sdl.h"
-#include "../input/input.h"
+#include <utility>
+#include "api/halley_api.h"
+#include "sdl/system_sdl.h"
+#include "input/input.h"
 
 using namespace Halley;
 

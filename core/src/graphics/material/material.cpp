@@ -1,3 +1,4 @@
+#include <halley/support/exception.h>
 #include "halley/graphics/material/material.h"
 #include "halley/graphics/material/material_definition.h"
 #include "halley/graphics/material/material_parameter.h"

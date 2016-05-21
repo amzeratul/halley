@@ -1,5 +1,7 @@
 #pragma once
 
+#include <halley/text/halleystring.h>
+
 namespace Halley
 {
 	class Environment

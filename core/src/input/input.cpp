@@ -19,11 +19,11 @@
 
 \*****************************************************************/
 
-#include "input.h"
-#include "input_joystick_sdl.h"
-#include "input_mouse_concrete.h"
-#include "input_keyboard_concrete.h"
-#include "input_touch.h"
+#include "input/input.h"
+#include "input/input_joystick_sdl.h"
+#include "input/input_mouse_concrete.h"
+#include "input/input_keyboard_concrete.h"
+#include "input/input_touch.h"
 #include <SDL.h>
 
 #ifdef _MSC_VER

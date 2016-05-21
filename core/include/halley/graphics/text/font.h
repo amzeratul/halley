@@ -1,7 +1,9 @@
 #pragma once
 
 #include "halley/graphics/texture.h"
-#include "../sprite/sprite.h"
+#include "graphics/sprite/sprite.h"
+#include <map>
+#include <memory>
 
 namespace Halley
 {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <halley/maths/vector2d.h>
+
 namespace Halley
 {
 	enum class TextureFormat

@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 #include <SDL.h>
-#include "input_keys.h"
+#include "input/input_keys.h"
 
 Halley::String Halley::Keys::getName(Key key)
 {

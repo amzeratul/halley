@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "input_button_base.h"
+#include "input/input_button_base.h"
 
 using namespace Halley;
 

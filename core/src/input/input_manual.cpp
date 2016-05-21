@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "input_manual.h"
+#include "input/input_manual.h"
 
 
 Halley::InputManual::InputManual(int nButtons, int nAxes)

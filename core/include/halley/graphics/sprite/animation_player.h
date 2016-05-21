@@ -1,6 +1,7 @@
 #pragma once
 #include "animation.h"
 #include "sprite_sheet.h"
+#include <halley/time/halleytime.h>
 
 namespace Halley
 {

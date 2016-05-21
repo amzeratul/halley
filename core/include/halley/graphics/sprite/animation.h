@@ -1,5 +1,9 @@
 #pragma once
 
+#include <halley/text/halleystring.h>
+#include <memory>
+#include <halley/resources/resource.h>
+
 namespace Halley
 {
 	class ResourceLoader;

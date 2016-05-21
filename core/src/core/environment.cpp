@@ -1,4 +1,5 @@
-#include "environment.h"
+#include <halley/os/os.h>
+#include "core/environment.h"
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../core/include/halley_core.h"
-#include "../core/include/halley_main.h"
+#include "../core/include/halley/halley_core.h"
+#include "../core/include/halley/halley_main.h"
 #include "../entity/include/halley/halley_entity.h"
 #include "../utils/include/halley/halley_utils.h"
 

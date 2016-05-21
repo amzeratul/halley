@@ -19,9 +19,9 @@
 
 \*****************************************************************/
 
-#include "../core/environment.h"
-#include "resource_locator.h"
-#include "resource_filesystem.h"
+#include "core/environment.h"
+#include "resources/resource_locator.h"
+#include "resources/resource_filesystem.h"
 #include <iostream>
 #include <set>
 

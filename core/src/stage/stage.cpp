@@ -1,4 +1,4 @@
-#include "stage.h"
+#include "stage/stage.h"
 
 using namespace Halley;
 
