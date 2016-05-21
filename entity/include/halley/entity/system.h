@@ -80,4 +80,4 @@ namespace Halley {
 
 }
 
-#define REGISTER_SYSTEM(sys) Halley::System* halleyCreate##sys##() { return new sys(); }
+#define REGISTER_SYSTEM(sys) Halley::System* halleyCreate##sys () { return new sys(); }

@@ -13,7 +13,7 @@ set (${PROJECT_NAME}_sources
 		"src/systems/time_system.cpp"
 		)
 
-include_directories("../../include" "../../core/include" "../../entity/include" "../../utils/include" "../../opengl/include")
+include_directories("gen/cpp" "../../include" "../../core/include" "../../entity/include" "../../utils/include" "../../opengl/include")
 
 #add_precompiled_header(${PROJECT_NAME} src/prec.h FORCEINCLUDE)
 
@@ -34,6 +34,7 @@ endfunction(assign_source_group)
 #assign_source_group(${${PROJECT_NAME}_sources})
 #assign_source_group(${${PROJECT_NAME}_headers})
 
+add_custom_target(codegen ALL ${CMAKE_HOME_DIRECTORY}/bin64/halley-cmd codegen gen_src gen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_executable (${PROJECT_NAME} ${${PROJECT_NAME}_sources})
 #target_link_libraries(${PROJECT_NAME} halley-core)
 
