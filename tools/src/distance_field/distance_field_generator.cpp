@@ -1,5 +1,6 @@
 #include "distance_field_generator.h"
 #include <cassert>
+#include <halley/file_formats/image.h>
 
 using namespace Halley;
 

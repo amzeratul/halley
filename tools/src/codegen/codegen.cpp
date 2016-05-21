@@ -2,6 +2,8 @@
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <sstream>
+#include <iostream>
+#include <halley/support/exception.h>
 #include "codegen.h"
 #include "component_schema.h"
 #include "system_schema.h"

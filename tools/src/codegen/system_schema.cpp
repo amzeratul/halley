@@ -1,4 +1,5 @@
 #include <yaml-cpp/yaml.h>
+#include <halley/support/exception.h>
 #include "system_schema.h"
 
 using namespace Halley;
@@ -59,7 +60,7 @@ SystemSchema::SystemSchema(YAML::Node node)
 
 	if (node["access"].IsDefined()) {
 		int accessValue = 0;
-		for(auto& accessOpt : node["access"]) {
+		for(auto accessOpt : node["access"]) {
 			String name = accessOpt.as<std::string>();
 			if (name == "api") {
 				accessValue |= int(SystemAccess::API);

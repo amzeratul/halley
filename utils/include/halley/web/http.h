@@ -21,10 +21,9 @@
 
 #pragma once
 
-#include "../text/halleystring.h"
-//#include "halley_config.h"
-
 #ifdef WITH_BOOST_ASIO
+
+#include "../text/halleystring.h"
 
 namespace Halley {
 	class HTTPPostEntry {

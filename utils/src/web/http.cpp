@@ -19,10 +19,11 @@
 
 \*****************************************************************/
 
-#include "../../include/halley/web/http.h"
-using namespace Halley;
+#include "halley/web/http.h"
 
 #ifdef WITH_BOOST_ASIO
+
+using namespace Halley;
 
 #ifdef _MSC_VER
 #pragma warning(disable: 6386 6258 6309 6387 4913)

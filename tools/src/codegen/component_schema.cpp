@@ -9,7 +9,7 @@ ComponentSchema::ComponentSchema(YAML::Node node)
 {
 	name = node["component"].as<std::string>();
 
-	for (auto& memberEntry : node["members"]) {
+	for (auto memberEntry : node["members"]) {
 		for (auto m = memberEntry.begin(); m != memberEntry.end(); ++m) {
 			members.emplace_back(VariableSchema(TypeSchema(m->second.as<std::string>()), m->first.as<std::string>()));
 		}

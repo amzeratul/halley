@@ -1,3 +1,6 @@
+#include <halley/text/halleystring.h>
+#include <halley/resources/resource_data.h>
+#include <halley/file_formats/image.h>
 #include "distance_field_tool.h"
 #include "distance_field_generator.h"
 
