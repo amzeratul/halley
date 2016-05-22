@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 3.0)
 
 project (halley-sample-test)
 
@@ -31,14 +31,15 @@ function(assign_source_group)
 	endforeach()
 endfunction(assign_source_group)
 
-#assign_source_group(${${PROJECT_NAME}_sources})
-#assign_source_group(${${PROJECT_NAME}_headers})
+assign_source_group(${${PROJECT_NAME}_sources})
+assign_source_group(${${PROJECT_NAME}_headers})
 
 find_package(SDL2 REQUIRED)
 find_package(YamlCpp REQUIRED)
 
-include_directories("gen/cpp" "../../include" "../../core/include" "../../entity/include" "../../utils/include" "../../opengl/include" ${SDL_INCLUDE_DIR} ${YAMLCPP_INCLUDE_DIR})
+include_directories("gen/cpp" "../../include" "../../core/include" "../../entity/include" "../../utils/include" "../../opengl/include" ${YAMLCPP_INCLUDE_DIR})
 
+# Run codegen
 add_custom_target(codegen ALL ${CMAKE_HOME_DIRECTORY}/bin64/halley-cmd codegen gen_src gen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_dependencies(codegen halley-cmd)
 

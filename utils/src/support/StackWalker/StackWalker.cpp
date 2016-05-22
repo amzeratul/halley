@@ -42,7 +42,7 @@
  *                       http://www.codeproject.com/KB/threads/StackWalker.aspx?msg=2822736#xx2822736xx
  *  2009-04-10   v9      License slihtly corrected (<ORGANIZATION> replaced)
  *  2010-04-15   v10     Added support for VS2010 RTM
- *  2010-05-2ß   v11     Now using secure MyStrcCpy. Thanks to luke.simon:
+ *  2010-05-2ï¿½   v11     Now using secure MyStrcCpy. Thanks to luke.simon:
  *                       http://www.codeproject.com/KB/applications/leakfinder.aspx?msg=3477467#xx3477467xx
  *
  * LICENSE (http://www.opensource.org/licenses/bsd-license.php)
@@ -73,6 +73,9 @@
  *   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  **********************************************************************/
+
+#ifdef _WIN32
+
 #include <windows.h>
 #include <tchar.h>
 #include <stdio.h>
@@ -661,7 +664,7 @@ private:
     pGMI = (tGMI) GetProcAddress( hPsapi, "GetModuleInformation" );
     if ( (pEPM == NULL) || (pGMFNE == NULL) || (pGMBN == NULL) || (pGMI == NULL) )
     {
-      // we couldn´t find all functions
+      // we couldnï¿½t find all functions
       FreeLibrary(hPsapi);
       return FALSE;
     }
@@ -1346,3 +1349,5 @@ void StackWalker::OnOutput(LPCSTR buffer)
 {
   OutputDebugStringA(buffer);
 }
+
+#endif
