@@ -30,7 +30,7 @@ set (${PROJECT_NAME}_headers
 		"gen/cpp/systems/time_system.h"
 		)
 
-#add_precompiled_header(${PROJECT_NAME} src/prec.h FORCEINCLUDE)
+add_precompiled_header(${PROJECT_NAME} prec.h FORCEINCLUDE)
 
 # From http://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake
 function(assign_source_group)
@@ -46,6 +46,12 @@ function(assign_source_group)
 	endforeach()
 endfunction(assign_source_group)
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+	set(EXTRA_LIBS)
+else()
+	set(EXTRA_LIBS stdc++fs pthread)
+endif()
+
 assign_source_group(${${PROJECT_NAME}_sources})
 assign_source_group(${${PROJECT_NAME}_headers})
 
@@ -59,7 +65,7 @@ add_custom_target(codegen ALL ${CMAKE_HOME_DIRECTORY}/bin64/halley-cmd codegen g
 add_dependencies(codegen halley-cmd)
 
 add_executable (${PROJECT_NAME} ${${PROJECT_NAME}_sources} ${${PROJECT_NAME}_headers})
-target_link_libraries(${PROJECT_NAME} halley-core halley-utils halley-opengl halley-entity ${SDL2_LIBRARIES} ${YAMLCPP_LIBRARY} stdc++fs pthread)
+target_link_libraries(${PROJECT_NAME} halley-core halley-utils halley-opengl halley-entity ${SDL2_LIBRARIES} ${YAMLCPP_LIBRARY} ${EXTRA_LIBS})
 
 install(TARGETS ${PROJECT_NAME}
 		RUNTIME DESTINATION ${CMAKE_HOME_DIRECTORY}/bin64
