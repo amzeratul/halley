@@ -26,7 +26,7 @@ void VideoOpenGL::deInit()
 	}
 
 	SDL_GL_MakeCurrent(window, nullptr);
-	//SDL_GL_DeleteContext(context); // This crashes Linux and Mac OS X, and I have no idea why
+	SDL_GL_DeleteContext(context);
 	SDL_DestroyWindow(window);
 	SDL_VideoQuit();
 
@@ -191,7 +191,7 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 		std::cout << "\tExtensions: " << ConsoleColor(Console::DARK_GREY);
 		int nExtensions;
 		glGetIntegerv(GL_NUM_EXTENSIONS, &nExtensions);
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < nExtensions; i++) {
 			String str = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
 			std::cout << str << " ";
 		}
