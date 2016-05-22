@@ -26,7 +26,7 @@ void VideoOpenGL::deInit()
 	}
 
 	SDL_GL_MakeCurrent(window, nullptr);
-	SDL_GL_DeleteContext(context);
+	//SDL_GL_DeleteContext(context); // This crashes Linux and Mac OS X, and I have no idea why
 	SDL_DestroyWindow(window);
 	SDL_VideoQuit();
 
