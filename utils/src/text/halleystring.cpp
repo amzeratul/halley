@@ -39,7 +39,7 @@ String::String()
 
 
 String::String(const char* utf8)
-: str(utf8)
+: str(utf8 ? utf8 : "")
 {
 }
 
