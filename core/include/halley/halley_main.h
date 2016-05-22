@@ -2,7 +2,7 @@
 
 namespace Halley {} // Get GitHub to realise this is C++ :3
 
-#include "halley_core.h"
+#include "halley/core/halley_core.h"
 //#include <SDL_main.h>
 #include "main_wrapper.h"
 

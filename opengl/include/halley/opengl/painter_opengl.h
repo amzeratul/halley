@@ -1,6 +1,6 @@
 #pragma once
 
-#include "halley/graphics/painter.h"
+#include "halley/core/graphics/painter.h"
 #include "halley_gl.h"
 
 namespace Halley

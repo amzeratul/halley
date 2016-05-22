@@ -2,7 +2,7 @@
 #include "halley/support/exception.h"
 #include "halley_gl.h"
 #include "texture_opengl.h"
-#include "halley/graphics/texture_descriptor.h"
+#include "halley/core/graphics/texture_descriptor.h"
 
 using namespace Halley;
 

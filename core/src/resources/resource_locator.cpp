@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "core/environment.h"
+#include "halley/core/game/environment.h"
 #include "resources/resource_locator.h"
 #include "resources/resource_filesystem.h"
 #include <iostream>

@@ -1,5 +1,5 @@
-#include "halley/graphics/render_context.h"
-#include "halley/graphics/render_target/render_target.h"
+#include "halley/core/graphics/render_context.h"
+#include "halley/core/graphics/render_target/render_target.h"
 
 using namespace Halley;
 

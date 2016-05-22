@@ -1,6 +1,6 @@
-#include "halley/graphics/texture.h"
-#include "halley/api/halley_api.h"
-#include "halley/graphics/texture_descriptor.h"
+#include "halley/core/graphics/texture.h"
+#include "halley/core/api/halley_api.h"
+#include "halley/core/graphics/texture_descriptor.h"
 
 using namespace Halley;
 

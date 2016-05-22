@@ -23,7 +23,7 @@
 
 #include "json_forward.h"
 #include <memory>
-#include "../text/halleystring.h"
+#include "halley/text/halleystring.h"
 
 namespace Halley {
 	class JSONFile {

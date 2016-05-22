@@ -1,5 +1,5 @@
 #include <halley/os/os.h>
-#include "core/environment.h"
+#include "halley/core/game/environment.h"
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>

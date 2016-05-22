@@ -1,5 +1,5 @@
 #pragma once
-#include "../resources/resource.h"
+#include "halley/resources/resource.h"
 #include <memory>
 
 namespace YAML

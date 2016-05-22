@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "../text/halleystring.h"
-#include "../maths/vector2d.h"
-#include "../maths/vector3d.h"
-#include "../maths/colour.h"
+#include "halley/text/halleystring.h"
+#include "halley/maths/vector2d.h"
+#include "halley/maths/vector3d.h"
+#include "halley/maths/colour.h"
 
 namespace Halley {
 

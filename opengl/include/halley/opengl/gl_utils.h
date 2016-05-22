@@ -25,7 +25,7 @@
 #include "halley/maths/rect.h"
 #include "halley/maths/colour.h"
 #include "halley_gl.h"
-#include <halley/graphics/blend.h>
+#include <halley/core/graphics/blend.h>
 
 namespace Halley {
 

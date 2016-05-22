@@ -1,7 +1,7 @@
 #pragma once
 
 #include "dynamic_grid.h"
-#include "../maths/rect.h"
+#include "halley/maths/rect.h"
 #include <map>
 #include <vector>
 

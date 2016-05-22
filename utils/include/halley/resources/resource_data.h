@@ -21,7 +21,7 @@ This file is subject to the terms of halley_license.txt.
 
 #pragma once
 
-#include "../text/halleystring.h"
+#include "halley/text/halleystring.h"
 #include <memory>
 #include <functional>
 

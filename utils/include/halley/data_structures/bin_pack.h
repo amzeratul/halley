@@ -1,6 +1,6 @@
 #pragma once
-#include "../maths/vector2d.h"
-#include "../maths/rect.h"
+#include "halley/maths/vector2d.h"
+#include "halley/maths/rect.h"
 #include "maybe.h"
 
 namespace Halley

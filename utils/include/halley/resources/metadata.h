@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../text/halleystring.h"
+#include "halley/text/halleystring.h"
 #include <memory>
 
 namespace YAML

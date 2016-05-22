@@ -1,6 +1,6 @@
 #pragma once
 
-#include "halley/halley_core.h"
+#include "halley/core/halley_core.h"
 #include "halley/halley_main.h"
 #include "halley/halley_entity.h"
 #include "halley/halley_utils.h"

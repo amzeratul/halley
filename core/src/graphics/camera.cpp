@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "halley/graphics/camera.h"
+#include "halley/core/graphics/camera.h"
 
 using namespace Halley;
 

@@ -1,8 +1,8 @@
 #include "utils/world_stats.h"
-#include "halley/graphics/render_context.h"
+#include "halley/core/graphics/render_context.h"
 #include "graphics/text/font.h"
 #include "resources/resources.h"
-#include "halley/api/core_api.h"
+#include "halley/core/api/core_api.h"
 #include <halley/entity/world.h>
 #include <halley/entity/system.h>
 

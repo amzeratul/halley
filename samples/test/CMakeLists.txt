@@ -40,6 +40,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
 find_Package(SDL2 REQUIRED)
 
 add_custom_target(codegen ALL ${CMAKE_HOME_DIRECTORY}/bin64/halley-cmd codegen gen_src gen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+add_dependencies(codegen halley-cmd)
+
 add_executable (${PROJECT_NAME} ${${PROJECT_NAME}_sources})
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} halley-core halley-utils halley-opengl halley-entity yaml-cpp stdc++fs pthread)
 

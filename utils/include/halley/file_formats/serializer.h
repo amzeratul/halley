@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../maths/utils.h"
+#include "halley/maths/utils.h"
 #include <vector>
 
 namespace Halley {

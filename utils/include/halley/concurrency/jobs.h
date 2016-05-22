@@ -23,7 +23,7 @@
 
 #include <queue>
 #include "concurrent.h"
-#include "../data_structures/maybe.h"
+#include "halley/data_structures/maybe.h"
 
 namespace Halley {
 	typedef long long PriorityType;

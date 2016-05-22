@@ -1,4 +1,4 @@
-#include "distance_field/distance_field_generator.h"
+#include "halley/tools/distance_field/distance_field_generator.h"
 #include <cassert>
 #include <halley/file_formats/image.h>
 

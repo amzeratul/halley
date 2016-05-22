@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include "core/core_runner.h"
-#include "core/game.h"
-#include "core/environment.h"
+#include "halley/core/game/core_runner.h"
+#include "halley/core/game/game.h"
+#include "halley/core/game/environment.h"
 #include "api/halley_api.h"
 #include "graphics/camera.h"
 #include "graphics/render_context.h"

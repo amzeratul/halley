@@ -1,7 +1,7 @@
 #pragma once
-#include "../text/halleystring.h"
+#include "halley/text/halleystring.h"
 #include <memory>
-#include "../resources/resource.h"
+#include "halley/resources/resource.h"
 
 namespace Halley
 {

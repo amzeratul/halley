@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "../text/halleystring.h"
+#include "halley/text/halleystring.h"
 
 namespace Halley {
 	class ComputerData {

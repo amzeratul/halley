@@ -1,6 +1,6 @@
 struct SDL_Window;
 
-#include "halley/api/halley_api_internal.h"
+#include "halley/core/api/halley_api_internal.h"
 
 namespace Halley {
 	class VideoOpenGL final : public VideoAPIInternal

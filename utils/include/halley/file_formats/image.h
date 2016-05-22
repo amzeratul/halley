@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "../maths/vector2d.h"
-#include "../text/halleystring.h"
-#include "../resources/resource.h"
+#include "halley/maths/vector2d.h"
+#include "halley/text/halleystring.h"
+#include "halley/resources/resource.h"
 
 namespace Halley {
 	class ResourceDataStatic;

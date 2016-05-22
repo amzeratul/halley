@@ -1,4 +1,4 @@
-#include "halley/graphics/texture_descriptor.h"
+#include "halley/core/graphics/texture_descriptor.h"
 
 int Halley::TextureDescriptor::getBitsPerPixel(TextureFormat format)
 {

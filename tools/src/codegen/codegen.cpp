@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <halley/support/exception.h>
-#include "codegen/codegen.h"
+#include "halley/tools/codegen/codegen.h"
 #include "component_schema.h"
 #include "system_schema.h"
 #include "message_schema.h"

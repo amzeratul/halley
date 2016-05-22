@@ -1,10 +1,10 @@
 #include "resources/resources.h"
-#include "halley/api/halley_api_internal.h"
-#include "halley/api/halley_api.h"
-#include "halley/graphics/shader.h"
-#include "halley/graphics/painter.h"
-#include "halley/graphics/material/material_definition.h"
-#include "halley/graphics/material/material_parameter.h"
+#include "halley/core/api/halley_api_internal.h"
+#include "halley/core/api/halley_api.h"
+#include "halley/core/graphics/shader.h"
+#include "halley/core/graphics/painter.h"
+#include "halley/core/graphics/material/material_definition.h"
+#include "halley/core/graphics/material/material_parameter.h"
 #include <yaml-cpp/yaml.h>
 
 using namespace Halley;

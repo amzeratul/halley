@@ -1,6 +1,6 @@
 #include "graphics/sprite/sprite_sheet.h"
-#include "halley/graphics/texture.h"
-#include "halley/api/halley_api.h"
+#include "halley/core/graphics/texture.h"
+#include "halley/core/api/halley_api.h"
 #include "resources/resources.h"
 #include "halley/file_formats/json/json.h"
 
