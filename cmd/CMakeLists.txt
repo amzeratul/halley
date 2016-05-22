@@ -1,11 +1,10 @@
 project (halley-cmd)
 
 find_Package(Freetype REQUIRED)
-include_directories("../tools/include" "../utils/include")
+find_package(YamlCpp REQUIRED)
+include_directories(${FREETYPE_INCLUDE_DIR} ${YAMLCPP_INCLUDE_DIR} "../tools/include" "../utils/include")
 
-set(SOURCES
-        "src/main.cpp"
-        )
+set(SOURCES "src/main.cpp")
 
 add_executable (halley-cmd ${SOURCES})
-target_link_libraries (halley-cmd halley-tools halley-utils ${FREETYPE_LIBRARIES} yaml-cpp stdc++fs pthread)
+target_link_libraries (halley-cmd halley-tools halley-utils ${FREETYPE_LIBRARIES} ${YAMLCPP_LIBRARY} stdc++fs pthread)

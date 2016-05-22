@@ -1,11 +1,9 @@
 project (halley-opengl)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
-
 find_Package(SDL2 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-include_directories(${SDL2_INCLUDE_DIR} "include/halley/opengl" "../utils/include" "../core/include")
+include_directories(${SDL2_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIR} "include/halley/opengl" "../utils/include" "../core/include")
 
 set(SOURCES
         "src/gl_utils.cpp"

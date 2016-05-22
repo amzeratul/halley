@@ -1,12 +1,7 @@
 project (halley-utils)
 
-find_package(Boost)
-if (Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIR})
-    add_definitions("-DHAS_BOOST")
-endif ()
-
-include_directories("include")
+find_package(Boost REQUIRED)
+include_directories("include" ${Boost_INCLUDE_DIR})
 
 set(SOURCES
         "src/concurrency/concurrent.cpp"
