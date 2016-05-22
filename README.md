@@ -1,5 +1,8 @@
 ![Halley Logo](http://higherorderfun.com/stuff/halley/halley_scarlet.png)
 
+[![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
+[![Standard](https://img.shields.io/badge/c%2B%2B-14-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B14)
+
 # Halley Game Engine
 A lightweight game engine written in C++14. I'm currently re-architecting the whole engine, while experimenting with some crazy ideas, so it's not usable at all right now (some basic components, such as input, are not there at all).
 
