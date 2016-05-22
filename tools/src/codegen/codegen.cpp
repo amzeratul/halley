@@ -1,4 +1,4 @@
-#include <experimental/filesystem>
+#include <boost/filesystem.hpp>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <sstream>
@@ -35,7 +35,7 @@ void Codegen::run(String inDir, String outDir)
 
 void Codegen::loadSources(String directory)
 {
-	using namespace std::experimental::filesystem;
+	using namespace boost::filesystem;
 	path p(directory.cppStr());
 	if (exists(p) && is_directory(p)) {
 		for (auto i = directory_iterator(p); i != directory_iterator(); ++i) {
@@ -99,7 +99,7 @@ void Codegen::process()
 
 bool Codegen::writeFile(String dstPath, const char* data, size_t dataSize)
 {
-	using namespace std::experimental::filesystem;
+	using namespace boost::filesystem;
 	path filePath(dstPath.cppStr());
 	if (exists(filePath) && file_size(filePath) == dataSize) {
 		// Size matches, check if contents are identical
@@ -137,7 +137,7 @@ bool Codegen::writeFile(String dstPath, const char* data, size_t dataSize)
 
 void Codegen::writeFiles(String directory, const CodeGenResult& files, Stats& stats)
 {
-	using namespace std::experimental::filesystem;
+	using namespace boost::filesystem;
 
 	path dir(directory.cppStr());
 	if (!exists(dir)) {
@@ -199,7 +199,7 @@ void Codegen::generateCode(String directory)
 	std::cout << "Codegen: " << stats.written << " written, " << stats.skipped << " skipped." << std::endl;
 }
 
-void Codegen::addSource(std::experimental::filesystem::path path)
+void Codegen::addSource(boost::filesystem::path path)
 {
 	std::vector<YAML::Node> documents;
 	

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <experimental/filesystem>
+#include <boost/filesystem.hpp>
 #include <map>
 #include "../../../../src/codegen/icode_generator.h"
 
@@ -34,7 +34,7 @@ namespace Halley
 		void generateCode(String directory);
 
 	private:
-		void addSource(std::experimental::filesystem::path path);
+		void addSource(boost::filesystem::path path);
 		void addComponent(YAML::Node rootNode);
 		void addSystem(YAML::Node rootNode);
 		void addMessage(YAML::Node rootNode);

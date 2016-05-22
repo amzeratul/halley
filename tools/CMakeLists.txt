@@ -1,7 +1,8 @@
 project (halley-tools)
 
 find_Package(Freetype REQUIRED)
-include_directories(${FREETYPE_INCLUDE_DIRS} "include" "../utils/include")
+find_package(Boost COMPONENTS system filesystem REQUIRED)
+include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../utils/include")
 
 set(SOURCES
         "src/codegen/cpp/codegen_cpp.cpp"
