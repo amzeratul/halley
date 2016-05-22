@@ -27,7 +27,7 @@
 #include <SDL.h>
 
 #ifdef _MSC_VER
-#include "input_joystick_xinput.h"
+#include "input/input_joystick_xinput.h"
 #endif
 
 using namespace Halley;

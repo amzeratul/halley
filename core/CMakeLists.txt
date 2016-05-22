@@ -1,7 +1,5 @@
 project (halley-core)
 
-find_Package(SDL2 REQUIRED)
-find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../entity/include")
 
 set(SOURCES

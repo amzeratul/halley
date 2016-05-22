@@ -21,7 +21,9 @@
 
 #include "resources/resource_data_reader.h"
 #include <SDL.h>
+#include <SDL_rwops.h>
 #include <cassert>
+#include <algorithm>
 
 using namespace Halley;
 

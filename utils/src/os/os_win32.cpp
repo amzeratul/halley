@@ -21,7 +21,7 @@
 
 #include <iostream>
 #ifdef _WIN32
-#include "../support/exception.h"
+#include "halley/support/exception.h"
 
 #pragma warning(disable: 6387)
 #include "os_win32.h"
@@ -157,7 +157,7 @@ BOOL CALLBACK onMonitorInfo(HMONITOR /*hMonitor*/, HDC /*hdcMonitor*/, LPRECT lp
 void Halley::OSWin32::createLogConsole(String winTitle)
 {
 	AllocConsole();
-	SetConsoleTitle(winTitle.getUTF16().c_str());
+	SetConsoleTitle(winTitle.c_str());
 
 	int hConHandle;
 	intptr_t lStdHandle;

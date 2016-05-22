@@ -1,6 +1,5 @@
 project (halley-utils)
 
-find_package(Boost REQUIRED)
 include_directories("include" ${Boost_INCLUDE_DIR})
 
 set(SOURCES

@@ -1,7 +1,5 @@
 project (halley-tools)
 
-find_Package(Freetype REQUIRED)
-find_package(Boost COMPONENTS system filesystem REQUIRED)
 include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../utils/include")
 
 set(SOURCES

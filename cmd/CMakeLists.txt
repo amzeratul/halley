@@ -1,8 +1,5 @@
 project (halley-cmd)
 
-find_Package(Freetype REQUIRED)
-find_package(YamlCpp REQUIRED)
-find_package(Boost COMPONENTS system filesystem REQUIRED)
 include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} ${YAMLCPP_INCLUDE_DIR} "../tools/include" "../utils/include")
 
 set(SOURCES "src/main.cpp")

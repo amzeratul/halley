@@ -30,7 +30,7 @@ set (${PROJECT_NAME}_headers
 		"gen/cpp/systems/time_system.h"
 		)
 
-add_precompiled_header(${PROJECT_NAME} prec.h FORCEINCLUDE)
+#add_precompiled_header(${PROJECT_NAME} prec.h FORCEINCLUDE)
 
 # From http://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake
 function(assign_source_group)
@@ -46,18 +46,8 @@ function(assign_source_group)
 	endforeach()
 endfunction(assign_source_group)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-	set(EXTRA_LIBS)
-else()
-	set(EXTRA_LIBS pthread)
-endif()
-
 assign_source_group(${${PROJECT_NAME}_sources})
 assign_source_group(${${PROJECT_NAME}_headers})
-
-find_package(SDL2 REQUIRED)
-find_package(YamlCpp REQUIRED)
-find_package(Boost COMPONENTS system filesystem REQUIRED)
 
 include_directories("gen/cpp" "../../include" "../../core/include" "../../entity/include" "../../utils/include" "../../opengl/include" ${YAMLCPP_INCLUDE_DIR})
 
