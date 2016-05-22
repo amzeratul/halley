@@ -2,7 +2,7 @@
 #include "halley/tools/distance_field/distance_field_generator.h"
 #include <yaml-cpp/yaml.h>
 #include <fstream>
-#include <experimental/filesystem>
+#include <boost/filesystem.hpp>
 #include <halley/data_structures/bin_pack.h>
 #include <halley/file_formats/image.h>
 #include <future>
@@ -140,7 +140,7 @@ int MakeFontTool::run(std::vector<std::string> args)
 	}
 	std::cout << " Done." << std::endl;
 
-	using std::experimental::filesystem::path;
+	using boost::filesystem::path;
 	path target = args[1];
 	String fileName = target.filename().string();
 	String dir = target.parent_path().string();
