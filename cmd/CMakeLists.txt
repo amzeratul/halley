@@ -7,10 +7,10 @@ include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} ${YAMLCPP_INCLU
 
 set(SOURCES "src/main.cpp")
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    set(EXTRA_LIBS)
-else()
-    set(EXTRA_LIBS pthread bz2 z)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(EXTRA_LIBS bz2 z)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    set(EXTRA_LIBS pthread)
 endif()
 
 add_executable (halley-cmd ${SOURCES})
