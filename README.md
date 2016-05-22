@@ -32,9 +32,9 @@ Halley is divided in a few sub-projects:
 ### Tools
 * CMake 3.x
 * C++14 capable compiler:
-** Visual C++ 14 Update 2 (Visual Studio 2015)
-** Clang 3.5
-** GCC 5.0
+  * Visual C++ 14 Update 2 (Visual Studio 2015)
+  * Clang 3.5
+  * GCC 5.0
 
 ### Dependencies
 * Boost 1.59.0 (Can we get rid of this? Only two files in Utils use it)
