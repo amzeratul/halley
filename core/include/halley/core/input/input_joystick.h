@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <functional>
 #include "input_button_base.h"
 
 #ifdef _MSC_VER

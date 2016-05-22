@@ -1,4 +1,5 @@
 #include <cstring>
+#include <string>
 #include "halley/file_formats/serializer.h"
 using namespace Halley;
 

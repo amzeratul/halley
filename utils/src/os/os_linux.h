@@ -29,7 +29,8 @@
 namespace Halley {
 	class OSLinux : public OSUnix {
 	public:
-		virtual String getUserDataDir();
+		virtual String getUserDataDir() override;
+		virtual ComputerData getComputerData() override;
 	};
 }
 

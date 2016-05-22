@@ -1,5 +1,6 @@
 #include <halley/os/os.h>
 #include "halley/core/game/environment.h"
+#include <iostream>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -26,8 +27,8 @@ void Halley::Environment::parseProgramPath(String path)
 	instance->programPath = path.left(last);
 
 #ifdef __APPLE__
-	std::cout << "Setting CWD to " << programPath << std::endl;
-	chdir(programPath.c_str());
+	std::cout << "Setting CWD to " << instance->programPath << std::endl;
+	chdir(instance->programPath.c_str());
 #endif	
 
 #ifdef __ANDROID__

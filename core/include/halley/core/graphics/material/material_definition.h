@@ -1,6 +1,7 @@
 #pragma once
 #include "halley/core/graphics/blend.h"
 #include "halley/resources/resource.h"
+#include <functional>
 
 namespace YAML
 {
