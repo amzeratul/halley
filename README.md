@@ -30,8 +30,11 @@ Halley is divided in a few sub-projects:
 ## Installation
 
 ### Tools
-* Visual C++ 14 Update 2 (Visual Studio 2015)
 * CMake 3.x
+* C++14 capable compiler:
+** Visual C++ 14 Update 2 (Visual Studio 2015)
+** Clang 3.5
+** GCC 5.0
 
 ### Dependencies
 * Boost 1.59.0 (Can we get rid of this? Only two files in Utils use it)
@@ -41,7 +44,4 @@ Halley is divided in a few sub-projects:
 * Freetype 2.6.3
 
 ### Set up
-* Make sure that all dependencies are installed and accessible to the compiler
-* Add [repo]/include, [repo]/lib/x64 and [repo]/bin64 to your global include, library and executable lookup paths, respectively.
-* Open halley.sln [Soon CMake will replace this]
-* Compile!
+* Run CMake
