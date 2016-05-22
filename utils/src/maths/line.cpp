@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "../../include/halley/maths/line.h"
+#include "halley/maths/line.h"
 
 using namespace Halley;
 

@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "../../include/halley/data_structures/highscore.h"
+#include "halley/data_structures/highscore.h"
 using namespace Halley;
 
 

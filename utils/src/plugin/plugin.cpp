@@ -1,4 +1,4 @@
-#include "../../include/halley/plugin/plugin.h"
+#include "halley/plugin/plugin.h"
 #include <map>
 #include <iostream>
 

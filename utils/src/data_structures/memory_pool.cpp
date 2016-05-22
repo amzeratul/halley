@@ -1,5 +1,5 @@
 #include <boost/pool/pool.hpp>
-#include "../../include/halley/data_structures/memory_pool.h"
+#include "halley/data_structures/memory_pool.h"
 
 using namespace Halley;
 

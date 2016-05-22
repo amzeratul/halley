@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 
-#include "../../include/halley/maths/polygon.h"
+#include "halley/maths/polygon.h"
 #include <float.h>
 using namespace Halley;
 

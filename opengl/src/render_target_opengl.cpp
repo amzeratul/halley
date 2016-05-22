@@ -1,6 +1,6 @@
-#include "../../utils/include/halley/support/debug.h"
+#include "halley/support/debug.h"
 #include <map>
-#include "../../utils/include/halley/support/exception.h"
+#include "halley/support/exception.h"
 #include "render_target_opengl.h"
 
 using namespace Halley;

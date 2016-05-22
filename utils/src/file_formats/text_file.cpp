@@ -1,5 +1,5 @@
-#include "../../include/halley/file_formats/text_file.h"
-#include "../../include/halley/resources/resource_data.h"
+#include "halley/file_formats/text_file.h"
+#include "halley/resources/resource_data.h"
 
 using namespace Halley;
 

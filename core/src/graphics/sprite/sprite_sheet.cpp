@@ -2,7 +2,7 @@
 #include "halley/graphics/texture.h"
 #include "halley/api/halley_api.h"
 #include "resources/resources.h"
-#include "../../../../utils/src/file_formats/json/json.h"
+#include "halley/file_formats/json/json.h"
 
 using namespace Halley;
 

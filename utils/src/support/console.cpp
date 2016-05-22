@@ -19,8 +19,8 @@
 
 \*****************************************************************/
 
-#include "../../include/halley/support/console.h"
-#include "../../include/halley/os/os.h"
+#include "halley/support/console.h"
+#include "halley/os/os.h"
 
 using namespace Halley;
 

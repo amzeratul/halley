@@ -1,4 +1,4 @@
-#include "../../include/halley/data_structures/bin_pack.h"
+#include "halley/data_structures/bin_pack.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4456 4458)

@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 #include <cstring>
-#include "../../include/halley/maths/matrix4.h"
+#include "halley/maths/matrix4.h"
 using namespace Halley;
 
 Matrix4f::Matrix4f()

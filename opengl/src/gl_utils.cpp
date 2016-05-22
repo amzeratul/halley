@@ -21,8 +21,8 @@
 
 #include "gl_utils.h"
 #include <set>
-#include "../../utils/include/halley/support/exception.h"
-#include "../../utils/include/halley/concurrency/concurrent.h"
+#include "halley/support/exception.h"
+#include "halley/concurrency/concurrent.h"
 
 using namespace Halley;
 

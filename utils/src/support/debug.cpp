@@ -19,13 +19,13 @@
 
 \*****************************************************************/
 
-#include "../../include/halley/support/debug.h"
-#include "../../include/halley/support/console.h"
-#include "../../include/halley/text/halleystring.h"
+#include "halley/support/debug.h"
+#include "halley/support/console.h"
+#include "halley/text/halleystring.h"
 #include <iostream>
 #include <sstream>
 #include <ctime>
-#include "../../include/halley/os/os.h"
+#include "halley/os/os.h"
 
 using namespace Halley;
 

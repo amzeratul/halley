@@ -19,10 +19,10 @@
 
 \*****************************************************************/
 
-#include "../../include/halley/file_formats/ini_reader.h"
+#include "halley/file_formats/ini_reader.h"
 #include <memory>
 #include <cstring>
-#include "../../include/halley/support/exception.h"
+#include "halley/support/exception.h"
 using namespace Halley;
 
 #ifdef _MSC_VER

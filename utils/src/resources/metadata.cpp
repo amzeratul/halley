@@ -1,5 +1,5 @@
-#include "../../include/halley/resources/metadata.h"
-#include "../../include/halley/resources/resource_data.h"
+#include "halley/resources/metadata.h"
+#include "halley/resources/resource_data.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4127)

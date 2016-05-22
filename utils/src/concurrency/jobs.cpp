@@ -19,8 +19,8 @@
 
 \*****************************************************************/
 
-#include "../../include/halley/concurrency/jobs.h"
-#include "../../include/halley/support/exception.h"
+#include "halley/concurrency/jobs.h"
+#include "halley/support/exception.h"
 #include <ctime>
 
 using namespace Halley;

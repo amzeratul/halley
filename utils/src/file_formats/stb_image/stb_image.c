@@ -73,7 +73,7 @@
 #pragma warning(disable: 6385 6246 6262 4996 4456 4457 4458)
 #endif
 
-#include "stb_image.h"
+#include "halley/file_formats/stb_image/stb_image.h"
 
 #ifndef STBI_HEADER_FILE_ONLY
 

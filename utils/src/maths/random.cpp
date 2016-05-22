@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "../../include/halley/maths/random.h"
+#include "halley/maths/random.h"
 #include <ctime>
 #include <cstdlib>
 using namespace Halley;

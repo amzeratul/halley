@@ -19,13 +19,13 @@
 
 \*****************************************************************/
 
-#include "../../include/halley/os/os.h"
+#include "halley/os/os.h"
 #include "os_win32.h"
 #include "os_mac.h"
 #include "os_android.h"
 #include "os_ios.h"
 #include "os_linux.h"
-#include "../../include/halley/support/exception.h"
+#include "halley/support/exception.h"
 
 using namespace Halley;
 

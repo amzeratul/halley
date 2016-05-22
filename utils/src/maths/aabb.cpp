@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "../../include/halley/maths/aabb.h"
+#include "halley/maths/aabb.h"
 
 using namespace Halley;
 

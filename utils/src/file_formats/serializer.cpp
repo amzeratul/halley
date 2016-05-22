@@ -1,5 +1,5 @@
 #include <cstring>
-#include "../../include/halley/file_formats/serializer.h"
+#include "halley/file_formats/serializer.h"
 using namespace Halley;
 
 #ifndef _MSC_VER

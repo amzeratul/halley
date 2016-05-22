@@ -19,8 +19,8 @@
 
 \*****************************************************************/
 
-#include "../../include/halley/support/exception.h"
-#include "../../include/halley/support/debug.h"
+#include "halley/support/exception.h"
+#include "halley/support/debug.h"
 
 using namespace Halley;
 

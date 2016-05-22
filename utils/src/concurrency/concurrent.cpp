@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "../../include/halley/concurrency/concurrent.h"
+#include "halley/concurrency/concurrent.h"
 #include <thread>
 #include <sstream>
 
