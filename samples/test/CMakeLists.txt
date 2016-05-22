@@ -49,7 +49,7 @@ endfunction(assign_source_group)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	set(EXTRA_LIBS)
 else()
-	set(EXTRA_LIBS stdc++fs pthread)
+	set(EXTRA_LIBS pthread)
 endif()
 
 assign_source_group(${${PROJECT_NAME}_sources})
@@ -57,6 +57,7 @@ assign_source_group(${${PROJECT_NAME}_headers})
 
 find_package(SDL2 REQUIRED)
 find_package(YamlCpp REQUIRED)
+find_package(Boost COMPONENTS system filesystem REQUIRED)
 
 include_directories("gen/cpp" "../../include" "../../core/include" "../../entity/include" "../../utils/include" "../../opengl/include" ${YAMLCPP_INCLUDE_DIR})
 
@@ -65,7 +66,17 @@ add_custom_target(codegen ALL ${CMAKE_HOME_DIRECTORY}/bin64/halley-cmd codegen g
 add_dependencies(codegen halley-cmd)
 
 add_executable (${PROJECT_NAME} ${${PROJECT_NAME}_sources} ${${PROJECT_NAME}_headers})
-target_link_libraries(${PROJECT_NAME} halley-core halley-utils halley-opengl halley-entity ${SDL2_LIBRARIES} ${YAMLCPP_LIBRARY} ${EXTRA_LIBS})
+target_link_libraries(${PROJECT_NAME}
+		halley-core
+		halley-utils
+		halley-opengl
+		halley-entity
+		${SDL2_LIBRARIES}
+		${YAMLCPP_LIBRARY}
+		${Boost_FILESYSTEM_LIBRARY}
+		${Boost_SYSTEM_LIBRARY}
+		${EXTRA_LIBS}
+		)
 
 install(TARGETS ${PROJECT_NAME}
 		RUNTIME DESTINATION ${CMAKE_HOME_DIRECTORY}/bin64

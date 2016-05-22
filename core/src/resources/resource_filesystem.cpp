@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 #include <SDL.h>
-#include <experimental/filesystem>
+#include <boost/filesystem.hpp>
 #include <halley/support/exception.h>
 #include <cassert>
 #include <iostream>
@@ -81,12 +81,13 @@ std::unique_ptr<ResourceData> FileSystemResourceLocator::doGet(String resource, 
 
 std::time_t Halley::FileSystemResourceLocator::doGetTimestamp(String resource)
 {
-	namespace fs = std::experimental::filesystem;
+	namespace fs = boost::filesystem;
 	String pathName = basePath + resource;
 	fs::path path(pathName.c_str());
 	if (fs::exists(path)) {
-		auto time = fs::last_write_time(path);
-		return decltype(time)::clock::to_time_t(time);
+		return fs::last_write_time(path);
+		//auto time = fs::last_write_time(path);
+		//return decltype(time)::clock::to_time_t(time);
 	} else {
 		return 0;
 	}
@@ -94,7 +95,7 @@ std::time_t Halley::FileSystemResourceLocator::doGetTimestamp(String resource)
 
 static void enumDir(StringArray& files, String root, String prefix)
 {
-	namespace fs = std::experimental::filesystem;
+	namespace fs = boost::filesystem;
 	String basePath = (root + prefix + "/");
 	basePath.replace("//", "/");
 	basePath.replace("\\\\", "\\");
@@ -104,7 +105,7 @@ static void enumDir(StringArray& files, String root, String prefix)
 			fs::path curPath = (*dir).path();
 			String name = curPath.filename().generic_string();
 			fs::file_type type = (*dir).status().type();
-			if (type == fs::file_type::directory) {
+			if (type == fs::file_type::directory_file) {
 				if (!name.startsWith(".")) {
 					enumDir(files, root, prefix + name + "/");
 				}

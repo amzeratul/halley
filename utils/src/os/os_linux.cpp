@@ -58,7 +58,7 @@ String slice(String str, const char* from, const char* to) {
 	return str.substr(pos, end - pos);
 }
 
-Halley::ComputerData Halley::OSUnix::getComputerData()
+Halley::ComputerData Halley::OSLinux::getComputerData()
 {
 	ComputerData data;
 

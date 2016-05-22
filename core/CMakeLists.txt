@@ -1,8 +1,8 @@
 project (halley-core)
 
 find_Package(SDL2 REQUIRED)
-
-include_directories(${SDL2_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../entity/include")
+find_package(Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../entity/include")
 
 set(SOURCES
         "src/api/halley_api.cpp"
