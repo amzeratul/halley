@@ -337,7 +337,7 @@ LPTOP_LEVEL_EXCEPTION_FILTER WINAPI MyDummySetUnhandledExceptionFilter(LPTOP_LEV
 
 BOOL PreventSetUnhandledExceptionFilter()
 {
-	HMODULE hKernel32 = LoadLibrary(L"kernel32.dll");
+	HMODULE hKernel32 = LoadLibrary("kernel32.dll");
 	if (hKernel32 == NULL) return FALSE;
 	void *pOrgEntry = GetProcAddress(hKernel32, "SetUnhandledExceptionFilter");
 	if(pOrgEntry == NULL) return FALSE;
