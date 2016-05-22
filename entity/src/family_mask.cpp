@@ -2,6 +2,7 @@
 #include <set>
 #include <unordered_set>
 #include <vector>
+#include <functional>
 
 using namespace Halley;
 using namespace FamilyMask;
@@ -33,7 +34,7 @@ struct MaskEntry
 };
 
 namespace std {
-	template <class T> struct hash;
+	//template <class T> struct hash;
 	template<> struct hash<MaskEntry>
 	{
 		std::size_t operator()(MaskEntry const& s) const {

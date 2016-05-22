@@ -10,7 +10,7 @@ set(SOURCES "src/main.cpp")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(EXTRA_LIBS)
 else()
-    set(EXTRA_LIBS pthread)
+    set(EXTRA_LIBS pthread bz2 z)
 endif()
 
 add_executable (halley-cmd ${SOURCES})
