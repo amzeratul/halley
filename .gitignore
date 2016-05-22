@@ -32,6 +32,7 @@ Thumbs.db
 *.lib
 *.exe
 halley-cmd
+halley-sample-test
 
 # Intermediate files
 [Dd]ebug*/

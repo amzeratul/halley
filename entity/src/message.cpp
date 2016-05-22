@@ -1,4 +1,4 @@
-#include "../include/halley/entity/message.h"
+#include "message.h"
 
 using namespace Halley;
 

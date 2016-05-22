@@ -1,6 +1,6 @@
 #include <halley/data_structures/memory_pool.h>
 #include <halley/support/exception.h>
-#include "../include/halley/entity/component.h"
+#include "component.h"
 
 using namespace Halley;
 

@@ -3,9 +3,9 @@
 #include <halley/support/exception.h>
 #include <halley/data_structures/memory_pool.h>
 #include <halley/maths/utils.h>
-#include "../include/halley/entity/world.h"
-#include "../include/halley/entity/system.h"
-#include "../include/halley/entity/family.h"
+#include "world.h"
+#include "system.h"
+#include "family.h"
 
 using namespace Halley;
 

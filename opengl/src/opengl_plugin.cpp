@@ -1,4 +1,4 @@
-#include "../include/halley/opengl/video_opengl.h"
+#include "video_opengl.h"
 
 namespace Halley {
 	

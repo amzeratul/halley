@@ -1,1 +1,1 @@
-#include "../include/halley/opengl/prec.h"
+#include "prec.h"
