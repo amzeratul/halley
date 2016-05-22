@@ -65,7 +65,11 @@ include_directories("gen/cpp" "../../include" "../../core/include" "../../entity
 add_custom_target(codegen ALL ${CMAKE_HOME_DIRECTORY}/bin64/halley-cmd codegen gen_src gen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_dependencies(codegen halley-cmd)
 
-add_executable (${PROJECT_NAME} ${${PROJECT_NAME}_sources} ${${PROJECT_NAME}_headers})
+add_executable (${PROJECT_NAME}
+		${${PROJECT_NAME}_sources}
+		${${PROJECT_NAME}_headers}
+		)
+
 target_link_libraries(${PROJECT_NAME}
 		halley-core
 		halley-utils
