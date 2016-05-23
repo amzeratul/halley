@@ -11,14 +11,17 @@ PainterOpenGL::~PainterOpenGL()
 	if (vbo != 0) {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glDeleteBuffers(1, &vbo);
-	}
-	if (vao != 0) {
-		glBindVertexArray(0);
-		glDeleteVertexArrays(1, &vao);
+		vbo = 0;
 	}
 	if (veo != 0) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glDeleteBuffers(1, &veo);
+		veo = 0;
+	}
+	if (vao != 0) {
+		glBindVertexArray(0);
+		glDeleteVertexArrays(1, &vao);
+		vao = 0;
 	}
 }
 
@@ -35,26 +38,28 @@ void PainterOpenGL::doStartRender()
 		glCheckError();
 	}
 
+	if (veo == 0) {
+		glGenBuffers(1, &veo);
+		glCheckError();
+	}
+
 	if (vao == 0) {
 		glGenVertexArrays(1, &vao);
 		glCheckError();
-	}
-
-	if (veo == 0) {
-		glGenVertexArrays(1, &veo);
+		glBindVertexArray(vao);
+		glCheckError();
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glCheckError();
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veo);
 		glCheckError();
 	}
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glCheckError();
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veo);
-	glCheckError();
 	glBindVertexArray(vao);
-	glCheckError();
 }
 
 void PainterOpenGL::doEndRender()
 {
+	glBindVertexArray(0);
 	glCheckError();
 }
 
