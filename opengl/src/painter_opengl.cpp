@@ -16,6 +16,10 @@ PainterOpenGL::~PainterOpenGL()
 		glBindVertexArray(0);
 		glDeleteVertexArrays(1, &vao);
 	}
+	if (veo != 0) {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glDeleteBuffers(1, &veo);
+	}
 }
 
 void PainterOpenGL::doStartRender()
@@ -36,7 +40,14 @@ void PainterOpenGL::doStartRender()
 		glCheckError();
 	}
 
+	if (veo == 0) {
+		glGenVertexArrays(1, &veo);
+		glCheckError();
+	}
+
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glCheckError();
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veo);
 	glCheckError();
 	glBindVertexArray(vao);
 	glCheckError();
@@ -144,9 +155,10 @@ void PainterOpenGL::drawQuads(size_t n)
 			indexData[i + 5] = pos;
 			pos += 4;
 		}
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, int(sz) * sizeof(short), indexData.data(), GL_STREAM_DRAW);
 	}
 
-	glDrawElements(GL_TRIANGLES, int(sz), GL_UNSIGNED_SHORT, indexData.data());
+	glDrawElements(GL_TRIANGLES, int(sz), GL_UNSIGNED_SHORT, 0);
 	glCheckError();
 }
 

@@ -27,6 +27,7 @@ namespace Halley
 	private:
 		GLuint vbo = 0;
 		GLuint vao = 0;
+		GLuint veo = 0;
 		std::unique_ptr<GLUtils> glUtils;
 
 		std::vector<unsigned short> indexData;
