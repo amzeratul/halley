@@ -15,6 +15,7 @@ core/graphics
 - generalize Sprite for more attributes [RESEARCH]
 - multi-pass conditional enabling of pass
 - multi-pass disable batching
+- shaders for other graphics APIs? [RESEARCH]
 
 opengl
 - instanced rendering? do we care?
@@ -52,7 +53,6 @@ cli tools
 - packer
 - atlas generator?
 - texture converter?
-- auto-generate project?
 
 editor
 - decide how this is going to work (overlay? separate tool? do we allow remote connection?) [RESEARCH]
@@ -65,6 +65,7 @@ editor
 
 utils
 * collision detection & triggers
+- tasks/concurrency review
 - better HTTP library/replace boost::asio
 - write my own memory pool/replace boost::pool
 - fix Maybe<T>
@@ -74,15 +75,9 @@ samples
 - make a minimal "template" sample
 
 build
-- CMake lists for all libraries and samples [RESEARCH]
-- external library dependencies [RESEARCH]
 - clean up
-- ensure gcc compatibility
-- ensure clang compatibility
 
 platforms
-* Mac
-- Linux
 - PS4?
 - XBox One?
 - Android?
