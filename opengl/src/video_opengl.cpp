@@ -69,7 +69,6 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 #endif
 
 	// Debug info
-	//char buffer[1024];
 	std::cout << std::endl << ConsoleColor(Console::GREEN) << "Initializing OpenGL...\n" << ConsoleColor();
 	std::cout << "Drivers available:\n";
 	for (int i = 0; i < SDL_GetNumVideoDrivers(); i++) {
@@ -97,8 +96,9 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 			flags |= SDL_WINDOW_BORDERLESS;
 		} else if (_windowType == WindowType::ResizableWindow) {
 			flags |= SDL_WINDOW_RESIZABLE;
+		} else if (_windowType == WindowType::Fullscreen) {
+			flags |= SDL_WINDOW_FULLSCREEN;
 		}
-		//if (_fullscreen) flags |= SDL_WINDOW_FULLSCREEN;
 		
 		// Context options
 #if defined(WITH_OPENGL_ES2)
@@ -117,8 +117,6 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 #ifdef _DEBUG
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-#else
-		//SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 #endif
 		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -149,7 +147,6 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 			throw Exception(String("Error creating OpenGL context: ") + SDL_GetError());
 		if (SDL_GL_MakeCurrent(window, context) < 0)
 			throw Exception(String("Error setting OpenGL context: ") + SDL_GetError());
-		context = context;
 
 		// VSync
 		SDL_GL_SetSwapInterval(vsync ? 1 : 0);
@@ -179,15 +176,6 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 		std::cout << "\tVendor: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_VENDOR) << ConsoleColor() << std::endl;
 		std::cout << "\tRenderer: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_RENDERER) << ConsoleColor() << std::endl;
 		std::cout << "\tGLSL Version: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_SHADING_LANGUAGE_VERSION) << ConsoleColor() << std::endl;
-
-		// Render-to-texture support
-		bool fboSupport = true;//TextureRenderTargetFBO::isSupported();
-		std::cout << "\tFramebuffer Objects: " << ConsoleColor(Console::DARK_GREY) << (fboSupport ? "enabled" : "disabled") << ConsoleColor() << std::endl;
-#if defined(WITH_OPENGL)
-		int n;
-		glGetIntegerv(GL_AUX_BUFFERS, &n);
-		//if (n > 0) TextureRenderTargetCopy::hasAuxBuffer = true;
-#endif
 
 		// Print extensions
 		std::cout << "\tExtensions: " << ConsoleColor(Console::DARK_GREY);
@@ -223,6 +211,8 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 	glCheckError();
 
 	// Swap buffers
+	flip();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	flip();
 
 	// Show window
