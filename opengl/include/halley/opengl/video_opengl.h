@@ -43,6 +43,13 @@ namespace Halley {
 	private:
 		void updateWindowDimensions();
 		void setWindowSize(Vector2i windowSize);
+		void setUpDebugCallback();
+		void setUpEnumMap();
+		void onGLDebugMessage(unsigned int source, unsigned int type, unsigned int id, unsigned int severity, String message) const;
+
+		std::map<unsigned int, String> glEnumMap;
+		mutable std::vector<std::function<void()>> messagesPending;
+		mutable std::mutex messagesMutex;
 
 		void* context;
 		Vector2i windowSize;

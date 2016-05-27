@@ -1,4 +1,4 @@
-#include <SDL.h>
+﻿#include <SDL.h>
 #include <GL/glew.h>
 #include "halley_gl.h"
 #include "video_opengl.h"
@@ -15,7 +15,7 @@ using namespace Halley;
 
 void VideoOpenGL::init()
 {
-	
+	setUpEnumMap();
 }
 
 void VideoOpenGL::deInit()
@@ -115,7 +115,9 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-#ifndef _DEBUG
+#ifdef _DEBUG
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#else
 		//SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 #endif
 		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -196,6 +198,8 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 			std::cout << str << " ";
 		}
 		std::cout << ConsoleColor() << std::endl;
+
+		setUpDebugCallback();
 	} else {
 		// Re-initializing
 
@@ -231,6 +235,54 @@ void VideoOpenGL::setWindowSize(Vector2i winSize)
 {
 	windowSize = winSize;
 	updateWindowDimensions();
+}
+
+void VideoOpenGL::setUpDebugCallback()
+{
+	if (glDebugMessageCallback) {
+		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+			reinterpret_cast<const VideoOpenGL*>(userParam)->onGLDebugMessage(source, type, id, severity, message);
+		}, this);
+	} else {
+		std::cout << ConsoleColor(Console::YELLOW) << "KHR_DEBUG is not available." << ConsoleColor() << std::endl;
+	}
+}
+
+void VideoOpenGL::setUpEnumMap()
+{
+	glEnumMap[GL_DEBUG_SOURCE_API] = "API";
+	glEnumMap[GL_DEBUG_SOURCE_WINDOW_SYSTEM] = "Window System";
+	glEnumMap[GL_DEBUG_SOURCE_SHADER_COMPILER] = "Shader Compiler";
+	glEnumMap[GL_DEBUG_SOURCE_THIRD_PARTY] = "Third Party";
+	glEnumMap[GL_DEBUG_SOURCE_APPLICATION] = "Application";
+	glEnumMap[GL_DEBUG_SOURCE_OTHER] = "Other";
+	glEnumMap[GL_DEBUG_TYPE_ERROR] = "Error";
+	glEnumMap[GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR] = "Deprecated Behaviour";
+	glEnumMap[GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR] = "Undefined Behaviour";
+	glEnumMap[GL_DEBUG_TYPE_PORTABILITY] = "Portability";
+	glEnumMap[GL_DEBUG_TYPE_PERFORMANCE] = "Performance";
+	glEnumMap[GL_DEBUG_TYPE_MARKER] = "Marker";
+	glEnumMap[GL_DEBUG_TYPE_PUSH_GROUP] = "Push Group";
+	glEnumMap[GL_DEBUG_TYPE_POP_GROUP] = "Pop Group";
+	glEnumMap[GL_DEBUG_TYPE_OTHER] = "Other";
+	glEnumMap[GL_DEBUG_SEVERITY_HIGH] = "High";
+	glEnumMap[GL_DEBUG_SEVERITY_MEDIUM] = "Medium";
+	glEnumMap[GL_DEBUG_SEVERITY_LOW] = "Low";
+	glEnumMap[GL_DEBUG_SEVERITY_NOTIFICATION] = "Notification";
+}
+
+void VideoOpenGL::onGLDebugMessage(unsigned int source, unsigned int type, unsigned int id, unsigned int severity, String message) const
+{
+	if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM || severity == GL_DEBUG_SEVERITY_LOW) {
+		std::stringstream ss;
+		ss << "[" << glEnumMap.at(source) << "] [" << glEnumMap.at(type) << "] [" << glEnumMap.at(severity) << "] " << id << ": " << message;
+		std::string str = ss.str();
+
+		std::lock_guard<std::mutex> lock(messagesMutex);
+		messagesPending.push_back([str] () {
+			std::cout << ConsoleColor(Console::YELLOW) << str << ConsoleColor() << std::endl;
+		});		
+	}
 }
 
 void VideoOpenGL::setVirtualSize(Vector2f vs)
@@ -402,6 +454,15 @@ Vector2i VideoOpenGL::getScreenSize(int n) const
 void VideoOpenGL::flip()
 {
 	SDL_GL_SwapWindow(window);
+
+	std::vector<std::function<void()>> msgs;
+	{
+		std::lock_guard<std::mutex> lock(messagesMutex);
+		msgs = std::move(messagesPending);
+	}
+	for (const auto& m: msgs) {
+		m();
+	}
 }
 
 void VideoOpenGL::setFullscreen(bool fs)
