@@ -86,6 +86,7 @@ set(HEADERS
         "include/halley/maths/base_transform.h"
         "include/halley/maths/box.h"
         "include/halley/maths/colour.h"
+		"include/halley/maths/colour.natvis"
         "include/halley/maths/line.h"
         "include/halley/maths/matrix4.h"
         "include/halley/maths/polygon.h"
@@ -94,6 +95,7 @@ set(HEADERS
         "include/halley/maths/rect.h"
         "include/halley/maths/utils.h"
         "include/halley/maths/vector2d.h"
+		"include/halley/maths/vector2d.natvis"
         "include/halley/maths/vector3d.h"
         "include/halley/os/os.h"
         "include/halley/plugin/plugin.h"
@@ -107,6 +109,7 @@ set(HEADERS
         "include/halley/support/redirect_stream.h"
         "include/halley/text/encode.h"
         "include/halley/text/halleystring.h"
+		"include/halley/text/halleystring.natvis"
         "include/halley/time/halleytime.h"
         "include/halley/time/stopwatch.h"
         "include/halley/web/http.h"
@@ -122,5 +125,8 @@ set(HEADERS
         "src/os/os_win32.h"
         "src/support/StackWalker/StackWalker.h"
         )
+
+assign_source_group(${SOURCES})
+assign_source_group(${HEADERS})
 
 add_library (halley-utils ${SOURCES} ${HEADERS})

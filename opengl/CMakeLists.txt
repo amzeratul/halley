@@ -23,5 +23,8 @@ set(HEADERS
         "include/halley/opengl/video_opengl.h"
         )
 
+assign_source_group(${SOURCES})
+assign_source_group(${HEADERS})
+
 add_library (halley-opengl ${SOURCES} ${HEADERS})
 target_link_libraries(halley-opengl halley-core ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES})

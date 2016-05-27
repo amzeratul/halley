@@ -10,8 +10,8 @@ static Material* currentMaterial = nullptr;
 static int currentPass = 0;
 
 Material::Material(const Material& other)
-	: materialDefinition(other.materialDefinition)
-	, uniforms(other.uniforms)
+	: uniforms(other.uniforms)
+	, materialDefinition(other.materialDefinition)
 {	
 }
 

@@ -63,7 +63,9 @@ set(HEADERS
         "include/halley/core/graphics/blend.h"
         "include/halley/core/graphics/camera.h"
         "include/halley/core/graphics/material/material_definition.h"
+		"include/halley/core/graphics/material/material_definition.natvis"
         "include/halley/core/graphics/material/material.h"
+		"include/halley/core/graphics/material/material.natvis"
         "include/halley/core/graphics/material/material_parameter.h"
         "include/halley/core/graphics/material/uniform_type.h"
         "include/halley/core/graphics/painter.h"
@@ -113,5 +115,8 @@ set(HEADERS
         "include/halley/main_wrapper.h"
         "src/prec.h"
         )
+
+assign_source_group(${SOURCES})
+assign_source_group(${HEADERS})
 
 add_library (halley-core ${SOURCES} ${HEADERS})

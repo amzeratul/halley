@@ -35,4 +35,7 @@ set(HEADERS
         "src/prec.h"
         )
 
+assign_source_group(${SOURCES})
+assign_source_group(${HEADERS})
+
 add_library (halley-tools ${SOURCES} ${HEADERS})
