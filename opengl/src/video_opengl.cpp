@@ -243,7 +243,9 @@ void VideoOpenGL::setUpDebugCallback()
 		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 			reinterpret_cast<const VideoOpenGL*>(userParam)->onGLDebugMessage(source, type, id, severity, message);
 		}, this);
+		glCheckError();
 	} else {
+		glGetError();
 		std::cout << ConsoleColor(Console::YELLOW) << "KHR_DEBUG is not available." << ConsoleColor() << std::endl;
 	}
 }
