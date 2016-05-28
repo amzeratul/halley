@@ -2,7 +2,7 @@ core
 - child stages
 
 core/resources
-- hot reloading [RESEARCH]
+* hot reloading [RESEARCH]
 
 core/graphics
 - consider replacing text format with binary format (current one is super slow)
@@ -32,9 +32,9 @@ entity
 * query other entities [RESEARCH]
 - load prefabs
 - smearing systems
-- parallel systems
+- parallel systems [RESEARCH]
 - better timelines
-- foreign language systems
+- foreign language systems [RESEARCH]
 - Lua systems
 - defragment/optimize memory? [RESEARCH]
 - universal hierarchical transforms? [RESEARCH]
