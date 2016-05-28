@@ -1,8 +1,11 @@
-#include "halley/core/game/main_loop.h"
+#include <iostream>
+
 #include <halley/support/console.h>
 #include <halley/support/debug.h>
-#include <halley/core/game/core.h>
-#include <iostream>
+
+#include "game/main_loop.h"
+#include "game/core.h"
+#include "game/game_reloader.h"
 
 Halley::MainLoop::MainLoop(IMainLoopable& target, GameReloader& reloader)
 	: target(target)

@@ -3,6 +3,7 @@
 
 namespace Halley
 {
+	class GameReloader;
 	class HalleyAPI;
 
 	class IMainLoopable
@@ -16,15 +17,6 @@ namespace Halley
 		virtual void onVariableUpdate(Time delta) = 0;
 		virtual void onFixedUpdate(Time delta) = 0;
 		virtual void onReloaded() = 0;
-	};
-
-	class GameReloader
-	{
-	public:
-		virtual ~GameReloader() {}
-
-		virtual bool needsToReload() const { return false; }
-		virtual void reload() {}
 	};
 
 	class MainLoop

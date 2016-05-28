@@ -18,8 +18,8 @@ namespace Halley
 			return staticMain(std::make_unique<T>(), args);
 		}
 
-	private:
 		static int staticMain(std::unique_ptr<Game> game, const StringArray& args);
+		static int dynamicMain(String dllName, const StringArray& args);
 	};
 }
 
