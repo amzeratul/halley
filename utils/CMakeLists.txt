@@ -102,6 +102,7 @@ set(HEADERS
         "include/halley/resources/metadata.h"
         "include/halley/resources/resource_data.h"
         "include/halley/resources/resource.h"
+		"include/halley/runner/entry_point.h"
 		"include/halley/runner/game_loader.h"
 		"include/halley/runner/halley_main.h"
 		"include/halley/runner/main_loop.h"

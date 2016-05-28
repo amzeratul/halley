@@ -5,6 +5,7 @@
 #include <halley/support/console.h>
 #include <halley/core/game/core.h>
 #include "main_loop.h"
+#include "entry_point.h"
 
 namespace Halley
 {
@@ -41,24 +42,6 @@ namespace Halley
 				std::cout << ConsoleColor(Console::RED) << "\n\nUnknown unhandled exception." << ConsoleColor() << std::endl;
 				return 1;
 			}
-		}
-	};
-
-	class IHalleyEntryPoint
-	{
-	public:
-		virtual ~IHalleyEntryPoint() {}
-
-		virtual std::unique_ptr<Game> makeGame() = 0;
-	};
-
-	template <typename T>
-	class HalleyEntryPoint : public IHalleyEntryPoint
-	{
-	public:
-		std::unique_ptr<Game> makeGame() override
-		{
-			return std::make_unique<T>();
 		}
 	};
 }

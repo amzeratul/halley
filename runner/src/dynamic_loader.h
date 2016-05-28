@@ -3,6 +3,7 @@
 #include <memory>
 #include <halley/runner/game_loader.h>
 #include "dynamic_library.h"
+#include "symbol_loader.h"
 
 namespace Halley
 {
@@ -27,7 +28,7 @@ namespace Halley
 
 		void load();
 		void unload();
-		void hotPatch();
+		void hotPatch(const std::vector<DebugSymbol>& prevSymbols, const std::vector<DebugSymbol>& newSymbols);
 		void setStatics();
 	};
 }

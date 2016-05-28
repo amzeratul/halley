@@ -5,15 +5,17 @@ include_directories(${Boost_INCLUDE_DIR} "../core/include" "../utils/include")
 set(SOURCES
 		"src/dynamic_library.cpp"
 		"src/dynamic_loader.cpp"
+		"src/memory_patcher.cpp"
 		"src/main.cpp"
-		"src/windows_dll_runner.cpp"
+		"src/symbol_loader.cpp"
 		)
 		
 set(HEADERS
 		"src/dynamic_library.h"
 		"src/dynamic_loader.h"
+		"src/memory_patcher.h"
+		"src/symbol_loader.h"
 		"src/win.h"
-		"src/windows_dll_runner.h"
 		)
 
 assign_source_group(${SOURCES})

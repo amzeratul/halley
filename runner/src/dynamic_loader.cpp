@@ -1,6 +1,8 @@
 #include "dynamic_loader.h"
 #include <halley/core/game/game.h>
 #include <halley/runner/halley_main.h>
+#include "symbol_loader.h"
+#include "memory_patcher.h"
 
 using namespace Halley;
 
@@ -28,13 +30,19 @@ bool DynamicGameLoader::needsToReload() const
 void DynamicGameLoader::reload()
 {
 	std::cout << ConsoleColor(Console::BLUE) << "\n**RELOADING GAME**" << std::endl;
-	std::cout << "Unloading..." << std::endl;
+	Stopwatch timer;
+
+	auto prevSymbols = SymbolLoader::loadSymbols("");
 	unload();
-	std::cout << "Loading..." << std::endl;
+	
 	load();
-	std::cout << "Hot-patching..." << std::endl;
-	hotPatch();
-	std::cout << "Done!\n" << ConsoleColor() << std::endl;
+	auto newSymbols = SymbolLoader::loadSymbols("");
+
+	hotPatch(prevSymbols, newSymbols);
+
+	timer.pause();
+	
+	std::cout << "Done in " << timer.elapsedSeconds() << " seconds.\n" << ConsoleColor() << std::endl;
 }
 
 void DynamicGameLoader::setCore(Core& c)
@@ -67,9 +75,14 @@ void DynamicGameLoader::unload()
 	lib.unload();
 }
 
-void DynamicGameLoader::hotPatch()
+void DynamicGameLoader::hotPatch(const std::vector<DebugSymbol>& prev, const std::vector<DebugSymbol>& next)
 {
 	setStatics();
+
+	MemoryPatchingMappings mappings;
+	mappings.generate(prev, next);
+	MemoryPatcher::patch(mappings);
+
 	core->onReloaded();
 }
 
