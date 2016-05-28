@@ -27,8 +27,14 @@ bool DynamicGameLoader::needsToReload() const
 
 void DynamicGameLoader::reload()
 {
+	std::cout << "**RELOADING GAME**" << std::endl;
+	std::cout << "Unloading..." << std::endl;
 	unload();
+	std::cout << "Hot-patching..." << std::endl;
+	hotPatch();
+	std::cout << "Loading..." << std::endl;
 	load();
+	std::cout << "Done!" << std::endl;
 }
 
 void DynamicGameLoader::load()
@@ -53,4 +59,9 @@ void DynamicGameLoader::unload()
 		entry = nullptr;
 	}
 	lib.unload();
+}
+
+void DynamicGameLoader::hotPatch()
+{
+	// TODO
 }

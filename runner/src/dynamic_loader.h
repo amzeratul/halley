@@ -25,5 +25,6 @@ namespace Halley
 
 		void load();
 		void unload();
+		void hotPatch();
 	};
 }

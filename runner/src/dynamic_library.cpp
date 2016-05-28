@@ -37,7 +37,7 @@ void DynamicLibrary::load(bool withAnotherName)
 		throw Exception("Unable to load library: " + libPath);
 	}
 
-	lastWrite = last_write_time(libPath.cppStr());
+	lastWrite = last_write_time(libOrigPath.cppStr());
 
 	loaded = true;
 }
@@ -69,5 +69,5 @@ void* DynamicLibrary::getFunction(String name)
 
 bool DynamicLibrary::hasChanged() const
 {
-	return last_write_time(libPath.cppStr()) > lastWrite;
+	return last_write_time(libOrigPath.cppStr()) > lastWrite;
 }
