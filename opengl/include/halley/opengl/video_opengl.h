@@ -1,3 +1,5 @@
+#include <map>
+#include <mutex>
 struct SDL_Window;
 
 #include "halley/core/api/halley_api_internal.h"
@@ -11,6 +13,7 @@ namespace Halley {
 		void startRender() override;
 		void finishRender() override;
 		void flip() override;
+		void reload() override;
 
 		void setVideo(WindowType windowType, Vector2i fullscreenSize, Vector2i windowedSize, Vector2f virtualSize = Vector2f(), bool vsync = true, int screen = 0) override;
 		Vector2i getWindowSize() const override { return windowSize; }
@@ -44,6 +47,7 @@ namespace Halley {
 		void printDebugInfo() const;
 		void createWindow();
 		void initOpenGL();
+		void initGlew();
 		void clearScreen();
 
 		void updateWindowDimensions();

@@ -3,7 +3,7 @@
 
 using namespace Halley;
 
-void initOpenGLPlugin();
+void initOpenGLPlugin(IPluginRegistry &registry);
 
 namespace Stages {
 	enum Type
@@ -15,15 +15,15 @@ namespace Stages {
 class SampleGame final : public Game
 {
 public:
-	int initPlugins() override
+	int initPlugins(IPluginRegistry &registry) override
 	{
-		initOpenGLPlugin();
+		initOpenGLPlugin(registry);
 		return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input;
 	}
 
-	void initResourceLocator(ResourceLocator& locator) override
+	void initResourceLocator(String dataPath, ResourceLocator& locator) override
 	{
-		locator.addStandardFileSystem();
+		locator.addFileSystem(dataPath);
 	}
 
 	std::unique_ptr<Stage> makeStage(StageID id) override

@@ -46,13 +46,10 @@ namespace std {
 class MaskStorage
 {
 public:
-	static MaskStorage& getInstance()
+	static MaskStorage*& getInstance()
 	{
 		static MaskStorage* i = nullptr;
-		if (!i) {
-			i = new MaskStorage();
-		}
-		return *i;
+		return i;
 	}
 
 	std::vector<MaskEntry*> values;
@@ -60,7 +57,7 @@ public:
 
 	static int getHandle(const RealType& value)
 	{
-		auto& instance = getInstance();
+		auto& instance = *getInstance();
 		auto entry = MaskEntry(value, 0);
 		auto i = instance.entries.find(entry);
 		if (i == instance.entries.end()) {
@@ -82,7 +79,7 @@ public:
 		if (handle == -1) {
 			return dummy;
 		} else {
-			return getInstance().values[handle]->mask;
+			return (*getInstance()).values[handle]->mask;
 		}
 	}
 };
@@ -146,4 +143,16 @@ const RealType& Handle::getRealValue() const
 HandleType FamilyMask::getHandle(RealType mask)
 {
 	return Handle(mask);
+}
+
+void* MaskStorageInterface::createMaskStorage()
+{
+	auto result = new MaskStorage();
+	MaskStorage::getInstance() = result;
+	return result;
+}
+
+void MaskStorageInterface::setMaskStorage(void* storage)
+{
+	MaskStorage::getInstance() = reinterpret_cast<MaskStorage*>(storage);
 }

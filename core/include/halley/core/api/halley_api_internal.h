@@ -1,8 +1,8 @@
 #pragma once
+#include <halley/plugin/plugin.h>
 
 union SDL_Event;
 
-#include "halley/halley_utils.h"
 #include "core_api.h"
 #include "video_api.h"
 #include "system_api.h"
@@ -33,6 +33,7 @@ namespace Halley
 
 		virtual std::unique_ptr<Painter> makePainter() = 0;
 		virtual std::function<void(int, void*)> getUniformBinding(UniformType type, int n) = 0;
+		virtual void reload() = 0;
 	};
 
 	class SystemAPIInternal : public SystemAPI, public HalleyAPIInternal
@@ -49,6 +50,9 @@ namespace Halley
 		virtual void beginEvents(Time t) = 0;
 	};
 
-	using CoreAPIInternal = CoreAPI;
+	class CoreAPIInternal : public CoreAPI, public IPluginRegistry {
+	public:
+		virtual ~CoreAPIInternal() {}
+	};
 }
 

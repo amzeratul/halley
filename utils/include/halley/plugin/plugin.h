@@ -24,8 +24,13 @@ namespace Halley
 		virtual String getName() = 0;
 
 		virtual HalleyAPIInternal* createAPI() { return nullptr; }
+	};
 
-		static void registerPlugin(std::unique_ptr<Plugin> plugin);
-		static std::vector<Plugin*> getPlugins(PluginType type);
+	class IPluginRegistry
+	{
+	public:
+		virtual ~IPluginRegistry() {}
+		virtual void registerPlugin(std::unique_ptr<Plugin> plugin) = 0;
+		virtual std::vector<Plugin*> getPlugins(PluginType type) = 0;
 	};
 }

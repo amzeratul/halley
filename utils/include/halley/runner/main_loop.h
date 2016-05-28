@@ -3,7 +3,7 @@
 
 namespace Halley
 {
-	class GameReloader;
+	class GameLoader;
 	class HalleyAPI;
 
 	class IMainLoopable
@@ -22,12 +22,12 @@ namespace Halley
 	class MainLoop
 	{
 	public:
-		MainLoop(IMainLoopable& core, GameReloader& reloader);
+		MainLoop(IMainLoopable& core, GameLoader& reloader);
 		void run();
 
 	private:
 		IMainLoopable& target;
-		GameReloader& reloader;
+		GameLoader& reloader;
 
 		unsigned int delay = 0;
 		int fps;

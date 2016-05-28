@@ -6,9 +6,11 @@
 #include <halley/time/halleytime.h>
 #include <halley/time/stopwatch.h>
 #include <halley/support/redirect_stream.h>
-#include "halley/core/api/core_api.h"
-#include "halley/core/stage/stage.h"
-#include "main_loop.h"
+#include <halley/core/stage/stage.h>
+#include <halley/runner/main_loop.h>
+#include <halley/plugin/plugin.h>
+#include <halley/core/api/halley_api_internal.h>
+#include "halley_statics.h"
 
 namespace Halley
 {
@@ -18,12 +20,14 @@ namespace Halley
 	class Painter;
 	class Camera;
 	class RenderTarget;
+	class Environment;
 
-	class Core final : public CoreAPI, public IMainLoopable
+	class Core final : public CoreAPIInternal, public IMainLoopable
 	{
 	public:
 		Core(std::unique_ptr<Game> game, std::vector<String> args);
 		~Core();
+		void init();
 
 		void setStage(StageID stage) override;
 		void setStage(std::unique_ptr<Stage> stage);
@@ -39,9 +43,12 @@ namespace Halley
 		HalleyAPI& getAPI() const override { return *api; }
 
 		void onReloaded() override;
+		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
+		std::vector<Plugin*> getPlugins(PluginType type) override;
+
+		HalleyStatics& getStatics() { return statics; }
 
 	private:
-		void init(std::vector<String> args);
 		void deInit();
 
 		void initResources();
@@ -55,6 +62,7 @@ namespace Halley
 
 		std::array<StopwatchAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> timers;
 
+		std::unique_ptr<Environment> environment;
 		std::unique_ptr<Game> game;
 		std::unique_ptr<HalleyAPI> api;
 		std::unique_ptr<Resources> resources;
@@ -69,5 +77,8 @@ namespace Halley
 
 		bool running = true;
 		std::unique_ptr<RedirectStream> out;
+
+		std::map<PluginType, std::vector<std::unique_ptr<Plugin>>> plugins;
+		HalleyStatics statics;
 	};
 }

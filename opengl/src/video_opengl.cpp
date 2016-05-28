@@ -6,6 +6,9 @@
 #include "texture_opengl.h"
 #include "shader_opengl.h"
 #include "render_target_opengl.h"
+#include <halley/support/console.h>
+#include <halley/support/exception.h>
+#include <halley/support/debug.h>
 using namespace Halley;
 
 #ifdef _MSC_VER
@@ -184,16 +187,7 @@ void VideoOpenGL::initOpenGL()
 #endif
 	}
 
-	// Initialize GLEW
-#ifdef WITH_OPENGL
-	glewExperimental = true;
-	GLenum err = glewInit();
-	if (err != GLEW_OK) {
-		throw Exception(String("Error initializing GLEW: ") + reinterpret_cast<const char*>(glewGetErrorString(err)));
-	}
-	glGetError(); // discard error
-	glCheckError();
-#endif
+	initGlew();
 
 	// Print OpenGL data
 	std::cout << "OpenGL initialized." << std::endl;
@@ -213,6 +207,19 @@ void VideoOpenGL::initOpenGL()
 	std::cout << ConsoleColor() << std::endl;
 
 	setUpDebugCallback();
+}
+
+void VideoOpenGL::initGlew()
+{
+#ifdef WITH_OPENGL
+	glewExperimental = true;
+	GLenum err = glewInit();
+	if (err != GLEW_OK) {
+		throw Exception(String("Error initializing GLEW: ") + reinterpret_cast<const char*>(glewGetErrorString(err)));
+	}
+	glGetError(); // discard error
+	glCheckError();
+#endif
 }
 
 void VideoOpenGL::clearScreen()
@@ -467,6 +474,11 @@ void VideoOpenGL::flip()
 	for (const auto& m: msgs) {
 		m();
 	}
+}
+
+void VideoOpenGL::reload()
+{
+	initGlew();
 }
 
 void VideoOpenGL::setFullscreen(bool fs)

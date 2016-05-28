@@ -6,8 +6,6 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "game/core.h"
 #include "game/game.h"
-#include "game/main_loop.h"
-#include "game/halley_main.h"
 
 #include "graphics/blend.h"
 #include "graphics/painter.h"

@@ -2,12 +2,12 @@
 
 #include <halley/support/console.h>
 #include <halley/support/debug.h>
+#include <halley/runner/main_loop.h>
+#include <halley/runner/game_loader.h>
 
-#include "game/main_loop.h"
-#include "game/core.h"
-#include "game/game_reloader.h"
+#include "halley/core/api/halley_api.h"
 
-Halley::MainLoop::MainLoop(IMainLoopable& target, GameReloader& reloader)
+Halley::MainLoop::MainLoop(IMainLoopable& target, GameLoader& reloader)
 	: target(target)
 	, reloader(reloader)
 {
@@ -38,6 +38,7 @@ void Halley::MainLoop::runLoop()
 
 	Time fixedDelta = 1.0 / fps;
 
+	startTime = targetTime = lastTime = api.system->getTicks();
 	while (isRunning()) {
 		if (target.transitionStage()) {
 			// Reset counters

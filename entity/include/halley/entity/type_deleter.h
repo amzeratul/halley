@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 namespace Halley {
 	class TypeDeleterBase
 	{
@@ -13,7 +15,7 @@ namespace Halley {
 	public:
 		static void set(int idx, TypeDeleterBase* deleter)
 		{
-			auto& m = getDeleters();
+			auto& m = *getDeleters();
 			if (m.size() <= idx) {
 				m.resize(static_cast<size_t>(idx * 1.5f + 1));
 			}
@@ -22,14 +24,12 @@ namespace Halley {
 
 		static TypeDeleterBase* get(int uid)
 		{
-			return getDeleters()[uid];
+			return (*getDeleters())[uid];
 		}
 
-	private:
-
-		static std::vector<TypeDeleterBase*>& getDeleters()
+		static std::vector<TypeDeleterBase*>*& getDeleters()
 		{
-			static std::vector<TypeDeleterBase*> map;
+			static std::vector<TypeDeleterBase*>* map;
 			return map;
 		}
 	};

@@ -3,6 +3,7 @@
 #include "halley/core/api/halley_api.h"
 #include "resources/resources.h"
 #include "halley/file_formats/json/json.h"
+#include <halley/file_formats/json_file.h>
 
 using namespace Halley;
 

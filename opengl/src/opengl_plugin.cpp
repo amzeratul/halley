@@ -1,4 +1,5 @@
 #include "video_opengl.h"
+#include <halley/plugin/plugin.h>
 
 namespace Halley {
 	
@@ -10,7 +11,7 @@ namespace Halley {
 	
 }
 
-void initOpenGLPlugin()
+void initOpenGLPlugin(Halley::IPluginRegistry &registry)
 {
-	Halley::Plugin::registerPlugin(std::make_unique<Halley::OpenGLPlugin>());
+	registry.registerPlugin(std::make_unique<Halley::OpenGLPlugin>());
 }

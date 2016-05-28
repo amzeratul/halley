@@ -2,6 +2,7 @@
 #include "api/halley_api.h"
 #include "sdl/system_sdl.h"
 #include "input/input.h"
+#include <halley/plugin/plugin.h>
 
 using namespace Halley;
 
@@ -43,7 +44,7 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 {
 	std::unique_ptr<VideoAPIInternal> video;
 	if (flags & HalleyAPIFlags::Video) {
-		auto plugins = Plugin::getPlugins(PluginType::GraphicsAPI);
+		auto plugins = core->getPlugins(PluginType::GraphicsAPI);
 		if (plugins.size() > 0) {
 			video.reset(static_cast<VideoAPIInternal*>(plugins[0]->createAPI()));
 		} else {

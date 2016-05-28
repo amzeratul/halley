@@ -31,23 +31,29 @@ using namespace Halley;
 
 OS& Halley::OS::get()
 {
-	static OS* instance = nullptr;
-	if (!instance) {
+	return *osInstance;
+}
+
+void OS::setInstance(OS* os)
+{
+	osInstance = os;
+}
+
+OS* OS::createOS()
+{
 #if defined(_WIN32)
-		instance = new OSWin32();
+	return new OSWin32();
 #elif defined(__APPLE__)
-		instance = new OSMac();
+	return new OSMac();
 #elif defined(__ANDROID__)
-		instance = new OSAndroid();
+	return new OSAndroid();
 #elif defined(__IPHONEOS__)
-		instance = new OSiOS();
+	return new OSiOS();
 #elif defined(linux)
-        instance = new OSLinux();
+	return new OSLinux();
 #else
-		throw Exception("Unknown OS - please update os.cpp on Halley.");
+	throw Exception("Unknown OS - please update os.cpp on Halley.");
 #endif
-	}
-	return *instance;
 }
 
 void Halley::OS::createLogConsole(String /*name*/)
@@ -67,3 +73,5 @@ Halley::String Halley::OS::makeDataPath(String appDataPath, String userProvidedP
 void Halley::OS::setConsoleColor(int, int)
 {
 }
+
+OS* OS::osInstance = nullptr;

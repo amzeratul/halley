@@ -137,9 +137,4 @@ namespace Halley {
 	{
 		add(std::make_unique<FileSystemResourceLocator>(path));
 	}
-
-	void ResourceLocator::addStandardFileSystem()
-	{
-		addFileSystem(Environment::getProgramPath());
-	}
 }
