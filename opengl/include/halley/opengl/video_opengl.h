@@ -41,6 +41,11 @@ namespace Halley {
 		void processEvent(SDL_Event& event) override;
 
 	private:
+		void printDebugInfo() const;
+		void createWindow();
+		void initOpenGL();
+		void clearScreen();
+
 		void updateWindowDimensions();
 		void setWindowSize(Vector2i windowSize);
 		void setUpDebugCallback();
@@ -62,6 +67,7 @@ namespace Halley {
 		bool running;
 		float scale;
 		float border;
+		int screenNumber;
 		SDL_Window* window;
 	};
 }

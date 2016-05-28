@@ -59,138 +59,28 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 		SDL_VideoInit(nullptr);
 	}
 
-	// Window size
-	Vector2i windowSize = _windowType == WindowType::Fullscreen ? _fullscreenSize : _windowedSize;
-
 #ifdef __ANDROID__
 	// Android-specific overrides, since it should always be fullscreen and on the actual window size
-	_fullscreen = true;
-	windowSize = VideoOpenGL::getScreenSize();
+	_windowType = WindowType::Fullscreen;
+	Vector2i windowSize = VideoOpenGL::getScreenSize();
+#else
+	Vector2i windowSize = _windowType == WindowType::Fullscreen ? _fullscreenSize : _windowedSize;
 #endif
 
-	// Debug info
-	std::cout << std::endl << ConsoleColor(Console::GREEN) << "Initializing OpenGL...\n" << ConsoleColor();
-	std::cout << "Drivers available:\n";
-	for (int i = 0; i < SDL_GetNumVideoDrivers(); i++) {
-		std::cout << "\t" << i << ": " << SDL_GetVideoDriver(i) << "\n";
-	}
-	std::cout << "Video driver: " << ConsoleColor(Console::DARK_GREY) << SDL_GetCurrentVideoDriver() << ConsoleColor() << std::endl;
-	std::cout << "Window size: " << ConsoleColor(Console::DARK_GREY) << windowSize.x << "x" << windowSize.y << ConsoleColor() << std::endl;
+	printDebugInfo();
 
-	// Store values
 	fullscreenSize = _fullscreenSize;
 	windowedSize = _windowedSize;
 	windowType = _windowType;
 	virtualSize = _virtualSize;
+	screenNumber = screen;
 	setWindowSize(windowSize);
-
-	// Window name
-	//String name = game.getName();
-	//if (game.isDevBuild()) name += " [DEV BUILD]";
-	String name = "Halley game";
-
+	
 	if (!wasInit) {
-		// Set flags and GL attributes
-		int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS;
-		if (_windowType == WindowType::BorderlessWindow) {
-			flags |= SDL_WINDOW_BORDERLESS;
-		} else if (_windowType == WindowType::ResizableWindow) {
-			flags |= SDL_WINDOW_RESIZABLE;
-		} else if (_windowType == WindowType::Fullscreen) {
-			flags |= SDL_WINDOW_FULLSCREEN;
-		}
-		
-		// Context options
-#if defined(WITH_OPENGL_ES2)
-		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
-		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 0);
-#else
-		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-#ifdef _DEBUG
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-#endif
-		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-#endif
-
-		// Window position
-		Vector2i winPos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-		if (screen < SDL_GetNumVideoDisplays()) {
-			SDL_Rect rect;
-			SDL_GetDisplayBounds(screen, &rect);
-			winPos.x = rect.x + (rect.w - windowSize.x) / 2;
-			winPos.y = rect.y + (rect.h - windowSize.y) / 2;
-		}
-
-		// Create window
-		window = SDL_CreateWindow(name.c_str(), winPos.x, winPos.y, windowSize.x, windowSize.y, flags);
-		if (!window)
-			throw Exception(String("Error creating SDL window: ") + SDL_GetError());
-#ifndef __ANDROID__
-		SDL_SetWindowFullscreen(window, _windowType == WindowType::Fullscreen ? SDL_TRUE : SDL_FALSE);
-#endif
-
-		// Create OpenGL context
-		SDL_GLContext context = SDL_GL_CreateContext(window);
-		if (!context)
-			throw Exception(String("Error creating OpenGL context: ") + SDL_GetError());
-		if (SDL_GL_MakeCurrent(window, context) < 0)
-			throw Exception(String("Error setting OpenGL context: ") + SDL_GetError());
-
-		// VSync
+		createWindow();
+		initOpenGL();
 		SDL_GL_SetSwapInterval(vsync ? 1 : 0);
-
-		// Start loader thread
-		if (!running) {
-#ifdef ____WIN32__
-			vid->loaderThread = TextureLoadQueue::startLoaderThread(window, &vid->running);
-			vid->running = true;
-#endif
-		}
-
-		// Initialize GLEW
-#ifdef WITH_OPENGL
-		glewExperimental = true;
-		GLenum err = glewInit();
-		if (err != GLEW_OK) {
-			throw Exception(String("Error initializing GLEW: ") + reinterpret_cast<const char*>(glewGetErrorString(err)));
-		}
-		glGetError(); // discard error
-		glCheckError();
-#endif
-
-		// Print OpenGL data
-		std::cout << "OpenGL initialized." << std::endl;
-		std::cout << "\tVersion: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_VERSION) << ConsoleColor() << std::endl;
-		std::cout << "\tVendor: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_VENDOR) << ConsoleColor() << std::endl;
-		std::cout << "\tRenderer: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_RENDERER) << ConsoleColor() << std::endl;
-		std::cout << "\tGLSL Version: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_SHADING_LANGUAGE_VERSION) << ConsoleColor() << std::endl;
-
-		// Print extensions
-		std::cout << "\tExtensions: " << ConsoleColor(Console::DARK_GREY);
-		int nExtensions;
-		glGetIntegerv(GL_NUM_EXTENSIONS, &nExtensions);
-		for (int i = 0; i < nExtensions; i++) {
-			String str = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
-			std::cout << str << " ";
-		}
-		std::cout << ConsoleColor() << std::endl;
-
-		setUpDebugCallback();
 	} else {
-		// Re-initializing
-
 		// Update window
 #ifndef __ANDROID__
 		if (_windowType != WindowType::Fullscreen) SDL_SetWindowFullscreen(window, SDL_FALSE);
@@ -200,6 +90,133 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 #endif
 	}
 
+	clearScreen();
+	SDL_ShowWindow(window);
+
+	initialized = true;
+	std::cout << ConsoleColor(Console::GREEN) << "Video init done.\n" << ConsoleColor() << std::endl;
+}
+
+void VideoOpenGL::printDebugInfo() const
+{
+	std::cout << std::endl << ConsoleColor(Console::GREEN) << "Initializing OpenGL Video Display...\n" << ConsoleColor();
+	std::cout << "Drivers available:\n";
+	for (int i = 0; i < SDL_GetNumVideoDrivers(); i++) {
+		std::cout << "\t" << i << ": " << SDL_GetVideoDriver(i) << "\n";
+	}
+	std::cout << "Video driver: " << ConsoleColor(Console::DARK_GREY) << SDL_GetCurrentVideoDriver() << ConsoleColor() << std::endl;
+	std::cout << "Window size: " << ConsoleColor(Console::DARK_GREY) << windowSize.x << "x" << windowSize.y << ConsoleColor() << std::endl;
+}
+
+void VideoOpenGL::createWindow()
+{
+	// Set flags and GL attributes
+	int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS;
+	if (windowType == WindowType::BorderlessWindow) {
+		flags |= SDL_WINDOW_BORDERLESS;
+	} else if (windowType == WindowType::ResizableWindow) {
+		flags |= SDL_WINDOW_RESIZABLE;
+	} else if (windowType == WindowType::Fullscreen) {
+		flags |= SDL_WINDOW_FULLSCREEN;
+	}
+
+	// Context options
+#if defined(WITH_OPENGL_ES2)
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 0);
+#else
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+#ifdef _DEBUG
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#endif
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#endif
+
+	// Window position
+	Vector2i winPos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	if (screenNumber < SDL_GetNumVideoDisplays()) {
+		SDL_Rect rect;
+		SDL_GetDisplayBounds(screenNumber, &rect);
+		winPos.x = rect.x + (rect.w - windowSize.x) / 2;
+		winPos.y = rect.y + (rect.h - windowSize.y) / 2;
+	}
+
+	// Window name
+	//String name = game.getName();
+	//if (game.isDevBuild()) name += " [DEV BUILD]";
+	String name = "Halley game";
+
+	// Create window
+	window = SDL_CreateWindow(name.c_str(), winPos.x, winPos.y, windowSize.x, windowSize.y, flags);
+	if (!window)
+		throw Exception(String("Error creating SDL window: ") + SDL_GetError());
+#ifndef __ANDROID__
+	SDL_SetWindowFullscreen(window, windowType == WindowType::Fullscreen ? SDL_TRUE : SDL_FALSE);
+#endif
+}
+
+void VideoOpenGL::initOpenGL()
+{
+	// Create OpenGL context
+	SDL_GLContext context = SDL_GL_CreateContext(window);
+	if (!context)
+		throw Exception(String("Error creating OpenGL context: ") + SDL_GetError());
+	if (SDL_GL_MakeCurrent(window, context) < 0)
+		throw Exception(String("Error setting OpenGL context: ") + SDL_GetError());
+	
+	// Start loader thread
+	if (!running) {
+#ifdef ____WIN32__
+		vid->loaderThread = TextureLoadQueue::startLoaderThread(window, &vid->running);
+		vid->running = true;
+#endif
+	}
+
+	// Initialize GLEW
+#ifdef WITH_OPENGL
+	glewExperimental = true;
+	GLenum err = glewInit();
+	if (err != GLEW_OK) {
+		throw Exception(String("Error initializing GLEW: ") + reinterpret_cast<const char*>(glewGetErrorString(err)));
+	}
+	glGetError(); // discard error
+	glCheckError();
+#endif
+
+	// Print OpenGL data
+	std::cout << "OpenGL initialized." << std::endl;
+	std::cout << "\tVersion: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_VERSION) << ConsoleColor() << std::endl;
+	std::cout << "\tVendor: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_VENDOR) << ConsoleColor() << std::endl;
+	std::cout << "\tRenderer: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_RENDERER) << ConsoleColor() << std::endl;
+	std::cout << "\tGLSL Version: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_SHADING_LANGUAGE_VERSION) << ConsoleColor() << std::endl;
+
+	// Print extensions
+	std::cout << "\tExtensions: " << ConsoleColor(Console::DARK_GREY);
+	int nExtensions;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &nExtensions);
+	for (int i = 0; i < nExtensions; i++) {
+		String str = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+		std::cout << str << " ";
+	}
+	std::cout << ConsoleColor() << std::endl;
+
+	setUpDebugCallback();
+}
+
+void VideoOpenGL::clearScreen()
+{
 	// Clear buffer
 	glCheckError();
 	glClearColor(0, 0, 0, 1);
@@ -214,11 +231,6 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 	flip();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	flip();
-
-	// Show window
-	SDL_ShowWindow(window);
-	initialized = true;
-	std::cout << ConsoleColor(Console::GREEN) << "Video init done.\n" << ConsoleColor() << std::endl;
 }
 
 void VideoOpenGL::setWindowSize(Vector2i winSize)
