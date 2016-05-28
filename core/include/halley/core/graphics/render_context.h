@@ -8,7 +8,7 @@ namespace Halley
 
 	class RenderContext
 	{
-		friend class CoreRunner;
+		friend class Core;
 
 	public:
 		void bind(std::function<void(Painter&)> f)

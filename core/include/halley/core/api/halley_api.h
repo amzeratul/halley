@@ -35,7 +35,7 @@ namespace Halley
 		}
 
 	private:
-		friend class CoreRunner;
+		friend class Core;
 
 		HalleyAPI(CoreAPIInternal* core, std::unique_ptr<SystemAPIInternal> system, std::unique_ptr<VideoAPIInternal> video, std::unique_ptr<InputAPIInternal> input);
 		static std::unique_ptr<HalleyAPI> create(CoreAPIInternal* core, int flags);

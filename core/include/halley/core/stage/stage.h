@@ -42,7 +42,7 @@ namespace Halley
 		}
 
 	private:
-		friend class CoreRunner;
+		friend class Core;
 
 		void doInit(HalleyAPI* api);
 		void doDeInit();

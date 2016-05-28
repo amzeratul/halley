@@ -15,7 +15,7 @@ namespace Halley
 
 	class HalleyAPIInternal
 	{
-		friend class CoreRunner;
+		friend class Core;
 		friend class HalleyAPI;
 
 	public:

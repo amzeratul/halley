@@ -6,7 +6,7 @@ namespace Halley
 {
 	class Environment
 	{
-		friend class CoreRunner;
+		friend class Core;
 
 	public:
 		static String getProgramPath() { return getInstance()->programPath;	}

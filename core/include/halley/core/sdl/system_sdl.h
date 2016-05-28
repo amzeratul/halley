@@ -12,7 +12,7 @@ namespace Halley
 
 	protected:
 		friend class HalleyAPI;
-		friend class CoreRunner;
+		friend class Core;
 
 		void init() override;
 		void deInit() override;

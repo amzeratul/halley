@@ -18,11 +18,11 @@ namespace Halley
 	class Camera;
 	class RenderTarget;
 
-	class CoreRunner final : public CoreAPI
+	class Core final : public CoreAPI
 	{
 	public:
-		CoreRunner(std::unique_ptr<Game> game, std::vector<String> args);
-		~CoreRunner();
+		Core(std::unique_ptr<Game> game, std::vector<String> args);
+		~Core();
 
 		void setStage(StageID stage) override;
 		void setStage(std::unique_ptr<Stage> stage);

@@ -8,11 +8,11 @@ namespace Halley
 		int main(int argc, char* argv[])
 		{
 			try {
-				Halley::StringArray args;
+				StringArray args;
 				for (int i = 0; i < argc; i++) {
 					args.push_back(argv[i]);
 				}
-				CoreRunner runner(std::make_unique<T>(), args);
+				Core runner(std::make_unique<T>(), args);
 				return 0;
 			} catch (std::exception& e) {
 				std::cout << "Unhandled std::exception: " << e.what() << std::endl;

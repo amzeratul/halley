@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "halley/core/game/core_runner.h"
+#include "halley/core/game/core.h"
 #include "halley/core/game/game.h"
 #include "halley/core/game/environment.h"
 #include "api/halley_api.h"
@@ -15,16 +15,16 @@
 
 using namespace Halley;
 
-CoreRunner::CoreRunner(std::unique_ptr<Game> game, std::vector<String> args)
+Core::Core(std::unique_ptr<Game> game, std::vector<String> args)
 {
 	run(std::move(game), args);
 }
 
-CoreRunner::~CoreRunner()
+Core::~Core()
 {
 }
 
-int CoreRunner::run(std::unique_ptr<Game> g, std::vector<String> args)
+int Core::run(std::unique_ptr<Game> g, std::vector<String> args)
 {
 	game = std::move(g);
 	
@@ -68,7 +68,7 @@ int CoreRunner::run(std::unique_ptr<Game> g, std::vector<String> args)
 	}
 }
 
-void CoreRunner::init(std::vector<String> args)
+void Core::init(std::vector<String> args)
 {
 	// Console
 	if (game->isDevBuild()) {
@@ -116,7 +116,7 @@ void CoreRunner::init(std::vector<String> args)
 	}
 }
 
-void CoreRunner::deInit()
+void Core::deInit()
 {
 	// Deinit game
 	game->deInit();
@@ -142,7 +142,7 @@ void CoreRunner::deInit()
 #endif
 }
 
-void CoreRunner::initResources()
+void Core::initResources()
 {
 	auto locator = std::make_unique<ResourceLocator>();
 	game->initResourceLocator(*locator);
@@ -150,7 +150,7 @@ void CoreRunner::initResources()
 	StandardResources::initialize(*resources);
 }
 
-void CoreRunner::pumpEvents(Time time)
+void Core::pumpEvents(Time time)
 {
 	auto video = dynamic_cast<VideoAPIInternal*>(&*api->video);
 	auto input = dynamic_cast<InputAPIInternal*>(&*api->input);
@@ -158,7 +158,7 @@ void CoreRunner::pumpEvents(Time time)
 	running = api->system->generateEvents(video, input);
 }
 
-void CoreRunner::onFixedUpdate(Time time)
+void Core::onFixedUpdate(Time time)
 {
 	auto& t = timers[int(TimeLine::FixedUpdate)];
 	t.beginSample();
@@ -173,7 +173,7 @@ void CoreRunner::onFixedUpdate(Time time)
 	t.endSample();
 }
 
-void CoreRunner::onVariableUpdate(Time time)
+void Core::onVariableUpdate(Time time)
 {
 	auto& t = timers[int(TimeLine::VariableUpdate)];
 	t.beginSample();
@@ -187,7 +187,7 @@ void CoreRunner::onVariableUpdate(Time time)
 	t.endSample();
 }
 
-void CoreRunner::onRender(Time)
+void Core::onRender(Time)
 {
 	auto& t = timers[int(TimeLine::Render)];
 	t.beginSample();
@@ -208,13 +208,13 @@ void CoreRunner::onRender(Time)
 	t.endSample();
 }
 
-void CoreRunner::handleException(std::exception& e)
+void Core::handleException(std::exception& e)
 {
 	std::cout << ConsoleColor(Console::RED) << "\n\nUnhandled exception: " << ConsoleColor(Console::DARK_RED) << e.what() << ConsoleColor() << std::endl;
 	crashed = true;
 }
 
-void CoreRunner::showComputerInfo() const
+void Core::showComputerInfo() const
 {
 	time_t rawtime;
 	time(&rawtime);
@@ -232,39 +232,39 @@ void CoreRunner::showComputerInfo() const
 	std::cout << "\tTime: " << ConsoleColor(Console::DARK_GREY) << curTime << ConsoleColor() << "\n" << std::endl;
 }
 
-void CoreRunner::setStage(StageID stage)
+void Core::setStage(StageID stage)
 {
 	setStage(game->makeStage(stage));
 }
 
-void CoreRunner::setStage(std::unique_ptr<Stage> next)
+void Core::setStage(std::unique_ptr<Stage> next)
 {
 	nextStage = std::move(next);
 	pendingStageTransition = true;
 }
 
-void CoreRunner::quit()
+void Core::quit()
 {
 	std::cout << "Game terminating via CoreAPI::quit()." << std::endl;
 	running = false;
 }
 
-Resources& CoreRunner::getResources()
+Resources& Core::getResources()
 {
 	return *resources;
 }
 
-long long CoreRunner::getAverageTime(TimeLine tl) const
+long long Core::getAverageTime(TimeLine tl) const
 {
 	return timers[int(tl)].averageElapsedNanoSeconds();
 }
 
-long long CoreRunner::getElapsedTime(TimeLine tl) const
+long long Core::getElapsedTime(TimeLine tl) const
 {
 	return timers[int(tl)].lastElapsedNanoSeconds();
 }
 
-void CoreRunner::transitionStage()
+void Core::transitionStage()
 {
 	// If it's not running anymore, reset stage
 	if (!running && currentStage) {
@@ -295,7 +295,7 @@ void CoreRunner::transitionStage()
 	}
 }
 
-void CoreRunner::runMainLoop(bool capFrameRate, int fps)
+void Core::runMainLoop(bool capFrameRate, int fps)
 {
 	running = true;
 	transitionStage();

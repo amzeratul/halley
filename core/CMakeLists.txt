@@ -4,7 +4,7 @@ include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} "include" "include/
 
 set(SOURCES
         "src/api/halley_api.cpp"
-        "src/core/core_runner.cpp"
+        "src/core/core.cpp"
         "src/core/environment.cpp"
         "src/graphics/camera.cpp"
         "src/graphics/material/material.cpp"
@@ -57,7 +57,7 @@ set(HEADERS
         "include/halley/core/api/system_api.h"
         "include/halley/core/api/video_api.h"
         "include/halley/core/external/irunner.h"
-        "include/halley/core/game/core_runner.h"
+        "include/halley/core/game/core.h"
         "include/halley/core/game/environment.h"
         "include/halley/core/game/game.h"
         "include/halley/core/graphics/blend.h"
