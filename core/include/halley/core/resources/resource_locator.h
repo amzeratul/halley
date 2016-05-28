@@ -47,7 +47,6 @@ namespace Halley {
 	public:
 		void add(std::unique_ptr<IResourceLocatorProvider> locator);
 		void addFileSystem(String path);
-		void addStandardFileSystem();
 		
 		std::unique_ptr<ResourceData> getResource(String resource, bool stream);
 		std::unique_ptr<ResourceData> tryGetResource(String resource, bool stream);

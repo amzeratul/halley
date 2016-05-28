@@ -9,15 +9,14 @@ namespace Halley
 		friend class Core;
 
 	public:
-		static String getProgramPath() { return getInstance()->programPath;	}
-		static String getDataPath() { return getInstance()->dataPath; }
-		static String getGameDataPath() { return getInstance()->gameDataPath; }
+		String getProgramPath() const { return programPath;	}
+		String getDataPath() const { return dataPath; }
+		String getGameDataPath() const { return gameDataPath; }
 
 	private:
-		static void parseProgramPath(String path);
-		static void setDataPath(String pathName);
+		void parseProgramPath(String path);
+		void setDataPath(String pathName);
 
-		static Environment* getInstance();
 		String programPath;
 		String dataPath;
 		String gameDataPath;

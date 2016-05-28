@@ -14,7 +14,7 @@ namespace Halley
 		virtual ~Game() = default;
 
 		virtual int initPlugins(IPluginRegistry &registry) = 0;
-		virtual void initResourceLocator(ResourceLocator&) {}
+		virtual void initResourceLocator(String, ResourceLocator&) {}
 
 		virtual String getName() const = 0;
 		virtual String getDataPath() const = 0;

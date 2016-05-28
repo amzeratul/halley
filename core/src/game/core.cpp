@@ -24,10 +24,11 @@ Core::Core(std::unique_ptr<Game> g, std::vector<String> args)
 	game = std::move(g);
 
 	// Set paths
+	environment = std::make_unique<Environment>();
 	if (args.size() > 0) {
-		Environment::parseProgramPath(args[0]);
+		environment->parseProgramPath(args[0]);
 	}
-	Environment::setDataPath(game->getDataPath());
+	environment->setDataPath(game->getDataPath());
 
 	// Initialize
 	init(StringArray(args.begin() + 1, args.end()));
@@ -46,6 +47,7 @@ void Core::init(std::vector<String> args)
 	if (game->isDevBuild()) {
 		OS::get().createLogConsole(game->getName());
 	}
+
 	std::cout << ConsoleColor(Console::GREEN) << "Halley is initializing..." << ConsoleColor() << std::endl;
 
 	// Debugging initialization
@@ -59,9 +61,9 @@ void Core::init(std::vector<String> args)
 	srand(seed);
 
 	// Redirect output
-	auto outStream = std::make_shared<std::ofstream>(Environment::getDataPath() + "log.txt", std::ios::out);
+	auto outStream = std::make_shared<std::ofstream>(environment->getDataPath() + "log.txt", std::ios::out);
 	out = std::make_unique<RedirectStreamToStream>(std::cout, outStream, false);
-	std::cout << "Data path is " << ConsoleColor(Console::DARK_GREY) << Environment::getDataPath() << ConsoleColor() << std::endl;
+	std::cout << "Data path is " << ConsoleColor(Console::DARK_GREY) << environment->getDataPath() << ConsoleColor() << std::endl;
 
 	// Computer info
 #ifndef _DEBUG
@@ -116,7 +118,7 @@ void Core::deInit()
 void Core::initResources()
 {
 	auto locator = std::make_unique<ResourceLocator>();
-	game->initResourceLocator(*locator);
+	game->initResourceLocator(environment->getProgramPath(), *locator);
 	resources = std::make_unique<Resources>(std::move(locator), &*api);
 	StandardResources::initialize(*resources);
 }

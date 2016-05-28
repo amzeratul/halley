@@ -21,9 +21,9 @@ public:
 		return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input;
 	}
 
-	void initResourceLocator(ResourceLocator& locator) override
+	void initResourceLocator(String dataPath, ResourceLocator& locator) override
 	{
-		locator.addStandardFileSystem();
+		locator.addFileSystem(dataPath);
 	}
 
 	std::unique_ptr<Stage> makeStage(StageID id) override

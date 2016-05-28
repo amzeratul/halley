@@ -10,8 +10,6 @@
 
 void Halley::Environment::parseProgramPath(String path)
 {
-	auto instance = getInstance();
-
 #ifdef __APPLE__
 	// Ignore parameter and use our own path
 	char buffer[2048];
@@ -25,17 +23,17 @@ void Halley::Environment::parseProgramPath(String path)
 	for (size_t i = 0; i<len; i++) {
 		if (path[i] == '/' || path[i] == '\\') last = i + 1;
 	}
-	instance->programPath = path.left(last);
+	programPath = path.left(last);
 
 #ifdef __APPLE__
-	std::cout << "Setting CWD to " << instance->programPath << std::endl;
-	chdir(instance->programPath.c_str());
+	std::cout << "Setting CWD to " << programPath << std::endl;
+	chdir(programPath.c_str());
 #endif	
 
 #ifdef __ANDROID__
-	instance->gameDataPath = ""; // Inside "assets"
+	gameDataPath = ""; // Inside "assets"
 #else
-	instance->gameDataPath = instance->programPath;
+	gameDataPath = programPath;
 #endif
 }
 
@@ -49,14 +47,5 @@ void Halley::Environment::setDataPath(String pathName)
 		create_directories(p);
 	}
 
-	getInstance()->dataPath = p.generic_string();
-}
-
-Halley::Environment* Halley::Environment::getInstance()
-{
-	static Environment* instance = nullptr;
-	if (!instance) {
-		instance = new Environment();
-	}
-	return instance;
+	dataPath = p.generic_string();
 }
