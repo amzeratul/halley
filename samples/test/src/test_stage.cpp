@@ -5,6 +5,7 @@
 
 using namespace Halley;
 
+/*
 #include <windows.h>
 #include <stdio.h>
 void test()
@@ -37,6 +38,7 @@ void test()
 	}
 	printf("\nXOR of all memory: %016llx, after %lld bytes\n", value, totalBytes);
 }
+*/
 
 void TestStage::init()
 {
@@ -68,10 +70,6 @@ void TestStage::onFixedUpdate(Time time)
 	auto& key = getInputAPI().getKeyboard();
 	if (key.isButtonDown(Keys::Esc)) {
 		getCoreAPI().quit();
-	}
-	if (key.isButtonDown(Keys::Space)) {
-		printf("%016p\n", this);
-		test();
 	}
 }
 

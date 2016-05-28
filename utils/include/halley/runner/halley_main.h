@@ -46,12 +46,19 @@ namespace Halley
 	};
 }
 
-// Macro to implement program
-#define HalleyGame(T) int main(int argc, char* argv[]) { return Halley::HalleyMain::main<T>(argc, argv); }
-
 #ifdef _WIN32
-	#define HALLEY_EXPORT extern "C" __declspec(dllexport)
+#define HALLEY_EXPORT extern "C" __declspec(dllexport)
 	#pragma comment(lib, "SDL2.lib")
 #else
-	#define HALLEY_EXPORT
+#define HALLEY_EXPORT
+#endif
+
+// Macro to implement program
+#if defined(HALLEY_EXECUTABLE)
+	#define HalleyGame(T) int main(int argc, char* argv[]) { return Halley::HalleyMain::main<T>(argc, argv); }
+#elif defined(HALLEY_SHARED_LIBRARY)
+	#define HalleyGame(T) \
+		HALLEY_EXPORT IHalleyEntryPoint* createHalleyEntry() { return new HalleyEntryPoint<T>(); } \
+		HALLEY_EXPORT void deleteHalleyEntry(IHalleyEntryPoint* entry) { delete entry; } \
+		HALLEY_EXPORT void setupStatics(HalleyStatics* statics) { statics->setup(); }
 #endif

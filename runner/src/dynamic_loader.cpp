@@ -1,7 +1,5 @@
 #include "dynamic_loader.h"
-#include <halley/core/game/game.h>
 #include <halley/runner/halley_main.h>
-#include "symbol_loader.h"
 #include "memory_patcher.h"
 
 using namespace Halley;
@@ -48,10 +46,16 @@ void DynamicGameLoader::setCore(Core& c)
 	setStatics();
 }
 
+#ifdef _WIN32
+#define STDCALL __stdcall
+#else
+#define STDCALL
+#endif
+
 void DynamicGameLoader::load()
 {
 	lib.load(true);
-	auto createHalleyEntry = reinterpret_cast<IHalleyEntryPoint*(__stdcall*)()>(lib.getFunction("createHalleyEntry"));
+	auto createHalleyEntry = reinterpret_cast<IHalleyEntryPoint*(STDCALL*)()>(lib.getFunction("createHalleyEntry"));
 	if (!createHalleyEntry) {
 		lib.unload();
 		throw Exception("createHalleyEntry not found.");
@@ -66,7 +70,7 @@ void DynamicGameLoader::load()
 void DynamicGameLoader::unload()
 {
 	if (entry) {
-		auto deleteHalleyEntry = reinterpret_cast<void(__stdcall*)(IHalleyEntryPoint*)>(lib.getFunction("deleteHalleyEntry"));
+		auto deleteHalleyEntry = reinterpret_cast<void(STDCALL*)(IHalleyEntryPoint*)>(lib.getFunction("deleteHalleyEntry"));
 		if (!deleteHalleyEntry) {
 			throw Exception("deleteHalleyEntry not found.");
 		}
@@ -89,7 +93,7 @@ void DynamicGameLoader::hotPatch()
 
 void DynamicGameLoader::setStatics()
 {
-	auto setupStatics = reinterpret_cast<void(__stdcall*)(HalleyStatics*)>(lib.getFunction("setupStatics"));
+	auto setupStatics = reinterpret_cast<void(STDCALL*)(HalleyStatics*)>(lib.getFunction("setupStatics"));
 	if (!setupStatics) {
 		throw Exception("setupStatics not found.");
 	}

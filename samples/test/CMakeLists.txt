@@ -53,7 +53,13 @@ set(LIBS
 		${EXTRA_LIBS}
 		)
 
-add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_sources} ${${PROJECT_NAME}_headers})
+if(MSVC)
+	add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_sources} ${${PROJECT_NAME}_headers})
+	add_definitions(-DHALLEY_SHARED_LIBRARY)
+else()
+	add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_sources} ${${PROJECT_NAME}_headers})
+	add_definitions(-DHALLEY_EXECUTABLE)
+endif()
 target_link_libraries(${PROJECT_NAME} ${LIBS})
 
 if(MSVC)

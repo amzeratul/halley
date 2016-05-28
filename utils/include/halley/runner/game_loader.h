@@ -4,6 +4,8 @@
 #include <halley/core/game/game.h>
 
 namespace Halley {
+	class Core;
+
 	class GameLoader
 	{
 	public:

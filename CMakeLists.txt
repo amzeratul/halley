@@ -35,6 +35,11 @@ else()
 
 endif()
 
+if (${UNIX})
+	set(EXTRA_OPTIONS ${EXTRA_OPTIONS} "-fPIC")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+endif()
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

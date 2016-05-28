@@ -62,19 +62,4 @@ public:
 	}
 };
 
-//HalleyGame(SampleGame);
-
-HALLEY_EXPORT IHalleyEntryPoint* createHalleyEntry()
-{
-	return new HalleyEntryPoint<SampleGame>();
-}
-
-HALLEY_EXPORT void deleteHalleyEntry(IHalleyEntryPoint* entry)
-{
-	delete entry;
-}
-
-HALLEY_EXPORT void setupStatics(HalleyStatics* statics)
-{
-	statics->setup();
-}
+HalleyGame(SampleGame);
