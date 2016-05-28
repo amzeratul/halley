@@ -38,6 +38,7 @@ void Halley::MainLoop::runLoop()
 
 	Time fixedDelta = 1.0 / fps;
 
+	startTime = targetTime = lastTime = api.system->getTicks();
 	while (isRunning()) {
 		if (target.transitionStage()) {
 			// Reset counters

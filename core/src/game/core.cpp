@@ -21,6 +21,8 @@ using namespace Halley;
 
 Core::Core(std::unique_ptr<Game> g, std::vector<String> args)
 {
+	statics.setup();
+
 	game = std::move(g);
 
 	// Set paths
@@ -30,26 +32,6 @@ Core::Core(std::unique_ptr<Game> g, std::vector<String> args)
 	}
 	environment->setDataPath(game->getDataPath());
 
-	statics.setup();
-
-	// Initialize
-	init(StringArray(args.begin() + 1, args.end()));
-}
-
-Core::~Core()
-{
-	deInit();
-}
-
-void Core::onReloaded()
-{
-	if (api->videoInternal) {
-		api->videoInternal->reload();
-	}
-}
-
-void Core::init(std::vector<String> args)
-{
 	// Console
 	if (game->isDevBuild()) {
 		OS::get().createLogConsole(game->getName());
@@ -71,7 +53,22 @@ void Core::init(std::vector<String> args)
 	auto outStream = std::make_shared<std::ofstream>(environment->getDataPath() + "log.txt", std::ios::out);
 	out = std::make_unique<RedirectStreamToStream>(std::cout, outStream, false);
 	std::cout << "Data path is " << ConsoleColor(Console::DARK_GREY) << environment->getDataPath() << ConsoleColor() << std::endl;
+}
 
+Core::~Core()
+{
+	deInit();
+}
+
+void Core::onReloaded()
+{
+	if (api->videoInternal) {
+		api->videoInternal->reload();
+	}
+}
+
+void Core::init()
+{
 	// Computer info
 #ifndef _DEBUG
 	showComputerInfo();

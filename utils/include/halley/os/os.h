@@ -38,6 +38,8 @@ namespace Halley {
 	public:
 		virtual ~OS() {}
 		static OS& get();
+		static void setInstance(OS* os);
+		static OS* createOS();
 
 		virtual void createLogConsole(String name);
 
@@ -45,5 +47,8 @@ namespace Halley {
 		virtual String getUserDataDir()=0;
 		virtual String makeDataPath(String appDataPath, String userProvidedPath);
 		virtual void setConsoleColor(int foreground, int background);
+
+	private:
+		static OS* osInstance;
 	};
 }
