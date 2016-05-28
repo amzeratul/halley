@@ -31,22 +31,22 @@ namespace Halley
 		long long getAverageTime(TimeLine tl) const override;
 		long long getElapsedTime(TimeLine tl) const override;
 
+		void onFixedUpdate(Time time);
+		void onVariableUpdate(Time time);
+		void onRender(Time time);
+
+		bool isRunning() const { return running; }
+		void transitionStage();
+		HalleyAPI& getAPI() const { return *api; }
+
 	private:
-		int run(std::unique_ptr<Game> game, std::vector<String> args);
-		void runMainLoop(bool capFrameRate, int fps);
 		void init(std::vector<String> args);
 		void deInit();
 
 		void initResources();
 
-		void onFixedUpdate(Time time);
-		void onVariableUpdate(Time time);
-		void onRender(Time time);
-
-		void handleException(std::exception& e);
 		void showComputerInfo() const;
 
-		void transitionStage();
 		void pumpEvents(Time time);
 
 		std::array<StopwatchAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> timers;
@@ -63,10 +63,7 @@ namespace Halley
 		std::unique_ptr<Stage> nextStage;
 		bool pendingStageTransition = false;
 
-		unsigned int delay = 0;
-		bool running = false;
-		bool crashed = false;
-
+		bool running = true;
 		std::unique_ptr<RedirectStream> out;
 	};
 }

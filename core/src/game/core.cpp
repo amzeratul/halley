@@ -15,57 +15,23 @@
 
 using namespace Halley;
 
-Core::Core(std::unique_ptr<Game> game, std::vector<String> args)
+Core::Core(std::unique_ptr<Game> g, std::vector<String> args)
 {
-	run(std::move(game), args);
+	game = std::move(g);
+
+	// Set paths
+	if (args.size() > 0) {
+		Environment::parseProgramPath(args[0]);
+	}
+	Environment::setDataPath(game->getDataPath());
+
+	// Initialize
+	init(StringArray(args.begin() + 1, args.end()));
 }
 
 Core::~Core()
 {
-}
-
-int Core::run(std::unique_ptr<Game> g, std::vector<String> args)
-{
-	game = std::move(g);
-	
-	bool initing = true;
-	try {
-		// Set paths
-		if (args.size() > 0) {
-			Environment::parseProgramPath(args[0]);
-		}
-		Environment::setDataPath(game->getDataPath());
-
-		// Initialize
-		init(StringArray(args.begin() + 1, args.end()));
-		initing = false;
-		runMainLoop(true, 60);
-	}
-	catch (std::exception& e) {
-		handleException(e);
-		return 1;
-	}
-	catch (...) {
-		if (initing) std::cout << ConsoleColor(Console::RED) << "Unknown unhandled exception in initialization" << ConsoleColor() << std::endl;
-		else std::cout << ConsoleColor(Console::RED) << "Unknown unhandled exception in main loop" << ConsoleColor() << std::endl;
-		crashed = true;
-		return 1;
-	}
-
-	try {
-		std::cout << "Game shutting down." << std::endl;
-		deInit();
-		return 0;
-	}
-	catch (std::exception& e) {
-		handleException(e);
-		return 1;
-	}
-	catch (...) {
-		std::cout << ConsoleColor(Console::RED) << "Unknown unhandled exception in deinitialization" << ConsoleColor() << std::endl;
-		crashed = true;
-		return 1;
-	}
+	deInit();
 }
 
 void Core::init(std::vector<String> args)
@@ -118,6 +84,8 @@ void Core::init(std::vector<String> args)
 
 void Core::deInit()
 {
+	std::cout << "Game shutting down." << std::endl;
+
 	// Deinit game
 	game->deInit();
 
@@ -134,12 +102,6 @@ void Core::deInit()
 	std::cout << "Goodbye!" << std::endl;
 	std::cout.flush();
 	out.reset();
-
-#ifdef _WIN32
-	if (crashed) {
-		system("pause");
-	}
-#endif
 }
 
 void Core::initResources()
@@ -206,12 +168,6 @@ void Core::onRender(Time)
 	}
 
 	t.endSample();
-}
-
-void Core::handleException(std::exception& e)
-{
-	std::cout << ConsoleColor(Console::RED) << "\n\nUnhandled exception: " << ConsoleColor(Console::DARK_RED) << e.what() << ConsoleColor() << std::endl;
-	crashed = true;
 }
 
 void Core::showComputerInfo() const
@@ -293,68 +249,4 @@ void Core::transitionStage()
 
 		pendingStageTransition = false;
 	}
-}
-
-void Core::runMainLoop(bool capFrameRate, int fps)
-{
-	running = true;
-	transitionStage();
-
-	std::cout << ConsoleColor(Console::GREEN) << "\nStarting main loop." << ConsoleColor() << std::endl;
-	Debug::trace("Game::runMainLoop begin");
-
-	using Uint32 = unsigned int;
-
-	// Set up the counters
-	if (api->video) {
-		api->video->flip();
-	}
-	Uint32 startTime = api->system->getTicks();
-	Uint32 targetTime = startTime;
-	Uint32 nSteps = 0;
-
-	while (running) {
-		Time delta = 1.0 / fps;
-
-		if (delay > 0) {
-			startTime += delay;
-			targetTime += delay;
-			delay = 0;
-		}
-		Uint32 curTime = api->system->getTicks();
-
-		// Got anything to do?
-		if (curTime >= targetTime) {
-			// Step until we're up-to-date
-			for (int i = 0; i < 10 && curTime >= targetTime; i++) {
-				// Fixed step
-				if (running) {
-					onFixedUpdate(delta);
-				}
-
-				nSteps++;
-				curTime = api->system->getTicks();
-				targetTime = startTime + Uint32(((long long)nSteps * 1000) / fps);
-			}
-		} else {
-			// Nope, release CPU
-			api->system->delay(1);
-		}
-
-		// Variable step
-		if (running) {
-			onVariableUpdate(delta);
-		}
-
-		// Render screen
-		if (running) {
-			onRender(delta);
-		}
-
-		// Switch stage
-		transitionStage();
-	}
-
-	Debug::trace("Game::runMainLoop end");
-	std::cout << ConsoleColor(Console::GREEN) << "Main loop terminated." << ConsoleColor() << std::endl;
 }

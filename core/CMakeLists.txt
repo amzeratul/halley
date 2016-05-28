@@ -4,8 +4,10 @@ include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} "include" "include/
 
 set(SOURCES
         "src/api/halley_api.cpp"
-        "src/core/core.cpp"
-        "src/core/environment.cpp"
+        "src/game/core.cpp"
+        "src/game/environment.cpp"
+		"src/game/halley_main.cpp"
+		"src/game/main_loop.cpp"
         "src/graphics/camera.cpp"
         "src/graphics/material/material.cpp"
         "src/graphics/material/material_definition.cpp"
@@ -60,6 +62,8 @@ set(HEADERS
         "include/halley/core/game/core.h"
         "include/halley/core/game/environment.h"
         "include/halley/core/game/game.h"
+		"include/halley/core/game/halley_main.h"
+		"include/halley/core/game/main_loop.h"
         "include/halley/core/graphics/blend.h"
         "include/halley/core/graphics/camera.h"
         "include/halley/core/graphics/material/material_definition.h"
@@ -111,8 +115,6 @@ set(HEADERS
         "include/halley/core/stage/stage.h"
         "include/halley/core/stage/stage_id.h"
         "include/halley/core/utils/world_stats.h"
-        "include/halley/halley_main.h"
-        "include/halley/main_wrapper.h"
         "src/prec.h"
         )
 
