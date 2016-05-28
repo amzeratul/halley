@@ -22,13 +22,17 @@ namespace Halley
 		void setCore(Core& core) override;
 
 	private:
+		String libName;
 		DynamicLibrary lib;
 		IHalleyEntryPoint* entry = nullptr;
 		Core* core = nullptr;
-
+		
+		std::vector<DebugSymbol> symbols;
+		std::vector<DebugSymbol> prevSymbols;
+		
 		void load();
 		void unload();
-		void hotPatch(const std::vector<DebugSymbol>& prevSymbols, const std::vector<DebugSymbol>& newSymbols);
+		void hotPatch();
 		void setStatics();
 	};
 }

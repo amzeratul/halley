@@ -7,7 +7,8 @@
 using namespace Halley;
 
 DynamicGameLoader::DynamicGameLoader(String name)
-	: lib(name)
+	: libName(name)
+	, lib(name)
 {
 	load();
 }
@@ -31,14 +32,10 @@ void DynamicGameLoader::reload()
 {
 	std::cout << ConsoleColor(Console::BLUE) << "\n**RELOADING GAME**" << std::endl;
 	Stopwatch timer;
-
-	auto prevSymbols = SymbolLoader::loadSymbols("");
-	unload();
 	
+	unload();
 	load();
-	auto newSymbols = SymbolLoader::loadSymbols("");
-
-	hotPatch(prevSymbols, newSymbols);
+	hotPatch();
 
 	timer.pause();
 	
@@ -59,6 +56,10 @@ void DynamicGameLoader::load()
 		lib.unload();
 		throw Exception("createHalleyEntry not found.");
 	}
+
+	prevSymbols = std::move(symbols);
+	symbols = SymbolLoader::loadSymbols(libName);
+
 	entry = createHalleyEntry();
 }
 
@@ -75,12 +76,12 @@ void DynamicGameLoader::unload()
 	lib.unload();
 }
 
-void DynamicGameLoader::hotPatch(const std::vector<DebugSymbol>& prev, const std::vector<DebugSymbol>& next)
+void DynamicGameLoader::hotPatch()
 {
 	setStatics();
 
 	MemoryPatchingMappings mappings;
-	mappings.generate(prev, next);
+	mappings.generate(prevSymbols, symbols);
 	MemoryPatcher::patch(mappings);
 
 	core->onReloaded();
