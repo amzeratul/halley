@@ -8,6 +8,7 @@
 #include <halley/support/redirect_stream.h>
 #include "halley/core/api/core_api.h"
 #include "halley/core/stage/stage.h"
+#include "main_loop.h"
 
 namespace Halley
 {
@@ -18,7 +19,7 @@ namespace Halley
 	class Camera;
 	class RenderTarget;
 
-	class Core final : public CoreAPI
+	class Core final : public CoreAPI, public IMainLoopable
 	{
 	public:
 		Core(std::unique_ptr<Game> game, std::vector<String> args);
@@ -31,19 +32,22 @@ namespace Halley
 		long long getAverageTime(TimeLine tl) const override;
 		long long getElapsedTime(TimeLine tl) const override;
 
-		void onFixedUpdate(Time time);
-		void onVariableUpdate(Time time);
-		void onRender(Time time);
+		void onFixedUpdate(Time time) override;
+		void onVariableUpdate(Time time) override;
+		bool isRunning() const override	{ return running; }
+		bool transitionStage() override;
+		HalleyAPI& getAPI() const override { return *api; }
 
-		bool isRunning() const { return running; }
-		bool transitionStage();
-		HalleyAPI& getAPI() const { return *api; }
+		void onReloaded() override;
 
 	private:
 		void init(std::vector<String> args);
 		void deInit();
 
 		void initResources();
+		void doFixedUpdate(Time time);
+		void doVariableUpdate(Time time);
+		void doRender(Time time);
 
 		void showComputerInfo() const;
 

@@ -41,8 +41,9 @@ int HalleyMain::staticMain(std::unique_ptr<Game> game, const StringArray& args)
 {
 	try {
 		Core core(std::move(game), args);
-		MainLoop loop(core);
-		loop.run(true, 60);
+		GameReloader reloader;
+		MainLoop loop(core, reloader);
+		loop.run();
 		return 0;
 	} catch (std::exception& e) {
 		std::cout << ConsoleColor(Console::RED) << "\n\nUnhandled exception: " << ConsoleColor(Console::DARK_RED) << e.what() << ConsoleColor() << std::endl;

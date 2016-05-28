@@ -34,6 +34,8 @@ Core::~Core()
 	deInit();
 }
 
+void Core::onReloaded() {}
+
 void Core::init(std::vector<String> args)
 {
 	// Console
@@ -125,6 +127,24 @@ void Core::pumpEvents(Time time)
 
 void Core::onFixedUpdate(Time time)
 {
+	if (isRunning()) {
+		doFixedUpdate(time);
+	}
+}
+
+void Core::onVariableUpdate(Time time)
+{
+	if (isRunning()) {
+		doVariableUpdate(time);
+	}
+
+	if (isRunning()) {
+		doRender(time);
+	}
+}
+
+void Core::doFixedUpdate(Time time)
+{
 	auto& t = timers[int(TimeLine::FixedUpdate)];
 	t.beginSample();
 
@@ -138,7 +158,7 @@ void Core::onFixedUpdate(Time time)
 	t.endSample();
 }
 
-void Core::onVariableUpdate(Time time)
+void Core::doVariableUpdate(Time time)
 {
 	auto& t = timers[int(TimeLine::VariableUpdate)];
 	t.beginSample();
@@ -152,7 +172,7 @@ void Core::onVariableUpdate(Time time)
 	t.endSample();
 }
 
-void Core::onRender(Time)
+void Core::doRender(Time)
 {
 	auto& t = timers[int(TimeLine::Render)];
 	t.beginSample();

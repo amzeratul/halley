@@ -4,14 +4,25 @@
 #include <halley/core/game/core.h>
 #include <iostream>
 
-Halley::MainLoop::MainLoop(Core& core)
-	: core(core)
+Halley::MainLoop::MainLoop(IMainLoopable& target, GameReloader& reloader)
+	: target(target)
+	, reloader(reloader)
 {
 }
 
-void Halley::MainLoop::run(bool capFrameRate, int fps)
+void Halley::MainLoop::run()
 {
-	auto& api = core.getAPI();
+	capFrameRate = true;
+	fps = 60;
+
+	do {
+		runLoop();
+	} while (tryReload());
+}
+
+void Halley::MainLoop::runLoop()
+{
+	auto& api = target.getAPI();
 
 	std::cout << ConsoleColor(Console::GREEN) << "\nStarting main loop." << ConsoleColor() << std::endl;
 	Debug::trace("MainLoop::run begin");
@@ -24,8 +35,8 @@ void Halley::MainLoop::run(bool capFrameRate, int fps)
 
 	Time fixedDelta = 1.0 / fps;
 
-	while (core.isRunning()) {
-		if (core.transitionStage()) {
+	while (isRunning()) {
+		if (target.transitionStage()) {
 			// Reset counters
 			startTime = targetTime = lastTime = api.system->getTicks();
 			nSteps = 0;
@@ -42,7 +53,7 @@ void Halley::MainLoop::run(bool capFrameRate, int fps)
 		if (curTime >= targetTime) {
 			// Step until we're up-to-date
 			for (int i = 0; i < 10 && curTime >= targetTime; i++) {
-				onFixedUpdate(fixedDelta);
+				target.onFixedUpdate(fixedDelta);
 
 				nSteps++;
 				curTime = api.system->getTicks();
@@ -53,7 +64,7 @@ void Halley::MainLoop::run(bool capFrameRate, int fps)
 			api.system->delay(1);
 		}
 
-		onVariableUpdate((curTime - lastTime) * 0.001f);
+		target.onVariableUpdate((curTime - lastTime) * 0.001f);
 		lastTime = curTime;
 	}
 
@@ -61,26 +72,16 @@ void Halley::MainLoop::run(bool capFrameRate, int fps)
 	std::cout << ConsoleColor(Console::GREEN) << "Main loop terminated." << ConsoleColor() << std::endl;
 }
 
-void Halley::MainLoop::onVariableUpdate(Time delta)
-{
-	std::cout << delta << " ";
-	if (core.isRunning()) {
-		core.onVariableUpdate(delta);
-	}
-
-	if (core.isRunning()) {
-		core.onRender(delta);
-	}
-}
-
-void Halley::MainLoop::onFixedUpdate(Time delta)
-{
-	if (core.isRunning()) {
-		core.onFixedUpdate(delta);
-	}
-}
-
 bool Halley::MainLoop::isRunning() const
 {
-	return core.isRunning();
+	return target.isRunning() && !reloader.needsToReload();
+}
+
+bool Halley::MainLoop::tryReload() const
+{
+	if (reloader.needsToReload()) {
+		reloader.reload();
+		return true;
+	}
+	return false;
 }

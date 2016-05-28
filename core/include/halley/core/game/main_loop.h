@@ -3,20 +3,46 @@
 
 namespace Halley
 {
-	class Core;
+	class HalleyAPI;
+
+	class IMainLoopable
+	{
+	public:
+		virtual ~IMainLoopable() {}
+
+		virtual HalleyAPI& getAPI() const = 0;
+		virtual bool transitionStage() = 0;
+		virtual bool isRunning() const = 0;
+		virtual void onVariableUpdate(Time delta) = 0;
+		virtual void onFixedUpdate(Time delta) = 0;
+		virtual void onReloaded() = 0;
+	};
+
+	class GameReloader
+	{
+	public:
+		virtual ~GameReloader() {}
+
+		virtual bool needsToReload() const { return false; }
+		virtual void reload() {}
+	};
 
 	class MainLoop
 	{
 	public:
-		MainLoop(Core& core);
-		void run(bool capFrameRate, int targetFps);
+		MainLoop(IMainLoopable& core, GameReloader& reloader);
+		void run();
 
 	private:
-		Core& core;
-		unsigned int delay = 0;
+		IMainLoopable& target;
+		GameReloader& reloader;
 
-		void onVariableUpdate(Time delta);
-		void onFixedUpdate(Time delta);
+		unsigned int delay = 0;
+		int fps;
+		bool capFrameRate;
+
+		void runLoop();
 		bool isRunning() const;
+		bool tryReload() const;
 	};
 }
