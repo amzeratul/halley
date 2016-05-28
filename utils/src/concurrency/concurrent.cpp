@@ -69,7 +69,7 @@ namespace Concurrent {
 	{
 #ifdef _WIN32
 #ifdef _DEBUG
-		SetThreadName((DWORD)-1, name.c_str());
+		SetThreadName(static_cast<DWORD>(-1), name.c_str());
 #endif
 #endif
 		threadName = name;

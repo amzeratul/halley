@@ -1,6 +1,7 @@
 #include <halley/os/os.h>
 #include "halley/core/game/environment.h"
 #include <iostream>
+#include <boost/filesystem.hpp>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -41,7 +42,14 @@ void Halley::Environment::parseProgramPath(String path)
 void Halley::Environment::setDataPath(String pathName)
 {
 	auto& os = OS::get();
-	getInstance()->dataPath = os.makeDataPath(os.getUserDataDir(), pathName);
+
+	using namespace boost::filesystem;
+	path p(os.makeDataPath(os.getUserDataDir(), pathName + "/").cppStr());
+	if (!exists(p)) {
+		create_directories(p);
+	}
+
+	getInstance()->dataPath = p.generic_string();
 }
 
 Halley::Environment* Halley::Environment::getInstance()
