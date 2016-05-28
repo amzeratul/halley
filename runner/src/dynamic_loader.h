@@ -18,13 +18,16 @@ namespace Halley
 		std::unique_ptr<Game> createGame() override;
 		bool needsToReload() const override;
 		void reload() override;
+		void setCore(Core& core) override;
 
 	private:
 		DynamicLibrary lib;
 		IHalleyEntryPoint* entry = nullptr;
+		Core* core = nullptr;
 
 		void load();
 		void unload();
 		void hotPatch();
+		void setStatics();
 	};
 }

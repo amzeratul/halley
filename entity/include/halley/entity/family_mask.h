@@ -99,5 +99,12 @@ namespace Halley {
 		};
 	}
 
+	class MaskStorageInterface
+	{
+	public:
+		static void* createMaskStorage();
+		static void setMaskStorage(void*);
+	};
+
 	using FamilyMaskType = FamilyMask::HandleType;
 }

@@ -73,3 +73,8 @@ HALLEY_EXPORT void deleteHalleyEntry(IHalleyEntryPoint* entry)
 {
 	delete entry;
 }
+
+HALLEY_EXPORT void setupStatics(HalleyStatics* statics)
+{
+	statics->setup();
+}

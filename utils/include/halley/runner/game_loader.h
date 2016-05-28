@@ -12,6 +12,7 @@ namespace Halley {
 		virtual std::unique_ptr<Game> createGame() = 0;
 		virtual bool needsToReload() const { return false; }
 		virtual void reload() {}
+		virtual void setCore(Core&) {}
 	};
 
 	template <typename T>

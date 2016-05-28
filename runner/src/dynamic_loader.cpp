@@ -27,14 +27,20 @@ bool DynamicGameLoader::needsToReload() const
 
 void DynamicGameLoader::reload()
 {
-	std::cout << "**RELOADING GAME**" << std::endl;
+	std::cout << ConsoleColor(Console::BLUE) << "\n**RELOADING GAME**" << std::endl;
 	std::cout << "Unloading..." << std::endl;
 	unload();
-	std::cout << "Hot-patching..." << std::endl;
-	hotPatch();
 	std::cout << "Loading..." << std::endl;
 	load();
-	std::cout << "Done!" << std::endl;
+	std::cout << "Hot-patching..." << std::endl;
+	hotPatch();
+	std::cout << "Done!\n" << ConsoleColor() << std::endl;
+}
+
+void DynamicGameLoader::setCore(Core& c)
+{
+	core = &c;
+	setStatics();
 }
 
 void DynamicGameLoader::load()
@@ -63,5 +69,15 @@ void DynamicGameLoader::unload()
 
 void DynamicGameLoader::hotPatch()
 {
-	// TODO
+	setStatics();
+	core->onReloaded();
+}
+
+void DynamicGameLoader::setStatics()
+{
+	auto setupStatics = reinterpret_cast<void(__stdcall*)(HalleyStatics*)>(lib.getFunction("setupStatics"));
+	if (!setupStatics) {
+		throw Exception("setupStatics not found.");
+	}
+	setupStatics(&core->getStatics());
 }

@@ -10,6 +10,7 @@
 #include <halley/runner/main_loop.h>
 #include <halley/plugin/plugin.h>
 #include <halley/core/api/halley_api_internal.h>
+#include "halley_statics.h"
 
 namespace Halley
 {
@@ -44,6 +45,8 @@ namespace Halley
 		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
 		std::vector<Plugin*> getPlugins(PluginType type) override;
 
+		HalleyStatics& getStatics() { return statics; }
+
 	private:
 		void init(std::vector<String> args);
 		void deInit();
@@ -76,5 +79,6 @@ namespace Halley
 		std::unique_ptr<RedirectStream> out;
 
 		std::map<PluginType, std::vector<std::unique_ptr<Plugin>>> plugins;
+		HalleyStatics statics;
 	};
 }

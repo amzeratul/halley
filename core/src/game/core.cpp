@@ -30,6 +30,8 @@ Core::Core(std::unique_ptr<Game> g, std::vector<String> args)
 	}
 	environment->setDataPath(game->getDataPath());
 
+	statics.setup();
+
 	// Initialize
 	init(StringArray(args.begin() + 1, args.end()));
 }
@@ -39,7 +41,12 @@ Core::~Core()
 	deInit();
 }
 
-void Core::onReloaded() {}
+void Core::onReloaded()
+{
+	if (api->videoInternal) {
+		api->videoInternal->reload();
+	}
+}
 
 void Core::init(std::vector<String> args)
 {

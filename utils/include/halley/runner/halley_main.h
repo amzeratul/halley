@@ -27,6 +27,7 @@ namespace Halley
 		{
 			try {
 				Core core(loader.createGame(), args);
+				loader.setCore(core);
 				MainLoop loop(core, loader);
 				loop.run();
 				return 0;

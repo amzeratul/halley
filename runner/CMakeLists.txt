@@ -22,6 +22,7 @@ assign_source_group(${HEADERS})
 add_executable (halley-runner ${SOURCES} ${HEADERS})
 target_link_libraries (halley-runner
 		halley-core
+		halley-entity
         halley-utils
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}

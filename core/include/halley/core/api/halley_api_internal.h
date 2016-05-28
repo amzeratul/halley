@@ -33,6 +33,7 @@ namespace Halley
 
 		virtual std::unique_ptr<Painter> makePainter() = 0;
 		virtual std::function<void(int, void*)> getUniformBinding(UniformType type, int n) = 0;
+		virtual void reload() = 0;
 	};
 
 	class SystemAPIInternal : public SystemAPI, public HalleyAPIInternal
