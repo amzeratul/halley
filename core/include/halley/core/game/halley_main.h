@@ -15,11 +15,11 @@ namespace Halley
 			for (int i = 0; i < argc; i++) {
 				args.push_back(argv[i]);
 			}
-			return doMain(std::make_unique<T>(), args);
+			return staticMain(std::make_unique<T>(), args);
 		}
 
 	private:
-		static int doMain(std::unique_ptr<Game> game, const StringArray& args);
+		static int staticMain(std::unique_ptr<Game> game, const StringArray& args);
 	};
 }
 

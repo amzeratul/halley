@@ -86,6 +86,9 @@ void Core::deInit()
 {
 	std::cout << "Game shutting down." << std::endl;
 
+	// Ensure stage is cleaned up
+	transitionStage();
+
 	// Deinit game
 	game->deInit();
 
@@ -220,7 +223,7 @@ long long Core::getElapsedTime(TimeLine tl) const
 	return timers[int(tl)].lastElapsedNanoSeconds();
 }
 
-void Core::transitionStage()
+bool Core::transitionStage()
 {
 	// If it's not running anymore, reset stage
 	if (!running && currentStage) {
@@ -248,5 +251,8 @@ void Core::transitionStage()
 		}
 
 		pendingStageTransition = false;
+		return true;
+	} else {
+		return false;
 	}
 }

@@ -37,12 +37,12 @@ return 1;
 
 using namespace Halley;
 
-int HalleyMain::doMain(std::unique_ptr<Game> game, const StringArray& args)
+int HalleyMain::staticMain(std::unique_ptr<Game> game, const StringArray& args)
 {
 	try {
 		Core core(std::move(game), args);
-		MainLoop loop;
-		loop.run(core, true, 60);
+		MainLoop loop(core);
+		loop.run(true, 60);
 		return 0;
 	} catch (std::exception& e) {
 		std::cout << ConsoleColor(Console::RED) << "\n\nUnhandled exception: " << ConsoleColor(Console::DARK_RED) << e.what() << ConsoleColor() << std::endl;

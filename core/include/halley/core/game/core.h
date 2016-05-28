@@ -36,7 +36,7 @@ namespace Halley
 		void onRender(Time time);
 
 		bool isRunning() const { return running; }
-		void transitionStage();
+		bool transitionStage();
 		HalleyAPI& getAPI() const { return *api; }
 
 	private:

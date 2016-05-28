@@ -1,4 +1,5 @@
 #pragma once
+#include <halley/time/halleytime.h>
 
 namespace Halley
 {
@@ -7,9 +8,15 @@ namespace Halley
 	class MainLoop
 	{
 	public:
-		void run(Core& core, bool capFrameRate, int targetFps);
+		MainLoop(Core& core);
+		void run(bool capFrameRate, int targetFps);
 
 	private:
+		Core& core;
 		unsigned int delay = 0;
+
+		void onVariableUpdate(Time delta);
+		void onFixedUpdate(Time delta);
+		bool isRunning() const;
 	};
 }

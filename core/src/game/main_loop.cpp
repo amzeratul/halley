@@ -1,30 +1,35 @@
 #include "halley/core/game/main_loop.h"
-#include <iostream>
 #include <halley/support/console.h>
 #include <halley/support/debug.h>
-#include <halley/time/halleytime.h>
 #include <halley/core/game/core.h>
+#include <iostream>
 
-void Halley::MainLoop::run(Core& core, bool capFrameRate, int fps)
+Halley::MainLoop::MainLoop(Core& core)
+	: core(core)
 {
-	core.transitionStage();
+}
+
+void Halley::MainLoop::run(bool capFrameRate, int fps)
+{
 	auto& api = core.getAPI();
 
 	std::cout << ConsoleColor(Console::GREEN) << "\nStarting main loop." << ConsoleColor() << std::endl;
-	Debug::trace("Game::runMainLoop begin");
+	Debug::trace("MainLoop::run begin");
 
 	using Uint32 = unsigned int;
-
-	// Set up the counters
-	if (api.video) {
-		api.video->flip();
-	}
-	Uint32 startTime = api.system->getTicks();
-	Uint32 targetTime = startTime;
+	Uint32 startTime = 0;
+	Uint32 targetTime = 0;
 	Uint32 nSteps = 0;
+	Uint32 lastTime = 0;
+
+	Time fixedDelta = 1.0 / fps;
 
 	while (core.isRunning()) {
-		Time delta = 1.0 / fps;
+		if (core.transitionStage()) {
+			// Reset counters
+			startTime = targetTime = lastTime = api.system->getTicks();
+			nSteps = 0;
+		}
 
 		if (delay > 0) {
 			startTime += delay;
@@ -37,35 +42,45 @@ void Halley::MainLoop::run(Core& core, bool capFrameRate, int fps)
 		if (curTime >= targetTime) {
 			// Step until we're up-to-date
 			for (int i = 0; i < 10 && curTime >= targetTime; i++) {
-				// Fixed step
-				if (core.isRunning()) {
-					core.onFixedUpdate(delta);
-				}
+				onFixedUpdate(fixedDelta);
 
 				nSteps++;
 				curTime = api.system->getTicks();
-				targetTime = startTime + Uint32(((long long)nSteps * 1000) / fps);
+				targetTime = startTime + Uint32((static_cast<long long>(nSteps) * 1000) / fps);
 			}
-		}
-		else {
+		} else {
 			// Nope, release CPU
 			api.system->delay(1);
 		}
 
-		// Variable step
-		if (core.isRunning()) {
-			core.onVariableUpdate(delta);
-		}
-
-		// Render screen
-		if (core.isRunning()) {
-			core.onRender(delta);
-		}
-
-		// Switch stage
-		core.transitionStage();
+		onVariableUpdate((curTime - lastTime) * 0.001f);
+		lastTime = curTime;
 	}
 
-	Debug::trace("Game::runMainLoop end");
+	Debug::trace("MainLoop::run end");
 	std::cout << ConsoleColor(Console::GREEN) << "Main loop terminated." << ConsoleColor() << std::endl;
+}
+
+void Halley::MainLoop::onVariableUpdate(Time delta)
+{
+	std::cout << delta << " ";
+	if (core.isRunning()) {
+		core.onVariableUpdate(delta);
+	}
+
+	if (core.isRunning()) {
+		core.onRender(delta);
+	}
+}
+
+void Halley::MainLoop::onFixedUpdate(Time delta)
+{
+	if (core.isRunning()) {
+		core.onFixedUpdate(delta);
+	}
+}
+
+bool Halley::MainLoop::isRunning() const
+{
+	return core.isRunning();
 }
