@@ -22,7 +22,7 @@ namespace Halley
 
 		void* getFunction(String name);
 
-		bool hasChanged();
+		bool hasChanged() const;
 
 	private:
 		String libName;

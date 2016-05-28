@@ -11,7 +11,7 @@ namespace Halley {
 	
 }
 
-void initOpenGLPlugin()
+void initOpenGLPlugin(Halley::IPluginRegistry &registry)
 {
-	Halley::Plugin::registerPlugin(std::make_unique<Halley::OpenGLPlugin>());
+	registry.registerPlugin(std::make_unique<Halley::OpenGLPlugin>());
 }

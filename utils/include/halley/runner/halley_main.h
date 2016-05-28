@@ -65,7 +65,7 @@ namespace Halley
 #define HalleyGame(T) int main(int argc, char* argv[]) { return Halley::HalleyMain::main<T>(argc, argv); }
 
 #ifdef _WIN32
-	#define HALLEY_EXPORT __declspec(dllexport)
+	#define HALLEY_EXPORT extern "C" __declspec(dllexport)
 	#pragma comment(lib, "SDL2.lib")
 #else
 	#define HALLEY_EXPORT

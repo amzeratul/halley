@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
 		args.push_back(argv[i]);
 	}
 
-	DynamicGameLoader loader("halley-sample-test");
+	DynamicGameLoader loader("c:/dev/projects/halley/bin64/halley-sample-test");
 
 	return HalleyMain::runMain(loader, args);
 }

@@ -4,6 +4,7 @@
 
 namespace Halley
 {
+	class IPluginRegistry;
 	class ResourceLocator;
 	class Stage;
 
@@ -12,7 +13,7 @@ namespace Halley
 	public:
 		virtual ~Game() = default;
 
-		virtual int initPlugins() = 0;
+		virtual int initPlugins(IPluginRegistry &registry) = 0;
 		virtual void initResourceLocator(ResourceLocator&) {}
 
 		virtual String getName() const = 0;

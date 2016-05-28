@@ -1,4 +1,5 @@
 #pragma once
+#include <halley/plugin/plugin.h>
 
 union SDL_Event;
 
@@ -48,6 +49,9 @@ namespace Halley
 		virtual void beginEvents(Time t) = 0;
 	};
 
-	using CoreAPIInternal = CoreAPI;
+	class CoreAPIInternal : public CoreAPI, public IPluginRegistry {
+	public:
+		virtual ~CoreAPIInternal() {}
+	};
 }
 

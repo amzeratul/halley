@@ -6,9 +6,10 @@
 #include <halley/time/halleytime.h>
 #include <halley/time/stopwatch.h>
 #include <halley/support/redirect_stream.h>
-#include <halley/core/api/core_api.h>
 #include <halley/core/stage/stage.h>
 #include <halley/runner/main_loop.h>
+#include <halley/plugin/plugin.h>
+#include <halley/core/api/halley_api_internal.h>
 
 namespace Halley
 {
@@ -19,7 +20,7 @@ namespace Halley
 	class Camera;
 	class RenderTarget;
 
-	class Core final : public CoreAPI, public IMainLoopable
+	class Core final : public CoreAPIInternal, public IMainLoopable
 	{
 	public:
 		Core(std::unique_ptr<Game> game, std::vector<String> args);
@@ -39,6 +40,8 @@ namespace Halley
 		HalleyAPI& getAPI() const override { return *api; }
 
 		void onReloaded() override;
+		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
+		std::vector<Plugin*> getPlugins(PluginType type) override;
 
 	private:
 		void init(std::vector<String> args);
@@ -69,5 +72,7 @@ namespace Halley
 
 		bool running = true;
 		std::unique_ptr<RedirectStream> out;
+
+		std::map<PluginType, std::vector<std::unique_ptr<Plugin>>> plugins;
 	};
 }

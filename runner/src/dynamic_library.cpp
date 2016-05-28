@@ -67,7 +67,7 @@ void* DynamicLibrary::getFunction(String name)
 #endif
 }
 
-bool DynamicLibrary::hasChanged()
+bool DynamicLibrary::hasChanged() const
 {
 	return last_write_time(libPath.cppStr()) > lastWrite;
 }

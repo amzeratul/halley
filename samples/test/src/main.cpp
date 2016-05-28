@@ -3,7 +3,7 @@
 
 using namespace Halley;
 
-void initOpenGLPlugin();
+void initOpenGLPlugin(IPluginRegistry &registry);
 
 namespace Stages {
 	enum Type
@@ -15,9 +15,9 @@ namespace Stages {
 class SampleGame final : public Game
 {
 public:
-	int initPlugins() override
+	int initPlugins(IPluginRegistry &registry) override
 	{
-		initOpenGLPlugin();
+		initOpenGLPlugin(registry);
 		return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input;
 	}
 

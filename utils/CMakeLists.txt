@@ -39,7 +39,6 @@ set(SOURCES
         "src/os/os_mac.cpp"
         "src/os/os_unix.cpp"
         "src/os/os_win32.cpp"
-        "src/plugin/plugin.cpp"
         "src/resources/metadata.cpp"
         "src/resources/resource_data.cpp"
 		"src/runner/main_loop.cpp"

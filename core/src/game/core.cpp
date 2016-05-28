@@ -69,7 +69,7 @@ void Core::init(std::vector<String> args)
 #endif
 
 	// API
-	api = HalleyAPI::create(this, game->initPlugins());
+	api = HalleyAPI::create(this, game->initPlugins(*this));
 
 	// Resources
 	initResources();
@@ -279,4 +279,18 @@ bool Core::transitionStage()
 	} else {
 		return false;
 	}
+}
+
+void Core::registerPlugin(std::unique_ptr<Plugin> plugin)
+{
+	plugins[plugin->getType()].emplace_back(std::move(plugin));
+}
+
+std::vector<Plugin*> Core::getPlugins(PluginType type)
+{
+	std::vector<Plugin*> result;
+	for (auto& p : plugins[type]) {
+		result.push_back(&*p);
+	}
+	return result;
 }
