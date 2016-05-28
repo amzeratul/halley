@@ -2,6 +2,7 @@
 #include <yaml-cpp/yaml.h>
 #include <halley/entity/world.h>
 #include <halley/entity/system.h>
+#include <halley/file_formats/yaml_file.h>
 using namespace Halley;
 
 std::unique_ptr<World> EntityStage::createWorld(String configName, std::function<std::unique_ptr<System>(String)> createFunction)

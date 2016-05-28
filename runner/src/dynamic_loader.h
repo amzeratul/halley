@@ -1,16 +1,18 @@
 #pragma once
-#include "game_reloader.h"
 #include <halley/text/halleystring.h>
 #include <memory>
-#include "game.h"
+#include <halley/runner/game_loader.h>
 
 namespace Halley
 {
-	class DynamicGameReloader : public GameReloader
+	class Game;
+
+	class DynamicGameLoader : public GameLoader
 	{
 	public:
-		DynamicGameReloader(String dllName);
-		std::unique_ptr<Game> createGame();
+		DynamicGameLoader(String dllName);
+
+		std::unique_ptr<Game> createGame() override;
 		bool needsToReload() const override;
 		void reload() override;
 

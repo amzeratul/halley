@@ -1,3 +1,5 @@
+#include <map>
+#include <mutex>
 struct SDL_Window;
 
 #include "halley/core/api/halley_api_internal.h"

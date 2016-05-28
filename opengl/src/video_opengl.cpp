@@ -6,6 +6,9 @@
 #include "texture_opengl.h"
 #include "shader_opengl.h"
 #include "render_target_opengl.h"
+#include <halley/support/console.h>
+#include <halley/support/exception.h>
+#include <halley/support/debug.h>
 using namespace Halley;
 
 #ifdef _MSC_VER

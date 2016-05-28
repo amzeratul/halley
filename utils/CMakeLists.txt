@@ -1,6 +1,6 @@
 project (halley-utils)
 
-include_directories("include" ${Boost_INCLUDE_DIR})
+include_directories("include" "../core/include" ${Boost_INCLUDE_DIR})
 
 set(SOURCES
         "src/concurrency/concurrent.cpp"
@@ -42,6 +42,7 @@ set(SOURCES
         "src/plugin/plugin.cpp"
         "src/resources/metadata.cpp"
         "src/resources/resource_data.cpp"
+		"src/runner/main_loop.cpp"
         "src/support/console.cpp"
         "src/support/debug.cpp"
         "src/support/exception.cpp"
@@ -102,6 +103,9 @@ set(HEADERS
         "include/halley/resources/metadata.h"
         "include/halley/resources/resource_data.h"
         "include/halley/resources/resource.h"
+		"include/halley/runner/game_loader.h"
+		"include/halley/runner/halley_main.h"
+		"include/halley/runner/main_loop.h"
         "include/halley/support/assert.h"
         "include/halley/support/console.h"
         "include/halley/support/debug.h"

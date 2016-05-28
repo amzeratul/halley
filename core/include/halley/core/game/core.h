@@ -6,9 +6,9 @@
 #include <halley/time/halleytime.h>
 #include <halley/time/stopwatch.h>
 #include <halley/support/redirect_stream.h>
-#include "halley/core/api/core_api.h"
-#include "halley/core/stage/stage.h"
-#include "main_loop.h"
+#include <halley/core/api/core_api.h>
+#include <halley/core/stage/stage.h>
+#include <halley/runner/main_loop.h>
 
 namespace Halley
 {

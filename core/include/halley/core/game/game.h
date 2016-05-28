@@ -5,6 +5,7 @@
 namespace Halley
 {
 	class ResourceLocator;
+	class Stage;
 
 	class Game
 	{

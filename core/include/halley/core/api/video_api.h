@@ -1,7 +1,11 @@
 #pragma once
+#include <halley/maths/vector2d.h>
+#include <halley/maths/rect.h>
+#include <halley/text/halleystring.h>
 
 namespace Halley
 {
+
 	enum class WindowType {
 		None,
 		Fullscreen,

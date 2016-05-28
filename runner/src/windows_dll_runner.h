@@ -1,5 +1,4 @@
 #pragma once
-#include "irunner.h"
 
 #ifdef _WIN32
 #include "win.h"
@@ -8,7 +7,6 @@
 #include <atomic>
 #include <mutex>
 #include <boost/filesystem/path.hpp>
-#include "../../core/src/external/irunner.h"
 
 class WindowsDLLRunner : public IRunner
 {

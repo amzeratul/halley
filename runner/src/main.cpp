@@ -1,16 +1,15 @@
-#include "main.h"
-#include "looper.h"
-#include "windows_dll_runner.h"
+#include "dynamic_loader.h"
+#include <halley/runner/halley_main.h>
+
+using namespace Halley;
 
 int main(int argc, char** argv) {
-	std::vector<std::string> args;
+	StringArray args;
 	for (int i = 0; i < argc; i++) {
 		args.push_back(argv[i]);
 	}
 
-	WindowsDLLRunner runner("halleygame.dll");
-	Looper looper;
-	looper.Run(runner, args);
+	DynamicGameLoader loader("halley-sample-test");
 
-	return 0;
+	return HalleyMain::runMain(loader, args);
 }

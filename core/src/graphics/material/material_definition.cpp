@@ -6,6 +6,7 @@
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/material/material_parameter.h"
 #include <yaml-cpp/yaml.h>
+#include <halley/file_formats/text_file.h>
 
 using namespace Halley;
 

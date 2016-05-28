@@ -40,13 +40,7 @@ include_directories("gen/cpp" "../../include" "../../core/include" "../../entity
 # Run codegen
 add_custom_target(codegen ALL ${CMAKE_HOME_DIRECTORY}/bin64/halley-cmd codegen gen_src gen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_dependencies(codegen halley-cmd)
-
-add_executable (${PROJECT_NAME}
-		${${PROJECT_NAME}_sources}
-		${${PROJECT_NAME}_headers}
-		)
-
-target_link_libraries(${PROJECT_NAME}
+set(LIBS
 		halley-core
 		halley-utils
 		halley-opengl
@@ -58,7 +52,10 @@ target_link_libraries(${PROJECT_NAME}
 		${EXTRA_LIBS}
 		)
 
+add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_sources} ${${PROJECT_NAME}_headers})
+target_link_libraries(${PROJECT_NAME} ${LIBS})
+
 install(TARGETS ${PROJECT_NAME}
 		RUNTIME DESTINATION ${CMAKE_HOME_DIRECTORY}/bin64
-		LIBRARY DESTINATION ${CMAKE_HOME_DIRECTORY}/lib/x64
-		ARCHIVE DESTINATION ${CMAKE_HOME_DIRECTORY}/lib/x64)
+		LIBRARY DESTINATION ${CMAKE_HOME_DIRECTORY}/bin64
+		ARCHIVE DESTINATION ${CMAKE_HOME_DIRECTORY}/bin64)

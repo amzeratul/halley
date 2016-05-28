@@ -2,6 +2,7 @@
 #include "api/halley_api.h"
 #include "sdl/system_sdl.h"
 #include "input/input.h"
+#include <halley/plugin/plugin.h>
 
 using namespace Halley;
 

@@ -1,6 +1,8 @@
 #include "sdl/system_sdl.h"
 #include <SDL.h>
 #include "halley/core/api/halley_api_internal.h"
+#include <halley/support/console.h>
+#include <halley/support/exception.h>
 
 using namespace Halley;
 

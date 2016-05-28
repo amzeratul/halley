@@ -10,6 +10,10 @@
 #include "resources/resources.h"
 #include "resources/resource_locator.h"
 #include "resources/standard_resources.h"
+#include <halley/os/os.h>
+#include <halley/concurrency/thread_pool.h>
+#include <halley/support/debug.h>
+#include <halley/support/console.h>
 
 #pragma warning(disable: 4996)
 

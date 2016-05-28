@@ -1,6 +1,6 @@
-#include "windows_dll_runner.h"
 
-#ifdef _WIN32
+#ifdef _WIN32__
+#include "windows_dll_runner.h"
 #include <iostream>
 #include <boost/filesystem.hpp>
 
