@@ -5,7 +5,7 @@ using namespace Halley;
 
 void initOpenGLPlugin(IPluginRegistry &registry);
 
-//#define WITH_BLAH_STAGE
+#define WITH_BLAH_STAGE
 
 namespace Stages {
 	enum Type

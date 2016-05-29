@@ -12,22 +12,16 @@ namespace Halley
 	public:
 		virtual ~IHalleyEntryPoint() {}
 
-		virtual std::unique_ptr<Game> makeGame() = 0;
-		virtual void setupStatics(HalleyStatics* statics) = 0;
+		virtual std::unique_ptr<IMainLoopable> createCore(std::vector<std::string> args) = 0;
 	};
 
 	template <typename T>
 	class HalleyEntryPoint : public IHalleyEntryPoint
 	{
 	public:
-		std::unique_ptr<Game> makeGame() override
+		std::unique_ptr<IMainLoopable> createCore(std::vector<std::string> args) override
 		{
-			return std::make_unique<T>();
-		}
-
-		void setupStatics(HalleyStatics* statics) override
-		{
-			statics->setup();
+			return std::make_unique<Core>(std::make_unique<T>(), args);
 		}
 	};
 }

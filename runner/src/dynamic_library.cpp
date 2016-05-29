@@ -6,11 +6,11 @@
 using namespace Halley;
 using namespace boost::filesystem;
 
-DynamicLibrary::DynamicLibrary(String name)
+DynamicLibrary::DynamicLibrary(std::string name)
 	: libName(name)
 {
 	#ifdef _WIN32
-	libOrigPath = path((libName + ".dll").cppStr());
+	libOrigPath = path(libName + ".dll");
 	#endif
 }
 
@@ -27,7 +27,6 @@ void DynamicLibrary::load(bool withAnotherName)
 	hasTempPath = withAnotherName;
 	if (withAnotherName) {
 		libPath = unique_path("halley-%%%%-%%%%-%%%%-%%%%.dll").string();
-		std::cout << "Copying " << libOrigPath.string() << " to " << libPath.string() << std::endl;
 		copy_file(libOrigPath, libPath);
 	} else {
 		libPath = libOrigPath;
@@ -41,6 +40,7 @@ void DynamicLibrary::load(bool withAnotherName)
 	hasDebugSymbols = exists(debugSymbolsOrigPath);
 
 	// Copy debug symbols if the lib got copied
+	/*
 	if (withAnotherName && debugSymbolsOrigPath != libOrigPath) {
 		debugSymbolsPath = libPath;
 		#ifdef _WIN32
@@ -50,6 +50,7 @@ void DynamicLibrary::load(bool withAnotherName)
 	} else {
 		debugSymbolsPath = debugSymbolsOrigPath;
 	}
+	*/
 
 	// Load
 	#ifdef _WIN32
@@ -78,16 +79,18 @@ void DynamicLibrary::unload()
 
 		if (hasTempPath) {
 			remove(libPath);
+			/*
 			if (libPath != debugSymbolsPath) {
 				remove(debugSymbolsPath);
 			}
+			*/
 		}
 
 		loaded = false;
 	}
 }
 
-void* DynamicLibrary::getFunction(String name)
+void* DynamicLibrary::getFunction(std::string name)
 {
 	#ifdef _WIN32
 	return GetProcAddress(handle, name.c_str());

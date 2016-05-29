@@ -16,7 +16,7 @@ namespace Halley
 		template <typename T>
 		static int main(int argc, char* argv[])
 		{
-			StringArray args;
+			std::vector<std::string> args;
 			for (int i = 0; i < argc; i++) {
 				args.push_back(argv[i]);
 			}
@@ -24,7 +24,7 @@ namespace Halley
 			return runMain(reloader, args);
 		}
 
-		static int runMain(GameLoader& loader, const StringArray& args)
+		static int runMain(GameLoader& loader, const std::vector<std::string>& args)
 		{
 			try {
 				Core core(loader.createGame(), args);
@@ -57,8 +57,5 @@ namespace Halley
 #if defined(HALLEY_EXECUTABLE)
 	#define HalleyGame(T) int main(int argc, char* argv[]) { return Halley::HalleyMain::main<T>(argc, argv); }
 #elif defined(HALLEY_SHARED_LIBRARY)
-	#define HalleyGame(T) \
-		HALLEY_EXPORT IHalleyEntryPoint* createHalleyEntry() { static HalleyEntryPoint<T> entry; return &entry; } \
-		HALLEY_EXPORT void deleteHalleyEntry(IHalleyEntryPoint* entry) { } \
-		HALLEY_EXPORT void setupStatics(HalleyStatics* statics) { statics->setup(); }
+	#define HalleyGame(T) HALLEY_EXPORT IHalleyEntryPoint* getHalleyEntry() { static HalleyEntryPoint<T> entry; return &entry; }
 #endif

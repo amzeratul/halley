@@ -15,19 +15,19 @@ namespace Halley
 	class DynamicLibrary
 	{
 	public:
-		DynamicLibrary(String name);
+		DynamicLibrary(std::string name);
 		~DynamicLibrary();
 
 		void load(bool withAnotherName);
 		void unload();
 
-		void* getFunction(String name);
+		void* getFunction(std::string name);
 		void* getBaseAddress() const;
 
 		bool hasChanged() const;
 
 	private:
-		String libName;
+		std::string libName;
 		boost::filesystem::path libOrigPath;
 		boost::filesystem::path libPath;
 		boost::filesystem::path debugSymbolsOrigPath;

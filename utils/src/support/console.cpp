@@ -20,21 +20,47 @@
 \*****************************************************************/
 
 #include "halley/support/console.h"
-#include "halley/os/os.h"
 
 using namespace Halley;
 
 
+#ifdef _WIN32
+
+#include <comutil.h>
+#include <objbase.h>
+#include <wincon.h>
+#pragma comment(lib, "comsuppw.lib")
+
+static void setConsoleColor(int foreground, int background)
+{
+	if (foreground == -1) {
+		foreground = 7;
+	}
+	if (background == -1) {
+		background = 0;
+	}
+
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, WORD(foreground | (background << 4)));
+}
+
+#else
+
+static void setConsoleColor(int, int)
+{}
+
+#endif
+
 void Halley::Console::setForeground(ColorType color)
 {
 	curForeground = color;
-	OS::get().setConsoleColor(curForeground, curBackground);
+	setConsoleColor(curForeground, curBackground);
 }
 
 void Halley::Console::setBackground(ColorType color)
 {
 	curBackground = color;
-	OS::get().setConsoleColor(curForeground, curBackground);
+	setConsoleColor(curForeground, curBackground);
 }
 
 Console::ColorType Halley::Console::getForeground()
