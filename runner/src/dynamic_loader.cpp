@@ -23,11 +23,27 @@ std::unique_ptr<Game> DynamicGameLoader::createGame()
 
 bool DynamicGameLoader::needsToReload() const
 {
+	/*
+	if (timeToRefresh == 0) {
+		if (lib.hasChanged()) {
+			timeToRefresh = 300;
+		}
+	} else {
+		timeToRefresh--;
+		if (timeToRefresh == 0) {
+			needsRefresh = true;
+		}
+	}
+	return needsRefresh;
+	*/
 	return lib.hasChanged();
 }
 
 void DynamicGameLoader::reload()
 {
+	timeToRefresh = 0;
+	needsRefresh = false;
+
 	std::cout << ConsoleColor(Console::BLUE) << "\n**RELOADING GAME**" << std::endl;
 	Stopwatch timer;
 	

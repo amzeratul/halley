@@ -9,6 +9,7 @@ namespace Halley
 	public:
 		std::vector<void*> src;
 		std::vector<void*> dst;
+		std::vector<std::string> name;
 		void* minSrc;
 		void* maxSrc;
 
@@ -18,6 +19,9 @@ namespace Halley
 	class MemoryPatcher
 	{
 	public:
-		static void patch(MemoryPatchingMappings& mappings);
+		static void patch(const MemoryPatchingMappings& mappings);
+
+	private:
+		static size_t patchMemory(void* address, size_t len, const MemoryPatchingMappings& mappings);
 	};
 }

@@ -1,6 +1,7 @@
 #include "dynamic_library.h"
 #include <boost/filesystem.hpp>
 #include <halley/support/exception.h>
+#include <iostream>
 
 using namespace Halley;
 using namespace boost::filesystem;
@@ -9,7 +10,7 @@ DynamicLibrary::DynamicLibrary(String name)
 	: libName(name)
 {
 	#ifdef _WIN32
-	libOrigPath = libName + ".dll";
+	libOrigPath = path((libName + ".dll").cppStr());
 	#endif
 }
 
@@ -26,7 +27,8 @@ void DynamicLibrary::load(bool withAnotherName)
 	hasTempPath = withAnotherName;
 	if (withAnotherName) {
 		libPath = unique_path("halley-%%%%-%%%%-%%%%-%%%%.dll").string();
-		copy_file(path(libOrigPath.cppStr()), libPath.cppStr());
+		std::cout << "Copying " << libOrigPath.string() << " to " << libPath.string() << std::endl;
+		copy_file(libOrigPath, libPath);
 	} else {
 		libPath = libOrigPath;
 	}
@@ -34,23 +36,22 @@ void DynamicLibrary::load(bool withAnotherName)
 	// Check for debug symbols
 	debugSymbolsPath = libOrigPath;
 	#ifdef _WIN32
-	auto debugPath = path(debugSymbolsPath.cppStr()).replace_extension("pdb");
-	hasDebugSymbols = exists(debugPath);
-	debugSymbolsPath = debugPath.string();
+	debugSymbolsPath.replace_extension("pdb");
 	#endif
+	hasDebugSymbols = exists(debugSymbolsPath);
 
 	// Load
 	#ifdef _WIN32
-	handle = LoadLibrary(libPath.c_str());
+	handle = LoadLibrary(libPath.string().c_str());
 	#endif
 	if (!handle) {
-		throw Exception("Unable to load library: " + libPath);
+		throw Exception("Unable to load library: " + libPath.string());
 	}
 
 	// Store write times
 	if (hasDebugSymbols) {
-		libLastWrite = last_write_time(libOrigPath.cppStr());
-		debugLastWrite = last_write_time(debugSymbolsPath.cppStr());
+		libLastWrite = last_write_time(libOrigPath);
+		debugLastWrite = last_write_time(debugSymbolsPath);
 	}
 
 	loaded = true;
@@ -65,7 +66,7 @@ void DynamicLibrary::unload()
 		handle = nullptr;
 
 		if (hasTempPath) {
-			remove(path(libPath.cppStr()));
+			remove(libPath);
 		}
 
 		loaded = false;
@@ -88,8 +89,14 @@ void* DynamicLibrary::getBaseAddress() const
 
 bool DynamicLibrary::hasChanged() const
 {
+	// Never got debug symbols, so disable hot-reload
 	if (!hasDebugSymbols) {
 		return false;
 	}
-	return last_write_time(libOrigPath.cppStr()) > libLastWrite && last_write_time(debugSymbolsPath.cppStr()) > debugLastWrite;
+	// One of the files is missing, maybe there was a linker error
+	if (!exists(libOrigPath) || !exists(debugSymbolsPath)) {
+		return false;
+	}
+	// If BOTH the dll and debug symbols files have changed, we're ready to reload
+	return last_write_time(libOrigPath) > libLastWrite && last_write_time(debugSymbolsPath) > debugLastWrite;
 }

@@ -26,6 +26,9 @@ namespace Halley
 		DynamicLibrary lib;
 		IHalleyEntryPoint* entry = nullptr;
 		Core* core = nullptr;
+
+		mutable int timeToRefresh = 0;
+		mutable bool needsRefresh = false;
 		
 		std::vector<DebugSymbol> symbols;
 		std::vector<DebugSymbol> prevSymbols;

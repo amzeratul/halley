@@ -1,6 +1,7 @@
 #pragma once
 
 #include <halley/text/halleystring.h>
+#include <boost/filesystem/path.hpp>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -27,16 +28,18 @@ namespace Halley
 
 	private:
 		String libName;
-		String libOrigPath;
-		String libPath;
-		String debugSymbolsPath;
-		bool hasTempPath = false;
-		bool hasDebugSymbols = false;
+		boost::filesystem::path libOrigPath;
+		boost::filesystem::path libPath;
+		boost::filesystem::path debugSymbolsPath;
 
-		bool loaded = false;
 		LibHandleType handle;
 
 		time_t libLastWrite;
 		time_t debugLastWrite;
+
+		bool hasTempPath = false;
+		bool hasDebugSymbols = false;
+		bool loaded = false;
+
 	};
 }

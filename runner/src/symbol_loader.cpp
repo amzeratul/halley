@@ -42,6 +42,12 @@ static void loadSymbolsImpl(DynamicLibrary& dll, std::vector<DebugSymbol>& vecto
 	SymCleanup(hProcess);
 }
 
+#else
+
+static void loadSymbolsImpl(DynamicLibrary&, std::vector<DebugSymbol>&)
+{
+}
+
 #endif
 
 DebugSymbol::DebugSymbol(std::string name, void* address, size_t size)

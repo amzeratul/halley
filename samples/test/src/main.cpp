@@ -5,6 +5,8 @@ using namespace Halley;
 
 void initOpenGLPlugin(IPluginRegistry &registry);
 
+//#define WITH_BLAH_STAGE
+
 namespace Stages {
 	enum Type
 	{
@@ -19,9 +21,7 @@ namespace Stages {
 class BlahStage : public Stage
 {
 public:
-	void onFixedUpdate(Time) override {
-		std::cout << "Hello";
-	}
+	void onFixedUpdate(Time) override { std::cout << "Hello"; }
 };
 #endif
 
