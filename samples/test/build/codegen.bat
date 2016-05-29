@@ -1,1 +1,0 @@
-halley-cmd codegen gen_src gen

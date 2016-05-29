@@ -36,10 +36,10 @@ set (${PROJECT_NAME}_headers
 assign_source_group(${${PROJECT_NAME}_sources})
 assign_source_group(${${PROJECT_NAME}_headers})
 
-include_directories("." "gen/cpp" "../../include" "../../core/include" "../../entity/include" "../../utils/include" "../../opengl/include" ${YAMLCPP_INCLUDE_DIR})
+include_directories("." "gen/cpp" "../../../include" "../../core/include" "../../entity/include" "../../utils/include" "../../opengl/include" ${YAMLCPP_INCLUDE_DIR})
 
 # Run codegen
-add_custom_target(codegen ALL ${CMAKE_HOME_DIRECTORY}/bin64/halley-cmd codegen gen_src gen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+add_custom_target(codegen ALL ${CMAKE_HOME_DIRECTORY}/bin/halley-cmd codegen gen_src gen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_dependencies(codegen halley-cmd)
 set(LIBS
 		halley-core
@@ -67,6 +67,6 @@ if(MSVC)
 endif()
 
 install(TARGETS ${PROJECT_NAME}
-		RUNTIME DESTINATION ${CMAKE_HOME_DIRECTORY}/bin64
-		LIBRARY DESTINATION ${CMAKE_HOME_DIRECTORY}/bin64
-		ARCHIVE DESTINATION ${CMAKE_HOME_DIRECTORY}/bin64)
+		RUNTIME DESTINATION ${CMAKE_HOME_DIRECTORY}/bin
+		LIBRARY DESTINATION ${CMAKE_HOME_DIRECTORY}/bin
+		ARCHIVE DESTINATION ${CMAKE_HOME_DIRECTORY}/bin)

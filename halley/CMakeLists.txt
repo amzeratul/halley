@@ -1,0 +1,8 @@
+add_subdirectory(utils)
+add_subdirectory(entity)
+add_subdirectory(opengl)
+add_subdirectory(tools)
+add_subdirectory(cmd)
+add_subdirectory(core)
+add_subdirectory(samples)
+add_subdirectory(runner)
