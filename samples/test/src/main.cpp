@@ -5,12 +5,25 @@ using namespace Halley;
 
 void initOpenGLPlugin(IPluginRegistry &registry);
 
+//#define WITH_BLAH_STAGE
+
 namespace Stages {
 	enum Type
 	{
 		Test
+#ifdef WITH_BLAH_STAGE
+		,Blah
+#endif
 	};
 }
+
+#ifdef WITH_BLAH_STAGE
+class BlahStage : public Stage
+{
+public:
+	void onFixedUpdate(Time) override { std::cout << "Hello"; }
+};
+#endif
 
 class SampleGame final : public Game
 {
@@ -31,6 +44,10 @@ public:
 		switch (id) {
 		case Stages::Test:
 			return std::make_unique<TestStage>();
+#ifdef WITH_BLAH_STAGE
+		case Stages::Blah:
+			return std::make_unique<BlahStage>();
+#endif
 		default:
 			return std::unique_ptr<Stage>();
 		}

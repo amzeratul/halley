@@ -25,9 +25,9 @@ namespace Halley
 	class Core final : public CoreAPIInternal, public IMainLoopable
 	{
 	public:
-		Core(std::unique_ptr<Game> game, std::vector<String> args);
+		Core(std::unique_ptr<Game> game, std::vector<std::string> args);
 		~Core();
-		void init();
+		void init() override;
 
 		void setStage(StageID stage) override;
 		void setStage(std::unique_ptr<Stage> stage);
@@ -42,16 +42,18 @@ namespace Halley
 		bool transitionStage() override;
 		HalleyAPI& getAPI() const override { return *api; }
 
+		void onSuspended() override;
 		void onReloaded() override;
+
 		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
 		std::vector<Plugin*> getPlugins(PluginType type) override;
-
-		HalleyStatics& getStatics() { return statics; }
 
 	private:
 		void deInit();
 
 		void initResources();
+		void setOutRedirect(bool appendToExisting);
+
 		void doFixedUpdate(Time time);
 		void doVariableUpdate(Time time);
 		void doRender(Time time);

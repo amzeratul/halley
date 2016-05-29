@@ -248,7 +248,7 @@ void VideoOpenGL::setWindowSize(Vector2i winSize)
 
 void VideoOpenGL::setUpDebugCallback()
 {
-	if (glDebugMessageCallback) {
+	if (false && glDebugMessageCallback) {
 		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 			reinterpret_cast<const VideoOpenGL*>(userParam)->onGLDebugMessage(source, type, id, severity, message);
 		}, this);

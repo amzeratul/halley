@@ -3,6 +3,7 @@
 
 namespace Halley
 {
+	class HalleyStatics;
 	class GameLoader;
 	class HalleyAPI;
 
@@ -16,6 +17,9 @@ namespace Halley
 		virtual bool isRunning() const = 0;
 		virtual void onVariableUpdate(Time delta) = 0;
 		virtual void onFixedUpdate(Time delta) = 0;
+
+		virtual void init() = 0;
+		virtual void onSuspended() = 0;
 		virtual void onReloaded() = 0;
 	};
 

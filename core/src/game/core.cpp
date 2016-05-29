@@ -19,7 +19,7 @@
 
 using namespace Halley;
 
-Core::Core(std::unique_ptr<Game> g, std::vector<String> args)
+Core::Core(std::unique_ptr<Game> g, std::vector<std::string> args)
 {
 	statics.setup();
 
@@ -50,8 +50,9 @@ Core::Core(std::unique_ptr<Game> g, std::vector<String> args)
 	srand(seed);
 
 	// Redirect output
-	auto outStream = std::make_shared<std::ofstream>(environment->getDataPath() + "log.txt", std::ios::out);
-	out = std::make_unique<RedirectStreamToStream>(std::cout, outStream, false);
+	setOutRedirect(false);
+
+	// Info
 	std::cout << "Data path is " << ConsoleColor(Console::DARK_GREY) << environment->getDataPath() << ConsoleColor() << std::endl;
 }
 
@@ -60,8 +61,17 @@ Core::~Core()
 	deInit();
 }
 
+void Core::onSuspended()
+{
+	std::cout.flush();
+	out.reset();
+}
+
 void Core::onReloaded()
 {
+	setOutRedirect(true);
+	statics.setup();
+
 	if (api->videoInternal) {
 		api->videoInternal->reload();
 	}
@@ -69,6 +79,8 @@ void Core::onReloaded()
 
 void Core::init()
 {
+	statics.setup();
+
 	// Computer info
 #ifndef _DEBUG
 	showComputerInfo();
@@ -125,6 +137,12 @@ void Core::initResources()
 	game->initResourceLocator(environment->getProgramPath(), *locator);
 	resources = std::make_unique<Resources>(std::move(locator), &*api);
 	StandardResources::initialize(*resources);
+}
+
+void Core::setOutRedirect(bool appendToExisting)
+{
+	auto outStream = std::make_shared<std::ofstream>(environment->getDataPath() + "log.txt", appendToExisting ? std::ofstream::app : std::ofstream::trunc);
+	out = std::make_unique<RedirectStreamToStream>(std::cout, outStream, false);
 }
 
 void Core::pumpEvents(Time time)

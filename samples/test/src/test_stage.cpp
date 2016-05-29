@@ -5,41 +5,6 @@
 
 using namespace Halley;
 
-/*
-#include <windows.h>
-#include <stdio.h>
-void test()
-{
-	MEMORY_BASIC_INFORMATION membasic;
-
-	size_t value = 0;
-	size_t totalBytes = 0;
-	printf(" address | BaseAddress     , AllocationBase  , AllocPrt, RegionSize      , State   , Protect , Type");
-	for (char* address = 0; VirtualQuery(address, &membasic, sizeof(membasic)); address += membasic.RegionSize) {
-		if (membasic.State == MEM_COMMIT) {
-			// scan me further
-			printf("\n%016p | %016llX, %08p, %08X, %016llX, %08X, %08X, %08X",
-				static_cast<void*>(address), size_t(membasic.BaseAddress) + size_t(membasic.AllocationBase), membasic.AllocationBase,
-				membasic.AllocationProtect, membasic.RegionSize, membasic.State, membasic.Protect,
-				membasic.Type);
-
-			constexpr unsigned int acceptMask = 0x04 | 0x08 | 0x40 | 0x80;
-			if ((membasic.Protect & acceptMask) == membasic.Protect) {
-				printf(" *");
-				using T = const size_t;
-				const T* start = reinterpret_cast<T*>(address);
-				const T* end = reinterpret_cast<T*>(address + membasic.RegionSize);
-				for (T* src = start; src < end; src++) {
-					value ^= *src;
-				}
-				totalBytes += membasic.RegionSize;
-			}
-		}
-	}
-	printf("\nXOR of all memory: %016llx, after %lld bytes\n", value, totalBytes);
-}
-*/
-
 void TestStage::init()
 {
 	world = createWorld("sample_test_world.yaml", createSystem);
@@ -83,3 +48,10 @@ void TestStage::onRender(RenderContext& context) const
 
 	statsView->draw(context);
 }
+
+/*
+void TestStage::onVariableUpdate(Halley::Time time)
+{
+	std::cout << ":D ";
+}
+*/

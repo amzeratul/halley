@@ -1,9 +1,9 @@
 #pragma once
-#include <halley/text/halleystring.h>
 #include <memory>
 #include <halley/runner/game_loader.h>
 #include "dynamic_library.h"
 #include "symbol_loader.h"
+#include <halley/runner/main_loop.h>
 
 namespace Halley
 {
@@ -13,26 +13,26 @@ namespace Halley
 	class DynamicGameLoader : public GameLoader
 	{
 	public:
-		DynamicGameLoader(String dllName);
+		DynamicGameLoader(std::string dllName);
 		~DynamicGameLoader();
 
+		std::unique_ptr<IMainLoopable> createCore(std::vector<std::string> args);
 		std::unique_ptr<Game> createGame() override;
 		bool needsToReload() const override;
 		void reload() override;
-		void setCore(Core& core) override;
+		void setCore(IMainLoopable& core) override;
 
 	private:
-		String libName;
+		std::string libName;
 		DynamicLibrary lib;
 		IHalleyEntryPoint* entry = nullptr;
-		Core* core = nullptr;
-		
+		IMainLoopable* core = nullptr;
+
 		std::vector<DebugSymbol> symbols;
 		std::vector<DebugSymbol> prevSymbols;
 		
 		void load();
 		void unload();
 		void hotPatch();
-		void setStatics();
 	};
 }

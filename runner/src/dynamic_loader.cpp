@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-DynamicGameLoader::DynamicGameLoader(String name)
+DynamicGameLoader::DynamicGameLoader(std::string name)
 	: libName(name)
 	, lib(name)
 {
@@ -16,9 +16,15 @@ DynamicGameLoader::~DynamicGameLoader()
 	unload();
 }
 
+std::unique_ptr<IMainLoopable> DynamicGameLoader::createCore(std::vector<std::string> args)
+{
+	assert(entry != nullptr);
+	return entry->createCore(args);
+}
+
 std::unique_ptr<Game> DynamicGameLoader::createGame()
 {
-	return entry->makeGame();
+	throw Exception("Cannot create game from DynamicGameLoader");
 }
 
 bool DynamicGameLoader::needsToReload() const
@@ -31,19 +37,21 @@ void DynamicGameLoader::reload()
 	std::cout << ConsoleColor(Console::BLUE) << "\n**RELOADING GAME**" << std::endl;
 	Stopwatch timer;
 	
+	core->onSuspended();
 	unload();
 	load();
 	hotPatch();
+	core->onReloaded();
 
 	timer.pause();
 	
 	std::cout << "Done in " << timer.elapsedSeconds() << " seconds.\n" << ConsoleColor() << std::endl;
 }
 
-void DynamicGameLoader::setCore(Core& c)
+void DynamicGameLoader::setCore(IMainLoopable& c)
 {
 	core = &c;
-	setStatics();
+	core->init();
 }
 
 #ifdef _WIN32
@@ -55,47 +63,28 @@ void DynamicGameLoader::setCore(Core& c)
 void DynamicGameLoader::load()
 {
 	lib.load(true);
-	auto createHalleyEntry = reinterpret_cast<IHalleyEntryPoint*(STDCALL*)()>(lib.getFunction("createHalleyEntry"));
-	if (!createHalleyEntry) {
+	auto getHalleyEntry = reinterpret_cast<IHalleyEntryPoint*(STDCALL*)()>(lib.getFunction("getHalleyEntry"));
+	if (!getHalleyEntry) {
 		lib.unload();
-		throw Exception("createHalleyEntry not found.");
+		throw Exception("getHalleyEntry not found.");
 	}
 
 	prevSymbols = std::move(symbols);
-	symbols = SymbolLoader::loadSymbols(libName);
+	symbols = SymbolLoader::loadSymbols(lib);
 
-	entry = createHalleyEntry();
+	entry = getHalleyEntry();
 }
 
 void DynamicGameLoader::unload()
 {
-	if (entry) {
-		auto deleteHalleyEntry = reinterpret_cast<void(STDCALL*)(IHalleyEntryPoint*)>(lib.getFunction("deleteHalleyEntry"));
-		if (!deleteHalleyEntry) {
-			throw Exception("deleteHalleyEntry not found.");
-		}
-		deleteHalleyEntry(entry);
-		entry = nullptr;
-	}
+	entry = nullptr;
 	lib.unload();
 }
 
 void DynamicGameLoader::hotPatch()
 {
-	setStatics();
-
 	MemoryPatchingMappings mappings;
 	mappings.generate(prevSymbols, symbols);
 	MemoryPatcher::patch(mappings);
-
-	core->onReloaded();
 }
 
-void DynamicGameLoader::setStatics()
-{
-	auto setupStatics = reinterpret_cast<void(STDCALL*)(HalleyStatics*)>(lib.getFunction("setupStatics"));
-	if (!setupStatics) {
-		throw Exception("setupStatics not found.");
-	}
-	setupStatics(&core->getStatics());
-}

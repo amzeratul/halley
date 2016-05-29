@@ -1,6 +1,6 @@
 project (halley-runner)
 
-include_directories(${Boost_INCLUDE_DIR} "../core/include" "../utils/include")
+include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR}  "../core/include" "../utils/include")
 
 set(SOURCES
 		"src/dynamic_library.cpp"
@@ -23,11 +23,8 @@ assign_source_group(${HEADERS})
 
 add_executable (halley-runner ${SOURCES} ${HEADERS})
 target_link_libraries (halley-runner
-		halley-core
-		halley-entity
-        halley-utils
+		halley-utils
 		${SDL2_LIBRARIES}
-		${YAMLCPP_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         ${EXTRA_LIBS}

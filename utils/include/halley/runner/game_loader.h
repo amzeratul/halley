@@ -4,7 +4,7 @@
 #include <halley/core/game/game.h>
 
 namespace Halley {
-	class Core;
+	class IMainLoopable;
 
 	class GameLoader
 	{
@@ -14,7 +14,7 @@ namespace Halley {
 		virtual std::unique_ptr<Game> createGame() = 0;
 		virtual bool needsToReload() const { return false; }
 		virtual void reload() {}
-		virtual void setCore(Core&) {}
+		virtual void setCore(IMainLoopable&) {}
 	};
 
 	template <typename T>
