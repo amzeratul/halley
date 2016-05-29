@@ -62,7 +62,7 @@ void DynamicGameLoader::load()
 	}
 
 	prevSymbols = std::move(symbols);
-	symbols = SymbolLoader::loadSymbols(libName);
+	symbols = SymbolLoader::loadSymbols(lib);
 
 	entry = createHalleyEntry();
 }

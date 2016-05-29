@@ -21,6 +21,7 @@ namespace Halley
 		void unload();
 
 		void* getFunction(String name);
+		void* getBaseAddress() const;
 
 		bool hasChanged() const;
 

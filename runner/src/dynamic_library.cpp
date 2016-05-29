@@ -67,6 +67,11 @@ void* DynamicLibrary::getFunction(String name)
 #endif
 }
 
+void* DynamicLibrary::getBaseAddress() const
+{
+	return handle;
+}
+
 bool DynamicLibrary::hasChanged() const
 {
 	return last_write_time(libOrigPath.cppStr()) > lastWrite;
