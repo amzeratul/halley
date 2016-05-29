@@ -13,6 +13,7 @@ namespace Halley
 		virtual ~IHalleyEntryPoint() {}
 
 		virtual std::unique_ptr<Game> makeGame() = 0;
+		virtual void setupStatics(HalleyStatics* statics) = 0;
 	};
 
 	template <typename T>
@@ -22,6 +23,11 @@ namespace Halley
 		std::unique_ptr<Game> makeGame() override
 		{
 			return std::make_unique<T>();
+		}
+
+		void setupStatics(HalleyStatics* statics) override
+		{
+			statics->setup();
 		}
 	};
 }

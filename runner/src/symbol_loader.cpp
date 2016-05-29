@@ -50,11 +50,18 @@ static void loadSymbolsImpl(DynamicLibrary&, std::vector<DebugSymbol>&)
 
 #endif
 
+constexpr size_t mask = 0x8000000000000001;
+
 DebugSymbol::DebugSymbol(std::string name, void* address, size_t size)
 	: name(name)
-	, address(address)
+	, address(size_t(address) ^ mask)
 	, size(size)
 {
+}
+
+void* DebugSymbol::getAddress() const
+{
+	return reinterpret_cast<void*>(address ^ mask);
 }
 
 std::vector<DebugSymbol> SymbolLoader::loadSymbols(DynamicLibrary& dll)

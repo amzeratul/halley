@@ -49,3 +49,9 @@ void TestStage::onRender(RenderContext& context) const
 	statsView->draw(context);
 }
 
+/*
+void TestStage::onVariableUpdate(Halley::Time time)
+{
+	std::cout << ":D ";
+}
+*/

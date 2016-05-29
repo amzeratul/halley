@@ -30,6 +30,7 @@ namespace Halley
 		String libName;
 		boost::filesystem::path libOrigPath;
 		boost::filesystem::path libPath;
+		boost::filesystem::path debugSymbolsOrigPath;
 		boost::filesystem::path debugSymbolsPath;
 
 		LibHandleType handle;

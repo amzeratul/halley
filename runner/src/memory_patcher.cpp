@@ -22,10 +22,10 @@ void MemoryPatchingMappings::generate(const std::vector<DebugSymbol>& prev, cons
 	// Construct mapping
 	std::unordered_map<std::string, Mapping> mapping;
 	for (const auto& p: prev) {
-		mapping[p.name].from = p.address;
+		mapping[p.getName()].from = p.getAddress();
 	}
 	for (const auto& n : next) {
-		mapping[n.name].to = n.address;
+		mapping[n.getName()].to = n.getAddress();
 	}
 
 	// Flatten

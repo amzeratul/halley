@@ -58,7 +58,7 @@ namespace Halley
 	#define HalleyGame(T) int main(int argc, char* argv[]) { return Halley::HalleyMain::main<T>(argc, argv); }
 #elif defined(HALLEY_SHARED_LIBRARY)
 	#define HalleyGame(T) \
-		HALLEY_EXPORT IHalleyEntryPoint* createHalleyEntry() { return new HalleyEntryPoint<T>(); } \
-		HALLEY_EXPORT void deleteHalleyEntry(IHalleyEntryPoint* entry) { delete entry; } \
+		HALLEY_EXPORT IHalleyEntryPoint* createHalleyEntry() { static HalleyEntryPoint<T> entry; return &entry; } \
+		HALLEY_EXPORT void deleteHalleyEntry(IHalleyEntryPoint* entry) { } \
 		HALLEY_EXPORT void setupStatics(HalleyStatics* statics) { statics->setup(); }
 #endif

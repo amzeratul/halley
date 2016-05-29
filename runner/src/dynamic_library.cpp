@@ -34,11 +34,22 @@ void DynamicLibrary::load(bool withAnotherName)
 	}
 
 	// Check for debug symbols
-	debugSymbolsPath = libOrigPath;
+	debugSymbolsOrigPath = libOrigPath;
 	#ifdef _WIN32
-	debugSymbolsPath.replace_extension("pdb");
+	debugSymbolsOrigPath.replace_extension("pdb");
 	#endif
-	hasDebugSymbols = exists(debugSymbolsPath);
+	hasDebugSymbols = exists(debugSymbolsOrigPath);
+
+	// Copy debug symbols if the lib got copied
+	if (withAnotherName && debugSymbolsOrigPath != libOrigPath) {
+		debugSymbolsPath = libPath;
+		#ifdef _WIN32
+		debugSymbolsPath.replace_extension("pdb");
+		#endif
+		copy_file(debugSymbolsOrigPath, debugSymbolsPath);
+	} else {
+		debugSymbolsPath = debugSymbolsOrigPath;
+	}
 
 	// Load
 	#ifdef _WIN32
@@ -51,7 +62,7 @@ void DynamicLibrary::load(bool withAnotherName)
 	// Store write times
 	if (hasDebugSymbols) {
 		libLastWrite = last_write_time(libOrigPath);
-		debugLastWrite = last_write_time(debugSymbolsPath);
+		debugLastWrite = last_write_time(debugSymbolsOrigPath);
 	}
 
 	loaded = true;
@@ -67,6 +78,9 @@ void DynamicLibrary::unload()
 
 		if (hasTempPath) {
 			remove(libPath);
+			if (libPath != debugSymbolsPath) {
+				remove(debugSymbolsPath);
+			}
 		}
 
 		loaded = false;
@@ -94,9 +108,9 @@ bool DynamicLibrary::hasChanged() const
 		return false;
 	}
 	// One of the files is missing, maybe there was a linker error
-	if (!exists(libOrigPath) || !exists(debugSymbolsPath)) {
+	if (!exists(libOrigPath) || !exists(debugSymbolsOrigPath)) {
 		return false;
 	}
 	// If BOTH the dll and debug symbols files have changed, we're ready to reload
-	return last_write_time(libOrigPath) > libLastWrite && last_write_time(debugSymbolsPath) > debugLastWrite;
+	return last_write_time(libOrigPath) > libLastWrite && last_write_time(debugSymbolsOrigPath) > debugLastWrite;
 }
