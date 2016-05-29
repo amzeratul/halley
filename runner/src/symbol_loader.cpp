@@ -16,7 +16,12 @@ static BOOL CALLBACK loadSymbolsCallback(SYMBOL_INFO* symInfo, unsigned long sym
 {
 	auto& symbols = *reinterpret_cast<std::vector<DebugSymbol>*>(userContext);
 	
-	symbols.push_back(DebugSymbol(symInfo->Name, reinterpret_cast<void*>(symInfo->Address), sizeof(void*)));
+	std::string name(symInfo->Name, symInfo->NameLen);
+	if (name.find("table") != std::string::npos) {
+		if (name.find("`vftable'") != std::string::npos || name.find("`vbtable'") != std::string::npos) {
+			symbols.push_back(DebugSymbol(symInfo->Name, reinterpret_cast<void*>(symInfo->Address), sizeof(void*)));
+		}
+	}
 
 	return 1;
 }
@@ -38,7 +43,7 @@ static void loadSymbolsImpl(DynamicLibrary& dll, std::vector<DebugSymbol>& vecto
 
 	long long baseAddr = long long(dll.getBaseAddress());
 
-	SymEnumSymbols(hProcess, baseAddr, "*vftable*", loadSymbolsCallback, &vector);
+	SymEnumSymbols(hProcess, baseAddr, "*", loadSymbolsCallback, &vector);
 
 	SymCleanup(hProcess);
 }

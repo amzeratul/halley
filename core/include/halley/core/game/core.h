@@ -54,7 +54,7 @@ namespace Halley
 		void deInit();
 
 		void initResources();
-		void setOutRedirect();
+		void setOutRedirect(bool appendToExisting);
 
 		void doFixedUpdate(Time time);
 		void doVariableUpdate(Time time);

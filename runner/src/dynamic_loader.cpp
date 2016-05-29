@@ -37,9 +37,11 @@ void DynamicGameLoader::reload()
 	std::cout << ConsoleColor(Console::BLUE) << "\n**RELOADING GAME**" << std::endl;
 	Stopwatch timer;
 	
+	core->onSuspended();
 	unload();
 	load();
 	hotPatch();
+	core->onReloaded();
 
 	timer.pause();
 	
@@ -75,8 +77,6 @@ void DynamicGameLoader::load()
 
 void DynamicGameLoader::unload()
 {
-	core->onSuspended();
-
 	entry = nullptr;
 	lib.unload();
 }
@@ -86,7 +86,5 @@ void DynamicGameLoader::hotPatch()
 	MemoryPatchingMappings mappings;
 	mappings.generate(prevSymbols, symbols);
 	MemoryPatcher::patch(mappings);
-
-	core->onReloaded();
 }
 
