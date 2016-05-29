@@ -83,3 +83,4 @@ void TestStage::onRender(RenderContext& context) const
 
 	statsView->draw(context);
 }
+

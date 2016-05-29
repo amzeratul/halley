@@ -8,9 +8,9 @@ using namespace boost::filesystem;
 DynamicLibrary::DynamicLibrary(String name)
 	: libName(name)
 {
-#ifdef _WIN32
+	#ifdef _WIN32
 	libOrigPath = libName + ".dll";
-#endif
+	#endif
 }
 
 DynamicLibrary::~DynamicLibrary()
@@ -22,6 +22,7 @@ void DynamicLibrary::load(bool withAnotherName)
 {
 	unload();
 
+	// Determine which path to load
 	hasTempPath = withAnotherName;
 	if (withAnotherName) {
 		libPath = unique_path("halley-%%%%-%%%%-%%%%-%%%%.dll").string();
@@ -30,14 +31,27 @@ void DynamicLibrary::load(bool withAnotherName)
 		libPath = libOrigPath;
 	}
 
-#ifdef _WIN32
+	// Check for debug symbols
+	debugSymbolsPath = libOrigPath;
+	#ifdef _WIN32
+	auto debugPath = path(debugSymbolsPath.cppStr()).replace_extension("pdb");
+	hasDebugSymbols = exists(debugPath);
+	debugSymbolsPath = debugPath.string();
+	#endif
+
+	// Load
+	#ifdef _WIN32
 	handle = LoadLibrary(libPath.c_str());
-#endif
+	#endif
 	if (!handle) {
 		throw Exception("Unable to load library: " + libPath);
 	}
 
-	lastWrite = last_write_time(libOrigPath.cppStr());
+	// Store write times
+	if (hasDebugSymbols) {
+		libLastWrite = last_write_time(libOrigPath.cppStr());
+		debugLastWrite = last_write_time(debugSymbolsPath.cppStr());
+	}
 
 	loaded = true;
 }
@@ -45,9 +59,9 @@ void DynamicLibrary::load(bool withAnotherName)
 void DynamicLibrary::unload()
 {
 	if (loaded) {
-#ifdef _WIN32
+		#ifdef _WIN32
 		FreeLibrary(handle);
-#endif
+		#endif
 		handle = nullptr;
 
 		if (hasTempPath) {
@@ -60,11 +74,11 @@ void DynamicLibrary::unload()
 
 void* DynamicLibrary::getFunction(String name)
 {
-#ifdef _WIN32
+	#ifdef _WIN32
 	return GetProcAddress(handle, name.c_str());
-#else
+	#else
 	return nullptr;
-#endif
+	#endif
 }
 
 void* DynamicLibrary::getBaseAddress() const
@@ -74,5 +88,8 @@ void* DynamicLibrary::getBaseAddress() const
 
 bool DynamicLibrary::hasChanged() const
 {
-	return last_write_time(libOrigPath.cppStr()) > lastWrite;
+	if (!hasDebugSymbols) {
+		return false;
+	}
+	return last_write_time(libOrigPath.cppStr()) > libLastWrite && last_write_time(debugSymbolsPath.cppStr()) > debugLastWrite;
 }

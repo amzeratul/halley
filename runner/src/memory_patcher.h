@@ -9,8 +9,8 @@ namespace Halley
 	public:
 		std::vector<void*> src;
 		std::vector<void*> dst;
-		void* minVal;
-		void* maxVal;
+		void* minSrc;
+		void* maxSrc;
 
 		void generate(const std::vector<DebugSymbol>& prev, const std::vector<DebugSymbol>& next);
 	};

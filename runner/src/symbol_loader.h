@@ -8,11 +8,11 @@ namespace Halley
 	class DebugSymbol
 	{
 	public:
-		String name;
+		std::string name;
 		void* address;
 		size_t size;
 
-		DebugSymbol(String name, void* address, size_t size);
+		DebugSymbol(std::string name, void* address, size_t size);
 	};
 
 	class SymbolLoader

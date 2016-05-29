@@ -44,7 +44,7 @@ static void loadSymbolsImpl(DynamicLibrary& dll, std::vector<DebugSymbol>& vecto
 
 #endif
 
-DebugSymbol::DebugSymbol(String name, void* address, size_t size)
+DebugSymbol::DebugSymbol(std::string name, void* address, size_t size)
 	: name(name)
 	, address(address)
 	, size(size)

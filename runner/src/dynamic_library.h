@@ -29,10 +29,14 @@ namespace Halley
 		String libName;
 		String libOrigPath;
 		String libPath;
-		bool hasTempPath;
+		String debugSymbolsPath;
+		bool hasTempPath = false;
+		bool hasDebugSymbols = false;
 
 		bool loaded = false;
 		LibHandleType handle;
-		time_t lastWrite;
+
+		time_t libLastWrite;
+		time_t debugLastWrite;
 	};
 }
