@@ -4,7 +4,7 @@
 [![Standard](https://img.shields.io/badge/c%2B%2B-14-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B14)
 
 # Halley Game Engine
-A lightweight game engine written in C++14. I'm currently re-architecting the whole engine, while experimenting with some crazy ideas, so it's not usable at all right now (some basic components, such as input, are not there at all).
+A lightweight game engine written in C++14. I'm currently re-architecting the whole engine, while experimenting with some crazy ideas, so it's not fully usable yet.
 
 Design guidelines & objectives:
 * Modern graphics pipelines, with first-class shader support
@@ -17,6 +17,7 @@ Design guidelines & objectives:
 * Cross-platform: support as many platforms as possible
 * No legacy: don't bother supporting legacy systems, such as Windows XP or older Android/iOS devices
 * Rich tools: where possible, provide tools to assist in development and debugging
+* Fast iteration time: hot-reloading wherever possible
 * Support scripting in other languages, such as Lua
 
 ## Modules
@@ -40,11 +41,12 @@ Halley is divided in a few sub-projects:
   * GCC 5.0
 
 ### Dependencies
-* Boost 1.59.0 (Can we get rid of this? Only two files in Utils use it)
+* Boost 1.59.0
 * SDL 2.0.4
 * GLEW 1.13.0
 * yaml-cpp 0.5.3
 * Freetype 2.6.3
 
 ### Set up
-* Run CMake
+* Build with CMake
+* Run halley-sample-test (or, on Windows, "halley-runner.exe halley-sample-test.dll")
