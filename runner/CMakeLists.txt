@@ -1,6 +1,6 @@
 project (halley-runner)
 
-include_directories(${Boost_INCLUDE_DIR} "../core/include" "../utils/include")
+include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR}  "../core/include" "../utils/include")
 
 set(SOURCES
 		"src/dynamic_library.cpp"

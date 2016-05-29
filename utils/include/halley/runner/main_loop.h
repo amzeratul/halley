@@ -21,7 +21,6 @@ namespace Halley
 		virtual void init() = 0;
 		virtual void onSuspended() = 0;
 		virtual void onReloaded() = 0;
-		virtual HalleyStatics& getStatics() = 0;
 	};
 
 	class MainLoop

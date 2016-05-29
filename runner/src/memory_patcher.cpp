@@ -24,7 +24,7 @@ void MemoryPatchingMappings::generate(const std::vector<DebugSymbol>& prev, cons
 	for (const auto& p: prev) {
 		mapping[p.getName()].from = p.getAddress();
 	}
-	for (const auto& n : next) {
+	for (const auto& n: next) {
 		mapping[n.getName()].to = n.getAddress();
 	}
 
@@ -88,7 +88,7 @@ static size_t scanProcessMemory(const MemoryPatchingMappings& mappings, std::fun
 
 #else
 
-static size_t patchProcessMemory(const MemoryPatchingMappings&)
+static size_t scanProcessMemory(const MemoryPatchingMappings&, std::function<size_t(void*, size_t, const MemoryPatchingMappings&)>)
 {
 	// TODO
 	return 0;

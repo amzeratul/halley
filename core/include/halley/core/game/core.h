@@ -27,7 +27,7 @@ namespace Halley
 	public:
 		Core(std::unique_ptr<Game> game, std::vector<std::string> args);
 		~Core();
-		void init();
+		void init() override;
 
 		void setStage(StageID stage) override;
 		void setStage(std::unique_ptr<Stage> stage);
@@ -47,8 +47,6 @@ namespace Halley
 
 		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
 		std::vector<Plugin*> getPlugins(PluginType type) override;
-
-		HalleyStatics& getStatics() { return statics; }
 
 	private:
 		void deInit();
