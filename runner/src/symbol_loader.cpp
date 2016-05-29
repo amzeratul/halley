@@ -2,6 +2,7 @@
 #include <halley/support/exception.h>
 #include <iostream>
 #include "dynamic_library.h"
+#include <sstream>
 
 using namespace Halley;
 
@@ -11,7 +12,7 @@ using namespace Halley;
 #include <DbgHelp.h>
 #pragma comment(lib, "dbghelp.lib")
 
-static BOOL CALLBACK loadSymbolsCallback(PSYMBOL_INFO symInfo, unsigned long symbolSize, void* userContext)
+static BOOL CALLBACK loadSymbolsCallback(SYMBOL_INFO* symInfo, unsigned long symbolSize, void* userContext)
 {
 	auto& symbols = *reinterpret_cast<std::vector<DebugSymbol>*>(userContext);
 	
@@ -64,9 +65,49 @@ void* DebugSymbol::getAddress() const
 	return reinterpret_cast<void*>(address ^ mask);
 }
 
+void DebugSymbol::appendToName(size_t id)
+{
+	std::stringstream ss;
+	ss << "#" << id;
+	name += ss.str();
+}
+
 std::vector<DebugSymbol> SymbolLoader::loadSymbols(DynamicLibrary& dll)
 {
 	std::vector<DebugSymbol> results;
 	loadSymbolsImpl(dll, results);
+
+	// We need to distinguish between multiple symbols with the same name.
+	// This is typically the case when doing multiple inheritance, as all vftables will have the same name.
+
+	// Our technique here is to sort the list of symbols by name, then by address, then rename conflicting types to have a number appended to them
+	std::sort(results.begin(), results.end(), [](DebugSymbol& a, DebugSymbol& b) -> bool {
+		if (a.getName() < b.getName()) return true;
+		if (b.getName() < a.getName()) return false;
+		return a.getAddress() < b.getAddress();
+	});
+	results.push_back(DebugSymbol("--sigil--", nullptr, 0));
+
+	std::string curName;
+	size_t lastUnique = 0;
+	for (size_t i = 0; i < results.size(); i++) {
+		if (results[i].getName() != curName) {
+			// Go through all the repeated ones and rename them
+			size_t nUnique = i - lastUnique;
+			if (nUnique >= 2) {
+				for (size_t j = 0; j < nUnique; j++) {
+					results[j + lastUnique].appendToName(j);
+				}
+			}
+
+			// New name
+			lastUnique = i;
+			curName = results[i].getName();
+		}		
+	}
+
+	// Remove sigil
+	results.pop_back();
+
 	return results;
 }

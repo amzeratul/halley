@@ -87,7 +87,6 @@ void DynamicGameLoader::hotPatch()
 	mappings.generate(prevSymbols, symbols);
 	MemoryPatcher::patch(mappings);
 
-	//setStatics();
 	core->onReloaded();
 }
 

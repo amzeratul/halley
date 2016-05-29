@@ -12,6 +12,7 @@ namespace Halley
 		std::string getName() const { return name; }
 		void* getAddress() const;
 		size_t getSize() const { return size; }
+		void appendToName(size_t id);
 
 	private:
 		std::string name;
