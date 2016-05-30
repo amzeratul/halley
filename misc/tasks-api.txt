@@ -1,0 +1,18 @@
+shared_ptr<T> Resources::getResource<T>(String name);
+Future<shared_ptr<T>> Resources::getResourceAsync<T>(String name);
+
+Future<T> Promise<T>::getFuture();
+void Promise<T>::setResult(const T&);
+void Promise<T>::setResult(T&&);
+
+T&& Future<T>::moveResult();
+T Future<T>::getResult();
+T Future<T>::isReady() const;
+void Future<T>::cancel();
+
+static Future<T> Concurrent::launch(executor, std::function<T()> f);
+Future<U> Future<T>::then(executor, std::function<U(T)> f);
+
+static Future<void> Concurrent::whenAll(Iterator<Future<T>> begin, Iterator<Future<T>> end);
+static Future<std::vector<T>> Concurrent::collect(Iterator<Future<T>> begin, Iterator<Future<T>> end);
+static Future<std::vector<T>> Concurrent::collectMove(Iterator<Future<T>> begin, Iterator<Future<T>> end);
