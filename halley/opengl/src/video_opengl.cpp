@@ -1,5 +1,5 @@
 ﻿#include <SDL.h>
-#include <GL/glew.h>
+#include "gl_core_3_3.h"
 #include "halley_gl.h"
 #include "video_opengl.h"
 #include "painter_opengl.h"
@@ -12,7 +12,6 @@
 using namespace Halley;
 
 #ifdef _MSC_VER
-#pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "opengl32.lib")
 #endif
 
@@ -187,7 +186,7 @@ void VideoOpenGL::initOpenGL()
 #endif
 	}
 
-	initGlew();
+	initGLBindings();
 
 	// Print OpenGL data
 	std::cout << "OpenGL initialized." << std::endl;
@@ -206,20 +205,44 @@ void VideoOpenGL::initOpenGL()
 	}
 	std::cout << ConsoleColor() << std::endl;
 
-	setUpDebugCallback();
+	setupDebugCallback();
 }
 
-void VideoOpenGL::initGlew()
+void VideoOpenGL::initGLBindings()
 {
 #ifdef WITH_OPENGL
-	glewExperimental = true;
-	GLenum err = glewInit();
-	if (err != GLEW_OK) {
-		throw Exception(String("Error initializing GLEW: ") + reinterpret_cast<const char*>(glewGetErrorString(err)));
+	if (ogl_LoadFunctions() == ogl_LOAD_FAILED) {
+		throw Exception(String("Error initializing glLoadGen."));
 	}
-	glGetError(); // discard error
 	glCheckError();
 #endif
+}
+
+void VideoOpenGL::setupDebugCallback()
+{
+	if (glDebugMessageCallback) {
+		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+			reinterpret_cast<const VideoOpenGL*>(userParam)->onGLDebugMessage(source, type, id, severity, message);
+		}, this);
+		glCheckError();
+	} else {
+		glGetError();
+		std::cout << ConsoleColor(Console::YELLOW) << "KHR_DEBUG is not available." << ConsoleColor() << std::endl;
+	}
+}
+
+void VideoOpenGL::onSuspend()
+{
+	if (glDebugMessageCallback) {
+		glDebugMessageCallback(nullptr, nullptr);
+		glCheckError();
+	}
+}
+
+void VideoOpenGL::onResume()
+{
+	initGLBindings();
+	setupDebugCallback();
 }
 
 void VideoOpenGL::clearScreen()
@@ -244,19 +267,6 @@ void VideoOpenGL::setWindowSize(Vector2i winSize)
 {
 	windowSize = winSize;
 	updateWindowDimensions();
-}
-
-void VideoOpenGL::setUpDebugCallback()
-{
-	if (false && glDebugMessageCallback) {
-		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-			reinterpret_cast<const VideoOpenGL*>(userParam)->onGLDebugMessage(source, type, id, severity, message);
-		}, this);
-		glCheckError();
-	} else {
-		glGetError();
-		std::cout << ConsoleColor(Console::YELLOW) << "KHR_DEBUG is not available." << ConsoleColor() << std::endl;
-	}
 }
 
 void VideoOpenGL::setUpEnumMap()
@@ -474,11 +484,6 @@ void VideoOpenGL::flip()
 	for (const auto& m: msgs) {
 		m();
 	}
-}
-
-void VideoOpenGL::reload()
-{
-	initGlew();
 }
 
 void VideoOpenGL::setFullscreen(bool fs)

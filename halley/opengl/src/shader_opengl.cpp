@@ -93,7 +93,7 @@ void ShaderOpenGL::compile()
 		}
 #ifndef WITH_OPENGL_ES
 		for (size_t i = 0; i<geometrySources.size(); i++) {
-			shaders.push_back(loadShader(geometrySources[i], GL_GEOMETRY_SHADER_ARB, name + "/geometry"));
+			shaders.push_back(loadShader(geometrySources[i], GL_GEOMETRY_SHADER, name + "/geometry"));
 		}
 #endif
 		for (size_t i = 0; i<pixelSources.size(); i++) {

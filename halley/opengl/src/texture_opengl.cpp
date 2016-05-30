@@ -46,7 +46,7 @@ unsigned int TextureOpenGL::create(size_t w, size_t h, TextureFormat format, boo
 #else
 	GLuint pixFormat = GL_UNSIGNED_BYTE;
 
-	if (useMipMap) glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, -1);
+	if (useMipMap) glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glCheckError();
@@ -55,8 +55,7 @@ unsigned int TextureOpenGL::create(size_t w, size_t h, TextureFormat format, boo
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
 
 	if (format == TextureFormat::DEPTH) {
-		glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 	}
 

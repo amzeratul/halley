@@ -13,8 +13,7 @@ namespace Halley {
 		void startRender() override;
 		void finishRender() override;
 		void flip() override;
-		void reload() override;
-
+		
 		void setVideo(WindowType windowType, Vector2i fullscreenSize, Vector2i windowedSize, Vector2f virtualSize = Vector2f(), bool vsync = true, int screen = 0) override;
 		Vector2i getWindowSize() const override { return windowSize; }
 		Vector2f getVirtualSize() const override { return virtualSize; }
@@ -41,18 +40,22 @@ namespace Halley {
 	protected:
 		void init() override;
 		void deInit() override;
+
+		void onSuspend() override;
+		void onResume() override;
+
 		void processEvent(SDL_Event& event) override;
 
 	private:
 		void printDebugInfo() const;
 		void createWindow();
 		void initOpenGL();
-		void initGlew();
+		void initGLBindings();
 		void clearScreen();
 
 		void updateWindowDimensions();
 		void setWindowSize(Vector2i windowSize);
-		void setUpDebugCallback();
+		void setupDebugCallback();
 		void setUpEnumMap();
 		void onGLDebugMessage(unsigned int source, unsigned int type, unsigned int id, unsigned int severity, String message) const;
 

@@ -18,6 +18,7 @@ void Halley::Environment::parseProgramPath(String path)
 	path = buffer;
 #endif
 
+	// HACK
 	size_t len = path.length();
 	size_t last = 0;
 	for (size_t i = 0; i<len; i++) {

@@ -14,9 +14,7 @@ AnimationFrame::AnimationFrame(int frameNumber, String imageName, SpriteSheet& s
 	const size_t n = directions.size();
 	sprites.resize(n);
 	for (size_t i = 0; i < n; i++) {
-		auto& sprite = sprites[i];
-		String spriteName = directions[i].getFrameName(frameNumber, imageName);
-		sprite = &sheet.getSprite(spriteName);
+		sprites[i] = &sheet.getSprite(directions[i].getFrameName(frameNumber, imageName));
 	}
 }
 

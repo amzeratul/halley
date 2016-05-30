@@ -4,7 +4,6 @@ namespace Halley
 {
 	enum class BlendType {
 		Opaque,
-		Test,
 		Alpha,
 		AlphaPremultiplied,
 		Add,

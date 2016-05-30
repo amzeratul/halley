@@ -43,7 +43,6 @@ Halley is divided in a few sub-projects:
 ### Dependencies
 * Boost 1.59.0
 * SDL 2.0.4
-* GLEW 1.13.0
 * yaml-cpp 0.5.3
 * Freetype 2.6.3
 

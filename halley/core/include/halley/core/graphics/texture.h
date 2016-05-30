@@ -19,7 +19,7 @@ namespace Halley
 		Vector2i getSize() const { return size; }
 
 	protected:
-		unsigned int textureId;
+		unsigned int textureId = -1;
 		Vector2i size;
 	};
 }

@@ -63,7 +63,7 @@ Halley::OSWin32::OSWin32()
 		if (FAILED(hr)) throw Exception("Unable to connect to WMI service");
 
 		// Set security on WMI connection
-		CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE);
+		hr = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE);
 		if (FAILED(hr)) throw Exception("Unable to set WMI security");
 	} catch (std::exception& e) {
 		std::cout << "Exception initializing COM/WMI: " << e.what() << std::endl;

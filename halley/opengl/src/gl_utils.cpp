@@ -131,15 +131,13 @@ GLUtils::GLUtils(GLUtils& other)
 
 void GLUtils::setBlendType(BlendType type)
 {
-	assert(type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Opaque || type == BlendType::Test || type == BlendType::Multiply || type == BlendType::Darken);
+	assert(type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Opaque || type == BlendType::Multiply || type == BlendType::Darken);
 	glCheckError();
 
 	const BlendType curType = state.curBlend;
 	if (!CHECKED || curType != type) {
 		bool hasBlend = curType == BlendType::Alpha || curType == BlendType::AlphaPremultiplied || curType == BlendType::Add || curType == BlendType::Multiply || curType == BlendType::Darken;
 		bool needsBlend = type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Multiply || type == BlendType::Darken;
-		bool hasTest = curType == BlendType::Test;
-		bool needsTest = type == BlendType::Test;
 
 		// Disable current
 		if (hasBlend && !needsBlend) {
@@ -148,16 +146,6 @@ void GLUtils::setBlendType(BlendType type)
 		}
 		else if (!hasBlend && needsBlend) {
 			glEnable(GL_BLEND);
-			glCheckError();
-		}
-		if (hasTest && !needsTest) {
-			glDisable(GL_ALPHA_TEST);
-			glCheckError();
-		}
-		else if (!hasTest && needsTest) {
-			glEnable(GL_ALPHA_TEST);
-			glCheckError();
-			glAlphaFunc(GL_GREATER, 0.1f);
 			glCheckError();
 		}
 

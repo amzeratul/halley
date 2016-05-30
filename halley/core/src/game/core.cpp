@@ -63,6 +63,13 @@ Core::~Core()
 
 void Core::onSuspended()
 {
+	if (api->videoInternal) {
+		api->videoInternal->onSuspend();
+	}
+	if (api->inputInternal) {
+		api->inputInternal->onSuspend();
+	}
+
 	std::cout.flush();
 	out.reset();
 }
@@ -72,8 +79,11 @@ void Core::onReloaded()
 	setOutRedirect(true);
 	statics.setup();
 
+	if (api->inputInternal) {
+		api->inputInternal->onResume();
+	}
 	if (api->videoInternal) {
-		api->videoInternal->reload();
+		api->videoInternal->onResume();
 	}
 }
 
