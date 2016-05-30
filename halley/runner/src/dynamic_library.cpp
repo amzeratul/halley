@@ -9,9 +9,16 @@ using namespace boost::filesystem;
 DynamicLibrary::DynamicLibrary(std::string name)
 	: libName(name)
 {
-	#ifdef _WIN32
-	libOrigPath = path(libName + ".dll");
+	std::string ext;
+	#if defined(_WIN32)
+	ext = ".dll";
+	#elif (__APPLE__)
+	ext = ".dylib";
+	#else
+	ext = ".so";
 	#endif
+
+	libOrigPath = path(libName + ext).normalize();
 }
 
 DynamicLibrary::~DynamicLibrary()
@@ -26,7 +33,7 @@ void DynamicLibrary::load(bool withAnotherName)
 	// Determine which path to load
 	hasTempPath = withAnotherName;
 	if (withAnotherName) {
-		libPath = unique_path("halley-%%%%-%%%%-%%%%-%%%%.dll").string();
+		libPath = libOrigPath.parent_path() / unique_path("halley-%%%%-%%%%-%%%%-%%%%.dll");
 		copy_file(libOrigPath, libPath);
 	} else {
 		libPath = libOrigPath;
