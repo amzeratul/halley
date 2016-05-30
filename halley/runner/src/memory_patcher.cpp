@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <cassert>
 #include <functional>
-#include <halley/support/console.h>
 
 using namespace Halley;
 
@@ -145,9 +144,9 @@ size_t MemoryPatcher::patchMemory(void* address, size_t len, const MemoryPatchin
 						std::cout << "Prevent patching at " << p << ", as it's inside MemoryPatchingMappings.\n";
 						#endif
 					} else {
-						//#ifdef VERBOSE_MAPPING
+						#ifdef VERBOSE_MAPPING
 						std::cout << "! " << p << ": " << val << " -> " << mappings.dst[n] << ": " << mappings.name[n] << "\n";
-						//#endif
+						#endif
 						*p = mappings.dst[n];
 						count++;
 					}

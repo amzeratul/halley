@@ -19,7 +19,6 @@
 
 \*****************************************************************/
 
-#include <iostream>
 #include "halley/concurrency/thread_pool.h"
 #include <thread>
 using namespace Halley;

@@ -29,9 +29,7 @@ namespace Halley {
 FontFace::FontFace(String filename)
 	: pimpl (std::make_unique<FontFacePimpl>())
 {
-	int error = 0;
-
-	error = FT_Init_FreeType(&pimpl->library);
+	int error = FT_Init_FreeType(&pimpl->library);
 	if (error) {
 		throw Exception("Unable to initialize FreeType");
 	}

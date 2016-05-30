@@ -55,9 +55,9 @@ namespace Halley
 		std::vector<char> vertexBuffer;
 		std::shared_ptr<Material> materialPending;
 
-		size_t nDrawCalls;
-		size_t nVertices;
-		size_t nTriangles;
+		size_t nDrawCalls = 0;
+		size_t nVertices = 0;
+		size_t nTriangles = 0;
 
 		void flushPending();
 		void executeDrawQuads(Material& material, size_t numVertices, void* vertexData);

@@ -135,7 +135,7 @@ bool Codegen::writeFile(String dstPath, const char* data, size_t dataSize) const
 	return true;
 }
 
-void Codegen::writeFiles(String directory, const CodeGenResult& files, Stats& stats)
+void Codegen::writeFiles(String directory, const CodeGenResult& files, Stats& stats) const
 {
 	using namespace boost::filesystem;
 
@@ -144,10 +144,7 @@ void Codegen::writeFiles(String directory, const CodeGenResult& files, Stats& st
 		create_directories(dir);
 		std::cout << "Created directory " << dir << std::endl;
 	}
-
-	int skipped = 0;
-	int written = 0;
-
+	
 	for (auto& f : files) {
 		path filePath = dir;
 		filePath.append(f.fileName.cppStr());

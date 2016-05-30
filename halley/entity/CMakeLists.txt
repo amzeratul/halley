@@ -8,10 +8,9 @@ set(SOURCES
         "src/family"
         "src/family_binding.cpp"
         "src/family_mask.cpp"
-        "src/message"
-        "src/prec"
-        "src/system"
-        "src/world"
+        "src/message.cpp"
+        "src/system.cpp"
+        "src/world.cpp"
         )
 
 set(HEADERS
@@ -24,7 +23,6 @@ set(HEADERS
         "include/halley/entity/family_mask.h"
         "include/halley/entity/family_type.h"
         "include/halley/entity/message.h"
-        "include/halley/entity/prec.h"
         "include/halley/entity/system.h"
         "include/halley/entity/type_deleter.h"
         "include/halley/entity/world.h"

@@ -48,7 +48,7 @@ namespace Halley
 		void doDeInit();
 
 		String name;
-		HalleyAPI* api;
+		HalleyAPI* api = nullptr;
 	};
 
 }

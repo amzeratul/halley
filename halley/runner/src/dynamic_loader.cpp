@@ -1,6 +1,7 @@
 #include "dynamic_loader.h"
 #include <halley/runner/halley_main.h>
 #include "memory_patcher.h"
+#include <halley/runner/entry_point.h>
 
 using namespace Halley;
 

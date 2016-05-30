@@ -19,7 +19,6 @@
 
 \*****************************************************************/
 
-#include <SDL_joystick.h>
 #include <cmath>
 #include "input/input_joystick.h"
 using namespace Halley;

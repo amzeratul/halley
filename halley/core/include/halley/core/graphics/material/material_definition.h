@@ -29,7 +29,8 @@ namespace Halley
 		Matrix2,
 		Matrix3,
 		Matrix4,
-		Texture2D
+		Texture2D,
+		Invalid
 	};
 
 	class MaterialAttribute
@@ -40,7 +41,12 @@ namespace Halley
 		int location;
 		int offset;
 
-		MaterialAttribute() {}
+		MaterialAttribute()
+			: type(ShaderParameterType::Invalid)
+			, location(-1)
+			, offset(-1)
+		{}
+
 		MaterialAttribute(String name, ShaderParameterType type, int location, int offset = 0)
 			: name(name)
 			, type(type)

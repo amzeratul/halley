@@ -34,8 +34,8 @@ namespace Halley
 		GameLoader& reloader;
 
 		unsigned int delay = 0;
-		int fps;
-		bool capFrameRate;
+		int fps = 60;
+		bool capFrameRate = false;
 
 		void runLoop();
 		bool isRunning() const;

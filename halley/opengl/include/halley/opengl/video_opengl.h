@@ -63,18 +63,18 @@ namespace Halley {
 		mutable std::vector<std::function<void()>> messagesPending;
 		mutable std::mutex messagesMutex;
 
-		void* context;
+		void* context = nullptr;
 		Vector2i windowSize;
 		Vector2i windowedSize;
 		Vector2i fullscreenSize;
 		Vector2f virtualSize;
 		Vector2f p1, p2;
 		WindowType windowType;
-		bool initialized;
-		bool running;
-		float scale;
-		float border;
-		int screenNumber;
-		SDL_Window* window;
+		bool initialized = false;
+		bool running = false;
+		float scale = 1;
+		float border = 0;
+		int screenNumber = 0;
+		SDL_Window* window = nullptr;
 	};
 }

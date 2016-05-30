@@ -95,10 +95,6 @@ namespace Halley {
 		void setBasePath(String path);
 		String getBasePath() const;
 
-		void clear();
-		void unloadAll(int minDepth = 0);
-		void flushAll(int minDepth = 0);
-
 		void setDepth(int depth);
 
 	private:

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <halley/text/halleystring.h>
 #include <boost/filesystem/path.hpp>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -33,10 +32,10 @@ namespace Halley
 		boost::filesystem::path debugSymbolsOrigPath;
 		boost::filesystem::path debugSymbolsPath;
 
-		LibHandleType handle;
+		LibHandleType handle = nullptr;
 
-		time_t libLastWrite;
-		time_t debugLastWrite;
+		time_t libLastWrite = 0;
+		time_t debugLastWrite = 0;
 
 		bool hasTempPath = false;
 		bool hasDebugSymbols = false;

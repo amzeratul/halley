@@ -28,7 +28,7 @@ namespace Halley {
 	class InputJoystickSDL : public InputJoystick {
 	public:
 		~InputJoystickSDL();
-		std::string getName() const override;
+		std::string getName() const final override;
 
 		JoystickType getType() const override {
 			return JOYSTICK_GENERIC;

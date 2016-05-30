@@ -1,5 +1,4 @@
 #include "system.h"
-#include <iostream>
 
 using namespace Halley;
 

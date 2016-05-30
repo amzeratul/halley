@@ -31,14 +31,14 @@ void Halley::MainLoop::runLoop()
 	Debug::trace("MainLoop::run begin");
 
 	using Uint32 = unsigned int;
-	Uint32 startTime = 0;
-	Uint32 targetTime = 0;
 	Uint32 nSteps = 0;
-	Uint32 lastTime = 0;
+	Uint32 startTime;
+	Uint32 targetTime;
+	Uint32 lastTime;
+	startTime = targetTime = lastTime = api.system->getTicks();
 
 	Time fixedDelta = 1.0 / fps;
 
-	startTime = targetTime = lastTime = api.system->getTicks();
 	while (isRunning()) {
 		if (target.transitionStage()) {
 			// Reset counters

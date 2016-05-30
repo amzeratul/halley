@@ -62,8 +62,8 @@ namespace Halley {
 		std::vector<int> messageTypesReceived;
 		std::vector<EntityId> messagesSentTo;
 
-		World* world;
-		HalleyAPI* api;
+		World* world = nullptr;
+		HalleyAPI* api = nullptr;
 		String name;
 		int systemId = -1;
 

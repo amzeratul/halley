@@ -1,9 +1,9 @@
 #include <halley/os/os.h>
 #include "halley/core/game/environment.h"
-#include <iostream>
 #include <boost/filesystem.hpp>
 
 #ifdef __APPLE__
+#include <iostream>
 #include <mach-o/dyld.h>
 #include <unistd.h>
 #endif

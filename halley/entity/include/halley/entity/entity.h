@@ -17,8 +17,8 @@ namespace Halley {
 	{
 	public:
 		std::unique_ptr<Message> msg;
-		int type;
-		int age;
+		int type = -1;
+		int age = -1;
 
 		MessageEntry() {}
 		MessageEntry(std::unique_ptr<Message> msg, int type, int age) : msg(std::move(msg)), type(type), age(age) {}

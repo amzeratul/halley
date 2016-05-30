@@ -49,7 +49,6 @@ namespace Halley {
 		float getAxis(int n) override;
 		InputDevice& getHat(int n) override;
 
-		void setAxisAdjust(std::function<float (float)> f);
 		static float defaultAxisAdjust(float value);
 
 		int getButtonAtPosition(char c) const;	// c = N, S, E or W

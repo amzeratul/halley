@@ -3,6 +3,8 @@
 
 namespace Halley
 {
+	class Texture;
+
 	class TextureRenderTarget : public RenderTarget {
 	public:
 		virtual ~TextureRenderTarget() {}

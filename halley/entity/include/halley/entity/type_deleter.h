@@ -6,6 +6,7 @@ namespace Halley {
 	class TypeDeleterBase
 	{
 	public:
+		virtual ~TypeDeleterBase() {}
 		virtual size_t getSize() = 0;
 		virtual void callDestructor(void* ptr) = 0;
 	};
@@ -35,7 +36,7 @@ namespace Halley {
 	};
 
 	template <typename T>
-	class TypeDeleter : public TypeDeleterBase
+	class TypeDeleter final : public TypeDeleterBase
 	{
 	public:
 		static void initialize()

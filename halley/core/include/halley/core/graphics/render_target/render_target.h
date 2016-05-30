@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include "halley/core/graphics/texture.h"
 #include "halley/maths/rect.h"
 
 namespace Halley {

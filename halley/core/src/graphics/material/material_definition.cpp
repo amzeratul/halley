@@ -24,7 +24,6 @@ static int currentPass = 0;
 MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	: api(loader.getAPI().video)
 {
-	auto& api = loader.getAPI();
 	String basePath = loader.getBasePath();
 
 	YAML::Node root;

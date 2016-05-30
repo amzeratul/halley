@@ -1,6 +1,5 @@
 #include "symbol_loader.h"
 #include <halley/support/exception.h>
-#include <iostream>
 #include "dynamic_library.h"
 #include <sstream>
 

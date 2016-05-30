@@ -1,5 +1,4 @@
 #pragma once
-#include <type_traits>
 #include <halley/maths/vector2d.h>
 #include <halley/text/halleystring.h>
 

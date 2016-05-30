@@ -128,7 +128,7 @@ std::vector<char> Halley::Encode::encodeRLE(const std::vector<char>& in)
 		// Compute run from here
 		char byte = in[i];
 		int len = 1;
-		for (size_t j=i+1; j<totalLen && in[j] == byte && len < 127; j++, len++);
+		for (size_t j = i + 1; j < totalLen && in[j] == byte && len < 127; j++, len++);
 
 		// Length of run, only write as RLE if it's at least 3 bytes long
 		if (len >= 3) {

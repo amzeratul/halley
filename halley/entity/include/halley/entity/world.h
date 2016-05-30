@@ -5,7 +5,6 @@
 #include "entity_id.h"
 #include "family_mask.h"
 #include "family.h"
-#include <chrono>
 #include <halley/time/halleytime.h>
 #include <halley/text/halleystring.h>
 #include <halley/data_structures/mapped_pool.h>
@@ -72,7 +71,6 @@ namespace Halley {
 		MappedPool<Entity*> entityMap;
 
 		std::map<FamilyMaskType, std::unique_ptr<Family>> families;
-		//std::shared_ptr<EntityRegistry> registry;
 
 		mutable std::array<StopwatchAveraging, 3> timer;
 

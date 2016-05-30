@@ -1,7 +1,6 @@
 #include "dynamic_library.h"
 #include <boost/filesystem.hpp>
 #include <halley/support/exception.h>
-#include <iostream>
 
 using namespace Halley;
 using namespace boost::filesystem;

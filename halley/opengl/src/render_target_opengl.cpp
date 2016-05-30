@@ -2,6 +2,7 @@
 #include <map>
 #include "halley/support/exception.h"
 #include "render_target_opengl.h"
+#include <halley/core/graphics/texture.h>
 
 using namespace Halley;
 

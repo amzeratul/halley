@@ -25,7 +25,7 @@ set (${PROJECT_NAME}_headers
 		"gen/cpp/components/sprite_component.h"
 		"gen/cpp/components/time_component.h"
 		"gen/cpp/components/velocity_component.h"
-		"gen/cpp/messages/expire_message"
+		"gen/cpp/messages/expire_message.h"
 		"gen/cpp/systems/movement_system.h"
 		"gen/cpp/systems/render_system.h"
 		"gen/cpp/systems/spawn_sprite_system.h"

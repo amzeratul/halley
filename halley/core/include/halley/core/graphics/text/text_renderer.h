@@ -32,7 +32,7 @@ namespace Halley
 		StringUTF32 text;
 		float size = 20;
 		float outline = 0;
-		float align;
+		float align = 0;
 		Vector2f offset;
 		Colour colour;
 		Colour outlineColour;
