@@ -32,7 +32,7 @@ static void initBase64()
 	if (!hasInit) {
 		base64reverse.resize(256);
 		for (size_t i=0; i<64; i++) {
-			base64reverse[base64dict[i]] = (char)i;
+			base64reverse[base64dict[i]] = char(i);
 		}
 		base64reverse['='] = -1;
 		hasInit = true;
@@ -95,7 +95,7 @@ std::vector<char> Halley::Encode::decodeBase64(const String& in)
 			b2 = 0;
 		}
 
-		unsigned int val = (unsigned int)((b0 << 18) | (b1 << 12) | (b2 << 6) | (b3));
+		unsigned int val = static_cast<unsigned int>((b0 << 18) | (b1 << 12) | (b2 << 6) | (b3));
 		size_t outPos = i * 3 / 4;
 
 		result[outPos] = (val >> 16) & 0xFF;
@@ -111,7 +111,7 @@ static void flushTo(std::vector<char>& toFlush, std::vector<char>& dest)
 	if (toFlush.size() > 0) {
 		for (size_t i=0; i<toFlush.size(); i += 127) {
 			int toWrite = std::min(int(toFlush.size() - i), 127);
-			dest.push_back((char)toWrite);
+			dest.push_back(char(toWrite));
 			dest.insert(dest.end(), toFlush.begin()+i, toFlush.begin()+i+toWrite);
 		}
 	}

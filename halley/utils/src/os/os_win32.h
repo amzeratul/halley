@@ -33,14 +33,14 @@ namespace Halley {
 		OSWin32();
 		~OSWin32();
 
-		virtual void createLogConsole(String name);
+		void createLogConsole(String name) override;
 
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir();
-		void setConsoleColor(int foreground, int background);
+		ComputerData getComputerData() override;
+		String getUserDataDir() override;
+		void setConsoleColor(int foreground, int background) override;
 
 	private:
-		String runWMIQuery(String query, String parameter);
+		String runWMIQuery(String query, String parameter) const;
 
 		IWbemLocator *pLoc;
 		IWbemServices *pSvc;

@@ -34,8 +34,8 @@ Halley::Job::Job(std::function<void()> _f, int _priority)
 	: f(_f)
 {
 	// Sort first by priority, then by negative timestamp (so older jobs have higher priority)
-	unsigned int c = (unsigned int)(-clock());
-	priority = (((long long)_priority) << 32) | c;
+	unsigned int c = static_cast<unsigned int>(-clock());
+	priority = (static_cast<long long>(_priority) << 32) | c;
 }
 
 void Halley::Job::run()

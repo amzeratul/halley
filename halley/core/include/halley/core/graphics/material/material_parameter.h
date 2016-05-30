@@ -27,7 +27,7 @@ namespace Halley
 
 	private:
 		MaterialParameter(Material& material, String name, ShaderParameterType type);
-		VideoAPIInternal& getAPI();
+		VideoAPIInternal& getAPI() const;
 
 		void updateAddresses();
 		unsigned int getAddress(int pass);

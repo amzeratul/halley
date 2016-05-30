@@ -23,7 +23,7 @@ namespace Halley
 
 	public:
 		int run(std::vector<std::string> args) override;
-		void generateFontMap(String imgName, FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale, float radius);
+		void generateFontMap(String imgName, FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale, float radius) const;
 		void generateTextureMeta(String destination);
 	};
 }

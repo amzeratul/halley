@@ -119,7 +119,9 @@ namespace Halley {
 	inline T floorDivInt (T a, T b)
 	{
 		T result = a / b;
-		if (a % b < 0) result--;
+		if (a % b < 0) {
+			--result;
+		}
 		return result;
 	}
 
@@ -140,7 +142,7 @@ namespace Halley {
 	// Smoothing
 	template <typename T>
 	inline T smoothCos(T a) {
-		return (T)((1-cos(a * 3.1415926535897932384626433832795))*0.5);
+		return T((1-cos(a * 3.1415926535897932384626433832795))*0.5);
 	}
 
 	// ASR (attack-sustain-release) envelope
@@ -158,7 +160,7 @@ namespace Halley {
 	template<typename T>
 	static T nextPowerOf2(T val)
 	{
-		val--;
+		--val;
 		val = (val >> 1) | val;
 		val = (val >> 2) | val;
 		val = (val >> 4) | val;

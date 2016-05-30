@@ -31,15 +31,15 @@ namespace Halley {
 	class StringDeserializer {
 	public:
 		StringDeserializer(String value);
-		operator Vector2i();
-		operator Vector2f();
-		operator Vector3i();
-		operator Vector3f();
-		operator String();
-		operator int();
-		operator float();
-		operator bool();
-		operator Colour();
+		operator Vector2i() const;
+		operator Vector2f() const;
+		operator Vector3i() const;
+		operator Vector3f() const;
+		operator String() const;
+		operator int() const;
+		operator float() const;
+		operator bool() const;
+		operator Colour() const;
 
 	private:
 		String value;

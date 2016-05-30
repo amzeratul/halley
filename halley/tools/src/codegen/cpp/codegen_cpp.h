@@ -17,7 +17,7 @@ namespace Halley
 
 	private:
 		std::vector<String> generateComponentHeader(ComponentSchema component);
-		std::vector<String> generateSystemHeader(SystemSchema system);
+		std::vector<String> generateSystemHeader(SystemSchema system) const;
 		std::vector<String> generateMessageHeader(MessageSchema message);
 	
 	};

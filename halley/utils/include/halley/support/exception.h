@@ -24,19 +24,13 @@
 #include <exception>
 #include "halley/text/halleystring.h"
 
-#ifdef _MSC_VER
-#define GCC_THROW
-#else
-#define GCC_THROW throw ()
-#endif
-
 namespace Halley {
 	class Exception : public std::exception {
 	public:
 		Exception(String msg);
-		~Exception() GCC_THROW {}
+		~Exception() noexcept {}
 
-		const char* what() const GCC_THROW;
+		const char* what() const noexcept override;
 
 	private:
 		String msg;

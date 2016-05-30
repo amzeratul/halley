@@ -16,7 +16,7 @@ MaterialParameter::MaterialParameter(Material& material, String name, ShaderPara
 	needsTextureUnit = type == ShaderParameterType::Texture2D;
 }
 
-VideoAPIInternal& MaterialParameter::getAPI()
+VideoAPIInternal& MaterialParameter::getAPI() const
 {
 	return *static_cast<VideoAPIInternal*>(material.getDefinition().api);
 }

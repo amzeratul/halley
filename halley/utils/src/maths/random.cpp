@@ -29,7 +29,7 @@ Random::Random()
 }
 
 Halley::Random::Random(long seed)
-	: generator((int)seed)
+	: generator(int(seed))
 {
 }
 
@@ -43,17 +43,17 @@ Random& Halley::Random::getGlobal()
 	static Random* global = nullptr;
 	if (!global) {
 		time_t curTime = time(nullptr);
-		int curClock = (int) clock();
+		int curClock = int(clock());
 		int salt = 0x3F29AB51;
-		int seed[] = { int(curTime & 0xFFFFFFFF), int((long long)(curTime) >> 32), curClock, salt };
-		global = new Random((char*)seed, sizeof(seed));
+		int seed[] = { int(curTime & 0xFFFFFFFF), int(static_cast<long long>(curTime) >> 32), curClock, salt };
+		global = new Random(reinterpret_cast<char*>(seed), sizeof(seed));
 	}
 	return *global;
 }
 
 void Halley::Random::setSeed(long seed)
 {
-	generator.seed((int)seed);
+	generator.seed(static_cast<int>(seed));
 }
 
 void Halley::Random::setSeed(char* bytes, size_t nBytes)

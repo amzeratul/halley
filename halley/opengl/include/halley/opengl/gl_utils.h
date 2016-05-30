@@ -47,7 +47,7 @@ namespace Halley {
 		void resetState();
 
 		void setViewPort(Rect4i rect, bool scissor = false);
-		Rect4i getViewPort();
+		Rect4i getViewPort() const;
 
 		void clear(Colour col);
 		static void doGlCheckError(const char* file = "", long line = 0);

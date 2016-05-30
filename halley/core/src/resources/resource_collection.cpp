@@ -56,9 +56,9 @@ void ResourceCollectionBase::flush(String name)
 
 void ResourceCollectionBase::flushAll(int minDepth)
 {
-	for (auto i = resources.begin(); i != resources.end(); i++) {
-		auto& res = (*i).second;
-		String name = (*i).first;
+	for (auto& iter: resources) {
+		String name = iter.first;
+		auto& res = iter.second;
 		auto curTime = parent.getFileWriteTime(name);
 		if (res.depth >= minDepth && res.lastWriteTime != curTime) {
 			std::cout << "Flushing \"" << ConsoleColor(Console::DARK_GREY) << name << ConsoleColor() << "\"...\n";

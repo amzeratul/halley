@@ -165,7 +165,7 @@ void CPPClassGenerator::writeTo(std::vector<String>& out, int nTabs)
 	}
 }
 
-void CPPClassGenerator::ensureOK()
+void CPPClassGenerator::ensureOK() const
 {
 	if (finished) {
 		throw Exception("finish() has already been called!");

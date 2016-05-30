@@ -31,7 +31,7 @@ Halley::String Halley::Keys::getName(Key key)
 	auto res = keyNames.find(key);
 	if (res != keyNames.end()) return res->second;
 
-	String result = SDL_GetKeyName((SDL_Keycode)key);
+	String result = SDL_GetKeyName(SDL_Keycode(key));
 	return result;
 }
 

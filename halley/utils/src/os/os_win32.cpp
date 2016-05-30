@@ -41,8 +41,8 @@
 using namespace Halley;
 
 Halley::OSWin32::OSWin32()
-	: pSvc(nullptr)
-	, pLoc(nullptr)
+	: pLoc(nullptr)
+	, pSvc(nullptr)
 {
 	// From http://msdn.microsoft.com/en-us/library/aa389762(v=VS.85).aspx
 	// "Creating a WMI Application Using C++"
@@ -50,16 +50,16 @@ Halley::OSWin32::OSWin32()
 	try {
 		// Initialize COM
 		HRESULT hr;
-		hr = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
+		hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 		if (FAILED(hr)) throw Exception("Unable to initialize COM.");
 		hr = CoInitializeSecurity(nullptr, -1, nullptr, nullptr, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE, nullptr);
 		if (FAILED(hr)) throw Exception("Unable to initialize COM security.");
 
 		// Initialize WMI
-		hr = CoCreateInstance(CLSID_WbemAdministrativeLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (void**) &pLoc);
+		hr = CoCreateInstance(CLSID_WbemAdministrativeLocator, nullptr, CLSCTX_INPROC_SERVER, IID_IWbemLocator, reinterpret_cast<void**>(&pLoc));
 		if (FAILED(hr)) throw Exception("Unable to obtain locator");
 		//hr = pLoc->ConnectServer(BSTR(L"ROOT\\DEFAULT"), nullptr, nullptr, 0, 0, 0, 0, &pSvc);
-		hr = pLoc->ConnectServer( L"root\\cimv2", NULL, NULL, NULL, WBEM_FLAG_CONNECT_USE_MAX_WAIT, NULL, NULL, &pSvc);
+		hr = pLoc->ConnectServer( L"root\\cimv2", nullptr, nullptr, nullptr, WBEM_FLAG_CONNECT_USE_MAX_WAIT, nullptr, nullptr, &pSvc);
 		if (FAILED(hr)) throw Exception("Unable to connect to WMI service");
 
 		// Set security on WMI connection
@@ -93,10 +93,10 @@ static String getCOMError(int hr)
 	BSTR str;
 	info->GetDescription(&str);
 	_bstr_t tmp(str);
-	return "\"" + String((LPCSTR)tmp) + "\", code 0x"+ String::integerToString(hr, 16);
+	return "\"" + String(LPCSTR(tmp)) + "\", code 0x"+ String::integerToString(hr, 16);
 }
 
-Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter)
+Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter) const
 {
 	// See:
 	// http://www.codeproject.com/KB/system/UsingWMI.aspx
@@ -108,7 +108,7 @@ Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter)
 			CComPtr<IEnumWbemClassObject> enumerator;
 			BSTR lang = CComBSTR(L"WQL");
 			BSTR q = CComBSTR(query.c_str());
-			hr = pSvc->ExecQuery(lang, q, WBEM_FLAG_FORWARD_ONLY, NULL, &enumerator);
+			hr = pSvc->ExecQuery(lang, q, WBEM_FLAG_FORWARD_ONLY, nullptr, &enumerator);
 			if (FAILED(hr)) throw Exception("Error running WMI query: "+getCOMError(hr));
 
 			ULONG retcnt;
@@ -124,7 +124,7 @@ Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter)
 			if (var_val.vt == VT_NULL) {
 				return "";
 			} else {
-				return String((const char*)((_bstr_t)var_val));
+				return String(static_cast<const char*>(_bstr_t(var_val)));
 			}
 		} catch (std::exception& e) {
 			std::cout << "Exception running WMI query: " << e.what() << std::endl;
@@ -145,7 +145,7 @@ public:
 
 BOOL CALLBACK onMonitorInfo(HMONITOR /*hMonitor*/, HDC /*hdcMonitor*/, LPRECT lprcMonitor, LPARAM dwData)
 {
-	MonitorInfo* info = (MonitorInfo*) dwData;
+	MonitorInfo* info = reinterpret_cast<MonitorInfo*>(dwData);
 	info->n++;
 	info->x = lprcMonitor->left;
 	info->y = lprcMonitor->top;
@@ -168,26 +168,26 @@ void Halley::OSWin32::createLogConsole(String winTitle)
 	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
 	fp = _fdopen( hConHandle, "w" );
 	*stdout = *fp;
-	setvbuf( stdout, NULL, _IONBF, 0 );
+	setvbuf( stdout, nullptr, _IONBF, 0 );
 
 	// redirect unbuffered STDIN to the console
 	lStdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_INPUT_HANDLE));
 	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
 	fp = _fdopen( hConHandle, "r" );
 	*stdin = *fp;
-	setvbuf( stdin, NULL, _IONBF, 0 );
+	setvbuf( stdin, nullptr, _IONBF, 0 );
 
 	// redirect unbuffered STDERR to the console
 	lStdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_ERROR_HANDLE));
 	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
 	fp = _fdopen( hConHandle, "w" );
 	*stderr = *fp;
-	setvbuf( stderr, NULL, _IONBF, 0 );
+	setvbuf( stderr, nullptr, _IONBF, 0 );
 
 	// Position console
 	MonitorInfo info;
 	info.n = 0;
-	EnumDisplayMonitors(NULL, NULL, onMonitorInfo, (LPARAM) &info);
+	EnumDisplayMonitors(nullptr, nullptr, onMonitorInfo, LPARAM(&info));
 	if (info.n > 1) {
 		HWND con = GetConsoleWindow();
 		RECT rect;

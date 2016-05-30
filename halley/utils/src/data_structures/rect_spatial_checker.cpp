@@ -196,7 +196,7 @@ void RectangleSpatialChecker::resetSweep()
 {
 }
 
-Halley::Vector2i RectangleSpatialChecker::pointToCell(Vector2i point)
+Halley::Vector2i RectangleSpatialChecker::pointToCell(Vector2i point) const
 {
 	return Vector2i(point.x >> resolution, point.y >> resolution);
 }

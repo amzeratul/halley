@@ -23,7 +23,7 @@ namespace Halley {
 		Serializer& operator<<(const std::vector<T>& val)
 		{
 			size_t sz = val.size();
-			*this << (short)sz;
+			*this << short(sz);
 			for (size_t i = 0; i < sz; i++) {
 				*this << val[i];
 			}

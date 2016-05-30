@@ -27,9 +27,9 @@ using namespace Halley;
 Halley::InputTouch::InputTouch(Vector2f pos)
 	: initialPos(pos)
 	, curPos(pos)
-	, elapsed(0)
 	, pressed(true)
 	, released(false)
+	, elapsed(0)
 {
 }
 

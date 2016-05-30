@@ -79,12 +79,12 @@ namespace Halley {
 		writeTOC(fp);
 
 		// Write all files
-		for (auto iter = entries.begin(); iter != entries.end(); iter++) {
-			writeFile(fp, iter->second);
+		for (auto& iter: entries) {
+			writeFile(fp, iter.second);
 		}
 
 		// Rewrite TOC, now that we have more data about each file
-		fseek(fp, (long)tocStart, SEEK_SET);
+		fseek(fp, long(tocStart), SEEK_SET);
 		writeTOC(fp);
 
 		// Done
@@ -104,14 +104,14 @@ namespace Halley {
 	{
 		// Number of elements
 		char buffer[1024];
-		int elems = (int)entries.size();
+		int elems = int(entries.size());
 		fwrite(&elems, 4, 1, fp);
 
-		for (auto iter = entries.begin(); iter != entries.end(); iter++) {
-			ResourcePackEntry& entry = iter->second;
+		for (auto& iter: entries) {
+			ResourcePackEntry& entry = iter.second;
 
 			// Name
-			int len = (int)entry.name.length();
+			int len = int(entry.name.length());
 			fwrite(&len, 4, 1, fp);
 			strcpy(buffer, entry.name.c_str());
 			encrypt(buffer, len);
@@ -261,7 +261,7 @@ namespace Halley {
 			char* buf = new char[sz];
 
 			// Read from file
-			fseek(fileP, (long)entry.pos, SEEK_SET);
+			fseek(fileP, long(entry.pos), SEEK_SET);
 			fread(buf, 1, sz, fileP);
 
 			// Decrypt
@@ -274,8 +274,8 @@ namespace Halley {
 	std::vector<String> ResourcePack::getResourceList()
 	{
 		std::vector<String> result;
-		for (auto iter = entries.begin(); iter != entries.end(); iter++) {
-			result.push_back(iter->first);
+		for (auto& iter: entries) {
+			result.push_back(iter.first);
 		}
 		return result;
 	}

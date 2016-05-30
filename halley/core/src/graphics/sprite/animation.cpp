@@ -153,9 +153,6 @@ Animation::Animation(ResourceLoader& loader)
 			sequences.emplace_back(sequence);
 		}
 	}
-	catch (Exception& e) {
-		throw e;
-	}
 	catch (std::exception& e) {
 		throw Exception("Exception parsing animation " + loader.getName() + ": " + e.what());
 	}

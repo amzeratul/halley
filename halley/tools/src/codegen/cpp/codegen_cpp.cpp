@@ -154,7 +154,7 @@ std::vector<U> convert(std::vector<T> in, U(*f)(const T&))
 	return result;
 }
 
-std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system)
+std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
 {
 	String methodName, methodArgType;
 	bool methodConst;

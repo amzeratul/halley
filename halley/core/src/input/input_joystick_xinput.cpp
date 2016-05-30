@@ -35,8 +35,8 @@ using namespace Halley;
 
 InputJoystickXInput::InputJoystickXInput(int number)
 	: index(number)
-	, enabled(false)
 	, cooldown(0)
+	, enabled(false)
 {
 	// Axes
 	axes.resize(6);
@@ -44,7 +44,7 @@ InputJoystickXInput::InputJoystickXInput(int number)
 
 	// Hat
 	hats.resize(1);
-	hats[0] = spInputButtonBase(new InputButtonBase(4));
+	hats[0] = std::make_shared<InputButtonBase>(4);
 
 	// Buttons
 	init(10);

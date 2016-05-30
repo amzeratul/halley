@@ -172,7 +172,7 @@ bool IsSpace(char chr)
 
 String& String::trim(bool fromRight)
 {
-	int len = (int)length();
+	int len = int(length());
 	size_t start = 0;
 	size_t n = len;
 
@@ -288,7 +288,7 @@ void String::writeNumber(Character *temp,int number,int pad,size_t &pos)
 	len++;
 
 	// Pad with zeroes
-	pad -= (int)len;
+	pad -= int(len);
 	for (int i=0;i<pad;i++) {
 		*dst++ = '0';
 		pos++;
@@ -309,11 +309,11 @@ bool String::asciiCompareNoCase(const Character *src) const
 	size_t len = size();
 	for (size_t i=0;i<len;i++) {
 		// Abort on end of string 2
-		c2 = (unsigned char) operator[](i);
+		c2 = static_cast<unsigned char>(operator[](i));
 		if (!c2) return false;
 
 		// Upper case both, this ONLY WORKS FOR ASCII
-		c1 = ((unsigned char)src[i]) & mask;
+		c1 = static_cast<unsigned char>(src[i]) & mask;
 		c2 = c2 & mask;
 
 		// Check them
@@ -516,7 +516,7 @@ int String::toInteger() const
 	const char *data = c_str();
 	for (size_t i=0;i<len;i++) {
 		if (data[i] == ' ') continue;
-		chr = (int)(data[i])-(int)'0';
+		chr = int(data[i])-int('0');
 		if (chr >= 0 && chr <= 9) value = 10*value+chr;
 		else if (firstChar && data[i] == '-') mult = -1;
 		else if (firstChar && data[i] == '+') {
@@ -539,7 +539,7 @@ long long String::toInteger64() const
 	const char *data = c_str();
 	for (size_t i=0;i<len;i++) {
 		if (data[i] == ' ') continue;
-		chr = (int)(data[i])-(int)'0';
+		chr = int(data[i])-int('0');
 		if (chr >= 0 && chr <= 9) value = 10*value+chr;
 		else if (firstChar && data[i] == '-') mult = -1;
 		else if (firstChar && data[i] == '+') {
@@ -555,7 +555,7 @@ long long String::toInteger64() const
 
 float String::toFloat() const
 {
-	return (float)atof(c_str());
+	return float(atof(c_str()));
 }
 
 
@@ -567,7 +567,7 @@ int String::subToInteger(size_t start,size_t end) const
 	int chr;
 	const char *data = c_str();
 	for (size_t i=start;i<end;i++) {
-		chr = (int)(data[i])-(int)'0';
+		chr = int(data[i])-int('0');
 		if (chr >= 0 && chr <= 9) value = 10*value+chr;
 	}
 	return value;
@@ -772,7 +772,7 @@ size_t String::UTF8toUTF16(const char *utf8, wchar_t *utf16)
 	for (size_t i=0; i<str.size(); i++) {
 		int code = str[i];
 		if (code <= 0xD7FF || (code >= 0xE000 && code <= 0xFFFF)) {
-			utf16[written++] = (wchar_t) code;
+			utf16[written++] = wchar_t(code);
 		} else {
 			code -= 0x10000;
 			wchar_t high = wchar_t((code >> 10) + 0xD800);
@@ -816,7 +816,7 @@ StringUTF32 String::getUTF32() const
 	size_t dst = 0;
 	utf32type dstChar = 0;
 	for (size_t i=0; i<len;) {
-		unsigned int c0 = (unsigned char) operator[](i++);
+		unsigned int c0 = static_cast<unsigned char>(operator[](i++));
 
 		// 1 byte
 		if ((c0 >> 7) == 0) {
@@ -825,7 +825,7 @@ StringUTF32 String::getUTF32() const
 
 		// 2 bytes
 		else if ((c0 >> 5) == 0x06) {
-			unsigned int c1 = (unsigned char) operator[](i++);
+			unsigned int c1 = static_cast<unsigned char>(operator[](i++));
 			if ((c1 >> 6) == 0x02) {
 				dstChar = ((c0 & 0x1F) << 6) | (c1 & 0x3F);
 			}
@@ -833,8 +833,8 @@ StringUTF32 String::getUTF32() const
 
 		// 3 bytes
 		else if ((c0 >> 4) == 0x0E) {
-			unsigned int c1 = (unsigned char) operator[](i++);
-			unsigned int c2 = (unsigned char) operator[](i++);
+			unsigned int c1 = static_cast<unsigned char>(operator[](i++));
+			unsigned int c2 = static_cast<unsigned char>(operator[](i++));
 			if ((c1 >> 6) == 0x02 && (c2 >> 6) == 0x02) {
 				dstChar = ((c0 & 0x0F) << 12) | ((c1 & 0x3F) << 6) | (c2 & 0x3F);
 			}
@@ -842,9 +842,9 @@ StringUTF32 String::getUTF32() const
 
 		// 4 bytes
 		else if ((c0 >> 3) == 0x1E) {
-			unsigned int c1 = (unsigned char) operator[](i++);
-			unsigned int c2 = (unsigned char) operator[](i++);
-			unsigned int c3 = (unsigned char) operator[](i++);
+			unsigned int c1 = static_cast<unsigned char>(operator[](i++));
+			unsigned int c2 = static_cast<unsigned char>(operator[](i++));
+			unsigned int c3 = static_cast<unsigned char>(operator[](i++));
 			if ((c1 >> 6) == 0x02 && (c2 >> 6) == 0x02 && (c3 >> 6) == 0x02) {
 				dstChar = ((c0 & 0x07) << 18) | ((c1 & 0x03F) << 12) | ((c2 & 0x3F) << 6) | (c3 & 0x3F);
 			}
@@ -862,7 +862,7 @@ size_t Halley::String::getUTF32Len() const
 	size_t len = length();
 	size_t result = 0;
 	for (size_t i=0; i<len;) {
-		unsigned int c0 = (unsigned char) operator[](i++);
+		unsigned int c0 = static_cast<unsigned char>(operator[](i++));
 
 		// 1 byte
 		if ((c0 >> 7) == 0) {

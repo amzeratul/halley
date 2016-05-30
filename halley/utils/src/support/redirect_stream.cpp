@@ -34,7 +34,7 @@ RedirectStream::RedirectStream(std::ostream& stream, bool _exclusive)
 	orgbuf = orgstream.rdbuf(this);
 
 	// Create a new ostream that we set the old buffer in
-	newstream = std::shared_ptr<std::ostream>(new std::ostream(orgbuf));
+	newstream = std::make_shared<std::ostream>(orgbuf);
 }
 
 RedirectStream::~RedirectStream(){

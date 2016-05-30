@@ -77,51 +77,51 @@ StringDeserializer::StringDeserializer(String v)
 {
 }
 
-StringDeserializer::operator Vector2i()
+StringDeserializer::operator Vector2i() const
 {
 	auto values = value.split(',');
 	return Vector2i(values[0].toInteger(), values[1].toInteger());
 }
 
-StringDeserializer::operator Vector2f()
+StringDeserializer::operator Vector2f() const
 {
 	auto values = value.split(',');
 	return Vector2f(values[0].toFloat(), values[1].toFloat());
 }
 
-StringDeserializer::operator Vector3i()
+StringDeserializer::operator Vector3i() const
 {
 	auto values = value.split(',');
 	return Vector3i(values[0].toInteger(), values[1].toInteger(), values[2].toInteger());
 }
 
-StringDeserializer::operator Vector3f()
+StringDeserializer::operator Vector3f() const
 {
 	auto values = value.split(',');
 	return Vector3f(values[0].toFloat(), values[1].toFloat(), values[2].toFloat());
 }
 
-StringDeserializer::operator String()
+StringDeserializer::operator String() const
 {
 	return value;
 }
 
-StringDeserializer::operator int()
+StringDeserializer::operator int() const
 {
 	return value.toInteger();
 }
 
-StringDeserializer::operator float()
+StringDeserializer::operator float() const
 {
 	return value.toFloat();
 }
 
-StringDeserializer::operator bool()
+StringDeserializer::operator bool() const
 {
 	return value.asciiLower() == "true";
 }
 
-StringDeserializer::operator Colour()
+StringDeserializer::operator Colour() const
 {
 	return Colour::fromString(value);
 }

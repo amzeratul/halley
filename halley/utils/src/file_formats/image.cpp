@@ -154,7 +154,7 @@ void Halley::Image::load(String name, const Byte* bytes, size_t nBytes, bool sho
 void Halley::Image::preMultiply()
 {
 	size_t n = w*h;
-	unsigned int* data = (unsigned int*) px.get();
+	unsigned int* data = reinterpret_cast<unsigned int*>(px.get());
 	for (size_t i=0; i<n; i++) {
 		unsigned int cur = data[i];
 		unsigned int r = cur & 0xFF;
@@ -172,7 +172,7 @@ void Halley::Image::preMultiply()
 int Halley::Image::getPixel(Vector2i pos) const
 {
 	if (pos.x < 0 || pos.y < 0 || pos.x >= int(w) || pos.y >= int(h)) return 0;
-	return *(int*)(getPixels() + 4*(pos.x + pos.y*w));
+	return *reinterpret_cast<const int*>(getPixels() + 4*(pos.x + pos.y*w));
 }
 
 int Halley::Image::getPixelAlpha(Vector2i pos) const
@@ -181,7 +181,7 @@ int Halley::Image::getPixelAlpha(Vector2i pos) const
 	return pixel >> 24;
 }
 
-void Halley::Image::savePNG(String file)
+void Halley::Image::savePNG(String file) const
 {
 	if (file == "") file = filename;
 	lodepng_encode_file(file.c_str(), reinterpret_cast<unsigned char*>(px.get()), w, h, LCT_RGBA, 8);

@@ -439,7 +439,7 @@ void VideoOpenGL::updateWindowDimensions()
 		virtualSize = p2 = Vector2f(windowSize);
 		scale = 1;
 	} else {
-		float wAR = (float) windowSize.x / (float) windowSize.y;
+		float wAR = float(windowSize.x) / float(windowSize.y);
 		float vAR = virtualSize.x / virtualSize.y;
 		p1 = Vector2f();
 		p2 = virtualSize;

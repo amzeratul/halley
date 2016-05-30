@@ -39,7 +39,7 @@ namespace Halley {
 		static Polygon makePolygon(Vector2f origin, float w, float h);
 
 		bool isPointInside(const Vector2f &point) const;
-		bool overlaps(const Polygon &param,Vector2f *translation=NULL,Vector2f *collisionPoint=NULL) const;
+		bool overlaps(const Polygon &param, Vector2f *translation= nullptr, Vector2f *collisionPoint= nullptr) const;
 
 		void setVertices(const VertexList& vertices);
 		void setOrigin(const Vertex& _origin) { origin = _origin; }

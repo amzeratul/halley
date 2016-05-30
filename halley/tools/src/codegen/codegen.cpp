@@ -97,7 +97,7 @@ void Codegen::process()
 	}
 }
 
-bool Codegen::writeFile(String dstPath, const char* data, size_t dataSize)
+bool Codegen::writeFile(String dstPath, const char* data, size_t dataSize) const
 {
 	using namespace boost::filesystem;
 	path filePath(dstPath.cppStr());

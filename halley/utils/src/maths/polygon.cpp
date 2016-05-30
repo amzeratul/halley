@@ -105,7 +105,7 @@ Vector2f average(std::vector<Vector2f>& v)
 	for (size_t i=0; i<len; i++) {
 		result += v[i];
 	}
-	result /= (float)len;
+	result /= float(len);
 	return result;
 }
 

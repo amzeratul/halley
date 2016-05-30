@@ -36,7 +36,7 @@ namespace Halley {
 		~Image();
 
 		void load(String filename, const Byte* bytes, size_t nBytes, bool preMultiply);
-		void savePNG(String filename="");
+		void savePNG(String filename="") const;
 
 		bool isPremultiplied() const { return preMultiplied; }
 

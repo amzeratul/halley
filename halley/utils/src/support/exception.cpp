@@ -34,7 +34,7 @@ Exception::Exception(String _msg)
 	}
 }
 
-const char* Exception::what() const GCC_THROW
+const char* Exception::what() const noexcept
 {
 	return msg.c_str();
 }

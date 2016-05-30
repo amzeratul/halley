@@ -255,7 +255,7 @@ void GLUtils::setViewPort(Rect4i r, bool scissor)
 	}
 }
 
-Halley::Rect4i GLUtils::getViewPort()
+Halley::Rect4i GLUtils::getViewPort() const
 {
 	return state.viewport;
 }

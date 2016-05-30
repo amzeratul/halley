@@ -109,7 +109,7 @@ namespace Halley {
 		std::unique_ptr<ResourceDataStatic> getStatic();
 		std::unique_ptr<ResourceDataStream> getStream();
 		HalleyAPI& getAPI() const { return *api; }
-		Metadata& getMeta() { return *metadata; }
+		Metadata& getMeta() const { return *metadata; }
 
 	private:
 		ResourceLoader(ResourceLoader&& loader);

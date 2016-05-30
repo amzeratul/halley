@@ -52,5 +52,5 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 		}
 	}
 	
-	return std::unique_ptr<HalleyAPI>(new HalleyAPI(core, std::unique_ptr<SystemSDL>(new SystemSDL()), std::move(video), std::unique_ptr<InputAPIInternal>(new Input())));
+	return std::unique_ptr<HalleyAPI>(new HalleyAPI(core, std::make_unique<SystemSDL>(), std::move(video), std::unique_ptr<Input>(new Input())));
 }

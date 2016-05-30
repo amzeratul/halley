@@ -44,7 +44,7 @@ namespace Halley {
 		Vector2D (T _x, T _y) : x(_x), y(_y) {}
 		
 		template <typename V>
-		explicit Vector2D (Vector2D<V> vec) : x((T)vec.x), y((T)vec.y) {}
+		explicit Vector2D (Vector2D<V> vec) : x(T(vec.x)), y(T(vec.y)) {}
 
 		//template <>
 		//Vector2D (Vector2D<T> vec) : x(vec.x), y(vec.y) {}

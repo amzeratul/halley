@@ -37,7 +37,7 @@ namespace Halley {
 
 		template<typename U> explicit Rect2D(Rect2D<U> r)
 		{
-			set((T)r.getX(), (T)r.getY(), (T)r.getWidth(), (T)r.getHeight());
+			set(T(r.getX()), T(r.getY()), T(r.getWidth()), T(r.getHeight()));
 		}
 
 		Rect2D(Vector2D<T> point1, Vector2D<T> point2)

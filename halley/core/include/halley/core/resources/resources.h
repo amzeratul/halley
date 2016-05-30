@@ -23,6 +23,7 @@
 
 #include <map>
 #include <ctime>
+#include <algorithm>
 #include <halley/support/exception.h>
 #include "resource_collection.h"
 
@@ -101,7 +102,7 @@ namespace Halley {
 		void setDepth(int depth);
 
 	private:
-		time_t getFileWriteTime(String name);
+		time_t getFileWriteTime(String name) const;
 
 		std::unique_ptr<ResourceLocator> locator;
 		std::map<std::string, int> resourceTypeIds;

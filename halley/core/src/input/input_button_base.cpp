@@ -90,25 +90,25 @@ bool Halley::InputButtonBase::isAnyButtonPressed()
 
 bool InputButtonBase::isButtonPressed(int code)
 {
-	if (code < 0 || code >= (int)buttonPressed.size()) return false;
+	if (code < 0 || code >= int(buttonPressed.size())) return false;
 	return buttonPressed[code] != 0;
 }
 
 bool InputButtonBase::isButtonPressedRepeat(int code)
 {
-	if (code < 0 || code >= (int)buttonPressedRepeat.size()) return false;
+	if (code < 0 || code >= int(buttonPressedRepeat.size())) return false;
 	return buttonPressedRepeat[code] != 0;
 }
 
 bool InputButtonBase::isButtonReleased(int code)
 {
-	if (code < 0 || code >= (int)buttonReleased.size()) return false;
+	if (code < 0 || code >= int(buttonReleased.size())) return false;
 	return buttonReleased[code] != 0;
 }
 
 bool InputButtonBase::isButtonDown(int code)
 {
-	if (code < 0 || code >= (int)buttonDown.size()) return false;
+	if (code < 0 || code >= int(buttonDown.size())) return false;
 	return buttonDown[code] != 0;
 }
 
@@ -119,7 +119,7 @@ Halley::String Halley::InputButtonBase::getButtonName(int code)
 
 void Halley::InputButtonBase::clearButton(int code)
 {
-	if (code >= 0 && code < (int)buttonPressedRepeat.size()) {
+	if (code >= 0 && code < int(buttonPressedRepeat.size())) {
 		buttonPressed[code] = 0;
 		buttonPressedRepeat[code] = 0;
 		buttonDown[code] = 0;

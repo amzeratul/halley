@@ -44,7 +44,7 @@ namespace Halley
 
 		std::vector<String> results;
 
-		void ensureOK();
+		void ensureOK() const;
 		static String getAccessString(CPPAccess access);
 		static String getTypeString(TypeSchema type);
 		static String getVariableString(VariableSchema var);

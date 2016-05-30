@@ -70,7 +70,7 @@ namespace Halley {
 		void free(T* p) {
 			Entry* entry = reinterpret_cast<Entry*>(p);
 			std::swap(entry->index, next);
-			entry->revision++;
+			++entry->revision;
 		}
 
 		void freeId(int externalIdx) {
@@ -82,7 +82,7 @@ namespace Halley {
 			unsigned short rev = static_cast<unsigned short>(externalIdx >> 16);
 
 			int blockN = idx / blockLen;
-			if (blockN < 0 || blockN >= (signed) blocks.size()) {
+			if (blockN < 0 || blockN >= signed(blocks.size())) {
 				return nullptr;
 			}
 			auto& block = blocks[blockN];

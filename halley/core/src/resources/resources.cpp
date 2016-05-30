@@ -27,7 +27,7 @@ void Resources::setDepth(int depth)
 	curDepth = depth;
 }
 
-time_t Resources::getFileWriteTime(String name)
+time_t Resources::getFileWriteTime(String name) const
 {
 	return locator->getTimestamp(name);
 }

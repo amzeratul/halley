@@ -44,6 +44,8 @@ size_t InputVirtual::getNumberAxes()
 	return axes.size();
 }
 
+#include <algorithm>
+
 bool InputVirtual::isAnyButtonPressed()
 {
 	// Enumerate devices
@@ -57,12 +59,7 @@ bool InputVirtual::isAnyButtonPressed()
 	}
 
 	// Check devices
-	for (auto iter = devices.begin(); iter != devices.end(); iter++) {
-		if ((*iter)->isAnyButtonPressed()) {
-			return true;
-		}
-	}
-	return false;
+	return std::any_of(devices.begin(), devices.end(), [](auto& d) { return d->isAnyButtonPressed(); });
 }
 
 bool InputVirtual::isButtonPressed(int code)
@@ -234,7 +231,7 @@ void Halley::InputVirtual::update(Time t)
 	updateLastDevice();
 
 	for (size_t i=0; i<axes.size(); i++) {
-		float curVal = getAxis((int)i);
+		float curVal = getAxis(int(i));
 		auto& timeout = axes[i].timeout;
 		auto& lastVal = axes[i].lastValue;
 		if (lastVal != curVal && lastVal * curVal <= 0) {
@@ -249,7 +246,7 @@ void Halley::InputVirtual::update(Time t)
 	}
 }
 
-Halley::spInputDevice Halley::InputVirtual::getLastDevice()
+Halley::spInputDevice Halley::InputVirtual::getLastDevice() const
 {
 	return lastDevice;
 }

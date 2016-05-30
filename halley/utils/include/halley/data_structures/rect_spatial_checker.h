@@ -43,7 +43,7 @@ namespace Halley {
 		DynamicGrid<GridCell> grid;
 
 		void resetSweep();
-		Vector2i pointToCell(Vector2i point);
+		Vector2i pointToCell(Vector2i point) const;
 		GridCell& getGridCell(int x, int y);
 
 		bool updateData(Entry& entry, Rect4i prev, Rect4i next);

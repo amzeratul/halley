@@ -21,7 +21,7 @@ namespace Halley
 		void load(bool withAnotherName);
 		void unload();
 
-		void* getFunction(std::string name);
+		void* getFunction(std::string name) const;
 		void* getBaseAddress() const;
 
 		bool hasChanged() const;

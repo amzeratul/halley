@@ -29,10 +29,12 @@ namespace Halley {
 	class InputKeyboardConcrete;
 	class InputMouseConcrete;
 
-	class Input : public InputAPIInternal {
+	class Input final : public InputAPIInternal {
 		friend class HalleyAPI;
 
 	public:
+		~Input();
+
 		size_t getNumberOfKeyboards() const override;
 		InputKeyboard& getKeyboard(int id=0) const override;
 
@@ -47,7 +49,6 @@ namespace Halley {
 
 	private:
 		Input();
-		~Input();
 
 		void init() override;
 		void deInit() override;

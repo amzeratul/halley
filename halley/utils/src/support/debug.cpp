@@ -63,7 +63,7 @@ public:
 	}
 
 protected:
-	void OnOutput(LPCSTR text)
+	void OnOutput(LPCSTR text) override
 	{
 		std::cout << text;
 		StackWalker::OnOutput(text);
@@ -83,15 +83,13 @@ public:
 	StringStackWalker& operator=(const StringStackWalker&) = delete;
 
 protected:
-	void OnLoadModule(LPCSTR, LPCSTR, DWORD64, DWORD, DWORD, LPCSTR, LPCSTR, ULONGLONG)
-	{
+	void OnLoadModule(LPCSTR, LPCSTR, DWORD64, DWORD, DWORD, LPCSTR, LPCSTR, ULONGLONG) override {
 	}
 
-	void OnSymInit(LPCSTR, DWORD, LPCSTR)
-	{
+	void OnSymInit(LPCSTR, DWORD, LPCSTR) override {
 	}
 
-	void OnOutput(LPCSTR text)
+	void OnOutput(LPCSTR text) override
 	{
 		if (skip > 0) {
 			skip--;
@@ -111,14 +109,14 @@ protected:
 bool IsDataSectionNeeded(const WCHAR* pModuleName) 
 {
 	// Check parameters 
-	if( pModuleName == 0 ) {
+	if( pModuleName == nullptr ) {
 		_ASSERTE( _T("Parameter is null.") ); 
 		return false; 
 	}
 
 	// Extract the module name 
 	WCHAR szFileName[_MAX_FNAME] = L""; 
-	_wsplitpath( pModuleName, NULL, NULL, szFileName, NULL ); 
+	_wsplitpath( pModuleName, nullptr, nullptr, szFileName, nullptr); 
 
 	// Compare the name with the list of known names and decide 
 	// Note: For this to work, the executable name must be "mididump.exe"
@@ -142,8 +140,8 @@ BOOL CALLBACK MyMiniDumpCallback(PVOID /*pParam*/, const PMINIDUMP_CALLBACK_INPU
 	BOOL bRet = FALSE; 
 
 	// Check parameters 
-	if( pInput == 0 ) return FALSE; 
-	if( pOutput == 0 ) return FALSE; 
+	if( pInput == nullptr ) return FALSE; 
+	if( pOutput == nullptr ) return FALSE; 
 	
 	// Process the callbacks 
 	switch( pInput->CallbackType ) {
@@ -215,9 +213,9 @@ void CreateMiniDump( EXCEPTION_POINTERS* pep, LPCWSTR path)
 {
 	// Open the file 
 
-	HANDLE hFile = CreateFileW(path, GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL); 
+	HANDLE hFile = CreateFileW(path, GENERIC_READ | GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr); 
 
-	if((hFile != NULL) && (hFile != INVALID_HANDLE_VALUE)) {
+	if((hFile != nullptr) && (hFile != INVALID_HANDLE_VALUE)) {
 		// Create the minidump 
 		MINIDUMP_EXCEPTION_INFORMATION mdei; 
 		mdei.ThreadId           = GetCurrentThreadId(); 
@@ -225,13 +223,13 @@ void CreateMiniDump( EXCEPTION_POINTERS* pep, LPCWSTR path)
 		mdei.ClientPointers     = FALSE; 
 
 		MINIDUMP_CALLBACK_INFORMATION mci; 
-		mci.CallbackRoutine     = (MINIDUMP_CALLBACK_ROUTINE)MyMiniDumpCallback; 
-		mci.CallbackParam       = 0; 
+		mci.CallbackRoutine     = static_cast<MINIDUMP_CALLBACK_ROUTINE>(MyMiniDumpCallback); 
+		mci.CallbackParam       = nullptr; 
 
 		//MINIDUMP_TYPE mdt       = (MINIDUMP_TYPE)(MiniDumpWithPrivateReadWriteMemory | MiniDumpWithDataSegs | MiniDumpWithHandleData | MiniDumpWithFullMemoryInfo | MiniDumpWithThreadInfo | MiniDumpWithUnloadedModules ); 
-		MINIDUMP_TYPE mdt       = (MINIDUMP_TYPE)(MiniDumpWithIndirectlyReferencedMemory | MiniDumpScanMemory); 
+		MINIDUMP_TYPE mdt       = static_cast<MINIDUMP_TYPE>(MiniDumpWithIndirectlyReferencedMemory | MiniDumpScanMemory); 
 
-		BOOL rv = MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, mdt, (pep != 0) ? &mdei : 0, 0, &mci); 
+		BOOL rv = MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, mdt, (pep != nullptr) ? &mdei : 0, nullptr, &mci); 
 
 		if(!rv) std::cout << "Failed creating minidump, last error = " << GetLastError() << std::endl; 
 		else std::cout << "Minidump created successfully." << std::endl;
@@ -285,7 +283,7 @@ void printException(PEXCEPTION_RECORD record)
 		default: std::cout << ", unknown on";
 		}
 		std::cout << " address: 0x";
-		std::cout << (void*) record->ExceptionInformation[1];
+		std::cout << reinterpret_cast<void*>(record->ExceptionInformation[1]);
 
 		if (c == EXCEPTION_IN_PAGE_ERROR) std::cout << ", NTSTATUS: " << record->ExceptionInformation[2];
 	}
@@ -332,20 +330,20 @@ LONG onUnhandledException(LPEXCEPTION_POINTERS e)
 //#endif
 LPTOP_LEVEL_EXCEPTION_FILTER WINAPI MyDummySetUnhandledExceptionFilter(LPTOP_LEVEL_EXCEPTION_FILTER /*lpTopLevelExceptionFilter*/)
 {
-	return NULL;
+	return nullptr;
 }
 
 BOOL PreventSetUnhandledExceptionFilter()
 {
 	HMODULE hKernel32 = LoadLibrary("kernel32.dll");
-	if (hKernel32 == NULL) return FALSE;
+	if (hKernel32 == nullptr) return FALSE;
 	void *pOrgEntry = GetProcAddress(hKernel32, "SetUnhandledExceptionFilter");
-	if(pOrgEntry == NULL) return FALSE;
+	if(pOrgEntry == nullptr) return FALSE;
 	unsigned char newJump[ 100 ];
-	size_t dwOrgEntryAddr = (size_t) pOrgEntry;
+	size_t dwOrgEntryAddr = reinterpret_cast<size_t>(pOrgEntry);
 	dwOrgEntryAddr += 5; // add 5 for 5 op-codes for jmp far
 	void *pNewFunc = &MyDummySetUnhandledExceptionFilter;
-	size_t dwNewEntryAddr = (size_t) pNewFunc;
+	size_t dwNewEntryAddr = reinterpret_cast<size_t>(pNewFunc);
 	size_t dwRelativeAddr = dwNewEntryAddr - dwOrgEntryAddr;
 
 	newJump[ 0 ] = 0xE9;  // JMP absolute
@@ -400,8 +398,8 @@ void Halley::Debug::trace(String str)
 Halley::String Halley::Debug::getLastTraces()
 {
 	String result;
-	for (auto i=lastTraces.begin(); i != lastTraces.end(); i++) {
-		result += " - " + (*i) + "\n";
+	for (auto i: lastTraces) {
+		result += " - " + i + "\n";
 	}
 	return result;
 }

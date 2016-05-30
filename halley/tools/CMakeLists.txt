@@ -32,7 +32,6 @@ set(HEADERS
         "src/codegen/message_schema.h"
         "src/codegen/system_schema.h"
         "src/make_font/font_face.h"
-        "src/prec.h"
         )
 
 assign_source_group(${SOURCES})

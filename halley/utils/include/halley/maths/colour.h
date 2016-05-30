@@ -177,7 +177,7 @@ namespace Halley {
 			int value;
 			ss << std::hex;
 			ss >> value;
-			return convertColour<unsigned char, T>((unsigned char)(value));
+			return convertColour<unsigned char, T>(static_cast<unsigned char>(value));
 		}
 
 		template <typename U>

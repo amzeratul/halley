@@ -67,7 +67,7 @@ namespace Halley {
 
 		void setRepeat(float first, float hold);
 
-		spInputDevice getLastDevice();
+		spInputDevice getLastDevice() const;
 		void setLastDeviceFreeze(bool frozen);
 
 	private:

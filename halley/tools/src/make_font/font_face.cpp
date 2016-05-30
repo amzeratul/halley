@@ -57,22 +57,22 @@ void FontFace::setSize(float sz)
 	FT_Set_Char_Size(pimpl->face, int(size * 64), 0, 72, 0);
 }
 
-String FontFace::getName()
+String FontFace::getName() const
 {
 	return pimpl->face->family_name + String(" ") + pimpl->face->style_name;
 }
 
-float FontFace::getSize()
+float FontFace::getSize() const
 {
 	return size;
 }
 
-float FontFace::getHeight()
+float FontFace::getHeight() const
 {
 	return pimpl->face->height * size / pimpl->face->units_per_EM;
 }
 
-float FontFace::getAscender()
+float FontFace::getAscender() const
 {
 	return pimpl->face->ascender * size / pimpl->face->units_per_EM;
 }
@@ -87,7 +87,7 @@ std::vector<int> FontFace::getCharCodes() const
 	return result;
 }
 
-Vector2i FontFace::getGlyphSize(int charCode)
+Vector2i FontFace::getGlyphSize(int charCode) const
 {
 	int index = charCode == 0 ? 0 : FT_Get_Char_Index(pimpl->face, charCode);
 	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
@@ -98,7 +98,7 @@ Vector2i FontFace::getGlyphSize(int charCode)
 	return Vector2i(metrics.width, metrics.height) / 64;
 }
 
-void FontFace::drawGlyph(Image& image, int charcode, Vector2i pos)
+void FontFace::drawGlyph(Image& image, int charcode, Vector2i pos) const
 {
 	auto glyph = pimpl->face->glyph;
 	
@@ -118,7 +118,7 @@ void FontFace::drawGlyph(Image& image, int charcode, Vector2i pos)
 	image.blitFrom(pos, reinterpret_cast<char*>(bmp.buffer), bmp.width, bmp.rows, bmp.pitch, 1);
 }
 
-FontMetrics FontFace::getMetrics(int charcode, float scale)
+FontMetrics FontFace::getMetrics(int charcode, float scale) const
 {
 	int index = FT_Get_Char_Index(pimpl->face, charcode);
 
@@ -138,7 +138,7 @@ FontMetrics FontFace::getMetrics(int charcode, float scale)
 	return result;
 }
 
-std::vector<KerningPair> FontFace::getKerning(const std::vector<int>& codes)
+std::vector<KerningPair> FontFace::getKerning(const std::vector<int>& codes) const
 {
 	std::vector<KerningPair> results;
 	if (!FT_HAS_KERNING(pimpl->face)) {

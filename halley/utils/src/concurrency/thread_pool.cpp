@@ -66,7 +66,7 @@ void Halley::ThreadPool::stop()
 
 ThreadPool& Halley::ThreadPool::get()
 {
-	if (!instance) instance = std::shared_ptr<ThreadPool>(new ThreadPool());
+	if (!instance) instance = std::make_shared<ThreadPool>();
 	return *instance;
 }
 

@@ -47,7 +47,7 @@ namespace Halley {
 		explicit Vector3D (const Vector2D<T> &vec, const T _z=0) { x = vec.x; y = vec.y; z = _z; }
 		Vector3D (const Vector3D<T> &vec) { x = vec.x; y = vec.y; z = vec.z; }
 		template <typename V>
-		explicit Vector3D (const Vector3D<V> &vec) { x = (T)vec.x; y = (T)vec.y; z = (T)vec.z; }
+		explicit Vector3D (const Vector3D<V> &vec) { x = T(vec.x); y = T(vec.y); z = T(vec.z); }
 
 		// Getter
 		inline T& operator[](int n) { return *((&x)+n); }

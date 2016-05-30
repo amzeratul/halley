@@ -31,18 +31,18 @@ namespace Halley
 		~FontFace();
 
 		void setSize(float size);
-		String getName();
-		float getSize();
-		float getHeight();
-		float getAscender();
+		String getName() const;
+		float getSize() const;
+		float getHeight() const;
+		float getAscender() const;
 
 		std::vector<int> getCharCodes() const;
-		Vector2i getGlyphSize(int charCode);
+		Vector2i getGlyphSize(int charCode) const;
 		
-		void drawGlyph(Image& image, int charcode, Vector2i pos);
-		FontMetrics getMetrics(int charcode, float scale = 1.0f);
+		void drawGlyph(Image& image, int charcode, Vector2i pos) const;
+		FontMetrics getMetrics(int charcode, float scale = 1.0f) const;
 
-		std::vector<KerningPair> getKerning(const std::vector<int>& codes);
+		std::vector<KerningPair> getKerning(const std::vector<int>& codes) const;
 
 	private:
 		std::unique_ptr<FontFacePimpl> pimpl;

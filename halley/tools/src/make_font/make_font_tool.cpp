@@ -152,7 +152,8 @@ int MakeFontTool::run(std::vector<std::string> args)
 	return 0;
 }
 
-void MakeFontTool::generateFontMap(String imgName, FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale, float radius) {
+void MakeFontTool::generateFontMap(String imgName, FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale, float radius) const
+{
 	std::sort(entries.begin(), entries.end(), [](const CharcodeEntry& a, const CharcodeEntry& b) { return a.charcode < b.charcode; });
 
 	YAML::Emitter yaml;
