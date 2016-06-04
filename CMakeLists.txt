@@ -27,7 +27,7 @@ else()
 	find_package(YamlCpp REQUIRED)
 	find_Package(SDL2 REQUIRED)
 	find_package(OpenGL REQUIRED)
-	find_package(Boost COMPONENTS system filesystem REQUIRED)
+	find_package(Boost COMPONENTS system filesystem thread REQUIRED)
 	
 	set(FREETYPE_LIB_DEBUG ${FREETYPE_LIB})
 	set(YAMLCPP_LIBRARY_DEBUG ${YAMLCPP_LIBRARY})
