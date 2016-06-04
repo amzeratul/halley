@@ -22,7 +22,7 @@
 #pragma once
 
 #include "halley/core/api/halley_api_internal.h"
-#include <map>
+#include <halley/data_structures/flat_map.h>
 
 namespace Halley {
 
@@ -62,8 +62,8 @@ namespace Halley {
 		std::vector<std::unique_ptr<InputJoystick>> joysticks;
 		std::vector<std::unique_ptr<InputMouseConcrete>> mice;
 
-		std::map<int, InputJoystick*> sdlJoys;
-		std::map<int, std::shared_ptr<InputTouch>> touchEvents;
+		FlatMap<int, InputJoystick*> sdlJoys;
+		FlatMap<int, std::shared_ptr<InputTouch>> touchEvents;
 	};
 
 };

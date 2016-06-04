@@ -82,7 +82,7 @@ CodeGenResult CodegenCPP::generateRegistry(const std::vector<ComponentSchema>& c
 		"",
 		"",
 		"using SystemFactoryPtr = System* (*)();",
-		"using SystemFactoryMap = std::map<String, SystemFactoryPtr>;",
+		"using SystemFactoryMap = Halley::HashMap<String, SystemFactoryPtr>;",
 		"",
 		"static SystemFactoryMap makeSystemFactories() {",
 		"	SystemFactoryMap result;"

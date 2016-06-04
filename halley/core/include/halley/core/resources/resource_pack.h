@@ -64,7 +64,7 @@ namespace Halley {
 		static void encrypt(char* data, size_t size);
 		static void decrypt(char* data, size_t size);
 
-		std::map<String, ResourcePackEntry> entries;
+		HashMap<String, ResourcePackEntry> entries;
 		int priority;
 		FILE* fileP;
 		String name;

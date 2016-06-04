@@ -8,16 +8,6 @@
 
 using namespace Halley;
 
-Font::Glyph::Glyph(Glyph&& o)
-	: charcode(o.charcode)
-	, area(o.area)
-	, size(o.size)
-	, horizontalBearing(o.horizontalBearing)
-	, verticalBearing(o.verticalBearing)
-	, advance(o.advance)
-{
-}
-
 Font::Glyph::Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance)
 	: charcode(charcode)
 	, area(area)

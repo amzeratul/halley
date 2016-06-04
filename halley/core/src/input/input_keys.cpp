@@ -47,4 +47,4 @@ void Halley::Keys::doInit()
 
 bool Halley::Keys::init = false;
 
-std::map<Halley::Keys::Key, Halley::String> Halley::Keys::keyNames;
+Halley::FlatMap<Halley::Keys::Key, Halley::String> Halley::Keys::keyNames;

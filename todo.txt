@@ -36,7 +36,6 @@ entity
 - systems as parallel tasks [RESEARCH]
 - better timelines?
 - foreign language systems [RESEARCH]
-- Lua systems
 - defragment/optimize memory? [RESEARCH]
 - universal hierarchical transforms? [RESEARCH]
 - onAddEntity/onRemoveEntity on systems [RESEARCH]
@@ -46,7 +45,14 @@ codegen
 - components registry [RESEARCH] (does this even make sense?)
 - components serialization [RESEARCH]
 - import custom types in components [RESEARCH]
+
+lua
+- bring Lua into project
 - codegen Lua
+- Lua systems
+- codegen component
+- codegen system
+- Moonscript support
 
 cli tools
 - assets bundler
@@ -65,7 +71,6 @@ editor
 utils
 * collision detection & triggers
 - tasks/concurrency review
-- replace std::map with a flat map
 - consider replacing STL with EASTL or similar?
 - fix Maybe<T>?
 - improve Halley::String?

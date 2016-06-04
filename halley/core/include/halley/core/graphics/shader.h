@@ -1,6 +1,6 @@
 #pragma once
 #include "halley/core/graphics/material/material.h"
-#include <vector>
+#include <halley/data_structures/vector.h>
 
 namespace Halley
 {
@@ -21,7 +21,7 @@ namespace Halley
 		virtual void addGeometrySource(String src) = 0;
 		virtual void addPixelSource(String src) = 0;
 
-		virtual void setAttributes(const std::vector<MaterialAttribute>& attributes) = 0;
+		virtual void setAttributes(const Vector<MaterialAttribute>& attributes) = 0;
 		virtual unsigned int getUniformLocation(String name) = 0;
 		virtual unsigned int getAttributeLocation(String name) = 0;
 	protected:

@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <map>
 #include <halley/text/halleystring.h>
+#include <halley/data_structures/flat_map.h>
 
 namespace Halley {
 	class Keys {
@@ -297,7 +297,7 @@ namespace Halley {
 
 	private:
 		static void doInit();
-		static std::map<Key, String> keyNames;
+		static FlatMap<Key, String> keyNames;
 		static bool init;
 	};
 

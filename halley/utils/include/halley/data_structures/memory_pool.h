@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include "flat_map.h"
 
 namespace Halley {
 	class SizePool
@@ -27,7 +27,7 @@ namespace Halley {
 	private:
 		static PoolPool& get();
 
-		std::map<size_t, SizePool*> pools;
+		FlatMap<size_t, SizePool*> pools;
 	};
 
 	template <typename T>

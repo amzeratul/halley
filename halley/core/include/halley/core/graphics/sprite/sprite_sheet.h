@@ -2,10 +2,10 @@
 
 #include <halley/maths/vector2d.h>
 #include <halley/maths/rect.h>
-#include <map>
 #include <memory>
 #include <halley/resources/resource.h>
 #include <halley/text/halleystring.h>
+#include <halley/data_structures/hash_map.h>
 
 namespace Halley
 {
@@ -31,6 +31,6 @@ namespace Halley
 
 	private:
 		std::shared_ptr<Texture> texture;
-		std::map<String, SpriteSheetEntry> sprites;
+		HashMap<String, SpriteSheetEntry> sprites;
 	};
 }

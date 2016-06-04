@@ -199,7 +199,7 @@ unsigned ShaderOpenGL::getAttributeLocation(String name)
 	return result;
 }
 
-void ShaderOpenGL::setAttributes(const std::vector<MaterialAttribute>& attributes)
+void ShaderOpenGL::setAttributes(const Vector<MaterialAttribute>& attributes)
 {
 	for (auto& attribute : attributes) {
 		glBindAttribLocation(id, attribute.location, attribute.name.c_str());

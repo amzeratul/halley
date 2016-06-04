@@ -2,8 +2,8 @@
 
 #include "dynamic_grid.h"
 #include "halley/maths/rect.h"
-#include <map>
-#include <vector>
+#include "vector.h"
+#include "hash_map.h"
 
 namespace Halley {
 	class RectangleSpatialChecker {
@@ -33,8 +33,8 @@ namespace Halley {
 			int hashMask;
 		};
 
-		std::map<DataType, Entry> entries;
-		std::vector<DataType> resultsBuffer;
+		HashMap<DataType, Entry> entries;
+		Vector<DataType> resultsBuffer;
 		int sweep = 0;
 
 		int resolution;

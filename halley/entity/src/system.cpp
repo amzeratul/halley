@@ -1,4 +1,5 @@
 #include "system.h"
+#include <halley/data_structures/flat_map.h>
 
 using namespace Halley;
 
@@ -61,7 +62,7 @@ void System::processMessages()
 		std::vector<Message*> msg;
 		std::vector<size_t> elemIdx;
 	};
-	std::map<int, MessageBox> inboxes;
+	FlatMap<int, MessageBox> inboxes;
 
 	if (!families.empty()) {
 		auto& fam = *families[0];

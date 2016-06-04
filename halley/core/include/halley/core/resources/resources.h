@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <map>
 #include <ctime>
 #include <algorithm>
 #include <halley/support/exception.h>
@@ -36,7 +35,7 @@ namespace Halley {
 	class ResourceTypeId
 	{
 	public:
-		static int getId(const std::map<std::string, int>& ids)
+		static int getId(const HashMap<std::string, int>& ids)
 		{
 			static int id = -1;
 			if (id == -1) {
@@ -51,7 +50,7 @@ namespace Halley {
 			return id;
 		}
 
-		static int makeId(std::map<std::string, int>& ids)
+		static int makeId(HashMap<std::string, int>& ids)
 		{
 			std::string name = typeid(T).name();
 			auto iter = ids.find(name);
@@ -101,8 +100,8 @@ namespace Halley {
 		time_t getFileWriteTime(String name) const;
 
 		std::unique_ptr<ResourceLocator> locator;
-		std::map<std::string, int> resourceTypeIds;
-		std::vector<std::unique_ptr<ResourceCollectionBase>> resources;
+		HashMap<std::string, int> resourceTypeIds;
+		Vector<std::unique_ptr<ResourceCollectionBase>> resources;
 		HalleyAPI* api;
 
 		int curDepth = 0;

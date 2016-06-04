@@ -4,7 +4,7 @@
 #include <memory>
 #include <halley/text/halleystring.h>
 #include <halley/resources/resource_data.h>
-#include <map>
+#include <halley/data_structures/hash_map.h>
 
 namespace Halley
 {
@@ -57,7 +57,7 @@ namespace Halley
 	private:
 		Resources& parent;
 		String path;
-		std::map<String, Wrapper> resources;
+		HashMap<String, Wrapper> resources;
 	};
 
 	template <typename T>

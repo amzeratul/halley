@@ -1,8 +1,8 @@
 #pragma once
 
 #include <boost/filesystem.hpp>
-#include <map>
-#include "../../../../src/codegen/icode_generator.h"
+#include "icode_generator.h"
+#include <halley/data_structures/hash_map.h>
 
 namespace YAML
 {
@@ -39,8 +39,8 @@ namespace Halley
 		void addSystem(YAML::Node rootNode);
 		void addMessage(YAML::Node rootNode);
 
-		std::map<String, ComponentSchema> components;
-		std::map<String, SystemSchema> systems;
-		std::map<String, MessageSchema> messages;
+		HashMap<String, ComponentSchema> components;
+		HashMap<String, SystemSchema> systems;
+		HashMap<String, MessageSchema> messages;
 	};
 }

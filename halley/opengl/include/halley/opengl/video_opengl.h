@@ -1,5 +1,6 @@
 #include <map>
 #include <mutex>
+#include <halley/data_structures/flat_map.h>
 struct SDL_Window;
 
 #include "halley/core/api/halley_api_internal.h"
@@ -59,7 +60,7 @@ namespace Halley {
 		void setUpEnumMap();
 		void onGLDebugMessage(unsigned int source, unsigned int type, unsigned int id, unsigned int severity, String message) const;
 
-		std::map<unsigned int, String> glEnumMap;
+		FlatMap<unsigned int, String> glEnumMap;
 		mutable std::vector<std::function<void()>> messagesPending;
 		mutable std::mutex messagesMutex;
 

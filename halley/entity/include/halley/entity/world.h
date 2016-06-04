@@ -1,15 +1,15 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 #include "entity_id.h"
 #include "family_mask.h"
 #include "family.h"
 #include <halley/time/halleytime.h>
 #include <halley/text/halleystring.h>
 #include <halley/data_structures/mapped_pool.h>
-#include <map>
 #include <halley/time/stopwatch.h>
+#include <halley/data_structures/vector.h>
+#include <halley/data_structures/tree_map.h>
 
 namespace Halley {
 	class Entity;
@@ -62,7 +62,7 @@ namespace Halley {
 		
 	private:
 		HalleyAPI* api;
-		std::array<std::vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
+		std::array<Vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
 		bool entityDirty = false;
 		
 		EntityId nextUid = 0;
@@ -70,7 +70,7 @@ namespace Halley {
 		std::vector<Entity*> entitiesPendingCreation;
 		MappedPool<Entity*> entityMap;
 
-		std::map<FamilyMaskType, std::unique_ptr<Family>> families;
+		TreeMap<FamilyMaskType, std::unique_ptr<Family>> families;
 
 		mutable std::array<StopwatchAveraging, 3> timer;
 

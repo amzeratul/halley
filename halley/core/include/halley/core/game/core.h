@@ -10,6 +10,8 @@
 #include <halley/plugin/plugin.h>
 #include <halley/core/api/halley_api_internal.h>
 #include "halley_statics.h"
+#include <halley/data_structures/flat_map.h>
+#include <halley/data_structures/vector.h>
 
 namespace Halley
 {
@@ -79,7 +81,7 @@ namespace Halley
 		bool running = true;
 		std::unique_ptr<RedirectStream> out;
 
-		std::map<PluginType, std::vector<std::unique_ptr<Plugin>>> plugins;
+		FlatMap<PluginType, Vector<std::unique_ptr<Plugin>>> plugins;
 		HalleyStatics statics;
 	};
 }

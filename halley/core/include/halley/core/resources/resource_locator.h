@@ -21,10 +21,11 @@
 
 #pragma once
 
-#include <map>
 #include <ctime>
 #include <halley/text/halleystring.h>
 #include <halley/resources/resource_data.h>
+#include <halley/data_structures/hash_map.h>
+#include <halley/data_structures/vector.h>
 
 namespace Halley {
 	class ResourceData;
@@ -38,7 +39,7 @@ namespace Halley {
 	protected:
 		virtual std::unique_ptr<ResourceData> doGet(String resource, bool stream)=0;
 		virtual std::time_t doGetTimestamp(String resource) = 0;
-		virtual std::vector<String> getResourceList()=0;
+		virtual Vector<String> getResourceList()=0;
 		virtual int getPriority() { return 0; }
 	};
 
@@ -56,7 +57,7 @@ namespace Halley {
 		StringArray enumerate(String prefix = "", bool removePrefix = false, String suffixMatch = "");
 
 	private:
-		std::map<String, IResourceLocatorProvider*> locators;
-		std::vector<std::unique_ptr<IResourceLocatorProvider>> locatorList;
+		HashMap<String, IResourceLocatorProvider*> locators;
+		Vector<std::unique_ptr<IResourceLocatorProvider>> locatorList;
 	};
 }

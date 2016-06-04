@@ -1,7 +1,7 @@
 #pragma once
 
 #include "halley/core/graphics/shader.h"
-#include <map>
+#include <halley/data_structures/hash_map.h>
 
 namespace Halley
 {
@@ -22,17 +22,17 @@ namespace Halley
 		
 		unsigned getUniformLocation(String name) override;
 		unsigned getAttributeLocation(String name) override;
-		void setAttributes(const std::vector<MaterialAttribute>& attributes) override;
+		void setAttributes(const Vector<MaterialAttribute>& attributes) override;
 
 	private:
 		unsigned int id = 0;
 		bool ready = false;
-		std::vector<String> vertexSources;
-		std::vector<String> pixelSources;
-		std::vector<String> geometrySources;
-		std::vector<unsigned int> shaders;
+		Vector<String> vertexSources;
+		Vector<String> pixelSources;
+		Vector<String> geometrySources;
+		Vector<unsigned int> shaders;
 
-		std::map<String, unsigned int> attributeLocations;
-		std::map<String, unsigned int> uniformLocations;
+		HashMap<String, unsigned int> attributeLocations;
+		HashMap<String, unsigned int> uniformLocations;
 	};
 }

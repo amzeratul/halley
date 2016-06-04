@@ -2,8 +2,8 @@
 
 #include "halley/core/graphics/texture.h"
 #include "halley/core/graphics/sprite/sprite.h"
-#include <map>
 #include <memory>
+#include <halley/data_structures/flat_map.h>
 
 namespace Halley
 {
@@ -20,8 +20,10 @@ namespace Halley
 			Vector2f verticalBearing;
 			Vector2f advance;
 			
-			Glyph(Glyph&& other);
+			Glyph(Glyph&& other) = default;
 			Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance);
+
+			Glyph& operator=(const Glyph& o) = default;
 		};
 
 		explicit Font(ResourceLoader& loader);
@@ -44,6 +46,6 @@ namespace Halley
 		float smoothRadius;
 
 		std::shared_ptr<Material> material;
-		std::map<int, Glyph> glyphs;
+		FlatMap<int, Glyph> glyphs;
 	};
 }

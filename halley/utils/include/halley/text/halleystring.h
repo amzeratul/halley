@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <halley/data_structures/vector.h>
 
 namespace Halley {
 
@@ -136,8 +136,8 @@ namespace Halley {
 		inline std::string& cppStr() { return str; }
 		inline const std::string& cppStr() const { return str; }
 
-		std::vector<String> split(char delimiter) const;
-		static String concatList(const std::vector<String>& list, String separator);
+		Vector<String> split(char delimiter) const;
+		static String concatList(const Vector<String>& list, String separator);
 
 		//////////
 
@@ -169,6 +169,17 @@ namespace Halley {
 	std::ostream& operator<< (std::ostream& os, const String& rhp);
 	std::istream& operator>> (std::istream& is, String& rhp);
 
-	using StringArray = std::vector<String>;
+	using StringArray = Vector<String>;
 
+}
+
+namespace std {
+	template<>
+	struct hash<Halley::String>
+	{
+		size_t operator()(const Halley::String& s) const 
+		{
+			return std::hash<std::string>()(s.cppStr());
+		}
+	};
 }

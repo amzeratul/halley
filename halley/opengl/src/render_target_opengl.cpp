@@ -1,8 +1,8 @@
 #include "halley/support/debug.h"
-#include <map>
 #include "halley/support/exception.h"
 #include "render_target_opengl.h"
 #include <halley/core/graphics/texture.h>
+#include <halley/data_structures/flat_map.h>
 
 using namespace Halley;
 
@@ -64,7 +64,7 @@ void RenderTargetOpenGL::init()
 		glCheckError();
 		if (status != GL_FRAMEBUFFER_COMPLETE) {
 			fbo = 0;
-			std::map<int, String> msgs;
+			FlatMap<int, String> msgs;
 			msgs[GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT] = "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
 			msgs[GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT] = "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
 			msgs[GL_FRAMEBUFFER_UNSUPPORTED] = "GL_FRAMEBUFFER_UNSUPPORTED";
