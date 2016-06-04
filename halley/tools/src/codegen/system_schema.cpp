@@ -1,6 +1,6 @@
 #include <yaml-cpp/yaml.h>
 #include <halley/support/exception.h>
-#include "system_schema.h"
+#include <halley/tools/codegen/system_schema.h>
 
 using namespace Halley;
 
