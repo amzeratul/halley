@@ -27,6 +27,7 @@ target_link_libraries (halley-runner
 		${SDL2_LIBRARIES}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
+		${Boost_THREAD_LIBRARY}
         ${EXTRA_LIBS}
         )
 

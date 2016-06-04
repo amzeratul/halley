@@ -31,7 +31,6 @@ else()
 	
 	set(FREETYPE_LIB_DEBUG ${FREETYPE_LIB})
 	set(YAMLCPP_LIBRARY_DEBUG ${YAMLCPP_LIBRARY})
-
 endif()
 
 if (${UNIX})
