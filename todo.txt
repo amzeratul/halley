@@ -46,7 +46,6 @@ entity
 codegen
 * components registry [RESEARCH] (does this even make sense?)
 * components serialization [RESEARCH]
-- system custom base classes [RESEARCH]
 - import custom types in components [RESEARCH]
 - codegen Lua
 
@@ -70,6 +69,9 @@ utils
 - better HTTP library/replace boost::asio
 - write my own memory pool/replace boost::pool
 - fix Maybe<T>
+- improve Halley::String?
+- replace std::map with a flat map
+- consider replacing STL with EASTL or similar?
 
 samples
 - expand "test" sample
