@@ -2,10 +2,11 @@ cmake_minimum_required (VERSION 3.0)
 
 project (halley-sample-test)
 
+file (GLOB_RECURSE ${PROJECT_NAME}_sources_gen "gen/*.cpp")
+file (GLOB_RECURSE ${PROJECT_NAME}_headers_gen "gen/*.h")
+
 set (${PROJECT_NAME}_sources
 		"prec.cpp"
-
-		"gen/cpp/registry.cpp"
 
 		"src/main.cpp"
 		"src/test_stage.cpp"
@@ -15,22 +16,15 @@ set (${PROJECT_NAME}_sources
 		"src/systems/spawn_sprite_system.cpp"
 		"src/systems/sprite_animation_system.cpp"
 		"src/systems/time_system.cpp"
+		
+		${${PROJECT_NAME}_sources_gen}
 		)
 
 set (${PROJECT_NAME}_headers
 		"prec.h"
 		"src/test_stage.h"
-		"gen/cpp/components/position_component.h"
-		"gen/cpp/components/sprite_animation_component.h"
-		"gen/cpp/components/sprite_component.h"
-		"gen/cpp/components/time_component.h"
-		"gen/cpp/components/velocity_component.h"
-		"gen/cpp/messages/expire_message.h"
-		"gen/cpp/systems/movement_system.h"
-		"gen/cpp/systems/render_system.h"
-		"gen/cpp/systems/spawn_sprite_system.h"
-		"gen/cpp/systems/sprite_animation_system.h"
-		"gen/cpp/systems/time_system.h"
+		
+		${${PROJECT_NAME}_headers_gen}
 		)
 
 assign_source_group(${${PROJECT_NAME}_sources})
