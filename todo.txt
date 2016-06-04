@@ -3,23 +3,22 @@ core
 
 core/resources
 - resources hot reloading [RESEARCH]
+- asynchronous resource loading
+- "library" of pre-processed assets from which the game loads data (like Unity)
 
 core/graphics
-- consider replacing text format with binary format (current one is super slow)
+- consider replacing text format with binary format? (current one is super slow)
 - convert uniforms into attributes for distance_field_sprite?
 - optimise SpritePainter
 - render graph [from old Halley]
 - sliced sprites [RESEARCH]
-- fix threaded load (TODOs in core_runner.cpp)
 - run rendering on another thread?
 - generalize Sprite for more attributes [RESEARCH]
+- expand attributes into four vertices at Painter, instead of Renderer
 - multi-pass conditional enabling of pass
 - multi-pass disable batching
 - fallback shaders
 - shaders for other graphics APIs? [RESEARCH]
-
-opengl
-- instanced rendering? do we care?
 
 input
 - isolate SDL events to SDL-specific file?
@@ -30,7 +29,7 @@ audio
 * figure out which backend to use (OpenAL still?) [RESEARCH]
 
 entity
-* query other entities [RESEARCH]
+- query other entities? [RESEARCH]
 - load prefabs
 - smearing systems
 - parallel systems [RESEARCH]
@@ -44,8 +43,8 @@ entity
 - store references to other components [RESEARCH]
 
 codegen
-* components registry [RESEARCH] (does this even make sense?)
-* components serialization [RESEARCH]
+- components registry [RESEARCH] (does this even make sense?)
+- components serialization [RESEARCH]
 - import custom types in components [RESEARCH]
 - codegen Lua
 
@@ -66,19 +65,22 @@ editor
 utils
 * collision detection & triggers
 - tasks/concurrency review
-- better HTTP library/replace boost::asio
-- write my own memory pool/replace boost::pool
-- fix Maybe<T>
-- improve Halley::String?
 - replace std::map with a flat map
 - consider replacing STL with EASTL or similar?
+- fix Maybe<T>?
+- improve Halley::String?
+- better HTTP library/replace boost::asio?
+- write my own memory pool/replace boost::pool?
 
 samples
 - expand "test" sample
 - make a minimal "template" sample
 
 build
+- figure out how to handle code generation and its errors
 - clean up
+- conan support?
+- look into meson?
 
 platforms
 - PS4?
