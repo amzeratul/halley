@@ -4,7 +4,7 @@ using namespace Halley;
 
 class RenderSystem final : public RenderSystemBase<RenderSystem> {
 public:
-	void render(Halley::Painter& painter) const
+	void render(Painter& painter) const
 	{
 		Camera& cam = painter.getCurrentCamera();
 		Rect4i viewPort = painter.getViewPort();
@@ -25,6 +25,7 @@ public:
 		}
 
 		spritePainter.draw(painter);
+		painter.flush();
 	}
 };
 

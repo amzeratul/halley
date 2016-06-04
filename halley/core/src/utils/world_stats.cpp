@@ -55,10 +55,10 @@ void WorldStatsView::draw(RenderContext& context)
 				drawStats(name, int(system->getEntityCount()), ns, pos);
 			}
 
-			text.setColour(Colour(0.7f, 0.7f, 0.7f));
-			drawStats("World Overhead", 0, worldTotal - sysTotal, pos);
-			drawStats("Engine Overhead", 0, engineTotal - worldTotal, pos);
-			text.setColour(Colour(0.7f, 0.8f, 0.7f));
+			text.setColour(Colour(0.8f, 0.8f, 0.8f));
+			drawStats("[World]", 0, worldTotal - sysTotal, pos);
+			drawStats("[Engine]", 0, engineTotal - worldTotal, pos);
+			text.setColour(Colour(0.8f, 1.0f, 0.8f));
 			drawStats("Total", int(world.numEntities()), engineTotal, pos);
 		}
 
