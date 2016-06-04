@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include <halley/data_structures/vector.h>
 #include "symbol_loader.h"
 
 namespace Halley
@@ -7,13 +7,13 @@ namespace Halley
 	class MemoryPatchingMappings
 	{
 	public:
-		std::vector<void*> src;
-		std::vector<void*> dst;
-		std::vector<std::string> name;
+		Vector<void*> src;
+		Vector<void*> dst;
+		Vector<std::string> name;
 		void* minSrc;
 		void* maxSrc;
 
-		void generate(const std::vector<DebugSymbol>& prev, const std::vector<DebugSymbol>& next);
+		void generate(const Vector<DebugSymbol>& prev, const Vector<DebugSymbol>& next);
 	};
 
 	class MemoryPatcher

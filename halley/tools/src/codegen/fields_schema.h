@@ -38,7 +38,7 @@ namespace Halley
 	{
 	public:
 		TypeSchema returnType;
-		std::vector<VariableSchema> arguments;
+		Vector<VariableSchema> arguments;
 		String name;
 		bool isConst = false;
 		bool isVirtual = false;
@@ -46,7 +46,7 @@ namespace Halley
 		bool isFinal = false;
 		bool isFriend = false;
 
-		MethodSchema(TypeSchema returnType, std::vector<VariableSchema> arguments, String name, bool isConst = false, bool isVirtual = false, bool isOverride = false, bool isFinal = false, bool isFriend = false)
+		MethodSchema(TypeSchema returnType, Vector<VariableSchema> arguments, String name, bool isConst = false, bool isVirtual = false, bool isOverride = false, bool isFinal = false, bool isFriend = false)
 			: returnType(returnType)
 			, arguments(arguments)
 			, name(name)

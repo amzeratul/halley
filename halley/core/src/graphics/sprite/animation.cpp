@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-AnimationFrame::AnimationFrame(int frameNumber, String imageName, SpriteSheet& sheet, const std::vector<AnimationDirection>& directions)
+AnimationFrame::AnimationFrame(int frameNumber, String imageName, SpriteSheet& sheet, const Vector<AnimationDirection>& directions)
 {
 	const size_t n = directions.size();
 	sprites.resize(n);
@@ -122,7 +122,7 @@ Animation::Animation(ResourceLoader& loader)
 			if (sequenceNode["frames"].IsDefined()) {
 				for (auto frameNode : sequenceNode["frames"]) {
 					String value = frameNode.as<std::string>();
-					std::vector<int> values;
+					Vector<int> values;
 					if (value.isInteger()) {
 						values.push_back(value.toInteger());
 					} else if (value.contains("-")) {

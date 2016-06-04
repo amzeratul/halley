@@ -19,7 +19,7 @@
 
 using namespace Halley;
 
-Core::Core(std::unique_ptr<Game> g, std::vector<std::string> args)
+Core::Core(std::unique_ptr<Game> g, Vector<std::string> args)
 {
 	statics.setup();
 
@@ -320,9 +320,9 @@ void Core::registerPlugin(std::unique_ptr<Plugin> plugin)
 	plugins[plugin->getType()].emplace_back(std::move(plugin));
 }
 
-std::vector<Plugin*> Core::getPlugins(PluginType type)
+Vector<Plugin*> Core::getPlugins(PluginType type)
 {
-	std::vector<Plugin*> result;
+	Vector<Plugin*> result;
 	for (auto& p : plugins[type]) {
 		result.push_back(&*p);
 	}

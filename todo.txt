@@ -80,6 +80,7 @@ utils
 samples
 - expand "test" sample
 - make a minimal "template" sample
+- port an old game jam game (trapped, maybe?)
 
 build
 - figure out how to handle code generation and its errors

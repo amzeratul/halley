@@ -1,6 +1,6 @@
 #include "family_mask.h"
 #include <unordered_set>
-#include <vector>
+#include <halley/data_structures/vector.h>
 #include <functional>
 
 using namespace Halley;
@@ -51,7 +51,7 @@ public:
 		return i;
 	}
 
-	std::vector<MaskEntry*> values;
+	Vector<MaskEntry*> values;
 	std::unordered_set<MaskEntry> entries;
 
 	static int getHandle(const RealType& value)

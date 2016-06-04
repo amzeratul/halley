@@ -33,7 +33,7 @@ namespace Halley {
 		void* elems = nullptr;
 		size_t elemCount = 0;
 		size_t elemSize = 0;
-		std::vector<EntityId> toRemove;
+		Vector<EntityId> toRemove;
 
 	private:
 		FamilyMaskType inclusionMask;
@@ -65,7 +65,7 @@ namespace Halley {
 		void removeDeadEntities() override
 		{
 			// Performance-critical code
-			// Benchmarks suggest that using a std::vector is faster than std::set and std::unordered_set
+			// Benchmarks suggest that using a Vector is faster than std::set and std::unordered_set
 			if (!toRemove.empty()) {
 				std::sort(toRemove.begin(), toRemove.end());
 
@@ -88,7 +88,7 @@ namespace Halley {
 		}
 
 	private:
-		std::vector<StorageType> entities;
+		Vector<StorageType> entities;
 
 		void updateElems()
 		{

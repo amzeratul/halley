@@ -16,7 +16,7 @@ namespace Halley
 		DynamicGameLoader(std::string dllName);
 		~DynamicGameLoader();
 
-		std::unique_ptr<IMainLoopable> createCore(std::vector<std::string> args);
+		std::unique_ptr<IMainLoopable> createCore(Vector<std::string> args);
 		std::unique_ptr<Game> createGame() override;
 		bool needsToReload() const override;
 		void reload() override;
@@ -28,8 +28,8 @@ namespace Halley
 		IHalleyEntryPoint* entry = nullptr;
 		IMainLoopable* core = nullptr;
 
-		std::vector<DebugSymbol> symbols;
-		std::vector<DebugSymbol> prevSymbols;
+		Vector<DebugSymbol> symbols;
+		Vector<DebugSymbol> prevSymbols;
 		
 		void load();
 		void unload();

@@ -61,7 +61,7 @@ namespace Halley {
 		void onGLDebugMessage(unsigned int source, unsigned int type, unsigned int id, unsigned int severity, String message) const;
 
 		FlatMap<unsigned int, String> glEnumMap;
-		mutable std::vector<std::function<void()>> messagesPending;
+		mutable Vector<std::function<void()>> messagesPending;
 		mutable std::mutex messagesMutex;
 
 		void* context = nullptr;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <halley/data_structures/vector.h>
 
 namespace Halley {
 	class TypeDeleterBase
@@ -28,9 +28,9 @@ namespace Halley {
 			return (*getDeleters())[uid];
 		}
 
-		static std::vector<TypeDeleterBase*>*& getDeleters()
+		static Vector<TypeDeleterBase*>*& getDeleters()
 		{
-			static std::vector<TypeDeleterBase*>* map;
+			static Vector<TypeDeleterBase*>* map;
 			return map;
 		}
 	};

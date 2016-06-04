@@ -17,6 +17,6 @@ namespace Halley
 
 		int id = -1;
 		String name;
-		std::vector<VariableSchema> members;
+		Vector<VariableSchema> members;
 	};
 }

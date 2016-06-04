@@ -34,6 +34,6 @@ namespace Halley
 	class BinPack
 	{
 	public:
-		static Maybe<std::vector<BinPackResult>> pack(std::vector<BinPackEntry> entries, Vector2i binSize);
+		static Maybe<Vector<BinPackResult>> pack(Vector<BinPackEntry> entries, Vector2i binSize);
 	};
 }

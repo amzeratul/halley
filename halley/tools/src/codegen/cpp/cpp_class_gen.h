@@ -24,25 +24,25 @@ namespace Halley
 		CPPClassGenerator& addComment(String comment);
 		CPPClassGenerator& addAccessLevelSection(CPPAccess access);
 		CPPClassGenerator& addMember(VariableSchema member);
-		CPPClassGenerator& addMembers(const std::vector<VariableSchema>& members);
+		CPPClassGenerator& addMembers(const Vector<VariableSchema>& members);
 		CPPClassGenerator& addMethodDeclaration(MethodSchema method);
-		CPPClassGenerator& addMethodDeclarations(const std::vector<MethodSchema>& methods);
+		CPPClassGenerator& addMethodDeclarations(const Vector<MethodSchema>& methods);
 		CPPClassGenerator& addMethodDefinition(MethodSchema method, String body);
-		CPPClassGenerator& addMethodDefinition(MethodSchema method, const std::vector<String>& body);
+		CPPClassGenerator& addMethodDefinition(MethodSchema method, const Vector<String>& body);
 		CPPClassGenerator& addTypeDefinition(String name, String type);
 		CPPClassGenerator& finish();
 		
 		CPPClassGenerator& addDefaultConstructor();
-		CPPClassGenerator& addConstructor(const std::vector<VariableSchema>& variables);
-		CPPClassGenerator& addCustomConstructor(const std::vector<VariableSchema>& parameters, const std::vector<VariableSchema>& initialization);
+		CPPClassGenerator& addConstructor(const Vector<VariableSchema>& variables);
+		CPPClassGenerator& addCustomConstructor(const Vector<VariableSchema>& parameters, const Vector<VariableSchema>& initialization);
 
-		void writeTo(std::vector<String>& out, int nTabs = 0);
+		void writeTo(Vector<String>& out, int nTabs = 0);
 	private:
 		String className;
 		bool finished = false;
 		CPPAccess currentAccess = CPPAccess::Private;
 
-		std::vector<String> results;
+		Vector<String> results;
 
 		void ensureOK() const;
 		static String getAccessString(CPPAccess access);

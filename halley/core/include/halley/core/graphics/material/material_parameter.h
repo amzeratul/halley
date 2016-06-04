@@ -36,7 +36,7 @@ namespace Halley
 		std::function<void(int)> toBind;
 		std::function<void(int, void*)> bindFunc;
 
-		std::vector<int> addresses;
+		Vector<int> addresses;
 		Material& material;
 		String name;
 		ShaderParameterType type;

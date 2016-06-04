@@ -164,7 +164,7 @@ void Halley::InputJoystickXInput::updateVibration(Time /*_t*/)
 	
 	float high = 0;
 	float low = 0;
-	std::vector<spInputVibration> vibs2 = vibs;
+	Vector<spInputVibration> vibs2 = vibs;
 	vibs.clear();
 	for (size_t i=0; i<vibs2.size(); i++) {
 		float h = 0;

@@ -44,8 +44,8 @@ namespace Halley {
 		size_t getNumberOfMice() const override;
 		InputMouse& getMouse(int id=0) const override;
 
-		std::vector<std::shared_ptr<InputTouch>> getNewTouchEvents() override;
-		std::vector<std::shared_ptr<InputTouch>> getTouchEvents() override;
+		Vector<std::shared_ptr<InputTouch>> getNewTouchEvents() override;
+		Vector<std::shared_ptr<InputTouch>> getTouchEvents() override;
 
 	private:
 		Input();
@@ -58,9 +58,9 @@ namespace Halley {
 		void processJoyEvent(int n, SDL_Event& event);
 		void processTouch(int type, long long touchId, long long fingerId, float x, float y);
 		
-		std::vector<std::unique_ptr<InputKeyboardConcrete>> keyboards;
-		std::vector<std::unique_ptr<InputJoystick>> joysticks;
-		std::vector<std::unique_ptr<InputMouseConcrete>> mice;
+		Vector<std::unique_ptr<InputKeyboardConcrete>> keyboards;
+		Vector<std::unique_ptr<InputJoystick>> joysticks;
+		Vector<std::unique_ptr<InputMouseConcrete>> mice;
 
 		FlatMap<int, InputJoystick*> sdlJoys;
 		FlatMap<int, std::shared_ptr<InputTouch>> touchEvents;

@@ -1,6 +1,6 @@
 #include "game/halley_statics.h"
 #include <halley/entity/type_deleter.h>
-#include <vector>
+#include <halley/data_structures/vector.h>
 #include <halley/entity/family_mask.h>
 #include <halley/os/os.h>
 
@@ -16,7 +16,7 @@ namespace Halley {
 			os = OS::createOS();
 		}
 
-		std::vector<TypeDeleterBase*> typeDeleters;
+		Vector<TypeDeleterBase*> typeDeleters;
 		void* maskStorage;
 		OS* os;
 	};

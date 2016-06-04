@@ -31,16 +31,16 @@ namespace Halley {
 		String name;
 		String filename;
 		String contentType;
-		std::vector<char> data;
+		Vector<char> data;
 	};
 
 	class HTTP {
 	public:
-		static std::vector<char> get(String host, String path);
-		static std::vector<char> post(String host, String path, std::vector<HTTPPostEntry>& entries);
+		static Vector<char> get(String host, String path);
+		static Vector<char> post(String host, String path, Vector<HTTPPostEntry>& entries);
 
 	private:
-		static std::vector<char> request(String host, String path, bool isPost, String& content, String boundary);
+		static Vector<char> request(String host, String path, bool isPost, String& content, String boundary);
 	};
 }
 

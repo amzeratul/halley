@@ -228,9 +228,9 @@ void Halley::Input::processTouch(int type, long long /*touchDeviceId*/, long lon
 	}
 }
 
-std::vector<spInputTouch> Halley::Input::getNewTouchEvents()
+Vector<spInputTouch> Halley::Input::getNewTouchEvents()
 {
-	std::vector<spInputTouch> result;
+	Vector<spInputTouch> result;
 	for (auto i : touchEvents) {
 		if (i.second->isPressed()) {
 			result.push_back(i.second);
@@ -239,9 +239,9 @@ std::vector<spInputTouch> Halley::Input::getNewTouchEvents()
 	return result;
 }
 
-std::vector<spInputTouch> Halley::Input::getTouchEvents()
+Vector<spInputTouch> Halley::Input::getTouchEvents()
 {
-	std::vector<spInputTouch> result;
+	Vector<spInputTouch> result;
 	for (auto i : touchEvents) {
 		result.push_back(i.second);
 	}

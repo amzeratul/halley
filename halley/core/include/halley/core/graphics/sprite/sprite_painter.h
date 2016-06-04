@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <halley/data_structures/vector.h>
 #include <cstddef>
 
 namespace Halley
@@ -38,6 +38,6 @@ namespace Halley
 		void draw(Painter& painter);
 
 	private:
-		std::vector<SpritePainterEntry> sprites;
+		Vector<SpritePainterEntry> sprites;
 	};
 }

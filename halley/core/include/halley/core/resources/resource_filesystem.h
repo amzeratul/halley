@@ -31,7 +31,7 @@ namespace Halley {
 	protected:
 		std::unique_ptr<ResourceData> doGet(String resource, bool stream) override;
 		std::time_t doGetTimestamp(String resource) override;
-		std::vector<String> getResourceList() override;
+		Vector<String> getResourceList() override;
 		int getPriority() override { return -1; }
 
 		String basePath;

@@ -17,7 +17,7 @@ DynamicGameLoader::~DynamicGameLoader()
 	unload();
 }
 
-std::unique_ptr<IMainLoopable> DynamicGameLoader::createCore(std::vector<std::string> args)
+std::unique_ptr<IMainLoopable> DynamicGameLoader::createCore(Vector<std::string> args)
 {
 	assert(entry != nullptr);
 	return entry->createCore(args);

@@ -38,7 +38,7 @@ void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter)
 	assert(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 
 	size_t spriteSize = 4 * sizeof(SpriteVertexAttrib);
-	std::vector<char> vertices(n * spriteSize);
+	Vector<char> vertices(n * spriteSize);
 
 	for (size_t i = 0; i < n; i++) {
 		auto& sprite = sprites[i];

@@ -119,9 +119,9 @@ static void enumDir(StringArray& files, String root, String prefix)
 	}
 }
 	
-std::vector<String> FileSystemResourceLocator::getResourceList()
+Vector<String> FileSystemResourceLocator::getResourceList()
 {
-	std::vector<String> res;
+	Vector<String> res;
 	res.push_back("*");
 
 #ifndef __ANDROID__

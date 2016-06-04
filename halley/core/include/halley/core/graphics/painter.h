@@ -52,7 +52,7 @@ namespace Halley
 
 		size_t verticesPending = 0;
 		size_t bytesPending = 0;
-		std::vector<char> vertexBuffer;
+		Vector<char> vertexBuffer;
 		std::shared_ptr<Material> materialPending;
 
 		size_t nDrawCalls = 0;

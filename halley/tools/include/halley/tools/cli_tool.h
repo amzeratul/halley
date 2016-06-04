@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <vector>
+#include <halley/data_structures/vector.h>
 #include <memory>
 
 namespace Halley
@@ -10,10 +10,10 @@ namespace Halley
 	public:
 		virtual ~CommandLineTool() {}
 
-		static std::vector<std::string> getToolNames();
+		static Vector<std::string> getToolNames();
 		static std::unique_ptr<CommandLineTool> getTool(std::string name);
 
 		int runRaw(int argc, char** argv);
-		virtual int run(std::vector<std::string> args) = 0;
+		virtual int run(Vector<std::string> args) = 0;
 	};
 }

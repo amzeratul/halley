@@ -13,7 +13,7 @@ using namespace Halley;
 
 static BOOL CALLBACK loadSymbolsCallback(SYMBOL_INFO* symInfo, unsigned long symbolSize, void* userContext)
 {
-	auto& symbols = *reinterpret_cast<std::vector<DebugSymbol>*>(userContext);
+	auto& symbols = *reinterpret_cast<Vector<DebugSymbol>*>(userContext);
 	
 	std::string name(symInfo->Name, symInfo->NameLen);
 	if (name.find("table") != std::string::npos) {
@@ -25,7 +25,7 @@ static BOOL CALLBACK loadSymbolsCallback(SYMBOL_INFO* symInfo, unsigned long sym
 	return 1;
 }
 
-static void loadSymbolsImpl(DynamicLibrary& dll, std::vector<DebugSymbol>& vector)
+static void loadSymbolsImpl(DynamicLibrary& dll, Vector<DebugSymbol>& vector)
 {
 	DWORD options = SymGetOptions();
 	options &= ~SYMOPT_DEFERRED_LOADS;
@@ -49,7 +49,7 @@ static void loadSymbolsImpl(DynamicLibrary& dll, std::vector<DebugSymbol>& vecto
 
 #else
 
-static void loadSymbolsImpl(DynamicLibrary&, std::vector<DebugSymbol>&)
+static void loadSymbolsImpl(DynamicLibrary&, Vector<DebugSymbol>&)
 {
 }
 
@@ -76,9 +76,9 @@ void DebugSymbol::appendToName(size_t id)
 	name += ss.str();
 }
 
-std::vector<DebugSymbol> SymbolLoader::loadSymbols(DynamicLibrary& dll)
+Vector<DebugSymbol> SymbolLoader::loadSymbols(DynamicLibrary& dll)
 {
-	std::vector<DebugSymbol> results;
+	Vector<DebugSymbol> results;
 	loadSymbolsImpl(dll, results);
 
 	// We need to distinguish between multiple symbols with the same name.

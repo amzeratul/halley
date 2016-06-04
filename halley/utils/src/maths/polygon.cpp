@@ -98,7 +98,7 @@ bool Polygon::isPointInside(const Vector2f &point) const
 ///////////////////////////////////////////////////////
 // Checks if any of the points are inside the polygon
 // Using the separating axis theorem here
-Vector2f average(std::vector<Vector2f>& v)
+Vector2f average(Vector<Vector2f>& v)
 {
 	Vector2f result;
 	size_t len = v.size();
@@ -161,7 +161,7 @@ bool Polygon::overlaps(const Polygon &param,Vector2f *translation,Vector2f *coll
 		// Find all vertices possibly involved in the collision
 		float dist;
 		int sign;
-		std::vector<Vector2f> v1,v2;
+		Vector<Vector2f> v1,v2;
 		if (bmin1 < bmin2) {
 			dist = bmin2 - bmax1;
 			sign = 1;
@@ -220,7 +220,7 @@ void Polygon::project(const Vector2f &_axis,float &_min,float &_max) const
 /////////////
 // Unproject
 // Finds all vertices whose projection on a given axis is the value given
-void Polygon::unproject(const Vector2f &axis,const float point,std::vector<Vector2f> &ver) const
+void Polygon::unproject(const Vector2f &axis,const float point,Vector<Vector2f> &ver) const
 {
 	size_t len = vertices.size();
 	float dot;

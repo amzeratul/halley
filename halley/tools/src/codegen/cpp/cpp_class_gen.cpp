@@ -58,7 +58,7 @@ CPPClassGenerator& CPPClassGenerator::addMember(VariableSchema member)
 	return *this;
 }
 
-CPPClassGenerator& CPPClassGenerator::addMembers(const std::vector<VariableSchema>& members)
+CPPClassGenerator& CPPClassGenerator::addMembers(const Vector<VariableSchema>& members)
 {
 	ensureOK();
 	for (auto& m : members) {
@@ -74,7 +74,7 @@ CPPClassGenerator& CPPClassGenerator::addMethodDeclaration(MethodSchema method)
 	return *this;
 }
 
-CPPClassGenerator& CPPClassGenerator::addMethodDeclarations(const std::vector<MethodSchema>& methods)
+CPPClassGenerator& CPPClassGenerator::addMethodDeclarations(const Vector<MethodSchema>& methods)
 {
 	ensureOK();
 	for (auto& m : methods) {
@@ -85,10 +85,10 @@ CPPClassGenerator& CPPClassGenerator::addMethodDeclarations(const std::vector<Me
 
 CPPClassGenerator& CPPClassGenerator::addMethodDefinition(MethodSchema method, String body)
 {
-	return addMethodDefinition(method, std::vector<String>{ body });
+	return addMethodDefinition(method, Vector<String>{ body });
 }
 
-CPPClassGenerator& CPPClassGenerator::addMethodDefinition(MethodSchema method, const std::vector<String>& body)
+CPPClassGenerator& CPPClassGenerator::addMethodDefinition(MethodSchema method, const Vector<String>& body)
 {
 	ensureOK();
 	results.push_back("\t" + getMethodSignatureString(method) + " {");
@@ -119,9 +119,9 @@ CPPClassGenerator& CPPClassGenerator::addDefaultConstructor()
 	return addCustomConstructor({}, {});
 }
 
-CPPClassGenerator& CPPClassGenerator::addConstructor(const std::vector<VariableSchema>& variables)
+CPPClassGenerator& CPPClassGenerator::addConstructor(const Vector<VariableSchema>& variables)
 {
-	std::vector<VariableSchema> init;
+	Vector<VariableSchema> init;
 	for (auto& v : variables) {
 		init.push_back(v);
 		init.back().initialValue = v.name;
@@ -129,7 +129,7 @@ CPPClassGenerator& CPPClassGenerator::addConstructor(const std::vector<VariableS
 	return addCustomConstructor(variables, init);
 }
 
-CPPClassGenerator& CPPClassGenerator::addCustomConstructor(const std::vector<VariableSchema>& parameters, const std::vector<VariableSchema>& initialization)
+CPPClassGenerator& CPPClassGenerator::addCustomConstructor(const Vector<VariableSchema>& parameters, const Vector<VariableSchema>& initialization)
 {
 	String sig = "\t" + getMethodSignatureString(MethodSchema(TypeSchema(""), parameters, className));
 	String body = "{}";
@@ -149,7 +149,7 @@ CPPClassGenerator& CPPClassGenerator::addCustomConstructor(const std::vector<Var
 	return *this;
 }
 
-void CPPClassGenerator::writeTo(std::vector<String>& out, int nTabs)
+void CPPClassGenerator::writeTo(Vector<String>& out, int nTabs)
 {
 	if (!finished) {
 		throw Exception("Class not finished yet.");
@@ -212,7 +212,7 @@ String CPPClassGenerator::getVariableString(VariableSchema var)
 
 String CPPClassGenerator::getMethodSignatureString(MethodSchema method)
 {
-	std::vector<String> args;
+	Vector<String> args;
 	for (auto& a : method.arguments) {
 		args.push_back(getVariableString(a));
 	}

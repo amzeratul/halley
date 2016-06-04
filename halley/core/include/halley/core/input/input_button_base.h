@@ -54,10 +54,10 @@ namespace Halley {
 		virtual void stopVibrating() override {}
 
 	protected:
-		std::vector<char> buttonPressed;
-		std::vector<char> buttonPressedRepeat;
-		std::vector<char> buttonReleased;
-		std::vector<char> buttonDown;
+		Vector<char> buttonPressed;
+		Vector<char> buttonPressedRepeat;
+		Vector<char> buttonReleased;
+		Vector<char> buttonDown;
 
 		void init(int nButtons);
 

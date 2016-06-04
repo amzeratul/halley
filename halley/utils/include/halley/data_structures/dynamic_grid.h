@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <halley/data_structures/vector.h>
 
 namespace Halley {
 	template <typename T>
@@ -18,7 +18,7 @@ namespace Halley {
 		}
 
 	private:
-		std::vector<T> grid;
+		Vector<T> grid;
 		int minX = 0;
 		int maxX = 0;
 		int minY = 0;
@@ -61,7 +61,7 @@ namespace Halley {
 			}
 
 			// Store data
-			std::vector<T> oldGrid = std::move(grid);
+			Vector<T> oldGrid = std::move(grid);
 
 			// Compute copy parameters
 			int oldX = minX;

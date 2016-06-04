@@ -24,7 +24,7 @@
 #include "halley/support/assert.h"
 
 static const char* base64dict = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-static std::vector<char> base64reverse;
+static Halley::Vector<char> base64reverse;
 
 static void initBase64()
 {
@@ -41,10 +41,10 @@ static void initBase64()
 
 typedef unsigned char uchar;
 
-Halley::String Halley::Encode::encodeBase64(const std::vector<char>& in)
+Halley::String Halley::Encode::encodeBase64(const Vector<char>& in)
 {
 	size_t sz = in.size();
-	std::vector<char> result(((sz+2) / 3) * 4);
+	Vector<char> result(((sz+2) / 3) * 4);
 
 	for (size_t i=0; i<sz; i+=3) {
 		// Input bytes
@@ -68,7 +68,7 @@ Halley::String Halley::Encode::encodeBase64(const std::vector<char>& in)
 	return String(result.data(), result.size());
 }
 
-std::vector<char> Halley::Encode::decodeBase64(const String& in)
+Halley::Vector<char> Halley::Encode::decodeBase64(const String& in)
 {
 	initBase64();
 
@@ -77,7 +77,7 @@ std::vector<char> Halley::Encode::decodeBase64(const String& in)
 	size_t resLen = sz * 3 / 4;
 	if (in[sz-2] == '=') resLen -= 2;
 	else if (in[sz-1] == '=') resLen -= 1;
-	std::vector<char> result(resLen);
+	Vector<char> result(resLen);
 
 	for (size_t i=0; i<sz; i+=4) {
 		int b0 = base64reverse[in[i]];
@@ -106,7 +106,7 @@ std::vector<char> Halley::Encode::decodeBase64(const String& in)
 	return result;
 }
 
-static void flushTo(std::vector<char>& toFlush, std::vector<char>& dest)
+static void flushTo(Halley::Vector<char>& toFlush, Halley::Vector<char>& dest)
 {
 	if (toFlush.size() > 0) {
 		for (size_t i=0; i<toFlush.size(); i += 127) {
@@ -118,10 +118,10 @@ static void flushTo(std::vector<char>& toFlush, std::vector<char>& dest)
 	toFlush.clear();
 }
 
-std::vector<char> Halley::Encode::encodeRLE(const std::vector<char>& in)
+Halley::Vector<char> Halley::Encode::encodeRLE(const Vector<char>& in)
 {
-	std::vector<char> result;
-	std::vector<char> toFlush;
+	Vector<char> result;
+	Vector<char> toFlush;
 
 	size_t totalLen = in.size();
 	for (size_t i=0; i<totalLen; ) {
@@ -151,9 +151,9 @@ std::vector<char> Halley::Encode::encodeRLE(const std::vector<char>& in)
 	return result;
 }
 
-std::vector<char> Halley::Encode::decodeRLE(const std::vector<char>& in)
+Halley::Vector<char> Halley::Encode::decodeRLE(const Vector<char>& in)
 {
-	std::vector<char> result;
+	Vector<char> result;
 	for (size_t i=0; i<in.size(); ) {
 		int control = in[i];
 		int len = control & 0x7F;

@@ -75,9 +75,9 @@ float FontFace::getAscender() const
 	return pimpl->face->ascender * size / pimpl->face->units_per_EM;
 }
 
-std::vector<int> FontFace::getCharCodes() const
+Vector<int> FontFace::getCharCodes() const
 {
-	std::vector<int> result;
+	Vector<int> result;
 	FT_UInt index;
 	for (FT_ULong charcode = FT_Get_First_Char(pimpl->face, &index); index != 0; charcode = FT_Get_Next_Char(pimpl->face, charcode, &index)) {
 		result.push_back(charcode);
@@ -136,14 +136,14 @@ FontMetrics FontFace::getMetrics(int charcode, float scale) const
 	return result;
 }
 
-std::vector<KerningPair> FontFace::getKerning(const std::vector<int>& codes) const
+Vector<KerningPair> FontFace::getKerning(const Vector<int>& codes) const
 {
-	std::vector<KerningPair> results;
+	Vector<KerningPair> results;
 	if (!FT_HAS_KERNING(pimpl->face)) {
 		return results;
 	}
 	
-	std::vector<int> indices;
+	Vector<int> indices;
 	for (int code: codes) {
 		int index = FT_Get_Char_Index(pimpl->face, code);
 		if (code != 0) {

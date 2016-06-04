@@ -6,7 +6,7 @@
 
 using namespace Halley;
 
-int DistanceFieldTool::run(std::vector<std::string> args)
+int DistanceFieldTool::run(Vector<std::string> args)
 {
 	if (args.size() != 4) {
 		std::cout << "Usage: halley-cmd distField srcFile dstFile WxH radius" << std::endl;

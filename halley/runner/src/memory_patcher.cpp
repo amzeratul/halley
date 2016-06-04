@@ -9,7 +9,7 @@ using namespace Halley;
 
 //#define VERBOSE_MAPPING
 
-void MemoryPatchingMappings::generate(const std::vector<DebugSymbol>& prev, const std::vector<DebugSymbol>& next)
+void MemoryPatchingMappings::generate(const Vector<DebugSymbol>& prev, const Vector<DebugSymbol>& next)
 {
 	struct Mapping
 	{
@@ -28,7 +28,7 @@ void MemoryPatchingMappings::generate(const std::vector<DebugSymbol>& prev, cons
 	}
 
 	// Flatten
-	std::vector<Mapping> flatMap;
+	Vector<Mapping> flatMap;
 	for (auto& kv: mapping) {
 		const auto& m = kv.second;
 		if (m.from != nullptr && m.from != m.to) {

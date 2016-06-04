@@ -36,7 +36,7 @@ namespace Halley {
 		static void run(std::function<void()> f, int priority=0);
 
 	private:
-		std::vector<thread> threads;
+		Vector<thread> threads;
 		std::atomic<bool> running;
 		JobExecuter jobs;
 

@@ -13,12 +13,12 @@ using namespace Halley;
 #define FAST_MODE
 #endif
 
-static Maybe<std::vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float borderSuperSampled, Range<int> range)
+static Maybe<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float borderSuperSampled, Range<int> range)
 {
 	font.setSize(fontSize);
 	std::cout << "Trying " << fontSize << " pt... ";
 
-	std::vector<BinPackEntry> entries;
+	Vector<BinPackEntry> entries;
 	for (int code : font.getCharCodes()) {
 		if (range.contains(code)) {
 			Vector2i glyphSize = font.getGlyphSize(code);
@@ -42,16 +42,16 @@ static Maybe<std::vector<BinPackResult>> tryPacking(FontFace& font, float fontSi
 	return result;
 }
 
-static Maybe<std::vector<BinPackResult>> binarySearch(std::function<Maybe<std::vector<BinPackResult>>(int)> f, int minBound, int maxBound)
+static Maybe<Vector<BinPackResult>> binarySearch(std::function<Maybe<Vector<BinPackResult>>(int)> f, int minBound, int maxBound)
 {
 	int v0 = minBound;
 	int v1 = maxBound;
 	int lastGood = v0;
-	Maybe<std::vector<BinPackResult>> bestResult;
+	Maybe<Vector<BinPackResult>> bestResult;
 	
 	while (v0 <= v1) {
 		int v = (v0 + v1) / 2;
-		Maybe<std::vector<BinPackResult>> result = f(v);
+		Maybe<Vector<BinPackResult>> result = f(v);
 
 		if (result) {
 			// Midpoint is good, try increasing
@@ -70,7 +70,7 @@ static Maybe<std::vector<BinPackResult>> binarySearch(std::function<Maybe<std::v
 	return bestResult;
 }
 
-int MakeFontTool::run(std::vector<std::string> args)
+int MakeFontTool::run(Vector<std::string> args)
 {
 	if (args.size() != 4) {
 		std::cout << "Usage: halley-cmd makeFont srcFont resultName WxH radius" << std::endl;
@@ -93,15 +93,15 @@ int MakeFontTool::run(std::vector<std::string> args)
 #endif
 
 	FontFace font(args[0]);
-	auto result = binarySearch([&] (int fontSize) -> Maybe<std::vector<BinPackResult>> {
+	auto result = binarySearch([&] (int fontSize) -> Maybe<Vector<BinPackResult>> {
 		return tryPacking(font, float(fontSize), size, scale, borderSuperSample, range);
 	}, minFont, maxFont);
 
 	auto dstImg = std::make_unique<Image>(size.x, size.y);
 	dstImg->clear(0);
 
-	std::vector<CharcodeEntry> codes;
-	std::vector<std::future<void>> futures;
+	Vector<CharcodeEntry> codes;
+	Vector<std::future<void>> futures;
 	std::mutex m;
 
 	if (result) {
@@ -152,7 +152,7 @@ int MakeFontTool::run(std::vector<std::string> args)
 	return 0;
 }
 
-void MakeFontTool::generateFontMap(String imgName, FontFace& font, std::vector<CharcodeEntry>& entries, String outPath, float scale, float radius) const
+void MakeFontTool::generateFontMap(String imgName, FontFace& font, Vector<CharcodeEntry>& entries, String outPath, float scale, float radius) const
 {
 	std::sort(entries.begin(), entries.end(), [](const CharcodeEntry& a, const CharcodeEntry& b) { return a.charcode < b.charcode; });
 
@@ -187,7 +187,7 @@ void MakeFontTool::generateFontMap(String imgName, FontFace& font, std::vector<C
 	yaml << YAML::EndSeq;
 	yaml << YAML::EndMap;
 
-	std::vector<int> codes;
+	Vector<int> codes;
 	for (int code: font.getCharCodes()) {
 		if (code < 256) {
 			codes.push_back(code);

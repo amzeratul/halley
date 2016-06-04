@@ -2,7 +2,7 @@
 
 #include "halley/text/halleystring.h"
 #include <memory>
-#include <vector>
+#include <halley/data_structures/vector.h>
 
 namespace Halley
 {
@@ -31,6 +31,6 @@ namespace Halley
 	public:
 		virtual ~IPluginRegistry() {}
 		virtual void registerPlugin(std::unique_ptr<Plugin> plugin) = 0;
-		virtual std::vector<Plugin*> getPlugins(PluginType type) = 0;
+		virtual Vector<Plugin*> getPlugins(PluginType type) = 0;
 	};
 }

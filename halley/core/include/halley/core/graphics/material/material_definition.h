@@ -67,16 +67,16 @@ namespace Halley
 		MaterialPass& getPass(int n);
 
 		int getVertexStride() const { return vertexStride; }
-		const std::vector<MaterialAttribute>& getAttributes() const { return attributes; }
-		const std::vector<MaterialAttribute>& getUniforms() const { return uniforms; }
+		const Vector<MaterialAttribute>& getAttributes() const { return attributes; }
+		const Vector<MaterialAttribute>& getUniforms() const { return uniforms; }
 
 		static std::unique_ptr<MaterialDefinition> loadResource(ResourceLoader& loader);
 
 	private:
 		VideoAPI* api;
-		std::vector<MaterialPass> passes;
-		std::vector<MaterialAttribute> uniforms;
-		std::vector<MaterialAttribute> attributes;
+		Vector<MaterialPass> passes;
+		Vector<MaterialAttribute> uniforms;
+		Vector<MaterialAttribute> attributes;
 		int vertexStride;
 		bool dirty = false;
 		String name;

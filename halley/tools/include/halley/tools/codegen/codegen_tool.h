@@ -7,6 +7,6 @@ namespace Halley
 	class CodegenTool : public CommandLineTool
 	{
 	public:
-		int run(std::vector<std::string> args) override;
+		int run(Vector<std::string> args) override;
 	};
 }

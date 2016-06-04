@@ -39,7 +39,7 @@ namespace Halley {
 
 		int resolution;
 
-		typedef std::vector<Entry> GridCell;
+		typedef Vector<Entry> GridCell;
 		DynamicGrid<GridCell> grid;
 
 		void resetSweep();

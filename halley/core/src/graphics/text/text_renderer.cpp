@@ -86,7 +86,7 @@ void TextRenderer::draw(Painter& painter, Vector2f position) const
 		p -= getExtents() * offset;
 	}
 
-	std::vector<Sprite> sprites;
+	Vector<Sprite> sprites;
 
 	size_t startPos = 0;
 	Vector2f lineOffset;

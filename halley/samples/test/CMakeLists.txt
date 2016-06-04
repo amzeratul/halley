@@ -53,7 +53,7 @@ set(LIBS
 		${EXTRA_LIBS}
 		)
 
-if(MSVC)
+if(MSVC_)
 	add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_sources} ${${PROJECT_NAME}_headers})
 	add_definitions(-DHALLEY_SHARED_LIBRARY)
 else()

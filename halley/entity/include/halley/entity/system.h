@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <halley/data_structures/vector.h>
 #include <initializer_list>
 
 #include "family_binding.h"
@@ -58,9 +58,9 @@ namespace Halley {
 	private:
 		friend class World;
 
-		std::vector<FamilyBindingBase*> families;
-		std::vector<int> messageTypesReceived;
-		std::vector<EntityId> messagesSentTo;
+		Vector<FamilyBindingBase*> families;
+		Vector<int> messageTypesReceived;
+		Vector<EntityId> messagesSentTo;
 
 		World* world = nullptr;
 		HalleyAPI* api = nullptr;

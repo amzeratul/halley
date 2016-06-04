@@ -23,6 +23,6 @@ namespace Halley
 	class SymbolLoader
 	{
 	public:
-		static std::vector<DebugSymbol> loadSymbols(DynamicLibrary& dll);
+		static Vector<DebugSymbol> loadSymbols(DynamicLibrary& dll);
 	};
 }

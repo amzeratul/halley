@@ -27,10 +27,10 @@ namespace Halley {
 	namespace Encode {
 		// I hope you guys have an r-value reference aware compiler
 
-		String encodeBase64(const std::vector<char>& in);
-		std::vector<char> decodeBase64(const String& in);
+		String encodeBase64(const Vector<char>& in);
+		Vector<char> decodeBase64(const String& in);
 
-		std::vector<char> encodeRLE(const std::vector<char>& in);
-		std::vector<char> decodeRLE(const std::vector<char>& in);
+		Vector<char> encodeRLE(const Vector<char>& in);
+		Vector<char> decodeRLE(const Vector<char>& in);
 	}
 }

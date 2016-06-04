@@ -65,9 +65,9 @@ CodeGenResult CodegenCPP::generateMessage(MessageSchema message)
 	return result;
 }
 
-CodeGenResult CodegenCPP::generateRegistry(const std::vector<ComponentSchema>& components, const std::vector<SystemSchema>& systems)
+CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& components, const Vector<SystemSchema>& systems)
 {
-	std::vector<String> registryCpp {
+	Vector<String> registryCpp {
 		"#include <halley.hpp>",
 		"using namespace Halley;",
 		"",
@@ -82,7 +82,7 @@ CodeGenResult CodegenCPP::generateRegistry(const std::vector<ComponentSchema>& c
 		"",
 		"",
 		"using SystemFactoryPtr = System* (*)();",
-		"using SystemFactoryMap = Halley::HashMap<String, SystemFactoryPtr>;",
+		"using SystemFactoryMap = HashMap<String, SystemFactoryPtr>;",
 		"",
 		"static SystemFactoryMap makeSystemFactories() {",
 		"	SystemFactoryMap result;"
@@ -99,12 +99,12 @@ CodeGenResult CodegenCPP::generateRegistry(const std::vector<ComponentSchema>& c
 		"namespace Halley {",
 		"	std::unique_ptr<System> createSystem(String name) {",
 		"		static SystemFactoryMap factories = makeSystemFactories();",
-		"		return std::unique_ptr<System>(factories.at(name)());",
+		"		return std::unique_ptr<System>(factories[name]());",
 		"	}",
 		"}"
 	});
 
-	std::vector<String> registryH{
+	Vector<String> registryH{
 		"#pragma once",
 		"",
 		"namespace Halley {",
@@ -118,9 +118,9 @@ CodeGenResult CodegenCPP::generateRegistry(const std::vector<ComponentSchema>& c
 	return result;
 }
 
-std::vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
+Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 {
-	std::vector<String> contents = {
+	Vector<String> contents = {
 		"#pragma once",
 		"",
 		"#include <halley.hpp>",
@@ -143,10 +143,10 @@ std::vector<String> CodegenCPP::generateComponentHeader(ComponentSchema componen
 }
 
 template <typename T, typename U>
-std::vector<U> convert(std::vector<T> in, U(*f)(const T&))
+Vector<U> convert(Vector<T> in, U(*f)(const T&))
 {
 	size_t sz = in.size();
-	std::vector<U> result;
+	Vector<U> result;
 	result.reserve(sz);
 	for (size_t i = 0; i < sz; i++) {
 		result.emplace_back(f(in[i]));
@@ -154,7 +154,7 @@ std::vector<U> convert(std::vector<T> in, U(*f)(const T&))
 	return result;
 }
 
-std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
+Vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
 {
 	String methodName, methodArgType;
 	bool methodConst;
@@ -170,7 +170,7 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
 		throw Exception("Unsupported method in " + system.name + "System");
 	}
 
-	std::vector<VariableSchema> familyArgs = { VariableSchema(TypeSchema(methodArgType), "p") };
+	Vector<VariableSchema> familyArgs = { VariableSchema(TypeSchema(methodArgType), "p") };
 	String stratImpl;
 	if (system.strategy == SystemStrategy::Global) {
 		stratImpl = "static_cast<T*>(this)->" + methodName + "(p);";
@@ -184,7 +184,7 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
 		throw Exception("Unsupported strategy in " + system.name + "System");
 	}
 
-	std::vector<String> contents = {
+	Vector<String> contents = {
 		"#pragma once",
 		"",
 		"#include <halley.hpp>",
@@ -237,7 +237,7 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::World&"), {}, "getWorld", true), "return doGetWorld();");
 	}
 	bool hasReceive = false;
-	std::vector<String> msgsReceived;
+	Vector<String> msgsReceived;
 	for (auto& msg : system.messages) {
 		if (msg.send) {
 			sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::EntityId"), "entityId"), VariableSchema(TypeSchema(msg.name + "Message&", true), "msg") }, "sendMessage"), "sendMessageGeneric(entityId, msg);");
@@ -258,7 +258,7 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
 		.addBlankLine();
 
 	if (hasReceive) {
-		std::vector<String> body = { "switch (msgIndex) {" };
+		Vector<String> body = { "switch (msgIndex) {" };
 		for (auto& msg : system.messages) {
 			if (msg.receive) {
 				body.emplace_back("case " + msg.name + "Message::messageIndex: onMessagesReceived(reinterpret_cast<" + msg.name + "Message**>(msgs), idx, n); break;");
@@ -302,9 +302,9 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
 	return contents;
 }
 
-std::vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
+Vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
 {
-	std::vector<String> contents = {
+	Vector<String> contents = {
 		"#pragma once",
 		"",
 		"#include <halley.hpp>",

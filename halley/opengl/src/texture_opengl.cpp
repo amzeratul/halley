@@ -59,7 +59,7 @@ unsigned int TextureOpenGL::create(size_t w, size_t h, TextureFormat format, boo
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 	}
 
-	std::vector<char> blank;
+	Vector<char> blank;
 	blank.resize(w * h * TextureDescriptor::getBitsPerPixel(format));
 	GLuint glFormat = getGLFormat(format);
 	GLuint format2 = glFormat;

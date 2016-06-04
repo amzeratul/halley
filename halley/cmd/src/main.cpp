@@ -1,10 +1,10 @@
 #include <iostream>
-#include <vector>
+#include <halley/data_structures/vector.h>
 #include <halley/tools/cli_tool.h>
 
 int main(int argc, char** argv)
 {
-	std::vector<std::string> names = Halley::CommandLineTool::getToolNames();
+	Halley::Vector<std::string> names = Halley::CommandLineTool::getToolNames();
 
 	if (argc < 2) {
 		std::cout << "Usage: halley [tool]" << std::endl;

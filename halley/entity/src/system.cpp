@@ -59,8 +59,8 @@ void System::processMessages()
 
 	struct MessageBox
 	{
-		std::vector<Message*> msg;
-		std::vector<size_t> elemIdx;
+		Vector<Message*> msg;
+		Vector<size_t> elemIdx;
 	};
 	FlatMap<int, MessageBox> inboxes;
 
@@ -71,7 +71,7 @@ void System::processMessages()
 			Elem* elem = reinterpret_cast<Elem*>(fam.getElement(i));
 			Entity* entity = world->tryGetEntity(elem->id);
 			
-			for (auto& msg: entity->inbox) {
+			for (const auto& msg: entity->inbox) {
 				if (std::find(messageTypesReceived.begin(), messageTypesReceived.end(), msg.type) != messageTypesReceived.end()) {
 					auto& inbox = inboxes[msg.type];
 					inbox.msg.emplace_back(msg.msg.get());

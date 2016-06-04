@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include <halley/data_structures/vector.h>
 #include <halley/time/halleytime.h>
 #include <halley/time/stopwatch.h>
 #include <halley/support/redirect_stream.h>
@@ -10,8 +10,7 @@
 #include <halley/plugin/plugin.h>
 #include <halley/core/api/halley_api_internal.h>
 #include "halley_statics.h"
-#include <halley/data_structures/flat_map.h>
-#include <halley/data_structures/vector.h>
+#include <halley/data_structures/tree_map.h>
 
 namespace Halley
 {
@@ -26,7 +25,7 @@ namespace Halley
 	class Core final : public CoreAPIInternal, public IMainLoopable
 	{
 	public:
-		Core(std::unique_ptr<Game> game, std::vector<std::string> args);
+		Core(std::unique_ptr<Game> game, Vector<std::string> args);
 		~Core();
 		void init() override;
 
@@ -47,7 +46,7 @@ namespace Halley
 		void onReloaded() override;
 
 		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
-		std::vector<Plugin*> getPlugins(PluginType type) override;
+		Vector<Plugin*> getPlugins(PluginType type) override;
 
 	private:
 		void deInit();
@@ -81,7 +80,7 @@ namespace Halley
 		bool running = true;
 		std::unique_ptr<RedirectStream> out;
 
-		FlatMap<PluginType, Vector<std::unique_ptr<Plugin>>> plugins;
+		TreeMap<PluginType, Vector<std::unique_ptr<Plugin>>> plugins;
 		HalleyStatics statics;
 	};
 }

@@ -31,7 +31,7 @@ namespace Halley {
 		};
 
 		struct Block {
-			std::vector<Entry> data;
+			Vector<Entry> data;
 
 			Block(size_t n)
 				: data(blockLen)
@@ -95,7 +95,7 @@ namespace Halley {
 		}
 
 	private:
-		std::vector<Block> blocks;
+		Vector<Block> blocks;
 		unsigned short next = 0xFFFF;
 	};
 }

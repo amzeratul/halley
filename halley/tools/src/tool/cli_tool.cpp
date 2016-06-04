@@ -6,7 +6,7 @@
 
 using namespace Halley;
 
-std::vector<std::string> CommandLineTool::getToolNames()
+Vector<std::string> CommandLineTool::getToolNames()
 {
 	return {"codegen", "distField", "makeFont"};
 }
@@ -26,7 +26,7 @@ std::unique_ptr<CommandLineTool> CommandLineTool::getTool(std::string name)
 
 int CommandLineTool::runRaw(int argc, char** argv)
 {
-	std::vector<std::string> args(argc);
+	Vector<std::string> args(argc);
 	for (int i = 0; i < argc; i++) {
 		args[i] = argv[i];
 	}

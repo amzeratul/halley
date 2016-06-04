@@ -9,7 +9,7 @@
 using namespace Halley;
 
 // Replacement for Halley::runMain
-static int runMain(DynamicGameLoader& loader, std::vector<std::string> args)
+static int runMain(DynamicGameLoader& loader, Vector<std::string> args)
 {
 	try {
 		//Core core(loader.createGame(), args);
@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
 	SDL_SetMainReady();
 	SDL_Init(SDL_INIT_NOPARACHUTE);
 
-	std::vector<std::string> args;
+	Vector<std::string> args;
 	for (int i = 0; i < argc; i++) {
 		args.push_back(argv[i]);
 	}

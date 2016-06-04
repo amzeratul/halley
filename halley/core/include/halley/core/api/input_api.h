@@ -23,7 +23,7 @@ namespace Halley
 		virtual size_t getNumberOfMice() const = 0;
 		virtual InputMouse& getMouse(int id = 0) const = 0;
 
-		virtual std::vector<std::shared_ptr<InputTouch>> getNewTouchEvents() = 0;
-		virtual std::vector<std::shared_ptr<InputTouch>> getTouchEvents() = 0;
+		virtual Vector<std::shared_ptr<InputTouch>> getNewTouchEvents() = 0;
+		virtual Vector<std::shared_ptr<InputTouch>> getTouchEvents() = 0;
 	};
 }

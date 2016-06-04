@@ -296,7 +296,11 @@ void VideoOpenGL::onGLDebugMessage(unsigned int source, unsigned int type, unsig
 {
 	if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM || severity == GL_DEBUG_SEVERITY_LOW) {
 		std::stringstream ss;
+#if HAS_EASTL
+		ss << "[" << glEnumMap.at(source).second << "] [" << glEnumMap.at(type).second << "] [" << glEnumMap.at(severity).second << "] " << id << ": " << message;
+#else
 		ss << "[" << glEnumMap.at(source) << "] [" << glEnumMap.at(type) << "] [" << glEnumMap.at(severity) << "] " << id << ": " << message;
+#endif
 		std::string str = ss.str();
 
 		std::lock_guard<std::mutex> lock(messagesMutex);
@@ -476,7 +480,7 @@ void VideoOpenGL::flip()
 {
 	SDL_GL_SwapWindow(window);
 
-	std::vector<std::function<void()>> msgs;
+	Vector<std::function<void()>> msgs;
 	{
 		std::lock_guard<std::mutex> lock(messagesMutex);
 		msgs = std::move(messagesPending);

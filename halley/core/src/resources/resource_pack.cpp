@@ -271,9 +271,9 @@ namespace Halley {
 		}
 	}
 
-	std::vector<String> ResourcePack::getResourceList()
+	Vector<String> ResourcePack::getResourceList()
 	{
-		std::vector<String> result;
+		Vector<String> result;
 		for (auto& iter: entries) {
 			result.push_back(iter.first);
 		}

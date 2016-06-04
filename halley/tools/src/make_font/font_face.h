@@ -35,13 +35,13 @@ namespace Halley
 		float getHeight() const;
 		float getAscender() const;
 
-		std::vector<int> getCharCodes() const;
+		Vector<int> getCharCodes() const;
 		Vector2i getGlyphSize(int charCode) const;
 		
 		void drawGlyph(Image& image, int charcode, Vector2i pos) const;
 		FontMetrics getMetrics(int charcode, float scale = 1.0f) const;
 
-		std::vector<KerningPair> getKerning(const std::vector<int>& codes) const;
+		Vector<KerningPair> getKerning(const Vector<int>& codes) const;
 
 	private:
 		std::unique_ptr<FontFacePimpl> pimpl;

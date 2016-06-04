@@ -29,13 +29,13 @@
 #include <memory>
 #include <array>
 #include <functional>
-#include <vector>
+#include <halley/data_structures/vector.h>
 
 
 namespace Halley {
 	// General aliases
 	using Byte = unsigned char;
-	using Bytes = std::vector<Byte>;
+	using Bytes = Vector<Byte>;
 	
 	template <typename T>
 	inline T clamp(T value, T minValue, T maxValue)
@@ -179,8 +179,8 @@ namespace Halley {
 
 	// Filter a vector
 	template<typename T, typename U>
-	std::vector<T> filter(std::vector<T>& in, U predicate) {
-		std::vector<T> result;
+	Vector<T> filter(Vector<T>& in, U predicate) {
+		Vector<T> result;
 		std::for_each(in.begin(), in.end(), [&](T& e) {
 			if (predicate(e)) {
 				result.push_back(e);

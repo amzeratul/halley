@@ -45,8 +45,8 @@ namespace Halley {
 		float getAxis(int n) override;
 
 	private:
-		std::vector<Command> commands;
-		std::vector<float> axes;
+		Vector<Command> commands;
+		Vector<float> axes;
 	};
 
 	typedef std::shared_ptr<InputManual> spInputManual;

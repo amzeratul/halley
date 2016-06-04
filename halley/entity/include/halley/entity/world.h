@@ -31,10 +31,10 @@ namespace Halley {
 
 		System& addSystem(std::unique_ptr<System> system, TimeLine timeline);
 		void removeSystem(System& system);
-		std::vector<System*> getSystems();
+		Vector<System*> getSystems();
 		System& getSystem(String name);
-		std::vector<std::unique_ptr<System>>& getSystems(TimeLine timeline);
-		const std::vector<std::unique_ptr<System>>& getSystems(TimeLine timeline) const;
+		Vector<std::unique_ptr<System>>& getSystems(TimeLine timeline);
+		const Vector<std::unique_ptr<System>>& getSystems(TimeLine timeline) const;
 
 		EntityRef createEntity();
 		void destroyEntity(EntityId id);
@@ -66,8 +66,8 @@ namespace Halley {
 		bool entityDirty = false;
 		
 		EntityId nextUid = 0;
-		std::vector<Entity*> entities;
-		std::vector<Entity*> entitiesPendingCreation;
+		Vector<Entity*> entities;
+		Vector<Entity*> entitiesPendingCreation;
 		MappedPool<Entity*> entityMap;
 
 		TreeMap<FamilyMaskType, std::unique_ptr<Family>> families;

@@ -16,7 +16,7 @@ namespace Halley
 		template <typename T>
 		static int main(int argc, char* argv[])
 		{
-			std::vector<std::string> args;
+			Vector<std::string> args;
 			for (int i = 0; i < argc; i++) {
 				args.push_back(argv[i]);
 			}
@@ -24,7 +24,7 @@ namespace Halley
 			return runMain(reloader, args);
 		}
 
-		static int runMain(GameLoader& loader, const std::vector<std::string>& args)
+		static int runMain(GameLoader& loader, const Vector<std::string>& args)
 		{
 			try {
 				Core core(loader.createGame(), args);
@@ -46,11 +46,18 @@ namespace Halley
 	};
 }
 
-#ifdef _WIN32
-#define HALLEY_EXPORT extern "C" __declspec(dllexport)
+#ifdef _MSC_VER
+	#define HALLEY_EXPORT extern "C" __declspec(dllexport)
 	#pragma comment(lib, "SDL2.lib")
+	#if HAS_EASTL
+		#ifndef _DEBUG
+			#pragma comment(lib, "EASTL.lib")
+		#else
+			#pragma comment(lib, "EASTLd.lib")
+		#endif
+	#endif
 #else
-#define HALLEY_EXPORT
+	#define HALLEY_EXPORT
 #endif
 
 // Macro to implement program

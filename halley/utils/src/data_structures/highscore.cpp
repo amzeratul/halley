@@ -61,12 +61,12 @@ bool Halley::HighScore::isHighScore(int value) const
 	return entries[entries.size()-1].second < value;
 }
 
-std::vector<char> Halley::HighScore::save() const
+Vector<char> Halley::HighScore::save() const
 {
-	return std::vector<char>();
+	return Vector<char>();
 }
 
-void Halley::HighScore::load(std::vector<char>&)
+void Halley::HighScore::load(Vector<char>&)
 {
 	// TODO
 }

@@ -5,22 +5,6 @@
 #include <halley/halley_utils.h>
 #include <halley/runner/halley_main.h>
 
-#ifdef _MSC_VER
-/*
-	#ifndef _DEBUG
-		#pragma comment(lib, "halley_utils.lib")
-		#pragma comment(lib, "halley_entity.lib")
-		#pragma comment(lib, "halley_core.lib")
-		#pragma comment(lib, "halley_opengl.lib")
-	#else
-		#pragma comment(lib, "halley_utils_d.lib")
-		#pragma comment(lib, "halley_entity_d.lib")
-		#pragma comment(lib, "halley_core_d.lib")
-		#pragma comment(lib, "halley_opengl_d.lib")
-	#endif
-*/
-#endif
-
 #ifdef __glew_h__
 #error "Glew cannot be included in halley.hpp"
 #endif

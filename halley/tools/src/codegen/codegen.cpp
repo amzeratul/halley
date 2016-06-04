@@ -104,7 +104,7 @@ bool Codegen::writeFile(String dstPath, const char* data, size_t dataSize) const
 	if (exists(filePath) && file_size(filePath) == dataSize) {
 		// Size matches, check if contents are identical
 		std::ifstream in(dstPath, std::ofstream::in | std::ofstream::binary);
-		std::vector<char> buffer(dataSize);
+		Vector<char> buffer(dataSize);
 		in.read(&buffer[0], dataSize);
 		in.close();
 
@@ -167,14 +167,14 @@ void Codegen::writeFiles(String directory, const CodeGenResult& files, Stats& st
 
 void Codegen::generateCode(String directory)
 {
-	std::vector<std::unique_ptr<ICodeGenerator>> gens;
+	Vector<std::unique_ptr<ICodeGenerator>> gens;
 	gens.emplace_back(std::make_unique<CodegenCPP>());
 	Stats stats;
 
 	for (auto& gen : gens) {
 		String genDir = directory + "/" + gen->getDirectory();
-		std::vector<ComponentSchema> comps;
-		std::vector<SystemSchema> syss;
+		Vector<ComponentSchema> comps;
+		Vector<SystemSchema> syss;
 
 		for (auto& comp : components) {
 			writeFiles(genDir, gen->generateComponent(comp.second), stats);

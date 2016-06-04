@@ -32,13 +32,13 @@ using namespace Halley;
 #include <boost/asio.hpp>
 #include "exception.h"
 
-std::vector<char> HTTP::get(String host, String path)
+Vector<char> HTTP::get(String host, String path)
 {
 	String content = "";
 	return request(host, path, false, content, "");
 }
 
-std::vector<char> Halley::HTTP::post(String host, String path, std::vector<HTTPPostEntry>& entries)
+Vector<char> Halley::HTTP::post(String host, String path, Vector<HTTPPostEntry>& entries)
 {
 	String boundary = "=.AaB03xBOunDaRyyy--";
 
@@ -60,7 +60,7 @@ std::vector<char> Halley::HTTP::post(String host, String path, std::vector<HTTPP
 	return request(host, path, true, content, boundary);
 }
 
-std::vector<char> Halley::HTTP::request(String host, String path, bool isPost, String& content, String boundary)
+Vector<char> Halley::HTTP::request(String host, String path, bool isPost, String& content, String boundary)
 {
 	// Code adapted from http://www.boost.org/doc/libs/1_49_0_beta1/doc/html/boost_asio/example/http/client/sync_client.cpp
 	
@@ -97,7 +97,7 @@ std::vector<char> Halley::HTTP::request(String host, String path, bool isPost, S
 	boost::asio::write(socket, request);
 
 	// Read the reply
-	std::vector<char> result;
+	Vector<char> result;
 	size_t pos = 0;
 	while (true) {
 		array<char, 128> buf;

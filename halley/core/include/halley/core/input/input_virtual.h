@@ -84,16 +84,16 @@ namespace Halley {
 		};
 
 		struct AxisData {
-			std::vector<Bind> binds;
+			Vector<Bind> binds;
 			float lastValue;
 			Time timeout;
 
 			AxisData() : lastValue(0), timeout(0) {}
-			AxisData(std::vector<Bind>& b) : binds(b), lastValue(0), timeout(0) {}
+			AxisData(Vector<Bind>& b) : binds(b), lastValue(0), timeout(0) {}
 		};
 
-		std::vector<std::vector<Bind> > buttons;
-		std::vector<AxisData> axes;
+		Vector<Vector<Bind> > buttons;
+		Vector<AxisData> axes;
 		spInputDevice vibrationOverride;
 		spInputDevice lastDevice;
 		bool lastDeviceFrozen;

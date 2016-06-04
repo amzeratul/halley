@@ -28,7 +28,7 @@ namespace Halley
 	private:
 		bool dirty = false;
 
-		std::vector<MaterialParameter> uniforms;
+		Vector<MaterialParameter> uniforms;
 		std::shared_ptr<MaterialDefinition> materialDefinition;
 
 		void updateUniforms();

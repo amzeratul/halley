@@ -22,14 +22,14 @@
 
 #pragma once
 
-#include <vector>
+#include <halley/data_structures/vector.h>
 #include "vector2d.h"
 #include "aabb.h"
 
 namespace Halley {
 
 	typedef Vector2f Vertex;
-	typedef std::vector<Vertex> VertexList;
+	typedef Vector<Vertex> VertexList;
 
 	class Polygon {
 	public:
@@ -57,7 +57,7 @@ namespace Halley {
 		AABB aabb;
 
 		void project(const Vector2f &axis,float &min,float &max) const;
-		void unproject(const Vector2f &axis,const float point,std::vector<Vector2f> &ver) const;
+		void unproject(const Vector2f &axis,const float point,Vector<Vector2f> &ver) const;
 		void realize();
 	};
 }

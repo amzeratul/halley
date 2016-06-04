@@ -30,7 +30,7 @@ namespace Halley
 		GLuint veo = 0;
 		std::unique_ptr<GLUtils> glUtils;
 
-		std::vector<unsigned short> indexData;
+		Vector<unsigned short> indexData;
 
 		void setupVertexAttributes(MaterialDefinition& material);
 	};

@@ -32,6 +32,7 @@ set(SOURCES
         "src/maths/matrix4.cpp"
         "src/maths/polygon.cpp"
         "src/maths/random.cpp"
+		"src/memory/memory.cpp"
         "src/os/os_android.cpp"
         "src/os/os.cpp"
         "src/os/os_ios.cpp"

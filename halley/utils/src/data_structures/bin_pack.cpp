@@ -7,7 +7,7 @@
 
 using namespace Halley;
 
-Maybe<std::vector<BinPackResult>> BinPack::pack(std::vector<BinPackEntry> entries, Vector2i binSize)
+Maybe<Vector<BinPackResult>> BinPack::pack(Vector<BinPackEntry> entries, Vector2i binSize)
 {
 	using T = void*;
 
@@ -23,12 +23,12 @@ Maybe<std::vector<BinPackResult>> BinPack::pack(std::vector<BinPackEntry> entrie
 	canvasArray.CollectContent(outputContent);
 
 	if (success) {
-		std::vector<BinPackResult> results;
+		Vector<BinPackResult> results;
 		for (auto& content: outputContent.Get()) {
 			results.push_back(BinPackResult(Rect4i(content.coord.x, content.coord.y, content.size.w, content.size.h), content.rotated, content.content));
 		}
-		return Maybe<std::vector<BinPackResult>>(std::move(results));
+		return Maybe<Vector<BinPackResult>>(std::move(results));
 	} else {
-		return Maybe<std::vector<BinPackResult>>();
+		return Maybe<Vector<BinPackResult>>();
 	}
 }

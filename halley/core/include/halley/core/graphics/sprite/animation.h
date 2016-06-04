@@ -15,11 +15,11 @@ namespace Halley
 	class AnimationFrame
 	{
 	public:
-		AnimationFrame(int frameNumber, String imageName, SpriteSheet& sheet, const std::vector<AnimationDirection>& directions);
+		AnimationFrame(int frameNumber, String imageName, SpriteSheet& sheet, const Vector<AnimationDirection>& directions);
 		const SpriteSheetEntry& getSprite(int dir) const { return *sprites[dir]; }
 
 	private:
-		std::vector<const SpriteSheetEntry*> sprites;
+		Vector<const SpriteSheetEntry*> sprites;
 	};
 
 	class AnimationSequence
@@ -34,7 +34,7 @@ namespace Halley
 		bool isNoFlip() const { return noFlip; }
 
 	private:
-		std::vector<AnimationFrame> frames;
+		Vector<AnimationFrame> frames;
 		String name;
 		float fps;
 		bool loop;
@@ -76,7 +76,7 @@ namespace Halley
 		String name;
 		std::shared_ptr<SpriteSheet> spriteSheet;
 		std::shared_ptr<Material> material;
-		std::vector<AnimationSequence> sequences;
-		std::vector<AnimationDirection> directions;
+		Vector<AnimationSequence> sequences;
+		Vector<AnimationDirection> directions;
 	};
 }

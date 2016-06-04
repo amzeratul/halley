@@ -1,6 +1,7 @@
 #pragma once
 
 #include <halley/text/halleystring.h>
+#include <halley/data_structures/vector.h>
 
 namespace YAML
 {
@@ -48,7 +49,7 @@ namespace Halley
 	{
 	public:
 		String name;
-		std::vector<ComponentReferenceSchema> components;
+		Vector<ComponentReferenceSchema> components;
 	};
 
 	enum class CodegenLanguage
@@ -70,7 +71,7 @@ namespace Halley
 		CodegenLanguage language = CodegenLanguage::CPlusPlus;
 		int smearing = 0;
 
-		std::vector<FamilySchema> families;
-		std::vector<MessageReferenceSchema> messages;
+		Vector<FamilySchema> families;
+		Vector<MessageReferenceSchema> messages;
 	};
 }

@@ -53,7 +53,7 @@ namespace Halley {
 		bool enabled;
 		time_t lastTime;
 
-		std::vector<spInputVibration> vibs;
+		Vector<spInputVibration> vibs;
 
 		friend class Input;
 	};

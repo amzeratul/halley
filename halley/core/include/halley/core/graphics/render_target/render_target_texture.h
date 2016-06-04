@@ -16,7 +16,7 @@ namespace Halley
 		std::shared_ptr<Texture> getDepthTexture() const;
 
 	protected:
-		std::vector<std::shared_ptr<Texture>> attachments;
+		Vector<std::shared_ptr<Texture>> attachments;
 		std::shared_ptr<Texture> depth;
 		bool dirty = false;
 	};

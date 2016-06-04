@@ -13,12 +13,12 @@ namespace Halley
 		CodeGenResult generateSystem(SystemSchema system) override;
 		CodeGenResult generateMessage(MessageSchema message) override;
 
-		CodeGenResult generateRegistry(const std::vector<ComponentSchema>& components, const std::vector<SystemSchema>& systems) override;
+		CodeGenResult generateRegistry(const Vector<ComponentSchema>& components, const Vector<SystemSchema>& systems) override;
 
 	private:
-		std::vector<String> generateComponentHeader(ComponentSchema component);
-		std::vector<String> generateSystemHeader(SystemSchema system) const;
-		std::vector<String> generateMessageHeader(MessageSchema message);
+		Vector<String> generateComponentHeader(ComponentSchema component);
+		Vector<String> generateSystemHeader(SystemSchema system) const;
+		Vector<String> generateMessageHeader(MessageSchema message);
 	
 	};
 }

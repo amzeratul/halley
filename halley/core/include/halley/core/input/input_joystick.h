@@ -54,8 +54,8 @@ namespace Halley {
 		int getButtonAtPosition(char c) const;	// c = N, S, E or W
 
 	protected:
-		std::vector<float> axes;
-		std::vector<spInputButtonBase> hats;
+		Vector<float> axes;
+		Vector<spInputButtonBase> hats;
 		std::function<float (float)> axisAdjust;
 
 		virtual void update(Time /*t*/) {}

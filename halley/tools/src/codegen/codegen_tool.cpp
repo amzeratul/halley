@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-int CodegenTool::run(std::vector<std::string> args)
+int CodegenTool::run(Vector<std::string> args)
 {
 	if (args.size() == 2) {
 		Codegen::run(args[0], args[1]);

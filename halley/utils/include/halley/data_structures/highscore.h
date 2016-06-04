@@ -37,11 +37,11 @@ namespace Halley {
 		void addScore(String data, int value);
 		bool isHighScore(int value) const;
 
-		std::vector<char> save() const;
-		void load(std::vector<char>& data);
+		Vector<char> save() const;
+		void load(Vector<char>& data);
 
 	private:
 		size_t maxEntries;
-		std::vector<HighScoreEntry> entries;
+		Vector<HighScoreEntry> entries;
 	};
 }

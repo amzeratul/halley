@@ -1,13 +1,13 @@
 #pragma once
 
 #include <array>
-#include <vector>
 #include <memory>
 #include "component.h"
 #include "message.h"
 #include "family_mask.h"
 #include "entity_id.h"
 #include "type_deleter.h"
+#include <halley/data_structures/vector.h>
 
 namespace Halley {
 	class World;
@@ -103,8 +103,8 @@ namespace Halley {
 		void destroy();
 
 	private:
-		std::vector<std::pair<int, Component*>> components;
-		std::vector<MessageEntry> inbox;
+		Vector<std::pair<int, Component*>> components;
+		Vector<MessageEntry> inbox;
 		std::array<Component*, numFastComponents> fastComponents;
 		FamilyMaskType mask;
 		EntityId uid = -1;

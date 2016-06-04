@@ -902,9 +902,9 @@ Halley::String Halley::String::prettySize(long long bytes)
 	return floatToString(double(bytes) / double(div)) + " " + suffixes[steps];
 }
 
-std::vector<String> Halley::String::split(char delimiter) const
+Vector<String> Halley::String::split(char delimiter) const
 {
-	std::vector<String> result;
+	Vector<String> result;
 	
 	size_t startPos = 0;
 	while (true) {
@@ -923,7 +923,7 @@ std::vector<String> Halley::String::split(char delimiter) const
 	return result;
 }
 
-String String::concatList(const std::vector<String>& list, String separator)
+String String::concatList(const Vector<String>& list, String separator)
 {
 	std::stringstream ss;
 	for (size_t i = 0; i < list.size(); i++) {
