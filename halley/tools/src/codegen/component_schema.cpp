@@ -1,5 +1,5 @@
 #include <yaml-cpp/yaml.h>
-#include "component_schema.h"
+#include <halley/tools/codegen/component_schema.h>
 
 using namespace Halley;
 

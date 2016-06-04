@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../fields_schema.h"
+#include <halley/tools/codegen/fields_schema.h>
 
 namespace Halley
 {
