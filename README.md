@@ -48,4 +48,4 @@ Halley is divided in a few sub-projects:
 
 ### Set up
 * Build with CMake
-* Run halley-sample-test (or, on Windows, "halley-runner.exe halley-sample-test.dll")
+* Run halley-sample-test

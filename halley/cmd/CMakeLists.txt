@@ -13,6 +13,7 @@ endif()
 assign_source_group(${SOURCES})
 
 add_executable (halley-cmd ${SOURCES})
+
 target_link_libraries (halley-cmd
         halley-tools
         halley-utils

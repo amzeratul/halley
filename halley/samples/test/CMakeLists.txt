@@ -57,6 +57,8 @@ else()
 endif()
 target_link_libraries(${PROJECT_NAME} ${LIBS})
 
+set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+
 if(MSVC)
 	add_precompiled_header(${PROJECT_NAME} prec.h FORCEINCLUDE SOURCE_CXX prec.cpp)
 endif()
