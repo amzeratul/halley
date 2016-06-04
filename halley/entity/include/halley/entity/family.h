@@ -39,13 +39,19 @@ namespace Halley {
 		FamilyMaskType inclusionMask;
 	};
 
+	// Apple's Clang 3.5 does not seem to have constexpr std::max...
+	constexpr size_t maxSize(size_t a, size_t b)
+	{
+		return a > b ? a : b;
+	}
+
 	template <typename T>
 	class FamilyImpl : public Family
 	{
 		struct StorageType
 		{
 			EntityId entityId;
-			alignas(alignof(void*)) std::array<char, sizeof(T) - std::max(sizeof(EntityId), sizeof(void*))> data;
+			alignas(alignof(void*)) std::array<char, sizeof(T) - maxSize(sizeof(EntityId), sizeof(void*))> data;
 		};
 
 	public:
