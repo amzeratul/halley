@@ -281,9 +281,10 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
 
 	contents.push_back("");
 
+	contents.push_back("/*");
+	contents.push_back("// Implement this:");
 	auto actualSys = CPPClassGenerator(system.name + "System", system.name + "SystemBase<" + system.name + "System>", CPPAccess::Public, true)
 		.addAccessLevelSection(CPPAccess::Public)
-		.addComment("Implement these:")
 		.addMethodDeclaration(MethodSchema(TypeSchema("void"), familyArgs, methodName, methodConst));
 
 	for (auto& msg : system.messages) {
@@ -295,6 +296,8 @@ std::vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
 	actualSys
 		.finish()
 		.writeTo(contents);
+
+	contents.push_back("*/");
 
 	return contents;
 }

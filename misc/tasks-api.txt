@@ -10,9 +10,53 @@ T Future<T>::getResult();
 T Future<T>::isReady() const;
 void Future<T>::cancel();
 
-static Future<T> Concurrent::launch(executor, std::function<T()> f);
-Future<U> Future<T>::then(executor, std::function<U(T)> f);
+Future<U> Future<T>::then(Executor& e, std::function<U(T)> f);
 
+Future<T> Concurrent::execute(Executor& e, std::function<T()> f);
+Future<T> Concurrent::execute(Executor& e, Task<T>&& task);
 static Future<void> Concurrent::whenAll(Iterator<Future<T>> begin, Iterator<Future<T>> end);
 static Future<std::vector<T>> Concurrent::collect(Iterator<Future<T>> begin, Iterator<Future<T>> end);
 static Future<std::vector<T>> Concurrent::collectMove(Iterator<Future<T>> begin, Iterator<Future<T>> end);
+
+Future<T> Executor::execute(Task<T>&& task);
+
+
+///
+
+Future<Texture> = Concurrent::execute(fileExecutor, loadFile).then(cpuExecutor, loadImage).then(glExecutor, loadTexture);
+
+///
+
+std::vector<Future<void>> deps(system->deps.size());
+for (auto& d : system->deps) {
+    deps.push_back(d->future);
+}
+system->future = Concurrent::whenAll(deps.begin(), deps.end()).then(cpuExecutor, [&]() { system->update(); });
+
+///
+
+auto task = Task<void>([&] () { system->update(); } );
+for (auto& d : system->deps) {
+    task.dependsOn(d->future);
+}
+system->future = Concurrent::execute(cpuExecutor, std::move(task));
+
+///
+
+/*
+
+From https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#Rconc-double
+
+atomic<bool> x_init;
+
+if (!x_init.load(memory_order_acquire)) {
+    lock_guard<mutex> lck(x_mutex);
+    if (!x_init.load(memory_order_relaxed)) {
+        // ... initialize x ...
+        x_init.store(true, memory_order_release);
+    }
+}
+
+// ... use x ...
+
+*/
