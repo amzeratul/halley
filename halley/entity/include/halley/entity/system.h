@@ -1,6 +1,7 @@
 #pragma once
 
 #include <halley/data_structures/vector.h>
+#include <halley/concurrency/concurrent.h>
 #include <initializer_list>
 
 #include "family_binding.h"
@@ -43,8 +44,9 @@ namespace Halley {
 		template <typename T, typename M, typename U, typename V>
 		static void invokeParallel(T* obj, M method, U& p, V& fam)
 		{
-			// TODO, fallback to invokeIndividual for now
-			invokeIndividual<T, M, U, V>(obj, method, p, fam);
+			Concurrent::foreach(std::begin(fam), std::end(fam), [&] (auto& e) {
+				(obj->*method)(p, e);
+			});
 		}
 
 		template <typename T>

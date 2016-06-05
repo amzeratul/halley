@@ -29,6 +29,7 @@ void Painter::flush()
 	flushPending();
 }
 
+/*
 template <typename T>
 static void doMemcpyAlign(void* dstBytes, const void* srcBytes, size_t bytes)
 {
@@ -50,6 +51,7 @@ inline void memcpyAlign(void* dstBytes, const void* srcBytes, size_t bytes)
 		doMemcpyAlign<int>(dstBytes, srcBytes, bytes);
 	}
 }
+*/
 
 void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, void* vertexData)
 {
@@ -70,7 +72,7 @@ void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, 
 		vertexBuffer.resize(requiredSize * 2);
 	}
 	
-	memcpyAlign(vertexBuffer.data() + bytesPending, vertexData, dataSize);
+	memmove(vertexBuffer.data() + bytesPending, vertexData, dataSize);
 
 	verticesPending += numVertices;
 	bytesPending += dataSize;

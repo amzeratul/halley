@@ -32,7 +32,6 @@ entity
 - query other entities? [RESEARCH]
 - load prefabs
 - smearing systems
-- parallel systems [RESEARCH]
 - systems as parallel tasks [RESEARCH]
 - better timelines?
 - foreign language systems [RESEARCH]
