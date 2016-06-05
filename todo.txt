@@ -46,7 +46,6 @@ codegen
 - import custom types in components [RESEARCH]
 
 lua
-- bring Lua into project
 - codegen Lua
 - Lua systems
 - codegen component
@@ -77,9 +76,18 @@ utils
 - write my own memory pool/replace boost::pool?
 
 samples
-- expand "test" sample
 - make a minimal "template" sample
-- port an old game jam game (trapped, maybe?)
+- ports from my old game jam games:
+  - ggj16 ("Anu & Ki") - from Unity
+  - ggj15 ("A Horrible Night") - from Unity
+  - poh13 ("Dungeon Butler") - from Halley 1
+  - ggj13 ("Stoneheart: The Beauty in the Beast") - from Halley 1
+  - ggj12 ("Trapped: In the Chambers of Eternal Darkness") - from Halley 1
+  - spjam11 ("Down Goes the Phoenix") - from Halley 1
+  - ggj11 ("Planetary Plan C") - from Halley 1
+  - sh09 ("Xtreme Programming - the Literal Game") - from Allegro
+  - sh07 ("Fury of the Sky God") - from Allegro
+  - sh05 ("Bunkermaster") - from Allegro
 
 build
 - figure out how to handle code generation and its errors
