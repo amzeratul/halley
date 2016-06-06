@@ -32,3 +32,4 @@ SET(HALLEY_VERSION_PATCH "0")
 SET(HALLEY_VERSION "${HALLEY_VERSION_MAJOR}.${HALLEY_VERSION_MINOR}.${HALLEY_VERSION_PATCH}")
 
 add_subdirectory(halley)
+add_subdirectory(samples)
