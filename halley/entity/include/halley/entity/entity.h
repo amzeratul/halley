@@ -162,6 +162,12 @@ namespace Halley {
 			return entity.getEntityId();
 		}
 
+		template <typename T>
+		bool hasComponent()
+		{
+			return entity.hasComponent<T>();
+		}
+
 	private:
 		friend class World;
 		EntityRef(Entity& e, World& w)

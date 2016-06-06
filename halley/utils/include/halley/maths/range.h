@@ -54,8 +54,8 @@ namespace Halley {
 
 		inline Range getOverlap(const Range &p) const
 		{
-			T start = max(s, p.s);
-			T end = min(e, p.e);
+			T start = std::max(s, p.s);
+			T end = std::min(e, p.e);
 			if (start < end) {
 				return Range(start, end);
 			} else {
