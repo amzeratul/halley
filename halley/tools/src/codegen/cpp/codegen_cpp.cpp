@@ -3,6 +3,7 @@
 #include "cpp_class_gen.h"
 #include <set>
 #include <halley/support/exception.h>
+#include <algorithm>
 
 using namespace Halley;
 
@@ -99,7 +100,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"namespace Halley {",
 		"	std::unique_ptr<System> createSystem(String name) {",
 		"		static SystemFactoryMap factories = makeSystemFactories();",
-		"		return std::unique_ptr<System>(factories[name]());",
+		"		return std::unique_ptr<System>(factories.at(name)());",
 		"	}",
 		"}"
 	});
@@ -127,16 +128,20 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		""
 	};
 
-	CPPClassGenerator(component.name + "Component", "Halley::Component", CPPAccess::Public, true)
+	auto gen = CPPClassGenerator(component.name + "Component", "Halley::Component", CPPAccess::Public, true)
 		.addAccessLevelSection(CPPAccess::Public)
 		.addMember(VariableSchema(TypeSchema("int", false, true, true), "componentIndex", String::integerToString(component.id)))
 		.addBlankLine()
 		.addMembers(component.members)
 		.addBlankLine()
-		.addDefaultConstructor()
-		.addBlankLine()
-		.addConstructor(component.members)
-		.finish()
+		.addDefaultConstructor();
+
+	if (component.members.size() > 0) {
+		gen.addBlankLine()
+			.addConstructor(component.members);
+	}
+
+	gen.finish()
 		.writeTo(contents);
 
 	return contents;
@@ -248,10 +253,16 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
 		}
 	}
 
+	auto fams = convert<FamilySchema, VariableSchema>(system.families, [](auto& fam) { return VariableSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); });
+	auto mid = fams.begin() + std::min(fams.size(), size_t(1));
+	std::vector<VariableSchema> mainFams(fams.begin(), mid);
+	std::vector<VariableSchema> otherFams(mid, fams.end());
 	sysClassGen
 		.addBlankLine()
 		.addAccessLevelSection(system.strategy == SystemStrategy::Global ? CPPAccess::Protected : CPPAccess::Private)
-		.addMembers(convert<FamilySchema, VariableSchema>(system.families, [](auto& fam) { return VariableSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); }))
+		.addMembers(mainFams)
+		.addAccessLevelSection(CPPAccess::Protected)
+		.addMembers(otherFams)
 		.addBlankLine()
 		.addAccessLevelSection(CPPAccess::Private)
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(methodArgType), "p") }, methodName + "Base", false, false, true, true), stratImpl)

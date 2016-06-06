@@ -2,9 +2,9 @@ core
 - child stages
 
 core/resources
+* "library" of pre-processed assets from which the game loads data (like Unity)
 - resources hot reloading [RESEARCH]
 - asynchronous resource loading
-- "library" of pre-processed assets from which the game loads data (like Unity)
 
 core/graphics
 - consider replacing text format with binary format? (current one is super slow)
@@ -91,7 +91,6 @@ samples
 
 build
 - figure out how to handle code generation and its errors
-- clean up
 - conan support?
 - look into meson?
 

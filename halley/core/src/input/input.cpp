@@ -76,19 +76,19 @@ void Input::deInit()
 	joysticks.clear();
 }
 
-InputKeyboard& Input::getKeyboard(int id) const
+std::shared_ptr<InputKeyboard> Input::getKeyboard(int id) const
 {
-	return *keyboards.at(id);
+	return keyboards.at(id);
 }
 
-InputJoystick& Input::getJoystick(int id) const
+std::shared_ptr<InputJoystick> Input::getJoystick(int id) const
 {
-	return *joysticks.at(id);
+	return joysticks.at(id);
 }
 
-InputMouse& Input::getMouse(int id) const
+std::shared_ptr<InputMouse> Input::getMouse(int id) const
 {
-	return *mice.at(id);
+	return mice.at(id);
 }
 
 size_t Input::getNumberOfKeyboards() const

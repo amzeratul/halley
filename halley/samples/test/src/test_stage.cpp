@@ -33,7 +33,7 @@ void TestStage::onFixedUpdate(Time time)
 	world->step(TimeLine::FixedUpdate, time);
 
 	auto& key = getInputAPI().getKeyboard();
-	if (key.isButtonDown(Keys::Esc)) {
+	if (key->isButtonDown(Keys::Esc)) {
 		getCoreAPI().quit();
 	}
 }
