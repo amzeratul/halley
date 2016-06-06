@@ -21,11 +21,11 @@ public:
 			auto& r = Random::getGlobal();
 
 			world.createEntity()
-				.addComponent(new PositionComponent(Vector2f(r.getFloat(0.0f, 1280.0f), r.getFloat(0.0f, 720.0f))))
-				.addComponent(new VelocityComponent(Vector2f(r.getFloat(200.0f, 300.0f), 0.0f).rotate(Angle1f::fromDegrees(r.getFloat(0.0f, 360.0f)))))
-				.addComponent(new SpriteComponent(Sprite(), 0))
-				.addComponent(new TimeComponent(r.getFloat(0.0f, 2.0f)))
-				.addComponent(new SpriteAnimationComponent(AnimationPlayer(anim, "run")));
+				.addComponent(PositionComponent(Vector2f(r.getFloat(0.0f, 1280.0f), r.getFloat(0.0f, 720.0f))))
+				.addComponent(VelocityComponent(Vector2f(r.getFloat(200.0f, 300.0f), 0.0f).rotate(Angle1f::fromDegrees(r.getFloat(0.0f, 360.0f)))))
+				.addComponent(SpriteComponent(Sprite(), 0))
+				.addComponent(TimeComponent(r.getFloat(0.0f, 2.0f)))
+				.addComponent(SpriteAnimationComponent(AnimationPlayer(anim, "run")));
 		}
 	}
 };

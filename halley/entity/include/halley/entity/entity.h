@@ -24,44 +24,17 @@ namespace Halley {
 		MessageEntry(std::unique_ptr<Message> msg, int type, int age) : msg(std::move(msg)), type(type), age(age) {}
 	};
 
+	class EntityRef;
+
 	class Entity
 	{
 		friend class World;
 		friend class System;
+		friend class EntityRef;
 		static const int numFastComponents = 3;
 
 	public:
 		~Entity();
-
-		template <typename T>
-		Entity& addComponent(World& world, T* component)
-		{
-			static_assert(!std::is_same<T, Component>::value, "Cannot add base class Component to entity, make sure type isn't being erased");
-			static_assert(std::is_base_of<Component, T>::value, "Components must extend the Component class");
-			static_assert(!std::is_polymorphic<T>::value, "Components cannot be polymorphic (i.e. they can't have virtual methods)");
-			static_assert(std::is_default_constructible<T>::value, "Components must have a default constructor");
-			addComponent(component, T::componentIndex, getFastAccessSlot<T>(0));
-			TypeDeleter<T>::initialize();
-
-			markDirty(world);
-			return *this;
-		}
-
-		template <typename T>
-		Entity& removeComponent(World& world)
-		{
-			int id = T::componentIndex;
-			for (size_t i = 0; i < components.size(); i++) {
-				if (components[i].first == id) {
-					deleteComponent(components[i].second, components[i].first, getFastAccessSlot<T>(0));
-					components.erase(components.begin() + i);
-					markDirty(world);
-					return *this;
-				}
-			}
-
-			return *this;
-		}
 
 		template <typename T>
 		T* getComponent()
@@ -114,6 +87,32 @@ namespace Halley {
 		Entity();
 
 		template <typename T>
+		Entity& addComponent(World& world, T* component)
+		{
+			addComponent(component, T::componentIndex, getFastAccessSlot<T>(0));
+			TypeDeleter<T>::initialize();
+
+			markDirty(world);
+			return *this;
+		}
+
+		template <typename T>
+		Entity& removeComponent(World& world)
+		{
+			int id = T::componentIndex;
+			for (size_t i = 0; i < components.size(); i++) {
+				if (components[i].first == id) {
+					deleteComponent(components[i].second, components[i].first, getFastAccessSlot<T>(0));
+					components.erase(components.begin() + i);
+					markDirty(world);
+					return *this;
+				}
+			}
+
+			return *this;
+		}
+
+		template <typename T>
 		int getFastAccessSlot(typename T::HasFastAccess*) {
 			return T::fastAccessSlot < numFastComponents ? T::fastAccessSlot : -1;
 		}
@@ -134,9 +133,14 @@ namespace Halley {
 	{
 	public:
 		template <typename T>
-		EntityRef& addComponent(T* component)
+		EntityRef& addComponent(T&& component)
 		{
-			entity.addComponent(world, component);
+			static_assert(!std::is_pointer<T>::value, "Cannot pass pointer to component");
+			static_assert(!std::is_same<T, Component>::value, "Cannot add base class Component to entity, make sure type isn't being erased");
+			static_assert(std::is_base_of<Component, T>::value, "Components must extend the Component class");
+			static_assert(!std::is_polymorphic<T>::value, "Components cannot be polymorphic (i.e. they can't have virtual methods)");
+			static_assert(std::is_default_constructible<T>::value, "Components must have a default constructor");
+			entity.addComponent(world, new T(std::move(component)));
 			return *this;
 		}
 

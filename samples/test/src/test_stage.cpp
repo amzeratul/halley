@@ -24,8 +24,8 @@ void TestStage::init()
 	sprite.getMaterial()["u_outlineColour"] = col;
 
 	world->createEntity()
-		.addComponent(new SpriteComponent(sprite, 1))
-		.addComponent(new PositionComponent(Vector2f(32, 752)));
+		.addComponent(SpriteComponent(sprite, 1))
+		.addComponent(PositionComponent(Vector2f(32, 752)));
 }
 
 void TestStage::onFixedUpdate(Time time)
