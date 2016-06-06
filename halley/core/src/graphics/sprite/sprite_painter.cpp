@@ -1,5 +1,6 @@
 #include "graphics/sprite/sprite_painter.h"
 #include "graphics/sprite/sprite.h"
+#include "graphics/painter.h"
 
 using namespace Halley;
 
@@ -32,4 +33,5 @@ void SpritePainter::draw(Painter& painter)
 	for (auto& s : sprites) {
 		s.getSprite().draw(painter);
 	}
+	painter.flush();
 }
