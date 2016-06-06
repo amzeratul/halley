@@ -58,10 +58,6 @@ void Halley::Random::setSeed(long seed)
 
 void Halley::Random::setSeed(char* bytes, size_t nBytes)
 {
-#ifdef __ANDROID__
-	generator.seed(*reinterpret_cast<int*>(bytes));
-#else
-	randnamespace::seed_seq seq(bytes, bytes+nBytes);
+	std::seed_seq seq(bytes, bytes+nBytes);
 	generator.seed(seq);
-#endif
 }

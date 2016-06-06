@@ -69,12 +69,26 @@ const AnimationSequence& Animation::getSequence(String name) const
 
 const AnimationDirection& Animation::getDirection(String name) const
 {
+	assert(directions.size() > 0);
+
 	for (auto& dir : directions) {
 		if (dir.name == name) {
 			return dir;
 		}
 	}
 	return directions[0];
+}
+
+const AnimationDirection& Animation::getDirection(int id) const
+{
+	assert(id >= 0);
+	assert(directions.size() > 0);
+
+	if (id < directions.size()) {
+		return directions[id];
+	} else {
+		return directions[0];
+	}
 }
 
 Animation::Animation(ResourceLoader& loader)

@@ -46,10 +46,14 @@ void AnimationPlayer::setDirection(int direction)
 {
 	if (dirId != direction) {
 		assert(animation);
-		curDir = &animation->getDirection(direction);
-		dirFlip = curDir->shouldFlip();
-		dirId = curDir->getId();
-		dirty = true;
+		
+		auto newDir = &animation->getDirection(direction);
+		if (curDir != newDir) {
+			curDir = newDir;
+			dirFlip = curDir->shouldFlip();
+			dirId = curDir->getId();
+			dirty = true;
+		}
 	}
 }
 
@@ -57,10 +61,14 @@ void AnimationPlayer::setDirection(String direction)
 {
 	if (!curDir || curDir->getName() != direction) {
 		assert(animation);
-		curDir = &animation->getDirection(direction);
-		dirFlip = curDir->shouldFlip();
-		dirId = curDir->getId();
-		dirty = true;
+
+		auto newDir = &animation->getDirection(direction);
+		if (curDir != newDir) {
+			curDir = newDir;
+			dirFlip = curDir->shouldFlip();
+			dirId = curDir->getId();
+			dirty = true;
+		}
 	}
 }
 

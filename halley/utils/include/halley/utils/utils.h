@@ -177,18 +177,6 @@ namespace Halley {
 		else return std::max(a-inc, b);
 	}
 
-	// Filter a vector
-	template<typename T, typename U>
-	Vector<T> filter(Vector<T>& in, U predicate) {
-		Vector<T> result;
-		std::for_each(in.begin(), in.end(), [&](T& e) {
-			if (predicate(e)) {
-				result.push_back(e);
-			}
-		});
-		return result;
-	}
-
 	// Prefetch data from memory
 	static inline void prefetchL1(void* p) {
 #ifdef _MSC_VER

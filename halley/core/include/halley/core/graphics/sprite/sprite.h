@@ -56,6 +56,7 @@ namespace Halley
 		Sprite& setSize(Vector2f size);
 		Sprite& setTexRect(Rect4f texRect);
 
+		Sprite& setSprite(Resources& resources, String spriteSheetName, String imageName, String materialName = "");
 		Sprite& setSprite(const SpriteSheet& sheet, String name);
 		Sprite& setSprite(const SpriteSheetEntry& entry);
 

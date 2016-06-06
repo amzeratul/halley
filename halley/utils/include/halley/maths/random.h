@@ -21,22 +21,11 @@
 
 #pragma once
 
-#ifdef __ANDROID__
-	#include <tr1/random>
-	#define randnamespace std::tr1
-	#define uniform_int_dist uniform_int
-	#define uniform_real_dist uniform_real
-#else
-	#include <random>
-	#define randnamespace std
-	#define uniform_int_dist uniform_int_distribution
-	#define uniform_real_dist uniform_real_distribution
-#endif
-
+#include <random>
 #include <halley/utils/utils.h>
 
 namespace Halley {
-	typedef randnamespace::mt19937 RandomGenType;
+	typedef std::mt19937 RandomGenType;
 
 	class Random {
 	public:
@@ -52,8 +41,10 @@ namespace Halley {
 		template <typename T>
 		T getInt(T min, T max)
 		{
-			if (min > max) swap(min, max);
-			randnamespace::uniform_int_dist<T> dist(min, max);
+			if (min > max) {
+				std::swap(min, max);
+			}
+			std::uniform_int_distribution<T> dist(min, max);
 			return dist(generator);
 		}
 
@@ -61,15 +52,8 @@ namespace Halley {
 		T getFloat(T min, T max)
 		{
 			if (min > max) std::swap(min, max);
-#ifdef __ANDROID__
-			// Hack
-			int range = 1000000;
-			int raw = getInt(0, range);
-			return min + raw * ((max-min)/1000000);
-#else
-			randnamespace::uniform_real_dist<T> dist(min, max);
+			std::uniform_real_distribution<T> dist(min, max);
 			return dist(generator);
-#endif
 		}
 
 		void setSeed(long seed);

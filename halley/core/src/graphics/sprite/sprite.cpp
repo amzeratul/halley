@@ -185,6 +185,17 @@ Sprite& Sprite::setTexRect(Rect4f v)
 	return *this;
 }
 
+Sprite& Sprite::setSprite(Resources& resources, String spriteSheetName, String imageName, String materialName)
+{
+	if (materialName == "") {
+		materialName = "sprite.yaml";
+	}
+	auto spriteSheet = resources.get<SpriteSheet>(spriteSheetName);
+	setImage(spriteSheet->getTexture(), resources.get<MaterialDefinition>(materialName));
+	setSprite(*spriteSheet, imageName);
+	return *this;
+}
+
 Sprite& Sprite::setSprite(const SpriteSheet& sheet, String name)
 {
 	setSprite(sheet.getSprite(name));
