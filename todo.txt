@@ -89,10 +89,15 @@ samples
   - sh07 ("Fury of the Sky God") - from Allegro
   - sh05 ("Bunkermaster") - from Allegro
 
+porting issues:
+- loading sprites is too complicated
+- exception during entity initialization can cause ::abort() to be called
+- CMake is horrible
+
 build
-- figure out how to handle code generation and its errors
+- figure out how to handle code generation and its errors :|
+- switch to meson for projects, since CMake hates codegen? :| [RESEARCH]
 - conan support?
-- look into meson?
 
 platforms
 - PS4?

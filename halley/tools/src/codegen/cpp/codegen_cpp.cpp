@@ -342,11 +342,13 @@ Vector<String> CodegenCPP::generateSystemStub(SystemSchema& system) const
 
 	auto actualSys = CPPClassGenerator(systemName, systemName + "Base<" + systemName + ">", CPPAccess::Public, true)
 		.addAccessLevelSection(CPPAccess::Public)
-		.addMethodDefinition(MethodSchema(TypeSchema("void"), info.familyArgs, info.methodName, info.methodConst), "");
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), info.familyArgs, info.methodName, info.methodConst), "// TODO");
 
 	for (auto& msg : system.messages) {
 		if (msg.receive) {
-			actualSys.addMethodDeclaration(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(msg.name + "Message&", true), "msg"), VariableSchema(TypeSchema("MainFamily&"), "entity") }, "onMessageReceived"));
+			actualSys
+				.addBlankLine()
+				.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(msg.name + "Message&", true), "msg"), VariableSchema(TypeSchema("MainFamily&"), "entity") }, "onMessageReceived"), "// TODO");
 		}
 	}
 

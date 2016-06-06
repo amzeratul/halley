@@ -7,6 +7,8 @@
 #include <halley/tools/codegen/codegen.h>
 #include "cpp/codegen_cpp.h"
 
+#include <sys/utime.h>
+
 #ifdef _MSC_VER
 #ifdef _DEBUG
 #pragma comment(lib, "libyaml-cppmdd.lib")
@@ -192,7 +194,16 @@ void Codegen::generateCode(String directory)
 			writeFiles(genDir, gen->generateMessage(msg.second), stats);
 		}
 
+		// Registry
 		writeFiles(genDir, gen->generateRegistry(comps, syss), stats);
+	}
+
+	// Has changes
+	if (stats.written > 0) {
+		using namespace boost::filesystem;
+		auto cmakeLists = path(directory.cppStr()).parent_path() / path("CMakeLists.txt");
+		std::cout << "Touching " << cmakeLists.string() << std::endl;
+		utime(cmakeLists.string().c_str(), nullptr);
 	}
 
 	std::cout << "Codegen: " << stats.written << " written, " << stats.skipped << " skipped." << std::endl;
