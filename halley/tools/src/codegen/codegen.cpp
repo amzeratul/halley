@@ -93,27 +93,33 @@ void Codegen::process()
 	}
 }
 
-bool Codegen::writeFile(String dstPath, const char* data, size_t dataSize) const
+bool Codegen::writeFile(String dstPath, const char* data, size_t dataSize, bool stub) const
 {
 	using namespace boost::filesystem;
 	path filePath(dstPath.cppStr());
-	if (exists(filePath) && file_size(filePath) == dataSize) {
-		// Size matches, check if contents are identical
-		std::ifstream in(dstPath, std::ofstream::in | std::ofstream::binary);
-		Vector<char> buffer(dataSize);
-		in.read(&buffer[0], dataSize);
-		in.close();
-
-		bool identical = true;
-		for (size_t i = 0; i < dataSize; i++) {
-			if (buffer[i] != data[i]) {
-				identical = false;
-				break;
-			}
+	if (exists(filePath)) {
+		if (stub) {
+			return false;
 		}
 
-		if (identical) {
-			return false;
+		if (file_size(filePath) == dataSize) {
+			// Size matches, check if contents are identical
+			std::ifstream in(dstPath, std::ofstream::in | std::ofstream::binary);
+			Vector<char> buffer(dataSize);
+			in.read(&buffer[0], dataSize);
+			in.close();
+
+			bool identical = true;
+			for (size_t i = 0; i < dataSize; i++) {
+				if (buffer[i] != data[i]) {
+					identical = false;
+					break;
+				}
+			}
+
+			if (identical) {
+				return false;
+			}
 		}
 	}
 
@@ -151,7 +157,7 @@ void Codegen::writeFiles(String directory, const CodeGenResult& files, Stats& st
 		}
 		auto finalData = ss.str();
 
-		bool wrote = writeFile(filePath.string(), &finalData[0], finalData.size());
+		bool wrote = writeFile(filePath.string(), &finalData[0], finalData.size(), f.stub);
 		if (wrote) {
 			stats.written++;
 			std::cout << "* Written " << filePath << std::endl;

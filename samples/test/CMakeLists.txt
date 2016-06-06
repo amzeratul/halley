@@ -3,21 +3,19 @@ cmake_minimum_required (VERSION 3.0)
 project (halley-sample-test)
 
 set (test_sources
-		"prec.cpp"
+	"prec.cpp"
 
-		"src/main.cpp"
-		"src/test_stage.cpp"
-
-		"src/systems/movement_system.cpp"
-		"src/systems/render_system.cpp"
-		"src/systems/spawn_sprite_system.cpp"
-		"src/systems/sprite_animation_system.cpp"
-		"src/systems/time_system.cpp"
-		)
+	"src/main.cpp"
+	"src/test_stage.cpp"
+	)
 
 set (test_headers
-		"prec.h"
-		"src/test_stage.h"
-		)
+	"prec.h"
+	"src/test_stage.h"
+	)
 
-halleyProject(halley-sample-test "${test_sources}" "${test_headers}" ${CMAKE_HOME_DIRECTORY}/bin)
+set (test_gen_definitions
+	"gen_src/test.yaml"
+	)
+
+halleyProject(halley-sample-test "${test_sources}" "${test_headers}" "${test_gen_definitions}" ${CMAKE_HOME_DIRECTORY}/bin)

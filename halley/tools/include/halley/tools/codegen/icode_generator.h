@@ -10,12 +10,14 @@ namespace Halley
 	{
 		String fileName;
 		Vector<String> fileContents;
+		bool stub = false;
 
 		CodeGenFile() {}
 
-		CodeGenFile(String fileName, Vector<String> contents)
+		CodeGenFile(String fileName, Vector<String> contents, bool stub = false)
 			: fileName(fileName)
 			, fileContents(contents)
+			, stub(stub)
 		{}
 	};
 

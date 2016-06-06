@@ -76,29 +76,33 @@ set(HALLEY_PROJECT_INCLUDE_DIRS
 set(HALLEY_PROJECT_LIB_DIRS
 	${HALLEY_PATH}/lib
 	)
-	
-function(halleyProject name sources headers targetDir)
+
+function(halleyProject name sources headers genDefinitions targetDir)
+	add_custom_target(${name}_codegen ALL ${HALLEY_PATH}/bin/halley-cmd codegen gen_src gen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${genDefinitions})
+
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${targetDir})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${targetDir})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${targetDir})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${targetDir})
 
 	file (GLOB_RECURSE ${name}_sources_gen "gen/*.cpp")
+	file (GLOB_RECURSE ${name}_sources_systems "src/systems/*.cpp")
 	file (GLOB_RECURSE ${name}_headers_gen "gen/*.h")
+	
+	set(proj_sources ${sources} ${${name}_sources_gen} ${${name}_sources_systems})
+	set(proj_headers ${headers} ${${name}_headers_gen} ${genDefinitions})
 
-	assign_source_group(${sources} ${${name}_sources_gen})
-	assign_source_group(${headers} ${${name}_headers_gen})
+	assign_source_group(${proj_sources})
+	assign_source_group(${proj_headers})
 
 	include_directories("." "gen/cpp" ${HALLEY_PROJECT_INCLUDE_DIRS})
 	link_directories(${HALLEY_PROJECT_LIB_DIRS})
 
-	add_custom_target(${name}_codegen ALL ${HALLEY_PATH}/bin/halley-cmd codegen gen_src gen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-
 	if(MSVC_)
-		add_library(${name} SHARED ${sources} ${headers} ${${name}_sources_gen} ${${name}_headers_gen})
+		add_library(${name} SHARED ${proj_sources} ${proj_headers})
 		add_definitions(-DHALLEY_SHARED_LIBRARY)
 	else()
-		add_executable(${name} ${sources} ${headers} ${${name}_sources_gen} ${${name}_headers_gen})
+		add_executable(${name} ${proj_sources} ${proj_headers})
 		add_definitions(-DHALLEY_EXECUTABLE)
 	endif()
 

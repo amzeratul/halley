@@ -10,12 +10,29 @@ using namespace Halley;
 static String toFileName(String className)
 {
 	std::stringstream ss;
+
+	auto isUpper = [](char c) {
+		return c >= 'A' && c <= 'Z';
+	};
+
+	auto lower = [](char c) {
+		return static_cast<char>(c + 32);
+	};
+
+	auto tryGet = [](const String& s, size_t i) {
+		if (s.size() > i) {
+			return s[i];
+		} else {
+			return char(0);
+		}
+	};
+
 	for (size_t i = 0; i < className.size(); i++) {
-		if (className[i] >= 'A' && className[i] <= 'Z') {
-			if (i > 0) {
+		if (isUpper(className[i])) {
+			if (i > 0 && !isUpper(tryGet(className, i+1))) {
 				ss << '_';
 			}
-			ss << static_cast<char>(className[i] + 32);
+			ss << lower(className[i]);
 		} else {
 			ss << className[i];
 		}
@@ -54,6 +71,7 @@ CodeGenResult CodegenCPP::generateSystem(SystemSchema system)
 
 	CodeGenResult result;
 	result.emplace_back(CodeGenFile("systems/" + toFileName(className) + ".h", generateSystemHeader(system)));
+	result.emplace_back(CodeGenFile("../../src/systems/" + toFileName(className) + ".cpp", generateSystemStub(system), true));
 	return result;
 }
 
@@ -159,35 +177,52 @@ Vector<U> convert(Vector<T> in, U(*f)(const T&))
 	return result;
 }
 
-Vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
+class SystemInfo
 {
-	String methodName, methodArgType;
-	bool methodConst;
-	if (system.method == SystemMethod::Update) {
-		methodName = "update";
-		methodArgType = "Halley::Time";
-		methodConst = false;
-	} else if (system.method == SystemMethod::Render) {
-		methodName = "render";
-		methodArgType = "Halley::Painter&";
-		methodConst = true;
-	} else {
-		throw Exception("Unsupported method in " + system.name + "System");
+public:
+	SystemInfo(SystemSchema& system)
+	{
+		if (system.method == SystemMethod::Update) {
+			methodName = "update";
+			methodArgType = "Halley::Time";
+			methodConst = false;
+		}
+		else if (system.method == SystemMethod::Render) {
+			methodName = "render";
+			methodArgType = "Halley::Painter&";
+			methodConst = true;
+		}
+		else {
+			throw Exception("Unsupported method in " + system.name + "System");
+		}
+
+		familyArgs = { VariableSchema(TypeSchema(methodArgType), "p") };
+		if (system.strategy == SystemStrategy::Global) {
+			stratImpl = "static_cast<T*>(this)->" + methodName + "(p);";
+		}
+		else if (system.strategy == SystemStrategy::Individual) {
+			familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "entity"));
+			stratImpl = "invokeIndividual(static_cast<T*>(this), &T::" + methodName + ", p, mainFamily);";
+		}
+		else if (system.strategy == SystemStrategy::Parallel) {
+			familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "entity"));
+			stratImpl = "invokeParallel(static_cast<T*>(this), &T::" + methodName + ", p, mainFamily);";
+		}
+		else {
+			throw Exception("Unsupported strategy in " + system.name + "System");
+		}
 	}
 
-	Vector<VariableSchema> familyArgs = { VariableSchema(TypeSchema(methodArgType), "p") };
+	String methodName;
+	String methodArgType;
 	String stratImpl;
-	if (system.strategy == SystemStrategy::Global) {
-		stratImpl = "static_cast<T*>(this)->" + methodName + "(p);";
-	} else if (system.strategy == SystemStrategy::Individual) {
-		familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "entity"));
-		stratImpl = "invokeIndividual(static_cast<T*>(this), &T::" + methodName + ", p, mainFamily);";
-	} else if (system.strategy == SystemStrategy::Parallel) {
-		familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "entity"));
-		stratImpl = "invokeParallel(static_cast<T*>(this), &T::" + methodName + ", p, mainFamily);";
-	} else {
-		throw Exception("Unsupported strategy in " + system.name + "System");
-	}
+	Vector<VariableSchema> familyArgs;
+	bool methodConst;
+};
+
+Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
+{
+	auto info = SystemInfo(system);
 
 	Vector<String> contents = {
 		"#pragma once",
@@ -265,7 +300,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
 		.addMembers(otherFams)
 		.addBlankLine()
 		.addAccessLevelSection(CPPAccess::Private)
-		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(methodArgType), "p") }, methodName + "Base", false, false, true, true), stratImpl)
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(info.methodArgType), "p") }, info.methodName + "Base", false, false, true, true), info.stratImpl)
 		.addBlankLine();
 
 	if (hasReceive) {
@@ -292,11 +327,22 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
 
 	contents.push_back("");
 
-	contents.push_back("/*");
-	contents.push_back("// Implement this:");
-	auto actualSys = CPPClassGenerator(system.name + "System", system.name + "SystemBase<" + system.name + "System>", CPPAccess::Public, true)
+	return contents;
+}
+
+Vector<String> CodegenCPP::generateSystemStub(SystemSchema& system) const
+{
+	auto info = SystemInfo(system);
+	String systemName = system.name + "System";
+
+	Vector<String> contents = {
+		"#include <systems/" + toFileName(systemName) + ".h>",
+		""
+	};
+
+	auto actualSys = CPPClassGenerator(systemName, systemName + "Base<" + systemName + ">", CPPAccess::Public, true)
 		.addAccessLevelSection(CPPAccess::Public)
-		.addMethodDeclaration(MethodSchema(TypeSchema("void"), familyArgs, methodName, methodConst));
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), info.familyArgs, info.methodName, info.methodConst), "");
 
 	for (auto& msg : system.messages) {
 		if (msg.receive) {
@@ -308,7 +354,11 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema system) const
 		.finish()
 		.writeTo(contents);
 
-	contents.push_back("*/");
+	contents.insert(contents.end(), {
+		"",
+		"REGISTER_SYSTEM(" + systemName + ")",
+		""
+	});
 
 	return contents;
 }
