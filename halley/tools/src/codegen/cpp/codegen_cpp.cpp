@@ -201,16 +201,13 @@ public:
 		familyArgs = { VariableSchema(TypeSchema(methodArgType), methodArgName) };
 		if (system.strategy == SystemStrategy::Global) {
 			stratImpl = "static_cast<T*>(this)->" + methodName + "(" + methodArgName + ");";
-		}
-		else if (system.strategy == SystemStrategy::Individual) {
+		} else if (system.strategy == SystemStrategy::Individual) {
 			familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "e"));
 			stratImpl = "invokeIndividual(static_cast<T*>(this), &T::" + methodName + ", " + methodArgName + ", mainFamily);";
-		}
-		else if (system.strategy == SystemStrategy::Parallel) {
+		} else if (system.strategy == SystemStrategy::Parallel) {
 			familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "e"));
 			stratImpl = "invokeParallel(static_cast<T*>(this), &T::" + methodName + ", " + methodArgName + ", mainFamily);";
-		}
-		else {
+		} else {
 			throw Exception("Unsupported strategy in " + system.name + "System");
 		}
 	}

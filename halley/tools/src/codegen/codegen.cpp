@@ -7,14 +7,17 @@
 #include <halley/tools/codegen/codegen.h>
 #include "cpp/codegen_cpp.h"
 
-#include <sys/utime.h>
-
 #ifdef _MSC_VER
-#ifdef _DEBUG
-#pragma comment(lib, "libyaml-cppmdd.lib")
+	#ifdef _DEBUG
+		#pragma comment(lib, "libyaml-cppmdd.lib")
+	#else
+		#pragma comment(lib, "libyaml-cppmd.lib")
+	#endif
+
+	#include <sys/utime.h>
 #else
-#pragma comment(lib, "libyaml-cppmd.lib")
-#endif
+	#include <sys/types.h>
+	#include <utime.h>
 #endif
 
 
