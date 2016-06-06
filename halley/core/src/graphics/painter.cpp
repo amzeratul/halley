@@ -4,6 +4,7 @@
 #include "halley/core/graphics/material/material.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/material/material_parameter.h"
+#include <cstring> // memmove
 
 using namespace Halley;
 
