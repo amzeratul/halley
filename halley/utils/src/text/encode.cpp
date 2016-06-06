@@ -19,8 +19,8 @@
 
 \*****************************************************************/
 
+#include <halley/utils/utils.h>
 #include "halley/text/encode.h"
-#include "halley/maths/utils.h"
 #include "halley/support/assert.h"
 
 static const char* base64dict = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
