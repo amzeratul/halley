@@ -33,7 +33,12 @@ namespace Halley {
 		Vector2D<T> p1, p2;
 
 	public:
-		Rect2D() {}
+		Rect2D() = default;
+		Rect2D(const Rect2D<T>& r) = default;
+		Rect2D(Rect2D<T>&& r) = default;
+
+		Rect2D<T>& operator=(const Rect2D<T>& o) = default;
+		Rect2D<T>& operator=(Rect2D<T>&& o) = default;
 
 		template<typename U> explicit Rect2D(Rect2D<U> r)
 		{
@@ -68,27 +73,46 @@ namespace Halley {
 			p2.y = std::max(point1.y, point2.y);
 		}
 
+		void setPos(Vector2D<T> pos)
+		{
+			auto sz = p2 - p1;
+			p1 = pos;
+			p2 = pos + sz;
+		}
+
 		void setX(T x)
 		{
 			float dx = x - p1.x;
 			p1.x += dx;
 			p2.x += dx;
 		}
+
 		void setY(T y)
 		{
 			float dy = y - p1.y;
 			p1.y += dy;
 			p2.y += dy;
 		}
-		void setWidth(T w) { p2.x = p1.x + w; }
-		void setHeight(T h) { p2.y = p1.y + h; }
-		void setSize(Vector2D<T> size) { p2 = p1 + size; }
 
-		Vector2D<T> getP1() const { return p1; }
-		Vector2D<T> getP2() const { return p2; }
-		Vector2D<T>& getP1() { return p1; }
-		Vector2D<T>& getP2() { return p2; }
-		Vector2D<T> getSize() const { return p2-p1; }
+		void setWidth(T w)
+		{
+			p2.x = p1.x + w;
+		}
+
+		void setHeight(T h)
+		{
+			p2.y = p1.y + h;
+		}
+
+		void setSize(Vector2D<T> size)
+		{
+			p2 = p1 + size;
+		}
+
+		Vector2D<T> getTopLeft() const { return p1; }
+		Vector2D<T> getBottomRight() const { return p2; }
+		Vector2D<T> getSize() const { return p2 - p1; }
+
 		T getWidth() const { return p2.x - p1.x; }
 		T getHeight() const { return p2.y - p1.y; }
 		T getX() const { return p1.x; }
@@ -110,7 +134,7 @@ namespace Halley {
 			return ((((p-p1) % size) + size) % size) + p1;
 		}
 
-		Rect2D<T> intersect(Rect2D<T> p) const
+		Rect2D<T> intersection(Rect2D<T> p) const
 		{
 			Range<T> x0(p1.x, p2.x);
 			Range<T> x1(p.p1.x, p.p2.x);
@@ -121,7 +145,46 @@ namespace Halley {
 			return Rect2D<T>(Vector2D<T>(x.s, y.s), Vector2D<T>(x.e, y.e));
 		}
 
-		bool intersects(Rect2D<T> other) const
+		Range<T> getHorizontal() const
+		{
+			return Range<T>(p1.x, p2.x);
+		}
+
+		Range<T> getVertical() const
+		{
+			return Range<T>(p1.y, p2.y);
+		}
+
+		Range<T> getRange(size_t i) const
+		{
+			return Range<T>(p1[i], p2[i]);
+		}
+
+		Rect2D<T> operator+(Vector2D<T> v) const
+		{
+			return Rect2D<T>(p1 + v, p2 + v);
+		}
+
+		Rect2D<T> operator-(Vector2D<T> v) const
+		{
+			return Rect2D<T>(p1 - v, p2 - v);
+		}
+
+		Rect2D<T>& operator+=(Vector2D<T> v)
+		{
+			p1 += v;
+			p2 += v;
+			return *this;
+		}
+
+		Rect2D<T>& operator-=(Vector2D<T> v)
+		{
+			p1 -= v;
+			p2 -= v;
+			return *this;
+		}
+
+		bool overlaps(Rect2D<T> other) const
 		{
 			return !(p2.x <= other.p1.x || other.p2.x <= p1.x || p2.y <= other.p1.y || other.p2.y <= p1.y);
 		}
@@ -131,35 +194,57 @@ namespace Halley {
 			return (p1+p2)/2;
 		}
 
-		bool isEmpty() const { return getWidth() <= 0 || getHeight() <= 0; }
+		bool isEmpty() const
+		{
+			return getWidth() <= 0 || getHeight() <= 0;
+		}
 
-		bool operator==(const Rect2D<T>& p) const { return p1 == p.p1 && p2 == p.p2; }
-		bool operator!=(const Rect2D<T>& p) const { return p1 != p.p1 || p2 != p.p2; }
+		bool operator==(const Rect2D<T>& p) const
+		{
+			return p1 == p.p1 && p2 == p.p2;
+		}
+
+		bool operator!=(const Rect2D<T>& p) const
+		{
+			return p1 != p.p1 || p2 != p.p2;
+		}
 
 		template <typename V>
-		inline Rect2D operator * (const V param) const { return Rect2D(p1 * param, p2 * param); }
+		Rect2D operator * (const V param) const
+		{
+			return Rect2D(p1 * param, p2 * param);
+		}
 
 		template <typename V>
-		inline Rect2D operator / (const V param) const { return Rect2D(p1 / param, p2 / param); }
+		Rect2D operator / (const V param) const
+		{
+			return Rect2D(p1 / param, p2 / param);
+		}
 	};
 
 	template <typename T>
 	std::ostream& operator<< (std::ostream& ostream, const Rect2D<T>& v)
 	{
-		ostream << "(" << v.getP1().x << ", " << v.getP1().y << ", " << v.getWidth() << ", " << v.getHeight() << ")";
+		ostream << "(" << v.getTopLeft().x << ", " << v.getTopLeft().y << ", " << v.getWidth() << ", " << v.getHeight() << ")";
 		return ostream;
 	}
 
 	template <typename T, typename V>
-	inline Rect2D<T> operator * (V f, const Rect2D<T> &v)
+	inline Rect2D<T> operator * (V f, Rect2D<T> v)
 	{
 		return v * f;
 	}
 
 	template <typename T, typename V>
-	inline Rect2D<T> operator / (V f, const Rect2D<T> &v)
+	inline Rect2D<T> operator / (V f, Rect2D<T> v)
 	{
 		return v / f;
+	}
+
+	template <typename T, typename U>
+	inline Rect2D<T> operator + (Vector2D<T, U> v, Rect2D<T> r)
+	{
+		return r + v;
 	}
 
 	typedef Rect2D<float> Rect4f;
