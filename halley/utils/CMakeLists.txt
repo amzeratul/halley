@@ -98,7 +98,6 @@ set(HEADERS
         "include/halley/maths/random.h"
         "include/halley/maths/range.h"
         "include/halley/maths/rect.h"
-        "include/halley/maths/utils.h"
         "include/halley/maths/vector2d.h"
 		"include/halley/maths/vector2d.natvis"
         "include/halley/maths/vector3d.h"
