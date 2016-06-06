@@ -78,7 +78,7 @@ bool Sprite::isInView(Rect4f v) const
 	Vector2f sz = vertices[0].size * 1.4142136f; // sqrt(2)
 	Rect4f rect(pos - sz, pos + sz); // Could use offset here, but that would also need to take rotation into account
 
-	return rect.intersects(v);
+	return rect.overlaps(v);
 }
 
 Sprite& Sprite::setImage(Resources& resources, String imageName, String materialName)

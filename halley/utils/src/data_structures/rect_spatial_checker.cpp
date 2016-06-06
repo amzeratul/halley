@@ -70,8 +70,8 @@ bool RectangleSpatialChecker::updateData(Entry& entry, Rect4i prev, Rect4i next)
 	bool hasDel = false;
 
 	if (prev.getWidth() > 0 && prev.getHeight() > 0) {
-		Vector2i p1 = pointToCell(prev.getP1());
-		Vector2i p2 = pointToCell(prev.getP2());
+		Vector2i p1 = pointToCell(prev.getTopLeft());
+		Vector2i p2 = pointToCell(prev.getBottomRight());
 		delRect = Rect4i(p1, p2);
 		hasDel = true;
 		x0 = p1.x;
@@ -81,8 +81,8 @@ bool RectangleSpatialChecker::updateData(Entry& entry, Rect4i prev, Rect4i next)
 	}
 
 	if (next.getWidth() > 0 && next.getHeight() > 0) {
-		Vector2i p1 = pointToCell(next.getP1());
-		Vector2i p2 = pointToCell(next.getP2());
+		Vector2i p1 = pointToCell(next.getTopLeft());
+		Vector2i p2 = pointToCell(next.getBottomRight());
 		addRect = Rect4i(p1, p2);
 		hasAdd = true;
 		x0 = std::min(x0, p1.x);
@@ -146,8 +146,8 @@ RectangleSpatialChecker::QueryResults RectangleSpatialChecker::query(Rect4i rect
 	// This will work as a poor man's bloom filter
 	int resultMask = 0;
 
-	Vector2i p1 = pointToCell(rect.getP1());
-	Vector2i p2 = pointToCell(rect.getP2());
+	Vector2i p1 = pointToCell(rect.getTopLeft());
+	Vector2i p2 = pointToCell(rect.getBottomRight());
 	int x0 = p1.x;
 	int x1 = p2.x;
 	int y0 = p1.y;
@@ -161,7 +161,7 @@ RectangleSpatialChecker::QueryResults RectangleSpatialChecker::query(Rect4i rect
 				Entry& e = vec[i];
 
 				// Check if they intersect
-				if (e.rect.intersects(rect)) {
+				if (e.rect.overlaps(rect)) {
 					// Check if it's already in the buffer
 					if ((resultMask & e.hashMask) != 0) {
 						for (size_t j = 0; j < results.n; j++) {

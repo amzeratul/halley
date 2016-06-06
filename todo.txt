@@ -93,6 +93,8 @@ porting issues:
 - loading sprites is too complicated
 - exception during entity initialization can cause ::abort() to be called
 - CMake is horrible
+- improve Rect4f (+ vector, += vector, other tools)
+- improve Vector2f (normalize, normalized)
 
 build
 - figure out how to handle code generation and its errors :|

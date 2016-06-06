@@ -70,14 +70,14 @@ std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 		if (entry.rotated) {
 			std::swap(texSize.x, texSize.y);
 		}
-		entry.coords = Rect4f(frame.getP1() * scale, texSize.x * scale.x, texSize.y * scale.y);
+		entry.coords = Rect4f(frame.getTopLeft() * scale, texSize.x * scale.x, texSize.y * scale.y);
 		entry.size = size;
 
 		const Vector2i sourceSize = readSize<Vector2i>(sprite["sourceSize"]);
 		const Rect4i spriteSourceSize = readRect<Rect4i>(sprite["spriteSourceSize"]);
 		Vector2f pivot = readVector<Vector2f>(sprite["pivot"]);
 		Vector2i pivotPos = Vector2i(int(pivot.x * sourceSize.x + 0.5f), int(pivot.y * sourceSize.y + 0.5f));
-		Vector2i newPivotPos = pivotPos - spriteSourceSize.getP1();
+		Vector2i newPivotPos = pivotPos - spriteSourceSize.getTopLeft();
 		entry.pivot = Vector2f(newPivotPos) / Vector2f(spriteSourceSize.getSize());
 		
 		result->sprites[iter.memberName()] = entry;

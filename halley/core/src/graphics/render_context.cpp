@@ -50,9 +50,9 @@ RenderContext RenderContext::with(RenderTarget& v) const
 
 RenderContext RenderContext::subArea(Rect4i area) const
 {
-	Vector2i start = viewPort.getP1() + area.getP1();
+	Vector2i start = viewPort.getTopLeft() + area.getTopLeft();
 	Vector2i end = start + area.getSize();
-	end.x = std::min(end.x, viewPort.getP2().x);
-	end.y = std::min(end.y, viewPort.getP2().y);
+	end.x = std::min(end.x, viewPort.getBottomRight().x);
+	end.y = std::min(end.y, viewPort.getBottomRight().y);
 	return RenderContext(painter, camera, renderTarget, Rect4i(start, end));
 }

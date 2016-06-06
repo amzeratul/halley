@@ -125,7 +125,7 @@ int MakeFontTool::run(Vector<std::string> args)
 				}
 
 				auto finalGlyphImg = DistanceFieldGenerator::generate(*tmpImg, dstRect.getSize(), radius);
-				dstImg->blitFrom(dstRect.getP1(), *finalGlyphImg);
+				dstImg->blitFrom(dstRect.getTopLeft(), *finalGlyphImg);
 
 				tmpImg.reset();
 				finalGlyphImg.reset();

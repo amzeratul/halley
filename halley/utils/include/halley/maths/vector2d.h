@@ -24,13 +24,14 @@
 
 #include <cmath>
 #include <iostream>
+#include <cassert>
 #include "angle.h"
 #include "utils.h"
 
 namespace Halley {
 	//////////////////////////////
 	// Vector2D class declaration
-	template <typename T=float,class U=Angle<float> >
+	template <typename T=float, class U=Angle<float> >
 	class Vector2D {
 	private:
 		T mod(T a, T b) const { return a % b; }
@@ -49,7 +50,7 @@ namespace Halley {
 		//template <>
 		//Vector2D (Vector2D<T> vec) : x(vec.x), y(vec.y) {}
 
-		Vector2D (const T length, const U &angle)
+		Vector2D (T length, U angle)
 		{
 			float s, c;
 			angle.sincos(s, c);
@@ -58,36 +59,44 @@ namespace Halley {
 		}
 
 		// Getter
-		inline T& operator[](int n) { return n==0? x: y; }
-		inline const T& operator[](int n) const { return n==0? x: y; }
+		inline T& operator[](size_t n)
+		{
+			assert(n <= 1);
+			return n == 0? x : y;
+		}
+		inline T operator[](size_t n) const
+		{
+			assert(n <= 1);
+			return n == 0? x : y;
+		}
 
 		// Assignment and comparison
-		inline Vector2D& operator = (const Vector2D &param) { x = param.x; y = param.y; return *this; }
-		inline Vector2D& operator = (const T param) { x = param; y = param; return *this; }
-		inline bool operator == (const Vector2D &param) const { return x == param.x && y == param.y; }
-		inline bool operator != (const Vector2D &param) const { return x != param.x || y != param.y; }
+		inline Vector2D& operator = (Vector2D param) { x = param.x; y = param.y; return *this; }
+		inline Vector2D& operator = (T param) { x = param; y = param; return *this; }
+		inline bool operator == (Vector2D param) const { return x == param.x && y == param.y; }
+		inline bool operator != (Vector2D param) const { return x != param.x || y != param.y; }
 
 		// Basic algebra
-		inline Vector2D operator + (const Vector2D &param) const { return Vector2D(x + param.x,y + param.y); }
-		inline Vector2D operator - (const Vector2D &param) const { return Vector2D(x - param.x,y - param.y); }
-		inline Vector2D operator * (const Vector2D &param) const { return Vector2D(x * param.x,y * param.y); }
-		inline Vector2D operator / (const Vector2D &param) const { return Vector2D(x / param.x,y / param.y); }
-		inline Vector2D operator % (const Vector2D &param) const { return Vector2D(mod(x, param.x), mod(y, param.y)); }
+		inline Vector2D operator + (Vector2D param) const { return Vector2D(x + param.x,y + param.y); }
+		inline Vector2D operator - (Vector2D param) const { return Vector2D(x - param.x,y - param.y); }
+		inline Vector2D operator * (Vector2D param) const { return Vector2D(x * param.x,y * param.y); }
+		inline Vector2D operator / (Vector2D param) const { return Vector2D(x / param.x,y / param.y); }
+		inline Vector2D operator % (Vector2D param) const { return Vector2D(mod(x, param.x), mod(y, param.y)); }
 
-		inline Vector2D modulo(const Vector2D &param) const { return Vector2D(Halley::modulo<T>(x, param.x), Halley::modulo<T>(y, param.y)); }
-		inline Vector2D floorDiv(const Vector2D &param) const { return Vector2D(Halley::floorDiv(x, param.x), Halley::floorDiv(y, param.y)); }
+		inline Vector2D modulo(Vector2D param) const { return Vector2D(Halley::modulo<T>(x, param.x), Halley::modulo<T>(y, param.y)); }
+		inline Vector2D floorDiv(Vector2D param) const { return Vector2D(Halley::floorDiv(x, param.x), Halley::floorDiv(y, param.y)); }
 
 		inline Vector2D operator - () const { return Vector2D(-x,-y); }
 
 		template <typename V>
-		inline Vector2D operator * (const V param) const { return Vector2D(T(x * param), T(y * param)); }
+		inline Vector2D operator * (V param) const { return Vector2D(T(x * param), T(y * param)); }
 
 		template <typename V>
-		inline Vector2D operator / (const V param) const { return Vector2D(T(x / param), T(y / param)); }
+		inline Vector2D operator / (V param) const { return Vector2D(T(x / param), T(y / param)); }
 
 		// In-place operations
-		inline Vector2D& operator += (const Vector2D &param) { x += param.x; y += param.y; return *this; }
-		inline Vector2D& operator -= (const Vector2D &param) { x -= param.x; y -= param.y; return *this; }
+		inline Vector2D& operator += (Vector2D param) { x += param.x; y += param.y; return *this; }
+		inline Vector2D& operator -= (Vector2D param) { x -= param.x; y -= param.y; return *this; }
 		inline Vector2D& operator *= (const T param) { x *= param; y *= param; return *this; }
 		inline Vector2D& operator /= (const T param) { x /= param; y /= param; return *this; }
 
@@ -97,19 +106,28 @@ namespace Halley {
 			float len = length();
 			if (len != 0) {
 				return (*this) / len;
+			} else {
+				return Vector2D(0, 0);
 			}
-			else return Vector2D(0,0);
+		}
+		inline Vector2D normalized() const
+		{
+			return unit();
+		}
+		inline void normalize()
+		{
+			*this = unit();
 		}
 
 		// Get the orthogonal vector
-		inline Vector2D orthoLeft () const { return Vector2D(-y,x); }
-		inline Vector2D orthoRight () const { return Vector2D(y,-x); }
+		inline Vector2D orthoLeft () const { return Vector2D(-y, x); }
+		inline Vector2D orthoRight () const { return Vector2D(y, -x); }
 
 		// Cross product (the Z component of it)
-		inline T cross (const Vector2D &param) const { return x * param.y - y * param.x; }
+		inline T cross (Vector2D param) const { return x * param.y - y * param.x; }
 
 		// Dot product
-		inline T dot (const Vector2D &param) const { return (x * param.x) + (y * param.y); }
+		inline T dot (Vector2D param) const { return (x * param.x) + (y * param.y); }
 
 		// Length
 		inline T length () const { return sqrt(squaredLength()); }
@@ -119,8 +137,15 @@ namespace Halley {
 		inline T squaredLength () const { return x*x+y*y; }
 
 		// Projection on another vector
-		inline Vector2D projection (const Vector2D &param) const { Vector2D unit = param.unit(); return dot(unit) * unit; }
-		inline T projectionLength (const Vector2D &param) const { Vector2D unit = param.unit(); return dot(unit); }
+		inline Vector2D projection (Vector2D param) const
+		{
+			Vector2D unit = param.unit();
+			return this->dot(unit) * unit;
+		}
+		inline T projectionLength (Vector2D param) const
+		{
+			return this->dot(param.unit());
+		}
 
 		// Floor
 		inline Vector2D floor() const { return Vector2D(floor(x), floor(y)); }
@@ -135,7 +160,7 @@ namespace Halley {
 		}
 
 		// Rotates vector by an angle
-		inline Vector2D rotate (const U angle) const
+		inline Vector2D rotate (U angle) const
 		{
 			T cos, sin;
 			angle.sincos(sin, cos);
@@ -143,13 +168,16 @@ namespace Halley {
 		}
 
 		// Rotates vector by sine and cosine
-		inline Vector2D rotate (const T sine,const T cosine) const
+		inline Vector2D rotate (T sine, T cosine) const
 		{
 			return Vector2D(x*cosine - y*sine, x*sine + y*cosine);
 		}
 
 		// Removes the length of the vector along the given axis
-		inline Vector2D neutralize (const Vector2D& param) const { return *this - dot(param)*param; }
+		inline Vector2D neutralize (Vector2D param) const
+		{
+			return *this - dot(param)*param;
+		}
 
 		// Boost serialization
 		/*
