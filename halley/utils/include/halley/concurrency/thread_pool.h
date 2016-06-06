@@ -22,7 +22,7 @@
 #pragma once
 
 #include "jobs.h"
-#include "halley/maths/utils.h"
+#include <halley/utils/utils.h>
 
 namespace Halley {
 	class ThreadPool {

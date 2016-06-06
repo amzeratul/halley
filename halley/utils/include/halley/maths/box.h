@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "utils.h"
+#include <halley/utils/utils.h>
 #include "vector3d.h"
 #include "range.h"
 

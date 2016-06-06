@@ -27,7 +27,7 @@
 #endif
 
 #include <cmath>
-#include "utils.h"
+#include <halley/utils/utils.h>
 
 namespace Halley {
 	///////////////

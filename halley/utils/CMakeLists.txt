@@ -121,6 +121,8 @@ set(HEADERS
 		"include/halley/text/halleystring.natvis"
         "include/halley/time/halleytime.h"
         "include/halley/time/stopwatch.h"
+        "include/halley/utils/algorithm.h"
+        "include/halley/utils/utils.h"
         "include/halley/web/http.h"
         "src/file_formats/tinyxml/ticpp.h"
         "src/file_formats/tinyxml/ticpprc.h"

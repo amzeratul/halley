@@ -33,7 +33,7 @@
 	#define uniform_real_dist uniform_real_distribution
 #endif
 
-#include "utils.h"
+#include <halley/utils/utils.h>
 
 namespace Halley {
 	typedef randnamespace::mt19937 RandomGenType;

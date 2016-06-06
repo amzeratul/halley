@@ -2,7 +2,7 @@
 #include <chrono>
 #include <halley/support/exception.h>
 #include <halley/data_structures/memory_pool.h>
-#include <halley/maths/utils.h>
+#include <halley/utils/utils.h>
 #include "world.h"
 #include "system.h"
 #include "family.h"

@@ -26,7 +26,7 @@
 #include <iostream>
 #include <cassert>
 #include "angle.h"
-#include "utils.h"
+#include <halley/utils/utils.h>
 
 namespace Halley {
 	//////////////////////////////
