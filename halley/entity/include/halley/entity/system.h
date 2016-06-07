@@ -34,7 +34,7 @@ namespace Halley {
 		virtual void onMessagesReceived(int, Message**, size_t*, size_t) {}
 
 		template <typename F, typename V>
-		static void invokeIndividual(F f, V& fam)
+		static void invokeIndividual(F&& f, V& fam)
 		{
 			for (auto& e : fam) {
 				f(e);
@@ -42,7 +42,7 @@ namespace Halley {
 		}
 
 		template <typename F, typename V>
-		static void invokeParallel(F f, V& fam)
+		static void invokeParallel(F&& f, V& fam)
 		{
 			Concurrent::foreach(std::begin(fam), std::end(fam), [&] (auto& e) {
 				f(e);
