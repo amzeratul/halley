@@ -203,10 +203,10 @@ public:
 			stratImpl = "static_cast<T*>(this)->" + methodName + "(" + methodArgName + ");";
 		} else if (system.strategy == SystemStrategy::Individual) {
 			familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "e"));
-			stratImpl = "invokeIndividual(static_cast<T*>(this), &T::" + methodName + ", " + methodArgName + ", mainFamily);";
+			stratImpl = "invokeIndividual([this, " + methodArgName + "] (auto& e) { static_cast<T*>(this)->" + methodName + "(" + methodArgName + ", e); }, mainFamily);";
 		} else if (system.strategy == SystemStrategy::Parallel) {
 			familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "e"));
-			stratImpl = "invokeParallel(static_cast<T*>(this), &T::" + methodName + ", " + methodArgName + ", mainFamily);";
+			stratImpl = "invokeParallel([this, " + methodArgName + "] (auto& e) { static_cast<T*>(this)->" + methodName + "(" + methodArgName + ", e); }, mainFamily);";
 		} else {
 			throw Exception("Unsupported strategy in " + system.name + "System");
 		}

@@ -33,19 +33,19 @@ namespace Halley {
 		virtual void renderBase(Painter&) {}
 		virtual void onMessagesReceived(int, Message**, size_t*, size_t) {}
 
-		template <typename T, typename M, typename U, typename V>
-		static void invokeIndividual(T* obj, M method, U& p, V& fam)
+		template <typename F, typename V>
+		static void invokeIndividual(F f, V& fam)
 		{
 			for (auto& e : fam) {
-				(obj->*method)(p, e);
+				f(e);
 			}
 		}
 
-		template <typename T, typename M, typename U, typename V>
-		static void invokeParallel(T* obj, M method, U& p, V& fam)
+		template <typename F, typename V>
+		static void invokeParallel(F f, V& fam)
 		{
 			Concurrent::foreach(std::begin(fam), std::end(fam), [&] (auto& e) {
-				(obj->*method)(p, e);
+				f(e);
 			});
 		}
 

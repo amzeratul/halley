@@ -42,6 +42,7 @@ families:
     - Sprite: write
     - SpriteAnimation: write
     - Velocity: read
+strategy: parallel
 ---
 system: Render
 families:
