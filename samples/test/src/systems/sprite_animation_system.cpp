@@ -4,12 +4,12 @@ class SpriteAnimationSystem final : public SpriteAnimationSystemBase<SpriteAnima
 public:
 	void update(Halley::Time time, MainFamily& e)
 	{
-		auto& sprite = e.sprite->sprite;
+		auto& sprite = e.sprite.sprite;
 
-		auto vel = e.velocity->velocity;
+		auto vel = e.velocity.velocity;
 		int dir = std::abs(vel.y) > std::abs(vel.x) ? (vel.y < 0 ? 0 : 2) : (vel.x < 0 ? 3 : 1);
 
-		auto& player = e.spriteAnimation->player;
+		auto& player = e.spriteAnimation.player;
 		player.setDirection(dir);
 		player.update(time);
 		player.updateSprite(sprite);

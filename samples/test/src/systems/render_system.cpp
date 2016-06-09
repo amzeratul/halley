@@ -17,10 +17,10 @@ public:
 
 		spritePainter.start(mainFamily.count());
 		for (auto& e : mainFamily) {
-			auto& sprite = e.sprite->sprite;
-			sprite.setPos(e.position->position);
+			auto& sprite = e.sprite.sprite;
+			sprite.setPos(e.position.position);
 			if (sprite.isInView(worldView)) {
-				spritePainter.add(sprite, e.sprite->layer, int(sprite.getPosition().y - worldView.getY()));
+				spritePainter.add(sprite, e.sprite.layer, int(sprite.getPosition().y - worldView.getY()));
 			}
 		}
 

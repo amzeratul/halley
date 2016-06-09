@@ -262,7 +262,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 				.addAccessLevelSection(CPPAccess::Public)
 				.addMember(VariableSchema(TypeSchema("Halley::EntityId", true), "entityId"))
 				.addBlankLine()
-				.addMembers(convert<ComponentReferenceSchema, VariableSchema>(fam.components, [](auto& comp) { return VariableSchema(TypeSchema(comp.name + "Component* const", !comp.write), lowerFirst(comp.name)); }))
+				.addMembers(convert<ComponentReferenceSchema, VariableSchema>(fam.components, [](auto& comp) { return VariableSchema(TypeSchema(comp.name + "Component&", !comp.write), lowerFirst(comp.name)); }))
 				.addBlankLine()
 				.addTypeDefinition("Type", "Halley::FamilyType<" + String::concatList(convert<ComponentReferenceSchema, String>(fam.components, [](auto& comp) { return comp.name + "Component"; }), ", ") + ">")
 				.finish())
