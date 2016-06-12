@@ -71,7 +71,6 @@ namespace Halley
 		void foreach(T begin, T end, F f)
 		{
 			foreach(ExecutionQueue::getDefault(), begin, end, f);
-
 		}
 
 		void setThreadName(String name);

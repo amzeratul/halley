@@ -292,18 +292,14 @@ namespace Halley
 			waitingFor.store(n);
 		}
 
-		bool notify()
+		int notify()
 		{
 			// Lock-free, juggling razors here!
 			while (true) {
 				int prev = waitingFor;
-				int next = waitingFor - 1;
+				int next = prev - 1;
 				if (waitingFor.exchange(next) == prev) {
-					if (next == 0) {
-						// Last one, enqueue
-						return true;
-					}
-					return false; // Swapped successfully
+					return next; // Swapped successfully
 				}
 				// Nope, race condition. Try again.
 			}
@@ -322,7 +318,8 @@ namespace Halley
 
 		void notify()
 		{
-			if (data->notify()) {
+			int nLeft = data->notify();
+			if (nLeft == 0) {
 				promise.set();
 			}
 		}
