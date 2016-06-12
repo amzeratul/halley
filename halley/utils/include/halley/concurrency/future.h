@@ -191,8 +191,9 @@ namespace Halley
 		auto then(E& e, F f) -> Future<typename TaskHelper<T>::FunctionHelper<F>::ReturnType>
 		{
 			using R = TaskHelper<T>::FunctionHelper<F>::ReturnType;
-			auto task = Task<R>();
 			std::reference_wrapper<E> executor(e);
+
+			auto task = Task<R>();
 			data->addContinuation([task, f, executor](typename TaskHelper<T>::DataType v) mutable {
 				auto f2 = f;
 				task.setPayload([f2, v]() mutable -> R {
@@ -201,6 +202,14 @@ namespace Halley
 				task.enqueueOn(executor.get());
 			});
 			return task.getFuture();
+		}
+
+		template <typename F>
+		auto thenNotify(F joinFuture) -> void
+		{
+			data->addContinuation([joinFuture](typename TaskHelper<T>::DataType v) mutable {
+				joinFuture.notify();
+			});
 		}
 
 	private:
@@ -250,7 +259,7 @@ namespace Halley
 			futureData->set(VoidWrapper());
 		}
 
-		Future<void> getFuture()
+		Future<void> getFuture() const
 		{
 			return future;
 		}
@@ -258,5 +267,58 @@ namespace Halley
 	private:
 		std::shared_ptr<FutureData<VoidWrapper>> futureData;
 		Future<void> future;
+	};
+
+	class JoinFutureData
+	{
+	public:
+		JoinFutureData(int n)
+		{
+			waitingFor.store(n);
+		}
+
+		bool notify()
+		{
+			// Lock-free, juggling razors here!
+			while (true) {
+				int prev = waitingFor;
+				int next = waitingFor - 1;
+				if (waitingFor.exchange(next) == prev) {
+					if (next == 0) {
+						// Last one, enqueue
+						return true;
+					}
+					return false; // Swapped successfully
+				}
+				// Nope, race condition. Try again.
+			}
+		}
+
+	private:
+		std::atomic<int> waitingFor;
+	};
+
+	class JoinFuture
+	{
+	public:
+		JoinFuture(int n)
+			: data(std::make_shared<JoinFutureData>(n))
+		{}
+
+		void notify()
+		{
+			if (data->notify()) {
+				promise.set();
+			}
+		}
+
+		Future<void> getFuture() const
+		{
+			return promise.getFuture();
+		}
+
+	private:
+		std::shared_ptr<JoinFutureData> data;
+		Promise<void> promise;
 	};
 }

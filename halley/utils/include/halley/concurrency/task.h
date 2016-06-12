@@ -6,9 +6,6 @@ namespace Halley
 	class Task
 	{
 	public:
-		Task()
-		{}
-
 		Task(std::function<T()> f)
 			: payload(f)
 		{}

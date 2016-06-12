@@ -33,6 +33,16 @@ namespace Halley
 			return task.enqueueOn(e);
 		}
 
+		template <typename Iter>
+		auto whenAll(Iter begin, Iter end) -> Future<void>
+		{
+			JoinFuture future(int(end - begin));
+			for (Iter i = begin; i != end; ++i) {
+				(*i).thenNotify(future);
+			}
+			return future.getFuture();
+		}
+
 		template <typename T, typename F>
 		void foreach(T begin, T end, F&& f)
 		{
@@ -60,9 +70,7 @@ namespace Halley
 				});
 			}
 
-			for (size_t j = 0; j < nThreads; ++j) {
-				futures[j].wait();
-			}
+			whenAll(futures.data(), futures.data() + nThreads).wait();
 		}
 
 		void setThreadName(String name);
