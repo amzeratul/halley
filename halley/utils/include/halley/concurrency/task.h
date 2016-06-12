@@ -17,7 +17,7 @@ namespace Halley
 			payload = f;
 		}
 
-		Future<T> enqueueOn(Executor& e)
+		Future<T> enqueueOn(ExecutionQueue& e)
 		{
 			auto f = payload;
 			auto p = promise;
@@ -29,7 +29,7 @@ namespace Halley
 
 		Future<T> enqueueOnDefault()
 		{
-			return enqueueOn(Executor::getDefault());
+			return enqueueOn(ExecutionQueue::getDefault());
 		}
 
 		Future<T> getFuture()

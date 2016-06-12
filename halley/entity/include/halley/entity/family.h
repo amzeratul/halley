@@ -52,7 +52,9 @@ namespace Halley {
 		{
 			EntityId entityId;
 			alignas(alignof(void*)) std::array<char, sizeof(T) - maxSize(sizeof(EntityId), sizeof(void*))> data;
+
 		};
+		static_assert(((T::Type::getNumComponents() + 1) * sizeof(void*)) == sizeof(T), "Family type has unexpected storage size");
 
 	public:
 		FamilyImpl() : Family(T::Type::readMask()) {}

@@ -71,7 +71,9 @@ namespace Concurrent {
 	{
 #ifdef _WIN32
 #ifdef _DEBUG
-		SetThreadName(static_cast<DWORD>(-1), name.c_str());
+		if (name != "main") {
+			SetThreadName(static_cast<DWORD>(-1), name.c_str());
+		}
 #endif
 #endif
 		threadName.reset(new String(name));

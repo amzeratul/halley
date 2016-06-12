@@ -8,13 +8,13 @@ namespace Halley
 {
 	using TaskBase = std::function<void()>;
 
-	class Executor
+	class ExecutionQueue
 	{
 	public:
-		static Executor& getDefault();
-		static void setDefault(Executor& e);
+		static ExecutionQueue& getDefault();
+		static void setDefault(ExecutionQueue& e);
 
-		Executor();
+		ExecutionQueue();
 		void addToQueue(TaskBase task);
 		TaskBase getNext();
 
@@ -30,22 +30,22 @@ namespace Halley
 		std::atomic<int> attachedCount;
 		std::atomic<bool> hasTasks;
 
-		static Executor* defaultExecutor;
+		static ExecutionQueue* defaultQueue;
 	};
 
-	class ExecutorRunner
+	class Executor
 	{
 	public:
-		ExecutorRunner(Executor& queue);
-		~ExecutorRunner();
+		Executor(ExecutionQueue& queue);
+		~Executor();
 		bool runPending();
 		void runForever();
 		void stop();
 		
-		static void makeThreadPool(Executor& queue, size_t n);
+		static void makeThreadPool(ExecutionQueue& queue, size_t n);
 
 	private:
-		Executor& queue;
+		ExecutionQueue& queue;
 		bool running = false;
 	};
 }
