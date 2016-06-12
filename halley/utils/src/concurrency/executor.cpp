@@ -1,3 +1,4 @@
+#include <halley/concurrency/concurrent.h>
 #include <halley/concurrency/executor.h>
 #include <halley/support/exception.h>
 
@@ -95,8 +96,9 @@ void ExecutorRunner::makeThreadPool(Executor& queue, size_t n)
 {
 	std::reference_wrapper<Executor> q = queue;
 	for (size_t i = 0; i < n; i++) {
-		boost::thread([q] ()
+		boost::thread([q, i] ()
 		{
+			Concurrent::setThreadName("threadPool" + String::integerToString(int(i)));
 			ExecutorRunner r(q.get());
 			r.runForever();
 		});
