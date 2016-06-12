@@ -16,14 +16,14 @@ namespace Halley {
 			maskStorage = MaskStorageInterface::createMaskStorage();
 			os = OS::createOS();
 
-			executor = new Executor();
-			ExecutorRunner::makeThreadPool(*executor, 4);
+			executor = new ExecutionQueue();
+			Executor::makeThreadPool(*executor, 4);
 		}
 
 		Vector<TypeDeleterBase*> typeDeleters;
 		void* maskStorage;
 		OS* os;
-		Executor* executor;
+		ExecutionQueue* executor;
 	};
 }
 
@@ -38,7 +38,7 @@ HalleyStatics::~HalleyStatics()
 
 void HalleyStatics::setup()
 {
-	Executor::setDefault(*pimpl->executor);
+	ExecutionQueue::setDefault(*pimpl->executor);
 	ComponentDeleterTable::getDeleters() = &pimpl->typeDeleters;
 	MaskStorageInterface::setMaskStorage(pimpl->maskStorage);
 	OS::setInstance(pimpl->os);

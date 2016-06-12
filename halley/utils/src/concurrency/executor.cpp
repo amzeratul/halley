@@ -4,14 +4,14 @@
 
 using namespace Halley;
 
-Executor* Executor::defaultExecutor = nullptr;
+ExecutionQueue* ExecutionQueue::defaultQueue = nullptr;
 
-Executor::Executor()
+ExecutionQueue::ExecutionQueue()
 {
 	hasTasks.store(false);
 }
 
-TaskBase Executor::getNext()
+TaskBase ExecutionQueue::getNext()
 {
 	while (true) {
 		boost::unique_lock<boost::mutex> lock(mutex);
@@ -25,7 +25,7 @@ TaskBase Executor::getNext()
 	}
 }
 
-void Executor::addToQueue(TaskBase task)
+void ExecutionQueue::addToQueue(TaskBase task)
 {
 	boost::unique_lock<boost::mutex> lock(mutex);
 	queue.emplace_back(task);
@@ -34,52 +34,52 @@ void Executor::addToQueue(TaskBase task)
 	condition.notify_all();
 }
 
-Executor& Executor::getDefault()
+ExecutionQueue& ExecutionQueue::getDefault()
 {
-	if (!defaultExecutor) {
+	if (!defaultQueue) {
 		throw Exception("Default executor not specified");
 	}
-	return *defaultExecutor;
+	return *defaultQueue;
 }
 
-void Executor::setDefault(Executor& e)
+void ExecutionQueue::setDefault(ExecutionQueue& e)
 {
-	defaultExecutor = &e;
+	defaultQueue = &e;
 }
 
-size_t Executor::threadCount() const
+size_t ExecutionQueue::threadCount() const
 {
 	return attachedCount.load();
 }
 
-void Executor::onAttached()
+void ExecutionQueue::onAttached()
 {
 	++attachedCount;
 }
 
-void Executor::onDetached()
+void ExecutionQueue::onDetached()
 {
 	--attachedCount;
 }
 
-ExecutorRunner::ExecutorRunner(Executor& queue)
+Executor::Executor(ExecutionQueue& queue)
 	: queue(queue)
 {
 	queue.onAttached();
 }
 
-ExecutorRunner::~ExecutorRunner()
+Executor::~Executor()
 {
 	queue.onDetached();
 }
 
-bool ExecutorRunner::runPending()
+bool Executor::runPending()
 {
 	// TODO
 	return false;
 }
 
-void ExecutorRunner::runForever()
+void Executor::runForever()
 {
 	running = true;
 	while (running)	{
@@ -87,19 +87,19 @@ void ExecutorRunner::runForever()
 	}
 }
 
-void ExecutorRunner::stop()
+void Executor::stop()
 {
 	running = false;
 }
 
-void ExecutorRunner::makeThreadPool(Executor& queue, size_t n)
+void Executor::makeThreadPool(ExecutionQueue& queue, size_t n)
 {
-	std::reference_wrapper<Executor> q = queue;
+	std::reference_wrapper<ExecutionQueue> q = queue;
 	for (size_t i = 0; i < n; i++) {
 		boost::thread([q, i] ()
 		{
 			Concurrent::setThreadName("threadPool" + String::integerToString(int(i)));
-			ExecutorRunner r(q.get());
+			Executor r(q.get());
 			r.runForever();
 		});
 	}
