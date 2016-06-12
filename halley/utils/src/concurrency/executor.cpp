@@ -14,13 +14,13 @@ TaskBase Executor::getNext()
 {
 	while (true) {
 		boost::unique_lock<boost::mutex> lock(mutex);
-		if (queue.empty()) {
+		while (queue.empty()) {
 			condition.wait(lock);
-		} else {
-			TaskBase value = queue.front();
-			queue.pop_front();
-			return value;
 		}
+		
+		TaskBase value = queue.front();
+		queue.pop_front();
+		return value;
 	}
 }
 

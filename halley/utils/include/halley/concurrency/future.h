@@ -63,6 +63,12 @@ namespace Halley
 	class FutureData
 	{
 	public:
+		FutureData() = default;
+		FutureData(FutureData&&) = delete;
+		FutureData(const FutureData&) = delete;
+		FutureData& operator=(FutureData&&) = delete;
+		FutureData& operator=(const FutureData&) = delete;
+
 		void set(T&& value)
 		{
 			data = std::move(value);
@@ -77,8 +83,11 @@ namespace Halley
 
 		void wait()
 		{
-			while (!available) {
-				// YOLO Spinlock
+			if (!available) {
+				boost::unique_lock<boost::mutex> lock(mutex);
+				while (!available) {
+					condition.wait(lock);
+				}
 			}
 		}
 
@@ -92,8 +101,9 @@ namespace Halley
 			if (available.load()) {
 				f(data.get());
 			} else {
-				boost::lock_guard<boost::mutex> lock(mutex);
+				boost::unique_lock<boost::mutex> lock(mutex);
 				if (available.load()) {
+					lock.unlock();
 					f(data.get());
 				} else {
 					continuations.push_back(f);
@@ -104,12 +114,19 @@ namespace Halley
 	private:
 		void makeAvailable()
 		{
-			boost::lock_guard<boost::mutex> lock(mutex);
-			for (auto f : continuations) {
+			std::vector<std::function<void(T)>> toRun;
+
+			{
+				boost::unique_lock<boost::mutex> lock(mutex);
+				toRun = std::move(continuations);
+				continuations.clear();
+				available.store(true);
+				condition.notify_all();
+			}
+
+			for (auto f : toRun) {
 				f(data.get());
 			}
-			continuations.clear();
-			available.store(true);
 		}
 
 		std::atomic<bool> available;
@@ -117,6 +134,7 @@ namespace Halley
 
 		std::vector<std::function<void(T)>> continuations;
 		boost::mutex mutex;
+		boost::condition_variable condition;
 	};
 
 	template <typename T>
