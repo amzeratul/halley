@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-ExecutionQueue* ExecutionQueue::defaultQueue = nullptr;
+Executors* Executors::instance = nullptr;
 
 ExecutionQueue::ExecutionQueue()
 {
@@ -25,6 +25,15 @@ TaskBase ExecutionQueue::getNext()
 	}
 }
 
+std::vector<TaskBase> ExecutionQueue::getAll()
+{
+	boost::unique_lock<boost::mutex> lock(mutex);
+	hasTasks.store(false);
+	std::vector<TaskBase> tasks(queue.begin(), queue.end());
+	queue.clear();
+	return tasks;
+}
+
 void ExecutionQueue::addToQueue(TaskBase task)
 {
 	boost::unique_lock<boost::mutex> lock(mutex);
@@ -34,17 +43,17 @@ void ExecutionQueue::addToQueue(TaskBase task)
 	condition.notify_all();
 }
 
-ExecutionQueue& ExecutionQueue::getDefault()
+Executors& Executors::get()
 {
-	if (!defaultQueue) {
-		throw Exception("Default executor not specified");
+	if (!instance) {
+		throw Exception("Executors instance not defined");
 	}
-	return *defaultQueue;
+	return *instance;
 }
 
-void ExecutionQueue::setDefault(ExecutionQueue& e)
+void Executors::set(Executors& e)
 {
-	defaultQueue = &e;
+	instance = &e;
 }
 
 size_t ExecutionQueue::threadCount() const
@@ -62,6 +71,11 @@ void ExecutionQueue::onDetached()
 	--attachedCount;
 }
 
+ExecutionQueue& ExecutionQueue::getDefault()
+{
+	return Executors::get().getCPU();
+}
+
 Executor::Executor(ExecutionQueue& queue)
 	: queue(queue)
 {
@@ -75,7 +89,10 @@ Executor::~Executor()
 
 bool Executor::runPending()
 {
-	// TODO
+	auto tasks = queue.getAll();
+	for (auto& t : tasks) {
+		t();
+	}
 	return false;
 }
 

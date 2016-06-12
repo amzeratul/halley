@@ -337,6 +337,71 @@ namespace Halley
 		Promise<void> promise;
 	};
 
+	template <typename T>
+	class MovableFunctionBase
+	{
+	public:
+		virtual ~MovableFunctionBase() {}
+		virtual T operator()() = 0;
+	};
+
+	template <typename T>
+	class MovableStdFunction : public MovableFunctionBase<T>
+	{
+	public:
+		MovableStdFunction(std::function<T()> f)
+			: f(f)
+		{}
+
+		T operator()() override {
+			return f();
+		}
+
+	private:
+		std::function<T()> f;
+	};
+
+	template <typename T, typename U>
+	class MovableBoundFunction : public MovableFunctionBase<T>
+	{
+	public:
+		MovableBoundFunction(std::function<T(U&&)> f, U&& v)
+			: f(f)
+			, v(std::move(v))
+		{}
+
+		T operator()() override {
+			return f(std::move(v));
+		}
+
+	private:
+		std::function<T(U&&)> f;
+		U v;
+	};
+
+	template <typename T>
+	class MovableFunction
+	{
+	public:
+		MovableFunction()
+		{}
+
+		MovableFunction(std::function<T()> f)
+			: f(std::make_shared<MovableStdFunction<T>>(f))
+		{}
+
+		template <typename F, typename U>
+		MovableFunction(F f, U&& v)
+			: f(std::make_shared<MovableBoundFunction<T, U>>(f, std::move(v)))
+		{}
+
+		T operator()() {
+			return (*f)();
+		}
+
+	private:
+		std::shared_ptr<MovableFunctionBase<T>> f;
+	};
 
 	template <typename T>
 	class Task
@@ -346,20 +411,22 @@ namespace Halley
 		{}
 
 		Task(std::function<T()> f)
+			: payload(MovableStdFunction<T>(f))
+		{}
+
+		Task(MovableFunction<T> f)
 			: payload(f)
 		{}
 
-		void setPayload(std::function<T()>&& f)
+		void setPayload(MovableFunction<T>&& f)
 		{
 			payload = std::move(f);
 		}
 
 		Future<T> enqueueOn(ExecutionQueue& e)
 		{
-			auto f = payload;
-			auto p = promise;
-			e.addToQueue([f, p]() mutable {
-				TaskHelper<T>::setPromise(p, f);
+			e.addToQueue([payload{std::move(payload)}, promise{promise}]() mutable {
+				TaskHelper<T>::setPromise(promise, payload);
 			});
 			return getFuture();
 		}
@@ -376,7 +443,7 @@ namespace Halley
 
 	private:
 		Promise<T> promise;
-		std::function<T()> payload;
+		MovableFunction<T> payload;
 	};
 
 	template<typename T>
@@ -388,8 +455,7 @@ namespace Halley
 
 		auto task = Task<R>();
 		data->addContinuation([task, f, executor](typename TaskHelper<T>::DataType v) mutable {
-			auto f2 = std::bind(f, std::move(v));
-			task.setPayload(std::move(f2));
+			task.setPayload(MovableFunction<R>(f, std::move(v)));
 			task.enqueueOn(executor.get());
 		});
 		return task.getFuture();

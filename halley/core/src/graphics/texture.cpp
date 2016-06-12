@@ -11,10 +11,10 @@ std::unique_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	Metadata meta = loader.getMeta();
 	auto video = loader.getAPI().video;
 
-	auto future = loader.getAsync().then([meta] (std::unique_ptr<ResourceDataStatic>& data) -> std::unique_ptr<Image>
+	auto future = loader.getAsync().then([meta] (std::unique_ptr<ResourceDataStatic> data) -> std::unique_ptr<Image>
 	{
 		return std::make_unique<Image>(data->getPath(), static_cast<Byte*>(data->getData()), data->getSize(), meta.getBool("premultiply", true));
-	}).then([meta, video] (std::unique_ptr<Image>& img) -> std::unique_ptr<Texture>
+	}).then(Executors::getMainThread(), [meta, video] (std::unique_ptr<Image> img) -> std::unique_ptr<Texture>
 	{
 		TextureDescriptor descriptor(Vector2i(img->getWidth(), img->getHeight()));
 		descriptor.pixelData = img->getPixels();
@@ -25,6 +25,11 @@ std::unique_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 
 		return video->createTexture(descriptor);
 	});
+
+	Executor e(Executors::getMainThread());
+	while (!future.isReady()) {
+		e.runPending();
+	}
 
 	return future.get();
 }

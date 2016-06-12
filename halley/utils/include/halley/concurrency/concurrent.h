@@ -16,9 +16,9 @@ namespace Halley
 		}
 
 		template <typename F>
-		auto execute(ExecutionQueue& e, F f) -> Future<decltype(f())>
+		auto execute(ExecutionQueue& e, F f) -> Future<typename std::result_of<F()>::type>
 		{
-			return execute(e, Task<decltype(f())>(f));
+			return execute(e, Task<typename std::result_of<F()>::type>(f));
 		}
 
 		template <typename T>
@@ -28,9 +28,9 @@ namespace Halley
 		}
 
 		template <typename F>
-		auto execute(F f) -> Future<decltype(f())>
+		auto execute(F f) -> Future<typename std::result_of<F()>::type>
 		{
-			return execute(ExecutionQueue::getDefault(), Task<decltype(f())>(f));
+			return execute(ExecutionQueue::getDefault(), Task<typename std::result_of<F()>::type>(f));
 		}
 
 		template <typename Iter>
