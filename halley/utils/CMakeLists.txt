@@ -4,8 +4,7 @@ include_directories("include" "../core/include" ${Boost_INCLUDE_DIR})
 
 set(SOURCES
         "src/concurrency/concurrent.cpp"
-        "src/concurrency/jobs.cpp"
-        "src/concurrency/thread_pool.cpp"
+        "src/concurrency/executor.cpp"
         "src/data_structures/bin_pack.cpp"
         "src/data_structures/highscore.cpp"
         "src/data_structures/memory_pool.cpp"
@@ -56,8 +55,9 @@ set(SOURCES
 
 set(HEADERS
         "include/halley/concurrency/concurrent.h"
-        "include/halley/concurrency/jobs.h"
-        "include/halley/concurrency/thread_pool.h"
+        "include/halley/concurrency/executor.h"
+        "include/halley/concurrency/future.h"
+        "include/halley/concurrency/task.h"
         "include/halley/data_structures/bin_pack.h"
         "include/halley/data_structures/circular_buffer.h"
         "include/halley/data_structures/dynamic_grid.h"
