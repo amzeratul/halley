@@ -9,11 +9,11 @@
 using namespace Halley;
 
 Metadata::Metadata()
-	: root(std::make_unique<YAML::Node>())
+	: root(std::make_shared<YAML::Node>())
 {}
 
 Metadata::Metadata(const ResourceDataStatic& data)
-	: root(std::make_unique<YAML::Node>())
+	: root(std::make_shared<YAML::Node>())
 {
 	*root = YAML::Load(data.getString());
 }

@@ -1,8 +1,10 @@
 #pragma once
 
+#include "executor.h"
 #include <memory>
 #include <atomic>
 #include <boost/optional.hpp>
+#include <boost/thread.hpp>
 #include <halley/support/exception.h>
 
 namespace Halley
@@ -20,11 +22,11 @@ namespace Halley
 		struct FunctionHelper
 		{
 			F f;
-			using ReturnType = decltype(f(*(T*)nullptr));
+			using ReturnType = typename std::result_of<F(T)>::type;
 
 			static ReturnType call(F callback, T&& value)
 			{
-				return callback(value);
+				return callback(std::move(value));
 			}
 		};
 
@@ -44,7 +46,7 @@ namespace Halley
 		struct FunctionHelper
 		{
 			F f;
-			using ReturnType = decltype(f());
+			using ReturnType = typename std::result_of<F()>::type;
 
 			static ReturnType call(F callback, VoidWrapper&& value)
 			{
@@ -81,7 +83,7 @@ namespace Halley
 		T get()
 		{
 			wait();
-			return data.get();
+			return std::move(doGet<T>(0));
 		}
 
 		void wait()
@@ -102,12 +104,12 @@ namespace Halley
 		void addContinuation(std::function<void(T)> f)
 		{
 			if (available.load()) {
-				f(data.get());
+				apply(f);
 			} else {
 				boost::unique_lock<boost::mutex> lock(mutex);
 				if (available.load()) {
 					lock.unlock();
-					f(data.get());
+					apply(f);
 				} else {
 					continuations.push_back(f);
 				}
@@ -115,6 +117,30 @@ namespace Halley
 		}
 
 	private:
+		void apply(std::function<void(T)> f) {
+			f(doGet<T>(0));
+		}
+
+		template<typename T0>
+		T0 doGet(typename std::enable_if<std::is_copy_constructible<T0>::value, int>::type)
+		{
+			if (!data.is_initialized()) {
+				throw Exception("Data is not initialized.");
+			}
+			return data.get();
+		}
+
+		template<typename T0>
+		T0 doGet(typename std::enable_if<!std::is_copy_constructible<T0>::value, int>::type)
+		{
+			if (!data.is_initialized()) {
+				throw Exception("Data is not initialized.");
+			}
+			auto result = std::move(data.get());
+			data.reset();
+			return std::move(result);
+		}
+
 		void makeAvailable()
 		{
 			std::vector<std::function<void(T)>> toRun;
@@ -128,7 +154,7 @@ namespace Halley
 			}
 
 			for (auto f : toRun) {
-				f(data.get());
+				apply(f);
 			}
 		}
 
@@ -191,21 +217,7 @@ namespace Halley
 		}
 
 		template <typename E, typename F>
-		auto then(E& e, F f) -> Future<typename TaskHelper<T>::template FunctionHelper<F>::ReturnType>
-		{
-			using R = typename TaskHelper<T>::template FunctionHelper<F>::ReturnType;
-			std::reference_wrapper<E> executor(e);
-
-			auto task = Task<R>();
-			data->addContinuation([task, f, executor](typename TaskHelper<T>::DataType v) mutable {
-				auto f2 = f;
-				task.setPayload([f2, v]() mutable -> R {
-					return TaskHelper<T>::template FunctionHelper<F>::call(f2, std::move(v));
-				});
-				task.enqueueOn(executor.get());
-			});
-			return task.getFuture();
-		}
+		auto then(E& e, F f)->Future<typename TaskHelper<T>::template FunctionHelper<F>::ReturnType>;
 
 		template <typename F>
 		auto thenNotify(F joinFuture) -> void
@@ -324,4 +336,62 @@ namespace Halley
 		std::shared_ptr<JoinFutureData> data;
 		Promise<void> promise;
 	};
+
+
+	template <typename T>
+	class Task
+	{
+	public:
+		Task()
+		{}
+
+		Task(std::function<T()> f)
+			: payload(f)
+		{}
+
+		void setPayload(std::function<T()>&& f)
+		{
+			payload = std::move(f);
+		}
+
+		Future<T> enqueueOn(ExecutionQueue& e)
+		{
+			auto f = payload;
+			auto p = promise;
+			e.addToQueue([f, p]() mutable {
+				TaskHelper<T>::setPromise(p, f);
+			});
+			return getFuture();
+		}
+
+		Future<T> enqueueOnDefault()
+		{
+			return enqueueOn(ExecutionQueue::getDefault());
+		}
+
+		Future<T> getFuture()
+		{
+			return promise.getFuture();
+		}
+
+	private:
+		Promise<T> promise;
+		std::function<T()> payload;
+	};
+
+	template<typename T>
+	template<typename E, typename F>
+	inline auto Future<T>::then(E & e, F f) -> Future<typename TaskHelper<T>::template FunctionHelper<F>::ReturnType>
+	{
+		using R = typename TaskHelper<T>::template FunctionHelper<F>::ReturnType;
+		std::reference_wrapper<E> executor(e);
+
+		auto task = Task<R>();
+		data->addContinuation([task, f, executor](typename TaskHelper<T>::DataType v) mutable {
+			auto f2 = std::bind(f, std::move(v));
+			task.setPayload(std::move(f2));
+			task.enqueueOn(executor.get());
+		});
+		return task.getFuture();
+	}
 }

@@ -16,6 +16,7 @@ namespace Halley
 	{
 	public:
 		Metadata();
+		Metadata(const Metadata& other) = default;
 		Metadata(const ResourceDataStatic& data);
 		~Metadata();
 
@@ -30,6 +31,6 @@ namespace Halley
 		String getString(String key, String defaultValue) const;
 
 	private:
-		std::unique_ptr<YAML::Node> root;
+		std::shared_ptr<YAML::Node> root;
 	};
 }

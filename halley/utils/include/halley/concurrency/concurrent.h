@@ -1,9 +1,9 @@
 #pragma once
-#include "executor.h"
 #include <functional>
+#include <halley/text/halleystring.h>
+#include "executor.h"
 #include "future.h"
 #include "task.h"
-#include <halley/text/halleystring.h>
 
 namespace Halley
 {
@@ -71,6 +71,7 @@ namespace Halley
 		void foreach(T begin, T end, F f)
 		{
 			foreach(ExecutionQueue::getDefault(), begin, end, f);
+
 		}
 
 		void setThreadName(String name);
