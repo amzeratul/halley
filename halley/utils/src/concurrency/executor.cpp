@@ -5,6 +5,34 @@ using namespace Halley;
 
 Executor* Executor::defaultExecutor = nullptr;
 
+Executor::Executor()
+{
+	hasTasks.store(false);
+}
+
+TaskBase Executor::getNext()
+{
+	while (true) {
+		boost::unique_lock<boost::mutex> lock(mutex);
+		if (queue.empty()) {
+			condition.wait(lock);
+		} else {
+			TaskBase value = queue.front();
+			queue.pop_front();
+			return value;
+		}
+	}
+}
+
+void Executor::addToQueue(TaskBase task)
+{
+	boost::unique_lock<boost::mutex> lock(mutex);
+	queue.emplace_back(task);
+	hasTasks.store(true);
+
+	condition.notify_all();
+}
+
 Executor& Executor::getDefault()
 {
 	if (!defaultExecutor) {
@@ -18,66 +46,59 @@ void Executor::setDefault(Executor& e)
 	defaultExecutor = &e;
 }
 
-Executor* Executor::createDefault()
+size_t Executor::threadCount() const
 {
-	defaultExecutor = new Executor();
-
-	boost::thread([] ()
-	{
-		defaultExecutor->runForever();
-	});
-
-	return defaultExecutor;
+	return attachedCount.load();
 }
 
-Executor::Executor()
+void Executor::onAttached()
 {
-	hasTasks.store(false);
+	++attachedCount;
 }
 
-void Executor::addToQueue(TaskBase task)
+void Executor::onDetached()
 {
-	boost::unique_lock<boost::mutex> lock(mutex);
-	queue.emplace_back(task);
-	hasTasks.store(true);
-
-	condition.notify_one();
+	--attachedCount;
 }
 
-bool Executor::runPending()
+ExecutorRunner::ExecutorRunner(Executor& queue)
+	: queue(queue)
 {
-	std::vector<TaskBase> toRun;
-	{
-		boost::unique_lock<boost::mutex> lock(mutex);
-		toRun = std::move(queue);
-		hasTasks.store(false);
-	}
-
-	for (auto t: toRun)
-	{
-		t();
-	}
-
-	return hasTasks.load();
+	queue.onAttached();
 }
 
-void Executor::runForever()
+ExecutorRunner::~ExecutorRunner()
+{
+	queue.onDetached();
+}
+
+bool ExecutorRunner::runPending()
+{
+	// TODO
+	return false;
+}
+
+void ExecutorRunner::runForever()
 {
 	running = true;
-	do {
-		while(runPending()) {}
-
-		boost::unique_lock<boost::mutex> lock(mutex);
-		condition.wait(lock);
-	} while (running);
+	while (running)	{
+		queue.getNext()();
+	}
 }
 
-void Executor::stop()
+void ExecutorRunner::stop()
 {
 	running = false;
 }
 
-size_t Executor::threadCount() const
+void ExecutorRunner::makeThreadPool(Executor& queue, size_t n)
 {
-	return 1;
+	std::reference_wrapper<Executor> q = queue;
+	for (size_t i = 0; i < n; i++) {
+		boost::thread([q] ()
+		{
+			ExecutorRunner r(q.get());
+			r.runForever();
+		});
+	}
 }

@@ -15,7 +15,9 @@ namespace Halley {
 		{
 			maskStorage = MaskStorageInterface::createMaskStorage();
 			os = OS::createOS();
-			executor = Executor::createDefault();
+
+			executor = new Executor();
+			ExecutorRunner::makeThreadPool(*executor, 4);
 		}
 
 		Vector<TypeDeleterBase*> typeDeleters;

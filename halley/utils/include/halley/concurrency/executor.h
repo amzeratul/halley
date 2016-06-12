@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include <deque>
 #include <boost/thread.hpp>
 #include <functional>
 #include <atomic>
@@ -13,23 +13,39 @@ namespace Halley
 	public:
 		static Executor& getDefault();
 		static void setDefault(Executor& e);
-		static Executor* createDefault();
 
 		Executor();
 		void addToQueue(TaskBase task);
+		TaskBase getNext();
+
+		size_t threadCount() const;
+		void onAttached();
+		void onDetached();
+
+	private:
+		std::deque<TaskBase> queue;
+		boost::mutex mutex;
+		boost::condition_variable condition;
+
+		std::atomic<int> attachedCount;
+		std::atomic<bool> hasTasks;
+
+		static Executor* defaultExecutor;
+	};
+
+	class ExecutorRunner
+	{
+	public:
+		ExecutorRunner(Executor& queue);
+		~ExecutorRunner();
 		bool runPending();
 		void runForever();
 		void stop();
-
-		size_t threadCount() const;
+		
+		static void makeThreadPool(Executor& queue, size_t n);
 
 	private:
-		std::vector<TaskBase> queue;
-		boost::mutex mutex;
-		boost::condition_variable condition;
-		std::atomic<bool> hasTasks;
+		Executor& queue;
 		bool running = false;
-
-		static Executor* defaultExecutor;
 	};
 }

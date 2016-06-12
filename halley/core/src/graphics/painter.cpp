@@ -59,6 +59,7 @@ void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, 
 	assert(numVertices > 0);
 	assert(numVertices % 4 == 0);
 	assert(vertexData != nullptr);
+	assert(material);
 
 	if (material != materialPending) {
 		if (materialPending != std::shared_ptr<Material>()) {
