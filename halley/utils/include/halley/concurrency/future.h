@@ -7,6 +7,9 @@
 
 namespace Halley
 {
+	template <typename T>
+	class Task;
+
 	struct VoidWrapper
 	{};
 
@@ -182,22 +185,22 @@ namespace Halley
 		}
 
 		template <typename F>
-		auto then(F f) -> Future<typename TaskHelper<T>::FunctionHelper<F>::ReturnType>
+		auto then(F f) -> Future<typename TaskHelper<T>::template FunctionHelper<F>::ReturnType>
 		{
 			return then(Executor::getDefault(), f);
 		}
 
 		template <typename E, typename F>
-		auto then(E& e, F f) -> Future<typename TaskHelper<T>::FunctionHelper<F>::ReturnType>
+		auto then(E& e, F f) -> Future<typename TaskHelper<T>::template FunctionHelper<F>::ReturnType>
 		{
-			using R = TaskHelper<T>::FunctionHelper<F>::ReturnType;
+			using R = typename TaskHelper<T>::template FunctionHelper<F>::ReturnType;
 			std::reference_wrapper<E> executor(e);
 
 			auto task = Task<R>();
 			data->addContinuation([task, f, executor](typename TaskHelper<T>::DataType v) mutable {
 				auto f2 = f;
 				task.setPayload([f2, v]() mutable -> R {
-					return TaskHelper<T>::FunctionHelper<F>::call(f2, std::move(v));
+					return TaskHelper<T>::template FunctionHelper<F>::call(f2, std::move(v));
 				});
 				task.enqueueOn(executor.get());
 			});

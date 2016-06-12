@@ -1,5 +1,7 @@
 #pragma once
 
+#include <halley/concurrency/future.h>
+
 namespace Halley
 {
 	template <typename T>

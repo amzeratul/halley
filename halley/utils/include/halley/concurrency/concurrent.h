@@ -9,16 +9,10 @@ namespace Halley
 {
 	namespace Concurrent
 	{
-		template <typename F>
-		auto execute(F f) -> Future<decltype(f())>
-		{
-			return execute(Executor::getDefault(), Task<decltype(f())>(f));
-		}
-
 		template <typename T>
-		auto execute(Task<T> task) -> Future<T>
+		auto execute(Executor& e, Task<T> task) -> Future<T>
 		{
-			return execute(Executor::getDefault(), task);
+			return task.enqueueOn(e);
 		}
 
 		template <typename F>
@@ -28,9 +22,15 @@ namespace Halley
 		}
 
 		template <typename T>
-		auto execute(Executor& e, Task<T> task) -> Future<T>
+		auto execute(Task<T> task) -> Future<T>
 		{
-			return task.enqueueOn(e);
+			return execute(Executor::getDefault(), task);
+		}
+
+		template <typename F>
+		auto execute(F f) -> Future<decltype(f())>
+		{
+			return execute(Executor::getDefault(), Task<decltype(f())>(f));
 		}
 
 		template <typename Iter>
@@ -44,13 +44,7 @@ namespace Halley
 		}
 
 		template <typename T, typename F>
-		void foreach(T begin, T end, F&& f)
-		{
-			foreach(Executor::getDefault(), begin, end, std::move(f));
-		}
-
-		template <typename T, typename F>
-		void foreach(Executor& e, T begin, T end, F&& f)
+		void foreach(Executor& e, T begin, T end, F f)
 		{
 			const size_t n = end - begin;
 			constexpr size_t maxThreads = 8;
@@ -71,6 +65,12 @@ namespace Halley
 			}
 
 			whenAll(futures.data(), futures.data() + nThreads).wait();
+		}
+
+		template <typename T, typename F>
+		void foreach(T begin, T end, F f)
+		{
+			foreach(Executor::getDefault(), begin, end, f);
 		}
 
 		void setThreadName(String name);
