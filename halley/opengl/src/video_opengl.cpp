@@ -9,6 +9,7 @@
 #include <halley/support/console.h>
 #include <halley/support/exception.h>
 #include <halley/support/debug.h>
+#include <halley/core/graphics/window.h>
 using namespace Halley;
 
 #ifdef _MSC_VER
@@ -27,13 +28,13 @@ void VideoOpenGL::deInit()
 		//loaderThread.join();
 	}
 
-	SDL_GL_DeleteContext(context); // This crashes Linux and Mac OS X, and I have no idea why
-	SDL_GL_MakeCurrent(window, nullptr);
-	SDL_DestroyWindow(window);
+	SDL_GL_DeleteContext(context);
+	SDL_GL_MakeCurrent(sdlWindow, nullptr);
+	SDL_DestroyWindow(sdlWindow);
 	SDL_VideoQuit();
 
 	context = nullptr;
-	window = nullptr;
+	sdlWindow = nullptr;
 
 	std::cout << "Video terminated." << std::endl;
 }
@@ -42,17 +43,15 @@ void VideoOpenGL::deInit()
 ///////////////
 // Constructor
 VideoOpenGL::VideoOpenGL()
-	: windowType(WindowType::None)
-	, initialized(false)
+	: initialized(false)
 	, running(false)
-	, border(0)
 {
 }
 
 
 /////////////
 // Set video
-void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSize, const Vector2i _windowedSize, const Vector2f _virtualSize, bool vsync, int screen)
+void VideoOpenGL::setWindow(Window&& window)
 {
 	bool wasInit = initialized;
 
@@ -63,56 +62,55 @@ void VideoOpenGL::setVideo(WindowType _windowType, const Vector2i _fullscreenSiz
 
 #ifdef __ANDROID__
 	// Android-specific overrides, since it should always be fullscreen and on the actual window size
-	_windowType = WindowType::Fullscreen;
+	WindowType windowType = WindowType::Fullscreen;
 	Vector2i windowSize = VideoOpenGL::getScreenSize();
 #else
-	Vector2i windowSize = _windowType == WindowType::Fullscreen ? _fullscreenSize : _windowedSize;
+	WindowType windowType = window.getWindowType();
+	Vector2i windowSize = window.getSize();
 #endif
 
 	printDebugInfo();
 
-	fullscreenSize = _fullscreenSize;
-	windowedSize = _windowedSize;
-	windowType = _windowType;
-	virtualSize = _virtualSize;
-	screenNumber = screen;
-	setWindowSize(windowSize);
-	
 	if (!wasInit) {
-		createWindow();
-		initOpenGL();
-		SDL_GL_SetSwapInterval(vsync ? 1 : 0);
+		createWindow(window);
+		initOpenGL(window.isVSync());
 	} else {
 		// Update window
 #ifndef __ANDROID__
-		if (_windowType != WindowType::Fullscreen) SDL_SetWindowFullscreen(window, SDL_FALSE);
-		SDL_SetWindowSize(window, windowSize.x, windowSize.y);
-		if (_windowType == WindowType::Fullscreen) SDL_SetWindowFullscreen(window, SDL_TRUE);
-		SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+		if (windowType != WindowType::Fullscreen) SDL_SetWindowFullscreen(sdlWindow, SDL_FALSE);
+		SDL_SetWindowSize(sdlWindow, windowSize.x, windowSize.y);
+		if (windowType == WindowType::Fullscreen) SDL_SetWindowFullscreen(sdlWindow, SDL_TRUE);
+		SDL_SetWindowPosition(sdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 #endif
 	}
 
 	clearScreen();
-	SDL_ShowWindow(window);
+	SDL_ShowWindow(sdlWindow);
 
+	curWindow = std::make_unique<Window>(window);
 	initialized = true;
 	std::cout << ConsoleColor(Console::GREEN) << "Video init done.\n" << ConsoleColor() << std::endl;
 }
 
+const Window& VideoOpenGL::getWindow() const
+{
+	return *curWindow;
+}
+
 void VideoOpenGL::printDebugInfo() const
 {
-	std::cout << std::endl << ConsoleColor(Console::GREEN) << "Initializing OpenGL Video Display...\n" << ConsoleColor();
+	std::cout << std::endl << ConsoleColor(Console::GREEN) << "Initializing Video Display...\n" << ConsoleColor();
 	std::cout << "Drivers available:\n";
 	for (int i = 0; i < SDL_GetNumVideoDrivers(); i++) {
 		std::cout << "\t" << i << ": " << SDL_GetVideoDriver(i) << "\n";
 	}
 	std::cout << "Video driver: " << ConsoleColor(Console::DARK_GREY) << SDL_GetCurrentVideoDriver() << ConsoleColor() << std::endl;
-	std::cout << "Window size: " << ConsoleColor(Console::DARK_GREY) << windowSize.x << "x" << windowSize.y << ConsoleColor() << std::endl;
 }
 
-void VideoOpenGL::createWindow()
+void VideoOpenGL::createWindow(const Window& window)
 {
 	// Set flags and GL attributes
+	auto windowType = window.getWindowType();
 	int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS;
 	if (windowType == WindowType::BorderlessWindow) {
 		flags |= SDL_WINDOW_BORDERLESS;
@@ -147,6 +145,8 @@ void VideoOpenGL::createWindow()
 #endif
 
 	// Window position
+	int screenNumber = window.getScreenNumber();
+	Vector2i windowSize = window.getSize();
 	Vector2i winPos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	if (screenNumber < SDL_GetNumVideoDisplays()) {
 		SDL_Rect rect;
@@ -155,28 +155,25 @@ void VideoOpenGL::createWindow()
 		winPos.y = rect.y + (rect.h - windowSize.y) / 2;
 	}
 
-	// Window name
-	//String name = game.getName();
-	//if (game.isDevBuild()) name += " [DEV BUILD]";
-	String name = "Halley game";
-
 	// Create window
-	window = SDL_CreateWindow(name.c_str(), winPos.x, winPos.y, windowSize.x, windowSize.y, flags);
-	if (!window)
+	sdlWindow = SDL_CreateWindow(window.getTitle().c_str(), winPos.x, winPos.y, windowSize.x, windowSize.y, flags);
+	if (!sdlWindow)
 		throw Exception(String("Error creating SDL window: ") + SDL_GetError());
 #ifndef __ANDROID__
-	SDL_SetWindowFullscreen(window, windowType == WindowType::Fullscreen ? SDL_TRUE : SDL_FALSE);
+	SDL_SetWindowFullscreen(sdlWindow, windowType == WindowType::Fullscreen ? SDL_TRUE : SDL_FALSE);
 #endif
 }
 
-void VideoOpenGL::initOpenGL()
+void VideoOpenGL::initOpenGL(bool vsync)
 {
 	// Create OpenGL context
-	SDL_GLContext context = SDL_GL_CreateContext(window);
-	if (!context)
+	SDL_GLContext context = SDL_GL_CreateContext(sdlWindow);
+	if (!context) {
 		throw Exception(String("Error creating OpenGL context: ") + SDL_GetError());
-	if (SDL_GL_MakeCurrent(window, context) < 0)
+	}
+	if (SDL_GL_MakeCurrent(sdlWindow, context) < 0) {
 		throw Exception(String("Error setting OpenGL context: ") + SDL_GetError());
+	}
 	
 	// Start loader thread
 	if (!running) {
@@ -206,6 +203,8 @@ void VideoOpenGL::initOpenGL()
 	std::cout << ConsoleColor() << std::endl;
 
 	setupDebugCallback();
+
+	SDL_GL_SetSwapInterval(vsync ? 1 : 0);
 }
 
 void VideoOpenGL::initGLBindings()
@@ -263,12 +262,6 @@ void VideoOpenGL::clearScreen()
 	flip();
 }
 
-void VideoOpenGL::setWindowSize(Vector2i winSize)
-{
-	windowSize = winSize;
-	updateWindowDimensions();
-}
-
 void VideoOpenGL::setUpEnumMap()
 {
 	glEnumMap[GL_DEBUG_SOURCE_API] = "API";
@@ -308,12 +301,6 @@ void VideoOpenGL::onGLDebugMessage(unsigned int source, unsigned int type, unsig
 			std::cout << ConsoleColor(Console::YELLOW) << str << ConsoleColor() << std::endl;
 		});		
 	}
-}
-
-void VideoOpenGL::setVirtualSize(Vector2f vs)
-{
-	virtualSize = vs;
-	updateWindowDimensions();
 }
 
 std::function<void(int, void*)> VideoOpenGL::getUniformBinding(UniformType type, int n)
@@ -436,36 +423,6 @@ std::unique_ptr<TextureRenderTarget> VideoOpenGL::createRenderTarget()
 	return std::make_unique<RenderTargetOpenGL>();
 }
 
-void VideoOpenGL::updateWindowDimensions()
-{
-	border = 0;
-	if (virtualSize.x == 0 || virtualSize.y == 0) {
-		virtualSize = p2 = Vector2f(windowSize);
-		scale = 1;
-	} else {
-		float wAR = float(windowSize.x) / float(windowSize.y);
-		float vAR = virtualSize.x / virtualSize.y;
-		p1 = Vector2f();
-		p2 = virtualSize;
-		if (wAR > vAR) {
-			// Letterbox on left/right
-			scale = windowSize.y / virtualSize.y;
-			border = (virtualSize.y * wAR - virtualSize.x) * 0.5f * scale;
-			p2 *= scale;
-			p1.x += border;
-			p2.x += border;
-		} else {
-			// Letterbox on top/bottom
-			//float border = windowSize.y - windowSize.x / vAR;
-			scale = windowSize.x / virtualSize.x;
-			border = (virtualSize.x / wAR - virtualSize.y) * 0.5f * scale;
-			p2 *= scale;
-			p1.y += border;
-			p2.y += border;
-		}
-	}
-}
-
 Vector2i VideoOpenGL::getScreenSize(int n) const
 {
 	if (n >= SDL_GetNumVideoDisplays()) {
@@ -478,7 +435,7 @@ Vector2i VideoOpenGL::getScreenSize(int n) const
 
 void VideoOpenGL::flip()
 {
-	SDL_GL_SwapWindow(window);
+	SDL_GL_SwapWindow(sdlWindow);
 
 	Vector<std::function<void()>> msgs;
 	{
@@ -490,31 +447,19 @@ void VideoOpenGL::flip()
 	}
 }
 
-void VideoOpenGL::setFullscreen(bool fs)
-{
-	if (fs != (windowType == WindowType::Fullscreen)) {
-		setVideo(fs ? WindowType::Fullscreen : WindowType::Window, fullscreenSize, windowedSize, virtualSize);
-	}
-}
-
-void VideoOpenGL::toggleFullscreen()
-{
-	setFullscreen(!isFullscreen());
-}
-
 void VideoOpenGL::processEvent(SDL_Event& event)
 {
 	if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
 		Vector2i size = Vector2i(event.window.data1, event.window.data2);
-		setWindowSize(size);
+		setWindow(getWindow().withSize(size));
 	}
 }
 
 Rect4i VideoOpenGL::getWindowRect() const
 {
 	int x, y, w, h;
-	SDL_GetWindowPosition(window, &x, &y);
-	SDL_GetWindowSize(window, &w, &h);
+	SDL_GetWindowPosition(sdlWindow, &x, &y);
+	SDL_GetWindowSize(sdlWindow, &w, &h);
 	return Rect4i(x, y, w, h);
 }
 
@@ -523,58 +468,6 @@ Rect4i VideoOpenGL::getDisplayRect() const
 	SDL_Rect rect;
 	SDL_GetDisplayBounds(0, &rect);
 	return Rect4i(rect.x, rect.y, rect.w, rect.h);
-}
-
-
-/*
-static void drawBox(spPainter painter, float x, float y, float w, float h)
-{
-	GLUtils glUtils;
-	glUtils.setNumberOfTextureUnits(1);
-	glUtils.setTextureUnit(0);
-	glUtils.bindTexture(0);
-	glUtils.setBlendType(BlendType::Opaque);
-	float vs[] = { x, y, x + w + 1, y, x + w + 1, y + h + 1, x, y + h + 1 };
-	painter->drawQuad(Shader::getDefault(), vs);
-}
-*/
-
-static void drawLetterbox() {
-	// TODO
-	/*
-	Debug::trace("Game::RenderScreen drawing letterboxes");
-	Camera::bindScreen();
-	Vector2f p = Video::getOrigin();
-
-	// Check if there's any need for it, i.e. window doesn't match game AR
-	if (p.y > 0 || p.x > 0) {
-		GLUtils glUtils;
-		Vector2f s = Video::getVirtualSize();
-		Rect4i oldView = glUtils.getViewPort();
-		Rect4i view = Rect4i(0, 0, Video::getWindowSize().x, Video::getWindowSize().y);
-
-		// Setting the viewport is necessary to draw outside game bounds, will work on certain drivers even with this off, so be careful
-		glUtils.setViewPort(view, false);
-
-		float border = Video::getBorder() / Video::getScale();
-
-		if (p.y > 0) {
-			// Top and bottom
-			border *= float(oldView.getHeight()) / view.getHeight();
-			drawBox(painter, 0, 0, s.x, border);
-			drawBox(painter, 0, s.y + 1 - border, s.x, border);
-		}
-		if (p.x > 0) {
-			// Left and right
-			border *= float(oldView.getWidth()) / view.getWidth();
-			drawBox(painter, 0, 0, border, s.y);
-			drawBox(painter, s.x + 1 - border, 0, border, s.y);
-		}
-
-		glUtils.setViewPort(oldView);
-	}
-	Camera::resetBind();
-	*/
 }
 
 void VideoOpenGL::startRender()
@@ -593,8 +486,6 @@ void VideoOpenGL::startRender()
 
 void VideoOpenGL::finishRender()
 {
-	drawLetterbox();
-
 	Debug::trace("VideoOpenGL::finishRender flipping");
 	flip();
 	Debug::trace("VideoOpenGL::finishRender end");

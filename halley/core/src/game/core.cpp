@@ -6,6 +6,7 @@
 #include "graphics/camera.h"
 #include "graphics/render_context.h"
 #include "graphics/render_target/render_target_screen.h"
+#include "graphics/window.h"
 #include "resources/resources.h"
 #include "resources/resource_locator.h"
 #include "resources/standard_resources.h"
@@ -111,7 +112,7 @@ void Core::init()
 	// Get video resources
 	if (api->video) {
 		painter = std::move(api->videoInternal->makePainter());
-		screenTarget = std::make_unique<ScreenRenderTarget>(Rect4i(Vector2i(), api->video->getWindowSize()));
+		screenTarget = std::make_unique<ScreenRenderTarget>(Rect4i(Vector2i(), api->video->getWindow().getSize()));
 		camera = std::make_unique<Camera>(Vector2f(640, 360), Vector2f(1280, 720));
 	}
 }

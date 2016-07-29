@@ -31,6 +31,8 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "graphics/sprite/sprite_painter.h"
 #include "graphics/sprite/sprite_sheet.h"
 
+#include "graphics/window.h"
+
 #include "input/input.h"
 #include "input/input_joystick.h"
 #include "input/input_keys.h"
