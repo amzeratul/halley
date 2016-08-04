@@ -17,27 +17,25 @@ namespace Halley
 	class Window
 	{
 	public:
-		Window(WindowType windowType, Vector2i size, String title, bool vsync = true, int screen = 0)
+		Window(WindowType windowType, Vector2i position, Vector2i size, String title)
 			: windowType(windowType)
+			, position(position)
 			, size(size)
 			, title(title)
-			, vsync(vsync)
-			, screen(screen)
 		{}
 
 		WindowType getWindowType() const { return windowType; }
+		Vector2i getPosition() const { return position; }
 		Vector2i getSize() const { return size; }
 		String getTitle() const { return title; }
-		bool isVSync() const { return vsync; }
-		int getScreenNumber() const { return screen; }
 
-		Window withSize(Vector2i newSize) const { return Window(windowType, newSize, title, vsync, screen); }
+		Window withPosition(Vector2i newPos) const { return Window(windowType, newPos, size, title); }
+		Window withSize(Vector2i newSize) const { return Window(windowType, position, newSize, title); }
 
 	private:
 		WindowType windowType;
+		Vector2i position;
 		Vector2i size;
 		String title;
-		bool vsync;
-		int screen;
 	};
 }

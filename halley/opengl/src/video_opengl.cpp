@@ -51,45 +51,23 @@ VideoOpenGL::VideoOpenGL()
 
 /////////////
 // Set video
-void VideoOpenGL::setWindow(Window&& window)
+void VideoOpenGL::setWindow(Window&& window, bool vsync)
 {
-	bool wasInit = initialized;
-
 	// Initialize video mode
-	if (!wasInit) {
+	if (!initialized) {
 		SDL_VideoInit(nullptr);
-	}
-
-#ifdef __ANDROID__
-	// Android-specific overrides, since it should always be fullscreen and on the actual window size
-	WindowType windowType = WindowType::Fullscreen;
-	Vector2i windowSize = VideoOpenGL::getScreenSize();
-#else
-	WindowType windowType = window.getWindowType();
-	Vector2i windowSize = window.getSize();
-#endif
-
-	printDebugInfo();
-
-	if (!wasInit) {
+		printDebugInfo();
 		createWindow(window);
-		initOpenGL(window.isVSync());
+		initOpenGL(vsync);
+
+		initialized = true;
+		std::cout << ConsoleColor(Console::GREEN) << "Video init done.\n" << ConsoleColor() << std::endl;
 	} else {
-		// Update window
-#ifndef __ANDROID__
-		if (windowType != WindowType::Fullscreen) SDL_SetWindowFullscreen(sdlWindow, SDL_FALSE);
-		SDL_SetWindowSize(sdlWindow, windowSize.x, windowSize.y);
-		if (windowType == WindowType::Fullscreen) SDL_SetWindowFullscreen(sdlWindow, SDL_TRUE);
-		SDL_SetWindowPosition(sdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-#endif
+		updateWindow(window);
 	}
 
 	clearScreen();
 	SDL_ShowWindow(sdlWindow);
-
-	curWindow = std::make_unique<Window>(window);
-	initialized = true;
-	std::cout << ConsoleColor(Console::GREEN) << "Video init done.\n" << ConsoleColor() << std::endl;
 }
 
 const Window& VideoOpenGL::getWindow() const
@@ -145,23 +123,41 @@ void VideoOpenGL::createWindow(const Window& window)
 #endif
 
 	// Window position
-	int screenNumber = window.getScreenNumber();
 	Vector2i windowSize = window.getSize();
-	Vector2i winPos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	if (screenNumber < SDL_GetNumVideoDisplays()) {
-		SDL_Rect rect;
-		SDL_GetDisplayBounds(screenNumber, &rect);
-		winPos.x = rect.x + (rect.w - windowSize.x) / 2;
-		winPos.y = rect.y + (rect.h - windowSize.y) / 2;
-	}
+	Vector2i winPos = window.getPosition();
 
 	// Create window
 	sdlWindow = SDL_CreateWindow(window.getTitle().c_str(), winPos.x, winPos.y, windowSize.x, windowSize.y, flags);
-	if (!sdlWindow)
+	if (!sdlWindow) {
 		throw Exception(String("Error creating SDL window: ") + SDL_GetError());
-#ifndef __ANDROID__
-	SDL_SetWindowFullscreen(sdlWindow, windowType == WindowType::Fullscreen ? SDL_TRUE : SDL_FALSE);
+	}
+	updateWindow(window);
+}
+
+void VideoOpenGL::updateWindow(const Window& window)
+{
+#ifdef __ANDROID__
+	return;
 #endif
+
+	// Update window position & size
+	// For windowed, get out of fullscreen first, then set size.
+	// For fullscreen, set size before going to fullscreen.
+	WindowType windowType = window.getWindowType();
+	Vector2i windowPos = window.getPosition();
+	Vector2i windowSize = window.getSize();
+
+	if (windowType != WindowType::Fullscreen) {
+		SDL_SetWindowFullscreen(sdlWindow, SDL_FALSE);
+	}
+	SDL_SetWindowSize(sdlWindow, windowSize.x, windowSize.y);
+	if (windowType == WindowType::Fullscreen) {
+		SDL_SetWindowFullscreen(sdlWindow, SDL_TRUE);
+	}
+
+	SDL_SetWindowPosition(sdlWindow, windowPos.x, windowPos.y);
+
+	curWindow = std::make_unique<Window>(window);
 }
 
 void VideoOpenGL::initOpenGL(bool vsync)
@@ -451,7 +447,9 @@ void VideoOpenGL::processEvent(SDL_Event& event)
 {
 	if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
 		Vector2i size = Vector2i(event.window.data1, event.window.data2);
-		setWindow(getWindow().withSize(size));
+		int x, y;
+		SDL_GetWindowPosition(sdlWindow, &x, &y);
+		updateWindow(getWindow().withPosition(Vector2i(x, y)).withSize(size));
 	}
 }
 
@@ -463,11 +461,19 @@ Rect4i VideoOpenGL::getWindowRect() const
 	return Rect4i(x, y, w, h);
 }
 
-Rect4i VideoOpenGL::getDisplayRect() const
+Rect4i VideoOpenGL::getDisplayRect(int screen) const
 {
+	screen = std::max(0, std::min(screen, SDL_GetNumVideoDisplays() - 1));
+
 	SDL_Rect rect;
-	SDL_GetDisplayBounds(0, &rect);
+	SDL_GetDisplayBounds(screen, &rect);
 	return Rect4i(rect.x, rect.y, rect.w, rect.h);
+}
+
+Vector2i VideoOpenGL::getCenteredWindow(Vector2i size, int screen) const
+{
+	Rect4i rect = getDisplayRect(screen);
+	return rect.getTopLeft() + (rect.getSize() - size) / 2;
 }
 
 void VideoOpenGL::startRender()

@@ -15,12 +15,13 @@ namespace Halley {
 		void finishRender() override;
 		void flip() override;
 		
-		void setWindow(Window&& window) override;
+		void setWindow(Window&& window, bool vsync) override;
 		const Window& getWindow() const override;
 
 		Vector2i getScreenSize(int n) const override;
 		Rect4i getWindowRect() const override;
-		Rect4i getDisplayRect() const override;
+		Rect4i getDisplayRect(int screen) const override;
+		Vector2i getCenteredWindow(Vector2i size, int screen) const override;
 
 		std::function<void(int, void*)> getUniformBinding(UniformType type, int n) override;
 		std::unique_ptr<Painter> makePainter() override;
@@ -40,6 +41,7 @@ namespace Halley {
 	private:
 		void printDebugInfo() const;
 		void createWindow(const Window& window);
+		void updateWindow(const Window& window);
 		void initOpenGL(bool vsync);
 		void initGLBindings();
 		void clearScreen();

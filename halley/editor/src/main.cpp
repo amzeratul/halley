@@ -58,7 +58,7 @@ public:
 
 	void init(HalleyAPI* api) override
 	{
-		api->video->setWindow(Window(WindowType::ResizableWindow, Vector2i(1280, 720), getName(), false));
+		api->video->setWindow(Window(WindowType::ResizableWindow, api->video->getCenteredWindow(Vector2i(1280, 720), 0), Vector2i(1280, 720), getName()), false);
 	}
 };
 
