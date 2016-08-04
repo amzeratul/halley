@@ -370,10 +370,10 @@ void Halley::Debug::setErrorHandling()
 void Halley::Debug::printCallStack()
 {
 #ifdef _WIN32
-	std::cout << ConsoleColor(Console::RED) << "===== CALL STACK =====" << ConsoleColor(Console::DARK_RED) << std::endl;
+	std::cout << ConsoleColour(Console::RED) << "===== CALL STACK =====" << ConsoleColour(Console::DARK_RED) << std::endl;
 	CoutStackWalker walker;
 	walker.ShowCallstack();
-	std::cout << ConsoleColor(Console::RED) << "======================" << ConsoleColor() << std::endl;
+	std::cout << ConsoleColour(Console::RED) << "======================" << ConsoleColour() << std::endl;
 #endif
 }
 

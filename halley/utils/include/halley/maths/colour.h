@@ -64,12 +64,19 @@ namespace Halley {
 			, b(colMinValue<T>())
 			, a(colMaxValue<T>())
 		{}
+
+		Colour4(T luma)
+			: r(luma)
+			, g(luma)
+			, b(luma)
+			, a(1)
+		{}
 		
-		Colour4(T _r, T _g, T _b, T _a=colMaxValue<T>())
-			: r(_r)
-			, g(_g)
-			, b(_b)
-			, a(_a)
+		Colour4(T r, T g, T b, T a=colMaxValue<T>())
+			: r(r)
+			, g(g)
+			, b(b)
+			, a(a)
 		{}
 
 		template <typename U>

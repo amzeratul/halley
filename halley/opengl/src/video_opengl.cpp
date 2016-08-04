@@ -61,7 +61,7 @@ void VideoOpenGL::setWindow(Window&& window, bool vsync)
 		initOpenGL(vsync);
 
 		initialized = true;
-		std::cout << ConsoleColor(Console::GREEN) << "Video init done.\n" << ConsoleColor() << std::endl;
+		std::cout << ConsoleColour(Console::GREEN) << "Video init done.\n" << ConsoleColour() << std::endl;
 	} else {
 		updateWindow(window);
 	}
@@ -77,12 +77,12 @@ const Window& VideoOpenGL::getWindow() const
 
 void VideoOpenGL::printDebugInfo() const
 {
-	std::cout << std::endl << ConsoleColor(Console::GREEN) << "Initializing Video Display...\n" << ConsoleColor();
+	std::cout << std::endl << ConsoleColour(Console::GREEN) << "Initializing Video Display...\n" << ConsoleColour();
 	std::cout << "Drivers available:\n";
 	for (int i = 0; i < SDL_GetNumVideoDrivers(); i++) {
 		std::cout << "\t" << i << ": " << SDL_GetVideoDriver(i) << "\n";
 	}
-	std::cout << "Video driver: " << ConsoleColor(Console::DARK_GREY) << SDL_GetCurrentVideoDriver() << ConsoleColor() << std::endl;
+	std::cout << "Video driver: " << ConsoleColour(Console::DARK_GREY) << SDL_GetCurrentVideoDriver() << ConsoleColour() << std::endl;
 }
 
 void VideoOpenGL::createWindow(const Window& window)
@@ -183,20 +183,20 @@ void VideoOpenGL::initOpenGL(bool vsync)
 
 	// Print OpenGL data
 	std::cout << "OpenGL initialized." << std::endl;
-	std::cout << "\tVersion: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_VERSION) << ConsoleColor() << std::endl;
-	std::cout << "\tVendor: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_VENDOR) << ConsoleColor() << std::endl;
-	std::cout << "\tRenderer: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_RENDERER) << ConsoleColor() << std::endl;
-	std::cout << "\tGLSL Version: " << ConsoleColor(Console::DARK_GREY) << glGetString(GL_SHADING_LANGUAGE_VERSION) << ConsoleColor() << std::endl;
+	std::cout << "\tVersion: " << ConsoleColour(Console::DARK_GREY) << glGetString(GL_VERSION) << ConsoleColour() << std::endl;
+	std::cout << "\tVendor: " << ConsoleColour(Console::DARK_GREY) << glGetString(GL_VENDOR) << ConsoleColour() << std::endl;
+	std::cout << "\tRenderer: " << ConsoleColour(Console::DARK_GREY) << glGetString(GL_RENDERER) << ConsoleColour() << std::endl;
+	std::cout << "\tGLSL Version: " << ConsoleColour(Console::DARK_GREY) << glGetString(GL_SHADING_LANGUAGE_VERSION) << ConsoleColour() << std::endl;
 
 	// Print extensions
-	std::cout << "\tExtensions: " << ConsoleColor(Console::DARK_GREY);
+	std::cout << "\tExtensions: " << ConsoleColour(Console::DARK_GREY);
 	int nExtensions;
 	glGetIntegerv(GL_NUM_EXTENSIONS, &nExtensions);
 	for (int i = 0; i < nExtensions; i++) {
 		String str = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
 		std::cout << str << " ";
 	}
-	std::cout << ConsoleColor() << std::endl;
+	std::cout << ConsoleColour() << std::endl;
 
 	setupDebugCallback();
 
@@ -222,7 +222,7 @@ void VideoOpenGL::setupDebugCallback()
 		glCheckError();
 	} else {
 		glGetError();
-		std::cout << ConsoleColor(Console::YELLOW) << "KHR_DEBUG is not available." << ConsoleColor() << std::endl;
+		std::cout << ConsoleColour(Console::YELLOW) << "KHR_DEBUG is not available." << ConsoleColour() << std::endl;
 	}
 }
 
@@ -294,7 +294,7 @@ void VideoOpenGL::onGLDebugMessage(unsigned int source, unsigned int type, unsig
 
 		std::lock_guard<std::mutex> lock(messagesMutex);
 		messagesPending.push_back([str] () {
-			std::cout << ConsoleColor(Console::YELLOW) << str << ConsoleColor() << std::endl;
+			std::cout << ConsoleColour(Console::YELLOW) << str << ConsoleColour() << std::endl;
 		});		
 	}
 }

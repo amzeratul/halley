@@ -35,7 +35,7 @@ bool DynamicGameLoader::needsToReload() const
 
 void DynamicGameLoader::reload()
 {
-	std::cout << ConsoleColor(Console::BLUE) << "\n**RELOADING GAME**" << std::endl;
+	std::cout << ConsoleColour(Console::BLUE) << "\n**RELOADING GAME**" << std::endl;
 	Stopwatch timer;
 	
 	core->onSuspended();
@@ -46,7 +46,7 @@ void DynamicGameLoader::reload()
 
 	timer.pause();
 	
-	std::cout << "Done in " << timer.elapsedSeconds() << " seconds.\n" << ConsoleColor() << std::endl;
+	std::cout << "Done in " << timer.elapsedSeconds() << " seconds.\n" << ConsoleColour() << std::endl;
 }
 
 void DynamicGameLoader::setCore(IMainLoopable& c)

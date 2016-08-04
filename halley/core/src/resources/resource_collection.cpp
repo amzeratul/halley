@@ -61,7 +61,7 @@ void ResourceCollectionBase::flushAll(int minDepth)
 		auto& res = iter.second;
 		auto curTime = parent.getFileWriteTime(name);
 		if (res.depth >= minDepth && res.lastWriteTime != curTime) {
-			std::cout << "Flushing \"" << ConsoleColor(Console::DARK_GREY) << name << ConsoleColor() << "\"...\n";
+			std::cout << "Flushing \"" << ConsoleColour(Console::DARK_GREY) << name << ConsoleColour() << "\"...\n";
 			res.flush();
 			res.lastWriteTime = curTime;
 		}

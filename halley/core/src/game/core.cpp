@@ -38,7 +38,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> args)
 		OS::get().createLogConsole(game->getName());
 	}
 
-	std::cout << ConsoleColor(Console::GREEN) << "Halley is initializing..." << ConsoleColor() << std::endl;
+	std::cout << ConsoleColour(Console::GREEN) << "Halley is initializing..." << ConsoleColour() << std::endl;
 
 	// Debugging initialization
 	Debug::setErrorHandling();
@@ -54,7 +54,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> args)
 	setOutRedirect(false);
 
 	// Info
-	std::cout << "Data path is " << ConsoleColor(Console::DARK_GREY) << environment->getDataPath() << ConsoleColor() << std::endl;
+	std::cout << "Data path is " << ConsoleColour(Console::DARK_GREY) << environment->getDataPath() << ConsoleColour() << std::endl;
 }
 
 Core::~Core()
@@ -247,11 +247,11 @@ void Core::showComputerInfo() const
 	std::cout << "Computer data:" << "\n";
 	//std::cout << "\tName: " << computerData.computerName << "\n";
 	//std::cout << "\tUser: " << computerData.userName << "\n";
-	std::cout << "\tOS:   " << ConsoleColor(Console::DARK_GREY) << computerData.osName << ConsoleColor() << "\n";
-	std::cout << "\tCPU:  " << ConsoleColor(Console::DARK_GREY) << computerData.cpuName << ConsoleColor() << "\n";
-	std::cout << "\tGPU:  " << ConsoleColor(Console::DARK_GREY) << computerData.gpuName << ConsoleColor() << "\n";
-	std::cout << "\tRAM:  " << ConsoleColor(Console::DARK_GREY) << String::prettySize(computerData.RAM) << ConsoleColor() << "\n";
-	std::cout << "\tTime: " << ConsoleColor(Console::DARK_GREY) << curTime << ConsoleColor() << "\n" << std::endl;
+	std::cout << "\tOS:   " << ConsoleColour(Console::DARK_GREY) << computerData.osName << ConsoleColour() << "\n";
+	std::cout << "\tCPU:  " << ConsoleColour(Console::DARK_GREY) << computerData.cpuName << ConsoleColour() << "\n";
+	std::cout << "\tGPU:  " << ConsoleColour(Console::DARK_GREY) << computerData.gpuName << ConsoleColour() << "\n";
+	std::cout << "\tRAM:  " << ConsoleColour(Console::DARK_GREY) << String::prettySize(computerData.RAM) << ConsoleColour() << "\n";
+	std::cout << "\tTime: " << ConsoleColour(Console::DARK_GREY) << curTime << ConsoleColour() << "\n" << std::endl;
 }
 
 void Core::setStage(StageID stage)

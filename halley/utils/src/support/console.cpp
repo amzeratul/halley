@@ -31,7 +31,7 @@ using namespace Halley;
 #include <wincon.h>
 #pragma comment(lib, "comsuppw.lib")
 
-static void setConsoleColor(int foreground, int background)
+static void setConsoleColour(int foreground, int background)
 {
 	if (foreground == -1) {
 		foreground = 7;
@@ -51,32 +51,32 @@ static void setConsoleColor(int, int)
 
 #endif
 
-void Halley::Console::setForeground(ColorType color)
+void Halley::Console::setForeground(ColourType colour)
 {
-	curForeground = color;
-	setConsoleColor(curForeground, curBackground);
+	curForeground = colour;
+	setConsoleColour(curForeground, curBackground);
 }
 
-void Halley::Console::setBackground(ColorType color)
+void Halley::Console::setBackground(ColourType colour)
 {
-	curBackground = color;
-	setConsoleColor(curForeground, curBackground);
+	curBackground = colour;
+	setConsoleColour(curForeground, curBackground);
 }
 
-Console::ColorType Halley::Console::getForeground()
+Console::ColourType Halley::Console::getForeground()
 {
 	return curForeground;
 }
 
-Console::ColorType Halley::Console::getBackground()
+Console::ColourType Halley::Console::getBackground()
 {
 	return curBackground;
 }
 
-Console::ColorType Halley::Console::curForeground = Console::GREY;
-Console::ColorType Halley::Console::curBackground = Console::BLACK;
+Console::ColourType Halley::Console::curForeground = Console::GREY;
+Console::ColourType Halley::Console::curBackground = Console::BLACK;
 
-Halley::ConsoleColorStack::ConsoleColorStack(Console::ColorType foreground, Console::ColorType background)
+Halley::ConsoleColourStack::ConsoleColourStack(Console::ColourType foreground, Console::ColourType background)
 {
 	prevForeground = Console::getForeground();
 	prevBackground = Console::getBackground();
@@ -84,13 +84,13 @@ Halley::ConsoleColorStack::ConsoleColorStack(Console::ColorType foreground, Cons
 	if (background != Console::NO_CHANGE) Console::setBackground(background);
 }
 
-Halley::ConsoleColorStack::~ConsoleColorStack()
+Halley::ConsoleColourStack::~ConsoleColourStack()
 {
 	Console::setForeground(prevForeground);
 	Console::setBackground(prevBackground);
 }
 
-Halley::ConsoleColor::ConsoleColor(Console::ColorType _foreground, Console::ColorType _background /*= Console::DEFAULT*/)
+Halley::ConsoleColour::ConsoleColour(Console::ColourType _foreground, Console::ColourType _background /*= Console::DEFAULT*/)
 	: foreground(_foreground)
 	, background(_background)
 {

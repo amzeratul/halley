@@ -27,7 +27,7 @@ void Halley::MainLoop::runLoop()
 {
 	auto& api = target.getAPI();
 
-	std::cout << ConsoleColor(Console::GREEN) << "\nStarting main loop." << ConsoleColor() << std::endl;
+	std::cout << ConsoleColour(Console::GREEN) << "\nStarting main loop." << ConsoleColour() << std::endl;
 	Debug::trace("MainLoop::run begin");
 
 	using Uint32 = unsigned int;
@@ -73,7 +73,7 @@ void Halley::MainLoop::runLoop()
 	}
 
 	Debug::trace("MainLoop::run end");
-	std::cout << ConsoleColor(Console::GREEN) << "Main loop terminated." << ConsoleColor() << std::endl;
+	std::cout << ConsoleColour(Console::GREEN) << "Main loop terminated." << ConsoleColour() << std::endl;
 }
 
 bool Halley::MainLoop::isRunning() const

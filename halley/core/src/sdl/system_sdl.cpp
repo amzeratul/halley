@@ -17,9 +17,9 @@ void SystemSDL::init()
 	SDL_version linked;
 	SDL_VERSION(&compiled);
 	SDL_GetVersion(&linked);
-	std::cout << ConsoleColor(Console::GREEN) << "\nInitializing SDL..." << ConsoleColor() << std::endl;
-	std::cout << "\tVersion/Compiled: " << ConsoleColor(Console::DARK_GREY) << int(compiled.major) << "." << int(compiled.minor) << "." << int(compiled.patch) << ConsoleColor() << std::endl;
-	std::cout << "\tVersion/Linked: " << ConsoleColor(Console::DARK_GREY) << int(linked.major) << "." << int(linked.minor) << "." << int(linked.patch) << ConsoleColor() << std::endl;
+	std::cout << ConsoleColour(Console::GREEN) << "\nInitializing SDL..." << ConsoleColour() << std::endl;
+	std::cout << "\tVersion/Compiled: " << ConsoleColour(Console::DARK_GREY) << int(compiled.major) << "." << int(compiled.minor) << "." << int(compiled.patch) << ConsoleColour() << std::endl;
+	std::cout << "\tVersion/Linked: " << ConsoleColour(Console::DARK_GREY) << int(linked.major) << "." << int(linked.minor) << "." << int(linked.patch) << ConsoleColour() << std::endl;
 
 	// Initialize SDL
 	if (!SDL_WasInit(SDL_INIT_NOPARACHUTE)) {

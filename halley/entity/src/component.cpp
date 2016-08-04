@@ -13,5 +13,5 @@ void* Component::operator new(size_t size)
 
 void Component::operator delete(void*)
 {
-	std::cout << ConsoleColor(Console::RED) << "Attempting to delete component!" << ConsoleColor() << std::endl;
+	std::cout << ConsoleColour(Console::RED) << "Attempting to delete component!" << ConsoleColour() << std::endl;
 }

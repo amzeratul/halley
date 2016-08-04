@@ -115,7 +115,7 @@ static void enumDir(StringArray& files, String root, String prefix)
 			}
 		}
 	} catch (std::exception &) {
-		std::cout << ConsoleColor(Console::YELLOW) << "Unable to enumerate resources folder: " << rootPath << ConsoleColor() << std::endl;
+		std::cout << ConsoleColour(Console::YELLOW) << "Unable to enumerate resources folder: " << rootPath << ConsoleColour() << std::endl;
 	}
 }
 	

@@ -4,13 +4,13 @@ uniform mat4 u_mvp;
 
 in vec4 a_position;
 in vec4 a_size;
-in vec4 a_color;
+in vec4 a_colour;
 in vec4 a_texCoord0;
 in vec2 a_vertPos;
 
 out vec4 v_texCoord0;
-out vec4 v_color;
-out vec4 v_colorAdd;
+out vec4 v_colour;
+out vec4 v_colourAdd;
 
 vec4 getTexCoord(vec4 texCoords, vec2 vertPos, float texCoordRotation) {
 	vec2 texPos = mix(vertPos, vec2(1.0 - vertPos.y, vertPos.x), texCoordRotation);
@@ -35,6 +35,6 @@ vec4 getVertexPosition(vec2 position, vec2 pivot, vec2 size, vec2 vertPos, float
 
 void main() {
 	v_texCoord0 = getTexCoord(a_texCoord0, a_vertPos, a_size.w);
-	getColours(a_color, v_color, v_colorAdd);
+	getColours(a_colour, v_colour, v_colourAdd);
 	gl_Position = getVertexPosition(a_position.xy, a_position.zw, a_size.xy, a_vertPos, a_size.z);
 }

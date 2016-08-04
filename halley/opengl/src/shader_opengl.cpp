@@ -125,7 +125,7 @@ void ShaderOpenGL::compile()
 		if (result == GL_FALSE) {
 			throw Exception("Error loading shader: " + log);
 		} else if (infolen > 0) {
-			std::cout << ConsoleColor(Console::YELLOW) << "\nIn shader \"" << name << "\":\n==========\n" << log << "\n==========" << ConsoleColor() << std::endl;
+			std::cout << ConsoleColour(Console::YELLOW) << "\nIn shader \"" << name << "\":\n==========\n" << log << "\n==========" << ConsoleColour() << std::endl;
 		}
 
 		uniformLocations.clear();

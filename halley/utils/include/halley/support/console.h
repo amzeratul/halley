@@ -26,7 +26,7 @@
 namespace Halley {
 	class Console {
 	public:
-		enum ColorType {
+		enum ColourType {
 			NO_CHANGE = -2,
 			DEFAULT = -1,
 			BLACK,
@@ -47,41 +47,41 @@ namespace Halley {
 			WHITE
 		};
 
-		static void setForeground(ColorType color);
-		static void setBackground(ColorType color);
-		static Console::ColorType getForeground();
-		static Console::ColorType getBackground();
+		static void setForeground(ColourType colour);
+		static void setBackground(ColourType colour);
+		static Console::ColourType getForeground();
+		static Console::ColourType getBackground();
 
 	private:
-		static Console::ColorType curForeground;
-		static Console::ColorType curBackground;
+		static Console::ColourType curForeground;
+		static Console::ColourType curBackground;
 	};
 
-	class ConsoleColorStack {
+	class ConsoleColourStack {
 	public:
-		ConsoleColorStack(Console::ColorType foreground = Console::DEFAULT, Console::ColorType background = Console::NO_CHANGE);
-		~ConsoleColorStack();
+		ConsoleColourStack(Console::ColourType foreground = Console::DEFAULT, Console::ColourType background = Console::NO_CHANGE);
+		~ConsoleColourStack();
 
 	private:
-		Console::ColorType prevForeground;
-		Console::ColorType prevBackground;
+		Console::ColourType prevForeground;
+		Console::ColourType prevBackground;
 	};
 
-	class ConsoleColor {
+	class ConsoleColour {
 	public:
-		ConsoleColor(Console::ColorType foreground = Console::DEFAULT, Console::ColorType background = Console::NO_CHANGE);
+		ConsoleColour(Console::ColourType foreground = Console::DEFAULT, Console::ColourType background = Console::NO_CHANGE);
 
 	private:
-		Console::ColorType foreground;
-		Console::ColorType background;
+		Console::ColourType foreground;
+		Console::ColourType background;
 
-		friend std::ostream& operator<<(std::ostream& os, const Halley::ConsoleColor& color);
+		friend std::ostream& operator<<(std::ostream& os, const Halley::ConsoleColour& colour);
 	};
 
-	inline std::ostream& operator<<(std::ostream& os, const Halley::ConsoleColor& color)
+	inline std::ostream& operator<<(std::ostream& os, const Halley::ConsoleColour& colour)
 	{
-		if (color.foreground != Console::NO_CHANGE) Console::setForeground(color.foreground);
-		if (color.background != Console::NO_CHANGE) Console::setBackground(color.background);
+		if (colour.foreground != Console::NO_CHANGE) Console::setForeground(colour.foreground);
+		if (colour.background != Console::NO_CHANGE) Console::setBackground(colour.background);
 		return os;
 	}
 
