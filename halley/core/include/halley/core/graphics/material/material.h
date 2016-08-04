@@ -17,6 +17,7 @@ namespace Halley
 		Material(const Material& other);
 		explicit Material(std::shared_ptr<MaterialDefinition> materialDefinition);
 		void bind(int pass, Painter& painter);
+		static void resetBindCache();
 
 		MaterialParameter& operator[](String name);
 

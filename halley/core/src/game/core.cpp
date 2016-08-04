@@ -112,8 +112,6 @@ void Core::init()
 	// Get video resources
 	if (api->video) {
 		painter = std::move(api->videoInternal->makePainter());
-		screenTarget = std::make_unique<ScreenRenderTarget>(Rect4i(Vector2i(), api->video->getWindow().getSize()));
-		camera = std::make_unique<Camera>(Vector2f(640, 360), Vector2f(1280, 720));
 	}
 }
 
@@ -173,6 +171,12 @@ void Core::onFixedUpdate(Time time)
 
 void Core::onVariableUpdate(Time time)
 {
+	if (api->video) {
+		auto windowSize = api->video->getWindow().getSize();
+		screenTarget = std::make_unique<ScreenRenderTarget>(Rect4i(Vector2i(), windowSize));
+		camera = std::make_unique<Camera>(Vector2f(windowSize) * 0.5f, Vector2f(windowSize));
+	}
+
 	if (isRunning()) {
 		doVariableUpdate(time);
 	}

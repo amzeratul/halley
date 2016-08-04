@@ -10,6 +10,7 @@ using namespace Halley;
 
 void Painter::startRender()
 {
+	Material::resetBindCache();
 	nDrawCalls = nTriangles = nVertices = 0;
 
 	verticesPending = 0;

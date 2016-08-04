@@ -41,6 +41,12 @@ void Material::bind(int pass, Painter& painter)
 	}
 }
 
+void Material::resetBindCache()
+{
+	currentMaterial = nullptr;
+	currentPass = 0;
+}
+
 void Material::updateUniforms()
 {
 	int tu = 0;
