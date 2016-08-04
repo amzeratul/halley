@@ -24,6 +24,7 @@ This file is subject to the terms of halley_license.txt.
 #include "halley/text/halleystring.h"
 #include <memory>
 #include <functional>
+#include <halley/concurrency/future.h>
 
 struct SDL_RWops;
 
@@ -106,10 +107,12 @@ namespace Halley {
 		String getResolvedName() const { return resolvedName; }
 		String getBasePath() const;
 		ResourceLoadPriority getPriority() const { return priority; }
-		std::unique_ptr<ResourceDataStatic> getStatic();
-		std::unique_ptr<ResourceDataStream> getStream();
 		HalleyAPI& getAPI() const { return *api; }
 		Metadata& getMeta() const { return *metadata; }
+
+		std::unique_ptr<ResourceDataStatic> getStatic();
+		std::unique_ptr<ResourceDataStream> getStream();
+		Future<std::unique_ptr<ResourceDataStatic>> getAsync() const;
 
 	private:
 		ResourceLoader(ResourceLoader&& loader);

@@ -11,16 +11,16 @@ namespace Halley
 	class ExecutionQueue
 	{
 	public:
-		static ExecutionQueue& getDefault();
-		static void setDefault(ExecutionQueue& e);
-
 		ExecutionQueue();
 		void addToQueue(TaskBase task);
 		TaskBase getNext();
+		std::vector<TaskBase> getAll();
 
 		size_t threadCount() const;
 		void onAttached();
 		void onDetached();
+
+		static ExecutionQueue& getDefault();
 
 	private:
 		std::deque<TaskBase> queue;
@@ -29,8 +29,26 @@ namespace Halley
 
 		std::atomic<int> attachedCount;
 		std::atomic<bool> hasTasks;
+	};
 
-		static ExecutionQueue* defaultQueue;
+	class Executors
+	{
+	public:
+		static Executors& get();
+		static void set(Executors& e);
+
+		static ExecutionQueue& getCPU() { return instance->cpu; }
+		static ExecutionQueue& getVideoAux() { return instance->videoAux; }
+		static ExecutionQueue& getMainThread() { return instance->mainThread; }
+		static ExecutionQueue& getDiskIO() { return instance->diskIO; }
+
+	private:
+		static Executors* instance;
+
+		ExecutionQueue cpu;
+		ExecutionQueue videoAux;
+		ExecutionQueue mainThread;
+		ExecutionQueue diskIO;
 	};
 
 	class Executor

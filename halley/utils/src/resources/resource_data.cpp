@@ -2,6 +2,7 @@
 #include "halley/resources/resource_data.h"
 #include "halley/resources/metadata.h"
 #include "halley/support/exception.h"
+#include <halley/concurrency/concurrent.h>
 
 using namespace Halley;
 
@@ -140,4 +141,14 @@ std::unique_ptr<ResourceDataStream> ResourceLoader::getStream()
 		loaded = true;
 	}
 	return result;
+}
+
+Future<std::unique_ptr<ResourceDataStatic>> ResourceLoader::getAsync() const
+{
+	std::reference_wrapper<IResourceLocator> loc = locator;
+	String resName = resolvedName;
+	return Concurrent::execute([loc, resName] () -> std::unique_ptr<ResourceDataStatic>
+	{
+		return loc.get().getStatic(resName);
+	});
 }
