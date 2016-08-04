@@ -1,15 +1,16 @@
 core
-- child stages
+- child stages?
 
 core/resources
 * "library" of pre-processed assets from which the game loads data (like Unity)
 - "standard library" of resources from Halley
+- binary format to replace yaml
 - resources hot reloading [RESEARCH]
 - asynchronous resource loading
 
 core/graphics
-- consider replacing text format with binary format? (current one is super slow)
 - convert uniforms into attributes for distance_field_sprite?
+- binary font format
 - optimise SpritePainter
 - render graph [from old Halley]
 - sliced sprites [RESEARCH]
@@ -59,7 +60,9 @@ cli tools
 - texture converter?
 
 editor
-- decide how this is going to work (overlay? separate tool? do we allow remote connection?) [RESEARCH]
+- connect to game via sockets
+- console
+- current tasks display
 - asset/prefab editor
 - scene editor? [RESEARCH]
 - animation editor

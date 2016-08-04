@@ -9,7 +9,7 @@ uniforms:
 attributes:
   - a_position: vec4   # xy = position, zw = relative pivot [0..1]
   - a_size: vec4       # xy = size (px), z = rotation (radians), w = sprite rotated? (1 if 90 degrees rotated)
-  - a_colour: vec4      # rgba
+  - a_colour: vec4     # rgba
   - a_texCoord0: vec4  # xy = top-left, zw = bottom-right
   - a_vertPos: vec2    # xy = relative position of vertex [0..1]
 passes:
