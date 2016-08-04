@@ -1,6 +1,15 @@
 #include "editor_root_stage.h"
+#include "console_window.h"
 
 using namespace Halley;
+
+EditorRootStage::EditorRootStage()
+{
+}
+
+EditorRootStage::~EditorRootStage()
+{
+}
 
 void EditorRootStage::init()
 {
@@ -15,10 +24,14 @@ void EditorRootStage::init()
 	mat["u_smoothness"] = 0.1f;
 	mat["u_outline"] = 0.0f;
 	mat["u_outlineColour"] = col;
+
+	console = std::make_unique<ConsoleWindow>(getResources());
 }
 
 void EditorRootStage::onVariableUpdate(Time time)
 {
+	console->update(*getInputAPI().getKeyboard());
+
 	halleyLogo.setPos(Vector2f(getVideoAPI().getWindow().getSize() / 2));
 }
 
@@ -26,6 +39,8 @@ void EditorRootStage::onRender(RenderContext& context) const
 {
 	context.bind([&](Painter& painter)
 	{
+		auto view = Rect4f(painter.getViewPort());
+
 		painter.clear(Colour(0));
 
 		// Background
@@ -35,8 +50,8 @@ void EditorRootStage::onRender(RenderContext& context) const
 			auto sprite = Sprite()
 				.setMaterial(matRaw)
 				.setPos(Vector2f(0, 0))
-				.setTexRect(Rect4f(painter.getViewPort()))
-				.setSize(Vector2f(painter.getViewPort().getSize()));
+				.setTexRect(view)
+				.setSize(view.getSize());
 			mat["u_col0"] = Colour4f(0.08f);
 			mat["u_col1"] = Colour4f(0.07f);
 			mat["u_distance"] = 6.0f;
@@ -44,5 +59,7 @@ void EditorRootStage::onRender(RenderContext& context) const
 		}
 
 		halleyLogo.draw(painter);
+
+		console->draw(painter, Rect4f(view.getTopLeft() + Vector2f(64, 64), view.getBottomRight() - Vector2f(64, 64)));
 	});
 }

@@ -53,7 +53,15 @@ void InputKeyboardConcrete::processEvent(const SDL_Event &_event)
 			{
 				int scancode = event.keysym.scancode;
 				onButtonPressed(scancode);
-				if (scancode == Keys::Backspace) letters.push_back(scancode);
+				if (scancode == Keys::Backspace) {
+					letters.push_back(scancode);
+				}
+				if (scancode == Keys::Enter || scancode == Keys::KP_Enter) {
+					letters.push_back('\n');
+				}
+				if (scancode == Keys::Tab) {
+					letters.push_back('\t');
+				}
 				break;
 			}
 		}

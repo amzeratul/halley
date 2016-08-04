@@ -30,6 +30,7 @@ namespace Halley
 		static std::unique_ptr<Font> loadResource(ResourceLoader& loader);
 
 		const Glyph& getGlyph(int code) const;
+		float getLineHeightAtSize(float size) const { return height * size / sizePt; }
 		float getAscenderDistance() const { return ascender; }
 		float getHeight() const { return height; }
 		float getSizePoints() const { return sizePt; }

@@ -2,13 +2,20 @@
 
 #include "prec.h"
 
-class EditorRootStage final : public Halley::Stage
-{
-public:
-	void init() override;
-	void onVariableUpdate(Halley::Time time) override;
-	void onRender(Halley::RenderContext& context) const override;
+namespace Halley {
+	class ConsoleWindow;
 
-private:
-	Halley::Sprite halleyLogo;
-};
+	class EditorRootStage final : public Stage
+	{
+	public:
+		EditorRootStage();
+		~EditorRootStage();
+		void init() override;
+		void onVariableUpdate(Time time) override;
+		void onRender(RenderContext& context) const override;
+
+	private:
+		Sprite halleyLogo;
+		std::unique_ptr<ConsoleWindow> console;
+	};
+}

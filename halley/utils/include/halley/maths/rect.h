@@ -111,6 +111,8 @@ namespace Halley {
 
 		Vector2D<T> getTopLeft() const { return p1; }
 		Vector2D<T> getBottomRight() const { return p2; }
+		Vector2D<T> getBottomLeft() const { return Vector2D<T>(p1.x, p2.y); }
+		Vector2D<T> getTopRight() const { return Vector2D<T>(p2.x, p1.y); }
 		Vector2D<T> getSize() const { return p2 - p1; }
 
 		T getWidth() const { return p2.x - p1.x; }
