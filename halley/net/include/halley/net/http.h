@@ -21,9 +21,8 @@
 
 #pragma once
 
-#ifdef WITH_BOOST_ASIO
-
-#include "../text/halleystring.h"
+#include <halley/text/halleystring.h>
+#include <halley/utils/utils.h>
 
 namespace Halley {
 	class HTTPPostEntry {
@@ -31,17 +30,15 @@ namespace Halley {
 		String name;
 		String filename;
 		String contentType;
-		Vector<char> data;
+		Bytes data;
 	};
 
 	class HTTP {
 	public:
-		static Vector<char> get(String host, String path);
-		static Vector<char> post(String host, String path, Vector<HTTPPostEntry>& entries);
+		static Bytes get(String host, String path);
+		static Bytes post(String host, String path, std::vector<HTTPPostEntry>& entries);
 
 	private:
-		static Vector<char> request(String host, String path, bool isPost, String& content, String boundary);
+		static Bytes request(String host, String path, bool isPost, String& content, String boundary);
 	};
 }
-
-#endif

@@ -19,9 +19,8 @@
 
 \*****************************************************************/
 
-#include "halley/web/http.h"
-
-#ifdef WITH_BOOST_ASIO
+#include "http.h"
+#include <halley/support/exception.h>
 
 using namespace Halley;
 
@@ -30,15 +29,14 @@ using namespace Halley;
 #endif
 
 #include <boost/asio.hpp>
-#include "exception.h"
 
-Vector<char> HTTP::get(String host, String path)
+Bytes HTTP::get(String host, String path)
 {
 	String content = "";
 	return request(host, path, false, content, "");
 }
 
-Vector<char> Halley::HTTP::post(String host, String path, Vector<HTTPPostEntry>& entries)
+Bytes HTTP::post(String host, String path, Vector<HTTPPostEntry>& entries)
 {
 	String boundary = "=.AaB03xBOunDaRyyy--";
 
@@ -52,7 +50,7 @@ Vector<char> Halley::HTTP::post(String host, String path, Vector<HTTPPostEntry>&
 			c << "Content-Type: application/unknown\r\n";
 			c << "Content-Transfer-Encoding: binary\r\n\r\n";
 		}
-		c.write(entries[i].data.data(), entries[i].data.size());
+		c.write(reinterpret_cast<const char*>(entries[i].data.data()), entries[i].data.size());
 		if (i != entries.size() - 1) c << "\r\n";
 	}
 	String content = c.str();
@@ -60,7 +58,7 @@ Vector<char> Halley::HTTP::post(String host, String path, Vector<HTTPPostEntry>&
 	return request(host, path, true, content, boundary);
 }
 
-Vector<char> Halley::HTTP::request(String host, String path, bool isPost, String& content, String boundary)
+Bytes HTTP::request(String host, String path, bool isPost, String& content, String boundary)
 {
 	// Code adapted from http://www.boost.org/doc/libs/1_49_0_beta1/doc/html/boost_asio/example/http/client/sync_client.cpp
 	
@@ -94,13 +92,13 @@ Vector<char> Halley::HTTP::request(String host, String path, bool isPost, String
 	}
 
 	// Send the request.
-	boost::asio::write(socket, request);
+	write(socket, request);
 
 	// Read the reply
-	Vector<char> result;
+	Bytes result;
 	size_t pos = 0;
 	while (true) {
-		array<char, 128> buf;
+		std::array<char, 128> buf;
 		boost::system::error_code error;
 
 		size_t len = socket.read_some(boost::asio::buffer(buf), error);
@@ -116,5 +114,3 @@ Vector<char> Halley::HTTP::request(String host, String path, bool isPost, String
 	}
 	return result;
 }
-
-#endif

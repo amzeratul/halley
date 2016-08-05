@@ -50,7 +50,6 @@ set(SOURCES
         "src/text/encode.cpp"
         "src/text/halleystring.cpp"
         "src/time/stopwatch.cpp"
-        "src/web/http.cpp"
         )
 
 set(HEADERS
@@ -122,7 +121,6 @@ set(HEADERS
         "include/halley/time/stopwatch.h"
         "include/halley/utils/algorithm.h"
         "include/halley/utils/utils.h"
-        "include/halley/web/http.h"
         "src/file_formats/tinyxml/ticpp.h"
         "src/file_formats/tinyxml/ticpprc.h"
         "src/file_formats/tinyxml/tinystr.h"

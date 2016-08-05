@@ -109,6 +109,18 @@ namespace Halley {
 			p2 = p1 + size;
 		}
 
+		Rect2D<T> shrink(T amount)
+		{
+			auto offset = Vector2D<T>(amount, amount);
+			return Rect2D(p1 + offset, p2 - offset);
+		}
+
+		Rect2D<T> grow(T amount)
+		{
+			auto offset = Vector2D<T>(amount, amount);
+			return Rect2D(p1 - offset, p2 + offset);
+		}
+
 		Vector2D<T> getTopLeft() const { return p1; }
 		Vector2D<T> getBottomRight() const { return p2; }
 		Vector2D<T> getBottomLeft() const { return Vector2D<T>(p1.x, p2.y); }
