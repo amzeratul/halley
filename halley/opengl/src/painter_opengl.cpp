@@ -142,27 +142,8 @@ void PainterOpenGL::setupVertexAttributes(MaterialDefinition& material)
 void PainterOpenGL::drawQuads(size_t n)
 {
 	size_t sz = n * 6;
-	size_t oldSize = indexData.size();
-	if (oldSize < sz) {
-		indexData.resize(sz);
-		unsigned short pos = static_cast<unsigned short>(oldSize * 2 / 3);
-		for (size_t i = oldSize; i < sz; i += 6) {
-			// B-----C
-			// |     |
-			// A-----D
-			// ABC
-			indexData[i] = pos;
-			indexData[i + 1] = pos + 1;
-			indexData[i + 2] = pos + 2;
-			// CDA
-			indexData[i + 3] = pos + 2;
-			indexData[i + 4] = pos + 3;
-			indexData[i + 5] = pos;
-			pos += 4;
-		}
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, int(sz) * sizeof(short), indexData.data(), GL_STREAM_DRAW);
-	}
 
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, int(sz) * sizeof(short), getStandardQuadIndices(sz), GL_STREAM_DRAW);
 	glDrawElements(GL_TRIANGLES, int(sz), GL_UNSIGNED_SHORT, 0);
 	glCheckError();
 }

@@ -31,13 +31,18 @@ void Painter::flush()
 	flushPending();
 }
 
+static Vector2f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
+{
+	return *reinterpret_cast<Vector2f*>(vertexAttrib + vertPosOffset);
+}
+
 void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites, size_t vertPosOffset, const void* vertexData)
 {
 	assert(numSprites > 0);
 	assert(vertexData != nullptr);
 	assert(material);
 
-	checkPendingMaterial(material);
+	startDrawCall(material);
 
 	const size_t vertexStride = material->getDefinition().getVertexStride();
 	const size_t dataSize = 4 * numSprites * vertexStride;
@@ -57,7 +62,7 @@ void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites,
 			// 1 -> 1, 0
 			// 2 -> 1, 1
 			// 3 -> 0, 1
-			*reinterpret_cast<Vector2f*>(dst + dstOffset + vertPosOffset) = Vector2f((j & 1) ^ ((j & 2) >> 1), (j & 2) >> 1);
+			getVertPos(dst + dstOffset, vertPosOffset) = Vector2f(((j & 1) ^ ((j & 2) >> 1)) * 1.0f, ((j & 2) >> 1) * 1.0f);
 		}
 	}
 
@@ -72,7 +77,7 @@ void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, 
 	assert(vertexData != nullptr);
 	assert(material);
 
-	checkPendingMaterial(material);
+	startDrawCall(material);
 
 	size_t dataSize = numVertices * material->getDefinition().getVertexStride();
 	makeSpaceForPendingBytes(dataSize);
@@ -91,7 +96,6 @@ void Painter::makeSpaceForPendingBytes(size_t numBytes)
 	}
 }
 
-
 void Painter::bind(RenderContext& context)
 {
 	// Set render target
@@ -109,7 +113,7 @@ void Painter::bind(RenderContext& context)
 	projection = camera->getProjection();
 }
 
-void Painter::checkPendingMaterial(std::shared_ptr<Material>& material)
+void Painter::startDrawCall(std::shared_ptr<Material>& material)
 {
 	if (material != materialPending) {
 		if (materialPending != std::shared_ptr<Material>()) {
@@ -152,4 +156,31 @@ void Painter::executeDrawQuads(Material& material, size_t numVertices, void* ver
 		nTriangles += numVertices / 2;
 		nVertices += numVertices;
 	}
+}
+
+unsigned short* Painter::getStandardQuadIndices(size_t numQuads)
+{
+	size_t sz = numQuads * 6;
+	size_t oldSize = stdQuadIndexCache.size();
+
+	if (oldSize < sz) {
+		stdQuadIndexCache.resize(sz);
+		unsigned short pos = static_cast<unsigned short>(oldSize * 2 / 3);
+		for (size_t i = oldSize; i < sz; i += 6) {
+			// B-----C
+			// |     |
+			// A-----D
+			// ABC
+			stdQuadIndexCache[i] = pos;
+			stdQuadIndexCache[i + 1] = pos + 1;
+			stdQuadIndexCache[i + 2] = pos + 2;
+			// CDA
+			stdQuadIndexCache[i + 3] = pos + 2;
+			stdQuadIndexCache[i + 4] = pos + 3;
+			stdQuadIndexCache[i + 5] = pos;
+			pos += 4;
+		}
+	}
+
+	return stdQuadIndexCache.data();
 }

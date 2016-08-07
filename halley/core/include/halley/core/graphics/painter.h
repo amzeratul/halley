@@ -46,6 +46,8 @@ namespace Halley
 		virtual void drawQuads(size_t n) = 0;
 
 		virtual void setViewPort(Rect4i rect, bool enableScissor) = 0;
+
+		unsigned short* getStandardQuadIndices(size_t numQuads);
 		
 	private:
 		void bind(RenderContext& context);
@@ -64,7 +66,9 @@ namespace Halley
 		size_t nVertices = 0;
 		size_t nTriangles = 0;
 
-		void checkPendingMaterial(std::shared_ptr<Material>& material);
+		Vector<unsigned short> stdQuadIndexCache;
+
+		void startDrawCall(std::shared_ptr<Material>& material);
 		void flushPending();
 		void executeDrawQuads(Material& material, size_t numVertices, void* vertexData);
 		void makeSpaceForPendingBytes(size_t numBytes);
