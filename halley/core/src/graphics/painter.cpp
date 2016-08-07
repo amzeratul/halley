@@ -31,55 +31,66 @@ void Painter::flush()
 	flushPending();
 }
 
-/*
-template <typename T>
-static void doMemcpyAlign(void* dstBytes, const void* srcBytes, size_t bytes)
+void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites, size_t vertPosOffset, const void* vertexData)
 {
-	T* dst = reinterpret_cast<T*>(dstBytes);
-	const T* src = reinterpret_cast<const T*>(srcBytes);
-	const T* srcEnd = src + (bytes / sizeof(T));
-	for (; src != srcEnd; ++src, ++dst) {
-		*dst = *src;
+	assert(numSprites > 0);
+	assert(vertexData != nullptr);
+	assert(material);
+
+	checkPendingMaterial(material);
+
+	const size_t vertexStride = material->getDefinition().getVertexStride();
+	const size_t dataSize = 4 * numSprites * vertexStride;
+	makeSpaceForPendingBytes(dataSize);
+
+	char* const dst = vertexBuffer.data() + bytesPending;
+	const char* const src = reinterpret_cast<const char*>(vertexData);
+
+	for (size_t i = 0; i < numSprites; i++) {
+		for (size_t j = 0; j < 4; j++) {
+			size_t srcOffset = i * vertexStride;
+			size_t dstOffset = (i * 4 + j) * vertexStride;
+			memmove(dst + dstOffset, src + srcOffset, vertexStride);
+
+			// j -> vertPos
+			// 0 -> 0, 0
+			// 1 -> 1, 0
+			// 2 -> 1, 1
+			// 3 -> 0, 1
+			*reinterpret_cast<Vector2f*>(dst + dstOffset + vertPosOffset) = Vector2f((j & 1) ^ ((j & 2) >> 1), (j & 2) >> 1);
+		}
 	}
+
+	verticesPending += numSprites * 4;
+	bytesPending += dataSize;
 }
 
-inline void memcpyAlign(void* dstBytes, const void* srcBytes, size_t bytes)
-{
-	if (bytes % sizeof(size_t) == 0) {
-		// Use size_t aligned if possible
-		doMemcpyAlign<size_t>(dstBytes, srcBytes, bytes);
-	} else {
-		// Data is always int-aligned, since numVertices % 4 == 0
-		doMemcpyAlign<int>(dstBytes, srcBytes, bytes);
-	}
-}
-*/
-
-void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, void* vertexData)
+void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData)
 {
 	assert(numVertices > 0);
 	assert(numVertices % 4 == 0);
 	assert(vertexData != nullptr);
 	assert(material);
 
-	if (material != materialPending) {
-		if (materialPending != std::shared_ptr<Material>()) {
-			flushPending();
-		}
-		materialPending = material;
-	}
+	checkPendingMaterial(material);
 
 	size_t dataSize = numVertices * material->getDefinition().getVertexStride();
-	size_t requiredSize = dataSize + bytesPending;
-	if (vertexBuffer.size() < requiredSize) {
-		vertexBuffer.resize(requiredSize * 2);
-	}
+	makeSpaceForPendingBytes(dataSize);
 	
 	memmove(vertexBuffer.data() + bytesPending, vertexData, dataSize);
 
 	verticesPending += numVertices;
 	bytesPending += dataSize;
 }
+
+void Painter::makeSpaceForPendingBytes(size_t numBytes)
+{
+	size_t requiredSize = bytesPending + numBytes;
+	if (vertexBuffer.size() < requiredSize) {
+		vertexBuffer.resize(requiredSize * 2);
+	}
+}
+
 
 void Painter::bind(RenderContext& context)
 {
@@ -96,6 +107,16 @@ void Painter::bind(RenderContext& context)
 	camera->setViewArea(Vector2f(viewPort.getSize()));
 	camera->updateProjection();
 	projection = camera->getProjection();
+}
+
+void Painter::checkPendingMaterial(std::shared_ptr<Material>& material)
+{
+	if (material != materialPending) {
+		if (materialPending != std::shared_ptr<Material>()) {
+			flushPending();
+		}
+		materialPending = material;
+	}
 }
 
 void Painter::flushPending()

@@ -62,14 +62,12 @@ namespace Halley
 
 	private:
 		std::shared_ptr<Material> material;
-		mutable std::array<SpriteVertexAttrib, 4> vertices;
+		SpriteVertexAttrib vertexAttrib;
 
 		Vector2f scale;
 		Vector2f size;
 		bool flip = false;
-		mutable bool dirty = false;
 
-		void update() const;
 		void computeSize();
 	};
 }

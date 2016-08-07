@@ -28,7 +28,12 @@ namespace Halley
 		virtual void clear(Colour colour) = 0;
 		virtual void setBlend(BlendType blend) = 0;
 
-		void drawQuads(std::shared_ptr<Material> material, size_t numVertices, void* vertexData);
+		// Draw sprites takes a single vertex per sprite, duplicates the data across multiple vertices, and draws
+		// vertPosOffset is the offset, in bytes, from the start of each vertex's data, to a Vector2f which will be filled with the vertex's position in 0-1 space.
+		void drawSprites(std::shared_ptr<Material> material, size_t numSprites, size_t vertPosOffset, const void* vertexData);
+
+		// Draws quads to the screen
+		void drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData);
 
 		size_t getNumDrawCalls() const { return nDrawCalls; }
 		size_t getNumVertices() const { return nVertices; }
@@ -59,7 +64,9 @@ namespace Halley
 		size_t nVertices = 0;
 		size_t nTriangles = 0;
 
+		void checkPendingMaterial(std::shared_ptr<Material>& material);
 		void flushPending();
 		void executeDrawQuads(Material& material, size_t numVertices, void* vertexData);
+		void makeSpaceForPendingBytes(size_t numBytes);
 	};
 }
