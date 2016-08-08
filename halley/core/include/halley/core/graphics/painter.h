@@ -42,13 +42,11 @@ namespace Halley
 	protected:
 		virtual void doStartRender() = 0;
 		virtual void doEndRender() = 0;
-		virtual void setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData) = 0;
-		virtual void drawQuads(size_t n) = 0;
+		virtual void setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices) = 0;
+		virtual void drawTriangles(size_t numIndices) = 0;
 
 		virtual void setViewPort(Rect4i rect, bool enableScissor) = 0;
 
-		unsigned short* getStandardQuadIndices(size_t numQuads);
-		
 	private:
 		void bind(RenderContext& context);
 
@@ -72,5 +70,6 @@ namespace Halley
 		void flushPending();
 		void executeDrawQuads(Material& material, size_t numVertices, void* vertexData);
 		void makeSpaceForPendingBytes(size_t numBytes);
+		unsigned short* getStandardQuadIndices(size_t numQuads);
 	};
 }

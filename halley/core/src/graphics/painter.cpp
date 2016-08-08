@@ -141,7 +141,9 @@ void Painter::executeDrawQuads(Material& material, size_t numVertices, void* ver
 	material["u_mvp"] = projection;
 
 	// Load vertices
-	setVertices(material.getDefinition(), numVertices, vertexData);
+	size_t numIndices = numVertices * 3 / 2;
+	auto indices = getStandardQuadIndices(numVertices / 4);
+	setVertices(material.getDefinition(), numVertices, vertexData, numIndices, indices);
 
 	// Go through each pass
 	for (int i = 0; i < material.getDefinition().getNumPasses(); i++) {
@@ -149,7 +151,7 @@ void Painter::executeDrawQuads(Material& material, size_t numVertices, void* ver
 		material.bind(i, *this);
 
 		// Draw
-		drawQuads(int(numVertices / 4));
+		drawTriangles(numIndices);
 
 		// Log stats
 		nDrawCalls++;

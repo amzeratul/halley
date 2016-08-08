@@ -76,8 +76,17 @@ void PainterOpenGL::setBlend(BlendType blend)
 	glUtils->setBlendType(blend);
 }
 
-void PainterOpenGL::setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData)
+void PainterOpenGL::setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
 {
+	assert(numVertices > 0);
+	assert(numIndices >= numVertices);
+	assert(vertexData);
+	assert(indices);
+
+	// Load indices into VBO
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, int(numIndices) * sizeof(unsigned short), indices, GL_STREAM_DRAW);
+	glCheckError();
+
 	// Load vertices into VBO
 	size_t bytesSize = numVertices * material.getVertexStride();
 	glBufferData(GL_ARRAY_BUFFER, bytesSize, vertexData, GL_STREAM_DRAW);
@@ -139,12 +148,10 @@ void PainterOpenGL::setupVertexAttributes(MaterialDefinition& material)
 	// TODO: disable positions not used by this program
 }
 
-void PainterOpenGL::drawQuads(size_t n)
+void PainterOpenGL::drawTriangles(size_t numIndices)
 {
-	size_t sz = n * 6;
-
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, int(sz) * sizeof(short), getStandardQuadIndices(sz), GL_STREAM_DRAW);
-	glDrawElements(GL_TRIANGLES, int(sz), GL_UNSIGNED_SHORT, 0);
+	assert(numIndices > 0);
+	glDrawElements(GL_TRIANGLES, int(numIndices), GL_UNSIGNED_SHORT, nullptr);
 	glCheckError();
 }
 

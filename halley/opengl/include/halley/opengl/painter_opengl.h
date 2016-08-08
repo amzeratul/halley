@@ -20,8 +20,8 @@ namespace Halley
 		void setBlend(BlendType blend) override;
 
 	protected:
-		void setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData) override;
-		void drawQuads(size_t n) override;
+		void setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices) override;
+		void drawTriangles(size_t numIndices) override;
 		void setViewPort(Rect4i rect, bool enableScissor) override;
 
 	private:
