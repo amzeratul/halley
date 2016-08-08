@@ -151,6 +151,8 @@ void PainterOpenGL::setupVertexAttributes(MaterialDefinition& material)
 void PainterOpenGL::drawTriangles(size_t numIndices)
 {
 	assert(numIndices > 0);
+	assert(numIndices % 3 == 0);
+
 	glDrawElements(GL_TRIANGLES, int(numIndices), GL_UNSIGNED_SHORT, nullptr);
 	glCheckError();
 }

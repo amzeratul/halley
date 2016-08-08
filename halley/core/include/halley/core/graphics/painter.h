@@ -57,7 +57,9 @@ namespace Halley
 
 		size_t verticesPending = 0;
 		size_t bytesPending = 0;
+		size_t indicesPending = 0;
 		Vector<char> vertexBuffer;
+		Vector<unsigned short> indexBuffer;
 		std::shared_ptr<Material> materialPending;
 
 		size_t nDrawCalls = 0;
@@ -66,10 +68,14 @@ namespace Halley
 
 		Vector<unsigned short> stdQuadIndexCache;
 
+		void resetPending();
 		void startDrawCall(std::shared_ptr<Material>& material);
 		void flushPending();
-		void executeDrawQuads(Material& material, size_t numVertices, void* vertexData);
-		void makeSpaceForPendingBytes(size_t numBytes);
+		void executeDrawTriangles(Material& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices);
+
+		void makeSpaceForPendingVertices(size_t numBytes);
+		void makeSpaceForPendingIndices(size_t numIndices);
+		void generateQuadIndices(size_t firstVertex, size_t numQuads);
 		unsigned short* getStandardQuadIndices(size_t numQuads);
 	};
 }

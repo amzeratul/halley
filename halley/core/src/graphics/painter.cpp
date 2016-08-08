@@ -13,8 +13,7 @@ void Painter::startRender()
 	Material::resetBindCache();
 	nDrawCalls = nTriangles = nVertices = 0;
 
-	verticesPending = 0;
-	bytesPending = 0;
+	resetPending();
 	doStartRender();
 }
 
@@ -46,7 +45,7 @@ void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites,
 
 	const size_t vertexStride = material->getDefinition().getVertexStride();
 	const size_t dataSize = 4 * numSprites * vertexStride;
-	makeSpaceForPendingBytes(dataSize);
+	makeSpaceForPendingVertices(dataSize);
 
 	char* const dst = vertexBuffer.data() + bytesPending;
 	const char* const src = reinterpret_cast<const char*>(vertexData);
@@ -66,6 +65,7 @@ void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites,
 		}
 	}
 
+	generateQuadIndices(verticesPending, numSprites);
 	verticesPending += numSprites * 4;
 	bytesPending += dataSize;
 }
@@ -80,19 +80,28 @@ void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, 
 	startDrawCall(material);
 
 	size_t dataSize = numVertices * material->getDefinition().getVertexStride();
-	makeSpaceForPendingBytes(dataSize);
+	makeSpaceForPendingVertices(dataSize);
 	
 	memmove(vertexBuffer.data() + bytesPending, vertexData, dataSize);
 
+	generateQuadIndices(verticesPending, numVertices / 4);
 	verticesPending += numVertices;
 	bytesPending += dataSize;
 }
 
-void Painter::makeSpaceForPendingBytes(size_t numBytes)
+void Painter::makeSpaceForPendingVertices(size_t numBytes)
 {
 	size_t requiredSize = bytesPending + numBytes;
 	if (vertexBuffer.size() < requiredSize) {
 		vertexBuffer.resize(requiredSize * 2);
+	}
+}
+
+void Painter::makeSpaceForPendingIndices(size_t numIndices)
+{
+	size_t requiredSize = indicesPending + numIndices;
+	if (indexBuffer.size() < requiredSize) {
+		indexBuffer.resize(requiredSize * 2);
 	}
 }
 
@@ -126,23 +135,26 @@ void Painter::startDrawCall(std::shared_ptr<Material>& material)
 void Painter::flushPending()
 {
 	if (verticesPending > 0) {
-		executeDrawQuads(*materialPending, verticesPending, vertexBuffer.data());
+		executeDrawTriangles(*materialPending, verticesPending, vertexBuffer.data(), indicesPending, indexBuffer.data());
 	}
 
-	// Reset
+	resetPending();
+}
+
+void Painter::resetPending()
+{
 	bytesPending = 0;
 	verticesPending = 0;
+	indicesPending = 0;
 	materialPending.reset();
 }
 
-void Painter::executeDrawQuads(Material& material, size_t numVertices, void* vertexData)
+void Painter::executeDrawTriangles(Material& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
 {
 	// Bind projection
 	material["u_mvp"] = projection;
 
 	// Load vertices
-	size_t numIndices = numVertices * 3 / 2;
-	auto indices = getStandardQuadIndices(numVertices / 4);
 	setVertices(material.getDefinition(), numVertices, vertexData, numIndices, indices);
 
 	// Go through each pass
@@ -155,7 +167,7 @@ void Painter::executeDrawQuads(Material& material, size_t numVertices, void* ver
 
 		// Log stats
 		nDrawCalls++;
-		nTriangles += numVertices / 2;
+		nTriangles += numIndices / 3;
 		nVertices += numVertices;
 	}
 }
@@ -185,4 +197,28 @@ unsigned short* Painter::getStandardQuadIndices(size_t numQuads)
 	}
 
 	return stdQuadIndexCache.data();
+}
+
+void Painter::generateQuadIndices(size_t firstVertex, size_t numQuads)
+{
+	size_t numIndices = numQuads * 6;
+	makeSpaceForPendingIndices(numIndices);
+
+	unsigned short pos = static_cast<unsigned short>(firstVertex);
+	for (size_t i = indicesPending; i < indicesPending + numIndices; i += 6) {
+		// B-----C
+		// |     |
+		// A-----D
+		// ABC
+		indexBuffer[i] = pos;
+		indexBuffer[i + 1] = pos + 1;
+		indexBuffer[i + 2] = pos + 2;
+		// CDA
+		indexBuffer[i + 3] = pos + 2;
+		indexBuffer[i + 4] = pos + 3;
+		indexBuffer[i + 5] = pos;
+		pos += 4;
+	}
+
+	indicesPending += numIndices;
 }
