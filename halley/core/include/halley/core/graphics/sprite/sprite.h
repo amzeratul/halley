@@ -34,6 +34,7 @@ namespace Halley
 		Sprite();
 
 		void draw(Painter& painter) const;
+		void drawSliced(Painter& painter, Vector4f slices) const;
 		static void draw(const Sprite* sprites, size_t n, Painter& painter);
 
 		bool isInView(Rect4f rect) const;

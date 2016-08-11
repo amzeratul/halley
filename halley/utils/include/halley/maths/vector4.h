@@ -153,7 +153,7 @@ namespace Halley {
 	template <typename T >
 	std::ostream& operator<< (std::ostream& ostream, const Vector4D<T>& v)
 	{
-		ostream << "(" << v.x << "," << v.y << "," v.z << "," << v.w << ")" ; return ostream;
+		ostream << "(" << v.x << "," << v.y << "," << v.z << "," << v.w << ")" ; return ostream;
 	}
 
 	////////////

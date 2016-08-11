@@ -61,12 +61,24 @@ Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& mater
 	return result;
 }
 
-void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites, size_t vertPosOffset, const void* vertexData)
+void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData)
+{
+	assert(numVertices % 4 == 0);
+	assert(vertexData != nullptr);
+
+	auto result = addDrawData(material, numVertices, numVertices * 3 / 2);
+
+	memmove(result.dstVertex, vertexData, result.dataSize);
+	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
+}
+
+void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites, const void* vertexData)
 {
 	assert(vertexData != nullptr);
 
 	const size_t verticesPerSprite = 4;
 	const size_t numVertices = verticesPerSprite * numSprites;
+	const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
 
 	auto result = addDrawData(material, numVertices, numSprites * 6);
 
@@ -92,15 +104,51 @@ void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites,
 	generateQuadIndices(result.firstIndex, numSprites, result.dstIndex);
 }
 
-void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData)
+void Painter::drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scale, Vector4f slices, const void* vertexData)
 {
-	assert(numVertices % 4 == 0);
 	assert(vertexData != nullptr);
+	assert(scale.x > 0.0001f);
+	assert(scale.y > 0.0001f);
 
-	auto result = addDrawData(material, numVertices, numVertices * 3 / 2);
+	//         a        c
+	//   00 -- 01 ----- 02 -- 03
+	//   |     |        |     |
+	// b 04 -- 05 ----- 06 -- 07
+	//   |     |        |     |
+	//   |     |        |     |
+	// d 08 -- 09 ----- 10 -- 11
+	//   |     |        |     |
+	//   12 -- 13 ----- 14 -- 15
 
-	memmove(result.dstVertex, vertexData, result.dataSize);
-	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
+	const size_t numVertices = 16;
+	const size_t numIndices = 9 * 6; // 9 quads, 6 indices per quad
+	const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
+
+	auto result = addDrawData(material, numVertices, numIndices);
+	const char* const src = reinterpret_cast<const char*>(vertexData);
+
+	// Vertices
+	std::array<Vector2f, 4> pos = { Vector2f(0, 0), Vector2f(slices.x / scale.x, slices.y / scale.y), Vector2f(1 - slices.z / scale.x, 1 - slices.w / scale.y), Vector2f(1, 1) };
+	std::array<Vector2f, 4> tex = { Vector2f(0, 0), Vector2f(slices.x, slices.y), Vector2f(1 - slices.z, 1 - slices.w), Vector2f(1, 1) };
+	for (size_t i = 0; i < numVertices; i++) {
+		const size_t ix = i & 3;
+		const size_t iy = i >> 2;
+		const size_t dstOffset = i * result.vertexSize;
+
+		memmove(result.dstVertex + dstOffset, src, result.vertexSize);
+
+		Vector4f& vertPos = getVertPos(result.dstVertex + dstOffset, vertPosOffset);
+		vertPos = Vector4f(pos[ix].x, pos[iy].y, tex[ix].x, tex[iy].y);
+	}
+
+	// Indices
+	unsigned short* dstIndex = result.dstIndex;
+	for (size_t y = 0; y < 3; y++) {
+		for (size_t x = 0; x < 3; x++) {
+			generateQuadIndicesOffset(static_cast<unsigned short>(result.firstIndex + x + (y * 4)), 4, dstIndex);
+			dstIndex += 6;
+		}
+	}
 }
 
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
@@ -195,9 +243,9 @@ unsigned short* Painter::getStandardQuadIndices(size_t numQuads)
 		stdQuadIndexCache.resize(sz);
 		unsigned short pos = static_cast<unsigned short>(oldSize * 2 / 3);
 		for (size_t i = oldSize; i < sz; i += 6) {
-			// B-----C
+			// A-----B
 			// |     |
-			// A-----D
+			// D-----C
 			// ABC
 			stdQuadIndexCache[i] = pos;
 			stdQuadIndexCache[i + 1] = pos + 1;
@@ -217,9 +265,9 @@ void Painter::generateQuadIndices(unsigned short pos, size_t numQuads, unsigned 
 {
 	size_t numIndices = numQuads * 6;
 	for (size_t i = 0; i < numIndices; i += 6) {
-		// B-----C
+		// A-----B
 		// |     |
-		// A-----D
+		// D-----C
 		// ABC
 		target[i] = pos;
 		target[i + 1] = pos + 1;
@@ -230,4 +278,19 @@ void Painter::generateQuadIndices(unsigned short pos, size_t numQuads, unsigned 
 		target[i + 5] = pos;
 		pos += 4;
 	}
+}
+
+void Painter::generateQuadIndicesOffset(unsigned short pos, unsigned short lineStride, unsigned short* target)
+{
+	// A-----B
+	// |     |
+	// C-----D
+	// ABD
+	target[0] = pos;
+	target[1] = pos + 1;
+	target[2] = pos + lineStride + 1;
+	// DCA
+	target[3] = pos + lineStride + 1;
+	target[4] = pos + lineStride;
+	target[5] = pos;
 }

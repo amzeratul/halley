@@ -3,6 +3,7 @@
 #include "blend.h"
 #include "halley/maths/colour.h"
 #include <condition_variable>
+#include <halley/maths/vector4.h>
 
 namespace Halley
 {
@@ -37,12 +38,15 @@ namespace Halley
 		virtual void clear(Colour colour) = 0;
 		virtual void setBlend(BlendType blend) = 0;
 
-		// Draw sprites takes a single vertex per sprite, duplicates the data across multiple vertices, and draws
-		// vertPosOffset is the offset, in bytes, from the start of each vertex's data, to a Vector2f which will be filled with the vertex's position in 0-1 space.
-		void drawSprites(std::shared_ptr<Material> material, size_t numSprites, size_t vertPosOffset, const void* vertexData);
-
 		// Draws quads to the screen
 		void drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData);
+
+		// Draw sprites takes a single vertex per sprite, duplicates the data across multiple vertices, and draws
+		// vertPosOffset is the offset, in bytes, from the start of each vertex's data, to a Vector2f which will be filled with the vertex's position in 0-1 space.
+		void drawSprites(std::shared_ptr<Material> material, size_t numSprites, const void* vertexData);
+
+		// Draw one sliced sprite. Slices -> x = left, y = top, z = right, w = bottom, in [0..1] space relative to the texture
+		void drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scale, Vector4f slices, const void* vertexData);
 
 		size_t getNumDrawCalls() const { return nDrawCalls; }
 		size_t getNumVertices() const { return nVertices; }
@@ -84,8 +88,10 @@ namespace Halley
 
 		void makeSpaceForPendingVertices(size_t numBytes);
 		void makeSpaceForPendingIndices(size_t numIndices);
-		void generateQuadIndices(unsigned short firstVertex, size_t numQuads, unsigned short* target);
-		unsigned short* getStandardQuadIndices(size_t numQuads);
 		PainterVertexData addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices);
+
+		unsigned short* getStandardQuadIndices(size_t numQuads);
+		void generateQuadIndices(unsigned short firstVertex, size_t numQuads, unsigned short* target);
+		void generateQuadIndicesOffset(unsigned short firstVertex, unsigned short lineStride, unsigned short* target);
 	};
 }

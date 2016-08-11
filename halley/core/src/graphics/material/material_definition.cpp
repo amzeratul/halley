@@ -148,6 +148,10 @@ void MaterialDefinition::loadAttributes(YAML::Node topNode)
 
 			int size = getAttributeSize(type);
 			offset += size;
+
+			if (a.name == "a_vertPos") {
+				vertexPosOffset = a.offset;
+			}
 		}
 	}
 

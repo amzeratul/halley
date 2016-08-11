@@ -33,10 +33,10 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 	Sprite()
 		.setMaterial(backgroundMaterial)
 		.setPos(bounds.getTopLeft())
-		//.setSize(bounds.getSize())
 		.setSize(Vector2f(64, 64))
+		.setScale(bounds.getSize() / Vector2f(64, 64))
 		.setTexRect(Rect4f(0, 0, 1, 1))
-		.draw(painter);
+		.drawSliced(painter, Vector4f(0.25f, 0.25f, 0.25f, 0.25f));
 
 	Rect4f innerBounds = bounds.shrink(8);
 

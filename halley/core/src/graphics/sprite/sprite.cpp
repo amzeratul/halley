@@ -10,8 +10,6 @@
 
 using namespace Halley;
 
-static const int vertPosOffset = 16 * 4;
-
 Sprite::Sprite()
 {
 	setScale(Vector2f(1, 1));
@@ -21,7 +19,13 @@ Sprite::Sprite()
 void Sprite::draw(Painter& painter) const
 {
 	assert(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
-	painter.drawSprites(material, 1, vertPosOffset, &vertexAttrib);
+	painter.drawSprites(material, 1, &vertexAttrib);
+}
+
+void Sprite::drawSliced(Painter& painter, Vector4f slices) const
+{
+	assert(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+	painter.drawSlicedSprite(material, scale, slices, &vertexAttrib);
 }
 
 void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
@@ -42,7 +46,7 @@ void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
 		memcpy(&vertices[i * spriteSize], &sprite.vertexAttrib, spriteSize);
 	}
 
-	painter.drawSprites(material, n, vertPosOffset, vertices.data());
+	painter.drawSprites(material, n, vertices.data());
 }
 
 void Sprite::computeSize()
