@@ -23,7 +23,7 @@
 #pragma once
 
 #include <halley/data_structures/vector.h>
-#include "vector2d.h"
+#include "vector2.h"
 #include "aabb.h"
 
 namespace Halley {

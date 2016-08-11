@@ -6,7 +6,7 @@ in vec4 a_position;
 in vec4 a_size;
 in vec4 a_colour;
 in vec4 a_texCoord0;
-in vec2 a_vertPos;
+in vec4 a_vertPos;
 
 out vec4 v_texCoord0;
 out vec4 v_colour;
@@ -34,7 +34,7 @@ vec4 getVertexPosition(vec2 position, vec2 pivot, vec2 size, vec2 vertPos, float
 }
 
 void main() {
-	v_texCoord0 = getTexCoord(a_texCoord0, a_vertPos, a_size.w);
+	v_texCoord0 = getTexCoord(a_texCoord0, a_vertPos.zw, a_size.w);
 	getColours(a_colour, v_colour, v_colourAdd);
-	gl_Position = getVertexPosition(a_position.xy, a_position.zw, a_size.xy, a_vertPos, a_size.z);
+	gl_Position = getVertexPosition(a_position.xy, a_position.zw, a_size.xy, a_vertPos.xy, a_size.z);
 }

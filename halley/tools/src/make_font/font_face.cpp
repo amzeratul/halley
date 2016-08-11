@@ -3,7 +3,7 @@
 #include <halley/text/halleystring.h>
 #include <memory>
 #include <halley/support/exception.h>
-#include <halley/maths/vector2d.h>
+#include <halley/maths/vector2.h>
 #include <halley/file_formats/image.h>
 #include FT_FREETYPE_H
 

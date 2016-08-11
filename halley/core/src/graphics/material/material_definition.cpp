@@ -107,7 +107,8 @@ ShaderParameterType MaterialDefinition::parseParameterType(String rawType)
 {
 	if (rawType == "float") {
 		return ShaderParameterType::Float;
-	} if (rawType == "vec2") {
+	}
+	if (rawType == "vec2") {
 		return ShaderParameterType::Float2;
 	}
 	else if (rawType == "vec3") {

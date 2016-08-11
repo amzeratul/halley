@@ -30,9 +30,9 @@ void Painter::flush()
 	flushPending();
 }
 
-static Vector2f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
+static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
 {
-	return *reinterpret_cast<Vector2f*>(vertexAttrib + vertPosOffset);
+	return *reinterpret_cast<Vector4f*>(vertexAttrib + vertPosOffset);
 }
 
 void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites, size_t vertPosOffset, const void* vertexData)
@@ -44,16 +44,18 @@ void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites,
 	startDrawCall(material);
 
 	const size_t vertexStride = material->getDefinition().getVertexStride();
-	const size_t dataSize = 4 * numSprites * vertexStride;
+	const size_t verticesPerSprite = 4;
+	const size_t numVertices = verticesPerSprite * numSprites;
+	const size_t dataSize = numVertices * vertexStride;
 	makeSpaceForPendingVertices(dataSize);
 
 	char* const dst = vertexBuffer.data() + bytesPending;
 	const char* const src = reinterpret_cast<const char*>(vertexData);
 
 	for (size_t i = 0; i < numSprites; i++) {
-		for (size_t j = 0; j < 4; j++) {
+		for (size_t j = 0; j < verticesPerSprite; j++) {
 			size_t srcOffset = i * vertexStride;
-			size_t dstOffset = (i * 4 + j) * vertexStride;
+			size_t dstOffset = (i * verticesPerSprite + j) * vertexStride;
 			memmove(dst + dstOffset, src + srcOffset, vertexStride);
 
 			// j -> vertPos
@@ -61,12 +63,14 @@ void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites,
 			// 1 -> 1, 0
 			// 2 -> 1, 1
 			// 3 -> 0, 1
-			getVertPos(dst + dstOffset, vertPosOffset) = Vector2f(((j & 1) ^ ((j & 2) >> 1)) * 1.0f, ((j & 2) >> 1) * 1.0f);
+			const float x = ((j & 1) ^ ((j & 2) >> 1)) * 1.0f;
+			const float y = ((j & 2) >> 1) * 1.0f;
+			getVertPos(dst + dstOffset, vertPosOffset) = Vector4f(x, y, x, y);
 		}
 	}
 
 	generateQuadIndices(verticesPending, numSprites);
-	verticesPending += numSprites * 4;
+	verticesPending += numVertices;
 	bytesPending += dataSize;
 }
 

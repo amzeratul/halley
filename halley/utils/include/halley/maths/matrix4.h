@@ -23,7 +23,7 @@
 
 #include <array>
 #include "angle.h"
-#include "vector2d.h"
+#include "vector2.h"
 
 namespace Halley {
 	class Matrix4f {

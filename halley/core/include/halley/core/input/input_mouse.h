@@ -22,7 +22,7 @@
 #pragma once
 
 #include "input_button_base.h"
-#include <halley/maths/vector2d.h>
+#include <halley/maths/vector2.h>
 
 namespace Halley {
 
