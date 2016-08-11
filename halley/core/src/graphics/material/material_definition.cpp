@@ -107,7 +107,8 @@ ShaderParameterType MaterialDefinition::parseParameterType(String rawType)
 {
 	if (rawType == "float") {
 		return ShaderParameterType::Float;
-	} if (rawType == "vec2") {
+	}
+	if (rawType == "vec2") {
 		return ShaderParameterType::Float2;
 	}
 	else if (rawType == "vec3") {
@@ -147,6 +148,10 @@ void MaterialDefinition::loadAttributes(YAML::Node topNode)
 
 			int size = getAttributeSize(type);
 			offset += size;
+
+			if (a.name == "a_vertPos") {
+				vertexPosOffset = a.offset;
+			}
 		}
 	}
 

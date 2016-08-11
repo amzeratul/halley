@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "vector2d.h"
+#include "vector2.h"
 
 namespace Halley {
 	class BaseTransform {

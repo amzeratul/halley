@@ -1,7 +1,7 @@
 #pragma once
 
 #include "halley/resources/resource.h"
-#include "halley/maths/vector2d.h"
+#include "halley/maths/vector2.h"
 #include <memory>
 
 namespace Halley

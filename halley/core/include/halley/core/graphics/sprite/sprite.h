@@ -1,8 +1,9 @@
 #pragma once
 
-#include <halley/maths/vector2d.h>
+#include <halley/maths/vector2.h>
 #include <halley/maths/rect.h>
 #include <halley/maths/colour.h>
+#include <halley/maths/vector4.h>
 
 namespace Halley
 {
@@ -24,7 +25,7 @@ namespace Halley
 		Vector2f rotation;   // size and rotation are a single vec4 on the shader
 		Colour4f colour;
 		Rect4f texRect;
-		Vector2f vertPos;
+		Vector4f vertPos;
 	};
 
 	class Sprite
@@ -33,6 +34,7 @@ namespace Halley
 		Sprite();
 
 		void draw(Painter& painter) const;
+		void drawSliced(Painter& painter, Vector4f slices) const;
 		static void draw(const Sprite* sprites, size_t n, Painter& painter);
 
 		bool isInView(Rect4f rect) const;
@@ -62,14 +64,12 @@ namespace Halley
 
 	private:
 		std::shared_ptr<Material> material;
-		mutable std::array<SpriteVertexAttrib, 4> vertices;
+		SpriteVertexAttrib vertexAttrib;
 
 		Vector2f scale;
 		Vector2f size;
 		bool flip = false;
-		mutable bool dirty = false;
 
-		void update() const;
 		void computeSize();
 	};
 }

@@ -23,7 +23,7 @@
 #pragma once
 
 #include <halley/utils/utils.h>
-#include "vector3d.h"
+#include "vector3.h"
 #include "range.h"
 
 namespace Halley {

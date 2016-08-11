@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "halley/maths/vector2d.h"
+#include "halley/maths/vector2.h"
 #include "halley/maths/angle.h"
 #include "halley/maths/rect.h"
 #include "halley/maths/matrix4.h"

@@ -1,7 +1,9 @@
 #pragma once
 
 #include <halley/maths/colour.h>
-#include <halley/maths/vector2d.h>
+#include <halley/maths/vector2.h>
+#include <halley/maths/vector3.h>
+#include <halley/maths/vector4.h>
 #include <halley/maths/matrix4.h>
 #include <memory>
 
@@ -21,6 +23,8 @@ namespace Halley
 		void operator=(Colour colour);
 		void operator=(float p);
 		void operator=(Vector2f p);
+		void operator=(Vector3f p);
+		void operator=(Vector4f p);
 		void operator=(int p);
 		void operator=(Vector2i p);
 		void operator=(Matrix4f m);

@@ -23,7 +23,7 @@
 #pragma once
 
 #include <cmath>
-#include "vector2d.h"
+#include "vector2.h"
 
 namespace Halley {
 	//////////////////////////////

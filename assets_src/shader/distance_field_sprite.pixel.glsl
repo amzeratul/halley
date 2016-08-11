@@ -17,7 +17,7 @@ void main() {
 	float inEdge = 0.5;
 	float outEdge = inEdge - clamp(u_outline, 0.0, 0.95) * 0.5;
 
-	float edge = smoothstep(clamp(outEdge - s, 0.01, 1.0), clamp(outEdge + s, 0.0, 0.99), a) * v_colour.a;
+	float edge = smoothstep(clamp(outEdge - s, 0.01, 1.0), clamp(outEdge + s, 0.0, 0.99), a);
 	float outline = 1.0 - smoothstep(inEdge - s, inEdge + s, a);
 	vec4 colFill = v_colour;
 	vec4 colOutline = u_outlineColour;

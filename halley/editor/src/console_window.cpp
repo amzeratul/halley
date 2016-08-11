@@ -4,7 +4,13 @@ using namespace Halley;
 
 ConsoleWindow::ConsoleWindow(Resources& resources)
 {
-	backgroundMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("solid_colour.yaml"));
+	backgroundMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite.yaml"));
+	auto& mat = *backgroundMaterial;
+	mat["tex0"] = resources.get<Texture>("round_rect.png");
+	mat["u_smoothness"] = 0.1f;
+	mat["u_outline"] = 0.5f;
+	mat["u_outlineColour"] = Colour(0.25f, 0.41f, 0.26f);
+
 	font = resources.get<Font>("ubuntub.yaml");
 
 	buffer.push_back("Halley Engine Editor.");
@@ -26,20 +32,25 @@ void ConsoleWindow::update(InputKeyboard& keyboard)
 
 void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 {
+	Rect4f innerBounds = bounds.shrink(12);
+	Rect4f outerBounds = bounds.grow(8);
+
 	// Background
 	Sprite()
 		.setMaterial(backgroundMaterial)
-		.setPos(bounds.getTopLeft())
-		.setSize(bounds.getSize())
-		.setColour(Colour4f(0, 0, 0, 0.3f))
-		.draw(painter);
+		.setPos(outerBounds.getTopLeft())
+		.setSize(Vector2f(64, 64))
+		.setScale(outerBounds.getSize() / Vector2f(64, 64))
+		.setTexRect(Rect4f(0, 0, 1, 1))
+		.setColour(Colour4f(0.0f, 0.0f, 0.0f, 0.4f))
+		.drawSliced(painter, Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
 
 	const float size = 16;
 	float lineH = font->getLineHeightAtSize(size);
-	int nLines = int(bounds.getHeight() / lineH) - 1;
+	int nLines = int(innerBounds.getHeight() / lineH) - 1;
+	Vector2f cursor = innerBounds.getBottomLeft();
 
 	TextRenderer text;
-	Vector2f cursor = bounds.getBottomLeft();
 	text.setFont(font).setSize(size).setOffset(Vector2f(0, 1)).setColour(Colour(0.61f, 1.0f, 0.75f));
 
 	// Draw command
@@ -58,5 +69,6 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 void ConsoleWindow::submit()
 {
 	buffer.push_back("> " + input);
+	history.push_back(input);
 	input = "";
 }

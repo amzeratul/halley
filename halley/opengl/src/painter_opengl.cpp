@@ -76,8 +76,17 @@ void PainterOpenGL::setBlend(BlendType blend)
 	glUtils->setBlendType(blend);
 }
 
-void PainterOpenGL::setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData)
+void PainterOpenGL::setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
 {
+	assert(numVertices > 0);
+	assert(numIndices >= numVertices);
+	assert(vertexData);
+	assert(indices);
+
+	// Load indices into VBO
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, int(numIndices) * sizeof(unsigned short), indices, GL_STREAM_DRAW);
+	glCheckError();
+
 	// Load vertices into VBO
 	size_t bytesSize = numVertices * material.getVertexStride();
 	glBufferData(GL_ARRAY_BUFFER, bytesSize, vertexData, GL_STREAM_DRAW);
@@ -139,31 +148,12 @@ void PainterOpenGL::setupVertexAttributes(MaterialDefinition& material)
 	// TODO: disable positions not used by this program
 }
 
-void PainterOpenGL::drawQuads(size_t n)
+void PainterOpenGL::drawTriangles(size_t numIndices)
 {
-	size_t sz = n * 6;
-	size_t oldSize = indexData.size();
-	if (oldSize < sz) {
-		indexData.resize(sz);
-		unsigned short pos = static_cast<unsigned short>(oldSize * 2 / 3);
-		for (size_t i = oldSize; i < sz; i += 6) {
-			// B-----C
-			// |     |
-			// A-----D
-			// ABC
-			indexData[i] = pos;
-			indexData[i + 1] = pos + 1;
-			indexData[i + 2] = pos + 2;
-			// CDA
-			indexData[i + 3] = pos + 2;
-			indexData[i + 4] = pos + 3;
-			indexData[i + 5] = pos;
-			pos += 4;
-		}
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, int(sz) * sizeof(short), indexData.data(), GL_STREAM_DRAW);
-	}
+	assert(numIndices > 0);
+	assert(numIndices % 3 == 0);
 
-	glDrawElements(GL_TRIANGLES, int(sz), GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, int(numIndices), GL_UNSIGNED_SHORT, nullptr);
 	glCheckError();
 }
 

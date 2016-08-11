@@ -81,6 +81,26 @@ void MaterialParameter::operator=(Vector2f p)
 	};
 }
 
+void MaterialParameter::operator=(Vector3f p)
+{
+	assert(type == ShaderParameterType::Float3);
+	bindFunc = getAPI().getUniformBinding(UniformType::Float, 3);
+	toBind = [=](int pass) {
+		auto l = p;
+		bindFunc(getAddress(pass), &l);
+	};
+}
+
+void MaterialParameter::operator=(Vector4f p)
+{
+	assert(type == ShaderParameterType::Float4);
+	bindFunc = getAPI().getUniformBinding(UniformType::Float, 4);
+	toBind = [=](int pass) {
+		auto l = p;
+		bindFunc(getAddress(pass), &l);
+	};
+}
+
 void MaterialParameter::operator=(int p)
 {
 	assert(type == ShaderParameterType::Int);

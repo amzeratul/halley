@@ -22,8 +22,8 @@
 #pragma once
 
 #include "halley/text/halleystring.h"
-#include "halley/maths/vector2d.h"
-#include "halley/maths/vector3d.h"
+#include "halley/maths/vector2.h"
+#include "halley/maths/vector3.h"
 #include "halley/maths/colour.h"
 
 namespace Halley {

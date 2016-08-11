@@ -67,6 +67,7 @@ namespace Halley
 		MaterialPass& getPass(int n);
 
 		int getVertexStride() const { return vertexStride; }
+		int getVertexPosOffset() const { return vertexPosOffset; }
 		const Vector<MaterialAttribute>& getAttributes() const { return attributes; }
 		const Vector<MaterialAttribute>& getUniforms() const { return uniforms; }
 
@@ -77,7 +78,8 @@ namespace Halley
 		Vector<MaterialPass> passes;
 		Vector<MaterialAttribute> uniforms;
 		Vector<MaterialAttribute> attributes;
-		int vertexStride;
+		int vertexStride = 0;
+		int vertexPosOffset = 0;
 		bool dirty = false;
 		String name;
 

@@ -6,19 +6,27 @@
 
 using namespace Halley;
 
-Vector<std::string> CommandLineTool::getToolNames()
+CommandLineTools::CommandLineTools()
 {
-	return {"codegen", "distField", "makeFont"};
+	factories["codegen"] = []() { return std::make_unique<CodegenTool>(); };
+	factories["distField"] = []() { return std::make_unique<DistanceFieldTool>(); };
+	factories["makeFont"] = []() { return std::make_unique<MakeFontTool>(); };
 }
 
-std::unique_ptr<CommandLineTool> CommandLineTool::getTool(std::string name)
+Vector<std::string> CommandLineTools::getToolNames()
 {
-	if (name == "codegen") {
-		return std::make_unique<CodegenTool>();
-	} else if (name == "distField") {
-		return std::make_unique<DistanceFieldTool>();
-	} else if (name == "makeFont") {
-		return std::make_unique<MakeFontTool>();
+	auto result = Vector<std::string>(factories.size());
+	for (auto& kv : factories) {
+		result.push_back(kv.first);
+	}
+	return result;
+}
+
+std::unique_ptr<CommandLineTool> CommandLineTools::getTool(std::string name)
+{
+	auto result = factories.find(name);
+	if (result != factories.end()) {
+		return result->second();
 	} else {
 		throw Exception("Unknown tool name");
 	}

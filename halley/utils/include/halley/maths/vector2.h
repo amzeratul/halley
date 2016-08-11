@@ -31,7 +31,7 @@
 namespace Halley {
 	//////////////////////////////
 	// Vector2D class declaration
-	template <typename T=float, class U=Angle<float> >
+	template <typename T=float, class U=Angle<float>>
 	class Vector2D {
 	private:
 		T mod(T a, T b) const { return a % b; }
@@ -46,9 +46,6 @@ namespace Halley {
 		
 		template <typename V>
 		explicit Vector2D (Vector2D<V> vec) : x(T(vec.x)), y(T(vec.y)) {}
-
-		//template <>
-		//Vector2D (Vector2D<T> vec) : x(vec.x), y(vec.y) {}
 
 		Vector2D (T length, U angle)
 		{
@@ -178,17 +175,6 @@ namespace Halley {
 		{
 			return *this - dot(param)*param;
 		}
-
-		// Boost serialization
-		/*
-		friend class boost::serialization::access;
-		template<class Archive>
-		void serialize(Archive & ar, const unsigned int version)
-		{
-			ar & x;
-			ar & y;
-		}
-		*/
 	};
 
 
