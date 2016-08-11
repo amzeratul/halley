@@ -14,6 +14,7 @@ EditorRootStage::~EditorRootStage()
 void EditorRootStage::init()
 {
 	auto col = Colour4f(0.065f);
+	//auto col = Colour4f(0.9882f, 0.15686f, 0.27843f, 1);
 	halleyLogo = Sprite()
 		.setImage(getResources(), "halley_logo_dist.png", "distance_field_sprite.yaml")
 		.setPivot(Vector2f(0.5f, 0.5f))
@@ -40,8 +41,6 @@ void EditorRootStage::onRender(RenderContext& context) const
 	context.bind([&](Painter& painter)
 	{
 		auto view = Rect4f(painter.getViewPort());
-
-		painter.clear(Colour(0));
 
 		// Background
 		{

@@ -4,9 +4,12 @@ using namespace Halley;
 
 ConsoleWindow::ConsoleWindow(Resources& resources)
 {
-	backgroundMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("sprite.yaml"));
+	backgroundMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite.yaml"));
 	auto& mat = *backgroundMaterial;
-	mat["tex0"] = resources.get<Texture>("console.png");
+	mat["tex0"] = resources.get<Texture>("round_rect.png");
+	mat["u_smoothness"] = 0.1f;
+	mat["u_outline"] = 0.5f;
+	mat["u_outlineColour"] = Colour(0.25f, 0.41f, 0.26f);
 
 	font = resources.get<Font>("ubuntub.yaml");
 
@@ -29,16 +32,18 @@ void ConsoleWindow::update(InputKeyboard& keyboard)
 
 void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 {
+	Rect4f innerBounds = bounds.shrink(12);
+	Rect4f outerBounds = bounds.grow(8);
+
 	// Background
 	Sprite()
 		.setMaterial(backgroundMaterial)
-		.setPos(bounds.getTopLeft())
+		.setPos(outerBounds.getTopLeft())
 		.setSize(Vector2f(64, 64))
-		.setScale(bounds.getSize() / Vector2f(64, 64))
+		.setScale(outerBounds.getSize() / Vector2f(64, 64))
 		.setTexRect(Rect4f(0, 0, 1, 1))
-		.drawSliced(painter, Vector4f(0.25f, 0.25f, 0.25f, 0.25f));
-
-	Rect4f innerBounds = bounds.shrink(8);
+		.setColour(Colour4f(0.0f, 0.0f, 0.0f, 0.4f))
+		.drawSliced(painter, Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
 
 	const float size = 16;
 	float lineH = font->getLineHeightAtSize(size);
