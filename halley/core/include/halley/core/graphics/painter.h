@@ -15,6 +15,15 @@ namespace Halley
 	{
 		friend class RenderContext;
 
+		struct PainterVertexData
+		{
+			char* dstVertex;
+			unsigned short* dstIndex;
+			size_t vertexSize;
+			size_t dataSize;
+			unsigned short firstIndex;
+		};
+
 	public:
 		virtual ~Painter() {}
 
@@ -75,7 +84,8 @@ namespace Halley
 
 		void makeSpaceForPendingVertices(size_t numBytes);
 		void makeSpaceForPendingIndices(size_t numIndices);
-		void generateQuadIndices(size_t firstVertex, size_t numQuads);
+		void generateQuadIndices(unsigned short firstVertex, size_t numQuads, unsigned short* target);
 		unsigned short* getStandardQuadIndices(size_t numQuads);
+		PainterVertexData addDrawData(std::shared_ptr<Material> material, size_t numVertices, size_t numIndices);
 	};
 }

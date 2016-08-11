@@ -35,28 +35,48 @@ static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
 	return *reinterpret_cast<Vector4f*>(vertexAttrib + vertPosOffset);
 }
 
-void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites, size_t vertPosOffset, const void* vertexData)
+Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material> material, size_t numVertices, size_t numIndices)
 {
-	assert(numSprites > 0);
-	assert(vertexData != nullptr);
+	PainterVertexData result;
+
 	assert(material);
+	assert(numVertices > 0);
+	assert(numIndices >= numVertices);
 
 	startDrawCall(material);
 
-	const size_t vertexStride = material->getDefinition().getVertexStride();
+	result.vertexSize = material->getDefinition().getVertexStride();
+	result.dataSize = numVertices * result.vertexSize;
+	makeSpaceForPendingVertices(result.dataSize);
+	makeSpaceForPendingIndices(numIndices);
+
+	result.dstVertex = vertexBuffer.data() + bytesPending;
+	result.dstIndex = indexBuffer.data() + indicesPending;
+	result.firstIndex = static_cast<unsigned short>(verticesPending);
+
+	indicesPending += numIndices;
+	verticesPending += numVertices;
+	bytesPending += result.dataSize;
+
+	return result;
+}
+
+void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites, size_t vertPosOffset, const void* vertexData)
+{
+	assert(vertexData != nullptr);
+
 	const size_t verticesPerSprite = 4;
 	const size_t numVertices = verticesPerSprite * numSprites;
-	const size_t dataSize = numVertices * vertexStride;
-	makeSpaceForPendingVertices(dataSize);
 
-	char* const dst = vertexBuffer.data() + bytesPending;
+	auto result = addDrawData(material, numVertices, numSprites * 6);
+
 	const char* const src = reinterpret_cast<const char*>(vertexData);
 
 	for (size_t i = 0; i < numSprites; i++) {
 		for (size_t j = 0; j < verticesPerSprite; j++) {
-			size_t srcOffset = i * vertexStride;
-			size_t dstOffset = (i * verticesPerSprite + j) * vertexStride;
-			memmove(dst + dstOffset, src + srcOffset, vertexStride);
+			size_t srcOffset = i * result.vertexSize;
+			size_t dstOffset = (i * verticesPerSprite + j) * result.vertexSize;
+			memmove(result.dstVertex + dstOffset, src + srcOffset, result.vertexSize);
 
 			// j -> vertPos
 			// 0 -> 0, 0
@@ -65,32 +85,22 @@ void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites,
 			// 3 -> 0, 1
 			const float x = ((j & 1) ^ ((j & 2) >> 1)) * 1.0f;
 			const float y = ((j & 2) >> 1) * 1.0f;
-			getVertPos(dst + dstOffset, vertPosOffset) = Vector4f(x, y, x, y);
+			getVertPos(result.dstVertex + dstOffset, vertPosOffset) = Vector4f(x, y, x, y);
 		}
 	}
 
-	generateQuadIndices(verticesPending, numSprites);
-	verticesPending += numVertices;
-	bytesPending += dataSize;
+	generateQuadIndices(result.firstIndex, numSprites, result.dstIndex);
 }
 
 void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData)
 {
-	assert(numVertices > 0);
 	assert(numVertices % 4 == 0);
 	assert(vertexData != nullptr);
-	assert(material);
 
-	startDrawCall(material);
+	auto result = addDrawData(material, numVertices, numVertices * 3 / 2);
 
-	size_t dataSize = numVertices * material->getDefinition().getVertexStride();
-	makeSpaceForPendingVertices(dataSize);
-	
-	memmove(vertexBuffer.data() + bytesPending, vertexData, dataSize);
-
-	generateQuadIndices(verticesPending, numVertices / 4);
-	verticesPending += numVertices;
-	bytesPending += dataSize;
+	memmove(result.dstVertex, vertexData, result.dataSize);
+	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
 }
 
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
@@ -203,26 +213,21 @@ unsigned short* Painter::getStandardQuadIndices(size_t numQuads)
 	return stdQuadIndexCache.data();
 }
 
-void Painter::generateQuadIndices(size_t firstVertex, size_t numQuads)
+void Painter::generateQuadIndices(unsigned short pos, size_t numQuads, unsigned short* target)
 {
 	size_t numIndices = numQuads * 6;
-	makeSpaceForPendingIndices(numIndices);
-
-	unsigned short pos = static_cast<unsigned short>(firstVertex);
-	for (size_t i = indicesPending; i < indicesPending + numIndices; i += 6) {
+	for (size_t i = 0; i < numIndices; i += 6) {
 		// B-----C
 		// |     |
 		// A-----D
 		// ABC
-		indexBuffer[i] = pos;
-		indexBuffer[i + 1] = pos + 1;
-		indexBuffer[i + 2] = pos + 2;
+		target[i] = pos;
+		target[i + 1] = pos + 1;
+		target[i + 2] = pos + 2;
 		// CDA
-		indexBuffer[i + 3] = pos + 2;
-		indexBuffer[i + 4] = pos + 3;
-		indexBuffer[i + 5] = pos;
+		target[i + 3] = pos + 2;
+		target[i + 4] = pos + 3;
+		target[i + 5] = pos;
 		pos += 4;
 	}
-
-	indicesPending += numIndices;
 }
