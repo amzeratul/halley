@@ -35,15 +35,15 @@ static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
 	return *reinterpret_cast<Vector4f*>(vertexAttrib + vertPosOffset);
 }
 
-Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material> material, size_t numVertices, size_t numIndices)
+Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices)
 {
-	PainterVertexData result;
-
 	assert(material);
 	assert(numVertices > 0);
 	assert(numIndices >= numVertices);
 
 	startDrawCall(material);
+
+	PainterVertexData result;
 
 	result.vertexSize = material->getDefinition().getVertexStride();
 	result.dataSize = numVertices * result.vertexSize;

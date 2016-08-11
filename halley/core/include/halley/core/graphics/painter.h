@@ -86,6 +86,6 @@ namespace Halley
 		void makeSpaceForPendingIndices(size_t numIndices);
 		void generateQuadIndices(unsigned short firstVertex, size_t numQuads, unsigned short* target);
 		unsigned short* getStandardQuadIndices(size_t numQuads);
-		PainterVertexData addDrawData(std::shared_ptr<Material> material, size_t numVertices, size_t numIndices);
+		PainterVertexData addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices);
 	};
 }
