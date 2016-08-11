@@ -1,0 +1,38 @@
+/*
+
+Network                     - network core
+IConnection                 - connection interface
+ + UDPConnection            - sends and receives packets via UDP
+ + InstabilitySimulator     - adapter class, simulates bad connections 
+ReliableConnection          - tracks packets, sends acks for packets, computes ping and data loss
+MessageQueue                - converts messages into packets and vice-versa, re-sends unacked reliable messages
+IMessageStream              - converts game messages into network messages
+ + StandardMessageStream    - has flags for reliability and ordering
+ + DeltaCodedMessageStream  - compresses messages as delta against last acked
+ + LargeMessageStream       - splits message into several sub-messages, for file transfer
+IMessage                    - game-specific message
+
+*/
+
+// Open connection
+Network network;
+network.startListening(1000);
+auto udp = network.tryAcceptConnection();
+auto udp = network.connect(address, port);
+auto conn = simulate? std::make_unique<InstabilitySimulator>(udp) : std::move(udp);
+auto reliableConn = std::make_unique<ReliableConnection>(conn);
+
+// Setup protocol
+auto msgs = std::make_unique<MessageQueue>(reliableConn);
+msgs->addStream(std::make_unique<StandardMessageStream>(false, true), 0);
+msgs->addStream(std::make_unique<DeltaCodedMessageStream>(), 1);
+msgs->addStream(std::make_unique<LargeMessageStream>(), 2);
+
+// Receive data
+network->receive();
+auto toProcess = msgs->receive();
+
+// Send data
+msgs->enqueue(foo, 0);
+msgs->enqueue(bar, 1);
+msgs->send();

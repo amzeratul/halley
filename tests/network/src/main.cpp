@@ -5,27 +5,14 @@ using namespace Halley;
 
 void initOpenGLPlugin(IPluginRegistry &registry);
 
-//#define WITH_BLAH_STAGE
-
 namespace Stages {
 	enum Type
 	{
 		Test
-#ifdef WITH_BLAH_STAGE
-		,Blah
-#endif
 	};
 }
 
-#ifdef WITH_BLAH_STAGE
-class BlahStage : public Stage
-{
-public:
-	void onFixedUpdate(Time) override { std::cout << "Hello"; }
-};
-#endif
-
-class SampleGame final : public Game
+class NetworkTestGame final : public Game
 {
 public:
 	int initPlugins(IPluginRegistry &registry) override
@@ -44,10 +31,6 @@ public:
 		switch (id) {
 		case Stages::Test:
 			return std::make_unique<TestStage>();
-#ifdef WITH_BLAH_STAGE
-		case Stages::Blah:
-			return std::make_unique<BlahStage>();
-#endif
 		default:
 			return std::unique_ptr<Stage>();
 		}
@@ -60,12 +43,12 @@ public:
 
 	String getName() const override
 	{
-		return "Sample game";
+		return "Network Test";
 	}
 
 	String getDataPath() const override
 	{
-		return "halley/sample";
+		return "halley/network-test";
 	}
 
 	bool isDevBuild() const override
@@ -79,4 +62,4 @@ public:
 	}
 };
 
-HalleyGame(SampleGame);
+HalleyGame(NetworkTestGame);

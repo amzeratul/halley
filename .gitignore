@@ -26,6 +26,9 @@ Thumbs.db
 *.vspx
 *.lastcodeanalysissucceeded
 
+# VSCode
+.vscode
+
 # Binaries
 *.dll
 *.hi

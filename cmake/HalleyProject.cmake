@@ -78,7 +78,7 @@ set(HALLEY_PROJECT_LIB_DIRS
 	)
 
 function(halleyProject name sources headers genDefinitions targetDir)
-	add_custom_target(${name}_codegen ALL ${HALLEY_PATH}/bin/halley-cmd codegen gen_src gen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${genDefinitions})
+	add_custom_target(${name}-codegen ALL ${HALLEY_PATH}/bin/halley-cmd codegen gen_src gen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${genDefinitions})
 
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${targetDir})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${targetDir})
@@ -108,7 +108,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 
 	target_link_libraries(${name} ${HALLEY_PROJECT_LIBS})
 	set_target_properties(${name} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-	add_dependencies(${name} ${name}_codegen)
+	add_dependencies(${name} ${PROJECT_NAME}-codegen)
 	
 	if(MSVC)
 		add_precompiled_header(${name} prec.h FORCEINCLUDE SOURCE_CXX prec.cpp)
