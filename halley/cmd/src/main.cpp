@@ -4,7 +4,8 @@
 
 int main(int argc, char** argv)
 {
-	Halley::Vector<std::string> names = Halley::CommandLineTool::getToolNames();
+	Halley::CommandLineTools tools;
+	Halley::Vector<std::string> names = tools.getToolNames();
 
 	if (argc < 2) {
 		std::cout << "Usage: halley [tool]" << std::endl;
@@ -16,7 +17,7 @@ int main(int argc, char** argv)
 	} else {
 		std::unique_ptr<Halley::CommandLineTool> tool;
 		try {
-			tool = Halley::CommandLineTool::getTool(argv[1]);
+			tool = tools.getTool(argv[1]);
 		} catch (...) {
 			std::cout << "Unknown tool: " << argv[1] << std::endl;
 			return 1;
