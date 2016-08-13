@@ -47,7 +47,7 @@ bool UDPConnection::receive(NetworkPacket& packet)
 		return false;
 	} else {
 		packet = std::move(pendingReceive.front());
-		pendingReceive.clear();
+		pendingReceive.pop_front();
 		return true;
 	}
 }
