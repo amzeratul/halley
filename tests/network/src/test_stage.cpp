@@ -43,7 +43,7 @@ void TestStage::updateNetwork()
 		else if (key->isButtonPressed(Keys::C)) {
 			// Client
 			network = std::make_unique<NetworkService>(0);
-			connection = network->connect("127.0.0.1", 4113);
+			setConnection(network->connect("127.0.0.1", 4113));			
 			std::cout << "Connecting as client." << std::endl;
 		}
 	} else {
@@ -51,7 +51,7 @@ void TestStage::updateNetwork()
 
 		auto conn = network->tryAcceptConnection();
 		if (conn) {
-			connection = conn;
+			setConnection(conn);
 			std::cout << "Client connected." << std::endl;
 		}
 
@@ -70,4 +70,9 @@ void TestStage::updateNetwork()
 
 		network->update();
 	}
+}
+
+void TestStage::setConnection(std::shared_ptr<Halley::IConnection> conn)
+{
+	connection = std::make_shared<InstabilitySimulator>(conn, 0.5f, 0.1f, 0.1f);
 }

@@ -13,6 +13,7 @@ public:
 private:
 	
 	void updateNetwork();
+	void setConnection(std::shared_ptr<Halley::IConnection> connection);
 
 	std::unique_ptr<Halley::NetworkService> network;
 	std::shared_ptr<Halley::IConnection> connection;

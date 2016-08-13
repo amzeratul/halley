@@ -22,7 +22,8 @@ namespace Halley
 		bool matchesEndpoint(const UDPEndpoint& remoteEndpoint) const;
 		void onReceive(const char* data, size_t size);
 		void setError(const std::string& cs);
-		void onClosed();
+		
+		void terminateConnection();
 
 	private:
 		UDPSocket& socket;
@@ -36,5 +37,6 @@ namespace Halley
 		std::string error;
 
 		void sendNext();
+		void onClose();
 	};
 }

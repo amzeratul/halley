@@ -39,8 +39,9 @@ NetworkService::NetworkService(int port, IPVersion version)
 NetworkService::~NetworkService()
 {
 	for (auto& conn : pimpl->activeConnections) {
-		conn->onClosed();
+		conn->terminateConnection();
 	}
+	pimpl->service.poll();
 }
 
 void NetworkService::update()
@@ -51,7 +52,7 @@ void NetworkService::update()
 	for (size_t i = 0; i < n; i++) {
 		auto& c = active[i];
 		if (c->getStatus() == ConnectionStatus::CLOSING) {
-			c->onClosed();
+			c->terminateConnection();
 			active.erase(active.begin() + i);
 			--i;
 			--n;

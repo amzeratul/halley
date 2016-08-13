@@ -13,8 +13,21 @@ UDPConnection::UDPConnection(UDPSocket& socket, UDPEndpoint remote)
 
 void UDPConnection::close()
 {
+	onClose();
 	status = ConnectionStatus::CLOSING;
-	pendingSend.clear();
+}
+
+void UDPConnection::terminateConnection()
+{
+	onClose();
+	status = ConnectionStatus::CLOSED;
+}
+
+void UDPConnection::onClose()
+{
+	if (status == ConnectionStatus::OPEN) {
+		// TODO: send close connection message
+	}
 }
 
 void UDPConnection::send(NetworkPacket&& packet)
@@ -46,7 +59,10 @@ bool UDPConnection::matchesEndpoint(const UDPEndpoint& remoteEndpoint) const
 
 void UDPConnection::onReceive(const char* data, size_t size)
 {
-	pendingReceive.push_back(NetworkPacket(data, size));
+	assert(size <= 1500);
+	if (size <= 1500) {
+		pendingReceive.push_back(NetworkPacket(data, size));
+	}
 }
 
 void UDPConnection::setError(const std::string& cs)
@@ -54,16 +70,9 @@ void UDPConnection::setError(const std::string& cs)
 	error = cs;
 }
 
-void UDPConnection::onClosed()
-{
-	status = ConnectionStatus::CLOSED;
-	pendingSend.clear();
-	pendingReceive.clear();
-}
-
 void UDPConnection::sendNext()
 {
-	if (pendingSend.empty() || status != ConnectionStatus::OPEN) {
+	if (pendingSend.empty()) {
 		return;
 	}
 
@@ -75,9 +84,8 @@ void UDPConnection::sendNext()
 	{
 		if (error) {
 			std::cout << "Error sending packet: " << error.message() << std::endl;
-		}
-
-		if (!pendingSend.empty()) {
+			close();
+		} else if (!pendingSend.empty()) {
 			sendNext();
 		}
 	});
