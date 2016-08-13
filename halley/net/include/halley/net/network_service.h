@@ -10,17 +10,23 @@ namespace Halley
 {
 	class NetworkServicePImpl;
 
+	enum class IPVersion
+	{
+		IPv4,
+		IPv6
+	};
+
 	class NetworkService
 	{
 	public:
-		NetworkService(int port);
+		NetworkService(int port, IPVersion version = IPVersion::IPv4);
 		~NetworkService();
 
 		void update();
 
 		void setAcceptingConnections(bool accepting);
-		IConnection* tryAcceptConnection();
-		IConnection* connect(String address, int port);
+		std::shared_ptr<IConnection> tryAcceptConnection();
+		std::shared_ptr<IConnection> connect(String address, int port);
 
 	private:
 		std::unique_ptr<NetworkServicePImpl> pimpl;

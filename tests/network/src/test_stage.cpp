@@ -42,12 +42,11 @@ void TestStage::updateNetwork()
 		}
 		else if (key->isButtonPressed(Keys::C)) {
 			// Client
-			network = std::make_unique<NetworkService>(4114);
+			network = std::make_unique<NetworkService>(0);
 			connection = network->connect("127.0.0.1", 4113);
 			std::cout << "Connecting as client." << std::endl;
 		}
-	}
-	else {
+	} else {
 		network->update();
 
 		auto conn = network->tryAcceptConnection();
@@ -59,12 +58,13 @@ void TestStage::updateNetwork()
 		if (connection) {
 			if (key->isButtonPressed(Keys::Space)) {
 				connection->send(NetworkPacket("hello world!", 13));
-				std::cout << "Sent packet from game." << std::endl;
 			}
 
 			NetworkPacket received;
 			while (connection->receive(received)) {
-				std::cout << "Got packet on game." << std::endl;
+				char buffer[64];
+				received.copyTo(buffer, 64);
+				std::cout << "Received: " << buffer << std::endl;
 			}
 		}
 

@@ -7,24 +7,19 @@ using namespace Halley;
 UDPConnection::UDPConnection(UDPSocket& socket, UDPEndpoint remote)
 	: socket(socket)
 	, remote(remote)
-	, open(true)
+	, status(ConnectionStatus::OPEN)
 {
 }
 
 void UDPConnection::close()
 {
-	open = false;
+	status = ConnectionStatus::CLOSING;
 	pendingSend.clear();
-}
-
-bool UDPConnection::isOpen() const
-{
-	return open;
 }
 
 void UDPConnection::send(NetworkPacket&& packet)
 {
-	if (open) {
+	if (status == ConnectionStatus::OPEN) {
 		bool needsSend = pendingSend.empty();
 		pendingSend.emplace_back(std::move(packet));
 		if (needsSend) {
@@ -59,9 +54,16 @@ void UDPConnection::setError(const std::string& cs)
 	error = cs;
 }
 
+void UDPConnection::onClosed()
+{
+	status = ConnectionStatus::CLOSED;
+	pendingSend.clear();
+	pendingReceive.clear();
+}
+
 void UDPConnection::sendNext()
 {
-	if (pendingSend.empty()) {
+	if (pendingSend.empty() || status != ConnectionStatus::OPEN) {
 		return;
 	}
 
@@ -73,8 +75,6 @@ void UDPConnection::sendNext()
 	{
 		if (error) {
 			std::cout << "Error sending packet: " << error.message() << std::endl;
-		} else {
-			std::cout << "Sent " << size << " bytes." << std::endl;
 		}
 
 		if (!pendingSend.empty()) {

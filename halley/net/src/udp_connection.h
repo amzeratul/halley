@@ -13,19 +13,21 @@ namespace Halley
 	{
 	public:
 		UDPConnection(UDPSocket& socket, UDPEndpoint remote);
+
 		void close() override;
-		bool isOpen() const override;
+		ConnectionStatus getStatus() const override { return status; }
 		void send(NetworkPacket&& packet) override;
 		bool receive(NetworkPacket& packet) override;
 		
 		bool matchesEndpoint(const UDPEndpoint& remoteEndpoint) const;
 		void onReceive(const char* data, size_t size);
 		void setError(const std::string& cs);
+		void onClosed();
 
 	private:
 		UDPSocket& socket;
 		UDPEndpoint remote;
-		bool open;
+		ConnectionStatus status;
 
 		// TODO: replace these with more efficient structures
 		std::list<NetworkPacket> pendingSend;

@@ -12,11 +12,11 @@ namespace Halley
 	class NetworkServicePImpl
 	{
 	public:
-		NetworkServicePImpl(int port)
-			: localEndpoint(asio::ip::udp::v4(), port)
+		NetworkServicePImpl(int port, IPVersion version)
+			: localEndpoint(version == IPVersion::IPv4 ? asio::ip::udp::v4() : asio::ip::udp::v6(), port)
 			, socket(service, localEndpoint)
 		{
-			assert(port > 1024);
+			assert(port == 0 || port > 1024);
 			assert(port < 65536);
 		}
 
@@ -25,23 +25,40 @@ namespace Halley
 		UDPEndpoint remoteEndpoint;
 		asio::ip::udp::socket socket;
 		std::list<UDPEndpoint> pendingIncomingConnections;
-		std::vector<std::unique_ptr<UDPConnection>> activeConnections;
+		std::vector<std::shared_ptr<UDPConnection>> activeConnections;
 
 		std::array<char, 2048> receiveBuffer;
 	};
 }
 
-NetworkService::NetworkService(int port)
-	: pimpl(std::make_unique<NetworkServicePImpl>(port))
+NetworkService::NetworkService(int port, IPVersion version)
+	: pimpl(std::make_unique<NetworkServicePImpl>(port, version))
 {
 }
 
 NetworkService::~NetworkService()
 {
+	for (auto& conn : pimpl->activeConnections) {
+		conn->onClosed();
+	}
 }
 
 void NetworkService::update()
 {
+	// Remove closed connections
+	auto& active = pimpl->activeConnections;
+	size_t n = active.size();
+	for (size_t i = 0; i < n; i++) {
+		auto& c = active[i];
+		if (c->getStatus() == ConnectionStatus::CLOSING) {
+			c->onClosed();
+			active.erase(active.begin() + i);
+			--i;
+			--n;
+		}
+	}
+
+	// Update service
 	pimpl->service.poll();
 }
 
@@ -55,31 +72,30 @@ void NetworkService::setAcceptingConnections(bool accepting)
 	}
 }
 
-IConnection* NetworkService::tryAcceptConnection()
+std::shared_ptr<IConnection> NetworkService::tryAcceptConnection()
 {
 	auto& pending = pimpl->pendingIncomingConnections;
 
 	if (pending.empty()) {
 		return nullptr;
 	} else {
-		pimpl->activeConnections.push_back(std::make_unique<UDPConnection>(pimpl->socket, pending.front()));
+		pimpl->activeConnections.push_back(std::make_shared<UDPConnection>(pimpl->socket, pending.front()));
 		pending.pop_front();
-		return pimpl->activeConnections.back().get();
+		return pimpl->activeConnections.back();
 	}
 }
 
-IConnection* NetworkService::connect(String addr, int port)
+std::shared_ptr<IConnection> NetworkService::connect(String addr, int port)
 {
 	assert(port > 1024);
 	assert(port < 65536);
 	auto remoteAddr = asio::ip::address::from_string(addr.cppStr());
 	auto remote = UDPEndpoint(remoteAddr, port); 
-	pimpl->activeConnections.push_back(std::make_unique<UDPConnection>(pimpl->socket, remote));
-	auto conn = pimpl->activeConnections.back().get();
+	pimpl->activeConnections.push_back(std::make_shared<UDPConnection>(pimpl->socket, remote));
+	auto& conn = pimpl->activeConnections.back();
 
-	// Send handshake
-	// TODO
-	conn->send(NetworkPacket("handshake", 10));
+	// Handshake
+	conn->send(NetworkPacket("halley_open_connection", 23));
 
 	startListening();
 
@@ -128,6 +144,7 @@ void NetworkService::receiveNext()
 
 void NetworkService::onNewConnectionRequest(char* data, size_t size, const UDPEndpoint& remoteEndpoint)
 {
-	// TODO: validate handshake
-	pimpl->pendingIncomingConnections.push_back(remoteEndpoint);
+	if (acceptingConnections && size == 23 && memcmp(data, "halley_open_connection", 23) == 0) {
+		pimpl->pendingIncomingConnections.push_back(remoteEndpoint);
+	}
 }

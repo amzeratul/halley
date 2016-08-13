@@ -1,5 +1,4 @@
 #include "network_packet.h"
-#include <cstring>
 #include <halley/support/exception.h>
 
 using namespace Halley;
