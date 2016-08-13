@@ -3,6 +3,8 @@
 #include <vector>
 #include <halley/text/halleystring.h>
 #include "iconnection.h"
+#include <boost/asio/detail/addressof.hpp>
+#include "../../../src/udp_connection.h"
 
 namespace Halley
 {
@@ -22,11 +24,11 @@ namespace Halley
 
 	private:
 		std::unique_ptr<NetworkServicePImpl> pimpl;
-		std::vector<std::unique_ptr<IConnection>> activeConnections;
 		bool acceptingConnections = false;
 		bool startedListening = false;
 
 		void startListening();
 		void receiveNext();
+		void onNewConnectionRequest(char* data, size_t size, const UDPEndpoint& remoteEndpoint);
 	};
 }

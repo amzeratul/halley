@@ -15,5 +15,5 @@ private:
 	void updateNetwork();
 
 	std::unique_ptr<Halley::NetworkService> network;
-	Halley::IConnection* connection;
+	Halley::IConnection* connection = nullptr;
 };

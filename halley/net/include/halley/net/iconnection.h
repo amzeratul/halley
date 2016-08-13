@@ -9,6 +9,7 @@ namespace Halley
 	public:
 		virtual ~IConnection() {}
 		virtual void close() = 0;
+		virtual bool isOpen() const = 0;
 		virtual void send(NetworkPacket&& packet) = 0;
 		virtual bool receive(NetworkPacket& packet) = 0;
 	};

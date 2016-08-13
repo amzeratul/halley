@@ -1,11 +1,27 @@
 #include "network_packet.h"
 #include <cstring>
+#include <halley/support/exception.h>
 
 using namespace Halley;
 
-size_t NetworkPacket::copyTo(char* dstBuffer, size_t maxSize)
+NetworkPacket::NetworkPacket()
 {
-	const char* lulz = "Hello world!";
-	strcpy(dstBuffer, lulz);
-	return strlen(lulz) + 1;
+}
+
+NetworkPacket::NetworkPacket(const char* src, size_t size)
+{
+	if (size > 1200) {
+		throw Exception("Packet too big for network.");
+	}
+	data.resize(size);
+	memcpy(data.data(), src, size);
+}
+
+size_t NetworkPacket::copyTo(char* dstBuffer, size_t maxSize) const
+{
+	if (maxSize < data.size()) {
+		throw Exception("Destination buffer is too small for network packet.");
+	}
+	memcpy(dstBuffer, data.data(), data.size());
+	return data.size();
 }

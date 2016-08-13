@@ -58,7 +58,7 @@ void TestStage::updateNetwork()
 
 		if (connection) {
 			if (key->isButtonPressed(Keys::Space)) {
-				connection->send(NetworkPacket());
+				connection->send(NetworkPacket("hello world!", 13));
 				std::cout << "Sent packet from game." << std::endl;
 			}
 
