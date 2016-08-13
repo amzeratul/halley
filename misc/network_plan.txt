@@ -1,6 +1,6 @@
 /*
 
-Network                     - network core
+NetworkService              - network core
 IConnection                 - connection interface
  + UDPConnection            - sends and receives packets via UDP
  + InstabilitySimulator     - adapter class, simulates bad connections 
@@ -10,13 +10,14 @@ IMessageStream              - converts game messages into network messages
  + StandardMessageStream    - has flags for reliability and ordering
  + DeltaCodedMessageStream  - compresses messages as delta against last acked
  + LargeMessageStream       - splits message into several sub-messages, for file transfer
+NetworkPacket               - a packet sent or received 
 IMessage                    - game-specific message
 
 */
 
 // Open connection
-Network network;
-network.startListening(1000);
+NetworkService network;
+network.startListening(port);
 auto udp = network.tryAcceptConnection();
 auto udp = network.connect(address, port);
 auto conn = simulate? std::make_unique<InstabilitySimulator>(udp) : std::move(udp);

@@ -6,11 +6,11 @@
 
 namespace Halley
 {
-	class Network
+	class NetworkService
 	{
 	public:
-		Network();
-		~Network();
+		NetworkService();
+		~NetworkService();
 
 		void update();
 
@@ -18,14 +18,10 @@ namespace Halley
 		void stopListening();
 
 		std::shared_ptr<UDPConnection> tryAcceptConnection();
-		std::shared_ptr<UDPConnection> openConnection(String address, int port);
+		std::shared_ptr<UDPConnection> connect(String address, int port);
 
 	private:
 		void closePendingConnections();
 		void closeActiveConnections();
-		
-		int listeningPort = -1;
-		std::vector<std::shared_ptr<UDPConnection>> pending;
-		std::vector<std::shared_ptr<UDPConnection>> active;
 	};
 }

@@ -4,16 +4,26 @@ include_directories("include/halley/net" "../utils/include")
 
 set(SOURCES
         "src/http.cpp"
-        "src/network.cpp"
+        "src/instability_simulator.cpp"
+        "src/message_queue.cpp"
+        "src/network_packet.cpp"
+        "src/network_service.cpp"
+        "src/reliable_connection.cpp"
+        "src/standard_message_stream.cpp"
         "src/udp_connection.cpp"
-        "src/udp_connection_channel.cpp"
         )
 
 set(HEADERS
         "include/halley/net/http.h"
-        "include/halley/net/network.h"
+        "include/halley/net/iconnection.h"
+        "include/halley/net/imessage.h"
+        "include/halley/net/instability_simulator.h"
+        "include/halley/net/message_queue.h"
+        "include/halley/net/network_packet.h"
+        "include/halley/net/network_service.h"
+        "include/halley/net/reliable_connection.h"
+        "include/halley/net/standard_message_stream.h"
         "include/halley/net/udp_connection.h"
-        "include/halley/net/udp_connection_channel.h"
         )
 
 assign_source_group(${SOURCES})

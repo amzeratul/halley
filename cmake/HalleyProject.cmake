@@ -51,10 +51,12 @@ set(CMAKE_DEBUG_POSTFIX "_d")
 set(HALLEY_PROJECT_LIBS
 	optimized halley-core
 	optimized halley-utils
+	optimized halley-net
 	optimized halley-opengl
 	optimized halley-entity
 	debug halley-core_d
 	debug halley-utils_d
+	debug halley-net_d
 	debug halley-opengl_d
 	debug halley-entity_d
 	${SDL2_LIBRARIES}
@@ -68,6 +70,7 @@ set(HALLEY_PROJECT_LIBS
 set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/include
 	${HALLEY_PATH}/halley/core/include
+	${HALLEY_PATH}/halley/net/include
 	${HALLEY_PATH}/halley/utils/include
 	${HALLEY_PATH}/halley/entity/include
 	${YAMLCPP_INCLUDE_DIR}
