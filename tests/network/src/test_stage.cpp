@@ -2,6 +2,10 @@
 
 using namespace Halley;
 
+TestStage::TestStage()
+{
+}
+
 void TestStage::init()
 {
 
@@ -29,22 +33,24 @@ void TestStage::updateNetwork()
 {
 	auto key = getInputAPI().getKeyboard();
 
-	if (!networkInit) {
+	if (!network) {
 		if (key->isButtonPressed(Keys::S)) {
 			// Server
-			network.startListening(4113);
-			networkInit = true;
+			network = std::make_unique<NetworkService>(4113);
+			network->setAcceptingConnections(true);
 			std::cout << "Listening..." << std::endl;
 		}
 		else if (key->isButtonPressed(Keys::C)) {
 			// Client
-			connection = network.connect("127.0.0.1", 4113);
-			networkInit = true;
+			network = std::make_unique<NetworkService>(4114);
+			connection = network->connect("127.0.0.1", 4113);
 			std::cout << "Connecting as client." << std::endl;
 		}
 	}
 	else {
-		auto conn = network.tryAcceptConnection();
+		network->update();
+
+		auto conn = network->tryAcceptConnection();
 		if (conn) {
 			connection = conn;
 			std::cout << "Client connected." << std::endl;
@@ -53,13 +59,15 @@ void TestStage::updateNetwork()
 		if (connection) {
 			if (key->isButtonPressed(Keys::Space)) {
 				connection->send(NetworkPacket());
-				std::cout << "Sent packet." << std::endl;
+				std::cout << "Sent packet from game." << std::endl;
 			}
 
 			NetworkPacket received;
 			while (connection->receive(received)) {
-				std::cout << "Got packet." << std::endl;
+				std::cout << "Got packet on game." << std::endl;
 			}
 		}
+
+		network->update();
 	}
 }

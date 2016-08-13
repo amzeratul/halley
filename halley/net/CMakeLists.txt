@@ -14,6 +14,7 @@ set(SOURCES
         )
 
 set(HEADERS
+        "include/halley/net/halley_net.h"
         "include/halley/net/http.h"
         "include/halley/net/iconnection.h"
         "include/halley/net/imessage.h"
@@ -23,7 +24,7 @@ set(HEADERS
         "include/halley/net/network_service.h"
         "include/halley/net/reliable_connection.h"
         "include/halley/net/standard_message_stream.h"
-        "include/halley/net/udp_connection.h"
+        "src/udp_connection.h"
         )
 
 assign_source_group(${SOURCES})

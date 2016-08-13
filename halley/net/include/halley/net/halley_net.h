@@ -12,4 +12,3 @@ namespace Halley {}
 #include <halley/net/network_service.h>
 #include <halley/net/reliable_connection.h>
 #include <halley/net/standard_message_stream.h>
-#include <halley/net/udp_connection.h>

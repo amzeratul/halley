@@ -2,26 +2,31 @@
 #include <memory>
 #include <vector>
 #include <halley/text/halleystring.h>
-#include "udp_connection.h"
+#include "iconnection.h"
 
 namespace Halley
 {
+	class NetworkServicePImpl;
+
 	class NetworkService
 	{
 	public:
-		NetworkService();
+		NetworkService(int port);
 		~NetworkService();
 
 		void update();
 
-		void startListening(int port);
-		void stopListening();
-
-		std::shared_ptr<UDPConnection> tryAcceptConnection();
-		std::shared_ptr<UDPConnection> connect(String address, int port);
+		void setAcceptingConnections(bool accepting);
+		IConnection* tryAcceptConnection();
+		IConnection* connect(String address, int port);
 
 	private:
-		void closePendingConnections();
-		void closeActiveConnections();
+		std::unique_ptr<NetworkServicePImpl> pimpl;
+		std::vector<std::unique_ptr<IConnection>> activeConnections;
+		bool acceptingConnections = false;
+		bool startedListening = false;
+
+		void startListening();
+		void receiveNext();
 	};
 }
