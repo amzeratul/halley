@@ -422,7 +422,7 @@ namespace Halley
 
 		Future<T> enqueueOn(ExecutionQueue& e)
 		{
-			e.addToQueue([payload{std::move(payload)}, promise{promise}]() mutable {
+			e.addToQueue([payload(std::move(payload)), promise(promise)]() mutable {
 				TaskHelper<T>::setPromise(promise, payload);
 			});
 			return getFuture();
