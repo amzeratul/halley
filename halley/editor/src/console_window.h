@@ -1,6 +1,8 @@
 #pragma once
 #include <halley/maths/rect.h>
 #include <halley/core/input/input_keyboard.h>
+#include <halley/core/resources/resources.h>
+#include <halley/core/graphics/text/font.h>
 
 namespace Halley
 {

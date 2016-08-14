@@ -1,4 +1,6 @@
 #include "console_window.h"
+#include <halley/core/graphics/sprite/sprite.h>
+#include <halley/core/graphics/text/text_renderer.h>
 
 using namespace Halley;
 
