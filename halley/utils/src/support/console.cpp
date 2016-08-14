@@ -46,7 +46,7 @@ static void setConsoleColour(int foreground, int background)
 
 #else
 
-static void setConsoleColor(int, int)
+static void setConsoleColour(int, int)
 {}
 
 #endif
