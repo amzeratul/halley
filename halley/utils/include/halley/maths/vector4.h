@@ -147,7 +147,7 @@ namespace Halley {
 	template <typename T, typename V>
 	inline Vector4D<T> operator * (V f, const Vector4D<T> &v)
 	{
-		return Vector4D<T,U>(T(v.x * f), T(v.y * f), T(v.z * f), T(v.w * f));
+		return Vector4D<T>(T(v.x * f), T(v.y * f), T(v.z * f), T(v.w * f));
 	}
 
 	template <typename T >
