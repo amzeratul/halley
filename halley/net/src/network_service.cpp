@@ -136,7 +136,9 @@ void NetworkService::receiveNext()
 			if (connection) {
 				connection->onReceive(pimpl->receiveBuffer.data(), size);
 			} else {
-				onNewConnectionRequest(pimpl->receiveBuffer.data(), size, pimpl->remoteEndpoint);
+				if (isValidConnectionRequest(pimpl->receiveBuffer.data(), size)) {
+					pimpl->pendingIncomingConnections.push_back(pimpl->remoteEndpoint);
+				}
 			}
 		}
 
@@ -144,9 +146,7 @@ void NetworkService::receiveNext()
 	});
 }
 
-void NetworkService::onNewConnectionRequest(char* data, size_t size, const UDPEndpoint& remoteEndpoint)
+bool NetworkService::isValidConnectionRequest(char* data, size_t size)
 {
-	if (acceptingConnections && size == 23 && memcmp(data, "halley_open_connection", 23) == 0) {
-		pimpl->pendingIncomingConnections.push_back(remoteEndpoint);
-	}
+	return acceptingConnections && size == 23 && memcmp(data, "halley_open_connection", 23) == 0;
 }

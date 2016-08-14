@@ -32,6 +32,6 @@ namespace Halley
 
 		void startListening();
 		void receiveNext();
-		void onNewConnectionRequest(char* data, size_t size, const UDPEndpoint& remoteEndpoint);
+		bool isValidConnectionRequest(char* data, size_t size);
 	};
 }
