@@ -1,10 +1,7 @@
 #pragma once
 #include <memory>
-#include <vector>
 #include <halley/text/halleystring.h>
 #include "iconnection.h"
-#include <boost/asio/detail/addressof.hpp>
-#include "../../../src/udp_connection.h"
 
 namespace Halley
 {

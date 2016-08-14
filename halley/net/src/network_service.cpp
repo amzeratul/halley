@@ -1,8 +1,9 @@
-#include "network_service.h"
+#include <vector>
+#include <list>
 #include <boost/asio.hpp>
+#include "network_service.h"
+#include "network_packet.h"
 #include "udp_connection.h"
-#include <iostream>
-#include <network_packet.h>
 
 using namespace Halley;
 namespace asio = boost::asio;

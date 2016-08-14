@@ -2,6 +2,9 @@
 
 #include "iconnection.h"
 #include <boost/asio.hpp>
+#include <list>
+#include <array>
+#include <string>
 
 namespace Halley
 {
