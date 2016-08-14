@@ -74,5 +74,7 @@ void TestStage::updateNetwork()
 
 void TestStage::setConnection(std::shared_ptr<Halley::IConnection> conn)
 {
-	connection = std::make_shared<InstabilitySimulator>(conn, 0.5f, 0.1f, 0.1f);
+	const bool unstable = true;
+	auto base = unstable ? std::make_shared<InstabilitySimulator>(conn, 0.5f, 0.1f, 0.1f) : conn;
+	connection = std::make_shared<ReliableConnection>(base);
 }

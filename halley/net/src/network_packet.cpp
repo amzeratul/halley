@@ -24,3 +24,13 @@ size_t NetworkPacket::copyTo(char* dstBuffer, size_t maxSize) const
 	memcpy(dstBuffer, data.data(), data.size());
 	return data.size();
 }
+
+size_t NetworkPacket::getSize() const
+{
+	return data.size();
+}
+
+const char* NetworkPacket::getData() const
+{
+	return data.data();
+}

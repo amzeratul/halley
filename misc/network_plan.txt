@@ -1,17 +1,17 @@
 /*
 
 NetworkService              - network core
+NetworkPacket               - a packet sent or received 
 IConnection                 - connection interface
  + UDPConnection            - sends and receives packets via UDP
  + InstabilitySimulator     - adapter class, simulates bad connections 
-ReliableConnection          - tracks packets, sends acks for packets, computes ping and data loss
+ + ReliableConnection       - tracks packets, sends acks for packets, computes ping and data loss
+IMessage                    - game-specific message
 MessageQueue                - converts messages into packets and vice-versa, re-sends unacked reliable messages
 IMessageStream              - converts game messages into network messages
  + StandardMessageStream    - has flags for reliability and ordering
  + DeltaCodedMessageStream  - compresses messages as delta against last acked
  + LargeMessageStream       - splits message into several sub-messages, for file transfer
-NetworkPacket               - a packet sent or received 
-IMessage                    - game-specific message
 
 */
 
