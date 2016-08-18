@@ -24,9 +24,9 @@
 
 #include <cmath>
 #include <iostream>
-#include <cassert>
 #include "angle.h"
 #include <halley/utils/utils.h>
+#include <gsl/gsl_assert>
 
 namespace Halley {
 	//////////////////////////////
@@ -65,13 +65,13 @@ namespace Halley {
 		// Getter
 		inline T& operator[](size_t n)
 		{
-			assert(n <= 3);
+			Expects(n <= 3);
 			return reinterpret_cast<T*>(this)[n];
 		}
 
 		inline T operator[](size_t n) const
 		{
-			assert(n <= 3);
+			Expects(n <= 3);
 			return reinterpret_cast<const T*>(this)[n];
 		}
 

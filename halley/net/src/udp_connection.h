@@ -5,6 +5,7 @@
 #include <list>
 #include <array>
 #include <string>
+#include <gsl/gsl>
 
 namespace Halley
 {
@@ -23,7 +24,7 @@ namespace Halley
 		bool receive(NetworkPacket& packet) override;
 		
 		bool matchesEndpoint(const UDPEndpoint& remoteEndpoint) const;
-		void onReceive(const char* data, size_t size);
+		void onReceive(gsl::span<const gsl::byte> data);
 		void setError(const std::string& cs);
 		
 		void terminateConnection();
@@ -36,7 +37,7 @@ namespace Halley
 		// TODO: replace these with more efficient structures
 		std::list<NetworkPacket> pendingSend;
 		std::list<NetworkPacket> pendingReceive;
-		std::array<char, 2048> sendBuffer;
+		std::array<gsl::byte, 2048> sendBuffer;
 		std::string error;
 
 		void sendNext();

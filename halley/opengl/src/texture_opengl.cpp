@@ -3,6 +3,7 @@
 #include "halley_gl.h"
 #include "texture_opengl.h"
 #include "halley/core/graphics/texture_descriptor.h"
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -23,11 +24,11 @@ void TextureOpenGL::bind(int textureUnit)
 
 unsigned int TextureOpenGL::create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering)
 {
+	Expects(w > 0);
+	Expects(h > 0);
+	Expects(w <= 4096);
+	Expects(h <= 4096);
 	glCheckError();
-	assert(w > 0);
-	assert(h > 0);
-	assert(w <= 4096);
-	assert(h <= 4096);
 
 	size = Vector2i(static_cast<int>(w), static_cast<int>(h));
 

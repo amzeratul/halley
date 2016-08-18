@@ -7,6 +7,7 @@
 #include "halley/core/graphics/material/material_parameter.h"
 #include "halley/core/graphics/texture.h"
 #include "resources/resources.h"
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -18,13 +19,13 @@ Sprite::Sprite()
 
 void Sprite::draw(Painter& painter) const
 {
-	assert(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	painter.drawSprites(material, 1, &vertexAttrib);
 }
 
 void Sprite::drawSliced(Painter& painter, Vector4f slices) const
 {
-	assert(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	painter.drawSlicedSprite(material, scale, slices, &vertexAttrib);
 }
 
@@ -35,14 +36,14 @@ void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
 	}
 
 	auto& material = sprites[0].material;
-	assert(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 
 	size_t spriteSize = sizeof(SpriteVertexAttrib);
 	Vector<char> vertices(n * spriteSize);
 
 	for (size_t i = 0; i < n; i++) {
 		auto& sprite = sprites[i];
-		assert(sprite.material == material);
+		Expects(sprite.material == material);
 		memcpy(&vertices[i * spriteSize], &sprite.vertexAttrib, spriteSize);
 	}
 

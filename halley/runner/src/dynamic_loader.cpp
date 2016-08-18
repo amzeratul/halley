@@ -2,6 +2,7 @@
 #include <halley/runner/halley_main.h>
 #include "memory_patcher.h"
 #include <halley/runner/entry_point.h>
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -19,7 +20,7 @@ DynamicGameLoader::~DynamicGameLoader()
 
 std::unique_ptr<IMainLoopable> DynamicGameLoader::createCore(Vector<std::string> args)
 {
-	assert(entry != nullptr);
+	Expects(entry != nullptr);
 	return entry->createCore(args);
 }
 

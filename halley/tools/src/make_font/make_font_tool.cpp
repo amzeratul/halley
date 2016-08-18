@@ -72,15 +72,15 @@ static Maybe<Vector<BinPackResult>> binarySearch(std::function<Maybe<Vector<BinP
 
 int MakeFontTool::run(Vector<std::string> args)
 {
-	if (args.size() != 4) {
-		std::cout << "Usage: halley-cmd makeFont srcFont resultName WxH radius" << std::endl;
+	if (args.size() != 5) {
+		std::cout << "Usage: halley-cmd makeFont srcFont resultName WxH radius supersample" << std::endl;
 		return 1;
 	}
 
 	auto res = String(args[2]).split('x');
 	Vector2i size(res[0].toInteger(), res[1].toInteger());
-	int superSample = 8;
 	Range<int> range(0, 256);
+	int superSample = String(args[4]).toInteger();
 	float scale = 1.0f / superSample;
 	float radius = String(args[3]).toFloat();
 	float borderFinal = ceil(radius);

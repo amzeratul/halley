@@ -5,6 +5,7 @@
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/material/material_parameter.h"
 #include <cstring> // memmove
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -37,9 +38,9 @@ static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
 
 Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices)
 {
-	assert(material);
-	assert(numVertices > 0);
-	assert(numIndices >= numVertices);
+	Expects(material);
+	Expects(numVertices > 0);
+	Expects(numIndices >= numVertices);
 
 	startDrawCall(material);
 
@@ -63,8 +64,8 @@ Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& mater
 
 void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData)
 {
-	assert(numVertices % 4 == 0);
-	assert(vertexData != nullptr);
+	Expects(numVertices % 4 == 0);
+	Expects(vertexData != nullptr);
 
 	auto result = addDrawData(material, numVertices, numVertices * 3 / 2);
 
@@ -74,7 +75,7 @@ void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, 
 
 void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites, const void* vertexData)
 {
-	assert(vertexData != nullptr);
+	Expects(vertexData != nullptr);
 
 	const size_t verticesPerSprite = 4;
 	const size_t numVertices = verticesPerSprite * numSprites;
@@ -106,9 +107,9 @@ void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites,
 
 void Painter::drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scale, Vector4f slices, const void* vertexData)
 {
-	assert(vertexData != nullptr);
-	assert(scale.x > 0.0001f);
-	assert(scale.y > 0.0001f);
+	Expects(vertexData != nullptr);
+	Expects(scale.x > 0.0001f);
+	Expects(scale.y > 0.0001f);
 
 	//         a        c
 	//   00 -- 01 ----- 02 -- 03

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cassert>
 #include <functional>
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -105,7 +106,7 @@ size_t MemoryPatcher::patchMemory(void* address, size_t len, const MemoryPatchin
 {
 	size_t count = 0;
 
-	assert(len % sizeof(size_t) == 0);
+	Expects(len % sizeof(size_t) == 0);
 	using ptr = void*;
 	ptr* start = reinterpret_cast<ptr*>(address);
 	ptr* end = start + (len / sizeof(ptr));

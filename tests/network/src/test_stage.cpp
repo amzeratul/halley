@@ -57,14 +57,15 @@ void TestStage::updateNetwork()
 
 		if (connection) {
 			if (key->isButtonPressed(Keys::Space)) {
-				connection->send(NetworkPacket("hello world!", 13));
+				connection->send(NetworkPacket(gsl::ensure_z("hello world!")));
 			}
 
 			NetworkPacket received;
 			while (connection->receive(received)) {
-				char buffer[64];
-				received.copyTo(buffer, 64);
-				std::cout << "Received: " << buffer << std::endl;
+				gsl::byte buffer[2048];
+				size_t bytes = received.copyTo(buffer);
+				buffer[bytes] = gsl::byte(0);
+				std::cout << "Received message: " << reinterpret_cast<const char*>(buffer) << std::endl;
 			}
 		}
 

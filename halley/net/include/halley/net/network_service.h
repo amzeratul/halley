@@ -2,6 +2,7 @@
 #include <memory>
 #include <halley/text/halleystring.h>
 #include "iconnection.h"
+#include <gsl/gsl>
 
 namespace Halley
 {
@@ -32,6 +33,6 @@ namespace Halley
 
 		void startListening();
 		void receiveNext();
-		bool isValidConnectionRequest(char* data, size_t size);
+		bool isValidConnectionRequest(gsl::span<const gsl::byte> data);
 	};
 }

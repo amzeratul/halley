@@ -59,7 +59,7 @@ namespace Halley
 	template<typename Iter, typename R>
 	auto pickRandom(Iter begin, Iter end, R rng) -> decltype(*begin)
 	{
-		assert(begin != end);
+		Expects(begin != end);
 		auto size = end - begin;
 		return *(begin + rng.getInt(decltype(size)(0), size - 1));
 	}

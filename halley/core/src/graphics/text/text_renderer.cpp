@@ -3,6 +3,7 @@
 #include "halley/core/graphics/painter.h"
 #include "halley/core/graphics/material/material.h"
 #include "halley/core/graphics/material/material_parameter.h"
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -71,7 +72,7 @@ TextRenderer& TextRenderer::setOutlineColour(Colour v)
 
 void TextRenderer::draw(Painter& painter, Vector2f position) const
 {
-	assert(font);
+	Expects(font);
 	auto material = font->getMaterial()->clone();
 	float scale = size / font->getSizePoints();
 	float smooth = clamp(1.0f / (scale * font->getSmoothRadius()), 0.01f, 0.99f);

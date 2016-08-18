@@ -22,8 +22,8 @@
 #include "resources/resource_data_reader.h"
 #include <SDL.h>
 #include <SDL_rwops.h>
-#include <cassert>
 #include <algorithm>
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -34,7 +34,7 @@ Halley::ResourceDataReaderFile::ResourceDataReaderFile(SDL_RWops* _fp, int _star
 	, end(_end)
 	, closeOnFinish(_closeOnFinish)
 {
-	assert (fp);
+	Expects(fp);
 }
 
 int Halley::ResourceDataReaderFile::read(void* dst, size_t size)

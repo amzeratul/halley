@@ -57,11 +57,11 @@ bool UDPConnection::matchesEndpoint(const UDPEndpoint& remoteEndpoint) const
 	return remote == remoteEndpoint;
 }
 
-void UDPConnection::onReceive(const char* data, size_t size)
+void UDPConnection::onReceive(gsl::span<const gsl::byte> data)
 {
-	assert(size <= 1500);
-	if (size <= 1500) {
-		pendingReceive.push_back(NetworkPacket(data, size));
+	Expects(data.size() <= 1500);
+	if (data.size() <= 1500) {
+		pendingReceive.push_back(NetworkPacket(data));
 	}
 }
 
@@ -77,7 +77,7 @@ void UDPConnection::sendNext()
 	}
 
 	auto& packet = pendingSend.front();
-	size_t size = packet.copyTo(sendBuffer.data(), sendBuffer.size());
+	size_t size = packet.copyTo(sendBuffer);
 	pendingSend.pop_front();
 
 	socket.async_send_to(boost::asio::buffer(sendBuffer, size), remote, [this] (const boost::system::error_code& error, std::size_t size)

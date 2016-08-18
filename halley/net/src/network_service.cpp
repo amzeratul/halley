@@ -4,6 +4,7 @@
 #include "network_service.h"
 #include "network_packet.h"
 #include "udp_connection.h"
+#include <iostream>
 
 using namespace Halley;
 namespace asio = boost::asio;
@@ -17,8 +18,8 @@ namespace Halley
 			: localEndpoint(version == IPVersion::IPv4 ? asio::ip::udp::v4() : asio::ip::udp::v6(), port)
 			, socket(service, localEndpoint)
 		{
-			assert(port == 0 || port > 1024);
-			assert(port < 65536);
+			Expects(port == 0 || port > 1024);
+			Expects(port < 65536);
 		}
 
 		asio::io_service service;
@@ -28,7 +29,7 @@ namespace Halley
 		std::list<UDPEndpoint> pendingIncomingConnections;
 		std::vector<std::shared_ptr<UDPConnection>> activeConnections;
 
-		std::array<char, 2048> receiveBuffer;
+		std::array<gsl::byte, 2048> receiveBuffer;
 	};
 }
 
@@ -89,15 +90,15 @@ std::shared_ptr<IConnection> NetworkService::tryAcceptConnection()
 
 std::shared_ptr<IConnection> NetworkService::connect(String addr, int port)
 {
-	assert(port > 1024);
-	assert(port < 65536);
+	Expects(port > 1024);
+	Expects(port < 65536);
 	auto remoteAddr = asio::ip::address::from_string(addr.cppStr());
 	auto remote = UDPEndpoint(remoteAddr, port); 
 	pimpl->activeConnections.push_back(std::make_shared<UDPConnection>(pimpl->socket, remote));
 	auto& conn = pimpl->activeConnections.back();
 
 	// Handshake
-	conn->send(NetworkPacket("halley_open_connection", 23));
+	conn->send(NetworkPacket(gsl::ensure_z("halley_open_connection")));
 
 	startListening();
 
@@ -117,6 +118,8 @@ void NetworkService::receiveNext()
 	auto buffer = asio::buffer(pimpl->receiveBuffer);
 	pimpl->socket.async_receive_from(buffer, pimpl->remoteEndpoint, [this] (const boost::system::error_code& error, size_t size)
 	{
+		Expects(size <= pimpl->receiveBuffer.size());
+
 		// Find the owner of this remote endpoint
 		UDPConnection* connection = nullptr;
 		for (auto& conn : pimpl->activeConnections) {
@@ -133,11 +136,15 @@ void NetworkService::receiveNext()
 				connection->close();
 			}
 		} else {
+			auto received = gsl::span<gsl::byte>(pimpl->receiveBuffer.data(), size);
 			if (connection) {
-				connection->onReceive(pimpl->receiveBuffer.data(), size);
+				connection->onReceive(received);
 			} else {
-				if (isValidConnectionRequest(pimpl->receiveBuffer.data(), size)) {
-					pimpl->pendingIncomingConnections.push_back(pimpl->remoteEndpoint);
+				if (isValidConnectionRequest(received)) {
+					auto& pending = pimpl->pendingIncomingConnections;
+					if (std::find(pending.begin(), pending.end(), pimpl->remoteEndpoint) == pending.end()) {
+						pending.push_back(pimpl->remoteEndpoint);
+					}
 				}
 			}
 		}
@@ -146,7 +153,7 @@ void NetworkService::receiveNext()
 	});
 }
 
-bool NetworkService::isValidConnectionRequest(char* data, size_t size)
+bool NetworkService::isValidConnectionRequest(gsl::span<const gsl::byte> data)
 {
-	return acceptingConnections && size == 23 && memcmp(data, "halley_open_connection", 23) == 0;
+	return acceptingConnections && data.size() == 22 && memcmp(data.data(), "halley_open_connection", 22) == 0;
 }

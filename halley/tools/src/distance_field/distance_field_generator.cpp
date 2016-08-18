@@ -1,10 +1,11 @@
 #include "halley/tools/distance_field/distance_field_generator.h"
 #include <cassert>
 #include <halley/file_formats/image.h>
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
-static float getDistanceAt(int* src, int srcW, int srcH, int xCentre, int yCentre, float radius)
+static float getDistanceAt(const int* src, int srcW, int srcH, int xCentre, int yCentre, float radius)
 {
 	auto getAlpha = [&](int x, int y) { return (src[x + y * srcW] & 0xFF000000) >> 24; };
 	bool isInside = getAlpha(xCentre, yCentre) > 127;
@@ -22,9 +23,7 @@ static float getDistanceAt(int* src, int srcW, int srcH, int xCentre, int yCentr
 			if (isInside != thisInside) {
 				// Candidate for best neighbour
 				int distSqr = (x - xCentre) * (x - xCentre) + (y - yCentre) * (y - yCentre);
-				if (distSqr < bestDistSqr) {
-					bestDistSqr = distSqr;
-				}
+				bestDistSqr = std::min(distSqr, bestDistSqr);
 			}
 		}
 	}
@@ -38,15 +37,15 @@ static float getDistanceAt(int* src, int srcW, int srcH, int xCentre, int yCentr
 
 std::unique_ptr<Image> DistanceFieldGenerator::generate(Image& srcImg, Vector2i size, float radius)
 {
-	assert(srcImg.getPixels() != nullptr);
-	int srcW = srcImg.getWidth();
-	int srcH = srcImg.getHeight();
-	int* src = reinterpret_cast<int*>(srcImg.getPixels());
+	Expects(srcImg.getPixels() != nullptr);
+	const int srcW = srcImg.getWidth();
+	const int srcH = srcImg.getHeight();
+	const int* src = reinterpret_cast<int*>(srcImg.getPixels());
 
 	auto dstImg = std::make_unique<Image>(size.x, size.y);
 
-	int w = size.x;
-	int h = size.y;
+	const int w = size.x;
+	const int h = size.y;
 	int* dstStart = reinterpret_cast<int*>(dstImg->getPixels());
 
 	int texelW = srcW / w;

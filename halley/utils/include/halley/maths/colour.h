@@ -26,7 +26,7 @@
 #include <sstream>
 #include <cmath>
 #include "halley/text/halleystring.h"
-#include "halley/support/assert.h"
+#include <gsl/gsl_assert>
 
 namespace Halley {
 	template <typename T>
@@ -104,7 +104,7 @@ namespace Halley {
 		{
 			Colour4 col;
 			size_t len = str.length();
-			assert(str[0] == '#');
+			Expects(str[0] == '#');
 			if (len >= 3) col.r = parseHex(str.substr(1, 2));
 			else col.r = 0;
 			if (len >= 5) col.g = parseHex(str.substr(3, 2));

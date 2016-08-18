@@ -24,6 +24,7 @@
 #include "halley/support/exception.h"
 #include "halley/concurrency/concurrent.h"
 #include <boost/thread/tss.hpp>
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -132,7 +133,7 @@ GLUtils::GLUtils(GLUtils& other)
 
 void GLUtils::setBlendType(BlendType type)
 {
-	assert(type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Opaque || type == BlendType::Multiply || type == BlendType::Darken);
+	Expects(type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Opaque || type == BlendType::Multiply || type == BlendType::Darken);
 	glCheckError();
 
 	const BlendType curType = state.curBlend;
@@ -176,8 +177,8 @@ void GLUtils::setBlendType(BlendType type)
 
 void GLUtils::setTextureUnit(int n)
 {
-	assert(n >= 0);
-	assert(n < 8);
+	Expects(n >= 0);
+	Expects(n < 8);
 
 	if (!CHECKED || state.curTexUnit != n) {
 		glActiveTexture(GL_TEXTURE0 + n);
@@ -188,7 +189,7 @@ void GLUtils::setTextureUnit(int n)
 
 void GLUtils::bindTexture(int id)
 {
-	assert(id >= 0);
+	Expects(id >= 0);
 
 	if (!CHECKED || id != state.curTex[state.curTexUnit]) {
 		state.curTex[state.curTexUnit] = id;
@@ -199,8 +200,8 @@ void GLUtils::bindTexture(int id)
 
 void GLUtils::setNumberOfTextureUnits(int n)
 {
-	assert(n >= 1);
-	assert(n < 8);
+	Expects(n >= 1);
+	Expects(n < 8);
 
 	int prevUnit = state.curTexUnit;
 

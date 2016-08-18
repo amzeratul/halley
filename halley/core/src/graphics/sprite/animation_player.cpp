@@ -1,6 +1,7 @@
 #include "graphics/sprite/animation.h"
 #include "graphics/sprite/animation_player.h"
 #include "graphics/sprite/sprite.h"
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -27,7 +28,7 @@ void AnimationPlayer::setAnimation(std::shared_ptr<Animation> v, String sequence
 void AnimationPlayer::setSequence(String sequence)
 {
 	if (!curSeq || curSeq->getName() != sequence) {
-		assert(animation);
+		Expects(animation);
 		curTime = 0;
 		curFrame = 0;
 		curSeq = &animation->getSequence(sequence);
@@ -45,7 +46,7 @@ void AnimationPlayer::setSequence(String sequence)
 void AnimationPlayer::setDirection(int direction)
 {
 	if (dirId != direction) {
-		assert(animation);
+		Expects(animation);
 		
 		auto newDir = &animation->getDirection(direction);
 		if (curDir != newDir) {
@@ -60,7 +61,7 @@ void AnimationPlayer::setDirection(int direction)
 void AnimationPlayer::setDirection(String direction)
 {
 	if (!curDir || curDir->getName() != direction) {
-		assert(animation);
+		Expects(animation);
 
 		auto newDir = &animation->getDirection(direction);
 		if (curDir != newDir) {

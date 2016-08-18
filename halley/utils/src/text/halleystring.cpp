@@ -29,6 +29,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cstring>
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -919,7 +920,7 @@ Vector<String> Halley::String::split(char delimiter) const
 		}
 	}
 
-	assert(result.size() > 0);
+	Ensures(result.size() > 0);
 	return result;
 }
 

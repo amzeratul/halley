@@ -1,13 +1,13 @@
-#include <cassert>
 #include "halley/core/graphics/render_target/render_target_texture.h"
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
 void TextureRenderTarget::setTarget(int attachmentNumber, std::shared_ptr<Texture> tex)
 {
-	assert(attachmentNumber >= 0);
-	assert(attachmentNumber < 8);
-	assert(tex != std::shared_ptr<Texture>());
+	Expects(attachmentNumber >= 0);
+	Expects(attachmentNumber < 8);
+	Expects(tex != std::shared_ptr<Texture>());
 
 	if (attachments.size() <= attachmentNumber) {
 		attachments.resize(attachmentNumber + 1);

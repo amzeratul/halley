@@ -1,5 +1,6 @@
 #include "painter_opengl.h"
 #include "halley/core/graphics/material/material_definition.h"
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -78,10 +79,10 @@ void PainterOpenGL::setBlend(BlendType blend)
 
 void PainterOpenGL::setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
 {
-	assert(numVertices > 0);
-	assert(numIndices >= numVertices);
-	assert(vertexData);
-	assert(indices);
+	Expects(numVertices > 0);
+	Expects(numIndices >= numVertices);
+	Expects(vertexData);
+	Expects(indices);
 
 	// Load indices into VBO
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, int(numIndices) * sizeof(unsigned short), indices, GL_STREAM_DRAW);
@@ -150,8 +151,8 @@ void PainterOpenGL::setupVertexAttributes(MaterialDefinition& material)
 
 void PainterOpenGL::drawTriangles(size_t numIndices)
 {
-	assert(numIndices > 0);
-	assert(numIndices % 3 == 0);
+	Expects(numIndices > 0);
+	Expects(numIndices % 3 == 0);
 
 	glDrawElements(GL_TRIANGLES, int(numIndices), GL_UNSIGNED_SHORT, nullptr);
 	glCheckError();

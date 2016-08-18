@@ -3,6 +3,7 @@
 #include "render_target_opengl.h"
 #include <halley/core/graphics/texture.h>
 #include <halley/data_structures/flat_map.h>
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -20,7 +21,7 @@ void RenderTargetOpenGL::bind()
 {
 	Debug::trace("TextureRenderTargetFBO::bind begin");
 	init();
-	assert(fbo != 0);
+	Expects(fbo != 0);
 
 	static GLuint buffers[] = { GL_COLOR_ATTACHMENT0 , GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7, GL_COLOR_ATTACHMENT8 };
 	glDrawBuffers(int(attachments.size()), buffers);

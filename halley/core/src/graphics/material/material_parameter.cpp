@@ -5,6 +5,7 @@
 #include "halley/core/api/halley_api.h"
 #include "halley/core/graphics/shader.h"
 #include "halley/core/graphics/texture.h"
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -43,7 +44,7 @@ void MaterialParameter::bind(int pass)
 
 void MaterialParameter::operator=(std::shared_ptr<Texture> texture)
 {
-	assert(type == ShaderParameterType::Texture2D);
+	Expects(type == ShaderParameterType::Texture2D);
 	bindFunc = getAPI().getUniformBinding(UniformType::Int, 1);
 	toBind = [texture, this](int pass) {
 		texture->bind(textureUnit);
@@ -53,7 +54,7 @@ void MaterialParameter::operator=(std::shared_ptr<Texture> texture)
 
 void MaterialParameter::operator=(Colour colour)
 {
-	assert(type == ShaderParameterType::Float4);
+	Expects(type == ShaderParameterType::Float4);
 	bindFunc = getAPI().getUniformBinding(UniformType::Float, 4);
 	toBind = [=](int pass) {
 		Colour c = colour;
@@ -63,7 +64,7 @@ void MaterialParameter::operator=(Colour colour)
 
 void MaterialParameter::operator=(float p)
 {
-	assert(type == ShaderParameterType::Float);
+	Expects(type == ShaderParameterType::Float);
 	bindFunc = getAPI().getUniformBinding(UniformType::Float, 1);
 	toBind = [=](int pass) {
 		auto l = p;
@@ -73,7 +74,7 @@ void MaterialParameter::operator=(float p)
 
 void MaterialParameter::operator=(Vector2f p)
 {
-	assert(type == ShaderParameterType::Float2);
+	Expects(type == ShaderParameterType::Float2);
 	bindFunc = getAPI().getUniformBinding(UniformType::Float, 2);
 	toBind = [=](int pass) {
 		auto l = p;
@@ -83,7 +84,7 @@ void MaterialParameter::operator=(Vector2f p)
 
 void MaterialParameter::operator=(Vector3f p)
 {
-	assert(type == ShaderParameterType::Float3);
+	Expects(type == ShaderParameterType::Float3);
 	bindFunc = getAPI().getUniformBinding(UniformType::Float, 3);
 	toBind = [=](int pass) {
 		auto l = p;
@@ -93,7 +94,7 @@ void MaterialParameter::operator=(Vector3f p)
 
 void MaterialParameter::operator=(Vector4f p)
 {
-	assert(type == ShaderParameterType::Float4);
+	Expects(type == ShaderParameterType::Float4);
 	bindFunc = getAPI().getUniformBinding(UniformType::Float, 4);
 	toBind = [=](int pass) {
 		auto l = p;
@@ -103,7 +104,7 @@ void MaterialParameter::operator=(Vector4f p)
 
 void MaterialParameter::operator=(int p)
 {
-	assert(type == ShaderParameterType::Int);
+	Expects(type == ShaderParameterType::Int);
 	bindFunc = getAPI().getUniformBinding(UniformType::Int, 1);
 	toBind = [=](int pass) {
 		auto l = p;
@@ -113,7 +114,7 @@ void MaterialParameter::operator=(int p)
 
 void MaterialParameter::operator=(Vector2i p)
 {
-	assert(type == ShaderParameterType::Int2);
+	Expects(type == ShaderParameterType::Int2);
 	bindFunc = getAPI().getUniformBinding(UniformType::Int, 2);
 	toBind = [=](int pass) {
 		auto l = p;
@@ -123,7 +124,7 @@ void MaterialParameter::operator=(Vector2i p)
 
 void MaterialParameter::operator=(Matrix4f m)
 {
-	assert(type == ShaderParameterType::Matrix4);
+	Expects(type == ShaderParameterType::Matrix4);
 	bindFunc = getAPI().getUniformBinding(UniformType::Mat4, 1);
 	toBind = [=](int pass) {
 		auto l = m;

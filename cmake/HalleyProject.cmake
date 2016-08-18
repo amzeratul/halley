@@ -115,5 +115,6 @@ function(halleyProject name sources headers genDefinitions targetDir)
 	
 	if(MSVC)
 		add_precompiled_header(${name} prec.h FORCEINCLUDE SOURCE_CXX prec.cpp)
+		add_definitions(-D_WIN32_WINNT=0x0600)
 	endif()
 endfunction(halleyProject)

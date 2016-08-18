@@ -6,6 +6,7 @@
 #include "halley/core/api/halley_api.h"
 #include "resources/resources.h"
 #include <yaml-cpp/yaml.h>
+#include <gsl/gsl_assert>
 
 using namespace Halley;
 
@@ -69,7 +70,7 @@ const AnimationSequence& Animation::getSequence(String name) const
 
 const AnimationDirection& Animation::getDirection(String name) const
 {
-	assert(directions.size() > 0);
+	Expects(directions.size() > 0);
 
 	for (auto& dir : directions) {
 		if (dir.name == name) {
@@ -81,8 +82,8 @@ const AnimationDirection& Animation::getDirection(String name) const
 
 const AnimationDirection& Animation::getDirection(int id) const
 {
-	assert(id >= 0);
-	assert(directions.size() > 0);
+	Expects(id >= 0);
+	Expects(directions.size() > 0);
 
 	if (id < directions.size()) {
 		return directions[id];
