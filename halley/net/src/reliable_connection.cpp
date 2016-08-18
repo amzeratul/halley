@@ -20,7 +20,7 @@ ReliableConnection::ReliableConnection(std::shared_ptr<IConnection> parent)
 	, receivedSeqs(BUFFER_SIZE)
 	, sentPackets(BUFFER_SIZE)
 {
-	lastSend = lastReceive = std::chrono::system_clock::now();
+	lastSend = lastReceive = Clock::now();
 }
 
 void ReliableConnection::close()
@@ -57,7 +57,7 @@ bool ReliableConnection::receive(NetworkPacket& packet)
 		}
 	} while (!processReceivedPacket(packet));
 
-	lastReceive = std::chrono::system_clock::now();
+	lastReceive = Clock::now();
 	return true;
 }
 
@@ -86,7 +86,7 @@ void ReliableConnection::internalSend(NetworkPacket& packet, int tag)
 	auto& sent = sentPackets[idx];
 	sent.waiting = true;
 	sent.tag = tag;
-	lastSend = sent.timestamp = std::chrono::system_clock::now();
+	lastSend = sent.timestamp = Clock::now();
 }
 
 bool ReliableConnection::processReceivedPacket(NetworkPacket& packet)
@@ -156,7 +156,7 @@ void ReliableConnection::onAckReceived(unsigned short sequence)
 				listener->onPacketAcked(data.tag);
 			}
 		}
-		float msgLag = std::chrono::duration<float>(std::chrono::system_clock::now() - data.timestamp).count();
+		float msgLag = std::chrono::duration<float>(Clock::now() - data.timestamp).count();
 		reportLatency(msgLag);
 		std::cout << "Ack " << sequence << " with " << msgLag << " ms lag (" << lag << " overall lag).\n";
 	}
@@ -185,11 +185,11 @@ void ReliableConnection::reportLatency(float lastMeasuredLag)
 
 float ReliableConnection::getTimeSinceLastSend() const
 {
-	return std::chrono::duration<float>(std::chrono::system_clock::now() - lastSend).count();
+	return std::chrono::duration<float>(Clock::now() - lastSend).count();
 }
 
 float ReliableConnection::getTimeSinceLastReceive() const
 {
-	return std::chrono::duration<float>(std::chrono::system_clock::now() - lastReceive).count();
+	return std::chrono::duration<float>(Clock::now() - lastReceive).count();
 }
 

@@ -17,11 +17,13 @@ namespace Halley
 
 	class ReliableConnection : public IConnection
 	{
+		using Clock = std::chrono::steady_clock;
+
 		struct SentPacketData
 		{
 			bool waiting = false;
 			int tag = -1;
-			std::chrono::system_clock::time_point timestamp;
+			Clock::time_point timestamp;
 		};
 
 	public:
@@ -52,8 +54,8 @@ namespace Halley
 		std::vector<IReliableConnectionAckListener*> ackListeners;
 
 		float lag = 0;
-		std::chrono::system_clock::time_point lastReceive;
-		std::chrono::system_clock::time_point lastSend;
+		Clock::time_point lastReceive;
+		Clock::time_point lastSend;
 
 		void internalSend(NetworkPacket& packet, int tag);
 

@@ -60,7 +60,7 @@ void TestStage::updateNetwork()
 				connection->send(NetworkPacket(gsl::ensure_z("hello world!")));
 			}
 
-			if (connection->getTimeSinceLastSend() > 0.1f) {
+			if (connection->getTimeSinceLastSend() > 1.0f / 30.0f) {
 				connection->send(NetworkPacket(gsl::ensure_z("no-op")));
 			}
 

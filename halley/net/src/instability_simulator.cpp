@@ -50,6 +50,8 @@ void InstabilitySimulator::send(NetworkPacket&& packet)
 	auto now = std::chrono::system_clock::now();
 	auto scheduledTime = now + std::chrono::duration_cast<decltype(now)::duration>(std::chrono::duration<double>(delay));
 	packets.push(DelayedPacket(scheduledTime, std::move(packet)));
+
+	sendPendingPackets();
 }
 
 bool InstabilitySimulator::receive(NetworkPacket& packet)
