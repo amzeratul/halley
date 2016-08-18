@@ -3,6 +3,7 @@
 #include "iconnection.h"
 #include <memory>
 #include <vector>
+#include <chrono>
 
 namespace Halley
 {
@@ -16,6 +17,13 @@ namespace Halley
 
 	class ReliableConnection : public IConnection
 	{
+		struct SentPacketData
+		{
+			bool waiting = false;
+			int tag = -1;
+			std::chrono::system_clock::time_point timestamp;
+		};
+
 	public:
 		ReliableConnection(std::shared_ptr<IConnection> parent);
 
@@ -28,6 +36,10 @@ namespace Halley
 		void addAckListener(IReliableConnectionAckListener& listener);
 		void removeAckListener(IReliableConnectionAckListener& listener);
 
+		float getLatency() const { return lag; }
+		float getTimeSinceLastSend() const;
+		float getTimeSinceLastReceive() const;
+
 	private:
 		std::shared_ptr<IConnection> parent;
 
@@ -35,10 +47,13 @@ namespace Halley
 		unsigned short highestReceived = 0xFFFF;
 
 		std::vector<char> receivedSeqs;
-		std::vector<char> waitingAcks;
-		std::vector<int> tags;
+		std::vector<SentPacketData> sentPackets;
 
 		std::vector<IReliableConnectionAckListener*> ackListeners;
+
+		float lag = 0;
+		std::chrono::system_clock::time_point lastReceive;
+		std::chrono::system_clock::time_point lastSend;
 
 		void internalSend(NetworkPacket& packet, int tag);
 
@@ -47,5 +62,6 @@ namespace Halley
 
 		void processReceivedAcks(unsigned short ack, unsigned int ackBits);
 		void onAckReceived(unsigned short sequence);
+		void reportLatency(float lag);
 	};
 }

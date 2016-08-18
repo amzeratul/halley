@@ -139,6 +139,11 @@ namespace Halley {
 		return T(a*(1-factor) + b*factor);
 	}
 
+	template <typename T>
+	inline T lerp(T a, T b, float factor) {
+		return T(a*(1 - factor) + b*factor);
+	}
+
 	// Smoothing
 	template <typename T>
 	inline T smoothCos(T a) {

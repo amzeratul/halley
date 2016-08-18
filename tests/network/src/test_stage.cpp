@@ -49,15 +49,19 @@ void TestStage::updateNetwork()
 	} else {
 		network->update();
 
-		auto conn = network->tryAcceptConnection();
-		if (conn) {
-			setConnection(conn);
-			std::cout << "Client connected." << std::endl;
-		}
-
 		if (connection) {
+			if (connection->getStatus() != ConnectionStatus::OPEN) {
+				std::cout << "Closing connection." << std::endl;
+				connection.reset();
+				return;
+			}
+
 			if (key->isButtonPressed(Keys::Space)) {
 				connection->send(NetworkPacket(gsl::ensure_z("hello world!")));
+			}
+
+			if (connection->getTimeSinceLastSend() > 0.1f) {
+				connection->send(NetworkPacket(gsl::ensure_z("no-op")));
 			}
 
 			NetworkPacket received;
@@ -66,6 +70,16 @@ void TestStage::updateNetwork()
 				size_t bytes = received.copyTo(buffer);
 				buffer[bytes] = gsl::byte(0);
 				std::cout << "Received message: " << reinterpret_cast<const char*>(buffer) << std::endl;
+			}
+
+			if (connection->getTimeSinceLastReceive() > 2.0f) {
+				connection->close();
+			}
+		} else {
+			auto conn = network->tryAcceptConnection();
+			if (conn) {
+				setConnection(conn);
+				std::cout << "Client connected." << std::endl;
 			}
 		}
 
@@ -76,6 +90,6 @@ void TestStage::updateNetwork()
 void TestStage::setConnection(std::shared_ptr<Halley::IConnection> conn)
 {
 	const bool unstable = true;
-	auto base = unstable ? std::make_shared<InstabilitySimulator>(conn, 0.5f, 0.1f, 0.1f) : conn;
+	auto base = unstable ? std::make_shared<InstabilitySimulator>(conn, 0.1f, 0.01f, 0.05f) : conn;
 	connection = std::make_shared<ReliableConnection>(base);
 }

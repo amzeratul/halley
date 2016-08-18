@@ -1,6 +1,8 @@
 #include "reliable_connection.h"
 #include <network_packet.h>
 #include <iostream>
+#include <chrono>
+#include <halley/utils/utils.h>
 
 using namespace Halley;
 
@@ -16,9 +18,9 @@ constexpr size_t BUFFER_SIZE = 1024;
 ReliableConnection::ReliableConnection(std::shared_ptr<IConnection> parent)
 	: parent(parent)
 	, receivedSeqs(BUFFER_SIZE)
-	, waitingAcks(BUFFER_SIZE)
-	, tags(BUFFER_SIZE)
+	, sentPackets(BUFFER_SIZE)
 {
+	lastSend = lastReceive = std::chrono::system_clock::now();
 }
 
 void ReliableConnection::close()
@@ -55,6 +57,7 @@ bool ReliableConnection::receive(NetworkPacket& packet)
 		}
 	} while (!processReceivedPacket(packet));
 
+	lastReceive = std::chrono::system_clock::now();
 	return true;
 }
 
@@ -77,11 +80,13 @@ void ReliableConnection::internalSend(NetworkPacket& packet, int tag)
 	packet.addHeader(gsl::span<ReliableHeader>(&header, sizeof(ReliableHeader)));
 	parent->send(std::move(packet));
 
-	// Mark as waiting
+	// Store send information
 	std::cout << "Sent " << header.sequence << "\n";
 	size_t idx = header.sequence % BUFFER_SIZE;
-	waitingAcks[idx] = true;
-	tags[idx] = tag;
+	auto& sent = sentPackets[idx];
+	sent.waiting = true;
+	sent.tag = tag;
+	lastSend = sent.timestamp = std::chrono::system_clock::now();
 }
 
 bool ReliableConnection::processReceivedPacket(NetworkPacket& packet)
@@ -111,6 +116,7 @@ bool ReliableConnection::processReceivedPacket(NetworkPacket& packet)
 
 	if (receivedSeqs[bufferPos]) {
 		// Already received
+		std::cout << "Rejected\n";
 		return false;
 	}
 
@@ -142,15 +148,17 @@ void ReliableConnection::processReceivedAcks(unsigned short ack, unsigned int ac
 
 void ReliableConnection::onAckReceived(unsigned short sequence)
 {
-	size_t idx = sequence % BUFFER_SIZE;
-	if (waitingAcks[idx]) {
-		waitingAcks[idx] = false;
-		if (tags[idx] != -1) {
+	auto& data = sentPackets[sequence % BUFFER_SIZE];
+	if (data.waiting) {
+		data.waiting = false;
+		if (data.tag != -1) {
 			for (auto& listener : ackListeners) {
-				listener->onPacketAcked(tags[idx]);
+				listener->onPacketAcked(data.tag);
 			}
 		}
-		std::cout << "Ack " << sequence << "\n";
+		float msgLag = std::chrono::duration<float>(std::chrono::system_clock::now() - data.timestamp).count();
+		reportLatency(msgLag);
+		std::cout << "Ack " << sequence << " with " << msgLag << " ms lag (" << lag << " overall lag).\n";
 	}
 }
 
@@ -165,3 +173,23 @@ unsigned int ReliableConnection::generateAckBits()
 
 	return result;
 }
+
+void ReliableConnection::reportLatency(float lastMeasuredLag)
+{
+	if (fabs(lag) < 0.00001f) {
+		lag = lastMeasuredLag;
+	} else {
+		lag = lerp(lag, lastMeasuredLag, 0.2f);
+	}
+}
+
+float ReliableConnection::getTimeSinceLastSend() const
+{
+	return std::chrono::duration<float>(std::chrono::system_clock::now() - lastSend).count();
+}
+
+float ReliableConnection::getTimeSinceLastReceive() const
+{
+	return std::chrono::duration<float>(std::chrono::system_clock::now() - lastReceive).count();
+}
+
