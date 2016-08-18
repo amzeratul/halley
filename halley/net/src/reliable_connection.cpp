@@ -17,6 +17,7 @@ ReliableConnection::ReliableConnection(std::shared_ptr<IConnection> parent)
 	: parent(parent)
 	, receivedSeqs(BUFFER_SIZE)
 	, waitingAcks(BUFFER_SIZE)
+	, tags(BUFFER_SIZE)
 {
 }
 
@@ -32,16 +33,13 @@ ConnectionStatus ReliableConnection::getStatus() const
 
 void ReliableConnection::send(NetworkPacket&& packet)
 {
-	ReliableHeader header;
-	header.sequence = sequenceSent++;
-	header.ack = highestReceived;
-	header.ackBits = generateAckBits();
-	packet.addHeader(gsl::span<ReliableHeader>(&header, sizeof(ReliableHeader)));
-	parent->send(std::move(packet));
+	internalSend(packet, -1);
+}
 
-	// Mark as waiting
-	std::cout << "Sent " << header.sequence << "\n";
-	waitingAcks[header.sequence % BUFFER_SIZE] = true;
+void ReliableConnection::sendTagged(NetworkPacket&& packet, int tag)
+{
+	Expects(tag >= 0);
+	internalSend(packet, tag);
 }
 
 bool ReliableConnection::receive(NetworkPacket& packet)
@@ -58,6 +56,32 @@ bool ReliableConnection::receive(NetworkPacket& packet)
 	} while (!processReceivedPacket(packet));
 
 	return true;
+}
+
+void ReliableConnection::addAckListener(IReliableConnectionAckListener& listener)
+{
+	ackListeners.push_back(&listener);
+}
+
+void ReliableConnection::removeAckListener(IReliableConnectionAckListener& listener)
+{
+	ackListeners.erase(std::find(ackListeners.begin(), ackListeners.end(), &listener));
+}
+
+void ReliableConnection::internalSend(NetworkPacket& packet, int tag)
+{
+	ReliableHeader header;
+	header.sequence = sequenceSent++;
+	header.ack = highestReceived;
+	header.ackBits = generateAckBits();
+	packet.addHeader(gsl::span<ReliableHeader>(&header, sizeof(ReliableHeader)));
+	parent->send(std::move(packet));
+
+	// Mark as waiting
+	std::cout << "Sent " << header.sequence << "\n";
+	size_t idx = header.sequence % BUFFER_SIZE;
+	waitingAcks[idx] = true;
+	tags[idx] = tag;
 }
 
 bool ReliableConnection::processReceivedPacket(NetworkPacket& packet)
@@ -99,7 +123,7 @@ bool ReliableConnection::processReceivedPacket(NetworkPacket& packet)
 	return true;
 }
 
-void ReliableConnection::processReceivedAcks(unsigned short ack, unsigned ackBits)
+void ReliableConnection::processReceivedAcks(unsigned short ack, unsigned int ackBits)
 {
 	// If acking something too far back in the past, ignore it
 	unsigned short diff = sequenceSent - ack;
@@ -118,8 +142,14 @@ void ReliableConnection::processReceivedAcks(unsigned short ack, unsigned ackBit
 
 void ReliableConnection::onAckReceived(unsigned short sequence)
 {
-	if (waitingAcks[sequence % BUFFER_SIZE]) {
-		waitingAcks[sequence % BUFFER_SIZE] = false;
+	size_t idx = sequence % BUFFER_SIZE;
+	if (waitingAcks[idx]) {
+		waitingAcks[idx] = false;
+		if (tags[idx] != -1) {
+			for (auto& listener : ackListeners) {
+				listener->onPacketAcked(tags[idx]);
+			}
+		}
 		std::cout << "Ack " << sequence << "\n";
 	}
 }

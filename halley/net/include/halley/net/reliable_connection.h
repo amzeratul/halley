@@ -6,6 +6,14 @@
 
 namespace Halley
 {
+	class IReliableConnectionAckListener
+	{
+	public:
+		virtual ~IReliableConnectionAckListener() {}
+
+		virtual void onPacketAcked(int tag) = 0;
+	};
+
 	class ReliableConnection : public IConnection
 	{
 	public:
@@ -16,6 +24,10 @@ namespace Halley
 		void send(NetworkPacket&& packet) override;
 		bool receive(NetworkPacket& packet) override;
 
+		void sendTagged(NetworkPacket&& packet, int tag);
+		void addAckListener(IReliableConnectionAckListener& listener);
+		void removeAckListener(IReliableConnectionAckListener& listener);
+
 	private:
 		std::shared_ptr<IConnection> parent;
 
@@ -24,6 +36,11 @@ namespace Halley
 
 		std::vector<char> receivedSeqs;
 		std::vector<char> waitingAcks;
+		std::vector<int> tags;
+
+		std::vector<IReliableConnectionAckListener*> ackListeners;
+
+		void internalSend(NetworkPacket& packet, int tag);
 
 		bool processReceivedPacket(NetworkPacket& packet);
 		unsigned int generateAckBits();
