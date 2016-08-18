@@ -23,9 +23,12 @@ namespace Halley
 		unsigned short highestReceived = 0xFFFF;
 
 		std::vector<char> receivedSeqs;
+		std::vector<char> waitingAcks;
 
 		bool processReceivedPacket(NetworkPacket& packet);
-		void processReceivedAcks(unsigned short ack, unsigned int ackBits);
 		unsigned int generateAckBits();
+
+		void processReceivedAcks(unsigned short ack, unsigned int ackBits);
+		void onAckReceived(unsigned short sequence);
 	};
 }

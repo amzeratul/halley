@@ -1,5 +1,6 @@
 #include "reliable_connection.h"
 #include <network_packet.h>
+#include <iostream>
 
 using namespace Halley;
 
@@ -15,6 +16,7 @@ constexpr size_t BUFFER_SIZE = 1024;
 ReliableConnection::ReliableConnection(std::shared_ptr<IConnection> parent)
 	: parent(parent)
 	, receivedSeqs(BUFFER_SIZE)
+	, waitingAcks(BUFFER_SIZE)
 {
 }
 
@@ -34,9 +36,12 @@ void ReliableConnection::send(NetworkPacket&& packet)
 	header.sequence = sequenceSent++;
 	header.ack = highestReceived;
 	header.ackBits = generateAckBits();
-
 	packet.addHeader(gsl::span<ReliableHeader>(&header, sizeof(ReliableHeader)));
 	parent->send(std::move(packet));
+
+	// Mark as waiting
+	std::cout << "Sent " << header.sequence << "\n";
+	waitingAcks[header.sequence % BUFFER_SIZE] = true;
 }
 
 bool ReliableConnection::receive(NetworkPacket& packet)
@@ -96,11 +101,37 @@ bool ReliableConnection::processReceivedPacket(NetworkPacket& packet)
 
 void ReliableConnection::processReceivedAcks(unsigned short ack, unsigned ackBits)
 {
-	// TODO
+	// If acking something too far back in the past, ignore it
+	unsigned short diff = sequenceSent - ack;
+	if (diff > 512) {
+		return;
+	}
+
+	for (int i = 32; --i >= 0; ) {
+		if (ackBits & (1 << i)) {
+			unsigned short seq = static_cast<unsigned short>(ack - (i + 1));
+			onAckReceived(seq);
+		}
+	}
+	onAckReceived(ack);
+}
+
+void ReliableConnection::onAckReceived(unsigned short sequence)
+{
+	if (waitingAcks[sequence % BUFFER_SIZE]) {
+		waitingAcks[sequence % BUFFER_SIZE] = false;
+		std::cout << "Ack " << sequence << "\n";
+	}
 }
 
 unsigned int ReliableConnection::generateAckBits()
 {
-	// TODO
-	return 0;
+	unsigned int result = 0;
+	
+	for (size_t i = 0; i < 32; i++) {
+		size_t bufferPos = ((highestReceived - 1 - i) + 0x10000) % BUFFER_SIZE;
+		result |= static_cast<unsigned int>(1 & receivedSeqs[bufferPos]) << i;
+	}
+
+	return result;
 }
