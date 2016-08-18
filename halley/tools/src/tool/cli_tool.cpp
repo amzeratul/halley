@@ -15,7 +15,7 @@ CommandLineTools::CommandLineTools()
 
 Vector<std::string> CommandLineTools::getToolNames()
 {
-	auto result = Vector<std::string>(factories.size());
+	auto result = Vector<std::string>();
 	for (auto& kv : factories) {
 		result.push_back(kv.first);
 	}

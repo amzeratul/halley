@@ -138,16 +138,21 @@ int MakeFontTool::run(Vector<std::string> args)
 	for (auto& f: futures) {
 		f.get();
 	}
-	std::cout << " Done." << std::endl;
+	std::cout << " Done generating." << std::endl;
 
 	using boost::filesystem::path;
 	path target = args[1];
-	String fileName = target.filename().string();
-	String dir = target.parent_path().string();
-	String imgName = fileName + ".png";
-	dstImg->savePNG(dir + "/" + imgName);
-	generateFontMap(imgName, font, codes, dir + "/" + fileName + ".yaml", scale, radius);
-	generateTextureMeta(dir + "/" + imgName + ".meta");
+	path fileName = target.filename();
+	path dir = target.parent_path();
+	path imgName = change_extension(fileName, ".png");
+	path pngPath = dir / imgName;
+	path yamlPath = dir / change_extension(fileName, ".yaml");
+	path metaPath = change_extension(pngPath, ".png.meta");
+	std::cout << "Saving " << pngPath << ", " << yamlPath << ", and " << metaPath << std::endl;
+
+	dstImg->savePNG(pngPath.string());
+	generateFontMap(imgName.string(), font, codes, yamlPath.string(), scale, radius);
+	generateTextureMeta(metaPath.string());
 
 	return 0;
 }
