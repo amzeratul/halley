@@ -11,7 +11,7 @@ InstabilitySimulator::DelayedPacket::DelayedPacket(std::chrono::system_clock::ti
 
 bool InstabilitySimulator::DelayedPacket::operator<(const DelayedPacket& other) const
 {
-	return when < other.when;
+	return when > other.when;
 }
 
 bool InstabilitySimulator::DelayedPacket::isReady() const
