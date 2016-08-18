@@ -20,7 +20,7 @@ namespace Halley
 		size_t getSize() const;
 		const char* getData() const;
 
-		void addHeader(const gsl::span<gsl::byte> src);
+		void addHeader(gsl::span<const gsl::byte> src);
 		void extractHeader(gsl::span<gsl::byte> dst);
 
 	private:

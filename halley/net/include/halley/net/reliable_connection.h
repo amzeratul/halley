@@ -2,6 +2,7 @@
 
 #include "iconnection.h"
 #include <memory>
+#include <vector>
 
 namespace Halley
 {
@@ -17,5 +18,14 @@ namespace Halley
 
 	private:
 		std::shared_ptr<IConnection> parent;
+
+		unsigned short sequenceSent = 0;
+		unsigned short highestReceived = 0xFFFF;
+
+		std::vector<char> receivedSeqs;
+
+		bool processReceivedPacket(NetworkPacket& packet);
+		void processReceivedAcks(unsigned short ack, unsigned int ackBits);
+		unsigned int generateAckBits();
 	};
 }

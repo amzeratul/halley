@@ -5,13 +5,16 @@ using namespace Halley;
 
 struct ReliableHeader
 {
-	unsigned short sequence;
-	unsigned short ack;
-	unsigned int ackBits;
+	unsigned short sequence = 0xFFFF;
+	unsigned short ack = 0xFFFF;
+	unsigned int ackBits = 0xFFFFFFFF;
 };
+
+constexpr size_t BUFFER_SIZE = 1024;
 
 ReliableConnection::ReliableConnection(std::shared_ptr<IConnection> parent)
 	: parent(parent)
+	, receivedSeqs(BUFFER_SIZE)
 {
 }
 
@@ -28,21 +31,76 @@ ConnectionStatus ReliableConnection::getStatus() const
 void ReliableConnection::send(NetworkPacket&& packet)
 {
 	ReliableHeader header;
-	// TODO: fill header
+	header.sequence = sequenceSent++;
+	header.ack = highestReceived;
+	header.ackBits = generateAckBits();
 
-	packet.addHeader(gsl::span<ReliableHeader>(&header, 1));
+	packet.addHeader(gsl::span<ReliableHeader>(&header, sizeof(ReliableHeader)));
 	parent->send(std::move(packet));
 }
 
 bool ReliableConnection::receive(NetworkPacket& packet)
 {
-	bool result = parent->receive(packet);
-	if (result) {
-		ReliableHeader header;
-		packet.extractHeader(gsl::span<ReliableHeader>(&header, 1));
+	// Keep trying until either:
+	// a. upstream connection is out of packets (returns false)
+	// b. processReceivedPacket returns true (returns true)
 
-		// TODO: read header
+	do {
+		bool result = parent->receive(packet);
+		if (!result) {
+			return false;
+		}
+	} while (!processReceivedPacket(packet));
+
+	return true;
+}
+
+bool ReliableConnection::processReceivedPacket(NetworkPacket& packet)
+{
+	ReliableHeader header;
+	packet.extractHeader(gsl::span<ReliableHeader>(&header, sizeof(ReliableHeader)));
+	unsigned short seq = header.sequence;
+
+	size_t bufferPos = size_t(seq) % BUFFER_SIZE;
+	unsigned short diff = seq - highestReceived;
+
+	if (diff != 0 && diff < 0x8000) { // seq higher than highestReceived, with unsigned wrap-around
+		if (diff > BUFFER_SIZE - 32) {
+			// Ops, skipped too many packets!
+			close();
+			return false;
+		}
+
+		// Clear everything inbetween these. This is wrap-around safe.
+		size_t expectedNextPos = size_t(highestReceived + 1) % BUFFER_SIZE;
+		for (size_t i = expectedNextPos; i != bufferPos; i = (i + 1) % BUFFER_SIZE) {
+			receivedSeqs[i] = false;
+		}
+
+		highestReceived = seq;
 	}
 
-	return result;
+	if (receivedSeqs[bufferPos]) {
+		// Already received
+		return false;
+	}
+
+	// Mark this packet as received
+	receivedSeqs[bufferPos] = true;
+
+	// Process ack
+	processReceivedAcks(header.ack, header.ackBits);
+
+	return true;
+}
+
+void ReliableConnection::processReceivedAcks(unsigned short ack, unsigned ackBits)
+{
+	// TODO
+}
+
+unsigned int ReliableConnection::generateAckBits()
+{
+	// TODO
+	return 0;
 }
