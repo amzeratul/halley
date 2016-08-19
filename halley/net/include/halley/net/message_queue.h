@@ -5,17 +5,24 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include "reliable_connection.h"
 
 namespace Halley
 {
 	class ReliableConnection;
 
-	class MessageQueue
+	class MessageQueue : private IReliableConnectionAckListener
 	{
+		struct PendingPacket
+		{
+			std::vector<std::unique_ptr<IMessage>> msgs;
+		};
+
 	public:
 		MessageQueue(std::shared_ptr<ReliableConnection> connection);
+		~MessageQueue();
 		
-		void addStream(IMessageStream&& stream, int channel);
+		void addStream(std::unique_ptr<IMessageStream> stream, int channel);
 
 		std::vector<std::unique_ptr<IMessage>> receiveAll();
 
@@ -24,6 +31,11 @@ namespace Halley
 
 	private:
 		std::shared_ptr<ReliableConnection> connection;
-		std::map<int, std::unique_ptr<IMessageStream>> streams;
+		std::map<int, std::unique_ptr<IMessageStream>> channels;
+
+		std::map<int, PendingPacket> pendingPackets;
+		int nextPacketId = 0;
+
+		void onPacketAcked(int tag) override;
 	};
 }

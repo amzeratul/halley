@@ -156,7 +156,6 @@ void ReliableConnection::onAckReceived(unsigned short sequence)
 		}
 		float msgLag = std::chrono::duration<float>(Clock::now() - data.timestamp).count();
 		reportLatency(msgLag);
-		std::cout << "Ack " << sequence << " with " << msgLag << " ms lag (" << lag << " overall lag).\n";
 	}
 }
 

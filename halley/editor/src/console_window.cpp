@@ -14,9 +14,9 @@ ConsoleWindow::ConsoleWindow(Resources& resources)
 	mat["tex0"] = resources.get<Texture>("round_rect.png");
 	mat["u_smoothness"] = 0.1f;
 	mat["u_outline"] = 0.5f;
-	mat["u_outlineColour"] = Colour(0.25f, 0.41f, 0.26f);
+	mat["u_outlineColour"] = Colour(0.13f, 0.56f, 1.00f);
 
-	font = resources.get<Font>("ubuntub.yaml");
+	font = resources.get<Font>("consolas.yaml");
 
 	buffer.push_back("Halley Engine Editor.");
 	buffer.push_back("Hello world!");
@@ -56,7 +56,7 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 	Vector2f cursor = innerBounds.getBottomLeft();
 
 	TextRenderer text;
-	text.setFont(font).setSize(size).setOffset(Vector2f(0, 1)).setColour(Colour(0.61f, 1.0f, 0.75f));
+	text.setFont(font).setSize(size).setOffset(Vector2f(0, 1)).setColour(Colour(0.13f, 0.56f, 1.00f));
 
 	// Draw command
 	text.setText("> " + input).draw(painter, cursor);
