@@ -1,6 +1,5 @@
 #pragma once
-#include <gsl/gsl_byte>
-#include <gsl/span>
+#include <gsl/gsl>
 
 namespace Halley
 {
