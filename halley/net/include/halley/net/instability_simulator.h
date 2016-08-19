@@ -13,7 +13,7 @@ namespace Halley
 		class DelayedPacket
 		{
 		public:
-			DelayedPacket(std::chrono::system_clock::time_point when, OutboundNetworkPacket&& packet);
+			DelayedPacket(std::chrono::system_clock::time_point when, OutboundNetworkPacket packet);
 			bool operator<(const DelayedPacket& other) const;
 			bool isReady() const;
 
@@ -22,7 +22,7 @@ namespace Halley
 		};
 
 	public:
-		explicit InstabilitySimulator(std::shared_ptr<IConnection> parent, float avgLag, float lagVariance, float packetLoss);
+		explicit InstabilitySimulator(std::shared_ptr<IConnection> parent, float avgLag, float lagVariance, float packetLoss, float duplication);
 		void close() override;
 		ConnectionStatus getStatus() const override;
 		void send(OutboundNetworkPacket&& packet) override;
@@ -33,6 +33,7 @@ namespace Halley
 		float avgLag;
 		float lagVariance;
 		float packetLoss;
+		float duplication;
 
 		std::priority_queue<DelayedPacket> packets;
 		void sendPendingPackets();

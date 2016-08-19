@@ -29,7 +29,23 @@ size_t NetworkPacketBase::copyTo(gsl::span<gsl::byte> dst) const
 
 size_t NetworkPacketBase::getSize() const
 {
+	Expects(dataStart < 1500);
+	Expects(data.size() >= dataStart);
 	return data.size() - dataStart;
+}
+
+OutboundNetworkPacket::OutboundNetworkPacket(const OutboundNetworkPacket& other)
+	: NetworkPacketBase()
+{
+	data = other.data;
+	dataStart = other.dataStart;
+}
+
+OutboundNetworkPacket::OutboundNetworkPacket(OutboundNetworkPacket&& other)
+{
+	data = other.data;
+	dataStart = other.dataStart;
+	other.dataStart = 0;
 }
 
 OutboundNetworkPacket::OutboundNetworkPacket(gsl::span<const gsl::byte> data)
@@ -46,9 +62,25 @@ void OutboundNetworkPacket::addHeader(gsl::span<const gsl::byte> src)
 	Ensures(dataStart <= 1500);
 }
 
+OutboundNetworkPacket& OutboundNetworkPacket::operator=(OutboundNetworkPacket&& other) 
+{
+	data = other.data;
+	dataStart = other.dataStart;
+	other.dataStart = 0;
+	return *this;
+}
+
 InboundNetworkPacket::InboundNetworkPacket()
 	: NetworkPacketBase()
 {}
+
+InboundNetworkPacket::InboundNetworkPacket(InboundNetworkPacket&& other)
+	: NetworkPacketBase()
+{
+	data = other.data;
+	dataStart = other.dataStart;
+	other.dataStart = 0;
+}
 
 InboundNetworkPacket::InboundNetworkPacket(gsl::span<const gsl::byte> data)
 	: NetworkPacketBase(data, 0)
@@ -62,4 +94,12 @@ void InboundNetworkPacket::extractHeader(gsl::span<gsl::byte> dst)
 	dataStart += dst.size_bytes();
 
 	Ensures(dataStart <= 1500);
+}
+
+InboundNetworkPacket& InboundNetworkPacket::operator=(InboundNetworkPacket&& other)
+{
+	data = other.data;
+	dataStart = other.dataStart;
+	other.dataStart = 0;
+	return *this;
 }

@@ -4,9 +4,9 @@
 
 using namespace Halley;
 
-InstabilitySimulator::DelayedPacket::DelayedPacket(std::chrono::system_clock::time_point when, OutboundNetworkPacket&& packet)
+InstabilitySimulator::DelayedPacket::DelayedPacket(std::chrono::system_clock::time_point when, OutboundNetworkPacket packet)
 	: when(when)
-	, packet(std::move(packet))
+	, packet(packet)
 {}
 
 bool InstabilitySimulator::DelayedPacket::operator<(const DelayedPacket& other) const
@@ -19,12 +19,15 @@ bool InstabilitySimulator::DelayedPacket::isReady() const
 	return std::chrono::system_clock::now() >= when;
 }
 
-InstabilitySimulator::InstabilitySimulator(std::shared_ptr<IConnection> parent, float avgLag, float lagVariance, float packetLoss)
+InstabilitySimulator::InstabilitySimulator(std::shared_ptr<IConnection> parent, float avgLag, float lagVariance, float packetLoss, float duplication)
 	: parent(parent)
 	, avgLag(avgLag)
 	, lagVariance(lagVariance)
 	, packetLoss(packetLoss)
+	, duplication(duplication)
 {
+	Expects(packetLoss < 0.95f);
+	Expects(duplication < 0.95f);
 }
 
 void InstabilitySimulator::close()
@@ -46,10 +49,12 @@ void InstabilitySimulator::send(OutboundNetworkPacket&& packet)
 		return;
 	}
 
-	float delay = rng.getFloat(avgLag - lagVariance, avgLag + lagVariance);
-	auto now = std::chrono::system_clock::now();
-	auto scheduledTime = now + std::chrono::duration_cast<decltype(now)::duration>(std::chrono::duration<double>(delay));
-	packets.push(DelayedPacket(scheduledTime, std::move(packet)));
+	do {
+		float delay = rng.getFloat(avgLag - lagVariance, avgLag + lagVariance);
+		auto now = std::chrono::system_clock::now();
+		auto scheduledTime = now + std::chrono::duration_cast<decltype(now)::duration>(std::chrono::duration<double>(delay));
+		packets.push(DelayedPacket(scheduledTime, packet));
+	} while (rng.getFloat(0.0f, 1.0f) < duplication);
 
 	sendPendingPackets();
 }

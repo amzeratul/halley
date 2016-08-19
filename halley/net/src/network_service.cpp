@@ -41,9 +41,17 @@ NetworkService::NetworkService(int port, IPVersion version)
 NetworkService::~NetworkService()
 {
 	for (auto& conn : pimpl->activeConnections) {
-		conn->terminateConnection();
+		try {
+			conn->terminateConnection();
+		} catch (...) {
+			std::cout << "Error terminating connection on ~NetworkService()" << std::endl;
+		}
 	}
-	pimpl->service.poll();
+	try {
+		pimpl->service.poll();
+	} catch (...) {
+		std::cout << "Error polling service on ~NetworkService()" << std::endl;
+	}
 }
 
 void NetworkService::update()

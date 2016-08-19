@@ -6,6 +6,8 @@
 #include <vector>
 #include <map>
 #include "reliable_connection.h"
+#include <list>
+#include <chrono>
 
 namespace Halley
 {
@@ -16,6 +18,7 @@ namespace Halley
 		struct PendingPacket
 		{
 			std::vector<std::unique_ptr<IMessage>> msgs;
+			std::chrono::steady_clock::time_point timeSent;
 		};
 
 	public:
@@ -26,13 +29,14 @@ namespace Halley
 
 		std::vector<std::unique_ptr<IMessage>> receiveAll();
 
-		void enqueue(IMessage&& msg, int channel);
+		void enqueue(std::unique_ptr<IMessage> msg, int channel);
 		void sendAll();
 
 	private:
 		std::shared_ptr<ReliableConnection> connection;
 		std::map<int, std::unique_ptr<IMessageStream>> channels;
 
+		std::list<std::unique_ptr<IMessage>> pendingMsgs;
 		std::map<int, PendingPacket> pendingPackets;
 		int nextPacketId = 0;
 

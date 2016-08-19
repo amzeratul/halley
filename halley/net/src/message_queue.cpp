@@ -30,29 +30,63 @@ void MessageQueue::addStream(std::unique_ptr<IMessageStream> stream, int channel
 
 std::vector<std::unique_ptr<IMessage>> MessageQueue::receiveAll()
 {
-	// TODO
-	return std::vector<std::unique_ptr<IMessage>>();
+	std::vector<std::unique_ptr<IMessage>> result;
+
+	InboundNetworkPacket packet;
+	while (connection->receive(packet)) {
+		// TODO: deserialize messages
+	}
+
+	return result;
 }
 
-void MessageQueue::enqueue(IMessage&& msg, int channel)
+void MessageQueue::enqueue(std::unique_ptr<IMessage> msg, int channel)
 {
-	// TODO
 	auto i = channels.find(channel);
 	if (i == channels.end()) {
 		throw Exception("Channel " + String::integerToString(channel) + " has not been set up");
 	}
 
-	size_t size = msg.getSerializedSize();
+	pendingMsgs.push_back(std::move(msg));
 }
 
 void MessageQueue::sendAll()
 {
-	// TODO
-	std::array<gsl::byte, 1500> buffer;
-	size_t size = 0;
+	while (!pendingMsgs.empty()) {
+		std::vector<std::unique_ptr<IMessage>> sentMsgs;
+		std::array<gsl::byte, 1500> buffer;
+		gsl::span<gsl::byte> dst(buffer);
+		size_t size = 0;
 
-	int id = nextPacketId++;
-	connection->sendTagged(OutboundNetworkPacket(gsl::span<gsl::byte>(buffer).first(size)), id);
+		// Figure out what messages are going in this packet
+		auto next = pendingMsgs.begin();
+		for (auto iter = pendingMsgs.begin(); iter != pendingMsgs.end(); iter = next) {
+			++next;
+
+			size_t msgSize = (*iter)->getSerializedSize(); // TODO: include header
+
+			// Message fits, move to list
+			if (size + msgSize <= buffer.size()) {
+				(*iter)->serializeTo(dst.subspan(size, msgSize));
+				size += msgSize;
+				sentMsgs.push_back(std::move(*iter));
+				pendingMsgs.erase(iter);
+			}
+		}
+
+		if (sentMsgs.empty()) {
+			throw Exception("Was not able to fit any messages into packet!");
+		}
+
+		// Track data in this packet
+		int tag = nextPacketId++;
+		auto& pendingData = pendingPackets[tag];
+		pendingData.msgs = std::move(sentMsgs);
+		pendingData.timeSent = std::chrono::steady_clock::now();
+
+		// Send
+		connection->sendTagged(OutboundNetworkPacket(dst.first(size)), tag);
+	}
 }
 
 void MessageQueue::onPacketAcked(int tag)
@@ -61,6 +95,11 @@ void MessageQueue::onPacketAcked(int tag)
 	if (i != pendingPackets.end()) {
 		auto& packet = i->second;
 
-		// TODO
+		for (auto& m : packet.msgs) {
+			// TODO: ack messages
+		}
+
+		// Remove pending
+		pendingPackets.erase(tag);
 	}
 }
