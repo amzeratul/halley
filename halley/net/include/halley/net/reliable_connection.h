@@ -31,10 +31,10 @@ namespace Halley
 
 		void close() override;
 		ConnectionStatus getStatus() const override;
-		void send(NetworkPacket&& packet) override;
-		bool receive(NetworkPacket& packet) override;
+		void send(OutboundNetworkPacket&& packet) override;
+		bool receive(InboundNetworkPacket& packet) override;
 
-		void sendTagged(NetworkPacket&& packet, int tag);
+		void sendTagged(OutboundNetworkPacket&& packet, int tag);
 		void addAckListener(IReliableConnectionAckListener& listener);
 		void removeAckListener(IReliableConnectionAckListener& listener);
 
@@ -57,9 +57,9 @@ namespace Halley
 		Clock::time_point lastReceive;
 		Clock::time_point lastSend;
 
-		void internalSend(NetworkPacket& packet, int tag);
+		void internalSend(OutboundNetworkPacket& packet, int tag);
 
-		bool processReceivedPacket(NetworkPacket& packet);
+		bool processReceivedPacket(InboundNetworkPacket& packet);
 		unsigned int generateAckBits();
 
 		void processReceivedAcks(unsigned short ack, unsigned int ackBits);

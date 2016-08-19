@@ -98,7 +98,7 @@ std::shared_ptr<IConnection> NetworkService::connect(String addr, int port)
 	auto& conn = pimpl->activeConnections.back();
 
 	// Handshake
-	conn->send(NetworkPacket(gsl::ensure_z("halley_open_connection")));
+	conn->send(OutboundNetworkPacket(gsl::ensure_z("halley_open_connection")));
 
 	startListening();
 

@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-InstabilitySimulator::DelayedPacket::DelayedPacket(std::chrono::system_clock::time_point when, NetworkPacket&& packet)
+InstabilitySimulator::DelayedPacket::DelayedPacket(std::chrono::system_clock::time_point when, OutboundNetworkPacket&& packet)
 	: when(when)
 	, packet(std::move(packet))
 {}
@@ -37,7 +37,7 @@ ConnectionStatus InstabilitySimulator::getStatus() const
 	return parent->getStatus();
 }
 
-void InstabilitySimulator::send(NetworkPacket&& packet)
+void InstabilitySimulator::send(OutboundNetworkPacket&& packet)
 {
 	auto& rng = Random::getGlobal();
 
@@ -54,7 +54,7 @@ void InstabilitySimulator::send(NetworkPacket&& packet)
 	sendPendingPackets();
 }
 
-bool InstabilitySimulator::receive(NetworkPacket& packet)
+bool InstabilitySimulator::receive(InboundNetworkPacket& packet)
 {
 	// This is called every frame, so it's a "good" place for this
 	sendPendingPackets();
@@ -65,7 +65,7 @@ bool InstabilitySimulator::receive(NetworkPacket& packet)
 void InstabilitySimulator::sendPendingPackets()
 {
 	while (!packets.empty() && packets.top().isReady()) {
-		NetworkPacket packet = packets.top().packet;
+		OutboundNetworkPacket packet = packets.top().packet;
 		parent->send(std::move(packet));
 		packets.pop();
 	}

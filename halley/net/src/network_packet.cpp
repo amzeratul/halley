@@ -4,55 +4,62 @@
 
 using namespace Halley;
 
-NetworkPacket::NetworkPacket()
-{
-}
+NetworkPacketBase::NetworkPacketBase()
+	: dataStart(0)
+{}
 
-NetworkPacket::NetworkPacket(gsl::span<const gsl::byte> src)
+NetworkPacketBase::NetworkPacketBase(gsl::span<const gsl::byte> src, size_t prePadding)
+	: dataStart(prePadding)
 {
-	if (src.size_bytes() > 1500) {
+	if (src.size_bytes() + prePadding > 1500) {
 		throw Exception("Packet too big for network.");
 	}
-	data.resize(src.size_bytes());
-	memcpy(data.data(), src.data(), src.size_bytes());
+	data.resize(src.size_bytes() + prePadding);
+	memcpy(data.data() + prePadding, src.data(), src.size_bytes());
 }
 
-size_t NetworkPacket::copyTo(gsl::span<gsl::byte> dst) const
+size_t NetworkPacketBase::copyTo(gsl::span<gsl::byte> dst) const
 {
-	if (dst.size() < signed(data.size())) {
+	if (dst.size() < signed(getSize())) {
 		throw Exception("Destination buffer is too small for network packet.");
 	}
-	memcpy(dst.data(), data.data(), data.size());
-	return data.size();
+	memcpy(dst.data(), data.data() + dataStart, getSize());
+	return getSize();
 }
 
-size_t NetworkPacket::getSize() const
+size_t NetworkPacketBase::getSize() const
 {
-	return data.size();
+	return data.size() - dataStart;
 }
 
-const char* NetworkPacket::getData() const
-{
-	return data.data();
-}
+OutboundNetworkPacket::OutboundNetworkPacket(gsl::span<const gsl::byte> data)
+	: NetworkPacketBase(data, 128)
+{}
 
-void NetworkPacket::addHeader(gsl::span<const gsl::byte> src)
+void OutboundNetworkPacket::addHeader(gsl::span<const gsl::byte> src)
 {
-	Expects(src.size_bytes() < 64);
+	Expects(src.size_bytes() <= signed(dataStart));
 	
-	std::vector<char> newData(data.size() + src.size_bytes());
-	memcpy(newData.data(), src.data(), src.size_bytes());
-	memcpy(newData.data() + src.size_bytes(), data.data(), data.size());
-	data = std::move(newData);
+	dataStart -= src.size_bytes();
+	memcpy(data.data() + dataStart, src.data(), src.size_bytes());
+
+	Ensures(dataStart <= 1500);
 }
 
-void NetworkPacket::extractHeader(gsl::span<gsl::byte> dst)
+InboundNetworkPacket::InboundNetworkPacket()
+	: NetworkPacketBase()
+{}
+
+InboundNetworkPacket::InboundNetworkPacket(gsl::span<const gsl::byte> data)
+	: NetworkPacketBase(data, 0)
+{}
+
+void InboundNetworkPacket::extractHeader(gsl::span<gsl::byte> dst)
 {
 	Expects(dst.size_bytes() <= signed(data.size()));
 
-	memcpy(dst.data(), data.data(), dst.size_bytes());
-	
-	std::vector<char> newData(data.size() - dst.size_bytes());
-	memcpy(newData.data(), data.data() + dst.size_bytes(), data.size() - dst.size_bytes());
-	data = std::move(newData);
+	memcpy(dst.data(), data.data() + dataStart, dst.size_bytes());
+	dataStart += dst.size_bytes();
+
+	Ensures(dataStart <= 1500);
 }

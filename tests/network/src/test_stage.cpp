@@ -57,14 +57,14 @@ void TestStage::updateNetwork()
 			}
 
 			if (key->isButtonPressed(Keys::Space)) {
-				connection->send(NetworkPacket(gsl::ensure_z("hello world!")));
+				connection->send(OutboundNetworkPacket(gsl::ensure_z("hello world!")));
 			}
 
 			if (connection->getTimeSinceLastSend() > 1.0f / 30.0f) {
-				connection->send(NetworkPacket(gsl::ensure_z("no-op")));
+				connection->send(OutboundNetworkPacket(gsl::ensure_z("no-op")));
 			}
 
-			NetworkPacket received;
+			InboundNetworkPacket received;
 			while (connection->receive(received)) {
 				gsl::byte buffer[2048];
 				size_t bytes = received.copyTo(buffer);

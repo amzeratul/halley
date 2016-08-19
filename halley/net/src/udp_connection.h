@@ -20,8 +20,8 @@ namespace Halley
 
 		void close() override;
 		ConnectionStatus getStatus() const override { return status; }
-		void send(NetworkPacket&& packet) override;
-		bool receive(NetworkPacket& packet) override;
+		void send(OutboundNetworkPacket&& packet) override;
+		bool receive(InboundNetworkPacket& packet) override;
 		
 		bool matchesEndpoint(const UDPEndpoint& remoteEndpoint) const;
 		void onReceive(gsl::span<const gsl::byte> data);
@@ -35,8 +35,8 @@ namespace Halley
 		ConnectionStatus status;
 
 		// TODO: replace these with more efficient structures
-		std::list<NetworkPacket> pendingSend;
-		std::list<NetworkPacket> pendingReceive;
+		std::list<OutboundNetworkPacket> pendingSend;
+		std::list<InboundNetworkPacket> pendingReceive;
 		std::array<gsl::byte, 2048> sendBuffer;
 		std::string error;
 

@@ -30,7 +30,7 @@ void UDPConnection::onClose()
 	}
 }
 
-void UDPConnection::send(NetworkPacket&& packet)
+void UDPConnection::send(OutboundNetworkPacket&& packet)
 {
 	if (status == ConnectionStatus::OPEN) {
 		bool needsSend = pendingSend.empty();
@@ -41,7 +41,7 @@ void UDPConnection::send(NetworkPacket&& packet)
 	}
 }
 
-bool UDPConnection::receive(NetworkPacket& packet)
+bool UDPConnection::receive(InboundNetworkPacket& packet)
 {
 	if (pendingReceive.empty()) {
 		return false;
@@ -61,7 +61,7 @@ void UDPConnection::onReceive(gsl::span<const gsl::byte> data)
 {
 	Expects(data.size() <= 1500);
 	if (data.size() <= 1500) {
-		pendingReceive.push_back(NetworkPacket(data));
+		pendingReceive.push_back(InboundNetworkPacket(data));
 	}
 }
 

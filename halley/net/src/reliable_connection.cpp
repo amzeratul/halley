@@ -33,18 +33,18 @@ ConnectionStatus ReliableConnection::getStatus() const
 	return parent->getStatus();
 }
 
-void ReliableConnection::send(NetworkPacket&& packet)
+void ReliableConnection::send(OutboundNetworkPacket&& packet)
 {
 	internalSend(packet, -1);
 }
 
-void ReliableConnection::sendTagged(NetworkPacket&& packet, int tag)
+void ReliableConnection::sendTagged(OutboundNetworkPacket&& packet, int tag)
 {
 	Expects(tag >= 0);
 	internalSend(packet, tag);
 }
 
-bool ReliableConnection::receive(NetworkPacket& packet)
+bool ReliableConnection::receive(InboundNetworkPacket& packet)
 {
 	// Keep trying until either:
 	// a. upstream connection is out of packets (returns false)
@@ -71,7 +71,7 @@ void ReliableConnection::removeAckListener(IReliableConnectionAckListener& liste
 	ackListeners.erase(std::find(ackListeners.begin(), ackListeners.end(), &listener));
 }
 
-void ReliableConnection::internalSend(NetworkPacket& packet, int tag)
+void ReliableConnection::internalSend(OutboundNetworkPacket& packet, int tag)
 {
 	ReliableHeader header;
 	header.sequence = sequenceSent++;
@@ -89,7 +89,7 @@ void ReliableConnection::internalSend(NetworkPacket& packet, int tag)
 	lastSend = sent.timestamp = Clock::now();
 }
 
-bool ReliableConnection::processReceivedPacket(NetworkPacket& packet)
+bool ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 {
 	ReliableHeader header;
 	packet.extractHeader(gsl::span<ReliableHeader>(&header, sizeof(ReliableHeader)));

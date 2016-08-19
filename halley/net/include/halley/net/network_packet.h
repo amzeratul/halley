@@ -4,26 +4,32 @@
 
 namespace Halley
 {
-	class NetworkPacket
+	class NetworkPacketBase
 	{
 	public:
-		NetworkPacket();
-		explicit NetworkPacket(gsl::span<const gsl::byte> src);
-
-		NetworkPacket(const NetworkPacket& packet) = default;
-		NetworkPacket(NetworkPacket&& packet) = default;
-		NetworkPacket& operator=(const NetworkPacket& packet) = default;
-		NetworkPacket& operator=(NetworkPacket&& packet) = default;
-
 		size_t copyTo(gsl::span<gsl::byte> dst) const;
-
 		size_t getSize() const;
-		const char* getData() const;
 
+	protected:
+		NetworkPacketBase();
+		NetworkPacketBase(gsl::span<const gsl::byte> data, size_t prePadding);
+
+		size_t dataStart;
+		std::vector<gsl::byte> data;
+	};
+
+	class OutboundNetworkPacket : public NetworkPacketBase
+	{
+	public:
+		explicit OutboundNetworkPacket(gsl::span<const gsl::byte> data);
 		void addHeader(gsl::span<const gsl::byte> src);
-		void extractHeader(gsl::span<gsl::byte> dst);
+	};
 
-	private:
-		std::vector<char> data;
+	class InboundNetworkPacket : public NetworkPacketBase
+	{
+	public:
+		InboundNetworkPacket();
+		explicit InboundNetworkPacket(gsl::span<const gsl::byte> data);
+		void extractHeader(gsl::span<gsl::byte> dst);
 	};
 }
