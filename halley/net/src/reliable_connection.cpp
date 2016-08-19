@@ -81,7 +81,6 @@ void ReliableConnection::internalSend(OutboundNetworkPacket& packet, int tag)
 	parent->send(std::move(packet));
 
 	// Store send information
-	std::cout << "Sent " << header.sequence << "\n";
 	size_t idx = header.sequence % BUFFER_SIZE;
 	auto& sent = sentPackets[idx];
 	sent.waiting = true;
@@ -105,10 +104,10 @@ bool ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 			return false;
 		}
 
-		// Clear everything inbetween these. This is wrap-around safe.
-		size_t expectedNextPos = size_t(highestReceived + 1) % BUFFER_SIZE;
-		for (size_t i = expectedNextPos; i != bufferPos; i = (i + 1) % BUFFER_SIZE) {
-			receivedSeqs[i] = false;
+		// Clear all packets half-buffer seqs ago (since the last cleared one)
+		for (size_t i = highestReceived % BUFFER_SIZE; i != bufferPos; i = (i + 1) % BUFFER_SIZE) {
+			size_t idx = (i + BUFFER_SIZE / 2) % BUFFER_SIZE;
+			receivedSeqs[idx] = false;
 		}
 
 		highestReceived = seq;
@@ -116,7 +115,6 @@ bool ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 
 	if (receivedSeqs[bufferPos]) {
 		// Already received
-		std::cout << "Rejected\n";
 		return false;
 	}
 

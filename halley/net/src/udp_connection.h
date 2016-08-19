@@ -1,8 +1,9 @@
 #pragma once
 
 #include "iconnection.h"
+#include "network_packet.h"
 #include <boost/asio.hpp>
-#include <list>
+#include <deque>
 #include <array>
 #include <string>
 #include <gsl/gsl>
@@ -34,9 +35,8 @@ namespace Halley
 		UDPEndpoint remote;
 		ConnectionStatus status;
 
-		// TODO: replace these with more efficient structures
-		std::list<OutboundNetworkPacket> pendingSend;
-		std::list<InboundNetworkPacket> pendingReceive;
+		std::deque<OutboundNetworkPacket> pendingSend;
+		std::deque<InboundNetworkPacket> pendingReceive;
 		std::array<gsl::byte, 2048> sendBuffer;
 		std::string error;
 
