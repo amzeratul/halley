@@ -28,9 +28,9 @@ void MessageQueue::addStream(std::unique_ptr<IMessageStream> stream, int channel
 	channels[channel] = std::move(stream);
 }
 
-std::vector<std::unique_ptr<IMessage>> MessageQueue::receiveAll()
+std::vector<std::unique_ptr<NetworkMessage>> MessageQueue::receiveAll()
 {
-	std::vector<std::unique_ptr<IMessage>> result;
+	std::vector<std::unique_ptr<NetworkMessage>> result;
 
 	InboundNetworkPacket packet;
 	while (connection->receive(packet)) {
@@ -40,20 +40,24 @@ std::vector<std::unique_ptr<IMessage>> MessageQueue::receiveAll()
 	return result;
 }
 
-void MessageQueue::enqueue(std::unique_ptr<IMessage> msg, int channel)
+void MessageQueue::enqueue(std::unique_ptr<NetworkMessage> msg, int channel)
 {
 	auto i = channels.find(channel);
 	if (i == channels.end()) {
 		throw Exception("Channel " + String::integerToString(channel) + " has not been set up");
 	}
 
+	msg->setStream(i->second.get());
+
 	pendingMsgs.push_back(std::move(msg));
 }
 
 void MessageQueue::sendAll()
 {
+	checkReSend();
+
 	while (!pendingMsgs.empty()) {
-		std::vector<std::unique_ptr<IMessage>> sentMsgs;
+		std::vector<std::unique_ptr<NetworkMessage>> sentMsgs;
 		std::array<gsl::byte, 1500> buffer;
 		gsl::span<gsl::byte> dst(buffer);
 		size_t size = 0;
@@ -96,10 +100,31 @@ void MessageQueue::onPacketAcked(int tag)
 		auto& packet = i->second;
 
 		for (auto& m : packet.msgs) {
-			// TODO: ack messages
+			m->onAck();
 		}
 
 		// Remove pending
 		pendingPackets.erase(tag);
+	}
+}
+
+void MessageQueue::checkReSend()
+{
+	auto next = pendingPackets.begin();
+	for (auto iter = pendingPackets.begin(); iter != pendingPackets.end(); iter = next) {
+		++next;
+		auto& pending = iter->second;
+
+		// Check how long it's been waiting
+		float elapsed = std::chrono::duration<float>(std::chrono::steady_clock::now() - pending.timeSent).count();
+		if (elapsed > 0.1f && elapsed > connection->getLatency() * 2.0f) {
+			// Re-send any reliable messages
+			for (auto& m : pending.msgs) {
+				if (m->isReliable()) {
+					pendingMsgs.push_back(std::move(m));
+				}
+			}
+			pendingPackets.erase(iter);
+		}
 	}
 }

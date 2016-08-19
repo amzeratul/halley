@@ -1,6 +1,6 @@
 #pragma once
 
-#include "imessage.h"
+#include "network_message.h"
 #include "imessage_stream.h"
 #include <memory>
 #include <vector>
@@ -17,7 +17,7 @@ namespace Halley
 	{
 		struct PendingPacket
 		{
-			std::vector<std::unique_ptr<IMessage>> msgs;
+			std::vector<std::unique_ptr<NetworkMessage>> msgs;
 			std::chrono::steady_clock::time_point timeSent;
 		};
 
@@ -27,19 +27,20 @@ namespace Halley
 		
 		void addStream(std::unique_ptr<IMessageStream> stream, int channel);
 
-		std::vector<std::unique_ptr<IMessage>> receiveAll();
+		std::vector<std::unique_ptr<NetworkMessage>> receiveAll();
 
-		void enqueue(std::unique_ptr<IMessage> msg, int channel);
+		void enqueue(std::unique_ptr<NetworkMessage> msg, int channel);
 		void sendAll();
 
 	private:
 		std::shared_ptr<ReliableConnection> connection;
 		std::map<int, std::unique_ptr<IMessageStream>> channels;
 
-		std::list<std::unique_ptr<IMessage>> pendingMsgs;
+		std::list<std::unique_ptr<NetworkMessage>> pendingMsgs;
 		std::map<int, PendingPacket> pendingPackets;
 		int nextPacketId = 0;
 
 		void onPacketAcked(int tag) override;
+		void checkReSend();
 	};
 }
