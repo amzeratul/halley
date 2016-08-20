@@ -50,10 +50,10 @@ Unreliable unordered: special effects
 UDPPacket
  + IP+UDP header: protocol data [20B]
  + Header: connectionId [1-2B]
- + ConnectionPacket                  {Encrypted once that's negotiated}
-   + Header: ack [2B], ackBits [4B]
-   + NetworkPacket                   {There can be one or two of these in a ConnectionPacket. If two, one is always reliable and the other is always unreliable}
-     + Header: seq [2B], size [1-2B] {Header is not included on the second packet, inferred as seq+1, remaining size on datagram}
-     + NetworkMessage                {There can be many network messages}
-       + Header: channel [1B], seq[0-2B], size [1-2B]  {seq is only for ordered channels. If the previous message was on the same channel, seq is implied as seq+1}
-       + Data: [size B]              {This is passed to the game to decode as it sees fit}
+ + ReliableConnectionPacket                                     {encrypted once that's negotiated}
+   + Header: ack [2B], ackBits [4B], firstSeq [2B]              {firstSeq is the sequence of the first packet in this. Others are in sequential order.}
+   + NetworkPacket                                              {there can multiple packets}
+     + Header: resendFlag [1b], size [7-15b], resendSeq [0-2B]  {if the resendFlag is set, resendSeq will contain the sequence of the packet it's re-sending.}                              
+     + NetworkMessage                                           {there can be many network messages}
+       + Header: channel [1B], seq[0-2B], size [1-2B]           {seq is only for ordered channels. If the previous message was on the same channel, seq is implied as seq+1}
+       + Data: [size B]                                         {this is passed to the game to decode as it sees fit}

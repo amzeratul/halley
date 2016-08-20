@@ -1,9 +1,11 @@
 #pragma once
 
 #include "iconnection.h"
+#include "network_packet.h"
 #include <memory>
 #include <vector>
 #include <chrono>
+#include <deque>
 
 namespace Halley
 {
@@ -48,8 +50,9 @@ namespace Halley
 		unsigned short sequenceSent = 0;
 		unsigned short highestReceived = 0xFFFF;
 
-		std::vector<char> receivedSeqs;
+		std::vector<char> receivedSeqs; // 0 = not received, 1 = received, 2 = received re-send, 3 = both
 		std::vector<SentPacketData> sentPackets;
+		std::deque<InboundNetworkPacket> pendingPackets;
 
 		std::vector<IReliableConnectionAckListener*> ackListeners;
 
@@ -57,12 +60,11 @@ namespace Halley
 		Clock::time_point lastReceive;
 		Clock::time_point lastSend;
 
-		void internalSend(OutboundNetworkPacket& packet, int tag);
-
-		bool processReceivedPacket(InboundNetworkPacket& packet);
+		void processReceivedPacket(InboundNetworkPacket& packet);
 		unsigned int generateAckBits();
 
 		void processReceivedAcks(unsigned short ack, unsigned int ackBits);
+		bool onSeqReceived(unsigned short sequence, bool isResend, unsigned short resendOf);
 		void onAckReceived(unsigned short sequence);
 		void reportLatency(float lag);
 	};

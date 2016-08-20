@@ -148,15 +148,17 @@ void NetworkService::receiveNext()
 	{
 		try {
 			Expects(size <= pimpl->receiveBuffer.size());
-			std::cout << "Received " << size << " bytes\n";
-
-			// Read connection id
 			auto received = gsl::span<gsl::byte>(pimpl->receiveBuffer.data(), size);
-			unsigned short id = -1; // TODO
-			received = received.subspan(1);
+			//std::cout << "Received " << size << " bytes\n";
+			UDPConnection* connection = nullptr;
+
+			short id = -1; // TODO
+			if (size >= 1) {
+				// Read connection id
+				received = received.subspan(1);
+			}
 
 			// Find the owner of this remote endpoint
-			UDPConnection* connection = nullptr;
 			for (auto& conn : pimpl->activeConnections) {
 				if (conn->matchesEndpoint(id, pimpl->remoteEndpoint)) {
 					connection = conn.get();
@@ -173,15 +175,21 @@ void NetworkService::receiveNext()
 			}
 			else {
 				if (connection) {
-					connection->onReceive(received);
+					try {
+						connection->onReceive(received);
+					} catch (std::exception& e) {
+						connection->setError(e.what());
+						connection->close();
+					} catch (...) {
+						connection->setError("Unknown error receiving packet.");
+						connection->close();
+					}
 				} else {
 					if (isValidConnectionRequest(received)) {
 						auto& pending = pimpl->pendingIncomingConnections;
 						if (std::find(pending.begin(), pending.end(), pimpl->remoteEndpoint) == pending.end()) {
 							pending.push_back(pimpl->remoteEndpoint);
 						}
-					} else {
-						std::cout << "Invalid packet on connection " << id << std::endl;
 					}
 				}
 			}

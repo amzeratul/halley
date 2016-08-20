@@ -75,7 +75,7 @@ bool UDPConnection::receive(InboundNetworkPacket& packet)
 
 bool UDPConnection::matchesEndpoint(short id, const UDPEndpoint& remoteEndpoint) const
 {
-	return id == connectionId && remote == remoteEndpoint;
+	return (id == -1 || id == connectionId) && remote == remoteEndpoint;
 }
 
 void UDPConnection::onReceive(gsl::span<const gsl::byte> data)
@@ -137,7 +137,7 @@ void UDPConnection::sendNext()
 
 	socket.async_send_to(boost::asio::buffer(sendBuffer, size), remote, [this] (const boost::system::error_code& error, std::size_t size)
 	{
-		std::cout << "Sent " << size << " bytes\n";
+		//std::cout << "Sent " << size << " bytes\n";
 		if (error) {
 			std::cout << "Error sending packet: " << error.message() << std::endl;
 			close();

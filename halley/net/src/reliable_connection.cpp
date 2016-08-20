@@ -3,6 +3,7 @@
 #include <iostream>
 #include <chrono>
 #include <halley/utils/utils.h>
+#include <halley/support/exception.h>
 
 using namespace Halley;
 
@@ -11,6 +12,13 @@ struct ReliableHeader
 	unsigned short sequence = 0xFFFF;
 	unsigned short ack = 0xFFFF;
 	unsigned int ackBits = 0xFFFFFFFF;
+};
+
+struct ReliableSubHeader
+{
+	unsigned char sizeA;
+	unsigned char sizeB;
+	unsigned short resend;
 };
 
 constexpr size_t BUFFER_SIZE = 1024;
@@ -35,44 +43,27 @@ ConnectionStatus ReliableConnection::getStatus() const
 
 void ReliableConnection::send(OutboundNetworkPacket&& packet)
 {
-	internalSend(packet, -1);
+	//throw Exception("Operation not supported.");
+	sendTagged(std::move(packet), 0);
 }
 
 void ReliableConnection::sendTagged(OutboundNetworkPacket&& packet, int tag)
 {
 	Expects(tag >= 0);
-	internalSend(packet, tag);
-}
 
-bool ReliableConnection::receive(InboundNetworkPacket& packet)
-{
-	// Keep trying until either:
-	// a. upstream connection is out of packets (returns false)
-	// b. processReceivedPacket returns true (returns true)
+	// Add reliable sub-header
+	bool isResend = false;
+	unsigned short resending = 0;
+	size_t size = packet.getSize();
+	bool longSize = size >= 64;
+	ReliableSubHeader subHeader;
+	subHeader.sizeA = static_cast<unsigned char>(longSize ? (size >> 8) & 0x3F : size) | (isResend ? 0x80 : 0);
+	subHeader.sizeB = static_cast<unsigned char>(longSize ? (size & 0xFF) : 0);
+	subHeader.resend = resending;
+	gsl::span<ReliableSubHeader> subData(&subHeader, sizeof(ReliableSubHeader));
+	packet.addHeader(subData.subspan(0, (longSize ? 2 : 1) + (isResend ? 2 : 0)));
 
-	do {
-		bool result = parent->receive(packet);
-		if (!result) {
-			return false;
-		}
-	} while (!processReceivedPacket(packet));
-
-	lastReceive = Clock::now();
-	return true;
-}
-
-void ReliableConnection::addAckListener(IReliableConnectionAckListener& listener)
-{
-	ackListeners.push_back(&listener);
-}
-
-void ReliableConnection::removeAckListener(IReliableConnectionAckListener& listener)
-{
-	ackListeners.erase(std::find(ackListeners.begin(), ackListeners.end(), &listener));
-}
-
-void ReliableConnection::internalSend(OutboundNetworkPacket& packet, int tag)
-{
+	// Add reliable header
 	ReliableHeader header;
 	header.sequence = sequenceSent++;
 	header.ack = highestReceived;
@@ -88,43 +79,83 @@ void ReliableConnection::internalSend(OutboundNetworkPacket& packet, int tag)
 	lastSend = sent.timestamp = Clock::now();
 }
 
-bool ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
+bool ReliableConnection::receive(InboundNetworkPacket& packet)
+{
+	// Process all incoming
+	InboundNetworkPacket tmp;
+	while (parent->receive(tmp)) {
+		lastReceive = Clock::now();
+		processReceivedPacket(tmp);
+	}
+
+	if (!pendingPackets.empty()) {
+		packet = std::move(pendingPackets.front());
+		pendingPackets.pop_front();
+		return true;
+	}
+
+	return false;
+}
+
+void ReliableConnection::addAckListener(IReliableConnectionAckListener& listener)
+{
+	ackListeners.push_back(&listener);
+}
+
+void ReliableConnection::removeAckListener(IReliableConnectionAckListener& listener)
+{
+	ackListeners.erase(std::find(ackListeners.begin(), ackListeners.end(), &listener));
+}
+
+void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 {
 	ReliableHeader header;
 	packet.extractHeader(gsl::span<ReliableHeader>(&header, sizeof(ReliableHeader)));
+	processReceivedAcks(header.ack, header.ackBits);
 	unsigned short seq = header.sequence;
 
-	size_t bufferPos = size_t(seq) % BUFFER_SIZE;
-	unsigned short diff = seq - highestReceived;
-
-	if (diff != 0 && diff < 0x8000) { // seq higher than highestReceived, with unsigned wrap-around
-		if (diff > BUFFER_SIZE - 32) {
-			// Ops, skipped too many packets!
-			close();
-			return false;
+	while (packet.getSize() > 0) {
+		if (packet.getSize() < 1) {
+			throw Exception("Sub-packet header not found.");
 		}
 
-		// Clear all packets half-buffer seqs ago (since the last cleared one)
-		for (size_t i = highestReceived % BUFFER_SIZE; i != bufferPos; i = (i + 1) % BUFFER_SIZE) {
-			size_t idx = (i + BUFFER_SIZE / 2) % BUFFER_SIZE;
-			receivedSeqs[idx] = false;
+		// Sub-packets header
+		ReliableSubHeader subHeader;
+		gsl::span<ReliableSubHeader> data(&subHeader, sizeof(ReliableSubHeader));
+		packet.extractHeader(data.subspan(0, 1));
+		size_t size = 0;
+		bool resend = (subHeader.sizeA & 0x80) != 0;
+		if (subHeader.sizeA & 0x40) {
+			if (packet.getSize() < 1) {
+				throw Exception("Sub-packet header incomplete.");
+			}
+			packet.extractHeader(data.subspan(1, 1));
+			size = (subHeader.sizeA & 0x3F) << 8 | (subHeader.sizeB);
+		} else {
+			size = subHeader.sizeA & 0x3F;
+		}
+		unsigned short resendOf = 0;
+		if (resend) {
+			if (packet.getSize() < 2) {
+				throw Exception("Sub-packet header missing resend data");
+			}
+			packet.extractHeader(gsl::span<unsigned short>(&resendOf, 2));
 		}
 
-		highestReceived = seq;
+		// Extract data
+		std::array<char, 2048> buffer;
+		if (size > buffer.size() || size > packet.getSize()) {
+			throw Exception("Unexpected sub-packet size");
+		}
+		auto subPacketData = gsl::span<char, 2048>(buffer).subspan(0, size);
+		packet.extractHeader(subPacketData);
+
+		// Process sub-packet
+		if (onSeqReceived(seq, resend, resendOf)) {
+			pendingPackets.push_back(InboundNetworkPacket(subPacketData));
+		}
+		++seq;
 	}
-
-	if (receivedSeqs[bufferPos]) {
-		// Already received
-		return false;
-	}
-
-	// Mark this packet as received
-	receivedSeqs[bufferPos] = true;
-
-	// Process ack
-	processReceivedAcks(header.ack, header.ackBits);
-
-	return true;
 }
 
 void ReliableConnection::processReceivedAcks(unsigned short ack, unsigned int ackBits)
@@ -142,6 +173,42 @@ void ReliableConnection::processReceivedAcks(unsigned short ack, unsigned int ac
 		}
 	}
 	onAckReceived(ack);
+}
+
+bool ReliableConnection::onSeqReceived(unsigned short seq, bool isResend, unsigned short resendOf)
+{
+	size_t bufferPos = size_t(seq) % BUFFER_SIZE;
+	size_t resendPos = size_t(resendOf) % BUFFER_SIZE;
+	unsigned short diff = seq - highestReceived;
+
+	if (diff != 0 && diff < 0x8000) { // seq higher than highestReceived, with unsigned wrap-around
+		if (diff > BUFFER_SIZE - 32) {
+			// Ops, skipped too many packets!
+			close();
+			return false;
+		}
+
+		// Clear all packets half-buffer seqs ago (since the last cleared one)
+		for (size_t i = highestReceived % BUFFER_SIZE; i != bufferPos; i = (i + 1) % BUFFER_SIZE) {
+			size_t idx = (i + BUFFER_SIZE / 2) % BUFFER_SIZE;
+			receivedSeqs[idx] = 0;
+		}
+
+		highestReceived = seq;
+	}
+
+	if (receivedSeqs[bufferPos] != 0 || (isResend && receivedSeqs[resendPos] != 0)) {
+		// Already received
+		return false;
+	}
+
+	// Mark this packet as received
+	receivedSeqs[bufferPos] |= 1;
+	if (isResend) {
+		receivedSeqs[resendPos] |= 2;
+	}
+
+	return true;
 }
 
 void ReliableConnection::onAckReceived(unsigned short sequence)

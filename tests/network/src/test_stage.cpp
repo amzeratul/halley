@@ -53,7 +53,12 @@ void TestStage::updateNetwork()
 			if (connection->getStatus() == ConnectionStatus::CLOSED) {
 				std::cout << "Closing connection." << std::endl;
 				connection.reset();
+				network.reset();
 				return;
+			} else {
+				if (connection->getTimeSinceLastReceive() > 2.0f) {
+					connection->close();
+				}
 			}
 			
 			if (connection->getStatus() == ConnectionStatus::OPEN) {
@@ -71,10 +76,6 @@ void TestStage::updateNetwork()
 					size_t bytes = received.copyTo(buffer);
 					buffer[bytes] = gsl::byte(0);
 					std::cout << "Received message: " << reinterpret_cast<const char*>(buffer) << std::endl;
-				}
-
-				if (connection->getTimeSinceLastReceive() > 2.0f) {
-					connection->close();
 				}
 			}
 		} else {
