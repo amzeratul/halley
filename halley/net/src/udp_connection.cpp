@@ -30,20 +30,13 @@ UDPConnection::UDPConnection(UDPSocket& socket, UDPEndpoint remote)
 
 void UDPConnection::close()
 {
-	onClose();
 	status = ConnectionStatus::CLOSING;
 }
 
 void UDPConnection::terminateConnection()
 {
-	onClose();
-	status = ConnectionStatus::CLOSED;
-}
-
-void UDPConnection::onClose()
-{
-	if (status == ConnectionStatus::OPEN) {
-		// TODO: send close connection message
+	if (status != ConnectionStatus::CLOSED) {
+		status = ConnectionStatus::CLOSED;
 	}
 }
 

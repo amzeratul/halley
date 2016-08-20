@@ -45,6 +45,5 @@ namespace Halley
 		std::string error;
 
 		void sendNext();
-		void onClose();
 	};
 }

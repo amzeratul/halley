@@ -17,4 +17,5 @@ private:
 
 	std::unique_ptr<Halley::NetworkService> network;
 	std::shared_ptr<Halley::ReliableConnection> connection;
+	bool isClient;
 };

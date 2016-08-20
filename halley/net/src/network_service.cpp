@@ -66,6 +66,7 @@ NetworkService::~NetworkService()
 	}
 	try {
 		pimpl->service.poll();
+		pimpl->socket.shutdown(UDPSocket::shutdown_both);
 	} catch (...) {
 		std::cout << "Error polling service on ~NetworkService()" << std::endl;
 	}
@@ -170,10 +171,19 @@ void NetworkService::receiveNext()
 
 void NetworkService::receivePacket(gsl::span<gsl::byte> received, std::string* error)
 {
-	if (received.size_bytes() == 0) {
-		if (error) {
-			std::cout << "Error receiving packet: " << (*error) << std::endl;
+	if (error) {
+		std::cout << "Error receiving packet: " << (*error) << std::endl;
+		// Find the owner of this remote endpoint
+		for (auto& conn : pimpl->activeConnections) {
+			if (conn.second->matchesEndpoint(pimpl->remoteEndpoint)) {
+				conn.second->setError(*error);
+				conn.second->close();
+			}
 		}
+		return;
+	}
+
+	if (received.size_bytes() == 0) {
 		return;
 	}
 
