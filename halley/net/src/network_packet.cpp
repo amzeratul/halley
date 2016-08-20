@@ -34,6 +34,11 @@ size_t NetworkPacketBase::getSize() const
 	return data.size() - dataStart;
 }
 
+gsl::span<const gsl::byte> NetworkPacketBase::getBytes() const
+{
+	return gsl::span<const gsl::byte>(data).subspan(dataStart, getSize());
+}
+
 OutboundNetworkPacket::OutboundNetworkPacket(const OutboundNetworkPacket& other)
 	: NetworkPacketBase()
 {

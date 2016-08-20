@@ -34,11 +34,15 @@ namespace Halley
 
 		struct Channel
 		{
+			std::vector<std::unique_ptr<NetworkMessage>> receiveQueue;
 			std::unique_ptr<NetworkMessage> lastAck;
 			unsigned int lastAckSeq = 0;
 			unsigned int lastSeq = 0;
+			unsigned short lastReceived = 0xFFFF;
 			ChannelSettings settings;
 			bool initialized = false;
+
+			void getReadyMessages(std::vector<std::unique_ptr<NetworkMessage>>& out);
 		};
 
 	public:
@@ -46,6 +50,7 @@ namespace Halley
 		~MessageQueue();
 		
 		void setChannel(int channel, ChannelSettings settings);
+		void addFactory(std::unique_ptr<NetworkMessageFactoryBase> factory);
 
 		std::vector<std::unique_ptr<NetworkMessage>> receiveAll();
 
@@ -56,6 +61,9 @@ namespace Halley
 		std::shared_ptr<ReliableConnection> connection;
 		std::vector<Channel> channels;
 
+		std::map<std::type_index, int> typeToMsgIndex;
+		std::vector<std::unique_ptr<NetworkMessageFactoryBase>> factories;
+
 		std::list<std::unique_ptr<NetworkMessage>> pendingMsgs;
 		std::map<int, PendingPacket> pendingPackets;
 		int nextPacketId = 0;
@@ -65,5 +73,8 @@ namespace Halley
 
 		ReliableSubPacket createPacket();
 		std::vector<gsl::byte> serializeMessages(const std::vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size) const;
+
+		void receiveMessages();
+		std::unique_ptr<NetworkMessage> deserializeMessage(gsl::span<const gsl::byte> data, unsigned short msgType, unsigned short seq);
 	};
 }

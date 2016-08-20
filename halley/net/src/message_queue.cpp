@@ -11,6 +11,32 @@ ChannelSettings::ChannelSettings(bool reliable, bool ordered, bool keepLastSent)
 	, keepLastSent(keepLastSent)
 {}
 
+void MessageQueue::Channel::getReadyMessages(std::vector<std::unique_ptr<NetworkMessage>>& out)
+{
+	if (settings.ordered) {
+		bool trying = true;
+		// Oh my god
+		while (trying && !receiveQueue.empty()) {
+			trying = false;
+			for (size_t i = 0; i < receiveQueue.size(); ++i) {
+				auto& m = receiveQueue[i];
+				if (m->seq == lastReceived + 1) {
+					trying = true;
+					out.push_back(std::move(m));
+					receiveQueue.erase(receiveQueue.begin() + i);
+					lastReceived++;
+					break;
+				}
+			}
+		}
+	} else {
+		for (auto& m: receiveQueue) {
+			out.emplace_back(std::move(m));
+		}
+		receiveQueue.clear();
+	}
+}
+
 MessageQueue::MessageQueue(std::shared_ptr<ReliableConnection> connection)
 	: connection(connection)
 	, channels(32)
@@ -38,15 +64,22 @@ void MessageQueue::setChannel(int channel, ChannelSettings settings)
 	c.initialized = true;
 }
 
+void MessageQueue::addFactory(std::unique_ptr<NetworkMessageFactoryBase> factory)
+{
+	typeToMsgIndex[factory->getTypeIndex()] = int(factories.size());
+	factories.emplace_back(std::move(factory));
+}
+
 std::vector<std::unique_ptr<NetworkMessage>> MessageQueue::receiveAll()
 {
-	std::vector<std::unique_ptr<NetworkMessage>> result;
-
-	InboundNetworkPacket packet;
-	while (connection->receive(packet)) {
-		// TODO: deserialize messages
+	if (connection->getStatus() == ConnectionStatus::OPEN) {
+		receiveMessages();
 	}
 
+	std::vector<std::unique_ptr<NetworkMessage>> result;
+	for (auto& c: channels) {
+		c.getReadyMessages(result);
+	}
 	return result;
 }
 
@@ -188,6 +221,11 @@ std::vector<gsl::byte> MessageQueue::serializeMessages(const std::vector<std::un
 	
 	for (auto& msg: msgs) {
 		size_t msgSize = msg->getSerializedSize();
+		auto idxIter = typeToMsgIndex.find(std::type_index(typeid(msg)));
+		if (idxIter == typeToMsgIndex.end()) {
+			throw Exception("No appropriate factory for this type of message: " + String(typeid(msg).name()));
+		}
+		int msgType = idxIter->second;
 		char channelN = msg->channel;
 
 		auto& channel = channels[channelN];
@@ -203,12 +241,24 @@ std::vector<gsl::byte> MessageQueue::serializeMessages(const std::vector<std::un
 		}
 		if (msgSize >= 128) {
 			std::array<unsigned char, 2> bytes;
-			bytes[0] = (msgSize >> 8) | 0x80;
-			bytes[1] = msgSize & 0xFF;
+			bytes[0] = static_cast<unsigned char>(msgSize >> 8) | 0x80;
+			bytes[1] = static_cast<unsigned char>(msgSize & 0xFF);
 			memcpy(&result[pos], bytes.data(), 2);
 			pos += 2;
 		} else {
 			unsigned char byte = msgSize & 0x7F;
+			memcpy(&result[pos], &byte, 1);
+			pos += 1;
+		}
+		if (msgType >= 128) {
+			std::array<unsigned char, 2> bytes;
+			bytes[0] = static_cast<unsigned char>(msgType >> 8) | 0x80;
+			bytes[1] = static_cast<unsigned char>(msgType & 0xFF);
+			memcpy(&result[pos], bytes.data(), 2);
+			pos += 2;
+		}
+		else {
+			unsigned char byte = msgType & 0x7F;
 			memcpy(&result[pos], &byte, 1);
 			pos += 1;
 		}
@@ -219,4 +269,91 @@ std::vector<gsl::byte> MessageQueue::serializeMessages(const std::vector<std::un
 	}
 
 	return result;
+}
+
+void MessageQueue::receiveMessages()
+{
+	try {
+		InboundNetworkPacket packet;
+		while (connection->receive(packet)) {
+			auto data = packet.getBytes();
+
+			while (data.size() > 0) {
+				// Read channel
+				char channelN;
+				memcpy(&channelN, data.data(), 1);
+				data = data.subspan(1);
+				if (channelN < 0 || channelN >= 32) {
+					throw Exception("Received invalid channel");
+				}
+				auto& channel = channels[channelN];
+
+				// Read sequence
+				unsigned short sequence = 0;
+				if (channel.settings.ordered) {
+					if (data.size() < 2) {
+						throw Exception("Missing sequence data");
+					}
+					memcpy(&sequence, data.data(), 2);
+					data = data.subspan(2);
+				}
+
+				// Read size
+				size_t size;
+				unsigned char b0;
+				if (data.size() < 1) {
+					throw Exception("Missing size data");
+				}
+				memcpy(&b0, data.data(), 1);
+				data = data.subspan(1);
+				if (b0 & 0x80) {
+					if (data.size() < 1) {
+						throw Exception("Missing size data");
+					}
+					unsigned char b1;
+					memcpy(&b1, data.data(), 1);
+					data = data.subspan(1);
+					size = (static_cast<unsigned short>(b0 & 0x7F) << 8) | static_cast<unsigned short>(b1);
+				} else {
+					size = b0;
+				}
+
+				// Read message type
+				unsigned short msgType;
+				if (data.size() < 1) {
+					throw Exception("Missing msgType data");
+				}
+				memcpy(&b0, data.data(), 1);
+				data = data.subspan(1);
+				if (b0 & 0x80) {
+					if (data.size() < 1) {
+						throw Exception("Missing msgType data");
+					}
+					unsigned char b1;
+					memcpy(&b1, data.data(), 1);
+					data = data.subspan(1);
+					msgType = (static_cast<unsigned short>(b0 & 0x7F) << 8) | static_cast<unsigned short>(b1);
+				} else {
+					msgType = b0;
+				}
+
+				// Read message
+				if (data.size() < signed(size)) {
+					throw Exception("Message does not contain enough data");
+				}
+				channel.receiveQueue.emplace_back(deserializeMessage(data.subspan(0, size), msgType, sequence));
+				data = data.subspan(size);
+			}
+		}
+	}
+	catch (...) {
+		connection->close();
+	}
+}
+
+std::unique_ptr<NetworkMessage> MessageQueue::deserializeMessage(gsl::span<const gsl::byte> data, unsigned short msgType, unsigned short seq)
+{
+	auto msg = factories.at(msgType)->create();
+	msg->deserializeFrom(data);
+	return std::move(msg);
 }

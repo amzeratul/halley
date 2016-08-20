@@ -9,6 +9,7 @@ namespace Halley
 	public:
 		size_t copyTo(gsl::span<gsl::byte> dst) const;
 		size_t getSize() const;
+		gsl::span<const gsl::byte> getBytes() const;
 
 		NetworkPacketBase(NetworkPacketBase&& other) = delete;
 		NetworkPacketBase& operator=(NetworkPacketBase&& other) = delete;
