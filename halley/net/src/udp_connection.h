@@ -24,13 +24,14 @@ namespace Halley
 		void send(OutboundNetworkPacket&& packet) override;
 		bool receive(InboundNetworkPacket& packet) override;
 		
-		bool matchesEndpoint(short id, const UDPEndpoint& remoteEndpoint) const;
+		bool matchesEndpoint(const UDPEndpoint& remoteEndpoint) const;
 		void onReceive(gsl::span<const gsl::byte> data);
 		void setError(const std::string& cs);
 		
 		void open(short connectionId);
 		void onOpen(short connectionId);
 		void terminateConnection();
+		short getConnectionId() const { return connectionId; }
 
 	private:
 		UDPSocket& socket;

@@ -33,6 +33,7 @@ namespace Halley
 
 		void startListening();
 		void receiveNext();
+		void receivePacket(gsl::span<gsl::byte> data, std::string* error);
 		bool isValidConnectionRequest(gsl::span<const gsl::byte> data);
 		short getFreeId() const;
 	};

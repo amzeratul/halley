@@ -24,7 +24,7 @@ UDPConnection::UDPConnection(UDPSocket& socket, UDPEndpoint remote)
 	: socket(socket)
 	, remote(remote)
 	, status(ConnectionStatus::CONNECTING)
-	, connectionId(-1)
+	, connectionId(0)
 {
 }
 
@@ -51,8 +51,17 @@ void UDPConnection::send(OutboundNetworkPacket&& packet)
 {
 	if (status == ConnectionStatus::OPEN || status == ConnectionStatus::CONNECTING) {
 		// Insert header
-		std::array<char, 1> id = { -1 };
-		packet.addHeader(gsl::span<char>(id));
+		std::array<unsigned char, 2> id = { 0, 0 };
+		size_t len = 0;
+		if (connectionId >= 128) {
+			id[0] = (connectionId >> 8) & 0x7F;
+			id[1] = connectionId & 0xFF;
+			len = 2;
+		} else {
+			id[0] = connectionId & 0x7F;
+			len = 1;
+		}
+		packet.addHeader(gsl::span<unsigned char>(id).subspan(0, len));
 
 		bool needsSend = pendingSend.empty();
 		pendingSend.emplace_back(std::move(packet));
@@ -73,9 +82,9 @@ bool UDPConnection::receive(InboundNetworkPacket& packet)
 	}
 }
 
-bool UDPConnection::matchesEndpoint(short id, const UDPEndpoint& remoteEndpoint) const
+bool UDPConnection::matchesEndpoint(const UDPEndpoint& remoteEndpoint) const
 {
-	return (id == -1 || id == connectionId) && remote == remoteEndpoint;
+	return remote == remoteEndpoint;
 }
 
 void UDPConnection::onReceive(gsl::span<const gsl::byte> data)
@@ -83,10 +92,11 @@ void UDPConnection::onReceive(gsl::span<const gsl::byte> data)
 	Expects(data.size() <= 1500);
 
 	if (status == ConnectionStatus::CONNECTING) {
-		HandshakeAccept accept;
-
-		if (data.size_bytes() == sizeof(accept)) {
+		if (data.size_bytes() == sizeof(HandshakeAccept)) {
+			HandshakeAccept accept;
 			if (memcmp(data.data(), &accept, sizeof(accept.handshake)) == 0) {
+				// Yep, accept handshake
+				memcpy(&accept, data.data(), data.size_bytes());
 				onOpen(accept.id);
 			}
 		}

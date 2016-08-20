@@ -5,6 +5,8 @@
 #include "network_packet.h"
 #include "udp_connection.h"
 #include <iostream>
+#include <unordered_map>
+#include <halley/support/exception.h>
 
 using namespace Halley;
 namespace asio = boost::asio;
@@ -27,7 +29,7 @@ namespace Halley
 		UDPEndpoint remoteEndpoint;
 		asio::ip::udp::socket socket;
 		std::list<UDPEndpoint> pendingIncomingConnections;
-		std::vector<std::shared_ptr<UDPConnection>> activeConnections;
+		std::unordered_map<short, std::shared_ptr<UDPConnection>> activeConnections;
 
 		std::array<gsl::byte, 2048> receiveBuffer;
 	};
@@ -57,7 +59,7 @@ NetworkService::~NetworkService()
 {
 	for (auto& conn : pimpl->activeConnections) {
 		try {
-			conn->terminateConnection();
+			conn.second->terminateConnection();
 		} catch (...) {
 			std::cout << "Error terminating connection on ~NetworkService()" << std::endl;
 		}
@@ -72,16 +74,17 @@ NetworkService::~NetworkService()
 void NetworkService::update()
 {
 	// Remove closed connections
+	std::vector<short> toErase;
 	auto& active = pimpl->activeConnections;
-	size_t n = active.size();
-	for (size_t i = 0; i < n; i++) {
-		auto& c = active[i];
-		if (c->getStatus() == ConnectionStatus::CLOSING) {
-			c->terminateConnection();
-			active.erase(active.begin() + i);
-			--i;
-			--n;
+	for (auto& conn: active) {
+		if (conn.second->getStatus() == ConnectionStatus::CLOSING) {
+			conn.second->terminateConnection();
+			toErase.push_back(conn.first);
 		}
+	}
+
+	for (auto i: toErase) {
+		active.erase(i);
 	}
 
 	// Update service
@@ -109,9 +112,9 @@ std::shared_ptr<IConnection> NetworkService::tryAcceptConnection()
 		short id = getFreeId();
 		conn->open(id);
 
-		pimpl->activeConnections.push_back(conn);
+		pimpl->activeConnections[id] = conn;
 		pending.pop_front();
-		return pimpl->activeConnections.back();
+		return conn;
 	}
 }
 
@@ -121,8 +124,8 @@ std::shared_ptr<IConnection> NetworkService::connect(String addr, int port)
 	Expects(port < 65536);
 	auto remoteAddr = asio::ip::address::from_string(addr.cppStr());
 	auto remote = UDPEndpoint(remoteAddr, port); 
-	pimpl->activeConnections.push_back(std::make_shared<UDPConnection>(pimpl->socket, remote));
-	auto& conn = pimpl->activeConnections.back();
+	auto conn = std::make_shared<UDPConnection>(pimpl->socket, remote);
+	pimpl->activeConnections[0] = conn;
 
 	// Handshake
 	HandshakeOpen open;
@@ -148,57 +151,101 @@ void NetworkService::receiveNext()
 	{
 		try {
 			Expects(size <= pimpl->receiveBuffer.size());
-			auto received = gsl::span<gsl::byte>(pimpl->receiveBuffer.data(), size);
-			//std::cout << "Received " << size << " bytes\n";
-			UDPConnection* connection = nullptr;
 
-			short id = -1; // TODO
-			if (size >= 1) {
-				// Read connection id
-				received = received.subspan(1);
-			}
-
-			// Find the owner of this remote endpoint
-			for (auto& conn : pimpl->activeConnections) {
-				if (conn->matchesEndpoint(id, pimpl->remoteEndpoint)) {
-					connection = conn.get();
-					break;
-				}
-			}
-
+			std::string errorMsg;
+			std::string* errorMsgPtr = nullptr;
 			if (error) {
-				// Close the connection if there was an error
-				if (connection) {
-					connection->setError(error.message());
-					connection->close();
-				}
+				errorMsg = error.message();
+				errorMsgPtr = &errorMsg;
 			}
-			else {
-				if (connection) {
-					try {
-						connection->onReceive(received);
-					} catch (std::exception& e) {
-						connection->setError(e.what());
-						connection->close();
-					} catch (...) {
-						connection->setError("Unknown error receiving packet.");
-						connection->close();
-					}
-				} else {
-					if (isValidConnectionRequest(received)) {
-						auto& pending = pimpl->pendingIncomingConnections;
-						if (std::find(pending.begin(), pending.end(), pimpl->remoteEndpoint) == pending.end()) {
-							pending.push_back(pimpl->remoteEndpoint);
-						}
-					}
-				}
-			}
+
+			receivePacket(gsl::span<gsl::byte>(pimpl->receiveBuffer.data(), size), errorMsgPtr);
 		} catch (...) {
 			std::cout << "Exception while receiving a packet." << std::endl;
 		}
 
 		receiveNext();
 	});
+}
+
+void NetworkService::receivePacket(gsl::span<gsl::byte> received, std::string* error)
+{
+	if (received.size_bytes() == 0) {
+		if (error) {
+			std::cout << "Error receiving packet: " << (*error) << std::endl;
+		}
+		return;
+	}
+
+	// Read connection id
+	short id = -1;
+	std::array<unsigned char, 2> bytes;
+	auto dst = gsl::as_writeable_bytes(gsl::span<unsigned char, 2>(bytes));
+	dst[0] = received[0];
+	if (bytes[0] & 0x80) {
+		if (received.size_bytes() < 2) {
+			// Invalid header
+			std::cout << "Invalid header\n";
+			return;
+		}
+		dst[1] = received[1];
+		received = received.subspan(2);
+		id = short(bytes[0] & 0x7F) | short(bytes[1]);
+	} else {
+		received = received.subspan(1);
+		id = short(bytes[0]);
+	}
+
+	// No connection id, check if it's a connection request
+	if (id == 0 && isValidConnectionRequest(received)) {
+		auto& pending = pimpl->pendingIncomingConnections;
+		if (std::find(pending.begin(), pending.end(), pimpl->remoteEndpoint) == pending.end()) {
+			pending.push_back(pimpl->remoteEndpoint);
+		}
+		// Pending connection is valid
+		return;
+	}
+
+	// Find the owner of this remote endpoint
+	auto conn = pimpl->activeConnections.find(id);
+	if (conn == pimpl->activeConnections.end()) {
+		// Connection doesn't exist, but check the pending slot
+		conn = pimpl->activeConnections.find(0);
+		if (conn == pimpl->activeConnections.end()) {
+			// Nope, give up
+			return;
+		}
+	}
+
+	// Validate that this connection is who it claims to be
+	if (conn->second->matchesEndpoint(pimpl->remoteEndpoint)) {
+		auto connection = conn->second;
+
+		if (error) {
+			// Close the connection if there was an error
+			connection->setError(*error);
+			connection->close();
+		} else {
+			try {
+				connection->onReceive(received);
+
+				if (conn->first == 0) {
+					// Hold on, we're still on 0, re-bind to the id
+					short newId = connection->getConnectionId();
+					if (newId != 0) {
+						pimpl->activeConnections[newId] = connection;
+						pimpl->activeConnections.erase(conn);
+					}
+				}
+			} catch (std::exception& e) {
+				connection->setError(e.what());
+				connection->close();
+			} catch (...) {
+				connection->setError("Unknown error receiving packet.");
+				connection->close();
+			}
+		}
+	}
 }
 
 bool NetworkService::isValidConnectionRequest(gsl::span<const gsl::byte> data)
@@ -209,6 +256,10 @@ bool NetworkService::isValidConnectionRequest(gsl::span<const gsl::byte> data)
 
 short NetworkService::getFreeId() const
 {
-	// TODO
-	return -1;
+	for (int i = 1; i < 1024; i++) {
+		if (pimpl->activeConnections.find(i) == pimpl->activeConnections.end()) {
+			return i;
+		}
+	}
+	throw Exception("Unable to find empty connection id");
 }
