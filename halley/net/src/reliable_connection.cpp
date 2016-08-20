@@ -70,7 +70,7 @@ void ReliableConnection::sendTagged(gsl::span<ReliableSubPacket> subPackets)
 		subHeader.sizeA = static_cast<unsigned char>(longSize ? (size >> 8) & 0x3F : size) | (isResend ? 0x80 : 0);
 		subHeader.sizeB = static_cast<unsigned char>(longSize ? (size & 0xFF) : 0);
 		subHeader.resend = resending;
-		auto subHeaderData = gsl::span<gsl::byte>(gsl::span<ReliableSubHeader>(&subHeader, sizeof(ReliableSubHeader)).subspan(0, (longSize ? 2 : 1) + (isResend ? 2 : 0)));
+		auto subHeaderData = gsl::as_bytes(gsl::span<ReliableSubHeader>(&subHeader, 1)).subspan(0, (longSize ? 2 : 1) + (isResend ? 2 : 0));
 		std::copy(subHeaderData.begin(), subHeaderData.end(), dst.subspan(pos).begin());
 		pos += subHeaderData.size();
 
@@ -95,7 +95,7 @@ void ReliableConnection::sendTagged(gsl::span<ReliableSubPacket> subPackets)
 	header.sequence = firstSeq;
 	header.ack = highestReceived;
 	header.ackBits = generateAckBits();
-	auto headerData = gsl::span<gsl::byte>(gsl::span<ReliableHeader>(&header, sizeof(ReliableHeader)));
+	auto headerData = gsl::as_bytes(gsl::span<ReliableHeader>(&header, 1));
 	std::copy(headerData.begin(), headerData.end(), dst.begin());
 
 	// Send
@@ -133,7 +133,7 @@ void ReliableConnection::removeAckListener(IReliableConnectionAckListener& liste
 void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 {
 	ReliableHeader header;
-	packet.extractHeader(gsl::span<ReliableHeader>(&header, sizeof(ReliableHeader)));
+	packet.extractHeader(gsl::as_writeable_bytes(gsl::span<ReliableHeader>(&header, 1)));
 	processReceivedAcks(header.ack, header.ackBits);
 	unsigned short seq = header.sequence;
 
@@ -144,7 +144,7 @@ void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 
 		// Sub-packets header
 		ReliableSubHeader subHeader;
-		gsl::span<ReliableSubHeader> data(&subHeader, sizeof(ReliableSubHeader));
+		auto data = gsl::as_writeable_bytes(gsl::span<ReliableSubHeader>(&subHeader, 1));
 		packet.extractHeader(data.subspan(0, 1));
 		size_t size = 0;
 		bool resend = (subHeader.sizeA & 0x80) != 0;

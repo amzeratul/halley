@@ -108,7 +108,7 @@ void UDPConnection::open(short id)
 		// Handshake
 		HandshakeAccept accept;
 		accept.id = id;
-		send(OutboundNetworkPacket(gsl::span<HandshakeAccept>(&accept, sizeof(HandshakeAccept))));
+		send(OutboundNetworkPacket(gsl::as_bytes(gsl::span<HandshakeAccept>(&accept, 1))));
 
 		onOpen(id);
 	}

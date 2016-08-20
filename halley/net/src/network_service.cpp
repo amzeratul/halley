@@ -126,7 +126,7 @@ std::shared_ptr<IConnection> NetworkService::connect(String addr, int port)
 
 	// Handshake
 	HandshakeOpen open;
-	conn->send(OutboundNetworkPacket(gsl::span<HandshakeOpen>(&open, sizeof(HandshakeOpen))));
+	conn->send(OutboundNetworkPacket(gsl::as_bytes(gsl::span<HandshakeOpen>(&open, 1))));
 
 	startListening();
 
