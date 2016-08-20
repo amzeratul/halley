@@ -6,7 +6,5 @@ namespace Halley
 	{
 	public:
 		virtual ~IMessageStream() {}
-
-		virtual bool isReliable() const = 0;
 	};
 }

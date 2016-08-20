@@ -17,10 +17,6 @@ namespace Halley
 		virtual void serializeTo(gsl::span<gsl::byte> dst) = 0;
 
 	private:
-		void setStream(gsl::not_null<IMessageStream*> stream);
-		bool isReliable() const;
-		void onAck();
-
-		IMessageStream* stream;
+		int channel = -1;
 	};
 }

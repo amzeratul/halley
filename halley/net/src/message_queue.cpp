@@ -5,6 +5,12 @@
 
 using namespace Halley;
 
+ChannelSettings::ChannelSettings(bool reliable, bool ordered, bool keepLastSent)
+	: reliable(reliable)
+	, ordered(ordered)
+	, keepLastSent(keepLastSent)
+{}
+
 MessageQueue::MessageQueue(std::shared_ptr<ReliableConnection> connection)
 	: connection(connection)
 {
@@ -17,7 +23,7 @@ MessageQueue::~MessageQueue()
 	connection->removeAckListener(*this);
 }
 
-void MessageQueue::addStream(std::unique_ptr<IMessageStream> stream, int channel)
+void MessageQueue::setChannel(int channel, ChannelSettings settings)
 {
 	Expects(channel >= 0 && channel <= 255);
 
@@ -25,7 +31,8 @@ void MessageQueue::addStream(std::unique_ptr<IMessageStream> stream, int channel
 		throw Exception("Channel " + String::integerToString(channel) + " already set");
 	}
 
-	channels[channel] = std::move(stream);
+	auto& c = channels[channel];
+	c.settings = settings;
 }
 
 std::vector<std::unique_ptr<NetworkMessage>> MessageQueue::receiveAll()
@@ -47,7 +54,7 @@ void MessageQueue::enqueue(std::unique_ptr<NetworkMessage> msg, int channel)
 		throw Exception("Channel " + String::integerToString(channel) + " has not been set up");
 	}
 
-	msg->setStream(i->second.get());
+	msg->channel = channel;
 
 	pendingMsgs.push_back(std::move(msg));
 }
@@ -100,7 +107,7 @@ void MessageQueue::onPacketAcked(int tag)
 		auto& packet = i->second;
 
 		for (auto& m : packet.msgs) {
-			m->onAck();
+			// TODO
 		}
 
 		// Remove pending
@@ -120,7 +127,7 @@ void MessageQueue::checkReSend()
 		if (elapsed > 0.1f && elapsed > connection->getLatency() * 2.0f) {
 			// Re-send any reliable messages
 			for (auto& m : pending.msgs) {
-				if (m->isReliable()) {
+				if (channels[m->channel].settings.reliable) {
 					pendingMsgs.push_back(std::move(m));
 				}
 			}

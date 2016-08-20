@@ -1,7 +1,6 @@
 #pragma once
 
 #include "network_message.h"
-#include "imessage_stream.h"
 #include <memory>
 #include <vector>
 #include <map>
@@ -13,6 +12,15 @@ namespace Halley
 {
 	class ReliableConnection;
 
+	struct ChannelSettings
+	{
+	public:
+		ChannelSettings(bool reliable = false, bool ordered = false, bool keepLastSent = false);
+		bool reliable;
+		bool ordered;
+		bool keepLastSent;
+	};
+	
 	class MessageQueue : private IReliableConnectionAckListener
 	{
 		struct PendingPacket
@@ -21,11 +29,17 @@ namespace Halley
 			std::chrono::steady_clock::time_point timeSent;
 		};
 
+		struct Channel
+		{
+			std::unique_ptr<NetworkMessage> lastSent;
+			ChannelSettings settings;
+		};
+
 	public:
 		MessageQueue(std::shared_ptr<ReliableConnection> connection);
 		~MessageQueue();
 		
-		void addStream(std::unique_ptr<IMessageStream> stream, int channel);
+		void setChannel(int channel, ChannelSettings settings);
 
 		std::vector<std::unique_ptr<NetworkMessage>> receiveAll();
 
@@ -34,7 +48,7 @@ namespace Halley
 
 	private:
 		std::shared_ptr<ReliableConnection> connection;
-		std::map<int, std::unique_ptr<IMessageStream>> channels;
+		std::map<int, Channel> channels;
 
 		std::list<std::unique_ptr<NetworkMessage>> pendingMsgs;
 		std::map<int, PendingPacket> pendingPackets;
