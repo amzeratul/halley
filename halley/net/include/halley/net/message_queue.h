@@ -27,7 +27,7 @@ namespace Halley
 		{
 			std::vector<std::unique_ptr<NetworkMessage>> msgs;
 			std::chrono::steady_clock::time_point timeSent;
-			//std::vector<gsl::byte> data;
+			size_t size;
 			unsigned short seq;
 			bool reliable;
 		};
@@ -38,6 +38,7 @@ namespace Halley
 			unsigned int lastAckSeq = 0;
 			unsigned int lastSeq = 0;
 			ChannelSettings settings;
+			bool initialized = false;
 		};
 
 	public:
@@ -53,7 +54,7 @@ namespace Halley
 
 	private:
 		std::shared_ptr<ReliableConnection> connection;
-		std::map<int, Channel> channels;
+		std::vector<Channel> channels;
 
 		std::list<std::unique_ptr<NetworkMessage>> pendingMsgs;
 		std::map<int, PendingPacket> pendingPackets;
@@ -63,6 +64,6 @@ namespace Halley
 		void checkReSend(std::vector<ReliableSubPacket>& collect);
 
 		ReliableSubPacket createPacket();
-		std::vector<gsl::byte> serializeMessages(const std::vector<std::unique_ptr<NetworkMessage>>& msgs) const;
+		std::vector<gsl::byte> serializeMessages(const std::vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size) const;
 	};
 }

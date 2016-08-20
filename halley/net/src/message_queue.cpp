@@ -13,6 +13,7 @@ ChannelSettings::ChannelSettings(bool reliable, bool ordered, bool keepLastSent)
 
 MessageQueue::MessageQueue(std::shared_ptr<ReliableConnection> connection)
 	: connection(connection)
+	, channels(32)
 {
 	Expects(connection);
 	connection->addAckListener(*this);
@@ -25,14 +26,16 @@ MessageQueue::~MessageQueue()
 
 void MessageQueue::setChannel(int channel, ChannelSettings settings)
 {
-	Expects(channel >= 0 && channel <= 255);
+	Expects(channel >= 0);
+	Expects(channel < 32);
 
-	if (channels.find(channel) != channels.end()) {
+	if (channels[channel].initialized) {
 		throw Exception("Channel " + String::integerToString(channel) + " already set");
 	}
 
 	auto& c = channels[channel];
 	c.settings = settings;
+	c.initialized = true;
 }
 
 std::vector<std::unique_ptr<NetworkMessage>> MessageQueue::receiveAll()
@@ -49,11 +52,13 @@ std::vector<std::unique_ptr<NetworkMessage>> MessageQueue::receiveAll()
 
 void MessageQueue::enqueue(std::unique_ptr<NetworkMessage> msg, int channelNumber)
 {
-	auto i = channels.find(channelNumber);
-	if (i == channels.end()) {
+	Expects(channelNumber >= 0);
+	Expects(channelNumber < 32);
+
+	if (!channels[channelNumber].initialized) {
 		throw Exception("Channel " + String::integerToString(channelNumber) + " has not been set up");
 	}
-	auto& channel = i->second;
+	auto& channel = channels[channelNumber];
 
 	msg->channel = channelNumber;
 	msg->seq = ++channel.lastSeq;
@@ -114,7 +119,7 @@ void MessageQueue::checkReSend(std::vector<ReliableSubPacket>& collect)
 		if (elapsed > 0.1f && elapsed > connection->getLatency() * 2.0f) {
 			// Re-send if it's reliable
 			if (pending.reliable) {
-				collect.push_back(ReliableSubPacket(serializeMessages(pending.msgs), pending.seq));
+				collect.push_back(ReliableSubPacket(serializeMessages(pending.msgs, pending.size), pending.seq));
 			}
 			pendingPackets.erase(iter);
 		}
@@ -142,7 +147,7 @@ ReliableSubPacket MessageQueue::createPacket()
 		if (first || isReliable == packetReliable) {
 			// Check if the message fits
 			size_t msgSize = (*iter)->getSerializedSize();
-			size_t headerSize = 1 + (isOrdered ? 2 : 0) + (msgSize >= 64 ? 2 : 1);
+			size_t headerSize = 1 + (isOrdered ? 2 : 0) + (msgSize >= 128 ? 2 : 1);
 			size_t totalSize = headerSize + msgSize;
 
 			if (size + totalSize <= maxSize) {
@@ -163,21 +168,55 @@ ReliableSubPacket MessageQueue::createPacket()
 	}
 
 	// Serialize
-	auto data = serializeMessages(sentMsgs);
+	auto data = serializeMessages(sentMsgs, size);
 
 	// Track data in this packet
 	int tag = nextPacketId++;
 	auto& pendingData = pendingPackets[tag];
 	pendingData.msgs = std::move(sentMsgs);
+	pendingData.size = size;
 	pendingData.reliable = packetReliable;
 	pendingData.timeSent = std::chrono::steady_clock::now();
 
 	return ReliableSubPacket(std::move(data));
 }
 
-std::vector<gsl::byte> MessageQueue::serializeMessages(const std::vector<std::unique_ptr<NetworkMessage>>& msgs) const
+std::vector<gsl::byte> MessageQueue::serializeMessages(const std::vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size) const
 {
-	std::vector<gsl::byte> result;
-	// TODO
+	std::vector<gsl::byte> result(size);
+	size_t pos = 0;
+	
+	for (auto& msg: msgs) {
+		size_t msgSize = msg->getSerializedSize();
+		char channelN = msg->channel;
+
+		auto& channel = channels[channelN];
+		bool isOrdered = channel.settings.ordered;
+
+		// Write header
+		memcpy(&result[pos], &channelN, 1);
+		pos += 1;
+		if (isOrdered) {
+			unsigned short sequence = static_cast<unsigned short>(msg->seq);
+			memcpy(&result[pos], &sequence, 2);
+			pos += 2;
+		}
+		if (msgSize >= 128) {
+			std::array<unsigned char, 2> bytes;
+			bytes[0] = (msgSize >> 8) | 0x80;
+			bytes[1] = msgSize & 0xFF;
+			memcpy(&result[pos], bytes.data(), 2);
+			pos += 2;
+		} else {
+			unsigned char byte = msgSize & 0x7F;
+			memcpy(&result[pos], &byte, 1);
+			pos += 1;
+		}
+
+		// Write message
+		msg->serializeTo(gsl::span<gsl::byte>(result).subspan(pos, msgSize));
+		pos += msgSize;
+	}
+
 	return result;
 }
