@@ -47,56 +47,37 @@ std::vector<std::unique_ptr<NetworkMessage>> MessageQueue::receiveAll()
 	return result;
 }
 
-void MessageQueue::enqueue(std::unique_ptr<NetworkMessage> msg, int channel)
+void MessageQueue::enqueue(std::unique_ptr<NetworkMessage> msg, int channelNumber)
 {
-	auto i = channels.find(channel);
+	auto i = channels.find(channelNumber);
 	if (i == channels.end()) {
-		throw Exception("Channel " + String::integerToString(channel) + " has not been set up");
+		throw Exception("Channel " + String::integerToString(channelNumber) + " has not been set up");
 	}
+	auto& channel = i->second;
 
-	msg->channel = channel;
+	msg->channel = channelNumber;
+	msg->seq = ++channel.lastSeq;
 
 	pendingMsgs.push_back(std::move(msg));
 }
 
 void MessageQueue::sendAll()
 {
-	checkReSend();
+	int firstTag = nextPacketId;
+	std::vector<ReliableSubPacket> toSend;
 
+	// Add packets which need to be re-sent
+	checkReSend(toSend);
+
+	// Create packets of pending messages
 	while (!pendingMsgs.empty()) {
-		std::vector<std::unique_ptr<NetworkMessage>> sentMsgs;
-		std::array<gsl::byte, 1500> buffer;
-		gsl::span<gsl::byte> dst(buffer);
-		size_t size = 0;
+		toSend.emplace_back(createPacket());
+	}
 
-		// Figure out what messages are going in this packet
-		auto next = pendingMsgs.begin();
-		for (auto iter = pendingMsgs.begin(); iter != pendingMsgs.end(); iter = next) {
-			++next;
-
-			size_t msgSize = (*iter)->getSerializedSize(); // TODO: include header
-
-			// Message fits, move to list
-			if (size + msgSize <= buffer.size()) {
-				(*iter)->serializeTo(dst.subspan(size, msgSize));
-				size += msgSize;
-				sentMsgs.push_back(std::move(*iter));
-				pendingMsgs.erase(iter);
-			}
-		}
-
-		if (sentMsgs.empty()) {
-			throw Exception("Was not able to fit any messages into packet!");
-		}
-
-		// Track data in this packet
-		int tag = nextPacketId++;
-		auto& pendingData = pendingPackets[tag];
-		pendingData.msgs = std::move(sentMsgs);
-		pendingData.timeSent = std::chrono::steady_clock::now();
-
-		// Send
-		connection->sendTagged(OutboundNetworkPacket(dst.first(size)), tag);
+	// Send and update sequences
+	connection->sendTagged(toSend);
+	for (auto& pending: toSend) {
+		pendingPackets[pending.tag].seq = pending.seq;
 	}
 }
 
@@ -107,7 +88,13 @@ void MessageQueue::onPacketAcked(int tag)
 		auto& packet = i->second;
 
 		for (auto& m : packet.msgs) {
-			// TODO
+			auto& channel = channels[m->channel];
+			if (m->seq - channel.lastAckSeq < 0x7FFFFFFF) {
+				channel.lastAckSeq = m->seq;
+				if (channel.settings.keepLastSent) {
+					channel.lastAck = std::move(m);
+				}
+			}
 		}
 
 		// Remove pending
@@ -115,7 +102,7 @@ void MessageQueue::onPacketAcked(int tag)
 	}
 }
 
-void MessageQueue::checkReSend()
+void MessageQueue::checkReSend(std::vector<ReliableSubPacket>& collect)
 {
 	auto next = pendingPackets.begin();
 	for (auto iter = pendingPackets.begin(); iter != pendingPackets.end(); iter = next) {
@@ -125,13 +112,72 @@ void MessageQueue::checkReSend()
 		// Check how long it's been waiting
 		float elapsed = std::chrono::duration<float>(std::chrono::steady_clock::now() - pending.timeSent).count();
 		if (elapsed > 0.1f && elapsed > connection->getLatency() * 2.0f) {
-			// Re-send any reliable messages
-			for (auto& m : pending.msgs) {
-				if (channels[m->channel].settings.reliable) {
-					pendingMsgs.push_back(std::move(m));
-				}
+			// Re-send if it's reliable
+			if (pending.reliable) {
+				collect.push_back(ReliableSubPacket(serializeMessages(pending.msgs), pending.seq));
 			}
 			pendingPackets.erase(iter);
 		}
 	}
+}
+
+ReliableSubPacket MessageQueue::createPacket()
+{
+	std::vector<std::unique_ptr<NetworkMessage>> sentMsgs;
+	size_t maxSize = 1200;
+	size_t size = 0;
+	bool first = true;
+	bool packetReliable = false;
+
+	// Figure out what messages are going in this packet
+	auto next = pendingMsgs.begin();
+	for (auto iter = pendingMsgs.begin(); iter != pendingMsgs.end(); iter = next) {
+		++next;
+		auto& msg = *iter;
+
+		// Check if this message is compatible
+		auto& channel = channels[msg->channel];
+		bool isReliable = channel.settings.reliable;
+		bool isOrdered = channel.settings.ordered;
+		if (first || isReliable == packetReliable) {
+			// Check if the message fits
+			size_t msgSize = (*iter)->getSerializedSize();
+			size_t headerSize = 1 + (isOrdered ? 2 : 0) + (msgSize >= 64 ? 2 : 1);
+			size_t totalSize = headerSize + msgSize;
+
+			if (size + totalSize <= maxSize) {
+				// It fits, so add it
+				size += totalSize;
+
+				sentMsgs.push_back(std::move(*iter));
+				pendingMsgs.erase(iter);
+
+				first = false;
+				packetReliable = isReliable;
+			}
+		}
+	}
+
+	if (sentMsgs.empty()) {
+		throw Exception("Was not able to fit any messages into packet!");
+	}
+
+	// Serialize
+	auto data = serializeMessages(sentMsgs);
+
+	// Track data in this packet
+	int tag = nextPacketId++;
+	auto& pendingData = pendingPackets[tag];
+	pendingData.msgs = std::move(sentMsgs);
+	pendingData.reliable = packetReliable;
+	pendingData.timeSent = std::chrono::steady_clock::now();
+
+	return ReliableSubPacket(std::move(data));
+}
+
+std::vector<gsl::byte> MessageQueue::serializeMessages(const std::vector<std::unique_ptr<NetworkMessage>>& msgs) const
+{
+	std::vector<gsl::byte> result;
+	// TODO
+	return result;
 }

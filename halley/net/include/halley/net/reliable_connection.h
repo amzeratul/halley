@@ -17,6 +17,33 @@ namespace Halley
 		virtual void onPacketAcked(int tag) = 0;
 	};
 
+	class ReliableSubPacket
+	{
+	public:
+		std::vector<gsl::byte> data;
+		int tag = -1;
+		//bool reliable = false;
+		bool resends = false;
+		unsigned short seq;
+		unsigned short resendSeq = 0;
+
+		ReliableSubPacket()
+		{}
+
+		ReliableSubPacket(ReliableSubPacket&& other) = default;
+
+		ReliableSubPacket(std::vector<gsl::byte>&& data)
+			: data(data)
+			, resends(false)
+		{}
+
+		ReliableSubPacket(std::vector<gsl::byte>&& data, unsigned short resendSeq)
+			: data(data)
+			, resends(true)
+			, resendSeq(resendSeq)
+		{}
+	};
+
 	class ReliableConnection : public IConnection
 	{
 		using Clock = std::chrono::steady_clock;
@@ -36,7 +63,7 @@ namespace Halley
 		void send(OutboundNetworkPacket&& packet) override;
 		bool receive(InboundNetworkPacket& packet) override;
 
-		void sendTagged(OutboundNetworkPacket&& packet, int tag);
+		void sendTagged(gsl::span<ReliableSubPacket> subPackets);
 		void addAckListener(IReliableConnectionAckListener& listener);
 		void removeAckListener(IReliableConnectionAckListener& listener);
 

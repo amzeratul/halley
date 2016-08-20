@@ -43,40 +43,63 @@ ConnectionStatus ReliableConnection::getStatus() const
 
 void ReliableConnection::send(OutboundNetworkPacket&& packet)
 {
-	//throw Exception("Operation not supported.");
-	sendTagged(std::move(packet), 0);
+	ReliableSubPacket subPacket;
+	subPacket.data.resize(packet.getSize());
+	packet.copyTo(subPacket.data);
+	subPacket.resends = false;
+	subPacket.tag = -1;
+
+	sendTagged(gsl::span<ReliableSubPacket>(&subPacket, 1));
 }
 
-void ReliableConnection::sendTagged(OutboundNetworkPacket&& packet, int tag)
+void ReliableConnection::sendTagged(gsl::span<ReliableSubPacket> subPackets)
 {
-	Expects(tag >= 0);
+	bool first = true;
+	unsigned short firstSeq = sequenceSent;
+	std::array<gsl::byte, 2048> buffer;
+	gsl::span<gsl::byte, 2048> dst(buffer);
+	size_t pos = sizeof(ReliableHeader);
 
-	// Add reliable sub-header
-	bool isResend = false;
-	unsigned short resending = 0;
-	size_t size = packet.getSize();
-	bool longSize = size >= 64;
-	ReliableSubHeader subHeader;
-	subHeader.sizeA = static_cast<unsigned char>(longSize ? (size >> 8) & 0x3F : size) | (isResend ? 0x80 : 0);
-	subHeader.sizeB = static_cast<unsigned char>(longSize ? (size & 0xFF) : 0);
-	subHeader.resend = resending;
-	gsl::span<ReliableSubHeader> subData(&subHeader, sizeof(ReliableSubHeader));
-	packet.addHeader(subData.subspan(0, (longSize ? 2 : 1) + (isResend ? 2 : 0)));
+	for (auto& subPacket : subPackets) {
+		// Add reliable sub-header
+		bool isResend = false;
+		unsigned short resending = 0;
+		size_t size = subPacket.data.size();
+		bool longSize = size >= 64;
+		ReliableSubHeader subHeader;
+		subHeader.sizeA = static_cast<unsigned char>(longSize ? (size >> 8) & 0x3F : size) | (isResend ? 0x80 : 0);
+		subHeader.sizeB = static_cast<unsigned char>(longSize ? (size & 0xFF) : 0);
+		subHeader.resend = resending;
+		auto subHeaderData = gsl::span<gsl::byte>(gsl::span<ReliableSubHeader>(&subHeader, sizeof(ReliableSubHeader)).subspan(0, (longSize ? 2 : 1) + (isResend ? 2 : 0)));
+		std::copy(subHeaderData.begin(), subHeaderData.end(), dst.subspan(pos).begin());
+		pos += subHeaderData.size();
+
+		// Add data
+		std::copy(subPacket.data.begin(), subPacket.data.end(), dst.subspan(pos).begin());
+		pos += subPacket.data.size();
+
+		// Get sequence
+		unsigned short seq = sequenceSent++;
+		size_t idx = seq % BUFFER_SIZE;
+		auto& sent = sentPackets[idx];
+		sent.waiting = true;
+		sent.tag = subPacket.tag;
+		lastSend = sent.timestamp = Clock::now();
+
+		// Update caller on the sequence number of this
+		subPacket.seq = seq;
+	}
 
 	// Add reliable header
 	ReliableHeader header;
-	header.sequence = sequenceSent++;
+	header.sequence = firstSeq;
 	header.ack = highestReceived;
 	header.ackBits = generateAckBits();
-	packet.addHeader(gsl::span<ReliableHeader>(&header, sizeof(ReliableHeader)));
-	parent->send(std::move(packet));
+	auto headerData = gsl::span<gsl::byte>(gsl::span<ReliableHeader>(&header, sizeof(ReliableHeader)));
+	std::copy(headerData.begin(), headerData.end(), dst.begin());
 
-	// Store send information
-	size_t idx = header.sequence % BUFFER_SIZE;
-	auto& sent = sentPackets[idx];
-	sent.waiting = true;
-	sent.tag = tag;
-	lastSend = sent.timestamp = Clock::now();
+	// Send
+	parent->send(OutboundNetworkPacket(dst.subspan(0, pos)));
 }
 
 bool ReliableConnection::receive(InboundNetworkPacket& packet)

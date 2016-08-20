@@ -27,11 +27,16 @@ namespace Halley
 		{
 			std::vector<std::unique_ptr<NetworkMessage>> msgs;
 			std::chrono::steady_clock::time_point timeSent;
+			//std::vector<gsl::byte> data;
+			unsigned short seq;
+			bool reliable;
 		};
 
 		struct Channel
 		{
-			std::unique_ptr<NetworkMessage> lastSent;
+			std::unique_ptr<NetworkMessage> lastAck;
+			unsigned int lastAckSeq = 0;
+			unsigned int lastSeq = 0;
 			ChannelSettings settings;
 		};
 
@@ -55,6 +60,9 @@ namespace Halley
 		int nextPacketId = 0;
 
 		void onPacketAcked(int tag) override;
-		void checkReSend();
+		void checkReSend(std::vector<ReliableSubPacket>& collect);
+
+		ReliableSubPacket createPacket();
+		std::vector<gsl::byte> serializeMessages(const std::vector<std::unique_ptr<NetworkMessage>>& msgs) const;
 	};
 }

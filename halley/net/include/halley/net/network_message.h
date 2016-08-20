@@ -18,5 +18,6 @@ namespace Halley
 
 	private:
 		int channel = -1;
+		unsigned int seq = 0;
 	};
 }

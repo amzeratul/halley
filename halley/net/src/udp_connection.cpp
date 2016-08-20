@@ -128,16 +128,11 @@ void UDPConnection::sendNext()
 	}
 
 	auto& packet = pendingSend.front();
-
-	// Append header
-	//packet.addHeader()
-
 	size_t size = packet.copyTo(sendBuffer);
 	pendingSend.pop_front();
 
 	socket.async_send_to(boost::asio::buffer(sendBuffer, size), remote, [this] (const boost::system::error_code& error, std::size_t size)
 	{
-		//std::cout << "Sent " << size << " bytes\n";
 		if (error) {
 			std::cout << "Error sending packet: " << error.message() << std::endl;
 			close();
