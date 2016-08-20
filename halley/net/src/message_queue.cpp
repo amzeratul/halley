@@ -14,19 +14,41 @@ ChannelSettings::ChannelSettings(bool reliable, bool ordered, bool keepLastSent)
 void MessageQueue::Channel::getReadyMessages(std::vector<std::unique_ptr<NetworkMessage>>& out)
 {
 	if (settings.ordered) {
-		bool trying = true;
-		// Oh my god
-		while (trying && !receiveQueue.empty()) {
-			trying = false;
+		if (settings.reliable) {
+			bool trying = true;
+			// Oh my god, this is horrible
+			while (trying && !receiveQueue.empty()) {
+				trying = false;
+				for (size_t i = 0; i < receiveQueue.size(); ++i) {
+					auto& m = receiveQueue[i];
+					if (m->seq == lastReceived + 1) {
+						trying = true;
+						out.push_back(std::move(m));
+						receiveQueue.erase(receiveQueue.begin() + i);
+						lastReceived++;
+						break;
+					}
+				}
+			}
+		} else {
+			unsigned short bestDist = 0;
+			size_t fail = size_t(-1);
+			size_t best = fail;
+			// Look for the highest seq message, as long as it's above lastReceived
 			for (size_t i = 0; i < receiveQueue.size(); ++i) {
 				auto& m = receiveQueue[i];
-				if (m->seq == lastReceived + 1) {
-					trying = true;
-					out.push_back(std::move(m));
-					receiveQueue.erase(receiveQueue.begin() + i);
-					lastReceived++;
-					break;
+				unsigned short dist = m->seq - lastReceived;
+				if (dist < 0x7FFF) {
+					if (dist > bestDist) {
+						bestDist = dist;
+						best = i;
+					}
 				}
+			}
+			if (best != fail) {
+				lastReceived = receiveQueue[best]->seq;
+				out.push_back(std::move(receiveQueue[best]));
+				receiveQueue.clear();
 			}
 		}
 	} else {
