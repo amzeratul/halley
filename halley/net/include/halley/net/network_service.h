@@ -34,5 +34,6 @@ namespace Halley
 		void startListening();
 		void receiveNext();
 		bool isValidConnectionRequest(gsl::span<const gsl::byte> data);
+		short getFreeId() const;
 	};
 }

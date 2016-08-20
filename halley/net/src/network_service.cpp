@@ -33,6 +33,21 @@ namespace Halley
 	};
 }
 
+struct HandshakeOpen
+{
+	HandshakeOpen()
+		: handshake("halley_open")
+	{
+	}
+
+	const char handshake[12];
+	// TODO: public-key encrypted temporary key
+};
+
+
+
+
+
 NetworkService::NetworkService(int port, IPVersion version)
 	: pimpl(std::make_unique<NetworkServicePImpl>(port, version))
 {
@@ -90,7 +105,11 @@ std::shared_ptr<IConnection> NetworkService::tryAcceptConnection()
 	if (pending.empty()) {
 		return nullptr;
 	} else {
-		pimpl->activeConnections.push_back(std::make_shared<UDPConnection>(pimpl->socket, pending.front()));
+		auto conn = std::make_shared<UDPConnection>(pimpl->socket, pending.front());
+		short id = getFreeId();
+		conn->open(id);
+
+		pimpl->activeConnections.push_back(conn);
 		pending.pop_front();
 		return pimpl->activeConnections.back();
 	}
@@ -106,7 +125,8 @@ std::shared_ptr<IConnection> NetworkService::connect(String addr, int port)
 	auto& conn = pimpl->activeConnections.back();
 
 	// Handshake
-	conn->send(OutboundNetworkPacket(gsl::ensure_z("halley_open_connection")));
+	HandshakeOpen open;
+	conn->send(OutboundNetworkPacket(gsl::span<HandshakeOpen>(&open, sizeof(HandshakeOpen))));
 
 	startListening();
 
@@ -126,35 +146,47 @@ void NetworkService::receiveNext()
 	auto buffer = asio::buffer(pimpl->receiveBuffer);
 	pimpl->socket.async_receive_from(buffer, pimpl->remoteEndpoint, [this] (const boost::system::error_code& error, size_t size)
 	{
-		Expects(size <= pimpl->receiveBuffer.size());
+		try {
+			Expects(size <= pimpl->receiveBuffer.size());
+			std::cout << "Received " << size << " bytes\n";
 
-		// Find the owner of this remote endpoint
-		UDPConnection* connection = nullptr;
-		for (auto& conn : pimpl->activeConnections) {
-			if (conn->matchesEndpoint(pimpl->remoteEndpoint)) {
-				connection = conn.get();
-				break;
-			}
-		}
-
-		if (error) {
-			// Close the connection if there was an error
-			if (connection) {
-				connection->setError(error.message());
-				connection->close();
-			}
-		} else {
+			// Read connection id
 			auto received = gsl::span<gsl::byte>(pimpl->receiveBuffer.data(), size);
-			if (connection) {
-				connection->onReceive(received);
-			} else {
-				if (isValidConnectionRequest(received)) {
-					auto& pending = pimpl->pendingIncomingConnections;
-					if (std::find(pending.begin(), pending.end(), pimpl->remoteEndpoint) == pending.end()) {
-						pending.push_back(pimpl->remoteEndpoint);
+			unsigned short id = -1; // TODO
+			received = received.subspan(1);
+
+			// Find the owner of this remote endpoint
+			UDPConnection* connection = nullptr;
+			for (auto& conn : pimpl->activeConnections) {
+				if (conn->matchesEndpoint(id, pimpl->remoteEndpoint)) {
+					connection = conn.get();
+					break;
+				}
+			}
+
+			if (error) {
+				// Close the connection if there was an error
+				if (connection) {
+					connection->setError(error.message());
+					connection->close();
+				}
+			}
+			else {
+				if (connection) {
+					connection->onReceive(received);
+				} else {
+					if (isValidConnectionRequest(received)) {
+						auto& pending = pimpl->pendingIncomingConnections;
+						if (std::find(pending.begin(), pending.end(), pimpl->remoteEndpoint) == pending.end()) {
+							pending.push_back(pimpl->remoteEndpoint);
+						}
+					} else {
+						std::cout << "Invalid packet on connection " << id << std::endl;
 					}
 				}
 			}
+		} catch (...) {
+			std::cout << "Exception while receiving a packet." << std::endl;
 		}
 
 		receiveNext();
@@ -163,5 +195,12 @@ void NetworkService::receiveNext()
 
 bool NetworkService::isValidConnectionRequest(gsl::span<const gsl::byte> data)
 {
-	return acceptingConnections && data.size() == 22 && memcmp(data.data(), "halley_open_connection", 22) == 0;
+	HandshakeOpen open;
+	return acceptingConnections && data.size() == sizeof(open) && memcmp(data.data(), &open, sizeof(open.handshake)) == 0;
+}
+
+short NetworkService::getFreeId() const
+{
+	// TODO
+	return -1;
 }

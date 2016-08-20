@@ -37,3 +37,23 @@ auto toProcess = msgs->receive();
 msgs->enqueue(foo, 0);
 msgs->enqueue(bar, 1);
 msgs->send();
+
+
+
+Reliable ordered: protocol establishment
+Reliable unordered: file transfer with tagged chunks
+Unreliable ordered: position
+Unreliable unordered: special effects
+
+
+
+UDPPacket
+ + IP+UDP header: protocol data [20B]
+ + Header: connectionId [1-2B]
+ + ConnectionPacket                  {Encrypted once that's negotiated}
+   + Header: ack [2B], ackBits [4B]
+   + NetworkPacket                   {There can be one or two of these in a ConnectionPacket. If two, one is always reliable and the other is always unreliable}
+     + Header: seq [2B], size [1-2B] {Header is not included on the second packet, inferred as seq+1, remaining size on datagram}
+     + NetworkMessage                {There can be many network messages}
+       + Header: channel [1B], seq[0-2B], size [1-2B]  {seq is only for ordered channels. If the previous message was on the same channel, seq is implied as seq+1}
+       + Data: [size B]              {This is passed to the game to decode as it sees fit}

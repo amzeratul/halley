@@ -8,6 +8,7 @@ namespace Halley
 	enum class ConnectionStatus
 	{
 		UNDEFINED,
+		CONNECTING,
 		OPEN,
 		CLOSING,
 		CLOSED

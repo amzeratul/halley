@@ -50,30 +50,32 @@ void TestStage::updateNetwork()
 		network->update();
 
 		if (connection) {
-			if (connection->getStatus() != ConnectionStatus::OPEN) {
+			if (connection->getStatus() == ConnectionStatus::CLOSED) {
 				std::cout << "Closing connection." << std::endl;
 				connection.reset();
 				return;
 			}
+			
+			if (connection->getStatus() == ConnectionStatus::OPEN) {
+				if (key->isButtonPressed(Keys::Space)) {
+					connection->send(OutboundNetworkPacket(gsl::ensure_z("hello world!")));
+				}
 
-			if (key->isButtonPressed(Keys::Space)) {
-				connection->send(OutboundNetworkPacket(gsl::ensure_z("hello world!")));
-			}
+				if (connection->getTimeSinceLastSend() > 0.01f) {
+					connection->send(OutboundNetworkPacket(gsl::ensure_z("no-op")));
+				}
 
-			if (connection->getTimeSinceLastSend() > 0.01f) {
-				connection->send(OutboundNetworkPacket(gsl::ensure_z("no-op")));
-			}
+				InboundNetworkPacket received;
+				while (connection->receive(received)) {
+					gsl::byte buffer[2048];
+					size_t bytes = received.copyTo(buffer);
+					buffer[bytes] = gsl::byte(0);
+					std::cout << "Received message: " << reinterpret_cast<const char*>(buffer) << std::endl;
+				}
 
-			InboundNetworkPacket received;
-			while (connection->receive(received)) {
-				gsl::byte buffer[2048];
-				size_t bytes = received.copyTo(buffer);
-				buffer[bytes] = gsl::byte(0);
-				std::cout << "Received message: " << reinterpret_cast<const char*>(buffer) << std::endl;
-			}
-
-			if (connection->getTimeSinceLastReceive() > 2.0f) {
-				connection->close();
+				if (connection->getTimeSinceLastReceive() > 2.0f) {
+					connection->close();
+				}
 			}
 		} else {
 			auto conn = network->tryAcceptConnection();
