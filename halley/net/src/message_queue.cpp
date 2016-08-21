@@ -39,6 +39,7 @@ void MessageQueue::Channel::getReadyMessages(std::vector<std::unique_ptr<Network
 			for (size_t i = 0; i < receiveQueue.size(); ++i) {
 				auto& m = receiveQueue[i];
 				unsigned short dist = m->seq - lastReceived;
+				std::cout << "Distance: " << dist << std::endl;
 				if (dist < 0x7FFF) {
 					if (dist > bestDist) {
 						bestDist = dist;
@@ -49,8 +50,8 @@ void MessageQueue::Channel::getReadyMessages(std::vector<std::unique_ptr<Network
 			if (best != fail) {
 				lastReceived = receiveQueue[best]->seq;
 				out.push_back(std::move(receiveQueue[best]));
-				receiveQueue.clear();
 			}
+			receiveQueue.clear();
 		}
 	} else {
 		for (auto& m: receiveQueue) {
@@ -184,7 +185,8 @@ void MessageQueue::checkReSend(std::vector<ReliableSubPacket>& collect)
 		if (elapsed > 0.1f && elapsed > connection->getLatency() * 2.0f) {
 			// Re-send if it's reliable
 			if (pending.reliable) {
-				collect.push_back(ReliableSubPacket(serializeMessages(pending.msgs, pending.size), pending.seq));
+				std::cout << "Re-sending " << pending.seq << std::endl;
+				collect.push_back(makeTaggedPacket(pending.msgs, pending.size, true, pending.seq));
 			}
 			pendingPackets.erase(iter);
 		}
@@ -233,19 +235,26 @@ ReliableSubPacket MessageQueue::createPacket()
 		throw Exception("Was not able to fit any messages into packet!");
 	}
 
-	// Serialize
-	auto data = serializeMessages(sentMsgs, size);
+	return makeTaggedPacket(sentMsgs, size);
+}
 
-	// Track data in this packet
+ReliableSubPacket MessageQueue::makeTaggedPacket(std::vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends, unsigned short resendSeq)
+{
+	bool reliable = !msgs.empty() && channels[msgs[0]->channel].settings.reliable;
+
+	auto data = serializeMessages(msgs, size);
+
 	int tag = nextPacketId++;
 	auto& pendingData = pendingPackets[tag];
-	pendingData.msgs = std::move(sentMsgs);
+	pendingData.msgs = std::move(msgs);
 	pendingData.size = size;
-	pendingData.reliable = packetReliable;
+	pendingData.reliable = reliable;
 	pendingData.timeSent = std::chrono::steady_clock::now();
 
 	auto result = ReliableSubPacket(std::move(data));
 	result.tag = tag;
+	result.resends = resends;
+	result.resendSeq = resendSeq;
 	return result;
 }
 

@@ -109,17 +109,16 @@ void TestStage::updateNetwork()
 			if (connection->getStatus() == ConnectionStatus::OPEN) {
 				if (key->isButtonPressed(Keys::Space)) {
 					msgs->enqueue(std::make_unique<TextMsg>("ding"), 1);
-					msgs->enqueue(std::make_unique<TextMsg>("dong!"), 1);
 				}
 
 				if (connection->getTimeSinceLastSend() > 0.01f) {
 					//msgs->enqueue(std::make_unique<NoOpMsg>(), 0);
-					msgs->enqueue(std::make_unique<TextMsg>(String::integerToString(count++)), 2);
+					msgs->enqueue(std::make_unique<TextMsg>(String::integerToString(count++)), 3);
 				}
 
 				for (auto& msg: msgs->receiveAll()) {
 					if (dynamic_cast<NoOpMsg*>(msg.get())) {
-						std::cout << ".";
+						//std::cout << ".";
 					} else {
 						auto text = dynamic_cast<TextMsg*>(msg.get());
 						if (text) {
@@ -151,6 +150,7 @@ void TestStage::setConnection(std::shared_ptr<Halley::IConnection> conn)
 	msgs->setChannel(0, ChannelSettings(false, false, false));
 	msgs->setChannel(1, ChannelSettings(true, false, false));
 	msgs->setChannel(2, ChannelSettings(false, true, false));
+	msgs->setChannel(3, ChannelSettings(true, true, false));
 	msgs->addFactory<NoOpMsg>();
 	msgs->addFactory<TextMsg>();
 }

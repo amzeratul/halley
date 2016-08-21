@@ -38,7 +38,7 @@ namespace Halley
 			std::unique_ptr<NetworkMessage> lastAck;
 			unsigned int lastAckSeq = 0;
 			unsigned int lastSeq = 0;
-			unsigned short lastReceived = 0xFFFF;
+			unsigned short lastReceived = 0;
 			ChannelSettings settings;
 			bool initialized = false;
 
@@ -77,6 +77,7 @@ namespace Halley
 		void checkReSend(std::vector<ReliableSubPacket>& collect);
 
 		ReliableSubPacket createPacket();
+		ReliableSubPacket makeTaggedPacket(std::vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends = false, unsigned short resendSeq = 0);
 		std::vector<gsl::byte> serializeMessages(const std::vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size) const;
 
 		void receiveMessages();
