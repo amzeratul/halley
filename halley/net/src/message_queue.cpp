@@ -383,5 +383,6 @@ std::unique_ptr<NetworkMessage> MessageQueue::deserializeMessage(gsl::span<const
 {
 	auto msg = factories.at(msgType)->create();
 	msg->deserializeFrom(data);
+	msg->seq = seq;
 	return std::move(msg);
 }

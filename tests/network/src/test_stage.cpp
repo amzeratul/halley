@@ -113,7 +113,8 @@ void TestStage::updateNetwork()
 				}
 
 				if (connection->getTimeSinceLastSend() > 0.01f) {
-					msgs->enqueue(std::make_unique<NoOpMsg>(), 0);
+					//msgs->enqueue(std::make_unique<NoOpMsg>(), 0);
+					msgs->enqueue(std::make_unique<TextMsg>(String::integerToString(count++)), 2);
 				}
 
 				for (auto& msg: msgs->receiveAll()) {
@@ -122,7 +123,7 @@ void TestStage::updateNetwork()
 					} else {
 						auto text = dynamic_cast<TextMsg*>(msg.get());
 						if (text) {
-							std::cout << text->getString();
+							std::cout << text->getString() << "\n";
 						}
 					}
 				}
@@ -149,6 +150,7 @@ void TestStage::setConnection(std::shared_ptr<Halley::IConnection> conn)
 	msgs = std::make_unique<MessageQueue>(connection);
 	msgs->setChannel(0, ChannelSettings(false, false, false));
 	msgs->setChannel(1, ChannelSettings(true, false, false));
+	msgs->setChannel(2, ChannelSettings(false, true, false));
 	msgs->addFactory<NoOpMsg>();
 	msgs->addFactory<TextMsg>();
 }

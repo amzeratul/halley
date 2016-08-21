@@ -19,4 +19,6 @@ private:
 	std::shared_ptr<Halley::ReliableConnection> connection;
 	std::unique_ptr<Halley::MessageQueue> msgs;
 	bool isClient;
+
+	int count = 0;
 };
