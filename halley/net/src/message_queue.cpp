@@ -182,10 +182,9 @@ void MessageQueue::checkReSend(std::vector<ReliableSubPacket>& collect)
 
 		// Check how long it's been waiting
 		float elapsed = std::chrono::duration<float>(std::chrono::steady_clock::now() - pending.timeSent).count();
-		if (elapsed > 0.1f && elapsed > connection->getLatency() * 2.0f) {
+		if (elapsed > 0.1f && elapsed > connection->getLatency() * 3.0f) {
 			// Re-send if it's reliable
 			if (pending.reliable) {
-				std::cout << "Re-sending " << pending.seq << std::endl;
 				collect.push_back(makeTaggedPacket(pending.msgs, pending.size, true, pending.seq));
 			}
 			pendingPackets.erase(iter);
@@ -385,8 +384,10 @@ void MessageQueue::receiveMessages()
 				data = data.subspan(size);
 			}
 		}
-	}
-	catch (...) {
+	} catch (std::exception& e) {
+		std::cout << "Error receiving messages: " << e.what() << std::endl;
+		connection->close();
+	} catch (...) {
 		connection->close();
 	}
 }

@@ -24,7 +24,7 @@ namespace Halley
 		int tag = -1;
 		//bool reliable = false;
 		bool resends = false;
-		unsigned short seq;
+		unsigned short seq = -1;
 		unsigned short resendSeq = 0;
 
 		ReliableSubPacket()
@@ -74,7 +74,7 @@ namespace Halley
 	private:
 		std::shared_ptr<IConnection> parent;
 
-		unsigned short sequenceSent = 0;
+		unsigned short nextSequenceToSend = 0;
 		unsigned short highestReceived = 0xFFFF;
 
 		std::vector<char> receivedSeqs; // 0 = not received, 1 = received, 2 = received re-send, 3 = both
@@ -83,7 +83,7 @@ namespace Halley
 
 		std::vector<IReliableConnectionAckListener*> ackListeners;
 
-		float lag = 0;
+		float lag = 1; // Start at 1 second
 		Clock::time_point lastReceive;
 		Clock::time_point lastSend;
 
