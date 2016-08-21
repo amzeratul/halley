@@ -62,8 +62,8 @@ void ReliableConnection::sendTagged(gsl::span<ReliableSubPacket> subPackets)
 
 	for (auto& subPacket : subPackets) {
 		// Add reliable sub-header
-		bool isResend = false;
-		unsigned short resending = 0;
+		bool isResend = subPacket.resends;
+		unsigned short resending = subPacket.resendSeq;
 		size_t size = subPacket.data.size();
 		bool longSize = size >= 64;
 		ReliableSubHeader subHeader;

@@ -2,6 +2,7 @@
 #include "reliable_connection.h"
 #include <halley/support/exception.h>
 #include <network_packet.h>
+#include <iostream>
 
 using namespace Halley;
 
@@ -243,7 +244,9 @@ ReliableSubPacket MessageQueue::createPacket()
 	pendingData.reliable = packetReliable;
 	pendingData.timeSent = std::chrono::steady_clock::now();
 
-	return ReliableSubPacket(std::move(data));
+	auto result = ReliableSubPacket(std::move(data));
+	result.tag = tag;
+	return result;
 }
 
 std::vector<gsl::byte> MessageQueue::serializeMessages(const std::vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size) const
