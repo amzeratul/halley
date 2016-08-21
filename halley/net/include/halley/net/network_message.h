@@ -15,7 +15,7 @@ namespace Halley
 		virtual ~NetworkMessage() {}
 
 		virtual size_t getSerializedSize() const = 0;
-		virtual void serializeTo(gsl::span<gsl::byte> dst) = 0;
+		virtual void serializeTo(gsl::span<gsl::byte> dst) const = 0;
 		virtual void deserializeFrom(gsl::span<const gsl::byte> src) = 0;
 
 	private:

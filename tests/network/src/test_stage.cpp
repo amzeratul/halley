@@ -2,6 +2,47 @@
 
 using namespace Halley;
 
+
+class NoOpMsg : public NetworkMessage
+{
+public:
+	size_t getSerializedSize() const override { return 0; }	
+	void serializeTo(gsl::span<gsl::byte> dst) const override {}	
+	void deserializeFrom(gsl::span<const gsl::byte> src) override {}
+};
+
+class TextMsg : public NetworkMessage
+{
+public:
+	TextMsg()
+	{}
+
+	TextMsg(String str)
+		: str(str)
+	{}
+
+	String getString() const { return str; }
+
+	size_t getSerializedSize() const override
+	{
+		return str.size();
+	}
+	
+	void serializeTo(gsl::span<gsl::byte> dst) const override
+	{
+		memcpy(dst.data(), str.c_str(), str.size());
+	}
+	
+	void deserializeFrom(gsl::span<const gsl::byte> src) override
+	{
+		str = String(reinterpret_cast<const char*>(src.data()), src.size());
+	}
+
+private:
+	String str;
+};
+
+
 TestStage::TestStage()
 {
 }
@@ -67,20 +108,25 @@ void TestStage::updateNetwork()
 			
 			if (connection->getStatus() == ConnectionStatus::OPEN) {
 				if (key->isButtonPressed(Keys::Space)) {
-					connection->send(OutboundNetworkPacket(gsl::ensure_z("hello world!")));
+					msgs->enqueue(std::make_unique<TextMsg>("ding"), 0);
+					msgs->enqueue(std::make_unique<TextMsg>("dong!"), 0);
 				}
 
 				if (connection->getTimeSinceLastSend() > 0.01f) {
-					connection->send(OutboundNetworkPacket(gsl::ensure_z("no-op")));
+					msgs->enqueue(std::make_unique<NoOpMsg>(), 0);
 				}
 
-				InboundNetworkPacket received;
-				while (connection->receive(received)) {
-					gsl::byte buffer[2048];
-					size_t bytes = received.copyTo(buffer);
-					buffer[bytes] = gsl::byte(0);
-					std::cout << "Received message: " << reinterpret_cast<const char*>(buffer) << std::endl;
+				for (auto& msg: msgs->receiveAll()) {
+					if (dynamic_cast<NoOpMsg*>(msg.get())) {
+						std::cout << ".";
+					} else {
+						auto text = dynamic_cast<TextMsg*>(msg.get());
+						if (text) {
+							std::cout << text->getString();
+						}
+					}
 				}
+				msgs->sendAll();
 			}
 		} else {
 			auto conn = network->tryAcceptConnection();
@@ -99,4 +145,9 @@ void TestStage::setConnection(std::shared_ptr<Halley::IConnection> conn)
 	const bool unstable = true;
 	auto base = unstable ? std::make_shared<InstabilitySimulator>(conn, 0.1f, 0.05f, 0.1f, 0.05f) : conn;
 	connection = std::make_shared<ReliableConnection>(base);
+	
+	msgs = std::make_unique<MessageQueue>(connection);
+	msgs->setChannel(0, ChannelSettings(false, false, false));
+	msgs->addFactory<NoOpMsg>();
+	msgs->addFactory<TextMsg>();
 }

@@ -50,7 +50,12 @@ namespace Halley
 		~MessageQueue();
 		
 		void setChannel(int channel, ChannelSettings settings);
-		void addFactory(std::unique_ptr<NetworkMessageFactoryBase> factory);
+
+		template <typename T>
+		void addFactory()
+		{
+			addFactory(std::make_unique<NetworkMessageFactory<T>>());
+		}
 
 		std::vector<std::unique_ptr<NetworkMessage>> receiveAll();
 
@@ -76,5 +81,8 @@ namespace Halley
 
 		void receiveMessages();
 		std::unique_ptr<NetworkMessage> deserializeMessage(gsl::span<const gsl::byte> data, unsigned short msgType, unsigned short seq);
+
+		void addFactory(std::unique_ptr<NetworkMessageFactoryBase> factory);
+		int getMessageType(NetworkMessage& msg) const;
 	};
 }

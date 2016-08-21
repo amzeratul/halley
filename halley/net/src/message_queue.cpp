@@ -92,6 +92,15 @@ void MessageQueue::addFactory(std::unique_ptr<NetworkMessageFactoryBase> factory
 	factories.emplace_back(std::move(factory));
 }
 
+int MessageQueue::getMessageType(NetworkMessage& msg) const
+{
+	auto idxIter = typeToMsgIndex.find(std::type_index(typeid(msg)));
+	if (idxIter == typeToMsgIndex.end()) {
+		throw Exception("No appropriate factory for this type of message: " + String(typeid(msg).name()));
+	}
+	return idxIter->second;
+}
+
 std::vector<std::unique_ptr<NetworkMessage>> MessageQueue::receiveAll()
 {
 	if (connection->getStatus() == ConnectionStatus::OPEN) {
@@ -202,7 +211,8 @@ ReliableSubPacket MessageQueue::createPacket()
 		if (first || isReliable == packetReliable) {
 			// Check if the message fits
 			size_t msgSize = (*iter)->getSerializedSize();
-			size_t headerSize = 1 + (isOrdered ? 2 : 0) + (msgSize >= 128 ? 2 : 1);
+			int msgType = getMessageType(**iter);
+			size_t headerSize = 1 + (isOrdered ? 2 : 0) + (msgSize >= 128 ? 2 : 1) + (msgType >= 128 ? 2 : 1);
 			size_t totalSize = headerSize + msgSize;
 
 			if (size + totalSize <= maxSize) {
@@ -243,11 +253,7 @@ std::vector<gsl::byte> MessageQueue::serializeMessages(const std::vector<std::un
 	
 	for (auto& msg: msgs) {
 		size_t msgSize = msg->getSerializedSize();
-		auto idxIter = typeToMsgIndex.find(std::type_index(typeid(msg)));
-		if (idxIter == typeToMsgIndex.end()) {
-			throw Exception("No appropriate factory for this type of message: " + String(typeid(msg).name()));
-		}
-		int msgType = idxIter->second;
+		int msgType = getMessageType(*msg);
 		char channelN = msg->channel;
 
 		auto& channel = channels[channelN];
