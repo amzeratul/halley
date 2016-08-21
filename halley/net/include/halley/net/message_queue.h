@@ -36,9 +36,9 @@ namespace Halley
 		{
 			std::vector<std::unique_ptr<NetworkMessage>> receiveQueue;
 			std::unique_ptr<NetworkMessage> lastAck;
-			unsigned int lastAckSeq = 0;
-			unsigned int lastSeq = 0;
-			unsigned short lastReceived = 0;
+			unsigned short lastAckSeq = 0;
+			unsigned short lastSentSeq = 0;
+			unsigned short lastReceivedSeq = 0;
 			ChannelSettings settings;
 			bool initialized = false;
 

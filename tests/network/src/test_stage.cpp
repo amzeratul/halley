@@ -52,7 +52,7 @@ void TestStage::init()
 
 }
 
-void TestStage::onFixedUpdate(Time time)
+void TestStage::onVariableUpdate(Time time)
 {
 	auto key = getInputAPI().getKeyboard();
 	if (key->isButtonDown(Keys::Esc)) {
@@ -113,7 +113,10 @@ void TestStage::updateNetwork()
 
 				if (connection->getTimeSinceLastSend() > 0.01f) {
 					//msgs->enqueue(std::make_unique<NoOpMsg>(), 0);
-					msgs->enqueue(std::make_unique<TextMsg>(String::integerToString(count++)), 3);
+					size_t n = Random::getGlobal().getInt(1, 5);
+					for (size_t i = 0; i < n; i++) {
+						msgs->enqueue(std::make_unique<TextMsg>(String::integerToString(count++)), 3);
+					}
 				}
 
 				for (auto& msg: msgs->receiveAll()) {
@@ -143,7 +146,7 @@ void TestStage::updateNetwork()
 void TestStage::setConnection(std::shared_ptr<Halley::IConnection> conn)
 {
 	const bool unstable = true;
-	auto base = unstable ? std::make_shared<InstabilitySimulator>(conn, 0.1f, 0.05f, 0.1f, 0.05f) : conn;
+	auto base = unstable ? std::make_shared<InstabilitySimulator>(conn, 0.1f, 0.03f, 0.1f, 0.05f) : conn;
 	connection = std::make_shared<ReliableConnection>(base);
 	
 	msgs = std::make_unique<MessageQueue>(connection);

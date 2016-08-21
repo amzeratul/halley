@@ -19,8 +19,8 @@ namespace Halley
 		virtual void deserializeFrom(gsl::span<const gsl::byte> src) = 0;
 
 	private:
-		int channel = -1;
-		unsigned int seq = 0;
+		unsigned short seq = 0;
+		char channel = -1;
 	};
 
 	class NetworkMessageFactoryBase

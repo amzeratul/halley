@@ -22,11 +22,15 @@ void MessageQueue::Channel::getReadyMessages(std::vector<std::unique_ptr<Network
 				trying = false;
 				for (size_t i = 0; i < receiveQueue.size(); ++i) {
 					auto& m = receiveQueue[i];
-					if (m->seq == lastReceived + 1) {
+					unsigned short expected = lastReceivedSeq + 1;
+					if (m->seq == expected) {
 						trying = true;
 						out.push_back(std::move(m));
-						receiveQueue.erase(receiveQueue.begin() + i);
-						lastReceived++;
+						if (receiveQueue.size() > 1) {
+							std::swap(receiveQueue[i], receiveQueue[receiveQueue.size() - 1]);
+						}
+						receiveQueue.pop_back();
+						lastReceivedSeq++;
 						break;
 					}
 				}
@@ -38,8 +42,7 @@ void MessageQueue::Channel::getReadyMessages(std::vector<std::unique_ptr<Network
 			// Look for the highest seq message, as long as it's above lastReceived
 			for (size_t i = 0; i < receiveQueue.size(); ++i) {
 				auto& m = receiveQueue[i];
-				unsigned short dist = m->seq - lastReceived;
-				std::cout << "Distance: " << dist << std::endl;
+				unsigned short dist = m->seq - lastReceivedSeq;
 				if (dist < 0x7FFF) {
 					if (dist > bestDist) {
 						bestDist = dist;
@@ -48,7 +51,7 @@ void MessageQueue::Channel::getReadyMessages(std::vector<std::unique_ptr<Network
 				}
 			}
 			if (best != fail) {
-				lastReceived = receiveQueue[best]->seq;
+				lastReceivedSeq = receiveQueue[best]->seq;
 				out.push_back(std::move(receiveQueue[best]));
 			}
 			receiveQueue.clear();
@@ -127,7 +130,7 @@ void MessageQueue::enqueue(std::unique_ptr<NetworkMessage> msg, int channelNumbe
 	auto& channel = channels[channelNumber];
 
 	msg->channel = channelNumber;
-	msg->seq = ++channel.lastSeq;
+	msg->seq = ++channel.lastSentSeq;
 
 	pendingMsgs.push_back(std::move(msg));
 }

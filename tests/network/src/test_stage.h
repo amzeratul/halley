@@ -7,7 +7,7 @@ class TestStage final : public Halley::Stage
 public:
 	TestStage();
 	void init() override;
-	void onFixedUpdate(Halley::Time time) override;
+	void onVariableUpdate(Halley::Time time) override;
 	void onRender(Halley::RenderContext& context) const override;
 
 private:
