@@ -108,8 +108,8 @@ void TestStage::updateNetwork()
 			
 			if (connection->getStatus() == ConnectionStatus::OPEN) {
 				if (key->isButtonPressed(Keys::Space)) {
-					msgs->enqueue(std::make_unique<TextMsg>("ding"), 0);
-					msgs->enqueue(std::make_unique<TextMsg>("dong!"), 0);
+					msgs->enqueue(std::make_unique<TextMsg>("ding"), 1);
+					msgs->enqueue(std::make_unique<TextMsg>("dong!"), 1);
 				}
 
 				if (connection->getTimeSinceLastSend() > 0.01f) {
@@ -148,6 +148,7 @@ void TestStage::setConnection(std::shared_ptr<Halley::IConnection> conn)
 	
 	msgs = std::make_unique<MessageQueue>(connection);
 	msgs->setChannel(0, ChannelSettings(false, false, false));
+	msgs->setChannel(1, ChannelSettings(true, false, false));
 	msgs->addFactory<NoOpMsg>();
 	msgs->addFactory<TextMsg>();
 }
