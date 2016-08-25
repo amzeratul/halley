@@ -5,15 +5,25 @@ project (halley-editor)
 set (editor_sources
 	"prec.cpp"
 
-	"src/console_window.cpp"
 	"src/editor_root_stage.cpp"
 	"src/main.cpp"
+
+	"src/console/console_window.cpp"
+
+	"src/project/project.cpp"
+
+	"src/tasks/editor_task.cpp"
 	)
 
 set (editor_headers
 	"prec.h"
-	"src/console_window.h"
 	"src/editor_root_stage.h"
+
+	"src/console/console_window.h"
+
+	"src/project/project.h"
+
+	"src/tasks/editor_task.h"
 	)
 
 set (editor_gen_definitions

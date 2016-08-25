@@ -1,5 +1,5 @@
 #include "editor_root_stage.h"
-#include "console_window.h"
+#include "console/console_window.h"
 
 using namespace Halley;
 
