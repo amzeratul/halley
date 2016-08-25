@@ -31,7 +31,7 @@ namespace Halley
 	private:
 		Vector<EditorTaskAnchor> continuations;
 		mutable std::mutex mutex;
-		std::atomic<float> progress = 0;
+		std::atomic<float> progress;
 		String name;
 		String progressLabel;
 

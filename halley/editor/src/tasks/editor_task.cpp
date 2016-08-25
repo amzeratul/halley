@@ -3,7 +3,8 @@
 using namespace Halley;
 
 EditorTask::EditorTask(String name, bool isCancellable, bool isVisible) 
-	: name(name)
+	: progress(0)
+	, name(name)
 	, cancelled(false)
 	, isCancellable(isCancellable)
 	, isVisible(isVisible)
