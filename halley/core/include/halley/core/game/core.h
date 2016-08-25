@@ -64,6 +64,8 @@ namespace Halley
 
 		std::array<StopwatchAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> timers;
 
+		Vector<String> args;
+
 		std::unique_ptr<Environment> environment;
 		std::unique_ptr<Game> game;
 		std::unique_ptr<HalleyAPI> api;

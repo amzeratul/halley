@@ -20,7 +20,7 @@
 
 using namespace Halley;
 
-Core::Core(std::unique_ptr<Game> g, Vector<std::string> args)
+Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 {
 	statics.setup();
 
@@ -28,8 +28,10 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> args)
 
 	// Set paths
 	environment = std::make_unique<Environment>();
-	if (args.size() > 0) {
-		environment->parseProgramPath(args[0]);
+	if (_args.size() > 0) {
+		environment->parseProgramPath(_args[0]);
+		args.reserve(_args.size() - 1);
+		std::copy(_args.begin() + 1, _args.end(), args.begin());
 	}
 	environment->setDataPath(game->getDataPath());
 
@@ -104,7 +106,7 @@ void Core::init()
 	initResources();
 
 	// Init game
-	game->init(&*api);
+	game->init(&*api, *environment, args);
 
 	// Create frame
 	setStage(game->makeStage(game->getInitialStage()));

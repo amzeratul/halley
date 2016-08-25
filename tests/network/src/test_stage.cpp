@@ -115,7 +115,7 @@ void TestStage::updateNetwork()
 					//msgs->enqueue(std::make_unique<NoOpMsg>(), 0);
 					size_t n = Random::getGlobal().getInt(1, 5);
 					for (size_t i = 0; i < n; i++) {
-						msgs->enqueue(std::make_unique<TextMsg>(String::integerToString(count++)), 3);
+						msgs->enqueue(std::make_unique<TextMsg>(String::integerToString(count++)), 2);
 					}
 				}
 

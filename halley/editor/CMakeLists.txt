@@ -6,7 +6,8 @@ set (editor_sources
 	"prec.cpp"
 
 	"src/editor_root_stage.cpp"
-	"src/main.cpp"
+	"src/halley_editor.cpp"
+	"src/preferences.cpp"
 
 	"src/console/console_window.cpp"
 
@@ -18,6 +19,8 @@ set (editor_sources
 set (editor_headers
 	"prec.h"
 	"src/editor_root_stage.h"
+	"src/halley_editor.h"
+	"src/preferences.h"
 
 	"src/console/console_window.h"
 

@@ -7,6 +7,7 @@ namespace Halley
 	class IPluginRegistry;
 	class ResourceLocator;
 	class Stage;
+	class Environment;
 
 	class Game
 	{
@@ -20,7 +21,7 @@ namespace Halley
 		virtual String getDataPath() const = 0;
 		virtual bool isDevBuild() const = 0;
 
-		virtual void init(HalleyAPI*) {}
+		virtual void init(HalleyAPI*, const Environment&, const Vector<String>& /*args*/) {}
 		virtual void deInit() {}
 
 		virtual std::unique_ptr<Stage> makeStage(StageID id) = 0;

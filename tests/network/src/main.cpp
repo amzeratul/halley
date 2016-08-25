@@ -56,7 +56,7 @@ public:
 		return true;
 	}
 
-	void init(HalleyAPI* api) override
+	void init(HalleyAPI* api, const Environment& environment, const Vector<String>& args) override
 	{
 		api->video->setWindow(Window(WindowType::Window, api->video->getCenteredWindow(Vector2i(1280, 720), 0), Vector2i(1280, 720), getName()), false);
 	}
