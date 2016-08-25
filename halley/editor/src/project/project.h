@@ -1,5 +1,6 @@
 #pragma once
 
+#include "prec.h"
 #include <boost/filesystem.hpp>
 
 namespace Halley

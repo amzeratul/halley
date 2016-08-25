@@ -1,5 +1,7 @@
 #pragma once
 
+#include "prec.h"
+
 namespace Halley
 {
 	class Preferences
