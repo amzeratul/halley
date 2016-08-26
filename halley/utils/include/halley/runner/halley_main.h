@@ -21,6 +21,7 @@ namespace Halley
 
 	class HalleyMain {
 	public:
+#ifdef _WIN32
 		template <typename T>
 		static int winMain()
 		{
@@ -36,6 +37,7 @@ namespace Halley
 			StaticGameLoader<T> reloader;
 			return runMain(reloader, args);
 		}
+#endif
 
 		template <typename T>
 		static int main(int argc, char* argv[])
