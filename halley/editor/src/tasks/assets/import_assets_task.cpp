@@ -13,6 +13,7 @@ ImportAssetsTask::ImportAssetsTask(Project& project, Vector<AssetToImport>&& fil
 
 void ImportAssetsTask::run()
 {
+	std::cout << "Importing...\n";
 	for (size_t i = 0; i < files.size(); ++i) {
 		if (isCancelled()) {
 			break;
@@ -20,6 +21,7 @@ void ImportAssetsTask::run()
 		setProgress(float(i) / float(files.size()), files[i].name.filename().string());
 
 		// TODO, just wasting time for now
+		std::cout << "* " << files[i].srcDir / files[i].name << " -> " << destinationFolder / files[i].name << std::endl;
 
 		using namespace std::chrono_literals;
 		std::this_thread::sleep_for(500ms);

@@ -60,7 +60,7 @@ bool HalleyEditor::isDevBuild() const
 void HalleyEditor::init(HalleyAPI* api, const Environment& environment, const Vector<String>& args)
 {
 	using boost::filesystem::path;
-	sharedAssetsPath = path(environment.getProgramPath().cppStr()).parent_path() / "assets_src";
+	sharedAssetsPath = path(environment.getProgramPath().cppStr()).parent_path().parent_path() / "assets_src";
 
 	preferences = std::make_unique<Preferences>((path(environment.getDataPath().cppStr()) / "settings.yaml").string());
 	preferences->load();
