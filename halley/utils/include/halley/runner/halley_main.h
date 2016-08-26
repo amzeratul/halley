@@ -7,12 +7,36 @@
 #include "main_loop.h"
 #include "entry_point.h"
 
+#ifdef _WIN32
+extern "C" {
+	__declspec(dllimport) wchar_t* __stdcall CommandLineToArgvW(wchar_t*, int*);
+	__declspec(dllimport) wchar_t* __stdcall GetCommandLineW();
+	__declspec(dllimport) void* __stdcall LocalFree(void*);
+}
+#endif
+
 namespace Halley
 {
 	class Game;
 
 	class HalleyMain {
 	public:
+		template <typename T>
+		static int winMain()
+		{
+			auto cmd = GetCommandLineW();
+			int argc;
+			auto argv = CommandLineToArgvW(cmd, &argc);
+			Vector<std::string> args;
+			for (int i = 0; i < argc; i++) {
+				args.push_back(String(reinterpret_cast<wchar_t**>(argv)[i]).cppStr());
+			}
+			LocalFree(argv);
+
+			StaticGameLoader<T> reloader;
+			return runMain(reloader, args);
+		}
+
 		template <typename T>
 		static int main(int argc, char* argv[])
 		{
@@ -62,7 +86,11 @@ namespace Halley
 
 // Macro to implement program
 #if defined(HALLEY_EXECUTABLE)
-	#define HalleyGame(T) int main(int argc, char* argv[]) { return Halley::HalleyMain::main<T>(argc, argv); }
+	#if defined(_WIN32)
+		#define HalleyGame(T) int __stdcall WinMain(void*, void*, char*, int) { return Halley::HalleyMain::winMain<T>(); }
+	#else
+		#define HalleyGame(T) int main(int argc, char* argv[]) { return Halley::HalleyMain::main<T>(argc, argv); }
+	#endif
 #elif defined(HALLEY_SHARED_LIBRARY)
 	#define HalleyGame(T) HALLEY_EXPORT IHalleyEntryPoint* getHalleyEntry() { static HalleyEntryPoint<T> entry; return &entry; }
 #endif

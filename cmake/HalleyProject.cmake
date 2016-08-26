@@ -110,7 +110,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		add_library(${name} SHARED ${proj_sources} ${proj_headers})
 		add_definitions(-DHALLEY_SHARED_LIBRARY)
 	else()
-		add_executable(${name} ${proj_sources} ${proj_headers})
+		add_executable(${name} WIN32 ${proj_sources} ${proj_headers})
 		add_definitions(-DHALLEY_EXECUTABLE)
 	endif()
 
