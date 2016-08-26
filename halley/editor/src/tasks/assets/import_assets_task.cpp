@@ -1,5 +1,6 @@
 #include "import_assets_task.h"
 #include "check_assets_task.h"
+#include <thread>
 
 using namespace Halley;
 
