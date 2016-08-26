@@ -21,7 +21,7 @@ void EditorTaskSet::update(Time time)
 		if (tasks[i].getStatus() == EditorTaskStatus::Done) {
 			auto newTasks = std::move(tasks[i].getContinuations());
 			for (auto& t : newTasks) {
-				tasks.emplace_back(std::move(t));
+				addTask(std::move(t));
 			}
 			tasks.erase(tasks.begin() + i);
 		} else {
@@ -33,4 +33,5 @@ void EditorTaskSet::update(Time time)
 void EditorTaskSet::addTask(EditorTaskAnchor&& task)
 {
 	tasks.emplace_back(std::move(task));
+	tasks.back().setId(nextId++);
 }

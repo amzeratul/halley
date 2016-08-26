@@ -68,6 +68,15 @@ bool Sprite::isInView(Rect4f v) const
 	return rect.overlaps(v);
 }
 
+Sprite& Sprite::setMaterial(Resources& resources, String materialName)
+{
+	if (materialName == "") {
+		materialName = "sprite.yaml";
+	}
+	setMaterial(std::make_shared<Material>(resources.get<MaterialDefinition>(materialName)));
+	return *this;
+}
+
 Sprite& Sprite::setImage(Resources& resources, String imageName, String materialName)
 {
 	if (materialName == "") {
@@ -179,5 +188,10 @@ Sprite& Sprite::setSprite(const SpriteSheetEntry& entry)
 		vertexAttrib.texRect = entry.coords;
 		vertexAttrib.rotation.y = entry.rotated ? 1.0f : 0.0f;
 	}
+	return *this;
+}
+
+Sprite Sprite::clone() const
+{
 	return *this;
 }

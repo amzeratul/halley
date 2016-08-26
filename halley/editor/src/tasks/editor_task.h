@@ -61,6 +61,9 @@ namespace Halley
 		bool isVisible() const;
 		void cancel();
 
+		int getId() const { return id; }
+		void setId(int value) { id = value; }
+
 		Vector<EditorTaskAnchor> getContinuations();
 
 	private:
@@ -71,5 +74,7 @@ namespace Halley
 		float timeToStart = 0;
 		float progress = 0;
 		String progressLabel;
+
+		int id = 0;
 	};
 }

@@ -6,6 +6,7 @@
 namespace Halley {
 	class HalleyEditor;
 	class ConsoleWindow;
+	class TaskBar;
 
 	class EditorRootStage final : public Stage
 	{
@@ -23,7 +24,9 @@ namespace Halley {
 		Sprite halleyLogo;
 		Sprite background;
 		std::unique_ptr<ConsoleWindow> console;
+		
 		std::unique_ptr<EditorTaskSet> tasks;
+		std::unique_ptr<TaskBar> taskBar;
 
 		void initSprites();
 	};

@@ -2,6 +2,7 @@
 #include "console/console_window.h"
 #include "tasks/assets/check_assets_task.h"
 #include "halley_editor.h"
+#include "ui/taskbar/taskbar.h"
 
 using namespace Halley;
 
@@ -18,6 +19,8 @@ EditorRootStage::~EditorRootStage()
 void EditorRootStage::init()
 {
 	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(editor.getProject())));
+	taskBar = std::make_unique<TaskBar>(getResources());
+
 	initSprites();
 	//console = std::make_unique<ConsoleWindow>(getResources());
 }
@@ -25,6 +28,7 @@ void EditorRootStage::init()
 void EditorRootStage::onVariableUpdate(Time time)
 {
 	tasks->update(time);
+	taskBar->update(tasks->getTasks(), time);
 
 	if (console) {
 		console->update(*getInputAPI().getKeyboard());
@@ -39,9 +43,13 @@ void EditorRootStage::onRender(RenderContext& context) const
 	{
 		auto view = Rect4f(painter.getViewPort());
 
+		// Background
 		Sprite bg = background;
 		bg.setTexRect(view).setSize(view.getSize()).draw(painter);
 		halleyLogo.draw(painter);
+
+		// Taskbar
+		taskBar->draw(painter);
 
 		if (console) {
 			console->draw(painter, Rect4f(view.getTopLeft() + Vector2f(64, 64), view.getBottomRight() - Vector2f(64, 64)));

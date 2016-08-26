@@ -13,19 +13,19 @@ ImportAssetsTask::ImportAssetsTask(Project& project, Vector<AssetToImport>&& fil
 
 void ImportAssetsTask::run()
 {
-	std::cout << "Importing...\n";
 	for (size_t i = 0; i < files.size(); ++i) {
 		if (isCancelled()) {
 			break;
 		}
-		setProgress(float(i) / float(files.size()), files[i].name.filename().string());
+		setProgress(float(i) / float(files.size()), "[" + String::integerToString(int(i) + 1) + "/" + String::integerToString(int(files.size())) + "] " + files[i].name.filename().string());
 
 		// TODO, just wasting time for now
-		std::cout << "* " << files[i].srcDir / files[i].name << " -> " << destinationFolder / files[i].name << std::endl;
+		//std::cout << "* " << files[i].srcDir / files[i].name << " -> " << destinationFolder / files[i].name << std::endl;
 
 		using namespace std::chrono_literals;
-		std::this_thread::sleep_for(500ms);
+		std::this_thread::sleep_for(100ms);
 	}
+	setProgress(1.0f, "");
 
 	addContinuation(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(project), 1.0f));
 }

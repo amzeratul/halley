@@ -11,8 +11,11 @@ namespace Halley
 		
 		void update(Time time);
 		void addTask(EditorTaskAnchor&& editorTaskAnchor);
+
+		const std::vector<EditorTaskAnchor>& getTasks() const { return tasks; }
 	
-		private:
+	private:
 		std::vector<EditorTaskAnchor> tasks;
+		int nextId = 0;
 	};
 }

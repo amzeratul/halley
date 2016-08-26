@@ -17,6 +17,8 @@ set (editor_sources
 	"src/tasks/editor_task_set.cpp"
 	"src/tasks/assets/check_assets_task.cpp"
 	"src/tasks/assets/import_assets_task.cpp"
+
+	"src/ui/taskbar/taskbar.cpp"
 	)
 
 set (editor_headers
@@ -33,6 +35,8 @@ set (editor_headers
 	"src/tasks/editor_task_set.h"
 	"src/tasks/assets/check_assets_task.h"
 	"src/tasks/assets/import_assets_task.h"
+
+	"src/ui/taskbar/taskbar.h"
 	)
 
 set (editor_gen_definitions
