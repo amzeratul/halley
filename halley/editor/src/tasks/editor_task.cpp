@@ -10,6 +10,11 @@ EditorTask::EditorTask(String name, bool isCancellable, bool isVisible)
 	, isVisible(isVisible)
 {}
 
+void EditorTask::addContinuation(EditorTaskAnchor&& task)
+{
+	continuations.emplace_back(std::move(task));
+}
+
 void EditorTask::setContinuations(Vector<EditorTaskAnchor>&& tasks)
 {
 	continuations = std::move(tasks);
@@ -27,18 +32,24 @@ bool EditorTask::isCancelled() const
 	return cancelled;
 }
 
-EditorTaskAnchor::EditorTaskAnchor(std::unique_ptr<EditorTask> task, float delay)
-	: task(std::move(task))
+EditorTaskAnchor::EditorTaskAnchor(std::unique_ptr<EditorTask> t, float delay)
+	: task(std::move(t))
 	, status(EditorTaskStatus::WaitingToStart)
-	, timeToStart(delay) {}
+	, timeToStart(delay)
+{
+	Expects(!!task);
+}
 
 EditorTaskAnchor::EditorTaskAnchor(EditorTaskAnchor&& other) = default;
 
 EditorTaskAnchor::~EditorTaskAnchor()
 {
-	// Wait for task to join
-	cancel();
-	while (status == EditorTaskStatus::Started && !taskFuture.hasValue()) {}
+	// If this has been moved, task will be null
+	if (task) {
+		// Wait for task to join
+		cancel();
+		while (status == EditorTaskStatus::Started && !taskFuture.hasValue()) {}
+	}
 }
 
 EditorTaskAnchor& EditorTaskAnchor::operator=(EditorTaskAnchor&& other) = default;
@@ -87,6 +98,9 @@ bool EditorTaskAnchor::isVisible() const
 
 void EditorTaskAnchor::cancel()
 {
+	if (status == EditorTaskStatus::WaitingToStart) {
+		status = EditorTaskStatus::Done;
+	}
 	if (task->isCancellable) {
 		task->cancelled = true;
 	}

@@ -3,16 +3,17 @@
 
 namespace Halley
 {
+	class Project;
+
 	class CheckAssetsTask : public EditorTask
 	{
 	public:
-		CheckAssetsTask(Vector<String>&& srcFolders, String dstFolder);
+		CheckAssetsTask(Project& project);
 
 	protected:
 		void run() override;
 
 	private:
-		Vector<String> srcFolders;
-		String dstFolder;
+		Project& project;
 	};
 }

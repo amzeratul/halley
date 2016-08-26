@@ -1,10 +1,13 @@
 #include "editor_root_stage.h"
 #include "console/console_window.h"
+#include "tasks/assets/check_assets_task.h"
+#include "halley_editor.h"
 
 using namespace Halley;
 
 EditorRootStage::EditorRootStage(HalleyEditor& editor)
 	: editor(editor)
+	, tasks(std::make_unique<EditorTaskSet>())
 {
 }
 
@@ -14,12 +17,15 @@ EditorRootStage::~EditorRootStage()
 
 void EditorRootStage::init()
 {
+	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(editor.getProject())));
 	initSprites();
 	//console = std::make_unique<ConsoleWindow>(getResources());
 }
 
 void EditorRootStage::onVariableUpdate(Time time)
 {
+	tasks->update(time);
+
 	if (console) {
 		console->update(*getInputAPI().getKeyboard());
 	}
@@ -71,19 +77,5 @@ void EditorRootStage::initSprites()
 		mat["u_smoothness"] = 0.1f;
 		mat["u_outline"] = 0.0f;
 		mat["u_outlineColour"] = col;
-	}
-}
-
-void EditorRootStage::updateTasks(Time time)
-{
-	for (size_t i = 0; i < tasks.size(); ) {
-		tasks[i].update(static_cast<float>(time));
-		if (tasks[i].getStatus() == EditorTaskStatus::Done) {
-			auto newTasks = std::move(tasks[i].getContinuations());
-			std::move(newTasks.begin(), newTasks.end(), tasks.end());
-			tasks.erase(tasks.begin() + i);
-		} else {
-			++i;
-		}
 	}
 }

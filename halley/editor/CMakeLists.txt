@@ -14,6 +14,7 @@ set (editor_sources
 	"src/project/project.cpp"
 
 	"src/tasks/editor_task.cpp"
+	"src/tasks/editor_task_set.cpp"
 	"src/tasks/assets/check_assets_task.cpp"
 	"src/tasks/assets/import_assets_task.cpp"
 	)
@@ -29,6 +30,7 @@ set (editor_headers
 	"src/project/project.h"
 
 	"src/tasks/editor_task.h"
+	"src/tasks/editor_task_set.h"
 	"src/tasks/assets/check_assets_task.h"
 	"src/tasks/assets/import_assets_task.h"
 	)

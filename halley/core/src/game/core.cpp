@@ -30,7 +30,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	environment = std::make_unique<Environment>();
 	if (_args.size() > 0) {
 		environment->parseProgramPath(_args[0]);
-		args.reserve(_args.size() - 1);
+		args.resize(_args.size() - 1);
 		std::copy(_args.begin() + 1, _args.end(), args.begin());
 	}
 	environment->setDataPath(game->getDataPath());

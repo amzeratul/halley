@@ -1,7 +1,7 @@
 #pragma once
 
 #include "prec.h"
-#include "tasks/editor_task.h"
+#include "tasks/editor_task_set.h"
 
 namespace Halley {
 	class HalleyEditor;
@@ -23,10 +23,8 @@ namespace Halley {
 		Sprite halleyLogo;
 		Sprite background;
 		std::unique_ptr<ConsoleWindow> console;
-
-		std::vector<EditorTaskAnchor> tasks;
+		std::unique_ptr<EditorTaskSet> tasks;
 
 		void initSprites();
-		void updateTasks(Time time);
 	};
 }

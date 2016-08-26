@@ -24,6 +24,7 @@ namespace Halley
 		EditorTask(String name, bool isCancellable, bool isVisible);
 
 		virtual void run() = 0;
+		void addContinuation(EditorTaskAnchor&& task);
 		void setContinuations(Vector<EditorTaskAnchor>&& tasks);
 		void setProgress(float progress, String label = "");
 		bool isCancelled() const;

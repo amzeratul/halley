@@ -5,13 +5,19 @@
 
 namespace Halley
 {
+	using Path = boost::filesystem::path;
+
 	class Project
 	{
 	public:
-		Project(boost::filesystem::path rootPath, boost::filesystem::path sharedAssetsPath);
-
+		Project(Path rootPath, Path sharedAssetsSrcPath);
+		
+		Path getAssetsPath() const;
+		Path getAssetsSrcPath() const;
+		Path getSharedAssetsSrcPath() const;
+	
 	private:
-		boost::filesystem::path rootPath;
-		boost::filesystem::path sharedAssetsPath;
+		Path rootPath;
+		Path sharedAssetsSrcPath;
 	};
 }
