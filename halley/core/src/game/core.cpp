@@ -37,7 +37,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 
 	// Console
 	if (game->isDevBuild()) {
-		//OS::get().createLogConsole(game->getName());
+		OS::get().createLogConsole(game->getName());
 	}
 
 	std::cout << ConsoleColour(Console::GREEN) << "Halley is initializing..." << ConsoleColour() << std::endl;

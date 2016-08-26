@@ -159,30 +159,26 @@ void Halley::OSWin32::createLogConsole(String winTitle)
 	AllocConsole();
 	SetConsoleTitle(winTitle.c_str());
 
-	int hConHandle;
-	intptr_t lStdHandle;
-	FILE *fp;
+	// From http://stackoverflow.com/a/25927081/546712
+	// Redirect the CRT standard input, output, and error handles to the console
+#pragma warning(push)
+#pragma warning(disable: 4996)
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
+#pragma warning(pop)
 
-	// redirect unbuffered STDOUT to the console
-	lStdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_OUTPUT_HANDLE));
-	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-	fp = _fdopen( hConHandle, "w" );
-	*stdout = *fp;
-	setvbuf( stdout, nullptr, _IONBF, 0 );
-
-	// redirect unbuffered STDIN to the console
-	lStdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_INPUT_HANDLE));
-	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-	fp = _fdopen( hConHandle, "r" );
-	*stdin = *fp;
-	setvbuf( stdin, nullptr, _IONBF, 0 );
-
-	// redirect unbuffered STDERR to the console
-	lStdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_ERROR_HANDLE));
-	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-	fp = _fdopen( hConHandle, "w" );
-	*stderr = *fp;
-	setvbuf( stderr, nullptr, _IONBF, 0 );
+	//Clear the error state for each of the C++ standard stream objects. We need to do this, as
+	//attempts to access the standard streams before they refer to a valid target will cause the
+	//iostream objects to enter an error state. In versions of Visual Studio after 2005, this seems
+	//to always occur during startup regardless of whether anything has been read from or written to
+	//the console or not.
+	std::wcout.clear();
+	std::cout.clear();
+	std::wcerr.clear();
+	std::cerr.clear();
+	std::wcin.clear();
+	std::cin.clear();
 
 	// Position console
 	MonitorInfo info;
