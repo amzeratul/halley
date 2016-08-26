@@ -73,3 +73,17 @@ void EditorRootStage::initSprites()
 		mat["u_outlineColour"] = col;
 	}
 }
+
+void EditorRootStage::updateTasks(Time time)
+{
+	for (size_t i = 0; i < tasks.size(); ) {
+		tasks[i].update(static_cast<float>(time));
+		if (tasks[i].getStatus() == EditorTaskStatus::Done) {
+			auto newTasks = std::move(tasks[i].getContinuations());
+			std::move(newTasks.begin(), newTasks.end(), tasks.end());
+			tasks.erase(tasks.begin() + i);
+		} else {
+			++i;
+		}
+	}
+}

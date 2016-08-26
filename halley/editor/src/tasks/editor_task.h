@@ -47,6 +47,8 @@ namespace Halley
 		EditorTaskAnchor(EditorTaskAnchor&& other);
 		~EditorTaskAnchor();
 
+		EditorTaskAnchor& operator=(EditorTaskAnchor&& other);
+
 		void update(float time);
 
 		EditorTaskStatus getStatus() const { return status; }

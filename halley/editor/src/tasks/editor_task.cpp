@@ -29,8 +29,8 @@ bool EditorTask::isCancelled() const
 
 EditorTaskAnchor::EditorTaskAnchor(std::unique_ptr<EditorTask> task, float delay)
 	: task(std::move(task))
-	, timeToStart(delay)
-{}
+	, status(EditorTaskStatus::WaitingToStart)
+	, timeToStart(delay) {}
 
 EditorTaskAnchor::EditorTaskAnchor(EditorTaskAnchor&& other) = default;
 
@@ -40,6 +40,8 @@ EditorTaskAnchor::~EditorTaskAnchor()
 	cancel();
 	while (status == EditorTaskStatus::Started && !taskFuture.hasValue()) {}
 }
+
+EditorTaskAnchor& EditorTaskAnchor::operator=(EditorTaskAnchor&& other) = default;
 
 void EditorTaskAnchor::update(float time)
 {
