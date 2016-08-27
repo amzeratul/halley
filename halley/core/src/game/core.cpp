@@ -35,10 +35,15 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	}
 	environment->setDataPath(game->getDataPath());
 
+	// Basic initialization
+	game->init(*environment, args);
+
 	// Console
-	if (game->isDevBuild()) {
+	if (game->shouldCreateSeparateConsole()) {
 		OS::get().createLogConsole(game->getName());
 	}
+	OS::get().initializeConsole();
+	setOutRedirect(false);
 
 	std::cout << ConsoleColour(Console::GREEN) << "Halley is initializing..." << ConsoleColour() << std::endl;
 
@@ -51,9 +56,6 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	clock_t curClock = clock();
 	int seed = static_cast<int>(curTime) ^ static_cast<int>(curClock) ^ 0x3F29AB51;
 	srand(seed);
-
-	// Redirect output
-	setOutRedirect(false);
 
 	// Info
 	std::cout << "Data path is " << ConsoleColour(Console::DARK_GREY) << environment->getDataPath() << ConsoleColour() << std::endl;
@@ -79,7 +81,9 @@ void Core::onSuspended()
 
 void Core::onReloaded()
 {
-	setOutRedirect(true);
+	if (game->shouldCreateSeparateConsole()) {
+		setOutRedirect(true);
+	}
 	statics.setup();
 
 	if (api->inputInternal) {
@@ -100,7 +104,6 @@ void Core::init()
 #endif
 
 	// Initialize game
-	game->init(*environment, args);
 	api = HalleyAPI::create(this, game->initPlugins(*this));
 
 	// Resources

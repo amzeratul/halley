@@ -21,6 +21,7 @@ namespace Halley
 		virtual String getName() const = 0;
 		virtual String getDataPath() const = 0;
 		virtual bool isDevBuild() const = 0;
+		virtual bool shouldCreateSeparateConsole() const { return isDevBuild(); }
 
 		virtual std::unique_ptr<Stage> startGame(HalleyAPI*) = 0;
 		virtual void endGame() {}

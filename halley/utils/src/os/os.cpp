@@ -60,6 +60,10 @@ void Halley::OS::createLogConsole(String /*name*/)
 {
 }
 
+void OS::initializeConsole()
+{
+}
+
 Halley::ComputerData Halley::OS::getComputerData()
 {
 	return ComputerData();

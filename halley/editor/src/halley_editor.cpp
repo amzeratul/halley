@@ -46,6 +46,11 @@ bool HalleyEditor::isDevBuild() const
 	return true;
 }
 
+bool HalleyEditor::shouldCreateSeparateConsole() const
+{
+	return !headless && isDevBuild();
+}
+
 void HalleyEditor::init(const Environment& environment, const Vector<String>& args)
 {
 	using boost::filesystem::path;

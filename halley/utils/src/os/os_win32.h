@@ -34,6 +34,7 @@ namespace Halley {
 		~OSWin32();
 
 		void createLogConsole(String name) override;
+		void initializeConsole() override;
 
 		ComputerData getComputerData() override;
 		String getUserDataDir() override;

@@ -42,6 +42,7 @@ namespace Halley {
 		static OS* createOS();
 
 		virtual void createLogConsole(String name);
+		virtual void initializeConsole();
 
 		virtual ComputerData getComputerData();
 		virtual String getUserDataDir()=0;

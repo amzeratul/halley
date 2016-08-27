@@ -159,6 +159,23 @@ void Halley::OSWin32::createLogConsole(String winTitle)
 	AllocConsole();
 	SetConsoleTitle(winTitle.c_str());
 
+	// Position console
+	MonitorInfo info;
+	info.n = 0;
+	EnumDisplayMonitors(nullptr, nullptr, onMonitorInfo, LPARAM(&info));
+	if (info.n > 1) {
+		HWND con = GetConsoleWindow();
+		RECT rect;
+		GetWindowRect(con, &rect);
+		int w = rect.right - rect.left;
+		int h = info.h;
+		//MoveWindow(con, (info.w - w)/2 + info.x, (info.h - h)/2 + info.h, w, h, true);
+		SetWindowPos(con, HWND_TOP, (info.w - w)/2 + info.x, (info.h - h)/2 + info.y, w, h, 0);
+	}
+}
+
+void OSWin32::initializeConsole()
+{
 	// From http://stackoverflow.com/a/25927081/546712
 	// Redirect the CRT standard input, output, and error handles to the console
 #pragma warning(push)
@@ -179,20 +196,6 @@ void Halley::OSWin32::createLogConsole(String winTitle)
 	std::cerr.clear();
 	std::wcin.clear();
 	std::cin.clear();
-
-	// Position console
-	MonitorInfo info;
-	info.n = 0;
-	EnumDisplayMonitors(nullptr, nullptr, onMonitorInfo, LPARAM(&info));
-	if (info.n > 1) {
-		HWND con = GetConsoleWindow();
-		RECT rect;
-		GetWindowRect(con, &rect);
-		int w = rect.right - rect.left;
-		int h = info.h;
-		//MoveWindow(con, (info.w - w)/2 + info.x, (info.h - h)/2 + info.h, w, h, true);
-		SetWindowPos(con, HWND_TOP, (info.w - w)/2 + info.x, (info.h - h)/2 + info.y, w, h, 0);
-	}
 }
 
 Halley::ComputerData Halley::OSWin32::getComputerData()
