@@ -1,4 +1,4 @@
-#include "font_face.h"
+#include "halley/tools/make_font/font_face.h"
 #include <ft2build.h>
 #include <halley/text/halleystring.h>
 #include <memory>
