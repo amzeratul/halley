@@ -22,7 +22,7 @@ void EditorRootStage::init()
 	taskBar = std::make_unique<TaskBar>(getResources());
 
 	initSprites();
-	//console = std::make_unique<ConsoleWindow>(getResources());
+	console = std::make_unique<ConsoleWindow>(getResources());
 }
 
 void EditorRootStage::onVariableUpdate(Time time)
@@ -52,7 +52,7 @@ void EditorRootStage::onRender(RenderContext& context) const
 		taskBar->draw(painter);
 
 		if (console) {
-			console->draw(painter, Rect4f(view.getTopLeft() + Vector2f(64, 64), view.getBottomRight() - Vector2f(64, 64)));
+			console->draw(painter, Rect4f(view.getTopLeft() + Vector2f(16, 16), view.getBottomRight() - Vector2f(16, 80)));
 		}
 	});
 }

@@ -14,7 +14,7 @@ ConsoleWindow::ConsoleWindow(Resources& resources)
 	mat["tex0"] = resources.get<Texture>("round_rect.png");
 	mat["u_smoothness"] = 0.1f;
 	mat["u_outline"] = 0.5f;
-	mat["u_outlineColour"] = Colour(0.13f, 0.56f, 1.00f);
+	mat["u_outlineColour"] = Colour(0.47f, 0.47f, 0.47f);
 
 	font = resources.get<Font>("consolas.yaml");
 
@@ -50,13 +50,13 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 		.setColour(Colour4f(0.0f, 0.0f, 0.0f, 0.4f))
 		.drawSliced(painter, Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
 
-	const float size = 16;
+	const float size = 14;
 	float lineH = font->getLineHeightAtSize(size);
 	int nLines = int(innerBounds.getHeight() / lineH) - 1;
 	Vector2f cursor = innerBounds.getBottomLeft();
 
 	TextRenderer text;
-	text.setFont(font).setSize(size).setOffset(Vector2f(0, 1)).setColour(Colour(0.13f, 0.56f, 1.00f));
+	text.setFont(font).setSize(size).setOffset(Vector2f(0, 1)).setColour(Colour(1, 1, 1));
 
 	// Draw command
 	text.setText("> " + input).draw(painter, cursor);
