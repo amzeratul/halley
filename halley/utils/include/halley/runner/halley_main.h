@@ -52,11 +52,12 @@ namespace Halley
 
 		static int runMain(GameLoader& loader, const Vector<std::string>& args)
 		{
+			std::unique_ptr<Core> core;
 			try {
-				Core core(loader.createGame(), args);
-				loader.setCore(core);
-				core.init();
-				MainLoop loop(core, loader);
+				core = std::make_unique<Core>(loader.createGame(), args);
+				loader.setCore(*core);
+				core->init();
+				MainLoop loop(*core, loader);
 				loop.run();
 				return 0;
 			}

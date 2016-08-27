@@ -11,16 +11,15 @@ using namespace Halley;
 // Replacement for Halley::runMain
 static int runMain(DynamicGameLoader& loader, Vector<std::string> args)
 {
+	std::unique_ptr<IMainLoopable> core;
 	try {
-		//Core core(loader.createGame(), args);
-		std::unique_ptr<IMainLoopable> core = loader.createCore(args);
+		core = loader.createCore(args);
 
 		loader.setCore(*core);
 		MainLoop loop(*core, loader);
 		loop.run();
 		
 		std::cout << "Main loop terminated normally." << std::endl;
-		core.reset();
 		return 0;
 	} catch (std::exception& e) {
 		std::cout << ConsoleColour(Console::RED) << "\n\nUnhandled exception: " << ConsoleColour(Console::DARK_RED) << e.what() << ConsoleColour() << std::endl;
