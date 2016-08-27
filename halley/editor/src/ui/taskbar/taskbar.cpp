@@ -83,7 +83,7 @@ void TaskBar::update(const std::vector<EditorTaskAnchor>& taskData, Time time)
 	}
 
 	// Update bar size
-	displaySize = lerp(displaySize, float(tasks.size()), 6 * time);
+	displaySize = lerp(displaySize, float(tasks.size()), static_cast<float>(6 * time));
 }
 
 void TaskBar::draw(Painter& painter)
@@ -92,7 +92,7 @@ void TaskBar::draw(Painter& painter)
 	auto view = painter.getViewPort();
 	Vector2f anchor = Vector2f(view.getBottomLeft());
 	Vector2f baseDrawPos = anchor + Vector2f(150, -72);
-	Vector2f size = Vector2f(200, 40);
+	Vector2f size = Vector2f(std::min(400.0f, (view.getWidth() - baseDrawPos.x - 150) / std::max(1.0f, displaySize)), 40);
 	float totalLen = baseDrawPos.x + (displaySize * size.x) + 10.0f;
 
 	// Draw logo
