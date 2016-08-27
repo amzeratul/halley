@@ -81,36 +81,40 @@ void TaskBar::update(const std::vector<EditorTaskAnchor>& taskData, Time time)
 		}
 		++i;
 	}
+
+	// Update bar size
+	displaySize = lerp(displaySize, float(tasks.size()), 6 * time);
 }
 
 void TaskBar::draw(Painter& painter)
 {
-	if (tasks.empty()) {
-		// Nothing to do here!
-		return;
-	}
-
 	// Setup for tasks
 	auto view = painter.getViewPort();
 	Vector2f anchor = Vector2f(view.getBottomLeft());
 	Vector2f baseDrawPos = anchor + Vector2f(150, -72);
 	Vector2f size = Vector2f(200, 40);
-	float totalLen = baseDrawPos.x + size.x + 510.0f;
-
-	// Setup text renderer
-	TextRenderer text;
-	text.setFont(font).setOffset(Vector2f(0, 0)).setColour(Colour(1, 1, 1)).setOutline(1.0f).setOutlineColour(Colour(0, 0, 0, 0.35f));
+	float totalLen = baseDrawPos.x + (displaySize * size.x) + 10.0f;
 
 	// Draw logo
 	barSolid.setScale(Vector2f(totalLen, 32)).setPos(anchor + Vector2f(0, -56)).draw(painter);
 	barFade.setPos(anchor + Vector2f(totalLen, -56)).draw(painter);
 	halleyLogo.setPos(anchor + Vector2f(80, -41)).draw(painter);
 
+	if (tasks.empty()) {
+		// Nothing to do here!
+		return;
+	}
+
+	// Setup text renderer
+	TextRenderer text;
+	text.setFont(font).setOffset(Vector2f(0, 0)).setColour(Colour(1, 1, 1)).setOutline(1.0f).setOutlineColour(Colour(0, 0, 0, 0.35f));
+
 	// Draw tasks
 	for (auto& t : tasks) {
 		Vector2f drawPos = baseDrawPos + Vector2f((size.x + 20) * t.displaySlot, 0);
 
-		Colour col = t.progress > 0.9999f ? Colour(0.16f, 0.69f, 0.34f) : Colour(0.96f, 0.78f, 0.0f);
+		//Colour col = t.progress > 0.9999f ? Colour(0.16f, 0.69f, 0.34f) : Colour(0.96f, 0.78f, 0.0f);
+		Colour col = t.progress > 0.9999f ? Colour(0.16f, 0.69f, 0.34f) : Colour(0.18f, 0.53f, 0.87f);
 		(*t.material)["u_outlineColour"] = col;
 
 		// Background

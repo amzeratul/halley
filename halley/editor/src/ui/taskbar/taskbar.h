@@ -36,6 +36,8 @@ namespace Halley
 
 		std::vector<TaskDisplay> tasks;
 
+		float displaySize = 0;
+
 		TaskDisplay& getDisplayForId(int id);
 	};
 }

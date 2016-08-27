@@ -17,7 +17,8 @@ void ImportAssetsTask::run()
 		if (isCancelled()) {
 			break;
 		}
-		setProgress(float(i) / float(files.size()), "[" + String::integerToString(int(i) + 1) + "/" + String::integerToString(int(files.size())) + "] " + files[i].name.filename().string());
+		//setProgress(float(i) / float(files.size()), "[" + String::integerToString(int(i) + 1) + "/" + String::integerToString(int(files.size())) + "] " + files[i].name.filename().string());
+		setProgress(float(i) / float(files.size()), files[i].name.filename().string());
 
 		// TODO, just wasting time for now
 		//std::cout << "* " << files[i].srcDir / files[i].name << " -> " << destinationFolder / files[i].name << std::endl;
