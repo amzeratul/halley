@@ -1,6 +1,8 @@
 #include <cstring>
 #include <string>
 #include "halley/file_formats/serializer.h"
+#include "halley/text/halleystring.h"
+
 using namespace Halley;
 
 #ifndef _MSC_VER
@@ -10,182 +12,54 @@ void memcpy_s(void* dst, size_t size, const void* src, size_t)
 }
 #endif
 
-Serializer::Serializer(Bytes& _data)
-	: data(_data)
-{
-}
+Serializer::Serializer()
+	: dryRun(true)
+{}
+
+Serializer::Serializer(gsl::span<gsl::byte> dst)
+	: dryRun(false)
+{}
 
 Serializer& Serializer::operator<<(const std::string& str)
 {
 	size_t sz = str.size();
 	*this << sz;
-	size_t pos = data.size();
-	increaseBy(sz);
-	memcpy_s(data.data() + pos, sz, str.data(), sz);
+	*this << gsl::as_bytes(gsl::span<const char>(str.data(), sz));
 	return *this;
 }
 
-Serializer& Serializer::operator<<(long long val)
+Serializer& Serializer::operator<<(const String& str)
 {
-	size_t pos = data.size();
-	increaseBy(8);
-	*(reinterpret_cast<long long*>(data.data() + pos)) = val;
-	return *this;
+	return (*this << str.cppStr());
 }
 
-Serializer& Serializer::operator<<(short val)
+Serializer& Serializer::operator<<(gsl::span<const gsl::byte> span)
 {
-	size_t pos = data.size();
-	increaseBy(2);
-	*(reinterpret_cast<short*>(data.data() + pos)) = val;
-	return *this;
-}
-
-Serializer& Serializer::operator<<(int val)
-{
-	size_t pos = data.size();
-	increaseBy(4);
-	*(reinterpret_cast<int*>(data.data() + pos)) = val;
-	return *this;
-}
-
-Serializer& Serializer::operator<<(size_t val)
-{
-	size_t pos = data.size();
-	increaseBy(4);
-	*(reinterpret_cast<size_t*>(data.data() + pos)) = val;
-	return *this;
-}
-
-Serializer& Serializer::operator<<(char val)
-{
-	size_t pos = data.size();
-	increaseBy(1);
-	*(reinterpret_cast<char*>(data.data() + pos)) = val;
-	return *this;
-}
-
-Serializer& Serializer::operator<<(bool val)
-{
-	size_t pos = data.size();
-	increaseBy(1);
-	*(reinterpret_cast<bool*>(data.data() + pos)) = val;
-	return *this;
-}
-
-Serializer& Serializer::operator<<(Bytes& val)
-{
-	short sz = short(val.size());
-	*this << sz;
-
-	size_t pos = data.size();
-	increaseBy(sz);
-	memcpy_s(data.data() + pos, sz, val.data(), sz);
-
-	return *this;
-}
-
-Serializer& Serializer::operator<<(float val)
-{
-	size_t pos = data.size();
-	increaseBy(4);
-	*(reinterpret_cast<float*>(data.data() + pos)) = val;
-	return *this;
-}
-
-void Serializer::increaseBy(size_t n)
-{
-	size_t target = data.size() + n;
-	if (target > data.capacity()) {
-		data.reserve(std::max(target, data.capacity() * 2));
+	if (!dryRun) {
+		memcpy(dst.data() + size, span.data(), span.size_bytes());
 	}
-	data.resize(target);
+	size += span.size_bytes();
+	return *this;
 }
 
-Deserializer::Deserializer(Bytes& _data)
-	: data(_data)
-	, pos(0)
+Deserializer::Deserializer(gsl::span<const gsl::byte> src)
+	: pos(0)
+	, src(src)
 {
-
 }
 
 Deserializer& Deserializer::operator>>(std::string& str)
 {
 	size_t sz;
 	*this >> sz;
-	str = std::string(reinterpret_cast<const char*>(data.data() + pos), sz);
+	str = std::string(reinterpret_cast<const char*>(src.data() + pos), sz);
 	pos += sz;
 	return *this;
 }
 
-Deserializer& Deserializer::operator>>(short& val)
+Deserializer& Deserializer::operator>>(gsl::span<gsl::byte>& span)
 {
-	val = *(reinterpret_cast<short*>(data.data() + pos));
-	pos += 2;
+	memcpy(span.data(), src.data() + pos, span.size_bytes());
+	pos += span.size_bytes();
 	return *this;
 }
-
-Deserializer& Deserializer::operator>>(int& val)
-{
-	val = *(reinterpret_cast<int*>(data.data() + pos));
-	pos += 4;
-	return *this;
-}
-
-Deserializer& Deserializer::operator>>(size_t& val)
-{
-	val = *(reinterpret_cast<size_t*>(data.data() + pos));
-	pos += 4;
-	return *this;
-}
-
-Deserializer& Deserializer::operator>>(long long& val)
-{
-	val = *(reinterpret_cast<long long*>(data.data() + pos));
-	pos += 8;
-	return *this;
-}
-
-Deserializer& Deserializer::operator>>(bool& val)
-{
-	val = *(reinterpret_cast<bool*>(data.data() + pos));
-	pos += 1;
-	return *this;
-}
-
-Deserializer& Deserializer::operator>>(char& val)
-{
-	val = *(reinterpret_cast<char*>(data.data() + pos));
-	pos += 1;
-	return *this;
-}
-
-Deserializer& Deserializer::operator>>(Bytes& val)
-{
-	short sz;
-	*this >> sz;
-
-	val.resize(sz);
-	memcpy_s(val.data(), sz, data.data() + pos, sz);
-	pos += sz;
-
-	return *this;
-}
-
-Deserializer& Deserializer::operator>>(float& val)
-{
-	val = *(reinterpret_cast<float*>(data.data() + pos));
-	pos += 4;
-	return *this;
-}
-
-void Deserializer::discard(size_t n)
-{
-	pos += n;
-}
-
-char Halley::Deserializer::peekChar() const
-{
-	return *(reinterpret_cast<const char*>(data.data() + pos));
-}
-

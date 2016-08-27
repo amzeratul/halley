@@ -7,6 +7,9 @@
 
 namespace Halley
 {
+	class Deserializer;
+	class Serializer;
+
 	class Font : public Resource
 	{
 	public:
@@ -24,6 +27,9 @@ namespace Halley
 			Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance);
 
 			Glyph& operator=(const Glyph& o) = default;
+
+			void serialize(Serializer& serializer) const;
+			void deserialize(Deserializer& deserializer);
 		};
 
 		explicit Font(ResourceLoader& loader);
@@ -38,6 +44,9 @@ namespace Halley
 		String getName() const { return name; }
 
 		std::shared_ptr<const Material> getMaterial() const;
+
+		void serialize(Serializer& serializer) const;
+		void deserialize(Deserializer& deserializer);
 
 	private:
 		String name;

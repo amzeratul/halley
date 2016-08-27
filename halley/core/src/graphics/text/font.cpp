@@ -3,6 +3,7 @@
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/material/material_parameter.h"
 #include "halley/core/api/halley_api.h"
+#include "halley/file_formats/serializer.h"
 #include "resources/resources.h"
 #include <yaml-cpp/yaml.h>
 
@@ -16,6 +17,16 @@ Font::Glyph::Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontal
 	, verticalBearing(verticalBearing)
 	, advance(advance)
 {
+}
+
+void Font::Glyph::serialize(Serializer& serializer) const
+{
+	// TODO
+}
+
+void Font::Glyph::deserialize(Deserializer& deserializer)
+{
+	// TODO
 }
 
 Font::Font(ResourceLoader& loader)
@@ -72,4 +83,19 @@ const Font::Glyph& Font::getGlyph(int code) const
 std::shared_ptr<const Material> Font::getMaterial() const
 {
 	return material;
+}
+
+void Font::serialize(Serializer& s) const
+{
+	s << name;
+	s << ascender;
+	s << height;
+	s << sizePt;
+	s << smoothRadius;
+	s << glyphs;
+}
+
+void Font::deserialize(Deserializer& s)
+{
+	
 }
