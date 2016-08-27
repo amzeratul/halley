@@ -12,17 +12,19 @@ namespace Halley
 	public:
 		Path name;
 		Path srcDir;
+		time_t fileTime;
 
-		AssetToImport(Path name, Path srcDir)
+		AssetToImport(Path name, Path srcDir, time_t time)
 			: name(name)
 			, srcDir(srcDir)
+			, fileTime(time)
 		{}
 	};
 
 	class ImportAssetsTask : public EditorTask
 	{
 	public:
-		ImportAssetsTask(Project& project, Vector<AssetToImport>&& files, Path destinationFolder);
+		ImportAssetsTask(Project& project, Vector<AssetToImport>&& files);
 
 	protected:
 		void run() override;
@@ -30,6 +32,5 @@ namespace Halley
 	private:
 		Project& project;
 		Vector<AssetToImport> files;
-		Path destinationFolder;
 	};
 }
