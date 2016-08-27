@@ -1,7 +1,7 @@
 #pragma once
 
 #include "prec.h"
-#include "tasks/editor_task_set.h"
+#include "halley/tools/tasks/editor_task_set.h"
 
 namespace Halley {
 	class HalleyEditor;

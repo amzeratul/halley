@@ -1,5 +1,5 @@
 #pragma once
-#include "../editor_task.h"
+#include "halley/tools/tasks/editor_task.h"
 #include <boost/filesystem.hpp>
 #include <map>
 #include <functional>

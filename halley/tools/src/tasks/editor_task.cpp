@@ -1,4 +1,8 @@
-#include "editor_task.h"
+#include "halley/tools/tasks/editor_task.h"
+#include "halley/text/halleystring.h"
+#include <mutex>
+#include <gsl/gsl_assert>
+#include "halley/concurrency/concurrent.h"
 
 using namespace Halley;
 

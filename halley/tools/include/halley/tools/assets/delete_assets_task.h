@@ -1,6 +1,7 @@
 #pragma once
-#include "src/tasks/editor_task.h"
+#include "../tasks/editor_task.h"
 #include <boost/filesystem/path.hpp>
+#include "halley/data_structures/vector.h"
 
 namespace Halley {
 	class Project;

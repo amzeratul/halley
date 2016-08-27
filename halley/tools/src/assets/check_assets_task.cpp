@@ -1,9 +1,9 @@
-#include "check_assets_task.h"
-#include "import_assets_task.h"
-#include "../../project/project.h"
 #include <unordered_set>
-#include "import_assets_database.h"
-#include "delete_assets_task.h"
+#include "halley/tools/assets/check_assets_task.h"
+#include "halley/tools/assets/import_assets_task.h"
+#include "halley/tools/project/project.h"
+#include "halley/tools/assets/import_assets_database.h"
+#include "halley/tools/assets/delete_assets_task.h"
 
 using namespace Halley;
 

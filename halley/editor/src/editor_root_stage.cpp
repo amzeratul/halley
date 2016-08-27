@@ -1,8 +1,8 @@
 #include "editor_root_stage.h"
 #include "console/console_window.h"
-#include "tasks/assets/check_assets_task.h"
 #include "halley_editor.h"
 #include "ui/taskbar/taskbar.h"
+#include "halley/tools/assets/check_assets_task.h"
 
 using namespace Halley;
 

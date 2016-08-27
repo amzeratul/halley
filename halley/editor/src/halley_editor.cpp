@@ -1,6 +1,6 @@
 #include "halley_editor.h"
 #include "editor_root_stage.h"
-#include "project/project.h"
+#include "halley/tools/project/project.h"
 #include "preferences.h"
 #include "halley/core/game/environment.h"
 

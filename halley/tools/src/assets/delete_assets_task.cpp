@@ -1,6 +1,6 @@
-#include "delete_assets_task.h"
-#include "src/project/project.h"
-#include "import_assets_database.h"
+#include "halley/tools/assets/delete_assets_task.h"
+#include "halley/tools/project/project.h"
+#include "halley/tools/assets/import_assets_database.h"
 
 using namespace Halley;
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "../editor_task.h"
+#include "../tasks/editor_task.h"
 
 namespace Halley
 {

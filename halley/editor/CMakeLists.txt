@@ -11,15 +11,6 @@ set (editor_sources
 
 	"src/console/console_window.cpp"
 
-	"src/project/project.cpp"
-
-	"src/tasks/editor_task.cpp"
-	"src/tasks/editor_task_set.cpp"
-	"src/tasks/assets/check_assets_task.cpp"
-	"src/tasks/assets/delete_assets_task.cpp"
-	"src/tasks/assets/import_assets_task.cpp"
-	"src/tasks/assets/import_assets_database.cpp"
-
 	"src/ui/taskbar/taskbar.cpp"
 	)
 
@@ -31,15 +22,6 @@ set (editor_headers
 
 	"src/console/console_window.h"
 
-	"src/project/project.h"
-
-	"src/tasks/editor_task.h"
-	"src/tasks/editor_task_set.h"
-	"src/tasks/assets/check_assets_task.h"
-	"src/tasks/assets/delete_assets_task.h"
-	"src/tasks/assets/import_assets_task.h"
-	"src/tasks/assets/import_assets_database.h"
-
 	"src/ui/taskbar/taskbar.h"
 	)
 
@@ -47,4 +29,20 @@ set (editor_gen_definitions
 	"gen_src/editor.yaml"
 	)
 
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(EXTRA_LIBS bz2 z)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    set(EXTRA_LIBS pthread)
+endif()
+
+include_directories(${FREETYPE_INCLUDE_DIR} "../tools/include")
+
 halleyProject(halley-editor "${editor_sources}" "${editor_headers}" "${editor_gen_definitions}" ${CMAKE_HOME_DIRECTORY}/bin)
+
+target_link_libraries (halley-editor
+        halley-tools
+        ${FREETYPE_LIBRARIES}
+        ${EXTRA_LIBS}
+        )
+

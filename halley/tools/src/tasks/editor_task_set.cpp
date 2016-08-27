@@ -1,4 +1,4 @@
-#include "editor_task_set.h"
+#include "halley/tools/tasks/editor_task_set.h"
 
 using namespace Halley;
 

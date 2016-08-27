@@ -1,6 +1,11 @@
 #pragma once
 
-#include "prec.h"
+#include <mutex>
+#include <atomic>
+
+#include "halley/data_structures/vector.h"
+#include "halley/text/halleystring.h"
+#include "halley/concurrency/future.h"
 
 namespace Halley
 {

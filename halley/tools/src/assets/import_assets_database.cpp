@@ -1,4 +1,4 @@
-#include "import_assets_database.h"
+#include "halley/tools/assets/import_assets_database.h"
 
 using namespace Halley;
 

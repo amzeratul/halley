@@ -1,8 +1,8 @@
-#include "import_assets_task.h"
-#include "check_assets_task.h"
 #include <thread>
-#include "src/project/project.h"
-#include "import_assets_database.h"
+#include "halley/tools/assets/import_assets_task.h"
+#include "halley/tools/assets/check_assets_task.h"
+#include "halley/tools/project/project.h"
+#include "halley/tools/assets/import_assets_database.h"
 
 using namespace Halley;
 
