@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/filesystem.hpp>
+#include <map>
 
 namespace Halley
 {
