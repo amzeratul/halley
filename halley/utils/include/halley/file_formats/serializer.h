@@ -16,14 +16,20 @@ namespace Halley {
 		explicit Serializer(gsl::span<gsl::byte> dst);
 
 		template <typename T>
-		static Bytes toBytes(const T& value)
+		static typename std::enable_if<std::is_convertible<T, std::function<void(Serializer&)>>::value, Bytes>::type toBytes(const T& f)
 		{
 			Serializer dry;
-			value.serialize(dry);
+			f(dry);
 			Bytes result(dry.getSize());
 			Serializer s(gsl::as_writeable_bytes(gsl::span<Halley::Byte>(result)));
-			value.serialize(dry);
+			f(s);
 			return result;
+		}
+
+		template <typename T>
+		static typename std::enable_if<!std::is_convertible<T, std::function<void(Serializer&)>>::value, Bytes>::type toBytes(const T& value)
+		{
+			return toBytes([&value](Serializer& s) { value.serialize(s); });
 		}
 
 		size_t getSize() const { return size; }
@@ -58,11 +64,9 @@ namespace Halley {
 		template <typename T, typename U>
 		Serializer& operator<<(const FlatMap<T, U>& val)
 		{
-			unsigned int sz = static_cast<unsigned int>(val.size());
-			*this << sz;
+			*this << static_cast<unsigned int>(val.size());
 			for (auto& kv : val) {
-				*this << kv.first;
-				*this << kv.second;
+				*this << kv.first << kv.second;
 			}
 			return *this;
 		}
@@ -70,17 +74,13 @@ namespace Halley {
 		template <typename T>
 		Serializer& operator<<(const Vector2D<T>& val)
 		{
-			*this << val.x;
-			*this << val.y;
-			return *this;
+			return *this << val.x << val.y;
 		}
 
 		template <typename T>
 		Serializer& operator<<(const Rect2D<T>& val)
 		{
-			*this << val.getTopLeft();
-			*this << val.getBottomRight();
-			return *this;
+			return *this << val.getTopLeft() << val.getBottomRight();
 		}
 
 		template <typename T>

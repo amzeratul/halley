@@ -35,7 +35,7 @@ TaskBar::TaskBar(Resources& resources)
 		barFade = Sprite().setImage(resources, "fade_right.png").setColour(col);
 	}
 
-	font = resources.get<Font>("ubuntub.yaml");
+	font = resources.get<Font>("ubuntub.font");
 }
 
 void TaskBar::update(const std::vector<EditorTaskAnchor>& taskData, Time time)

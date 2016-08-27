@@ -29,7 +29,6 @@ namespace Halley
 
 			Glyph& operator=(const Glyph& o) = default;
 
-			void serialize(Serializer& serializer) const;
 			void deserialize(Deserializer& deserializer);
 		};
 
@@ -46,11 +45,11 @@ namespace Halley
 
 		std::shared_ptr<const Material> getMaterial() const;
 
-		void serialize(Serializer& serializer) const;
 		void deserialize(Deserializer& deserializer);
 
 	private:
 		String name;
+		String imageName;
 		float ascender;
 		float height;
 		float sizePt;

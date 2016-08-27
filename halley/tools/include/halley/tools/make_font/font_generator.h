@@ -27,7 +27,7 @@ namespace Halley
 		void generateFont(Path fontFile, Path result, Vector2i size, float radius, int supersample, Range<int> range);
 
 	private:
-		void generateFontMap(String imgName, FontFace& font, Vector<CharcodeEntry>& entries, Path outPath, float scale, float radius) const;
+		void generateFontMapBinary(String imgName, FontFace& font, Vector<CharcodeEntry>& entries, Path outPath, float scale, float radius, Vector2i imageSize) const;
 		void generateTextureMeta(Path destination);
 	};
 }

@@ -25,6 +25,7 @@ This file is subject to the terms of halley_license.txt.
 #include <memory>
 #include <functional>
 #include <halley/concurrency/future.h>
+#include <gsl/gsl>
 
 struct SDL_RWops;
 
@@ -58,6 +59,7 @@ namespace Halley {
 
 		void* getData();
 		const void* getData() const;
+		gsl::span<const gsl::byte> getSpan() const;
 		size_t getSize() const;
 		String getString() const;
 

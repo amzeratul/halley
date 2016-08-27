@@ -16,7 +16,7 @@ ConsoleWindow::ConsoleWindow(Resources& resources)
 	mat["u_outline"] = 0.5f;
 	mat["u_outlineColour"] = Colour(0.47f, 0.47f, 0.47f);
 
-	font = resources.get<Font>("consolas.yaml");
+	font = resources.get<Font>("consolas.font");
 
 	buffer.push_back("Halley Engine Editor.");
 	buffer.push_back("Hello world!");

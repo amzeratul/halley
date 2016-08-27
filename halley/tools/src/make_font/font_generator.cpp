@@ -6,6 +6,7 @@
 #include <halley/data_structures/bin_pack.h>
 #include <halley/file_formats/image.h>
 #include <future>
+#include "halley/file_formats/serializer.h"
 
 using namespace Halley;
 
@@ -124,6 +125,7 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 			}));
 		}
 	}
+	std::sort(codes.begin(), codes.end(), [](const CharcodeEntry& a, const CharcodeEntry& b) { return a.charcode < b.charcode; });
 
 	for (auto& f : futures) {
 		f.get();
@@ -135,65 +137,56 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 	Path imgName = change_extension(fileName, ".png");
 	Path pngPath = dir / imgName;
 	Path yamlPath = dir / change_extension(fileName, ".yaml");
+	Path binPath = dir / change_extension(fileName, ".font");
 	Path metaPath = change_extension(pngPath, ".png.meta");
 	std::cout << "Saving " << pngPath << ", " << yamlPath << ", and " << metaPath << std::endl;
 
 	dstImg->savePNG(pngPath.string());
-	generateFontMap(imgName.string(), font, codes, yamlPath.string(), scale, radius);
+
+	generateFontMapBinary(imgName.string(), font, codes, binPath, scale, radius, size);
 	generateTextureMeta(metaPath.string());
 }
 
-void FontGenerator::generateFontMap(String imgName, FontFace& font, Vector<CharcodeEntry>& entries, Path outPath, float scale, float radius) const
+void FontGenerator::generateFontMapBinary(String imgName, FontFace& font, Vector<CharcodeEntry>& entries, Path outPath, float scale, float radius, Vector2i imageSize) const
 {
-	std::sort(entries.begin(), entries.end(), [](const CharcodeEntry& a, const CharcodeEntry& b) { return a.charcode < b.charcode; });
+	auto serialize = [&] (Serializer& s) {
+		String name = font.getName();
+		String imageName = imgName;
+		float ascender = (font.getAscender() * scale);
+		float height = (font.getHeight() * scale);
+		float sizePt = (font.getSize() * scale);
+		float smoothRadius = radius;
+		s << name;
+		s << imageName;
+		s << ascender;
+		s << height;
+		s << sizePt;
+		s << smoothRadius;
 
-	YAML::Emitter yaml;
-	yaml << YAML::BeginMap;
-	yaml << YAML::Key << "font";
-	yaml << YAML::BeginMap;
-	yaml << YAML::Key << "name" << YAML::Value << font.getName();
-	yaml << YAML::Key << "image" << YAML::Value << imgName;
-	yaml << YAML::Key << "sizePt" << YAML::Value << (font.getSize() * scale);
-	yaml << YAML::Key << "height" << YAML::Value << (font.getHeight() * scale);
-	yaml << YAML::Key << "ascender" << YAML::Value << (font.getAscender() * scale);
-	yaml << YAML::Key << "radius" << YAML::Value << radius;
-	yaml << YAML::EndMap;
-	yaml << YAML::Key << "glyphs";
-	yaml << YAML::BeginSeq;
+		unsigned int numEntries = static_cast<unsigned int>(entries.size());
+		s << numEntries;
+		for (unsigned int i = 0; i < numEntries; i++) {
+			auto& c = entries[i];
+			auto metrics = font.getMetrics(c.charcode, scale);
 
-	for (auto& c : entries) {
-		auto metrics = font.getMetrics(c.charcode, scale);
-		String printable;
-		printable.appendCharacter(c.charcode);
-
-		yaml << YAML::BeginMap;
-		yaml << YAML::Key << "code" << YAML::Value << c.charcode;
-		yaml << YAML::Key << "character" << YAML::Value << YAML::DoubleQuoted << printable.c_str();
-		yaml << YAML::Key << "rect" << YAML::Value << YAML::Flow << YAML::BeginSeq << c.rect.getX() << c.rect.getY() << c.rect.getWidth() << c.rect.getHeight() << YAML::EndSeq;
-		yaml << YAML::Key << "bearing" << YAML::Value << YAML::Flow << YAML::BeginSeq << metrics.bearingHorizontal.x << metrics.bearingHorizontal.y << metrics.bearingVertical.x << metrics.bearingVertical.y << YAML::EndSeq;
-		yaml << YAML::Key << "advance" << YAML::Value << YAML::Flow << YAML::BeginSeq << metrics.advance.x << metrics.advance.y << YAML::EndSeq;
-		yaml << YAML::EndMap;
-	}
-
-	yaml << YAML::EndSeq;
-	yaml << YAML::EndMap;
-
-	Vector<int> codes;
-	for (int code : font.getCharCodes()) {
-		if (code < 256) {
-			codes.push_back(code);
+			int charcode = c.charcode;
+			Rect4f area = Rect4f(c.rect) / Vector2f(imageSize);
+			Vector2f size = Vector2f(c.rect.getSize());
+			Vector2f horizontalBearing = metrics.bearingHorizontal;
+			Vector2f verticalBearing = metrics.bearingVertical;
+			Vector2f advance = metrics.advance;
+			s << charcode;
+			s << area;
+			s << size;
+			s << horizontalBearing;
+			s << verticalBearing;
+			s << advance;
 		}
-	}
-	/*
-	for (auto& kern : font.getKerning(codes)) {
-	std::cout << "Kerning: " << char(kern.left) << " " << char(kern.right) << ": " << kern.kerning << std::endl;
-	}
-	*/
-
-	std::ofstream out(outPath.string(), std::ios::out);
-	out << "---\n";
-	out << yaml.c_str();
-	out << "\n...\n";
+	};
+	
+	auto bytes = Serializer::toBytes(serialize);
+	std::ofstream out(outPath.string(), std::ios::out | std::ios::binary);
+	out.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
 	out.close();
 }
 

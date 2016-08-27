@@ -21,19 +21,9 @@ Font::Glyph::Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontal
 {
 }
 
-void Font::Glyph::serialize(Serializer& s) const
-{
-	s << charcode;
-	s << area;
-	s << size;
-	s << horizontalBearing;
-	s << verticalBearing;
-	s << advance;
-}
-
 void Font::Glyph::deserialize(Deserializer& s)
 {
-	s >> charcode;
+	// See font_generator.cpp
 	s >> area;
 	s >> size;
 	s >> horizontalBearing;
@@ -43,35 +33,14 @@ void Font::Glyph::deserialize(Deserializer& s)
 
 Font::Font(ResourceLoader& loader)
 {
-	auto root = YAML::Load(loader.getStatic()->getString());
+	auto data = loader.getStatic();
+	auto ds = Deserializer(data->getSpan());
+	deserialize(ds);
 
-	auto fontNode = root["font"];
-	name = fontNode["name"].as<std::string>();
-	ascender = fontNode["ascender"].as<float>();
-	height = fontNode["height"].as<float>();
-	sizePt = fontNode["sizePt"].as<float>();
-	smoothRadius = fontNode["radius"].as<float>();
-
-	auto texture = loader.getAPI().getResource<Texture>("../font/" + fontNode["image"].as<std::string>());
+	auto texture = loader.getAPI().getResource<Texture>("../font/" + imageName);
 	auto matDef = loader.getAPI().getResource<MaterialDefinition>("text.yaml");
 	material = std::make_unique<Material>(matDef);
 	(*material)["tex0"] = texture;
-
-	auto glyphsNode = root["glyphs"];
-	for (auto node: glyphsNode) {
-		int code = node["code"].as<int>();
-		auto bearingNode = node["bearing"];
-		auto advanceNode = node["advance"];
-		auto rectNode = node["rect"];
-
-		Rect4i iRect(rectNode[0].as<int>(), rectNode[1].as<int>(), rectNode[2].as<int>(), rectNode[3].as<int>());
-		Rect4f rect = Rect4f(iRect) / Vector2f(texture->getSize());
-		Vector2f hBearing = Vector2f(bearingNode[0].as<float>(), bearingNode[1].as<float>());
-		Vector2f vBearing = Vector2f(bearingNode[2].as<float>(), bearingNode[3].as<float>());
-		Vector2f advance = Vector2f(advanceNode[0].as<float>(), advanceNode[1].as<float>());
-
-		glyphs.emplace(code, Glyph(code, rect, Vector2f(iRect.getSize()), hBearing, vBearing, advance));
-	}
 }
 
 std::unique_ptr<Font> Font::loadResource(ResourceLoader& loader)
@@ -97,22 +66,18 @@ std::shared_ptr<const Material> Font::getMaterial() const
 	return material;
 }
 
-void Font::serialize(Serializer& s) const
-{
-	s << name;
-	s << ascender;
-	s << height;
-	s << sizePt;
-	s << smoothRadius;
-	s << glyphs;
-}
-
 void Font::deserialize(Deserializer& s)
 {
+	// See font_generator.cpp
 	s >> name;
+	s >> imageName;
 	s >> ascender;
 	s >> height;
 	s >> sizePt;
 	s >> smoothRadius;
 	s >> glyphs;
+
+	for (auto& g: glyphs) {
+		g.second.charcode = g.first;
+	}
 }

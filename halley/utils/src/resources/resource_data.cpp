@@ -48,6 +48,11 @@ const void* Halley::ResourceDataStatic::getData() const
 	return data.get();
 }
 
+gsl::span<const gsl::byte> ResourceDataStatic::getSpan() const
+{
+	return gsl::span<const gsl::byte>(reinterpret_cast<const gsl::byte*>(getData()), getSize());
+}
+
 size_t Halley::ResourceDataStatic::getSize() const
 {
 	if (!loaded) throw Exception("Resource data not yet loaded");

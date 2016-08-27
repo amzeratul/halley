@@ -18,6 +18,7 @@ Serializer::Serializer()
 
 Serializer::Serializer(gsl::span<gsl::byte> dst)
 	: dryRun(false)
+	, dst(dst)
 {}
 
 Serializer& Serializer::operator<<(const std::string& str)
