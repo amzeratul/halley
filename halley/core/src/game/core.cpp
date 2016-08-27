@@ -99,18 +99,16 @@ void Core::init()
 	showComputerInfo();
 #endif
 
-	// API
+	// Initialize game
+	game->init(*environment, args);
 	api = HalleyAPI::create(this, game->initPlugins(*this));
 
 	// Resources
 	initResources();
 
-	// Init game
-	game->init(&*api, *environment, args);
-
-	// Create frame
-	setStage(game->makeStage(game->getInitialStage()));
-
+	// Start game
+	setStage(game->startGame(&*api));
+	
 	// Get video resources
 	if (api->video) {
 		painter = std::move(api->videoInternal->makePainter());
@@ -125,7 +123,7 @@ void Core::deInit()
 	transitionStage();
 
 	// Deinit game
-	game->deInit();
+	game->endGame();
 
 	// Deinit painter
 	painter.reset();

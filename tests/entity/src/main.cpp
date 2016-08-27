@@ -52,12 +52,7 @@ public:
 			return std::unique_ptr<Stage>();
 		}
 	}
-
-	StageID getInitialStage() const override
-	{
-		return Stages::Test;
-	}
-
+	
 	String getName() const override
 	{
 		return "Entity test";
@@ -73,9 +68,10 @@ public:
 		return true;
 	}
 
-	void init(HalleyAPI* api, const Environment& environment, const Vector<String>& args) override
+	std::unique_ptr<Stage> startGame(HalleyAPI* api) override
 	{
 		api->video->setWindow(Window(WindowType::Window, api->video->getCenteredWindow(Vector2i(1280, 720), 0), Vector2i(1280, 720), getName()), false);
+		return std::make_unique<TestStage>();
 	}
 };
 

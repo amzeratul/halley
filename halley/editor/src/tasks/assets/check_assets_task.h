@@ -8,12 +8,13 @@ namespace Halley
 	class CheckAssetsTask : public EditorTask
 	{
 	public:
-		CheckAssetsTask(Project& project);
+		CheckAssetsTask(Project& project, bool headless);
 
 	protected:
 		void run() override;
 
 	private:
 		Project& project;
+		bool headless;
 	};
 }

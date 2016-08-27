@@ -1,6 +1,8 @@
 #pragma once
 #include "../editor_task.h"
 #include <boost/filesystem.hpp>
+#include <map>
+#include <functional>
 
 namespace Halley
 {
@@ -24,13 +26,20 @@ namespace Halley
 	class ImportAssetsTask : public EditorTask
 	{
 	public:
-		ImportAssetsTask(Project& project, Vector<AssetToImport>&& files);
+		ImportAssetsTask(Project& project, bool headless, Vector<AssetToImport>&& files);
 
 	protected:
 		void run() override;
 
 	private:
 		Project& project;
+		bool headless;
 		Vector<AssetToImport> files;
+		std::map<String, std::function<void(Path, Path)>> importers;
+
+		void importAsset(AssetToImport& asset);
+		void ensureParentDirectoryExists(Path path) const;
+
+		void setImportTable();
 	};
 }

@@ -7,9 +7,10 @@
 
 using namespace Halley;
 
-CheckAssetsTask::CheckAssetsTask(Project& project)
+CheckAssetsTask::CheckAssetsTask(Project& project, bool headless)
 	: EditorTask("Check assets", false, false)
 	, project(project)
+	, headless(headless)
 {}
 
 void CheckAssetsTask::run()
@@ -48,14 +49,16 @@ void CheckAssetsTask::run()
 	}
 
 	if (!filesToImport.empty()) {
-		addContinuation(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(project, std::move(filesToImport))));
+		addContinuation(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(project, headless, std::move(filesToImport))));
 	} else {
-		// Schedule the next one to run after one second
-		addContinuation(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(project), 1.0f));
+		if (!headless) {
+			// Schedule the next one to run after one second
+			addContinuation(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(project, headless), 1.0f));
+		}
 	}
 
 	Vector<Path> filesToDelete = db.getAllMissing();
 	if (!filesToDelete.empty()) {
-		addContinuation(EditorTaskAnchor(std::make_unique<DeleteAssetsTask>(project, std::move(filesToDelete))));
+		addContinuation(EditorTaskAnchor(std::make_unique<DeleteAssetsTask>(project, headless, std::move(filesToDelete))));
 	}
 }

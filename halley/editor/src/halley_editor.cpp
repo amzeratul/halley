@@ -18,28 +18,17 @@ HalleyEditor::~HalleyEditor()
 
 int HalleyEditor::initPlugins(IPluginRegistry &registry)
 {
-	initOpenGLPlugin(registry);
-	return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input;
+	if (headless) {
+		return 0;
+	} else {
+		initOpenGLPlugin(registry);
+		return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input;
+	}
 }
 
 void HalleyEditor::initResourceLocator(String dataPath, ResourceLocator& locator)
 {
 	locator.addFileSystem(dataPath);
-}
-
-std::unique_ptr<Stage> HalleyEditor::makeStage(StageID id)
-{
-	switch (id) {
-	case Stages::Root:
-		return std::make_unique<EditorRootStage>(*this);
-	default:
-		return std::unique_ptr<Stage>();
-	}
-}
-
-StageID HalleyEditor::getInitialStage() const
-{
-	return Stages::Root;
 }
 
 String HalleyEditor::getName() const
@@ -57,7 +46,7 @@ bool HalleyEditor::isDevBuild() const
 	return true;
 }
 
-void HalleyEditor::init(HalleyAPI* api, const Environment& environment, const Vector<String>& args)
+void HalleyEditor::init(const Environment& environment, const Vector<String>& args)
 {
 	using boost::filesystem::path;
 	sharedAssetsPath = path(environment.getProgramPath().cppStr()).parent_path().parent_path() / "assets_src";
@@ -65,18 +54,43 @@ void HalleyEditor::init(HalleyAPI* api, const Environment& environment, const Ve
 	preferences = std::make_unique<Preferences>((path(environment.getDataPath().cppStr()) / "settings.yaml").string());
 	preferences->load();
 
-	if (!args.empty()) {
-		try {
-			loadProject(path(args[0].cppStr()));
-		} catch (std::exception& e) {
-			std::cout << e.what() << std::endl;
+	parseArguments(args);
+}
+
+void HalleyEditor::parseArguments(const std::vector<String>& args)
+{
+	using boost::filesystem::path;
+
+	headless = false;
+	bool gotProjectPath = false;
+
+	for (auto& arg : args) {
+		if (arg.startsWith("--")) {
+			if (arg == "--headless") {
+				headless = true;
+			} else {
+				std::cout << "Unknown argument \"" << arg << "\".\n";
+			}
+		} else {
+			if (!gotProjectPath) {
+				loadProject(path(arg.cppStr()));
+				gotProjectPath = true;
+			} else {
+				std::cout << "Unknown argument \"" << arg << "\".\n";
+			}
 		}
 	}
+}
 
-	Rect4i rect = preferences->getWindowRect();
-	Vector2i winSize(1280, 720);
-	Vector2i winPos = api->video->getCenteredWindow(winSize, 0);
-	api->video->setWindow(Window(WindowType::ResizableWindow, winPos, winSize, getName()), false);
+std::unique_ptr<Stage> HalleyEditor::startGame(HalleyAPI* api)
+{
+	if (!headless) {
+		Rect4i rect = preferences->getWindowRect();
+		Vector2i winSize(1280, 720);
+		Vector2i winPos = api->video->getCenteredWindow(winSize, 0);
+		api->video->setWindow(Window(WindowType::ResizableWindow, winPos, winSize, getName()), false);
+	}
+	return std::make_unique<EditorRootStage>(*this);
 }
 
 Project& HalleyEditor::loadProject(boost::filesystem::path path)

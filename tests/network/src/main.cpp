@@ -5,13 +5,6 @@ using namespace Halley;
 
 void initOpenGLPlugin(IPluginRegistry &registry);
 
-namespace Stages {
-	enum Type
-	{
-		Test
-	};
-}
-
 class NetworkTestGame final : public Game
 {
 public:
@@ -24,21 +17,6 @@ public:
 	void initResourceLocator(String dataPath, ResourceLocator& locator) override
 	{
 		locator.addFileSystem(dataPath);
-	}
-
-	std::unique_ptr<Stage> makeStage(StageID id) override
-	{
-		switch (id) {
-		case Stages::Test:
-			return std::make_unique<TestStage>();
-		default:
-			return std::unique_ptr<Stage>();
-		}
-	}
-
-	StageID getInitialStage() const override
-	{
-		return Stages::Test;
 	}
 
 	String getName() const override
@@ -56,9 +34,10 @@ public:
 		return true;
 	}
 
-	void init(HalleyAPI* api, const Environment& environment, const Vector<String>& args) override
+	std::unique_ptr<Stage> startGame(HalleyAPI* api) override
 	{
 		api->video->setWindow(Window(WindowType::Window, api->video->getCenteredWindow(Vector2i(1280, 720), 0), Vector2i(1280, 720), getName()), false);
+		return std::make_unique<TestStage>();
 	}
 };
 

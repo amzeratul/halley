@@ -6,9 +6,10 @@
 
 using namespace Halley;
 
-ImportAssetsTask::ImportAssetsTask(Project& project, Vector<AssetToImport>&& files)
+ImportAssetsTask::ImportAssetsTask(Project& project, bool headless, Vector<AssetToImport>&& files)
 	: EditorTask("Importing assets", true, true)
 	, project(project)
+	, headless(headless)
 	, files(std::move(files))
 {}
 
@@ -25,16 +26,8 @@ void ImportAssetsTask::run()
 		}
 		setProgress(float(i) / float(files.size()), files[i].name.filename().string());
 
-		// Copy file for now
 		try {
-			auto dst = destinationFolder / files[i].name;
-			auto dstDir = dst.parent_path();
-			if (!boost::filesystem::exists(dstDir)) {
-				boost::filesystem::create_directories(dstDir);
-			}
-			boost::filesystem::copy_file(files[i].srcDir / files[i].name, dst, boost::filesystem::copy_option::overwrite_if_exists);
-
-			// Mark file as imported
+			importAsset(files[i]);
 			db.markAsImported(files[i].name, files[i].fileTime);
 
 			// Check if db needs saving
@@ -53,5 +46,36 @@ void ImportAssetsTask::run()
 		setProgress(1.0f, "");
 	}
 
-	addContinuation(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(project), 1.0f));
+	if (!headless) {
+		addContinuation(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(project, headless), 1.0f));
+	}
+}
+
+void ImportAssetsTask::importAsset(AssetToImport& asset)
+{
+	auto src = asset.srcDir / asset.name;
+	auto dst = project.getAssetsPath() / asset.name;
+	auto root = asset.name.begin()->string();
+
+	auto iter = importers.find(root);
+	if (iter != importers.end()) {
+		iter->second(src, dst);
+	} else {
+		// No importer found, just copy
+		ensureParentDirectoryExists(dst);
+		boost::filesystem::copy_file(src, dst, boost::filesystem::copy_option::overwrite_if_exists);
+	}
+}
+
+void ImportAssetsTask::ensureParentDirectoryExists(Path path) const
+{
+	auto dstDir = boost::filesystem::is_directory(path) ? path : path.parent_path();
+	if (!boost::filesystem::exists(dstDir)) {
+		boost::filesystem::create_directories(dstDir);
+	}
+}
+
+void ImportAssetsTask::setImportTable()
+{
+	
 }

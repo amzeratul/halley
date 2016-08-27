@@ -27,8 +27,11 @@ namespace Halley
 		void markAllAsMissing();
 		void markAsPresent(Path file);
 		std::vector<Path> getAllMissing() const;
+
 	private:
 		Path file;
 		std::map<Path, FileEntry> filesImported;
+		
+		mutable std::mutex mutex;
 	};
 }

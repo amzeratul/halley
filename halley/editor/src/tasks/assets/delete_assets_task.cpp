@@ -4,9 +4,10 @@
 
 using namespace Halley;
 
-DeleteAssetsTask::DeleteAssetsTask(Project& project, Vector<Path> files)
+DeleteAssetsTask::DeleteAssetsTask(Project& project, bool headless, Vector<Path> files)
 	: EditorTask("Deleting assets", true, true)
 	, project(project)
+	, headless(headless)
 	, files(files)
 {
 }

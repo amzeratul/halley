@@ -18,23 +18,30 @@ EditorRootStage::~EditorRootStage()
 
 void EditorRootStage::init()
 {
-	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(editor.getProject())));
-	taskBar = std::make_unique<TaskBar>(getResources());
+	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(editor.getProject(), editor.isHeadless())));
 
-	initSprites();
-	console = std::make_unique<ConsoleWindow>(getResources());
+	if (!editor.isHeadless()) {
+		initSprites();
+		taskBar = std::make_unique<TaskBar>(getResources());
+		console = std::make_unique<ConsoleWindow>(getResources());
+	}
 }
 
 void EditorRootStage::onVariableUpdate(Time time)
 {
 	tasks->update(time);
-	taskBar->update(tasks->getTasks(), time);
+
+	if (editor.isHeadless() && tasks->getTasks().empty()) {
+		getCoreAPI().quit();
+	}
+
+	if (taskBar) {
+		taskBar->update(tasks->getTasks(), time);
+	}
 
 	if (console) {
 		console->update(*getInputAPI().getKeyboard());
 	}
-
-	halleyLogo.setPos(Vector2f(getVideoAPI().getWindow().getSize() / 2));
 }
 
 void EditorRootStage::onRender(RenderContext& context) const
@@ -46,7 +53,7 @@ void EditorRootStage::onRender(RenderContext& context) const
 		// Background
 		Sprite bg = background;
 		bg.setTexRect(view).setSize(view.getSize()).draw(painter);
-		halleyLogo.draw(painter);
+		halleyLogo.clone().setPos(Vector2f(getVideoAPI().getWindow().getSize() / 2)).draw(painter);
 
 		// Taskbar
 		taskBar->draw(painter);
