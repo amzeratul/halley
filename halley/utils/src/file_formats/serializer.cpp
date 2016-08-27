@@ -22,7 +22,7 @@ Serializer::Serializer(gsl::span<gsl::byte> dst)
 
 Serializer& Serializer::operator<<(const std::string& str)
 {
-	size_t sz = str.size();
+	unsigned int sz = static_cast<unsigned int>(str.size());
 	*this << sz;
 	*this << gsl::as_bytes(gsl::span<const char>(str.data(), sz));
 	return *this;
@@ -50,10 +50,18 @@ Deserializer::Deserializer(gsl::span<const gsl::byte> src)
 
 Deserializer& Deserializer::operator>>(std::string& str)
 {
-	size_t sz;
+	unsigned int sz;
 	*this >> sz;
 	str = std::string(reinterpret_cast<const char*>(src.data() + pos), sz);
 	pos += sz;
+	return *this;
+}
+
+Deserializer& Deserializer::operator>>(String& str)
+{
+	std::string s;
+	*this >> s;
+	str = s;
 	return *this;
 }
 

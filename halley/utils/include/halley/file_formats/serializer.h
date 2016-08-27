@@ -4,6 +4,8 @@
 #include <vector>
 #include <gsl/gsl>
 #include "halley/data_structures/flat_map.h"
+#include "halley/maths/vector2.h"
+#include "halley/maths/rect.h"
 
 namespace Halley {
 	class String;
@@ -34,7 +36,7 @@ namespace Halley {
 		Serializer& operator<<(int val) { return serializePod(val); }
 		Serializer& operator<<(unsigned int val) { return serializePod(val); }
 		Serializer& operator<<(long long val) { return serializePod(val); }
-		Serializer& operator<<(size_t val) { return serializePod(val); }
+		Serializer& operator<<(unsigned long long val) { return serializePod(val); }
 		Serializer& operator<<(float val) { return serializePod(val); }
 		Serializer& operator<<(double val) { return serializePod(val); }
 
@@ -45,9 +47,9 @@ namespace Halley {
 		template <typename T>
 		Serializer& operator<<(const std::vector<T>& val)
 		{
-			size_t sz = val.size();
+			unsigned int sz = static_cast<unsigned int>(val.size());
 			*this << sz;
-			for (size_t i = 0; i < sz; i++) {
+			for (unsigned int i = 0; i < sz; i++) {
 				*this << val[i];
 			}
 			return *this;
@@ -56,12 +58,28 @@ namespace Halley {
 		template <typename T, typename U>
 		Serializer& operator<<(const FlatMap<T, U>& val)
 		{
-			size_t sz = val.size();
+			unsigned int sz = static_cast<unsigned int>(val.size());
 			*this << sz;
 			for (auto& kv : val) {
 				*this << kv.first;
 				*this << kv.second;
 			}
+			return *this;
+		}
+
+		template <typename T>
+		Serializer& operator<<(const Vector2D<T>& val)
+		{
+			*this << val.x;
+			*this << val.y;
+			return *this;
+		}
+
+		template <typename T>
+		Serializer& operator<<(const Rect2D<T>& val)
+		{
+			*this << val.getTopLeft();
+			*this << val.getBottomRight();
 			return *this;
 		}
 
@@ -100,24 +118,65 @@ namespace Halley {
 		Deserializer& operator>>(int& val) { return deserializePod(val); }
 		Deserializer& operator>>(unsigned int& val) { return deserializePod(val); }
 		Deserializer& operator>>(long long& val) { return deserializePod(val); }
-		Deserializer& operator>>(size_t& val) { return deserializePod(val); }
+		Deserializer& operator>>(unsigned long long& val) { return deserializePod(val); }
 		Deserializer& operator>>(float& val) { return deserializePod(val); }
 		Deserializer& operator>>(double& val) { return deserializePod(val); }
 
 		Deserializer& operator>>(std::string& str);
+		Deserializer& operator>>(String& str);
 		Deserializer& operator>>(gsl::span<gsl::byte>& span);
 
 		template <typename T>
 		Deserializer& operator>>(std::vector<T>& val)
 		{
-			size_t sz;
+			unsigned int sz;
 			*this >> sz;
 			val.clear();
 			val.reserve(sz);
-			for (size_t i = 0; i < sz; i++) {
+			for (unsigned int i = 0; i < sz; i++) {
 				val.push_back(T());
 				*this >> val[i];
 			}
+			return *this;
+		}
+
+		template <typename T, typename U>
+		Deserializer& operator>>(FlatMap<T, U>& val)
+		{
+			unsigned int sz;
+			*this >> sz;
+			for (unsigned int i = 0; i < sz; i++) {
+				T key;
+				U value;
+				*this >> key;
+				*this >> value;
+				val[key] = value;
+			}
+			return *this;
+		}
+
+		template <typename T>
+		Deserializer& operator>>(Vector2D<T>& val)
+		{
+			*this >> val.x;
+			*this >> val.y;
+			return *this;
+		}
+
+		template <typename T>
+		Deserializer& operator>>(Rect2D<T>& val)
+		{
+			Vector2D<T> p1, p2;
+			*this >> p1;
+			*this >> p2;
+			val = Rect2D<T>(p1, p2);
+			return *this;
+		}
+
+		template <typename T>
+		Deserializer& operator>>(T& val)
+		{
+			val.deserialize(*this);
 			return *this;
 		}
 

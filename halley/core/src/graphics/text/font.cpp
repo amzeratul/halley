@@ -9,6 +9,8 @@
 
 using namespace Halley;
 
+Font::Glyph::Glyph() {}
+
 Font::Glyph::Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance)
 	: charcode(charcode)
 	, area(area)
@@ -19,14 +21,24 @@ Font::Glyph::Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontal
 {
 }
 
-void Font::Glyph::serialize(Serializer& serializer) const
+void Font::Glyph::serialize(Serializer& s) const
 {
-	// TODO
+	s << charcode;
+	s << area;
+	s << size;
+	s << horizontalBearing;
+	s << verticalBearing;
+	s << advance;
 }
 
-void Font::Glyph::deserialize(Deserializer& deserializer)
+void Font::Glyph::deserialize(Deserializer& s)
 {
-	// TODO
+	s >> charcode;
+	s >> area;
+	s >> size;
+	s >> horizontalBearing;
+	s >> verticalBearing;
+	s >> advance;
 }
 
 Font::Font(ResourceLoader& loader)
@@ -97,5 +109,10 @@ void Font::serialize(Serializer& s) const
 
 void Font::deserialize(Deserializer& s)
 {
-	
+	s >> name;
+	s >> ascender;
+	s >> height;
+	s >> sizePt;
+	s >> smoothRadius;
+	s >> glyphs;
 }

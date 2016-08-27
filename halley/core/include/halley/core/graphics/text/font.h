@@ -23,6 +23,7 @@ namespace Halley
 			Vector2f verticalBearing;
 			Vector2f advance;
 			
+			Glyph();
 			Glyph(Glyph&& other) = default;
 			Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance);
 
