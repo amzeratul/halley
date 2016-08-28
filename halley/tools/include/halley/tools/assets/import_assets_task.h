@@ -3,6 +3,7 @@
 #include <boost/filesystem.hpp>
 #include <map>
 #include <functional>
+#include "halley/resources/metadata.h"
 
 namespace Halley
 {
@@ -38,7 +39,10 @@ namespace Halley
 		std::map<String, std::function<void(Path, Path)>> importers;
 
 		void importAsset(AssetToImport& asset);
-		void ensureParentDirectoryExists(Path path) const;
+		static void ensureParentDirectoryExists(Path path);
+		static std::unique_ptr<Metadata> getMetaData(Path path);
+
+		void loadFont(Path src, Path dst) const;
 
 		void setImportTable();
 	};

@@ -3,6 +3,7 @@
 #include "halley/tools/assets/check_assets_task.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
+#include "halley/tools/make_font/font_generator.h"
 
 using namespace Halley;
 
@@ -15,6 +16,8 @@ ImportAssetsTask::ImportAssetsTask(Project& project, bool headless, Vector<Asset
 
 void ImportAssetsTask::run()
 {
+	setImportTable();
+
 	using namespace std::chrono_literals;
 	auto& db = project.getImportAssetsDatabase();
 	auto lastSave = std::chrono::steady_clock::now();
@@ -67,7 +70,7 @@ void ImportAssetsTask::importAsset(AssetToImport& asset)
 	}
 }
 
-void ImportAssetsTask::ensureParentDirectoryExists(Path path) const
+void ImportAssetsTask::ensureParentDirectoryExists(Path path)
 {
 	auto dstDir = boost::filesystem::is_directory(path) ? path : path.parent_path();
 	if (!boost::filesystem::exists(dstDir)) {
@@ -75,7 +78,36 @@ void ImportAssetsTask::ensureParentDirectoryExists(Path path) const
 	}
 }
 
+std::unique_ptr<Metadata> ImportAssetsTask::getMetaData(Path path)
+{
+	// TODO
+	return std::unique_ptr<Metadata>();
+}
+
+void ImportAssetsTask::loadFont(Path src, Path dst) const
+{
+	if (src.extension() != "meta") {
+		std::cout << "Importing font " << src << std::endl;
+
+		ensureParentDirectoryExists(dst);
+
+		Vector2i imgSize(512, 512);
+		float radius = 8;
+		int supersample = 4;
+		auto meta = getMetaData(src);
+		if (meta) {
+			radius = meta->getFloat("radius", 8);
+			supersample = meta->getInt("supersample", 4);
+			imgSize.x = meta->getInt("width", 512);
+			imgSize.y = meta->getInt("height", 512);
+		}
+
+		FontGenerator gen;
+		gen.generateFont(src, dst.replace_extension("font"), imgSize, radius, supersample, Range<int>(0, 255));
+	}
+}
+
 void ImportAssetsTask::setImportTable()
 {
-	
+	importers["font"] = [this](Path src, Path dst) { loadFont(src, dst); };
 }
