@@ -17,7 +17,7 @@ int MakeFontTool::run(Vector<std::string> args)
 	float radius = String(args[3]).toFloat();
 	int superSample = String(args[4]).toInteger();
 
-	FontGenerator generator;
+	FontGenerator generator(true);
 	generator.generateFont(source, target, size, radius, superSample, Range<int>(0, 255));
 
 	return 0;

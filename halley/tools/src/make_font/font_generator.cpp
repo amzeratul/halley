@@ -17,7 +17,6 @@ using namespace Halley;
 static Maybe<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float borderSuperSampled, Range<int> range)
 {
 	font.setSize(fontSize);
-	std::cout << "Trying " << fontSize << " pt... ";
 
 	Vector<BinPackEntry> entries;
 	for (int code : font.getCharCodes()) {
@@ -38,12 +37,10 @@ static Maybe<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, V
 		}
 	}
 
-	auto result = BinPack::pack(entries, packSize);
-	std::cout << (result ? "Fits." : "Does not fit.") << std::endl;
-	return result;
+	return BinPack::pack(entries, packSize);
 }
 
-static Maybe<Vector<BinPackResult>> binarySearch(std::function<Maybe<Vector<BinPackResult>>(int)> f, int minBound, int maxBound)
+static Maybe<Vector<BinPackResult>> binarySearch(std::function<Maybe<Vector<BinPackResult>>(int)> f, int minBound, int maxBound, int &best)
 {
 	int v0 = minBound;
 	int v1 = maxBound;
@@ -66,10 +63,13 @@ static Maybe<Vector<BinPackResult>> binarySearch(std::function<Maybe<Vector<BinP
 		}
 	}
 
-	if (lastGood > 0) {
-		std::cout << "Packing with " << lastGood << " pt." << std::endl;
-	}
+	best = lastGood;
 	return bestResult;
+}
+
+FontGenerator::FontGenerator(bool verbose)
+	: verbose(verbose)
+{
 }
 
 void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, float radius, int superSample, Range<int> range) {
@@ -84,9 +84,14 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 #endif
 
 	FontFace font(fontFile.string());
+	if (verbose) {
+		std::cout << "Finding best pack size...\n";
+	}
+	int fontSize;
 	auto result = binarySearch([&](int fontSize) -> Maybe<Vector<BinPackResult>> {
 		return tryPacking(font, float(fontSize), size, scale, borderSuperSample, range);
-	}, minFont, maxFont);
+	}, minFont, maxFont, fontSize);
+	font.setSize(float(fontSize));
 
 	auto dstImg = std::make_unique<Image>(size.x, size.y);
 	dstImg->clear(0);
@@ -97,7 +102,9 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 
 	if (result) {
 		auto& pack = result.get();
-		std::cout << "Rendering " << pack.size() << " glyphs";
+		if (verbose) {
+			std::cout << "Rendering " << pack.size() << " glyphs";
+		}
 
 		for (auto& r : pack) {
 			int charcode = int(reinterpret_cast<size_t>(r.data));
@@ -106,7 +113,9 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 			codes.push_back(CharcodeEntry(charcode, dstRect));
 
 			futures.push_back(std::async(std::launch::async, [=, &m, &font, &dstImg] {
-				std::cout << "+";
+				if (verbose) {
+					std::cout << "+";
+				}
 
 				auto tmpImg = std::make_unique<Image>(srcRect.getWidth(), srcRect.getHeight());
 				tmpImg->clear(0);
@@ -121,25 +130,32 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 				tmpImg.reset();
 				finalGlyphImg.reset();
 
-				std::cout << "-";
+				if (verbose) {
+					std::cout << "-";
+				}
 			}));
 		}
+	} else {
+		throw Exception("Unable to generate font.");
 	}
 	std::sort(codes.begin(), codes.end(), [](const CharcodeEntry& a, const CharcodeEntry& b) { return a.charcode < b.charcode; });
 
 	for (auto& f : futures) {
 		f.get();
 	}
-	std::cout << " Done generating." << std::endl;
+	if (verbose) {
+		std::cout << " Done generating." << std::endl;
+	}
 
 	Path fileName = target.filename();
 	Path dir = target.parent_path();
 	Path imgName = change_extension(fileName, ".png");
 	Path pngPath = dir / imgName;
-	Path yamlPath = dir / change_extension(fileName, ".yaml");
 	Path binPath = dir / change_extension(fileName, ".font");
 	Path metaPath = change_extension(pngPath, ".png.meta");
-	std::cout << "Saving " << pngPath << ", " << yamlPath << ", and " << metaPath << std::endl;
+	if (verbose) {
+		std::cout << "Saving " << pngPath << ", " << binPath << ", and " << metaPath << std::endl;
+	}
 
 	dstImg->savePNG(pngPath.string());
 
