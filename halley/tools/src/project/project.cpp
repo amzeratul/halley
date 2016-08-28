@@ -14,7 +14,7 @@ Project::~Project() = default;
 
 Path Project::getAssetsPath() const
 {
-	return rootPath / "assets";
+	return rootPath / "bin" / "assets";
 }
 
 Path Project::getAssetsSrcPath() const

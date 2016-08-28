@@ -30,6 +30,7 @@ Thumbs.db
 .vscode
 
 # Binaries
+bin
 *.dll
 *.hi
 *.o
