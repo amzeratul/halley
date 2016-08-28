@@ -6,6 +6,7 @@
 #include "halley/data_structures/flat_map.h"
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
+#include <map>
 
 namespace Halley {
 	class String;
@@ -63,6 +64,16 @@ namespace Halley {
 
 		template <typename T, typename U>
 		Serializer& operator<<(const FlatMap<T, U>& val)
+		{
+			*this << static_cast<unsigned int>(val.size());
+			for (auto& kv : val) {
+				*this << kv.first << kv.second;
+			}
+			return *this;
+		}
+
+		template <typename T, typename U>
+		Serializer& operator<<(const std::map<T, U>& val)
 		{
 			*this << static_cast<unsigned int>(val.size());
 			for (auto& kv : val) {
@@ -142,6 +153,21 @@ namespace Halley {
 
 		template <typename T, typename U>
 		Deserializer& operator>>(FlatMap<T, U>& val)
+		{
+			unsigned int sz;
+			*this >> sz;
+			for (unsigned int i = 0; i < sz; i++) {
+				T key;
+				U value;
+				*this >> key;
+				*this >> value;
+				val[key] = value;
+			}
+			return *this;
+		}
+
+		template <typename T, typename U>
+		Deserializer& operator >> (std::map<T, U>& val)
 		{
 			unsigned int sz;
 			*this >> sz;

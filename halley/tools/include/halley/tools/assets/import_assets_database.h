@@ -2,9 +2,12 @@
 #include <boost/filesystem.hpp>
 #include <map>
 #include <mutex>
+#include "halley/text/halleystring.h"
 
 namespace Halley
 {
+	class Deserializer;
+	class Serializer;
 	using Path = boost::filesystem::path;
 
 	class ImportAssetsDatabase
@@ -13,6 +16,9 @@ namespace Halley
 		{
 			time_t timestamp;
 			bool present;
+
+			void serialize(Serializer& s) const;
+			void deserialize(Deserializer& s);
 		};
 
 	public:
@@ -29,9 +35,12 @@ namespace Halley
 		void markAsPresent(Path file);
 		std::vector<Path> getAllMissing() const;
 
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+
 	private:
 		Path file;
-		std::map<Path, FileEntry> filesImported;
+		std::map<String, FileEntry> filesImported;
 		
 		mutable std::mutex mutex;
 	};
