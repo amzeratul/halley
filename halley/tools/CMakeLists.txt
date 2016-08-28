@@ -68,3 +68,8 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-tools ${SOURCES} ${HEADERS})
+
+target_link_libraries (halley-tools
+        ${FREETYPE_LIBRARIES}
+        ${YAMLCPP_LIBRARY}
+        )

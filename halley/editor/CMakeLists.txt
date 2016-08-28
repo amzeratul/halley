@@ -43,6 +43,7 @@ halleyProject(halley-editor "${editor_sources}" "${editor_headers}" "${editor_ge
 target_link_libraries (halley-editor
         halley-tools
         ${FREETYPE_LIBRARIES}
+        ${YAMLCPP_LIBRARY}
         ${EXTRA_LIBS}
         )
 
