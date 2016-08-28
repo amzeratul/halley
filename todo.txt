@@ -2,7 +2,7 @@ core
 - child stages?
 
 core/resources
-* "library" of pre-processed assets from which the game loads data (like Unity)
+- asset database
 - binary format to replace yaml
 - resources hot reloading [RESEARCH]
 - asynchronous resource loading
@@ -16,14 +16,16 @@ core/graphics
 - multi-pass disable batching
 - fallback shaders
 - shaders for other graphics APIs? [RESEARCH]
+- improve sliced sprites API [RESEARCH]
+- improve distance field API (less magic)
 
 input
 - isolate SDL events to SDL-specific file?
 - input context system [RESEARCH]
 
 audio
-* bring library into engine
-* figure out which backend to use (OpenAL still?) [RESEARCH]
+- bring library into engine
+- figure out which backend to use (OpenAL still?) [RESEARCH]
 
 entity
 - query other entities? [RESEARCH]
@@ -49,23 +51,30 @@ lua
 - codegen system
 - Moonscript support
 
-cli tools
-- assets bundler
-- atlas generator?
-- texture converter?
-
-editor
+editor/tools
+* better asset import database
+- generate asset database
+- fix drawing of tasks
+- project selector
+- create project from template
 - connect to game via sockets
-- console
-- asset/prefab editor
+- game stats display
+- console back-end
+- asset/prefab editor?
 - scene editor? [RESEARCH]
 - animation editor
 - system/component/message editor
 - render graph editor
 - state machine editor? [RESEARCH]
+- compile game
+- launch game
+- assets bundler
+- atlas generator?
+- texture converter?
+- remember window position
 
 utils
-* collision detection & triggers
+- collision detection & triggers
 - tasks/concurrency review
 - consider replacing STL with EASTL or similar?
 - fix Maybe<T>?
