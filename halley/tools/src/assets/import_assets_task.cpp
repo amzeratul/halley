@@ -4,6 +4,7 @@
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/tools/make_font/font_generator.h"
+#include "halley/resources/resource_data.h"
 
 using namespace Halley;
 
@@ -80,13 +81,16 @@ void ImportAssetsTask::ensureParentDirectoryExists(Path path)
 
 std::unique_ptr<Metadata> ImportAssetsTask::getMetaData(Path path)
 {
-	// TODO
-	return std::unique_ptr<Metadata>();
+	try {
+		return std::make_unique<Metadata>(*ResourceDataStatic::loadFromFileSystem(path.string() + ".meta"));
+	} catch (...) {
+		return std::unique_ptr<Metadata>();
+	}
 }
 
 void ImportAssetsTask::loadFont(Path src, Path dst) const
 {
-	if (src.extension() != "meta") {
+	if (src.extension() != ".meta") {
 		std::cout << "Importing font " << src << std::endl;
 
 		ensureParentDirectoryExists(dst);
