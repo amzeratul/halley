@@ -3,20 +3,15 @@ core
 
 core/resources
 * "library" of pre-processed assets from which the game loads data (like Unity)
-- "standard library" of resources from Halley
 - binary format to replace yaml
 - resources hot reloading [RESEARCH]
 - asynchronous resource loading
 
 core/graphics
 - convert uniforms into attributes for distance_field_sprite?
-- binary font format
 - optimise SpritePainter
 - render graph [from old Halley]
-- sliced sprites [RESEARCH]
 - run rendering on another thread?
-- generalize Sprite for more attributes [RESEARCH]
-- expand attributes into four vertices at Painter, instead of Renderer
 - multi-pass conditional enabling of pass
 - multi-pass disable batching
 - fallback shaders
@@ -62,7 +57,6 @@ cli tools
 editor
 - connect to game via sockets
 - console
-- current tasks display
 - asset/prefab editor
 - scene editor? [RESEARCH]
 - animation editor
