@@ -123,14 +123,14 @@ namespace Halley {
 		Deserializer(gsl::span<const gsl::byte> src);
 
 		Deserializer& operator>>(bool& val) { return deserializePod(val); }
-		Deserializer& operator>>(char& val) { return deserializePod(val); }
-		Deserializer& operator>>(unsigned char& val) { return deserializePod(val); }
-		Deserializer& operator>>(short& val) { return deserializePod(val); }
-		Deserializer& operator>>(unsigned short& val) { return deserializePod(val); }
-		Deserializer& operator>>(int& val) { return deserializePod(val); }
-		Deserializer& operator>>(unsigned int& val) { return deserializePod(val); }
-		Deserializer& operator>>(long long& val) { return deserializePod(val); }
-		Deserializer& operator>>(unsigned long long& val) { return deserializePod(val); }
+		Deserializer& operator>>(int8_t& val) { return deserializePod(val); }
+		Deserializer& operator>>(uint8_t& val) { return deserializePod(val); }
+		Deserializer& operator>>(int16_t& val) { return deserializePod(val); }
+		Deserializer& operator>>(uint16_t& val) { return deserializePod(val); }
+		Deserializer& operator>>(int32_t& val) { return deserializePod(val); }
+		Deserializer& operator>>(uint32_t& val) { return deserializePod(val); }
+		Deserializer& operator>>(int64_t& val) { return deserializePod(val); }
+		Deserializer& operator>>(uint64_t& val) { return deserializePod(val); }
 		Deserializer& operator>>(float& val) { return deserializePod(val); }
 		Deserializer& operator>>(double& val) { return deserializePod(val); }
 
