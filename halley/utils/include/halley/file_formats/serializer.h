@@ -7,6 +7,7 @@
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
 #include <map>
+#include <cstdint>
 
 namespace Halley {
 	class String;
@@ -36,14 +37,14 @@ namespace Halley {
 		size_t getSize() const { return size; }
 
 		Serializer& operator<<(bool val) { return serializePod(val); }
-		Serializer& operator<<(char val) { return serializePod(val); }
-		Serializer& operator<<(unsigned char val) { return serializePod(val); }
-		Serializer& operator<<(short val) { return serializePod(val); }
-		Serializer& operator<<(unsigned short val) { return serializePod(val); }
-		Serializer& operator<<(int val) { return serializePod(val); }
-		Serializer& operator<<(unsigned int val) { return serializePod(val); }
-		Serializer& operator<<(long long val) { return serializePod(val); }
-		Serializer& operator<<(unsigned long long val) { return serializePod(val); }
+		Serializer& operator<<(int8_t val) { return serializePod(val); }
+		Serializer& operator<<(uint8_t val) { return serializePod(val); }
+		Serializer& operator<<(int16_t val) { return serializePod(val); }
+		Serializer& operator<<(uint16_t val) { return serializePod(val); }
+		Serializer& operator<<(int32_t val) { return serializePod(val); }
+		Serializer& operator<<(uint32_t val) { return serializePod(val); }
+		Serializer& operator<<(int64_t val) { return serializePod(val); }
+		Serializer& operator<<(uint64_t val) { return serializePod(val); }
 		Serializer& operator<<(float val) { return serializePod(val); }
 		Serializer& operator<<(double val) { return serializePod(val); }
 
