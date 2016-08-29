@@ -37,15 +37,22 @@ void CheckAssetsTask::checkAllAssets()
 	auto& db = project.getImportAssetsDatabase();
 	db.markAllAsMissing();
 
-	Vector<AssetToImport> assets;
+	Vector<ImportAssetsDatabaseEntry> assets;
 	std::set<Path> included;
 
 	// Enumerate all potential assets
 	for (auto srcPath : { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }) {
 		for (auto filePath : FileSystem::enumerateDirectory(srcPath)) {
-			if (included.find(filePath) == included.end()) {
+			if (filePath.extension() != ".meta" && included.find(filePath) == included.end()) {
 				included.insert(filePath);
-				assets.emplace_back(filePath, srcPath, FileSystem::getLastWriteTime(srcPath / filePath));
+
+				int64_t metaTime = 0;
+				auto metaPath = (srcPath / filePath).append(".meta");
+				if (FileSystem::exists(metaPath)) {
+					metaTime = FileSystem::getLastWriteTime(metaPath);
+				}
+
+				assets.emplace_back(filePath, srcPath, FileSystem::getLastWriteTime(srcPath / filePath), metaTime);
 				db.markAsPresent(filePath);
 			}
 		}
@@ -58,20 +65,20 @@ void CheckAssetsTask::checkAllAssets()
 	checkAssets(assets);
 }
 
-void CheckAssetsTask::checkAssets(const std::vector<AssetToImport>& assets)
+void CheckAssetsTask::checkAssets(const std::vector<ImportAssetsDatabaseEntry>& assets)
 {
 	auto& db = project.getImportAssetsDatabase();
-	Vector<AssetToImport> toImport;
+	Vector<ImportAssetsDatabaseEntry> toImport;
 
 	for (auto &a : assets) {
-		if (db.needsImporting(a.name, a.fileTime)) {
+		if (db.needsImporting(a)) {
 			toImport.push_back(a);
 		}
 	}
 
 	if (!toImport.empty()) {
 		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(project, std::move(toImport))));
-	}	
+	}
 }
 
 void CheckAssetsTask::deleteMissing(const std::vector<Path>& paths)

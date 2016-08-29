@@ -7,14 +7,35 @@
 
 namespace Halley
 {
+	class Project;
 	class Deserializer;
 	class Serializer;
+
+	class ImportAssetsDatabaseEntry
+	{
+	public:
+		Path inputFile;
+		Path srcDir;
+		int64_t fileTime = 0;
+		int64_t metaTime = 0;
+
+		ImportAssetsDatabaseEntry() {}
+
+		ImportAssetsDatabaseEntry(Path inputFile, Path srcDir, int64_t time, int64_t metaTime)
+			: inputFile(inputFile)
+			, srcDir(srcDir)
+			, fileTime(time)
+			, metaTime(time)
+		{}
+	};
 
 	class ImportAssetsDatabase
 	{
 		struct FileEntry
 		{
-			int64_t timestamp;
+			ImportAssetsDatabaseEntry asset;
+			std::vector<Path> outputFiles;
+
 			bool present;
 
 			void serialize(Serializer& s) const;
@@ -22,13 +43,13 @@ namespace Halley
 		};
 
 	public:
-		ImportAssetsDatabase(Path file);
+		ImportAssetsDatabase(Project& project, Path dbFile);
 
 		void load();
 		void save() const;
 
-		bool needsImporting(Path file, time_t timestamp) const;
-		void markAsImported(Path file, time_t timestamp);
+		bool needsImporting(const ImportAssetsDatabaseEntry& asset) const;
+		void markAsImported(const ImportAssetsDatabaseEntry& asset);
 		void markDeleted(Path file);
 
 		void markAllAsMissing();
@@ -39,8 +60,10 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 	private:
-		Path file;
-		std::map<String, FileEntry> filesImported;
+		Project& project;
+		Path dbFile;
+
+		std::map<Path, FileEntry> filesImported;
 		
 		mutable std::mutex mutex;
 	};

@@ -71,7 +71,7 @@ static Maybe<Vector<BinPackResult>> binarySearch(std::function<Maybe<Vector<BinP
 	return bestResult;
 }
 
-FontGenerator::FontGenerator(bool verbose, std::function<void(float, String)> progressReporter)
+FontGenerator::FontGenerator(bool verbose, std::function<bool(float, String)> progressReporter)
 	: verbose(verbose)
 	, progressReporter(progressReporter)
 {
@@ -88,7 +88,10 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 	minFont = maxFont = 50;
 #endif
 
-	progressReporter(0, "Packing");
+	if (!progressReporter(0, "Packing")) {
+		return;
+	}
+
 	FontFace font(fontFile.string());
 	if (verbose) {
 		std::cout << "Finding best pack size...\n";
@@ -98,7 +101,10 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 		return tryPacking(font, float(fontSize), size, scale, borderSuperSample, range);
 	}, minFont, maxFont, fontSize);
 	font.setSize(float(fontSize));
-	progressReporter(0.1f, "Encoding");
+	
+	if (!progressReporter(0.1f, "Encoding")) {
+		return;
+	}
 
 	auto dstImg = std::make_unique<Image>(size.x, size.y);
 	dstImg->clear(0);
@@ -107,6 +113,7 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 	Vector<std::future<void>> futures;
 	std::mutex m;
 	std::atomic<int> nDone(0);
+	std::atomic<bool> keepGoing(true);
 
 	if (result) {
 		auto& pack = result.get();
@@ -120,7 +127,11 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 			Rect4i srcRect = dstRect * superSample;
 			codes.push_back(CharcodeEntry(charcode, dstRect));
 
-			futures.push_back(std::async(std::launch::async, [=, &m, &font, &dstImg, &nDone] {
+			futures.push_back(std::async(std::launch::async, [=, &m, &font, &dstImg, &nDone, &keepGoing] {
+				if (!keepGoing) {
+					return;
+				}
+
 				if (verbose) {
 					std::cout << "+";
 				}
@@ -132,6 +143,9 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 					font.drawGlyph(*tmpImg, charcode, Vector2i(int(borderSuperSample), int(borderSuperSample)));
 				}
 
+				if (!keepGoing) {
+					return;
+				}
 				auto finalGlyphImg = DistanceFieldGenerator::generate(*tmpImg, dstRect.getSize(), radius);
 				dstImg->blitFrom(dstRect.getTopLeft(), *finalGlyphImg);
 
@@ -142,7 +156,10 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 					std::cout << "-";
 				}
 				float progress = lerp(0.1f, 0.95f, float(++nDone) / float(pack.size()));
-				progressReporter(progress, "Generating");
+				
+				if (!progressReporter(progress, "Generating")) {
+					keepGoing = false;
+				}
 			}));
 		}
 	} else {
@@ -153,10 +170,16 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 	for (auto& f : futures) {
 		f.get();
 	}
+	if (!keepGoing) {
+		return;
+	}
+
 	if (verbose) {
 		std::cout << " Done generating." << std::endl;
 	}
-	progressReporter(0.95f, "Generating files");
+	if (!progressReporter(0.95f, "Generating files")) {
+		return;
+	}
 
 	Path fileName = target.filename();
 	Path dir = target.parent_path();

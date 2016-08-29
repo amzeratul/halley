@@ -1,6 +1,9 @@
 #include "halley/tools/tasks/editor_task_set.h"
+#include <thread>
+#include <chrono>
 
 using namespace Halley;
+using namespace std::chrono_literals;
 
 EditorTaskSet::EditorTaskSet() 
 {}
@@ -11,7 +14,12 @@ EditorTaskSet::~EditorTaskSet()
 	for (auto& t : tasks) {
 		t.cancel();
 	}
-	tasks.clear(); // This will block until they're all done
+
+	// Keep updating until they're all cancelled
+	while (!tasks.empty()) {
+		std::this_thread::sleep_for(25ms);
+		update(0.025f);
+	}
 }
 
 void EditorTaskSet::update(Time time)

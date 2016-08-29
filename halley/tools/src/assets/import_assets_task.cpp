@@ -8,7 +8,7 @@
 
 using namespace Halley;
 
-ImportAssetsTask::ImportAssetsTask(Project& project, Vector<AssetToImport>&& files)
+ImportAssetsTask::ImportAssetsTask(Project& project, Vector<ImportAssetsDatabaseEntry>&& files)
 	: EditorTask("Importing assets", true, true)
 	, project(project)
 	, files(std::move(files))
@@ -30,12 +30,15 @@ void ImportAssetsTask::run()
 
 		curFileProgressStart = float(i) / float(files.size());
 		curFileProgressEnd = float(i + 1) / float(files.size());
-		curFileLabel = files[i].name.filename().string();
+		curFileLabel = files[i].inputFile.filename().string();
 		setProgress(curFileProgressStart, curFileLabel);
 
 		try {
 			importAsset(files[i]);
-			db.markAsImported(files[i].name, files[i].fileTime);
+			if (isCancelled()) {
+				break;
+			}
+			db.markAsImported(files[i]);
 
 			// Check if db needs saving
 			auto now = std::chrono::steady_clock::now();
@@ -44,7 +47,7 @@ void ImportAssetsTask::run()
 				lastSave = now;
 			}
 		} catch (std::exception& e) {
-			std::cout << "Error importing asset " << files[i].name << ": " << e.what() << std::endl;
+			std::cout << "Error importing asset " << files[i].inputFile << ": " << e.what() << std::endl;
 		}
 	}
 	db.save();
@@ -54,11 +57,11 @@ void ImportAssetsTask::run()
 	}
 }
 
-void ImportAssetsTask::importAsset(AssetToImport& asset)
+void ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
-	auto src = asset.srcDir / asset.name;
-	auto dst = project.getAssetsPath() / asset.name;
-	auto root = asset.name.begin()->string();
+	auto src = asset.srcDir / asset.inputFile;
+	auto dst = project.getAssetsPath() / asset.inputFile;
+	auto root = asset.inputFile.begin()->string();
 
 	auto iter = importers.find(root);
 	if (iter != importers.end()) {
@@ -96,8 +99,9 @@ void ImportAssetsTask::loadFont(Path src, Path dst)
 			imgSize.y = meta->getInt("height", 512);
 		}
 
-		FontGenerator gen(false, [=] (float progress, String) {
+		FontGenerator gen(false, [=] (float progress, String) -> bool {
 			setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel);
+			return !isCancelled();
 		});
 		gen.generateFont(src, dst.replace_extension("font"), imgSize, radius, supersample, Range<int>(0, 255));
 	}

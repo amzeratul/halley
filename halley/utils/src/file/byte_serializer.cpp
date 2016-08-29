@@ -34,6 +34,11 @@ Serializer& Serializer::operator<<(const String& str)
 	return (*this << str.cppStr());
 }
 
+Serializer& Serializer::operator<<(const Path& path)
+{
+	return (*this << path.string());
+}
+
 Serializer& Serializer::operator<<(gsl::span<const gsl::byte> span)
 {
 	if (!dryRun) {
@@ -69,6 +74,14 @@ Deserializer& Deserializer::operator>>(String& str)
 	std::string s;
 	*this >> s;
 	str = s;
+	return *this;
+}
+
+Deserializer& Deserializer::operator>>(Path& p)
+{
+	std::string s;
+	*this >> s;
+	p = s;
 	return *this;
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "../tasks/editor_task.h"
-#include "import_assets_task.h"
+#include "import_assets_database.h"
 #include "halley/file/directory_monitor.h"
 
 namespace Halley
@@ -21,7 +21,7 @@ namespace Halley
 		DirectoryMonitor monitorShared;
 
 		void checkAllAssets();
-		void checkAssets(const std::vector<AssetToImport>& assets);
+		void checkAssets(const std::vector<ImportAssetsDatabaseEntry>& assets);
 		void deleteMissing(const std::vector<Path>& paths);
 	};
 }

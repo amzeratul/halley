@@ -82,6 +82,7 @@ utils
 - better HTTP library/replace boost::asio?
 - write my own memory pool/replace boost::pool?
 - YAML replacement
+- DirectoryMonitor support on Linux and Mac
 
 samples
 - make a minimal "template" sample

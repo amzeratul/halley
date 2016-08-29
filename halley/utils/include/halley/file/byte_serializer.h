@@ -6,6 +6,7 @@
 #include "halley/data_structures/flat_map.h"
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
+#include "halley/file/filesystem.h"
 #include <map>
 #include <cstdint>
 #include <utility>
@@ -51,6 +52,7 @@ namespace Halley {
 
 		Serializer& operator<<(const std::string& str);
 		Serializer& operator<<(const String& str);
+		Serializer& operator<<(const Path& path);
 		Serializer& operator<<(gsl::span<const gsl::byte> span);
 
 		template <typename T>
@@ -138,6 +140,7 @@ namespace Halley {
 
 		Deserializer& operator>>(std::string& str);
 		Deserializer& operator>>(String& str);
+		Deserializer& operator>>(Path& p);
 		Deserializer& operator>>(gsl::span<gsl::byte>& span);
 
 		template <typename T>

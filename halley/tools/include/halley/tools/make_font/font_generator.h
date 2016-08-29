@@ -21,10 +21,10 @@ namespace Halley
 			{}
 		};
 
-		static void ignoreReport(float, String) {}
+		static bool ignoreReport(float, String) { return true; }
 
 	public:
-		explicit FontGenerator(bool verbose = false, std::function<void(float, String)> progressReporter = ignoreReport);
+		explicit FontGenerator(bool verbose = false, std::function<bool(float, String)> progressReporter = ignoreReport);
 		void generateFont(Path fontFile, Path result, Vector2i size, float radius, int supersample, Range<int> range);
 
 	private:
@@ -32,6 +32,6 @@ namespace Halley
 		void generateTextureMeta(Path destination);
 
 		bool verbose;
-		std::function<void(float, String)> progressReporter;
+		std::function<bool(float, String)> progressReporter;
 	};
 }

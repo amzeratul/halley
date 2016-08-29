@@ -7,16 +7,25 @@ using namespace Halley;
 
 void ImportAssetsDatabase::FileEntry::serialize(Serializer& s) const
 {
-	s << timestamp;
+	s << asset.inputFile;
+	s << asset.srcDir;
+	s << asset.fileTime;
+	s << asset.metaTime;
+	s << outputFiles;
 }
 
 void ImportAssetsDatabase::FileEntry::deserialize(Deserializer& s)
 {
-	s >> timestamp;
+	s >> asset.inputFile;
+	s >> asset.srcDir;
+	s >> asset.fileTime;
+	s >> asset.metaTime;
+	s >> outputFiles;
 }
 
-ImportAssetsDatabase::ImportAssetsDatabase(Path file)
-	: file(file)
+ImportAssetsDatabase::ImportAssetsDatabase(Project& project, Path dbFile)
+	: project(project)
+	, dbFile(dbFile)
 {
 	load();
 }
@@ -25,7 +34,7 @@ void ImportAssetsDatabase::load()
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	try {
-		auto data = FileSystem::readFile(file);
+		auto data = FileSystem::readFile(dbFile);
 		auto s = Deserializer(data);
 		deserialize(s);
 	} catch (...) {
@@ -36,33 +45,34 @@ void ImportAssetsDatabase::load()
 void ImportAssetsDatabase::save() const
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	FileSystem::writeFile(file, Serializer::toBytes(*this));
+	FileSystem::writeFile(dbFile, Serializer::toBytes(*this));
 }
 
-bool ImportAssetsDatabase::needsImporting(Path file, time_t timestamp) const
+bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	auto iter = filesImported.find(file.string());
+	auto iter = filesImported.find(asset.inputFile);
 	if (iter == filesImported.end()) {
 		return true;
 	} else {
-		return timestamp > iter->second.timestamp;
+		auto& newAsset = iter->second.asset;
+		return asset.srcDir != newAsset.srcDir || asset.fileTime != newAsset.fileTime || asset.metaTime != newAsset.metaTime;
 	}
 }
 
-void ImportAssetsDatabase::markAsImported(Path file, time_t timestamp)
+void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	FileEntry entry;
-	entry.timestamp = timestamp;
+	entry.asset = asset;
 	entry.present = true;
-	filesImported[file.string()] = entry;
+	filesImported[asset.inputFile] = entry;
 }
 
 void ImportAssetsDatabase::markDeleted(Path file)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	filesImported.erase(file.string());
+	filesImported.erase(file);
 }
 
 void ImportAssetsDatabase::markAllAsMissing()
@@ -76,7 +86,7 @@ void ImportAssetsDatabase::markAllAsMissing()
 void ImportAssetsDatabase::markAsPresent(Path file)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	auto iter = filesImported.find(file.string());
+	auto iter = filesImported.find(file);
 	if (iter != filesImported.end()) {
 		iter->second.present = true;
 	}
@@ -88,7 +98,9 @@ std::vector<Path> ImportAssetsDatabase::getAllMissing() const
 	std::vector<Path> result;
 	for (auto& e : filesImported) {
 		if (!e.second.present) {
-			result.push_back(e.first.cppStr());
+			for (auto& o : e.second.outputFiles) {
+				result.push_back(o);
+			}
 		}
 	}
 	return result;
@@ -96,10 +108,18 @@ std::vector<Path> ImportAssetsDatabase::getAllMissing() const
 
 void ImportAssetsDatabase::serialize(Serializer& s) const
 {
+	int version = 1;
+	s << version;
 	s << filesImported;
 }
 
 void ImportAssetsDatabase::deserialize(Deserializer& s)
 {
-	s >> filesImported;
+	int version;
+	s >> version;
+	if (version == 1) {
+		s >> filesImported;
+	} else {
+		save();
+	}
 }
