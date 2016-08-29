@@ -10,7 +10,7 @@ namespace Halley
 	class CheckAssetsTask : public EditorTask
 	{
 	public:
-		CheckAssetsTask(Project& project);
+		CheckAssetsTask(Project& project, bool headless);
 
 	protected:
 		void run() override;
@@ -19,6 +19,7 @@ namespace Halley
 		Project& project;
 		DirectoryMonitor monitor;
 		DirectoryMonitor monitorShared;
+		bool headless;
 
 		void checkAllAssets();
 		void checkAssets(const std::vector<ImportAssetsDatabaseEntry>& assets);

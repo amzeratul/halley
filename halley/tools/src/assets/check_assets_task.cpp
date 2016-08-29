@@ -10,11 +10,12 @@
 using namespace Halley;
 using namespace std::chrono_literals;
 
-CheckAssetsTask::CheckAssetsTask(Project& project)
+CheckAssetsTask::CheckAssetsTask(Project& project, bool headless)
 	: EditorTask("Check assets", true, false)
 	, project(project)
 	, monitor(project.getAssetsSrcPath())
 	, monitorShared(project.getSharedAssetsSrcPath())
+	, headless(headless)
 {}
 
 void CheckAssetsTask::run()
@@ -29,6 +30,10 @@ void CheckAssetsTask::run()
 		do {
 			std::this_thread::sleep_for(monitor.hasRealImplementation() ? 25ms : 100ms);
 		} while (hasPendingTasks());
+
+		if (headless) {
+			return;
+		}
 	}
 }
 
