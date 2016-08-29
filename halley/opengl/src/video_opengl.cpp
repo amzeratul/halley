@@ -90,7 +90,7 @@ void VideoOpenGL::createWindow(const Window& window)
 {
 	// Set flags and GL attributes
 	auto windowType = window.getWindowType();
-	int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS;
+	int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_INPUT_FOCUS;
 	if (windowType == WindowType::BorderlessWindow) {
 		flags |= SDL_WINDOW_BORDERLESS;
 	} else if (windowType == WindowType::ResizableWindow) {
@@ -132,9 +132,10 @@ void VideoOpenGL::createWindow(const Window& window)
 	if (!sdlWindow) {
 		throw Exception(String("Error creating SDL window: ") + SDL_GetError());
 	}
-
-	// Set window icon
+	
+	// Set window icon and show
 	NativeWindow::setWindowIcon(sdlWindow);
+	SDL_ShowWindow(sdlWindow);
 
 	// Update
 	updateWindow(window);

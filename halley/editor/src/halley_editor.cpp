@@ -54,10 +54,9 @@ bool HalleyEditor::shouldCreateSeparateConsole() const
 
 void HalleyEditor::init(const Environment& environment, const Vector<String>& args)
 {
-	using boost::filesystem::path;
-	sharedAssetsPath = path(environment.getProgramPath().cppStr()).parent_path().parent_path() / "assets_src";
+	sharedAssetsPath = Path(environment.getProgramPath().cppStr()).parent_path().parent_path() / "assets_src";
 
-	preferences = std::make_unique<Preferences>((path(environment.getDataPath().cppStr()) / "settings.yaml").string());
+	preferences = std::make_unique<Preferences>((Path(environment.getDataPath().cppStr()) / "settings.yaml").string());
 	preferences->load();
 
 	parseArguments(args);
@@ -99,7 +98,7 @@ std::unique_ptr<Stage> HalleyEditor::startGame(HalleyAPI* api)
 	return std::make_unique<EditorRootStage>(*this);
 }
 
-Project& HalleyEditor::loadProject(boost::filesystem::path path)
+Project& HalleyEditor::loadProject(Path path)
 {
 	project = std::make_unique<Project>(path, sharedAssetsPath);
 
@@ -110,7 +109,7 @@ Project& HalleyEditor::loadProject(boost::filesystem::path path)
 	return *project;
 }
 
-Project& HalleyEditor::createProject(boost::filesystem::path path)
+Project& HalleyEditor::createProject(Path path)
 {
 	project.reset();
 

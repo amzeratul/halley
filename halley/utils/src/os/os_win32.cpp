@@ -164,7 +164,7 @@ void OSWin32::loadWindowIcon(HWND hwnd)
 {
 	if (icon != nullptr) {
 		::SetClassLongPtr(hwnd, GCLP_HICON, reinterpret_cast<LONG_PTR>(icon));
-		//::SendMessage(hwnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(icon));
+		::SendMessage(hwnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(icon));
 	}
 }
 
