@@ -28,7 +28,11 @@ void ImportAssetsTask::run()
 		if (isCancelled()) {
 			break;
 		}
-		setProgress(float(i) / float(files.size()), files[i].name.filename().string());
+
+		curFileProgressStart = float(i) / float(files.size());
+		curFileProgressEnd = float(i + 1) / float(files.size());
+		curFileLabel = files[i].name.filename().string();
+		setProgress(curFileProgressStart, curFileLabel);
 
 		try {
 			importAsset(files[i]);
@@ -88,7 +92,7 @@ std::unique_ptr<Metadata> ImportAssetsTask::getMetaData(Path path)
 	}
 }
 
-void ImportAssetsTask::loadFont(Path src, Path dst) const
+void ImportAssetsTask::loadFont(Path src, Path dst)
 {
 	if (src.extension() != ".meta") {
 		std::cout << "Importing font " << src << std::endl;
@@ -106,7 +110,9 @@ void ImportAssetsTask::loadFont(Path src, Path dst) const
 			imgSize.y = meta->getInt("height", 512);
 		}
 
-		FontGenerator gen;
+		FontGenerator gen(false, [=] (float progress, String) {
+			setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel);
+		});
 		gen.generateFont(src, dst.replace_extension("font"), imgSize, radius, supersample, Range<int>(0, 255));
 	}
 }

@@ -37,12 +37,16 @@ namespace Halley
 		bool headless;
 		Vector<AssetToImport> files;
 		std::map<String, std::function<void(Path, Path)>> importers;
+		
+		float curFileProgressStart;
+		float curFileProgressEnd;
+		std::string curFileLabel;
 
 		void importAsset(AssetToImport& asset);
 		static void ensureParentDirectoryExists(Path path);
 		static std::unique_ptr<Metadata> getMetaData(Path path);
 
-		void loadFont(Path src, Path dst) const;
+		void loadFont(Path src, Path dst);
 
 		void setImportTable();
 	};

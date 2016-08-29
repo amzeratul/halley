@@ -1,6 +1,7 @@
 #include <fstream>
 #include <future>
 #include <cstdint>
+#include <atomic>
 #include <boost/filesystem.hpp>
 #include <yaml-cpp/yaml.h>
 
@@ -69,8 +70,9 @@ static Maybe<Vector<BinPackResult>> binarySearch(std::function<Maybe<Vector<BinP
 	return bestResult;
 }
 
-FontGenerator::FontGenerator(bool verbose)
+FontGenerator::FontGenerator(bool verbose, std::function<void(float, String)> progressReporter)
 	: verbose(verbose)
+	, progressReporter(progressReporter)
 {
 }
 
@@ -85,6 +87,7 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 	minFont = maxFont = 50;
 #endif
 
+	progressReporter(0, "Packing");
 	FontFace font(fontFile.string());
 	if (verbose) {
 		std::cout << "Finding best pack size...\n";
@@ -94,6 +97,7 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 		return tryPacking(font, float(fontSize), size, scale, borderSuperSample, range);
 	}, minFont, maxFont, fontSize);
 	font.setSize(float(fontSize));
+	progressReporter(0.1f, "Encoding");
 
 	auto dstImg = std::make_unique<Image>(size.x, size.y);
 	dstImg->clear(0);
@@ -101,6 +105,7 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 	Vector<CharcodeEntry> codes;
 	Vector<std::future<void>> futures;
 	std::mutex m;
+	std::atomic<int> nDone(0);
 
 	if (result) {
 		auto& pack = result.get();
@@ -114,7 +119,7 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 			Rect4i srcRect = dstRect * superSample;
 			codes.push_back(CharcodeEntry(charcode, dstRect));
 
-			futures.push_back(std::async(std::launch::async, [=, &m, &font, &dstImg] {
+			futures.push_back(std::async(std::launch::async, [=, &m, &font, &dstImg, &nDone] {
 				if (verbose) {
 					std::cout << "+";
 				}
@@ -135,6 +140,8 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 				if (verbose) {
 					std::cout << "-";
 				}
+				float progress = lerp(0.1f, 0.95f, float(++nDone) / float(pack.size()));
+				progressReporter(progress, "Generating");
 			}));
 		}
 	} else {
@@ -148,6 +155,7 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 	if (verbose) {
 		std::cout << " Done generating." << std::endl;
 	}
+	progressReporter(0.95f, "Generating files");
 
 	Path fileName = target.filename();
 	Path dir = target.parent_path();
@@ -163,6 +171,7 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 
 	generateFontMapBinary(imgName.string(), font, codes, binPath, scale, radius, size);
 	generateTextureMeta(metaPath.string());
+	progressReporter(1.0f, "Done");
 }
 
 void FontGenerator::generateFontMapBinary(String imgName, FontFace& font, Vector<CharcodeEntry>& entries, Path outPath, float scale, float radius, Vector2i imageSize) const
