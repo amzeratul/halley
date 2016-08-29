@@ -18,8 +18,8 @@ namespace Halley {
 		Serializer();
 		explicit Serializer(gsl::span<gsl::byte> dst);
 
-		template <typename T>
-		static typename std::enable_if<std::is_convertible<T, std::function<void(Serializer&)>>::value, Bytes>::type toBytes(const T& f)
+		template <typename T, typename std::enable_if<std::is_convertible<T, std::function<void(Serializer&)>>::value, int>::type = 0>
+		static Bytes toBytes(const T& f)
 		{
 			Serializer dry;
 			f(dry);
@@ -29,8 +29,8 @@ namespace Halley {
 			return result;
 		}
 
-		template <typename T>
-		static typename std::enable_if<!std::is_convertible<T, std::function<void(Serializer&)>>::value, Bytes>::type toBytes(const T& value)
+		template <typename T, typename std::enable_if<!std::is_convertible<T, std::function<void(Serializer&)>>::value, int>::type = 0>
+		static Bytes toBytes(const T& value)
 		{
 			return toBytes([&value](Serializer& s) { value.serialize(s); });
 		}
