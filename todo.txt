@@ -52,6 +52,7 @@ lua
 - Moonscript support
 
 editor/tools
+- codegen
 - generate asset database
 - fix drawing of tasks
 - project selector
@@ -71,6 +72,7 @@ editor/tools
 - atlas generator?
 - texture converter?
 - remember window position
+- generate fonts with OpenCL
 
 utils
 - collision detection & triggers
