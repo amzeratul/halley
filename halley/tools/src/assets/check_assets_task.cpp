@@ -27,7 +27,7 @@ void CheckAssetsTask::run()
 		}
 
 		do {
-			std::this_thread::sleep_for(25ms);
+			std::this_thread::sleep_for(monitor.hasRealImplementation() ? 25ms : 100ms);
 		} while (hasPendingTasks());
 	}
 }

@@ -14,6 +14,7 @@ namespace Halley
 		~DirectoryMonitor();
 
 		bool poll();
+		bool hasRealImplementation() const;
 
 	private:
 		std::unique_ptr<DirectoryMonitorPimpl> pimpl;

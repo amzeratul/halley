@@ -52,7 +52,6 @@ lua
 - Moonscript support
 
 editor/tools
-- better/smarter import assets system
 - generate asset database
 - fix drawing of tasks
 - project selector

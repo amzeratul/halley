@@ -40,6 +40,11 @@ namespace Halley {
 			return changed;
 		}
 
+		bool hasRealImplementation() const
+		{
+			return true;
+		}
+
 	private:
 		HANDLE handle;
 		Path path;
@@ -55,6 +60,7 @@ namespace Halley {
 	public:
 		DirectoryMonitorPimpl(const Path&) {}
 		bool poll() { return true; };
+		bool hasRealImplementation() const { return false; }
 	};
 }
 
@@ -71,3 +77,7 @@ bool DirectoryMonitor::poll()
 	return pimpl->poll();
 }
 
+bool DirectoryMonitor::hasRealImplementation() const
+{
+	return pimpl->hasRealImplementation();
+}
