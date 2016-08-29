@@ -25,6 +25,7 @@
 #include "input/input_keyboard_concrete.h"
 #include "input/input_touch.h"
 #include <SDL.h>
+#include "halley/support/console.h"
 
 #ifdef _MSC_VER
 #include "input/input_joystick_xinput.h"
@@ -57,10 +58,13 @@ void Input::init()
 	for (int i = 0; i<nJoy; i++) {
 		auto joy = std::unique_ptr<InputJoystick>(new InputJoystickSDL(i));
 		String name = joy->getName();
-		// Don't add if it's a 360 controller
-		if (!hasXInput || name.asciiLower().find("xbox 360") == String::npos) {
-			sdlJoys[i] = joy.get();
+
+		bool isXinputController = name.asciiLower().find("xbox 360") != String::npos || name.asciiLower().find("xinput") != String::npos;
+		if (!hasXInput || !isXinputController) {
 			joysticks.push_back(std::move(joy));
+			sdlJoys[i] = joysticks.back().get();
+
+			std::cout << "\tInitialized SDL joystick: \"" << ConsoleColour(Console::DARK_GREY) << name << ConsoleColour() << "\".\n";
 		}
 	}
 

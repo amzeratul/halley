@@ -50,9 +50,6 @@ InputJoystickSDL::InputJoystickSDL(int number)
 	// Buttons
 	int buttons = SDL_JoystickNumButtons(joy);
 	init(buttons);
-
-	// Done
-	std::cout << "\tInitialized SDL joystick: \"" << ConsoleColour(Console::DARK_GREY) << InputJoystickSDL::getName() << ConsoleColour() << "\".\n";
 }
 
 InputJoystickSDL::~InputJoystickSDL()
