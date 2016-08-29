@@ -52,7 +52,7 @@ lua
 - Moonscript support
 
 editor/tools
-* better asset import database
+- better/smarter import assets system
 - generate asset database
 - fix drawing of tasks
 - project selector
@@ -81,6 +81,7 @@ utils
 - improve Halley::String?
 - better HTTP library/replace boost::asio?
 - write my own memory pool/replace boost::pool?
+- YAML replacement
 
 samples
 - make a minimal "template" sample
@@ -99,6 +100,11 @@ samples
 porting issues:
 - exception during entity initialization can cause ::abort() to be called
 - CMake is horrible
+
+misc/refactor
+- Use C++ modules? (pending approval of SG2 TS + implementation)
+- use GSL through code base
+- filesystem utils
 
 build
 - figure out how to handle code generation and its errors :|

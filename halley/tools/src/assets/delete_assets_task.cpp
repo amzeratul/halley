@@ -23,7 +23,7 @@ void DeleteAssetsTask::run()
 		}
 
 		try {
-			boost::filesystem::remove(root / f);
+			FileSystem::remove(root / f);
 			db.markDeleted(f);
 		} catch (std::exception& e) {
 			std::cout << "Error removing file " << f << ": " << e.what() << std::endl;

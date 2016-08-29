@@ -1,6 +1,6 @@
 #include <cstring>
 #include <string>
-#include "halley/file_formats/serializer.h"
+#include "halley/file/byte_serializer.h"
 #include "halley/text/halleystring.h"
 
 using namespace Halley;
@@ -46,6 +46,12 @@ Serializer& Serializer::operator<<(gsl::span<const gsl::byte> span)
 Deserializer::Deserializer(gsl::span<const gsl::byte> src)
 	: pos(0)
 	, src(src)
+{
+}
+
+Deserializer::Deserializer(const Bytes& src)
+	: pos(0)
+	, src(gsl::as_bytes(gsl::span<const Halley::Byte>(src)))
 {
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "halley/tools/tasks/editor_task.h"
-#include <boost/filesystem.hpp>
+#include "halley/file/filesystem.h"
 #include <map>
 #include <functional>
 #include "halley/resources/metadata.h"
@@ -8,7 +8,6 @@
 namespace Halley
 {
 	class Project;
-	using Path = boost::filesystem::path;
 
 	class AssetToImport
 	{
@@ -43,7 +42,6 @@ namespace Halley
 		std::string curFileLabel;
 
 		void importAsset(AssetToImport& asset);
-		static void ensureParentDirectoryExists(Path path);
 		static std::unique_ptr<Metadata> getMetaData(Path path);
 
 		void loadFont(Path src, Path dst);

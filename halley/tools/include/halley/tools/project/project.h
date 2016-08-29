@@ -1,11 +1,9 @@
 #pragma once
 
-#include <boost/filesystem.hpp>
+#include "halley/file/filesystem.h"
 
 namespace Halley
 {
-	using Path = boost::filesystem::path;
-
 	class ImportAssetsDatabase;
 
 	class Project

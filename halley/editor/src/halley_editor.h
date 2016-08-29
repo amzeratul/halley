@@ -1,7 +1,7 @@
 #pragma once
 
 #include "prec.h"
-#include <boost/filesystem.hpp>
+#include "halley/file/filesystem.h"
 
 namespace Halley
 {
@@ -14,8 +14,8 @@ namespace Halley
 		HalleyEditor();
 		~HalleyEditor();
 
-		Project& loadProject(boost::filesystem::path path);
-		Project& createProject(boost::filesystem::path path);
+		Project& loadProject(Path path);
+		Project& createProject(Path path);
 
 		bool hasProjectLoaded() const;
 		Project& getProject() const;
@@ -35,7 +35,7 @@ namespace Halley
 	private:
 		std::unique_ptr<Project> project;
 		std::unique_ptr<Preferences> preferences;
-		boost::filesystem::path sharedAssetsPath;
+		Path sharedAssetsPath;
 		bool headless = true;
 
 		void parseArguments(const std::vector<String>& args);

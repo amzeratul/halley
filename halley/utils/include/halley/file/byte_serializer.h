@@ -122,6 +122,7 @@ namespace Halley {
 	class Deserializer {
 	public:
 		Deserializer(gsl::span<const gsl::byte> src);
+		explicit Deserializer(const Bytes& src);
 
 		Deserializer& operator>>(bool& val) { return deserializePod(val); }
 		Deserializer& operator>>(int8_t& val) { return deserializePod(val); }

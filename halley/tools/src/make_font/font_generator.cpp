@@ -9,7 +9,8 @@
 #include "halley/tools/distance_field/distance_field_generator.h"
 #include <halley/data_structures/bin_pack.h>
 #include <halley/file_formats/image.h>
-#include "halley/file_formats/serializer.h"
+#include "halley/file/byte_serializer.h"
+#include "halley/file/filesystem.h"
 
 using namespace Halley;
 
@@ -211,10 +212,7 @@ void FontGenerator::generateFontMapBinary(String imgName, FontFace& font, Vector
 		}
 	};
 	
-	auto bytes = Serializer::toBytes(serialize);
-	std::ofstream out(outPath.string(), std::ios::out | std::ios::binary);
-	out.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
-	out.close();
+	FileSystem::writeFile(outPath, Serializer::toBytes(serialize));
 }
 
 void FontGenerator::generateTextureMeta(Path outPath)

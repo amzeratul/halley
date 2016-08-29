@@ -2,12 +2,10 @@
 
 #include "font_face.h"
 #include <halley/maths/rect.h>
-#include <boost/filesystem/path.hpp>
+#include "halley/file/filesystem.h"
 
 namespace Halley
 {
-	using Path = boost::filesystem::path;
-
 	class FontGenerator
 	{
 		struct CharcodeEntry

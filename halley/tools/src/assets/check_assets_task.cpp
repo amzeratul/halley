@@ -4,6 +4,7 @@
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/tools/assets/delete_assets_task.h"
+#include <boost/filesystem/operations.hpp>
 
 using namespace Halley;
 
@@ -24,12 +25,12 @@ void CheckAssetsTask::run()
 
 	// Enumerate all potential assets
 	for (auto srcPath : { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }) {
-		if (boost::filesystem::exists(srcPath)) {
+		if (FileSystem::exists(srcPath)) {
 			using RDI = boost::filesystem::recursive_directory_iterator;
 			RDI end;
 			for (RDI i(srcPath); i != end; ++i) {
 				Path fullPath = i->path();
-				if (boost::filesystem::is_regular_file(fullPath)) {
+				if (FileSystem::isFile(fullPath)) {
 					Path filePath = fullPath.lexically_relative(srcPath);
 
 					std::string filename = filePath.filename().string();
@@ -37,7 +38,7 @@ void CheckAssetsTask::run()
 						included.insert(filename);
 
 						// First time we're seeing this file. Check if it needs to be imported
-						auto time = boost::filesystem::last_write_time(fullPath);
+						auto time = FileSystem::getLastWriteTime(fullPath);
 						db.markAsPresent(filePath);
 						if (db.needsImporting(filePath, time)) {
 							filesToImport.push_back(AssetToImport(filePath, srcPath, time));

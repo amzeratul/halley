@@ -19,7 +19,8 @@
 
 \*****************************************************************/
 
-#include "halley/file_formats/string_serializer.h"
+#include "halley/file/string_serializer.h"
+
 using namespace Halley;
 
 String StringSerializer::encode(Vector2i v)

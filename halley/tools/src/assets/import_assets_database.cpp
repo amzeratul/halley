@@ -1,6 +1,7 @@
 #include "halley/tools/assets/import_assets_database.h"
-#include "halley/file_formats/serializer.h"
+#include "halley/file/byte_serializer.h"
 #include "halley/resources/resource_data.h"
+#include "halley/file/filesystem.h"
 
 using namespace Halley;
 
@@ -24,8 +25,8 @@ void ImportAssetsDatabase::load()
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	try {
-		auto data = ResourceDataStatic::loadFromFileSystem(file.string());
-		auto s = Deserializer(data->getSpan());
+		auto data = FileSystem::readFile(file);
+		auto s = Deserializer(data);
 		deserialize(s);
 	} catch (...) {
 		// No database found, just ignore it
@@ -35,11 +36,7 @@ void ImportAssetsDatabase::load()
 void ImportAssetsDatabase::save() const
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	
-	auto bytes = Serializer::toBytes(*this);
-	std::ofstream fp(file.string(), std::ios::binary | std::ios::out);
-	fp.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
-	fp.close();
+	FileSystem::writeFile(file, Serializer::toBytes(*this));
 }
 
 bool ImportAssetsDatabase::needsImporting(Path file, time_t timestamp) const

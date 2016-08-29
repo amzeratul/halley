@@ -3,7 +3,7 @@
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/material/material_parameter.h"
 #include "halley/core/api/halley_api.h"
-#include "halley/file_formats/serializer.h"
+#include "halley/file/byte_serializer.h"
 #include "resources/resources.h"
 #include <yaml-cpp/yaml.h>
 

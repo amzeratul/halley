@@ -1,5 +1,5 @@
 #pragma once
-#include <boost/filesystem.hpp>
+#include "halley/file/filesystem.h"
 #include <map>
 #include <mutex>
 #include "halley/text/halleystring.h"
@@ -9,7 +9,6 @@ namespace Halley
 {
 	class Deserializer;
 	class Serializer;
-	using Path = boost::filesystem::path;
 
 	class ImportAssetsDatabase
 	{

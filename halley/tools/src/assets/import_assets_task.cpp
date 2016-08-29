@@ -70,16 +70,7 @@ void ImportAssetsTask::importAsset(AssetToImport& asset)
 		iter->second(src, dst);
 	} else {
 		// No importer found, just copy
-		ensureParentDirectoryExists(dst);
-		boost::filesystem::copy_file(src, dst, boost::filesystem::copy_option::overwrite_if_exists);
-	}
-}
-
-void ImportAssetsTask::ensureParentDirectoryExists(Path path)
-{
-	auto dstDir = boost::filesystem::is_directory(path) ? path : path.parent_path();
-	if (!boost::filesystem::exists(dstDir)) {
-		boost::filesystem::create_directories(dstDir);
+		FileSystem::copyFile(src, dst);
 	}
 }
 
@@ -97,7 +88,7 @@ void ImportAssetsTask::loadFont(Path src, Path dst)
 	if (src.extension() != ".meta") {
 		std::cout << "Importing font " << src << std::endl;
 
-		ensureParentDirectoryExists(dst);
+		FileSystem::createParentDir(dst);
 
 		Vector2i imgSize(512, 512);
 		float radius = 8;

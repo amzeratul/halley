@@ -1,12 +1,10 @@
 #pragma once
 #include "../tasks/editor_task.h"
-#include <boost/filesystem/path.hpp>
 #include "halley/data_structures/vector.h"
+#include "halley/file/filesystem.h"
 
 namespace Halley {
 	class Project;
-
-	using Path = boost::filesystem::path;
 
 	class DeleteAssetsTask : public EditorTask
 	{
