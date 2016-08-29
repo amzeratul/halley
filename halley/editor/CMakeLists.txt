@@ -25,6 +25,15 @@ set (editor_headers
 	"src/ui/taskbar/taskbar.h"
 	)
 
+if (MSVC)
+	set (editor_headers
+		${EDITOR_HEADERS}
+		"res/halley-editor.rc"
+		"res/resource.h"
+		"res/halley.ico"
+	)
+endif ()
+
 set (editor_gen_definitions
 	"gen_src/editor.yaml"
 	)

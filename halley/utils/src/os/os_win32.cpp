@@ -19,12 +19,14 @@
 
 \*****************************************************************/
 
-#include <iostream>
 #ifdef _WIN32
 #include "halley/support/exception.h"
 
 #pragma warning(disable: 6387)
 #include "os_win32.h"
+
+#include <iostream>
+#include <winuser.h>
 #include <Lmcons.h>
 #include <Shlobj.h>
 #include <fcntl.h>
@@ -74,6 +76,10 @@ Halley::OSWin32::OSWin32()
 		pSvc = nullptr;
 		pLoc = nullptr;
 	}
+
+	// Load icon
+	HINSTANCE handle = ::GetModuleHandle(nullptr);
+	icon = ::LoadIcon(handle, "IDI_MAIN_ICON");
 }
 
 Halley::OSWin32::~OSWin32()
@@ -154,17 +160,33 @@ BOOL CALLBACK onMonitorInfo(HMONITOR /*hMonitor*/, HDC /*hdcMonitor*/, LPRECT lp
 	return (info->n != 2);
 }
 
+void OSWin32::loadWindowIcon(HWND hwnd)
+{
+	if (icon != nullptr) {
+		::SetClassLongPtr(hwnd, GCLP_HICON, reinterpret_cast<LONG_PTR>(icon));
+		//::SendMessage(hwnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(icon));
+	}
+}
+
+void OSWin32::onWindowCreated(void* window)
+{
+	loadWindowIcon(reinterpret_cast<HWND>(window));
+}
+
 void Halley::OSWin32::createLogConsole(String winTitle)
 {
 	AllocConsole();
 	SetConsoleTitle(winTitle.c_str());
+
+	// Icon
+	HWND con = GetConsoleWindow();
+	loadWindowIcon(con);
 
 	// Position console
 	MonitorInfo info;
 	info.n = 0;
 	EnumDisplayMonitors(nullptr, nullptr, onMonitorInfo, LPARAM(&info));
 	if (info.n > 1) {
-		HWND con = GetConsoleWindow();
 		RECT rect;
 		GetWindowRect(con, &rect);
 		int w = rect.right - rect.left;

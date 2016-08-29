@@ -1,4 +1,12 @@
 ﻿#include <SDL.h>
+#include <SDL_syswm.h>
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
+
 #include "gl_core_3_3.h"
 #include "halley_gl.h"
 #include "video_opengl.h"
@@ -10,6 +18,7 @@
 #include <halley/support/exception.h>
 #include <halley/support/debug.h>
 #include <halley/core/graphics/window.h>
+#include "halley/os/os.h"
 using namespace Halley;
 
 #ifdef _MSC_VER
@@ -131,6 +140,17 @@ void VideoOpenGL::createWindow(const Window& window)
 	if (!sdlWindow) {
 		throw Exception(String("Error creating SDL window: ") + SDL_GetError());
 	}
+
+	// Set window icon
+#ifdef _WIN32
+	SDL_SysWMinfo wminfo;
+	SDL_VERSION(&wminfo.version);
+	if (SDL_GetWindowWMInfo(sdlWindow, &wminfo) == 1) {
+		OS::get().onWindowCreated(wminfo.info.win.window);
+	}
+#endif
+
+	// Update
 	updateWindow(window);
 }
 

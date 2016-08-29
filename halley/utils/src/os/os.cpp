@@ -64,6 +64,10 @@ void OS::initializeConsole()
 {
 }
 
+void OS::onWindowCreated(void* sdlWindow)
+{
+}
+
 Halley::ComputerData Halley::OS::getComputerData()
 {
 	return ComputerData();

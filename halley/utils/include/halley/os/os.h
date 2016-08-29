@@ -44,6 +44,8 @@ namespace Halley {
 		virtual void createLogConsole(String name);
 		virtual void initializeConsole();
 
+		virtual void onWindowCreated(void* windowHandle);
+
 		virtual ComputerData getComputerData();
 		virtual String getUserDataDir()=0;
 		virtual String makeDataPath(String appDataPath, String userProvidedPath);

@@ -24,6 +24,7 @@
 #ifdef _WIN32
 #include <halley/os/os.h>
 #define _WIN32_DCOM
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <wbemidl.h>
 
@@ -40,11 +41,15 @@ namespace Halley {
 		String getUserDataDir() override;
 		void setConsoleColor(int foreground, int background) override;
 
+		void onWindowCreated(void* window) override;
+
 	private:
 		String runWMIQuery(String query, String parameter) const;
+		void loadWindowIcon(HWND hwnd);
 
 		IWbemLocator *pLoc;
 		IWbemServices *pSvc;
+		HICON icon;
 	};
 }
 

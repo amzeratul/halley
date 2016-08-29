@@ -48,7 +48,8 @@ bool HalleyEditor::isDevBuild() const
 
 bool HalleyEditor::shouldCreateSeparateConsole() const
 {
-	return !headless && isDevBuild();
+	//return !headless && isDevBuild();
+	return false;
 }
 
 void HalleyEditor::init(const Environment& environment, const Vector<String>& args)
