@@ -8,6 +8,7 @@
 #include "halley/maths/rect.h"
 #include <map>
 #include <cstdint>
+#include <utility>
 
 namespace Halley {
 	class String;
@@ -157,13 +158,11 @@ namespace Halley {
 		{
 			unsigned int sz;
 			*this >> sz;
+			std::vector<std::pair<T, U>> tmpData(sz);
 			for (unsigned int i = 0; i < sz; i++) {
-				T key;
-				U value;
-				*this >> key;
-				*this >> value;
-				val[key] = value;
+				*this >> tmpData[i].first >> tmpData[i].second;
 			}
+			val = FlatMap<T, U>(boost::container::ordered_unique_range_t(), tmpData.begin(), tmpData.end());
 			return *this;
 		}
 
@@ -175,8 +174,7 @@ namespace Halley {
 			for (unsigned int i = 0; i < sz; i++) {
 				T key;
 				U value;
-				*this >> key;
-				*this >> value;
+				*this >> key >> value;
 				val[key] = value;
 			}
 			return *this;

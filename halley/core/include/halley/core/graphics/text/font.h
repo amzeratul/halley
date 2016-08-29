@@ -25,10 +25,12 @@ namespace Halley
 			Vector2f advance;
 			
 			Glyph();
+			Glyph(const Glyph& other) = default;
 			Glyph(Glyph&& other) = default;
 			Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance);
 
 			Glyph& operator=(const Glyph& o) = default;
+			Glyph& operator=(Glyph&& o) = default;
 
 			void deserialize(Deserializer& deserializer);
 		};
