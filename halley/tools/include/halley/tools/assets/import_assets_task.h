@@ -26,14 +26,13 @@ namespace Halley
 	class ImportAssetsTask : public EditorTask
 	{
 	public:
-		ImportAssetsTask(Project& project, bool headless, Vector<AssetToImport>&& files);
+		ImportAssetsTask(Project& project, Vector<AssetToImport>&& files);
 
 	protected:
 		void run() override;
 
 	private:
 		Project& project;
-		bool headless;
 		Vector<AssetToImport> files;
 		std::map<String, std::function<void(Path, Path)>> importers;
 		

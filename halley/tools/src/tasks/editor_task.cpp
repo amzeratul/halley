@@ -10,6 +10,7 @@ EditorTask::EditorTask(String name, bool isCancellable, bool isVisible)
 	: progress(0)
 	, name(name)
 	, cancelled(false)
+	, pendingTaskCount(0)
 	, isCancellable(isCancellable)
 	, isVisible(isVisible)
 {}
@@ -36,6 +37,25 @@ bool EditorTask::isCancelled() const
 	return cancelled;
 }
 
+bool EditorTask::hasPendingTasks() const
+{
+	return pendingTaskCount != 0;
+}
+
+void EditorTask::addPendingTask(EditorTaskAnchor&& task)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	++pendingTaskCount;
+	task.setParent(*this);
+	pendingTasks.emplace_back(std::move(task));
+}
+
+void EditorTask::onPendingTaskDone(const EditorTaskAnchor& editorTaskAnchor)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	--pendingTaskCount;
+}
+
 EditorTaskAnchor::EditorTaskAnchor(std::unique_ptr<EditorTask> t, float delay)
 	: task(std::move(t))
 	, status(EditorTaskStatus::WaitingToStart)
@@ -51,8 +71,14 @@ EditorTaskAnchor::~EditorTaskAnchor()
 	// If this has been moved, task will be null
 	if (task) {
 		// Wait for task to join
-		cancel();
-		while (status == EditorTaskStatus::Started && !taskFuture.hasValue()) {}
+		if (status != EditorTaskStatus::Done) {
+			cancel();
+			while (status == EditorTaskStatus::Started && !taskFuture.hasValue()) {}
+		}
+
+		if (parent) {
+			parent->onPendingTaskDone(*this);
+		}
 	}
 }
 
@@ -113,4 +139,19 @@ void EditorTaskAnchor::cancel()
 Vector<EditorTaskAnchor> EditorTaskAnchor::getContinuations()
 {
 	return std::move(task->continuations);
+}
+
+Vector<EditorTaskAnchor> EditorTaskAnchor::getPendingTasks()
+{
+	if (task->pendingTaskCount > 0) {
+		std::lock_guard<std::mutex> lock(task->mutex);
+		return std::move(task->pendingTasks);
+	} else {
+		return Vector<EditorTaskAnchor>();
+	}
+}
+
+void EditorTaskAnchor::setParent(EditorTask& editorTask)
+{
+	parent = &editorTask;
 }

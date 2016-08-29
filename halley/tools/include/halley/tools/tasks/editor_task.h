@@ -34,14 +34,22 @@ namespace Halley
 		void setProgress(float progress, String label = "");
 		bool isCancelled() const;
 
+		bool hasPendingTasks() const;
+		void addPendingTask(EditorTaskAnchor&& task);
+		void onPendingTaskDone(const EditorTaskAnchor& editorTaskAnchor);
+
 	private:
 		Vector<EditorTaskAnchor> continuations;
+		Vector<EditorTaskAnchor> pendingTasks;
+
 		mutable std::mutex mutex;
 		std::atomic<float> progress;
 		String name;
 		String progressLabel;
 
 		std::atomic<bool> cancelled;
+		std::atomic<int> pendingTaskCount;
+
 		const bool isCancellable;
 		const bool isVisible;
 	};
@@ -70,10 +78,14 @@ namespace Halley
 		void setId(int value) { id = value; }
 
 		Vector<EditorTaskAnchor> getContinuations();
+		Vector<EditorTaskAnchor> getPendingTasks();
+		void setParent(EditorTask& editorTask);
 
 	private:
 		std::unique_ptr<EditorTask> task;
 		Future<void> taskFuture;
+
+		EditorTask* parent = nullptr;
 
 		EditorTaskStatus status;
 		float timeToStart = 0;

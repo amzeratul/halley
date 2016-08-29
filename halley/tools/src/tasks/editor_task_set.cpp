@@ -18,6 +18,12 @@ void EditorTaskSet::update(Time time)
 {
 	for (size_t i = 0; i < tasks.size(); ) {
 		tasks[i].update(static_cast<float>(time));
+
+		auto subTasks = std::move(tasks[i].getPendingTasks());
+		for (auto& t : subTasks) {
+			addTask(std::move(t));
+		}
+
 		if (tasks[i].getStatus() == EditorTaskStatus::Done) {
 			auto newTasks = std::move(tasks[i].getContinuations());
 			for (auto& t : newTasks) {

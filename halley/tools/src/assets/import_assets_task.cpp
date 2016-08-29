@@ -8,10 +8,9 @@
 
 using namespace Halley;
 
-ImportAssetsTask::ImportAssetsTask(Project& project, bool headless, Vector<AssetToImport>&& files)
+ImportAssetsTask::ImportAssetsTask(Project& project, Vector<AssetToImport>&& files)
 	: EditorTask("Importing assets", true, true)
 	, project(project)
-	, headless(headless)
 	, files(std::move(files))
 {}
 
@@ -52,10 +51,6 @@ void ImportAssetsTask::run()
 
 	if (!isCancelled()) {
 		setProgress(1.0f, "");
-	}
-
-	if (!headless) {
-		addContinuation(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(project, headless), 1.0f));
 	}
 }
 

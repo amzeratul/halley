@@ -48,8 +48,11 @@ bool HalleyEditor::isDevBuild() const
 
 bool HalleyEditor::shouldCreateSeparateConsole() const
 {
-	//return !headless && isDevBuild();
+#ifdef _DEBUG
+	return !headless && isDevBuild();
+#else
 	return false;
+#endif
 }
 
 void HalleyEditor::init(const Environment& environment, const Vector<String>& args)
@@ -64,8 +67,6 @@ void HalleyEditor::init(const Environment& environment, const Vector<String>& ar
 
 void HalleyEditor::parseArguments(const std::vector<String>& args)
 {
-	using boost::filesystem::path;
-
 	headless = false;
 	bool gotProjectPath = false;
 
@@ -78,7 +79,7 @@ void HalleyEditor::parseArguments(const std::vector<String>& args)
 			}
 		} else {
 			if (!gotProjectPath) {
-				loadProject(path(arg.cppStr()));
+				loadProject(Path(arg.cppStr()));
 				gotProjectPath = true;
 			} else {
 				std::cout << "Unknown argument \"" << arg << "\".\n";

@@ -18,7 +18,7 @@ EditorRootStage::~EditorRootStage()
 
 void EditorRootStage::init()
 {
-	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(editor.getProject(), editor.isHeadless())));
+	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(editor.getProject())));
 
 	if (!editor.isHeadless()) {
 		initSprites();

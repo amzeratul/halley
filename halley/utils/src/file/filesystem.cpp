@@ -72,3 +72,19 @@ Bytes FileSystem::readFile(const Path& path)
 
 	return result;
 }
+
+std::vector<Path> FileSystem::enumerateDirectory(const Path& path)
+{
+	std::vector<Path> result;
+	if (exists(path)) {
+		using RDI = boost::filesystem::recursive_directory_iterator;
+		RDI end;
+		for (RDI i(path); i != end; ++i) {
+			Path fullPath = i->path();
+			if (FileSystem::isFile(fullPath)) {
+				result.push_back(fullPath.lexically_relative(path));
+			}
+		}
+	}
+	return result;
+}

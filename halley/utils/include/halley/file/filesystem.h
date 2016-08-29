@@ -3,6 +3,7 @@
 #include <gsl/gsl>
 #include "halley/utils/utils.h"
 #include <boost/filesystem/path.hpp>
+#include <vector>
 
 namespace Halley
 {
@@ -25,5 +26,7 @@ namespace Halley
 		static void writeFile(const Path& path, gsl::span<const gsl::byte> data);
 		static void writeFile(const Path& path, const Bytes& data);
 		static Bytes readFile(const Path& path);
+
+		static std::vector<Path> enumerateDirectory(const Path& path);
 	};
 }

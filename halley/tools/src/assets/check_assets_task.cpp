@@ -1,4 +1,4 @@
-#include <unordered_set>
+#include <set>
 #include "halley/tools/assets/check_assets_task.h"
 #include "halley/tools/assets/import_assets_task.h"
 #include "halley/tools/project/project.h"
@@ -7,59 +7,68 @@
 #include <boost/filesystem/operations.hpp>
 
 using namespace Halley;
+using namespace std::chrono_literals;
 
-CheckAssetsTask::CheckAssetsTask(Project& project, bool headless)
-	: EditorTask("Check assets", false, false)
+CheckAssetsTask::CheckAssetsTask(Project& project)
+	: EditorTask("Check assets", true, false)
 	, project(project)
-	, headless(headless)
 {}
 
 void CheckAssetsTask::run()
 {
-	Vector<AssetToImport> filesToImport;
-	std::unordered_set<std::string> included;
+	while (!isCancelled()) {
+		checkAllAssets();
+		do {
+			std::this_thread::sleep_for(50ms);
+		} while (hasPendingTasks());
+	}
+}
 
-	// Prepare database
+void CheckAssetsTask::checkAllAssets()
+{
 	auto& db = project.getImportAssetsDatabase();
 	db.markAllAsMissing();
 
+	Vector<AssetToImport> assets;
+	std::set<Path> included;
+
 	// Enumerate all potential assets
 	for (auto srcPath : { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }) {
-		if (FileSystem::exists(srcPath)) {
-			using RDI = boost::filesystem::recursive_directory_iterator;
-			RDI end;
-			for (RDI i(srcPath); i != end; ++i) {
-				Path fullPath = i->path();
-				if (FileSystem::isFile(fullPath)) {
-					Path filePath = fullPath.lexically_relative(srcPath);
-
-					std::string filename = filePath.filename().string();
-					if (included.find(filename) == included.end()) {
-						included.insert(filename);
-
-						// First time we're seeing this file. Check if it needs to be imported
-						auto time = FileSystem::getLastWriteTime(fullPath);
-						db.markAsPresent(filePath);
-						if (db.needsImporting(filePath, time)) {
-							filesToImport.push_back(AssetToImport(filePath, srcPath, time));
-						}
-					}
-				}
+		for (auto filePath : FileSystem::enumerateDirectory(srcPath)) {
+			if (included.find(filePath) == included.end()) {
+				included.insert(filePath);
+				assets.emplace_back(filePath, srcPath, FileSystem::getLastWriteTime(srcPath / filePath));
+				db.markAsPresent(filePath);
 			}
 		}
 	}
 
-	if (!filesToImport.empty()) {
-		addContinuation(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(project, headless, std::move(filesToImport))));
-	} else {
-		if (!headless) {
-			// Schedule the next one to run after one second
-			addContinuation(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(project, headless), 1.0f));
+	// Missing
+	deleteMissing(db.getAllMissing());
+
+	// Added
+	checkAssets(assets);
+}
+
+void CheckAssetsTask::checkAssets(const std::vector<AssetToImport>& assets)
+{
+	auto& db = project.getImportAssetsDatabase();
+	Vector<AssetToImport> toImport;
+
+	for (auto &a : assets) {
+		if (db.needsImporting(a.name, a.fileTime)) {
+			toImport.push_back(a);
 		}
 	}
 
-	Vector<Path> filesToDelete = db.getAllMissing();
-	if (!filesToDelete.empty()) {
-		addContinuation(EditorTaskAnchor(std::make_unique<DeleteAssetsTask>(project, headless, std::move(filesToDelete))));
+	if (!toImport.empty()) {
+		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(project, std::move(toImport))));
+	}	
+}
+
+void CheckAssetsTask::deleteMissing(const std::vector<Path>& paths)
+{
+	if (!paths.empty()) {
+		addPendingTask(EditorTaskAnchor(std::make_unique<DeleteAssetsTask>(project, paths)));
 	}
 }
