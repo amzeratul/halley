@@ -1,4 +1,5 @@
 #include <set>
+#include <thread>
 #include "halley/tools/assets/check_assets_task.h"
 #include "halley/tools/assets/import_assets_task.h"
 #include "halley/tools/project/project.h"
@@ -12,14 +13,21 @@ using namespace std::chrono_literals;
 CheckAssetsTask::CheckAssetsTask(Project& project)
 	: EditorTask("Check assets", true, false)
 	, project(project)
+	, monitor(project.getAssetsSrcPath())
+	, monitorShared(project.getSharedAssetsSrcPath())
 {}
 
 void CheckAssetsTask::run()
 {
+	bool first = true;
 	while (!isCancelled()) {
-		checkAllAssets();
+		if (first | monitor.poll() | monitorShared.poll()) { // Don't short-circuit
+			first = false;
+			checkAllAssets();
+		}
+
 		do {
-			std::this_thread::sleep_for(50ms);
+			std::this_thread::sleep_for(25ms);
 		} while (hasPendingTasks());
 	}
 }
