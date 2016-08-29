@@ -10,12 +10,18 @@ bool FileSystem::exists(const Path& p)
 
 bool FileSystem::createDir(const Path& p)
 {
-	return boost::filesystem::create_directories(p);
+	if (!exists(p)) {
+		try {
+			return boost::filesystem::create_directories(p);
+		} catch (...) {
+			return false;
+		}
+	}
 }
 
 bool FileSystem::createParentDir(const Path& p)
 {
-	return boost::filesystem::create_directories(p.parent_path());
+	return createDir(p.parent_path());
 }
 
 int64_t FileSystem::getLastWriteTime(const Path& p)

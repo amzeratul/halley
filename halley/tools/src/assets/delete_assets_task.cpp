@@ -4,29 +4,33 @@
 
 using namespace Halley;
 
-DeleteAssetsTask::DeleteAssetsTask(Project& project, Vector<Path> files)
+DeleteAssetsTask::DeleteAssetsTask(Project& project, Vector<ImportAssetsDatabaseEntry> assets)
 	: EditorTask("Deleting assets", true, true)
 	, project(project)
-	, files(files)
+	, assets(assets)
 {
 }
 
 void DeleteAssetsTask::run()
 {
+	std::cout << "Start deleting files." << std::endl;
 	auto& db = project.getImportAssetsDatabase();
 	auto root = project.getAssetsPath();
 
-	for (auto& f : files) {
+	for (auto& asset : assets) {
 		if (isCancelled()) {
 			break;
 		}
 
 		try {
-			FileSystem::remove(root / f);
-			db.markDeleted(f);
+			for (auto& f : asset.outputFiles) {
+				FileSystem::remove(root / f);
+			}
+			db.markDeleted(asset);
 		} catch (std::exception& e) {
-			std::cout << "Error removing file " << f << ": " << e.what() << std::endl;
+			std::cout << "Error removing file " << asset.inputFile << ": " << e.what() << std::endl;
 		}
 	}
 	db.save();
+	std::cout << "Done deleting files." << std::endl;
 }

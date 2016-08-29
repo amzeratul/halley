@@ -22,6 +22,6 @@ namespace Halley
 
 		void checkAllAssets();
 		void checkAssets(const std::vector<ImportAssetsDatabaseEntry>& assets);
-		void deleteMissing(const std::vector<Path>& paths);
+		void deleteMissing(const std::vector<ImportAssetsDatabaseEntry>& assets);
 	};
 }

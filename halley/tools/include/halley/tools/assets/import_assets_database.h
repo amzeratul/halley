@@ -18,6 +18,7 @@ namespace Halley
 		Path srcDir;
 		int64_t fileTime = 0;
 		int64_t metaTime = 0;
+		std::vector<Path> outputFiles;
 
 		ImportAssetsDatabaseEntry() {}
 
@@ -25,7 +26,7 @@ namespace Halley
 			: inputFile(inputFile)
 			, srcDir(srcDir)
 			, fileTime(time)
-			, metaTime(time)
+			, metaTime(metaTime)
 		{}
 	};
 
@@ -34,7 +35,6 @@ namespace Halley
 		struct FileEntry
 		{
 			ImportAssetsDatabaseEntry asset;
-			std::vector<Path> outputFiles;
 
 			bool present;
 
@@ -50,11 +50,11 @@ namespace Halley
 
 		bool needsImporting(const ImportAssetsDatabaseEntry& asset) const;
 		void markAsImported(const ImportAssetsDatabaseEntry& asset);
-		void markDeleted(Path file);
+		void markDeleted(const ImportAssetsDatabaseEntry& asset);
 
 		void markAllAsMissing();
 		void markAsPresent(Path file);
-		std::vector<Path> getAllMissing() const;
+		std::vector<ImportAssetsDatabaseEntry> getAllMissing() const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

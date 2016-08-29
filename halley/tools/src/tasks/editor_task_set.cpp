@@ -17,6 +17,9 @@ EditorTaskSet::~EditorTaskSet()
 
 	// Keep updating until they're all cancelled
 	while (!tasks.empty()) {
+		for (auto& t : tasks) {
+			std::cout << "Waiting for: " << t.getName() << std::endl;
+		}
 		std::this_thread::sleep_for(25ms);
 		update(0.025f);
 	}

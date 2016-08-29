@@ -36,6 +36,7 @@ void ImportAssetsTask::run()
 		try {
 			importAsset(files[i]);
 			if (isCancelled()) {
+				// If this was cancelled, the asset importing might have stopped halfway, so abort without marking it as imported
 				break;
 			}
 			db.markAsImported(files[i]);
@@ -59,16 +60,15 @@ void ImportAssetsTask::run()
 
 void ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
-	auto src = asset.srcDir / asset.inputFile;
-	auto dst = project.getAssetsPath() / asset.inputFile;
+	auto dstDir = project.getAssetsPath();
 	auto root = asset.inputFile.begin()->string();
 
 	auto iter = importers.find(root);
 	if (iter != importers.end()) {
-		iter->second(src, dst);
+		asset.outputFiles = iter->second(asset, dstDir);
 	} else {
-		// No importer found, just copy
-		FileSystem::copyFile(src, dst);
+		// No specific importer, use fallback
+		asset.outputFiles = genericImporter(asset, dstDir);
 	}
 }
 
@@ -81,33 +81,58 @@ std::unique_ptr<Metadata> ImportAssetsTask::getMetaData(Path path)
 	}
 }
 
-void ImportAssetsTask::loadFont(Path src, Path dst)
+std::vector<Path> ImportAssetsTask::loadFont(const ImportAssetsDatabaseEntry& asset, Path dstDir)
 {
-	if (src.extension() != ".meta") {
-		std::cout << "Importing font " << src << std::endl;
+	std::cout << "Importing font " << asset.inputFile << std::endl;
 
-		FileSystem::createParentDir(dst);
+	Path dst = asset.inputFile;
+	Path dstImg = asset.inputFile;
+	Path dstMeta = asset.inputFile;
+	dst.replace_extension("font");
+	dstImg.replace_extension("png");
+	dstMeta.replace_extension("png.meta");
 
-		Vector2i imgSize(512, 512);
-		float radius = 8;
-		int supersample = 4;
-		auto meta = getMetaData(src);
-		if (meta) {
-			radius = meta->getFloat("radius", 8);
-			supersample = meta->getInt("supersample", 4);
-			imgSize.x = meta->getInt("width", 512);
-			imgSize.y = meta->getInt("height", 512);
-		}
+	FileSystem::createParentDir(dst);
 
-		FontGenerator gen(false, [=] (float progress, String) -> bool {
-			setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel);
-			return !isCancelled();
-		});
-		gen.generateFont(src, dst.replace_extension("font"), imgSize, radius, supersample, Range<int>(0, 255));
+	Vector2i imgSize(512, 512);
+	float radius = 8;
+	int supersample = 4;
+	auto meta = getMetaData(asset.srcDir / asset.inputFile);
+	if (meta) {
+		radius = meta->getFloat("radius", 8);
+		supersample = meta->getInt("supersample", 4);
+		imgSize.x = meta->getInt("width", 512);
+		imgSize.y = meta->getInt("height", 512);
+	}
+
+	FontGenerator gen(false, [=] (float progress, String) -> bool {
+		setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel);
+		return !isCancelled();
+	});
+	gen.generateFont(asset.srcDir / asset.inputFile, dstDir / dst, imgSize, radius, supersample, Range<int>(0, 255));
+
+	return { dst, dstImg, dstMeta };
+}
+
+std::vector<Path> ImportAssetsTask::genericImporter(const ImportAssetsDatabaseEntry& asset, Path dstDir)
+{
+	auto file = asset.inputFile;
+	auto metaFile = file;
+	metaFile.replace_extension(metaFile.extension().string() + ".meta");
+	auto srcDir = asset.srcDir;
+
+	FileSystem::copyFile(srcDir / file, dstDir / file);
+
+	auto meta = getMetaData(asset.srcDir / asset.inputFile);
+	if (meta) {
+		FileSystem::copyFile(srcDir / metaFile, dstDir / metaFile);
+		return{ file, metaFile };
+	} else {
+		return { file };
 	}
 }
 
 void ImportAssetsTask::setImportTable()
 {
-	importers["font"] = [this](Path src, Path dst) { loadFont(src, dst); };
+	importers["font"] = [this](const ImportAssetsDatabaseEntry& asset, Path dstDir) -> std::vector<Path> { return loadFont(asset, dstDir); };
 }

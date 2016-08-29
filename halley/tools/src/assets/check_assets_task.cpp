@@ -47,7 +47,8 @@ void CheckAssetsTask::checkAllAssets()
 				included.insert(filePath);
 
 				int64_t metaTime = 0;
-				auto metaPath = (srcPath / filePath).append(".meta");
+				auto metaPath = srcPath / filePath;
+				metaPath.replace_extension(metaPath.extension().string() + ".meta");
 				if (FileSystem::exists(metaPath)) {
 					metaTime = FileSystem::getLastWriteTime(metaPath);
 				}
@@ -81,9 +82,9 @@ void CheckAssetsTask::checkAssets(const std::vector<ImportAssetsDatabaseEntry>& 
 	}
 }
 
-void CheckAssetsTask::deleteMissing(const std::vector<Path>& paths)
+void CheckAssetsTask::deleteMissing(const std::vector<ImportAssetsDatabaseEntry>& assets)
 {
-	if (!paths.empty()) {
-		addPendingTask(EditorTaskAnchor(std::make_unique<DeleteAssetsTask>(project, paths)));
+	if (!assets.empty()) {
+		addPendingTask(EditorTaskAnchor(std::make_unique<DeleteAssetsTask>(project, assets)));
 	}
 }
