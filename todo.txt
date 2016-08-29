@@ -22,6 +22,7 @@ core/graphics
 input
 - isolate SDL events to SDL-specific file?
 - input context system [RESEARCH]
+- use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
 - bring library into engine
@@ -118,6 +119,7 @@ platforms
 - XBox One?
 - Android?
 - iOS?
+- .....Emscripten?
 
 directx 11/12?
 - future support?
