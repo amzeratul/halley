@@ -3,6 +3,7 @@
 #include <map>
 #include <mutex>
 #include "halley/text/halleystring.h"
+#include <cstdint>
 
 namespace Halley
 {
@@ -14,7 +15,7 @@ namespace Halley
 	{
 		struct FileEntry
 		{
-			time_t timestamp;
+			int64_t timestamp;
 			bool present;
 
 			void serialize(Serializer& s) const;

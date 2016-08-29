@@ -1,11 +1,13 @@
+#include <fstream>
+#include <future>
+#include <cstdint>
+#include <boost/filesystem.hpp>
+#include <yaml-cpp/yaml.h>
+
 #include "halley/tools/make_font/font_generator.h"
 #include "halley/tools/distance_field/distance_field_generator.h"
-#include <yaml-cpp/yaml.h>
-#include <fstream>
-#include <boost/filesystem.hpp>
 #include <halley/data_structures/bin_pack.h>
 #include <halley/file_formats/image.h>
-#include <future>
 #include "halley/file_formats/serializer.h"
 
 using namespace Halley;
@@ -185,7 +187,7 @@ void FontGenerator::generateFontMapBinary(String imgName, FontFace& font, Vector
 			auto& c = entries[i];
 			auto metrics = font.getMetrics(c.charcode, scale);
 
-			int charcode = c.charcode;
+			int32_t charcode = c.charcode;
 			Rect4f area = Rect4f(c.rect) / Vector2f(imageSize);
 			Vector2f size = Vector2f(c.rect.getSize());
 			Vector2f horizontalBearing = metrics.bearingHorizontal;

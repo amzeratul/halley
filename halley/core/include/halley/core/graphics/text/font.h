@@ -1,8 +1,9 @@
 #pragma once
 
+#include <cstdint>
+#include <memory>
 #include "halley/core/graphics/texture.h"
 #include "halley/core/graphics/sprite/sprite.h"
-#include <memory>
 #include <halley/data_structures/flat_map.h>
 
 namespace Halley
@@ -16,7 +17,7 @@ namespace Halley
 		class Glyph
 		{
 		public:
-			int charcode;
+			int32_t charcode;
 			Rect4f area;
 			Vector2f size;
 			Vector2f horizontalBearing;
