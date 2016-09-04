@@ -6,7 +6,7 @@
 
 using namespace Halley;
 
-Halley::ResourceData::ResourceData(String p)
+ResourceData::ResourceData(String p)
 	: path(p)
 {
 }
@@ -29,20 +29,20 @@ static void deleter(char* data)
 	delete[] data;
 }
 
-void Halley::ResourceDataStatic::set(void* _data, size_t _size)
+void ResourceDataStatic::set(void* _data, size_t _size)
 {
 	data = std::shared_ptr<char>(static_cast<char*>(_data), deleter);
 	size = _size;
 	loaded = true;
 }
 
-void* Halley::ResourceDataStatic::getData()
+void* ResourceDataStatic::getData()
 {
 	if (!loaded) throw Exception("Resource data not yet loaded");
 	return data.get();
 }
 
-const void* Halley::ResourceDataStatic::getData() const
+const void* ResourceDataStatic::getData() const
 {
 	if (!loaded) throw Exception("Resource data not yet loaded");
 	return data.get();
@@ -53,18 +53,18 @@ gsl::span<const gsl::byte> ResourceDataStatic::getSpan() const
 	return gsl::span<const gsl::byte>(reinterpret_cast<const gsl::byte*>(getData()), getSize());
 }
 
-size_t Halley::ResourceDataStatic::getSize() const
+size_t ResourceDataStatic::getSize() const
 {
 	if (!loaded) throw Exception("Resource data not yet loaded");
 	return size;
 }
 
-bool Halley::ResourceDataStatic::isLoaded() const
+bool ResourceDataStatic::isLoaded() const
 {
 	return loaded;
 }
 
-Halley::String Halley::ResourceDataStatic::getString() const
+String ResourceDataStatic::getString() const
 {
 	return String(static_cast<const char*>(getData()), getSize());
 }
@@ -93,7 +93,7 @@ void ResourceDataStatic::writeToFileSystem(String filePath) const
 	fp.close();
 }
 
-Halley::ResourceDataStream::ResourceDataStream(String path, ResourceDataMakeReader makeReader)
+ResourceDataStream::ResourceDataStream(String path, ResourceDataMakeReader makeReader)
 	: ResourceData(path)
 	, make(makeReader)
 {
@@ -117,7 +117,7 @@ ResourceLoader::ResourceLoader(IResourceLocator& locator, String name, String re
 	, resolvedName(resolvedName)
 	, priority(priority)
 	, api(api)
-	, metadata(std::move(metadata))
+	, metadata(move(metadata))
 {}
 
 String ResourceLoader::getBasePath() const

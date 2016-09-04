@@ -53,16 +53,26 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 		for (auto filePath : FileSystem::enumerateDirectory(srcPath)) {
 			auto& assetImporter = project.getAssetImporter().getImporter(filePath);
 			String assetId = assetImporter.getAssetId(filePath);
-			auto& asset = assets[assetId];
 
-			if (asset.assetType != AssetType::UNDEFINED && asset.assetType != assetImporter.getType()) {
-				throw Exception("AssetId conflict on " + assetId);
-			}
+			auto input = ImportAssetsDatabaseEntry::InputFile(filePath, FileSystem::getLastWriteTime(srcPath / filePath));
 
-			if (asset.srcDir == Path() || asset.srcDir == srcPath) { // Don't mix files from two different source paths
+			auto iter = assets.find(assetId);
+			if (iter == assets.end()) {
+				// New; create it
+				auto& asset = assets[assetId];
+				asset.assetId = assetId;
 				asset.assetType = assetImporter.getType();
 				asset.srcDir = srcPath;
-				asset.inputFiles.emplace_back(filePath, FileSystem::getLastWriteTime(srcPath / filePath));
+				asset.inputFiles.push_back(input);
+			} else {
+				// Already exists
+				auto& asset = iter->second;
+				if (asset.assetType != assetImporter.getType()) { // Ensure it has the correct type
+					throw Exception("AssetId conflict on " + assetId);
+				}
+				if (asset.srcDir == srcPath) { // Don't mix files from two different source paths
+					asset.inputFiles.push_back(input);
+				}
 			}
 		}
 	}
