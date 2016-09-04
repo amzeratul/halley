@@ -8,11 +8,14 @@
 
 using namespace Halley;
 
-std::vector<Path> FontImporter::import(const ImportAssetsDatabaseEntry& asset, Path dstDir)
+std::vector<Path> FontImporter::import(const ImportAssetsDatabaseEntry& asset, Path dstDir, ProgressReporter reporter)
 {
 	std::cout << "Importing font " << asset.assetId << std::endl;
 
 	Path src = getMainFile(asset);
+	if (src == Path()) {
+		return {};
+	}
 
 	Path dst = src;
 	Path dstImg = src;
@@ -34,12 +37,7 @@ std::vector<Path> FontImporter::import(const ImportAssetsDatabaseEntry& asset, P
 		imgSize.y = meta->getInt("height", 512);
 	}
 
-	FontGenerator gen(false, [=](float progress, String) -> bool {
-		// TODO
-		//setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel);
-		//return !isCancelled();
-		return true;
-	});
+	FontGenerator gen(false, reporter);
 	gen.generateFont(asset.srcDir / src, dstDir / dst, imgSize, radius, supersample, Range<int>(0, 255));
 
 	return{ dst, dstImg, dstMeta };

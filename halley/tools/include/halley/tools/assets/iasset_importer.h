@@ -21,12 +21,14 @@ namespace Halley
 	class IAssetImporter
 	{
 	public:
+		using ProgressReporter = std::function<bool(float, String)>;
+
 		virtual ~IAssetImporter() {}
 
 		virtual AssetType getType() const = 0;
 
 		virtual String getAssetId(Path file) const;
-		virtual std::vector<Path> import(const ImportAssetsDatabaseEntry& asset, Path dstDir) = 0;
+		virtual std::vector<Path> import(const ImportAssetsDatabaseEntry& asset, Path dstDir, ProgressReporter reporter) = 0;
 
 		static Path getMainFile(const ImportAssetsDatabaseEntry& asset);
 		static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& asset);

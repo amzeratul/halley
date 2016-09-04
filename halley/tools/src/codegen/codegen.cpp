@@ -46,6 +46,13 @@ void Codegen::loadSources(Path p)
 	}
 }
 
+void Codegen::loadSources(std::vector<Path> files)
+{
+	for (auto& f : files) {
+		addSource(f);
+	}
+}
+
 void Codegen::validate()
 {
 	for (auto& sys : systems) {
@@ -154,10 +161,11 @@ void Codegen::writeFiles(Path dir, const CodeGenResult& files, Stats& stats) con
 		} else {
 			stats.skipped++;
 		}
+		stats.files.emplace_back(std::move(filePath));
 	}
 }
 
-void Codegen::generateCode(Path directory)
+std::vector<Path> Codegen::generateCode(Path directory)
 {
 	Vector<std::unique_ptr<ICodeGenerator>> gens;
 	gens.emplace_back(std::make_unique<CodegenCPP>());
@@ -195,6 +203,7 @@ void Codegen::generateCode(Path directory)
 	}
 
 	std::cout << "Codegen: " << stats.written << " written, " << stats.skipped << " skipped." << std::endl;
+	return stats.files;
 }
 
 void Codegen::addSource(Path path)

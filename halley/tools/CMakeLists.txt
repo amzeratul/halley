@@ -10,7 +10,6 @@ set(SOURCES
         "src/codegen/component_schema.cpp"
         "src/codegen/message_schema.cpp"
         "src/codegen/system_schema.cpp"
-        "src/codegen/import_codegen_task.cpp"
         
         "src/distance_field/distance_field_generator.cpp"
         "src/distance_field/distance_field_tool.cpp"
@@ -28,6 +27,8 @@ set(SOURCES
 	"src/assets/import_assets_task.cpp"
 	"src/assets/import_assets_database.cpp"
 
+        "src/assets/importers/codegen_importer.cpp"
+        "src/assets/importers/codegen_importer.h"
         "src/assets/importers/copy_file_importer.cpp"
         "src/assets/importers/copy_file_importer.h"
         "src/assets/importers/font_importer.cpp"
@@ -57,7 +58,6 @@ set(HEADERS
         "include/halley/tools/codegen/fields_schema.h"
         "include/halley/tools/codegen/message_schema.h"
         "include/halley/tools/codegen/system_schema.h"
-        "include/halley/tools/codegen/import_codegen_task.h"
         
         "src/codegen/cpp/codegen_cpp.h"
         "src/codegen/cpp/cpp_class_gen.h"

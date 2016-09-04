@@ -2,6 +2,7 @@
 #include "halley/support/exception.h"
 #include "importers/copy_file_importer.h"
 #include "importers/font_importer.h"
+#include "importers/codegen_importer.h"
 
 using namespace Halley;
 
@@ -10,6 +11,7 @@ AssetImporter::AssetImporter()
 {
 	importers[AssetType::SIMPLE_COPY] = std::make_unique<CopyFileImporter>();
 	importers[AssetType::FONT] = std::make_unique<FontImporter>();
+	importers[AssetType::CODEGEN] = std::make_unique<CodegenImporter>();
 }
 
 IAssetImporter& AssetImporter::getImporter(Path path) const

@@ -12,7 +12,7 @@ namespace Halley
 	class ImportAssetsTask : public EditorTask
 	{
 	public:
-		ImportAssetsTask(ImportAssetsDatabase& db, const AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files);
+		ImportAssetsTask(String taskName, ImportAssetsDatabase& db, const AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files);
 
 	protected:
 		void run() override;

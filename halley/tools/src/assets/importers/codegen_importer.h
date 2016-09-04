@@ -3,11 +3,12 @@
 
 namespace Halley
 {
-	class FontImporter : public IAssetImporter
+	class CodegenImporter : public IAssetImporter
 	{
 	public:
-		AssetType getType() const override { return AssetType::FONT; }
+		AssetType getType() const override { return AssetType::CODEGEN; }
 
+		String getAssetId(Path file) const override;
 		std::vector<Path> import(const ImportAssetsDatabaseEntry& asset, Path dstDir, ProgressReporter reporter) override;
 	};
 }

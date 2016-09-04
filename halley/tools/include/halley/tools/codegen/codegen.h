@@ -21,17 +21,19 @@ namespace Halley
 		{
 			int written = 0;
 			int skipped = 0;
+			std::vector<Path> files;
 		};
 
 	public:
 		static void run(Path inDir, Path outDir);
 
 		void loadSources(Path directory);
+		void loadSources(std::vector<Path> files);
 		void validate();
 		void process();
 		bool writeFile(Path path, const char* data, size_t dataSize, bool stub) const;
 		void writeFiles(Path directory, const CodeGenResult& files, Stats& stats) const;
-		void generateCode(Path directory);
+		std::vector<Path> generateCode(Path directory);
 
 	private:
 		void addSource(Path path);

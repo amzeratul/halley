@@ -7,8 +7,8 @@
 
 using namespace Halley;
 
-ImportAssetsTask::ImportAssetsTask(ImportAssetsDatabase& db, const AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files)
-	: EditorTask("Importing assets", true, true)
+ImportAssetsTask::ImportAssetsTask(String taskName, ImportAssetsDatabase& db, const AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files)
+	: EditorTask(taskName, true, true)
 	, db(db)
 	, importer(importer)
 	, assetsPath(assetsPath)
@@ -57,5 +57,17 @@ void ImportAssetsTask::run()
 
 void ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
-	asset.outputFiles = importer.getImporter(asset.assetType).import(asset, assetsPath);
+	auto previous = asset.outputFiles;
+	auto out = importer.getImporter(asset.assetType).import(asset, assetsPath, [&] (float progress, String label) -> bool
+	{
+		setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel + " " + label);
+		return !isCancelled();
+	});
+	asset.outputFiles = out;
+	for (auto& f: previous) {
+		if (std::find(out.begin(), out.end(), f) == out.end()) {
+			// File no longer exists as part of this asset, remove it
+			FileSystem::remove(assetsPath / f);
+		}
+	}
 }
