@@ -10,7 +10,7 @@ int CodegenTool::run(Vector<std::string> args)
 		Codegen::run(args[0], args[1]);
 		return 0;
 	} else {
-		std::cout << "Usage: halley codegen srcDir dstDir" << std::endl;
+		std::cout << "Usage: halley-cmd codegen srcDir dstDir" << std::endl;
 		return 1;
 	}
 }

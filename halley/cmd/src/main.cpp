@@ -8,7 +8,7 @@ int main(int argc, char** argv)
 	Halley::Vector<std::string> names = tools.getToolNames();
 
 	if (argc < 2) {
-		std::cout << "Usage: halley [tool]" << std::endl;
+		std::cout << "Usage: halley-cmd [tool]" << std::endl;
 		std::cout << "Available tools:" << std::endl;
 		for (auto& n : names) {
 			std::cout << "- " << n << std::endl;

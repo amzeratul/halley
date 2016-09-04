@@ -86,7 +86,7 @@ set(HALLEY_PROJECT_LIB_DIRS
 	)
 
 function(halleyProject name sources headers genDefinitions targetDir)
-	add_custom_target(${name}-codegen ALL ${HALLEY_PATH}/bin/halley-cmd codegen gen_src gen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${genDefinitions})
+	add_custom_target(${name}-codegen ALL ${HALLEY_PATH}/bin/halley-cmd import . ${HALLEY_PATH} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${genDefinitions})
 
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${targetDir})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${targetDir})

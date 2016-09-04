@@ -26,6 +26,7 @@ set(SOURCES
         "src/assets/iasset_importer.cpp"
 	"src/assets/import_assets_task.cpp"
 	"src/assets/import_assets_database.cpp"
+        "src/assets/import_tool.cpp"
 
         "src/assets/importers/codegen_importer.cpp"
         "src/assets/importers/codegen_importer.h"
@@ -68,6 +69,7 @@ set(HEADERS
         "include/halley/tools/assets/iasset_importer.h"
 	"include/halley/tools/assets/import_assets_task.h"
 	"include/halley/tools/assets/import_assets_database.h"
+        "include/halley/tools/assets/import_tool.h"
 
 	"include/halley/tools/tasks/editor_task.h"
 	"include/halley/tools/tasks/editor_task_set.h"

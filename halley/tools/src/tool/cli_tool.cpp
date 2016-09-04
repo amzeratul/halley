@@ -3,11 +3,13 @@
 #include "halley/tools/codegen/codegen_tool.h"
 #include "halley/tools/distance_field/distance_field_tool.h"
 #include "halley/tools/make_font/make_font_tool.h"
+#include "halley/tools/assets/import_tool.h"
 
 using namespace Halley;
 
 CommandLineTools::CommandLineTools()
 {
+	factories["import"] = []() { return std::make_unique<ImportTool>(); };
 	factories["codegen"] = []() { return std::make_unique<CodegenTool>(); };
 	factories["distField"] = []() { return std::make_unique<DistanceFieldTool>(); };
 	factories["makeFont"] = []() { return std::make_unique<MakeFontTool>(); };
