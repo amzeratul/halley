@@ -125,7 +125,7 @@ void VideoOpenGL::createWindow(const Window& window)
 
 	// Window position
 	Vector2i windowSize = window.getSize();
-	Vector2i winPos = window.getPosition();
+	Vector2i winPos = window.getPosition().get_value_or(getCenteredWindow(windowSize, 0));
 
 	// Create window
 	sdlWindow = SDL_CreateWindow(window.getTitle().c_str(), winPos.x, winPos.y, windowSize.x, windowSize.y, flags);
@@ -151,8 +151,8 @@ void VideoOpenGL::updateWindow(const Window& window)
 	// For windowed, get out of fullscreen first, then set size.
 	// For fullscreen, set size before going to fullscreen.
 	WindowType windowType = window.getWindowType();
-	Vector2i windowPos = window.getPosition();
 	Vector2i windowSize = window.getSize();
+	Vector2i windowPos = window.getPosition().get_value_or(getCenteredWindow(windowSize, 0));
 
 	if (windowType != WindowType::Fullscreen) {
 		SDL_SetWindowFullscreen(sdlWindow, SDL_FALSE);

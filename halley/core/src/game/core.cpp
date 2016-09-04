@@ -40,6 +40,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 
 	// Console
 	if (game->shouldCreateSeparateConsole()) {
+		hasConsole = true;
 		OS::get().createLogConsole(game->getName());
 	}
 	OS::get().initializeConsole();
@@ -94,6 +95,11 @@ void Core::onReloaded()
 	}
 }
 
+void Core::onTerminatedInError()
+{
+	hasError = true;
+}
+
 void Core::init()
 {
 	statics.setup();
@@ -141,6 +147,12 @@ void Core::deInit()
 	std::cout << "Goodbye!" << std::endl;
 	std::cout.flush();
 	out.reset();
+
+#ifdef _WIN32
+	if (hasError && hasConsole) {
+		system("pause");
+	}
+#endif
 }
 
 void Core::initResources()

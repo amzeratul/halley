@@ -43,6 +43,7 @@ set(SOURCES
         "src/os/os_win32.cpp"
         "src/resources/metadata.cpp"
         "src/resources/resource_data.cpp"
+        "src/runner/halley_main.cpp"
 		"src/runner/main_loop.cpp"
         "src/support/console.cpp"
         "src/support/debug.cpp"

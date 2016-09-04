@@ -44,6 +44,7 @@ namespace Halley
 
 		void onSuspended() override;
 		void onReloaded() override;
+		void onTerminatedInError();
 
 		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
 		Vector<Plugin*> getPlugins(PluginType type) override;
@@ -80,6 +81,8 @@ namespace Halley
 		bool pendingStageTransition = false;
 
 		bool running = true;
+		bool hasError = false;
+		bool hasConsole = false;
 		std::unique_ptr<RedirectStream> out;
 
 		TreeMap<PluginType, Vector<std::unique_ptr<Plugin>>> plugins;

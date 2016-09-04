@@ -3,6 +3,7 @@
 #include "memory_patcher.h"
 #include <halley/runner/entry_point.h>
 #include <gsl/gsl_assert>
+#include "halley/support/console.h"
 
 using namespace Halley;
 
