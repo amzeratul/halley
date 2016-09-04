@@ -56,12 +56,17 @@ static String lowerFirst(String name)
 	return name;
 }
 
+static Path makePath(Path dir, String className, String extension)
+{
+	return dir / (toFileName(className) + "." + extension).cppStr();
+}
+
 CodeGenResult CodegenCPP::generateComponent(ComponentSchema component)
 {
 	String className = component.name + "Component";
 
 	CodeGenResult result;
-	result.emplace_back(CodeGenFile("components/" + toFileName(className) + ".h", generateComponentHeader(component)));
+	result.emplace_back(CodeGenFile(makePath("components", className, "h"), generateComponentHeader(component)));
 	return result;
 }
 
@@ -70,8 +75,8 @@ CodeGenResult CodegenCPP::generateSystem(SystemSchema system)
 	String className = system.name + "System";
 
 	CodeGenResult result;
-	result.emplace_back(CodeGenFile("systems/" + toFileName(className) + ".h", generateSystemHeader(system)));
-	result.emplace_back(CodeGenFile("../../src/systems/" + toFileName(className) + ".cpp", generateSystemStub(system), true));
+	result.emplace_back(CodeGenFile(makePath("systems", className, "h"), generateSystemHeader(system)));
+	result.emplace_back(CodeGenFile(makePath("../../src/systems", className, "cpp"), generateSystemStub(system), true));
 	return result;
 }
 
@@ -80,7 +85,7 @@ CodeGenResult CodegenCPP::generateMessage(MessageSchema message)
 	String className = message.name + "Message";
 
 	CodeGenResult result;
-	result.emplace_back(CodeGenFile("messages/" + toFileName(className) + ".h", generateMessageHeader(message)));
+	result.emplace_back(CodeGenFile(makePath("messages", className, "h"), generateMessageHeader(message)));
 	return result;
 }
 

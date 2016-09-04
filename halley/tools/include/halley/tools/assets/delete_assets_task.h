@@ -10,13 +10,14 @@ namespace Halley {
 	class DeleteAssetsTask : public EditorTask
 	{
 	public:
-		DeleteAssetsTask(Project& project, Vector<ImportAssetsDatabaseEntry> assets);
+		DeleteAssetsTask(ImportAssetsDatabase& db, Path assetsPath, Vector<ImportAssetsDatabaseEntry> assets);
 
 	protected:
 		void run() override;
 
 	private:
-		Project& project;
+		ImportAssetsDatabase& db;
+		Path assetsPath;
 		Vector<ImportAssetsDatabaseEntry> assets;
 	};
 }

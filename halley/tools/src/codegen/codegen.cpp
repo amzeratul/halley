@@ -23,7 +23,7 @@
 
 using namespace Halley;
 
-void Codegen::run(String inDir, String outDir)
+void Codegen::run(Path inDir, Path outDir)
 {
 	std::cout << "Codegen \"" << inDir << "\" -> \"" << outDir << "\"." << std::endl;
 
@@ -34,12 +34,10 @@ void Codegen::run(String inDir, String outDir)
 	codegen.generateCode(outDir);
 }
 
-void Codegen::loadSources(String directory)
+void Codegen::loadSources(Path p)
 {
-	using namespace boost::filesystem;
-	path p(directory.cppStr());
 	if (exists(p) && is_directory(p)) {
-		for (auto i = directory_iterator(p); i != directory_iterator(); ++i) {
+		for (auto i = boost::filesystem::directory_iterator(p); i != boost::filesystem::directory_iterator(); ++i) {
 			auto filePath = i->path();
 			if (filePath.extension() == ".yaml") {
 				addSource(filePath);
@@ -98,18 +96,16 @@ void Codegen::process()
 	}
 }
 
-bool Codegen::writeFile(String dstPath, const char* data, size_t dataSize, bool stub) const
+bool Codegen::writeFile(Path filePath, const char* data, size_t dataSize, bool stub) const
 {
-	using namespace boost::filesystem;
-	path filePath(dstPath.cppStr());
-	if (exists(filePath)) {
+	if (FileSystem::exists(filePath)) {
 		if (stub) {
 			return false;
 		}
 
 		if (file_size(filePath) == dataSize) {
 			// Size matches, check if contents are identical
-			std::ifstream in(dstPath, std::ofstream::in | std::ofstream::binary);
+			std::ifstream in(filePath.string(), std::ofstream::in | std::ofstream::binary);
 			Vector<char> buffer(dataSize);
 			in.read(&buffer[0], dataSize);
 			in.close();
@@ -128,33 +124,22 @@ bool Codegen::writeFile(String dstPath, const char* data, size_t dataSize, bool 
 		}
 	}
 
-	// Ensure directory existance
-	path dir = filePath.parent_path();
-	if (!exists(dir)) {
-		create_directories(dir);
-	}
+	FileSystem::createParentDir(filePath);
 
 	// Write file
-	std::ofstream out(dstPath, std::ofstream::out | std::ofstream::binary);
+	std::ofstream out(filePath.string(), std::ofstream::out | std::ofstream::binary);
 	out.write(data, dataSize);
 	out.close();
 
 	return true;
 }
 
-void Codegen::writeFiles(String directory, const CodeGenResult& files, Stats& stats) const
+void Codegen::writeFiles(Path dir, const CodeGenResult& files, Stats& stats) const
 {
-	using namespace boost::filesystem;
-
-	path dir(directory.cppStr());
-	if (!exists(dir)) {
-		create_directories(dir);
-		std::cout << "Created directory " << dir << std::endl;
-	}
+	FileSystem::createDir(dir);
 	
 	for (auto& f : files) {
-		path filePath = dir;
-		filePath.append(f.fileName.cppStr());
+		Path filePath = dir / f.fileName;
 		std::stringstream ss;
 		for (auto& line: f.fileContents) {
 			ss << line;
@@ -162,7 +147,7 @@ void Codegen::writeFiles(String directory, const CodeGenResult& files, Stats& st
 		}
 		auto finalData = ss.str();
 
-		bool wrote = writeFile(filePath.string(), &finalData[0], finalData.size(), f.stub);
+		bool wrote = writeFile(filePath, &finalData[0], finalData.size(), f.stub);
 		if (wrote) {
 			stats.written++;
 			std::cout << "* Written " << filePath << std::endl;
@@ -172,14 +157,14 @@ void Codegen::writeFiles(String directory, const CodeGenResult& files, Stats& st
 	}
 }
 
-void Codegen::generateCode(String directory)
+void Codegen::generateCode(Path directory)
 {
 	Vector<std::unique_ptr<ICodeGenerator>> gens;
 	gens.emplace_back(std::make_unique<CodegenCPP>());
 	Stats stats;
 
 	for (auto& gen : gens) {
-		String genDir = directory + "/" + gen->getDirectory();
+		Path genDir = directory / gen->getDirectory();
 		Vector<ComponentSchema> comps;
 		Vector<SystemSchema> syss;
 
@@ -204,7 +189,7 @@ void Codegen::generateCode(String directory)
 	// Has changes
 	if (stats.written > 0) {
 		using namespace boost::filesystem;
-		auto cmakeLists = path(directory.cppStr()).parent_path() / path("CMakeLists.txt");
+		auto cmakeLists = directory.parent_path() / path("CMakeLists.txt");
 		std::cout << "Touching " << cmakeLists.string() << std::endl;
 		utime(cmakeLists.string().c_str(), nullptr);
 	}
@@ -212,7 +197,7 @@ void Codegen::generateCode(String directory)
 	std::cout << "Codegen: " << stats.written << " written, " << stats.skipped << " skipped." << std::endl;
 }
 
-void Codegen::addSource(boost::filesystem::path path)
+void Codegen::addSource(Path path)
 {
 	std::vector<YAML::Node> documents;
 	

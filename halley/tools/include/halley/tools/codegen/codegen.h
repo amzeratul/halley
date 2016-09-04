@@ -1,8 +1,8 @@
 #pragma once
 
-#include <boost/filesystem.hpp>
 #include "icode_generator.h"
 #include <halley/data_structures/hash_map.h>
+#include "halley/file/filesystem.h"
 
 namespace YAML
 {
@@ -24,17 +24,17 @@ namespace Halley
 		};
 
 	public:
-		static void run(String inDir, String outDir);
+		static void run(Path inDir, Path outDir);
 
-		void loadSources(String directory);
+		void loadSources(Path directory);
 		void validate();
 		void process();
-		bool writeFile(String path, const char* data, size_t dataSize, bool stub) const;
-		void writeFiles(String directory, const CodeGenResult& files, Stats& stats) const;
-		void generateCode(String directory);
+		bool writeFile(Path path, const char* data, size_t dataSize, bool stub) const;
+		void writeFiles(Path directory, const CodeGenResult& files, Stats& stats) const;
+		void generateCode(Path directory);
 
 	private:
-		void addSource(boost::filesystem::path path);
+		void addSource(Path path);
 		void addComponent(YAML::Node rootNode);
 		void addSystem(YAML::Node rootNode);
 		void addMessage(YAML::Node rootNode);

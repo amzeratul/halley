@@ -17,12 +17,15 @@ namespace Halley
 
 	private:
 		Project& project;
-		DirectoryMonitor monitor;
-		DirectoryMonitor monitorShared;
+		DirectoryMonitor monitorAssets;
+		DirectoryMonitor monitorSharedAssets;
+		DirectoryMonitor monitorGen;
 		bool headless;
 
-		void checkAllAssets();
-		void checkAssets(const std::vector<ImportAssetsDatabaseEntry>& assets);
-		void deleteMissing(const std::vector<ImportAssetsDatabaseEntry>& assets);
+		std::vector<ImportAssetsDatabaseEntry> filterNeedsImporting(const std::vector<ImportAssetsDatabaseEntry>& assets) const;
+		void checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, Path dstPath, std::function<EditorTaskAnchor(ImportAssetsDatabase&, Path, std::vector<ImportAssetsDatabaseEntry>&&)> importer);
+		
+		static EditorTaskAnchor importAssets(ImportAssetsDatabase& db, Path dstPath, std::vector<ImportAssetsDatabaseEntry>&& assets);
+		static EditorTaskAnchor importCodegen(ImportAssetsDatabase& db, Path dstPath, std::vector<ImportAssetsDatabaseEntry>&& assets);
 	};
 }

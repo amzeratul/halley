@@ -3,18 +3,19 @@
 #include "component_schema.h"
 #include "system_schema.h"
 #include "message_schema.h"
+#include "halley/file/filesystem.h"
 
 namespace Halley
 {
 	struct CodeGenFile
 	{
-		String fileName;
+		Path fileName;
 		Vector<String> fileContents;
 		bool stub = false;
 
 		CodeGenFile() {}
 
-		CodeGenFile(String fileName, Vector<String> contents, bool stub = false)
+		CodeGenFile(Path fileName, Vector<String> contents, bool stub = false)
 			: fileName(fileName)
 			, fileContents(contents)
 			, stub(stub)
@@ -29,7 +30,7 @@ namespace Halley
 		virtual ~ICodeGenerator() {}
 
 		virtual CodegenLanguage getLanguage() const = 0;
-		virtual String getDirectory() const = 0;
+		virtual Path getDirectory() const = 0;
 
 		virtual CodeGenResult generateComponent(ComponentSchema component) = 0;
 		virtual CodeGenResult generateSystem(SystemSchema system) = 0;

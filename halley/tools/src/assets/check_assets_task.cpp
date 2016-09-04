@@ -6,6 +6,7 @@
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/tools/assets/delete_assets_task.h"
 #include <boost/filesystem/operations.hpp>
+#include "halley/tools/codegen/import_codegen_task.h"
 
 using namespace Halley;
 using namespace std::chrono_literals;
@@ -13,8 +14,9 @@ using namespace std::chrono_literals;
 CheckAssetsTask::CheckAssetsTask(Project& project, bool headless)
 	: EditorTask("Check assets", true, false)
 	, project(project)
-	, monitor(project.getAssetsSrcPath())
-	, monitorShared(project.getSharedAssetsSrcPath())
+	, monitorAssets(project.getAssetsSrcPath())
+	, monitorSharedAssets(project.getSharedAssetsSrcPath())
+	, monitorGen(project.getGenSrcPath())
 	, headless(headless)
 {}
 
@@ -22,13 +24,18 @@ void CheckAssetsTask::run()
 {
 	bool first = true;
 	while (!isCancelled()) {
-		if (first | monitor.poll() | monitorShared.poll()) { // Don't short-circuit
-			first = false;
-			checkAllAssets();
+		if (first | monitorAssets.poll() | monitorSharedAssets.poll()) { // Don't short-circuit
+			checkAllAssets(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, project.getAssetsPath(), &CheckAssetsTask::importAssets);
 		}
 
+		if (first | monitorGen.poll()) {
+			checkAllAssets(project.getCodegenDatabase(), { project.getGenSrcPath() }, project.getGenPath(), &CheckAssetsTask::importCodegen);
+		}
+
+		first = false;
+
 		do {
-			std::this_thread::sleep_for(monitor.hasRealImplementation() ? 25ms : 100ms);
+			std::this_thread::sleep_for(monitorAssets.hasRealImplementation() ? 25ms : 100ms);
 		} while (hasPendingTasks());
 
 		if (headless) {
@@ -37,16 +44,15 @@ void CheckAssetsTask::run()
 	}
 }
 
-void CheckAssetsTask::checkAllAssets()
+void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, Path dstPath, std::function<EditorTaskAnchor(ImportAssetsDatabase&, Path, std::vector<ImportAssetsDatabaseEntry>&&)> importer)
 {
-	auto& db = project.getImportAssetsDatabase();
 	db.markAllAsMissing();
 
 	Vector<ImportAssetsDatabaseEntry> assets;
 	std::set<Path> included;
 
 	// Enumerate all potential assets
-	for (auto srcPath : { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }) {
+	for (auto srcPath : srcPaths) {
 		for (auto filePath : FileSystem::enumerateDirectory(srcPath)) {
 			if (filePath.extension() != ".meta" && included.find(filePath) == included.end()) {
 				included.insert(filePath);
@@ -64,14 +70,20 @@ void CheckAssetsTask::checkAllAssets()
 		}
 	}
 
-	// Missing
-	deleteMissing(db.getAllMissing());
+	// Delete missing assets
+	auto missing = db.getAllMissing();
+	if (!missing.empty()) {
+		addPendingTask(EditorTaskAnchor(std::make_unique<DeleteAssetsTask>(db, dstPath, std::move(missing))));
+	}
 
-	// Added
-	checkAssets(assets);
+	// Import assets
+	auto toImport = filterNeedsImporting(assets);
+	if (!toImport.empty()) {
+		addPendingTask(importer(db, dstPath, std::move(toImport)));
+	}
 }
 
-void CheckAssetsTask::checkAssets(const std::vector<ImportAssetsDatabaseEntry>& assets)
+std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::filterNeedsImporting(const std::vector<ImportAssetsDatabaseEntry>& assets) const
 {
 	auto& db = project.getImportAssetsDatabase();
 	Vector<ImportAssetsDatabaseEntry> toImport;
@@ -82,14 +94,15 @@ void CheckAssetsTask::checkAssets(const std::vector<ImportAssetsDatabaseEntry>& 
 		}
 	}
 
-	if (!toImport.empty()) {
-		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(project, std::move(toImport))));
-	}
+	return toImport;
 }
 
-void CheckAssetsTask::deleteMissing(const std::vector<ImportAssetsDatabaseEntry>& assets)
+EditorTaskAnchor CheckAssetsTask::importAssets(ImportAssetsDatabase& db, Path dstPath, std::vector<ImportAssetsDatabaseEntry>&& assets)
 {
-	if (!assets.empty()) {
-		addPendingTask(EditorTaskAnchor(std::make_unique<DeleteAssetsTask>(project, assets)));
-	}
+	return EditorTaskAnchor(std::make_unique<ImportAssetsTask>(db, dstPath, std::move(assets)));
+}
+
+EditorTaskAnchor CheckAssetsTask::importCodegen(ImportAssetsDatabase& db, Path dstPath, std::vector<ImportAssetsDatabaseEntry>&& assets)
+{
+	return EditorTaskAnchor(std::make_unique<ImportCodegenTask>(db, dstPath, std::move(assets)));
 }

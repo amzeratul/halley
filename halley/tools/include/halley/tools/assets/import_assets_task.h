@@ -14,18 +14,20 @@ namespace Halley
 	class ImportAssetsTask : public EditorTask
 	{
 	public:
-		ImportAssetsTask(Project& project, Vector<ImportAssetsDatabaseEntry>&& files);
+		ImportAssetsTask(ImportAssetsDatabase& db, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files);
 
 	protected:
 		void run() override;
 
 	private:
-		Project& project;
+		ImportAssetsDatabase& db;
+		Path assetsPath;
+
 		Vector<ImportAssetsDatabaseEntry> files;
 		std::map<String, std::function<std::vector<Path>(const ImportAssetsDatabaseEntry&, Path)>> importers;
 		
-		float curFileProgressStart;
-		float curFileProgressEnd;
+		float curFileProgressStart = 0;
+		float curFileProgressEnd = 0;
 		std::string curFileLabel;
 
 		void importAsset(ImportAssetsDatabaseEntry& asset);

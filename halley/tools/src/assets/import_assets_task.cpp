@@ -8,9 +8,10 @@
 
 using namespace Halley;
 
-ImportAssetsTask::ImportAssetsTask(Project& project, Vector<ImportAssetsDatabaseEntry>&& files)
+ImportAssetsTask::ImportAssetsTask(ImportAssetsDatabase& db, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files)
 	: EditorTask("Importing assets", true, true)
-	, project(project)
+	, db(db)
+	, assetsPath(assetsPath)
 	, files(std::move(files))
 {}
 
@@ -19,9 +20,7 @@ void ImportAssetsTask::run()
 	setImportTable();
 
 	using namespace std::chrono_literals;
-	auto& db = project.getImportAssetsDatabase();
 	auto lastSave = std::chrono::steady_clock::now();
-	auto destinationFolder = project.getAssetsPath();
 
 	for (size_t i = 0; i < files.size(); ++i) {
 		if (isCancelled()) {
@@ -60,15 +59,14 @@ void ImportAssetsTask::run()
 
 void ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
-	auto dstDir = project.getAssetsPath();
 	auto root = asset.inputFile.begin()->string();
 
 	auto iter = importers.find(root);
 	if (iter != importers.end()) {
-		asset.outputFiles = iter->second(asset, dstDir);
+		asset.outputFiles = iter->second(asset, assetsPath);
 	} else {
 		// No specific importer, use fallback
-		asset.outputFiles = genericImporter(asset, dstDir);
+		asset.outputFiles = genericImporter(asset, assetsPath);
 	}
 }
 

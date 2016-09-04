@@ -4,9 +4,10 @@
 
 using namespace Halley;
 
-DeleteAssetsTask::DeleteAssetsTask(Project& project, Vector<ImportAssetsDatabaseEntry> assets)
+DeleteAssetsTask::DeleteAssetsTask(ImportAssetsDatabase& db, Path assetsPath, Vector<ImportAssetsDatabaseEntry> assets)
 	: EditorTask("Deleting assets", true, true)
-	, project(project)
+	, db(db)
+	, assetsPath(assetsPath)
 	, assets(assets)
 {
 }
@@ -14,8 +15,6 @@ DeleteAssetsTask::DeleteAssetsTask(Project& project, Vector<ImportAssetsDatabase
 void DeleteAssetsTask::run()
 {
 	std::cout << "Start deleting files." << std::endl;
-	auto& db = project.getImportAssetsDatabase();
-	auto root = project.getAssetsPath();
 
 	for (auto& asset : assets) {
 		if (isCancelled()) {
@@ -24,7 +23,7 @@ void DeleteAssetsTask::run()
 
 		try {
 			for (auto& f : asset.outputFiles) {
-				FileSystem::remove(root / f);
+				FileSystem::remove(assetsPath / f);
 			}
 			db.markDeleted(asset);
 		} catch (std::exception& e) {
