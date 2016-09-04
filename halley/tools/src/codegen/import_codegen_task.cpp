@@ -3,9 +3,10 @@
 
 using namespace Halley;
 
-ImportCodegenTask::ImportCodegenTask(ImportAssetsDatabase& db, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files)
+ImportCodegenTask::ImportCodegenTask(ImportAssetsDatabase& db, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& _files)
 	: EditorTask("Generating code", true, true)
 	, db(db)
+	, files(_files)
 	, srcPath(files.at(0).srcDir)
 	, dstPath(assetsPath)
 {	
@@ -37,4 +38,9 @@ void ImportCodegenTask::run()
 	codegen.generateCode(dstPath);
 
 	setProgress(1.0f);
+
+	for (auto& f: files) {
+		db.markAsImported(f);
+	}
+	db.save();
 }

@@ -17,6 +17,7 @@ namespace Halley
 
 	private:
 		ImportAssetsDatabase& db;
+		Vector<ImportAssetsDatabaseEntry> files;
 		Path srcPath;
 		Path dstPath;
 	};

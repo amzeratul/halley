@@ -77,15 +77,14 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 	}
 
 	// Import assets
-	auto toImport = filterNeedsImporting(assets);
+	auto toImport = filterNeedsImporting(db, assets);
 	if (!toImport.empty()) {
 		addPendingTask(importer(db, dstPath, std::move(toImport)));
 	}
 }
 
-std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::filterNeedsImporting(const std::vector<ImportAssetsDatabaseEntry>& assets) const
+std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::filterNeedsImporting(ImportAssetsDatabase& db, const std::vector<ImportAssetsDatabaseEntry>& assets)
 {
-	auto& db = project.getImportAssetsDatabase();
 	Vector<ImportAssetsDatabaseEntry> toImport;
 
 	for (auto &a : assets) {
