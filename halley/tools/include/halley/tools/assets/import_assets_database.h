@@ -69,6 +69,8 @@ namespace Halley
 		void markAsPresent(const ImportAssetsDatabaseEntry& asset);
 		std::vector<ImportAssetsDatabaseEntry> getAllMissing() const;
 
+		std::vector<Path> getOutFiles(String assetId) const;
+
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 

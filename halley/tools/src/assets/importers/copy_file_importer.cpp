@@ -14,7 +14,7 @@ std::vector<Path> CopyFileImporter::import(const ImportAssetsDatabaseEntry& asse
 			return {};
 		}
 		FileSystem::copyFile(srcDir / i.first, dstDir / i.first);
-		out.emplace_back(dstDir / i.first);
+		out.emplace_back(i.first);
 		++n;
 	}
 

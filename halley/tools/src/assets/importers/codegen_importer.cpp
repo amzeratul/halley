@@ -22,12 +22,16 @@ std::vector<Path> CodegenImporter::import(const ImportAssetsDatabaseEntry& asset
 		srcs.push_back(asset.srcDir / f.first);
 		++n;
 	}
-	codegen.loadSources(srcs);
+	codegen.loadSources(srcs, [&](float progress, String label) -> bool {
+		return reporter(lerp(0.0f, 0.25f, progress), "Loading " + label);
+	});
 
 	if (!reporter(0.25f, "Validating")) {
 		return {};
 	}
-	codegen.validate();
+	codegen.validate([&](float progress, String label) -> bool {
+		return reporter(lerp(0.25f, 0.5f, progress), "Validating " + label);
+	});
 
 	if (!reporter(0.50f, "Processing")) {
 		return {};
@@ -37,9 +41,13 @@ std::vector<Path> CodegenImporter::import(const ImportAssetsDatabaseEntry& asset
 	if (!reporter(0.75f, "Generating code")) {
 		return {};
 	}
-	auto out = codegen.generateCode(dstDir);
+	auto out = codegen.generateCode(dstDir, [&](float progress, String label) -> bool {
+		return reporter(lerp(0.75f, 1.0f, progress), "Generating " + label);
+	});
 
-	reporter(1.0f, "");
+	if (!reporter(0.999f, "")) {
+		return {};
+	}
 	
 	return out;
 }

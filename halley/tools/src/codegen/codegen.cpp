@@ -34,6 +34,11 @@ void Codegen::run(Path inDir, Path outDir)
 	codegen.generateCode(outDir);
 }
 
+Codegen::Codegen(bool verbose)
+	: verbose(verbose)
+{
+}
+
 void Codegen::loadSources(Path p)
 {
 	if (exists(p) && is_directory(p)) {
@@ -46,16 +51,25 @@ void Codegen::loadSources(Path p)
 	}
 }
 
-void Codegen::loadSources(std::vector<Path> files)
+void Codegen::loadSources(std::vector<Path> files, ProgressReporter progress)
 {
+	int i = 0;
 	for (auto& f : files) {
 		addSource(f);
+		if (!progress(float(i) / float(files.size()), f.string())) {
+			return;
+		}
 	}
 }
 
-void Codegen::validate()
+void Codegen::validate(ProgressReporter progress)
 {
+	int i = 0;
 	for (auto& sys : systems) {
+		if (!progress(float(i) / float(systems.size()), sys.first)) {
+			return;
+		}
+
 		bool hasMain = false;
 		std::set<String> famNames;
 
@@ -157,7 +171,9 @@ void Codegen::writeFiles(Path dir, const CodeGenResult& files, Stats& stats) con
 		bool wrote = writeFile(filePath, &finalData[0], finalData.size(), f.stub);
 		if (wrote) {
 			stats.written++;
-			std::cout << "* Written " << filePath << std::endl;
+			if (verbose) {
+				std::cout << "* Written " << filePath << std::endl;
+			}
 		} else {
 			stats.skipped++;
 		}
@@ -165,7 +181,7 @@ void Codegen::writeFiles(Path dir, const CodeGenResult& files, Stats& stats) con
 	}
 }
 
-std::vector<Path> Codegen::generateCode(Path directory)
+std::vector<Path> Codegen::generateCode(Path directory, ProgressReporter progress)
 {
 	Vector<std::unique_ptr<ICodeGenerator>> gens;
 	gens.emplace_back(std::make_unique<CodegenCPP>());
@@ -198,12 +214,21 @@ std::vector<Path> Codegen::generateCode(Path directory)
 	if (stats.written > 0) {
 		using namespace boost::filesystem;
 		auto cmakeLists = directory.parent_path() / path("CMakeLists.txt");
-		std::cout << "Touching " << cmakeLists.string() << std::endl;
+		if (verbose) {
+			std::cout << "Touching " << cmakeLists.string() << std::endl;
+		}
 		utime(cmakeLists.string().c_str(), nullptr);
 	}
 
-	std::cout << "Codegen: " << stats.written << " written, " << stats.skipped << " skipped." << std::endl;
-	return stats.files;
+	if (verbose) {
+		std::cout << "Codegen: " << stats.written << " written, " << stats.skipped << " skipped." << std::endl;
+	}
+
+	std::vector<Path> out;
+	for (auto& f : stats.files) {
+		out.push_back(FileSystem::getRelative(f, directory));
+	}
+	return out;
 }
 
 void Codegen::addSource(Path path)

@@ -28,5 +28,7 @@ namespace Halley
 		static Bytes readFile(const Path& path);
 
 		static std::vector<Path> enumerateDirectory(const Path& path);
+		
+		static Path getRelative(const Path& path, const Path& parentPath);
 	};
 }

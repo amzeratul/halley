@@ -17,6 +17,7 @@ bool FileSystem::createDir(const Path& p)
 			return false;
 		}
 	}
+	return false;
 }
 
 bool FileSystem::createParentDir(const Path& p)
@@ -93,4 +94,9 @@ std::vector<Path> FileSystem::enumerateDirectory(const Path& path)
 		}
 	}
 	return result;
+}
+
+Path FileSystem::getRelative(const Path& path, const Path& parentPath)
+{
+	return boost::filesystem::relative(path, parentPath);
 }

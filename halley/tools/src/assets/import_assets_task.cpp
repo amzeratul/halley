@@ -57,7 +57,7 @@ void ImportAssetsTask::run()
 
 void ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
-	auto previous = asset.outputFiles;
+	auto previous = db.getOutFiles(asset.assetId);
 	auto out = importer.getImporter(asset.assetType).import(asset, assetsPath, [&] (float progress, String label) -> bool
 	{
 		setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel + " " + label);

@@ -130,6 +130,16 @@ std::vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() con
 	return result;
 }
 
+std::vector<Path> ImportAssetsDatabase::getOutFiles(String assetId) const
+{
+	auto iter = filesImported.find(assetId);
+	if (iter != filesImported.end()) {
+		return iter->second.asset.outputFiles;
+	} else {
+		return {};
+	}
+}
+
 void ImportAssetsDatabase::serialize(Serializer& s) const
 {
 	int version = 1;
