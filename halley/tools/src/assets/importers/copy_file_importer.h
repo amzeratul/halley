@@ -8,7 +8,6 @@ namespace Halley
 	public:
 		AssetType getType() const override { return AssetType::SIMPLE_COPY; }
 
-		String getAssetId(Path file) const override;
 		std::vector<Path> import(const ImportAssetsDatabaseEntry& asset, Path dstDir) override;
 	};
 }

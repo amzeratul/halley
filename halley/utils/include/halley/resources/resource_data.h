@@ -22,6 +22,7 @@ This file is subject to the terms of halley_license.txt.
 #pragma once
 
 #include "halley/text/halleystring.h"
+#include "halley/file/filesystem.h"
 #include <memory>
 #include <functional>
 #include <halley/concurrency/future.h>
@@ -63,7 +64,7 @@ namespace Halley {
 		size_t getSize() const;
 		String getString() const;
 
-		static std::unique_ptr<ResourceDataStatic> loadFromFileSystem(String path);
+		static std::unique_ptr<ResourceDataStatic> loadFromFileSystem(Path path);
 		void writeToFileSystem(String path) const;
 
 	private:

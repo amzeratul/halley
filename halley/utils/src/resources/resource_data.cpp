@@ -69,9 +69,9 @@ Halley::String Halley::ResourceDataStatic::getString() const
 	return String(static_cast<const char*>(getData()), getSize());
 }
 
-std::unique_ptr<ResourceDataStatic> ResourceDataStatic::loadFromFileSystem(String path)
+std::unique_ptr<ResourceDataStatic> ResourceDataStatic::loadFromFileSystem(Path path)
 {
-	std::ifstream fp(path, std::ios::binary | std::ios::in);
+	std::ifstream fp(path.string(), std::ios::binary | std::ios::in);
 	fp.seekg(0, std::ios::end);
 	size_t size = fp.tellg();
 	fp.seekg(0, std::ios::beg);
@@ -79,7 +79,7 @@ std::unique_ptr<ResourceDataStatic> ResourceDataStatic::loadFromFileSystem(Strin
 	try {
 		fp.read(buffer, size);
 		fp.close();
-		return std::make_unique<ResourceDataStatic>(buffer, size, path);
+		return std::make_unique<ResourceDataStatic>(buffer, size, path.string());
 	} catch (...) {
 		delete[] buffer; // ...unless it fails, so delete it before re-throwing error
 		throw;

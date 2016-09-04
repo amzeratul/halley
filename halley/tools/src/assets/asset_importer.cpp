@@ -1,18 +1,25 @@
 #include "halley/tools/assets/asset_importer.h"
 #include "halley/support/exception.h"
+#include "importers/copy_file_importer.h"
+#include "importers/font_importer.h"
 
 using namespace Halley;
 
 
 AssetImporter::AssetImporter()
 {
-	// TODO
+	importers[AssetType::SIMPLE_COPY] = std::make_unique<CopyFileImporter>();
+	importers[AssetType::FONT] = std::make_unique<FontImporter>();
 }
 
 IAssetImporter& AssetImporter::getImporter(Path path) const
 {
-	AssetType type = AssetType::UNDEFINED;
-	// TODO
+	AssetType type = AssetType::SIMPLE_COPY;
+	
+	auto root = path.begin()->string();
+	if (root == "font") {
+		type = AssetType::FONT;
+	}
 
 	return getImporter(type);
 }

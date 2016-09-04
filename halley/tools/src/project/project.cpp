@@ -9,6 +9,7 @@ Project::Project(Path rootPath, Path sharedAssetsSrcPath)
 {
 	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(*this, getAssetsPath() / "import.db");
 	codegenDatabase = std::make_unique<ImportAssetsDatabase>(*this, getGenPath() / "import.db");
+	assetImporter = std::make_unique<AssetImporter>();
 }
 
 Project::~Project() = default;

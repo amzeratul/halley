@@ -44,7 +44,7 @@ void CheckAssetsTask::run()
 	}
 }
 
-void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, Path dstPath, std::function<EditorTaskAnchor(ImportAssetsDatabase&, Path, std::vector<ImportAssetsDatabaseEntry>&&)> importer)
+void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, Path dstPath, std::function<EditorTaskAnchor(ImportAssetsDatabase&, const AssetImporter& importer, Path, std::vector<ImportAssetsDatabaseEntry>&&)> importer)
 {
 	std::map<String, ImportAssetsDatabaseEntry> assets;
 
@@ -60,6 +60,7 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 			}
 
 			if (asset.srcDir == Path() || asset.srcDir == srcPath) { // Don't mix files from two different source paths
+				asset.assetType = assetImporter.getType();
 				asset.srcDir = srcPath;
 				asset.inputFiles.emplace_back(filePath, FileSystem::getLastWriteTime(srcPath / filePath));
 			}
@@ -79,7 +80,7 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 	// Import assets
 	auto toImport = filterNeedsImporting(db, assets);
 	if (!toImport.empty()) {
-		addPendingTask(importer(db, dstPath, std::move(toImport)));
+		addPendingTask(importer(db, project.getAssetImporter(), dstPath, std::move(toImport)));
 	}
 }
 
@@ -96,12 +97,12 @@ std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::filterNeedsImporting(Imp
 	return toImport;
 }
 
-EditorTaskAnchor CheckAssetsTask::importAssets(ImportAssetsDatabase& db, Path dstPath, std::vector<ImportAssetsDatabaseEntry>&& assets)
+EditorTaskAnchor CheckAssetsTask::importAssets(ImportAssetsDatabase& db, const AssetImporter& importer, Path dstPath, std::vector<ImportAssetsDatabaseEntry>&& assets)
 {
-	return EditorTaskAnchor(std::make_unique<ImportAssetsTask>(db, dstPath, std::move(assets)));
+	return EditorTaskAnchor(std::make_unique<ImportAssetsTask>(db, importer, dstPath, std::move(assets)));
 }
 
-EditorTaskAnchor CheckAssetsTask::importCodegen(ImportAssetsDatabase& db, Path dstPath, std::vector<ImportAssetsDatabaseEntry>&& assets)
+EditorTaskAnchor CheckAssetsTask::importCodegen(ImportAssetsDatabase& db, const AssetImporter& importer, Path dstPath, std::vector<ImportAssetsDatabaseEntry>&& assets)
 {
 	return EditorTaskAnchor(std::make_unique<ImportCodegenTask>(db, dstPath, std::move(assets)));
 }

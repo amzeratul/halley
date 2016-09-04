@@ -25,9 +25,10 @@ namespace Halley
 
 		virtual AssetType getType() const = 0;
 
-		virtual String getAssetId(Path file) const = 0;
+		virtual String getAssetId(Path file) const;
 		virtual std::vector<Path> import(const ImportAssetsDatabaseEntry& asset, Path dstDir) = 0;
 
-		static std::unique_ptr<Metadata> getMetaData(Path path);
+		static Path getMainFile(const ImportAssetsDatabaseEntry& asset);
+		static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& asset);
 	};
 }

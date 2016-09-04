@@ -3,12 +3,11 @@
 #include "halley/tools/assets/check_assets_task.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
-#include "halley/tools/make_font/font_generator.h"
 #include "halley/resources/resource_data.h"
 
 using namespace Halley;
 
-ImportAssetsTask::ImportAssetsTask(ImportAssetsDatabase& db, AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files)
+ImportAssetsTask::ImportAssetsTask(ImportAssetsDatabase& db, const AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files)
 	: EditorTask("Importing assets", true, true)
 	, db(db)
 	, importer(importer)
@@ -59,55 +58,4 @@ void ImportAssetsTask::run()
 void ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
 	asset.outputFiles = importer.getImporter(asset.assetType).import(asset, assetsPath);
-}
-
-std::vector<Path> ImportAssetsTask::loadFont(const ImportAssetsDatabaseEntry& asset, Path dstDir)
-{
-	std::cout << "Importing font " << asset.inputFile << std::endl;
-
-	Path dst = asset.inputFile;
-	Path dstImg = asset.inputFile;
-	Path dstMeta = asset.inputFile;
-	dst.replace_extension("font");
-	dstImg.replace_extension("png");
-	dstMeta.replace_extension("png.meta");
-
-	FileSystem::createParentDir(dst);
-
-	Vector2i imgSize(512, 512);
-	float radius = 8;
-	int supersample = 4;
-	auto meta = getMetaData(asset.srcDir / asset.inputFile);
-	if (meta) {
-		radius = meta->getFloat("radius", 8);
-		supersample = meta->getInt("supersample", 4);
-		imgSize.x = meta->getInt("width", 512);
-		imgSize.y = meta->getInt("height", 512);
-	}
-
-	FontGenerator gen(false, [=] (float progress, String) -> bool {
-		setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel);
-		return !isCancelled();
-	});
-	gen.generateFont(asset.srcDir / asset.inputFile, dstDir / dst, imgSize, radius, supersample, Range<int>(0, 255));
-
-	return { dst, dstImg, dstMeta };
-}
-
-std::vector<Path> ImportAssetsTask::genericImporter(const ImportAssetsDatabaseEntry& asset, Path dstDir)
-{
-	auto file = asset.inputFile;
-	auto metaFile = file;
-	metaFile.replace_extension(metaFile.extension().string() + ".meta");
-	auto srcDir = asset.srcDir;
-
-	FileSystem::copyFile(srcDir / file, dstDir / file);
-
-	auto meta = getMetaData(asset.srcDir / asset.inputFile);
-	if (meta) {
-		FileSystem::copyFile(srcDir / metaFile, dstDir / metaFile);
-		return{ file, metaFile };
-	} else {
-		return { file };
-	}
 }
