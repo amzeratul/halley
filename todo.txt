@@ -53,7 +53,6 @@ lua
 - Moonscript support
 
 editor/tools
-- codegen
 - generate asset database
 - fix drawing of tasks
 - project selector
@@ -107,7 +106,6 @@ porting issues:
 misc/refactor
 - Use C++ modules? (pending approval of SG2 TS + implementation)
 - use GSL through code base
-- filesystem utils
 
 build
 - figure out how to handle code generation and its errors :|
