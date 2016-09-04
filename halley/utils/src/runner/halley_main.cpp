@@ -19,15 +19,11 @@ int HalleyMain::runMain(GameLoader& loader, const Vector<std::string>& args)
 		MainLoop loop(*core, loader);
 		loop.run();
 		return 0;
-	}
-	catch (std::exception& e) {
-		std::cout << ConsoleColour(Console::RED) << "\n\nUnhandled exception: " << ConsoleColour(Console::DARK_RED) << e.what() << ConsoleColour() << std::endl;
-		core->onTerminatedInError();
+	} catch (std::exception& e) {
+		core->onTerminatedInError(e.what());
 		return 1;
-	}
-	catch (...) {
-		std::cout << ConsoleColour(Console::RED) << "\n\nUnknown unhandled exception." << ConsoleColour() << std::endl;
-		core->onTerminatedInError();
+	} catch (...) {
+		core->onTerminatedInError("");
 		return 1;
 	}
 }

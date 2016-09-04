@@ -44,7 +44,7 @@ namespace Halley
 
 		void onSuspended() override;
 		void onReloaded() override;
-		void onTerminatedInError();
+		void onTerminatedInError(const std::string& error) override;
 
 		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
 		Vector<Plugin*> getPlugins(PluginType type) override;

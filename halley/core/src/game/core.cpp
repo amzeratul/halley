@@ -95,8 +95,13 @@ void Core::onReloaded()
 	}
 }
 
-void Core::onTerminatedInError()
+void Core::onTerminatedInError(const std::string& error)
 {
+	if (error != "") {
+		std::cout << ConsoleColour(Console::RED) << "\n\nUnhandled exception: " << ConsoleColour(Console::DARK_RED) << error << ConsoleColour() << std::endl;
+	} else {
+		std::cout << ConsoleColour(Console::RED) << "\n\nUnknown unhandled exception." << ConsoleColour() << std::endl;
+	}
 	hasError = true;
 }
 

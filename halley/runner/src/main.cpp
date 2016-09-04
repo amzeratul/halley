@@ -1,7 +1,6 @@
 #include "dynamic_loader.h"
 #include <boost/filesystem.hpp>
 #include <halley/runner/main_loop.h>
-#include <halley/support/console.h>
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
@@ -22,10 +21,10 @@ static int runMain(DynamicGameLoader& loader, Vector<std::string> args)
 		std::cout << "Main loop terminated normally." << std::endl;
 		return 0;
 	} catch (std::exception& e) {
-		std::cout << ConsoleColour(Console::RED) << "\n\nUnhandled exception: " << ConsoleColour(Console::DARK_RED) << e.what() << ConsoleColour() << std::endl;
+		core->onTerminatedInError(e.what());
 		return 1;
 	} catch (...) {
-		std::cout << ConsoleColour(Console::RED) << "\n\nUnknown unhandled exception." << ConsoleColour() << std::endl;
+		core->onTerminatedInError("");
 		return 1;
 	}
 }

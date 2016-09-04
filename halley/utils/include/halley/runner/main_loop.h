@@ -21,6 +21,7 @@ namespace Halley
 		virtual void init() = 0;
 		virtual void onSuspended() = 0;
 		virtual void onReloaded() = 0;
+		virtual void onTerminatedInError(const std::string& error) = 0;
 	};
 
 	class MainLoop
