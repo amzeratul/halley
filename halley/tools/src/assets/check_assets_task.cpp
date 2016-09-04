@@ -46,31 +46,31 @@ void CheckAssetsTask::run()
 
 void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, Path dstPath, std::function<EditorTaskAnchor(ImportAssetsDatabase&, Path, std::vector<ImportAssetsDatabaseEntry>&&)> importer)
 {
-	db.markAllAsMissing();
-
-	Vector<ImportAssetsDatabaseEntry> assets;
-	std::set<Path> included;
+	std::map<String, ImportAssetsDatabaseEntry> assets;
 
 	// Enumerate all potential assets
 	for (auto srcPath : srcPaths) {
 		for (auto filePath : FileSystem::enumerateDirectory(srcPath)) {
-			if (filePath.extension() != ".meta" && included.find(filePath) == included.end()) {
-				included.insert(filePath);
+			auto& assetImporter = project.getAssetImporter().getImporter(filePath);
+			String assetId = assetImporter.getAssetId(filePath);
+			auto& asset = assets[assetId];
 
-				int64_t metaTime = 0;
-				auto metaPath = srcPath / filePath;
-				metaPath.replace_extension(metaPath.extension().string() + ".meta");
-				if (FileSystem::exists(metaPath)) {
-					metaTime = FileSystem::getLastWriteTime(metaPath);
-				}
+			if (asset.assetType != AssetType::UNDEFINED && asset.assetType != assetImporter.getType()) {
+				throw Exception("AssetId conflict on " + assetId);
+			}
 
-				assets.emplace_back(filePath, srcPath, FileSystem::getLastWriteTime(srcPath / filePath), metaTime);
-				db.markAsPresent(filePath);
+			if (asset.srcDir == Path() || asset.srcDir == srcPath) { // Don't mix files from two different source paths
+				asset.srcDir = srcPath;
+				asset.inputFiles.emplace_back(filePath, FileSystem::getLastWriteTime(srcPath / filePath));
 			}
 		}
 	}
 
-	// Delete missing assets
+	// Check for missing files
+	db.markAllAsMissing();
+	for (auto& a : assets) {
+		db.markAsPresent(a.second);
+	}
 	auto missing = db.getAllMissing();
 	if (!missing.empty()) {
 		addPendingTask(EditorTaskAnchor(std::make_unique<DeleteAssetsTask>(db, dstPath, std::move(missing))));
@@ -83,13 +83,13 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 	}
 }
 
-std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::filterNeedsImporting(ImportAssetsDatabase& db, const std::vector<ImportAssetsDatabaseEntry>& assets)
+std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::filterNeedsImporting(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets)
 {
 	Vector<ImportAssetsDatabaseEntry> toImport;
 
 	for (auto &a : assets) {
-		if (db.needsImporting(a)) {
-			toImport.push_back(a);
+		if (db.needsImporting(a.second)) {
+			toImport.push_back(a.second);
 		}
 	}
 

@@ -21,10 +21,17 @@ set(SOURCES
 
         "src/tool/cli_tool.cpp"
 
+        "src/assets/asset_importer.cpp"
 	"src/assets/check_assets_task.cpp"
 	"src/assets/delete_assets_task.cpp"
+        "src/assets/iasset_importer.cpp"
 	"src/assets/import_assets_task.cpp"
 	"src/assets/import_assets_database.cpp"
+
+        "src/assets/importers/copy_file_importer.cpp"
+        "src/assets/importers/copy_file_importer.h"
+        "src/assets/importers/font_importer.cpp"
+        "src/assets/importers/font_importer.h"
 
         "src/tasks/editor_task.cpp"
 	"src/tasks/editor_task_set.cpp"
@@ -55,8 +62,10 @@ set(HEADERS
         "src/codegen/cpp/codegen_cpp.h"
         "src/codegen/cpp/cpp_class_gen.h"
 
+        "include/halley/tools/assets/asset_importer.h"
 	"include/halley/tools/assets/check_assets_task.h"
 	"include/halley/tools/assets/delete_assets_task.h"
+        "include/halley/tools/assets/iasset_importer.h"
 	"include/halley/tools/assets/import_assets_task.h"
 	"include/halley/tools/assets/import_assets_database.h"
 

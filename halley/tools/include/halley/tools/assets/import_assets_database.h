@@ -4,29 +4,42 @@
 #include <mutex>
 #include "halley/text/halleystring.h"
 #include <cstdint>
+#include "asset_importer.h"
 
 namespace Halley
 {
 	class Project;
 	class Deserializer;
 	class Serializer;
-
+	
 	class ImportAssetsDatabaseEntry
 	{
 	public:
-		Path inputFile;
+		using InputFile = std::pair<Path, int64_t>;
+
+		String assetId;
 		Path srcDir;
-		int64_t fileTime = 0;
-		int64_t metaTime = 0;
+		std::vector<InputFile> inputFiles;
 		std::vector<Path> outputFiles;
+		AssetType assetType = AssetType::UNDEFINED;
 
 		ImportAssetsDatabaseEntry() {}
 
-		ImportAssetsDatabaseEntry(Path inputFile, Path srcDir, int64_t time, int64_t metaTime)
-			: inputFile(inputFile)
+		ImportAssetsDatabaseEntry(String assetId, Path srcDir, Path inputFile, int64_t time)
+			: assetId(assetId)
 			, srcDir(srcDir)
-			, fileTime(time)
-			, metaTime(metaTime)
+			, inputFiles({ InputFile(inputFile, time) })
+		{}
+
+		ImportAssetsDatabaseEntry(String assetId, Path srcDir)
+			: assetId(assetId)
+			, srcDir(srcDir)
+		{}
+
+		ImportAssetsDatabaseEntry(String assetId, Path srcDir, std::vector<InputFile>&& inputFiles)
+			: assetId(assetId)
+			, srcDir(srcDir)
+			, inputFiles(std::move(inputFiles))
 		{}
 	};
 
@@ -53,7 +66,7 @@ namespace Halley
 		void markDeleted(const ImportAssetsDatabaseEntry& asset);
 
 		void markAllAsMissing();
-		void markAsPresent(Path file);
+		void markAsPresent(const ImportAssetsDatabaseEntry& asset);
 		std::vector<ImportAssetsDatabaseEntry> getAllMissing() const;
 
 		void serialize(Serializer& s) const;
@@ -63,7 +76,7 @@ namespace Halley
 		Project& project;
 		Path dbFile;
 
-		std::map<Path, FileEntry> filesImported;
+		std::map<String, FileEntry> filesImported;
 		
 		mutable std::mutex mutex;
 	};

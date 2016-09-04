@@ -105,6 +105,12 @@ namespace Halley {
 			return *this;
 		}
 
+		template <typename T, typename U>
+		Serializer& operator<<(const std::pair<T, U>& p)
+		{
+			return *this << p.first << p.second;
+		}
+
 	private:
 		bool dryRun;
 		size_t size = 0;
@@ -207,6 +213,12 @@ namespace Halley {
 		{
 			val.deserialize(*this);
 			return *this;
+		}
+
+		template <typename T, typename U>
+		Deserializer& operator>>(std::pair<T, U>& p)
+		{
+			return *this >> p.first >> p.second;
 		}
 
 	private:

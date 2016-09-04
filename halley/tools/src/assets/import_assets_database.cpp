@@ -7,20 +7,23 @@ using namespace Halley;
 
 void ImportAssetsDatabase::FileEntry::serialize(Serializer& s) const
 {
-	s << asset.inputFile;
+	s << asset.assetId;
 	s << asset.srcDir;
-	s << asset.fileTime;
-	s << asset.metaTime;
+	s << asset.inputFiles;
 	s << asset.outputFiles;
+	int t = int(asset.assetType);
+	s << t;
 }
 
 void ImportAssetsDatabase::FileEntry::deserialize(Deserializer& s)
 {
-	s >> asset.inputFile;
+	s >> asset.assetId;
 	s >> asset.srcDir;
-	s >> asset.fileTime;
-	s >> asset.metaTime;
+	s >> asset.inputFiles;
 	s >> asset.outputFiles;
+	int t;
+	s >> t;
+	asset.assetType = AssetType(t);
 }
 
 ImportAssetsDatabase::ImportAssetsDatabase(Project& project, Path dbFile)
@@ -51,12 +54,35 @@ void ImportAssetsDatabase::save() const
 bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	auto iter = filesImported.find(asset.inputFile);
+	auto iter = filesImported.find(asset.assetId);
 	if (iter == filesImported.end()) {
 		return true;
 	} else {
 		auto& oldAsset = iter->second.asset;
-		return asset.srcDir != oldAsset.srcDir || asset.fileTime != oldAsset.fileTime || asset.metaTime != oldAsset.metaTime;
+		if (asset.srcDir != oldAsset.srcDir) {
+			// Directory changed
+			return true;
+		}
+
+		if (asset.inputFiles.size() != oldAsset.inputFiles.size()) {
+			// Number of files changed
+			return true;
+		}
+
+		for (auto& i: asset.inputFiles) {
+			auto result = std::find_if(oldAsset.inputFiles.begin(), oldAsset.inputFiles.end(), [&](const ImportAssetsDatabaseEntry::InputFile& entry) { return entry.first == i.first; });
+			if (result == oldAsset.inputFiles.end()) {
+				// File wasn't there before
+				return true;
+			} else if (result->second != i.second) {
+				// Timestamp changed
+				return true;
+			}
+		}
+
+		// At this point, we know it's identical. We don't have to check old files on new input, because the size matches and all entries matched.
+
+		return false;
 	}
 }
 
@@ -66,13 +92,13 @@ void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset
 	FileEntry entry;
 	entry.asset = asset;
 	entry.present = true;
-	filesImported[asset.inputFile] = entry;
+	filesImported[asset.assetId] = entry;
 }
 
 void ImportAssetsDatabase::markDeleted(const ImportAssetsDatabaseEntry& asset)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	filesImported.erase(asset.inputFile);
+	filesImported.erase(asset.assetId);
 }
 
 void ImportAssetsDatabase::markAllAsMissing()
@@ -83,10 +109,10 @@ void ImportAssetsDatabase::markAllAsMissing()
 	}
 }
 
-void ImportAssetsDatabase::markAsPresent(Path file)
+void ImportAssetsDatabase::markAsPresent(const ImportAssetsDatabaseEntry& asset)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	auto iter = filesImported.find(file);
+	auto iter = filesImported.find(asset.assetId);
 	if (iter != filesImported.end()) {
 		iter->second.present = true;
 	}

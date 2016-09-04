@@ -1,6 +1,7 @@
 #pragma once
 
 #include "halley/file/filesystem.h"
+#include "halley/tools/assets/asset_importer.h"
 
 namespace Halley
 {
@@ -21,6 +22,8 @@ namespace Halley
 
 		ImportAssetsDatabase& getImportAssetsDatabase();
 		ImportAssetsDatabase& getCodegenDatabase();
+
+		const AssetImporter& getAssetImporter() const;
 	
 	private:
 		Path rootPath;
@@ -28,5 +31,6 @@ namespace Halley
 
 		std::unique_ptr<ImportAssetsDatabase> importAssetsDatabase;
 		std::unique_ptr<ImportAssetsDatabase> codegenDatabase;
+		std::unique_ptr<AssetImporter> assetImporter;
 	};
 }

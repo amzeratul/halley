@@ -27,7 +27,7 @@ void DeleteAssetsTask::run()
 			}
 			db.markDeleted(asset);
 		} catch (std::exception& e) {
-			std::cout << "Error removing file " << asset.inputFile << ": " << e.what() << std::endl;
+			std::cout << "Error removing asset \"" << asset.assetId << "\": " << e.what() << std::endl;
 		}
 	}
 	db.save();

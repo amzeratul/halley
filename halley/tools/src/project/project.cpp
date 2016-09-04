@@ -47,3 +47,8 @@ ImportAssetsDatabase& Project::getCodegenDatabase()
 {
 	return *codegenDatabase;
 }
+
+const AssetImporter& Project::getAssetImporter() const
+{
+	return *assetImporter;
+}

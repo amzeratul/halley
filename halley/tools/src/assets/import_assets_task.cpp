@@ -8,17 +8,16 @@
 
 using namespace Halley;
 
-ImportAssetsTask::ImportAssetsTask(ImportAssetsDatabase& db, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files)
+ImportAssetsTask::ImportAssetsTask(ImportAssetsDatabase& db, AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files)
 	: EditorTask("Importing assets", true, true)
 	, db(db)
+	, importer(importer)
 	, assetsPath(assetsPath)
 	, files(std::move(files))
 {}
 
 void ImportAssetsTask::run()
 {
-	setImportTable();
-
 	using namespace std::chrono_literals;
 	auto lastSave = std::chrono::steady_clock::now();
 
@@ -29,7 +28,7 @@ void ImportAssetsTask::run()
 
 		curFileProgressStart = float(i) / float(files.size());
 		curFileProgressEnd = float(i + 1) / float(files.size());
-		curFileLabel = files[i].inputFile.filename().string();
+		curFileLabel = files[i].assetId;
 		setProgress(curFileProgressStart, curFileLabel);
 
 		try {
@@ -47,7 +46,7 @@ void ImportAssetsTask::run()
 				lastSave = now;
 			}
 		} catch (std::exception& e) {
-			std::cout << "Error importing asset " << files[i].inputFile << ": " << e.what() << std::endl;
+			std::cout << "Error importing asset " << files[i].assetId << ": " << e.what() << std::endl;
 		}
 	}
 	db.save();
@@ -59,24 +58,7 @@ void ImportAssetsTask::run()
 
 void ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
-	auto root = asset.inputFile.begin()->string();
-
-	auto iter = importers.find(root);
-	if (iter != importers.end()) {
-		asset.outputFiles = iter->second(asset, assetsPath);
-	} else {
-		// No specific importer, use fallback
-		asset.outputFiles = genericImporter(asset, assetsPath);
-	}
-}
-
-std::unique_ptr<Metadata> ImportAssetsTask::getMetaData(Path path)
-{
-	try {
-		return std::make_unique<Metadata>(*ResourceDataStatic::loadFromFileSystem(path.string() + ".meta"));
-	} catch (...) {
-		return std::unique_ptr<Metadata>();
-	}
+	asset.outputFiles = importer.getImporter(asset.assetType).import(asset, assetsPath);
 }
 
 std::vector<Path> ImportAssetsTask::loadFont(const ImportAssetsDatabaseEntry& asset, Path dstDir)
@@ -128,9 +110,4 @@ std::vector<Path> ImportAssetsTask::genericImporter(const ImportAssetsDatabaseEn
 	} else {
 		return { file };
 	}
-}
-
-void ImportAssetsTask::setImportTable()
-{
-	importers["font"] = [this](const ImportAssetsDatabaseEntry& asset, Path dstDir) -> std::vector<Path> { return loadFont(asset, dstDir); };
 }

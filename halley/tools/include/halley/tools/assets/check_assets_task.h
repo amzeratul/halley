@@ -22,7 +22,7 @@ namespace Halley
 		DirectoryMonitor monitorGen;
 		bool headless;
 
-		static std::vector<ImportAssetsDatabaseEntry> filterNeedsImporting(ImportAssetsDatabase& db, const std::vector<ImportAssetsDatabaseEntry>& assets);
+		static std::vector<ImportAssetsDatabaseEntry> filterNeedsImporting(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets);
 		void checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, Path dstPath, std::function<EditorTaskAnchor(ImportAssetsDatabase&, Path, std::vector<ImportAssetsDatabaseEntry>&&)> importer);
 		
 		static EditorTaskAnchor importAssets(ImportAssetsDatabase& db, Path dstPath, std::vector<ImportAssetsDatabaseEntry>&& assets);
