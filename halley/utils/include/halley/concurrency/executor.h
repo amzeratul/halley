@@ -19,6 +19,7 @@ namespace Halley
 		size_t threadCount() const;
 		void onAttached();
 		void onDetached();
+		void abort();
 
 		static ExecutionQueue& getDefault();
 
@@ -29,6 +30,7 @@ namespace Halley
 
 		std::atomic<int> attachedCount;
 		std::atomic<bool> hasTasks;
+		std::atomic<bool> aborted;
 	};
 
 	class Executors
@@ -56,14 +58,24 @@ namespace Halley
 	public:
 		Executor(ExecutionQueue& queue);
 		~Executor();
+
 		bool runPending();
 		void runForever();
 		void stop();
 		
-		static void makeThreadPool(ExecutionQueue& queue, size_t n);
-
 	private:
 		ExecutionQueue& queue;
-		bool running = false;
+		std::atomic<bool> running;
+	};
+
+	class ThreadPool
+	{
+	public:
+		ThreadPool(ExecutionQueue& queue, size_t n);
+		~ThreadPool();
+
+	private:
+		std::vector<std::unique_ptr<Executor>> executors;
+		std::vector<boost::thread> threads;
 	};
 }

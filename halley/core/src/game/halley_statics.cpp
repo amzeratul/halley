@@ -18,9 +18,10 @@ namespace Halley {
 
 			executors = new Executors();
 			executors->set(*executors);
-			Executor::makeThreadPool(executors->getCPU(), 4);
+			threadPool = std::make_unique<ThreadPool>(executors->getCPU(), 4);
 		}
 
+		std::unique_ptr<ThreadPool> threadPool;
 		Vector<TypeDeleterBase*> typeDeleters;
 		void* maskStorage;
 		OS* os;

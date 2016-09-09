@@ -4,9 +4,12 @@
 
 using namespace Halley;
 
+class AbortException : public std::exception {};
+
 Executors* Executors::instance = nullptr;
 
 ExecutionQueue::ExecutionQueue()
+	: aborted(false)
 {
 	hasTasks.store(false);
 }
@@ -17,6 +20,9 @@ TaskBase ExecutionQueue::getNext()
 		boost::unique_lock<boost::mutex> lock(mutex);
 		while (queue.empty()) {
 			condition.wait(lock);
+			if (aborted) {
+				throw AbortException();
+			}
 		}
 		
 		TaskBase value = queue.front();
@@ -40,7 +46,7 @@ void ExecutionQueue::addToQueue(TaskBase task)
 	queue.emplace_back(task);
 	hasTasks.store(true);
 
-	condition.notify_all();
+	condition.notify_one();
 }
 
 Executors& Executors::get()
@@ -71,6 +77,14 @@ void ExecutionQueue::onDetached()
 	--attachedCount;
 }
 
+void ExecutionQueue::abort()
+{
+	if (!aborted) {
+		aborted = true;
+		condition.notify_all();
+	}
+}
+
 ExecutionQueue& ExecutionQueue::getDefault()
 {
 	return Executors::get().getCPU();
@@ -78,6 +92,7 @@ ExecutionQueue& ExecutionQueue::getDefault()
 
 Executor::Executor(ExecutionQueue& queue)
 	: queue(queue)
+	, running(true)
 {
 	queue.onAttached();
 }
@@ -98,26 +113,41 @@ bool Executor::runPending()
 
 void Executor::runForever()
 {
-	running = true;
 	while (running)	{
-		queue.getNext()();
+		try {
+			queue.getNext()();
+		} catch (AbortException) {}
 	}
 }
 
 void Executor::stop()
 {
 	running = false;
+	queue.abort();
 }
 
-void Executor::makeThreadPool(ExecutionQueue& queue, size_t n)
+ThreadPool::ThreadPool(ExecutionQueue& queue, size_t n)
 {
-	std::reference_wrapper<ExecutionQueue> q = queue;
 	for (size_t i = 0; i < n; i++) {
-		boost::thread([q, i] ()
+		executors.emplace_back(std::make_unique<Executor>(queue));
+	}
+	threads.resize(n);
+
+	for (size_t i = 0; i < n; i++) {
+		threads[i] = boost::thread([this, i]()
 		{
 			Concurrent::setThreadName("threadPool" + String::integerToString(int(i)));
-			Executor r(q.get());
-			r.runForever();
-		}).detach();
+			executors[i]->runForever();
+		});
+	}
+}
+
+ThreadPool::~ThreadPool()
+{
+	for (auto& e: executors) {
+		e->stop();
+	}
+	for (auto& t : threads) {
+		t.join();
 	}
 }
