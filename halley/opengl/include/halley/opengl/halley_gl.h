@@ -27,10 +27,10 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "gl_core_3_3.h"
 #if defined(WITH_OPENGL)
-	#ifdef __APPLE__
+	#if defined(__APPLE__)
 		#include <OpenGL/gl.h>
 	#else
-		#include <GL/GL.h>
+		#include <GL/gl.h>
 	#endif
 #elif defined(WITH_OPENGL_ES2)
 	//#include <SDL_opengles2.h>
