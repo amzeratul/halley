@@ -118,6 +118,6 @@ void Executor::makeThreadPool(ExecutionQueue& queue, size_t n)
 			Concurrent::setThreadName("threadPool" + String::integerToString(int(i)));
 			Executor r(q.get());
 			r.runForever();
-		});
+		}).detach();
 	}
 }
