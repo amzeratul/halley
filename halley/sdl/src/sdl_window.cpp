@@ -16,11 +16,13 @@ using namespace Halley;
 SDLWindow::SDLWindow(SDL_Window* window)
 	: window(window)
 {
+#ifdef _WIN32
 	SDL_SysWMinfo wminfo;
 	SDL_VERSION(&wminfo.version);
 	if (SDL_GetWindowWMInfo(window, &wminfo) == 1) {
 		OS::get().onWindowCreated(wminfo.info.win.window);
 	}
+#endif
 }
 
 static Vector2i getCenteredWindow(Vector2i size, int screen)
