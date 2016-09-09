@@ -21,15 +21,19 @@ Design guidelines & objectives:
 * Support scripting in other languages, such as Lua
 
 ## Modules
-Halley is divided in a few sub-projects:
+Halley is divided in a several sub-projects:
 * **core**: Core features of the engine, including looper, API management
-* **opengl**: OpenGL backend
+* **opengl**: Video/OpenGL implementation
+* **sdl**: System/SDL implementation
 * **entity**: Framework for dealing with entities, components, and systems
 * **runner**: Provides an entry point for execution and dynamic reloading. Highly experimental.
 * **utils**: Utilities library
 * **tools**: Editor tools to generate files and assets
+* **net**: Networking library
 * **cmd**: Command-line interface to tools
-* **samples/test**: Sample game
+* **editor**: Editor UI
+* **test/entity**: Stress test of entity system
+* **test/network**: Stress test of network system
 
 ## Installation
 
@@ -42,10 +46,10 @@ Halley is divided in a few sub-projects:
 
 ### Dependencies
 * Boost 1.59.0
-* SDL 2.0.4
+* SDL 2.0.4 (technically only for SDL system, but no alternative is available)
 * yaml-cpp 0.5.3
 * Freetype 2.6.3
 
 ### Set up
 * Build with CMake
-* Run halley-sample-test
+* Run halley-editor

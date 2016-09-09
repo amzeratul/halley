@@ -293,12 +293,7 @@ namespace Halley {
 			Last = 512
 		};
 
-		static String getName(Key);
-
 	private:
-		static void doInit();
-		static FlatMap<Key, String> keyNames;
-		static bool init;
 	};
 
 	namespace KeyMods {

@@ -88,7 +88,18 @@ int InputKeyboardSDL::getNextLetter()
 	}
 }
 
-Halley::String Halley::InputKeyboardSDL::getButtonName(int code)
+String InputKeyboardSDL::getButtonName(int code)
 {
-	return Keys::getName(static_cast<Keys::Key>(code));
+	switch (code) {
+	case Keys::Esc:
+		return "Esc";
+	case Keys::Delete:
+		return "Del";
+	default:
+		if (code >= Keys::A && code <= Keys::Z) {
+			return String(wchar_t(code - Keys::A + 'A'));
+		} else {
+			return SDL_GetKeyName(SDL_Keycode(code));
+		}
+	}
 }
