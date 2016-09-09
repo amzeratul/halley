@@ -4,7 +4,7 @@
 namespace Halley {
 	
 	class SDLPlugin : public Plugin {
-		HalleyAPIInternal* createAPI() override { return new SystemSDL(); }
+		HalleyAPIInternal* createAPI(SystemAPI*) override { return new SystemSDL(); }
 		PluginType getType() override { return PluginType::SystemAPI; }
 		String getName() override { return "System/SDL"; }
 	};

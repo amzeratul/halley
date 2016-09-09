@@ -7,6 +7,7 @@
 namespace Halley
 {
 	class HalleyAPIInternal;
+	class SystemAPI;
 
 	enum class PluginType
 	{
@@ -24,7 +25,7 @@ namespace Halley
 		virtual PluginType getType() = 0;
 		virtual String getName() = 0;
 
-		virtual HalleyAPIInternal* createAPI() { return nullptr; }
+		virtual HalleyAPIInternal* createAPI(SystemAPI*) { return nullptr; }
 	};
 
 	class IPluginRegistry

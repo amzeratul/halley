@@ -44,7 +44,7 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 	{
 		auto plugins = core->getPlugins(PluginType::SystemAPI);
 		if (plugins.size() > 0) {
-			system.reset(static_cast<SystemAPIInternal*>(plugins[0]->createAPI()));
+			system.reset(static_cast<SystemAPIInternal*>(plugins[0]->createAPI(nullptr)));
 		} else {
 			throw Exception("No suitable system plugins found.");
 		}
@@ -54,7 +54,7 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 	if (flags & HalleyAPIFlags::Video) {
 		auto plugins = core->getPlugins(PluginType::GraphicsAPI);
 		if (plugins.size() > 0) {
-			video.reset(static_cast<VideoAPIInternal*>(plugins[0]->createAPI()));
+			video.reset(static_cast<VideoAPIInternal*>(plugins[0]->createAPI(system.get())));
 		} else {
 			throw Exception("No suitable video plugins found.");
 		}

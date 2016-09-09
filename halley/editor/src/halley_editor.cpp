@@ -93,10 +93,8 @@ void HalleyEditor::parseArguments(const std::vector<String>& args)
 std::unique_ptr<Stage> HalleyEditor::startGame(HalleyAPI* api)
 {
 	if (!headless) {
-		Rect4i rect = preferences->getWindowRect();
 		Vector2i winSize(1280, 720);
-		Vector2i winPos = api->video->getCenteredWindow(winSize, 0);
-		api->video->setWindow(Window(WindowType::ResizableWindow, winPos, winSize, getName()), false);
+		api->video->setWindow(WindowDefinition(WindowType::ResizableWindow, winSize, getName()), false);
 	}
 	return std::make_unique<EditorRootStage>(*this);
 }
