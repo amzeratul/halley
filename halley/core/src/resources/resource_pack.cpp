@@ -25,7 +25,6 @@
 #include <Windows.h>
 #endif
 #include <iostream>
-#include <SDL.h>
 #include <halley/support/exception.h>
 #include <halley/core/api/system_api.h>
 

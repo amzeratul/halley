@@ -11,6 +11,7 @@ namespace Halley
 	class TextureDescriptor;
 	class TextureRenderTarget;
 	class Shader;
+	class Window;
 
 	class VideoAPI
 	{
@@ -22,7 +23,7 @@ namespace Halley
 		virtual void flip() = 0;
 
 		virtual void setWindow(WindowDefinition&& windowDescriptor, bool vsync) = 0;
-		virtual const WindowDefinition& getWindow() const = 0;
+		virtual const Window& getWindow() const = 0;
 
 		virtual std::unique_ptr<Texture> createTexture(const TextureDescriptor& descriptor) = 0;
 		virtual std::unique_ptr<Shader> createShader(String name) = 0;

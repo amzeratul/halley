@@ -5,6 +5,8 @@
 
 namespace Halley
 {
+	class SDLWindow;
+
 	class SystemSDL final : public SystemAPIInternal
 	{
 	protected:
@@ -22,17 +24,19 @@ namespace Halley
 		void destroyWindow(std::shared_ptr<Window> window) override;
 
 		Vector2i getScreenSize(int n) const override;
-		Rect4i getWindowRect() const override;
 		Rect4i getDisplayRect(int screen) const override;
-
+		Vector2i getCenteredWindow(Vector2i size, int screen) const;
 		std::unique_ptr<GLContext> createGLContext() override;
 
 	private:
 		void processVideoEvent(VideoAPI* video, const SDL_Event& event);
 
 		void printDebugInfo() const;
-		Vector2i getCenteredWindow(Vector2i size, int screen) const;
 
-		std::shared_ptr<Window> window;
+		void initVideo();
+		void deInitVideo();
+
+		std::vector<std::shared_ptr<SDLWindow>> windows;
+		bool videoInit = false;
 	};
 }

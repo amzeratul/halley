@@ -26,7 +26,6 @@
 #include <halley/support/console.h>
 #include "resources/resource_filesystem.h"
 #include "halley/core/api/system_api.h"
-#include <SDL.h>
 
 using namespace Halley;
 

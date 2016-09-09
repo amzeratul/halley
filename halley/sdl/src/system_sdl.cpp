@@ -1,6 +1,5 @@
 #include "system_sdl.h"
 #include <SDL.h>
-#include <SDL_syswm.h>
 #include "halley/core/api/halley_api_internal.h"
 #include <halley/support/console.h>
 #include <halley/support/exception.h>
@@ -8,14 +7,8 @@
 #include "sdl_rw_ops.h"
 #include "halley/core/graphics/window.h"
 #include "halley/os/os.h"
-
-// win32 crap
-#ifdef max
-#undef max
-#endif
-#ifdef min
-#undef min
-#endif
+#include "sdl_window.h"
+#include "sdl_gl_context.h"
 
 using namespace Halley;
 
@@ -115,7 +108,12 @@ void SystemSDL::processVideoEvent(VideoAPI* video, const SDL_Event& event)
 	if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
 		int x, y;
 		SDL_GetWindowPosition(SDL_GetWindowFromID(event.window.windowID), &x, &y);
-		resizeWindow(Rect4i(x, y, event.window.data1, event.window.data2));
+
+		for (auto& w : windows) {
+			if (w->getId() == event.window.windowID) {
+				w->resize(Rect4i(x, y, event.window.data1, event.window.data2));
+			}
+		}
 	}
 }
 
@@ -137,11 +135,13 @@ std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(gsl::span<const gsl
 	}
 }
 
-void* SystemSDL::createWindow(const WindowDefinition& window)
+std::shared_ptr<Window> SystemSDL::createWindow(const WindowDefinition& windowDef)
 {
+	initVideo();
+
 	// Set flags and GL attributes
-	auto windowType = window.getWindowType();
-	int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_ALLOW_HIGHDPI;
+	auto windowType = windowDef.getWindowType();
+	int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_ALLOW_HIGHDPI;
 	if (windowType == WindowType::BorderlessWindow) {
 		flags |= SDL_WINDOW_BORDERLESS;
 	}
@@ -177,64 +177,36 @@ void* SystemSDL::createWindow(const WindowDefinition& window)
 #endif
 
 	// Window position
-	Vector2i windowSize = window.getSize();
-	Vector2i winPos = window.getPosition().get_value_or(getCenteredWindow(windowSize, 0));
+	Vector2i windowSize = windowDef.getSize();
+	Vector2i winPos = windowDef.getPosition().get_value_or(getCenteredWindow(windowSize, 0));
 
 	// Create window
-	sdlWindow = SDL_CreateWindow(window.getTitle().c_str(), winPos.x, winPos.y, windowSize.x, windowSize.y, flags);
+	auto sdlWindow = SDL_CreateWindow(windowDef.getTitle().c_str(), winPos.x, winPos.y, windowSize.x, windowSize.y, flags);
 	if (!sdlWindow) {
 		throw Exception(String("Error creating SDL window: ") + SDL_GetError());
 	}
 
-	// Set window icon
-	SDL_SysWMinfo wminfo;
-	SDL_VERSION(&wminfo.version);
-	if (SDL_GetWindowWMInfo(sdlWindow, &wminfo) == 1) {
-		OS::get().onWindowCreated(wminfo.info.win.window);
-	}
-
 	// Show window
-	SDL_ShowWindow(sdlWindow);
-
-	updateWindow(window);
-
-	return sdlWindow;
+	auto window = std::make_shared<SDLWindow>(sdlWindow);
+	window->show();
+	window->update(windowDef);
+	windows.push_back(window);
+	
+	return window;
 }
 
 void SystemSDL::destroyWindow(std::shared_ptr<Window> window)
 {
-	
-}
-
-void SystemSDL::updateWindow(const WindowDefinition& window)
-{
-#ifdef __ANDROID__
-	return;
-#endif
-
-	// Update window position & size
-	// For windowed, get out of fullscreen first, then set size.
-	// For fullscreen, set size before going to fullscreen.
-	WindowType windowType = window.getWindowType();
-	Vector2i windowSize = window.getSize();
-	Vector2i windowPos = window.getPosition().get_value_or(getCenteredWindow(windowSize, 0));
-
-	if (windowType != WindowType::Fullscreen) {
-		SDL_SetWindowFullscreen(sdlWindow, SDL_FALSE);
+	for (size_t i = 0; i < windows.size(); ++i) {
+		if (windows[i] == window) {
+			windows[i]->destroy();
+			windows.erase(windows.begin() + i);
+			break;
+		}
 	}
-	SDL_SetWindowSize(sdlWindow, windowSize.x, windowSize.y);
-	if (windowType == WindowType::Fullscreen) {
-		SDL_SetWindowFullscreen(sdlWindow, SDL_TRUE);
+	if (windows.empty()) {
+		deInitVideo();
 	}
-
-	SDL_SetWindowPosition(sdlWindow, windowPos.x, windowPos.y);
-
-	curWindow = std::make_unique<WindowDefinition>(window);
-}
-
-void SystemSDL::resizeWindow(Rect4i windowSize)
-{
-	updateWindow(curWindow->withPosition(windowSize.getTopLeft()).withSize(windowSize.getSize()));
 }
 
 Vector2i SystemSDL::getScreenSize(int n) const
@@ -245,14 +217,6 @@ Vector2i SystemSDL::getScreenSize(int n) const
 	SDL_DisplayMode info;
 	SDL_GetDesktopDisplayMode(n, &info);
 	return Vector2i(info.w, info.h);
-}
-
-Rect4i SystemSDL::getWindowRect() const
-{
-	int x, y, w, h;
-	SDL_GetWindowPosition(sdlWindow, &x, &y);
-	SDL_GetWindowSize(sdlWindow, &w, &h);
-	return Rect4i(x, y, w, h);
 }
 
 Rect4i SystemSDL::getDisplayRect(int screen) const
@@ -272,7 +236,7 @@ Vector2i SystemSDL::getCenteredWindow(Vector2i size, int screen) const
 
 std::unique_ptr<GLContext> SystemSDL::createGLContext()
 {
-	// TODO
+	return std::make_unique<SDLGLContext>(windows[0]->getSDLWindow());
 }
 
 void SystemSDL::printDebugInfo() const
@@ -283,4 +247,21 @@ void SystemSDL::printDebugInfo() const
 		std::cout << "\t" << i << ": " << SDL_GetVideoDriver(i) << "\n";
 	}
 	std::cout << "Video driver: " << ConsoleColour(Console::DARK_GREY) << SDL_GetCurrentVideoDriver() << ConsoleColour() << std::endl;
+}
+
+void SystemSDL::initVideo()
+{
+	if (!videoInit) {
+		SDL_VideoInit(nullptr);
+		printDebugInfo();
+		videoInit = true;
+	}
+}
+
+void SystemSDL::deInitVideo()
+{
+	if (videoInit) {
+		SDL_VideoQuit();
+		videoInit = false;
+	}
 }

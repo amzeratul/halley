@@ -30,7 +30,6 @@ namespace Halley
 		virtual void destroyWindow(std::shared_ptr<Window> window) = 0;
 
 		virtual Vector2i getScreenSize(int n) const = 0;
-		virtual Rect4i getWindowRect() const = 0;
 		virtual Rect4i getDisplayRect(int screen) const = 0;
 
 	private:

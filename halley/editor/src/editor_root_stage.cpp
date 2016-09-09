@@ -53,7 +53,7 @@ void EditorRootStage::onRender(RenderContext& context) const
 		// Background
 		Sprite bg = background;
 		bg.setTexRect(view).setSize(view.getSize()).draw(painter);
-		halleyLogo.clone().setPos(Vector2f(getVideoAPI().getWindow().getSize() / 2)).draw(painter);
+		halleyLogo.clone().setPos(Vector2f(getVideoAPI().getWindow().getDefinition().getSize() / 2)).draw(painter);
 
 		// Taskbar
 		taskBar->draw(painter);

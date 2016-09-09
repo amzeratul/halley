@@ -64,6 +64,11 @@ void VideoOpenGL::setWindow(WindowDefinition&& windowDefinition, bool vsync)
 	window->show();
 }
 
+const Window& VideoOpenGL::getWindow() const
+{
+	return *window;
+}
+
 void VideoOpenGL::initOpenGL()
 {
 	std::cout << ConsoleColour(Console::GREEN) << "Initializing OpenGL...\n" << ConsoleColour() << std::endl;

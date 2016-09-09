@@ -2,6 +2,7 @@
 #include <halley/maths/vector2.h>
 #include <halley/maths/rect.h>
 #include <boost/optional.hpp>
+#include <halley/text/halleystring.h>
 
 namespace Halley
 {
@@ -56,5 +57,7 @@ namespace Halley
 		virtual void hide() = 0;
 		virtual void setVsync(bool vsync) = 0;
 		virtual void swap() = 0;
+		virtual Rect4i getWindowRect() const = 0;
+		virtual const WindowDefinition& getDefinition() const = 0;
 	};
 }

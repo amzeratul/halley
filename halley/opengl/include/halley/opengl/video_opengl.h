@@ -19,7 +19,7 @@ namespace Halley {
 		void flip() override;
 		
 		void setWindow(WindowDefinition&& window, bool vsync) override;
-		const WindowDefinition& getWindow() const override;
+		const Window& getWindow() const override;
 
 		std::function<void(int, void*)> getUniformBinding(UniformType type, int n) override;
 		std::unique_ptr<Painter> makePainter() override;

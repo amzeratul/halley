@@ -1,6 +1,6 @@
 project (halley-opengl)
 
-include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} "include/halley/opengl" "../utils/include" "../core/include")
+include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} "include/halley/opengl" "../utils/include" "../core/include")
 
 set(SOURCES
         "src/gl_core_3_3.c"
