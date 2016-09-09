@@ -34,7 +34,7 @@ namespace Halley {
 		virtual ~ResourceDataReader() {}
 		virtual size_t size() const = 0;
 		virtual int read(gsl::span<gsl::byte> dst) = 0;
-		virtual void seek(long long pos, int whence) = 0;
+		virtual void seek(int64_t pos, int whence) = 0;
 		virtual size_t tell() const = 0;
 		virtual void close() = 0;
 	};
