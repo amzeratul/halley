@@ -68,7 +68,7 @@ void SDLRWOps::close()
 	}
 }
 
-void SDLRWOps::seek(long long offset, int whence)
+void SDLRWOps::seek(int64_t offset, int whence)
 {
 	if (whence == SEEK_SET) pos = int(offset + start);
 	else if (whence == SEEK_CUR) pos += int(offset);
