@@ -162,7 +162,7 @@ void Core::deInit()
 
 void Core::initResources()
 {
-	auto locator = std::make_unique<ResourceLocator>();
+	auto locator = std::make_unique<ResourceLocator>(*api->system);
 	game->initResourceLocator(environment->getProgramPath() + "/", *locator);
 	resources = std::make_unique<Resources>(std::move(locator), &*api);
 	StandardResources::initialize(*resources);
@@ -192,7 +192,7 @@ void Core::onFixedUpdate(Time time)
 void Core::onVariableUpdate(Time time)
 {
 	if (api->video) {
-		auto windowSize = api->video->getWindow().getSize();
+		auto windowSize = api->video->getWindow().getDefinition().getSize();
 		screenTarget = std::make_unique<ScreenRenderTarget>(Rect4i(Vector2i(), windowSize));
 		camera = std::make_unique<Camera>(Vector2f(windowSize) * 0.5f, Vector2f(windowSize));
 	}

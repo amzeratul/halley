@@ -20,7 +20,6 @@ core/graphics
 - improve distance field API (less magic)
 
 input
-- isolate SDL events to SDL-specific file?
 - input context system [RESEARCH]
 - use GameController API, ditch XInput+Joystick (should be superceded)
 

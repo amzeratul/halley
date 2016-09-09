@@ -7,6 +7,9 @@
 
 #include "halley/core/api/halley_api.h"
 
+#include <chrono>
+#include <thread>
+
 Halley::MainLoop::MainLoop(IMainLoopable& target, GameLoader& reloader)
 	: target(target)
 	, reloader(reloader)
@@ -25,33 +28,27 @@ void Halley::MainLoop::run()
 
 void Halley::MainLoop::runLoop()
 {
-	auto& api = target.getAPI();
-
 	std::cout << ConsoleColour(Console::GREEN) << "\nStarting main loop." << ConsoleColour() << std::endl;
 	Debug::trace("MainLoop::run begin");
 
-	using Uint32 = unsigned int;
-	Uint32 nSteps = 0;
-	Uint32 startTime;
-	Uint32 targetTime;
-	Uint32 lastTime;
-	startTime = targetTime = lastTime = api.system->getTicks();
+	using Clock = std::chrono::steady_clock;
+	using namespace std::chrono_literals;
+
+	int nSteps = 0;
+	Clock::time_point startTime;
+	Clock::time_point targetTime;
+	Clock::time_point lastTime;
+	startTime = targetTime = lastTime = Clock::now();
 
 	Time fixedDelta = 1.0 / fps;
 
 	while (isRunning()) {
 		if (target.transitionStage()) {
 			// Reset counters
-			startTime = targetTime = lastTime = api.system->getTicks();
+			startTime = targetTime = lastTime = Clock::now();
 			nSteps = 0;
 		}
-
-		if (delay > 0) {
-			startTime += delay;
-			targetTime += delay;
-			delay = 0;
-		}
-		Uint32 curTime = api.system->getTicks();
+		Clock::time_point curTime = Clock::now();
 
 		// Got anything to do?
 		if (curTime >= targetTime) {
@@ -60,15 +57,15 @@ void Halley::MainLoop::runLoop()
 				target.onFixedUpdate(fixedDelta);
 
 				nSteps++;
-				curTime = api.system->getTicks();
-				targetTime = startTime + Uint32((static_cast<long long>(nSteps) * 1000) / fps);
+				curTime = Clock::now();
+				targetTime = startTime + std::chrono::microseconds((static_cast<long long>(nSteps) * 1000000) / fps);
 			}
 		} else {
 			// Nope, release CPU
-			api.system->delay(1);
+			std::this_thread::sleep_for(1ms);
 		}
 
-		target.onVariableUpdate((curTime - lastTime) * 0.001f);
+		target.onVariableUpdate(std::chrono::duration<float>(curTime - lastTime).count());
 		lastTime = curTime;
 	}
 

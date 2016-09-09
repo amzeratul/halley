@@ -29,7 +29,9 @@ namespace Halley {
 	// XInput implementation
 	class InputJoystickXInput : public InputJoystick {
 	public:
+		InputJoystickXInput(int number);
 		~InputJoystickXInput();
+
 		std::string getName() const override;
 
 		bool isEnabled() const override { return enabled; }
@@ -39,15 +41,10 @@ namespace Halley {
 		void vibrate(spInputVibration vib) override;
 		void stopVibrating() override;
 
-	private:
-		InputJoystickXInput(int number);
-
 		void update(Time t) override;
 		void setEnabled(bool enabled);
 
-		void updateVibration(Time t);
-		void setVibration(float high, float low);
-
+	private:
 		int index;
 		int cooldown;
 		bool enabled;
@@ -55,7 +52,8 @@ namespace Halley {
 
 		Vector<spInputVibration> vibs;
 
-		friend class Input;
+		void updateVibration(Time t);
+		void setVibration(float high, float low);
 	};
 }
 

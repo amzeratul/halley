@@ -64,6 +64,7 @@ Deserializer& Deserializer::operator>>(std::string& str)
 {
 	unsigned int sz;
 	*this >> sz;
+	Expects(sz < 100 * 1024 * 1024);
 	str = std::string(reinterpret_cast<const char*>(src.data() + pos), sz);
 	pos += sz;
 	return *this;

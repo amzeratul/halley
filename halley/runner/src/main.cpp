@@ -5,6 +5,10 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 
+#ifdef _MSC_VER
+#pragma comment(lib, "SDL2.lib")
+#endif
+
 using namespace Halley;
 
 // Replacement for Halley::runMain

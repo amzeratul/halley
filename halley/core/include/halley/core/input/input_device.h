@@ -24,8 +24,6 @@
 #include "input_vibration.h"
 #include <halley/text/halleystring.h>
 
-union SDL_Event;
-
 namespace Halley {
 
 	class InputDevice {

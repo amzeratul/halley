@@ -28,15 +28,14 @@ This file is subject to the terms of halley_license.txt.
 #include <halley/concurrency/future.h>
 #include <gsl/gsl>
 
-struct SDL_RWops;
-
 namespace Halley {
 	class ResourceDataReader {
 	public:
 		virtual ~ResourceDataReader() {}
-		virtual int read(void* dst, size_t size) = 0;
+		virtual size_t size() const = 0;
+		virtual int read(gsl::span<gsl::byte> dst) = 0;
 		virtual void seek(long long pos, int whence) = 0;
-		virtual size_t tell() = 0;
+		virtual size_t tell() const = 0;
 		virtual void close() = 0;
 	};
 

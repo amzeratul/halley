@@ -19,47 +19,57 @@
 
 \*****************************************************************/
 
-#pragma once
+#include <SDL.h>
+#include "input_mouse_sdl.h"
 
-#include <functional>
-#include "input_button_base.h"
+using namespace Halley;
 
-#ifdef _MSC_VER
-#define XINPUT_AVAILABLE
-#endif
+InputMouseSDL::InputMouseSDL()
+	: wheelMove(0)
+{
+	init(5);
+}
 
-namespace Halley {
+void InputMouseSDL::processEvent(const SDL_Event& event)
+{
+	switch (event.type) {
+	case SDL_MOUSEMOTION:
+		pos.x = event.motion.x;
+		pos.y = event.motion.y;
+		break;
 
-	enum JoystickType {
-		JOYSTICK_GENERIC,
-		JOYSTICK_360,
-		JOYSTICK_PS3
-	};
+	case SDL_MOUSEBUTTONDOWN:
+		{
+			Uint8 button = event.button.button;
+			onButtonPressed(button - 1);
+			break;
+		}
 
-	class InputJoystick : public InputButtonBase {
-	public:
-		virtual ~InputJoystick() {}
+	case SDL_MOUSEBUTTONUP:
+		{
+			Uint8 button = event.button.button;
+			onButtonReleased(button - 1);
+			break;
+		}
 
-		virtual std::string getName() const = 0;
-		virtual JoystickType getType() const = 0;
+	case SDL_MOUSEWHEEL:
+		{
+			wheelMove += event.wheel.y;
+		}
+	}
+}
 
-		size_t getNumberAxes() override;
-		size_t getNumberHats() override;
+Halley::Vector2i Halley::InputMouseSDL::getPosition() const
+{
+	return pos;
+}
 
-		float getAxis(int n) override;
-		InputDevice& getHat(int n) override;
+int Halley::InputMouseSDL::getWheelMove() const
+{
+	return wheelMove;
+}
 
-		static float defaultAxisAdjust(float value);
-
-		int getButtonAtPosition(char c) const;	// c = N, S, E or W
-
-		virtual void update(Time /*t*/) {}
-
-	protected:
-		Vector<float> axes;
-		Vector<spInputButtonBase> hats;
-		std::function<float (float)> axisAdjust;
-	};
-
-	typedef std::shared_ptr<InputJoystick> spInputJoystick;
+void Halley::InputMouseSDL::update()
+{
+	wheelMove = 0;
 }

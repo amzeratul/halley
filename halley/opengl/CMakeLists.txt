@@ -1,11 +1,10 @@
 project (halley-opengl)
 
-include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} "include/halley/opengl" "../utils/include" "../core/include")
+include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} "include/halley/opengl" "../utils/include" "../core/include")
 
 set(SOURCES
         "src/gl_core_3_3.c"
         "src/gl_utils.cpp"
-        "src/native_window.cpp"
         "src/opengl_plugin.cpp"
         "src/painter_opengl.cpp"
         "src/render_target_opengl.cpp"
@@ -24,8 +23,6 @@ set(HEADERS
         "include/halley/opengl/shader_opengl.h"
         "include/halley/opengl/texture_opengl.h"
         "include/halley/opengl/video_opengl.h"
-
-        "src/native_window.h"
         )
 
 assign_source_group(${SOURCES})

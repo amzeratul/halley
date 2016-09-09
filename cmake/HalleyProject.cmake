@@ -58,11 +58,13 @@ set(HALLEY_PROJECT_LIBS
 	optimized halley-utils
 	optimized halley-net
 	optimized halley-opengl
+	optimized halley-sdl
 	optimized halley-entity
 	debug halley-core_d
 	debug halley-utils_d
 	debug halley-net_d
 	debug halley-opengl_d
+	debug halley-sdl_d
 	debug halley-entity_d
 	${SDL2_LIBRARIES}
 	${YAMLCPP_LIBRARY}

@@ -1,7 +1,5 @@
 #pragma once
 
-union SDL_Event;
-
 namespace Halley
 {
 	class InputKeyboard;

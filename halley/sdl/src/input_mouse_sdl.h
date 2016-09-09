@@ -14,33 +14,39 @@
 
   ---------------------------------------------------------------
 
-  Copyright (c) 2007-2011 - Rodrigo Braz Monteiro.
+  Copyright (c) 2007-2012 - Rodrigo Braz Monteiro.
   This file is subject to the terms of halley_license.txt.
 
 \*****************************************************************/
 
 #pragma once
 
-struct SDL_RWops;
-
-#include <halley/resources/resource_data.h>
+#include "halley/core/input/input_mouse.h"
 
 namespace Halley {
-	class ResourceDataReaderFile : public ResourceDataReader {
-	public:
-		ResourceDataReaderFile(SDL_RWops* fp, int start, int end, bool closeOnFinish);
-		int read(void* dst, size_t size) override;
-		void seek(long long pos, int whence) override;
-		size_t tell() override;
-		void close() override;
 
-		static SDL_RWops* getRWOpsFromStaticData(ResourceDataStatic& data);
+#ifdef _MSC_VER
+#pragma warning(disable: 4250)
+#endif
+
+	class InputMouseSDL : public InputButtonBase, public InputMouse {
+		friend class InputSDL;
+	public:
+		Vector2i getPosition() const override;
+		int getWheelMove() const override;
+
+		void update();
 
 	private:
-		SDL_RWops* fp;
-		int pos;
-		int start;
-		int end;
-		bool closeOnFinish;
+		InputMouseSDL();
+		void processEvent(const SDL_Event& event);
+
+		Vector2i pos;
+		int wheelMove;
 	};
+
+#ifdef _MSC_VER
+#pragma warning(default: 4250)
+#endif
+
 }

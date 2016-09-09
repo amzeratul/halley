@@ -25,9 +25,8 @@
 #include <Windows.h>
 #endif
 #include <iostream>
-#include <SDL.h>
 #include <halley/support/exception.h>
-#include "resources/resource_data_reader.h"
+#include <halley/core/api/system_api.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
@@ -36,8 +35,9 @@
 namespace Halley {
 	static const char* IDENTIFIER="HLYRSPCK";
 
-	ResourcePack::ResourcePack(String name)
-		: priority(0)
+	ResourcePack::ResourcePack(SystemAPI& system, String name)
+		: system(system)
+		, priority(0)
 		, fileP(nullptr)
 	{
 		if (name != "") {
@@ -249,8 +249,7 @@ namespace Halley {
 			size_t start = entry.pos;
 
 			return std::make_unique<ResourceDataStream>(path, [=] () -> std::unique_ptr<ResourceDataReader> {
-				SDL_RWops* fp = SDL_RWFromFile(name.c_str(), "rb");
-				return std::make_unique<ResourceDataReaderFile>(fp, static_cast<int>(start), static_cast<int>(start+sz), true);
+				return system.getDataReader(path, start, start + sz);
 			});
 		}
 

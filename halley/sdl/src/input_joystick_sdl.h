@@ -19,32 +19,38 @@
 
 \*****************************************************************/
 
-#include <SDL.h>
-#include "input/input_keys.h"
+#pragma once
 
-Halley::String Halley::Keys::getName(Key key)
-{
-	if (!init) {
-		doInit();
-	}
+#include "halley/core/input/input_joystick.h"
 
-	auto res = keyNames.find(key);
-	if (res != keyNames.end()) return res->second;
+namespace Halley {
 
-	String result = SDL_GetKeyName(SDL_Keycode(key));
-	return result;
+	class InputJoystickSDL : public InputJoystick {
+	public:
+		~InputJoystickSDL();
+		std::string getName() const final override;
+
+		JoystickType getType() const override {
+			return JOYSTICK_GENERIC;
+		}
+
+	private:
+		InputJoystickSDL(int number);
+		void processEvent(const SDL_Event& event);
+
+		void* joystick;
+		int index;
+
+		friend class InputSDL;
+	};
+
+	class InputJoystickHatSDL : public InputButtonBase {
+	private:
+		InputJoystickHatSDL() : InputButtonBase(4) {}
+
+		void processEvent(const SDL_Event& event);
+	
+		friend class InputJoystickSDL;
+	};
+
 }
-
-void Halley::Keys::doInit()
-{
-	keyNames[Esc] = "Esc";
-	keyNames[Delete] = "Del";
-	for (int i=A; i<=Z; i++) {
-		keyNames[Key(i)] = String((i-A)+'A');
-	}
-	init = true;
-}
-
-bool Halley::Keys::init = false;
-
-Halley::FlatMap<Halley::Keys::Key, Halley::String> Halley::Keys::keyNames;

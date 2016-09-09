@@ -4,7 +4,7 @@
 namespace Halley {
 	
 	class OpenGLPlugin : public Plugin {
-		HalleyAPIInternal* createAPI() override { return new VideoOpenGL();	}
+		HalleyAPIInternal* createAPI(SystemAPI* system) override { return new VideoOpenGL(*system); }
 		PluginType getType() override { return PluginType::GraphicsAPI; }
 		String getName() override { return "Video/OpenGL"; }
 	};
