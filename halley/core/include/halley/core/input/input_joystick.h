@@ -53,15 +53,12 @@ namespace Halley {
 
 		int getButtonAtPosition(char c) const;	// c = N, S, E or W
 
+		virtual void update(Time /*t*/) {}
+
 	protected:
 		Vector<float> axes;
 		Vector<spInputButtonBase> hats;
 		std::function<float (float)> axisAdjust;
-
-		virtual void update(Time /*t*/) {}
-		virtual void processEvent(const SDL_Event& /*event*/) {}
-
-		friend class InputSDL;
 	};
 
 	typedef std::shared_ptr<InputJoystick> spInputJoystick;

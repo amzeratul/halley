@@ -26,21 +26,20 @@
 
 namespace Halley {
 	class InputTouch {
-		friend class InputSDL;
-
 	public:
+		InputTouch(Vector2f initialPos);
+
 		bool isPressed() const;
 		bool isReleased() const;
 		Vector2f getInitialPos() const;
 		Vector2f getCurrentPos() const;
 		Time getTimeElapsed() const;
 
-	private:
-		InputTouch(Vector2f initialPos);
 		void setPos(Vector2f pos);
 		void update(Time t);
 		void setReleased();
 
+	private:
 		Vector2f initialPos;
 		Vector2f curPos;
 		bool pressed;

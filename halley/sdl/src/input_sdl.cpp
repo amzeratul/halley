@@ -62,7 +62,7 @@ void InputSDL::init()
 		bool isXinputController = name.asciiLower().find("xbox 360") != String::npos || name.asciiLower().find("xinput") != String::npos;
 		if (!hasXInput || !isXinputController) {
 			joysticks.push_back(std::move(joy));
-			sdlJoys[i] = joysticks.back().get();
+			sdlJoys[i] = dynamic_cast<InputJoystickSDL*>(joysticks.back().get());
 
 			std::cout << "\tInitialized SDL joystick: \"" << ConsoleColour(Console::DARK_GREY) << name << ConsoleColour() << "\".\n";
 		}

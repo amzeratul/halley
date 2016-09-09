@@ -36,7 +36,7 @@ namespace Halley {
 
 	private:
 		InputJoystickSDL(int number);
-		void processEvent(const SDL_Event& event) override;
+		void processEvent(const SDL_Event& event);
 
 		void* joystick;
 		int index;

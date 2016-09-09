@@ -23,6 +23,8 @@
 
 #include "halley/core/api/halley_api_internal.h"
 #include <halley/data_structures/flat_map.h>
+#include <SDL.h>
+#include "input_joystick_sdl.h"
 
 namespace Halley {
 
@@ -48,11 +50,12 @@ namespace Halley {
 		Vector<std::shared_ptr<InputTouch>> getNewTouchEvents() override;
 		Vector<std::shared_ptr<InputTouch>> getTouchEvents() override;
 
+		void processEvent(SDL_Event& event);
+
 	private:
 		void init() override;
 		void deInit() override;
 		void beginEvents(Time t) override;
-		void processEvent(SDL_Event& event) override;
 
 		void processJoyEvent(int n, SDL_Event& event);
 		void processTouch(int type, long long touchId, long long fingerId, float x, float y);
@@ -61,7 +64,7 @@ namespace Halley {
 		Vector<std::shared_ptr<InputJoystick>> joysticks;
 		Vector<std::shared_ptr<InputMouseSDL>> mice;
 
-		FlatMap<int, InputJoystick*> sdlJoys;
+		FlatMap<int, InputJoystickSDL*> sdlJoys;
 		FlatMap<int, std::shared_ptr<InputTouch>> touchEvents;
 	};
 

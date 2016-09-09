@@ -426,6 +426,11 @@ std::unique_ptr<TextureRenderTarget> VideoOpenGL::createRenderTarget()
 	return std::make_unique<RenderTargetOpenGL>();
 }
 
+void VideoOpenGL::resizeWindow(Rect4i windowSize)
+{
+	updateWindow(curWindow->withPosition(windowSize.getTopLeft()).withSize(windowSize.getSize()));
+}
+
 Vector2i VideoOpenGL::getScreenSize(int n) const
 {
 	if (n >= SDL_GetNumVideoDisplays()) {
@@ -447,16 +452,6 @@ void VideoOpenGL::flip()
 	}
 	for (const auto& m: msgs) {
 		m();
-	}
-}
-
-void VideoOpenGL::processEvent(SDL_Event& event)
-{
-	if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-		Vector2i size = Vector2i(event.window.data1, event.window.data2);
-		int x, y;
-		SDL_GetWindowPosition(sdlWindow, &x, &y);
-		updateWindow(getWindow().withPosition(Vector2i(x, y)).withSize(size));
 	}
 }
 

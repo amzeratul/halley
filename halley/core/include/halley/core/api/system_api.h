@@ -18,6 +18,6 @@ namespace Halley
 		friend class HalleyAPI;
 		friend class Core;
 
-		virtual bool generateEvents(HalleyAPIInternal* video, HalleyAPIInternal* input) = 0;
+		virtual bool generateEvents(VideoAPI* video, InputAPI* input) = 0;
 	};
 }

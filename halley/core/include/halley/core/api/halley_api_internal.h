@@ -1,8 +1,6 @@
 #pragma once
 #include <halley/plugin/plugin.h>
 
-union SDL_Event;
-
 #include "core_api.h"
 #include "video_api.h"
 #include "system_api.h"
@@ -23,7 +21,6 @@ namespace Halley
 
 		virtual void init() = 0;
 		virtual void deInit() = 0;
-		virtual void processEvent(SDL_Event& event) = 0;
 
 		virtual void onSuspend() {}
 		virtual void onResume() {}

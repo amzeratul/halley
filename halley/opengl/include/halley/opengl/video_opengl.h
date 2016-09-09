@@ -29,14 +29,14 @@ namespace Halley {
 		std::unique_ptr<Shader> createShader(String name) override;
 		std::unique_ptr<TextureRenderTarget> createRenderTarget() override;
 
+		void resizeWindow(Rect4i windowSize) override;
+
 	protected:
 		void init() override;
 		void deInit() override;
 
 		void onSuspend() override;
 		void onResume() override;
-
-		void processEvent(SDL_Event& event) override;
 
 	private:
 		void printDebugInfo() const;

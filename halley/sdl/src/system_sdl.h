@@ -1,6 +1,7 @@
 #pragma once
 
 #include "halley/core/api/halley_api_internal.h"
+#include "../../opengl/src/native_window.h"
 
 namespace Halley
 {
@@ -16,10 +17,12 @@ namespace Halley
 
 		void init() override;
 		void deInit() override;
-		void processEvent(SDL_Event& evt) override;
 
-		bool generateEvents(HalleyAPIInternal* video, HalleyAPIInternal* input) override;
+		bool generateEvents(VideoAPI* video, InputAPI* input) override;
 
 		std::unique_ptr<InputAPIInternal> makeInputAPI() override;
+
+	private:
+		void processVideoEvent(VideoAPI* video, const SDL_Event& event);
 	};
 }

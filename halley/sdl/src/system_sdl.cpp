@@ -59,51 +59,45 @@ void SystemSDL::delay(unsigned int ms)
 	SDL_Delay(ms);
 }
 
-void SystemSDL::processEvent(SDL_Event& evt)
-{
-}
-
-bool SystemSDL::generateEvents(HalleyAPIInternal* video, HalleyAPIInternal* input)
+bool SystemSDL::generateEvents(VideoAPI* video, InputAPI* input)
 {
 	SDL_Event event;
 	SDL_PumpEvents();
 	while (SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT) > 0) {
 		switch (event.type) {
-		case SDL_KEYDOWN:
-		case SDL_KEYUP:
-		case SDL_TEXTINPUT:
-		case SDL_TEXTEDITING:
-		case SDL_JOYAXISMOTION:
-		case SDL_JOYBUTTONDOWN:
-		case SDL_JOYBUTTONUP:
-		case SDL_JOYHATMOTION:
-		case SDL_JOYBALLMOTION:
-		case SDL_MOUSEMOTION:
-		case SDL_MOUSEBUTTONUP:
-		case SDL_MOUSEBUTTONDOWN:
-		case SDL_FINGERUP:
-		case SDL_FINGERDOWN:
-		case SDL_FINGERMOTION:
-		{
-			if (input) {
-				// TODO: convert to internal event format?
-				input->processEvent(event);
+			case SDL_KEYDOWN:
+			case SDL_KEYUP:
+			case SDL_TEXTINPUT:
+			case SDL_TEXTEDITING:
+			case SDL_JOYAXISMOTION:
+			case SDL_JOYBUTTONDOWN:
+			case SDL_JOYBUTTONUP:
+			case SDL_JOYHATMOTION:
+			case SDL_JOYBALLMOTION:
+			case SDL_MOUSEMOTION:
+			case SDL_MOUSEBUTTONUP:
+			case SDL_MOUSEBUTTONDOWN:
+			case SDL_FINGERUP:
+			case SDL_FINGERDOWN:
+			case SDL_FINGERMOTION:
+			{
+				auto sdlInput = dynamic_cast<InputSDL*>(input);
+				if (sdlInput) {
+					sdlInput->processEvent(event);
+				}
+				break;
 			}
-			break;
-		}
-		case SDL_QUIT:
-		{
-			std::cout << "SDL_QUIT received." << std::endl;
-			return false;
-		}
-		case SDL_WINDOWEVENT:
-		{
-			if (video) {
-				// TODO: convert to internal event format?
-				video->processEvent(event);
+			case SDL_QUIT:
+			{
+				std::cout << "SDL_QUIT received." << std::endl;
+				return false;
 			}
-			break;
-		}
+			case SDL_WINDOWEVENT:
+			{
+				if (video) {
+					processVideoEvent(video, event);
+				}
+			}
 		}
 	}
 	return true;
@@ -112,4 +106,13 @@ bool SystemSDL::generateEvents(HalleyAPIInternal* video, HalleyAPIInternal* inpu
 std::unique_ptr<InputAPIInternal> SystemSDL::makeInputAPI()
 {
 	return std::make_unique<InputSDL>();
+}
+
+void SystemSDL::processVideoEvent(VideoAPI* video, const SDL_Event& event)
+{
+	if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+		int x, y;
+		SDL_GetWindowPosition(SDL_GetWindowFromID(event.window.windowID), &x, &y);
+		video->resizeWindow(Rect4i(x, y, event.window.data1, event.window.data2));
+	}
 }

@@ -53,6 +53,8 @@ namespace Halley {
 		virtual void vibrate(spInputVibration /*vib*/) override {}
 		virtual void stopVibrating() override {}
 
+		void clearPresses();
+
 	protected:
 		Vector<char> buttonPressed;
 		Vector<char> buttonPressedRepeat;
@@ -64,7 +66,6 @@ namespace Halley {
 		void onButtonPressed(int code);
 		void onButtonReleased(int code);
 		void onButtonStatus(int code, bool down);
-		void clearPresses();
 
 		friend class InputJoystickXInput;
 	};
