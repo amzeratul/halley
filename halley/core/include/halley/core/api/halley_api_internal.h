@@ -38,18 +38,20 @@ namespace Halley
 		virtual std::function<void(int, void*)> getUniformBinding(UniformType type, int n) = 0;
 	};
 
-	class SystemAPIInternal : public SystemAPI, public HalleyAPIInternal
-	{
-	public:
-		virtual ~SystemAPIInternal() {}
-	};
-
 	class InputAPIInternal : public InputAPI, public HalleyAPIInternal
 	{
 	public:
 		virtual ~InputAPIInternal() {}
 
 		virtual void beginEvents(Time t) = 0;
+	};
+
+	class SystemAPIInternal : public SystemAPI, public HalleyAPIInternal
+	{
+	public:
+		virtual ~SystemAPIInternal() {}
+
+		virtual std::unique_ptr<InputAPIInternal> makeInputAPI() = 0;
 	};
 
 	class CoreAPIInternal : public CoreAPI, public IPluginRegistry {

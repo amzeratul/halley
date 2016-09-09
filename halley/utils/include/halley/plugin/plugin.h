@@ -10,6 +10,7 @@ namespace Halley
 
 	enum class PluginType
 	{
+		SystemAPI,
 		GraphicsAPI,
 		AudioAPI,
 		InputAPI

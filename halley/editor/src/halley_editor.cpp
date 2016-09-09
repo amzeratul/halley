@@ -7,6 +7,7 @@
 using namespace Halley;
 
 void initOpenGLPlugin(IPluginRegistry &registry);
+void initSDLPlugin(IPluginRegistry &registry);
 
 HalleyEditor::HalleyEditor()
 {
@@ -18,6 +19,7 @@ HalleyEditor::~HalleyEditor()
 
 int HalleyEditor::initPlugins(IPluginRegistry &registry)
 {
+	initSDLPlugin(registry);
 	if (headless) {
 		return 0;
 	} else {
