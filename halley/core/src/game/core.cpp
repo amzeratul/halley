@@ -162,7 +162,7 @@ void Core::deInit()
 
 void Core::initResources()
 {
-	auto locator = std::make_unique<ResourceLocator>();
+	auto locator = std::make_unique<ResourceLocator>(*api->system);
 	game->initResourceLocator(environment->getProgramPath() + "/", *locator);
 	resources = std::make_unique<Resources>(std::move(locator), &*api);
 	StandardResources::initialize(*resources);

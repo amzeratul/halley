@@ -26,6 +26,11 @@
 #include <halley/support/exception.h>
 
 namespace Halley {
+	ResourceLocator::ResourceLocator(SystemAPI& system)
+		: system(system)
+	{
+	}
+
 	void ResourceLocator::add(std::unique_ptr<IResourceLocatorProvider> locator)
 	{
 		auto res = locator->getResourceList();
@@ -134,6 +139,6 @@ namespace Halley {
 
 	void ResourceLocator::addFileSystem(String path)
 	{
-		add(std::make_unique<FileSystemResourceLocator>(path));
+		add(std::make_unique<FileSystemResourceLocator>(system, path));
 	}
 }

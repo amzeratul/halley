@@ -4,6 +4,7 @@
 #include <halley/support/console.h>
 #include <halley/support/exception.h>
 #include "input_sdl.h"
+#include "sdl_rw_ops.h"
 
 using namespace Halley;
 
@@ -47,16 +48,6 @@ void SystemSDL::deInit()
 {
 	// Close SDL
 	SDL_Quit();
-}
-
-unsigned int SystemSDL::getTicks()
-{
-	return SDL_GetTicks();
-}
-
-void SystemSDL::delay(unsigned int ms)
-{
-	SDL_Delay(ms);
 }
 
 bool SystemSDL::generateEvents(VideoAPI* video, InputAPI* input)
@@ -114,5 +105,23 @@ void SystemSDL::processVideoEvent(VideoAPI* video, const SDL_Event& event)
 		int x, y;
 		SDL_GetWindowPosition(SDL_GetWindowFromID(event.window.windowID), &x, &y);
 		video->resizeWindow(Rect4i(x, y, event.window.data1, event.window.data2));
+	}
+}
+
+std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(String path, int64_t start, int64_t end)
+{
+	try {
+		return SDLRWOps::fromPath(path, start, end);
+	} catch (...) {
+		return std::unique_ptr<ResourceDataReader>();
+	}
+}
+
+std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(gsl::span<const gsl::byte> memory)
+{
+	try {
+		return SDLRWOps::fromMemory(memory);
+	} catch (...) {
+		return std::unique_ptr<ResourceDataReader>();
 	}
 }

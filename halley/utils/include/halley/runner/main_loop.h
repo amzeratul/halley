@@ -34,7 +34,6 @@ namespace Halley
 		IMainLoopable& target;
 		GameLoader& reloader;
 
-		unsigned int delay = 0;
 		int fps = 60;
 		bool capFrameRate = false;
 

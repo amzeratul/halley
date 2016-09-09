@@ -29,6 +29,7 @@
 
 namespace Halley {
 	class ResourceData;
+	class SystemAPI;
 
 	class IResourceLocatorProvider {
 		friend class ResourceLocator;
@@ -46,6 +47,7 @@ namespace Halley {
 	class ResourceLocator : public IResourceLocator
 	{
 	public:
+		explicit ResourceLocator(SystemAPI& system);
 		void add(std::unique_ptr<IResourceLocatorProvider> locator);
 		void addFileSystem(String path);
 		
@@ -57,6 +59,7 @@ namespace Halley {
 		StringArray enumerate(String prefix = "", bool removePrefix = false, String suffixMatch = "");
 
 	private:
+		SystemAPI& system;
 		HashMap<String, IResourceLocatorProvider*> locators;
 		Vector<std::unique_ptr<IResourceLocatorProvider>> locatorList;
 	};

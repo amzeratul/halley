@@ -36,9 +36,11 @@ namespace Halley {
 		bool zipped;
 	};
 
+	class SystemAPI;
+
 	class ResourcePack : public IResourceLocatorProvider {
 	public:
-		ResourcePack(String name="");
+		ResourcePack(SystemAPI& system, String name="");
 		~ResourcePack();
 
 		void add(String root, String file, bool encrypted=false, bool zipped=false);
@@ -64,6 +66,7 @@ namespace Halley {
 		static void encrypt(char* data, size_t size);
 		static void decrypt(char* data, size_t size);
 
+		SystemAPI& system;
 		HashMap<String, ResourcePackEntry> entries;
 		int priority;
 		FILE* fileP;

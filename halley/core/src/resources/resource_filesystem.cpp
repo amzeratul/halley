@@ -19,19 +19,20 @@
 
 \*****************************************************************/
 
-#include <SDL.h>
 #include <boost/filesystem.hpp>
 #include <halley/support/exception.h>
 #include <cassert>
 #include <iostream>
 #include <halley/support/console.h>
 #include "resources/resource_filesystem.h"
-#include "resources/resource_data_reader.h"
+#include "halley/core/api/system_api.h"
+#include <SDL.h>
 
 using namespace Halley;
 
-FileSystemResourceLocator::FileSystemResourceLocator(String _basePath)
-	: basePath(_basePath)
+FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, String _basePath)
+	: system(system)
+    , basePath(_basePath)
 {
 }
 
@@ -41,41 +42,18 @@ std::unique_ptr<ResourceData> FileSystemResourceLocator::doGet(String resource, 
 	
 	if (stream) {
 		return std::make_unique<ResourceDataStream>(path, [=] () -> std::unique_ptr<ResourceDataReader> {
-			SDL_RWops* fp = SDL_RWFromFile(path.c_str(), "rb");
-			if (!fp) {
-				return std::unique_ptr<ResourceDataReader>();
-			}
-
-			SDL_RWseek(fp, 0, SEEK_END);
-			Sint64 sz = SDL_RWtell(fp);
-			SDL_RWseek(fp, 0, SEEK_SET);
-			return std::make_unique<ResourceDataReaderFile>(fp, 0, static_cast<int>(sz), true);
+			return system.getDataReader(path.cppStr());
 		});
-	}
-
-	else {
-		SDL_RWops* fp = SDL_RWFromFile(path.c_str(), "rb");
+	} else {
+		auto fp = system.getDataReader(path.cppStr());
 		if (!fp) {
-			return std::unique_ptr<ResourceData>();
+			return std::unique_ptr<ResourceDataStatic>();
 		}
 
-		SDL_RWseek(fp, 0, RW_SEEK_END);
-		Sint64 p1 = SDL_RWtell(fp);
-		SDL_RWseek(fp, 0, RW_SEEK_SET);
-		if (p1 <= 0) {
-			throw Exception("Invalid file size for resource (FileSystem/Static): " + resource + ", " + String::integerToString(int(p1)) + " bytes.");
-		}
-		size_t sz = size_t(p1);
-
-		char* buf = new char[static_cast<unsigned int>(sz)];
-		Sint64 nRead = SDL_RWread(fp, buf, 1, size_t(sz));
-		assert (nRead == sz);
-		(void) nRead;
-		std::unique_ptr<ResourceData> data(new ResourceDataStatic(buf, size_t(sz), path));
-
-		SDL_RWclose(fp);
-
-		return data;
+		size_t size = fp->size();
+		char* buf = new char[size];
+		fp->read(gsl::as_writeable_bytes(gsl::span<char>(buf, size)));
+		return std::make_unique<ResourceDataStatic>(buf, size, path);
 	}
 }
 

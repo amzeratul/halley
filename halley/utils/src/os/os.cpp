@@ -64,7 +64,7 @@ void OS::initializeConsole()
 {
 }
 
-void OS::onWindowCreated(void* sdlWindow)
+void OS::onWindowCreated(void* windowHandle)
 {
 }
 

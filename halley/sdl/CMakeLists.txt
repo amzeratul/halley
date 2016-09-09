@@ -8,6 +8,7 @@ set(SOURCES
     "src/input_keyboard_sdl.cpp"
     "src/input_mouse_sdl.cpp"
     "src/sdl_plugin.cpp"
+    "src/sdl_rw_ops.cpp"
     "src/system_sdl.cpp"
     )
 
@@ -16,6 +17,7 @@ set(HEADERS
     "src/input_joystick_sdl.h"
     "src/input_keyboard_sdl.h"
     "src/input_mouse_sdl.h"
+    "src/sdl_rw_ops.h"
     "src/system_sdl.h"
     )
 

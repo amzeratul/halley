@@ -7,10 +7,6 @@ namespace Halley
 {
 	class SystemSDL final : public SystemAPIInternal
 	{
-	public:
-		unsigned int getTicks() override;
-		void delay(unsigned int ms) override;
-
 	protected:
 		friend class HalleyAPI;
 		friend class Core;
@@ -21,6 +17,9 @@ namespace Halley
 		bool generateEvents(VideoAPI* video, InputAPI* input) override;
 
 		std::unique_ptr<InputAPIInternal> makeInputAPI() override;
+
+		std::unique_ptr<ResourceDataReader> getDataReader(String path, int64_t start, int64_t end) override;
+		std::unique_ptr<ResourceDataReader> getDataReader(gsl::span<const gsl::byte> memory) override;
 
 	private:
 		void processVideoEvent(VideoAPI* video, const SDL_Event& event);
