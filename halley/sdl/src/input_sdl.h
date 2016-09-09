@@ -26,14 +26,15 @@
 
 namespace Halley {
 
-	class InputKeyboardConcrete;
-	class InputMouseConcrete;
+	class InputKeyboardSDL;
+	class InputMouseSDL;
 
-	class Input final : public InputAPIInternal {
+	class InputSDL final : public InputAPIInternal {
 		friend class HalleyAPI;
 
 	public:
-		~Input();
+		InputSDL();
+		~InputSDL();
 
 		size_t getNumberOfKeyboards() const override;
 		std::shared_ptr<InputKeyboard> getKeyboard(int id=0) const override;
@@ -48,8 +49,6 @@ namespace Halley {
 		Vector<std::shared_ptr<InputTouch>> getTouchEvents() override;
 
 	private:
-		Input();
-
 		void init() override;
 		void deInit() override;
 		void beginEvents(Time t) override;
@@ -58,9 +57,9 @@ namespace Halley {
 		void processJoyEvent(int n, SDL_Event& event);
 		void processTouch(int type, long long touchId, long long fingerId, float x, float y);
 		
-		Vector<std::shared_ptr<InputKeyboardConcrete>> keyboards;
+		Vector<std::shared_ptr<InputKeyboardSDL>> keyboards;
 		Vector<std::shared_ptr<InputJoystick>> joysticks;
-		Vector<std::shared_ptr<InputMouseConcrete>> mice;
+		Vector<std::shared_ptr<InputMouseSDL>> mice;
 
 		FlatMap<int, InputJoystick*> sdlJoys;
 		FlatMap<int, std::shared_ptr<InputTouch>> touchEvents;

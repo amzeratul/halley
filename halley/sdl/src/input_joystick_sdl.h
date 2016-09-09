@@ -41,7 +41,7 @@ namespace Halley {
 		void* joystick;
 		int index;
 
-		friend class Input;
+		friend class InputSDL;
 	};
 
 	class InputJoystickHatSDL : public InputButtonBase {

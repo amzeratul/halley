@@ -55,7 +55,7 @@ namespace Halley {
 
 		Vector<spInputVibration> vibs;
 
-		friend class Input;
+		friend class InputSDL;
 	};
 }
 

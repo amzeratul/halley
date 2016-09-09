@@ -24,13 +24,13 @@
 
 using namespace Halley;
 
-InputMouseConcrete::InputMouseConcrete()
+InputMouseSDL::InputMouseSDL()
 	: wheelMove(0)
 {
 	init(5);
 }
 
-void InputMouseConcrete::processEvent(const SDL_Event& event)
+void InputMouseSDL::processEvent(const SDL_Event& event)
 {
 	switch (event.type) {
 	case SDL_MOUSEMOTION:
@@ -59,17 +59,17 @@ void InputMouseConcrete::processEvent(const SDL_Event& event)
 	}
 }
 
-Halley::Vector2i Halley::InputMouseConcrete::getPosition() const
+Halley::Vector2i Halley::InputMouseSDL::getPosition() const
 {
 	return pos;
 }
 
-int Halley::InputMouseConcrete::getWheelMove() const
+int Halley::InputMouseSDL::getWheelMove() const
 {
 	return wheelMove;
 }
 
-void Halley::InputMouseConcrete::update()
+void Halley::InputMouseSDL::update()
 {
 	wheelMove = 0;
 }

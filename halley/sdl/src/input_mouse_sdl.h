@@ -29,8 +29,8 @@ namespace Halley {
 #pragma warning(disable: 4250)
 #endif
 
-	class InputMouseConcrete : public InputButtonBase, public InputMouse {
-		friend class Input;
+	class InputMouseSDL : public InputButtonBase, public InputMouse {
+		friend class InputSDL;
 	public:
 		Vector2i getPosition() const override;
 		int getWheelMove() const override;
@@ -38,7 +38,7 @@ namespace Halley {
 		void update();
 
 	private:
-		InputMouseConcrete();
+		InputMouseSDL();
 		void processEvent(const SDL_Event& event);
 
 		Vector2i pos;

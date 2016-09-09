@@ -26,7 +26,7 @@
 
 namespace Halley {
 	class InputTouch {
-		friend class Input;
+		friend class InputSDL;
 
 	public:
 		bool isPressed() const;

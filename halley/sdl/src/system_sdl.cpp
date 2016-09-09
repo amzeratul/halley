@@ -111,5 +111,5 @@ bool SystemSDL::generateEvents(HalleyAPIInternal* video, HalleyAPIInternal* inpu
 
 std::unique_ptr<InputAPIInternal> SystemSDL::makeInputAPI()
 {
-	return std::make_unique<Input>();
+	return std::make_unique<InputSDL>();
 }

@@ -11,7 +11,7 @@ namespace Halley {
 #pragma warning(disable: 4250)
 #endif
 
-	class InputKeyboardConcrete : public InputButtonBase, public InputKeyboard {
+	class InputKeyboardSDL : public InputButtonBase, public InputKeyboard {
 	public:
 		int getNextLetter() override;
 		String getButtonName(int code) override;
@@ -19,12 +19,12 @@ namespace Halley {
 	private:
 		std::deque<int> letters;
 
-		InputKeyboardConcrete();
+		InputKeyboardSDL();
 
 		void processEvent(const SDL_Event &event);
 		void onTextEntered(const char* text);
 
-		friend class Input;
+		friend class InputSDL;
 	};
 
 #ifdef _MSC_VER

@@ -61,7 +61,7 @@ namespace Halley {
 		virtual void update(Time /*t*/) {}
 		virtual void processEvent(const SDL_Event& /*event*/) {}
 
-		friend class Input;
+		friend class InputSDL;
 	};
 
 	typedef std::shared_ptr<InputJoystick> spInputJoystick;

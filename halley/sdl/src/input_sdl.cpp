@@ -33,13 +33,13 @@
 
 using namespace Halley;
 
-Input::Input() = default;
-Input::~Input() = default;
+InputSDL::InputSDL() = default;
+InputSDL::~InputSDL() = default;
 
-void Input::init()
+void InputSDL::init()
 {
-	keyboards.push_back(std::unique_ptr<InputKeyboardConcrete>(new InputKeyboardConcrete()));
-	mice.push_back(std::unique_ptr<InputMouseConcrete>(new InputMouseConcrete()));
+	keyboards.push_back(std::unique_ptr<InputKeyboardSDL>(new InputKeyboardSDL()));
+	mice.push_back(std::unique_ptr<InputMouseSDL>(new InputMouseSDL()));
 
 	// XInput controllers
 #ifdef XINPUT_AVAILABLE
@@ -72,7 +72,7 @@ void Input::init()
 	SDL_JoystickEventState(SDL_ENABLE);
 }
 
-void Input::deInit()
+void InputSDL::deInit()
 {
 	keyboards.clear();
 	mice.clear();
@@ -80,37 +80,37 @@ void Input::deInit()
 	joysticks.clear();
 }
 
-std::shared_ptr<InputKeyboard> Input::getKeyboard(int id) const
+std::shared_ptr<InputKeyboard> InputSDL::getKeyboard(int id) const
 {
 	return keyboards.at(id);
 }
 
-std::shared_ptr<InputJoystick> Input::getJoystick(int id) const
+std::shared_ptr<InputJoystick> InputSDL::getJoystick(int id) const
 {
 	return joysticks.at(id);
 }
 
-std::shared_ptr<InputMouse> Input::getMouse(int id) const
+std::shared_ptr<InputMouse> InputSDL::getMouse(int id) const
 {
 	return mice.at(id);
 }
 
-size_t Input::getNumberOfKeyboards() const
+size_t InputSDL::getNumberOfKeyboards() const
 {
 	return keyboards.size();
 }
 
-size_t Input::getNumberOfJoysticks() const
+size_t InputSDL::getNumberOfJoysticks() const
 {
 	return joysticks.size();
 }
 
-size_t Input::getNumberOfMice() const
+size_t InputSDL::getNumberOfMice() const
 {
 	return mice.size();
 }
 
-void Input::beginEvents(Time t)
+void InputSDL::beginEvents(Time t)
 {
 	// Keyboards
 	size_t n = getNumberOfKeyboards();
@@ -147,7 +147,7 @@ void Input::beginEvents(Time t)
 	}
 }
 
-void Input::processEvent(SDL_Event& event)
+void InputSDL::processEvent(SDL_Event& event)
 {
 	switch (event.type) {
 		case SDL_KEYDOWN:
@@ -199,7 +199,7 @@ void Input::processEvent(SDL_Event& event)
 	}
 }
 
-void Input::processJoyEvent(int n, SDL_Event& event)
+void InputSDL::processJoyEvent(int n, SDL_Event& event)
 {
 	auto iter = sdlJoys.find(n);
 	if (iter != sdlJoys.end()) {
@@ -207,7 +207,7 @@ void Input::processJoyEvent(int n, SDL_Event& event)
 	}
 }
 
-void Halley::Input::processTouch(int type, long long /*touchDeviceId*/, long long fingerId, float x, float y)
+void Halley::InputSDL::processTouch(int type, long long /*touchDeviceId*/, long long fingerId, float x, float y)
 {
 	Vector2f windowSize = Vector2f(1, 1); // TODO
 	Vector2f origin = Vector2f(0, 0); // TODO
@@ -232,7 +232,7 @@ void Halley::Input::processTouch(int type, long long /*touchDeviceId*/, long lon
 	}
 }
 
-Vector<spInputTouch> Halley::Input::getNewTouchEvents()
+Vector<spInputTouch> Halley::InputSDL::getNewTouchEvents()
 {
 	Vector<spInputTouch> result;
 	for (auto i : touchEvents) {
@@ -243,7 +243,7 @@ Vector<spInputTouch> Halley::Input::getNewTouchEvents()
 	return result;
 }
 
-Vector<spInputTouch> Halley::Input::getTouchEvents()
+Vector<spInputTouch> Halley::InputSDL::getTouchEvents()
 {
 	Vector<spInputTouch> result;
 	for (auto i : touchEvents) {

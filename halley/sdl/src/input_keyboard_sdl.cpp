@@ -30,13 +30,13 @@ using namespace Halley;
 #define SDL_KEYS SDLK_LAST
 #endif
 
-InputKeyboardConcrete::InputKeyboardConcrete()
+InputKeyboardSDL::InputKeyboardSDL()
 	: InputButtonBase(SDL_KEYS)
 {
 	SDL_StartTextInput();
 }
 
-void InputKeyboardConcrete::processEvent(const SDL_Event &_event)
+void InputKeyboardSDL::processEvent(const SDL_Event &_event)
 {
 	if (_event.type == SDL_TEXTINPUT) {
 		const SDL_TextInputEvent& event = _event.text;
@@ -69,7 +69,7 @@ void InputKeyboardConcrete::processEvent(const SDL_Event &_event)
 }
 
 
-void InputKeyboardConcrete::onTextEntered(const char* text)
+void InputKeyboardSDL::onTextEntered(const char* text)
 {
 	auto str = String(text).getUTF32();
 	for (size_t i=0; i<str.size(); i++) {
@@ -77,7 +77,7 @@ void InputKeyboardConcrete::onTextEntered(const char* text)
 	}
 }
 
-int InputKeyboardConcrete::getNextLetter()
+int InputKeyboardSDL::getNextLetter()
 {
 	if (letters.size()) {
 		int letter = letters.front();
@@ -88,7 +88,7 @@ int InputKeyboardConcrete::getNextLetter()
 	}
 }
 
-Halley::String Halley::InputKeyboardConcrete::getButtonName(int code)
+Halley::String Halley::InputKeyboardSDL::getButtonName(int code)
 {
 	return Keys::getName(static_cast<Keys::Key>(code));
 }
