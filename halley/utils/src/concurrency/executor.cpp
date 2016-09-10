@@ -16,19 +16,19 @@ ExecutionQueue::ExecutionQueue()
 
 TaskBase ExecutionQueue::getNext()
 {
-	while (true) {
-		boost::unique_lock<boost::mutex> lock(mutex);
-		while (queue.empty()) {
+	boost::unique_lock<boost::mutex> lock(mutex);
+	while (queue.empty()) {
+		if (!aborted) {
 			condition.wait(lock);
-			if (aborted) {
-				throw AbortException();
-			}
 		}
-		
-		TaskBase value = queue.front();
-		queue.pop_front();
-		return value;
+		if (aborted) {
+			throw AbortException();
+		}
 	}
+
+	TaskBase value = queue.front();
+	queue.pop_front();
+	return value;
 }
 
 std::vector<TaskBase> ExecutionQueue::getAll()
@@ -79,10 +79,14 @@ void ExecutionQueue::onDetached()
 
 void ExecutionQueue::abort()
 {
-	if (!aborted) {
+	{
+		boost::unique_lock<boost::mutex> lock(mutex);
+		if (aborted) {
+			return;
+		}
 		aborted = true;
-		condition.notify_all();
 	}
+	condition.notify_all();
 }
 
 ExecutionQueue& ExecutionQueue::getDefault()
