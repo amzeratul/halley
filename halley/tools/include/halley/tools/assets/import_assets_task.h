@@ -28,7 +28,7 @@ namespace Halley
 		float curFileProgressEnd = 0;
 		std::string curFileLabel;
 
-		void importAsset(ImportAssetsDatabaseEntry& asset);
+		bool importAsset(ImportAssetsDatabaseEntry& asset);
 
 		std::vector<Path> loadFont(const ImportAssetsDatabaseEntry& asset, Path dstDir);
 		std::vector<Path> genericImporter(const ImportAssetsDatabaseEntry& asset, Path dstDir);

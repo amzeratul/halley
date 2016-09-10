@@ -11,6 +11,7 @@ namespace Halley
 		HalleyStatics();
 		~HalleyStatics();
 		void setup();
+		void suspend();
 
 	private:
 		std::unique_ptr<HalleyStaticsPimpl> pimpl;

@@ -16,7 +16,7 @@ int ImportTool::run(Vector<std::string> args)
 		std::cout << "Importing project..." << std::endl;
 		Executors executors;
 		Executors::set(executors);
-		ThreadPool tp(executors.getCPU(), 4);
+		ThreadPool tp(executors.getCPU(), std::thread::hardware_concurrency());
 
 		Path sharedAssetsPath = Path(args[1]) / "assets_src";
 		auto proj = std::make_unique<Project>(args[0], sharedAssetsPath);

@@ -30,22 +30,13 @@ void ImportAssetsTask::run()
 		curFileLabel = files[i].assetId;
 		setProgress(curFileProgressStart, curFileLabel);
 
-		try {
-			importAsset(files[i]);
-			if (isCancelled()) {
-				// If this was cancelled, the asset importing might have stopped halfway, so abort without marking it as imported
-				break;
-			}
-			db.markAsImported(files[i]);
-
+		if (importAsset(files[i])) {
 			// Check if db needs saving
 			auto now = std::chrono::steady_clock::now();
 			if (now - lastSave > 1s) {
 				db.save();
 				lastSave = now;
 			}
-		} catch (std::exception& e) {
-			std::cout << "Error importing asset " << files[i].assetId << ": " << e.what() << std::endl;
 		}
 	}
 	db.save();
@@ -55,19 +46,41 @@ void ImportAssetsTask::run()
 	}
 }
 
-void ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
+bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
+	std::vector<Path> out;
+	try {
+		// Import
+		out = importer.getImporter(asset.assetType).import(asset, assetsPath, [&] (float progress, String label) -> bool
+		{
+			setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel + " " + label);
+			return !isCancelled();
+		});
+	} catch (std::exception& e) {
+		std::cout << "Error importing asset " << asset.assetId << ": " << e.what() << std::endl;
+		
+		// TODO: mark asset as pending fix
+
+		return false;
+	}
+
+	// Check if it didn't get cancelled
+	if (isCancelled()) {
+		return false;
+	}
+
+	// Retrieve previous output from this asset, and remove any files which went missing
 	auto previous = db.getOutFiles(asset.assetId);
-	auto out = importer.getImporter(asset.assetType).import(asset, assetsPath, [&] (float progress, String label) -> bool
-	{
-		setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel + " " + label);
-		return !isCancelled();
-	});
-	asset.outputFiles = out;
 	for (auto& f: previous) {
 		if (std::find(out.begin(), out.end(), f) == out.end()) {
 			// File no longer exists as part of this asset, remove it
 			FileSystem::remove(assetsPath / f);
 		}
 	}
+
+	// Store output in db
+	asset.outputFiles = out;
+	db.markAsImported(asset);
+
+	return true;
 }

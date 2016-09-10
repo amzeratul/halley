@@ -21,14 +21,23 @@ static int runMain(DynamicGameLoader& loader, Vector<std::string> args)
 		loader.setCore(*core);
 		MainLoop loop(*core, loader);
 		loop.run();
+		core.reset();
 		
 		std::cout << "Main loop terminated normally." << std::endl;
 		return 0;
 	} catch (std::exception& e) {
-		core->onTerminatedInError(e.what());
+		if (core) {
+			core->onTerminatedInError(e.what());
+		} else {
+			std::cout << "Error initializing core: " << e.what() << std::endl;
+		}
 		return 1;
 	} catch (...) {
-		core->onTerminatedInError("");
+		if (core) {
+			core->onTerminatedInError("");
+		} else {
+			std::cout << "Unknown error initializing core." << std::endl;
+		}
 		return 1;
 	}
 }
@@ -43,9 +52,9 @@ int main(int argc, char** argv) {
 	}
 
 	using namespace boost::filesystem;
-	path p(args[0]);
+	path p(args[1]);
 
-	DynamicGameLoader loader(p.parent_path().string() + "/halley-sample-test");
+	DynamicGameLoader loader(p.string());
 
 	return runMain(loader, args);
 }

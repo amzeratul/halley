@@ -59,7 +59,8 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	srand(seed);
 
 	// Info
-	std::cout << "Data path is " << ConsoleColour(Console::DARK_GREY) << environment->getDataPath() << ConsoleColour() << std::endl;
+	std::cout << "Program dir: " << ConsoleColour(Console::DARK_GREY) << environment->getProgramPath() << ConsoleColour() << std::endl;
+	std::cout << "Data dir: " << ConsoleColour(Console::DARK_GREY) << environment->getDataPath() << ConsoleColour() << std::endl;
 }
 
 Core::~Core()
@@ -75,6 +76,8 @@ void Core::onSuspended()
 	if (api->inputInternal) {
 		api->inputInternal->onSuspend();
 	}
+
+	statics.suspend();
 
 	std::cout.flush();
 	out.reset();
@@ -107,8 +110,6 @@ void Core::onTerminatedInError(const std::string& error)
 
 void Core::init()
 {
-	statics.setup();
-
 	// Computer info
 #ifndef _DEBUG
 	showComputerInfo();

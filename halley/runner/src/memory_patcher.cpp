@@ -98,8 +98,12 @@ static size_t scanProcessMemory(const MemoryPatchingMappings&, std::function<siz
 
 void MemoryPatcher::patch(const MemoryPatchingMappings& mappings)
 {
-	size_t n = scanProcessMemory(mappings, &patchMemory);
-	std::cout << "Patched " << n << " pointers." << std::endl;
+	if (mappings.src.size() == 0) {
+		std::cout << "Nothing to patch." << std::endl;
+	} else {
+		size_t n = scanProcessMemory(mappings, &patchMemory);
+		std::cout << "Patched " << n << " pointers." << std::endl;
+	}
 }
 
 size_t MemoryPatcher::patchMemory(void* address, size_t len, const MemoryPatchingMappings& mappings)

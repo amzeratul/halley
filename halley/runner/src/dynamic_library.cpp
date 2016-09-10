@@ -5,19 +5,10 @@
 using namespace Halley;
 using namespace boost::filesystem;
 
-DynamicLibrary::DynamicLibrary(std::string name)
-	: libName(name)
+DynamicLibrary::DynamicLibrary(std::string originalPath)
+	: libOrigPath(originalPath)
 {
-	std::string ext;
-	#if defined(_WIN32)
-	ext = ".dll";
-	#elif (__APPLE__)
-	ext = ".dylib";
-	#else
-	ext = ".so";
-	#endif
-
-	libOrigPath = path(libName + ext).normalize();
+	libName = path(originalPath).filename().string();
 }
 
 DynamicLibrary::~DynamicLibrary()
@@ -79,7 +70,9 @@ void DynamicLibrary::unload()
 {
 	if (loaded) {
 		#ifdef _WIN32
-		FreeLibrary(handle);
+		if (!FreeLibrary(handle)) {
+			throw Exception("Unable to release library " + libPath.string() + " due to error " + String::integerToString(GetLastError()));
+		}
 		#endif
 		handle = nullptr;
 

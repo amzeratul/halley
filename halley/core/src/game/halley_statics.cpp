@@ -4,6 +4,7 @@
 #include <halley/entity/family_mask.h>
 #include <halley/os/os.h>
 #include <halley/concurrency/executor.h>
+#include <thread>
 
 using namespace Halley;
 
@@ -16,16 +17,16 @@ namespace Halley {
 			maskStorage = MaskStorageInterface::createMaskStorage();
 			os = OS::createOS();
 
-			executors = new Executors();
+			executors = std::make_unique<Executors>();
 			executors->set(*executors);
-			threadPool = std::make_unique<ThreadPool>(executors->getCPU(), 4);
 		}
 
-		std::unique_ptr<ThreadPool> threadPool;
 		Vector<TypeDeleterBase*> typeDeleters;
 		void* maskStorage;
 		OS* os;
-		Executors* executors;
+		
+		std::unique_ptr<Executors> executors;
+		std::unique_ptr<ThreadPool> threadPool;
 	};
 }
 
@@ -36,12 +37,20 @@ HalleyStatics::HalleyStatics()
 
 HalleyStatics::~HalleyStatics()
 {
+	suspend();
 }
 
 void HalleyStatics::setup()
 {
 	Executors::set(*pimpl->executors);
+	pimpl->threadPool = std::make_unique<ThreadPool>(pimpl->executors->getCPU(), std::thread::hardware_concurrency());
+
 	ComponentDeleterTable::getDeleters() = &pimpl->typeDeleters;
 	MaskStorageInterface::setMaskStorage(pimpl->maskStorage);
 	OS::setInstance(pimpl->os);
+}
+
+void HalleyStatics::suspend()
+{
+	pimpl->threadPool.reset();
 }

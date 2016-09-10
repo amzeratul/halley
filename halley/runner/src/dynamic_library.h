@@ -14,7 +14,7 @@ namespace Halley
 	class DynamicLibrary
 	{
 	public:
-		DynamicLibrary(std::string name);
+		DynamicLibrary(std::string originalPath);
 		~DynamicLibrary();
 
 		void load(bool withAnotherName);

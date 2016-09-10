@@ -19,9 +19,12 @@ DynamicGameLoader::~DynamicGameLoader()
 	unload();
 }
 
-std::unique_ptr<IMainLoopable> DynamicGameLoader::createCore(Vector<std::string> args)
+std::unique_ptr<IMainLoopable> DynamicGameLoader::createCore(std::vector<std::string> args)
 {
 	Expects(entry != nullptr);
+	Expects(args.size() >= 2);
+
+	args.erase(args.begin());
 	return entry->createCore(args);
 }
 
