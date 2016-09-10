@@ -6,7 +6,7 @@ std::unique_ptr<ResourceDataReader> SDLRWOps::fromPath(const String& path, int64
 {
 	auto fp = SDL_RWFromFile(path.c_str(), "rb");
 	if (!fp) {
-		throw Exception("Unable to open file: " + path);
+		return std::unique_ptr<ResourceDataReader>();
 	}
 	return std::make_unique<SDLRWOps>(fp, start, end, true);
 }
@@ -15,7 +15,7 @@ std::unique_ptr<ResourceDataReader> SDLRWOps::fromMemory(gsl::span<const gsl::by
 {
 	auto fp = SDL_RWFromConstMem(span.data(), int(span.size()));
 	if (!fp) {
-		throw Exception("Unable to open data from memory");
+		return std::unique_ptr<ResourceDataReader>();
 	}
 	return std::make_unique<SDLRWOps>(fp, 0, 0, true);
 }

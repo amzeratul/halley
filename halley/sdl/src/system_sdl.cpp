@@ -119,20 +119,12 @@ void SystemSDL::processVideoEvent(VideoAPI* video, const SDL_Event& event)
 
 std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(String path, int64_t start, int64_t end)
 {
-	try {
-		return SDLRWOps::fromPath(path, start, end);
-	} catch (...) {
-		return std::unique_ptr<ResourceDataReader>();
-	}
+	return SDLRWOps::fromPath(path, start, end);
 }
 
 std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(gsl::span<const gsl::byte> memory)
 {
-	try {
-		return SDLRWOps::fromMemory(memory);
-	} catch (...) {
-		return std::unique_ptr<ResourceDataReader>();
-	}
+	return SDLRWOps::fromMemory(memory);
 }
 
 std::shared_ptr<Window> SystemSDL::createWindow(const WindowDefinition& windowDef)
