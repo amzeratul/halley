@@ -58,8 +58,10 @@ void GLUtils::doGlCheckError(const char* file, long line)
 			case GL_INVALID_ENUM: msg += "GL_INVALID_ENUM"; break;
 			case GL_INVALID_VALUE: msg += "GL_INVALID_VALUE"; break;
 			case GL_INVALID_OPERATION: msg += "GL_INVALID_OPERATION"; break;
+#ifdef WITH_OPENGL
 			case GL_STACK_OVERFLOW: msg += "GL_STACK_OVERFLOW"; break;
 			case GL_STACK_UNDERFLOW: msg += "GL_STACK_UNDERFLOW"; break;
+#endif
 			case GL_OUT_OF_MEMORY: msg += "GL_OUT_OF_MEMORY"; break;
 			default: msg += "?";
 			}

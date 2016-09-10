@@ -1,5 +1,4 @@
-﻿#include "gl_core_3_3.h"
-#include "halley_gl.h"
+﻿#include "halley_gl.h"
 #include "video_opengl.h"
 #include "painter_opengl.h"
 #include "texture_opengl.h"
@@ -12,7 +11,19 @@
 using namespace Halley;
 
 #ifdef _MSC_VER
-#pragma comment(lib, "opengl32.lib")
+	#if defined(WITH_OPENGL)
+		#pragma comment(lib, "opengl32.lib")
+	#elif defined(WITH_OPENGL_ES2)
+		#ifdef _DEBUG
+			#pragma comment(lib, "libEGL_d.lib")
+			#pragma comment(lib, "libGLESv2_d.lib")
+		#else
+			#pragma comment(lib, "libEGL.lib")
+			#pragma comment(lib, "libGLESv2.lib")
+		#endif
+	#elif defined(WITH_OPENGL_ES)
+		#pragma error("GLES 1.0 is not supported with MSVC")
+	#endif
 #endif
 
 void VideoOpenGL::init()
@@ -96,12 +107,16 @@ void VideoOpenGL::initOpenGL()
 
 	// Print extensions
 	std::cout << "\tExtensions: " << ConsoleColour(Console::DARK_GREY);
+#ifdef WITH_OPENGL
 	int nExtensions;
 	glGetIntegerv(GL_NUM_EXTENSIONS, &nExtensions);
 	for (int i = 0; i < nExtensions; i++) {
 		String str = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
 		std::cout << str << " ";
 	}
+#else
+	String str = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
+#endif
 	std::cout << ConsoleColour() << std::endl;
 
 	setupDebugCallback();
@@ -121,6 +136,7 @@ void VideoOpenGL::initGLBindings()
 
 void VideoOpenGL::setupDebugCallback()
 {
+#ifdef WITH_OPENGL
 	if (glDebugMessageCallback) {
 		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 			reinterpret_cast<const VideoOpenGL*>(userParam)->onGLDebugMessage(source, type, id, severity, message);
@@ -130,14 +146,17 @@ void VideoOpenGL::setupDebugCallback()
 		glGetError();
 		std::cout << ConsoleColour(Console::YELLOW) << "KHR_DEBUG is not available." << ConsoleColour() << std::endl;
 	}
+#endif
 }
 
 void VideoOpenGL::onSuspend()
 {
+#ifdef WITH_OPENGL
 	if (glDebugMessageCallback) {
 		glDebugMessageCallback(nullptr, nullptr);
 		glCheckError();
 	}
+#endif
 }
 
 void VideoOpenGL::onResume()
@@ -166,6 +185,7 @@ void VideoOpenGL::clearScreen()
 
 void VideoOpenGL::setUpEnumMap()
 {
+#ifdef WITH_OPENGL
 	glEnumMap[GL_DEBUG_SOURCE_API] = "API";
 	glEnumMap[GL_DEBUG_SOURCE_WINDOW_SYSTEM] = "Window System";
 	glEnumMap[GL_DEBUG_SOURCE_SHADER_COMPILER] = "Shader Compiler";
@@ -185,10 +205,12 @@ void VideoOpenGL::setUpEnumMap()
 	glEnumMap[GL_DEBUG_SEVERITY_MEDIUM] = "Medium";
 	glEnumMap[GL_DEBUG_SEVERITY_LOW] = "Low";
 	glEnumMap[GL_DEBUG_SEVERITY_NOTIFICATION] = "Notification";
+#endif
 }
 
 void VideoOpenGL::onGLDebugMessage(unsigned int source, unsigned int type, unsigned int id, unsigned int severity, String message) const
 {
+#ifdef WITH_OPENGL
 	if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM || severity == GL_DEBUG_SEVERITY_LOW) {
 		std::stringstream ss;
 #if HAS_EASTL
@@ -203,6 +225,7 @@ void VideoOpenGL::onGLDebugMessage(unsigned int source, unsigned int type, unsig
 			std::cout << ConsoleColour(Console::YELLOW) << str << ConsoleColour() << std::endl;
 		});		
 	}
+#endif
 }
 
 std::function<void(int, void*)> VideoOpenGL::getUniformBinding(UniformType type, int n)

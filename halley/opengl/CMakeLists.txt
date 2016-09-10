@@ -3,7 +3,6 @@ project (halley-opengl)
 include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} "include/halley/opengl" "../utils/include" "../core/include")
 
 set(SOURCES
-        "src/gl_core_3_3.c"
         "src/gl_utils.cpp"
         "src/opengl_plugin.cpp"
         "src/painter_opengl.cpp"
@@ -14,7 +13,6 @@ set(SOURCES
         )
 
 set(HEADERS
-        "include/halley/opengl/gl_core_3_3.h"
         "include/halley/opengl/gl_utils.h"
         "include/halley/opengl/halley_gl.h"
         "include/halley/opengl/painter_opengl.h"
@@ -27,6 +25,16 @@ set(HEADERS
 
 assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
+
+set(WITH_OPENGL 1)
+
+if (WITH_OPENGL)
+	add_definitions(-DWITH_OPENGL)
+	set(SOURCES ${SOURCES} "src/gl_core_3_3.c")
+	set(HEADERS ${HEADERS} "include/halley/opengl/gl_core_3_3.h")
+elseif(WITH_OPENGL_ES2)
+	add_definitions(-DWITH_OPENGL_ES2)
+endif()
 
 add_library (halley-opengl ${SOURCES} ${HEADERS})
 target_link_libraries(halley-opengl halley-core ${OPENGL_LIBRARIES})

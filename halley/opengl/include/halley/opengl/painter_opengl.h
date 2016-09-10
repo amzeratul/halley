@@ -26,7 +26,9 @@ namespace Halley
 
 	private:
 		GLuint vbo = 0;
+#ifdef WITH_OPENGL
 		GLuint vao = 0;
+#endif
 		GLuint veo = 0;
 		std::unique_ptr<GLUtils> glUtils;
 

@@ -42,30 +42,36 @@ unsigned int TextureOpenGL::create(size_t w, size_t h, TextureFormat format, boo
 
 	//loader = TextureLoadQueue::getCurrent();
 
-#ifdef WITH_OPENGL_ES
-	GLuint pixFormat = GL_UNSIGNED_BYTE;
-#else
+#ifdef WITH_OPENGL
 	GLuint pixFormat = GL_UNSIGNED_BYTE;
 
 	if (useMipMap) glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glCheckError();
+#else
+	GLuint pixFormat = GL_UNSIGNED_BYTE;
 #endif
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, useMipMap ? GL_LINEAR_MIPMAP_LINEAR : filtering);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
 
+#ifdef WITH_OPENGL
 	if (format == TextureFormat::DEPTH) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 	}
+#endif
 
 	Vector<char> blank;
 	blank.resize(w * h * TextureDescriptor::getBitsPerPixel(format));
 	GLuint glFormat = getGLFormat(format);
 	GLuint format2 = glFormat;
+#ifdef WITH_OPENGL
 	if (format2 == GL_RGBA16F || format2 == GL_RGBA16) format2 = GL_RGBA;
 	if (format2 == GL_DEPTH_COMPONENT24) format2 = GL_DEPTH_COMPONENT;
+#else
+	if (format2 == GL_DEPTH_COMPONENT16) format2 = GL_DEPTH_COMPONENT;
+#endif
 	glTexImage2D(GL_TEXTURE_2D, 0, glFormat, size.x, size.y, 0, format2, pixFormat, blank.data());
 	glCheckError();
 
@@ -74,7 +80,9 @@ unsigned int TextureOpenGL::create(size_t w, size_t h, TextureFormat format, boo
 
 void TextureOpenGL::loadImage(const char* px, size_t w, size_t h, size_t stride, TextureFormat format, bool useMipMap)
 {
+#ifdef WITH_OPENGL
 	glPixelStorei(GL_PACK_ROW_LENGTH, int(stride));
+#endif
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, int(w), int(h), getGLFormat(format), GL_UNSIGNED_BYTE, px);
 	glCheckError();
 
@@ -101,7 +109,11 @@ unsigned TextureOpenGL::getGLFormat(TextureFormat format)
 	case TextureFormat::RGBA:
 		return GL_RGBA;
 	case TextureFormat::DEPTH:
+#ifdef WITH_OPENGL
 		return GL_DEPTH_COMPONENT24;
+#else
+		return GL_DEPTH_COMPONENT16;
+#endif
 	}
 	throw Exception("Unknown texture format: " + String::integerToString(static_cast<int>(format)));
 }

@@ -91,7 +91,7 @@ void ShaderOpenGL::compile()
 		for (size_t i = 0; i<vertexSources.size(); i++) {
 			shaders.push_back(loadShader(vertexSources[i], GL_VERTEX_SHADER, name + "/vertex"));
 		}
-#ifndef WITH_OPENGL_ES
+#ifdef WITH_OPENGL
 		for (size_t i = 0; i<geometrySources.size(); i++) {
 			shaders.push_back(loadShader(geometrySources[i], GL_GEOMETRY_SHADER, name + "/geometry"));
 		}

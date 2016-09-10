@@ -19,11 +19,14 @@ PainterOpenGL::~PainterOpenGL()
 		glDeleteBuffers(1, &veo);
 		veo = 0;
 	}
+
+#ifdef WITH_OPENGL
 	if (vao != 0) {
 		glBindVertexArray(0);
 		glDeleteVertexArrays(1, &vao);
 		vao = 0;
 	}
+#endif
 }
 
 void PainterOpenGL::doStartRender()
@@ -44,6 +47,7 @@ void PainterOpenGL::doStartRender()
 		glCheckError();
 	}
 
+#ifdef WITH_OPENGL
 	if (vao == 0) {
 		glGenVertexArrays(1, &vao);
 		glCheckError();
@@ -56,11 +60,14 @@ void PainterOpenGL::doStartRender()
 	}
 
 	glBindVertexArray(vao);
+#endif
 }
 
 void PainterOpenGL::doEndRender()
 {
+#ifdef WITH_OPENGL
 	glBindVertexArray(0);
+#endif
 	glCheckError();
 }
 
