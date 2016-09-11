@@ -29,11 +29,9 @@ set(SOURCES
         "src/assets/import_tool.cpp"
 
         "src/assets/importers/codegen_importer.cpp"
-        "src/assets/importers/codegen_importer.h"
         "src/assets/importers/copy_file_importer.cpp"
-        "src/assets/importers/copy_file_importer.h"
         "src/assets/importers/font_importer.cpp"
-        "src/assets/importers/font_importer.h"
+        "src/assets/importers/image_importer.cpp"
 
         "src/tasks/editor_task.cpp"
 	"src/tasks/editor_task_set.cpp"
@@ -70,6 +68,11 @@ set(HEADERS
 	"include/halley/tools/assets/import_assets_task.h"
 	"include/halley/tools/assets/import_assets_database.h"
         "include/halley/tools/assets/import_tool.h"
+
+        "src/assets/importers/codegen_importer.h"
+        "src/assets/importers/copy_file_importer.h"
+        "src/assets/importers/font_importer.h"
+        "src/assets/importers/image_importer.h"
 
 	"include/halley/tools/tasks/editor_task.h"
 	"include/halley/tools/tasks/editor_task_set.h"

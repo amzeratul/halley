@@ -41,6 +41,8 @@ namespace Halley {
 		void savePNG(String filename = "") const;
 		void savePNG(const Path& filename) const;
 
+		static Vector2i getImageSize(String filename, gsl::span<const gsl::byte> bytes);
+
 		bool isPremultiplied() const { return preMultiplied; }
 
 		int getPixel(Vector2i pos) const;
@@ -67,11 +69,11 @@ namespace Halley {
 		String filename;
 
 		std::unique_ptr<char, void(*)(char*)> px;
-		size_t dataLen;
-		unsigned int w;
-		unsigned int h;
-		int nComponents;
-		bool preMultiplied;
+		size_t dataLen = 0;
+		unsigned int w = 0;
+		unsigned int h = 0;
+		int nComponents = 0;
+		bool preMultiplied = false;
 		
 		void preMultiply();
 	};

@@ -184,10 +184,25 @@ int Halley::Image::getPixelAlpha(Vector2i pos) const
 void Halley::Image::savePNG(String file) const
 {
 	if (file == "") file = filename;
-	savePNG(file);
+	savePNG(Path(file.cppStr()));
 }
 
 void Halley::Image::savePNG(const Path& file) const
 {
 	lodepng_encode_file(file.string().c_str(), reinterpret_cast<unsigned char*>(px.get()), w, h, LCT_RGBA, 8);
+}
+
+Halley::Vector2i Halley::Image::getImageSize(String name, gsl::span<const gsl::byte> bytes)
+{
+	bool useLodePng = name.endsWith(".png");
+	if (useLodePng)	{
+		unsigned w, h;
+		lodepng::State state;
+		lodepng_inspect(&w, &h, &state, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size());
+		return Vector2i(int(w), int(h));
+	} else {
+		int w, h, comp;
+		stbi_info_from_memory(reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size(), &w, &h, &comp);
+		return Vector2i(w, h);
+	}
 }
