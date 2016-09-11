@@ -1,6 +1,6 @@
 project (halley-tools)
 
-include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../utils/include")
+include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../../engine/utils/include")
 
 set(SOURCES
         "src/codegen/cpp/codegen_cpp.cpp"

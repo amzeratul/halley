@@ -76,10 +76,10 @@ set(HALLEY_PROJECT_LIBS
 
 set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/include
-	${HALLEY_PATH}/halley/core/include
-	${HALLEY_PATH}/halley/net/include
-	${HALLEY_PATH}/halley/utils/include
-	${HALLEY_PATH}/halley/entity/include
+	${HALLEY_PATH}/engine/core/include
+	${HALLEY_PATH}/engine/net/include
+	${HALLEY_PATH}/engine/utils/include
+	${HALLEY_PATH}/engine/entity/include
 	${YAMLCPP_INCLUDE_DIR}
 	)
 	
