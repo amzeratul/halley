@@ -13,11 +13,20 @@ TextureOpenGL::TextureOpenGL(VideoOpenGL& parent, Vector2i s)
 	, loaded(false)
 {
 	size = s;
+
+	glGenTextures(1, &textureId);
+}
+
+TextureOpenGL::~TextureOpenGL()
+{
+	waitForLoad();
+	glDeleteTextures(1, &textureId);
+	textureId = 0;
 }
 
 void TextureOpenGL::load(const TextureDescriptor& d)
 {
-	textureId = create(d.size.x, d.size.y, d.format, d.useMipMap, d.useFiltering);
+	create(d.size.x, d.size.y, d.format, d.useMipMap, d.useFiltering);
 	if (d.pixelData != nullptr) {
 		loadImage(reinterpret_cast<const char*>(d.pixelData), d.size.x, d.size.y, d.size.x, d.format, d.useMipMap);
 	}
@@ -31,13 +40,7 @@ void TextureOpenGL::load(const TextureDescriptor& d)
 	loadWait.notify_all();
 }
 
-bool TextureOpenGL::isLoaded() const
-{
-	return loaded;
-}
-
-// Do not use this method inside this class, due to fence
-void TextureOpenGL::bind(int textureUnit)
+void TextureOpenGL::waitForLoad()
 {
 	if (!loaded) {
 		std::unique_lock<std::mutex> lock(loadMutex);
@@ -48,20 +51,32 @@ void TextureOpenGL::bind(int textureUnit)
 		GLenum result = glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, GLuint64(10000000000));
 		if (result == GL_TIMEOUT_EXPIRED) {
 			throw Exception("Timeout waiting for texture to load.");
-		} else if (result == GL_WAIT_FAILED) {
+		}
+		else if (result == GL_WAIT_FAILED) {
 			throw Exception("Error waiting for texture to load.");
-		} else if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED) {
+		}
+		else if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED) {
 			glDeleteSync(fence);
 			fence = nullptr;
 		}
 	}
+}
 
+bool TextureOpenGL::isLoaded() const
+{
+	return loaded;
+}
+
+// Do not use this method inside this class, due to fence
+void TextureOpenGL::bind(int textureUnit)
+{
+	waitForLoad();
 	GLUtils glUtils;
 	glUtils.setTextureUnit(textureUnit);
 	glUtils.bindTexture(textureId);
 }
 
-unsigned int TextureOpenGL::create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering)
+void TextureOpenGL::create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering)
 {
 	Expects(w > 0);
 	Expects(h > 0);
@@ -71,11 +86,8 @@ unsigned int TextureOpenGL::create(size_t w, size_t h, TextureFormat format, boo
 
 	int filtering = useFiltering ? GL_LINEAR : GL_NEAREST;
 
-	unsigned int id;
-	glGenTextures(1, &id);
-	
 	GLUtils glUtils;
-	glUtils.bindTexture(id);
+	glUtils.bindTexture(textureId);
 
 	//loader = TextureLoadQueue::getCurrent();
 
@@ -111,8 +123,6 @@ unsigned int TextureOpenGL::create(size_t w, size_t h, TextureFormat format, boo
 #endif
 	glTexImage2D(GL_TEXTURE_2D, 0, glFormat, size.x, size.y, 0, format2, pixFormat, blank.data());
 	glCheckError();
-
-	return id;
 }
 
 void TextureOpenGL::loadImage(const char* px, size_t w, size_t h, size_t stride, TextureFormat format, bool useMipMap)

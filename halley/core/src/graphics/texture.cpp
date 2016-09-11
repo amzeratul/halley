@@ -21,15 +21,19 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	Vector2i size(img->getWidth(), img->getHeight());
 	std::shared_ptr<Texture> texture = video->createTexture(size);
 
-	auto loadTexture = [meta, img, size, texture]()
-	{
-		TextureDescriptor descriptor(size);
-		descriptor.pixelData = img->getPixels();
-		descriptor.useFiltering = meta.getBool("filtering", false);
-		descriptor.useMipMap = meta.getBool("mipmap", false);
-		descriptor.format = meta.getString("format", "RGBA") == "RGBA" ? TextureFormat::RGBA : TextureFormat::RGB;
+	TextureDescriptor descriptor(size);
+	descriptor.useFiltering = meta.getBool("filtering", false);
+	descriptor.useMipMap = meta.getBool("mipmap", false);
+	descriptor.format = meta.getString("format", "RGBA") == "RGBA" ? TextureFormat::RGBA : TextureFormat::RGB;
 
-		texture->load(descriptor);
+	auto loadTexture = [img, descriptor, texture]()
+	{
+		if (img->getSize() != descriptor.size) {
+			throw Exception("Image size does not match metadata.");
+		}
+		TextureDescriptor d = descriptor;
+		d.pixelData = img->getPixels();
+		texture->load(d);
 	};
 
 	Concurrent::execute(Executors::getVideoAux(), loadTexture);

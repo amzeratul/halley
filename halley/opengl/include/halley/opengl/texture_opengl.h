@@ -13,6 +13,7 @@ namespace Halley
 	{
 	public:
 		explicit TextureOpenGL(VideoOpenGL& parent, Vector2i size);
+		~TextureOpenGL();
 
 		void bind(int textureUnit) override;
 		void load(const TextureDescriptor& descriptor) override;
@@ -20,9 +21,11 @@ namespace Halley
 
 	private:
 		void loadImage(const char* px, size_t w, size_t h, size_t stride, TextureFormat format, bool useMipMap);
-		unsigned int create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering);
+		void create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering);
 
 		static unsigned int getGLFormat(TextureFormat format);
+
+		void waitForLoad();
 
 		VideoOpenGL& parent;
 		GLsync fence = nullptr;
