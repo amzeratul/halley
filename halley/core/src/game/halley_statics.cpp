@@ -26,7 +26,8 @@ namespace Halley {
 		OS* os;
 		
 		std::unique_ptr<Executors> executors;
-		std::unique_ptr<ThreadPool> threadPool;
+		std::unique_ptr<ThreadPool> cpuThreadPool;
+		std::unique_ptr<ThreadPool> diskIOThreadPool;
 	};
 }
 
@@ -43,7 +44,8 @@ HalleyStatics::~HalleyStatics()
 void HalleyStatics::setup()
 {
 	Executors::set(*pimpl->executors);
-	pimpl->threadPool = std::make_unique<ThreadPool>(pimpl->executors->getCPU(), std::thread::hardware_concurrency());
+	pimpl->cpuThreadPool = std::make_unique<ThreadPool>(pimpl->executors->getCPU(), std::thread::hardware_concurrency());
+	pimpl->diskIOThreadPool = std::make_unique<ThreadPool>(pimpl->executors->getDiskIO(), 1);
 
 	ComponentDeleterTable::getDeleters() = &pimpl->typeDeleters;
 	MaskStorageInterface::setMaskStorage(pimpl->maskStorage);
@@ -52,5 +54,5 @@ void HalleyStatics::setup()
 
 void HalleyStatics::suspend()
 {
-	pimpl->threadPool.reset();
+	pimpl->cpuThreadPool.reset();
 }

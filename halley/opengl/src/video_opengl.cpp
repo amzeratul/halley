@@ -33,10 +33,7 @@ void VideoOpenGL::init()
 
 void VideoOpenGL::deInit()
 {
-	if (running) {
-		running = false;
-		//loaderThread.join();
-	}
+	loaderThread.reset();
 
 	context.reset();
 	system.destroyWindow(window);
@@ -51,7 +48,6 @@ void VideoOpenGL::deInit()
 VideoOpenGL::VideoOpenGL(SystemAPI& system)
 	: system(system)
 	, initialized(false)
-	, running(false)
 {
 }
 
@@ -88,14 +84,6 @@ void VideoOpenGL::initOpenGL()
 	context = system.createGLContext();
 	context->bind();
 	
-	// Start loader thread
-	if (!running) {
-#ifdef ____WIN32__
-		vid->loaderThread = TextureLoadQueue::startLoaderThread(window, &vid->running);
-		vid->running = true;
-#endif
-	}
-
 	initGLBindings();
 
 	// Print OpenGL data
@@ -131,6 +119,8 @@ void VideoOpenGL::initGLBindings()
 		throw Exception(String("Error initializing glLoadGen."));
 	}
 	glCheckError();
+
+	loaderThread = std::make_unique<LoaderThreadOpenGL>(*context);
 #endif
 }
 
@@ -156,6 +146,7 @@ void VideoOpenGL::onSuspend()
 		glDebugMessageCallback(nullptr, nullptr);
 		glCheckError();
 	}
+	loaderThread.reset();
 #endif
 }
 
@@ -223,7 +214,7 @@ void VideoOpenGL::onGLDebugMessage(unsigned int source, unsigned int type, unsig
 		std::lock_guard<std::mutex> lock(messagesMutex);
 		messagesPending.push_back([str] () {
 			std::cout << ConsoleColour(Console::YELLOW) << str << ConsoleColour() << std::endl;
-		});		
+		});
 	}
 #endif
 }
@@ -335,7 +326,8 @@ std::unique_ptr<Painter> VideoOpenGL::makePainter()
 
 std::unique_ptr<Texture> VideoOpenGL::createTexture(const TextureDescriptor& descriptor)
 {
-	return std::make_unique<TextureOpenGL>(descriptor);
+	bool isAsync = loaderThread && std::this_thread::get_id() == loaderThread->getThreadId();
+	return std::make_unique<TextureOpenGL>(descriptor, isAsync);
 }
 
 std::unique_ptr<Shader> VideoOpenGL::createShader(String name)

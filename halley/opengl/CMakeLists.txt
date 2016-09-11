@@ -4,6 +4,7 @@ include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} "include/halley/o
 
 set(SOURCES
         "src/gl_utils.cpp"
+        "src/loader_thread_opengl.cpp"
         "src/opengl_plugin.cpp"
         "src/painter_opengl.cpp"
         "src/render_target_opengl.cpp"
@@ -15,6 +16,7 @@ set(SOURCES
 set(HEADERS
         "include/halley/opengl/gl_utils.h"
         "include/halley/opengl/halley_gl.h"
+        "include/halley/opengl/loader_thread_opengl.h"
         "include/halley/opengl/painter_opengl.h"
         "include/halley/opengl/prec.h"
         "include/halley/opengl/render_target_opengl.h"

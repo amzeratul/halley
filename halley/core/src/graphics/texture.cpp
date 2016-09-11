@@ -27,6 +27,6 @@ std::unique_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 		return video->createTexture(descriptor);
 	};
 
-	//return loader.getAsync().then(loadImage).then(Executors::getVideoAux(), loadTexture);
-	return loadTexture(loadImage(loader.getStatic()));
+	return loader.getAsync().then(loadImage).then(Executors::getVideoAux(), loadTexture).get(); // lol innefficiency
+	//return loadTexture(loadImage(loader.getStatic()));
 }

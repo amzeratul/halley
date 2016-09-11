@@ -152,7 +152,7 @@ Future<std::unique_ptr<ResourceDataStatic>> ResourceLoader::getAsync() const
 {
 	std::reference_wrapper<IResourceLocator> loc = locator;
 	String resName = resolvedName;
-	return Concurrent::execute([loc, resName] () -> std::unique_ptr<ResourceDataStatic>
+	return Concurrent::execute(Executors::getDiskIO(), [loc, resName] () -> std::unique_ptr<ResourceDataStatic>
 	{
 		return loc.get().getStatic(resName);
 	});

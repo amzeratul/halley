@@ -10,7 +10,7 @@ namespace Halley
 	class TextureOpenGL final : public Texture
 	{
 	public:
-		explicit TextureOpenGL(const TextureDescriptor& descriptor);
+		explicit TextureOpenGL(const TextureDescriptor& descriptor, bool async);
 
 		void bind(int textureUnit) override;
 
@@ -19,5 +19,7 @@ namespace Halley
 		unsigned int create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering);
 
 		static unsigned int getGLFormat(TextureFormat format);
+
+		GLsync fence;
 	};
 }

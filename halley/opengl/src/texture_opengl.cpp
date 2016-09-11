@@ -7,16 +7,35 @@
 
 using namespace Halley;
 
-TextureOpenGL::TextureOpenGL(const TextureDescriptor& d)
+TextureOpenGL::TextureOpenGL(const TextureDescriptor& d, bool async)
+	: fence(nullptr)
 {
 	textureId = create(d.size.x, d.size.y, d.format, d.useMipMap, d.useFiltering);
 	if (d.pixelData != nullptr) {
 		loadImage(reinterpret_cast<const char*>(d.pixelData), d.size.x, d.size.y, d.size.x, d.format, d.useMipMap);
 	}
+
+	if (async) {
+		fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		glFlush();
+	}
 }
 
+// Do not use this method inside this class, due to fence
 void TextureOpenGL::bind(int textureUnit)
 {
+	if (fence) {
+		GLenum result = glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, GLuint64(10000000000));
+		if (result == GL_TIMEOUT_EXPIRED) {
+			throw Exception("Timeout waiting for texture to load.");
+		} else if (result == GL_WAIT_FAILED) {
+			throw Exception("Error waiting for texture to load.");
+		} else if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED) {
+			glDeleteSync(fence);
+			fence = nullptr;
+		}
+	}
+
 	GLUtils glUtils;
 	glUtils.setTextureUnit(textureUnit);
 	glUtils.bindTexture(textureId);

@@ -5,6 +5,7 @@
 #include <halley/data_structures/flat_map.h>
 #include "halley/core/api/halley_api_internal.h"
 #include "halley/core/graphics/window.h"
+#include "loader_thread_opengl.h"
 
 namespace Halley {
 	class SystemAPI;
@@ -51,8 +52,9 @@ namespace Halley {
 
 		std::unique_ptr<GLContext> context;
 		bool initialized = false;
-		bool running = false;
-		
+
+		std::unique_ptr<LoaderThreadOpenGL> loaderThread;
+				
 		std::shared_ptr<Window> window;
 	};
 }
