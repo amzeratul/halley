@@ -27,28 +27,30 @@ EditorTaskSet::~EditorTaskSet()
 
 void EditorTaskSet::update(Time time)
 {
-	for (size_t i = 0; i < tasks.size(); ) {
-		tasks[i].update(static_cast<float>(time));
+	auto next = tasks.begin();
+	for (auto iter = tasks.begin(); iter != tasks.end(); iter = next) {
+		++next;
 
-		auto subTasks = std::move(tasks[i].getPendingTasks());
+		auto& task = *iter;
+		task.update(static_cast<float>(time));
+
+		auto subTasks = task.getPendingTasks();
 		for (auto& t : subTasks) {
 			addTask(std::move(t));
 		}
 
-		if (tasks[i].getStatus() == EditorTaskStatus::Done) {
-			auto newTasks = std::move(tasks[i].getContinuations());
+		if (task.getStatus() == EditorTaskStatus::Done) {
+			auto newTasks = std::move(task.getContinuations());
 			for (auto& t : newTasks) {
 				addTask(std::move(t));
 			}
-			tasks.erase(tasks.begin() + i);
-		} else {
-			++i;
+			tasks.erase(iter);
 		}
 	}
 }
 
 void EditorTaskSet::addTask(EditorTaskAnchor&& task)
 {
+	task.setId(nextId++);
 	tasks.emplace_back(std::move(task));
-	tasks.back().setId(nextId++);
 }

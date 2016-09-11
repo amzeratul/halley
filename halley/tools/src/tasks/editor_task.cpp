@@ -10,6 +10,7 @@ EditorTask::EditorTask(String name, bool isCancellable, bool isVisible)
 	: progress(0)
 	, name(name)
 	, cancelled(false)
+	, hasPendingTasksOnQueue(false)
 	, pendingTaskCount(0)
 	, isCancellable(isCancellable)
 	, isVisible(isVisible)
@@ -46,8 +47,10 @@ void EditorTask::addPendingTask(EditorTaskAnchor&& task)
 {
 	task.setParent(*this);
 	std::lock_guard<std::mutex> lock(mutex);
+
 	++pendingTaskCount;
 	pendingTasks.emplace_back(std::move(task));
+	hasPendingTasksOnQueue = true;
 	Ensures(pendingTaskCount > 0);
 }
 
@@ -68,6 +71,7 @@ EditorTaskAnchor::EditorTaskAnchor(std::unique_ptr<EditorTask> t, float delay)
 }
 
 EditorTaskAnchor::EditorTaskAnchor(EditorTaskAnchor&& other) = default;
+EditorTaskAnchor& EditorTaskAnchor::operator=(EditorTaskAnchor&& other) = default;
 
 EditorTaskAnchor::~EditorTaskAnchor()
 {
@@ -84,8 +88,6 @@ EditorTaskAnchor::~EditorTaskAnchor()
 		}
 	}
 }
-
-EditorTaskAnchor& EditorTaskAnchor::operator=(EditorTaskAnchor&& other) = default;
 
 void EditorTaskAnchor::update(float time)
 {
@@ -139,6 +141,11 @@ void EditorTaskAnchor::cancel()
 	}
 }
 
+void EditorTaskAnchor::setId(int value)
+{
+	id = value;
+}
+
 Vector<EditorTaskAnchor> EditorTaskAnchor::getContinuations()
 {
 	return std::move(task->continuations);
@@ -146,12 +153,17 @@ Vector<EditorTaskAnchor> EditorTaskAnchor::getContinuations()
 
 Vector<EditorTaskAnchor> EditorTaskAnchor::getPendingTasks()
 {
-	if (task->pendingTaskCount > 0) {
+	if (task->hasPendingTasksOnQueue) {
 		std::lock_guard<std::mutex> lock(task->mutex);
-		return std::move(task->pendingTasks);
-	} else {
-		return Vector<EditorTaskAnchor>();
+		if (task->hasPendingTasksOnQueue) {
+			task->hasPendingTasksOnQueue = false;
+			Vector<EditorTaskAnchor> result = std::move(task->pendingTasks);
+			task->pendingTasks.clear();
+			return result;
+		}
 	}
+	
+	return Vector<EditorTaskAnchor>();
 }
 
 void EditorTaskAnchor::setParent(EditorTask& editorTask)

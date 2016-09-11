@@ -24,7 +24,7 @@ namespace Halley
 
 	public:
 		TaskBar(Resources& resources);
-		void update(const std::vector<EditorTaskAnchor>& tasks, Time time);
+		void update(const std::list<EditorTaskAnchor>& tasks, Time time);
 		void draw(Painter& painter);
 
 	private:

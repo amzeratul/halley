@@ -48,6 +48,7 @@ namespace Halley
 		String progressLabel;
 
 		std::atomic<bool> cancelled;
+		std::atomic<bool> hasPendingTasksOnQueue;
 		std::atomic<int> pendingTaskCount;
 
 		const bool isCancellable;
@@ -75,7 +76,7 @@ namespace Halley
 		void cancel();
 
 		int getId() const { return id; }
-		void setId(int value) { id = value; }
+		void setId(int value);
 
 		Vector<EditorTaskAnchor> getContinuations();
 		Vector<EditorTaskAnchor> getPendingTasks();

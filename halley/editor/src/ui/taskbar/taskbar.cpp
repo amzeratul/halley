@@ -38,7 +38,7 @@ TaskBar::TaskBar(Resources& resources)
 	font = resources.get<Font>("ubuntub.font");
 }
 
-void TaskBar::update(const std::vector<EditorTaskAnchor>& taskData, Time time)
+void TaskBar::update(const std::list<EditorTaskAnchor>& taskData, Time time)
 {
 	// Flag them all as not running, so anything not found is accurately set as not running
 	for (auto& t : tasks) {

@@ -1,6 +1,7 @@
 #pragma once
 #include "editor_task.h"
 #include "halley/time/halleytime.h"
+#include <list>
 
 namespace Halley
 {
@@ -13,10 +14,10 @@ namespace Halley
 		void update(Time time);
 		void addTask(EditorTaskAnchor&& editorTaskAnchor);
 
-		const std::vector<EditorTaskAnchor>& getTasks() const { return tasks; }
+		const std::list<EditorTaskAnchor>& getTasks() const { return tasks; }
 	
 	private:
-		std::vector<EditorTaskAnchor> tasks;
+		std::list<EditorTaskAnchor> tasks;
 		int nextId = 0;
 	};
 }
