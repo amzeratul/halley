@@ -19,12 +19,12 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 
 	std::shared_ptr<Texture> texture = loader.getAPI().video->createTexture(size);
 
-	auto loadImage = [premultiply](std::unique_ptr<ResourceDataStatic> data) -> std::unique_ptr<Image>
+	loader.getAsync()
+	.then([premultiply](std::unique_ptr<ResourceDataStatic> data) -> std::unique_ptr<Image>
 	{
 		return std::make_unique<Image>(data->getPath(), data->getSpan(), premultiply);
-	};
-
-	auto loadTexture = [descriptor, texture](std::unique_ptr<Image> img)
+	})
+	.then(Executors::getVideoAux(), [descriptor, texture](std::unique_ptr<Image> img)
 	{
 		if (img->getSize() != descriptor.size) {
 			throw Exception("Image size does not match metadata.");
@@ -32,9 +32,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 		TextureDescriptor d = descriptor;
 		d.pixelData = img->getPixels();
 		texture->load(d);
-	};
-
-	loader.getAsync().then(loadImage).then(Executors::getVideoAux(), loadTexture);
+	});
 
 	return texture;
 }
