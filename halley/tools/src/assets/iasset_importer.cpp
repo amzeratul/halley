@@ -28,7 +28,7 @@ std::unique_ptr<Metadata> IAssetImporter::getMetaData(const ImportAssetsDatabase
 {
 	for (auto& i: asset.inputFiles) {
 		if (i.first.extension() == ".meta") {
-			return std::make_unique<Metadata>(*ResourceDataStatic::loadFromFileSystem(asset.srcDir / i.first));
+			return Metadata::fromYAML(*ResourceDataStatic::loadFromFileSystem(asset.srcDir / i.first));
 		}
 	}
 	return std::unique_ptr<Metadata>();

@@ -1,5 +1,6 @@
 #include "halley/resources/metadata.h"
 #include "halley/resources/resource_data.h"
+#include "halley/file/byte_serializer.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4127)
@@ -8,54 +9,127 @@
 
 using namespace Halley;
 
-Metadata::Metadata()
-	: root(std::make_shared<YAML::Node>())
-{}
-
-Metadata::Metadata(const ResourceDataStatic& data)
-	: root(std::make_shared<YAML::Node>())
-{
-	*root = YAML::Load(data.getString());
-}
+Metadata::Metadata() {}
 
 Metadata::~Metadata() {}
 
+bool Metadata::hasKey(String key) const
+{
+	return entries.find(key) != entries.end();
+}
+
 bool Metadata::getBool(String key) const
 {
-	return (*root)[key.cppStr()].as<bool>();
+	return getString(key) == "true";
 }
 
 int Metadata::getInt(String key) const
 {
-	return (*root)[key.cppStr()].as<int>();
+	return getString(key).toInteger();
 }
 
 float Metadata::getFloat(String key) const
 {
-	return (*root)[key.cppStr()].as<float>();
+	return getString(key).toFloat();
 }
 
 String Metadata::getString(String key) const
 {
-	return (*root)[key.cppStr()].as<std::string>();
+	auto result = entries.find(key);
+	if (result != entries.end()) {
+		return result->second;
+	} else {
+		throw Exception("Key " + key + " not found in metafile.");
+	}
 }
 
 bool Metadata::getBool(String key, bool v) const
 {
-	return (*root)[key.cppStr()].as<bool>(v);
+	if (hasKey(key)) {
+		return getBool(key);
+	} else {
+		return v;
+	}
 }
 
 int Metadata::getInt(String key, int v) const
 {
-	return (*root)[key.cppStr()].as<int>(v);
+	if (hasKey(key)) {
+		return getInt(key);
+	} else {
+		return v;
+	}
 }
 
 float Metadata::getFloat(String key, float v) const
 {
-	return (*root)[key.cppStr()].as<float>(v);
+	if (hasKey(key)) {
+		return getFloat(key);
+	} else {
+		return v;
+	}
 }
 
 String Metadata::getString(String key, String v) const
 {
-	return (*root)[key.cppStr()].as<std::string>(v);
+	if (hasKey(key)) {
+		return getString(key);
+	} else {
+		return v;
+	}
+}
+
+void Metadata::set(String key, bool value)
+{
+	entries[key] = value ? "true" : "false";
+}
+
+void Metadata::set(String key, int value)
+{
+	entries[key] = String::integerToString(value);
+}
+
+void Metadata::set(String key, float value)
+{
+	entries[key] = String::floatToString(value);
+}
+
+void Metadata::set(String key, String value)
+{
+	entries[key] = value;
+}
+
+std::unique_ptr<Metadata> Metadata::fromYAML(ResourceDataStatic& data)
+{
+	auto root = YAML::Load(data.getString());
+
+	auto meta = std::make_unique<Metadata>();
+
+	for (auto yamlEntry : root.as<YAML::Node>()) {
+		for (YAML::const_iterator it = yamlEntry.begin(); it != yamlEntry.end(); ++it) {
+			String key = it->first.as<std::string>();
+			String value = it->second.as<std::string>();
+			meta->set(key, value);
+		}
+	}
+
+	return std::move(meta);
+}
+
+std::unique_ptr<Metadata> Metadata::fromBinary(ResourceDataStatic& data)
+{
+	auto meta = std::make_unique<Metadata>();
+	Deserializer s(data.getSpan());
+	meta->deserialize(s);
+	return std::move(meta);
+}
+
+void Metadata::serialize(Serializer& s) const
+{
+	s << entries;
+}
+
+void Metadata::deserialize(Deserializer& s)
+{
+	s >> entries;
 }

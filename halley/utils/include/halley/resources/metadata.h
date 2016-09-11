@@ -2,6 +2,7 @@
 
 #include "halley/text/halleystring.h"
 #include <memory>
+#include "resource_data.h"
 
 namespace YAML
 {
@@ -10,6 +11,8 @@ namespace YAML
 
 namespace Halley
 {
+	class Deserializer;
+	class Serializer;
 	class ResourceDataStatic;
 
 	class Metadata
@@ -17,8 +20,9 @@ namespace Halley
 	public:
 		Metadata();
 		Metadata(const Metadata& other) = default;
-		Metadata(const ResourceDataStatic& data);
 		~Metadata();
+
+		bool hasKey(String key) const;
 
 		bool getBool(String key) const;
 		int getInt(String key) const;
@@ -30,7 +34,18 @@ namespace Halley
 		float getFloat(String key, float defaultValue) const;
 		String getString(String key, String defaultValue) const;
 
+		void set(String key, bool value);
+		void set(String key, int value);
+		void set(String key, float value);
+		void set(String key, String value);
+		
+		static std::unique_ptr<Metadata> fromYAML(ResourceDataStatic& data);
+		static std::unique_ptr<Metadata> fromBinary(ResourceDataStatic& data);
+		
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+
 	private:
-		std::shared_ptr<YAML::Node> root;
+		std::map<String, String> entries;
 	};
 }
