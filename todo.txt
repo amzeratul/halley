@@ -7,7 +7,6 @@ core/resources
   - material
   - animation
   - entity stage
-* asynchronous resource loading
 - resources hot reloading [RESEARCH]
 
 core/graphics
@@ -55,7 +54,6 @@ lua
 - Moonscript support
 
 editor/tools
-* asset importers can generate more assets
 - project selector
 - create project from template
 - connect to game via sockets

@@ -9,24 +9,22 @@ using namespace Halley;
 
 std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 {
-	Metadata meta = loader.getMeta();
-	auto video = loader.getAPI().video;
-
-	auto loadImage = [meta](std::unique_ptr<ResourceDataStatic> data) -> std::unique_ptr<Image>
-	{
-		return std::make_unique<Image>(data->getPath(), data->getSpan(), meta.getBool("premultiply", true));
-	};
-
-	std::shared_ptr<Image> img = loader.getAsync().then(loadImage).get(); // LOL
-	Vector2i size(img->getWidth(), img->getHeight());
-	std::shared_ptr<Texture> texture = video->createTexture(size);
-
+	Metadata& meta = loader.getMeta();
+	Vector2i size(meta.getInt("width"), meta.getInt("height"));
 	TextureDescriptor descriptor(size);
 	descriptor.useFiltering = meta.getBool("filtering", false);
 	descriptor.useMipMap = meta.getBool("mipmap", false);
 	descriptor.format = meta.getString("format", "RGBA") == "RGBA" ? TextureFormat::RGBA : TextureFormat::RGB;
+	bool premultiply = meta.getBool("premultiply", true);
 
-	auto loadTexture = [img, descriptor, texture]()
+	std::shared_ptr<Texture> texture = loader.getAPI().video->createTexture(size);
+
+	auto loadImage = [premultiply](std::unique_ptr<ResourceDataStatic> data) -> std::unique_ptr<Image>
+	{
+		return std::make_unique<Image>(data->getPath(), data->getSpan(), premultiply);
+	};
+
+	auto loadTexture = [descriptor, texture](std::unique_ptr<Image> img)
 	{
 		if (img->getSize() != descriptor.size) {
 			throw Exception("Image size does not match metadata.");
@@ -36,10 +34,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 		texture->load(d);
 	};
 
-	Concurrent::execute(Executors::getVideoAux(), loadTexture);
+	loader.getAsync().then(loadImage).then(Executors::getVideoAux(), loadTexture);
 
 	return texture;
-
-	//return loader.getAsync().then(loadImage).then(Executors::getVideoAux(), loadTexture).get(); // lol innefficiency
-	//return loadTexture(loadImage(loader.getStatic()));
 }
