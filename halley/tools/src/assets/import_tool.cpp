@@ -13,13 +13,13 @@ using namespace std::chrono_literals;
 int ImportTool::run(Vector<std::string> args)
 {
 	if (args.size() == 2) {
-		std::cout << "Importing project..." << std::endl;
 		Executors executors;
 		Executors::set(executors);
 		ThreadPool tp(executors.getCPU(), std::thread::hardware_concurrency());
 
 		Path sharedAssetsPath = Path(args[1]) / "assets_src";
 		auto proj = std::make_unique<Project>(args[0], sharedAssetsPath);
+		std::cout << "Importing project at \"" << args[0] << "\", with shared assets at \"" << sharedAssetsPath.string() << "\"" << std::endl;
 
 		auto tasks = std::make_unique<EditorTaskSet>();
 		tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(*proj, true)));
