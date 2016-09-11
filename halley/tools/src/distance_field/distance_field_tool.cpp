@@ -27,7 +27,7 @@ int DistanceFieldTool::run(Vector<std::string> args)
 	inputImg.reset();
 
 	// Output image
-	result->savePNG(args[1]);
+	result->savePNG(Path(args[1]));
 	
 	return 0;
 }

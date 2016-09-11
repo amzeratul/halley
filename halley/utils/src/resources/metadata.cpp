@@ -94,7 +94,17 @@ void Metadata::set(String key, float value)
 	entries[key] = String::floatToString(value);
 }
 
-void Metadata::set(String key, String value)
+void Metadata::set(String key, const char* value)
+{
+	entries[key] = value;
+}
+
+void Metadata::set(String key, const std::string& value)
+{
+	entries[key] = value;
+}
+
+void Metadata::set(String key, const String& value)
 {
 	entries[key] = value;
 }
@@ -105,12 +115,10 @@ std::unique_ptr<Metadata> Metadata::fromYAML(ResourceDataStatic& data)
 
 	auto meta = std::make_unique<Metadata>();
 
-	for (auto yamlEntry : root.as<YAML::Node>()) {
-		for (YAML::const_iterator it = yamlEntry.begin(); it != yamlEntry.end(); ++it) {
-			String key = it->first.as<std::string>();
-			String value = it->second.as<std::string>();
-			meta->set(key, value);
-		}
+	for (YAML::const_iterator it = root.begin(); it != root.end(); ++it) {
+		String key = it->first.as<std::string>();
+		String value = it->second.as<std::string>();
+		meta->set(key, value);
 	}
 
 	return std::move(meta);

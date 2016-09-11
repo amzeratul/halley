@@ -87,7 +87,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(String rawName, Resource
 	auto metaData = parent.locator->tryGetResource(name + ".meta", false);
 	std::unique_ptr<Metadata> meta;
 	if (metaData) {
-		meta = Metadata::fromYAML(*static_cast<ResourceDataStatic*>(metaData.get()));
+		meta = Metadata::fromBinary(*static_cast<ResourceDataStatic*>(metaData.get()));
 	} else {
 		meta.reset(new Metadata());
 	}

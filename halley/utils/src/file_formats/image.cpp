@@ -184,5 +184,10 @@ int Halley::Image::getPixelAlpha(Vector2i pos) const
 void Halley::Image::savePNG(String file) const
 {
 	if (file == "") file = filename;
-	lodepng_encode_file(file.c_str(), reinterpret_cast<unsigned char*>(px.get()), w, h, LCT_RGBA, 8);
+	savePNG(file);
+}
+
+void Halley::Image::savePNG(const Path& file) const
+{
+	lodepng_encode_file(file.string().c_str(), reinterpret_cast<unsigned char*>(px.get()), w, h, LCT_RGBA, 8);
 }

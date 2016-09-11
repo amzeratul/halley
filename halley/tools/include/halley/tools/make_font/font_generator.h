@@ -3,9 +3,24 @@
 #include "font_face.h"
 #include <halley/maths/rect.h>
 #include "halley/file/filesystem.h"
+#include "halley/resources/metadata.h"
 
 namespace Halley
 {
+	struct FontGeneratorResult
+	{
+		bool success = false;
+		String assetName;
+		std::unique_ptr<Image> image;
+		std::unique_ptr<Metadata> imageMeta;
+		Bytes fontData;
+
+		FontGeneratorResult();
+		FontGeneratorResult(FontGeneratorResult&& other);
+		~FontGeneratorResult();
+		std::vector<filesystem::path> write(Path dst, bool verbose = false) const;
+	};
+
 	class FontGenerator
 	{
 		struct CharcodeEntry
@@ -25,11 +40,11 @@ namespace Halley
 
 	public:
 		explicit FontGenerator(bool verbose = false, std::function<bool(float, String)> progressReporter = ignoreReport);
-		void generateFont(Path fontFile, Path result, Vector2i size, float radius, int supersample, Range<int> range);
+		FontGeneratorResult generateFont(String assetName, Path fontFile, Vector2i size, float radius, int supersample, Range<int> range);
 
 	private:
-		void generateFontMapBinary(String imgName, FontFace& font, Vector<CharcodeEntry>& entries, Path outPath, float scale, float radius, Vector2i imageSize) const;
-		void generateTextureMeta(Path destination);
+		Bytes generateFontMapBinary(String imgName, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float radius, Vector2i imageSize) const;
+		static std::unique_ptr<Metadata> generateTextureMeta();
 
 		bool verbose;
 		std::function<bool(float, String)> progressReporter;

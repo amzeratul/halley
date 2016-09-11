@@ -17,14 +17,7 @@ std::vector<Path> FontImporter::import(const ImportAssetsDatabaseEntry& asset, P
 		return {};
 	}
 
-	Path dst = src;
-	Path dstImg = src;
-	Path dstMeta = src;
-	dst.replace_extension("font");
-	dstImg.replace_extension("png");
-	dstMeta.replace_extension("png.meta");
-
-	FileSystem::createParentDir(dst);
+	FileSystem::createDir(dstDir);
 
 	Vector2i imgSize(512, 512);
 	float radius = 8;
@@ -38,7 +31,6 @@ std::vector<Path> FontImporter::import(const ImportAssetsDatabaseEntry& asset, P
 	}
 
 	FontGenerator gen(false, reporter);
-	gen.generateFont(asset.srcDir / src, dstDir / dst, imgSize, radius, supersample, Range<int>(0, 255));
-
-	return{ dst, dstImg, dstMeta };
+	auto result = gen.generateFont(asset.assetId, asset.srcDir / src, imgSize, radius, supersample, Range<int>(0, 255));
+	return result.write(dstDir, true);
 }

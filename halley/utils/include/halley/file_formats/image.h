@@ -25,6 +25,7 @@
 #include "halley/maths/vector2.h"
 #include "halley/text/halleystring.h"
 #include "halley/resources/resource.h"
+#include "halley/file/filesystem.h"
 
 namespace Halley {
 	class ResourceDataStatic;
@@ -37,7 +38,8 @@ namespace Halley {
 		~Image();
 
 		void load(String filename, gsl::span<const gsl::byte> bytes, bool preMultiply);
-		void savePNG(String filename="") const;
+		void savePNG(String filename = "") const;
+		void savePNG(const Path& filename) const;
 
 		bool isPremultiplied() const { return preMultiplied; }
 

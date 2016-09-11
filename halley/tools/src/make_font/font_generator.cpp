@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <atomic>
 #include <boost/filesystem.hpp>
-#include <yaml-cpp/yaml.h>
 
 #include "halley/tools/make_font/font_generator.h"
 #include "halley/tools/distance_field/distance_field_generator.h"
@@ -77,7 +76,7 @@ FontGenerator::FontGenerator(bool verbose, std::function<bool(float, String)> pr
 {
 }
 
-void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, float radius, int superSample, Range<int> range) {
+FontGeneratorResult FontGenerator::generateFont(String assetName, Path fontFile, Vector2i size, float radius, int superSample, Range<int> range) {
 	float scale = 1.0f / superSample;
 	float borderFinal = ceil(radius);
 	float borderSuperSample = borderFinal * superSample;
@@ -89,7 +88,7 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 #endif
 
 	if (!progressReporter(0, "Packing")) {
-		return;
+		return FontGeneratorResult();
 	}
 
 	FontFace font(fontFile.string());
@@ -103,7 +102,7 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 	font.setSize(float(fontSize));
 	
 	if (!progressReporter(0.1f, "Encoding")) {
-		return;
+		return FontGeneratorResult();
 	}
 
 	auto dstImg = std::make_unique<Image>(size.x, size.y);
@@ -171,34 +170,29 @@ void FontGenerator::generateFont(Path fontFile, Path target, Vector2i size, floa
 		f.get();
 	}
 	if (!keepGoing) {
-		return;
+		return FontGeneratorResult();
 	}
 
 	if (verbose) {
 		std::cout << " Done generating." << std::endl;
 	}
 	if (!progressReporter(0.95f, "Generating files")) {
-		return;
+		return FontGeneratorResult();
 	}
 
-	Path fileName = target.filename();
-	Path dir = target.parent_path();
-	Path imgName = change_extension(fileName, ".png");
-	Path pngPath = dir / imgName;
-	Path binPath = dir / change_extension(fileName, ".font");
-	Path metaPath = change_extension(pngPath, ".png.meta");
-	if (verbose) {
-		std::cout << "Saving " << pngPath << ", " << binPath << ", and " << metaPath << std::endl;
-	}
-
-	dstImg->savePNG(pngPath.string());
-
-	generateFontMapBinary(imgName.string(), font, codes, binPath, scale, radius, size);
-	generateTextureMeta(metaPath.string());
+	String asset = Path(assetName.cppStr()).stem().string();
+	FontGeneratorResult genResult;
+	genResult.success = true;
+	genResult.assetName = "font/" + asset;
+	genResult.fontData = generateFontMapBinary(asset + ".png", font, codes, scale, radius, size);
+	genResult.image = std::move(dstImg);
+	genResult.imageMeta = generateTextureMeta();
 	progressReporter(1.0f, "Done");
+
+	return genResult;
 }
 
-void FontGenerator::generateFontMapBinary(String imgName, FontFace& font, Vector<CharcodeEntry>& entries, Path outPath, float scale, float radius, Vector2i imageSize) const
+Bytes FontGenerator::generateFontMapBinary(String imgName, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float radius, Vector2i imageSize) const
 {
 	auto serialize = [&] (Serializer& s) {
 		String name = font.getName();
@@ -235,22 +229,37 @@ void FontGenerator::generateFontMapBinary(String imgName, FontFace& font, Vector
 		}
 	};
 	
-	FileSystem::writeFile(outPath, Serializer::toBytes(serialize));
+	return Serializer::toBytes(serialize);
 }
 
-void FontGenerator::generateTextureMeta(Path outPath)
+std::unique_ptr<Metadata> FontGenerator::generateTextureMeta()
 {
-	YAML::Emitter yaml;
-	yaml << YAML::BeginMap;
-	yaml << YAML::Key << "filtering" << YAML::Value << true;
-	yaml << YAML::Key << "mipmap" << YAML::Value << false;
-	yaml << YAML::Key << "premultiply" << YAML::Value << false;
-	yaml << YAML::Key << "format" << YAML::Value << "RGBA";
-	yaml << YAML::EndMap;
+	auto meta = std::make_unique<Metadata>();
+	meta->set("filtering", true);
+	meta->set("mipmap", false);
+	meta->set("premultiply", false);
+	meta->set("format", "RGBA");
+	return std::move(meta);
+}
 
-	std::ofstream out(outPath.string(), std::ios::out);
-	out << "---\n";
-	out << yaml.c_str();
-	out << "\n...\n";
-	out.close();
+FontGeneratorResult::FontGeneratorResult() = default;
+FontGeneratorResult::FontGeneratorResult(FontGeneratorResult&& other) = default;
+FontGeneratorResult::~FontGeneratorResult() = default;
+
+std::vector<filesystem::path> FontGeneratorResult::write(Path dir, bool verbose) const
+{
+	Path fileName = assetName.cppStr();
+	Path imgName = change_extension(fileName, ".png");
+	Path pngPath = imgName;
+	Path binPath = change_extension(fileName, ".font");
+	Path metaPath = change_extension(pngPath, ".png.meta");
+	if (verbose) {
+		std::cout << "Saving " << pngPath << ", " << binPath << ", and " << metaPath << std::endl;
+	}
+
+	image->savePNG(dir / pngPath);
+	FileSystem::writeFile(dir / binPath, fontData);
+	FileSystem::writeFile(dir / metaPath, Serializer::toBytes(*imageMeta));
+
+	return {pngPath, binPath, metaPath};
 }

@@ -37,7 +37,9 @@ namespace Halley
 		void set(String key, bool value);
 		void set(String key, int value);
 		void set(String key, float value);
-		void set(String key, String value);
+		void set(String key, const char* value);
+		void set(String key, const std::string& value);
+		void set(String key, const String& value);
 		
 		static std::unique_ptr<Metadata> fromYAML(ResourceDataStatic& data);
 		static std::unique_ptr<Metadata> fromBinary(ResourceDataStatic& data);

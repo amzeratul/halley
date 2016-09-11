@@ -16,6 +16,9 @@ String IAssetImporter::getAssetId(Path file) const
 
 Path IAssetImporter::getMainFile(const ImportAssetsDatabaseEntry& asset)
 {
+	if (asset.inputFiles.size() == 1) {
+		return asset.inputFiles[0].first;
+	}
 	for (auto& i : asset.inputFiles) {
 		if (i.first.extension() != ".meta") {
 			return i.first;
@@ -26,9 +29,11 @@ Path IAssetImporter::getMainFile(const ImportAssetsDatabaseEntry& asset)
 
 std::unique_ptr<Metadata> IAssetImporter::getMetaData(const ImportAssetsDatabaseEntry& asset)
 {
-	for (auto& i: asset.inputFiles) {
-		if (i.first.extension() == ".meta") {
-			return Metadata::fromYAML(*ResourceDataStatic::loadFromFileSystem(asset.srcDir / i.first));
+	if (asset.inputFiles.size() > 1) {
+		for (auto& i: asset.inputFiles) {
+			if (i.first.extension() == ".meta") {
+				return Metadata::fromYAML(*ResourceDataStatic::loadFromFileSystem(asset.srcDir / i.first));
+			}
 		}
 	}
 	return std::unique_ptr<Metadata>();
