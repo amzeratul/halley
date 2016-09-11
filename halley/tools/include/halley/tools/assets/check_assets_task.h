@@ -18,8 +18,10 @@ namespace Halley
 	private:
 		Project& project;
 		DirectoryMonitor monitorAssets;
-		DirectoryMonitor monitorSharedAssets;
+		DirectoryMonitor monitorAssetsSrc;
+		DirectoryMonitor monitorSharedAssetsSrc;
 		DirectoryMonitor monitorGen;
+		DirectoryMonitor monitorGenSrc;
 		bool headless;
 
 		static std::vector<ImportAssetsDatabaseEntry> filterNeedsImporting(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets);

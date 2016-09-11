@@ -13,9 +13,11 @@ using namespace std::chrono_literals;
 CheckAssetsTask::CheckAssetsTask(Project& project, bool headless)
 	: EditorTask("Check assets", true, false)
 	, project(project)
-	, monitorAssets(project.getAssetsSrcPath())
-	, monitorSharedAssets(project.getSharedAssetsSrcPath())
-	, monitorGen(project.getGenSrcPath())
+	, monitorAssetsSrc(project.getAssetsSrcPath())
+	, monitorSharedAssetsSrc(project.getSharedAssetsSrcPath())
+	, monitorAssets(project.getAssetsPath())
+	, monitorGenSrc(project.getGenSrcPath())
+	, monitorGen(project.getGenPath())
 	, headless(headless)
 {}
 
@@ -23,11 +25,11 @@ void CheckAssetsTask::run()
 {
 	bool first = true;
 	while (!isCancelled()) {
-		if (first | monitorAssets.poll() | monitorSharedAssets.poll()) { // Don't short-circuit
+		if (first | monitorAssets.poll() | monitorAssetsSrc.poll() | monitorSharedAssetsSrc.poll()) { // Don't short-circuit
 			checkAllAssets(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, project.getAssetsPath(), "Importing assets");
 		}
 
-		if (first | monitorGen.poll()) {
+		if (first | monitorGen.poll() | monitorGenSrc.poll()) {
 			checkAllAssets(project.getCodegenDatabase(), { project.getGenSrcPath() }, project.getGenPath(), "Generating code");
 		}
 
