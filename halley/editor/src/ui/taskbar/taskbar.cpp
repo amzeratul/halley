@@ -126,12 +126,14 @@ void TaskBar::draw(Painter& painter)
 			.drawSliced(painter, Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
 
 		// Progress
+		painter.setClip(Rect4i(Rect4f(drawPos + Vector2f(12, 12), size.x * t.progressDisplay + 24, size.y + 24)));
 		taskSprite.clone()
 			.setMaterial(t.material)
 			.setPos(drawPos)
-			.setScale((size * Vector2f(t.progressDisplay, 1) + Vector2f(24, 24)) / Vector2f(64, 64))
+			.setScale((size + Vector2f(24, 24)) / Vector2f(64, 64))
 			.setColour(col)
 			.drawSliced(painter, Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
+		painter.setClip();
 
 		// Text
 		text.setSize(14).setText(t.label).draw(painter, drawPos + Vector2f(24, 12));

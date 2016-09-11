@@ -46,7 +46,8 @@ namespace Halley {
 		void setNumberOfTextureUnits(int n);
 		void resetState();
 
-		void setViewPort(Rect4i rect, bool scissor = false);
+		void setViewPort(Rect4i rect);
+		void setScissor(Rect4i rect, bool enable);
 		Rect4i getViewPort() const;
 
 		void clear(Colour col);

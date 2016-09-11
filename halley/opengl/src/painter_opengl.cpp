@@ -84,6 +84,22 @@ void PainterOpenGL::setBlend(BlendType blend)
 	glUtils->setBlendType(blend);
 }
 
+static Rect4i flipRectangle(Rect4i r, int h)
+{
+	int y = h - r.getBottom();
+	return Rect4i(Vector2i(r.getLeft(), y), r.getWidth(), r.getHeight());
+}
+
+void PainterOpenGL::setClip(Rect4i clip, Vector2i renderTargetSize, bool enable)
+{
+	glUtils->setScissor(flipRectangle(clip, renderTargetSize.y), enable);
+}
+
+void PainterOpenGL::setViewPort(Rect4i rect, Vector2i renderTargetSize)
+{
+	glUtils->setViewPort(flipRectangle(rect, renderTargetSize.y));
+}
+
 void PainterOpenGL::setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
 {
 	Expects(numVertices > 0);
@@ -163,9 +179,4 @@ void PainterOpenGL::drawTriangles(size_t numIndices)
 
 	glDrawElements(GL_TRIANGLES, int(numIndices), GL_UNSIGNED_SHORT, nullptr);
 	glCheckError();
-}
-
-void PainterOpenGL::setViewPort(Rect4i rect, bool enableScissor)
-{
-	glUtils->setViewPort(rect, enableScissor);
 }

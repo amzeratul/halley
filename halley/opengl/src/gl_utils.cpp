@@ -240,22 +240,24 @@ void GLUtils::resetState()
 {
 }
 
-void GLUtils::setViewPort(Rect4i r, bool scissor)
+void GLUtils::setViewPort(Rect4i r)
 {
 	if (state.viewport != r) {
 		glViewport(r.getX(), r.getY(), r.getWidth(), r.getHeight());
 		state.viewport = r;
 	}
+}
 
-	if (scissor != state.scissoring) {
-		if (scissor) {
+void GLUtils::setScissor(Rect4i r, bool enable)
+{
+	if (enable != state.scissoring) {
+		if (enable) {
 			glScissor(r.getX(), r.getY(), r.getWidth(), r.getHeight());
 			glEnable(GL_SCISSOR_TEST);
-		}
-		else {
+		} else {
 			glDisable(GL_SCISSOR_TEST);
 		}
-		state.scissoring = scissor;
+		state.scissoring = enable;
 	}
 }
 

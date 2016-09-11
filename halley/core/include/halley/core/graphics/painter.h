@@ -38,6 +38,9 @@ namespace Halley
 		virtual void clear(Colour colour) = 0;
 		virtual void setBlend(BlendType blend) = 0;
 
+		void setClip(Rect4i rect);
+		void setClip();
+
 		// Draws quads to the screen
 		void drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData);
 
@@ -58,13 +61,15 @@ namespace Halley
 		virtual void setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices) = 0;
 		virtual void drawTriangles(size_t numIndices) = 0;
 
-		virtual void setViewPort(Rect4i rect, bool enableScissor) = 0;
+		virtual void setViewPort(Rect4i rect, Vector2i renderTargetSize) = 0;
+		virtual void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable) = 0;
 
 	private:
 		void bind(RenderContext& context);
 
 		RenderContext* activeContext = nullptr;
 		Matrix4f projection;
+		Rect4i renderTargetViewPort;
 		Rect4i viewPort;
 		Camera* camera = nullptr;
 

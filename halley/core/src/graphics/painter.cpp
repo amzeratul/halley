@@ -172,17 +172,32 @@ void Painter::bind(RenderContext& context)
 {
 	// Set render target
 	auto& rt = context.getRenderTarget();
+	renderTargetViewPort = rt.getViewPort();
 	rt.bind();
 	
 	// Set viewport
-	viewPort = context.getViewPort();
-	setViewPort(viewPort, viewPort != rt.getViewPort());
+	viewPort = context.getViewPort().intersection(renderTargetViewPort);
+	setViewPort(viewPort, renderTargetViewPort.getSize());
+	setClip();
 
 	// Set camera
 	camera = &context.getCamera();
 	camera->setViewArea(Vector2f(viewPort.getSize()));
 	camera->updateProjection();
 	projection = camera->getProjection();
+}
+
+void Painter::setClip(Rect4i rect)
+{
+	flushPending();
+	Rect4i finalRect = (rect + viewPort.getTopLeft()).intersection(viewPort);
+	setClip(finalRect, renderTargetViewPort.getSize(), finalRect != renderTargetViewPort);
+}
+
+void Painter::setClip()
+{
+	flushPending();
+	setClip(viewPort, renderTargetViewPort.getSize(), viewPort != renderTargetViewPort);
 }
 
 void Painter::startDrawCall(std::shared_ptr<Material>& material)
