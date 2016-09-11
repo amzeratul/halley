@@ -80,7 +80,7 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 		// Import
 		while (!toLoad.empty()) {
 			auto& cur = toLoad.front();
-			auto curOut = importer.getImporter(cur.assetType).import(cur, assetsPath, [&] (float progress, String label) -> bool
+			std::vector<Path> curOut = importer.getImporter(cur.assetType).import(cur, assetsPath, [&] (float progress, String label) -> bool
 			{
 				setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel + " " + label);
 				return !isCancelled();

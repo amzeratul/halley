@@ -192,6 +192,18 @@ void Halley::Image::savePNG(const Path& file) const
 	lodepng_encode_file(file.string().c_str(), reinterpret_cast<unsigned char*>(px.get()), w, h, LCT_RGBA, 8);
 }
 
+Halley::Bytes Halley::Image::savePNGToBytes()
+{
+	unsigned char* bytes;
+	size_t size;
+	lodepng_encode_memory(&bytes, &size, reinterpret_cast<unsigned char*>(px.get()), w, h, LCT_RGBA, 8);
+	Bytes result;
+	result.resize(size);
+	memcpy(result.data(), bytes, size);
+	free(bytes);
+	return result;
+}
+
 Halley::Vector2i Halley::Image::getImageSize(String name, gsl::span<const gsl::byte> bytes)
 {
 	bool useLodePng = name.endsWith(".png");
@@ -202,7 +214,7 @@ Halley::Vector2i Halley::Image::getImageSize(String name, gsl::span<const gsl::b
 		return Vector2i(int(w), int(h));
 	} else {
 		int w, h, comp;
-		stbi_info_from_memory(reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size(), &w, &h, &comp);
+		stbi_info_from_memory(reinterpret_cast<const unsigned char*>(bytes.data()), int(bytes.size()), &w, &h, &comp);
 		return Vector2i(w, h);
 	}
 }

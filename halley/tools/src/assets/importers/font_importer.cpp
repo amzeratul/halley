@@ -5,6 +5,7 @@
 #include "halley/maths/range.h"
 #include "halley/tools/make_font/font_generator.h"
 #include "halley/resources/metadata.h"
+#include "halley/file_formats/image.h"
 
 using namespace Halley;
 
@@ -29,5 +30,21 @@ std::vector<Path> FontImporter::import(const ImportingAsset& asset, Path dstDir,
 
 	FontGenerator gen(false, reporter);
 	auto result = gen.generateFont(asset.assetId, data, imgSize, radius, supersample, Range<int>(0, 255));
-	return result.write(dstDir, true);
+	
+	Path fileName = asset.assetId.cppStr();
+	Path pngPath = fileName;
+	fileName.replace_extension(".font");
+	pngPath.replace_extension(".png");
+	FileSystem::writeFile(dstDir / fileName, result.fontData);
+
+	auto imgData = result.image->savePNGToBytes();
+
+	ImportingAsset image;
+	image.assetId = asset.assetId + "-image";
+	image.assetType = AssetType::IMAGE;
+	image.metadata = std::move(result.imageMeta);
+	image.inputFiles.emplace_back(ImportingAssetFile(pngPath, std::move(imgData)));
+	collector(std::move(image));
+
+	return { fileName };
 }

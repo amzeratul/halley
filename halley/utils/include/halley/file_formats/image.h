@@ -40,6 +40,7 @@ namespace Halley {
 		void load(String filename, gsl::span<const gsl::byte> bytes, bool preMultiply);
 		void savePNG(String filename = "") const;
 		void savePNG(const Path& filename) const;
+		Bytes savePNGToBytes();
 
 		static Vector2i getImageSize(String filename, gsl::span<const gsl::byte> bytes);
 
