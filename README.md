@@ -37,6 +37,8 @@ Halley is divided in a several sub-projects:
 * **tests**
   * **entity**: Stress test of entity system
   * **network**: Stress test of network system
+* **samples**
+  * see [this project](https://github.com/amzeratul/halley-samples)
 
 ## Installation
 
