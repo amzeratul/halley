@@ -25,13 +25,7 @@ using namespace Halley;
 
 void Codegen::run(Path inDir, Path outDir)
 {
-	std::cout << "Codegen \"" << inDir << "\" -> \"" << outDir << "\"." << std::endl;
-
-	Codegen codegen;
-	codegen.loadSources(inDir);
-	codegen.validate();
-	codegen.process();
-	codegen.generateCode(outDir);
+	throw Exception("Not supported");
 }
 
 Codegen::Codegen(bool verbose)
@@ -39,24 +33,12 @@ Codegen::Codegen(bool verbose)
 {
 }
 
-void Codegen::loadSources(Path p)
-{
-	if (FileSystem::exists(p) && FileSystem::isDirectory(p)) {
-		for (auto i = filesystem::directory_iterator(p); i != filesystem::directory_iterator(); ++i) {
-			auto filePath = i->path();
-			if (filePath.extension() == ".yaml") {
-				addSource(filePath);
-			}
-		}
-	}
-}
-
-void Codegen::loadSources(std::vector<Path> files, ProgressReporter progress)
+void Codegen::loadSources(std::vector<std::pair<String, gsl::span<const gsl::byte>>> files, ProgressReporter progress)
 {
 	int i = 0;
 	for (auto& f : files) {
-		addSource(f);
-		if (!progress(float(i) / float(files.size()), f.string())) {
+		addSource(f.first, f.second);
+		if (!progress(float(i) / float(files.size()), f.first)) {
 			return;
 		}
 	}
@@ -231,14 +213,15 @@ std::vector<Path> Codegen::generateCode(Path directory, ProgressReporter progres
 	return out;
 }
 
-void Codegen::addSource(Path path)
+void Codegen::addSource(String path, gsl::span<const gsl::byte> data)
 {
 	std::vector<YAML::Node> documents;
 	
 	try {
-		documents = YAML::LoadAllFromFile(path.string());
+		String strData(reinterpret_cast<const char*>(data.data()), data.size());
+		documents = YAML::LoadAll(strData.cppStr());
 	} catch (const std::exception& e) {
-		std::cout << "Failed to load " << path.string() << ": " << e.what() << std::endl;
+		std::cout << "Failed to load " << path << ": " << e.what() << std::endl;
 	}
 
 	for (auto document: documents) {

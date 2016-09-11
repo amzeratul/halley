@@ -9,17 +9,17 @@ String CodegenImporter::getAssetId(Path file) const
 	return ":codegen";
 }
 
-std::vector<Path> CodegenImporter::import(const ImportAssetsDatabaseEntry& asset, Path dstDir, ProgressReporter reporter)
+std::vector<Path> CodegenImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
 {
 	Codegen codegen;
 
-	std::vector<Path> srcs;
+	std::vector<std::pair<String, gsl::span<const gsl::byte>>> srcs;
 	int n = 0;
 	for (auto& f : asset.inputFiles) {
 		if (!reporter(lerp(0.0f, 0.25f, float(n) / asset.inputFiles.size()), "Loading sources")) {
 			return {};
 		}
-		srcs.push_back(asset.srcDir / f.first);
+		srcs.push_back(std::make_pair(f.name.string(), gsl::as_bytes(gsl::span<const Byte>(f.data))));
 		++n;
 	}
 	codegen.loadSources(srcs, [&](float progress, String label) -> bool {

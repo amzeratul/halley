@@ -46,16 +46,54 @@ void ImportAssetsTask::run()
 	}
 }
 
+static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& asset)
+{
+	if (asset.inputFiles.size() > 1) {
+		for (auto& i: asset.inputFiles) {
+			if (i.first.extension() == ".meta") {
+				return Metadata::fromYAML(*ResourceDataStatic::loadFromFileSystem(asset.srcDir / i.first));
+			}
+		}
+	}
+	return std::unique_ptr<Metadata>();
+}
+
 bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
 	std::vector<Path> out;
 	try {
+		// Create queue
+		std::list<ImportingAsset> toLoad;
+
+		// Load files from disk
+		ImportingAsset importingAsset;
+		importingAsset.assetId = asset.assetId;
+		importingAsset.assetType = asset.assetType;
+		importingAsset.metadata = getMetaData(asset);
+		for (auto& f: asset.inputFiles) {
+			if (f.first.extension() != ".meta") {
+				importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.first, FileSystem::readFile(asset.srcDir / f.first)));
+			}
+		}
+		toLoad.emplace_back(std::move(importingAsset));
+
 		// Import
-		out = importer.getImporter(asset.assetType).import(asset, assetsPath, [&] (float progress, String label) -> bool
-		{
-			setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel + " " + label);
-			return !isCancelled();
-		});
+		while (!toLoad.empty()) {
+			auto& cur = toLoad.front();
+			auto curOut = importer.getImporter(cur.assetType).import(cur, assetsPath, [&] (float progress, String label) -> bool
+			{
+				setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel + " " + label);
+				return !isCancelled();
+			}, [&] (ImportingAsset&& toAdd)
+			{
+				toLoad.emplace_back(std::move(toAdd));
+			});
+
+			for (auto& o: curOut) {
+				out.push_back(o);
+			}
+			toLoad.pop_front();
+		}
 	} catch (std::exception& e) {
 		std::cout << "Error importing asset " << asset.assetId << ": " << e.what() << std::endl;
 		

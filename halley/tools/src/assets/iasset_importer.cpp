@@ -14,6 +14,7 @@ String IAssetImporter::getAssetId(Path file) const
 	return name;
 }
 
+/*
 Path IAssetImporter::getMainFile(const ImportAssetsDatabaseEntry& asset)
 {
 	if (asset.inputFiles.size() == 1) {
@@ -38,3 +39,4 @@ std::unique_ptr<Metadata> IAssetImporter::getMetaData(const ImportAssetsDatabase
 	}
 	return std::unique_ptr<Metadata>();
 }
+*/

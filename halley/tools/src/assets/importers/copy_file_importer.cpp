@@ -5,21 +5,18 @@
 
 using namespace Halley;
 
-std::vector<Path> CopyFileImporter::import(const ImportAssetsDatabaseEntry& asset, Path dstDir, ProgressReporter reporter)
+std::vector<Path> CopyFileImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
 {
-	auto srcDir = asset.srcDir;
-
 	std::vector<Path> out;
 	
-	Path mainFile = getMainFile(asset);
-	FileSystem::copyFile(srcDir / mainFile, dstDir / mainFile);
+	Path mainFile = asset.inputFiles.at(0).name;
+	FileSystem::writeFile(dstDir / mainFile, asset.inputFiles[0].data);
 	out.push_back(mainFile);
 
-	auto meta = getMetaData(asset);
-	if (meta) {
+	if (asset.metadata) {
 		Path metaPath = mainFile;
 		metaPath.replace_extension(metaPath.extension().string() + ".meta");
-		FileSystem::writeFile(dstDir / metaPath, Serializer::toBytes(*meta));
+		FileSystem::writeFile(dstDir / metaPath, Serializer::toBytes(*asset.metadata));
 		out.push_back(metaPath);
 	}
 

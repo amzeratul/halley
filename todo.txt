@@ -2,15 +2,13 @@ core
 - child stages?
 
 core/resources
-- asset database
-- binary format to replace yaml
-  - metadata
+* asset database
+* custom importers:
   - material
   - animation
   - entity stage
-  - remove from utils/file_formats
+* asynchronous resource loading
 - resources hot reloading [RESEARCH]
-- asynchronous resource loading
 
 core/graphics
 - convert uniforms into attributes for distance_field_sprite?
@@ -57,6 +55,7 @@ lua
 - Moonscript support
 
 editor/tools
+* asset importers can generate more assets
 - project selector
 - create project from template
 - connect to game via sockets
@@ -77,6 +76,7 @@ editor/tools
 - generate fonts with OpenCL
 
 utils
+* remove YAML from utils/file_formats
 - collision detection & triggers
 - tasks/concurrency review
 - consider replacing STL with EASTL or similar?
@@ -84,7 +84,6 @@ utils
 - improve Halley::String?
 - better HTTP library/replace boost::asio?
 - write my own memory pool/replace boost::pool?
-- YAML replacement
 - DirectoryMonitor support on Linux and Mac
 
 samples

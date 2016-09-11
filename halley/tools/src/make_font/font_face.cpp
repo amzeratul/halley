@@ -39,6 +39,19 @@ FontFace::FontFace(String filename)
 	}
 }
 
+FontFace::FontFace(gsl::span<const gsl::byte> data)
+	: pimpl (std::make_unique<FontFacePimpl>())
+{
+	int error = FT_Init_FreeType(&pimpl->library);
+	if (error) {
+		throw Exception("Unable to initialize FreeType");
+	}
+	error = FT_New_Memory_Face(pimpl->library, reinterpret_cast<const FT_Byte*>(data.data()), FT_Long(data.size()), 0, &pimpl->face);
+	if (error) {
+		throw Exception("Unable to load font face");
+	}
+}
+
 FontFace::~FontFace()
 {
 	if (pimpl->face) {

@@ -1,6 +1,7 @@
 #pragma once
 #include <halley/maths/vector2.h>
 #include <halley/text/halleystring.h>
+#include <gsl/gsl>
 
 namespace Halley
 {
@@ -27,6 +28,7 @@ namespace Halley
 	{
 	public:
 		explicit FontFace(String filename);
+		explicit FontFace(gsl::span<const gsl::byte> data);
 		~FontFace();
 
 		void setSize(float size);

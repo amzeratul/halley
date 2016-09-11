@@ -3,6 +3,7 @@
 #include "icode_generator.h"
 #include <halley/data_structures/hash_map.h>
 #include "halley/file/filesystem.h"
+#include <gsl/gsl>
 
 namespace YAML
 {
@@ -33,8 +34,7 @@ namespace Halley
 
 		explicit Codegen(bool verbose = false);
 
-		void loadSources(Path directory);
-		void loadSources(std::vector<Path> files, ProgressReporter progress = &doNothing);
+		void loadSources(std::vector<std::pair<String, gsl::span<const gsl::byte>>> files, ProgressReporter progress = &doNothing);
 		void validate(ProgressReporter progress = &doNothing);
 		void process();
 		bool writeFile(Path path, const char* data, size_t dataSize, bool stub) const;
@@ -42,7 +42,7 @@ namespace Halley
 		std::vector<Path> generateCode(Path directory, ProgressReporter progress = &doNothing);
 
 	private:
-		void addSource(Path path);
+		void addSource(String name, gsl::span<const gsl::byte> data);
 		void addComponent(YAML::Node rootNode);
 		void addSystem(YAML::Node rootNode);
 		void addMessage(YAML::Node rootNode);

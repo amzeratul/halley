@@ -76,7 +76,7 @@ FontGenerator::FontGenerator(bool verbose, std::function<bool(float, String)> pr
 {
 }
 
-FontGeneratorResult FontGenerator::generateFont(String assetName, Path fontFile, Vector2i size, float radius, int superSample, Range<int> range) {
+FontGeneratorResult FontGenerator::generateFont(String assetName, gsl::span<const gsl::byte> fontFile, Vector2i size, float radius, int superSample, Range<int> range) {
 	float scale = 1.0f / superSample;
 	float borderFinal = ceil(radius);
 	float borderSuperSample = borderFinal * superSample;
@@ -91,7 +91,7 @@ FontGeneratorResult FontGenerator::generateFont(String assetName, Path fontFile,
 		return FontGeneratorResult();
 	}
 
-	FontFace font(fontFile.string());
+	FontFace font(fontFile);
 	if (verbose) {
 		std::cout << "Finding best pack size...\n";
 	}
