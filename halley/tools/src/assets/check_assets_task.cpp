@@ -33,13 +33,14 @@ void CheckAssetsTask::run()
 
 		first = false;
 
-		do {
-			std::this_thread::sleep_for(monitorAssets.hasRealImplementation() ? 25ms : 100ms);
-		} while (hasPendingTasks());
+		while (hasPendingTasks()) {
+			std::this_thread::sleep_for(5ms);
+		}
 
 		if (headless) {
 			return;
 		}
+		std::this_thread::sleep_for(monitorAssets.hasRealImplementation() ? 25ms : 100ms);
 	}
 }
 

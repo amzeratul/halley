@@ -35,6 +35,7 @@ int ImportTool::run(Vector<std::string> args)
 			tasks->update(elapsed);
 		}
 
+		std::cout << "Import done." << std::endl;
 		return 0;
 	}
 	else {

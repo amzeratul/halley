@@ -44,16 +44,19 @@ bool EditorTask::hasPendingTasks() const
 
 void EditorTask::addPendingTask(EditorTaskAnchor&& task)
 {
+	task.setParent(*this);
 	std::lock_guard<std::mutex> lock(mutex);
 	++pendingTaskCount;
-	task.setParent(*this);
 	pendingTasks.emplace_back(std::move(task));
+	Ensures(pendingTaskCount > 0);
 }
 
 void EditorTask::onPendingTaskDone(const EditorTaskAnchor& editorTaskAnchor)
 {
+	Expects(pendingTaskCount > 0);
 	std::lock_guard<std::mutex> lock(mutex);
 	--pendingTaskCount;
+	Ensures(pendingTaskCount >= 0);
 }
 
 EditorTaskAnchor::EditorTaskAnchor(std::unique_ptr<EditorTask> t, float delay)
