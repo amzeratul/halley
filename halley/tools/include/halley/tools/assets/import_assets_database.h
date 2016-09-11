@@ -41,11 +41,14 @@ namespace Halley
 			, srcDir(srcDir)
 			, inputFiles(std::move(inputFiles))
 		{}
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 	};
 
 	class ImportAssetsDatabase
 	{
-		struct FileEntry
+		struct AssetEntry
 		{
 			ImportAssetsDatabaseEntry asset;
 
@@ -65,8 +68,8 @@ namespace Halley
 		void markAsImported(const ImportAssetsDatabaseEntry& asset);
 		void markDeleted(const ImportAssetsDatabaseEntry& asset);
 
-		void markAllAsMissing();
-		void markAsPresent(const ImportAssetsDatabaseEntry& asset);
+		void markAllInputsAsMissing();
+		void markInputAsPresent(const ImportAssetsDatabaseEntry& asset);
 		std::vector<ImportAssetsDatabaseEntry> getAllMissing() const;
 
 		std::vector<Path> getOutFiles(String assetId) const;
@@ -78,7 +81,7 @@ namespace Halley
 		Project& project;
 		Path dbFile;
 
-		std::map<String, FileEntry> filesImported;
+		std::map<String, AssetEntry> assetsImported;
 		
 		mutable std::mutex mutex;
 	};

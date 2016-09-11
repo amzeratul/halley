@@ -79,10 +79,10 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 		}
 	}
 
-	// Check for missing files
-	db.markAllAsMissing();
+	// Check for missing input files
+	db.markAllInputsAsMissing();
 	for (auto& a : assets) {
-		db.markAsPresent(a.second);
+		db.markInputAsPresent(a.second);
 	}
 	auto missing = db.getAllMissing();
 	if (!missing.empty()) {

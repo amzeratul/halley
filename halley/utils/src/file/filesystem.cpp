@@ -2,17 +2,18 @@
 #include <boost/filesystem.hpp>
 
 using namespace Halley;
+using namespace filesystem;
 
 bool FileSystem::exists(const Path& p)
 {
-	return boost::filesystem::exists(p);
+	return filesystem::exists(p);
 }
 
 bool FileSystem::createDir(const Path& p)
 {
 	if (!exists(p)) {
 		try {
-			return boost::filesystem::create_directories(p);
+			return create_directories(p);
 		} catch (...) {
 			return false;
 		}
@@ -27,28 +28,28 @@ bool FileSystem::createParentDir(const Path& p)
 
 int64_t FileSystem::getLastWriteTime(const Path& p)
 {
-	return boost::filesystem::last_write_time(p);
+	return last_write_time(p);
 }
 
 bool FileSystem::isFile(const Path& p)
 {
-	return boost::filesystem::is_regular_file(p);
+	return is_regular_file(p);
 }
 
 bool FileSystem::isDirectory(const Path& p)
 {
-	return boost::filesystem::is_directory(p);
+	return is_directory(p);
 }
 
 void FileSystem::copyFile(const Path& src, const Path& dst)
 {
 	createParentDir(dst);
-	boost::filesystem::copy_file(src, dst, boost::filesystem::copy_option::overwrite_if_exists);
+	copy_file(src, dst, filesystem::copy_option::overwrite_if_exists);
 }
 
 bool FileSystem::remove(const Path& path)
 {
-	return boost::filesystem::remove(path);
+	return filesystem::remove(path);
 }
 
 void FileSystem::writeFile(const Path& path, gsl::span<const gsl::byte> data)
@@ -61,7 +62,7 @@ void FileSystem::writeFile(const Path& path, gsl::span<const gsl::byte> data)
 
 void FileSystem::writeFile(const Path& path, const Bytes& data)
 {
-	writeFile(path, gsl::as_bytes(gsl::span<const Halley::Byte>(data)));
+	writeFile(path, as_bytes(gsl::span<const Byte>(data)));
 }
 
 Bytes FileSystem::readFile(const Path& path)
@@ -84,11 +85,11 @@ std::vector<Path> FileSystem::enumerateDirectory(const Path& path)
 {
 	std::vector<Path> result;
 	if (exists(path)) {
-		using RDI = boost::filesystem::recursive_directory_iterator;
+		using RDI = filesystem::recursive_directory_iterator;
 		RDI end;
 		for (RDI i(path); i != end; ++i) {
 			Path fullPath = i->path();
-			if (FileSystem::isFile(fullPath)) {
+			if (isFile(fullPath)) {
 				result.push_back(fullPath.lexically_relative(path));
 			}
 		}
@@ -98,5 +99,10 @@ std::vector<Path> FileSystem::enumerateDirectory(const Path& path)
 
 Path FileSystem::getRelative(const Path& path, const Path& parentPath)
 {
-	return boost::filesystem::relative(path, parentPath);
+	return relative(path, parentPath);
+}
+
+Path FileSystem::getAbsolute(const Path& path)
+{
+	return path.lexically_normal();
 }

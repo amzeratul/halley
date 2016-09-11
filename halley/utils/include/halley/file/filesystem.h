@@ -7,7 +7,8 @@
 
 namespace Halley
 {
-	using Path = boost::filesystem::path;
+	namespace filesystem = boost::filesystem;
+	using Path = filesystem::path;
 
 	class FileSystem
 	{
@@ -30,5 +31,6 @@ namespace Halley
 		static std::vector<Path> enumerateDirectory(const Path& path);
 		
 		static Path getRelative(const Path& path, const Path& parentPath);
+		static Path getAbsolute(const Path& path);
 	};
 }

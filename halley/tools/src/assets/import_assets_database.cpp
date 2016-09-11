@@ -5,25 +5,35 @@
 
 using namespace Halley;
 
-void ImportAssetsDatabase::FileEntry::serialize(Serializer& s) const
+void ImportAssetsDatabaseEntry::serialize(Serializer& s) const
 {
-	s << asset.assetId;
-	s << asset.srcDir;
-	s << asset.inputFiles;
-	s << asset.outputFiles;
-	int t = int(asset.assetType);
+	s << assetId;
+	s << srcDir;
+	s << inputFiles;
+	s << outputFiles;
+	int t = int(assetType);
 	s << t;
 }
 
-void ImportAssetsDatabase::FileEntry::deserialize(Deserializer& s)
+void ImportAssetsDatabaseEntry::deserialize(Deserializer& s)
 {
-	s >> asset.assetId;
-	s >> asset.srcDir;
-	s >> asset.inputFiles;
-	s >> asset.outputFiles;
+	s >> assetId;
+	s >> srcDir;
+	s >> inputFiles;
+	s >> outputFiles;
 	int t;
 	s >> t;
-	asset.assetType = AssetType(t);
+	assetType = AssetType(t);
+}
+
+void ImportAssetsDatabase::AssetEntry::serialize(Serializer& s) const
+{
+	s << asset;
+}
+
+void ImportAssetsDatabase::AssetEntry::deserialize(Deserializer& s)
+{
+	s >> asset;
 }
 
 ImportAssetsDatabase::ImportAssetsDatabase(Project& project, Path dbFile)
@@ -54,8 +64,8 @@ void ImportAssetsDatabase::save() const
 bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	auto iter = filesImported.find(asset.assetId);
-	if (iter == filesImported.end()) {
+	auto iter = assetsImported.find(asset.assetId);
+	if (iter == assetsImported.end()) {
 		return true;
 	} else {
 		auto& oldAsset = iter->second.asset;
@@ -89,31 +99,31 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	FileEntry entry;
+	AssetEntry entry;
 	entry.asset = asset;
 	entry.present = true;
-	filesImported[asset.assetId] = entry;
+	assetsImported[asset.assetId] = entry;
 }
 
 void ImportAssetsDatabase::markDeleted(const ImportAssetsDatabaseEntry& asset)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	filesImported.erase(asset.assetId);
+	assetsImported.erase(asset.assetId);
 }
 
-void ImportAssetsDatabase::markAllAsMissing()
+void ImportAssetsDatabase::markAllInputsAsMissing()
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	for (auto& e: filesImported) {
+	for (auto& e: assetsImported) {
 		e.second.present = false;
 	}
 }
 
-void ImportAssetsDatabase::markAsPresent(const ImportAssetsDatabaseEntry& asset)
+void ImportAssetsDatabase::markInputAsPresent(const ImportAssetsDatabaseEntry& asset)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	auto iter = filesImported.find(asset.assetId);
-	if (iter != filesImported.end()) {
+	auto iter = assetsImported.find(asset.assetId);
+	if (iter != assetsImported.end()) {
 		iter->second.present = true;
 	}
 }
@@ -122,7 +132,7 @@ std::vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() con
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	std::vector<ImportAssetsDatabaseEntry> result;
-	for (auto& e : filesImported) {
+	for (auto& e : assetsImported) {
 		if (!e.second.present) {
 			result.push_back(e.second.asset);
 		}
@@ -132,8 +142,8 @@ std::vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() con
 
 std::vector<Path> ImportAssetsDatabase::getOutFiles(String assetId) const
 {
-	auto iter = filesImported.find(assetId);
-	if (iter != filesImported.end()) {
+	auto iter = assetsImported.find(assetId);
+	if (iter != assetsImported.end()) {
 		return iter->second.asset.outputFiles;
 	} else {
 		return {};
@@ -144,7 +154,7 @@ void ImportAssetsDatabase::serialize(Serializer& s) const
 {
 	int version = 1;
 	s << version;
-	s << filesImported;
+	s << assetsImported;
 }
 
 void ImportAssetsDatabase::deserialize(Deserializer& s)
@@ -152,7 +162,7 @@ void ImportAssetsDatabase::deserialize(Deserializer& s)
 	int version;
 	s >> version;
 	if (version == 1) {
-		s >> filesImported;
+		s >> assetsImported;
 	} else {
 		save();
 	}

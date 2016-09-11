@@ -41,8 +41,8 @@ Codegen::Codegen(bool verbose)
 
 void Codegen::loadSources(Path p)
 {
-	if (exists(p) && is_directory(p)) {
-		for (auto i = boost::filesystem::directory_iterator(p); i != boost::filesystem::directory_iterator(); ++i) {
+	if (FileSystem::exists(p) && FileSystem::isDirectory(p)) {
+		for (auto i = filesystem::directory_iterator(p); i != filesystem::directory_iterator(); ++i) {
 			auto filePath = i->path();
 			if (filePath.extension() == ".yaml") {
 				addSource(filePath);
@@ -212,7 +212,7 @@ std::vector<Path> Codegen::generateCode(Path directory, ProgressReporter progres
 
 	// Has changes
 	if (stats.written > 0) {
-		using namespace boost::filesystem;
+		using namespace filesystem;
 		auto cmakeLists = directory.parent_path() / path("CMakeLists.txt");
 		if (verbose) {
 			std::cout << "Touching " << cmakeLists.string() << std::endl;
