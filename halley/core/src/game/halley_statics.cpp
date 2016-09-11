@@ -55,4 +55,5 @@ void HalleyStatics::setup()
 void HalleyStatics::suspend()
 {
 	pimpl->cpuThreadPool.reset();
+	pimpl->diskIOThreadPool.reset();
 }

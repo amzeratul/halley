@@ -152,6 +152,7 @@ void VideoOpenGL::onSuspend()
 
 void VideoOpenGL::onResume()
 {
+	context->bind();
 	initGLBindings();
 	setupDebugCallback();
 }
