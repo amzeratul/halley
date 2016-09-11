@@ -22,18 +22,21 @@ Design guidelines & objectives:
 
 ## Modules
 Halley is divided in a several sub-projects:
-* **core**: Core features of the engine, including looper, API management
-* **opengl**: Video/OpenGL implementation
-* **sdl**: System/SDL implementation
-* **entity**: Framework for dealing with entities, components, and systems
-* **runner**: Provides an entry point for execution and dynamic reloading. Highly experimental.
-* **utils**: Utilities library
-* **tools**: Editor tools to generate files and assets
-* **net**: Networking library
-* **cmd**: Command-line interface to tools
-* **editor**: Editor UI
-* **test/entity**: Stress test of entity system
-* **test/network**: Stress test of network system
+* **engine**
+  * **core**: Core features of the engine, including looper, API management
+  * **opengl**: Video/OpenGL implementation
+  * **sdl**: System/SDL implementation
+  * **entity**: Framework for dealing with entities, components, and systems
+  * **utils**: Utilities library
+  * **net**: Networking library
+* **tools**
+  * **editor**: Editor UI
+  * **cmd**: Command-line interface to tools
+  * **runner**: Provides an entry point for execution and dynamic reloading. Highly experimental.
+  * **tools**: Editor tools to generate files and assets
+* **tests**
+  * **entity**: Stress test of entity system
+  * **network**: Stress test of network system
 
 ## Installation
 
@@ -45,10 +48,12 @@ Halley is divided in a several sub-projects:
   * GCC 5.0
 
 ### Dependencies
-* Boost 1.59.0
-* SDL 2.0.4 (technically only for SDL system, but no alternative is available)
-* yaml-cpp 0.5.3
-* Freetype 2.6.3
+* Engine:
+  * Boost 1.59.0
+  * SDL 2.0.4 (technically only for SDL system, but no alternative is available)
+  * yaml-cpp 0.5.3
+* Tools only:
+  * Freetype 2.6.3
 
 ### Set up
 * Build with CMake
