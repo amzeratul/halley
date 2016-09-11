@@ -3,10 +3,11 @@
 #include "halley/core/graphics/texture_descriptor.h"
 #include <halley/file_formats/image.h>
 #include <halley/resources/metadata.h>
+#include "halley/concurrency/concurrent.h"
 
 using namespace Halley;
 
-std::unique_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
+std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 {
 	Metadata meta = loader.getMeta();
 	auto video = loader.getAPI().video;
@@ -16,19 +17,25 @@ std::unique_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 		return std::make_unique<Image>(data->getPath(), data->getSpan(), meta.getBool("premultiply", true));
 	};
 
-	auto loadTexture = [meta, video](std::unique_ptr<Image> img) -> std::unique_ptr<Texture>
+	std::shared_ptr<Image> img = loader.getAsync().then(loadImage).get(); // LOL
+	Vector2i size(img->getWidth(), img->getHeight());
+	std::shared_ptr<Texture> texture = video->createTexture(size);
+
+	auto loadTexture = [meta, img, size, texture]()
 	{
-		TextureDescriptor descriptor(Vector2i(img->getWidth(), img->getHeight()));
+		TextureDescriptor descriptor(size);
 		descriptor.pixelData = img->getPixels();
 		descriptor.useFiltering = meta.getBool("filtering", false);
 		descriptor.useMipMap = meta.getBool("mipmap", false);
 		descriptor.format = meta.getString("format", "RGBA") == "RGBA" ? TextureFormat::RGBA : TextureFormat::RGB;
 
-		auto texture = video->createTexture(descriptor);
 		texture->load(descriptor);
-		return std::move(texture);
 	};
 
-	return loader.getAsync().then(loadImage).then(Executors::getVideoAux(), loadTexture).get(); // lol innefficiency
+	Concurrent::execute(Executors::getVideoAux(), loadTexture);
+
+	return texture;
+
+	//return loader.getAsync().then(loadImage).then(Executors::getVideoAux(), loadTexture).get(); // lol innefficiency
 	//return loadTexture(loadImage(loader.getStatic()));
 }

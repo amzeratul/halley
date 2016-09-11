@@ -50,7 +50,7 @@ namespace Halley
 		String resolveName(String name) const;
 
 	protected:
-		virtual std::unique_ptr<Resource> loadResource(ResourceLoader& loader) = 0;
+		virtual std::shared_ptr<Resource> loadResource(ResourceLoader& loader) = 0;
 
 		std::shared_ptr<Resource> doGet(String name, ResourceLoadPriority priority);
 
@@ -76,7 +76,7 @@ namespace Halley
 		}
 
 	protected:
-		std::unique_ptr<Resource> loadResource(ResourceLoader& loader) override {
+		std::shared_ptr<Resource> loadResource(ResourceLoader& loader) override {
 			return T::loadResource(loader);
 		}
 	};

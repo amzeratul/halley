@@ -14,8 +14,9 @@ namespace Halley
 	public:
 		virtual void bind(int textureUnit) = 0;
 		virtual void load(const TextureDescriptor& descriptor) = 0;
+		virtual bool isLoaded() const = 0;
 
-		static std::unique_ptr<Texture> loadResource(ResourceLoader& loader);
+		static std::shared_ptr<Texture> loadResource(ResourceLoader& loader);
 		unsigned int getNativeId() const { return textureId; }
 
 		Vector2i getSize() const { return size; }

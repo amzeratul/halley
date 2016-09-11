@@ -325,9 +325,9 @@ std::unique_ptr<Painter> VideoOpenGL::makePainter()
 	return std::make_unique<PainterOpenGL>();
 }
 
-std::unique_ptr<Texture> VideoOpenGL::createTexture(const TextureDescriptor& descriptor)
+std::unique_ptr<Texture> VideoOpenGL::createTexture(Vector2i size)
 {
-	return std::make_unique<TextureOpenGL>(*this, descriptor.size);
+	return std::make_unique<TextureOpenGL>(*this, size);
 }
 
 std::unique_ptr<Shader> VideoOpenGL::createShader(String name)

@@ -102,13 +102,12 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(String rawName, Resource
 			throw Exception("Unable to load resource data: " + name);
 		}
 	}
-	auto sharedResource = std::shared_ptr<Resource>(std::move(newRes));
 
 	// Store in cache
 	time_t time = parent.getFileWriteTime(name);
-	resources.emplace(name, Wrapper(sharedResource, parent.curDepth, time));
+	resources.emplace(name, Wrapper(newRes, parent.curDepth, time));
 
-	return sharedResource;
+	return newRes;
 }
 
 void ResourceCollectionBase::setResource(int curDepth, String name, std::shared_ptr<Resource> resource) {

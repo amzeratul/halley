@@ -2,6 +2,7 @@
 
 #include <halley/core/graphics/texture.h>
 #include <halley/core/graphics/texture_descriptor.h>
+#include <condition_variable>
 
 namespace Halley
 {
@@ -15,6 +16,7 @@ namespace Halley
 
 		void bind(int textureUnit) override;
 		void load(const TextureDescriptor& descriptor) override;
+		bool isLoaded() const override;
 
 	private:
 		void loadImage(const char* px, size_t w, size_t h, size_t stride, TextureFormat format, bool useMipMap);
@@ -24,5 +26,9 @@ namespace Halley
 
 		VideoOpenGL& parent;
 		GLsync fence = nullptr;
+
+		std::atomic<bool> loaded;
+		std::condition_variable loadWait;
+		std::mutex loadMutex;
 	};
 }
