@@ -13,11 +13,11 @@ using namespace std::chrono_literals;
 CheckAssetsTask::CheckAssetsTask(Project& project, bool headless)
 	: EditorTask("Check assets", true, false)
 	, project(project)
+	, monitorAssets(project.getAssetsPath())
 	, monitorAssetsSrc(project.getAssetsSrcPath())
 	, monitorSharedAssetsSrc(project.getSharedAssetsSrcPath())
-	, monitorAssets(project.getAssetsPath())
-	, monitorGenSrc(project.getGenSrcPath())
 	, monitorGen(project.getGenPath())
+	, monitorGenSrc(project.getGenSrcPath())
 	, headless(headless)
 {}
 

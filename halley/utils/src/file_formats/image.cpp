@@ -43,12 +43,12 @@ Halley::Image::Image(unsigned int _w, unsigned int _h)
 	}
 }
 
-Halley::Image::Image(String _filename, const Byte* bytes, size_t nBytes, bool _preMultiply)
+Halley::Image::Image(String _filename, gsl::span<const gsl::byte> bytes, bool _preMultiply)
 	: filename(_filename)
 	, px(nullptr, [](char*) {})
 	, preMultiplied(false)
 {
-	load(filename, bytes, nBytes, _preMultiply);
+	load(filename, bytes, _preMultiply);
 }
 
 Halley::Image::~Image()
@@ -116,10 +116,10 @@ void Halley::Image::blitFrom(Vector2i pos, Image& img)
 std::unique_ptr<Halley::Image> Halley::Image::loadResource(ResourceLoader& loader)
 {
 	auto data = loader.getStatic();
-	return std::make_unique<Image>(loader.getName(), reinterpret_cast<const Byte*>(data->getData()), data->getSize(), false);
+	return std::make_unique<Image>(loader.getName(), data->getSpan(), false);
 }
 
-void Halley::Image::load(String name, const Byte* bytes, size_t nBytes, bool shouldPreMultiply)
+void Halley::Image::load(String name, gsl::span<const gsl::byte> bytes, bool shouldPreMultiply)
 {
 	filename = name;
 
@@ -127,7 +127,7 @@ void Halley::Image::load(String name, const Byte* bytes, size_t nBytes, bool sho
 	if (useLodePng)	{
 		unsigned char* pixels;
 		unsigned int x, y;
-		lodepng_decode_memory(&pixels, &x, &y, bytes, nBytes, LCT_RGBA, 8);
+		lodepng_decode_memory(&pixels, &x, &y, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size(), LCT_RGBA, 8);
 		px = std::unique_ptr<char, void(*)(char*)>(reinterpret_cast<char*>(pixels), [](char* data) { ::free(data); });
 		w = x;
 		h = y;
@@ -136,7 +136,7 @@ void Halley::Image::load(String name, const Byte* bytes, size_t nBytes, bool sho
 	} else {
 		int x, y, nComp;
 		nComponents = 4;	// Force 4 bpp
-		char *pixels = reinterpret_cast<char*>(stbi_load_from_memory(static_cast<stbi_uc const*>(bytes), static_cast<int>(nBytes), &x, &y, &nComp, nComponents));
+		char *pixels = reinterpret_cast<char*>(stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &x, &y, &nComp, nComponents));
 		if (!pixels) {
 			throw Exception("Unable to load image data.");
 		}

@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <gsl/gsl>
 #include "halley/maths/vector2.h"
 #include "halley/text/halleystring.h"
 #include "halley/resources/resource.h"
@@ -32,10 +33,10 @@ namespace Halley {
 	class Image : public Resource {
 	public:
 		Image(unsigned int w=0, unsigned int h=0);
-		Image(String filename, const Byte* bytes, size_t nBytes, bool preMultiply);
+		Image(String filename, gsl::span<const gsl::byte> bytes, bool preMultiply);
 		~Image();
 
-		void load(String filename, const Byte* bytes, size_t nBytes, bool preMultiply);
+		void load(String filename, gsl::span<const gsl::byte> bytes, bool preMultiply);
 		void savePNG(String filename="") const;
 
 		bool isPremultiplied() const { return preMultiplied; }

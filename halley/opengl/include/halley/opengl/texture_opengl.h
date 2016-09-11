@@ -5,14 +5,16 @@
 
 namespace Halley
 {
+	class VideoOpenGL;
 	enum class TextureFormat;
 
 	class TextureOpenGL final : public Texture
 	{
 	public:
-		explicit TextureOpenGL(const TextureDescriptor& descriptor, bool async);
+		explicit TextureOpenGL(VideoOpenGL& parent, Vector2i size);
 
 		void bind(int textureUnit) override;
+		void load(const TextureDescriptor& descriptor) override;
 
 	private:
 		void loadImage(const char* px, size_t w, size_t h, size_t stride, TextureFormat format, bool useMipMap);
@@ -20,6 +22,7 @@ namespace Halley
 
 		static unsigned int getGLFormat(TextureFormat format);
 
-		GLsync fence;
+		VideoOpenGL& parent;
+		GLsync fence = nullptr;
 	};
 }

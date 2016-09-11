@@ -5,7 +5,6 @@
 #include "halley/core/api/halley_api.h"
 #include "halley/file/byte_serializer.h"
 #include "resources/resources.h"
-#include <yaml-cpp/yaml.h>
 
 using namespace Halley;
 

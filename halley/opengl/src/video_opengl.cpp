@@ -327,8 +327,7 @@ std::unique_ptr<Painter> VideoOpenGL::makePainter()
 
 std::unique_ptr<Texture> VideoOpenGL::createTexture(const TextureDescriptor& descriptor)
 {
-	bool isAsync = loaderThread && std::this_thread::get_id() == loaderThread->getThreadId();
-	return std::make_unique<TextureOpenGL>(descriptor, isAsync);
+	return std::make_unique<TextureOpenGL>(*this, descriptor.size);
 }
 
 std::unique_ptr<Shader> VideoOpenGL::createShader(String name)
@@ -339,6 +338,11 @@ std::unique_ptr<Shader> VideoOpenGL::createShader(String name)
 std::unique_ptr<TextureRenderTarget> VideoOpenGL::createRenderTarget()
 {
 	return std::make_unique<RenderTargetOpenGL>();
+}
+
+bool VideoOpenGL::isLoaderThread() const
+{
+	return loaderThread && std::this_thread::get_id() == loaderThread->getThreadId();
 }
 
 void VideoOpenGL::startRender()

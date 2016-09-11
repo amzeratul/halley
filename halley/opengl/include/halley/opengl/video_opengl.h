@@ -27,6 +27,8 @@ namespace Halley {
 		std::unique_ptr<Texture> createTexture(const TextureDescriptor& descriptor) override;
 		std::unique_ptr<Shader> createShader(String name) override;
 		std::unique_ptr<TextureRenderTarget> createRenderTarget() override;
+		
+		bool isLoaderThread() const;
 
 	protected:
 		void init() override;

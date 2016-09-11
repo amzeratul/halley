@@ -13,7 +13,7 @@ std::unique_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 
 	auto loadImage = [meta](std::unique_ptr<ResourceDataStatic> data) -> std::unique_ptr<Image>
 	{
-		return std::make_unique<Image>(data->getPath(), static_cast<Byte*>(data->getData()), data->getSize(), meta.getBool("premultiply", true));
+		return std::make_unique<Image>(data->getPath(), data->getSpan(), meta.getBool("premultiply", true));
 	};
 
 	auto loadTexture = [meta, video](std::unique_ptr<Image> img) -> std::unique_ptr<Texture>
@@ -24,7 +24,9 @@ std::unique_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 		descriptor.useMipMap = meta.getBool("mipmap", false);
 		descriptor.format = meta.getString("format", "RGBA") == "RGBA" ? TextureFormat::RGBA : TextureFormat::RGB;
 
-		return video->createTexture(descriptor);
+		auto texture = video->createTexture(descriptor);
+		texture->load(descriptor);
+		return std::move(texture);
 	};
 
 	return loader.getAsync().then(loadImage).then(Executors::getVideoAux(), loadTexture).get(); // lol innefficiency

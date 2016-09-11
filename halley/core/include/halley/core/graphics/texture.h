@@ -6,12 +6,14 @@
 
 namespace Halley
 {
+	class TextureDescriptor;
 	class ResourceLoader;
 
 	class Texture : public Resource
 	{
 	public:
 		virtual void bind(int textureUnit) = 0;
+		virtual void load(const TextureDescriptor& descriptor) = 0;
 
 		static std::unique_ptr<Texture> loadResource(ResourceLoader& loader);
 		unsigned int getNativeId() const { return textureId; }

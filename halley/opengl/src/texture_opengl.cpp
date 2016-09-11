@@ -4,18 +4,24 @@
 #include "texture_opengl.h"
 #include "halley/core/graphics/texture_descriptor.h"
 #include <gsl/gsl_assert>
+#include "video_opengl.h"
 
 using namespace Halley;
 
-TextureOpenGL::TextureOpenGL(const TextureDescriptor& d, bool async)
-	: fence(nullptr)
+TextureOpenGL::TextureOpenGL(VideoOpenGL& parent, Vector2i s)
+	: parent(parent)
+{
+	size = s;
+}
+
+void TextureOpenGL::load(const TextureDescriptor& d)
 {
 	textureId = create(d.size.x, d.size.y, d.format, d.useMipMap, d.useFiltering);
 	if (d.pixelData != nullptr) {
 		loadImage(reinterpret_cast<const char*>(d.pixelData), d.size.x, d.size.y, d.size.x, d.format, d.useMipMap);
 	}
 
-	if (async) {
+	if (parent.isLoaderThread()) {
 		fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 		glFlush();
 	}
@@ -48,8 +54,6 @@ unsigned int TextureOpenGL::create(size_t w, size_t h, TextureFormat format, boo
 	Expects(w <= 4096);
 	Expects(h <= 4096);
 	glCheckError();
-
-	size = Vector2i(static_cast<int>(w), static_cast<int>(h));
 
 	int filtering = useFiltering ? GL_LINEAR : GL_NEAREST;
 

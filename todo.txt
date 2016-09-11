@@ -4,6 +4,11 @@ core
 core/resources
 - asset database
 - binary format to replace yaml
+  - metadata
+  - material
+  - animation
+  - entity stage
+  - remove from utils/file_formats
 - resources hot reloading [RESEARCH]
 - asynchronous resource loading
 
@@ -52,7 +57,6 @@ lua
 - Moonscript support
 
 editor/tools
-- generate asset database
 - project selector
 - create project from template
 - connect to game via sockets
