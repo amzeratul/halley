@@ -36,8 +36,8 @@ void ImportAssetsDatabase::AssetEntry::deserialize(Deserializer& s)
 	s >> asset;
 }
 
-ImportAssetsDatabase::ImportAssetsDatabase(Project& project, Path dbFile)
-	: project(project)
+ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile)
+	: directory(directory)
 	, dbFile(dbFile)
 {
 	load();
@@ -66,19 +66,23 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 	std::lock_guard<std::mutex> lock(mutex);
 	auto iter = assetsImported.find(asset.assetId);
 	if (iter == assetsImported.end()) {
+		// Asset didn't even exist before
 		return true;
 	} else {
 		auto& oldAsset = iter->second.asset;
+
+		// Input directory changed?
 		if (asset.srcDir != oldAsset.srcDir) {
-			// Directory changed
 			return true;
 		}
 
+		// Total count of input files changed?
 		if (asset.inputFiles.size() != oldAsset.inputFiles.size()) {
-			// Number of files changed
 			return true;
 		}
 
+		// Any of the input files changed?
+		// Note: We don't have to check old files on new input, because the size matches and all entries matched.
 		for (auto& i: asset.inputFiles) {
 			auto result = std::find_if(oldAsset.inputFiles.begin(), oldAsset.inputFiles.end(), [&](const ImportAssetsDatabaseEntry::InputFile& entry) { return entry.first == i.first; });
 			if (result == oldAsset.inputFiles.end()) {
@@ -90,7 +94,12 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 			}
 		}
 
-		// At this point, we know it's identical. We don't have to check old files on new input, because the size matches and all entries matched.
+		// Have any of the output files gone missing?
+		for (auto& o: oldAsset.outputFiles) {
+			if (!FileSystem::exists(directory / o)) {
+				return true;
+			}
+		}
 
 		return false;
 	}

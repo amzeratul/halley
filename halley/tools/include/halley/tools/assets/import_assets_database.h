@@ -59,7 +59,7 @@ namespace Halley
 		};
 
 	public:
-		ImportAssetsDatabase(Project& project, Path dbFile);
+		ImportAssetsDatabase(Path directory, Path dbFile);
 
 		void load();
 		void save() const;
@@ -78,7 +78,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 	private:
-		Project& project;
+		Path directory;
 		Path dbFile;
 
 		std::map<String, AssetEntry> assetsImported;
