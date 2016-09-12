@@ -1,7 +1,7 @@
 ---
 name: "Ella"
 spriteSheet: "ella.json"
-material: "sprite.yaml"
+material: "sprite"
 directions:
   - { name: "back" }
   - { name: "right", fileName: "side", flip: true }
