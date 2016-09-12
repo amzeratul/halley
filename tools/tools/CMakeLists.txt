@@ -33,6 +33,7 @@ set(SOURCES
         "src/assets/importers/copy_file_importer.cpp"
         "src/assets/importers/font_importer.cpp"
         "src/assets/importers/image_importer.cpp"
+        "src/assets/importers/material_importer.cpp"
 
         "src/tasks/editor_task.cpp"
 	"src/tasks/editor_task_set.cpp"
@@ -75,6 +76,7 @@ set(HEADERS
         "src/assets/importers/copy_file_importer.h"
         "src/assets/importers/font_importer.h"
         "src/assets/importers/image_importer.h"
+        "src/assets/importers/material_importer.h"
 
 	"include/halley/tools/tasks/editor_task.h"
 	"include/halley/tools/tasks/editor_task_set.h"

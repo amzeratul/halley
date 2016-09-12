@@ -22,7 +22,6 @@ static int currentPass = 0;
 #endif
 
 MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
-	: api(loader.getAPI().video)
 {
 	String basePath = loader.getBasePath();
 
@@ -51,26 +50,23 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 			return loader.getAPI().getResource<TextFile>("shader/" + path)->data;
 		});
 	}
+
+	loadShader(loader.getAPI().video);
 }
 
 void MaterialDefinition::loadPass(YAML::Node node, std::function<String(String)> retriever)
 {
 	// Load shader
-	auto shader = api->createShader(name + "/pass" + String::integerToString(int(passes.size())));
-	auto load = [&](std::string name, std::function<void(String)> f)
+	auto load = [&](std::string name) -> String
 	{
 		if (node[name + "Source"]) {
-			f(node[name + "Source"].as<std::string>());
+			return node[name + "Source"].as<std::string>();
 		}
 		else if (node[name]) {
-			f(retriever(node[name].as<std::string>()));
+			return retriever(node[name].as<std::string>());
 		}
+		return "";
 	};
-	shader->setAttributes(attributes);
-	load("vertex", [&](String src) { shader->addVertexSource(src); });
-	load("pixel", [&](String src) { shader->addPixelSource(src); });
-	load("geometry", [&](String src) { shader->addGeometrySource(src); });
-	shader->compile();
 
 	String blend = node["blend"].as<std::string>("Opaque");
 	BlendType blendType;
@@ -87,7 +83,7 @@ void MaterialDefinition::loadPass(YAML::Node node, std::function<String(String)>
 		throw Exception("Unknown blend type: " + blend);
 	}
 
-	passes.emplace_back(MaterialPass(std::move(shader), blendType));
+	passes.emplace_back(MaterialPass(blendType, load("vertex"), load("geometry"), load("pixel")));
 }
 
 void MaterialDefinition::loadUniforms(YAML::Node topNode)
@@ -189,14 +185,41 @@ std::unique_ptr<MaterialDefinition> MaterialDefinition::loadResource(ResourceLoa
 	return std::make_unique<MaterialDefinition>(loader);
 }
 
-MaterialPass::MaterialPass(std::shared_ptr<Shader> shader, BlendType blend)
-	: shader(shader)
-	, blend(blend)
+void MaterialDefinition::loadShader(VideoAPI* _api)
+{
+	api = _api;
+	int i = 0;
+	for (auto& p: passes) {
+		p.createShader(api, name + "/pass" + String::integerToString(i++), attributes);
+	}
+}
+
+MaterialPass::MaterialPass(BlendType blend, String vertexSrc, String geometrySrc, String pixelSrc)
+	: blend(blend)
+	, vertexSrc(vertexSrc)
+	, geometrySrc(geometrySrc)
+	, pixelSrc(pixelSrc)
 {
 }
 
-void MaterialPass::bind(Painter& painter)
+void MaterialPass::bind(Painter& painter) const
 {
 	shader->bind();
 	painter.setBlend(getBlend());
+}
+
+void MaterialPass::createShader(VideoAPI* api, String name, const Vector<MaterialAttribute>& attributes)
+{
+	shader = api->createShader(name);
+	shader->setAttributes(attributes);
+	if (vertexSrc != "") {
+		shader->addVertexSource(vertexSrc);
+	}
+	if (geometrySrc != "") {
+		shader->addGeometrySource(geometrySrc);
+	}
+	if (pixelSrc != "") {
+		shader->addPixelSource(pixelSrc);
+	}
+	shader->compile();
 }

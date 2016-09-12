@@ -60,6 +60,7 @@ namespace Halley
 		friend class MaterialParameter;
 
 	public:
+		MaterialDefinition();
 		explicit MaterialDefinition(ResourceLoader& loader);
 
 		void bind(int pass, Painter& painter);
@@ -73,8 +74,11 @@ namespace Halley
 
 		static std::unique_ptr<MaterialDefinition> loadResource(ResourceLoader& loader);
 
+		void loadShader(VideoAPI* api);
+
 	private:
-		VideoAPI* api;
+		VideoAPI* api = nullptr;
+
 		Vector<MaterialPass> passes;
 		Vector<MaterialAttribute> uniforms;
 		Vector<MaterialAttribute> attributes;
@@ -96,15 +100,21 @@ namespace Halley
 		friend class Material;
 
 	public:
-		MaterialPass(std::shared_ptr<Shader> shader, BlendType blend);
+		MaterialPass(BlendType blend, String vertexSrc, String geometrySrc, String pixelSrc);
 
-		void bind(Painter& painter);
+		void bind(Painter& painter) const;
 
 		BlendType getBlend() const { return blend; }
 		Shader& getShader() const { return *shader; }
 
+		void createShader(VideoAPI* api, String name, const Vector<MaterialAttribute>& attributes);
+
 	private:
 		std::shared_ptr<Shader> shader;
 		BlendType blend;
+		
+		String vertexSrc;
+		String geometrySrc;
+		String pixelSrc;
 	};
 }
