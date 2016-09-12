@@ -4,6 +4,7 @@
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/resources/resource_data.h"
+#include <yaml-cpp/yaml.h>
 
 using namespace Halley;
 
@@ -51,7 +52,18 @@ static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& as
 	if (asset.inputFiles.size() > 1) {
 		for (auto& i: asset.inputFiles) {
 			if (i.first.extension() == ".meta") {
-				return Metadata::fromYAML(*ResourceDataStatic::loadFromFileSystem(asset.srcDir / i.first));
+				auto data = ResourceDataStatic::loadFromFileSystem(asset.srcDir / i.first);
+				auto root = YAML::Load(data->getString());
+
+				auto meta = std::make_unique<Metadata>();
+
+				for (YAML::const_iterator it = root.begin(); it != root.end(); ++it) {
+					String key = it->first.as<std::string>();
+					String value = it->second.as<std::string>();
+					meta->set(key, value);
+				}
+
+				return std::move(meta);
 			}
 		}
 	}

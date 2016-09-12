@@ -41,7 +41,6 @@ namespace Halley
 		void set(String key, const std::string& value);
 		void set(String key, const String& value);
 		
-		static std::unique_ptr<Metadata> fromYAML(ResourceDataStatic& data);
 		static std::unique_ptr<Metadata> fromBinary(ResourceDataStatic& data);
 		
 		void serialize(Serializer& s) const;

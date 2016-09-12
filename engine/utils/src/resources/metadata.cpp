@@ -2,11 +2,6 @@
 #include "halley/resources/resource_data.h"
 #include "halley/file/byte_serializer.h"
 
-#ifdef _MSC_VER
-#pragma warning(disable: 4127)
-#endif
-#include <yaml-cpp/yaml.h>
-
 using namespace Halley;
 
 Metadata::Metadata() {}
@@ -107,21 +102,6 @@ void Metadata::set(String key, const std::string& value)
 void Metadata::set(String key, const String& value)
 {
 	entries[key] = value;
-}
-
-std::unique_ptr<Metadata> Metadata::fromYAML(ResourceDataStatic& data)
-{
-	auto root = YAML::Load(data.getString());
-
-	auto meta = std::make_unique<Metadata>();
-
-	for (YAML::const_iterator it = root.begin(); it != root.end(); ++it) {
-		String key = it->first.as<std::string>();
-		String value = it->second.as<std::string>();
-		meta->set(key, value);
-	}
-
-	return std::move(meta);
 }
 
 std::unique_ptr<Metadata> Metadata::fromBinary(ResourceDataStatic& data)
