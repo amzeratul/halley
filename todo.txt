@@ -4,7 +4,6 @@ core
 core/resources
 * custom importers:
   - material
-  - animation
   - entity stage
 - asset database
 - resources hot reloading [RESEARCH]

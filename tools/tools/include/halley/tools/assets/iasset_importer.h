@@ -15,6 +15,8 @@ namespace Halley
 		FONT,
 		IMAGE,
 		MATERIAL,
+		ANIMATION,
+		ENTITY_WORLD,
 		SIMPLE_COPY
 	};
 

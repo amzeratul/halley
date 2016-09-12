@@ -4,11 +4,6 @@
 #include <memory>
 #include "resource_data.h"
 
-namespace YAML
-{
-	class Node;
-}
-
 namespace Halley
 {
 	class Deserializer;

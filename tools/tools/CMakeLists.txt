@@ -1,6 +1,6 @@
 project (halley-tools)
 
-include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../../engine/utils/include")
+include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../../engine/core/include" "../../engine/utils/include")
 
 set(SOURCES
         "src/codegen/cpp/codegen_cpp.cpp"
@@ -28,6 +28,7 @@ set(SOURCES
 	"src/assets/import_assets_database.cpp"
         "src/assets/import_tool.cpp"
 
+        "src/assets/importers/animation_importer.cpp"
         "src/assets/importers/codegen_importer.cpp"
         "src/assets/importers/copy_file_importer.cpp"
         "src/assets/importers/font_importer.cpp"
@@ -69,6 +70,7 @@ set(HEADERS
 	"include/halley/tools/assets/import_assets_database.h"
         "include/halley/tools/assets/import_tool.h"
 
+        "src/assets/importers/animation_importer.h"
         "src/assets/importers/codegen_importer.h"
         "src/assets/importers/copy_file_importer.h"
         "src/assets/importers/font_importer.h"
@@ -86,6 +88,7 @@ assign_source_group(${HEADERS})
 add_library (halley-tools ${SOURCES} ${HEADERS})
 
 target_link_libraries (halley-tools
+        halley-core
         ${FREETYPE_LIBRARIES}
         ${YAMLCPP_LIBRARY}
         )

@@ -1,11 +1,11 @@
-#include "graphics/sprite/animation.h"
-#include "graphics/sprite/sprite_sheet.h"
+#include "halley/core/graphics/sprite/animation.h"
+#include "halley/core/graphics/sprite/sprite_sheet.h"
 #include "halley/core/graphics/material/material.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/material/material_parameter.h"
 #include "halley/core/api/halley_api.h"
 #include "resources/resources.h"
-#include <yaml-cpp/yaml.h>
+#include "halley/file/byte_serializer.h"
 #include <gsl/gsl_assert>
 
 using namespace Halley;
@@ -18,6 +18,56 @@ AnimationFrame::AnimationFrame(int frameNumber, String imageName, SpriteSheet& s
 		sprites[i] = &sheet.getSprite(directions[i].getFrameName(frameNumber, imageName));
 	}
 }
+
+AnimationFrameDefinition::AnimationFrameDefinition()
+	: frameNumber(-1)
+{}
+
+AnimationFrameDefinition::AnimationFrameDefinition(int frameNumber, String imageName)
+	: imageName(imageName)
+	, frameNumber(frameNumber)
+{
+}
+
+AnimationFrame AnimationFrameDefinition::makeFrame(SpriteSheet& sheet, const Vector<AnimationDirection>& directions) const
+{
+	return AnimationFrame(frameNumber, imageName, sheet, directions);
+}
+
+void AnimationFrameDefinition::serialize(Serializer& s) const
+{
+	s << imageName;
+	s << frameNumber;
+}
+
+void AnimationFrameDefinition::deserialize(Deserializer& s)
+{
+	s >> imageName;
+	s >> frameNumber;
+}
+
+void AnimationSequence::serialize(Serializer& s) const
+{
+	s << frameDefinitions;
+	s << name;
+	s << fps;
+	s << loop;
+	s << noFlip;
+}
+
+void AnimationSequence::deserialize(Deserializer& s)
+{
+	s >> frameDefinitions;
+	s >> name;
+	s >> fps;
+	s >> loop;
+	s >> noFlip;
+}
+
+AnimationDirection::AnimationDirection()
+	: id(-1)
+	, flip(false)
+{}
 
 AnimationDirection::AnimationDirection(String name, String fileName, bool flip, int id)
 	: name(name)
@@ -53,9 +103,48 @@ String AnimationDirection::getFrameName(int frameNumber, String baseName) const
 	}
 }
 
+void AnimationDirection::serialize(Serializer& s) const
+{
+	s << name;
+	s << fileName;
+	s << id;
+	s << flip;
+}
+
+void AnimationDirection::deserialize(Deserializer& s)
+{
+	s >> name;
+	s >> fileName;
+	s >> id;
+	s >> flip;
+}
+
+Animation::Animation() 
+{}
+
 std::unique_ptr<Animation> Animation::loadResource(ResourceLoader& loader)
 {
-	return std::unique_ptr<Animation>(new Animation(loader));
+	auto result = std::make_unique<Animation>();
+	auto sData = loader.getStatic();
+	Deserializer s(sData->getSpan());
+	s >> *result;
+	result->loadDependencies(loader);
+	return std::move(result);
+}
+
+void Animation::loadDependencies(ResourceLoader& loader)
+{
+	spriteSheet = loader.getAPI().getResource<SpriteSheet>(spriteSheetName);
+
+	auto matDef = loader.getAPI().getResource<MaterialDefinition>(materialName);
+	material = std::make_shared<Material>(matDef);
+	(*material)["tex0"] = spriteSheet->getTexture();
+
+	for (auto& s: sequences) {
+		for (auto& f : s.frameDefinitions) {
+			s.frames.emplace_back(f.makeFrame(*spriteSheet, directions));
+		}
+	}
 }
 
 const AnimationSequence& Animation::getSequence(String name) const
@@ -92,83 +181,20 @@ const AnimationDirection& Animation::getDirection(int id) const
 	}
 }
 
-Animation::Animation(ResourceLoader& loader)
+void Animation::serialize(Serializer& s) const
 {
-	try {
-		YAML::Node root = YAML::Load(loader.getStatic()->getString());
+	s << name;
+	s << spriteSheetName;
+	s << materialName;
+	s << sequences;
+	s << directions;
+}
 
-		String basePath = loader.getBasePath();
-
-		name = root["name"].as<std::string>();
-
-		if (root["spriteSheet"].IsDefined()) {
-			String path = root["spriteSheet"].as<std::string>();
-			spriteSheet = loader.getAPI().getResource<SpriteSheet>(path);
-		}
-
-		if (root["shader"].IsDefined()) {
-			String path = root["shader"].as<std::string>();
-			auto matDef = loader.getAPI().getResource<MaterialDefinition>(path);
-			material = std::make_shared<Material>(matDef);
-			(*material)["tex0"] = spriteSheet->getTexture();
-		}
-
-		if (root["directions"].IsDefined()) {
-			for (auto directionNode : root["directions"]) {
-				String name = directionNode["name"].as<std::string>("default");
-				String fileName = directionNode["fileName"].as<std::string>(name);
-				bool flip = directionNode["flip"].as<bool>(false);
-				size_t idx = directions.size();
-				directions.emplace_back(AnimationDirection(name, fileName, flip, int(idx)));
-			}
-		} else {
-			directions.emplace_back(AnimationDirection("default", "default", false, 0));
-		}
-
-		for (auto sequenceNode : root["sequences"]) {
-			AnimationSequence sequence;
-			sequence.name = sequenceNode["name"].as<std::string>("default");
-			sequence.fps = sequenceNode["fps"].as<float>(0.0f);
-			sequence.loop = sequenceNode["loop"].as<bool>(true);
-			sequence.noFlip = sequenceNode["noFlip"].as<bool>(false);
-			String fileName = sequenceNode["fileName"].as<std::string>();
-
-			// Load frames
-			if (sequenceNode["frames"].IsDefined()) {
-				for (auto frameNode : sequenceNode["frames"]) {
-					String value = frameNode.as<std::string>();
-					Vector<int> values;
-					if (value.isInteger()) {
-						values.push_back(value.toInteger());
-					} else if (value.contains("-")) {
-						auto split = value.split('-');
-						if (split.size() == 2 && split[0].isInteger() && split[1].isInteger()) {
-							int a = split[0].toInteger();
-							int b = split[1].toInteger();
-							int dir = a < b ? 1 : -1;
-							for (int i = a; i != b + dir; i += dir) {
-								values.push_back(i);
-							}
-						} else {
-							throw Exception("Invalid frame token: " + value);
-						}
-					}
-
-					for (int number : values) {
-						sequence.frames.emplace_back(AnimationFrame(number, fileName, *spriteSheet, directions));
-					}
-				}
-			}
-
-			// No frames listed, 
-			if (sequence.frames.size() == 0) {
-				sequence.frames.emplace_back(AnimationFrame(0, fileName, *spriteSheet, directions));
-			}
-
-			sequences.emplace_back(sequence);
-		}
-	}
-	catch (std::exception& e) {
-		throw Exception("Exception parsing animation " + loader.getName() + ": " + e.what());
-	}
+void Animation::deserialize(Deserializer& s)
+{
+	s >> name;
+	s >> spriteSheetName;
+	s >> materialName;
+	s >> sequences;
+	s >> directions;
 }

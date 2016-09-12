@@ -16,7 +16,7 @@ public:
 		auto& resources = getAPI().core->getResources();
 		const int targetEntities = Debug::isDebug() ? 200 : 10000;
 		const int nToSpawn = std::min(targetEntities - int(world.numEntities()), std::max(1, targetEntities / 60));
-		auto anim = resources.get<Animation>("ella.yaml");
+		auto anim = resources.get<Animation>("ella");
 		for (int i = 0; i < nToSpawn; i++) {
 			auto& r = Random::getGlobal();
 

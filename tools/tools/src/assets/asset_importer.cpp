@@ -4,6 +4,7 @@
 #include "importers/font_importer.h"
 #include "importers/codegen_importer.h"
 #include "importers/image_importer.h"
+#include "importers/animation_importer.h"
 
 using namespace Halley;
 
@@ -13,6 +14,7 @@ AssetImporter::AssetImporter()
 	importers[AssetType::SIMPLE_COPY] = std::make_unique<CopyFileImporter>();
 	importers[AssetType::FONT] = std::make_unique<FontImporter>();
 	importers[AssetType::IMAGE] = std::make_unique<ImageImporter>();
+	importers[AssetType::ANIMATION] = std::make_unique<AnimationImporter>();
 	importers[AssetType::CODEGEN] = std::make_unique<CodegenImporter>();
 }
 
@@ -25,6 +27,8 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 		type = AssetType::FONT;
 	} else if (root == "image") {
 		type = AssetType::IMAGE;
+	} else if (root == "animation") {
+		type = AssetType::ANIMATION;
 	}
 
 	return getImporter(type);
