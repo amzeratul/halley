@@ -42,21 +42,23 @@ Halley is divided in a several sub-projects:
 
 ## Installation
 
-### Tools
+### Tools required
 * CMake 3.x
 * C++14 capable compiler:
   * Visual C++ 14 Update 2 (Visual Studio 2015)
   * Clang 3.5
   * GCC 5.0
 
-### Dependencies
+### Library dependencies
 * Engine:
+  * OpenGL
   * Boost 1.59.0
   * SDL 2.0.4 (technically only for SDL system, but no alternative is available)
-  * yaml-cpp 0.5.3
 * Tools only:
   * Freetype 2.6.3
+  * yaml-cpp 0.5.3
 
 ### Set up
 * Build with CMake
-* Run halley-editor
+* Run "halley-editor tests/entity" (or whichever other project you want to test)
+* Launch that project

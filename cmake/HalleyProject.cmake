@@ -23,11 +23,11 @@ else()
 	set(EXTRA_LIBS pthread)
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
-	find_package(YamlCpp REQUIRED)
+	find_package(YamlCpp)
 	find_Package(SDL2 REQUIRED)
 	find_package(OpenGL REQUIRED)
 	find_package(Boost COMPONENTS system filesystem thread REQUIRED)
-	
+
 	set(FREETYPE_LIB_DEBUG ${FREETYPE_LIB})
 	set(YAMLCPP_LIBRARY_DEBUG ${YAMLCPP_LIBRARY})
 endif()
@@ -67,7 +67,6 @@ set(HALLEY_PROJECT_LIBS
 	debug halley-sdl_d
 	debug halley-entity_d
 	${SDL2_LIBRARIES}
-	${YAMLCPP_LIBRARY}
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}
@@ -80,7 +79,6 @@ set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/engine/net/include
 	${HALLEY_PATH}/engine/utils/include
 	${HALLEY_PATH}/engine/entity/include
-	${YAMLCPP_INCLUDE_DIR}
 	)
 	
 set(HALLEY_PROJECT_LIB_DIRS

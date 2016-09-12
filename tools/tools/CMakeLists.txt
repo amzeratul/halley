@@ -89,7 +89,7 @@ set(HEADERS
 assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
-add_library (halley-tools ${SOURCES} ${HEADERS})
+add_library (halley-tools ${SOURCES} ${HEADERS} ${YAMLCPP_INCLUDE_DIR})
 
 target_link_libraries (halley-tools
         halley-core
