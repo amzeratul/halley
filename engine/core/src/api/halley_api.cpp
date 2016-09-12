@@ -60,7 +60,15 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 		}
 	}
 
-	std::unique_ptr<InputAPIInternal> input = system->makeInputAPI();
+	std::unique_ptr<InputAPIInternal> input;
+	if (flags & HalleyAPIFlags::Input) {
+		auto plugins = core->getPlugins(PluginType::InputAPI);
+		if (plugins.size() > 0) {
+			input.reset(static_cast<InputAPIInternal*>(plugins[0]->createAPI(system.get())));
+		} else {
+			throw Exception("No suitable input plugins found.");
+		}
+	}
 
 	return std::unique_ptr<HalleyAPI>(new HalleyAPI(core, std::move(system), std::move(video), std::move(input)));
 }

@@ -47,8 +47,6 @@ namespace Halley
 	{
 	public:
 		virtual ~SystemAPIInternal() {}
-
-		virtual std::unique_ptr<InputAPIInternal> makeInputAPI() = 0;
 	};
 
 	class CoreAPIInternal : public CoreAPI, public IPluginRegistry {

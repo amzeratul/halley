@@ -3,12 +3,12 @@
 #include "halley/core/api/halley_api_internal.h"
 #include <halley/support/console.h>
 #include <halley/support/exception.h>
-#include "input_sdl.h"
 #include "sdl_rw_ops.h"
 #include "halley/core/graphics/window.h"
 #include "halley/os/os.h"
 #include "sdl_window.h"
 #include "sdl_gl_context.h"
+#include "input_sdl.h"
 
 using namespace Halley;
 
@@ -92,15 +92,11 @@ bool SystemSDL::generateEvents(VideoAPI* video, InputAPI* input)
 				if (video) {
 					processVideoEvent(video, event);
 				}
+				break;
 			}
 		}
 	}
 	return true;
-}
-
-std::unique_ptr<InputAPIInternal> SystemSDL::makeInputAPI()
-{
-	return std::make_unique<InputSDL>();
 }
 
 void SystemSDL::processVideoEvent(VideoAPI* video, const SDL_Event& event)
