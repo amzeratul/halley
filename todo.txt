@@ -37,6 +37,7 @@ entity
 - universal hierarchical transforms? [RESEARCH]
 - onAddEntity/onRemoveEntity on systems [RESEARCH]
 - store references to other components [RESEARCH]
+- snapshot world
 
 codegen
 - components registry [RESEARCH] (does this even make sense?)

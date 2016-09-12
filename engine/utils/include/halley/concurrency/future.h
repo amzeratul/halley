@@ -184,7 +184,7 @@ namespace Halley
 		Future& operator=(const Future& o) = default;
 		Future& operator=(Future&& o) = default;
 
-		T get()
+		DataType get()
 		{
 			if (!data) {
 				throw Exception("Future has not been bound.");

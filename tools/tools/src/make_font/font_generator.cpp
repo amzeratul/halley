@@ -10,6 +10,7 @@
 #include <halley/file_formats/image.h>
 #include "halley/file/byte_serializer.h"
 #include "halley/file/filesystem.h"
+#include "halley/concurrency/concurrent.h"
 
 using namespace Halley;
 
@@ -109,7 +110,7 @@ FontGeneratorResult FontGenerator::generateFont(String assetName, gsl::span<cons
 	dstImg->clear(0);
 
 	Vector<CharcodeEntry> codes;
-	Vector<std::future<void>> futures;
+	Vector<Future<void>> futures;
 	std::mutex m;
 	std::atomic<int> nDone(0);
 	std::atomic<bool> keepGoing(true);
@@ -126,7 +127,7 @@ FontGeneratorResult FontGenerator::generateFont(String assetName, gsl::span<cons
 			Rect4i srcRect = dstRect * superSample;
 			codes.push_back(CharcodeEntry(charcode, dstRect));
 
-			futures.push_back(std::async(std::launch::async, [=, &m, &font, &dstImg, &nDone, &keepGoing] {
+			futures.push_back(Concurrent::execute([=, &m, &font, &dstImg, &nDone, &keepGoing] {
 				if (!keepGoing) {
 					return;
 				}
