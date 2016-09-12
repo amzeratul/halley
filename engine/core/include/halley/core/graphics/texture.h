@@ -9,12 +9,11 @@ namespace Halley
 	class TextureDescriptor;
 	class ResourceLoader;
 
-	class Texture : public Resource
+	class Texture : public AsyncResource
 	{
 	public:
 		virtual void bind(int textureUnit) = 0;
 		virtual void load(const TextureDescriptor& descriptor) = 0;
-		virtual bool isLoaded() const = 0;
 
 		static std::shared_ptr<Texture> loadResource(ResourceLoader& loader);
 		unsigned int getNativeId() const { return textureId; }

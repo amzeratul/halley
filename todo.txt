@@ -2,10 +2,8 @@ core
 - child stages?
 
 core/resources
-* custom importers:
-  - entity stage
 - asset database
-- separate shaders from materials on importing
+- shader importer/validator
 - resources hot reloading [RESEARCH]
 
 core/graphics
@@ -73,15 +71,15 @@ editor/tools
 - generate fonts with OpenCL
 
 utils
-* remove YAML from utils/file_formats
 - collision detection & triggers
-- tasks/concurrency review
 - consider replacing STL with EASTL or similar?
 - fix Maybe<T>?
 - improve Halley::String?
-- better HTTP library/replace boost::asio?
 - write my own memory pool/replace boost::pool?
 - DirectoryMonitor support on Linux and Mac
+
+net
+- better HTTP library/replace boost::asio?
 
 samples
 - make a minimal "template" sample

@@ -10,7 +10,6 @@ using namespace Halley;
 
 TextureOpenGL::TextureOpenGL(VideoOpenGL& parent, Vector2i s)
 	: parent(parent)
-	, loaded(false)
 {
 	size = s;
 
@@ -19,7 +18,7 @@ TextureOpenGL::TextureOpenGL(VideoOpenGL& parent, Vector2i s)
 
 TextureOpenGL::~TextureOpenGL()
 {
-	waitForLoad();
+	waitForOpenGLLoad();
 	glDeleteTextures(1, &textureId);
 	textureId = 0;
 }
@@ -36,16 +35,12 @@ void TextureOpenGL::load(const TextureDescriptor& d)
 		glFlush();
 	}
 
-	loaded = true;
-	loadWait.notify_all();
+	doneLoading();
 }
 
-void TextureOpenGL::waitForLoad()
+void TextureOpenGL::waitForOpenGLLoad()
 {
-	if (!loaded) {
-		std::unique_lock<std::mutex> lock(loadMutex);
-		loadWait.wait(lock);
-	}
+	waitForLoad();
 
 	if (fence) {
 		GLenum result = glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, GLuint64(10000000000));
@@ -62,15 +57,10 @@ void TextureOpenGL::waitForLoad()
 	}
 }
 
-bool TextureOpenGL::isLoaded() const
-{
-	return loaded;
-}
-
 // Do not use this method inside this class, due to fence
 void TextureOpenGL::bind(int textureUnit)
 {
-	waitForLoad();
+	waitForOpenGLLoad();
 	GLUtils glUtils;
 	glUtils.setTextureUnit(textureUnit);
 	glUtils.bindTexture(textureId);
