@@ -15,7 +15,7 @@ void TestStage::init()
 
 	auto col = Colour4f(0.9882f, 0.15686f, 0.27843f, 1);
 	auto sprite = Sprite()
-		.setImage(getResources(), "halley_logo_dist.png", "distance_field_sprite.yaml")
+		.setImage(getResources(), "halley_logo_dist.png", "distance_field_sprite")
 		.setPivot(Vector2f(0.0f, 1.0f))
 		.setColour(col)
 		.setScale(Vector2f(2, 2));

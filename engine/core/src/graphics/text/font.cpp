@@ -37,7 +37,7 @@ Font::Font(ResourceLoader& loader)
 	deserialize(ds);
 
 	auto texture = loader.getAPI().getResource<Texture>("../font/" + imageName);
-	auto matDef = loader.getAPI().getResource<MaterialDefinition>("text.yaml");
+	auto matDef = loader.getAPI().getResource<MaterialDefinition>("text");
 	material = std::make_unique<Material>(matDef);
 	(*material)["tex0"] = texture;
 }

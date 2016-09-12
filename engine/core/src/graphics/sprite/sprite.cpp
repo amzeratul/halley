@@ -71,7 +71,7 @@ bool Sprite::isInView(Rect4f v) const
 Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 {
 	if (materialName == "") {
-		materialName = "sprite.yaml";
+		materialName = "sprite";
 	}
 	setMaterial(std::make_shared<Material>(resources.get<MaterialDefinition>(materialName)));
 	return *this;
@@ -80,7 +80,7 @@ Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 Sprite& Sprite::setImage(Resources& resources, String imageName, String materialName)
 {
 	if (materialName == "") {
-		materialName = "sprite.yaml";
+		materialName = "sprite";
 	}
 	setImage(resources.get<Texture>(imageName), resources.get<MaterialDefinition>(materialName));
 	return *this;
@@ -166,7 +166,7 @@ Sprite& Sprite::setTexRect(Rect4f v)
 Sprite& Sprite::setSprite(Resources& resources, String spriteSheetName, String imageName, String materialName)
 {
 	if (materialName == "") {
-		materialName = "sprite.yaml";
+		materialName = "sprite";
 	}
 	auto spriteSheet = resources.get<SpriteSheet>(spriteSheetName);
 	setImage(spriteSheet->getTexture(), resources.get<MaterialDefinition>(materialName));

@@ -5,7 +5,7 @@ using namespace Halley;
 TaskBar::TaskBar(Resources& resources)
 {
 	{
-		taskMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite.yaml"));
+		taskMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite"));
 		auto& mat = *taskMaterial;
 		mat["tex0"] = resources.get<Texture>("round_rect.png");
 		mat["u_smoothness"] = 0.1f;
@@ -19,7 +19,7 @@ TaskBar::TaskBar(Resources& resources)
 	{
 		auto col = Colour4f(0.9882f, 0.15686f, 0.27843f, 1);
 		halleyLogo = Sprite()
-			.setImage(resources, "halley_logo_dist.png", "distance_field_sprite.yaml")
+			.setImage(resources, "halley_logo_dist.png", "distance_field_sprite")
 			.setPivot(Vector2f(0.5f, 0.5f))
 			.setColour(col)
 			.setScale(Vector2f(0.5f, 0.5f));
@@ -31,7 +31,7 @@ TaskBar::TaskBar(Resources& resources)
 
 	{
 		Colour4f col(0.12f, 0.12f, 0.12f);
-		barSolid = Sprite().setMaterial(resources, "solid_colour.yaml").setSize(Vector2f(1, 1)).setColour(col);
+		barSolid = Sprite().setMaterial(resources, "solid_colour").setSize(Vector2f(1, 1)).setColour(col);
 		barFade = Sprite().setImage(resources, "fade_right.png").setColour(col);
 	}
 

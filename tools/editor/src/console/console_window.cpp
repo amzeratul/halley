@@ -9,7 +9,7 @@ using namespace Halley;
 
 ConsoleWindow::ConsoleWindow(Resources& resources)
 {
-	backgroundMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite.yaml"));
+	backgroundMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite"));
 	auto& mat = *backgroundMaterial;
 	mat["tex0"] = resources.get<Texture>("round_rect.png");
 	mat["u_smoothness"] = 0.1f;

@@ -3,9 +3,9 @@ core
 
 core/resources
 * custom importers:
-  - material
   - entity stage
 - asset database
+- separate shaders from materials on importing
 - resources hot reloading [RESEARCH]
 
 core/graphics
