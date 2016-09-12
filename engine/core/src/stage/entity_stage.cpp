@@ -1,19 +1,19 @@
 #include "stage/entity_stage.h"
-#include <yaml-cpp/yaml.h>
 #include <halley/entity/world.h>
 #include <halley/entity/system.h>
-#include <halley/file_formats/yaml_file.h>
+#include "halley/file_formats/config_file.h"
 using namespace Halley;
 
 std::unique_ptr<World> EntityStage::createWorld(String configName, std::function<std::unique_ptr<System>(String)> createFunction)
 {
 	auto world = std::make_unique<World>(&getAPI());
-	auto config = getResource<YAMLFile>("config/" + configName);
+
+	auto config = getResource<ConfigFile>(configName);
 	auto& root = config->getRoot();
 
-	auto timelines = root["timelines"];
+	auto timelines = root["timelines"].asMap();
 	for (auto iter = timelines.begin(); iter != timelines.end(); ++iter) {
-		String timelineName = iter->first.as<std::string>();
+		String timelineName = iter->first;
 		TimeLine timeline;
 		if (timelineName == "fixedUpdate") {
 			timeline = TimeLine::FixedUpdate;
@@ -26,7 +26,7 @@ std::unique_ptr<World> EntityStage::createWorld(String configName, std::function
 		}
 
 		for (auto sysName : iter->second) {
-			String name = sysName.as<std::string>();
+			String name = sysName.asString();
 			world->addSystem(createFunction(name + "System"), timeline).setName(name);
 		}
 	}

@@ -20,13 +20,13 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "file/filesystem.h"
 #include "file/string_serializer.h"
 
+#include "file_formats/config_file.h"
 #include "file_formats/image.h"
 #include "file_formats/ini_reader.h"
 #include "file_formats/json_file.h"
 #include "file_formats/text_file.h"
 #include "file_formats/text_reader.h"
 #include "file_formats/xml_file.h"
-#include "file_formats/yaml_file.h"
 
 #include "maths/aabb.h"
 #include "maths/angle.h"

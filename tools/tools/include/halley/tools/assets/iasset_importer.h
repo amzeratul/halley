@@ -16,7 +16,7 @@ namespace Halley
 		IMAGE,
 		MATERIAL,
 		ANIMATION,
-		ENTITY_WORLD,
+		CONFIG,
 		SIMPLE_COPY
 	};
 

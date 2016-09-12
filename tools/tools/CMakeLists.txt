@@ -30,6 +30,7 @@ set(SOURCES
 
         "src/assets/importers/animation_importer.cpp"
         "src/assets/importers/codegen_importer.cpp"
+        "src/assets/importers/config_importer.cpp"
         "src/assets/importers/copy_file_importer.cpp"
         "src/assets/importers/font_importer.cpp"
         "src/assets/importers/image_importer.cpp"
@@ -73,6 +74,7 @@ set(HEADERS
 
         "src/assets/importers/animation_importer.h"
         "src/assets/importers/codegen_importer.h"
+        "src/assets/importers/config_importer.h"
         "src/assets/importers/copy_file_importer.h"
         "src/assets/importers/font_importer.h"
         "src/assets/importers/image_importer.h"

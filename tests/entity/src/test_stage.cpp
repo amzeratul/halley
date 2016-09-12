@@ -7,7 +7,7 @@ using namespace Halley;
 
 void TestStage::init()
 {
-	world = createWorld("sample_test_world.yaml", createSystem);
+	world = createWorld("sample_test_world", createSystem);
 	statsView = std::make_unique<WorldStatsView>(*getAPI().core, *world);
 
 	//target = getAPI().video->createRenderTarget();
