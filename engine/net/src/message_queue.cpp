@@ -83,7 +83,7 @@ void MessageQueue::setChannel(int channel, ChannelSettings settings)
 	Expects(channel < 32);
 
 	if (channels[channel].initialized) {
-		throw Exception("Channel " + String::integerToString(channel) + " already set");
+		throw Exception("Channel " + toString(channel) + " already set");
 	}
 
 	auto& c = channels[channel];
@@ -125,7 +125,7 @@ void MessageQueue::enqueue(std::unique_ptr<NetworkMessage> msg, int channelNumbe
 	Expects(channelNumber < 32);
 
 	if (!channels[channelNumber].initialized) {
-		throw Exception("Channel " + String::integerToString(channelNumber) + " has not been set up");
+		throw Exception("Channel " + toString(channelNumber) + " has not been set up");
 	}
 	auto& channel = channels[channelNumber];
 

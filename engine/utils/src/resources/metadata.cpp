@@ -81,12 +81,12 @@ void Metadata::set(String key, bool value)
 
 void Metadata::set(String key, int value)
 {
-	entries[key] = String::integerToString(value);
+	entries[key] = toString(value);
 }
 
 void Metadata::set(String key, float value)
 {
-	entries[key] = String::floatToString(value);
+	entries[key] = toString(value);
 }
 
 void Metadata::set(String key, const char* value)

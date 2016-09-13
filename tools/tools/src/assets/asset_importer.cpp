@@ -48,6 +48,6 @@ IAssetImporter& AssetImporter::getImporter(AssetType type) const
 	if (i != importers.end()) {
 		return *i->second;
 	} else {
-		throw Exception("Unknown asset type: " + String::integerToString(int(type)));
+		throw Exception("Unknown asset type: " + toString(int(type)));
 	}
 }

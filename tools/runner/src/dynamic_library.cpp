@@ -71,7 +71,7 @@ void DynamicLibrary::unload()
 	if (loaded) {
 		#ifdef _WIN32
 		if (!FreeLibrary(handle)) {
-			throw Exception("Unable to release library " + libPath.string() + " due to error " + String::integerToString(GetLastError()));
+			throw Exception("Unable to release library " + libPath.string() + " due to error " + toString(GetLastError()));
 		}
 		#endif
 		handle = nullptr;

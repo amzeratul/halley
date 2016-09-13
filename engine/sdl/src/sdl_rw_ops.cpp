@@ -37,7 +37,7 @@ SDLRWOps::SDLRWOps(SDL_RWops* _fp, int64_t _start, int64_t _end, bool _closeOnFi
 
 	int64_t size = end - start;
 	if (size < 0) {
-		throw Exception("Invalid file size for resource: " + String::integerToString(int(size)) + " bytes.");
+		throw Exception("Invalid file size for resource: " + toString(size) + " bytes.");
 	}
 }
 

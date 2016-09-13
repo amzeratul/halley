@@ -99,7 +99,7 @@ static String getCOMError(int hr)
 	BSTR str;
 	info->GetDescription(&str);
 	_bstr_t tmp(str);
-	return "\"" + String(LPCSTR(tmp)) + "\", code 0x"+ String::integerToString(hr, 16);
+	return "\"" + String(LPCSTR(tmp)) + "\", code 0x"+ toString(hr, 16);
 }
 
 Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter) const

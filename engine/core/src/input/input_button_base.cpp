@@ -114,7 +114,7 @@ bool InputButtonBase::isButtonDown(int code)
 
 Halley::String Halley::InputButtonBase::getButtonName(int code)
 {
-	return "Button" + String::integerToString(code);
+	return "Button" + toString(code);
 }
 
 void Halley::InputButtonBase::clearButton(int code)

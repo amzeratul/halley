@@ -42,7 +42,7 @@ void GLUtils::doGlCheckError(const char* file, long line)
 		check = true;
 	} else if (checkOnce) {
 		static std::set<String> checked;
-		String key = String(file) + ":" + String::integerToString(line);
+		String key = String(file) + ":" + toString(line);
 		if (checked.find(key) == checked.end()) {
 			// Not checked yet, go ahead
 			check = true;
@@ -66,7 +66,7 @@ void GLUtils::doGlCheckError(const char* file, long line)
 			default: msg += "?";
 			}
 			if (String(file) != "") {
-				msg += " at " + String(file) + ":" + String::integerToString(line);
+				msg += " at " + String(file) + ":" + toString(line);
 			}
 			throw Exception(msg);
 		}

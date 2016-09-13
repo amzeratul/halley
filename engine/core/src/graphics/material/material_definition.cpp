@@ -55,7 +55,7 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	api = loader.getAPI().video;
 	int i = 0;
 	for (auto& p: passes) {
-		p.createShader(loader, name + "/pass" + String::integerToString(i++), attributes);
+		p.createShader(loader, name + "/pass" + toString(i++), attributes);
 	}
 }
 

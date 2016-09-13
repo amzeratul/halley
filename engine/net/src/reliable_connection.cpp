@@ -185,7 +185,7 @@ void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 		// Extract data
 		std::array<char, 2048> buffer;
 		if (size > buffer.size() || size > packet.getSize()) {
-			throw Exception("Unexpected sub-packet size: " + String::integerToString(size) + " bytes, packet is " + String::integerToString(packet.getSize()) + " bytes.");
+			throw Exception("Unexpected sub-packet size: " + toString(size) + " bytes, packet is " + toString(packet.getSize()) + " bytes.");
 		}
 		auto subPacketData = gsl::span<char, 2048>(buffer).subspan(0, size);
 		packet.extractHeader(subPacketData);

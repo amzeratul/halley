@@ -316,7 +316,7 @@ std::function<void(int, void*)> VideoOpenGL::getUniformBinding(UniformType type,
 			};
 		}
 		default:
-			throw Exception("Unsupported uniform type: " + String::integerToString(static_cast<int>(type)));
+			throw Exception("Unsupported uniform type: " + toString(static_cast<int>(type)));
 	}
 }
 

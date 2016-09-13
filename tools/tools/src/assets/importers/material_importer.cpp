@@ -135,6 +135,6 @@ int MaterialImporter::getAttributeSize(ShaderParameterType type)
 	case ShaderParameterType::Float2: return 8;
 	case ShaderParameterType::Float3: return 12;
 	case ShaderParameterType::Float4: return 16;
-	default: throw Exception("Unknown type: " + String::integerToString(int(type)));
+	default: throw Exception("Unknown type: " + toString(int(type)));
 	}
 }

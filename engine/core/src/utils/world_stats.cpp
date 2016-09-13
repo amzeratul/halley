@@ -29,7 +29,7 @@ void WorldStatsView::draw(RenderContext& context)
 			text.setText(name).setAlignment(0).draw(painter, basePos + Vector2f(10, 0));
 			text.setAlignment(1);
 			if (nEntities > 0) {
-				text.setText(String::integerToString(nEntities)).draw(painter, basePos + Vector2f(280, 0));
+				text.setText(toString(nEntities)).draw(painter, basePos + Vector2f(280, 0));
 			}
 			text.setText(formatTime(time)).draw(painter, basePos + Vector2f(350, 0));
 			text.setAlignment(0);
@@ -63,7 +63,7 @@ void WorldStatsView::draw(RenderContext& context)
 		}
 
 		int maxFPS = int(1'000'000'000.0 / grandTotal + 0.5f);
-		text.setColour(Colour(1, 1, 1)).setText("Total elapsed: " + formatTime(grandTotal) + " ms [" + String::integerToString(maxFPS) + " FPS maximum].").draw(painter, Vector2f(40, 40));
+		text.setColour(Colour(1, 1, 1)).setText("Total elapsed: " + formatTime(grandTotal) + " ms [" + toString(maxFPS) + " FPS maximum].").draw(painter, Vector2f(40, 40));
 	});
 }
 

@@ -103,7 +103,7 @@ Vector2i FontFace::getGlyphSize(int charCode) const
 	int index = charCode == 0 ? 0 : FT_Get_Char_Index(pimpl->face, charCode);
 	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
 	if (error) {
-		throw Exception("Unable to load glyph " + String::integerToString(charCode));
+		throw Exception("Unable to load glyph " + toString(charCode));
 	}
 	auto metrics = pimpl->face->glyph->metrics;
 	return Vector2i(metrics.width, metrics.height) / 64;
@@ -117,12 +117,12 @@ void FontFace::drawGlyph(Image& image, int charcode, Vector2i pos) const
 	
 	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
 	if (error) {
-		throw Exception("Unable to load glyph " + String::integerToString(charcode));
+		throw Exception("Unable to load glyph " + toString(charcode));
 	}
 	
 	error = FT_Render_Glyph(glyph, FT_RENDER_MODE_MONO);
 	if (error != 0) {
-		throw Exception("Unable to render glyph " + String::integerToString(charcode));
+		throw Exception("Unable to render glyph " + toString(charcode));
 	}
 	
 	auto bmp = glyph->bitmap;
@@ -135,7 +135,7 @@ FontMetrics FontFace::getMetrics(int charcode, float scale) const
 
 	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
 	if (error) {
-		throw Exception("Unable to load glyph " + String::integerToString(charcode));
+		throw Exception("Unable to load glyph " + toString(charcode));
 	}
 
 	FontMetrics result;

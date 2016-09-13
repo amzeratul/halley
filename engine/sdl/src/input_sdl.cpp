@@ -223,7 +223,7 @@ void Halley::InputSDL::processTouch(int type, long long /*touchDeviceId*/, long 
 	} else {
 		// Update existing
 		auto i = touchEvents.find(static_cast<int>(fingerId));
-		if (i == touchEvents.end()) throw Exception("Unknown touchId: "+String::integerToString(static_cast<int>(fingerId)));
+		if (i == touchEvents.end()) throw Exception("Unknown touchId: "+toString(fingerId));
 		touch = i->second;
 		touch->setPos(pos);
 		if (type == SDL_FINGERUP) {

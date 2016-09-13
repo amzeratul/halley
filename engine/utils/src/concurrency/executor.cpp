@@ -140,7 +140,7 @@ ThreadPool::ThreadPool(ExecutionQueue& queue, size_t n)
 	for (size_t i = 0; i < n; i++) {
 		threads[i] = boost::thread([this, i]()
 		{
-			Concurrent::setThreadName("threadPool" + String::integerToString(int(i)));
+			Concurrent::setThreadName("threadPool" + toString(i));
 			executors[i]->runForever();
 		});
 	}

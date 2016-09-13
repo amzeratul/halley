@@ -25,22 +25,22 @@ using namespace Halley;
 
 String StringSerializer::encode(Vector2i v)
 {
-	return String::integerToString(v.x) + "," + String::integerToString(v.y);
+	return toString(v.x) + "," + toString(v.y);
 }
 
 String StringSerializer::encode(Vector2f v)
 {
-	return String::floatToString(v.x) + "," + String::floatToString(v.y);
+	return toString(v.x) + "," + toString(v.y);
 }
 
 String StringSerializer::encode(Vector3i v)
 {
-	return String::integerToString(v.x) + "," + String::integerToString(v.y) + "," + String::integerToString(v.z);
+	return toString(v.x) + "," + toString(v.y) + "," + toString(v.z);
 }
 
 String StringSerializer::encode(Vector3f v)
 {
-	return String::floatToString(v.x) + "," + String::floatToString(v.y) + "," + String::floatToString(v.z);
+	return toString(v.x) + "," + toString(v.y) + "," + toString(v.z);
 }
 
 String StringSerializer::encode(String v)
@@ -50,12 +50,12 @@ String StringSerializer::encode(String v)
 
 String StringSerializer::encode(int v)
 {
-	return String::integerToString(v);
+	return toString(v);
 }
 
 String StringSerializer::encode(float v)
 {
-	return String::floatToString(v);
+	return toString(v);
 }
 
 String StringSerializer::encode(bool v)

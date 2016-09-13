@@ -111,13 +111,13 @@ String::String(int character)
 
 String::String(float number)
 {
-	*this = floatToString(number);
+	*this = toString(number);
 }
 
 
 String::String(double number)
 {
-	*this = floatToString(number);
+	*this = toString(number);
 }
 
 String& String::operator=(const char* utf8) {
@@ -482,13 +482,13 @@ String String::operator += (const wchar_t* p)
 
 String String::operator += (const double &p)
 {
-	str.append(floatToString(p));
+	str.append(toString(p));
 	return *this;
 }
 
 String String::operator += (const int &p)
 {
-	str.append(integerToString(p));
+	str.append(toString(p));
 	return *this;
 }
 
@@ -591,49 +591,6 @@ String String::prettyFloat(String src)
 		}
 	}
 	return src;
-}
-
-
-///////////////////
-// Float to string
-String String::floatToString(float src, int prec)
-{
-	std::stringstream str;
-	if (prec != -1) {
-		str << std::fixed << std::setprecision(prec);
-	}
-	str << src;
-	if (prec == -1) {
-		return prettyFloat(str.str());
-	} else {
-		return str.str();
-	}
-}
-
-String String::floatToString(double src, int prec)
-{
-	std::stringstream str;
-	if (prec != -1) {
-		str << std::fixed << std::setprecision(prec);
-	}
-	str << src;
-	if (prec == -1) {
-		return prettyFloat(str.str());
-	} else {
-		return str.str();
-	}
-}
-
-
-/////////////////
-// Int to string
-String String::integerToString(int value, int base)
-{
-	std::stringstream ss;
-	if (base == 16) ss.setf(std::ios::hex, std::ios::basefield);
-	else if (base == 8) ss.setf(std::ios::oct, std::ios::basefield);
-	ss << value;
-	return ss.str();
 }
 
 
@@ -900,7 +857,7 @@ Halley::String Halley::String::prettySize(long long bytes)
 		steps++;
 	}
 	String suffixes[] = { "", "kB", "MB", "GB", "TB", "PB" };
-	return floatToString(double(bytes) / double(div)) + " " + suffixes[steps];
+	return toString(double(bytes) / double(div)) + " " + suffixes[steps];
 }
 
 Vector<String> Halley::String::split(char delimiter) const

@@ -14,6 +14,7 @@ TextureOpenGL::TextureOpenGL(VideoOpenGL& parent, Vector2i s)
 	size = s;
 
 	glGenTextures(1, &textureId);
+	startLoading();
 }
 
 TextureOpenGL::~TextureOpenGL()
@@ -152,5 +153,5 @@ unsigned TextureOpenGL::getGLFormat(TextureFormat format)
 		return GL_DEPTH_COMPONENT16;
 #endif
 	}
-	throw Exception("Unknown texture format: " + String::integerToString(static_cast<int>(format)));
+	throw Exception("Unknown texture format: " + toString(static_cast<int>(format)));
 }

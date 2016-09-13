@@ -98,7 +98,7 @@ EntityRef World::getEntity(EntityId id)
 {
 	Entity* entity = tryGetEntity(id);
 	if (entity == nullptr) {
-		throw Exception("Entity does not exist: " + String::integerToString(id));
+		throw Exception("Entity does not exist: " + toString(id));
 	}
 	return EntityRef(*entity, *this);
 }

@@ -104,7 +104,7 @@ void Halley::Image::blitFrom(Vector2i pos, const char* buffer, size_t width, siz
 			}
 		}
 	} else {
-		throw Exception("Unknown amount of bits per pixel: " + String::integerToString(int(bpp)));
+		throw Exception("Unknown amount of bits per pixel: " + toString(bpp));
 	}
 }
 

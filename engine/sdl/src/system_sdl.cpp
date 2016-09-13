@@ -28,8 +28,8 @@ void SystemSDL::init()
 	std::cout << "\tVersion/Linked: " << ConsoleColour(Console::DARK_GREY) << int(linked.major) << "." << int(linked.minor) << "." << int(linked.patch) << ConsoleColour() << std::endl;
 
 	// Initialize SDL
-	if (!SDL_WasInit(SDL_INIT_NOPARACHUTE)) {
-		if (SDL_Init(SDL_INIT_NOPARACHUTE) == -1) {
+	if (!SDL_WasInit(0)) {
+		if (SDL_Init(0) == -1) {
 			throw Exception(String("Exception initializing SDL: ") + SDL_GetError());
 		}
 	}
@@ -43,8 +43,6 @@ void SystemSDL::init()
 		throw Exception(String("Exception initializing joystick: ") + SDL_GetError());
 	}
 
-	//SDL_EnableUNICODE(1);
-	//SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 	SDL_ShowCursor(SDL_DISABLE);
 }
 
