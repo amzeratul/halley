@@ -21,7 +21,7 @@
 
 
 #include "halley/maths/polygon.h"
-#include <float.h>
+#include <limits>
 using namespace Halley;
 
 
@@ -44,10 +44,9 @@ Polygon::Polygon(const VertexList& _vertices, Vertex _origin)
 void Polygon::realize()
 {
 	// Calculate the outer radius and aabb
-	float x1 = FLT_MAX;
-	float x2 = -FLT_MAX;
-	float y1 = FLT_MAX;
-	float y2 = -FLT_MAX;
+	float x1, x2, y1, y2;
+	x1 = y1 = std::numeric_limits<float>::max();
+	x2 = y2 = std::numeric_limits<float>::lowest();
 
 	outerRadius = 0.0f;
 	size_t len = vertices.size();

@@ -1,5 +1,5 @@
 #include "halley/data_structures/rect_spatial_checker.h"
-#include <climits>
+#include <limits>
 
 using namespace Halley;
 
@@ -60,10 +60,9 @@ bool RectangleSpatialChecker::updateData(Entry& entry, Rect4i prev, Rect4i next)
 		return false; // Nothing to do here
 	}
 	
-	int x0 = INT_MAX;
-	int x1 = INT_MIN;
-	int y0 = INT_MAX;
-	int y1 = INT_MIN;
+	int x0, x1, y0, y1;
+	x0 = y0 = std::numeric_limits<int>::max();
+	x1 = y1 = std::numeric_limits<int>::lowest();
 	Rect4i addRect;
 	Rect4i delRect;
 	bool hasAdd = false;
