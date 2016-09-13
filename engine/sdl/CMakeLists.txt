@@ -3,6 +3,7 @@ project (halley-sdl)
 include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} "include/halley/sdl" "../utils/include" "../core/include")
 
 set(SOURCES
+    "src/audio_sdl.cpp"
     "src/input_sdl.cpp"
     "src/input_joystick_sdl.cpp"
     "src/input_keyboard_sdl.cpp"
@@ -15,6 +16,7 @@ set(SOURCES
     )
 
 set(HEADERS
+    "src/audio_sdl.h"
     "src/input_sdl.h"
     "src/input_joystick_sdl.h"
     "src/input_keyboard_sdl.h"

@@ -23,8 +23,12 @@ input
 - use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
-- bring library into engine
-- figure out which backend to use (OpenAL still?) [RESEARCH]
+- define audio API
+- SDL back-end
+- audio clip resources
+- Ogg Vorbis importer
+- write audio playback engine
+- write audio mixer
 
 entity
 - query other entities? [RESEARCH]

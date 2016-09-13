@@ -44,6 +44,7 @@ set(SOURCES
         )
 
 set(HEADERS
+        "include/halley/core/api/audio_api.h"
         "include/halley/core/api/core_api.h"
         "include/halley/core/api/halley_api.h"
         "include/halley/core/api/halley_api_internal.h"

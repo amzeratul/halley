@@ -5,6 +5,7 @@
 #include "video_api.h"
 #include "system_api.h"
 #include "input_api.h"
+#include "audio_api.h"
 #include "halley/core/graphics/material/uniform_type.h"
 
 namespace Halley
@@ -41,6 +42,12 @@ namespace Halley
 		virtual ~InputAPIInternal() {}
 
 		virtual void beginEvents(Time t) = 0;
+	};
+
+	class AudioAPIInternal : public AudioAPI, public HalleyAPIInternal
+	{
+	public:
+		virtual ~AudioAPIInternal() {}
 	};
 
 	class SystemAPIInternal : public SystemAPI, public HalleyAPIInternal
