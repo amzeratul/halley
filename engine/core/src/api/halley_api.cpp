@@ -4,17 +4,17 @@
 
 using namespace Halley;
 
-HalleyAPI::HalleyAPI(CoreAPIInternal* _core, std::unique_ptr<SystemAPIInternal> _system, std::unique_ptr<VideoAPIInternal> _video, std::unique_ptr<InputAPIInternal> _input, std::unique_ptr<AudioAPIInternal> _audio)
+HalleyAPI::HalleyAPI(CoreAPIInternal* _core, std::unique_ptr<SystemAPIInternal> _system, std::unique_ptr<VideoAPIInternal> _video, std::unique_ptr<InputAPIInternal> _input, std::unique_ptr<AudioOutputAPIInternal> _audioOutput)
 	: coreInternal(_core)
 	, systemInternal(std::move(_system))
 	, videoInternal(std::move(_video))
 	, inputInternal(std::move(_input))
-	, audioInternal(std::move(_audio))
+	, audioOutputInternal(std::move(_audioOutput))
 	, core(coreInternal)
 	, system(&*systemInternal)
 	, video(&*videoInternal)
 	, input(&*inputInternal)
-	, audio(&*audioInternal)
+	, audioOutput(&*audioOutputInternal)
 {
 	if (systemInternal) {
 		systemInternal->init();
@@ -25,15 +25,15 @@ HalleyAPI::HalleyAPI(CoreAPIInternal* _core, std::unique_ptr<SystemAPIInternal> 
 	if (inputInternal) {
 		inputInternal->init();
 	}
-	if (audioInternal) {
-		audioInternal->init();
+	if (audioOutputInternal) {
+		audioOutputInternal->init();
 	}
 }
 
 HalleyAPI::~HalleyAPI()
 {
-	if (audioInternal) {
-		audioInternal->deInit();
+	if (audioOutputInternal) {
+		audioOutputInternal->deInit();
 	}
 	if (inputInternal) {
 		inputInternal->deInit();
@@ -78,15 +78,15 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 		}
 	}
 
-	std::unique_ptr<AudioAPIInternal> audio;
+	std::unique_ptr<AudioOutputAPIInternal> audioOutput;
 	if (flags & HalleyAPIFlags::Audio) {
-		auto plugins = core->getPlugins(PluginType::AudioAPI);
+		auto plugins = core->getPlugins(PluginType::AudioOutputAPI);
 		if (plugins.size() > 0) {
-			audio.reset(static_cast<AudioAPIInternal*>(plugins[0]->createAPI(system.get())));
+			audioOutput.reset(static_cast<AudioOutputAPIInternal*>(plugins[0]->createAPI(system.get())));
 		} else {
 			throw Exception("No suitable audio plugins found.");
 		}
 	}
 
-	return std::unique_ptr<HalleyAPI>(new HalleyAPI(core, std::move(system), std::move(video), std::move(input), std::move(audio)));
+	return std::unique_ptr<HalleyAPI>(new HalleyAPI(core, std::move(system), std::move(video), std::move(input), std::move(audioOutput)));
 }

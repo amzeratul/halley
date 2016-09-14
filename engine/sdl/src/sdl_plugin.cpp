@@ -19,7 +19,7 @@ namespace Halley {
 
 	class SDLAudioPlugin : public Plugin {
 		HalleyAPIInternal* createAPI(SystemAPI*) override { return new AudioSDL(); }
-		PluginType getType() override { return PluginType::AudioAPI; }
+		PluginType getType() override { return PluginType::AudioOutputAPI; }
 		String getName() override { return "Audio/SDL"; }
 	};
 	

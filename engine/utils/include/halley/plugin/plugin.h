@@ -13,7 +13,7 @@ namespace Halley
 	{
 		SystemAPI,
 		GraphicsAPI,
-		AudioAPI,
+		AudioOutputAPI,
 		InputAPI
 	};
 

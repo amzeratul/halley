@@ -25,6 +25,23 @@ void EditorRootStage::init()
 		taskBar = std::make_unique<TaskBar>(getResources());
 		console = std::make_unique<ConsoleWindow>(getResources());
 	}
+
+	/*
+	auto audio = getAPI().audioOutput;
+	audio->openAudioDevice(AudioSpec(48000, 2, 4096, AudioSampleFormat::Float), [](gsl::span<gsl::byte> span) {
+		gsl::span<float> dst(reinterpret_cast<float*>(span.data()), span.size_bytes() / sizeof(float));
+		size_t nSamples = size_t(dst.size() / 2);
+		float harmonic = 32.0f;
+		float scale = harmonic * 6.283185307179586476925286766559f / nSamples;
+		for (size_t i = 0; i < nSamples; i++) {
+			float phase = i * scale;
+			float v = ::sin(phase) * 0.3f;
+			dst[i * 2] = v;
+			dst[i * 2 + 1] = v;
+		}
+	});
+	audio->startPlayback();
+	*/
 }
 
 void EditorRootStage::onVariableUpdate(Time time)
