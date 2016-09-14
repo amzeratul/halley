@@ -39,7 +39,7 @@ Vector<std::unique_ptr<const AudioDevice>> AudioSDL::getAudioDevices()
 	return std::move(result);
 }
 
-extern "C" static void sdlCallback(void* user, uint8_t* bytes, int size)
+static void sdlCallback(void* user, uint8_t* bytes, int size)
 {
 	reinterpret_cast<AudioSDL*>(user)->onCallback(gsl::as_writeable_bytes(gsl::span<uint8_t>(bytes, size)));
 }
