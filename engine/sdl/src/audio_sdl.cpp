@@ -99,10 +99,7 @@ void AudioSDL::startPlayback()
 
 void AudioSDL::stopPlayback()
 {
-	if (!device) {
-		throw Exception("Audio not initialised.");
-	}
-	if (playing) {
+	if (device && playing) {
 		SDL_PauseAudioDevice(device, 1);
 		playing = false;
 	}
