@@ -59,8 +59,8 @@ void VideoOpenGL::setWindow(WindowDefinition&& windowDefinition, bool vsync)
 	// Initialize video mode
 	if (!initialized) {
 		window = system.createWindow(windowDefinition);
-		window->setVsync(vsync);
 		initOpenGL();
+		window->setVsync(vsync);
 		initialized = true;
 	} else {
 		window->update(windowDefinition);

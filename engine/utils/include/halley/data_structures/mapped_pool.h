@@ -25,7 +25,7 @@ namespace Halley {
 	template <typename T, size_t blockLen = 16384>
 	class MappedPool {
 		struct Entry {
-			std::array<char, sizeof(T)> data;
+			alignas(T) std::array<char, sizeof(T)> data;
 			unsigned short nextFreeEntryIndex;
 			unsigned short revision;
 		};

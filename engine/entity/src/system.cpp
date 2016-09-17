@@ -70,12 +70,13 @@ void System::processMessages()
 		for (size_t i = 0; i < sz; i++) {
 			Elem* elem = reinterpret_cast<Elem*>(fam.getElement(i));
 			Entity* entity = world->tryGetEntity(elem->id);
-			
-			for (const auto& msg: entity->inbox) {
-				if (std::find(messageTypesReceived.begin(), messageTypesReceived.end(), msg.type) != messageTypesReceived.end()) {
-					auto& inbox = inboxes[msg.type];
-					inbox.msg.emplace_back(msg.msg.get());
-					inbox.elemIdx.emplace_back(i);
+			if (entity) {
+				for (const auto& msg: entity->inbox) {
+					if (std::find(messageTypesReceived.begin(), messageTypesReceived.end(), msg.type) != messageTypesReceived.end()) {
+						auto& inbox = inboxes[msg.type];
+						inbox.msg.emplace_back(msg.msg.get());
+						inbox.elemIdx.emplace_back(i);
+					}
 				}
 			}
 		}
