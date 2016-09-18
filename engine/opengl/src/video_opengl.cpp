@@ -94,6 +94,7 @@ void VideoOpenGL::initOpenGL()
 	std::cout << "\tGLSL Version: " << ConsoleColour(Console::DARK_GREY) << glGetString(GL_SHADING_LANGUAGE_VERSION) << ConsoleColour() << std::endl;
 
 	// Print extensions
+#ifndef _DEBUG
 	std::cout << "\tExtensions: " << ConsoleColour(Console::DARK_GREY);
 #ifdef WITH_OPENGL
 	int nExtensions;
@@ -106,6 +107,7 @@ void VideoOpenGL::initOpenGL()
 	String str = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
 #endif
 	std::cout << ConsoleColour() << std::endl;
+#endif
 
 	setupDebugCallback();
 
