@@ -40,6 +40,12 @@ Halley is divided in a several sub-projects:
 * **samples**
   * see [this project](https://github.com/amzeratul/halley-samples)
 
+## Platforms
+The following platforms are supported:
+* **Windows**: Tested on Windows 10 Professional x64
+* **Mac OS X**: Tested on Mac OS X 10.9
+* **Linux**: Tested on Ubuntu 16.04
+
 ## Installation
 
 ### Tools required
