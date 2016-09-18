@@ -24,11 +24,11 @@ input
 
 audio
 - define audio API
-- SDL back-end
-- audio clip resources
-- Ogg Vorbis importer
-- write audio playback engine
-- write audio mixer
+- audio clip resources (Ogg Opus?)
+- Importers (Ogg Vorbis? MP3? Wav?) -> Ogg Opus
+- Audio mixers
+- Audio playback engine
+- Effects
 
 entity
 * fix MappedPool (crashes with too many entities)

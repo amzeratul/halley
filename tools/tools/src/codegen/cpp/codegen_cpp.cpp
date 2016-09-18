@@ -159,7 +159,7 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		.addBlankLine()
 		.addDefaultConstructor();
 
-	if (component.members.size() > 0) {
+	if (!component.members.empty()) {
 		gen.addBlankLine()
 			.addConstructor(component.members);
 	}
@@ -378,17 +378,21 @@ Vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
 		""
 	};
 
-	CPPClassGenerator(message.name + "Message", "Halley::Message", CPPAccess::Public, true)
+	auto gen = CPPClassGenerator(message.name + "Message", "Halley::Message", CPPAccess::Public, true)
 		.addAccessLevelSection(CPPAccess::Public)
 		.addMember(VariableSchema(TypeSchema("int", false, true, true), "messageIndex", toString(message.id)))
 		.addBlankLine()
 		.addMembers(message.members)
 		.addBlankLine()
 		.addDefaultConstructor()
-		.addBlankLine()
-		.addConstructor(message.members)
-		.addBlankLine()
-		.addMethodDefinition(MethodSchema(TypeSchema("size_t"), {}, "getSize", true, false, true, true), "return sizeof(" + message.name + "Message);")
+		.addBlankLine();
+
+	if (!message.members.empty()) {
+		gen.addConstructor(message.members)
+			.addBlankLine();
+	}
+
+	gen.addMethodDefinition(MethodSchema(TypeSchema("size_t"), {}, "getSize", true, false, true, true), "return sizeof(" + message.name + "Message);")
 		.finish()
 		.writeTo(contents);
 
