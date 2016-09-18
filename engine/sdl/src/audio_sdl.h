@@ -28,7 +28,7 @@ namespace Halley
 		void startPlayback() override;
 		void stopPlayback() override;
 
-		inline void onCallback(gsl::span<gsl::byte> bytes) const { callback(bytes); }
+		inline void onCallback(gsl::span<AudioSamplePack> bytes) const { callback(bytes); }
 
 	private:
 		bool playing = false;

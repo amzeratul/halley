@@ -41,7 +41,8 @@ Vector<std::unique_ptr<const AudioDevice>> AudioSDL::getAudioDevices()
 
 static void sdlCallback(void* user, uint8_t* bytes, int size)
 {
-	reinterpret_cast<AudioSDL*>(user)->onCallback(gsl::as_writeable_bytes(gsl::span<uint8_t>(bytes, size)));
+	Expects(size % 64 == 0);
+	reinterpret_cast<AudioSDL*>(user)->onCallback(gsl::span<AudioSamplePack>(reinterpret_cast<AudioSamplePack*>(bytes), size / 64));
 }
 
 AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, AudioCallback c, const AudioDevice* dev)

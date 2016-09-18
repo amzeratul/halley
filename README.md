@@ -26,6 +26,7 @@ Halley is divided in a several sub-projects:
   * **core**: Core features of the engine, including looper, API management, resouces, and graphics engine
   * **opengl**: Video/OpenGL implementation
   * **sdl**: System/SDL, Input/SDL and AudioOut/SDL implementations
+  * **audio**: Audio engine
   * **entity**: Framework for dealing with entities, components, and systems
   * **utils**: Utilities library
   * **net**: Networking library

@@ -4,9 +4,12 @@
 #include <gsl/gsl>
 #include <memory>
 #include <vector>
+#include "halley/text/halleystring.h"
 
 namespace Halley
 {
+	class AudioClip;
+
 	class AudioDevice
 	{
 	public:
@@ -14,7 +17,12 @@ namespace Halley
 		virtual String getName() const = 0;
 	};
 
-	using AudioCallback = std::function<void(gsl::span<gsl::byte> span)>;
+	struct alignas(64) AudioSamplePack
+	{
+		std::array<float, 16> samples; // AVX-512 friendly
+	};
+
+	using AudioCallback = std::function<void(gsl::span<AudioSamplePack> span)>;
 
 	enum class AudioSampleFormat
 	{
@@ -52,5 +60,15 @@ namespace Halley
 
 		virtual void startPlayback() = 0;
 		virtual void stopPlayback() = 0;
+	};
+
+	class AudioAPI
+	{
+	public:
+		virtual ~AudioAPI() {}
+
+		virtual AudioCallback getCallback() = 0;
+
+		virtual void playUI(std::shared_ptr<AudioClip> clip, float volume = 1.0f, float pan = 0.5f) = 0;
 	};
 }
