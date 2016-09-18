@@ -23,9 +23,9 @@ Design guidelines & objectives:
 ## Modules
 Halley is divided in a several sub-projects:
 * **engine**
-  * **core**: Core features of the engine, including looper, API management
+  * **core**: Core features of the engine, including looper, API management, resouces, and graphics engine
   * **opengl**: Video/OpenGL implementation
-  * **sdl**: System/SDL implementation
+  * **sdl**: System/SDL, Input/SDL and AudioOut/SDL implementations
   * **entity**: Framework for dealing with entities, components, and systems
   * **utils**: Utilities library
   * **net**: Networking library
@@ -51,14 +51,15 @@ Halley is divided in a several sub-projects:
 
 ### Library dependencies
 * Engine:
-  * OpenGL
   * Boost 1.59.0
-  * SDL 2.0.4 (technically only for SDL system, but no alternative is available)
+  * OpenGL (for OpenGL plugin, but no alternative is available yet)
+  * SDL 2.0.4 (for SDL plugin, but no alternative is available yet)
 * Tools only:
   * Freetype 2.6.3
   * yaml-cpp 0.5.3
 
 ### Set up
-* Build with CMake
+* Ensure that all dependencies above are set up correctly
+* Build with CMake (recommended: "mkdir build && cmake ..")
 * Run "halley-editor tests/entity" (or whichever other project you want to test)
 * Launch that project
