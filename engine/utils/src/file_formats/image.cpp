@@ -21,8 +21,8 @@
 
 #include <cassert>
 #include "halley/file_formats/image.h"
-#include "halley/file_formats/stb_image/stb_image.h"
-#include "halley/file_formats/lodepng/lodepng.h"
+#include "../../contrib/stb_image/stb_image.h"
+#include "../../contrib/lodepng/lodepng.h"
 #include "halley/support/exception.h"
 #include "halley/resources/resource_data.h"
 

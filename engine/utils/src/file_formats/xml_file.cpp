@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 #include "halley/file_formats/xml_file.h"
-#include "tinyxml/ticpp.h"
+#include "../../contrib/tinyxml/ticpp.h"
 
 using namespace Halley;
 

@@ -112,6 +112,7 @@ void VideoOpenGL::initOpenGL()
 	setupDebugCallback();
 
 	std::cout << ConsoleColour(Console::GREEN) << "OpenGL init done.\n" << ConsoleColour() << std::endl;
+	startLoaderThread();
 }
 
 void VideoOpenGL::initGLBindings()
@@ -121,9 +122,12 @@ void VideoOpenGL::initGLBindings()
 		throw Exception(String("Error initializing glLoadGen."));
 	}
 	glCheckError();
-
-	loaderThread = std::make_unique<LoaderThreadOpenGL>(*context);
 #endif
+}
+
+void VideoOpenGL::startLoaderThread()
+{
+	loaderThread = std::make_unique<LoaderThreadOpenGL>(*context);
 }
 
 void VideoOpenGL::setupDebugCallback()
@@ -157,6 +161,7 @@ void VideoOpenGL::onResume()
 	context->bind();
 	initGLBindings();
 	setupDebugCallback();
+	startLoaderThread();
 }
 
 void VideoOpenGL::clearScreen()

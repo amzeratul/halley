@@ -41,6 +41,7 @@ namespace Halley {
 		void initOpenGL();
 		void initGLBindings();
 		void clearScreen();
+		void startLoaderThread();
 
 		void setupDebugCallback();
 		void setUpEnumMap();
