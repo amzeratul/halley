@@ -6,8 +6,8 @@
 using namespace Halley;
 
 LoaderThreadOpenGL::LoaderThreadOpenGL(GLContext& context)
-	: parentContext(context)
-	, executor(Executors::getVideoAux())
+	: executor(Executors::getVideoAux())
+	, context(context.createSharedContext())
 {
 	workerThread = std::thread([this]() { run(); });
 }
@@ -27,14 +27,8 @@ std::thread::id LoaderThreadOpenGL::getThreadId()
 void LoaderThreadOpenGL::run()
 {
 	Concurrent::setThreadName("OpenGL loader");
-	initializeContext();
-	executor.runForever();
-}
-
-void LoaderThreadOpenGL::initializeContext()
-{
-	context = parentContext.createSharedContext();
 	context->bind();
+	executor.runForever();
 }
 
 void LoaderThreadOpenGL::waitForGPU()

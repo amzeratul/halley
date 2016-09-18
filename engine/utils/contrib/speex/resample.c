@@ -57,6 +57,10 @@
    The latter both reduces CPU time and makes the algorithm more SIMD-friendly.
 */
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4244)
+#endif
+
 #define OUTSIDE_SPEEX
 
 #ifdef HAVE_CONFIG_H

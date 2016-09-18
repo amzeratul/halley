@@ -61,14 +61,16 @@ void VideoOpenGL::setWindow(WindowDefinition&& windowDefinition, bool vsync)
 		window = system.createWindow(windowDefinition);
 		initOpenGL();
 		window->setVsync(vsync);
+
+		clearScreen();
+		window->show();
+		flip();
+		startLoaderThread();
 		initialized = true;
 	} else {
 		window->update(windowDefinition);
+		clearScreen();
 	}
-
-	clearScreen();
-
-	window->show();
 }
 
 const Window& VideoOpenGL::getWindow() const
@@ -112,7 +114,6 @@ void VideoOpenGL::initOpenGL()
 	setupDebugCallback();
 
 	std::cout << ConsoleColour(Console::GREEN) << "OpenGL init done.\n" << ConsoleColour() << std::endl;
-	startLoaderThread();
 }
 
 void VideoOpenGL::initGLBindings()

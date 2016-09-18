@@ -14,14 +14,12 @@ namespace Halley
 		std::thread::id getThreadId();
 
 	private:
-		GLContext& parentContext;
 		std::thread workerThread;
 		Executor executor;
 		
 		std::unique_ptr<GLContext> context;
 		
 		void run();
-		void initializeContext();
 		void waitForGPU();
 	};
 }
