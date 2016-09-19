@@ -3,6 +3,7 @@
 #include "audio_buffer.h"
 #include <mutex>
 #include <atomic>
+#include <condition_variable>
 
 namespace Halley {
     class AudioEngine : public AudioPlaybackAPI
