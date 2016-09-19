@@ -188,11 +188,11 @@ void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 			throw Exception("Unexpected sub-packet size: " + toString(size) + " bytes, packet is " + toString(packet.getSize()) + " bytes.");
 		}
 		auto subPacketData = gsl::span<char, 2048>(buffer).subspan(0, size);
-		packet.extractHeader(subPacketData);
+		packet.extractHeader(gsl::as_writeable_bytes(subPacketData));
 
 		// Process sub-packet
 		if (onSeqReceived(seq, resend, resendOf)) {
-			pendingPackets.push_back(InboundNetworkPacket(subPacketData));
+			pendingPackets.push_back(InboundNetworkPacket(gsl::as_bytes(subPacketData)));
 		}
 		++seq;
 	}

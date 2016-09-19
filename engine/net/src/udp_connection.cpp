@@ -54,7 +54,7 @@ void UDPConnection::send(OutboundNetworkPacket&& packet)
 			id[0] = connectionId & 0x7F;
 			len = 1;
 		}
-		packet.addHeader(gsl::span<unsigned char>(id).subspan(0, len));
+		packet.addHeader(gsl::as_bytes(gsl::span<unsigned char>(id).subspan(0, len)));
 
 		bool needsSend = pendingSend.empty();
 		pendingSend.emplace_back(std::move(packet));
