@@ -20,6 +20,7 @@ namespace Halley
 		const std::unique_ptr<SystemAPIInternal> systemInternal;
 		const std::unique_ptr<VideoAPIInternal> videoInternal;
 		const std::unique_ptr<InputAPIInternal> inputInternal;
+		const std::unique_ptr<AudioAPIInternal> audioInternal;
 		const std::unique_ptr<AudioOutputAPIInternal> audioOutputInternal;
 
 	public:
@@ -28,7 +29,7 @@ namespace Halley
 		SystemAPI* const system;
 		VideoAPI* const video;
 		InputAPI* const input;
-		AudioOutputAPI* const audioOutput;
+		AudioAPI* const audio;
 		
 		template <typename T>
 		std::shared_ptr<T> getResource(String name)
@@ -39,7 +40,7 @@ namespace Halley
 	private:
 		friend class Core;
 
-		HalleyAPI(CoreAPIInternal* core, std::unique_ptr<SystemAPIInternal> system, std::unique_ptr<VideoAPIInternal> video, std::unique_ptr<InputAPIInternal> input, std::unique_ptr<AudioOutputAPIInternal> audioOutput);
+		HalleyAPI(CoreAPIInternal* core, std::unique_ptr<SystemAPIInternal> system, std::unique_ptr<VideoAPIInternal> video, std::unique_ptr<InputAPIInternal> input, std::unique_ptr<AudioAPIInternal> audio, std::unique_ptr<AudioOutputAPIInternal> audioOutput);
 		static std::unique_ptr<HalleyAPI> create(CoreAPIInternal* core, int flags);
 	};
 }

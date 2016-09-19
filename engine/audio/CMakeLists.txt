@@ -8,6 +8,7 @@ set(SOURCES
         )
 
 set(HEADERS
+        "include/halley/audio/audio_buffer.h"
         "include/halley/audio/audio_engine.h"
         "include/halley/audio/audio_facade.h"
         )

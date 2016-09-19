@@ -62,13 +62,21 @@ namespace Halley
 		virtual void stopPlayback() = 0;
 	};
 
-	class AudioAPI
+	class AudioPlaybackAPI
+	{
+	public:
+		virtual ~AudioPlaybackAPI() {}
+
+		virtual void playUI(std::shared_ptr<AudioClip> clip, float volume = 1.0f, float pan = 0.5f) = 0;
+	};
+
+	class AudioAPI : public AudioPlaybackAPI
 	{
 	public:
 		virtual ~AudioAPI() {}
 
-		virtual AudioCallback getCallback() = 0;
-
-		virtual void playUI(std::shared_ptr<AudioClip> clip, float volume = 1.0f, float pan = 0.5f) = 0;
+		virtual Vector<std::unique_ptr<const AudioDevice>> getAudioDevices() = 0;
+		virtual void startPlayback(int deviceNumber = 0) = 0;
+		virtual void stopPlayback() = 0;
 	};
 }

@@ -1,27 +1,36 @@
 #pragma once
-#include "halley/core/api/audio_api.h"
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include "halley/core/api/halley_api_internal.h"
 
 namespace Halley {
 	class AudioEngine;
 
-    class AudioFacade : public AudioAPI
+    class AudioFacade : public AudioAPIInternal
     {
     public:
-		explicit AudioFacade(AudioSpec spec);
+		explicit AudioFacade(AudioOutputAPI& output);
 		~AudioFacade();
 
-	    AudioCallback getCallback() override;
+		void init() override;
+		void deInit() override;
+
+		Vector<std::unique_ptr<const AudioDevice>> getAudioDevices() override;
+		void startPlayback(int deviceNumber) override;
+		void stopPlayback() override;
+
 	    void playUI(std::shared_ptr<AudioClip> clip, float volume, float pan) override;
 
     private:
+		AudioOutputAPI& output;
 		std::unique_ptr<AudioEngine> engine;
 
 		std::thread audioThread;
 		std::mutex audioMutex;
 		std::atomic<bool> running;
+
+		std::vector<std::function<void()>> actions;
 
 		void run();
     };

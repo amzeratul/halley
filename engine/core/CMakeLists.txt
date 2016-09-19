@@ -1,6 +1,6 @@
 project (halley-core)
 
-include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../entity/include")
+include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../entity/include" "../audio/include")
 
 set(SOURCES
         "src/api/halley_api.cpp"
