@@ -58,8 +58,8 @@ void AudioFacade::stopPlayback()
 		engine->stop();
 		audioThread.join();
 		engine.reset();
+		output.stopPlayback();
 	}
-	output.stopPlayback();
 }
 
 void AudioFacade::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan)
