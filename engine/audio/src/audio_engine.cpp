@@ -1,4 +1,5 @@
 #include "audio_engine.h"
+#include <cmath>
 
 using namespace Halley;
 
