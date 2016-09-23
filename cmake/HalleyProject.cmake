@@ -81,6 +81,7 @@ set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/engine/net/include
 	${HALLEY_PATH}/engine/utils/include
 	${HALLEY_PATH}/engine/entity/include
+	${HALLEY_PATH}/engine/audio/include
 	)
 	
 set(HALLEY_PROJECT_LIB_DIRS

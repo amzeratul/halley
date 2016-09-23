@@ -53,8 +53,8 @@ void AudioEngine::serviceAudio(gsl::span<AudioSamplePack> buffer)
 	Expects(buffer.size() == backBuffer.samples.size());
 
 	for (ptrdiff_t i = 0; i < buffer.size(); ++i) {
-		gsl::span<const float> src = backBuffer.samples[i].samples;
-		gsl::span<float> dst = buffer[i].samples;
+		gsl::span<const AudioConfig::SampleFormat> src = backBuffer.samples[i].samples;
+		gsl::span<AudioConfig::SampleFormat> dst = buffer[i].samples;
 		for (size_t j = 0; j < 16; ++j) {
 			dst[j] = src[j];
 		}
@@ -71,7 +71,7 @@ void AudioEngine::generateBuffer()
 	constexpr float scale = 6.283185307179586476925286766559f / 256.0f;
 	
 	for (size_t i = 0; i < backBuffer.samples.size(); ++i) {
-		gsl::span<float> dst = backBuffer.samples[i].samples;
+		gsl::span<AudioConfig::SampleFormat> dst = backBuffer.samples[i].samples;
 		for (size_t j = 0; j < 16; j += 2) {
 			size_t pos = j + i * 16;
 			float amplitude = 0.25f * ::sin(pos * scale);

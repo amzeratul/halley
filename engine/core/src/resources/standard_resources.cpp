@@ -7,6 +7,7 @@
 #include "halley/core/graphics/material/material_definition.h"
 #include "graphics/text/font.h"
 #include "halley/file_formats/config_file.h"
+#include "halley/audio/audio_clip.h"
 
 using namespace Halley;
 
@@ -19,4 +20,5 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<TextFile>("");
 	resources.init<Font>("font");
 	resources.init<ConfigFile>("config");
+	resources.init<AudioClip>("audio");
 }

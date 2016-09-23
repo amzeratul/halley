@@ -4,6 +4,7 @@
 #include <halley/halley_entity.h>
 #include <halley/halley_utils.h>
 #include <halley/net/halley_net.h>
+#include <halley/audio/halley_audio.h>
 #include <halley/runner/halley_main.h>
 
 #ifdef __glew_h__

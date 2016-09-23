@@ -10,6 +10,11 @@ namespace Halley
 {
 	class AudioClip;
 
+    namespace AudioConfig {
+        constexpr int sampleRate = 48000;
+        using SampleFormat = float;
+    }
+
 	class AudioDevice
 	{
 	public:
@@ -19,7 +24,7 @@ namespace Halley
 
 	struct alignas(64) AudioSamplePack
 	{
-		std::array<float, 16> samples; // AVX-512 friendly
+		std::array<AudioConfig::SampleFormat, 16> samples; // AVX-512 friendly
 	};
 
 	using AudioCallback = std::function<void(gsl::span<AudioSamplePack> span)>;
