@@ -21,7 +21,6 @@ void AudioClip::loadFromData(std::shared_ptr<ResourceDataStatic> data)
 	vorbis.close();
 
 	const AudioConfig::SampleFormat scale = 1.0f / 32768.0f;
-	const AudioConfig::SampleFormat offset = -1.0f;
 
 	const short* src = reinterpret_cast<short*>(rawData.data());
 	size_t nSamples = rawData.size() / (2 * nChannels);
@@ -32,12 +31,12 @@ void AudioClip::loadFromData(std::shared_ptr<ResourceDataStatic> data)
 
 	if (nChannels == 1) {
 		for (size_t i = 0; i < nSamples; ++i) {
-			samples[0][i] = AudioConfig::SampleFormat(src[i]) * scale + offset;
+			samples[0][i] = AudioConfig::SampleFormat(src[i]) * scale;
 		}
 	} else if (nChannels == 2) {
 		for (size_t i = 0; i < nSamples; ++i) {
-			samples[0][i] = AudioConfig::SampleFormat(src[i * 2]) * scale + offset;
-			samples[1][i] = AudioConfig::SampleFormat(src[i * 2 + 1]) * scale + offset;
+			samples[0][i] = AudioConfig::SampleFormat(src[i * 2]) * scale;
+			samples[1][i] = AudioConfig::SampleFormat(src[i * 2 + 1]) * scale;
 		}
 	} else {
 		throw Exception("Sound clip must have one or two channels.");

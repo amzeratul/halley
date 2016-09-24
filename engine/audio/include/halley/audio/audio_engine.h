@@ -4,6 +4,7 @@
 #include <mutex>
 #include <atomic>
 #include <condition_variable>
+#include "audio_source.h"
 
 namespace Halley {
     class AudioEngine : public AudioPlaybackAPI
@@ -28,7 +29,13 @@ namespace Halley {
 		std::mutex mutex;
 		std::condition_variable backBufferCondition;
 
+		std::vector<std::unique_ptr<AudioSource>> sources;
+		std::vector<AudioChannelData> channels;
+
 		void serviceAudio(gsl::span<AudioSamplePack> dst);
 	    void generateBuffer();
+		void updateSources();
+
+		void mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst);
     };
 }

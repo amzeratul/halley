@@ -16,7 +16,7 @@ AudioCallback AudioEngine::getCallback()
 
 void AudioEngine::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan)
 {
-	// TODO
+	sources.push_back(std::make_unique<AudioSource>(clip, AudioSourcePosition::makeUI(pan), volume));
 }
 
 void AudioEngine::run()
@@ -66,17 +66,47 @@ void AudioEngine::serviceAudio(gsl::span<AudioSamplePack> buffer)
 
 void AudioEngine::generateBuffer()
 {
-	// TODO: make this actually work instead of generating a sine wave
+	updateSources();
 
-	constexpr float scale = 6.283185307179586476925286766559f / 256.0f;
-	
+	for (size_t i = 0; i < spec.numChannels; ++i) {
+		mixChannel(i, nullptr);
+	}
+
 	for (size_t i = 0; i < backBuffer.samples.size(); ++i) {
 		gsl::span<AudioConfig::SampleFormat> dst = backBuffer.samples[i].samples;
 		for (size_t j = 0; j < 16; j += 2) {
 			size_t pos = j + i * 16;
-			float amplitude = 0.25f * ::sin(pos * scale);
-			dst[j] = amplitude;
-			dst[j + 1] = amplitude;
+			dst[j] = 0;
+			dst[j + 1] = 0;
+		}
+	}
+}
+
+void AudioEngine::updateSources()
+{
+	size_t n = sources.size();
+	for (size_t i = 0; i < n; ++i) {
+		if (sources[i]->isPlaying()) {
+			sources[i]->update(channels);
+		} else if (sources[i]->isDone()) {
+			if (sources.size() > 1) {
+				std::swap(sources[i], sources.back());
+			}
+			sources.pop_back();
+			--i;
+			--n;
+		} else if (sources[i]->isReady()) {
+			sources[i]->start();
+			sources[i]->update(channels);
+		}
+	}
+}
+
+void AudioEngine::mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst)
+{
+	for (auto& source : sources) {
+		if (source->isPlaying()) {
+			source->getChannelSamples(0, channelNum, tmp);
 		}
 	}
 }
