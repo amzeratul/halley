@@ -62,6 +62,11 @@ bool AudioSource::isDone() const
 	return done;
 }
 
+size_t AudioSource::getNumberOfChannels() const
+{
+	return clip->getNumberOfChannels();
+}
+
 void AudioSource::update(gsl::span<const AudioChannelData> channels)
 {
 	Expects(playing);

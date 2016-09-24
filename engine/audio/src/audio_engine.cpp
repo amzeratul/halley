@@ -26,13 +26,13 @@ void AudioEngine::run()
 		while (!needsBuffer && running) {
 			backBufferCondition.wait(lock);
 		}
-		needsBuffer = false;
 	}
 
 	if (!running) {
 		return;
 	}
 
+	needsBuffer = false;
 	generateBuffer();
 }
 
@@ -60,7 +60,7 @@ void AudioEngine::stop()
 
 void AudioEngine::serviceAudio(gsl::span<AudioSamplePack> buffer)
 {
-	Expects(buffer.size() == backBuffer.packs.size());
+	//Expects(buffer.size() == backBuffer.packs.size());
 
 	for (ptrdiff_t i = 0; i < buffer.size(); ++i) {
 		gsl::span<const AudioConfig::SampleFormat> src = backBuffer.packs[i].samples;
@@ -70,10 +70,7 @@ void AudioEngine::serviceAudio(gsl::span<AudioSamplePack> buffer)
 		}
 	}
 
-	{
-		std::unique_lock<std::mutex> lock(mutex);
-		needsBuffer = true;
-	}
+	needsBuffer = true;
 	backBufferCondition.notify_one();
 }
 
@@ -128,7 +125,13 @@ void AudioEngine::mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst)
 	}
 	for (auto& source : sources) {
 		if (source->isPlaying()) {
-			source->mixToBuffer(0, channelNum, tmpBuffer.packs, dst);
+			size_t nChannels = source->getNumberOfChannels();
+			if (nChannels == 2) {
+				// TODO: more than stereo support
+				source->mixToBuffer(channelNum, channelNum, tmpBuffer.packs, dst);
+			} else {
+				source->mixToBuffer(0, channelNum, tmpBuffer.packs, dst);
+			}
 		}
 	}
 }
