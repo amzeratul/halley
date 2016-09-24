@@ -26,6 +26,9 @@ void EditorRootStage::init()
 		taskBar = std::make_unique<TaskBar>(getResources());
 		console = std::make_unique<ConsoleWindow>(getResources());
 	}
+
+	getAPI().audio->startPlayback();
+	getAPI().audio->playUI(getResource<AudioClip>("bell.ogg"));
 }
 
 void EditorRootStage::onVariableUpdate(Time time)
