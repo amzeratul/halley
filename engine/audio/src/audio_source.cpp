@@ -17,6 +17,10 @@ void AudioSource::start()
 	playing = true;
 	playbackPos = 0;
 	playbackLength = clip->getLength();
+
+	if (clip->getNumberOfChannels() > 1) {
+		sourcePos = AudioSourcePosition::makeFixed();
+	}
 }
 
 void AudioSource::stop()
@@ -50,11 +54,11 @@ void AudioSource::update(gsl::span<const AudioChannelData> channels)
 	Expects(playing);
 	
 	if (playbackPos == 0) {
-		sourcePos.setMix(channels, channelMix, gain);
+		sourcePos.setMix(clip->getNumberOfChannels(), channels, channelMix, gain);
 		prevChannelMix = channelMix;
 	} else {
 		prevChannelMix = channelMix;
-		sourcePos.setMix(channels, channelMix, gain);
+		sourcePos.setMix(clip->getNumberOfChannels(), channels, channelMix, gain);
 	}
 }
 
@@ -64,8 +68,12 @@ void AudioSource::mixToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<Au
 	Expects(tmp.size() == out.size());
 	Expects(dstChannel < 8);
 
-	const float gain0 = prevChannelMix[dstChannel];
-	const float gain1 = channelMix[dstChannel];
+	const size_t numChannels = clip->getNumberOfChannels();
+	Expects(srcChannel < numChannels);
+
+	const size_t mixIndex = (srcChannel * numChannels) + dstChannel;
+	const float gain0 = prevChannelMix[mixIndex];
+	const float gain1 = channelMix[mixIndex];
 	if (gain0 < 0.01f && gain1 < 0.01f) {
 		// Early out
 		return;

@@ -17,8 +17,7 @@ AudioCallback AudioEngine::getCallback()
 
 void AudioEngine::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan)
 {
-	auto pos = AudioSourcePosition::makeUI(pan);
-	sources.push_back(std::make_unique<AudioSource>(clip, pos, volume));
+	sources.push_back(std::make_unique<AudioSource>(clip, AudioSourcePosition::makeUI(pan), volume));
 }
 
 void AudioEngine::run()
@@ -45,12 +44,15 @@ void AudioEngine::start(AudioSpec s)
 	const size_t bufferSize = spec.bufferSize / 16;
 	backBuffer.packs.resize(bufferSize * spec.numChannels);
 
-	channels.resize(spec.numChannels);
 	tmpBuffer.packs.resize(bufferSize);
 	channelBuffers.resize(spec.numChannels);
 	for (auto& b: channelBuffers) {
 		b.packs.resize(bufferSize);
 	}
+
+	channels.resize(spec.numChannels);
+	channels[0].pan = 0.0f;
+	channels[1].pan = 1.0f;
 }
 
 void AudioEngine::stop()
@@ -128,11 +130,8 @@ void AudioEngine::mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst)
 	for (auto& source : sources) {
 		if (source->isPlaying()) {
 			size_t nChannels = source->getNumberOfChannels();
-			if (nChannels == 2) {
-				// TODO: more than stereo support
-				source->mixToBuffer(channelNum, channelNum, tmpBuffer.packs, dst);
-			} else {
-				source->mixToBuffer(0, channelNum, tmpBuffer.packs, dst);
+			for (size_t i = 0; i < nChannels; ++i) {
+				source->mixToBuffer(i, channelNum, tmpBuffer.packs, dst);
 			}
 		}
 	}

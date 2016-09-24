@@ -31,9 +31,36 @@ AudioSourcePosition AudioSourcePosition::makeFixed()
 	return AudioSourcePosition(Vector3f(), true, false);
 }
 
-void AudioSourcePosition::setMix(gsl::span<const AudioChannelData> channels, gsl::span<float, 8> dst, float gain) const
+static float gain2DPan(float srcPan, float dstPan)
 {
-	// TODO
-	dst[0] = 0.5f * gain;
-	dst[1] = 0.5f * gain;
+	return std::max(0.0f, 1.0f - fabs(srcPan - dstPan));
+}
+
+void AudioSourcePosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain) const
+{
+	const size_t nDstChannels = size_t(dstChannels.size());
+
+	if (isPannable) {
+		// Pannable (mono) sounds
+		Expects(nSrcChannels == 1);
+		if (isUI) {
+			for (size_t i = 0; i < nDstChannels; ++i) {
+				dst[i] = gain2DPan(pos.x, dstChannels[i].pan) * gain;
+			}
+		} else {
+			// TODO: in-world sounds, do this relative to listener
+			for (size_t i = 0; i < nDstChannels; ++i) {
+				dst[i] = gain2DPan(pos.x, dstChannels[i].pan) * gain;
+			}
+		}
+	} else {
+		// Non-pannable (stereo) sounds
+		Expects(nSrcChannels == 2);
+		for (size_t i = 0; i < nSrcChannels; ++i) {
+			float srcPan = i == 0 ? 0.0f : 1.0f;
+			for (size_t j = 0; j < nDstChannels; ++j) {
+				dst[i * nSrcChannels + j] = gain2DPan(srcPan, dstChannels[j].pan) * gain;
+			}
+		}
+	}
 }

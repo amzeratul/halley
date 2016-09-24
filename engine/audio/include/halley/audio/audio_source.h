@@ -22,17 +22,18 @@ namespace Halley {
 		
     private:
 		std::shared_ptr<AudioClip> clip;
-		AudioSourcePosition sourcePos;
-		float gain;
 
 		size_t playbackPos = 0;
 		size_t playbackLength = 0;
+
+    	AudioSourcePosition sourcePos;
 		bool playing = false;
 		bool done = false;
+    	float gain;
 
-		std::array<float, 8> prevChannelMix;
-		std::array<float, 8> channelMix;
+		std::array<float, 16> channelMix;
+		std::array<float, 16> prevChannelMix;
 
-		void readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const;
+    	void readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const;
     };
 }
