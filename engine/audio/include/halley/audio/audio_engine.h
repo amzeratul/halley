@@ -30,6 +30,7 @@ namespace Halley {
 		std::condition_variable backBufferCondition;
 
 		std::vector<std::unique_ptr<AudioSource>> sources;
+		std::vector<std::vector<AudioSamplePack>> buffers;
 		std::vector<AudioChannelData> channels;
 
 		void serviceAudio(gsl::span<AudioSamplePack> dst);
@@ -37,5 +38,6 @@ namespace Halley {
 		void updateSources();
 
 		void mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst);
+	    void interpolateChannels(AudioBuffer& dst, const std::vector<std::vector<AudioSamplePack>>& src);
     };
 }

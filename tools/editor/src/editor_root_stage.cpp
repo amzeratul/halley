@@ -28,7 +28,6 @@ void EditorRootStage::init()
 	}
 
 	getAPI().audio->startPlayback();
-	getAPI().audio->playUI(getResource<AudioClip>("bell.ogg"));
 }
 
 void EditorRootStage::onVariableUpdate(Time time)
@@ -45,6 +44,10 @@ void EditorRootStage::onVariableUpdate(Time time)
 
 	if (console) {
 		console->update(*getInputAPI().getKeyboard());
+	}
+
+	if (getInputAPI().getKeyboard()->isButtonPressed(Keys::Space)) {
+		getAPI().audio->playUI(getResource<AudioClip>("bell.ogg"));
 	}
 }
 
