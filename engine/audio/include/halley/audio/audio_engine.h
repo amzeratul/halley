@@ -40,6 +40,5 @@ namespace Halley {
 	    void postUpdateSources();
 
 		void mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst);
-	    void interpolateChannels(AudioBuffer& dst, const std::vector<AudioBuffer>& src);
     };
 }

@@ -1,5 +1,6 @@
 #include "audio_engine.h"
 #include <cmath>
+#include "audio_mixer.h"
 
 using namespace Halley;
 
@@ -84,7 +85,7 @@ void AudioEngine::generateBuffer()
 
 	postUpdateSources();
 
-	interpolateChannels(backBuffer, channelBuffers);
+	AudioMixer::interleaveChannels(backBuffer, channelBuffers);
 }
 
 void AudioEngine::updateSources()
@@ -132,23 +133,6 @@ void AudioEngine::mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst)
 			} else {
 				source->mixToBuffer(0, channelNum, tmpBuffer.packs, dst);
 			}
-		}
-	}
-}
-
-void AudioEngine::interpolateChannels(AudioBuffer& dstBuffer, const std::vector<AudioBuffer>& src)
-{
-	size_t n = 0;
-	for (size_t i = 0; i < backBuffer.packs.size(); ++i) {
-		gsl::span<AudioConfig::SampleFormat> dst = dstBuffer.packs[i].samples;
-		size_t srcIdx = i >> 1;
-		size_t srcOff = (i & 1) << 3;
-
-		for (size_t j = 0; j < 8; ++j) {
-			size_t srcPos = j + srcOff;
-			dst[2 * j] = src[0].packs[srcIdx].samples[srcPos];
-			dst[2 * j + 1] = src[1].packs[srcIdx].samples[srcPos];
-			n += 2;
 		}
 	}
 }
