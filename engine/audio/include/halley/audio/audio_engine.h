@@ -13,7 +13,10 @@ namespace Halley {
 	    AudioEngine();
 
 	    AudioCallback getCallback();
-	    void playUI(std::shared_ptr<AudioClip> clip, float volume, float pan) override;
+
+    	void playUI(std::shared_ptr<AudioClip> clip, float volume, float pan) override;
+	    void playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume) override;
+	    void setListener(Vector2f position) override;
 
 		void run();
 		void start(AudioSpec spec);

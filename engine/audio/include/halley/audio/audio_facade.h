@@ -21,6 +21,8 @@ namespace Halley {
 		void stopPlayback() override;
 
 	    void playUI(std::shared_ptr<AudioClip> clip, float volume, float pan) override;
+	    void playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume) override;
+	    void setListener(Vector2f position) override;
 
     private:
 		AudioOutputAPI& output;

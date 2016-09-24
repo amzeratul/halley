@@ -20,6 +20,16 @@ void AudioEngine::playUI(std::shared_ptr<AudioClip> clip, float volume, float pa
 	sources.push_back(std::make_unique<AudioSource>(clip, AudioSourcePosition::makeUI(pan), volume));
 }
 
+void AudioEngine::playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume)
+{
+	sources.push_back(std::make_unique<AudioSource>(clip, AudioSourcePosition::makePositional(Vector3f(position)), volume));
+}
+
+void AudioEngine::setListener(Vector2f position)
+{
+	// TODO
+}
+
 void AudioEngine::run()
 {
 	{
