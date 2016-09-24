@@ -45,7 +45,6 @@ void AudioClip::loadFromData(std::shared_ptr<ResourceDataStatic> data)
 	rawData.clear();
 
 	sampleLength = nSamples;
-	std::cout << "Clip loaded with " << sampleLength << " samples." << std::endl;
 
 	doneLoading();
 }
@@ -67,6 +66,13 @@ void AudioClip::getChannelData(size_t channelN, size_t pos, gsl::span<AudioConfi
 			dst[i] = AudioConfig::SampleFormat();
 		}
 	}
+}
+
+gsl::span<const AudioConfig::SampleFormat> AudioClip::getChannelData(size_t channelN, size_t pos, size_t len) const
+{
+	Expects(pos + len <= sampleLength);
+
+	return gsl::span<const AudioConfig::SampleFormat>(samples.at(channelN).data() + pos, len);
 }
 
 size_t AudioClip::getLength() const

@@ -15,6 +15,8 @@ namespace Halley
 		void loadFromData(std::shared_ptr<ResourceDataStatic> data);
 
 		void getChannelData(size_t channelN, size_t pos, gsl::span<AudioConfig::SampleFormat> dst) const;
+		gsl::span<const AudioConfig::SampleFormat> getChannelData(size_t channelN, size_t pos, size_t len) const;
+
 		size_t getLength() const; // in samples
 		size_t getNumberOfChannels() const;
 

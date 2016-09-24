@@ -6,6 +6,7 @@ set(SOURCES
         "src/audio_clip.cpp"
         "src/audio_engine.cpp"
         "src/audio_facade.cpp"
+        "src/audio_source.cpp"
         "src/vorbis_dec.cpp"
         )
 
@@ -14,6 +15,7 @@ set(HEADERS
         "include/halley/audio/audio_clip.h"
         "include/halley/audio/audio_engine.h"
         "include/halley/audio/audio_facade.h"
+        "include/halley/audio/audio_source.h"
         "include/halley/audio/halley_audio.h"
         "src/vorbis_dec.h"
         )
