@@ -1,29 +1,8 @@
 #pragma once
 #include "audio_clip.h"
-#include "halley/maths/vector3.h"
+#include "audio_source_position.h"
 
 namespace Halley {
-	class AudioChannelData
-	{
-	public:
-		float pan; // TODO, do this right
-	};
-
-	class AudioSourcePosition
-	{
-	public:
-		static AudioSourcePosition makeUI(float pan);
-		static AudioSourcePosition makePositional(Vector3f pos);
-
-		void setMix(gsl::span<const AudioChannelData> channels, gsl::span<float, 8> dst, float gain) const;
-		
-	private:
-		AudioSourcePosition(bool isUI, Vector3f pos);
-
-		bool isUI;
-		Vector3f pos;
-	};
-
     class AudioSource {
     public:
 		AudioSource(std::shared_ptr<AudioClip> clip, AudioSourcePosition sourcePos, float gain);

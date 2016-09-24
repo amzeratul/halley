@@ -17,7 +17,8 @@ AudioCallback AudioEngine::getCallback()
 
 void AudioEngine::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan)
 {
-	sources.push_back(std::make_unique<AudioSource>(clip, AudioSourcePosition::makeUI(pan), volume));
+	auto pos = AudioSourcePosition::makeUI(pan);
+	sources.push_back(std::make_unique<AudioSource>(clip, pos, volume));
 }
 
 void AudioEngine::run()

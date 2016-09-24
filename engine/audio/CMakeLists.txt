@@ -8,6 +8,7 @@ set(SOURCES
         "src/audio_facade.cpp"
         "src/audio_mixer.cpp"
         "src/audio_source.cpp"
+        "src/audio_source_position.cpp"
         "src/vorbis_dec.cpp"
         )
 
@@ -18,6 +19,7 @@ set(HEADERS
         "include/halley/audio/audio_facade.h"
         "include/halley/audio/audio_mixer.h"
         "include/halley/audio/audio_source.h"
+        "include/halley/audio/audio_source_position.h"
         "include/halley/audio/halley_audio.h"
         "src/vorbis_dec.h"
         )
