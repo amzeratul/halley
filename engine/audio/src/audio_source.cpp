@@ -1,4 +1,5 @@
 #include "audio_source.h"
+#include "audio_mixer.h"
 
 using namespace Halley;
 
@@ -86,29 +87,16 @@ void AudioSource::mixToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<Au
 	Expects(tmp.size() == out.size());
 	Expects(dstChannel < 8);
 
-	readSourceToBuffer(srcChannel, tmp);
-
 	const float gain0 = prevChannelMix[dstChannel];
 	const float gain1 = channelMix[dstChannel];
-	const float scale = 1.0f / out.size();
-
-	const size_t nPacks = size_t(tmp.size());
-
-	if (gain0 == gain1) {
-		// If the gain doesn't change, the code is faster
-		for (size_t i = 0; i < nPacks; ++i) {
-			for (size_t j = 0; j < 16; ++j) {
-				out[i].samples[j] += tmp[i].samples[j] * gain0;
-			}
-		}
-	} else {
-		// Interpolate the gain
-		for (size_t i = 0; i < nPacks; ++i) {
-			for (size_t j = 0; j < 16; ++j) {
-				out[i].samples[j] += tmp[i].samples[j] * lerp(gain0, gain1, (i * 16 + j) * scale);
-			}
-		}
+	if (gain0 < 0.01f && gain1 < 0.01f) {
+		// Early out
+		return;
 	}
+
+	readSourceToBuffer(srcChannel, tmp);
+
+	AudioMixer::mixAudio(tmp, out, gain0, gain1);
 }
 
 void AudioSource::advancePlayback(size_t samples)
