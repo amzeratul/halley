@@ -36,8 +36,8 @@ namespace Halley {
 		bool isDone() const;
 
 		void update(gsl::span<const AudioChannelData> channels);
-		void readToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<AudioConfig::SampleFormat> out);
-		void mixToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<AudioConfig::SampleFormat> out);
+		void mixToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<AudioSamplePack> tmp, gsl::span<AudioSamplePack> out);
+		void advancePlayback(size_t samples);
 		
     private:
 		std::shared_ptr<AudioClip> clip;
@@ -51,5 +51,7 @@ namespace Halley {
 
 		std::array<float, 8> prevChannelMix;
 		std::array<float, 8> channelMix;
+
+		void readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const;
     };
 }

@@ -212,7 +212,6 @@ void Core::doFixedUpdate(Time time)
 	auto& t = timers[int(TimeLine::FixedUpdate)];
 	t.beginSample();
 
-	pumpEvents(time);
 	if (running) {
 		if (currentStage) {
 			currentStage->onFixedUpdate(time);
@@ -227,6 +226,7 @@ void Core::doVariableUpdate(Time time)
 	auto& t = timers[int(TimeLine::VariableUpdate)];
 	t.beginSample();
 
+	pumpEvents(time);
 	if (running) {
 		if (currentStage) {
 			currentStage->onVariableUpdate(time);

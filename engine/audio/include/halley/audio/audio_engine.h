@@ -22,22 +22,24 @@ namespace Halley {
     private:
 		AudioSpec spec;
 
-		AudioBuffer backBuffer;
-
 		std::atomic<bool> running;
 		std::atomic<bool> needsBuffer;
 		std::mutex mutex;
 		std::condition_variable backBufferCondition;
 
 		std::vector<std::unique_ptr<AudioSource>> sources;
-		std::vector<std::vector<AudioSamplePack>> buffers;
 		std::vector<AudioChannelData> channels;
+
+		AudioBuffer backBuffer;
+		AudioBuffer tmpBuffer;
+    	std::vector<AudioBuffer> channelBuffers;
 
 		void serviceAudio(gsl::span<AudioSamplePack> dst);
 	    void generateBuffer();
 		void updateSources();
+	    void postUpdateSources();
 
 		void mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst);
-	    void interpolateChannels(AudioBuffer& dst, const std::vector<std::vector<AudioSamplePack>>& src);
+	    void interpolateChannels(AudioBuffer& dst, const std::vector<AudioBuffer>& src);
     };
 }

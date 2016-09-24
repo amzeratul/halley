@@ -26,6 +26,7 @@ void AudioEngine::run()
 		while (!needsBuffer && running) {
 			backBufferCondition.wait(lock);
 		}
+		needsBuffer = false;
 	}
 
 	if (!running) {
@@ -40,12 +41,13 @@ void AudioEngine::start(AudioSpec s)
 	spec = s;
 
 	const size_t bufferSize = spec.bufferSize / 16;
-	backBuffer.samples.resize(bufferSize * spec.numChannels);
+	backBuffer.packs.resize(bufferSize * spec.numChannels);
 
 	channels.resize(spec.numChannels);
-	buffers.resize(spec.numChannels);
-	for (auto& b: buffers) {
-		b.resize(bufferSize);
+	tmpBuffer.packs.resize(bufferSize);
+	channelBuffers.resize(spec.numChannels);
+	for (auto& b: channelBuffers) {
+		b.packs.resize(bufferSize);
 	}
 }
 
@@ -58,17 +60,20 @@ void AudioEngine::stop()
 
 void AudioEngine::serviceAudio(gsl::span<AudioSamplePack> buffer)
 {
-	Expects(buffer.size() == backBuffer.samples.size());
+	Expects(buffer.size() == backBuffer.packs.size());
 
 	for (ptrdiff_t i = 0; i < buffer.size(); ++i) {
-		gsl::span<const AudioConfig::SampleFormat> src = backBuffer.samples[i].samples;
+		gsl::span<const AudioConfig::SampleFormat> src = backBuffer.packs[i].samples;
 		gsl::span<AudioConfig::SampleFormat> dst = buffer[i].samples;
 		for (size_t j = 0; j < 16; ++j) {
 			dst[j] = src[j];
 		}
 	}
 
-	needsBuffer = true;
+	{
+		std::unique_lock<std::mutex> lock(mutex);
+		needsBuffer = true;
+	}
 	backBufferCondition.notify_one();
 }
 
@@ -77,10 +82,12 @@ void AudioEngine::generateBuffer()
 	updateSources();
 
 	for (size_t i = 0; i < spec.numChannels; ++i) {
-		mixChannel(i, buffers[i]);
+		mixChannel(i, channelBuffers[i].packs);
 	}
 
-	interpolateChannels(backBuffer, buffers);
+	postUpdateSources();
+
+	interpolateChannels(backBuffer, channelBuffers);
 }
 
 void AudioEngine::updateSources()
@@ -103,6 +110,15 @@ void AudioEngine::updateSources()
 	}
 }
 
+void AudioEngine::postUpdateSources()
+{
+	for (auto& source : sources) {
+		if (source->isPlaying()) {
+			source->advancePlayback(backBuffer.packs.size() * 16 / spec.numChannels);
+		}
+	}
+}
+
 void AudioEngine::mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst)
 {
 	for (auto& pack : dst) {
@@ -112,22 +128,24 @@ void AudioEngine::mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst)
 	}
 	for (auto& source : sources) {
 		if (source->isPlaying()) {
-			source->mixToBuffer(0, channelNum, gsl::span<AudioConfig::SampleFormat>(reinterpret_cast<AudioConfig::SampleFormat*>(dst.data()), dst.size() * 16));
+			source->mixToBuffer(0, channelNum, tmpBuffer.packs, dst);
 		}
 	}
 }
 
-void AudioEngine::interpolateChannels(AudioBuffer& dstBuffer, const std::vector<std::vector<AudioSamplePack>>& src)
+void AudioEngine::interpolateChannels(AudioBuffer& dstBuffer, const std::vector<AudioBuffer>& src)
 {
-	for (size_t i = 0; i < backBuffer.samples.size(); ++i) {
-		gsl::span<AudioConfig::SampleFormat> dst = dstBuffer.samples[i].samples;
+	size_t n = 0;
+	for (size_t i = 0; i < backBuffer.packs.size(); ++i) {
+		gsl::span<AudioConfig::SampleFormat> dst = dstBuffer.packs[i].samples;
 		size_t srcIdx = i >> 1;
 		size_t srcOff = (i & 1) << 3;
 
 		for (size_t j = 0; j < 8; ++j) {
 			size_t srcPos = j + srcOff;
-			dst[2 * j] = buffers[0][srcIdx].samples[srcPos];
-			dst[2 * j + 1] = buffers[1][srcIdx].samples[srcPos];
+			dst[2 * j] = src[0].packs[srcIdx].samples[srcPos];
+			dst[2 * j + 1] = src[1].packs[srcIdx].samples[srcPos];
+			n += 2;
 		}
 	}
 }

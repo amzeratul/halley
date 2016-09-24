@@ -6,6 +6,6 @@ namespace Halley
 {
 	struct AudioBuffer
 	{
-		std::vector<AudioSamplePack> samples;
+		std::vector<AudioSamplePack> packs;
 	};
 }
