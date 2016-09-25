@@ -23,11 +23,12 @@ input
 - use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
-- define audio API
-- audio clip resources (Ogg Opus?)
-- Importers (Ogg Vorbis? MP3? Wav?) -> Ogg Opus
-- Audio mixers
-- Audio playback engine
+- Music
+- Looping samples
+- Falloff
+- Listener position
+- Sample callback/adjusting
+- Fading
 - Effects
 
 entity
