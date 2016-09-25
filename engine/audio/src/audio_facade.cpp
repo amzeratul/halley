@@ -64,9 +64,7 @@ void AudioFacade::stopPlayback()
 
 void AudioFacade::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop)
 {
-	std::unique_lock<std::mutex> lock(audioMutex);
-
-	actions.push_back([=] ()
+	enqueue([=] ()
 	{
 		engine->playUI(clip, volume, pan, loop);
 	});
@@ -74,9 +72,7 @@ void AudioFacade::playUI(std::shared_ptr<AudioClip> clip, float volume, float pa
 
 void AudioFacade::playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop)
 {
-	std::unique_lock<std::mutex> lock(audioMutex);
-
-	actions.push_back([=] ()
+	enqueue([=] ()
 	{
 		engine->playWorld(clip, position, volume, loop);
 	});
@@ -84,9 +80,7 @@ void AudioFacade::playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, 
 
 void AudioFacade::setListener(Vector2f position)
 {
-	std::unique_lock<std::mutex> lock(audioMutex);
-
-	actions.push_back([=] ()
+	enqueue([=] ()
 	{
 		engine->setListener(position);
 	});
@@ -108,4 +102,10 @@ void AudioFacade::run()
 
 		engine->run();
 	}
+}
+
+void AudioFacade::enqueue(std::function<void()> action)
+{
+	std::unique_lock<std::mutex> lock(audioMutex);
+	actions.push_back(action);
 }

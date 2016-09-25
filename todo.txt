@@ -7,9 +7,9 @@ core/resources
 - resources hot reloading [RESEARCH]
 
 core/graphics
+- render graph [from old Halley]
 - convert uniforms into attributes for distance_field_sprite?
 - optimise SpritePainter
-- render graph [from old Halley]
 - run rendering on another thread?
 - multi-pass conditional enabling of pass
 - multi-pass disable batching
@@ -23,12 +23,16 @@ input
 - use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
-- Music
 - Sample callback/adjusting
+- Music
 - Falloff
 - Listener position
 - Fading
 - Effects
+  - Pitch bending
+  - Doppler shift
+  - Low-pass
+  - Reverb
 
 entity
 * fix MappedPool (crashes with too many entities)
@@ -46,6 +50,7 @@ entity
 - snapshot world
 
 codegen
+- don't delete system files
 - components registry [RESEARCH] (does this even make sense?)
 - components serialization [RESEARCH]
 - import custom types in components [RESEARCH]

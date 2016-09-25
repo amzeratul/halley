@@ -1,5 +1,4 @@
 #pragma once
-#include "halley/core/api/audio_api.h"
 #include "audio_buffer.h"
 #include <mutex>
 #include <atomic>
@@ -9,15 +8,15 @@
 namespace Halley {
 	class AudioMixer;
 
-    class AudioEngine : public AudioPlaybackAPI
+    class AudioEngine
     {
     public:
 	    AudioEngine();
 		~AudioEngine();
 
-    	void playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop) override;
-	    void playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop) override;
-	    void setListener(Vector2f position) override;
+    	void playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop);
+	    void playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop);
+	    void setListener(Vector2f position);
 
 		void run();
 		void start(AudioSpec spec, AudioOutputAPI& out);

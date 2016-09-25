@@ -35,5 +35,6 @@ namespace Halley {
 		std::vector<std::function<void()>> actions;
 
 		void run();
+		void enqueue(std::function<void()> action);
     };
 }
