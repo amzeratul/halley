@@ -68,7 +68,10 @@ namespace Halley
 	class FutureData
 	{
 	public:
-		FutureData() = default;
+		FutureData()
+			: available(false)
+		{}
+
 		FutureData(FutureData&&) = delete;
 		FutureData(const FutureData&) = delete;
 		FutureData& operator=(FutureData&&) = delete;

@@ -15,7 +15,7 @@ int ImportTool::run(Vector<std::string> args)
 	if (args.size() == 2) {
 		Executors executors;
 		Executors::set(executors);
-		ThreadPool tp(executors.getCPU(), std::max(unsigned int(4), std::thread::hardware_concurrency()));
+		ThreadPool tp(executors.getCPU(), std::max(static_cast<unsigned int>(4), std::thread::hardware_concurrency()));
 
 		Path projectPath = FileSystem::getAbsolute(Path(args[0]));
 		Path sharedAssetsPath = FileSystem::getAbsolute(Path(args[1]) / "assets_src");
