@@ -45,10 +45,10 @@ void AudioMixer::interleaveChannels(AudioBuffer& dstBuffer, gsl::span<const Audi
 }
 
 #ifdef HAS_SSE
-#include <cpuid.h>
 
 #ifndef _MSC_VER
 
+#include <cpuid.h>
 static inline unsigned long long _xgetbv(unsigned int index){
 	unsigned int eax, edx;
 	__asm__ __volatile__("xgetbv" : "=a"(eax), "=d"(edx) : "c"(index));

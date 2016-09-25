@@ -194,7 +194,7 @@ size_t VorbisData::vorbisRead(void* ptr, size_t size, size_t nmemb, void* dataso
 	}
 }
 
-int VorbisData::vorbisSeek(void *datasource, long int offset, int whence)
+int VorbisData::vorbisSeek(void *datasource, OggOffsetType offset, int whence)
 {
 	VorbisData* data = static_cast<VorbisData*>(datasource);
 

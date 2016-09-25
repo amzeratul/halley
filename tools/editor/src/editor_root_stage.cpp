@@ -47,7 +47,8 @@ void EditorRootStage::onVariableUpdate(Time time)
 	}
 
 	if (getInputAPI().getKeyboard()->isButtonPressed(Keys::Space)) {
-		getAPI().audio->playUI(getResource<AudioClip>("bell.ogg"));
+		getAPI().audio->playUI(getResource<AudioClip>("bell.ogg"), 2, 0.5f);
+		getAPI().audio->playUI(getResource<AudioClip>("Step_wood.ogg"), 1);
 	}
 }
 
