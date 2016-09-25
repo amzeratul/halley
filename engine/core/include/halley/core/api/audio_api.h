@@ -67,8 +67,8 @@ namespace Halley
 		virtual void startPlayback() = 0;
 		virtual void stopPlayback() = 0;
 
-		virtual void lockOutputDevice() = 0;
-		virtual void unlockOutputDevice() = 0;
+		virtual void queueAudio(gsl::span<const AudioSamplePack> data) = 0;
+		virtual size_t getQueuedSize() const = 0;
 	};
 
 	class AudioPlaybackAPI

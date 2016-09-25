@@ -1,5 +1,6 @@
 #include "audio_sdl.h"
 #include <SDL.h>
+#include <cstdint>
 
 using namespace Halley;
 
@@ -52,7 +53,8 @@ AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, AudioCallb
 
 	auto f = requestedFormat.format;
 	SDL_AudioSpec desired;
-	desired.callback = &sdlCallback;
+	//desired.callback = &sdlCallback;
+	desired.callback = nullptr;
 	desired.channels = requestedFormat.numChannels;
 	desired.freq = requestedFormat.sampleRate;
 	desired.samples = requestedFormat.bufferSize;
@@ -106,16 +108,14 @@ void AudioSDL::stopPlayback()
 	}
 }
 
-void AudioSDL::lockOutputDevice()
+void AudioSDL::queueAudio(gsl::span<const AudioSamplePack> data)
 {
-	if (device) {
-		SDL_LockAudioDevice(device);
-	}
+	Expects(device);
+	SDL_QueueAudio(device, data.data(), uint32_t(data.size_bytes()));
 }
 
-void AudioSDL::unlockOutputDevice()
+size_t AudioSDL::getQueuedSize() const
 {
-	if (device) {
-		SDL_UnlockAudioDevice(device);
-	}
+	Expects(device);
+	return size_t(SDL_GetQueuedAudioSize(device));
 }

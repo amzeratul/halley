@@ -38,17 +38,21 @@ void AudioEngine::setListener(Vector2f position)
 
 void AudioEngine::run()
 {
+	const size_t bufSize = spec.numChannels * sizeof(AudioConfig::SampleFormat) * spec.bufferSize;
+	const size_t minQueue = bufSize * 2;
+
 	using namespace std::chrono_literals;
-	while (!needsBuffer && running) {
+	while (out->getQueuedSize() >= minQueue && running) {
 		std::this_thread::sleep_for(100us);
 	}
-	needsBuffer = false;
 
 	if (!running) {
 		return;
 	}
 
-	generateBuffer();
+	while (out->getQueuedSize() < minQueue && running) {
+		generateBuffer();
+	}
 }
 
 void AudioEngine::generateBuffer()
@@ -62,7 +66,7 @@ void AudioEngine::generateBuffer()
 	postUpdateSources();
 
 	mixer->interleaveChannels(backBuffer, channelBuffers);
-	std::swap(backBuffer, frontBuffer);
+	out->queueAudio(backBuffer.packs);
 }
 
 void AudioEngine::serviceAudio(gsl::span<AudioSamplePack> buffer)
