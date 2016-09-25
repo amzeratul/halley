@@ -44,7 +44,7 @@ void AudioFacade::startPlayback(int deviceNumber)
 
 	AudioSpec obtained = output.openAudioDevice(format, engine->getCallback(), getAudioDevices().at(deviceNumber).get());
 
-	engine->start(obtained);
+	engine->start(obtained, output);
 	running = true;
 	audioThread = std::thread([this] () { run(); });
 

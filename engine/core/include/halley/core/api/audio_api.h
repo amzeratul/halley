@@ -66,6 +66,9 @@ namespace Halley
 
 		virtual void startPlayback() = 0;
 		virtual void stopPlayback() = 0;
+
+		virtual void lockOutputDevice() = 0;
+		virtual void unlockOutputDevice() = 0;
 	};
 
 	class AudioPlaybackAPI

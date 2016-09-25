@@ -5,9 +5,9 @@
 using namespace Halley;
 
 AudioEngine::AudioEngine()
-	: running(true)
+	: mixer(AudioMixer::makeMixer())
+	, running(true)
 	, needsBuffer(true)
-	, mixer(AudioMixer::makeMixer())
 {
 }
 
@@ -52,12 +52,37 @@ void AudioEngine::run()
 	generateBuffer();
 }
 
-void AudioEngine::start(AudioSpec s)
+void AudioEngine::generateBuffer()
+{
+	updateSources();
+
+	for (size_t i = 0; i < spec.numChannels; ++i) {
+		mixChannel(i, channelBuffers[i].packs);
+	}
+
+	postUpdateSources();
+
+	mixer->interleaveChannels(backBuffer, channelBuffers);
+	out->lockOutputDevice();
+	std::swap(backBuffer, frontBuffer);
+	out->unlockOutputDevice();
+}
+
+void AudioEngine::serviceAudio(gsl::span<AudioSamplePack> buffer)
+{
+	needsBuffer = true;
+	backBufferCondition.notify_one();
+	memcpy(buffer.data(), frontBuffer.packs.data(), buffer.size_bytes());
+}
+
+void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 {
 	spec = s;
+	out = &o;
 
 	const size_t bufferSize = spec.bufferSize / 16;
 	backBuffer.packs.resize(bufferSize * spec.numChannels);
+	frontBuffer.packs.resize(bufferSize * spec.numChannels);
 
 	tmpBuffer.packs.resize(bufferSize);
 	channelBuffers.resize(spec.numChannels);
@@ -75,35 +100,6 @@ void AudioEngine::stop()
 	running = false;
 	needsBuffer = false;
 	backBufferCondition.notify_one();
-}
-
-void AudioEngine::serviceAudio(gsl::span<AudioSamplePack> buffer)
-{
-	//Expects(buffer.size() == backBuffer.packs.size());
-
-	for (ptrdiff_t i = 0; i < buffer.size(); ++i) {
-		gsl::span<const AudioConfig::SampleFormat> src = backBuffer.packs[i].samples;
-		gsl::span<AudioConfig::SampleFormat> dst = buffer[i].samples;
-		for (size_t j = 0; j < 16; ++j) {
-			dst[j] = src[j];
-		}
-	}
-
-	needsBuffer = true;
-	backBufferCondition.notify_one();
-}
-
-void AudioEngine::generateBuffer()
-{
-	updateSources();
-
-	for (size_t i = 0; i < spec.numChannels; ++i) {
-		mixChannel(i, channelBuffers[i].packs);
-	}
-
-	postUpdateSources();
-
-	mixer->interleaveChannels(backBuffer, channelBuffers);
 }
 
 void AudioEngine::updateSources()

@@ -28,8 +28,10 @@ namespace Halley
 		void startPlayback() override;
 		void stopPlayback() override;
 
-		inline void onCallback(gsl::span<AudioSamplePack> bytes) const { callback(bytes); }
+		void lockOutputDevice() override;
+		void unlockOutputDevice() override;
 
+		inline void onCallback(gsl::span<AudioSamplePack> bytes) const { callback(bytes); }
 	private:
 		bool playing = false;
 		Uint32 device = 0;

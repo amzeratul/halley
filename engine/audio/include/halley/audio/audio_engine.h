@@ -22,11 +22,12 @@ namespace Halley {
 	    void setListener(Vector2f position) override;
 
 		void run();
-		void start(AudioSpec spec);
+		void start(AudioSpec spec, AudioOutputAPI& out);
 		void stop();
 
     private:
 		AudioSpec spec;
+		AudioOutputAPI* out;
 		std::unique_ptr<AudioMixer> mixer;
 
 		std::atomic<bool> running;
@@ -37,6 +38,7 @@ namespace Halley {
 		std::vector<std::unique_ptr<AudioSource>> sources;
 		std::vector<AudioChannelData> channels;
 
+		AudioBuffer frontBuffer;
 		AudioBuffer backBuffer;
 		AudioBuffer tmpBuffer;
     	std::vector<AudioBuffer> channelBuffers;

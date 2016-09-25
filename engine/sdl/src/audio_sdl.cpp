@@ -105,3 +105,17 @@ void AudioSDL::stopPlayback()
 		playing = false;
 	}
 }
+
+void AudioSDL::lockOutputDevice()
+{
+	if (device) {
+		SDL_LockAudioDevice(device);
+	}
+}
+
+void AudioSDL::unlockOutputDevice()
+{
+	if (device) {
+		SDL_UnlockAudioDevice(device);
+	}
+}
