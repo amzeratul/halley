@@ -7,7 +7,7 @@ namespace Halley {
 
 	class AudioSource {
     public:
-		AudioSource(std::shared_ptr<AudioClip> clip, AudioSourcePosition sourcePos, float gain);
+		AudioSource(std::shared_ptr<AudioClip> clip, AudioSourcePosition sourcePos, float gain, bool loop);
 
 		void start();
 		void stop();
@@ -31,6 +31,7 @@ namespace Halley {
     	AudioSourcePosition sourcePos;
 		bool playing = false;
 		bool done = false;
+		bool looping = false;
     	float gain;
 
 		std::array<float, 16> channelMix;

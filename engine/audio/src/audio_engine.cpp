@@ -16,14 +16,14 @@ AudioEngine::~AudioEngine()
 {
 }
 
-void AudioEngine::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan)
+void AudioEngine::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop)
 {
-	sources.push_back(std::make_unique<AudioSource>(clip, AudioSourcePosition::makeUI(pan), volume));
+	sources.push_back(std::make_unique<AudioSource>(clip, AudioSourcePosition::makeUI(pan), volume, loop));
 }
 
-void AudioEngine::playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume)
+void AudioEngine::playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop)
 {
-	sources.push_back(std::make_unique<AudioSource>(clip, AudioSourcePosition::makePositional(Vector3f(position)), volume));
+	sources.push_back(std::make_unique<AudioSource>(clip, AudioSourcePosition::makePositional(Vector3f(position)), volume, loop));
 }
 
 void AudioEngine::setListener(Vector2f position)

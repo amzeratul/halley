@@ -62,23 +62,23 @@ void AudioFacade::stopPlayback()
 	}
 }
 
-void AudioFacade::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan)
+void AudioFacade::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop)
 {
 	std::unique_lock<std::mutex> lock(audioMutex);
 
 	actions.push_back([=] ()
 	{
-		engine->playUI(clip, volume, pan);
+		engine->playUI(clip, volume, pan, loop);
 	});
 }
 
-void AudioFacade::playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume)
+void AudioFacade::playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop)
 {
 	std::unique_lock<std::mutex> lock(audioMutex);
 
 	actions.push_back([=] ()
 	{
-		engine->playWorld(clip, position, volume);
+		engine->playWorld(clip, position, volume, loop);
 	});
 }
 

@@ -24,10 +24,9 @@ input
 
 audio
 - Music
-- Looping samples
+- Sample callback/adjusting
 - Falloff
 - Listener position
-- Sample callback/adjusting
 - Fading
 - Effects
 

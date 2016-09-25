@@ -74,8 +74,8 @@ namespace Halley
 	public:
 		virtual ~AudioPlaybackAPI() {}
 
-		virtual void playUI(std::shared_ptr<AudioClip> clip, float volume = 1.0f, float pan = 0.5f) = 0;
-		virtual void playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume = 1.0f) = 0;
+		virtual void playUI(std::shared_ptr<AudioClip> clip, float volume = 1.0f, float pan = 0.5f, bool loop = false) = 0;
+		virtual void playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume = 1.0f, bool loop = false) = 0;
 
 		virtual void setListener(Vector2f position) = 0;
 	};

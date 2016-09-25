@@ -15,8 +15,8 @@ namespace Halley {
 	    AudioEngine();
 		~AudioEngine();
 
-    	void playUI(std::shared_ptr<AudioClip> clip, float volume, float pan) override;
-	    void playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume) override;
+    	void playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop) override;
+	    void playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop) override;
 	    void setListener(Vector2f position) override;
 
 		void run();

@@ -3,9 +3,10 @@
 
 using namespace Halley;
 
-AudioSource::AudioSource(std::shared_ptr<AudioClip> clip, AudioSourcePosition sourcePos, float gain) 
+AudioSource::AudioSource(std::shared_ptr<AudioClip> clip, AudioSourcePosition sourcePos, float gain, bool loop) 
 	: clip(clip)
 	, sourcePos(sourcePos)
+	, looping(loop)
 	, gain(gain)
 {}
 
@@ -93,7 +94,11 @@ void AudioSource::advancePlayback(size_t samples)
 {
 	playbackPos += samples;
 	if (playbackPos >= playbackLength) {
-		stop();
+		if (looping) {
+			playbackPos %= playbackLength;
+		} else {
+			stop();
+		}
 	}
 }
 
@@ -104,11 +109,22 @@ void AudioSource::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePac
 
 	size_t requestedLen = size_t(dst.size()) * 16;
 	size_t len = std::min(requestedLen, playbackLength - playbackPos);
+	size_t remainingLen = requestedLen - len;
 	auto src = clip->getChannelData(srcChannel, playbackPos, len);
 
 	memcpy(dst.data(), src.data(), src.size_bytes());
-	if (src.size_bytes() != dst.size_bytes()) {
-		memset(reinterpret_cast<char*>(dst.data()) + src.size_bytes(), 0, dst.size_bytes() - src.size_bytes());
+
+	if (remainingLen > 0) {
+		size_t remainingBytes = remainingLen * sizeof(AudioConfig::SampleFormat);
+		char* dst2 = reinterpret_cast<char*>(dst.data()) + src.size_bytes();
+		if (looping) {
+			// Copy from start
+			auto src2 = clip->getChannelData(srcChannel, 0, len);
+			memcpy(dst2, src2.data(), remainingBytes);
+		} else {
+			// Pad with zeroes
+			memset(dst2, 0, remainingBytes);
+		}
 	}
 }
 

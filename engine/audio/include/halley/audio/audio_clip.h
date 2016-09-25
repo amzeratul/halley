@@ -2,6 +2,7 @@
 #include "halley/resources/resource.h"
 #include "halley/resources/resource_data.h"
 #include "halley/core/api/audio_api.h"
+#include "audio_source.h"
 
 namespace Halley
 {
@@ -19,7 +20,6 @@ namespace Halley
 
 		size_t getLength() const; // in samples
 		size_t getNumberOfChannels() const;
-
 		static std::shared_ptr<AudioClip> loadResource(ResourceLoader& loader);
 
 	private:
