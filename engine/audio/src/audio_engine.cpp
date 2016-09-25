@@ -31,14 +31,6 @@ void AudioEngine::setListener(Vector2f position)
 	// TODO
 }
 
-void AudioEngine::stopSource(size_t id)
-{
-	auto src = getSource(id);
-	if (src) {
-		src->stop();
-	}
-}
-
 void AudioEngine::run()
 {
 	const size_t bufSize = spec.numChannels * sizeof(AudioConfig::SampleFormat) * spec.bufferSize;

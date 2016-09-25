@@ -20,12 +20,13 @@ namespace Halley {
 	    void playWorld(size_t id, std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop);
 	    void setListener(Vector2f position);
 
-	    void stopSource(size_t id);
+		AudioSource* getSource(size_t id);
 
 		void run();
 		void start(AudioSpec spec, AudioOutputAPI& out);
 		void stop();
-    private:
+
+   	private:
 		AudioSpec spec;
 		AudioOutputAPI* out;
 		std::unique_ptr<AudioMixer> mixer;
@@ -45,7 +46,6 @@ namespace Halley {
 		std::map<size_t, AudioSource*> idToSource;
 
 		void addSource(size_t id, std::unique_ptr<AudioSource>&& src);
-		AudioSource* getSource(size_t id);
 
 	    void generateBuffer();
 		void updateSources();

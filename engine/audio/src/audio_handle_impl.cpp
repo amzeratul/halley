@@ -27,10 +27,9 @@ void AudioHandleImpl::setPan(float pan)
 
 void AudioHandleImpl::stop()
 {
-	size_t id = handleId;
-	AudioEngine* engine = facade.engine.get();
-	facade.enqueue([id, engine] () {
-		engine->stopSource(id);
+	enqueue([] (AudioSource& src)
+	{
+		src.stop();
 	});
 }
 
@@ -38,4 +37,16 @@ bool AudioHandleImpl::isPlaying() const
 {
 	// TODO
 	return false;
+}
+
+void AudioHandleImpl::enqueue(std::function<void(AudioSource& src)> f)
+{
+	size_t id = handleId;
+	AudioEngine* engine = facade.engine.get();
+	facade.enqueue([id, engine, f] () {
+		auto src = engine->getSource(id);
+		if (src) {
+			f(*src);
+		}
+	});
 }

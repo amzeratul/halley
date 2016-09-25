@@ -1,9 +1,11 @@
 #pragma once
 #include "halley/core/api/audio_api.h"
+#include <functional>
 
 namespace Halley
 {
 	class AudioFacade;
+	class AudioSource;
 
 	class AudioHandleImpl : public IAudioHandle
 	{
@@ -19,5 +21,7 @@ namespace Halley
 	private:
 		AudioFacade& facade;
 		size_t handleId;
+
+		void enqueue(std::function<void(AudioSource& src)> f);
 	};
 }
