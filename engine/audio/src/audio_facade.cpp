@@ -94,8 +94,9 @@ void AudioFacade::run()
 		std::vector<std::function<void()>> toDo;
 		{
 			std::unique_lock<std::mutex> lock(audioMutex);
-			toDo = std::move(actions);
-			actions.clear();
+			toDo = std::move(inbox);
+			inbox.clear();
+			playingSoundsNext = engine->getPlayingSounds();
 		}
 
 		for (auto& action: toDo) {
@@ -108,6 +109,21 @@ void AudioFacade::run()
 
 void AudioFacade::enqueue(std::function<void()> action)
 {
+	outbox.push_back(action);
+}
+
+void AudioFacade::pump()
+{
 	std::unique_lock<std::mutex> lock(audioMutex);
-	actions.push_back(action);
+	
+	if (!outbox.empty()) {
+		size_t i = inbox.size();
+		inbox.resize(i + outbox.size());
+		for (auto& o: outbox) {
+			inbox[i++] = std::move(o);
+		}
+		outbox.clear();
+	}
+
+	playingSounds = playingSoundsNext;
 }

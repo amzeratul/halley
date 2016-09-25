@@ -62,6 +62,7 @@ namespace Halley
 		void showComputerInfo() const;
 
 		void pumpEvents(Time time);
+		void pumpAudio();
 
 		std::array<StopwatchAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> timers;
 

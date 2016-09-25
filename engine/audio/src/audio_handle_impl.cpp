@@ -1,6 +1,7 @@
 #include "audio_handle_impl.h"
 #include "audio_facade.h"
 #include "audio_engine.h"
+#include <algorithm>
 
 using namespace Halley;
 
@@ -12,17 +13,26 @@ AudioHandleImpl::AudioHandleImpl(AudioFacade& facade, size_t id)
 
 void AudioHandleImpl::setGain(float gain)
 {
-	// TODO
+	enqueue([gain] (AudioSource& src)
+	{
+		src.setGain(gain);
+	});
 }
 
 void AudioHandleImpl::setPosition(Vector2f pos)
 {
-	// TODO
+	enqueue([pos] (AudioSource& src)
+	{
+		src.setAudioSourcePosition(AudioSourcePosition::makePositional(Vector3f(pos)));
+	});
 }
 
 void AudioHandleImpl::setPan(float pan)
 {
-	// TODO
+	enqueue([pan] (AudioSource& src)
+	{
+		src.setAudioSourcePosition(AudioSourcePosition::makeUI(pan));
+	});
 }
 
 void AudioHandleImpl::stop()
@@ -35,8 +45,8 @@ void AudioHandleImpl::stop()
 
 bool AudioHandleImpl::isPlaying() const
 {
-	// TODO
-	return false;
+	auto& playing = facade.playingSounds;
+	return std::binary_search(playing.begin(), playing.end(), handleId);
 }
 
 void AudioHandleImpl::enqueue(std::function<void(AudioSource& src)> f)

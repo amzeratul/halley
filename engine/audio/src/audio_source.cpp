@@ -45,6 +45,18 @@ bool AudioSource::isDone() const
 	return done;
 }
 
+void AudioSource::setGain(float g)
+{
+	gain = g;
+}
+
+void AudioSource::setAudioSourcePosition(AudioSourcePosition s)
+{
+	if (clip->getNumberOfChannels() == 1) {
+		sourcePos = s;
+	}
+}
+
 size_t AudioSource::getNumberOfChannels() const
 {
 	return clip->getNumberOfChannels();

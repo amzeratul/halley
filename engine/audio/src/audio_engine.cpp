@@ -45,9 +45,9 @@ void AudioEngine::run()
 		return;
 	}
 
-	while (out->getQueuedSize() < minQueue && running) {
-		generateBuffer();
-	}
+	//while (out->getQueuedSize() < minQueue && running) {
+	generateBuffer();
+	//}
 }
 
 void AudioEngine::addSource(size_t id, std::unique_ptr<AudioSource>&& src)
@@ -65,6 +65,16 @@ AudioSource* AudioEngine::getSource(size_t id)
 	} else {
 		return nullptr;
 	}
+}
+
+std::vector<size_t> AudioEngine::getPlayingSounds()
+{
+	std::vector<size_t> result(idToSource.size());
+	size_t i = 0;
+	for (auto& kv: idToSource) {
+		result[i++] = kv.first;
+	}
+	return result;
 }
 
 void AudioEngine::generateBuffer()
@@ -109,31 +119,34 @@ void AudioEngine::stop()
 
 void AudioEngine::updateSources()
 {
-	size_t n = sources.size();
-	for (size_t i = 0; i < n; ++i) {
-		if (sources[i]->isPlaying()) {
-			sources[i]->update(channels);
-		} else if (sources[i]->isDone()) {
-			// Remove source
-			if (sources.size() > 1) {
-				std::swap(sources[i], sources.back());
-			}
-			idToSource.erase(sources.back()->getId());
-			sources.pop_back();
-			--i;
-			--n;
-		} else if (sources[i]->isReady()) {
-			sources[i]->start();
-			sources[i]->update(channels);
+	for (auto& source: sources) {
+		if (source->isPlaying()) {
+			source->update(channels);
+		} else if (!source->isDone() && source->isReady()) {
+			source->start();
+			source->update(channels);
 		}
 	}
 }
 
 void AudioEngine::postUpdateSources()
 {
-	for (auto& source : sources) {
+	size_t n = sources.size();
+	for (size_t i = 0; i < n; ++i) {
+		auto& source = sources[i];
+
 		if (source->isPlaying()) {
 			source->advancePlayback(backBuffer.packs.size() * 16 / spec.numChannels);
+		}
+		if (source->isDone()) {
+			// Remove source
+			idToSource.erase(source->getId());
+			if (sources.size() > 1) {
+				std::swap(source, sources.back());
+			}
+			sources.pop_back();
+			--i;
+			--n;
 		}
 	}
 }

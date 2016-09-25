@@ -2,6 +2,7 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <vector>
 #include "halley/core/api/halley_api_internal.h"
 
 namespace Halley {
@@ -19,6 +20,8 @@ namespace Halley {
 		void init() override;
 		void deInit() override;
 
+		void pump() override;
+
 		Vector<std::unique_ptr<const AudioDevice>> getAudioDevices() override;
 		void startPlayback(int deviceNumber) override;
 		void stopPlayback() override;
@@ -35,7 +38,10 @@ namespace Halley {
 		std::mutex audioMutex;
 		std::atomic<bool> running;
 
-		std::vector<std::function<void()>> actions;
+		std::vector<std::function<void()>> outbox;
+		std::vector<std::function<void()>> inbox;
+		std::vector<size_t> playingSounds;
+		std::vector<size_t> playingSoundsNext;
 
 		size_t uniqueId = 0;
 

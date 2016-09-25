@@ -21,6 +21,7 @@ namespace Halley {
 	    void setListener(Vector2f position);
 
 		AudioSource* getSource(size_t id);
+		std::vector<size_t> getPlayingSounds();
 
 		void run();
 		void start(AudioSpec spec, AudioOutputAPI& out);

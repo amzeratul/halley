@@ -183,6 +183,13 @@ void Core::pumpEvents(Time time)
 	running = api->system->generateEvents(video, input);
 }
 
+void Core::pumpAudio()
+{
+	if (api->audio) {
+		api->audioInternal->pump();
+	}
+}
+
 void Core::onFixedUpdate(Time time)
 {
 	if (isRunning()) {
@@ -217,6 +224,7 @@ void Core::doFixedUpdate(Time time)
 			currentStage->onFixedUpdate(time);
 		}
 	}
+	pumpAudio();
 
 	t.endSample();
 }
@@ -232,6 +240,7 @@ void Core::doVariableUpdate(Time time)
 			currentStage->onVariableUpdate(time);
 		}
 	}
+	pumpAudio();
 
 	t.endSample();
 }

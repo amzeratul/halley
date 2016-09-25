@@ -48,6 +48,8 @@ namespace Halley
 	{
 	public:
 		virtual ~AudioAPIInternal() {}
+
+		virtual void pump() = 0;
 	};
 
 	class AudioOutputAPIInternal : public AudioOutputAPI, public HalleyAPIInternal

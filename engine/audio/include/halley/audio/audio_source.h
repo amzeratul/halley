@@ -16,6 +16,9 @@ namespace Halley {
 		bool isReady() const;
 		bool isDone() const;
 
+		void setGain(float gain);
+		void setAudioSourcePosition(AudioSourcePosition sourcePos);
+
 		size_t getNumberOfChannels() const;
 
 		void update(gsl::span<const AudioChannelData> channels);
