@@ -1,3 +1,9 @@
+if (MSVC)
+    set(YAMLCPP_LIBRARY "")
+else ()
+    find_package(YamlCpp)
+endif ()
+
 add_subdirectory(tools)
 add_subdirectory(cmd)
 add_subdirectory(editor)

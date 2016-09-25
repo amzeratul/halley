@@ -1,6 +1,6 @@
 project (halley-audio)
 
-include_directories(${Boost_INCLUDE_DIR} "include/halley/audio" "../utils/include" "../core/include")
+include_directories(${Boost_INCLUDE_DIR} ${OGG_INCLUDE_DIR} ${VORBIS_INCLUDE_DIR} "include/halley/audio" "../utils/include" "../core/include")
 
 set(SOURCES
         "src/audio_clip.cpp"
@@ -36,3 +36,4 @@ if (MSVC)
 endif ()
 
 add_library (halley-audio ${SOURCES} ${HEADERS})
+
