@@ -1,6 +1,7 @@
 #include "audio_engine.h"
-#include <cmath>
 #include "audio_mixer.h"
+#include <thread>
+#include <chrono>
 
 using namespace Halley;
 
@@ -37,18 +38,16 @@ void AudioEngine::setListener(Vector2f position)
 
 void AudioEngine::run()
 {
-	{
-		std::unique_lock<std::mutex> lock(mutex);
-		while (!needsBuffer && running) {
-			backBufferCondition.wait(lock);
-		}
+	using namespace std::chrono_literals;
+	while (!needsBuffer && running) {
+		std::this_thread::sleep_for(100us);
 	}
+	needsBuffer = false;
 
 	if (!running) {
 		return;
 	}
 
-	needsBuffer = false;
 	generateBuffer();
 }
 
@@ -63,15 +62,12 @@ void AudioEngine::generateBuffer()
 	postUpdateSources();
 
 	mixer->interleaveChannels(backBuffer, channelBuffers);
-	out->lockOutputDevice();
 	std::swap(backBuffer, frontBuffer);
-	out->unlockOutputDevice();
 }
 
 void AudioEngine::serviceAudio(gsl::span<AudioSamplePack> buffer)
 {
 	needsBuffer = true;
-	backBufferCondition.notify_one();
 	memcpy(buffer.data(), frontBuffer.packs.data(), buffer.size_bytes());
 }
 
