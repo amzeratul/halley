@@ -61,6 +61,8 @@ The following platforms are supported:
   * Boost 1.59.0
   * OpenGL (for OpenGL plugin, but no alternative is available yet)
   * SDL 2.0.4 (for SDL plugin, but no alternative is available yet)
+  * libogg 1.3.2
+  * libvorbis 1.3.5
 * Tools only:
   * Freetype 2.6.3
   * yaml-cpp 0.5.3
