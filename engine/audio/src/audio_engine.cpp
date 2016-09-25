@@ -7,6 +7,11 @@ using namespace Halley;
 AudioEngine::AudioEngine()
 	: running(true)
 	, needsBuffer(true)
+	, mixer(AudioMixer::makeMixer())
+{
+}
+
+AudioEngine::~AudioEngine()
 {
 }
 
@@ -98,7 +103,7 @@ void AudioEngine::generateBuffer()
 
 	postUpdateSources();
 
-	AudioMixer::interleaveChannels(backBuffer, channelBuffers);
+	mixer->interleaveChannels(backBuffer, channelBuffers);
 }
 
 void AudioEngine::updateSources()
@@ -141,7 +146,7 @@ void AudioEngine::mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst)
 		if (source->isPlaying()) {
 			size_t nChannels = source->getNumberOfChannels();
 			for (size_t i = 0; i < nChannels; ++i) {
-				source->mixToBuffer(i, channelNum, tmpBuffer.packs, dst);
+				source->mixToBuffer(i, channelNum, tmpBuffer.packs, dst, *mixer);
 			}
 		}
 	}

@@ -7,6 +7,8 @@ set(SOURCES
         "src/audio_engine.cpp"
         "src/audio_facade.cpp"
         "src/audio_mixer.cpp"
+        "src/audio_mixer_avx.cpp"
+        "src/audio_mixer_sse.cpp"
         "src/audio_source.cpp"
         "src/audio_source_position.cpp"
         "src/vorbis_dec.cpp"
@@ -22,9 +24,15 @@ set(HEADERS
         "include/halley/audio/audio_source_position.h"
         "include/halley/audio/halley_audio.h"
         "src/vorbis_dec.h"
+        "src/audio_mixer_avx.h"
+        "src/audio_mixer_sse.h"
         )
 
 assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
+
+if (MSVC)
+        set_source_files_properties(src/audio_mixer_avx.cpp PROPERTIES COMPILE_FLAGS /arch:AVX)
+endif ()
 
 add_library (halley-audio ${SOURCES} ${HEADERS})

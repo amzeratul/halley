@@ -7,10 +7,13 @@
 #include "audio_source.h"
 
 namespace Halley {
+	class AudioMixer;
+
     class AudioEngine : public AudioPlaybackAPI
     {
     public:
 	    AudioEngine();
+		~AudioEngine();
 
 	    AudioCallback getCallback();
 
@@ -24,6 +27,7 @@ namespace Halley {
 
     private:
 		AudioSpec spec;
+		std::unique_ptr<AudioMixer> mixer;
 
 		std::atomic<bool> running;
 		std::atomic<bool> needsBuffer;
