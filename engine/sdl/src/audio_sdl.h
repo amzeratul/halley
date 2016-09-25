@@ -22,7 +22,7 @@ namespace Halley
 		void deInit() override;
 
 		Vector<std::unique_ptr<const AudioDevice>> getAudioDevices() override;
-		AudioSpec openAudioDevice(const AudioSpec& requestedFormat, AudioCallback callback, const AudioDevice* device) override;
+		AudioSpec openAudioDevice(const AudioSpec& requestedFormat, const AudioDevice* device) override;
 		void closeAudioDevice() override;
 
 		void startPlayback() override;
@@ -31,10 +31,8 @@ namespace Halley
 		void queueAudio(gsl::span<const AudioSamplePack> data) override;
 		size_t getQueuedSize() const override;
 
-		inline void onCallback(gsl::span<AudioSamplePack> bytes) const { callback(bytes); }
 	private:
 		bool playing = false;
 		Uint32 device = 0;
-		AudioCallback callback;
 	};
 }

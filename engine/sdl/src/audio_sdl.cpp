@@ -40,20 +40,13 @@ Vector<std::unique_ptr<const AudioDevice>> AudioSDL::getAudioDevices()
 	return std::move(result);
 }
 
-static void sdlCallback(void* user, uint8_t* bytes, int size)
-{
-	Expects(size % sizeof(AudioSamplePack) == 0);
-	reinterpret_cast<AudioSDL*>(user)->onCallback(gsl::span<AudioSamplePack>(reinterpret_cast<AudioSamplePack*>(bytes), size / sizeof(AudioSamplePack)));
-}
-
-AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, AudioCallback c, const AudioDevice* dev)
+AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, const AudioDevice* dev)
 {
 	String name = dev ? dev->getName() : "";
 	const char* deviceName = name != "" ? name.c_str() : nullptr;
 
 	auto f = requestedFormat.format;
 	SDL_AudioSpec desired;
-	//desired.callback = &sdlCallback;
 	desired.callback = nullptr;
 	desired.channels = requestedFormat.numChannels;
 	desired.freq = requestedFormat.sampleRate;
@@ -67,7 +60,6 @@ AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, AudioCallb
 	if (device == 0) {
 		throw Exception("Unable to open audio device \"" + (name != "" ? name : "default") + "\"");
 	}
-	callback = c;
 
 	AudioSpec result;
 	result.format = obtained.format == AUDIO_S16SYS ? AudioSampleFormat::Int16 : (obtained.format == AUDIO_S32SYS ? AudioSampleFormat::Int32 : (obtained.format == AUDIO_F32SYS ? AudioSampleFormat::Float : AudioSampleFormat::Undefined));

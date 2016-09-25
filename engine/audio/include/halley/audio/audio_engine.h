@@ -15,8 +15,6 @@ namespace Halley {
 	    AudioEngine();
 		~AudioEngine();
 
-	    AudioCallback getCallback();
-
     	void playUI(std::shared_ptr<AudioClip> clip, float volume, float pan) override;
 	    void playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume) override;
 	    void setListener(Vector2f position) override;
@@ -38,12 +36,10 @@ namespace Halley {
 		std::vector<std::unique_ptr<AudioSource>> sources;
 		std::vector<AudioChannelData> channels;
 
-		AudioBuffer frontBuffer;
 		AudioBuffer backBuffer;
 		AudioBuffer tmpBuffer;
     	std::vector<AudioBuffer> channelBuffers;
 
-		void serviceAudio(gsl::span<AudioSamplePack> dst);
 	    void generateBuffer();
 		void updateSources();
 	    void postUpdateSources();

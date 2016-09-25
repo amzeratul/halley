@@ -28,8 +28,6 @@ namespace Halley
 		std::array<AudioConfig::SampleFormat, 16> samples; // AVX-512 friendly
 	};
 
-	using AudioCallback = std::function<void(gsl::span<AudioSamplePack> span)>;
-
 	enum class AudioSampleFormat
 	{
 		Undefined,
@@ -61,7 +59,7 @@ namespace Halley
 		virtual ~AudioOutputAPI() {}
 
 		virtual Vector<std::unique_ptr<const AudioDevice>> getAudioDevices() = 0;
-		virtual AudioSpec openAudioDevice(const AudioSpec& requestedFormat, AudioCallback callback, const AudioDevice* device = nullptr) = 0;
+		virtual AudioSpec openAudioDevice(const AudioSpec& requestedFormat, const AudioDevice* device = nullptr) = 0;
 		virtual void closeAudioDevice() = 0;
 
 		virtual void startPlayback() = 0;

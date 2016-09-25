@@ -16,11 +16,6 @@ AudioEngine::~AudioEngine()
 {
 }
 
-AudioCallback AudioEngine::getCallback()
-{
-	return [this] (gsl::span<AudioSamplePack> dst) { serviceAudio(dst); };
-}
-
 void AudioEngine::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan)
 {
 	sources.push_back(std::make_unique<AudioSource>(clip, AudioSourcePosition::makeUI(pan), volume));
@@ -69,12 +64,6 @@ void AudioEngine::generateBuffer()
 	out->queueAudio(backBuffer.packs);
 }
 
-void AudioEngine::serviceAudio(gsl::span<AudioSamplePack> buffer)
-{
-	needsBuffer = true;
-	memcpy(buffer.data(), frontBuffer.packs.data(), buffer.size_bytes());
-}
-
 void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 {
 	spec = s;
@@ -82,7 +71,6 @@ void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 
 	const size_t bufferSize = spec.bufferSize / 16;
 	backBuffer.packs.resize(bufferSize * spec.numChannels);
-	frontBuffer.packs.resize(bufferSize * spec.numChannels);
 
 	tmpBuffer.packs.resize(bufferSize);
 	channelBuffers.resize(spec.numChannels);

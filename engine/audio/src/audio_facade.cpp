@@ -37,12 +37,12 @@ void AudioFacade::startPlayback(int deviceNumber)
 	engine = std::make_unique<AudioEngine>();
 
 	AudioSpec format;
-	format.bufferSize = 512;
+	format.bufferSize = 2048;
 	format.format = AudioSampleFormat::Float;
 	format.numChannels = 2;
 	format.sampleRate = 48000;
 
-	AudioSpec obtained = output.openAudioDevice(format, engine->getCallback(), getAudioDevices().at(deviceNumber).get());
+	AudioSpec obtained = output.openAudioDevice(format, getAudioDevices().at(deviceNumber).get());
 
 	engine->start(obtained, output);
 	running = true;
