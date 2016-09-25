@@ -23,16 +23,16 @@ input
 - use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
-- Sample callback/adjusting
 - Music
 - Falloff
 - Listener position
 - Fading
+- Mixing groups
 - Effects
-  - Pitch bending
-  - Doppler shift
-  - Low-pass
-  - Reverb
+  - Pitch bending [RESEARCH]
+  - Doppler shift [RESEARCH]
+  - Low-pass [RESEARCH]
+  - Reverb [RESEARCH]
 
 entity
 * fix MappedPool (crashes with too many entities)
