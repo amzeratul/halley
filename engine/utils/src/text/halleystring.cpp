@@ -933,13 +933,15 @@ size_t String::find(String s) const
 
 std::ostream& Halley::operator<< (std::ostream& os, const String& rhp)
 {
-	os << (std::string&) rhp;
+	os << rhp.cppStr();
 	return os;
 }
 
 std::istream& Halley::operator>> (std::istream& is, String& rhp)
 {
-	is >> (std::string&) rhp;
+	std::string str;
+	is >> str;
+	rhp = str;
 	return is;
 }
 

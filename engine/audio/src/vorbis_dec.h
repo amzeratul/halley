@@ -26,7 +26,7 @@
 
 struct OggVorbis_File;
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__clang__)
 using OggOffsetType = int64_t;
 #else
 using OggOffsetType = long int;
