@@ -22,7 +22,10 @@ namespace Halley {
 		void mixToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<AudioSamplePack> tmp, gsl::span<AudioSamplePack> out, AudioMixer& mixer);
 		void advancePlayback(size_t samples);
 		
-    private:
+		void setId(size_t id);
+		size_t getId() const;
+
+	private:
 		std::shared_ptr<AudioClip> clip;
 
 		size_t playbackPos = 0;
@@ -37,7 +40,9 @@ namespace Halley {
 		std::array<float, 16> channelMix;
 		std::array<float, 16> prevChannelMix;
 
-    	void readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const;
+		size_t id = -1;
+
+		void readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const;
 	    bool canDoDirectRead(size_t size) const;
     };
 }

@@ -6,6 +6,7 @@ set(SOURCES
         "src/audio_clip.cpp"
         "src/audio_engine.cpp"
         "src/audio_facade.cpp"
+        "src/audio_handle_impl.cpp"
         "src/audio_mixer.cpp"
         "src/audio_mixer_avx.cpp"
         "src/audio_mixer_sse.cpp"
@@ -24,6 +25,7 @@ set(HEADERS
         "include/halley/audio/audio_source_position.h"
         "include/halley/audio/halley_audio.h"
         "src/vorbis_dec.h"
+        "src/audio_handle_impl.h"
         "src/audio_mixer_avx.h"
         "src/audio_mixer_sse.h"
         )

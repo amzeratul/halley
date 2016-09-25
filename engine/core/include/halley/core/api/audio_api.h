@@ -69,6 +69,20 @@ namespace Halley
 		virtual size_t getQueuedSize() const = 0;
 	};
 
+	class IAudioHandle
+	{
+	public:
+		virtual ~IAudioHandle() {}
+
+		virtual void setGain(float gain) = 0;
+		virtual void setPosition(Vector2f pos) = 0;
+		virtual void setPan(float pan) = 0;
+
+		virtual void stop() = 0;
+		virtual bool isPlaying() const = 0;
+	};
+	using AudioHandle = std::shared_ptr<IAudioHandle>;
+
 	class AudioAPI
 	{
 	public:
@@ -78,8 +92,8 @@ namespace Halley
 		virtual void startPlayback(int deviceNumber = 0) = 0;
 		virtual void stopPlayback() = 0;
 
-		virtual void playUI(std::shared_ptr<AudioClip> clip, float volume = 1.0f, float pan = 0.5f, bool loop = false) = 0;
-		virtual void playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume = 1.0f, bool loop = false) = 0;
+		virtual AudioHandle playUI(std::shared_ptr<AudioClip> clip, float volume = 1.0f, float pan = 0.5f, bool loop = false) = 0;
+		virtual AudioHandle playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume = 1.0f, bool loop = false) = 0;
 
 		virtual void setListener(Vector2f position) = 0;
 	};

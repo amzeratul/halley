@@ -16,19 +16,27 @@ AudioEngine::~AudioEngine()
 {
 }
 
-void AudioEngine::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop)
+void AudioEngine::playUI(size_t id, std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop)
 {
-	sources.push_back(std::make_unique<AudioSource>(clip, AudioSourcePosition::makeUI(pan), volume, loop));
+	addSource(id, std::make_unique<AudioSource>(clip, AudioSourcePosition::makeUI(pan), volume, loop));
 }
 
-void AudioEngine::playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop)
+void AudioEngine::playWorld(size_t id, std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop)
 {
-	sources.push_back(std::make_unique<AudioSource>(clip, AudioSourcePosition::makePositional(Vector3f(position)), volume, loop));
+	addSource(id, std::make_unique<AudioSource>(clip, AudioSourcePosition::makePositional(Vector3f(position)), volume, loop));
 }
 
 void AudioEngine::setListener(Vector2f position)
 {
 	// TODO
+}
+
+void AudioEngine::stopSource(size_t id)
+{
+	auto src = getSource(id);
+	if (src) {
+		src->stop();
+	}
 }
 
 void AudioEngine::run()
@@ -47,6 +55,23 @@ void AudioEngine::run()
 
 	while (out->getQueuedSize() < minQueue && running) {
 		generateBuffer();
+	}
+}
+
+void AudioEngine::addSource(size_t id, std::unique_ptr<AudioSource>&& src)
+{
+	sources.emplace_back(std::move(src));
+	sources.back()->setId(id);
+	idToSource[id] = sources.back().get();
+}
+
+AudioSource* AudioEngine::getSource(size_t id)
+{
+	auto src = idToSource.find(id);
+	if (src != idToSource.end()) {
+		return src->second;
+	} else {
+		return nullptr;
 	}
 }
 
@@ -97,9 +122,11 @@ void AudioEngine::updateSources()
 		if (sources[i]->isPlaying()) {
 			sources[i]->update(channels);
 		} else if (sources[i]->isDone()) {
+			// Remove source
 			if (sources.size() > 1) {
 				std::swap(sources[i], sources.back());
 			}
+			idToSource.erase(sources.back()->getId());
 			sources.pop_back();
 			--i;
 			--n;

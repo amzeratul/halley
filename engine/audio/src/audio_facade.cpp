@@ -1,5 +1,6 @@
 #include "audio_facade.h"
 #include "audio_engine.h"
+#include "audio_handle_impl.h"
 
 using namespace Halley;
 
@@ -62,26 +63,27 @@ void AudioFacade::stopPlayback()
 	}
 }
 
-void AudioFacade::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop)
+AudioHandle AudioFacade::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop)
 {
-	enqueue([=] ()
-	{
-		engine->playUI(clip, volume, pan, loop);
+	size_t id = uniqueId++;
+	enqueue([=] () {
+		engine->playUI(id, clip, volume, pan, loop);
 	});
+	return std::make_shared<AudioHandleImpl>(*this, id);
 }
 
-void AudioFacade::playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop)
+AudioHandle AudioFacade::playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop)
 {
-	enqueue([=] ()
-	{
-		engine->playWorld(clip, position, volume, loop);
+	size_t id = uniqueId++;
+	enqueue([=] () {
+		engine->playWorld(id, clip, position, volume, loop);
 	});
+	return std::make_shared<AudioHandleImpl>(*this, id);
 }
 
 void AudioFacade::setListener(Vector2f position)
 {
-	enqueue([=] ()
-	{
+	enqueue([=] () {
 		engine->setListener(position);
 	});
 }

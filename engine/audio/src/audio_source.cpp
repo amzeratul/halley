@@ -102,6 +102,16 @@ void AudioSource::advancePlayback(size_t samples)
 	}
 }
 
+void AudioSource::setId(size_t i)
+{
+	id = i;
+}
+
+size_t AudioSource::getId() const
+{
+	return id;
+}
+
 void AudioSource::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const
 {
 	Expects(clip);

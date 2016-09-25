@@ -3,6 +3,8 @@
 #include <mutex>
 #include <atomic>
 #include <condition_variable>
+#include <map>
+#include <vector>
 #include "audio_source.h"
 
 namespace Halley {
@@ -14,14 +16,15 @@ namespace Halley {
 	    AudioEngine();
 		~AudioEngine();
 
-    	void playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop);
-	    void playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop);
+    	void playUI(size_t id, std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop);
+	    void playWorld(size_t id, std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop);
 	    void setListener(Vector2f position);
+
+	    void stopSource(size_t id);
 
 		void run();
 		void start(AudioSpec spec, AudioOutputAPI& out);
 		void stop();
-
     private:
 		AudioSpec spec;
 		AudioOutputAPI* out;
@@ -38,6 +41,11 @@ namespace Halley {
 		AudioBuffer backBuffer;
 		AudioBuffer tmpBuffer;
     	std::vector<AudioBuffer> channelBuffers;
+
+		std::map<size_t, AudioSource*> idToSource;
+
+		void addSource(size_t id, std::unique_ptr<AudioSource>&& src);
+		AudioSource* getSource(size_t id);
 
 	    void generateBuffer();
 		void updateSources();
