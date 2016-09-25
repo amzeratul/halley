@@ -44,11 +44,30 @@ void AudioMixer::interleaveChannels(AudioBuffer& dstBuffer, gsl::span<const Audi
 	}
 }
 
+static bool hasAVX()
+{
+#ifdef HAS_SSE
+	int cpuInfo[4];
+	__cpuid(cpuInfo, 1);
+
+	bool osUsesXSAVE_XRSTORE = cpuInfo[2] & (1 << 27) || false;
+	bool cpuAVXSuport = cpuInfo[2] & (1 << 28) || false;
+
+	if (osUsesXSAVE_XRSTORE && cpuAVXSuport) {
+		unsigned long long xcrFeatureMask = _xgetbv(_XCR_XFEATURE_ENABLED_MASK);
+		return (xcrFeatureMask & 0x6) == 0x6;
+	} else {
+		return false;
+	}
+#else
+	return false;
+#endif
+}
+
 std::unique_ptr<AudioMixer> AudioMixer::makeMixer()
 {
 #ifdef HAS_SSE
-	bool hasAvx = false;
-	if (hasAvx) {
+	if (hasAVX()) {
 		return std::make_unique<AudioMixerAVX>();
 	} else {
 		return std::make_unique<AudioMixerSSE>();
