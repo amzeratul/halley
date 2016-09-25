@@ -33,7 +33,9 @@ assign_source_group(${HEADERS})
 
 if (MSVC)
         set_source_files_properties(src/audio_mixer_avx.cpp PROPERTIES COMPILE_FLAGS /arch:AVX)
+else ()
+        set_source_files_properties(src/audio_mixer_avx.cpp PROPERTIES COMPILE_FLAGS -mavx)
 endif ()
 
 add_library (halley-audio ${SOURCES} ${HEADERS})
-
+target_link_libraries (halley-audio ${OGG_LIBRARY} ${VORBIS_LIBRARY} ${VORBISFILE_LIBRARY})

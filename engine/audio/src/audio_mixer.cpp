@@ -44,14 +44,44 @@ void AudioMixer::interleaveChannels(AudioBuffer& dstBuffer, gsl::span<const Audi
 	}
 }
 
+#ifdef HAS_SSE
+#include <cpuid.h>
+
+#ifndef _MSC_VER
+
+static inline unsigned long long _xgetbv(unsigned int index){
+	unsigned int eax, edx;
+	__asm__ __volatile__("xgetbv" : "=a"(eax), "=d"(edx) : "c"(index));
+	return ((unsigned long long)edx << 32) | eax;
+}
+#define _XCR_XFEATURE_ENABLED_MASK 0
+
+#endif
+
+#endif
+
 static bool hasAVX()
 {
-#ifdef HAS_SSE
-	int cpuInfo[4];
-	__cpuid(cpuInfo, 1);
+#ifndef _MSC_VER
+    // It's crashing on Linux :(
+    return false;
+#endif
 
-	bool osUsesXSAVE_XRSTORE = cpuInfo[2] & (1 << 27) || false;
-	bool cpuAVXSuport = cpuInfo[2] & (1 << 28) || false;
+#ifdef HAS_SSE
+	int regs[4];
+	int i = 1;
+
+#ifdef _WIN32
+	__cpuid(regs, i);
+#else
+	asm volatile
+	("cpuid" : "=a" (regs[0]), "=b" (regs[1]), "=c" (regs[2]), "=d" (regs[3])
+	: "a" (i), "c" (0));
+	// ECX is set to zero for CPUID function 4
+#endif
+
+	bool osUsesXSAVE_XRSTORE = regs[2] & (1 << 27) || false;
+	bool cpuAVXSuport = regs[2] & (1 << 28) || false;
 
 	if (osUsesXSAVE_XRSTORE && cpuAVXSuport) {
 		unsigned long long xcrFeatureMask = _xgetbv(_XCR_XFEATURE_ENABLED_MASK);

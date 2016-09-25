@@ -47,7 +47,7 @@ namespace Halley {
 	private:
 		void open();
 		static size_t vorbisRead(void* ptr, size_t size, size_t nmemb, void* datasource);
-		static int vorbisSeek(void *datasource, long long offset, int whence);
+		static int vorbisSeek(void *datasource, long int offset, int whence);
 		static int vorbisClose(void *datasource);
 		static long vorbisTell(void *datasource);
 

@@ -20,14 +20,14 @@ if (MSVC)
 	set(Boost_THREAD_LIBRARY "")
 	set(OGG_LIBRARY "")
 	set(VORBIS_LIBRARY "")
+	set(VORBISFILE_LIBRARY "")
 else()
 	set(EXTRA_LIBS pthread)
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
 	find_Package(SDL2 REQUIRED)
 	find_package(OpenGL REQUIRED)
-	find_package(ogg REQUIRED)
-	find_package(vorbis REQUIRED)
+	find_package(OggVorbis REQUIRED)
 	find_package(Boost COMPONENTS system filesystem thread REQUIRED)
 endif()
 
@@ -73,6 +73,7 @@ set(HALLEY_PROJECT_LIBS
 	${Boost_THREAD_LIBRARY}
 	${OGG_LIBRARY}
 	${VORBIS_LIBRARY}
+	${VORBISFILE_LIBRARY}
 	${EXTRA_LIBS}
 	)
 
