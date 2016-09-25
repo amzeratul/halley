@@ -79,9 +79,14 @@ void AudioSource::mixToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<Au
 		return;
 	}
 
-	readSourceToBuffer(srcChannel, tmp);
-
-	AudioMixer::mixAudio(tmp, out, gain0, gain1);
+	size_t totalLen = size_t(tmp.size()) * 16; 
+	if (canDoDirectRead(totalLen)) {
+		auto src = clip->getChannelData(srcChannel, playbackPos, totalLen);
+		AudioMixer::mixAudio(gsl::span<const AudioSamplePack>(reinterpret_cast<const AudioSamplePack*>(src.data()), totalLen / 16), out, gain0, gain1);
+	} else {
+		readSourceToBuffer(srcChannel, tmp);
+		AudioMixer::mixAudio(tmp, out, gain0, gain1);
+	}
 }
 
 void AudioSource::advancePlayback(size_t samples)
@@ -105,4 +110,9 @@ void AudioSource::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePac
 	if (src.size_bytes() != dst.size_bytes()) {
 		memset(reinterpret_cast<char*>(dst.data()) + src.size_bytes(), 0, dst.size_bytes() - src.size_bytes());
 	}
+}
+
+bool AudioSource::canDoDirectRead(size_t size) const
+{
+	return playbackPos % 4 == 0 && playbackPos + size <= playbackLength;
 }

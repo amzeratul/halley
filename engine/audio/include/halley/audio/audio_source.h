@@ -35,5 +35,6 @@ namespace Halley {
 		std::array<float, 16> prevChannelMix;
 
     	void readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const;
+	    bool canDoDirectRead(size_t size) const;
     };
 }
