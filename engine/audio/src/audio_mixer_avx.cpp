@@ -2,6 +2,11 @@
 
 #ifdef HAS_SSE
 #include <xmmintrin.h>
+
+#ifdef __clang__
+#include <immintrin.h>
+#endif
+
 using namespace Halley;
 
 void AudioMixerAVX::mixAudio(gsl::span<const AudioSamplePack> srcRaw, gsl::span<AudioSamplePack> dstRaw, float gain0, float gain1)
