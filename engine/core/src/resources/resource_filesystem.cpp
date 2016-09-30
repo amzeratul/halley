@@ -19,11 +19,7 @@
 
 \*****************************************************************/
 
-#include <boost/filesystem.hpp>
-#include <halley/support/exception.h>
 #include <cassert>
-#include <iostream>
-#include <halley/support/console.h>
 #include "resources/resource_filesystem.h"
 #include "halley/core/api/system_api.h"
 
@@ -55,41 +51,8 @@ std::unique_ptr<ResourceData> FileSystemResourceLocator::doGet(String resource, 
 		return std::make_unique<ResourceDataStatic>(buf, size, path);
 	}
 }
-
-static void enumDir(StringArray& files, String root, String prefix)
-{
-	namespace fs = boost::filesystem;
-	String basePath = (root + prefix + "/");
-	basePath.replace("//", "/");
-	basePath.replace("\\\\", "\\");
-	fs::path rootPath = fs::path(basePath.c_str()).make_preferred();
-	try {
-		for (fs::directory_iterator end, dir(rootPath.string().c_str()); dir != end; ++dir) {
-			fs::path curPath = (*dir).path();
-			String name = curPath.filename().generic_string();
-			fs::file_type type = (*dir).status().type();
-			if (type == fs::file_type::directory_file) {
-				if (!name.startsWith(".")) {
-					enumDir(files, root, prefix + name + "/");
-				}
-			}
-			else {
-				files.push_back(prefix + name);
-			}
-		}
-	} catch (std::exception &) {
-		std::cout << ConsoleColour(Console::YELLOW) << "Unable to enumerate resources folder: " << rootPath << ConsoleColour() << std::endl;
-	}
-}
 	
 Vector<String> FileSystemResourceLocator::getResourceList()
 {
-	Vector<String> res;
-	res.push_back("*");
-
-#ifndef __ANDROID__
-	enumDir(res, basePath, "assets/");
-#endif
-
-	return res;
+	return {"*"};
 }
