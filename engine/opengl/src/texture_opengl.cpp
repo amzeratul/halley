@@ -30,7 +30,7 @@ void TextureOpenGL::load(const TextureDescriptor& d)
 	if (d.pixelData != nullptr) {
 		loadImage(reinterpret_cast<const char*>(d.pixelData), d.size.x, d.size.y, d.size.x, d.format, d.useMipMap);
 	}
-
+	
 	if (parent.isLoaderThread()) {
 		fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 		glFlush();
@@ -133,10 +133,6 @@ void TextureOpenGL::loadImage(const char* px, size_t w, size_t h, size_t stride,
 	}
 
 #endif
-
-	if (Concurrent::getThreadName() != "main") {
-		glFinish();
-	}
 }
 
 unsigned TextureOpenGL::getGLFormat(TextureFormat format)

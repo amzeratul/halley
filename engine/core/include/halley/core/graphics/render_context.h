@@ -16,13 +16,14 @@ namespace Halley
 			pushContext();
 			setActive();
 			f(painter);
+			setInactive();
 			popContext();
 		}
 
 		RenderContext(RenderContext&& context);
 
 		RenderContext with(Camera& camera) const;
-		RenderContext with(RenderTarget& camera) const;
+		RenderContext with(RenderTarget& target) const;
 		RenderContext subArea(Rect4i area) const;
 
 		Camera& getCamera() const { return camera; }
@@ -39,6 +40,7 @@ namespace Halley
 
 		RenderContext(Painter& painter, Camera& camera, RenderTarget& renderTarget, Rect4i viewPort);
 		void setActive();
+		void setInactive();
 		void pushContext();
 		void popContext();
 	};

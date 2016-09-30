@@ -22,6 +22,9 @@ void RenderTargetOpenGL::bind()
 	Debug::trace("TextureRenderTargetFBO::bind begin");
 	init();
 	Expects(fbo != 0);
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glCheckError();
 
 #ifdef WITH_OPENGL
 	static GLuint buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7, GL_COLOR_ATTACHMENT8 };
@@ -31,9 +34,6 @@ void RenderTargetOpenGL::bind()
 	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, );
 #endif
 
-	glCheckError();
-
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glCheckError();
 	Debug::trace("TextureRenderTargetFBO::bind end");
 }

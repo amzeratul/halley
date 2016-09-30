@@ -24,6 +24,13 @@ void RenderContext::setActive()
 	painter.bind(*this);
 }
 
+void RenderContext::setInactive()
+{
+	painter.flush();
+	renderTarget.unbind();
+	painter.activeContext = nullptr;
+}
+
 void RenderContext::pushContext()
 {
 	restore = painter.activeContext;
@@ -31,7 +38,6 @@ void RenderContext::pushContext()
 
 void RenderContext::popContext()
 {
-	painter.flush();
 	if (restore) {
 		restore->setActive();
 		restore = nullptr;
