@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <functional>
 #include <halley/text/halleystring.h>
 #include "executor.h"
