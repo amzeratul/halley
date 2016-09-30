@@ -19,19 +19,16 @@ namespace Halley
 		public:
 			Wrapper(Wrapper&& other)
 				: res(std::move(other.res))
-				, lastWriteTime(other.lastWriteTime)
 				, depth(other.depth)
 			{}
 
-			Wrapper(std::shared_ptr<Resource> resource, int loadDepth, time_t time)
+			Wrapper(std::shared_ptr<Resource> resource, int loadDepth)
 				: res(resource)
-				, lastWriteTime(time)
 				, depth(loadDepth)
 			{}
 
 			void flush();
 			std::shared_ptr<Resource> res;
-			time_t lastWriteTime;
 			int depth;
 		};
 
@@ -44,7 +41,6 @@ namespace Halley
 		void unload(String name);
 		void unloadAll(int minDepth = 0);
 		void flush(String name);
-		void flushAll(int minDepth = 0);
 		
 		String getPath() const { return path; }
 		String resolveName(String name) const;

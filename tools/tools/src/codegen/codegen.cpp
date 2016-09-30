@@ -159,7 +159,9 @@ void Codegen::writeFiles(Path dir, const CodeGenResult& files, Stats& stats) con
 		} else {
 			stats.skipped++;
 		}
-		stats.files.emplace_back(std::move(filePath));
+		if (!f.stub) {
+			stats.files.emplace_back(std::move(filePath));
+		}
 	}
 }
 

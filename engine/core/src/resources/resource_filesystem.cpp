@@ -56,20 +56,6 @@ std::unique_ptr<ResourceData> FileSystemResourceLocator::doGet(String resource, 
 	}
 }
 
-std::time_t Halley::FileSystemResourceLocator::doGetTimestamp(String resource)
-{
-	namespace fs = boost::filesystem;
-	String pathName = basePath + resource;
-	fs::path path(pathName.c_str());
-	if (fs::exists(path)) {
-		return fs::last_write_time(path);
-		//auto time = fs::last_write_time(path);
-		//return decltype(time)::clock::to_time_t(time);
-	} else {
-		return 0;
-	}
-}
-
 static void enumDir(StringArray& files, String root, String prefix)
 {
 	namespace fs = boost::filesystem;

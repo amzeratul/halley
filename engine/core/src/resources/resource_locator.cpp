@@ -78,24 +78,6 @@ namespace Halley {
 		}
 	}
 
-	std::time_t ResourceLocator::getTimestamp(String resource)
-	{
-		auto result = locators.find(resource);
-		if (result != locators.end()) {
-			// Found a locator
-			return result->second->doGetTimestamp(resource);
-		} else {
-			// Could not find, try the generic locator
-			result = locators.find("*");
-			if (result != locators.end()) {
-				// Generic locator found, use it
-				return result->second->doGetTimestamp(resource);
-			} else {
-				return 0;
-			}
-		}
-	}
-
 	std::unique_ptr<ResourceDataStatic> ResourceLocator::getStatic(String resource)
 	{
 		auto ptr = dynamic_cast<ResourceDataStatic*>(getResource(resource, false).release());

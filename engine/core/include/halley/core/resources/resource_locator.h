@@ -39,7 +39,6 @@ namespace Halley {
 
 	protected:
 		virtual std::unique_ptr<ResourceData> doGet(String resource, bool stream)=0;
-		virtual std::time_t doGetTimestamp(String resource) = 0;
 		virtual Vector<String> getResourceList()=0;
 		virtual int getPriority() { return 0; }
 	};
@@ -55,7 +54,6 @@ namespace Halley {
 		std::unique_ptr<ResourceData> tryGetResource(String resource, bool stream);
 		std::unique_ptr<ResourceDataStatic> getStatic(String resource) override;
 		std::unique_ptr<ResourceDataStream> getStream(String resource) override;
-		std::time_t getTimestamp(String resource);
 		StringArray enumerate(String prefix = "", bool removePrefix = false, String suffixMatch = "");
 
 	private:

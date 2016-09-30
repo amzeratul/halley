@@ -303,9 +303,4 @@ namespace Halley {
 		}
 	}
 
-	std::time_t ResourcePack::doGetTimestamp(String resource)
-	{
-		return 0;
-	}
-
 }

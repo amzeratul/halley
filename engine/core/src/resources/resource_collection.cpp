@@ -54,20 +54,6 @@ void ResourceCollectionBase::flush(String name)
 	}
 }
 
-void ResourceCollectionBase::flushAll(int minDepth)
-{
-	for (auto& iter: resources) {
-		String name = iter.first;
-		auto& res = iter.second;
-		auto curTime = parent.getFileWriteTime(name);
-		if (res.depth >= minDepth && res.lastWriteTime != curTime) {
-			std::cout << "Flushing \"" << ConsoleColour(Console::DARK_GREY) << name << ConsoleColour() << "\"...\n";
-			res.flush();
-			res.lastWriteTime = curTime;
-		}
-	}
-}
-
 String ResourceCollectionBase::resolveName(String name) const
 {
 	return parent.basePath + "/" + path + "/" + name;
@@ -104,12 +90,11 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(String rawName, Resource
 	}
 
 	// Store in cache
-	time_t time = parent.getFileWriteTime(name);
-	resources.emplace(name, Wrapper(newRes, parent.curDepth, time));
+	resources.emplace(name, Wrapper(newRes, parent.curDepth));
 
 	return newRes;
 }
 
 void ResourceCollectionBase::setResource(int curDepth, String name, std::shared_ptr<Resource> resource) {
-	resources.emplace(name, Wrapper(resource, curDepth, 0));
+	resources.emplace(name, Wrapper(resource, curDepth));
 }

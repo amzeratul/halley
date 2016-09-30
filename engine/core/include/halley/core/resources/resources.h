@@ -97,8 +97,6 @@ namespace Halley {
 		void setDepth(int depth);
 
 	private:
-		time_t getFileWriteTime(String name) const;
-
 		std::unique_ptr<ResourceLocator> locator;
 		HashMap<std::string, int> resourceTypeIds;
 		Vector<std::unique_ptr<ResourceCollectionBase>> resources;
