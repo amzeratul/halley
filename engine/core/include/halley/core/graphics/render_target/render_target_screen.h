@@ -29,6 +29,7 @@ namespace Halley {
 		ScreenRenderTarget(Rect4i viewPort);
 
 		Rect4i getViewPort() const override { return viewPort; }
+		bool isScreen() const override { return true; }
 
 	protected:
 		void bind() override;

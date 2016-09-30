@@ -65,12 +65,12 @@ void Camera::setZoom(float _zoom)
 }
 
 
-void Camera::updateProjection()
+void Camera::updateProjection(bool flipVertical)
 {
 	// Setup projection
 	float w = area.x;
 	float h = area.y;
-	projection = Matrix4f::makeOrtho2D(-w/2, w/2, h/2, -h/2, -1000, 1000);
+	projection = Matrix4f::makeOrtho2D(-w/2, w/2, flipVertical ? h/2 : -h/2, flipVertical ? -h/2 : h/2, -1000, 1000);
 
 	// Camera properties
 	if (zoom != 1.0f) {

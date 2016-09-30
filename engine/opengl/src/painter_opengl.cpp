@@ -90,14 +90,22 @@ static Rect4i flipRectangle(Rect4i r, int h)
 	return Rect4i(Vector2i(r.getLeft(), y), r.getWidth(), r.getHeight());
 }
 
-void PainterOpenGL::setClip(Rect4i clip, Vector2i renderTargetSize, bool enable)
+void PainterOpenGL::setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen)
 {
-	glUtils->setScissor(flipRectangle(clip, renderTargetSize.y), enable);
+	if (isScreen) {
+		glUtils->setScissor(flipRectangle(clip, renderTargetSize.y), enable);
+	} else {
+		glUtils->setScissor(clip, enable);
+	}	
 }
 
-void PainterOpenGL::setViewPort(Rect4i rect, Vector2i renderTargetSize)
+void PainterOpenGL::setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen)
 {
-	glUtils->setViewPort(flipRectangle(rect, renderTargetSize.y));
+	if (isScreen) {
+		glUtils->setViewPort(flipRectangle(rect, renderTargetSize.y));
+	} else {
+		glUtils->setViewPort(rect);
+	}
 }
 
 void PainterOpenGL::setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)

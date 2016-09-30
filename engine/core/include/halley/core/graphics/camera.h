@@ -51,7 +51,7 @@ namespace Halley {
 
 		Matrix4f getProjection() const { return projection; }
 
-		void updateProjection();
+		void updateProjection(bool flipVertical = true);
 
 	private:
 		Vector2f pos;

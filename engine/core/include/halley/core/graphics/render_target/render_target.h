@@ -29,6 +29,7 @@ namespace Halley {
 		virtual ~RenderTarget() {}
 
 		virtual Rect4i getViewPort() const = 0;
+		virtual bool isScreen() const = 0;
 
 		virtual void bind() = 0;
 		virtual void unbind() = 0;
