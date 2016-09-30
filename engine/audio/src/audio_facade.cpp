@@ -81,10 +81,10 @@ AudioHandle AudioFacade::playWorld(std::shared_ptr<AudioClip> clip, Vector2f pos
 	return std::make_shared<AudioHandleImpl>(*this, id);
 }
 
-void AudioFacade::setListener(Vector2f position)
+void AudioFacade::setListener(AudioListenerData listener)
 {
 	enqueue([=] () {
-		engine->setListener(position);
+		engine->setListener(listener);
 	});
 }
 

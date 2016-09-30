@@ -6,6 +6,7 @@
 #include <vector>
 #include "halley/text/halleystring.h"
 #include "halley/maths/vector2.h"
+#include "halley/maths/vector3.h"
 
 namespace Halley
 {
@@ -53,6 +54,12 @@ namespace Halley
 		{}
 	};
 
+	class AudioListenerData
+	{
+	public:
+		Vector3f position;
+	};
+
 	class AudioOutputAPI
 	{
 	public:
@@ -95,6 +102,6 @@ namespace Halley
 		virtual AudioHandle playUI(std::shared_ptr<AudioClip> clip, float volume = 1.0f, float pan = 0.5f, bool loop = false) = 0;
 		virtual AudioHandle playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume = 1.0f, bool loop = false) = 0;
 
-		virtual void setListener(Vector2f position) = 0;
+		virtual void setListener(AudioListenerData listener) = 0;
 	};
 }

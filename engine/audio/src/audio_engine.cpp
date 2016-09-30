@@ -26,9 +26,9 @@ void AudioEngine::playWorld(size_t id, std::shared_ptr<AudioClip> clip, Vector2f
 	addSource(id, std::make_unique<AudioSource>(clip, AudioSourcePosition::makePositional(Vector3f(position)), volume, loop));
 }
 
-void AudioEngine::setListener(Vector2f position)
+void AudioEngine::setListener(AudioListenerData l)
 {
-	// TODO
+	listener = l;
 }
 
 void AudioEngine::run()

@@ -18,7 +18,7 @@ namespace Halley {
 
     	void playUI(size_t id, std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop);
 	    void playWorld(size_t id, std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop);
-	    void setListener(Vector2f position);
+	    void setListener(AudioListenerData position);
 
 		AudioSource* getSource(size_t id);
 		std::vector<size_t> getPlayingSounds();
@@ -45,6 +45,8 @@ namespace Halley {
     	std::vector<AudioBuffer> channelBuffers;
 
 		std::map<size_t, AudioSource*> idToSource;
+
+		AudioListenerData listener;
 
 		void addSource(size_t id, std::unique_ptr<AudioSource>&& src);
 

@@ -19,11 +19,12 @@ core/graphics
 - improve distance field API (less magic)
 
 input
+- remap mouse
 - input context system [RESEARCH]
 - use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
-- Music streaming/track control
+- Music track control
 - Fading
 - Falloff
 - Listener position
@@ -50,7 +51,6 @@ entity
 - snapshot world
 
 codegen
-- don't delete system files
 - components registry [RESEARCH] (does this even make sense?)
 - components serialization [RESEARCH]
 - import custom types in components [RESEARCH]
