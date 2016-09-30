@@ -28,6 +28,8 @@ void EditorRootStage::init()
 	}
 
 	getAPI().audio->startPlayback();
+
+	getAPI().audio->playUI(getResource<AudioClip>("evil_lord_pakku.ogg"), 1, 0.5f, true);
 }
 
 void EditorRootStage::onVariableUpdate(Time time)
@@ -42,13 +44,35 @@ void EditorRootStage::onVariableUpdate(Time time)
 		taskBar->update(tasks->getTasks(), time);
 	}
 
+	auto& kb = *getInputAPI().getKeyboard();
+
 	if (console) {
-		console->update(*getInputAPI().getKeyboard());
+		console->update(kb);
 	}
 
-	if (getInputAPI().getKeyboard()->isButtonPressed(Keys::Space)) {
-		getAPI().audio->playUI(getResource<AudioClip>("bell.ogg"), 2, 0.5f);
+	if (kb.isButtonPressed(Keys::Space)) {
+		if (handle) {
+			handle->stop();
+		}
+		handle = getAPI().audio->playUI(getResource<AudioClip>("bell.ogg"), 2, 0.5f, true);
 		getAPI().audio->playUI(getResource<AudioClip>("Step_wood.ogg"), 1);
+	}
+
+	if (kb.isButtonPressed(Keys::Z)) {
+		if (handle) {
+			handle->stop();
+		}
+	}
+
+	if (kb.isButtonDown(Keys::Left)) {
+		pan = std::max(0.0f, pan - float(time) * 0.5f);
+	}
+	if (kb.isButtonDown(Keys::Right)) {
+		pan = std::min(1.0f, pan + float(time) * 0.5f);
+	}
+
+	if (handle) {
+		handle->setPan(pan);
 	}
 }
 
