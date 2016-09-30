@@ -29,7 +29,8 @@ namespace Halley
 		size_t numChannels;
 		bool streaming;
 
-		std::vector<short> temp;
+		std::vector<short> temp0;
+		std::vector<short> temp1;
 		std::vector<std::vector<AudioConfig::SampleFormat>> samples;
 		std::unique_ptr<VorbisData> vorbisData;
 	};

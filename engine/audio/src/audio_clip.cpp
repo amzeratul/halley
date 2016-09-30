@@ -77,6 +77,8 @@ gsl::span<const AudioConfig::SampleFormat> AudioClip::getChannelData(size_t chan
 	Expects(pos + len <= sampleLength);
 
 	if (streaming) {
+		auto& temp = pos == 0 ? temp0 : temp1; // pos == 0 has a different buffer because if it loops around, it will be used together with another buffer
+
 		if (channelN == 0) { // TODO: this assumes the channels will be read in order. This will break threading.
 			if (pos == 0) {
 				vorbisData->seek(0);
