@@ -23,8 +23,12 @@
 #include <set>
 #include "halley/support/exception.h"
 #include "halley/concurrency/concurrent.h"
-#include <boost/thread/tss.hpp>
 #include <gsl/gsl_assert>
+
+#ifdef __APPLE__
+#include <boost/thread/tss.hpp>
+#endif
+
 
 using namespace Halley;
 
@@ -111,12 +115,17 @@ namespace Halley {
 
 GLInternals& getState()
 {
+#ifdef __APPLE__
 	static boost::thread_specific_ptr<GLInternals> glState;
 	if (!glState.get()) {
 		glState.reset(new GLInternals());
 		std::cout << "GL state created on thread " << Concurrent::getThreadName() << std::endl;
 	}
 	return *glState;
+#else
+	thread_local GLInternals state;
+	return state;
+#endif
 }
 
 ////////////////////

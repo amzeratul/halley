@@ -22,12 +22,13 @@
 #include "halley/concurrency/concurrent.h"
 #include <thread>
 #include <sstream>
-#include <boost/thread/tss.hpp>
 
 using namespace Halley;
 
-//static thread_local String threadName;
-static boost::thread_specific_ptr<String> threadName;
+#if defined(_WIN32) || defined(__linux__)
+#define HAS_THREAD_LOCAL
+static thread_local String threadName;
+#endif
 
 #ifdef _WIN32
 #include <windows.h>
@@ -76,12 +77,17 @@ namespace Concurrent {
 		}
 #endif
 #endif
-		threadName.reset(new String(name));
+#ifdef HAS_THREAD_LOCAL
+		threadName = name;
+#endif
 	}
 
 	String getThreadName()
 	{
-		if (threadName.get()) return *threadName;
+#ifdef HAS_THREAD_LOCAL
+		if (threadName != "") {
+			return threadName;
+		}
 
 		std::stringstream ss;
 		ss << std::this_thread::get_id();
@@ -89,6 +95,9 @@ namespace Concurrent {
 		String n = String("thread_") + ss.str();
 		setThreadName(n);
 		return n;
+#else
+		return "";
+#endif
 	}
 
 }

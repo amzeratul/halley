@@ -42,8 +42,8 @@ void Halley::Environment::setDataPath(String pathName)
 {
 	auto& os = OS::get();
 
-	Path p = Path(os.getUserDataDir().cppStr()) / pathName.cppStr();
-	FileSystem::createDir(p);
+	String p = os.getUserDataDir() + "/" + pathName + "/";
+	FileSystem::createDir(p.cppStr());
 
-	dataPath = p.generic_string() + "/";
+	dataPath = p;
 }
