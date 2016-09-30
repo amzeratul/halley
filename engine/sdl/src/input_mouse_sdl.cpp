@@ -30,13 +30,17 @@ InputMouseSDL::InputMouseSDL()
 	init(5);
 }
 
-void InputMouseSDL::processEvent(const SDL_Event& event)
+void InputMouseSDL::processEvent(const SDL_Event& event, std::function<Vector2f(Vector2i)> remap)
 {
 	switch (event.type) {
 	case SDL_MOUSEMOTION:
-		pos.x = event.motion.x;
-		pos.y = event.motion.y;
-		break;
+		{
+			Vector2i p;
+			p.x = event.motion.x;
+			p.y = event.motion.y;
+			pos = remap(Vector2i(p));
+			break;
+		}
 
 	case SDL_MOUSEBUTTONDOWN:
 		{
@@ -59,7 +63,7 @@ void InputMouseSDL::processEvent(const SDL_Event& event)
 	}
 }
 
-Halley::Vector2i Halley::InputMouseSDL::getPosition() const
+Halley::Vector2f Halley::InputMouseSDL::getPosition() const
 {
 	return pos;
 }

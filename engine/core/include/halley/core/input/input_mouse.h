@@ -29,7 +29,7 @@ namespace Halley {
 	class InputMouse : public virtual InputDevice {
 	public:
 		virtual ~InputMouse() {}
-		virtual Vector2i getPosition() const=0;
+		virtual Vector2f getPosition() const=0;
 		virtual int getWheelMove() const=0;
 	};
 

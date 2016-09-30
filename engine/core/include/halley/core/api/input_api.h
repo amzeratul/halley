@@ -1,5 +1,8 @@
 #pragma once
 
+#include <functional>
+#include "halley/maths/vector2.h"
+
 namespace Halley
 {
 	class InputKeyboard;
@@ -23,5 +26,7 @@ namespace Halley
 
 		virtual Vector<std::shared_ptr<InputTouch>> getNewTouchEvents() = 0;
 		virtual Vector<std::shared_ptr<InputTouch>> getTouchEvents() = 0;
+
+		virtual void setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction) = 0;
 	};
 }

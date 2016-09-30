@@ -32,16 +32,16 @@ namespace Halley {
 	class InputMouseSDL : public InputButtonBase, public InputMouse {
 		friend class InputSDL;
 	public:
-		Vector2i getPosition() const override;
+		Vector2f getPosition() const override;
 		int getWheelMove() const override;
 
 		void update();
 
 	private:
 		InputMouseSDL();
-		void processEvent(const SDL_Event& event);
+		void processEvent(const SDL_Event& event, std::function<Vector2f(Vector2i)> remap);
 
-		Vector2i pos;
+		Vector2f pos;
 		int wheelMove;
 	};
 

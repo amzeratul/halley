@@ -38,6 +38,8 @@ InputSDL::~InputSDL() = default;
 
 void InputSDL::init()
 {
+	mouseRemap = [] (Vector2i p) { return Vector2f(p); };
+
 	keyboards.push_back(std::unique_ptr<InputKeyboardSDL>(new InputKeyboardSDL()));
 	mice.push_back(std::unique_ptr<InputMouseSDL>(new InputMouseSDL()));
 
@@ -183,7 +185,7 @@ void InputSDL::processEvent(SDL_Event& event)
 			{
 				size_t n = getNumberOfMice();
 				for (size_t i=0; i < n; i++) {
-					mice[i]->processEvent(event);
+					mice[i]->processEvent(event, mouseRemap);
 				}
 				break;
 			}
@@ -197,6 +199,11 @@ void InputSDL::processEvent(SDL_Event& event)
 		default:
 			break;
 	}
+}
+
+void InputSDL::setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction)
+{
+	mouseRemap = remapFunction;
 }
 
 void InputSDL::processJoyEvent(int n, SDL_Event& event)

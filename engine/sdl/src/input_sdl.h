@@ -52,6 +52,8 @@ namespace Halley {
 
 		void processEvent(SDL_Event& event);
 
+		void setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction) override;
+
 	private:
 		void init() override;
 		void deInit() override;
@@ -66,6 +68,8 @@ namespace Halley {
 
 		FlatMap<int, InputJoystickSDL*> sdlJoys;
 		FlatMap<int, std::shared_ptr<InputTouch>> touchEvents;
+
+		std::function<Vector2f(Vector2i)> mouseRemap;
 	};
 
 };
