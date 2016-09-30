@@ -3,6 +3,7 @@
 #include "halley/text/halleystring.h"
 #include <memory>
 #include "resource_data.h"
+#include <map>
 
 namespace Halley
 {

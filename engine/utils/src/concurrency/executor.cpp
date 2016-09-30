@@ -16,7 +16,7 @@ ExecutionQueue::ExecutionQueue()
 
 TaskBase ExecutionQueue::getNext()
 {
-	boost::unique_lock<boost::mutex> lock(mutex);
+	std::unique_lock<std::mutex> lock(mutex);
 	while (queue.empty()) {
 		if (!aborted) {
 			condition.wait(lock);
@@ -33,7 +33,7 @@ TaskBase ExecutionQueue::getNext()
 
 std::vector<TaskBase> ExecutionQueue::getAll()
 {
-	boost::unique_lock<boost::mutex> lock(mutex);
+	std::unique_lock<std::mutex> lock(mutex);
 	hasTasks.store(false);
 	std::vector<TaskBase> tasks(queue.begin(), queue.end());
 	queue.clear();
@@ -42,7 +42,7 @@ std::vector<TaskBase> ExecutionQueue::getAll()
 
 void ExecutionQueue::addToQueue(TaskBase task)
 {
-	boost::unique_lock<boost::mutex> lock(mutex);
+	std::unique_lock<std::mutex> lock(mutex);
 	queue.emplace_back(task);
 	hasTasks.store(true);
 
@@ -80,7 +80,7 @@ void ExecutionQueue::onDetached()
 void ExecutionQueue::abort()
 {
 	{
-		boost::unique_lock<boost::mutex> lock(mutex);
+		std::unique_lock<std::mutex> lock(mutex);
 		if (aborted) {
 			return;
 		}
@@ -138,7 +138,7 @@ ThreadPool::ThreadPool(ExecutionQueue& queue, size_t n)
 	threads.resize(n);
 
 	for (size_t i = 0; i < n; i++) {
-		threads[i] = boost::thread([this, i]()
+		threads[i] = std::thread([this, i]()
 		{
 			Concurrent::setThreadName("threadPool" + toString(i));
 			executors[i]->runForever();

@@ -4,7 +4,9 @@
 #include <memory>
 #include <atomic>
 #include <boost/optional.hpp>
-#include <boost/thread.hpp>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 #include <halley/support/exception.h>
 
 namespace Halley
@@ -92,7 +94,7 @@ namespace Halley
 		void wait()
 		{
 			if (!available) {
-				boost::unique_lock<boost::mutex> lock(mutex);
+				std::unique_lock<std::mutex> lock(mutex);
 				while (!available) {
 					condition.wait(lock);
 				}
@@ -109,7 +111,7 @@ namespace Halley
 			if (available.load()) {
 				apply(f);
 			} else {
-				boost::unique_lock<boost::mutex> lock(mutex);
+				std::unique_lock<std::mutex> lock(mutex);
 				if (available.load()) {
 					lock.unlock();
 					apply(f);
@@ -149,7 +151,7 @@ namespace Halley
 			std::vector<std::function<void(T)>> toRun;
 
 			{
-				boost::unique_lock<boost::mutex> lock(mutex);
+				std::unique_lock<std::mutex> lock(mutex);
 				toRun = std::move(continuations);
 				continuations.clear();
 				available.store(true);
@@ -165,8 +167,8 @@ namespace Halley
 		boost::optional<T> data;
 
 		std::vector<std::function<void(T)>> continuations;
-		boost::mutex mutex;
-		boost::condition_variable condition;
+		std::mutex mutex;
+		std::condition_variable condition;
 	};
 
 	template <typename T>

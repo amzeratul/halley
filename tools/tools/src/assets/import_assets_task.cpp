@@ -5,6 +5,7 @@
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/resources/resource_data.h"
 #include <yaml-cpp/yaml.h>
+#include <iostream>
 
 using namespace Halley;
 

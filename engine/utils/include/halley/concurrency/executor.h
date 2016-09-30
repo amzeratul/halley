@@ -1,8 +1,11 @@
 #pragma once
 #include <deque>
-#include <boost/thread.hpp>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 #include <functional>
 #include <atomic>
+#include <vector>
 
 namespace Halley
 {
@@ -25,8 +28,8 @@ namespace Halley
 
 	private:
 		std::deque<TaskBase> queue;
-		boost::mutex mutex;
-		boost::condition_variable condition;
+		std::mutex mutex;
+		std::condition_variable condition;
 
 		std::atomic<int> attachedCount;
 		std::atomic<bool> hasTasks;
@@ -76,6 +79,6 @@ namespace Halley
 
 	private:
 		std::vector<std::unique_ptr<Executor>> executors;
-		std::vector<boost::thread> threads;
+		std::vector<std::thread> threads;
 	};
 }

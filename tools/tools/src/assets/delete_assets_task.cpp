@@ -1,6 +1,7 @@
 #include "halley/tools/assets/delete_assets_task.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
+#include <iostream>
 
 using namespace Halley;
 
@@ -14,8 +15,6 @@ DeleteAssetsTask::DeleteAssetsTask(ImportAssetsDatabase& db, Path assetsPath, Ve
 
 void DeleteAssetsTask::run()
 {
-	std::cout << "Start deleting files." << std::endl;
-
 	for (auto& asset : assets) {
 		if (isCancelled()) {
 			break;
@@ -31,5 +30,4 @@ void DeleteAssetsTask::run()
 		}
 	}
 	db.save();
-	std::cout << "Done deleting files." << std::endl;
 }

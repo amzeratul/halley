@@ -141,9 +141,9 @@ size_t Halley::VorbisData::read(gsl::span<gsl::byte> dstBuf)
 		char* dst = reinterpret_cast<char*>(dstBuf.data());
 
 #ifdef WITH_IVORBIS
-		int justRead = ov_read(file, dst, dstBuf.size(), &bitstream);
+		int justRead = ov_read(file, dst, int(dstBuf.size()), &bitstream);
 #else
-		int justRead = ov_read(file, dst, dstBuf.size(), 0, 2, 1, &bitstream);
+		int justRead = ov_read(file, dst, int(dstBuf.size()), 0, 2, 1, &bitstream);
 #endif
 
 		if (justRead > 0) {

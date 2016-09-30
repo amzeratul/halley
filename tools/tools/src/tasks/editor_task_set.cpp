@@ -1,6 +1,7 @@
 #include "halley/tools/tasks/editor_task_set.h"
 #include <thread>
 #include <chrono>
+#include <iostream>
 
 using namespace Halley;
 using namespace std::chrono_literals;
