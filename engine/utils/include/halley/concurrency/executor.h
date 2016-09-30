@@ -16,6 +16,7 @@ namespace Halley
 	public:
 		ExecutionQueue();
 		void addToQueue(TaskBase task);
+
 		TaskBase getNext();
 		std::vector<TaskBase> getAll();
 

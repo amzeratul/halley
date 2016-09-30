@@ -44,8 +44,10 @@ HalleyStatics::~HalleyStatics()
 void HalleyStatics::setup()
 {
 	Executors::set(*pimpl->executors);
+#if HAS_THREADS
 	pimpl->cpuThreadPool = std::make_unique<ThreadPool>(pimpl->executors->getCPU(), std::thread::hardware_concurrency());
 	pimpl->diskIOThreadPool = std::make_unique<ThreadPool>(pimpl->executors->getDiskIO(), 1);
+#endif
 
 	ComponentDeleterTable::getDeleters() = &pimpl->typeDeleters;
 	MaskStorageInterface::setMaskStorage(pimpl->maskStorage);

@@ -6,6 +6,8 @@
 #include "future.h"
 #include "task.h"
 
+#define HAS_THREADS 1
+
 namespace Halley
 {
 	namespace Concurrent
@@ -49,7 +51,7 @@ namespace Halley
 		{
 			const size_t n = end - begin;
 			constexpr size_t maxThreads = 8;
-			size_t nThreads = std::min(maxThreads, e.threadCount());
+			size_t nThreads = std::max(size_t(1), std::min(maxThreads, e.threadCount()));
 			std::array<Future<void>, maxThreads> futures;
 
 			size_t prevEnd = 0;

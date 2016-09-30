@@ -2,6 +2,7 @@
 #include "halley/core/api/system_api.h"
 #include "halley_gl.h"
 #include "halley/core/halley_core.h"
+#include "halley/concurrency/concurrent.h"
 
 using namespace Halley;
 
@@ -9,26 +10,36 @@ LoaderThreadOpenGL::LoaderThreadOpenGL(GLContext& context)
 	: executor(Executors::getVideoAux())
 	, context(context.createSharedContext())
 {
+#if HAS_THREADS
 	workerThread = std::thread([this]() { run(); });
+#endif
 }
 
 LoaderThreadOpenGL::~LoaderThreadOpenGL()
 {	
+#if HAS_THREADS
 	executor.stop();
 	workerThread.join();
 	context.reset();
+#endif
 }
 
 std::thread::id LoaderThreadOpenGL::getThreadId()
 {
+#if HAS_THREADS
 	return workerThread.get_id();
+#else
+	return std::thread::id();
+#endif
 }
 
 void LoaderThreadOpenGL::run()
 {
+#if HAS_THREADS
 	Concurrent::setThreadName("OpenGL loader");
 	context->bind();
 	executor.runForever();
+#endif
 }
 
 void LoaderThreadOpenGL::waitForGPU()

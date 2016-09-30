@@ -42,11 +42,15 @@ std::vector<TaskBase> ExecutionQueue::getAll()
 
 void ExecutionQueue::addToQueue(TaskBase task)
 {
+#if HAS_THREADS
 	std::unique_lock<std::mutex> lock(mutex);
 	queue.emplace_back(task);
 	hasTasks.store(true);
 
 	condition.notify_one();
+#else
+	task();
+#endif
 }
 
 Executors& Executors::get()
@@ -98,40 +102,51 @@ Executor::Executor(ExecutionQueue& queue)
 	: queue(queue)
 	, running(true)
 {
+#if HAS_THREADS
 	queue.onAttached();
+#endif
 }
 
 Executor::~Executor()
 {
+#if HAS_THREADS
 	queue.onDetached();
+#endif
 }
 
 bool Executor::runPending()
 {
+#if HAS_THREADS
 	auto tasks = queue.getAll();
 	for (auto& t : tasks) {
 		t();
 	}
+#endif
 	return false;
 }
 
 void Executor::runForever()
 {
+#if HAS_THREADS
 	while (running)	{
 		try {
 			queue.getNext()();
 		} catch (AbortException) {}
 	}
+#endif
 }
 
 void Executor::stop()
 {
+#if HAS_THREADS
 	running = false;
 	queue.abort();
+#endif
 }
 
 ThreadPool::ThreadPool(ExecutionQueue& queue, size_t n)
 {
+#if HAS_THREADS
 	for (size_t i = 0; i < n; i++) {
 		executors.emplace_back(std::make_unique<Executor>(queue));
 	}
@@ -144,14 +159,17 @@ ThreadPool::ThreadPool(ExecutionQueue& queue, size_t n)
 			executors[i]->runForever();
 		});
 	}
+#endif
 }
 
 ThreadPool::~ThreadPool()
 {
+#if HAS_THREADS
 	for (auto& e: executors) {
 		e->stop();
 	}
 	for (auto& t : threads) {
 		t.join();
 	}
+#endif
 }
