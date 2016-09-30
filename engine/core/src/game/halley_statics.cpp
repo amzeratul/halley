@@ -4,6 +4,7 @@
 #include <halley/entity/family_mask.h>
 #include <halley/os/os.h>
 #include <halley/concurrency/executor.h>
+#include <halley/concurrency/concurrent.h>
 #include <thread>
 
 using namespace Halley;
