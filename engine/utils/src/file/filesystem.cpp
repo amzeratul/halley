@@ -6,14 +6,14 @@ using namespace filesystem;
 
 bool FileSystem::exists(const Path& p)
 {
-	return filesystem::exists(p);
+	return filesystem::exists(p.getNative());
 }
 
 bool FileSystem::createDir(const Path& p)
 {
 	if (!exists(p)) {
 		try {
-			return create_directories(p);
+			return create_directories(p.getNative());
 		} catch (...) {
 			return false;
 		}
@@ -23,33 +23,33 @@ bool FileSystem::createDir(const Path& p)
 
 bool FileSystem::createParentDir(const Path& p)
 {
-	return createDir(p.parent_path());
+	return createDir(p.getNative().parent_path());
 }
 
 int64_t FileSystem::getLastWriteTime(const Path& p)
 {
-	return last_write_time(p);
+	return last_write_time(p.getNative());
 }
 
 bool FileSystem::isFile(const Path& p)
 {
-	return is_regular_file(p);
+	return is_regular_file(p.getNative());
 }
 
 bool FileSystem::isDirectory(const Path& p)
 {
-	return is_directory(p);
+	return is_directory(p.getNative());
 }
 
 void FileSystem::copyFile(const Path& src, const Path& dst)
 {
 	createParentDir(dst);
-	copy_file(src, dst, filesystem::copy_option::overwrite_if_exists);
+	copy_file(src.getNative(), dst.getNative(), filesystem::copy_option::overwrite_if_exists);
 }
 
 bool FileSystem::remove(const Path& path)
 {
-	return filesystem::remove(path);
+	return filesystem::remove(path.getNative());
 }
 
 void FileSystem::writeFile(const Path& path, gsl::span<const gsl::byte> data)
@@ -81,16 +81,16 @@ Bytes FileSystem::readFile(const Path& path)
 	return result;
 }
 
-std::vector<Path> FileSystem::enumerateDirectory(const Path& path)
+std::vector<Path> FileSystem::enumerateDirectory(const Path& dir)
 {
 	std::vector<Path> result;
-	if (exists(path)) {
+	if (exists(dir)) {
 		using RDI = filesystem::recursive_directory_iterator;
 		RDI end;
-		for (RDI i(path); i != end; ++i) {
-			Path fullPath = i->path();
-			if (isFile(fullPath)) {
-				result.push_back(fullPath.lexically_relative(path));
+		for (RDI i(dir.getNative()); i != end; ++i) {
+			path fullPath = i->path();
+			if (is_regular_file(fullPath.native())) {
+				result.push_back(Path(fullPath.lexically_relative(dir.getNative())));
 			}
 		}
 	}
@@ -99,10 +99,15 @@ std::vector<Path> FileSystem::enumerateDirectory(const Path& path)
 
 Path FileSystem::getRelative(const Path& path, const Path& parentPath)
 {
-	return relative(path, parentPath);
+	return relative(path.getNative(), parentPath.getNative());
 }
 
 Path FileSystem::getAbsolute(const Path& path)
 {
-	return path.lexically_normal();
+	return path.getNative().lexically_normal();
+}
+
+size_t FileSystem::fileSize(const Path& path)
+{
+	return file_size(path.getNative());
 }

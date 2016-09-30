@@ -11,8 +11,7 @@ std::vector<Path> MaterialImporter::import(const ImportingAsset& asset, Path dst
 	MaterialDefinition material;
 	parseMaterial(material, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
 
-	Path dst = asset.inputFiles[0].name;
-	dst.replace_extension("");
+	Path dst = Path(asset.inputFiles[0].name).replaceExtension("");
 	FileSystem::writeFile(dstDir / dst, Serializer::toBytes(material));
 
 	return { dst };

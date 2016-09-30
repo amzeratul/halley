@@ -2,7 +2,6 @@
 #include <cstdint>
 #include <memory>
 #include <SDL.h>
-#include "halley/file/filesystem.h"
 #include "halley/resources/resource_data.h"
 
 namespace Halley

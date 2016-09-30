@@ -2,7 +2,6 @@
 #include <future>
 #include <cstdint>
 #include <atomic>
-#include <boost/filesystem.hpp>
 
 #include "halley/tools/make_font/font_generator.h"
 #include "halley/tools/distance_field/distance_field_generator.h"
@@ -181,7 +180,7 @@ FontGeneratorResult FontGenerator::generateFont(String assetName, gsl::span<cons
 		return FontGeneratorResult();
 	}
 
-	String asset = Path(assetName.cppStr()).stem().string();
+	String asset = Path(assetName).getStem().string();
 	FontGeneratorResult genResult;
 	genResult.success = true;
 	genResult.assetName = "font/" + asset;
@@ -247,13 +246,13 @@ FontGeneratorResult::FontGeneratorResult() = default;
 FontGeneratorResult::FontGeneratorResult(FontGeneratorResult&& other) = default;
 FontGeneratorResult::~FontGeneratorResult() = default;
 
-std::vector<filesystem::path> FontGeneratorResult::write(Path dir, bool verbose) const
+std::vector<Path> FontGeneratorResult::write(Path dir, bool verbose) const
 {
 	Path fileName = assetName.cppStr();
-	Path imgName = change_extension(fileName, ".png");
+	Path imgName = fileName.replaceExtension(".png");
 	Path pngPath = imgName;
-	Path binPath = change_extension(fileName, ".font");
-	Path metaPath = change_extension(pngPath, ".png.meta");
+	Path binPath = fileName.replaceExtension(".font");
+	Path metaPath = pngPath.replaceExtension(".png.meta");
 	if (verbose) {
 		std::cout << "Saving " << pngPath << ", " << binPath << ", and " << metaPath << std::endl;
 	}

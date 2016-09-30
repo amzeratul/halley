@@ -25,7 +25,7 @@
 #include "halley/maths/vector2.h"
 #include "halley/text/halleystring.h"
 #include "halley/resources/resource.h"
-#include "halley/file/filesystem.h"
+#include "halley/file/path.h"
 
 namespace Halley {
 	class ResourceDataStatic;

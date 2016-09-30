@@ -1,5 +1,4 @@
 #pragma once
-#include "halley/file/filesystem.h"
 #include "halley/resources/resource_data.h"
 #include "halley/core/graphics/window.h"
 

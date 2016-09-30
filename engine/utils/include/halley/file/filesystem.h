@@ -2,14 +2,10 @@
 
 #include <gsl/gsl>
 #include "halley/utils/utils.h"
-#include <boost/filesystem/path.hpp>
 #include <vector>
+#include "path.h"
 
-namespace Halley
-{
-	namespace filesystem = boost::filesystem;
-	using Path = filesystem::path;
-
+namespace Halley {
 	class FileSystem
 	{
 	public:
@@ -32,5 +28,8 @@ namespace Halley
 		
 		static Path getRelative(const Path& path, const Path& parentPath);
 		static Path getAbsolute(const Path& path);
+
+		static size_t fileSize(const Path& path);
 	};
 }
+

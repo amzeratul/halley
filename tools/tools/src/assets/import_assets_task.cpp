@@ -52,7 +52,7 @@ static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& as
 {
 	if (asset.inputFiles.size() > 1) {
 		for (auto& i: asset.inputFiles) {
-			if (i.first.extension() == ".meta") {
+			if (i.first.getExtension() == ".meta") {
 				auto data = ResourceDataStatic::loadFromFileSystem(asset.srcDir / i.first);
 				auto root = YAML::Load(data->getString());
 
@@ -84,7 +84,7 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 		importingAsset.assetType = asset.assetType;
 		importingAsset.metadata = getMetaData(asset);
 		for (auto& f: asset.inputFiles) {
-			if (f.first.extension() != ".meta") {
+			if (f.first.getExtension() != ".meta") {
 				importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.first, FileSystem::readFile(asset.srcDir / f.first)));
 			}
 		}

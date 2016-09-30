@@ -23,8 +23,7 @@ std::vector<Path> ImageImporter::import(const ImportingAsset& asset, Path dstDir
 	meta.set("width", size.x);
 	meta.set("height", size.y);
 
-	Path metaPath = mainFile;
-	metaPath.replace_extension(metaPath.extension().string() + ".meta");
+	Path metaPath = mainFile.replaceExtension(mainFile.getExtension() + ".meta");
 	FileSystem::writeFile(dstDir / metaPath, Serializer::toBytes(meta));
 
 	return { mainFile, metaPath };

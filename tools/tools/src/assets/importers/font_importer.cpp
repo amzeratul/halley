@@ -34,10 +34,8 @@ std::vector<Path> FontImporter::import(const ImportingAsset& asset, Path dstDir,
 		return {};
 	}
 	
-	Path fileName = asset.assetId.cppStr();
-	Path pngPath = fileName;
-	fileName.replace_extension(".font");
-	pngPath.replace_extension(".png");
+	Path fileName = Path(asset.assetId).replaceExtension(".font");
+	Path pngPath = fileName.replaceExtension(".png");
 	FileSystem::writeFile(dstDir / fileName, result.fontData);
 
 	auto imgData = result.image->savePNGToBytes();

@@ -6,7 +6,7 @@
 #include "halley/data_structures/flat_map.h"
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
-#include "halley/file/filesystem.h"
+#include "halley/file/path.h"
 #include <map>
 #include <cstdint>
 #include <utility>

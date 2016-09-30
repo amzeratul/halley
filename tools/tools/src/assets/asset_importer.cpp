@@ -26,7 +26,7 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 {
 	AssetType type = AssetType::SIMPLE_COPY;
 	
-	auto root = path.begin()->string();
+	auto root = path.getRoot();
 	if (root == "font") {
 		type = AssetType::FONT;
 	} else if (root == "image") {

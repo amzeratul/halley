@@ -18,7 +18,7 @@ namespace Halley
 		FontGeneratorResult();
 		FontGeneratorResult(FontGeneratorResult&& other);
 		~FontGeneratorResult();
-		std::vector<filesystem::path> write(Path dst, bool verbose = false) const;
+		std::vector<Path> write(Path dst, bool verbose = false) const;
 	};
 
 	class FontGenerator

@@ -22,7 +22,7 @@ This file is subject to the terms of halley_license.txt.
 #pragma once
 
 #include "halley/text/halleystring.h"
-#include "halley/file/filesystem.h"
+#include "halley/file/path.h"
 #include <memory>
 #include <functional>
 #include <halley/concurrency/future.h>

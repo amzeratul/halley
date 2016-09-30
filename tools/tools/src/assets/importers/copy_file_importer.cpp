@@ -14,8 +14,7 @@ std::vector<Path> CopyFileImporter::import(const ImportingAsset& asset, Path dst
 	out.push_back(mainFile);
 
 	if (asset.metadata) {
-		Path metaPath = mainFile;
-		metaPath.replace_extension(metaPath.extension().string() + ".meta");
+		Path metaPath = mainFile.replaceExtension(mainFile.getExtension() + ".meta");
 		FileSystem::writeFile(dstDir / metaPath, Serializer::toBytes(*asset.metadata));
 		out.push_back(metaPath);
 	}

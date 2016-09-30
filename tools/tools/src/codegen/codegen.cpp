@@ -1,4 +1,4 @@
-#include <boost/filesystem.hpp>
+#include <halley/file/filesystem.h>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <sstream>
@@ -106,7 +106,7 @@ bool Codegen::writeFile(Path filePath, const char* data, size_t dataSize, bool s
 			return false;
 		}
 
-		if (file_size(filePath) == dataSize) {
+		if (FileSystem::fileSize(filePath) == dataSize) {
 			// Size matches, check if contents are identical
 			std::ifstream in(filePath.string(), std::ofstream::in | std::ofstream::binary);
 			Vector<char> buffer(dataSize);
@@ -197,7 +197,7 @@ std::vector<Path> Codegen::generateCode(Path directory, ProgressReporter progres
 	// Has changes
 	if (stats.written > 0) {
 		using namespace filesystem;
-		auto cmakeLists = directory.parent_path() / path("CMakeLists.txt");
+		auto cmakeLists = directory.parentPath() / Path("CMakeLists.txt");
 		if (verbose) {
 			std::cout << "Touching " << cmakeLists.string() << std::endl;
 		}
