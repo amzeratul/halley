@@ -62,6 +62,7 @@ static void onVorbisError(int error)
 
 Halley::VorbisData::VorbisData(std::shared_ptr<ResourceData> resource)
 	: resource(resource)
+	, file(nullptr)
 	, streaming(std::dynamic_pointer_cast<ResourceDataStream>(resource))
 	, pos(0)
 {
@@ -75,6 +76,8 @@ Halley::VorbisData::~VorbisData()
 
 void Halley::VorbisData::open()
 {
+	close();
+
 	if (streaming) {
 		stream = std::dynamic_pointer_cast<ResourceDataStream>(resource)->getReader();
 	}
@@ -87,7 +90,9 @@ void Halley::VorbisData::open()
 
 	file = new OggVorbis_File();
 	int result = ov_open_callbacks(this, file, nullptr, 0, callbacks);
-	if (result != 0) onVorbisError(result);
+	if (result != 0) {
+		onVorbisError(result);
+	}
 }
 
 void Halley::VorbisData::close()
@@ -110,35 +115,45 @@ void Halley::VorbisData::getData(std::vector<char>& dst, int len)
 	// Warning: len might be -1 ("as much as you can get")
 
 	size_t totalRead = 0;
-	const size_t bufferSize = 2048;
+	constexpr size_t bufferSize = 2048;
 	char buffer[bufferSize];
 	
 	while (len < 0 || totalRead < size_t(len)) {
-		size_t n = read(buffer, bufferSize);
-		if (n == 0) break;
+		size_t n = read(gsl::as_writeable_bytes(gsl::span<char>(buffer)));
+		if (n == 0) {
+			break;
+		}
 		totalRead += n;
 		size_t dstSize = dst.size();
 		size_t sz = n + dstSize;
-		//while (dst.capacity() < sz) dst.reserve(dst.capacity() * 2);
 		dst.resize(sz);
 		memcpy(dst.data() + dstSize, buffer, n);
 	}
 }
 
-size_t Halley::VorbisData::read(char* dst, size_t len)
+size_t Halley::VorbisData::read(gsl::span<gsl::byte> dstBuf)
 {
 	Expects(file);
 	int bitstream;
 	size_t nRead = 0;
-	while (nRead < len) {
+
+	while (dstBuf.size() > 0) {
+		char* dst = reinterpret_cast<char*>(dstBuf.data());
+
 #ifdef WITH_IVORBIS
-		int r = ov_read(file, dst+nRead, int(len-nRead), &bitstream);
+		int justRead = ov_read(file, dst, dstBuf.size(), &bitstream);
 #else
-		int r = ov_read(file, dst+nRead, int(len-nRead), 0, 2, 1, &bitstream);
+		int justRead = ov_read(file, dst, dstBuf.size(), 0, 2, 1, &bitstream);
 #endif
-		if (r > 0) nRead += size_t(r);
-		else if (r == 0) break;
-		else onVorbisError(r);
+
+		if (justRead > 0) {
+			dstBuf = dstBuf.subspan(justRead);
+			nRead += justRead;
+		} else if (justRead == 0) {
+			break;
+		} else {
+			onVorbisError(justRead);
+		}
 	}
 	return nRead;
 }

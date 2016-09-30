@@ -23,10 +23,10 @@ input
 - use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
-- Music
+- Music streaming/track control
+- Fading
 - Falloff
 - Listener position
-- Fading
 - Mixing groups
 - Effects
   - Pitch bending [RESEARCH]

@@ -34,7 +34,7 @@ void AudioEngine::setListener(Vector2f position)
 void AudioEngine::run()
 {
 	const size_t bufSize = spec.numChannels * sizeof(AudioConfig::SampleFormat) * spec.bufferSize;
-	const size_t minQueue = bufSize * 2;
+	const size_t minQueue = bufSize;
 
 	using namespace std::chrono_literals;
 	while (out->getQueuedSize() >= minQueue && running) {

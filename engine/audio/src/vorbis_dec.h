@@ -23,6 +23,7 @@
 
 #include <memory>
 #include <vector>
+#include <gsl/gsl>
 
 struct OggVorbis_File;
 
@@ -42,7 +43,7 @@ namespace Halley {
 		~VorbisData();
 
 		void getData(std::vector<char>& data, int len=-1);
-		size_t read(char* dst, size_t len);
+		size_t read(gsl::span<gsl::byte> dst);
 		size_t getSize() const;
 		int getFrequency() const;
 		int getChannels() const;

@@ -7,16 +7,18 @@
 namespace Halley
 {
 	class ResourceLoader;
+	class VorbisData;
 
 	class AudioClip : public AsyncResource
 	{
 	public:
-		AudioClip();
+		AudioClip(size_t numChannels);
+		~AudioClip();
 
-		void loadFromData(std::shared_ptr<ResourceDataStatic> data);
+		void loadFromStatic(std::shared_ptr<ResourceDataStatic> data);
+		void loadFromStream(std::shared_ptr<ResourceDataStream> data);
 
-		void getChannelData(size_t channelN, size_t pos, gsl::span<AudioConfig::SampleFormat> dst) const;
-		gsl::span<const AudioConfig::SampleFormat> getChannelData(size_t channelN, size_t pos, size_t len) const;
+		gsl::span<const AudioConfig::SampleFormat> getChannelData(size_t channelN, size_t pos, size_t len);
 
 		size_t getLength() const; // in samples
 		size_t getNumberOfChannels() const;
@@ -24,6 +26,11 @@ namespace Halley
 
 	private:
 		size_t sampleLength;
+		size_t numChannels;
+		bool streaming;
+
+		std::vector<short> temp;
 		std::vector<std::vector<AudioConfig::SampleFormat>> samples;
+		std::unique_ptr<VorbisData> vorbisData;
 	};
 }
