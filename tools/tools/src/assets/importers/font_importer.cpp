@@ -30,6 +30,9 @@ std::vector<Path> FontImporter::import(const ImportingAsset& asset, Path dstDir,
 
 	FontGenerator gen(false, reporter);
 	auto result = gen.generateFont(asset.assetId, data, imgSize, radius, supersample, Range<int>(0, 255));
+	if (!result.success) {
+		return {};
+	}
 	
 	Path fileName = asset.assetId.cppStr();
 	Path pngPath = fileName;
