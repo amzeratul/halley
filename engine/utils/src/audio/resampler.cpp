@@ -31,6 +31,17 @@ AudioResamplerResult AudioResampler::resampleInterleaved(gsl::span<const float> 
 	return result;
 }
 
+AudioResamplerResult AudioResampler::resampleInterleaved(gsl::span<const short> src, gsl::span<short> dst)
+{
+	unsigned inLen = unsigned(src.size() / nChannels);
+	unsigned outLen = unsigned(dst.size() / nChannels);
+	speex_resampler_process_interleaved_int(resampler.get(), src.data(), &inLen, dst.data(), &outLen);
+	AudioResamplerResult result;
+	result.nRead = inLen;
+	result.nWritten = outLen;
+	return result;
+}
+
 size_t AudioResampler::numOutputSamples(size_t numInputSamples) const
 {
 	return numInputSamples * to / from;

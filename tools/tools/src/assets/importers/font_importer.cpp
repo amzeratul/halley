@@ -42,7 +42,7 @@ std::vector<Path> FontImporter::import(const ImportingAsset& asset, Path dstDir,
 
 	ImportingAsset image;
 	image.assetId = asset.assetId + "-image";
-	image.assetType = AssetType::IMAGE;
+	image.assetType = AssetType::Image;
 	image.metadata = std::move(result.imageMeta);
 	image.inputFiles.emplace_back(ImportingAssetFile(pngPath, std::move(imgData)));
 	collector(std::move(image));

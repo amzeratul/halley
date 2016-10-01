@@ -110,25 +110,16 @@ void Halley::VorbisData::reset()
 	open();
 }
 
+void VorbisData::getData(std::vector<short>& data, int len)
+{
+	data.resize(len == -1 ? getNumSamples() * getNumChannels() : len);
+	read(gsl::as_writeable_bytes(gsl::span<short>(data)));
+}
+
 void Halley::VorbisData::getData(std::vector<char>& dst, int len)
 {
-	// Warning: len might be -1 ("as much as you can get")
-
-	size_t totalRead = 0;
-	constexpr size_t bufferSize = 2048;
-	char buffer[bufferSize];
-	
-	while (len < 0 || totalRead < size_t(len)) {
-		size_t n = read(gsl::as_writeable_bytes(gsl::span<char>(buffer)));
-		if (n == 0) {
-			break;
-		}
-		totalRead += n;
-		size_t dstSize = dst.size();
-		size_t sz = n + dstSize;
-		dst.resize(sz);
-		memcpy(dst.data() + dstSize, buffer, n);
-	}
+	dst.resize(len == -1 ? getNumSamples() * getNumChannels() : len);
+	read(gsl::as_writeable_bytes(gsl::span<char>(dst)));
 }
 
 size_t Halley::VorbisData::read(gsl::span<gsl::byte> dstBuf)
@@ -164,14 +155,20 @@ size_t Halley::VorbisData::getSize() const
 	return size_t(ov_pcm_total(file, -1)) * 2;
 }
 
-int Halley::VorbisData::getFrequency() const
+size_t VorbisData::getNumSamples() const
+{
+	Expects(file);
+	return size_t(ov_pcm_total(file, -1)) / getNumChannels();
+}
+
+int Halley::VorbisData::getSampleRate() const
 {
 	Expects(file);
 	vorbis_info *info = ov_info(file, -1);
 	return info->rate;
 }
 
-int Halley::VorbisData::getChannels() const
+int Halley::VorbisData::getNumChannels() const
 {
 	Expects(file);
 	vorbis_info *info = ov_info(file, -1);

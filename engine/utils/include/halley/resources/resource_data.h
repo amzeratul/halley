@@ -52,12 +52,12 @@ namespace Halley {
 	class ResourceDataStatic : public ResourceData {
 	public:
 		ResourceDataStatic(String path);
-		ResourceDataStatic(void* data, size_t size, String path);
+		ResourceDataStatic(const void* data, size_t size, String path, bool owning = true);
 
-		void set(void* data, size_t size);
+		void set(const void* data, size_t size, bool owning = true);
 		bool isLoaded() const;
 
-		void* getData();
+		//void* getData();
 		const void* getData() const;
 		gsl::span<const gsl::byte> getSpan() const;
 		size_t getSize() const;
@@ -67,7 +67,7 @@ namespace Halley {
 		void writeToFileSystem(String path) const;
 
 	private:
-		std::shared_ptr<char> data;
+		std::shared_ptr<const char> data;
 		size_t size = 0;
 		bool loaded;
 	};

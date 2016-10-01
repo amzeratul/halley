@@ -8,7 +8,7 @@ namespace Halley
 	class ConfigImporter : public IAssetImporter
 	{
 	public:
-		AssetType getType() const override { return AssetType::CONFIG; }
+		AssetType getType() const override { return AssetType::Config; }
 
 		std::vector<Path> import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector) override;
 

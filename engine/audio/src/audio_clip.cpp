@@ -19,12 +19,12 @@ AudioClip::~AudioClip()
 void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data)
 {
 	VorbisData vorbis(data);
-	size_t nChannels = vorbis.getChannels();
-	if (vorbis.getFrequency() != AudioConfig::sampleRate) {
+	size_t nChannels = vorbis.getNumChannels();
+	if (vorbis.getSampleRate() != AudioConfig::sampleRate) {
 		throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.");
 	}	
+	size_t nSamples = vorbis.getNumSamples();
 	size_t size = vorbis.getSize();
-	size_t nSamples = size / nChannels;
 	std::vector<short> src(size);
 	vorbis.read(gsl::as_writeable_bytes(gsl::span<short>(src)));
 	vorbis.close();
@@ -59,15 +59,14 @@ void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data)
 void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data)
 {
 	vorbisData = std::make_unique<VorbisData>(data);
-	size_t nChannels = vorbisData->getChannels();
-	if (vorbisData->getFrequency() != AudioConfig::sampleRate) {
-		//throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.");
-	}	
-	size_t size = vorbisData->getSize();
-
+	size_t nChannels = vorbisData->getNumChannels();
+	if (vorbisData->getSampleRate() != AudioConfig::sampleRate) {
+		throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.");
+	}
+	
 	samples.resize(nChannels);
 	numChannels = nChannels;
-	sampleLength = size / nChannels;
+	sampleLength = vorbisData->getNumSamples();
 	streaming = true;
 	doneLoading();
 }

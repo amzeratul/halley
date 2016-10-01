@@ -21,7 +21,7 @@ namespace Halley
 		Path srcDir;
 		std::vector<InputFile> inputFiles;
 		std::vector<Path> outputFiles;
-		AssetType assetType = AssetType::UNDEFINED;
+		AssetType assetType = AssetType::Undefined;
 
 		ImportAssetsDatabaseEntry() {}
 

@@ -17,29 +17,27 @@ ResourceDataStatic::ResourceDataStatic(String path)
 {
 }
 
-ResourceDataStatic::ResourceDataStatic(void* _data, size_t _size, String path)
+ResourceDataStatic::ResourceDataStatic(const void* _data, size_t _size, String path, bool owning)
 	: ResourceData(path)
 	, loaded(false)
 {
-	set(_data, _size);
+	set(_data, _size, owning);
 }
 
-static void deleter(char* data)
+static void deleter(const char* data)
 {
 	delete[] data;
 }
 
-void ResourceDataStatic::set(void* _data, size_t _size)
+static void noOpDeleter(const char*)
 {
-	data = std::shared_ptr<char>(static_cast<char*>(_data), deleter);
-	size = _size;
-	loaded = true;
 }
 
-void* ResourceDataStatic::getData()
+void ResourceDataStatic::set(const void* _data, size_t _size, bool owning)
 {
-	if (!loaded) throw Exception("Resource data not yet loaded");
-	return data.get();
+	data = std::shared_ptr<const char>(static_cast<const char*>(_data), owning ? deleter : noOpDeleter);
+	size = _size;
+	loaded = true;
 }
 
 const void* ResourceDataStatic::getData() const

@@ -21,6 +21,7 @@ namespace Halley
 		~AudioResampler();
 
 		AudioResamplerResult resampleInterleaved(gsl::span<const float> src, gsl::span<float> dst);
+		AudioResamplerResult resampleInterleaved(gsl::span<const short> src, gsl::span<short> dst);
 		size_t numOutputSamples(size_t numInputSamples) const;
 
 	private:

@@ -10,14 +10,15 @@ namespace Halley
 
 	enum class AssetType
 	{
-		UNDEFINED,
-		CODEGEN,
-		FONT,
-		IMAGE,
-		MATERIAL,
-		ANIMATION,
-		CONFIG,
-		SIMPLE_COPY
+		Undefined,
+		Codegen,
+		Font,
+		Image,
+		Material,
+		Animation,
+		Config,
+		Audio,
+		SimpleCopy
 	};
 
 	class ImportingAssetFile
@@ -39,7 +40,7 @@ namespace Halley
 		String assetId;
 		std::vector<ImportingAssetFile> inputFiles;
 		std::unique_ptr<Metadata> metadata;
-		AssetType assetType = AssetType::UNDEFINED;
+		AssetType assetType = AssetType::Undefined;
 	};
 
 	class IAssetImporter

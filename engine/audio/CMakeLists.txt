@@ -24,7 +24,7 @@ set(HEADERS
         "include/halley/audio/audio_source.h"
         "include/halley/audio/audio_source_position.h"
         "include/halley/audio/halley_audio.h"
-        "src/vorbis_dec.h"
+        "include/halley/audio/vorbis_dec.h"
         "src/audio_handle_impl.h"
         "src/audio_mixer_avx.h"
         "src/audio_mixer_sse.h"

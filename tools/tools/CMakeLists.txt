@@ -1,6 +1,6 @@
 project (halley-tools)
 
-include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../../engine/core/include" "../../engine/utils/include")
+include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../../engine/core/include" "../../engine/utils/include" "../../engine/audio/include")
 
 set(SOURCES
         "src/codegen/cpp/codegen_cpp.cpp"
@@ -29,6 +29,7 @@ set(SOURCES
         "src/assets/import_tool.cpp"
 
         "src/assets/importers/animation_importer.cpp"
+        "src/assets/importers/audio_importer.cpp"
         "src/assets/importers/codegen_importer.cpp"
         "src/assets/importers/config_importer.cpp"
         "src/assets/importers/copy_file_importer.cpp"
@@ -73,6 +74,7 @@ set(HEADERS
         "include/halley/tools/assets/import_tool.h"
 
         "src/assets/importers/animation_importer.h"
+        "src/assets/importers/audio_importer.h"
         "src/assets/importers/codegen_importer.h"
         "src/assets/importers/config_importer.h"
         "src/assets/importers/copy_file_importer.h"
