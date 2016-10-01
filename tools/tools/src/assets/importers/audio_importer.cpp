@@ -91,17 +91,39 @@ static void onVorbisError(int error)
 	throw Exception("Error opening Ogg Vorbis: "+str);
 }
 
-static void outputPacket(Bytes& dst, ogg_packet& packet)
+static void writeBytes(Bytes& dst, gsl::span<const gsl::byte> src)
 {
 	size_t size = dst.size();
-	dst.resize(size + packet.bytes);
-	memcpy(dst.data() + size, packet.packet, size);
+	dst.resize(size + src.size());
+	memcpy(dst.data() + size, src.data(), size);
+}
+
+static void outputPacket(Bytes& dst, ogg_packet& packet, ogg_stream_state& os, bool& eos)
+{
+	ogg_page og;
+	ogg_stream_packetin(&os, &packet);
+	while (!eos) {
+		int result = ogg_stream_pageout(&os, &og);
+		if (result == 0) {
+			break;
+		}
+		writeBytes(dst, gsl::as_bytes(gsl::span<char>(reinterpret_cast<char*>(og.header), og.header_len)));
+		writeBytes(dst, gsl::as_bytes(gsl::span<char>(reinterpret_cast<char*>(og.body), og.body_len)));
+
+		if (ogg_page_eos(&og)) {
+			eos = true;
+		}
+	}
 }
 
 Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const short> src)
 {
 	Bytes result;
 	int ret = 0;
+	bool eos = false;
+
+	ogg_stream_state os;
+	ogg_stream_init(&os, 0);
 
 	// Based on steps from https://xiph.org/vorbis/doc/libvorbis/overview.html
 	// 1.
@@ -117,85 +139,90 @@ Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const
 	vorbis_analysis_init(&v, &vi);
 
 	// 3.
-	ogg_packet op;
-	ogg_packet op_comm;
-	ogg_packet op_code;
 	vorbis_comment vc;
-	vorbis_comment_init(&vc);
-	ret = vorbis_analysis_headerout(&v, &vc, &op, &op_comm, &op_code);
-	if (ret) {
-		onVorbisError(ret);
+	{
+		ogg_packet header;
+		ogg_packet header_comm;
+		ogg_packet header_code;
+		vorbis_comment_init(&vc);
+		vorbis_comment_add_tag(&vc, "ENCODER", "Halley");
+		ret = vorbis_analysis_headerout(&v, &vc, &header, &header_comm, &header_code);
+		if (ret) {
+			onVorbisError(ret);
+		}
+		ogg_stream_packetin(&os, &header);
+		ogg_stream_packetin(&os, &header_comm);
+		ogg_stream_packetin(&os, &header_code);
+		ogg_page og;
+		while (eos) {
+			ret = ogg_stream_flush(&os, &og);
+			if (ret == 0) {
+				break;
+			}
+			writeBytes(result, gsl::as_bytes(gsl::span<char>(reinterpret_cast<char*>(og.header), og.header_len)));
+			writeBytes(result, gsl::as_bytes(gsl::span<char>(reinterpret_cast<char*>(og.body), og.body_len)));
+		}
 	}
-	outputPacket(result, op);
-	outputPacket(result, op_comm);
-	outputPacket(result, op_code);
 
 	// 4.
 	vorbis_block vb;
+	ogg_packet op;
 	ret = vorbis_block_init(&v, &vb);
-	if (!ret) {
+	if (ret) {
 		onVorbisError(ret);
 	}
 
 	// 5. / 6.
 	float scale = 1.0f / 32768.0f;
-	while (true) {
+	constexpr int bufferSize = 1024;
+	while (!eos) {
 		// 5.1.
-		size_t samplesToWrite = std::min(size_t(src.size() / nChannels), size_t(1024));
-		float** buffers = vorbis_analysis_buffer(&v, samplesToWrite);
+		size_t samplesToWrite = std::min(size_t(src.size() / nChannels), size_t(bufferSize));
+		std::cout << "Writing " << samplesToWrite << " samples.\n";
+		float** buffers = vorbis_analysis_buffer(&v, bufferSize);
 		for (size_t i = 0; i < nChannels; ++i) {
-			for (size_t j = 0; j < samplesToWrite; ++j) {
-				buffers[i][j] = src[j * nChannels + i] * scale;
+			for (int j = 0; j < samplesToWrite; ++j) {
+				//buffers[i][j] = src[j * nChannels + i] * scale;
 			}
 		}
-		vorbis_analysis_wrote(&v, samplesToWrite);
 
+		ret = vorbis_analysis_wrote(&v, samplesToWrite);
+		if (ret) {
+			onVorbisError(ret);
+		}
+		
 		// 5.2.
-		bool hasMoreBlocks = true;
-		while (hasMoreBlocks) {
-			ret = vorbis_analysis_blockout(&v, &vb);
-			if (ret < 0) {
-				onVorbisError(ret);
-			}
-			hasMoreBlocks = ret == 1;
-
+		while (vorbis_analysis_blockout(&v, &vb) == 1) {
 			// 5.2.1.
 			ret = vorbis_analysis(&vb, nullptr);
-			if (!ret) {
+			if (ret) {
 				onVorbisError(ret);
 			}
 			
 			// 5.2.2.
 			ret = vorbis_bitrate_addblock(&vb);
-			if (!ret) {
+			if (ret) {
 				onVorbisError(ret);
 			}
 
-			bool hasMorePackets = true;
-			while (hasMorePackets) {
-				ret = vorbis_bitrate_flushpacket(&v, &op);
-				if (!ret) {
-					onVorbisError(ret);
-				}
-				hasMorePackets = ret == 1;
-
+			while (vorbis_bitrate_flushpacket(&v, &op)) {
 				// 5.2.3.
-				outputPacket(result, op);
+				outputPacket(result, op, os, eos);
 			}
 		}
 
-		// We allow it to loop one more time after size is zero
-		if (src.size() == 0) {
-			break;
-		}
 		src = src.subspan(samplesToWrite * nChannels);
+		if (samplesToWrite == 0) {
+			eos = true;
+		}
 	}
 
 	// 7.
-	vorbis_block_clear(&vb);
 	vorbis_comment_clear(&vc);
+	vorbis_block_clear(&vb);
 	vorbis_dsp_clear(&v);
 	vorbis_info_clear(&vi);
+	ogg_stream_clear(&os);
 
 	return result;
 }

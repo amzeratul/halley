@@ -1,5 +1,6 @@
 #include "halley/file/filesystem.h"
 #include <boost/filesystem.hpp>
+#include "halley/support/exception.h"
 
 using namespace Halley;
 using namespace filesystem;
@@ -70,6 +71,10 @@ Bytes FileSystem::readFile(const Path& path)
 	Bytes result;
 
 	std::ifstream fp(path.string(), std::ios::binary | std::ios::in);
+	if (!fp.is_open()) {
+		throw Exception("Unable to open file at " + path.string());
+	}
+
 	fp.seekg(0, std::ios::end);
 	size_t size = fp.tellg();
 	fp.seekg(0, std::ios::beg);
