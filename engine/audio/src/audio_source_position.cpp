@@ -45,21 +45,23 @@ void AudioSourcePosition::setMix(size_t nSrcChannels, gsl::span<const AudioChann
 		// Pannable (mono) sounds
 		Expects(nSrcChannels == 1);
 		if (isUI) {
+			// UI sound
 			for (size_t i = 0; i < nDstChannels; ++i) {
 				dst[i] = gain2DPan(pos.x, dstChannels[i].pan) * gain;
 			}
 		} else {
-			// TODO: do some proper computation, use falloff, etc
+			// In-world sound
+			// TODO: read falloff parameters from elsewhere
+			auto delta = pos - listener.position;
+			float pan = clamp(delta.x * 0.005f + 0.5f, 0.0f, 1.0f);
+			float len = delta.length();
+
+			const float fallOffNear = 200.0f;
+			const float fallOffFar = 400.0f;
+
+			float fallOff = 1.0f - clamp((len - fallOffNear) / (fallOffFar - fallOffNear), 0.0f, 1.0f);
+
 			for (size_t i = 0; i < nDstChannels; ++i) {
-				auto delta = pos - listener.position;
-				float pan = clamp(delta.x * 0.005f + 0.5f, 0.0f, 1.0f);
-				float len = delta.length();
-
-				const float fallOffNear = 200.0f;
-				const float fallOffFar = 400.0f;
-
-				float fallOff = 1.0f - clamp((len - fallOffNear) / (fallOffFar - fallOffNear), 0.0f, 1.0f);
-
 				dst[i] = gain2DPan(pan, dstChannels[i].pan) * gain * fallOff;
 			}
 		}
