@@ -40,4 +40,18 @@ void AudioMixerAVX::mixAudio(gsl::span<const AudioSamplePack> srcRaw, gsl::span<
 	}
 }
 
+void AudioMixerAVX::compressRange(gsl::span<AudioSamplePack> buffer)
+{
+	gsl::span<__m256> dst(reinterpret_cast<__m256*>(buffer.data()), buffer.size() * 2);
+	const size_t nSamples = size_t(dst.size());
+
+	float val = 0.99995f;
+	__m256 minVal = { -val, -val, -val, -val, -val, -val, -val, -val };
+	__m256 maxVal = { val, val, val, val, val, val, val, val };
+
+	for (size_t i = 0; i < nSamples; ++i) {
+		dst[i] = _mm256_max_ps(minVal, _mm256_min_ps(dst[i], maxVal));
+	}
+}
+
 #endif

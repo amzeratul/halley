@@ -50,7 +50,7 @@ void AudioSourcePosition::setMix(size_t nSrcChannels, gsl::span<const AudioChann
 		} else {
 			// TODO: in-world sounds, do this relative to listener
 			for (size_t i = 0; i < nDstChannels; ++i) {
-				dst[i] = gain2DPan(pos.x, dstChannels[i].pan) * gain;
+				dst[i] = gain2DPan(0.5f, dstChannels[i].pan) * gain;
 			}
 		}
 	} else {

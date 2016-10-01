@@ -34,10 +34,9 @@ void AudioEngine::setListener(AudioListenerData l)
 void AudioEngine::run()
 {
 	const size_t bufSize = spec.numChannels * sizeof(AudioConfig::SampleFormat) * spec.bufferSize;
-	const size_t minQueue = bufSize;
 
 	using namespace std::chrono_literals;
-	while (out->getQueuedSize() >= minQueue && running) {
+	while (out->getQueuedSampleCount() >= spec.bufferSize && running) {
 		std::this_thread::sleep_for(100us);
 	}
 
@@ -45,9 +44,7 @@ void AudioEngine::run()
 		return;
 	}
 
-	//while (out->getQueuedSize() < minQueue && running) {
 	generateBuffer();
-	//}
 }
 
 void AudioEngine::addSource(size_t id, std::unique_ptr<AudioSource>&& src)
@@ -88,6 +85,7 @@ void AudioEngine::generateBuffer()
 	postUpdateSources();
 
 	mixer->interleaveChannels(backBuffer, channelBuffers);
+	mixer->compressRange(backBuffer.packs);
 	out->queueAudio(backBuffer.packs);
 }
 

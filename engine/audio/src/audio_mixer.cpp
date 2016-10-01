@@ -44,6 +44,16 @@ void AudioMixer::interleaveChannels(AudioBuffer& dstBuffer, gsl::span<const Audi
 	}
 }
 
+void AudioMixer::compressRange(gsl::span<AudioSamplePack> buffer)
+{
+	for (ptrdiff_t i = 0; i < buffer.size(); ++i) {
+		for (size_t j = 0; j < 16; ++j) {
+			float& sample = buffer[i].samples[j];
+			sample = std::max(-0.99995f, std::min(sample, 0.99995f));
+		}
+	}
+}
+
 #ifdef HAS_SSE
 
 #ifndef _MSC_VER

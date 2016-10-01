@@ -69,6 +69,7 @@ AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, const Audi
 	result.bufferSize = obtained.samples;
 	result.numChannels = obtained.channels;
 	result.sampleRate = obtained.freq;
+	outputFormat = result;
 	return result;
 }
 
@@ -103,11 +104,46 @@ void AudioSDL::stopPlayback()
 void AudioSDL::queueAudio(gsl::span<const AudioSamplePack> data)
 {
 	Expects(device);
-	SDL_QueueAudio(device, data.data(), uint32_t(data.size_bytes()));
+
+	const size_t numSamples = data.size() * 16;
+
+	// Float
+	if (outputFormat.format == AudioSampleFormat::Float) {
+		SDL_QueueAudio(device, data.data(), uint32_t(data.size_bytes()));
+	}
+	
+	// Int16
+	else if (outputFormat.format == AudioSampleFormat::Int16) {
+		if (tmpShort.size() < numSamples) {
+			tmpShort.resize(numSamples);
+		}
+		for (ptrdiff_t i = 0; i < data.size(); ++i) {
+			for (size_t j = 0; j < 16; ++j) {
+				tmpShort[i * 16 + j] = static_cast<short>(data[i].samples[j] * 32768.0f);
+			}
+		}
+
+		SDL_QueueAudio(device, tmpShort.data(), uint32_t(tmpShort.size() * sizeof(short)));
+	}
+	
+	// Int32
+	else if (outputFormat.format == AudioSampleFormat::Int32) {
+		if (tmpInt.size() < numSamples) {
+			tmpInt.resize(numSamples);
+		}
+		for (ptrdiff_t i = 0; i < data.size(); ++i) {
+			for (size_t j = 0; j < 16; ++j) {
+				tmpInt[i * 16 + j] = static_cast<int>(data[i].samples[j] * 2147483648.0f);
+			}
+		}
+
+		SDL_QueueAudio(device, tmpInt.data(), uint32_t(tmpInt.size() * sizeof(int)));
+	}
 }
 
-size_t AudioSDL::getQueuedSize() const
+size_t AudioSDL::getQueuedSampleCount() const
 {
 	Expects(device);
-	return size_t(SDL_GetQueuedAudioSize(device));
+	size_t sizePerSample = outputFormat.format == AudioSampleFormat::Int16 ? 2 : 4;
+	return size_t(SDL_GetQueuedAudioSize(device)) / outputFormat.numChannels;
 }

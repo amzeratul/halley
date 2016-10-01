@@ -36,4 +36,18 @@ void AudioMixerSSE::mixAudio(gsl::span<const AudioSamplePack> srcRaw, gsl::span<
 	}
 }
 
+void AudioMixerSSE::compressRange(gsl::span<AudioSamplePack> buffer)
+{
+	gsl::span<__m128> dst(reinterpret_cast<__m128*>(buffer.data()), buffer.size() * 4);
+	const size_t nSamples = size_t(dst.size());
+
+	float val = 0.99995f;
+	__m128 minVal = { -val, -val, -val, -val };
+	__m128 maxVal = { val, val, val, val};
+
+	for (size_t i = 0; i < nSamples; ++i) {
+		dst[i] = _mm_max_ps(minVal, _mm_min_ps(dst[i], maxVal));
+	}
+}
+
 #endif

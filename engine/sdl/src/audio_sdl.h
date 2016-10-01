@@ -2,6 +2,7 @@
 #include "halley/core/api/halley_api_internal.h"
 #include "input_sdl.h"
 #include <cstdint>
+#include <vector>
 
 namespace Halley
 {
@@ -29,10 +30,14 @@ namespace Halley
 		void stopPlayback() override;
 
 		void queueAudio(gsl::span<const AudioSamplePack> data) override;
-		size_t getQueuedSize() const override;
+		size_t getQueuedSampleCount() const override;
 
 	private:
 		bool playing = false;
 		Uint32 device = 0;
+		AudioSpec outputFormat;
+
+		std::vector<short> tmpShort;
+		std::vector<int> tmpInt;
 	};
 }
