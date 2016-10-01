@@ -46,12 +46,10 @@ ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile)
 void ImportAssetsDatabase::load()
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	try {
-		auto data = FileSystem::readFile(dbFile);
+	auto data = FileSystem::readFile(dbFile);
+	if (data.size() > 0) {
 		auto s = Deserializer(data);
 		deserialize(s);
-	} catch (...) {
-		// No database found, just ignore it
 	}
 }
 

@@ -93,9 +93,11 @@ static void onVorbisError(int error)
 
 static void writeBytes(Bytes& dst, gsl::span<const gsl::byte> src)
 {
-	size_t size = dst.size();
-	dst.resize(size + src.size());
-	memcpy(dst.data() + size, src.data(), size);
+	size_t start = dst.size();
+	size_t size = src.size();
+	dst.resize(start + size);
+	std::cout << "Writing " << size << " bytes (total of " << (start + size) << ")\n";
+	memcpy(dst.data() + start, src.data(), size);
 }
 
 static void outputPacket(Bytes& dst, ogg_packet& packet, ogg_stream_state& os, bool& eos)
@@ -154,7 +156,7 @@ Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const
 		ogg_stream_packetin(&os, &header_comm);
 		ogg_stream_packetin(&os, &header_code);
 		ogg_page og;
-		while (eos) {
+		while (!eos) {
 			ret = ogg_stream_flush(&os, &og);
 			if (ret == 0) {
 				break;
@@ -182,7 +184,7 @@ Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const
 		float** buffers = vorbis_analysis_buffer(&v, bufferSize);
 		for (size_t i = 0; i < nChannels; ++i) {
 			for (int j = 0; j < samplesToWrite; ++j) {
-				//buffers[i][j] = src[j * nChannels + i] * scale;
+				buffers[i][j] = src[j * nChannels + i] * scale;
 			}
 		}
 
@@ -238,6 +240,6 @@ std::vector<short> AudioImporter::resample(int numChannels, int from, int to, gs
 	if (result.nWritten * numChannels == dst.size()) {
 		throw Exception("Resample dst buffer overflow.");
 	}
-	dst.resize(result.nWritten);
+	dst.resize(result.nWritten * numChannels);
 	return dst;
 }

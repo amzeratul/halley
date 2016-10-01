@@ -151,14 +151,13 @@ size_t Halley::VorbisData::read(gsl::span<gsl::byte> dstBuf)
 
 size_t Halley::VorbisData::getSize() const
 {
-	Expects(file);
-	return size_t(ov_pcm_total(file, -1)) * 2;
+	return getNumSamples() * getNumChannels() * 2;
 }
 
 size_t VorbisData::getNumSamples() const
 {
 	Expects(file);
-	return size_t(ov_pcm_total(file, -1)) / getNumChannels();
+	return size_t(ov_pcm_total(file, -1));
 }
 
 int Halley::VorbisData::getSampleRate() const
