@@ -96,7 +96,6 @@ static void writeBytes(Bytes& dst, gsl::span<const gsl::byte> src)
 	size_t start = dst.size();
 	size_t size = src.size();
 	dst.resize(start + size);
-	std::cout << "Writing " << size << " bytes (total of " << (start + size) << ")\n";
 	memcpy(dst.data() + start, src.data(), size);
 }
 
@@ -180,7 +179,6 @@ Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const
 	while (!eos) {
 		// 5.1.
 		size_t samplesToWrite = std::min(size_t(src.size() / nChannels), size_t(bufferSize));
-		std::cout << "Writing " << samplesToWrite << " samples.\n";
 		float** buffers = vorbis_analysis_buffer(&v, bufferSize);
 		for (size_t i = 0; i < nChannels; ++i) {
 			for (int j = 0; j < samplesToWrite; ++j) {
@@ -188,7 +186,7 @@ Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const
 			}
 		}
 
-		ret = vorbis_analysis_wrote(&v, samplesToWrite);
+		ret = vorbis_analysis_wrote(&v, int(samplesToWrite));
 		if (ret) {
 			onVorbisError(ret);
 		}

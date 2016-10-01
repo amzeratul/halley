@@ -95,6 +95,7 @@ add_library (halley-tools ${SOURCES} ${HEADERS} ${YAMLCPP_INCLUDE_DIR})
 
 target_link_libraries (halley-tools
         halley-core
+        ${VORBISENC_LIBRARY}
         ${FREETYPE_LIBRARIES}
         ${YAMLCPP_LIBRARY}
         )
