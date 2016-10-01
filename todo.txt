@@ -7,33 +7,33 @@ core/resources
 - resources hot reloading [RESEARCH]
 
 core/graphics
-- render graph [from old Halley]
+- render graph [from old Halley?]
 - convert uniforms into attributes for distance_field_sprite?
 - optimise SpritePainter
-- run rendering on another thread?
-- multi-pass conditional enabling of pass
-- multi-pass disable batching
+- run rendering on another thread? [RESEARCH]
+- multi-pass: conditional enabling of pass
+- multi-pass: disable batching
 - fallback shaders
 - shaders for other graphics APIs? [RESEARCH]
 - improve sliced sprites API [RESEARCH]
 - improve distance field API (less magic)
 
 input
-- remap mouse
 - input context system [RESEARCH]
 - use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
-- Music track control
-- Fading
-- Falloff
-- Listener position
-- Mixing groups
-- Effects
-  - Pitch bending [RESEARCH]
-  - Doppler shift [RESEARCH]
-  - Low-pass [RESEARCH]
-  - Reverb [RESEARCH]
+- music track control
+- fading
+- falloff
+- listener position
+- mixing groups
+- ducking
+- effects/DSP
+  - pitch bending [RESEARCH]
+  - doppler shift [RESEARCH]
+  - low-pass [RESEARCH]
+  - reverb [RESEARCH]
 
 entity
 * fix MappedPool (crashes with too many entities)
@@ -107,9 +107,9 @@ samples
   - sh07 ("Fury of the Sky God") - from Allegro
   - sh05 ("Bunkermaster") - from Allegro
 
-porting issues:
+fixes needed:
 - exception during entity initialization can cause ::abort() to be called
-- CMake is horrible
+- exceptions on other threads are not printed to console
 
 misc/refactor
 - Use C++ modules? (pending approval of SG2 TS + implementation)
@@ -117,8 +117,6 @@ misc/refactor
 
 build
 - figure out how to handle code generation and its errors :|
-- switch to meson for projects, since CMake hates codegen? :| [RESEARCH]
-- conan support?
 
 platforms
 - PS4?

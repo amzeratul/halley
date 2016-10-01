@@ -28,9 +28,6 @@ namespace Halley {
 		std::unique_ptr<EditorTaskSet> tasks;
 		std::unique_ptr<TaskBar> taskBar;
 
-		AudioHandle handle;
-		float pan = 0.5f;
-
 		void initSprites();
 	};
 }
