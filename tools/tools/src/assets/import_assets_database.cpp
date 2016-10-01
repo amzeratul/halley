@@ -105,10 +105,11 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 
 void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset)
 {
-	std::lock_guard<std::mutex> lock(mutex);
 	AssetEntry entry;
 	entry.asset = asset;
 	entry.present = true;
+
+	std::lock_guard<std::mutex> lock(mutex);
 	assetsImported[asset.assetId] = entry;
 }
 

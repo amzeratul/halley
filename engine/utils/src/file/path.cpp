@@ -86,7 +86,7 @@ bool Path::operator!=(const Path& other) const
 
 std::string Path::string() const
 {
-	return getNative().string();
+	return getNative().lexically_normal().string();
 }
 
 filesystem::path Path::getNative() const

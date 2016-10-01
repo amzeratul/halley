@@ -17,6 +17,11 @@ VideoAPI& Stage::getVideoAPI() const
 	return *api->video;
 }
 
+AudioAPI& Stage::getAudioAPI() const
+{
+	return *api->audio;
+}
+
 CoreAPI& Stage::getCoreAPI() const
 {
 	return *api->core;
