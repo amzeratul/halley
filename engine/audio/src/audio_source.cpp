@@ -62,16 +62,18 @@ size_t AudioSource::getNumberOfChannels() const
 	return clip->getNumberOfChannels();
 }
 
-void AudioSource::update(gsl::span<const AudioChannelData> channels)
+void AudioSource::update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener)
 {
 	Expects(playing);
+
+	if (playbackPos != 0) {
+		prevChannelMix = channelMix;
+	}
+
+	sourcePos.setMix(clip->getNumberOfChannels(), channels, channelMix, gain, listener);
 	
 	if (playbackPos == 0) {
-		sourcePos.setMix(clip->getNumberOfChannels(), channels, channelMix, gain);
 		prevChannelMix = channelMix;
-	} else {
-		prevChannelMix = channelMix;
-		sourcePos.setMix(clip->getNumberOfChannels(), channels, channelMix, gain);
 	}
 }
 

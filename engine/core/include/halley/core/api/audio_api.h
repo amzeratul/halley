@@ -58,6 +58,11 @@ namespace Halley
 	{
 	public:
 		Vector3f position;
+
+		AudioListenerData() {}
+		AudioListenerData(Vector3f position)
+			: position(position)
+		{}
 	};
 
 	class AudioOutputAPI

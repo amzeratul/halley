@@ -118,11 +118,12 @@ void AudioEngine::stop()
 void AudioEngine::updateSources()
 {
 	for (auto& source: sources) {
-		if (source->isPlaying()) {
-			source->update(channels);
-		} else if (!source->isDone() && source->isReady()) {
+		if (!source->isPlaying() && !source->isDone() && source->isReady()) {
 			source->start();
-			source->update(channels);
+		}
+		
+		if (source->isPlaying()) {
+			source->update(channels, listener);
 		}
 	}
 }

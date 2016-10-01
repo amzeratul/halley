@@ -4,7 +4,8 @@
 
 namespace Halley
 {
-	
+	class AudioListenerData;
+
 	class AudioChannelData
 	{
 	public:
@@ -18,7 +19,7 @@ namespace Halley
 		static AudioSourcePosition makePositional(Vector3f pos);
 		static AudioSourcePosition makeFixed();
 
-		void setMix(size_t srcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain) const;
+		void setMix(size_t srcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const;
 
 		AudioSourcePosition();
 		
