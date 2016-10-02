@@ -8,6 +8,7 @@
 #include <ogg/ogg.h>
 #include <vorbis/codec.h>
 #include <vorbis/vorbisenc.h>
+#include "halley/concurrency/concurrent.h"
 
 using namespace Halley;
 
@@ -48,9 +49,9 @@ std::vector<Path> AudioImporter::import(const ImportingAsset& asset, Path dstDir
 	// Resample
 	if (needsResampling) {
 		// Resample
-		for (size_t i = 0; i < numChannels; ++i) {
-			samples[i] = resampleChannel(sampleRate, 48000, samples[i]);
-		}
+		Concurrent::foreach(std::begin(samples), std::end(samples), [&] (std::vector<float>& s) {
+			s = resampleChannel(sampleRate, 48000, s);
+		});
 		sampleRate = 48000;
 		needsEncoding = true;
 	}
