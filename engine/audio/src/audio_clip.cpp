@@ -19,40 +19,20 @@ AudioClip::~AudioClip()
 void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data)
 {
 	VorbisData vorbis(data);
-	size_t nChannels = vorbis.getNumChannels();
 	if (vorbis.getSampleRate() != AudioConfig::sampleRate) {
 		throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.");
 	}	
-	size_t nSamples = vorbis.getNumSamples();
-	size_t size = vorbis.getSize();
-	std::vector<short> src(size);
-	vorbis.read(gsl::as_writeable_bytes(gsl::span<short>(src)));
+	numChannels = vorbis.getNumChannels();
+	sampleLength = vorbis.getNumSamples();
+	streaming = false;
+
+	samples.resize(numChannels);
+	for (size_t i = 0; i < numChannels; ++i) {
+		samples[i].resize(sampleLength);
+	}
+	vorbis.read(samples);
 	vorbis.close();
 
-	const AudioConfig::SampleFormat scale = 1.0f / 32768.0f;
-
-	samples.resize(nChannels);
-	for (size_t i = 0; i < nChannels; ++i) {
-		samples[i].resize(nSamples);
-	}
-
-	if (nChannels == 1) {
-		for (size_t i = 0; i < nSamples; ++i) {
-			samples[0][i] = AudioConfig::SampleFormat(src[i]) * scale;
-		}
-	} else if (nChannels == 2) {
-		for (size_t i = 0; i < nSamples; ++i) {
-			samples[0][i] = AudioConfig::SampleFormat(src[i * 2]) * scale;
-			samples[1][i] = AudioConfig::SampleFormat(src[i * 2 + 1]) * scale;
-		}
-	} else {
-		throw Exception("Sound clip must have one or two channels.");
-	}
-	src.clear();
-
-	numChannels = nChannels;
-	sampleLength = nSamples;
-	streaming = false;
 	doneLoading();
 }
 
@@ -77,17 +57,22 @@ gsl::span<const AudioConfig::SampleFormat> AudioClip::getChannelData(size_t chan
 
 	if (streaming) {
 		auto& temp = pos == 0 ? temp0 : temp1; // pos == 0 has a different buffer because if it loops around, it will be used together with another buffer
+		if (temp.size() != numChannels) {
+			temp.resize(numChannels);
+		}
 
 		if (channelN == 0) { // TODO: this assumes the channels will be read in order. This will break threading.
 			if (pos == 0) {
 				vorbisData->seek(0);
 			}
 
-			size_t toRead = len * numChannels;
-			if (temp.size() < toRead) {
-				temp.resize(toRead);
+			size_t toRead = len;
+			for (size_t i = 0; i < numChannels; ++i) {
+				if (temp[i].size() < toRead) {
+					temp[i].resize(toRead);
+				}
 			}
-			vorbisData->read(gsl::as_writeable_bytes(gsl::span<short>(temp)));
+			vorbisData->read(temp);
 		}
 
 		auto& buf = samples.at(channelN);
@@ -95,12 +80,8 @@ gsl::span<const AudioConfig::SampleFormat> AudioClip::getChannelData(size_t chan
 			buf.resize(len);
 		}
 
-		const AudioConfig::SampleFormat scale = 1.0f / 32768.0f;
-		const short* src = reinterpret_cast<short*>(temp.data());
-
-		for (size_t i = 0; i < len; ++i) {
-			samples[channelN][i] = AudioConfig::SampleFormat(src[i * numChannels + channelN]) * scale;
-		}
+		memcpy(samples[channelN].data(), temp[channelN].data(), len * sizeof(AudioConfig::SampleFormat));
+		
 		return gsl::span<const AudioConfig::SampleFormat>(samples[channelN].data(), len);
 	} else {
 		return gsl::span<const AudioConfig::SampleFormat>(samples.at(channelN).data() + pos, len);

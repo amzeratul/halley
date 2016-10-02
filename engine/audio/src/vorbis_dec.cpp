@@ -110,48 +110,34 @@ void Halley::VorbisData::reset()
 	open();
 }
 
-void VorbisData::getData(std::vector<short>& data, int len)
-{
-	data.resize(len == -1 ? getNumSamples() * getNumChannels() : len);
-	read(gsl::as_writeable_bytes(gsl::span<short>(data)));
-}
-
-void Halley::VorbisData::getData(std::vector<char>& dst, int len)
-{
-	dst.resize(len == -1 ? getNumSamples() * getNumChannels() : len);
-	read(gsl::as_writeable_bytes(gsl::span<char>(dst)));
-}
-
-size_t Halley::VorbisData::read(gsl::span<gsl::byte> dstBuf)
+size_t Halley::VorbisData::read(gsl::span<std::vector<float>> dst)
 {
 	Expects(file);
+	Expects(dst.size() == getNumChannels());
+
 	int bitstream;
-	size_t nRead = 0;
+	size_t nChannels = getNumChannels();
+	size_t totalRead = 0;
+	size_t toReadLeft = dst[0].size();
 
-	while (dstBuf.size() > 0) {
-		char* dst = reinterpret_cast<char*>(dstBuf.data());
+	while (toReadLeft > 0) {
+		float **pcm;
+		int nRead = ov_read_float(file, &pcm, int(toReadLeft), &bitstream);
 
-#ifdef WITH_IVORBIS
-		int justRead = ov_read(file, dst, int(dstBuf.size()), &bitstream);
-#else
-		int justRead = ov_read(file, dst, int(dstBuf.size()), 0, 2, 1, &bitstream);
-#endif
+		if (nRead > 0) {
+			for (size_t i = 0; i < nChannels; ++i) {
+				memcpy(dst[i].data() + totalRead, pcm[i], nRead * sizeof(float));
+			}
 
-		if (justRead > 0) {
-			dstBuf = dstBuf.subspan(justRead);
-			nRead += justRead;
-		} else if (justRead == 0) {
+			totalRead += nRead;
+			toReadLeft -= nRead;
+		} else if (nRead == 0) {
 			break;
 		} else {
-			onVorbisError(justRead);
+			onVorbisError(nRead);
 		}
 	}
-	return nRead;
-}
-
-size_t Halley::VorbisData::getSize() const
-{
-	return getNumSamples() * getNumChannels() * 2;
+	return totalRead;
 }
 
 size_t VorbisData::getNumSamples() const

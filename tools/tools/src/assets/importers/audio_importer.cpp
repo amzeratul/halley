@@ -19,7 +19,7 @@ std::vector<Path> AudioImporter::import(const ImportingAsset& asset, Path dstDir
 	Bytes encodedData;
 	gsl::span<const gsl::byte> fileData(gsl::as_bytes(gsl::span<const Halley::Byte>(rawData)));
 
-	std::vector<short> samples;
+	std::vector<std::vector<float>> samples;
 	int numChannels = 0;
 	int sampleRate = 0;
 	bool needsEncoding = false;
@@ -29,11 +29,16 @@ std::vector<Path> AudioImporter::import(const ImportingAsset& asset, Path dstDir
 		// Load vorbis data
 		VorbisData vorbis(resData);
 		numChannels = vorbis.getNumChannels();
+		size_t numSamples = vorbis.getNumSamples();
 		sampleRate = vorbis.getSampleRate();
+		samples.resize(numChannels);
+		for (size_t i = 0; i < numChannels; ++i) {
+			samples[i].resize(numSamples);
+		}
 
 		// Decode
 		if (sampleRate != 48000) {
-			vorbis.getData(samples);
+			vorbis.read(samples);
 			needsResampling = true;
 		}
 	} else {
@@ -43,16 +48,16 @@ std::vector<Path> AudioImporter::import(const ImportingAsset& asset, Path dstDir
 	// Resample
 	if (needsResampling) {
 		// Resample
-		auto dst = resample(numChannels, sampleRate, 48000, samples);
-		samples = std::move(dst);
-		dst.clear();
+		for (size_t i = 0; i < numChannels; ++i) {
+			samples[i] = resampleChannel(sampleRate, 48000, samples[i]);
+		}
 		sampleRate = 48000;
 		needsEncoding = true;
 	}
 
 	// Encode to vorbis
 	if (needsEncoding) {
-		encodedData = encodeVorbis(numChannels, sampleRate, gsl::span<short>(samples));
+		encodedData = encodeVorbis(numChannels, sampleRate, samples);
 		fileData = gsl::as_bytes(gsl::span<const Halley::Byte>(encodedData));
 		samples.clear();
 	}
@@ -117,7 +122,7 @@ static void outputPacket(Bytes& dst, ogg_packet& packet, ogg_stream_state& os, b
 	}
 }
 
-Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const short> src)
+Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const std::vector<float>> src)
 {
 	Bytes result;
 	int ret = 0;
@@ -174,17 +179,20 @@ Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const
 	}
 
 	// 5. / 6.
-	float scale = 1.0f / 32768.0f;
 	constexpr int bufferSize = 1024;
+	size_t pos = 0;
+	size_t len = src[0].size();
 	while (!eos) {
 		// 5.1.
-		size_t samplesToWrite = std::min(size_t(src.size() / nChannels), size_t(bufferSize));
+		Expects(pos <= len);
+		size_t samplesToWrite = std::min(len - pos, size_t(bufferSize));
 		float** buffers = vorbis_analysis_buffer(&v, bufferSize);
 		for (size_t i = 0; i < nChannels; ++i) {
 			for (int j = 0; j < samplesToWrite; ++j) {
-				buffers[i][j] = src[j * nChannels + i] * scale;
+				buffers[i][j] = src[i][j + pos];
 			}
 		}
+		pos += samplesToWrite;
 
 		ret = vorbis_analysis_wrote(&v, int(samplesToWrite));
 		if (ret) {
@@ -211,7 +219,6 @@ Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const
 			}
 		}
 
-		src = src.subspan(samplesToWrite * nChannels);
 		if (samplesToWrite == 0) {
 			eos = true;
 		}
@@ -227,17 +234,17 @@ Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const
 	return result;
 }
 
-std::vector<short> AudioImporter::resample(int numChannels, int from, int to, gsl::span<const short> src)
+std::vector<float> AudioImporter::resampleChannel(int from, int to, gsl::span<const float> src)
 {
-	AudioResampler resampler(from, to, numChannels, 1.0f);
-	std::vector<short> dst(resampler.numOutputSamples(src.size()) + 1024);
+	AudioResampler resampler(from, to, 1, 1.0f);
+	std::vector<float> dst(resampler.numOutputSamples(src.size()) + 1024);
 	auto result = resampler.resampleInterleaved(src, dst);
-	if (result.nRead * numChannels != src.size()) {
+	if (result.nRead != src.size()) {
 		throw Exception("Only read " + toString(result.nRead) + " samples, expected " + toString(src.size()));
 	}
-	if (result.nWritten * numChannels == dst.size()) {
+	if (result.nWritten == dst.size()) {
 		throw Exception("Resample dst buffer overflow.");
 	}
-	dst.resize(result.nWritten * numChannels);
+	dst.resize(result.nWritten);
 	return dst;
 }

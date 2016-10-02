@@ -42,11 +42,8 @@ namespace Halley {
 		VorbisData(std::shared_ptr<ResourceData> resource);
 		~VorbisData();
 
-		void getData(std::vector<short>& data, int len=-1); // -1 = read all you can
-		void getData(std::vector<char>& data, int len=-1);
-		size_t read(gsl::span<gsl::byte> dst);
+		size_t read(gsl::span<std::vector<float>> dst);
 
-		size_t getSize() const; // In bytes, total
 		size_t getNumSamples() const; // Per channel
 		int getSampleRate() const;
 		int getNumChannels() const;

@@ -11,7 +11,7 @@ namespace Halley
 		std::vector<Path> import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector) override;
 
 	private:
-		Bytes encodeVorbis(int channels, int sampleRate, gsl::span<const short> src);
-		std::vector<short> resample(int channels, int from, int to, gsl::span<const short> src);
+		Bytes encodeVorbis(int channels, int sampleRate, gsl::span<const std::vector<float>> src);
+		std::vector<float> resampleChannel(int from, int to, gsl::span<const float> src);
 	};
 }
