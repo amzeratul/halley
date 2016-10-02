@@ -11,6 +11,7 @@ set(SOURCES
         "src/audio_mixer_avx.cpp"
         "src/audio_mixer_sse.cpp"
         "src/audio_source.cpp"
+        "src/audio_source_behaviour.cpp"
         "src/audio_source_position.cpp"
         "src/vorbis_dec.cpp"
         )
@@ -22,6 +23,7 @@ set(HEADERS
         "include/halley/audio/audio_facade.h"
         "include/halley/audio/audio_mixer.h"
         "include/halley/audio/audio_source.h"
+        "include/halley/audio/audio_source_behaviour.h"
         "include/halley/audio/audio_source_position.h"
         "include/halley/audio/halley_audio.h"
         "include/halley/audio/vorbis_dec.h"

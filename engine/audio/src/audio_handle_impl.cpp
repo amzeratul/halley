@@ -43,11 +43,21 @@ void AudioHandleImpl::stop()
 	});
 }
 
+void AudioHandleImpl::setBehaviour(std::unique_ptr<AudioSourceBehaviour> b)
+{
+	std::shared_ptr<AudioSourceBehaviour> behaviour = std::move(b);
+	enqueue([behaviour] (AudioSource& src) mutable
+	{
+		src.setBehaviour(behaviour);
+	});
+}
+
 bool AudioHandleImpl::isPlaying() const
 {
 	auto& playing = facade.playingSounds;
 	return std::binary_search(playing.begin(), playing.end(), handleId);
 }
+
 
 void AudioHandleImpl::enqueue(std::function<void(AudioSource& src)> f)
 {

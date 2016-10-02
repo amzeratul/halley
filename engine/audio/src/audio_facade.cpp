@@ -1,6 +1,7 @@
 #include "audio_facade.h"
 #include "audio_engine.h"
 #include "audio_handle_impl.h"
+#include "audio_source_behaviour.h"
 
 using namespace Halley;
 
@@ -84,10 +85,16 @@ AudioHandle AudioFacade::playWorld(std::shared_ptr<AudioClip> clip, Vector2f pos
 
 AudioHandle AudioFacade::playMusic(std::shared_ptr<AudioClip> clip, int track, float fadeInTime, bool loop)
 {
-	// TODO: fade in
+	bool hasFade = fadeInTime > 0.0001f;
+	
 	stopMusic(track, fadeInTime);
-	auto handle = playUI(clip, 1.0f, 0.5f, true);
+	auto handle = playUI(clip, hasFade ? 0.0f : 1.0f, 0.5f, true);
 	musicTracks[track] = handle;
+
+	if (hasFade) {
+		handle->setBehaviour(std::make_unique<AudioSourceFadeBehaviour>(fadeInTime, 1.0f, false));
+	}
+
 	return handle;
 }
 
@@ -103,24 +110,28 @@ AudioHandle AudioFacade::getMusic(int track)
 
 void AudioFacade::stopMusic(int track, float fadeOutTime)
 {
-	// TODO: fade out
 	auto iter = musicTracks.find(track);
 	if (iter != musicTracks.end()) {
-		auto& handle = iter->second;
-		if (handle) {
-			handle->stop();
-			handle.reset();
-		}
+		stopMusic(iter->second, fadeOutTime);
+		musicTracks.erase(iter);
 	}
 }
 
 void AudioFacade::stopAllMusic(float fadeOutTime)
 {
-	// TODO: fade out
 	for (auto& m: musicTracks) {
-		m.second->stop();
+		stopMusic(m.second, fadeOutTime);
 	}
 	musicTracks.clear();
+}
+
+void AudioFacade::stopMusic(AudioHandle& handle, float fadeOutTime)
+{
+	if (fadeOutTime > 0.001f) {
+		handle->setBehaviour(std::make_unique<AudioSourceFadeBehaviour>(fadeOutTime, 0.0f, true));
+	} else {
+		handle->stop();
+	}
 }
 
 void AudioFacade::setGroupVolume(String groupName, float gain)

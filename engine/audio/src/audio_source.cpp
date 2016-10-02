@@ -1,5 +1,6 @@
 #include "audio_source.h"
 #include "audio_mixer.h"
+#include "audio_source_behaviour.h"
 
 using namespace Halley;
 
@@ -8,6 +9,9 @@ AudioSource::AudioSource(std::shared_ptr<AudioClip> clip, AudioSourcePosition so
 	, sourcePos(sourcePos)
 	, looping(loop)
 	, gain(gain)
+{}
+
+AudioSource::~AudioSource()
 {}
 
 void AudioSource::start()
@@ -57,6 +61,11 @@ void AudioSource::setAudioSourcePosition(AudioSourcePosition s)
 	}
 }
 
+float AudioSource::getGain() const
+{
+	return gain;
+}
+
 size_t AudioSource::getNumberOfChannels() const
 {
 	return clip->getNumberOfChannels();
@@ -66,14 +75,20 @@ void AudioSource::update(gsl::span<const AudioChannelData> channels, const Audio
 {
 	Expects(playing);
 
-	if (playbackPos != 0) {
-		prevChannelMix = channelMix;
+	if (behaviour) {
+		bool keep = behaviour->update(elapsedTime, *this);
+		if (!keep) {
+			behaviour.reset();
+		}
+		elapsedTime = 0;
 	}
 
+	prevChannelMix = channelMix;
 	sourcePos.setMix(clip->getNumberOfChannels(), channels, channelMix, gain, listener);
 	
-	if (playbackPos == 0) {
+	if (isFirstUpdate) {
 		prevChannelMix = channelMix;
+		isFirstUpdate = false;
 	}
 }
 
@@ -107,6 +122,7 @@ void AudioSource::mixToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<Au
 void AudioSource::advancePlayback(size_t samples)
 {
 	playbackPos += samples;
+	elapsedTime += float(samples) / AudioConfig::sampleRate;
 	if (playbackPos >= playbackLength) {
 		if (looping) {
 			playbackPos %= playbackLength;
@@ -124,6 +140,13 @@ void AudioSource::setId(size_t i)
 size_t AudioSource::getId() const
 {
 	return id;
+}
+
+void AudioSource::setBehaviour(std::shared_ptr<AudioSourceBehaviour> value)
+{
+	behaviour = std::move(value);
+	elapsedTime = 0;
+	behaviour->onAttach(*this);
 }
 
 void AudioSource::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const

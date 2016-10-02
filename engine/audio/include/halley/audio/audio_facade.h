@@ -58,5 +58,6 @@ namespace Halley {
 
 		void run();
 		void enqueue(std::function<void()> action);
+		void stopMusic(AudioHandle& handle, float fade);
     };
 }
