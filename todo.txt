@@ -21,12 +21,12 @@ core/graphics
 input
 - input context system [RESEARCH]
 - use GameController API, ditch XInput+Joystick (should be superceded)
+- input works equally well on both variable and fixed update timelines
 
 audio
 - music track control
 - fading
 - falloff
-- listener position
 - mixing groups
 - ducking
 - effects/DSP
@@ -89,6 +89,7 @@ utils
 - improve Halley::String?
 - write my own memory pool/replace boost::pool?
 - DirectoryMonitor support on Linux and Mac
+- remove dependency on boost::filesystem for engine?
 
 net
 - better HTTP library/replace boost::asio?

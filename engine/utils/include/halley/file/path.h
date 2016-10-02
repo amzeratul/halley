@@ -51,6 +51,7 @@ namespace Halley
 
 	private:
 		String p;
+		void setPath(const String& value);
 	};
 
 	std::ostream& operator<<(std::ostream& os, const Path& p);

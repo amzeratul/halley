@@ -3,22 +3,47 @@
 
 using namespace Halley;
 
-Path::Path() {}
+Path::Path()
+{}
 
-Path::Path(const char* name) : p(name) {}
-Path::Path(const std::string& name) : p(name) {}
-Path::Path(const String& name) : p(name) {}
-Path::Path(const filesystem::path& path) : p(path.string()) {}
+Path::Path(const char* name)
+{
+	setPath(name);
+}
+
+Path::Path(const std::string& name)
+{
+	setPath(name);
+}
+
+Path::Path(const filesystem::path& path)
+{
+	setPath(path.string());
+}
+
+Path::Path(const String& name)
+{
+	setPath(name);
+}
+
+void Path::setPath(const String& value)
+{
+	String str = filesystem::path(value.cppStr()).lexically_normal().string();
+#ifdef _WIN32
+	str.replace("/", "\\");
+#endif
+	p = str;	
+}
 
 Path& Path::operator=(const std::string& other)
 {
-	p = other;
+	setPath(other);
 	return *this;
 }
 
 Path& Path::operator=(const String& other)
 {
-	p = other;
+	setPath(other);
 	return *this;
 }
 
@@ -39,9 +64,9 @@ Path Path::parentPath() const
 
 Path Path::replaceExtension(String newExtension) const
 {
-	auto p = getNative();
-	p.replace_extension(newExtension.cppStr());
-	return p;
+	auto n = getNative();
+	n.replace_extension(newExtension.cppStr());
+	return n;
 }
 
 Path Path::operator/(const char* other) const
@@ -66,27 +91,35 @@ Path Path::operator/(const std::string& other) const
 
 bool Path::operator==(const char* other) const
 {
-	return p == other;
+	return operator==(Path(other));
 }
 
 bool Path::operator==(const String& other) const 
 {
-	return p == other;
+	return operator==(Path(other));
 }
 
 bool Path::operator==(const Path& other) const 
 {
+#ifdef _WIN32
+	return p.asciiLower() == other.p.asciiLower();
+#else
 	return p == other.p;
+#endif
 }
 
 bool Path::operator!=(const Path& other) const 
 {
-	return p != other.p;
+#ifdef _WIN32
+	return p.asciiLower() != other.p.asciiLower();
+#else
+	return p == other.p;
+#endif
 }
 
 std::string Path::string() const
 {
-	return getNative().lexically_normal().string();
+	return p;
 }
 
 filesystem::path Path::getNative() const
@@ -101,5 +134,5 @@ std::ostream& Halley::operator<<(std::ostream& os, const Path& p)
 
 Path Path::getRoot() const
 {
-	return filesystem::path(p.cppStr()).begin()->string();
+	return getNative().begin()->string();
 }

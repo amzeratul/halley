@@ -4,8 +4,6 @@
 
 using namespace Halley;
 
-class AbortException : public std::exception {};
-
 Executors* Executors::instance = nullptr;
 
 ExecutionQueue::ExecutionQueue()
@@ -22,7 +20,8 @@ TaskBase ExecutionQueue::getNext()
 			condition.wait(lock);
 		}
 		if (aborted) {
-			throw AbortException();
+			queue.clear();
+			return TaskBase([] () {});
 		}
 	}
 
@@ -129,9 +128,10 @@ void Executor::runForever()
 {
 #if HAS_THREADS
 	while (running)	{
-		try {
-			queue.getNext()();
-		} catch (AbortException) {}
+		auto next = queue.getNext();
+		if (running) {
+			next();
+		}
 	}
 #endif
 }

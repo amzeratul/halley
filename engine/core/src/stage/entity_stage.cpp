@@ -17,7 +17,7 @@ std::unique_ptr<World> EntityStage::createWorld(String configName, std::function
 		TimeLine timeline;
 		if (timelineName == "fixedUpdate") {
 			timeline = TimeLine::FixedUpdate;
-		} else if (timelineName == "VariableUpdate") {
+		} else if (timelineName == "variableUpdate") {
 			timeline = TimeLine::VariableUpdate;
 		} else if (timelineName == "render") {
 			timeline = TimeLine::Render;
