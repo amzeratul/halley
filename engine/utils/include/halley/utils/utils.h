@@ -136,12 +136,12 @@ namespace Halley {
 	// Interpolation
 	template <typename T>
 	inline T interpolate(T a, T b, float factor) {
-		return T(a*(1-factor) + b*factor);
+		return static_cast<T>(a * (1 - factor) + b * factor);
 	}
 
 	template <typename T>
 	inline T lerp(T a, T b, float factor) {
-		return T(a*(1 - factor) + b*factor);
+		return static_cast<T>(a * (1 - factor) + b * factor);
 	}
 
 	// Smoothing

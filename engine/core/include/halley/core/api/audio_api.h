@@ -7,10 +7,12 @@
 #include "halley/text/halleystring.h"
 #include "halley/maths/vector2.h"
 #include "halley/maths/vector3.h"
+#include <memory>
 
 namespace Halley
 {
 	class AudioClip;
+	class AudioSourceBehaviour;
 
     namespace AudioConfig {
         constexpr int sampleRate = 48000;
@@ -92,6 +94,7 @@ namespace Halley
 
 		virtual void stop() = 0;
 		virtual bool isPlaying() const = 0;
+		virtual void setBehaviour(std::unique_ptr<AudioSourceBehaviour> behaviour) = 0;
 	};
 	using AudioHandle = std::shared_ptr<IAudioHandle>;
 

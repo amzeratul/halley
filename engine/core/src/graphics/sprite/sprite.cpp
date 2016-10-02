@@ -19,6 +19,7 @@ Sprite::Sprite()
 
 void Sprite::draw(Painter& painter) const
 {
+	Expects(material);
 	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	painter.drawSprites(material, 1, &vertexAttrib);
 }
@@ -77,6 +78,13 @@ Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 	return *this;
 }
 
+Sprite& Sprite::setMaterial(std::shared_ptr<Material> m)
+{
+	Expects(m);
+	material = m;
+	return *this;
+}
+
 Sprite& Sprite::setImage(Resources& resources, String imageName, String materialName)
 {
 	if (materialName == "") {
@@ -88,6 +96,9 @@ Sprite& Sprite::setImage(Resources& resources, String imageName, String material
 
 Sprite& Sprite::setImage(std::shared_ptr<Texture> image, std::shared_ptr<MaterialDefinition> materialDefinition)
 {
+	Expects(image);
+	Expects(materialDefinition);
+
 	auto mat = std::make_shared<Material>(materialDefinition);
 	(*mat)["tex0"] = image;
 	setMaterial(mat);
@@ -176,6 +187,8 @@ Sprite& Sprite::setSprite(Resources& resources, String spriteSheetName, String i
 
 Sprite& Sprite::setSprite(const SpriteSheet& sheet, String name)
 {
+	Expects(&sheet != nullptr);
+
 	setSprite(sheet.getSprite(name));
 	return *this;
 }

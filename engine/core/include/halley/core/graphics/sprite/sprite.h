@@ -40,7 +40,7 @@ namespace Halley
 		bool isInView(Rect4f rect) const;
 		
 		Sprite& setMaterial(Resources& resources, String materialName = "");
-		Sprite& setMaterial(std::shared_ptr<Material> m) { material = m; return *this; }
+		Sprite& setMaterial(std::shared_ptr<Material> m);
 		Material& getMaterial() const { return *material; }
 
 		Sprite& setImage(Resources& resources, String imageName, String materialName = "");
