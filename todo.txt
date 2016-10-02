@@ -24,16 +24,16 @@ input
 - input works equally well on both variable and fixed update timelines
 
 audio
-- music track control
 - fading
 - falloff
 - mixing groups
-- ducking
+- range compression/ducking
+- audio environment
 - effects/DSP
   - pitch bending [RESEARCH]
-  - doppler shift [RESEARCH]
   - low-pass [RESEARCH]
   - reverb [RESEARCH]
+  - doppler shift [RESEARCH]
 
 entity
 * fix MappedPool (crashes with too many entities)

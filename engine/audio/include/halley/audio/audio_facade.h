@@ -4,12 +4,13 @@
 #include <atomic>
 #include <vector>
 #include "halley/core/api/halley_api_internal.h"
+#include <map>
 
 namespace Halley {
 	class AudioEngine;
 	class AudioHandleImpl;
 
-    class AudioFacade : public AudioAPIInternal
+    class AudioFacade final : public AudioAPIInternal
     {
 		friend class AudioHandleImpl;
 
@@ -28,6 +29,14 @@ namespace Halley {
 
 	    AudioHandle playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop) override;
 	    AudioHandle playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop) override;
+
+		AudioHandle playMusic(std::shared_ptr<AudioClip> clip, int track = 0, float fadeInTime = 0.0f, bool loop = true) override;
+		AudioHandle getMusic(int track = 0) override;
+		void stopMusic(int track = 0, float fadeOutTime = 0.0f) override;
+		void stopAllMusic(float fadeOutTime = 0.0f) override;
+
+		void setGroupVolume(String groupName, float gain = 1.0f) override;
+
 	    void setListener(AudioListenerData listener) override;
 
     private:
@@ -42,6 +51,8 @@ namespace Halley {
 		std::vector<std::function<void()>> inbox;
 		std::vector<size_t> playingSounds;
 		std::vector<size_t> playingSoundsNext;
+
+		std::map<int, AudioHandle> musicTracks;
 
 		size_t uniqueId = 0;
 

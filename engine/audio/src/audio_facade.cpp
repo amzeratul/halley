@@ -55,6 +55,7 @@ void AudioFacade::startPlayback(int deviceNumber)
 void AudioFacade::stopPlayback()
 {
 	if (running) {
+		musicTracks.clear();
 		running = false;
 		engine->stop();
 		audioThread.join();
@@ -79,6 +80,52 @@ AudioHandle AudioFacade::playWorld(std::shared_ptr<AudioClip> clip, Vector2f pos
 		engine->playWorld(id, clip, position, volume, loop);
 	});
 	return std::make_shared<AudioHandleImpl>(*this, id);
+}
+
+AudioHandle AudioFacade::playMusic(std::shared_ptr<AudioClip> clip, int track, float fadeInTime, bool loop)
+{
+	// TODO: fade in
+	stopMusic(track, fadeInTime);
+	auto handle = playUI(clip, 1.0f, 0.5f, true);
+	musicTracks[track] = handle;
+	return handle;
+}
+
+AudioHandle AudioFacade::getMusic(int track)
+{
+	auto iter = musicTracks.find(track);
+	if (iter != musicTracks.end()) {
+		return iter->second;
+	} else {
+		return AudioHandle();
+	}
+}
+
+void AudioFacade::stopMusic(int track, float fadeOutTime)
+{
+	// TODO: fade out
+	auto iter = musicTracks.find(track);
+	if (iter != musicTracks.end()) {
+		auto& handle = iter->second;
+		if (handle) {
+			handle->stop();
+			handle.reset();
+		}
+	}
+}
+
+void AudioFacade::stopAllMusic(float fadeOutTime)
+{
+	// TODO: fade out
+	for (auto& m: musicTracks) {
+		m.second->stop();
+	}
+	musicTracks.clear();
+}
+
+void AudioFacade::setGroupVolume(String groupName, float gain)
+{
+	// TODO
 }
 
 void AudioFacade::setListener(AudioListenerData listener)
