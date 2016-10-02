@@ -18,7 +18,7 @@ void AudioMixer::mixAudio(gsl::span<const AudioSamplePack> src, gsl::span<AudioS
 		}
 	} else {
 		// Interpolate the gain
-		const float scale = 1.0f / dst.size();
+		const float scale = 1.0f / (dst.size() * 16);
 		for (size_t i = 0; i < nPacks; ++i) {
 			for (size_t j = 0; j < 16; ++j) {
 				dst[i].samples[j] += src[i].samples[j] * lerp(gain0, gain1, (i * 16 + j) * scale);

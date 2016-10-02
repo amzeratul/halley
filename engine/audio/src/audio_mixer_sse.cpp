@@ -19,7 +19,7 @@ void AudioMixerSSE::mixAudio(gsl::span<const AudioSamplePack> srcRaw, gsl::span<
 			dst[i + 3] = _mm_add_ps(dst[i + 3], _mm_mul_ps(src[i + 3], gain));
 		}
 	} else {
-		const float sc = 1.0f / dst.size();
+		const float sc = 1.0f / (dst.size() * 16);
 		const float gainDiff = gain1 - gain0;
 
 		__m128 gain0p = { gain0, gain0, gain0, gain0 };

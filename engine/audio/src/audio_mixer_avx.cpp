@@ -22,7 +22,7 @@ void AudioMixerAVX::mixAudio(gsl::span<const AudioSamplePack> srcRaw, gsl::span<
 			dst[i + 1] = _mm256_add_ps(dst[i + 1], _mm256_mul_ps(src[i + 1], gain));
 		}
 	} else {
-		const float sc = 1.0f / dst.size();
+		const float sc = 1.0f / (dst.size() * 16);
 		const float gainDiff = gain1 - gain0;
 		const float eight = 8.0f;
 
