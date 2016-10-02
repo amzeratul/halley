@@ -7,6 +7,7 @@
 #include <map>
 
 namespace Halley {
+	class AudioSourcePosition;
 	class AudioEngine;
 	class AudioHandleImpl;
 
@@ -27,8 +28,8 @@ namespace Halley {
 		void startPlayback(int deviceNumber) override;
 		void stopPlayback() override;
 
+    	AudioHandle play(std::shared_ptr<AudioClip> clip, AudioSourcePosition position, float volume, bool loop) override;
 	    AudioHandle playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop) override;
-	    AudioHandle playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop) override;
 
 		AudioHandle playMusic(std::shared_ptr<AudioClip> clip, int track = 0, float fadeInTime = 0.0f, bool loop = true) override;
 		AudioHandle getMusic(int track = 0) override;
@@ -58,6 +59,7 @@ namespace Halley {
 
 		void run();
 		void enqueue(std::function<void()> action);
+		
 		void stopMusic(AudioHandle& handle, float fade);
     };
 }

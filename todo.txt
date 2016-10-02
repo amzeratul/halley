@@ -24,7 +24,6 @@ input
 - input works equally well on both variable and fixed update timelines
 
 audio
-- falloff
 - mixing groups
 - range compression/ducking
 - audio environment

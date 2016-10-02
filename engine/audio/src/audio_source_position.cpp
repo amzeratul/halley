@@ -10,31 +10,42 @@ AudioSourcePosition::AudioSourcePosition()
 {
 }
 
-AudioSourcePosition::AudioSourcePosition(Vector3f pos, bool isUI, bool isPannable)
-	: pos(pos)
-	, isUI(isUI)
-	, isPannable(isPannable)
-{
-}
-
 AudioSourcePosition AudioSourcePosition::makeUI(float pan)
 {
-	return AudioSourcePosition(Vector3f(pan, 0, 0), true, true);
+	auto result = AudioSourcePosition();
+	result.pos = Vector3f(pan, 0, 0);
+	result.isUI = true;
+	result.isPannable = true;
+	return result;
 }
 
-AudioSourcePosition AudioSourcePosition::makePositional(Vector3f pos)
+AudioSourcePosition AudioSourcePosition::makePositional(Vector2f pos, float referenceDistance, float maxDistance)
 {
-	return AudioSourcePosition(pos, false, true);
+	return makePositional(Vector3f(pos), referenceDistance, maxDistance);
+}
+
+AudioSourcePosition AudioSourcePosition::makePositional(Vector3f pos, float referenceDistance, float maxDistance)
+{
+	auto result = AudioSourcePosition();
+	result.pos = pos;
+	result.isUI = false;
+	result.isPannable = true;
+	result.referenceDistance = std::max(0.1f, referenceDistance);
+	result.maxDistance = std::max(result.referenceDistance, maxDistance);
+	return result;
 }
 
 AudioSourcePosition AudioSourcePosition::makeFixed()
 {
-	return AudioSourcePosition(Vector3f(), true, false);
+	auto result = AudioSourcePosition();
+	result.isUI = true;
+	result.isPannable = false;
+	return result;
 }
 
 static float gain2DPan(float srcPan, float dstPan)
 {
-	return std::max(0.0f, 1.0f - std::abs(srcPan - dstPan));
+	return std::max(0.0f, 1.0f - 0.5f * std::abs(srcPan - dstPan));
 }
 
 void AudioSourcePosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const
@@ -51,25 +62,21 @@ void AudioSourcePosition::setMix(size_t nSrcChannels, gsl::span<const AudioChann
 			}
 		} else {
 			// In-world sound
-			// TODO: read falloff parameters from elsewhere
 			auto delta = pos - listener.position;
-			float pan = clamp(delta.x * 0.005f + 0.5f, 0.0f, 1.0f);
+			float pan = clamp(delta.x * 0.01f, 0.0f, 1.0f);
 			float len = delta.length();
 
-			const float fallOffNear = 200.0f;
-			const float fallOffFar = 400.0f;
-
-			float fallOff = 1.0f - clamp((len - fallOffNear) / (fallOffFar - fallOffNear), 0.0f, 1.0f);
+			float rolloff = 1.0f - clamp((len - referenceDistance) / (maxDistance - referenceDistance), 0.0f, 1.0f);
 
 			for (size_t i = 0; i < nDstChannels; ++i) {
-				dst[i] = gain2DPan(pan, dstChannels[i].pan) * gain * fallOff;
+				dst[i] = gain2DPan(pan, dstChannels[i].pan) * gain * rolloff;
 			}
 		}
 	} else {
 		// Non-pannable (stereo) sounds
 		Expects(nSrcChannels == 2);
 		for (size_t i = 0; i < nSrcChannels; ++i) {
-			float srcPan = i == 0 ? 0.0f : 1.0f;
+			float srcPan = i == 0 ? -1.0f : 1.0f;
 			for (size_t j = 0; j < nDstChannels; ++j) {
 				dst[i * nSrcChannels + j] = gain2DPan(srcPan, dstChannels[j].pan) * gain;
 			}

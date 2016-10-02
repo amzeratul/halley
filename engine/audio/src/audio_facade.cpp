@@ -67,20 +67,7 @@ void AudioFacade::stopPlayback()
 
 AudioHandle AudioFacade::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop)
 {
-	size_t id = uniqueId++;
-	enqueue([=] () {
-		engine->playUI(id, clip, volume, pan, loop);
-	});
-	return std::make_shared<AudioHandleImpl>(*this, id);
-}
-
-AudioHandle AudioFacade::playWorld(std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop)
-{
-	size_t id = uniqueId++;
-	enqueue([=] () {
-		engine->playWorld(id, clip, position, volume, loop);
-	});
-	return std::make_shared<AudioHandleImpl>(*this, id);
+	return play(clip, AudioSourcePosition::makeUI(pan), volume, loop);
 }
 
 AudioHandle AudioFacade::playMusic(std::shared_ptr<AudioClip> clip, int track, float fadeInTime, bool loop)
@@ -88,7 +75,7 @@ AudioHandle AudioFacade::playMusic(std::shared_ptr<AudioClip> clip, int track, f
 	bool hasFade = fadeInTime > 0.0001f;
 	
 	stopMusic(track, fadeInTime);
-	auto handle = playUI(clip, hasFade ? 0.0f : 1.0f, 0.5f, true);
+	auto handle = play(clip, AudioSourcePosition::makeFixed(), hasFade ? 0.0f : 1.0f, true);
 	musicTracks[track] = handle;
 
 	if (hasFade) {
@@ -96,6 +83,15 @@ AudioHandle AudioFacade::playMusic(std::shared_ptr<AudioClip> clip, int track, f
 	}
 
 	return handle;
+}
+
+AudioHandle AudioFacade::play(std::shared_ptr<AudioClip> clip, AudioSourcePosition position, float volume, bool loop)
+{
+	size_t id = uniqueId++;
+	enqueue([=] () {
+		engine->play(id, clip, position, volume, loop);
+	});
+	return std::make_shared<AudioHandleImpl>(*this, id);
 }
 
 AudioHandle AudioFacade::getMusic(int track)

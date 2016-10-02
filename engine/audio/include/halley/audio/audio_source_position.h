@@ -16,7 +16,8 @@ namespace Halley
 	{
 	public:
 		static AudioSourcePosition makeUI(float pan);
-		static AudioSourcePosition makePositional(Vector3f pos);
+		static AudioSourcePosition makePositional(Vector2f pos, float referenceDistance = 200.0f, float maxDistance = 400.0f);
+		static AudioSourcePosition makePositional(Vector3f pos, float referenceDistance = 200.0f, float maxDistance = 400.0f);
 		static AudioSourcePosition makeFixed();
 
 		void setMix(size_t srcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const;
@@ -24,9 +25,9 @@ namespace Halley
 		AudioSourcePosition();
 		
 	private:
-		AudioSourcePosition(Vector3f pos, bool isUI, bool isPannable);
-
 		Vector3f pos;
+		float referenceDistance;
+		float maxDistance;
 		bool isUI;
 		bool isPannable;
 	};

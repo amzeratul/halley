@@ -16,14 +16,9 @@ AudioEngine::~AudioEngine()
 {
 }
 
-void AudioEngine::playUI(size_t id, std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop)
+void AudioEngine::play(size_t id, std::shared_ptr<AudioClip> clip, AudioSourcePosition position, float volume, bool loop)
 {
-	addSource(id, std::make_unique<AudioSource>(clip, AudioSourcePosition::makeUI(pan), volume, loop));
-}
-
-void AudioEngine::playWorld(size_t id, std::shared_ptr<AudioClip> clip, Vector2f position, float volume, bool loop)
-{
-	addSource(id, std::make_unique<AudioSource>(clip, AudioSourcePosition::makePositional(Vector3f(position)), volume, loop));
+	addSource(id, std::make_unique<AudioSource>(clip, position, volume, loop));
 }
 
 void AudioEngine::setListener(AudioListenerData l)
@@ -104,7 +99,7 @@ void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 	}
 
 	channels.resize(spec.numChannels);
-	channels[0].pan = 0.0f;
+	channels[0].pan = -1.0f;
 	channels[1].pan = 1.0f;
 }
 
