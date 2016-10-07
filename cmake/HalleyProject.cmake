@@ -88,6 +88,7 @@ set(HALLEY_PROJECT_LIBS
 
 set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/include
+	${HALLEY_PATH}/contrib
 	${HALLEY_PATH}/engine/core/include
 	${HALLEY_PATH}/engine/net/include
 	${HALLEY_PATH}/engine/utils/include
