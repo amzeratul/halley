@@ -1,5 +1,6 @@
 #include "system.h"
 #include <halley/data_structures/flat_map.h>
+#include "halley/support/debug.h"
 
 using namespace Halley;
 
@@ -98,6 +99,7 @@ void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, size
 }
 
 void System::doUpdate(Time time) {
+	Debug::trace("Updating " + name);
 	timer.beginSample();
 
 	purgeMessages();
@@ -108,12 +110,15 @@ void System::doUpdate(Time time) {
 	updateBase(time);
 	
 	timer.endSample();
+	Debug::trace("Done updating " + name);
 }
 
 void System::doRender(Painter& painter) {
+	Debug::trace("Rendering " + name);
 	timer.beginSample();
 
 	renderBase(painter);
 
 	timer.endSample();
+	Debug::trace("Done rendering " + name);
 }

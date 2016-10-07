@@ -105,6 +105,7 @@ void Core::onTerminatedInError(const std::string& error)
 	} else {
 		std::cout << ConsoleColour(Console::RED) << "\n\nUnknown unhandled exception." << ConsoleColour() << std::endl;
 	}
+	std::cout << ConsoleColour(Console::RED) << "Last traces:\n" << ConsoleColour(Console::DARK_RED) << Debug::getLastTraces << ConsoleColour() << std::endl;
 	hasError = true;
 }
 
