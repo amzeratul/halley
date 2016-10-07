@@ -47,7 +47,7 @@ namespace Halley {
 		size_t getNumberHats() override;
 
 		float getAxis(int n) override;
-		InputDevice& getHat(int n) override;
+		std::shared_ptr<InputDevice> getHat(int n) override;
 
 		static float defaultAxisAdjust(float value);
 

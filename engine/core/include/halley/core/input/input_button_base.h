@@ -48,7 +48,7 @@ namespace Halley {
 
 		virtual float getAxis(int /*n*/) override {return 0; };
 		virtual int getAxisRepeat(int /*n*/) override { return 0; }
-		virtual InputDevice& getHat(int /*n*/) override { throw Exception("Hat not available."); }
+		virtual std::shared_ptr<InputDevice> getHat(int /*n*/) override { return std::shared_ptr<InputDevice>(); }
 
 		virtual void vibrate(spInputVibration /*vib*/) override {}
 		virtual void stopVibrating() override {}

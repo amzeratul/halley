@@ -32,7 +32,7 @@ namespace Halley {
 		
 		bool isEnabled() const override { return true; }
 		virtual size_t getNumberHats() override { return 0; }
-		virtual InputDevice& getHat(int /*n*/) override { throw Exception("Hat not available"); }
+		virtual std::shared_ptr<InputDevice> getHat(int /*n*/) override { return std::shared_ptr<InputDevice>(); }
 
 		size_t getNumberButtons() override;
 		size_t getNumberAxes() override;
