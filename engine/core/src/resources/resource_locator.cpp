@@ -96,6 +96,11 @@ namespace Halley {
 		return std::unique_ptr<ResourceDataStream>(ptr);
 	}
 
+	bool ResourceLocator::fileExists(const String& resource)
+	{
+		return !!getResource(resource, true);
+	}
+
 	StringArray ResourceLocator::enumerate(String prefix, bool removePrefix, String suffixMatch)
 	{
 		std::set<String> result;

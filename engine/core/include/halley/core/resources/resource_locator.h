@@ -56,6 +56,8 @@ namespace Halley {
 		std::unique_ptr<ResourceDataStream> getStream(String resource) override;
 		StringArray enumerate(String prefix = "", bool removePrefix = false, String suffixMatch = "");
 
+		bool fileExists(const String& string) override;
+
 	private:
 		SystemAPI& system;
 		HashMap<String, IResourceLocatorProvider*> locators;

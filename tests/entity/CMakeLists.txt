@@ -18,4 +18,4 @@ set (entity_test_gen_definitions
 	"gen_src/test.yaml"
 	)
 
-halleyProject(halley-entity-test "${entity_test_sources}" "${entity_test_headers}" "${entity_test_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+halleyProjectCodegen(halley-entity-test "${entity_test_sources}" "${entity_test_headers}" "${entity_test_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)

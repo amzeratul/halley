@@ -17,5 +17,5 @@ set (network_test_headers
 set (network_test_gen_definitions
 	)
 
-halleyProject(halley-network-test "${network_test_sources}" "${network_test_headers}" "${network_test_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+halleyProjectCodegen(halley-network-test "${network_test_sources}" "${network_test_headers}" "${network_test_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 add_dependencies(halley-network-test halley-cmd)

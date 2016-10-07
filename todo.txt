@@ -21,12 +21,14 @@ core/graphics
 input
 - input context system [RESEARCH]
 - use GameController API, ditch XInput+Joystick (should be superceded)
-- input works equally well on both variable and fixed update timelines
+- input should work equally well on both variable and fixed update timelines
 
 audio
 - mixing groups
 - range compression/ducking
-- audio environment
+- audio environments
+- source filters
+- listener filters
 - effects/DSP
   - pitch bending [RESEARCH]
   - low-pass [RESEARCH]

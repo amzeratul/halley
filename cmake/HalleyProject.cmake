@@ -100,8 +100,6 @@ set(HALLEY_PROJECT_LIB_DIRS
 	)
 
 function(halleyProject name sources headers genDefinitions targetDir)
-	add_custom_target(${name}-codegen ALL ${HALLEY_PATH}/bin/halley-cmd import ${targetDir}/.. ${HALLEY_PATH} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${genDefinitions})
-
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${targetDir})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${targetDir})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${targetDir})
@@ -130,7 +128,6 @@ function(halleyProject name sources headers genDefinitions targetDir)
 
 	target_link_libraries(${name} ${HALLEY_PROJECT_LIBS})
 	set_target_properties(${name} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-	add_dependencies(${name} ${PROJECT_NAME}-codegen)
 
 	if (HOTRELOAD)
 		set(HALLEY_RUNNER_PATH ${HALLEY_PATH}\\bin\\halley-runner.exe)
@@ -143,3 +140,9 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		add_definitions(-D_WIN32_WINNT=0x0600)
 	endif()
 endfunction(halleyProject)
+
+function(halleyProjectCodegen name sources headers genDefinitions targetDir)
+	add_custom_target(${name}-codegen ALL ${HALLEY_PATH}/bin/halley-cmd import ${targetDir}/.. ${HALLEY_PATH} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${genDefinitions})
+	halleyProject(${name} "${sources}" "${headers}" "${genDefinitions}" "${targetDir}")
+	add_dependencies(${name} ${PROJECT_NAME}-codegen)
+endfunction(halleyProjectCodegen)

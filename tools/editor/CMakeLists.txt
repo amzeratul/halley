@@ -47,7 +47,7 @@ endif()
 
 include_directories(${FREETYPE_INCLUDE_DIR} "../tools/include")
 
-halleyProject(halley-editor "${editor_sources}" "${editor_headers}" "${editor_gen_definitions}" ${CMAKE_HOME_DIRECTORY}/bin)
+halleyProjectCodegen(halley-editor "${editor_sources}" "${editor_headers}" "${editor_gen_definitions}" ${CMAKE_HOME_DIRECTORY}/bin)
 add_dependencies(halley-editor halley-cmd halley-core halley-net halley-sdl halley-opengl)
 
 target_link_libraries (halley-editor

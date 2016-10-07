@@ -80,6 +80,9 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(String rawName, Resource
 
 	// Load resource from disk
 	auto resLoader = ResourceLoader(*(parent.locator), rawName, name, priority, parent.api, std::move(meta));
+	if (!resLoader.fileExists()) {
+		throw Exception("Unable to load resource file: " + name);
+	}
 	auto newRes = loadResource(resLoader);
 	if (!newRes) {
 		if (resLoader.loaded) {
