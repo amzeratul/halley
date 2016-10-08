@@ -1,6 +1,6 @@
 project (halley-entity)
 
-include_directories("include/halley/entity" "../utils/include")
+include_directories(${Boost_INCLUDE_DIR} "include/halley/entity" "../utils/include")
 
 set(SOURCES
         "src/component.cpp"
