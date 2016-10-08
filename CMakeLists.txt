@@ -3,6 +3,8 @@ cmake_minimum_required (VERSION 3.0)
 project (halley)
 
 set(HALLEY_PATH ${CMAKE_HOME_DIRECTORY})
+set(BUILD_HALLEY_TOOLS 1 CACHE BOOL "Build editor and commandline tools")
+set(BUILD_HALLEY_TESTS 1 CACHE BOOL "Build tests")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${HALLEY_PATH}/cmake/")
 include(HalleyProject)
 
@@ -36,5 +38,12 @@ SET(HALLEY_VERSION_PATCH "0")
 SET(HALLEY_VERSION "${HALLEY_VERSION_MAJOR}.${HALLEY_VERSION_MINOR}.${HALLEY_VERSION_PATCH}")
 
 add_subdirectory(engine)
-add_subdirectory(tools)
-add_subdirectory(tests)
+
+if (BUILD_HALLEY_TOOLS)
+    add_subdirectory(tools)
+endif()
+
+if (BUILD_HALLEY_TESTS)
+    add_subdirectory(tests)
+endif()
+
