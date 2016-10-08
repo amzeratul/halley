@@ -102,6 +102,7 @@ set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/engine/utils/include
 	${HALLEY_PATH}/engine/entity/include
 	${HALLEY_PATH}/engine/audio/include
+	${Boost_INCLUDE_DIR} 
 	)
 	
 set(HALLEY_PROJECT_LIB_DIRS
