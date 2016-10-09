@@ -402,7 +402,7 @@ Halley::String Halley::Debug::getLastTraces()
 	String result;
 	const size_t n = lastTraces.size();
 	for (size_t i = 0; i < n; ++i) {
-		auto& trace = lastTraces[(i + tracePos + 1) % n];
+		auto& trace = lastTraces[(i + tracePos) % n];
 		result += " - " + String(trace.filename) + ":" + toString(trace.line);
 		if (i == n - 1) {
 			result += " [latest]";

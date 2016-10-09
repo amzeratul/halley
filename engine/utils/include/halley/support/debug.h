@@ -28,8 +28,8 @@
 namespace Halley {
 	struct DebugTraceEntry
 	{
-		const char* filename;
-		int line;
+		const char* filename = nullptr;
+		int line = 0;
 	};
 
 	class Debug {
