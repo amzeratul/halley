@@ -101,5 +101,7 @@ target_link_libraries (halley-tools
         halley-core
         ${VORBISENC_LIBRARY}
         ${FREETYPE_LIBRARIES}
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
         ${YAMLCPP_LIBRARY}
         )
