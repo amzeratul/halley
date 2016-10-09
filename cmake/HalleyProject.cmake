@@ -147,4 +147,8 @@ function(halleyProjectCodegen name sources headers genDefinitions targetDir)
 	add_custom_target(${name}-codegen ALL ${HALLEY_PATH}/bin/halley-cmd import ${targetDir}/.. ${HALLEY_PATH} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${genDefinitions})
 	halleyProject(${name} "${sources}" "${headers}" "${genDefinitions}" "${targetDir}")
 	add_dependencies(${name} ${PROJECT_NAME}-codegen)
+
+	if (TARGET halley-cmd)
+		add_dependencies(${PROJECT_NAME}-codegen halley-cmd)
+	endif ()
 endfunction(halleyProjectCodegen)
