@@ -1,16 +1,10 @@
-BUGS:
-- two families which have the same components, but in a different order, will cause memory corruption
-- failure to parse components/systems yaml causes all generated files to be deleted (and the editor to go mental on the task bar)
-- failure to load textures (due to file not existing) does not display clear error message
-- MappedPool crashes with too many entities (> 20k)
-- invalid system names on the definition file gives cryptic error message
-
 core
 - child stages?
 
 core/resources
 - asset database
 - shader importer/validator
+- auto atlas spritesheets
 - resources hot reloading [RESEARCH]
 
 core/graphics

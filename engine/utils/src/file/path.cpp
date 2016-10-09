@@ -16,11 +16,6 @@ Path::Path(const std::string& name)
 	setPath(name);
 }
 
-Path::Path(const filesystem::path& path)
-{
-	setPath(path.string());
-}
-
 Path::Path(const String& name)
 {
 	setPath(name);
@@ -49,7 +44,7 @@ Path& Path::operator=(const String& other)
 
 Path Path::getStem() const
 {
-	return getNative().stem();
+	return getNative().stem().string();
 }
 
 String Path::getExtension() const
@@ -59,14 +54,14 @@ String Path::getExtension() const
 
 Path Path::parentPath() const
 {
-	return getNative().parent_path();
+	return getNative().parent_path().string();
 }
 
 Path Path::replaceExtension(String newExtension) const
 {
 	auto n = getNative();
 	n.replace_extension(newExtension.cppStr());
-	return n;
+	return n.string();
 }
 
 Path Path::operator/(const char* other) const
@@ -76,7 +71,7 @@ Path Path::operator/(const char* other) const
 
 Path Path::operator/(const Path& other) const 
 {
-	return getNative() / other.getNative();
+	return (getNative() / other.getNative()).string();
 }
 
 Path Path::operator/(const String& other) const

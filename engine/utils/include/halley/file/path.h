@@ -22,7 +22,6 @@ namespace Halley
 		Path(const char* name);
 		Path(const std::string& name);
 		Path(const String& name);
-		Path(const filesystem::path& path);
 
 		Path& operator=(const std::string& other);
 		Path& operator=(const String& other);
@@ -47,11 +46,11 @@ namespace Halley
 
 		std::string string() const;
 
-		filesystem::path getNative() const;
-
 	private:
 		String p;
 		void setPath(const String& value);
+
+		filesystem::path getNative() const;
 	};
 
 	std::ostream& operator<<(std::ostream& os, const Path& p);
