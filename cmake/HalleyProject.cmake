@@ -20,7 +20,8 @@ find_Package(SDL2 REQUIRED)
 
 # Ogg Vorbis
 find_package(OggVorbis REQUIRED)
-if (not VORBISENC_LIBRARY)
+if (VORBISENC_LIBRARY)
+else()
 	set(VORBISENC_LIBRARY "")
 endif()
 
