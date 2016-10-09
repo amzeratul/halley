@@ -1,6 +1,6 @@
 project (halley-audio)
 
-include_directories(${Boost_INCLUDE_DIR} "include/halley/audio" "../utils/include" "../core/include" "../../contrib/libogg/include" "../../contrib/libvorbis/include")
+include_directories(${Boost_INCLUDE_DIR} "include/halley/audio" "../utils/include" "../core/include" "../../contrib/libogg/include" "../../contrib/libvorbis/include" "../../contrib/libvorbis/lib")
 
 set(SOURCES
         "src/audio_clip.cpp"
