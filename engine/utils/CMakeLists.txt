@@ -47,6 +47,7 @@ set(SOURCES
         "src/text/encode.cpp"
         "src/text/halleystring.cpp"
         "src/time/stopwatch.cpp"
+        "src/utils/boost_system.cpp"
         
         "contrib/json/jsoncpp.cpp"
         "contrib/lodepng/lodepng.cpp"

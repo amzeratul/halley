@@ -30,6 +30,7 @@ find_package(OpenGL REQUIRED)
 
 # Boost
 find_package(Boost REQUIRED)
+add_definitions(-DBOOST_ALL_NO_LIB)
 
 
 # Compiler-specific flags
