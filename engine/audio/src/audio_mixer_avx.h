@@ -1,7 +1,7 @@
 #pragma once
 #include "audio_mixer.h"
 
-#ifdef HAS_SSE
+#ifdef HAS_AVX
 namespace Halley
 {
 	class AudioMixerAVX : public AudioMixer

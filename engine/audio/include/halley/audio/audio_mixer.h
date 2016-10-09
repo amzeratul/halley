@@ -5,6 +5,9 @@
 
 #if defined(_M_X64) || defined(__x86_64__)
 #define HAS_SSE
+#if !defined(__linux__)
+#define HAS_AVX
+#endif
 #endif
 
 #if defined(_M_IX86) || defined(__i386)

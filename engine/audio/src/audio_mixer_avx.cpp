@@ -1,6 +1,6 @@
 #include "audio_mixer_avx.h"
 
-#ifdef HAS_SSE
+#ifdef HAS_AVX
 #include <xmmintrin.h>
 
 #ifdef __clang__

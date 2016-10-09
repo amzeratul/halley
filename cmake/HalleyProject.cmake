@@ -8,24 +8,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 
-# Libs
-if (CMAKE_LIBRARY_PATH)
-	link_directories(CMAKE_INCLUDE_PATH)
-endif()
-
-
-# SDL2
-set (SDL2_BUILDING_LIBRARY 1)
-find_Package(SDL2 REQUIRED)
-
-# GL
-find_package(OpenGL REQUIRED)
-
-# Boost
-find_package(Boost REQUIRED)
-add_definitions(-DBOOST_ALL_NO_LIB)
-
-
 # Compiler-specific flags
 if (MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /fp:fast")
@@ -43,10 +25,6 @@ else()
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
 		endif()
 	endif()
-
-	if (APPLE)
-	    set(SDL2_LIBRARIES "${SDL2_LIBRARIES} -framework Carbon -framework Cocoa -framework CoreAudio -framework AudioUnit -framework ForceFeedback -framework IOKit -framework CoreVideo -liconv")
-	endif(APPLE)
 endif()
 
 
@@ -56,6 +34,37 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DGSL_UNENFORCED_ON_CONT
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DGSL_UNENFORCED_ON_CONTRACT_VIOLATION")
 set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -DGSL_UNENFORCED_ON_CONTRACT_VIOLATION")
 
+
+# Libs
+if (CMAKE_LIBRARY_PATH)
+	link_directories(CMAKE_INCLUDE_PATH)
+endif()
+
+# SDL2
+set (SDL2_BUILDING_LIBRARY 1)
+find_Package(SDL2 REQUIRED)
+
+# GL
+find_package(OpenGL REQUIRED)
+
+# Boost
+find_package(Boost REQUIRED)
+add_definitions(-DBOOST_ALL_NO_LIB)
+
+# Apple frameworks
+if (APPLE)
+	find_library(CARBON_LIBRARY Carbon)
+	find_library(COCOA_LIBRARY Cocoa)
+	find_library(COREAUDIO_LIBRARY CoreAudio)
+	find_library(AUDIOUNIT_LIBRARY AudioUnit)
+	find_library(FORCEFEEDBACK_LIBRARY ForceFeedback)
+	find_library(IOKIT_LIBRARY IOKit)
+	find_library(COREVIDEO_LIBRARY CoreVideo)
+
+	mark_as_advanced(CARBON_LIBRARY COCOA_LIBRARY COREAUDIO_LIBRARY AUDIOUNIT_LIBRARY FORCEFEEDBACK_LIBRARY IOKIT_LIBRARY COREVIDEO_LIBRARY)
+
+	set(EXTRA_LIBS ${EXTRA_LIBS} ${CARBON_LIBRARY} ${COCOA_LIBRARY} ${COREAUDIO_LIBRARY} ${AUDIOUNIT_LIBRARY} ${FORCEFEEDBACK_LIBRARY} ${IOKIT_LIBRARY} ${COREVIDEO_LIBRARY})
+endif(APPLE)
 
 # From http://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake
 function(assign_source_group)
