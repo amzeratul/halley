@@ -1,43 +1,60 @@
 include(PrecompiledHeader)
 
+# C++14 support
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=libc++") # Apparently Clang on Mac needs this...
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=libc++") # Apparently Clang on Mac needs this...
 endif()
 
+
+# Libs
 if (CMAKE_LIBRARY_PATH)
 	link_directories(CMAKE_INCLUDE_PATH)
 endif()
 
+
+# SDL2
 set (SDL2_BUILDING_LIBRARY 1)
 find_Package(SDL2 REQUIRED)
+
+# Ogg Vorbis
 find_package(OggVorbis REQUIRED)
-find_package(OpenGL REQUIRED)
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	find_package(Boost COMPONENTS system filesystem thread REQUIRED)
-else()
-	find_package(Boost COMPONENTS system filesystem REQUIRED)
+if (not VORBISENC_LIBRARY)
+	set(VORBISENC_LIBRARY "")
 endif()
 
+# GL
+find_package(OpenGL REQUIRED)
+
+# Boost
+find_package(Boost COMPONENTS system filesystem REQUIRED)
+
+
+# Compiler-specific flags
 if (MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /fp:fast")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL /sdl /Oi /Ot /Oy")
 	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
 	set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
 	set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
-
-	set(VORBISENC_LIBRARY "")
 else()
 	set(EXTRA_LIBS pthread)
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
+
+	if (HALLEY_ENABLE_STATIC_STDLIB)
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static-libgcc")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
+	endif()
 endif()
 
+
+# GSL flags
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DGSL_THROW_ON_CONTRACT_VIOLATION")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DGSL_UNENFORCED_ON_CONTRACT_VIOLATION")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DGSL_UNENFORCED_ON_CONTRACT_VIOLATION")
 set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -DGSL_UNENFORCED_ON_CONTRACT_VIOLATION")
+
 
 # From http://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake
 function(assign_source_group)
@@ -73,7 +90,6 @@ set(HALLEY_PROJECT_LIBS
 	${SDL2_LIBRARIES}
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}
-	${Boost_THREAD_LIBRARY}
 	${OGG_LIBRARY}
 	${VORBIS_LIBRARY}
 	${VORBISFILE_LIBRARY}

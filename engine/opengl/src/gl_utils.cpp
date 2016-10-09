@@ -26,7 +26,7 @@
 #include <gsl/gsl_assert>
 
 #ifdef __APPLE__
-#include <boost/thread/tss.hpp>
+#include <pthread.h>
 #endif
 
 
@@ -113,15 +113,33 @@ namespace Halley {
 
 }
 
+#ifdef __APPLE__
+static pthread_once_t key_once = PTHREAD_ONCE_INIT;
+static pthread_key_t key;
+
+static void destroyState(void* value)
+{
+	GLInternals* state = reinterpret_cast<GLInternals*>(value);
+	delete state;
+}
+
+static void makeState()
+{
+	pthread_key_create(&key, destroyState);
+}
+#endif
+
 GLInternals& getState()
 {
 #ifdef __APPLE__
-	static boost::thread_specific_ptr<GLInternals> glState;
-	if (!glState.get()) {
-		glState.reset(new GLInternals());
-		std::cout << "GL state created on thread " << Concurrent::getThreadName() << std::endl;
-	}
-	return *glState;
+	pthread_once(&key_once, makeState);
+	GLInternals* ptr = reinterpret_cast<GLInternals*>(pthread_getspecific(key));
+    if (!ptr) {
+        ptr = new GLInternals();
+        pthread_setspecific(key, ptr);
+    }
+
+	return *ptr;
 #else
 	thread_local GLInternals state;
 	return state;
