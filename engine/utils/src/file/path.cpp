@@ -1,5 +1,4 @@
 #include "halley/file/path.h"
-#include <boost/filesystem.hpp>
 #include <sstream>
 
 using namespace Halley;
