@@ -1,4 +1,3 @@
-#include <halley/file/filesystem.h>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <sstream>
@@ -6,6 +5,7 @@
 #include <halley/support/exception.h>
 #include <halley/tools/codegen/codegen.h>
 #include "cpp/codegen_cpp.h"
+#include "halley/tools/file/filesystem.h"
 
 #ifdef _MSC_VER
 	#ifdef _DEBUG
