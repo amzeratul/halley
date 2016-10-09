@@ -9,6 +9,7 @@
 #include <vorbis/codec.h>
 #include <vorbis/vorbisenc.h>
 #include "halley/concurrency/concurrent.h"
+#include "halley/tools/file/filesystem.h"
 
 using namespace Halley;
 

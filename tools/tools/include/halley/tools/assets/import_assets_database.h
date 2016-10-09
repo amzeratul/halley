@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/file/filesystem.h"
+#include "halley/file/path.h"
 #include <map>
 #include <mutex>
 #include "halley/text/halleystring.h"

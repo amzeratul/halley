@@ -1,10 +1,10 @@
 #pragma once
 
-#include "filesystem.h"
 #include <memory>
 
 namespace Halley
 {
+	class Path;
 	class DirectoryMonitorPimpl;
 	
 	class DirectoryMonitor

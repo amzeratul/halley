@@ -8,8 +8,9 @@
 #include <halley/data_structures/bin_pack.h>
 #include <halley/file_formats/image.h>
 #include "halley/file/byte_serializer.h"
-#include "halley/file/filesystem.h"
+#include "halley/file/path.h"
 #include "halley/concurrency/concurrent.h"
+#include "halley/tools/file/filesystem.h"
 
 using namespace Halley;
 

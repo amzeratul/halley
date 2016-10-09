@@ -3,6 +3,7 @@
 #include "halley/file/byte_serializer.h"
 #include "halley/resources/metadata.h"
 #include "halley/file_formats/image.h"
+#include "halley/tools/file/filesystem.h"
 
 using namespace Halley;
 

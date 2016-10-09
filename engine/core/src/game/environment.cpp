@@ -1,6 +1,5 @@
 #include <halley/os/os.h>
 #include "halley/core/game/environment.h"
-#include "halley/file/filesystem.h"
 
 #ifdef __APPLE__
 #include <iostream>
@@ -43,7 +42,7 @@ void Halley::Environment::setDataPath(String pathName)
 	auto& os = OS::get();
 
 	String p = os.getUserDataDir() + "/" + pathName + "/";
-	FileSystem::createDir(p);
+	//FileSystem::createDir(p);
 
 	dataPath = p;
 }

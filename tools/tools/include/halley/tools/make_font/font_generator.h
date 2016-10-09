@@ -2,7 +2,7 @@
 
 #include "font_face.h"
 #include <halley/maths/rect.h>
-#include "halley/file/filesystem.h"
+#include "halley/file/path.h"
 #include "halley/resources/metadata.h"
 
 namespace Halley

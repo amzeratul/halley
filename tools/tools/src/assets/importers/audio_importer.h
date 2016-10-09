@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/tools/assets/iasset_importer.h"
+#include <gsl/gsl>
 
 namespace Halley
 {

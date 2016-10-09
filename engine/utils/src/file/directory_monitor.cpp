@@ -1,5 +1,6 @@
 #include "halley/file/directory_monitor.h"
 #include "halley/support/exception.h"
+#include "halley/file/path.h"
 
 using namespace Halley;
 

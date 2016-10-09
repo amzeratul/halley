@@ -3,9 +3,10 @@
 #include <gsl/gsl>
 #include "halley/utils/utils.h"
 #include <vector>
-#include "path.h"
 
 namespace Halley {
+	class Path;
+
 	class FileSystem
 	{
 	public:

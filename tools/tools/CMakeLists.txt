@@ -14,6 +14,8 @@ set(SOURCES
         "src/distance_field/distance_field_generator.cpp"
         "src/distance_field/distance_field_tool.cpp"
         
+        "src/file/filesystem.cpp"
+
         "src/make_font/font_face.cpp"
         "src/make_font/font_generator.cpp"
         "src/make_font/make_font_tool.cpp"
@@ -53,6 +55,8 @@ set(HEADERS
         "include/halley/tools/distance_field/distance_field_generator.h"
         "include/halley/tools/distance_field/distance_field_tool.h"
         
+        "include/halley/tools/file/filesystem.h"
+
         "include/halley/tools/make_font/font_face.h"
         "include/halley/tools/make_font/font_generator.h"
         "include/halley/tools/make_font/make_font_tool.h"

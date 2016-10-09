@@ -3,6 +3,7 @@
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/support/exception.h"
 #include <yaml-cpp/yaml.h>
+#include "halley/tools/file/filesystem.h"
 
 using namespace Halley;
 

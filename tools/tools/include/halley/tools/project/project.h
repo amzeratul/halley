@@ -1,6 +1,6 @@
 #pragma once
 
-#include "halley/file/filesystem.h"
+#include "halley/file/path.h"
 #include "halley/tools/assets/asset_importer.h"
 
 namespace Halley

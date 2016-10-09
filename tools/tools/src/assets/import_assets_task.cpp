@@ -6,6 +6,7 @@
 #include "halley/resources/resource_data.h"
 #include <yaml-cpp/yaml.h>
 #include <iostream>
+#include "halley/tools/file/filesystem.h"
 
 using namespace Halley;
 

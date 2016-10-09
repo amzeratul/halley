@@ -1,8 +1,9 @@
 #pragma once
-#include "halley/file/filesystem.h"
 #include "halley/text/halleystring.h"
 #include <memory>
 #include <vector>
+#include "halley/file/path.h"
+#include "halley/utils/utils.h"
 
 namespace Halley
 {

@@ -2,6 +2,7 @@
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/file/byte_serializer.h"
 #include "halley/resources/metadata.h"
+#include "halley/tools/file/filesystem.h"
 
 using namespace Halley;
 

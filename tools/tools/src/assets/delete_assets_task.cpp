@@ -2,6 +2,7 @@
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include <iostream>
+#include "halley/tools/file/filesystem.h"
 
 using namespace Halley;
 

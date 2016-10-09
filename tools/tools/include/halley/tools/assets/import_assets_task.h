@@ -1,6 +1,6 @@
 #pragma once
 #include "halley/tools/tasks/editor_task.h"
-#include "halley/file/filesystem.h"
+#include "halley/file/path.h"
 #include <vector>
 #include "halley/resources/metadata.h"
 #include "import_assets_database.h"

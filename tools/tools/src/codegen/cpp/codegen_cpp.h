@@ -1,5 +1,6 @@
 #pragma once
 #include <halley/tools/codegen/icode_generator.h>
+#include "halley/file/path.h"
 
 namespace Halley
 {

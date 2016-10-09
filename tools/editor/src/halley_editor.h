@@ -1,7 +1,7 @@
 #pragma once
 
 #include "prec.h"
-#include "halley/file/filesystem.h"
+#include "halley/file/path.h"
 
 namespace Halley
 {

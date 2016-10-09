@@ -2,6 +2,7 @@
 #include "halley/file/byte_serializer.h"
 #include "halley/file_formats/config_file.h"
 #include <yaml-cpp/yaml.h>
+#include "halley/tools/file/filesystem.h"
 
 using namespace Halley;
 

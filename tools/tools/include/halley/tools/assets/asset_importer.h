@@ -1,7 +1,5 @@
 #pragma once
 #include "iasset_importer.h"
-#include "halley/file/filesystem.h"
-#include "halley/text/halleystring.h"
 #include <map>
 #include <memory>
 

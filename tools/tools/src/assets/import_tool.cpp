@@ -6,6 +6,7 @@
 #include "halley/tools/assets/check_assets_task.h"
 #include <thread>
 #include <chrono>
+#include "halley/tools/file/filesystem.h"
 
 using namespace Halley;
 using namespace std::chrono_literals;

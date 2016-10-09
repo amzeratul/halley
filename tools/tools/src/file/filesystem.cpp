@@ -1,6 +1,6 @@
-#include "halley/file/filesystem.h"
+#include "halley/tools/file/filesystem.h"
 #include <boost/filesystem.hpp>
-#include "halley/support/exception.h"
+#include <halley/file/path.h>
 
 using namespace Halley;
 using namespace filesystem;
