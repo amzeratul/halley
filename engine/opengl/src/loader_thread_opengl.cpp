@@ -45,7 +45,9 @@ void LoaderThreadOpenGL::run()
 void LoaderThreadOpenGL::waitForGPU()
 {
 	// See https://forums.libsdl.org/viewtopic.php?t=9036&sid=3374c819e18df779e17b4ce5a49fdd15
+#if WITH_OPENGL
 	GLsync fenceId = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 	while (glClientWaitSync(fenceId, GL_SYNC_FLUSH_COMMANDS_BIT, GLuint64(5000000000)) == GL_TIMEOUT_EXPIRED) {}
 	glDeleteSync(fenceId);
+#endif
 }

@@ -32,7 +32,9 @@ void TextureOpenGL::load(const TextureDescriptor& d)
 	}
 	
 	if (parent.isLoaderThread()) {
+#ifdef WITH_OPENGL
 		fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+#endif
 		glFlush();
 	}
 
@@ -43,6 +45,7 @@ void TextureOpenGL::waitForOpenGLLoad()
 {
 	waitForLoad();
 
+#ifdef WITH_OPENGL
 	if (fence) {
 		GLenum result = glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, GLuint64(10000000000));
 		if (result == GL_TIMEOUT_EXPIRED) {
@@ -56,6 +59,7 @@ void TextureOpenGL::waitForOpenGLLoad()
 			fence = nullptr;
 		}
 	}
+#endif
 }
 
 // Do not use this method inside this class, due to fence

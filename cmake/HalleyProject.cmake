@@ -6,7 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=libc++") # Apparently Clang on Mac needs this...
 endif()
-
+if (EMSCRIPTEN)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=libc++")
+	add_definitions(-s USE_SDL=2)
+endif()
 
 # Compiler-specific flags
 if (MSVC)
@@ -41,8 +44,13 @@ if (CMAKE_LIBRARY_PATH)
 endif()
 
 # SDL2
-set (SDL2_BUILDING_LIBRARY 1)
-find_Package(SDL2 REQUIRED)
+if(EMSCRIPTEN)
+	set(SDL2_INCLUDE_DIR "")
+	set(SDL2_LIBRARIES "")
+else()
+	set (SDL2_BUILDING_LIBRARY 1)
+	find_Package(SDL2 REQUIRED)
+endif()
 
 # GL
 find_package(OpenGL REQUIRED)

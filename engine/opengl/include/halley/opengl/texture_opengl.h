@@ -27,6 +27,8 @@ namespace Halley
 		void waitForOpenGLLoad();
 
 		VideoOpenGL& parent;
+#ifdef WITH_OPENGL
 		GLsync fence = nullptr;
+#endif
 	};
 }

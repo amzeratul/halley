@@ -28,7 +28,11 @@ set(HEADERS
 assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
-set(WITH_OPENGL 1)
+if(EMSCRIPTEN)
+        set(WITH_OPENGL_ES2 1)
+else()
+        set(WITH_OPENGL 1)
+endif()
 
 if (WITH_OPENGL)
 	add_definitions(-DWITH_OPENGL)
