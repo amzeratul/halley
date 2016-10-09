@@ -106,12 +106,14 @@ static bool hasAVX()
 
 std::unique_ptr<AudioMixer> AudioMixer::makeMixer()
 {
-#ifdef HAS_SSE
+#ifdef HAS_AVX
 	if (hasAVX()) {
 		return std::make_unique<AudioMixerAVX>();
 	} else {
 		return std::make_unique<AudioMixerSSE>();
 	}
+#elif HAS_SEE
+	return std::make_unique<AudioMixerSSE>();
 #else
 	return std::make_unique<AudioMixer>();
 #endif
