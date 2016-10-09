@@ -12,10 +12,6 @@
 
 using namespace Halley;
 
-#ifdef _MSC_VER
-#pragma comment(lib, "SDL2.lib")
-#endif
-
 void SystemSDL::init()
 {
 	// SDL version
