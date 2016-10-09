@@ -5,7 +5,7 @@ else ()
 endif ()
 
 find_package(Boost COMPONENTS system filesystem REQUIRED)
-
+find_Package(Freetype REQUIRED)
 
 add_subdirectory(tools)
 add_subdirectory(cmd)
