@@ -43,6 +43,10 @@ else()
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
 		endif()
 	endif()
+
+	if (APPLE)
+	    set(SDL2_LIBRARIES "${SDL2_LIBRARIES} -framework Carbon -framework Cocoa -framework CoreAudio -framework AudioUnit -framework ForceFeedback -framework IOKit -framework CoreVideo -liconv")
+	endif(APPLE)
 endif()
 
 
