@@ -4,6 +4,9 @@ else ()
     find_package(YamlCpp)
 endif ()
 
+find_package(Boost COMPONENTS system filesystem REQUIRED)
+
+
 add_subdirectory(tools)
 add_subdirectory(cmd)
 add_subdirectory(editor)

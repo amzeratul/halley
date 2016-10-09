@@ -196,7 +196,6 @@ std::vector<Path> Codegen::generateCode(Path directory, ProgressReporter progres
 
 	// Has changes
 	if (stats.written > 0) {
-		using namespace filesystem;
 		auto cmakeLists = directory.parentPath() / Path("CMakeLists.txt");
 		if (verbose) {
 			std::cout << "Touching " << cmakeLists.string() << std::endl;

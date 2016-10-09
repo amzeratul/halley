@@ -3,7 +3,7 @@
 #include <halley/file/path.h>
 
 using namespace Halley;
-using namespace filesystem;
+using namespace boost::filesystem;
 
 static path getNative(const Path& p)
 {
@@ -12,7 +12,7 @@ static path getNative(const Path& p)
 
 bool FileSystem::exists(const Path& p)
 {
-	return filesystem::exists(getNative(p));
+	return ::exists(getNative(p));
 }
 
 bool FileSystem::createDir(const Path& p)
@@ -50,12 +50,12 @@ bool FileSystem::isDirectory(const Path& p)
 void FileSystem::copyFile(const Path& src, const Path& dst)
 {
 	createParentDir(dst);
-	copy_file(getNative(src), getNative(src), filesystem::copy_option::overwrite_if_exists);
+	copy_file(getNative(src), getNative(src), copy_option::overwrite_if_exists);
 }
 
 bool FileSystem::remove(const Path& path)
 {
-	return filesystem::remove(getNative(path));
+	return boost::filesystem::remove(getNative(path));
 }
 
 void FileSystem::writeFile(const Path& path, gsl::span<const gsl::byte> data)
@@ -95,7 +95,7 @@ std::vector<Path> FileSystem::enumerateDirectory(const Path& dir)
 {
 	std::vector<Path> result;
 	if (exists(dir)) {
-		using RDI = filesystem::recursive_directory_iterator;
+		using RDI = recursive_directory_iterator;
 		RDI end;
 		for (RDI i(getNative(dir)); i != end; ++i) {
 			path fullPath = i->path();

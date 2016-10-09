@@ -3,18 +3,8 @@
 #include "halley/text/halleystring.h"
 #include <iostream>
 
-namespace boost
-{
-	namespace filesystem
-	{
-		class path;
-	}
-}
-
 namespace Halley
 {
-	namespace filesystem = boost::filesystem;
-	
 	class Path
 	{
 	public:
@@ -27,8 +17,10 @@ namespace Halley
 		Path& operator=(const String& other);
 
 		Path getRoot() const;
+		Path getFilename() const;
 		Path getStem() const;
 		String getExtension() const;
+		String getString() const;
 
 		Path parentPath() const;
 		Path replaceExtension(String newExtension) const;
@@ -47,10 +39,11 @@ namespace Halley
 		std::string string() const;
 
 	private:
-		String p;
+		std::vector<String> pathParts;
+		void normalise();
 		void setPath(const String& value);
 
-		filesystem::path getNative() const;
+		explicit Path(std::vector<String> parts);
 	};
 
 	std::ostream& operator<<(std::ostream& os, const Path& p);

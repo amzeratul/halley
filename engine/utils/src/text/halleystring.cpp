@@ -992,6 +992,9 @@ const char* String::c_str() const
 
 String String::substr(size_t pos, size_t len) const
 {
+	if (pos >= str.size()) {
+		return "";
+	}
 	return str.substr(pos, len);
 }
 

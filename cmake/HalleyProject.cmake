@@ -29,7 +29,7 @@ endif()
 find_package(OpenGL REQUIRED)
 
 # Boost
-find_package(Boost COMPONENTS system filesystem REQUIRED)
+find_package(Boost REQUIRED)
 
 
 # Compiler-specific flags
@@ -89,8 +89,6 @@ set(HALLEY_PROJECT_LIBS
 	debug halley-sdl_d
 	debug halley-entity_d
 	${SDL2_LIBRARIES}
-	${Boost_FILESYSTEM_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 	${OGG_LIBRARY}
 	${VORBIS_LIBRARY}
 	${VORBISFILE_LIBRARY}
