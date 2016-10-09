@@ -1,6 +1,6 @@
 project (halley-audio)
 
-include_directories(${Boost_INCLUDE_DIR} ${OGG_INCLUDE_DIR} ${VORBIS_INCLUDE_DIR} "include/halley/audio" "../utils/include" "../core/include")
+include_directories(${Boost_INCLUDE_DIR} "include/halley/audio" "../utils/include" "../core/include" "../../contrib/libogg/include" "../../contrib/libvorbis/include")
 
 set(SOURCES
         "src/audio_clip.cpp"
@@ -32,6 +32,16 @@ set(HEADERS
         "src/audio_mixer_sse.h"
         )
 
+file (GLOB_RECURSE OGG_FILES "../../contrib/libogg/*.c")
+file (GLOB_RECURSE VORBIS_FILES "../../contrib/libvorbis/*.c")
+
+if(MSVC)
+        add_definitions("-wd4996 -wd4244 -wd4100 -wd4267 -wd4189 -wd4305 -wd4127 -wd4706")
+        add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
+
+set(SOURCES ${SOURCES} ${OGG_FILES} ${VORBIS_FILES})
+
 assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
@@ -42,4 +52,3 @@ else ()
 endif ()
 
 add_library (halley-audio ${SOURCES} ${HEADERS})
-target_link_libraries (halley-audio ${OGG_LIBRARY} ${VORBIS_LIBRARY} ${VORBISFILE_LIBRARY})

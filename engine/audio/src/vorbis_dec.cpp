@@ -22,16 +22,16 @@
 #include "halley/utils/utils.h"
 #include "vorbis_dec.h"
 
-#include <ogg/ogg.h>
+#include "ogg/ogg.h"
 #include "halley/support/exception.h"
 #include "halley/resources/resource_data.h"
 
 #ifdef WITH_IVORBIS
-	#include <ivorbiscodec.h>
-	#include <ivorbisfile.h>
+	#include "ivorbiscodec.h"
+	#include "ivorbisfile.h"
 #else
-	#include <vorbis/codec.h>
-	#include <vorbis/vorbisfile.h>
+	#include "vorbis/codec.h"
+	#include "vorbis/vorbisfile.h"
 #endif
 
 using namespace Halley;

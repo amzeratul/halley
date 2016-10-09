@@ -18,13 +18,6 @@ endif()
 set (SDL2_BUILDING_LIBRARY 1)
 find_Package(SDL2 REQUIRED)
 
-# Ogg Vorbis
-find_package(OggVorbis REQUIRED)
-if (VORBISENC_LIBRARY)
-else()
-	set(VORBISENC_LIBRARY "")
-endif()
-
 # GL
 find_package(OpenGL REQUIRED)
 
@@ -90,9 +83,6 @@ set(HALLEY_PROJECT_LIBS
 	debug halley-sdl_d
 	debug halley-entity_d
 	${SDL2_LIBRARIES}
-	${OGG_LIBRARY}
-	${VORBIS_LIBRARY}
-	${VORBISFILE_LIBRARY}
 	${EXTRA_LIBS}
 	)
 

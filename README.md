@@ -64,8 +64,6 @@ The following platforms are supported:
   * OpenGL
   * Boost 1.59.0 (header only)
   * SDL 2.0.4
-  * libogg 1.3.2
-  * libvorbis 1.3.5
 * Tools only:
   * Boost 1.59.0 libraries: filesystem, system
   * Freetype 2.6.3

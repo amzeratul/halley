@@ -18,6 +18,7 @@ add_executable (halley-cmd ${SOURCES})
 target_link_libraries (halley-cmd
         halley-tools
         halley-utils
+        halley-audio
         ${FREETYPE_LIBRARIES}
         ${YAMLCPP_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}

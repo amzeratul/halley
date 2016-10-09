@@ -1,6 +1,6 @@
 project (halley-tools)
 
-include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../../engine/core/include" "../../engine/utils/include" "../../engine/audio/include")
+include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../../engine/core/include" "../../engine/utils/include" "../../engine/audio/include" "../../contrib/libogg/include" "../../contrib/libvorbis/include")
 
 set(SOURCES
         "src/codegen/cpp/codegen_cpp.cpp"
@@ -99,7 +99,7 @@ add_library (halley-tools ${SOURCES} ${HEADERS} ${YAMLCPP_INCLUDE_DIR})
 
 target_link_libraries (halley-tools
         halley-core
-        ${VORBISENC_LIBRARY}
+        halley-audio
         ${FREETYPE_LIBRARIES}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}

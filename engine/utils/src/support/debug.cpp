@@ -391,7 +391,8 @@ Halley::String Halley::Debug::getCallStack()
 
 void Debug::trace(const char* filename, int line)
 {
-	auto& trace = lastTraces[tracePos++];
+	auto& trace = lastTraces[tracePos];
+	tracePos = (tracePos + 1) % lastTraces.size();
 	trace.filename = filename;
 	trace.line = line;
 }

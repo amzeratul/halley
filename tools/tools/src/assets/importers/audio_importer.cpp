@@ -5,9 +5,9 @@
 #include "halley/audio/vorbis_dec.h"
 #include "halley/audio/resampler.h"
 
-#include <ogg/ogg.h>
-#include <vorbis/codec.h>
-#include <vorbis/vorbisenc.h>
+#include "ogg/ogg.h"
+#include "vorbis/codec.h"
+#include "vorbis/vorbisenc.h"
 #include "halley/concurrency/concurrent.h"
 #include "halley/tools/file/filesystem.h"
 
