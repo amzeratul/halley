@@ -23,8 +23,15 @@
 
 #include "halley/text/halleystring.h"
 #include <list>
+#include <array>
 
 namespace Halley {
+	struct DebugTraceEntry
+	{
+		const char* filename;
+		int line;
+	};
+
 	class Debug {
 	public:
 		static bool isDebug();
@@ -33,12 +40,15 @@ namespace Halley {
 		static void printCallStack();
 		static String getCallStack();
 
-		static void trace(String str);
+		static void trace(const char* filename, int line);
 		static String getLastTraces();
 
 	private:
 		Debug();
 		static bool debugging;
-		static std::list<String> lastTraces;
+		static std::array<DebugTraceEntry, 8> lastTraces;
+		static int tracePos;
 	};
+
+	#define HALLEY_DEBUG_TRACE() Halley::Debug::trace(__FILE__, __LINE__)
 }

@@ -29,7 +29,7 @@ void Halley::MainLoop::run()
 void Halley::MainLoop::runLoop()
 {
 	std::cout << ConsoleColour(Console::GREEN) << "\nStarting main loop." << ConsoleColour() << std::endl;
-	Debug::trace("MainLoop::run begin");
+	HALLEY_DEBUG_TRACE();
 
 	using Clock = std::chrono::steady_clock;
 	using namespace std::chrono_literals;
@@ -54,7 +54,9 @@ void Halley::MainLoop::runLoop()
 		if (curTime >= targetTime) {
 			// Step until we're up-to-date
 			for (int i = 0; i < 10 && curTime >= targetTime; i++) {
+				HALLEY_DEBUG_TRACE();
 				target.onFixedUpdate(fixedDelta);
+				HALLEY_DEBUG_TRACE();
 
 				nSteps++;
 				curTime = Clock::now();
@@ -65,11 +67,13 @@ void Halley::MainLoop::runLoop()
 			std::this_thread::sleep_for(1ms);
 		}
 
+		HALLEY_DEBUG_TRACE();
 		target.onVariableUpdate(std::chrono::duration<float>(curTime - lastTime).count());
+		HALLEY_DEBUG_TRACE();
 		lastTime = curTime;
 	}
 
-	Debug::trace("MainLoop::run end");
+	HALLEY_DEBUG_TRACE();
 	std::cout << ConsoleColour(Console::GREEN) << "Main loop terminated." << ConsoleColour() << std::endl;
 }
 

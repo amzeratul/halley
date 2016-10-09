@@ -75,6 +75,8 @@ void ConfigNode::deserialize(Deserializer& s)
 			contents = scalar;
 			break;
 		}
+		default:
+			throw Exception("Unknown configuration node type.");
 	}
 }
 

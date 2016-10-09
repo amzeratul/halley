@@ -19,7 +19,7 @@ Rect4i RenderTargetOpenGL::getViewPort() const
 
 void RenderTargetOpenGL::bind()
 {
-	Debug::trace("TextureRenderTargetFBO::bind begin");
+	HALLEY_DEBUG_TRACE();
 	init();
 	Expects(fbo != 0);
 	
@@ -35,12 +35,12 @@ void RenderTargetOpenGL::bind()
 #endif
 
 	glCheckError();
-	Debug::trace("TextureRenderTargetFBO::bind end");
+	HALLEY_DEBUG_TRACE();
 }
 
 void RenderTargetOpenGL::unbind()
 {
-	Debug::trace("RenderTargetOpenGL::unbind begin");
+	HALLEY_DEBUG_TRACE();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glCheckError();
 #ifdef WITH_OPENGL
@@ -49,13 +49,13 @@ void RenderTargetOpenGL::unbind()
 	// TODO?
 #endif
 	glCheckError();
-	Debug::trace("RenderTargetOpenGL::unbind end");
+	HALLEY_DEBUG_TRACE();
 }
 
 void RenderTargetOpenGL::init()
 {
 	if (fbo == 0) {
-		Debug::trace("RenderTargetOpenGL::init begin");
+		HALLEY_DEBUG_TRACE();
 
 		glGenFramebuffers(1, &fbo);
 		glCheckError();
@@ -82,7 +82,7 @@ void RenderTargetOpenGL::init()
 			throw Exception("Unable to set up framebuffer: error " + msgs[status]);
 		}
 
-		Debug::trace("RenderTargetOpenGL::init end");
+		HALLEY_DEBUG_TRACE();
 	}
 }
 

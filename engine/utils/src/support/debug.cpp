@@ -389,19 +389,27 @@ Halley::String Halley::Debug::getCallStack()
 #endif
 }
 
-void Halley::Debug::trace(String str)
+void Debug::trace(const char* filename, int line)
 {
-	if (lastTraces.size() >= 5) lastTraces.pop_back();
-	lastTraces.push_front(str);
+	auto& trace = lastTraces[tracePos++];
+	trace.filename = filename;
+	trace.line = line;
 }
 
 Halley::String Halley::Debug::getLastTraces()
 {
 	String result;
-	for (auto i: lastTraces) {
-		result += " - " + i + "\n";
+	const size_t n = lastTraces.size();
+	for (size_t i = 0; i < n; ++i) {
+		auto& trace = lastTraces[(i + tracePos + 1) % n];
+		result += " - " + String(trace.filename) + ":" + toString(trace.line);
+		if (i == n - 1) {
+			result += " [latest]";
+		}
+		result += "\n";
 	}
 	return result;
 }
 
-std::list<Halley::String> Halley::Debug::lastTraces;
+std::array<Halley::DebugTraceEntry, 8> Halley::Debug::lastTraces;
+int Halley::Debug::tracePos = 0;

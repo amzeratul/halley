@@ -99,7 +99,7 @@ void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, size
 }
 
 void System::doUpdate(Time time) {
-	Debug::trace("Updating " + name);
+	HALLEY_DEBUG_TRACE();
 	timer.beginSample();
 
 	purgeMessages();
@@ -110,15 +110,15 @@ void System::doUpdate(Time time) {
 	updateBase(time);
 	
 	timer.endSample();
-	Debug::trace("Done updating " + name);
+	HALLEY_DEBUG_TRACE();
 }
 
 void System::doRender(Painter& painter) {
-	Debug::trace("Rendering " + name);
+	HALLEY_DEBUG_TRACE();
 	timer.beginSample();
 
 	renderBase(painter);
 
 	timer.endSample();
-	Debug::trace("Done rendering " + name);
+	HALLEY_DEBUG_TRACE();
 }

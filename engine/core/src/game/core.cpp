@@ -15,6 +15,7 @@
 #include <halley/support/console.h>
 #include <halley/concurrency/concurrent.h>
 #include <fstream>
+#include <halley/support/debug.h>
 
 #pragma warning(disable: 4996)
 
@@ -70,6 +71,7 @@ Core::~Core()
 
 void Core::onSuspended()
 {
+	HALLEY_DEBUG_TRACE();
 	if (api->videoInternal) {
 		api->videoInternal->onSuspend();
 	}
@@ -81,10 +83,12 @@ void Core::onSuspended()
 
 	std::cout.flush();
 	out.reset();
+	HALLEY_DEBUG_TRACE();
 }
 
 void Core::onReloaded()
 {
+	HALLEY_DEBUG_TRACE();
 	if (game->shouldCreateSeparateConsole()) {
 		setOutRedirect(true);
 	}
@@ -96,6 +100,7 @@ void Core::onReloaded()
 	if (api->videoInternal) {
 		api->videoInternal->onResume();
 	}
+	HALLEY_DEBUG_TRACE();
 }
 
 void Core::onTerminatedInError(const std::string& error)
@@ -217,6 +222,7 @@ void Core::onVariableUpdate(Time time)
 
 void Core::doFixedUpdate(Time time)
 {
+	HALLEY_DEBUG_TRACE();
 	auto& t = timers[int(TimeLine::FixedUpdate)];
 	t.beginSample();
 
@@ -228,10 +234,12 @@ void Core::doFixedUpdate(Time time)
 	pumpAudio();
 
 	t.endSample();
+	HALLEY_DEBUG_TRACE();
 }
 
 void Core::doVariableUpdate(Time time)
 {
+	HALLEY_DEBUG_TRACE();
 	auto& t = timers[int(TimeLine::VariableUpdate)];
 	t.beginSample();
 
@@ -244,10 +252,12 @@ void Core::doVariableUpdate(Time time)
 	pumpAudio();
 
 	t.endSample();
+	HALLEY_DEBUG_TRACE();
 }
 
 void Core::doRender(Time)
 {
+	HALLEY_DEBUG_TRACE();
 	auto& t = timers[int(TimeLine::Render)];
 	t.beginSample();
 
@@ -265,6 +275,7 @@ void Core::doRender(Time)
 	}
 
 	t.endSample();
+	HALLEY_DEBUG_TRACE();
 }
 
 void Core::showComputerInfo() const
@@ -287,7 +298,9 @@ void Core::showComputerInfo() const
 
 void Core::setStage(StageID stage)
 {
+	HALLEY_DEBUG_TRACE();
 	setStage(game->makeStage(stage));
+	HALLEY_DEBUG_TRACE();
 }
 
 void Core::setStage(std::unique_ptr<Stage> next)
@@ -329,8 +342,10 @@ bool Core::transitionStage()
 	if (pendingStageTransition) {
 		// Get rid of current stage
 		if (currentStage) {
+			HALLEY_DEBUG_TRACE();
 			currentStage->deInit();
 			currentStage.reset();
+			HALLEY_DEBUG_TRACE();
 		}
 
 		// Update stage
@@ -338,8 +353,10 @@ bool Core::transitionStage()
 
 		// Prepare next stage
 		if (currentStage) {
+			HALLEY_DEBUG_TRACE();
 			currentStage->api = &*api;
 			currentStage->init();
+			HALLEY_DEBUG_TRACE();
 		} else {
 			running = false;
 		}
