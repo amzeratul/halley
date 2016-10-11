@@ -102,21 +102,21 @@ Path Path::getFilename() const
 
 Path Path::getStem() const
 {
-	String filename = getFilename().pathParts.front();
+	String filename = pathParts.back();
 	if (filename == "." || filename == "..") {
 		return filename;
 	}
-	size_t dotPos = filename.find('.');
+	size_t dotPos = filename.find_last_of('.');
 	return filename.substr(0, dotPos);
 }
 
 String Path::getExtension() const
 {
-	String filename = getFilename().pathParts.front();
+	String filename = pathParts.back();
 	if (filename == "." || filename == "..") {
 		return filename;
 	}
-	size_t dotPos = filename.find('.');
+	size_t dotPos = filename.find_last_of('.');
 	return filename.substr(dotPos);
 }
 
