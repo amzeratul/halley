@@ -93,20 +93,20 @@ endfunction(assign_source_group)
 set(CMAKE_DEBUG_POSTFIX "_d")
 
 set(HALLEY_PROJECT_LIBS
-	optimized halley-core
-	optimized halley-audio
-	optimized halley-utils
-	optimized halley-net
 	optimized halley-opengl
 	optimized halley-sdl
+	optimized halley-core
 	optimized halley-entity
-	debug halley-core_d
-	debug halley-audio_d
-	debug halley-utils_d
-	debug halley-net_d
+	optimized halley-audio
+	optimized halley-net
+	optimized halley-utils
 	debug halley-opengl_d
 	debug halley-sdl_d
+	debug halley-core_d
 	debug halley-entity_d
+	debug halley-audio_d
+	debug halley-net_d
+	debug halley-utils_d
 	${SDL2_LIBRARIES}
 	${EXTRA_LIBS}
 	)

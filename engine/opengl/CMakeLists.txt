@@ -43,4 +43,4 @@ elseif(WITH_OPENGL_ES2)
 endif()
 
 add_library (halley-opengl ${SOURCES} ${HEADERS})
-target_link_libraries(halley-opengl halley-core ${OPENGL_LIBRARIES})
+target_link_libraries(halley-opengl halley-core halley-utils ${OPENGL_LIBRARIES})
