@@ -3,6 +3,7 @@
 #include <gsl/gsl>
 #include "halley/file_formats/image.h"
 #include "halley/core/graphics/sprite/sprite_sheet.h"
+#include "halley/data_structures/bin_pack.h"
 
 namespace Halley
 {
@@ -27,6 +28,7 @@ namespace Halley
 	private:
 		std::vector<ImageData> importAseprite(String baseName, gsl::span<const gsl::byte> fileData);
 		Animation generateAnimation(String baseName, const std::vector<ImageData>& data);
-		void generateAtlas(String baseName, const std::vector<ImageData>& images, Image& atlasImage, SpriteSheet& spriteSheet);
+		std::unique_ptr<Image> generateAtlas(String baseName, std::vector<ImageData>& images, SpriteSheet& spriteSheet);
+		std::unique_ptr<Image> makeAtlas(String baseName, const std::vector<BinPackResult>& pack, Vector2i size, SpriteSheet& spriteSheet);
 	};
 }

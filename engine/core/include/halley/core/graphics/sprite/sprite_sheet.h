@@ -52,6 +52,9 @@ namespace Halley
 		void loadJson(gsl::span<const gsl::byte> data);
 		void loadTexture(Resources& resources);
 
+		void addSprite(String name, const SpriteSheetEntry& sprite);
+		void setTextureName(String name);
+
 		static std::unique_ptr<SpriteSheet> loadResource(ResourceLoader& loader);
 
 		void serialize(Serializer& s) const;

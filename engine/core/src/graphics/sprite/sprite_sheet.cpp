@@ -98,6 +98,16 @@ void SpriteSheet::loadTexture(Resources& resources)
 	texture = resources.get<Texture>(textureName);
 }
 
+void SpriteSheet::addSprite(String name, const SpriteSheetEntry& sprite)
+{
+	sprites[name] = sprite;
+}
+
+void SpriteSheet::setTextureName(String name)
+{
+	textureName = name;
+}
+
 void SpriteSheet::serialize(Serializer& s) const
 {
 	s << textureName;

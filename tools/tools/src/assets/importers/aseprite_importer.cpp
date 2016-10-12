@@ -7,6 +7,7 @@
 #include "halley/core/graphics/sprite/sprite_sheet.h"
 #include "halley/core/graphics/sprite/animation.h"
 #include <sstream>
+#include "halley/data_structures/bin_pack.h"
 
 using namespace Halley;
 
@@ -14,33 +15,32 @@ std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, Path dst
 {
 	Path srcPath = asset.inputFiles.at(0).name;
 	String baseName = srcPath.getStem().getString();
-	Path animationPath = dstDir / "animation" / baseName;
-	Path spriteSheetPath = dstDir / "spritesheet" / baseName;
-	Path imagePath = dstDir / "image" / (baseName + ".png");
+	Path animationPath = Path("animation") / baseName;
+	Path spriteSheetPath = Path("spritesheet") / baseName;
+	Path imagePath = Path("image") / (baseName + ".png");
+	Path imageMetaPath = imagePath.replaceExtension(imagePath.getExtension() + ".meta");
 
 	// Import
 	auto frames = importAseprite(baseName, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data)));
 
 	// Write animation
 	Animation animation = generateAnimation(baseName, frames);
-	FileSystem::writeFile(animationPath, Serializer::toBytes(animation));
+	FileSystem::writeFile(dstDir / animationPath, Serializer::toBytes(animation));
 
 	// Generate atlas + spritesheet
-	Image atlasImage;
 	SpriteSheet spriteSheet;
-	generateAtlas(baseName, frames, atlasImage, spriteSheet);
-	FileSystem::writeFile(imagePath, atlasImage.savePNGToBytes());
-	FileSystem::writeFile(spriteSheetPath, Serializer::toBytes(spriteSheet));
+	auto atlasImage = generateAtlas(baseName, frames, spriteSheet);
+	FileSystem::writeFile(dstDir / imagePath, atlasImage->savePNGToBytes());
+	FileSystem::writeFile(dstDir / spriteSheetPath, Serializer::toBytes(spriteSheet));
 
 	// Image metafile
 	Metadata meta;
 	if (asset.metadata) {
 		meta = *asset.metadata;
 	}
-	auto size = atlasImage.getSize();
+	auto size = atlasImage->getSize();
 	meta.set("width", size.x);
 	meta.set("height", size.y);
-	Path imageMetaPath = imagePath.replaceExtension(imagePath.getExtension() + ".meta");
 	FileSystem::writeFile(dstDir / imageMetaPath, Serializer::toBytes(meta));
 
 	return { spriteSheetPath, animationPath, imagePath, imageMetaPath };
@@ -68,8 +68,12 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::importAseprite(String
 		if (p.getExtension() == ".png") {
 			ImageData data;
 
-			auto bytes = FileSystem::readFile(p);
+			auto bytes = FileSystem::readFile(tmp / p);
 			data.img = std::make_unique<Image>(p.getFilename().getString(), gsl::as_bytes(gsl::span<Byte>(bytes)), false);
+			if (data.img->getSize().x < 0) {
+				std::cout << "wtf?";
+			}
+
 			auto parsedName = p.getStem().getString().split("___");
 			if (parsedName.size() != 3 || parsedName[0] != "out") {
 				throw Exception("Error parsing filename: " + p.getStem().getString());
@@ -147,7 +151,58 @@ Animation AsepriteImporter::generateAnimation(String baseName, const std::vector
 	return animation;
 }
 
-void AsepriteImporter::generateAtlas(String baseName, const std::vector<ImageData>& images, Image& atlasImage, SpriteSheet& spriteSheet)
+std::unique_ptr<Image> AsepriteImporter::generateAtlas(String baseName, std::vector<ImageData>& images, SpriteSheet& spriteSheet)
 {
-	// TODO
+	// Generate entries
+	std::vector<BinPackEntry> entries;
+	for (auto& img: images) {
+		if (img.sequenceName != "") {
+			entries.push_back(BinPackEntry(img.img->getSize(), &img));
+		}
+	}
+
+	// Try packing
+	int maxSize = 2048;
+	int curSize = 32;
+	bool wide = false;
+	while (curSize < maxSize) {
+		Vector2i size(curSize * (wide ? 2 : 1), curSize);
+		auto res = BinPack::pack(entries, size);
+		if (res.is_initialized()) {
+			// Found a pack
+			return makeAtlas(baseName, res.get(), size, spriteSheet);
+		} else {
+			// Try 64x64, then 128x64, 128x128, 256x128, etc
+			if (wide) {
+				wide = false;
+				curSize *= 2;
+			} else {
+				wide = true;
+			}
+		}
+	}
+
+	throw Exception("Unable to pack sprites in a reasonably sized atlas!");
+}
+
+std::unique_ptr<Image> AsepriteImporter::makeAtlas(String baseName, const std::vector<BinPackResult>& result, Vector2i size, SpriteSheet& spriteSheet)
+{
+	auto image = std::make_unique<Image>(size.x, size.y);
+	image->clear(0);
+
+	spriteSheet.setTextureName(baseName + ".png");
+
+	for (auto& packedImg: result) {
+		ImageData* img = reinterpret_cast<ImageData*>(packedImg.data);
+		image->blitFrom(packedImg.rect.getTopLeft(), *img->img);
+
+		SpriteSheetEntry entry;
+		entry.size = Vector2f(img->img->getSize());
+		entry.rotated = false;
+		entry.pivot = Vector2f();
+		entry.coords = Rect4f(packedImg.rect) / Vector2f(size);
+		spriteSheet.addSprite(img->filename, entry);
+	}
+
+	return image;
 }

@@ -37,6 +37,7 @@ namespace Halley {
 		Image(String filename, gsl::span<const gsl::byte> bytes, bool preMultiply);
 		~Image();
 
+		void setSize(Vector2i size);
 		void setName(const String& string);
 
 		void load(String filename, gsl::span<const gsl::byte> bytes, bool preMultiply);
