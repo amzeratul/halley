@@ -22,6 +22,7 @@
 #include "os_unix.h"
 #ifdef IS_UNIX
 
+#include <halley/support/exception.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <pwd.h>
@@ -64,9 +65,9 @@ int Halley::OSUnix::runCommand(String command)
 {
 	auto args = command.split(' ');
 	String cmd = args[0];
-	std::vector<const char*> argsPtr(args.size());
+	std::vector<char*> argsPtr(args.size());
 	for (size_t i = 1; i < args.size(); ++i) {
-		argsPtr[i - 1] = args[i].c_str();
+		argsPtr[i - 1] = const_cast<char*>(args[i].c_str());
 	}
 	argsPtr[args.size() - 1] = nullptr;
 
