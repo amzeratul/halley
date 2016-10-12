@@ -133,7 +133,7 @@ Animation AsepriteImporter::generateAnimation(String baseName, const std::vector
 	for (auto& frame: frameData) {
 		auto i = sequences.find(frame.sequenceName);
 		if (i == sequences.end()) {
-			sequences[frame.sequenceName] = AnimationSequence(frame.sequenceName, int(std::round(1000.0f / frame.duration)), true, false);
+			sequences[frame.sequenceName] = AnimationSequence(frame.sequenceName, 1000.0f / float(frame.duration), true, false);
 		}
 		auto& seq = sequences[frame.sequenceName];
 

@@ -10,6 +10,9 @@
 
 namespace Halley
 {
+	class Resources;
+	class Serializer;
+	class Deserializer;
 	class ResourceDataStatic;
 	class Texture;
 	class ResourceLoader;
@@ -22,6 +25,9 @@ namespace Halley
 		Rect4f coords;
 		int duration;
 		bool rotated;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 	};
 
 	class SpriteSheetFrameTag
@@ -30,6 +36,9 @@ namespace Halley
 		String name;
 		int from;
 		int to;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 	};
 	
 	class SpriteSheet : public Resource
@@ -41,8 +50,12 @@ namespace Halley
 		std::vector<String> getSpriteNames() const;
 
 		void loadJson(gsl::span<const gsl::byte> data);
+		void loadTexture(Resources& resources);
 
 		static std::unique_ptr<SpriteSheet> loadResource(ResourceLoader& loader);
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 
 	private:
 		std::shared_ptr<Texture> texture;

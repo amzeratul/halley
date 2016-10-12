@@ -9,6 +9,7 @@
 #include "importers/config_importer.h"
 #include "importers/audio_importer.h"
 #include "importers/aseprite_importer.h"
+#include "importers/spritesheet_importer.h"
 
 using namespace Halley;
 
@@ -24,6 +25,7 @@ AssetImporter::AssetImporter()
 	importers[AssetType::Codegen] = std::make_unique<CodegenImporter>();
 	importers[AssetType::Audio] = std::make_unique<AudioImporter>();
 	importers[AssetType::Aseprite] = std::make_unique<AsepriteImporter>();
+	importers[AssetType::SpriteSheet] = std::make_unique<SpriteSheetImporter>();
 }
 
 IAssetImporter& AssetImporter::getImporter(Path path) const
@@ -45,6 +47,8 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 		type = AssetType::Audio;
 	} else if (root == "aseprite") {
 		type = AssetType::Aseprite;
+	} else if (root == "spritesheet") {
+		type = AssetType::SpriteSheet;
 	}
 
 	return getImporter(type);

@@ -4,6 +4,7 @@
 #include "resources/resources.h"
 #include "halley/file_formats/json/json.h"
 #include <halley/file_formats/json_file.h>
+#include "halley/file/byte_serializer.h"
 
 using namespace Halley;
 
@@ -23,6 +24,38 @@ template <typename T>
 static T readSize(JSONValue value)
 {
 	return T(value["w"], value["h"]);
+}
+
+void SpriteSheetEntry::serialize(Serializer& s) const
+{
+	s << pivot;
+	s << size;
+	s << coords;
+	s << duration;
+	s << rotated;
+}
+
+void SpriteSheetEntry::deserialize(Deserializer& s)
+{
+	s >> pivot;
+	s >> size;
+	s >> coords;
+	s >> duration;
+	s >> rotated;
+}
+
+void SpriteSheetFrameTag::serialize(Serializer& s) const
+{
+	s << name;
+	s << to;
+	s << from;
+}
+
+void SpriteSheetFrameTag::deserialize(Deserializer& s)
+{
+	s >> name;
+	s >> to;
+	s >> from;
 }
 
 const SpriteSheetEntry& SpriteSheet::getSprite(String name) const
@@ -51,15 +84,32 @@ std::vector<String> SpriteSheet::getSpriteNames() const
 
 std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 {
-	// Create sprite sheet
 	auto result = std::make_unique<SpriteSheet>();
 	auto data = loader.getStatic();
-	result->loadJson(data->getSpan());
-
-	// Load texture
-	result->texture = loader.getAPI().getResource<Texture>(result->textureName);
+	Deserializer s(data->getSpan());
+	result->deserialize(s);
+	result->loadTexture(loader.getAPI().core->getResources());
 
 	return std::move(result);
+}
+
+void SpriteSheet::loadTexture(Resources& resources)
+{
+	texture = resources.get<Texture>(textureName);
+}
+
+void SpriteSheet::serialize(Serializer& s) const
+{
+	s << textureName;
+	s << sprites;
+	s << frameTags;
+}
+
+void SpriteSheet::deserialize(Deserializer& s)
+{
+	s >> textureName;
+	s >> sprites;
+	s >> frameTags;
 }
 
 void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)

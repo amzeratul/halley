@@ -20,7 +20,8 @@ namespace Halley
 		Animation,
 		Config,
 		Audio,
-		Aseprite
+		Aseprite,
+		SpriteSheet
 	};
 
 	class ImportingAssetFile

@@ -8,6 +8,7 @@
 #include "halley/maths/rect.h"
 #include "halley/file/path.h"
 #include <map>
+#include <unordered_map>
 #include <cstdint>
 #include <utility>
 
@@ -78,6 +79,16 @@ namespace Halley {
 
 		template <typename T, typename U>
 		Serializer& operator<<(const std::map<T, U>& val)
+		{
+			*this << static_cast<unsigned int>(val.size());
+			for (auto& kv : val) {
+				*this << kv.first << kv.second;
+			}
+			return *this;
+		}
+
+		template <typename T, typename U>
+		Serializer& operator<<(const std::unordered_map<T, U>& val)
 		{
 			*this << static_cast<unsigned int>(val.size());
 			for (auto& kv : val) {
@@ -178,6 +189,20 @@ namespace Halley {
 
 		template <typename T, typename U>
 		Deserializer& operator >> (std::map<T, U>& val)
+		{
+			unsigned int sz;
+			*this >> sz;
+			for (unsigned int i = 0; i < sz; i++) {
+				T key;
+				U value;
+				*this >> key >> value;
+				val[key] = value;
+			}
+			return *this;
+		}
+
+		template <typename T, typename U>
+		Deserializer& operator >> (std::unordered_map<T, U>& val)
 		{
 			unsigned int sz;
 			*this >> sz;
