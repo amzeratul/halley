@@ -31,6 +31,7 @@ namespace Halley
 
 		void queueAudio(gsl::span<const AudioSamplePack> data) override;
 		size_t getQueuedSampleCount() const override;
+		void onCallback(unsigned char* stream, int len);
 
 	private:
 		bool playing = false;
@@ -39,5 +40,12 @@ namespace Halley
 
 		std::vector<short> tmpShort;
 		std::vector<int> tmpInt;
+
+		std::mutex mutex;
+		std::list<std::vector<unsigned char>> audioQueue;
+		size_t readPos = 0;
+		size_t queuedSize = 0;
+
+		void doQueueAudio(gsl::span<const gsl::byte> data);
 	};
 }
