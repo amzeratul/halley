@@ -37,11 +37,12 @@ namespace Halley {
 		Image(String filename, gsl::span<const gsl::byte> bytes, bool preMultiply);
 		~Image();
 
+		void setName(const String& string);
+
 		void load(String filename, gsl::span<const gsl::byte> bytes, bool preMultiply);
 		void savePNG(String filename = "") const;
 		void savePNG(const Path& filename) const;
 		Bytes savePNGToBytes();
-
 		static Vector2i getImageSize(String filename, gsl::span<const gsl::byte> bytes);
 
 		bool isPremultiplied() const { return preMultiplied; }

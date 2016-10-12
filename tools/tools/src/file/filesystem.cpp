@@ -56,7 +56,8 @@ void FileSystem::copyFile(const Path& src, const Path& dst)
 
 bool FileSystem::remove(const Path& path)
 {
-	return boost::filesystem::remove(getNative(path));
+	boost::system::error_code ec;
+	return boost::filesystem::remove_all(getNative(path), ec) > 0;
 }
 
 void FileSystem::writeFile(const Path& path, gsl::span<const gsl::byte> data)

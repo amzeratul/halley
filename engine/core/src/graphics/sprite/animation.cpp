@@ -46,6 +46,15 @@ void AnimationFrameDefinition::deserialize(Deserializer& s)
 	s >> frameNumber;
 }
 
+AnimationSequence::AnimationSequence() {}
+
+AnimationSequence::AnimationSequence(String name, float fps, bool loop, bool noFlip)
+	: name(name)
+	, fps(fps)
+	, loop(loop)
+	, noFlip(noFlip)
+{}
+
 void AnimationSequence::serialize(Serializer& s) const
 {
 	s << frameDefinitions;
@@ -62,6 +71,11 @@ void AnimationSequence::deserialize(Deserializer& s)
 	s >> fps;
 	s >> loop;
 	s >> noFlip;
+}
+
+void AnimationSequence::addFrame(const AnimationFrameDefinition& animationFrameDefinition)
+{
+	frameDefinitions.push_back(animationFrameDefinition);
 }
 
 AnimationDirection::AnimationDirection()
@@ -145,6 +159,31 @@ void Animation::loadDependencies(ResourceLoader& loader)
 			s.frames.emplace_back(f.makeFrame(*spriteSheet, directions));
 		}
 	}
+}
+
+void Animation::setName(const String& n)
+{
+	name = n;
+}
+
+void Animation::setMaterialName(const String& n)
+{
+	materialName = n;
+}
+
+void Animation::setSpriteSheetName(const String& n)
+{
+	spriteSheetName = n;
+}
+
+void Animation::addSequence(const AnimationSequence& sequence)
+{
+	sequences.push_back(sequence);
+}
+
+void Animation::addDirection(const AnimationDirection& direction)
+{
+	directions.push_back(direction);
 }
 
 const AnimationSequence& Animation::getSequence(String name) const

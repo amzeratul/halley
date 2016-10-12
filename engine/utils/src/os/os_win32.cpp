@@ -269,7 +269,7 @@ void Halley::OSWin32::setConsoleColor(int foreground, int background)
 int OSWin32::runCommand(String command)
 {
 	char buffer[1024];
-	strcpy(buffer, command.c_str());
+	strcpy_s(buffer, 1024, command.c_str());
 	buffer[command.size()] = 0;
 
 	STARTUPINFO si;
