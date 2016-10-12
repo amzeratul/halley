@@ -7,6 +7,7 @@
 #include <thread>
 #include <chrono>
 #include "halley/tools/file/filesystem.h"
+#include "halley/os/os.h"
 
 using namespace Halley;
 using namespace std::chrono_literals;
@@ -16,6 +17,7 @@ int ImportTool::run(Vector<std::string> args)
 	if (args.size() == 2) {
 		Executors executors;
 		Executors::set(executors);
+		OS::setInstance(OS::createOS());
 		ThreadPool tp(executors.getCPU(), std::max(static_cast<unsigned int>(4), std::thread::hardware_concurrency()));
 
 		Path projectPath = FileSystem::getAbsolute(Path(args[0]));

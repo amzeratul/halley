@@ -8,6 +8,7 @@
 #include "importers/material_importer.h"
 #include "importers/config_importer.h"
 #include "importers/audio_importer.h"
+#include "importers/aseprite_importer.h"
 
 using namespace Halley;
 
@@ -22,6 +23,7 @@ AssetImporter::AssetImporter()
 	importers[AssetType::Config] = std::make_unique<ConfigImporter>();
 	importers[AssetType::Codegen] = std::make_unique<CodegenImporter>();
 	importers[AssetType::Audio] = std::make_unique<AudioImporter>();
+	importers[AssetType::Aseprite] = std::make_unique<AsepriteImporter>();
 }
 
 IAssetImporter& AssetImporter::getImporter(Path path) const
@@ -41,6 +43,8 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 		type = AssetType::Config;
 	} else if (root == "audio") {
 		type = AssetType::Audio;
+	} else if (root == "aseprite") {
+		type = AssetType::Aseprite;
 	}
 
 	return getImporter(type);

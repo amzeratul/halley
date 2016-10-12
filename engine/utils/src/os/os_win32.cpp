@@ -266,5 +266,26 @@ void Halley::OSWin32::setConsoleColor(int foreground, int background)
 	SetConsoleTextAttribute(hConsole, WORD(foreground | (background << 4)));
 }
 
+int OSWin32::runCommand(String command)
+{
+	char buffer[1024];
+	strcpy(buffer, command.c_str());
+	buffer[command.size()] = 0;
+
+	STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+	memset(&si, 0, sizeof(STARTUPINFO));
+	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
+              
+	if (!CreateProcessA(nullptr, buffer, nullptr, nullptr, false, 0, nullptr, nullptr, &si, &pi)) {
+		return -1;
+	}
+	WaitForSingleObject(pi.hProcess, INFINITE);
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+
+	return 0;
+}
 
 #endif

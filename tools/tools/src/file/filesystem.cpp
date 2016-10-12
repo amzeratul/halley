@@ -1,6 +1,7 @@
 #include "halley/tools/file/filesystem.h"
 #include <boost/filesystem.hpp>
 #include <halley/file/path.h>
+#include "halley/os/os.h"
 
 using namespace Halley;
 using namespace boost::filesystem;
@@ -120,4 +121,14 @@ Path FileSystem::getAbsolute(const Path& path)
 size_t FileSystem::fileSize(const Path& path)
 {
 	return file_size(getNative(path));
+}
+
+Path FileSystem::getTemporaryPath() 
+{
+	return (temp_directory_path() / unique_path()).string();
+}
+
+int FileSystem::runCommand(const String& command)
+{
+	return OS::get().runCommand(command);
 }

@@ -43,6 +43,8 @@ namespace Halley {
 
 		void onWindowCreated(void* window) override;
 
+		int runCommand(String command) override;
+
 	private:
 		String runWMIQuery(String query, String parameter) const;
 		void loadWindowIcon(HWND hwnd);

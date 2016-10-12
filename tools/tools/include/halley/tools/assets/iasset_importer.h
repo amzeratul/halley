@@ -13,13 +13,14 @@ namespace Halley
 	{
 		Undefined,
 		Codegen,
+		SimpleCopy,
 		Font,
 		Image,
 		Material,
 		Animation,
 		Config,
 		Audio,
-		SimpleCopy
+		Aseprite
 	};
 
 	class ImportingAssetFile
