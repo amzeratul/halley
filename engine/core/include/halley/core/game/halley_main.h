@@ -2,8 +2,8 @@
 
 #include <halley/runner/game_loader.h>
 #include <halley/core/game/core.h>
-#include "main_loop.h"
-#include "entry_point.h"
+#include "halley/runner/main_loop.h"
+#include "halley/runner/entry_point.h"
 
 namespace Halley
 {
