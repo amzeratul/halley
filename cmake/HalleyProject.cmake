@@ -54,9 +54,6 @@ else()
 	find_Package(SDL2 REQUIRED)
 endif()
 
-# GL
-find_package(OpenGL REQUIRED)
-
 # Boost
 find_package(Boost REQUIRED)
 add_definitions(-DBOOST_ALL_NO_LIB)
