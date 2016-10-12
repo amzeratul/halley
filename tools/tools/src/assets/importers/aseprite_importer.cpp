@@ -13,35 +13,40 @@ using namespace Halley;
 std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
 {
 	Path srcPath = asset.inputFiles.at(0).name;
+	String baseName = srcPath.getStem().getString();
+	Path animationPath = dstDir / "animation" / baseName;
+	Path spriteSheetPath = dstDir / "spritesheet" / baseName;
+	Path imagePath = dstDir / "image" / (baseName + ".png");
 
-	std::vector<std::unique_ptr<Image>> frames;
-	Animation animation;
-	importAseprite(srcPath.getStem().getString(), gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data)), frames, animation);
+	// Import
+	auto frames = importAseprite(baseName, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data)));
+
+	// Write animation
+	Animation animation = generateAnimation(baseName, frames);
+	FileSystem::writeFile(animationPath, Serializer::toBytes(animation));
 
 	// Generate atlas + spritesheet
-	// TODO
-
-	// Generate animation
-	// TODO
-
-	Path spriteSheetPath;
-	Path imagePath = srcPath;
-	Path animationPath;
+	Image atlasImage;
+	SpriteSheet spriteSheet;
+	generateAtlas(baseName, frames, atlasImage, spriteSheet);
+	FileSystem::writeFile(imagePath, atlasImage.savePNGToBytes());
+	FileSystem::writeFile(spriteSheetPath, Serializer::toBytes(spriteSheet));
 
 	// Image metafile
 	Metadata meta;
 	if (asset.metadata) {
 		meta = *asset.metadata;
 	}
-	//meta.set("width", size.x);
-	//meta.set("height", size.y);
+	auto size = atlasImage.getSize();
+	meta.set("width", size.x);
+	meta.set("height", size.y);
 	Path imageMetaPath = imagePath.replaceExtension(imagePath.getExtension() + ".meta");
 	FileSystem::writeFile(dstDir / imageMetaPath, Serializer::toBytes(meta));
 
 	return { spriteSheetPath, animationPath, imagePath, imageMetaPath };
 }
 
-void AsepriteImporter::importAseprite(String baseName, gsl::span<const gsl::byte> fileData, std::vector<std::unique_ptr<Image>>& frames, Animation& animation)
+std::vector<AsepriteImporter::ImageData> AsepriteImporter::importAseprite(String baseName, gsl::span<const gsl::byte> fileData)
 {
 	// Make temporary folder
 	Path tmp = FileSystem::getTemporaryPath();
@@ -58,15 +63,7 @@ void AsepriteImporter::importAseprite(String baseName, gsl::span<const gsl::byte
 	}
 
 	// Load all images
-	struct ImageData
-	{
-		int frameNumber;
-		int duration;
-		String sequenceName;
-		String filename;
-		std::unique_ptr<Image> img;
-	};
-	std::vector<ImageData> framesTemp;
+	std::vector<ImageData> frameData;
 	for (auto p : FileSystem::enumerateDirectory(tmp)) {
 		if (p.getExtension() == ".png") {
 			ImageData data;
@@ -79,12 +76,9 @@ void AsepriteImporter::importAseprite(String baseName, gsl::span<const gsl::byte
 			}
 			data.sequenceName = parsedName[1];
 			data.frameNumber = parsedName[2].toInteger();
-			framesTemp.push_back(std::move(data));
+			frameData.push_back(std::move(data));
 		}
 	}
-	std::sort(framesTemp.begin(), framesTemp.end(), [] (const ImageData& a, const ImageData& b) -> bool {
-		return a.frameNumber < b.frameNumber;
-	});
 
 	// Load spritesheet
 	SpriteSheet spriteSheet;
@@ -104,8 +98,11 @@ void AsepriteImporter::importAseprite(String baseName, gsl::span<const gsl::byte
 	}
 
 	// Process images
+	std::sort(frameData.begin(), frameData.end(), [] (const ImageData& a, const ImageData& b) -> bool {
+		return a.frameNumber < b.frameNumber;
+	});
 	for (auto tag: spriteSheet.getFrameTags()) {
-		for (auto& frame: framesTemp) {
+		for (auto& frame: frameData) {
 			if (frame.sequenceName == tag.name) {
 				frame.duration = durations[frame.frameNumber];
 				frame.frameNumber -= tag.from;
@@ -117,11 +114,40 @@ void AsepriteImporter::importAseprite(String baseName, gsl::span<const gsl::byte
 			}
 		}
 	}
-	for (auto& frame: framesTemp) {
-		frames.push_back(std::move(frame.img));
+	return frameData;
+}
+
+Animation AsepriteImporter::generateAnimation(String baseName, const std::vector<ImageData>& frameData)
+{
+	Animation animation;
+
+	animation.setName(baseName);
+	animation.setMaterialName("sprite");
+	animation.setSpriteSheetName(baseName);
+
+	std::map<String, AnimationSequence> sequences;
+
+	animation.addDirection(AnimationDirection("right", "forward", false, 0));
+	animation.addDirection(AnimationDirection("left", "forward", true, 0));
+	
+	for (auto& frame: frameData) {
+		auto i = sequences.find(frame.sequenceName);
+		if (i == sequences.end()) {
+			sequences[frame.sequenceName] = AnimationSequence(frame.sequenceName, int(std::round(1000.0f / frame.duration)), true, false);
+		}
+		auto& seq = sequences[frame.sequenceName];
+
+		seq.addFrame(AnimationFrameDefinition(frame.frameNumber, frame.filename));
 	}
 
-	// Generate animation
+	for (auto& seq: sequences) {
+		animation.addSequence(seq.second);
+	}
 
-	// 
+	return animation;
+}
+
+void AsepriteImporter::generateAtlas(String baseName, const std::vector<ImageData>& images, Image& atlasImage, SpriteSheet& spriteSheet)
+{
+	// TODO
 }
