@@ -61,7 +61,7 @@ add_definitions(-DBOOST_ALL_NO_LIB)
 # OpenGL
 find_package(OpenGL REQUIRED)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    FindX11()
+    find_library(X11 REQUIRED)
 else()
 	SET(X11_LIBRARIES "")
 endif ()
