@@ -42,10 +42,12 @@ namespace Halley
 
 	class AnimationSequence
 	{
-		friend class AnimationImporter;
 		friend class Animation;
 
 	public:
+		AnimationSequence();
+		AnimationSequence(String name, float fps, bool loop, bool noFlip);
+
 		float getFPS() const { return fps; }
 		size_t numFrames() const { return frames.size(); }
 		const AnimationFrame& getFrame(size_t n) const { return frames[n]; }
@@ -55,6 +57,8 @@ namespace Halley
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+
+		void addFrame(const AnimationFrameDefinition& animationFrameDefinition);
 
 	private:
 		Vector<AnimationFrame> frames;
@@ -67,7 +71,6 @@ namespace Halley
 
 	class AnimationDirection
 	{
-		friend class AnimationImporter;
 		friend class Animation;
 
 	public:
@@ -107,6 +110,12 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 		void loadDependencies(ResourceLoader& loader);
+
+		void setName(const String& name);
+		void setMaterialName(const String& name);
+		void setSpriteSheetName(const String& name);
+		void addSequence(const AnimationSequence& sequence);
+		void addDirection(const AnimationDirection& direction);
 
 	private:
 		String name;

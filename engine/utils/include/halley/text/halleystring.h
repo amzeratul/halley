@@ -138,6 +138,7 @@ namespace Halley {
 		inline const std::string& cppStr() const { return str; }
 
 		Vector<String> split(char delimiter) const;
+		Vector<String> split(String delimiter) const;
 		static String concatList(const Vector<String>& list, String separator);
 
 		//////////

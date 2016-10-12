@@ -31,6 +31,7 @@ set(SOURCES
         "src/assets/import_tool.cpp"
 
         "src/assets/importers/animation_importer.cpp"
+        "src/assets/importers/aseprite_importer.cpp"
         "src/assets/importers/audio_importer.cpp"
         "src/assets/importers/codegen_importer.cpp"
         "src/assets/importers/config_importer.cpp"
@@ -38,6 +39,7 @@ set(SOURCES
         "src/assets/importers/font_importer.cpp"
         "src/assets/importers/image_importer.cpp"
         "src/assets/importers/material_importer.cpp"
+        "src/assets/importers/spritesheet_importer.cpp"
 
         "src/tasks/editor_task.cpp"
 	"src/tasks/editor_task_set.cpp"
@@ -78,6 +80,7 @@ set(HEADERS
         "include/halley/tools/assets/import_tool.h"
 
         "src/assets/importers/animation_importer.h"
+        "src/assets/importers/aseprite_importer.h"
         "src/assets/importers/audio_importer.h"
         "src/assets/importers/codegen_importer.h"
         "src/assets/importers/config_importer.h"
@@ -85,6 +88,7 @@ set(HEADERS
         "src/assets/importers/font_importer.h"
         "src/assets/importers/image_importer.h"
         "src/assets/importers/material_importer.h"
+        "src/assets/importers/spritesheet_importer.h"
 
 	"include/halley/tools/tasks/editor_task.h"
 	"include/halley/tools/tasks/editor_task_set.h"

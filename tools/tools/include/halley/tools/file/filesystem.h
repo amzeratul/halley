@@ -5,6 +5,7 @@
 #include <vector>
 
 namespace Halley {
+	class String;
 	class Path;
 
 	class FileSystem
@@ -31,6 +32,10 @@ namespace Halley {
 		static Path getAbsolute(const Path& path);
 
 		static size_t fileSize(const Path& path);
+
+		static Path getTemporaryPath();
+
+		static int runCommand(const String& command);
 	};
 }
 

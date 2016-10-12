@@ -7,7 +7,7 @@
 
 using namespace Halley;
 
-Maybe<Vector<BinPackResult>> BinPack::pack(Vector<BinPackEntry> entries, Vector2i binSize)
+boost::optional<Vector<BinPackResult>> BinPack::pack(Vector<BinPackEntry> entries, Vector2i binSize)
 {
 	using T = void*;
 
@@ -27,8 +27,8 @@ Maybe<Vector<BinPackResult>> BinPack::pack(Vector<BinPackEntry> entries, Vector2
 		for (auto& content: outputContent.Get()) {
 			results.push_back(BinPackResult(Rect4i(content.coord.x, content.coord.y, content.size.w, content.size.h), content.rotated, content.content));
 		}
-		return Maybe<Vector<BinPackResult>>(std::move(results));
+		return boost::optional<Vector<BinPackResult>>(std::move(results));
 	} else {
-		return Maybe<Vector<BinPackResult>>();
+		return boost::optional<Vector<BinPackResult>>();
 	}
 }

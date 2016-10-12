@@ -4,6 +4,7 @@
 #include "resources/resources.h"
 #include "halley/file_formats/json/json.h"
 #include <halley/file_formats/json_file.h>
+#include "halley/file/byte_serializer.h"
 
 using namespace Halley;
 
@@ -25,6 +26,38 @@ static T readSize(JSONValue value)
 	return T(value["w"], value["h"]);
 }
 
+void SpriteSheetEntry::serialize(Serializer& s) const
+{
+	s << pivot;
+	s << size;
+	s << coords;
+	s << duration;
+	s << rotated;
+}
+
+void SpriteSheetEntry::deserialize(Deserializer& s)
+{
+	s >> pivot;
+	s >> size;
+	s >> coords;
+	s >> duration;
+	s >> rotated;
+}
+
+void SpriteSheetFrameTag::serialize(Serializer& s) const
+{
+	s << name;
+	s << to;
+	s << from;
+}
+
+void SpriteSheetFrameTag::deserialize(Deserializer& s)
+{
+	s >> name;
+	s >> to;
+	s >> from;
+}
+
 const SpriteSheetEntry& SpriteSheet::getSprite(String name) const
 {
 	auto iter = sprites.find(name);
@@ -35,26 +68,89 @@ const SpriteSheetEntry& SpriteSheet::getSprite(String name) const
 	}
 }
 
+const std::vector<SpriteSheetFrameTag>& SpriteSheet::getFrameTags() const
+{
+	return frameTags;
+}
+
+std::vector<String> SpriteSheet::getSpriteNames() const
+{
+	std::vector<String> result;
+	for (auto& f: sprites) {
+		result.push_back(f.first);
+	}
+	return result;
+}
+
 std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 {
-	// Read data
+	auto result = std::make_unique<SpriteSheet>();
 	auto data = loader.getStatic();
-	auto src = static_cast<const char*>(data->getData());
+	Deserializer s(data->getSpan());
+	result->deserialize(s);
+	result->loadTexture(loader.getAPI().core->getResources());
+
+	return std::move(result);
+}
+
+void SpriteSheet::loadTexture(Resources& resources)
+{
+	texture = resources.get<Texture>(textureName);
+}
+
+void SpriteSheet::addSprite(String name, const SpriteSheetEntry& sprite)
+{
+	sprites[name] = sprite;
+}
+
+void SpriteSheet::setTextureName(String name)
+{
+	textureName = name;
+}
+
+void SpriteSheet::serialize(Serializer& s) const
+{
+	s << textureName;
+	s << sprites;
+	s << frameTags;
+}
+
+void SpriteSheet::deserialize(Deserializer& s)
+{
+	s >> textureName;
+	s >> sprites;
+	s >> frameTags;
+}
+
+void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)
+{
+	auto src = reinterpret_cast<const char*>(data.data());
 
 	// Parse json
 	Json::Reader reader;
 	JSONValue root;
-	reader.parse(src, src + data->getSize(), root);
+	reader.parse(src, src + data.size(), root);
 
-	// Create sprite sheet
-	auto result = std::make_unique<SpriteSheet>();
-	
 	// Read Metadata
 	auto meta = root["meta"];
-	String textureName = meta["image"].asString();
-	Vector2f textureSize = readSize<Vector2f>(meta["size"]);
-	Vector2f scale = Vector2f(1.0f / textureSize.x, 1.0f / textureSize.y);
-	result->texture = loader.getAPI().getResource<Texture>(textureName);
+	Vector2f scale = Vector2f(1, 1);
+	textureName = "";
+	if (meta) {
+		if (meta["image"]) {
+			textureName = meta["image"].asString();
+			Vector2f textureSize = readSize<Vector2f>(meta["size"]);
+			scale = Vector2f(1.0f / textureSize.x, 1.0f / textureSize.y);
+		}
+		if (meta["frameTags"]) {
+			for (auto& frameTag: meta["frameTags"]) {
+				frameTags.push_back(SpriteSheetFrameTag());
+				auto& f = frameTags.back();
+				f.name = frameTag["name"].asString();
+				f.from = frameTag["from"].asInt();
+				f.to = frameTag["to"].asInt();
+			}
+		}
+	}
 
 	// Read sprites
 	auto frames = root["frames"];
@@ -79,9 +175,12 @@ std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 		Vector2i pivotPos = Vector2i(int(pivot.x * sourceSize.x + 0.5f), int(pivot.y * sourceSize.y + 0.5f));
 		Vector2i newPivotPos = pivotPos - spriteSourceSize.getTopLeft();
 		entry.pivot = Vector2f(newPivotPos) / Vector2f(spriteSourceSize.getSize());
-		
-		result->sprites[iter.memberName()] = entry;
-	}
 
-	return std::move(result);
+		if (sprite["duration"]) {
+			entry.duration = sprite["duration"].asInt();
+		}
+		
+		sprites[iter.memberName()] = entry;
+	}
+	
 }

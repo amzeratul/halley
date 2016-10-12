@@ -881,6 +881,29 @@ Vector<String> Halley::String::split(char delimiter) const
 	return result;
 }
 
+Vector<String> String::split(String delimiter) const
+{
+	Vector<String> result;
+	
+	size_t size = delimiter.size();
+	size_t startPos = 0;
+	const char* cStr = delimiter.c_str();
+	while (true) {
+		size_t endPos = find(cStr, startPos);
+		if (endPos == npos) {
+			// No more delimiters
+			result.push_back(substr(startPos));
+			break;
+		} else {
+			result.push_back(substr(startPos, endPos-startPos));
+			startPos = endPos + size;
+		}
+	}
+
+	Ensures(result.size() > 0);
+	return result;
+}
+
 String String::concatList(const Vector<String>& list, String separator)
 {
 	std::stringstream ss;

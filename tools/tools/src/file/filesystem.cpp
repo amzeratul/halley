@@ -1,6 +1,7 @@
 #include "halley/tools/file/filesystem.h"
 #include <boost/filesystem.hpp>
 #include <halley/file/path.h>
+#include "halley/os/os.h"
 
 using namespace Halley;
 using namespace boost::filesystem;
@@ -55,7 +56,8 @@ void FileSystem::copyFile(const Path& src, const Path& dst)
 
 bool FileSystem::remove(const Path& path)
 {
-	return boost::filesystem::remove(getNative(path));
+	boost::system::error_code ec;
+	return boost::filesystem::remove_all(getNative(path), ec) > 0;
 }
 
 void FileSystem::writeFile(const Path& path, gsl::span<const gsl::byte> data)
@@ -120,4 +122,14 @@ Path FileSystem::getAbsolute(const Path& path)
 size_t FileSystem::fileSize(const Path& path)
 {
 	return file_size(getNative(path));
+}
+
+Path FileSystem::getTemporaryPath() 
+{
+	return (temp_directory_path() / unique_path()).string();
+}
+
+int FileSystem::runCommand(const String& command)
+{
+	return OS::get().runCommand(command);
 }

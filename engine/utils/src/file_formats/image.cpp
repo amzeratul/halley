@@ -29,18 +29,9 @@
 Halley::Image::Image(unsigned int _w, unsigned int _h)
 	: px(nullptr, [](char*){})
 	, dataLen(0)
-	, w(_w)
-	, h(_h)
 	, nComponents(0)
-	, preMultiplied(false)
 {
-	if (w > 0 && h > 0)	{
-		nComponents = 4;
-		dataLen = w * h * nComponents;
-		dataLen += (16 - (dataLen % 16)) % 16;
-		px = std::unique_ptr<char, void(*)(char*)>(new char[dataLen], [](char* data) { delete[] data; });
-		assert(px.get() != nullptr);
-	}
+	setSize(Vector2i(_w, _h));
 }
 
 Halley::Image::Image(String _filename, gsl::span<const gsl::byte> bytes, bool _preMultiply)
@@ -54,6 +45,25 @@ Halley::Image::Image(String _filename, gsl::span<const gsl::byte> bytes, bool _p
 Halley::Image::~Image()
 {
 	px.reset();
+}
+
+void Halley::Image::setSize(Vector2i size)
+{
+	preMultiplied = false;
+	w = size.x;
+	h = size.y;
+	if (w > 0 && h > 0)	{
+		nComponents = 4;
+		dataLen = w * h * nComponents;
+		dataLen += (16 - (dataLen % 16)) % 16;
+		px = std::unique_ptr<char, void(*)(char*)>(new char[dataLen], [](char* data) { delete[] data; });
+		assert(px.get() != nullptr);
+	}
+}
+
+void Halley::Image::setName(const String& name)
+{
+	filename = name;
 }
 
 int Halley::Image::getRGBA(int r, int g, int b, int a)

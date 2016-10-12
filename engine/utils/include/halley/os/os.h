@@ -50,6 +50,7 @@ namespace Halley {
 		virtual String getUserDataDir()=0;
 		virtual String makeDataPath(String appDataPath, String userProvidedPath);
 		virtual void setConsoleColor(int foreground, int background);
+		virtual int runCommand(String command);
 
 	private:
 		static OS* osInstance;

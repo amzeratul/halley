@@ -82,4 +82,9 @@ void Halley::OS::setConsoleColor(int, int)
 {
 }
 
+int OS::runCommand(String)
+{
+	throw Exception("Running commands is not implemented in this platform.");
+}
+
 OS* OS::osInstance = nullptr;
