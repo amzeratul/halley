@@ -40,6 +40,11 @@ Vector<std::unique_ptr<const AudioDevice>> AudioSDL::getAudioDevices()
 	return std::move(result);
 }
 
+static void sdlCallback(void *userdata, Uint8 * stream, int len)
+{
+	reinterpret_cast<AudioSDL*>(userdata)->onCallback(stream, len);
+}
+
 AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, const AudioDevice* dev)
 {
 	String name = dev ? dev->getName() : "";
@@ -47,7 +52,7 @@ AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, const Audi
 
 	auto f = requestedFormat.format;
 	SDL_AudioSpec desired;
-	desired.callback = nullptr;
+	desired.callback = sdlCallback;
 	desired.channels = requestedFormat.numChannels;
 	desired.freq = requestedFormat.sampleRate;
 	desired.samples = requestedFormat.bufferSize;
@@ -109,7 +114,7 @@ void AudioSDL::queueAudio(gsl::span<const AudioSamplePack> data)
 
 	// Float
 	if (outputFormat.format == AudioSampleFormat::Float) {
-		SDL_QueueAudio(device, data.data(), uint32_t(data.size_bytes()));
+		doQueueAudio(gsl::as_bytes(data));
 	}
 	
 	// Int16
@@ -123,7 +128,7 @@ void AudioSDL::queueAudio(gsl::span<const AudioSamplePack> data)
 			}
 		}
 
-		SDL_QueueAudio(device, tmpShort.data(), uint32_t(tmpShort.size() * sizeof(short)));
+		doQueueAudio(gsl::as_bytes(gsl::span<short>(tmpShort)));
 	}
 	
 	// Int32
@@ -137,13 +142,52 @@ void AudioSDL::queueAudio(gsl::span<const AudioSamplePack> data)
 			}
 		}
 
-		SDL_QueueAudio(device, tmpInt.data(), uint32_t(tmpInt.size() * sizeof(int)));
+		doQueueAudio(gsl::as_bytes(gsl::span<int>(tmpInt)));
 	}
 }
 
 size_t AudioSDL::getQueuedSampleCount() const
 {
-	Expects(device);
 	size_t sizePerSample = outputFormat.format == AudioSampleFormat::Int16 ? 2 : 4;
-	return size_t(SDL_GetQueuedAudioSize(device)) / outputFormat.numChannels;
+	return queuedSize / (outputFormat.numChannels * sizePerSample);
 }
+
+void AudioSDL::doQueueAudio(gsl::span<const gsl::byte> data) 
+{
+	std::vector<unsigned char> tmp(data.size_bytes());
+	memcpy(tmp.data(), data.data(), data.size_bytes());
+
+	std::unique_lock<std::mutex> lock(mutex);
+	queuedSize += data.size_bytes();
+	audioQueue.push_back(std::move(tmp));
+}
+
+void AudioSDL::onCallback(unsigned char* stream, int len) 
+{
+	size_t remaining = size_t(len);
+	size_t pos = 0;
+
+	std::unique_lock<std::mutex> lock(mutex);
+	while (remaining > 0 && !audioQueue.empty()) {
+		auto& front = audioQueue.front();
+		size_t toCopy = std::min(remaining, front.size() - readPos);
+
+		memcpy(stream + pos, front.data() + readPos, toCopy);
+
+		remaining -= toCopy;
+		queuedSize -= toCopy;
+		pos += toCopy;
+		readPos += toCopy;
+
+		if (readPos == front.size()) {
+			readPos = 0;
+			audioQueue.pop_front();
+		}
+	}
+
+	if (remaining > 0) {
+		// :(
+		memset(stream + pos, 0, remaining);
+	}
+}
+
