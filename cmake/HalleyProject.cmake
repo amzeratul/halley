@@ -58,6 +58,14 @@ endif()
 find_package(Boost REQUIRED)
 add_definitions(-DBOOST_ALL_NO_LIB)
 
+# OpenGL
+find_package(OpenGL REQUIRED)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    FindX11()
+else()
+	SET(X11_LIBRARIES "")
+endif ()
+
 # Apple frameworks
 if (APPLE)
 	find_library(CARBON_LIBRARY Carbon)
@@ -105,6 +113,8 @@ set(HALLEY_PROJECT_LIBS
 	debug halley-net_d
 	debug halley-utils_d
 	${SDL2_LIBRARIES}
+	${OPENGL_LIBRARIES}
+	${X11_LIBRARIES}
 	${EXTRA_LIBS}
 	)
 
