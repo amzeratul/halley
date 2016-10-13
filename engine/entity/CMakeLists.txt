@@ -23,6 +23,7 @@ set(HEADERS
         "include/halley/entity/family_mask.h"
         "include/halley/entity/family_type.h"
         "include/halley/entity/message.h"
+        "include/halley/entity/service.h"
         "include/halley/entity/system.h"
         "include/halley/entity/type_deleter.h"
         "include/halley/entity/world.h"

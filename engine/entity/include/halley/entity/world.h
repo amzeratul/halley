@@ -10,6 +10,7 @@
 #include <halley/time/stopwatch.h>
 #include <halley/data_structures/vector.h>
 #include <halley/data_structures/tree_map.h>
+#include "service.h"
 
 namespace Halley {
 	class Entity;
@@ -32,9 +33,12 @@ namespace Halley {
 		System& addSystem(std::unique_ptr<System> system, TimeLine timeline);
 		void removeSystem(System& system);
 		Vector<System*> getSystems();
-		System& getSystem(String name);
+		System& getSystem(const String& name);
 		Vector<std::unique_ptr<System>>& getSystems(TimeLine timeline);
 		const Vector<std::unique_ptr<System>>& getSystems(TimeLine timeline) const;
+
+		Service& addService(std::unique_ptr<Service> service);
+		Service& getService(const String& name) const;
 
 		EntityRef createEntity();
 		void destroyEntity(EntityId id);
@@ -71,6 +75,7 @@ namespace Halley {
 		MappedPool<Entity*> entityMap;
 
 		TreeMap<FamilyMaskType, std::unique_ptr<Family>> families;
+		TreeMap<String, std::unique_ptr<Service>> services;
 
 		mutable std::array<StopwatchAveraging, 3> timer;
 

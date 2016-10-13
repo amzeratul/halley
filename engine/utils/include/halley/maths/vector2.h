@@ -127,8 +127,9 @@ namespace Halley {
 		inline T dot (Vector2D param) const { return (x * param.x) + (y * param.y); }
 
 		// Length
-		inline T length () const { return sqrt(squaredLength()); }
+		inline T length () const { return std::sqrt(squaredLength()); }
 		inline T len () const { return length(); }
+		inline T manhattanLength() const { return std::abs(x) + std::abs(y); }
 
 		// Squared length, often useful and much faster
 		inline T squaredLength () const { return x*x+y*y; }

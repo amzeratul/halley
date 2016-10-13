@@ -277,7 +277,7 @@ int OSWin32::runCommand(String command)
 
 	memset(&si, 0, sizeof(STARTUPINFO));
 	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
-              
+
 	if (!CreateProcessA(nullptr, buffer, nullptr, nullptr, false, 0, nullptr, nullptr, &si, &pi)) {
 		return -1;
 	}

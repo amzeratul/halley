@@ -65,7 +65,7 @@ Vector<System*> World::getSystems()
 	return std::move(result);
 }
 
-System& World::getSystem(String name)
+System& World::getSystem(const String& name)
 {
 	for (auto& tl : systems) {
 		for (auto& s : tl) {
@@ -75,6 +75,22 @@ System& World::getSystem(String name)
 		}
 	}
 	throw Exception("System not found: " + name);
+}
+
+Service& World::addService(std::unique_ptr<Service> service)
+{
+	auto& ref = *service;
+	services[service->getName()] = std::move(service);
+	return ref;
+}
+
+Service& World::getService(const String& name) const
+{
+	auto iter = services.find(name);
+	if (iter == services.end()) {
+		throw Exception("Service not found: " + name);
+	}
+	return *iter->second;
 }
 
 EntityRef World::createEntity()
