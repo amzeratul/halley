@@ -98,6 +98,13 @@ void Codegen::process()
 			msg.second.id = id++;
 		}
 	}
+	for (auto& system: systems) {
+		for (auto& fam: system.second.families) {
+			std::sort(fam.components.begin(), fam.components.end(), [] (const ComponentReferenceSchema& a, const ComponentReferenceSchema& b) -> bool {
+				return a.name < b.name;
+			});
+		}
+	}
 }
 
 bool Codegen::writeFile(Path filePath, const char* data, size_t dataSize, bool stub) const
