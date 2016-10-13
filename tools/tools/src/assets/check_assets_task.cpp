@@ -7,6 +7,7 @@
 #include "halley/tools/assets/delete_assets_task.h"
 #include <boost/filesystem/operations.hpp>
 #include "halley/tools/file/filesystem.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 using namespace std::chrono_literals;

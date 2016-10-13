@@ -1,6 +1,7 @@
 #include "halley/support/logger.h"
 #include "halley/text/halleystring.h"
 #include <gsl/gsl_assert>
+#include <iostream>
 
 using namespace Halley;
 
@@ -23,9 +24,12 @@ void Logger::removeSink(ILoggerSink& sink)
 
 void Logger::log(LoggerLevel level, const String& msg)
 {
-	Expects(instance);
-	for (auto& s: instance->sinks) {
-		s->log(level, msg);
+	if (instance) {
+		for (auto& s: instance->sinks) {
+			s->log(level, msg);
+		}
+	} else {
+		std::cout << msg << std::endl;
 	}
 }
 

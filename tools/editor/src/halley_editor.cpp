@@ -59,7 +59,7 @@ bool HalleyEditor::shouldCreateSeparateConsole() const
 
 void HalleyEditor::init(const Environment& environment, const Vector<String>& args)
 {
-	sharedAssetsPath = Path(environment.getProgramPath().cppStr()).parentPath() / "assets_src";
+	sharedAssetsPath = Path(environment.getProgramPath().cppStr()).parentPath() / "shared_assets";
 
 	preferences = std::make_unique<Preferences>((Path(environment.getDataPath().cppStr()) / "settings.yaml").string());
 	preferences->load();
