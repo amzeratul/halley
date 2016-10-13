@@ -88,7 +88,6 @@ namespace Halley {
 		virtual ~IResourceLocator() {}
 		virtual std::unique_ptr<ResourceDataStatic> getStatic(String resource) = 0;
 		virtual std::unique_ptr<ResourceDataStream> getStream(String resource) = 0;
-		virtual bool fileExists(const String& string) = 0;
 	};
 
 
@@ -116,8 +115,6 @@ namespace Halley {
 		std::unique_ptr<ResourceDataStatic> getStatic();
 		std::unique_ptr<ResourceDataStream> getStream();
 		Future<std::unique_ptr<ResourceDataStatic>> getAsync() const;
-
-		bool fileExists() const;
 
 	private:
 		ResourceLoader(ResourceLoader&& loader);

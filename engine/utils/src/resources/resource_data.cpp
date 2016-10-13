@@ -155,8 +155,3 @@ Future<std::unique_ptr<ResourceDataStatic>> ResourceLoader::getAsync() const
 		return loc.get().getStatic(resName);
 	});
 }
-
-bool ResourceLoader::fileExists() const
-{
-	return locator.fileExists(resolvedName);
-}

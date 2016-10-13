@@ -10,7 +10,11 @@ using namespace Halley;
 std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 {
 	Metadata& meta = loader.getMeta();
-	Vector2i size(meta.getInt("width"), meta.getInt("height"));
+	Vector2i size(meta.getInt("width", -1), meta.getInt("height", -1));
+	if (size.x == -1 && size.y == -1) {
+		throw Exception("Unable to load texture \"" + loader.getName() + "\" due to missing asset data.");
+	}
+
 	TextureDescriptor descriptor(size);
 	descriptor.useFiltering = meta.getBool("filtering", false);
 	descriptor.useMipMap = meta.getBool("mipmap", false);
