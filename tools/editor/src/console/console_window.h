@@ -15,6 +15,8 @@ namespace Halley
 		void update(InputKeyboard& keyboard);
 		void draw(Painter& painter, Rect4f bounds) const;
 
+		void printLn(const String& line);
+
 	private:
 		void submit();
 

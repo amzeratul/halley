@@ -18,8 +18,7 @@ ConsoleWindow::ConsoleWindow(Resources& resources)
 
 	font = resources.get<Font>("Inconsolata.font");
 
-	buffer.push_back("Halley Engine Editor.");
-	buffer.push_back("Hello world!");
+	printLn("Welcome to the Halley Game Engine Editor.");
 }
 
 void ConsoleWindow::update(InputKeyboard& keyboard)
@@ -50,7 +49,7 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 		.setColour(Colour4f(0.0f, 0.0f, 0.0f, 0.4f))
 		.drawSliced(painter, Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
 
-	const float size = 16;
+	const float size = 18;
 	float lineH = font->getLineHeightAtSize(size);
 	int nLines = int(innerBounds.getHeight() / lineH) - 1;
 	Vector2f cursor = innerBounds.getBottomLeft();
@@ -73,7 +72,12 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 
 void ConsoleWindow::submit()
 {
-	buffer.push_back("> " + input);
+	printLn("> " + input);
 	history.push_back(input);
 	input = "";
+}
+
+void ConsoleWindow::printLn(const String& line)
+{
+	buffer.push_back(line);
 }

@@ -176,8 +176,6 @@ size_t VorbisData::vorbisRead(void* ptr, size_t size, size_t nmemb, void* dataso
 		size_t requested = size*nmemb;
 		size_t toRead = std::min(requested, left);
 
-		//std::cout << "reading " << data->pos << "->" << (data->pos+toRead) << " [" << toRead << "/" << requested << "]\n";
-
 		const char* src = static_cast<const char*>(res->getData());
 		memcpy(ptr, src+data->pos, toRead);
 		data->pos += toRead;
@@ -202,10 +200,8 @@ int VorbisData::vorbisSeek(void *datasource, OggOffsetType offset, int whence)
 	return 0;
 }
 
-int VorbisData::vorbisClose(void * /*dataSource*/)
+int VorbisData::vorbisClose(void *)
 {
-	//std::cout << "closing\n";
-	//VorbisData* data = (VorbisData*) datasource;
 	return 0;
 }
 
