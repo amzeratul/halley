@@ -14,10 +14,10 @@ namespace Halley
 		void update(Time time);
 		void addTask(EditorTaskAnchor&& editorTaskAnchor);
 
-		const std::list<EditorTaskAnchor>& getTasks() const { return tasks; }
-	
+		const std::list<std::shared_ptr<EditorTaskAnchor>>& getTasks() const;
+
 	private:
-		std::list<EditorTaskAnchor> tasks;
+		std::list<std::shared_ptr<EditorTaskAnchor>> tasks;
 		int nextId = 0;
 	};
 }

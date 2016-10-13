@@ -67,6 +67,7 @@ namespace Halley
 		bool needsImporting(const ImportAssetsDatabaseEntry& asset) const;
 		void markAsImported(const ImportAssetsDatabaseEntry& asset);
 		void markDeleted(const ImportAssetsDatabaseEntry& asset);
+		void markFailed(const ImportAssetsDatabaseEntry& asset);
 
 		void markAllInputsAsMissing();
 		void markInputAsPresent(const ImportAssetsDatabaseEntry& asset);
@@ -82,6 +83,7 @@ namespace Halley
 		Path dbFile;
 
 		std::map<String, AssetEntry> assetsImported;
+		std::map<String, AssetEntry> assetsFailed; // Ephemeral
 		
 		mutable std::mutex mutex;
 	};

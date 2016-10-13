@@ -5,7 +5,6 @@
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/resources/resource_data.h"
 #include <yaml-cpp/yaml.h>
-#include <iostream>
 #include "halley/tools/file/filesystem.h"
 
 using namespace Halley;
@@ -109,9 +108,8 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 			toLoad.pop_front();
 		}
 	} catch (std::exception& e) {
-		std::cout << "Error importing asset " << asset.assetId << ": " << e.what() << std::endl;
-		
-		// TODO: mark asset as pending fix
+		addError(asset.assetId + ": " + e.what());
+		db.markFailed(asset);
 
 		return false;
 	}

@@ -13,13 +13,13 @@ EditorTaskSet::~EditorTaskSet()
 {
 	// We're not going anywhere until all those tasks are done; cancel them all to speed it up
 	for (auto& t : tasks) {
-		t.cancel();
+		t->cancel();
 	}
 
 	// Keep updating until they're all cancelled
 	while (!tasks.empty()) {
 		for (auto& t : tasks) {
-			std::cout << "Waiting for: " << t.getName() << std::endl;
+			std::cout << "Waiting for: " << t->getName() << std::endl;
 		}
 		std::this_thread::sleep_for(25ms);
 		update(0.025f);
@@ -33,18 +33,19 @@ void EditorTaskSet::update(Time time)
 		++next;
 
 		auto& task = *iter;
-		task.update(static_cast<float>(time));
+		task->update(static_cast<float>(time));
 
-		auto subTasks = task.getPendingTasks();
+		auto subTasks = task->getPendingTasks();
 		for (auto& t : subTasks) {
 			addTask(std::move(t));
 		}
 
-		if (task.getStatus() == EditorTaskStatus::Done) {
-			auto newTasks = std::move(task.getContinuations());
+		if (task->getStatus() == EditorTaskStatus::Done) {
+			auto newTasks = std::move(task->getContinuations());
 			for (auto& t : newTasks) {
 				addTask(std::move(t));
 			}
+			task->terminate();
 			tasks.erase(iter);
 		}
 	}
@@ -53,5 +54,10 @@ void EditorTaskSet::update(Time time)
 void EditorTaskSet::addTask(EditorTaskAnchor&& task)
 {
 	task.setId(nextId++);
-	tasks.emplace_back(std::move(task));
+	tasks.emplace_back(std::make_shared<EditorTaskAnchor>(std::move(task)));
+}
+
+const std::list<std::shared_ptr<EditorTaskAnchor>>& EditorTaskSet::getTasks() const
+{
+	return tasks;
 }

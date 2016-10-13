@@ -10,12 +10,9 @@ namespace Halley
 		class TaskDisplay
 		{
 		public:
-			String label;
-			String subLabel;
-			float progress = 0;
+			std::shared_ptr<EditorTaskAnchor> task;
+
 			float progressDisplay = 0;
-			bool running = false;
-			int id = 0;
 			float completeTime = 0;
 			float displaySlot = -1;
 
@@ -24,7 +21,7 @@ namespace Halley
 
 	public:
 		TaskBar(Resources& resources);
-		void update(const std::list<EditorTaskAnchor>& tasks, Time time);
+		void update(const std::list<std::shared_ptr<EditorTaskAnchor>>& tasks, Time time);
 		void draw(Painter& painter);
 
 	private:
@@ -40,6 +37,6 @@ namespace Halley
 
 		float displaySize = 0;
 
-		TaskDisplay& getDisplayForId(int id);
+		TaskDisplay& getDisplayFor(const std::shared_ptr<EditorTaskAnchor>& task);
 	};
 }

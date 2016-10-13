@@ -38,23 +38,12 @@ TaskBar::TaskBar(Resources& resources)
 	font = resources.get<Font>("ubuntub.font");
 }
 
-void TaskBar::update(const std::list<EditorTaskAnchor>& taskData, Time time)
+void TaskBar::update(const std::list<std::shared_ptr<EditorTaskAnchor>>& taskData, Time time)
 {
-	// Flag them all as not running, so anything not found is accurately set as not running
-	for (auto& t : tasks) {
-		t.running = false;
-		t.progress = 1;
-		t.subLabel = "";
-	}
-
-	// Copy data
+	// Ensure it has a display associated
 	for (auto& t : taskData) {
-		if (t.isVisible() && t.getStatus() == EditorTaskStatus::Started) {
-			auto& display = getDisplayForId(t.getId());
-			display.label = t.getName();
-			display.subLabel = t.getProgressLabel();
-			display.progress = t.getProgress();
-			display.running = true;
+		if (t->isVisible() && t->getStatus() == EditorTaskStatus::Started) {
+			getDisplayFor(t);
 		}
 	}
 
@@ -69,15 +58,15 @@ void TaskBar::update(const std::list<EditorTaskAnchor>& taskData, Time time)
 			t.displaySlot = lerp(t.displaySlot, targetDisplaySlot, static_cast<float>(6 * time));
 		}
 
-		if (t.running) {
-			t.progressDisplay = lerp(t.progressDisplay, t.progress, static_cast<float>(10 * time));
-		} else {
+		if (t.task->getStatus() == EditorTaskStatus::Done) {
 			t.progressDisplay = 1;
 			t.completeTime += static_cast<float>(time);
-			if (t.completeTime >= 1.5f) {
+			if (t.completeTime >= 1.5f && !t.task->hasError()) {
 				tasks.erase(tasks.begin() + i);
 				continue;
 			}
+		} else {
+			t.progressDisplay = lerp(t.progressDisplay, t.task->getProgress(), static_cast<float>(10 * time));
 		}
 		++i;
 	}
@@ -113,8 +102,7 @@ void TaskBar::draw(Painter& painter)
 	for (auto& t : tasks) {
 		Vector2f drawPos = baseDrawPos + Vector2f((size.x + 20) * t.displaySlot, 0);
 
-		//Colour col = t.progress > 0.9999f ? Colour(0.16f, 0.69f, 0.34f) : Colour(0.96f, 0.78f, 0.0f);
-		Colour col = t.progress > 0.9999f ? Colour(0.16f, 0.69f, 0.34f) : Colour(0.18f, 0.53f, 0.87f);
+		Colour col = t.task->hasError() ? Colour(0.93f, 0.2f, 0.2f) : (t.task->getProgress() > 0.9999f ? Colour(0.16f, 0.69f, 0.34f) : Colour(0.18f, 0.53f, 0.87f));
 		(*t.material)["u_outlineColour"] = col;
 
 		// Background
@@ -136,15 +124,22 @@ void TaskBar::draw(Painter& painter)
 		painter.setClip();
 
 		// Text
-		text.setSize(14).setText(t.label).draw(painter, drawPos + Vector2f(24, 12));
-		text.setSize(12).setText(t.subLabel).draw(painter, drawPos + Vector2f(24, 30));
+		text.setSize(14).setText(t.task->getName()).draw(painter, drawPos + Vector2f(24, 12));
+		text.setSize(12).setText(t.task->getProgressLabel()).draw(painter, drawPos + Vector2f(24, 30));
 	}
 }
 
-TaskBar::TaskDisplay& TaskBar::getDisplayForId(int id)
+TaskBar::TaskDisplay& TaskBar::getDisplayFor(const std::shared_ptr<EditorTaskAnchor>& task)
 {
 	for (auto& t : tasks) {
-		if (t.id == id) {
+		// Already assigned one!
+		if (t.task == task) {
+			return t;
+		}
+
+		// Replace error:
+		if (t.task->hasError() && t.task->getName() == task->getName()) {
+			t.task = task;
 			return t;
 		}
 	}
@@ -153,6 +148,6 @@ TaskBar::TaskDisplay& TaskBar::getDisplayForId(int id)
 	TaskDisplay& display = tasks.back();
 
 	display.material = std::make_shared<Material>(*taskMaterial);
-	display.id = id;
+	display.task = task;
 	return display;
 }

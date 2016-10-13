@@ -67,7 +67,11 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 		// Asset didn't even exist before
 		return true;
 	} else {
-		auto& oldAsset = iter->second.asset;
+		// Asset exists, check if it failed loading last time
+		auto failIter = assetsFailed.find(asset.assetId);
+		bool failed = failIter != assetsFailed.end();
+
+		auto& oldAsset = (failed ? failIter : iter)->second.asset;
 
 		// Input directory changed?
 		if (asset.srcDir != oldAsset.srcDir) {
@@ -93,9 +97,11 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 		}
 
 		// Have any of the output files gone missing?
-		for (auto& o: oldAsset.outputFiles) {
-			if (!FileSystem::exists(directory / o)) {
-				return true;
+		if (!failed) {
+			for (auto& o: oldAsset.outputFiles) {
+				if (!FileSystem::exists(directory / o)) {
+					return true;
+				}
 			}
 		}
 
@@ -111,12 +117,27 @@ void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset
 
 	std::lock_guard<std::mutex> lock(mutex);
 	assetsImported[asset.assetId] = entry;
+	
+	auto failIter = assetsFailed.find(asset.assetId);
+	if (failIter != assetsFailed.end()) {
+		assetsFailed.erase(failIter);
+	}
 }
 
 void ImportAssetsDatabase::markDeleted(const ImportAssetsDatabaseEntry& asset)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	assetsImported.erase(asset.assetId);
+}
+
+void ImportAssetsDatabase::markFailed(const ImportAssetsDatabaseEntry& asset)
+{
+	AssetEntry entry;
+	entry.asset = asset;
+	entry.present = true;
+
+	std::lock_guard<std::mutex> lock(mutex);
+	assetsFailed[asset.assetId] = entry;
 }
 
 void ImportAssetsDatabase::markAllInputsAsMissing()

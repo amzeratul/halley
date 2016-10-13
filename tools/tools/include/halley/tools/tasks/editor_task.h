@@ -32,7 +32,11 @@ namespace Halley
 		void addContinuation(EditorTaskAnchor&& task);
 		void setContinuations(Vector<EditorTaskAnchor>&& tasks);
 		void setProgress(float progress, String label = "");
+		void addError(const String& message);
+		
 		bool isCancelled() const;
+		bool hasError() const;
+		const String& getError() const;
 
 		bool hasPendingTasks() const;
 		void addPendingTask(EditorTaskAnchor&& task);
@@ -53,6 +57,9 @@ namespace Halley
 
 		const bool isCancellable;
 		const bool isVisible;
+		
+		bool error = false;
+		String errorMsg;
 	};
 
 	class EditorTaskAnchor
@@ -64,6 +71,7 @@ namespace Halley
 
 		EditorTaskAnchor& operator=(EditorTaskAnchor&& other);
 
+		void terminate();
 		void update(float time);
 
 		EditorTaskStatus getStatus() const { return status; }
@@ -78,6 +86,9 @@ namespace Halley
 		int getId() const { return id; }
 		void setId(int value);
 
+		bool hasError() const;
+		const String& getError() const;
+
 		Vector<EditorTaskAnchor> getContinuations();
 		Vector<EditorTaskAnchor> getPendingTasks();
 		void setParent(EditorTask& editorTask);
@@ -91,6 +102,9 @@ namespace Halley
 		EditorTaskStatus status;
 		float timeToStart = 0;
 		float progress = 0;
+		bool terminated = false;
+		bool error = false;
+		String errorMsg;
 		String progressLabel;
 
 		int id = 0;

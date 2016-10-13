@@ -3,6 +3,7 @@
 #include <mutex>
 #include <gsl/gsl_assert>
 #include "halley/concurrency/concurrent.h"
+#include <iostream>
 
 using namespace Halley;
 
@@ -33,9 +34,30 @@ void EditorTask::setProgress(float p, String label)
 	progressLabel = label;
 }
 
+void EditorTask::addError(const String& message)
+{
+	std::cout << "Error importing asset: " + message << std::endl;
+	std::lock_guard<std::mutex> lock(mutex);
+	error = true;
+	if (!errorMsg.isEmpty()) {
+		errorMsg += "\n";
+	}
+	errorMsg += message;
+}
+
 bool EditorTask::isCancelled() const
 {
 	return cancelled;
+}
+
+bool EditorTask::hasError() const
+{
+	return error;
+}
+
+const String& EditorTask::getError() const
+{
+	return errorMsg;
 }
 
 bool EditorTask::hasPendingTasks() const
@@ -75,16 +97,25 @@ EditorTaskAnchor& EditorTaskAnchor::operator=(EditorTaskAnchor&& other) = defaul
 
 EditorTaskAnchor::~EditorTaskAnchor()
 {
-	// If this has been moved, task will be null
-	if (task) {
-		// Wait for task to join
-		if (status != EditorTaskStatus::Done) {
-			cancel();
-			while (status == EditorTaskStatus::Started && !taskFuture.hasValue()) {}
-		}
+	terminate();
+}
 
-		if (parent) {
-			parent->onPendingTaskDone(*this);
+void EditorTaskAnchor::terminate()
+{
+	if (!terminated) {
+		terminated = true;
+
+		// If this has been moved, task will be null
+		if (task) {
+			// Wait for task to join
+			if (status != EditorTaskStatus::Done) {
+				cancel();
+				while (status == EditorTaskStatus::Started && !taskFuture.hasValue()) {}
+			}
+
+			if (parent) {
+				parent->onPendingTaskDone(*this);
+			}
 		}
 	}
 }
@@ -101,6 +132,8 @@ void EditorTaskAnchor::update(float time)
 		bool done = taskFuture.hasValue();
 		if (done) {
 			status = EditorTaskStatus::Done;
+			error = task->hasError();
+			errorMsg = task->getError();
 			progress = 1;
 			progressLabel = "";
 		} else {
@@ -144,6 +177,16 @@ void EditorTaskAnchor::cancel()
 void EditorTaskAnchor::setId(int value)
 {
 	id = value;
+}
+
+bool EditorTaskAnchor::hasError() const
+{
+	return error;
+}
+
+const String& EditorTaskAnchor::getError() const
+{
+	return errorMsg;
 }
 
 Vector<EditorTaskAnchor> EditorTaskAnchor::getContinuations()
