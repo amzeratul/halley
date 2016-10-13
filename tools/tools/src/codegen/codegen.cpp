@@ -98,8 +98,10 @@ void Codegen::process()
 			msg.second.id = id++;
 		}
 	}
+
 	for (auto& system: systems) {
 		for (auto& fam: system.second.families) {
+			// Sorting the components ensures that different systems which use the same family will not corrupt memory by accessing them in different orders
 			std::sort(fam.components.begin(), fam.components.end(), [] (const ComponentReferenceSchema& a, const ComponentReferenceSchema& b) -> bool {
 				return a.name < b.name;
 			});
