@@ -4,6 +4,7 @@
 #include <gsl/gsl_assert>
 #include "halley/concurrency/concurrent.h"
 #include <iostream>
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -36,7 +37,8 @@ void EditorTask::setProgress(float p, String label)
 
 void EditorTask::addError(const String& message)
 {
-	std::cout << "Error importing asset: " + message << std::endl;
+	Logger::logError("Error importing asset: " + message);
+
 	std::lock_guard<std::mutex> lock(mutex);
 	error = true;
 	if (!errorMsg.isEmpty()) {

@@ -90,10 +90,12 @@ float FontFace::getAscender() const
 
 Vector<int> FontFace::getCharCodes() const
 {
-	Vector<int> result;
+	Vector<int> result = {0};
 	FT_UInt index;
 	for (FT_ULong charcode = FT_Get_First_Char(pimpl->face, &index); index != 0; charcode = FT_Get_Next_Char(pimpl->face, charcode, &index)) {
-		result.push_back(charcode);
+		if (charcode != 0) {
+			result.push_back(charcode);
+		}
 	}
 	return result;
 }

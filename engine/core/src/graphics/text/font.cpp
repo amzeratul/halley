@@ -53,7 +53,7 @@ const Font::Glyph& Font::getGlyph(int code) const
 	if (iter == glyphs.end()) {
 		iter = glyphs.find(0);
 		if (iter == glyphs.end()) {
-			throw Exception("Unable to load fallback character.");
+			throw Exception("Unable to load fallback character, needed for character " + toString(code));
 		}
 		return iter->second;
 	}

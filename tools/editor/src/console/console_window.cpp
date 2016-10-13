@@ -19,6 +19,17 @@ ConsoleWindow::ConsoleWindow(Resources& resources)
 	font = resources.get<Font>("Inconsolata.font");
 
 	printLn("Welcome to the Halley Game Engine Editor.");
+	Logger::addSink(*this);
+}
+
+ConsoleWindow::~ConsoleWindow()
+{
+	Logger::removeSink(*this);
+}
+
+void ConsoleWindow::log(LoggerLevel level, const String& msg)
+{
+	printLn(msg);
 }
 
 void ConsoleWindow::update(InputKeyboard& keyboard)
@@ -63,10 +74,19 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 
 	// Draw buffer
 	int last = int(buffer.size());
-	int first = std::max(0, last - nLines);
-	for (int i = last; --i >= first;) {
-		text.setText(buffer[i]).draw(painter, cursor);
-		cursor += Vector2f(0, -lineH);
+	int nDrawn = 0;
+	for (int i = last; --i >= 0 && nDrawn < nLines;) {
+		int nLinesHere = 1;
+		size_t pos = 0;
+		while ((pos = buffer[i].find('\n', pos)) != size_t(-1)) {
+			nLinesHere++;
+			pos++;
+		}
+		text.setText(buffer[i]);
+		//auto extents = text.getExtents();
+		text.draw(painter, cursor);
+		cursor += Vector2f(0, -lineH * nLinesHere);
+		nDrawn += nLinesHere;
 	}
 }
 

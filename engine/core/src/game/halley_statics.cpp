@@ -6,6 +6,7 @@
 #include <halley/concurrency/executor.h>
 #include <halley/concurrency/concurrent.h>
 #include <thread>
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -15,6 +16,7 @@ namespace Halley {
 	public:
 		HalleyStaticsPimpl()
 		{
+			logger = new Logger();
 			maskStorage = MaskStorageInterface::createMaskStorage();
 			os = OS::createOS();
 
@@ -25,6 +27,7 @@ namespace Halley {
 		Vector<TypeDeleterBase*> typeDeleters;
 		void* maskStorage;
 		OS* os;
+		Logger* logger;
 		
 		std::unique_ptr<Executors> executors;
 		std::unique_ptr<ThreadPool> cpuThreadPool;
@@ -44,6 +47,7 @@ HalleyStatics::~HalleyStatics()
 
 void HalleyStatics::setup()
 {
+	Logger::setInstance(*pimpl->logger);
 	Executors::set(*pimpl->executors);
 #if HAS_THREADS
 	pimpl->cpuThreadPool = std::make_unique<ThreadPool>(pimpl->executors->getCPU(), std::thread::hardware_concurrency());

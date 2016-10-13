@@ -381,3 +381,8 @@ Vector<Plugin*> Core::getPlugins(PluginType type)
 	}
 	return result;
 }
+
+void Core::log(LoggerLevel level, const String& msg)
+{
+	std::cout << msg << std::endl;
+}

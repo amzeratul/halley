@@ -8,14 +8,18 @@ namespace Halley
 {
 	class Painter;
 
-	class ConsoleWindow
+	class ConsoleWindow : public ILoggerSink
 	{
 	public:
 		explicit ConsoleWindow(Resources& resources);
+		~ConsoleWindow();
+
 		void update(InputKeyboard& keyboard);
 		void draw(Painter& painter, Rect4f bounds) const;
 
 		void printLn(const String& line);
+
+		void log(LoggerLevel level, const String& msg) override;
 
 	private:
 		void submit();

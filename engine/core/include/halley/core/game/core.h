@@ -11,6 +11,7 @@
 #include <halley/core/api/halley_api_internal.h>
 #include "halley_statics.h"
 #include <halley/data_structures/tree_map.h>
+#include "halley/support/logger.h"
 
 namespace Halley
 {
@@ -22,7 +23,7 @@ namespace Halley
 	class RenderTarget;
 	class Environment;
 
-	class Core final : public CoreAPIInternal, public IMainLoopable
+	class Core final : public CoreAPIInternal, public IMainLoopable, public ILoggerSink
 	{
 	public:
 		Core(std::unique_ptr<Game> game, Vector<std::string> args);
@@ -48,6 +49,8 @@ namespace Halley
 
 		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
 		Vector<Plugin*> getPlugins(PluginType type) override;
+
+		void log(LoggerLevel level, const String& msg) override;
 
 	private:
 		void deInit();

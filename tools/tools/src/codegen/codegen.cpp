@@ -6,6 +6,7 @@
 #include <halley/tools/codegen/codegen.h>
 #include "cpp/codegen_cpp.h"
 #include "halley/tools/file/filesystem.h"
+#include "halley/support/logger.h"
 
 #ifdef _MSC_VER
 	#ifdef _DEBUG
@@ -216,24 +217,24 @@ std::vector<Path> Codegen::generateCode(Path directory, ProgressReporter progres
 
 void Codegen::addSource(String path, gsl::span<const gsl::byte> data)
 {
-	std::vector<YAML::Node> documents;
-	
-	try {
-		String strData(reinterpret_cast<const char*>(data.data()), data.size());
-		documents = YAML::LoadAll(strData.cppStr());
-	} catch (const std::exception& e) {
-		std::cout << "Failed to load " << path << ": " << e.what() << std::endl;
-	}
+	String strData(reinterpret_cast<const char*>(data.data()), data.size());
+	auto documents = YAML::LoadAll(strData.cppStr());
 
 	for (auto document: documents) {
-		if (document["component"].IsDefined()) {
+		if (!document.IsDefined() || document.IsNull()) {
+			throw Exception("Invalid document in stream.");
+		}
+			
+		if (document.IsScalar()) {
+			throw Exception("Unable to parse document in YAML codegen stream: " + document.as<std::string>());
+		} else if (document["component"].IsDefined()) {
 			addComponent(document);
 		} else if (document["system"].IsDefined()) {
 			addSystem(document);
 		} else if (document["message"].IsDefined()) {
 			addMessage(document);
 		} else {
-			std::cout << "Warning: unknown document in stream." << std::endl;
+			throw Exception("Unknown document type in YAML codegen stream: " + document.as<std::string>());
 		}
 	}
 }
