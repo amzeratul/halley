@@ -10,6 +10,13 @@ AnimationPlayer::AnimationPlayer(std::shared_ptr<Animation> animation, String se
 	setAnimation(animation, sequence, direction);
 }
 
+void AnimationPlayer::playOnce(String sequence)
+{
+	curSeq = nullptr;
+	setSequence(sequence);
+	seqLooping = false;
+}
+
 void AnimationPlayer::setAnimation(std::shared_ptr<Animation> v, String sequence, String direction)
 {
 	if (animation != v) {
