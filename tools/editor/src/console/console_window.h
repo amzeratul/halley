@@ -3,6 +3,7 @@
 #include <halley/core/input/input_keyboard.h>
 #include <halley/core/resources/resources.h>
 #include <halley/core/graphics/text/font.h>
+#include <halley/support/logger.h>
 
 namespace Halley
 {

@@ -221,12 +221,14 @@ void Codegen::addSource(String path, gsl::span<const gsl::byte> data)
 	auto documents = YAML::LoadAll(strData.cppStr());
 
 	for (auto document: documents) {
+		String curPos = path + ":" + toString(document.Mark().line) + ":" + toString(document.Mark().column);
+
 		if (!document.IsDefined() || document.IsNull()) {
 			throw Exception("Invalid document in stream.");
 		}
 			
 		if (document.IsScalar()) {
-			throw Exception("Unable to parse document in YAML codegen stream: " + document.as<std::string>());
+			throw Exception("YAML parse error in codegen definitions:\n\"" + document.as<std::string>() + "\"\nat " + curPos);
 		} else if (document["component"].IsDefined()) {
 			addComponent(document);
 		} else if (document["system"].IsDefined()) {
@@ -234,7 +236,7 @@ void Codegen::addSource(String path, gsl::span<const gsl::byte> data)
 		} else if (document["message"].IsDefined()) {
 			addMessage(document);
 		} else {
-			throw Exception("Unknown document type in YAML codegen stream: " + document.as<std::string>());
+			throw Exception("YAML parse error in codegen definitions: unknown type\nat " + curPos);
 		}
 	}
 }

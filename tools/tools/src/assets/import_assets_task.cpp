@@ -108,7 +108,7 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 			toLoad.pop_front();
 		}
 	} catch (std::exception& e) {
-		addError(asset.assetId + ": " + e.what());
+		addError("\"" + asset.assetId + "\" - " + e.what());
 		db.markFailed(asset);
 
 		return false;
