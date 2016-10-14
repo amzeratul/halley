@@ -34,6 +34,7 @@ namespace Halley
 
 		Rect4i getViewPort() const { return viewPort; }
 		Camera& getCurrentCamera() const { return *camera; }
+		Rect4f getWorldViewAABB() const;
 
 		virtual void clear(Colour colour) = 0;
 		virtual void setBlend(BlendType blend) = 0;

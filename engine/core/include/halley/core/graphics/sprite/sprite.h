@@ -37,6 +37,7 @@ namespace Halley
 		void drawSliced(Painter& painter, Vector4f slices) const;
 		static void draw(const Sprite* sprites, size_t n, Painter& painter);
 
+		Rect4f getAABB() const;
 		bool isInView(Rect4f rect) const;
 		
 		Sprite& setMaterial(Resources& resources, String materialName = "");

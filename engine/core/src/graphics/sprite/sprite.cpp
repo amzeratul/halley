@@ -59,14 +59,17 @@ void Sprite::computeSize()
 	}
 }
 
-bool Sprite::isInView(Rect4f v) const
+Rect4f Sprite::getAABB() const
 {
 	// This is a coarse test; will give a few false positives
 	Vector2f pos = vertexAttrib.pos;
 	Vector2f sz = vertexAttrib.size * 1.4142136f; // sqrt(2)
-	Rect4f rect(pos - sz, pos + sz); // Could use offset here, but that would also need to take rotation into account
+	return Rect4f(pos - sz, pos + sz); // Could use offset here, but that would also need to take rotation into account
+}
 
-	return rect.overlaps(v);
+bool Sprite::isInView(Rect4f v) const
+{
+	return getAABB().overlaps(v);
 }
 
 Sprite& Sprite::setMaterial(Resources& resources, String materialName)

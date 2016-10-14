@@ -31,6 +31,13 @@ void Painter::flush()
 	flushPending();
 }
 
+Rect4f Painter::getWorldViewAABB() const
+{
+	Vector2f size = Vector2f(viewPort.getSize()) / camera->getZoom();
+	assert(camera->getAngle().getRadians() == 0); // Camera rotation not accounted by following line
+	return Rect4f(camera->getPosition() - size * 0.5f, size);
+}
+
 static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
 {
 	return *reinterpret_cast<Vector4f*>(vertexAttrib + vertPosOffset);
