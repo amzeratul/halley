@@ -10,7 +10,7 @@ namespace Halley
 	{
 	public:
 		virtual ~CoreAPI() {}
-		virtual void quit() = 0;
+		virtual void quit(int exitCode = 0) = 0;
 		virtual void setStage(StageID stage) = 0;
 		virtual Resources& getResources() = 0;
 

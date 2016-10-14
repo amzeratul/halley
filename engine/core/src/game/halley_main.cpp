@@ -19,7 +19,7 @@ int HalleyMain::runMain(GameLoader& loader, const Vector<std::string>& args)
 		core->init();
 		MainLoop loop(*core, loader);
 		loop.run();
-		return 0;
+		return core->getExitCode();
 	} catch (std::exception& e) {
 		core->onTerminatedInError(e.what());
 		return 1;

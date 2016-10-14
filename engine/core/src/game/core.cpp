@@ -186,7 +186,9 @@ void Core::pumpEvents(Time time)
 	auto video = dynamic_cast<VideoAPIInternal*>(&*api->video);
 	auto input = dynamic_cast<InputAPIInternal*>(&*api->input);
 	input->beginEvents(time);
-	running = api->system->generateEvents(video, input);
+	if (!api->system->generateEvents(video, input)) {
+		throw Exception("Unable to generate events");
+	}
 }
 
 void Core::pumpAudio()
@@ -309,8 +311,9 @@ void Core::setStage(std::unique_ptr<Stage> next)
 	pendingStageTransition = true;
 }
 
-void Core::quit()
+void Core::quit(int code)
 {
+	exitCode = code;
 	std::cout << "Game terminating via CoreAPI::quit()." << std::endl;
 	running = false;
 }
@@ -358,7 +361,7 @@ bool Core::transitionStage()
 			currentStage->init();
 			HALLEY_DEBUG_TRACE();
 		} else {
-			running = false;
+			quit(0);
 		}
 
 		pendingStageTransition = false;

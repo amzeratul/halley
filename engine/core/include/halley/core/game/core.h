@@ -32,7 +32,7 @@ namespace Halley
 
 		void setStage(StageID stage) override;
 		void setStage(std::unique_ptr<Stage> stage);
-		void quit() override;
+		void quit(int exitCode = 0) override;
 		Resources& getResources() override;
 		long long getAverageTime(TimeLine tl) const override;
 		long long getElapsedTime(TimeLine tl) const override;
@@ -51,6 +51,8 @@ namespace Halley
 		Vector<Plugin*> getPlugins(PluginType type) override;
 
 		void log(LoggerLevel level, const String& msg) override;
+
+		int getExitCode() const { return exitCode; }
 
 	private:
 		void deInit();
@@ -87,6 +89,7 @@ namespace Halley
 		bool running = true;
 		bool hasError = false;
 		bool hasConsole = false;
+		int exitCode = 0;
 		std::unique_ptr<RedirectStream> out;
 
 		TreeMap<PluginType, Vector<std::unique_ptr<Plugin>>> plugins;
