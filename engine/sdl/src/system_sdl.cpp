@@ -29,9 +29,6 @@ void SystemSDL::init()
 			throw Exception(String("Exception initializing SDL: ") + SDL_GetError());
 		}
 	}
-	if (SDL_InitSubSystem(SDL_INIT_VIDEO) == -1) {
-		throw Exception(String("Exception initializing video: ") + SDL_GetError());
-	}
 	if (SDL_InitSubSystem(SDL_INIT_TIMER) == -1) {
 		throw Exception(String("Exception initializing timer: ") + SDL_GetError());
 	}
@@ -235,6 +232,9 @@ void SystemSDL::printDebugInfo() const
 void SystemSDL::initVideo()
 {
 	if (!videoInit) {
+		if (SDL_InitSubSystem(SDL_INIT_VIDEO) == -1) {
+			throw Exception(String("Exception initializing video: ") + SDL_GetError());
+		}
 		SDL_VideoInit(nullptr);
 		printDebugInfo();
 		videoInit = true;
@@ -245,6 +245,7 @@ void SystemSDL::deInitVideo()
 {
 	if (videoInit) {
 		SDL_VideoQuit();
+		SDL_QuitSubSystem(SDL_INIT_VIDEO);
 		videoInit = false;
 	}
 }
