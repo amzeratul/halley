@@ -24,7 +24,7 @@ namespace Halley
 	protected:
 		void init(const Environment& environment, const Vector<String>& args) override;
 		int initPlugins(IPluginRegistry &registry) override;
-		void initResourceLocator(String dataPath, ResourceLocator& locator) override;
+		void initResourceLocator(Path dataPath, ResourceLocator& locator) override;
 		std::unique_ptr<Stage> startGame(HalleyAPI* api) override;
 
 		String getName() const override;

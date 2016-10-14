@@ -2,48 +2,33 @@
 #include "halley/core/game/environment.h"
 #include "halley/file/path.h"
 
-#ifdef __APPLE__
-#include <iostream>
-#include <mach-o/dyld.h>
-#include <unistd.h>
-#endif
-
-void Halley::Environment::parseProgramPath(String path)
+Halley::Path Halley::Environment::getProgramPath() const
 {
-#ifdef __APPLE__
-	// Ignore parameter and use our own path
-	char buffer[2048];
-	uint32_t bufSize = 2048;
-	_NSGetExecutablePath(buffer, &bufSize);
-	path = buffer;
-#endif
+	return programPath;
+}
 
-	// HACK
-	size_t len = path.length();
-	size_t last = 0;
-	for (size_t i = 0; i<len; i++) {
-		if (path[i] == '/' || path[i] == '\\') last = i + 1;
-	}
-	programPath = path.left(last);
+Halley::Path Halley::Environment::getDataPath() const
+{
+	return dataPath;
+}
 
-#ifdef __APPLE__
-	std::cout << "Setting CWD to " << programPath << std::endl;
-	chdir(programPath.c_str());
-#endif	
+Halley::Path Halley::Environment::getGameDataPath() const
+{
+	return gameDataPath;
+}
+
+void Halley::Environment::parseProgramPath(const String& commandLine)
+{
+	programPath = OS::get().parseProgramPath(commandLine);
 
 #ifdef __ANDROID__
-	gameDataPath = ""; // Inside "assets"
+	gameDataPath = Path(); // Inside "assets"
 #else
 	gameDataPath = programPath;
 #endif
 }
 
-void Halley::Environment::setDataPath(String pathName)
+void Halley::Environment::setDataPath(Path pathName)
 {
-	auto& os = OS::get();
-
-	String p = (Path(os.getUserDataDir()) / pathName / ".").getString();
-	//FileSystem::createDir(p);
-
-	dataPath = p;
+	dataPath = Path(OS::get().getUserDataDir()) / pathName / ".";
 }

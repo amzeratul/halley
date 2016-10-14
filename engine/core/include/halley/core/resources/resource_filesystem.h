@@ -28,7 +28,7 @@ namespace Halley {
 
 	class FileSystemResourceLocator : public IResourceLocatorProvider {
 	public:
-		FileSystemResourceLocator(SystemAPI& system, String basePath);
+		FileSystemResourceLocator(SystemAPI& system, Path basePath);
 
 	protected:
 		std::unique_ptr<ResourceData> doGet(String resource, bool stream) override;
@@ -36,6 +36,6 @@ namespace Halley {
 		int getPriority() override { return -1; }
 
 		SystemAPI& system;
-		String basePath;
+		Path basePath;
 	};
 }

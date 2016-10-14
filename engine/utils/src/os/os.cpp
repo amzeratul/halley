@@ -78,6 +78,11 @@ Halley::String Halley::OS::makeDataPath(String appDataPath, String userProvidedP
 	return appDataPath + userProvidedPath;
 }
 
+Path OS::parseProgramPath(const String& commandLine)
+{
+	return Path(commandLine).parentPath() / ".";
+}
+
 void Halley::OS::setConsoleColor(int, int)
 {
 }

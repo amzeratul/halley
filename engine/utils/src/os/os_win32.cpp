@@ -253,6 +253,15 @@ Halley::String Halley::OSWin32::getUserDataDir()
 	return String(path) + "\\";
 }
 
+Path OSWin32::parseProgramPath(const String&)
+{
+	HMODULE hModule = GetModuleHandleW(nullptr);
+	WCHAR path[MAX_PATH];
+	GetModuleFileNameW(hModule, path, MAX_PATH);
+	String programPath(path);
+	return Path(programPath).parentPath() / ".";
+}
+
 void Halley::OSWin32::setConsoleColor(int foreground, int background)
 {
 	if (foreground == -1) {

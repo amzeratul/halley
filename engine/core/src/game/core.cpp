@@ -170,7 +170,7 @@ void Core::deInit()
 void Core::initResources()
 {
 	auto locator = std::make_unique<ResourceLocator>(*api->system);
-	game->initResourceLocator(environment->getProgramPath() + "/", *locator);
+	game->initResourceLocator(environment->getProgramPath(), *locator);
 	resources = std::make_unique<Resources>(std::move(locator), &*api);
 	StandardResources::initialize(*resources);
 }
@@ -187,7 +187,7 @@ void Core::pumpEvents(Time time)
 	auto input = dynamic_cast<InputAPIInternal*>(&*api->input);
 	input->beginEvents(time);
 	if (!api->system->generateEvents(video, input)) {
-		throw Exception("Unable to generate events");
+		quit(0); // System close event
 	}
 }
 

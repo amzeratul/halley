@@ -36,7 +36,7 @@ public:
 		return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input;
 	}
 
-	void initResourceLocator(String dataPath, ResourceLocator& locator) override
+	void initResourceLocator(Path dataPath, ResourceLocator& locator) override
 	{
 		locator.addFileSystem(dataPath);
 	}

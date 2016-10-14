@@ -26,10 +26,12 @@
 #include <stdio.h>    
 #include <pwd.h>
 #include <unistd.h>
+#include <iostream>
+#include <mach-o/dyld.h>
 
 using namespace Halley;
 
-Halley::String Halley::OSMac::getUserDataDir()
+String OSMac::getUserDataDir()
 {
 	String result;
 	struct passwd* pwd = getpwuid(getuid());
@@ -40,6 +42,20 @@ Halley::String Halley::OSMac::getUserDataDir()
 	}
 
 	return result + "/Library/";
+}
+
+Path OSMac::parseProgramPath(const String&)
+{
+	// Ignore parameter and use our own path
+	char buffer[2048];
+	uint32_t bufSize = 2048;
+	_NSGetExecutablePath(buffer, &bufSize);
+	Path programPath = Path(String(buffer)).parentPath() / ".";
+
+	std::cout << "Setting CWD to " << programPath << std::endl;
+	chdir(programPath.string().c_str());
+
+	return programPath;
 }
 
 #endif

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <halley/text/halleystring.h>
+#include "halley/file/path.h"
 
 namespace Halley
 {
@@ -9,16 +10,16 @@ namespace Halley
 		friend class Core;
 
 	public:
-		String getProgramPath() const { return programPath;	}
-		String getDataPath() const { return dataPath; }
-		String getGameDataPath() const { return gameDataPath; }
+		Path getProgramPath() const;
+		Path getDataPath() const;
+		Path getGameDataPath() const;
 
 	private:
-		void parseProgramPath(String path);
-		void setDataPath(String pathName);
+		void parseProgramPath(const String& commandLine);
+		void setDataPath(Path pathName);
 
-		String programPath;
-		String dataPath;
-		String gameDataPath;
+		Path programPath;
+		Path dataPath;
+		Path gameDataPath;
 	};
 }

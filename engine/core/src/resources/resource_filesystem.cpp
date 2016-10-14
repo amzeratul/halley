@@ -25,7 +25,7 @@
 
 using namespace Halley;
 
-FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, String _basePath)
+FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, Path _basePath)
 	: system(system)
     , basePath(_basePath)
 {
@@ -33,7 +33,7 @@ FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, String _
 
 std::unique_ptr<ResourceData> FileSystemResourceLocator::doGet(String resource, bool stream)
 {
-	String path = basePath + resource;
+	String path = (basePath / resource).getString();
 	
 	if (stream) {
 		return std::make_unique<ResourceDataStream>(path, [=] () -> std::unique_ptr<ResourceDataReader> {

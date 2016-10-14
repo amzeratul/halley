@@ -119,7 +119,7 @@ namespace Halley {
 		return result2;
 	}
 
-	void ResourceLocator::addFileSystem(String path)
+	void ResourceLocator::addFileSystem(Path path)
 	{
 		add(std::make_unique<FileSystemResourceLocator>(system, path));
 	}

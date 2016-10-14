@@ -28,7 +28,7 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 	}
 }
 
-void HalleyEditor::initResourceLocator(String dataPath, ResourceLocator& locator)
+void HalleyEditor::initResourceLocator(Path dataPath, ResourceLocator& locator)
 {
 	locator.addFileSystem(dataPath);
 }
@@ -59,9 +59,9 @@ bool HalleyEditor::shouldCreateSeparateConsole() const
 
 void HalleyEditor::init(const Environment& environment, const Vector<String>& args)
 {
-	sharedAssetsPath = Path(environment.getProgramPath().cppStr()).parentPath() / "shared_assets";
+	sharedAssetsPath = environment.getProgramPath().parentPath() / "shared_assets";
 
-	preferences = std::make_unique<Preferences>((Path(environment.getDataPath().cppStr()) / "settings.yaml").string());
+	preferences = std::make_unique<Preferences>((environment.getDataPath() / "settings.yaml").string());
 	preferences->load();
 
 	parseArguments(args);

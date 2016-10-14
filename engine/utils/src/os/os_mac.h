@@ -29,7 +29,8 @@
 namespace Halley {
 	class OSMac : public OSUnix {
 	public:
-		virtual String getUserDataDir();
+		String getUserDataDir() override;
+		Path parseProgramPath(const String&) override;
 	};
 }
 
