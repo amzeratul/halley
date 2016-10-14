@@ -11,33 +11,31 @@ namespace Halley
 	class SpritePainterEntry
 	{
 	public:
-		bool operator<(const SpritePainterEntry& o) const {
-			if (layer != o.layer) {
-				return layer < o.layer;
-			} else if (tieBreaker != o.tieBreaker) {
-				return tieBreaker < o.tieBreaker;
-			} else {
-				return sprite < o.sprite;
-			}
-		}
+		SpritePainterEntry(Sprite& sprite, int layer, float tieBreaker);
+		SpritePainterEntry(size_t spriteIdx, int layer, float tieBreaker);
 
-		SpritePainterEntry(Sprite& sprite, int layer, int tieBreaker);
-		Sprite& getSprite() const { return *sprite; }
+		bool operator<(const SpritePainterEntry& o) const;
+		bool hasSprite() const;
+		Sprite& getSprite() const;
+		size_t getIndex() const;
 
 	private:
-		Sprite* sprite;
+		Sprite* sprite = nullptr;
+		size_t index = -1;
 		int layer;
-		int tieBreaker;
+		float tieBreaker;
 	};
 
 	class SpritePainter
 	{
 	public:
 		void start(size_t nSprites);
-		void add(Sprite& sprite, int layer, int tieBreaker);
+		void add(Sprite& sprite, int layer, float tieBreaker);
+		void addCopy(const Sprite& sprite, int layer, float tieBreaker);
 		void draw(Painter& painter);
 
 	private:
 		Vector<SpritePainterEntry> sprites;
+		Vector<Sprite> cached;
 	};
 }

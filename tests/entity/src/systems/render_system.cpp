@@ -20,7 +20,7 @@ public:
 			auto& sprite = e.sprite.sprite;
 			sprite.setPos(e.position.position);
 			if (sprite.isInView(worldView)) {
-				spritePainter.add(sprite, e.sprite.layer, int(sprite.getPosition().y - worldView.getY()));
+				spritePainter.add(sprite, e.sprite.layer, sprite.getPosition().y - worldView.getY());
 			}
 		}
 
