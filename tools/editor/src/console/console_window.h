@@ -29,6 +29,6 @@ namespace Halley
 		std::vector<String> buffer;
 		std::vector<String> history;
 		std::shared_ptr<Material> backgroundMaterial;
-		std::shared_ptr<Font> font;
+		std::shared_ptr<const Font> font;
 	};
 }

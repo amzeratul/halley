@@ -10,11 +10,11 @@ namespace Halley
 	class AnimationPlayer
 	{
 	public:
-		explicit AnimationPlayer(std::shared_ptr<Animation> animation = std::shared_ptr<Animation>(), String sequence = "default", String direction = "default");
+		explicit AnimationPlayer(std::shared_ptr<const Animation> animation = std::shared_ptr<const Animation>(), String sequence = "default", String direction = "default");
 
 		void playOnce(String sequence);
 
-		void setAnimation(std::shared_ptr<Animation> animation, String sequence = "default", String direction = "default");
+		void setAnimation(std::shared_ptr<const Animation> animation, String sequence = "default", String direction = "default");
 		void setSequence(String sequence);
 		void setDirection(int direction);
 		void setDirection(String direction);
@@ -26,7 +26,7 @@ namespace Halley
 	private:
 		void resolveSprite();
 
-		std::shared_ptr<Animation> animation;
+		std::shared_ptr<const Animation> animation;
 		const SpriteSheetEntry* spriteData = nullptr;
 
 		const AnimationSequence* curSeq;

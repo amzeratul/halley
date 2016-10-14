@@ -31,7 +31,7 @@ namespace Halley
 		Sprite taskSprite;
 
 		std::shared_ptr<Material> taskMaterial;
-		std::shared_ptr<Font> font;
+		std::shared_ptr<const Font> font;
 
 		std::vector<TaskDisplay> tasks;
 

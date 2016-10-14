@@ -51,7 +51,7 @@ void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data)
 	doneLoading();
 }
 
-gsl::span<const AudioConfig::SampleFormat> AudioClip::getChannelData(size_t channelN, size_t pos, size_t len)
+gsl::span<const AudioConfig::SampleFormat> AudioClip::getChannelData(size_t channelN, size_t pos, size_t len) const
 {
 	Expects(pos + len <= sampleLength);
 

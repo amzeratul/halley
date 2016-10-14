@@ -10,7 +10,7 @@
 
 using namespace Halley;
 
-AnimationFrame::AnimationFrame(int frameNumber, String imageName, SpriteSheet& sheet, const Vector<AnimationDirection>& directions)
+AnimationFrame::AnimationFrame(int frameNumber, const String& imageName, const SpriteSheet& sheet, const Vector<AnimationDirection>& directions)
 {
 	const size_t n = directions.size();
 	sprites.resize(n);
@@ -23,13 +23,13 @@ AnimationFrameDefinition::AnimationFrameDefinition()
 	: frameNumber(-1)
 {}
 
-AnimationFrameDefinition::AnimationFrameDefinition(int frameNumber, String imageName)
+AnimationFrameDefinition::AnimationFrameDefinition(int frameNumber, const String& imageName)
 	: imageName(imageName)
 	, frameNumber(frameNumber)
 {
 }
 
-AnimationFrame AnimationFrameDefinition::makeFrame(SpriteSheet& sheet, const Vector<AnimationDirection>& directions) const
+AnimationFrame AnimationFrameDefinition::makeFrame(const SpriteSheet& sheet, const Vector<AnimationDirection>& directions) const
 {
 	return AnimationFrame(frameNumber, imageName, sheet, directions);
 }

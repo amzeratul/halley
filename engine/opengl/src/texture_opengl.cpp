@@ -41,7 +41,7 @@ void TextureOpenGL::load(const TextureDescriptor& d)
 	doneLoading();
 }
 
-void TextureOpenGL::waitForOpenGLLoad()
+void TextureOpenGL::waitForOpenGLLoad() const
 {
 	waitForLoad();
 
@@ -63,7 +63,7 @@ void TextureOpenGL::waitForOpenGLLoad()
 }
 
 // Do not use this method inside this class, due to fence
-void TextureOpenGL::bind(int textureUnit)
+void TextureOpenGL::bind(int textureUnit) const
 {
 	waitForOpenGLLoad();
 	GLUtils glUtils;

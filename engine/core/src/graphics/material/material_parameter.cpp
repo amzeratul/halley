@@ -42,7 +42,7 @@ void MaterialParameter::bind(int pass)
 	}
 }
 
-void MaterialParameter::operator=(std::shared_ptr<Texture> texture)
+void MaterialParameter::operator=(std::shared_ptr<const Texture> texture)
 {
 	Expects(type == ShaderParameterType::Texture2D);
 	bindFunc = getAPI().getUniformBinding(UniformType::Int, 1);

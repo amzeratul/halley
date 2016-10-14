@@ -32,7 +32,7 @@ namespace Halley
 		AudioAPI* const audio;
 		
 		template <typename T>
-		std::shared_ptr<T> getResource(String name)
+		std::shared_ptr<const T> getResource(String name)
 		{
 			return core->getResources().of<T>().get(name);
 		}

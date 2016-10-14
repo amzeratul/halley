@@ -9,7 +9,7 @@ namespace Halley {
 
 	class AudioSource {
     public:
-		AudioSource(std::shared_ptr<AudioClip> clip, AudioSourcePosition sourcePos, float gain, bool loop);
+		AudioSource(std::shared_ptr<const AudioClip> clip, AudioSourcePosition sourcePos, float gain, bool loop);
 		~AudioSource();
 
 		void start();
@@ -35,7 +35,7 @@ namespace Halley {
 		void setBehaviour(std::shared_ptr<AudioSourceBehaviour> behaviour);
 
 	private:
-		std::shared_ptr<AudioClip> clip;
+		std::shared_ptr<const AudioClip> clip;
 		std::shared_ptr<AudioSourceBehaviour> behaviour;
 
 		size_t playbackPos = 0;

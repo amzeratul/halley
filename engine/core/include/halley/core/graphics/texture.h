@@ -12,7 +12,7 @@ namespace Halley
 	class Texture : public AsyncResource
 	{
 	public:
-		virtual void bind(int textureUnit) = 0;
+		virtual void bind(int textureUnit) const = 0;
 		virtual void load(const TextureDescriptor& descriptor) = 0;
 
 		static std::shared_ptr<Texture> loadResource(ResourceLoader& loader);

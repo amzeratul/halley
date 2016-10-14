@@ -11,7 +11,7 @@ TextRenderer::TextRenderer()
 {
 }
 
-TextRenderer::TextRenderer(std::shared_ptr<Font> font, String text, float size, Colour colour, float outline, Colour outlineColour)
+TextRenderer::TextRenderer(std::shared_ptr<const Font> font, String text, float size, Colour colour, float outline, Colour outlineColour)
 	: font(font)
 	, text(text.getUTF32())
 	, size(size)
@@ -21,7 +21,7 @@ TextRenderer::TextRenderer(std::shared_ptr<Font> font, String text, float size, 
 {
 }
 
-TextRenderer& TextRenderer::setFont(std::shared_ptr<Font> v)
+TextRenderer& TextRenderer::setFont(std::shared_ptr<const Font> v)
 {
 	font = v;
 	return *this;

@@ -18,7 +18,7 @@ namespace Halley
 		void loadFromStatic(std::shared_ptr<ResourceDataStatic> data);
 		void loadFromStream(std::shared_ptr<ResourceDataStream> data);
 
-		gsl::span<const AudioConfig::SampleFormat> getChannelData(size_t channelN, size_t pos, size_t len);
+		gsl::span<const AudioConfig::SampleFormat> getChannelData(size_t channelN, size_t pos, size_t len) const;
 
 		size_t getLength() const; // in samples
 		size_t getNumberOfChannels() const;
@@ -29,9 +29,10 @@ namespace Halley
 		size_t numChannels;
 		bool streaming;
 
-		std::vector<std::vector<AudioConfig::SampleFormat>> temp0;
-		std::vector<std::vector<AudioConfig::SampleFormat>> temp1;
-		std::vector<std::vector<AudioConfig::SampleFormat>> samples;
-		std::unique_ptr<VorbisData> vorbisData;
+		// TODO: sort this mess?
+		mutable std::vector<std::vector<AudioConfig::SampleFormat>> temp0;
+		mutable std::vector<std::vector<AudioConfig::SampleFormat>> temp1;
+		mutable std::vector<std::vector<AudioConfig::SampleFormat>> samples;
+		mutable std::unique_ptr<VorbisData> vorbisData;
 	};
 }

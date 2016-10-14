@@ -18,7 +18,7 @@ namespace Halley
 	class AnimationFrame
 	{
 	public:
-		AnimationFrame(int frameNumber, String imageName, SpriteSheet& sheet, const Vector<AnimationDirection>& directions);
+		AnimationFrame(int frameNumber, const String& imageName, const SpriteSheet& sheet, const Vector<AnimationDirection>& directions);
 		const SpriteSheetEntry& getSprite(int dir) const { return *sprites[dir]; }
 
 	private:
@@ -29,8 +29,8 @@ namespace Halley
 	{
 	public:
 		AnimationFrameDefinition();
-		AnimationFrameDefinition(int frameNumber, String imageName);
-		AnimationFrame makeFrame(SpriteSheet& sheet, const Vector<AnimationDirection>& directions) const;
+		AnimationFrameDefinition(int frameNumber, const String& imageName);
+		AnimationFrame makeFrame(const SpriteSheet& sheet, const Vector<AnimationDirection>& directions) const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -101,7 +101,7 @@ namespace Halley
 		Animation();
 		static std::unique_ptr<Animation> loadResource(ResourceLoader& loader);
 
-		SpriteSheet& getSpriteSheet() const { return *spriteSheet; }
+		const SpriteSheet& getSpriteSheet() const { return *spriteSheet; }
 		std::shared_ptr<Material> getMaterial() const { return material; }
 		const AnimationSequence& getSequence(String name) const;
 		const AnimationDirection& getDirection(String name) const;
@@ -124,7 +124,7 @@ namespace Halley
 		Vector<AnimationSequence> sequences;
 		Vector<AnimationDirection> directions;
 
-		std::shared_ptr<SpriteSheet> spriteSheet;
+		std::shared_ptr<const SpriteSheet> spriteSheet;
 		std::shared_ptr<Material> material;
 	};
 }

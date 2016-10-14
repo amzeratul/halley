@@ -108,10 +108,10 @@ namespace Halley
 		virtual void startPlayback(int deviceNumber = 0) = 0;
 		virtual void stopPlayback() = 0;
 
-		virtual AudioHandle play(std::shared_ptr<AudioClip> clip, AudioSourcePosition position, float volume = 1.0f, bool loop = false) = 0;
-		virtual AudioHandle playUI(std::shared_ptr<AudioClip> clip, float volume = 1.0f, float pan = 0.0f, bool loop = false) = 0;
+		virtual AudioHandle play(std::shared_ptr<const AudioClip> clip, AudioSourcePosition position, float volume = 1.0f, bool loop = false) = 0;
+		virtual AudioHandle playUI(std::shared_ptr<const AudioClip> clip, float volume = 1.0f, float pan = 0.0f, bool loop = false) = 0;
 
-		virtual AudioHandle playMusic(std::shared_ptr<AudioClip> clip, int track = 0, float fadeInTime = 0.0f, bool loop = true) = 0;
+		virtual AudioHandle playMusic(std::shared_ptr<const AudioClip> clip, int track = 0, float fadeInTime = 0.0f, bool loop = true) = 0;
 		virtual AudioHandle getMusic(int track = 0) = 0;
 		virtual void stopMusic(int track = 0, float fadeOutTime = 0.0f) = 0;
 		virtual void stopAllMusic(float fadeOutTime = 0.0f) = 0;

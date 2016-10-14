@@ -86,7 +86,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		std::shared_ptr<T> get(String name, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
+		std::shared_ptr<const T> get(String name, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
 		{
 			return of<T>().get(name, priority);
 		}

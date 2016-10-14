@@ -63,7 +63,7 @@ MaterialPass::MaterialPass()
 	: blend(BlendType::Undefined)
 {}
 
-void MaterialDefinition::bind(int pass, Painter& painter)
+void MaterialDefinition::bind(int pass, Painter& painter) const
 {
 	passes[pass].bind(painter);
 }

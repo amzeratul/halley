@@ -16,7 +16,7 @@ AudioEngine::~AudioEngine()
 {
 }
 
-void AudioEngine::play(size_t id, std::shared_ptr<AudioClip> clip, AudioSourcePosition position, float volume, bool loop)
+void AudioEngine::play(size_t id, std::shared_ptr<const AudioClip> clip, AudioSourcePosition position, float volume, bool loop)
 {
 	addSource(id, std::make_unique<AudioSource>(clip, position, volume, loop));
 }

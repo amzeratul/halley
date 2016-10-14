@@ -66,7 +66,7 @@ namespace Halley
 			: ResourceCollectionBase(parent, path)
 		{}
 
-		std::shared_ptr<T> get(String name, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
+		std::shared_ptr<const T> get(String name, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
 		{
 			return std::static_pointer_cast<T>(doGet(name, priority));
 		}

@@ -44,7 +44,7 @@ namespace Halley
 	class SpriteSheet : public Resource
 	{
 	public:
-		const std::shared_ptr<Texture>& getTexture() const { return texture; }
+		const std::shared_ptr<const Texture>& getTexture() const { return texture; }
 		const SpriteSheetEntry& getSprite(const String& name) const;
 		const SpriteSheetEntry& getSprite(size_t idx) const;
 
@@ -66,7 +66,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 	private:
-		std::shared_ptr<Texture> texture;
+		std::shared_ptr<const Texture> texture;
 		std::vector<SpriteSheetEntry> sprites;
 		HashMap<String, size_t> spriteIdx;
 		std::vector<SpriteSheetFrameTag> frameTags;

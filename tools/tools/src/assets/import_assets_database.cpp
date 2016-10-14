@@ -179,9 +179,11 @@ std::vector<Path> ImportAssetsDatabase::getOutFiles(String assetId) const
 	}
 }
 
+constexpr static int currentAssetVersion = 2;
+
 void ImportAssetsDatabase::serialize(Serializer& s) const
 {
-	int version = 1;
+	int version = currentAssetVersion;
 	s << version;
 	s << assetsImported;
 }
@@ -190,9 +192,7 @@ void ImportAssetsDatabase::deserialize(Deserializer& s)
 {
 	int version;
 	s >> version;
-	if (version == 1) {
+	if (version == currentAssetVersion) {
 		s >> assetsImported;
-	} else {
-		save();
 	}
 }

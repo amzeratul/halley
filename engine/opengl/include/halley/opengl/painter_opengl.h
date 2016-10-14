@@ -22,7 +22,7 @@ namespace Halley
 		void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) override;
 
 	protected:
-		void setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices) override;
+		void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices) override;
 		void drawTriangles(size_t numIndices) override;
 		void setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) override;
 
@@ -34,6 +34,6 @@ namespace Halley
 		GLuint veo = 0;
 		std::unique_ptr<GLUtils> glUtils;
 
-		void setupVertexAttributes(MaterialDefinition& material);
+		void setupVertexAttributes(const MaterialDefinition& material);
 	};
 }

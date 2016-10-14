@@ -19,7 +19,7 @@ namespace Halley
 		friend class Material;
 
 	public:
-		void operator=(std::shared_ptr<Texture> texture);
+		void operator=(std::shared_ptr<const Texture> texture);
 		void operator=(Colour colour);
 		void operator=(float p);
 		void operator=(Vector2f p);

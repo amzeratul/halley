@@ -45,7 +45,7 @@ namespace Halley
 		Material& getMaterial() const { return *material; }
 
 		Sprite& setImage(Resources& resources, String imageName, String materialName = "");
-		Sprite& setImage(std::shared_ptr<Texture> image, std::shared_ptr<MaterialDefinition> material);
+		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material);
 
 		Vector2f getPosition() const;
 

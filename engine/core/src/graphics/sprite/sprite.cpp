@@ -97,7 +97,7 @@ Sprite& Sprite::setImage(Resources& resources, String imageName, String material
 	return *this;
 }
 
-Sprite& Sprite::setImage(std::shared_ptr<Texture> image, std::shared_ptr<MaterialDefinition> materialDefinition)
+Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> materialDefinition)
 {
 	Expects(image);
 	Expects(materialDefinition);

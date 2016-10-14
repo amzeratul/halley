@@ -54,7 +54,7 @@ namespace Halley
 		MaterialDefinition();
 		explicit MaterialDefinition(ResourceLoader& loader);
 
-		void bind(int pass, Painter& painter);
+		void bind(int pass, Painter& painter) const;
 		int getNumPasses() const;
 		MaterialPass& getPass(int n);
 

@@ -15,7 +15,7 @@ namespace Halley
 		explicit TextureOpenGL(VideoOpenGL& parent, Vector2i size);
 		~TextureOpenGL();
 
-		void bind(int textureUnit) override;
+		void bind(int textureUnit) const override;
 		void load(const TextureDescriptor& descriptor) override;
 
 	private:
@@ -24,11 +24,11 @@ namespace Halley
 
 		static unsigned int getGLFormat(TextureFormat format);
 
-		void waitForOpenGLLoad();
+		void waitForOpenGLLoad() const;
 
 		VideoOpenGL& parent;
 #ifdef WITH_OPENGL
-		GLsync fence = nullptr;
+		mutable GLsync fence = nullptr;
 #endif
 	};
 }

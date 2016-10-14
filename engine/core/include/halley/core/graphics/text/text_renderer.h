@@ -13,9 +13,9 @@ namespace Halley
 	{
 	public:
 		TextRenderer();
-		explicit TextRenderer(std::shared_ptr<Font> font, String text = "", float size = 20, Colour colour = Colour(1, 1, 1, 1), float outline = 0, Colour outlineColour = Colour(0, 0, 0, 1));
+		explicit TextRenderer(std::shared_ptr<const Font> font, String text = "", float size = 20, Colour colour = Colour(1, 1, 1, 1), float outline = 0, Colour outlineColour = Colour(0, 0, 0, 1));
 
-		TextRenderer& setFont(std::shared_ptr<Font> font);
+		TextRenderer& setFont(std::shared_ptr<const Font> font);
 		TextRenderer& setText(String text);
 		TextRenderer& setSize(float size);
 		TextRenderer& setColour(Colour colour);
@@ -28,7 +28,7 @@ namespace Halley
 		Vector2f getExtents() const;
 
 	private:
-		std::shared_ptr<Font> font;
+		std::shared_ptr<const Font> font;
 		StringUTF32 text;
 		float size = 20;
 		float outline = 0;

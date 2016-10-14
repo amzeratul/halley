@@ -5,7 +5,7 @@
 
 using namespace Halley;
 
-AnimationPlayer::AnimationPlayer(std::shared_ptr<Animation> animation, String sequence, String direction)
+AnimationPlayer::AnimationPlayer(std::shared_ptr<const Animation> animation, String sequence, String direction)
 {
 	setAnimation(animation, sequence, direction);
 }
@@ -17,7 +17,7 @@ void AnimationPlayer::playOnce(String sequence)
 	seqLooping = false;
 }
 
-void AnimationPlayer::setAnimation(std::shared_ptr<Animation> v, String sequence, String direction)
+void AnimationPlayer::setAnimation(std::shared_ptr<const Animation> v, String sequence, String direction)
 {
 	if (animation != v) {
 		animation = v;

@@ -108,7 +108,7 @@ void PainterOpenGL::setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isS
 	}
 }
 
-void PainterOpenGL::setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
+void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
 {
 	Expects(numVertices > 0);
 	Expects(numIndices >= numVertices);
@@ -128,7 +128,7 @@ void PainterOpenGL::setVertices(MaterialDefinition& material, size_t numVertices
 	setupVertexAttributes(material);
 }
 
-void PainterOpenGL::setupVertexAttributes(MaterialDefinition& material)
+void PainterOpenGL::setupVertexAttributes(const MaterialDefinition& material)
 {
 	// Set vertex attribute pointers in VBO
 	int vertexStride = material.getVertexStride();

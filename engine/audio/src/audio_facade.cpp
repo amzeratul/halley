@@ -65,12 +65,12 @@ void AudioFacade::stopPlayback()
 	}
 }
 
-AudioHandle AudioFacade::playUI(std::shared_ptr<AudioClip> clip, float volume, float pan, bool loop)
+AudioHandle AudioFacade::playUI(std::shared_ptr<const AudioClip> clip, float volume, float pan, bool loop)
 {
 	return play(clip, AudioSourcePosition::makeUI(pan), volume, loop);
 }
 
-AudioHandle AudioFacade::playMusic(std::shared_ptr<AudioClip> clip, int track, float fadeInTime, bool loop)
+AudioHandle AudioFacade::playMusic(std::shared_ptr<const AudioClip> clip, int track, float fadeInTime, bool loop)
 {
 	bool hasFade = fadeInTime > 0.0001f;
 	
@@ -85,7 +85,7 @@ AudioHandle AudioFacade::playMusic(std::shared_ptr<AudioClip> clip, int track, f
 	return handle;
 }
 
-AudioHandle AudioFacade::play(std::shared_ptr<AudioClip> clip, AudioSourcePosition position, float volume, bool loop)
+AudioHandle AudioFacade::play(std::shared_ptr<const AudioClip> clip, AudioSourcePosition position, float volume, bool loop)
 {
 	size_t id = uniqueId++;
 	enqueue([=] () {

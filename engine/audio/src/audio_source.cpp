@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-AudioSource::AudioSource(std::shared_ptr<AudioClip> clip, AudioSourcePosition sourcePos, float gain, bool loop) 
+AudioSource::AudioSource(std::shared_ptr<const AudioClip> clip, AudioSourcePosition sourcePos, float gain, bool loop) 
 	: clip(clip)
 	, sourcePos(sourcePos)
 	, looping(loop)

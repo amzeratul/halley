@@ -59,7 +59,7 @@ namespace Halley
 	protected:
 		virtual void doStartRender() = 0;
 		virtual void doEndRender() = 0;
-		virtual void setVertices(MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices) = 0;
+		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices) = 0;
 		virtual void drawTriangles(size_t numIndices) = 0;
 
 		virtual void setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) = 0;

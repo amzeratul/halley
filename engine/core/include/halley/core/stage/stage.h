@@ -38,7 +38,7 @@ namespace Halley
 		Resources& getResources() const;
 
 		template <typename T>
-		std::shared_ptr<T> getResource(String name) const {
+		std::shared_ptr<const T> getResource(String name) const {
 			return getResources().of<T>().get(name);
 		}
 

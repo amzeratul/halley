@@ -15,13 +15,12 @@ namespace Halley
 
 	public:
 		Material(const Material& other);
-		explicit Material(std::shared_ptr<MaterialDefinition> materialDefinition);
+		explicit Material(std::shared_ptr<const MaterialDefinition> materialDefinition);
 		void bind(int pass, Painter& painter);
 		static void resetBindCache();
 
 		MaterialParameter& operator[](String name);
 
-		MaterialDefinition& getDefinition() { return *materialDefinition; }
 		const MaterialDefinition& getDefinition() const { return *materialDefinition; }
 
 		std::shared_ptr<Material> clone() const;
@@ -30,7 +29,7 @@ namespace Halley
 		bool dirty = false;
 
 		Vector<MaterialParameter> uniforms;
-		std::shared_ptr<MaterialDefinition> materialDefinition;
+		std::shared_ptr<const MaterialDefinition> materialDefinition;
 
 		void updateUniforms();
 	};

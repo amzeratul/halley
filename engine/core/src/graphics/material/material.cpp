@@ -15,7 +15,7 @@ Material::Material(const Material& other)
 {	
 }
 
-Material::Material(std::shared_ptr<MaterialDefinition> materialDefinition)
+Material::Material(std::shared_ptr<const MaterialDefinition> materialDefinition)
 	: materialDefinition(materialDefinition)
 {
 	for (auto& uniform : materialDefinition->getUniforms()) {
