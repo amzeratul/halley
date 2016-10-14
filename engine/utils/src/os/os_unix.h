@@ -33,8 +33,8 @@ namespace Halley {
 		OSUnix();
 		~OSUnix();
 
-		virtual ComputerData getComputerData();
-		virtual String getUserDataDir();
+		virtual ComputerData getComputerData() override;
+		virtual String getUserDataDir() override;
 
 		int runCommand(String command) override;
 	};
