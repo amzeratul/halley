@@ -16,6 +16,8 @@
 #include <halley/concurrency/concurrent.h>
 #include <fstream>
 #include <halley/support/debug.h>
+#include <chrono>
+#include <ctime>
 
 #pragma warning(disable: 4996)
 
@@ -52,6 +54,11 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	// Debugging initialization
 	Debug::setErrorHandling();
 	Concurrent::setThreadName("main");
+
+	// Time
+	auto now = std::chrono::system_clock::now();
+	auto now_c = std::chrono::system_clock::to_time_t(now);
+	std::cout << "It is " << std::put_time(std::localtime(&now_c), "%F %T") << std::endl;
 
 	// Seed RNG
 	time_t curTime = time(nullptr);
