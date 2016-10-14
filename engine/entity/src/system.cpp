@@ -99,6 +99,11 @@ void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, size
 }
 
 void System::doUpdate(Time time) {
+	if (!initialised) {
+		initBase();
+		initialised = true;
+	}
+
 	HALLEY_DEBUG_TRACE();
 	timer.beginSample();
 
@@ -114,6 +119,11 @@ void System::doUpdate(Time time) {
 }
 
 void System::doRender(Painter& painter) {
+	if (!initialised) {
+		initBase();
+		initialised = true;
+	}
+
 	HALLEY_DEBUG_TRACE();
 	timer.beginSample();
 

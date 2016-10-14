@@ -29,6 +29,7 @@ namespace Halley {
 		HalleyAPI& doGetAPI() const { return *api; }
 		World& doGetWorld() const { return *world; }
 
+		virtual void initBase() {}
 		virtual void updateBase(Time) {}
 		virtual void renderBase(Painter&) {}
 		virtual void onMessagesReceived(int, Message**, size_t*, size_t) {}
@@ -68,6 +69,7 @@ namespace Halley {
 		HalleyAPI* api = nullptr;
 		String name;
 		int systemId = -1;
+		bool initialised = false;
 
 		StopwatchAveraging timer;
 

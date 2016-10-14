@@ -66,6 +66,8 @@ SystemSchema::SystemSchema(YAML::Node node)
 				accessValue |= int(SystemAccess::API);
 			} else if (name == "world") {
 				accessValue |= int(SystemAccess::World);
+			} else if (name == "resources") {
+				accessValue |= int(SystemAccess::Resources);
 			} else {
 				throw Exception("Unknown access type: " + name);
 			}
@@ -94,6 +96,14 @@ SystemSchema::SystemSchema(YAML::Node node)
 				msg.send = type == "send";
 				messages.push_back(msg);
 			}
+		}
+	}
+
+	if (node["services"].IsDefined()) {
+		for (auto serviceEntry : node["services"]) {
+			ServiceSchema service;
+			service.name = serviceEntry.as<std::string>();
+			services.push_back(service);
 		}
 	}
 }

@@ -21,7 +21,8 @@ namespace Halley
 	{
 		Pure = 0,
 		API = 1,
-		World = 2
+		World = 2,
+		Resources = 3
 	};
 
 	enum class SystemMethod
@@ -52,6 +53,12 @@ namespace Halley
 		Vector<ComponentReferenceSchema> components;
 	};
 
+	class ServiceSchema
+	{
+	public:
+		String name;
+	};
+
 	enum class CodegenLanguage
 	{
 		CPlusPlus,
@@ -73,5 +80,6 @@ namespace Halley
 
 		Vector<FamilySchema> families;
 		Vector<MessageReferenceSchema> messages;
+		Vector<ServiceSchema> services;
 	};
 }
