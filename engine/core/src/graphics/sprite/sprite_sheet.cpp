@@ -58,14 +58,14 @@ void SpriteSheetFrameTag::deserialize(Deserializer& s)
 	s >> from;
 }
 
-const SpriteSheetEntry& SpriteSheet::getSprite(String name) const
+const SpriteSheetEntry& SpriteSheet::getSprite(const String& name) const
 {
-	auto iter = sprites.find(name);
-	if (iter == sprites.end()) {
-		throw Exception("Spritesheet does not contain sprite \"" + name + "\".");
-	} else {
-		return iter->second;
-	}
+	return getSprite(getIndex(name));
+}
+
+const SpriteSheetEntry& SpriteSheet::getSprite(size_t idx) const
+{
+	return sprites[idx];
 }
 
 const std::vector<SpriteSheetFrameTag>& SpriteSheet::getFrameTags() const
@@ -76,10 +76,25 @@ const std::vector<SpriteSheetFrameTag>& SpriteSheet::getFrameTags() const
 std::vector<String> SpriteSheet::getSpriteNames() const
 {
 	std::vector<String> result;
-	for (auto& f: sprites) {
+	for (auto& f: spriteIdx) {
 		result.push_back(f.first);
 	}
 	return result;
+}
+
+size_t SpriteSheet::getSpriteCount() const
+{
+	return sprites.size();
+}
+
+size_t SpriteSheet::getIndex(const String& name) const
+{
+	auto iter = spriteIdx.find(name);
+	if (iter == spriteIdx.end()) {
+		throw Exception("Spritesheet does not contain sprite \"" + name + "\".");
+	} else {
+		return iter->second;
+	}
 }
 
 std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
@@ -100,7 +115,8 @@ void SpriteSheet::loadTexture(Resources& resources)
 
 void SpriteSheet::addSprite(String name, const SpriteSheetEntry& sprite)
 {
-	sprites[name] = sprite;
+	sprites.push_back(sprite);
+	spriteIdx[name] = sprites.size() - 1;
 }
 
 void SpriteSheet::setTextureName(String name)
@@ -112,6 +128,7 @@ void SpriteSheet::serialize(Serializer& s) const
 {
 	s << textureName;
 	s << sprites;
+	s << spriteIdx;
 	s << frameTags;
 }
 
@@ -119,6 +136,7 @@ void SpriteSheet::deserialize(Deserializer& s)
 {
 	s >> textureName;
 	s >> sprites;
+	s >> spriteIdx;
 	s >> frameTags;
 }
 
@@ -180,7 +198,6 @@ void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)
 			entry.duration = sprite["duration"].asInt();
 		}
 		
-		sprites[iter.memberName()] = entry;
-	}
-	
+		addSprite(iter.memberName(), entry);
+	}	
 }
