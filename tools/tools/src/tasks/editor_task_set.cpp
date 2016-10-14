@@ -46,6 +46,12 @@ void EditorTaskSet::update(Time time)
 				addTask(std::move(t));
 			}
 			task->terminate();
+			if (listener) {
+				if (task->hasError()) {
+					listener->onTaskError(task);
+				}
+				listener->onTaskTerminated(task);
+			}
 			tasks.erase(iter);
 		}
 	}
@@ -55,6 +61,14 @@ void EditorTaskSet::addTask(EditorTaskAnchor&& task)
 {
 	task.setId(nextId++);
 	tasks.emplace_back(std::make_shared<EditorTaskAnchor>(std::move(task)));
+	if (listener) {
+		listener->onTaskAdded(tasks.back());
+	}
+}
+
+void EditorTaskSet::setListener(EditorTaskSetListener& l)
+{
+	listener = &l;
 }
 
 const std::list<std::shared_ptr<EditorTaskAnchor>>& EditorTaskSet::getTasks() const

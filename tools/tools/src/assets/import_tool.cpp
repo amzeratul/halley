@@ -27,6 +27,7 @@ int ImportTool::run(Vector<std::string> args)
 		std::cout << "Importing project at " << projectPath << ", with shared assets at " << sharedAssetsPath << "" << std::endl;
 
 		auto tasks = std::make_unique<EditorTaskSet>();
+		tasks->setListener(*this);
 		tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(*proj, true)));
 		auto last = std::chrono::steady_clock::now();
 
@@ -40,11 +41,29 @@ int ImportTool::run(Vector<std::string> args)
 			tasks->update(elapsed);
 		}
 
-		std::cout << "Import done." << std::endl;
-		return 0;
+		if (hasError) {
+			std::cout << "Import failed." << std::endl;
+			return 1;
+		} else {
+			std::cout << "Import done." << std::endl;
+			return 0;
+		}
 	}
 	else {
 		std::cout << "Usage: halley-cmd import projDir halleyDir" << std::endl;
 		return 1;
 	}
+}
+
+void ImportTool::onTaskAdded(const std::shared_ptr<EditorTaskAnchor>&)
+{
+}
+
+void ImportTool::onTaskTerminated(const std::shared_ptr<EditorTaskAnchor>&)
+{
+}
+
+void ImportTool::onTaskError(const std::shared_ptr<EditorTaskAnchor>&)
+{
+	hasError = true;
 }

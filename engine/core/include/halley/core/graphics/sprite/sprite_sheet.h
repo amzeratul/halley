@@ -68,7 +68,7 @@ namespace Halley
 	private:
 		std::shared_ptr<const Texture> texture;
 		std::vector<SpriteSheetEntry> sprites;
-		HashMap<String, size_t> spriteIdx;
+		HashMap<String, uint32_t> spriteIdx;
 		std::vector<SpriteSheetFrameTag> frameTags;
 		String textureName;
 	};

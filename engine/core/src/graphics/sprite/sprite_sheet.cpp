@@ -93,7 +93,7 @@ size_t SpriteSheet::getIndex(const String& name) const
 	if (iter == spriteIdx.end()) {
 		throw Exception("Spritesheet does not contain sprite \"" + name + "\".");
 	} else {
-		return iter->second;
+		return size_t(iter->second);
 	}
 }
 
@@ -116,7 +116,7 @@ void SpriteSheet::loadTexture(Resources& resources)
 void SpriteSheet::addSprite(String name, const SpriteSheetEntry& sprite)
 {
 	sprites.push_back(sprite);
-	spriteIdx[name] = sprites.size() - 1;
+	spriteIdx[name] = uint32_t(sprites.size() - 1);
 }
 
 void SpriteSheet::setTextureName(String name)

@@ -5,6 +5,15 @@
 
 namespace Halley
 {
+	class EditorTaskSetListener
+	{
+	public:
+		virtual ~EditorTaskSetListener() {}
+		virtual void onTaskAdded(const std::shared_ptr<EditorTaskAnchor>& task) = 0;
+		virtual void onTaskTerminated(const std::shared_ptr<EditorTaskAnchor>& task) = 0;
+		virtual void onTaskError(const std::shared_ptr<EditorTaskAnchor>& task) = 0;
+	};
+
 	class EditorTaskSet
 	{
 	public:
@@ -14,10 +23,13 @@ namespace Halley
 		void update(Time time);
 		void addTask(EditorTaskAnchor&& editorTaskAnchor);
 
+		void setListener(EditorTaskSetListener& listener);
+
 		const std::list<std::shared_ptr<EditorTaskAnchor>>& getTasks() const;
 
 	private:
 		std::list<std::shared_ptr<EditorTaskAnchor>> tasks;
+		EditorTaskSetListener* listener = nullptr;
 		int nextId = 0;
 	};
 }
