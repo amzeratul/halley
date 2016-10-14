@@ -177,7 +177,7 @@ void Core::initResources()
 
 void Core::setOutRedirect(bool appendToExisting)
 {
-	auto outStream = std::make_shared<std::ofstream>(environment->getDataPath() + "log.txt", appendToExisting ? std::ofstream::app : std::ofstream::trunc);
+	auto outStream = std::make_shared<std::ofstream>((Path(environment->getDataPath()) / "log.txt").getString(), appendToExisting ? std::ofstream::app : std::ofstream::trunc);
 	out = std::make_unique<RedirectStreamToStream>(std::cout, outStream, false);
 }
 
