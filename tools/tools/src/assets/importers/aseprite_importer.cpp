@@ -70,10 +70,6 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::importAseprite(String
 
 			auto bytes = FileSystem::readFile(tmp / p);
 			data.img = std::make_unique<Image>(p.getFilename().getString(), gsl::as_bytes(gsl::span<Byte>(bytes)), false);
-			if (data.img->getSize().x < 0) {
-				std::cout << "wtf?";
-			}
-
 			auto parsedName = p.getStem().getString().split("___");
 			if (parsedName.size() != 3 || parsedName[0] != "out") {
 				throw Exception("Error parsing filename: " + p.getStem().getString());
@@ -118,6 +114,16 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::importAseprite(String
 			}
 		}
 	}
+	// Untagged images
+	for (auto& frame: frameData) {
+		if (frame.sequenceName == "") {
+			frame.duration = 100;
+			std::stringstream ss;
+			ss << baseName.cppStr() << "_" << std::setw(3) << std::setfill('0') << frame.frameNumber << ".png";
+			frame.filename = ss.str();
+			frame.img->setName(frame.filename);
+		}
+	}
 	return frameData;
 }
 
@@ -156,9 +162,7 @@ std::unique_ptr<Image> AsepriteImporter::generateAtlas(String baseName, std::vec
 	// Generate entries
 	std::vector<BinPackEntry> entries;
 	for (auto& img: images) {
-		if (img.sequenceName != "") {
-			entries.push_back(BinPackEntry(img.img->getSize(), &img));
-		}
+		entries.push_back(BinPackEntry(img.img->getSize(), &img));
 	}
 
 	// Try packing
