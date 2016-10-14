@@ -62,51 +62,55 @@ void ImportAssetsDatabase::save() const
 bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	auto iter = assetsImported.find(asset.assetId);
-	if (iter == assetsImported.end()) {
-		// Asset didn't even exist before
-		return true;
-	} else {
-		// Asset exists, check if it failed loading last time
-		auto failIter = assetsFailed.find(asset.assetId);
-		bool failed = failIter != assetsFailed.end();
-
-		auto& oldAsset = (failed ? failIter : iter)->second.asset;
-
-		// Input directory changed?
-		if (asset.srcDir != oldAsset.srcDir) {
+	
+	// Check if it failed loading last time
+	auto iter = assetsFailed.find(asset.assetId);
+	bool failed = iter != assetsFailed.end();
+	if (!failed) {
+		// No failures, check if this was imported before
+		iter = assetsImported.find(asset.assetId);
+		if (iter == assetsImported.end()) {
+			// Asset didn't even exist before
 			return true;
 		}
-
-		// Total count of input files changed?
-		if (asset.inputFiles.size() != oldAsset.inputFiles.size()) {
-			return true;
-		}
-
-		// Any of the input files changed?
-		// Note: We don't have to check old files on new input, because the size matches and all entries matched.
-		for (auto& i: asset.inputFiles) {
-			auto result = std::find_if(oldAsset.inputFiles.begin(), oldAsset.inputFiles.end(), [&](const ImportAssetsDatabaseEntry::InputFile& entry) { return entry.first == i.first; });
-			if (result == oldAsset.inputFiles.end()) {
-				// File wasn't there before
-				return true;
-			} else if (result->second != i.second) {
-				// Timestamp changed
-				return true;
-			}
-		}
-
-		// Have any of the output files gone missing?
-		if (!failed) {
-			for (auto& o: oldAsset.outputFiles) {
-				if (!FileSystem::exists(directory / o)) {
-					return true;
-				}
-			}
-		}
-
-		return false;
 	}
+
+	// At this point, iter points to the failed one if it failed, or the the old successful one if it didn't.
+	auto& oldAsset = iter->second.asset;
+
+	// Input directory changed?
+	if (asset.srcDir != oldAsset.srcDir) {
+		return true;
+	}
+
+	// Total count of input files changed?
+	if (asset.inputFiles.size() != oldAsset.inputFiles.size()) {
+		return true;
+	}
+
+	// Any of the input files changed?
+	// Note: We don't have to check old files on new input, because the size matches and all entries matched.
+	for (auto& i: asset.inputFiles) {
+		auto result = std::find_if(oldAsset.inputFiles.begin(), oldAsset.inputFiles.end(), [&](const ImportAssetsDatabaseEntry::InputFile& entry) { return entry.first == i.first; });
+		if (result == oldAsset.inputFiles.end()) {
+			// File wasn't there before
+			return true;
+		} else if (result->second != i.second) {
+			// Timestamp changed
+			return true;
+		}
+	}
+
+	// Have any of the output files gone missing?
+	if (!failed) {
+		for (auto& o: oldAsset.outputFiles) {
+			if (!FileSystem::exists(directory / o)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset)
