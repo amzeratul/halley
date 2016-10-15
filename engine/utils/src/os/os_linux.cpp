@@ -58,7 +58,7 @@ String slice(String str, const char* from, const char* to) {
 	return str.substr(pos, end - pos);
 }
 
-Halley::ComputerData Halley::OSLinux::getComputerData()
+ComputerData OSLinux::getComputerData()
 {
 	ComputerData data;
 
@@ -82,7 +82,18 @@ Halley::ComputerData Halley::OSLinux::getComputerData()
 	return data;
 }
 
-Halley::String Halley::OSLinux::getUserDataDir()
+Path OSLinux::parseProgramPath(const String& path)
+{
+	constexpr size_t len = 1024;
+	char buffer[len];
+	if (readlink("/proc/self/exe", buffer, len) != -1) {
+		return Path(String(buffer)).getParent() / ".";
+	} else {
+		return OSUnix::parseProgramPath(path);
+	}
+}
+
+String OSLinux::getUserDataDir()
 {
 	String result;
 	struct passwd* pwd = getpwuid(getuid());

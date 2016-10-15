@@ -29,8 +29,9 @@
 namespace Halley {
 	class OSLinux : public OSUnix {
 	public:
-		virtual String getUserDataDir() override;
-		virtual ComputerData getComputerData() override;
+		String getUserDataDir() override;
+		ComputerData getComputerData() override;
+		Path parseProgramPath(const String&) override;
 	};
 }
 
