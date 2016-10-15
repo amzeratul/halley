@@ -5,6 +5,7 @@
 #include "halley/core/graphics/texture_descriptor.h"
 #include <gsl/gsl_assert>
 #include "video_opengl.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -49,10 +50,11 @@ void TextureOpenGL::waitForOpenGLLoad() const
 	if (fence) {
 		GLenum result = glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, GLuint64(10000000000));
 		if (result == GL_TIMEOUT_EXPIRED) {
-			throw Exception("Timeout waiting for texture to load.");
+			//throw Exception("Timeout waiting for texture to load.");
+			Logger::logError("Timeout waiting for texture fence to sync. Graphics might be corrupted.");
 		}
 		else if (result == GL_WAIT_FAILED) {
-			throw Exception("Error waiting for texture to load.");
+			glCheckError();
 		}
 		else if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED) {
 			glDeleteSync(fence);
