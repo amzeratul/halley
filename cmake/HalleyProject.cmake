@@ -25,7 +25,7 @@ else()
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
 	if (HALLEY_ENABLE_STATIC_STDLIB)
-		if (CMAKE_CXX_COMPILER_ID EQUAL GNU) 
+		if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") 
 			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static-libgcc")
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
 		endif()
