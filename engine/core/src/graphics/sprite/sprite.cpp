@@ -28,10 +28,17 @@ void Sprite::draw(Painter& painter) const
 void Sprite::drawSliced(Painter& painter) const
 {
 	Expects(material);
-	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	Expects(!!material->getMainTexture());
 
-	Vector4f slices(material->getMainTexture()->getSlice());
+	drawSliced(painter, material->getMainTexture()->getSlice());
+}
+
+void Sprite::drawSliced(Painter& painter, Vector4i slicesPixel) const
+{
+	Expects(material);
+	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+	
+	Vector4f slices(slicesPixel);
 	slices.x /= size.x;
 	slices.y /= size.y;
 	slices.z /= size.x;

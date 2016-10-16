@@ -50,25 +50,29 @@ void ImportAssetsTask::run()
 
 static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& asset)
 {
-	if (asset.inputFiles.size() > 1) {
-		for (auto& i: asset.inputFiles) {
-			if (i.first.getExtension() == ".meta") {
-				auto data = ResourceDataStatic::loadFromFileSystem(asset.srcDir / i.first);
-				auto root = YAML::Load(data->getString());
+	try {
+		if (asset.inputFiles.size() > 1) {
+			for (auto& i: asset.inputFiles) {
+				if (i.first.getExtension() == ".meta") {
+					auto data = ResourceDataStatic::loadFromFileSystem(asset.srcDir / i.first);
+					auto root = YAML::Load(data->getString());
 
-				auto meta = std::make_unique<Metadata>();
+					auto meta = std::make_unique<Metadata>();
 
-				for (YAML::const_iterator it = root.begin(); it != root.end(); ++it) {
-					String key = it->first.as<std::string>();
-					String value = it->second.as<std::string>();
-					meta->set(key, value);
+					for (YAML::const_iterator it = root.begin(); it != root.end(); ++it) {
+						String key = it->first.as<std::string>();
+						String value = it->second.as<std::string>();
+						meta->set(key, value);
+					}
+
+					return std::move(meta);
 				}
-
-				return std::move(meta);
 			}
 		}
+		return std::unique_ptr<Metadata>();
+	} catch (std::exception& e) {
+		throw Exception("Error parsing metafile for " + asset.assetId + ": " + e.what());
 	}
-	return std::unique_ptr<Metadata>();
 }
 
 bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
@@ -87,6 +91,9 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 			if (f.first.getExtension() != ".meta") {
 				importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.first, FileSystem::readFile(asset.srcDir / f.first)));
 			}
+		}
+		if (importingAsset.inputFiles.empty()) {
+			throw Exception("No input files found for asset " + asset.assetId + " - do you have a stray meta file?");
 		}
 		toLoad.emplace_back(std::move(importingAsset));
 
