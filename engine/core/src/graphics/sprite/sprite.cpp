@@ -33,7 +33,7 @@ void Sprite::drawSliced(Painter& painter, Vector2f drawSize, Vector4i sliceTexel
 	slices.y /= size.y;
 	slices.z /= size.x;
 	slices.w /= size.y;
-	painter.drawSlicedSprite(material, scale, slices, &vertexAttrib);
+	painter.drawSlicedSprite(material, vertexAttrib.scale, slices, &vertexAttrib);
 }
 
 void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
@@ -55,14 +55,6 @@ void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
 	}
 
 	painter.drawSprites(material, n, vertices.data());
-}
-
-void Sprite::computeSize()
-{
-	vertexAttrib.size = scale * size;
-	if (flip) {
-		vertexAttrib.size.x *= -1;
-	}
 }
 
 Rect4f Sprite::getAABB() const
@@ -129,7 +121,7 @@ Sprite& Sprite::setPos(Vector2f v)
 
 Sprite& Sprite::setRotation(Angle1f v)
 {
-	vertexAttrib.rotation.x = v.getRadians();
+	vertexAttrib.rotation = v.getRadians();
 	return *this;
 }
 
@@ -141,10 +133,7 @@ Sprite& Sprite::setColour(Colour4f v)
 
 Sprite& Sprite::setScale(Vector2f v)
 {
-	if (scale != v) {
-		scale = v;
-		computeSize();
-	}
+	vertexAttrib.scale = v;
 	return *this;
 }
 
@@ -208,7 +197,7 @@ Sprite& Sprite::setSprite(const SpriteSheetEntry& entry)
 		setSize(entry.size);
 		vertexAttrib.pivot = entry.pivot;
 		vertexAttrib.texRect = entry.coords;
-		vertexAttrib.rotation.y = entry.rotated ? 1.0f : 0.0f;
+		vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
 	}
 	return *this;
 }
@@ -216,4 +205,12 @@ Sprite& Sprite::setSprite(const SpriteSheetEntry& entry)
 Sprite Sprite::clone() const
 {
 	return *this;
+}
+
+void Sprite::computeSize()
+{
+	vertexAttrib.size = size;
+	if (flip) {
+		vertexAttrib.size.x *= -1;
+	}
 }

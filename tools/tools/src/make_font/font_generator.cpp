@@ -208,6 +208,7 @@ Bytes FontGenerator::generateFontMapBinary(String imgName, FontFace& font, Vecto
 		s << height;
 		s << sizePt;
 		s << smoothRadius;
+		s << scale;
 
 		unsigned int numEntries = static_cast<unsigned int>(entries.size());
 		s << numEntries;

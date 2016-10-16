@@ -12,7 +12,7 @@ ConsoleWindow::ConsoleWindow(Resources& resources)
 	backgroundMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite"));
 	auto& mat = *backgroundMaterial;
 	mat["tex0"] = resources.get<Texture>("round_rect.png");
-	mat["u_smoothness"] = 0.1f;
+	mat["u_smoothness"] = 1.0f / 16.0f;
 	mat["u_outline"] = 0.5f;
 	mat["u_outlineColour"] = Colour(0.47f, 0.47f, 0.47f);
 

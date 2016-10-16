@@ -19,13 +19,15 @@ namespace Halley
 	{
 		// This structure must match the layout of the shader
 		// See sprite.yaml for reference
+		Vector4f vertPos;
 		Vector2f pos;
-		Vector2f pivot;     // pos and offset are a single vec4 on the shader
+		Vector2f pivot;
 		Vector2f size;
-		Vector2f rotation;   // size and rotation are a single vec4 on the shader
+		Vector2f scale;
 		Colour4f colour;
 		Rect4f texRect;
-		Vector4f vertPos;
+		float rotation = 0;
+		float textureRotation = 0;
 	};
 
 	class Sprite
@@ -70,7 +72,6 @@ namespace Halley
 		std::shared_ptr<Material> material;
 		SpriteVertexAttrib vertexAttrib;
 
-		Vector2f scale;
 		Vector2f size;
 		bool flip = false;
 

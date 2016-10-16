@@ -74,6 +74,7 @@ void Font::deserialize(Deserializer& s)
 	s >> height;
 	s >> sizePt;
 	s >> smoothRadius;
+	s >> scale;
 	s >> glyphs;
 
 	for (auto& g: glyphs) {

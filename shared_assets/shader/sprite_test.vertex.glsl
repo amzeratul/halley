@@ -5,7 +5,7 @@ uniform float u_time;
 
 in vec4 a_position;
 in vec4 a_size;
-in vec4 a_texCoord0;
+in vec2 a_texCoord0;
 in vec4 a_vertPos;
 
 out vec4 v_texCoord0;

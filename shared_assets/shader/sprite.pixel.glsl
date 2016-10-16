@@ -2,7 +2,7 @@
 
 uniform sampler2D tex0;
 
-in vec4 v_texCoord0;
+in vec2 v_texCoord0;
 in vec4 v_colour;
 in vec4 v_colourAdd;
 

@@ -28,7 +28,6 @@ namespace Halley
 		Sprite barSolid;
 		Sprite barFade;
 		Sprite halleyLogo;
-		Sprite taskSprite;
 
 		std::shared_ptr<Material> taskMaterial;
 		std::shared_ptr<const Font> font;

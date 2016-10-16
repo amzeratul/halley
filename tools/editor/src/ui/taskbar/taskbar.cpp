@@ -8,12 +8,8 @@ TaskBar::TaskBar(Resources& resources)
 		taskMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite"));
 		auto& mat = *taskMaterial;
 		mat["tex0"] = resources.get<Texture>("round_rect.png");
-		mat["u_smoothness"] = 0.1f;
+		mat["u_smoothness"] = 1.0f / 16.0f;
 		mat["u_outline"] = 0.4f;
-
-		taskSprite = Sprite()
-			.setSize(Vector2f(64, 64))
-			.setTexRect(Rect4f(0, 0, 1, 1));
 	}
 
 	{
@@ -24,7 +20,7 @@ TaskBar::TaskBar(Resources& resources)
 			.setColour(col)
 			.setScale(Vector2f(0.5f, 0.5f));
 		auto& mat = halleyLogo.getMaterial();
-		mat["u_smoothness"] = 0.4f;
+		mat["u_smoothness"] = 1.0f / 8.0f;
 		mat["u_outline"] = 0.0f;
 		mat["u_outlineColour"] = col;
 	}
@@ -105,7 +101,9 @@ void TaskBar::draw(Painter& painter)
 		Colour col = t.task->hasError() ? Colour(0.93f, 0.2f, 0.2f) : (t.task->getProgress() > 0.9999f ? Colour(0.16f, 0.69f, 0.34f) : Colour(0.18f, 0.53f, 0.87f));
 		(*t.material)["u_outlineColour"] = col;
 
-		auto sprite = taskSprite.clone()
+		auto sprite = Sprite()
+			.setSize(Vector2f(64, 64))
+			.setTexRect(Rect4f(0, 0, 1, 1))
 			.setMaterial(t.material)
 			.setPos(drawPos);
 
