@@ -241,6 +241,13 @@ Sprite& Sprite::setSliced(Vector4s s)
 	return *this;
 }
 
+Sprite& Sprite::setSlicedFromMaterial()
+{
+	Expects (material);
+	Expects (material->getMainTexture());
+	return setSliced(material->getMainTexture()->getSlices());
+}
+
 Sprite& Sprite::setNormal()
 {
 	sliced = false;

@@ -71,6 +71,7 @@ namespace Halley
 		Sprite& setSprite(const SpriteSheetEntry& entry);
 
 		Sprite& setSliced(Vector4s slices);
+		Sprite& setSlicedFromMaterial();
 		Sprite& setNormal();
 
 		Sprite clone() const;
