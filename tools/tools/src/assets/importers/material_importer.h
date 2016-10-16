@@ -15,7 +15,7 @@ namespace Halley
 
 		std::vector<Path> import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector) override;
 
-		static void parseMaterial(MaterialDefinition& animation, gsl::span<const gsl::byte> data);
+		MaterialDefinition parseMaterial(Path basePath, gsl::span<const gsl::byte> data) const;
 
 	private:
 		static void loadPass(MaterialDefinition& material, const YAML::Node& node);

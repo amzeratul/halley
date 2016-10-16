@@ -8,7 +8,7 @@ namespace Halley
 	class AssetImporter
 	{
 	public:
-		AssetImporter();
+		AssetImporter(std::vector<Path> assetsSrc);
 		IAssetImporter& getImporter(Path path) const;
 		IAssetImporter& getImporter(AssetType type) const;
 

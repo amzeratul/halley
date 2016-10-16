@@ -1,17 +1,6 @@
 ---
 name: Halley/SolidColour
-uniforms:
-  - u_mvp: mat4
-attributes:
-  - a_vertPos: vec4          # xy = relative position of vertex [0..1], zw = relative position of texture [0..1]
-  - a_position: vec2         # position (world space)
-  - a_pivot: vec2            # relative pivot [0..1]
-  - a_size: vec2             # size (px), should be the size of the texture
-  - a_scale: vec2            # scale (relative)
-  - a_colour: vec4           # rgba
-  - a_texCoord0: vec4        # xy = top-left, zw = bottom-right
-  - a_rotation: float        # rotation (radians)
-  - a_textureRotation: float # is the sprite rotated? (1 if 90 degrees rotated)
+base: sprite_base.yaml
 passes:
   - blend: Alpha
     vertex: sprite.vertex.glsl

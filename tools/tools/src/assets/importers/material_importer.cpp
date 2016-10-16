@@ -9,8 +9,8 @@ using namespace Halley;
 
 std::vector<Path> MaterialImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
 {
-	MaterialDefinition material;
-	parseMaterial(material, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
+	Path basePath = asset.inputFiles.at(0).name.parentPath();
+	auto material = parseMaterial(basePath, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
 
 	Path dst = Path(asset.inputFiles[0].name).replaceExtension("");
 	FileSystem::writeFile(dstDir / dst, Serializer::toBytes(material));
@@ -18,10 +18,18 @@ std::vector<Path> MaterialImporter::import(const ImportingAsset& asset, Path dst
 	return { dst };
 }
 
-void MaterialImporter::parseMaterial(MaterialDefinition& material, gsl::span<const gsl::byte> data)
+MaterialDefinition MaterialImporter::parseMaterial(Path basePath, gsl::span<const gsl::byte> data) const
 {
+	MaterialDefinition material;
 	String strData(reinterpret_cast<const char*>(data.data()), data.size());
 	YAML::Node root = YAML::Load(strData.cppStr());
+
+	// Load base material
+	if (root["base"]) {
+		String baseName = root["base"].as<std::string>();
+		auto otherData = readAdditionalFile(basePath / baseName);
+		material = parseMaterial(basePath, gsl::as_bytes(gsl::span<Byte>(otherData)));
+	}
 
 	// Load name
 	material.name = root["name"] ? root["name"].as<std::string>() : "Unknown";
@@ -38,6 +46,8 @@ void MaterialImporter::parseMaterial(MaterialDefinition& material, gsl::span<con
 	for (auto passNode : root["passes"]) {
 		loadPass(material, passNode.as<YAML::Node>());
 	}
+
+	return material;
 }
 
 void MaterialImporter::loadPass(MaterialDefinition& material, const YAML::Node& node)
@@ -100,8 +110,8 @@ ShaderParameterType MaterialImporter::parseParameterType(String rawType)
 
 void MaterialImporter::loadAttributes(MaterialDefinition& material, const YAML::Node& topNode)
 {
-	int location = 0;
-	int offset = 0;
+	int location = int(material.attributes.size());
+	int offset = material.vertexStride;
 
 	auto attribSeqNode = topNode.as<YAML::Node>();
 	for (auto attribEntry : attribSeqNode) {

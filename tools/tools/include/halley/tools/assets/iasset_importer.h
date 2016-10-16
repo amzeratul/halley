@@ -58,5 +58,12 @@ namespace Halley
 
 		virtual String getAssetId(Path file) const;
 		virtual std::vector<Path> import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector) = 0;
+
+		void setAssetsSrc(const std::vector<Path>& assetsSrc);
+
+	protected:
+		Bytes readAdditionalFile(Path filePath) const;
+
+		std::vector<Path> assetsSrc;
 	};
 }

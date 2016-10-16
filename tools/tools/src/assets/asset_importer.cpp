@@ -14,7 +14,7 @@
 using namespace Halley;
 
 
-AssetImporter::AssetImporter()
+AssetImporter::AssetImporter(std::vector<Path> assetsSrc)
 {
 	importers[AssetType::SimpleCopy] = std::make_unique<CopyFileImporter>();
 	importers[AssetType::Font] = std::make_unique<FontImporter>();
@@ -26,6 +26,10 @@ AssetImporter::AssetImporter()
 	importers[AssetType::Audio] = std::make_unique<AudioImporter>();
 	importers[AssetType::Aseprite] = std::make_unique<AsepriteImporter>();
 	importers[AssetType::SpriteSheet] = std::make_unique<SpriteSheetImporter>();
+
+	for (auto& i: importers) {
+		i.second->setAssetsSrc(assetsSrc);
+	}
 }
 
 IAssetImporter& AssetImporter::getImporter(Path path) const
