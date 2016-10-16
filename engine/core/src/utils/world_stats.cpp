@@ -11,7 +11,7 @@ using namespace Halley;
 WorldStatsView::WorldStatsView(CoreAPI& coreAPI, const World& world)
 	: coreAPI(coreAPI)
 	, world(world)
-	, text(coreAPI.getResources().get<Font>("ubuntub.font"), "", 16, Colour(1, 1, 1), 1.5f, Colour(0.1f, 0.1f, 0.1f))
+	, text(coreAPI.getResources().get<Font>("ubuntub.font"), "", 16, Colour(1, 1, 1), 2.0f, Colour(0.1f, 0.1f, 0.1f))
 {
 }
 
@@ -21,6 +21,7 @@ void WorldStatsView::draw(RenderContext& context)
 		TimeLine timelines[] = { TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::Render };
 		String timelineLabels[] = { "Fixed", "Variable", "Render" };
 		int i = 0;
+		float width = (context.getViewPort().getWidth() - 40) / 3;
 
 		long long grandTotal = 0;
 
@@ -29,15 +30,15 @@ void WorldStatsView::draw(RenderContext& context)
 			text.setText(name).setAlignment(0).draw(painter, basePos + Vector2f(10, 0));
 			text.setAlignment(1);
 			if (nEntities > 0) {
-				text.setText(toString(nEntities)).draw(painter, basePos + Vector2f(280, 0));
+				text.setText(toString(nEntities)).draw(painter, basePos + Vector2f(width - 120, 0));
 			}
-			text.setText(formatTime(time)).draw(painter, basePos + Vector2f(350, 0));
+			text.setText(formatTime(time)).draw(painter, basePos + Vector2f(width - 50, 0));
 			text.setAlignment(0);
 			basePos.y += 20;
 		};
 
 		for (auto timeline : timelines) {
-			Vector2f pos = Vector2f(40 + (i++) * 400.0f, 80);
+			Vector2f pos = Vector2f(20 + (i++) * width, 60);
 			text.setColour(Colour(0.2f, 1.0f, 0.3f)).setText(String(timelineLabels[int(timeline)]) + ": ").draw(painter, pos);
 			text.setColour(Colour(1, 1, 1));
 			pos.y += 20;
@@ -63,7 +64,7 @@ void WorldStatsView::draw(RenderContext& context)
 		}
 
 		int maxFPS = int(1'000'000'000.0 / grandTotal + 0.5f);
-		text.setColour(Colour(1, 1, 1)).setText("Total elapsed: " + formatTime(grandTotal) + " ms [" + toString(maxFPS) + " FPS maximum].").draw(painter, Vector2f(40, 40));
+		text.setColour(Colour(1, 1, 1)).setText("Total elapsed: " + formatTime(grandTotal) + " ms [" + toString(maxFPS) + " FPS maximum].").draw(painter, Vector2f(20, 20));
 	});
 }
 
