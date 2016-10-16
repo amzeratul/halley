@@ -22,6 +22,7 @@
 #include "input/input_virtual.h"
 #include "input/input_manual.h"
 #include <set>
+#include <algorithm>
 
 using namespace Halley;
 
@@ -148,18 +149,9 @@ float InputVirtual::getAxis(int n)
 	return value;
 }
 
-int Halley::InputVirtual::getAxisRepeat(int n)
+int InputVirtual::getAxisRepeat(int n)
 {
-	Time& timeout = axes.at(n).timeout;
-	float value = getAxis(n);
-	if (timeout <= 0) {
-		timeout += repeatDelayFirst;
-		int actualValue = value > 0.50f ? 1 : (value < -0.50f ? - 1 : 0);
-		axes[n].lastValue = float(actualValue);
-		return actualValue;
-	} else {
-		return 0;
-	}
+	return axes.at(n).curRepeatValue;
 }
 
 void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
@@ -240,19 +232,33 @@ void Halley::InputVirtual::update(Time t)
 {
 	updateLastDevice();
 
-	for (size_t i=0; i<axes.size(); i++) {
+	for (size_t i = 0; i < axes.size(); i++) {
+		auto& axis = axes[i];
+
+		axis.curRepeatValue = 0;
+
 		float curVal = getAxis(int(i));
-		auto& timeout = axes[i].timeout;
-		auto& lastVal = axes[i].lastValue;
-		if (lastVal != curVal && lastVal * curVal <= 0) {
-			timeout = 0;
-		} else if (lastVal == curVal) {
-			timeout -= t;
-			if (timeout <= 0) {
-				timeout = -(repeatDelayFirst - repeatDelayHold);
+		int intVal = curVal > 0.50f ? 1 : (curVal < -0.50f ? - 1 : 0);
+
+		auto& timeSinceRepeat = axis.timeSinceRepeat;
+		auto& lastVal = axis.lastRepeatedValue;
+
+		if (lastVal != intVal) {
+			timeSinceRepeat = std::max(repeatDelayFirst, repeatDelayHold);
+			axis.numRepeats = 0;
+		}
+		
+		if (intVal != 0) {
+			Time threshold = axis.numRepeats == 1 ? repeatDelayFirst : repeatDelayHold;
+			timeSinceRepeat += t;
+			if (timeSinceRepeat >= threshold) {
+				axis.curRepeatValue = intVal;
+				axis.numRepeats++;
+				timeSinceRepeat = 0;
 			}
 		}
-		lastVal = curVal;
+
+		lastVal = intVal;
 	}
 }
 
@@ -278,6 +284,17 @@ void Halley::InputVirtual::updateLastDevice()
 		}
 	}
 }
+
+InputVirtual::Bind::Bind(spInputDevice d, int n): device(d), a(n), b(0), isAxis(true) {}
+
+InputVirtual::Bind::Bind(spInputDevice d, int _a, int _b): device(d), a(_a), b(_b), isAxis(false) {}
+
+InputVirtual::AxisData::AxisData()
+{}
+
+InputVirtual::AxisData::AxisData(Vector<Bind>& b)
+	: binds(b)
+{}
 
 void Halley::InputVirtual::setLastDeviceFreeze(bool frozen)
 {

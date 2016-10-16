@@ -81,17 +81,19 @@ namespace Halley {
 			int b;
 			bool isAxis;
 
-			Bind(spInputDevice d, int n) : device(d), a(n), b(0), isAxis(true) {}
-			Bind(spInputDevice d, int _a, int _b) : device(d), a(_a), b(_b), isAxis(false) {}
+			Bind(spInputDevice d, int n);
+			Bind(spInputDevice d, int _a, int _b);
 		};
 
 		struct AxisData {
 			Vector<Bind> binds;
-			float lastValue;
-			Time timeout;
+			int lastRepeatedValue = 0;
+			int numRepeats = 0;
+			int curRepeatValue = 0;
+			Time timeSinceRepeat = 0;
 
-			AxisData() : lastValue(0), timeout(0) {}
-			AxisData(Vector<Bind>& b) : binds(b), lastValue(0), timeout(0) {}
+			AxisData();
+			explicit AxisData(Vector<Bind>& b);
 		};
 
 		Vector<Vector<Bind> > buttons;
