@@ -32,6 +32,8 @@ namespace Halley {
 		size_t getNumberButtons() override { return buttonDown.size(); }
 
 		bool isAnyButtonPressed() override;
+		bool isAnyButtonReleased() override;
+
 		bool isButtonPressed(int code) override;
 		bool isButtonPressedRepeat(int code) override;
 		bool isButtonReleased(int code) override;

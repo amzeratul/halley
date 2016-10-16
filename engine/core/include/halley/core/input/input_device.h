@@ -39,6 +39,8 @@ namespace Halley {
 		virtual String getButtonName(int code)=0;
 
 		virtual bool isAnyButtonPressed()=0;
+		virtual bool isAnyButtonReleased()=0;
+
 		virtual bool isButtonPressed(int code)=0;
 		virtual bool isButtonPressedRepeat(int code)=0;
 		virtual bool isButtonReleased(int code)=0;

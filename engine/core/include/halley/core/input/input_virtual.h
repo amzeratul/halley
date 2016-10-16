@@ -38,6 +38,8 @@ namespace Halley {
 		size_t getNumberAxes() override;
 
 		bool isAnyButtonPressed() override;
+		bool isAnyButtonReleased() override;
+
 		bool isButtonPressed(int code) override;
 		bool isButtonPressedRepeat(int code) override;
 		bool isButtonReleased(int code) override;

@@ -88,6 +88,16 @@ bool Halley::InputButtonBase::isAnyButtonPressed()
 	return false;
 }
 
+bool InputButtonBase::isAnyButtonReleased()
+{
+	for (size_t i=0; i<buttonReleased.size(); i++) {
+		if (buttonReleased[i] != 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
 bool InputButtonBase::isButtonPressed(int code)
 {
 	if (code < 0 || code >= int(buttonPressed.size())) return false;

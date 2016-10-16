@@ -44,22 +44,32 @@ size_t InputVirtual::getNumberAxes()
 	return axes.size();
 }
 
-#include <algorithm>
-
 bool InputVirtual::isAnyButtonPressed()
 {
-	// Enumerate devices
-	std::set<spInputDevice> devices;
 	for (size_t j=0; j < buttons.size(); j++) {
 		auto& binds = buttons[j];
 		for (size_t i=0; i<binds.size(); i++) {
 			Bind& bind = binds[i];
-			devices.insert(bind.device);
+			if (bind.device->isAnyButtonPressed()) {
+				return true;
+			}
 		};
 	}
+	return false;
+}
 
-	// Check devices
-	return std::any_of(devices.begin(), devices.end(), [](auto& d) { return d->isAnyButtonPressed(); });
+bool InputVirtual::isAnyButtonReleased()
+{
+	for (size_t j=0; j < buttons.size(); j++) {
+		auto& binds = buttons[j];
+		for (size_t i=0; i<binds.size(); i++) {
+			Bind& bind = binds[i];
+			if (bind.device->isAnyButtonReleased()) {
+				return true;
+			}
+		};
+	}
+	return false;
 }
 
 bool InputVirtual::isButtonPressed(int code)
