@@ -6,11 +6,10 @@ TaskBar::TaskBar(Resources& resources)
 {
 	{
 		taskMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite"));
-		roundRectTexture = resources.get<Texture>("round_rect.png");
-		auto& mat = *taskMaterial;
-		mat["tex0"] = roundRectTexture;
-		mat["u_smoothness"] = 1.0f / 16.0f;
-		mat["u_outline"] = 0.4f;
+		taskMaterial
+			->set("tex0", resources.get<Texture>("round_rect.png"))
+			.set("u_smoothness", 1.0f / 16.0f)
+			.set("u_outline", 0.4f);
 	}
 
 	{
@@ -18,12 +17,12 @@ TaskBar::TaskBar(Resources& resources)
 		halleyLogo = Sprite()
 			.setImage(resources, "halley_logo_dist.png", "distance_field_sprite")
 			.setPivot(Vector2f(0.5f, 0.5f))
-			.setColour(col)
-			.setScale(Vector2f(0.5f, 0.5f));
-		auto& mat = halleyLogo.getMaterial();
-		mat["u_smoothness"] = 1.0f / 8.0f;
-		mat["u_outline"] = 0.0f;
-		mat["u_outlineColour"] = col;
+			.setScale(Vector2f(0.5f, 0.5f))
+			.setColour(col);
+		halleyLogo.getMaterial()
+			.set("u_smoothness", 1.0f / 8.0f)
+			.set("u_outline", 0.0f)
+			.set("u_outlineColour", col);
 	}
 
 	{
@@ -100,24 +99,23 @@ void TaskBar::draw(Painter& painter)
 		Vector2f drawPos = baseDrawPos + Vector2f((size.x + 20) * t.displaySlot, 0);
 
 		Colour col = t.task->hasError() ? Colour(0.93f, 0.2f, 0.2f) : (t.task->getProgress() > 0.9999f ? Colour(0.16f, 0.69f, 0.34f) : Colour(0.18f, 0.53f, 0.87f));
-		(*t.material)["u_outlineColour"] = col;
+		t.material->set("u_outlineColour", col);
 
 		auto sprite = Sprite()
-			.setSize(Vector2f(64, 64))
-			.setTexRect(Rect4f(0, 0, 1, 1))
 			.setMaterial(t.material)
-			.setPos(drawPos);
+			.setPos(drawPos)
+			.scaleTo(size + Vector2f(24, 24));
 
 		// Background
 		sprite
 			.setColour(Colour4f(0.15f, 0.15f, 0.19f))
-			.drawSliced(painter, size + Vector2f(24, 24), roundRectTexture->getSlice());
+			.drawSliced(painter);
 
 		// Progress
 		painter.setClip(Rect4i(Rect4f(drawPos + Vector2f(12, 12), size.x * t.progressDisplay + 24, size.y + 24)));
 		sprite
 			.setColour(col)
-			.drawSliced(painter, size + Vector2f(24, 24), roundRectTexture->getSlice());
+			.drawSliced(painter);
 		painter.setClip();
 
 		// Text

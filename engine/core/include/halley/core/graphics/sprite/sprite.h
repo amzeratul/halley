@@ -36,7 +36,7 @@ namespace Halley
 		Sprite();
 
 		void draw(Painter& painter) const;
-		void drawSliced(Painter& painter, Vector2f size, Vector4i sliceTexels); // Slices -> x = left, y = top, z = right, w = bottom, in texels
+		void drawSliced(Painter& painter) const;
 		static void draw(const Sprite* sprites, size_t n, Painter& painter);
 
 		Rect4f getAABB() const;
@@ -48,6 +48,7 @@ namespace Halley
 
 		Sprite& setImage(Resources& resources, String imageName, String materialName = "");
 		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material);
+		Sprite& setImageData(const Texture& image);
 
 		Vector2f getPosition() const;
 
@@ -56,6 +57,7 @@ namespace Halley
 		Sprite& setColour(Colour4f colour);
 		Sprite& setScale(Vector2f scale);
 		Sprite& setScale(float scale);
+		Sprite& scaleTo(Vector2f size);
 		Sprite& setFlip(bool flip);
 
 		Sprite& setPivot(Vector2f offset);

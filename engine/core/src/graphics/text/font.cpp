@@ -39,7 +39,7 @@ Font::Font(ResourceLoader& loader)
 	auto texture = loader.getAPI().getResource<Texture>("../font/" + imageName);
 	auto matDef = loader.getAPI().getResource<MaterialDefinition>("text");
 	material = std::make_unique<Material>(matDef);
-	(*material)["tex0"] = texture;
+	material->set("tex0", texture);
 }
 
 std::unique_ptr<Font> Font::loadResource(ResourceLoader& loader)

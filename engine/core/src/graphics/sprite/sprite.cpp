@@ -21,14 +21,17 @@ void Sprite::draw(Painter& painter) const
 {
 	Expects(material);
 	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+	
 	painter.drawSprites(material, 1, &vertexAttrib);
 }
 
-void Sprite::drawSliced(Painter& painter, Vector2f drawSize, Vector4i sliceTexels)
+void Sprite::drawSliced(Painter& painter) const
 {
+	Expects(material);
 	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
-	setScale(drawSize / size);
-	Vector4f slices(sliceTexels);
+	Expects(!!material->getMainTexture());
+
+	Vector4f slices(material->getMainTexture()->getSlice());
 	slices.x /= size.x;
 	slices.y /= size.y;
 	slices.z /= size.x;
@@ -83,6 +86,12 @@ Sprite& Sprite::setMaterial(std::shared_ptr<Material> m)
 {
 	Expects(m);
 	material = m;
+
+	auto& mainTex = material->getMainTexture();
+	if (mainTex) {
+		setImageData(*mainTex);
+	}
+
 	return *this;
 }
 
@@ -101,9 +110,14 @@ Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<c
 	Expects(materialDefinition);
 
 	auto mat = std::make_shared<Material>(materialDefinition);
-	(*mat)["tex0"] = image;
+	mat->set("tex0", image);
 	setMaterial(mat);
-	setSize(Vector2f(image->getSize()));
+	return *this;
+}
+
+Sprite& Sprite::setImageData(const Texture& image)
+{
+	setSize(Vector2f(image.getSize()));
 	setTexRect(Rect4f(0, 0, 1, 1));
 	return *this;
 }
@@ -140,6 +154,11 @@ Sprite& Sprite::setScale(Vector2f v)
 Sprite& Sprite::setScale(float scale)
 {
 	return setScale(Vector2f(scale, scale));
+}
+
+Sprite& Sprite::scaleTo(Vector2f newSize)
+{
+	return setScale(newSize / size);
 }
 
 Sprite& Sprite::setFlip(bool v)

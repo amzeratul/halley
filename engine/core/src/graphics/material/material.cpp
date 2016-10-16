@@ -12,6 +12,7 @@ static int currentPass = 0;
 Material::Material(const Material& other)
 	: uniforms(other.uniforms)
 	, materialDefinition(other.materialDefinition)
+	, mainTexture(other.mainTexture)
 {	
 }
 
@@ -60,7 +61,17 @@ void Material::updateUniforms()
 	}
 }
 
-MaterialParameter& Material::operator[](String name)
+void Material::setMainTexture(const std::shared_ptr<const Texture>& tex)
+{
+	mainTexture = tex;
+}
+
+const std::shared_ptr<const Texture>& Material::getMainTexture() const
+{
+	return mainTexture;
+}
+
+MaterialParameter& Material::getParameter(const String& name)
 {
 	for (auto& u : uniforms) {
 		if (u.name == name) {
@@ -73,4 +84,13 @@ MaterialParameter& Material::operator[](String name)
 std::shared_ptr<Material> Material::clone() const
 {
 	return std::make_shared<Material>(*this);
+}
+
+Material& Material::set(const String& name, const std::shared_ptr<const Texture>& texture)
+{
+	getParameter(name) = texture;
+	if (name == "tex0") {
+		setMainTexture(texture);
+	}
+	return *this;
 }

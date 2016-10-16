@@ -9,13 +9,16 @@ using namespace Halley;
 
 ConsoleWindow::ConsoleWindow(Resources& resources)
 {
-	texture = resources.get<Texture>("round_rect.png");
-	backgroundMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite"));
-	auto& mat = *backgroundMaterial;
-	mat["tex0"] = texture;
-	mat["u_smoothness"] = 1.0f / 16.0f;
-	mat["u_outline"] = 0.5f;
-	mat["u_outlineColour"] = Colour(0.47f, 0.47f, 0.47f);
+	auto backgroundMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite"));
+	backgroundMaterial
+		->set("tex0", resources.get<Texture>("round_rect.png"))
+		.set("u_smoothness", 1.0f / 16.0f)
+		.set("u_outline", 0.5f)
+		.set("u_outlineColour", Colour(0.47f, 0.47f, 0.47f));
+
+	background = Sprite()
+		.setMaterial(backgroundMaterial)
+		.setColour(Colour4f(0.0f, 0.0f, 0.0f, 0.4f));
 
 	font = resources.get<Font>("Inconsolata.font");
 
@@ -52,13 +55,10 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 	Rect4f outerBounds = bounds.grow(8);
 
 	// Background
-	Sprite()
-		.setMaterial(backgroundMaterial)
+	background.clone()
 		.setPos(outerBounds.getTopLeft())
-		.setSize(Vector2f(64, 64))
-		.setTexRect(Rect4f(0, 0, 1, 1))
-		.setColour(Colour4f(0.0f, 0.0f, 0.0f, 0.4f))
-		.drawSliced(painter, outerBounds.getSize(), texture->getSlice());
+		.scaleTo(outerBounds.getSize())
+		.drawSliced(painter);
 
 	const float size = 18;
 	float lineH = font->getLineHeightAtSize(size);

@@ -77,9 +77,10 @@ void TextRenderer::draw(Painter& painter, Vector2f position) const
 	float smooth = clamp(1.0f / (font->getScale() * font->getSmoothRadius()), 0.001f, 0.999f);
 	float outlineSize = clamp(outline / font->getSmoothRadius(), 0.0f, 0.995f);
 
-	(*material)["u_smoothness"] = smooth;
-	(*material)["u_outline"] = outlineSize;
-	(*material)["u_outlineColour"] = outlineColour;
+	material
+		->set("u_smoothness", smooth)
+		.set("u_outline", outlineSize)
+		.set("u_outlineColour", outlineColour);
 
 	float scale = size / font->getSizePoints();
 	Vector2f p = position + Vector2f(0, font->getAscenderDistance() * scale);
@@ -115,11 +116,11 @@ void TextRenderer::draw(Painter& painter, Vector2f position) const
 			auto& glyph = font->getGlyph(c);
 
 			sprites.push_back(Sprite()
-				.setTexRect(glyph.area)
 				.setMaterial(material)
+				.setSize(glyph.size)
+				.setTexRect(glyph.area)
 				.setColour(colour)
 				.setPivot(glyph.horizontalBearing / glyph.size * Vector2f(-1, 1))
-				.setSize(glyph.size)
 				.setScale(scale)
 				.setPos(p + lineOffset));
 

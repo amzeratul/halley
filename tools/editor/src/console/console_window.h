@@ -26,10 +26,9 @@ namespace Halley
 		void submit();
 
 		String input;
+		Sprite background;
 		std::vector<String> buffer;
 		std::vector<String> history;
-		std::shared_ptr<const Texture> texture;
-		std::shared_ptr<Material> backgroundMaterial;
 		std::shared_ptr<const Font> font;
 	};
 }

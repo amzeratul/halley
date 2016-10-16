@@ -19,9 +19,10 @@ void TestStage::init()
 		.setPivot(Vector2f(0.0f, 1.0f))
 		.setColour(col)
 		.setScale(Vector2f(2, 2));
-	sprite.getMaterial()["u_smoothness"] = 0.1f;
-	sprite.getMaterial()["u_outline"] = 0.0f;
-	sprite.getMaterial()["u_outlineColour"] = col;
+	sprite.getMaterial()
+		.set("u_smoothness", 0.1f)
+		.set("u_outline", 0.0f)
+		.set("u_outlineColour", col);
 
 	world->createEntity()
 		.addComponent(SpriteComponent(sprite, 1))

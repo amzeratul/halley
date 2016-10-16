@@ -72,12 +72,12 @@ void EditorRootStage::initSprites()
 	{
 		// Background
 		{
-			auto matRaw = std::make_shared<Material>(getResource<MaterialDefinition>("scanlines"));
-			auto& mat = *matRaw;
-			mat["u_col0"] = Colour4f(0.08f);
-			mat["u_col1"] = Colour4f(0.07f);
-			mat["u_distance"] = 6.0f;
-			background = Sprite().setMaterial(matRaw).setPos(Vector2f(0, 0));
+			auto mat = std::make_shared<Material>(getResource<MaterialDefinition>("scanlines"));
+			mat
+				->set("u_col0", Colour4f(0.08f))
+				.set("u_col1", Colour4f(0.07f))
+				.set("u_distance", 6.0f);
+			background = Sprite().setMaterial(mat).setPos(Vector2f(0, 0));
 		}
 	}
 
@@ -91,9 +91,9 @@ void EditorRootStage::initSprites()
 			.setColour(col)
 			.setScale(Vector2f(8, 8))
 			.setPos(Vector2f(640, 360));
-		auto& mat = halleyLogo.getMaterial();
-		mat["u_smoothness"] = 0.1f;
-		mat["u_outline"] = 0.0f;
-		mat["u_outlineColour"] = col;
+		halleyLogo.getMaterial()
+			.set("u_smoothness", 0.1f)
+			.set("u_outline", 0.0f)
+			.set("u_outlineColour", col);
 	}
 }
