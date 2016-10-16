@@ -2,6 +2,16 @@
 
 using namespace Halley;
 
+void Resource::setMeta(const Metadata& m)
+{
+	meta = m;
+}
+
+const Metadata& Resource::getMeta() const
+{
+	return meta;
+}
+
 AsyncResource::AsyncResource() 
 	: loading(false)
 {}

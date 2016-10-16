@@ -3,6 +3,7 @@
 #include <atomic>
 #include <thread>
 #include <condition_variable>
+#include "metadata.h"
 
 namespace Halley
 {
@@ -10,6 +11,12 @@ namespace Halley
 	{
 	public:
 		virtual ~Resource() {}
+
+		void setMeta(const Metadata& meta);
+		const Metadata& getMeta() const;
+
+	private:
+		Metadata meta;
 	};
 
 	class AsyncResource : public Resource

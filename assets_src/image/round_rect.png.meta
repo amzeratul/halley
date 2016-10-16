@@ -3,4 +3,8 @@ filtering: true
 mipmap: false
 premultiply: false
 format: RGBA
+slice_top: 28
+slice_bottom: 28
+slice_left: 28
+slice_right: 28
 ...

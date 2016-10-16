@@ -6,8 +6,9 @@ TaskBar::TaskBar(Resources& resources)
 {
 	{
 		taskMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite"));
+		roundRectTexture = resources.get<Texture>("round_rect.png");
 		auto& mat = *taskMaterial;
-		mat["tex0"] = resources.get<Texture>("round_rect.png");
+		mat["tex0"] = roundRectTexture;
 		mat["u_smoothness"] = 1.0f / 16.0f;
 		mat["u_outline"] = 0.4f;
 	}
@@ -110,13 +111,13 @@ void TaskBar::draw(Painter& painter)
 		// Background
 		sprite
 			.setColour(Colour4f(0.15f, 0.15f, 0.19f))
-			.drawSliced(painter, size + Vector2f(24, 24), Vector4i(28, 28, 28, 28));
+			.drawSliced(painter, size + Vector2f(24, 24), roundRectTexture->getSlice());
 
 		// Progress
 		painter.setClip(Rect4i(Rect4f(drawPos + Vector2f(12, 12), size.x * t.progressDisplay + 24, size.y + 24)));
 		sprite
 			.setColour(col)
-			.drawSliced(painter, size + Vector2f(24, 24), Vector4i(28, 28, 28, 28));
+			.drawSliced(painter, size + Vector2f(24, 24), roundRectTexture->getSlice());
 		painter.setClip();
 
 		// Text

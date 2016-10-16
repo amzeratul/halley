@@ -3,6 +3,7 @@
 #include "halley/resources/resource.h"
 #include "halley/maths/vector2.h"
 #include <memory>
+#include "halley/maths/vector4.h"
 
 namespace Halley
 {
@@ -20,8 +21,13 @@ namespace Halley
 
 		Vector2i getSize() const { return size; }
 
+		Vector4i getSlice() const;
+
 	protected:
 		unsigned int textureId = -1;
 		Vector2i size;
+		Vector4i slice;
+
+		void computeSlice();
 	};
 }
