@@ -36,8 +36,9 @@ namespace Halley
 		Sprite();
 
 		void draw(Painter& painter) const;
+		void drawNormal(Painter& painter) const;
 		void drawSliced(Painter& painter) const;
-		void drawSliced(Painter& painter, Vector4i slices) const;
+		void drawSliced(Painter& painter, Vector4s slices) const;
 		static void draw(const Sprite* sprites, size_t n, Painter& painter);
 
 		Rect4f getAABB() const;
@@ -69,6 +70,9 @@ namespace Halley
 		Sprite& setSprite(const SpriteSheet& sheet, String name);
 		Sprite& setSprite(const SpriteSheetEntry& entry);
 
+		Sprite& setSliced(Vector4s slices);
+		Sprite& setNormal();
+
 		Sprite clone() const;
 
 	private:
@@ -76,7 +80,9 @@ namespace Halley
 		SpriteVertexAttrib vertexAttrib;
 
 		Vector2f size;
+		Vector4s slices;
 		bool flip = false;
+		bool sliced = false;
 
 		void computeSize();
 	};

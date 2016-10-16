@@ -4,6 +4,7 @@
 #include <halley/file_formats/image.h>
 #include <halley/resources/metadata.h>
 #include "halley/concurrency/concurrent.h"
+#include <gsl/gsl>
 
 using namespace Halley;
 
@@ -46,16 +47,16 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	return texture;
 }
 
-Vector4i Texture::getSlice() const
+Vector4s Texture::getSlices() const
 {
-	return slice;
+	return slices;
 }
 
 void Texture::computeSlice()
 {
 	auto& meta = getMeta();
-	slice.x = meta.getInt("slice_left", 0);
-	slice.y = meta.getInt("slice_top", 0);
-	slice.z = meta.getInt("slice_right", 0);
-	slice.w = meta.getInt("slice_bottom", 0);
+	slices.x = gsl::narrow<short, int>(meta.getInt("slice_left", 0));
+	slices.y = gsl::narrow<short, int>(meta.getInt("slice_top", 0));
+	slices.z = gsl::narrow<short, int>(meta.getInt("slice_right", 0));
+	slices.w = gsl::narrow<short, int>(meta.getInt("slice_bottom", 0));
 }

@@ -19,6 +19,15 @@ Sprite::Sprite()
 
 void Sprite::draw(Painter& painter) const
 {
+	if (sliced) {
+		drawSliced(painter, slices);
+	} else {
+		drawNormal(painter);
+	}
+}
+
+void Sprite::drawNormal(Painter& painter) const
+{
 	Expects(material);
 	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	
@@ -27,13 +36,10 @@ void Sprite::draw(Painter& painter) const
 
 void Sprite::drawSliced(Painter& painter) const
 {
-	Expects(material);
-	Expects(!!material->getMainTexture());
-
-	drawSliced(painter, material->getMainTexture()->getSlice());
+	drawSliced(painter, slices);
 }
 
-void Sprite::drawSliced(Painter& painter, Vector4i slicesPixel) const
+void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel) const
 {
 	Expects(material);
 	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
@@ -225,6 +231,19 @@ Sprite& Sprite::setSprite(const SpriteSheetEntry& entry)
 		vertexAttrib.texRect = entry.coords;
 		vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
 	}
+	return *this;
+}
+
+Sprite& Sprite::setSliced(Vector4s s)
+{
+	slices = s;
+	sliced = true;
+	return *this;
+}
+
+Sprite& Sprite::setNormal()
+{
+	sliced = false;
 	return *this;
 }
 

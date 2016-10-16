@@ -18,6 +18,7 @@ ConsoleWindow::ConsoleWindow(Resources& resources)
 
 	background = Sprite()
 		.setMaterial(backgroundMaterial)
+		.setSliced(backgroundMaterial->getMainTexture()->getSlices())
 		.setColour(Colour4f(0.0f, 0.0f, 0.0f, 0.4f));
 
 	font = resources.get<Font>("Inconsolata.font");
@@ -58,7 +59,7 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 	background.clone()
 		.setPos(outerBounds.getTopLeft())
 		.scaleTo(outerBounds.getSize())
-		.drawSliced(painter);
+		.draw(painter);
 
 	const float size = 18;
 	float lineH = font->getLineHeightAtSize(size);

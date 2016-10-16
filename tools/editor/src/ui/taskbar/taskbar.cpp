@@ -104,18 +104,19 @@ void TaskBar::draw(Painter& painter)
 		auto sprite = Sprite()
 			.setMaterial(t.material)
 			.setPos(drawPos)
+			.setSliced(t.material->getMainTexture()->getSlices())
 			.scaleTo(size + Vector2f(24, 24));
 
 		// Background
 		sprite
 			.setColour(Colour4f(0.15f, 0.15f, 0.19f))
-			.drawSliced(painter);
+			.draw(painter);
 
 		// Progress
 		painter.setClip(Rect4i(Rect4f(drawPos + Vector2f(12, 12), size.x * t.progressDisplay + 24, size.y + 24)));
 		sprite
 			.setColour(col)
-			.drawSliced(painter);
+			.draw(painter);
 		painter.setClip();
 
 		// Text

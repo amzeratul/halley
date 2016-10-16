@@ -21,12 +21,12 @@ namespace Halley
 
 		Vector2i getSize() const { return size; }
 
-		Vector4i getSlice() const;
+		Vector4s getSlices() const;
 
 	protected:
 		unsigned int textureId = -1;
 		Vector2i size;
-		Vector4i slice;
+		Vector4s slices;
 
 		void computeSlice();
 	};
