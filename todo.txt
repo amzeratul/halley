@@ -5,6 +5,7 @@ core/resources
 - asset database
 - shader importer/validator
 - auto atlas spritesheets
+- atlas sprite trimming
 - resources hot reloading [RESEARCH]
 
 core/graphics
@@ -22,7 +23,6 @@ core/graphics
 input
 - input context system [RESEARCH]
 - use GameController API, ditch XInput+Joystick (should be superceded)
-- input should work equally well on both variable and fixed update timelines
 
 audio
 - mixing groups
@@ -54,7 +54,6 @@ codegen
 - components registry [RESEARCH] (does this even make sense?)
 - components serialization [RESEARCH]
 - import custom types in components [RESEARCH]
-- better support for Services
 
 lua
 - codegen Lua
@@ -106,10 +105,6 @@ samples
   - sh09 ("Xtreme Programming - the Literal Game") - from Allegro
   - sh07 ("Fury of the Sky God") - from Allegro
   - sh05 ("Bunkermaster") - from Allegro
-
-fixes needed:
-- exception during entity initialization can cause ::abort() to be called
-- exceptions on other threads are not printed to console
 
 misc/refactor
 - Use C++ modules? (waiting on standard)

@@ -112,13 +112,13 @@ void TaskBar::draw(Painter& painter)
 		// Background
 		sprite
 			.setColour(Colour4f(0.15f, 0.15f, 0.19f))
-			.drawSliced(painter, size + Vector2f(24, 24), Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
+			.drawSliced(painter, size + Vector2f(24, 24), Vector4i(28, 28, 28, 28));
 
 		// Progress
 		painter.setClip(Rect4i(Rect4f(drawPos + Vector2f(12, 12), size.x * t.progressDisplay + 24, size.y + 24)));
 		sprite
 			.setColour(col)
-			.drawSliced(painter, size + Vector2f(24, 24), Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
+			.drawSliced(painter, size + Vector2f(24, 24), Vector4i(28, 28, 28, 28));
 		painter.setClip();
 
 		// Text

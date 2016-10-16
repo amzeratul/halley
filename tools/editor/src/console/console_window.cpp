@@ -57,7 +57,7 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 		.setSize(Vector2f(64, 64))
 		.setTexRect(Rect4f(0, 0, 1, 1))
 		.setColour(Colour4f(0.0f, 0.0f, 0.0f, 0.4f))
-		.drawSliced(painter, outerBounds.getSize(), Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
+		.drawSliced(painter, outerBounds.getSize(), Vector4i(28, 28, 28, 28));
 
 	const float size = 18;
 	float lineH = font->getLineHeightAtSize(size);

@@ -24,10 +24,15 @@ void Sprite::draw(Painter& painter) const
 	painter.drawSprites(material, 1, &vertexAttrib);
 }
 
-void Sprite::drawSliced(Painter& painter, Vector2f drawSize, Vector4f slices)
+void Sprite::drawSliced(Painter& painter, Vector2f drawSize, Vector4i sliceTexels)
 {
 	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	setScale(drawSize / size);
+	Vector4f slices(sliceTexels);
+	slices.x /= size.x;
+	slices.y /= size.y;
+	slices.z /= size.x;
+	slices.w /= size.y;
 	painter.drawSlicedSprite(material, scale, slices, &vertexAttrib);
 }
 
