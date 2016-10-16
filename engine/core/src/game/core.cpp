@@ -26,6 +26,7 @@ using namespace Halley;
 Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 {
 	statics.setup();
+	Logger::addSink(*this);
 
 	game = std::move(g);
 
@@ -165,6 +166,7 @@ void Core::deInit()
 	// Deinit console redirector
 	std::cout << "Goodbye!" << std::endl;
 	std::cout.flush();
+	Logger::removeSink(*this);
 	out.reset();
 
 #ifdef _WIN32

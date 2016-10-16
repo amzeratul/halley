@@ -18,7 +18,7 @@ namespace Halley
 	struct SpriteVertexAttrib
 	{
 		// This structure must match the layout of the shader
-		// See sprite.yaml for reference
+		// See shared_assets/material/sprite_base.yaml for reference
 		Vector4f vertPos;
 		Vector2f pos;
 		Vector2f pivot;
