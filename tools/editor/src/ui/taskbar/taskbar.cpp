@@ -105,22 +105,20 @@ void TaskBar::draw(Painter& painter)
 		Colour col = t.task->hasError() ? Colour(0.93f, 0.2f, 0.2f) : (t.task->getProgress() > 0.9999f ? Colour(0.16f, 0.69f, 0.34f) : Colour(0.18f, 0.53f, 0.87f));
 		(*t.material)["u_outlineColour"] = col;
 
-		// Background
-		taskSprite.clone()
+		auto sprite = taskSprite.clone()
 			.setMaterial(t.material)
-			.setPos(drawPos)
-			.setScale((size + Vector2f(24, 24)) / Vector2f(64, 64))
+			.setPos(drawPos);
+
+		// Background
+		sprite
 			.setColour(Colour4f(0.15f, 0.15f, 0.19f))
-			.drawSliced(painter, Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
+			.drawSliced(painter, size + Vector2f(24, 24), Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
 
 		// Progress
 		painter.setClip(Rect4i(Rect4f(drawPos + Vector2f(12, 12), size.x * t.progressDisplay + 24, size.y + 24)));
-		taskSprite.clone()
-			.setMaterial(t.material)
-			.setPos(drawPos)
-			.setScale((size + Vector2f(24, 24)) / Vector2f(64, 64))
+		sprite
 			.setColour(col)
-			.drawSliced(painter, Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
+			.drawSliced(painter, size + Vector2f(24, 24), Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
 		painter.setClip();
 
 		// Text

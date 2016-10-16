@@ -34,7 +34,7 @@ namespace Halley
 		Sprite();
 
 		void draw(Painter& painter) const;
-		void drawSliced(Painter& painter, Vector4f slices) const;
+		void drawSliced(Painter& painter, Vector2f size, Vector4f slices);
 		static void draw(const Sprite* sprites, size_t n, Painter& painter);
 
 		Rect4f getAABB() const;
