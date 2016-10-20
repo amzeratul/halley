@@ -70,7 +70,7 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 	text.setFont(font).setSize(size).setOffset(Vector2f(0, 1)).setColour(Colour(1, 1, 1));
 
 	// Draw command
-	text.setText("> " + input).draw(painter, cursor);
+	text.setText("> " + input).setPosition(cursor).draw(painter);
 	cursor += Vector2f(0, -lineH);
 
 	// Draw buffer
@@ -85,7 +85,7 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 		}
 		text.setText(buffer[i]);
 		//auto extents = text.getExtents();
-		text.draw(painter, cursor);
+		text.setPosition(cursor).draw(painter);
 		cursor += Vector2f(0, -lineH * nLinesHere);
 		nDrawn += nLinesHere;
 	}

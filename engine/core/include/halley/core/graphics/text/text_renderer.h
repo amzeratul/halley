@@ -15,6 +15,7 @@ namespace Halley
 		TextRenderer();
 		explicit TextRenderer(std::shared_ptr<const Font> font, String text = "", float size = 20, Colour colour = Colour(1, 1, 1, 1), float outline = 0, Colour outlineColour = Colour(0, 0, 0, 1));
 
+		TextRenderer& setPosition(Vector2f pos);
 		TextRenderer& setFont(std::shared_ptr<const Font> font);
 		TextRenderer& setText(String text);
 		TextRenderer& setSize(float size);
@@ -24,8 +25,10 @@ namespace Halley
 		TextRenderer& setAlignment(float align);
 		TextRenderer& setOffset(Vector2f align);
 
-		void draw(Painter& painter, Vector2f position) const;
+		void draw(Painter& painter) const;
 		Vector2f getExtents() const;
+
+		Vector2f getPosition() const;
 
 	private:
 		std::shared_ptr<const Font> font;
@@ -33,6 +36,7 @@ namespace Halley
 		float size = 20;
 		float outline = 0;
 		float align = 0;
+		Vector2f position;
 		Vector2f offset;
 		Colour colour;
 		Colour outlineColour;

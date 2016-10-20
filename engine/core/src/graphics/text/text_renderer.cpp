@@ -21,6 +21,12 @@ TextRenderer::TextRenderer(std::shared_ptr<const Font> font, String text, float 
 {
 }
 
+TextRenderer& TextRenderer::setPosition(Vector2f pos)
+{
+	position = pos;
+	return *this;
+}
+
 TextRenderer& TextRenderer::setFont(std::shared_ptr<const Font> v)
 {
 	font = v;
@@ -70,7 +76,7 @@ TextRenderer& TextRenderer::setOutlineColour(Colour v)
 	return *this;
 }
 
-void TextRenderer::draw(Painter& painter, Vector2f position) const
+void TextRenderer::draw(Painter& painter) const
 {
 	Expects(font);
 	auto material = font->getMaterial()->clone();
@@ -155,4 +161,9 @@ Vector2f TextRenderer::getExtents() const
 	w = std::max(w, p.x);
 
 	return Vector2f(w, p.y);
+}
+
+Vector2f TextRenderer::getPosition() const
+{
+	return position;
 }

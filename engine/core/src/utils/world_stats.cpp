@@ -27,19 +27,19 @@ void WorldStatsView::draw(RenderContext& context)
 
 		auto drawStats = [&] (String name, int nEntities, long long time, Vector2f& basePos)
 		{
-			text.setText(name).setAlignment(0).draw(painter, basePos + Vector2f(10, 0));
+			text.setText(name).setAlignment(0).setPosition(basePos + Vector2f(10, 0)).draw(painter);
 			text.setAlignment(1);
 			if (nEntities > 0) {
-				text.setText(toString(nEntities)).draw(painter, basePos + Vector2f(width - 120, 0));
+				text.setText(toString(nEntities)).setPosition(basePos + Vector2f(width - 120, 0)).draw(painter);
 			}
-			text.setText(formatTime(time)).draw(painter, basePos + Vector2f(width - 50, 0));
+			text.setText(formatTime(time)).setPosition(basePos + Vector2f(width - 50, 0)).draw(painter);
 			text.setAlignment(0);
 			basePos.y += 20;
 		};
 
 		for (auto timeline : timelines) {
 			Vector2f pos = Vector2f(20 + (i++) * width, 60);
-			text.setColour(Colour(0.2f, 1.0f, 0.3f)).setText(String(timelineLabels[int(timeline)]) + ": ").draw(painter, pos);
+			text.setColour(Colour(0.2f, 1.0f, 0.3f)).setText(String(timelineLabels[int(timeline)]) + ": ").setPosition(pos).draw(painter);
 			text.setColour(Colour(1, 1, 1));
 			pos.y += 20;
 
@@ -64,7 +64,7 @@ void WorldStatsView::draw(RenderContext& context)
 		}
 
 		int maxFPS = int(1'000'000'000.0 / grandTotal + 0.5f);
-		text.setColour(Colour(1, 1, 1)).setText("Total elapsed: " + formatTime(grandTotal) + " ms [" + toString(maxFPS) + " FPS maximum].").draw(painter, Vector2f(20, 20));
+		text.setColour(Colour(1, 1, 1)).setText("Total elapsed: " + formatTime(grandTotal) + " ms [" + toString(maxFPS) + " FPS maximum].").setPosition(Vector2f(20, 20)).draw(painter);
 	});
 }
 

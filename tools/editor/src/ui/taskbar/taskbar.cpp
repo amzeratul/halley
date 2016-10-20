@@ -120,8 +120,8 @@ void TaskBar::draw(Painter& painter)
 		painter.setClip();
 
 		// Text
-		text.setSize(14).setText(t.task->getName()).draw(painter, drawPos + Vector2f(24, 12));
-		text.setSize(12).setText(t.task->getProgressLabel()).draw(painter, drawPos + Vector2f(24, 30));
+		text.setSize(14).setText(t.task->getName()).setPosition(drawPos + Vector2f(24, 12)).draw(painter);
+		text.setSize(12).setText(t.task->getProgressLabel()).setPosition(drawPos + Vector2f(24, 30)).draw(painter);
 	}
 }
 
