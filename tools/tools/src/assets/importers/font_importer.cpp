@@ -4,7 +4,6 @@
 #include "halley/maths/vector2.h"
 #include "halley/maths/range.h"
 #include "halley/tools/make_font/font_generator.h"
-#include "halley/resources/metadata.h"
 #include "halley/file_formats/image.h"
 #include "halley/tools/file/filesystem.h"
 

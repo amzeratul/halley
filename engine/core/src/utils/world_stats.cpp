@@ -21,7 +21,7 @@ void WorldStatsView::draw(RenderContext& context)
 		TimeLine timelines[] = { TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::Render };
 		String timelineLabels[] = { "Fixed", "Variable", "Render" };
 		int i = 0;
-		float width = (context.getViewPort().getWidth() - 40) / 3;
+		float width = (float(context.getViewPort().getWidth()) - 40.0f) / 3.0f;
 
 		long long grandTotal = 0;
 

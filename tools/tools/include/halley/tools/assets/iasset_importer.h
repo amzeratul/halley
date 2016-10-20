@@ -4,6 +4,7 @@
 #include <vector>
 #include "halley/file/path.h"
 #include "halley/utils/utils.h"
+#include "halley/resources/metadata.h"
 
 namespace Halley
 {
@@ -15,6 +16,7 @@ namespace Halley
 		Codegen,
 		SimpleCopy,
 		Font,
+		BitmapFont,
 		Image,
 		Material,
 		Animation,

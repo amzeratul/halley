@@ -20,14 +20,44 @@ Font::Glyph::Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontal
 {
 }
 
+void Font::Glyph::serialize(Serializer& s) const
+{
+	s << area;
+	s << size;
+	s << horizontalBearing;
+	s << verticalBearing;
+	s << advance;
+}
+
 void Font::Glyph::deserialize(Deserializer& s)
 {
-	// See font_generator.cpp
 	s >> area;
 	s >> size;
 	s >> horizontalBearing;
 	s >> verticalBearing;
 	s >> advance;
+}
+
+Font::Font(String name, String imageName, float ascender, float height, float sizePt)
+	: name(name)
+	, imageName(imageName)
+	, ascender(ascender)
+	, height(height)
+	, sizePt(sizePt)
+	, smoothRadius(0)
+	, isDistanceField(false)
+{
+}
+
+Font::Font(String name, String imageName, float ascender, float height, float sizePt, float distanceFieldSmoothRadius)
+	: name(name)
+	, imageName(imageName)
+	, ascender(ascender)
+	, height(height)
+	, sizePt(sizePt)
+	, smoothRadius(distanceFieldSmoothRadius)
+	, isDistanceField(true)
+{
 }
 
 Font::Font(ResourceLoader& loader)
@@ -60,14 +90,30 @@ const Font::Glyph& Font::getGlyph(int code) const
 	return iter->second;
 }
 
+void Font::addGlyph(const Glyph& glyph)
+{
+	glyphs[glyph.charcode] = glyph;
+}
+
 std::shared_ptr<const Material> Font::getMaterial() const
 {
 	return material;
 }
 
+void Font::serialize(Serializer& s) const
+{
+	s << name;
+	s << imageName;
+	s << ascender;
+	s << height;
+	s << sizePt;
+	s << isDistanceField;
+	s << smoothRadius;
+	s << glyphs;
+}
+
 void Font::deserialize(Deserializer& s)
 {
-	// See font_generator.cpp
 	s >> name;
 	s >> imageName;
 	s >> ascender;

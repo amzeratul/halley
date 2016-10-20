@@ -32,8 +32,12 @@ namespace Halley
 			Glyph& operator=(const Glyph& o) = default;
 			Glyph& operator=(Glyph&& o) = default;
 
+			void serialize(Serializer& serializer) const;
 			void deserialize(Deserializer& deserializer);
 		};
+
+		Font(String name, String imageName, float ascender, float height, float sizePt);
+		Font(String name, String imageName, float ascender, float height, float sizePt, float distanceFieldSmoothRadius);
 
 		explicit Font(ResourceLoader& loader);
 		static std::unique_ptr<Font> loadResource(ResourceLoader& loader);
@@ -46,8 +50,11 @@ namespace Halley
 		float getSmoothRadius() const { return smoothRadius; }
 		String getName() const { return name; }
 
+		void addGlyph(const Glyph& glyph);
+
 		std::shared_ptr<const Material> getMaterial() const;
 
+		void serialize(Serializer& deserializer) const;
 		void deserialize(Deserializer& deserializer);
 
 	private:

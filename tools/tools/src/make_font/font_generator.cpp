@@ -11,6 +11,7 @@
 #include "halley/file/path.h"
 #include "halley/concurrency/concurrent.h"
 #include "halley/tools/file/filesystem.h"
+#include "halley/core/graphics/text/font.h"
 
 using namespace Halley;
 
@@ -195,44 +196,29 @@ FontGeneratorResult FontGenerator::generateFont(String assetName, gsl::span<cons
 
 Bytes FontGenerator::generateFontMapBinary(String imgName, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float radius, Vector2i imageSize) const
 {
-	auto serialize = [&] (Serializer& s) {
-		String name = font.getName();
-		String imageName = imgName;
-		float ascender = (font.getAscender() * scale);
-		float height = (font.getHeight() * scale);
-		float sizePt = (font.getSize() * scale);
-		float smoothRadius = radius;
-		bool isDistanceField = true;
-		s << name;
-		s << imageName;
-		s << ascender;
-		s << height;
-		s << sizePt;
-		s << isDistanceField;
-		s << (smoothRadius * scale);
+	String name = font.getName();
+	String imageName = imgName;
+	float ascender = (font.getAscender() * scale);
+	float height = (font.getHeight() * scale);
+	float sizePt = (font.getSize() * scale);
+	float smoothRadius = radius * scale;
 
-		unsigned int numEntries = static_cast<unsigned int>(entries.size());
-		s << numEntries;
-		for (unsigned int i = 0; i < numEntries; i++) {
-			auto& c = entries[i];
-			auto metrics = font.getMetrics(c.charcode, scale);
+	Font result(name, imageName, ascender, height, sizePt, smoothRadius);
 
-			int32_t charcode = c.charcode;
-			Rect4f area = Rect4f(c.rect) / Vector2f(imageSize);
-			Vector2f size = Vector2f(c.rect.getSize());
-			Vector2f horizontalBearing = metrics.bearingHorizontal;
-			Vector2f verticalBearing = metrics.bearingVertical;
-			Vector2f advance = metrics.advance;
-			s << charcode;
-			s << area;
-			s << size;
-			s << horizontalBearing;
-			s << verticalBearing;
-			s << advance;
-		}
-	};
+	for (auto& c: entries) {
+		auto metrics = font.getMetrics(c.charcode, scale);
+
+		int32_t charcode = c.charcode;
+		Rect4f area = Rect4f(c.rect) / Vector2f(imageSize);
+		Vector2f size = Vector2f(c.rect.getSize());
+		Vector2f horizontalBearing = metrics.bearingHorizontal;
+		Vector2f verticalBearing = metrics.bearingVertical;
+		Vector2f advance = metrics.advance;
+
+		result.addGlyph(Font::Glyph(charcode, area, size, horizontalBearing, verticalBearing, advance));
+	}
 	
-	return Serializer::toBytes(serialize);
+	return Serializer::toBytes(result);
 }
 
 std::unique_ptr<Metadata> FontGenerator::generateTextureMeta()

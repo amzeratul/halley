@@ -10,6 +10,7 @@
 #include "importers/audio_importer.h"
 #include "importers/aseprite_importer.h"
 #include "importers/spritesheet_importer.h"
+#include "importers/bitmap_font_importer.h"
 
 using namespace Halley;
 
@@ -18,6 +19,7 @@ AssetImporter::AssetImporter(std::vector<Path> assetsSrc)
 {
 	importers[AssetType::SimpleCopy] = std::make_unique<CopyFileImporter>();
 	importers[AssetType::Font] = std::make_unique<FontImporter>();
+	importers[AssetType::BitmapFont] = std::make_unique<BitmapFontImporter>();
 	importers[AssetType::Image] = std::make_unique<ImageImporter>();
 	importers[AssetType::Animation] = std::make_unique<AnimationImporter>();
 	importers[AssetType::Material] = std::make_unique<MaterialImporter>();
@@ -39,6 +41,8 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 	auto root = path.getRoot();
 	if (root == "font") {
 		type = AssetType::Font;
+	} else if (root == "bitmap_font") {
+		type = AssetType::BitmapFont;
 	} else if (root == "image") {
 		type = AssetType::Image;
 	} else if (root == "animation") {
