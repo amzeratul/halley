@@ -49,6 +49,7 @@ namespace Halley
 		float getSizePoints() const { return sizePt; }
 		float getSmoothRadius() const { return smoothRadius; }
 		String getName() const { return name; }
+		bool isDistanceField() const { return distanceField; }
 
 		void addGlyph(const Glyph& glyph);
 
@@ -64,7 +65,7 @@ namespace Halley
 		float height;
 		float sizePt;
 		float smoothRadius;
-		bool isDistanceField;
+		bool distanceField;
 
 		std::shared_ptr<Material> material;
 		FlatMap<int, Glyph> glyphs;

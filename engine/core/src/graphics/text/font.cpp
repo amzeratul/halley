@@ -45,7 +45,7 @@ Font::Font(String name, String imageName, float ascender, float height, float si
 	, height(height)
 	, sizePt(sizePt)
 	, smoothRadius(0)
-	, isDistanceField(false)
+	, distanceField(false)
 {
 }
 
@@ -56,7 +56,7 @@ Font::Font(String name, String imageName, float ascender, float height, float si
 	, height(height)
 	, sizePt(sizePt)
 	, smoothRadius(distanceFieldSmoothRadius)
-	, isDistanceField(true)
+	, distanceField(true)
 {
 }
 
@@ -67,7 +67,7 @@ Font::Font(ResourceLoader& loader)
 	deserialize(ds);
 
 	auto texture = loader.getAPI().getResource<Texture>("../font/" + imageName);
-	auto matDef = loader.getAPI().getResource<MaterialDefinition>("text");
+	auto matDef = loader.getAPI().getResource<MaterialDefinition>(distanceField ? "text" : "sprite");
 	material = std::make_unique<Material>(matDef);
 	material->set("tex0", texture);
 }
@@ -107,7 +107,7 @@ void Font::serialize(Serializer& s) const
 	s << ascender;
 	s << height;
 	s << sizePt;
-	s << isDistanceField;
+	s << distanceField;
 	s << smoothRadius;
 	s << glyphs;
 }
@@ -119,7 +119,7 @@ void Font::deserialize(Deserializer& s)
 	s >> ascender;
 	s >> height;
 	s >> sizePt;
-	s >> isDistanceField;
+	s >> distanceField;
 	s >> smoothRadius;
 	s >> glyphs;
 

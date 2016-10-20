@@ -74,13 +74,15 @@ void TextRenderer::draw(Painter& painter, Vector2f position) const
 {
 	Expects(font);
 	auto material = font->getMaterial()->clone();
-	float smooth = clamp(1.0f / font->getSmoothRadius(), 0.001f, 0.999f);
-	float outlineSize = clamp(outline / font->getSmoothRadius(), 0.0f, 0.995f);
-
-	material
-		->set("u_smoothness", smooth)
-		.set("u_outline", outlineSize)
-		.set("u_outlineColour", outlineColour);
+	
+	if (font->isDistanceField()) {
+		float smooth = clamp(1.0f / font->getSmoothRadius(), 0.001f, 0.999f);
+		float outlineSize = clamp(outline / font->getSmoothRadius(), 0.0f, 0.995f);
+		material
+			->set("u_smoothness", smooth)
+			.set("u_outline", outlineSize)
+			.set("u_outlineColour", outlineColour);
+	}
 
 	float scale = size / font->getSizePoints();
 	Vector2f p = position + Vector2f(0, font->getAscenderDistance() * scale);

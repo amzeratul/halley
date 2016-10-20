@@ -22,10 +22,10 @@ std::vector<Path> BitmapFontImporter::import(const ImportingAsset& asset, Path d
 
 	for (auto& file: asset.inputFiles) {
 		if (file.name.getExtension() == ".xml") {
-			xmlPath = file.name;
+			xmlPath = Path("font") / file.name.getFilename();
 			xmlData = file.data;
 		} else if (file.name.getExtension() == ".png") {
-			pngPath = file.name;
+			pngPath = Path("font") / file.name.getFilename();
 			pngData = file.data;
 		}
 	}
@@ -89,7 +89,7 @@ void BitmapFontImporter::parseBitmapFontXML(String imageName, Vector2i imageSize
 
 				auto offsets = String(child->GetAttribute("offset")).split(' ');
 				bearing.x = offsets[0].toFloat();
-				bearing.y = offsets[1].toFloat();
+				bearing.y = -offsets[1].toFloat(); // ??
 
 				Vector2f imgPos;
 				auto rect = String(child->GetAttribute("rect")).split(' ');
