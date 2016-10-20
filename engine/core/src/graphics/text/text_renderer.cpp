@@ -93,7 +93,7 @@ void TextRenderer::draw(Painter& painter) const
 	float scale = size / font->getSizePoints();
 	Vector2f p = position + Vector2f(0, font->getAscenderDistance() * scale);
 	if (offset != Vector2f(0, 0)) {
-		p -= getExtents() * offset;
+		p -= (getExtents() * offset).floor();
 	}
 
 	Vector<Sprite> sprites;
@@ -108,9 +108,10 @@ void TextRenderer::draw(Painter& painter) const
 		if (c == '\n') {
 			// Line break, update previous characters!
 			if (align != 0) {
+				Vector2f off = (-lineOffset * align).floor();
 				for (size_t j = startPos; j < sprites.size(); j++) {
 					auto& sprite = sprites[j];
-					sprite.setPos(sprite.getPosition() - lineOffset * align);
+					sprite.setPos(sprite.getPosition() + off);
 				}
 			}
 

@@ -146,8 +146,8 @@ namespace Halley {
 		}
 
 		// Floor
-		inline Vector2D floor() const { return Vector2D(floor(x), floor(y)); }
-		inline Vector2D ceil() const { return Vector2D(ceil(x), ceil(y)); }
+		inline Vector2D floor() const { return Vector2D(std::floor(x), std::floor(y)); }
+		inline Vector2D ceil() const { return Vector2D(std::ceil(x), std::ceil(y)); }
 
 		// Gets the angle that this vector is pointing to
 		inline U angle () const
