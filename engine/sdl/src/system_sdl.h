@@ -26,6 +26,8 @@ namespace Halley
 		Vector2i getCenteredWindow(Vector2i size, int screen) const;
 		std::unique_ptr<GLContext> createGLContext() override;
 
+		void showCursor(bool show) override;
+
 	private:
 		void processVideoEvent(VideoAPI* video, const SDL_Event& event);
 

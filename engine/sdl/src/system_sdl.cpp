@@ -219,6 +219,11 @@ std::unique_ptr<GLContext> SystemSDL::createGLContext()
 	return std::make_unique<SDLGLContext>(windows[0]->getSDLWindow());
 }
 
+void SystemSDL::showCursor(bool show)
+{
+	SDL_ShowCursor(show ? 1 : 0);
+}
+
 void SystemSDL::printDebugInfo() const
 {
 	std::cout << std::endl << ConsoleColour(Console::GREEN) << "Initializing Video Display...\n" << ConsoleColour();
