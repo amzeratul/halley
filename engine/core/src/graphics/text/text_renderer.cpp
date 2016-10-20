@@ -74,7 +74,7 @@ void TextRenderer::draw(Painter& painter, Vector2f position) const
 {
 	Expects(font);
 	auto material = font->getMaterial()->clone();
-	float smooth = clamp(1.0f / (font->getScale() * font->getSmoothRadius()), 0.001f, 0.999f);
+	float smooth = clamp(1.0f / font->getSmoothRadius(), 0.001f, 0.999f);
 	float outlineSize = clamp(outline / font->getSmoothRadius(), 0.0f, 0.995f);
 
 	material

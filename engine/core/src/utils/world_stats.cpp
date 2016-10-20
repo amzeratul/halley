@@ -11,7 +11,7 @@ using namespace Halley;
 WorldStatsView::WorldStatsView(CoreAPI& coreAPI, const World& world)
 	: coreAPI(coreAPI)
 	, world(world)
-	, text(coreAPI.getResources().get<Font>("ubuntub.font"), "", 16, Colour(1, 1, 1), 2.0f, Colour(0.1f, 0.1f, 0.1f))
+	, text(coreAPI.getResources().get<Font>("ubuntub.font"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f))
 {
 }
 

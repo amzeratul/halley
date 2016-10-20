@@ -1,6 +1,6 @@
 ---
 name: "Ella"
-spriteSheet: "ella.json"
+spriteSheet: "ella"
 material: "sprite"
 directions:
   - { name: "back" }

@@ -73,8 +73,8 @@ void Font::deserialize(Deserializer& s)
 	s >> ascender;
 	s >> height;
 	s >> sizePt;
+	s >> isDistanceField;
 	s >> smoothRadius;
-	s >> scale;
 	s >> glyphs;
 
 	for (auto& g: glyphs) {

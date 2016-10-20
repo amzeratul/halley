@@ -1,7 +1,5 @@
 #include "test_stage.h"
 #include "registry.h"
-#include "components/sprite_component.h"
-#include "components/position_component.h"
 
 using namespace Halley;
 
@@ -9,24 +7,6 @@ void TestStage::init()
 {
 	world = createWorld("sample_test_world", createSystem);
 	statsView = std::make_unique<WorldStatsView>(*getAPI().core, *world);
-
-	//target = getAPI().video->createRenderTarget();
-	//target->setTarget(0, getAPI().video->createTexture(TextureDescriptor(Vector2i(1280, 720))));
-
-	auto col = Colour4f(0.9882f, 0.15686f, 0.27843f, 1);
-	auto sprite = Sprite()
-		.setImage(getResources(), "halley_logo_dist.png", "distance_field_sprite")
-		.setPivot(Vector2f(0.0f, 1.0f))
-		.setColour(col)
-		.setScale(Vector2f(2, 2));
-	sprite.getMaterial()
-		.set("u_smoothness", 0.1f)
-		.set("u_outline", 0.0f)
-		.set("u_outlineColour", col);
-
-	world->createEntity()
-		.addComponent(SpriteComponent(sprite, 1))
-		.addComponent(PositionComponent(Vector2f(32, 752)));
 }
 
 void TestStage::onFixedUpdate(Time time)
@@ -49,10 +29,3 @@ void TestStage::onRender(RenderContext& context) const
 
 	statsView->draw(context);
 }
-
-/*
-void TestStage::onVariableUpdate(Halley::Time time)
-{
-	std::cout << ":D ";
-}
-*/
