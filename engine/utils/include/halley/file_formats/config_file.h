@@ -45,6 +45,8 @@ namespace Halley
 		SequenceType& asSequence();
 		MapType& asMap();
 
+		bool hasKey(const String& key) const;
+
 		ConfigNode& operator[](const String& key);
 		ConfigNode& operator[](size_t idx);
 

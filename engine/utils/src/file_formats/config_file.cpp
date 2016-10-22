@@ -140,6 +140,16 @@ ConfigNode::MapType& ConfigNode::asMap()
 	}
 }
 
+bool ConfigNode::hasKey(const String& key) const
+{
+	if (type == ConfigNodeType::Map) {
+		auto& map = asMap();
+		return map.find(key) != map.end();
+	} else {
+		return false;
+	}
+}
+
 ConfigNode& ConfigNode::operator[](const String& key)
 {
 	return asMap()[key];
