@@ -56,8 +56,8 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::importAseprite(String
 	FileSystem::writeFile(tmpFilePath, fileData);
 
 	// Run aseprite
-	Path jsonPath = (tmpFilePath.parentPath() / "data.json");
-	Path baseOutputPath = (tmpFilePath.parentPath() / "out");
+	Path jsonPath = tmpFilePath.parentPath() / "data.json";
+	Path baseOutputPath = tmpFilePath.parentPath() / "out";
 	if (FileSystem::runCommand("aseprite -b " + tmpFilePath.getString() + " --list-tags --data " + jsonPath.getString() + " --filename-format {path}/out___{tag}___{frame000}.png --save-as " + baseOutputPath.getString() + ".png") != 0) {
 		throw Exception("Unable to execute aseprite.");
 	}
@@ -101,28 +101,34 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::importAseprite(String
 	std::sort(frameData.begin(), frameData.end(), [] (const ImageData& a, const ImageData& b) -> bool {
 		return a.frameNumber < b.frameNumber;
 	});
-	for (auto tag: spriteSheet.getFrameTags()) {
-		for (auto& frame: frameData) {
-			if (frame.sequenceName == tag.name) {
-				frame.duration = durations[frame.frameNumber];
-				frame.frameNumber -= tag.from;
 
-				std::stringstream ss;
-				ss << baseName.cppStr() << "_" << frame.sequenceName.cppStr() << "_" << std::setw(3) << std::setfill('0') << frame.frameNumber << ".png";
-				frame.filename = ss.str();
-				frame.img->setName(frame.filename);
-			}
-		}
-	}
-	// Untagged images
+	struct TagInfo {
+		int num = 0;
+		int cur = 0;
+	};
+
+	std::map<String, TagInfo> tags;
 	for (auto& frame: frameData) {
-		if (frame.sequenceName == "") {
-			frame.duration = 100;
-			std::stringstream ss;
-			ss << baseName.cppStr() << "_" << std::setw(3) << std::setfill('0') << frame.frameNumber << ".png";
-			frame.filename = ss.str();
-			frame.img->setName(frame.filename);
+		tags[frame.sequenceName].num++;
+	}
+
+	for (auto& frame: frameData) {
+		auto& tag = tags[frame.sequenceName];
+		frame.duration = durations[frame.frameNumber];
+		frame.frameNumber = tag.cur++;
+
+		bool hasFrameNumber = tag.num > 1;
+
+		std::stringstream ss;
+		ss << baseName.cppStr();
+		if (frame.sequenceName != "") {
+			ss << "_" << frame.sequenceName.cppStr();
 		}
+		if (hasFrameNumber) {
+			ss << "_" << std::setw(3) << std::setfill('0') << frame.frameNumber;
+		}
+		frame.filename = ss.str();
+		frame.img->setName(frame.filename);
 	}
 	return frameData;
 }

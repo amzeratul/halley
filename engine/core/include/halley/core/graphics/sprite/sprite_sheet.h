@@ -34,8 +34,8 @@ namespace Halley
 	{
 	public:
 		String name;
-		int from;
-		int to;
+		int from = 0;
+		int to = 0;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
