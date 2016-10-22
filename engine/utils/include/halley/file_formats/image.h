@@ -26,6 +26,7 @@
 #include "halley/text/halleystring.h"
 #include "halley/resources/resource.h"
 #include "halley/file/path.h"
+#include "halley/maths/rect.h"
 
 namespace Halley {
 	class ResourceDataStatic;
@@ -60,9 +61,12 @@ namespace Halley {
 
 		int getNComponents() const { return nComponents; }
 
+		Rect4i getTrimRect() const;
+
 		void clear(int colour);
 		void blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp);
 		void blitFrom(Vector2i pos, Image& img);
+		void blitFrom(Vector2i pos, Image& img, Rect4i srcArea);
 
 		static std::unique_ptr<Image> loadResource(ResourceLoader& loader);
 

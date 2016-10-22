@@ -71,11 +71,40 @@ int Halley::Image::getRGBA(int r, int g, int b, int a)
 	return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
+Halley::Rect4i Halley::Image::getTrimRect() const
+{
+	int x0 = w;
+	int x1 = 0;
+	int y0 = h;
+	int y1 = 0;
+
+	const unsigned int* src = reinterpret_cast<const unsigned int*>(px.get());
+	for (int y = 0; y < int(h); y++) {
+		for (int x = 0; x < int(w); x++) {
+			unsigned int px = src[x + y * h];
+			int alpha = int(px >> 24);
+
+			if (alpha > 0) {
+				x0 = std::min(x0, x);
+				y0 = std::min(y0, y);
+				x1 = std::max(x1, x);
+				y1 = std::max(y1, y);
+			}
+		}
+	}
+
+	if (x0 > x1 || y0 > y1) {
+		return Rect4i();
+	}
+
+	return Rect4i(Vector2i(x0, y0), Vector2i(x1 + 1, y1 + 1));
+}
+
 void Halley::Image::clear(int colour)
 {
 	int* dst = reinterpret_cast<int*>(px.get());
-	for (size_t y = 0; y < h; y++) {
-		for (size_t x = 0; x < w; x++) {
+	for (unsigned int y = 0; y < h; y++) {
+		for (unsigned int x = 0; x < w; x++) {
 			*dst++ = colour;
 		}
 	}
@@ -118,9 +147,17 @@ void Halley::Image::blitFrom(Vector2i pos, const char* buffer, size_t width, siz
 	}
 }
 
-void Halley::Image::blitFrom(Vector2i pos, Image& img)
+void Halley::Image::blitFrom(Vector2i pos, Image& srcImg)
 {
-	blitFrom(pos, img.getPixels(), img.getWidth(), img.getHeight(), img.getWidth(), 32);
+	blitFrom(pos, srcImg.getPixels(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), 32);
+}
+
+void Halley::Image::blitFrom(Vector2i pos, Image& srcImg, Rect4i srcArea)
+{
+	Rect4i src = Rect4i(Vector2i(), srcImg.getSize()).intersection(srcArea);
+	size_t stride = srcImg.getWidth();
+	size_t offset = src.getTop() * stride + src.getLeft();
+	blitFrom(pos, srcImg.getPixels() + offset * 4, src.getWidth(), src.getHeight(), stride, 32);
 }
 
 std::unique_ptr<Halley::Image> Halley::Image::loadResource(ResourceLoader& loader)
