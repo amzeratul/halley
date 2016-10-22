@@ -135,6 +135,11 @@ String Path::getString() const
 	return s.str();
 }
 
+Path Path::dropFront(int numberFolders) const
+{
+	return Path(std::vector<String>(pathParts.begin() + 1, pathParts.end()));
+}
+
 Path Path::parentPath() const
 {
 	return Path(getString() + "/..");

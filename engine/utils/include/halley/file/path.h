@@ -22,6 +22,8 @@ namespace Halley
 		String getExtension() const;
 		String getString() const;
 
+		Path dropFront(int numberFolders) const;
+
 		Path parentPath() const;
 		Path replaceExtension(String newExtension) const;
 

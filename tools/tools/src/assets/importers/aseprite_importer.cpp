@@ -15,9 +15,10 @@ std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, Path dst
 {
 	Path srcPath = asset.inputFiles.at(0).name;
 	String baseName = srcPath.getStem().getString();
-	Path animationPath = Path("animation") / baseName;
-	Path spriteSheetPath = Path("spritesheet") / baseName;
-	Path imagePath = Path("image") / (baseName + ".png");
+	Path basePath = srcPath.parentPath().dropFront(1) / baseName;
+	Path animationPath = Path("animation") / basePath;
+	Path spriteSheetPath = Path("spritesheet") / basePath;
+	Path imagePath = (Path("image") / basePath).replaceExtension(".png");
 	Path imageMetaPath = imagePath.replaceExtension(imagePath.getExtension() + ".meta");
 
 	// Meta
@@ -30,7 +31,7 @@ std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, Path dst
 	auto frames = importAseprite(baseName, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data)));
 
 	// Write animation
-	Animation animation = generateAnimation(baseName, frames);
+	Animation animation = generateAnimation(baseName, spriteSheetPath.dropFront(1), frames);
 	FileSystem::writeFile(dstDir / animationPath, Serializer::toBytes(animation));
 
 	// Split grid
@@ -41,7 +42,7 @@ std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, Path dst
 
 	// Generate atlas + spritesheet
 	SpriteSheet spriteSheet;
-	auto atlasImage = generateAtlas(baseName, frames, spriteSheet);
+	auto atlasImage = generateAtlas(imagePath.dropFront(1), frames, spriteSheet);
 	FileSystem::writeFile(dstDir / imagePath, atlasImage->savePNGToBytes());
 	FileSystem::writeFile(dstDir / spriteSheetPath, Serializer::toBytes(spriteSheet));
 
@@ -154,13 +155,13 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::importAseprite(String
 	return frameData;
 }
 
-Animation AsepriteImporter::generateAnimation(String baseName, const std::vector<ImageData>& frameData)
+Animation AsepriteImporter::generateAnimation(String baseName, Path spriteSheetPath, const std::vector<ImageData>& frameData)
 {
 	Animation animation;
 
 	animation.setName(baseName);
 	animation.setMaterialName("sprite");
-	animation.setSpriteSheetName(baseName);
+	animation.setSpriteSheetName(spriteSheetPath.getString());
 
 	std::map<String, AnimationSequence> sequences;
 
@@ -184,7 +185,7 @@ Animation AsepriteImporter::generateAnimation(String baseName, const std::vector
 	return animation;
 }
 
-std::unique_ptr<Image> AsepriteImporter::generateAtlas(String baseName, std::vector<ImageData>& images, SpriteSheet& spriteSheet)
+std::unique_ptr<Image> AsepriteImporter::generateAtlas(Path imageName, std::vector<ImageData>& images, SpriteSheet& spriteSheet)
 {
 	// Generate entries
 	std::vector<BinPackEntry> entries;
@@ -201,7 +202,7 @@ std::unique_ptr<Image> AsepriteImporter::generateAtlas(String baseName, std::vec
 		auto res = BinPack::pack(entries, size);
 		if (res.is_initialized()) {
 			// Found a pack
-			return makeAtlas(baseName, res.get(), size, spriteSheet);
+			return makeAtlas(imageName, res.get(), size, spriteSheet);
 		} else {
 			// Try 64x64, then 128x64, 128x128, 256x128, etc
 			if (wide) {
@@ -216,12 +217,12 @@ std::unique_ptr<Image> AsepriteImporter::generateAtlas(String baseName, std::vec
 	throw Exception("Unable to pack sprites in a reasonably sized atlas!");
 }
 
-std::unique_ptr<Image> AsepriteImporter::makeAtlas(String baseName, const std::vector<BinPackResult>& result, Vector2i size, SpriteSheet& spriteSheet)
+std::unique_ptr<Image> AsepriteImporter::makeAtlas(Path imageName, const std::vector<BinPackResult>& result, Vector2i size, SpriteSheet& spriteSheet)
 {
 	auto image = std::make_unique<Image>(size.x, size.y);
 	image->clear(0);
 
-	spriteSheet.setTextureName(baseName + ".png");
+	spriteSheet.setTextureName(imageName.getString());
 
 	for (auto& packedImg: result) {
 		ImageData* img = reinterpret_cast<ImageData*>(packedImg.data);
