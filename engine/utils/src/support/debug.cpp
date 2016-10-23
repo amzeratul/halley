@@ -389,12 +389,24 @@ Halley::String Halley::Debug::getCallStack()
 #endif
 }
 
-void Debug::trace(const char* filename, int line)
+#ifdef min
+#undef min
+#endif
+
+void Debug::trace(const char* filename, int line, const char* arg)
 {
 	auto& trace = lastTraces[tracePos];
 	tracePos = (tracePos + 1) % lastTraces.size();
 	trace.filename = filename;
 	trace.line = line;
+
+	if (arg) {
+		size_t len = std::min(trace.arg.size() - 1, strlen(arg));
+		memcpy(trace.arg.data(), arg, len);
+		trace.arg[len] = 0;
+	} else {
+		trace.arg[0] = 0;
+	}
 }
 
 Halley::String Halley::Debug::getLastTraces()
@@ -404,6 +416,9 @@ Halley::String Halley::Debug::getLastTraces()
 	for (size_t i = 0; i < n; ++i) {
 		auto& trace = lastTraces[(i + tracePos) % n];
 		result += " - " + String(trace.filename) + ":" + toString(trace.line);
+		if (trace.arg[0] != 0) {
+			result += String(" [") + trace.arg.data() + "]";
+		}
 		if (i == n - 1) {
 			result += " [latest]";
 		}

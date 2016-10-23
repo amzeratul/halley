@@ -104,7 +104,7 @@ void System::doUpdate(Time time) {
 		initialised = true;
 	}
 
-	HALLEY_DEBUG_TRACE();
+	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 	timer.beginSample();
 
 	purgeMessages();
@@ -115,7 +115,7 @@ void System::doUpdate(Time time) {
 	updateBase(time);
 	
 	timer.endSample();
-	HALLEY_DEBUG_TRACE();
+	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 }
 
 void System::doRender(Painter& painter) {
@@ -124,11 +124,11 @@ void System::doRender(Painter& painter) {
 		initialised = true;
 	}
 
-	HALLEY_DEBUG_TRACE();
+	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 	timer.beginSample();
 
 	renderBase(painter);
 
 	timer.endSample();
-	HALLEY_DEBUG_TRACE();
+	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 }

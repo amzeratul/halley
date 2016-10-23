@@ -30,6 +30,7 @@ namespace Halley {
 	{
 		const char* filename = nullptr;
 		int line = 0;
+		std::array<char, 1024> arg = {};
 	};
 
 	class Debug {
@@ -40,7 +41,7 @@ namespace Halley {
 		static void printCallStack();
 		static String getCallStack();
 
-		static void trace(const char* filename, int line);
+		static void trace(const char* filename, int line, const char* arg = nullptr);
 		static String getLastTraces();
 
 	private:
@@ -51,4 +52,6 @@ namespace Halley {
 	};
 
 	#define HALLEY_DEBUG_TRACE() Halley::Debug::trace(__FILE__, __LINE__)
+	#define HALLEY_DEBUG_TRACE_COMMENT(str) Halley::Debug::trace(__FILE__, __LINE__, (str))
+	#define HALLEY_DEBUG_TRACE_THIS() Halley::Debug::trace(__FILE__, __LINE__, typeid(*this).name())
 }
