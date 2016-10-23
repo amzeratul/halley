@@ -25,6 +25,7 @@
 #include <iostream>
 #include <sstream>
 #include <ctime>
+#include <cstring>
 #include "halley/os/os.h"
 
 using namespace Halley;
