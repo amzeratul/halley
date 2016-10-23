@@ -183,7 +183,7 @@ std::vector<Path> ImportAssetsDatabase::getOutFiles(String assetId) const
 	}
 }
 
-constexpr static int currentAssetVersion = 7;
+constexpr static int currentAssetVersion = 8;
 
 void ImportAssetsDatabase::serialize(Serializer& s) const
 {

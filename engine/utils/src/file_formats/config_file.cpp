@@ -206,13 +206,19 @@ const ConfigNode& ConfigFile::getRoot() const
 	return root;
 }
 
+constexpr int curVersion = 1;
+
 void ConfigFile::serialize(Serializer& s) const
 {
+	int version = curVersion;
+	s << version;
 	s << root;
 }
 
 void ConfigFile::deserialize(Deserializer& s)
 {
+	int version;
+	s >> version;
 	s >> root;
 }
 

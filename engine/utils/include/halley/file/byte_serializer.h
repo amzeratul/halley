@@ -109,17 +109,17 @@ namespace Halley {
 			return *this << val.getTopLeft() << val.getBottomRight();
 		}
 
+		template <typename T, typename U>
+		Serializer& operator<<(const std::pair<T, U>& p)
+		{
+			return *this << p.first << p.second;
+		}
+
 		template <typename T>
 		Serializer& operator<<(const T& val)
 		{
 			val.serialize(*this);
 			return *this;
-		}
-
-		template <typename T, typename U>
-		Serializer& operator<<(const std::pair<T, U>& p)
-		{
-			return *this << p.first << p.second;
 		}
 
 	private:
@@ -233,17 +233,17 @@ namespace Halley {
 			return *this;
 		}
 
+		template <typename T, typename U>
+		Deserializer& operator>>(std::pair<T, U>& p)
+		{
+			return *this >> p.first >> p.second;
+		}
+
 		template <typename T>
 		Deserializer& operator>>(T& val)
 		{
 			val.deserialize(*this);
 			return *this;
-		}
-
-		template <typename T, typename U>
-		Deserializer& operator>>(std::pair<T, U>& p)
-		{
-			return *this >> p.first >> p.second;
 		}
 
 	private:
