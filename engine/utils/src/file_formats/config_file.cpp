@@ -11,6 +11,21 @@ ConfigNode::ConfigNode()
 {
 }
 
+ConfigNode::ConfigNode(MapType&& entryMap)
+{
+	operator=(std::move(entryMap));
+}
+
+ConfigNode::ConfigNode(SequenceType&& entryList)
+{
+	operator=(std::move(entryList));
+}
+
+ConfigNode::ConfigNode(ScalarType&& value)
+{
+	operator=(std::move(value));
+}
+
 ConfigNode& ConfigNode::operator=(MapType&& entry) 
 {
 	type = ConfigNodeType::Map;

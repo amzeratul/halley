@@ -28,6 +28,9 @@ namespace Halley
 		using ScalarType = String;
 
 		ConfigNode();
+		ConfigNode(MapType&& entryMap);
+		ConfigNode(SequenceType&& entryList);
+		ConfigNode(ScalarType&& value);
 		
 		ConfigNode& operator=(MapType&& entryMap);
 		ConfigNode& operator=(SequenceType&& entryList);
