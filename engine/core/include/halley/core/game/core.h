@@ -31,7 +31,7 @@ namespace Halley
 		void init() override;
 
 		void setStage(StageID stage) override;
-		void setStage(std::unique_ptr<Stage> stage);
+		void setStage(std::unique_ptr<Stage> stage) override;
 		void quit(int exitCode = 0) override;
 		Resources& getResources() override;
 		long long getAverageTime(TimeLine tl) const override;

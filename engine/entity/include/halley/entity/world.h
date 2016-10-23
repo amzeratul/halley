@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <typeinfo>
+#include <type_traits>
 #include "entity_id.h"
 #include "family_mask.h"
 #include "family.h"
@@ -38,7 +40,13 @@ namespace Halley {
 		const Vector<std::unique_ptr<System>>& getSystems(TimeLine timeline) const;
 
 		Service& addService(std::unique_ptr<Service> service);
-		Service& getService(const String& name) const;
+
+		template <typename T>
+		T& getService() const
+		{
+			static_assert(std::is_base_of<Service, T>::value, "Must extend Service");
+			return *dynamic_cast<T*>(&getService(typeid(T).name()));
+		}
 
 		EntityRef createEntity();
 		void destroyEntity(EntityId id);
@@ -88,5 +96,7 @@ namespace Halley {
 		void renderSystems(Painter& painter) const;
 		
 		void onAddFamily(Family& family);
+
+		Service& getService(const String& name) const;
 	};
 }

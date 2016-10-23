@@ -1,11 +1,13 @@
 #pragma once
 
+#include <typeinfo>
+
 namespace Halley
 {
 	class Service
 	{
 	public:
 		virtual ~Service() {}
-		virtual String getName() const = 0;
+		String getName() const { return typeid(*this).name(); }
 	};
 }

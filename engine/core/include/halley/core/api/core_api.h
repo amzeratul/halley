@@ -5,6 +5,7 @@
 namespace Halley
 {
 	class Resources;
+	class Stage;
 
 	class CoreAPI
 	{
@@ -12,6 +13,7 @@ namespace Halley
 		virtual ~CoreAPI() {}
 		virtual void quit(int exitCode = 0) = 0;
 		virtual void setStage(StageID stage) = 0;
+		virtual void setStage(std::unique_ptr<Stage> stage) = 0;
 		virtual Resources& getResources() = 0;
 
 		virtual long long getAverageTime(TimeLine tl) const = 0;
