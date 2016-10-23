@@ -34,6 +34,7 @@ namespace Halley
 		void setStage(std::unique_ptr<Stage> stage) override;
 		void quit(int exitCode = 0) override;
 		Resources& getResources() override;
+		const Environment& getEnvironment() override;
 		long long getAverageTime(TimeLine tl) const override;
 		long long getElapsedTime(TimeLine tl) const override;
 

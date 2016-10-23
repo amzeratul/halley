@@ -332,6 +332,11 @@ Resources& Core::getResources()
 	return *resources;
 }
 
+const Environment& Core::getEnvironment()
+{
+	return *environment;
+}
+
 long long Core::getAverageTime(TimeLine tl) const
 {
 	return timers[int(tl)].averageElapsedNanoSeconds();

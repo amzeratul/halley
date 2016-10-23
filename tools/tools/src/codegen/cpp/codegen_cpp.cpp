@@ -305,7 +305,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 	if (!system.services.empty()) {
 		std::vector<String> methodBody;
 		for (auto& service: system.services) {
-			methodBody.push_back(lowerFirst(service.name) + " = &doGetWorld().getService<" + service.name + ">();");
+			methodBody.push_back(lowerFirst(service.name) + " = &doGetWorld().template getService<" + service.name + ">();");
 		}
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "initBase", false, false, true), methodBody);
 	}
