@@ -23,8 +23,11 @@ std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, Path dst
 
 	// Meta
 	Metadata meta;
+	Vector2i pivot;
 	if (asset.metadata) {
 		meta = *asset.metadata;
+		pivot.x = meta.getInt("pivotX", 0);
+		pivot.y = meta.getInt("pivotY", 0);
 	}
 
 	// Import
@@ -42,7 +45,7 @@ std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, Path dst
 
 	// Generate atlas + spritesheet
 	SpriteSheet spriteSheet;
-	auto atlasImage = generateAtlas(imagePath.dropFront(1), frames, spriteSheet);
+	auto atlasImage = generateAtlas(imagePath.dropFront(1), frames, spriteSheet, pivot);
 	FileSystem::writeFile(dstDir / imagePath, atlasImage->savePNGToBytes());
 	FileSystem::writeFile(dstDir / spriteSheetPath, Serializer::toBytes(spriteSheet));
 
@@ -185,7 +188,7 @@ Animation AsepriteImporter::generateAnimation(String baseName, Path spriteSheetP
 	return animation;
 }
 
-std::unique_ptr<Image> AsepriteImporter::generateAtlas(Path imageName, std::vector<ImageData>& images, SpriteSheet& spriteSheet)
+std::unique_ptr<Image> AsepriteImporter::generateAtlas(Path imageName, std::vector<ImageData>& images, SpriteSheet& spriteSheet, Vector2i pivot)
 {
 	// Generate entries
 	std::vector<BinPackEntry> entries;
@@ -202,7 +205,7 @@ std::unique_ptr<Image> AsepriteImporter::generateAtlas(Path imageName, std::vect
 		auto res = BinPack::pack(entries, size);
 		if (res.is_initialized()) {
 			// Found a pack
-			return makeAtlas(imageName, res.get(), size, spriteSheet);
+			return makeAtlas(imageName, res.get(), size, spriteSheet, pivot);
 		} else {
 			// Try 64x64, then 128x64, 128x128, 256x128, etc
 			if (wide) {
@@ -217,7 +220,7 @@ std::unique_ptr<Image> AsepriteImporter::generateAtlas(Path imageName, std::vect
 	throw Exception("Unable to pack sprites in a reasonably sized atlas!");
 }
 
-std::unique_ptr<Image> AsepriteImporter::makeAtlas(Path imageName, const std::vector<BinPackResult>& result, Vector2i size, SpriteSheet& spriteSheet)
+std::unique_ptr<Image> AsepriteImporter::makeAtlas(Path imageName, const std::vector<BinPackResult>& result, Vector2i size, SpriteSheet& spriteSheet, Vector2i pivot)
 {
 	auto image = std::make_unique<Image>(size.x, size.y);
 	image->clear(0);
@@ -231,7 +234,7 @@ std::unique_ptr<Image> AsepriteImporter::makeAtlas(Path imageName, const std::ve
 		SpriteSheetEntry entry;
 		entry.size = Vector2f(img->img->getSize());
 		entry.rotated = false;
-		entry.pivot = Vector2f();
+		entry.pivot = Vector2f(pivot) / entry.size;
 		entry.coords = Rect4f(packedImg.rect) / Vector2f(size);
 		spriteSheet.addSprite(img->filename, entry);
 	}

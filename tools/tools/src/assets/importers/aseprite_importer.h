@@ -33,8 +33,8 @@ namespace Halley
 
 		Animation generateAnimation(String baseName, Path spriteSheetPath, const std::vector<ImageData>& data);
 
-		std::unique_ptr<Image> generateAtlas(Path imageName, std::vector<ImageData>& images, SpriteSheet& spriteSheet);
-		std::unique_ptr<Image> makeAtlas(Path imageName, const std::vector<BinPackResult>& pack, Vector2i size, SpriteSheet& spriteSheet);
+		std::unique_ptr<Image> generateAtlas(Path imageName, std::vector<ImageData>& images, SpriteSheet& spriteSheet, Vector2i pivot);
+		std::unique_ptr<Image> makeAtlas(Path imageName, const std::vector<BinPackResult>& pack, Vector2i size, SpriteSheet& spriteSheet, Vector2i pivot);
 
 		std::vector<ImageData> splitImagesInGrid(const std::vector<ImageData>& images, Vector2i grid);
 	};
