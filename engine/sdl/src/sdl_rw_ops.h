@@ -13,6 +13,8 @@ namespace Halley
 		static std::unique_ptr<ResourceDataReader> fromMemory(gsl::span<const gsl::byte> span);
 
 		SDLRWOps(SDL_RWops* fp, int64_t start, int64_t end, bool closeOnFinish);
+		~SDLRWOps();
+
 		size_t size() const override;
 		int read(gsl::span<gsl::byte> dst) override;
 		void seek(int64_t pos, int whence) override;

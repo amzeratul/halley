@@ -42,6 +42,11 @@ SDLRWOps::SDLRWOps(SDL_RWops* _fp, int64_t _start, int64_t _end, bool _closeOnFi
 	}
 }
 
+SDLRWOps::~SDLRWOps()
+{
+	SDLRWOps::close();
+}
+
 size_t SDLRWOps::size() const
 {
 	return end - start;
