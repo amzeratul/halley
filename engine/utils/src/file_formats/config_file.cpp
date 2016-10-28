@@ -119,6 +119,42 @@ String ConfigNode::asString() const
 	}
 }
 
+int ConfigNode::asInt(int defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asInt();
+	}
+}
+
+float ConfigNode::asFloat(float defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asFloat();
+	}
+}
+
+bool ConfigNode::asBool(bool defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asBool();
+	}
+}
+
+String ConfigNode::asString(const String& defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asString();
+	}
+}
+
 const ConfigNode::SequenceType& ConfigNode::asSequence() const
 {
 	if (type == ConfigNodeType::Sequence) {
@@ -182,7 +218,7 @@ const ConfigNode& ConfigNode::operator[](const String& key) const
 	if (iter != map.end()) {
 		return iter->second;
 	} else {
-		throw Exception("Key " + key + " not found in map.");
+		return undefinedConfigNode;
 	}
 }
 
@@ -247,3 +283,5 @@ std::unique_ptr<ConfigFile> ConfigFile::loadResource(ResourceLoader& loader)
 
 	return std::move(config);
 }
+
+ConfigNode ConfigNode::undefinedConfigNode;

@@ -43,6 +43,12 @@ namespace Halley
 		float asFloat() const;
 		bool asBool() const;
 		String asString() const;
+
+		int asInt(int defaultValue) const;
+		float asFloat(float defaultValue) const;
+		bool asBool(bool defaultValue) const;
+		String asString(const String& defaultValue) const;
+
 		const SequenceType& asSequence() const;
 		const MapType& asMap() const;
 		SequenceType& asSequence();
@@ -65,6 +71,8 @@ namespace Halley
 	private:
 		ConfigNodeType type;
 		boost::variant<ScalarType, SequenceType, MapType> contents;
+
+		static ConfigNode undefinedConfigNode;
 	};
 
 	class ConfigFile : public Resource
