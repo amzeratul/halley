@@ -7,6 +7,7 @@
 #include "halley/core/graphics/material/material_parameter.h"
 #include <halley/file_formats/text_file.h>
 #include "halley/file/byte_serializer.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

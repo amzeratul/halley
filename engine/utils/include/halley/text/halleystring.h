@@ -174,34 +174,6 @@ namespace Halley {
 	using StringArray = Vector<String>;
 
 	
-
-	template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
-	String toString(T src, int prec = -1)
-	{
-		Expects(prec >= -1 && prec <= 20);
-		std::stringstream str;
-		if (prec != -1) {
-			str << std::fixed << std::setprecision(prec);
-		}
-		str << src;
-		if (prec == -1) {
-			return String::prettyFloat(str.str());
-		} else {
-			return str.str();
-		}
-	}
-
-	template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-	String toString(T value, int base = 10)
-	{
-		Expects(base == 10 || base == 16 || base == 8);
-		std::stringstream ss;
-		if (base == 16) ss.setf(std::ios::hex, std::ios::basefield);
-		else if (base == 8) ss.setf(std::ios::oct, std::ios::basefield);
-		ss << value;
-		return ss.str();
-	}
-
 }
 
 namespace std {

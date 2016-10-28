@@ -8,6 +8,7 @@
 #include <halley/support/exception.h>
 #include <halley/support/debug.h>
 #include <halley/core/graphics/window.h>
+#include "halley/text/string_converter.h"
 using namespace Halley;
 
 #ifdef _MSC_VER

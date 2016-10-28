@@ -5,6 +5,7 @@
 #include "halley/core/api/halley_api.h"
 #include "halley/file/byte_serializer.h"
 #include "resources/resources.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

@@ -20,6 +20,7 @@
 \*****************************************************************/
 
 #include "input/input_button_base.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

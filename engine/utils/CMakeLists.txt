@@ -126,6 +126,7 @@ set(HEADERS
         "include/halley/text/encode.h"
         "include/halley/text/halleystring.h"
 		"include/halley/text/halleystring.natvis"
+        "include/halley/text/string_converter.h"
         "include/halley/time/halleytime.h"
         "include/halley/time/stopwatch.h"
         "include/halley/utils/algorithm.h"

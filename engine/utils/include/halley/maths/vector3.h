@@ -108,6 +108,11 @@ namespace Halley {
 		// Projection on another vector
 		inline Vector3D projection (const Vector3D &p) const { Vector3D unit = p.getUnit(); return dot(unit) * unit; }
 		inline T projectionLength (const Vector3D &p) const { Vector3D unit = p.getUnit(); return dot(unit); }
+
+		String toString() const
+		{
+			return String("(") + x + ", " + y + ", " + z + ")";
+		}
 	};
 
 

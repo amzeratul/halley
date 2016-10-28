@@ -1,6 +1,7 @@
 #include "audio_sdl.h"
 #include <SDL.h>
 #include <cstdint>
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

@@ -1,6 +1,7 @@
 #include "halley/resources/metadata.h"
 #include "halley/resources/resource_data.h"
 #include "halley/file/byte_serializer.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

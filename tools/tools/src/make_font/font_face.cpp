@@ -6,6 +6,7 @@
 #include <halley/maths/vector2.h>
 #include <halley/file_formats/image.h>
 #include FT_FREETYPE_H
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

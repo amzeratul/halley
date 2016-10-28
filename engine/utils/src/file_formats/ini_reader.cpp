@@ -23,6 +23,7 @@
 #include <memory>
 #include <cstring>
 #include "halley/support/exception.h"
+#include "halley/text/string_converter.h"
 using namespace Halley;
 
 #ifdef _MSC_VER

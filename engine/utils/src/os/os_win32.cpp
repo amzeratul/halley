@@ -19,6 +19,7 @@
 
 \*****************************************************************/
 
+#include "halley/text/string_converter.h"
 #ifdef _WIN32
 #include "halley/support/exception.h"
 

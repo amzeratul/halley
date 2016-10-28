@@ -25,6 +25,7 @@
 #include "../../contrib/lodepng/lodepng.h"
 #include "halley/support/exception.h"
 #include "halley/resources/resource_data.h"
+#include "halley/text/string_converter.h"
 
 Halley::Image::Image(unsigned int _w, unsigned int _h)
 	: px(nullptr, [](char*){})

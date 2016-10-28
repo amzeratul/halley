@@ -4,6 +4,7 @@
 #include "halley/support/exception.h"
 #include <yaml-cpp/yaml.h>
 #include "halley/tools/file/filesystem.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

@@ -3,6 +3,7 @@
 #include <halley/support/exception.h>
 #include <network_packet.h>
 #include <iostream>
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

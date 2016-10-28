@@ -8,6 +8,7 @@
 #include "halley/core/graphics/sprite/animation.h"
 #include <sstream>
 #include "halley/data_structures/bin_pack.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

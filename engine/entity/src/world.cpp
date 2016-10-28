@@ -6,6 +6,7 @@
 #include "world.h"
 #include "system.h"
 #include "family.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

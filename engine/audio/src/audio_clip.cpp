@@ -3,6 +3,7 @@
 #include "vorbis_dec.h"
 #include "halley/resources/metadata.h"
 #include "halley/concurrency/concurrent.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

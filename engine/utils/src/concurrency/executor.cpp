@@ -1,6 +1,7 @@
 #include <halley/concurrency/concurrent.h>
 #include <halley/concurrency/executor.h>
 #include <halley/support/exception.h>
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

@@ -1,4 +1,5 @@
 #include "sdl_rw_ops.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

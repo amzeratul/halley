@@ -4,6 +4,7 @@
 #include <set>
 #include <halley/support/exception.h>
 #include <algorithm>
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

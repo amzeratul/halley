@@ -11,6 +11,7 @@
 #include "importers/aseprite_importer.h"
 #include "importers/spritesheet_importer.h"
 #include "importers/bitmap_font_importer.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

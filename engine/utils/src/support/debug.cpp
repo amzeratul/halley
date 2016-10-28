@@ -27,6 +27,7 @@
 #include <ctime>
 #include <cstring>
 #include "halley/os/os.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

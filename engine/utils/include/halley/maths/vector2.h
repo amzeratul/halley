@@ -27,6 +27,7 @@
 #include <cassert>
 #include "angle.h"
 #include <halley/utils/utils.h>
+#include "halley/text/string_converter.h"
 
 namespace Halley {
 	//////////////////////////////
@@ -176,6 +177,11 @@ namespace Halley {
 		{
 			return *this - dot(param)*param;
 		}
+
+		String toString() const
+		{
+			return String("(") + x + ", " + y + ")";
+		}
 	};
 
 
@@ -192,7 +198,7 @@ namespace Halley {
 	{
 		ostream << "(" << v.x << "," << v.y << ")" ; return ostream;
 	}
-
+	
 	////////////
 	// Typedefs
 	typedef Vector2D<double,Angle<double> > Vector2d;

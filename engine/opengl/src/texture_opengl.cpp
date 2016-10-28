@@ -6,6 +6,7 @@
 #include <gsl/gsl_assert>
 #include "video_opengl.h"
 #include "halley/support/logger.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

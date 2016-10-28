@@ -20,27 +20,28 @@
 \*****************************************************************/
 
 #include "halley/file/string_serializer.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 
 String StringSerializer::encode(Vector2i v)
 {
-	return toString(v.x) + "," + toString(v.y);
+	return toString(v);
 }
 
 String StringSerializer::encode(Vector2f v)
 {
-	return toString(v.x) + "," + toString(v.y);
+	return toString(v);
 }
 
 String StringSerializer::encode(Vector3i v)
 {
-	return toString(v.x) + "," + toString(v.y) + "," + toString(v.z);
+	return toString(v);
 }
 
 String StringSerializer::encode(Vector3f v)
 {
-	return toString(v.x) + "," + toString(v.y) + "," + toString(v.z);
+	return toString(v);
 }
 
 String StringSerializer::encode(String v)
@@ -60,7 +61,7 @@ String StringSerializer::encode(float v)
 
 String StringSerializer::encode(bool v)
 {
-	return v ? "true" : "false";
+	return toString(v);
 }
 
 Halley::String Halley::StringSerializer::encode(Colour c)

@@ -1,4 +1,5 @@
 #include "test_stage.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

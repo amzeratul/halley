@@ -10,6 +10,7 @@
 #include "vorbis/vorbisenc.h"
 #include "halley/concurrency/concurrent.h"
 #include "halley/tools/file/filesystem.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 

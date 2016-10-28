@@ -7,6 +7,7 @@
 #include "cpp/codegen_cpp.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/support/logger.h"
+#include "halley/text/string_converter.h"
 
 #ifdef _MSC_VER
 	#ifdef _DEBUG

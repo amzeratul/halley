@@ -5,6 +5,7 @@
 #include "halley/core/api/core_api.h"
 #include <halley/entity/world.h>
 #include <halley/entity/system.h>
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 
