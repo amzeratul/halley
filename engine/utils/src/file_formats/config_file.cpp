@@ -47,6 +47,27 @@ ConfigNode& ConfigNode::operator=(ScalarType&& entry)
 	return *this;
 }
 
+ConfigNode& ConfigNode::operator=(const MapType& entry)
+{
+	type = ConfigNodeType::Map;
+	contents = entry;
+	return *this;
+}
+
+ConfigNode& ConfigNode::operator=(const SequenceType& entry)
+{
+	type = ConfigNodeType::Sequence;
+	contents = entry;
+	return *this;
+}
+
+ConfigNode& ConfigNode::operator=(const ScalarType& entry)
+{
+	type = ConfigNodeType::Scalar;
+	contents = entry;
+	return *this;
+}
+
 class SerializerVisitor : public boost::static_visitor<>
 {
 public:

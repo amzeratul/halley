@@ -35,6 +35,9 @@ namespace Halley
 		ConfigNode& operator=(MapType&& entryMap);
 		ConfigNode& operator=(SequenceType&& entryList);
 		ConfigNode& operator=(ScalarType&& value);
+		ConfigNode& operator=(const MapType& entryMap);
+		ConfigNode& operator=(const SequenceType& entryList);
+		ConfigNode& operator=(const ScalarType& value);
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
