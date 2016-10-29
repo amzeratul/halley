@@ -17,7 +17,7 @@ namespace Halley
 		template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
 		static String toString(const T& v)
 		{
-			return EnumNames<T>::names[int(v)];
+			return EnumNames<T>()()[int(v)];
 		}
 
 		template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
@@ -29,7 +29,8 @@ namespace Halley
 		template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
 		static T fromString(const String& str)
 		{
-			auto& names = EnumNames<T>::names;
+			EnumNames<T> n;
+			auto names = n();
 			return T(std::find_if(std::begin(names), std::end(names), [&](const char* v) { return str == v; }) - std::begin(names));
 		}
 
