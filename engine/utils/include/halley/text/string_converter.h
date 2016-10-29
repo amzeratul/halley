@@ -137,6 +137,16 @@ namespace Halley
 		return ToStringConverter<typename std::remove_cv<T>::type>()(value);
 	}
 
+
+
+	template <typename T>
+	T fromString(const String& value)
+	{
+		return FromStringConverter<T>()(value);
+	}
+
+
+
 	template <typename T, typename std::enable_if<!std::is_same<T, String>::value, int>::type = 0>
 	String operator+ (const String& lhp, const T& rhp)
 	{

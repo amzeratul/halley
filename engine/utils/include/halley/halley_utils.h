@@ -58,6 +58,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "text/encode.h"
 #include "text/halleystring.h"
+#include "text/string_converter.h"
 
 #include "time/halleytime.h"
 #include "time/stopwatch.h"
