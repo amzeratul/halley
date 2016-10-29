@@ -1,5 +1,6 @@
 #pragma once
 #include <gsl/gsl_assert>
+#include <algorithm>
 #include "halleystring.h"
 
 namespace Halley
