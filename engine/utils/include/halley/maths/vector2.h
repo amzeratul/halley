@@ -209,3 +209,23 @@ namespace Halley {
 	typedef Vector2f Position;
 	typedef Vector2f Size;
 }
+
+namespace std {
+	template<>
+	struct hash<Halley::Vector2i>
+	{
+		size_t operator()(const Halley::Vector2i& v) const 
+		{
+			return std::hash<long long>()(*reinterpret_cast<const long long*>(&v));
+		}
+	};
+
+	template<>
+	struct hash<Halley::Vector2f>
+	{
+		size_t operator()(const Halley::Vector2f& v) const 
+		{
+			return std::hash<long long>()(*reinterpret_cast<const long long*>(&v));
+		}
+	};
+}
