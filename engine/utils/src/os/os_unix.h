@@ -35,6 +35,7 @@ namespace Halley {
 
 		virtual ComputerData getComputerData() override;
 		virtual String getUserDataDir() override;
+		void createDirectories(const Path& path) override;
 
 		int runCommand(String command) override;
 	};

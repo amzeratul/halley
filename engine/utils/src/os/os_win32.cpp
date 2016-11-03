@@ -276,6 +276,24 @@ void Halley::OSWin32::setConsoleColor(int foreground, int background)
 	SetConsoleTextAttribute(hConsole, WORD(foreground | (background << 4)));
 }
 
+static bool hasDirectory(const Path& directory) {
+    DWORD res = GetFileAttributesW(directory.getString().getUTF16().c_str());
+    return res != INVALID_FILE_ATTRIBUTES && (res & FILE_ATTRIBUTE_DIRECTORY) != 0;
+}
+
+void OSWin32::createDirectories(const Path& path)
+{
+	size_t n = path.getNumberPaths();
+	for (size_t i = 1; i < n; ++i) {
+		Path curPath = path.getFront(i);
+		if (!hasDirectory(curPath)) {
+			if (!CreateDirectoryW(curPath.getString().getUTF16().c_str(), 0)) {
+				throw Exception("Unable to create directory: " + curPath + " (trying to make " + path + ")");
+			}
+		}
+	}
+}
+
 int OSWin32::runCommand(String command)
 {
 	char buffer[1024];

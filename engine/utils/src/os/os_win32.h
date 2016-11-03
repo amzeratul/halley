@@ -41,6 +41,7 @@ namespace Halley {
 		String getUserDataDir() override;
 		Path parseProgramPath(const String&) override;
 		void setConsoleColor(int foreground, int background) override;
+		void createDirectories(const Path& path) override;
 
 		void onWindowCreated(void* window) override;
 

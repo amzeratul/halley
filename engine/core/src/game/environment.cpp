@@ -31,4 +31,5 @@ void Halley::Environment::parseProgramPath(const String& commandLine)
 void Halley::Environment::setDataPath(Path pathName)
 {
 	dataPath = Path(OS::get().getUserDataDir()) / pathName / ".";
+	OS::get().createDirectories(dataPath);
 }

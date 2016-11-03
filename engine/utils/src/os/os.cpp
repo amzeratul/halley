@@ -83,6 +83,10 @@ Path OS::parseProgramPath(const String& commandLine)
 	return Path(commandLine).parentPath() / ".";
 }
 
+void OS::createDirectories(const Path& path)
+{
+}
+
 void Halley::OS::setConsoleColor(int, int)
 {
 }

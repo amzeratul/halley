@@ -135,6 +135,16 @@ String Path::getString() const
 	return s.str();
 }
 
+String Path::toString() const
+{
+	return getString();
+}
+
+size_t Path::getNumberPaths() const
+{
+	return pathParts.size();
+}
+
 Path Path::dropFront(int numberFolders) const
 {
 	return Path(std::vector<String>(pathParts.begin() + 1, pathParts.end()));
@@ -226,3 +236,10 @@ Path Path::getRoot() const
 	return pathParts.front();
 }
 
+Path Path::getFront(size_t n) const
+{
+	if (n >= pathParts.size()) {
+		return *this;
+	}
+	return Path(std::vector<String>(pathParts.begin(), pathParts.begin() + n));
+}

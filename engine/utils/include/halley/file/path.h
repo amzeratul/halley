@@ -17,10 +17,14 @@ namespace Halley
 		Path& operator=(const String& other);
 
 		Path getRoot() const;
+		Path getFront(size_t n) const;
 		Path getFilename() const;
 		Path getStem() const;
 		String getExtension() const;
 		String getString() const;
+		String toString() const;
+
+		size_t getNumberPaths() const;
 
 		Path dropFront(int numberFolders) const;
 

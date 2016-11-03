@@ -51,6 +51,7 @@ namespace Halley {
 		virtual String getUserDataDir()=0;
 		virtual String makeDataPath(String appDataPath, String userProvidedPath);
 		virtual Path parseProgramPath(const String& commandLine);
+		virtual void createDirectories(const Path& path);
 
 		virtual void setConsoleColor(int foreground, int background);
 		virtual int runCommand(String command);
