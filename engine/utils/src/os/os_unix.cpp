@@ -124,7 +124,7 @@ int mkpath(const char *path, mode_t mode)
     char           *pp;
     char           *sp;
     int             status;
-    char           *copypath = STRDUP(path);
+    char           *copypath = strdup(path);
 
     status = 0;
     pp = copypath;
@@ -141,7 +141,7 @@ int mkpath(const char *path, mode_t mode)
     }
     if (status == 0)
         status = do_mkdir(path, mode);
-    FREE(copypath);
+    free(copypath);
     return (status);
 }
 
