@@ -93,6 +93,7 @@ int Halley::OSUnix::runCommand(String command)
 }
 
 // Code by Jonathan Leffler, from http://stackoverflow.com/questions/675039/how-can-i-create-directory-tree-in-c-linux/675193#675193
+typedef struct stat Stat;
 static int do_mkdir(const char *path, mode_t mode)
 {
     Stat            st;
