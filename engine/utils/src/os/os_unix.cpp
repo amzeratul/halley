@@ -31,6 +31,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 using namespace Halley;
 
