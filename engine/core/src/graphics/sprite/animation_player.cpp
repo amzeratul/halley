@@ -108,11 +108,30 @@ void AnimationPlayer::update(Time time)
 void AnimationPlayer::updateSprite(Sprite& sprite) const
 {
 	if (hasUpdate) {
-		sprite.setMaterial(animation->getMaterial());
+		if (materialOverride) {
+			sprite.setMaterial(materialOverride);
+		} else {
+			sprite.setMaterial(animation->getMaterial());
+		}
 		sprite.setSprite(*spriteData);
 		sprite.setFlip(dirFlip && !seqNoFlip);
 		hasUpdate = false;
 	}
+}
+
+void AnimationPlayer::setMaterialOverride(std::shared_ptr<Material> material)
+{
+	materialOverride = material;
+}
+
+std::shared_ptr<Material> AnimationPlayer::getMaterialOverride() const
+{
+	return materialOverride;
+}
+
+std::shared_ptr<const Material> AnimationPlayer::getMaterial() const
+{
+	return animation->getMaterial();
 }
 
 void AnimationPlayer::resolveSprite()
