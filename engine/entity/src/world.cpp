@@ -78,7 +78,7 @@ System& World::getSystem(const String& name)
 	throw Exception("System not found: " + name);
 }
 
-Service& World::addService(std::unique_ptr<Service> service)
+Service& World::addService(std::shared_ptr<Service> service)
 {
 	auto& ref = *service;
 	services[service->getName()] = std::move(service);

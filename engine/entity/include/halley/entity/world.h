@@ -39,7 +39,7 @@ namespace Halley {
 		Vector<std::unique_ptr<System>>& getSystems(TimeLine timeline);
 		const Vector<std::unique_ptr<System>>& getSystems(TimeLine timeline) const;
 
-		Service& addService(std::unique_ptr<Service> service);
+		Service& addService(std::shared_ptr<Service> service);
 
 		template <typename T>
 		T& getService() const
@@ -83,7 +83,7 @@ namespace Halley {
 		MappedPool<Entity*> entityMap;
 
 		TreeMap<FamilyMaskType, std::unique_ptr<Family>> families;
-		TreeMap<String, std::unique_ptr<Service>> services;
+		TreeMap<String, std::shared_ptr<Service>> services;
 
 		mutable std::array<StopwatchAveraging, 3> timer;
 
