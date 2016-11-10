@@ -45,7 +45,8 @@ AudioSourcePosition AudioSourcePosition::makeFixed()
 
 static float gain2DPan(float srcPan, float dstPan)
 {
-	return std::max(0.0f, 1.0f - 0.5f * std::abs(srcPan - dstPan));
+	constexpr float piOverTwo = 3.1415926535897932384626433832795f / 2.0f;
+	return std::sin(std::max(0.0f, 1.0f - 0.5f * std::abs(srcPan - dstPan)) * piOverTwo);
 }
 
 void AudioSourcePosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const
