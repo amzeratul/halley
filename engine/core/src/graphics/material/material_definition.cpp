@@ -52,7 +52,7 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	auto data = loader.getStatic();
 	Deserializer s(data->getSpan());
 	s >> *this;
-		
+
 	api = loader.getAPI().video;
 	int i = 0;
 	for (auto& p: passes) {

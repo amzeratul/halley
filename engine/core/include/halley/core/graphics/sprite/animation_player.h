@@ -26,9 +26,17 @@ namespace Halley
 		void setMaterialOverride(std::shared_ptr<Material> material);
 		std::shared_ptr<Material> getMaterialOverride() const;
 		std::shared_ptr<const Material> getMaterial() const;
+
+		bool isPlaying() const;
+		const String& getCurrentSequenceName() const;
+		Time getCurrentSequenceTime() const;
+		int getCurrentSequenceFrame() const;
 		
 	private:
 		void resolveSprite();
+
+		void onSequenceStarted();
+		void onSequenceDone();
 
 		std::shared_ptr<Material> materialOverride;
 		std::shared_ptr<const Animation> animation;
@@ -50,6 +58,7 @@ namespace Halley
 		bool seqLooping;
 		bool seqNoFlip;
 		bool dirFlip;
+		bool playing = false;
 
 		mutable bool hasUpdate = true;
 	};

@@ -19,9 +19,6 @@ Rect4i RenderTargetOpenGL::getViewPort() const
 
 void RenderTargetOpenGL::bind()
 {
-	GLUtils gl;
-	gl.setNumberOfTextureUnits(1);
-
 	init();
 	Expects(fbo != 0);
 	

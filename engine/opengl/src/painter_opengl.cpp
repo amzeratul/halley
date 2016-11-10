@@ -37,6 +37,10 @@ void PainterOpenGL::doStartRender()
 		glUtils = std::make_unique<GLUtils>();
 	}
 
+	glUtils->setNumberOfTextureUnits(1);
+	glUtils->bindTexture(0);
+	glUtils->setScissor(Rect4i(), false);
+
 	if (vbo == 0) {
 		glGenBuffers(1, &vbo);
 		glCheckError();

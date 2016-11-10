@@ -47,6 +47,7 @@ void AnimationPlayer::setSequence(String sequence)
 		seqNoFlip = curSeq->isNoFlip();
 
 		dirty = true;
+		onSequenceStarted();
 	}
 }
 
@@ -100,6 +101,7 @@ void AnimationPlayer::update(Time time)
 				curTime = ::fmod(curTime, seqTimeLen);
 			} else {
 				curTime = seqTimeLen;
+				onSequenceDone();
 			}
 		}
 	}
@@ -134,8 +136,38 @@ std::shared_ptr<const Material> AnimationPlayer::getMaterial() const
 	return animation->getMaterial();
 }
 
+bool AnimationPlayer::isPlaying() const
+{
+	return playing;
+}
+
+const String& AnimationPlayer::getCurrentSequenceName() const
+{
+	return curSeq->getName();
+}
+
+Time AnimationPlayer::getCurrentSequenceTime() const
+{
+	return curTime;
+}
+
+int AnimationPlayer::getCurrentSequenceFrame() const
+{
+	return curFrame;
+}
+
 void AnimationPlayer::resolveSprite()
 {
 	spriteData = &curSeq->getFrame(curFrame).getSprite(dirId);
 	hasUpdate = true;
+}
+
+void AnimationPlayer::onSequenceStarted()
+{
+	playing = true;
+}
+
+void AnimationPlayer::onSequenceDone()
+{
+	playing = false;
 }
