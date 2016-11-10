@@ -19,7 +19,9 @@ Rect4i RenderTargetOpenGL::getViewPort() const
 
 void RenderTargetOpenGL::bind()
 {
-	HALLEY_DEBUG_TRACE();
+	GLUtils gl;
+	gl.setNumberOfTextureUnits(1);
+
 	init();
 	Expects(fbo != 0);
 	
@@ -35,21 +37,19 @@ void RenderTargetOpenGL::bind()
 #endif
 
 	glCheckError();
-	HALLEY_DEBUG_TRACE();
 }
 
 void RenderTargetOpenGL::unbind()
 {
-	HALLEY_DEBUG_TRACE();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glCheckError();
 #ifdef WITH_OPENGL
-	glDrawBuffer(GL_BACK);
+	static GLuint buffers[] = { GL_BACK_LEFT };
+	glDrawBuffers(1, buffers);
 #else
 	// TODO?
 #endif
 	glCheckError();
-	HALLEY_DEBUG_TRACE();
 }
 
 void RenderTargetOpenGL::init()

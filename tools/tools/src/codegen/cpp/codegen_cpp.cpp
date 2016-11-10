@@ -77,7 +77,7 @@ CodeGenResult CodegenCPP::generateSystem(SystemSchema system)
 
 	CodeGenResult result;
 	result.emplace_back(CodeGenFile(makePath("systems", className, "h"), generateSystemHeader(system)));
-	result.emplace_back(CodeGenFile(makePath("../../src/systems", className, "cpp"), generateSystemStub(system), true));
+	//result.emplace_back(CodeGenFile(makePath("../../src/systems", className, "cpp"), generateSystemStub(system), true));
 	return result;
 }
 

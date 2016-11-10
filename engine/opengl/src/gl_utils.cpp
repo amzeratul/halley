@@ -280,12 +280,14 @@ void GLUtils::setScissor(Rect4i r, bool enable)
 {
 	if (enable != state.scissoring) {
 		if (enable) {
-			glScissor(r.getX(), r.getY(), r.getWidth(), r.getHeight());
 			glEnable(GL_SCISSOR_TEST);
 		} else {
 			glDisable(GL_SCISSOR_TEST);
 		}
 		state.scissoring = enable;
+	}
+	if (enable) {
+		glScissor(r.getX(), r.getY(), r.getWidth(), r.getHeight());
 	}
 }
 
