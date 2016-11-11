@@ -85,7 +85,7 @@ void GLUtils::doGlCheckError(const char* file, long line)
 
 using namespace Halley;
 
-static const bool CHECKED = true;
+static const bool checked = false;
 
 namespace Halley {
 	class GLInternals {
@@ -167,7 +167,7 @@ void GLUtils::setBlendType(BlendType type)
 	glCheckError();
 
 	const BlendType curType = state.curBlend;
-	if (!CHECKED || curType != type) {
+	if (!checked || curType != type) {
 		bool hasBlend = curType == BlendType::Alpha || curType == BlendType::AlphaPremultiplied || curType == BlendType::Add || curType == BlendType::Multiply || curType == BlendType::Darken;
 		bool needsBlend = type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Multiply || type == BlendType::Darken;
 
@@ -210,7 +210,7 @@ void GLUtils::setTextureUnit(int n)
 	Expects(n >= 0);
 	Expects(n < 8);
 
-	if (!CHECKED || state.curTexUnit != n) {
+	if (!checked || state.curTexUnit != n) {
 		glActiveTexture(GL_TEXTURE0 + n);
 		glCheckError();
 		state.curTexUnit = n;
@@ -221,7 +221,7 @@ void GLUtils::bindTexture(int id)
 {
 	Expects(id >= 0);
 
-	if (!CHECKED || id != state.curTex[state.curTexUnit]) {
+	if (!checked || id != state.curTex[state.curTexUnit]) {
 		state.curTex[state.curTexUnit] = id;
 		glBindTexture(GL_TEXTURE_2D, id);
 		glCheckError();
@@ -235,7 +235,7 @@ void GLUtils::setNumberOfTextureUnits(int n)
 
 	int prevUnit = state.curTexUnit;
 
-	if (CHECKED) {
+	if (checked) {
 		// Enable units
 		if (n > state.numUnits) {
 			for (int i = state.numUnits; i<n; i++) {
