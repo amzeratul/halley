@@ -13,7 +13,7 @@ void ResourceCollectionBase::Wrapper::flush()
 	// TODO
 }
 
-ResourceCollectionBase::ResourceCollectionBase(Resources& parent, String path)
+ResourceCollectionBase::ResourceCollectionBase(Resources& parent, const String& path)
 	: parent(parent)
 	, path(path)
 {
@@ -24,9 +24,9 @@ void ResourceCollectionBase::clear()
 	resources.clear();
 }
 
-void ResourceCollectionBase::unload(String name)
+void ResourceCollectionBase::unload(const String& name)
 {
-	resources.erase(name);
+	String fullName = resolveName(name);
 }
 
 void ResourceCollectionBase::unloadAll(int minDepth)
@@ -45,7 +45,7 @@ void ResourceCollectionBase::unloadAll(int minDepth)
 	}
 }
 
-void ResourceCollectionBase::flush(String name)
+void ResourceCollectionBase::flush(const String& name)
 {
 	auto res = resources.find(name);
 	if (res != resources.end()) {
@@ -54,12 +54,12 @@ void ResourceCollectionBase::flush(String name)
 	}
 }
 
-String ResourceCollectionBase::resolveName(String name) const
+String ResourceCollectionBase::resolveName(const String& name) const
 {
 	return parent.basePath + "/" + path + "/" + name;
 }
 
-std::shared_ptr<Resource> ResourceCollectionBase::doGet(String rawName, ResourceLoadPriority priority)
+std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& rawName, ResourceLoadPriority priority)
 {
 	String name = resolveName(rawName);
 
@@ -95,6 +95,6 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(String rawName, Resource
 	return newRes;
 }
 
-void ResourceCollectionBase::setResource(int curDepth, String name, std::shared_ptr<Resource> resource) {
+void ResourceCollectionBase::setResource(int curDepth, const String& name, std::shared_ptr<Resource> resource) {
 	resources.emplace(name, Wrapper(resource, curDepth));
 }

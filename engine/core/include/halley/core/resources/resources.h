@@ -72,7 +72,7 @@ namespace Halley {
 		~Resources();
 
 		template <typename T>
-		void init(String path)
+		void init(const String& path)
 		{
 			int id = ResourceTypeId<T>::makeId(resourceTypeIds);
 			resources.resize(std::max(resources.size(), size_t(id + 1)));
@@ -86,12 +86,12 @@ namespace Halley {
 		}
 
 		template <typename T>
-		std::shared_ptr<const T> get(String name, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
+		std::shared_ptr<const T> get(const String& name, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
 		{
 			return of<T>().get(name, priority);
 		}
 
-		void setBasePath(String path);
+		void setBasePath(const String& path);
 		String getBasePath() const;
 
 		void setDepth(int depth);

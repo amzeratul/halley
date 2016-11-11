@@ -33,22 +33,22 @@ namespace Halley
 		};
 
 	public:
-		explicit ResourceCollectionBase(Resources& parent, String path);
+		explicit ResourceCollectionBase(Resources& parent, const String& path);
 		virtual ~ResourceCollectionBase() {}
 
-		void setResource(int curDepth, String name, std::shared_ptr<Resource> resource);
+		void setResource(int curDepth, const String& name, std::shared_ptr<Resource> resource);
 		void clear();
-		void unload(String name);
+		void unload(const String& name);
 		void unloadAll(int minDepth = 0);
-		void flush(String name);
+		void flush(const String& name);
 		
 		String getPath() const { return path; }
-		String resolveName(String name) const;
+		String resolveName(const String& name) const;
 
 	protected:
 		virtual std::shared_ptr<Resource> loadResource(ResourceLoader& loader) = 0;
 
-		std::shared_ptr<Resource> doGet(String name, ResourceLoadPriority priority);
+		std::shared_ptr<Resource> doGet(const String& name, ResourceLoadPriority priority);
 
 	private:
 		Resources& parent;
@@ -62,11 +62,11 @@ namespace Halley
 		static_assert(std::is_base_of<Resource, T>::value, "Type must extend Resource");
 
 	public:
-		ResourceCollection(Resources& parent, String path)
+		ResourceCollection(Resources& parent, const String& path)
 			: ResourceCollectionBase(parent, path)
 		{}
 
-		std::shared_ptr<const T> get(String name, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
+		std::shared_ptr<const T> get(const String& name, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
 		{
 			return std::static_pointer_cast<T>(doGet(name, priority));
 		}

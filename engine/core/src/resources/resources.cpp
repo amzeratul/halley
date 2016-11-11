@@ -11,7 +11,7 @@ Resources::Resources(std::unique_ptr<ResourceLocator> locator, HalleyAPI* api)
 
 Resources::~Resources() = default;
 
-void Resources::setBasePath(String path)
+void Resources::setBasePath(const String& path)
 {
 	basePath = path;
 }
