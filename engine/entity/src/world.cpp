@@ -15,7 +15,12 @@ Halley::World::World(HalleyAPI* api)
 {	
 }
 
-Halley::World::~World() = default;
+Halley::World::~World()
+{
+	for (auto e: entities) {
+		deleteEntity(e);
+	}
+}
 
 Halley::System& Halley::World::addSystem(std::unique_ptr<System> system, TimeLine timelineType)
 {
