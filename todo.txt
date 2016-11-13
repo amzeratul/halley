@@ -37,7 +37,6 @@ audio
 entity
 - generalised rendering
 - universal hierarchical transforms [RESEARCH]
-- onAddEntity/onRemoveEntity on systems [RESEARCH]
 - store references to other components [RESEARCH]
 - query other entities? [RESEARCH]
 - load prefabs

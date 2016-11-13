@@ -178,7 +178,14 @@ void Halley::World::step(TimeLine timeline, Time elapsed)
 
 	spawnPending();
 	updateEntities();
+
 	updateSystems(timeline, elapsed);
+	
+	if (timeline == TimeLine::VariableUpdate) {
+		// The variable update timeline runs before render, so give everything a chance to spawn before rendering
+		spawnPending();
+		updateEntities();
+	}
 
 	t.endSample();
 }
