@@ -18,7 +18,7 @@ namespace Halley {
 	struct HasInitMember : std::false_type {};
 
 	template <class T>
-	struct HasInitMember<T, std::void_t<decltype(std::declval<T&>().init())>> : std::true_type { };
+	struct HasInitMember<T, Halley::void_t<decltype(std::declval<T&>().init())>> : std::true_type { };
 	
 	class System
 	{
