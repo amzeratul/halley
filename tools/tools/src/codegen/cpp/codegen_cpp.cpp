@@ -285,6 +285,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::Resources&"), {}, "getResources", true), "return doGetAPI().core->getResources();");
 	}
 
+	// Receive messages
 	bool hasReceive = false;
 	Vector<String> msgsReceived;
 	for (auto& msg : system.messages) {
@@ -297,19 +298,20 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 		}
 	}
 
+	// Service declarations
 	for (auto& service: system.services) {
 		sysClassGen.addBlankLine();
 		sysClassGen.addMember(VariableSchema(service.name + "*", lowerFirst(service.name), "nullptr"));
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema(service.name + "&"), {}, "get" + service.name, true), "return *" + lowerFirst(service.name) + ";");
 	}
 
-	if (!system.services.empty()) {
-		std::vector<String> methodBody;
-		for (auto& service: system.services) {
-			methodBody.push_back(lowerFirst(service.name) + " = &doGetWorld().template getService<" + service.name + ">();");
-		}
-		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "initBase", false, false, true), methodBody);
+	// initBase();
+	std::vector<String> initBaseMethodBody;
+	for (auto& service: system.services) {
+		initBaseMethodBody.push_back(lowerFirst(service.name) + " = &doGetWorld().template getService<" + service.name + ">();");
 	}
+	initBaseMethodBody.push_back("invokeInit<T>();");
+	sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "initBase", false, false, true), initBaseMethodBody);
 
 	auto fams = convert<FamilySchema, VariableSchema>(system.families, [](auto& fam) { return VariableSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); });
 	auto mid = fams.begin() + std::min(fams.size(), size_t(1));

@@ -64,4 +64,5 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "time/stopwatch.h"
 
 #include "utils/algorithm.h"
+#include "utils/type_traits.h"
 #include "utils/utils.h"

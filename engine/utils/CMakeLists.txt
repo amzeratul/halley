@@ -130,6 +130,7 @@ set(HEADERS
         "include/halley/time/halleytime.h"
         "include/halley/time/stopwatch.h"
         "include/halley/utils/algorithm.h"
+        "include/halley/utils/type_traits.h"
         "include/halley/utils/utils.h"
         "src/os/os_android.h"
         "src/os/os_ios.h"

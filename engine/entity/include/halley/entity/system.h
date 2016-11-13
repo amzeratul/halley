@@ -8,10 +8,17 @@
 #include "family_mask.h"
 #include "family_type.h"
 #include "entity.h"
+#include "halley/utils/type_traits.h"
 
 namespace Halley {
 	class Message;
 	class HalleyAPI;
+
+	template <class, class = void_t<>>
+	struct HasInitMember : std::false_type {};
+
+	template <class T>
+	struct HasInitMember<T, std::void_t<decltype(std::declval<T&>().init())>> : std::true_type { };
 	
 	class System
 	{
@@ -56,6 +63,17 @@ namespace Halley {
 			auto toSend = std::make_unique<T>();
 			*toSend = msg;
 			doSendMessage(entityId, std::move(toSend), sizeof(T), T::messageIndex);
+		}
+
+		template <typename T, typename std::enable_if<HasInitMember<T>::value, int>::type = 0>
+		void invokeInit()
+		{
+			static_cast<T*>(this)->init();
+		}
+
+		template <typename T, typename std::enable_if<!HasInitMember<T>::value, int>::type = 0>
+		void invokeInit()
+		{
 		}
 
 	private:
