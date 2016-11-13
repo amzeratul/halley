@@ -89,30 +89,30 @@ namespace Halley {
 		{}
 
 		template <typename T, typename F, typename std::enable_if<HasOnEntityAdded<T, F>::value, int>::type = 0>
-		void initialiseOnEntityAdded(FamilyBinding<F>& binding)
+		void initialiseOnEntityAdded(FamilyBinding<F>& binding, T* system)
 		{
-			binding.setOnEntityAdded([this] (void* e) { static_cast<T*>(this)->onEntityAdded(*static_cast<F*>(e)); });
+			binding.setOnEntityAdded([system] (void* e) { system->onEntityAdded(*static_cast<F*>(e)); });
 		}
 
 		template <typename T, typename F, typename std::enable_if<!HasOnEntityAdded<T, F>::value, int>::type = 0>
-		void initialiseOnEntityAdded(FamilyBinding<F>&)
+		void initialiseOnEntityAdded(FamilyBinding<F>&, T*)
 		{}
 
 		template <typename T, typename F, typename std::enable_if<HasOnEntityRemoved<T, F>::value, int>::type = 0>
-		void initialiseOnEntityRemoved(FamilyBinding<F>& binding)
+		void initialiseOnEntityRemoved(FamilyBinding<F>& binding, T* system)
 		{
-			binding.setOnEntityRemoved([this] (void* e) { static_cast<T*>(this)->onEntityRemoved(*static_cast<F*>(e)); });
+			binding.setOnEntityRemoved([system] (void* e) { system->onEntityRemoved(*static_cast<F*>(e)); });
 		}
 
 		template <typename T, typename F, typename std::enable_if<!HasOnEntityRemoved<T, F>::value, int>::type = 0>
-		void initialiseOnEntityRemoved(FamilyBinding<F>&)
+		void initialiseOnEntityRemoved(FamilyBinding<F>&, T*)
 		{}
 
 		template <typename T, typename F>
-		void initialiseFamilyBinding(FamilyBinding<F>& binding)
+		void initialiseFamilyBinding(FamilyBinding<F>& binding, T* system)
 		{
-			initialiseOnEntityAdded<T, F>(binding);
-			initialiseOnEntityRemoved<T, F>(binding);
+			initialiseOnEntityAdded<T, F>(binding, system);
+			initialiseOnEntityRemoved<T, F>(binding, system);
 		}
 
 	private:

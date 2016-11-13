@@ -323,7 +323,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 	}
 	initBaseMethodBody.push_back("invokeInit<T>();");
 	for (auto& family: system.families) {
-		initBaseMethodBody.push_back("initialiseFamilyBinding<T, " + upperFirst(family.name) + "Family>(" + family.name + "Family);");
+		initBaseMethodBody.push_back("initialiseFamilyBinding<T, " + upperFirst(family.name) + "Family>(" + family.name + "Family, static_cast<T*>(this));");
 	}
 	sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "initBase", false, false, true), initBaseMethodBody);
 
