@@ -15,6 +15,7 @@ namespace Halley
 	class ComponentSchema;
 	class SystemSchema;
 	class MessageSchema;
+	class CustomTypeSchema;
 
 	class Codegen
 	{
@@ -46,10 +47,13 @@ namespace Halley
 		void addComponent(YAML::Node rootNode);
 		void addSystem(YAML::Node rootNode);
 		void addMessage(YAML::Node rootNode);
+		void addType(YAML::Node rootNode);
+		String getInclude(String typeName) const;
 
 		bool verbose;
 		HashMap<String, ComponentSchema> components;
 		HashMap<String, SystemSchema> systems;
 		HashMap<String, MessageSchema> messages;
+		HashMap<String, CustomTypeSchema> types;
 	};
 }

@@ -3,6 +3,7 @@
 #include "component_schema.h"
 #include "system_schema.h"
 #include "message_schema.h"
+#include "custom_type_schema.h"
 #include "halley/file/path.h"
 
 namespace Halley

@@ -8,7 +8,7 @@ SystemSchema::SystemSchema() {}
 
 SystemSchema::SystemSchema(YAML::Node node)
 {
-	name = node["system"].as<std::string>();
+	name = node["name"].as<std::string>();
 
 	if (node["families"].IsDefined()) {
 		for (auto familyEntry : node["families"]) {

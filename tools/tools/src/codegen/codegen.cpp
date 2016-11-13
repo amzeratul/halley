@@ -73,6 +73,18 @@ void Codegen::validate(ProgressReporter progress)
 			}
 		}
 
+		for (auto& msg: sys.second.messages) {
+			if (messages.find(msg.name) == messages.end()) {
+				throw Exception("Unknown message \"" + msg.name + "\" in system \"" + sys.second.name + "\".");
+			}
+		}
+
+		for (auto& service: sys.second.services) {
+			if (types.find(service.name) == types.end()) {
+				throw Exception("Unknown service \"" + service.name + "\" in system \"" + sys.second.name + "\".");
+			}
+		}
+
 		if (sys.second.strategy == SystemStrategy::Individual || sys.second.strategy == SystemStrategy::Parallel) {
 			if (!hasMain) {
 				throw Exception("System " + sys.second.name + " needs to have a main family due to its strategy.");
@@ -92,20 +104,42 @@ void Codegen::process()
 		int id = 0;
 		for (auto& comp : components) {
 			comp.second.id = id++;
+
+			for (auto& m: comp.second.members) {
+				String i = getInclude(m.type.name);
+				if (i != "") {
+					comp.second.includeFiles.insert(i);
+				}
+			}
 		}
-	}{
+	}
+	
+	{
 		int id = 0;
 		for (auto& msg : messages) {
 			msg.second.id = id++;
+
+			for (auto& m: msg.second.members) {
+				String i = getInclude(m.type.name);
+				if (i != "") {
+					msg.second.includeFiles.insert(i);
+				}
+			}
 		}
 	}
 
 	for (auto& system: systems) {
-		for (auto& fam: system.second.families) {
+		auto& sys = system.second;
+
+		for (auto& fam: sys.families) {
 			// Sorting the components ensures that different systems which use the same family will not corrupt memory by accessing them in different orders
 			std::sort(fam.components.begin(), fam.components.end(), [] (const ComponentReferenceSchema& a, const ComponentReferenceSchema& b) -> bool {
 				return a.name < b.name;
 			});
+		}
+
+		for (auto& service: sys.services) {
+			sys.includeFiles.insert(getInclude(service.name));
 		}
 	}
 }
@@ -245,6 +279,8 @@ void Codegen::addSource(String path, gsl::span<const gsl::byte> data)
 			addSystem(document);
 		} else if (document["message"].IsDefined()) {
 			addMessage(document);
+		} else if (document["type"].IsDefined()) {
+			addType(document);
 		} else {
 			throw Exception("YAML parse error in codegen definitions: unknown type\nat " + curPos);
 		}
@@ -253,30 +289,53 @@ void Codegen::addSource(String path, gsl::span<const gsl::byte> data)
 
 void Codegen::addComponent(YAML::Node rootNode)
 {
-	String name = rootNode["component"].as<std::string>();
-	if (components.find(name) == components.end()) {
-		components[name] = ComponentSchema(rootNode);
+	auto comp = ComponentSchema(rootNode["component"]);
+
+	if (components.find(comp.name) == components.end()) {
+		components[comp.name] = comp;
 	} else {
-		throw Exception("Component already declared: " + name);
+		throw Exception("Component already declared: " + comp.name);
 	}
 }
 
 void Codegen::addSystem(YAML::Node rootNode)
 {
-	String name = rootNode["system"].as<std::string>();
-	if (systems.find(name) == systems.end()) {
-		systems[name] = SystemSchema(rootNode);
+	auto sys = SystemSchema(rootNode["system"]);
+
+	if (systems.find(sys.name) == systems.end()) {
+		systems[sys.name] = sys;
 	} else {
-		throw Exception("System already declared: " + name);
+		throw Exception("System already declared: " + sys.name);
 	}
 }
 
 void Codegen::addMessage(YAML::Node rootNode)
 {
-	String name = rootNode["message"].as<std::string>();
-	if (messages.find(name) == messages.end()) {
-		messages[name] = MessageSchema(rootNode);
+	auto msg = MessageSchema(rootNode["message"]);
+
+	if (messages.find(msg.name) == messages.end()) {
+		messages[msg.name] = msg;
 	} else {
-		throw Exception("Message already declared: " + name);
+		throw Exception("Message already declared: " + msg.name);
 	}
+}
+
+void Codegen::addType(YAML::Node rootNode)
+{
+	auto t = CustomTypeSchema(rootNode["type"]);
+
+	if (types.find(t.name) == types.end()) {
+		types[t.name] = t;
+	} else {
+		throw Exception("Type already declared: " + t.name);
+	}
+}
+
+String Codegen::getInclude(String typeName) const
+{
+	auto i = types.find(typeName);
+	if (i != types.end()) {
+		return i->second.includeFile;
+	}
+	return "";
 }

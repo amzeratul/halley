@@ -7,7 +7,7 @@ ComponentSchema::ComponentSchema() {}
 
 ComponentSchema::ComponentSchema(YAML::Node node)
 {
-	name = node["component"].as<std::string>();
+	name = node["name"].as<std::string>();
 
 	for (auto memberEntry : node["members"]) {
 		for (auto m = memberEntry.begin(); m != memberEntry.end(); ++m) {

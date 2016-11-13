@@ -2,6 +2,7 @@
 
 #include <halley/text/halleystring.h>
 #include <halley/data_structures/vector.h>
+#include <unordered_set>
 
 namespace YAML
 {
@@ -77,6 +78,8 @@ namespace Halley
 		SystemMethod method = SystemMethod::Update;
 		CodegenLanguage language = CodegenLanguage::CPlusPlus;
 		int smearing = 0;
+
+		std::unordered_set<String> includeFiles;
 
 		Vector<FamilySchema> families;
 		Vector<MessageReferenceSchema> messages;

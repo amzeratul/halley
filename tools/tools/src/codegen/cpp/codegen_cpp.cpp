@@ -152,6 +152,11 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		""
 	};
 
+	for (auto& includeFile: component.includeFiles) {
+		contents.push_back("#include \"" + includeFile + "\"");
+	}
+	contents.push_back("");
+
 	auto gen = CPPClassGenerator(component.name + "Component", "Halley::Component", CPPAccess::Public, true)
 		.addAccessLevelSection(CPPAccess::Public)
 		.addMember(VariableSchema(TypeSchema("int", false, true, true), "componentIndex", toString(component.id)))
@@ -236,6 +241,12 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 		"#include <halley.hpp>",
 		""
 	};
+
+	// General headers
+	for (auto& includeFile: system.includeFiles) {
+		contents.push_back("#include \"" + includeFile + "\"");
+	}
+	contents.push_back("");
 
 	// Family headers
 	std::set<String> included;
@@ -401,6 +412,11 @@ Vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
 		"#include <halley.hpp>",
 		""
 	};
+
+	for (auto& includeFile: message.includeFiles) {
+		contents.push_back("#include \"" + includeFile + "\"");
+	}
+	contents.push_back("");
 
 	auto gen = CPPClassGenerator(message.name + "Message", "Halley::Message", CPPAccess::Public, true)
 		.addAccessLevelSection(CPPAccess::Public)

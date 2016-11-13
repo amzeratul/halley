@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fields_schema.h"
+#include <unordered_set>
 
 namespace YAML
 {
@@ -18,5 +19,6 @@ namespace Halley
 		int id = -1;
 		String name;
 		Vector<VariableSchema> members;
+		std::unordered_set<String> includeFiles;
 	};
 }
