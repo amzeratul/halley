@@ -3,6 +3,7 @@
 #include "family_mask.h"
 #include "world.h"
 #include <halley/support/exception.h>
+#include <functional>
 
 namespace Halley {
 	class Family;
@@ -11,7 +12,8 @@ namespace Halley {
 	public:
 		size_t count() const { return family->count(); }
 		size_t size() const { return family->count(); }
-		virtual ~FamilyBindingBase() = default;
+
+		virtual ~FamilyBindingBase();
 
 	protected:
 		FamilyBindingBase(FamilyMaskType readMask, FamilyMaskType writeMask);
@@ -19,12 +21,21 @@ namespace Halley {
 		virtual void bindFamily(World& world) = 0;
 		void setFamily(Family* family);
 
+		void setOnEntityAdded(std::function<void(void*)> callback);
+		void setOnEntityRemoved(std::function<void(void*)> callback);
+
+		void onEntityAdded(void* entity);
+		void onEntityRemoved(void* entity);
+
 	private:
 		friend class System;
+		friend class Family;
 
 		Family* family = nullptr;
 		const FamilyMaskType readMask;
 		const FamilyMaskType writeMask;
+		std::function<void(void*)> addedCallback;
+		std::function<void(void*)> removedCallback;
 	};
 
 	template <typename T>

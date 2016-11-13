@@ -17,12 +17,20 @@ Halley::World::World(HalleyAPI* api)
 
 Halley::World::~World()
 {
+	for (auto& f: families) {
+		f.second->clearEntities();
+	}
+	for (auto& tl: systems) {
+		tl.clear();
+	}
 	for (auto e: entitiesPendingCreation) {
 		deleteEntity(e);
 	}
 	for (auto e: entities) {
 		deleteEntity(e);
 	}
+	families.clear();
+	services.clear();
 }
 
 Halley::System& Halley::World::addSystem(std::unique_ptr<System> system, TimeLine timelineType)

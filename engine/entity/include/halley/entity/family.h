@@ -7,13 +7,14 @@
 
 namespace Halley {
 	class Entity;
+	class FamilyBindingBase;
 
 	class Family {
 		friend class World;
 
 	public:
 		Family(FamilyMaskType mask);
-		virtual ~Family() = default;
+		virtual ~Family() {}
 
 		size_t count() const
 		{
@@ -25,15 +26,27 @@ namespace Halley {
 			return static_cast<char*>(elems) + (n * elemSize);
 		}
 
+		void addOnEntityAdded(FamilyBindingBase* bind);
+		void removeOnEntityAdded(FamilyBindingBase* bind);
+		void addOnEntityRemoved(FamilyBindingBase* bind);
+		void removeOnEntityRemoved(FamilyBindingBase* bind);
+
+		void notifyAdd(void* entity);
+		void notifyRemove(void* entity);
+
 	protected:
 		virtual void addEntity(Entity& entity) = 0;
 		void removeEntity(Entity& entity);
 		virtual void removeDeadEntities() = 0;
+		virtual void clearEntities() = 0;
 		
 		void* elems = nullptr;
 		size_t elemCount = 0;
 		size_t elemSize = 0;
 		Vector<EntityId> toRemove;
+
+		Vector<FamilyBindingBase*> addEntityCallbacks;
+		Vector<FamilyBindingBase*> removeEntityCallbacks;
 
 	private:
 		FamilyMaskType inclusionMask;
@@ -57,7 +70,7 @@ namespace Halley {
 
 	public:
 		FamilyImpl() : Family(T::Type::readMask()) {}
-		
+				
 	protected:
 		void addEntity(Entity& entity) override
 		{
@@ -65,6 +78,8 @@ namespace Halley {
 			auto& e = entities.back();
 			e.entityId = entity.getEntityId();
 			T::Type::loadComponents(entity, &e.data[0]);
+
+			notifyAdd(&e);
 
 			updateElems();
 		}
@@ -81,6 +96,8 @@ namespace Halley {
 					EntityId id = entities[i].entityId;
 					auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
 					if (iter != toRemove.end() && id == *iter) {
+						notifyRemove(&entities[i]);
+
 						toRemove.erase(iter);
 						std::swap(entities[i], entities[size - 1]);
 						entities.pop_back();
@@ -94,12 +111,21 @@ namespace Halley {
 			}
 		}
 
+		void clearEntities() override
+		{
+			for (auto& e: entities) {
+				notifyRemove(&e);
+			}
+			entities.clear();
+			updateElems();
+		}
+
 	private:
 		Vector<StorageType> entities;
 
 		void updateElems()
 		{
-			elems = entities.data();
+			elems = entities.empty() ? nullptr : entities.data();
 			elemCount = entities.size();
 			elemSize = sizeof(StorageType);
 		}

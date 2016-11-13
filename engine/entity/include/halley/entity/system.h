@@ -14,11 +14,23 @@ namespace Halley {
 	class Message;
 	class HalleyAPI;
 
-	template <class, class = void_t<>>
-	struct HasInitMember : std::false_type {};
+	// lol MSVC workarounds
+	struct HasInitTag;
+	struct HasOnEntityAddedTag;
+	struct HasOnEntityRemovedTag;
 
-	template <class T>
-	struct HasInitMember<T, Halley::void_t<decltype(std::declval<T&>().init())>> : std::true_type { };
+	// True if T::init() exists
+	template <class, class = Halley::void_t<>> struct HasInitMember : std::false_type {};
+	template <class T> struct HasInitMember<T, decltype(std::declval<T&>().init())> : std::true_type { };
+
+	// True if T::onEntityAdded(F&) exists
+	template <class, class, class = Halley::void_t<>> struct HasOnEntityAdded : std::false_type {};
+	template <class T, class F> struct HasOnEntityAdded<T, F, decltype(std::declval<T>().onEntityAdded(std::declval<F&>()))> : std::true_type { };
+	
+	// True if T::onEntityRemoved(F&) exists
+	template <class, class, class = Halley::void_t<>> struct HasOnEntityRemoved : std::false_type {};
+	template <class T, class F> struct HasOnEntityRemoved<T, F, decltype(std::declval<T>().onEntityRemoved(std::declval<F&>()))> : std::true_type { };
+
 	
 	class System
 	{
@@ -74,7 +86,33 @@ namespace Halley {
 
 		template <typename T, typename std::enable_if<!HasInitMember<T>::value, int>::type = 0>
 		void invokeInit()
+		{}
+
+		template <typename T, typename F, typename std::enable_if<HasOnEntityAdded<T, F>::value, int>::type = 0>
+		void initialiseOnEntityAdded(FamilyBinding<F>& binding)
 		{
+			binding.setOnEntityAdded([this] (void* e) { static_cast<T*>(this)->onEntityAdded(*static_cast<F*>(e)); });
+		}
+
+		template <typename T, typename F, typename std::enable_if<!HasOnEntityAdded<T, F>::value, int>::type = 0>
+		void initialiseOnEntityAdded(FamilyBinding<F>&)
+		{}
+
+		template <typename T, typename F, typename std::enable_if<HasOnEntityRemoved<T, F>::value, int>::type = 0>
+		void initialiseOnEntityRemoved(FamilyBinding<F>& binding)
+		{
+			binding.setOnEntityRemoved([this] (void* e) { static_cast<T*>(this)->onEntityRemoved(*static_cast<F*>(e)); });
+		}
+
+		template <typename T, typename F, typename std::enable_if<!HasOnEntityRemoved<T, F>::value, int>::type = 0>
+		void initialiseOnEntityRemoved(FamilyBinding<F>&)
+		{}
+
+		template <typename T, typename F>
+		void initialiseFamilyBinding(FamilyBinding<F>& binding)
+		{
+			initialiseOnEntityAdded<T, F>(binding);
+			initialiseOnEntityRemoved<T, F>(binding);
 		}
 
 	private:

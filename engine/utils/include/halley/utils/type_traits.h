@@ -2,7 +2,6 @@
 
 namespace Halley
 {
-	template<class...> using void_t = void;
-
-	template<class...> using int_t = int;
+	template<typename... Ts> struct make_void { typedef void type;};
+	template<typename... Ts> using void_t = typename make_void<Ts...>::type;
 }

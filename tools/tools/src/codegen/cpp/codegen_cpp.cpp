@@ -305,12 +305,15 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema(service.name + "&"), {}, "get" + service.name, true), "return *" + lowerFirst(service.name) + ";");
 	}
 
-	// initBase();
+	// Construct initBase();
 	std::vector<String> initBaseMethodBody;
 	for (auto& service: system.services) {
 		initBaseMethodBody.push_back(lowerFirst(service.name) + " = &doGetWorld().template getService<" + service.name + ">();");
 	}
 	initBaseMethodBody.push_back("invokeInit<T>();");
+	for (auto& family: system.families) {
+		initBaseMethodBody.push_back("initialiseFamilyBinding<T, " + upperFirst(family.name) + "Family>(" + family.name + "Family);");
+	}
 	sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "initBase", false, false, true), initBaseMethodBody);
 
 	auto fams = convert<FamilySchema, VariableSchema>(system.families, [](auto& fam) { return VariableSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); });
