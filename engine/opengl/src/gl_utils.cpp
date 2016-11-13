@@ -85,7 +85,7 @@ void GLUtils::doGlCheckError(const char* file, long line)
 
 using namespace Halley;
 
-static const bool checked = false;
+static const bool checked = true;
 
 namespace Halley {
 	class GLInternals {
@@ -221,7 +221,7 @@ void GLUtils::bindTexture(int id)
 {
 	Expects(id >= 0);
 
-	if (!checked || id != state.curTex[state.curTexUnit]) {
+	if (true || !checked || id != state.curTex[state.curTexUnit]) {
 		state.curTex[state.curTexUnit] = id;
 		glBindTexture(GL_TEXTURE_2D, id);
 		glCheckError();
