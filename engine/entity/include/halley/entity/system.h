@@ -79,13 +79,13 @@ namespace Halley {
 		}
 
 		template <typename T, typename std::enable_if<HasInitMember<T>::value, int>::type = 0>
-		void invokeInit()
+		void invokeInit(T* system)
 		{
-			static_cast<T*>(this)->init();
+			system->init();
 		}
 
 		template <typename T, typename std::enable_if<!HasInitMember<T>::value, int>::type = 0>
-		void invokeInit()
+		void invokeInit(T*)
 		{}
 
 		template <typename T, typename F, typename std::enable_if<HasOnEntityAdded<T, F>::value, int>::type = 0>

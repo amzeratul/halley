@@ -321,7 +321,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 	for (auto& service: system.services) {
 		initBaseMethodBody.push_back(lowerFirst(service.name) + " = &doGetWorld().template getService<" + service.name + ">();");
 	}
-	initBaseMethodBody.push_back("invokeInit<T>();");
+	initBaseMethodBody.push_back("invokeInit<T>(static_cast<T*>(this));");
 	for (auto& family: system.families) {
 		initBaseMethodBody.push_back("initialiseFamilyBinding<T, " + upperFirst(family.name) + "Family>(" + family.name + "Family, static_cast<T*>(this));");
 	}
