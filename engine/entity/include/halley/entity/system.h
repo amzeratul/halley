@@ -31,6 +31,7 @@ namespace Halley {
 		long long getNanoSecondsTaken() const { return timer.lastElapsedNanoSeconds(); }
 		long long getNanoSecondsTakenAvg() const { return timer.averageElapsedNanoSeconds(); }
 		size_t getEntityCount() const;
+		void tryInit();
 
 	protected:
 		HalleyAPI& doGetAPI() const { return *api; }

@@ -19,6 +19,14 @@ size_t System::getEntityCount() const
 	return n;
 }
 
+void System::tryInit()
+{
+	if (!initialised) {
+		initBase();
+		initialised = true;
+	}
+}
+
 void System::onAddedToWorld(World& w, int id) {
 	world = &w;
 	systemId = id;
@@ -99,11 +107,6 @@ void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, size
 }
 
 void System::doUpdate(Time time) {
-	if (!initialised) {
-		initBase();
-		initialised = true;
-	}
-
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 	timer.beginSample();
 
@@ -119,11 +122,6 @@ void System::doUpdate(Time time) {
 }
 
 void System::doRender(Painter& painter) {
-	if (!initialised) {
-		initBase();
-		initialised = true;
-	}
-
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 	timer.beginSample();
 

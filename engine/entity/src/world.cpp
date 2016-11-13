@@ -17,6 +17,9 @@ Halley::World::World(HalleyAPI* api)
 
 Halley::World::~World()
 {
+	for (auto e: entitiesPendingCreation) {
+		deleteEntity(e);
+	}
 	for (auto e: entities) {
 		deleteEntity(e);
 	}
@@ -281,7 +284,9 @@ void World::updateEntities()
 
 void World::updateSystems(TimeLine timeline, Time time)
 {
-	// Update systems
+	for (auto& system : getSystems(timeline)) {
+		system->tryInit();
+	}
 	for (auto& system : getSystems(timeline)) {
 		system->doUpdate(time);
 	}
@@ -289,7 +294,9 @@ void World::updateSystems(TimeLine timeline, Time time)
 
 void World::renderSystems(Painter& painter) const
 {
-	// Update systems
+	for (auto& system : getSystems(TimeLine::Render)) {
+		system->tryInit();
+	}
 	for (auto& system : getSystems(TimeLine::Render)) {
 		system->doRender(painter);
 	}
