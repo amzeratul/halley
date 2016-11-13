@@ -17,6 +17,7 @@ core/graphics
 - multi-pass: disable batching
 - fallback shaders
 - shaders for other graphics APIs? [RESEARCH]
+- Codegen vertex attribute data? [RESEARCH]
 
 input
 - input context system [RESEARCH]
@@ -50,7 +51,6 @@ entity
 codegen
 - components registry [RESEARCH] (does this even make sense?)
 - components serialization [RESEARCH]
-- import custom types in components [RESEARCH]
 
 lua
 - codegen Lua
