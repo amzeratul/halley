@@ -26,6 +26,8 @@ namespace Halley {
 		void start(AudioSpec spec, AudioOutputAPI& out);
 		void stop();
 
+		void generateBuffer();
+
    	private:
 		AudioSpec spec;
 		AudioOutputAPI* out;
@@ -49,7 +51,6 @@ namespace Halley {
 
 		void addSource(size_t id, std::unique_ptr<AudioSource>&& src);
 
-	    void generateBuffer();
 		void updateSources();
 	    void postUpdateSources();
 

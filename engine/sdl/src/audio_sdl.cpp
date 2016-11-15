@@ -46,8 +46,10 @@ static void sdlCallback(void *userdata, Uint8 * stream, int len)
 	reinterpret_cast<AudioSDL*>(userdata)->onCallback(stream, len);
 }
 
-AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, const AudioDevice* dev)
+AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, const AudioDevice* dev, AudioCallback callback)
 {
+	prepareAudioCallback = callback;
+
 	String name = dev ? dev->getName() : "";
 	const char* deviceName = name != "" ? name.c_str() : nullptr;
 
@@ -165,6 +167,10 @@ void AudioSDL::doQueueAudio(gsl::span<const gsl::byte> data)
 
 void AudioSDL::onCallback(unsigned char* stream, int len) 
 {
+	if (prepareAudioCallback) {
+		prepareAudioCallback();
+	}
+
 	size_t remaining = size_t(len);
 	size_t pos = 0;
 

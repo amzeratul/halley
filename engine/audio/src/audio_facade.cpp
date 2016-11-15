@@ -5,6 +5,8 @@
 
 using namespace Halley;
 
+constexpr bool ownAudioThread = false;
+
 AudioFacade::AudioFacade(AudioOutputAPI& output)
 	: output(output)
 	, running(false)
@@ -39,16 +41,19 @@ void AudioFacade::startPlayback(int deviceNumber)
 	engine = std::make_unique<AudioEngine>();
 
 	AudioSpec format;
-	format.bufferSize = 1024;
+	format.bufferSize = 2048;
 	format.format = AudioSampleFormat::Int16;
 	format.numChannels = 2;
 	format.sampleRate = 48000;
 
-	AudioSpec obtained = output.openAudioDevice(format, getAudioDevices().at(deviceNumber).get());
+	AudioSpec obtained = output.openAudioDevice(format, getAudioDevices().at(deviceNumber).get(), [this]() { onNeedBuffer(); });
 
 	engine->start(obtained, output);
 	running = true;
-	audioThread = std::thread([this] () { run(); });
+
+	if (ownAudioThread) {
+		audioThread = std::thread([this]() { run(); });
+	}
 
 	output.startPlayback();
 }
@@ -59,7 +64,9 @@ void AudioFacade::stopPlayback()
 		musicTracks.clear();
 		running = false;
 		engine->stop();
-		audioThread.join();
+		if (ownAudioThread) {
+			audioThread.join();
+		}
 		engine.reset();
 		output.stopPlayback();
 	}
@@ -130,6 +137,13 @@ void AudioFacade::stopMusic(AudioHandle& handle, float fadeOutTime)
 	}
 }
 
+void AudioFacade::onNeedBuffer()
+{
+	if (!ownAudioThread) {
+		stepAudio();
+	}
+}
+
 void AudioFacade::setGroupVolume(String groupName, float gain)
 {
 	// TODO
@@ -145,19 +159,28 @@ void AudioFacade::setListener(AudioListenerData listener)
 void AudioFacade::run()
 {
 	while (running) {
-		std::vector<std::function<void()>> toDo;
-		{
-			std::unique_lock<std::mutex> lock(audioMutex);
-			toDo = std::move(inbox);
-			inbox.clear();
-			playingSoundsNext = engine->getPlayingSounds();
-		}
+		stepAudio();
+	}
+}
 
-		for (auto& action: toDo) {
-			action();
-		}
+void AudioFacade::stepAudio()
+{
+	std::vector<std::function<void()>> toDo;
+	{
+		std::unique_lock<std::mutex> lock(audioMutex);
+		toDo = std::move(inbox);
+		inbox.clear();
+		playingSoundsNext = engine->getPlayingSounds();
+	}
 
+	for (auto& action : toDo) {
+		action();
+	}
+
+	if (ownAudioThread) {
 		engine->run();
+	} else {
+		engine->generateBuffer();
 	}
 }
 

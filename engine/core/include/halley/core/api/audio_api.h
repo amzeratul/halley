@@ -68,13 +68,15 @@ namespace Halley
 		{}
 	};
 
+	using AudioCallback = std::function<void()>;
+
 	class AudioOutputAPI
 	{
 	public:
 		virtual ~AudioOutputAPI() {}
 
 		virtual Vector<std::unique_ptr<const AudioDevice>> getAudioDevices() = 0;
-		virtual AudioSpec openAudioDevice(const AudioSpec& requestedFormat, const AudioDevice* device = nullptr) = 0;
+		virtual AudioSpec openAudioDevice(const AudioSpec& requestedFormat, const AudioDevice* device = nullptr, AudioCallback prepareAudioCallback = AudioCallback()) = 0;
 		virtual void closeAudioDevice() = 0;
 
 		virtual void startPlayback() = 0;
