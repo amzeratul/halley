@@ -277,7 +277,7 @@ void Core::doRender(Time)
 		painter->startRender();
 
 		if (currentStage) {
-			RenderContext context(*painter, *camera, *screenTarget, Rect4i(screenTarget->getViewPort()));
+			RenderContext context(*painter, *camera, *screenTarget);
 			currentStage->onRender(context);
 		}
 

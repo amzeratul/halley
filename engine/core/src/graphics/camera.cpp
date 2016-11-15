@@ -20,6 +20,7 @@
 \*****************************************************************/
 
 #include "halley/core/graphics/camera.h"
+#include "graphics/render_target/render_target.h"
 
 using namespace Halley;
 
@@ -56,9 +57,30 @@ void Camera::setZoom(float _zoom)
 	zoom = _zoom;
 }
 
-
-void Camera::updateProjection(Vector2i area, bool flipVertical)
+void Camera::resetRenderTarget()
 {
+	renderTarget = nullptr;
+}
+
+void Camera::setRenderTarget(RenderTarget& target)
+{
+	renderTarget = &target;
+}
+
+void Camera::resetViewPort()
+{
+	viewPort.reset();
+}
+
+void Camera::setViewPort(Rect4i v)
+{
+	viewPort = v;
+}
+
+void Camera::updateProjection(bool flipVertical)
+{
+	Vector2i area = getViewPort().getSize();
+
 	// Setup projection
 	float w = float(area.x);
 	float h = float(area.y);
@@ -74,6 +96,22 @@ void Camera::updateProjection(Vector2i area, bool flipVertical)
 	if (pos != Vector2f()) {
 		projection.translate2D(-pos.x, -pos.y);
 	}
+}
+
+RenderTarget& Camera::getActiveRenderTarget() const
+{
+	Expects(rendering);
+	return renderTarget ? *renderTarget : *defaultRenderTarget;
+}
+
+RenderTarget* Camera::getRenderTarget() const
+{
+	return renderTarget;
+}
+
+Rect4i Camera::getViewPort() const
+{
+	return viewPort ? viewPort.get().intersection(getActiveRenderTarget().getViewPort()) : getActiveRenderTarget().getViewPort();
 }
 
 Vector2f Camera::screenToWorld(Vector2f p, Rect4f viewport) const

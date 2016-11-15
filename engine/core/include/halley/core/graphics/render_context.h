@@ -23,22 +23,18 @@ namespace Halley
 		RenderContext(RenderContext&& context);
 
 		RenderContext with(Camera& camera) const;
-		RenderContext with(RenderTarget& target) const;
-		RenderContext subArea(Rect4i area) const;
-
 		Camera& getCamera() const { return camera; }
-		Rect4i getViewPort() const { return viewPort; }
-		RenderTarget& getRenderTarget() const { return renderTarget; }
+
+		RenderTarget& getDefaultRenderTarget();
 
 	private:
 		Painter& painter;
 		Camera& camera;
-		RenderTarget& renderTarget;
-		Rect4i viewPort;
+		RenderTarget& defaultRenderTarget;
 
 		RenderContext* restore = nullptr;
 
-		RenderContext(Painter& painter, Camera& camera, RenderTarget& renderTarget, Rect4i viewPort);
+		RenderContext(Painter& painter, Camera& camera, RenderTarget& renderTarget);
 		void setActive();
 		void setInactive();
 		void pushContext();

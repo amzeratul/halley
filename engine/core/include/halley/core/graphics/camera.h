@@ -55,18 +55,24 @@ namespace Halley {
 
 		Matrix4f getProjection() const { return projection; }
 
-		void updateProjection(Vector2i viewSize, bool flipVertical = true);
+		void updateProjection(bool flipVertical = true);
 
+		RenderTarget& getActiveRenderTarget() const;
 		RenderTarget* getRenderTarget() const;
-		Maybe<Rect4i> getViewPort() const;
+		Rect4i getViewPort() const;
 
 	private:
+		friend class Painter;
+
 		Vector2f pos;
 		Matrix4f projection;
 		Angle1f angle;
 		float zoom;
+		bool rendering = false;
 
-		RenderTarget* renderTarget;
+		RenderTarget* renderTarget = nullptr;
 		Maybe<Rect4i> viewPort;
+
+		RenderTarget* defaultRenderTarget;
 	};
 }

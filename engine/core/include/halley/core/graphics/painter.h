@@ -67,6 +67,7 @@ namespace Halley
 
 	private:
 		void bind(RenderContext& context);
+		void unbind(RenderContext& context);
 
 		RenderContext* activeContext = nullptr;
 		Matrix4f projection;

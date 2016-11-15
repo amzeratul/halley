@@ -177,21 +177,32 @@ void Painter::makeSpaceForPendingIndices(size_t numIndices)
 
 void Painter::bind(RenderContext& context)
 {
+	// Setup camera
+	camera = &context.getCamera();
+	camera->rendering = true;
+	camera->defaultRenderTarget = &context.getDefaultRenderTarget();
+
 	// Set render target
-	auto& rt = context.getRenderTarget();
+	auto& rt = camera->getActiveRenderTarget();
 	renderTargetViewPort = rt.getViewPort();
 	renderTargetIsScreen = rt.isScreen();
 	rt.bind();
-	
+
 	// Set viewport
-	viewPort = context.getViewPort().intersection(renderTargetViewPort);
+	viewPort = camera->getViewPort();
 	setViewPort(viewPort, renderTargetViewPort.getSize(), renderTargetIsScreen);
 	setClip();
 
-	// Set camera
-	camera = &context.getCamera();
-	camera->updateProjection(viewPort.getSize(), renderTargetIsScreen);
+	// Update projection
+	camera->updateProjection(renderTargetIsScreen);
 	projection = camera->getProjection();
+}
+
+void Painter::unbind(RenderContext& context)
+{
+	flush();
+	camera->getActiveRenderTarget().unbind();
+	camera->rendering = false;
 }
 
 void Painter::setClip(Rect4i rect)

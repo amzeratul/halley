@@ -3,18 +3,16 @@
 
 using namespace Halley;
 
-RenderContext::RenderContext(Painter& painter, Camera& camera, RenderTarget& renderTarget, Rect4i viewPort)
+RenderContext::RenderContext(Painter& painter, Camera& camera, RenderTarget& renderTarget)
 	: painter(painter)
 	, camera(camera)
-	, renderTarget(renderTarget)
-	, viewPort(viewPort)
+	, defaultRenderTarget(renderTarget)
 {}
 
 RenderContext::RenderContext(RenderContext&& context)
 	: painter(context.painter)
 	, camera(context.camera)
-	, renderTarget(context.renderTarget)
-	, viewPort(context.viewPort)
+	, defaultRenderTarget(context.defaultRenderTarget)
 {
 }
 
@@ -26,8 +24,7 @@ void RenderContext::setActive()
 
 void RenderContext::setInactive()
 {
-	painter.flush();
-	renderTarget.unbind();
+	painter.unbind(*this);
 	painter.activeContext = nullptr;
 }
 
@@ -46,14 +43,14 @@ void RenderContext::popContext()
 
 RenderContext RenderContext::with(Camera& v) const
 {
-	return RenderContext(painter, v, renderTarget, viewPort);
+	return RenderContext(painter, v, defaultRenderTarget);
 }
 
-RenderContext RenderContext::with(RenderTarget& v) const
+RenderTarget& RenderContext::getDefaultRenderTarget()
 {
-	return RenderContext(painter, camera, v, viewPort);
+	return defaultRenderTarget;
 }
-
+/*
 RenderContext RenderContext::subArea(Rect4i area) const
 {
 	Vector2i start = viewPort.getTopLeft() + area.getTopLeft();
@@ -62,3 +59,4 @@ RenderContext RenderContext::subArea(Rect4i area) const
 	end.y = std::min(end.y, viewPort.getBottomRight().y);
 	return RenderContext(painter, camera, renderTarget, Rect4i(start, end));
 }
+*/
