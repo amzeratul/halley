@@ -227,6 +227,8 @@ void World::updateEntities()
 
 	size_t nEntities = entities.size();
 
+	std::vector<size_t> entitiesRemoved;
+
 	// Update all entities
 	// This loop should be as fast as reasonably possible
 	for (size_t i = 0; i < nEntities; i++) {
@@ -249,18 +251,8 @@ void World::updateEntities()
 					}
 				}
 
-				// Remove from map
-				//std::cout << "-" << entity.getEntityId() << " ";
-				entityMap.freeId(entity.getEntityId());
-
-				// Swap with last, then pop
-				std::swap(entities[i], entities[nEntities - 1]);
-				deleteEntity(entities.back());
-				entities.pop_back();
-				nEntities--;
-				i--;
-			}
-			else {
+				entitiesRemoved.push_back(i);
+			} else {
 				// It's alive, so check old and new system inclusions
 				FamilyMaskType oldMask = entity.getMask();
 				entity.refresh();
@@ -296,6 +288,23 @@ void World::updateEntities()
 		//auto& family = iter.second;
 		auto& family = iter;
 		family->removeDeadEntities();
+	}
+
+	// Actually remove dead entities
+	if (!entitiesRemoved.empty()) {
+		size_t livingEntityCount = entities.size();
+		for (int i = int(entitiesRemoved.size()); --i >= 0; ) {
+			size_t idx = entitiesRemoved[i];
+			auto& entity = *entities[idx];
+
+			// Remove
+			entityMap.freeId(entity.getEntityId());
+			deleteEntity(&entity);
+
+			// Put it at the back of the array, so it's removed when the array gets resized
+			std::swap(entities[idx], entities[--livingEntityCount]);
+		}
+		entities.resize(livingEntityCount);
 	}
 
 	entityDirty = false;

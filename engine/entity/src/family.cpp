@@ -38,7 +38,7 @@ void Family::notifyRemove(void* entity)
 {
 	for (auto& c: removeEntityCallbacks) {
 		c->onEntityRemoved(entity);
-	}	
+	}
 }
 
 void Family::removeEntity(Entity& entity)
