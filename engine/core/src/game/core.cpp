@@ -219,7 +219,7 @@ void Core::onVariableUpdate(Time time)
 	if (api->video) {
 		auto windowSize = api->video->getWindow().getDefinition().getSize();
 		screenTarget = std::make_unique<ScreenRenderTarget>(Rect4i(Vector2i(), windowSize));
-		camera = std::make_unique<Camera>(Vector2f(windowSize) * 0.5f, Vector2f(windowSize));
+		camera = std::make_unique<Camera>(Vector2f(windowSize) * 0.5f);
 	}
 
 	if (isRunning()) {

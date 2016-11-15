@@ -190,8 +190,7 @@ void Painter::bind(RenderContext& context)
 
 	// Set camera
 	camera = &context.getCamera();
-	camera->setViewArea(Vector2f(viewPort.getSize()));
-	camera->updateProjection(renderTargetIsScreen);
+	camera->updateProjection(viewPort.getSize(), renderTargetIsScreen);
 	projection = camera->getProjection();
 }
 

@@ -27,14 +27,12 @@ using namespace Halley;
 Camera::Camera()
 	: zoom(1.0f)
 {
-	area = Vector2f(1280, 720);
-	pos = 0.5*area;
+	pos = Vector2f(640, 360);
 }
 
 
-Camera::Camera(Vector2f _pos, Vector2f _area, Angle1f _angle)
+Camera::Camera(Vector2f _pos, Angle1f _angle)
 	: pos(_pos)
-	, area(_area)
 	, angle(_angle)
 	, zoom(1.0f)
 {
@@ -44,12 +42,6 @@ Camera::Camera(Vector2f _pos, Vector2f _area, Angle1f _angle)
 void Camera::setPosition(Vector2f _pos)
 {
 	pos = _pos;
-}
-
-
-void Camera::setViewArea(Vector2f _area)
-{
-	area = _area;
 }
 
 
@@ -65,11 +57,11 @@ void Camera::setZoom(float _zoom)
 }
 
 
-void Camera::updateProjection(bool flipVertical)
+void Camera::updateProjection(Vector2i area, bool flipVertical)
 {
 	// Setup projection
-	float w = area.x;
-	float h = area.y;
+	float w = float(area.x);
+	float h = float(area.y);
 	projection = Matrix4f::makeOrtho2D(-w/2, w/2, flipVertical ? h/2 : -h/2, flipVertical ? -h/2 : h/2, -1000, 1000);
 
 	// Camera properties
@@ -84,23 +76,10 @@ void Camera::updateProjection(bool flipVertical)
 	}
 }
 
-Halley::Rect4f Halley::Camera::getViewRect() const
-{
-	Vector2f area = getViewArea();
-	return Rect4f(getPosition() - area / 2, area.x, area.y);
-}
-
 Vector2f Camera::screenToWorld(Vector2f p, Rect4f viewport) const
 {
-	// x and y relative to viewport, from -0.5 to 0.5
-	Vector2f p2;
-	p2.x = (p.x - viewport.getX()) / viewport.getWidth() - 0.5f;
-	p2.y = -((p.y - viewport.getY()) / viewport.getHeight() - 0.5f);
+	Vector2f p2 = ((p - viewport.getTopLeft()) - viewport.getSize() * 0.5f) / zoom;
 
-	// Apply area/zoom
-	p2 = p2 * area / zoom;
-
-	// Rotate
 	p2 = p2.rotate(angle);
 
 	return p2 + pos;
