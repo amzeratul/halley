@@ -39,12 +39,12 @@ namespace Halley {
 		template <typename T>
 		T* getComponent()
 		{
-			const int fastAccessId = getFastAccessSlot<T>(0);
+			int fastAccessId = getFastAccessSlot<T>(0);
 			if (fastAccessId >= 0) {
 				return static_cast<T*>(fastComponents[fastAccessId]);
 			}
 			else {
-				const int id = T::componentIndex;
+				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
 				for (size_t i = 0; i < components.size(); i++) {
 					if (components[i].first == id) {
 						return static_cast<T*>(components[i].second);
@@ -57,7 +57,7 @@ namespace Halley {
 		template <typename T>
 		bool hasComponent()
 		{
-			return FamilyMask::hasBit(mask, T::componentIndex);
+			return FamilyMask::hasBit(mask, FamilyMask::RetrieveComponentIndex<T>::componentIndex);
 		}
 
 		bool needsRefresh() const

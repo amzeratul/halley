@@ -74,6 +74,7 @@ set(HEADERS
         "include/halley/data_structures/highscore.h"
         "include/halley/data_structures/mapped_pool.h"
         "include/halley/data_structures/maybe.h"
+        "include/halley/data_structures/maybe_ref.h"
         "include/halley/data_structures/memory_pool.h"
         "include/halley/data_structures/rect_spatial_checker.h"
 		"include/halley/data_structures/tree_map.h"

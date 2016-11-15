@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bitset>
+#include "halley/data_structures/maybe_ref.h"
 
 namespace Halley {
 	namespace FamilyMask {
@@ -45,6 +46,18 @@ namespace Halley {
 		HandleType getHandle(RealType mask);
 
 
+		template <typename T>
+		struct RetrieveComponentIndex {
+			static constexpr int componentIndex = T::componentIndex;
+		};
+
+		template <typename T>
+		struct RetrieveComponentIndex<MaybeRef<T>> {
+			static constexpr int componentIndex = T::componentIndex;
+		};
+
+
+
 
 		template <typename... Ts>
 		struct Evaluator;
@@ -59,7 +72,7 @@ namespace Halley {
 		template <typename T, typename... Ts>
 		struct Evaluator <T, Ts...> {
 			static void makeMask(RealType& mask) {
-				FamilyMask::setBit(mask, T::componentIndex);
+				FamilyMask::setBit(mask, RetrieveComponentIndex<T>::componentIndex);
 				Evaluator<Ts...>::makeMask(mask);
 			}
 
@@ -70,7 +83,7 @@ namespace Halley {
 			}
 		};
 
-
+		
 
 		template <typename... Ts>
 		struct MutableEvaluator;
@@ -86,7 +99,41 @@ namespace Halley {
 		struct MutableEvaluator <T, Ts...> {
 			static void makeMask(RealType& mask) {
 				if (std::is_const<T>::value) {
-					FamilyMask::setBit(mask, T::componentIndex);
+					FamilyMask::setBit(mask, RetrieveComponentIndex<T>::componentIndex);
+				}
+				Evaluator<Ts...>::makeMask(mask);
+			}
+
+			static HandleType getMask() {
+				RealType mask;
+				makeMask(mask);
+				return getHandle(mask);
+			}
+		};
+
+
+		template <typename T>
+		struct IsMaybeRef : std::false_type {};
+
+		template <typename T>
+		struct IsMaybeRef<MaybeRef<T>> : std::true_type {};
+
+
+		template <typename... Ts>
+		struct InclusionEvaluator;
+
+		template <>
+		struct InclusionEvaluator <> {
+			static RealType makeMask(RealType startValue) {
+				return startValue;
+			}
+		};
+
+		template <typename T, typename... Ts>
+		struct InclusionEvaluator <T, Ts...> {
+			static void makeMask(RealType& mask) {
+				if (!IsMaybeRef<T>::value) {
+					FamilyMask::setBit(mask, RetrieveComponentIndex<T>::componentIndex);
 				}
 				Evaluator<Ts...>::makeMask(mask);
 			}

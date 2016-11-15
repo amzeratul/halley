@@ -59,16 +59,20 @@ namespace Halley {
 		template <typename T>
 		Family& getFamily()
 		{
+			// Disable re-using of families due to optional components messing them up
+			/*
 			FamilyMaskType mask = T::Type::readMask();
 			auto iter = families.find(mask);
 			if (iter != families.end()) {
 				return *iter->second;
 			}
+			*/
 
 			auto newFam = std::make_unique<FamilyImpl<T>>();
 			Family* newFamPtr = newFam.get();
 			onAddFamily(*newFamPtr);
-			families[mask] = std::move(newFam);
+			//families[mask] = std::move(newFam);
+			families.emplace_back(std::move(newFam));
 			return *newFamPtr;
 		}
 		
@@ -82,7 +86,8 @@ namespace Halley {
 		Vector<Entity*> entitiesPendingCreation;
 		MappedPool<Entity*> entityMap;
 
-		TreeMap<FamilyMaskType, std::unique_ptr<Family>> families;
+		//TreeMap<FamilyMaskType, std::unique_ptr<Family>> families;
+		Vector<std::unique_ptr<Family>> families;
 		TreeMap<String, std::shared_ptr<Service>> services;
 
 		mutable std::array<StopwatchAveraging, 3> timer;

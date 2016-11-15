@@ -111,6 +111,10 @@ void ConfigNode::deserialize(Deserializer& s)
 			contents = scalar;
 			break;
 		}
+		case ConfigNodeType::Undefined:
+		{
+			break;
+		}
 		default:
 			throw Exception("Unknown configuration node type.");
 	}

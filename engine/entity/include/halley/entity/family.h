@@ -69,7 +69,7 @@ namespace Halley {
 		static_assert(((T::Type::getNumComponents() + 1) * sizeof(void*)) == sizeof(T), "Family type has unexpected storage size");
 
 	public:
-		FamilyImpl() : Family(T::Type::readMask()) {}
+		FamilyImpl() : Family(T::Type::inclusionMask()) {}
 				
 	protected:
 		void addEntity(Entity& entity) override

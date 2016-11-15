@@ -18,7 +18,8 @@ Halley::World::World(HalleyAPI* api)
 Halley::World::~World()
 {
 	for (auto& f: families) {
-		f.second->clearEntities();
+		//f.second->clearEntities();
+		f->clearEntities();
 	}
 	for (auto& tl: systems) {
 		tl.clear();
@@ -240,7 +241,8 @@ void World::updateEntities()
 			if (!entity.isAlive()) {
 				// Remove from systems
 				for (auto& iter : families) {
-					auto& family = *iter.second;
+					//auto& family = *iter.second;
+					auto& family = *iter;
 					FamilyMaskType famMask = family.inclusionMask;
 					if ((famMask & entity.getMask()) == famMask) {
 						family.removeEntity(entity);
@@ -268,7 +270,8 @@ void World::updateEntities()
 				if (oldMask != newMask) {
 					// Let the systems know about it
 					for (auto& iter : families) {
-						auto& family = *iter.second;
+						//auto& family = *iter.second;
+						auto& family = *iter;
 						FamilyMaskType famMask = family.inclusionMask;
 						bool matchOld = (famMask & oldMask) == famMask;
 						bool matchNew = (famMask & newMask) == famMask;
@@ -290,7 +293,8 @@ void World::updateEntities()
 
 	// Update families
 	for (auto& iter : families) {
-		auto& family = iter.second;
+		//auto& family = iter.second;
+		auto& family = iter;
 		family->removeDeadEntities();
 	}
 

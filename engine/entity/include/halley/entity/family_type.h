@@ -14,6 +14,10 @@ namespace Halley {
 			return FamilyMask::Evaluator<Ts...>::getMask();
 		}
 
+		static FamilyMaskType inclusionMask() {
+			return FamilyMask::InclusionEvaluator<Ts...>::getMask();
+		}
+
 		static void loadComponents(Entity& entity, char* data) {
 			Halley::FamilyExtractor::Evaluator<Ts...>::buildEntity(entity, reinterpret_cast<void**>(data), 0);
 		}

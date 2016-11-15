@@ -62,7 +62,8 @@ namespace Halley
 		Sprite& scaleTo(Vector2f size);
 		Sprite& setFlip(bool flip);
 
-		Sprite& setPivot(Vector2f offset);
+		Sprite& setPivot(Vector2f pivot);
+		Sprite& setAbsolutePivot(Vector2f pivot);
 		Sprite& setSize(Vector2f size);
 		Sprite& setTexRect(Rect4f texRect);
 

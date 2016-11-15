@@ -18,7 +18,30 @@ SystemSchema::SystemSchema(YAML::Node node)
 				for (auto compList : iter->second) {
 					for (auto comp = compList.begin(); comp != compList.end(); ++comp) {
 						ComponentReferenceSchema component;
-						component.write = comp->second.as<std::string>() == "write";
+						String desc = comp->second.as<std::string>();
+						bool read = false;
+						bool write = false;
+						for (auto& d : desc.split(' ')) {
+							if (d == "write") {
+								component.write = true;
+								write = true;
+							} else if (d == "read") {
+								component.write = false;
+								read = true;
+							} else if (d == "optional") {
+								component.optional = true;
+							} else {
+								throw Exception("Unknown component descriptor: " + d + ", in family " + name);
+							}
+						}
+						if (!read && !write) {
+							throw Exception("Component must be either read or write, in family " + name);
+						}
+						if (read && write) {
+							throw Exception("Component mark as read and write, simply tag it write, in family " + name);
+						}
+						component.write = desc.contains("write");
+						component.optional = desc.contains("optional");
 						component.name = comp->first.as<std::string>();
 
 						family.components.push_back(component);

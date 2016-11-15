@@ -37,6 +37,7 @@ namespace Halley
 	public:
 		String name;
 		bool write = false;
+		bool optional = false;
 	};
 
 	class MessageReferenceSchema

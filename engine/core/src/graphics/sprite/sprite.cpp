@@ -189,6 +189,12 @@ Sprite& Sprite::setPivot(Vector2f v)
 	return *this;
 }
 
+Sprite& Sprite::setAbsolutePivot(Vector2f v)
+{
+	vertexAttrib.pivot = v / size;
+	return *this;
+}
+
 Sprite& Sprite::setSize(Vector2f v)
 {
 	if (size != v) {
