@@ -191,12 +191,12 @@ void Halley::World::step(TimeLine timeline, Time elapsed)
 	t.endSample();
 }
 
-void World::render(Painter& painter) const
+void World::render(RenderContext& rc) const
 {
 	auto& t = timer[int(TimeLine::Render)];
 	t.beginSample();
 
-	renderSystems(painter);
+	renderSystems(rc);
 
 	t.endSample();
 }
@@ -320,13 +320,13 @@ void World::updateSystems(TimeLine timeline, Time time)
 	}
 }
 
-void World::renderSystems(Painter& painter) const
+void World::renderSystems(RenderContext& rc) const
 {
 	for (auto& system : getSystems(TimeLine::Render)) {
 		system->tryInit();
 	}
 	for (auto& system : getSystems(TimeLine::Render)) {
-		system->doRender(painter);
+		system->doRender(rc);
 	}
 }
 

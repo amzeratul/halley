@@ -121,11 +121,11 @@ void System::doUpdate(Time time) {
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 }
 
-void System::doRender(Painter& painter) {
+void System::doRender(RenderContext& rc) {
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 	timer.beginSample();
 
-	renderBase(painter);
+	renderBase(rc);
 
 	timer.endSample();
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());

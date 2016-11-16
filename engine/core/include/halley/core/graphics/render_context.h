@@ -23,6 +23,7 @@ namespace Halley
 		RenderContext(RenderContext&& context);
 
 		RenderContext with(Camera& camera) const;
+		RenderContext with(RenderTarget& defaultRenderTarget) const;
 		Camera& getCamera() const { return camera; }
 
 		RenderTarget& getDefaultRenderTarget();

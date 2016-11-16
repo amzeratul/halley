@@ -1,61 +1,72 @@
 ---
-component: Position
-members:
-  - position: 'Halley::Vector2f'
+component:
+  name: Position
+  members:
+    - position: 'Halley::Vector2f'
 ---
-component: Velocity
-members:
-  - velocity: 'Halley::Vector2f'
+component:
+  name: Velocity
+  members:
+    - velocity: 'Halley::Vector2f'
 ---
-component: Time
-members:
-  - elapsed: float
+component:
+  name: Time
+  members:
+    - elapsed: float
 ---
-component: Sprite
-members:
-  - sprite: 'Halley::Sprite'
-  - layer: int
+component:
+  name: Sprite
+  members:
+    - sprite: 'Halley::Sprite'
+    - layer: int
 ---
-component: SpriteAnimation
-members:
-  - player: 'Halley::AnimationPlayer'
+component:
+  name: SpriteAnimation
+  members:
+    - player: 'Halley::AnimationPlayer'
 ---
-system: Time
-families:
-  - main:
-    - Time: write
-messages:
-  - Expire: send
+system:
+  name: Time
+  families:
+    - main:
+      - Time: write
+  messages:
+    - Expire: send
 ---
-system: Movement
-families:
-  - main:
-    - Position: write
-    - Velocity: write
-access: ['world']
-messages:
-  - Expire: receive
+system:
+  name: Movement
+  families:
+    - main:
+      - Position: write
+      - Velocity: write
+  access: ['world']
+  messages:
+    - Expire: receive
 ---
-system: SpriteAnimation
-families:
-  - main:
-    - Sprite: write
-    - SpriteAnimation: write
-    - Velocity: read
-strategy: parallel
+system:
+  name: SpriteAnimation
+  families:
+    - main:
+      - Sprite: write
+      - SpriteAnimation: write
+      - Velocity: read
+  strategy: parallel
 ---
-system: Render
-families:
-  - main:
-    - Position: read
-    - Sprite: write
-method: render
-strategy: global
+system:
+  name: Render
+  families:
+    - main:
+      - Position: read
+      - Sprite: write
+  method: render
+  strategy: global
 ---
-system: SpawnSprite
-access: ['world', 'api']
+system:
+  name: SpawnSprite
+  access: ['world', 'api']
 ---
-message: Expire
-members:
-  - time: float
+message:
+  name: Expire
+  members:
+    - time: float
 ...

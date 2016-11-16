@@ -201,8 +201,8 @@ public:
 		}
 		else if (system.method == SystemMethod::Render) {
 			methodName = "render";
-			methodArgType = "Halley::Painter&";
-			methodArgName = "painter";
+			methodArgType = "Halley::RenderContext&";
+			methodArgName = "rc";
 			methodConst = true;
 		}
 		else {

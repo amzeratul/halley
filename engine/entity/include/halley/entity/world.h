@@ -15,6 +15,7 @@
 #include "service.h"
 
 namespace Halley {
+	class RenderContext;
 	class Entity;
 	class System;
 	class Painter;
@@ -27,7 +28,7 @@ namespace Halley {
 		~World();
 
 		void step(TimeLine timeline, Time elapsed);
-		void render(Painter& painter) const;
+		void render(RenderContext& rc) const;
 		bool hasSystemsOnTimeLine(TimeLine timeline) const;
 		
 		long long getAverageTime(TimeLine timeline) const;
@@ -98,7 +99,7 @@ namespace Halley {
 		void deleteEntity(Entity* entity);
 
 		void updateSystems(TimeLine timeline, Time elapsed);
-		void renderSystems(Painter& painter) const;
+		void renderSystems(RenderContext& rc) const;
 		
 		void onAddFamily(Family& family);
 

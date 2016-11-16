@@ -21,11 +21,6 @@ void TestStage::onFixedUpdate(Time time)
 
 void TestStage::onRender(RenderContext& context) const
 {
-	context.bind([&] (Painter& painter)
-	{
-		painter.clear(Colour(0.2f, 0.2f, 0.3f));
-		world->render(painter);
-	});
-
+	world->render(context);
 	statsView->draw(context);
 }

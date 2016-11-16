@@ -51,7 +51,7 @@ namespace Halley {
 
 		virtual void initBase() {}
 		virtual void updateBase(Time) {}
-		virtual void renderBase(Painter&) {}
+		virtual void renderBase(RenderContext&) {}
 		virtual void onMessagesReceived(int, Message**, size_t*, size_t) {}
 
 		template <typename F, typename V>
@@ -131,7 +131,7 @@ namespace Halley {
 		StopwatchAveraging timer;
 
 		void doUpdate(Time time);
-		void doRender(Painter& painter);
+		void doRender(RenderContext& rc);
 		void onAddedToWorld(World& world, int id);
 
 		void purgeMessages();

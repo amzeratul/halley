@@ -46,6 +46,11 @@ RenderContext RenderContext::with(Camera& v) const
 	return RenderContext(painter, v, defaultRenderTarget);
 }
 
+RenderContext RenderContext::with(RenderTarget& renderTarget) const
+{
+	return RenderContext(painter, camera, renderTarget);
+}
+
 RenderTarget& RenderContext::getDefaultRenderTarget()
 {
 	return defaultRenderTarget;
