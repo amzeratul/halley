@@ -28,7 +28,10 @@ void AsyncResource::startLoading()
 
 void AsyncResource::doneLoading()
 {
-	loading = false;
+	{
+		std::unique_lock<std::mutex> lock(loadMutex);
+		loading = false;
+	}
 	loadWait.notify_all();
 }
 
