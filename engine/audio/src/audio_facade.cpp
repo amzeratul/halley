@@ -61,9 +61,12 @@ void AudioFacade::startPlayback(int deviceNumber)
 void AudioFacade::stopPlayback()
 {
 	if (running) {
-		musicTracks.clear();
-		running = false;
-		engine->stop();
+		{
+			std::unique_lock<std::mutex> lock(audioMutex);
+			musicTracks.clear();
+			running = false;
+			engine->stop();
+		}
 		if (ownAudioThread) {
 			audioThread.join();
 		}
@@ -168,6 +171,9 @@ void AudioFacade::stepAudio()
 	std::vector<std::function<void()>> toDo;
 	{
 		std::unique_lock<std::mutex> lock(audioMutex);
+		if (!running) {
+			return;
+		}
 		toDo = std::move(inbox);
 		inbox.clear();
 		playingSoundsNext = engine->getPlayingSounds();
