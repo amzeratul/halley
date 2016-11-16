@@ -7,25 +7,28 @@
 
 using namespace Halley;
 
-SpritePainterEntry::SpritePainterEntry(Sprite& sprite, int layer, float tieBreaker)
+SpritePainterEntry::SpritePainterEntry(Sprite& sprite, int mask, int layer, float tieBreaker)
 	: ptr(&sprite)
 	, type(SpritePainterEntryType::SpriteRef)
 	, layer(layer)
+	, mask(mask)
 	, tieBreaker(tieBreaker)
 {}
 
-SpritePainterEntry::SpritePainterEntry(TextRenderer& text, int layer, float tieBreaker)
+SpritePainterEntry::SpritePainterEntry(TextRenderer& text, int mask, int layer, float tieBreaker)
 	: ptr(&text)
 	, type(SpritePainterEntryType::TextRef)
 	, layer(layer)
+	, mask(mask)
 	, tieBreaker(tieBreaker)
 {
 }
 
-SpritePainterEntry::SpritePainterEntry(SpritePainterEntryType type, size_t spriteIdx, int layer, float tieBreaker)
+SpritePainterEntry::SpritePainterEntry(SpritePainterEntryType type, size_t spriteIdx, int mask, int layer, float tieBreaker)
 	: index(int(spriteIdx))
 	, type(type)
 	, layer(layer)
+	, mask(mask)
 	, tieBreaker(tieBreaker)
 {}
 
@@ -65,6 +68,11 @@ size_t SpritePainterEntry::getIndex() const
 	return index;
 }
 
+int SpritePainterEntry::getMask() const
+{
+	return mask;
+}
+
 void SpritePainter::start(size_t nSprites)
 {
 	if (sprites.capacity() < nSprites) {
@@ -74,47 +82,56 @@ void SpritePainter::start(size_t nSprites)
 	cachedSprites.clear();
 }
 
-void SpritePainter::add(Sprite& sprite, int layer, float tieBreaker)
+void SpritePainter::add(Sprite& sprite, int mask, int layer, float tieBreaker)
 {
-	sprites.push_back(SpritePainterEntry(sprite, layer, tieBreaker));
+	sprites.push_back(SpritePainterEntry(sprite, mask, layer, tieBreaker));
+	dirty = true;
 }
 
-void SpritePainter::addCopy(const Sprite& sprite, int layer, float tieBreaker)
+void SpritePainter::addCopy(const Sprite& sprite, int mask, int layer, float tieBreaker)
 {
-	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), layer, tieBreaker));
+	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), mask, layer, tieBreaker));
 	cachedSprites.push_back(sprite);
+	dirty = true;
 }
 
-void SpritePainter::add(TextRenderer& text, int layer, float tieBreaker)
+void SpritePainter::add(TextRenderer& text, int mask, int layer, float tieBreaker)
 {
-	sprites.push_back(SpritePainterEntry(text, layer, tieBreaker));
+	sprites.push_back(SpritePainterEntry(text, mask, layer, tieBreaker));
+	dirty = true;
 }
 
-void SpritePainter::addCopy(const TextRenderer& text, int layer, float tieBreaker)
+void SpritePainter::addCopy(const TextRenderer& text, int mask, int layer, float tieBreaker)
 {
-	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::TextCached, cachedText.size(), layer, tieBreaker));
+	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::TextCached, cachedText.size(), mask, layer, tieBreaker));
 	cachedText.push_back(text);
+	dirty = true;
 }
 
-void SpritePainter::draw(Painter& painter)
+void SpritePainter::draw(int mask, Painter& painter)
 {
-	// TODO: implement hierarchical bucketing.
-	// - one bucket per layer
-	// - for each layer, one bucket per vertical band of the screen (32px or so)
-	// - sort each leaf bucket
-	std::sort(sprites.begin(), sprites.end()); // lol
+	if (dirty) {
+		// TODO: implement hierarchical bucketing.
+		// - one bucket per layer
+		// - for each layer, one bucket per vertical band of the screen (32px or so)
+		// - sort each leaf bucket
+		std::sort(sprites.begin(), sprites.end()); // lol
+		dirty = false;
+	}
 
 	// Draw!
 	for (auto& s : sprites) {
-		auto type = s.getType();
-		if (type == SpritePainterEntryType::SpriteRef) {
-			s.getSprite().draw(painter);
-		} else if (type == SpritePainterEntryType::SpriteCached) {
-			cachedSprites[s.getIndex()].draw(painter);
-		} else if (type == SpritePainterEntryType::TextRef) {
-			s.getText().draw(painter);
-		} else if (type == SpritePainterEntryType::TextCached) {
-			cachedText[s.getIndex()].draw(painter);
+		if (s.getMask() == mask) {
+			auto type = s.getType();
+			if (type == SpritePainterEntryType::SpriteRef) {
+				s.getSprite().draw(painter);
+			} else if (type == SpritePainterEntryType::SpriteCached) {
+				cachedSprites[s.getIndex()].draw(painter);
+			} else if (type == SpritePainterEntryType::TextRef) {
+				s.getText().draw(painter);
+			} else if (type == SpritePainterEntryType::TextCached) {
+				cachedText[s.getIndex()].draw(painter);
+			}
 		}
 	}
 	painter.flush();
