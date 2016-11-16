@@ -35,7 +35,6 @@ if (MSVC)
 endif ()
 
 set (editor_gen_definitions
-	"gen_src/editor.yaml"
 	)
 
 
