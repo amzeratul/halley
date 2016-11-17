@@ -43,7 +43,7 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -DGSL_UNENFORCED_O
 
 # Libs
 if (CMAKE_LIBRARY_PATH)
-	link_directories(CMAKE_INCLUDE_PATH)
+	link_directories(${CMAKE_LIBRARY_PATH})
 endif()
 
 # SDL2
@@ -58,6 +58,10 @@ endif()
 # Boost
 find_package(Boost REQUIRED)
 add_definitions(-DBOOST_ALL_NO_LIB)
+if (BOOST_INCLUDE_DIR)
+else()
+	set(BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
+endif()
 
 # OpenGL
 find_package(OpenGL REQUIRED)
