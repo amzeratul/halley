@@ -229,11 +229,13 @@ Sprite& Sprite::setSprite(const SpriteSheet& sheet, String name)
 	return *this;
 }
 
-Sprite& Sprite::setSprite(const SpriteSheetEntry& entry)
+Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot)
 {
 	if (vertexAttrib.texRect != entry.coords) {
 		setSize(entry.size);
-		vertexAttrib.pivot = entry.pivot;
+		if (applyPivot) {
+			vertexAttrib.pivot = entry.pivot;
+		}
 		vertexAttrib.texRect = entry.coords;
 		vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
 	}

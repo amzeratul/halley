@@ -12,18 +12,20 @@ namespace Halley
 	public:
 		explicit AnimationPlayer(std::shared_ptr<const Animation> animation = std::shared_ptr<const Animation>(), String sequence = "default", String direction = "default");
 
-		void playOnce(String sequence);
+		AnimationPlayer& playOnce(String sequence);
 
-		void setAnimation(std::shared_ptr<const Animation> animation, String sequence = "default", String direction = "default");
-		void setSequence(String sequence);
-		void setDirection(int direction);
-		void setDirection(String direction);
+		AnimationPlayer& setAnimation(std::shared_ptr<const Animation> animation, String sequence = "default", String direction = "default");
+		AnimationPlayer& setSequence(String sequence);
+		AnimationPlayer& setDirection(int direction);
+		AnimationPlayer& setDirection(String direction);
+
+		AnimationPlayer& setApplyPivot(bool apply);
 
 		void update(Time time);
 
 		void updateSprite(Sprite& sprite) const;
 
-		void setMaterialOverride(std::shared_ptr<Material> material);
+		AnimationPlayer& setMaterialOverride(std::shared_ptr<Material> material);
 		std::shared_ptr<Material> getMaterialOverride() const;
 		std::shared_ptr<const Material> getMaterial() const;
 
@@ -59,6 +61,8 @@ namespace Halley
 		bool seqNoFlip;
 		bool dirFlip;
 		bool playing = false;
+
+		bool applyPivot = true;
 
 		mutable bool hasUpdate = true;
 	};

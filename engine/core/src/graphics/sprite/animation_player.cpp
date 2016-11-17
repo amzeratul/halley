@@ -10,14 +10,15 @@ AnimationPlayer::AnimationPlayer(std::shared_ptr<const Animation> animation, Str
 	setAnimation(animation, sequence, direction);
 }
 
-void AnimationPlayer::playOnce(String sequence)
+AnimationPlayer& AnimationPlayer::playOnce(String sequence)
 {
 	curSeq = nullptr;
 	setSequence(sequence);
 	seqLooping = false;
+	return *this;
 }
 
-void AnimationPlayer::setAnimation(std::shared_ptr<const Animation> v, String sequence, String direction)
+AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> v, String sequence, String direction)
 {
 	if (animation != v) {
 		animation = v;
@@ -30,9 +31,10 @@ void AnimationPlayer::setAnimation(std::shared_ptr<const Animation> v, String se
 		setSequence(sequence);
 		setDirection(direction);
 	}
+	return *this;
 }
 
-void AnimationPlayer::setSequence(String sequence)
+AnimationPlayer& AnimationPlayer::setSequence(String sequence)
 {
 	if (!curSeq || curSeq->getName() != sequence) {
 		Expects(animation);
@@ -49,9 +51,10 @@ void AnimationPlayer::setSequence(String sequence)
 		dirty = true;
 		onSequenceStarted();
 	}
+	return *this;
 }
 
-void AnimationPlayer::setDirection(int direction)
+AnimationPlayer& AnimationPlayer::setDirection(int direction)
 {
 	if (dirId != direction) {
 		Expects(animation);
@@ -64,9 +67,10 @@ void AnimationPlayer::setDirection(int direction)
 			dirty = true;
 		}
 	}
+	return *this;
 }
 
-void AnimationPlayer::setDirection(String direction)
+AnimationPlayer& AnimationPlayer::setDirection(String direction)
 {
 	if (!curDir || curDir->getName() != direction) {
 		Expects(animation);
@@ -79,6 +83,13 @@ void AnimationPlayer::setDirection(String direction)
 			dirty = true;
 		}
 	}
+	return *this;
+}
+
+AnimationPlayer& AnimationPlayer::setApplyPivot(bool apply)
+{
+	applyPivot = apply;
+	return *this;
 }
 
 void AnimationPlayer::update(Time time)
@@ -115,15 +126,16 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 		} else {
 			sprite.setMaterial(animation->getMaterial());
 		}
-		sprite.setSprite(*spriteData);
+		sprite.setSprite(*spriteData, applyPivot);
 		sprite.setFlip(dirFlip && !seqNoFlip);
 		hasUpdate = false;
 	}
 }
 
-void AnimationPlayer::setMaterialOverride(std::shared_ptr<Material> material)
+AnimationPlayer& AnimationPlayer::setMaterialOverride(std::shared_ptr<Material> material)
 {
 	materialOverride = material;
+	return *this;
 }
 
 std::shared_ptr<Material> AnimationPlayer::getMaterialOverride() const

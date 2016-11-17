@@ -69,7 +69,7 @@ namespace Halley
 
 		Sprite& setSprite(Resources& resources, String spriteSheetName, String imageName, String materialName = "");
 		Sprite& setSprite(const SpriteSheet& sheet, String name);
-		Sprite& setSprite(const SpriteSheetEntry& entry);
+		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true);
 
 		Sprite& setSliced(Vector4s slices);
 		Sprite& setSlicedFromMaterial();
