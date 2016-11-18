@@ -287,7 +287,7 @@ void World::updateEntities()
 	for (auto& iter : families) {
 		//auto& family = iter.second;
 		auto& family = iter;
-		family->removeDeadEntities();
+		family->updateEntities();
 	}
 
 	// Actually remove dead entities

@@ -37,7 +37,7 @@ namespace Halley {
 	protected:
 		virtual void addEntity(Entity& entity) = 0;
 		void removeEntity(Entity& entity);
-		virtual void removeDeadEntities() = 0;
+		virtual void updateEntities() = 0;
 		virtual void clearEntities() = 0;
 		
 		void* elems = nullptr;
@@ -79,12 +79,48 @@ namespace Halley {
 			e.entityId = entity.getEntityId();
 			T::Type::loadComponents(entity, &e.data[0]);
 
-			notifyAdd(&e);
+			dirty = true;
+		}
 
+		void updateEntities() override
+		{
+			if (dirty) {
+				// Notify additions
+				size_t prevSize = elemCount;
+				size_t curSize = entities.size();
+				updateElems();
+				for (size_t i = prevSize; i < curSize; ++i) {
+					notifyAdd(&entities[i]);
+				}
+
+				dirty = false;
+			}
+
+			// Remove
+			removeDeadEntities();
+		}
+
+		void clearEntities() override
+		{
+			for (auto& e: entities) {
+				notifyRemove(&e);
+			}
+			entities.clear();
 			updateElems();
 		}
 
-		void removeDeadEntities() override
+	private:
+		Vector<StorageType> entities;
+		bool dirty = false;
+
+		void updateElems()
+		{
+			elems = entities.empty() ? nullptr : entities.data();
+			elemCount = entities.size();
+			elemSize = sizeof(StorageType);
+		}
+
+		void removeDeadEntities()
 		{
 			// Performance-critical code
 			// Benchmarks suggest that using a Vector is faster than std::set and std::unordered_set
@@ -109,25 +145,6 @@ namespace Halley {
 				toRemove.clear();
 				updateElems();
 			}
-		}
-
-		void clearEntities() override
-		{
-			for (auto& e: entities) {
-				notifyRemove(&e);
-			}
-			entities.clear();
-			updateElems();
-		}
-
-	private:
-		Vector<StorageType> entities;
-
-		void updateElems()
-		{
-			elems = entities.empty() ? nullptr : entities.data();
-			elemCount = entities.size();
-			elemSize = sizeof(StorageType);
 		}
 	};
 }
