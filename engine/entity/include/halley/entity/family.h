@@ -125,26 +125,41 @@ namespace Halley {
 			// Performance-critical code
 			// Benchmarks suggest that using a Vector is faster than std::set and std::unordered_set
 			if (!toRemove.empty()) {
+				std::vector<size_t> removeIdx(toRemove.size());
 				std::sort(toRemove.begin(), toRemove.end());
 
-				size_t size = entities.size();
-				for (size_t i = 0; i < size; i++) {
-					EntityId id = entities[i].entityId;
-					auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
-					if (iter != toRemove.end() && id == *iter) {
-						notifyRemove(&entities[i]);
-
-						toRemove.erase(iter);
-						std::swap(entities[i], entities[size - 1]);
-						entities.pop_back();
-						size--;
-						i--;
-						if (toRemove.empty()) break;
+				// Find the ids
+				{
+					size_t j = 0;
+					for (int i = int(entities.size()); --i >= 0;) {
+						EntityId id = entities[i].entityId;
+						auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
+						if (iter != toRemove.end() && id == *iter) {
+							toRemove.erase(iter);
+							removeIdx[j++] = size_t(i);
+							if (toRemove.empty()) {
+								break;
+							}
+						}
 					}
 				}
-				toRemove.clear();
+
+				// Notify
+				for (size_t i = 0; i < removeIdx.size(); ++i) {
+					notifyRemove(&entities[removeIdx[i]]);
+				}
+
+				// Remove them
+				size_t swapWith = entities.size();
+				for (size_t i = 0; i < removeIdx.size(); ++i) {
+					size_t idx = removeIdx[i];
+					std::swap(entities[idx], entities[--swapWith]);
+				}
+				entities.resize(entities.size() - removeIdx.size());
+
 				updateElems();
 			}
+			Ensures(toRemove.empty());
 		}
 	};
 }
