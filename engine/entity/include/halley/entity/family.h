@@ -26,13 +26,13 @@ namespace Halley {
 			return static_cast<char*>(elems) + (n * elemSize);
 		}
 
-		void addOnEntityAdded(FamilyBindingBase* bind);
+		void addOnEntitiesAdded(FamilyBindingBase* bind);
 		void removeOnEntityAdded(FamilyBindingBase* bind);
-		void addOnEntityRemoved(FamilyBindingBase* bind);
+		void addOnEntitiesRemoved(FamilyBindingBase* bind);
 		void removeOnEntityRemoved(FamilyBindingBase* bind);
 
-		void notifyAdd(void* entity);
-		void notifyRemove(void* entity);
+		void notifyAdd(void* entities, size_t count);
+		void notifyRemove(void* entities, size_t count);
 
 	protected:
 		virtual void addEntity(Entity& entity) = 0;
@@ -89,9 +89,7 @@ namespace Halley {
 				size_t prevSize = elemCount;
 				size_t curSize = entities.size();
 				updateElems();
-				for (size_t i = prevSize; i < curSize; ++i) {
-					notifyAdd(&entities[i]);
-				}
+				notifyAdd(entities.data() + prevSize, curSize - prevSize);
 
 				dirty = false;
 			}
@@ -102,9 +100,7 @@ namespace Halley {
 
 		void clearEntities() override
 		{
-			for (auto& e: entities) {
-				notifyRemove(&e);
-			}
+			notifyRemove(entities.data(), entities.size());
 			entities.clear();
 			updateElems();
 		}
@@ -125,18 +121,18 @@ namespace Halley {
 			// Performance-critical code
 			// Benchmarks suggest that using a Vector is faster than std::set and std::unordered_set
 			if (!toRemove.empty()) {
-				std::vector<size_t> removeIdx(toRemove.size());
+				size_t removeCount = toRemove.size();
 				std::sort(toRemove.begin(), toRemove.end());
 
-				// Find the ids
+				// Move all entities to be removed to the back of the vector
 				{
-					size_t j = 0;
+					size_t swapWith = entities.size();
 					for (int i = int(entities.size()); --i >= 0;) {
 						EntityId id = entities[i].entityId;
 						auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
 						if (iter != toRemove.end() && id == *iter) {
 							toRemove.erase(iter);
-							removeIdx[j++] = size_t(i);
+							std::swap(entities[i], entities[--swapWith]);
 							if (toRemove.empty()) {
 								break;
 							}
@@ -144,19 +140,12 @@ namespace Halley {
 					}
 				}
 
-				// Notify
-				for (size_t i = 0; i < removeIdx.size(); ++i) {
-					notifyRemove(&entities[removeIdx[i]]);
-				}
+				// Notify removal
+				size_t newSize = entities.size() - removeCount;
+				notifyRemove(entities.data() + newSize, removeCount);
 
 				// Remove them
-				size_t swapWith = entities.size();
-				for (size_t i = 0; i < removeIdx.size(); ++i) {
-					size_t idx = removeIdx[i];
-					std::swap(entities[idx], entities[--swapWith]);
-				}
-				entities.resize(entities.size() - removeIdx.size());
-
+				entities.resize(newSize);
 				updateElems();
 			}
 			Ensures(toRemove.empty());

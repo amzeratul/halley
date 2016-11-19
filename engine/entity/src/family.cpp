@@ -7,7 +7,7 @@ Family::Family(FamilyMaskType mask)
 	: inclusionMask(mask)
 {}
 
-void Family::addOnEntityAdded(FamilyBindingBase* bind)
+void Family::addOnEntitiesAdded(FamilyBindingBase* bind)
 {
 	addEntityCallbacks.push_back(bind);
 }
@@ -17,7 +17,7 @@ void Family::removeOnEntityAdded(FamilyBindingBase* bind)
 	addEntityCallbacks.erase(std::remove(addEntityCallbacks.begin(), addEntityCallbacks.end(), bind), addEntityCallbacks.end());
 }
 
-void Family::addOnEntityRemoved(FamilyBindingBase* bind)
+void Family::addOnEntitiesRemoved(FamilyBindingBase* bind)
 {
 	removeEntityCallbacks.push_back(bind);
 }
@@ -27,17 +27,17 @@ void Family::removeOnEntityRemoved(FamilyBindingBase* bind)
 	removeEntityCallbacks.erase(std::remove(removeEntityCallbacks.begin(), removeEntityCallbacks.end(), bind), removeEntityCallbacks.end());
 }
 
-void Family::notifyAdd(void* entity)
+void Family::notifyAdd(void* entities, size_t count)
 {
 	for (auto& c: addEntityCallbacks) {
-		c->onEntityAdded(entity);
+		c->onEntitiesAdded(entities, count);
 	}
 }
 
-void Family::notifyRemove(void* entity)
+void Family::notifyRemove(void* entities, size_t count)
 {
 	for (auto& c: removeEntityCallbacks) {
-		c->onEntityRemoved(entity);
+		c->onEntitiesRemoved(entities, count);
 	}
 }
 

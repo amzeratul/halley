@@ -19,28 +19,28 @@ FamilyBindingBase::FamilyBindingBase(FamilyMaskType readMask, FamilyMaskType wri
 {
 }
 
-void FamilyBindingBase::onEntityAdded(void* entity)
+void FamilyBindingBase::onEntitiesAdded(void* entity, size_t count)
 {
-	addedCallback(entity);
+	addedCallback(entity, count);
 }
 
-void FamilyBindingBase::onEntityRemoved(void* entity)
+void FamilyBindingBase::onEntitiesRemoved(void* entity, size_t count)
 {
-	removedCallback(entity);
+	removedCallback(entity, count);
 }
 
 void FamilyBindingBase::setFamily(Family* f) {
 	family = f;
 }
 
-void FamilyBindingBase::setOnEntityAdded(std::function<void(void*)> callback)
+void FamilyBindingBase::setOnEntitiesAdded(std::function<void(void*, size_t)> callback)
 {
 	addedCallback = callback;
-	family->addOnEntityAdded(this);
+	family->addOnEntitiesAdded(this);
 }
 
-void FamilyBindingBase::setOnEntityRemoved(std::function<void(void*)> callback)
+void FamilyBindingBase::setOnEntitiesRemoved(std::function<void(void*, size_t)> callback)
 {
 	removedCallback = callback;
-	family->addOnEntityRemoved(this);
+	family->addOnEntitiesRemoved(this);
 }

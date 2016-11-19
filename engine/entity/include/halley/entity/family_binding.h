@@ -21,11 +21,11 @@ namespace Halley {
 		virtual void bindFamily(World& world) = 0;
 		void setFamily(Family* family);
 
-		void setOnEntityAdded(std::function<void(void*)> callback);
-		void setOnEntityRemoved(std::function<void(void*)> callback);
+		void setOnEntitiesAdded(std::function<void(void*, size_t)> callback);
+		void setOnEntitiesRemoved(std::function<void(void*, size_t)> callback);
 
-		void onEntityAdded(void* entity);
-		void onEntityRemoved(void* entity);
+		void onEntitiesAdded(void* entities, size_t count);
+		void onEntitiesRemoved(void* entities, size_t count);
 
 	private:
 		friend class System;
@@ -34,8 +34,8 @@ namespace Halley {
 		Family* family = nullptr;
 		const FamilyMaskType readMask;
 		const FamilyMaskType writeMask;
-		std::function<void(void*)> addedCallback;
-		std::function<void(void*)> removedCallback;
+		std::function<void(void*, size_t)> addedCallback;
+		std::function<void(void*, size_t)> removedCallback;
 	};
 
 	template <typename T>

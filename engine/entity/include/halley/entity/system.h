@@ -14,22 +14,19 @@ namespace Halley {
 	class Message;
 	class HalleyAPI;
 
-	// lol MSVC workarounds
-	struct HasInitTag;
-	struct HasOnEntityAddedTag;
-	struct HasOnEntityRemovedTag;
+	template <typename T, size_t size = -1> using Span = gsl::span<T, size>;
 
 	// True if T::init() exists
 	template <class, class = Halley::void_t<>> struct HasInitMember : std::false_type {};
 	template <class T> struct HasInitMember<T, decltype(std::declval<T&>().init())> : std::true_type { };
 
 	// True if T::onEntityAdded(F&) exists
-	template <class, class, class = Halley::void_t<>> struct HasOnEntityAdded : std::false_type {};
-	template <class T, class F> struct HasOnEntityAdded<T, F, decltype(std::declval<T>().onEntityAdded(std::declval<F&>()))> : std::true_type { };
+	template <class, class, class = Halley::void_t<>> struct HasOnEntitiesAdded : std::false_type {};
+	template <class T, class F> struct HasOnEntitiesAdded<T, F, decltype(std::declval<T>().onEntitiesAdded(std::declval<Span<F>>()))> : std::true_type { };
 	
 	// True if T::onEntityRemoved(F&) exists
-	template <class, class, class = Halley::void_t<>> struct HasOnEntityRemoved : std::false_type {};
-	template <class T, class F> struct HasOnEntityRemoved<T, F, decltype(std::declval<T>().onEntityRemoved(std::declval<F&>()))> : std::true_type { };
+	template <class, class, class = Halley::void_t<>> struct HasOnEntitiesRemoved : std::false_type {};
+	template <class T, class F> struct HasOnEntitiesRemoved<T, F, decltype(std::declval<T>().onEntitiesRemoved(std::declval<Span<F>>()))> : std::true_type { };
 
 	
 	class System
@@ -88,23 +85,29 @@ namespace Halley {
 		void invokeInit(T*)
 		{}
 
-		template <typename T, typename F, typename std::enable_if<HasOnEntityAdded<T, F>::value, int>::type = 0>
+		template <typename T, typename F, typename std::enable_if<HasOnEntitiesAdded<T, F>::value, int>::type = 0>
 		void initialiseOnEntityAdded(FamilyBinding<F>& binding, T* system)
 		{
-			binding.setOnEntityAdded([system] (void* e) { system->onEntityAdded(*static_cast<F*>(e)); });
+			binding.setOnEntitiesAdded([system] (void* es, size_t count)
+			{
+				system->onEntitiesAdded(Span<F>(static_cast<F*>(es), count));
+			});
 		}
 
-		template <typename T, typename F, typename std::enable_if<!HasOnEntityAdded<T, F>::value, int>::type = 0>
+		template <typename T, typename F, typename std::enable_if<!HasOnEntitiesAdded<T, F>::value, int>::type = 0>
 		void initialiseOnEntityAdded(FamilyBinding<F>&, T*)
 		{}
 
-		template <typename T, typename F, typename std::enable_if<HasOnEntityRemoved<T, F>::value, int>::type = 0>
+		template <typename T, typename F, typename std::enable_if<HasOnEntitiesRemoved<T, F>::value, int>::type = 0>
 		void initialiseOnEntityRemoved(FamilyBinding<F>& binding, T* system)
 		{
-			binding.setOnEntityRemoved([system] (void* e) { system->onEntityRemoved(*static_cast<F*>(e)); });
+			binding.setOnEntitiesRemoved([system] (void* es, size_t count)
+			{
+				system->onEntitiesRemoved(Span<F>(static_cast<F*>(es), count));
+			});
 		}
 
-		template <typename T, typename F, typename std::enable_if<!HasOnEntityRemoved<T, F>::value, int>::type = 0>
+		template <typename T, typename F, typename std::enable_if<!HasOnEntitiesRemoved<T, F>::value, int>::type = 0>
 		void initialiseOnEntityRemoved(FamilyBinding<F>&, T*)
 		{}
 
