@@ -14,7 +14,7 @@ namespace Halley {
 	class Message;
 	class HalleyAPI;
 
-	template <typename T, size_t size = gsl::dynamic_extent> using Span = gsl::span<T, size>;
+	template <typename T, std::ptrdiff_t size = gsl::dynamic_extent> using Span = gsl::span<T, size>;
 
 	// True if T::init() exists
 	template <class, class = Halley::void_t<>> struct HasInitMember : std::false_type {};
