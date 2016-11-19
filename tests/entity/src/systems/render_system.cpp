@@ -6,28 +6,21 @@ class RenderSystem final : public RenderSystemBase<RenderSystem> {
 public:
 	void render(RenderContext& rc) const
 	{
-		/*
-		Camera& cam = painter.getCurrentCamera();
-		Rect4i viewPort = painter.getViewPort();
-
 		static SpritePainter spritePainter;
-
-		Vector2f size = Vector2f(viewPort.getSize()) / cam.getZoom();
-		assert(cam.getAngle().getRadians() == 0); // Camera rotation not accounted by following line
-		Rect4f worldView(cam.getPosition() - size * 0.5f, size);
 
 		spritePainter.start(mainFamily.count());
 		for (auto& e : mainFamily) {
 			auto& sprite = e.sprite.sprite;
 			sprite.setPos(e.position.position);
-			if (sprite.isInView(worldView)) {
-				spritePainter.add(sprite, e.sprite.layer, sprite.getPosition().y - worldView.getY());
-			}
+			spritePainter.add(sprite, 0, e.sprite.layer, sprite.getPosition().y);
 		}
 
-		spritePainter.draw(painter);
-		painter.flush();
-		*/
+		rc.bind([&] (Painter& painter)
+		{
+			painter.clear(Colour());
+			spritePainter.draw(0, painter);
+			painter.flush();
+		});
 	}
 };
 
