@@ -33,6 +33,9 @@ namespace Halley
 		const String& getCurrentSequenceName() const;
 		Time getCurrentSequenceTime() const;
 		int getCurrentSequenceFrame() const;
+
+		AnimationPlayer& setPlaybackSpeed(float value);
+		float getPlaybackSpeed() const;
 		
 	private:
 		void resolveSprite();
@@ -55,6 +58,7 @@ namespace Halley
 		int dirId;
 		int curFrame;
 		float seqFPS;
+		float playbackSpeed = 1.0f;
 
 		bool dirty;
 		bool seqLooping;

@@ -104,7 +104,7 @@ void AnimationPlayer::update(Time time)
 			dirty = false;
 		}
 		
-		curTime += time;
+		curTime += time * playbackSpeed;
 
 		if (curTime > seqTimeLen) {
 			// Reached end of sequence			
@@ -166,6 +166,17 @@ Time AnimationPlayer::getCurrentSequenceTime() const
 int AnimationPlayer::getCurrentSequenceFrame() const
 {
 	return curFrame;
+}
+
+AnimationPlayer& AnimationPlayer::setPlaybackSpeed(float value)
+{
+	playbackSpeed = value;
+	return *this;
+}
+
+float AnimationPlayer::getPlaybackSpeed() const
+{
+	return playbackSpeed;
 }
 
 void AnimationPlayer::resolveSprite()
