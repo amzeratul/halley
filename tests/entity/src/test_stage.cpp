@@ -12,6 +12,11 @@ void TestStage::init()
 void TestStage::onFixedUpdate(Time time)
 {
 	world->step(TimeLine::FixedUpdate, time);
+}
+
+void TestStage::onVariableUpdate(Time time)
+{
+	world->step(TimeLine::VariableUpdate, time);
 
 	auto key = getInputAPI().getKeyboard();
 	if (key->isButtonDown(Keys::Esc)) {

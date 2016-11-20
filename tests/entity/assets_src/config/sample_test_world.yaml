@@ -1,6 +1,6 @@
 ---
 timelines:
-  fixedUpdate:
+  variableUpdate:
     - SpawnSprite
     - Time
     - Movement

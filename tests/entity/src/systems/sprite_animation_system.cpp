@@ -14,6 +14,14 @@ public:
 		player.update(time);
 		player.updateSprite(sprite);
 	}
+
+	void onEntitiesAdded(Halley::Span<MainFamily> es)
+	{
+		for (auto& e: es) {
+			e.spriteAnimation.player.update(0);
+			e.spriteAnimation.player.updateSprite(e.sprite.sprite);
+		}
+	}
 };
 
 REGISTER_SYSTEM(SpriteAnimationSystem)
