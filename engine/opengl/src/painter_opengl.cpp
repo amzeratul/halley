@@ -125,7 +125,13 @@ void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVe
 
 	// Load vertices into VBO
 	size_t bytesSize = numVertices * material.getVertexStride();
-	glBufferData(GL_ARRAY_BUFFER, bytesSize, vertexData, GL_STREAM_DRAW);
+	if (bufferSize < bytesSize) {
+		glBufferData(GL_ARRAY_BUFFER, bytesSize, vertexData, GL_STREAM_DRAW);
+		bufferSize = bytesSize;
+	} else {
+		glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_STREAM_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, bytesSize, vertexData);
+	}
 	glCheckError();
 
 	// Set attributes

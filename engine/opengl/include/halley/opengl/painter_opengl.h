@@ -32,6 +32,7 @@ namespace Halley
 		GLuint vao = 0;
 #endif
 		GLuint veo = 0;
+		size_t bufferSize = 0;
 		std::unique_ptr<GLUtils> glUtils;
 
 		void setupVertexAttributes(const MaterialDefinition& material);
