@@ -299,6 +299,9 @@ namespace Halley
 
 		int notify()
 		{
+			std::unique_lock<std::mutex> lock(mutex);
+			return --waitingFor;
+			/*
 			// Lock-free, juggling razors here!
 			while (true) {
 				int prev = waitingFor;
@@ -308,9 +311,11 @@ namespace Halley
 				}
 				// Nope, race condition. Try again.
 			}
+			*/
 		}
 
 	private:
+		std::mutex mutex;
 		std::atomic<int> waitingFor;
 	};
 
