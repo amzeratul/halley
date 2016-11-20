@@ -9,17 +9,6 @@ PainterOpenGL::PainterOpenGL()
 
 PainterOpenGL::~PainterOpenGL()
 {
-	if (vbo != 0) {
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDeleteBuffers(1, &vbo);
-		vbo = 0;
-	}
-	if (veo != 0) {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glDeleteBuffers(1, &veo);
-		veo = 0;
-	}
-
 #ifdef WITH_OPENGL
 	if (vao != 0) {
 		glBindVertexArray(0);
@@ -41,15 +30,8 @@ void PainterOpenGL::doStartRender()
 	glUtils->bindTexture(0);
 	glUtils->setScissor(Rect4i(), false);
 
-	if (vbo == 0) {
-		glGenBuffers(1, &vbo);
-		glCheckError();
-	}
-
-	if (veo == 0) {
-		glGenBuffers(1, &veo);
-		glCheckError();
-	}
+	vertexBuffer.init(GL_ARRAY_BUFFER);
+	elementBuffer.init(GL_ELEMENT_ARRAY_BUFFER);
 
 #ifdef WITH_OPENGL
 	if (vao == 0) {
@@ -57,10 +39,8 @@ void PainterOpenGL::doStartRender()
 		glCheckError();
 		glBindVertexArray(vao);
 		glCheckError();
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glCheckError();
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veo);
-		glCheckError();
+		vertexBuffer.bind();
+		elementBuffer.bind();
 	}
 
 	glBindVertexArray(vao);
@@ -120,19 +100,11 @@ void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVe
 	Expects(indices);
 
 	// Load indices into VBO
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, int(numIndices) * sizeof(unsigned short), indices, GL_STREAM_DRAW);
-	glCheckError();
+	elementBuffer.setData(gsl::as_bytes(gsl::span<unsigned short>(indices, numIndices)));
 
 	// Load vertices into VBO
 	size_t bytesSize = numVertices * material.getVertexStride();
-	if (bufferSize < bytesSize) {
-		glBufferData(GL_ARRAY_BUFFER, bytesSize, vertexData, GL_STREAM_DRAW);
-		bufferSize = bytesSize;
-	} else {
-		glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_STREAM_DRAW);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, bytesSize, vertexData);
-	}
-	glCheckError();
+	vertexBuffer.setData(gsl::as_bytes(gsl::span<char>(static_cast<char*>(vertexData), bytesSize)));
 
 	// Set attributes
 	setupVertexAttributes(material);

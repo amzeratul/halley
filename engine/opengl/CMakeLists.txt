@@ -1,8 +1,9 @@
 project (halley-opengl)
 
-include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} "include/halley/opengl" "../utils/include" "../core/include")
+include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} "../utils/include" "../core/include")
 
 set(SOURCES
+        "src/gl_buffer.cpp"
         "src/gl_utils.cpp"
         "src/loader_thread_opengl.cpp"
         "src/opengl_plugin.cpp"
@@ -14,19 +15,17 @@ set(SOURCES
         )
 
 set(HEADERS
-        "include/halley/opengl/gl_utils.h"
-        "include/halley/opengl/halley_gl.h"
-        "include/halley/opengl/loader_thread_opengl.h"
-        "include/halley/opengl/painter_opengl.h"
-        "include/halley/opengl/prec.h"
-        "include/halley/opengl/render_target_opengl.h"
-        "include/halley/opengl/shader_opengl.h"
-        "include/halley/opengl/texture_opengl.h"
-        "include/halley/opengl/video_opengl.h"
+        "src/gl_buffer.h"
+        "src/gl_utils.h"
+        "src/halley_gl.h"
+        "src/loader_thread_opengl.h"
+        "src/painter_opengl.h"
+        "src/prec.h"
+        "src/render_target_opengl.h"
+        "src/shader_opengl.h"
+        "src/texture_opengl.h"
+        "src/video_opengl.h"
         )
-
-assign_source_group(${SOURCES})
-assign_source_group(${HEADERS})
 
 if(EMSCRIPTEN)
         set(WITH_OPENGL_ES2 1)
@@ -37,10 +36,13 @@ endif()
 if (WITH_OPENGL)
 	add_definitions(-DWITH_OPENGL)
 	set(SOURCES ${SOURCES} "src/gl_core_3_3.c")
-	set(HEADERS ${HEADERS} "include/halley/opengl/gl_core_3_3.h")
+	set(HEADERS ${HEADERS} "src/gl_core_3_3.h")
 elseif(WITH_OPENGL_ES2)
 	add_definitions(-DWITH_OPENGL_ES2)
 endif()
+
+assign_source_group(${SOURCES})
+assign_source_group(${HEADERS})
 
 add_library (halley-opengl ${SOURCES} ${HEADERS})
 target_link_libraries(halley-opengl halley-core halley-utils ${OPENGL_LIBRARIES})

@@ -2,6 +2,7 @@
 
 #include "halley/core/graphics/painter.h"
 #include "halley_gl.h"
+#include "gl_buffer.h"
 
 namespace Halley
 {
@@ -27,12 +28,11 @@ namespace Halley
 		void setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) override;
 
 	private:
-		GLuint vbo = 0;
 #ifdef WITH_OPENGL
 		GLuint vao = 0;
 #endif
-		GLuint veo = 0;
-		size_t bufferSize = 0;
+		GLBuffer vertexBuffer;
+		GLBuffer elementBuffer;
 		std::unique_ptr<GLUtils> glUtils;
 
 		void setupVertexAttributes(const MaterialDefinition& material);
