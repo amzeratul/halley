@@ -16,8 +16,8 @@ namespace Halley
 		void setData(gsl::span<const gsl::byte> data);
 		
 	private:
-        GLuint name = 0;
 		GLenum target = 0;
+        GLuint name = 0;
 		size_t size = 0;
 	};
 }
