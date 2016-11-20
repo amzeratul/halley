@@ -36,7 +36,7 @@ using namespace Halley;
 void GLUtils::doGlCheckError(const char* file, long line)
 {
 #ifdef _DEBUG
-	const bool alwaysCheck = true;
+	const bool alwaysCheck = false;
 #else
 	const bool alwaysCheck = false;
 #endif
