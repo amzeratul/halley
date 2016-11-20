@@ -64,7 +64,7 @@ void Halley::MainLoop::runLoop()
 			}
 		} else {
 			// Nope, release CPU
-			std::this_thread::sleep_for(1ms);
+			//std::this_thread::sleep_for(1ms);
 		}
 
 		HALLEY_DEBUG_TRACE();

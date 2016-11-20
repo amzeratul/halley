@@ -25,7 +25,7 @@ void PainterOpenGL::doStartRender()
 	if (!glUtils) {
 		glUtils = std::make_unique<GLUtils>();
 	}
-
+	
 	glUtils->setNumberOfTextureUnits(1);
 	glUtils->bindTexture(0);
 	glUtils->setScissor(Rect4i(), false);
@@ -45,6 +45,8 @@ void PainterOpenGL::doStartRender()
 
 	glBindVertexArray(vao);
 #endif
+
+	clear(Colour(0, 0, 0, 1.0f));
 }
 
 void PainterOpenGL::doEndRender()
