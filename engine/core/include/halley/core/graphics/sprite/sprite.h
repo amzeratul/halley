@@ -53,6 +53,7 @@ namespace Halley
 		Sprite& setImageData(const Texture& image);
 
 		Vector2f getPosition() const;
+		Colour4f getColour() const;
 
 		Sprite& setPos(Vector2f pos);
 		Sprite& setRotation(Angle1f angle);

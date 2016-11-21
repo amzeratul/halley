@@ -140,6 +140,11 @@ Vector2f Sprite::getPosition() const
 	return vertexAttrib.pos;
 }
 
+Colour4f Sprite::getColour() const
+{
+	return vertexAttrib.colour;
+}
+
 Sprite& Sprite::setPos(Vector2f v)
 {
 	vertexAttrib.pos = v;
