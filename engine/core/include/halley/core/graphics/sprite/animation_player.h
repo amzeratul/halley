@@ -36,6 +36,8 @@ namespace Halley
 
 		AnimationPlayer& setPlaybackSpeed(float value);
 		float getPlaybackSpeed() const;
+
+		const Animation& getAnimation() const;
 		
 	private:
 		void resolveSprite();

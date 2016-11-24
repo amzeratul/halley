@@ -186,7 +186,7 @@ void Animation::addDirection(const AnimationDirection& direction)
 	directions.push_back(direction);
 }
 
-const AnimationSequence& Animation::getSequence(String name) const
+const AnimationSequence& Animation::getSequence(const String& name) const
 {
 	for (auto& seq: sequences) {
 		if (seq.name == name) {
@@ -196,7 +196,7 @@ const AnimationSequence& Animation::getSequence(String name) const
 	return sequences[0];
 }
 
-const AnimationDirection& Animation::getDirection(String name) const
+const AnimationDirection& Animation::getDirection(const String& name) const
 {
 	Expects(directions.size() > 0);
 
@@ -218,6 +218,16 @@ const AnimationDirection& Animation::getDirection(int id) const
 	} else {
 		return directions[0];
 	}
+}
+
+bool Animation::hasSequence(const String& name) const
+{
+	for (auto& s: sequences) {
+		if (s.getName() == name) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void Animation::serialize(Serializer& s) const

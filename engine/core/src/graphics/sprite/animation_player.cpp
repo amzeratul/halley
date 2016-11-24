@@ -179,6 +179,11 @@ float AnimationPlayer::getPlaybackSpeed() const
 	return playbackSpeed;
 }
 
+const Animation& AnimationPlayer::getAnimation() const
+{
+	return *animation;
+}
+
 void AnimationPlayer::resolveSprite()
 {
 	spriteData = &curSeq->getFrame(curFrame).getSprite(dirId);

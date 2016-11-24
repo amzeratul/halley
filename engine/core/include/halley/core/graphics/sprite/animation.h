@@ -103,9 +103,11 @@ namespace Halley
 
 		const SpriteSheet& getSpriteSheet() const { return *spriteSheet; }
 		std::shared_ptr<Material> getMaterial() const { return material; }
-		const AnimationSequence& getSequence(String name) const;
-		const AnimationDirection& getDirection(String name) const;
+		const AnimationSequence& getSequence(const String& name) const;
+		const AnimationDirection& getDirection(const String& name) const;
 		const AnimationDirection& getDirection(int id) const;
+
+		bool hasSequence(const String& name) const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
