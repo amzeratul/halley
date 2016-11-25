@@ -70,8 +70,8 @@ void AudioFacade::stopPlayback()
 		if (ownAudioThread) {
 			audioThread.join();
 		}
-		engine.reset();
 		output.stopPlayback();
+		engine.reset();
 	}
 }
 
