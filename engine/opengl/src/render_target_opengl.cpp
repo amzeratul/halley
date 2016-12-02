@@ -12,11 +12,6 @@ RenderTargetOpenGL::~RenderTargetOpenGL()
 	deInit();
 }
 
-Rect4i RenderTargetOpenGL::getViewPort() const
-{
-	return Rect4i(Vector2i(0, 0), attachments[0]->getSize());
-}
-
 void RenderTargetOpenGL::bind()
 {
 	init();

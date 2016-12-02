@@ -10,7 +10,6 @@ namespace Halley
 	public:
 		~RenderTargetOpenGL();
 
-		Rect4i getViewPort() const override;
 		bool isScreen() const override { return false; }
 
 		void bind() override;
