@@ -242,7 +242,10 @@ void Painter::resetPending()
 	bytesPending = 0;
 	verticesPending = 0;
 	indicesPending = 0;
-	materialPending.reset();
+	if (materialPending) {
+		Material::resetBindCache();
+		materialPending.reset();
+	}
 }
 
 void Painter::executeDrawTriangles(Material& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)

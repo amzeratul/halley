@@ -85,7 +85,11 @@ void GLUtils::doGlCheckError(const char* file, long line)
 
 using namespace Halley;
 
-static const bool checked = true;
+#ifdef _DEBUG
+static constexpr bool checked = false;
+#else
+static constexpr bool checked = true;
+#endif
 
 namespace Halley {
 	class GLInternals {
