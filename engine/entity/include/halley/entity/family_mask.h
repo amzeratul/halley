@@ -135,7 +135,7 @@ namespace Halley {
 				if (!IsMaybeRef<T>::value) {
 					FamilyMask::setBit(mask, RetrieveComponentIndex<T>::componentIndex);
 				}
-				Evaluator<Ts...>::makeMask(mask);
+				InclusionEvaluator<Ts...>::makeMask(mask);
 			}
 
 			static HandleType getMask() {
