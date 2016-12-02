@@ -189,7 +189,7 @@ void Painter::bind(RenderContext& context)
 	rt.bind();
 
 	// Set viewport
-	viewPort = camera->getViewPort();
+	viewPort = camera->getActiveViewPort();
 	setViewPort(viewPort, renderTargetViewPort.getSize(), renderTargetIsScreen);
 	setClip();
 

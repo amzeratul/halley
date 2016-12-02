@@ -79,7 +79,7 @@ void Camera::setViewPort(Rect4i v)
 
 void Camera::updateProjection(bool flipVertical)
 {
-	Vector2i area = getViewPort().getSize();
+	Vector2i area = getActiveViewPort().getSize();
 
 	// Setup projection
 	float w = float(area.x);
@@ -109,7 +109,7 @@ RenderTarget* Camera::getRenderTarget() const
 	return renderTarget;
 }
 
-Rect4i Camera::getViewPort() const
+Rect4i Camera::getActiveViewPort() const
 {
 	return viewPort ? viewPort.get().intersection(getActiveRenderTarget().getViewPort()) : getActiveRenderTarget().getViewPort();
 }

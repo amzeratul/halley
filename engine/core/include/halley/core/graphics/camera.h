@@ -49,6 +49,7 @@ namespace Halley {
 		Vector2f getPosition() const { return pos; }
 		Angle1f getAngle() const { return angle; }
 		float getZoom() const { return zoom; }
+		Maybe<Rect4i> getViewPort() const { return viewPort; }
 
 		Vector2f screenToWorld(Vector2f p, Rect4f viewport) const;
 		Vector2f worldToScreen(Vector2f p, Rect4f viewport) const;
@@ -59,7 +60,7 @@ namespace Halley {
 
 		RenderTarget& getActiveRenderTarget() const;
 		RenderTarget* getRenderTarget() const;
-		Rect4i getViewPort() const;
+		Rect4i getActiveViewPort() const;
 
 	private:
 		friend class Painter;
