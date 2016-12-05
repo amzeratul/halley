@@ -117,14 +117,18 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		registryCpp.push_back("	result[\"" + sys.name + "System\"] = &halleyCreate" + sys.name + "System;");
 	}
 
-	registryCpp.insert(registryCpp.end(), { 
+	registryCpp.insert(registryCpp.end(), {
 		"	return result;",
 		"}",
 		"",
 		"namespace Halley {",
 		"	std::unique_ptr<System> createSystem(String name) {",
 		"		static SystemFactoryMap factories = makeSystemFactories();",
-		"		return std::unique_ptr<System>(factories.at(name)());",
+		"		auto result = factories.find(name);",
+		"		if (result == factories.end()) {",
+		"			throw Exception(\"System not found: \" + name);",
+		"		}",
+		"		return std::unique_ptr<System>(result->second());",
 		"	}",
 		"}"
 	});
