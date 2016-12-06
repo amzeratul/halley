@@ -40,41 +40,48 @@ Camera::Camera(Vector2f _pos, Angle1f _angle)
 }
 
 
-void Camera::setPosition(Vector2f _pos)
+Camera& Camera::setPosition(Vector2f _pos)
 {
 	pos = _pos;
+	return *this;
 }
 
 
-void Camera::setAngle(Angle1f _angle)
+Camera& Camera::setAngle(Angle1f _angle)
 {
 	angle = _angle;
+	return *this;
 }
 
 
-void Camera::setZoom(float _zoom)
+Camera& Camera::setZoom(float _zoom)
 {
 	zoom = _zoom;
+	return *this;
 }
 
-void Camera::resetRenderTarget()
+Camera& Camera::resetRenderTarget()
 {
 	renderTarget = nullptr;
+	return *this;
 }
 
-void Camera::setRenderTarget(RenderTarget& target)
+Camera& Camera::setRenderTarget(RenderTarget& target)
 {
 	renderTarget = &target;
+	return *this;
 }
 
-void Camera::resetViewPort()
+Camera& Camera::resetViewPort()
 {
 	viewPort.reset();
+	return *this;
 }
 
-void Camera::setViewPort(Rect4i v)
+Camera& Camera::setViewPort(Rect4i v)
 {
 	viewPort = v;
+	return *this;
 }
 
 void Camera::updateProjection(bool flipVertical)
@@ -111,7 +118,12 @@ RenderTarget* Camera::getRenderTarget() const
 
 Rect4i Camera::getActiveViewPort() const
 {
-	return viewPort ? viewPort.get().intersection(getActiveRenderTarget().getViewPort()) : getActiveRenderTarget().getViewPort();
+	auto targetViewPort = getActiveRenderTarget().getViewPort();
+	if (viewPort) {
+		return viewPort.get().intersection(targetViewPort);
+	} else {
+		return targetViewPort;
+	}
 }
 
 Vector2f Camera::screenToWorld(Vector2f p, Rect4f viewport) const

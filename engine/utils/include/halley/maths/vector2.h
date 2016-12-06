@@ -146,9 +146,10 @@ namespace Halley {
 			return this->dot(param.unit());
 		}
 
-		// Floor
+		// Rounding
 		inline Vector2D floor() const { return Vector2D(std::floor(x), std::floor(y)); }
 		inline Vector2D ceil() const { return Vector2D(std::ceil(x), std::ceil(y)); }
+		inline Vector2D round() const { return Vector2D(std::round(x), std::round(y)); }
 
 		// Gets the angle that this vector is pointing to
 		inline U angle () const

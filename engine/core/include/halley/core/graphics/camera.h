@@ -36,15 +36,15 @@ namespace Halley {
 		Camera();
 		Camera(Vector2f pos, Angle1f angle=Angle1f::fromDegrees(0));
 
-		void setPosition(Vector2f pos);
-		void setAngle(Angle1f angle);
-		void setZoom(float zoom);
+		Camera& setPosition(Vector2f pos);
+		Camera& setAngle(Angle1f angle);
+		Camera& setZoom(float zoom);
 
-		void resetRenderTarget();
-		void setRenderTarget(RenderTarget& target);
+		Camera& resetRenderTarget();
+		Camera& setRenderTarget(RenderTarget& target);
 
-		void resetViewPort();
-		void setViewPort(Rect4i viewPort);
+		Camera& resetViewPort();
+		Camera& setViewPort(Rect4i viewPort);
 
 		Vector2f getPosition() const { return pos; }
 		Angle1f getAngle() const { return angle; }
