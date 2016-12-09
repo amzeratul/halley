@@ -180,6 +180,7 @@ void Halley::World::step(TimeLine timeline, Time elapsed)
 	spawnPending();
 	updateEntities();
 
+	initSystems();
 	updateSystems(timeline, elapsed);
 	
 	if (timeline == TimeLine::VariableUpdate) {
@@ -196,6 +197,7 @@ void World::render(RenderContext& rc) const
 	auto& t = timer[int(TimeLine::Render)];
 	t.beginSample();
 
+	initSystems();
 	renderSystems(rc);
 
 	t.endSample();
@@ -310,11 +312,17 @@ void World::updateEntities()
 	entityDirty = false;
 }
 
+void World::initSystems() const
+{
+	for (auto& tl: systems) {
+		for (auto& system : tl) {
+			system->tryInit();
+		}
+	}
+}
+
 void World::updateSystems(TimeLine timeline, Time time)
 {
-	for (auto& system : getSystems(timeline)) {
-		system->tryInit();
-	}
 	for (auto& system : getSystems(timeline)) {
 		system->doUpdate(time);
 	}
@@ -322,9 +330,6 @@ void World::updateSystems(TimeLine timeline, Time time)
 
 void World::renderSystems(RenderContext& rc) const
 {
-	for (auto& system : getSystems(TimeLine::Render)) {
-		system->tryInit();
-	}
 	for (auto& system : getSystems(TimeLine::Render)) {
 		system->doRender(rc);
 	}
