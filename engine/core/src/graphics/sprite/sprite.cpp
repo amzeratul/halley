@@ -75,10 +75,16 @@ void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
 
 Rect4f Sprite::getAABB() const
 {
-	// This is a coarse test; will give a few false positives
 	Vector2f pos = vertexAttrib.pos;
-	Vector2f sz = vertexAttrib.size * 1.4142136f; // sqrt(2)
-	return Rect4f(pos - sz, pos + sz); // Could use offset here, but that would also need to take rotation into account
+	if (std::abs(vertexAttrib.rotation) < 0.0001f) {
+		// No rotation, give exact bounding box
+		Vector2f sz = vertexAttrib.size;
+		return Rect4f(pos - sz * vertexAttrib.pivot, pos + sz * (Vector2f(1, 1) - vertexAttrib.pivot));
+	} else {
+		// This is a coarse test; will give a few false positives
+		Vector2f sz = vertexAttrib.size * 1.4142136f; // sqrt(2)
+		return Rect4f(pos - sz, pos + sz); // Could use offset here, but that would also need to take rotation into account
+	}
 }
 
 bool Sprite::isInView(Rect4f v) const
