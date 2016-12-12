@@ -126,6 +126,16 @@ Rect4i Camera::getActiveViewPort() const
 	}
 }
 
+Rect4f Camera::getClippingRectangle() const
+{
+	auto vp = getActiveViewPort();
+	auto halfSize = Vector2f(vp.getSize()) / (zoom * 2);
+	auto a = halfSize.rotate(angle);
+	auto b = Vector2f(-halfSize.x, halfSize.y).rotate(angle);
+	auto rotatedHalfSize = Vector2f(std::max(std::abs(a.x), std::abs(b.x)), std::max(std::abs(a.y), std::abs(b.y)));
+	return Rect4f(pos - rotatedHalfSize, pos + rotatedHalfSize);
+}
+
 Vector2f Camera::screenToWorld(Vector2f p, Rect4f viewport) const
 {
 	Vector2f p2 = ((p - viewport.getTopLeft()) - viewport.getSize() * 0.5f) / zoom;

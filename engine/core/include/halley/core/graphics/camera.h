@@ -62,6 +62,8 @@ namespace Halley {
 		RenderTarget* getRenderTarget() const;
 		Rect4i getActiveViewPort() const;
 
+		Rect4f getClippingRectangle() const;
+
 	private:
 		friend class Painter;
 

@@ -119,20 +119,36 @@ void SpritePainter::draw(int mask, Painter& painter)
 		dirty = false;
 	}
 
+	// View
+	auto& cam = painter.getCurrentCamera();
+	Rect4f view = cam.getClippingRectangle();
+
 	// Draw!
 	for (auto& s : sprites) {
 		if (s.getMask() == mask) {
 			auto type = s.getType();
 			if (type == SpritePainterEntryType::SpriteRef) {
-				s.getSprite().draw(painter);
+				draw(s.getSprite(), painter, view);
 			} else if (type == SpritePainterEntryType::SpriteCached) {
-				cachedSprites[s.getIndex()].draw(painter);
+				draw(cachedSprites[s.getIndex()], painter, view);
 			} else if (type == SpritePainterEntryType::TextRef) {
-				s.getText().draw(painter);
+				draw(s.getText(), painter, view);
 			} else if (type == SpritePainterEntryType::TextCached) {
-				cachedText[s.getIndex()].draw(painter);
+				draw(cachedText[s.getIndex()], painter, view);
 			}
 		}
 	}
 	painter.flush();
+}
+
+void SpritePainter::draw(Sprite& sprite, Painter& painter, Rect4f view)
+{
+	if (sprite.isInView(view)) {
+		sprite.draw(painter);
+	}
+}
+
+void SpritePainter::draw(TextRenderer& text, Painter& painter, Rect4f view)
+{
+	text.draw(painter);
 }

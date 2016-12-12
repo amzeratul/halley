@@ -2,6 +2,7 @@
 
 #include <halley/data_structures/vector.h>
 #include <cstddef>
+#include "halley/maths/rect.h"
 
 namespace Halley
 {
@@ -56,5 +57,8 @@ namespace Halley
 		Vector<Sprite> cachedSprites;
 		Vector<TextRenderer> cachedText;
 		bool dirty = false;
+
+		void draw(Sprite& sprite, Painter& painter, Rect4f view);
+		void draw(TextRenderer& text, Painter& painter, Rect4f view);
 	};
 }
