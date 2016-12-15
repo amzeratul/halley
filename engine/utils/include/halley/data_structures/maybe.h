@@ -178,6 +178,32 @@ namespace Halley
 			return *this;
 		}
 
+		bool operator==(const Maybe& o) const
+		{
+			// Different, don't even bother
+			if (defined != o.defined) {
+				return false;
+			}
+
+			// They're the same...
+			if (!defined) {
+				// Both are undefined
+				return true;
+			} else {
+				// Both are defined
+				return data == o.data;
+			}
+		}
+
+		bool operator==(const T& o) const
+		{
+			if (!defined) {
+				return false;
+			}
+
+			return data == o;
+		}
+
 		void reset()
 		{
 			if (defined) {
@@ -230,4 +256,10 @@ namespace Halley
 		T data;
 		bool defined;
 	};
+
+	template <typename T>
+	bool operator==(const T& a, const Maybe<T>& b)
+	{
+		return b == a;
+	}
 }
