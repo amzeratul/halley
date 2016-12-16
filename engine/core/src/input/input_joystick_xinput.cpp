@@ -30,7 +30,7 @@
 #include <ctime>
 using namespace Halley;
 
-#pragma comment(lib, "xinput.lib")
+#pragma comment(lib, "XInput9_1_0.lib")
 
 
 InputJoystickXInput::InputJoystickXInput(int number)
