@@ -191,12 +191,13 @@ void SystemSDL::destroyWindow(std::shared_ptr<Window> window)
 
 Vector2i SystemSDL::getScreenSize(int n) const
 {
-	if (n >= SDL_GetNumVideoDisplays()) {
+	initVideo();
+	SDL_DisplayMode info;
+	if (SDL_GetDesktopDisplayMode(n, &info) == 0) {
+		return Vector2i(info.w, info.h);
+	} else {
 		return Vector2i();
 	}
-	SDL_DisplayMode info;
-	SDL_GetDesktopDisplayMode(n, &info);
-	return Vector2i(info.w, info.h);
 }
 
 Rect4i SystemSDL::getDisplayRect(int screen) const
@@ -234,7 +235,7 @@ void SystemSDL::printDebugInfo() const
 	std::cout << "Video driver: " << ConsoleColour(Console::DARK_GREY) << SDL_GetCurrentVideoDriver() << ConsoleColour() << std::endl;
 }
 
-void SystemSDL::initVideo()
+void SystemSDL::initVideo() const
 {
 	if (!videoInit) {
 		if (SDL_InitSubSystem(SDL_INIT_VIDEO) == -1) {

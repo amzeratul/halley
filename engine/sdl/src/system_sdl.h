@@ -33,10 +33,10 @@ namespace Halley
 
 		void printDebugInfo() const;
 
-		void initVideo();
+		void initVideo() const;
 		void deInitVideo();
 
 		std::vector<std::shared_ptr<SDLWindow>> windows;
-		bool videoInit = false;
+		mutable bool videoInit = false;
 	};
 }
