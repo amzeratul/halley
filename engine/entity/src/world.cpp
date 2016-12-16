@@ -124,8 +124,11 @@ EntityRef World::createEntity()
 
 void World::destroyEntity(EntityId id)
 {
-	getEntity(id).entity.destroy();
-	entityDirty = true;
+	auto e = tryGetEntity(id);
+	if (e) {
+		e->destroy();
+		entityDirty = true;
+	}
 }
 
 EntityRef World::getEntity(EntityId id)
