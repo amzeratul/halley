@@ -31,7 +31,6 @@ namespace Halley {
 		friend class World;
 		friend class System;
 		friend class EntityRef;
-		static const int numFastComponents = 3;
 
 	public:
 		~Entity();
@@ -39,19 +38,13 @@ namespace Halley {
 		template <typename T>
 		T* getComponent()
 		{
-			int fastAccessId = getFastAccessSlot<T>(0);
-			if (fastAccessId >= 0) {
-				return static_cast<T*>(fastComponents[fastAccessId]);
-			}
-			else {
-				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
-				for (size_t i = 0; i < components.size(); i++) {
-					if (components[i].first == id) {
-						return static_cast<T*>(components[i].second);
-					}
+			constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
+			for (size_t i = 0; i < components.size(); i++) {
+				if (components[i].first == id) {
+					return static_cast<T*>(components[i].second);
 				}
-				return nullptr;
 			}
+			return nullptr;
 		}
 
 		template <typename T>
@@ -78,9 +71,9 @@ namespace Halley {
 	private:
 		Vector<std::pair<int, Component*>> components;
 		Vector<MessageEntry> inbox;
-		std::array<Component*, numFastComponents> fastComponents;
 		FamilyMaskType mask;
 		EntityId uid = -1;
+		int liveComponents = 0;
 		bool dirty = false;
 		bool alive = true;
 
@@ -89,7 +82,7 @@ namespace Halley {
 		template <typename T>
 		Entity& addComponent(World& world, T* component)
 		{
-			addComponent(component, T::componentIndex, getFastAccessSlot<T>(0));
+			addComponent(component, T::componentIndex);
 			TypeDeleter<T>::initialize();
 
 			markDirty(world);
@@ -100,10 +93,9 @@ namespace Halley {
 		Entity& removeComponent(World& world)
 		{
 			int id = T::componentIndex;
-			for (size_t i = 0; i < components.size(); i++) {
+			for (int i = 0; i < liveComponents; ++i) {
 				if (components[i].first == id) {
-					deleteComponent(components[i].second, components[i].first, getFastAccessSlot<T>(0));
-					components.erase(components.begin() + i);
+					removeComponentAt(i);
 					markDirty(world);
 					return *this;
 				}
@@ -112,18 +104,9 @@ namespace Halley {
 			return *this;
 		}
 
-		template <typename T>
-		int getFastAccessSlot(typename T::HasFastAccess*) {
-			return T::fastAccessSlot < numFastComponents ? T::fastAccessSlot : -1;
-		}
-
-		template <typename>
-		int getFastAccessSlot(...) {
-			return -1;
-		}
-
-		void addComponent(Component* component, int id, int fastId);
-		void deleteComponent(Component* component, int id, int fastId);
+		void addComponent(Component* component, int id);
+		void removeComponentAt(int index);
+		void deleteComponent(Component* component, int id);
 		void onReady();
 
 		void markDirty(World& world);

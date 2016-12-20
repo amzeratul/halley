@@ -6,34 +6,39 @@ using namespace Halley;
 
 Entity::Entity()
 {
-	for (size_t i = 0; i < numFastComponents; i++) {
-		fastComponents[i] = nullptr;
-	}
+	liveComponents = 0;
 }
 
 Entity::~Entity()
 {
-	for (auto i = components.begin(); i != components.end(); i++) {
-		deleteComponent(i->second, i->first, -1);
+	for (auto i = components.begin(); i != components.end(); ++i) {
+		deleteComponent(i->second, i->first);
 	}
+	liveComponents = 0;
 }
 
-void Entity::addComponent(Component* component, int id, int fastId)
+void Entity::addComponent(Component* component, int id)
 {
 	components.push_back(std::pair<int, Component*>(id, component));
-	if (fastId >= 0) {
-		fastComponents[fastId] = component;
+	if (liveComponents < int(components.size())) {
+		// Swap with first non-live component
+		std::swap(components[liveComponents], components.back());
 	}
+	++liveComponents;
 }
 
-void Entity::deleteComponent(Component* component, int id, int fastId)
+void Entity::removeComponentAt(int i)
+{
+	// Put it at the end and decrease live count
+	std::swap(components[i], components.back());
+	--liveComponents;
+}
+
+void Entity::deleteComponent(Component* component, int id)
 {
 	TypeDeleterBase* deleter = ComponentDeleterTable::get(id);
 	deleter->callDestructor(component);
 	PoolPool::getPool(deleter->getSize())->free(component);
-	if (fastId >= 0) {
-		fastComponents[fastId] = nullptr;
-	}
 }
 
 void Entity::onReady()
@@ -56,8 +61,16 @@ FamilyMaskType Entity::getMask() const
 void Entity::refresh()
 {
 	if (dirty) {
-		auto m = FamilyMask::RealType();
 		dirty = false;
+
+		// Delete stale components
+		for (int i = liveComponents; i < int(components.size()); ++i) {
+			deleteComponent(components[i].second, components[i].first);
+		}
+		components.resize(liveComponents);
+
+		// Re-generate mask
+		auto m = FamilyMask::RealType();
 		for (auto i : components) {
 			FamilyMask::setBit(m, i.first);
 		}
