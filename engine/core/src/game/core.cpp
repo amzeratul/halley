@@ -401,5 +401,10 @@ Vector<Plugin*> Core::getPlugins(PluginType type)
 
 void Core::log(LoggerLevel level, const String& msg)
 {
-	std::cout << msg << std::endl;
+	if (level == LoggerLevel::Error) {
+		std::cout << ConsoleColour(Console::RED);
+	} else if (level == LoggerLevel::Warning) {
+		std::cout << ConsoleColour(Console::YELLOW);
+	}
+	std::cout << msg << ConsoleColour() << std::endl;
 }

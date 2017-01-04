@@ -2,6 +2,7 @@
 #include <halley/concurrency/executor.h>
 #include <halley/support/exception.h>
 #include "halley/text/string_converter.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -157,7 +158,13 @@ ThreadPool::ThreadPool(ExecutionQueue& queue, size_t n)
 		threads[i] = std::thread([this, i]()
 		{
 			Concurrent::setThreadName("threadPool" + toString(i));
-			executors[i]->runForever();
+			try {
+				executors[i]->runForever();
+			} catch (std::exception& e) {
+				Logger::logException(e);
+			} catch (...) {
+				Logger::logError("Unknown exception in thread pool");
+			}
 		});
 	}
 #endif

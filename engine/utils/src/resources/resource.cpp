@@ -13,7 +13,8 @@ const Metadata& Resource::getMeta() const
 }
 
 AsyncResource::AsyncResource() 
-	: loading(false)
+	: failed(false)
+	, loading(false)
 {}
 
 AsyncResource::~AsyncResource()
@@ -24,6 +25,7 @@ AsyncResource::~AsyncResource()
 void AsyncResource::startLoading()
 {
 	loading = true;
+	failed = false;
 }
 
 void AsyncResource::doneLoading()
@@ -35,6 +37,12 @@ void AsyncResource::doneLoading()
 	loadWait.notify_all();
 }
 
+void AsyncResource::loadingFailed()
+{
+	failed = true;
+	doneLoading();
+}
+
 void AsyncResource::waitForLoad() const
 {
 	if (loading) {
@@ -42,6 +50,9 @@ void AsyncResource::waitForLoad() const
 		while (loading) {
 			loadWait.wait(lock);
 		}
+	}
+	if (failed) {
+		throw Exception("Resource failed to load.");
 	}
 }
 

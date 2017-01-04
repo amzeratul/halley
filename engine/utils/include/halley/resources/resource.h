@@ -27,11 +27,13 @@ namespace Halley
 
 		void startLoading(); // call from main thread before spinning worker thread
 		void doneLoading();  // call from worker thread when done loading
+		void loadingFailed(); // Call from worker thread if loading fails
 		void waitForLoad() const;
 
 		bool isLoaded() const;
 
 	private:
+		std::atomic<bool> failed;
 		std::atomic<bool> loading;
 		mutable std::condition_variable loadWait;
 		mutable std::mutex loadMutex;
