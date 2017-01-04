@@ -3,12 +3,34 @@
 
 using namespace Halley;
 
+NullableReferenceAnchor::NullableReferenceAnchor()
+{
+}
+
+NullableReferenceAnchor::NullableReferenceAnchor(NullableReferenceAnchor&& other)
+{
+	firstReference = other.firstReference;
+	other.firstReference = nullptr;
+}
+
+NullableReferenceAnchor& NullableReferenceAnchor::operator=(NullableReferenceAnchor&& other)
+{
+	firstReference = other.firstReference;
+	other.firstReference = nullptr;
+	return *this;
+}
+
 NullableReferenceAnchor::~NullableReferenceAnchor()
 {
 	for (auto ref = firstReference; ref; ref = ref->next) {
 		ref->nullify();
 	}
 	firstReference = nullptr;
+}
+
+NullableReference NullableReferenceAnchor::getReference()
+{
+	return NullableReference(*this);
 }
 
 void NullableReferenceAnchor::addReference(NullableReference* ref)
@@ -20,9 +42,35 @@ void NullableReferenceAnchor::addReference(NullableReference* ref)
 	firstReference = ref;
 }
 
+NullableReference::NullableReference()
+{
+}
+
+NullableReference::NullableReference(const NullableReference& other)
+{
+	setReference(other.ref);
+}
+
+NullableReference::NullableReference(NullableReference&& other)
+{
+	setReference(other.ref);
+}
+
+NullableReference& NullableReference::operator=(const NullableReference& other)
+{
+	setReference(other.ref);
+	return *this;
+}
+
+NullableReference& NullableReference::operator=(NullableReference&& other)
+{
+	setReference(other.ref);
+	return *this;
+}
+
 NullableReference::NullableReference(NullableReferenceAnchor& anchor)
 {
-	anchor.addReference(this);
+	setReference(&anchor);
 }
 
 NullableReference::~NullableReference()
@@ -44,9 +92,20 @@ NullableReference::~NullableReference()
 void NullableReference::nullify()
 {
 	ref = nullptr;
+	next = nullptr;
+	prev = nullptr;
 }
 
-NullableReferenceAnchor& NullableReference::get() const
+void NullableReference::setReference(NullableReferenceAnchor* anchor)
+{
+	if (anchor != ref) {
+		nullify();
+		ref = anchor;
+		ref->addReference(this);
+	}
+}
+
+NullableReferenceAnchor& NullableReference::getRaw() const
 {
 	Expects(ref);
 	return *ref;

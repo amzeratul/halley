@@ -279,7 +279,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 
 	for (auto& fam : system.families) {
 		sysClassGen
-			.addClass(CPPClassGenerator(upperFirst(fam.name) + "Family", "Halley::FamilyBase")
+			.addClass(CPPClassGenerator(upperFirst(fam.name) + "Family", "Halley::FamilyBaseOf<" + upperFirst(fam.name) + "Family>")
 				.addAccessLevelSection(CPPAccess::Public)
 				.addMembers(convert<ComponentReferenceSchema, VariableSchema>(fam.components, [](auto& comp)
 				{

@@ -53,11 +53,28 @@ namespace Halley {
 		FamilyMaskType inclusionMask;
 	};
 
-	class FamilyBase : public NullableReferenceAnchor {
+	class FamilyBase {
+	protected:
+		NullableReferenceAnchor anchor;
+
 	public:
 		EntityId entityId;
 	};
 
+	template <typename T>
+	class FamilyBaseOf : public FamilyBase {
+	public:
+		NullableReferenceOf<T> getReference()
+		{
+			return anchor.getReferenceOf<T>();
+		}
+
+		NullableReferenceOf<const T> getReference() const
+		{
+			return anchor.getReferenceOf<const T>();
+		}
+	};
+	
 	// Apple's Clang 3.5 does not seem to have constexpr std::max...
 	constexpr size_t maxSize(size_t a, size_t b)
 	{
