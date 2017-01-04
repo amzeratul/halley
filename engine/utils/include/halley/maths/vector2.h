@@ -29,6 +29,13 @@
 #include <halley/utils/utils.h>
 #include "halley/text/string_converter.h"
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 namespace Halley {
 	//////////////////////////////
 	// Vector2D class declaration
@@ -184,14 +191,14 @@ namespace Halley {
 			return String("(") + x + ", " + y + ")";
 		}
 
-		static Vector2D min(Vector2D a, Vector2D b)
+		inline static Vector2D<T,U> min(Vector2D<T,U> a, Vector2D<T,U> b)
 		{
-			return Vector2D(std::min(a.x, b.x), std::min(a.y, b.y));
+			return Vector2D<T,U>(std::min(a.x, b.x), std::min(a.y, b.y));
 		}
 
-		static Vector2D max(Vector2D a, Vector2D b)
+		inline static Vector2D<T,U> max(Vector2D<T,U> a, Vector2D<T,U> b)
 		{
-			return Vector2D(std::max(a.x, b.x), std::max(a.y, b.y));
+			return Vector2D<T,U>(std::max(a.x, b.x), std::max(a.y, b.y));
 		}
 	};
 
