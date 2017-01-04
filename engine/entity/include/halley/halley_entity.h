@@ -8,3 +8,4 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "entity/system.h"
 #include "entity/world.h"
 #include "entity/family_binding.h"
+#include "entity/family.h"
