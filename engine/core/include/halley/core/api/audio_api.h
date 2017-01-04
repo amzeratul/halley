@@ -95,7 +95,7 @@ namespace Halley
 		virtual void setPosition(Vector2f pos) = 0;
 		virtual void setPan(float pan) = 0;
 
-		virtual void stop() = 0;
+		virtual void stop(float fadeTime = 0.0f) = 0;
 		virtual bool isPlaying() const = 0;
 		virtual void setBehaviour(std::unique_ptr<AudioSourceBehaviour> behaviour) = 0;
 	};

@@ -35,11 +35,15 @@ void AudioHandleImpl::setPan(float pan)
 	});
 }
 
-void AudioHandleImpl::stop()
+void AudioHandleImpl::stop(float fadeTime)
 {
-	enqueue([] (AudioSource& src)
+	enqueue([fadeTime] (AudioSource& src)
 	{
-		src.stop();
+		if (fadeTime >= 0.001f) {
+			src.setBehaviour(std::make_unique<AudioSourceFadeBehaviour>(fadeTime, 0.0f, true));
+		} else {
+			src.stop();
+		}
 	});
 }
 

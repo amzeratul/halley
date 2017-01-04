@@ -275,7 +275,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 	auto sysClassGen = CPPClassGenerator(system.name + "SystemBase", "Halley::System", CPPAccess::Private)
 		.addMethodDeclaration(MethodSchema(TypeSchema("Halley::System*"), {}, "halleyCreate" + system.name + "System", false, false, false, false, true))
 		.addBlankLine()
-		.addAccessLevelSection(CPPAccess::Protected);
+		.addAccessLevelSection(CPPAccess::Public);
 
 	for (auto& fam : system.families) {
 		sysClassGen
@@ -294,6 +294,8 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 				.finish())
 			.addBlankLine();
 	}
+
+	sysClassGen.addAccessLevelSection(CPPAccess::Protected);
 
 	if ((int(system.access) & int(SystemAccess::API)) != 0) {
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::HalleyAPI&"), {}, "getAPI", true), "return doGetAPI();");

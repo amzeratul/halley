@@ -15,7 +15,7 @@ namespace Halley
 		void setGain(float gain) override;
 		void setPosition(Vector2f pos) override;
 		void setPan(float pan) override;
-		void stop() override;
+		void stop(float fadeTime) override;
 		bool isPlaying() const override;
 		void setBehaviour(std::unique_ptr<AudioSourceBehaviour> behaviour) override;
 

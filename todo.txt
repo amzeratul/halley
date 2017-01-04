@@ -38,7 +38,6 @@ audio
 entity
 - generalised rendering
 - universal hierarchical transforms [RESEARCH]
-- store references to other components [RESEARCH]
 - query other entities? [RESEARCH]
 - load prefabs
 - smearing systems
