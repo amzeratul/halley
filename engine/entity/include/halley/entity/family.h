@@ -4,6 +4,7 @@
 #include "family_type.h"
 #include "family_mask.h"
 #include "entity_id.h"
+#include "halley/data_structures/nullable_reference.h"
 
 namespace Halley {
 	class Entity;
@@ -52,6 +53,11 @@ namespace Halley {
 		FamilyMaskType inclusionMask;
 	};
 
+	class FamilyBase : public NullableReferenceAnchor {
+	public:
+		EntityId entityId;
+	};
+
 	// Apple's Clang 3.5 does not seem to have constexpr std::max...
 	constexpr size_t maxSize(size_t a, size_t b)
 	{
@@ -61,12 +67,11 @@ namespace Halley {
 	template <typename T>
 	class FamilyImpl : public Family
 	{
-		struct StorageType
+		struct StorageType : public FamilyBase
 		{
-			EntityId entityId;
-			alignas(alignof(void*)) std::array<char, sizeof(T) - maxSize(sizeof(EntityId), sizeof(void*))> data;
+			alignas(alignof(void*)) std::array<char, sizeof(T) - maxSize(sizeof(FamilyBase), 2 * sizeof(void*))> data;
 		};
-		static_assert(((T::Type::getNumComponents() + 1) * sizeof(void*)) == sizeof(T), "Family type has unexpected storage size");
+		static_assert(((T::Type::getNumComponents() + 2) * sizeof(void*)) == sizeof(T), "Family type has unexpected storage size");
 
 	public:
 		FamilyImpl() : Family(T::Type::inclusionMask()) {}

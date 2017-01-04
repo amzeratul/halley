@@ -61,11 +61,6 @@ void System::purgeMessages()
 void System::processMessages()
 {
 	// This whole method is probably very inefficient.
-	struct Elem
-	{
-		EntityId id;
-	};
-
 	struct MessageBox
 	{
 		Vector<Message*> msg;
@@ -77,8 +72,8 @@ void System::processMessages()
 		auto& fam = *families[0];
 		size_t sz = fam.count();
 		for (size_t i = 0; i < sz; i++) {
-			Elem* elem = reinterpret_cast<Elem*>(fam.getElement(i));
-			Entity* entity = world->tryGetEntity(elem->id);
+			FamilyBase* elem = reinterpret_cast<FamilyBase*>(fam.getElement(i));
+			Entity* entity = world->tryGetEntity(elem->entityId);
 			if (entity) {
 				for (const auto& msg: entity->inbox) {
 					if (std::find(messageTypesReceived.begin(), messageTypesReceived.end(), msg.type) != messageTypesReceived.end()) {
