@@ -92,6 +92,11 @@ bool Sprite::isInView(Rect4f v) const
 	return getAABB().overlaps(v);
 }
 
+Vector2f Sprite::getSize() const
+{
+	return vertexAttrib.scale * vertexAttrib.size;
+}
+
 Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 {
 	if (materialName == "") {
