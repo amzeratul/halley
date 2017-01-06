@@ -92,7 +92,7 @@ bool Sprite::isInView(Rect4f v) const
 	return getAABB().overlaps(v);
 }
 
-Vector2f Sprite::getSize() const
+Vector2f Sprite::getScaledSize() const
 {
 	return vertexAttrib.scale * vertexAttrib.size;
 }
