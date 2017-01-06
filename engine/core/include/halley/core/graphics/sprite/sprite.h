@@ -43,7 +43,7 @@ namespace Halley
 
 		Rect4f getAABB() const;
 		bool isInView(Rect4f rect) const;
-		Vector2f getSize() const;
+		Vector2f getScaledSize() const;
 		
 		Sprite& setMaterial(Resources& resources, String materialName = "");
 		Sprite& setMaterial(std::shared_ptr<Material> m);
