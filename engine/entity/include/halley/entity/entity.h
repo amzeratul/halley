@@ -50,7 +50,11 @@ namespace Halley {
 		template <typename T>
 		bool hasComponent()
 		{
-			return FamilyMask::hasBit(mask, FamilyMask::RetrieveComponentIndex<T>::componentIndex);
+			if (dirty) {
+				return getComponent<T>() != nullptr;
+			} else {
+				return FamilyMask::hasBit(mask, FamilyMask::RetrieveComponentIndex<T>::componentIndex);
+			}
 		}
 
 		bool needsRefresh() const
