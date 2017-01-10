@@ -11,7 +11,7 @@ UIWidget::UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f i
 {
 }
 
-Vector2f UIWidget::computeMinimumSize()
+Vector2f UIWidget::computeMinimumSize() const
 {
 	Vector2f minSize = getMinimumSize();
 	auto sizer = getSizer();
@@ -36,6 +36,13 @@ void UIWidget::setRect(Rect4f rect)
 	}
 }
 
+void UIWidget::layout()
+{
+	Vector2f minimumSize = computeMinimumSize();
+	Vector2f targetSize = Vector2f::max(size, minimumSize);
+	setRect(Rect4f(Vector2f(), targetSize));
+}
+
 Maybe<UISizer>& UIWidget::getSizer()
 {
 	return sizer;
@@ -54,6 +61,16 @@ bool UIWidget::isFocusable() const
 String UIWidget::getId() const
 {
 	return id;
+}
+
+Vector2f UIWidget::getPosition() const
+{
+	return position;
+}
+
+Vector2f UIWidget::getSize() const
+{
+	return size;
 }
 
 Vector2f UIWidget::getMinimumSize() const

@@ -11,8 +11,10 @@ namespace Halley {
 		UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 		virtual ~UIWidget() {}
 
-		Vector2f computeMinimumSize() override;
+		Vector2f computeMinimumSize() const override;
 		void setRect(Rect4f rect) override;
+
+		void layout();
 		
 		Maybe<UISizer>& getSizer();
 		const Maybe<UISizer>& getSizer() const;
@@ -20,6 +22,8 @@ namespace Halley {
 		bool isFocusable() const;
 		String getId() const;
 
+		Vector2f getPosition() const;
+		Vector2f getSize() const;
 		Vector2f getMinimumSize() const;
 		Vector4f getInnerBorder() const;
 

@@ -36,7 +36,7 @@ namespace Halley {
 	public:
 		virtual ~IUISizeable() {}
 
-		virtual Vector2f computeMinimumSize() = 0;
+		virtual Vector2f computeMinimumSize() const = 0;
 		virtual void setRect(Rect4f rect) = 0;
 	};
 
@@ -61,12 +61,12 @@ namespace Halley {
 		int fillFlags;
 	};
 
-	class UISizer {
+	class UISizer : public IUISizeable {
 	public:
 		explicit UISizer(UISizerType type = UISizerType::Horizontal, float gap = 1.0f);
 
-		Vector2f computeMinimumSize() const;
-		void setRect(Rect4f rect);
+		Vector2f computeMinimumSize() const override;
+		void setRect(Rect4f rect) override;
 
 		void add(UISizeablePtr widget, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill);
 
