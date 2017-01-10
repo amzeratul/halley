@@ -2,8 +2,10 @@
 
 using namespace Halley;
 
-UIWidget::UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)
-	: id(id)
+UIWidget::UIWidget(IUIParent& parent, String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)
+	: parent(parent)
+	, uiRoot(parent.getRoot())
+	, id(id)
 	, size(size)
 	, minSize(minSize)
 	, innerBorder(innerBorder)
@@ -55,7 +57,17 @@ const Maybe<UISizer>& UIWidget::getSizer() const
 
 bool UIWidget::isFocusable() const
 {
-	return focusable;
+	return true;
+}
+
+bool UIWidget::isFocused() const
+{
+	return focused;
+}
+
+bool UIWidget::isMouseOver() const
+{
+	return mouseOver;
 }
 
 String UIWidget::getId() const
@@ -81,6 +93,21 @@ Vector2f UIWidget::getMinimumSize() const
 Vector4f UIWidget::getInnerBorder() const
 {
 	return innerBorder;
+}
+
+void UIWidget::pressMouse(int button)
+{
+	// TODO
+}
+
+void UIWidget::releaseMouse(int button)
+{
+	// TODO
+}
+
+UIRoot& UIWidget::getRoot()
+{
+	return uiRoot;
 }
 
 void UIWidget::setWidgetRect(Rect4f rect)

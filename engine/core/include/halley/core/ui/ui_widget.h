@@ -6,9 +6,12 @@
 #include "halley/data_structures/maybe.h"
 
 namespace Halley {
-	class UIWidget : public IUISizeable {
+	class IUIParent;
+	class UIRoot;
+
+	class UIWidget : public IUIElement, public IUIParent {
 	public:
-		UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
+		UIWidget(IUIParent& parent, String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 		virtual ~UIWidget() {}
 
 		Vector2f computeMinimumSize() const override;
@@ -19,7 +22,10 @@ namespace Halley {
 		Maybe<UISizer>& getSizer();
 		const Maybe<UISizer>& getSizer() const;
 
-		bool isFocusable() const;
+		virtual bool isFocusable() const;
+		bool isFocused() const;
+		bool isMouseOver() const;
+
 		String getId() const;
 
 		Vector2f getPosition() const;
@@ -27,9 +33,16 @@ namespace Halley {
 		Vector2f getMinimumSize() const;
 		Vector4f getInnerBorder() const;
 
+		void pressMouse(int button);
+		void releaseMouse(int button);
+
+		UIRoot& getRoot() override;
+
 	protected:
 		void setWidgetRect(Rect4f);
 
+		IUIParent& parent;
+		UIRoot& uiRoot;
 		String id;
 
 		Vector2f position;
@@ -39,6 +52,8 @@ namespace Halley {
 		Vector4f innerBorder;
 		Maybe<UISizer> sizer;
 
-		bool focusable = false;
+		bool focused = false;
+		bool mouseOver = false;
+		bool forceFocus = false;
 	};
 }

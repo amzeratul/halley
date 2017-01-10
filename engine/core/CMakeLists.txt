@@ -47,6 +47,7 @@ set(SOURCES
         "src/stage/entity_stage.cpp"
         "src/stage/stage.cpp"
 
+        "src/ui/ui_root.cpp"
         "src/ui/ui_sizer.cpp"
         "src/ui/ui_widget.cpp"
 
@@ -118,6 +119,8 @@ set(HEADERS
         "include/halley/core/stage/stage.h"
         "include/halley/core/stage/stage_id.h"
 
+        "include/halley/core/ui/ui_element.h"
+        "include/halley/core/ui/ui_root.h"
         "include/halley/core/ui/ui_sizer.h"
         "include/halley/core/ui/ui_widget.h"
 

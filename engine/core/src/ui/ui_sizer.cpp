@@ -7,7 +7,7 @@ UISizerEntry::UISizerEntry()
 {
 }
 
-UISizerEntry::UISizerEntry(UISizeablePtr widget, float proportion, Vector4f border, int fillFlags)
+UISizerEntry::UISizerEntry(UIElementPtr widget, float proportion, Vector4f border, int fillFlags)
 	: widget(widget)
 	, proportion(proportion)
 	, border(border)
@@ -169,7 +169,7 @@ void UISizer::setRect(Rect4f rect)
 	}
 }
 
-void UISizer::add(UISizeablePtr widget, float proportion, Vector4f border, int fillFlags)
+void UISizer::add(UIElementPtr widget, float proportion, Vector4f border, int fillFlags)
 {
 	entries.emplace_back(UISizerEntry(widget, proportion, border, fillFlags));
 }

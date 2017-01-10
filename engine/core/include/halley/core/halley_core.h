@@ -48,6 +48,8 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "stage/stage.h"
 #include "stage/entity_stage.h"
 
+#include "ui/ui_element.h"
+#include "ui/ui_root.h"
 #include "ui/ui_sizer.h"
 #include "ui/ui_widget.h"
 

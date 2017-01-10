@@ -3,6 +3,7 @@
 #include "halley/maths/vector2.h"
 #include "halley/maths/vector4.h"
 #include "halley/maths/rect.h"
+#include "ui_element.h"
 
 namespace Halley {
 	enum class UISizerType {
@@ -32,20 +33,10 @@ namespace Halley {
 		};
 	}
 
-	class IUISizeable {
-	public:
-		virtual ~IUISizeable() {}
-
-		virtual Vector2f computeMinimumSize() const = 0;
-		virtual void setRect(Rect4f rect) = 0;
-	};
-
-	using UISizeablePtr = std::shared_ptr<IUISizeable>;
-
 	class UISizerEntry {
 	public:
 		UISizerEntry();
-		UISizerEntry(UISizeablePtr widget, float proportion, Vector4f border, int fillFlags);
+		UISizerEntry(UIElementPtr widget, float proportion, Vector4f border, int fillFlags);
 	
 		float getProportion() const;
 		Vector2f getMinimumSize() const;
@@ -55,20 +46,20 @@ namespace Halley {
 		void placeInside(Rect4f rect, Vector2f minSize);
 	
 	private:
-		UISizeablePtr widget;
+		UIElementPtr widget;
 		float proportion;
 		Vector4f border;
 		int fillFlags;
 	};
 
-	class UISizer : public IUISizeable {
+	class UISizer : public IUIElement {
 	public:
 		explicit UISizer(UISizerType type = UISizerType::Horizontal, float gap = 1.0f);
 
 		Vector2f computeMinimumSize() const override;
 		void setRect(Rect4f rect) override;
 
-		void add(UISizeablePtr widget, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill);
+		void add(UIElementPtr widget, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill);
 
 		UISizerType getType() const;
 		size_t size() const;
