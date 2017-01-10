@@ -3,23 +3,17 @@
 
 using namespace Halley;
 
-UIWidget::UIWidget(UIParent& parent, String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)
-	: parent(parent)
-	, uiRoot(parent.getRoot())
-	, id(id)
+UIWidget::UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)
+	: id(id)
 	, size(size)
 	, minSize(minSize)
 	, innerBorder(innerBorder)
 	, sizer(sizer)
 {
-	uiRoot.addWidget(*this);
-	parent.addChild(*this);
 }
 
 UIWidget::~UIWidget()
 {
-	parent.removeChild(*this);
-	uiRoot.removeWidget(*this);
 }
 
 Vector2f UIWidget::computeMinimumSize() const
@@ -116,7 +110,20 @@ void UIWidget::releaseMouse(int button)
 
 UIRoot& UIWidget::getRoot()
 {
-	return uiRoot;
+	return *uiRoot;
+}
+
+void UIWidget::setParent(UIParent& p)
+{
+	parent = &p;
+	uiRoot = &parent->getRoot();
+}
+
+void UIWidget::destroy()
+{
+	if (parent) {
+		parent->removeChild(*this);
+	}
 }
 
 void UIWidget::setWidgetRect(Rect4f rect)

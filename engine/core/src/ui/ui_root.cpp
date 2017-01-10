@@ -3,17 +3,23 @@
 
 using namespace Halley;
 
-void UIParent::addChild(UIWidget& widget)
+void UIParent::addChild(std::shared_ptr<UIWidget> widget)
 {
-	children.push_back(&widget);
+	widget->setParent(*this);
+	getRoot().addWidget(*widget);
+	children.push_back(widget);
 }
 
 void UIParent::removeChild(UIWidget& widget)
 {
-	children.erase(std::remove(children.begin(), children.end(), &widget), children.end());
+	children.erase(std::remove_if(children.begin(), children.end(), [&] (auto& c)
+	{
+		return c.get() == &widget;
+	}), children.end());
+	getRoot().removeWidget(widget);
 }
 
-std::vector<UIWidget*>& UIParent::getChildren()
+std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()
 {
 	return children;
 }

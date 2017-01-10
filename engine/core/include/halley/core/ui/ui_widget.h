@@ -8,8 +8,10 @@
 
 namespace Halley {
 	class UIWidget : public IUIElement, public UIParent {
+		friend class UIParent;
+
 	public:
-		UIWidget(UIParent& parent, String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
+		UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 		virtual ~UIWidget();
 
 		Vector2f computeMinimumSize() const override;
@@ -35,12 +37,14 @@ namespace Halley {
 		void releaseMouse(int button);
 
 		UIRoot& getRoot() override;
+		void destroy();
 
 	protected:
-		void setWidgetRect(Rect4f);
+		void setWidgetRect(Rect4f rect);
+		void setParent(UIParent& parent);
 
-		UIParent& parent;
-		UIRoot& uiRoot;
+		UIParent* parent = nullptr;
+		UIRoot* uiRoot = nullptr;
 		String id;
 
 		Vector2f position;

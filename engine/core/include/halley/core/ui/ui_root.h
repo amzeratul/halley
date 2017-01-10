@@ -13,13 +13,13 @@ namespace Halley {
 
 		virtual UIRoot& getRoot() = 0;
 
-		void addChild(UIWidget& widget);
+		void addChild(std::shared_ptr<UIWidget> widget);
 		void removeChild(UIWidget& widget);
 
-		std::vector<UIWidget*>& getChildren();
+		std::vector<std::shared_ptr<UIWidget>>& getChildren();
 
 	private:
-		std::vector<UIWidget*> children;
+		std::vector<std::shared_ptr<UIWidget>> children;
 	};
 	
 	class UIRoot : public UIParent {
