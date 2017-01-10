@@ -3,9 +3,9 @@
 
 using namespace Halley;
 
-UIButton::UIButton(String id, std::shared_ptr<UIStyle> style)
-	: UIWidget(id, {}, UISizer(UISizerType::Horizontal, 1))
-	, style(style)
+UIButton::UIButton(String id, std::shared_ptr<UIStyle> s)
+	: UIWidget(id, {}, UISizer(UISizerType::Horizontal, 1), s->buttonInnerBorder)
+	, style(s)
 {
 	sprite = style->buttonNormal;
 }

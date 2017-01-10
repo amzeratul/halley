@@ -48,7 +48,8 @@ void UIWidget::setRect(Rect4f rect)
 	auto sizer = getSizer();
 	if (sizer) {
 		auto border = getInnerBorder();
-		sizer.get().setRect(Rect4f(Vector2f(border.x, border.y), rect.getSize() - Vector2f(border.z, border.w)));
+		auto p0 = getPosition();
+		sizer.get().setRect(Rect4f(p0 + Vector2f(border.x, border.y), p0 + rect.getSize() - Vector2f(border.z, border.w)));
 	}
 }
 

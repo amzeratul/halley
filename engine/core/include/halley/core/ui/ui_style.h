@@ -7,13 +7,13 @@ namespace Halley {
 	class UIStyle {
 	public:
 		Sprite windowBackground;
-		Vector4s windowInnerBorder;
+		Vector4f windowInnerBorder;
 
 		Sprite buttonNormal;
 		Sprite buttonHover;
 		Sprite buttonDown;
 		TextRenderer buttonLabel;
-		Vector4s buttonInnerBorder;
+		Vector4f buttonInnerBorder;
 
 		TextRenderer label;
 	};
