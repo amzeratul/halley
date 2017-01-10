@@ -1,8 +1,9 @@
 #include "ui/ui_widget.h"
+#include "ui/ui_root.h"
 
 using namespace Halley;
 
-UIWidget::UIWidget(IUIParent& parent, String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)
+UIWidget::UIWidget(UIParent& parent, String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)
 	: parent(parent)
 	, uiRoot(parent.getRoot())
 	, id(id)
@@ -11,6 +12,14 @@ UIWidget::UIWidget(IUIParent& parent, String id, Vector2f minSize, Maybe<UISizer
 	, innerBorder(innerBorder)
 	, sizer(sizer)
 {
+	uiRoot.addWidget(*this);
+	parent.addChild(*this);
+}
+
+UIWidget::~UIWidget()
+{
+	parent.removeChild(*this);
+	uiRoot.removeWidget(*this);
 }
 
 Vector2f UIWidget::computeMinimumSize() const

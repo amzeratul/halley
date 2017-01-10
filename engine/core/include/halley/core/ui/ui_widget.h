@@ -1,18 +1,16 @@
 #pragma once
 #include "ui_sizer.h"
+#include "ui_root.h"
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
 #include "halley/maths/vector4.h"
 #include "halley/data_structures/maybe.h"
 
 namespace Halley {
-	class IUIParent;
-	class UIRoot;
-
-	class UIWidget : public IUIElement, public IUIParent {
+	class UIWidget : public IUIElement, public UIParent {
 	public:
-		UIWidget(IUIParent& parent, String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
-		virtual ~UIWidget() {}
+		UIWidget(UIParent& parent, String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
+		virtual ~UIWidget();
 
 		Vector2f computeMinimumSize() const override;
 		void setRect(Rect4f rect) override;
@@ -41,7 +39,7 @@ namespace Halley {
 	protected:
 		void setWidgetRect(Rect4f);
 
-		IUIParent& parent;
+		UIParent& parent;
 		UIRoot& uiRoot;
 		String id;
 

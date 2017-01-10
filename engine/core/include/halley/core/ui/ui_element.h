@@ -4,15 +4,6 @@
 #include "halley/maths/rect.h"
 
 namespace Halley {
-	class UIRoot;
-
-	class IUIParent {
-	public:
-		virtual ~IUIParent() {}
-
-		virtual UIRoot& getRoot() = 0;
-	};
-
 	class IUIElement {
 	public:
 		virtual ~IUIElement() {}
