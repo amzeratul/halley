@@ -63,10 +63,25 @@ void UIRoot::removeWidget(UIWidget& widget)
 	widgets.erase(std::remove(widgets.begin(), widgets.end(), &widget), widgets.end());
 }
 
-void UIRoot::update(Time t, Vector2f mousePos, bool leftClick, bool rightClick)
+void UIRoot::update(Time t, Vector2f mousePos, bool mousePressed, bool mouseReleased)
 {
+	std::shared_ptr<UIWidget> underMouse;
+
 	for (auto& c: getChildren()) {
 		c->layout();
+		underMouse = getWidgetUnderMouse(c, mousePos);
+	}
+
+	updateFocus(underMouse);
+
+	auto focus = currentFocus.lock();
+	if (focus) {
+		if (mousePressed) {
+			focus->pressMouse(0);
+		}
+		if (mouseReleased) {
+			focus->releaseMouse(0);
+		}
 	}
 
 	for (auto& c: widgets) {
@@ -80,6 +95,51 @@ void UIRoot::draw(SpritePainter& painter, int mask, int layer)
 
 	for (auto& c: getChildren()) {
 		c->draw(p);
+	}
+}
+
+std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos)
+{
+	// Depth first
+	for (auto& c: start->getChildren()) {
+		auto result = getWidgetUnderMouse(c, mousePos);
+		if (result) {
+			return result;
+		}
+	}
+
+	auto rect = Rect4f(start->getPosition(), start->getPosition() + start->getSize());
+	if (start->isFocusable() && rect.isInside(mousePos)) {
+		return start;
+	} else {
+		return {};
+	}
+}
+
+void UIRoot::updateFocus(const std::shared_ptr<UIWidget>& underMouse)
+{
+	auto curMouseOver = currentMouseOver.lock();
+	if (curMouseOver != underMouse) {
+		if (curMouseOver) {
+			curMouseOver->setMouseOver(false);
+		}
+		if (underMouse) {
+			underMouse->setMouseOver(true);
+		}
+		currentMouseOver = underMouse;
+	}
+
+	auto curFocus = currentFocus.lock();
+	if (curFocus != underMouse) {
+		if (!curFocus || !curFocus->isFocusLocked()) {
+			if (curFocus) {
+				curFocus->setFocused(false);
+			}
+			if (underMouse) {
+				underMouse->setFocused(true);
+			}
+			currentFocus = underMouse;
+		}
 	}
 }
 

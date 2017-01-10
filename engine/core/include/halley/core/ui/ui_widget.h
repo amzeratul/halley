@@ -28,8 +28,8 @@ namespace Halley {
 		const Maybe<UISizer>& getSizer() const;
 
 		virtual bool isFocusable() const;
+		virtual bool isFocusLocked() const;
 		bool isFocused() const;
-		bool isMouseOver() const;
 
 		String getId() const;
 
@@ -40,8 +40,10 @@ namespace Halley {
 
 		void setPosition(Vector2f pos);
 
-		void pressMouse(int button);
-		void releaseMouse(int button);
+		void setFocused(bool focused);
+		void setMouseOver(bool mouseOver);
+		virtual void pressMouse(int button);
+		virtual void releaseMouse(int button);
 
 		UIRoot& getRoot() override;
 		void destroy();
@@ -63,6 +65,5 @@ namespace Halley {
 
 		bool focused = false;
 		bool mouseOver = false;
-		bool forceFocus = false;
 	};
 }

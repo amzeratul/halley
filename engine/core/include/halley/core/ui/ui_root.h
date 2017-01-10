@@ -47,10 +47,15 @@ namespace Halley {
 		void addWidget(UIWidget& widget);
 		void removeWidget(UIWidget& widget);
 
-		void update(Time t, Vector2f mousePos, bool leftClick, bool rightClick);
+		void update(Time t, Vector2f mousePos, bool mousePressed, bool mouseReleased);
 		void draw(SpritePainter& painter, int mask, int layer);
 
 	private:
 		std::vector<UIWidget*> widgets;
+		std::weak_ptr<UIWidget> currentMouseOver;
+		std::weak_ptr<UIWidget> currentFocus;
+
+		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos);
+		void updateFocus(const std::shared_ptr<UIWidget>& underMouse);
 	};
 }

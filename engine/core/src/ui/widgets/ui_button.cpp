@@ -19,7 +19,44 @@ void UIButton::draw(UIPainter& painter) const
 
 void UIButton::update(Time t)
 {
+	if (held) {
+		if (mouseOver) {
+			sprite = style->buttonDown;
+		} else {
+			sprite = style->buttonHover;
+		}
+	} else {
+		if (isFocused()) {
+			sprite = style->buttonHover;
+		} else {
+			sprite = style->buttonNormal;
+		}
+	}
 	sprite.scaleTo(getSize()).setPos(getPosition());
 
 	UIWidget::update(t);
+}
+
+bool UIButton::isFocusable() const
+{
+	return true;
+}
+
+bool UIButton::isFocusLocked() const
+{
+	return held;
+}
+
+void UIButton::pressMouse(int button)
+{
+	if (button == 0) {
+		held = true;
+	}
+}
+
+void UIButton::releaseMouse(int button)
+{
+	if (button == 0) {
+		held = false;
+	}
 }

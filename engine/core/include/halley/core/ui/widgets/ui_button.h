@@ -11,9 +11,15 @@ namespace Halley {
 
 		void draw(UIPainter& painter) const override;
 		void update(Time t) override;
+		bool isFocusable() const override;
+		bool isFocusLocked() const override;
+
+		void pressMouse(int button) override;
+		void releaseMouse(int button) override;
 
 	private:
 		Sprite sprite;
 		std::shared_ptr<UIStyle> style;
+		bool held = false;
 	};
 }

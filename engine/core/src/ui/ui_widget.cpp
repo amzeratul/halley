@@ -72,7 +72,7 @@ const Maybe<UISizer>& UIWidget::getSizer() const
 
 bool UIWidget::isFocusable() const
 {
-	return true;
+	return false;
 }
 
 bool UIWidget::isFocused() const
@@ -80,9 +80,9 @@ bool UIWidget::isFocused() const
 	return focused;
 }
 
-bool UIWidget::isMouseOver() const
+bool UIWidget::isFocusLocked() const
 {
-	return mouseOver;
+	return false;
 }
 
 String UIWidget::getId() const
@@ -115,14 +115,22 @@ void UIWidget::setPosition(Vector2f pos)
 	position = pos;
 }
 
+void UIWidget::setFocused(bool f)
+{
+	focused = f;
+}
+
+void UIWidget::setMouseOver(bool mo)
+{
+	mouseOver = mo;
+}
+
 void UIWidget::pressMouse(int button)
 {
-	// TODO
 }
 
 void UIWidget::releaseMouse(int button)
 {
-	// TODO
 }
 
 UIRoot& UIWidget::getRoot()
