@@ -16,6 +16,17 @@ UIWidget::~UIWidget()
 {
 }
 
+void UIWidget::draw(UIPainter& painter) const
+{
+	for (auto& c: getChildren()) {
+		c->draw(painter);
+	}
+}
+
+void UIWidget::update(Time t)
+{
+}
+
 Vector2f UIWidget::computeMinimumSize() const
 {
 	Vector2f minSize = getMinimumSize();
@@ -45,7 +56,7 @@ void UIWidget::layout()
 {
 	Vector2f minimumSize = computeMinimumSize();
 	Vector2f targetSize = Vector2f::max(size, minimumSize);
-	setRect(Rect4f(Vector2f(), targetSize));
+	setRect(Rect4f(getPosition(), getPosition() + targetSize));
 }
 
 Maybe<UISizer>& UIWidget::getSizer()
@@ -96,6 +107,11 @@ Vector2f UIWidget::getMinimumSize() const
 Vector4f UIWidget::getInnerBorder() const
 {
 	return innerBorder;
+}
+
+void UIWidget::setPosition(Vector2f pos)
+{
+	position = pos;
 }
 
 void UIWidget::pressMouse(int button)

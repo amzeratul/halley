@@ -7,12 +7,17 @@
 #include "halley/data_structures/maybe.h"
 
 namespace Halley {
+	class Painter;
+
 	class UIWidget : public IUIElement, public UIParent {
 		friend class UIParent;
 
 	public:
 		UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 		virtual ~UIWidget();
+
+		virtual void draw(UIPainter& painter) const;
+		virtual void update(Time t);
 
 		Vector2f computeMinimumSize() const override;
 		void setRect(Rect4f rect) override;
@@ -32,6 +37,8 @@ namespace Halley {
 		Vector2f getSize() const;
 		Vector2f getMinimumSize() const;
 		Vector4f getInnerBorder() const;
+
+		void setPosition(Vector2f pos);
 
 		void pressMouse(int button);
 		void releaseMouse(int button);

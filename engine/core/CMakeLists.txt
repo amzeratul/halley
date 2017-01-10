@@ -51,6 +51,10 @@ set(SOURCES
         "src/ui/ui_sizer.cpp"
         "src/ui/ui_widget.cpp"
 
+        "src/ui/widgets/ui_button.cpp"
+        "src/ui/widgets/ui_image.cpp"
+        "src/ui/widgets/ui_label.cpp"
+
         "src/utils/world_stats.cpp"
         )
 
@@ -122,7 +126,12 @@ set(HEADERS
         "include/halley/core/ui/ui_element.h"
         "include/halley/core/ui/ui_root.h"
         "include/halley/core/ui/ui_sizer.h"
+        "include/halley/core/ui/ui_style.h"
         "include/halley/core/ui/ui_widget.h"
+
+        "include/halley/core/ui/widgets/ui_button.h"
+        "include/halley/core/ui/widgets/ui_image.h"
+        "include/halley/core/ui/widgets/ui_label.h"
 
         "include/halley/core/utils/world_stats.h"
         "src/prec.h"

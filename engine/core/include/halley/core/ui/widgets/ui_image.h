@@ -1,0 +1,16 @@
+#pragma once
+#include "ui/ui_widget.h"
+#include "graphics/sprite/sprite.h"
+
+namespace Halley {
+	class UIImage : public UIWidget {
+	public:
+		explicit UIImage(Sprite sprite, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
+
+		void draw(UIPainter& painter) const override;
+		void update(Time t) override;
+
+	private:
+		Sprite sprite;
+	};
+}
