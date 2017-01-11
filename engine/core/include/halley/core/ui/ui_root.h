@@ -2,10 +2,11 @@
 #include "halley/time/halleytime.h"
 #include <vector>
 #include "halley/maths/vector2.h"
-#include "api/audio_api.h"
 #include "ui_event.h"
 
 namespace Halley {
+	class AudioAPI;
+	class AudioClip;
 	class TextRenderer;
 	class Sprite;
 	class SpritePainter;

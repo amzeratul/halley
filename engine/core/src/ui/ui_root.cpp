@@ -1,6 +1,7 @@
 #include "ui/ui_root.h"
 #include "ui/ui_widget.h"
 #include "graphics/sprite/sprite_painter.h"
+#include "api/audio_api.h"
 
 using namespace Halley;
 
