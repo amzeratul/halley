@@ -7,7 +7,7 @@
 
 using namespace Halley;
 
-SpritePainterEntry::SpritePainterEntry(Sprite& sprite, int mask, int layer, float tieBreaker)
+SpritePainterEntry::SpritePainterEntry(const Sprite& sprite, int mask, int layer, float tieBreaker)
 	: ptr(&sprite)
 	, type(SpritePainterEntryType::SpriteRef)
 	, layer(layer)
@@ -15,7 +15,7 @@ SpritePainterEntry::SpritePainterEntry(Sprite& sprite, int mask, int layer, floa
 	, tieBreaker(tieBreaker)
 {}
 
-SpritePainterEntry::SpritePainterEntry(TextRenderer& text, int mask, int layer, float tieBreaker)
+SpritePainterEntry::SpritePainterEntry(const TextRenderer& text, int mask, int layer, float tieBreaker)
 	: ptr(&text)
 	, type(SpritePainterEntryType::TextRef)
 	, layer(layer)
@@ -48,18 +48,18 @@ SpritePainterEntryType SpritePainterEntry::getType() const
 	return type;
 }
 
-Sprite& SpritePainterEntry::getSprite() const
+const Sprite& SpritePainterEntry::getSprite() const
 {
 	Expects(ptr != nullptr);
 	Expects(type == SpritePainterEntryType::SpriteRef);
-	return *reinterpret_cast<Sprite*>(ptr);
+	return *reinterpret_cast<const Sprite*>(ptr);
 }
 
-TextRenderer& SpritePainterEntry::getText() const
+const TextRenderer& SpritePainterEntry::getText() const
 {
 	Expects(ptr != nullptr);
 	Expects(type == SpritePainterEntryType::TextRef);
-	return *reinterpret_cast<TextRenderer*>(ptr);
+	return *reinterpret_cast<const TextRenderer*>(ptr);
 }
 
 size_t SpritePainterEntry::getIndex() const
@@ -82,7 +82,7 @@ void SpritePainter::start(size_t nSprites)
 	cachedSprites.clear();
 }
 
-void SpritePainter::add(Sprite& sprite, int mask, int layer, float tieBreaker)
+void SpritePainter::add(const Sprite& sprite, int mask, int layer, float tieBreaker)
 {
 	sprites.push_back(SpritePainterEntry(sprite, mask, layer, tieBreaker));
 	dirty = true;
@@ -95,7 +95,7 @@ void SpritePainter::addCopy(const Sprite& sprite, int mask, int layer, float tie
 	dirty = true;
 }
 
-void SpritePainter::add(TextRenderer& text, int mask, int layer, float tieBreaker)
+void SpritePainter::add(const TextRenderer& text, int mask, int layer, float tieBreaker)
 {
 	sprites.push_back(SpritePainterEntry(text, mask, layer, tieBreaker));
 	dirty = true;
@@ -141,14 +141,14 @@ void SpritePainter::draw(int mask, Painter& painter)
 	painter.flush();
 }
 
-void SpritePainter::draw(Sprite& sprite, Painter& painter, Rect4f view)
+void SpritePainter::draw(const Sprite& sprite, Painter& painter, Rect4f view)
 {
 	if (sprite.isInView(view)) {
 		sprite.draw(painter);
 	}
 }
 
-void SpritePainter::draw(TextRenderer& text, Painter& painter, Rect4f view)
+void SpritePainter::draw(const TextRenderer& text, Painter& painter, Rect4f view)
 {
 	text.draw(painter);
 }

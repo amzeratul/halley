@@ -22,19 +22,19 @@ namespace Halley
 	class SpritePainterEntry
 	{
 	public:
-		SpritePainterEntry(Sprite& sprite, int mask, int layer, float tieBreaker);
-		SpritePainterEntry(TextRenderer& text, int mask, int layer, float tieBreaker);
+		SpritePainterEntry(const Sprite& sprite, int mask, int layer, float tieBreaker);
+		SpritePainterEntry(const TextRenderer& text, int mask, int layer, float tieBreaker);
 		SpritePainterEntry(SpritePainterEntryType type, size_t spriteIdx, int mask, int layer, float tieBreaker);
 
 		bool operator<(const SpritePainterEntry& o) const;
 		SpritePainterEntryType getType() const;
-		Sprite& getSprite() const;
-		TextRenderer& getText() const;
+		const Sprite& getSprite() const;
+		const TextRenderer& getText() const;
 		size_t getIndex() const;
 		int getMask() const;
 
 	private:
-		void* ptr = nullptr;
+		const void* ptr = nullptr;
 		unsigned int index = -1;
 		SpritePainterEntryType type;
 		int layer;
@@ -46,9 +46,9 @@ namespace Halley
 	{
 	public:
 		void start(size_t nSprites);
-		void add(Sprite& sprite, int mask, int layer, float tieBreaker);
+		void add(const Sprite& sprite, int mask, int layer, float tieBreaker);
 		void addCopy(const Sprite& sprite, int mask, int layer, float tieBreaker);
-		void add(TextRenderer& sprite, int mask, int layer, float tieBreaker);
+		void add(const TextRenderer& sprite, int mask, int layer, float tieBreaker);
 		void addCopy(const TextRenderer& text, int mask, int layer, float tieBreaker);
 		void draw(int mask, Painter& painter);
 
@@ -58,7 +58,7 @@ namespace Halley
 		Vector<TextRenderer> cachedText;
 		bool dirty = false;
 
-		void draw(Sprite& sprite, Painter& painter, Rect4f view);
-		void draw(TextRenderer& text, Painter& painter, Rect4f view);
+		void draw(const Sprite& sprite, Painter& painter, Rect4f view);
+		void draw(const TextRenderer& text, Painter& painter, Rect4f view);
 	};
 }

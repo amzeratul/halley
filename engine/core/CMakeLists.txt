@@ -4,10 +4,12 @@ include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../uti
 
 set(SOURCES
         "src/api/halley_api.cpp"
+
         "src/game/core.cpp"
         "src/game/environment.cpp"
         "src/game/halley_main.cpp"
 		"src/game/halley_statics.cpp"
+
         "src/graphics/camera.cpp"
         "src/graphics/material/material.cpp"
         "src/graphics/material/material_definition.cpp"
@@ -26,6 +28,7 @@ set(SOURCES
         "src/graphics/text/text_renderer.cpp"
         "src/graphics/texture.cpp"
         "src/graphics/texture_descriptor.cpp"
+
         "src/input/input_button_base.cpp"
         "src/input/input_joystick.cpp"
         "src/input/input_joystick_xinput.cpp"
@@ -33,14 +36,26 @@ set(SOURCES
         "src/input/input_touch.cpp"
         "src/input/input_vibration.cpp"
         "src/input/input_virtual.cpp"
+
         "src/resources/resource_collection.cpp"
         "src/resources/resource_filesystem.cpp"
         "src/resources/resource_locator.cpp"
         "src/resources/resource_pack.cpp"
         "src/resources/resources.cpp"
         "src/resources/standard_resources.cpp"
+
         "src/stage/entity_stage.cpp"
         "src/stage/stage.cpp"
+
+        "src/ui/ui_event.cpp"
+        "src/ui/ui_root.cpp"
+        "src/ui/ui_sizer.cpp"
+        "src/ui/ui_widget.cpp"
+
+        "src/ui/widgets/ui_button.cpp"
+        "src/ui/widgets/ui_image.cpp"
+        "src/ui/widgets/ui_label.cpp"
+
         "src/utils/world_stats.cpp"
         )
 
@@ -52,11 +67,13 @@ set(HEADERS
         "include/halley/core/api/input_api.h"
         "include/halley/core/api/system_api.h"
         "include/halley/core/api/video_api.h"
+        
         "include/halley/core/game/core.h"
         "include/halley/core/game/environment.h"
         "include/halley/core/game/game.h"
         "include/halley/core/game/halley_main.h"
 		"include/halley/core/game/halley_statics.h"
+        
         "include/halley/core/graphics/blend.h"
         "include/halley/core/graphics/camera.h"
         "include/halley/core/graphics/material/material_definition.h"
@@ -81,7 +98,9 @@ set(HEADERS
         "include/halley/core/graphics/texture_descriptor.h"
         "include/halley/core/graphics/texture.h"
 		"include/halley/core/graphics/window.h"
+        
         "include/halley/core/halley_core.h"
+        
         "include/halley/core/input/input_button_base.h"
         "include/halley/core/input/input_device.h"
         "include/halley/core/input/input_joystick.h"
@@ -93,15 +112,29 @@ set(HEADERS
         "include/halley/core/input/input_touch.h"
         "include/halley/core/input/input_vibration.h"
         "include/halley/core/input/input_virtual.h"
+        
         "include/halley/core/resources/resource_collection.h"
         "include/halley/core/resources/resource_filesystem.h"
         "include/halley/core/resources/resource_locator.h"
         "include/halley/core/resources/resource_pack.h"
         "include/halley/core/resources/resources.h"
         "include/halley/core/resources/standard_resources.h"
+
         "include/halley/core/stage/entity_stage.h"
         "include/halley/core/stage/stage.h"
         "include/halley/core/stage/stage_id.h"
+
+        "include/halley/core/ui/ui_element.h"
+        "include/halley/core/ui/ui_event.h"
+        "include/halley/core/ui/ui_root.h"
+        "include/halley/core/ui/ui_sizer.h"
+        "include/halley/core/ui/ui_style.h"
+        "include/halley/core/ui/ui_widget.h"
+
+        "include/halley/core/ui/widgets/ui_button.h"
+        "include/halley/core/ui/widgets/ui_image.h"
+        "include/halley/core/ui/widgets/ui_label.h"
+
         "include/halley/core/utils/world_stats.h"
         "src/prec.h"
         )
