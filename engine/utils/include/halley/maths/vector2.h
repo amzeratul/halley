@@ -191,6 +191,11 @@ namespace Halley {
 			return String("(") + x + ", " + y + ")";
 		}
 
+		Vector2D abs() const
+		{
+			return Vector2D(std::abs(x), std::abs(y));
+		}
+
 		inline static Vector2D<T,U> min(Vector2D<T,U> a, Vector2D<T,U> b)
 		{
 			return Vector2D<T,U>(std::min(a.x, b.x), std::min(a.y, b.y));

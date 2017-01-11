@@ -3,7 +3,7 @@
 using namespace Halley;
 
 UIImage::UIImage(Sprite s, Maybe<UISizer> sizer, Vector4f innerBorder)
-	: UIWidget("", s.getScaledSize(), sizer, innerBorder)
+	: UIWidget("", s.getScaledSize().abs(), sizer, innerBorder)
 	, sprite(s)
 {
 }

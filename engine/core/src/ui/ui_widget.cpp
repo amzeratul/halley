@@ -5,7 +5,7 @@ using namespace Halley;
 
 UIWidget::UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)
 	: id(id)
-	, size(size)
+	, size(minSize)
 	, minSize(minSize)
 	, innerBorder(innerBorder)
 	, sizer(sizer)
@@ -121,6 +121,7 @@ Vector4f UIWidget::getInnerBorder() const
 void UIWidget::setPosition(Vector2f pos)
 {
 	position = pos;
+	positionUpdated = true;
 }
 
 void UIWidget::setFocused(bool f)
