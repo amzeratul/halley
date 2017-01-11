@@ -1,6 +1,6 @@
 #pragma once
 #include "../ui_widget.h"
-#include "graphics/sprite/sprite.h"
+#include "halley/core/graphics/sprite/sprite.h"
 #include "api/audio_api.h"
 
 namespace Halley {

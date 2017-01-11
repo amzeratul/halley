@@ -1,6 +1,6 @@
 #pragma once
 #include "../ui_widget.h"
-#include "graphics/text/text_renderer.h"
+#include "halley/core/graphics/text/text_renderer.h"
 
 namespace Halley {
 	class UILabel : public UIWidget {
