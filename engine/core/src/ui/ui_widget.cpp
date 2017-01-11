@@ -161,6 +161,11 @@ void UIWidget::destroy()
 	doDestroy();
 }
 
+void UIWidget::createEventHandler()
+{
+	eventHandler = std::make_shared<UIEventHandler>();
+}
+
 void UIWidget::doDestroy()
 {
 	for (auto& c: getChildren()) {
@@ -172,6 +177,11 @@ void UIWidget::doDestroy()
 void UIWidget::setEventHandler(std::shared_ptr<UIEventHandler> handler)
 {
 	eventHandler = handler;
+}
+
+std::shared_ptr<UIEventHandler> UIWidget::getEventHandler()
+{
+	return eventHandler;
 }
 
 void UIWidget::draw(UIPainter& painter) const

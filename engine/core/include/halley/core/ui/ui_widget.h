@@ -50,7 +50,9 @@ namespace Halley {
 		UIRoot& getRoot() override;
 		void destroy();
 
+		void createEventHandler();
 		void setEventHandler(std::shared_ptr<UIEventHandler> handler);
+		std::shared_ptr<UIEventHandler> getEventHandler();
 
 	protected:
 		virtual void draw(UIPainter& painter) const;

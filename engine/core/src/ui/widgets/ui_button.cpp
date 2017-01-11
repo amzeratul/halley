@@ -65,6 +65,15 @@ void UIButton::releaseMouse(int button)
 	}
 }
 
+void UIButton::onClick(UIEventCallback callback)
+{
+	if (!getEventHandler()) {
+		createEventHandler();
+	}
+
+	getEventHandler()->setHandle(UIEventType::ButtonClicked, callback);
+}
+
 void UIButton::playSound(const std::shared_ptr<const AudioClip>& clip)
 {
 	if (clip) {

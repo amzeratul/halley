@@ -24,6 +24,8 @@ namespace Halley {
 		void pressMouse(int button) override;
 		void releaseMouse(int button) override;
 
+		void onClick(UIEventCallback callback);
+
 	private:
 		Sprite sprite;
 		std::shared_ptr<UIStyle> style;
