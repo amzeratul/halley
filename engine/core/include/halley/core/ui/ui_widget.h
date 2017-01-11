@@ -61,6 +61,7 @@ namespace Halley {
 	private:
 		void setWidgetRect(Rect4f rect);
 		void setParent(UIParent& parent);
+		void doDestroy();
 
 		UIParent* parent = nullptr;
 		UIRoot* uiRoot = nullptr;

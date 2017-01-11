@@ -157,6 +157,15 @@ void UIWidget::destroy()
 	if (parent) {
 		parent->removeChild(*this);
 	}
+	doDestroy();
+}
+
+void UIWidget::doDestroy()
+{
+	for (auto& c: getChildren()) {
+		c->doDestroy();
+	}
+	uiRoot->removeWidget(*this);
 }
 
 void UIWidget::setEventHandler(std::shared_ptr<UIEventHandler> handler)
