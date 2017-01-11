@@ -33,7 +33,7 @@ void UIWidget::doUpdate(Time t)
 Vector2f UIWidget::computeMinimumSize() const
 {
 	Vector2f minSize = getMinimumSize();
-	auto sizer = getSizer();
+	auto& sizer = getSizer();
 	if (sizer) {
 		auto border = getInnerBorder();
 		Vector2f innerSize = sizer.get().computeMinimumSize();
@@ -48,7 +48,7 @@ Vector2f UIWidget::computeMinimumSize() const
 void UIWidget::setRect(Rect4f rect)
 {
 	setWidgetRect(rect);
-	auto sizer = getSizer();
+	auto& sizer = getSizer();
 	if (sizer) {
 		auto border = getInnerBorder();
 		auto p0 = getPosition();
@@ -159,12 +159,24 @@ void UIWidget::destroy()
 	}
 }
 
+void UIWidget::setEventHandler(std::shared_ptr<UIEventHandler> handler)
+{
+	eventHandler = handler;
+}
+
 void UIWidget::draw(UIPainter& painter) const
 {
 }
 
 void UIWidget::update(Time t, bool moved)
 {
+}
+
+void UIWidget::sendEvent(UIEvent&& event) const
+{
+	if (!eventHandler || !eventHandler->handle(event)) {
+		parent->sendEvent(std::move(event));
+	}
 }
 
 void UIWidget::setWidgetRect(Rect4f rect)

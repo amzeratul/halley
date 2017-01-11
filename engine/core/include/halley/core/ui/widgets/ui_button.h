@@ -1,6 +1,7 @@
 #pragma once
 #include "ui/ui_widget.h"
 #include "graphics/sprite/sprite.h"
+#include "api/audio_api.h"
 
 namespace Halley {
 	class UIStyle;
@@ -29,6 +30,7 @@ namespace Halley {
 		bool held = false;
 		State curState = State::Up;
 
+		void playSound(const std::shared_ptr<const AudioClip>& clip);
 		bool setState(State state);
 	};
 }

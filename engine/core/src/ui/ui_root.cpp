@@ -53,6 +53,11 @@ UIRoot& UIRoot::getRoot()
 	return *this;
 }
 
+UIRoot::UIRoot(AudioAPI* audio)
+	: audio(audio)
+{
+}
+
 void UIRoot::addWidget(UIWidget& widget)
 {
 	widgets.push_back(&widget);
@@ -96,6 +101,18 @@ void UIRoot::draw(SpritePainter& painter, int mask, int layer)
 	for (auto& c: getChildren()) {
 		c->doDraw(p);
 	}
+}
+
+void UIRoot::playSound(const std::shared_ptr<const AudioClip>& clip)
+{
+	if (audio && clip) {
+		audio->playUI(clip);
+	}
+}
+
+void UIRoot::sendEvent(UIEvent&&) const
+{
+	// Unhandled event
 }
 
 std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos)

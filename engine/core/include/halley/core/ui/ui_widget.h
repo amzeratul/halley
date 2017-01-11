@@ -7,6 +7,7 @@
 #include "halley/data_structures/maybe.h"
 
 namespace Halley {
+	class UIEvent;
 	class Painter;
 
 	class UIWidget : public IUIElement, public UIParent {
@@ -49,9 +50,13 @@ namespace Halley {
 		UIRoot& getRoot() override;
 		void destroy();
 
+		void setEventHandler(std::shared_ptr<UIEventHandler> handler);
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void update(Time t, bool moved);
+
+		void sendEvent(UIEvent&& event) const override;
 
 	private:
 		void setWidgetRect(Rect4f rect);
@@ -67,6 +72,8 @@ namespace Halley {
 
 		Vector4f innerBorder;
 		Maybe<UISizer> sizer;
+
+		std::shared_ptr<UIEventHandler> eventHandler;
 
 		bool focused = false;
 		bool mouseOver = false;

@@ -58,7 +58,17 @@ void UIButton::pressMouse(int button)
 void UIButton::releaseMouse(int button)
 {
 	if (button == 0) {
+		if (held && isMouseOver()) {
+			sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));
+		}
 		held = false;
+	}
+}
+
+void UIButton::playSound(const std::shared_ptr<const AudioClip>& clip)
+{
+	if (clip) {
+		getRoot().playSound(clip);
 	}
 }
 
@@ -69,10 +79,13 @@ bool UIButton::setState(State state)
 
 		if (state == State::Up) {
 			sprite = style->buttonNormal;
+			playSound(style->buttonUpSound);
 		} else if (state == State::Down) {
 			sprite = style->buttonDown;
+			playSound(style->buttonDownSound);
 		} else if (state == State::Hover) {
 			sprite = style->buttonHover;
+			playSound(style->buttonHoverSound);
 		}
 
 		return true;
