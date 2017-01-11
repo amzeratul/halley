@@ -15,7 +15,9 @@ void UILabel::draw(UIPainter& painter) const
 	UIWidget::draw(painter);
 }
 
-void UILabel::update(Time t)
+void UILabel::update(Time t, bool moved)
 {
-	text.setPosition(getPosition());
+	if (moved) {
+		text.setPosition(getPosition());
+	}
 }

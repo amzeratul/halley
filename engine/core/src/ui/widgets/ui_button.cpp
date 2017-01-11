@@ -13,28 +13,29 @@ UIButton::UIButton(String id, std::shared_ptr<UIStyle> s)
 void UIButton::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);
-
-	UIWidget::draw(painter);
 }
 
-void UIButton::update(Time t)
+void UIButton::update(Time t, bool moved)
 {
+	bool dirty = moved;
+
 	if (held) {
-		if (mouseOver) {
-			sprite = style->buttonDown;
+		if (isMouseOver()) {
+			dirty |= setState(State::Down);
 		} else {
-			sprite = style->buttonHover;
+			dirty |= setState(State::Hover);
 		}
 	} else {
 		if (isFocused()) {
-			sprite = style->buttonHover;
+			dirty |= setState(State::Hover);
 		} else {
-			sprite = style->buttonNormal;
+			dirty |= setState(State::Up);
 		}
 	}
-	sprite.scaleTo(getSize()).setPos(getPosition());
 
-	UIWidget::update(t);
+	if (dirty) {
+		sprite.scaleTo(getSize()).setPos(getPosition());
+	}
 }
 
 bool UIButton::isFocusable() const
@@ -59,4 +60,22 @@ void UIButton::releaseMouse(int button)
 	if (button == 0) {
 		held = false;
 	}
+}
+
+bool UIButton::setState(State state)
+{
+	if (state != curState) {
+		curState = state;
+
+		if (state == State::Up) {
+			sprite = style->buttonNormal;
+		} else if (state == State::Down) {
+			sprite = style->buttonDown;
+		} else if (state == State::Hover) {
+			sprite = style->buttonHover;
+		}
+
+		return true;
+	}
+	return false;
 }

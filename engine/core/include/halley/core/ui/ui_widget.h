@@ -16,8 +16,8 @@ namespace Halley {
 		UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 		virtual ~UIWidget();
 
-		virtual void draw(UIPainter& painter) const;
-		virtual void update(Time t);
+		void doDraw(UIPainter& painter) const;
+		void doUpdate(Time t);
 
 		Vector2f computeMinimumSize() const override;
 		void setRect(Rect4f rect) override;
@@ -29,6 +29,7 @@ namespace Halley {
 
 		virtual bool isFocusable() const;
 		virtual bool isFocusLocked() const;
+		bool isMouseOver() const;
 		bool isFocused() const;
 
 		String getId() const;
@@ -49,6 +50,10 @@ namespace Halley {
 		void destroy();
 
 	protected:
+		virtual void draw(UIPainter& painter) const;
+		virtual void update(Time t, bool moved);
+
+	private:
 		void setWidgetRect(Rect4f rect);
 		void setParent(UIParent& parent);
 
@@ -65,5 +70,6 @@ namespace Halley {
 
 		bool focused = false;
 		bool mouseOver = false;
+		bool positionUpdated = false;
 	};
 }

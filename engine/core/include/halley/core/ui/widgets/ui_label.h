@@ -8,7 +8,7 @@ namespace Halley {
 		explicit UILabel(TextRenderer text);
 
 		void draw(UIPainter& painter) const override;
-		void update(Time t) override;
+		void update(Time t, bool moved) override;
 
 	private:
 		TextRenderer text;

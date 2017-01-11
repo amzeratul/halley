@@ -2,6 +2,7 @@
 
 #include "graphics/sprite/sprite.h"
 #include "graphics/text/text_renderer.h"
+#include "halley/audio/audio_clip.h"
 
 namespace Halley {
 	class UIStyle {
@@ -14,6 +15,9 @@ namespace Halley {
 		Sprite buttonDown;
 		TextRenderer buttonLabel;
 		Vector4f buttonInnerBorder;
+		std::shared_ptr<AudioClip> buttonHoverSound;
+		std::shared_ptr<AudioClip> buttonDownSound;
+		std::shared_ptr<AudioClip> buttonUpSound;
 
 		TextRenderer label;
 	};

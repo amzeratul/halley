@@ -85,7 +85,7 @@ void UIRoot::update(Time t, Vector2f mousePos, bool mousePressed, bool mouseRele
 	}
 
 	for (auto& c: widgets) {
-		c->update(t);
+		c->doUpdate(t);
 	}
 }
 
@@ -94,7 +94,7 @@ void UIRoot::draw(SpritePainter& painter, int mask, int layer)
 	UIPainter p(painter, mask, layer);
 
 	for (auto& c: getChildren()) {
-		c->draw(p);
+		c->doDraw(p);
 	}
 }
 

@@ -16,15 +16,18 @@ UIWidget::~UIWidget()
 {
 }
 
-void UIWidget::draw(UIPainter& painter) const
+void UIWidget::doDraw(UIPainter& painter) const
 {
+	draw(painter);
 	for (auto& c: getChildren()) {
-		c->draw(painter);
+		c->doDraw(painter);
 	}
 }
 
-void UIWidget::update(Time t)
+void UIWidget::doUpdate(Time t)
 {
+	update(t, positionUpdated);
+	positionUpdated = false;
 }
 
 Vector2f UIWidget::computeMinimumSize() const
@@ -83,6 +86,11 @@ bool UIWidget::isFocused() const
 bool UIWidget::isFocusLocked() const
 {
 	return false;
+}
+
+bool UIWidget::isMouseOver() const
+{
+	return mouseOver;
 }
 
 String UIWidget::getId() const
@@ -151,8 +159,22 @@ void UIWidget::destroy()
 	}
 }
 
+void UIWidget::draw(UIPainter& painter) const
+{
+}
+
+void UIWidget::update(Time t, bool moved)
+{
+}
+
 void UIWidget::setWidgetRect(Rect4f rect)
 {
-	position = rect.getTopLeft();
-	size = rect.getSize();
+	if (position != rect.getTopLeft()) {
+		position = rect.getTopLeft();
+		positionUpdated = true;
+	}
+	if (size != rect.getSize()) {
+		size = rect.getSize();
+		positionUpdated = true;
+	}
 }

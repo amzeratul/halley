@@ -8,7 +8,7 @@ namespace Halley {
 		explicit UIImage(Sprite sprite, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 
 		void draw(UIPainter& painter) const override;
-		void update(Time t) override;
+		void update(Time t, bool moved) override;
 
 	private:
 		Sprite sprite;

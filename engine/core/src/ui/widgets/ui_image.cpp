@@ -11,13 +11,11 @@ UIImage::UIImage(Sprite s, Maybe<UISizer> sizer, Vector4f innerBorder)
 void UIImage::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);
-
-	UIWidget::draw(painter);
 }
 
-void UIImage::update(Time t)
+void UIImage::update(Time t, bool moved)
 {
-	sprite.setPos(getPosition()).scaleTo(getSize());
-
-	UIWidget::update(t);
+	if (moved) {
+		sprite.setPos(getPosition()).scaleTo(getSize());
+	}
 }

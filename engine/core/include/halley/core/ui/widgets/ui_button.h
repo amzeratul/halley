@@ -6,11 +6,17 @@ namespace Halley {
 	class UIStyle;
 
 	class UIButton : public UIWidget {
+		enum class State {
+			Up,
+			Down,
+			Hover
+		};
+
 	public:
 		explicit UIButton(String id, std::shared_ptr<UIStyle> style);
 
 		void draw(UIPainter& painter) const override;
-		void update(Time t) override;
+		void update(Time t, bool moved) override;
 		bool isFocusable() const override;
 		bool isFocusLocked() const override;
 
@@ -21,5 +27,8 @@ namespace Halley {
 		Sprite sprite;
 		std::shared_ptr<UIStyle> style;
 		bool held = false;
+		State curState = State::Up;
+
+		bool setState(State state);
 	};
 }
