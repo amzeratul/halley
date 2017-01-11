@@ -1,7 +1,7 @@
 #pragma once
 
-#include "graphics/sprite/sprite.h"
-#include "graphics/text/text_renderer.h"
+#include "halley/core/graphics/sprite/sprite.h"
+#include "halley/core/graphics/text/text_renderer.h"
 
 namespace Halley {
 	class AudioClip;
