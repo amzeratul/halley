@@ -1,10 +1,10 @@
 #pragma once
 #include "../ui_widget.h"
 #include "halley/core/graphics/sprite/sprite.h"
-#include "api/audio_api.h"
 
 namespace Halley {
 	class UIStyle;
+	class AudioClip;
 
 	class UIButton : public UIWidget {
 		enum class State {
