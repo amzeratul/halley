@@ -1,5 +1,5 @@
 #pragma once
-#include "ui/ui_widget.h"
+#include "../ui_widget.h"
 #include "graphics/sprite/sprite.h"
 
 namespace Halley {
