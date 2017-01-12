@@ -20,6 +20,15 @@ namespace Halley {
 		std::shared_ptr<const AudioClip> buttonDownSound;
 		std::shared_ptr<const AudioClip> buttonUpSound;
 
+		Sprite inputBox;
+		TextRenderer inputLabel;
+
 		TextRenderer label;
+
+		Sprite dialogueBackground;
+		Sprite dialogueTitleBar;
+		TextRenderer dialogueTitleLabel;
+
+		Sprite horizontalDiv;
 	};
 }

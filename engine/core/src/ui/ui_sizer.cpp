@@ -171,6 +171,11 @@ void UISizer::setRect(Rect4f rect)
 	}
 }
 
+void UISizer::addSpacer(float size)
+{
+	entries.emplace_back(UISizerEntry({}, 0, Vector4f(type == UISizerType::Horizontal ? size : 0.0f, type == UISizerType::Vertical ? size : 0.0f, 0.0f, 0.0f), {}));
+}
+
 void UISizer::addStretchSpacer(float proportion)
 {
 	entries.emplace_back(UISizerEntry({}, proportion, {}, {}));

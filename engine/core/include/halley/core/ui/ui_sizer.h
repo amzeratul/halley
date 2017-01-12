@@ -59,6 +59,7 @@ namespace Halley {
 		Vector2f computeMinimumSize() const override;
 		void setRect(Rect4f rect) override;
 
+		void addSpacer(float size);
 		void addStretchSpacer(float proportion = 0);
 		void add(UIElementPtr widget, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill);
 
