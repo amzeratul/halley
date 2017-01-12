@@ -124,6 +124,11 @@ void UIWidget::setPosition(Vector2f pos)
 	positionUpdated = true;
 }
 
+void UIWidget::setMinSize(Vector2f size)
+{
+	minSize = size;
+}
+
 void UIWidget::setFocused(bool f)
 {
 	focused = f;

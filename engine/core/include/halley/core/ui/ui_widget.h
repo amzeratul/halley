@@ -41,6 +41,7 @@ namespace Halley {
 		Vector4f getInnerBorder() const;
 
 		void setPosition(Vector2f pos);
+		void setMinSize(Vector2f size);
 
 		void setFocused(bool focused);
 		void setMouseOver(bool mouseOver);

@@ -22,7 +22,7 @@ float UISizerEntry::getProportion() const
 
 Vector2f UISizerEntry::getMinimumSize() const
 {
-	return widget->computeMinimumSize();
+	return widget ? widget->computeMinimumSize() : Vector2f();
 }
 
 void UISizerEntry::placeInside(Rect4f rect, Vector2f minSize)
@@ -59,7 +59,9 @@ void UISizerEntry::placeInside(Rect4f rect, Vector2f minSize)
 	Vector2f spareSize = cellSize - size;
 	Vector2f pos = (rect.getTopLeft() + spareSize * anchoring).round();
 
-	widget->setRect(Rect4f(pos, pos + size));
+	if (widget) {
+		widget->setRect(Rect4f(pos, pos + size));
+	}
 }
 
 Vector4f UISizerEntry::getBorder() const
@@ -167,6 +169,11 @@ void UISizer::setRect(Rect4f rect)
 
 		pos[mainAxis] += cellSize[mainAxis] + border[mainAxis] + border[mainAxis + 2];
 	}
+}
+
+void UISizer::addStretchSpacer(float proportion)
+{
+	entries.emplace_back(UISizerEntry({}, proportion, {}, {}));
 }
 
 void UISizer::add(UIElementPtr widget, float proportion, Vector4f border, int fillFlags)
