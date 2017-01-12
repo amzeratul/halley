@@ -22,6 +22,7 @@ namespace Halley {
 
 		Sprite inputBox;
 		TextRenderer inputLabel;
+		TextRenderer inputLabelGhost;
 
 		TextRenderer label;
 

@@ -9,8 +9,13 @@ namespace Halley {
 
 	class UIInput : public UIWidget {
 	public:
-		explicit UIInput(String id, std::shared_ptr<UIStyle> style);
+		explicit UIInput(String id, std::shared_ptr<UIStyle> style, String text = "", String ghostText = "");
 		bool isFocusable() const override;
+
+		UIInput& setText(const String& text);
+		String getText() const;
+		UIInput& setGhostText(const String& text);
+		String getGhostText() const;
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -20,5 +25,8 @@ namespace Halley {
 		std::shared_ptr<UIStyle> style;
 		Sprite sprite;
 		TextRenderer label;
+
+		String text;
+		String ghostText;
 	};
 }
