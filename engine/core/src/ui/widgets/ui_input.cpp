@@ -85,3 +85,10 @@ void UIInput::update(Time t, bool moved)
 		sprite.setPos(getPosition()).scaleTo(getSize());
 	}
 }
+
+void UIInput::onFocus()
+{
+	caretTime = 0;
+	caretShowing = true;
+	while (keyboard->getNextLetter()) {}
+}

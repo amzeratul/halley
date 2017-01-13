@@ -51,6 +51,8 @@ namespace Halley {
 		UIRoot& getRoot() override;
 		void destroy();
 
+		std::shared_ptr<UIWidget> getWidget(const String& id);
+
 		void createEventHandler();
 		void setEventHandler(std::shared_ptr<UIEventHandler> handler);
 		std::shared_ptr<UIEventHandler> getEventHandler();
@@ -58,6 +60,9 @@ namespace Halley {
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void update(Time t, bool moved);
+
+		virtual void onFocus();
+		virtual void onFocusLost();
 
 		void sendEvent(UIEvent&& event) const override;
 

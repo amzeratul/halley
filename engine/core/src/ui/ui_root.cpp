@@ -79,6 +79,7 @@ void UIRoot::update(Time t, Vector2f mousePos, bool mousePressed, bool mouseRele
 	}
 
 	if (mousePressed) {
+		mouseHeld = true;
 		setFocus(underMouse);
 		if (underMouse) {
 			underMouse->pressMouse(0);
@@ -87,16 +88,17 @@ void UIRoot::update(Time t, Vector2f mousePos, bool mousePressed, bool mouseRele
 
 	auto focus = currentFocus.lock();
 	if (mouseReleased) {
+		mouseHeld = false;
 		if (focus) {
 			focus->releaseMouse(0);
 		}
 	}
 
 	auto activeMouseOver = underMouse;
-	if (focus && focus != underMouse) {
+	if (mouseHeld && focus && focus != underMouse) {
 		activeMouseOver.reset();
 	}
-	updateMouseOver(underMouse);
+	updateMouseOver(activeMouseOver);
 
 	for (auto& c: widgets) {
 		c->doUpdate(t);

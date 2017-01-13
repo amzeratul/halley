@@ -131,7 +131,14 @@ void UIWidget::setMinSize(Vector2f size)
 
 void UIWidget::setFocused(bool f)
 {
-	focused = f;
+	if (focused != f) {
+		focused = f;
+		if (focused) {
+			onFocus();
+		} else {
+			onFocusLost();
+		}
+	}
 }
 
 void UIWidget::setMouseOver(bool mo)
@@ -166,6 +173,20 @@ void UIWidget::destroy()
 	doDestroy();
 }
 
+std::shared_ptr<UIWidget> UIWidget::getWidget(const String& id)
+{
+	for (auto& c: getChildren()) {
+		if (c->getId() == id) {
+			return c;
+		}
+		auto c2 = c->getWidget(id);
+		if (c2) {
+			return c2;
+		}
+	}
+	return {};
+}
+
 void UIWidget::createEventHandler()
 {
 	eventHandler = std::make_shared<UIEventHandler>();
@@ -194,6 +215,14 @@ void UIWidget::draw(UIPainter& painter) const
 }
 
 void UIWidget::update(Time t, bool moved)
+{
+}
+
+void UIWidget::onFocus()
+{
+}
+
+void UIWidget::onFocusLost()
 {
 }
 
