@@ -3,12 +3,13 @@
 
 using namespace Halley;
 
-UIInput::UIInput(String id, std::shared_ptr<UIStyle> style, String text, String ghostText)
+UIInput::UIInput(std::shared_ptr<InputKeyboard> keyboard, String id, std::shared_ptr<UIStyle> style, String text, String ghostText)
 	: UIWidget(id, {}, UISizer(UISizerType::Vertical), Vector4f(3, 3, 3, 3))
+	, keyboard(keyboard)
 	, style(style)
 	, sprite(style->inputBox)
 	, label(style->inputLabel)
-	, text(text)
+	, text(text.getUTF32())
 	, ghostText(ghostText)
 {
 	label.setText(text);
@@ -21,13 +22,13 @@ bool UIInput::isFocusable() const
 
 UIInput& UIInput::setText(const String& t)
 {
-	text = t;
+	text = t.getUTF32();
 	return *this;
 }
 
 String UIInput::getText() const
 {
-	return text;
+	return String(text);
 }
 
 UIInput& UIInput::setGhostText(const String& t)
@@ -49,12 +50,34 @@ void UIInput::draw(UIPainter& painter) const
 
 void UIInput::update(Time t, bool moved)
 {
-	if (text.isEmpty()) {
+	caretTime += float(t);
+	if (caretTime > 0.4f) {
+		caretTime -= 0.4f;
+		caretShowing = !caretShowing;
+	}
+
+	if (isFocused()) {
+		for (int letter = keyboard->getNextLetter(); letter != 0; letter = keyboard->getNextLetter()) {
+			if (letter == 8) { // Backspace
+				if (!text.empty()) {
+					text.pop_back();
+				}
+			} else if (letter >= 32) {
+				text.push_back(letter);
+			}
+		}
+	}
+
+	if (text.empty() && !isFocused()) {
 		label = style->inputLabelGhost;
 		label.setText(ghostText);
 	} else {
 		label = style->inputLabel;
-		label.setText(text);
+		auto txt = String(text);
+		if (isFocused() && caretShowing) {
+			txt.appendCharacter('|');
+		}
+		label.setText(txt);
 	}
 	label.setPosition(getPosition() + Vector2f(3, 0));
 

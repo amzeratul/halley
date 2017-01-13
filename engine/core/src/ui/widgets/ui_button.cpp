@@ -26,7 +26,7 @@ void UIButton::update(Time t, bool moved)
 			dirty |= setState(State::Hover);
 		}
 	} else {
-		if (isFocused()) {
+		if (isMouseOver()) {
 			dirty |= setState(State::Hover);
 		} else {
 			dirty |= setState(State::Up);

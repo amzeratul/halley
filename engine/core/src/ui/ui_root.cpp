@@ -78,17 +78,25 @@ void UIRoot::update(Time t, Vector2f mousePos, bool mousePressed, bool mouseRele
 		underMouse = getWidgetUnderMouse(c, mousePos);
 	}
 
-	updateFocus(underMouse);
+	if (mousePressed) {
+		setFocus(underMouse);
+		if (underMouse) {
+			underMouse->pressMouse(0);
+		}
+	}
 
 	auto focus = currentFocus.lock();
-	if (focus) {
-		if (mousePressed) {
-			focus->pressMouse(0);
-		}
-		if (mouseReleased) {
+	if (mouseReleased) {
+		if (focus) {
 			focus->releaseMouse(0);
 		}
 	}
+
+	auto activeMouseOver = underMouse;
+	if (focus && focus != underMouse) {
+		activeMouseOver.reset();
+	}
+	updateMouseOver(underMouse);
 
 	for (auto& c: widgets) {
 		c->doUpdate(t);
@@ -134,7 +142,7 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWi
 	}
 }
 
-void UIRoot::updateFocus(const std::shared_ptr<UIWidget>& underMouse)
+void UIRoot::updateMouseOver(const std::shared_ptr<UIWidget>& underMouse)
 {
 	auto curMouseOver = currentMouseOver.lock();
 	if (curMouseOver != underMouse) {
@@ -146,18 +154,18 @@ void UIRoot::updateFocus(const std::shared_ptr<UIWidget>& underMouse)
 		}
 		currentMouseOver = underMouse;
 	}
+}
 
+void UIRoot::setFocus(std::shared_ptr<UIWidget> focus)
+{
 	auto curFocus = currentFocus.lock();
-	if (curFocus != underMouse) {
-		if (!curFocus || !curFocus->isFocusLocked()) {
-			if (curFocus) {
-				curFocus->setFocused(false);
-			}
-			if (underMouse) {
-				underMouse->setFocused(true);
-			}
-			currentFocus = underMouse;
-		}
+	if (curFocus) {
+		curFocus->setFocused(false);
+	}
+
+	currentFocus = focus;
+	if (focus) {
+		focus->setFocused(true);
 	}
 }
 
