@@ -126,6 +126,11 @@ void UIRoot::sendEvent(UIEvent&&) const
 	// Unhandled event
 }
 
+bool UIRoot::hasModalUI() const
+{
+	return !getChildren().empty();
+}
+
 std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos)
 {
 	// Depth first

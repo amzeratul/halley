@@ -60,6 +60,8 @@ namespace Halley {
 
 		void sendEvent(UIEvent&& event) const override;
 
+		bool hasModalUI() const;
+
 	private:
 		std::vector<UIWidget*> widgets;
 		std::weak_ptr<UIWidget> currentMouseOver;
