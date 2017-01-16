@@ -10,6 +10,7 @@ Family::Family(FamilyMaskType mask)
 void Family::addOnEntitiesAdded(FamilyBindingBase* bind)
 {
 	addEntityCallbacks.push_back(bind);
+	bind->onEntitiesAdded(elems, elemCount);
 }
 
 void Family::removeOnEntityAdded(FamilyBindingBase* bind)
