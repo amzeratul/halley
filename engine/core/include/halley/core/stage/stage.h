@@ -12,6 +12,7 @@ namespace Halley
 	class InputAPI;
 	class VideoAPI;
 	class CoreAPI;
+	class Game;
 
 	class Stage
 	{
@@ -37,6 +38,8 @@ namespace Halley
 		CoreAPI& getCoreAPI() const;
 		Resources& getResources() const;
 
+		Game& getGame() const;
+
 		template <typename T>
 		std::shared_ptr<const T> getResource(String name) const {
 			return getResources().of<T>().get(name);
@@ -45,9 +48,11 @@ namespace Halley
 	private:
 		friend class Core;
 
+		void setGame(Game& game);
 		void doInit(HalleyAPI* api);
 		void doDeInit();
 
+		Game* game = nullptr;
 		String name;
 		HalleyAPI* api = nullptr;
 	};

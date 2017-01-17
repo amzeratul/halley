@@ -32,6 +32,16 @@ Resources& Stage::getResources() const
 	return api->core->getResources();
 }
 
+Game& Stage::getGame() const
+{
+	return *game;
+}
+
+void Stage::setGame(Game& g)
+{
+	game = &g;
+}
+
 void Stage::doInit(HalleyAPI* _api)
 {
 	api = _api;

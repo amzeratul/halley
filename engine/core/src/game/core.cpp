@@ -372,6 +372,7 @@ bool Core::transitionStage()
 		if (currentStage) {
 			HALLEY_DEBUG_TRACE();
 			currentStage->api = &*api;
+			currentStage->setGame(*game);
 			currentStage->init();
 			HALLEY_DEBUG_TRACE();
 		} else {
