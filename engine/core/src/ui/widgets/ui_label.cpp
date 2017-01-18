@@ -21,3 +21,9 @@ void UILabel::update(Time t, bool moved)
 		text.setPosition(getPosition());
 	}
 }
+
+void UILabel::setText(const String& t)
+{
+	text.setText(t);
+	setMinSize(text.getExtents());
+}
