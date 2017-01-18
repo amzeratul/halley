@@ -28,6 +28,9 @@ void UIWidget::doUpdate(Time t)
 {
 	update(t, positionUpdated);
 	positionUpdated = false;
+	for (auto& c: getChildren()) {
+		c->doUpdate(t);
+	}
 }
 
 Vector2f UIWidget::computeMinimumSize() const
@@ -154,15 +157,14 @@ void UIWidget::releaseMouse(int button)
 {
 }
 
-UIRoot& UIWidget::getRoot()
+UIRoot* UIWidget::getRoot()
 {
-	return *uiRoot;
+	return parent ? parent->getRoot() : nullptr;
 }
 
 void UIWidget::setParent(UIParent& p)
 {
 	parent = &p;
-	uiRoot = &parent->getRoot();
 }
 
 void UIWidget::destroy()
@@ -197,7 +199,6 @@ void UIWidget::doDestroy()
 	for (auto& c: getChildren()) {
 		c->doDestroy();
 	}
-	uiRoot->removeWidget(*this);
 }
 
 void UIWidget::setEventHandler(std::shared_ptr<UIEventHandler> handler)

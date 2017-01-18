@@ -48,7 +48,6 @@ namespace Halley {
 		virtual void pressMouse(int button);
 		virtual void releaseMouse(int button);
 
-		UIRoot& getRoot() override;
 		void destroy();
 
 		std::shared_ptr<UIWidget> getWidget(const String& id);
@@ -63,6 +62,7 @@ namespace Halley {
 
 		virtual void onFocus();
 		virtual void onFocusLost();
+		UIRoot* getRoot() override;
 
 		void sendEvent(UIEvent&& event) const override;
 
@@ -72,7 +72,6 @@ namespace Halley {
 		void doDestroy();
 
 		UIParent* parent = nullptr;
-		UIRoot* uiRoot = nullptr;
 		String id;
 
 		Vector2f position;

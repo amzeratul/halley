@@ -17,7 +17,7 @@ namespace Halley {
 	public:
 		virtual ~UIParent() {}
 
-		virtual UIRoot& getRoot() = 0;
+		virtual UIRoot* getRoot() = 0;
 		virtual void sendEvent(UIEvent&& event) const = 0;
 
 		void addChild(std::shared_ptr<UIWidget> widget);
@@ -46,12 +46,9 @@ namespace Halley {
 	
 	class UIRoot : public UIParent {
 	public:
-		UIRoot& getRoot() override;
+		UIRoot* getRoot() override;
 
 		explicit UIRoot(AudioAPI* audio);
-
-		void addWidget(UIWidget& widget);
-		void removeWidget(UIWidget& widget);
 
 		void update(Time t, Vector2f mousePos, bool mousePressed, bool mouseReleased);
 		void draw(SpritePainter& painter, int mask, int layer);

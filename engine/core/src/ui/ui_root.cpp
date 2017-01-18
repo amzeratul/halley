@@ -8,7 +8,6 @@ using namespace Halley;
 void UIParent::addChild(std::shared_ptr<UIWidget> widget)
 {
 	widget->setParent(*this);
-	getRoot().addWidget(*widget);
 	children.push_back(widget);
 }
 
@@ -18,7 +17,6 @@ void UIParent::removeChild(UIWidget& widget)
 	{
 		return c.get() == &widget;
 	}), children.end());
-	getRoot().removeWidget(widget);
 }
 
 std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()
@@ -49,24 +47,14 @@ void UIPainter::draw(const TextRenderer& sprite)
 	painter.add(sprite, mask, layer, float(n++));
 }
 
-UIRoot& UIRoot::getRoot()
+UIRoot* UIRoot::getRoot()
 {
-	return *this;
+	return this;
 }
 
 UIRoot::UIRoot(AudioAPI* audio)
 	: audio(audio)
 {
-}
-
-void UIRoot::addWidget(UIWidget& widget)
-{
-	widgets.push_back(&widget);
-}
-
-void UIRoot::removeWidget(UIWidget& widget)
-{
-	widgets.erase(std::remove(widgets.begin(), widgets.end(), &widget), widgets.end());
 }
 
 void UIRoot::update(Time t, Vector2f mousePos, bool mousePressed, bool mouseReleased)
@@ -100,7 +88,7 @@ void UIRoot::update(Time t, Vector2f mousePos, bool mousePressed, bool mouseRele
 	}
 	updateMouseOver(activeMouseOver);
 
-	for (auto& c: widgets) {
+	for (auto& c: getChildren()) {
 		c->doUpdate(t);
 	}
 }

@@ -77,7 +77,10 @@ void UIButton::onClick(UIEventCallback callback)
 void UIButton::playSound(const std::shared_ptr<const AudioClip>& clip)
 {
 	if (clip) {
-		getRoot().playSound(clip);
+		auto root = getRoot();
+		if (root) {
+			root->playSound(clip);
+		}
 	}
 }
 
