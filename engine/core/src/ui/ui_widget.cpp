@@ -64,6 +64,12 @@ void UIWidget::layout()
 	setRect(Rect4f(getPosition(), getPosition() + targetSize));
 }
 
+void UIWidget::centerAt(Vector2f pos)
+{
+	layout();
+	setPosition(pos - (size / 2.0f).floor());
+}
+
 Maybe<UISizer>& UIWidget::tryGetSizer()
 {
 	return sizer;
@@ -220,11 +226,6 @@ std::shared_ptr<UIWidget> UIWidget::getWidget(const String& id)
 	return {};
 }
 
-void UIWidget::createEventHandler()
-{
-	eventHandler = std::make_shared<UIEventHandler>();
-}
-
 void UIWidget::doDestroy()
 {
 	for (auto& c: getChildren()) {
@@ -237,9 +238,12 @@ void UIWidget::setEventHandler(std::shared_ptr<UIEventHandler> handler)
 	eventHandler = handler;
 }
 
-std::shared_ptr<UIEventHandler> UIWidget::getEventHandler()
+UIEventHandler& UIWidget::getEventHandler()
 {
-	return eventHandler;
+	if (!eventHandler) {
+		eventHandler = std::make_shared<UIEventHandler>();
+	}
+	return *eventHandler;
 }
 
 void UIWidget::draw(UIPainter& painter) const

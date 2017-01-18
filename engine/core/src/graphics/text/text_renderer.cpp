@@ -70,6 +70,11 @@ TextRenderer& TextRenderer::setOffset(Vector2f v)
 	return *this;
 }
 
+TextRenderer TextRenderer::clone() const
+{
+	return *this;
+}
+
 TextRenderer& TextRenderer::setOutlineColour(Colour v)
 {
 	outlineColour = v;

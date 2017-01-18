@@ -25,6 +25,8 @@ namespace Halley
 		TextRenderer& setAlignment(float align);
 		TextRenderer& setOffset(Vector2f align);
 
+		TextRenderer clone() const;
+
 		void draw(Painter& painter) const;
 		Vector2f getExtents() const;
 

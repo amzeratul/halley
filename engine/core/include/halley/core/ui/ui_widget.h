@@ -24,6 +24,7 @@ namespace Halley {
 		void setRect(Rect4f rect) override;
 
 		void layout();
+		void centerAt(Vector2f position);
 		
 		virtual Maybe<UISizer>& tryGetSizer();
 		virtual UISizer& getSizer();
@@ -57,9 +58,8 @@ namespace Halley {
 
 		std::shared_ptr<UIWidget> getWidget(const String& id);
 
-		void createEventHandler();
 		void setEventHandler(std::shared_ptr<UIEventHandler> handler);
-		std::shared_ptr<UIEventHandler> getEventHandler();
+		UIEventHandler& getEventHandler();
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
