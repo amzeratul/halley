@@ -1,5 +1,6 @@
 #include "ui/widgets/ui_input.h"
 #include "ui/ui_style.h"
+#include "ui/ui_validator.h"
 
 using namespace Halley;
 
@@ -42,10 +43,35 @@ String UIInput::getGhostText() const
 	return ghostText;
 }
 
+void UIInput::setValidator(std::shared_ptr<UIValidator> v)
+{
+	validator = v;
+}
+
 void UIInput::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);
 	painter.draw(label);
+}
+
+void UIInput::updateTextInput()
+{
+	bool modified = false;
+	for (int letter = keyboard->getNextLetter(); letter != 0; letter = keyboard->getNextLetter()) {
+		if (letter == 8) { // Backspace
+			if (!text.empty()) {
+				text.pop_back();
+				modified = true;
+			}
+		} else if (letter >= 32) {
+			text.push_back(letter);
+			modified = true;
+		}
+	}
+
+	if (modified && validator) {
+		text = validator->onTextChanged(text);
+	}
 }
 
 void UIInput::update(Time t, bool moved)
@@ -57,15 +83,7 @@ void UIInput::update(Time t, bool moved)
 	}
 
 	if (isFocused()) {
-		for (int letter = keyboard->getNextLetter(); letter != 0; letter = keyboard->getNextLetter()) {
-			if (letter == 8) { // Backspace
-				if (!text.empty()) {
-					text.pop_back();
-				}
-			} else if (letter >= 32) {
-				text.push_back(letter);
-			}
-		}
+		updateTextInput();
 	}
 
 	if (text.empty() && !isFocused()) {

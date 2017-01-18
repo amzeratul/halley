@@ -7,6 +7,7 @@
 
 namespace Halley {
 	class UIStyle;
+	class UIValidator;
 
 	class UIInput : public UIWidget {
 	public:
@@ -18,6 +19,8 @@ namespace Halley {
 		UIInput& setGhostText(const String& text);
 		String getGhostText() const;
 
+		void setValidator(std::shared_ptr<UIValidator> validator);
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -25,10 +28,14 @@ namespace Halley {
 		void onFocus() override;
 
 	private:
+		void updateTextInput();
+
 		std::shared_ptr<InputKeyboard> keyboard;
 		std::shared_ptr<UIStyle> style;
 		Sprite sprite;
 		TextRenderer label;
+
+		std::shared_ptr<UIValidator> validator;
 
 		StringUTF32 text;
 		String ghostText;

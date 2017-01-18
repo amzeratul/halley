@@ -50,6 +50,7 @@ set(SOURCES
         "src/ui/ui_event.cpp"
         "src/ui/ui_root.cpp"
         "src/ui/ui_sizer.cpp"
+        "src/ui/ui_validator.cpp"
         "src/ui/ui_widget.cpp"
 
         "src/ui/widgets/ui_button.cpp"
@@ -130,6 +131,7 @@ set(HEADERS
         "include/halley/core/ui/ui_root.h"
         "include/halley/core/ui/ui_sizer.h"
         "include/halley/core/ui/ui_style.h"
+        "include/halley/core/ui/ui_validator.h"
         "include/halley/core/ui/ui_widget.h"
 
         "include/halley/core/ui/widgets/ui_button.h"
