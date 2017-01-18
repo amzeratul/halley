@@ -44,6 +44,8 @@ namespace Halley {
 		int getFillFlags() const;
 
 		void placeInside(Rect4f rect, Vector2f minSize);
+
+		UIElementPtr getPointer() const;
 	
 	private:
 		UIElementPtr widget;
@@ -52,16 +54,33 @@ namespace Halley {
 		int fillFlags;
 	};
 
-	class UISizer : public IUIElement {
+	class UIWidget;
+	class UISizer;
+	class UIParent;
+
+	class IUISizer {
+	public:
+		virtual ~IUISizer() {}
+
+		virtual void add(std::shared_ptr<UIWidget> widget, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) = 0;
+		virtual void add(std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) = 0;
+		virtual void addSpacer(float size) = 0;
+		virtual void addStretchSpacer(float proportion = 0) = 0;
+	};
+
+	class UISizer : public IUIElement, public IUISizer {
 	public:
 		explicit UISizer(UISizerType type = UISizerType::Horizontal, float gap = 1.0f);
 
 		Vector2f computeMinimumSize() const override;
 		void setRect(Rect4f rect) override;
 
-		void addSpacer(float size);
-		void addStretchSpacer(float proportion = 0);
-		void add(UIElementPtr widget, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill);
+		void add(std::shared_ptr<UIWidget> widget, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
+		void add(std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
+		void addSpacer(float size) override;
+		void addStretchSpacer(float proportion = 0) override;
+
+		void reparent(UIParent& parent);
 
 		UISizerType getType() const;
 		size_t size() const;
@@ -74,5 +93,6 @@ namespace Halley {
 		float gap;
 
 		Vector2f computeMinimumSize(bool includeProportional) const;
+		void addElement(UIElementPtr widget, float proportion, Vector4f border, int fillFlags);
 	};
 }

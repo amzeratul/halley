@@ -36,7 +36,6 @@ void UIWidget::doUpdate(Time t)
 Vector2f UIWidget::computeMinimumSize() const
 {
 	Vector2f minSize = getMinimumSize();
-	auto& sizer = getSizer();
 	if (sizer) {
 		auto border = getInnerBorder();
 		Vector2f innerSize = sizer.get().computeMinimumSize();
@@ -51,7 +50,6 @@ Vector2f UIWidget::computeMinimumSize() const
 void UIWidget::setRect(Rect4f rect)
 {
 	setWidgetRect(rect);
-	auto& sizer = getSizer();
 	if (sizer) {
 		auto border = getInnerBorder();
 		auto p0 = getPosition();
@@ -66,14 +64,47 @@ void UIWidget::layout()
 	setRect(Rect4f(getPosition(), getPosition() + targetSize));
 }
 
-Maybe<UISizer>& UIWidget::getSizer()
+Maybe<UISizer>& UIWidget::tryGetSizer()
 {
 	return sizer;
 }
 
-const Maybe<UISizer>& UIWidget::getSizer() const
+UISizer& UIWidget::getSizer()
 {
-	return sizer;
+	if (!sizer) {
+		throw Exception("UIWidget does not have a sizer.");
+	}
+	return sizer.get();
+}
+
+void UIWidget::add(std::shared_ptr<UIWidget> widget, float porportion, Vector4f border, int fillFlags)
+{
+	addChild(widget);
+	if (sizer) {
+		sizer.get().add(widget, porportion, border, fillFlags);
+	}
+}
+
+void UIWidget::add(std::shared_ptr<UISizer> s, float proportion, Vector4f border, int fillFlags)
+{
+	s->reparent(*this);
+	if (sizer) {
+		sizer.get().add(s, proportion, border, fillFlags);
+	}
+}
+
+void UIWidget::addSpacer(float size)
+{
+	if (sizer) {
+		sizer.get().addSpacer(size);
+	}
+}
+
+void UIWidget::addStretchSpacer(float proportion)
+{
+	if (sizer) {
+		sizer.get().addStretchSpacer(proportion);
+	}
 }
 
 bool UIWidget::isFocusable() const

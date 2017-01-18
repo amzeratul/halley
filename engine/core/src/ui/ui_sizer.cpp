@@ -64,6 +64,11 @@ void UISizerEntry::placeInside(Rect4f rect, Vector2f minSize)
 	}
 }
 
+UIElementPtr UISizerEntry::getPointer() const
+{
+	return widget;
+}
+
 Vector4f UISizerEntry::getBorder() const
 {
 	return border;
@@ -171,6 +176,16 @@ void UISizer::setRect(Rect4f rect)
 	}
 }
 
+void UISizer::add(std::shared_ptr<UIWidget> widget, float proportion, Vector4f border, int fillFlags)
+{
+	addElement(widget, proportion, border, fillFlags);
+}
+
+void UISizer::add(std::shared_ptr<UISizer> sizer, float proportion, Vector4f border, int fillFlags)
+{
+	addElement(sizer, proportion, border, fillFlags);
+}
+
 void UISizer::addSpacer(float size)
 {
 	entries.emplace_back(UISizerEntry({}, 0, Vector4f(type == UISizerType::Horizontal ? size : 0.0f, type == UISizerType::Vertical ? size : 0.0f, 0.0f, 0.0f), {}));
@@ -181,7 +196,22 @@ void UISizer::addStretchSpacer(float proportion)
 	entries.emplace_back(UISizerEntry({}, proportion, {}, {}));
 }
 
-void UISizer::add(UIElementPtr widget, float proportion, Vector4f border, int fillFlags)
+void UISizer::reparent(UIParent& parent)
+{
+	for (auto& e: entries) {
+		auto widget = std::dynamic_pointer_cast<UIWidget>(e.getPointer());
+		if (widget) {
+			parent.addChild(widget);
+		} else {
+			auto sizer = std::dynamic_pointer_cast<UISizer>(e.getPointer());
+			if (sizer) {
+				sizer->reparent(parent);
+			}
+		}
+	}
+}
+
+void UISizer::addElement(UIElementPtr widget, float proportion, Vector4f border, int fillFlags)
 {
 	entries.emplace_back(UISizerEntry(widget, proportion, border, fillFlags));
 }

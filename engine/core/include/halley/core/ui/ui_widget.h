@@ -10,7 +10,7 @@ namespace Halley {
 	class UIEvent;
 	class Painter;
 
-	class UIWidget : public IUIElement, public UIParent {
+	class UIWidget : public IUIElement, public UIParent, public IUISizer {
 		friend class UIParent;
 
 	public:
@@ -25,8 +25,13 @@ namespace Halley {
 
 		void layout();
 		
-		Maybe<UISizer>& getSizer();
-		const Maybe<UISizer>& getSizer() const;
+		virtual Maybe<UISizer>& tryGetSizer();
+		virtual UISizer& getSizer();
+
+		void add(std::shared_ptr<UIWidget> widget, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
+		void add(std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
+		void addSpacer(float size) override;
+		void addStretchSpacer(float proportion = 0) override;
 
 		virtual bool isFocusable() const;
 		virtual bool isFocusLocked() const;
