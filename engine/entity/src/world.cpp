@@ -234,6 +234,12 @@ void World::updateEntities()
 
 	std::vector<size_t> entitiesRemoved;
 
+	struct FamilyTodo {
+		std::vector<Entity*> toAdd;
+		std::vector<Entity*> toRemove;
+	};
+	std::map<FamilyMaskType, FamilyTodo> pending;
+
 	// Update all entities
 	// This loop should be as fast as reasonably possible
 	for (size_t i = 0; i < nEntities; i++) {
@@ -247,15 +253,7 @@ void World::updateEntities()
 			// First of all, let's check if it's dead
 			if (!entity.isAlive()) {
 				// Remove from systems
-				for (auto& iter : families) {
-					//auto& family = *iter.second;
-					auto& family = *iter;
-					FamilyMaskType famMask = family.inclusionMask;
-					if ((famMask & entity.getMask()) == famMask) {
-						family.removeEntity(entity);
-					}
-				}
-
+				pending[entity.getMask()].toRemove.push_back(&entity);
 				entitiesRemoved.push_back(i);
 			} else {
 				// It's alive, so check old and new system inclusions
@@ -265,25 +263,20 @@ void World::updateEntities()
 
 				// Did it change?
 				if (oldMask != newMask) {
-					// Let the systems know about it
-					for (auto& iter : families) {
-						//auto& family = *iter.second;
-						auto& family = *iter;
-						FamilyMaskType famMask = family.inclusionMask;
-						bool matchOld = (famMask & oldMask) == famMask;
-						bool matchNew = (famMask & newMask) == famMask;
-
-						// Remove
-						if (matchOld && !matchNew) {
-							family.removeEntity(entity);
-						}
-
-						// Add
-						if (!matchOld && matchNew) {
-							family.addEntity(entity);
-						}
-					}
+					pending[oldMask].toRemove.push_back(&entity);
+					pending[newMask].toAdd.push_back(&entity);
 				}
+			}
+		}
+	}
+
+	for (auto& todo: pending) {
+		for (auto& fam: getFamiliesFor(todo.first)) {
+			for (auto& e: todo.second.toRemove) {
+				fam->removeEntity(*e);
+			}
+			for (auto& e: todo.second.toAdd) {
+				fam->addEntity(*e);
 			}
 		}
 	}
@@ -349,5 +342,25 @@ void World::onAddFamily(Family& family)
 		if ((eMask & fMask) == fMask) {
 			family.addEntity(entity);
 		}
+	}
+	familyCache.clear();
+}
+
+const std::vector<Family*>& World::getFamiliesFor(const FamilyMaskType& mask)
+{
+	auto i = familyCache.find(mask);
+	if (i != familyCache.end()) {
+		return i->second;
+	} else {
+		std::vector<Family*> result;
+		for (auto& iter : families) {
+			auto& family = *iter;
+			FamilyMaskType famMask = family.inclusionMask;
+			if (mask.contains(famMask)) {
+				result.push_back(&family);
+			}
+		}
+		familyCache[mask] = std::move(result);
+		return familyCache[mask];
 	}
 }

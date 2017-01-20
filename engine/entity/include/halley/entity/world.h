@@ -91,6 +91,8 @@ namespace Halley {
 		Vector<std::unique_ptr<Family>> families;
 		TreeMap<String, std::shared_ptr<Service>> services;
 
+		TreeMap<FamilyMaskType, std::vector<Family*>> familyCache;
+
 		mutable std::array<StopwatchAveraging, 3> timer;
 
 		void allocateEntity(Entity* entity);
@@ -105,5 +107,7 @@ namespace Halley {
 		void onAddFamily(Family& family);
 
 		Service& getService(const String& name) const;
+
+		const std::vector<Family*>& getFamiliesFor(const FamilyMaskType& mask);
 	};
 }

@@ -25,6 +25,8 @@ namespace Halley {
 			Handle operator&(const Handle& h) const;
 
 			const RealType& getRealValue() const;
+			
+			bool contains(const Handle& handle) const;
 
 		private:
 			int value = -1;

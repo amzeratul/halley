@@ -139,6 +139,14 @@ const RealType& Handle::getRealValue() const
 	return MaskStorage::retrieve(value);
 }
 
+bool Handle::contains(const Handle& handle) const
+{
+	auto& mine = getRealValue();
+	auto& theirs = handle.getRealValue();
+
+	return (mine & theirs) == theirs;
+}
+
 HandleType FamilyMask::getHandle(RealType mask)
 {
 	return Handle(mask);
