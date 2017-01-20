@@ -142,6 +142,13 @@ namespace Halley {
 			return (p.x >= p1.x && p.x <= p2.x && p.y >= p1.y && p.y <= p2.y);
 		}
 
+		Vector2D<T> getClosestPoint(Vector2D<T> p) const
+		{
+			p.x = clamp(p.x, p1.x, p2.x);
+			p.y = clamp(p.y, p1.y, p2.y);
+			return p;
+		}
+
 		Vector2D<T> wrapInside(Vector2D<T> p) const
 		{
 			Vector2D<T> size = getSize();
