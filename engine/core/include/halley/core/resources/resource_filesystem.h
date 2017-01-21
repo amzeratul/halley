@@ -33,7 +33,7 @@ namespace Halley {
 	protected:
 		std::unique_ptr<ResourceData> doGet(String resource, bool stream) override;
 		Vector<String> getResourceList() override;
-		int getPriority() override { return -1; }
+		int getPriority() const override { return -1; }
 
 		SystemAPI& system;
 		Path basePath;

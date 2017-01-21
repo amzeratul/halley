@@ -51,7 +51,7 @@ namespace Halley {
 	protected:
 		std::unique_ptr<ResourceData> doGet(String resource, bool stream) override;
 		Vector<String> getResourceList() override;
-		int getPriority() const { return priority; }
+		int getPriority() const override { return priority; }
 
 	private:
 

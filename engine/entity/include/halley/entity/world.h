@@ -82,7 +82,6 @@ namespace Halley {
 		std::array<Vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
 		bool entityDirty = false;
 		
-		EntityId nextUid = 0;
 		Vector<Entity*> entities;
 		Vector<Entity*> entitiesPendingCreation;
 		MappedPool<Entity*> entityMap;

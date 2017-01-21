@@ -55,7 +55,9 @@ namespace Halley {
 
 		void callDestructor(void* ptr) override
 		{
+#ifdef _MSC_VER
 			ptr = ptr; // Make it shut up about unused
+#endif
 			static_cast<T*>(ptr)->~T();
 		}
 	};

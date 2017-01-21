@@ -136,8 +136,8 @@ void Painter::drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scal
 	const char* const src = reinterpret_cast<const char*>(vertexData);
 
 	// Vertices
-	std::array<Vector2f, 4> pos = { Vector2f(0, 0), Vector2f(slices.x / scale.x, slices.y / scale.y), Vector2f(1 - slices.z / scale.x, 1 - slices.w / scale.y), Vector2f(1, 1) };
-	std::array<Vector2f, 4> tex = { Vector2f(0, 0), Vector2f(slices.x, slices.y), Vector2f(1 - slices.z, 1 - slices.w), Vector2f(1, 1) };
+	std::array<Vector2f, 4> pos = {{ Vector2f(0, 0), Vector2f(slices.x / scale.x, slices.y / scale.y), Vector2f(1 - slices.z / scale.x, 1 - slices.w / scale.y), Vector2f(1, 1) }};
+	std::array<Vector2f, 4> tex = {{ Vector2f(0, 0), Vector2f(slices.x, slices.y), Vector2f(1 - slices.z, 1 - slices.w), Vector2f(1, 1) }};
 	for (size_t i = 0; i < numVertices; i++) {
 		const size_t ix = i & 3;
 		const size_t iy = i >> 2;

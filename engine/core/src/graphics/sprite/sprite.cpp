@@ -239,8 +239,6 @@ Sprite& Sprite::setSprite(Resources& resources, String spriteSheetName, String i
 
 Sprite& Sprite::setSprite(const SpriteSheet& sheet, String name)
 {
-	Expects(&sheet != nullptr);
-
 	setSprite(sheet.getSprite(name));
 	return *this;
 }

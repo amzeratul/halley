@@ -40,7 +40,7 @@ namespace Halley {
 	protected:
 		virtual std::unique_ptr<ResourceData> doGet(String resource, bool stream)=0;
 		virtual Vector<String> getResourceList()=0;
-		virtual int getPriority() { return 0; }
+		virtual int getPriority() const { return 0; }
 	};
 
 	class ResourceLocator : public IResourceLocator
