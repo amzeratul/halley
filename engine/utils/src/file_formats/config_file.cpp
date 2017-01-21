@@ -306,7 +306,7 @@ std::unique_ptr<ConfigFile> ConfigFile::loadResource(ResourceLoader& loader)
 	Deserializer s(data->getSpan());
 	s >> *config;
 
-	return std::move(config);
+	return config;
 }
 
 ConfigNode ConfigNode::undefinedConfigNode;

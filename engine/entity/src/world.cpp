@@ -80,7 +80,7 @@ Vector<System*> World::getSystems()
 			result[i++] = s.get();
 		}
 	}
-	return std::move(result);
+	return result;
 }
 
 System& World::getSystem(const String& name)

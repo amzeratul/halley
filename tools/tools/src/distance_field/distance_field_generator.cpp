@@ -67,5 +67,5 @@ std::unique_ptr<Image> DistanceFieldGenerator::generate(Image& srcImg, Vector2i 
 		}
 	}
 
-	return std::move(dstImg);
+	return dstImg;
 }

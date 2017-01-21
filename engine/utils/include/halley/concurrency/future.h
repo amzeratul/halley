@@ -88,7 +88,7 @@ namespace Halley
 		T get()
 		{
 			wait();
-			return std::move(doGet<T>(0));
+			return doGet<T>(0);
 		}
 
 		void wait()
@@ -143,7 +143,7 @@ namespace Halley
 			}
 			auto result = std::move(data.get());
 			data.reset();
-			return std::move(result);
+			return result;
 		}
 
 		void makeAvailable()

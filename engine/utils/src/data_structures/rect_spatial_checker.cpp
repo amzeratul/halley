@@ -3,7 +3,9 @@
 
 using namespace Halley;
 
+#ifdef _MSC_VER
 #pragma warning(disable: 4996)
+#endif
 
 RectangleSpatialChecker::RectangleSpatialChecker(int _resolution)
 	: resolution(_resolution)

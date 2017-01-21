@@ -143,7 +143,7 @@ std::unique_ptr<Animation> Animation::loadResource(ResourceLoader& loader)
 	Deserializer s(sData->getSpan());
 	s >> *result;
 	result->loadDependencies(loader);
-	return std::move(result);
+	return result;
 }
 
 void Animation::loadDependencies(ResourceLoader& loader)

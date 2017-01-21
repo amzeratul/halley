@@ -31,5 +31,5 @@ std::unique_ptr<World> EntityStage::createWorld(String configName, std::function
 		}
 	}
 
-	return std::move(world);
+	return world;
 }

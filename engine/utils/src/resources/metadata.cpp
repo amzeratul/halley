@@ -110,7 +110,7 @@ std::unique_ptr<Metadata> Metadata::fromBinary(ResourceDataStatic& data)
 	auto meta = std::make_unique<Metadata>();
 	Deserializer s(data.getSpan());
 	meta->deserialize(s);
-	return std::move(meta);
+	return meta;
 }
 
 void Metadata::serialize(Serializer& s) const

@@ -228,7 +228,7 @@ std::unique_ptr<Metadata> FontGenerator::generateTextureMeta()
 	meta->set("mipmap", false);
 	meta->set("premultiply", false);
 	meta->set("format", "RGBA");
-	return std::move(meta);
+	return meta;
 }
 
 FontGeneratorResult::FontGeneratorResult() = default;

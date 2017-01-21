@@ -65,7 +65,7 @@ static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& as
 						meta->set(key, value);
 					}
 
-					return std::move(meta);
+					return meta;
 				}
 			}
 		}

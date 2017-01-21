@@ -51,7 +51,7 @@ namespace Halley {
 	{
 		auto result = tryGetResource(resource, stream);
 		if (result) {
-			return std::move(result);
+			return result;
 		} else {
 			// Not found
 			throw Exception("Unable to locate resource: " + resource);

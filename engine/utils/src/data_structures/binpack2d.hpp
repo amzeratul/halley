@@ -224,11 +224,10 @@ public:
   {}
   
   Content( const _T &content, const Coord &coord, const Size &size, bool rotated )
-    : 
-      content(content),
+    : rotated(rotated),
       coord(coord),
       size(size),
-      rotated(rotated)
+      content(content)
   {}
   
   void Rotate() {

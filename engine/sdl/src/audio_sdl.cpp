@@ -38,7 +38,7 @@ Vector<std::unique_ptr<const AudioDevice>> AudioSDL::getAudioDevices()
 			result.emplace_back(std::make_unique<AudioDeviceSDL>(SDL_GetAudioDeviceName(i, 0)));
 		}
 	}
-	return std::move(result);
+	return result;
 }
 
 static void sdlCallback(void *userdata, Uint8 * stream, int len)

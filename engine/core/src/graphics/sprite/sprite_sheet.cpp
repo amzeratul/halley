@@ -105,7 +105,7 @@ std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 	result->deserialize(s);
 	result->loadTexture(loader.getAPI().core->getResources());
 
-	return std::move(result);
+	return result;
 }
 
 void SpriteSheet::loadTexture(Resources& resources)

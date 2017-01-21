@@ -76,7 +76,7 @@ namespace Halley {
 	class ResourceDataStream : public ResourceData {
 	public:
 		ResourceDataStream(String path, ResourceDataMakeReader makeReader);
-		std::unique_ptr<ResourceDataReader> getReader() const { return std::move(make()); }
+		std::unique_ptr<ResourceDataReader> getReader() const { return make(); }
 
 	private:
 		ResourceDataMakeReader make;
