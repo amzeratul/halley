@@ -60,6 +60,7 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 	{
 		auto plugins = core->getPlugins(PluginType::SystemAPI);
 		if (plugins.size() > 0) {
+			std::cout << "System plugin: " << plugins[0]->getName() << "\n";
 			system.reset(static_cast<SystemAPIInternal*>(plugins[0]->createAPI(nullptr)));
 		} else {
 			throw Exception("No suitable system plugins found.");
@@ -70,6 +71,7 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 	if (flags & HalleyAPIFlags::Video) {
 		auto plugins = core->getPlugins(PluginType::GraphicsAPI);
 		if (plugins.size() > 0) {
+			std::cout << "Video plugin: " << plugins[0]->getName() << "\n";
 			video.reset(static_cast<VideoAPIInternal*>(plugins[0]->createAPI(system.get())));
 		} else {
 			throw Exception("No suitable video plugins found.");
@@ -80,6 +82,7 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 	if (flags & HalleyAPIFlags::Input) {
 		auto plugins = core->getPlugins(PluginType::InputAPI);
 		if (plugins.size() > 0) {
+			std::cout << "Input plugin: " << plugins[0]->getName() << "\n";
 			input.reset(static_cast<InputAPIInternal*>(plugins[0]->createAPI(system.get())));
 		} else {
 			throw Exception("No suitable input plugins found.");
@@ -91,6 +94,7 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 	if (flags & HalleyAPIFlags::Audio) {
 		auto plugins = core->getPlugins(PluginType::AudioOutputAPI);
 		if (plugins.size() > 0) {
+			std::cout << "Audio output plugin: " << plugins[0]->getName() << "\n";
 			audioOutput.reset(static_cast<AudioOutputAPIInternal*>(plugins[0]->createAPI(system.get())));
 			audio = std::make_unique<AudioFacade>(*audioOutput);
 		} else {
