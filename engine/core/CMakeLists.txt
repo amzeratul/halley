@@ -7,6 +7,7 @@ set(SOURCES
         
         "src/dummy/dummy_audio.cpp"
         "src/dummy/dummy_input.cpp"
+        "src/dummy/dummy_plugins.cpp"
         "src/dummy/dummy_system.cpp"
         "src/dummy/dummy_video.cpp"
 
@@ -69,6 +70,7 @@ set(SOURCES
 set(HEADERS
         "src/dummy/dummy_audio.h"
         "src/dummy/dummy_input.h"
+        "src/dummy/dummy_plugins.h"
         "src/dummy/dummy_system.h"
         "src/dummy/dummy_video.h"
 

@@ -2,26 +2,6 @@
 
 using namespace Halley;
 
-PluginType DummyInputPlugin::getType()
-{
-	return PluginType::InputAPI;
-}
-
-String DummyInputPlugin::getName()
-{
-	return "dummyInput";
-}
-
-HalleyAPIInternal* DummyInputPlugin::createAPI(SystemAPI*)
-{
-	return new DummyInputAPI();
-}
-
-int DummyInputPlugin::getPriority() const
-{
-	return -1;
-}
-
 size_t DummyInputAPI::getNumberOfKeyboards() const
 {
 	return 0;

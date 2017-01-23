@@ -1,16 +1,7 @@
 #pragma once
-#include "halley/plugin/plugin.h"
 #include "api/halley_api_internal.h"
 
 namespace Halley {
-	class DummyAudioPlugin : public Plugin {
-	public:
-		PluginType getType() override;
-		String getName() override;
-		HalleyAPIInternal* createAPI(SystemAPI*) override;
-		int getPriority() const override;
-	};
-
 	class DummyAudioAPI : public AudioOutputAPIInternal {
 	public:
 		Vector<std::unique_ptr<const AudioDevice>> getAudioDevices() override;

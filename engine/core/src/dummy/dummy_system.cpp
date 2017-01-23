@@ -2,26 +2,6 @@
 
 using namespace Halley;
 
-PluginType DummySystemPlugin::getType()
-{
-	return PluginType::SystemAPI;
-}
-
-String DummySystemPlugin::getName()
-{
-	return "dummySystem";
-}
-
-HalleyAPIInternal* DummySystemPlugin::createAPI(SystemAPI*)
-{
-	return new DummySystemAPI();
-}
-
-int DummySystemPlugin::getPriority() const
-{
-	return -1;
-}
-
 std::unique_ptr<ResourceDataReader> DummySystemAPI::getDataReader(String path, int64_t start, int64_t end)
 {
 	return {};

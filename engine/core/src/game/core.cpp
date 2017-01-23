@@ -18,10 +18,7 @@
 #include <halley/support/debug.h>
 #include <chrono>
 #include <ctime>
-#include "../dummy/dummy_system.h"
-#include "../dummy/dummy_video.h"
-#include "../dummy/dummy_audio.h"
-#include "../dummy/dummy_input.h"
+#include "../dummy/dummy_plugins.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
