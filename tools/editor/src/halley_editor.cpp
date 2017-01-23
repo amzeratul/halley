@@ -7,7 +7,9 @@
 using namespace Halley;
 
 void initOpenGLPlugin(IPluginRegistry &registry);
-void initSDLPlugin(IPluginRegistry &registry);
+void initSDLSystemPlugin(IPluginRegistry &registry);
+void initSDLAudioPlugin(IPluginRegistry &registry);
+void initSDLInputPlugin(IPluginRegistry &registry);
 
 HalleyEditor::HalleyEditor()
 {
@@ -19,10 +21,12 @@ HalleyEditor::~HalleyEditor()
 
 int HalleyEditor::initPlugins(IPluginRegistry &registry)
 {
-	initSDLPlugin(registry);
+	initSDLSystemPlugin(registry);
 	if (headless) {
 		return 0;
 	} else {
+		initSDLAudioPlugin(registry);
+		initSDLInputPlugin(registry);
 		initOpenGLPlugin(registry);
 		return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input;
 	}

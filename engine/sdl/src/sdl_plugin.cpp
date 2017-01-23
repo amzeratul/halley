@@ -25,9 +25,17 @@ namespace Halley {
 	
 }
 
-void initSDLPlugin(Halley::IPluginRegistry &registry)
+void initSDLSystemPlugin(Halley::IPluginRegistry &registry)
 {
 	registry.registerPlugin(std::make_unique<Halley::SDLSystemPlugin>());
+}
+
+void initSDLInputPlugin(Halley::IPluginRegistry &registry)
+{
 	registry.registerPlugin(std::make_unique<Halley::SDLInputPlugin>());
+}
+
+void initSDLAudioPlugin(Halley::IPluginRegistry &registry)
+{
 	registry.registerPlugin(std::make_unique<Halley::SDLAudioPlugin>());
 }

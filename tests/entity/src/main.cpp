@@ -4,7 +4,9 @@
 using namespace Halley;
 
 void initOpenGLPlugin(IPluginRegistry &registry);
-void initSDLPlugin(IPluginRegistry &registry);
+void initSDLSystemPlugin(IPluginRegistry &registry);
+void initSDLAudioPlugin(IPluginRegistry &registry);
+void initSDLInputPlugin(IPluginRegistry &registry);
 
 //#define WITH_BLAH_STAGE
 
@@ -31,7 +33,9 @@ class EntityTestGame final : public Game
 public:
 	int initPlugins(IPluginRegistry &registry) override
 	{
-		initSDLPlugin(registry);
+		initSDLSystemPlugin(registry);
+		initSDLAudioPlugin(registry);
+		initSDLInputPlugin(registry);
 		initOpenGLPlugin(registry);
 		return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input;
 	}
