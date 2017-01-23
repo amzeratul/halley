@@ -3,6 +3,7 @@
 #include <halley/core/graphics/texture.h>
 #include <halley/core/graphics/shader.h>
 #include <halley/core/graphics/render_target/render_target_texture.h>
+#include "dummy_system.h"
 
 using namespace Halley;
 
@@ -24,7 +25,8 @@ void DummyVideoAPI::flip()
 
 void DummyVideoAPI::setWindow(WindowDefinition&& windowDescriptor, bool vsync)
 {
-	window = system.createWindow(windowDescriptor);
+	//window = system.createWindow(windowDescriptor);
+	window = std::make_shared<DummyWindow>(windowDescriptor);
 }
 
 const Window& DummyVideoAPI::getWindow() const

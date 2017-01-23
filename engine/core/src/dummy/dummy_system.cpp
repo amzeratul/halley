@@ -52,3 +52,27 @@ void DummySystemAPI::init()
 void DummySystemAPI::deInit()
 {
 }
+
+DummyWindow::DummyWindow(const WindowDefinition& definition) 
+	: definition(definition)
+{}
+
+void DummyWindow::update(const WindowDefinition& definition) {}
+
+void DummyWindow::show() {}
+
+void DummyWindow::hide() {}
+
+void DummyWindow::setVsync(bool vsync) {}
+
+void DummyWindow::swap() {}
+
+Rect4i DummyWindow::getWindowRect() const
+{
+	return Rect4i({}, definition.getSize());
+}
+
+const WindowDefinition& DummyWindow::getDefinition() const
+{
+	return definition;
+}

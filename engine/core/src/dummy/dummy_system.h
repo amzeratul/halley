@@ -12,10 +12,25 @@ namespace Halley {
 		Vector2i getScreenSize(int n) const override;
 		Rect4i getDisplayRect(int screen) const override;
 		void showCursor(bool show) override;
-	private:
 		bool generateEvents(VideoAPI* video, InputAPI* input) override;
-	public:
 		void init() override;
 		void deInit() override;
+	};
+
+	class DummyWindow : public Window
+	{
+	public:
+		explicit DummyWindow(const WindowDefinition& definition);
+
+		void update(const WindowDefinition& definition) override;
+		void show() override;
+		void hide() override;
+		void setVsync(bool vsync) override;
+		void swap() override;
+		Rect4i getWindowRect() const override;
+		const WindowDefinition& getDefinition() const override;
+
+	private:
+		const WindowDefinition& definition;
 	};
 }
