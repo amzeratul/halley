@@ -38,24 +38,27 @@ void AudioFacade::startPlayback(int deviceNumber)
 		stopPlayback();
 	}
 
-	engine = std::make_unique<AudioEngine>();
+	auto devices = getAudioDevices();
+	if (int(devices.size()) > deviceNumber) {
+		engine = std::make_unique<AudioEngine>();
 
-	AudioSpec format;
-	format.bufferSize = 2048;
-	format.format = AudioSampleFormat::Int16;
-	format.numChannels = 2;
-	format.sampleRate = 48000;
+		AudioSpec format;
+		format.bufferSize = 2048;
+		format.format = AudioSampleFormat::Int16;
+		format.numChannels = 2;
+		format.sampleRate = 48000;
+		
+		AudioSpec obtained = output.openAudioDevice(format, devices.at(deviceNumber).get(), [this]() { onNeedBuffer(); });
 
-	AudioSpec obtained = output.openAudioDevice(format, getAudioDevices().at(deviceNumber).get(), [this]() { onNeedBuffer(); });
+		engine->start(obtained, output);
+		running = true;
 
-	engine->start(obtained, output);
-	running = true;
+		if (ownAudioThread) {
+			audioThread = std::thread([this]() { run(); });
+		}
 
-	if (ownAudioThread) {
-		audioThread = std::thread([this]() { run(); });
+		output.startPlayback();
 	}
-
-	output.startPlayback();
 }
 
 void AudioFacade::stopPlayback()
@@ -192,21 +195,28 @@ void AudioFacade::stepAudio()
 
 void AudioFacade::enqueue(std::function<void()> action)
 {
-	outbox.push_back(action);
+	if (running) {
+		outbox.push_back(action);
+	}
 }
 
 void AudioFacade::pump()
 {
-	std::unique_lock<std::mutex> lock(audioMutex);
+	if (running) {
+		std::unique_lock<std::mutex> lock(audioMutex);
 	
-	if (!outbox.empty()) {
-		size_t i = inbox.size();
-		inbox.resize(i + outbox.size());
-		for (auto& o: outbox) {
-			inbox[i++] = std::move(o);
+		if (!outbox.empty()) {
+			size_t i = inbox.size();
+			inbox.resize(i + outbox.size());
+			for (auto& o: outbox) {
+				inbox[i++] = std::move(o);
+			}
+			outbox.clear();
 		}
+
+		playingSounds = playingSoundsNext;
+	} else {
+		inbox.clear();
 		outbox.clear();
 	}
-
-	playingSounds = playingSoundsNext;
 }
