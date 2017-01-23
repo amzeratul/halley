@@ -21,10 +21,18 @@ int HalleyMain::runMain(GameLoader& loader, const Vector<std::string>& args)
 		loop.run();
 		return core->getExitCode();
 	} catch (std::exception& e) {
-		core->onTerminatedInError(e.what());
+		if (core) {
+			core->onTerminatedInError(e.what());
+		} else {
+			std::cout << "Exception initialising core: " + String(e.what()) << std::endl;
+		}
 		return 1;
 	} catch (...) {
-		core->onTerminatedInError("");
+		if (core) {
+			core->onTerminatedInError("");
+		} else {
+			std::cout << "Unknown exception initialising core." << std::endl;
+		}
 		return 1;
 	}
 }

@@ -52,7 +52,7 @@ OS* OS::createOS()
 #elif defined(linux)
 	return new OSLinux();
 #else
-	throw Exception("Unknown OS - please update os.cpp on Halley.");
+	return new OS();
 #endif
 }
 
@@ -71,6 +71,11 @@ void OS::onWindowCreated(void* windowHandle)
 Halley::ComputerData Halley::OS::getComputerData()
 {
 	return ComputerData();
+}
+
+String OS::getUserDataDir()
+{
+	return "";
 }
 
 Halley::String Halley::OS::makeDataPath(String appDataPath, String userProvidedPath)

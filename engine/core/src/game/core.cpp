@@ -188,8 +188,10 @@ void Core::initResources()
 
 void Core::setOutRedirect(bool appendToExisting)
 {
+#if defined(_WIN32) || defined(__APPLE__) || defined(linux)
 	auto outStream = std::make_shared<std::ofstream>((Path(environment->getDataPath()) / "log.txt").getString(), appendToExisting ? std::ofstream::app : std::ofstream::trunc);
 	out = std::make_unique<RedirectStreamToStream>(std::cout, outStream, false);
+#endif
 }
 
 void Core::pumpEvents(Time time)

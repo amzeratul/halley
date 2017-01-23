@@ -48,7 +48,7 @@ namespace Halley {
 		virtual void onWindowCreated(void* windowHandle);
 
 		virtual ComputerData getComputerData();
-		virtual String getUserDataDir()=0;
+		virtual String getUserDataDir();
 		virtual String makeDataPath(String appDataPath, String userProvidedPath);
 		virtual Path parseProgramPath(const String& commandLine);
 		virtual void createDirectories(const Path& path);
