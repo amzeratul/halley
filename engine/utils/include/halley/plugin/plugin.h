@@ -24,6 +24,7 @@ namespace Halley
 
 		virtual PluginType getType() = 0;
 		virtual String getName() = 0;
+		virtual int getPriority() const { return 0; }
 
 		virtual HalleyAPIInternal* createAPI(SystemAPI*) { return nullptr; }
 	};

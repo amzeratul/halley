@@ -18,6 +18,10 @@
 #include <halley/support/debug.h>
 #include <chrono>
 #include <ctime>
+#include "../dummy/dummy_system.h"
+#include "../dummy/dummy_video.h"
+#include "../dummy/dummy_audio.h"
+#include "../dummy/dummy_input.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
@@ -132,6 +136,7 @@ void Core::init()
 #endif
 
 	// Initialize game
+	registerDefaultPlugins();
 	api = HalleyAPI::create(this, game->initPlugins(*this));
 
 	// Resources
@@ -390,6 +395,14 @@ bool Core::transitionStage()
 	}
 }
 
+void Core::registerDefaultPlugins()
+{
+	registerPlugin(std::make_unique<DummySystemPlugin>());
+	registerPlugin(std::make_unique<DummyVideoPlugin>());
+	registerPlugin(std::make_unique<DummyAudioPlugin>());
+	registerPlugin(std::make_unique<DummyInputPlugin>());
+}
+
 void Core::registerPlugin(std::unique_ptr<Plugin> plugin)
 {
 	plugins[plugin->getType()].emplace_back(std::move(plugin));
@@ -401,6 +414,7 @@ Vector<Plugin*> Core::getPlugins(PluginType type)
 	for (auto& p : plugins[type]) {
 		result.push_back(&*p);
 	}
+	std::sort(result.begin(), result.end(), [] (Plugin* a, Plugin* b) { return a->getPriority() > b->getPriority(); });
 	return result;
 }
 

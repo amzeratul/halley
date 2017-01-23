@@ -48,6 +48,7 @@ namespace Halley
 		void onReloaded() override;
 		void onTerminatedInError(const std::string& error) override;
 
+		void registerDefaultPlugins();
 		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
 		Vector<Plugin*> getPlugins(PluginType type) override;
 
