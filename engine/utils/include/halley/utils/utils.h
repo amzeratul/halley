@@ -61,6 +61,11 @@ namespace Halley {
 		return (s1 < e2) && (s2 < e1);
 	}
 
+	constexpr double pi()
+	{
+		return 3.1415926535897932384626433832795;
+	}
+
 
 	// Endianness conversion
 	//const bool IS_BIG_ENDIAN = *((short*)"AB") == 0x4243;
