@@ -39,6 +39,7 @@ namespace Halley
 		virtual void clear(Colour colour) = 0;
 		virtual void setBlend(BlendType blend) = 0;
 
+		void setRelativeClip(Rect4f rect);
 		void setClip(Rect4i rect);
 		void setClip();
 

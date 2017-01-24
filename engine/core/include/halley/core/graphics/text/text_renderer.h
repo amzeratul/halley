@@ -3,6 +3,8 @@
 #include <memory>
 #include <halley/maths/colour.h>
 #include <halley/maths/vector2.h>
+#include "halley/maths/rect.h"
+#include "halley/data_structures/maybe.h"
 
 namespace Halley
 {
@@ -24,6 +26,8 @@ namespace Halley
 		TextRenderer& setOutline(float width);
 		TextRenderer& setAlignment(float align);
 		TextRenderer& setOffset(Vector2f align);
+		TextRenderer& setClip(Rect4f clip);
+		TextRenderer& setClip();
 
 		TextRenderer clone() const;
 
@@ -42,5 +46,6 @@ namespace Halley
 		Vector2f offset;
 		Colour colour;
 		Colour outlineColour;
+		Maybe<Rect4f> clip;
 	};
 }

@@ -138,15 +138,10 @@ Rect4f Camera::getClippingRectangle() const
 
 Vector2f Camera::screenToWorld(Vector2f p, Rect4f viewport) const
 {
-	Vector2f p2 = ((p - viewport.getTopLeft()) - viewport.getSize() * 0.5f) / zoom;
-
-	p2 = p2.rotate(angle);
-
-	return p2 + pos;
+	return ((p - viewport.getCenter()) / zoom).rotate(angle) + pos;
 }
 
-Vector2f Camera::worldToScreen(Vector2f p, Rect4f) const
+Vector2f Camera::worldToScreen(Vector2f p, Rect4f viewport) const
 {
-	// TODO
-	return p;
+	return (p - pos).rotate(-angle) * zoom + viewport.getCenter();
 }

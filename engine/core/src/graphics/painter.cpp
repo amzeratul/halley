@@ -205,6 +205,23 @@ void Painter::unbind(RenderContext& context)
 	camera->rendering = false;
 }
 
+void Painter::setRelativeClip(Rect4f rect)
+{
+	std::array<Vector2f, 4> ps = {{ rect.getTopLeft(), rect.getTopRight(), rect.getBottomLeft(), rect.getBottomRight() }};
+	float x0 = -std::numeric_limits<float>::infinity();
+	float x1 = std::numeric_limits<float>::infinity();
+	float y0 = -std::numeric_limits<float>::infinity();
+	float y1 = std::numeric_limits<float>::infinity();
+	for (auto& p: ps) {
+		auto point = camera->worldToScreen(p, Rect4f(viewPort));
+		x0 = std::max(x0, point.x);
+		x1 = std::min(x1, point.x);
+		y0 = std::max(y0, point.y);
+		y1 = std::min(y1, point.y);
+	}
+	setClip(Rect4i(Vector2i(Vector2f(x0, y0).floor()), Vector2i(Vector2f(x1, y1).ceil())));
+}
+
 void Painter::setClip(Rect4i rect)
 {
 	flushPending();

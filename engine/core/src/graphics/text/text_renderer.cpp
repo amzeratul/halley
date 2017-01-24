@@ -70,6 +70,18 @@ TextRenderer& TextRenderer::setOffset(Vector2f v)
 	return *this;
 }
 
+TextRenderer& TextRenderer::setClip(Rect4f c)
+{
+	clip = c;
+	return *this;
+}
+
+TextRenderer& TextRenderer::setClip()
+{
+	clip.reset();
+	return *this;
+}
+
 TextRenderer TextRenderer::clone() const
 {
 	return *this;
@@ -142,7 +154,13 @@ void TextRenderer::draw(Painter& painter) const
 		}
 	}
 
+	if (clip) {
+		painter.setRelativeClip(clip.get() + position);
+	}
 	Sprite::draw(sprites.data(), sprites.size(), painter);
+	if (clip) {
+		painter.setClip();
+	}
 }
 
 Vector2f TextRenderer::getExtents() const
