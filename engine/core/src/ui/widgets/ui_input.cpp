@@ -92,12 +92,25 @@ void UIInput::update(Time t, bool moved)
 	} else {
 		label = style->inputLabel;
 		auto txt = String(text);
-		if (isFocused() && caretShowing) {
-			txt.appendCharacter('|');
+		if (isFocused()) {
+			txt.appendCharacter(caretShowing ? '_' : ' ');
 		}
 		label.setText(txt);
 	}
-	label.setPosition(getPosition() + Vector2f(3, 0));
+
+	float length = label.getExtents().x;
+	float capacity = getSize().x - 6;
+	if (length > capacity) {
+		label
+			.setAlignment(1.0f)
+			.setClip(Rect4f(Vector2f(-capacity, 0), Vector2f(capacity, 20)))
+			.setPosition(getPosition() + Vector2f(3 + capacity, 0));
+	} else {
+		label
+			.setAlignment(0.0f)
+			.setClip()
+			.setPosition(getPosition() + Vector2f(3, 0));
+	}
 
 	if (moved) {
 		sprite.setPos(getPosition()).scaleTo(getSize());
