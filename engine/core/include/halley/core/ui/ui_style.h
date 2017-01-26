@@ -31,5 +31,6 @@ namespace Halley {
 		TextRenderer dialogueTitleLabel;
 
 		Sprite horizontalDiv;
+		Sprite verticalDiv;
 	};
 }
