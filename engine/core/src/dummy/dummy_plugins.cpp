@@ -13,7 +13,7 @@ PluginType DummyAudioPlugin::getType()
 
 String DummyAudioPlugin::getName()
 {
-	return "dummyAudio";
+	return "Audio/Dummy";
 }
 
 HalleyAPIInternal* DummyAudioPlugin::createAPI(SystemAPI*)
@@ -33,7 +33,7 @@ PluginType DummySystemPlugin::getType()
 
 String DummySystemPlugin::getName()
 {
-	return "dummySystem";
+	return "System/Dummy";
 }
 
 HalleyAPIInternal* DummySystemPlugin::createAPI(SystemAPI*)
@@ -53,7 +53,7 @@ PluginType DummyVideoPlugin::getType()
 
 String DummyVideoPlugin::getName()
 {
-	return "dummyVideo";
+	return "Video/Dummy";
 }
 
 HalleyAPIInternal* DummyVideoPlugin::createAPI(SystemAPI* system)
@@ -73,7 +73,7 @@ PluginType DummyInputPlugin::getType()
 
 String DummyInputPlugin::getName()
 {
-	return "dummyInput";
+	return "Input/Dummy";
 }
 
 HalleyAPIInternal* DummyInputPlugin::createAPI(SystemAPI*)
