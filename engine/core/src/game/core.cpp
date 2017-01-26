@@ -157,13 +157,17 @@ void Core::deInit()
 
 	// Deinit game
 	game->endGame();
+	game.reset();
 
 	// Deinit painter
 	painter.reset();
+	
+	// Stop thread pool and other statics
+	statics.suspend();
 
 	// Deinit resources
 	resources.reset();
-	
+
 	// Deinit API
 	api.reset();
 
