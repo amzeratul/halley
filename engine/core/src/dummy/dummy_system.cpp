@@ -2,12 +2,12 @@
 
 using namespace Halley;
 
-std::unique_ptr<ResourceDataReader> DummySystemAPI::getDataReader(String path, int64_t start, int64_t end)
+String DummySystemAPI::getResourcesBasePath() const
 {
-	return {};
+	return "";
 }
 
-std::unique_ptr<ResourceDataReader> DummySystemAPI::getDataReader(gsl::span<const gsl::byte> memory)
+std::unique_ptr<ResourceDataReader> DummySystemAPI::getDataReader(String path, int64_t start, int64_t end)
 {
 	return {};
 }

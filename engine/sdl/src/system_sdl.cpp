@@ -45,6 +45,11 @@ void SystemSDL::deInit()
 	SDL_Quit();
 }
 
+String SystemSDL::getResourcesBasePath() const
+{
+	return "assets/";
+}
+
 bool SystemSDL::generateEvents(VideoAPI* video, InputAPI* input)
 {
 	SDL_Event event;
@@ -107,11 +112,6 @@ void SystemSDL::processVideoEvent(VideoAPI* video, const SDL_Event& event)
 std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(String path, int64_t start, int64_t end)
 {
 	return SDLRWOps::fromPath(path, start, end);
-}
-
-std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(gsl::span<const gsl::byte> memory)
-{
-	return SDLRWOps::fromMemory(memory);
 }
 
 std::shared_ptr<Window> SystemSDL::createWindow(const WindowDefinition& windowDef)
