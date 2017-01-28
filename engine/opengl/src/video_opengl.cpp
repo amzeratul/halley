@@ -339,9 +339,9 @@ std::unique_ptr<Texture> VideoOpenGL::createTexture(Vector2i size)
 	return std::make_unique<TextureOpenGL>(*this, size);
 }
 
-std::unique_ptr<Shader> VideoOpenGL::createShader(String name)
+std::unique_ptr<Shader> VideoOpenGL::createShader(const ShaderDefinition& definition)
 {
-	return std::make_unique<ShaderOpenGL>(name);
+	return std::make_unique<ShaderOpenGL>(definition);
 }
 
 std::unique_ptr<TextureRenderTarget> VideoOpenGL::createRenderTarget()

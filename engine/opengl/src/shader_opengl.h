@@ -8,31 +8,31 @@ namespace Halley
 	class ShaderOpenGL final : public Shader
 	{
 	public:
-		ShaderOpenGL(String name);
+		explicit ShaderOpenGL(const ShaderDefinition& definition);
 		~ShaderOpenGL();
 
 		void bind() override;
 		void unbind();
-		void compile() override;
 		void destroy();
 
-		void addVertexSource(String src) override;
-		void addGeometrySource(String src) override;
-		void addPixelSource(String src) override;
-		
 		unsigned getUniformLocation(String name) override;
-		unsigned getAttributeLocation(String name) override;
-		void setAttributes(const Vector<MaterialAttribute>& attributes) override;
+		unsigned getAttributeLocation(String name);
 
 	private:
 		unsigned int id = 0;
 		bool ready = false;
-		Vector<String> vertexSources;
-		Vector<String> pixelSources;
-		Vector<String> geometrySources;
+		Vector<Bytes> vertexSources;
+		Vector<Bytes> pixelSources;
+		Vector<Bytes> geometrySources;
 		Vector<unsigned int> shaders;
 
 		HashMap<String, unsigned int> attributeLocations;
 		HashMap<String, unsigned int> uniformLocations;
+
+		String name;
+
+		void loadShaders(const std::map<ShaderType, Bytes>& shaders);
+		void compile();
+		void setAttributes(const Vector<MaterialAttribute>& attributes);
 	};
 }

@@ -15,7 +15,7 @@ namespace Halley {
 		void setWindow(WindowDefinition&& windowDescriptor, bool vsync) override;
 		const Window& getWindow() const override;
 		std::unique_ptr<Texture> createTexture(Vector2i size) override;
-		std::unique_ptr<Shader> createShader(String name) override;
+		std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) override;
 		std::unique_ptr<TextureRenderTarget> createRenderTarget() override;
 		void init() override;
 		void deInit() override;
@@ -46,16 +46,8 @@ namespace Halley {
 	class DummyShader : public Shader
 	{
 	public:
-		explicit DummyShader(const String& name);
-
 		void bind() override;
-		void compile() override;
-		void addVertexSource(String src) override;
-		void addGeometrySource(String src) override;
-		void addPixelSource(String src) override;
-		void setAttributes(const Vector<MaterialAttribute>& attributes) override;
 		unsigned getUniformLocation(String name) override;
-		unsigned getAttributeLocation(String name) override;
 	};
 
 	class DummyPainter : public Painter

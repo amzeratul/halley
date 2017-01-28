@@ -5,6 +5,7 @@
 
 namespace Halley
 {
+	class ShaderDefinition;
 	class WindowDefinition;
 	class Painter;
 	class Texture;
@@ -25,7 +26,7 @@ namespace Halley
 		virtual const Window& getWindow() const = 0;
 
 		virtual std::unique_ptr<Texture> createTexture(Vector2i size) = 0;
-		virtual std::unique_ptr<Shader> createShader(String name) = 0;
+		virtual std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) = 0;
 		virtual std::unique_ptr<TextureRenderTarget> createRenderTarget() = 0;
 	};
 }

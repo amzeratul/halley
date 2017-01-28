@@ -13,11 +13,14 @@ static ShaderOpenGL* currentShader = nullptr;
 #pragma warning(disable: 4996)
 #endif
 
-ShaderOpenGL::ShaderOpenGL(String name)
-	: Shader(name)
+ShaderOpenGL::ShaderOpenGL(const ShaderDefinition& definition)
 {
 	id = glCreateProgram();
-	glCheckError();
+	glCheckError();	
+
+	name = definition.name;
+	loadShaders(definition.shaders);
+	compile();
 }
 
 ShaderOpenGL::~ShaderOpenGL()
@@ -44,7 +47,7 @@ void ShaderOpenGL::unbind()
 	glCheckError();
 }
 
-static GLuint loadShader(String src, GLenum type, String name)
+static GLuint loadShader(const Bytes& src, GLenum type, String name)
 {
 	// Create shader
 	GLuint shader = glCreateShader(type);
@@ -53,7 +56,7 @@ static GLuint loadShader(String src, GLenum type, String name)
 	// Load source
 	size_t len = src.size();
 	GLchar* buffer = new GLchar[len + 1];
-	strcpy(buffer, src.c_str());
+	memcpy(buffer, src.data(), src.size());
 	buffer[len] = 0;
 	const char* cbuf = buffer;
 	glShaderSource(shader, 1, &cbuf, nullptr);
@@ -84,22 +87,34 @@ static GLuint loadShader(String src, GLenum type, String name)
 	return shader;
 }
 
+void ShaderOpenGL::loadShaders(const std::map<ShaderType, Bytes>& sources)
+{
+	for (auto& s: sources) {
+		auto type = s.first;
+		int glType = 0;
+		switch (type) {
+		case ShaderType::Vertex:
+			glType = GL_VERTEX_SHADER;
+			break;
+		case ShaderType::Pixel:
+			glType = GL_FRAGMENT_SHADER;
+			break;
+#ifdef WITH_OPENGL
+		case ShaderType::Geometry:
+			glType = GL_GEOMETRY_SHADER;
+			break;
+#endif
+		default:
+			throw Exception("Unsupported shader type: " + toString(type));
+		}
+
+		shaders.push_back(loadShader(s.second, glType, name + "/" + toString(type)));
+	}
+}
+
 void ShaderOpenGL::compile()
 {
 	if (!ready) {
-		// Compile shaders
-		for (size_t i = 0; i<vertexSources.size(); i++) {
-			shaders.push_back(loadShader(vertexSources[i], GL_VERTEX_SHADER, name + "/vertex"));
-		}
-#ifdef WITH_OPENGL
-		for (size_t i = 0; i<geometrySources.size(); i++) {
-			shaders.push_back(loadShader(geometrySources[i], GL_GEOMETRY_SHADER, name + "/geometry"));
-		}
-#endif
-		for (size_t i = 0; i<pixelSources.size(); i++) {
-			shaders.push_back(loadShader(pixelSources[i], GL_FRAGMENT_SHADER, name + "/pixel"));
-		}
-
 		// Create program
 		for (size_t i = 0; i<shaders.size(); i++) {
 			glAttachShader(id, shaders[i]);
@@ -154,21 +169,6 @@ void ShaderOpenGL::destroy()
 		glCheckError();
 		id = 0;
 	}
-}
-
-void ShaderOpenGL::addVertexSource(String src)
-{
-	vertexSources.emplace_back(src);
-}
-
-void ShaderOpenGL::addGeometrySource(String src)
-{
-	geometrySources.emplace_back(src);
-}
-
-void ShaderOpenGL::addPixelSource(String src)
-{
-	pixelSources.emplace_back(src);
 }
 
 unsigned ShaderOpenGL::getUniformLocation(String name)

@@ -5,9 +5,9 @@
 #include "halley/core/graphics/painter.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/material/material_parameter.h"
-#include <halley/file_formats/text_file.h>
 #include "halley/file/byte_serializer.h"
 #include "halley/text/string_converter.h"
+#include "halley/file_formats/binary_file.h"
 
 using namespace Halley;
 
@@ -138,17 +138,19 @@ void MaterialPass::deserialize(Deserializer& s)
 
 void MaterialPass::createShader(ResourceLoader& loader, String name, const Vector<MaterialAttribute>& attributes)
 {
-	shader = loader.getAPI().video->createShader(name);
-	shader->setAttributes(attributes);
-	
+	ShaderDefinition definition;
+	definition.name = name;
+	definition.vertexAttributes = attributes;
+
 	if (vertex != "") {
-		shader->addVertexSource(loader.getAPI().getResource<TextFile>("shader/" + vertex)->data);
+		definition.shaders[ShaderType::Vertex] = loader.getAPI().getResource<BinaryFile>("shader/" + vertex)->data;
 	}
 	if (geometry != "") {
-		shader->addGeometrySource(loader.getAPI().getResource<TextFile>("shader/" + geometry)->data);
+		definition.shaders[ShaderType::Geometry] = loader.getAPI().getResource<BinaryFile>("shader/" + geometry)->data;
 	}
 	if (pixel != "") {
-		shader->addPixelSource(loader.getAPI().getResource<TextFile>("shader/" + pixel)->data);
+		definition.shaders[ShaderType::Pixel] = loader.getAPI().getResource<BinaryFile>("shader/" + pixel)->data;
 	}
-	shader->compile();
+
+	shader = loader.getAPI().video->createShader(definition);
 }

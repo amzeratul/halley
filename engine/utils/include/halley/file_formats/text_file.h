@@ -11,7 +11,8 @@ namespace Halley
 	{
 	public:
 		TextFile();
-		explicit TextFile(String data);
+		explicit TextFile(const String& data);
+		explicit TextFile(String&& data);
 
 		String data;
 

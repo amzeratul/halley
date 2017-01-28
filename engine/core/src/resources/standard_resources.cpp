@@ -8,6 +8,7 @@
 #include "graphics/text/font.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/audio/audio_clip.h"
+#include "halley/file_formats/binary_file.h"
 
 using namespace Halley;
 
@@ -17,6 +18,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<SpriteSheet>("spritesheet");
 	resources.init<Texture>("image");
 	resources.init<MaterialDefinition>("material");
+	resources.init<BinaryFile>("");
 	resources.init<TextFile>("");
 	resources.init<Font>("font");
 	resources.init<ConfigFile>("config");

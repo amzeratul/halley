@@ -5,7 +5,11 @@ using namespace Halley;
 
 TextFile::TextFile() {}
 
-TextFile::TextFile(String data)
+TextFile::TextFile(const String& data)
+	: data(data)
+{}
+
+TextFile::TextFile(String&& data)
 	: data(data)
 {}
 

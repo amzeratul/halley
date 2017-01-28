@@ -35,9 +35,9 @@ std::unique_ptr<Texture> DummyVideoAPI::createTexture(Vector2i size)
 	return std::make_unique<DummyTexture>(size);
 }
 
-std::unique_ptr<Shader> DummyVideoAPI::createShader(String name)
+std::unique_ptr<Shader> DummyVideoAPI::createShader(const ShaderDefinition&)
 {
-	return std::make_unique<DummyShader>(name);
+	return std::make_unique<DummyShader>();
 }
 
 std::unique_ptr<TextureRenderTarget> DummyVideoAPI::createRenderTarget()
@@ -84,28 +84,9 @@ void DummyTextureRenderTarget::bind() {}
 
 void DummyTextureRenderTarget::unbind() {}
 
-DummyShader::DummyShader(const String& name)
-: Shader(name)
-{}
-
 void DummyShader::bind() {}
 
-void DummyShader::compile() {}
-
-void DummyShader::addVertexSource(String src) {}
-
-void DummyShader::addGeometrySource(String src) {}
-
-void DummyShader::addPixelSource(String src) {}
-
-void DummyShader::setAttributes(const Vector<MaterialAttribute>& attributes) {}
-
 unsigned DummyShader::getUniformLocation(String name)
-{
-	return 0;
-}
-
-unsigned DummyShader::getAttributeLocation(String name)
 {
 	return 0;
 }

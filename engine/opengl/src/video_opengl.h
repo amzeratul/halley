@@ -24,7 +24,7 @@ namespace Halley {
 		std::function<void(int, void*)> getUniformBinding(UniformType type, int n) override;
 		std::unique_ptr<Painter> makePainter() override;
 		std::unique_ptr<Texture> createTexture(Vector2i size) override;
-		std::unique_ptr<Shader> createShader(String name) override;
+		std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) override;
 		std::unique_ptr<TextureRenderTarget> createRenderTarget() override;
 		
 		bool isLoaderThread() const;
