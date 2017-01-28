@@ -24,6 +24,13 @@ namespace Halley {
 			executors->set(*executors);
 		}
 
+		~HalleyStaticsPimpl()
+		{
+			executors.reset();
+			diskIOThreadPool.reset();
+			cpuThreadPool.reset();
+		}
+
 		Vector<TypeDeleterBase*> typeDeleters;
 		void* maskStorage;
 		OS* os;
@@ -42,7 +49,7 @@ HalleyStatics::HalleyStatics()
 
 HalleyStatics::~HalleyStatics()
 {
-	suspend();
+	pimpl.reset();
 }
 
 void HalleyStatics::setup()
@@ -61,6 +68,6 @@ void HalleyStatics::setup()
 
 void HalleyStatics::suspend()
 {
-	pimpl->cpuThreadPool.reset();
 	pimpl->diskIOThreadPool.reset();
+	pimpl->cpuThreadPool.reset();
 }
