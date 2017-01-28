@@ -12,7 +12,6 @@ namespace Halley {
 
 		void startRender() override;
 		void finishRender() override;
-		void flip() override;
 		void setWindow(WindowDefinition&& windowDescriptor, bool vsync) override;
 		const Window& getWindow() const override;
 		std::unique_ptr<Texture> createTexture(Vector2i size) override;

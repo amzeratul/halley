@@ -20,7 +20,6 @@ namespace Halley
 
 		virtual void startRender() = 0;
 		virtual void finishRender() = 0;
-		virtual void flip() = 0;
 
 		virtual void setWindow(WindowDefinition&& windowDescriptor, bool vsync) = 0;
 		virtual const Window& getWindow() const = 0;

@@ -19,10 +19,6 @@ void DummyVideoAPI::finishRender()
 {
 }
 
-void DummyVideoAPI::flip()
-{
-}
-
 void DummyVideoAPI::setWindow(WindowDefinition&& windowDescriptor, bool vsync)
 {
 	//window = system.createWindow(windowDescriptor);

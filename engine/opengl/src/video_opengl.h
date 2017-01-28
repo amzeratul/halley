@@ -17,7 +17,6 @@ namespace Halley {
 
 		void startRender() override;
 		void finishRender() override;
-		void flip() override;
 		
 		void setWindow(WindowDefinition&& window, bool vsync) override;
 		const Window& getWindow() const override;
@@ -42,6 +41,7 @@ namespace Halley {
 		void initGLBindings();
 		void clearScreen();
 		void startLoaderThread();
+		void flip();
 
 		void setupDebugCallback();
 		void setUpEnumMap();
