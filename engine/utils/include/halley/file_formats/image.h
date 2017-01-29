@@ -70,6 +70,7 @@ namespace Halley {
 		void blitFrom(Vector2i pos, Image& img, Rect4i srcArea, bool rotated = false);
 
 		static std::unique_ptr<Image> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::Image; }
 
 		Image& operator=(const Image& o) = delete;
 

@@ -41,6 +41,7 @@ namespace Halley
 
 		explicit Font(ResourceLoader& loader);
 		static std::unique_ptr<Font> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::Font; }
 
 		const Glyph& getGlyph(int code) const;
 		float getLineHeightAtSize(float size) const { return height * size / sizePt; }
