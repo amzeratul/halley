@@ -14,13 +14,13 @@ using namespace Halley;
 
 void StandardResources::initialize(Resources& resources)
 {
-	resources.init<Animation>("animation");
-	resources.init<SpriteSheet>("spritesheet");
-	resources.init<Texture>("image");
-	resources.init<MaterialDefinition>("material");
-	resources.init<BinaryFile>("");
-	resources.init<TextFile>("");
-	resources.init<Font>("font");
-	resources.init<ConfigFile>("config");
-	resources.init<AudioClip>("audio");
+	resources.init<Animation>();
+	resources.init<SpriteSheet>();
+	resources.init<Texture>();
+	resources.init<MaterialDefinition>();
+	resources.init<BinaryFile>();
+	resources.init<TextFile>();
+	resources.init<Font>();
+	resources.init<ConfigFile>();
+	resources.init<AudioClip>();
 }

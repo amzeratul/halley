@@ -18,5 +18,6 @@ namespace Halley
 		Bytes data;
 
 		static std::unique_ptr<BinaryFile> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::BinaryFile; }
 	};
 }

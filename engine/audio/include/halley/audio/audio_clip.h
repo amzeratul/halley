@@ -23,6 +23,7 @@ namespace Halley
 		size_t getLength() const; // in samples
 		size_t getNumberOfChannels() const;
 		static std::shared_ptr<AudioClip> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::AudioClip; }
 
 	private:
 		size_t sampleLength;

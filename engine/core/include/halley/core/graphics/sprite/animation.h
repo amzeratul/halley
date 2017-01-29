@@ -100,6 +100,7 @@ namespace Halley
 	public:
 		Animation();
 		static std::unique_ptr<Animation> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::Animation; }
 
 		const SpriteSheet& getSpriteSheet() const { return *spriteSheet; }
 		std::shared_ptr<Material> getMaterial() const { return material; }

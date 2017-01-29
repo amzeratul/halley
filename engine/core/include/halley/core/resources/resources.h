@@ -24,46 +24,15 @@
 #include <ctime>
 #include <algorithm>
 #include <halley/support/exception.h>
+#include "halley/resources/resource.h"
 #include "resource_collection.h"
+#include "halley/text/string_converter.h"
 
 namespace Halley {
 	
 	class ResourceLocator;
 	class HalleyAPI;
 	
-	template <typename T>
-	class ResourceTypeId
-	{
-	public:
-		static int getId(const HashMap<std::string, int>& ids)
-		{
-			static int id = -1;
-			if (id == -1) {
-				std::string name = typeid(T).name();
-				auto iter = ids.find(name);
-				if (iter != ids.end()) {
-					id = iter->second;
-				} else {
-					throw Exception("Type " + String(typeid(T).name()) + " has not been initialized.");
-				}
-			}
-			return id;
-		}
-
-		static int makeId(HashMap<std::string, int>& ids)
-		{
-			std::string name = typeid(T).name();
-			auto iter = ids.find(name);
-			if (iter != ids.end()) {
-				throw Exception("Type " + String(typeid(T).name()) + " has already been initialized.");
-			}
-
-			int id = int(ids.size());
-			ids[name] = id;
-			return id;
-		}
-	};
-
 	class Resources {
 		friend class ResourceCollectionBase;
 
@@ -72,17 +41,18 @@ namespace Halley {
 		~Resources();
 
 		template <typename T>
-		void init(const String& path)
+		void init()
 		{
-			int id = ResourceTypeId<T>::makeId(resourceTypeIds);
+			AssetType assetType = T::getAssetType();
+			int id = int();
 			resources.resize(std::max(resources.size(), size_t(id + 1)));
-			resources[id] = std::make_unique<ResourceCollection<T>>(*this, path);
+			resources[id] = std::make_unique<ResourceCollection<T>>(*this, toString(assetType));
 		}
 
 		template <typename T>
 		ResourceCollection<T>& of()
 		{
-			return static_cast<ResourceCollection<T>&>(*resources.at(ResourceTypeId<T>::getId(resourceTypeIds)));
+			return static_cast<ResourceCollection<T>&>(*resources.at(int(T::getAssetType())));
 		}
 
 		template <typename T>
@@ -90,19 +60,10 @@ namespace Halley {
 		{
 			return of<T>().get(name, priority);
 		}
-
-		void setBasePath(const String& path);
-		String getBasePath() const;
-
-		void setDepth(int depth);
-
+		
 	private:
 		std::unique_ptr<ResourceLocator> locator;
-		HashMap<std::string, int> resourceTypeIds;
 		Vector<std::unique_ptr<ResourceCollectionBase>> resources;
 		HalleyAPI* api;
-
-		int curDepth = 0;
-		String basePath;
 	};
 }

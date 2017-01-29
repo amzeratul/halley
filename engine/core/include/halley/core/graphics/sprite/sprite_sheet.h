@@ -61,6 +61,7 @@ namespace Halley
 		void setTextureName(String name);
 
 		static std::unique_ptr<SpriteSheet> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::SpriteSheet; }
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

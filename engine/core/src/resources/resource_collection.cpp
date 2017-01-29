@@ -37,7 +37,6 @@ void ResourceCollectionBase::unloadAll(int minDepth)
 
 		auto& res = (*iter).second;
 		if (res.depth >= minDepth) {
-			//std::cout << "Unloaded " << (*iter).first << "\n";
 			resources.erase(iter);
 		}
 
@@ -56,7 +55,7 @@ void ResourceCollectionBase::flush(const String& name)
 
 String ResourceCollectionBase::resolveName(const String& name) const
 {
-	return parent.basePath + "/" + path + "/" + name;
+	return path + "/" + name;
 }
 
 std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& rawName, ResourceLoadPriority priority)
@@ -90,7 +89,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& rawName, R
 	}
 
 	// Store in cache
-	resources.emplace(name, Wrapper(newRes, parent.curDepth));
+	resources.emplace(name, Wrapper(newRes, 0));
 
 	return newRes;
 }

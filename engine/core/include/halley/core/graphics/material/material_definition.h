@@ -64,6 +64,7 @@ namespace Halley
 		const Vector<MaterialAttribute>& getUniforms() const { return uniforms; }
 
 		static std::unique_ptr<MaterialDefinition> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::MaterialDefinition; }
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

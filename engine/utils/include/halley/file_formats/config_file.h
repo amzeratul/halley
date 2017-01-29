@@ -88,6 +88,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 		static std::unique_ptr<ConfigFile> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::ConfigFile; }
 
 	private:
 		ConfigNode root;
