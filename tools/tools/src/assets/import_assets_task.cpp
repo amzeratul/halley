@@ -78,7 +78,8 @@ static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& as
 
 bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
-	std::vector<Path> out;
+	std::vector<AssetResource> out;
+	std::vector<Path> outFiles;
 	try {
 		// Create queue
 		std::list<ImportingAsset> toLoad;
@@ -103,7 +104,7 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 			auto cur = std::move(toLoad.front());
 			toLoad.pop_front();
 			
-			AssetCollector collector(assetsPath, importer.getAssetsSrc(), [=] (float progress, const String& label) -> bool
+			AssetCollector collector(cur, assetsPath, importer.getAssetsSrc(), [=] (float progress, const String& label) -> bool
 			{
 				setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel + " " + label);
 				return !isCancelled();
@@ -115,8 +116,9 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 				toLoad.push_front(std::move(additional));
 			}
 
-			for (auto& o: collector.getOutFiles()) {
-				out.push_back(o);
+			for (auto& o: collector.collectAssets()) {
+				out.emplace_back(o);
+				outFiles.emplace_back(o.filepath);
 			}
 		}
 	} catch (std::exception& e) {
@@ -134,14 +136,14 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 	// Retrieve previous output from this asset, and remove any files which went missing
 	auto previous = db.getOutFiles(asset.assetId);
 	for (auto& f: previous) {
-		if (std::find(out.begin(), out.end(), f) == out.end()) {
+		if (std::find(outFiles.begin(), outFiles.end(), f) == outFiles.end()) {
 			// File no longer exists as part of this asset, remove it
 			FileSystem::remove(assetsPath / f);
 		}
 	}
 
 	// Store output in db
-	asset.outputFiles = out;
+	asset.outputFiles = outFiles;
 	db.markAsImported(asset);
 
 	return true;

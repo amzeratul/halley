@@ -4,6 +4,7 @@
 #include <thread>
 #include <condition_variable>
 #include "metadata.h"
+#include "halley/text/string_converter.h"
 
 namespace Halley
 {
@@ -22,6 +23,36 @@ namespace Halley
 		Aseprite,
 		SpriteSheet,
 		Shader
+	};
+
+	enum class AssetType
+	{
+		BinaryFile,
+		TextFile,
+		ConfigFile,
+		Texture,
+		MaterialDefinition,
+		SpriteSheet,
+		Animation,
+		Font,
+		AudioClip
+	};
+
+	template <>
+	struct EnumNames<AssetType> {
+		constexpr std::array<const char*, 9> operator()() const {
+			return{{
+				"binaryFile",
+				"textFile",
+				"configFile",
+				"texture",
+				"materialDefinition",
+				"spriteSheet",
+				"animation",
+				"font",
+				"audioClip"
+			}};
+		}
 	};
 
 	class Resource

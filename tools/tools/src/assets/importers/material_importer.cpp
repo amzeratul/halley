@@ -12,9 +12,7 @@ void MaterialImporter::import(const ImportingAsset& asset, IAssetCollector& coll
 {
 	Path basePath = asset.inputFiles.at(0).name.parentPath();
 	auto material = parseMaterial(basePath, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)), collector);
-
-	Path dst = Path(asset.inputFiles[0].name).replaceExtension("");
-	collector.output(dst, Serializer::toBytes(material));
+	collector.output(AssetType::MaterialDefinition, Serializer::toBytes(material));
 }
 
 MaterialDefinition MaterialImporter::parseMaterial(Path basePath, gsl::span<const gsl::byte> data, IAssetCollector& collector) const

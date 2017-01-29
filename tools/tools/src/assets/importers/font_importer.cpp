@@ -33,16 +33,14 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 		throw Exception("Failed to generate font: " + asset.assetId);
 	}
 	
-	Path fileName = Path(asset.assetId).replaceExtension(".font");
-	Path pngPath = fileName.replaceExtension(".png");
-	collector.output(fileName, result.fontData);
+	collector.output(AssetType::Font, result.fontData);
 
 	auto imgData = result.image->savePNGToBytes();
 
 	ImportingAsset image;
-	image.assetId = asset.assetId + "-image";
+	image.assetId = asset.assetId;
 	image.assetType = ImportAssetType::Image;
 	image.metadata = std::move(result.imageMeta);
-	image.inputFiles.emplace_back(ImportingAssetFile(pngPath, std::move(imgData)));
+	image.inputFiles.emplace_back(ImportingAssetFile("", std::move(imgData)));
 	collector.addAdditionalAsset(std::move(image));
 }

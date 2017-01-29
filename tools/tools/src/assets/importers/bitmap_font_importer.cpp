@@ -41,14 +41,13 @@ void BitmapFontImporter::import(const ImportingAsset& asset, IAssetCollector& co
 	Vector2i imageSize = Image::getImageSize(pngPath.getFilename().getString(), gsl::as_bytes(gsl::span<Byte>(pngData)));
 
 	// Generate font from XML
-	Path outName = xmlPath.replaceExtension("");
-	collector.output(outName, parseBitmapFontXML(pngPath.getFilename().getString(), imageSize, xmlData));
+	collector.output(AssetType::Font, parseBitmapFontXML(asset.assetId, imageSize, xmlData));
 
 	// Pass image forward
 	ImportingAsset image;
-	image.assetId = asset.assetId + "-image";
+	image.assetId = asset.assetId;
 	image.assetType = ImportAssetType::Image;
-	image.inputFiles.emplace_back(ImportingAssetFile(pngPath, std::move(pngData)));
+	image.inputFiles.emplace_back(ImportingAssetFile("", std::move(pngData)));
 	collector.addAdditionalAsset(std::move(image));
 }
 

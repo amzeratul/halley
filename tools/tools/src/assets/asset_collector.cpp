@@ -6,27 +6,30 @@
 using namespace Halley;
 
 
-AssetCollector::AssetCollector(const Path& dstDir, const std::vector<Path>& assetsSrc, ProgressReporter reporter)
-	: dstDir(dstDir)
+AssetCollector::AssetCollector(const ImportingAsset& asset, const Path& dstDir, const std::vector<Path>& assetsSrc, ProgressReporter reporter)
+	: asset(asset)
+	, dstDir(dstDir)
 	, assetsSrc(assetsSrc)
 	, reporter(reporter)
 {}
 
-void AssetCollector::output(const Path& path, const Bytes& data, Maybe<Metadata> metadata)
+void AssetCollector::output(AssetType type, const Bytes& data, Maybe<Metadata> metadata)
 {
-	output(path, gsl::as_bytes(gsl::span<const Byte>(data)), metadata);
+	output(type, gsl::as_bytes(gsl::span<const Byte>(data)), metadata);
 }
 
-void AssetCollector::output(const Path& path, gsl::span<const gsl::byte> data, Maybe<Metadata> metadata)
+void AssetCollector::output(AssetType type, gsl::span<const gsl::byte> data, Maybe<Metadata> metadata)
 {
-	FileSystem::writeFile(dstDir / path, data);
-	outFiles.emplace_back(path);
+	Path filePath = dstDir / toString(type) / asset.assetId;
+	FileSystem::writeFile(filePath, data);
 
+	AssetResource result;
+	result.type = type;
+	result.filepath = filePath.string();
 	if (metadata) {
-		Path metaPath = path.replaceExtension(path.getExtension() + ".meta");
-		FileSystem::writeFile(dstDir / metaPath, Serializer::toBytes(metadata.get()));
-		outFiles.emplace_back(metaPath);
+		result.metadata = metadata.get();
 	}
+	assets.emplace_back(result);
 }
 
 void AssetCollector::addAdditionalAsset(ImportingAsset&& asset)
@@ -55,9 +58,9 @@ Bytes AssetCollector::readAdditionalFile(const Path& filePath) const
 	throw Exception("Unable to find asset dependency: \"" + filePath.getString() + "\"");
 }
 
-const std::vector<Path>& AssetCollector::getOutFiles() const
+std::vector<AssetResource> AssetCollector::collectAssets()
 {
-	return outFiles;
+	return std::move(assets);
 }
 
 std::vector<ImportingAsset> AssetCollector::collectAdditionalAssets()
