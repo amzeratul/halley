@@ -41,7 +41,7 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 
 	ImportingAsset image;
 	image.assetId = asset.assetId + "-image";
-	image.assetType = AssetType::Image;
+	image.assetType = ImportAssetType::Image;
 	image.metadata = std::move(result.imageMeta);
 	image.inputFiles.emplace_back(ImportingAssetFile(pngPath, std::move(imgData)));
 	collector.addAdditionalAsset(std::move(image));

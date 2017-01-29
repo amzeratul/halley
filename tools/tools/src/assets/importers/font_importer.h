@@ -6,7 +6,7 @@ namespace Halley
 	class FontImporter : public IAssetImporter
 	{
 	public:
-		AssetType getType() const override { return AssetType::Font; }
+		ImportAssetType getType() const override { return ImportAssetType::Font; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 	};

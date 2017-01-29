@@ -11,7 +11,7 @@ namespace Halley
 	class MaterialImporter : public IAssetImporter
 	{
 	public:
-		AssetType getType() const override { return AssetType::Material; }
+		ImportAssetType getType() const override { return ImportAssetType::Material; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 

@@ -9,10 +9,8 @@ namespace Halley {
 
 		AssetCollector(const Path& dstDir, const std::vector<Path>& assetsSrc, ProgressReporter reporter);
 
-		void output(const Path& path, const Bytes& data) override;
-		void output(const Path& path, gsl::span<const gsl::byte> data) override;
-		void output(const Path& path, const Bytes& data, const Metadata& metadata) override;
-		void output(const Path& path, gsl::span<const gsl::byte> data, const Metadata& metadata) override;
+		void output(const Path& path, const Bytes& data, Maybe<Metadata> metadata) override;
+		void output(const Path& path, gsl::span<const gsl::byte> data, Maybe<Metadata> metadata) override;
 
 		void addAdditionalAsset(ImportingAsset&& asset) override;
 		bool reportProgress(float progress, const String& label) override;
@@ -28,7 +26,5 @@ namespace Halley {
 		ProgressReporter reporter;
 		std::vector<Path> outFiles;
 		std::vector<ImportingAsset> additionalAssets;
-
-		void output(const Path& path, gsl::span<const gsl::byte> data, const Metadata* metadata);
 	};
 }

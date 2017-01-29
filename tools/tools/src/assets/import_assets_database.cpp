@@ -23,7 +23,7 @@ void ImportAssetsDatabaseEntry::deserialize(Deserializer& s)
 	s >> outputFiles;
 	int t;
 	s >> t;
-	assetType = AssetType(t);
+	assetType = ImportAssetType(t);
 }
 
 void ImportAssetsDatabase::AssetEntry::serialize(Serializer& s) const

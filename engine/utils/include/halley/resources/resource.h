@@ -7,7 +7,7 @@
 
 namespace Halley
 {
-	enum class AssetType
+	enum class ImportAssetType
 	{
 		Undefined,
 		Codegen,

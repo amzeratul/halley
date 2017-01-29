@@ -22,7 +22,7 @@ namespace Halley
 		};
 
 	public:
-		AssetType getType() const override { return AssetType::Aseprite; }
+		ImportAssetType getType() const override { return ImportAssetType::Aseprite; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 

@@ -6,7 +6,7 @@ namespace Halley
 	class SpriteSheetImporter : public IAssetImporter
 	{
 	public:
-		AssetType getType() const override { return AssetType::SpriteSheet; }
+		ImportAssetType getType() const override { return ImportAssetType::SpriteSheet; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 	};

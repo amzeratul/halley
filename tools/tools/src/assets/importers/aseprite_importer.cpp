@@ -57,7 +57,7 @@ void AsepriteImporter::import(const ImportingAsset& asset, IAssetCollector& coll
 	// Write image
 	ImportingAsset image;
 	image.assetId = asset.assetId + "-image";
-	image.assetType = AssetType::Image;
+	image.assetType = ImportAssetType::Image;
 	image.metadata = std::make_unique<Metadata>(meta);
 	image.inputFiles.emplace_back(ImportingAssetFile(imagePath, atlasImage->savePNGToBytes()));
 	collector.addAdditionalAsset(std::move(image));

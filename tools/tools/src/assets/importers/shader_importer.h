@@ -6,7 +6,7 @@ namespace Halley
 	class ShaderImporter : public IAssetImporter
 	{
 	public:
-		AssetType getType() const override { return AssetType::Shader; }
+		ImportAssetType getType() const override { return ImportAssetType::Shader; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 	};

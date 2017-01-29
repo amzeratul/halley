@@ -6,7 +6,7 @@ namespace Halley
 	class ImageImporter : public IAssetImporter
 	{
 	public:
-		AssetType getType() const override { return AssetType::Image; }
+		ImportAssetType getType() const override { return ImportAssetType::Image; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 	};

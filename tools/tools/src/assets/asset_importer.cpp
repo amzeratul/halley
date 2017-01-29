@@ -46,35 +46,35 @@ AssetImporter::AssetImporter(Project& project, const std::vector<Path>& assetsSr
 
 IAssetImporter& AssetImporter::getImporter(Path path) const
 {
-	AssetType type = AssetType::SimpleCopy;
+	ImportAssetType type = ImportAssetType::SimpleCopy;
 	
 	auto root = path.getRoot();
 	if (root == "font") {
-		type = AssetType::Font;
+		type = ImportAssetType::Font;
 	} else if (root == "bitmap_font") {
-		type = AssetType::BitmapFont;
+		type = ImportAssetType::BitmapFont;
 	} else if (root == "image") {
-		type = AssetType::Image;
+		type = ImportAssetType::Image;
 	} else if (root == "animation") {
-		type = AssetType::Animation;
+		type = ImportAssetType::Animation;
 	} else if (root == "material") {
-		type = AssetType::Material;
+		type = ImportAssetType::Material;
 	} else if (root == "config") {
-		type = AssetType::Config;
+		type = ImportAssetType::Config;
 	} else if (root == "audio") {
-		type = AssetType::Audio;
+		type = ImportAssetType::Audio;
 	} else if (root == "aseprite") {
-		type = AssetType::Aseprite;
+		type = ImportAssetType::Aseprite;
 	} else if (root == "spritesheet") {
-		type = AssetType::SpriteSheet;
+		type = ImportAssetType::SpriteSheet;
 	} else if (root == "shader") {
-		type = AssetType::Shader;
+		type = ImportAssetType::Shader;
 	}
 
 	return getImporter(type);
 }
 
-IAssetImporter& AssetImporter::getImporter(AssetType type) const
+IAssetImporter& AssetImporter::getImporter(ImportAssetType type) const
 {
 	auto i = importers.find(type);
 	if (i != importers.end()) {

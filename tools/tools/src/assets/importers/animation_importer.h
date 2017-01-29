@@ -9,7 +9,7 @@ namespace Halley
 	class AnimationImporter : public IAssetImporter
 	{
 	public:
-		AssetType getType() const override { return AssetType::Animation; }
+		ImportAssetType getType() const override { return ImportAssetType::Animation; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 

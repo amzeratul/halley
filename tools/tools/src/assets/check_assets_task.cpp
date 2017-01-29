@@ -57,7 +57,7 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 	// Enumerate all potential assets
 	for (auto srcPath : srcPaths) {
 		for (auto filePath : FileSystem::enumerateDirectory(srcPath)) {
-			auto& assetImporter = codegen ? project.getAssetImporter().getImporter(AssetType::Codegen) : project.getAssetImporter().getImporter(filePath);
+			auto& assetImporter = codegen ? project.getAssetImporter().getImporter(ImportAssetType::Codegen) : project.getAssetImporter().getImporter(filePath);
 			String assetId = assetImporter.getAssetId(filePath);
 
 			auto input = ImportAssetsDatabaseEntry::InputFile(filePath, FileSystem::getLastWriteTime(srcPath / filePath));

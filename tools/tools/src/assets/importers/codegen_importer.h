@@ -6,7 +6,7 @@ namespace Halley
 	class CodegenImporter : public IAssetImporter
 	{
 	public:
-		AssetType getType() const override { return AssetType::Codegen; }
+		ImportAssetType getType() const override { return ImportAssetType::Codegen; }
 
 		String getAssetId(const Path& file) const override;
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;

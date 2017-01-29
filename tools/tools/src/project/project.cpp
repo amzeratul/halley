@@ -59,7 +59,7 @@ const AssetImporter& Project::getAssetImporter() const
 	return *assetImporter;
 }
 
-std::unique_ptr<IAssetImporter> Project::getAssetImporterOverride(AssetType type) const
+std::unique_ptr<IAssetImporter> Project::getAssetImporterOverride(ImportAssetType type) const
 {
 	for (auto& plugin: plugins) {
 		auto importer = plugin->getAssetImporter(type);

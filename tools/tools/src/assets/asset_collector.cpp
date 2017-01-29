@@ -12,34 +12,19 @@ AssetCollector::AssetCollector(const Path& dstDir, const std::vector<Path>& asse
 	, reporter(reporter)
 {}
 
-void AssetCollector::output(const Path& path, const Bytes& data)
+void AssetCollector::output(const Path& path, const Bytes& data, Maybe<Metadata> metadata)
 {
-	output(path, gsl::as_bytes(gsl::span<const Byte>(data)), nullptr);
+	output(path, gsl::as_bytes(gsl::span<const Byte>(data)), metadata);
 }
 
-void AssetCollector::output(const Path& path, gsl::span<const gsl::byte> data)
-{
-	output(path, data, nullptr);
-}
-
-void AssetCollector::output(const Path& path, const Bytes& data, const Metadata& metadata)
-{
-	output(path, gsl::as_bytes(gsl::span<const Byte>(data)), &metadata);
-}
-
-void AssetCollector::output(const Path& path, gsl::span<const gsl::byte> data, const Metadata& metadata)
-{
-	output(path, data, &metadata);
-}
-
-void AssetCollector::output(const Path& path, gsl::span<const gsl::byte> data, const Metadata* metadata)
+void AssetCollector::output(const Path& path, gsl::span<const gsl::byte> data, Maybe<Metadata> metadata)
 {
 	FileSystem::writeFile(dstDir / path, data);
 	outFiles.emplace_back(path);
 
 	if (metadata) {
 		Path metaPath = path.replaceExtension(path.getExtension() + ".meta");
-		FileSystem::writeFile(dstDir / metaPath, Serializer::toBytes(*metadata));
+		FileSystem::writeFile(dstDir / metaPath, Serializer::toBytes(metadata.get()));
 		outFiles.emplace_back(metaPath);
 	}
 }

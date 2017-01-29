@@ -6,7 +6,7 @@ namespace Halley
 	class CopyFileImporter : public IAssetImporter
 	{
 	public:
-		AssetType getType() const override { return AssetType::SimpleCopy; }
+		ImportAssetType getType() const override { return ImportAssetType::SimpleCopy; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 	};

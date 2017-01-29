@@ -8,7 +8,7 @@ namespace Halley {
 		virtual ~IHalleyPlugin() {}
 		virtual const char* getName() const = 0;
         virtual std::vector<String> getSupportedPlatforms() const { return {"*"}; }
-		virtual std::unique_ptr<IAssetImporter> getAssetImporter(AssetType type) { return {}; }
+		virtual std::unique_ptr<IAssetImporter> getAssetImporter(ImportAssetType type) { return {}; }
     };
 }
 

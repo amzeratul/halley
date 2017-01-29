@@ -7,7 +7,7 @@ namespace Halley
 	class BitmapFontImporter : public IAssetImporter
 	{
 	public:
-		AssetType getType() const override { return AssetType::BitmapFont; }
+		ImportAssetType getType() const override { return ImportAssetType::BitmapFont; }
 
 		String getAssetId(const Path& file) const override;
 
