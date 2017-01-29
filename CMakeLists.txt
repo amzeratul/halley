@@ -44,3 +44,6 @@ if (BUILD_HALLEY_TESTS)
     add_subdirectory(tests)
 endif()
 
+if (IS_DIRECTORY "${CMAKE_HOME_DIRECTORY}/external")
+    add_subdirectory(external)
+endif()
