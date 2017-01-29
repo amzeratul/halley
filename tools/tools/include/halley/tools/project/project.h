@@ -10,7 +10,7 @@ namespace Halley
 	class Project
 	{
 	public:
-		Project(Path rootPath, Path sharedAssetsSrcPath);
+		Project(const String& platform, Path projectRootPath, Path halleyRootPath);
 		~Project();
 		
 		Path getAssetsPath() const;
@@ -27,11 +27,15 @@ namespace Halley
 		std::unique_ptr<IAssetImporter> getAssetImporterOverride(AssetType type) const;
 	
 	private:
+		String platform;
 		Path rootPath;
-		Path sharedAssetsSrcPath;
+		Path halleyRootPath;
 
 		std::unique_ptr<ImportAssetsDatabase> importAssetsDatabase;
 		std::unique_ptr<ImportAssetsDatabase> codegenDatabase;
 		std::unique_ptr<AssetImporter> assetImporter;
+
+		void initialisePlugins();
+		void loadPlugin(const Path& path);
 	};
 }

@@ -14,7 +14,7 @@ namespace Halley
 		HalleyEditor();
 		~HalleyEditor();
 
-		Project& loadProject(Path path);
+		Project& loadProject(const String& platform, Path path);
 		Project& createProject(Path path);
 
 		bool hasProjectLoaded() const;
@@ -35,7 +35,7 @@ namespace Halley
 	private:
 		std::unique_ptr<Project> project;
 		std::unique_ptr<Preferences> preferences;
-		Path sharedAssetsPath;
+		Path rootPath;
 		bool headless = true;
 
 		void parseArguments(const std::vector<String>& args);

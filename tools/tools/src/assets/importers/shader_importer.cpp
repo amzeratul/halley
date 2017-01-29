@@ -6,7 +6,7 @@
 
 using namespace Halley;
 
-std::vector<Path> ShaderImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
+std::vector<Path> ShaderImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
 {
 	std::vector<Path> out;
 	

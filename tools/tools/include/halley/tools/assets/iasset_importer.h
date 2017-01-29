@@ -34,15 +34,15 @@ namespace Halley
 	class IAssetImporter
 	{
 	public:
-		using ProgressReporter = std::function<bool(float, String)>;
+		using ProgressReporter = std::function<bool(float, const String&)>;
 		using AssetCollector = std::function<void(ImportingAsset&&)>;
 
 		virtual ~IAssetImporter() {}
 
 		virtual AssetType getType() const = 0;
 
-		virtual String getAssetId(Path file) const;
-		virtual std::vector<Path> import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector) = 0;
+		virtual String getAssetId(const Path& file) const;
+		virtual std::vector<Path> import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector) = 0;
 
 		void setAssetsSrc(const std::vector<Path>& assetsSrc);
 

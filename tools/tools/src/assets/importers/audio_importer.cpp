@@ -14,7 +14,7 @@
 
 using namespace Halley;
 
-std::vector<Path> AudioImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
+std::vector<Path> AudioImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
 {
 	Path mainFile = asset.inputFiles.at(0).name;
 	auto& rawData = asset.inputFiles[0].data;

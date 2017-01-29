@@ -7,7 +7,7 @@
 
 using namespace Halley;
 
-std::vector<Path> ImageImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
+std::vector<Path> ImageImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
 {
 	// Load image
 	Path mainFile = asset.inputFiles.at(0).name;

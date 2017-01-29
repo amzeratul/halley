@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-String IAssetImporter::getAssetId(Path file) const
+String IAssetImporter::getAssetId(const Path& file) const
 {
 	String name = file.string();
 	if (name.endsWith(".meta")) {

@@ -11,7 +11,7 @@ namespace Halley
 	public:
 		AssetType getType() const override { return AssetType::Animation; }
 
-		std::vector<Path> import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector) override;
+		std::vector<Path> import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector) override;
 
 		static void parseAnimation(Animation& animation, gsl::span<const gsl::byte> data);
 	};

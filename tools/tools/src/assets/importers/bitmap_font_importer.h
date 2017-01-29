@@ -9,9 +9,9 @@ namespace Halley
 	public:
 		AssetType getType() const override { return AssetType::BitmapFont; }
 
-		String getAssetId(Path file) const override;
+		String getAssetId(const Path& file) const override;
 
-		std::vector<Path> import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector) override;
+		std::vector<Path> import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector) override;
 
 	private:
 		void parseBitmapFontXML(String imageName, Vector2i imageSize, const Bytes& data, const Path& path);

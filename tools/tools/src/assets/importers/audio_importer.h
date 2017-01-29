@@ -9,7 +9,7 @@ namespace Halley
 	public:
 		AssetType getType() const override { return AssetType::Audio; }
 
-		std::vector<Path> import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector) override;
+		std::vector<Path> import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector) override;
 
 	private:
 		Bytes encodeVorbis(int channels, int sampleRate, gsl::span<const std::vector<float>> src);

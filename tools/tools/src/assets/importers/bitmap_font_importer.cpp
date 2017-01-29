@@ -8,12 +8,12 @@
 
 using namespace Halley;
 
-String BitmapFontImporter::getAssetId(Path file) const
+String BitmapFontImporter::getAssetId(const Path& file) const
 {
 	return file.getStem().getString();
 }
 
-std::vector<Path> BitmapFontImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
+std::vector<Path> BitmapFontImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
 {
 	Bytes xmlData;
 	Path xmlPath;

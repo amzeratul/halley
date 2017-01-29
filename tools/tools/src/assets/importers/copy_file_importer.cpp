@@ -6,7 +6,7 @@
 
 using namespace Halley;
 
-std::vector<Path> CopyFileImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
+std::vector<Path> CopyFileImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
 {
 	std::vector<Path> out;
 	

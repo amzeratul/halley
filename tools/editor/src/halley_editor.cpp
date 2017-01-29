@@ -63,7 +63,7 @@ bool HalleyEditor::shouldCreateSeparateConsole() const
 
 void HalleyEditor::init(const Environment& environment, const Vector<String>& args)
 {
-	sharedAssetsPath = environment.getProgramPath().parentPath() / "shared_assets";
+	rootPath = environment.getProgramPath().parentPath();
 
 	preferences = std::make_unique<Preferences>((environment.getDataPath() / "settings.yaml").string());
 	preferences->load();
@@ -74,18 +74,21 @@ void HalleyEditor::init(const Environment& environment, const Vector<String>& ar
 void HalleyEditor::parseArguments(const std::vector<String>& args)
 {
 	headless = false;
+	String platform = "pc";
 	bool gotProjectPath = false;
 
 	for (auto& arg : args) {
 		if (arg.startsWith("--")) {
 			if (arg == "--headless") {
 				headless = true;
+			} if (arg.startsWith("--platform=")) {
+				platform = arg.mid(String("--platform=").length());
 			} else {
 				std::cout << "Unknown argument \"" << arg << "\".\n";
 			}
 		} else {
 			if (!gotProjectPath) {
-				loadProject(Path(arg.cppStr()));
+				loadProject(platform, Path(arg.cppStr()));
 				gotProjectPath = true;
 			} else {
 				std::cout << "Unknown argument \"" << arg << "\".\n";
@@ -103,9 +106,9 @@ std::unique_ptr<Stage> HalleyEditor::startGame(HalleyAPI* api)
 	return std::make_unique<EditorRootStage>(*this);
 }
 
-Project& HalleyEditor::loadProject(Path path)
+Project& HalleyEditor::loadProject(const String& platform, Path path)
 {
-	project = std::make_unique<Project>(path, sharedAssetsPath);
+	project = std::make_unique<Project>(platform, path, rootPath);
 
 	if (!project) {
 		throw Exception("Unable to load project at " + path.string());

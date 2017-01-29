@@ -21,10 +21,10 @@ int ImportTool::run(Vector<std::string> args)
 		ThreadPool tp(executors.getCPU(), std::max(static_cast<unsigned int>(4), std::thread::hardware_concurrency()));
 
 		Path projectPath = FileSystem::getAbsolute(Path(args[0]));
-		Path sharedAssetsPath = FileSystem::getAbsolute(Path(args[1]) / "shared_assets");
+		Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));
 
-		auto proj = std::make_unique<Project>(projectPath, sharedAssetsPath);
-		std::cout << "Importing project at " << projectPath << ", with shared assets at " << sharedAssetsPath << "" << std::endl;
+		auto proj = std::make_unique<Project>("pc", projectPath, halleyRootPath);
+		std::cout << "Importing project at " << projectPath << ", with Halley root at " << halleyRootPath << "" << std::endl;
 
 		auto tasks = std::make_unique<EditorTaskSet>();
 		tasks->setListener(*this);

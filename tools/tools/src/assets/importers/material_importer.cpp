@@ -8,7 +8,7 @@
 
 using namespace Halley;
 
-std::vector<Path> MaterialImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
+std::vector<Path> MaterialImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
 {
 	Path basePath = asset.inputFiles.at(0).name.parentPath();
 	auto material = parseMaterial(basePath, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));

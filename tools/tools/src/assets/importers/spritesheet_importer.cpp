@@ -3,7 +3,7 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/file/byte_serializer.h"
 
-std::vector<Halley::Path> Halley::SpriteSheetImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
+std::vector<Halley::Path> Halley::SpriteSheetImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
 {
 	SpriteSheet sheet;
 	Path dstFile = asset.inputFiles[0].name.replaceExtension("");

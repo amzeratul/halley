@@ -12,7 +12,7 @@
 
 using namespace Halley;
 
-std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
+std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
 {
 	Path srcPath = asset.inputFiles.at(0).name;
 	String baseName = srcPath.getStem().getString();

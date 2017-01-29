@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-std::vector<Path> FontImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
+std::vector<Path> FontImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
 {
 	std::cout << "Importing font " << asset.assetId << std::endl;
 

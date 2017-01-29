@@ -4,12 +4,12 @@
 
 using namespace Halley;
 
-String CodegenImporter::getAssetId(Path file) const
+String CodegenImporter::getAssetId(const Path& file) const
 {
 	return ":codegen";
 }
 
-std::vector<Path> CodegenImporter::import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector)
+std::vector<Path> CodegenImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
 {
 	Codegen codegen;
 

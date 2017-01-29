@@ -1,14 +1,18 @@
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/tools/project/project.h"
+#include "halley/tools/file/filesystem.h"
 
 using namespace Halley;
 
-Project::Project(Path rootPath, Path sharedAssetsSrcPath)
-	: rootPath(rootPath)
-	, sharedAssetsSrcPath(sharedAssetsSrcPath)
+Project::Project(const String& platform, Path projectRootPath, Path halleyRootPath)
+	: platform(platform)
+	, rootPath(projectRootPath)
+	, halleyRootPath(halleyRootPath)
 {
 	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getAssetsPath(), getAssetsPath() / "import.db");
 	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db");
+
+	initialisePlugins();
 	assetImporter = std::make_unique<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
 }
 
@@ -26,7 +30,7 @@ Path Project::getAssetsSrcPath() const
 
 Path Project::getSharedAssetsSrcPath() const
 {
-	return sharedAssetsSrcPath;
+	return halleyRootPath / "shared_assets";
 }
 
 Path Project::getGenPath() const
@@ -58,4 +62,20 @@ std::unique_ptr<IAssetImporter> Project::getAssetImporterOverride(AssetType type
 {
 	// TODO
 	return {};
+}
+
+void Project::initialisePlugins()
+{
+	auto pluginPath = halleyRootPath / "plugins";
+	auto files = FileSystem::enumerateDirectory(pluginPath);
+	for (auto& file: files) {
+		if (file.getExtension() == ".dll") {
+			loadPlugin(file);
+		}
+	}
+}
+
+void Project::loadPlugin(const Path& path)
+{
+	
 }

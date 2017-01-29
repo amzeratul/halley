@@ -11,7 +11,7 @@ namespace Halley
 	public:
 		AssetType getType() const override { return AssetType::Config; }
 
-		std::vector<Path> import(const ImportingAsset& asset, Path dstDir, ProgressReporter reporter, AssetCollector collector) override;
+		std::vector<Path> import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector) override;
 
 		static void parseConfig(ConfigFile& config, gsl::span<const gsl::byte> data);
 	};
