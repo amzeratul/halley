@@ -39,6 +39,7 @@ bin
 *.dylib
 *.lib
 *.exe
+*.exp
 halley-cmd
 halley-sample-test
 
