@@ -72,26 +72,29 @@ std::unique_ptr<IAssetImporter> Project::getAssetImporterOverride(AssetType type
 
 void Project::initialisePlugins()
 {
+	bool knownPlatform = platform == "pc";
+
 	auto pluginPath = halleyRootPath / "plugins";
 	auto files = FileSystem::enumerateDirectory(pluginPath);
 	for (auto& file: files) {
 		// HACK: fix extension for OSX/Linux
 		if (file.getExtension() == ".dll") {
-			loadPlugin(file);
-		}
-	}
-
-	std::set<String> knownPlatforms = { "pc" };
-	for (auto& p: plugins) {
-		auto platforms = p->getSupportedPlatforms();
-		for (auto& plat: platforms) {
-			if (plat != "*" && knownPlatforms.find(plat) == knownPlatforms.end()) {
-				knownPlatforms.insert(plat);
+			auto plugin = loadPlugin(pluginPath / file);
+			if (plugin) {
+				auto platforms = plugin->getSupportedPlatforms();
+				bool accepted = false;
+				for (auto& plat: platforms) {
+					accepted = plat == "*" || plat == platform;
+					knownPlatform |= plat == platform;
+				}
+				if (accepted) {
+					plugins.emplace_back(std::move(plugin));
+				}
 			}
 		}
 	}
-
-	if (knownPlatforms.find(platform) == knownPlatforms.end()) {
+	
+	if (!knownPlatform) {
 		throw Exception("Unknown platform: " + platform);
 	}
 }
@@ -104,7 +107,9 @@ void Project::initialisePlugins()
 Project::HalleyPluginPtr Project::loadPlugin(const Path& path)
 {
 	// HACK: abstract this/support OSX/support Linux
-	auto module = LoadLibrary(path.getString().c_str());
+	String nativePath = path.getString();
+	nativePath.replace("/", "\\", true);
+	auto module = LoadLibrary(nativePath.c_str());
 	if (!module) {
 		return {};
 	}

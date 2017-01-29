@@ -75,6 +75,7 @@ void HalleyEditor::parseArguments(const std::vector<String>& args)
 {
 	headless = false;
 	String platform = "pc";
+	String projectPath;
 	bool gotProjectPath = false;
 
 	for (auto& arg : args) {
@@ -88,12 +89,18 @@ void HalleyEditor::parseArguments(const std::vector<String>& args)
 			}
 		} else {
 			if (!gotProjectPath) {
-				loadProject(platform, Path(arg.cppStr()));
+				projectPath = arg.cppStr();
 				gotProjectPath = true;
 			} else {
 				std::cout << "Unknown argument \"" << arg << "\".\n";
 			}
 		}
+	}
+
+	if (gotProjectPath) {
+		loadProject(platform, Path(projectPath));
+	} else {
+		throw Exception("Please specify a project path.");
 	}
 }
 
