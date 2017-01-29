@@ -1,5 +1,7 @@
 #include "halley/tools/assets/asset_collector.h"
 #include "halley/tools/file/filesystem.h"
+#include "halley/file/byte_serializer.h"
+#include "halley/resources/metadata.h"
 
 using namespace Halley;
 
@@ -12,18 +14,34 @@ AssetCollector::AssetCollector(const Path& dstDir, const std::vector<Path>& asse
 
 void AssetCollector::output(const Path& path, const Bytes& data)
 {
-	output(path, gsl::as_bytes(gsl::span<const Byte>(data)));
-}
-
-void AssetCollector::output(const Path& path, Bytes&& data)
-{
-	output(path, gsl::as_bytes(gsl::span<const Byte>(data)));
+	output(path, gsl::as_bytes(gsl::span<const Byte>(data)), nullptr);
 }
 
 void AssetCollector::output(const Path& path, gsl::span<const gsl::byte> data)
 {
+	output(path, data, nullptr);
+}
+
+void AssetCollector::output(const Path& path, const Bytes& data, const Metadata& metadata)
+{
+	output(path, gsl::as_bytes(gsl::span<const Byte>(data)), &metadata);
+}
+
+void AssetCollector::output(const Path& path, gsl::span<const gsl::byte> data, const Metadata& metadata)
+{
+	output(path, data, &metadata);
+}
+
+void AssetCollector::output(const Path& path, gsl::span<const gsl::byte> data, const Metadata* metadata)
+{
 	FileSystem::writeFile(dstDir / path, data);
 	outFiles.emplace_back(path);
+
+	if (metadata) {
+		Path metaPath = path.replaceExtension(path.getExtension() + ".meta");
+		FileSystem::writeFile(dstDir / metaPath, Serializer::toBytes(*metadata));
+		outFiles.emplace_back(metaPath);
+	}
 }
 
 void AssetCollector::addAdditionalAsset(ImportingAsset&& asset)

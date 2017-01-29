@@ -9,10 +9,9 @@ using namespace Halley;
 void CopyFileImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	Path mainFile = asset.inputFiles.at(0).name;
-	collector.output(mainFile, asset.inputFiles[0].data);
-
 	if (asset.metadata) {
-		Path metaPath = mainFile.replaceExtension(mainFile.getExtension() + ".meta");
-		collector.output(metaPath, Serializer::toBytes(*asset.metadata));
+		collector.output(mainFile, asset.inputFiles[0].data, *asset.metadata);
+	} else {
+		collector.output(mainFile, asset.inputFiles[0].data);
 	}
 }

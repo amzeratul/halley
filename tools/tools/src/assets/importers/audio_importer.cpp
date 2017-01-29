@@ -65,18 +65,16 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 		samples.clear();
 	}
 
-	// Simply save file
-	collector.output(mainFile, fileData);
-
-	// Write metafile
+	// Write metadata
 	Metadata meta;
 	if (asset.metadata) {
 		meta = *asset.metadata;
 	}
 	meta.set("channels", numChannels);
 	meta.set("sampleRate", sampleRate);
-	Path metaPath = mainFile.replaceExtension(mainFile.getExtension() + ".meta");
-	collector.output(metaPath, Serializer::toBytes(meta));
+
+	// Output
+	collector.output(mainFile, fileData, meta);
 }
 
 static void onVorbisError(int error)

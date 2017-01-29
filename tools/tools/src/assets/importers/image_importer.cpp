@@ -13,17 +13,15 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	Path mainFile = asset.inputFiles.at(0).name;
 	auto span = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
 	Vector2i size = Image::getImageSize(mainFile.string(), span);
-	collector.output(mainFile, span);
 
-	// Prepare metafile
+	// Prepare metadata
 	Metadata meta;
 	if (asset.metadata) {
 		meta = *asset.metadata;
 	}
-
 	meta.set("width", size.x);
 	meta.set("height", size.y);
 
-	Path metaPath = mainFile.replaceExtension(mainFile.getExtension() + ".meta");
-	collector.output(metaPath, Serializer::toBytes(meta));
+	// Output
+	collector.output(mainFile, span, meta);
 }
