@@ -9,6 +9,6 @@ namespace Halley
 		AssetType getType() const override { return AssetType::Codegen; }
 
 		String getAssetId(const Path& file) const override;
-		std::vector<Path> import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector) override;
+		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 	};
 }

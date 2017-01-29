@@ -18,7 +18,8 @@
 
 using namespace Halley;
 
-AssetImporter::AssetImporter(Project& project, std::vector<Path> assetsSrc)
+AssetImporter::AssetImporter(Project& project, const std::vector<Path>& assetsSrc)
+	: assetsSrc(assetsSrc)
 {
 	std::unique_ptr<IAssetImporter> defaultImporters[] = {
 		std::make_unique<CopyFileImporter>(),
@@ -39,7 +40,6 @@ AssetImporter::AssetImporter(Project& project, std::vector<Path> assetsSrc)
 		auto type = i->getType();
 		auto overrider = project.getAssetImporterOverride(type);
 		auto& importer = overrider ? overrider : i;
-		importer->setAssetsSrc(assetsSrc);
 		importers[type] = std::move(importer);
 	}
 }
@@ -82,4 +82,9 @@ IAssetImporter& AssetImporter::getImporter(AssetType type) const
 	} else {
 		throw Exception("Unknown asset type: " + toString(int(type)));
 	}
+}
+
+const std::vector<Path>& AssetImporter::getAssetsSrc() const
+{
+	return assetsSrc;
 }

@@ -11,9 +11,9 @@ namespace Halley
 
 		String getAssetId(const Path& file) const override;
 
-		std::vector<Path> import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector) override;
+		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 
 	private:
-		void parseBitmapFontXML(String imageName, Vector2i imageSize, const Bytes& data, const Path& path);
+		Bytes parseBitmapFontXML(String imageName, Vector2i imageSize, const Bytes& data);
 	};
 }

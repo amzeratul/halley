@@ -8,18 +8,16 @@
 
 using namespace Halley;
 
-std::vector<Path> MaterialImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
+void MaterialImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	Path basePath = asset.inputFiles.at(0).name.parentPath();
-	auto material = parseMaterial(basePath, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
+	auto material = parseMaterial(basePath, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)), collector);
 
 	Path dst = Path(asset.inputFiles[0].name).replaceExtension("");
-	FileSystem::writeFile(dstDir / dst, Serializer::toBytes(material));
-
-	return { dst };
+	collector.output(dst, Serializer::toBytes(material));
 }
 
-MaterialDefinition MaterialImporter::parseMaterial(Path basePath, gsl::span<const gsl::byte> data) const
+MaterialDefinition MaterialImporter::parseMaterial(Path basePath, gsl::span<const gsl::byte> data, IAssetCollector& collector) const
 {
 	MaterialDefinition material;
 	String strData(reinterpret_cast<const char*>(data.data()), data.size());
@@ -28,8 +26,8 @@ MaterialDefinition MaterialImporter::parseMaterial(Path basePath, gsl::span<cons
 	// Load base material
 	if (root["base"]) {
 		String baseName = root["base"].as<std::string>();
-		auto otherData = readAdditionalFile(basePath / baseName);
-		material = parseMaterial(basePath, gsl::as_bytes(gsl::span<Byte>(otherData)));
+		auto otherData = collector.readAdditionalFile(basePath / baseName);
+		material = parseMaterial(basePath, gsl::as_bytes(gsl::span<Byte>(otherData)), collector);
 	}
 
 	// Load name

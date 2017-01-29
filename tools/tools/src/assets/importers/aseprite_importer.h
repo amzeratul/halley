@@ -23,7 +23,7 @@ namespace Halley
 	public:
 		AssetType getType() const override { return AssetType::Aseprite; }
 
-		std::vector<Path> import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector) override;
+		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 
 	private:
 		std::vector<ImageData> importAseprite(String baseName, gsl::span<const gsl::byte> fileData);

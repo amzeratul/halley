@@ -6,15 +6,13 @@
 
 using namespace Halley;
 
-std::vector<Path> ConfigImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
+void ConfigImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	ConfigFile config;
 	parseConfig(config, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
 
 	Path dst = asset.inputFiles[0].name.replaceExtension("");
-	FileSystem::writeFile(dstDir / dst, Serializer::toBytes(config));
-
-	return { dst };
+	collector.output(dst, Serializer::toBytes(config));
 }
 
 static ConfigNode parseYAMLNode(const YAML::Node& node)

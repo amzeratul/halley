@@ -13,9 +13,9 @@ namespace Halley
 	public:
 		AssetType getType() const override { return AssetType::Material; }
 
-		std::vector<Path> import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector) override;
+		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 
-		MaterialDefinition parseMaterial(Path basePath, gsl::span<const gsl::byte> data) const;
+		MaterialDefinition parseMaterial(Path basePath, gsl::span<const gsl::byte> data, IAssetCollector& collector) const;
 
 	private:
 		static void loadPass(MaterialDefinition& material, const YAML::Node& node);

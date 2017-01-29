@@ -6,6 +6,7 @@
 #include "halley/resources/resource_data.h"
 #include <yaml-cpp/yaml.h>
 #include "halley/tools/file/filesystem.h"
+#include "halley/tools/assets/asset_collector.h"
 
 using namespace Halley;
 
@@ -101,17 +102,20 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 		while (!toLoad.empty()) {
 			auto cur = std::move(toLoad.front());
 			toLoad.pop_front();
-			std::cout << "Import: " << cur.assetId << std::endl;
-			std::vector<Path> curOut = importer.getImporter(cur.assetType).import(cur, assetsPath, [&] (float progress, const String& label) -> bool
+			
+			AssetCollector collector(assetsPath, importer.getAssetsSrc(), [=] (float progress, const String& label) -> bool
 			{
 				setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel + " " + label);
 				return !isCancelled();
-			}, [&] (ImportingAsset&& toAdd)
-			{
-				toLoad.emplace_front(std::move(toAdd));
 			});
+			
+			importer.getImporter(cur.assetType).import(cur, collector);
+			
+			for (auto& additional: collector.collectAdditionalAssets()) {
+				toLoad.push_front(std::move(additional));
+			}
 
-			for (auto& o: curOut) {
+			for (auto& o: collector.getOutFiles()) {
 				out.push_back(o);
 			}
 		}

@@ -7,13 +7,13 @@
 
 using namespace Halley;
 
-std::vector<Path> ImageImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
+void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	// Load image
 	Path mainFile = asset.inputFiles.at(0).name;
 	auto span = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
 	Vector2i size = Image::getImageSize(mainFile.string(), span);
-	FileSystem::writeFile(dstDir / mainFile, span);
+	collector.output(mainFile, span);
 
 	// Prepare metafile
 	Metadata meta;
@@ -25,7 +25,5 @@ std::vector<Path> ImageImporter::import(const ImportingAsset& asset, const Path&
 	meta.set("height", size.y);
 
 	Path metaPath = mainFile.replaceExtension(mainFile.getExtension() + ".meta");
-	FileSystem::writeFile(dstDir / metaPath, Serializer::toBytes(meta));
-
-	return { mainFile, metaPath };
+	collector.output(metaPath, Serializer::toBytes(meta));
 }

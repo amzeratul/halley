@@ -7,15 +7,13 @@
 
 using namespace Halley;
 
-std::vector<Path> AnimationImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
+void AnimationImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	Animation animation;
 	parseAnimation(animation, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
 
 	Path dst = asset.inputFiles[0].name.replaceExtension("");
-	FileSystem::writeFile(dstDir / dst, Serializer::toBytes(animation));
-
-	return { dst };
+	collector.output(dst, Serializer::toBytes(animation));
 }
 
 void AnimationImporter::parseAnimation(Animation& animation, gsl::span<const gsl::byte> data)

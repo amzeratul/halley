@@ -31,24 +31,34 @@ namespace Halley
 		AssetType assetType = AssetType::Undefined;
 	};
 
+	class IAssetCollector
+	{
+	public:
+		virtual ~IAssetCollector() {}
+		virtual void output(const Path& path, const Bytes& data) = 0;
+		virtual void output(const Path& path, Bytes&& data) = 0;
+		virtual void output(const Path& path, gsl::span<const gsl::byte> data) = 0;
+		virtual void addAdditionalAsset(ImportingAsset&& asset) = 0;
+		virtual bool reportProgress(float progress, const String& label = "") = 0;
+		virtual Bytes readAdditionalFile(const Path& filePath) const = 0;
+		virtual const Path& getDestinationDirectory() = 0;
+	};
+
 	class IAssetImporter
 	{
 	public:
-		using ProgressReporter = std::function<bool(float, const String&)>;
-		using AssetCollector = std::function<void(ImportingAsset&&)>;
-
 		virtual ~IAssetImporter() {}
 
 		virtual AssetType getType() const = 0;
+		virtual void import(const ImportingAsset& asset, IAssetCollector& collector) = 0;
 
-		virtual String getAssetId(const Path& file) const;
-		virtual std::vector<Path> import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector) = 0;
-
-		void setAssetsSrc(const std::vector<Path>& assetsSrc);
-
-	protected:
-		Bytes readAdditionalFile(Path filePath) const;
-
-		std::vector<Path> assetsSrc;
+		virtual String getAssetId(const Path& file) const
+		{
+			String name = file.string();
+			if (name.endsWith(".meta")) {
+				name = name.substr(0, name.length() - 5);
+			}
+			return name;
+		}
 	};
 }

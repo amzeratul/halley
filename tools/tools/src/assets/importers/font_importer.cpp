@@ -9,12 +9,8 @@
 
 using namespace Halley;
 
-std::vector<Path> FontImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
+void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	std::cout << "Importing font " << asset.assetId << std::endl;
-
-	FileSystem::createDir(dstDir);
-
 	Vector2i imgSize(512, 512);
 	float radius = 8;
 	int supersample = 4;
@@ -28,15 +24,18 @@ std::vector<Path> FontImporter::import(const ImportingAsset& asset, const Path& 
 
 	auto data = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
 
-	FontGenerator gen(false, reporter);
+	FontGenerator gen(false, [&] (float progress, const String& label)
+	{
+		return collector.reportProgress(progress, label);
+	});
 	auto result = gen.generateFont(asset.assetId, data, imgSize, radius, supersample, Range<int>(0, 255));
 	if (!result.success) {
-		return {};
+		throw Exception("Failed to generate font: " + asset.assetId);
 	}
 	
 	Path fileName = Path(asset.assetId).replaceExtension(".font");
 	Path pngPath = fileName.replaceExtension(".png");
-	FileSystem::writeFile(dstDir / fileName, result.fontData);
+	collector.output(fileName, result.fontData);
 
 	auto imgData = result.image->savePNGToBytes();
 
@@ -45,7 +44,5 @@ std::vector<Path> FontImporter::import(const ImportingAsset& asset, const Path& 
 	image.assetType = AssetType::Image;
 	image.metadata = std::move(result.imageMeta);
 	image.inputFiles.emplace_back(ImportingAssetFile(pngPath, std::move(imgData)));
-	collector(std::move(image));
-
-	return { fileName };
+	collector.addAdditionalAsset(std::move(image));
 }

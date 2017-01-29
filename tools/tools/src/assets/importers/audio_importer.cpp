@@ -14,7 +14,7 @@
 
 using namespace Halley;
 
-std::vector<Path> AudioImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
+void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	Path mainFile = asset.inputFiles.at(0).name;
 	auto& rawData = asset.inputFiles[0].data;
@@ -66,7 +66,7 @@ std::vector<Path> AudioImporter::import(const ImportingAsset& asset, const Path&
 	}
 
 	// Simply save file
-	FileSystem::writeFile(dstDir / mainFile, fileData);
+	collector.output(mainFile, fileData);
 
 	// Write metafile
 	Metadata meta;
@@ -76,9 +76,7 @@ std::vector<Path> AudioImporter::import(const ImportingAsset& asset, const Path&
 	meta.set("channels", numChannels);
 	meta.set("sampleRate", sampleRate);
 	Path metaPath = mainFile.replaceExtension(mainFile.getExtension() + ".meta");
-	FileSystem::writeFile(dstDir / metaPath, Serializer::toBytes(meta));
-
-	return { mainFile, metaPath };
+	collector.output(metaPath, Serializer::toBytes(meta));
 }
 
 static void onVorbisError(int error)

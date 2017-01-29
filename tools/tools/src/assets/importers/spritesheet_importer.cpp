@@ -3,11 +3,12 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/file/byte_serializer.h"
 
-std::vector<Halley::Path> Halley::SpriteSheetImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
+using namespace Halley;
+
+void SpriteSheetImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	SpriteSheet sheet;
 	Path dstFile = asset.inputFiles[0].name.replaceExtension("");
 	sheet.loadJson(gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
-	FileSystem::writeFile(dstDir / dstFile, Serializer::toBytes(sheet));
-	return { dstFile };
+	collector.output(dstFile, Serializer::toBytes(sheet));
 }

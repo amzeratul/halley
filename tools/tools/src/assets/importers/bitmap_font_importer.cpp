@@ -13,7 +13,7 @@ String BitmapFontImporter::getAssetId(const Path& file) const
 	return file.getStem().getString();
 }
 
-std::vector<Path> BitmapFontImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
+void BitmapFontImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	Bytes xmlData;
 	Path xmlPath;
@@ -42,19 +42,17 @@ std::vector<Path> BitmapFontImporter::import(const ImportingAsset& asset, const 
 
 	// Generate font from XML
 	Path outName = xmlPath.replaceExtension("");
-	parseBitmapFontXML(pngPath.getFilename().getString(), imageSize, xmlData, dstDir / outName);
+	collector.output(outName, parseBitmapFontXML(pngPath.getFilename().getString(), imageSize, xmlData));
 
 	// Pass image forward
 	ImportingAsset image;
 	image.assetId = asset.assetId + "-image";
 	image.assetType = AssetType::Image;
 	image.inputFiles.emplace_back(ImportingAssetFile(pngPath, std::move(pngData)));
-	collector(std::move(image));
-
-	return { outName };
+	collector.addAdditionalAsset(std::move(image));
 }
 
-void BitmapFontImporter::parseBitmapFontXML(String imageName, Vector2i imageSize, const Bytes& data, const Path& path)
+Bytes BitmapFontImporter::parseBitmapFontXML(String imageName, Vector2i imageSize, const Bytes& data)
 {
 	ticpp::Document doc;
 	doc.Parse(String(reinterpret_cast<const char*>(data.data()), data.size()).cppStr());
@@ -105,8 +103,9 @@ void BitmapFontImporter::parseBitmapFontXML(String imageName, Vector2i imageSize
 				font.addGlyph(Font::Glyph(charcode, area, size, bearing, bearing, advance));
 			}
 
-			FileSystem::writeFile(path, Serializer::toBytes(font));
-			return;
+			return Serializer::toBytes(font);
 		}
 	}
+
+	throw Exception("Invalid bitmap font format");
 }

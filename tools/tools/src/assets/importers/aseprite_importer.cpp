@@ -12,7 +12,7 @@
 
 using namespace Halley;
 
-std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
+void AsepriteImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	Path srcPath = asset.inputFiles.at(0).name;
 	String baseName = srcPath.getStem().getString();
@@ -36,7 +36,7 @@ std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, const Pa
 
 	// Write animation
 	Animation animation = generateAnimation(baseName, spriteSheetPath.dropFront(1), frames);
-	FileSystem::writeFile(dstDir / animationPath, Serializer::toBytes(animation));
+	collector.output(animationPath, Serializer::toBytes(animation));
 
 	// Split grid
 	Vector2i grid(meta.getInt("tileWidth", 0), meta.getInt("tileHeight", 0));
@@ -47,7 +47,7 @@ std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, const Pa
 	// Generate atlas + spritesheet
 	SpriteSheet spriteSheet;
 	auto atlasImage = generateAtlas(imagePath.dropFront(1), frames, spriteSheet, pivot);
-	FileSystem::writeFile(dstDir / spriteSheetPath, Serializer::toBytes(spriteSheet));
+	collector.output(spriteSheetPath, Serializer::toBytes(spriteSheet));
 
 	// Image metafile
 	auto size = atlasImage->getSize();
@@ -60,9 +60,7 @@ std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, const Pa
 	image.assetType = AssetType::Image;
 	image.metadata = std::make_unique<Metadata>(meta);
 	image.inputFiles.emplace_back(ImportingAssetFile(imagePath, atlasImage->savePNGToBytes()));
-	collector(std::move(image));
-
-	return { spriteSheetPath, animationPath, imagePath, imageMetaPath };
+	collector.addAdditionalAsset(std::move(image));
 }
 
 std::vector<AsepriteImporter::ImageData> AsepriteImporter::loadImagesFromPath(Path tmp) {

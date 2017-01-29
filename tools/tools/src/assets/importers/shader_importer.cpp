@@ -6,19 +6,13 @@
 
 using namespace Halley;
 
-std::vector<Path> ShaderImporter::import(const ImportingAsset& asset, const Path& dstDir, ProgressReporter reporter, AssetCollector collector)
+void ShaderImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	std::vector<Path> out;
-	
 	Path mainFile = asset.inputFiles.at(0).name;
-	FileSystem::writeFile(dstDir / mainFile, asset.inputFiles[0].data);
-	out.push_back(mainFile);
+	collector.output(mainFile, asset.inputFiles[0].data);
 
 	if (asset.metadata) {
 		Path metaPath = mainFile.replaceExtension(mainFile.getExtension() + ".meta");
-		FileSystem::writeFile(dstDir / metaPath, Serializer::toBytes(*asset.metadata));
-		out.push_back(metaPath);
+		collector.output(metaPath, Serializer::toBytes(*asset.metadata));
 	}
-
-	return out;
 }
