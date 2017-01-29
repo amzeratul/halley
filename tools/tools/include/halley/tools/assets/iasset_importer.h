@@ -5,27 +5,10 @@
 #include "halley/file/path.h"
 #include "halley/utils/utils.h"
 #include "halley/resources/metadata.h"
+#include "halley/resources/resource.h"
 
 namespace Halley
 {
-	class Metadata;
-
-	enum class AssetType
-	{
-		Undefined,
-		Codegen,
-		SimpleCopy,
-		Font,
-		BitmapFont,
-		Image,
-		Material,
-		Animation,
-		Config,
-		Audio,
-		Aseprite,
-		SpriteSheet
-	};
-
 	class ImportingAssetFile
 	{
 	public:

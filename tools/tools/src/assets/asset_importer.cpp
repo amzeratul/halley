@@ -11,27 +11,36 @@
 #include "importers/aseprite_importer.h"
 #include "importers/spritesheet_importer.h"
 #include "importers/bitmap_font_importer.h"
+#include "importers/shader_importer.h"
 #include "halley/text/string_converter.h"
+#include "halley/tools/project/project.h"
+#include <boost/variant/detail/substitute.hpp>
 
 using namespace Halley;
 
-
-AssetImporter::AssetImporter(std::vector<Path> assetsSrc)
+AssetImporter::AssetImporter(Project& project, std::vector<Path> assetsSrc)
 {
-	importers[AssetType::SimpleCopy] = std::make_unique<CopyFileImporter>();
-	importers[AssetType::Font] = std::make_unique<FontImporter>();
-	importers[AssetType::BitmapFont] = std::make_unique<BitmapFontImporter>();
-	importers[AssetType::Image] = std::make_unique<ImageImporter>();
-	importers[AssetType::Animation] = std::make_unique<AnimationImporter>();
-	importers[AssetType::Material] = std::make_unique<MaterialImporter>();
-	importers[AssetType::Config] = std::make_unique<ConfigImporter>();
-	importers[AssetType::Codegen] = std::make_unique<CodegenImporter>();
-	importers[AssetType::Audio] = std::make_unique<AudioImporter>();
-	importers[AssetType::Aseprite] = std::make_unique<AsepriteImporter>();
-	importers[AssetType::SpriteSheet] = std::make_unique<SpriteSheetImporter>();
+	std::unique_ptr<IAssetImporter> defaultImporters[] = {
+		std::make_unique<CopyFileImporter>(),
+		std::make_unique<FontImporter>(),
+		std::make_unique<BitmapFontImporter>(),
+		std::make_unique<ImageImporter>(),
+		std::make_unique<AnimationImporter>(),
+		std::make_unique<MaterialImporter>(),
+		std::make_unique<ConfigImporter>(),
+		std::make_unique<CodegenImporter>(),
+		std::make_unique<AudioImporter>(),
+		std::make_unique<AsepriteImporter>(),
+		std::make_unique<SpriteSheetImporter>(),
+		std::make_unique<ShaderImporter>()
+	};
 
-	for (auto& i: importers) {
-		i.second->setAssetsSrc(assetsSrc);
+	for (auto& i: defaultImporters) {
+		auto type = i->getType();
+		auto overrider = project.getAssetImporterOverride(type);
+		auto& importer = overrider ? overrider : i;
+		importer->setAssetsSrc(assetsSrc);
+		importers[type] = std::move(importer);
 	}
 }
 
@@ -58,6 +67,8 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 		type = AssetType::Aseprite;
 	} else if (root == "spritesheet") {
 		type = AssetType::SpriteSheet;
+	} else if (root == "shader") {
+		type = AssetType::Shader;
 	}
 
 	return getImporter(type);

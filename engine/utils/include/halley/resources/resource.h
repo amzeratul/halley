@@ -7,6 +7,23 @@
 
 namespace Halley
 {
+	enum class AssetType
+	{
+		Undefined,
+		Codegen,
+		SimpleCopy,
+		Font,
+		BitmapFont,
+		Image,
+		Material,
+		Animation,
+		Config,
+		Audio,
+		Aseprite,
+		SpriteSheet,
+		Shader
+	};
+
 	class Resource
 	{
 	public:

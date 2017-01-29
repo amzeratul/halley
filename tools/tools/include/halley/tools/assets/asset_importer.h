@@ -2,13 +2,16 @@
 #include "iasset_importer.h"
 #include <map>
 #include <memory>
+#include "halley/resources/resource.h"
 
 namespace Halley
 {
+	class Project;
+
 	class AssetImporter
 	{
 	public:
-		AssetImporter(std::vector<Path> assetsSrc);
+		AssetImporter(Project& project, std::vector<Path> assetsSrc);
 		IAssetImporter& getImporter(Path path) const;
 		IAssetImporter& getImporter(AssetType type) const;
 

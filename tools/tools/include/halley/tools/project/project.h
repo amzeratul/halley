@@ -24,6 +24,7 @@ namespace Halley
 		ImportAssetsDatabase& getCodegenDatabase();
 
 		const AssetImporter& getAssetImporter() const;
+		std::unique_ptr<IAssetImporter> getAssetImporterOverride(AssetType type) const;
 	
 	private:
 		Path rootPath;
