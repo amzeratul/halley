@@ -8,10 +8,10 @@ using namespace Halley;
 
 void CopyFileImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	Path mainFile = asset.inputFiles.at(0).name;
+	Path mainFile = asset.assetId;
 	if (asset.metadata) {
-		collector.output(mainFile, asset.inputFiles[0].data, *asset.metadata);
+		collector.output(AssetType::BinaryFile, asset.inputFiles[0].data, *asset.metadata);
 	} else {
-		collector.output(mainFile, asset.inputFiles[0].data);
+		collector.output(AssetType::BinaryFile, asset.inputFiles[0].data);
 	}
 }

@@ -74,7 +74,7 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	meta.set("sampleRate", sampleRate);
 
 	// Output
-	collector.output(mainFile, fileData, meta);
+	collector.output(AssetType::AudioClip, fileData, meta);
 }
 
 static void onVorbisError(int error)
