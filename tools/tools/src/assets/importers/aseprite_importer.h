@@ -18,6 +18,7 @@ namespace Halley
 			String sequenceName;
 			String filename;
 			std::unique_ptr<Image> img;
+			Rect4i clip;
 		};
 
 	public:

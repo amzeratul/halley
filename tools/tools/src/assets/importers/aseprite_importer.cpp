@@ -77,6 +77,7 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::loadImagesFromPath(Pa
 			}
 			data.sequenceName = parsedName[1];
 			data.frameNumber = parsedName[2].toInteger();
+			data.clip = data.img->getTrimRect();
 			frameData.push_back(std::move(data));
 		}
 	}
@@ -198,7 +199,7 @@ std::unique_ptr<Image> AsepriteImporter::generateAtlas(Path imageName, std::vect
 	// Generate entries
 	std::vector<BinPackEntry> entries;
 	for (auto& img: images) {
-		entries.push_back(BinPackEntry(img.img->getSize(), &img));
+		entries.push_back(BinPackEntry(img.clip.getSize(), &img));
 	}
 
 	// Try packing
@@ -234,12 +235,12 @@ std::unique_ptr<Image> AsepriteImporter::makeAtlas(Path imageName, const std::ve
 
 	for (auto& packedImg: result) {
 		ImageData* img = reinterpret_cast<ImageData*>(packedImg.data);
-		image->blitFrom(packedImg.rect.getTopLeft(), *img->img);
+		image->blitFrom(packedImg.rect.getTopLeft(), *img->img, img->clip, packedImg.rotated);
 
 		SpriteSheetEntry entry;
-		entry.size = Vector2f(img->img->getSize());
-		entry.rotated = false;
-		entry.pivot = Vector2f(pivot) / entry.size;
+		entry.size = Vector2f(img->clip.getSize());
+		entry.rotated = packedImg.rotated;
+		entry.pivot = Vector2f(pivot - img->clip.getTopLeft()) / entry.size;
 		entry.coords = Rect4f(packedImg.rect) / Vector2f(size);
 		spriteSheet.addSprite(img->filename, entry);
 	}
@@ -272,6 +273,7 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::splitImagesInGrid(con
 					dst.filename = src.filename + suffix;
 					dst.sequenceName = src.sequenceName + suffix;
 					dst.img = std::move(img);
+					dst.clip = Rect4i({}, grid);
 				}
 			}
 		}

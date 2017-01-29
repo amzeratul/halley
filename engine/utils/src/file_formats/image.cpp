@@ -82,7 +82,7 @@ Halley::Rect4i Halley::Image::getTrimRect() const
 	const unsigned int* src = reinterpret_cast<const unsigned int*>(px.get());
 	for (int y = 0; y < int(h); y++) {
 		for (int x = 0; x < int(w); x++) {
-			unsigned int px = src[x + y * h];
+			unsigned int px = src[x + y * w];
 			int alpha = int(px >> 24);
 
 			if (alpha > 0) {
@@ -148,17 +148,51 @@ void Halley::Image::blitFrom(Vector2i pos, const char* buffer, size_t width, siz
 	}
 }
 
-void Halley::Image::blitFrom(Vector2i pos, Image& srcImg)
+void Halley::Image::blitFromRotated(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp)
 {
-	blitFrom(pos, srcImg.getPixels(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), 32);
+	Rect4i dstRect = Rect4i({}, w, h);
+	Rect4i srcRect = Rect4i(pos, int(height), int(width)); // Rotated
+	Rect4i intersection = dstRect.intersection(srcRect);
+
+	auto xMin = intersection.getLeft();
+	auto yMin = intersection.getTop();
+	auto xMax = intersection.getRight();
+	auto yMax = intersection.getBottom();
+	int* dst = reinterpret_cast<int*>(px.get());
+
+	if (bpp == 32) {
+		const int* src = reinterpret_cast<const int*>(buffer);
+		for (auto y = yMin; y < yMax; y++) {
+			for (auto x = xMin; x < xMax; x++) {
+				auto srcX = y - yMin;
+				auto srcY = height - (x - xMin) - 1;
+				dst[x + y * w] = src[srcX + srcY * pitch];
+			}
+		}
+	} else {
+		throw Exception("Unknown amount of bits per pixel: " + toString(bpp));
+	}
 }
 
-void Halley::Image::blitFrom(Vector2i pos, Image& srcImg, Rect4i srcArea)
+void Halley::Image::blitFrom(Vector2i pos, Image& srcImg, bool rotated)
+{
+	if (rotated) {
+		blitFromRotated(pos, srcImg.getPixels(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), 32);
+	} else {
+		blitFrom(pos, srcImg.getPixels(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), 32);
+	}
+}
+
+void Halley::Image::blitFrom(Vector2i pos, Image& srcImg, Rect4i srcArea, bool rotated)
 {
 	Rect4i src = Rect4i(Vector2i(), srcImg.getSize()).intersection(srcArea);
 	size_t stride = srcImg.getWidth();
 	size_t offset = src.getTop() * stride + src.getLeft();
-	blitFrom(pos, srcImg.getPixels() + offset * 4, src.getWidth(), src.getHeight(), stride, 32);
+	if (rotated) {
+		blitFromRotated(pos, srcImg.getPixels() + offset * 4, src.getWidth(), src.getHeight(), stride, 32);
+	} else {
+		blitFrom(pos, srcImg.getPixels() + offset * 4, src.getWidth(), src.getHeight(), stride, 32);
+	}
 }
 
 std::unique_ptr<Halley::Image> Halley::Image::loadResource(ResourceLoader& loader)

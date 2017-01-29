@@ -74,6 +74,8 @@ void Project::initialisePlugins()
 {
 	bool knownPlatform = platform == "pc";
 
+#if _WIN32
+#ifndef _DEBUG
 	auto pluginPath = halleyRootPath / "plugins";
 	auto files = FileSystem::enumerateDirectory(pluginPath);
 	for (auto& file: files) {
@@ -93,6 +95,8 @@ void Project::initialisePlugins()
 			}
 		}
 	}
+#endif
+#endif
 	
 	if (!knownPlatform) {
 		throw Exception("Unknown platform: " + platform);
