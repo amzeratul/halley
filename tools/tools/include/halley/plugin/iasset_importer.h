@@ -1,7 +1,7 @@
 #pragma once
-#include "halley/text/halleystring.h"
 #include <memory>
 #include <vector>
+#include "halley/text/halleystring.h"
 #include "halley/file/path.h"
 #include "halley/utils/utils.h"
 #include "halley/resources/metadata.h"

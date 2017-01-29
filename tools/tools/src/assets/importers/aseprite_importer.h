@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/tools/assets/iasset_importer.h"
+#include "halley/plugin/iasset_importer.h"
 #include <gsl/gsl>
 #include "halley/file_formats/image.h"
 #include "halley/core/graphics/sprite/sprite_sheet.h"

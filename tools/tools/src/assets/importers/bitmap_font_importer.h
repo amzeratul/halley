@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/tools/assets/iasset_importer.h"
+#include "halley/plugin/iasset_importer.h"
 #include "halley/maths/vector2.h"
 
 namespace Halley

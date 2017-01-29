@@ -1,5 +1,5 @@
 #pragma once
-#include "iasset_importer.h"
+#include "halley/plugin/iasset_importer.h"
 #include <map>
 #include <memory>
 #include "halley/resources/resource.h"

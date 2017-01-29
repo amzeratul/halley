@@ -1,4 +1,4 @@
-#include "halley/tools/assets/iasset_importer.h"
+#include "halley/plugin/iasset_importer.h"
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
 

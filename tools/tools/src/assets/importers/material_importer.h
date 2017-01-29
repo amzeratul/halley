@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/tools/assets/iasset_importer.h"
+#include "halley/plugin/iasset_importer.h"
 #include <yaml-cpp/node/node.h>
 #include "halley/core/graphics/material/material_definition.h"
 #include <gsl/span>

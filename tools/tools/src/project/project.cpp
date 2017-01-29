@@ -1,6 +1,7 @@
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/file/filesystem.h"
+#include <set>
 
 using namespace Halley;
 
@@ -60,7 +61,12 @@ const AssetImporter& Project::getAssetImporter() const
 
 std::unique_ptr<IAssetImporter> Project::getAssetImporterOverride(AssetType type) const
 {
-	// TODO
+	for (auto& plugin: plugins) {
+		auto importer = plugin->getAssetImporter(type);
+		if (importer) {
+			return importer;
+		}
+	}
 	return {};
 }
 
@@ -69,13 +75,53 @@ void Project::initialisePlugins()
 	auto pluginPath = halleyRootPath / "plugins";
 	auto files = FileSystem::enumerateDirectory(pluginPath);
 	for (auto& file: files) {
+		// HACK: fix extension for OSX/Linux
 		if (file.getExtension() == ".dll") {
 			loadPlugin(file);
 		}
 	}
+
+	std::set<String> knownPlatforms = { "pc" };
+	for (auto& p: plugins) {
+		auto platforms = p->getSupportedPlatforms();
+		for (auto& plat: platforms) {
+			if (plat != "*" && knownPlatforms.find(plat) == knownPlatforms.end()) {
+				knownPlatforms.insert(plat);
+			}
+		}
+	}
+
+	if (knownPlatforms.find(platform) == knownPlatforms.end()) {
+		throw Exception("Unknown platform: " + platform);
+	}
 }
 
-void Project::loadPlugin(const Path& path)
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#endif
+
+Project::HalleyPluginPtr Project::loadPlugin(const Path& path)
 {
-	
+	// HACK: abstract this/support OSX/support Linux
+	auto module = LoadLibrary(path.getString().c_str());
+	if (!module) {
+		return {};
+	}
+
+	using CreateHalleyPluginFn = IHalleyPlugin*();
+	using DestroyHalleyPluginFn = void(IHalleyPlugin*);
+
+	auto createHalleyPlugin = reinterpret_cast<CreateHalleyPluginFn*>(GetProcAddress(module, "createHalleyPlugin"));
+	auto destroyHalleyPlugin = reinterpret_cast<DestroyHalleyPluginFn*>(GetProcAddress(module, "destroyHalleyPlugin"));
+	if (!createHalleyPlugin || !destroyHalleyPlugin) {
+		FreeLibrary(module);
+		return {};
+	}
+
+	return HalleyPluginPtr(createHalleyPlugin(), [=] (IHalleyPlugin* plugin)
+	{
+		destroyHalleyPlugin(plugin);
+		FreeLibrary(module);
+	});
 }

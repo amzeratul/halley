@@ -51,6 +51,9 @@ set(SOURCES
     )
 
 set(HEADERS
+    "include/halley/plugin/halley_plugin.h"
+    "include/halley/plugin/iasset_importer.h"
+
     "include/halley/tools/cli_tool.h"
     
     "include/halley/tools/codegen/codegen.h"
@@ -78,7 +81,6 @@ set(HEADERS
     "include/halley/tools/assets/asset_importer.h"
     "include/halley/tools/assets/check_assets_task.h"
     "include/halley/tools/assets/delete_assets_task.h"
-    "include/halley/tools/assets/iasset_importer.h"
     "include/halley/tools/assets/import_assets_task.h"
     "include/halley/tools/assets/import_assets_database.h"
     "include/halley/tools/assets/import_tool.h"

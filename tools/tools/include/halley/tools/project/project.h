@@ -2,6 +2,7 @@
 
 #include "halley/file/path.h"
 #include "halley/tools/assets/asset_importer.h"
+#include "halley/plugin/halley_plugin.h"
 
 namespace Halley
 {
@@ -35,7 +36,10 @@ namespace Halley
 		std::unique_ptr<ImportAssetsDatabase> codegenDatabase;
 		std::unique_ptr<AssetImporter> assetImporter;
 
+		using HalleyPluginPtr = std::unique_ptr<IHalleyPlugin, std::function<void(IHalleyPlugin*)>>;
+		std::vector<HalleyPluginPtr> plugins;
+
 		void initialisePlugins();
-		void loadPlugin(const Path& path);
+		HalleyPluginPtr loadPlugin(const Path& path);
 	};
 }
