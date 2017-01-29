@@ -47,14 +47,20 @@ std::vector<Path> AsepriteImporter::import(const ImportingAsset& asset, const Pa
 	// Generate atlas + spritesheet
 	SpriteSheet spriteSheet;
 	auto atlasImage = generateAtlas(imagePath.dropFront(1), frames, spriteSheet, pivot);
-	FileSystem::writeFile(dstDir / imagePath, atlasImage->savePNGToBytes());
 	FileSystem::writeFile(dstDir / spriteSheetPath, Serializer::toBytes(spriteSheet));
 
 	// Image metafile
 	auto size = atlasImage->getSize();
 	meta.set("width", size.x);
 	meta.set("height", size.y);
-	FileSystem::writeFile(dstDir / imageMetaPath, Serializer::toBytes(meta));
+
+	// Write image
+	ImportingAsset image;
+	image.assetId = asset.assetId + "-image";
+	image.assetType = AssetType::Image;
+	image.metadata = std::make_unique<Metadata>(meta);
+	image.inputFiles.emplace_back(ImportingAssetFile(imagePath, atlasImage->savePNGToBytes()));
+	collector(std::move(image));
 
 	return { spriteSheetPath, animationPath, imagePath, imageMetaPath };
 }

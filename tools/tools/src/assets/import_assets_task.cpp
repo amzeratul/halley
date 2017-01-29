@@ -99,20 +99,21 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 
 		// Import
 		while (!toLoad.empty()) {
-			auto& cur = toLoad.front();
+			auto cur = std::move(toLoad.front());
+			toLoad.pop_front();
+			std::cout << "Import: " << cur.assetId << std::endl;
 			std::vector<Path> curOut = importer.getImporter(cur.assetType).import(cur, assetsPath, [&] (float progress, const String& label) -> bool
 			{
 				setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel + " " + label);
 				return !isCancelled();
 			}, [&] (ImportingAsset&& toAdd)
 			{
-				toLoad.emplace_back(std::move(toAdd));
+				toLoad.emplace_front(std::move(toAdd));
 			});
 
 			for (auto& o: curOut) {
 				out.push_back(o);
 			}
-			toLoad.pop_front();
 		}
 	} catch (std::exception& e) {
 		addError("\"" + asset.assetId + "\" - " + e.what());
