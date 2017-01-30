@@ -1,4 +1,5 @@
 #include "halley/resources/resource.h"
+#include "halley/support/exception.h"
 
 using namespace Halley;
 

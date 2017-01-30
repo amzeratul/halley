@@ -42,8 +42,6 @@ namespace Halley
 		void unload(const String& assetId);
 		void unloadAll(int minDepth = 0);
 		void flush(const String& assetId);
-		
-		Path resolvePath(const String& assetId) const;
 
 	protected:
 		virtual std::shared_ptr<Resource> loadResource(ResourceLoader& loader) = 0;

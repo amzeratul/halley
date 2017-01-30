@@ -27,8 +27,11 @@ This file is subject to the terms of halley_license.txt.
 #include <functional>
 #include <halley/concurrency/future.h>
 #include <gsl/gsl>
+#include "metadata.h"
 
 namespace Halley {
+	enum class AssetType;
+
 	class ResourceDataReader {
 	public:
 		virtual ~ResourceDataReader() {}
@@ -45,6 +48,7 @@ namespace Halley {
 		virtual ~ResourceData() {}
 
 		String getPath() const { return path; }
+
 	private:
 		String path;
 	};
@@ -57,7 +61,6 @@ namespace Halley {
 		void set(const void* data, size_t size, bool owning = true);
 		bool isLoaded() const;
 
-		//void* getData();
 		const void* getData() const;
 		gsl::span<const gsl::byte> getSpan() const;
 		size_t getSize() const;
@@ -86,8 +89,9 @@ namespace Halley {
 	{
 	public:
 		virtual ~IResourceLocator() {}
-		virtual std::unique_ptr<ResourceDataStatic> getStatic(const String& resource) = 0;
-		virtual std::unique_ptr<ResourceDataStream> getStream(const String& resource) = 0;
+		virtual const Metadata& getMetaData(const String& resource, AssetType type) const = 0;
+		virtual std::unique_ptr<ResourceDataStatic> getStatic(const String& asset, AssetType type) = 0;
+		virtual std::unique_ptr<ResourceDataStream> getStream(const String& asset, AssetType type) = 0;
 	};
 
 
@@ -106,10 +110,9 @@ namespace Halley {
 
 	public:
 		const String& getName() const { return name; }
-		const Path& getPath() const { return path; }
 		ResourceLoadPriority getPriority() const { return priority; }
 		HalleyAPI& getAPI() const { return *api; }
-		Metadata& getMeta() const { return *metadata; }
+		const Metadata& getMeta() const { return *metadata; }
 
 		std::unique_ptr<ResourceDataStatic> getStatic();
 		std::unique_ptr<ResourceDataStream> getStream();
@@ -117,15 +120,15 @@ namespace Halley {
 
 	private:
 		ResourceLoader(ResourceLoader&& loader);
-		ResourceLoader(IResourceLocator& locator, String name, Path path, ResourceLoadPriority priority, HalleyAPI* api, std::unique_ptr<Metadata> metadata);
+		ResourceLoader(IResourceLocator& locator, const String& name, AssetType type, ResourceLoadPriority priority, HalleyAPI* api);
 		~ResourceLoader();
 
 		IResourceLocator& locator;
 		String name;
-		Path path;
+		AssetType type;
 		ResourceLoadPriority priority;
 		HalleyAPI* api;
-		std::unique_ptr<Metadata> metadata;
+		const Metadata* metadata;
 		bool loaded = false;
 	};
 

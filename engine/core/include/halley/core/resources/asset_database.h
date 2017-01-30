@@ -18,6 +18,9 @@ namespace Halley
 			String path;
 			Metadata meta;
 
+			Entry();
+			Entry(const String& path, const Metadata& meta);
+
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
 		};
@@ -26,10 +29,12 @@ namespace Halley
 		{
 		public:
 			void add(const String& name, Entry&& asset);
-			const Entry& get(const String& name);
+			const Entry& get(const String& name) const;
 
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
+
+			const HashMap<String, Entry>& getAssets() const;
 
 		private:
 			HashMap<String, Entry> assets;
@@ -37,6 +42,7 @@ namespace Halley
 
 		void addAsset(const String& name, AssetType type, Entry&& entry);
 		const TypedDB& getDatabase(AssetType type) const;
+		std::vector<String> getAssets() const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

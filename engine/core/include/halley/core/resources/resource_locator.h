@@ -28,18 +28,16 @@
 #include <halley/data_structures/vector.h>
 
 namespace Halley {
+	enum class AssetType;
 	class ResourceData;
 	class SystemAPI;
+	class AssetDatabase;
 
 	class IResourceLocatorProvider {
-		friend class ResourceLocator;
-
 	public:
 		virtual ~IResourceLocatorProvider() {}
-
-	protected:
-		virtual std::unique_ptr<ResourceData> doGet(const String& resource, bool stream)=0;
-		virtual Vector<String> getResourceList()=0;
+		virtual std::unique_ptr<ResourceData> getData(const String& path, AssetType type, bool stream) = 0;
+		virtual const AssetDatabase& getAssetDatabase() const = 0;
 		virtual int getPriority() const { return 0; }
 	};
 
@@ -50,15 +48,16 @@ namespace Halley {
 		void add(std::unique_ptr<IResourceLocatorProvider> locator);
 		void addFileSystem(Path path);
 		
-		std::unique_ptr<ResourceData> getResource(const String& resource, bool stream);
-		std::unique_ptr<ResourceData> tryGetResource(const String& resource, bool stream);
-		std::unique_ptr<ResourceDataStatic> getStatic(const String& resource) override;
-		std::unique_ptr<ResourceDataStream> getStream(const String& resource) override;
-		StringArray enumerate(String prefix = "", bool removePrefix = false, String suffixMatch = "");
+		const Metadata& getMetaData(const String& resource, AssetType type) const override;
+
+		std::unique_ptr<ResourceDataStatic> getStatic(const String& asset, AssetType type) override;
+		std::unique_ptr<ResourceDataStream> getStream(const String& asset, AssetType type) override;
 
 	private:
 		SystemAPI& system;
 		HashMap<String, IResourceLocatorProvider*> locators;
 		Vector<std::unique_ptr<IResourceLocatorProvider>> locatorList;
+
+		std::unique_ptr<ResourceData> getResource(const String& asset, AssetType type, bool stream);
 	};
 }

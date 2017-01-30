@@ -109,18 +109,19 @@ ResourceLoader::~ResourceLoader()
 {
 }
 
-ResourceLoader::ResourceLoader(IResourceLocator& locator, String name, Path path, ResourceLoadPriority priority, HalleyAPI* api, std::unique_ptr<Metadata> metadata)
+ResourceLoader::ResourceLoader(IResourceLocator& locator, const String& name, AssetType type, ResourceLoadPriority priority, HalleyAPI* api)
 	: locator(locator)
 	, name(name)
-	, path(path)
+	, type(type)
 	, priority(priority)
 	, api(api)
-	, metadata(move(metadata))
-{}
+{
+	metadata = &locator.getMetaData(name, type);
+}
 
 std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
 {
-	auto result = locator.getStatic(path.string());
+	auto result = locator.getStatic(name, type);
 	if (result) {
 		loaded = true;
 	}
@@ -129,7 +130,7 @@ std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
 
 std::unique_ptr<ResourceDataStream> ResourceLoader::getStream()
 {
-	auto result = locator.getStream(path.string());
+	auto result = locator.getStream(name, type);
 	if (result) {
 		loaded = true;
 	}
@@ -139,9 +140,10 @@ std::unique_ptr<ResourceDataStream> ResourceLoader::getStream()
 Future<std::unique_ptr<ResourceDataStatic>> ResourceLoader::getAsync() const
 {
 	std::reference_wrapper<IResourceLocator> loc = locator;
-	auto p = path;
-	return Concurrent::execute(Executors::getDiskIO(), [loc, p] () -> std::unique_ptr<ResourceDataStatic>
+	auto n = name;
+	auto t = type;
+	return Concurrent::execute(Executors::getDiskIO(), [loc, n, t] () -> std::unique_ptr<ResourceDataStatic>
 	{
-		return loc.get().getStatic(p.string());
+		return loc.get().getStatic(n, t);
 	});
 }

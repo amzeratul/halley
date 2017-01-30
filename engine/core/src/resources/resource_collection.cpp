@@ -53,32 +53,16 @@ void ResourceCollectionBase::flush(const String& assetId)
 	}
 }
 
-Path ResourceCollectionBase::resolvePath(const String& assetId) const
-{
-	throw Exception("Not implemented");
-}
-
 std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& assetId, ResourceLoadPriority priority)
 {
-	Path path = resolvePath(assetId);
-
 	// Look in cache and return if it's there
 	auto res = resources.find(assetId);
 	if (res != resources.end()) {
 		return res->second.res;
 	}
-
-	// Load metadata
-	auto metaData = parent.locator->tryGetResource(assetId + ".meta", false);
-	std::unique_ptr<Metadata> meta;
-	if (metaData) {
-		meta = Metadata::fromBinary(*static_cast<ResourceDataStatic*>(metaData.get()));
-	} else {
-		meta.reset(new Metadata());
-	}
-
+	
 	// Load resource from disk
-	auto resLoader = ResourceLoader(*(parent.locator), assetId, path, priority, parent.api, std::move(meta));
+	auto resLoader = ResourceLoader(*(parent.locator), assetId, type, priority, parent.api);
 	auto newRes = loadResource(resLoader);
 	if (!newRes) {
 		if (resLoader.loaded) {

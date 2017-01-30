@@ -22,6 +22,7 @@
 #pragma once
 
 #include "resource_locator.h"
+#include "asset_database.h"
 
 namespace Halley {
 	class SystemAPI;
@@ -31,11 +32,12 @@ namespace Halley {
 		FileSystemResourceLocator(SystemAPI& system, Path basePath);
 
 	protected:
-		std::unique_ptr<ResourceData> doGet(const String& resource, bool stream) override;
-		Vector<String> getResourceList() override;
+		std::unique_ptr<ResourceData> getData(const String& path, AssetType type, bool stream) override;
+		const AssetDatabase& getAssetDatabase() const override;
 		int getPriority() const override { return -1; }
 
 		SystemAPI& system;
 		Path basePath;
+		std::unique_ptr<AssetDatabase> assetDb;
 	};
 }

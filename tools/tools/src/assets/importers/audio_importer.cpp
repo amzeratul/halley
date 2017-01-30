@@ -11,6 +11,7 @@
 #include "halley/concurrency/concurrent.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/text/string_converter.h"
+#include "halley/resources/resource_data.h"
 
 using namespace Halley;
 

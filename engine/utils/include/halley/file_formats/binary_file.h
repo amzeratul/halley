@@ -2,6 +2,7 @@
 #include <memory>
 #include "halley/resources/resource.h"
 #include "halley/utils/utils.h"
+#include <gsl/gsl>
 
 namespace Halley
 {

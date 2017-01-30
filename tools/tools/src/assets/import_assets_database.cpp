@@ -36,9 +36,10 @@ void ImportAssetsDatabase::AssetEntry::deserialize(Deserializer& s)
 	s >> asset;
 }
 
-ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile)
+ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile)
 	: directory(directory)
 	, dbFile(dbFile)
+	, assetsDbFile(assetsDbFile)
 {
 	load();
 }
@@ -57,6 +58,8 @@ void ImportAssetsDatabase::save() const
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	FileSystem::writeFile(dbFile, Serializer::toBytes(*this));
+	auto assetDb = makeAssetDatabase();
+	FileSystem::writeFile(assetsDbFile, Serializer::toBytes(*assetDb));
 }
 
 bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset) const
@@ -183,7 +186,7 @@ std::vector<AssetResource> ImportAssetsDatabase::getOutFiles(String assetId) con
 	}
 }
 
-constexpr static int currentAssetVersion = 8;
+constexpr static int currentAssetVersion = 9;
 
 void ImportAssetsDatabase::serialize(Serializer& s) const
 {
@@ -199,4 +202,16 @@ void ImportAssetsDatabase::deserialize(Deserializer& s)
 	if (version == currentAssetVersion) {
 		s >> assetsImported;
 	}
+}
+
+std::unique_ptr<AssetDatabase> ImportAssetsDatabase::makeAssetDatabase() const
+{
+	auto result = std::make_unique<AssetDatabase>();
+	for (auto& a: assetsImported) {
+		auto& asset = a.second.asset;
+		for (auto& o: asset.outputFiles) {
+			result->addAsset(a.first, o.type, AssetDatabase::Entry(o.filepath, o.metadata));
+		}
+	}
+	return result;
 }

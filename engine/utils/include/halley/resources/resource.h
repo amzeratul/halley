@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <thread>
+#include <array>
 #include <condition_variable>
 #include "metadata.h"
 #include "halley/text/string_converter.h"

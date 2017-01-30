@@ -5,6 +5,7 @@
 #include "halley/text/halleystring.h"
 #include <cstdint>
 #include "asset_importer.h"
+#include "halley/core/resources/asset_database.h"
 
 namespace Halley
 {
@@ -59,7 +60,7 @@ namespace Halley
 		};
 
 	public:
-		ImportAssetsDatabase(Path directory, Path dbFile);
+		ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile);
 
 		void load();
 		void save() const;
@@ -81,10 +82,13 @@ namespace Halley
 	private:
 		Path directory;
 		Path dbFile;
+		Path assetsDbFile;
 
 		std::map<String, AssetEntry> assetsImported;
 		std::map<String, AssetEntry> assetsFailed; // Ephemeral
 		
 		mutable std::mutex mutex;
+
+		std::unique_ptr<AssetDatabase> makeAssetDatabase() const;
 	};
 }

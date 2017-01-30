@@ -22,6 +22,7 @@
 #include <cassert>
 #include "resources/resource_filesystem.h"
 #include "halley/core/api/system_api.h"
+#include "halley/file/byte_serializer.h"
 
 using namespace Halley;
 
@@ -29,12 +30,23 @@ FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, Path _ba
 	: system(system)
     , basePath(_basePath)
 {
+	// Read assetDb
+	assetDb = std::make_unique<AssetDatabase>();
+	auto reader = system.getDataReader((basePath / "asset.db").string());
+
+	Bytes result(reader->size());
+	reader->read(gsl::as_writeable_bytes(gsl::span<Byte>(result)));
+	Deserializer s(result);
+	s >> *assetDb;
 }
 
-std::unique_ptr<ResourceData> FileSystemResourceLocator::doGet(const String& resource, bool stream)
+const AssetDatabase& FileSystemResourceLocator::getAssetDatabase() const
 {
-	String path = (basePath / resource).getString();
-	
+	return *assetDb;
+}
+
+std::unique_ptr<ResourceData> FileSystemResourceLocator::getData(const String& path, AssetType type, bool stream)
+{
 	if (stream) {
 		return std::make_unique<ResourceDataStream>(path, [=] () -> std::unique_ptr<ResourceDataReader> {
 			return system.getDataReader(path.cppStr());
@@ -50,9 +62,4 @@ std::unique_ptr<ResourceData> FileSystemResourceLocator::doGet(const String& res
 		fp->read(gsl::as_writeable_bytes(gsl::span<char>(buf, size)));
 		return std::make_unique<ResourceDataStatic>(buf, size, path);
 	}
-}
-	
-Vector<String> FileSystemResourceLocator::getResourceList()
-{
-	return {"*"};
 }
