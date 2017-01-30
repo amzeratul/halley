@@ -24,6 +24,9 @@ namespace Halley {
 		TextRenderer inputLabel;
 		TextRenderer inputLabelGhost;
 
+		Sprite dropdownNormal;
+		Sprite dropdownHover;
+
 		TextRenderer label;
 
 		Sprite dialogueBackground;
