@@ -57,6 +57,12 @@ namespace Halley {
 		void destroy();
 
 		std::shared_ptr<UIWidget> getWidget(const String& id);
+		
+		template <typename T>
+		std::shared_ptr<T> getWidgetAs(const String& id)
+		{
+			return std::static_pointer_cast<T>(getWidget(id));
+		}
 
 		void setEventHandler(std::shared_ptr<UIEventHandler> handler);
 		UIEventHandler& getEventHandler();
