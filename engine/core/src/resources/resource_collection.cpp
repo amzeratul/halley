@@ -13,9 +13,9 @@ void ResourceCollectionBase::Wrapper::flush()
 	// TODO
 }
 
-ResourceCollectionBase::ResourceCollectionBase(Resources& parent, const String& path)
+ResourceCollectionBase::ResourceCollectionBase(Resources& parent, AssetType type)
 	: parent(parent)
-	, path(path)
+	, type(type)
 {
 }
 
@@ -24,9 +24,9 @@ void ResourceCollectionBase::clear()
 	resources.clear();
 }
 
-void ResourceCollectionBase::unload(const String& name)
+void ResourceCollectionBase::unload(const String& assetId)
 {
-	String fullName = resolveName(name);
+	resources.erase(assetId);
 }
 
 void ResourceCollectionBase::unloadAll(int minDepth)
@@ -44,32 +44,32 @@ void ResourceCollectionBase::unloadAll(int minDepth)
 	}
 }
 
-void ResourceCollectionBase::flush(const String& name)
+void ResourceCollectionBase::flush(const String& assetId)
 {
-	auto res = resources.find(name);
+	auto res = resources.find(assetId);
 	if (res != resources.end()) {
 		auto& resWrap = res->second;
 		resWrap.flush();
 	}
 }
 
-String ResourceCollectionBase::resolveName(const String& name) const
+Path ResourceCollectionBase::resolvePath(const String& assetId) const
 {
-	return path + "/" + name;
+	throw Exception("Not implemented");
 }
 
-std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& rawName, ResourceLoadPriority priority)
+std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& assetId, ResourceLoadPriority priority)
 {
-	String name = resolveName(rawName);
+	Path path = resolvePath(assetId);
 
 	// Look in cache and return if it's there
-	auto res = resources.find(name);
+	auto res = resources.find(assetId);
 	if (res != resources.end()) {
 		return res->second.res;
 	}
 
 	// Load metadata
-	auto metaData = parent.locator->tryGetResource(name + ".meta", false);
+	auto metaData = parent.locator->tryGetResource(assetId + ".meta", false);
 	std::unique_ptr<Metadata> meta;
 	if (metaData) {
 		meta = Metadata::fromBinary(*static_cast<ResourceDataStatic*>(metaData.get()));
@@ -78,18 +78,18 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& rawName, R
 	}
 
 	// Load resource from disk
-	auto resLoader = ResourceLoader(*(parent.locator), rawName, name, priority, parent.api, std::move(meta));
+	auto resLoader = ResourceLoader(*(parent.locator), assetId, path, priority, parent.api, std::move(meta));
 	auto newRes = loadResource(resLoader);
 	if (!newRes) {
 		if (resLoader.loaded) {
-			throw Exception("Unable to construct resource from data: " + name);
+			throw Exception("Unable to construct resource from data: " + assetId);
 		} else {
-			throw Exception("Unable to load resource data: " + name);
+			throw Exception("Unable to load resource data: " + assetId);
 		}
 	}
 
 	// Store in cache
-	resources.emplace(name, Wrapper(newRes, 0));
+	resources.emplace(assetId, Wrapper(newRes, 0));
 
 	return newRes;
 }

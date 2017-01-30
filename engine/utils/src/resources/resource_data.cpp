@@ -109,28 +109,18 @@ ResourceLoader::~ResourceLoader()
 {
 }
 
-ResourceLoader::ResourceLoader(IResourceLocator& locator, String name, String resolvedName, ResourceLoadPriority priority, HalleyAPI* api, std::unique_ptr<Metadata> metadata)
+ResourceLoader::ResourceLoader(IResourceLocator& locator, String name, Path path, ResourceLoadPriority priority, HalleyAPI* api, std::unique_ptr<Metadata> metadata)
 	: locator(locator)
 	, name(name)
-	, resolvedName(resolvedName)
+	, path(path)
 	, priority(priority)
 	, api(api)
 	, metadata(move(metadata))
 {}
 
-String ResourceLoader::getBasePath() const
-{
-	auto basePath = getName();
-	size_t lastSlash = basePath.find_last_of('/');
-	if (lastSlash != std::string::npos) {
-		basePath = basePath.left(lastSlash + 1);
-	};
-	return basePath;
-}
-
 std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
 {
-	auto result = locator.getStatic(resolvedName);
+	auto result = locator.getStatic(path.string());
 	if (result) {
 		loaded = true;
 	}
@@ -139,7 +129,7 @@ std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
 
 std::unique_ptr<ResourceDataStream> ResourceLoader::getStream()
 {
-	auto result = locator.getStream(resolvedName);
+	auto result = locator.getStream(path.string());
 	if (result) {
 		loaded = true;
 	}
@@ -149,9 +139,9 @@ std::unique_ptr<ResourceDataStream> ResourceLoader::getStream()
 Future<std::unique_ptr<ResourceDataStatic>> ResourceLoader::getAsync() const
 {
 	std::reference_wrapper<IResourceLocator> loc = locator;
-	String resName = resolvedName;
-	return Concurrent::execute(Executors::getDiskIO(), [loc, resName] () -> std::unique_ptr<ResourceDataStatic>
+	auto p = path;
+	return Concurrent::execute(Executors::getDiskIO(), [loc, p] () -> std::unique_ptr<ResourceDataStatic>
 	{
-		return loc.get().getStatic(resName);
+		return loc.get().getStatic(p.string());
 	});
 }

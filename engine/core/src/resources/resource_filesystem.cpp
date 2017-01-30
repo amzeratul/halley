@@ -31,7 +31,7 @@ FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, Path _ba
 {
 }
 
-std::unique_ptr<ResourceData> FileSystemResourceLocator::doGet(String resource, bool stream)
+std::unique_ptr<ResourceData> FileSystemResourceLocator::doGet(const String& resource, bool stream)
 {
 	String path = (basePath / resource).getString();
 	

@@ -86,8 +86,8 @@ namespace Halley {
 	{
 	public:
 		virtual ~IResourceLocator() {}
-		virtual std::unique_ptr<ResourceDataStatic> getStatic(String resource) = 0;
-		virtual std::unique_ptr<ResourceDataStream> getStream(String resource) = 0;
+		virtual std::unique_ptr<ResourceDataStatic> getStatic(const String& resource) = 0;
+		virtual std::unique_ptr<ResourceDataStream> getStream(const String& resource) = 0;
 	};
 
 
@@ -105,9 +105,8 @@ namespace Halley {
 		friend class ResourceCollectionBase;
 
 	public:
-		String getName() const { return name; }
-		String getResolvedName() const { return resolvedName; }
-		String getBasePath() const;
+		const String& getName() const { return name; }
+		const Path& getPath() const { return path; }
 		ResourceLoadPriority getPriority() const { return priority; }
 		HalleyAPI& getAPI() const { return *api; }
 		Metadata& getMeta() const { return *metadata; }
@@ -118,12 +117,12 @@ namespace Halley {
 
 	private:
 		ResourceLoader(ResourceLoader&& loader);
-		ResourceLoader(IResourceLocator& locator, String name, String resolvedName, ResourceLoadPriority priority, HalleyAPI* api, std::unique_ptr<Metadata> metadata);
+		ResourceLoader(IResourceLocator& locator, String name, Path path, ResourceLoadPriority priority, HalleyAPI* api, std::unique_ptr<Metadata> metadata);
 		~ResourceLoader();
 
 		IResourceLocator& locator;
 		String name;
-		String resolvedName;
+		Path path;
 		ResourceLoadPriority priority;
 		HalleyAPI* api;
 		std::unique_ptr<Metadata> metadata;

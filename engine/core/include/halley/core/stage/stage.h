@@ -41,7 +41,7 @@ namespace Halley
 		Game& getGame() const;
 
 		template <typename T>
-		std::shared_ptr<const T> getResource(String name) const {
+		std::shared_ptr<const T> getResource(const String& name) const {
 			return getResources().of<T>().get(name);
 		}
 

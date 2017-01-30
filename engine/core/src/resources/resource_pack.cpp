@@ -235,7 +235,7 @@ namespace Halley {
 		}
 	}
 
-	std::unique_ptr<ResourceData> ResourcePack::doGet(String resource, bool stream)
+	std::unique_ptr<ResourceData> ResourcePack::doGet(const String& resource, bool stream)
 	{
 		auto iter = entries.find(resource);
 		if (iter == entries.end()) throw Exception("Resource not found: "+resource);

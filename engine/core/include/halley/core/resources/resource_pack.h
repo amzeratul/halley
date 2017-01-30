@@ -49,7 +49,7 @@ namespace Halley {
 		void load(String path);
 
 	protected:
-		std::unique_ptr<ResourceData> doGet(String resource, bool stream) override;
+		std::unique_ptr<ResourceData> doGet(const String& resource, bool stream) override;
 		Vector<String> getResourceList() override;
 		int getPriority() const override { return priority; }
 

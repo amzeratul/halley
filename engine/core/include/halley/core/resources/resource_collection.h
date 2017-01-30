@@ -8,6 +8,7 @@
 
 namespace Halley
 {
+	enum class AssetType;
 	class Resource;
 	class Resources;
 	class ResourceLoader;
@@ -33,17 +34,16 @@ namespace Halley
 		};
 
 	public:
-		explicit ResourceCollectionBase(Resources& parent, const String& path);
+		explicit ResourceCollectionBase(Resources& parent, AssetType type);
 		virtual ~ResourceCollectionBase() {}
 
-		void setResource(int curDepth, const String& name, std::shared_ptr<Resource> resource);
+		void setResource(int curDepth, const String& assetId, std::shared_ptr<Resource> resource);
 		void clear();
-		void unload(const String& name);
+		void unload(const String& assetId);
 		void unloadAll(int minDepth = 0);
-		void flush(const String& name);
+		void flush(const String& assetId);
 		
-		String getPath() const { return path; }
-		String resolveName(const String& name) const;
+		Path resolvePath(const String& assetId) const;
 
 	protected:
 		virtual std::shared_ptr<Resource> loadResource(ResourceLoader& loader) = 0;
@@ -52,8 +52,8 @@ namespace Halley
 
 	private:
 		Resources& parent;
-		String path;
 		HashMap<String, Wrapper> resources;
+		AssetType type;
 	};
 
 	template <typename T>
@@ -62,13 +62,13 @@ namespace Halley
 		static_assert(std::is_base_of<Resource, T>::value, "Type must extend Resource");
 
 	public:
-		ResourceCollection(Resources& parent, const String& path)
-			: ResourceCollectionBase(parent, path)
+		ResourceCollection(Resources& parent, AssetType type)
+			: ResourceCollectionBase(parent, type)
 		{}
 
-		std::shared_ptr<const T> get(const String& name, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
+		std::shared_ptr<const T> get(const String& assetId, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
 		{
-			return std::static_pointer_cast<T>(doGet(name, priority));
+			return std::static_pointer_cast<T>(doGet(assetId, priority));
 		}
 
 	protected:

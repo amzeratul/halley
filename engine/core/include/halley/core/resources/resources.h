@@ -44,15 +44,16 @@ namespace Halley {
 		void init()
 		{
 			AssetType assetType = T::getAssetType();
-			int id = int();
+			int id = int(assetType);
 			resources.resize(std::max(resources.size(), size_t(id + 1)));
-			resources[id] = std::make_unique<ResourceCollection<T>>(*this, toString(assetType));
+			resources[id] = std::make_unique<ResourceCollection<T>>(*this, assetType);
 		}
 
 		template <typename T>
 		ResourceCollection<T>& of()
 		{
-			return static_cast<ResourceCollection<T>&>(*resources.at(int(T::getAssetType())));
+			AssetType assetType = T::getAssetType();
+			return static_cast<ResourceCollection<T>&>(*resources.at(int(assetType)));
 		}
 
 		template <typename T>

@@ -38,7 +38,7 @@ namespace Halley {
 		virtual ~IResourceLocatorProvider() {}
 
 	protected:
-		virtual std::unique_ptr<ResourceData> doGet(String resource, bool stream)=0;
+		virtual std::unique_ptr<ResourceData> doGet(const String& resource, bool stream)=0;
 		virtual Vector<String> getResourceList()=0;
 		virtual int getPriority() const { return 0; }
 	};
@@ -50,10 +50,10 @@ namespace Halley {
 		void add(std::unique_ptr<IResourceLocatorProvider> locator);
 		void addFileSystem(Path path);
 		
-		std::unique_ptr<ResourceData> getResource(String resource, bool stream);
-		std::unique_ptr<ResourceData> tryGetResource(String resource, bool stream);
-		std::unique_ptr<ResourceDataStatic> getStatic(String resource) override;
-		std::unique_ptr<ResourceDataStream> getStream(String resource) override;
+		std::unique_ptr<ResourceData> getResource(const String& resource, bool stream);
+		std::unique_ptr<ResourceData> tryGetResource(const String& resource, bool stream);
+		std::unique_ptr<ResourceDataStatic> getStatic(const String& resource) override;
+		std::unique_ptr<ResourceDataStream> getStream(const String& resource) override;
 		StringArray enumerate(String prefix = "", bool removePrefix = false, String suffixMatch = "");
 
 	private:

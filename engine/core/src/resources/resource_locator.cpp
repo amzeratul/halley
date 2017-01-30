@@ -47,7 +47,7 @@ namespace Halley {
 		locatorList.emplace_back(std::move(locator));
 	}
 	
-	std::unique_ptr<ResourceData> ResourceLocator::getResource(String resource, bool stream)
+	std::unique_ptr<ResourceData> ResourceLocator::getResource(const String& resource, bool stream)
 	{
 		auto result = tryGetResource(resource, stream);
 		if (result) {
@@ -58,7 +58,7 @@ namespace Halley {
 		}
 	}
 
-	std::unique_ptr<ResourceData> ResourceLocator::tryGetResource(String resource, bool stream)
+	std::unique_ptr<ResourceData> ResourceLocator::tryGetResource(const String& resource, bool stream)
 	{
 		auto result = locators.find(resource);
 		if (result != locators.end()) {
@@ -78,7 +78,7 @@ namespace Halley {
 		}
 	}
 
-	std::unique_ptr<ResourceDataStatic> ResourceLocator::getStatic(String resource)
+	std::unique_ptr<ResourceDataStatic> ResourceLocator::getStatic(const String& resource)
 	{
 		auto ptr = dynamic_cast<ResourceDataStatic*>(getResource(resource, false).release());
 		if (!ptr) {
@@ -87,7 +87,7 @@ namespace Halley {
 		return std::unique_ptr<ResourceDataStatic>(ptr);
 	}
 
-	std::unique_ptr<ResourceDataStream> ResourceLocator::getStream(String resource)
+	std::unique_ptr<ResourceDataStream> ResourceLocator::getStream(const String& resource)
 	{
 		auto ptr = dynamic_cast<ResourceDataStream*>(getResource(resource, true).release());
 		if (!ptr) {
