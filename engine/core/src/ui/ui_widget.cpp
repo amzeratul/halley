@@ -269,6 +269,16 @@ void UIWidget::sendEvent(UIEvent&& event) const
 	}
 }
 
+void UIWidget::playSound(const std::shared_ptr<const AudioClip>& clip)
+{
+	if (clip) {
+		auto root = getRoot();
+		if (root) {
+			root->playSound(clip);
+		}
+	}
+}
+
 void UIWidget::setWidgetRect(Rect4f rect)
 {
 	if (position != rect.getTopLeft()) {

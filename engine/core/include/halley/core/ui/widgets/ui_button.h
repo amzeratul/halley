@@ -7,12 +7,6 @@ namespace Halley {
 	class AudioClip;
 
 	class UIButton : public UIWidget {
-		enum class State {
-			Up,
-			Down,
-			Hover
-		};
-
 	public:
 		explicit UIButton(String id, std::shared_ptr<UIStyle> style);
 
@@ -25,14 +19,22 @@ namespace Halley {
 		void releaseMouse(int button) override;
 
 		void onClick(UIEventCallback callback);
+		virtual void onClicked();
 
-	private:
+	protected:
+		enum class State {
+			Up,
+			Down,
+			Hover
+		};
+
+		virtual bool setState(State state);
+
+		State curState = State::Up;
 		Sprite sprite;
 		std::shared_ptr<UIStyle> style;
-		bool held = false;
-		State curState = State::Up;
 
-		void playSound(const std::shared_ptr<const AudioClip>& clip);
-		bool setState(State state);
+	private:
+		bool held = false;
 	};
 }

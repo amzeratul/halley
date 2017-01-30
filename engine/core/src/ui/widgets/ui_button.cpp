@@ -59,7 +59,7 @@ void UIButton::releaseMouse(int button)
 {
 	if (button == 0) {
 		if (held && isMouseOver()) {
-			sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));
+			onClicked();
 		}
 		held = false;
 	}
@@ -70,14 +70,9 @@ void UIButton::onClick(UIEventCallback callback)
 	getEventHandler().setHandle(UIEventType::ButtonClicked, callback);
 }
 
-void UIButton::playSound(const std::shared_ptr<const AudioClip>& clip)
+void UIButton::onClicked()
 {
-	if (clip) {
-		auto root = getRoot();
-		if (root) {
-			root->playSound(clip);
-		}
-	}
+	sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));
 }
 
 bool UIButton::setState(State state)

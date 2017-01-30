@@ -5,7 +5,8 @@
 
 namespace Halley {
 	enum class UIEventType {
-		ButtonClicked
+		ButtonClicked,
+		CheckboxUpdated
 	};
 
     class UIEvent {

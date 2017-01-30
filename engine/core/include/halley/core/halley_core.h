@@ -57,6 +57,8 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "ui/ui_widget.h"
 
 #include "ui/widgets/ui_button.h"
+#include "ui/widgets/ui_checkbox.h"
+#include "ui/widgets/ui_dropdown.h"
 #include "ui/widgets/ui_image.h"
 #include "ui/widgets/ui_input.h"
 #include "ui/widgets/ui_label.h"

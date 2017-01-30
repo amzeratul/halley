@@ -32,5 +32,10 @@ namespace Halley {
 
 		Sprite horizontalDiv;
 		Sprite verticalDiv;
+
+		Sprite checkboxNormal;
+		Sprite checkboxChecked;
+		Sprite checkboxNormalHover;
+		Sprite checkboxCheckedHover;
 	};
 }

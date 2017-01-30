@@ -71,6 +71,8 @@ namespace Halley {
 
 		void sendEvent(UIEvent&& event) const override;
 
+		void playSound(const std::shared_ptr<const AudioClip>& clip);
+
 	private:
 		void setWidgetRect(Rect4f rect);
 		void setParent(UIParent& parent);
