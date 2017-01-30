@@ -10,8 +10,8 @@ void CopyFileImporter::import(const ImportingAsset& asset, IAssetCollector& coll
 {
 	Path mainFile = asset.assetId;
 	if (asset.metadata) {
-		collector.output(AssetType::BinaryFile, asset.inputFiles[0].data, *asset.metadata);
+		collector.output(asset.assetId, AssetType::BinaryFile, asset.inputFiles[0].data, *asset.metadata);
 	} else {
-		collector.output(AssetType::BinaryFile, asset.inputFiles[0].data);
+		collector.output(asset.assetId, AssetType::BinaryFile, asset.inputFiles[0].data);
 	}
 }

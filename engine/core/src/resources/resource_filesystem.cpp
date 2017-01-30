@@ -28,11 +28,11 @@ using namespace Halley;
 
 FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, Path _basePath)
 	: system(system)
-    , basePath(_basePath)
+    , basePath(_basePath / "assets")
 {
 	// Read assetDb
 	assetDb = std::make_unique<AssetDatabase>();
-	auto reader = system.getDataReader((basePath / "asset.db").string());
+	auto reader = system.getDataReader((basePath / "assets.db").string());
 
 	Bytes result(reader->size());
 	reader->read(gsl::as_writeable_bytes(gsl::span<Byte>(result)));
@@ -45,14 +45,16 @@ const AssetDatabase& FileSystemResourceLocator::getAssetDatabase() const
 	return *assetDb;
 }
 
-std::unique_ptr<ResourceData> FileSystemResourceLocator::getData(const String& path, AssetType type, bool stream)
+std::unique_ptr<ResourceData> FileSystemResourceLocator::getData(const String& asset, AssetType type, bool stream)
 {
+	auto path = (basePath / assetDb->getDatabase(type).get(asset).path).string();
+
 	if (stream) {
 		return std::make_unique<ResourceDataStream>(path, [=] () -> std::unique_ptr<ResourceDataReader> {
-			return system.getDataReader(path.cppStr());
+			return system.getDataReader(path);
 		});
 	} else {
-		auto fp = system.getDataReader(path.cppStr());
+		auto fp = system.getDataReader(path);
 		if (!fp) {
 			return std::unique_ptr<ResourceDataStatic>();
 		}

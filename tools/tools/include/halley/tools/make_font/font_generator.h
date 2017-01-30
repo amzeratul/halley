@@ -7,13 +7,14 @@
 
 namespace Halley
 {
+	class Font;
+
 	struct FontGeneratorResult
 	{
 		bool success = false;
-		String assetName;
 		std::unique_ptr<Image> image;
 		std::unique_ptr<Metadata> imageMeta;
-		Bytes fontData;
+		std::unique_ptr<Font> font;
 
 		FontGeneratorResult();
 		FontGeneratorResult(FontGeneratorResult&& other);
@@ -43,7 +44,7 @@ namespace Halley
 		FontGeneratorResult generateFont(String assetName, gsl::span<const gsl::byte> fontFile, Vector2i size, float radius, int supersample, Range<int> range);
 
 	private:
-		Bytes generateFontMapBinary(String imgName, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float radius, Vector2i imageSize) const;
+		std::unique_ptr<Font> generateFontMapBinary(FontFace& font, Vector<CharcodeEntry>& entries, float scale, float radius, Vector2i imageSize) const;
 		static std::unique_ptr<Metadata> generateTextureMeta();
 
 		bool verbose;

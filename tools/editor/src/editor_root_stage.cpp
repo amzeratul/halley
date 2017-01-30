@@ -72,7 +72,7 @@ void EditorRootStage::initSprites()
 	{
 		// Background
 		{
-			auto mat = std::make_shared<Material>(getResource<MaterialDefinition>("scanlines"));
+			auto mat = std::make_shared<Material>(getResource<MaterialDefinition>("Halley/Scanlines"));
 			mat
 				->set("u_col0", Colour4f(0.08f))
 				.set("u_col1", Colour4f(0.07f))

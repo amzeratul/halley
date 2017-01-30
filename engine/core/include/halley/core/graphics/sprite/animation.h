@@ -102,6 +102,7 @@ namespace Halley
 		static std::unique_ptr<Animation> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Animation; }
 
+		const String& getName() const { return name; }
 		const SpriteSheet& getSpriteSheet() const { return *spriteSheet; }
 		std::shared_ptr<Material> getMaterial() const { return material; }
 		const AnimationSequence& getSequence(const String& name) const;

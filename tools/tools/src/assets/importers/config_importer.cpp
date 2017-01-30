@@ -10,7 +10,7 @@ void ConfigImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 {
 	ConfigFile config;
 	parseConfig(config, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
-	collector.output(AssetType::ConfigFile, Serializer::toBytes(config));
+	collector.output(asset.assetId, AssetType::ConfigFile, Serializer::toBytes(config));
 }
 
 static ConfigNode parseYAMLNode(const YAML::Node& node)

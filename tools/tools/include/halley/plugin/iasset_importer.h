@@ -36,12 +36,14 @@ namespace Halley
 	class AssetResource
 	{
 	public:
+		String name;
 		AssetType type;
 		String filepath;
 		Metadata metadata;
 
 		void serialize(Serializer& s) const
 		{
+			s << name;
 			s << int(type);
 			s << filepath;
 			s << metadata;
@@ -49,6 +51,7 @@ namespace Halley
 		
 		void deserialize(Deserializer& s)
 		{
+			s >> name;
 			int tmp;
 			s >> tmp;
 			type = AssetType(tmp);
@@ -61,8 +64,8 @@ namespace Halley
 	{
 	public:
 		virtual ~IAssetCollector() {}
-		virtual void output(AssetType type, const Bytes& data, Maybe<Metadata> metadata = {}) = 0;
-		virtual void output(AssetType type, gsl::span<const gsl::byte> data, Maybe<Metadata> metadata = {}) = 0;
+		virtual void output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata = {}) = 0;
+		virtual void output(const String& name, AssetType type, gsl::span<const gsl::byte> data, Maybe<Metadata> metadata = {}) = 0;
 		virtual void addAdditionalAsset(ImportingAsset&& asset) = 0;
 		virtual bool reportProgress(float progress, const String& label = "") = 0;
 		virtual Bytes readAdditionalFile(const Path& filePath) const = 0;

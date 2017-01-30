@@ -48,7 +48,12 @@ std::unique_ptr<ResourceData> ResourceLocator::getResource(const String& asset, 
 {
 	auto result = locators.find(asset);
 	if (result != locators.end()) {
-		return result->second->getData(asset, type, stream);
+		auto data = result->second->getData(asset, type, stream);
+		if (data) {
+			return data;
+		} else {
+			throw Exception("Unable to load resource: " + asset);
+		}
 	} else {
 		throw Exception("Unable to locate resource: " + asset);
 	}

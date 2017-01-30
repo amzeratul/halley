@@ -11,7 +11,7 @@ void AnimationImporter::import(const ImportingAsset& asset, IAssetCollector& col
 {
 	Animation animation;
 	parseAnimation(animation, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
-	collector.output(AssetType::Animation, Serializer::toBytes(animation));
+	collector.output(animation.getName(), AssetType::Animation, Serializer::toBytes(animation));
 }
 
 void AnimationImporter::parseAnimation(Animation& animation, gsl::span<const gsl::byte> data)

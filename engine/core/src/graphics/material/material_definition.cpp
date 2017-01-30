@@ -79,6 +79,11 @@ MaterialPass& MaterialDefinition::getPass(int n)
 	return passes[n];
 }
 
+const String& MaterialDefinition::getName() const
+{
+	return name;
+}
+
 std::unique_ptr<MaterialDefinition> MaterialDefinition::loadResource(ResourceLoader& loader)
 {
 	return std::make_unique<MaterialDefinition>(loader);

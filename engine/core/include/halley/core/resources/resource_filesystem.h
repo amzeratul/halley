@@ -32,7 +32,7 @@ namespace Halley {
 		FileSystemResourceLocator(SystemAPI& system, Path basePath);
 
 	protected:
-		std::unique_ptr<ResourceData> getData(const String& path, AssetType type, bool stream) override;
+		std::unique_ptr<ResourceData> getData(const String& asset, AssetType type, bool stream) override;
 		const AssetDatabase& getAssetDatabase() const override;
 		int getPriority() const override { return -1; }
 

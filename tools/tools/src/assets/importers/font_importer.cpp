@@ -6,6 +6,7 @@
 #include "halley/tools/make_font/font_generator.h"
 #include "halley/file_formats/image.h"
 #include "halley/tools/file/filesystem.h"
+#include "halley/core/graphics/text/font.h"
 
 using namespace Halley;
 
@@ -32,13 +33,13 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	if (!result.success) {
 		throw Exception("Failed to generate font: " + asset.assetId);
 	}
-	
-	collector.output(AssetType::Font, result.fontData);
+
+	collector.output(result.font->getName(), AssetType::Font, Serializer::toBytes(*result.font));
 
 	auto imgData = result.image->savePNGToBytes();
 
 	ImportingAsset image;
-	image.assetId = asset.assetId;
+	image.assetId = asset.assetId + ":img";
 	image.assetType = ImportAssetType::Image;
 	image.metadata = std::move(result.imageMeta);
 	image.inputFiles.emplace_back(ImportingAssetFile("", std::move(imgData)));

@@ -186,7 +186,7 @@ std::vector<AssetResource> ImportAssetsDatabase::getOutFiles(String assetId) con
 	}
 }
 
-constexpr static int currentAssetVersion = 9;
+constexpr static int currentAssetVersion = 10;
 
 void ImportAssetsDatabase::serialize(Serializer& s) const
 {
@@ -210,7 +210,7 @@ std::unique_ptr<AssetDatabase> ImportAssetsDatabase::makeAssetDatabase() const
 	for (auto& a: assetsImported) {
 		auto& asset = a.second.asset;
 		for (auto& o: asset.outputFiles) {
-			result->addAsset(a.first, o.type, AssetDatabase::Entry(o.filepath, o.metadata));
+			result->addAsset(o.name, o.type, AssetDatabase::Entry(o.filepath, o.metadata));
 		}
 	}
 	return result;

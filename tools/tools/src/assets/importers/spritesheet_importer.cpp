@@ -9,5 +9,5 @@ void SpriteSheetImporter::import(const ImportingAsset& asset, IAssetCollector& c
 {
 	SpriteSheet sheet;
 	sheet.loadJson(gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
-	collector.output(AssetType::SpriteSheet, Serializer::toBytes(sheet));
+	collector.output(asset.assetId, AssetType::SpriteSheet, Serializer::toBytes(sheet));
 }

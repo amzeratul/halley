@@ -24,11 +24,12 @@ void AsepriteImporter::import(const ImportingAsset& asset, IAssetCollector& coll
 	}
 
 	// Import
-	auto frames = importAseprite(asset.assetId, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data)));
+	String spriteName = asset.assetId;
+	auto frames = importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data)));
 
 	// Write animation
-	Animation animation = generateAnimation(asset.assetId, frames);
-	collector.output(AssetType::Animation, Serializer::toBytes(animation));
+	Animation animation = generateAnimation(spriteName, frames);
+	collector.output(spriteName + ":animation", AssetType::Animation, Serializer::toBytes(animation));
 
 	// Split grid
 	Vector2i grid(meta.getInt("tileWidth", 0), meta.getInt("tileHeight", 0));
@@ -38,8 +39,8 @@ void AsepriteImporter::import(const ImportingAsset& asset, IAssetCollector& coll
 
 	// Generate atlas + spritesheet
 	SpriteSheet spriteSheet;
-	auto atlasImage = generateAtlas(asset.assetId, frames, spriteSheet, pivot);
-	collector.output(AssetType::SpriteSheet, Serializer::toBytes(spriteSheet));
+	auto atlasImage = generateAtlas(spriteName, frames, spriteSheet, pivot);
+	collector.output(spriteName + ":spritesheet", AssetType::SpriteSheet, Serializer::toBytes(spriteSheet));
 
 	// Image metafile
 	auto size = atlasImage->getSize();
@@ -48,7 +49,7 @@ void AsepriteImporter::import(const ImportingAsset& asset, IAssetCollector& coll
 
 	// Write image
 	ImportingAsset image;
-	image.assetId = asset.assetId;
+	image.assetId = spriteName + ":img";
 	image.assetType = ImportAssetType::Image;
 	image.metadata = std::make_unique<Metadata>(meta);
 	image.inputFiles.emplace_back(ImportingAssetFile("", atlasImage->savePNGToBytes()));
@@ -162,7 +163,7 @@ Animation AsepriteImporter::generateAnimation(const String& assetName, const std
 
 	animation.setName(assetName);
 	animation.setMaterialName("sprite");
-	animation.setSpriteSheetName(assetName);
+	animation.setSpriteSheetName(assetName + ":spritesheet");
 
 	std::map<String, AnimationSequence> sequences;
 
@@ -223,7 +224,7 @@ std::unique_ptr<Image> AsepriteImporter::makeAtlas(const String& assetName, cons
 	auto image = std::make_unique<Image>(size.x, size.y);
 	image->clear(0);
 
-	spriteSheet.setTextureName(assetName);
+	spriteSheet.setTextureName(assetName + ":img");
 
 	for (auto& packedImg: result) {
 		ImageData* img = reinterpret_cast<ImageData*>(packedImg.data);

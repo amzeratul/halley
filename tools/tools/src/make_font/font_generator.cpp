@@ -182,11 +182,9 @@ FontGeneratorResult FontGenerator::generateFont(String assetName, gsl::span<cons
 		return FontGeneratorResult();
 	}
 
-	String asset = Path(assetName).getStem().string();
 	FontGeneratorResult genResult;
 	genResult.success = true;
-	genResult.assetName = "font/" + asset;
-	genResult.fontData = generateFontMapBinary(asset + ".png", font, codes, scale, radius, size);
+	genResult.font = generateFontMapBinary(font, codes, scale, radius, size);
 	genResult.image = std::move(dstImg);
 	genResult.imageMeta = generateTextureMeta();
 	progressReporter(1.0f, "Done");
@@ -194,16 +192,15 @@ FontGeneratorResult FontGenerator::generateFont(String assetName, gsl::span<cons
 	return genResult;
 }
 
-Bytes FontGenerator::generateFontMapBinary(String imgName, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float radius, Vector2i imageSize) const
+std::unique_ptr<Font> FontGenerator::generateFontMapBinary(FontFace& font, Vector<CharcodeEntry>& entries, float scale, float radius, Vector2i imageSize) const
 {
 	String name = font.getName();
-	String imageName = imgName;
 	float ascender = (font.getAscender() * scale);
 	float height = (font.getHeight() * scale);
 	float sizePt = (font.getSize() * scale);
 	float smoothRadius = radius * scale;
 
-	Font result(name, imageName, ascender, height, sizePt, smoothRadius);
+	std::unique_ptr<Font> result = std::make_unique<Font>(name, name + ":img", ascender, height, sizePt, smoothRadius);
 
 	for (auto& c: entries) {
 		auto metrics = font.getMetrics(c.charcode, scale);
@@ -215,10 +212,10 @@ Bytes FontGenerator::generateFontMapBinary(String imgName, FontFace& font, Vecto
 		Vector2f verticalBearing = metrics.bearingVertical;
 		Vector2f advance = metrics.advance;
 
-		result.addGlyph(Font::Glyph(charcode, area, size, horizontalBearing, verticalBearing, advance));
+		result->addGlyph(Font::Glyph(charcode, area, size, horizontalBearing, verticalBearing, advance));
 	}
 	
-	return Serializer::toBytes(result);
+	return result;
 }
 
 std::unique_ptr<Metadata> FontGenerator::generateTextureMeta()
@@ -237,7 +234,7 @@ FontGeneratorResult::~FontGeneratorResult() = default;
 
 std::vector<Path> FontGeneratorResult::write(Path dir, bool verbose) const
 {
-	Path fileName = assetName.cppStr();
+	Path fileName = font->getName();
 	Path imgName = fileName.replaceExtension(".png");
 	Path pngPath = imgName;
 	Path binPath = fileName.replaceExtension(".font");
@@ -247,7 +244,7 @@ std::vector<Path> FontGeneratorResult::write(Path dir, bool verbose) const
 	}
 
 	image->savePNG(dir / pngPath);
-	FileSystem::writeFile(dir / binPath, fontData);
+	FileSystem::writeFile(dir / binPath, Serializer::toBytes(*font));
 	FileSystem::writeFile(dir / metaPath, Serializer::toBytes(*imageMeta));
 
 	return {pngPath, binPath, metaPath};

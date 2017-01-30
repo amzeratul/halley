@@ -13,17 +13,18 @@ AssetCollector::AssetCollector(const ImportingAsset& asset, const Path& dstDir, 
 	, reporter(reporter)
 {}
 
-void AssetCollector::output(AssetType type, const Bytes& data, Maybe<Metadata> metadata)
+void AssetCollector::output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata)
 {
-	output(type, gsl::as_bytes(gsl::span<const Byte>(data)), metadata);
+	output(name, type, gsl::as_bytes(gsl::span<const Byte>(data)), metadata);
 }
 
-void AssetCollector::output(AssetType type, gsl::span<const gsl::byte> data, Maybe<Metadata> metadata)
+void AssetCollector::output(const String& name, AssetType type, gsl::span<const gsl::byte> data, Maybe<Metadata> metadata)
 {
 	Path filePath = Path(toString(type)) / toString(std::hash<std::string>()(asset.assetId.cppStr()), 16);
 	FileSystem::writeFile(dstDir / filePath, data);
 
 	AssetResource result;
+	result.name = name;
 	result.type = type;
 	result.filepath = filePath.string();
 	if (metadata) {

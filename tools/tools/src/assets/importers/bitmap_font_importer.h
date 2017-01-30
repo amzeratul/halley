@@ -1,6 +1,7 @@
 #pragma once
 #include "halley/plugin/iasset_importer.h"
 #include "halley/maths/vector2.h"
+#include "halley/core/graphics/text/font.h"
 
 namespace Halley
 {
@@ -14,6 +15,6 @@ namespace Halley
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 
 	private:
-		Bytes parseBitmapFontXML(String imageName, Vector2i imageSize, const Bytes& data);
+		Font parseBitmapFontXML(Vector2i imageSize, const Bytes& data);
 	};
 }

@@ -58,6 +58,7 @@ namespace Halley
 		int getNumPasses() const;
 		MaterialPass& getPass(int n);
 
+		const String& getName() const;
 		int getVertexStride() const { return vertexStride; }
 		int getVertexPosOffset() const { return vertexPosOffset; }
 		const Vector<MaterialAttribute>& getAttributes() const { return attributes; }

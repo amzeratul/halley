@@ -41,17 +41,18 @@ void BitmapFontImporter::import(const ImportingAsset& asset, IAssetCollector& co
 	Vector2i imageSize = Image::getImageSize(pngPath.getFilename().getString(), gsl::as_bytes(gsl::span<Byte>(pngData)));
 
 	// Generate font from XML
-	collector.output(AssetType::Font, parseBitmapFontXML(asset.assetId, imageSize, xmlData));
+	Font font = parseBitmapFontXML(imageSize, xmlData);
+	collector.output(font.getName(), AssetType::Font, Serializer::toBytes(font));
 
 	// Pass image forward
 	ImportingAsset image;
-	image.assetId = asset.assetId;
+	image.assetId = font.getName() + ":img";
 	image.assetType = ImportAssetType::Image;
 	image.inputFiles.emplace_back(ImportingAssetFile("", std::move(pngData)));
 	collector.addAdditionalAsset(std::move(image));
 }
 
-Bytes BitmapFontImporter::parseBitmapFontXML(String imageName, Vector2i imageSize, const Bytes& data)
+Font BitmapFontImporter::parseBitmapFontXML(Vector2i imageSize, const Bytes& data)
 {
 	ticpp::Document doc;
 	doc.Parse(String(reinterpret_cast<const char*>(data.data()), data.size()).cppStr());
@@ -69,7 +70,7 @@ Bytes BitmapFontImporter::parseBitmapFontXML(String imageName, Vector2i imageSiz
 			fontElem->GetAttribute("height", &fontHeight);
 			fontElem->GetAttribute("size", &fontSize);
 
-			Font font(family, imageName, 0, float(fontHeight), float(fontSize));
+			Font font(family, family + ":img", 0, float(fontHeight), float(fontSize));
 
 			ticpp::Iterator<ticpp::Element> child("Char");
 			for (child = child.begin(fontIter); child != child.end(); ++child) {
@@ -102,7 +103,7 @@ Bytes BitmapFontImporter::parseBitmapFontXML(String imageName, Vector2i imageSiz
 				font.addGlyph(Font::Glyph(charcode, area, size, bearing, bearing, advance));
 			}
 
-			return Serializer::toBytes(font);
+			return font;
 		}
 	}
 
