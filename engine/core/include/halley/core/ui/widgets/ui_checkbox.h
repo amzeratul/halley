@@ -4,7 +4,7 @@
 namespace Halley {
 	class UIStyle;
 
-	class UICheckbox : public UIButton {
+	class UICheckbox : public UIClickable {
 	public:
 		explicit UICheckbox(String id, std::shared_ptr<UIStyle> style, bool checked = false);
 
@@ -12,9 +12,11 @@ namespace Halley {
         void setChecked(bool checked);
 
 		void onClicked() override;
-		bool setState(State state) override;
+		void doSetState(State state) override;
 
 	private:
+		Sprite sprite;
+		std::shared_ptr<UIStyle> style;
         bool checked = false;
 	};
 }

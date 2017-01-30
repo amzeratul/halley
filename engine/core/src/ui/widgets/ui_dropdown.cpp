@@ -4,7 +4,7 @@
 using namespace Halley;
 
 UIDropdown::UIDropdown(String id, std::shared_ptr<UIStyle> style, const std::vector<String>& os, int defaultOption)
-	: UIWidget(id, {})
+	: UIClickable(id, {})
 	, style(style)
 	, options(os)
 	, curOption(defaultOption)
@@ -24,9 +24,15 @@ UIDropdown::UIDropdown(String id, std::shared_ptr<UIStyle> style, const std::vec
 	setMinSize(Vector2f(maxExtents + 14, 14));
 }
 
-bool UIDropdown::isFocusable() const
+void UIDropdown::setSelectedOption(int option)
 {
-	return true;
+	curOption = clamp(option, 0, int(options.size()));
+	label.setText(options[curOption]);
+}
+
+int UIDropdown::getSelectedOption() const
+{
+	return curOption;
 }
 
 void UIDropdown::draw(UIPainter& painter) const
@@ -44,4 +50,18 @@ void UIDropdown::update(Time t, bool moved)
 		sprite.setPos(getPosition()).scaleTo(getSize());
 		label.setAlignment(0.0f).setPosition(getPosition() + Vector2f(3, 0));
 	}
+}
+
+void UIDropdown::onClicked()
+{
+	setSelectedOption((curOption + 1) % options.size());
+}
+
+void UIDropdown::doSetState(State state)
+{
+}
+
+bool UIDropdown::isFocusLocked() const
+{
+	return isOpen || UIClickable::isFocusLocked();
 }

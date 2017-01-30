@@ -4,7 +4,7 @@
 using namespace Halley;
 
 UICheckbox::UICheckbox(String id, std::shared_ptr<UIStyle> style, bool checked)
-	: UIButton(id, style)
+	: UIClickable(id, {})
 	, checked(checked)
 {
 	sprite = style->checkboxNormal;
@@ -27,16 +27,11 @@ void UICheckbox::onClicked()
 	sendEvent(UIEvent(UIEventType::CheckboxUpdated, getId(), checked ? "true" : "false"));
 }
 
-bool UICheckbox::setState(State state)
+void UICheckbox::doSetState(State state)
 {
-	if (curState != state) {
-		if (state == State::Hover) {
-			sprite = checked ? style->checkboxCheckedHover : style->checkboxNormalHover;
-		} else {
-			sprite = checked ? style->checkboxChecked : style->checkboxNormal;
-		}
-		curState = state;
-		return true;
+	if (state == State::Hover) {
+		sprite = checked ? style->checkboxCheckedHover : style->checkboxNormalHover;
+	} else {
+		sprite = checked ? style->checkboxChecked : style->checkboxNormal;
 	}
-	return false;
 }

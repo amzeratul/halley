@@ -6,12 +6,10 @@ namespace Halley {
 	class UIStyle;
 	class AudioClip;
 
-	class UIButton : public UIWidget {
+	class UIClickable : public UIWidget {
 	public:
-		explicit UIButton(String id, std::shared_ptr<UIStyle> style);
+		explicit UIClickable(String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 
-		void draw(UIPainter& painter) const override;
-		void update(Time t, bool moved) override;
 		bool isFocusable() const override;
 		bool isFocusLocked() const override;
 
@@ -19,7 +17,7 @@ namespace Halley {
 		void releaseMouse(int button) override;
 
 		void onClick(UIEventCallback callback);
-		virtual void onClicked();
+		virtual void onClicked() = 0;
 
 	protected:
 		enum class State {
@@ -28,13 +26,29 @@ namespace Halley {
 			Hover
 		};
 
-		virtual bool setState(State state);
-
-		State curState = State::Up;
-		Sprite sprite;
-		std::shared_ptr<UIStyle> style;
+		virtual void doSetState(State state) = 0;
+		bool updateButton();
 
 	private:
+		State curState = State::Up;
 		bool held = false;
+
+		bool setState(State state);
+	};
+
+	class UIButton : public UIClickable {
+	public:
+		explicit UIButton(String id, std::shared_ptr<UIStyle> style);
+
+		void draw(UIPainter& painter) const override;
+		void update(Time t, bool moved) override;
+		void onClicked() override;
+
+	protected:
+		void doSetState(State state) override;
+
+	private:
+		Sprite sprite;
+		std::shared_ptr<UIStyle> style;
 	};
 }
