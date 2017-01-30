@@ -104,7 +104,7 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 	// Have any of the output files gone missing?
 	if (!failed) {
 		for (auto& o: oldAsset.outputFiles) {
-			if (!FileSystem::exists(directory / o)) {
+			if (!FileSystem::exists(directory / o.filepath)) {
 				return true;
 			}
 		}
@@ -173,7 +173,7 @@ std::vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() con
 	return result;
 }
 
-std::vector<Path> ImportAssetsDatabase::getOutFiles(String assetId) const
+std::vector<AssetResource> ImportAssetsDatabase::getOutFiles(String assetId) const
 {
 	auto iter = assetsImported.find(assetId);
 	if (iter != assetsImported.end()) {

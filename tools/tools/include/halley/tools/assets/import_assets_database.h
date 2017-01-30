@@ -20,7 +20,7 @@ namespace Halley
 		String assetId;
 		Path srcDir;
 		std::vector<InputFile> inputFiles;
-		std::vector<Path> outputFiles;
+		std::vector<AssetResource> outputFiles;
 		ImportAssetType assetType = ImportAssetType::Undefined;
 
 		ImportAssetsDatabaseEntry() {}
@@ -73,7 +73,7 @@ namespace Halley
 		void markInputAsPresent(const ImportAssetsDatabaseEntry& asset);
 		std::vector<ImportAssetsDatabaseEntry> getAllMissing() const;
 
-		std::vector<Path> getOutFiles(String assetId) const;
+		std::vector<AssetResource> getOutFiles(String assetId) const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

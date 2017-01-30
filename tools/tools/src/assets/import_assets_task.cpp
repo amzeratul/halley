@@ -79,7 +79,6 @@ static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& as
 bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
 	std::vector<AssetResource> out;
-	std::vector<Path> outFiles;
 	try {
 		// Create queue
 		std::list<ImportingAsset> toLoad;
@@ -118,7 +117,6 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 
 			for (auto& o: collector.collectAssets()) {
 				out.emplace_back(o);
-				outFiles.emplace_back(o.filepath);
 			}
 		}
 	} catch (std::exception& e) {
@@ -136,14 +134,14 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 	// Retrieve previous output from this asset, and remove any files which went missing
 	auto previous = db.getOutFiles(asset.assetId);
 	for (auto& f: previous) {
-		if (std::find(outFiles.begin(), outFiles.end(), f) == outFiles.end()) {
+		if (std::find_if(out.begin(), out.end(), [&] (const AssetResource& r) { return r.filepath == f.filepath; }) == out.end()) {
 			// File no longer exists as part of this asset, remove it
-			FileSystem::remove(assetsPath / f);
+			FileSystem::remove(assetsPath / f.filepath);
 		}
 	}
 
 	// Store output in db
-	asset.outputFiles = outFiles;
+	asset.outputFiles = out;
 	db.markAsImported(asset);
 
 	return true;

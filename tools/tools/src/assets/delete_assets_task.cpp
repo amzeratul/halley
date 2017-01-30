@@ -23,7 +23,7 @@ void DeleteAssetsTask::run()
 
 		try {
 			for (auto& f : asset.outputFiles) {
-				FileSystem::remove(assetsPath / f);
+				FileSystem::remove(assetsPath / f.filepath);
 			}
 			db.markDeleted(asset);
 		} catch (std::exception& e) {

@@ -7,6 +7,7 @@
 #include "halley/resources/metadata.h"
 #include "halley/resources/resource.h"
 #include "halley/data_structures/maybe.h"
+#include "halley/file/byte_serializer.h"
 
 namespace Halley
 {
@@ -38,6 +39,22 @@ namespace Halley
 		AssetType type;
 		String filepath;
 		Metadata metadata;
+
+		void serialize(Serializer& s) const
+		{
+			s << int(type);
+			s << filepath;
+			s << metadata;
+		}
+		
+		void deserialize(Deserializer& s)
+		{
+			int tmp;
+			s >> tmp;
+			type = AssetType(tmp);
+			s >> filepath;
+			s >> metadata;
+		}
 	};
 
 	class IAssetCollector

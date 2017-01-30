@@ -43,6 +43,7 @@ set(SOURCES
         "src/input/input_vibration.cpp"
         "src/input/input_virtual.cpp"
 
+        "src/resources/asset_database.cpp"
         "src/resources/resource_collection.cpp"
         "src/resources/resource_filesystem.cpp"
         "src/resources/resource_locator.cpp"
@@ -129,6 +130,7 @@ set(HEADERS
         "include/halley/core/input/input_vibration.h"
         "include/halley/core/input/input_virtual.h"
         
+        "include/halley/core/resources/asset_database.h"
         "include/halley/core/resources/resource_collection.h"
         "include/halley/core/resources/resource_filesystem.h"
         "include/halley/core/resources/resource_locator.h"

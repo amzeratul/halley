@@ -20,8 +20,8 @@ void AssetCollector::output(AssetType type, const Bytes& data, Maybe<Metadata> m
 
 void AssetCollector::output(AssetType type, gsl::span<const gsl::byte> data, Maybe<Metadata> metadata)
 {
-	Path filePath = dstDir / toString(type) / toString(std::hash<std::string>()(asset.assetId.cppStr()), 16);
-	FileSystem::writeFile(filePath, data);
+	Path filePath = Path(toString(type)) / toString(std::hash<std::string>()(asset.assetId.cppStr()), 16);
+	FileSystem::writeFile(dstDir / filePath, data);
 
 	AssetResource result;
 	result.type = type;
