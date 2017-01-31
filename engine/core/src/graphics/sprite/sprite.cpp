@@ -100,7 +100,7 @@ Vector2f Sprite::getScaledSize() const
 Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 {
 	if (materialName == "") {
-		materialName = "sprite";
+		materialName = "Halley/Sprite";
 	}
 	setMaterial(std::make_shared<Material>(resources.get<MaterialDefinition>(materialName)));
 	return *this;
@@ -122,7 +122,7 @@ Sprite& Sprite::setMaterial(std::shared_ptr<Material> m)
 Sprite& Sprite::setImage(Resources& resources, String imageName, String materialName)
 {
 	if (materialName == "") {
-		materialName = "sprite";
+		materialName = "Halley/Sprite";
 	}
 	setImage(resources.get<Texture>(imageName), resources.get<MaterialDefinition>(materialName));
 	return *this;
@@ -229,7 +229,7 @@ Sprite& Sprite::setTexRect(Rect4f v)
 Sprite& Sprite::setSprite(Resources& resources, String spriteSheetName, String imageName, String materialName)
 {
 	if (materialName == "") {
-		materialName = "sprite";
+		materialName = "Halley/Sprite";
 	}
 	auto spriteSheet = resources.get<SpriteSheet>(spriteSheetName);
 	setImage(spriteSheet->getTexture(), resources.get<MaterialDefinition>(materialName));

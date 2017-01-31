@@ -9,9 +9,9 @@ using namespace Halley;
 
 ConsoleWindow::ConsoleWindow(Resources& resources)
 {
-	auto backgroundMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite"));
+	auto backgroundMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("Halley/DistanceFieldSprite"));
 	backgroundMaterial
-		->set("tex0", resources.get<Texture>("round_rect.png"))
+		->set("tex0", resources.get<Texture>("image/round_rect.png"))
 		.set("u_smoothness", 1.0f / 16.0f)
 		.set("u_outline", 0.5f)
 		.set("u_outlineColour", Colour(0.47f, 0.47f, 0.47f));
@@ -21,7 +21,7 @@ ConsoleWindow::ConsoleWindow(Resources& resources)
 		.setSliced(backgroundMaterial->getMainTexture()->getSlices())
 		.setColour(Colour4f(0.0f, 0.0f, 0.0f, 0.4f));
 
-	font = resources.get<Font>("Inconsolata.font");
+	font = resources.get<Font>("Inconsolata Medium");
 
 	printLn("Welcome to the Halley Game Engine Editor.");
 	Logger::addSink(*this);

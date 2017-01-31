@@ -10,8 +10,8 @@ void ShaderImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 {
 	Path mainFile = asset.inputFiles.at(0).name;
 	if (asset.metadata) {
-		collector.output(asset.assetId, AssetType::TextFile, asset.inputFiles[0].data, *asset.metadata);
+		collector.output(asset.assetId, AssetType::BinaryFile, asset.inputFiles[0].data, *asset.metadata);
 	} else {
-		collector.output(asset.assetId, AssetType::TextFile, asset.inputFiles[0].data);
+		collector.output(asset.assetId, AssetType::BinaryFile, asset.inputFiles[0].data);
 	}
 }

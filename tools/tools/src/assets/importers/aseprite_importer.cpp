@@ -52,7 +52,7 @@ void AsepriteImporter::import(const ImportingAsset& asset, IAssetCollector& coll
 	image.assetId = spriteName + ":img";
 	image.assetType = ImportAssetType::Image;
 	image.metadata = std::make_unique<Metadata>(meta);
-	image.inputFiles.emplace_back(ImportingAssetFile("", atlasImage->savePNGToBytes()));
+	image.inputFiles.emplace_back(ImportingAssetFile(spriteName + ":img.png", atlasImage->savePNGToBytes()));
 	collector.addAdditionalAsset(std::move(image));
 }
 
@@ -162,7 +162,7 @@ Animation AsepriteImporter::generateAnimation(const String& assetName, const std
 	Animation animation;
 
 	animation.setName(assetName);
-	animation.setMaterialName("sprite");
+	animation.setMaterialName("Halley/Sprite");
 	animation.setSpriteSheetName(assetName + ":spritesheet");
 
 	std::map<String, AnimationSequence> sequences;

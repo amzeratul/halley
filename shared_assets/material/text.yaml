@@ -1,5 +1,5 @@
 ---
-name: Text
+name: Halley/Text
 base: sprite_base.yaml
 uniforms:
   - tex0: sampler2D

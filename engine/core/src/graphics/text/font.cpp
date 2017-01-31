@@ -67,8 +67,8 @@ Font::Font(ResourceLoader& loader)
 	auto ds = Deserializer(data->getSpan());
 	deserialize(ds);
 
-	auto texture = loader.getAPI().getResource<Texture>("../font/" + imageName);
-	auto matDef = loader.getAPI().getResource<MaterialDefinition>(distanceField ? "text" : "sprite");
+	auto texture = loader.getAPI().getResource<Texture>(imageName);
+	auto matDef = loader.getAPI().getResource<MaterialDefinition>(distanceField ? "Halley/Text" : "Halley/Sprite");
 	material = std::make_unique<Material>(matDef);
 	material->set("tex0", texture);
 }

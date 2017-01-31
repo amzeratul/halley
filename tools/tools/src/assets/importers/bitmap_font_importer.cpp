@@ -48,7 +48,7 @@ void BitmapFontImporter::import(const ImportingAsset& asset, IAssetCollector& co
 	ImportingAsset image;
 	image.assetId = font.getName() + ":img";
 	image.assetType = ImportAssetType::Image;
-	image.inputFiles.emplace_back(ImportingAssetFile("", std::move(pngData)));
+	image.inputFiles.emplace_back(ImportingAssetFile(font.getName() + ":img.png", std::move(pngData)));
 	collector.addAdditionalAsset(std::move(image));
 }
 

@@ -5,9 +5,9 @@ using namespace Halley;
 TaskBar::TaskBar(Resources& resources)
 {
 	{
-		taskMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("distance_field_sprite"));
+		taskMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("Halley/DistanceFieldSprite"));
 		taskMaterial
-			->set("tex0", resources.get<Texture>("round_rect.png"))
+			->set("tex0", resources.get<Texture>("image/round_rect.png"))
 			.set("u_smoothness", 1.0f / 16.0f)
 			.set("u_outline", 0.4f);
 	}
@@ -15,7 +15,7 @@ TaskBar::TaskBar(Resources& resources)
 	{
 		auto col = Colour4f(0.9882f, 0.15686f, 0.27843f, 1);
 		halleyLogo = Sprite()
-			.setImage(resources, "halley_logo_dist.png", "distance_field_sprite")
+			.setImage(resources, "image/halley_logo_dist.png", "Halley/DistanceFieldSprite")
 			.setPivot(Vector2f(0.5f, 0.5f))
 			.setScale(Vector2f(0.5f, 0.5f))
 			.setColour(col);
@@ -27,11 +27,11 @@ TaskBar::TaskBar(Resources& resources)
 
 	{
 		Colour4f col(0.12f, 0.12f, 0.12f);
-		barSolid = Sprite().setMaterial(resources, "solid_colour").setSize(Vector2f(1, 1)).setColour(col);
-		barFade = Sprite().setImage(resources, "fade_right.png").setColour(col);
+		barSolid = Sprite().setMaterial(resources, "Halley/SolidColour").setSize(Vector2f(1, 1)).setColour(col);
+		barFade = Sprite().setImage(resources, "image/fade_right.png").setColour(col);
 	}
 
-	font = resources.get<Font>("ubuntub.font");
+	font = resources.get<Font>("Ubuntu Bold");
 }
 
 void TaskBar::update(const std::list<std::shared_ptr<EditorTaskAnchor>>& taskData, Time time)
