@@ -26,8 +26,12 @@ UIDropdown::UIDropdown(String id, std::shared_ptr<UIStyle> style, const std::vec
 
 void UIDropdown::setSelectedOption(int option)
 {
-	curOption = clamp(option, 0, int(options.size()));
-	label.setText(options[curOption]);
+	int nextOption = clamp(option, 0, int(options.size()));
+	if (curOption != nextOption) {
+		curOption = nextOption;
+		label.setText(options[curOption]);
+		sendEvent(UIEvent(UIEventType::DropboxSelectionChanged, getId(), options[curOption]));
+	}
 }
 
 int UIDropdown::getSelectedOption() const
