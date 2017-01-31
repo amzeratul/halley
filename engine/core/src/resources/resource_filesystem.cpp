@@ -31,7 +31,6 @@ FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, Path _ba
     , basePath(_basePath / "assets")
 {
 	// Read assetDb
-	std::cout << "Creating FileSystemResourceLocator at " << basePath << "...";
 	std::cout.flush();
 	assetDb = std::make_unique<AssetDatabase>();
 	auto reader = system.getDataReader((basePath / "assets.db").string());
@@ -40,7 +39,6 @@ FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, Path _ba
 	reader->read(gsl::as_writeable_bytes(gsl::span<Byte>(result)));
 	Deserializer s(result);
 	s >> *assetDb;
-	std::cout << " Done." << std::endl;
 }
 
 const AssetDatabase& FileSystemResourceLocator::getAssetDatabase() const
