@@ -20,7 +20,11 @@ void AssetCollector::output(const String& name, AssetType type, const Bytes& dat
 
 void AssetCollector::output(const String& name, AssetType type, gsl::span<const gsl::byte> data, Maybe<Metadata> metadata)
 {
-	Path filePath = Path(toString(type)) / toString(std::hash<std::string>()(asset.assetId.cppStr()), 16);
+	//Path filePath = Path(toString(type)) / toString(std::hash<std::string>()(asset.assetId.cppStr()), 16);
+	String id = asset.assetId;
+	id.replace("_", "__");
+	id.replace("/", "_");
+	Path filePath = Path(toString(type)) / id;
 	FileSystem::writeFile(dstDir / filePath, data);
 
 	AssetResource result;

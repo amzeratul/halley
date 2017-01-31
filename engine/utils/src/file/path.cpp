@@ -147,7 +147,7 @@ size_t Path::getNumberPaths() const
 
 Path Path::dropFront(int numberFolders) const
 {
-	return Path(std::vector<String>(pathParts.begin() + 1, pathParts.end()));
+	return Path(std::vector<String>(pathParts.begin() + numberFolders, pathParts.end()));
 }
 
 Path Path::parentPath() const

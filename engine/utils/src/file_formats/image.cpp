@@ -205,8 +205,7 @@ void Halley::Image::load(String name, gsl::span<const gsl::byte> bytes, bool sho
 {
 	filename = name;
 
-	bool useLodePng = name.endsWith(".png");
-	if (useLodePng)	{
+	if (isPNG(bytes)) {
 		unsigned char* pixels;
 		unsigned int x, y;
 		lodepng_decode_memory(&pixels, &x, &y, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size(), LCT_RGBA, 8);
@@ -288,8 +287,7 @@ Halley::Bytes Halley::Image::savePNGToBytes()
 
 Halley::Vector2i Halley::Image::getImageSize(String name, gsl::span<const gsl::byte> bytes)
 {
-	bool useLodePng = name.endsWith(".png");
-	if (useLodePng)	{
+	if (isPNG(bytes))	{
 		unsigned w, h;
 		lodepng::State state;
 		lodepng_inspect(&w, &h, &state, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size());
@@ -299,4 +297,10 @@ Halley::Vector2i Halley::Image::getImageSize(String name, gsl::span<const gsl::b
 		stbi_info_from_memory(reinterpret_cast<const unsigned char*>(bytes.data()), int(bytes.size()), &w, &h, &comp);
 		return Vector2i(w, h);
 	}
+}
+
+bool Halley::Image::isPNG(gsl::span<const gsl::byte> bytes)
+{
+	unsigned char pngHeader[] = { 137, 80, 78, 71, 13, 10, 26, 10 };
+	return bytes.size() >= 8 && memcmp(bytes.data(), pngHeader, 8) == 0;
 }

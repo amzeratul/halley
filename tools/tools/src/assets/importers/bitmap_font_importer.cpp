@@ -46,9 +46,9 @@ void BitmapFontImporter::import(const ImportingAsset& asset, IAssetCollector& co
 
 	// Pass image forward
 	ImportingAsset image;
-	image.assetId = font.getName() + ":img";
+	image.assetId = font.getName();
 	image.assetType = ImportAssetType::Image;
-	image.inputFiles.emplace_back(ImportingAssetFile(font.getName() + ":img.png", std::move(pngData)));
+	image.inputFiles.emplace_back(ImportingAssetFile(font.getName(), std::move(pngData)));
 	collector.addAdditionalAsset(std::move(image));
 }
 
@@ -70,7 +70,7 @@ Font BitmapFontImporter::parseBitmapFontXML(Vector2i imageSize, const Bytes& dat
 			fontElem->GetAttribute("height", &fontHeight);
 			fontElem->GetAttribute("size", &fontSize);
 
-			Font font(family, family + ":img", 0, float(fontHeight), float(fontSize));
+			Font font(family, family, 0, float(fontHeight), float(fontSize));
 
 			ticpp::Iterator<ticpp::Element> child("Char");
 			for (child = child.begin(fontIter); child != child.end(); ++child) {

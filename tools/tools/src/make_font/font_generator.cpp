@@ -200,7 +200,7 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(FontFace& font, Vecto
 	float sizePt = (font.getSize() * scale);
 	float smoothRadius = radius * scale;
 
-	std::unique_ptr<Font> result = std::make_unique<Font>(name, name + ":img", ascender, height, sizePt, smoothRadius);
+	std::unique_ptr<Font> result = std::make_unique<Font>(name, name, ascender, height, sizePt, smoothRadius);
 
 	for (auto& c: entries) {
 		auto metrics = font.getMetrics(c.charcode, scale);

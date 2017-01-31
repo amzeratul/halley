@@ -21,6 +21,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "file/directory_monitor.h"
 #include "file/string_serializer.h"
 
+#include "file_formats/binary_file.h"
 #include "file_formats/config_file.h"
 #include "file_formats/image.h"
 #include "file_formats/ini_reader.h"

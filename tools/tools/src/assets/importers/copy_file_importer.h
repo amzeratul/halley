@@ -9,5 +9,6 @@ namespace Halley
 		ImportAssetType getType() const override { return ImportAssetType::SimpleCopy; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
+		int dropFrontCount() const override { return 0; }
 	};
 }
