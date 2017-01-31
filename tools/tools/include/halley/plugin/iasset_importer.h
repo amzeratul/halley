@@ -82,7 +82,7 @@ namespace Halley
 
 		virtual String getAssetId(const Path& file) const
 		{
-			String name = file.string();
+			String name = file.dropFront(1).string();
 			if (name.endsWith(".meta")) {
 				name = name.substr(0, name.length() - 5);
 			}

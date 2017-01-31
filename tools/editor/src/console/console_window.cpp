@@ -11,7 +11,7 @@ ConsoleWindow::ConsoleWindow(Resources& resources)
 {
 	auto backgroundMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("Halley/DistanceFieldSprite"));
 	backgroundMaterial
-		->set("tex0", resources.get<Texture>("image/round_rect.png"))
+		->set("tex0", resources.get<Texture>("round_rect.png"))
 		.set("u_smoothness", 1.0f / 16.0f)
 		.set("u_outline", 0.5f)
 		.set("u_outlineColour", Colour(0.47f, 0.47f, 0.47f));

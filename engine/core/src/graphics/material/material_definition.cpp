@@ -148,13 +148,13 @@ void MaterialPass::createShader(ResourceLoader& loader, String name, const Vecto
 	definition.vertexAttributes = attributes;
 
 	if (vertex != "") {
-		definition.shaders[ShaderType::Vertex] = loader.getAPI().getResource<BinaryFile>("shader/" + vertex)->data;
+		definition.shaders[ShaderType::Vertex] = loader.getAPI().getResource<BinaryFile>(vertex)->data;
 	}
 	if (geometry != "") {
-		definition.shaders[ShaderType::Geometry] = loader.getAPI().getResource<BinaryFile>("shader/" + geometry)->data;
+		definition.shaders[ShaderType::Geometry] = loader.getAPI().getResource<BinaryFile>(geometry)->data;
 	}
 	if (pixel != "") {
-		definition.shaders[ShaderType::Pixel] = loader.getAPI().getResource<BinaryFile>("shader/" + pixel)->data;
+		definition.shaders[ShaderType::Pixel] = loader.getAPI().getResource<BinaryFile>(pixel)->data;
 	}
 
 	shader = loader.getAPI().video->createShader(definition);
