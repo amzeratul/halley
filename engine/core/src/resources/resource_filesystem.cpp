@@ -32,6 +32,7 @@ FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, Path _ba
 {
 	// Read assetDb
 	std::cout << "Creating FileSystemResourceLocator at " << basePath << "...";
+	std::cout.flush();
 	assetDb = std::make_unique<AssetDatabase>();
 	auto reader = system.getDataReader((basePath / "assets.db").string());
 
