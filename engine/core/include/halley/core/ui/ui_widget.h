@@ -23,7 +23,7 @@ namespace Halley {
 		Vector2f computeMinimumSize() const override;
 		void setRect(Rect4f rect) override;
 
-		void layout();
+		void layout(bool shrink = false);
 		void centerAt(Vector2f position);
 		
 		virtual Maybe<UISizer>& tryGetSizer();

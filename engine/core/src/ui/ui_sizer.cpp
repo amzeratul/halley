@@ -235,3 +235,19 @@ UISizerEntry& UISizer::operator[](size_t n)
 {
 	return entries[n];
 }
+
+void UISizer::clear()
+{
+	for (auto& e: entries) {
+		auto widget = std::dynamic_pointer_cast<UIWidget>(e.getPointer());
+		if (widget) {
+			widget->destroy();
+		} else {
+			auto sizer = std::dynamic_pointer_cast<UISizer>(e.getPointer());
+			if (sizer) {
+				sizer->clear();
+			}
+		}
+	}
+	entries.clear();
+}

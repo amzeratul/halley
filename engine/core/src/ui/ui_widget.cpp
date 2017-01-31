@@ -57,10 +57,10 @@ void UIWidget::setRect(Rect4f rect)
 	}
 }
 
-void UIWidget::layout()
+void UIWidget::layout(bool shrink)
 {
 	Vector2f minimumSize = computeMinimumSize();
-	Vector2f targetSize = Vector2f::max(size, minimumSize);
+	Vector2f targetSize = Vector2f::max(shrink ? Vector2f() : size, minimumSize);
 	setRect(Rect4f(getPosition(), getPosition() + targetSize));
 }
 

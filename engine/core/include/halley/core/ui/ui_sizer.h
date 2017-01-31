@@ -82,6 +82,8 @@ namespace Halley {
 
 		void reparent(UIParent& parent);
 
+		void clear();
+
 		UISizerType getType() const;
 		size_t size() const;
 		const UISizerEntry& operator[](size_t n) const;
