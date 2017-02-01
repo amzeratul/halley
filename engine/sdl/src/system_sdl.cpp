@@ -45,9 +45,9 @@ void SystemSDL::deInit()
 	SDL_Quit();
 }
 
-String SystemSDL::getResourcesBasePath() const
+String SystemSDL::getResourcesBasePath(const String& gamePath) const
 {
-	return "assets/";
+	return gamePath + "/assets/";
 }
 
 bool SystemSDL::generateEvents(VideoAPI* video, InputAPI* input)

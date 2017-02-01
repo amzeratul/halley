@@ -2,7 +2,6 @@
 #include "graphics/sprite/sprite.h"
 #include "graphics/painter.h"
 #include <gsl/gsl>
-#include <boost/asio/detail/buffer_sequence_adapter.hpp>
 #include "graphics/text/text_renderer.h"
 
 using namespace Halley;

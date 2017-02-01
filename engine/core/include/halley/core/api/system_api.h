@@ -21,7 +21,7 @@ namespace Halley
 	public:
 		virtual ~SystemAPI() {}
 
-		virtual String getResourcesBasePath() const = 0;
+		virtual String getResourcesBasePath(const String& gamePath) const = 0;
 
 		virtual std::unique_ptr<ResourceDataReader> getDataReader(String path, int64_t start = 0, int64_t end = -1) = 0;
 		

@@ -4,7 +4,7 @@
 namespace Halley {
 	class DummySystemAPI : public SystemAPIInternal {
 	public:
-		String getResourcesBasePath() const override;
+		String getResourcesBasePath(const String& gamePath) const override;
 		std::unique_ptr<ResourceDataReader> getDataReader(String path, int64_t start, int64_t end) override;
 		std::unique_ptr<GLContext> createGLContext() override;
 		std::shared_ptr<Window> createWindow(const WindowDefinition& window) override;

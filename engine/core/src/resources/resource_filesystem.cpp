@@ -28,10 +28,9 @@ using namespace Halley;
 
 FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, Path _basePath)
 	: system(system)
-    , basePath(_basePath / "assets")
+    , basePath(system.getResourcesBasePath(_basePath.string()))
 {
 	// Read assetDb
-	std::cout.flush();
 	assetDb = std::make_unique<AssetDatabase>();
 	auto reader = system.getDataReader((basePath / "assets.db").string());
 

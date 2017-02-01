@@ -2,9 +2,9 @@
 
 using namespace Halley;
 
-String DummySystemAPI::getResourcesBasePath() const
+String DummySystemAPI::getResourcesBasePath(const String& gamePath) const
 {
-	return "";
+	return gamePath;
 }
 
 std::unique_ptr<ResourceDataReader> DummySystemAPI::getDataReader(String path, int64_t start, int64_t end)
