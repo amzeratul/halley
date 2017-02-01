@@ -36,8 +36,7 @@ AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> 
 
 AnimationPlayer& AnimationPlayer::setSequence(String sequence)
 {
-	if (!curSeq || curSeq->getName() != sequence) {
-		Expects(animation);
+	if (animation && (!curSeq || curSeq->getName() != sequence)) {
 		curTime = 0;
 		curFrame = 0;
 		curSeq = &animation->getSequence(sequence);
@@ -56,9 +55,7 @@ AnimationPlayer& AnimationPlayer::setSequence(String sequence)
 
 AnimationPlayer& AnimationPlayer::setDirection(int direction)
 {
-	if (dirId != direction) {
-		Expects(animation);
-		
+	if (animation && dirId != direction) {
 		auto newDir = &animation->getDirection(direction);
 		if (curDir != newDir) {
 			curDir = newDir;
@@ -72,9 +69,7 @@ AnimationPlayer& AnimationPlayer::setDirection(int direction)
 
 AnimationPlayer& AnimationPlayer::setDirection(String direction)
 {
-	if (!curDir || curDir->getName() != direction) {
-		Expects(animation);
-
+	if (animation && (!curDir || curDir->getName() != direction)) {
 		auto newDir = &animation->getDirection(direction);
 		if (curDir != newDir) {
 			curDir = newDir;
@@ -120,7 +115,7 @@ void AnimationPlayer::update(Time time)
 
 void AnimationPlayer::updateSprite(Sprite& sprite) const
 {
-	if (hasUpdate) {
+	if (animation && hasUpdate) {
 		if (materialOverride) {
 			sprite.setMaterial(materialOverride);
 		} else {
@@ -153,9 +148,9 @@ bool AnimationPlayer::isPlaying() const
 	return playing;
 }
 
-const String& AnimationPlayer::getCurrentSequenceName() const
+String AnimationPlayer::getCurrentSequenceName() const
 {
-	return curSeq->getName();
+	return curSeq ? curSeq->getName() : "";
 }
 
 Time AnimationPlayer::getCurrentSequenceTime() const

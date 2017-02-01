@@ -48,6 +48,7 @@ namespace Halley
 		Sprite& setMaterial(Resources& resources, String materialName = "");
 		Sprite& setMaterial(std::shared_ptr<Material> m);
 		Material& getMaterial() const { return *material; }
+		bool hasMaterial() const { return material != nullptr; }
 
 		Sprite& setImage(Resources& resources, String imageName, String materialName = "");
 		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material);

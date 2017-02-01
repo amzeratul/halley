@@ -30,7 +30,7 @@ namespace Halley
 		std::shared_ptr<const Material> getMaterial() const;
 
 		bool isPlaying() const;
-		const String& getCurrentSequenceName() const;
+		String getCurrentSequenceName() const;
 		Time getCurrentSequenceTime() const;
 		int getCurrentSequenceFrame() const;
 
@@ -49,8 +49,8 @@ namespace Halley
 		std::shared_ptr<const Animation> animation;
 		const SpriteSheetEntry* spriteData = nullptr;
 
-		const AnimationSequence* curSeq;
-		const AnimationDirection* curDir;
+		const AnimationSequence* curSeq = nullptr;
+		const AnimationDirection* curDir = nullptr;
 
 		Time seqTimeLen;
 		Time curTime;
