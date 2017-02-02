@@ -33,7 +33,8 @@ AssetImporter::AssetImporter(Project& project, const std::vector<Path>& assetsSr
 		std::make_unique<AudioImporter>(),
 		std::make_unique<AsepriteImporter>(),
 		std::make_unique<SpriteSheetImporter>(),
-		std::make_unique<ShaderImporter>()
+		std::make_unique<ShaderImporter>(),
+		std::make_unique<IAssetImporter>()
 	};
 
 	for (auto& i: defaultImporters) {
@@ -68,7 +69,7 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 	} else if (root == "spritesheet") {
 		type = ImportAssetType::SpriteSheet;
 	} else if (root == "shader") {
-		type = ImportAssetType::Shader;
+		type = ImportAssetType::Skip;
 	}
 
 	return getImporter(type);

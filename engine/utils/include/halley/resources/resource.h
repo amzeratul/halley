@@ -12,6 +12,7 @@ namespace Halley
 	enum class ImportAssetType
 	{
 		Undefined,
+		Skip,
 		Codegen,
 		SimpleCopy,
 		Font,
@@ -37,12 +38,13 @@ namespace Halley
 		SpriteSheet,
 		Animation,
 		Font,
-		AudioClip
+		AudioClip,
+		Shader
 	};
 
 	template <>
 	struct EnumNames<AssetType> {
-		constexpr std::array<const char*, 10> operator()() const {
+		constexpr std::array<const char*, 11> operator()() const {
 			return{{
 				"binaryFile",
 				"textFile",
@@ -53,7 +55,8 @@ namespace Halley
 				"spriteSheet",
 				"animation",
 				"font",
-				"audioClip"
+				"audioClip",
+				"shader"
 			}};
 		}
 	};

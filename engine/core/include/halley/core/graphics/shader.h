@@ -12,16 +12,18 @@ namespace Halley
 	{
 		Vertex,
 		Pixel,
-		Geometry
+		Geometry,
+		Combined
 	};
 
 	template <>
 	struct EnumNames<ShaderType> {
-		constexpr std::array<const char*, 3> operator()() const {
+		constexpr std::array<const char*, 4> operator()() const {
 			return{{
 				"vertex",
 				"pixel",
-				"geometry"
+				"geometry",
+				"combined"
 			}};
 		}
 	};
@@ -32,6 +34,18 @@ namespace Halley
 		String name;
 		std::map<ShaderType, Bytes> shaders;
 		Vector<MaterialAttribute> vertexAttributes;
+	};
+
+	class ShaderFile : public Resource
+	{
+	public:
+		std::map<int, Bytes> shaders; // Key is ShaderType enum
+
+		static std::unique_ptr<ShaderFile> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::Shader; }
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 	};
 
 	class Shader

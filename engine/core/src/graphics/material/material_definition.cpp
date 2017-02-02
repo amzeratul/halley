@@ -109,11 +109,9 @@ void MaterialDefinition::deserialize(Deserializer& s)
 	s >> vertexPosOffset;
 }
 
-MaterialPass::MaterialPass(BlendType blend, String vertex, String geometry, String pixel)
+MaterialPass::MaterialPass(BlendType blend, String shaderAssetId)
 	: blend(blend)
-	, vertex(vertex)
-	, geometry(geometry)
-	, pixel(pixel)
+	, shaderAssetId(shaderAssetId)
 {
 }
 
@@ -126,9 +124,7 @@ void MaterialPass::bind(Painter& painter) const
 void MaterialPass::serialize(Serializer& s) const
 {
 	s << int(blend);
-	s << vertex;
-	s << geometry;
-	s << pixel;
+	s << shaderAssetId;
 }
 
 void MaterialPass::deserialize(Deserializer& s)
@@ -136,9 +132,7 @@ void MaterialPass::deserialize(Deserializer& s)
 	int temp; 
 	s >> temp;
 	blend = BlendType(temp);
-	s >> vertex;
-	s >> geometry;
-	s >> pixel;	
+	s >> shaderAssetId;
 }
 
 void MaterialPass::createShader(ResourceLoader& loader, String name, const Vector<MaterialAttribute>& attributes)
@@ -147,14 +141,9 @@ void MaterialPass::createShader(ResourceLoader& loader, String name, const Vecto
 	definition.name = name;
 	definition.vertexAttributes = attributes;
 
-	if (vertex != "") {
-		definition.shaders[ShaderType::Vertex] = loader.getAPI().getResource<BinaryFile>(vertex)->data;
-	}
-	if (geometry != "") {
-		definition.shaders[ShaderType::Geometry] = loader.getAPI().getResource<BinaryFile>(geometry)->data;
-	}
-	if (pixel != "") {
-		definition.shaders[ShaderType::Pixel] = loader.getAPI().getResource<BinaryFile>(pixel)->data;
+	auto shaderData = loader.getAPI().getResource<ShaderFile>(shaderAssetId);
+	for (auto& shader: shaderData->shaders) {
+		definition.shaders[ShaderType(shader.first)] = shader.second;
 	}
 
 	shader = loader.getAPI().video->createShader(definition);

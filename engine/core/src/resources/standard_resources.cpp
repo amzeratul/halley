@@ -3,6 +3,7 @@
 #include "resources/resources.h"
 #include "graphics/sprite/animation.h"
 #include "graphics/sprite/sprite_sheet.h"
+#include "halley/core/graphics/shader.h"
 #include "halley/core/graphics/texture.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include "graphics/text/font.h"
@@ -18,6 +19,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<SpriteSheet>();
 	resources.init<Texture>();
 	resources.init<MaterialDefinition>();
+	resources.init<ShaderFile>();
 	resources.init<BinaryFile>();
 	resources.init<TextFile>();
 	resources.init<Font>();

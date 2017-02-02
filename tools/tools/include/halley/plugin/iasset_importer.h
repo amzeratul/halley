@@ -77,8 +77,8 @@ namespace Halley
 	public:
 		virtual ~IAssetImporter() {}
 
-		virtual ImportAssetType getType() const = 0;
-		virtual void import(const ImportingAsset& asset, IAssetCollector& collector) = 0;
+		virtual ImportAssetType getType() const { return ImportAssetType::Skip; }
+		virtual void import(const ImportingAsset&, IAssetCollector&) {}
 		virtual int dropFrontCount() const { return 1; }
 
 		virtual String getAssetId(const Path& file) const

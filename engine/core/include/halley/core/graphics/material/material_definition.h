@@ -87,7 +87,7 @@ namespace Halley
 
 	public:
 		MaterialPass();
-		MaterialPass(BlendType blend, String vertex, String geometry, String pixel);
+		MaterialPass(BlendType blend, String shaderAsset);
 
 		void bind(Painter& painter) const;
 
@@ -103,8 +103,6 @@ namespace Halley
 		std::shared_ptr<Shader> shader;
 		BlendType blend;
 		
-		String vertex;
-		String geometry;
-		String pixel;
+		String shaderAssetId;
 	};
 }

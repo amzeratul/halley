@@ -40,14 +40,15 @@ MaterialDefinition MaterialImporter::parseMaterial(Path basePath, gsl::span<cons
 	}
 
 	// Load passes
+	int passN = 0;
 	for (auto passNode : root["passes"]) {
-		loadPass(material, passNode.as<YAML::Node>());
+		loadPass(material, passNode.as<YAML::Node>(), collector, passN++);
 	}
 
 	return material;
 }
 
-void MaterialImporter::loadPass(MaterialDefinition& material, const YAML::Node& node)
+void MaterialImporter::loadPass(MaterialDefinition& material, const YAML::Node& node, IAssetCollector& collector, int passN)
 {
 	String blend = node["blend"].as<std::string>("Opaque");
 	BlendType blendType;
@@ -64,7 +65,22 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const YAML::Node& 
 		throw Exception("Unknown blend type: " + blend);
 	}
 
-	material.passes.emplace_back(MaterialPass(blendType, node["vertex"].as<std::string>(""), node["geometry"].as<std::string>(""), node["pixel"].as<std::string>("")));
+	auto shaderType = { "vertex", "geometry", "pixel" };
+
+	String shaderName = material.getName() + "_pass_" + toString(passN);
+
+	ImportingAsset shaderAsset;
+	shaderAsset.assetId = shaderName;
+	shaderAsset.assetType = ImportAssetType::Shader;
+	for (auto& curType: shaderType) {
+		if (node[curType].IsDefined()) {
+			auto data = collector.readAdditionalFile("shader/" + node[curType].as<std::string>());
+			shaderAsset.inputFiles.emplace_back(ImportingAssetFile(shaderName + "." + curType, std::move(data)));
+		}
+	}
+	collector.addAdditionalAsset(std::move(shaderAsset));
+
+	material.passes.emplace_back(MaterialPass(blendType, shaderName));
 }
 
 void MaterialImporter::loadUniforms(MaterialDefinition& material, const YAML::Node& topNode)
