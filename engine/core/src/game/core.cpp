@@ -28,7 +28,7 @@ using namespace Halley;
 
 Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 {
-	statics.setup();
+	statics.resume();
 	Logger::addSink(*this);
 
 	game = std::move(g);
@@ -80,6 +80,11 @@ Core::~Core()
 	deInit();
 }
 
+const HalleyStatics& Core::getStatics()
+{
+	return statics;
+}
+
 void Core::onSuspended()
 {
 	HALLEY_DEBUG_TRACE();
@@ -103,7 +108,7 @@ void Core::onReloaded()
 	if (game->shouldCreateSeparateConsole()) {
 		setOutRedirect(true);
 	}
-	statics.setup();
+	statics.resume();
 
 	if (api->inputInternal) {
 		api->inputInternal->onResume();

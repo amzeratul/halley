@@ -302,6 +302,7 @@ int OSWin32::runCommand(String command)
 
 	STARTUPINFO si;
     PROCESS_INFORMATION pi;
+	DWORD exitCode = -2;
 
 	memset(&si, 0, sizeof(STARTUPINFO));
 	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
@@ -310,10 +311,11 @@ int OSWin32::runCommand(String command)
 		return -1;
 	}
 	WaitForSingleObject(pi.hProcess, INFINITE);
+	GetExitCodeProcess(pi.hProcess, &exitCode);
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
 
-	return 0;
+	return int(exitCode);
 }
 
 #endif

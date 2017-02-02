@@ -10,7 +10,8 @@ namespace Halley
 	public:
 		HalleyStatics();
 		~HalleyStatics();
-		void setup();
+		void setupGlobals() const;
+		void resume();
 		void suspend();
 
 	private:

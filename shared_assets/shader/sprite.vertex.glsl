@@ -1,5 +1,3 @@
-#version 140
-
 uniform mat4 u_mvp;
 
 in vec4 a_vertPos;

@@ -1,5 +1,3 @@
-#version 140
-
 uniform sampler2D tex0;
 
 in vec2 v_texCoord0;

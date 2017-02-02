@@ -7,6 +7,7 @@ namespace Halley
 {
 	class Resources;
 	class Stage;
+	class HalleyStatics;
 
 	class CoreAPI
 	{
@@ -15,6 +16,8 @@ namespace Halley
 		virtual void quit(int exitCode = 0) = 0;
 		virtual void setStage(StageID stage) = 0;
 		virtual void setStage(std::unique_ptr<Stage> stage) = 0;
+
+		virtual const HalleyStatics& getStatics() = 0;
 		
 		virtual Resources& getResources() = 0;
 		virtual const Environment& getEnvironment() = 0;

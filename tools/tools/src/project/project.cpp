@@ -2,11 +2,13 @@
 #include "halley/tools/project/project.h"
 #include "halley/tools/file/filesystem.h"
 #include <set>
+#include "halley/core/game/halley_statics.h"
 
 using namespace Halley;
 
-Project::Project(const String& platform, Path projectRootPath, Path halleyRootPath)
-	: platform(platform)
+Project::Project(const HalleyStatics& statics, const String& platform, Path projectRootPath, Path halleyRootPath)
+	: statics(statics)
+	, platform(platform)
 	, rootPath(projectRootPath)
 	, halleyRootPath(halleyRootPath)
 {
@@ -75,7 +77,6 @@ void Project::initialisePlugins()
 	bool knownPlatform = platform == "pc";
 
 #if _WIN32
-#ifndef _DEBUG
 	auto pluginPath = halleyRootPath / "plugins";
 	auto files = FileSystem::enumerateDirectory(pluginPath);
 	for (auto& file: files) {
@@ -95,7 +96,6 @@ void Project::initialisePlugins()
 			}
 		}
 	}
-#endif
 #endif
 	
 	if (!knownPlatform) {
@@ -118,7 +118,7 @@ Project::HalleyPluginPtr Project::loadPlugin(const Path& path)
 		return {};
 	}
 
-	using CreateHalleyPluginFn = IHalleyPlugin*();
+	using CreateHalleyPluginFn = IHalleyPlugin*(HalleyStatics*);
 	using DestroyHalleyPluginFn = void(IHalleyPlugin*);
 
 	auto createHalleyPlugin = reinterpret_cast<CreateHalleyPluginFn*>(GetProcAddress(module, "createHalleyPlugin"));
@@ -128,7 +128,7 @@ Project::HalleyPluginPtr Project::loadPlugin(const Path& path)
 		return {};
 	}
 
-	return HalleyPluginPtr(createHalleyPlugin(), [=] (IHalleyPlugin* plugin)
+	return HalleyPluginPtr(createHalleyPlugin(const_cast<HalleyStatics*>(&statics)), [=] (IHalleyPlugin* plugin)
 	{
 		destroyHalleyPlugin(plugin);
 		FreeLibrary(module);

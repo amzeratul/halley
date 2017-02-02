@@ -1,5 +1,3 @@
-#version 140
-
 uniform sampler2D tex0;
 uniform float u_smoothness;
 uniform float u_outline;

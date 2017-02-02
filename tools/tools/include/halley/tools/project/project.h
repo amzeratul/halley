@@ -6,12 +6,13 @@
 
 namespace Halley
 {
+	class HalleyStatics;
 	class ImportAssetsDatabase;
 
 	class Project
 	{
 	public:
-		Project(const String& platform, Path projectRootPath, Path halleyRootPath);
+		Project(const HalleyStatics& statics, const String& platform, Path projectRootPath, Path halleyRootPath);
 		~Project();
 		
 		Path getAssetsPath() const;
@@ -28,6 +29,7 @@ namespace Halley
 		std::unique_ptr<IAssetImporter> getAssetImporterOverride(ImportAssetType type) const;
 	
 	private:
+		const HalleyStatics& statics;
 		String platform;
 		Path rootPath;
 		Path halleyRootPath;

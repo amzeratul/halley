@@ -126,7 +126,7 @@ size_t FileSystem::fileSize(const Path& path)
 
 Path FileSystem::getTemporaryPath() 
 {
-	return (temp_directory_path() / unique_path()).string();
+	return (temp_directory_path() / unique_path("%%%%%%%%%%%%%%%%")).string();
 }
 
 int FileSystem::runCommand(const String& command)

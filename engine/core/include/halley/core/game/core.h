@@ -43,6 +43,7 @@ namespace Halley
 		bool isRunning() const override	{ return running; }
 		bool transitionStage() override;
 		HalleyAPI& getAPI() const override { return *api; }
+		const HalleyStatics& getStatics() override;
 
 		void onSuspended() override;
 		void onReloaded() override;

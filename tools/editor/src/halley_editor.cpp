@@ -74,9 +74,8 @@ void HalleyEditor::init(const Environment& environment, const Vector<String>& ar
 void HalleyEditor::parseArguments(const std::vector<String>& args)
 {
 	headless = false;
-	String platform = "pc";
-	String projectPath;
-	bool gotProjectPath = false;
+	platform = "pc";
+	gotProjectPath = false;
 
 	for (auto& arg : args) {
 		if (arg.startsWith("--")) {
@@ -96,16 +95,16 @@ void HalleyEditor::parseArguments(const std::vector<String>& args)
 			}
 		}
 	}
-
-	if (gotProjectPath) {
-		loadProject(platform, Path(projectPath));
-	} else {
-		throw Exception("Please specify a project path.");
-	}
 }
 
 std::unique_ptr<Stage> HalleyEditor::startGame(HalleyAPI* api)
 {
+	if (gotProjectPath) {
+		loadProject(api->core->getStatics(), platform, Path(projectPath));
+	} else {
+		throw Exception("Please specify a project path.");
+	}
+
 	if (!headless) {
 		Vector2i winSize(1280, 720);
 		api->video->setWindow(WindowDefinition(WindowType::ResizableWindow, winSize, getName()), false);
@@ -113,9 +112,9 @@ std::unique_ptr<Stage> HalleyEditor::startGame(HalleyAPI* api)
 	return std::make_unique<EditorRootStage>(*this);
 }
 
-Project& HalleyEditor::loadProject(const String& platform, Path path)
+Project& HalleyEditor::loadProject(const HalleyStatics& statics, const String& platform, Path path)
 {
-	project = std::make_unique<Project>(platform, path, rootPath);
+	project = std::make_unique<Project>(statics, platform, path, rootPath);
 
 	if (!project) {
 		throw Exception("Unable to load project at " + path.string());

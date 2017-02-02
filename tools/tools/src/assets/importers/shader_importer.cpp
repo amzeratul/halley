@@ -12,7 +12,10 @@ void ShaderImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	ShaderFile shader;
 	for (auto& input: asset.inputFiles) {
 		auto shaderType = fromString<ShaderType>(input.name.getExtension().mid(1));
-		shader.shaders[int(shaderType)] = input.data;
+		String strData = "#version 330\n" + String(reinterpret_cast<const char*>(input.data.data()), input.data.size());
+		Bytes data(strData.size());
+		memcpy(data.data(), strData.c_str(), data.size());
+		shader.shaders[int(shaderType)] = data;
 	}
 
 	collector.output(asset.assetId, AssetType::Shader, Serializer::toBytes(shader));

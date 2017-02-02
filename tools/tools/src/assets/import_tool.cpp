@@ -8,6 +8,7 @@
 #include <chrono>
 #include "halley/tools/file/filesystem.h"
 #include "halley/os/os.h"
+#include "halley/core/game/halley_statics.h"
 
 using namespace Halley;
 using namespace std::chrono_literals;
@@ -15,15 +16,13 @@ using namespace std::chrono_literals;
 int ImportTool::run(Vector<std::string> args)
 {
 	if (args.size() == 2) {
-		Executors executors;
-		Executors::set(executors);
-		OS::setInstance(OS::createOS());
-		ThreadPool tp(executors.getCPU(), std::max(static_cast<unsigned int>(4), std::thread::hardware_concurrency()));
+		HalleyStatics statics;
+		statics.resume();
 
 		Path projectPath = FileSystem::getAbsolute(Path(args[0]));
 		Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));
 
-		auto proj = std::make_unique<Project>("pc", projectPath, halleyRootPath);
+		auto proj = std::make_unique<Project>(statics, "pc", projectPath, halleyRootPath);
 		std::cout << "Importing project at " << projectPath << ", with Halley root at " << halleyRootPath << "" << std::endl;
 
 		auto tasks = std::make_unique<EditorTaskSet>();

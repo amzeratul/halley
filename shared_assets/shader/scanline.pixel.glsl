@@ -1,5 +1,3 @@
-#version 140
-
 uniform vec4 u_col0;
 uniform vec4 u_col1;
 uniform float u_distance;
