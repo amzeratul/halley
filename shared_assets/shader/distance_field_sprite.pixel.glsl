@@ -13,10 +13,9 @@ in vec4 gl_FragCoord;
 out vec4 outCol;
 
 void main() {
-	vec2 dxy = abs(dFdy(v_pixelTexCoord0.xy) / dFdy(gl_FragCoord.xy));
-	//float dx = abs(dFdx(v_pixelTexCoord0.x) / dFdx(gl_FragCoord.x));
-	//float dy = abs(dFdy(v_pixelTexCoord0.y) / dFdy(gl_FragCoord.y));
-	float texGrad = max(dxy.x, dxy.y);
+	float dx = abs(dFdx(v_pixelTexCoord0.x) / dFdx(gl_FragCoord.x));
+	float dy = abs(dFdy(v_pixelTexCoord0.y) / dFdy(gl_FragCoord.y));
+	float texGrad = max(dx, dy);
 
 	float a = texture(tex0, v_texCoord0).a;
 	float s = u_smoothness * texGrad;
