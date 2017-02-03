@@ -89,3 +89,12 @@ void AssetDatabase::deserialize(Deserializer& s)
 {
 	s >> dbs;
 }
+
+std::vector<String> AssetDatabase::enumerate(AssetType type) const
+{
+	std::vector<String> result;
+	for (auto& asset: getDatabase(type).getAssets()) {
+		result.push_back(asset.first);
+	}
+	return result;
+}

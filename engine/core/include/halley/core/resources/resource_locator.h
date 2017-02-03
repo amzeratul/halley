@@ -52,6 +52,7 @@ namespace Halley {
 
 		std::unique_ptr<ResourceDataStatic> getStatic(const String& asset, AssetType type) override;
 		std::unique_ptr<ResourceDataStream> getStream(const String& asset, AssetType type) override;
+		std::vector<String> enumerate(const AssetType type);
 
 	private:
 		SystemAPI& system;

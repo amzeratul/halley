@@ -53,6 +53,11 @@ void ResourceCollectionBase::flush(const String& assetId)
 	}
 }
 
+std::vector<String> ResourceCollectionBase::enumerate() const
+{
+	return parent.locator->enumerate(type);
+}
+
 std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& assetId, ResourceLoadPriority priority)
 {
 	// Look in cache and return if it's there

@@ -42,6 +42,7 @@ namespace Halley
 		void unload(const String& assetId);
 		void unloadAll(int minDepth = 0);
 		void flush(const String& assetId);
+		std::vector<String> enumerate() const;
 
 	protected:
 		virtual std::shared_ptr<Resource> loadResource(ResourceLoader& loader) = 0;

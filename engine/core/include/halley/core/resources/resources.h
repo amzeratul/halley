@@ -61,6 +61,12 @@ namespace Halley {
 		{
 			return of<T>().get(name, priority);
 		}
+
+		template <typename T>
+		std::vector<String> enumerate()
+		{
+			return of<T>().enumerate();
+		}
 		
 	private:
 		std::unique_ptr<ResourceLocator> locator;

@@ -46,6 +46,7 @@ namespace Halley
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+		std::vector<String> enumerate(AssetType type) const;
 
 	private:
 		mutable TreeMap<int, TypedDB> dbs;

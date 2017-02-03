@@ -76,7 +76,18 @@ std::unique_ptr<ResourceDataStream> ResourceLocator::getStream(const String& ass
 	}
 	return std::unique_ptr<ResourceDataStream>(ptr);
 }
-	
+
+std::vector<String> ResourceLocator::enumerate(const AssetType type)
+{
+	std::vector<String> result;
+	for (auto& l: locatorList) {
+		for (auto& r: l->getAssetDatabase().enumerate(type)) {
+			result.push_back(std::move(r));
+		}
+	}
+	return result;
+}
+
 void ResourceLocator::addFileSystem(Path path)
 {
 	add(std::make_unique<FileSystemResourceLocator>(system, path));
