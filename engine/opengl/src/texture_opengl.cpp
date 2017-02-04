@@ -26,11 +26,11 @@ TextureOpenGL::~TextureOpenGL()
 	textureId = 0;
 }
 
-void TextureOpenGL::load(const TextureDescriptor& d)
+void TextureOpenGL::load(TextureDescriptor&& d)
 {
 	create(d.size.x, d.size.y, d.format, d.useMipMap, d.useFiltering);
-	if (d.pixelData != nullptr) {
-		loadImage(reinterpret_cast<const char*>(d.pixelData), d.size.x, d.size.y, d.size.x, d.format, d.useMipMap);
+	if (!d.pixelData.empty()) {
+		loadImage(reinterpret_cast<const char*>(d.pixelData.getBytes()), d.size.x, d.size.y, d.size.x, d.format, d.useMipMap);
 	}
 	
 	if (parent.isLoaderThread()) {

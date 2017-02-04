@@ -1,6 +1,7 @@
 #pragma once
 
 #include <halley/maths/vector2.h>
+#include "halley/file_formats/image.h"
 
 namespace Halley
 {
@@ -11,6 +12,27 @@ namespace Halley
 		DEPTH
 	};
 
+	
+	class TextureDescriptorImageData
+	{
+	public:
+		TextureDescriptorImageData();
+		TextureDescriptorImageData(std::unique_ptr<Image> img);
+		TextureDescriptorImageData(Bytes&& bytes);
+		TextureDescriptorImageData(TextureDescriptorImageData&& other) noexcept;
+		TextureDescriptorImageData(gsl::span<const gsl::byte> bytes);
+
+		TextureDescriptorImageData& operator=(TextureDescriptorImageData&& other) noexcept;
+
+		bool empty() const;
+		Byte* getBytes();
+
+	private:
+		std::unique_ptr<Image> img;
+		Bytes rawBytes;
+		bool isRaw = false;
+	};
+
 	class TextureDescriptor
 	{
 	public:
@@ -19,7 +41,7 @@ namespace Halley
 		TextureFormat format = TextureFormat::RGBA;
 		bool useMipMap = false;
 		bool useFiltering = false;
-		void* pixelData = nullptr;
+		TextureDescriptorImageData pixelData;
 
 		static int getBitsPerPixel(TextureFormat format);
 

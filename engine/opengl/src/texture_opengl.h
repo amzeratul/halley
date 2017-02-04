@@ -16,7 +16,7 @@ namespace Halley
 		~TextureOpenGL();
 
 		void bind(int textureUnit) const override;
-		void load(const TextureDescriptor& descriptor) override;
+		void load(TextureDescriptor&& descriptor) override;
 
 	private:
 		void loadImage(const char* px, size_t w, size_t h, size_t stride, TextureFormat format, bool useMipMap);

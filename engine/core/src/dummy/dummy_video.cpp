@@ -70,7 +70,7 @@ DummyTexture::DummyTexture(Vector2i s)
 
 void DummyTexture::bind(int textureUnit) const {}
 
-void DummyTexture::load(const TextureDescriptor& descriptor)
+void DummyTexture::load(TextureDescriptor&& descriptor)
 {
 	doneLoading();
 }

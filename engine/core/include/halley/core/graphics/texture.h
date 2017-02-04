@@ -14,7 +14,7 @@ namespace Halley
 	{
 	public:
 		virtual void bind(int textureUnit) const = 0;
-		virtual void load(const TextureDescriptor& descriptor) = 0;
+		virtual void load(TextureDescriptor&& descriptor) = 0;
 
 		static std::shared_ptr<Texture> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Texture; }

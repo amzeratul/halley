@@ -32,7 +32,7 @@ namespace Halley {
 	public:
 		explicit DummyTexture(Vector2i size);
 		void bind(int textureUnit) const override;
-		void load(const TextureDescriptor& descriptor) override;
+		void load(TextureDescriptor&& descriptor) override;
 	};
 
 	class DummyTextureRenderTarget : public TextureRenderTarget
