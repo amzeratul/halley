@@ -3,6 +3,7 @@
 #include "halley/tools/file/filesystem.h"
 #include <set>
 #include "halley/core/game/halley_statics.h"
+#include "halley/support/debug.h"
 
 using namespace Halley;
 
@@ -83,7 +84,7 @@ void Project::initialisePlugins()
 		// HACK: fix extension for OSX/Linux
 		if (file.getExtension() == ".dll") {
 			auto plugin = loadPlugin(pluginPath / file);
-			if (plugin) {
+			if (plugin && plugin->isDebug() == Debug::isDebug()) {
 				auto platforms = plugin->getSupportedPlatforms();
 				bool accepted = false;
 				for (auto& plat: platforms) {
