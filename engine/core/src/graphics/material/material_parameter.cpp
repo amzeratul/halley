@@ -24,9 +24,11 @@ VideoAPIInternal& MaterialParameter::getAPI() const
 
 void MaterialParameter::updateAddresses()
 {
-	addresses.resize(material.getDefinition().passes.size());
+	auto& definition = material.getDefinition();
+	addresses.resize(definition.passes.size());
 	for (size_t i = 0; i < addresses.size(); i++) {
-		addresses[i] = material.getDefinition().passes[i].getShader().getUniformLocation(name);
+		auto& shader = definition.passes[i].getShader();
+		addresses[i] = shader.getUniformLocation(name);
 	}
 }
 
