@@ -307,7 +307,7 @@ int OSWin32::runCommand(String command)
 	memset(&si, 0, sizeof(STARTUPINFO));
 	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
 
-	if (!CreateProcessA(nullptr, buffer, nullptr, nullptr, false, 0, nullptr, nullptr, &si, &pi)) {
+	if (!CreateProcessA(nullptr, buffer, nullptr, nullptr, false, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
 		return -1;
 	}
 	WaitForSingleObject(pi.hProcess, INFINITE);
