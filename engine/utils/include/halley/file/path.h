@@ -52,5 +52,7 @@ namespace Halley
 		explicit Path(std::vector<String> parts);
 	};
 
+	using TimestampedPath = std::pair<Path, int64_t>;
+
 	std::ostream& operator<<(std::ostream& os, const Path& p);
 }

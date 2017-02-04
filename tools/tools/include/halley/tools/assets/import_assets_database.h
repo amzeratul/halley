@@ -16,11 +16,10 @@ namespace Halley
 	class ImportAssetsDatabaseEntry
 	{
 	public:
-		using InputFile = std::pair<Path, int64_t>;
-
 		String assetId;
 		Path srcDir;
-		std::vector<InputFile> inputFiles;
+		std::vector<TimestampedPath> inputFiles;
+		std::vector<TimestampedPath> additionalInputFiles; // These were requested by the importer, rather than enumerated directly
 		std::vector<AssetResource> outputFiles;
 		ImportAssetType assetType = ImportAssetType::Undefined;
 
@@ -29,7 +28,7 @@ namespace Halley
 		ImportAssetsDatabaseEntry(String assetId, Path srcDir, Path inputFile, int64_t time)
 			: assetId(assetId)
 			, srcDir(srcDir)
-			, inputFiles({ InputFile(inputFile, time) })
+			, inputFiles({ TimestampedPath(inputFile, time) })
 		{}
 
 		ImportAssetsDatabaseEntry(String assetId, Path srcDir)
@@ -37,7 +36,7 @@ namespace Halley
 			, srcDir(srcDir)
 		{}
 
-		ImportAssetsDatabaseEntry(String assetId, Path srcDir, std::vector<InputFile>&& inputFiles)
+		ImportAssetsDatabaseEntry(String assetId, Path srcDir, std::vector<TimestampedPath>&& inputFiles)
 			: assetId(assetId)
 			, srcDir(srcDir)
 			, inputFiles(std::move(inputFiles))

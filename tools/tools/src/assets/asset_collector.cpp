@@ -52,23 +52,29 @@ const Path& AssetCollector::getDestinationDirectory()
 	return dstDir;
 }
 
-Bytes AssetCollector::readAdditionalFile(const Path& filePath) const
+Bytes AssetCollector::readAdditionalFile(const Path& filePath)
 {
 	for (auto path : assetsSrc) {
 		Path f = path / filePath;
 		if (FileSystem::exists(f)) {
+			additionalInputs.push_back(TimestampedPath(f, FileSystem::getLastWriteTime(f)));
 			return FileSystem::readFile(f);
 		}
 	}
 	throw Exception("Unable to find asset dependency: \"" + filePath.getString() + "\"");
 }
 
-std::vector<AssetResource> AssetCollector::collectAssets()
+const std::vector<AssetResource>& AssetCollector::getAssets() const
 {
-	return std::move(assets);
+	return assets;
 }
 
 std::vector<ImportingAsset> AssetCollector::collectAdditionalAssets()
 {
 	return std::move(additionalAssets);
+}
+
+const std::vector<TimestampedPath>& AssetCollector::getAdditionalInputs() const
+{
+	return additionalInputs;
 }

@@ -15,17 +15,20 @@ namespace Halley {
 		void addAdditionalAsset(ImportingAsset&& asset) override;
 		bool reportProgress(float progress, const String& label) override;
 		const Path& getDestinationDirectory() override;
-		Bytes readAdditionalFile(const Path& filePath) const override;
+		Bytes readAdditionalFile(const Path& filePath) override;
 
-		std::vector<AssetResource> collectAssets();
 		std::vector<ImportingAsset> collectAdditionalAssets();
+		const std::vector<AssetResource>& getAssets() const;
+		const std::vector<TimestampedPath>& getAdditionalInputs() const;
 		
 	private:
 		const ImportingAsset& asset;
 		Path dstDir;
 		std::vector<Path> assetsSrc;
 		ProgressReporter reporter;
+
 		std::vector<AssetResource> assets;
 		std::vector<ImportingAsset> additionalAssets;
+		std::vector<TimestampedPath> additionalInputs;
 	};
 }

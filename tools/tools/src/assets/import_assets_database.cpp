@@ -10,6 +10,7 @@ void ImportAssetsDatabaseEntry::serialize(Serializer& s) const
 	s << assetId;
 	s << srcDir;
 	s << inputFiles;
+	s << additionalInputFiles;
 	s << outputFiles;
 	int t = int(assetType);
 	s << t;
@@ -20,6 +21,7 @@ void ImportAssetsDatabaseEntry::deserialize(Deserializer& s)
 	s >> assetId;
 	s >> srcDir;
 	s >> inputFiles;
+	s >> additionalInputFiles;
 	s >> outputFiles;
 	int t;
 	s >> t;
@@ -94,7 +96,7 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 	// Any of the input files changed?
 	// Note: We don't have to check old files on new input, because the size matches and all entries matched.
 	for (auto& i: asset.inputFiles) {
-		auto result = std::find_if(oldAsset.inputFiles.begin(), oldAsset.inputFiles.end(), [&](const ImportAssetsDatabaseEntry::InputFile& entry) { return entry.first == i.first; });
+		auto result = std::find_if(oldAsset.inputFiles.begin(), oldAsset.inputFiles.end(), [&](const TimestampedPath& entry) { return entry.first == i.first; });
 		if (result == oldAsset.inputFiles.end()) {
 			// File wasn't there before
 			return true;
@@ -102,6 +104,17 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 			// Timestamp changed
 			return true;
 		}
+	}
+
+	// Any of the additional input files changed?
+	for (auto& i: oldAsset.additionalInputFiles) {
+		if (!FileSystem::exists(i.first)) {
+			// File removed
+			return true;
+		} else if  (FileSystem::getLastWriteTime(i.first) != i.second) {
+			// Timestamp changed
+			return true;
+		}		
 	}
 
 	// Have any of the output files gone missing?
@@ -186,7 +199,7 @@ std::vector<AssetResource> ImportAssetsDatabase::getOutFiles(String assetId) con
 	}
 }
 
-constexpr static int currentAssetVersion = 11;
+constexpr static int currentAssetVersion = 12;
 
 void ImportAssetsDatabase::serialize(Serializer& s) const
 {

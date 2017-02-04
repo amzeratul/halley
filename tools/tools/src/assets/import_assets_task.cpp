@@ -79,6 +79,7 @@ static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& as
 bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
 	std::vector<AssetResource> out;
+	std::vector<TimestampedPath> additionalInputs;
 	try {
 		// Create queue
 		std::list<ImportingAsset> toLoad;
@@ -112,11 +113,15 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 			importer.getImporter(cur.assetType).import(cur, collector);
 			
 			for (auto& additional: collector.collectAdditionalAssets()) {
-				toLoad.push_front(std::move(additional));
+				toLoad.emplace_front(std::move(additional));
 			}
 
-			for (auto& o: collector.collectAssets()) {
-				out.emplace_back(o);
+			for (auto& o: collector.getAssets()) {
+				out.push_back(o);
+			}
+
+			for (auto& i: collector.getAdditionalInputs()) {
+				additionalInputs.push_back(i);
 			}
 		}
 	} catch (std::exception& e) {
@@ -141,7 +146,8 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 	}
 
 	// Store output in db
-	asset.outputFiles = out;
+	asset.additionalInputFiles = std::move(additionalInputs);
+	asset.outputFiles = std::move(out);
 	db.markAsImported(asset);
 
 	return true;
