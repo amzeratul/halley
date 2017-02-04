@@ -21,6 +21,7 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	}
 	meta.set("width", size.x);
 	meta.set("height", size.y);
+	meta.set("compression", "png");
 
 	// Output
 	collector.output(asset.assetId, AssetType::Texture, span, meta);

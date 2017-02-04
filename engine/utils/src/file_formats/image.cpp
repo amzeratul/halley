@@ -35,7 +35,7 @@ Halley::Image::Image(unsigned int _w, unsigned int _h)
 	setSize(Vector2i(_w, _h));
 }
 
-Halley::Image::Image(String _filename, gsl::span<const gsl::byte> bytes, bool _preMultiply)
+Halley::Image::Image(const String& _filename, gsl::span<const gsl::byte> bytes, bool _preMultiply)
 	: filename(_filename)
 	, px(nullptr, [](char*) {})
 	, preMultiplied(false)
@@ -201,7 +201,7 @@ std::unique_ptr<Halley::Image> Halley::Image::loadResource(ResourceLoader& loade
 	return std::make_unique<Image>(loader.getName(), data->getSpan(), false);
 }
 
-void Halley::Image::load(String name, gsl::span<const gsl::byte> bytes, bool shouldPreMultiply)
+void Halley::Image::load(const String& name, gsl::span<const gsl::byte> bytes, bool shouldPreMultiply)
 {
 	filename = name;
 

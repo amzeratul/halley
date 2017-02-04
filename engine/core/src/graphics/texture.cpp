@@ -8,6 +8,47 @@
 
 using namespace Halley;
 
+struct ImageData
+{
+public:
+	ImageData(std::unique_ptr<Image> img)
+		: img(std::move(img)), isRaw(false)
+	{}
+
+	ImageData(Bytes&& bytes)
+		: rawBytes(std::move(bytes)), isRaw(true)
+	{}
+
+	ImageData(ImageData&& other) noexcept
+		: img(std::move(other.img)), rawBytes(std::move(other.rawBytes)), isRaw(other.isRaw)
+	{}
+
+	ImageData(gsl::span<const gsl::byte> bytes)
+		: rawBytes(bytes.size_bytes())
+		, isRaw(true)
+	{
+		memcpy(rawBytes.data(), bytes.data(), bytes.size_bytes());
+	}
+
+	ImageData& operator=(ImageData&& other)
+	{
+		img = std::move(other.img);
+		rawBytes = std::move(other.rawBytes);
+		isRaw = std::move(other.isRaw);
+		return *this;
+	}
+
+	Byte* getBytes()
+	{
+		return isRaw ? rawBytes.data() : reinterpret_cast<Byte*>(img->getPixels());
+	}
+
+private:
+	std::unique_ptr<Image> img;
+	Bytes rawBytes;
+	bool isRaw = false;
+};
+
 std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 {
 	auto& meta = loader.getMeta();
@@ -22,11 +63,16 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	texture->computeSlice();
 
 	loader.getAsync()
-	.then([premultiply](std::unique_ptr<ResourceDataStatic> data) -> std::unique_ptr<Image>
+	.then([premultiply, texture](std::unique_ptr<ResourceDataStatic> data) -> ImageData
 	{
-		return std::make_unique<Image>(data->getPath(), data->getSpan(), premultiply);
+		auto& meta = texture->getMeta();
+		if (meta.getString("compression") == "png") {
+			return ImageData(std::make_unique<Image>(data->getPath(), data->getSpan(), premultiply));
+		} else {
+			return ImageData(data->getSpan());
+		}
 	})
-	.then(Executors::getVideoAux(), [texture](std::unique_ptr<Image> img)
+	.then(Executors::getVideoAux(), [texture](ImageData img)
 	{
 		auto& meta = texture->getMeta();
 
@@ -36,11 +82,8 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 		descriptor.useMipMap = meta.getBool("mipmap", false);
 		descriptor.format = meta.getString("format", "RGBA") == "RGBA" ? TextureFormat::RGBA : TextureFormat::RGB;
 
-		if (img->getSize() != descriptor.size) {
-			throw Exception("Image size does not match metadata.");
-		}
 		TextureDescriptor d = descriptor;
-		d.pixelData = img->getPixels();
+		d.pixelData = img.getBytes();
 		texture->load(d);
 	});
 
