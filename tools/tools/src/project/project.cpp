@@ -13,8 +13,8 @@ Project::Project(const HalleyStatics& statics, const String& platform, Path proj
 	, rootPath(projectRootPath)
 	, halleyRootPath(halleyRootPath)
 {
-	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getAssetsPath(), getAssetsPath() / "import.db", getAssetsPath() / "assets.db");
-	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db");
+	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getAssetsPath(), getAssetsPath() / "import.db", getAssetsPath() / "assets.db", platform);
+	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", "");
 
 	initialisePlugins();
 	assetImporter = std::make_unique<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});

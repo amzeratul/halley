@@ -59,7 +59,7 @@ namespace Halley
 		};
 
 	public:
-		ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile);
+		ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, const String& Platform);
 
 		void load();
 		void save() const;
@@ -79,6 +79,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 	private:
+		String platform;
 		Path directory;
 		Path dbFile;
 		Path assetsDbFile;

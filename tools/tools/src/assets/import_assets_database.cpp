@@ -38,8 +38,9 @@ void ImportAssetsDatabase::AssetEntry::deserialize(Deserializer& s)
 	s >> asset;
 }
 
-ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile)
-	: directory(directory)
+ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, const String& platform)
+	: platform(platform)
+	, directory(directory)
 	, dbFile(dbFile)
 	, assetsDbFile(assetsDbFile)
 {
@@ -199,12 +200,13 @@ std::vector<AssetResource> ImportAssetsDatabase::getOutFiles(String assetId) con
 	}
 }
 
-constexpr static int currentAssetVersion = 12;
+constexpr static int currentAssetVersion = 13;
 
 void ImportAssetsDatabase::serialize(Serializer& s) const
 {
 	int version = currentAssetVersion;
 	s << version;
+	s << platform;
 	s << assetsImported;
 }
 
@@ -213,7 +215,11 @@ void ImportAssetsDatabase::deserialize(Deserializer& s)
 	int version;
 	s >> version;
 	if (version == currentAssetVersion) {
-		s >> assetsImported;
+		String platformRead;
+		s >> platformRead;
+		if (platformRead == platform) {
+			s >> assetsImported;
+		}
 	}
 }
 
