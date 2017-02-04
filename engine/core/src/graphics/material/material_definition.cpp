@@ -117,7 +117,7 @@ MaterialPass::MaterialPass(BlendType blend, String shaderAssetId)
 
 void MaterialPass::bind(Painter& painter) const
 {
-	shader->bind();
+	painter.setShader(*shader);
 	painter.setBlend(getBlend());
 }
 

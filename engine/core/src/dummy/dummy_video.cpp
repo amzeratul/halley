@@ -84,8 +84,6 @@ void DummyTextureRenderTarget::bind() {}
 
 void DummyTextureRenderTarget::unbind() {}
 
-void DummyShader::bind() {}
-
 unsigned DummyShader::getUniformLocation(String name)
 {
 	return 0;
@@ -106,3 +104,5 @@ void DummyPainter::drawTriangles(size_t numIndices) {}
 void DummyPainter::setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) {}
 
 void DummyPainter::setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) {}
+
+void DummyPainter::setShader(Shader& shader) {}

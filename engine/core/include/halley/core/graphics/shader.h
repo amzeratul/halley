@@ -52,7 +52,6 @@ namespace Halley
 	{
 	public:
 		virtual ~Shader() {}
-		virtual void bind() = 0;
 		virtual unsigned int getUniformLocation(String name) = 0;
 	};
 }

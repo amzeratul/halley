@@ -11,7 +11,7 @@ namespace Halley
 		explicit ShaderOpenGL(const ShaderDefinition& definition);
 		~ShaderOpenGL();
 
-		void bind() override;
+		void bind();
 		void unbind();
 		void destroy();
 

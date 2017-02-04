@@ -7,6 +7,7 @@
 
 namespace Halley
 {
+	class Shader;
 	class Material;
 	class MaterialDefinition;
 	class Camera;
@@ -38,6 +39,7 @@ namespace Halley
 
 		virtual void clear(Colour colour) = 0;
 		virtual void setBlend(BlendType blend) = 0;
+		virtual void setShader(Shader& shader) = 0;
 
 		void setRelativeClip(Rect4f rect);
 		void setClip(Rect4i rect);

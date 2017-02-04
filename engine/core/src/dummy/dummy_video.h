@@ -46,7 +46,6 @@ namespace Halley {
 	class DummyShader : public Shader
 	{
 	public:
-		void bind() override;
 		unsigned getUniformLocation(String name) override;
 	};
 
@@ -61,5 +60,6 @@ namespace Halley {
 		void drawTriangles(size_t numIndices) override;
 		void setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) override;
 		void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) override;
+		void setShader(Shader& shader) override;
 	};
 }

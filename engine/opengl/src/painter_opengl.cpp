@@ -1,6 +1,7 @@
 #include "painter_opengl.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include <gsl/gsl_assert>
+#include "shader_opengl.h"
 
 using namespace Halley;
 
@@ -68,6 +69,11 @@ void PainterOpenGL::clear(Colour colour)
 void PainterOpenGL::setBlend(BlendType blend)
 {
 	glUtils->setBlendType(blend);
+}
+
+void PainterOpenGL::setShader(Shader& shader)
+{
+	static_cast<ShaderOpenGL&>(shader).bind();
 }
 
 static Rect4i flipRectangle(Rect4i r, int h)
