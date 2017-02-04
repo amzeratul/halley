@@ -20,7 +20,11 @@ Project::Project(const HalleyStatics& statics, const String& platform, Path proj
 	assetImporter = std::make_unique<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
 }
 
-Project::~Project() = default;
+Project::~Project()
+{
+	assetImporter.reset();
+	plugins.clear();
+}
 
 Path Project::getAssetsPath() const
 {
