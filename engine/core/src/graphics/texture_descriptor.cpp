@@ -49,12 +49,15 @@ Byte* TextureDescriptorImageData::getBytes()
 Bytes TextureDescriptorImageData::moveBytes()
 {
 	if (isRaw) {
+		return move(rawBytes);
+	} else {
+		if (!img || img->getByteSize() == 0) {
+			return Bytes();
+		}
 		Bytes result(img->getByteSize());
 		memcpy(result.data(), img->getPixels(), img->getByteSize());
 		img.reset();
 		return result;
-	} else {
-		return move(rawBytes);
 	}
 }
 
