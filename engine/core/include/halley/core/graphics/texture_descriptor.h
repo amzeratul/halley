@@ -12,6 +12,12 @@ namespace Halley
 		DEPTH
 	};
 
+	enum class PixelDataFormat
+	{
+		RGBA,
+		Precompiled
+	};
+
 	
 	class TextureDescriptorImageData
 	{
@@ -27,6 +33,8 @@ namespace Halley
 		bool empty() const;
 		Byte* getBytes();
 
+		Bytes moveBytes();
+
 	private:
 		std::unique_ptr<Image> img;
 		Bytes rawBytes;
@@ -39,6 +47,7 @@ namespace Halley
 		Vector2i size;
 		size_t padding = 0;
 		TextureFormat format = TextureFormat::RGBA;
+		PixelDataFormat pixelFormat = PixelDataFormat::RGBA;
 		bool useMipMap = false;
 		bool useFiltering = false;
 		TextureDescriptorImageData pixelData;

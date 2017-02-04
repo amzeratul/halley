@@ -1,50 +1,64 @@
 #include "halley/core/graphics/texture_descriptor.h"
 
-Halley::TextureDescriptorImageData::TextureDescriptorImageData()
+using namespace Halley;
+
+TextureDescriptorImageData::TextureDescriptorImageData()
 {}
 
-Halley::TextureDescriptorImageData::TextureDescriptorImageData(std::unique_ptr<Image> img)
-	: img(std::move(img))
+TextureDescriptorImageData::TextureDescriptorImageData(std::unique_ptr<Image> img)
+	: img(move(img))
 	, isRaw(false)
 {}
 
-Halley::TextureDescriptorImageData::TextureDescriptorImageData(Bytes&& bytes)
-	: rawBytes(std::move(bytes))
+TextureDescriptorImageData::TextureDescriptorImageData(Bytes&& bytes)
+	: rawBytes(move(bytes))
 	, isRaw(true)
 {}
 
-Halley::TextureDescriptorImageData::TextureDescriptorImageData(TextureDescriptorImageData&& other) noexcept
-	: img(std::move(other.img))
-	, rawBytes(std::move(other.rawBytes))
+TextureDescriptorImageData::TextureDescriptorImageData(TextureDescriptorImageData&& other) noexcept
+	: img(move(other.img))
+	, rawBytes(move(other.rawBytes))
 	, isRaw(other.isRaw)
 {}
 
-Halley::TextureDescriptorImageData::TextureDescriptorImageData(gsl::span<const gsl::byte> bytes)
+TextureDescriptorImageData::TextureDescriptorImageData(gsl::span<const gsl::byte> bytes)
 	: rawBytes(bytes.size_bytes())
     , isRaw(true)
 {
 	memcpy(rawBytes.data(), bytes.data(), bytes.size_bytes());
 }
 
-Halley::TextureDescriptorImageData& Halley::TextureDescriptorImageData::operator=(TextureDescriptorImageData&& other) noexcept
+TextureDescriptorImageData& TextureDescriptorImageData::operator=(TextureDescriptorImageData&& other) noexcept
 {
-	img = std::move(other.img);
-	rawBytes = std::move(other.rawBytes);
+	img = move(other.img);
+	rawBytes = move(other.rawBytes);
 	isRaw = std::move(other.isRaw);
 	return *this;
 }
 
-bool Halley::TextureDescriptorImageData::empty() const
+bool TextureDescriptorImageData::empty() const
 {
 	return isRaw ? rawBytes.empty() : !img;
 }
 
-Halley::Byte* Halley::TextureDescriptorImageData::getBytes()
+Byte* TextureDescriptorImageData::getBytes()
 {
 	return isRaw ? rawBytes.data() : reinterpret_cast<Byte*>(img->getPixels());
 }
 
-int Halley::TextureDescriptor::getBitsPerPixel(TextureFormat format)
+Bytes TextureDescriptorImageData::moveBytes()
+{
+	if (isRaw) {
+		Bytes result(img->getByteSize());
+		memcpy(result.data(), img->getPixels(), img->getByteSize());
+		img.reset();
+		return result;
+	} else {
+		return move(rawBytes);
+	}
+}
+
+int TextureDescriptor::getBitsPerPixel(TextureFormat format)
 {
 	switch (format) {
 	case TextureFormat::RGBA:

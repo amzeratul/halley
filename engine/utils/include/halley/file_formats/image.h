@@ -55,6 +55,7 @@ namespace Halley {
 		static int getRGBA(int r, int g, int b, int a=255);
 		char* getPixels() { return px.get(); }
 		const char* getPixels() const { return px.get(); }
+		size_t getByteSize() const;
 
 		unsigned int getWidth() const { return w; }
 		unsigned int getHeight() const { return h; }

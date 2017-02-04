@@ -41,6 +41,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 		descriptor.useMipMap = meta.getBool("mipmap", false);
 		descriptor.format = meta.getString("format", "RGBA") == "RGBA" ? TextureFormat::RGBA : TextureFormat::RGB;
 		descriptor.pixelData = std::move(img);
+		descriptor.pixelFormat = meta.getString("compression") == "png" ? PixelDataFormat::RGBA : PixelDataFormat::Precompiled;
 		texture->load(std::move(descriptor));
 	});
 

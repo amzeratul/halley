@@ -72,6 +72,11 @@ int Halley::Image::getRGBA(int r, int g, int b, int a)
 	return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
+size_t Halley::Image::getByteSize() const
+{
+	return dataLen;
+}
+
 Halley::Rect4i Halley::Image::getTrimRect() const
 {
 	int x0 = w;
