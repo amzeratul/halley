@@ -20,6 +20,7 @@ namespace Halley
 		void clear(Colour colour) override;
 		void setBlend(BlendType blend) override;
 		void setShader(Shader& shader) override;
+		std::unique_ptr<MaterialConstantBuffer> makeConstantBuffer(const Material& material) override;
 
 		void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) override;
 

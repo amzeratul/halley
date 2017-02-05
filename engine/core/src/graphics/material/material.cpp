@@ -35,7 +35,14 @@ void Material::bind(int pass, Painter& painter)
 	currentMaterial = this;
 	currentPass = pass;
 
-	materialDefinition->bind(pass, painter, uniforms);
+	if (!constantBuffer) {
+		constantBuffer = painter.makeConstantBuffer(*this);
+	}
+	if (dirty) {
+		constantBuffer->update(uniforms);
+	}
+	materialDefinition->bind(pass, painter);
+	constantBuffer->bind(pass);
 }
 
 void Material::resetBindCache()

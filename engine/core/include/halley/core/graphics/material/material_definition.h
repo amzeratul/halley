@@ -56,7 +56,7 @@ namespace Halley
 		MaterialDefinition();
 		explicit MaterialDefinition(ResourceLoader& loader);
 
-		void bind(int pass, Painter& painter, const std::vector<MaterialParameter>& uniforms) const;
+		void bind(int pass, Painter& painter) const;
 		int getNumPasses() const;
 		MaterialPass& getPass(int n);
 
@@ -91,7 +91,7 @@ namespace Halley
 		MaterialPass();
 		MaterialPass(BlendType blend, String shaderAsset);
 
-		void bind(int pass, Painter& painter, const std::vector<MaterialParameter>& uniforms) const;
+		void bind(int pass, Painter& painter) const;
 
 		BlendType getBlend() const { return blend; }
 		Shader& getShader() const { return *shader; }

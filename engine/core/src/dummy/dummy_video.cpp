@@ -89,6 +89,10 @@ unsigned DummyShader::getUniformLocation(String name)
 	return 0;
 }
 
+void DummyMaterialConstantBuffer::update(const Vector<MaterialParameter>& uniforms) {}
+
+void DummyMaterialConstantBuffer::bind(int pass) {}
+
 void DummyPainter::clear(Colour colour) {}
 
 void DummyPainter::setBlend(BlendType blend) {}
@@ -106,3 +110,8 @@ void DummyPainter::setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isSc
 void DummyPainter::setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) {}
 
 void DummyPainter::setShader(Shader& shader) {}
+
+std::unique_ptr<MaterialConstantBuffer> DummyPainter::makeConstantBuffer(const Material& material)
+{
+	return std::make_unique<DummyMaterialConstantBuffer>();
+}

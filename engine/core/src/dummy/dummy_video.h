@@ -49,6 +49,13 @@ namespace Halley {
 		unsigned getUniformLocation(String name) override;
 	};
 
+	class DummyMaterialConstantBuffer : public MaterialConstantBuffer
+	{
+	public:
+		void update(const Vector<MaterialParameter>& uniforms) override;
+		void bind(int pass) override;
+	};
+
 	class DummyPainter : public Painter
 	{
 	public:
@@ -61,5 +68,6 @@ namespace Halley {
 		void setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) override;
 		void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) override;
 		void setShader(Shader& shader) override;
+		std::unique_ptr<MaterialConstantBuffer> makeConstantBuffer(const Material& material) override;
 	};
 }

@@ -83,9 +83,9 @@ MaterialPass::MaterialPass()
 	: blend(BlendType::Undefined)
 {}
 
-void MaterialDefinition::bind(int pass, Painter& painter, const std::vector<MaterialParameter>& uniforms) const
+void MaterialDefinition::bind(int pass, Painter& painter) const
 {
-	passes[pass].bind(pass, painter, uniforms);
+	passes[pass].bind(pass, painter);
 }
 
 int MaterialDefinition::getNumPasses() const
@@ -134,13 +134,10 @@ MaterialPass::MaterialPass(BlendType blend, String shaderAssetId)
 {
 }
 
-void MaterialPass::bind(int pass, Painter& painter, const std::vector<MaterialParameter>& uniforms) const
+void MaterialPass::bind(int pass, Painter& painter) const
 {
 	painter.setShader(*shader);
 	painter.setBlend(getBlend());
-	for (auto& u: uniforms) {
-		u.bind(pass);
-	}
 }
 
 void MaterialPass::serialize(Serializer& s) const

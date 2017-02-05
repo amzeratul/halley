@@ -9,6 +9,15 @@ namespace Halley
 	class Painter;
 	class MaterialDefinition;
 	class MaterialParameter;
+
+	class MaterialConstantBuffer
+	{
+	public:
+		virtual ~MaterialConstantBuffer() {}
+
+		virtual void update(const Vector<MaterialParameter>& uniforms) = 0;
+		virtual void bind(int pass) = 0;
+	};
 	
 	class Material
 	{
@@ -40,6 +49,7 @@ namespace Halley
 		Vector<MaterialParameter> uniforms;
 		std::shared_ptr<const MaterialDefinition> materialDefinition;
 		std::shared_ptr<const Texture> mainTexture;
+		std::unique_ptr<MaterialConstantBuffer> constantBuffer;
 
 		void initUniforms();
 		void setMainTexture(const std::shared_ptr<const Texture>& tex);

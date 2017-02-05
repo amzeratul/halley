@@ -4,6 +4,7 @@
 #include "halley/maths/colour.h"
 #include <condition_variable>
 #include <halley/maths/vector4.h>
+#include "material/material.h"
 
 namespace Halley
 {
