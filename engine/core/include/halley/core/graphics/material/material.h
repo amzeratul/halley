@@ -3,6 +3,7 @@
 #include <memory>
 #include "halley/text/halleystring.h"
 #include "halley/core/graphics/texture.h"
+#include "halley/support/exception.h"
 #include "uniform_type.h"
 
 namespace Halley
