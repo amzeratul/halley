@@ -43,6 +43,8 @@ namespace Halley
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+
+		static size_t getAttributeSize(ShaderParameterType type);
 	};
 
 	class MaterialDefinition final : public Resource

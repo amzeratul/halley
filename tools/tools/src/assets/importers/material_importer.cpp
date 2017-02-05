@@ -139,7 +139,7 @@ void MaterialImporter::loadAttributes(MaterialDefinition& material, const YAML::
 			a.location = location++;
 			a.offset = offset;
 
-			int size = getAttributeSize(type);
+			int size = MaterialAttribute::getAttributeSize(type);
 			offset += size;
 
 			if (a.name == "a_vertPos") {
@@ -149,15 +149,4 @@ void MaterialImporter::loadAttributes(MaterialDefinition& material, const YAML::
 	}
 
 	material.vertexStride = offset;
-}
-
-int MaterialImporter::getAttributeSize(ShaderParameterType type)
-{
-	switch (type) {
-	case ShaderParameterType::Float: return 4;
-	case ShaderParameterType::Float2: return 8;
-	case ShaderParameterType::Float3: return 12;
-	case ShaderParameterType::Float4: return 16;
-	default: throw Exception("Unknown type: " + toString(int(type)));
-	}
 }

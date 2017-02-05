@@ -45,6 +45,25 @@ void MaterialAttribute::deserialize(Deserializer& s)
 	s >> offset;
 }
 
+size_t MaterialAttribute::getAttributeSize(ShaderParameterType type)
+{
+	switch (type) {
+		case ShaderParameterType::Float: return 4;
+		case ShaderParameterType::Float2: return 8;
+		case ShaderParameterType::Float3: return 12;
+		case ShaderParameterType::Float4: return 16;
+		case ShaderParameterType::Int: return 4;
+		case ShaderParameterType::Int2: return 8;
+		case ShaderParameterType::Int3: return 12;
+		case ShaderParameterType::Int4: return 16;
+		case ShaderParameterType::Matrix2: return 16;
+		case ShaderParameterType::Matrix3: return 36;
+		case ShaderParameterType::Matrix4: return 64;
+		case ShaderParameterType::Texture2D: return 4;
+		default: throw Exception("Unknown type: " + toString(int(type)));
+	}
+}
+
 MaterialDefinition::MaterialDefinition() {}
 
 MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
