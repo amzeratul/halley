@@ -45,9 +45,14 @@ namespace Halley
 		MaterialConstantBuffer& getConstantBuffer() const;
 
 		template <typename T>
-		Material& set(const String& name, const T& value)
+		Material& set(const String& name, const T& value, bool optional = false)
 		{
-			getParameter(name) = value;
+			auto param = getParameter(name);
+			if (param) {
+				*param = value;
+			} else if (!optional) {
+				throw Exception("Uniform not available: " + name);
+			}
 			return *this;
 		}
 
@@ -62,6 +67,6 @@ namespace Halley
 		std::vector<std::shared_ptr<const Texture>> textures;
 
 		void initUniforms();
-		MaterialParameter& getParameter(const String& name);
+		MaterialParameter* getParameter(const String& name);
 	};
 }

@@ -105,14 +105,14 @@ MaterialConstantBuffer& Material::getConstantBuffer() const
 	return *constantBuffer;
 }
 
-MaterialParameter& Material::getParameter(const String& name)
+MaterialParameter* Material::getParameter(const String& name)
 {
 	for (auto& u : uniforms) {
 		if (u.name == name) {
-			return u;
+			return &u;
 		}
 	}
-	throw Exception("Uniform not available: " + name);
+	return nullptr;
 }
 
 std::shared_ptr<Material> Material::clone() const
