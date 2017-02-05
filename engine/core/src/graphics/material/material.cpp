@@ -42,14 +42,14 @@ void Material::initUniforms()
 	textures.resize(std::max(1, textureUnit));
 }
 
-void Material::bind(int pass, Painter& painter)
+void Material::bind(int passNumber, Painter& painter)
 {
 	// Avoid redundant work
-	if (currentMaterial == this && currentPass == pass && !dirty) {
+	if (currentMaterial == this && currentPass == passNumber && !dirty) {
 		return;
 	}
 	currentMaterial = this;
-	currentPass = pass;
+	currentPass = passNumber;
 
 	if (!constantBuffer) {
 		constantBuffer = getDefinition().api->createConstantBuffer(*this);
@@ -57,8 +57,7 @@ void Material::bind(int pass, Painter& painter)
 	if (dirty) {
 		constantBuffer->update(*this);
 	}
-	materialDefinition->bind(pass, painter);
-	constantBuffer->bind(pass);
+	painter.setMaterialPass(*this, passNumber);
 }
 
 void Material::resetBindCache()
@@ -98,6 +97,12 @@ const Bytes& Material::getData() const
 const Vector<MaterialParameter>& Material::getUniforms() const
 {
 	return uniforms;
+}
+
+MaterialConstantBuffer& Material::getConstantBuffer() const
+{
+	Expects(constantBuffer);
+	return *constantBuffer;
 }
 
 MaterialParameter& Material::getParameter(const String& name)

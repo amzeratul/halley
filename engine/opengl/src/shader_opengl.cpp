@@ -4,6 +4,7 @@
 #include "shader_opengl.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include "gl_utils.h"
+#include "halley_gl.h"
 
 using namespace Halley;
 

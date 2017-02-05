@@ -53,20 +53,18 @@ namespace Halley {
 	{
 	public:
 		void update(const Material& material) override;
-		void bind(int pass) override;
 	};
 
 	class DummyPainter : public Painter
 	{
 	public:
 		void clear(Colour colour) override;
-		void setBlend(BlendType blend) override;
+		void setMaterialPass(const Material& material, int pass) override;
 		void doStartRender() override;
 		void doEndRender() override;
 		void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices) override;
 		void drawTriangles(size_t numIndices) override;
 		void setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) override;
 		void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) override;
-		void setShader(Shader& shader) override;
 	};
 }

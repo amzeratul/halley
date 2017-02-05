@@ -2,6 +2,7 @@
 #include "halley/core/graphics/material/material_definition.h"
 #include <gsl/gsl_assert>
 #include "shader_opengl.h"
+#include "constant_buffer_opengl.h"
 
 using namespace Halley;
 
@@ -66,14 +67,13 @@ void PainterOpenGL::clear(Colour colour)
 	glCheckError();
 }
 
-void PainterOpenGL::setBlend(BlendType blend)
+void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 {
-	glUtils->setBlendType(blend);
-}
+	auto& pass = material.getDefinition().getPass(passNumber);
 
-void PainterOpenGL::setShader(Shader& shader)
-{
-	static_cast<ShaderOpenGL&>(shader).bind();
+	glUtils->setBlendType(pass.getBlend());
+	static_cast<ShaderOpenGL&>(pass.getShader()).bind();
+	static_cast<ConstantBufferOpenGL&>(material.getConstantBuffer()).bind(passNumber);
 }
 
 static Rect4i flipRectangle(Rect4i r, int h)

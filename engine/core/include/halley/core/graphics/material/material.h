@@ -19,7 +19,6 @@ namespace Halley
 		virtual ~MaterialConstantBuffer() {}
 
 		virtual void update(const Material& material) = 0;
-		virtual void bind(int pass) = 0;
 	};
 	
 	class Material
@@ -43,6 +42,7 @@ namespace Halley
 		const std::shared_ptr<const Texture>& getTexture(int textureUnit) const;
 		const Bytes& getData() const;
 		const Vector<MaterialParameter>& getUniforms() const;
+		MaterialConstantBuffer& getConstantBuffer() const;
 
 		template <typename T>
 		Material& set(const String& name, const T& value)

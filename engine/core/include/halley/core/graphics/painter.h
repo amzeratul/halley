@@ -39,8 +39,7 @@ namespace Halley
 		Rect4f getWorldViewAABB() const;
 
 		virtual void clear(Colour colour) = 0;
-		virtual void setBlend(BlendType blend) = 0;
-		virtual void setShader(Shader& shader) = 0;
+		virtual void setMaterialPass(const Material& material, int pass) = 0;
 
 		void setRelativeClip(Rect4f rect);
 		void setClip(Rect4i rect);

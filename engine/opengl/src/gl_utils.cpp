@@ -25,6 +25,7 @@
 #include "halley/concurrency/concurrent.h"
 #include <gsl/gsl_assert>
 #include "halley/text/string_converter.h"
+#include "halley_gl.h"
 
 #ifdef __APPLE__
 #include <pthread.h>

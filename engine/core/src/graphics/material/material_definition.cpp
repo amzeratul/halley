@@ -83,14 +83,14 @@ MaterialPass::MaterialPass()
 	: blend(BlendType::Undefined)
 {}
 
-void MaterialDefinition::bind(int pass, Painter& painter) const
-{
-	passes[pass].bind(pass, painter);
-}
-
 int MaterialDefinition::getNumPasses() const
 {
 	return int(passes.size());
+}
+
+const MaterialPass& MaterialDefinition::getPass(int n) const
+{
+	return passes[n];
 }
 
 MaterialPass& MaterialDefinition::getPass(int n)
@@ -132,12 +132,6 @@ MaterialPass::MaterialPass(BlendType blend, String shaderAssetId)
 	: blend(blend)
 	, shaderAssetId(shaderAssetId)
 {
-}
-
-void MaterialPass::bind(int pass, Painter& painter) const
-{
-	painter.setShader(*shader);
-	painter.setBlend(getBlend());
 }
 
 void MaterialPass::serialize(Serializer& s) const

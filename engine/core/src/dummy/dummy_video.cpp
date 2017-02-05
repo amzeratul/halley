@@ -91,11 +91,9 @@ unsigned DummyShader::getUniformLocation(String name)
 
 void DummyMaterialConstantBuffer::update(const Material& material) {}
 
-void DummyMaterialConstantBuffer::bind(int pass) {}
-
 void DummyPainter::clear(Colour colour) {}
 
-void DummyPainter::setBlend(BlendType blend) {}
+void DummyPainter::setMaterialPass(const Material& material, int pass) {}
 
 void DummyPainter::doStartRender() {}
 
@@ -108,5 +106,3 @@ void DummyPainter::drawTriangles(size_t numIndices) {}
 void DummyPainter::setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) {}
 
 void DummyPainter::setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) {}
-
-void DummyPainter::setShader(Shader& shader) {}

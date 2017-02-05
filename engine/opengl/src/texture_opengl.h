@@ -3,6 +3,7 @@
 #include <halley/core/graphics/texture.h>
 #include <halley/core/graphics/texture_descriptor.h>
 #include <condition_variable>
+#include "halley_gl.h"
 
 namespace Halley
 {
