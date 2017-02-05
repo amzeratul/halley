@@ -4,6 +4,7 @@
 #include "halley/core/graphics/material/material_parameter.h"
 #include "halley/core/graphics/painter.h"
 #include "api/video_api.h"
+#include <cstring>
 
 using namespace Halley;
 
