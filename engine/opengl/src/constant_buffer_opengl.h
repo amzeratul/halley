@@ -7,7 +7,7 @@ namespace Halley
 	{
 	public:
 		explicit ConstantBufferOpenGL(const Material& material);
-		void update(const Vector<MaterialParameter>& uniforms) override;
+		void update(const Material& material) override;
 		void bind(int pass) override;
 
 	private:

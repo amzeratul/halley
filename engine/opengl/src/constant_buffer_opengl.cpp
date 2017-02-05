@@ -12,7 +12,7 @@ ConstantBufferOpenGL::ConstantBufferOpenGL(const Material& material)
 {
 }
 
-void ConstantBufferOpenGL::update(const Vector<MaterialParameter>& uniforms)
+void ConstantBufferOpenGL::update(const Material& material)
 {
 	
 }

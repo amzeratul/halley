@@ -55,7 +55,7 @@ void Material::bind(int pass, Painter& painter)
 		constantBuffer = getDefinition().api->createConstantBuffer(*this);
 	}
 	if (dirty) {
-		constantBuffer->update(uniforms);
+		constantBuffer->update(*this);
 	}
 	materialDefinition->bind(pass, painter);
 	constantBuffer->bind(pass);

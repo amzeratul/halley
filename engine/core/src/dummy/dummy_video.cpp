@@ -89,7 +89,7 @@ unsigned DummyShader::getUniformLocation(String name)
 	return 0;
 }
 
-void DummyMaterialConstantBuffer::update(const Vector<MaterialParameter>& uniforms) {}
+void DummyMaterialConstantBuffer::update(const Material& material) {}
 
 void DummyMaterialConstantBuffer::bind(int pass) {}
 

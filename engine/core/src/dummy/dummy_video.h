@@ -52,7 +52,7 @@ namespace Halley {
 	class DummyMaterialConstantBuffer : public MaterialConstantBuffer
 	{
 	public:
-		void update(const Vector<MaterialParameter>& uniforms) override;
+		void update(const Material& material) override;
 		void bind(int pass) override;
 	};
 

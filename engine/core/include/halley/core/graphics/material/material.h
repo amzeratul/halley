@@ -7,6 +7,7 @@
 
 namespace Halley
 {
+	class Material;
 	enum class ShaderParameterType;
 	class Painter;
 	class MaterialDefinition;
@@ -17,7 +18,7 @@ namespace Halley
 	public:
 		virtual ~MaterialConstantBuffer() {}
 
-		virtual void update(const Vector<MaterialParameter>& uniforms) = 0;
+		virtual void update(const Material& material) = 0;
 		virtual void bind(int pass) = 0;
 	};
 	
