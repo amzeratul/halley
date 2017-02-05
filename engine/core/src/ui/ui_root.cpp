@@ -57,13 +57,14 @@ UIRoot::UIRoot(AudioAPI* audio)
 {
 }
 
-void UIRoot::update(Time t, spInputDevice mouse, Vector2f uiOffset)
+void UIRoot::update(Time t, spInputDevice mouse, spInputDevice manual, Vector2f uiOffset)
 {
 	// Layout all widgets
 	for (auto& c: getChildren()) {
 		c->layout();
 	}
 
+	updateManual(manual);
 	updateMouse(mouse, uiOffset);
 
 	// Update children
@@ -79,8 +80,17 @@ void UIRoot::update(Time t, spInputDevice mouse, Vector2f uiOffset)
 
 void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)
 {
-	// Go through all root-level widgets and find the actual widget under the mouse
-	auto underMouse = getWidgetUnderMouse(mouse->getPosition() + uiOffset);
+	// Check where we should be mouse overing.
+	// If the mouse hasn't moved, keep the last one.
+	std::shared_ptr<UIWidget> underMouse;
+	Vector2f mousePos = mouse->getPosition() + uiOffset;
+	if ((mousePos - lastMousePos).squaredLength() > 0.01f) {
+		// Go through all root-level widgets and find the actual widget under the mouse
+		underMouse = getWidgetUnderMouse(mousePos);
+		lastMousePos = mousePos;
+	} else {
+		underMouse = currentMouseOver.lock();
+	}
 
 	// Click
 	if (mouse->isButtonPressed(0)) {
@@ -106,6 +116,41 @@ void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)
 		activeMouseOver.reset();
 	}
 	updateMouseOver(activeMouseOver);
+}
+
+void UIRoot::updateManual(spInputDevice manual)
+{
+	int x = manual->getAxisRepeat(0);
+	int y = manual->getAxisRepeat(1);
+	if (x > 0 || y > 0) {
+		mouseOverNext(true);
+	} else if (x < 0 || y < 0) {
+		mouseOverNext(false);
+	}
+}
+
+void UIRoot::mouseOverNext(bool forward)
+{
+	if (getChildren().empty()) {
+		return;
+	}
+	std::vector<std::shared_ptr<UIWidget>> widgets;
+	collectWidgets(getChildren().back(), widgets);
+
+	if (widgets.empty()) {
+		return;
+	}
+
+	size_t nextIdx = 0;
+	auto current = currentMouseOver.lock();
+	if (current) {
+		auto i = std::find(widgets.begin(), widgets.end(), current);
+		if (i != widgets.end()) {
+			nextIdx = ((i - widgets.begin()) + widgets.size() + (forward ? 1 : -1)) % widgets.size();
+		}
+	}
+
+	updateMouseOver(widgets[nextIdx]);
 }
 
 void UIRoot::setFocus(std::shared_ptr<UIWidget> focus)
@@ -138,11 +183,10 @@ void UIRoot::updateMouseOver(const std::shared_ptr<UIWidget>& underMouse)
 
 std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos)
 {
-	std::shared_ptr<UIWidget> underMouse;
-	for (auto& c: getChildren()) {
-		underMouse = getWidgetUnderMouse(c, mousePos);
+	if (getChildren().empty()) {
+		return {};
 	}
-	return underMouse;
+	return getWidgetUnderMouse(getChildren().back(), mousePos);
 }
 
 std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos)
@@ -160,6 +204,17 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWi
 		return start;
 	} else {
 		return {};
+	}
+}
+
+void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output)
+{
+	for (auto& c: start->getChildren()) {
+		collectWidgets(c, output);
+	}
+
+	if (start->isFocusable()) {
+		output.push_back(start);
 	}
 }
 

@@ -3,7 +3,7 @@
 #include <vector>
 #include "halley/maths/vector2.h"
 #include "ui_event.h"
-#include "input/input_virtual.h"
+#include "halley/core/input/input_virtual.h"
 
 namespace Halley {
 	class AudioAPI;
@@ -51,7 +51,7 @@ namespace Halley {
 
 		explicit UIRoot(AudioAPI* audio);
 
-		void update(Time t, spInputDevice mouse, Vector2f uiOffset = {});
+		void update(Time t, spInputDevice mouse, spInputDevice manual, Vector2f uiOffset = {});
 		void draw(SpritePainter& painter, int mask, int layer);
 		
 		void playSound(const std::shared_ptr<const AudioClip>& clip);
@@ -61,17 +61,22 @@ namespace Halley {
 		bool hasModalUI() const;
 
 	private:
-		std::vector<UIWidget*> widgets;
 		std::weak_ptr<UIWidget> currentMouseOver;
 		std::weak_ptr<UIWidget> currentFocus;
+		Vector2f lastMousePos;
 
 		AudioAPI* audio;
 		bool mouseHeld = false;
 
 		void updateMouse(spInputDevice mouse, Vector2f uiOffset);
+		void updateManual(spInputDevice manual);
+		void mouseOverNext(bool forward = true);
+
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos);
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos);
 		void updateMouseOver(const std::shared_ptr<UIWidget>& underMouse);
 		void setFocus(std::shared_ptr<UIWidget> focus);
+
+		void collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output);
 	};
 }
