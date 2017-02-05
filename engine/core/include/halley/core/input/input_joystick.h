@@ -46,8 +46,12 @@ namespace Halley {
 		BumperRight,
 		TriggerLeft,
 		TriggerRight,
+		LeftStick,
+		RightStick,
 		Select,
-		Start
+		Start,
+		PlatformAcceptButton,
+		PlatformCancelButton
 	};
 
 	class InputJoystick : public InputButtonBase {
@@ -65,7 +69,7 @@ namespace Halley {
 
 		static float defaultAxisAdjust(float value);
 
-		int getButtonAtPosition(JoystickButtonPosition position) const;
+		virtual int getButtonAtPosition(JoystickButtonPosition position) const;
 
 		virtual void update(Time /*t*/) {}
 

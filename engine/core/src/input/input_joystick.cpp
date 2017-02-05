@@ -72,6 +72,10 @@ int InputJoystick::getButtonAtPosition(JoystickButtonPosition position) const
 		case JoystickButtonPosition::Start: return 5;
 		case JoystickButtonPosition::BumperLeft: return 6;
 		case JoystickButtonPosition::BumperRight: return 7;
+		case JoystickButtonPosition::LeftStick: return 8;
+		case JoystickButtonPosition::RightStick: return 9;
+		case JoystickButtonPosition::PlatformAcceptButton: return 0;
+		case JoystickButtonPosition::PlatformCancelButton: return 1;
 		default: throw Exception("Invalid parameter");
 	}
 }

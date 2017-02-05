@@ -44,6 +44,8 @@ namespace Halley {
 		void update(Time t) override;
 		void setEnabled(bool enabled);
 
+		int getButtonAtPosition(JoystickButtonPosition position) const override;
+
 	private:
 		int index;
 		int cooldown;

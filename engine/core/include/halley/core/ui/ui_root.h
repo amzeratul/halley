@@ -3,6 +3,7 @@
 #include <vector>
 #include "halley/maths/vector2.h"
 #include "ui_event.h"
+#include "input/input_virtual.h"
 
 namespace Halley {
 	class AudioAPI;
@@ -50,7 +51,7 @@ namespace Halley {
 
 		explicit UIRoot(AudioAPI* audio);
 
-		void update(Time t, Vector2f mousePos, bool mousePressed, bool mouseReleased);
+		void update(Time t, spInputDevice mouse, Vector2f uiOffset = {});
 		void draw(SpritePainter& painter, int mask, int layer);
 		
 		void playSound(const std::shared_ptr<const AudioClip>& clip);
@@ -67,7 +68,7 @@ namespace Halley {
 		AudioAPI* audio;
 		bool mouseHeld = false;
 
-		void updateMouse(Vector2f mousePos, bool mousePressed, bool mouseReleased);
+		void updateMouse(spInputDevice mouse, Vector2f uiOffset);
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos);
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos);
 		void updateMouseOver(const std::shared_ptr<UIWidget>& underMouse);

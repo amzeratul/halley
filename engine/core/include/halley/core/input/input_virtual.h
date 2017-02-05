@@ -22,6 +22,8 @@
 #pragma once
 
 #include "input_button_base.h"
+#include "halley/maths/rect.h"
+#include "halley/data_structures/maybe.h"
 
 namespace Halley {
 	using spInputDevice = std::shared_ptr<InputDevice>;
@@ -29,10 +31,10 @@ namespace Halley {
 	class InputVirtual : public InputDevice {
 	public:
 		InputVirtual(int nButtons, int nAxes);
-		
-		bool isEnabled() const override { return true; }
-		virtual size_t getNumberHats() override { return 0; }
-		virtual std::shared_ptr<InputDevice> getHat(int /*n*/) override { return std::shared_ptr<InputDevice>(); }
+
+		bool isEnabled() const override;
+		size_t getNumberHats() override;
+		std::shared_ptr<InputDevice> getHat(int /*n*/) override;
 
 		size_t getNumberButtons() override;
 		size_t getNumberAxes() override;
@@ -55,11 +57,17 @@ namespace Halley {
 		void vibrate(spInputVibration vib) override;
 		void stopVibrating() override;
 
+		Vector2f getPosition() const override;
+		void setPositionLimits(Rect4f limits);
+		void setPositionLimits();
+
 		void bindButton(int n, spInputDevice device, int deviceN);
 		void bindAxis(int n, spInputDevice device, int deviceN);
 		void bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton);
 		void bindVibrationOverride(spInputDevice joy);
 		void bindHat(int leftRight, int upDown, spInputDevice hat);
+		void bindPosition(spInputDevice device);
+		void bindPositionRelative(spInputDevice device, int axisX, int axisY, float speed);
 
 		void unbindButton(int n);
 		void unbindAxis(int n);
@@ -96,8 +104,27 @@ namespace Halley {
 			explicit AxisData(Vector<Bind>& b);
 		};
 
-		Vector<Vector<Bind> > buttons;
+		struct PositionBindData
+		{
+			spInputDevice device;
+			bool direct = false;
+			int axisX = 0;
+			int axisY = 0;
+			float speed = 0.0f;
+			Vector2f lastRead;
+
+			PositionBindData();
+			explicit PositionBindData(spInputDevice device);
+			explicit PositionBindData(spInputDevice device, int axisX, int axisY, float speed);
+		};
+
+		Vector<Vector<Bind>> buttons;
 		Vector<AxisData> axes;
+
+		Vector<PositionBindData> positions;
+		Maybe<Rect4f> positionLimits;
+		Vector2f position;
+
 		spInputDevice vibrationOverride;
 		spInputDevice lastDevice;
 		bool lastDeviceFrozen;

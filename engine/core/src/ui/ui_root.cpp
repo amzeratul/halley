@@ -57,14 +57,14 @@ UIRoot::UIRoot(AudioAPI* audio)
 {
 }
 
-void UIRoot::update(Time t, Vector2f mousePos, bool mousePressed, bool mouseReleased)
+void UIRoot::update(Time t, spInputDevice mouse, Vector2f uiOffset)
 {
 	// Layout all widgets
 	for (auto& c: getChildren()) {
 		c->layout();
 	}
 
-	updateMouse(mousePos, mousePressed, mouseReleased);
+	updateMouse(mouse, uiOffset);
 
 	// Update children
 	for (auto& c: getChildren()) {
@@ -77,13 +77,13 @@ void UIRoot::update(Time t, Vector2f mousePos, bool mousePressed, bool mouseRele
 	}
 }
 
-void UIRoot::updateMouse(Vector2f mousePos, bool mousePressed, bool mouseReleased)
+void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)
 {
 	// Go through all root-level widgets and find the actual widget under the mouse
-	auto underMouse = getWidgetUnderMouse(mousePos);
+	auto underMouse = getWidgetUnderMouse(mouse->getPosition() + uiOffset);
 
 	// Click
-	if (mousePressed) {
+	if (mouse->isButtonPressed(0)) {
 		mouseHeld = true;
 		setFocus(underMouse);
 		if (underMouse) {
@@ -93,7 +93,7 @@ void UIRoot::updateMouse(Vector2f mousePos, bool mousePressed, bool mouseRelease
 
 	// Release click
 	auto focus = currentFocus.lock();
-	if (mouseReleased) {
+	if (mouse->isButtonReleased(0)) {
 		mouseHeld = false;
 		if (focus) {
 			focus->releaseMouse(0);

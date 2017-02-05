@@ -127,8 +127,8 @@ namespace Halley {
 				if (r > 255) r = 255;
 				g = b = r;
 			} else {
-				h = ::fmod(h, 1);
-				int hi = int(h*6);
+				h = float(std::fmod(h, 1.0f));
+				int hi = int(h * 6.0f);
 				float f = h*6 - hi;
 				float p = v*(1-s);
 				float q = v*(1-f*s);

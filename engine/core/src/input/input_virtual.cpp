@@ -35,6 +35,21 @@ InputVirtual::InputVirtual(int nButtons, int nAxes)
 	axes.resize(nAxes);
 }
 
+bool InputVirtual::isEnabled() const
+{
+	return true;
+}
+
+size_t InputVirtual::getNumberHats()
+{
+	return 0;
+}
+
+std::shared_ptr<InputDevice> InputVirtual::getHat(int)
+{
+	return std::shared_ptr<InputDevice>();
+}
+
 size_t InputVirtual::getNumberButtons()
 {
 	return buttons.size();
@@ -211,10 +226,35 @@ void Halley::InputVirtual::stopVibrating()
 	}
 }
 
+Vector2f InputVirtual::getPosition() const
+{
+	return position;
+}
+
+void InputVirtual::setPositionLimits(Rect4f limits)
+{
+	positionLimits = limits;
+}
+
+void InputVirtual::setPositionLimits()
+{
+	positionLimits.reset();
+}
+
 void Halley::InputVirtual::bindHat(int leftRight, int upDown, spInputDevice hat)
 {
 	bindAxisButton(leftRight, hat, 3, 1);
 	bindAxisButton(upDown, hat, 0, 2);
+}
+
+void InputVirtual::bindPosition(spInputDevice device)
+{
+	positions.push_back(PositionBindData(device));
+}
+
+void InputVirtual::bindPositionRelative(spInputDevice device, int axisX, int axisY, float speed)
+{
+	positions.push_back(PositionBindData(device, axisX, axisY, speed));
 }
 
 Halley::String Halley::InputVirtual::getButtonName(int code)
@@ -260,6 +300,22 @@ void Halley::InputVirtual::update(Time t)
 
 		lastVal = intVal;
 	}
+
+	for (auto& pos: positions) {
+		if (pos.direct) {
+			auto posNow = pos.device->getPosition();
+			if ((pos.lastRead - posNow).squaredLength() > 0.001f) {
+				pos.lastRead = posNow;
+				position = posNow;
+			}
+		} else {
+			Vector2f delta(pos.device->getAxis(pos.axisX), pos.device->getAxis(pos.axisY));
+			position += delta * float(pos.speed * t);
+		}
+	}
+	if (positionLimits) {
+		position = positionLimits.get().getClosestPoint(position);
+	}
 }
 
 Halley::spInputDevice Halley::InputVirtual::getLastDevice() const
@@ -294,6 +350,21 @@ InputVirtual::AxisData::AxisData()
 
 InputVirtual::AxisData::AxisData(Vector<Bind>& b)
 	: binds(b)
+{}
+
+InputVirtual::PositionBindData::PositionBindData()
+{}
+
+InputVirtual::PositionBindData::PositionBindData(spInputDevice device)
+	: device(device)
+	, direct(true)
+{}
+
+InputVirtual::PositionBindData::PositionBindData(spInputDevice device, int axisX, int axisY, float speed)
+	: device(device)
+	, axisX(axisX)
+	, axisY(axisY)
+	, speed(speed)
 {}
 
 void Halley::InputVirtual::setLastDeviceFreeze(bool frozen)
