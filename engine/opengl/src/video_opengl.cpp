@@ -9,6 +9,7 @@
 #include <halley/support/debug.h>
 #include <halley/core/graphics/window.h>
 #include "halley/text/string_converter.h"
+#include "constant_buffer_opengl.h"
 using namespace Halley;
 
 #ifdef _MSC_VER
@@ -229,7 +230,7 @@ void VideoOpenGL::onGLDebugMessage(unsigned int source, unsigned int type, unsig
 #endif
 }
 
-std::function<void(int, void*)> VideoOpenGL::getUniformBinding(UniformType type, int n)
+static std::function<void(int, void*)> getUniformBinding(UniformType type, int n)
 {
 	switch (type) {
 		case UniformType::Int:
@@ -327,6 +328,11 @@ std::function<void(int, void*)> VideoOpenGL::getUniformBinding(UniformType type,
 		default:
 			throw Exception("Unsupported uniform type: " + toString(static_cast<int>(type)));
 	}
+}
+
+std::unique_ptr<MaterialConstantBuffer> VideoOpenGL::createConstantBuffer(const Material& material)
+{
+	return std::make_unique<ConstantBufferOpenGL>(material);
 }
 
 std::unique_ptr<Painter> VideoOpenGL::makePainter()

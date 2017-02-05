@@ -3,9 +3,11 @@
 #include <memory>
 #include "halley/text/halleystring.h"
 #include "halley/core/graphics/texture.h"
+#include "uniform_type.h"
 
 namespace Halley
 {
+	enum class ShaderParameterType;
 	class Painter;
 	class MaterialDefinition;
 	class MaterialParameter;
@@ -29,12 +31,17 @@ namespace Halley
 		void bind(int pass, Painter& painter);
 		static void resetBindCache();
 
+		void setUniform(size_t offset, ShaderParameterType type, void* data);
+		void setTexture(int textureUnit, std::shared_ptr<const Texture> texture);
+
 		const MaterialDefinition& getDefinition() const { return *materialDefinition; }
 
 		std::shared_ptr<Material> clone() const;
+		
 		const std::shared_ptr<const Texture>& getMainTexture() const;
-
-		Material& set(const String& name, const std::shared_ptr<const Texture>& texture);
+		const std::shared_ptr<const Texture>& getTexture(int textureUnit) const;
+		const Bytes& getData() const;
+		const Vector<MaterialParameter>& getUniforms() const;
 
 		template <typename T>
 		Material& set(const String& name, const T& value)
@@ -48,11 +55,12 @@ namespace Halley
 
 		Vector<MaterialParameter> uniforms;
 		std::shared_ptr<const MaterialDefinition> materialDefinition;
-		std::shared_ptr<const Texture> mainTexture;
 		std::unique_ptr<MaterialConstantBuffer> constantBuffer;
 
+		Bytes uniformData;
+		std::vector<std::shared_ptr<const Texture>> textures;
+
 		void initUniforms();
-		void setMainTexture(const std::shared_ptr<const Texture>& tex);
 		MaterialParameter& getParameter(const String& name);
 	};
 }

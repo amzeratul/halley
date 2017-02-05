@@ -17,10 +17,10 @@ namespace Halley {
 		std::unique_ptr<Texture> createTexture(Vector2i size) override;
 		std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) override;
 		std::unique_ptr<TextureRenderTarget> createRenderTarget() override;
+		std::unique_ptr<MaterialConstantBuffer> createConstantBuffer(const Material& material) override;
 		void init() override;
 		void deInit() override;
 		std::unique_ptr<Painter> makePainter() override;
-		std::function<void(int, void*)> getUniformBinding(UniformType type, int n) override;
 
 	private:
 		SystemAPI& system;
@@ -68,6 +68,5 @@ namespace Halley {
 		void setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) override;
 		void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) override;
 		void setShader(Shader& shader) override;
-		std::unique_ptr<MaterialConstantBuffer> makeConstantBuffer(const Material& material) override;
 	};
 }

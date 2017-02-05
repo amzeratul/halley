@@ -49,6 +49,7 @@ namespace Halley
 
 	class MaterialDefinition final : public Resource
 	{
+		friend class Material;
 		friend class MaterialParameter;
 		friend class MaterialImporter;
 

@@ -45,6 +45,11 @@ std::unique_ptr<TextureRenderTarget> DummyVideoAPI::createRenderTarget()
 	return std::make_unique<DummyTextureRenderTarget>();
 }
 
+std::unique_ptr<MaterialConstantBuffer> DummyVideoAPI::createConstantBuffer(const Material& material)
+{
+	return std::make_unique<DummyMaterialConstantBuffer>();
+}
+
 void DummyVideoAPI::init()
 {
 }
@@ -56,11 +61,6 @@ void DummyVideoAPI::deInit()
 std::unique_ptr<Painter> DummyVideoAPI::makePainter()
 {
 	return std::make_unique<DummyPainter>();
-}
-
-std::function<void(int, void*)> DummyVideoAPI::getUniformBinding(UniformType type, int n)
-{
-	return [] (int, void*) {};
 }
 
 DummyTexture::DummyTexture(Vector2i s)
@@ -110,8 +110,3 @@ void DummyPainter::setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isSc
 void DummyPainter::setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) {}
 
 void DummyPainter::setShader(Shader& shader) {}
-
-std::unique_ptr<MaterialConstantBuffer> DummyPainter::makeConstantBuffer(const Material& material)
-{
-	return std::make_unique<DummyMaterialConstantBuffer>();
-}

@@ -3,6 +3,7 @@
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/material/material_parameter.h"
 #include "halley/core/graphics/painter.h"
+#include "api/video_api.h"
 
 using namespace Halley;
 
@@ -12,18 +13,33 @@ static int currentPass = 0;
 Material::Material(const Material& other)
 	: uniforms(other.uniforms)
 	, materialDefinition(other.materialDefinition)
-	, mainTexture(other.mainTexture)
+	, uniformData(other.uniformData)
+	, textures(other.textures)
 {	
 }
 
 Material::Material(std::shared_ptr<const MaterialDefinition> materialDefinition)
 	: materialDefinition(materialDefinition)
 {
-	for (auto& uniform : materialDefinition->getUniforms()) {
-		uniforms.push_back(MaterialParameter(*this, uniform.name, uniform.type));
-	}
-
 	initUniforms();
+}
+
+void Material::initUniforms()
+{
+	size_t curOffset = 0;
+	int textureUnit = 0;
+	for (auto& uniform : materialDefinition->getUniforms()) {
+		uniforms.push_back(MaterialParameter(*this, uniform.name, uniform.type, curOffset));
+		curOffset += MaterialAttribute::getAttributeSize(uniform.type);
+
+		auto& u = uniforms.back();
+		u.init();
+		if (uniform.type == ShaderParameterType::Texture2D) {
+			u.textureUnit = textureUnit++;
+		}
+	}
+	uniformData.resize(curOffset);
+	textures.resize(std::max(1, textureUnit));
 }
 
 void Material::bind(int pass, Painter& painter)
@@ -36,7 +52,7 @@ void Material::bind(int pass, Painter& painter)
 	currentPass = pass;
 
 	if (!constantBuffer) {
-		constantBuffer = painter.makeConstantBuffer(*this);
+		constantBuffer = getDefinition().api->createConstantBuffer(*this);
 	}
 	if (dirty) {
 		constantBuffer->update(uniforms);
@@ -51,27 +67,37 @@ void Material::resetBindCache()
 	currentPass = 0;
 }
 
-void Material::initUniforms()
+void Material::setUniform(size_t offset, ShaderParameterType type, void* data)
 {
-	int tu = 0;
-	for (auto& u : uniforms) {
-		u.init();
-		if (u.needsTextureUnit) {
-			u.textureUnit = tu++;
-		} else {
-			u.textureUnit = -1;
-		}
-	}
+	const size_t size = MaterialAttribute::getAttributeSize(type);
+	Expects(size + offset <= uniformData.size());
+	Expects(offset % 4 == 0); // Alignment
+	memcpy(uniformData.data() + offset, data, size);
 }
 
-void Material::setMainTexture(const std::shared_ptr<const Texture>& tex)
+void Material::setTexture(int textureUnit, std::shared_ptr<const Texture> texture)
 {
-	mainTexture = tex;
+	textures[textureUnit] = texture;
 }
 
 const std::shared_ptr<const Texture>& Material::getMainTexture() const
 {
-	return mainTexture;
+	return textures[0];
+}
+
+const std::shared_ptr<const Texture>& Material::getTexture(int textureUnit) const
+{
+	return textures[textureUnit];
+}
+
+const Bytes& Material::getData() const
+{
+	return uniformData;
+}
+
+const Vector<MaterialParameter>& Material::getUniforms() const
+{
+	return uniforms;
 }
 
 MaterialParameter& Material::getParameter(const String& name)
@@ -87,13 +113,4 @@ MaterialParameter& Material::getParameter(const String& name)
 std::shared_ptr<Material> Material::clone() const
 {
 	return std::make_shared<Material>(*this);
-}
-
-Material& Material::set(const String& name, const std::shared_ptr<const Texture>& texture)
-{
-	getParameter(name) = texture;
-	if (name == "tex0") {
-		setMainTexture(texture);
-	}
-	return *this;
 }

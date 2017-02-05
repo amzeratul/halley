@@ -3,6 +3,7 @@ project (halley-opengl)
 include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} "../utils/include" "../core/include")
 
 set(SOURCES
+        "src/constant_buffer_opengl.cpp"
         "src/gl_buffer.cpp"
         "src/gl_utils.cpp"
         "src/loader_thread_opengl.cpp"
@@ -15,6 +16,7 @@ set(SOURCES
         )
 
 set(HEADERS
+        "src/constant_buffer_opengl.h"
         "src/gl_buffer.h"
         "src/gl_utils.h"
         "src/halley_gl.h"

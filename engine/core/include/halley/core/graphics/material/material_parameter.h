@@ -31,18 +31,21 @@ namespace Halley
 		void operator=(Vector2i p);
 		void operator=(Matrix4f m);
 
+		ShaderParameterType getType() const;
+		const void* getData() const;
+		unsigned int getAddress(int pass) const;
+		const String& getName() const;
+
 	private:
-		MaterialParameter(Material& material, String name, ShaderParameterType type);
+		MaterialParameter(Material& material, String name, ShaderParameterType type, size_t offset);
 
 		void init();
-		unsigned int getAddress(int pass);
-		void bind(int pass) const;
 		
 		Vector<int> addresses;
 		Material& material;
 		String name;
 		ShaderParameterType type;
-		bool needsTextureUnit = false;
+		size_t offset;
 		int textureUnit = -1;
 	};
 

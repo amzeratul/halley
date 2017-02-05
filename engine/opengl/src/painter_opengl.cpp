@@ -76,11 +76,6 @@ void PainterOpenGL::setShader(Shader& shader)
 	static_cast<ShaderOpenGL&>(shader).bind();
 }
 
-std::unique_ptr<MaterialConstantBuffer> PainterOpenGL::makeConstantBuffer(const Material& material)
-{
-	// TODO
-}
-
 static Rect4i flipRectangle(Rect4i r, int h)
 {
 	int y = h - r.getBottom();

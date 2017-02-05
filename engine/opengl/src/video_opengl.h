@@ -21,11 +21,11 @@ namespace Halley {
 		void setWindow(WindowDefinition&& window, bool vsync) override;
 		const Window& getWindow() const override;
 
-		std::function<void(int, void*)> getUniformBinding(UniformType type, int n) override;
 		std::unique_ptr<Painter> makePainter() override;
 		std::unique_ptr<Texture> createTexture(Vector2i size) override;
 		std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) override;
 		std::unique_ptr<TextureRenderTarget> createRenderTarget() override;
+		std::unique_ptr<MaterialConstantBuffer> createConstantBuffer(const Material& material) override;
 		
 		bool isLoaderThread() const;
 
