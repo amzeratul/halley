@@ -31,7 +31,7 @@ namespace Halley {
 		std::string getName() const final override;
 
 		JoystickType getType() const override {
-			return JOYSTICK_GENERIC;
+			return JoystickType::Generic;
 		}
 
 	private:

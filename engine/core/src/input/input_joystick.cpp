@@ -60,16 +60,18 @@ std::shared_ptr<InputDevice> InputJoystick::getHat(int n)
 	return hats.at(n);
 }
 
-int InputJoystick::getButtonAtPosition(char c) const
+int InputJoystick::getButtonAtPosition(JoystickButtonPosition position) const
 {
-	bool is360 = getType() == JOYSTICK_360;
-	switch (c) {
-		case 'N': return is360 ? 3 : 0;
-		case 'E': return is360 ? 1 : 1;
-		case 'S': return is360 ? 0 : 2;
-		case 'W': return is360 ? 2 : 3;
-		case 'L': return 4;
-		case 'R': return 5;
+	bool isXbox = getType() == JoystickType::Xbox;
+	switch (position) {
+		case JoystickButtonPosition::FaceTop: return isXbox ? 3 : 0;
+		case JoystickButtonPosition::FaceRight: return isXbox ? 1 : 1;
+		case JoystickButtonPosition::FaceBottom: return isXbox ? 0 : 2;
+		case JoystickButtonPosition::FaceLeft: return isXbox ? 2 : 3;
+		case JoystickButtonPosition::Select: return 4;
+		case JoystickButtonPosition::Start: return 5;
+		case JoystickButtonPosition::BumperLeft: return 6;
+		case JoystickButtonPosition::BumperRight: return 7;
 		default: throw Exception("Invalid parameter");
 	}
 }

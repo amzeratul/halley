@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-UIInput::UIInput(std::shared_ptr<InputKeyboard> keyboard, String id, std::shared_ptr<UIStyle> style, String text, String ghostText)
+UIInput::UIInput(std::shared_ptr<InputDevice> keyboard, String id, std::shared_ptr<UIStyle> style, String text, String ghostText)
 	: UIWidget(id, {}, UISizer(UISizerType::Vertical), Vector4f(3, 3, 3, 3))
 	, keyboard(keyboard)
 	, style(style)

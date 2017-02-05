@@ -23,37 +23,44 @@
 
 #include "input_vibration.h"
 #include <halley/text/halleystring.h>
+#include "halley/maths/vector2.h"
 
 namespace Halley {
 
 	class InputDevice {
 	public:
-		virtual ~InputDevice() {}
+		virtual ~InputDevice();
 
-		virtual bool isEnabled() const=0;
+		virtual bool isEnabled() const;
 
-		virtual size_t getNumberButtons()=0;;
-		virtual size_t getNumberAxes()=0;
-		virtual size_t getNumberHats()=0;
+		virtual size_t getNumberButtons();
+		virtual size_t getNumberAxes();
 
-		virtual String getButtonName(int code)=0;
+		virtual String getButtonName(int code);
 
-		virtual bool isAnyButtonPressed()=0;
-		virtual bool isAnyButtonReleased()=0;
+		virtual bool isAnyButtonPressed();
+		virtual bool isAnyButtonReleased();
 
-		virtual bool isButtonPressed(int code)=0;
-		virtual bool isButtonPressedRepeat(int code)=0;
-		virtual bool isButtonReleased(int code)=0;
-		virtual bool isButtonDown(int code)=0;
+		virtual bool isButtonPressed(int code);
+		virtual bool isButtonPressedRepeat(int code);
+		virtual bool isButtonReleased(int code);
+		virtual bool isButtonDown(int code);
 
-		virtual void clearButton(int code)=0;
+		virtual void clearButton(int code);
 
-		virtual float getAxis(int n)=0;
-		virtual int getAxisRepeat(int n)=0;
-		virtual std::shared_ptr<InputDevice> getHat(int n)=0;
+		virtual float getAxis(int /*n*/);;
+		virtual int getAxisRepeat(int /*n*/);
 
-		virtual void vibrate(spInputVibration vib)=0;
-		virtual void stopVibrating()=0;
+		virtual size_t getNumberHats();
+		virtual std::shared_ptr<InputDevice> getHat(int /*n*/);
+
+		virtual void vibrate(spInputVibration /*vib*/);
+		virtual void stopVibrating();
+
+		virtual Vector2f getPosition() const;
+		virtual int getWheelMove() const;
+
+		virtual int getNextLetter();
 	};
 	
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include <halley/maths/rect.h>
-#include <halley/core/input/input_keyboard.h>
+#include <halley/core/input/input_device.h>
 #include <halley/core/resources/resources.h>
 #include <halley/core/graphics/text/font.h>
 #include <halley/support/logger.h>
@@ -15,7 +15,7 @@ namespace Halley
 		explicit ConsoleWindow(Resources& resources);
 		~ConsoleWindow();
 
-		void update(InputKeyboard& keyboard);
+		void update(InputDevice& keyboard);
 		void draw(Painter& painter, Rect4f bounds) const;
 
 		void printLn(const String& line);

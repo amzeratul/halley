@@ -25,7 +25,7 @@
 #include <halley/support/exception.h>
 
 namespace Halley {
-	class InputButtonBase : public virtual InputDevice {
+	class InputButtonBase : public InputDevice {
 	public:
 		InputButtonBase(int nButtons=-1);
 
@@ -41,19 +41,7 @@ namespace Halley {
 
 		void clearButton(int code) override;
 
-		virtual String getButtonName(int code) override;
-
-		virtual bool isEnabled() const override { return true; }
-
-		virtual size_t getNumberAxes() override { return 0; }
-		virtual size_t getNumberHats() override { return 0; }
-
-		virtual float getAxis(int /*n*/) override {return 0; };
-		virtual int getAxisRepeat(int /*n*/) override { return 0; }
-		virtual std::shared_ptr<InputDevice> getHat(int /*n*/) override { return std::shared_ptr<InputDevice>(); }
-
-		virtual void vibrate(spInputVibration /*vib*/) override {}
-		virtual void stopVibrating() override {}
+		String getButtonName(int code) override;
 
 		void clearPresses();
 

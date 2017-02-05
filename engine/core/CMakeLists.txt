@@ -36,6 +36,7 @@ set(SOURCES
         "src/graphics/texture_descriptor.cpp"
 
         "src/input/input_button_base.cpp"
+        "src/input/input_device.cpp"
         "src/input/input_joystick.cpp"
         "src/input/input_joystick_xinput.cpp"
         "src/input/input_manual.cpp"
@@ -121,10 +122,8 @@ set(HEADERS
         "include/halley/core/input/input_device.h"
         "include/halley/core/input/input_joystick.h"
         "include/halley/core/input/input_joystick_xinput.h"
-        "include/halley/core/input/input_keyboard.h"
         "include/halley/core/input/input_keys.h"
         "include/halley/core/input/input_manual.h"
-        "include/halley/core/input/input_mouse.h"
         "include/halley/core/input/input_touch.h"
         "include/halley/core/input/input_vibration.h"
         "include/halley/core/input/input_virtual.h"

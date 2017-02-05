@@ -37,7 +37,7 @@ void ConsoleWindow::log(LoggerLevel level, const String& msg)
 	printLn(msg);
 }
 
-void ConsoleWindow::update(InputKeyboard& keyboard)
+void ConsoleWindow::update(InputDevice& keyboard)
 {
 	for (int next; (next = keyboard.getNextLetter()) != 0;) {
 		if (next == '\b') {

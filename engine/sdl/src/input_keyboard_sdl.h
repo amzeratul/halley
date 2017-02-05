@@ -2,7 +2,6 @@
 
 #include <deque>
 #include "halley/core/input/input_button_base.h"
-#include "halley/core/input/input_keyboard.h"
 struct SDL_KeyboardEvent;
 
 namespace Halley {
@@ -11,7 +10,7 @@ namespace Halley {
 #pragma warning(disable: 4250)
 #endif
 
-	class InputKeyboardSDL : public InputButtonBase, public InputKeyboard {
+	class InputKeyboardSDL : public InputButtonBase {
 	public:
 		int getNextLetter() override;
 		String getButtonName(int code) override;

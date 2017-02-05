@@ -36,7 +36,7 @@ namespace Halley {
 
 		bool isEnabled() const override { return enabled; }
 
-		JoystickType getType() const override { return JOYSTICK_360; }
+		JoystickType getType() const override { return JoystickType::Xbox; }
 	
 		void vibrate(spInputVibration vib) override;
 		void stopVibrating() override;

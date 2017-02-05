@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "halley/core/input/input_mouse.h"
+#include "halley/core/input/input_button_base.h"
 
 namespace Halley {
 
@@ -29,7 +29,7 @@ namespace Halley {
 #pragma warning(disable: 4250)
 #endif
 
-	class InputMouseSDL : public InputButtonBase, public InputMouse {
+	class InputMouseSDL : public InputButtonBase {
 		friend class InputSDL;
 	public:
 		Vector2f getPosition() const override;

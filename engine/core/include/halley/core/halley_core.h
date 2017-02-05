@@ -36,9 +36,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "input/input_joystick.h"
 #include "input/input_keys.h"
-#include "input/input_keyboard.h"
 #include "input/input_manual.h"
-#include "input/input_mouse.h"
 #include "input/input_touch.h"
 #include "input/input_virtual.h"
 

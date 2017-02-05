@@ -3,7 +3,7 @@
 #include "../ui_widget.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/text/text_renderer.h"
-#include "halley/core/input/input_keyboard.h"
+#include "halley/core/input/input_device.h"
 
 namespace Halley {
 	class UIStyle;
@@ -11,7 +11,7 @@ namespace Halley {
 
 	class UIInput : public UIWidget {
 	public:
-		explicit UIInput(std::shared_ptr<InputKeyboard> keyboard, String id, std::shared_ptr<UIStyle> style, String text = "", String ghostText = "");
+		explicit UIInput(std::shared_ptr<InputDevice> keyboard, String id, std::shared_ptr<UIStyle> style, String text = "", String ghostText = "");
 		bool isFocusable() const override;
 
 		UIInput& setText(const String& text);
@@ -30,7 +30,7 @@ namespace Halley {
 	private:
 		void updateTextInput();
 
-		std::shared_ptr<InputKeyboard> keyboard;
+		std::shared_ptr<InputDevice> keyboard;
 		std::shared_ptr<UIStyle> style;
 		Sprite sprite;
 		TextRenderer label;

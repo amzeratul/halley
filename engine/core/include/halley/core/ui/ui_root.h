@@ -67,6 +67,8 @@ namespace Halley {
 		AudioAPI* audio;
 		bool mouseHeld = false;
 
+		void updateMouse(Vector2f mousePos, bool mousePressed, bool mouseReleased);
+		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos);
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos);
 		void updateMouseOver(const std::shared_ptr<UIWidget>& underMouse);
 		void setFocus(std::shared_ptr<UIWidget> focus);

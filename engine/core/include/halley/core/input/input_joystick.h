@@ -30,10 +30,24 @@
 
 namespace Halley {
 
-	enum JoystickType {
-		JOYSTICK_GENERIC,
-		JOYSTICK_360,
-		JOYSTICK_PS3
+	enum class JoystickType {
+		Generic,
+		Xbox,
+		Playstation
+	};
+
+	enum class JoystickButtonPosition
+	{
+		FaceTop,
+		FaceRight,
+		FaceBottom,
+		FaceLeft,
+		BumperLeft,
+		BumperRight,
+		TriggerLeft,
+		TriggerRight,
+		Select,
+		Start
 	};
 
 	class InputJoystick : public InputButtonBase {
@@ -51,7 +65,7 @@ namespace Halley {
 
 		static float defaultAxisAdjust(float value);
 
-		int getButtonAtPosition(char c) const;	// c = N, S, E or W
+		int getButtonAtPosition(JoystickButtonPosition position) const;
 
 		virtual void update(Time /*t*/) {}
 
