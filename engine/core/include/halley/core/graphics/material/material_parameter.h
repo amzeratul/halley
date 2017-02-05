@@ -12,11 +12,13 @@ namespace Halley
 	class Texture;
 	class VideoAPIInternal;
 	class Material;
+	class MaterialPass;
 	enum class ShaderParameterType;
 
 	class MaterialParameter
 	{
 		friend class Material;
+		friend class MaterialPass;
 
 	public:
 		void operator=(std::shared_ptr<const Texture> texture);
@@ -33,9 +35,9 @@ namespace Halley
 		MaterialParameter(Material& material, String name, ShaderParameterType type);
 		VideoAPIInternal& getAPI() const;
 
-		void updateAddresses();
+		void init();
 		unsigned int getAddress(int pass);
-		void bind(int pass);
+		void bind(int pass) const;
 
 		std::function<void(int)> toBind;
 		std::function<void(int, void*)> bindFunc;

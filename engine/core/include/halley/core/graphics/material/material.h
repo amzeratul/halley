@@ -41,7 +41,7 @@ namespace Halley
 		std::shared_ptr<const MaterialDefinition> materialDefinition;
 		std::shared_ptr<const Texture> mainTexture;
 
-		void updateUniforms();
+		void initUniforms();
 		void setMainTexture(const std::shared_ptr<const Texture>& tex);
 		MaterialParameter& getParameter(const String& name);
 	};

@@ -22,7 +22,7 @@ VideoAPIInternal& MaterialParameter::getAPI() const
 	return *static_cast<VideoAPIInternal*>(material.getDefinition().api);
 }
 
-void MaterialParameter::updateAddresses()
+void MaterialParameter::init()
 {
 	auto& definition = material.getDefinition();
 	addresses.resize(definition.passes.size());
@@ -37,7 +37,7 @@ unsigned int MaterialParameter::getAddress(int pass)
 	return addresses[pass];
 }
 
-void MaterialParameter::bind(int pass)
+void MaterialParameter::bind(int pass) const
 {
 	if (toBind) {
 		toBind(pass);

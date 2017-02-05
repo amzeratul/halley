@@ -23,7 +23,7 @@ Material::Material(std::shared_ptr<const MaterialDefinition> materialDefinition)
 		uniforms.push_back(MaterialParameter(*this, uniform.name, uniform.type));
 	}
 
-	updateUniforms();
+	initUniforms();
 }
 
 void Material::bind(int pass, Painter& painter)
@@ -35,11 +35,7 @@ void Material::bind(int pass, Painter& painter)
 	currentMaterial = this;
 	currentPass = pass;
 
-	materialDefinition->bind(pass, painter);
-
-	for (auto& u : uniforms) {
-		u.bind(pass);
-	}
+	materialDefinition->bind(pass, painter, uniforms);
 }
 
 void Material::resetBindCache()
@@ -48,11 +44,11 @@ void Material::resetBindCache()
 	currentPass = 0;
 }
 
-void Material::updateUniforms()
+void Material::initUniforms()
 {
 	int tu = 0;
 	for (auto& u : uniforms) {
-		u.updateAddresses();
+		u.init();
 		if (u.needsTextureUnit) {
 			u.textureUnit = tu++;
 		} else {
