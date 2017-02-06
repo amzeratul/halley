@@ -54,6 +54,9 @@ namespace Halley {
 		virtual void pressMouse(int button);
 		virtual void releaseMouse(int button);
 
+		bool isEnabled() const;
+		void setEnabled(bool enabled);
+
 		void destroy();
 
 		std::shared_ptr<UIWidget> getWidget(const String& id);
@@ -66,6 +69,8 @@ namespace Halley {
 
 		void setEventHandler(std::shared_ptr<UIEventHandler> handler);
 		UIEventHandler& getEventHandler();
+		
+		virtual void setInputType(UIInputType uiInput);
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
@@ -86,6 +91,7 @@ namespace Halley {
 
 		UIParent* parent = nullptr;
 		String id;
+		bool enabled = true;
 
 		Vector2f position;
 		Vector2f size;

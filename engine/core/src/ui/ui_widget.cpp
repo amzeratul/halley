@@ -18,23 +18,30 @@ UIWidget::~UIWidget()
 
 void UIWidget::doDraw(UIPainter& painter) const
 {
-	draw(painter);
-	for (auto& c: getChildren()) {
-		c->doDraw(painter);
+	if (enabled) {
+		draw(painter);
+		for (auto& c: getChildren()) {
+			c->doDraw(painter);
+		}
 	}
 }
 
 void UIWidget::doUpdate(Time t)
 {
-	update(t, positionUpdated);
-	positionUpdated = false;
-	for (auto& c: getChildren()) {
-		c->doUpdate(t);
+	if (enabled) {
+		update(t, positionUpdated);
+		positionUpdated = false;
+		for (auto& c: getChildren()) {
+			c->doUpdate(t);
+		}
 	}
 }
 
 Vector2f UIWidget::computeMinimumSize() const
 {
+	if (!enabled) {
+		return {};
+	}
 	Vector2f minSize = getMinimumSize();
 	if (sizer) {
 		auto border = getInnerBorder();
@@ -194,6 +201,16 @@ void UIWidget::releaseMouse(int button)
 {
 }
 
+bool UIWidget::isEnabled() const
+{
+	return enabled;
+}
+
+void UIWidget::setEnabled(bool e)
+{
+	enabled = e;
+}
+
 UIRoot* UIWidget::getRoot()
 {
 	return parent ? parent->getRoot() : nullptr;
@@ -244,6 +261,10 @@ UIEventHandler& UIWidget::getEventHandler()
 		eventHandler = std::make_shared<UIEventHandler>();
 	}
 	return *eventHandler;
+}
+
+void UIWidget::setInputType(UIInputType uiInput)
+{
 }
 
 void UIWidget::draw(UIPainter& painter) const

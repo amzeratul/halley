@@ -2,6 +2,7 @@
 #include "ui/ui_widget.h"
 #include "graphics/sprite/sprite_painter.h"
 #include "api/audio_api.h"
+#include "ui/widgets/ui_button.h"
 
 using namespace Halley;
 
@@ -9,6 +10,7 @@ void UIParent::addChild(std::shared_ptr<UIWidget> widget)
 {
 	widget->setParent(*this);
 	children.push_back(widget);
+	topChildChanged = true;
 }
 
 void UIParent::removeChild(UIWidget& widget)
@@ -17,6 +19,7 @@ void UIParent::removeChild(UIWidget& widget)
 	{
 		return c.get() == &widget;
 	}), children.end());
+	topChildChanged = true;
 }
 
 std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()
@@ -57,13 +60,12 @@ UIRoot::UIRoot(AudioAPI* audio)
 {
 }
 
-void UIRoot::update(Time t, spInputDevice mouse, spInputDevice manual, Vector2f uiOffset)
+void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual, Vector2f uiOffset)
 {
 	// Layout all widgets
-	for (auto& c: getChildren()) {
-		c->layout();
-	}
+	runLayout();
 
+	// Update input
 	updateManual(manual);
 	updateMouse(mouse, uiOffset);
 
@@ -72,9 +74,19 @@ void UIRoot::update(Time t, spInputDevice mouse, spInputDevice manual, Vector2f 
 		c->doUpdate(t);
 	}
 
-	// Layout again, since update might have caused items to be spawned
-	for (auto& c: getChildren()) {
-		c->layout();
+	// Update new windows
+	if (topChildChanged) {
+		topChildChanged = false;
+		if (activeInputType != UIInputType::Mouse) {
+			mouseOverNext();
+		}
+		runLayout();
+	}
+
+	// Update input type
+	if (activeInputType != lastInputType) {
+		lastInputType = activeInputType;
+		convertToInputType(activeInputType);
 	}
 }
 
@@ -131,11 +143,7 @@ void UIRoot::updateManual(spInputDevice manual)
 
 void UIRoot::mouseOverNext(bool forward)
 {
-	if (getChildren().empty()) {
-		return;
-	}
-	std::vector<std::shared_ptr<UIWidget>> widgets;
-	collectWidgets(getChildren().back(), widgets);
+	auto widgets = collectWidgets();
 
 	if (widgets.empty()) {
 		return;
@@ -151,6 +159,13 @@ void UIRoot::mouseOverNext(bool forward)
 	}
 
 	updateMouseOver(widgets[nextIdx]);
+}
+
+void UIRoot::runLayout()
+{
+	for (auto& c: getChildren()) {
+		c->layout();
+	}
 }
 
 void UIRoot::setFocus(std::shared_ptr<UIWidget> focus)
@@ -207,6 +222,16 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWi
 	}
 }
 
+std::vector<std::shared_ptr<UIWidget>> UIRoot::collectWidgets()
+{
+	std::vector<std::shared_ptr<UIWidget>> output;
+	if (getChildren().empty()) {
+		return {};
+	}
+	collectWidgets(getChildren().back(), output);
+	return output;
+}
+
 void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output)
 {
 	for (auto& c: start->getChildren()) {
@@ -215,6 +240,14 @@ void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<
 
 	if (start->isFocusable()) {
 		output.push_back(start);
+	}
+}
+
+void UIRoot::convertToInputType(UIInputType activeInput)
+{
+	auto widgets = collectWidgets();
+	for (auto& w: widgets) {
+		w->setInputType(activeInput);
 	}
 }
 
