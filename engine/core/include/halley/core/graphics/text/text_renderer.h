@@ -35,6 +35,7 @@ namespace Halley
 		Vector2f getExtents() const;
 
 		Vector2f getPosition() const;
+		String getText() const;
 
 	private:
 		std::shared_ptr<const Font> font;

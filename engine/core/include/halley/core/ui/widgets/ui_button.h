@@ -26,6 +26,7 @@ namespace Halley {
 			Hover
 		};
 
+		bool setState(State state);
 		virtual void doSetState(State state) = 0;
 		State getCurState() const;
 		bool updateButton();
@@ -35,8 +36,6 @@ namespace Halley {
 		State curState = State::Up;
 		bool held = false;
 		bool forceUpdate = false;
-
-		bool setState(State state);
 	};
 
 

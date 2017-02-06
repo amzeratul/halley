@@ -80,13 +80,12 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 		if (activeInputType != UIInputType::Mouse) {
 			mouseOverNext();
 		}
-		runLayout();
 	}
 
-	// Update input type
-	if (activeInputType != lastInputType) {
-		lastInputType = activeInputType;
-		convertToInputType(activeInputType);
+	// Update again, to reflect what happened >_>
+	runLayout();
+	for (auto& c: getChildren()) {
+		c->doUpdate(0, activeInputType);
 	}
 }
 
@@ -232,11 +231,6 @@ std::vector<std::shared_ptr<UIWidget>> UIRoot::collectWidgets()
 	return output;
 }
 
-UIInputType UIRoot::getInputType() const
-{
-	return lastInputType;
-}
-
 void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output)
 {
 	for (auto& c: start->getChildren()) {
@@ -246,12 +240,6 @@ void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<
 	if (start->isFocusable()) {
 		output.push_back(start);
 	}
-}
-
-void UIRoot::convertToInputType(UIInputType activeInput)
-{
-	lastInputType = activeInput;
-	runLayout();
 }
 
 void UIRoot::draw(SpritePainter& painter, int mask, int layer)

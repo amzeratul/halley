@@ -28,8 +28,8 @@ void UIWidget::doDraw(UIPainter& painter) const
 
 void UIWidget::doUpdate(Time t, UIInputType inputType)
 {
+	setInputType(inputType);
 	if (enabled) {
-		setInputType(inputType);
 		update(t, positionUpdated);
 		positionUpdated = false;
 		for (auto& c: getChildren()) {

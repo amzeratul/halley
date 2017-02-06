@@ -69,6 +69,11 @@ UIElementPtr UISizerEntry::getPointer() const
 	return widget;
 }
 
+bool UISizerEntry::isEnabled() const
+{
+	return !widget || widget->isEnabled();
+}
+
 Vector4f UISizerEntry::getBorder() const
 {
 	return border;
@@ -93,8 +98,11 @@ Vector2f UISizer::computeMinimumSize() const
 Vector2f UISizer::computeMinimumSize(bool includeProportional) const
 {
 	float totalProportion = 0;
+
 	for (auto& e: entries) {
-		totalProportion += e.getProportion();
+		if (e.isEnabled()) {
+			totalProportion += e.getProportion();
+		}
 	}
 
 	int mainAxis = type == UISizerType::Horizontal ? 0 : 1;
@@ -106,6 +114,10 @@ Vector2f UISizer::computeMinimumSize(bool includeProportional) const
 	
 	bool first = true;
 	for (auto& e: entries) {
+		if (!e.isEnabled()) {
+			continue;
+		}
+
 		Vector2f sz = e.getMinimumSize();
 		auto border = e.getBorder();
 		if (!first) {
@@ -130,8 +142,9 @@ Vector2f UISizer::computeMinimumSize(bool includeProportional) const
 	}
 
 	Vector2f result;
-	result[mainAxis] = main;
-	result[otherAxis] = other;
+	result[mainAxis] = std::max(0.0f, main);
+	result[otherAxis] = std::max(0.0f, other);
+
 	return result;
 }
 
@@ -141,7 +154,9 @@ void UISizer::setRect(Rect4f rect)
 
 	float totalProportion = 0;
 	for (auto& e: entries) {
-		totalProportion += e.getProportion();
+		if (e.isEnabled()) {
+			totalProportion += e.getProportion();
+		}
 	}
 
 	int mainAxis = type == UISizerType::Horizontal ? 0 : 1;
@@ -152,6 +167,10 @@ void UISizer::setRect(Rect4f rect)
 	
 	bool first = true;
 	for (auto& e: entries) {
+		if (!e.isEnabled()) {
+			continue;
+		}
+
 		float p = e.getProportion();
 		auto border = e.getBorder();
 		if (!first) {
@@ -250,4 +269,14 @@ void UISizer::clear()
 		}
 	}
 	entries.clear();
+}
+
+bool UISizer::isEnabled() const
+{
+	for (auto& e: entries) {
+		if (e.isEnabled()) {
+			return true;
+		}
+	}
+	return false;
 }

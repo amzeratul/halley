@@ -191,3 +191,8 @@ Vector2f TextRenderer::getPosition() const
 {
 	return position;
 }
+
+String TextRenderer::getText() const
+{
+	return String(text);
+}

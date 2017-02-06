@@ -10,6 +10,7 @@ namespace Halley {
 
 		virtual Vector2f computeMinimumSize() const = 0;
 		virtual void setRect(Rect4f rect) = 0;
+		virtual bool isEnabled() const = 0;
 	};
 	using UIElementPtr = std::shared_ptr<IUIElement>;
 }

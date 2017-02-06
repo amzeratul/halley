@@ -54,7 +54,7 @@ namespace Halley {
 		virtual void pressMouse(int button);
 		virtual void releaseMouse(int button);
 
-		bool isEnabled() const;
+		bool isEnabled() const override;
 		void setEnabled(bool enabled);
 
 		void destroy();

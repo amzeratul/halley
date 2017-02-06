@@ -46,7 +46,8 @@ namespace Halley {
 		void placeInside(Rect4f rect, Vector2f minSize);
 
 		UIElementPtr getPointer() const;
-	
+		bool isEnabled() const;
+
 	private:
 		UIElementPtr widget;
 		float proportion;
@@ -83,6 +84,7 @@ namespace Halley {
 		void reparent(UIParent& parent);
 
 		void clear();
+		bool isEnabled() const override;
 
 		UISizerType getType() const;
 		size_t size() const;
