@@ -14,6 +14,7 @@ namespace Halley {
 		Sprite buttonNormal;
 		Sprite buttonHover;
 		Sprite buttonDown;
+		Sprite buttonBorderOnly;
 		TextRenderer buttonLabel;
 		Vector4f buttonInnerBorder;
 		std::shared_ptr<const AudioClip> buttonHoverSound;

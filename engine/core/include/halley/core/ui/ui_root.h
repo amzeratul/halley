@@ -72,6 +72,7 @@ namespace Halley {
 		bool hasModalUI() const;
 
 		std::vector<std::shared_ptr<UIWidget>> collectWidgets();
+		UIInputType getInputType() const;
 
 	private:
 		std::weak_ptr<UIWidget> currentMouseOver;

@@ -26,13 +26,14 @@ void UIWidget::doDraw(UIPainter& painter) const
 	}
 }
 
-void UIWidget::doUpdate(Time t)
+void UIWidget::doUpdate(Time t, UIInputType inputType)
 {
 	if (enabled) {
+		setInputType(inputType);
 		update(t, positionUpdated);
 		positionUpdated = false;
 		for (auto& c: getChildren()) {
-			c->doUpdate(t);
+			c->doUpdate(t, inputType);
 		}
 	}
 }
@@ -265,6 +266,17 @@ UIEventHandler& UIWidget::getEventHandler()
 
 void UIWidget::setInputType(UIInputType uiInput)
 {
+	enabled = onlyEnabledWithInput == UIInputType::Undefined || uiInput == onlyEnabledWithInput;
+}
+
+void UIWidget::setOnlyEnabledWithInput(UIInputType uiInput)
+{
+	onlyEnabledWithInput = uiInput;
+}
+
+UIInputType UIWidget::getOnlyEnabledWithInput() const
+{
+	return onlyEnabledWithInput;
 }
 
 void UIWidget::draw(UIPainter& painter) const

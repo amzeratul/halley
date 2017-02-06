@@ -71,7 +71,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 
 	// Update children
 	for (auto& c: getChildren()) {
-		c->doUpdate(t);
+		c->doUpdate(t, activeInputType);
 	}
 
 	// Update new windows
@@ -232,6 +232,11 @@ std::vector<std::shared_ptr<UIWidget>> UIRoot::collectWidgets()
 	return output;
 }
 
+UIInputType UIRoot::getInputType() const
+{
+	return lastInputType;
+}
+
 void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output)
 {
 	for (auto& c: start->getChildren()) {
@@ -245,10 +250,8 @@ void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<
 
 void UIRoot::convertToInputType(UIInputType activeInput)
 {
-	auto widgets = collectWidgets();
-	for (auto& w: widgets) {
-		w->setInputType(activeInput);
-	}
+	lastInputType = activeInput;
+	runLayout();
 }
 
 void UIRoot::draw(SpritePainter& painter, int mask, int layer)

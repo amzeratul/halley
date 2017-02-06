@@ -60,9 +60,15 @@ void UIClickable::onClick(UIEventCallback callback)
 	getEventHandler().setHandle(UIEventType::ButtonClicked, callback);
 }
 
+UIClickable::State UIClickable::getCurState() const
+{
+	return curState;
+}
+
 bool UIClickable::updateButton()
 {
-	bool dirty = false;
+	bool dirty = forceUpdate;
+	forceUpdate = false;
 	if (held) {
 		if (isMouseOver()) {
 			dirty |= setState(State::Down);
@@ -79,22 +85,51 @@ bool UIClickable::updateButton()
 	return dirty;
 }
 
+void UIClickable::doForceUpdate()
+{
+	forceUpdate = true;
+}
+
 void UIButton::onClicked()
 {
 	sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));
 }
 
+void UIButton::setInputType(UIInputType uiInput)
+{
+	if (uiInput != curInputType) {
+		curInputType = uiInput;
+		borderOnly = getOnlyEnabledWithInput() != UIInputType::Undefined && curInputType != UIInputType::Mouse;
+		doSetState(getCurState());
+		doForceUpdate();
+	}
+}
+
+bool UIButton::isFocusable() const
+{
+	return borderOnly ? false : UIClickable::isFocusable();
+}
+
+bool UIButton::isFocusLocked() const
+{
+	return borderOnly ? false : UIClickable::isFocusLocked();
+}
+
 void UIButton::doSetState(State state)
 {
-	if (state == State::Up) {
-		sprite = style->buttonNormal;
-		playSound(style->buttonUpSound);
-	} else if (state == State::Down) {
-		sprite = style->buttonDown;
-		playSound(style->buttonDownSound);
-	} else if (state == State::Hover) {
-		sprite = style->buttonHover;
-		playSound(style->buttonHoverSound);
+	if (borderOnly) {
+		sprite = style->buttonBorderOnly;
+	} else {
+		if (state == State::Up) {
+			sprite = style->buttonNormal;
+			playSound(style->buttonUpSound);
+		} else if (state == State::Down) {
+			sprite = style->buttonDown;
+			playSound(style->buttonDownSound);
+		} else if (state == State::Hover) {
+			sprite = style->buttonHover;
+			playSound(style->buttonHoverSound);
+		}
 	}
 }
 

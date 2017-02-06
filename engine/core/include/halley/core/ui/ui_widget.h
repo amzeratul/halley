@@ -18,7 +18,7 @@ namespace Halley {
 		virtual ~UIWidget();
 
 		void doDraw(UIPainter& painter) const;
-		void doUpdate(Time t);
+		void doUpdate(Time t, UIInputType inputType);
 
 		Vector2f computeMinimumSize() const override;
 		void setRect(Rect4f rect) override;
@@ -71,6 +71,8 @@ namespace Halley {
 		UIEventHandler& getEventHandler();
 		
 		virtual void setInputType(UIInputType uiInput);
+		void setOnlyEnabledWithInput(UIInputType uiInput);
+		UIInputType getOnlyEnabledWithInput() const;
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
@@ -92,6 +94,7 @@ namespace Halley {
 		UIParent* parent = nullptr;
 		String id;
 		bool enabled = true;
+		UIInputType onlyEnabledWithInput = UIInputType::Undefined;
 
 		Vector2f position;
 		Vector2f size;

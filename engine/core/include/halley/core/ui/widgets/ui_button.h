@@ -27,14 +27,18 @@ namespace Halley {
 		};
 
 		virtual void doSetState(State state) = 0;
+		State getCurState() const;
 		bool updateButton();
+		void doForceUpdate();
 
 	private:
 		State curState = State::Up;
 		bool held = false;
+		bool forceUpdate = false;
 
 		bool setState(State state);
 	};
+
 
 	class UIButton : public UIClickable {
 	public:
@@ -43,6 +47,10 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 		void onClicked() override;
+		void setInputType(UIInputType uiInput) override;
+
+		bool isFocusable() const override;
+		bool isFocusLocked() const override;
 
 	protected:
 		void doSetState(State state) override;
@@ -50,5 +58,7 @@ namespace Halley {
 	private:
 		Sprite sprite;
 		std::shared_ptr<UIStyle> style;
+		UIInputType curInputType = UIInputType::Undefined;
+		bool borderOnly = false;
 	};
 }
