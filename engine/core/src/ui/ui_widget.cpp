@@ -26,15 +26,20 @@ void UIWidget::doDraw(UIPainter& painter) const
 	}
 }
 
-void UIWidget::doUpdate(Time t, UIInputType inputType)
+void UIWidget::updateInputDevice(InputDevice& device)
+{
+}
+
+void UIWidget::doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice)
 {
 	setInputType(inputType);
 	if (enabled) {
 		update(t, positionUpdated);
 		positionUpdated = false;
 		for (auto& c: getChildren()) {
-			c->doUpdate(t, inputType);
+			c->doUpdate(t, inputType, inputDevice);
 		}
+		updateInputDevice(inputDevice);
 	}
 }
 
@@ -212,6 +217,11 @@ void UIWidget::setEnabled(bool e)
 	enabled = e;
 }
 
+bool UIWidget::isAlive() const
+{
+	return alive;
+}
+
 UIRoot* UIWidget::getRoot()
 {
 	return parent ? parent->getRoot() : nullptr;
@@ -224,10 +234,7 @@ void UIWidget::setParent(UIParent& p)
 
 void UIWidget::destroy()
 {
-	if (parent) {
-		parent->removeChild(*this);
-	}
-	doDestroy();
+	alive = false;
 }
 
 std::shared_ptr<UIWidget> UIWidget::getWidget(const String& id)
@@ -242,13 +249,6 @@ std::shared_ptr<UIWidget> UIWidget::getWidget(const String& id)
 		}
 	}
 	return {};
-}
-
-void UIWidget::doDestroy()
-{
-	for (auto& c: getChildren()) {
-		c->doDestroy();
-	}
 }
 
 void UIWidget::setEventHandler(std::shared_ptr<UIEventHandler> handler)

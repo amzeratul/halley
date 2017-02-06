@@ -134,6 +134,20 @@ void UIButton::doSetState(State state)
 	}
 }
 
+void UIClickable::setInputButton(int button)
+{
+	inputButton = button;
+}
+
+void UIClickable::updateInputDevice(InputDevice& device)
+{
+	if (inputButton != -1) {
+		if (device.isButtonPressed(inputButton)) {
+			onClicked();
+		}
+	}
+}
+
 bool UIClickable::setState(State state)
 {
 	if (state != curState) {

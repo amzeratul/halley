@@ -22,6 +22,17 @@ void UIParent::removeChild(UIWidget& widget)
 	topChildChanged = true;
 }
 
+void UIParent::removeDeadChildren()
+{
+	children.erase(std::remove_if(children.begin(), children.end(), [&] (auto& c)
+	{
+		return !c->isAlive();
+	}), children.end());
+	for (auto& c: children) {
+		c->removeDeadChildren();
+	}
+}
+
 std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()
 {
 	return children;
@@ -71,8 +82,11 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 
 	// Update children
 	for (auto& c: getChildren()) {
-		c->doUpdate(t, activeInputType);
+		c->doUpdate(t, activeInputType, *manual);
 	}
+
+	// Remove dead
+	removeDeadChildren();
 
 	// Update new windows
 	if (topChildChanged) {
@@ -85,7 +99,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 	// Update again, to reflect what happened >_>
 	runLayout();
 	for (auto& c: getChildren()) {
-		c->doUpdate(0, activeInputType);
+		c->doUpdate(0, activeInputType, *manual);
 	}
 }
 

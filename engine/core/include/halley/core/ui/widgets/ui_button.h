@@ -19,6 +19,9 @@ namespace Halley {
 		void onClick(UIEventCallback callback);
 		virtual void onClicked() = 0;
 
+		void setInputButton(int button);
+		void updateInputDevice(InputDevice& device) override;
+
 	protected:
 		enum class State {
 			Up,
@@ -36,6 +39,7 @@ namespace Halley {
 		State curState = State::Up;
 		bool held = false;
 		bool forceUpdate = false;
+		int inputButton = -1;
 	};
 
 

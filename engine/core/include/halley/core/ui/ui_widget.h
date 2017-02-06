@@ -12,13 +12,15 @@ namespace Halley {
 
 	class UIWidget : public IUIElement, public UIParent, public IUISizer {
 		friend class UIParent;
+		friend class UIRoot;
 
 	public:
 		UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 		virtual ~UIWidget();
 
 		void doDraw(UIPainter& painter) const;
-		void doUpdate(Time t, UIInputType inputType);
+		virtual void updateInputDevice(InputDevice& shared);
+		void doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice);
 
 		Vector2f computeMinimumSize() const override;
 		void setRect(Rect4f rect) override;
@@ -57,6 +59,7 @@ namespace Halley {
 		bool isEnabled() const override;
 		void setEnabled(bool enabled);
 
+		bool isAlive() const;
 		void destroy();
 
 		std::shared_ptr<UIWidget> getWidget(const String& id);
@@ -89,7 +92,6 @@ namespace Halley {
 	private:
 		void setWidgetRect(Rect4f rect);
 		void setParent(UIParent& parent);
-		void doDestroy();
 
 		UIParent* parent = nullptr;
 		String id;
@@ -105,6 +107,7 @@ namespace Halley {
 
 		std::shared_ptr<UIEventHandler> eventHandler;
 
+		bool alive = true;
 		bool focused = false;
 		bool mouseOver = false;
 		bool positionUpdated = false;
