@@ -163,6 +163,11 @@ int AnimationPlayer::getCurrentSequenceFrame() const
 	return curFrame;
 }
 
+String AnimationPlayer::getCurrentDirectionName() const
+{
+	return curDir ? curDir->getName() : "default";
+}
+
 AnimationPlayer& AnimationPlayer::setPlaybackSpeed(float value)
 {
 	playbackSpeed = value;

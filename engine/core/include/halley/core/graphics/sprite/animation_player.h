@@ -34,6 +34,8 @@ namespace Halley
 		Time getCurrentSequenceTime() const;
 		int getCurrentSequenceFrame() const;
 
+		String getCurrentDirectionName() const;
+
 		AnimationPlayer& setPlaybackSpeed(float value);
 		float getPlaybackSpeed() const;
 
