@@ -196,3 +196,8 @@ String TextRenderer::getText() const
 {
 	return String(text);
 }
+
+Colour TextRenderer::getColour() const
+{
+	return colour;
+}
