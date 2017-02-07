@@ -20,6 +20,7 @@ ShaderOpenGL::ShaderOpenGL(const ShaderDefinition& definition)
 	glCheckError();	
 
 	name = definition.name;
+	setAttributes(definition.vertexAttributes);
 	loadShaders(definition.shaders);
 	compile();
 }
