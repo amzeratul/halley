@@ -68,6 +68,11 @@ ConfigNode& ConfigNode::operator=(const ScalarType& entry)
 	return *this;
 }
 
+ConfigNodeType ConfigNode::getType() const
+{
+	return type;
+}
+
 class SerializerVisitor : public boost::static_visitor<>
 {
 public:
