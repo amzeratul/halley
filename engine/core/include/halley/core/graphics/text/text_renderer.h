@@ -29,6 +29,7 @@ namespace Halley
 		TextRenderer& setClip(Rect4f clip);
 		TextRenderer& setClip();
 		TextRenderer& setSmoothness(float smoothness);
+		TextRenderer& setPixelOffset(Vector2f offset);
 
 		TextRenderer clone() const;
 
@@ -50,6 +51,7 @@ namespace Halley
 		float smoothness = 1.0f;
 		Vector2f position;
 		Vector2f offset;
+		Vector2f pixelOffset;
 		Colour colour;
 		Colour outlineColour;
 		Maybe<Rect4f> clip;

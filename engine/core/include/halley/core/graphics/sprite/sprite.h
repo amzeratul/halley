@@ -4,6 +4,7 @@
 #include <halley/maths/rect.h>
 #include <halley/maths/colour.h>
 #include <halley/maths/vector4.h>
+#include "halley/data_structures/maybe.h"
 
 namespace Halley
 {
@@ -78,6 +79,9 @@ namespace Halley
 		Sprite& setSlicedFromMaterial();
 		Sprite& setNormal();
 
+		Sprite& setClip(Rect4f clip);
+		Sprite& setClip();
+
 		Sprite clone() const;
 
 	private:
@@ -88,6 +92,7 @@ namespace Halley
 		Vector4s slices;
 		bool flip = false;
 		bool sliced = false;
+		Maybe<Rect4f> clip;
 
 		void computeSize();
 	};

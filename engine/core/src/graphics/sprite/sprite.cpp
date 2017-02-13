@@ -31,7 +31,13 @@ void Sprite::drawNormal(Painter& painter) const
 	Expects(material);
 	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	
+	if (clip) {
+		painter.setRelativeClip(clip.get() + vertexAttrib.pos);
+	}
 	painter.drawSprites(material, 1, &vertexAttrib);
+	if (clip) {
+		painter.setClip();
+	}
 }
 
 void Sprite::drawSliced(Painter& painter) const
@@ -49,7 +55,14 @@ void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel) const
 	slices.y /= size.y;
 	slices.z /= size.x;
 	slices.w /= size.y;
+
+	if (clip) {
+		painter.setRelativeClip(clip.get() + vertexAttrib.pos);
+	}
 	painter.drawSlicedSprite(material, vertexAttrib.scale, slices, &vertexAttrib);
+	if (clip) {
+		painter.setClip();
+	}
 }
 
 void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
@@ -273,6 +286,18 @@ Sprite& Sprite::setSlicedFromMaterial()
 Sprite& Sprite::setNormal()
 {
 	sliced = false;
+	return *this;
+}
+
+Sprite& Sprite::setClip(Rect4f c)
+{
+	clip = c;
+	return *this;
+}
+
+Sprite& Sprite::setClip()
+{
+	clip.reset();
 	return *this;
 }
 

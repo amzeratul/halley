@@ -88,6 +88,12 @@ TextRenderer& TextRenderer::setSmoothness(float s)
 	return *this;
 }
 
+TextRenderer& TextRenderer::setPixelOffset(Vector2f offset)
+{
+	pixelOffset = offset;
+	return *this;
+}
+
 TextRenderer TextRenderer::clone() const
 {
 	return *this;
@@ -154,7 +160,7 @@ void TextRenderer::draw(Painter& painter) const
 				.setColour(colour)
 				.setPivot(glyph.horizontalBearing / glyph.size * Vector2f(-1, 1))
 				.setScale(scale)
-				.setPos(p + lineOffset));
+				.setPos(p + lineOffset + pixelOffset));
 
 			lineOffset.x += glyph.advance.x * scale;
 		}
@@ -182,8 +188,7 @@ Vector2f TextRenderer::getExtents() const
 			w = std::max(w, p.x);
 			p.x = 0;
 			p.y += lineH;
-		}
-		else {
+		} else {
 			auto& glyph = font->getGlyph(c);
 			p += Vector2f(glyph.advance.x, 0) * scale;
 		}
