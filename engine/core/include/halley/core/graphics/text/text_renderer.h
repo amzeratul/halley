@@ -28,6 +28,7 @@ namespace Halley
 		TextRenderer& setOffset(Vector2f align);
 		TextRenderer& setClip(Rect4f clip);
 		TextRenderer& setClip();
+		TextRenderer& setSmoothness(float smoothness);
 
 		TextRenderer clone() const;
 
@@ -37,6 +38,8 @@ namespace Halley
 		Vector2f getPosition() const;
 		String getText() const;
 		Colour getColour() const;
+		Colour getOutlineColour() const;
+		float getSmoothness() const;
 
 	private:
 		std::shared_ptr<const Font> font;
@@ -44,6 +47,7 @@ namespace Halley
 		float size = 20;
 		float outline = 0;
 		float align = 0;
+		float smoothness = 1.0f;
 		Vector2f position;
 		Vector2f offset;
 		Colour colour;

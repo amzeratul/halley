@@ -82,6 +82,12 @@ TextRenderer& TextRenderer::setClip()
 	return *this;
 }
 
+TextRenderer& TextRenderer::setSmoothness(float s)
+{
+	smoothness = s;
+	return *this;
+}
+
 TextRenderer TextRenderer::clone() const
 {
 	return *this;
@@ -99,7 +105,7 @@ void TextRenderer::draw(Painter& painter) const
 	auto material = font->getMaterial()->clone();
 	
 	if (font->isDistanceField()) {
-		float smooth = clamp(1.0f / font->getSmoothRadius(), 0.001f, 0.999f);
+		float smooth = clamp(smoothness / font->getSmoothRadius(), 0.001f, 0.999f);
 		float outlineSize = clamp(outline / font->getSmoothRadius(), 0.0f, 0.995f);
 		material
 			->set("u_smoothness", smooth)
@@ -200,4 +206,14 @@ String TextRenderer::getText() const
 Colour TextRenderer::getColour() const
 {
 	return colour;
+}
+
+Colour TextRenderer::getOutlineColour() const
+{
+	return outlineColour;
+}
+
+float TextRenderer::getSmoothness() const
+{
+	return smoothness;
 }
