@@ -148,8 +148,14 @@ namespace Halley {
 			return Colour4<T>(Colour4<float>(r, g, b));
 		}
 
-		Colour4 multiplyLuma(float t) const {
+		Colour4 multiplyLuma(float t) const
+		{
 			return Colour4(r*t, g*t, b*t, a);
+		}
+
+		Colour4 inverseMultiplyLuma(float t) const
+		{
+			return Colour4(1.0f - ((1.0f - r) * t), 1.0f - ((1.0f - g) * t), 1.0f - ((1.0f - b) * t), a);
 		}
 
 		Colour4 operator+(const Colour4& c) const
