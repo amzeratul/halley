@@ -84,7 +84,7 @@ void DummyTextureRenderTarget::bind() {}
 
 void DummyTextureRenderTarget::unbind() {}
 
-unsigned DummyShader::getUniformLocation(String name)
+int DummyShader::getUniformLocation(const String& name)
 {
 	return 0;
 }

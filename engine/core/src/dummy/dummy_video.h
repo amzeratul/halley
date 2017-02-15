@@ -46,7 +46,7 @@ namespace Halley {
 	class DummyShader : public Shader
 	{
 	public:
-		unsigned getUniformLocation(String name) override;
+		int getUniformLocation(const String& name) override;
 	};
 
 	class DummyMaterialConstantBuffer : public MaterialConstantBuffer

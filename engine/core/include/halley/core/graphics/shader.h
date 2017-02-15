@@ -52,6 +52,6 @@ namespace Halley
 	{
 	public:
 		virtual ~Shader() {}
-		virtual unsigned int getUniformLocation(String name) = 0;
+		virtual int getUniformLocation(const String& name) = 0;
 	};
 }

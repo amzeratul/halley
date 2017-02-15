@@ -15,8 +15,8 @@ namespace Halley
 		void unbind();
 		void destroy();
 
-		unsigned getUniformLocation(String name) override;
-		unsigned getAttributeLocation(String name);
+		int getUniformLocation(const String& name) override;
+		int getAttributeLocation(const String& name);
 
 	private:
 		unsigned int id = 0;

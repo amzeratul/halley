@@ -173,32 +173,32 @@ void ShaderOpenGL::destroy()
 	}
 }
 
-unsigned ShaderOpenGL::getUniformLocation(String name)
+int ShaderOpenGL::getUniformLocation(const String& name)
 {
 	auto i = uniformLocations.find(name);
 	if (i != uniformLocations.end()) {
-		return i->second;
+		return int(i->second);
 	}
 
 	unsigned int result = glGetUniformLocation(id, name.c_str());
 	glCheckError();
 
 	uniformLocations[name] = result;
-	return result;
+	return int(result);
 }
 
-unsigned ShaderOpenGL::getAttributeLocation(String name)
+int ShaderOpenGL::getAttributeLocation(const String& name)
 {
 	auto i = attributeLocations.find(name);
 	if (i != attributeLocations.end()) {
-		return i->second;
+		return int(i->second);
 	}
 
 	unsigned int result = glGetAttribLocation(id, name.c_str());
 	glCheckError();
 
 	attributeLocations[name] = result;
-	return result;
+	return int(result);
 }
 
 void ShaderOpenGL::setAttributes(const Vector<MaterialAttribute>& attributes)

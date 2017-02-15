@@ -54,9 +54,11 @@ void Material::bind(int passNumber, Painter& painter)
 
 	if (!constantBuffer) {
 		constantBuffer = getDefinition().api->createConstantBuffer(*this);
+		dirty = true;
 	}
 	if (dirty) {
 		constantBuffer->update(*this);
+		dirty = false;
 	}
 	painter.setMaterialPass(*this, passNumber);
 }
