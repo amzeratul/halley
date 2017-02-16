@@ -278,19 +278,24 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 		.addAccessLevelSection(CPPAccess::Public);
 
 	for (auto& fam : system.families) {
+		auto members = convert<ComponentReferenceSchema, VariableSchema>(fam.components, [](auto& comp)
+		{
+			String type = comp.optional ? "Halley::MaybeRef<" + comp.name + "Component>" : comp.name + "Component&";
+			return VariableSchema(TypeSchema(type, !comp.write), lowerFirst(comp.name));
+		});
+
 		sysClassGen
 			.addClass(CPPClassGenerator(upperFirst(fam.name) + "Family", "Halley::FamilyBaseOf<" + upperFirst(fam.name) + "Family>")
 				.addAccessLevelSection(CPPAccess::Public)
-				.addMembers(convert<ComponentReferenceSchema, VariableSchema>(fam.components, [](auto& comp)
-				{
-					String type = comp.optional ? "Halley::MaybeRef<" + comp.name + "Component>" : comp.name + "Component&";
-					return VariableSchema(TypeSchema(type, !comp.write), lowerFirst(comp.name));
-				}))
+				.addMembers(members)
 				.addBlankLine()
 				.addTypeDefinition("Type", "Halley::FamilyType<" + String::concatList(convert<ComponentReferenceSchema, String>(fam.components, [](auto& comp)
 				{
 					return comp.optional ? "Halley::MaybeRef<" + comp.name + "Component>" : comp.name + "Component";
 				}), ", ") + ">")
+				.addBlankLine()
+				.addAccessLevelSection(CPPAccess::Protected)
+				.addConstructor(members)
 				.finish())
 			.addBlankLine();
 	}
