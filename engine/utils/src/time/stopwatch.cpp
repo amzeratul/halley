@@ -86,7 +86,7 @@ void StopwatchAveraging::endSample()
 
 	nsTakenAvgAccum += nsTaken;
 	nsTakenAvgSamples++;
-	if (nsTakenAvgSamples >= 30) {
+	if (nsTakenAvgSamples >= nSamples) {
 		nsTakenAvg = int(nsTakenAvgAccum / nsTakenAvgSamples);
 		nsTakenAvgSamples = 0;
 		nsTakenAvgAccum = 0;

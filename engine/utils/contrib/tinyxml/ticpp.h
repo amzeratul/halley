@@ -105,27 +105,32 @@ namespace ticpp
 	class Comment;
 	class Attribute;
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif
+
 	/** Wrapper around TiXmlVisitor */
 	class Visitor : public TiXmlVisitor
 	{
 	public:
 		// Overload the TiXmlVisitor functions, wrap objects, call ticpp::Visitor functions
 		/// @internal
-		virtual bool VisitEnter( const TiXmlDocument& doc );
+		virtual bool VisitEnter( const TiXmlDocument& doc ) override;
 		/// @internal
-		virtual bool VisitExit( const TiXmlDocument& doc );
+		virtual bool VisitExit( const TiXmlDocument& doc ) override;
 		/// @internal
-		virtual bool VisitEnter( const TiXmlElement& element, const TiXmlAttribute* firstAttribute );
+		virtual bool VisitEnter( const TiXmlElement& element, const TiXmlAttribute* firstAttribute ) override;
 		/// @internal
-		virtual bool VisitExit( const TiXmlElement& element );
+		virtual bool VisitExit( const TiXmlElement& element ) override;
 		/// @internal
-		virtual bool Visit( const TiXmlDeclaration& declaration );
+		virtual bool Visit( const TiXmlDeclaration& declaration ) override;
 		/// @internal
-		virtual bool Visit( const TiXmlStylesheetReference& stylesheet );
+		virtual bool Visit( const TiXmlStylesheetReference& stylesheet ) override;
 		/// @internal
-		virtual bool Visit( const TiXmlText& text );
+		virtual bool Visit( const TiXmlText& text ) override;
 		/// @internal
-		virtual bool Visit( const TiXmlComment& comment );
+		virtual bool Visit( const TiXmlComment& comment ) override;
 
 	public:
 		/// Visit a document.
@@ -147,6 +152,10 @@ namespace ticpp
 		/// Visit a comment node
 		virtual bool Visit( const Comment& /*comment*/ )			{ return true; }
 	};
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 	/** Wrapper around TiXmlBase */
 	class Base

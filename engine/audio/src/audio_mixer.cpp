@@ -70,6 +70,7 @@ static inline unsigned long long _xgetbv(unsigned int index){
 
 #endif
 
+#ifdef HAS_AVX
 static bool hasAVX()
 {
 #ifndef _MSC_VER
@@ -103,6 +104,7 @@ static bool hasAVX()
 	return false;
 #endif
 }
+#endif
 
 std::unique_ptr<AudioMixer> AudioMixer::makeMixer()
 {

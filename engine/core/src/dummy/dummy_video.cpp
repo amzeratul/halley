@@ -7,8 +7,7 @@
 
 using namespace Halley;
 
-DummyVideoAPI::DummyVideoAPI(SystemAPI& system) 
-	: system(system)
+DummyVideoAPI::DummyVideoAPI(SystemAPI&) 
 {}
 
 void DummyVideoAPI::startRender()

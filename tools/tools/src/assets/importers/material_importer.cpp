@@ -139,7 +139,7 @@ void MaterialImporter::loadAttributes(MaterialDefinition& material, const YAML::
 			a.location = location++;
 			a.offset = offset;
 
-			int size = MaterialAttribute::getAttributeSize(type);
+			int size = int(MaterialAttribute::getAttributeSize(type));
 			offset += size;
 
 			if (a.name == "a_vertPos") {

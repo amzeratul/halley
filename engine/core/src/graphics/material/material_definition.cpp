@@ -11,9 +11,6 @@
 
 using namespace Halley;
 
-static Material* currentMaterial = nullptr;
-static int currentPass = 0;
-
 MaterialAttribute::MaterialAttribute()
 	: type(ShaderParameterType::Invalid)
     , location(-1)

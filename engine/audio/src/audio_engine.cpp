@@ -28,7 +28,7 @@ void AudioEngine::setListener(AudioListenerData l)
 
 void AudioEngine::run()
 {
-	const size_t bufSize = spec.numChannels * sizeof(AudioConfig::SampleFormat) * spec.bufferSize;
+	//const size_t bufSize = spec.numChannels * sizeof(AudioConfig::SampleFormat) * spec.bufferSize;
 
 	using namespace std::chrono_literals;
 	while (out->getQueuedSampleCount() >= spec.bufferSize && running) {

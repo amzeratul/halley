@@ -175,12 +175,21 @@ static __inline void vorbis_fpu_restore(vorbis_fpu_control fpu){
 
 typedef int vorbis_fpu_control;
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
+
 static int vorbis_ftoi(double f){
         /* Note: MSVC and GCC (at least on some systems) round towards zero, thus,
            the floor() call is required to ensure correct roudning of
            negative numbers */
         return (int)floor(f+.5);
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 /* We don't have special code for this compiler/arch, so do it the slow way */
 #  define vorbis_fpu_setround(vorbis_fpu_control) {}

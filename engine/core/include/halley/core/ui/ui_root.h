@@ -82,8 +82,6 @@ namespace Halley {
 		AudioAPI* audio;
 		bool mouseHeld = false;
 
-		UIInputType lastInputType = UIInputType::Undefined;
-
 		void updateMouse(spInputDevice mouse, Vector2f uiOffset);
 		void updateManual(spInputDevice manual);
 

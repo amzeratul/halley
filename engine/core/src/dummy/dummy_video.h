@@ -23,7 +23,6 @@ namespace Halley {
 		std::unique_ptr<Painter> makePainter() override;
 
 	private:
-		SystemAPI& system;
 		std::shared_ptr<Window> window;
 	};
 
