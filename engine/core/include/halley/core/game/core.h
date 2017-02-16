@@ -48,6 +48,7 @@ namespace Halley
 		void onSuspended() override;
 		void onReloaded() override;
 		void onTerminatedInError(const std::string& error) override;
+		int getTargetFPS() override;
 
 		void registerDefaultPlugins();
 		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
@@ -72,6 +73,7 @@ namespace Halley
 		void pumpEvents(Time time);
 		void pumpAudio();
 
+	private:
 		std::array<StopwatchAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> timers;
 
 		Vector<String> args;

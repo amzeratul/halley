@@ -130,6 +130,11 @@ void Core::onTerminatedInError(const std::string& error)
 	hasError = true;
 }
 
+int Core::getTargetFPS()
+{
+	return game->getTargetFPS();
+}
+
 void Core::init()
 {
 	// Computer info

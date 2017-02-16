@@ -19,7 +19,7 @@ Halley::MainLoop::MainLoop(IMainLoopable& target, GameLoader& reloader)
 void Halley::MainLoop::run()
 {
 	capFrameRate = true;
-	fps = 60;
+	fps = target.getTargetFPS();
 
 	do {
 		runLoop();
@@ -40,37 +40,45 @@ void Halley::MainLoop::runLoop()
 	Clock::time_point lastTime;
 	startTime = targetTime = lastTime = Clock::now();
 
-	Time fixedDelta = 1.0 / fps;
-
-	while (isRunning()) {
-		if (target.transitionStage()) {
-			// Reset counters
-			startTime = targetTime = lastTime = Clock::now();
-			nSteps = 0;
+	if (fps <= 0) {
+		while (isRunning()) {
+			target.transitionStage();
+			constexpr Time fixedDelta = 1.0 / 60.0;
+			target.onFixedUpdate(fixedDelta);
+			target.onVariableUpdate(fixedDelta);
 		}
-		Clock::time_point curTime = Clock::now();
-
-		// Got anything to do?
-		if (curTime >= targetTime) {
-			// Step until we're up-to-date
-			for (int i = 0; i < 10 && curTime >= targetTime; i++) {
-				HALLEY_DEBUG_TRACE();
-				target.onFixedUpdate(fixedDelta);
-				HALLEY_DEBUG_TRACE();
-
-				nSteps++;
-				curTime = Clock::now();
-				targetTime = startTime + std::chrono::microseconds((static_cast<long long>(nSteps) * 1000000) / fps);
+	} else {
+		while (isRunning()) {
+			if (target.transitionStage()) {
+				// Reset counters
+				startTime = targetTime = lastTime = Clock::now();
+				nSteps = 0;
 			}
-		} else {
-			// Nope, release CPU
-			//std::this_thread::sleep_for(1ms);
-		}
+			Clock::time_point curTime = Clock::now();
 
-		HALLEY_DEBUG_TRACE();
-		target.onVariableUpdate(std::chrono::duration<float>(curTime - lastTime).count());
-		HALLEY_DEBUG_TRACE();
-		lastTime = curTime;
+			// Got anything to do?
+			if (curTime >= targetTime) {
+				// Step until we're up-to-date
+				for (int i = 0; i < 10 && curTime >= targetTime; i++) {
+					Time fixedDelta = 1.0 / fps;
+					HALLEY_DEBUG_TRACE();
+					target.onFixedUpdate(fixedDelta);
+					HALLEY_DEBUG_TRACE();
+
+					nSteps++;
+					curTime = Clock::now();
+					targetTime = startTime + std::chrono::microseconds((static_cast<long long>(nSteps) * 1000000) / fps);
+				}
+			} else {
+				// Nope, release CPU
+				std::this_thread::sleep_for(100us);
+			}
+
+			HALLEY_DEBUG_TRACE();
+			target.onVariableUpdate(std::chrono::duration<float>(curTime - lastTime).count());
+			HALLEY_DEBUG_TRACE();
+			lastTime = curTime;
+		}
 	}
 
 	HALLEY_DEBUG_TRACE();

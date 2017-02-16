@@ -27,5 +27,7 @@ namespace Halley
 		virtual void endGame() {}
 
 		virtual std::unique_ptr<Stage> makeStage(StageID id) { return std::unique_ptr<Stage>(); }
+
+		virtual int getTargetFPS() const { return 60; }
 	};
 }
