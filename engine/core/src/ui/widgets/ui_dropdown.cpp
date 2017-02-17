@@ -51,7 +51,9 @@ void UIDropdown::draw(UIPainter& painter) const
 	painter.draw(label, offset);
 
 	if (isOpen) {
-		painter.draw(optionsLabel, offset);
+		for (auto& label: optionsLabels) {
+			painter.draw(label, offset);
+		}
 	}
 }
 
@@ -63,8 +65,15 @@ void UIDropdown::update(Time t, bool moved)
 	if (needUpdate) {
 		sprite.setPos(getPosition()).scaleTo(getSize());
 		label.setAlignment(0.0f).setPosition(getPosition() + Vector2f(3, 0));
-		optionsLabel.setPosition(getPosition() + Vector2f(3, 0));
+		
+		for (size_t i = 0; i < optionsLabels.size(); ++i) {
+			optionsLabels[i].setPosition(getPosition() + Vector2f(3.0f, float((i + 1) * 14)));
+		}
 		dropdownSprite.setPos(getPosition());
+	}
+
+	if (!isOpen) {
+		optionsLabels.clear();
 	}
 }
 
@@ -73,20 +82,21 @@ void UIDropdown::onClicked(Vector2f mousePos)
 	if (isOpen) {
 		isOpen = false;
 		Vector2f relPos = mousePos - getPosition();
-		float entryH = optionsExtent.y / (options.size() + 1);
+		float entryH = 14.0f;
 		int idx = clamp(int(std::floor(relPos.y / entryH)) - 1, 0, int(options.size() - 1));
 		setSelectedOption(idx);
 	} else {
 		isOpen = true;
-		String optionsText;
+		optionsLabels.clear();
+		optionsExtent = Vector2f(14, 14);
 		for (auto& o: options) {
-			optionsText += "\n" + o;
+			optionsLabels.push_back(style->inputLabel.clone().setText(o));
+			auto ext = optionsLabels.back().getExtents();
+			optionsExtent.x = std::max(optionsExtent.x, ext.x + 14);
+			optionsExtent.y += 14;
 		}
-		optionsLabel = label;
-		optionsLabel.setText(optionsText);
-		optionsExtent = optionsLabel.getExtents();
 		dropdownSprite = style->dropdownNormal;
-		dropdownSprite.setPos(getPosition()).scaleTo(optionsExtent + Vector2f(14, 0));
+		dropdownSprite.setPos(getPosition()).scaleTo(optionsExtent);
 	}
 }
 
