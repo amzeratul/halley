@@ -199,11 +199,11 @@ void UIWidget::setMouseOver(bool mo)
 	mouseOver = mo;
 }
 
-void UIWidget::pressMouse(int button)
+void UIWidget::pressMouse(Vector2f mousePos, int button)
 {
 }
 
-void UIWidget::releaseMouse(int button)
+void UIWidget::releaseMouse(Vector2f mousePos, int button)
 {
 }
 
@@ -277,6 +277,11 @@ void UIWidget::setOnlyEnabledWithInput(UIInputType uiInput)
 UIInputType UIWidget::getOnlyEnabledWithInput() const
 {
 	return onlyEnabledWithInput;
+}
+
+Rect4f UIWidget::getMouseRect() const
+{
+	return Rect4f(getPosition(), getPosition() + getSize());
 }
 
 void UIWidget::draw(UIPainter& painter) const

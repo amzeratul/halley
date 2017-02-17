@@ -21,7 +21,7 @@ void UICheckbox::setChecked(bool c)
 	checked = c;
 }
 
-void UICheckbox::onClicked()
+void UICheckbox::onClicked(Vector2f)
 {
 	checked = !checked;
 	sendEvent(UIEvent(UIEventType::CheckboxUpdated, getId(), checked ? "true" : "false"));

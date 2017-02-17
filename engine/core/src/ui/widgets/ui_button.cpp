@@ -38,18 +38,18 @@ bool UIClickable::isFocusLocked() const
 	return held;
 }
 
-void UIClickable::pressMouse(int button)
+void UIClickable::pressMouse(Vector2f, int button)
 {
 	if (button == 0) {
 		held = true;
 	}
 }
 
-void UIClickable::releaseMouse(int button)
+void UIClickable::releaseMouse(Vector2f mousePos, int button)
 {
 	if (button == 0) {
 		if (held && isMouseOver()) {
-			onClicked();
+			onClicked(mousePos);
 		}
 		held = false;
 	}
@@ -90,7 +90,7 @@ void UIClickable::doForceUpdate()
 	forceUpdate = true;
 }
 
-void UIButton::onClicked()
+void UIButton::onClicked(Vector2f)
 {
 	sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));
 }
@@ -143,7 +143,7 @@ void UIClickable::updateInputDevice(InputDevice& device)
 {
 	if (inputButton != -1) {
 		if (device.isButtonPressed(inputButton)) {
-			onClicked();
+			onClicked(Vector2f());
 		}
 	}
 }

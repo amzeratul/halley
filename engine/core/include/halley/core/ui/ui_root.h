@@ -46,8 +46,8 @@ namespace Halley {
 	public:
 		UIPainter(SpritePainter& painter, int mask, int layer);
 
-		void draw(const Sprite& sprite);
-		void draw(const TextRenderer& sprite);
+		void draw(const Sprite& sprite, int layerOffset = 0);
+		void draw(const TextRenderer& sprite, int layerOffset = 0);
 
 	private:
 		SpritePainter& painter;

@@ -51,14 +51,14 @@ UIPainter::UIPainter(SpritePainter& painter, int mask, int layer)
 {
 }
 
-void UIPainter::draw(const Sprite& sprite)
+void UIPainter::draw(const Sprite& sprite, int layerOffset)
 {
-	painter.add(sprite, mask, layer, float(n++));
+	painter.add(sprite, mask, layer + layerOffset, float(n++));
 }
 
-void UIPainter::draw(const TextRenderer& sprite)
+void UIPainter::draw(const TextRenderer& sprite, int layerOffset)
 {
-	painter.add(sprite, mask, layer, float(n++));
+	painter.add(sprite, mask, layer + layerOffset, float(n++));
 }
 
 UIRoot* UIRoot::getRoot()
@@ -122,7 +122,7 @@ void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)
 		mouseHeld = true;
 		setFocus(underMouse);
 		if (underMouse) {
-			underMouse->pressMouse(0);
+			underMouse->pressMouse(mousePos, 0);
 		}
 	}
 
@@ -131,7 +131,7 @@ void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)
 	if (mouse->isButtonReleased(0)) {
 		mouseHeld = false;
 		if (focus) {
-			focus->releaseMouse(0);
+			focus->releaseMouse(mousePos, 0);
 		}
 	}
 
@@ -184,13 +184,15 @@ void UIRoot::runLayout()
 void UIRoot::setFocus(std::shared_ptr<UIWidget> focus)
 {
 	auto curFocus = currentFocus.lock();
-	if (curFocus) {
-		curFocus->setFocused(false);
-	}
+	if (curFocus != focus) {
+		if (curFocus) {
+			curFocus->setFocused(false);
+		}
 
-	currentFocus = focus;
-	if (focus) {
-		focus->setFocused(true);
+		currentFocus = focus;
+		if (focus) {
+			focus->setFocused(true);
+		}
 	}
 }
 
@@ -227,7 +229,7 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWi
 		}
 	}
 
-	auto rect = Rect4f(start->getPosition(), start->getPosition() + start->getSize());
+	auto rect = start->getMouseRect();
 	if (start->isFocusable() && rect.isInside(mousePos)) {
 		return start;
 	} else {

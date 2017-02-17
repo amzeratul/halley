@@ -53,8 +53,9 @@ namespace Halley {
 
 		void setFocused(bool focused);
 		void setMouseOver(bool mouseOver);
-		virtual void pressMouse(int button);
-		virtual void releaseMouse(int button);
+		virtual void pressMouse(Vector2f mousePos, int button);
+		virtual void releaseMouse(Vector2f mousePos, int button);
+		virtual Rect4f getMouseRect() const;
 
 		bool isEnabled() const override;
 		void setEnabled(bool enabled);
@@ -76,7 +77,7 @@ namespace Halley {
 		virtual void setInputType(UIInputType uiInput);
 		void setOnlyEnabledWithInput(UIInputType uiInput);
 		UIInputType getOnlyEnabledWithInput() const;
-
+		
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void update(Time t, bool moved);

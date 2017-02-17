@@ -13,11 +13,11 @@ namespace Halley {
 		bool isFocusable() const override;
 		bool isFocusLocked() const override;
 
-		void pressMouse(int button) override;
-		void releaseMouse(int button) override;
+		void pressMouse(Vector2f mousePos, int button) override;
+		void releaseMouse(Vector2f mousePos, int button) override;
 
 		void onClick(UIEventCallback callback);
-		virtual void onClicked() = 0;
+		virtual void onClicked(Vector2f mousePos) = 0;
 
 		void setInputButton(int button);
 		void updateInputDevice(InputDevice& device) override;
@@ -49,7 +49,7 @@ namespace Halley {
 
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
-		void onClicked() override;
+		void onClicked(Vector2f mousePos) override;
 		void setInputType(UIInputType uiInput) override;
 
 		bool isFocusable() const override;

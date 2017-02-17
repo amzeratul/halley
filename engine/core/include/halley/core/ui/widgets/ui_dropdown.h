@@ -20,15 +20,22 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
-		void onClicked() override;
+		void onClicked(Vector2f mousePos) override;
 		void doSetState(State state) override;
 
 		bool isFocusLocked() const override;
+		void onFocusLost() override;
+
+		Rect4f getMouseRect() const override;
 
 	private:
 		Sprite sprite;
+		Sprite dropdownSprite;
 		TextRenderer label;
+		TextRenderer optionsLabel;
 		std::shared_ptr<UIStyle> style;
+
+		Vector2f optionsExtent;
 
 		std::vector<String> options;
 		int curOption = 0;
