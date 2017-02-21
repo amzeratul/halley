@@ -3,9 +3,10 @@
 using namespace Halley;
 
 UILabel::UILabel(TextRenderer text)
-	: UIWidget("", text.getExtents())
+	: UIWidget("", {})
 	, text(text)
 {
+	updateMinSize();
 }
 
 void UILabel::draw(UIPainter& painter) const
@@ -22,8 +23,24 @@ void UILabel::update(Time t, bool moved)
 	}
 }
 
+void UILabel::updateMinSize()
+{
+	auto extents = text.getExtents();
+	if (extents.x > maxWidth) {
+		text.setText(text.split(maxWidth));
+		extents = text.getExtents();
+	}
+	setMinSize(extents);
+}
+
 void UILabel::setText(const String& t)
 {
 	text.setText(t);
-	setMinSize(text.getExtents());
+	updateMinSize();
+}
+
+void UILabel::setMaxWidth(float m)
+{
+	maxWidth = m;
+	updateMinSize();
 }

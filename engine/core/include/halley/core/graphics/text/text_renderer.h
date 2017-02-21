@@ -19,7 +19,8 @@ namespace Halley
 
 		TextRenderer& setPosition(Vector2f pos);
 		TextRenderer& setFont(std::shared_ptr<const Font> font);
-		TextRenderer& setText(String text);
+		TextRenderer& setText(const String& text);
+		TextRenderer& setText(const StringUTF32& text);
 		TextRenderer& setSize(float size);
 		TextRenderer& setColour(Colour colour);
 		TextRenderer& setOutlineColour(Colour colour);
@@ -35,6 +36,8 @@ namespace Halley
 
 		void draw(Painter& painter) const;
 		Vector2f getExtents() const;
+
+		StringUTF32 split(float width) const;
 
 		Vector2f getPosition() const;
 		String getText() const;

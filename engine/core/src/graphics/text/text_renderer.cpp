@@ -33,10 +33,15 @@ TextRenderer& TextRenderer::setFont(std::shared_ptr<const Font> v)
 	return *this;
 }
 
-TextRenderer& TextRenderer::setText(String v)
+TextRenderer& TextRenderer::setText(const String& v)
 {
 	text = v.getUTF32();
-	text.push_back('\n');
+	return *this;
+}
+
+TextRenderer& TextRenderer::setText(const StringUTF32& v)
+{
+	text = v;
 	return *this;
 }
 
@@ -130,26 +135,31 @@ void TextRenderer::draw(Painter& painter) const
 	size_t startPos = 0;
 	Vector2f lineOffset;
 
+	auto flush = [&] ()
+	{
+		// Line break, update previous characters!
+		if (align != 0) {
+			Vector2f off = (-lineOffset * align).floor();
+			for (size_t j = startPos; j < sprites.size(); j++) {
+				auto& sprite = sprites[j];
+				sprite.setPos(sprite.getPosition() + off);
+			}
+		}
+
+		// Move pen
+		p.y += font->getHeight() * scale;
+
+		// Reset
+		startPos = sprites.size();
+		lineOffset.x = 0;
+	};
+
 	const size_t n = text.size();
 	for (size_t i = 0; i < n; i++) {
 		int c = text[i];
 		
 		if (c == '\n') {
-			// Line break, update previous characters!
-			if (align != 0) {
-				Vector2f off = (-lineOffset * align).floor();
-				for (size_t j = startPos; j < sprites.size(); j++) {
-					auto& sprite = sprites[j];
-					sprite.setPos(sprite.getPosition() + off);
-				}
-			}
-
-			// Move pen
-			p.y += font->getHeight() * scale;
-
-			// Reset
-			startPos = sprites.size();
-			lineOffset.x = 0;
+			flush();
 		} else {
 			auto& glyph = font->getGlyph(c);
 
@@ -163,6 +173,10 @@ void TextRenderer::draw(Painter& painter) const
 				.setPos(p + lineOffset + pixelOffset));
 
 			lineOffset.x += glyph.advance.x * scale;
+
+			if (i == n - 1) {
+				flush();
+			}
 		}
 	}
 
@@ -195,7 +209,52 @@ Vector2f TextRenderer::getExtents() const
 	}
 	w = std::max(w, p.x);
 
-	return Vector2f(w, p.y);
+	return Vector2f(w, p.y + lineH);
+}
+
+StringUTF32 TextRenderer::split(float maxWidth) const
+{
+	StringUTF32 result;
+
+	float scale = size / font->getSizePoints();
+	float curWidth = 0.0f;
+	size_t startPoint = 0;
+	size_t lastSplitPoint = 0;
+
+	auto split = [&] (bool last = false)
+	{
+		if (last) {
+			result += text.substr(startPoint);
+		} else {
+			result += text.substr(startPoint, lastSplitPoint - startPoint);
+			result += '\n';
+		}
+		startPoint = lastSplitPoint + 1;
+		curWidth = 0;
+	};
+
+	for (size_t i = 0; i < text.length(); ++i) {
+		auto c = text[i];
+		if (c == '\n') {
+			lastSplitPoint = i;
+			split();
+		} else {
+			if (c == ' ' || c == '\t') {
+				lastSplitPoint = i;
+			}
+			auto& glyph = font->getGlyph(c);
+			float w = glyph.advance.x * scale;
+			if (curWidth + w < maxWidth) {
+				curWidth += w;
+			} else {
+				split();
+				i = lastSplitPoint;
+			}
+		}
+	}
+	split(true);
+
+	return result;
 }
 
 Vector2f TextRenderer::getPosition() const
