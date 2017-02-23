@@ -215,29 +215,38 @@ Vector2f TextRenderer::getExtents() const
 StringUTF32 TextRenderer::split(float maxWidth) const
 {
 	StringUTF32 result;
+	if (text.empty()) {
+		return result;
+	}
 
 	float scale = size / font->getSizePoints();
 	float curWidth = 0.0f;
 	size_t startPoint = 0;
 	size_t lastSplitPoint = 0;
 
-	auto split = [&] (bool last = false)
+	auto split = [&] (size_t i, bool last = false)
 	{
 		if (last) {
 			result += text.substr(startPoint);
 		} else {
-			result += text.substr(startPoint, lastSplitPoint - startPoint);
+			if (lastSplitPoint > startPoint) {
+				result += text.substr(startPoint, lastSplitPoint - startPoint);
+				startPoint = lastSplitPoint + 1;
+			} else {
+				lastSplitPoint = i - 1;
+				result += text.substr(startPoint, lastSplitPoint - startPoint + 1);
+				startPoint = i;
+			}
 			result += '\n';
+			curWidth = 0;
 		}
-		startPoint = lastSplitPoint + 1;
-		curWidth = 0;
 	};
 
 	for (size_t i = 0; i < text.length(); ++i) {
 		auto c = text[i];
 		if (c == '\n') {
 			lastSplitPoint = i;
-			split();
+			split(i);
 		} else {
 			if (c == ' ' || c == '\t') {
 				lastSplitPoint = i;
@@ -247,12 +256,12 @@ StringUTF32 TextRenderer::split(float maxWidth) const
 			if (curWidth + w < maxWidth) {
 				curWidth += w;
 			} else {
-				split();
+				split(i);
 				i = lastSplitPoint;
 			}
 		}
 	}
-	split(true);
+	split(text.length() - 1, true);
 
 	return result;
 }
