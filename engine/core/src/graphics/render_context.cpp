@@ -9,7 +9,7 @@ RenderContext::RenderContext(Painter& painter, Camera& camera, RenderTarget& ren
 	, defaultRenderTarget(renderTarget)
 {}
 
-RenderContext::RenderContext(RenderContext&& context)
+RenderContext::RenderContext(RenderContext&& context) noexcept
 	: painter(context.painter)
 	, camera(context.camera)
 	, defaultRenderTarget(context.defaultRenderTarget)

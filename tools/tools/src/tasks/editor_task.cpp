@@ -94,8 +94,8 @@ EditorTaskAnchor::EditorTaskAnchor(std::unique_ptr<EditorTask> t, float delay)
 	Expects(!!task);
 }
 
-EditorTaskAnchor::EditorTaskAnchor(EditorTaskAnchor&& other) = default;
-EditorTaskAnchor& EditorTaskAnchor::operator=(EditorTaskAnchor&& other) = default;
+EditorTaskAnchor::EditorTaskAnchor(EditorTaskAnchor&& other) noexcept = default;
+EditorTaskAnchor& EditorTaskAnchor::operator=(EditorTaskAnchor&& other) noexcept = default;
 
 EditorTaskAnchor::~EditorTaskAnchor()
 {

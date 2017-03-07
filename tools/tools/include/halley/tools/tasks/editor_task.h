@@ -66,10 +66,10 @@ namespace Halley
 	{
 	public:
 		EditorTaskAnchor(std::unique_ptr<EditorTask> task, float delay = 0);
-		EditorTaskAnchor(EditorTaskAnchor&& other);
+		EditorTaskAnchor(EditorTaskAnchor&& other) noexcept;
 		~EditorTaskAnchor();
 
-		EditorTaskAnchor& operator=(EditorTaskAnchor&& other);
+		EditorTaskAnchor& operator=(EditorTaskAnchor&& other) noexcept;
 
 		void terminate();
 		void update(float time);

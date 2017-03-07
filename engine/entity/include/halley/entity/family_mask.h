@@ -13,7 +13,7 @@ namespace Halley {
 		public:
 			Handle();
 			Handle(const Handle& h);
-			Handle(Handle&& h);
+			Handle(Handle&& h) noexcept;
 			Handle(const RealType& mask);
 			Handle(RealType&& mask);
 

@@ -17,7 +17,7 @@ namespace Halley
 		std::unique_ptr<Font> font;
 
 		FontGeneratorResult();
-		FontGeneratorResult(FontGeneratorResult&& other);
+		FontGeneratorResult(FontGeneratorResult&& other) noexcept;
 		~FontGeneratorResult();
 		std::vector<Path> write(Path dst, bool verbose = false) const;
 	};

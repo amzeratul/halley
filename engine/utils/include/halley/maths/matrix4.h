@@ -30,7 +30,7 @@ namespace Halley {
 	public:
 		Matrix4f();
 		Matrix4f(const Matrix4f& m);
-		Matrix4f(Matrix4f&& m);
+		Matrix4f(Matrix4f&& m) noexcept;
 		Matrix4f(const float elements[]);
 
 		Matrix4f& operator=(const Matrix4f& param);

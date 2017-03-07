@@ -80,7 +80,7 @@ String::String(const String& other)
 	str = other.str;
 }
 
-String::String(String&& other)
+String::String(String&& other) noexcept
 {
 	str = std::move(other.str);
 }
@@ -131,7 +131,8 @@ String& String::operator=(const std::basic_string<Character>& s) {
 	return *this;
 }
 
-String& String::operator=(String&& s) {
+String& String::operator=(String&& s) noexcept
+{
 	str = std::move(s.str);
 	return *this;
 }

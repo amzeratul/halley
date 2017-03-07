@@ -11,10 +11,10 @@ namespace Halley {
 
 		NullableReference();
 		NullableReference(const NullableReference& other);
-		NullableReference(NullableReference&& other);
+		NullableReference(NullableReference&& other) noexcept;
 
 		NullableReference& operator=(const NullableReference& other);
-		NullableReference& operator=(NullableReference&& other);
+		NullableReference& operator=(NullableReference&& other) noexcept;
 
 		bool isValid() const;
 
@@ -49,7 +49,7 @@ namespace Halley {
 			: NullableReference(other)
 		{}
 		
-		NullableReferenceOf(NullableReferenceOf&& other)
+		NullableReferenceOf(NullableReferenceOf&& other) noexcept
 			: NullableReference(other)
 		{}
 
@@ -71,7 +71,7 @@ namespace Halley {
 			return *this;
 		}
 		
-		NullableReferenceOf& operator=(NullableReferenceOf&& other)
+		NullableReferenceOf& operator=(NullableReferenceOf&& other) noexcept
 		{
 			NullableReference::operator=(other);
 			return *this;
@@ -93,8 +93,8 @@ namespace Halley {
 
 	public:
 		NullableReferenceAnchor();
-		NullableReferenceAnchor(NullableReferenceAnchor&& other);
-		NullableReferenceAnchor& operator=(NullableReferenceAnchor&& other);
+		NullableReferenceAnchor(NullableReferenceAnchor&& other) noexcept;
+		NullableReferenceAnchor& operator=(NullableReferenceAnchor&& other) noexcept;
 
 		NullableReferenceAnchor(const NullableReferenceAnchor& other) = delete;
 		NullableReferenceAnchor& operator=(const NullableReferenceAnchor& other) = delete;

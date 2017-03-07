@@ -208,7 +208,7 @@ class TiXmlString
 
 	TiXmlString& append (const char* str, size_type len);
 
-	void swap (TiXmlString& other)
+	void swap (TiXmlString& other) noexcept
 	{
 		Rep* r = rep_;
 		rep_ = other.rep_;

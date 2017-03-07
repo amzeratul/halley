@@ -119,7 +119,7 @@ namespace Halley {
 		Future<std::unique_ptr<ResourceDataStatic>> getAsync() const;
 
 	private:
-		ResourceLoader(ResourceLoader&& loader);
+		ResourceLoader(ResourceLoader&& loader) noexcept;
 		ResourceLoader(IResourceLocator& locator, const String& name, AssetType type, ResourceLoadPriority priority, HalleyAPI* api);
 		~ResourceLoader();
 

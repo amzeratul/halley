@@ -7,13 +7,13 @@ NullableReferenceAnchor::NullableReferenceAnchor()
 {
 }
 
-NullableReferenceAnchor::NullableReferenceAnchor(NullableReferenceAnchor&& other)
+NullableReferenceAnchor::NullableReferenceAnchor(NullableReferenceAnchor&& other) noexcept
 {
 	firstReference = other.firstReference;
 	other.firstReference = nullptr;
 }
 
-NullableReferenceAnchor& NullableReferenceAnchor::operator=(NullableReferenceAnchor&& other)
+NullableReferenceAnchor& NullableReferenceAnchor::operator=(NullableReferenceAnchor&& other) noexcept
 {
 	firstReference = other.firstReference;
 	other.firstReference = nullptr;
@@ -51,7 +51,7 @@ NullableReference::NullableReference(const NullableReference& other)
 	setReference(other.ref);
 }
 
-NullableReference::NullableReference(NullableReference&& other)
+NullableReference::NullableReference(NullableReference&& other) noexcept
 {
 	setReference(other.ref);
 }
@@ -62,7 +62,7 @@ NullableReference& NullableReference::operator=(const NullableReference& other)
 	return *this;
 }
 
-NullableReference& NullableReference::operator=(NullableReference&& other)
+NullableReference& NullableReference::operator=(NullableReference&& other) noexcept
 {
 	setReference(other.ref);
 	return *this;

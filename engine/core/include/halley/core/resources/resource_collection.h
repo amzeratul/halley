@@ -18,7 +18,7 @@ namespace Halley
 		class Wrapper
 		{
 		public:
-			Wrapper(Wrapper&& other)
+			Wrapper(Wrapper&& other) noexcept
 				: res(std::move(other.res))
 				, depth(other.depth)
 			{}

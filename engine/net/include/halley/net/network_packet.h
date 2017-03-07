@@ -26,11 +26,11 @@ namespace Halley
 	{
 	public:
 		OutboundNetworkPacket(const OutboundNetworkPacket& other);
-		explicit OutboundNetworkPacket(OutboundNetworkPacket&& other);
+		explicit OutboundNetworkPacket(OutboundNetworkPacket&& other) noexcept;
 		explicit OutboundNetworkPacket(gsl::span<const gsl::byte> data);
 		void addHeader(gsl::span<const gsl::byte> src);
 
-		OutboundNetworkPacket& operator=(OutboundNetworkPacket&& other);
+		OutboundNetworkPacket& operator=(OutboundNetworkPacket&& other) noexcept;
 	};
 
 	class InboundNetworkPacket : public NetworkPacketBase

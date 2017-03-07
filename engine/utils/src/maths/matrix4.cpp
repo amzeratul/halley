@@ -32,7 +32,7 @@ Matrix4f::Matrix4f(const Matrix4f& m)
 {
 }
 
-Matrix4f::Matrix4f(Matrix4f&& m)
+Matrix4f::Matrix4f(Matrix4f&& m) noexcept
 	: elements(m.elements)
 {
 }

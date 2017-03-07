@@ -20,7 +20,7 @@ namespace Halley
 			popContext();
 		}
 
-		RenderContext(RenderContext&& context);
+		RenderContext(RenderContext&& context) noexcept;
 
 		RenderContext with(Camera& camera) const;
 		RenderContext with(RenderTarget& defaultRenderTarget) const;

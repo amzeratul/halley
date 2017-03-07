@@ -229,7 +229,7 @@ std::unique_ptr<Metadata> FontGenerator::generateTextureMeta()
 }
 
 FontGeneratorResult::FontGeneratorResult() = default;
-FontGeneratorResult::FontGeneratorResult(FontGeneratorResult&& other) = default;
+FontGeneratorResult::FontGeneratorResult(FontGeneratorResult&& other) noexcept = default;
 FontGeneratorResult::~FontGeneratorResult() = default;
 
 std::vector<Path> FontGeneratorResult::write(Path dir, bool verbose) const

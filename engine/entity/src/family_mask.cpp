@@ -11,7 +11,7 @@ struct MaskEntry
 	RealType mask;
 	int idx;
 
-	MaskEntry(MaskEntry&& o)
+	MaskEntry(MaskEntry&& o) noexcept
 		: mask(std::move(o.mask))
 		, idx(o.idx)
 	{}
@@ -94,7 +94,7 @@ Handle::Handle(const Handle& h)
 {
 }
 
-Handle::Handle(Handle&& h)
+Handle::Handle(Handle&& h) noexcept
 	: value(h.value)
 {
 }

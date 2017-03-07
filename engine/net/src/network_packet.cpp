@@ -46,7 +46,7 @@ OutboundNetworkPacket::OutboundNetworkPacket(const OutboundNetworkPacket& other)
 	dataStart = other.dataStart;
 }
 
-OutboundNetworkPacket::OutboundNetworkPacket(OutboundNetworkPacket&& other)
+OutboundNetworkPacket::OutboundNetworkPacket(OutboundNetworkPacket&& other) noexcept
 {
 	data = other.data;
 	dataStart = other.dataStart;
@@ -67,7 +67,7 @@ void OutboundNetworkPacket::addHeader(gsl::span<const gsl::byte> src)
 	Ensures(dataStart <= 1500);
 }
 
-OutboundNetworkPacket& OutboundNetworkPacket::operator=(OutboundNetworkPacket&& other) 
+OutboundNetworkPacket& OutboundNetworkPacket::operator=(OutboundNetworkPacket&& other) noexcept
 {
 	data = other.data;
 	dataStart = other.dataStart;
