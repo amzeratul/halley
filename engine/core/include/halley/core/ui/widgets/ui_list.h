@@ -28,6 +28,7 @@ namespace Halley {
 	private:
 		std::shared_ptr<UIStyle> style;
 		Sprite sprite;
+		UIListItem* selected = nullptr;
 
 		int curOptionHighlight = -1;
 		int curOption = 0;
@@ -40,6 +41,7 @@ namespace Halley {
 		explicit UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, std::shared_ptr<UIWidget> widget);
 
 		void onClicked(Vector2f mousePos) override;
+		void setSelected(bool selected);
 	
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -49,7 +51,9 @@ namespace Halley {
 		UIList& parent;
 		std::shared_ptr<UIStyle> style;
 		Sprite sprite;
+		bool selected = false;
 
 		void doSetState(State state) override;
+		void updateSpritePosition();
 	};
 }

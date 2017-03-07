@@ -28,7 +28,12 @@ void UIList::addTextItem(const String& id, const String& label)
 
 void UIList::addItem(const String& id, std::shared_ptr<UIWidget> widget)
 {
-	add(std::make_shared<UIListItem>(id, *this, style, widget));
+	auto item = std::make_shared<UIListItem>(id, *this, style, widget);
+	add(item);
+	if (!selected) {
+		item->setSelected(true);
+		selected = item.get();
+	}
 }
 
 void UIList::draw(UIPainter& painter) const
@@ -50,6 +55,9 @@ void UIList::update(Time t, bool moved)
 void UIList::onItemClicked(UIListItem& item)
 {
 	sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), item.getId()));
+	selected->setSelected(false);
+	selected = &item;
+	selected->setSelected(true);
 }
 
 UIListItem::UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, std::shared_ptr<UIWidget> widget)
@@ -66,6 +74,12 @@ void UIListItem::onClicked(Vector2f mousePos)
 	parent.onItemClicked(*this);
 }
 
+void UIListItem::setSelected(bool s)
+{
+	selected = s;
+	doSetState(getCurState());
+}
+
 void UIListItem::draw(UIPainter& painter) const
 {
 	if (sprite.hasMaterial()) {
@@ -76,9 +90,7 @@ void UIListItem::draw(UIPainter& painter) const
 void UIListItem::update(Time t, bool moved)
 {
 	if (moved) {
-		if (sprite.hasMaterial()) {
-			sprite.scaleTo(getSize()).setPos(getPosition());
-		}
+		updateSpritePosition();
 	}
 }
 
@@ -86,13 +98,19 @@ void UIListItem::doSetState(State state)
 {
 	switch (state) {
 	case State::Up:
-		sprite = style->listItemNormal;
-		break;
 	case State::Down:
-		sprite = style->listItemSelected;
+		sprite = selected ? style->listItemSelected : style->listItemNormal;
 		break;
 	case State::Hover:
 		sprite = style->listItemHover;
 		break;
+	}
+	updateSpritePosition();
+}
+
+void UIListItem::updateSpritePosition()
+{
+	if (sprite.hasMaterial()) {
+		sprite.scaleTo(getSize()).setPos(getPosition());
 	}
 }
