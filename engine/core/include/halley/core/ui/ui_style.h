@@ -41,5 +41,10 @@ namespace Halley {
 		Sprite checkboxChecked;
 		Sprite checkboxNormalHover;
 		Sprite checkboxCheckedHover;
+
+		Sprite listBackground;
+		Sprite listItemNormal;
+		Sprite listItemHover;
+		Sprite listItemSelected;
 	};
 }

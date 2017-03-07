@@ -66,6 +66,7 @@ set(SOURCES
         "src/ui/widgets/ui_image.cpp"
         "src/ui/widgets/ui_input.cpp"
         "src/ui/widgets/ui_label.cpp"
+        "src/ui/widgets/ui_list.cpp"
 
         "src/utils/world_stats.cpp"
         )
@@ -153,6 +154,7 @@ set(HEADERS
         "include/halley/core/ui/widgets/ui_image.h"
         "include/halley/core/ui/widgets/ui_input.h"
         "include/halley/core/ui/widgets/ui_label.h"
+        "include/halley/core/ui/widgets/ui_list.h"
 
         "include/halley/core/utils/world_stats.h"
         "src/prec.h"
