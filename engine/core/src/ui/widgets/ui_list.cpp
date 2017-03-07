@@ -89,21 +89,28 @@ void UIListItem::draw(UIPainter& painter) const
 
 void UIListItem::update(Time t, bool moved)
 {
-	if (moved) {
+	bool dirty = updateButton() | moved;
+	if (dirty) {
 		updateSpritePosition();
 	}
 }
 
 void UIListItem::doSetState(State state)
 {
-	switch (state) {
-	case State::Up:
-	case State::Down:
-		sprite = selected ? style->listItemSelected : style->listItemNormal;
-		break;
-	case State::Hover:
-		sprite = style->listItemHover;
-		break;
+	if (selected) {
+		sprite = style->listItemSelected;
+	} else {
+		switch (state) {
+		case State::Up:
+			sprite = style->listItemNormal;
+			break;
+		case State::Hover:
+			sprite = style->listItemHover;
+			break;
+		case State::Down:
+			sprite = style->listItemSelected;
+			break;
+		}
 	}
 	updateSpritePosition();
 }
