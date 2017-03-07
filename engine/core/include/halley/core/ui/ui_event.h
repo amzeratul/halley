@@ -7,7 +7,8 @@ namespace Halley {
 	enum class UIEventType {
 		ButtonClicked,
 		CheckboxUpdated,
-		DropboxSelectionChanged
+		DropboxSelectionChanged,
+		ListSelectionChanged
 	};
 
     class UIEvent {

@@ -7,9 +7,11 @@
 
 namespace Halley {
 	class UIStyle;
-	class UIValidator;
+	class UIListItem;
 
 	class UIList : public UIWidget {
+		friend class UIListItem;
+
 	public:
 		explicit UIList(const String& id, std::shared_ptr<UIStyle> style);
 
@@ -29,13 +31,19 @@ namespace Halley {
 
 		int curOptionHighlight = -1;
 		int curOption = 0;
+
+		void onItemClicked(UIListItem& item);
 	};
 
 	class UIListItem : public UIClickable {
 	public:
-		explicit UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style);
+		explicit UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, std::shared_ptr<UIWidget> widget);
 
 		void onClicked(Vector2f mousePos) override;
+	
+	protected:
+		void draw(UIPainter& painter) const override;
+		void update(Time t, bool moved) override;
 
 	private:
 		UIList& parent;
