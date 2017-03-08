@@ -23,12 +23,28 @@ int UIList::getSelectedOption() const
 
 void UIList::addTextItem(const String& id, const String& label)
 {
-	addItem(id, std::make_unique<UILabel>(style->label.clone().setText(label)));
+	auto widget = std::make_shared<UILabel>(style->label.clone().setText(label));
+	auto item = std::make_shared<UIListItem>(id, *this, style);
+	item->add(widget, 0, Vector4f(3, 0, 3, 0));
+	addItem(item);
 }
 
 void UIList::addItem(const String& id, std::shared_ptr<UIWidget> widget)
 {
-	auto item = std::make_shared<UIListItem>(id, *this, style, widget);
+	auto item = std::make_shared<UIListItem>(id, *this, style);
+	item->add(widget);
+	addItem(item);
+}
+
+void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer)
+{
+	auto item = std::make_shared<UIListItem>(id, *this, style);
+	item->add(sizer);
+	addItem(item);
+}
+
+void UIList::addItem(std::shared_ptr<UIListItem> item)
+{
 	add(item);
 	if (!selected) {
 		item->setSelected(true);
@@ -60,13 +76,12 @@ void UIList::onItemClicked(UIListItem& item)
 	selected->setSelected(true);
 }
 
-UIListItem::UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, std::shared_ptr<UIWidget> widget)
+UIListItem::UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style)
 	: UIClickable(id, {}, UISizer(UISizerType::Vertical))
 	, parent(parent)
 	, style(style)
 {
 	sprite = style->listItemNormal;
-	UIWidget::add(widget, 0, Vector4f(3, 0, 3, 0));
 }
 
 void UIListItem::onClicked(Vector2f mousePos)

@@ -20,6 +20,7 @@ namespace Halley {
 
 		void addTextItem(const String& id, const String& label);
 		void addItem(const String& id, std::shared_ptr<UIWidget> widget);
+		void addItem(const String& id, std::shared_ptr<UISizer> sizer);
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -34,11 +35,12 @@ namespace Halley {
 		int curOption = 0;
 
 		void onItemClicked(UIListItem& item);
+		void addItem(std::shared_ptr<UIListItem> item);
 	};
 
 	class UIListItem : public UIClickable {
 	public:
-		explicit UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, std::shared_ptr<UIWidget> widget);
+		explicit UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style);
 
 		void onClicked(Vector2f mousePos) override;
 		void setSelected(bool selected);
