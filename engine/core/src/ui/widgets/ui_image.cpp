@@ -10,7 +10,9 @@ UIImage::UIImage(Sprite s, Maybe<UISizer> sizer, Vector4f innerBorder)
 
 void UIImage::draw(UIPainter& painter) const
 {
-	painter.draw(sprite);
+	if (sprite.hasMaterial()) {
+		painter.draw(sprite);
+	}
 }
 
 void UIImage::update(Time t, bool moved)

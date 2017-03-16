@@ -11,6 +11,8 @@ namespace Halley {
 		void setText(const String& text);
 		void setMaxWidth(float maxWidth);
 
+		void setColour(Colour4f colour);
+
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 

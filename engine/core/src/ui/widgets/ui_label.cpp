@@ -44,3 +44,8 @@ void UILabel::setMaxWidth(float m)
 	maxWidth = m;
 	updateMinSize();
 }
+
+void UILabel::setColour(Colour4f colour)
+{
+	text.setColour(colour);
+}
