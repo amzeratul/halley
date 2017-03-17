@@ -99,7 +99,7 @@ void UIButton::setInputType(UIInputType uiInput)
 {
 	if (uiInput != curInputType) {
 		curInputType = uiInput;
-		borderOnly = getOnlyEnabledWithInput() != UIInputType::Undefined && curInputType != UIInputType::Mouse;
+		borderOnly = !getOnlyEnabledWithInput().empty() && curInputType != UIInputType::Mouse && curInputType != UIInputType::Keyboard;
 		doForceUpdate();
 		setState(State::Up);
 		doSetState(State::Up);

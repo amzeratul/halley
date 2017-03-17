@@ -75,8 +75,8 @@ namespace Halley {
 		UIEventHandler& getEventHandler();
 		
 		virtual void setInputType(UIInputType uiInput);
-		void setOnlyEnabledWithInput(UIInputType uiInput);
-		UIInputType getOnlyEnabledWithInput() const;
+		void setOnlyEnabledWithInputs(const std::vector<UIInputType>& inputs);
+		const std::vector<UIInputType>& getOnlyEnabledWithInput() const;
 		
 	protected:
 		virtual void draw(UIPainter& painter) const;
@@ -97,7 +97,7 @@ namespace Halley {
 		UIParent* parent = nullptr;
 		String id;
 		bool enabled = true;
-		UIInputType onlyEnabledWithInput = UIInputType::Undefined;
+		std::vector<UIInputType> onlyEnabledWithInputs;
 
 		Vector2f position;
 		Vector2f size;

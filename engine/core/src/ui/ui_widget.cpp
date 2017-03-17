@@ -266,17 +266,17 @@ UIEventHandler& UIWidget::getEventHandler()
 
 void UIWidget::setInputType(UIInputType uiInput)
 {
-	enabled = onlyEnabledWithInput == UIInputType::Undefined || uiInput == onlyEnabledWithInput;
+	enabled = onlyEnabledWithInputs.empty() || std::find(onlyEnabledWithInputs.begin(), onlyEnabledWithInputs.end(), uiInput) != onlyEnabledWithInputs.end();
 }
 
-void UIWidget::setOnlyEnabledWithInput(UIInputType uiInput)
+void UIWidget::setOnlyEnabledWithInputs(const std::vector<UIInputType>& uiInput)
 {
-	onlyEnabledWithInput = uiInput;
+	onlyEnabledWithInputs = uiInput;
 }
 
-UIInputType UIWidget::getOnlyEnabledWithInput() const
+const std::vector<UIInputType>& UIWidget::getOnlyEnabledWithInput() const
 {
-	return onlyEnabledWithInput;
+	return onlyEnabledWithInputs;
 }
 
 Rect4f UIWidget::getMouseRect() const
