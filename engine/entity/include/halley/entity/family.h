@@ -149,12 +149,17 @@ namespace Halley {
 				// Move all entities to be removed to the back of the vector
 				{
 					size_t swapWith = entities.size();
-					for (int i = int(entities.size()); --i >= 0;) {
+					int n = int(entities.size());
+					// Note: it's important to scan it forward. Scanning backwards would improve performance for short-lived entities,
+					// but it causes an issue where an entity is removed and added to the same family in one frame.
+					for (int i = 0; i < n; i++) {
 						EntityId id = entities[i].entityId;
 						auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
 						if (iter != toRemove.end() && id == *iter) {
 							toRemove.erase(iter);
 							std::swap(entities[i], entities[--swapWith]);
+							i--;
+							n--;
 							if (toRemove.empty()) {
 								break;
 							}
