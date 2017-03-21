@@ -47,7 +47,7 @@ namespace Halley {
 	private:
 		Debug();
 		static bool debugging;
-		static std::array<DebugTraceEntry, 8> lastTraces;
+		static std::array<DebugTraceEntry, 16> lastTraces;
 		static int tracePos;
 	};
 

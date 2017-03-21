@@ -7,6 +7,7 @@
 #include "system.h"
 #include "family.h"
 #include "halley/text/string_converter.h"
+#include "halley/support/debug.h"
 
 using namespace Halley;
 
@@ -215,12 +216,14 @@ void World::allocateEntity(Entity* entity) {
 void World::spawnPending()
 {
 	if (!entitiesPendingCreation.empty()) {
+		HALLEY_DEBUG_TRACE();
 		for (auto& e : entitiesPendingCreation) {
 			e->onReady();
 		}
 		std::move(entitiesPendingCreation.begin(), entitiesPendingCreation.end(), std::insert_iterator<decltype(entities)>(entities, entities.end()));
 		entitiesPendingCreation.clear();
 		entityDirty = true;
+		HALLEY_DEBUG_TRACE();
 	}
 }
 
@@ -230,6 +233,7 @@ void World::updateEntities()
 		return;
 	}
 
+	HALLEY_DEBUG_TRACE();
 	size_t nEntities = entities.size();
 
 	std::vector<size_t> entitiesRemoved;
@@ -270,6 +274,7 @@ void World::updateEntities()
 		}
 	}
 
+	HALLEY_DEBUG_TRACE();
 	for (auto& todo: pending) {
 		for (auto& fam: getFamiliesFor(todo.first)) {
 			for (auto& e: todo.second.toRemove) {
@@ -281,6 +286,7 @@ void World::updateEntities()
 		}
 	}
 
+	HALLEY_DEBUG_TRACE();
 	// Update families
 	for (auto& iter : families) {
 		//auto& family = iter.second;
@@ -288,6 +294,7 @@ void World::updateEntities()
 		family->updateEntities();
 	}
 
+	HALLEY_DEBUG_TRACE();
 	// Actually remove dead entities
 	if (!entitiesRemoved.empty()) {
 		size_t livingEntityCount = entities.size();
@@ -306,6 +313,7 @@ void World::updateEntities()
 	}
 
 	entityDirty = false;
+	HALLEY_DEBUG_TRACE();
 }
 
 void World::initSystems() const
