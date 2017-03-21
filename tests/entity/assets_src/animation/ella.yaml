@@ -1,7 +1,7 @@
 ---
-name: "Ella"
-spriteSheet: "ella"
-material: "sprite"
+name: "ella"
+spriteSheet: "ella.json"
+material: "Halley/Sprite"
 directions:
   - { name: "back" }
   - { name: "right", fileName: "side", flip: true }
