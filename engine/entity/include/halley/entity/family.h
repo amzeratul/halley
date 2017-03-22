@@ -7,6 +7,7 @@
 #include "entity_id.h"
 #include "halley/data_structures/nullable_reference.h"
 #include "halley/support/exception.h"
+#include "halley/support/debug.h"
 
 namespace Halley {
 	class Entity;
@@ -110,15 +111,20 @@ namespace Halley {
 		{
 			if (dirty) {
 				// Notify additions
+				HALLEY_DEBUG_TRACE();
 				size_t prevSize = elemCount;
 				size_t curSize = entities.size();
 				updateElems();
-				notifyAdd(entities.data() + prevSize, curSize - prevSize);
+				Expects(curSize >= prevSize);
+				if (curSize > prevSize) {
+					notifyAdd(entities.data() + prevSize, curSize - prevSize);
+				}
 
 				dirty = false;
 			}
 
 			// Remove
+			HALLEY_DEBUG_TRACE();
 			removeDeadEntities();
 		}
 
@@ -178,7 +184,9 @@ namespace Halley {
 				notifyRemove(entities.data() + newSize, removeCount);
 
 				// Remove them
+				HALLEY_DEBUG_TRACE();
 				entities.resize(newSize);
+				HALLEY_DEBUG_TRACE();
 				updateElems();
 			}
 			Ensures(toRemove.empty());

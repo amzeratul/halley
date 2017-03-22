@@ -289,9 +289,7 @@ void World::updateEntities()
 	HALLEY_DEBUG_TRACE();
 	// Update families
 	for (auto& iter : families) {
-		//auto& family = iter.second;
-		auto& family = iter;
-		family->updateEntities();
+		iter->updateEntities();
 	}
 
 	HALLEY_DEBUG_TRACE();
