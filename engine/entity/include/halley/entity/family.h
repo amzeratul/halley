@@ -1,10 +1,12 @@
 #pragma once
 
 #include <algorithm>
+#include <gsl/gsl_assert>
 #include "family_type.h"
 #include "family_mask.h"
 #include "entity_id.h"
 #include "halley/data_structures/nullable_reference.h"
+#include "halley/support/exception.h"
 
 namespace Halley {
 	class Entity;
@@ -144,11 +146,11 @@ namespace Halley {
 			// Benchmarks suggest that using a Vector is faster than std::set and std::unordered_set
 			if (!toRemove.empty()) {
 				size_t removeCount = toRemove.size();
+				Expects (removeCount <= entities.size());
 				std::sort(toRemove.begin(), toRemove.end());
 
 				// Move all entities to be removed to the back of the vector
 				{
-					size_t swapWith = entities.size();
 					int n = int(entities.size());
 					// Note: it's important to scan it forward. Scanning backwards would improve performance for short-lived entities,
 					// but it causes an issue where an entity is removed and added to the same family in one frame.
@@ -157,18 +159,22 @@ namespace Halley {
 						auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
 						if (iter != toRemove.end() && id == *iter) {
 							toRemove.erase(iter);
-							std::swap(entities[i], entities[--swapWith]);
-							i--;
+							if (i != n - 1) {
+								std::swap(entities[i], entities[n - 1]);
+								i--;
+							}
 							n--;
 							if (toRemove.empty()) {
 								break;
 							}
 						}
 					}
+					Ensures(size_t(n) + removeCount == entities.size());
 				}
 
 				// Notify removal
 				size_t newSize = entities.size() - removeCount;
+				Ensures(newSize < entities.size());
 				notifyRemove(entities.data() + newSize, removeCount);
 
 				// Remove them
