@@ -124,7 +124,6 @@ namespace Halley {
 			}
 
 			// Remove
-			HALLEY_DEBUG_TRACE();
 			removeDeadEntities();
 		}
 
@@ -151,6 +150,7 @@ namespace Halley {
 			// Performance-critical code
 			// Benchmarks suggest that using a Vector is faster than std::set and std::unordered_set
 			if (!toRemove.empty()) {
+				HALLEY_DEBUG_TRACE();
 				size_t removeCount = toRemove.size();
 				Expects (removeCount <= entities.size());
 				std::sort(toRemove.begin(), toRemove.end());
@@ -184,9 +184,7 @@ namespace Halley {
 				notifyRemove(entities.data() + newSize, removeCount);
 
 				// Remove them
-				HALLEY_DEBUG_TRACE();
 				entities.resize(newSize);
-				HALLEY_DEBUG_TRACE();
 				updateElems();
 			}
 			Ensures(toRemove.empty());
