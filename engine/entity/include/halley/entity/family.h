@@ -152,7 +152,8 @@ namespace Halley {
 			if (!toRemove.empty()) {
 				HALLEY_DEBUG_TRACE();
 				size_t removeCount = toRemove.size();
-				Expects (removeCount <= entities.size());
+				Expects(removeCount > 0);
+				Expects(removeCount <= entities.size());
 				std::sort(toRemove.begin(), toRemove.end());
 
 				// Move all entities to be removed to the back of the vector
@@ -176,6 +177,10 @@ namespace Halley {
 						}
 					}
 					Ensures(size_t(n) + removeCount == entities.size());
+				}
+
+				if (!toRemove.empty()) {
+					throw Exception("Unable to remove all entities.");
 				}
 
 				// Notify removal
