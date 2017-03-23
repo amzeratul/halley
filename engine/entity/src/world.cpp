@@ -327,7 +327,6 @@ void World::updateSystems(TimeLine timeline, Time time)
 {
 	for (auto& system : getSystems(timeline)) {
 		system->doUpdate(time);
-		updateEntities();
 	}
 }
 
