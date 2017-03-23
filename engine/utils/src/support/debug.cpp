@@ -429,5 +429,5 @@ Halley::String Halley::Debug::getLastTraces()
 	return result;
 }
 
-std::array<Halley::DebugTraceEntry, 16> Halley::Debug::lastTraces;
+std::array<Halley::DebugTraceEntry, 32> Halley::Debug::lastTraces;
 int Halley::Debug::tracePos = 0;
