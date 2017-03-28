@@ -10,14 +10,15 @@ namespace Halley
 	class AnimationPlayer
 	{
 	public:
-		explicit AnimationPlayer(std::shared_ptr<const Animation> animation = std::shared_ptr<const Animation>(), String sequence = "default", String direction = "default");
+		explicit AnimationPlayer(std::shared_ptr<const Animation> animation = std::shared_ptr<const Animation>(), const String& sequence = "default", const String& direction = "default");
 
-		AnimationPlayer& playOnce(String sequence);
+		AnimationPlayer& playOnce(const String& sequence);
 
-		AnimationPlayer& setAnimation(std::shared_ptr<const Animation> animation, String sequence = "default", String direction = "default");
-		AnimationPlayer& setSequence(String sequence);
+		AnimationPlayer& setAnimation(std::shared_ptr<const Animation> animation, const String& sequence = "default", const String& direction = "default");
+		AnimationPlayer& setSequence(const String& sequence);
 		AnimationPlayer& setDirection(int direction);
-		AnimationPlayer& setDirection(String direction);
+		AnimationPlayer& setDirection(const String& direction);
+		bool trySetSequence(const String& sequence);
 
 		AnimationPlayer& setApplyPivot(bool apply);
 
@@ -40,6 +41,7 @@ namespace Halley
 		float getPlaybackSpeed() const;
 
 		const Animation& getAnimation() const;
+		bool hasAnimation() const;
 		
 	private:
 		void resolveSprite();

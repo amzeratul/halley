@@ -5,12 +5,12 @@
 
 using namespace Halley;
 
-AnimationPlayer::AnimationPlayer(std::shared_ptr<const Animation> animation, String sequence, String direction)
+AnimationPlayer::AnimationPlayer(std::shared_ptr<const Animation> animation, const String& sequence, const String& direction)
 {
 	setAnimation(animation, sequence, direction);
 }
 
-AnimationPlayer& AnimationPlayer::playOnce(String sequence)
+AnimationPlayer& AnimationPlayer::playOnce(const String& sequence)
 {
 	curSeq = nullptr;
 	setSequence(sequence);
@@ -18,7 +18,7 @@ AnimationPlayer& AnimationPlayer::playOnce(String sequence)
 	return *this;
 }
 
-AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> v, String sequence, String direction)
+AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> v, const String& sequence, const String& direction)
 {
 	if (animation != v) {
 		animation = v;
@@ -34,7 +34,7 @@ AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> 
 	return *this;
 }
 
-AnimationPlayer& AnimationPlayer::setSequence(String sequence)
+AnimationPlayer& AnimationPlayer::setSequence(const String& sequence)
 {
 	if (animation && (!curSeq || curSeq->getName() != sequence)) {
 		curTime = 0;
@@ -67,7 +67,7 @@ AnimationPlayer& AnimationPlayer::setDirection(int direction)
 	return *this;
 }
 
-AnimationPlayer& AnimationPlayer::setDirection(String direction)
+AnimationPlayer& AnimationPlayer::setDirection(const String& direction)
 {
 	if (animation && (!curDir || curDir->getName() != direction)) {
 		auto newDir = &animation->getDirection(direction);
@@ -79,6 +79,15 @@ AnimationPlayer& AnimationPlayer::setDirection(String direction)
 		}
 	}
 	return *this;
+}
+
+bool AnimationPlayer::trySetSequence(const String& sequence)
+{
+	if (animation && animation->hasSequence(sequence)) {
+		setSequence(sequence);
+		return true;
+	}
+	return false;
 }
 
 AnimationPlayer& AnimationPlayer::setApplyPivot(bool apply)
@@ -182,6 +191,11 @@ float AnimationPlayer::getPlaybackSpeed() const
 const Animation& AnimationPlayer::getAnimation() const
 {
 	return *animation;
+}
+
+bool AnimationPlayer::hasAnimation() const
+{
+	return static_cast<bool>(animation);
 }
 
 void AnimationPlayer::resolveSprite()
