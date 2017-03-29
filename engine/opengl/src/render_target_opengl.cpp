@@ -82,5 +82,7 @@ void RenderTargetOpenGL::deInit()
 {
 	if (fbo != 0) {
 		unbind();
+		glDeleteFramebuffers(1, &fbo);
+		fbo = 0;
 	}
 }
