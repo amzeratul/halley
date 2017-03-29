@@ -37,6 +37,8 @@ namespace Halley
 		void draw(Painter& painter) const;
 		Vector2f getExtents() const;
 
+		StringUTF32 split(const String& str, float width) const;
+		StringUTF32 split(const StringUTF32& str, float width) const;
 		StringUTF32 split(float width) const;
 
 		Vector2f getPosition() const;

@@ -212,10 +212,21 @@ Vector2f TextRenderer::getExtents() const
 	return Vector2f(w, p.y + lineH);
 }
 
+
 StringUTF32 TextRenderer::split(float maxWidth) const
 {
+	return split(text, maxWidth);
+}
+
+StringUTF32 TextRenderer::split(const String& str, float maxWidth) const
+{
+	return split(str.getUTF32(), maxWidth);
+}
+
+StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth) const
+{
 	StringUTF32 result;
-	if (text.empty()) {
+	if (str.empty()) {
 		return result;
 	}
 
@@ -227,14 +238,14 @@ StringUTF32 TextRenderer::split(float maxWidth) const
 	auto split = [&] (size_t i, bool last = false)
 	{
 		if (last) {
-			result += text.substr(startPoint);
+			result += str.substr(startPoint);
 		} else {
 			if (lastSplitPoint > startPoint) {
-				result += text.substr(startPoint, lastSplitPoint - startPoint);
+				result += str.substr(startPoint, lastSplitPoint - startPoint);
 				startPoint = lastSplitPoint + 1;
 			} else {
 				lastSplitPoint = i - 1;
-				result += text.substr(startPoint, lastSplitPoint - startPoint + 1);
+				result += str.substr(startPoint, lastSplitPoint - startPoint + 1);
 				startPoint = i;
 			}
 			result += '\n';
@@ -242,8 +253,8 @@ StringUTF32 TextRenderer::split(float maxWidth) const
 		}
 	};
 
-	for (size_t i = 0; i < text.length(); ++i) {
-		auto c = text[i];
+	for (size_t i = 0; i < str.length(); ++i) {
+		auto c = str[i];
 		if (c == '\n') {
 			lastSplitPoint = i;
 			split(i);
@@ -261,7 +272,7 @@ StringUTF32 TextRenderer::split(float maxWidth) const
 			}
 		}
 	}
-	split(text.length() - 1, true);
+	split(str.length() - 1, true);
 
 	return result;
 }
