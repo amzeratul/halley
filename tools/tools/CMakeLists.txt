@@ -43,6 +43,7 @@ set(SOURCES
     "src/assets/importers/material_importer.cpp"
     "src/assets/importers/spritesheet_importer.cpp"
     "src/assets/importers/shader_importer.cpp"
+    "src/assets/importers/texture_importer.cpp"
 
     "src/tasks/editor_task.cpp"
     "src/tasks/editor_task_set.cpp"
@@ -98,6 +99,7 @@ set(HEADERS
     "src/assets/importers/material_importer.h"
     "src/assets/importers/spritesheet_importer.h"
     "src/assets/importers/shader_importer.h"
+    "src/assets/importers/texture_importer.h"
 
     "include/halley/tools/tasks/editor_task.h"
     "include/halley/tools/tasks/editor_task_set.h"

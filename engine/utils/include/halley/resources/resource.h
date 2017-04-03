@@ -18,6 +18,7 @@ namespace Halley
 		Font,
 		BitmapFont,
 		Image,
+		Texture,
 		Material,
 		Animation,
 		Config,

@@ -24,5 +24,10 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	meta.set("compression", "png");
 
 	// Output
-	collector.output(asset.assetId, AssetType::Texture, span, meta);
+	ImportingAsset image;
+	image.assetId = asset.assetId;
+	image.assetType = ImportAssetType::Texture;
+	image.metadata = std::make_unique<Metadata>(meta);
+	image.inputFiles.emplace_back(ImportingAssetFile(asset.assetId, Bytes(asset.inputFiles.at(0).data)));
+	collector.addAdditionalAsset(std::move(image));
 }

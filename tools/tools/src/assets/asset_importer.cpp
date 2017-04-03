@@ -15,6 +15,7 @@
 #include "halley/text/string_converter.h"
 #include "halley/tools/project/project.h"
 #include <boost/variant/detail/substitute.hpp>
+#include "importers/texture_importer.h"
 
 using namespace Halley;
 
@@ -34,6 +35,7 @@ AssetImporter::AssetImporter(Project& project, const std::vector<Path>& assetsSr
 		std::make_unique<AsepriteImporter>(),
 		std::make_unique<SpriteSheetImporter>(),
 		std::make_unique<ShaderImporter>(),
+		std::make_unique<TextureImporter>(),
 		std::make_unique<IAssetImporter>()
 	};
 
@@ -70,6 +72,8 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 		type = ImportAssetType::SpriteSheet;
 	} else if (root == "shader") {
 		type = ImportAssetType::Skip;
+	} else if (root == "texture") {
+		type = ImportAssetType::Texture;
 	}
 
 	return getImporter(type);
