@@ -63,7 +63,7 @@ std::unique_ptr<Image> DistanceFieldGenerator::generate(Image& srcImg, Vector2i 
 				}
 			}
 			int distance = clamp(int(distAcc * 255 / (texelW * texelH)), 0, 255);
-			*dst = Image::getRGBA(255, 255, 255, distance);
+			*dst = Image::convertRGBAToInt(255, 255, 255, distance);
 		}
 	}
 

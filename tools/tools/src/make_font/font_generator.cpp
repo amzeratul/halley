@@ -243,7 +243,7 @@ std::vector<Path> FontGeneratorResult::write(Path dir, bool verbose) const
 		std::cout << "Saving " << pngPath << ", " << binPath << ", and " << metaPath << std::endl;
 	}
 
-	image->savePNG(dir / pngPath);
+	FileSystem::writeFile(dir / pngPath, image->savePNGToBytes());
 	FileSystem::writeFile(dir / binPath, Serializer::toBytes(*font));
 	FileSystem::writeFile(dir / metaPath, Serializer::toBytes(*imageMeta));
 

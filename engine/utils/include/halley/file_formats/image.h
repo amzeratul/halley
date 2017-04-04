@@ -51,19 +51,19 @@ namespace Halley {
 		void setSize(Vector2i size);
 
 		void load(gsl::span<const gsl::byte> bytes, Mode mode = Mode::Undefined);
-		void savePNG(const String& filename = "") const;
-		void savePNG(const Path& filename) const;
-		Bytes savePNGToBytes();
+		Bytes savePNGToBytes() const;
 		static Vector2i getImageSize(gsl::span<const gsl::byte> bytes);
 		static Mode getImageMode(gsl::span<const gsl::byte> bytes);
 		static bool isPNG(gsl::span<const gsl::byte> bytes);
 
 		int getPixel(Vector2i pos) const;
 		int getPixelAlpha(Vector2i pos) const;
-		static int getRGBA(int r, int g, int b, int a=255);
 		char* getPixels() { return px.get(); }
 		const char* getPixels() const { return px.get(); }
 		size_t getByteSize() const;
+
+		static unsigned int convertRGBAToInt(unsigned int r, unsigned int g, unsigned int b, unsigned int a=255);
+		static void convertIntToRGBA(unsigned int col, unsigned int& r, unsigned int& g, unsigned int& b, unsigned int& a);
 
 		unsigned int getWidth() const { return w; }
 		unsigned int getHeight() const { return h; }

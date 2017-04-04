@@ -3,6 +3,7 @@
 #include <halley/file_formats/image.h>
 #include "halley/tools/distance_field/distance_field_tool.h"
 #include "halley/tools/distance_field/distance_field_generator.h"
+#include "halley/tools/file/filesystem.h"
 
 using namespace Halley;
 
@@ -27,7 +28,7 @@ int DistanceFieldTool::run(Vector<std::string> args)
 	inputImg.reset();
 
 	// Output image
-	result->savePNG(Path(args[1]));
+	FileSystem::writeFile(Path(args[1]), result->savePNGToBytes());
 	
 	return 0;
 }

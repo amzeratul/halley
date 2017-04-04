@@ -74,14 +74,22 @@ void Halley::Image::setSize(Vector2i size)
 	}
 }
 
-int Halley::Image::getRGBA(int r, int g, int b, int a)
+size_t Halley::Image::getByteSize() const
+{
+	return dataLen;
+}
+
+unsigned int Halley::Image::convertRGBAToInt(unsigned int r, unsigned int g, unsigned int b, unsigned int a)
 {
 	return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
-size_t Halley::Image::getByteSize() const
+void Halley::Image::convertIntToRGBA(unsigned int col, unsigned int& r, unsigned int& g, unsigned int& b, unsigned int& a)
 {
-	return dataLen;
+	r = col & 0xFF;
+	g = (col >> 8) & 0xFF;
+	b = (col >> 16) & 0xFF;
+	a = (col >> 24) & 0xFF;
 }
 
 int Halley::Image::getBytesPerPixel() const
@@ -158,14 +166,14 @@ void Halley::Image::blitFrom(Vector2i pos, const char* buffer, size_t width, siz
 				size_t pxPos = (x >> 3) + y * pitch;
 				int bit = 1 << (int(7 - x) & 7);
 				bool active = (src[pxPos] & bit) != 0;
-				dst[x + y * w] = getRGBA(255, 255, 255, active ? 255 : 0);
+				dst[x + y * w] = convertRGBAToInt(255, 255, 255, active ? 255 : 0);
 			}
 		}
 	} else if (bpp == 8) {
 		const char* src = reinterpret_cast<const char*>(buffer);
 		for (size_t y = yMin; y < yMax; y++) {
 			for (size_t x = xMin; x < xMax; x++) {
-				dst[x + y * w] = getRGBA(255, 255, 255, src[x + y * pitch]);
+				dst[x + y * w] = convertRGBAToInt(255, 255, 255, src[x + y * pitch]);
 			}
 		}
 	} else if (bpp == 32) {
@@ -182,6 +190,8 @@ void Halley::Image::blitFrom(Vector2i pos, const char* buffer, size_t width, siz
 
 void Halley::Image::blitFromRotated(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp)
 {
+	Expects(getBytesPerPixel() == 4);
+
 	Rect4i dstRect = Rect4i({}, w, h);
 	Rect4i srcRect = Rect4i(pos, int(height), int(width)); // Rotated
 	Rect4i intersection = dstRect.intersection(srcRect);
@@ -209,9 +219,9 @@ void Halley::Image::blitFromRotated(Vector2i pos, const char* buffer, size_t wid
 void Halley::Image::blitFrom(Vector2i pos, Image& srcImg, bool rotated)
 {
 	if (rotated) {
-		blitFromRotated(pos, srcImg.getPixels(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), 32);
+		blitFromRotated(pos, srcImg.getPixels(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), getBytesPerPixel() * 8);
 	} else {
-		blitFrom(pos, srcImg.getPixels(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), 32);
+		blitFrom(pos, srcImg.getPixels(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), getBytesPerPixel() * 8);
 	}
 }
 
@@ -221,9 +231,9 @@ void Halley::Image::blitFrom(Vector2i pos, Image& srcImg, Rect4i srcArea, bool r
 	size_t stride = srcImg.getWidth();
 	size_t offset = src.getTop() * stride + src.getLeft();
 	if (rotated) {
-		blitFromRotated(pos, srcImg.getPixels() + offset * 4, src.getWidth(), src.getHeight(), stride, 32);
+		blitFromRotated(pos, srcImg.getPixels() + offset * getBytesPerPixel(), src.getWidth(), src.getHeight(), stride, getBytesPerPixel() * 8);
 	} else {
-		blitFrom(pos, srcImg.getPixels() + offset * 4, src.getWidth(), src.getHeight(), stride, 32);
+		blitFrom(pos, srcImg.getPixels() + offset * getBytesPerPixel(), src.getWidth(), src.getHeight(), stride, getBytesPerPixel() * 8);
 	}
 }
 
@@ -306,10 +316,9 @@ void Halley::Image::preMultiply()
 	unsigned int* data = reinterpret_cast<unsigned int*>(px.get());
 	for (size_t i = 0; i < n; i++) {
 		unsigned int cur = data[i];
-		unsigned int r = cur & 0xFF;
-		unsigned int g = (cur >> 8) & 0xFF;
-		unsigned int b = (cur >> 16) & 0xFF;
-		unsigned int a = (cur >> 24) + 1;
+		unsigned int r, g, b, a;
+		convertIntToRGBA(cur, r, g, b, a);
+		++a;
 		data[i] = ((r * a >> 8) & 0xFF)
 			    | ((g * a) & 0xFF00)
 				| ((b * a << 8) & 0xFF0000)
@@ -321,6 +330,8 @@ void Halley::Image::preMultiply()
 
 int Halley::Image::getPixel(Vector2i pos) const
 {
+	Expects(getBytesPerPixel() == 4);
+
 	if (pos.x < 0 || pos.y < 0 || pos.x >= int(w) || pos.y >= int(h)) return 0;
 	return *reinterpret_cast<const int*>(getPixels() + 4*(pos.x + pos.y*w));
 }
@@ -331,21 +342,24 @@ int Halley::Image::getPixelAlpha(Vector2i pos) const
 	return pixel >> 24;
 }
 
-void Halley::Image::savePNG(const String& file) const
-{
-	savePNG(Path(file.cppStr()));
-}
-
-void Halley::Image::savePNG(const Path& file) const
-{
-	lodepng_encode_file(file.string().c_str(), reinterpret_cast<unsigned char*>(px.get()), w, h, LCT_RGBA, 8);
-}
-
-Halley::Bytes Halley::Image::savePNGToBytes()
+Halley::Bytes Halley::Image::savePNGToBytes() const
 {
 	unsigned char* bytes;
 	size_t size;
-	lodepng_encode_memory(&bytes, &size, reinterpret_cast<unsigned char*>(px.get()), w, h, LCT_RGBA, 8);
+
+	LodePNGColorType colMode;
+	switch (mode) {
+	case Mode::RGB:
+		colMode = LCT_RGB;
+		break;
+	case Mode::Indexed:
+		colMode = LCT_GREY;
+		break;
+	default:
+		colMode = LCT_RGBA;
+	}
+
+	lodepng_encode_memory(&bytes, &size, reinterpret_cast<unsigned char*>(px.get()), w, h, colMode, 8);
 	Bytes result;
 	result.resize(size);
 	memcpy(result.data(), bytes, size);

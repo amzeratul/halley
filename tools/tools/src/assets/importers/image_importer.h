@@ -12,6 +12,7 @@ namespace Halley
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 
 	private:
-		std::unique_ptr<Image> convertToIndexed(const Image& image, const Image& palette);
+		static std::unique_ptr<Image> convertToIndexed(const Image& image, const Image& palette);
+		static std::unordered_map<int, int> makePaletteConversion(const Image& palette);
 	};
 }
