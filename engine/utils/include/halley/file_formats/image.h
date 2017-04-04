@@ -35,13 +35,12 @@ namespace Halley {
 	class Image : public Resource {
 	public:
 		Image(unsigned int w=0, unsigned int h=0);
-		Image(const String& filename, gsl::span<const gsl::byte> bytes, bool preMultiply);
+		Image(gsl::span<const gsl::byte> bytes, bool preMultiply);
 		~Image();
 
 		void setSize(Vector2i size);
-		void setName(const String& string);
 
-		void load(const String& filename, gsl::span<const gsl::byte> bytes, bool preMultiply);
+		void load(gsl::span<const gsl::byte> bytes, bool preMultiply);
 		void savePNG(String filename = "") const;
 		void savePNG(const Path& filename) const;
 		Bytes savePNGToBytes();
@@ -77,8 +76,6 @@ namespace Halley {
 		Image& operator=(const Image& o) = delete;
 
 	private:
-		String filename;
-
 		std::unique_ptr<char, void(*)(char*)> px;
 		size_t dataLen = 0;
 		unsigned int w = 0;

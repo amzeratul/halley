@@ -63,7 +63,7 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::loadImagesFromPath(Pa
 			ImageData data;
 
 			auto bytes = FileSystem::readFile(tmp / p);
-			data.img = std::make_unique<Image>(p.getFilename().getString(), gsl::as_bytes(gsl::span<Byte>(bytes)), false);
+			data.img = std::make_unique<Image>(gsl::as_bytes(gsl::span<Byte>(bytes)), false);
 			auto parsedName = p.getStem().getString().split("___");
 			if (parsedName.size() != 3 || parsedName[0] != "out") {
 				throw Exception("Error parsing filename: " + p.getStem().getString());
@@ -125,7 +125,6 @@ void AsepriteImporter::processFrameData(String baseName, std::vector<ImageData>&
 			ss << "_" << std::setw(3) << std::setfill('0') << frame.frameNumber;
 		}
 		frame.filename = ss.str();
-		frame.img->setName(frame.filename);
 	}
 }
 

@@ -35,12 +35,11 @@ Halley::Image::Image(unsigned int _w, unsigned int _h)
 	setSize(Vector2i(_w, _h));
 }
 
-Halley::Image::Image(const String& _filename, gsl::span<const gsl::byte> bytes, bool _preMultiply)
-	: filename(_filename)
-	, px(nullptr, [](char*) {})
+Halley::Image::Image(gsl::span<const gsl::byte> bytes, bool _preMultiply)
+	: px(nullptr, [](char*) {})
 	, preMultiplied(false)
 {
-	load(filename, bytes, _preMultiply);
+	load( bytes, _preMultiply);
 }
 
 Halley::Image::~Image()
@@ -60,11 +59,6 @@ void Halley::Image::setSize(Vector2i size)
 		px = std::unique_ptr<char, void(*)(char*)>(new char[dataLen], [](char* data) { delete[] data; });
 		assert(px.get() != nullptr);
 	}
-}
-
-void Halley::Image::setName(const String& name)
-{
-	filename = name;
 }
 
 int Halley::Image::getRGBA(int r, int g, int b, int a)
@@ -203,13 +197,11 @@ void Halley::Image::blitFrom(Vector2i pos, Image& srcImg, Rect4i srcArea, bool r
 std::unique_ptr<Halley::Image> Halley::Image::loadResource(ResourceLoader& loader)
 {
 	auto data = loader.getStatic();
-	return std::make_unique<Image>(loader.getName(), data->getSpan(), false);
+	return std::make_unique<Image>(data->getSpan(), false);
 }
 
-void Halley::Image::load(const String& name, gsl::span<const gsl::byte> bytes, bool shouldPreMultiply)
+void Halley::Image::load(gsl::span<const gsl::byte> bytes, bool shouldPreMultiply)
 {
-	filename = name;
-
 	if (isPNG(bytes)) {
 		unsigned char* pixels;
 		unsigned int x, y;
@@ -269,7 +261,6 @@ int Halley::Image::getPixelAlpha(Vector2i pos) const
 
 void Halley::Image::savePNG(String file) const
 {
-	if (file == "") file = filename;
 	savePNG(Path(file.cppStr()));
 }
 
