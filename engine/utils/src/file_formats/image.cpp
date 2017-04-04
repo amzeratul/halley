@@ -247,7 +247,7 @@ void Halley::Image::serialize(Serializer& s) const
 	s << w;
 	s << h;
 	s << int(format);
-	s << dataLen;
+	s << uint64_t(dataLen);
 	s << gsl::as_bytes(gsl::span<char>(px.get(), dataLen));
 }
 
@@ -260,7 +260,9 @@ void Halley::Image::deserialize(Deserializer& s)
 	s >> m;
 	format = static_cast<Format>(m);
 
-	s >> dataLen;
+	uint64_t len;
+	s >> len;
+	dataLen = size_t(len);
 	px = std::unique_ptr<char, void(*)(char*)>(static_cast<char*>(malloc(dataLen)), [](char* data) { ::free(data); });
 	auto span = gsl::as_writeable_bytes(gsl::span<char>(px.get(), dataLen));
 	s >> span;
