@@ -36,12 +36,10 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 
 	collector.output(result.font->getName(), AssetType::Font, Serializer::toBytes(*result.font));
 
-	auto imgData = result.image->savePNGToBytes();
-
 	ImportingAsset image;
 	image.assetId = result.font->getName();
 	image.assetType = ImportAssetType::Image;
 	image.metadata = std::move(result.imageMeta);
-	image.inputFiles.emplace_back(ImportingAssetFile(result.font->getName(), std::move(imgData)));
+	image.inputFiles.emplace_back(ImportingAssetFile(result.font->getName(), Serializer::toBytes(*result.image)));
 	collector.addAdditionalAsset(std::move(image));
 }

@@ -223,8 +223,8 @@ std::unique_ptr<Metadata> FontGenerator::generateTextureMeta()
 	auto meta = std::make_unique<Metadata>();
 	meta->set("filtering", true);
 	meta->set("mipmap", false);
-	meta->set("premultiply", false);
-	meta->set("format", "RGBA");
+	meta->set("mode", "rgba");
+	meta->set("compression", "raw_image");
 	return meta;
 }
 
