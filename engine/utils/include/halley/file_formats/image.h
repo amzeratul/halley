@@ -42,7 +42,7 @@ namespace Halley {
 			RGBAPremultiplied
 		};
 
-		Image(Mode mode = Mode::RGBA, unsigned int w = 0, unsigned int h = 0);
+		Image(Mode mode = Mode::RGBA, Vector2i size = {});
 		Image(gsl::span<const gsl::byte> bytes, Mode mode = Mode::Undefined);
 		explicit Image(const ResourceDataStatic& data);
 		Image(const ResourceDataStatic& data, const Metadata& meta);

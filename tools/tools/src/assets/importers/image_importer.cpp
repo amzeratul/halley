@@ -27,6 +27,14 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 		s >> *image;
 	}
 
+	// Convert to indexed mode
+	auto palette = meta.getString("palette", "");
+	if (palette != "") {
+		auto paletteBytes = collector.readAdditionalFile(palette);
+		Image paletteImage(gsl::as_bytes(gsl::span<Byte>(paletteBytes)));
+		image = convertToIndexed(*image, paletteImage);
+	}
+
 	// Fill meta
 	Vector2i size = image->getSize();
 	meta.set("width", size.x);
@@ -40,4 +48,10 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	imageAsset.metadata = std::make_unique<Metadata>(meta);
 	imageAsset.inputFiles.emplace_back(ImportingAssetFile(asset.assetId, Serializer::toBytes(*image)));
 	collector.addAdditionalAsset(std::move(imageAsset));
+}
+
+std::unique_ptr<Image> ImageImporter::convertToIndexed(const Image& image, const Image& palette)
+{
+	auto result = std::make_unique<Image>(Image::Mode::Indexed, image.getSize());
+	return result;
 }

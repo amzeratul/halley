@@ -28,12 +28,12 @@
 #include "halley/text/string_converter.h"
 #include "halley/file/byte_serializer.h"
 
-Halley::Image::Image(Mode mode, unsigned int _w, unsigned int _h)
+Halley::Image::Image(Mode mode, Vector2i size)
 	: px(nullptr, [](char*){})
 	, dataLen(0)
 	, mode(mode)
 {
-	setSize(Vector2i(_w, _h));
+	setSize(size);
 }
 
 Halley::Image::Image(gsl::span<const gsl::byte> bytes, Mode targetMode)

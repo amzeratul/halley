@@ -88,6 +88,7 @@ Deserializer& Deserializer::operator>>(Path& p)
 
 Deserializer& Deserializer::operator>>(gsl::span<gsl::byte>& span)
 {
+	Expects(span.size_bytes() > 0);
 	memcpy(span.data(), src.data() + pos, span.size_bytes());
 	pos += span.size_bytes();
 	return *this;
