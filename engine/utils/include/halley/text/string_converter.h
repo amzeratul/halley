@@ -2,6 +2,7 @@
 #include <gsl/gsl_assert>
 #include <algorithm>
 #include "halleystring.h"
+#include <halley/support/exception.h>
 
 namespace Halley
 {
@@ -31,7 +32,11 @@ namespace Halley
 		{
 			EnumNames<T> n;
 			auto names = n();
-			return T(std::find_if(std::begin(names), std::end(names), [&](const char* v) { return str == v; }) - std::begin(names));
+			auto res = std::find_if(std::begin(names), std::end(names), [&](const char* v) { return str == v; });
+			if (res == std::end(names)) {
+				throw Exception("String \"" + str + "\" does not exist in enum \"" + typeid(T).name() + "\".");
+			}
+			return T(res - std::begin(names));
 		}
 
 		template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>

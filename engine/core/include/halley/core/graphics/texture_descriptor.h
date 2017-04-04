@@ -7,10 +7,22 @@ namespace Halley
 {
 	enum class TextureFormat
 	{
-		R,
-		RGBA,
+		Indexed,
 		RGB,
+		RGBA,
 		DEPTH
+	};
+
+	template <>
+	struct EnumNames<TextureFormat> {
+		constexpr std::array<const char*, 4> operator()() const {
+			return{{
+				"indexed",
+				"rgb",
+				"rgba",
+				"depth"
+			}};
+		}
 	};
 
 	enum class PixelDataFormat
@@ -48,7 +60,7 @@ namespace Halley
 		Vector2i size;
 		size_t padding = 0;
 		TextureFormat format = TextureFormat::RGBA;
-		PixelDataFormat pixelFormat = PixelDataFormat::RGBA;
+		PixelDataFormat pixelFormat = PixelDataFormat::Image;
 		bool useMipMap = false;
 		bool useFiltering = false;
 		TextureDescriptorImageData pixelData;

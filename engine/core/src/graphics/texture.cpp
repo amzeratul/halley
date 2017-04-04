@@ -35,11 +35,16 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	{
 		auto& meta = texture->getMeta();
 
+		auto formatStr = meta.getString("format", "rgba");
+		if (formatStr == "rgba_premultiplied") {
+			formatStr = "rgba";
+		}
+
 		Vector2i size(meta.getInt("width"), meta.getInt("height"));
 		TextureDescriptor descriptor(size);
 		descriptor.useFiltering = meta.getBool("filtering", false);
 		descriptor.useMipMap = meta.getBool("mipmap", false);
-		descriptor.format = meta.getString("format", "rgba") == "rgba" ? TextureFormat::RGBA : TextureFormat::RGB;
+		descriptor.format = fromString<TextureFormat>(formatStr);
 		descriptor.pixelData = std::move(img);
 		descriptor.pixelFormat = meta.getString("compression") == "png" ? PixelDataFormat::Image : PixelDataFormat::Precompiled;
 		texture->load(std::move(descriptor));

@@ -145,6 +145,8 @@ void TextureOpenGL::loadImage(const char* px, size_t w, size_t h, size_t stride,
 unsigned TextureOpenGL::getGLFormat(TextureFormat format)
 {
 	switch (format) {
+	case TextureFormat::Indexed:
+		return GL_RED;
 	case TextureFormat::RGB:
 		return GL_RGB;
 	case TextureFormat::RGBA:
@@ -155,6 +157,7 @@ unsigned TextureOpenGL::getGLFormat(TextureFormat format)
 #else
 		return GL_DEPTH_COMPONENT16;
 #endif
+	default:
+		throw Exception("Unknown texture format: " + toString(static_cast<int>(format)));
 	}
-	throw Exception("Unknown texture format: " + toString(static_cast<int>(format)));
 }
