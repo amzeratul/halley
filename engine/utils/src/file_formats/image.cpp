@@ -27,10 +27,10 @@
 #include "halley/resources/resource_data.h"
 #include "halley/text/string_converter.h"
 
-Halley::Image::Image(unsigned int _w, unsigned int _h)
+Halley::Image::Image(Mode mode, unsigned int _w, unsigned int _h)
 	: px(nullptr, [](char*){})
 	, dataLen(0)
-	, nComponents(0)
+	, mode(mode)
 {
 	setSize(Vector2i(_w, _h));
 }
@@ -53,8 +53,7 @@ void Halley::Image::setSize(Vector2i size)
 	w = size.x;
 	h = size.y;
 	if (w > 0 && h > 0)	{
-		nComponents = 4;
-		dataLen = w * h * nComponents;
+		dataLen = w * h * getBytesPerPixel();
 		dataLen += (16 - (dataLen % 16)) % 16;
 		px = std::unique_ptr<char, void(*)(char*)>(new char[dataLen], [](char* data) { delete[] data; });
 		assert(px.get() != nullptr);
@@ -69,6 +68,20 @@ int Halley::Image::getRGBA(int r, int g, int b, int a)
 size_t Halley::Image::getByteSize() const
 {
 	return dataLen;
+}
+
+int Halley::Image::getBytesPerPixel() const
+{
+	switch (mode) {
+	case Mode::RGBA:
+		return 4;
+	case Mode::RGB:
+		return 3;
+	case Mode::Indexed:
+		return 1;
+	default:
+		throw Exception("Image mode is undefined.");
+	}
 }
 
 Halley::Rect4i Halley::Image::getTrimRect() const
@@ -209,22 +222,22 @@ void Halley::Image::load(gsl::span<const gsl::byte> bytes, bool shouldPreMultipl
 		px = std::unique_ptr<char, void(*)(char*)>(reinterpret_cast<char*>(pixels), [](char* data) { ::free(data); });
 		w = x;
 		h = y;
-		nComponents = 4;
-		dataLen = w * h * nComponents;
+		mode = Mode::RGBA;
+		dataLen = w * h * getBytesPerPixel();
 	} else {
 		int x, y, nComp;
-		nComponents = 4;	// Force 4 bpp
-		char *pixels = reinterpret_cast<char*>(stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &x, &y, &nComp, nComponents));
+		mode = Mode::RGBA;
+		char *pixels = reinterpret_cast<char*>(stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &x, &y, &nComp, 4));
 		if (!pixels) {
 			throw Exception("Unable to load image data.");
 		}
 		px = std::unique_ptr<char, void(*)(char*)>(pixels, [](char* data) { stbi_image_free(data); });
 		w = x;
 		h = y;
-		dataLen = w * h * nComponents;
+		dataLen = w * h * getBytesPerPixel();
 	}
 
-	if (nComponents == 4 && shouldPreMultiply) {
+	if (mode == Mode::RGBA && shouldPreMultiply) {
 		preMultiply();
 	}
 }
@@ -259,7 +272,7 @@ int Halley::Image::getPixelAlpha(Vector2i pos) const
 	return pixel >> 24;
 }
 
-void Halley::Image::savePNG(String file) const
+void Halley::Image::savePNG(const String& file) const
 {
 	savePNG(Path(file.cppStr()));
 }
@@ -281,7 +294,7 @@ Halley::Bytes Halley::Image::savePNGToBytes()
 	return result;
 }
 
-Halley::Vector2i Halley::Image::getImageSize(String name, gsl::span<const gsl::byte> bytes)
+Halley::Vector2i Halley::Image::getImageSize(gsl::span<const gsl::byte> bytes)
 {
 	if (isPNG(bytes))	{
 		unsigned w, h;

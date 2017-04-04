@@ -34,17 +34,24 @@ namespace Halley {
 
 	class Image : public Resource {
 	public:
-		Image(unsigned int w=0, unsigned int h=0);
+		enum class Mode {
+			Undefined,
+			Indexed,
+			RGB,
+			RGBA
+		};
+
+		Image(Mode mode = Mode::RGBA, unsigned int w = 0, unsigned int h = 0);
 		Image(gsl::span<const gsl::byte> bytes, bool preMultiply);
 		~Image();
 
 		void setSize(Vector2i size);
 
 		void load(gsl::span<const gsl::byte> bytes, bool preMultiply);
-		void savePNG(String filename = "") const;
+		void savePNG(const String& filename = "") const;
 		void savePNG(const Path& filename) const;
 		Bytes savePNGToBytes();
-		static Vector2i getImageSize(String filename, gsl::span<const gsl::byte> bytes);
+		static Vector2i getImageSize(gsl::span<const gsl::byte> bytes);
 		static bool isPNG(gsl::span<const gsl::byte> bytes);
 
 		bool isPremultiplied() const { return preMultiplied; }
@@ -60,7 +67,7 @@ namespace Halley {
 		unsigned int getHeight() const { return h; }
 		Vector2i getSize() const { return Vector2i(int(w), int(h)); }
 
-		int getNComponents() const { return nComponents; }
+		int getBytesPerPixel() const;
 
 		Rect4i getTrimRect() const;
 
@@ -80,7 +87,7 @@ namespace Halley {
 		size_t dataLen = 0;
 		unsigned int w = 0;
 		unsigned int h = 0;
-		int nComponents = 0;
+		Mode mode = Mode::Undefined;
 		bool preMultiplied = false;
 		
 		void preMultiply();

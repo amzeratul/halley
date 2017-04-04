@@ -12,7 +12,7 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	// Load image
 	Path mainFile = asset.inputFiles.at(0).name;
 	auto span = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
-	Vector2i size = Image::getImageSize(mainFile.string(), span);
+	Vector2i size = Image::getImageSize(span);
 
 	// Prepare metadata
 	Metadata meta;

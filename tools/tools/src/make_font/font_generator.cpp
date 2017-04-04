@@ -107,7 +107,7 @@ FontGeneratorResult FontGenerator::generateFont(String assetName, gsl::span<cons
 		return FontGeneratorResult();
 	}
 
-	auto dstImg = std::make_unique<Image>(size.x, size.y);
+	auto dstImg = std::make_unique<Image>(Image::Mode::RGBA, size.x, size.y);
 	dstImg->clear(0);
 
 	Vector<CharcodeEntry> codes;
@@ -137,7 +137,7 @@ FontGeneratorResult FontGenerator::generateFont(String assetName, gsl::span<cons
 					std::cout << "+";
 				}
 
-				auto tmpImg = std::make_unique<Image>(srcRect.getWidth(), srcRect.getHeight());
+				auto tmpImg = std::make_unique<Image>(Image::Mode::RGBA, srcRect.getWidth(), srcRect.getHeight());
 				tmpImg->clear(0);
 				{
 					std::lock_guard<std::mutex> g(m);

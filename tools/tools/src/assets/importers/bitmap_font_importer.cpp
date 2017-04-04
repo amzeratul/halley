@@ -38,7 +38,7 @@ void BitmapFontImporter::import(const ImportingAsset& asset, IAssetCollector& co
 	}
 
 	// Parse image
-	Vector2i imageSize = Image::getImageSize(pngPath.getFilename().getString(), gsl::as_bytes(gsl::span<Byte>(pngData)));
+	Vector2i imageSize = Image::getImageSize(gsl::as_bytes(gsl::span<Byte>(pngData)));
 
 	// Generate font from XML
 	Font font = parseBitmapFontXML(imageSize, xmlData);
