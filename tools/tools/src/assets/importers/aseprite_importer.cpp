@@ -221,7 +221,7 @@ std::unique_ptr<Image> AsepriteImporter::generateAtlas(const String& assetName, 
 
 std::unique_ptr<Image> AsepriteImporter::makeAtlas(const String& assetName, const std::vector<BinPackResult>& result, Vector2i size, SpriteSheet& spriteSheet, Vector2i pivot)
 {
-	auto image = std::make_unique<Image>(Image::Mode::RGBA, size);
+	auto image = std::make_unique<Image>(Image::Format::RGBA, size);
 	image->clear(0);
 
 	spriteSheet.setTextureName(assetName);
@@ -252,7 +252,7 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::splitImagesInGrid(con
 
 		for (int y = 0; y < nY; ++y) {
 			for (int x = 0; x < nX; ++x) {
-				auto img = std::make_unique<Image>(Image::Mode::RGBA, grid);
+				auto img = std::make_unique<Image>(Image::Format::RGBA, grid);
 				img->blitFrom(Vector2i(), *src.img, Rect4i(Vector2i(x, y) * grid, grid.x, grid.y));
 				Rect4i trimRect = img->getTrimRect();
 				if (trimRect.getWidth() > 0 && trimRect.getHeight() > 0) {

@@ -42,7 +42,7 @@ std::unique_ptr<Image> DistanceFieldGenerator::generate(Image& srcImg, Vector2i 
 	const int srcH = srcImg.getHeight();
 	const int* src = reinterpret_cast<int*>(srcImg.getPixels());
 
-	auto dstImg = std::make_unique<Image>(Image::Mode::RGBA, size);
+	auto dstImg = std::make_unique<Image>(Image::Format::RGBA, size);
 
 	const int w = size.x;
 	const int h = size.y;

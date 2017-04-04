@@ -34,7 +34,7 @@ namespace Halley {
 
 	class Image : public Resource {
 	public:
-		enum class Mode {
+		enum class Format {
 			Undefined,
 			Indexed,
 			RGB,
@@ -42,18 +42,18 @@ namespace Halley {
 			RGBAPremultiplied
 		};
 
-		Image(Mode mode = Mode::RGBA, Vector2i size = {});
-		Image(gsl::span<const gsl::byte> bytes, Mode mode = Mode::Undefined);
+		Image(Format format = Format::RGBA, Vector2i size = {});
+		Image(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined);
 		explicit Image(const ResourceDataStatic& data);
 		Image(const ResourceDataStatic& data, const Metadata& meta);
 		~Image();
 
 		void setSize(Vector2i size);
 
-		void load(gsl::span<const gsl::byte> bytes, Mode mode = Mode::Undefined);
+		void load(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined);
 		Bytes savePNGToBytes() const;
 		static Vector2i getImageSize(gsl::span<const gsl::byte> bytes);
-		static Mode getImageMode(gsl::span<const gsl::byte> bytes);
+		static Format getImageFormat(gsl::span<const gsl::byte> bytes);
 		static bool isPNG(gsl::span<const gsl::byte> bytes);
 
 		int getPixel(Vector2i pos) const;
@@ -70,7 +70,7 @@ namespace Halley {
 		Vector2i getSize() const { return Vector2i(int(w), int(h)); }
 
 		int getBytesPerPixel() const;
-		Mode getMode() const;
+		Format getFormat() const;
 
 		Rect4i getTrimRect() const;
 
@@ -93,13 +93,13 @@ namespace Halley {
 		size_t dataLen = 0;
 		unsigned int w = 0;
 		unsigned int h = 0;
-		Mode mode = Mode::Undefined;
+		Format format = Format::Undefined;
 		
 		void preMultiply();
 	};
 
 	template <>
-	struct EnumNames<Image::Mode> {
+	struct EnumNames<Image::Format> {
 		constexpr std::array<const char*, 5> operator()() const {
 			return{{
 				"undefined",

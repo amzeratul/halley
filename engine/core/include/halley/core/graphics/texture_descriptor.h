@@ -7,6 +7,7 @@ namespace Halley
 {
 	enum class TextureFormat
 	{
+		R,
 		RGBA,
 		RGB,
 		DEPTH
@@ -14,7 +15,7 @@ namespace Halley
 
 	enum class PixelDataFormat
 	{
-		RGBA,
+		Image,
 		Precompiled
 	};
 

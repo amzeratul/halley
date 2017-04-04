@@ -107,7 +107,7 @@ FontGeneratorResult FontGenerator::generateFont(String assetName, gsl::span<cons
 		return FontGeneratorResult();
 	}
 
-	auto dstImg = std::make_unique<Image>(Image::Mode::RGBA, size);
+	auto dstImg = std::make_unique<Image>(Image::Format::RGBA, size);
 	dstImg->clear(0);
 
 	Vector<CharcodeEntry> codes;
@@ -137,7 +137,7 @@ FontGeneratorResult FontGenerator::generateFont(String assetName, gsl::span<cons
 					std::cout << "+";
 				}
 
-				auto tmpImg = std::make_unique<Image>(Image::Mode::RGBA, srcRect.getSize());
+				auto tmpImg = std::make_unique<Image>(Image::Format::RGBA, srcRect.getSize());
 				tmpImg->clear(0);
 				{
 					std::lock_guard<std::mutex> g(m);
@@ -223,7 +223,7 @@ std::unique_ptr<Metadata> FontGenerator::generateTextureMeta()
 	auto meta = std::make_unique<Metadata>();
 	meta->set("filtering", true);
 	meta->set("mipmap", false);
-	meta->set("mode", "rgba");
+	meta->set("format", "rgba");
 	meta->set("compression", "raw_image");
 	return meta;
 }

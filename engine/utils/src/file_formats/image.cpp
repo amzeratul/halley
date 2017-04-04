@@ -28,31 +28,31 @@
 #include "halley/text/string_converter.h"
 #include "halley/file/byte_serializer.h"
 
-Halley::Image::Image(Mode mode, Vector2i size)
+Halley::Image::Image(Format format, Vector2i size)
 	: px(nullptr, [](char*){})
 	, dataLen(0)
-	, mode(mode)
+	, format(format)
 {
 	setSize(size);
 }
 
-Halley::Image::Image(gsl::span<const gsl::byte> bytes, Mode targetMode)
+Halley::Image::Image(gsl::span<const gsl::byte> bytes, Format targetFormat)
 	: px(nullptr, [](char*) {})
 {
-	load(bytes, targetMode);
+	load(bytes, targetFormat);
 }
 
 Halley::Image::Image(const ResourceDataStatic& data)
 	: px(nullptr, [](char*) {})
 {
-	load(data.getSpan(), Mode::Undefined);
+	load(data.getSpan(), Format::Undefined);
 }
 
 Halley::Image::Image(const ResourceDataStatic& data, const Metadata& meta)
 	: px(nullptr, [](char*) {})
 {
-	auto mode = fromString<Mode>(meta.getString("mode", "undefined"));
-	load(data.getSpan(), mode);
+	auto format = fromString<Format>(meta.getString("format", "undefined"));
+	load(data.getSpan(), format);
 }
 
 Halley::Image::~Image()
@@ -94,22 +94,22 @@ void Halley::Image::convertIntToRGBA(unsigned int col, unsigned int& r, unsigned
 
 int Halley::Image::getBytesPerPixel() const
 {
-	switch (mode) {
-	case Mode::RGBA:
-	case Mode::RGBAPremultiplied:
+	switch (format) {
+	case Format::RGBA:
+	case Format::RGBAPremultiplied:
 		return 4;
-	case Mode::RGB:
+	case Format::RGB:
 		return 3;
-	case Mode::Indexed:
+	case Format::Indexed:
 		return 1;
 	default:
-		throw Exception("Image mode is undefined.");
+		throw Exception("Image format is undefined.");
 	}
 }
 
-Halley::Image::Mode Halley::Image::getMode() const
+Halley::Image::Format Halley::Image::getFormat() const
 {
-	return mode;
+	return format;
 }
 
 Halley::Rect4i Halley::Image::getTrimRect() const
@@ -246,7 +246,7 @@ void Halley::Image::serialize(Serializer& s) const
 {
 	s << w;
 	s << h;
-	s << int(mode);
+	s << int(format);
 	s << dataLen;
 	s << gsl::as_bytes(gsl::span<char>(px.get(), dataLen));
 }
@@ -258,7 +258,7 @@ void Halley::Image::deserialize(Deserializer& s)
 
 	int m;
 	s >> m;
-	mode = static_cast<Mode>(m);
+	format = static_cast<Format>(m);
 
 	s >> dataLen;
 	px = std::unique_ptr<char, void(*)(char*)>(static_cast<char*>(malloc(dataLen)), [](char* data) { ::free(data); });
@@ -266,33 +266,33 @@ void Halley::Image::deserialize(Deserializer& s)
 	s >> span;
 }
 
-void Halley::Image::load(gsl::span<const gsl::byte> bytes, Mode targetMode)
+void Halley::Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 {
 	if (isPNG(bytes)) {
 		unsigned char* pixels;
 		unsigned int x, y;
 		lodepng::State state;
-		LodePNGColorType colorMode;
-		switch (targetMode) {
-		case Mode::Indexed:
-			colorMode = LCT_GREY;
+		LodePNGColorType colorFormat;
+		switch (targetFormat) {
+		case Format::Indexed:
+			colorFormat = LCT_GREY;
 			break;
-		case Mode::RGB:
-			colorMode = LCT_RGB;
+		case Format::RGB:
+			colorFormat = LCT_RGB;
 			break;
 		default:
-			colorMode = LCT_RGBA;
+			colorFormat = LCT_RGBA;
 		}
-		lodepng_decode_memory(&pixels, &x, &y, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size(), colorMode, 8);
+		lodepng_decode_memory(&pixels, &x, &y, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size(), colorFormat, 8);
 
 		px = std::unique_ptr<char, void(*)(char*)>(reinterpret_cast<char*>(pixels), [](char* data) { ::free(data); });
 		w = x;
 		h = y;
-		mode = targetMode != Mode::Undefined ? targetMode : Mode::RGBA;
+		format = targetFormat != Format::Undefined ? targetFormat : Format::RGBA;
 		dataLen = w * h * getBytesPerPixel();
 	} else {
 		int x, y, nComp;
-		mode = Mode::RGBA;
+		format = Format::RGBA;
 		char *pixels = reinterpret_cast<char*>(stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &x, &y, &nComp, 4));
 		if (!pixels) {
 			throw Exception("Unable to load image data.");
@@ -303,14 +303,14 @@ void Halley::Image::load(gsl::span<const gsl::byte> bytes, Mode targetMode)
 		dataLen = w * h * getBytesPerPixel();
 	}
 
-	if (mode == Mode::RGBA && targetMode == Mode::Undefined) {
+	if (format == Format::RGBA && targetFormat == Format::Undefined) {
 		preMultiply();
 	}
 }
 
 void Halley::Image::preMultiply()
 {
-	Expects(mode == Mode::RGBA);
+	Expects(format == Format::RGBA);
 
 	size_t n = w * h;
 	unsigned int* data = reinterpret_cast<unsigned int*>(px.get());
@@ -325,7 +325,7 @@ void Halley::Image::preMultiply()
 				| ((a-1) << 24);
 	}
 
-	mode = Mode::RGBAPremultiplied;
+	format = Format::RGBAPremultiplied;
 }
 
 int Halley::Image::getPixel(Vector2i pos) const
@@ -347,19 +347,19 @@ Halley::Bytes Halley::Image::savePNGToBytes() const
 	unsigned char* bytes;
 	size_t size;
 
-	LodePNGColorType colMode;
-	switch (mode) {
-	case Mode::RGB:
-		colMode = LCT_RGB;
+	LodePNGColorType colFormat;
+	switch (format) {
+	case Format::RGB:
+		colFormat = LCT_RGB;
 		break;
-	case Mode::Indexed:
-		colMode = LCT_GREY;
+	case Format::Indexed:
+		colFormat = LCT_GREY;
 		break;
 	default:
-		colMode = LCT_RGBA;
+		colFormat = LCT_RGBA;
 	}
 
-	lodepng_encode_memory(&bytes, &size, reinterpret_cast<unsigned char*>(px.get()), w, h, colMode, 8);
+	lodepng_encode_memory(&bytes, &size, reinterpret_cast<unsigned char*>(px.get()), w, h, colFormat, 8);
 	Bytes result;
 	result.resize(size);
 	memcpy(result.data(), bytes, size);
@@ -381,20 +381,20 @@ Halley::Vector2i Halley::Image::getImageSize(gsl::span<const gsl::byte> bytes)
 	}
 }
 
-Halley::Image::Mode Halley::Image::getImageMode(gsl::span<const gsl::byte> bytes)
+Halley::Image::Format Halley::Image::getImageFormat(gsl::span<const gsl::byte> bytes)
 {
 	unsigned int x, y;
 	LodePNGState state;
 	lodepng_inspect(&x, &y, &state, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size());
-	LodePNGColorType colorMode = state.info_png.color.colortype;
-	switch (colorMode) {
+	LodePNGColorType colorFormat = state.info_png.color.colortype;
+	switch (colorFormat) {
 	case LCT_GREY:
 	case LCT_PALETTE:
-		return Mode::Indexed;
+		return Format::Indexed;
 	case LCT_RGB:
-		return Mode::RGB;
+		return Format::RGB;
 	default:
-		return Mode::RGBA;
+		return Format::RGBA;
 	}
 }
 

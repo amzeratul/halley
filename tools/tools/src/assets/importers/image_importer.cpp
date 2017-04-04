@@ -21,7 +21,7 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	auto span = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
 	std::unique_ptr<Image> image;
 	if (meta.getString("compression", "png") == "png") {
-		image = std::make_unique<Image>(span, fromString<Image::Mode>(meta.getString("mode", "undefined")));
+		image = std::make_unique<Image>(span, fromString<Image::Format>(meta.getString("format", "undefined")));
 	} else {
 		image = std::make_unique<Image>();
 		Deserializer s(span);
@@ -40,7 +40,7 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	Vector2i size = image->getSize();
 	meta.set("width", size.x);
 	meta.set("height", size.y);
-	meta.set("mode", toString(image->getMode()));
+	meta.set("format", toString(image->getFormat()));
 
 	// Output
 	ImportingAsset imageAsset;
@@ -55,7 +55,7 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const Image& image, const
 {
 	auto lookup = makePaletteConversion(palette);
 
-	auto result = std::make_unique<Image>(Image::Mode::Indexed, image.getSize());
+	auto result = std::make_unique<Image>(Image::Format::Indexed, image.getSize());
 	auto dst = result->getPixels();
 	auto src = reinterpret_cast<const int*>(image.getPixels());
 	size_t n = image.getWidth() * image.getHeight();
