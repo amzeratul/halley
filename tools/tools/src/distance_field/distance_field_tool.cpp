@@ -20,7 +20,7 @@ int DistanceFieldTool::run(Vector<std::string> args)
 
 	// Load image
 	auto data = ResourceDataStatic::loadFromFileSystem(args[0]);
-	auto inputImg = std::make_unique<Image>(data->getSpan(), false);
+	auto inputImg = std::make_unique<Image>(*data);
 
 	// Process image
 	auto result = DistanceFieldGenerator::generate(*inputImg, size, radius);

@@ -46,13 +46,14 @@ void AsepriteImporter::import(const ImportingAsset& asset, IAssetCollector& coll
 	auto size = atlasImage->getSize();
 	meta.set("width", size.x);
 	meta.set("height", size.y);
+	meta.set("compression", "raw_image");
 
 	// Write image
 	ImportingAsset image;
 	image.assetId = spriteName;
 	image.assetType = ImportAssetType::Image;
 	image.metadata = std::make_unique<Metadata>(meta);
-	image.inputFiles.emplace_back(ImportingAssetFile(spriteName, atlasImage->savePNGToBytes()));
+	image.inputFiles.emplace_back(ImportingAssetFile(spriteName, Serializer::toBytes(*atlasImage)));
 	collector.addAdditionalAsset(std::move(image));
 }
 
@@ -63,7 +64,7 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::loadImagesFromPath(Pa
 			ImageData data;
 
 			auto bytes = FileSystem::readFile(tmp / p);
-			data.img = std::make_unique<Image>(gsl::as_bytes(gsl::span<Byte>(bytes)), false);
+			data.img = std::make_unique<Image>(gsl::as_bytes(gsl::span<Byte>(bytes)));
 			auto parsedName = p.getStem().getString().split("___");
 			if (parsedName.size() != 3 || parsedName[0] != "out") {
 				throw Exception("Error parsing filename: " + p.getStem().getString());

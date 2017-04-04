@@ -38,23 +38,25 @@ namespace Halley {
 			Undefined,
 			Indexed,
 			RGB,
-			RGBA
+			RGBA,
+			RGBAPremultiplied
 		};
 
 		Image(Mode mode = Mode::RGBA, unsigned int w = 0, unsigned int h = 0);
-		Image(gsl::span<const gsl::byte> bytes, bool preMultiply);
+		Image(gsl::span<const gsl::byte> bytes, Mode mode = Mode::Undefined);
+		explicit Image(const ResourceDataStatic& data);
+		Image(const ResourceDataStatic& data, const Metadata& meta);
 		~Image();
 
 		void setSize(Vector2i size);
 
-		void load(gsl::span<const gsl::byte> bytes, bool preMultiply);
+		void load(gsl::span<const gsl::byte> bytes, Mode mode = Mode::Undefined);
 		void savePNG(const String& filename = "") const;
 		void savePNG(const Path& filename) const;
 		Bytes savePNGToBytes();
 		static Vector2i getImageSize(gsl::span<const gsl::byte> bytes);
+		static Mode getImageMode(gsl::span<const gsl::byte> bytes);
 		static bool isPNG(gsl::span<const gsl::byte> bytes);
-
-		bool isPremultiplied() const { return preMultiplied; }
 
 		int getPixel(Vector2i pos) const;
 		int getPixelAlpha(Vector2i pos) const;
@@ -68,6 +70,7 @@ namespace Halley {
 		Vector2i getSize() const { return Vector2i(int(w), int(h)); }
 
 		int getBytesPerPixel() const;
+		Mode getMode() const;
 
 		Rect4i getTrimRect() const;
 
@@ -82,14 +85,29 @@ namespace Halley {
 
 		Image& operator=(const Image& o) = delete;
 
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+
 	private:
 		std::unique_ptr<char, void(*)(char*)> px;
 		size_t dataLen = 0;
 		unsigned int w = 0;
 		unsigned int h = 0;
 		Mode mode = Mode::Undefined;
-		bool preMultiplied = false;
 		
 		void preMultiply();
+	};
+
+	template <>
+	struct EnumNames<Image::Mode> {
+		constexpr std::array<const char*, 5> operator()() const {
+			return{{
+				"undefined",
+				"indexed",
+				"rgb",
+				"rgba",
+				"rgba_premultiplied"
+			}};
+		}
 	};
 }

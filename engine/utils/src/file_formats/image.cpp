@@ -26,6 +26,7 @@
 #include "halley/support/exception.h"
 #include "halley/resources/resource_data.h"
 #include "halley/text/string_converter.h"
+#include "halley/file/byte_serializer.h"
 
 Halley::Image::Image(Mode mode, unsigned int _w, unsigned int _h)
 	: px(nullptr, [](char*){})
@@ -35,11 +36,23 @@ Halley::Image::Image(Mode mode, unsigned int _w, unsigned int _h)
 	setSize(Vector2i(_w, _h));
 }
 
-Halley::Image::Image(gsl::span<const gsl::byte> bytes, bool _preMultiply)
+Halley::Image::Image(gsl::span<const gsl::byte> bytes, Mode targetMode)
 	: px(nullptr, [](char*) {})
-	, preMultiplied(false)
 {
-	load( bytes, _preMultiply);
+	load(bytes, targetMode);
+}
+
+Halley::Image::Image(const ResourceDataStatic& data)
+	: px(nullptr, [](char*) {})
+{
+	load(data.getSpan(), Mode::Undefined);
+}
+
+Halley::Image::Image(const ResourceDataStatic& data, const Metadata& meta)
+	: px(nullptr, [](char*) {})
+{
+	auto mode = fromString<Mode>(meta.getString("mode", "undefined"));
+	load(data.getSpan(), mode);
 }
 
 Halley::Image::~Image()
@@ -49,14 +62,15 @@ Halley::Image::~Image()
 
 void Halley::Image::setSize(Vector2i size)
 {
-	preMultiplied = false;
 	w = size.x;
 	h = size.y;
+	dataLen = w * h * getBytesPerPixel();
+	dataLen += (16 - (dataLen % 16)) % 16;
 	if (w > 0 && h > 0)	{
-		dataLen = w * h * getBytesPerPixel();
-		dataLen += (16 - (dataLen % 16)) % 16;
 		px = std::unique_ptr<char, void(*)(char*)>(new char[dataLen], [](char* data) { delete[] data; });
 		assert(px.get() != nullptr);
+	} else {
+		px = std::unique_ptr<char, void(*)(char*)>(nullptr, [](char*) {});
 	}
 }
 
@@ -74,6 +88,7 @@ int Halley::Image::getBytesPerPixel() const
 {
 	switch (mode) {
 	case Mode::RGBA:
+	case Mode::RGBAPremultiplied:
 		return 4;
 	case Mode::RGB:
 		return 3;
@@ -82,6 +97,11 @@ int Halley::Image::getBytesPerPixel() const
 	default:
 		throw Exception("Image mode is undefined.");
 	}
+}
+
+Halley::Image::Mode Halley::Image::getMode() const
+{
+	return mode;
 }
 
 Halley::Rect4i Halley::Image::getTrimRect() const
@@ -209,20 +229,56 @@ void Halley::Image::blitFrom(Vector2i pos, Image& srcImg, Rect4i srcArea, bool r
 
 std::unique_ptr<Halley::Image> Halley::Image::loadResource(ResourceLoader& loader)
 {
-	auto data = loader.getStatic();
-	return std::make_unique<Image>(data->getSpan(), false);
+	return std::make_unique<Image>(*loader.getStatic(), loader.getMeta());
 }
 
-void Halley::Image::load(gsl::span<const gsl::byte> bytes, bool shouldPreMultiply)
+void Halley::Image::serialize(Serializer& s) const
+{
+	s << w;
+	s << h;
+	s << int(mode);
+	s << dataLen;
+	s << gsl::as_bytes(gsl::span<char>(px.get(), dataLen));
+}
+
+void Halley::Image::deserialize(Deserializer& s)
+{
+	s >> w;
+	s >> h;
+
+	int m;
+	s >> m;
+	mode = static_cast<Mode>(m);
+
+	s >> dataLen;
+	px = std::unique_ptr<char, void(*)(char*)>(static_cast<char*>(malloc(dataLen)), [](char* data) { ::free(data); });
+	auto span = gsl::as_writeable_bytes(gsl::span<char>(px.get(), dataLen));
+	s >> span;
+}
+
+void Halley::Image::load(gsl::span<const gsl::byte> bytes, Mode targetMode)
 {
 	if (isPNG(bytes)) {
 		unsigned char* pixels;
 		unsigned int x, y;
-		lodepng_decode_memory(&pixels, &x, &y, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size(), LCT_RGBA, 8);
+		lodepng::State state;
+		LodePNGColorType colorMode;
+		switch (targetMode) {
+		case Mode::Indexed:
+			colorMode = LCT_GREY;
+			break;
+		case Mode::RGB:
+			colorMode = LCT_RGB;
+			break;
+		default:
+			colorMode = LCT_RGBA;
+		}
+		lodepng_decode_memory(&pixels, &x, &y, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size(), colorMode, 8);
+
 		px = std::unique_ptr<char, void(*)(char*)>(reinterpret_cast<char*>(pixels), [](char* data) { ::free(data); });
 		w = x;
 		h = y;
-		mode = Mode::RGBA;
+		mode = targetMode != Mode::Undefined ? targetMode : Mode::RGBA;
 		dataLen = w * h * getBytesPerPixel();
 	} else {
 		int x, y, nComp;
@@ -237,16 +293,18 @@ void Halley::Image::load(gsl::span<const gsl::byte> bytes, bool shouldPreMultipl
 		dataLen = w * h * getBytesPerPixel();
 	}
 
-	if (mode == Mode::RGBA && shouldPreMultiply) {
+	if (mode == Mode::RGBA && targetMode == Mode::Undefined) {
 		preMultiply();
 	}
 }
 
 void Halley::Image::preMultiply()
 {
-	size_t n = w*h;
+	Expects(mode == Mode::RGBA);
+
+	size_t n = w * h;
 	unsigned int* data = reinterpret_cast<unsigned int*>(px.get());
-	for (size_t i=0; i<n; i++) {
+	for (size_t i = 0; i < n; i++) {
 		unsigned int cur = data[i];
 		unsigned int r = cur & 0xFF;
 		unsigned int g = (cur >> 8) & 0xFF;
@@ -257,7 +315,8 @@ void Halley::Image::preMultiply()
 				| ((b * a << 8) & 0xFF0000)
 				| ((a-1) << 24);
 	}
-	preMultiplied = true;
+
+	mode = Mode::RGBAPremultiplied;
 }
 
 int Halley::Image::getPixel(Vector2i pos) const
@@ -305,6 +364,23 @@ Halley::Vector2i Halley::Image::getImageSize(gsl::span<const gsl::byte> bytes)
 		int w, h, comp;
 		stbi_info_from_memory(reinterpret_cast<const unsigned char*>(bytes.data()), int(bytes.size()), &w, &h, &comp);
 		return Vector2i(w, h);
+	}
+}
+
+Halley::Image::Mode Halley::Image::getImageMode(gsl::span<const gsl::byte> bytes)
+{
+	unsigned int x, y;
+	LodePNGState state;
+	lodepng_inspect(&x, &y, &state, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size());
+	LodePNGColorType colorMode = state.info_png.color.colortype;
+	switch (colorMode) {
+	case LCT_GREY:
+	case LCT_PALETTE:
+		return Mode::Indexed;
+	case LCT_RGB:
+		return Mode::RGB;
+	default:
+		return Mode::RGBA;
 	}
 }
 

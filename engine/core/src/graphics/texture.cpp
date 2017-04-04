@@ -26,7 +26,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	{
 		auto& meta = texture->getMeta();
 		if (meta.getString("compression") == "png") {
-			return TextureDescriptorImageData(std::make_unique<Image>(data->getSpan(), premultiply));
+			return TextureDescriptorImageData(std::make_unique<Image>(*data, meta));
 		} else {
 			return TextureDescriptorImageData(data->getSpan());
 		}

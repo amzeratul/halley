@@ -9,25 +9,35 @@ using namespace Halley;
 
 void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	// Load image
-	Path mainFile = asset.inputFiles.at(0).name;
-	auto span = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
-	Vector2i size = Image::getImageSize(span);
-
 	// Prepare metadata
 	Metadata meta;
 	if (asset.metadata) {
 		meta = *asset.metadata;
 	}
+
+	// Load image
+	Path mainFile = asset.inputFiles.at(0).name;
+	auto span = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
+	std::unique_ptr<Image> image;
+	if (meta.getString("compression", "png") == "png") {
+		image = std::make_unique<Image>(span, fromString<Image::Mode>(meta.getString("mode", "undefined")));
+	} else {
+		image = std::make_unique<Image>();
+		Deserializer s(span);
+		s >> *image;
+	}
+
+	// Fill meta
+	Vector2i size = image->getSize();
 	meta.set("width", size.x);
 	meta.set("height", size.y);
-	meta.set("compression", "png");
+	meta.set("mode", toString(image->getMode()));
 
 	// Output
-	ImportingAsset image;
-	image.assetId = asset.assetId;
-	image.assetType = ImportAssetType::Texture;
-	image.metadata = std::make_unique<Metadata>(meta);
-	image.inputFiles.emplace_back(ImportingAssetFile(asset.assetId, Bytes(asset.inputFiles.at(0).data)));
-	collector.addAdditionalAsset(std::move(image));
+	ImportingAsset imageAsset;
+	imageAsset.assetId = asset.assetId;
+	imageAsset.assetType = ImportAssetType::Texture;
+	imageAsset.metadata = std::make_unique<Metadata>(meta);
+	imageAsset.inputFiles.emplace_back(ImportingAssetFile(asset.assetId, Serializer::toBytes(*image)));
+	collector.addAdditionalAsset(std::move(imageAsset));
 }
