@@ -57,6 +57,10 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 	// Enumerate all potential assets
 	for (auto srcPath : srcPaths) {
 		for (auto filePath : FileSystem::enumerateDirectory(srcPath)) {
+			if (filePath.getFilename() == "_dir.meta") {
+				continue;
+			}
+
 			auto& assetImporter = codegen ? project.getAssetImporter().getImporter(ImportAssetType::Codegen) : project.getAssetImporter().getImporter(filePath);
 			String assetId = assetImporter.getAssetId(filePath);
 
@@ -70,6 +74,12 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 				asset.assetType = assetImporter.getType();
 				asset.srcDir = srcPath;
 				asset.inputFiles.push_back(input);
+
+				// Check if there's a directory metafile to add
+				auto dirMetaPath = filePath.parentPath() / "_dir.meta";
+				if (FileSystem::exists(srcPath / dirMetaPath)) {
+					asset.inputFiles.push_back(TimestampedPath(dirMetaPath, FileSystem::getLastWriteTime(srcPath / dirMetaPath)));
+				}
 			} else {
 				// Already exists
 				auto& asset = iter->second;

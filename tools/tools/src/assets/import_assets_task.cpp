@@ -49,28 +49,35 @@ void ImportAssetsTask::run()
 	}
 }
 
+static void loadMetaData(Metadata& meta, const Path& path)
+{
+	auto data = ResourceDataStatic::loadFromFileSystem(path);
+	auto root = YAML::Load(data->getString());
+
+	for (YAML::const_iterator it = root.begin(); it != root.end(); ++it) {
+		String key = it->first.as<std::string>();
+		String value = it->second.as<std::string>();
+		meta.set(key, value);
+	}
+}
+
 static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& asset)
 {
 	try {
-		if (asset.inputFiles.size() > 1) {
+		auto meta = std::make_unique<Metadata>();
+
+		for (int j = 0; j < 2; ++j) {
+			// First load the directory meta, then load private meta on top of it, so it overrides
+			bool isDirectoryMeta = j == 0;
+
 			for (auto& i: asset.inputFiles) {
-				if (i.first.getExtension() == ".meta") {
-					auto data = ResourceDataStatic::loadFromFileSystem(asset.srcDir / i.first);
-					auto root = YAML::Load(data->getString());
-
-					auto meta = std::make_unique<Metadata>();
-
-					for (YAML::const_iterator it = root.begin(); it != root.end(); ++it) {
-						String key = it->first.as<std::string>();
-						String value = it->second.as<std::string>();
-						meta->set(key, value);
-					}
-
-					return meta;
+				if (i.first.getExtension() == ".meta" && (i.first.getFilename() == "_dir.meta") == isDirectoryMeta) {
+					loadMetaData(*meta, asset.srcDir / i.first);
 				}
 			}
 		}
-		return std::unique_ptr<Metadata>();
+		
+		return meta;
 	} catch (std::exception& e) {
 		throw Exception("Error parsing metafile for " + asset.assetId + ": " + e.what());
 	}
