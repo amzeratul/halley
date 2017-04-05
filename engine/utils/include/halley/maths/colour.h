@@ -53,6 +53,12 @@ namespace Halley {
 		return U(float(x) * colMaxValue<U>() / colMaxValue<T>());
 	}
 
+	template <>
+	inline unsigned char convertColour(int x)
+	{
+		return unsigned char(x);
+	}
+
 	template <typename T>
 	class Colour4 {
 	public:

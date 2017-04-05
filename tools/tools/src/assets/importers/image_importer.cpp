@@ -65,7 +65,7 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const Image& image, const
 		if (res == lookup.end()) {
 			unsigned int r, g, b, a;
 			Image::convertIntToRGBA(src[i], r, g, b, a);
-			throw Exception("Colour " + Colour(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f).toString() + " doesn't exist in palette.");
+			throw Exception("Colour " + Colour4<int>(r, g, b, a).toString() + " doesn't exist in palette.");
 		}
 		dst[i] = res->second;
 	}
@@ -82,15 +82,15 @@ std::unordered_map<int, int> ImageImporter::makePaletteConversion(const Image& p
 	std::unordered_map<int, int> lookup;
 	for (size_t y = 0; y < h; ++y) {
 		for (size_t x = 0; x < w; ++x) {
-			auto col = src[y * w + x];
+			auto colour = src[y * w + x];
 
-			auto res = lookup.find(col);
+			auto res = lookup.find(colour);
 			if (res == lookup.end()) {
-				lookup[col] = int(x);
-			} else if (col != 0) {
+				lookup[colour] = int(x);
+			} else if (colour != 0) {
 				unsigned int r, g, b, a;
-				Image::convertIntToRGBA(col, r, g, b, a);
-				throw Exception("Colour " + Colour(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f).toString()
+				Image::convertIntToRGBA(colour, r, g, b, a);
+				throw Exception("Colour " + Colour4<int>(r, g, b, a).toString()
 					+ " is duplicated in the palette. Found at " + toString(x) + ", " + toString(y) + "; previously found at index "
 					+ toString(res->second));
 			}
