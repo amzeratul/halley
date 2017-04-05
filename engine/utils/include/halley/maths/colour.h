@@ -56,7 +56,7 @@ namespace Halley {
 	template <>
 	inline unsigned char convertColour(int x)
 	{
-		return unsigned char(x);
+		return static_cast<unsigned char>(x);
 	}
 
 	template <typename T>
