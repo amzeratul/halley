@@ -48,11 +48,9 @@ namespace Halley
 		template <typename T>
 		Material& set(const String& name, const T& value, bool optional = false)
 		{
-			auto param = getParameter(name);
+			auto param = getParameter(name, optional);
 			if (param) {
 				*param = value;
-			} else if (!optional) {
-				throw Exception("Uniform not available: " + name);
 			}
 			return *this;
 		}
@@ -68,6 +66,6 @@ namespace Halley
 		std::vector<std::shared_ptr<const Texture>> textures;
 
 		void initUniforms();
-		MaterialParameter* getParameter(const String& name);
+		MaterialParameter* getParameter(const String& name, bool optional);
 	};
 }

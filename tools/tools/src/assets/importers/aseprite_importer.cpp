@@ -28,7 +28,7 @@ void AsepriteImporter::import(const ImportingAsset& asset, IAssetCollector& coll
 	auto frames = importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data)));
 
 	// Write animation
-	Animation animation = generateAnimation(spriteName, frames);
+	Animation animation = generateAnimation(spriteName, meta.getString("material", "Halley/Sprite"), frames);
 	collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation));
 
 	// Split grid
@@ -157,12 +157,12 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::importAseprite(String
 	return frameData;
 }
 
-Animation AsepriteImporter::generateAnimation(const String& assetName, const std::vector<ImageData>& frameData)
+Animation AsepriteImporter::generateAnimation(const String& assetName, const String& materialName, const std::vector<ImageData>& frameData)
 {
 	Animation animation;
 
 	animation.setName(assetName);
-	animation.setMaterialName("Halley/Sprite");
+	animation.setMaterialName(materialName);
 	animation.setSpriteSheetName(assetName);
 
 	std::map<String, AnimationSequence> sequences;

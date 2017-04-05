@@ -108,13 +108,18 @@ MaterialConstantBuffer& Material::getConstantBuffer() const
 	return *constantBuffer;
 }
 
-MaterialParameter* Material::getParameter(const String& name)
+MaterialParameter* Material::getParameter(const String& name, bool optional)
 {
 	for (auto& u : uniforms) {
 		if (u.name == name) {
 			return &u;
 		}
 	}
+
+	if (!optional) {
+		throw Exception("Uniform \"" + name + "\" not available in material \"" + materialDefinition->getName() + "\"");
+	}
+
 	return nullptr;
 }
 

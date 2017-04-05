@@ -32,7 +32,7 @@ namespace Halley
 		std::map<int, int> getSpriteDurations(Path jsonPath);
 		void processFrameData(String baseName, std::vector<AsepriteImporter::ImageData>& frameData, std::map<int, int> durations);
 
-		Animation generateAnimation(const String& assetName, const std::vector<ImageData>& data);
+		Animation generateAnimation(const String& assetName, const String& materialName, const std::vector<ImageData>& data);
 
 		std::unique_ptr<Image> generateAtlas(const String& assetName, std::vector<ImageData>& images, SpriteSheet& spriteSheet, Vector2i pivot);
 		std::unique_ptr<Image> makeAtlas(const String& assetName, const std::vector<BinPackResult>& pack, Vector2i size, SpriteSheet& spriteSheet, Vector2i pivot);
