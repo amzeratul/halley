@@ -2,5 +2,5 @@
 filtering: false
 mipmap: false
 premultiply: true
-format: RGBA
+format: rgba
 ...
