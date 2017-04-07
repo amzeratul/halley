@@ -16,7 +16,10 @@ Material::Material(const Material& other)
 	, materialDefinition(other.materialDefinition)
 	, uniformData(other.uniformData)
 	, textures(other.textures)
-{	
+{
+	for (auto& u: uniforms) {
+		u.rebind(*this);
+	}
 }
 
 Material::Material(std::shared_ptr<const MaterialDefinition> materialDefinition)

@@ -40,9 +40,10 @@ namespace Halley
 		MaterialParameter(Material& material, String name, ShaderParameterType type, size_t offset);
 
 		void init();
+		void rebind(Material& material);
 		
 		Vector<int> addresses;
-		Material& material;
+		Material* material;
 		String name;
 		ShaderParameterType type;
 		size_t offset;
