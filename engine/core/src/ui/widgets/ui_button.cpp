@@ -8,8 +8,8 @@ UIClickable::UIClickable(String id, Vector2f minSize, Maybe<UISizer> sizer, Vect
 {
 }
 
-UIButton::UIButton(String id, std::shared_ptr<UIStyle> s)
-	: UIClickable(id, {}, UISizer(UISizerType::Horizontal, 1), s->buttonInnerBorder)
+UIButton::UIButton(String id, std::shared_ptr<UIStyle> s, Maybe<UISizer> sizer, Vector4f innerBorder)
+	: UIClickable(id, {}, sizer, innerBorder)
 	, style(s)
 {
 	sprite = style->buttonNormal;
