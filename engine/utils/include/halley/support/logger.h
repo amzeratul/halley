@@ -21,6 +21,11 @@ namespace Halley
 		virtual void log(LoggerLevel level, const String& msg) = 0;
 	};
 
+	class StdOutSink : public ILoggerSink {
+	public:
+		void log(LoggerLevel level, const String& msg) override;
+	};
+
 	class Logger
 	{
 	public:

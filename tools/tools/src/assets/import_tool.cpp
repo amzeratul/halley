@@ -9,6 +9,7 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/os/os.h"
 #include "halley/core/game/halley_statics.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 using namespace std::chrono_literals;
@@ -18,6 +19,8 @@ int ImportTool::run(Vector<std::string> args)
 	if (args.size() == 2) {
 		HalleyStatics statics;
 		statics.resume();
+		StdOutSink logSink;
+		Logger::addSink(logSink);
 
 		Path projectPath = FileSystem::getAbsolute(Path(args[0]));
 		Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));

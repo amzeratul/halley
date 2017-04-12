@@ -5,6 +5,11 @@
 
 using namespace Halley;
 
+void StdOutSink::log(LoggerLevel level, const String& msg)
+{
+	std::cout << msg << std::endl;
+}
+
 void Logger::setInstance(Logger& logger)
 {
 	instance = &logger;

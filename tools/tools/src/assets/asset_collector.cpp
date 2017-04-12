@@ -2,6 +2,7 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/file/byte_serializer.h"
 #include "halley/resources/metadata.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -26,6 +27,7 @@ void AssetCollector::output(const String& name, AssetType type, gsl::span<const 
 	id.replace("/", "_");
 	Path filePath = Path(toString(type)) / id;
 	FileSystem::writeFile(dstDir / filePath, data);
+	Logger::logInfo("- Writing asset: " + (dstDir / filePath) + " (" + toString(data.size_bytes()) + " bytes)");
 
 	AssetResource result;
 	result.name = name;
