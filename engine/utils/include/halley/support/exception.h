@@ -27,7 +27,7 @@
 namespace Halley {
 	class Exception : public std::exception {
 	public:
-		Exception(String msg);
+		Exception(const String& msg, bool logCallStack = true);
 		~Exception() noexcept {}
 
 		const char* what() const noexcept override;

@@ -24,14 +24,17 @@
 
 using namespace Halley;
 
-Exception::Exception(String _msg)
+Exception::Exception(const String& _msg, bool logCallStack)
 {
-	String stack = Debug::getCallStack();
-	if (stack != "") {
-		msg = _msg + "\n" + stack;
-	} else {
-		msg = _msg;
+	if (logCallStack) {
+		String stack = Debug::getCallStack();
+		if (stack != "") {
+			msg = _msg + "\n" + stack;
+			return;
+		}
 	}
+
+	msg = _msg;
 }
 
 const char* Exception::what() const noexcept
