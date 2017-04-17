@@ -250,7 +250,7 @@ void Painter::setClip()
 void Painter::startDrawCall(std::shared_ptr<Material>& material)
 {
 	if (material != materialPending) {
-		if (materialPending != std::shared_ptr<Material>()) {
+		if (materialPending != std::shared_ptr<Material>() && !(*material == *materialPending)) {
 			flushPending();
 		}
 		materialPending = material;

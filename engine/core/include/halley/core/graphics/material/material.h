@@ -4,6 +4,7 @@
 #include "halley/text/halleystring.h"
 #include "halley/core/graphics/texture.h"
 #include <gsl/gsl>
+#include <boost/predef/detail/_exception.h>
 
 namespace Halley
 {
@@ -70,6 +71,8 @@ namespace Halley
 		void bind(int pass, Painter& painter);
 		void uploadData(Painter& painter);
 		static void resetBindCache();
+
+		bool operator==(const Material& material) const;
 
 		const MaterialDefinition& getDefinition() const { return *materialDefinition; }
 

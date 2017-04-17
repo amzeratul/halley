@@ -16,7 +16,7 @@ MaterialDataBlock::MaterialDataBlock()
 }
 
 MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, const String& name, const MaterialDefinition& def)
-	: data(type == MaterialDataBlockType::SharedExternal ? 0 : size)
+	: data(type == MaterialDataBlockType::SharedExternal ? 0 : size, 0)
 	, addresses(def.getNumPasses())
 	, dataBlockType(type)
 	, bindPoint(bindPoint)
@@ -165,6 +165,38 @@ void Material::resetBindCache()
 {
 	currentMaterial = nullptr;
 	currentPass = 0;
+}
+
+bool Material::operator==(const Material& other) const
+{
+	// Same instance
+	if (this == &other) {
+		return true;
+	}
+
+	// Different definitions
+	if (materialDefinition != other.materialDefinition) {
+		return false;
+	}
+
+	// TODO: hash all this stuff
+
+	// Different textures (only need to check pointer equality)
+	for (size_t i = 0; i < textures.size(); ++i) {
+		if (textures[i] != other.textures[i]) {
+			return false;
+		}
+	}
+
+	// Different data
+	for (size_t i = 0; i < dataBlocks.size(); ++i) {
+		if (dataBlocks[i].getData() != other.dataBlocks[i].getData()) {
+			return false;
+		}
+	}
+
+	// Must be the same
+	return true;
 }
 
 void Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, void* data)
