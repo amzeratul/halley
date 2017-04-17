@@ -8,7 +8,8 @@
 
 using namespace Halley;
 
-PainterOpenGL::PainterOpenGL()
+PainterOpenGL::PainterOpenGL(Resources& resources)
+	: Painter(resources)
 {}
 
 PainterOpenGL::~PainterOpenGL()
@@ -79,30 +80,38 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 	shader.bind();
 
 	// Bind constant buffer
-	int bindPoint = 0;
+	// TODO: move this logic to Painter?
 	for (auto& dataBlock: material.getDataBlocks()) {
 		int address = dataBlock.getAddress(passNumber);
 		if (address != -1) {
-			shader.setUniformBlockBinding(address, bindPoint);
-			static_cast<ConstantBufferOpenGL&>(dataBlock.getConstantBuffer()).bind(bindPoint);
-			bindPoint++;
+			shader.setUniformBlockBinding(address, dataBlock.getBindPoint());
 		}
 	}
 
 	// Bind textures
+	// TODO: move this logic to Painter?
 	int textureUnit = 0;
 	for (auto& tex: material.getTextureUniforms()) {
 		int location = tex.getAddress(passNumber);
 		if (location != -1) {
-			glUniform1i(location, textureUnit);
 			auto texture = std::static_pointer_cast<const TextureOpenGL>(material.getTexture(textureUnit));
 			if (!texture) {
 				throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.");					
 			} else {
+				glUniform1i(location, textureUnit);
 				texture->bind(textureUnit);
 			}
 		}
 		++textureUnit;
+	}
+}
+
+void PainterOpenGL::setMaterialData(const Material& material)
+{
+	for (auto& dataBlock: material.getDataBlocks()) {
+		if (dataBlock.getType() != MaterialDataBlockType::SharedExternal) {
+			static_cast<ConstantBufferOpenGL&>(dataBlock.getConstantBuffer()).bind(dataBlock.getBindPoint());
+		}
 	}
 }
 

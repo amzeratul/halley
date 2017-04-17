@@ -32,7 +32,7 @@ namespace Halley
 	public:
 		virtual ~VideoAPIInternal() {}
 
-		virtual std::unique_ptr<Painter> makePainter() = 0;
+		virtual std::unique_ptr<Painter> makePainter(Resources& resources) = 0;
 	};
 
 	class InputAPIInternal : public InputAPI, public HalleyAPIInternal

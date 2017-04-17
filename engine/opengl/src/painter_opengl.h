@@ -6,12 +6,13 @@
 
 namespace Halley
 {
+	class Resources;
 	class MaterialPass;
 
 	class PainterOpenGL final : public Painter
 	{
 	public:
-		PainterOpenGL();
+		PainterOpenGL(Resources& resources);
 		~PainterOpenGL();
 
 		void doStartRender() override;
@@ -19,6 +20,7 @@ namespace Halley
 
 		void clear(Colour colour) override;
 		void setMaterialPass(const Material& material, int pass) override;
+		void setMaterialData(const Material& material) override;
 
 		void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) override;
 

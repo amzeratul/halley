@@ -6,8 +6,18 @@
 #include "halley/core/graphics/material/material_parameter.h"
 #include <cstring> // memmove
 #include <gsl/gsl_assert>
+#include "resources/resources.h"
 
 using namespace Halley;
+
+Painter::Painter(Resources& resources)
+	: halleyGlobalMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/MaterialBase"), true))
+{
+}
+
+Painter::~Painter()
+{
+}
 
 void Painter::startRender()
 {
@@ -194,8 +204,7 @@ void Painter::bind(RenderContext& context)
 	setClip();
 
 	// Update projection
-	camera->updateProjection(renderTargetIsScreen);
-	projection = camera->getProjection();
+	updateProjection();
 }
 
 void Painter::unbind(RenderContext& context)
@@ -267,11 +276,12 @@ void Painter::resetPending()
 
 void Painter::executeDrawTriangles(Material& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
 {
-	// Bind projection
-	material.set("u_mvp", projection);
-
 	// Load vertices
 	setVertices(material.getDefinition(), numVertices, vertexData, numIndices, indices);
+
+	// Load material uniforms
+	material.uploadData(*this);
+	setMaterialData(material);
 
 	// Go through each pass
 	for (int i = 0; i < material.getDefinition().getNumPasses(); i++) {
@@ -347,4 +357,15 @@ void Painter::generateQuadIndicesOffset(unsigned short pos, unsigned short lineS
 	target[3] = pos + lineStride + 1;
 	target[4] = pos + lineStride;
 	target[5] = pos;
+}
+
+void Painter::updateProjection()
+{
+	camera->updateProjection(renderTargetIsScreen);
+	projection = camera->getProjection();
+	
+	halleyGlobalMaterial->set("u_mvp", projection);
+
+	halleyGlobalMaterial->uploadData(*this);
+	setMaterialData(*halleyGlobalMaterial);
 }

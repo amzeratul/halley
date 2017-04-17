@@ -4,10 +4,10 @@
 #include "halley/maths/colour.h"
 #include <condition_variable>
 #include <halley/maths/vector4.h>
-#include "material/material.h"
 
 namespace Halley
 {
+	class Resources;
 	class Shader;
 	class Material;
 	class MaterialDefinition;
@@ -28,7 +28,8 @@ namespace Halley
 		};
 
 	public:
-		virtual ~Painter() {}
+		Painter(Resources& resources);
+		virtual ~Painter();
 
 		void startRender();
 		void endRender();
@@ -40,6 +41,7 @@ namespace Halley
 
 		virtual void clear(Colour colour) = 0;
 		virtual void setMaterialPass(const Material& material, int pass) = 0;
+		virtual void setMaterialData(const Material& material) = 0;
 
 		void setRelativeClip(Rect4f rect);
 		void setClip(Rect4i rect);
@@ -68,6 +70,8 @@ namespace Halley
 		virtual void setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) = 0;
 		virtual void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) = 0;
 
+		std::unique_ptr<Material> halleyGlobalMaterial;
+
 	private:
 		void bind(RenderContext& context);
 		void unbind(RenderContext& context);
@@ -75,7 +79,7 @@ namespace Halley
 		RenderContext* activeContext = nullptr;
 		Matrix4f projection;
 		Rect4i renderTargetViewPort;
-		bool renderTargetIsScreen;
+		bool renderTargetIsScreen = true;
 		Rect4i viewPort;
 		Camera* camera = nullptr;
 
@@ -104,5 +108,7 @@ namespace Halley
 		unsigned short* getStandardQuadIndices(size_t numQuads);
 		void generateQuadIndices(unsigned short firstVertex, size_t numQuads, unsigned short* target);
 		void generateQuadIndicesOffset(unsigned short firstVertex, unsigned short lineStride, unsigned short* target);
+
+		void updateProjection();
 	};
 }

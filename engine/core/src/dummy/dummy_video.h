@@ -20,7 +20,7 @@ namespace Halley {
 		std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() override;
 		void init() override;
 		void deInit() override;
-		std::unique_ptr<Painter> makePainter() override;
+		std::unique_ptr<Painter> makePainter(Resources& resources) override;
 
 	private:
 		std::shared_ptr<Window> window;
@@ -58,6 +58,7 @@ namespace Halley {
 	class DummyPainter : public Painter
 	{
 	public:
+		explicit DummyPainter(Resources& resources);
 		void clear(Colour colour) override;
 		void setMaterialPass(const Material& material, int pass) override;
 		void doStartRender() override;
@@ -66,5 +67,6 @@ namespace Halley {
 		void drawTriangles(size_t numIndices) override;
 		void setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) override;
 		void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) override;
+		void setMaterialData(const Material& material) override;
 	};
 }

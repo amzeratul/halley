@@ -24,28 +24,40 @@ namespace Halley
 		virtual void update(const MaterialDataBlock& dataBlock) = 0;
 	};
 
+	enum class MaterialDataBlockType
+	{
+		// Shared blocks are not stored locally in the material (e.g. the HalleyBlock, stored by the engine)
+		SharedLocal,    // Shared, this keeps the canonical copy
+		SharedExternal, // Shared, only a reference
+		Local           // Local data
+	};
+
 	class MaterialDataBlock
 	{
 		friend class Material;
 
 	public:
 		MaterialDataBlock();
-		MaterialDataBlock(size_t size, const String& name, const MaterialDefinition& def);
+		MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, const String& name, const MaterialDefinition& def);
 		MaterialDataBlock(const MaterialDataBlock& other);
 		MaterialDataBlock(MaterialDataBlock&& other) noexcept;
 
 		MaterialConstantBuffer& getConstantBuffer() const;
 		int getAddress(int pass) const;
+		int getBindPoint() const;
 		gsl::span<const gsl::byte> getData() const;
+		MaterialDataBlockType getType() const;
 
 	private:
 		std::unique_ptr<MaterialConstantBuffer> constantBuffer;
 		Bytes data;
 		Vector<int> addresses;
+		MaterialDataBlockType dataBlockType;
+		int bindPoint = 0;
 		bool dirty = true;
 
 		void setUniform(size_t offset, ShaderParameterType type, void* data);
-		void upload(int passNumber, VideoAPI* api);
+		void upload(VideoAPI* api);
 	};
 	
 	class Material
@@ -54,8 +66,9 @@ namespace Halley
 
 	public:
 		Material(const Material& other);
-		explicit Material(std::shared_ptr<const MaterialDefinition> materialDefinition);
+		explicit Material(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks = false); // forceLocalBlocks is for engine use only
 		void bind(int pass, Painter& painter);
+		void uploadData(Painter& painter);
 		static void resetBindCache();
 
 		const MaterialDefinition& getDefinition() const { return *materialDefinition; }
@@ -88,7 +101,7 @@ namespace Halley
 		std::vector<std::shared_ptr<const Texture>> textures;
 		bool dirty = true;
 
-		void initUniforms();
+		void initUniforms(bool forceLocalBlocks);
 		MaterialParameter& getParameter(const String& name);
 
 		void setUniform(int blockNumber, size_t offset, ShaderParameterType type, void* data);

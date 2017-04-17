@@ -15,9 +15,11 @@ MaterialDataBlock::MaterialDataBlock()
 {
 }
 
-MaterialDataBlock::MaterialDataBlock(size_t size, const String& name, const MaterialDefinition& def)
-	: data(size)
+MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, const String& name, const MaterialDefinition& def)
+	: data(type == MaterialDataBlockType::SharedExternal ? 0 : size)
 	, addresses(def.getNumPasses())
+	, dataBlockType(type)
+	, bindPoint(bindPoint)
 {
 	for (int i = 0; i < def.getNumPasses(); ++i) {
 		auto& shader = def.getPass(i).getShader();
@@ -28,17 +30,19 @@ MaterialDataBlock::MaterialDataBlock(size_t size, const String& name, const Mate
 MaterialDataBlock::MaterialDataBlock(const MaterialDataBlock& other)
 	: data(other.data)
 	, addresses(other.addresses)
+	, dataBlockType(other.dataBlockType)
+	, bindPoint(other.bindPoint)
 	, dirty(true)
-{
-}
+{}
 
 MaterialDataBlock::MaterialDataBlock(MaterialDataBlock&& other) noexcept
 	: constantBuffer(std::move(other.constantBuffer))
 	, data(std::move(other.data))
 	, addresses(std::move(other.addresses))
+	, dataBlockType(other.dataBlockType)
+	, bindPoint(other.bindPoint)
 	, dirty(other.dirty)
-{
-}
+{}
 
 MaterialConstantBuffer& MaterialDataBlock::getConstantBuffer() const
 {
@@ -51,13 +55,25 @@ int MaterialDataBlock::getAddress(int pass) const
 	return addresses[pass];
 }
 
+int MaterialDataBlock::getBindPoint() const
+{
+	return bindPoint;
+}
+
 gsl::span<const gsl::byte> MaterialDataBlock::getData() const
 {
 	return gsl::as_bytes(gsl::span<const Byte>(data));
 }
 
+MaterialDataBlockType MaterialDataBlock::getType() const
+{
+	return dataBlockType;
+}
+
 void MaterialDataBlock::setUniform(size_t offset, ShaderParameterType type, void* srcData)
 {
+	Expects(dataBlockType != MaterialDataBlockType::SharedExternal);
+
 	const size_t size = MaterialAttribute::getAttributeSize(type);
 	Expects(size + offset <= data.size());
 	Expects(offset % 4 == 0); // Alignment
@@ -65,15 +81,17 @@ void MaterialDataBlock::setUniform(size_t offset, ShaderParameterType type, void
 	dirty = true;
 }
 
-void MaterialDataBlock::upload(int passNumber, VideoAPI* api)
+void MaterialDataBlock::upload(VideoAPI* api)
 {
-	if (!constantBuffer) {
-		constantBuffer = api->createConstantBuffer();
-		dirty = true;
-	}
-	if (dirty) {
-		constantBuffer->update(*this);
-		dirty = false;
+	if (dataBlockType != MaterialDataBlockType::SharedExternal) {
+		if (!constantBuffer) {
+			constantBuffer = api->createConstantBuffer();
+			dirty = true;
+		}
+		if (dirty) {
+			constantBuffer->update(*this);
+			dirty = false;
+		}
 	}
 }
 
@@ -89,15 +107,16 @@ Material::Material(const Material& other)
 	}
 }
 
-Material::Material(std::shared_ptr<const MaterialDefinition> materialDefinition)
+Material::Material(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks)
 	: materialDefinition(materialDefinition)
 {
-	initUniforms();
+	initUniforms(forceLocalBlocks);
 }
 
-void Material::initUniforms()
+void Material::initUniforms(bool forceLocalBlocks)
 {
 	int blockNumber = 0;
+	int nextBindPoint = 1;
 	for (auto& uniformBlock : materialDefinition->getUniformBlocks()) {
 		size_t curOffset = 0;
 		for (auto& uniform: uniformBlock.uniforms) {
@@ -106,7 +125,11 @@ void Material::initUniforms()
 			uniforms.push_back(MaterialParameter(*this, uniform.name, uniform.type, blockNumber, curOffset));
 			curOffset += size;
 		}
-		dataBlocks.push_back(MaterialDataBlock(curOffset, uniformBlock.name, *materialDefinition));
+		auto type = uniformBlock.name == "HalleyBlock"
+			? (forceLocalBlocks ? MaterialDataBlockType::SharedLocal : MaterialDataBlockType::SharedExternal)
+			: MaterialDataBlockType::Local;
+		int bind = type == MaterialDataBlockType::Local ? nextBindPoint++ : 0;
+		dataBlocks.push_back(MaterialDataBlock(type, curOffset, bind, uniformBlock.name, *materialDefinition));
 		++blockNumber;
 	}
 
@@ -125,12 +148,17 @@ void Material::bind(int passNumber, Painter& painter)
 	currentMaterial = this;
 	currentPass = passNumber;
 
-	for (auto& block: dataBlocks) {
-		block.upload(passNumber, getDefinition().api);
-	}
-	dirty = false;
-
 	painter.setMaterialPass(*this, passNumber);
+}
+
+void Material::uploadData(Painter& painter)
+{	
+	if (dirty) {
+		for (auto& block: dataBlocks) {
+			block.upload(getDefinition().api);
+		}
+		dirty = false;
+	}
 }
 
 void Material::resetBindCache()

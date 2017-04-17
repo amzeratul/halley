@@ -343,9 +343,9 @@ std::unique_ptr<MaterialConstantBuffer> VideoOpenGL::createConstantBuffer()
 	return std::make_unique<ConstantBufferOpenGL>();
 }
 
-std::unique_ptr<Painter> VideoOpenGL::makePainter()
+std::unique_ptr<Painter> VideoOpenGL::makePainter(Resources& resources)
 {
-	return std::make_unique<PainterOpenGL>();
+	return std::make_unique<PainterOpenGL>(resources);
 }
 
 std::unique_ptr<Texture> VideoOpenGL::createTexture(Vector2i size)

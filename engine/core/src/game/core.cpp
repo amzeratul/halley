@@ -154,7 +154,7 @@ void Core::init()
 	
 	// Get video resources
 	if (api->video) {
-		painter = api->videoInternal->makePainter();
+		painter = api->videoInternal->makePainter(api->core->getResources());
 	}
 }
 

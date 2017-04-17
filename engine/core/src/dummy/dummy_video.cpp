@@ -57,9 +57,9 @@ void DummyVideoAPI::deInit()
 {
 }
 
-std::unique_ptr<Painter> DummyVideoAPI::makePainter()
+std::unique_ptr<Painter> DummyVideoAPI::makePainter(Resources& resources)
 {
-	return std::make_unique<DummyPainter>();
+	return std::make_unique<DummyPainter>(resources);
 }
 
 DummyTexture::DummyTexture(Vector2i s)
@@ -95,6 +95,10 @@ int DummyShader::getBlockLocation(const String& name)
 
 void DummyMaterialConstantBuffer::update(const MaterialDataBlock& dataBlock) {}
 
+DummyPainter::DummyPainter(Resources& resources)
+	: Painter(resources)
+{}
+
 void DummyPainter::clear(Colour colour) {}
 
 void DummyPainter::setMaterialPass(const Material& material, int pass) {}
@@ -110,3 +114,5 @@ void DummyPainter::drawTriangles(size_t numIndices) {}
 void DummyPainter::setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) {}
 
 void DummyPainter::setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) {}
+
+void DummyPainter::setMaterialData(const Material& material) {}
