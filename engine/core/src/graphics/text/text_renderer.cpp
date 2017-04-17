@@ -12,13 +12,13 @@ TextRenderer::TextRenderer()
 }
 
 TextRenderer::TextRenderer(std::shared_ptr<const Font> font, String text, float size, Colour colour, float outline, Colour outlineColour)
-	: font(font)
-	, text(text.getUTF32())
+	: text(text.getUTF32())
 	, size(size)
 	, outline(outline)
 	, colour(colour)
 	, outlineColour(outlineColour)
 {
+	setFont(font);
 }
 
 TextRenderer& TextRenderer::setPosition(Vector2f pos)
@@ -29,7 +29,11 @@ TextRenderer& TextRenderer::setPosition(Vector2f pos)
 
 TextRenderer& TextRenderer::setFont(std::shared_ptr<const Font> v)
 {
-	font = v;
+	if (font != v) {
+		font = v;
+		material = font->getMaterial()->clone();
+	}
+
 	return *this;
 }
 
@@ -113,8 +117,7 @@ TextRenderer& TextRenderer::setOutlineColour(Colour v)
 void TextRenderer::draw(Painter& painter) const
 {
 	Expects(font);
-	auto material = font->getMaterial()->clone();
-	
+		
 	if (font->isDistanceField()) {
 		float smooth = clamp(smoothness / font->getSmoothRadius(), 0.001f, 0.999f);
 		float outlineSize = clamp(outline / font->getSmoothRadius(), 0.0f, 0.995f);

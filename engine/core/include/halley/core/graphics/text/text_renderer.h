@@ -10,6 +10,7 @@ namespace Halley
 {
 	class Font;
 	class Painter;
+	class Material;
 
 	class TextRenderer
 	{
@@ -49,6 +50,7 @@ namespace Halley
 
 	private:
 		std::shared_ptr<const Font> font;
+		std::shared_ptr<Material> material;
 		StringUTF32 text;
 		float size = 20;
 		float outline = 0;
