@@ -20,6 +20,7 @@ namespace Halley
 	private:
 		static void loadPass(MaterialDefinition& material, const YAML::Node& node, IAssetCollector& collector, int passN);
 		static void loadUniforms(MaterialDefinition& material, const YAML::Node& topNode);
+		static void loadTextures(MaterialDefinition& material, const YAML::Node& topNode);
 		static void loadAttributes(MaterialDefinition& material, const YAML::Node& topNode);
 
 		static ShaderParameterType parseParameterType(String rawType);

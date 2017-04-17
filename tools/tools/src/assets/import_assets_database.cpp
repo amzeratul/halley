@@ -3,6 +3,8 @@
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
 
+constexpr static int currentAssetVersion = 16;
+
 using namespace Halley;
 
 void ImportAssetsDatabaseEntry::serialize(Serializer& s) const
@@ -199,8 +201,6 @@ std::vector<AssetResource> ImportAssetsDatabase::getOutFiles(String assetId) con
 		return {};
 	}
 }
-
-constexpr static int currentAssetVersion = 15;
 
 void ImportAssetsDatabase::serialize(Serializer& s) const
 {

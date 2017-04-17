@@ -30,6 +30,33 @@ namespace Halley
 		Invalid
 	};
 
+	
+	class MaterialUniform
+	{
+	public:
+		String name;
+		ShaderParameterType type;
+
+		MaterialUniform();
+		MaterialUniform(String name, ShaderParameterType type);
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
+
+	class MaterialUniformBlock
+	{
+	public:
+		String name;
+		Vector<MaterialUniform> uniforms;
+
+		MaterialUniformBlock();
+		MaterialUniformBlock(const String& name, const Vector<MaterialUniform>& uniforms);
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
+
 	class MaterialAttribute
 	{
 	public:
@@ -65,7 +92,8 @@ namespace Halley
 		int getVertexStride() const { return vertexStride; }
 		int getVertexPosOffset() const { return vertexPosOffset; }
 		const Vector<MaterialAttribute>& getAttributes() const { return attributes; }
-		const Vector<MaterialAttribute>& getUniforms() const { return uniforms; }
+		const Vector<MaterialUniform>& getUniforms() const { return uniforms; }
+		const Vector<String>& getTextures() const { return textures; }
 
 		static std::unique_ptr<MaterialDefinition> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::MaterialDefinition; }
@@ -78,7 +106,8 @@ namespace Halley
 
 		String name;
 		Vector<MaterialPass> passes;
-		Vector<MaterialAttribute> uniforms;
+		Vector<String> textures;
+		Vector<MaterialUniform> uniforms;
 		Vector<MaterialAttribute> attributes;
 		int vertexStride = 0;
 		int vertexPosOffset = 0;

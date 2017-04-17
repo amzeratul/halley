@@ -11,6 +11,48 @@
 
 using namespace Halley;
 
+MaterialUniform::MaterialUniform()
+	: type(ShaderParameterType::Invalid)
+{}
+
+MaterialUniform::MaterialUniform(String name, ShaderParameterType type)
+	: name(name)
+	, type(type)
+{}
+
+void MaterialUniform::serialize(Serializer& s) const
+{
+	s << name;
+	s << int(type);
+}
+
+void MaterialUniform::deserialize(Deserializer& s)
+{
+	s >> name;
+	int temp;
+	s >> temp;
+	type = ShaderParameterType(temp);
+}
+
+MaterialUniformBlock::MaterialUniformBlock() {}
+
+MaterialUniformBlock::MaterialUniformBlock(const String& name, const Vector<MaterialUniform>& uniforms)
+	: name(name)
+	, uniforms(uniforms)
+{}
+
+void MaterialUniformBlock::serialize(Serializer& s) const
+{
+	s << name;
+	s << uniforms;
+}
+
+void MaterialUniformBlock::deserialize(Deserializer& s)
+{
+	s >> name;
+	s >> uniforms;
+}
+
 MaterialAttribute::MaterialAttribute()
 	: type(ShaderParameterType::Invalid)
     , location(-1)
@@ -109,6 +151,7 @@ void MaterialDefinition::serialize(Serializer& s) const
 {
 	s << name;
 	s << passes;
+	s << textures;
 	s << uniforms;
 	s << attributes;
 	s << vertexStride;
@@ -119,6 +162,7 @@ void MaterialDefinition::deserialize(Deserializer& s)
 {
 	s >> name;
 	s >> passes;
+	s >> textures;
 	s >> uniforms;
 	s >> attributes;
 	s >> vertexStride;

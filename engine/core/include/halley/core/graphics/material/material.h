@@ -32,9 +32,6 @@ namespace Halley
 		void bind(int pass, Painter& painter);
 		static void resetBindCache();
 
-		void setUniform(size_t offset, ShaderParameterType type, void* data);
-		void setTexture(int textureUnit, std::shared_ptr<const Texture> texture);
-
 		const MaterialDefinition& getDefinition() const { return *materialDefinition; }
 
 		std::shared_ptr<Material> clone() const;
@@ -43,29 +40,33 @@ namespace Halley
 		const std::shared_ptr<const Texture>& getTexture(int textureUnit) const;
 		const Bytes& getData() const;
 		const Vector<MaterialParameter>& getUniforms() const;
+		const Vector<MaterialParameter>& getTextureUniforms() const;
 		MaterialConstantBuffer& getConstantBuffer() const;
 
+		Material& set(const String& name, const std::shared_ptr<const Texture>& texture);
+
 		template <typename T>
-		Material& set(const String& name, const T& value, bool optional = false)
+		Material& set(const String& name, const T& value)
 		{
-			auto param = getParameter(name, optional);
-			if (param) {
-				*param = value;
-			}
+			getParameter(name) = value;
 			return *this;
 		}
 
 	private:
 		bool dirty = false;
 
-		Vector<MaterialParameter> uniforms;
 		std::shared_ptr<const MaterialDefinition> materialDefinition;
+		
+		Vector<MaterialParameter> uniforms;
 		std::unique_ptr<MaterialConstantBuffer> constantBuffer;
-
 		Bytes uniformData;
+
+		Vector<MaterialParameter> textureUniforms;
 		std::vector<std::shared_ptr<const Texture>> textures;
 
 		void initUniforms();
-		MaterialParameter* getParameter(const String& name, bool optional);
+		MaterialParameter& getParameter(const String& name);
+
+		void setUniform(size_t offset, ShaderParameterType type, void* data);
 	};
 }

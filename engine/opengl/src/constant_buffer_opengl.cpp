@@ -51,18 +51,6 @@ void ConstantBufferOpenGL::bind(int pass)
 		case ShaderParameterType::Int4:
 			glUniform4i(loc, ints[0], ints[1], ints[2], ints[3]);
 			break;
-		case ShaderParameterType::Texture2D:
-			{
-				int textureUnit = ints[0];
-				glUniform1i(loc, textureUnit);
-				auto texture = std::static_pointer_cast<const TextureOpenGL>(material.getTexture(textureUnit));
-				if (!texture) {
-					//throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.");					
-				} else {
-					texture->bind(textureUnit);
-				}
-			}
-			break;
 		case ShaderParameterType::Matrix2:
 			glUniformMatrix2fv(loc, 1, false, floats);
 			break;

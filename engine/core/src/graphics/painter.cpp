@@ -268,7 +268,7 @@ void Painter::resetPending()
 void Painter::executeDrawTriangles(Material& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
 {
 	// Bind projection
-	material.set("u_mvp", projection, true);
+	material.set("u_mvp", projection);
 
 	// Load vertices
 	setVertices(material.getDefinition(), numVertices, vertexData, numIndices, indices);

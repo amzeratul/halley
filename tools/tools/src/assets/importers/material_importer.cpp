@@ -38,6 +38,9 @@ MaterialDefinition MaterialImporter::parseMaterial(Path basePath, gsl::span<cons
 	if (root["uniforms"]) {
 		loadUniforms(material, root["uniforms"]);
 	}
+	if (root["textures"]) {
+		loadTextures(material, root["textures"]);
+	}
 
 	// Load passes
 	int passN = 0;
@@ -90,7 +93,23 @@ void MaterialImporter::loadUniforms(MaterialDefinition& material, const YAML::No
 			String name = it->first.as<std::string>();
 			ShaderParameterType type = parseParameterType(it->second.as<std::string>());
 
-			material.uniforms.push_back(MaterialAttribute(name, type, -1));
+			material.uniforms.push_back(MaterialUniform(name, type));
+		}
+	}
+}
+
+void MaterialImporter::loadTextures(MaterialDefinition& material, const YAML::Node& topNode)
+{
+	auto attribSeqNode = topNode.as<YAML::Node>();
+	for (auto attribEntry : attribSeqNode) {
+		for (YAML::const_iterator it = attribEntry.begin(); it != attribEntry.end(); ++it) {
+			String name = it->first.as<std::string>();
+			ShaderParameterType type = parseParameterType(it->second.as<std::string>());
+			if (type != ShaderParameterType::Texture2D) {
+				throw Exception("Texture \"" + name + "\" must be sampler2D");
+			}
+
+			material.textures.push_back(name);
 		}
 	}
 }

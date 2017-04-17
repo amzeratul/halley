@@ -1,7 +1,7 @@
 ---
 name: Halley/Sprite
 base: sprite_base.yaml
-uniforms:
+textures:
   - tex0: sampler2D
 passes:
   - blend: AlphaPremultiplied

@@ -3,6 +3,8 @@
 #include <gsl/gsl_assert>
 #include "shader_opengl.h"
 #include "constant_buffer_opengl.h"
+#include "halley/core/graphics/material/material_parameter.h"
+#include "texture_opengl.h"
 
 using namespace Halley;
 
@@ -71,9 +73,28 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 {
 	auto& pass = material.getDefinition().getPass(passNumber);
 
+	// Set blend and shader
 	glUtils->setBlendType(pass.getBlend());
 	static_cast<ShaderOpenGL&>(pass.getShader()).bind();
+
+	// Bind constant buffer
 	static_cast<ConstantBufferOpenGL&>(material.getConstantBuffer()).bind(passNumber);
+
+	// Bind textures
+	int textureUnit = 0;
+	for (auto& tex: material.getTextureUniforms()) {
+		int location = tex.getAddress(passNumber);
+		if (location != -1) {
+			glUniform1i(location, textureUnit);
+			auto texture = std::static_pointer_cast<const TextureOpenGL>(material.getTexture(textureUnit));
+			if (!texture) {
+				throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.");					
+			} else {
+				texture->bind(textureUnit);
+			}
+		}
+		++textureUnit;
+	}
 }
 
 static Rect4i flipRectangle(Rect4i r, int h)

@@ -15,6 +15,7 @@ MaterialParameter::MaterialParameter(Material& material, String name, ShaderPara
 	, type(type)
 	, offset(offset)
 {
+	init();
 }
 
 void MaterialParameter::init()
@@ -35,14 +36,6 @@ void MaterialParameter::rebind(Material& m)
 unsigned int MaterialParameter::getAddress(int pass) const
 {
 	return addresses[pass];
-}
-
-void MaterialParameter::operator=(std::shared_ptr<const Texture> texture)
-{
-	Expects(texture);
-	Expects(type == ShaderParameterType::Texture2D);
-	material->setUniform(offset, ShaderParameterType::Int, &textureUnit);
-	material->setTexture(textureUnit, texture);
 }
 
 void MaterialParameter::operator=(Colour colour)

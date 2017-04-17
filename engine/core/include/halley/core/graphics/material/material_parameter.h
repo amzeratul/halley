@@ -21,7 +21,6 @@ namespace Halley
 		friend class MaterialPass;
 
 	public:
-		void operator=(std::shared_ptr<const Texture> texture);
 		void operator=(Colour colour);
 		void operator=(float p);
 		void operator=(Vector2f p);
@@ -47,7 +46,6 @@ namespace Halley
 		String name;
 		ShaderParameterType type;
 		size_t offset;
-		int textureUnit = -1;
 	};
 
 }
