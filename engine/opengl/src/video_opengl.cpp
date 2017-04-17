@@ -135,6 +135,8 @@ void VideoOpenGL::startLoaderThread()
 
 void VideoOpenGL::setupDebugCallback()
 {
+	return;
+
 #ifdef WITH_OPENGL
 	if (glDebugMessageCallback) {
 #ifdef _DEBUG
