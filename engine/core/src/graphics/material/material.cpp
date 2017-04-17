@@ -123,6 +123,11 @@ Material& Material::set(const String& name, const std::shared_ptr<const Texture>
 	throw Exception("Texture sampler \"" + name + "\" not available in material \"" + materialDefinition->getName() + "\"");
 }
 
+Material& Material::set(const String& name, const std::shared_ptr<Texture>& texture)
+{
+	return set(name, std::shared_ptr<const Texture>(texture));
+}
+
 MaterialParameter& Material::getParameter(const String& name)
 {
 	for (auto& u : uniforms) {

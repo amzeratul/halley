@@ -44,6 +44,7 @@ namespace Halley
 		MaterialConstantBuffer& getConstantBuffer() const;
 
 		Material& set(const String& name, const std::shared_ptr<const Texture>& texture);
+		Material& set(const String& name, const std::shared_ptr<Texture>& texture);
 
 		template <typename T>
 		Material& set(const String& name, const T& value)
