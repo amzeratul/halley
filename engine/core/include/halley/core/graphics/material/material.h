@@ -30,7 +30,7 @@ namespace Halley
 
 	public:
 		MaterialDataBlock();
-		MaterialDataBlock(const String& name, const MaterialDefinition& def);
+		MaterialDataBlock(size_t size, const String& name, const MaterialDefinition& def);
 		MaterialDataBlock(const MaterialDataBlock& other);
 		MaterialDataBlock(MaterialDataBlock&& other) noexcept;
 

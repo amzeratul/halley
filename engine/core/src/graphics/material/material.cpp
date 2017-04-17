@@ -15,9 +15,10 @@ MaterialDataBlock::MaterialDataBlock()
 {
 }
 
-MaterialDataBlock::MaterialDataBlock(const String& name, const MaterialDefinition& def)
+MaterialDataBlock::MaterialDataBlock(size_t size, const String& name, const MaterialDefinition& def)
+	: data(size)
+	, addresses(def.getNumPasses())
 {
-	addresses.resize(def.getNumPasses());
 	for (int i = 0; i < def.getNumPasses(); ++i) {
 		auto& shader = def.getPass(i).getShader();
 		addresses[i] = shader.getBlockLocation(name);
@@ -105,8 +106,7 @@ void Material::initUniforms()
 			uniforms.push_back(MaterialParameter(*this, uniform.name, uniform.type, blockNumber, curOffset));
 			curOffset += size;
 		}
-		dataBlocks.push_back(MaterialDataBlock(uniformBlock.name, *materialDefinition));
-		dataBlocks.back().data.resize(curOffset);
+		dataBlocks.push_back(MaterialDataBlock(curOffset, uniformBlock.name, *materialDefinition));
 		++blockNumber;
 	}
 
