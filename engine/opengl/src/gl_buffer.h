@@ -15,6 +15,7 @@ namespace Halley
 		void bindToTarget(GLuint index);
 		void init(GLenum target);
 		void setData(gsl::span<const gsl::byte> data);
+		size_t getSize() const;
 
 	private:
 		GLenum target = 0;

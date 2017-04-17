@@ -37,6 +37,7 @@ void PainterOpenGL::doStartRender()
 
 	vertexBuffer.init(GL_ARRAY_BUFFER);
 	elementBuffer.init(GL_ELEMENT_ARRAY_BUFFER);
+	stdQuadElementBuffer.init(GL_ELEMENT_ARRAY_BUFFER);
 
 #ifdef WITH_OPENGL
 	if (vao == 0) {
@@ -139,7 +140,7 @@ void PainterOpenGL::setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isS
 	}
 }
 
-void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
+void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly)
 {
 	Expects(numVertices > 0);
 	Expects(numIndices >= numVertices);
@@ -147,7 +148,18 @@ void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVe
 	Expects(indices);
 
 	// Load indices into VBO
-	elementBuffer.setData(gsl::as_bytes(gsl::span<unsigned short>(indices, numIndices)));
+	if (false && standardQuadsOnly) { // For some reason, this is a pessimisation? Why?
+		if (stdQuadElementBuffer.getSize() < numIndices * sizeof(unsigned short)) {
+			size_t indicesToAllocate = nextPowerOf2(numIndices);
+			std::vector<unsigned short> tmp(indicesToAllocate);
+			generateQuadIndices(0, indicesToAllocate / 6, tmp.data());
+			stdQuadElementBuffer.setData(gsl::as_bytes(gsl::span<unsigned short>(tmp)));
+		} else {
+			stdQuadElementBuffer.bind();
+		}
+	} else {
+		elementBuffer.setData(gsl::as_bytes(gsl::span<unsigned short>(indices, numIndices)));
+	}
 
 	// Load vertices into VBO
 	size_t bytesSize = numVertices * material.getVertexStride();

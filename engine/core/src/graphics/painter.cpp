@@ -56,7 +56,7 @@ static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
 	return *reinterpret_cast<Vector4f*>(vertexAttrib + vertPosOffset);
 }
 
-Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices)
+Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly)
 {
 	Expects(material);
 	Expects(numVertices > 0);
@@ -78,6 +78,7 @@ Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& mater
 	indicesPending += numIndices;
 	verticesPending += numVertices;
 	bytesPending += result.dataSize;
+	allIndicesAreQuads &= standardQuadsOnly;
 
 	return result;
 }
@@ -87,7 +88,7 @@ void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, 
 	Expects(numVertices % 4 == 0);
 	Expects(vertexData != nullptr);
 
-	auto result = addDrawData(material, numVertices, numVertices * 3 / 2);
+	auto result = addDrawData(material, numVertices, numVertices * 3 / 2, true);
 
 	memmove(result.dstVertex, vertexData, result.dataSize);
 	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
@@ -101,7 +102,7 @@ void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites,
 	const size_t numVertices = verticesPerSprite * numSprites;
 	const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
 
-	auto result = addDrawData(material, numVertices, numSprites * 6);
+	auto result = addDrawData(material, numVertices, numSprites * 6, true);
 
 	const char* const src = reinterpret_cast<const char*>(vertexData);
 
@@ -145,7 +146,7 @@ void Painter::drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scal
 	const size_t numIndices = 9 * 6; // 9 quads, 6 indices per quad
 	const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
 
-	auto result = addDrawData(material, numVertices, numIndices);
+	auto result = addDrawData(material, numVertices, numIndices, false);
 	const char* const src = reinterpret_cast<const char*>(vertexData);
 
 	// Vertices
@@ -271,6 +272,7 @@ void Painter::resetPending()
 	bytesPending = 0;
 	verticesPending = 0;
 	indicesPending = 0;
+	allIndicesAreQuads = true;
 	if (materialPending) {
 		Material::resetBindCache();
 		materialPending.reset();
@@ -280,7 +282,7 @@ void Painter::resetPending()
 void Painter::executeDrawTriangles(Material& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
 {
 	// Load vertices
-	setVertices(material.getDefinition(), numVertices, vertexData, numIndices, indices);
+	setVertices(material.getDefinition(), numVertices, vertexData, numIndices, indices, allIndicesAreQuads);
 
 	// Load material uniforms
 	material.uploadData(*this);

@@ -68,13 +68,13 @@ namespace Halley
 	protected:
 		virtual void doStartRender() = 0;
 		virtual void doEndRender() = 0;
-		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices) = 0;
+		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly) = 0;
 		virtual void drawTriangles(size_t numIndices) = 0;
 
 		virtual void setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) = 0;
 		virtual void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) = 0;
 
-		std::unique_ptr<Material> halleyGlobalMaterial;
+		void generateQuadIndices(unsigned short firstVertex, size_t numQuads, unsigned short* target);
 
 	private:
 		void bind(RenderContext& context);
@@ -90,9 +90,11 @@ namespace Halley
 		size_t verticesPending = 0;
 		size_t bytesPending = 0;
 		size_t indicesPending = 0;
+		bool allIndicesAreQuads = true;
 		Vector<char> vertexBuffer;
 		Vector<unsigned short> indexBuffer;
 		std::shared_ptr<Material> materialPending;
+		std::unique_ptr<Material> halleyGlobalMaterial;
 
 		size_t nDrawCalls = 0;
 		size_t nVertices = 0;
@@ -110,10 +112,9 @@ namespace Halley
 
 		void makeSpaceForPendingVertices(size_t numBytes);
 		void makeSpaceForPendingIndices(size_t numIndices);
-		PainterVertexData addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices);
+		PainterVertexData addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly);
 
 		unsigned short* getStandardQuadIndices(size_t numQuads);
-		void generateQuadIndices(unsigned short firstVertex, size_t numQuads, unsigned short* target);
 		void generateQuadIndicesOffset(unsigned short firstVertex, unsigned short lineStride, unsigned short* target);
 
 		void updateProjection();

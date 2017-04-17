@@ -33,6 +33,11 @@ void GLBuffer::setData(gsl::span<const gsl::byte> data)
 	glCheckError();
 }
 
+size_t GLBuffer::getSize() const
+{
+	return size;
+}
+
 void GLBuffer::bind()
 {
 	glBindBuffer(target, name);

@@ -63,7 +63,7 @@ namespace Halley {
 		void setMaterialPass(const Material& material, int pass) override;
 		void doStartRender() override;
 		void doEndRender() override;
-		void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices) override;
+		void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly) override;
 		void drawTriangles(size_t numIndices) override;
 		void setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) override;
 		void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) override;

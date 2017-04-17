@@ -68,7 +68,7 @@ void Halley::MainLoop::runLoop()
 				}
 			} else {
 				// Nope, release CPU
-				std::this_thread::sleep_for(100us);
+				std::this_thread::yield();
 			}
 
 			target.onVariableUpdate(std::chrono::duration<float>(curTime - lastTime).count());

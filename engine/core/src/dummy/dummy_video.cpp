@@ -107,7 +107,7 @@ void DummyPainter::doStartRender() {}
 
 void DummyPainter::doEndRender() {}
 
-void DummyPainter::setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices) {}
+void DummyPainter::setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly) {}
 
 void DummyPainter::drawTriangles(size_t numIndices) {}
 
