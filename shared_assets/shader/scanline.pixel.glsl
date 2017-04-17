@@ -1,4 +1,4 @@
-uniform MaterialBlock {
+layout(std140) uniform MaterialBlock {
 	vec4 u_col0;
 	vec4 u_col1;
 	float u_distance;

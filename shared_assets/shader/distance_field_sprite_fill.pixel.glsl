@@ -1,5 +1,5 @@
 uniform sampler2D tex0;
-uniform MaterialBlock {
+layout(std140) uniform MaterialBlock {
 	float u_smoothness;
 	float u_outline;
 	vec4 u_outlineColour;

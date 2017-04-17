@@ -19,6 +19,7 @@ namespace Halley
 	private:
 		GLenum target = 0;
         GLuint name = 0;
+		size_t capacity = 0;
 		size_t size = 0;
 	};
 }

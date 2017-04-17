@@ -96,12 +96,14 @@ Material::Material(std::shared_ptr<const MaterialDefinition> materialDefinition)
 
 void Material::initUniforms()
 {
-	size_t curOffset = 0;
 	int blockNumber = 0;
 	for (auto& uniformBlock : materialDefinition->getUniformBlocks()) {
+		size_t curOffset = 0;
 		for (auto& uniform: uniformBlock.uniforms) {
+			auto size = MaterialAttribute::getAttributeSize(uniform.type);
+			curOffset = alignUp(curOffset, std::min(size_t(16), size));
 			uniforms.push_back(MaterialParameter(*this, uniform.name, uniform.type, blockNumber, curOffset));
-			curOffset += MaterialAttribute::getAttributeSize(uniform.type);
+			curOffset += size;
 		}
 		dataBlocks.push_back(MaterialDataBlock(uniformBlock.name, *materialDefinition));
 		dataBlocks.back().data.resize(curOffset);

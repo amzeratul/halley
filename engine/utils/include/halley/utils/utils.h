@@ -187,6 +187,19 @@ namespace Halley {
 		else return std::max(a-inc, b);
 	}
 
+	// Align address
+	template <typename T>
+	T alignUp(T val, T align)
+	{
+		return val + (align - (val % align)) % align;
+	}
+
+	template <typename T>
+	T alignDown(T val, T align)
+	{
+		return (val / align) * align;
+	}
+
 	// Prefetch data from memory
 	static inline void prefetchL1(void* p) {
 #ifdef _MSC_VER

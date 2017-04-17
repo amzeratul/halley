@@ -1,4 +1,4 @@
-uniform HalleyBlock {
+layout(std140) uniform HalleyBlock {
 	mat4 u_mvp;
 };
 
