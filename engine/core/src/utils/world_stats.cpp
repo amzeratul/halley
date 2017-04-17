@@ -65,7 +65,11 @@ void WorldStatsView::draw(RenderContext& context)
 		}
 
 		int maxFPS = int(1'000'000'000.0 / grandTotal + 0.5f);
-		text.setColour(Colour(1, 1, 1)).setText("Total elapsed: " + formatTime(grandTotal) + " ms [" + toString(maxFPS) + " FPS maximum].").setPosition(Vector2f(20, 20)).draw(painter);
+		text
+			.setColour(Colour(1, 1, 1))
+			.setText("Total elapsed: " + formatTime(grandTotal) + " ms [" + toString(maxFPS) + " FPS maximum].\n" + toString(painter.getPrevDrawCalls()) + " draw calls, " + toString(painter.getPrevTriangles()) + " triangles, " + toString(painter.getPrevVertices()) + " vertices.")
+			.setPosition(Vector2f(20, 20))
+			.draw(painter);
 	});
 }
 

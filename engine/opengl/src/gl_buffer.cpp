@@ -22,12 +22,12 @@ void GLBuffer::init(GLenum t)
 
 void GLBuffer::setData(gsl::span<const gsl::byte> data)
 {
+	bind();
 	size = size_t(data.size_bytes());
 	if (capacity < size) {
 		capacity = nextPowerOf2(size);
+		glBufferData(target, capacity, nullptr, GL_STREAM_DRAW);
 	}
-	bind();
-	glBufferData(target, capacity, nullptr, GL_STREAM_DRAW);
 	glBufferSubData(target, 0, size, data.data());
 
 	glCheckError();

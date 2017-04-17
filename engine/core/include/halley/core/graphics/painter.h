@@ -61,6 +61,10 @@ namespace Halley
 		size_t getNumVertices() const { return nVertices; }
 		size_t getNumTriangles() const { return nTriangles; }
 
+		size_t getPrevDrawCalls() const { return prevDrawCalls; }
+		size_t getPrevVertices() const { return prevVertices; }
+		size_t getPrevTriangles() const { return prevTriangles; }
+
 	protected:
 		virtual void doStartRender() = 0;
 		virtual void doEndRender() = 0;
@@ -93,6 +97,9 @@ namespace Halley
 		size_t nDrawCalls = 0;
 		size_t nVertices = 0;
 		size_t nTriangles = 0;
+		size_t prevDrawCalls = 0;
+		size_t prevVertices = 0;
+		size_t prevTriangles = 0;
 
 		Vector<unsigned short> stdQuadIndexCache;
 

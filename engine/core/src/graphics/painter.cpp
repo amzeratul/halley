@@ -22,6 +22,9 @@ Painter::~Painter()
 void Painter::startRender()
 {
 	Material::resetBindCache();
+	prevDrawCalls = nDrawCalls;
+	prevTriangles = nTriangles;
+	prevVertices = nVertices;
 	nDrawCalls = nTriangles = nVertices = 0;
 
 	resetPending();
