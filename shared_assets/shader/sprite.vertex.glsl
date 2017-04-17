@@ -1,4 +1,6 @@
-uniform mat4 u_mvp;
+uniform HalleyBlock {
+	mat4 u_mvp;
+};
 
 in vec4 a_vertPos;
 in vec2 a_position;

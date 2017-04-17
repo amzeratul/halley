@@ -1,0 +1,6 @@
+---
+name: Halley/MaterialBase
+uniforms:
+  - HalleyBlock:
+    - u_mvp: mat4
+...

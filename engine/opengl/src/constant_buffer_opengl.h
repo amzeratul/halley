@@ -1,16 +1,18 @@
 #pragma once
 #include "halley/core/graphics/material/material.h"
+#include "gl_buffer.h"
 
 namespace Halley
 {
 	class ConstantBufferOpenGL : public MaterialConstantBuffer
 	{
 	public:
-		explicit ConstantBufferOpenGL(const Material& material);
-		void update(const Material& material) override;
-		void bind(int pass);
+		explicit ConstantBufferOpenGL();
+		~ConstantBufferOpenGL();
+		void update(const MaterialDataBlock& dataBlock) override;
+		void bind(int bindPoint);
 
 	private:
-		const Material& material;
+		GLBuffer buffer;
 	};
 }

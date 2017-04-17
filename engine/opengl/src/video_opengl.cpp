@@ -330,9 +330,9 @@ static std::function<void(int, void*)> getUniformBinding(UniformType type, int n
 	}
 }
 
-std::unique_ptr<MaterialConstantBuffer> VideoOpenGL::createConstantBuffer(const Material& material)
+std::unique_ptr<MaterialConstantBuffer> VideoOpenGL::createConstantBuffer()
 {
-	return std::make_unique<ConstantBufferOpenGL>(material);
+	return std::make_unique<ConstantBufferOpenGL>();
 }
 
 std::unique_ptr<Painter> VideoOpenGL::makePainter()

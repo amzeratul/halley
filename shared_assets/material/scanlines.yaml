@@ -2,9 +2,10 @@
 name: Halley/Scanlines
 base: sprite_base.yaml
 uniforms:
-  - u_col0: vec4
-  - u_col1: vec4
-  - u_distance: float
+  - MaterialBlock:
+    - u_col0: vec4
+    - u_col1: vec4
+    - u_distance: float
 passes:
   - blend: Opaque
     vertex: sprite.vertex.glsl

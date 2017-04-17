@@ -22,19 +22,10 @@ void GLBuffer::init(GLenum t)
 
 void GLBuffer::setData(gsl::span<const gsl::byte> data)
 {
-	/*
-	if (size < size_t(data.size_bytes())) {
-		glBufferData(target, data.size_bytes(), data.data(), GL_STREAM_DRAW);
-		size = data.size_bytes();
-	} else {
-		glBufferData(target, size, nullptr, GL_STREAM_DRAW);
-		glBufferSubData(target, 0, data.size_bytes(), data.data());
-	}
-	*/
-
 	if (size < size_t(data.size_bytes())) {
 		size = nextPowerOf2(data.size_bytes());
 	}
+	bind();
 	glBufferData(target, size, nullptr, GL_STREAM_DRAW);
 	glBufferSubData(target, 0, data.size_bytes(), data.data());
 
@@ -44,5 +35,11 @@ void GLBuffer::setData(gsl::span<const gsl::byte> data)
 void GLBuffer::bind()
 {
 	glBindBuffer(target, name);
+	glCheckError();
+}
+
+void GLBuffer::bindToTarget(GLuint index)
+{
+	glBindBufferBase(target, index, name);
 	glCheckError();
 }

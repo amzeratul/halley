@@ -15,6 +15,17 @@ namespace Halley
 	class MaterialPass;
 	enum class ShaderParameterType;
 
+	class MaterialTextureParameter
+	{
+	public:
+		MaterialTextureParameter(Material& material, const String& name);
+		unsigned int getAddress(int pass) const;
+
+	private:
+		String name;
+		Vector<int> addresses;
+	};
+
 	class MaterialParameter
 	{
 		friend class Material;
@@ -31,20 +42,16 @@ namespace Halley
 		void operator=(Matrix4f m);
 
 		ShaderParameterType getType() const;
-		const void* getData() const;
-		unsigned int getAddress(int pass) const;
-		const String& getName() const;
 
 	private:
-		MaterialParameter(Material& material, String name, ShaderParameterType type, size_t offset);
+		MaterialParameter(Material& material, const String& name, ShaderParameterType type, int blockNumber, size_t offset);
 
-		void init();
 		void rebind(Material& material);
 		
-		Vector<int> addresses;
 		Material* material;
-		String name;
 		ShaderParameterType type;
+		String name;
+		int blockNumber;
 		size_t offset;
 	};
 

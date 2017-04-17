@@ -75,10 +75,19 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 
 	// Set blend and shader
 	glUtils->setBlendType(pass.getBlend());
-	static_cast<ShaderOpenGL&>(pass.getShader()).bind();
+	ShaderOpenGL& shader = static_cast<ShaderOpenGL&>(pass.getShader());
+	shader.bind();
 
 	// Bind constant buffer
-	static_cast<ConstantBufferOpenGL&>(material.getConstantBuffer()).bind(passNumber);
+	int bindPoint = 0;
+	for (auto& dataBlock: material.getDataBlocks()) {
+		int address = dataBlock.getAddress(passNumber);
+		if (address != -1) {
+			shader.setUniformBlockBinding(address, bindPoint);
+			static_cast<ConstantBufferOpenGL&>(dataBlock.getConstantBuffer()).bind(bindPoint);
+			bindPoint++;
+		}
+	}
 
 	// Bind textures
 	int textureUnit = 0;

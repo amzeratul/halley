@@ -30,6 +30,6 @@ namespace Halley
 		virtual std::unique_ptr<Texture> createTexture(Vector2i size) = 0;
 		virtual std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) = 0;
 		virtual std::unique_ptr<TextureRenderTarget> createRenderTarget() = 0;
-		virtual std::unique_ptr<MaterialConstantBuffer> createConstantBuffer(const Material& material) = 0;
+		virtual std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() = 0;
 	};
 }

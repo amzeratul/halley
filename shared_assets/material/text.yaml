@@ -4,9 +4,10 @@ base: sprite_base.yaml
 textures:
   - tex0: sampler2D
 uniforms:
-  - u_smoothness: float
-  - u_outline: float
-  - u_outlineColour: vec4
+  - MaterialBlock:
+    - u_smoothness: float
+    - u_outline: float
+    - u_outlineColour: vec4
 passes:
   - blend: Alpha
     vertex: sprite.vertex.glsl

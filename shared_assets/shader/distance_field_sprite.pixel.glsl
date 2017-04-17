@@ -1,7 +1,9 @@
 uniform sampler2D tex0;
-uniform float u_smoothness;
-uniform float u_outline;
-uniform vec4 u_outlineColour;
+uniform MaterialBlock {
+	float u_smoothness;
+	float u_outline;
+	vec4 u_outlineColour;
+};
 
 in vec2 v_texCoord0;
 in vec2 v_pixelTexCoord0;

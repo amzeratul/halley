@@ -173,6 +173,12 @@ void ShaderOpenGL::destroy()
 	}
 }
 
+void ShaderOpenGL::setUniformBlockBinding(unsigned int blockIndex, unsigned int binding)
+{
+	glUniformBlockBinding(id, blockIndex, binding);
+	glCheckError();
+}
+
 int ShaderOpenGL::getUniformLocation(const String& name)
 {
 	auto i = uniformLocations.find(name);
@@ -184,6 +190,20 @@ int ShaderOpenGL::getUniformLocation(const String& name)
 	glCheckError();
 
 	uniformLocations[name] = result;
+	return int(result);
+}
+
+int ShaderOpenGL::getBlockLocation(const String& name)
+{
+	auto i = blockLocations.find(name);
+	if (i != blockLocations.end()) {
+		return int(i->second);
+	}
+
+	unsigned int result = glGetUniformBlockIndex(id, name.c_str());
+	glCheckError();
+
+	blockLocations[name] = result;
 	return int(result);
 }
 

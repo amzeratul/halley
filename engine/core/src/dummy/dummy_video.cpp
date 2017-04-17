@@ -44,7 +44,7 @@ std::unique_ptr<TextureRenderTarget> DummyVideoAPI::createRenderTarget()
 	return std::make_unique<DummyTextureRenderTarget>();
 }
 
-std::unique_ptr<MaterialConstantBuffer> DummyVideoAPI::createConstantBuffer(const Material& material)
+std::unique_ptr<MaterialConstantBuffer> DummyVideoAPI::createConstantBuffer()
 {
 	return std::make_unique<DummyMaterialConstantBuffer>();
 }
@@ -88,7 +88,12 @@ int DummyShader::getUniformLocation(const String& name)
 	return 0;
 }
 
-void DummyMaterialConstantBuffer::update(const Material& material) {}
+int DummyShader::getBlockLocation(const String& name)
+{
+	return 0;
+}
+
+void DummyMaterialConstantBuffer::update(const MaterialDataBlock& dataBlock) {}
 
 void DummyPainter::clear(Colour colour) {}
 

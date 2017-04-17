@@ -12,6 +12,7 @@ namespace Halley
 	class VideoAPI;
 	class Painter;
 	class MaterialImporter;
+	class MaterialTextureParameter;
 
 	enum class ShaderParameterType
 	{
@@ -78,6 +79,7 @@ namespace Halley
 	{
 		friend class Material;
 		friend class MaterialParameter;
+		friend class MaterialTextureParameter;
 		friend class MaterialImporter;
 
 	public:
@@ -92,7 +94,7 @@ namespace Halley
 		int getVertexStride() const { return vertexStride; }
 		int getVertexPosOffset() const { return vertexPosOffset; }
 		const Vector<MaterialAttribute>& getAttributes() const { return attributes; }
-		const Vector<MaterialUniform>& getUniforms() const { return uniforms; }
+		const Vector<MaterialUniformBlock>& getUniformBlocks() const { return uniformBlocks; }
 		const Vector<String>& getTextures() const { return textures; }
 
 		static std::unique_ptr<MaterialDefinition> loadResource(ResourceLoader& loader);
@@ -107,7 +109,7 @@ namespace Halley
 		String name;
 		Vector<MaterialPass> passes;
 		Vector<String> textures;
-		Vector<MaterialUniform> uniforms;
+		Vector<MaterialUniformBlock> uniformBlocks;
 		Vector<MaterialAttribute> attributes;
 		int vertexStride = 0;
 		int vertexPosOffset = 0;

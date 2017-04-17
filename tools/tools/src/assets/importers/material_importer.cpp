@@ -90,10 +90,19 @@ void MaterialImporter::loadUniforms(MaterialDefinition& material, const YAML::No
 	auto attribSeqNode = topNode.as<YAML::Node>();
 	for (auto attribEntry : attribSeqNode) {
 		for (YAML::const_iterator it = attribEntry.begin(); it != attribEntry.end(); ++it) {
-			String name = it->first.as<std::string>();
-			ShaderParameterType type = parseParameterType(it->second.as<std::string>());
+			String blockName = it->first.as<std::string>();
+			auto uniformNodes = it->second.as<YAML::Node>();
 
-			material.uniforms.push_back(MaterialUniform(name, type));
+			std::vector<MaterialUniform> uniforms;
+			for (auto uniformEntry: uniformNodes) {
+				for (YAML::const_iterator uit = uniformEntry.begin(); uit != uniformEntry.end(); ++uit) {
+					String uniformName = uit->first.as<std::string>();
+					ShaderParameterType type = parseParameterType(uit->second.as<std::string>());
+					uniforms.push_back(MaterialUniform(uniformName, type));
+				}
+			}
+			
+			material.uniformBlocks.push_back(MaterialUniformBlock(blockName, uniforms));
 		}
 	}
 }

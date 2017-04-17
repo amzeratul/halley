@@ -152,7 +152,7 @@ void MaterialDefinition::serialize(Serializer& s) const
 	s << name;
 	s << passes;
 	s << textures;
-	s << uniforms;
+	s << uniformBlocks;
 	s << attributes;
 	s << vertexStride;
 	s << vertexPosOffset;
@@ -163,7 +163,7 @@ void MaterialDefinition::deserialize(Deserializer& s)
 	s >> name;
 	s >> passes;
 	s >> textures;
-	s >> uniforms;
+	s >> uniformBlocks;
 	s >> attributes;
 	s >> vertexStride;
 	s >> vertexPosOffset;

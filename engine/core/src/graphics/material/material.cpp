@@ -3,19 +3,84 @@
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/material/material_parameter.h"
 #include "halley/core/graphics/painter.h"
+#include "halley/core/graphics/shader.h"
 #include "api/video_api.h"
-#include <cstring>
 
 using namespace Halley;
 
 static Material* currentMaterial = nullptr;
 static int currentPass = 0;
 
+MaterialDataBlock::MaterialDataBlock()
+{
+}
+
+MaterialDataBlock::MaterialDataBlock(const String& name, const MaterialDefinition& def)
+{
+	addresses.resize(def.getNumPasses());
+	for (int i = 0; i < def.getNumPasses(); ++i) {
+		auto& shader = def.getPass(i).getShader();
+		addresses[i] = shader.getBlockLocation(name);
+	}
+}
+
+MaterialDataBlock::MaterialDataBlock(const MaterialDataBlock& other)
+	: data(other.data)
+	, addresses(other.addresses)
+	, dirty(true)
+{
+}
+
+MaterialDataBlock::MaterialDataBlock(MaterialDataBlock&& other) noexcept
+	: constantBuffer(std::move(other.constantBuffer))
+	, data(std::move(other.data))
+	, addresses(std::move(other.addresses))
+	, dirty(other.dirty)
+{
+}
+
+MaterialConstantBuffer& MaterialDataBlock::getConstantBuffer() const
+{
+	Expects(constantBuffer);
+	return *constantBuffer;
+}
+
+int MaterialDataBlock::getAddress(int pass) const
+{
+	return addresses[pass];
+}
+
+gsl::span<const gsl::byte> MaterialDataBlock::getData() const
+{
+	return gsl::as_bytes(gsl::span<const Byte>(data));
+}
+
+void MaterialDataBlock::setUniform(size_t offset, ShaderParameterType type, void* srcData)
+{
+	const size_t size = MaterialAttribute::getAttributeSize(type);
+	Expects(size + offset <= data.size());
+	Expects(offset % 4 == 0); // Alignment
+	memcpy(data.data() + offset, srcData, size);
+	dirty = true;
+}
+
+void MaterialDataBlock::upload(int passNumber, VideoAPI* api)
+{
+	if (!constantBuffer) {
+		constantBuffer = api->createConstantBuffer();
+		dirty = true;
+	}
+	if (dirty) {
+		constantBuffer->update(*this);
+		dirty = false;
+	}
+}
+
 Material::Material(const Material& other)
 	: materialDefinition(other.materialDefinition)
 	, uniforms(other.uniforms)
-	, uniformData(other.uniformData)
 	, textureUniforms(other.textureUniforms)
+	, dataBlocks(other.dataBlocks)
 	, textures(other.textures)
 {
 	for (auto& u: uniforms) {
@@ -32,15 +97,20 @@ Material::Material(std::shared_ptr<const MaterialDefinition> materialDefinition)
 void Material::initUniforms()
 {
 	size_t curOffset = 0;
-	for (auto& uniform : materialDefinition->getUniforms()) {
-		uniforms.push_back(MaterialParameter(*this, uniform.name, uniform.type, curOffset));
-		curOffset += MaterialAttribute::getAttributeSize(uniform.type);
+	int blockNumber = 0;
+	for (auto& uniformBlock : materialDefinition->getUniformBlocks()) {
+		for (auto& uniform: uniformBlock.uniforms) {
+			uniforms.push_back(MaterialParameter(*this, uniform.name, uniform.type, blockNumber, curOffset));
+			curOffset += MaterialAttribute::getAttributeSize(uniform.type);
+		}
+		dataBlocks.push_back(MaterialDataBlock(uniformBlock.name, *materialDefinition));
+		dataBlocks.back().data.resize(curOffset);
+		++blockNumber;
 	}
-	uniformData.resize(curOffset);
 
 	textures.resize(std::max(size_t(1), materialDefinition->getTextures().size()));
 	for (auto& tex: materialDefinition->getTextures()) {
-		textureUniforms.push_back(MaterialParameter(*this, tex, ShaderParameterType::Texture2D, 0));
+		textureUniforms.push_back(MaterialTextureParameter(*this, tex));
 	}
 }
 
@@ -53,14 +123,11 @@ void Material::bind(int passNumber, Painter& painter)
 	currentMaterial = this;
 	currentPass = passNumber;
 
-	if (!constantBuffer) {
-		constantBuffer = getDefinition().api->createConstantBuffer(*this);
-		dirty = true;
+	for (auto& block: dataBlocks) {
+		block.upload(passNumber, getDefinition().api);
 	}
-	if (dirty) {
-		constantBuffer->update(*this);
-		dirty = false;
-	}
+	dirty = false;
+
 	painter.setMaterialPass(*this, passNumber);
 }
 
@@ -70,12 +137,10 @@ void Material::resetBindCache()
 	currentPass = 0;
 }
 
-void Material::setUniform(size_t offset, ShaderParameterType type, void* data)
+void Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, void* data)
 {
-	const size_t size = MaterialAttribute::getAttributeSize(type);
-	Expects(size + offset <= uniformData.size());
-	Expects(offset % 4 == 0); // Alignment
-	memcpy(uniformData.data() + offset, data, size);
+	dataBlocks[blockNumber].setUniform(offset, type, data);
+	dirty = true;
 }
 
 const std::shared_ptr<const Texture>& Material::getMainTexture() const
@@ -88,25 +153,19 @@ const std::shared_ptr<const Texture>& Material::getTexture(int textureUnit) cons
 	return textures[textureUnit];
 }
 
-const Bytes& Material::getData() const
-{
-	return uniformData;
-}
-
 const Vector<MaterialParameter>& Material::getUniforms() const
 {
 	return uniforms;
 }
 
-const Vector<MaterialParameter>& Material::getTextureUniforms() const
+const Vector<MaterialDataBlock>& Material::getDataBlocks() const
 {
-	return textureUniforms;
+	return dataBlocks;
 }
 
-MaterialConstantBuffer& Material::getConstantBuffer() const
+const Vector<MaterialTextureParameter>& Material::getTextureUniforms() const
 {
-	Expects(constantBuffer);
-	return *constantBuffer;
+	return textureUniforms;
 }
 
 Material& Material::set(const String& name, const std::shared_ptr<const Texture>& texture)

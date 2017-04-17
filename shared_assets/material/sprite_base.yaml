@@ -1,7 +1,6 @@
 ---
 name: Halley/SpriteBase
-uniforms:
-  - u_mvp: mat4
+base: material_base.yaml
 attributes:
   - a_vertPos: vec4          # xy = relative position of vertex [0..1], zw = relative position of texture [0..1]
   - a_position: vec2         # position (world space)

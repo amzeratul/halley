@@ -17,7 +17,7 @@ namespace Halley {
 		std::unique_ptr<Texture> createTexture(Vector2i size) override;
 		std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) override;
 		std::unique_ptr<TextureRenderTarget> createRenderTarget() override;
-		std::unique_ptr<MaterialConstantBuffer> createConstantBuffer(const Material& material) override;
+		std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() override;
 		void init() override;
 		void deInit() override;
 		std::unique_ptr<Painter> makePainter() override;
@@ -46,12 +46,13 @@ namespace Halley {
 	{
 	public:
 		int getUniformLocation(const String& name) override;
+		int getBlockLocation(const String& name) override;
 	};
 
 	class DummyMaterialConstantBuffer : public MaterialConstantBuffer
 	{
 	public:
-		void update(const Material& material) override;
+		void update(const MaterialDataBlock& dataBlock) override;
 	};
 
 	class DummyPainter : public Painter

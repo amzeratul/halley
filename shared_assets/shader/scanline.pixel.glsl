@@ -1,6 +1,8 @@
-uniform vec4 u_col0;
-uniform vec4 u_col1;
-uniform float u_distance;
+uniform MaterialBlock {
+	vec4 u_col0;
+	vec4 u_col1;
+	float u_distance;
+};
 
 in vec2 v_texCoord0;
 in vec4 v_colour;

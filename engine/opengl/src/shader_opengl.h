@@ -14,8 +14,10 @@ namespace Halley
 		void bind();
 		void unbind();
 		void destroy();
+		void setUniformBlockBinding(unsigned int blockIndex, unsigned int binding);
 
 		int getUniformLocation(const String& name) override;
+		int getBlockLocation(const String& name) override;
 		int getAttributeLocation(const String& name);
 
 	private:
@@ -28,6 +30,7 @@ namespace Halley
 
 		HashMap<String, unsigned int> attributeLocations;
 		HashMap<String, unsigned int> uniformLocations;
+		HashMap<String, unsigned int> blockLocations;
 
 		String name;
 
