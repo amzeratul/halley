@@ -12,10 +12,11 @@ GLBuffer::~GLBuffer()
 	}
 }
 
-void GLBuffer::init(GLenum t)
+void GLBuffer::init(GLenum t, GLenum u)
 {
 	if (name == 0) {
 		target = t;
+		usage = u;
 		glGenBuffers(1, &name);
 	}
 }
@@ -26,7 +27,7 @@ void GLBuffer::setData(gsl::span<const gsl::byte> data)
 	size = size_t(data.size_bytes());
 	if (capacity < size) {
 		capacity = nextPowerOf2(size);
-		glBufferData(target, capacity, nullptr, GL_STREAM_DRAW);
+		glBufferData(target, capacity, nullptr, usage);
 	}
 	glBufferSubData(target, 0, size, data.data());
 

@@ -37,7 +37,7 @@ void PainterOpenGL::doStartRender()
 
 	vertexBuffer.init(GL_ARRAY_BUFFER);
 	elementBuffer.init(GL_ELEMENT_ARRAY_BUFFER);
-	stdQuadElementBuffer.init(GL_ELEMENT_ARRAY_BUFFER);
+	stdQuadElementBuffer.init(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
 
 #ifdef WITH_OPENGL
 	if (vao == 0) {
@@ -148,7 +148,7 @@ void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVe
 	Expects(indices);
 
 	// Load indices into VBO
-	if (false && standardQuadsOnly) { // For some reason, this is a pessimisation? Why?
+	if (standardQuadsOnly) {
 		if (stdQuadElementBuffer.getSize() < numIndices * sizeof(unsigned short)) {
 			size_t indicesToAllocate = nextPowerOf2(numIndices);
 			std::vector<unsigned short> tmp(indicesToAllocate);
