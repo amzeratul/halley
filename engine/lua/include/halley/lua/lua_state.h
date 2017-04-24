@@ -1,39 +1,13 @@
 #pragma once
 
-#include <memory>
 #include <gsl/gsl>
 #include <halley/text/halleystring.h>
-#include "lua_selector.h"
+#include "lua_reference.h"
 #include <unordered_map>
 
 struct lua_State;
 
 namespace Halley {
-	class LuaState;
-
-	class LuaReference {
-	public:
-		LuaReference();
-		LuaReference(LuaState& lua);
-		LuaReference(LuaReference&& other) noexcept;
-		~LuaReference();
-
-		LuaReference& operator=(LuaReference&& other) noexcept;
-
-		LuaReference(const LuaReference& other) = delete;
-		LuaReference& operator=(const LuaReference& other) = delete;
-
-		void pushToLuaStack() const;
-
-		LuaReference operator[](const String& name) const;
-
-		void operator()() const;
-
-	private:
-		LuaState* lua;
-		int refId = -1;
-	};
-
 	class LuaState {
 	public:
 		LuaState();
