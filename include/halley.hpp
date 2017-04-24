@@ -6,6 +6,7 @@
 #include <halley/halley_utils.h>
 #include <halley/net/halley_net.h>
 #include <halley/audio/halley_audio.h>
+#include <halley/lua/halley_lua.h>
 
 #ifdef __glew_h__
 #error "Glew cannot be included in halley.hpp"

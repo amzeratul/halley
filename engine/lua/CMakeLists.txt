@@ -1,12 +1,14 @@
 project (halley-lua)
 
-include_directories(${Boost_INCLUDE_DIR} "include/halley/lua" "../utils/include" "../core/include" "../../contrib/lua/src" "../../contrib/selene/include")
+include_directories(${Boost_INCLUDE_DIR} "include/halley/lua" "../utils/include" "../core/include" "../../contrib/lua/src")
 
 set(SOURCES
+        "src/lua_state.cpp"
         )
 
 set(HEADERS
-        "include/halley/lua/lua.h"
+        "include/halley/lua/halley_lua.h"
+        "include/halley/lua/lua_state.h"
         )
 
 file (GLOB_RECURSE LUA_FILES "../../contrib/lua/src/*.*")

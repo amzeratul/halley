@@ -110,6 +110,7 @@ set(HALLEY_PROJECT_LIBS
 	optimized halley-entity
 	optimized halley-audio
 	optimized halley-net
+	optimized halley-lua
 	optimized halley-utils
 	debug halley-opengl_d
 	debug halley-sdl_d
@@ -117,6 +118,7 @@ set(HALLEY_PROJECT_LIBS
 	debug halley-entity_d
 	debug halley-audio_d
 	debug halley-net_d
+	debug halley-lua_d
 	debug halley-utils_d
 	${SDL2_LIBRARIES}
 	${OPENGL_LIBRARIES}
@@ -132,6 +134,7 @@ set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/engine/utils/include
 	${HALLEY_PATH}/engine/entity/include
 	${HALLEY_PATH}/engine/audio/include
+	${HALLEY_PATH}/engine/lua/include
 	${Boost_INCLUDE_DIR} 
 	)
 	
