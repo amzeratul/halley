@@ -23,3 +23,23 @@ std::unique_ptr<BinaryFile> BinaryFile::loadResource(ResourceLoader& loader)
 {
 	return std::make_unique<BinaryFile>(loader.getStatic()->getSpan());
 }
+
+const Bytes& BinaryFile::getBytes() const
+{
+	return data;
+}
+
+Bytes& BinaryFile::getBytes()
+{
+	return data;
+}
+
+gsl::span<const gsl::byte> BinaryFile::getSpan() const
+{
+	return gsl::as_bytes(gsl::span<const Byte>(data));
+}
+
+gsl::span<gsl::byte> BinaryFile::getSpan()
+{
+	return gsl::as_writeable_bytes(gsl::span<Byte>(data));
+}
