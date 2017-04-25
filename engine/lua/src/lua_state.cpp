@@ -1,6 +1,7 @@
 #include <lua.hpp>
 #include "lua_state.h"
 #include "halley/support/exception.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -8,6 +9,12 @@ LuaState::LuaState()
 	: lua(luaL_newstate())
 {
 	luaL_openlibs(lua);
+
+	// TODO: convert this into an automatic table
+	LuaStackOps stack(*this);
+	stack.pushTable();
+	stack.setField("print", LuaCallbackBind(this, &LuaState::print));
+	stack.makeGlobal("halleyAPI");
 }
 
 LuaState::~LuaState()
@@ -72,16 +79,21 @@ LuaReference LuaState::loadScript(const String& chunkName, gsl::span<const gsl::
 	return std::move(ref);
 }
 
+void LuaState::print(String string)
+{
+	Logger::logInfo(string);
+}
+
 static int luaClosureInvoker(lua_State* lua)
 {
-	LuaCallbackBind::LuaCallback* callback = reinterpret_cast<LuaCallbackBind::LuaCallback*>(lua_touserdata(lua, lua_upvalueindex(1)));
+	LuaCallback* callback = reinterpret_cast<LuaCallback*>(lua_touserdata(lua, lua_upvalueindex(1)));
 	LuaState* state = reinterpret_cast<LuaState*>(lua_touserdata(lua, lua_upvalueindex(2)));
 	return (*callback)(*state);
 }
 
-void LuaState::doPushCallback(LuaCallbackBind::LuaCallback&& callback)
+void LuaState::pushCallback(LuaCallback&& callback)
 {
-	closures.push_back(std::make_unique<LuaCallbackBind::LuaCallback>(callback));
+	closures.push_back(std::make_unique<LuaCallback>(callback));
 
 	lua_pushlightuserdata(lua, closures.back().get());
 	lua_pushlightuserdata(lua, this);

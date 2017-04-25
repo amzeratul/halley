@@ -8,6 +8,8 @@ namespace Halley {
 	class String;
 	class LuaState;
 
+	using LuaCallback = std::function<int(LuaState&)>;
+
 	class LuaStackOps {
 	public:
 		explicit LuaStackOps(LuaState& state);
@@ -20,6 +22,7 @@ namespace Halley {
 		void push(const char* v);
 		void push(const String& v);
 		void push(Vector2i v);
+		void push(LuaCallback callback);
 
 		void pushTable();
 		void makeGlobal(const String& name);

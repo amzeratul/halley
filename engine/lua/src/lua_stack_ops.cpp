@@ -53,6 +53,11 @@ void LuaStackOps::push(Vector2i v)
 	lua_setfield(state.getRawState(), -2, "y");
 }
 
+void LuaStackOps::push(LuaCallback callback)
+{
+	state.pushCallback(std::move(callback));
+}
+
 void LuaStackOps::pushTable()
 {
 	lua_createtable(state.getRawState(), 0, 0);

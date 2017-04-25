@@ -21,19 +21,16 @@ namespace Halley {
 		void unloadModule(const String& moduleName);
 
 		lua_State* getRawState();
-
-		template <typename T, typename F>
-		void pushCallback(T& obj, F function)
-		{
-			doPushCallback(LuaCallbackBind::bindCallback(&obj, function));
-		}
+		
+		void pushCallback(LuaCallback&& callback);
 
 	private:
 		lua_State* lua;
 		std::unordered_map<String, LuaReference> modules;
-		std::vector<std::unique_ptr<LuaCallbackBind::LuaCallback>> closures;
+		std::vector<std::unique_ptr<LuaCallback>> closures;
 
 		LuaReference loadScript(const String& chunkName, gsl::span<const gsl::byte> data);
-		void doPushCallback(LuaCallbackBind::LuaCallback&& callback);
+
+		void print(String string);
 	};
 }
