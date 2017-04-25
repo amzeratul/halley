@@ -2,6 +2,7 @@
 #include "halley/maths/vector2.h"
 #include "halley/data_structures/maybe.h"
 #include <cstdint>
+#include <cstddef>
 
 namespace Halley {
 	class String;
@@ -13,7 +14,7 @@ namespace Halley {
 		static void startCall(LuaReference& ref);
 		static void endCall(LuaState& state, int nArgs, int nRets);
 
-		static void push(LuaState& state, nullptr_t n);
+		static void push(LuaState& state, std::nullptr_t n);
 		static void push(LuaState& state, bool v);
 		static void push(LuaState& state, int v);
 		static void push(LuaState& state, int64_t v);
