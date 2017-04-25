@@ -22,15 +22,18 @@ namespace Halley {
 
 		LuaReference operator[](const String& name) const;
 
-		template <typename... Us>
-		LuaStackReturn operator()(Us... us)
+		template <typename T, typename... Us>
+		T call(Us... us)
 		{
-			return LuaFunctionBind<Us...>::call(*lua, *this, us...);
+			LuaFunctionBind<Us...>::call(*lua, *this, LuaReturnSize<T>::value, us...);
+			return LuaConvert<T>::fromStack(*lua);
 		}
 
-		LuaStackReturn operator()()
+		template <typename T>
+		T call()
 		{
-			return LuaFunctionBind<>::call(*lua, *this);
+			LuaFunctionBind::call(*lua, *this, LuaReturnSize<T>::value);
+			return LuaConvert<T>::fromStack(*lua);
 		}
 
 	private:

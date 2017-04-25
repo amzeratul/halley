@@ -33,6 +33,16 @@ namespace Halley {
 		}
 	};
 
+	template <typename T>
+	struct LuaReturnSize {
+		static constexpr int value = 1;
+	};
+
+	template <>
+	struct LuaReturnSize<void> {
+		static constexpr int value = 0;
+	};
+
 	class LuaStackReturn {
 	public:
 		explicit LuaStackReturn(LuaState& state);
@@ -48,38 +58,47 @@ namespace Halley {
 		LuaState& state;
 	};
 
+	template <typename T>
+	struct LuaConvert {
+		static T fromStack(LuaState& state) { return T(LuaStackReturn(state)); }
+	};
+
+	template <>
+	struct LuaConvert<void> {
+		static void fromStack(LuaState&) {}
+	};
+
 	template <typename... Us>
 	class LuaFunctionBind;
 
 	template <>
 	class LuaFunctionBind<> {
 	public:
-		static LuaStackReturn call(LuaState& state, LuaReference& ref)
+		static void call(LuaState& state, LuaReference& ref, int nRets)
 		{
 			LuaFunctionCaller::startCall(ref);
-			return _doCall(state, 0);
+			_doCall(state, 0, nRets);
 		}
 		
-		static LuaStackReturn _doCall(LuaState& state, int nArgs)
+		static void _doCall(LuaState& state, int nArgs, int nRets)
 		{
-			LuaFunctionCaller::endCall(state, nArgs, 1);
-			return LuaStackReturn(state);
+			LuaFunctionCaller::endCall(state, nArgs, nRets);
 		}
 	};
 
 	template <typename U, typename... Us>
 	class LuaFunctionBind<U, Us...> {
 	public:
-		static LuaStackReturn call(LuaState& state, LuaReference& ref, U u, Us... us)
+		static void call(LuaState& state, LuaReference& ref, int nRets, U u, Us... us)
 		{
 			LuaFunctionCaller::startCall(ref);
-			return _doCall(state, 0, u, us...);
+			_doCall(state, 0, nRets, u, us...);
 		}
 
-		static LuaStackReturn _doCall(LuaState& state, int nArgs, U u, Us... us)
+		static void _doCall(LuaState& state, int nArgs, int nRets, U u, Us... us)
 		{
 			LuaFunctionCaller::push(state, u);
-			return LuaFunctionBind<Us...>::_doCall(state, nArgs + 1, us...);
+			LuaFunctionBind<Us...>::_doCall(state, nArgs + 1, nRets, us...);
 		}
 	};
 }
