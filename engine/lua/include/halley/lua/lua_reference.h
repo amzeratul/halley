@@ -33,8 +33,6 @@ namespace Halley {
 			return LuaFunctionBind<>::call(*lua, *this);
 		}
 
-		void call(int nArgs, int nRets) const;
-
 	private:
 		LuaState* lua;
 		int refId = -1;

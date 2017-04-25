@@ -56,9 +56,3 @@ LuaReference LuaReference::operator[](const String& name) const
 	}
 	return LuaReference(*lua);
 }
-
-void LuaReference::call(int nArgs, int nRets) const
-{
-	pushToLuaStack();
-	lua_pcall(lua->getRawState(), nArgs, nRets, 0);
-}

@@ -1,4 +1,7 @@
 #pragma once
+#include "halley/maths/vector2.h"
+#include "halley/data_structures/maybe.h"
+#include <cstdint>
 
 namespace Halley {
 	class String;
@@ -7,10 +10,26 @@ namespace Halley {
 
 	class LuaFunctionCaller {
 	public:
-		static void call(LuaReference& ref, int nArgs, int nRets);
+		static void startCall(LuaReference& ref);
+		static void endCall(LuaState& state, int nArgs, int nRets);
+
+		static void push(LuaState& state, nullptr_t n);
 		static void push(LuaState& state, bool v);
 		static void push(LuaState& state, int v);
+		static void push(LuaState& state, int64_t v);
+		static void push(LuaState& state, double v);
 		static void push(LuaState& state, const String& v);
+		static void push(LuaState& state, Vector2i v);
+
+		template <typename T>
+		static void push(LuaState& state, Maybe<T> v)
+		{
+			if (v) {
+				push(state, v.get());
+			} else {
+				push(state, nullptr);
+			}
+		}
 	};
 
 	class LuaStackReturn {
@@ -18,6 +37,11 @@ namespace Halley {
 		explicit LuaStackReturn(LuaState& state);
 
 		operator bool() const;
+		operator int() const;
+		operator int64_t() const;
+		operator double() const;
+		operator String() const;
+		operator Vector2i() const;
 
 	private:
 		LuaState& state;
@@ -31,12 +55,13 @@ namespace Halley {
 	public:
 		static LuaStackReturn call(LuaState& state, LuaReference& ref)
 		{
-			return doCall(state, ref, 0);
+			LuaFunctionCaller::startCall(ref);
+			return _doCall(state, 0);
 		}
 		
-		static LuaStackReturn doCall(LuaState& state, LuaReference& ref, int nArgs)
+		static LuaStackReturn _doCall(LuaState& state, int nArgs)
 		{
-			LuaFunctionCaller::call(ref, nArgs, 1);
+			LuaFunctionCaller::endCall(state, nArgs, 1);
 			return LuaStackReturn(state);
 		}
 	};
@@ -46,13 +71,14 @@ namespace Halley {
 	public:
 		static LuaStackReturn call(LuaState& state, LuaReference& ref, U u, Us... us)
 		{
-			return doCall(state, ref, 0, u, us...);
+			LuaFunctionCaller::startCall(ref);
+			return _doCall(state, 0, u, us...);
 		}
 
-		static LuaStackReturn doCall(LuaState& state, LuaReference& ref, int nArgs, U u, Us... us)
+		static LuaStackReturn _doCall(LuaState& state, int nArgs, U u, Us... us)
 		{
 			LuaFunctionCaller::push(state, u);
-			return LuaFunctionBind<Us...>::doCall(state, ref, nArgs + 1, us...);
+			return LuaFunctionBind<Us...>::_doCall(state, nArgs + 1, us...);
 		}
 	};
 }
