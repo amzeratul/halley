@@ -15,7 +15,7 @@ void LuaFunctionCaller::endCall(LuaState& state, int nArgs, int nRets)
 	lua_pcall(state.getRawState(), nArgs, nRets, 0);
 }
 
-void LuaFunctionCaller::push(LuaState& state, nullptr_t)
+void LuaFunctionCaller::push(LuaState& state, std::nullptr_t)
 {
 	lua_pushnil(state.getRawState());
 }
