@@ -8,6 +8,8 @@
 struct lua_State;
 
 namespace Halley {
+	class LuaState;
+
 	class LuaState {
 	public:
 		LuaState();
@@ -20,10 +22,18 @@ namespace Halley {
 
 		lua_State* getRawState();
 
+		template <typename T, typename F>
+		void pushCallback(T& obj, F function)
+		{
+			doPushCallback(LuaCallbackBind::bindCallback(&obj, function));
+		}
+
 	private:
 		lua_State* lua;
 		std::unordered_map<String, LuaReference> modules;
+		std::vector<std::unique_ptr<LuaCallbackBind::LuaCallback>> closures;
 
 		LuaReference loadScript(const String& chunkName, gsl::span<const gsl::byte> data);
+		void doPushCallback(LuaCallbackBind::LuaCallback&& callback);
 	};
 }

@@ -17,8 +17,21 @@ namespace Halley {
 		void push(int v);
 		void push(int64_t v);
 		void push(double v);
+		void push(const char* v);
 		void push(const String& v);
 		void push(Vector2i v);
+
+		void pushTable();
+		void makeGlobal(const String& name);
+
+		void setField(const String& name);
+
+		template <typename T>
+		void setField(const String& name, T v)
+		{
+			push(v);
+			setField(name);
+		}
 
 		template <typename T>
 		void push(Maybe<T> v)
@@ -53,6 +66,7 @@ namespace Halley {
 		operator double() const;
 		operator String() const;
 		operator Vector2i() const;
+		operator LuaState&() const;
 
 	private:
 		LuaState& state;

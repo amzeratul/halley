@@ -34,6 +34,11 @@ void LuaStackOps::push(double v)
 	lua_pushnumber(state.getRawState(), v);
 }
 
+void LuaStackOps::push(const char* v)
+{
+	lua_pushstring(state.getRawState(), v);
+}
+
 void LuaStackOps::push(const String& v)
 {
 	lua_pushstring(state.getRawState(), v.c_str());
@@ -46,6 +51,16 @@ void LuaStackOps::push(Vector2i v)
 	lua_setfield(state.getRawState(), -2, "x");
 	push(v.y);
 	lua_setfield(state.getRawState(), -2, "y");
+}
+
+void LuaStackOps::pushTable()
+{
+	lua_createtable(state.getRawState(), 0, 0);
+}
+
+void LuaStackOps::makeGlobal(const String& name)
+{
+	lua_setglobal(state.getRawState(), name.c_str());
 }
 
 void LuaStackOps::pop()
@@ -101,6 +116,11 @@ Vector2i LuaStackOps::popVector2i()
 	return result;
 }
 
+void LuaStackOps::setField(const String& name)
+{
+	lua_setfield(state.getRawState(), -2, name.c_str());
+}
+
 LuaStackReturn::LuaStackReturn(LuaState& state)
 	: state(state)
 {
@@ -138,4 +158,9 @@ LuaStackReturn::operator String() const
 LuaStackReturn::operator Vector2i() const
 {
 	return LuaStackOps(state).popVector2i();
+}
+
+LuaStackReturn::operator LuaState&() const
+{
+	return state;
 }

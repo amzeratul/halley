@@ -71,3 +71,19 @@ LuaReference LuaState::loadScript(const String& chunkName, gsl::span<const gsl::
 	auto ref = LuaReference(*this);
 	return std::move(ref);
 }
+
+static int luaClosureInvoker(lua_State* lua)
+{
+	LuaCallbackBind::LuaCallback* callback = reinterpret_cast<LuaCallbackBind::LuaCallback*>(lua_touserdata(lua, lua_upvalueindex(1)));
+	LuaState* state = reinterpret_cast<LuaState*>(lua_touserdata(lua, lua_upvalueindex(2)));
+	return (*callback)(*state);
+}
+
+void LuaState::doPushCallback(LuaCallbackBind::LuaCallback&& callback)
+{
+	closures.push_back(std::make_unique<LuaCallbackBind::LuaCallback>(callback));
+
+	lua_pushlightuserdata(lua, closures.back().get());
+	lua_pushlightuserdata(lua, this);
+	lua_pushcclosure(lua, luaClosureInvoker, 2);
+}
