@@ -1,8 +1,5 @@
 #pragma once
-#include "halley/maths/vector2.h"
-#include "halley/data_structures/maybe.h"
-#include <cstdint>
-#include <cstddef>
+#include "lua_stack_ops.h"
 
 namespace Halley {
 	class String;
@@ -13,24 +10,6 @@ namespace Halley {
 	public:
 		static void startCall(LuaReference& ref);
 		static void endCall(LuaState& state, int nArgs, int nRets);
-
-		static void push(LuaState& state, std::nullptr_t n);
-		static void push(LuaState& state, bool v);
-		static void push(LuaState& state, int v);
-		static void push(LuaState& state, int64_t v);
-		static void push(LuaState& state, double v);
-		static void push(LuaState& state, const String& v);
-		static void push(LuaState& state, Vector2i v);
-
-		template <typename T>
-		static void push(LuaState& state, Maybe<T> v)
-		{
-			if (v) {
-				push(state, v.get());
-			} else {
-				push(state, nullptr);
-			}
-		}
 	};
 
 	template <typename T>
@@ -41,21 +20,6 @@ namespace Halley {
 	template <>
 	struct LuaReturnSize<void> {
 		static constexpr int value = 0;
-	};
-
-	class LuaStackReturn {
-	public:
-		explicit LuaStackReturn(LuaState& state);
-
-		operator bool() const;
-		operator int() const;
-		operator int64_t() const;
-		operator double() const;
-		operator String() const;
-		operator Vector2i() const;
-
-	private:
-		LuaState& state;
 	};
 
 	template <typename T>
@@ -97,7 +61,7 @@ namespace Halley {
 
 		static void _doCall(LuaState& state, int nArgs, int nRets, U u, Us... us)
 		{
-			LuaFunctionCaller::push(state, u);
+			LuaStackOps(state).push(u);
 			LuaFunctionBind<Us...>::_doCall(state, nArgs + 1, nRets, us...);
 		}
 	};

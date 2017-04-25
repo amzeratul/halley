@@ -64,7 +64,7 @@ LuaReference LuaState::loadScript(const String& chunkName, gsl::span<const gsl::
 	// Run chunk
 	result = lua_pcall(lua, 0, 1, 0);
 	if (result != 0) {
-		throw Exception("Error running lua chunk.");
+		throw Exception("Error running lua chunk: " + LuaStackOps(*this).popString());
 	}
 
 	// Store chunk in registry
