@@ -78,11 +78,13 @@ namespace Halley {
 			std::get<pos - 1>(tuple) = LuaStackReturn(state);
 			doFillTuple<pos - 1, Tuple>(state, tuple);
 		}
-
+		
 		template <typename... Ps>
-		void fillTuple(LuaState& state, std::tuple<Ps...>& tuple)
+		std::tuple<Ps...> makeTuple(LuaState& state)
 		{
-			doFillTuple<sizeof...(Ps), decltype(tuple)>(state, tuple);
+			std::tuple<Ps...> tuple;
+			doFillTuple<sizeof...(Ps), std::tuple<Ps...>>(state, tuple);
+			return tuple;
 		}
 
 		template <typename T, typename R, typename... Ps, typename... As>
@@ -108,9 +110,7 @@ namespace Halley {
 		{
 			return [=] (LuaState& state) -> int
 			{
-				std::tuple<Ps...> args;
-				fillTuple<Ps...>(state, args);
-				call(obj, f, std::move(args));
+				call(obj, f, makeTuple<Ps...>(state));
 				return 0;
 			};
 		}
@@ -120,9 +120,7 @@ namespace Halley {
 		{
 			return [=] (LuaState& state) -> int
 			{
-				std::tuple<Ps...> args;
-				fillTuple<Ps...>(state, args);
-				R result = call(obj, f, std::move(args));
+				R result = call(obj, f, makeTuple<Ps...>(state));
 				LuaStackOps(state).push(result);
 				return 1;
 			};
