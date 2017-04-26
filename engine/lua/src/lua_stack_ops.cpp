@@ -53,8 +53,9 @@ void LuaStackOps::push(LuaCallback callback)
 	state.pushCallback(std::move(callback));
 }
 
-void LuaStackOps::pushTable()
+void LuaStackOps::push(const LuaTable& table)
 {
+	// TODO
 	lua_createtable(state.getRawState(), 0, 0);
 }
 
@@ -114,6 +115,18 @@ Vector2i LuaStackOps::popVector2i()
 	lua_getfield(state.getRawState(), -1, "y");
 	result.y = popInt();
 	return result;
+}
+
+LuaTable LuaStackOps::popTable()
+{
+	// TODO
+	pop();
+	return LuaTable();
+}
+
+bool LuaStackOps::isTopNil()
+{
+	return lua_isnil(state.getRawState(), -1);
 }
 
 void LuaStackOps::setField(const String& name)

@@ -75,7 +75,8 @@ namespace Halley {
 		template <signed int pos, typename Tuple, std::enable_if_t<pos != 0, int> = 0>
 		void doFillTuple(LuaState& state, Tuple& tuple)
 		{
-			std::get<pos - 1>(tuple) = LuaStackReturn(state);
+			using T = typename std::tuple_element<pos - 1, Tuple>::type;
+			std::get<pos - 1>(tuple) = LuaStackReturn(state).operator T();
 			doFillTuple<pos - 1, Tuple>(state, tuple);
 		}
 		

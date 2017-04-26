@@ -10,6 +10,8 @@ namespace Halley {
 
 	using LuaCallback = std::function<int(LuaState&)>;
 
+	class LuaTable {}; // TODO
+
 	class LuaStackOps {
 	public:
 		inline explicit LuaStackOps(LuaState& state) : state(state) {}
@@ -23,8 +25,8 @@ namespace Halley {
 		void push(const String& v);
 		void push(Vector2i v);
 		void push(LuaCallback callback);
+		void push(const LuaTable& table);
 
-		void pushTable();
 		void makeGlobal(const String& name);
 
 		void setField(const String& name);
@@ -53,6 +55,9 @@ namespace Halley {
 		double popDouble();
 		String popString();
 		Vector2i popVector2i();
+		LuaTable popTable();
+		
+		bool isTopNil();
 
 	private:
 		LuaState& state;
@@ -68,7 +73,19 @@ namespace Halley {
 		operator double() const { return LuaStackOps(state).popDouble(); }
 		operator String() const { return LuaStackOps(state).popString(); }
 		operator Vector2i() const { return LuaStackOps(state).popVector2i(); }
+		operator LuaTable() const { return LuaStackOps(state).popTable(); }
 		operator LuaState&() const { return state; }
+
+		template <typename T>
+		operator Maybe<T>() const
+		{
+			LuaStackOps stack(state);
+			if (stack.isTopNil()) {
+				return Maybe<T>();
+			} else {
+				return T(*this);
+			}
+		}
 
 	private:
 		LuaState& state;

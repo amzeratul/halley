@@ -12,7 +12,7 @@ LuaState::LuaState()
 
 	// TODO: convert this into an automatic table
 	LuaStackOps stack(*this);
-	stack.pushTable();
+	stack.push(LuaTable());
 	stack.setField("print", LuaCallbackBind(this, &LuaState::print));
 	stack.makeGlobal("halleyAPI");
 }
@@ -65,7 +65,7 @@ LuaReference LuaState::loadScript(const String& chunkName, gsl::span<const gsl::
 {
 	int result = luaL_loadbuffer(lua, reinterpret_cast<const char*>(data.data()), data.size_bytes(), chunkName.c_str());
 	if (result != 0) {
-		throw Exception("Error loading Lua chunk, add error checking here.");
+		throw Exception("Error loading Lua chunk:" + LuaStackOps(*this).popString());
 	}
 
 	// Run chunk
