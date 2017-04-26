@@ -25,14 +25,16 @@ namespace Halley {
 		template <typename T, typename... Us>
 		T call(Us... us)
 		{
-			LuaFunctionBind<Us...>::call(*lua, *this, LuaReturnSize<T>::value, us...);
+			pushToLuaStack();
+			LuaFunctionBind<Us...>::call(*lua, LuaReturnSize<T>::value, us...);
 			return LuaConvert<T>::fromStack(*lua);
 		}
 
 		template <typename T>
 		T call()
 		{
-			LuaFunctionBind<>::call(*lua, *this, LuaReturnSize<T>::value);
+			pushToLuaStack();
+			LuaFunctionBind<>::call(*lua, LuaReturnSize<T>::value);
 			return LuaConvert<T>::fromStack(*lua);
 		}
 

@@ -56,6 +56,14 @@ void LuaState::unloadModule(const String& moduleName)
 	modules.erase(iter);
 }
 
+void LuaState::call(int nArgs, int nRets)
+{
+	int result = lua_pcall(lua, nArgs, nRets, 0);
+	if (result != 0) {
+		throw Exception("Lua exception:\n\t" + LuaStackOps(*this).popString());
+	}
+}
+
 lua_State* LuaState::getRawState()
 {
 	return lua;
@@ -65,14 +73,9 @@ LuaReference LuaState::loadScript(const String& chunkName, gsl::span<const gsl::
 {
 	int result = luaL_loadbuffer(lua, reinterpret_cast<const char*>(data.data()), data.size_bytes(), chunkName.c_str());
 	if (result != 0) {
-		throw Exception("Error loading Lua chunk:" + LuaStackOps(*this).popString());
+		throw Exception("Error loading Lua chunk:\n\t" + LuaStackOps(*this).popString());
 	}
-
-	// Run chunk
-	result = lua_pcall(lua, 0, 1, 0);
-	if (result != 0) {
-		throw Exception("Error running lua chunk: " + LuaStackOps(*this).popString());
-	}
+	call(0, 1);
 
 	// Store chunk in registry
 	auto ref = LuaReference(*this);

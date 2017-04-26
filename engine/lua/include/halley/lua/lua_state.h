@@ -20,6 +20,8 @@ namespace Halley {
 		const LuaReference& loadModule(const String& moduleName, gsl::span<const gsl::byte> data);
 		void unloadModule(const String& moduleName);
 
+		void call(int nArgs, int nRets);
+
 		lua_State* getRawState();
 		
 		void pushCallback(LuaCallback&& callback);

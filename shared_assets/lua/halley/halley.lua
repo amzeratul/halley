@@ -20,4 +20,16 @@ print = function(...)
     api.print(result)
 end
 
+-- Some useful functions
+functional = {}
+
+function functional.any(f, vs)
+    for i,v in ipairs(vs) do
+        if (f(v)) then
+            return true
+        end
+    end
+    return false
+end
+
 return {}
