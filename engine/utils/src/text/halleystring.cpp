@@ -46,7 +46,7 @@ String::String(const char* utf8)
 }
 
 
-String::String(const char* utf8,size_t bytes)
+String::String(const char* utf8, size_t bytes)
 {
 	str.resize(bytes);
 	if (bytes > 0) memcpy(getCharPointer(0),utf8,bytes);
@@ -68,7 +68,7 @@ String::String(const wchar_t* utf16)
 }
 
 
-String::String(const StringUTF32 &utf32)
+String::String(const StringUTF32& utf32)
 {
 	size_t len = getUTF8Len(utf32);
 	str.resize(len);

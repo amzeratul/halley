@@ -167,7 +167,6 @@ namespace Halley {
 	};
 
 	String operator+ (const String& lhp, const String& rhp);
-	void operator<< (double &p1, String &p2);
 	std::ostream& operator<< (std::ostream& os, const String& rhp);
 	std::istream& operator>> (std::istream& is, String& rhp);
 

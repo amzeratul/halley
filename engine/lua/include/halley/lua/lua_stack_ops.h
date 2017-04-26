@@ -12,7 +12,7 @@ namespace Halley {
 
 	class LuaStackOps {
 	public:
-		explicit LuaStackOps(LuaState& state);
+		inline explicit LuaStackOps(LuaState& state) : state(state) {}
 
 		void push(std::nullptr_t n);
 		void push(bool v);
@@ -60,15 +60,15 @@ namespace Halley {
 
 	class LuaStackReturn {
 	public:
-		explicit LuaStackReturn(LuaState& state);
+		inline explicit LuaStackReturn(LuaState& state) : state(state) {}
 
-		operator bool() const;
-		operator int() const;
-		operator int64_t() const;
-		operator double() const;
-		operator String() const;
-		operator Vector2i() const;
-		operator LuaState&() const;
+		operator bool() const { return LuaStackOps(state).popBool(); }
+		operator int() const { return LuaStackOps(state).popInt(); }
+		operator int64_t() const { return LuaStackOps(state).popInt64(); }
+		operator double() const { return LuaStackOps(state).popDouble(); }
+		operator String() const { return LuaStackOps(state).popString(); }
+		operator Vector2i() const { return LuaStackOps(state).popVector2i(); }
+		operator LuaState&() const { return state; }
 
 	private:
 		LuaState& state;

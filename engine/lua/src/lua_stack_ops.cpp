@@ -4,11 +4,6 @@
 
 using namespace Halley;
 
-LuaStackOps::LuaStackOps(LuaState& state)
-	: state(state)
-{
-}
-
 void LuaStackOps::push(std::nullptr_t)
 {
 	lua_pushnil(state.getRawState());
@@ -124,44 +119,4 @@ Vector2i LuaStackOps::popVector2i()
 void LuaStackOps::setField(const String& name)
 {
 	lua_setfield(state.getRawState(), -2, name.c_str());
-}
-
-LuaStackReturn::LuaStackReturn(LuaState& state)
-	: state(state)
-{
-}
-
-LuaStackReturn::operator bool() const
-{
-	return LuaStackOps(state).popBool();
-}
-
-LuaStackReturn::operator int() const
-{
-	return LuaStackOps(state).popInt();
-}
-
-LuaStackReturn::operator int64_t() const
-{
-	return LuaStackOps(state).popInt64();
-}
-
-LuaStackReturn::operator double() const
-{
-	return LuaStackOps(state).popDouble();
-}
-
-LuaStackReturn::operator String() const
-{
-	return LuaStackOps(state).popString();
-}
-
-LuaStackReturn::operator Vector2i() const
-{
-	return LuaStackOps(state).popVector2i();
-}
-
-LuaStackReturn::operator LuaState&() const
-{
-	return state;
 }
