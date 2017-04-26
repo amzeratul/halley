@@ -131,10 +131,6 @@ LuaStackReturn::LuaStackReturn(LuaState& state)
 {
 }
 
-LuaStackReturn::operator void() const
-{
-}
-
 LuaStackReturn::operator bool() const
 {
 	return LuaStackOps(state).popBool();

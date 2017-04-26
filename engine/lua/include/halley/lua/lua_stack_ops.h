@@ -62,7 +62,6 @@ namespace Halley {
 	public:
 		explicit LuaStackReturn(LuaState& state);
 
-		operator void() const;
 		operator bool() const;
 		operator int() const;
 		operator int64_t() const;

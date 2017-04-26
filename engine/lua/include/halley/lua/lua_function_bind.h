@@ -104,7 +104,7 @@ namespace Halley {
 		}
 
 		template <typename T, typename R, typename... Ps>
-		LuaCallback bind(T* obj, R (T::*f)(Ps...), std::enable_if_t<std::is_void_v<R>, int>)
+		LuaCallback bind(T* obj, R (T::*f)(Ps...), std::enable_if_t<std::is_void<R>::value, int>)
 		{
 			return [=] (LuaState& state) -> int
 			{
@@ -116,7 +116,7 @@ namespace Halley {
 		}
 
 		template <typename T, typename R, typename... Ps>
-		LuaCallback bind(T* obj, R (T::*f)(Ps...), std::enable_if_t<!std::is_void_v<R>, int>)
+		LuaCallback bind(T* obj, R (T::*f)(Ps...), std::enable_if_t<!std::is_void<R>::value, int>)
 		{
 			return [=] (LuaState& state) -> int
 			{
