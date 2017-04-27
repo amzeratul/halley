@@ -12,7 +12,7 @@ LuaState::LuaState()
 
 	// TODO: convert this into an automatic table
 	LuaStackUtils u(*this);
-	u.push(LuaTable());
+	u.pushTable();
 	u.setField("print", LuaCallbackBind(this, &LuaState::print));
 	u.makeGlobal("halleyAPI");
 }

@@ -3,14 +3,13 @@
 #include "halley/data_structures/maybe.h"
 #include <cstdint>
 #include <cstddef>
+#include <type_traits>
 
 namespace Halley {
 	class String;
 	class LuaState;
 
 	using LuaCallback = std::function<int(LuaState&)>;
-
-	class LuaTable {}; // TODO
 
 	class LuaStackOps {
 	public:
@@ -25,12 +24,14 @@ namespace Halley {
 		void push(const String& v);
 		void push(Vector2i v);
 		void push(LuaCallback callback);
-		void push(const LuaTable& table);
+		void pushTable(int nArrayIndices = 0, int nRecords = 0);
 
 		void makeGlobal(const String& name);
 
 		void setField(const String& name);
+		void setField(int idx);
 		void getField(const String& name);
+		void getField(int idx);
 
 		void pop();
 		bool popBool();
@@ -39,7 +40,6 @@ namespace Halley {
 		double popDouble();
 		String popString();
 		Vector2i popVector2i();
-		LuaTable popTable();
 		
 		bool isTopNil();
 
@@ -47,16 +47,47 @@ namespace Halley {
 		LuaState& state;
 	};
 
+	class LuaCustomSerialize {};
 
+	namespace StdLuaConversion {
+		template <typename T, std::enable_if_t<std::is_base_of<LuaCustomSerialize, T>::value, int> = 0>
+		inline T from(LuaState& state)
+		{
+			T result;
+			result.fromLua(state);
+			return result;
+		}
+    
+		template <typename T, std::enable_if_t<!std::is_base_of<LuaCustomSerialize, T>::value, int> = 0>
+		inline T from(LuaState& state)
+		{
+			return T();
+		}
+		
+		template <typename T, std::enable_if_t<std::is_base_of<LuaCustomSerialize, T>::value, int> = 0>
+		inline void to(LuaState& state, const T& value)
+		{
+			value.toLua(state);
+		}
+    
+		template <typename T, std::enable_if_t<!std::is_base_of<LuaCustomSerialize, T>::value, int> = 0>
+		inline void to(LuaState& state, const T& value)
+		{
+			LuaStackOps(state).push(value);
+		}
+	}
+
+	
 	// Generic from/to
 	template <typename T>
 	struct FromLua {
-		inline T operator()(LuaState& state) const = delete;
+		inline T operator()(LuaState& state) const { return StdLuaConversion::from<T>(state); }
 	};
+
 
 	template <typename T>
 	struct ToLua {
-		inline void operator()(LuaState& state, const T& value) const { LuaStackOps(state).push(value); }
+		inline void operator()(LuaState& state, const T& value) const { StdLuaConversion::to<T>(state, value); }
 	};
 
 
@@ -97,11 +128,6 @@ namespace Halley {
 	};
 
 	template <>
-	struct FromLua<LuaTable> {
-		inline LuaTable operator()(LuaState& state) const { return LuaStackOps(state).popTable(); };
-	};
-
-	template <>
 	struct FromLua<LuaState&> {
 		inline LuaState& operator()(LuaState& state) const { return state; };
 	};
@@ -122,9 +148,28 @@ namespace Halley {
 	struct ToLua<Maybe<T>> {
 		inline void operator()(LuaState& state, const Maybe<T>& value) const {
 			if (value) {
-				LuaStackOps(state).push(value.get());
+				ToLua<T>()(state, value.get());
 			} else {
 				LuaStackOps(state).push(nullptr);
+			}
+		}
+	};
+
+	template <typename T>
+	struct FromLua<std::vector<T>> {
+		inline std::vector<T> operator()(LuaState& state) const {
+			return {}; // TODO
+		}
+	};
+
+	template <typename T>
+	struct ToLua<std::vector<T>> {
+		inline void operator()(LuaState& state, const std::vector<T>& value) const {
+			auto ops = LuaStackOps(state);
+			ops.pushTable(0, int(value.size()));
+			for (size_t i = 0; i < value.size(); ++i) {
+				ToLua<T>()(state, value[i]);
+				ops.setField(int(i + 1));
 			}
 		}
 	};
@@ -142,7 +187,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		inline void pop()
+		inline T pop()
 		{
 			return FromLua<T>()(state);
 		}
@@ -155,15 +200,40 @@ namespace Halley {
 		}
 
 		template <typename T>
+		void setField(int idx, T v)
+		{
+			push<T>(v);
+			LuaStackOps(state).setField(idx);
+		}
+
+		template <typename T>
 		T getField(const String& name)
 		{
 			LuaStackOps(state).getField(name);
 			return pop<T>();
 		}
 
+		template <typename T>
+		T getField(int idx)
+		{
+			LuaStackOps(state).getField(idx);
+			return pop<T>();
+		}
+
+		template <typename T>
+		void getField(const String& name, T& v)
+		{
+			v = getField<T>(name);
+		}
+
 		void makeGlobal(const String& name)
 		{
 			LuaStackOps(state).makeGlobal(name);
+		}
+
+		void pushTable(int nArr = 0, int nRec = 0)
+		{
+			LuaStackOps(state).pushTable(nArr, nRec);
 		}
 
 	private:

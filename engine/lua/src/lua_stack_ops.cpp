@@ -53,10 +53,9 @@ void LuaStackOps::push(LuaCallback callback)
 	state.pushCallback(std::move(callback));
 }
 
-void LuaStackOps::push(const LuaTable& table)
+void LuaStackOps::pushTable(int nArrayIndices, int nRecords)
 {
-	// TODO
-	lua_createtable(state.getRawState(), 0, 0);
+	lua_createtable(state.getRawState(), nArrayIndices, nRecords);
 }
 
 void LuaStackOps::makeGlobal(const String& name)
@@ -117,13 +116,6 @@ Vector2i LuaStackOps::popVector2i()
 	return result;
 }
 
-LuaTable LuaStackOps::popTable()
-{
-	// TODO
-	pop();
-	return LuaTable();
-}
-
 bool LuaStackOps::isTopNil()
 {
 	return lua_isnil(state.getRawState(), -1);
@@ -134,7 +126,17 @@ void LuaStackOps::setField(const String& name)
 	lua_setfield(state.getRawState(), -2, name.c_str());
 }
 
+void LuaStackOps::setField(int idx)
+{
+	lua_rawseti(state.getRawState(), -2, idx);
+}
+
 void LuaStackOps::getField(const String& name)
 {
 	lua_getfield(state.getRawState(), -1, name.c_str());
+}
+
+void LuaStackOps::getField(int idx)
+{
+	lua_rawgeti(state.getRawState(), -1, idx);
 }
