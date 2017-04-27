@@ -21,16 +21,6 @@ namespace Halley {
 		static constexpr int value = 0;
 	};
 
-	template <typename T>
-	struct LuaConvert {
-		static T fromStack(LuaState& state) { return T(LuaStackReturn(state)); }
-	};
-
-	template <>
-	struct LuaConvert<void> {
-		static void fromStack(LuaState&) {}
-	};
-
 	template <typename... Us>
 	class LuaFunctionBind;
 
@@ -58,7 +48,7 @@ namespace Halley {
 
 		static void _doCall(LuaState& state, int nArgs, int nRets, U u, Us... us)
 		{
-			LuaStackOps(state).push(u);
+			ToLua<U>()(state, u);
 			LuaFunctionBind<Us...>::_doCall(state, nArgs + 1, nRets, us...);
 		}
 	};
@@ -73,7 +63,7 @@ namespace Halley {
 		inline void doFillTuple(LuaState& state, Tuple& tuple)
 		{
 			using T = typename std::tuple_element<pos - 1, Tuple>::type;
-			std::get<pos - 1>(tuple) = LuaStackReturn(state).operator T();
+			std::get<pos - 1>(tuple) = FromLua<T>()(state);
 			doFillTuple<pos - 1, Tuple>(state, tuple);
 		}
 		
@@ -119,7 +109,7 @@ namespace Halley {
 			return [=] (LuaState& state) -> int
 			{
 				R result = call(obj, f, makeTuple<Ps...>(state));
-				LuaStackOps(state).push(result);
+				ToLua<R>()(state, result);
 				return 1;
 			};
 		}

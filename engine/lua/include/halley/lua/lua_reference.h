@@ -27,7 +27,7 @@ namespace Halley {
 		{
 			pushToLuaStack();
 			LuaFunctionBind<Us...>::call(*lua, LuaReturnSize<T>::value, us...);
-			return LuaConvert<T>::fromStack(*lua);
+			return FromLua<T>()(*lua);
 		}
 
 		template <typename T>
@@ -35,7 +35,7 @@ namespace Halley {
 		{
 			pushToLuaStack();
 			LuaFunctionBind<>::call(*lua, LuaReturnSize<T>::value);
-			return LuaConvert<T>::fromStack(*lua);
+			return FromLua<T>()(*lua);
 		}
 
 	private:

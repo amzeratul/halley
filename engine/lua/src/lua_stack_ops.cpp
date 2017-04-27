@@ -133,3 +133,8 @@ void LuaStackOps::setField(const String& name)
 {
 	lua_setfield(state.getRawState(), -2, name.c_str());
 }
+
+void LuaStackOps::getField(const String& name)
+{
+	lua_getfield(state.getRawState(), -1, name.c_str());
+}

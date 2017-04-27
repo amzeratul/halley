@@ -16,7 +16,7 @@ namespace Halley {
 	public:
 		inline explicit LuaStackOps(LuaState& state) : state(state) {}
 
-		void push(std::nullptr_t n);
+		void push(std::nullptr_t);
 		void push(bool v);
 		void push(int v);
 		void push(int64_t v);
@@ -30,23 +30,7 @@ namespace Halley {
 		void makeGlobal(const String& name);
 
 		void setField(const String& name);
-
-		template <typename T>
-		void setField(const String& name, T v)
-		{
-			push(v);
-			setField(name);
-		}
-
-		template <typename T>
-		void push(Maybe<T> v)
-		{
-			if (v) {
-				push(v.get());
-			} else {
-				push(nullptr);
-			}
-		}
+		void getField(const String& name);
 
 		void pop();
 		bool popBool();
@@ -63,28 +47,123 @@ namespace Halley {
 		LuaState& state;
 	};
 
-	class LuaStackReturn {
-	public:
-		inline explicit LuaStackReturn(LuaState& state) : state(state) {}
 
-		operator bool() const { return LuaStackOps(state).popBool(); }
-		operator int() const { return LuaStackOps(state).popInt(); }
-		operator int64_t() const { return LuaStackOps(state).popInt64(); }
-		operator double() const { return LuaStackOps(state).popDouble(); }
-		operator String() const { return LuaStackOps(state).popString(); }
-		operator Vector2i() const { return LuaStackOps(state).popVector2i(); }
-		operator LuaTable() const { return LuaStackOps(state).popTable(); }
-		operator LuaState&() const { return state; }
+	// Generic from/to
+	template <typename T>
+	struct FromLua {
+		inline T operator()(LuaState& state) const = delete;
+	};
 
-		template <typename T>
-		operator Maybe<T>() const
-		{
-			LuaStackOps stack(state);
-			if (stack.isTopNil()) {
+	template <typename T>
+	struct ToLua {
+		inline void operator()(LuaState& state, const T& value) const { LuaStackOps(state).push(value); }
+	};
+
+
+	// Specialisations
+	template <>
+	struct FromLua<void> {
+		inline void operator()(LuaState&) const {};
+	};
+
+	template <>
+	struct FromLua<bool> {
+		inline bool operator()(LuaState& state) const { return LuaStackOps(state).popBool(); };
+	};
+
+	template <>
+	struct FromLua<int> {
+		inline int operator()(LuaState& state) const { return LuaStackOps(state).popInt(); };
+	};
+
+	template <>
+	struct FromLua<int64_t> {
+		inline int64_t operator()(LuaState& state) const { return LuaStackOps(state).popInt64(); };
+	};
+
+	template <>
+	struct FromLua<double> {
+		inline double operator()(LuaState& state) const { return LuaStackOps(state).popDouble(); };
+	};
+
+	template <>
+	struct FromLua<String> {
+		inline String operator()(LuaState& state) const { return LuaStackOps(state).popString(); };
+	};
+
+	template <>
+	struct FromLua<Vector2i> {
+		inline Vector2i operator()(LuaState& state) const { return LuaStackOps(state).popVector2i(); };
+	};
+
+	template <>
+	struct FromLua<LuaTable> {
+		inline LuaTable operator()(LuaState& state) const { return LuaStackOps(state).popTable(); };
+	};
+
+	template <>
+	struct FromLua<LuaState&> {
+		inline LuaState& operator()(LuaState& state) const { return state; };
+	};
+
+
+	template <typename T>
+	struct FromLua<Maybe<T>> {
+		inline Maybe<T> operator()(LuaState& state) const {
+			if (LuaStackOps(state).isTopNil()) {
 				return Maybe<T>();
 			} else {
-				return T(*this);
+				return FromLua<T>()(state);
 			}
+		}
+	};
+
+	template <typename T>
+	struct ToLua<Maybe<T>> {
+		inline void operator()(LuaState& state, const Maybe<T>& value) const {
+			if (value) {
+				LuaStackOps(state).push(value.get());
+			} else {
+				LuaStackOps(state).push(nullptr);
+			}
+		}
+	};
+
+
+	// Utils
+	class LuaStackUtils {
+	public:
+		LuaStackUtils(LuaState& state) : state(state) {}
+
+		template <typename T>
+		inline void push(T value)
+		{
+			ToLua<T>()(state, value);
+		}
+
+		template <typename T>
+		inline void pop()
+		{
+			return FromLua<T>()(state);
+		}
+		
+		template <typename T>
+		void setField(const String& name, T v)
+		{
+			push<T>(v);
+			LuaStackOps(state).setField(name);
+		}
+
+		template <typename T>
+		T getField(const String& name)
+		{
+			LuaStackOps(state).getField(name);
+			return pop<T>();
+		}
+
+		void makeGlobal(const String& name)
+		{
+			LuaStackOps(state).makeGlobal(name);
 		}
 
 	private:

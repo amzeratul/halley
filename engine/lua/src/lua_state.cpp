@@ -11,10 +11,10 @@ LuaState::LuaState()
 	luaL_openlibs(lua);
 
 	// TODO: convert this into an automatic table
-	LuaStackOps stack(*this);
-	stack.push(LuaTable());
-	stack.setField("print", LuaCallbackBind(this, &LuaState::print));
-	stack.makeGlobal("halleyAPI");
+	LuaStackUtils u(*this);
+	u.push(LuaTable());
+	u.setField("print", LuaCallbackBind(this, &LuaState::print));
+	u.makeGlobal("halleyAPI");
 }
 
 LuaState::~LuaState()
