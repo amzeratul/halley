@@ -65,13 +65,13 @@ namespace Halley {
 		}
 		
 		template <typename T, std::enable_if_t<std::is_base_of<LuaCustomSerialize, T>::value, int> = 0>
-		inline void to(LuaState& state, const T& value)
+		inline void to(LuaState& state, T& value)
 		{
 			value.toLua(state);
 		}
     
 		template <typename T, std::enable_if_t<!std::is_base_of<LuaCustomSerialize, T>::value, int> = 0>
-		inline void to(LuaState& state, const T& value)
+		inline void to(LuaState& state, T& value)
 		{
 			LuaStackOps(state).push(value);
 		}
@@ -87,7 +87,7 @@ namespace Halley {
 
 	template <typename T>
 	struct ToLua {
-		inline void operator()(LuaState& state, const T& value) const { StdLuaConversion::to<T>(state, value); }
+		inline void operator()(LuaState& state, T& value) const { StdLuaConversion::to<T>(state, value); }
 	};
 
 
@@ -146,7 +146,7 @@ namespace Halley {
 
 	template <typename T>
 	struct ToLua<Maybe<T>> {
-		inline void operator()(LuaState& state, const Maybe<T>& value) const {
+		inline void operator()(LuaState& state, Maybe<T>& value) const {
 			if (value) {
 				ToLua<T>()(state, value.get());
 			} else {
@@ -164,7 +164,7 @@ namespace Halley {
 
 	template <typename T>
 	struct ToLua<std::vector<T>> {
-		inline void operator()(LuaState& state, const std::vector<T>& value) const {
+		inline void operator()(LuaState& state, std::vector<T>& value) const {
 			auto ops = LuaStackOps(state);
 			ops.pushTable(0, int(value.size()));
 			for (size_t i = 0; i < value.size(); ++i) {
@@ -239,4 +239,54 @@ namespace Halley {
 	private:
 		LuaState& state;
 	};
+
+
+	// Helper serializer
+
+	class LuaSerializer {
+	public:
+		LuaSerializer(LuaState& state) : state(state) {}
+
+		template <typename T>
+		inline void convert(const String& name, T value)
+		{
+			LuaStackUtils(state).setField(name, value);
+		}
+
+	private:
+		LuaState& state;
+	};
+
+	class LuaDeserializer {
+	public:
+		LuaDeserializer(LuaState& state) : state(state) {}
+
+		template <typename T>
+		inline void convert(const String& name, T& value)
+		{
+			LuaStackUtils(state).getField(name, value);
+		}
+
+	private:
+		LuaState& state;
+	};
+
+	template <typename T>
+	class LuaTableSerialize : public LuaCustomSerialize {
+	public:
+		void toLua(LuaState& state)
+		{
+			LuaSerializer s(state);
+			LuaStackUtils(state).pushTable();
+			static_cast<T*>(this)->luaConvert(s);
+		}
+
+		void fromLua(LuaState& state)
+		{
+			LuaDeserializer s(state);
+			static_cast<T*>(this)->luaConvert(s);			
+		}
+	};
+
+	#define LUA_CONVERT(v) s.convert((#v), (v))
 }
