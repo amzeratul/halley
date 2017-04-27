@@ -65,12 +65,12 @@ namespace Halley {
 
 	namespace LuaCallbackBindDetails {
 		template <signed int pos, typename Tuple, std::enable_if_t<pos == 0, int> = 0>
-		void doFillTuple(LuaState& state, Tuple& tuple)
+		inline void doFillTuple(LuaState& state, Tuple& tuple)
 		{
 		}
 
 		template <signed int pos, typename Tuple, std::enable_if_t<pos != 0, int> = 0>
-		void doFillTuple(LuaState& state, Tuple& tuple)
+		inline void doFillTuple(LuaState& state, Tuple& tuple)
 		{
 			using T = typename std::tuple_element<pos - 1, Tuple>::type;
 			std::get<pos - 1>(tuple) = LuaStackReturn(state).operator T();
@@ -78,7 +78,7 @@ namespace Halley {
 		}
 		
 		template <typename... Ps>
-		std::tuple<Ps...> makeTuple(LuaState& state)
+		inline std::tuple<Ps...> makeTuple(LuaState& state)
 		{
 			std::tuple<Ps...> tuple;
 			doFillTuple<sizeof...(Ps), std::tuple<Ps...>>(state, tuple);
@@ -86,25 +86,25 @@ namespace Halley {
 		}
 
 		template <typename T, typename R, typename... Ps, typename... As>
-		R applyTuple(std::enable_if_t<sizeof...(Ps) == sizeof...(As), int>, T* obj, R (T::*f)(Ps...), std::tuple<Ps...>&& tuple, As... args)
+		inline R applyTuple(std::enable_if_t<sizeof...(Ps) == sizeof...(As), T*> obj, R (T::*f)(Ps...), std::tuple<Ps...>& tuple, As... args)
 		{
 			return (obj->*f)(args...);
 		}
 
 		template <typename T, typename R, typename... Ps, typename... As>
-		R applyTuple(std::enable_if_t<sizeof...(Ps) != sizeof...(As), int>, T* obj, R (T::*f)(Ps...), std::tuple<Ps...>&& tuple, As... args)
+		inline R applyTuple(std::enable_if_t<sizeof...(Ps) != sizeof...(As), T*> obj, R (T::*f)(Ps...), std::tuple<Ps...>& tuple, As... args)
 		{
-			return applyTuple(0, obj, f, std::move(tuple), args..., std::get<sizeof...(As)>(tuple));
+			return applyTuple(obj, f, tuple, args..., std::get<sizeof...(As)>(tuple));
 		}
 
 		template <typename T, typename R, typename... Ps>
-		R call(T* obj, R (T::*f)(Ps...), std::tuple<Ps...>&& args)
+		inline R call(T* obj, R (T::*f)(Ps...), std::tuple<Ps...>&& args)
 		{
-			return applyTuple(0, obj, f, std::move(args));
+			return applyTuple(obj, f, args);
 		}
 
 		template <typename T, typename R, typename... Ps>
-		LuaCallback bind(T* obj, R (T::*f)(Ps...), std::enable_if_t<std::is_void<R>::value, int>)
+		inline LuaCallback bind(T* obj, R (T::*f)(Ps...), std::enable_if_t<std::is_void<R>::value, int>)
 		{
 			return [=] (LuaState& state) -> int
 			{
@@ -114,7 +114,7 @@ namespace Halley {
 		}
 
 		template <typename T, typename R, typename... Ps>
-		LuaCallback bind(T* obj, R (T::*f)(Ps...), std::enable_if_t<!std::is_void<R>::value, int>)
+		inline LuaCallback bind(T* obj, R (T::*f)(Ps...), std::enable_if_t<!std::is_void<R>::value, int>)
 		{
 			return [=] (LuaState& state) -> int
 			{
