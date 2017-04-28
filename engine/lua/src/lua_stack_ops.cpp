@@ -113,12 +113,18 @@ Vector2i LuaStackOps::popVector2i()
 	result.x = popInt();
 	lua_getfield(state.getRawState(), -1, "y");
 	result.y = popInt();
+	pop();
 	return result;
 }
 
 bool LuaStackOps::isTopNil()
 {
 	return lua_isnil(state.getRawState(), -1);
+}
+
+int LuaStackOps::getLength()
+{
+	return int(lua_rawlen(state.getRawState(), -1));
 }
 
 void LuaStackOps::setField(const String& name)

@@ -42,6 +42,7 @@ namespace Halley {
 		Vector2i popVector2i();
 		
 		bool isTopNil();
+		int getLength();
 
 	private:
 		LuaState& state;
@@ -59,10 +60,7 @@ namespace Halley {
 		}
     
 		template <typename T, std::enable_if_t<!std::is_base_of<LuaCustomSerialize, T>::value, int> = 0>
-		inline T from(LuaState& state)
-		{
-			return T();
-		}
+		inline T from(LuaState& state) = delete;
 		
 		template <typename T, std::enable_if_t<std::is_base_of<LuaCustomSerialize, T>::value, int> = 0>
 		inline void to(LuaState& state, T& value)
@@ -158,7 +156,14 @@ namespace Halley {
 	template <typename T>
 	struct FromLua<std::vector<T>> {
 		inline std::vector<T> operator()(LuaState& state) const {
-			return {}; // TODO
+			auto ops = LuaStackOps(state);
+			std::vector<T> result(LuaStackOps(state).getLength());
+			for (size_t i = 0; i < result.size(); ++i) {
+				ops.getField(int(i + 1));
+				result[i] = FromLua<T>()(state);
+			}
+			ops.pop();
+			return result;
 		}
 	};
 

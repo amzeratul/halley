@@ -2,19 +2,30 @@
 #include "lua_state.h"
 #include "halley/support/exception.h"
 #include "halley/support/logger.h"
+#include "halley/core/resources/resources.h"
+#include "halley/file_formats/binary_file.h"
 
 using namespace Halley;
 
-LuaState::LuaState()
+LuaState::LuaState(Resources& resources)
 	: lua(luaL_newstate())
 {
 	luaL_openlibs(lua);
-
+			
 	// TODO: convert this into an automatic table
 	LuaStackUtils u(*this);
 	u.pushTable();
 	u.setField("print", LuaCallbackBind(this, &LuaState::print));
+	u.setField("errorHandler", LuaCallbackBind(this, &LuaState::errorHandler));
 	u.makeGlobal("halleyAPI");
+
+	lua_getglobal(lua, "halleyAPI");
+	lua_getfield(lua, -1, "errorHandler");
+	errorHandlerRef = std::make_unique<LuaReference>(*this);
+	lua_pop(lua, 1);
+
+	auto res = resources.get<BinaryFile>("lua/halley/halley.lua");
+	loadModule("halley", res->getSpan());
 }
 
 LuaState::~LuaState()
@@ -58,7 +69,8 @@ void LuaState::unloadModule(const String& moduleName)
 
 void LuaState::call(int nArgs, int nRets)
 {
-	int result = lua_pcall(lua, nArgs, nRets, 0);
+	int result = lua_pcall(lua, nArgs, nRets, errorHandlerStackPos.empty() ? 0 : errorHandlerStackPos.back());
+
 	if (result != 0) {
 		throw Exception("Lua exception:\n\t" + LuaStackOps(*this).popString());
 	}
@@ -101,4 +113,89 @@ void LuaState::pushCallback(LuaCallback&& callback)
 	lua_pushlightuserdata(lua, closures.back().get());
 	lua_pushlightuserdata(lua, this);
 	lua_pushcclosure(lua, luaClosureInvoker, 2);
+}
+
+void LuaState::pushErrorHandler()
+{
+	if (errorHandlerRef) {
+		errorHandlerRef->pushToLuaStack();
+		errorHandlerStackPos.push_back(lua_gettop(lua));
+	}
+}
+
+void LuaState::popErrorHandler()
+{
+	if (errorHandlerRef) {
+		if (errorHandlerStackPos.empty()) {
+			throw Exception("Error handler not set.");
+		}
+		if (errorHandlerStackPos.back() != lua_gettop(lua)) {
+			throw Exception("Stack corruption.");
+		}
+		lua_pop(lua, 1);
+		errorHandlerStackPos.pop_back();
+	}
+}
+
+String LuaState::errorHandler(String message)
+{
+	String result = message;
+	
+	lua_Debug stack;
+	for (int i = 1; lua_getstack(lua, i, &stack); ++i) {
+		lua_getinfo(lua, "nSlf", &stack);
+		
+		String name;
+		if (stack.namewhat) {
+			name = stack.namewhat + String(" ");
+		}
+		if (stack.name) {
+			name += stack.name;
+		} else {
+			name += "unknown";
+		}
+		
+		result += "\n\t" + toString(i) + ": " + name + " [" + stack.short_src + ":" + toString(stack.currentline) + "]";
+
+		{
+			const char* localName = nullptr;
+			for (int j = 1; (localName = lua_getupvalue(lua, -1, j)) != nullptr; ++j) {
+				result += "\n\t\tU " + String(localName) + " = " + printVariableAtTop();
+			}
+		}
+		{
+			const char* localName = nullptr;
+			for (int j = 1; (localName = lua_getlocal(lua, &stack, j)) != nullptr; ++j) {
+				result += "\n\t\tL " + String(localName) + " = " + printVariableAtTop();
+			}
+		}
+	}
+
+	return result;
+}
+
+String LuaState::printVariableAtTop()
+{
+	String result;
+
+	if (lua_istable(lua, -1)) {
+		result = toString("{...}");
+	} else if (lua_isinteger(lua, -1)) {
+		result = toString(lua_tointeger(lua, -1));
+	} else if (lua_isstring(lua, -1)) {
+		result = String("\"") + lua_tostring(lua, -1) + "\"";
+	} else if (lua_isnumber(lua, -1)) {
+		result = toString(lua_tonumber(lua, -1));
+	} else if (lua_isnoneornil(lua, -1)) {
+		result = "nil";
+	} else if (lua_isfunction(lua, -1)) {
+		result = "function";
+	} else if (lua_isboolean(lua, -1)) {
+		result = lua_toboolean(lua, -1) != 0? "true" : "false";
+	} else if (lua_isthread(lua, -1)) {
+		result = "thread";
+	}
+
+	lua_pop(lua, 1);
+	return result;
 }

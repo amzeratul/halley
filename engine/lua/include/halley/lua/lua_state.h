@@ -8,11 +8,12 @@
 struct lua_State;
 
 namespace Halley {
+	class Resources;
 	class LuaState;
 
 	class LuaState {
 	public:
-		LuaState();
+		LuaState(Resources& resources);
 		~LuaState();
 
 		const LuaReference* tryGetModule(const String& moduleName) const;
@@ -26,13 +27,20 @@ namespace Halley {
 		
 		void pushCallback(LuaCallback&& callback);
 
+		void pushErrorHandler();
+		void popErrorHandler();
+
 	private:
 		lua_State* lua;
 		std::unordered_map<String, LuaReference> modules;
 		std::vector<std::unique_ptr<LuaCallback>> closures;
+		std::unique_ptr<LuaReference> errorHandlerRef;
+		std::vector<int> errorHandlerStackPos;
 
 		LuaReference loadScript(const String& chunkName, gsl::span<const gsl::byte> data);
 
 		void print(String string);
+		String errorHandler(String message);
+		String printVariableAtTop();
 	};
 }

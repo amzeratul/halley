@@ -8,7 +8,9 @@ namespace Halley {
 
 	class LuaFunctionCaller {
 	public:
+		static void startCall(LuaState& state);
 		static void call(LuaState& state, int nArgs, int nRets);
+		static void endCall(LuaState& state);
 	};
 
 	template <typename T>

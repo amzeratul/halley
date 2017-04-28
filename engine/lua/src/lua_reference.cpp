@@ -54,5 +54,6 @@ LuaReference LuaReference::operator[](const String& name) const
 	if (lua_isnil(lua->getRawState(), -1)) {
 		throw Exception("Unknown field: " + name);
 	}
+	lua_remove(lua->getRawState(), -2);
 	return LuaReference(*lua);
 }
