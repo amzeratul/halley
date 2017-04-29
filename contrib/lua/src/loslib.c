@@ -140,7 +140,8 @@ static time_t l_checktime (lua_State *L, int arg) {
 
 static int os_execute (lua_State *L) {
   const char *cmd = luaL_optstring(L, 1, NULL);
-  int stat = system(cmd);
+  //int stat = system(cmd);
+  int stat = 0;
   if (cmd != NULL)
     return luaL_execresult(L, stat);
   else {
@@ -165,8 +166,8 @@ static int os_rename (lua_State *L) {
 
 static int os_tmpname (lua_State *L) {
   char buff[LUA_TMPNAMBUFSIZE];
-  int err;
-  lua_tmpnam(buff, err);
+  int err = 1;
+  //lua_tmpnam(buff, err);
   if (err)
     return luaL_error(L, "unable to generate a unique filename");
   lua_pushstring(L, buff);
