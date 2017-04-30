@@ -3,12 +3,14 @@
 namespace Halley
 {
 	enum class BlendType {
+		Undefined,
 		Opaque,
 		Alpha,
 		AlphaPremultiplied,
 		Add,
 		Multiply,
 		Darken,
-		Undefined
+
+		NumberOfBlendTypes
 	};
 }
