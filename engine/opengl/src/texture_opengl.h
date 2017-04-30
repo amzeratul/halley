@@ -16,7 +16,7 @@ namespace Halley
 		explicit TextureOpenGL(VideoOpenGL& parent, Vector2i size);
 		~TextureOpenGL();
 
-		void bind(int textureUnit) const override;
+		void bind(int textureUnit) const;
 		void load(TextureDescriptor&& descriptor) override;
 
 	private:

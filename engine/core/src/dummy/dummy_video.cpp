@@ -67,8 +67,6 @@ DummyTexture::DummyTexture(Vector2i s)
 	size = s;
 }
 
-void DummyTexture::bind(int textureUnit) const {}
-
 void DummyTexture::load(TextureDescriptor&& descriptor)
 {
 	doneLoading();
