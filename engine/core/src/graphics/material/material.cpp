@@ -203,6 +203,11 @@ bool Material::operator==(const Material& other) const
 	return true;
 }
 
+const std::vector<std::shared_ptr<const Texture>>& Material::getTextures() const
+{
+	return textures;
+}
+
 void Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, void* data)
 {
 	dataBlocks[blockNumber].setUniform(offset, type, data);

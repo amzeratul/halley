@@ -82,6 +82,7 @@ namespace Halley
 		const std::shared_ptr<const Texture>& getMainTexture() const;
 		const std::shared_ptr<const Texture>& getTexture(int textureUnit) const;
 		const Vector<MaterialTextureParameter>& getTextureUniforms() const;
+		const std::vector<std::shared_ptr<const Texture>>& getTextures() const;
 
 		const Vector<MaterialParameter>& getUniforms() const;
 		const Vector<MaterialDataBlock>& getDataBlocks() const;
