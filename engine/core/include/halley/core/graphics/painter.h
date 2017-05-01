@@ -33,6 +33,8 @@ namespace Halley
 
 		void startRender();
 		void endRender();
+		virtual void startDrawCall() {}
+		virtual void endDrawCall() {}
 		void flush();
 
 		Rect4i getViewPort() const { return viewPort; }

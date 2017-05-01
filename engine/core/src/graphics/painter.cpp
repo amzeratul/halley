@@ -281,6 +281,8 @@ void Painter::resetPending()
 
 void Painter::executeDrawTriangles(Material& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
 {
+	startDrawCall();
+
 	// Load vertices
 	setVertices(material.getDefinition(), numVertices, vertexData, numIndices, indices, allIndicesAreQuads);
 
@@ -301,6 +303,8 @@ void Painter::executeDrawTriangles(Material& material, size_t numVertices, void*
 		nTriangles += numIndices / 3;
 		nVertices += numVertices;
 	}
+
+	endDrawCall();
 }
 
 unsigned short* Painter::getStandardQuadIndices(size_t numQuads)
@@ -372,5 +376,7 @@ void Painter::updateProjection()
 	halleyGlobalMaterial->set("u_mvp", projection);
 
 	halleyGlobalMaterial->uploadData(*this);
+	startDrawCall();
 	setMaterialData(*halleyGlobalMaterial);
+	endDrawCall();
 }
