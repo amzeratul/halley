@@ -18,7 +18,7 @@ ConsoleWindow::ConsoleWindow(Resources& resources)
 
 	background = Sprite()
 		.setMaterial(backgroundMaterial)
-		.setSliced(backgroundMaterial->getMainTexture()->getSlices())
+		.setSlicedFromMaterial()
 		.setColour(Colour4f(0.0f, 0.0f, 0.0f, 0.4f));
 
 	font = resources.get<Font>("Inconsolata Medium");

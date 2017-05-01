@@ -124,9 +124,8 @@ Sprite& Sprite::setMaterial(std::shared_ptr<Material> m)
 	Expects(m);
 	material = m;
 
-	auto& mainTex = material->getMainTexture();
-	if (mainTex) {
-		setImageData(*mainTex);
+	if (!material->getTextures().empty()) {
+		setImageData(*material->getTextures()[0]);
 	}
 
 	return *this;
@@ -279,8 +278,8 @@ Sprite& Sprite::setSliced(Vector4s s)
 Sprite& Sprite::setSlicedFromMaterial()
 {
 	Expects (material);
-	Expects (material->getMainTexture());
-	return setSliced(material->getMainTexture()->getSlices());
+	Expects (!material->getTextures().empty());
+	return setSliced(material->getTextures()[0]->getSlices());
 }
 
 Sprite& Sprite::setNormal()

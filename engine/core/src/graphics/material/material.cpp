@@ -137,7 +137,7 @@ void Material::initUniforms(bool forceLocalBlocks)
 		++blockNumber;
 	}
 
-	textures.resize(std::max(size_t(1), materialDefinition->getTextures().size()));
+	textures.resize(materialDefinition->getTextures().size());
 	for (auto& tex: materialDefinition->getTextures()) {
 		textureUniforms.push_back(MaterialTextureParameter(*this, tex));
 	}
@@ -212,11 +212,6 @@ void Material::setUniform(int blockNumber, size_t offset, ShaderParameterType ty
 {
 	dataBlocks[blockNumber].setUniform(offset, type, data);
 	dirty = true;
-}
-
-const std::shared_ptr<const Texture>& Material::getMainTexture() const
-{
-	return textures[0];
 }
 
 const std::shared_ptr<const Texture>& Material::getTexture(int textureUnit) const
