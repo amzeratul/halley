@@ -83,7 +83,7 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 	// Bind constant buffer
 	// TODO: move this logic to Painter?
 	for (auto& dataBlock: material.getDataBlocks()) {
-		int address = dataBlock.getAddress(passNumber);
+		int address = dataBlock.getAddress(passNumber, ShaderType::Combined);
 		if (address != -1) {
 			shader.setUniformBlockBinding(address, dataBlock.getBindPoint());
 		}
@@ -93,7 +93,7 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 	// TODO: move this logic to Painter?
 	int textureUnit = 0;
 	for (auto& tex: material.getTextureUniforms()) {
-		int location = tex.getAddress(passNumber);
+		int location = tex.getAddress(passNumber, ShaderType::Combined);
 		if (location != -1) {
 			auto texture = std::static_pointer_cast<const TextureOpenGL>(material.getTexture(textureUnit));
 			if (!texture) {

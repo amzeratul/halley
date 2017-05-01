@@ -16,8 +16,8 @@ namespace Halley
 		void destroy();
 		void setUniformBlockBinding(unsigned int blockIndex, unsigned int binding);
 
-		int getUniformLocation(const String& name) override;
-		int getBlockLocation(const String& name) override;
+		int getUniformLocation(const String& name, ShaderType stage) override;
+		int getBlockLocation(const String& name, ShaderType stage) override;
 		int getAttributeLocation(const String& name);
 
 	private:

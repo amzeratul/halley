@@ -9,20 +9,24 @@
 
 using namespace Halley;
 
+constexpr static int shaderStageCount = int(ShaderType::NumOfShaderTypes);
+
 MaterialTextureParameter::MaterialTextureParameter(Material& material, const String& name)
 	: name(name)
 {
 	auto& definition = material.getDefinition();
-	addresses.resize(definition.passes.size());
-	for (size_t i = 0; i < addresses.size(); i++) {
+	addresses.resize(definition.passes.size() * shaderStageCount);
+	for (size_t i = 0; i < definition.passes.size(); i++) {
 		auto& shader = definition.passes[i].getShader();
-		addresses[i] = shader.getUniformLocation(name);
+		for (int j = 0; j < shaderStageCount; ++j) {
+			addresses[i * shaderStageCount + j] = shader.getUniformLocation(name, ShaderType(j));
+		}
 	}
 }
 
-unsigned MaterialTextureParameter::getAddress(int pass) const
+unsigned MaterialTextureParameter::getAddress(int pass, ShaderType stage) const
 {
-	return addresses[pass];
+	return addresses[pass * shaderStageCount + int(stage)];
 }
 
 MaterialParameter::MaterialParameter(Material& material, const String& name, ShaderParameterType type, int blockNumber, size_t offset)

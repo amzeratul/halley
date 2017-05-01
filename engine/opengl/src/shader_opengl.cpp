@@ -179,8 +179,13 @@ void ShaderOpenGL::setUniformBlockBinding(unsigned int blockIndex, unsigned int 
 	glCheckError();
 }
 
-int ShaderOpenGL::getUniformLocation(const String& name)
+int ShaderOpenGL::getUniformLocation(const String& name, ShaderType stage)
 {
+	if (stage != ShaderType::Combined) {
+		// OpenGL doesn't support per-stage bindings
+		return -1;
+	}
+
 	auto i = uniformLocations.find(name);
 	if (i != uniformLocations.end()) {
 		return int(i->second);
@@ -193,8 +198,13 @@ int ShaderOpenGL::getUniformLocation(const String& name)
 	return int(result);
 }
 
-int ShaderOpenGL::getBlockLocation(const String& name)
+int ShaderOpenGL::getBlockLocation(const String& name, ShaderType stage)
 {
+	if (stage != ShaderType::Combined) {
+		// OpenGL doesn't support per-stage bindings
+		return -1;
+	}
+
 	auto i = blockLocations.find(name);
 	if (i != blockLocations.end()) {
 		return int(i->second);

@@ -9,6 +9,7 @@
 
 namespace Halley
 {
+	enum class ShaderType;
 	class Texture;
 	class VideoAPIInternal;
 	class Material;
@@ -19,7 +20,7 @@ namespace Halley
 	{
 	public:
 		MaterialTextureParameter(Material& material, const String& name);
-		unsigned int getAddress(int pass) const;
+		unsigned int getAddress(int pass, ShaderType stage) const;
 
 	private:
 		String name;

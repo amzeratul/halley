@@ -8,6 +8,7 @@
 
 namespace Halley
 {
+	enum class ShaderType;
 	class MaterialDataBlock;
 	class Material;
 	enum class ShaderParameterType;
@@ -44,7 +45,7 @@ namespace Halley
 		MaterialDataBlock(MaterialDataBlock&& other) noexcept;
 
 		MaterialConstantBuffer& getConstantBuffer() const;
-		int getAddress(int pass) const;
+		int getAddress(int pass, ShaderType stage) const;
 		int getBindPoint() const;
 		gsl::span<const gsl::byte> getData() const;
 		MaterialDataBlockType getType() const;

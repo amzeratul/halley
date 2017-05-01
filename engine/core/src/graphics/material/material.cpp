@@ -11,19 +11,23 @@ using namespace Halley;
 static Material* currentMaterial = nullptr;
 static int currentPass = 0;
 
+constexpr static int shaderStageCount = int(ShaderType::NumOfShaderTypes);
+
 MaterialDataBlock::MaterialDataBlock()
 {
 }
 
 MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, const String& name, const MaterialDefinition& def)
 	: data(type == MaterialDataBlockType::SharedExternal ? 0 : size, 0)
-	, addresses(def.getNumPasses())
+	, addresses(def.getNumPasses() * shaderStageCount)
 	, dataBlockType(type)
 	, bindPoint(bindPoint)
 {
 	for (int i = 0; i < def.getNumPasses(); ++i) {
 		auto& shader = def.getPass(i).getShader();
-		addresses[i] = shader.getBlockLocation(name);
+		for (int j = 0; j < shaderStageCount; ++j) {
+			addresses[i * shaderStageCount + j] = shader.getBlockLocation(name, ShaderType(j));
+		}
 	}
 }
 
@@ -50,9 +54,9 @@ MaterialConstantBuffer& MaterialDataBlock::getConstantBuffer() const
 	return *constantBuffer;
 }
 
-int MaterialDataBlock::getAddress(int pass) const
+int MaterialDataBlock::getAddress(int pass, ShaderType stage) const
 {
-	return addresses[pass];
+	return addresses[pass * shaderStageCount + int(stage)];
 }
 
 int MaterialDataBlock::getBindPoint() const

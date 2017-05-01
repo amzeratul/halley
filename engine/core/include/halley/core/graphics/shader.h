@@ -13,7 +13,9 @@ namespace Halley
 		Vertex,
 		Pixel,
 		Geometry,
-		Combined
+		Combined,
+
+		NumOfShaderTypes
 	};
 
 	template <>
@@ -52,7 +54,7 @@ namespace Halley
 	{
 	public:
 		virtual ~Shader() {}
-		virtual int getUniformLocation(const String& name) = 0;
-		virtual int getBlockLocation(const String& name) = 0;
+		virtual int getUniformLocation(const String& name, ShaderType stage) = 0;
+		virtual int getBlockLocation(const String& name, ShaderType stage) = 0;
 	};
 }

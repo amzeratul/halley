@@ -44,8 +44,8 @@ namespace Halley {
 	class DummyShader : public Shader
 	{
 	public:
-		int getUniformLocation(const String& name) override;
-		int getBlockLocation(const String& name) override;
+		int getUniformLocation(const String& name, ShaderType stage) override;
+		int getBlockLocation(const String& name, ShaderType stage) override;
 	};
 
 	class DummyMaterialConstantBuffer : public MaterialConstantBuffer

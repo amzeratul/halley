@@ -81,12 +81,12 @@ void DummyTextureRenderTarget::bind() {}
 
 void DummyTextureRenderTarget::unbind() {}
 
-int DummyShader::getUniformLocation(const String& name)
+int DummyShader::getUniformLocation(const String& name, ShaderType stage)
 {
 	return 0;
 }
 
-int DummyShader::getBlockLocation(const String& name)
+int DummyShader::getBlockLocation(const String& name, ShaderType stage)
 {
 	return 0;
 }
