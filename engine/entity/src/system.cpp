@@ -87,10 +87,20 @@ void System::processMessages()
 
 void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, size_t, int id)
 {
-	Entity* entity = world->tryGetEntity(entityId);
-	if (entity) {
-		entity->inbox.emplace_back(MessageEntry(std::move(msg), id, systemId));
-		messagesSentTo.push_back(entityId);
+	outbox.emplace_back(std::make_pair(entityId, MessageEntry(std::move(msg), id, systemId)));
+}
+
+void System::dispatchMessages()
+{
+	if (!outbox.empty()) {
+		for (auto& o: outbox) {
+			Entity* entity = world->tryGetEntity(o.first);
+			if (entity) {
+				entity->inbox.emplace_back(std::move(o.second));
+				messagesSentTo.push_back(o.first);
+			}
+		}
+		outbox.clear();
 	}
 }
 
@@ -104,6 +114,7 @@ void System::doUpdate(Time time) {
 	}
 	
 	updateBase(time);
+	dispatchMessages();
 	
 	timer.endSample();
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());

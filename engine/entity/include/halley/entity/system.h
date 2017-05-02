@@ -124,6 +124,7 @@ namespace Halley {
 		Vector<FamilyBindingBase*> families;
 		Vector<int> messageTypesReceived;
 		Vector<EntityId> messagesSentTo;
+		Vector<std::pair<EntityId, MessageEntry>> outbox;
 
 		World* world = nullptr;
 		HalleyAPI* api = nullptr;
@@ -140,6 +141,7 @@ namespace Halley {
 		void purgeMessages();
 		void processMessages();
 		void doSendMessage(EntityId target, std::unique_ptr<Message> msg, size_t msgSize, int msgId);
+		void dispatchMessages();
 	};
 
 }
