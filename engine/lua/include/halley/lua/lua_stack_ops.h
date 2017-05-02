@@ -289,7 +289,8 @@ namespace Halley {
 		void fromLua(LuaState& state)
 		{
 			LuaDeserializer s(state);
-			static_cast<T*>(this)->luaConvert(s);			
+			static_cast<T*>(this)->luaConvert(s);
+			LuaStackOps(state).pop();
 		}
 	};
 
