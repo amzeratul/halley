@@ -44,14 +44,7 @@ void System::purgeMessages()
 
 			if (entity) {
 				auto& inbox = entity->inbox;
-				size_t inboxSize = inbox.size();
-				for (size_t i = 0; i < inboxSize; i++) {
-					if (inbox[i].age == systemId) {
-						inbox.erase(inbox.begin() + i);
-						i--;
-						inboxSize--;
-					}
-				}
+				inbox.erase(std::remove_if(inbox.begin(), inbox.end(), [&] (const MessageEntry& e) { return e.age == systemId; }), inbox.end());
 			}
 		}
 		messagesSentTo.clear();

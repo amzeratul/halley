@@ -31,6 +31,8 @@ LuaState::LuaState(Resources& resources)
 LuaState::~LuaState()
 {
 	modules.clear();
+	closures.clear();
+	errorHandlerRef.reset();
 	lua_close(lua);
 }
 
