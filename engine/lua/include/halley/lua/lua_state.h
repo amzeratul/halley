@@ -18,6 +18,7 @@ namespace Halley {
 
 		const LuaReference* tryGetModule(const String& moduleName) const;
 		const LuaReference& getModule(const String& moduleName) const;
+		const LuaReference& getOrLoadModule(const String& moduleName);
 		const LuaReference& loadModule(const String& moduleName, gsl::span<const gsl::byte> data);
 		void unloadModule(const String& moduleName);
 
@@ -32,6 +33,8 @@ namespace Halley {
 
 	private:
 		lua_State* lua;
+		Resources* resources;
+
 		std::unordered_map<String, LuaReference> modules;
 		std::vector<std::unique_ptr<LuaCallback>> closures;
 		std::unique_ptr<LuaReference> errorHandlerRef;
@@ -41,6 +44,7 @@ namespace Halley {
 
 		void print(String string);
 		String errorHandler(String message);
+		const LuaReference& packageLoader(String moduleName);
 		String printVariableAtTop();
 	};
 }

@@ -9,6 +9,7 @@ using namespace Halley;
 
 LuaState::LuaState(Resources& resources)
 	: lua(luaL_newstate())
+	, resources(&resources)
 {
 	luaL_openlibs(lua);
 			
@@ -17,6 +18,7 @@ LuaState::LuaState(Resources& resources)
 	u.pushTable();
 	u.setField("print", LuaCallbackBind(this, &LuaState::print));
 	u.setField("errorHandler", LuaCallbackBind(this, &LuaState::errorHandler));
+	u.setField("packageLoader", LuaCallbackBind(this, &LuaState::packageLoader));
 	u.makeGlobal("halleyAPI");
 
 	lua_getglobal(lua, "halleyAPI");
@@ -50,6 +52,16 @@ const LuaReference& LuaState::getModule(const String& moduleName) const
 	auto result = tryGetModule(moduleName);
 	if (!result) {
 		throw Exception("Module not found: " + moduleName);
+	}
+	return *result;
+}
+
+const LuaReference& LuaState::getOrLoadModule(const String& moduleName)
+{
+	auto result = tryGetModule(moduleName);
+	if (!result) {
+		auto res = resources->get<BinaryFile>("lua/" + moduleName + ".lua");
+		return loadModule(moduleName, res->getSpan());
 	}
 	return *result;
 }
@@ -174,6 +186,11 @@ String LuaState::errorHandler(String message)
 	}
 
 	return result;
+}
+
+const LuaReference& LuaState::packageLoader(String module)
+{
+	return getOrLoadModule(module);
 }
 
 String LuaState::printVariableAtTop()
