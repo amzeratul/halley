@@ -160,16 +160,27 @@ String LuaState::errorHandler(String message)
 		lua_getinfo(lua, "nSlf", &stack);
 		
 		String name;
-		if (stack.namewhat) {
+		if (stack.namewhat && String(stack.namewhat) != "") {
 			name = stack.namewhat + String(" ");
 		}
 		if (stack.name) {
 			name += stack.name;
 		} else {
-			name += "unknown";
+			name += "<unknown>";
+		}
+
+		String args;
+		{
+			const char* argName = nullptr;
+			for (int j = 1; (argName = lua_getlocal(lua, &stack, j)) != nullptr && j <= stack.nparams; ++j) {
+				if (j > 1) {
+					args += ", ";
+				}
+				args += String(argName) + " = " + printVariableAtTop();
+			}
 		}
 		
-		result += "\n\t" + toString(i) + ": " + name + " [" + stack.short_src + ":" + toString(stack.currentline) + "]";
+		result += "\n\t" + toString(i) + ": " + name + " (" + args + ") [" + stack.source + ":" + toString(stack.currentline) + "]";
 
 		{
 			const char* localName = nullptr;
@@ -179,7 +190,7 @@ String LuaState::errorHandler(String message)
 		}
 		{
 			const char* localName = nullptr;
-			for (int j = 1; (localName = lua_getlocal(lua, &stack, j)) != nullptr; ++j) {
+			for (int j = 1 + stack.nparams; (localName = lua_getlocal(lua, &stack, j)) != nullptr; ++j) {
 				result += "\n\t\tL " + String(localName) + " = " + printVariableAtTop();
 			}
 		}
