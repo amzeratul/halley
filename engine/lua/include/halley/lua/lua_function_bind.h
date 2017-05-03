@@ -29,12 +29,7 @@ namespace Halley {
 	template <>
 	class LuaFunctionBind<> {
 	public:
-		static void call(LuaState& state, int nRets)
-		{
-			_doCall(state, 0, nRets);
-		}
-		
-		static void _doCall(LuaState& state, int nArgs, int nRets)
+		static void call(LuaState& state, int nArgs, int nRets)
 		{
 			LuaFunctionCaller::call(state, nArgs, nRets);
 		}
@@ -43,15 +38,10 @@ namespace Halley {
 	template <typename U, typename... Us>
 	class LuaFunctionBind<U, Us...> {
 	public:
-		static void call(LuaState& state, int nRets, U u, Us... us)
-		{
-			_doCall(state, 0, nRets, u, us...);
-		}
-
-		static void _doCall(LuaState& state, int nArgs, int nRets, U u, Us... us)
+		static void call(LuaState& state, int nArgs, int nRets, U u, Us... us)
 		{
 			ToLua<U>()(state, u);
-			LuaFunctionBind<Us...>::_doCall(state, nArgs + 1, nRets, us...);
+			LuaFunctionBind<Us...>::call(state, nArgs + 1, nRets, us...);
 		}
 	};
 

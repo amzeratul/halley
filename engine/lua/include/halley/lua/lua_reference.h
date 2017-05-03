@@ -43,20 +43,40 @@ namespace Halley {
 		LuaReference operator[](const String& name) const;
 
 		template <typename T, typename... Us>
-		T call(Us... us)
+		T call(Us... us) const
 		{
 			LuaFunctionCaller::startCall(*lua);
 			pushToLuaStack();
-			LuaFunctionBind<Us...>::call(*lua, LuaReturnSize<T>::value, us...);
+			LuaFunctionBind<Us...>::call(*lua, 0, LuaReturnSize<T>::value, us...);
 			return LuaReturnHelper<T>::cleanUpAndReturn(*lua);
 		}
 
 		template <typename T>
-		T call()
+		T call() const
 		{
 			LuaFunctionCaller::startCall(*lua);
 			pushToLuaStack();
-			LuaFunctionBind<>::call(*lua, LuaReturnSize<T>::value);
+			LuaFunctionBind<>::call(*lua, 0, LuaReturnSize<T>::value);
+			return LuaReturnHelper<T>::cleanUpAndReturn(*lua);
+		}
+
+		template <typename T, typename... Us>
+		T callMethod(const String& methodName, Us... us) const
+		{
+			LuaFunctionCaller::startCall(*lua);
+			operator[](methodName).pushToLuaStack();
+			pushToLuaStack();
+			LuaFunctionBind<Us...>::call(*lua, 1, LuaReturnSize<T>::value, us...);
+			return LuaReturnHelper<T>::cleanUpAndReturn(*lua);
+		}
+
+		template <typename T>
+		T callMethod(const String& methodName) const
+		{
+			LuaFunctionCaller::startCall(*lua);
+			operator[](methodName).pushToLuaStack();
+			pushToLuaStack();
+			LuaFunctionBind<>::call(*lua, 1, LuaReturnSize<T>::value);
 			return LuaReturnHelper<T>::cleanUpAndReturn(*lua);
 		}
 
