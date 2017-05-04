@@ -168,30 +168,21 @@ String LuaState::errorHandler(String message)
 		} else {
 			name += "<unknown>";
 		}
+		
+		result += "\n\t" + toString(i) + ": " + name + " [" + stack.source + ":" + toString(stack.currentline) + "]";
 
-		String args;
 		{
-			const char* argName = nullptr;
-			for (int j = 1; (argName = lua_getlocal(lua, &stack, j)) != nullptr && j <= stack.nparams; ++j) {
-				if (j > 1) {
-					args += ", ";
-				}
-				args += String(argName) + " = " + printVariableAtTop();
+			const char* localName = nullptr;
+			for (int j = 1; (localName = lua_getlocal(lua, &stack, j)) != nullptr; ++j) {
+				result += "\n\t\t" + String(localName) + " = " + printVariableAtTop();
 			}
 		}
-		
-		result += "\n\t" + toString(i) + ": " + name + " (" + args + ") [" + stack.source + ":" + toString(stack.currentline) + "]";
-
 		{
 			const char* localName = nullptr;
 			for (int j = 1; (localName = lua_getupvalue(lua, -1, j)) != nullptr; ++j) {
-				result += "\n\t\tU " + String(localName) + " = " + printVariableAtTop();
-			}
-		}
-		{
-			const char* localName = nullptr;
-			for (int j = 1 + stack.nparams; (localName = lua_getlocal(lua, &stack, j)) != nullptr; ++j) {
-				result += "\n\t\tL " + String(localName) + " = " + printVariableAtTop();
+				if (String(localName) != "_ENV") {
+					result += "\n\t\t(upvalue) " + String(localName) + " = " + printVariableAtTop();
+				}
 			}
 		}
 	}
@@ -204,16 +195,39 @@ const LuaReference& LuaState::packageLoader(String module)
 	return getOrLoadModule(module);
 }
 
-String LuaState::printVariableAtTop()
+String LuaState::printVariableAtTop(int maxDepth, bool quote)
 {
 	String result;
 
 	if (lua_istable(lua, -1)) {
-		result = toString("{...}");
+		if (maxDepth > 0) {
+			result = "{";
+
+			lua_pushnil(lua);  /* first key */
+			for (int i = 0; lua_next(lua, -2) != 0; ++i) {
+				String val = printVariableAtTop(maxDepth - 1);
+				lua_pushvalue(lua, -1);
+				String key = printVariableAtTop(maxDepth - 1, false);
+				if (val != "function") {
+					if (i > 0) {
+						result += ", ";
+					}
+					result += key + "=" + val;
+				}
+			}
+
+			result += "}";
+		} else {
+			result = "{...}";
+		}
 	} else if (lua_isinteger(lua, -1)) {
 		result = toString(lua_tointeger(lua, -1));
 	} else if (lua_isstring(lua, -1)) {
-		result = String("\"") + lua_tostring(lua, -1) + "\"";
+		if (quote) {
+			result = String("\"") + lua_tostring(lua, -1) + "\"";
+		} else {
+			result = lua_tostring(lua, -1);
+		}
 	} else if (lua_isnumber(lua, -1)) {
 		result = toString(lua_tonumber(lua, -1));
 	} else if (lua_isnoneornil(lua, -1)) {

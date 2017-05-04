@@ -45,6 +45,6 @@ namespace Halley {
 		void print(String string);
 		String errorHandler(String message);
 		const LuaReference& packageLoader(String moduleName);
-		String printVariableAtTop();
+		String printVariableAtTop(int maxDepth = 2, bool quote = true);
 	};
 }
