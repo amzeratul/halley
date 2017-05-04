@@ -201,22 +201,53 @@ String LuaState::printVariableAtTop(int maxDepth, bool quote)
 
 	if (lua_istable(lua, -1)) {
 		if (maxDepth > 0) {
-			result = "{";
+			String arrayPart;
+			String tablePart;
+
+			lua_len(lua, -1);
+			int len = int(lua_tointeger(lua, -1));
+			lua_pop(lua, 1);
+			if (len > 0) {
+				for (int i = 1; i <= len; ++i) {
+					lua_geti(lua, -1, i);
+					String val = printVariableAtTop(maxDepth - 1);
+					if (i > 1) {
+						arrayPart += ", ";
+					}
+					arrayPart += val;
+				}
+			}
 
 			lua_pushnil(lua);  /* first key */
 			for (int i = 0; lua_next(lua, -2) != 0; ++i) {
 				String val = printVariableAtTop(maxDepth - 1);
+
+				if (lua_isinteger(lua, -1)) {
+					int v = int(lua_tointeger(lua, -1));
+					if (v <= len) {
+						continue;
+					}
+				}
+
 				lua_pushvalue(lua, -1);
 				String key = printVariableAtTop(maxDepth - 1, false);
 				if (val != "function") {
 					if (i > 0) {
-						result += ", ";
+						tablePart += ", ";
 					}
-					result += key + "=" + val;
+					tablePart += key + "=" + val;
 				}
 			}
 
-			result += "}";
+			if (!arrayPart.isEmpty()) {
+				result += "[" + arrayPart + "]";
+				if (!tablePart.isEmpty()) {
+					result += " & ";
+				}
+			}
+			if (!tablePart.isEmpty() || arrayPart.isEmpty()) {
+				result += "{" + tablePart + "}";
+			}
 		} else {
 			result = "{...}";
 		}
