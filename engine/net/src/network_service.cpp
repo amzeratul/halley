@@ -1,5 +1,6 @@
 #include <vector>
 #include <list>
+#define BOOST_SYSTEM_NO_DEPRECATED
 #include <boost/asio.hpp>
 #include "network_service.h"
 #include "network_packet.h"

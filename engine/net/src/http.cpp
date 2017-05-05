@@ -28,6 +28,7 @@ using namespace Halley;
 #pragma warning(disable: 6386 6258 6309 6387 4913)
 #endif
 
+#define BOOST_SYSTEM_NO_DEPRECATED
 #include <boost/asio.hpp>
 
 Bytes HTTP::get(String host, String path)

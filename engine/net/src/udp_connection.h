@@ -2,6 +2,7 @@
 
 #include "iconnection.h"
 #include "network_packet.h"
+#define BOOST_SYSTEM_NO_DEPRECATED
 #include <boost/asio.hpp>
 #include <deque>
 #include <array>

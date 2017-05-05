@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <cstdint>
 #include <utility>
+#include <boost/optional.hpp>
 
 namespace Halley {
 	class String;
@@ -113,6 +114,16 @@ namespace Halley {
 		Serializer& operator<<(const std::pair<T, U>& p)
 		{
 			return *this << p.first << p.second;
+		}
+		
+		template <typename T>
+		Serializer& operator<<(const boost::optional<T>& p)
+		{
+			if (p) {
+				return *this << true << p.get();
+			} else {
+				return *this << false;
+			}
 		}
 
 		template <typename T>
@@ -237,6 +248,21 @@ namespace Halley {
 		Deserializer& operator>>(std::pair<T, U>& p)
 		{
 			return *this >> p.first >> p.second;
+		}
+
+		template <typename T>
+		Deserializer& operator>>(boost::optional<T>& p)
+		{
+			bool present;
+			*this >> present;
+			if (present) {
+				T tmp;
+				*this >> tmp;
+				p = tmp;
+			} else {
+				p = boost::optional<T>();
+			}
+			return *this;
 		}
 
 		template <typename T>
