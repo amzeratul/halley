@@ -107,12 +107,14 @@ set(CMAKE_DEBUG_POSTFIX "_d")
 set(HALLEY_PROJECT_LIBS
 	optimized halley-opengl
 	optimized halley-sdl
+	optimized halley-asio
 	optimized halley-core
 	optimized halley-entity
 	optimized halley-audio
 	optimized halley-net
 	optimized halley-lua
 	optimized halley-utils
+	debug halley-asio_d
 	debug halley-opengl_d
 	debug halley-sdl_d
 	debug halley-core_d
