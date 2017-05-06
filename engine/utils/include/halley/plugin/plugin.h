@@ -14,7 +14,8 @@ namespace Halley
 		SystemAPI,
 		GraphicsAPI,
 		AudioOutputAPI,
-		InputAPI
+		InputAPI,
+		NetworkAPI
 	};
 
 	class Plugin

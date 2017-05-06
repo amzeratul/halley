@@ -15,10 +15,10 @@ namespace Halley
 	using UDPEndpoint = boost::asio::ip::udp::endpoint;
 	using UDPSocket = boost::asio::ip::udp::socket;
 
-	class UDPConnection : public IConnection
+	class AsioUDPConnection : public IConnection
 	{
 	public:
-		UDPConnection(UDPSocket& socket, UDPEndpoint remote);
+		AsioUDPConnection(UDPSocket& socket, UDPEndpoint remote);
 
 		void close() override;
 		ConnectionStatus getStatus() const override { return status; }

@@ -79,14 +79,14 @@ void TestStage::updateNetwork()
 		if (key->isButtonPressed(Keys::S)) {
 			// Server
 			isClient = false;
-			network = std::make_unique<NetworkService>(4113);
+			network = getNetworkAPI().createService(4113);
 			network->setAcceptingConnections(true);
 			std::cout << "Listening..." << std::endl;
 		}
 		else if (key->isButtonPressed(Keys::C)) {
 			// Client
 			isClient = true;
-			network = std::make_unique<NetworkService>(0);
+			network = getNetworkAPI().createService(0);
 			setConnection(network->connect("127.0.0.1", 4113));			
 			std::cout << "Connecting as client." << std::endl;
 		}

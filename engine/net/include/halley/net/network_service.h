@@ -2,12 +2,9 @@
 #include <memory>
 #include <halley/text/halleystring.h>
 #include "iconnection.h"
-#include <gsl/gsl>
 
 namespace Halley
 {
-	class NetworkServicePImpl;
-
 	enum class IPVersion
 	{
 		IPv4,
@@ -17,24 +14,12 @@ namespace Halley
 	class NetworkService
 	{
 	public:
-		NetworkService(int port, IPVersion version = IPVersion::IPv4);
-		~NetworkService();
+		virtual ~NetworkService() {}
 
-		void update();
+		virtual void update() = 0;
 
-		void setAcceptingConnections(bool accepting);
-		std::shared_ptr<IConnection> tryAcceptConnection();
-		std::shared_ptr<IConnection> connect(String address, int port);
-
-	private:
-		std::unique_ptr<NetworkServicePImpl> pimpl;
-		bool acceptingConnections = false;
-		bool startedListening = false;
-
-		void startListening();
-		void receiveNext();
-		void receivePacket(gsl::span<gsl::byte> data, std::string* error);
-		bool isValidConnectionRequest(gsl::span<const gsl::byte> data);
-		short getFreeId() const;
+		virtual void setAcceptingConnections(bool accepting) = 0;
+		virtual std::shared_ptr<IConnection> tryAcceptConnection() = 0;
+		virtual std::shared_ptr<IConnection> connect(String address, int port) = 0;
 	};
 }

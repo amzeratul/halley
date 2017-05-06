@@ -27,6 +27,11 @@ CoreAPI& Stage::getCoreAPI() const
 	return *api->core;
 }
 
+NetworkAPI& Stage::getNetworkAPI() const
+{
+	return *api->network;
+}
+
 Resources& Stage::getResources() const
 {
 	return api->core->getResources();

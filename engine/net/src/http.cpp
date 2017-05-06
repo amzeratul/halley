@@ -22,6 +22,9 @@
 #include "http.h"
 #include <halley/support/exception.h>
 
+// Comment this whole thing out for now
+#ifdef false
+
 using namespace Halley;
 
 #ifdef _MSC_VER
@@ -115,3 +118,5 @@ Bytes HTTP::request(String host, String path, bool isPost, String& content, Stri
 	}
 	return result;
 }
+
+#endif

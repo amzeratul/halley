@@ -1,4 +1,4 @@
-#include "udp_connection.h"
+#include "asio_udp_connection.h"
 #include <network_packet.h>
 #include <iostream>
 
@@ -20,7 +20,7 @@ struct HandshakeAccept
 
 
 
-UDPConnection::UDPConnection(UDPSocket& socket, UDPEndpoint remote)
+AsioUDPConnection::AsioUDPConnection(UDPSocket& socket, UDPEndpoint remote)
 	: socket(socket)
 	, remote(remote)
 	, status(ConnectionStatus::CONNECTING)
@@ -28,19 +28,19 @@ UDPConnection::UDPConnection(UDPSocket& socket, UDPEndpoint remote)
 {
 }
 
-void UDPConnection::close()
+void AsioUDPConnection::close()
 {
 	status = ConnectionStatus::CLOSING;
 }
 
-void UDPConnection::terminateConnection()
+void AsioUDPConnection::terminateConnection()
 {
 	if (status != ConnectionStatus::CLOSED) {
 		status = ConnectionStatus::CLOSED;
 	}
 }
 
-void UDPConnection::send(OutboundNetworkPacket&& packet)
+void AsioUDPConnection::send(OutboundNetworkPacket&& packet)
 {
 	if (status == ConnectionStatus::OPEN || status == ConnectionStatus::CONNECTING) {
 		// Insert header
@@ -64,7 +64,7 @@ void UDPConnection::send(OutboundNetworkPacket&& packet)
 	}
 }
 
-bool UDPConnection::receive(InboundNetworkPacket& packet)
+bool AsioUDPConnection::receive(InboundNetworkPacket& packet)
 {
 	if (pendingReceive.empty()) {
 		return false;
@@ -75,12 +75,12 @@ bool UDPConnection::receive(InboundNetworkPacket& packet)
 	}
 }
 
-bool UDPConnection::matchesEndpoint(const UDPEndpoint& remoteEndpoint) const
+bool AsioUDPConnection::matchesEndpoint(const UDPEndpoint& remoteEndpoint) const
 {
 	return remote == remoteEndpoint;
 }
 
-void UDPConnection::onReceive(gsl::span<const gsl::byte> data)
+void AsioUDPConnection::onReceive(gsl::span<const gsl::byte> data)
 {
 	Expects(data.size() <= 1500);
 
@@ -100,12 +100,12 @@ void UDPConnection::onReceive(gsl::span<const gsl::byte> data)
 	}
 }
 
-void UDPConnection::setError(const std::string& cs)
+void AsioUDPConnection::setError(const std::string& cs)
 {
 	error = cs;
 }
 
-void UDPConnection::open(short id)
+void AsioUDPConnection::open(short id)
 {
 	if (status == ConnectionStatus::CONNECTING) {
 		// Handshake
@@ -117,14 +117,14 @@ void UDPConnection::open(short id)
 	}
 }
 
-void UDPConnection::onOpen(short id)
+void AsioUDPConnection::onOpen(short id)
 {
 	std::cout << "Connection open on id = " << id << std::endl;
 	connectionId = id;
 	status = ConnectionStatus::OPEN;
 }
 
-void UDPConnection::sendNext()
+void AsioUDPConnection::sendNext()
 {
 	if (pendingSend.empty()) {
 		return;

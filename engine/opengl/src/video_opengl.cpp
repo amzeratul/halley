@@ -10,6 +10,7 @@
 #include <halley/core/graphics/window.h>
 #include "halley/text/string_converter.h"
 #include "constant_buffer_opengl.h"
+#include "halley/core/graphics/material/uniform_type.h"
 using namespace Halley;
 
 #ifdef _MSC_VER

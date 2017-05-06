@@ -1,6 +1,6 @@
 project (halley-core)
 
-include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../entity/include" "../audio/include")
+include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../entity/include" "../audio/include" "../net/include")
 
 set(SOURCES
         "src/api/halley_api.cpp"
@@ -8,6 +8,7 @@ set(SOURCES
         "src/dummy/dummy_audio.cpp"
         "src/dummy/dummy_input.cpp"
         "src/dummy/dummy_plugins.cpp"
+        "src/dummy/dummy_network.cpp"
         "src/dummy/dummy_system.cpp"
         "src/dummy/dummy_video.cpp"
 
@@ -75,6 +76,7 @@ set(HEADERS
         "src/dummy/dummy_audio.h"
         "src/dummy/dummy_input.h"
         "src/dummy/dummy_plugins.h"
+        "src/dummy/dummy_network.h"
         "src/dummy/dummy_system.h"
         "src/dummy/dummy_video.h"
 
@@ -83,6 +85,7 @@ set(HEADERS
         "include/halley/core/api/halley_api.h"
         "include/halley/core/api/halley_api_internal.h"
         "include/halley/core/api/input_api.h"
+        "include/halley/core/api/network_api.h"
         "include/halley/core/api/system_api.h"
         "include/halley/core/api/video_api.h"
         

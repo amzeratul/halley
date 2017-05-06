@@ -6,7 +6,7 @@
 #include "system_api.h"
 #include "input_api.h"
 #include "audio_api.h"
-#include "halley/core/graphics/material/uniform_type.h"
+#include "network_api.h"
 
 namespace Halley
 {
@@ -66,6 +66,12 @@ namespace Halley
 	class CoreAPIInternal : public CoreAPI, public IPluginRegistry {
 	public:
 		virtual ~CoreAPIInternal() {}
+	};
+
+	class NetworkAPIInternal : public NetworkAPI, public HalleyAPIInternal
+	{
+	public:
+		virtual ~NetworkAPIInternal() {}
 	};
 }
 
