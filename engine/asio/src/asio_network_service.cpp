@@ -1,7 +1,5 @@
 #include <vector>
 #include <list>
-#define BOOST_SYSTEM_NO_DEPRECATED
-#include <boost/asio.hpp>
 #include "halley/net/network_packet.h"
 #include "asio_network_service.h"
 #include "asio_udp_connection.h"

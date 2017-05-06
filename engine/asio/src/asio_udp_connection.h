@@ -2,8 +2,11 @@
 
 #include "halley/net/iconnection.h"
 #include "halley/net/network_packet.h"
+
 #define BOOST_SYSTEM_NO_DEPRECATED
+#define BOOST_ERROR_CODE_HEADER_ONLY
 #include <boost/asio.hpp>
+
 #include <deque>
 #include <array>
 #include <string>
