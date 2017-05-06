@@ -3,6 +3,7 @@
 #include "dummy_system.h"
 #include "dummy_video.h"
 #include "dummy_input.h"
+#include "dummy_network.h"
 
 using namespace Halley;
 
@@ -42,6 +43,26 @@ HalleyAPIInternal* DummySystemPlugin::createAPI(SystemAPI*)
 }
 
 int DummySystemPlugin::getPriority() const
+{
+	return -1;
+}
+
+PluginType DummyNetworkPlugin::getType()
+{
+	return PluginType::NetworkAPI;
+}
+
+String DummyNetworkPlugin::getName()
+{
+	return "Network/Dummy";
+}
+
+HalleyAPIInternal* DummyNetworkPlugin::createAPI(SystemAPI*)
+{
+	return new DummyNetworkAPI();
+}
+
+int DummyNetworkPlugin::getPriority() const
 {
 	return -1;
 }
