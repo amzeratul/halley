@@ -3,8 +3,6 @@ project (halley-net)
 include_directories(${Boost_INCLUDE_DIR} "include/halley/net" "../utils/include")
 
 set(SOURCES
-        "src/asio_udp_connection.cpp"
-        "src/asio_network_service.cpp"
         "src/http.cpp"
         "src/instability_simulator.cpp"
         "src/message_queue.cpp"
@@ -26,8 +24,6 @@ set(HEADERS
         "include/halley/net/network_service.h"
         "include/halley/net/reliable_connection.h"
         "include/halley/net/standard_message_stream.h"
-        "src/asio_udp_connection.h"
-        "src/asio_network_service.h"
         )
 
 assign_source_group(${SOURCES})

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "iconnection.h"
-#include "network_packet.h"
+#include "halley/net/iconnection.h"
+#include "halley/net/network_packet.h"
 #define BOOST_SYSTEM_NO_DEPRECATED
 #include <boost/asio.hpp>
 #include <deque>
