@@ -73,8 +73,8 @@ namespace Halley
 		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly) = 0;
 		virtual void drawTriangles(size_t numIndices) = 0;
 
-		virtual void setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) = 0;
-		virtual void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) = 0;
+		virtual void setViewPort(Rect4i rect) = 0;
+		virtual void setClip(Rect4i clip, bool enable) = 0;
 
 		void generateQuadIndices(unsigned short firstVertex, size_t numQuads, unsigned short* target);
 
@@ -83,9 +83,8 @@ namespace Halley
 		void unbind(RenderContext& context);
 
 		RenderContext* activeContext = nullptr;
+		RenderTarget* activeRenderTarget = nullptr;
 		Matrix4f projection;
-		Rect4i renderTargetViewPort;
-		bool renderTargetFlipVertical = true;
 		Rect4i viewPort;
 		Camera* camera = nullptr;
 
@@ -120,5 +119,7 @@ namespace Halley
 		void generateQuadIndicesOffset(unsigned short firstVertex, unsigned short lineStride, unsigned short* target);
 
 		void updateProjection();
+
+		Rect4i getRectangleForActiveRenderTarget(Rect4i rectangle);
 	};
 }

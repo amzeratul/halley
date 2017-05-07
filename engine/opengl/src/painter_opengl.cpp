@@ -122,22 +122,14 @@ static Rect4i flipRectangle(Rect4i r, int h)
 	return Rect4i(Vector2i(r.getLeft(), y), r.getWidth(), r.getHeight());
 }
 
-void PainterOpenGL::setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool flipVertical)
+void PainterOpenGL::setClip(Rect4i clip, bool enable)
 {
-	if (flipVertical) {
-		glUtils->setScissor(flipRectangle(clip, renderTargetSize.y), enable);
-	} else {
-		glUtils->setScissor(clip, enable);
-	}	
+	glUtils->setScissor(clip, enable);
 }
 
-void PainterOpenGL::setViewPort(Rect4i rect, Vector2i renderTargetSize, bool flipVertical)
+void PainterOpenGL::setViewPort(Rect4i rect)
 {
-	if (flipVertical) {
-		glUtils->setViewPort(flipRectangle(rect, renderTargetSize.y));
-	} else {
-		glUtils->setViewPort(rect);
-	}
+	glUtils->setViewPort(rect);
 }
 
 void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly)

@@ -115,8 +115,8 @@ void DummyPainter::setVertices(const MaterialDefinition& material, size_t numVer
 
 void DummyPainter::drawTriangles(size_t numIndices) {}
 
-void DummyPainter::setViewPort(Rect4i rect, Vector2i renderTargetSize, bool isScreen) {}
+void DummyPainter::setViewPort(Rect4i rect) {}
 
-void DummyPainter::setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool isScreen) {}
+void DummyPainter::setClip(Rect4i clip, bool enable) {}
 
 void DummyPainter::setMaterialData(const Material& material) {}

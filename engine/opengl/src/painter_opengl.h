@@ -22,12 +22,12 @@ namespace Halley
 		void setMaterialPass(const Material& material, int pass) override;
 		void setMaterialData(const Material& material) override;
 
-		void setClip(Rect4i clip, Vector2i renderTargetSize, bool enable, bool flipVertical) override;
+		void setClip(Rect4i clip, bool enable) override;
 
 	protected:
 		void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly) override;
 		void drawTriangles(size_t numIndices) override;
-		void setViewPort(Rect4i rect, Vector2i renderTargetSize, bool flipVertical) override;
+		void setViewPort(Rect4i rect) override;
 
 	private:
 #ifdef WITH_OPENGL

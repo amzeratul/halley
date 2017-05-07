@@ -197,14 +197,12 @@ void Painter::bind(RenderContext& context)
 	camera->defaultRenderTarget = &context.getDefaultRenderTarget();
 
 	// Set render target
-	auto& rt = camera->getActiveRenderTarget();
-	renderTargetViewPort = rt.getViewPort();
-	renderTargetFlipVertical = rt.flipVertical();
-	rt.bind();
+	activeRenderTarget = &camera->getActiveRenderTarget();
+	activeRenderTarget->bind();
 
 	// Set viewport
 	viewPort = camera->getActiveViewPort();
-	setViewPort(viewPort, renderTargetViewPort.getSize(), renderTargetFlipVertical);
+	setViewPort(getRectangleForActiveRenderTarget(viewPort));
 	setClip();
 
 	// Update projection
@@ -214,7 +212,8 @@ void Painter::bind(RenderContext& context)
 void Painter::unbind(RenderContext& context)
 {
 	flush();
-	camera->getActiveRenderTarget().unbind();
+	activeRenderTarget->unbind();
+	activeRenderTarget = nullptr;
 	camera->rendering = false;
 }
 
@@ -239,13 +238,25 @@ void Painter::setClip(Rect4i rect)
 {
 	flushPending();
 	Rect4i finalRect = (rect + viewPort.getTopLeft()).intersection(viewPort);
-	setClip(finalRect, renderTargetViewPort.getSize(), finalRect != renderTargetViewPort, renderTargetFlipVertical);
+	setClip(getRectangleForActiveRenderTarget(finalRect), finalRect != activeRenderTarget->getViewPort());
 }
 
 void Painter::setClip()
 {
 	flushPending();
-	setClip(viewPort, renderTargetViewPort.getSize(), viewPort != renderTargetViewPort, renderTargetFlipVertical);
+	setClip(getRectangleForActiveRenderTarget(viewPort), viewPort != activeRenderTarget->getViewPort());
+}
+
+Rect4i Painter::getRectangleForActiveRenderTarget(Rect4i r)
+{
+	Expects(activeRenderTarget);
+	int h = activeRenderTarget->getViewPort().getHeight();
+	if (activeRenderTarget->flipVertical()) {
+		int y = h - r.getBottom();
+		return Rect4i(Vector2i(r.getLeft(), y), r.getWidth(), r.getHeight());
+	} else {
+		return r;
+	}
 }
 
 void Painter::startDrawCall(std::shared_ptr<Material>& material)
@@ -370,7 +381,7 @@ void Painter::generateQuadIndicesOffset(unsigned short pos, unsigned short lineS
 
 void Painter::updateProjection()
 {
-	camera->updateProjection(renderTargetFlipVertical);
+	camera->updateProjection(activeRenderTarget->flipVertical());
 	projection = camera->getProjection();
 	
 	halleyGlobalMaterial->set("u_mvp", projection);
