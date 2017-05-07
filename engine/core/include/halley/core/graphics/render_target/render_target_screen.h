@@ -30,7 +30,6 @@ namespace Halley {
 		virtual ~ScreenRenderTarget() {}
 
 		Rect4i getViewPort() const override { return viewPort; }
-		bool isScreen() const override { return true; }
 
 	protected:
 		Vector2f size;

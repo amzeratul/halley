@@ -87,6 +87,11 @@ void TextureRenderTargetOpenGL::deInit()
 	}
 }
 
+bool ScreenRenderTargetOpenGL::flipVertical() const
+{
+	return true;
+}
+
 void ScreenRenderTargetOpenGL::bind()
 {	
 }

@@ -85,7 +85,7 @@ namespace Halley
 		RenderContext* activeContext = nullptr;
 		Matrix4f projection;
 		Rect4i renderTargetViewPort;
-		bool renderTargetIsScreen = true;
+		bool renderTargetFlipVertical = true;
 		Rect4i viewPort;
 		Camera* camera = nullptr;
 

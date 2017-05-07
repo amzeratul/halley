@@ -199,12 +199,12 @@ void Painter::bind(RenderContext& context)
 	// Set render target
 	auto& rt = camera->getActiveRenderTarget();
 	renderTargetViewPort = rt.getViewPort();
-	renderTargetIsScreen = rt.isScreen();
+	renderTargetFlipVertical = rt.flipVertical();
 	rt.bind();
 
 	// Set viewport
 	viewPort = camera->getActiveViewPort();
-	setViewPort(viewPort, renderTargetViewPort.getSize(), renderTargetIsScreen);
+	setViewPort(viewPort, renderTargetViewPort.getSize(), renderTargetFlipVertical);
 	setClip();
 
 	// Update projection
@@ -239,13 +239,13 @@ void Painter::setClip(Rect4i rect)
 {
 	flushPending();
 	Rect4i finalRect = (rect + viewPort.getTopLeft()).intersection(viewPort);
-	setClip(finalRect, renderTargetViewPort.getSize(), finalRect != renderTargetViewPort, renderTargetIsScreen);
+	setClip(finalRect, renderTargetViewPort.getSize(), finalRect != renderTargetViewPort, renderTargetFlipVertical);
 }
 
 void Painter::setClip()
 {
 	flushPending();
-	setClip(viewPort, renderTargetViewPort.getSize(), viewPort != renderTargetViewPort, renderTargetIsScreen);
+	setClip(viewPort, renderTargetViewPort.getSize(), viewPort != renderTargetViewPort, renderTargetFlipVertical);
 }
 
 void Painter::startDrawCall(std::shared_ptr<Material>& material)
@@ -370,7 +370,7 @@ void Painter::generateQuadIndicesOffset(unsigned short pos, unsigned short lineS
 
 void Painter::updateProjection()
 {
-	camera->updateProjection(renderTargetIsScreen);
+	camera->updateProjection(renderTargetFlipVertical);
 	projection = camera->getProjection();
 	
 	halleyGlobalMaterial->set("u_mvp", projection);
