@@ -23,7 +23,6 @@ set(SOURCES
         "src/graphics/material/material_parameter.cpp"
         "src/graphics/painter.cpp"
         "src/graphics/render_context.cpp"
-        "src/graphics/render_target/render_target_screen.cpp"
         "src/graphics/render_target/render_target_texture.cpp"
         "src/graphics/shader.cpp"
         "src/graphics/sprite/animation.cpp"

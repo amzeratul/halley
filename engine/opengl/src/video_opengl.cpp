@@ -361,9 +361,14 @@ std::unique_ptr<Shader> VideoOpenGL::createShader(const ShaderDefinition& defini
 	return std::make_unique<ShaderOpenGL>(definition);
 }
 
-std::unique_ptr<TextureRenderTarget> VideoOpenGL::createRenderTarget()
+std::unique_ptr<ScreenRenderTarget> VideoOpenGL::createScreenRenderTarget()
 {
-	return std::make_unique<RenderTargetOpenGL>();
+	return std::make_unique<ScreenRenderTargetOpenGL>(Rect4i({}, getWindow().getWindowRect().getSize()));
+}
+
+std::unique_ptr<TextureRenderTarget> VideoOpenGL::createTextureRenderTarget()
+{
+	return std::make_unique<TextureRenderTargetOpenGL>();
 }
 
 bool VideoOpenGL::isLoaderThread() const

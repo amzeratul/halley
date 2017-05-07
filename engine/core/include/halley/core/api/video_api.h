@@ -11,6 +11,7 @@ namespace Halley
 	class Texture;
 	class TextureDescriptor;
 	class TextureRenderTarget;
+	class ScreenRenderTarget;
 	class Shader;
 	class Window;
 	class MaterialConstantBuffer;
@@ -29,7 +30,8 @@ namespace Halley
 
 		virtual std::unique_ptr<Texture> createTexture(Vector2i size) = 0;
 		virtual std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) = 0;
-		virtual std::unique_ptr<TextureRenderTarget> createRenderTarget() = 0;
+		virtual std::unique_ptr<TextureRenderTarget> createTextureRenderTarget() = 0;
+		virtual std::unique_ptr<ScreenRenderTarget> createScreenRenderTarget() = 0;
 		virtual std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() = 0;
 	};
 }

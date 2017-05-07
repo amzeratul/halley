@@ -2,6 +2,7 @@
 #include "api/halley_api_internal.h"
 #include "graphics/texture.h"
 #include "graphics/render_target/render_target_texture.h"
+#include "graphics/render_target/render_target_screen.h"
 #include "graphics/shader.h"
 #include "graphics/painter.h"
 
@@ -16,7 +17,8 @@ namespace Halley {
 		const Window& getWindow() const override;
 		std::unique_ptr<Texture> createTexture(Vector2i size) override;
 		std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) override;
-		std::unique_ptr<TextureRenderTarget> createRenderTarget() override;
+		std::unique_ptr<TextureRenderTarget> createTextureRenderTarget() override;
+		std::unique_ptr<ScreenRenderTarget> createScreenRenderTarget() override;
 		std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() override;
 		void init() override;
 		void deInit() override;
@@ -36,7 +38,14 @@ namespace Halley {
 	class DummyTextureRenderTarget : public TextureRenderTarget
 	{
 	public:
-		bool isScreen() const override;
+		void bind() override;
+		void unbind() override;
+	};
+
+	class DummyScreenRenderTarget : public ScreenRenderTarget
+	{
+	public:
+		DummyScreenRenderTarget(Rect4i viewPort);
 		void bind() override;
 		void unbind() override;
 	};

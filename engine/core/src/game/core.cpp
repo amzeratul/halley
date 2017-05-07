@@ -236,12 +236,6 @@ void Core::onFixedUpdate(Time time)
 
 void Core::onVariableUpdate(Time time)
 {
-	if (api->video) {
-		auto windowSize = api->video->getWindow().getDefinition().getSize();
-		screenTarget = std::make_unique<ScreenRenderTarget>(Rect4i(Vector2i(), windowSize));
-		camera = std::make_unique<Camera>(Vector2f(windowSize) * 0.5f);
-	}
-
 	if (isRunning()) {
 		doVariableUpdate(time);
 	}
@@ -297,6 +291,13 @@ void Core::doRender(Time)
 		painter->startRender();
 
 		if (currentStage) {
+			auto windowSize = api->video->getWindow().getDefinition().getSize();
+			if (windowSize != prevWindowSize) {
+				screenTarget.reset();
+				screenTarget = api->video->createScreenRenderTarget();
+				camera = std::make_unique<Camera>(Vector2f(windowSize) * 0.5f);
+				prevWindowSize = windowSize;
+			}
 			RenderContext context(*painter, *camera, *screenTarget);
 			currentStage->onRender(context);
 		}

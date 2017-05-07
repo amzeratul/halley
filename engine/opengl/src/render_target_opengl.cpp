@@ -7,12 +7,12 @@
 
 using namespace Halley;
 
-RenderTargetOpenGL::~RenderTargetOpenGL()
+TextureRenderTargetOpenGL::~TextureRenderTargetOpenGL()
 {
 	deInit();
 }
 
-void RenderTargetOpenGL::bind()
+void TextureRenderTargetOpenGL::bind()
 {
 	init();
 	Expects(fbo != 0);
@@ -31,7 +31,7 @@ void RenderTargetOpenGL::bind()
 	glCheckError();
 }
 
-void RenderTargetOpenGL::unbind()
+void TextureRenderTargetOpenGL::unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glCheckError();
@@ -44,7 +44,7 @@ void RenderTargetOpenGL::unbind()
 	glCheckError();
 }
 
-void RenderTargetOpenGL::init()
+void TextureRenderTargetOpenGL::init()
 {
 	if (fbo == 0) {
 		HALLEY_DEBUG_TRACE();
@@ -78,11 +78,19 @@ void RenderTargetOpenGL::init()
 	}
 }
 
-void RenderTargetOpenGL::deInit()
+void TextureRenderTargetOpenGL::deInit()
 {
 	if (fbo != 0) {
 		unbind();
 		glDeleteFramebuffers(1, &fbo);
 		fbo = 0;
 	}
+}
+
+void ScreenRenderTargetOpenGL::bind()
+{	
+}
+
+void ScreenRenderTargetOpenGL::unbind()
+{
 }

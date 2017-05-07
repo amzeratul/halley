@@ -2,15 +2,14 @@
 
 #include "halley/core/graphics/render_target/render_target_texture.h"
 #include "halley_gl.h"
+#include "halley/core/graphics/render_target/render_target_screen.h"
 
 namespace Halley
 {
-	class RenderTargetOpenGL final : public TextureRenderTarget
+	class TextureRenderTargetOpenGL final : public TextureRenderTarget
 	{
 	public:
-		~RenderTargetOpenGL();
-
-		bool isScreen() const override { return false; }
+		~TextureRenderTargetOpenGL();
 
 		void bind() override;
 		void unbind() override;
@@ -20,5 +19,14 @@ namespace Halley
 		void deInit();
 
 		GLuint fbo = 0;
+	};
+
+	class ScreenRenderTargetOpenGL final : public ScreenRenderTarget
+	{
+	public:
+		ScreenRenderTargetOpenGL(Rect4i rect) : ScreenRenderTarget(rect) {}
+
+		void bind() override;
+		void unbind() override;
 	};
 }

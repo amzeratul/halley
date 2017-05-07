@@ -20,6 +20,8 @@ namespace Halley
 		void setViewPort(Rect4i viewPort);
 		void resetViewPort();
 
+		bool isScreen() const override { return false; }
+
 	protected:
 		Vector<std::shared_ptr<Texture>> attachments;
 		std::shared_ptr<Texture> depth;

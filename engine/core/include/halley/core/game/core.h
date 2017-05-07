@@ -86,6 +86,7 @@ namespace Halley
 		std::unique_ptr<Painter> painter;
 		std::unique_ptr<Camera> camera;
 		std::unique_ptr<RenderTarget> screenTarget;
+		Vector2i prevWindowSize = Vector2i(-1, -1);
 
 		std::unique_ptr<Stage> currentStage;
 		std::unique_ptr<Stage> nextStage;
