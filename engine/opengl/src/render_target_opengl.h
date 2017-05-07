@@ -11,8 +11,8 @@ namespace Halley
 	public:
 		~TextureRenderTargetOpenGL();
 
-		void bind() override;
-		void unbind() override;
+		void onBind(Painter&) override;
+		void onUnbind(Painter&) override;
 
 	private:
 		void init();
@@ -28,7 +28,6 @@ namespace Halley
 
 		bool flipVertical() const override;
 
-		void bind() override;
-		void unbind() override;
+		void onBind(Painter&) override;
 	};
 }

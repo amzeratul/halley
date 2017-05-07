@@ -12,7 +12,7 @@ TextureRenderTargetOpenGL::~TextureRenderTargetOpenGL()
 	deInit();
 }
 
-void TextureRenderTargetOpenGL::bind()
+void TextureRenderTargetOpenGL::onBind(Painter&)
 {
 	init();
 	Expects(fbo != 0);
@@ -31,17 +31,9 @@ void TextureRenderTargetOpenGL::bind()
 	glCheckError();
 }
 
-void TextureRenderTargetOpenGL::unbind()
+void TextureRenderTargetOpenGL::onUnbind(Painter&)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glCheckError();
-#ifdef WITH_OPENGL
-	static GLuint buffers[] = { GL_BACK_LEFT };
-	glDrawBuffers(1, buffers);
-#else
-	// TODO?
-#endif
-	glCheckError();
 }
 
 void TextureRenderTargetOpenGL::init()
@@ -81,7 +73,6 @@ void TextureRenderTargetOpenGL::init()
 void TextureRenderTargetOpenGL::deInit()
 {
 	if (fbo != 0) {
-		unbind();
 		glDeleteFramebuffers(1, &fbo);
 		fbo = 0;
 	}
@@ -92,10 +83,13 @@ bool ScreenRenderTargetOpenGL::flipVertical() const
 	return true;
 }
 
-void ScreenRenderTargetOpenGL::bind()
-{	
-}
-
-void ScreenRenderTargetOpenGL::unbind()
+void ScreenRenderTargetOpenGL::onBind(Painter&)
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#ifdef WITH_OPENGL
+	GLuint buffer = GL_BACK_LEFT;
+	glDrawBuffers(1, &buffer);
+#else
+	// TODO?
+#endif
 }

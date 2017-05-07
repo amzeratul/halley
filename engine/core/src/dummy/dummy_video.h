@@ -35,21 +35,6 @@ namespace Halley {
 		void load(TextureDescriptor&& descriptor) override;
 	};
 
-	class DummyTextureRenderTarget : public TextureRenderTarget
-	{
-	public:
-		void bind() override;
-		void unbind() override;
-	};
-
-	class DummyScreenRenderTarget : public ScreenRenderTarget
-	{
-	public:
-		DummyScreenRenderTarget(Rect4i viewPort);
-		void bind() override;
-		void unbind() override;
-	};
-
 	class DummyShader : public Shader
 	{
 	public:

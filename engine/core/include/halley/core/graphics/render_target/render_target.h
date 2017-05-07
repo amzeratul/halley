@@ -24,6 +24,8 @@
 #include "halley/maths/rect.h"
 
 namespace Halley {
+	class Painter;
+
 	class RenderTarget {
 	public:
 		virtual ~RenderTarget() {}
@@ -31,7 +33,9 @@ namespace Halley {
 		virtual Rect4i getViewPort() const = 0;
 		virtual bool flipVertical() const { return false; }
 
-		virtual void bind() = 0;
-		virtual void unbind() = 0;
+		virtual void onBind(Painter&) {}
+		virtual void onUnbind(Painter&) {}
+		virtual void onStartDrawCall(Painter&) {}
+		virtual void onEndDrawCall(Painter&) {}
 	};
 }

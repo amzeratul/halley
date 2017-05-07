@@ -77,6 +77,7 @@ namespace Halley
 		virtual void setClip(Rect4i clip, bool enable) = 0;
 
 		void generateQuadIndices(unsigned short firstVertex, size_t numQuads, unsigned short* target);
+		RenderTarget& getActiveRenderTarget();
 
 	private:
 		void bind(RenderContext& context);

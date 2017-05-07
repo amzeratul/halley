@@ -198,7 +198,7 @@ void Painter::bind(RenderContext& context)
 
 	// Set render target
 	activeRenderTarget = &camera->getActiveRenderTarget();
-	activeRenderTarget->bind();
+	activeRenderTarget->onBind(*this);
 
 	// Set viewport
 	viewPort = camera->getActiveViewPort();
@@ -212,7 +212,7 @@ void Painter::bind(RenderContext& context)
 void Painter::unbind(RenderContext& context)
 {
 	flush();
-	activeRenderTarget->unbind();
+	activeRenderTarget->onUnbind(*this);
 	activeRenderTarget = nullptr;
 	camera->rendering = false;
 }
@@ -364,6 +364,12 @@ void Painter::generateQuadIndices(unsigned short pos, size_t numQuads, unsigned 
 	}
 }
 
+RenderTarget& Painter::getActiveRenderTarget()
+{
+	Expects(activeRenderTarget);
+	return *activeRenderTarget;
+}
+
 void Painter::generateQuadIndicesOffset(unsigned short pos, unsigned short lineStride, unsigned short* target)
 {
 	// A-----B
@@ -387,7 +393,5 @@ void Painter::updateProjection()
 	halleyGlobalMaterial->set("u_mvp", projection);
 
 	halleyGlobalMaterial->uploadData(*this);
-	startDrawCall();
 	setMaterialData(*halleyGlobalMaterial);
-	endDrawCall();
 }

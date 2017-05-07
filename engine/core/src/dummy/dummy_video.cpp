@@ -41,12 +41,12 @@ std::unique_ptr<Shader> DummyVideoAPI::createShader(const ShaderDefinition&)
 
 std::unique_ptr<TextureRenderTarget> DummyVideoAPI::createTextureRenderTarget()
 {
-	return std::make_unique<DummyTextureRenderTarget>();
+	return std::make_unique<TextureRenderTarget>();
 }
 
 std::unique_ptr<ScreenRenderTarget> DummyVideoAPI::createScreenRenderTarget()
 {
-	return std::make_unique<DummyScreenRenderTarget>(Rect4i({}, getWindow().getWindowRect().getSize()));
+	return std::make_unique<ScreenRenderTarget>(Rect4i({}, getWindow().getWindowRect().getSize()));
 }
 
 std::unique_ptr<MaterialConstantBuffer> DummyVideoAPI::createConstantBuffer()
@@ -76,16 +76,6 @@ void DummyTexture::load(TextureDescriptor&& descriptor)
 {
 	doneLoading();
 }
-
-void DummyTextureRenderTarget::bind() {}
-void DummyTextureRenderTarget::unbind() {}
-
-DummyScreenRenderTarget::DummyScreenRenderTarget(Rect4i viewPort)
-	: ScreenRenderTarget(viewPort)
-{}
-
-void DummyScreenRenderTarget::bind() {}
-void DummyScreenRenderTarget::unbind() {}
 
 int DummyShader::getUniformLocation(const String& name, ShaderType stage)
 {
