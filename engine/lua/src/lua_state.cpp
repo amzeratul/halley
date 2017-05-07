@@ -104,8 +104,7 @@ LuaReference LuaState::loadScript(const String& chunkName, gsl::span<const gsl::
 	call(0, 1);
 
 	// Store chunk in registry
-	auto ref = LuaReference(*this);
-	return std::move(ref);
+	return LuaReference(*this);
 }
 
 void LuaState::print(String string)
