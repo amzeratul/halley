@@ -33,13 +33,31 @@ void NetworkSession::setMaxClients(int clients)
 	maxClients = clients;
 }
 
+int NetworkSession::getClientCount() const
+{
+	if (type == NetworkSessionType::Client) {
+		return getStatus() != ConnectionStatus::OPEN ? 0 : 2; // TODO
+	} else if (type == NetworkSessionType::Host) {
+		int i = 1;
+		for (auto& c: connections) {
+			if (c->getStatus() == ConnectionStatus::OPEN) {
+				++i;
+			}
+		}
+		return i;
+	} else {
+		return 0;
+	}
+}
+
 void NetworkSession::update()
 {
 	// Remove dead connections
+	service.update();
 	connections.erase(std::remove_if(connections.begin(), connections.end(), [] (const std::shared_ptr<IConnection>& c) { return c->getStatus() == ConnectionStatus::CLOSED; }), connections.end());
 
 	if (type == NetworkSessionType::Host) {
-		if (connections.size() + 1 < maxClients) { // I'm also a client!
+		if (getClientCount() < maxClients) { // I'm also a client!
 			service.setAcceptingConnections(true);
 			auto incoming = service.tryAcceptConnection();
 			if (incoming) {
@@ -48,6 +66,10 @@ void NetworkSession::update()
 		} else {
 			service.setAcceptingConnections(false);
 		}
+	}
+
+	if (type == NetworkSessionType::Client && connections.empty()) {
+		close();
 	}
 }
 
@@ -81,6 +103,7 @@ void NetworkSession::close()
 		c->close();
 	}
 	connections.clear();
+	type = NetworkSessionType::Undefined;
 }
 
 ConnectionStatus NetworkSession::getStatus() const

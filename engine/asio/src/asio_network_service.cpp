@@ -1,6 +1,6 @@
 #include <vector>
 #include <list>
-#include "halley/net/network_packet.h"
+#include "halley/net/connection/network_packet.h"
 #include "asio_network_service.h"
 #include "asio_udp_connection.h"
 #include <iostream>

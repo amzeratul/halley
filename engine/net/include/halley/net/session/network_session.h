@@ -21,6 +21,7 @@ namespace Halley {
 		void join(const String& address, int port);
 
 		void setMaxClients(int clients);
+		int getClientCount() const;
 		void update();
 
 		NetworkSessionType getType() const;
