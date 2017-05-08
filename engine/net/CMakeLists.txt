@@ -3,27 +3,30 @@ project (halley-net)
 include_directories(${Boost_INCLUDE_DIR} "include/halley/net" "../utils/include")
 
 set(SOURCES
-        "src/http.cpp"
-        "src/instability_simulator.cpp"
-        "src/message_queue.cpp"
-        "src/network_message.cpp"
-        "src/network_packet.cpp"
-        "src/reliable_connection.cpp"
-        "src/standard_message_stream.cpp"
+        "src/connection/http.cpp"
+        "src/connection/instability_simulator.cpp"
+        "src/connection/message_queue.cpp"
+        "src/connection/network_packet.cpp"
+        "src/connection/reliable_connection.cpp"
+
+        "src/session/network_session.cpp"
         )
 
 set(HEADERS
         "include/halley/net/halley_net.h"
-        "include/halley/net/http.h"
-        "include/halley/net/iconnection.h"
-        "include/halley/net/imessage_stream.h"
-        "include/halley/net/instability_simulator.h"
-        "include/halley/net/message_queue.h"
-        "include/halley/net/network_message.h"
-        "include/halley/net/network_packet.h"
-        "include/halley/net/network_service.h"
-        "include/halley/net/reliable_connection.h"
-        "include/halley/net/standard_message_stream.h"
+
+        "include/halley/net/connection/http.h"
+        "include/halley/net/connection/iconnection.h"
+        "include/halley/net/connection/imessage_stream.h"
+        "include/halley/net/connection/instability_simulator.h"
+        "include/halley/net/connection/message_queue.h"
+        "include/halley/net/connection/network_message.h"
+        "include/halley/net/connection/network_packet.h"
+        "include/halley/net/connection/network_service.h"
+        "include/halley/net/connection/reliable_connection.h"
+        "include/halley/net/connection/standard_message_stream.h"
+
+        "include/halley/net/session/network_session.h"
         )
 
 assign_source_group(${SOURCES})

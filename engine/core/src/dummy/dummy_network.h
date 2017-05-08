@@ -1,6 +1,6 @@
 #pragma once
 #include "api/halley_api_internal.h"
-#include "halley/net/network_service.h"
+#include "halley/net/connection/network_service.h"
 
 namespace Halley {
 	class DummyNetworkAPI : public NetworkAPIInternal

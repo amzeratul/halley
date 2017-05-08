@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/net/network_service.h"
+#include "halley/net/connection/network_service.h"
 
 #define BOOST_SYSTEM_NO_DEPRECATED
 #define BOOST_ERROR_CODE_HEADER_ONLY

@@ -1,6 +1,6 @@
 #include <iostream>
 #include "asio_udp_connection.h"
-#include "halley/net/network_packet.h"
+#include "halley/net/connection/network_packet.h"
 
 using namespace Halley;
 

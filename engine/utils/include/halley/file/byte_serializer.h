@@ -149,10 +149,27 @@ namespace Halley {
 		}
 	};
 
+	class DeserializeHelper {
+    public:
+        DeserializeHelper(const Bytes& data)
+            : data(data)
+        {}
+
+        template <typename T> operator T() const;
+
+    private:
+        const Bytes& data;
+    };
+
 	class Deserializer {
 	public:
 		Deserializer(gsl::span<const gsl::byte> src);
 		explicit Deserializer(const Bytes& src);
+
+		static DeserializeHelper fromBytes(const Bytes& src)
+		{
+			return DeserializeHelper(src);
+		}
 
 		Deserializer& operator>>(bool& val) { return deserializePod(val); }
 		Deserializer& operator>>(int8_t& val) { return deserializePod(val); }
@@ -284,4 +301,13 @@ namespace Halley {
 			return *this;
 		}
 	};
+
+	template <typename T>
+	DeserializeHelper::operator T() const
+	{
+		T result;
+		Deserializer s(data);
+		s >> result;
+		return result;
+	}
 }

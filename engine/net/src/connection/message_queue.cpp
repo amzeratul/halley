@@ -1,8 +1,9 @@
-#include "message_queue.h"
-#include "reliable_connection.h"
 #include <halley/support/exception.h>
-#include <network_packet.h>
 #include <iostream>
+
+#include "connection/message_queue.h"
+#include "connection/reliable_connection.h"
+#include "connection/network_packet.h"
 #include "halley/text/string_converter.h"
 
 using namespace Halley;

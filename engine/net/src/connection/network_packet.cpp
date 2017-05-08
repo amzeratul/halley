@@ -1,4 +1,4 @@
-#include "network_packet.h"
+#include "connection/network_packet.h"
 #include <halley/support/exception.h>
 #include <cassert>
 

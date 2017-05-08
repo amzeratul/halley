@@ -1,5 +1,5 @@
-#include "reliable_connection.h"
-#include <network_packet.h>
+#include "connection/reliable_connection.h"
+#include "connection/network_packet.h"
 #include <iostream>
 #include <chrono>
 #include <halley/utils/utils.h>

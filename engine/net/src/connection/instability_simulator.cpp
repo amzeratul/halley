@@ -1,4 +1,4 @@
-#include "instability_simulator.h"
+#include "connection/instability_simulator.h"
 #include <halley/maths/random.h>
 #include <chrono>
 
