@@ -19,11 +19,11 @@
 
 \*****************************************************************/
 
-#include "http.h"
-#include <halley/support/exception.h>
-
 // Comment this whole thing out for now
 #ifdef false
+
+#include "http.h"
+#include <halley/support/exception.h>
 
 using namespace Halley;
 
