@@ -26,6 +26,9 @@ set(HEADERS
         "include/halley/net/connection/reliable_connection.h"
         "include/halley/net/connection/standard_message_stream.h"
 
+        "include/halley/net/session/network_session_control_messages.h"
+        "include/halley/net/session/network_session_messages.h"
+        "include/halley/net/session/network_session_peer.h"
         "include/halley/net/session/network_session.h"
         )
 

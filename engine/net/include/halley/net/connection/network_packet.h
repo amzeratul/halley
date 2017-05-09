@@ -30,6 +30,12 @@ namespace Halley
 		explicit OutboundNetworkPacket(gsl::span<const gsl::byte> data);
 		void addHeader(gsl::span<const gsl::byte> src);
 
+		template <typename T>
+		void addHeader(const T& h)
+		{
+			addHeader(gsl::as_bytes(gsl::span<const T>(&h, 1)));
+		}
+
 		OutboundNetworkPacket& operator=(OutboundNetworkPacket&& other) noexcept;
 	};
 
@@ -40,6 +46,12 @@ namespace Halley
 		explicit InboundNetworkPacket(InboundNetworkPacket&& other);
 		explicit InboundNetworkPacket(gsl::span<const gsl::byte> data);
 		void extractHeader(gsl::span<gsl::byte> dst);
+
+		template <typename T>
+		void extractHeader(T& h)
+		{
+			extractHeader(gsl::as_writeable_bytes(gsl::span<T>(&h, 1)));
+		}
 
 		InboundNetworkPacket& operator=(InboundNetworkPacket&& other);
 	};

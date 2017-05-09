@@ -2,25 +2,10 @@
 #include "halley/utils/utils.h"
 #include "halley/file/byte_serializer.h"
 #include "../connection/iconnection.h"
+#include "network_session_messages.h"
 
 namespace Halley {
 	class NetworkService;
-
-	enum class NetworkSessionType {
-		Undefined,
-		Host,
-		Client
-	};
-
-	enum class NetworkSessionMessageType {
-		Control,
-		ToAllClients,
-		ToMaster
-	};
-
-	struct NetworkSessionMessageHeader {
-		NetworkSessionMessageType type;
-	};
 
 	class NetworkSession : public IConnection {
 	public:
@@ -48,12 +33,16 @@ namespace Halley {
 	private:
 		NetworkService& service;
 		NetworkSessionType type = NetworkSessionType::Undefined;
+
 		int maxClients = 0;
+		int playerId = -1;
+
 		std::map<String, Bytes> sharedData;
 
 		std::vector<std::shared_ptr<IConnection>> connections;
-	};
 
-    //matchSettings = session.getShared("matchSettings");
-    //session.setShared("matchSettings", matchSettings);
+		OutboundNetworkPacket makeOutbound(gsl::span<const gsl::byte> data, NetworkSessionMessageHeader header);
+		void receiveControlMessage(int peerId, gsl::span<const gsl::byte> data);
+		void closeConnection(int peerId, const String& reason);
+	};
 }
