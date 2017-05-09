@@ -1,5 +1,6 @@
 #include "session/network_session.h"
 #include "connection/network_service.h"
+#include "connection/network_packet.h"
 using namespace Halley;
 
 NetworkSession::NetworkSession(NetworkService& service)
@@ -125,18 +126,28 @@ ConnectionStatus NetworkSession::getStatus() const
 
 void NetworkSession::send(OutboundNetworkPacket&& packet)
 {
-	// TODO
-	if (!connections.empty()) {
-		connections.at(0)->send(std::move(packet));
+	for (auto& c: connections) {
+		c->send(std::move(packet));
 	}
 }
 
 bool NetworkSession::receive(InboundNetworkPacket& packet)
 {
-	// TODO
 	if (connections.empty()) {
 		return false;
 	} else {
-		return connections.at(0)->receive(packet);
+		for (size_t i = 0; i < connections.size(); ++i) {
+			bool gotMessage = connections[i]->receive(packet);
+			if (gotMessage) {
+				// Broadcast to other connections
+				for (size_t j = 0; j < connections.size(); ++j) {
+					if (i != j) {
+						connections[j]->send(OutboundNetworkPacket(packet.getBytes()));
+					}
+				}
+				return true;
+			}
+		}
+		return false;
 	}	
 }
