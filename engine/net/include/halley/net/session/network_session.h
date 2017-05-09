@@ -12,6 +12,16 @@ namespace Halley {
 		Client
 	};
 
+	enum class NetworkSessionMessageType {
+		Control,
+		ToAllClients,
+		ToMaster
+	};
+
+	struct NetworkSessionMessageHeader {
+		NetworkSessionMessageType type;
+	};
+
 	class NetworkSession : public IConnection {
 	public:
 		NetworkSession(NetworkService& service);

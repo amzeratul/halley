@@ -126,28 +126,39 @@ ConnectionStatus NetworkSession::getStatus() const
 
 void NetworkSession::send(OutboundNetworkPacket&& packet)
 {
-	for (auto& c: connections) {
-		c->send(std::move(packet));
+	// Add header
+	NetworkSessionMessageHeader header;
+	header.type = NetworkSessionMessageType::ToAllClients;
+	packet.addHeader(gsl::as_bytes(gsl::span<NetworkSessionMessageHeader>(&header, 1)));
+
+	if (connections.size() == 1) {
+		connections[0]->send(std::move(packet));
+	} else {
+		for (auto& c: connections) {
+			c->send(OutboundNetworkPacket(packet));
+		}
 	}
 }
 
 bool NetworkSession::receive(InboundNetworkPacket& packet)
 {
-	if (connections.empty()) {
-		return false;
-	} else {
-		for (size_t i = 0; i < connections.size(); ++i) {
-			bool gotMessage = connections[i]->receive(packet);
-			if (gotMessage) {
-				// Broadcast to other connections
+	for (size_t i = 0; i < connections.size(); ++i) {
+		bool gotMessage = connections[i]->receive(packet);
+		if (gotMessage) {
+			// Get header
+			NetworkSessionMessageHeader header;
+			packet.extractHeader(gsl::as_writeable_bytes(gsl::span<NetworkSessionMessageHeader>(&header, 1)));
+
+			// Broadcast to other connections
+			if (header.type == NetworkSessionMessageType::ToAllClients) {
 				for (size_t j = 0; j < connections.size(); ++j) {
 					if (i != j) {
 						connections[j]->send(OutboundNetworkPacket(packet.getBytes()));
 					}
 				}
-				return true;
 			}
+			return true;
 		}
-		return false;
-	}	
+	}
+	return false;
 }
