@@ -7,11 +7,11 @@ namespace Halley
 
 	enum class ConnectionStatus
 	{
-		UNDEFINED,
-		CONNECTING,
-		OPEN,
-		CLOSING,
-		CLOSED
+		Undefined,
+		Connecting,
+		Open,
+		Closing,
+		Closed
 	};
 
 	class IConnection

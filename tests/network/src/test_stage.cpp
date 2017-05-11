@@ -1,5 +1,7 @@
 #include "test_stage.h"
 #include "halley/text/string_converter.h"
+#include "halley/net/connection/iconnection.h"
+#include "halley/net/connection/network_message.h"
 
 using namespace Halley;
 
@@ -94,7 +96,7 @@ void TestStage::updateNetwork()
 		network->update();
 
 		if (connection) {
-			if (connection->getStatus() == ConnectionStatus::CLOSED) {
+			if (connection->getStatus() == ConnectionStatus::Closed) {
 				std::cout << "Closing connection." << std::endl;
 				connection.reset();
 				if (isClient) {
@@ -107,7 +109,7 @@ void TestStage::updateNetwork()
 				}
 			}
 			
-			if (connection->getStatus() == ConnectionStatus::OPEN) {
+			if (connection->getStatus() == ConnectionStatus::Open) {
 				if (key->isButtonPressed(Keys::Space)) {
 					msgs->enqueue(std::make_unique<TextMsg>("ding"), 1);
 				}

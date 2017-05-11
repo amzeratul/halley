@@ -16,7 +16,7 @@ namespace Halley {
 
 	struct ControlMsgSetPeerId
 	{
-		char peerId;
+		int8_t peerId;
 	};
 
 	struct ControlMsgSetSessionState {
@@ -24,7 +24,7 @@ namespace Halley {
 	};
 
 	struct ControlMsgSetPeerState {
-		char peerId;
+		int8_t peerId;
 		Bytes state;
 	};
 }

@@ -110,7 +110,7 @@ int MessageQueue::getMessageType(NetworkMessage& msg) const
 
 std::vector<std::unique_ptr<NetworkMessage>> MessageQueue::receiveAll()
 {
-	if (connection->getStatus() == ConnectionStatus::OPEN) {
+	if (connection->getStatus() == ConnectionStatus::Open) {
 		receiveMessages();
 	}
 

@@ -56,7 +56,7 @@ void AsioNetworkService::update()
 	std::vector<short> toErase;
 	auto& active = activeConnections;
 	for (auto& conn: active) {
-		if (conn.second->getStatus() == ConnectionStatus::CLOSING) {
+		if (conn.second->getStatus() == ConnectionStatus::Closing) {
 			conn.second->terminateConnection();
 			toErase.push_back(conn.first);
 		}

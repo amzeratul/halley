@@ -19,6 +19,7 @@ namespace Halley {
 
 		void setMaxClients(int clients);
 		int getClientCount() const;
+		void acceptConnection(std::shared_ptr<IConnection> move);
 		void update();
 
 		NetworkSessionType getType() const;
@@ -48,9 +49,12 @@ namespace Halley {
 		std::map<int, std::unique_ptr<SharedData>> sharedData;
 
 		std::vector<std::shared_ptr<IConnection>> connections;
+		std::vector<InboundNetworkPacket> inbox;
 
 		OutboundNetworkPacket makeOutbound(gsl::span<const gsl::byte> data, NetworkSessionMessageHeader header);
+		void sendToAll(OutboundNetworkPacket&& packet, int except = -1);
 		void closeConnection(int peerId, const String& reason);
+		void processReceive();
 
 		void retransmitControlMessage(int peerId, gsl::span<const gsl::byte> bytes);
 		void receiveControlMessage(int peerId, InboundNetworkPacket& packet);
@@ -59,6 +63,16 @@ namespace Halley {
 		void onControlMessage(int peerId, const ControlMsgSetSessionState& msg);
 
 		void setMyPeerId(int id);
+
+		void checkForOutboundStateChanges(bool isSessionState, SharedData& data);
+
+		template <typename T>
+		OutboundNetworkPacket makeControlPacket(NetworkSessionControlMessageType msgType, const T& data)
+		{
+			return doMakeControlPacket(msgType, OutboundNetworkPacket(data));
+		}
+
+		OutboundNetworkPacket doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket&& packet);
 	};
 
 	template <typename SessionSharedDataType, typename PeerSharedDataType>

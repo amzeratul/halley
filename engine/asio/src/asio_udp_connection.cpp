@@ -23,26 +23,26 @@ struct HandshakeAccept
 AsioUDPConnection::AsioUDPConnection(UDPSocket& socket, UDPEndpoint remote)
 	: socket(socket)
 	, remote(remote)
-	, status(ConnectionStatus::CONNECTING)
+	, status(ConnectionStatus::Connecting)
 	, connectionId(0)
 {
 }
 
 void AsioUDPConnection::close()
 {
-	status = ConnectionStatus::CLOSING;
+	status = ConnectionStatus::Closing;
 }
 
 void AsioUDPConnection::terminateConnection()
 {
-	if (status != ConnectionStatus::CLOSED) {
-		status = ConnectionStatus::CLOSED;
+	if (status != ConnectionStatus::Closed) {
+		status = ConnectionStatus::Closed;
 	}
 }
 
 void AsioUDPConnection::send(OutboundNetworkPacket&& packet)
 {
-	if (status == ConnectionStatus::OPEN || status == ConnectionStatus::CONNECTING) {
+	if (status == ConnectionStatus::Open || status == ConnectionStatus::Connecting) {
 		// Insert header
 		std::array<unsigned char, 2> id = { 0, 0 };
 		size_t len = 0;
@@ -84,7 +84,7 @@ void AsioUDPConnection::onReceive(gsl::span<const gsl::byte> data)
 {
 	Expects(data.size() <= 1500);
 
-	if (status == ConnectionStatus::CONNECTING) {
+	if (status == ConnectionStatus::Connecting) {
 		if (data.size_bytes() == sizeof(HandshakeAccept)) {
 			HandshakeAccept accept;
 			if (memcmp(data.data(), &accept, sizeof(accept.handshake)) == 0) {
@@ -93,7 +93,7 @@ void AsioUDPConnection::onReceive(gsl::span<const gsl::byte> data)
 				onOpen(accept.id);
 			}
 		}
-	} else if (status == ConnectionStatus::OPEN) {
+	} else if (status == ConnectionStatus::Open) {
 		if (data.size() <= 1500) {
 			pendingReceive.push_back(InboundNetworkPacket(data));
 		}
@@ -107,7 +107,7 @@ void AsioUDPConnection::setError(const std::string& cs)
 
 void AsioUDPConnection::open(short id)
 {
-	if (status == ConnectionStatus::CONNECTING) {
+	if (status == ConnectionStatus::Connecting) {
 		// Handshake
 		HandshakeAccept accept;
 		accept.id = id;
@@ -121,7 +121,7 @@ void AsioUDPConnection::onOpen(short id)
 {
 	std::cout << "Connection open on id = " << id << std::endl;
 	connectionId = id;
-	status = ConnectionStatus::OPEN;
+	status = ConnectionStatus::Open;
 }
 
 void AsioUDPConnection::sendNext()

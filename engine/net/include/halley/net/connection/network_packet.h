@@ -28,6 +28,13 @@ namespace Halley
 		OutboundNetworkPacket(const OutboundNetworkPacket& other);
 		explicit OutboundNetworkPacket(OutboundNetworkPacket&& other) noexcept;
 		explicit OutboundNetworkPacket(gsl::span<const gsl::byte> data);
+		
+		template <typename T>
+		explicit OutboundNetworkPacket(const T& h)
+			: OutboundNetworkPacket(gsl::as_bytes(gsl::span<const T>(&h, 1)))
+		{
+		}
+
 		void addHeader(gsl::span<const gsl::byte> src);
 
 		template <typename T>
