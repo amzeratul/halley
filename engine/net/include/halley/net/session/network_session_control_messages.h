@@ -4,7 +4,9 @@
 
 namespace Halley {
 	enum class NetworkSessionControlMessageType : char {
-		SetPeerId
+		SetPeerId,
+		SetSessionState,
+		SetPeerState
 	};
 
 	struct ControlMsgHeader
@@ -15,5 +17,14 @@ namespace Halley {
 	struct ControlMsgSetPeerId
 	{
 		char peerId;
+	};
+
+	struct ControlMsgSetSessionState {
+		Bytes state;
+	};
+
+	struct ControlMsgSetPeerState {
+		char peerId;
+		Bytes state;
 	};
 }

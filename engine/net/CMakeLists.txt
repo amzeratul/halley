@@ -10,6 +10,7 @@ set(SOURCES
         "src/connection/reliable_connection.cpp"
 
         "src/session/network_session.cpp"
+        "src/session/shared_data.cpp"
         )
 
 set(HEADERS
@@ -30,6 +31,7 @@ set(HEADERS
         "include/halley/net/session/network_session_messages.h"
         "include/halley/net/session/network_session_peer.h"
         "include/halley/net/session/network_session.h"
+        "include/halley/net/session/shared_data.h"
         )
 
 assign_source_group(${SOURCES})

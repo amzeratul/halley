@@ -3,6 +3,8 @@
 #include "halley/file/byte_serializer.h"
 #include "../connection/iconnection.h"
 #include "network_session_messages.h"
+#include "shared_data.h"
+#include "network_session_control_messages.h"
 
 namespace Halley {
 	class NetworkService;
@@ -10,7 +12,7 @@ namespace Halley {
 	class NetworkSession : public IConnection {
 	public:
 		NetworkSession(NetworkService& service);
-		~NetworkSession();
+		virtual ~NetworkSession();
 
 		void host(int port);
 		void join(const String& address, int port);
@@ -21,28 +23,79 @@ namespace Halley {
 
 		NetworkSessionType getType() const;
 
-		bool hasSharedData(const String& id) const;
-		DeserializeHelper getSharedData(const String& id) const;
-		void setSharedData(const String& id, Bytes&& data);
-
 		void close() final override; // Called from destructor, hence final
 		ConnectionStatus getStatus() const override;
 		void send(OutboundNetworkPacket&& packet) override;
 		bool receive(InboundNetworkPacket& packet) override;
 
+	protected:
+		SharedData& doGetMySharedData();
+		SharedData& doGetMutableSessionSharedData();
+		const SharedData& doGetSessionSharedData() const;
+		const SharedData& doGetClientSharedData(int clientId) const;
+
+		virtual std::unique_ptr<SharedData> makeSessionSharedData() = 0;
+		virtual std::unique_ptr<SharedData> makePeerSharedData() = 0;
+		
 	private:
 		NetworkService& service;
 		NetworkSessionType type = NetworkSessionType::Undefined;
 
 		int maxClients = 0;
-		int playerId = -1;
+		int myPeerId = -1;
 
-		std::map<String, Bytes> sharedData;
+		std::unique_ptr<SharedData> sessionSharedData;
+		std::map<int, std::unique_ptr<SharedData>> sharedData;
 
 		std::vector<std::shared_ptr<IConnection>> connections;
 
 		OutboundNetworkPacket makeOutbound(gsl::span<const gsl::byte> data, NetworkSessionMessageHeader header);
-		void receiveControlMessage(int peerId, gsl::span<const gsl::byte> data);
 		void closeConnection(int peerId, const String& reason);
+
+		void retransmitControlMessage(int peerId, gsl::span<const gsl::byte> bytes);
+		void receiveControlMessage(int peerId, InboundNetworkPacket& packet);
+		void onControlMessage(int peerId, const ControlMsgSetPeerId& msg);
+		void onControlMessage(int peerId, const ControlMsgSetPeerState& msg);
+		void onControlMessage(int peerId, const ControlMsgSetSessionState& msg);
+
+		void setMyPeerId(int id);
+	};
+
+	template <typename SessionSharedDataType, typename PeerSharedDataType>
+	class NetworkSessionImpl : public NetworkSession {
+	public:
+		NetworkSessionImpl(NetworkService& s) : NetworkSession(s) {}
+		virtual ~NetworkSessionImpl() {}
+
+		SessionSharedDataType& getMutableSessionSharedData()
+		{
+			return static_cast<SessionSharedDataType&>(doGetMutableSessionSharedData());
+		}
+		
+		const SessionSharedDataType& getSessionSharedData() const
+		{
+			return static_cast<const SessionSharedDataType&>(doGetSessionSharedData());
+		}
+
+		PeerSharedDataType& getMySharedData()
+		{
+			return static_cast<PeerSharedDataType&>(doGetMySharedData());
+		}
+
+		const PeerSharedDataType& getClientSharedData(int clientId) const
+		{
+			return static_cast<const PeerSharedDataType&>(doGetClientSharedData(clientId));
+		}
+
+	protected:
+		std::unique_ptr<SharedData> makeSessionSharedData() override final
+		{
+			return std::make_unique<SessionSharedDataType>();
+		}
+		
+		std::unique_ptr<SharedData> makePeerSharedData() override final
+		{
+			return std::make_unique<PeerSharedDataType>();
+		}
 	};
 }
