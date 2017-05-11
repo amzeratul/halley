@@ -2,6 +2,7 @@
 #include "halley/utils/utils.h"
 #include "halley/file/byte_serializer.h"
 #include "../connection/iconnection.h"
+#include "../connection/network_packet.h"
 #include "network_session_messages.h"
 #include "shared_data.h"
 #include "network_session_control_messages.h"
