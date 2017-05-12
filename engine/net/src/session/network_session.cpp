@@ -22,9 +22,9 @@ void NetworkSession::host(int port)
 	Expects(type == NetworkSessionType::Undefined);
 
 	type = NetworkSessionType::Host;
-	setMyPeerId(0);
 
 	onStartSession();
+	setMyPeerId(0);
 	onHosting();
 }
 
@@ -170,6 +170,10 @@ const SharedData& NetworkSession::doGetClientSharedData(int clientId) const
 }
 
 void NetworkSession::onStartSession()
+{
+}
+
+void NetworkSession::onPeerIdAssigned()
 {
 }
 
@@ -375,9 +379,12 @@ void NetworkSession::onControlMessage(int peerId, const ControlMsgSetSessionStat
 
 void NetworkSession::setMyPeerId(int id)
 {
+	Expects (myPeerId == -1);
 	myPeerId = id;
 	sessionSharedData = makeSessionSharedData();
 	sharedData[id] = makePeerSharedData();
+
+	onPeerIdAssigned();
 }
 
 void NetworkSession::checkForOutboundStateChanges(int ownerId)
