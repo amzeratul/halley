@@ -267,8 +267,6 @@ void NetworkSession::processReceive()
 					}
 				} else if (header.type == NetworkSessionMessageType::Control) {
 					// Receive control
-					ControlMsgHeader controlHeader;
-					packet.extractHeader(controlHeader);
 					receiveControlMessage(peerId, packet);
 				} else if (header.type == NetworkSessionMessageType::ToMaster) {
 					// For me only
@@ -406,7 +404,7 @@ OutboundNetworkPacket NetworkSession::makeUpdateSharedDataPacket(int ownerId)
 		return doMakeControlPacket(NetworkSessionControlMessageType::SetSessionState, OutboundNetworkPacket(bytes));
 	} else {
 		ControlMsgSetPeerState state;
-		state.peerId = myPeerId;
+		state.peerId = ownerId;
 		state.state = Serializer::toBytes(data);
 		Bytes bytes = Serializer::toBytes(state);
 		return doMakeControlPacket(NetworkSessionControlMessageType::SetPeerState, OutboundNetworkPacket(bytes));
@@ -415,15 +413,13 @@ OutboundNetworkPacket NetworkSession::makeUpdateSharedDataPacket(int ownerId)
 
 OutboundNetworkPacket NetworkSession::doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket&& packet)
 {
+	ControlMsgHeader ctrlHeader;
+	ctrlHeader.type = msgType;
+	packet.addHeader(ctrlHeader);
+
 	NetworkSessionMessageHeader header;
 	header.type = NetworkSessionMessageType::Control;
 	header.srcPeerId = myPeerId;
-
-	ControlMsgHeader ctrlHeader;
-	ctrlHeader.type = msgType;
-
-	packet.addHeader(ctrlHeader);
-
 	packet.addHeader(header);
 
 	return packet;

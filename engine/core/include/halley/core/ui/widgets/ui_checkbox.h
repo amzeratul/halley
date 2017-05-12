@@ -8,6 +8,9 @@ namespace Halley {
 	public:
 		explicit UICheckbox(String id, std::shared_ptr<UIStyle> style, bool checked = false);
 
+		void draw(UIPainter& painter) const override;
+		void update(Time t, bool moved) override;
+
         bool isChecked() const;
         void setChecked(bool checked);
 

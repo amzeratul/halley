@@ -5,10 +5,24 @@ using namespace Halley;
 
 UICheckbox::UICheckbox(String id, std::shared_ptr<UIStyle> style, bool checked)
 	: UIClickable(id, {})
+	, style(style)
 	, checked(checked)
 {
 	sprite = style->checkboxNormal;
 	setMinSize(sprite.getScaledSize().abs());
+}
+
+void UICheckbox::draw(UIPainter& painter) const
+{
+	painter.draw(sprite);
+}
+
+void UICheckbox::update(Time t, bool moved)
+{
+	bool dirty = updateButton() | moved;
+	if (dirty) {
+		sprite.scaleTo(getSize()).setPos(getPosition());
+	}
 }
 
 bool UICheckbox::isChecked() const

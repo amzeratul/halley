@@ -3,7 +3,7 @@
 #include "halley/file/byte_serializer.h"
 
 namespace Halley {
-	enum class NetworkSessionControlMessageType : char {
+	enum class NetworkSessionControlMessageType : int8_t {
 		SetPeerId,
 		SetSessionState,
 		SetPeerState
