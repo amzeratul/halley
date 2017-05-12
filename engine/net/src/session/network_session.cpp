@@ -73,7 +73,8 @@ void NetworkSession::acceptConnection(std::shared_ptr<IConnection> incoming)
 
 	ControlMsgSetPeerId msg;
 	msg.peerId = int8_t(connections.size());
-	connections.back()->send(makeControlPacket(NetworkSessionControlMessageType::SetPeerId, msg));
+	Bytes bytes = Serializer::toBytes(msg);
+	connections.back()->send(doMakeControlPacket(NetworkSessionControlMessageType::SetPeerId, OutboundNetworkPacket(bytes)));
 }
 
 void NetworkSession::update()
@@ -269,7 +270,6 @@ void NetworkSession::closeConnection(int peerId, const String& reason)
 {
 	int connId = type == NetworkSessionType::Host ? peerId - 1 : 0;
 	connections.at(connId)->close();
-	std::cout << "Terminating connection with peer " << peerId << " with message: " << reason << std::endl;
 }
 
 void NetworkSession::retransmitControlMessage(int peerId, gsl::span<const gsl::byte> bytes)
@@ -287,27 +287,22 @@ void NetworkSession::receiveControlMessage(int peerId, InboundNetworkPacket& pac
 	ControlMsgHeader header;
 	packet.extractHeader(header);
 
-	std::cout << "Ctrl msg type is " << int(header.type) << ".\n";
-
 	switch (header.type) {
 	case NetworkSessionControlMessageType::SetPeerId:
 		{
-			ControlMsgSetPeerId msg;
-			packet.extractHeader(msg);
+			ControlMsgSetPeerId msg = Deserializer::fromBytes(packet.getBytes());
 			onControlMessage(peerId, msg);
 		}
 		break;
 	case NetworkSessionControlMessageType::SetSessionState:
 		{
-			ControlMsgSetSessionState msg;
-			packet.extractHeader(msg);
+			ControlMsgSetSessionState msg = Deserializer::fromBytes(packet.getBytes());
 			onControlMessage(peerId, msg);
 		}
 		break;
 	case NetworkSessionControlMessageType::SetPeerState:
 		{
-			ControlMsgSetPeerState msg;
-			packet.extractHeader(msg);
+			ControlMsgSetPeerState msg = Deserializer::fromBytes(packet.getBytes());
 			onControlMessage(peerId, msg);
 			retransmitControlMessage(peerId, origData);
 		}
@@ -349,12 +344,10 @@ void NetworkSession::onControlMessage(int peerId, const ControlMsgSetSessionStat
 
 	auto s = Deserializer(msg.state);
 	sessionSharedData->deserialize(s);
-	std::cout << "Received session state." << std::endl;
 }
 
 void NetworkSession::setMyPeerId(int id)
 {
-	std::cout << "Setting my peer id to " << id << std::endl;
 	myPeerId = id;
 	sessionSharedData = makeSessionSharedData();
 }
@@ -362,17 +355,17 @@ void NetworkSession::setMyPeerId(int id)
 void NetworkSession::checkForOutboundStateChanges(bool isSessionState, SharedData& data)
 {
 	if (data.isModified()) {
-		std::cout << "Sending shared data..." << std::endl;
-
 		if (isSessionState) {
 			ControlMsgSetSessionState state;
 			state.state = Serializer::toBytes(data);
-			sendToAll(makeControlPacket(NetworkSessionControlMessageType::SetSessionState, state));
+			Bytes bytes = Serializer::toBytes(state);
+			sendToAll(doMakeControlPacket(NetworkSessionControlMessageType::SetSessionState, OutboundNetworkPacket(bytes)));
 		} else {
 			ControlMsgSetPeerState state;
 			state.peerId = myPeerId;
 			state.state = Serializer::toBytes(data);
-			sendToAll(makeControlPacket(NetworkSessionControlMessageType::SetPeerState, state));
+			Bytes bytes = Serializer::toBytes(state);
+			sendToAll(doMakeControlPacket(NetworkSessionControlMessageType::SetPeerState, OutboundNetworkPacket(bytes)));
 		}
 
 		data.markUnmodified();

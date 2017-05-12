@@ -57,6 +57,11 @@ OutboundNetworkPacket::OutboundNetworkPacket(gsl::span<const gsl::byte> data)
 	: NetworkPacketBase(data, 128)
 {}
 
+OutboundNetworkPacket::OutboundNetworkPacket(const Bytes& data)
+	: NetworkPacketBase(gsl::as_bytes(gsl::span<const Byte>(data)), 128)
+{
+}
+
 void OutboundNetworkPacket::addHeader(gsl::span<const gsl::byte> src)
 {
 	Expects(src.size_bytes() <= signed(dataStart));

@@ -17,14 +17,23 @@ namespace Halley {
 	struct ControlMsgSetPeerId
 	{
 		int8_t peerId;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 	};
 
 	struct ControlMsgSetSessionState {
 		Bytes state;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 	};
 
 	struct ControlMsgSetPeerState {
 		int8_t peerId;
 		Bytes state;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 	};
 }

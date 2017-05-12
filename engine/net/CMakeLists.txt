@@ -9,6 +9,7 @@ set(SOURCES
         "src/connection/network_packet.cpp"
         "src/connection/reliable_connection.cpp"
 
+        "src/session/network_session_control_messages.cpp"
         "src/session/network_session.cpp"
         "src/session/shared_data.cpp"
         )

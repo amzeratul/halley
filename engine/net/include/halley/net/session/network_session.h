@@ -66,13 +66,7 @@ namespace Halley {
 		void setMyPeerId(int id);
 
 		void checkForOutboundStateChanges(bool isSessionState, SharedData& data);
-
-		template <typename T>
-		OutboundNetworkPacket makeControlPacket(NetworkSessionControlMessageType msgType, const T& data)
-		{
-			return doMakeControlPacket(msgType, OutboundNetworkPacket(data));
-		}
-
+		
 		OutboundNetworkPacket doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket&& packet);
 	};
 
