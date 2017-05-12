@@ -247,12 +247,10 @@ void NetworkSession::processReceive()
 			}
 
 			else if (type == NetworkSessionType::Client) {
-				std::cout << "Got msg.\n";
 				if (header.type == NetworkSessionMessageType::ToPeers) {
 					// Consume!
 					inbox.emplace_back(std::move(packet));
 				} else if (header.type == NetworkSessionMessageType::Control) {
-					std::cout << "Got ctrl msg.\n";
 					receiveControlMessage(peerId, packet);
 				} else {
 					closeConnection(peerId, "Invalid session message type for client: " + toString(type));
