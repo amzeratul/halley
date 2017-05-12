@@ -65,7 +65,8 @@ namespace Halley {
 
 		void setMyPeerId(int id);
 
-		void checkForOutboundStateChanges(bool isSessionState, SharedData& data);
+		void checkForOutboundStateChanges(int ownerId);
+		OutboundNetworkPacket makeUpdateSharedDataPacket(int ownerId);
 		
 		OutboundNetworkPacket doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket&& packet);
 	};

@@ -74,7 +74,13 @@ void NetworkSession::acceptConnection(std::shared_ptr<IConnection> incoming)
 	ControlMsgSetPeerId msg;
 	msg.peerId = int8_t(connections.size());
 	Bytes bytes = Serializer::toBytes(msg);
-	connections.back()->send(doMakeControlPacket(NetworkSessionControlMessageType::SetPeerId, OutboundNetworkPacket(bytes)));
+
+	auto& conn = *connections.back();
+	conn.send(doMakeControlPacket(NetworkSessionControlMessageType::SetPeerId, OutboundNetworkPacket(bytes)));
+	conn.send(makeUpdateSharedDataPacket(-1));
+	for (auto& i: sharedData) {
+		conn.send(makeUpdateSharedDataPacket(i.first));
+	}
 }
 
 void NetworkSession::update()
@@ -94,7 +100,7 @@ void NetworkSession::update()
 			service.setAcceptingConnections(false);
 		}
 
-		checkForOutboundStateChanges(true, *sessionSharedData);
+		checkForOutboundStateChanges(-1);
 	}
 
 	if (type == NetworkSessionType::Client) {
@@ -107,7 +113,7 @@ void NetworkSession::update()
 		if (myPeerId != -1) {
 			auto iter = sharedData.find(myPeerId);
 			if (iter != sharedData.end()) {
-				checkForOutboundStateChanges(false, *iter->second);
+				checkForOutboundStateChanges(myPeerId);
 			}
 		}
 	}
@@ -350,23 +356,29 @@ void NetworkSession::setMyPeerId(int id)
 	sessionSharedData = makeSessionSharedData();
 }
 
-void NetworkSession::checkForOutboundStateChanges(bool isSessionState, SharedData& data)
+void NetworkSession::checkForOutboundStateChanges(int ownerId)
 {
+	SharedData& data = ownerId == -1 ? *sessionSharedData : *sharedData.at(ownerId);
 	if (data.isModified()) {
-		if (isSessionState) {
-			ControlMsgSetSessionState state;
-			state.state = Serializer::toBytes(data);
-			Bytes bytes = Serializer::toBytes(state);
-			sendToAll(doMakeControlPacket(NetworkSessionControlMessageType::SetSessionState, OutboundNetworkPacket(bytes)));
-		} else {
-			ControlMsgSetPeerState state;
-			state.peerId = myPeerId;
-			state.state = Serializer::toBytes(data);
-			Bytes bytes = Serializer::toBytes(state);
-			sendToAll(doMakeControlPacket(NetworkSessionControlMessageType::SetPeerState, OutboundNetworkPacket(bytes)));
-		}
-
+		sendToAll(makeUpdateSharedDataPacket(ownerId));
 		data.markUnmodified();
+	}
+}
+
+OutboundNetworkPacket NetworkSession::makeUpdateSharedDataPacket(int ownerId)
+{
+	SharedData& data = ownerId == -1 ? *sessionSharedData : *sharedData.at(ownerId);
+	if (ownerId == -1) {
+		ControlMsgSetSessionState state;
+		state.state = Serializer::toBytes(data);
+		Bytes bytes = Serializer::toBytes(state);
+		return doMakeControlPacket(NetworkSessionControlMessageType::SetSessionState, OutboundNetworkPacket(bytes));
+	} else {
+		ControlMsgSetPeerState state;
+		state.peerId = myPeerId;
+		state.state = Serializer::toBytes(data);
+		Bytes bytes = Serializer::toBytes(state);
+		return doMakeControlPacket(NetworkSessionControlMessageType::SetPeerState, OutboundNetworkPacket(bytes));
 	}
 }
 
