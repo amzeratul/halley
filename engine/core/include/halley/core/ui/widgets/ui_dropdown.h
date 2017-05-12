@@ -15,6 +15,7 @@ namespace Halley {
 
 		void setSelectedOption(int option);
 		int getSelectedOption() const;
+		String getSelectedOptionText() const;
 
 	protected:
 		void draw(UIPainter& painter) const override;

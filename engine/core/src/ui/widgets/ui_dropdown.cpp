@@ -39,6 +39,11 @@ int UIDropdown::getSelectedOption() const
 	return curOption;
 }
 
+String UIDropdown::getSelectedOptionText() const
+{
+	return options[curOption];
+}
+
 void UIDropdown::draw(UIPainter& painter) const
 {
 	int offset = isOpen ? 1 : 0;
