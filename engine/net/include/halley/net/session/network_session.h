@@ -38,6 +38,11 @@ namespace Halley {
 
 		virtual std::unique_ptr<SharedData> makeSessionSharedData() = 0;
 		virtual std::unique_ptr<SharedData> makePeerSharedData() = 0;
+
+		virtual void onStartSession();
+		virtual void onHosting();
+		virtual void onConnected(int peerId);
+		virtual void onDisconnected(int peerId);
 		
 	private:
 		NetworkService& service;

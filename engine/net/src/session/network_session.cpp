@@ -23,6 +23,9 @@ void NetworkSession::host(int port)
 
 	type = NetworkSessionType::Host;
 	setMyPeerId(0);
+
+	onStartSession();
+	onHosting();
 }
 
 void NetworkSession::join(const String& address, int port)
@@ -32,6 +35,8 @@ void NetworkSession::join(const String& address, int port)
 	connections.emplace_back(service.connect(address, port));
 	
 	type = NetworkSessionType::Client;
+
+	onStartSession();
 }
 
 void NetworkSession::close()
@@ -74,6 +79,7 @@ void NetworkSession::acceptConnection(std::shared_ptr<IConnection> incoming)
 	ControlMsgSetPeerId msg;
 	msg.peerId = int8_t(connections.size());
 	Bytes bytes = Serializer::toBytes(msg);
+	sharedData[msg.peerId] = makePeerSharedData();
 
 	auto& conn = *connections.back();
 	conn.send(doMakeControlPacket(NetworkSessionControlMessageType::SetPeerId, OutboundNetworkPacket(bytes)));
@@ -81,6 +87,7 @@ void NetworkSession::acceptConnection(std::shared_ptr<IConnection> incoming)
 	for (auto& i: sharedData) {
 		conn.send(makeUpdateSharedDataPacket(i.first));
 	}
+	onConnected(msg.peerId);
 }
 
 void NetworkSession::update()
@@ -160,6 +167,22 @@ const SharedData& NetworkSession::doGetClientSharedData(int clientId) const
 		throw Exception("Unknown client with id: " + toString(clientId));
 	}
 	return *iter->second;
+}
+
+void NetworkSession::onStartSession()
+{
+}
+
+void NetworkSession::onHosting()
+{
+}
+
+void NetworkSession::onConnected(int peerId)
+{
+}
+
+void NetworkSession::onDisconnected(int peerId)
+{
 }
 
 ConnectionStatus NetworkSession::getStatus() const
@@ -354,6 +377,7 @@ void NetworkSession::setMyPeerId(int id)
 {
 	myPeerId = id;
 	sessionSharedData = makeSessionSharedData();
+	sharedData[id] = makePeerSharedData();
 }
 
 void NetworkSession::checkForOutboundStateChanges(int ownerId)
