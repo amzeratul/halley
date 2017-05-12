@@ -246,7 +246,7 @@ void Halley::Image::serialize(Serializer& s) const
 {
 	s << w;
 	s << h;
-	s << int(format);
+	s << format;
 	s << uint64_t(dataLen);
 	s << gsl::as_bytes(gsl::span<char>(px.get(), dataLen));
 }
@@ -255,10 +255,7 @@ void Halley::Image::deserialize(Deserializer& s)
 {
 	s >> w;
 	s >> h;
-
-	int m;
-	s >> m;
-	format = static_cast<Format>(m);
+	s >> format;
 
 	uint64_t len;
 	s >> len;

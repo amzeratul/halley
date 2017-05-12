@@ -126,7 +126,14 @@ namespace Halley {
 			}
 		}
 
-		template <typename T>
+		template <typename T, std::enable_if_t<std::is_enum<T>::value == true, int> = 0>
+		Serializer& operator<<(const T& val)
+		{
+			using B = typename std::underlying_type<T>::type;
+			return *this << B(val);
+		}
+
+		template <typename T, std::enable_if_t<std::is_enum<T>::value == false, int> = 0>
 		Serializer& operator<<(const T& val)
 		{
 			val.serialize(*this);
@@ -299,7 +306,16 @@ namespace Halley {
 			return *this;
 		}
 
-		template <typename T>
+		template <typename T, std::enable_if_t<std::is_enum<T>::value == true, int> = 0>
+		Deserializer& operator>>(T& val)
+		{
+			typename std::underlying_type<T>::type tmp;
+			*this >> tmp;
+			val = T(tmp);
+			return *this;
+		}
+
+		template <typename T, std::enable_if_t<std::is_enum<T>::value == false, int> = 0>
 		Deserializer& operator>>(T& val)
 		{
 			val.deserialize(*this);

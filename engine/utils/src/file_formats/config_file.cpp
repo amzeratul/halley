@@ -84,15 +84,13 @@ private:
 
 void ConfigNode::serialize(Serializer& s) const
 {
-	s << int(type);
+	s << type;
 	boost::apply_visitor(SerializerVisitor(s), contents);
 }
 
 void ConfigNode::deserialize(Deserializer& s)
 {
-	int temp;
-	s >> temp;
-	type = ConfigNodeType(temp);
+	s >> type;
 
 	switch (type) {
 		case ConfigNodeType::Scalar:

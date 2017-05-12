@@ -23,15 +23,13 @@ MaterialUniform::MaterialUniform(String name, ShaderParameterType type)
 void MaterialUniform::serialize(Serializer& s) const
 {
 	s << name;
-	s << int(type);
+	s << type;
 }
 
 void MaterialUniform::deserialize(Deserializer& s)
 {
 	s >> name;
-	int temp;
-	s >> temp;
-	type = ShaderParameterType(temp);
+	s >> type;
 }
 
 MaterialUniformBlock::MaterialUniformBlock() {}
@@ -69,7 +67,7 @@ MaterialAttribute::MaterialAttribute(String name, ShaderParameterType type, int 
 void MaterialAttribute::serialize(Serializer& s) const
 {
 	s << name;
-	s << int(type);
+	s << type;
 	s << location;
 	s << offset;
 }
@@ -77,9 +75,7 @@ void MaterialAttribute::serialize(Serializer& s) const
 void MaterialAttribute::deserialize(Deserializer& s)
 {
 	s >> name;
-	int temp;
-	s >> temp;
-	type = ShaderParameterType(temp);
+	s >> type;
 	s >> location;
 	s >> offset;
 }
@@ -177,15 +173,13 @@ MaterialPass::MaterialPass(BlendType blend, String shaderAssetId)
 
 void MaterialPass::serialize(Serializer& s) const
 {
-	s << int(blend);
+	s << blend;
 	s << shaderAssetId;
 }
 
 void MaterialPass::deserialize(Deserializer& s)
 {
-	int temp; 
-	s >> temp;
-	blend = BlendType(temp);
+	s >> blend;
 	s >> shaderAssetId;
 }
 

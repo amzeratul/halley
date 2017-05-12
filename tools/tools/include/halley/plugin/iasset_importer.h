@@ -44,7 +44,7 @@ namespace Halley
 		void serialize(Serializer& s) const
 		{
 			s << name;
-			s << int(type);
+			s << type;
 			s << filepath;
 			s << metadata;
 		}
@@ -52,9 +52,7 @@ namespace Halley
 		void deserialize(Deserializer& s)
 		{
 			s >> name;
-			int tmp;
-			s >> tmp;
-			type = AssetType(tmp);
+			s >> type;
 			s >> filepath;
 			s >> metadata;
 		}
