@@ -57,8 +57,8 @@ namespace Halley {
 		virtual void releaseMouse(Vector2f mousePos, int button);
 		virtual Rect4f getMouseRect() const;
 
-		bool isEnabled() const override;
-		void setEnabled(bool enabled);
+		bool isShown() const override;
+		void setShown(bool enabled);
 
 		bool isAlive() const;
 		void destroy();
@@ -96,7 +96,7 @@ namespace Halley {
 
 		UIParent* parent = nullptr;
 		String id;
-		bool enabled = true;
+		bool shown = true;
 		std::vector<UIInputType> onlyEnabledWithInputs;
 
 		Vector2f position;

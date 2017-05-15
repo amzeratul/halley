@@ -71,7 +71,7 @@ UIElementPtr UISizerEntry::getPointer() const
 
 bool UISizerEntry::isEnabled() const
 {
-	return !widget || widget->isEnabled();
+	return !widget || widget->isShown();
 }
 
 Vector4f UISizerEntry::getBorder() const
@@ -271,7 +271,7 @@ void UISizer::clear()
 	entries.clear();
 }
 
-bool UISizer::isEnabled() const
+bool UISizer::isShown() const
 {
 	for (auto& e: entries) {
 		if (e.isEnabled()) {

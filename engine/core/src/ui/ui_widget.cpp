@@ -18,7 +18,7 @@ UIWidget::~UIWidget()
 
 void UIWidget::doDraw(UIPainter& painter) const
 {
-	if (enabled) {
+	if (shown) {
 		draw(painter);
 		for (auto& c: getChildren()) {
 			c->doDraw(painter);
@@ -33,7 +33,7 @@ void UIWidget::updateInputDevice(InputDevice& device)
 void UIWidget::doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice)
 {
 	setInputType(inputType);
-	if (enabled) {
+	if (shown) {
 		update(t, positionUpdated);
 		positionUpdated = false;
 		for (auto& c: getChildren()) {
@@ -45,7 +45,7 @@ void UIWidget::doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice)
 
 Vector2f UIWidget::computeMinimumSize() const
 {
-	if (!enabled) {
+	if (!shown) {
 		return {};
 	}
 	Vector2f minSize = getMinimumSize();
@@ -207,14 +207,14 @@ void UIWidget::releaseMouse(Vector2f mousePos, int button)
 {
 }
 
-bool UIWidget::isEnabled() const
+bool UIWidget::isShown() const
 {
-	return enabled;
+	return shown;
 }
 
-void UIWidget::setEnabled(bool e)
+void UIWidget::setShown(bool e)
 {
-	enabled = e;
+	shown = e;
 }
 
 bool UIWidget::isAlive() const
@@ -266,7 +266,7 @@ UIEventHandler& UIWidget::getEventHandler()
 
 void UIWidget::setInputType(UIInputType uiInput)
 {
-	enabled = onlyEnabledWithInputs.empty() || std::find(onlyEnabledWithInputs.begin(), onlyEnabledWithInputs.end(), uiInput) != onlyEnabledWithInputs.end();
+	shown = onlyEnabledWithInputs.empty() || std::find(onlyEnabledWithInputs.begin(), onlyEnabledWithInputs.end(), uiInput) != onlyEnabledWithInputs.end();
 }
 
 void UIWidget::setOnlyEnabledWithInputs(const std::vector<UIInputType>& uiInput)
