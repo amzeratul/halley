@@ -35,8 +35,10 @@ void UILabel::updateMinSize()
 
 void UILabel::setText(const String& t)
 {
-	text.setText(t);
-	updateMinSize();
+	if (text.getText() != t) {
+		text.setText(t);
+		updateMinSize();
+	}
 }
 
 void UILabel::setMaxWidth(float m)

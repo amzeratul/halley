@@ -43,9 +43,13 @@ void UICheckbox::onClicked(Vector2f)
 
 void UICheckbox::doSetState(State state)
 {
-	if (state == State::Hover) {
-		sprite = checked ? style->checkboxCheckedHover : style->checkboxNormalHover;
+	if (isEnabled()) {
+		if (state == State::Hover) {
+			sprite = checked ? style->checkboxCheckedHover : style->checkboxNormalHover;
+		} else {
+			sprite = checked ? style->checkboxChecked : style->checkboxNormal;
+		}
 	} else {
-		sprite = checked ? style->checkboxChecked : style->checkboxNormal;
+		sprite = checked ? style->checkboxCheckedDisabled : style->checkboxDisabled;
 	}
 }

@@ -55,6 +55,16 @@ void NetworkSession::setMaxClients(int clients)
 	maxClients = clients;
 }
 
+int NetworkSession::getMaxClients() const
+{
+	return maxClients;
+}
+
+int NetworkSession::getMyPeerId() const
+{
+	return myPeerId;
+}
+
 int NetworkSession::getClientCount() const
 {
 	if (type == NetworkSessionType::Client) {

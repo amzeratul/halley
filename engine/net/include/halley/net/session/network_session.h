@@ -19,6 +19,10 @@ namespace Halley {
 		void join(const String& address, int port);
 
 		void setMaxClients(int clients);
+		int getMaxClients() const;
+
+		int getMyPeerId() const;
+
 		int getClientCount() const;
 		void acceptConnection(std::shared_ptr<IConnection> move);
 		void update();
