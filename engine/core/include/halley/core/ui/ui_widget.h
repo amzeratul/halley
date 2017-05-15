@@ -58,7 +58,9 @@ namespace Halley {
 		virtual Rect4f getMouseRect() const;
 
 		bool isShown() const override;
-		void setShown(bool enabled);
+		void setShown(bool shown);
+		bool isEnabled() const;
+		void setEnabled(bool enabled);
 
 		bool isAlive() const;
 		void destroy();
@@ -86,6 +88,8 @@ namespace Halley {
 		virtual void onFocusLost();
 		UIRoot* getRoot() override;
 
+		virtual void onEnabledChanged();
+
 		void sendEvent(UIEvent&& event) const override;
 
 		void playSound(const std::shared_ptr<const AudioClip>& clip);
@@ -96,7 +100,6 @@ namespace Halley {
 
 		UIParent* parent = nullptr;
 		String id;
-		bool shown = true;
 		std::vector<UIInputType> onlyEnabledWithInputs;
 
 		Vector2f position;
@@ -108,6 +111,8 @@ namespace Halley {
 
 		std::shared_ptr<UIEventHandler> eventHandler;
 
+		bool shown = true;
+		bool enabled = true;
 		bool alive = true;
 		bool focused = false;
 		bool mouseOver = false;

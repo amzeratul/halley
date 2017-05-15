@@ -34,6 +34,7 @@ namespace Halley {
 		State getCurState() const;
 		bool updateButton();
 		void doForceUpdate();
+		void onEnabledChanged() override;
 
 	private:
 		State curState = State::Up;

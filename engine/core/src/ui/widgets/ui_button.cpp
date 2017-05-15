@@ -40,14 +40,14 @@ bool UIClickable::isFocusLocked() const
 
 void UIClickable::pressMouse(Vector2f, int button)
 {
-	if (button == 0) {
+	if (button == 0 && isEnabled()) {
 		held = true;
 	}
 }
 
 void UIClickable::releaseMouse(Vector2f mousePos, int button)
 {
-	if (button == 0) {
+	if (button == 0 && isEnabled()) {
 		if (held && isMouseOver()) {
 			onClicked(mousePos);
 		}
@@ -67,8 +67,7 @@ UIClickable::State UIClickable::getCurState() const
 
 bool UIClickable::updateButton()
 {
-	bool dirty = forceUpdate;
-	forceUpdate = false;
+	bool dirty = false;
 	if (held) {
 		if (isMouseOver()) {
 			dirty |= setState(State::Down);
@@ -82,6 +81,7 @@ bool UIClickable::updateButton()
 			dirty |= setState(State::Up);
 		}
 	}
+	forceUpdate = false;
 	return dirty;
 }
 
@@ -121,7 +121,9 @@ void UIButton::doSetState(State state)
 	if (borderOnly) {
 		sprite = style->buttonBorderOnly;
 	} else {
-		if (state == State::Up) {
+		if (!isEnabled()) {
+			sprite = style->buttonDisabled;
+		} else if (state == State::Up) {
 			sprite = style->buttonNormal;
 			playSound(style->buttonUpSound);
 		} else if (state == State::Down) {
@@ -150,10 +152,18 @@ void UIClickable::updateInputDevice(InputDevice& device)
 
 bool UIClickable::setState(State state)
 {
-	if (state != curState) {
+	if (state != curState || forceUpdate) {
 		curState = state;
 		doSetState(state);
 		return true;
 	}
 	return false;
+}
+
+void UIClickable::onEnabledChanged()
+{
+	if (!isEnabled()) {
+		held = false;
+	}
+	doForceUpdate();
 }

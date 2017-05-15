@@ -212,9 +212,22 @@ bool UIWidget::isShown() const
 	return shown;
 }
 
-void UIWidget::setShown(bool e)
+void UIWidget::setShown(bool s)
 {
-	shown = e;
+	shown = s;
+}
+
+bool UIWidget::isEnabled() const
+{
+	return enabled;
+}
+
+void UIWidget::setEnabled(bool e)
+{
+	if (enabled != e) {
+		enabled = e;
+		onEnabledChanged();
+	}
 }
 
 bool UIWidget::isAlive() const
@@ -225,6 +238,10 @@ bool UIWidget::isAlive() const
 UIRoot* UIWidget::getRoot()
 {
 	return parent ? parent->getRoot() : nullptr;
+}
+
+void UIWidget::onEnabledChanged()
+{
 }
 
 void UIWidget::setParent(UIParent& p)
