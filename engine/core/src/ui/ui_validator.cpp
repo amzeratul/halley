@@ -11,6 +11,11 @@ StringUTF32 UIValidator::onTextChanged(const StringUTF32& changedTo)
 	return changedTo;
 }
 
+bool UIValidator::isEnabled()
+{
+	return true;
+}
+
 UINumericValidator::UINumericValidator(bool allowNegative)
 	: allowNegative(allowNegative)
 {
@@ -26,4 +31,14 @@ StringUTF32 UINumericValidator::onTextChanged(const StringUTF32& src)
 		}
 	}
 	return StringUTF32(result.data(), j);
+}
+
+UIFunctionValidator::UIFunctionValidator(std::function<bool()> f)
+	: f(f)
+{
+}
+
+bool UIFunctionValidator::isEnabled()
+{
+	return f();
 }

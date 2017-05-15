@@ -9,6 +9,7 @@
 namespace Halley {
 	class UIEvent;
 	class Painter;
+	class UIValidator;
 
 	class UIWidget : public IUIElement, public UIParent, public IUISizer {
 		friend class UIParent;
@@ -79,6 +80,9 @@ namespace Halley {
 		virtual void setInputType(UIInputType uiInput);
 		void setOnlyEnabledWithInputs(const std::vector<UIInputType>& inputs);
 		const std::vector<UIInputType>& getOnlyEnabledWithInput() const;
+
+		void setValidator(std::shared_ptr<UIValidator> validator);
+		std::shared_ptr<UIValidator> getValidator() const;
 		
 	protected:
 		virtual void draw(UIPainter& painter) const;
@@ -110,6 +114,7 @@ namespace Halley {
 		Maybe<UISizer> sizer;
 
 		std::shared_ptr<UIEventHandler> eventHandler;
+		std::shared_ptr<UIValidator> validator;
 
 		bool shown = true;
 		bool enabled = true;

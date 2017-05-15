@@ -43,11 +43,6 @@ String UIInput::getGhostText() const
 	return ghostText;
 }
 
-void UIInput::setValidator(std::shared_ptr<UIValidator> v)
-{
-	validator = v;
-}
-
 void UIInput::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);
@@ -69,8 +64,8 @@ void UIInput::updateTextInput()
 		}
 	}
 
-	if (modified && validator) {
-		text = validator->onTextChanged(text);
+	if (modified && getValidator()) {
+		text = getValidator()->onTextChanged(text);
 	}
 }
 

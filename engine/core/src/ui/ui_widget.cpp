@@ -1,5 +1,6 @@
 #include "ui/ui_widget.h"
 #include "ui/ui_root.h"
+#include "ui/ui_validator.h"
 
 using namespace Halley;
 
@@ -33,6 +34,11 @@ void UIWidget::updateInputDevice(InputDevice& device)
 void UIWidget::doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice)
 {
 	setInputType(inputType);
+	
+	if (validator) {
+		setEnabled(getValidator()->isEnabled());
+	}
+
 	if (shown) {
 		update(t, positionUpdated);
 		positionUpdated = false;
@@ -345,4 +351,14 @@ void UIWidget::setWidgetRect(Rect4f rect)
 		size = rect.getSize();
 		positionUpdated = true;
 	}
+}
+
+void UIWidget::setValidator(std::shared_ptr<UIValidator> v)
+{
+	validator = v;
+}
+
+std::shared_ptr<UIValidator> UIWidget::getValidator() const
+{
+	return validator;
 }
