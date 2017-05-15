@@ -28,6 +28,7 @@ namespace Halley {
 
 		Sprite dropdownNormal;
 		Sprite dropdownHover;
+		Sprite dropdownDisabled;
 
 		TextRenderer label;
 

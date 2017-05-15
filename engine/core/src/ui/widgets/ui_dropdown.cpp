@@ -65,7 +65,7 @@ void UIDropdown::draw(UIPainter& painter) const
 void UIDropdown::update(Time t, bool moved)
 {
 	bool needUpdate = true;
-	sprite = isMouseOver() ? style->dropdownHover : style->dropdownNormal;
+	sprite = isEnabled() ? (isMouseOver() ? style->dropdownHover : style->dropdownNormal) : style->dropdownDisabled;
 
 	if (needUpdate) {
 		sprite.setPos(getPosition()).scaleTo(getSize());

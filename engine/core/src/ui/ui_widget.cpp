@@ -289,6 +289,7 @@ void UIWidget::setInputType(UIInputType uiInput)
 void UIWidget::setOnlyEnabledWithInputs(const std::vector<UIInputType>& uiInput)
 {
 	onlyEnabledWithInputs = uiInput;
+	setInputType(UIInputType::Keyboard);
 }
 
 const std::vector<UIInputType>& UIWidget::getOnlyEnabledWithInput() const
