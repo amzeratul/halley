@@ -172,11 +172,20 @@ const SharedData& NetworkSession::doGetSessionSharedData() const
 
 const SharedData& NetworkSession::doGetClientSharedData(int clientId) const
 {
-	auto iter = sharedData.find(clientId);
-	if (iter == sharedData.end()) {
+	auto result = doTryGetClientSharedData(clientId);
+	if (!result) {
 		throw Exception("Unknown client with id: " + toString(clientId));
 	}
-	return *iter->second;
+	return *result;
+}
+
+const SharedData* NetworkSession::doTryGetClientSharedData(int clientId) const
+{
+	auto iter = sharedData.find(clientId);
+	if (iter == sharedData.end()) {
+		return nullptr;
+	}
+	return iter->second.get();
 }
 
 void NetworkSession::onStartSession()

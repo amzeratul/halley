@@ -39,6 +39,7 @@ namespace Halley {
 		SharedData& doGetMutableSessionSharedData();
 		const SharedData& doGetSessionSharedData() const;
 		const SharedData& doGetClientSharedData(int clientId) const;
+		const SharedData* doTryGetClientSharedData(int clientId) const;
 
 		virtual std::unique_ptr<SharedData> makeSessionSharedData() = 0;
 		virtual std::unique_ptr<SharedData> makePeerSharedData() = 0;
@@ -105,6 +106,11 @@ namespace Halley {
 		const PeerSharedDataType& getClientSharedData(int clientId) const
 		{
 			return static_cast<const PeerSharedDataType&>(doGetClientSharedData(clientId));
+		}
+
+		const PeerSharedDataType* tryGetClientSharedData(int clientId) const
+		{
+			return static_cast<const PeerSharedDataType*>(doTryGetClientSharedData(clientId));
 		}
 
 	protected:
