@@ -34,6 +34,16 @@ void UIDropdown::setSelectedOption(int option)
 	}
 }
 
+void UIDropdown::setSelectedOption(const String& option)
+{
+	auto result = std::find(options.begin(), options.end(), option);
+	if (result != options.end()) {
+		setSelectedOption(int(result - options.begin()));
+	} else {
+		setSelectedOption(0);
+	}
+}
+
 int UIDropdown::getSelectedOption() const
 {
 	return curOption;
