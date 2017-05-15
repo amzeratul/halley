@@ -32,7 +32,10 @@ bool UICheckbox::isChecked() const
 
 void UICheckbox::setChecked(bool c)
 {
-	checked = c;
+	if (checked != c) {
+		checked = c;
+		doForceUpdate();
+	}
 }
 
 void UICheckbox::onClicked(Vector2f)

@@ -22,6 +22,7 @@ void NetworkSession::host(int port)
 	Expects(type == NetworkSessionType::Undefined);
 
 	type = NetworkSessionType::Host;
+	sessionSharedData = makeSessionSharedData();
 
 	onStartSession();
 	setMyPeerId(0);
@@ -68,7 +69,8 @@ int NetworkSession::getMyPeerId() const
 int NetworkSession::getClientCount() const
 {
 	if (type == NetworkSessionType::Client) {
-		return getStatus() != ConnectionStatus::Open ? 0 : 2; // TODO
+		throw Exception("Client shouldn't bet rying to query client count!");
+		//return getStatus() != ConnectionStatus::Open ? 0 : 2; // TODO
 	} else if (type == NetworkSessionType::Host) {
 		int i = 1;
 		for (auto& c: connections) {
@@ -216,7 +218,11 @@ ConnectionStatus NetworkSession::getStatus() const
 		if (connections.empty()) {
 			return ConnectionStatus::Closed;
 		} else {
-			return connections[0]->getStatus() == ConnectionStatus::Open ? (myPeerId != -1 ? ConnectionStatus::Open : ConnectionStatus::Connecting) : connections[0]->getStatus();
+			if (connections[0]->getStatus() == ConnectionStatus::Open) {
+				return myPeerId != -1 && sessionSharedData ? ConnectionStatus::Open : ConnectionStatus::Connecting;
+			} else {
+				return connections[0]->getStatus();
+			}
 		}
 	} else if (type == NetworkSessionType::Host) {
 		return ConnectionStatus::Open;
@@ -390,6 +396,9 @@ void NetworkSession::onControlMessage(int peerId, const ControlMsgSetSessionStat
 		closeConnection(peerId, "Unauthorised control message: SetSessionState");
 	}
 
+	if (!sessionSharedData) {
+		sessionSharedData = makeSessionSharedData();
+	}
 	auto s = Deserializer(msg.state);
 	sessionSharedData->deserialize(s);
 }
@@ -398,7 +407,6 @@ void NetworkSession::setMyPeerId(int id)
 {
 	Expects (myPeerId == -1);
 	myPeerId = id;
-	sessionSharedData = makeSessionSharedData();
 	sharedData[id] = makePeerSharedData();
 
 	onPeerIdAssigned();
