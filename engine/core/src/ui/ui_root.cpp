@@ -27,7 +27,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 
 	// Update children
 	for (auto& c: getChildren()) {
-		c->doUpdate(t, activeInputType, *manual);
+		c->doUpdate(t, activeInputType, c == getChildren().back() ? *manual : *dummyInput);
 	}
 
 	// Remove dead
