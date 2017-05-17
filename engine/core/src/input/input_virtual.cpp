@@ -231,6 +231,11 @@ Vector2f InputVirtual::getPosition() const
 	return position;
 }
 
+void InputVirtual::setPosition(Vector2f pos)
+{
+	position = pos;
+}
+
 void InputVirtual::setPositionLimits(Rect4f limits)
 {
 	positionLimits = limits;

@@ -38,7 +38,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 	if (topChildChanged) {
 		topChildChanged = false;
 		if (activeInputType != UIInputType::Mouse) {
-			mouseOverNext();
+			//mouseOverNext();
 		}
 	}
 
