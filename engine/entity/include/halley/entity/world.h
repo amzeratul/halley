@@ -15,6 +15,7 @@
 #include "service.h"
 
 namespace Halley {
+	class ConfigNode;
 	class RenderContext;
 	class Entity;
 	class System;
@@ -41,6 +42,7 @@ namespace Halley {
 		const Vector<std::unique_ptr<System>>& getSystems(TimeLine timeline) const;
 
 		Service& addService(std::shared_ptr<Service> service);
+		void loadSystems(const ConfigNode& config, std::function<std::unique_ptr<System>(String)> createFunction);
 
 		template <typename T>
 		T& getService() const

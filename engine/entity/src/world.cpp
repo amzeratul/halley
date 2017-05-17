@@ -8,6 +8,7 @@
 #include "family.h"
 #include "halley/text/string_converter.h"
 #include "halley/support/debug.h"
+#include "halley/file_formats/config_file.h"
 
 using namespace Halley;
 
@@ -101,6 +102,29 @@ Service& World::addService(std::shared_ptr<Service> service)
 	auto& ref = *service;
 	services[service->getName()] = std::move(service);
 	return ref;
+}
+
+void World::loadSystems(const ConfigNode& root, std::function<std::unique_ptr<System>(String)> createFunction)
+{
+	auto timelines = root["timelines"].asMap();
+	for (auto iter = timelines.begin(); iter != timelines.end(); ++iter) {
+		String timelineName = iter->first;
+		TimeLine timeline;
+		if (timelineName == "fixedUpdate") {
+			timeline = TimeLine::FixedUpdate;
+		} else if (timelineName == "variableUpdate") {
+			timeline = TimeLine::VariableUpdate;
+		} else if (timelineName == "render") {
+			timeline = TimeLine::Render;
+		} else {
+			throw Exception("Unknown timeline: " + timelineName);
+		}
+
+		for (auto sysName : iter->second) {
+			String name = sysName.asString();
+			addSystem(createFunction(name + "System"), timeline).setName(name);
+		}
+	}
 }
 
 Service& World::getService(const String& name) const

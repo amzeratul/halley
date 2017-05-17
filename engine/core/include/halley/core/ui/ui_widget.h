@@ -61,6 +61,7 @@ namespace Halley {
 		void setShown(bool shown);
 		bool isEnabled() const;
 		void setEnabled(bool enabled);
+		virtual bool isModal() const;
 
 		bool isAlive() const;
 		void destroy();
@@ -74,7 +75,7 @@ namespace Halley {
 
 		void setValidator(std::shared_ptr<UIValidator> validator);
 		std::shared_ptr<UIValidator> getValidator() const;
-		
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void update(Time t, bool moved);

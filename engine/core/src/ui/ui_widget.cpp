@@ -356,3 +356,8 @@ std::shared_ptr<UIValidator> UIWidget::getValidator() const
 {
 	return validator;
 }
+
+bool UIWidget::isModal() const
+{
+	return true;
+}

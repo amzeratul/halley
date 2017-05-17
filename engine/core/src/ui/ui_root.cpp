@@ -230,5 +230,10 @@ void UIRoot::sendEvent(UIEvent&&) const
 
 bool UIRoot::hasModalUI() const
 {
-	return !getChildren().empty();
+	for (auto& c: getChildren()) {
+		if (c->isModal()) {
+			return true;
+		}
+	}
+	return false;
 }
