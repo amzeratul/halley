@@ -13,7 +13,7 @@ namespace Halley {
 		friend class UIListItem;
 
 	public:
-		explicit UIList(const String& id, std::shared_ptr<UIStyle> style);
+		explicit UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType orientation = UISizerType::Vertical);
 
 		void setSelectedOption(int option);
 		int getSelectedOption() const;
@@ -28,6 +28,7 @@ namespace Halley {
 
 	private:
 		std::shared_ptr<UIStyle> style;
+		UISizerType orientation;
 		Sprite sprite;
 		UIListItem* selected = nullptr;
 

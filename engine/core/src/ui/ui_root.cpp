@@ -1,65 +1,9 @@
 #include "ui/ui_root.h"
 #include "ui/ui_widget.h"
-#include "graphics/sprite/sprite_painter.h"
 #include "api/audio_api.h"
-#include "ui/widgets/ui_button.h"
+#include "ui/ui_painter.h"
 
 using namespace Halley;
-
-void UIParent::addChild(std::shared_ptr<UIWidget> widget)
-{
-	widget->setParent(*this);
-	children.push_back(widget);
-	topChildChanged = true;
-}
-
-void UIParent::removeChild(UIWidget& widget)
-{
-	children.erase(std::remove_if(children.begin(), children.end(), [&] (auto& c)
-	{
-		return c.get() == &widget;
-	}), children.end());
-	topChildChanged = true;
-}
-
-void UIParent::removeDeadChildren()
-{
-	children.erase(std::remove_if(children.begin(), children.end(), [&] (auto& c)
-	{
-		return !c->isAlive();
-	}), children.end());
-	for (auto& c: children) {
-		c->removeDeadChildren();
-	}
-}
-
-std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()
-{
-	return children;
-}
-
-const std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren() const
-{
-	return children;
-}
-
-UIPainter::UIPainter(SpritePainter& painter, int mask, int layer)
-	: painter(painter)
-	, mask(mask)
-	, layer(layer)
-	, n(0)
-{
-}
-
-void UIPainter::draw(const Sprite& sprite, int layerOffset)
-{
-	painter.add(sprite, mask, layer + layerOffset, float(n++));
-}
-
-void UIPainter::draw(const TextRenderer& sprite, int layerOffset)
-{
-	painter.add(sprite, mask, layer + layerOffset, float(n++));
-}
 
 UIRoot* UIRoot::getRoot()
 {
@@ -77,7 +21,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 	runLayout();
 
 	// Update input
-	updateManual(manual);
+	updateTabbing(manual);
 	updateMouse(mouse, uiOffset);
 
 	// Update children
@@ -143,15 +87,16 @@ void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)
 	updateMouseOver(activeMouseOver);
 }
 
-void UIRoot::updateManual(spInputDevice manual)
+void UIRoot::updateTabbing(spInputDevice manual)
 {
 	int x = manual->getAxisRepeat(0);
 	int y = manual->getAxisRepeat(1);
-	if (x > 0 || y > 0) {
+	
+	/*if (x > 0 || y > 0) {
 		mouseOverNext(true);
 	} else if (x < 0 || y < 0) {
 		mouseOverNext(false);
-	}
+	}*/
 }
 
 void UIRoot::mouseOverNext(bool forward)

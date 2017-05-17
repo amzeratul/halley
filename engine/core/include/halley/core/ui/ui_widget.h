@@ -1,6 +1,7 @@
 #pragma once
 #include "ui_sizer.h"
 #include "ui_root.h"
+#include "ui_painter.h"
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
 #include "halley/maths/vector4.h"
@@ -8,7 +9,6 @@
 
 namespace Halley {
 	class UIEvent;
-	class Painter;
 	class UIValidator;
 
 	class UIWidget : public IUIElement, public UIParent, public IUISizer {

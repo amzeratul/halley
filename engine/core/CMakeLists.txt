@@ -55,6 +55,8 @@ set(SOURCES
         "src/stage/stage.cpp"
 
         "src/ui/ui_event.cpp"
+        "src/ui/ui_painter.cpp"
+        "src/ui/ui_parent.cpp"
         "src/ui/ui_root.cpp"
         "src/ui/ui_sizer.cpp"
         "src/ui/ui_validator.cpp"
@@ -144,6 +146,8 @@ set(HEADERS
 
         "include/halley/core/ui/ui_element.h"
         "include/halley/core/ui/ui_event.h"
+        "include/halley/core/ui/ui_painter.h"
+        "include/halley/core/ui/ui_parent.h"
         "include/halley/core/ui/ui_root.h"
         "include/halley/core/ui/ui_sizer.h"
         "include/halley/core/ui/ui_style.h"

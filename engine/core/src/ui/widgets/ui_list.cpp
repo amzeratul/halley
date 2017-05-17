@@ -4,9 +4,10 @@
 
 using namespace Halley;
 
-UIList::UIList(const String& id, std::shared_ptr<UIStyle> style)
-	: UIWidget(id, {}, UISizer(UISizerType::Vertical))
+UIList::UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType orientation)
+	: UIWidget(id, {}, UISizer(orientation))
 	, style(style)
+	, orientation(orientation)
 {
 	sprite = style->listBackground;
 }
@@ -25,7 +26,7 @@ void UIList::addTextItem(const String& id, const String& label)
 {
 	auto widget = std::make_shared<UILabel>(style->label.clone().setText(label));
 	auto item = std::make_shared<UIListItem>(id, *this, style);
-	item->add(widget, 0, Vector4f(3, 0, 3, 0));
+	item->add(widget, 0, orientation == UISizerType::Vertical ? Vector4f(3, 0, 3, 0) : Vector4f(0, 3, 0, 3));
 	addItem(item);
 }
 

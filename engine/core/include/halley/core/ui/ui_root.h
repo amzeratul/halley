@@ -1,59 +1,20 @@
 #pragma once
 #include "halley/time/halleytime.h"
-#include <vector>
 #include "halley/maths/vector2.h"
 #include "ui_event.h"
 #include "halley/core/input/input_virtual.h"
+#include "ui_parent.h"
 
 namespace Halley {
+	class SpritePainter;
 	class AudioAPI;
 	class AudioClip;
-	class TextRenderer;
-	class Sprite;
-	class SpritePainter;
-	class UIWidget;
-	class UIRoot;
 
 	enum class UIInputType {
 		Undefined,
 		Mouse,
 		Keyboard,
 		Gamepad
-	};
-
-	class UIParent {
-	public:
-		virtual ~UIParent() {}
-
-		virtual UIRoot* getRoot() = 0;
-		virtual void sendEvent(UIEvent&& event) const = 0;
-
-		void addChild(std::shared_ptr<UIWidget> widget);
-		void removeChild(UIWidget& widget);
-		void removeDeadChildren();
-
-		std::vector<std::shared_ptr<UIWidget>>& getChildren();
-		const std::vector<std::shared_ptr<UIWidget>>& getChildren() const;
-		
-	protected:
-		bool topChildChanged = false;
-
-	private:
-		std::vector<std::shared_ptr<UIWidget>> children;
-	};
-
-	class UIPainter {
-	public:
-		UIPainter(SpritePainter& painter, int mask, int layer);
-
-		void draw(const Sprite& sprite, int layerOffset = 0);
-		void draw(const TextRenderer& sprite, int layerOffset = 0);
-
-	private:
-		SpritePainter& painter;
-		int mask;
-		int layer;
-		int n;
 	};
 	
 	class UIRoot : public UIParent {
@@ -83,7 +44,7 @@ namespace Halley {
 		bool mouseHeld = false;
 
 		void updateMouse(spInputDevice mouse, Vector2f uiOffset);
-		void updateManual(spInputDevice manual);
+		void updateTabbing(spInputDevice manual);
 
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos);
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos);
