@@ -278,7 +278,7 @@ void Halley::InputVirtual::update(Time t)
 		axis.curRepeatValue = 0;
 
 		float curVal = getAxis(int(i));
-		int intVal = curVal > 0.50f ? 1 : (curVal < -0.50f ? - 1 : 0);
+		int intVal = curVal > 0.30f ? 1 : (curVal < -0.30f ? -1 : 0);
 
 		auto& timeSinceRepeat = axis.timeSinceRepeat;
 		auto& lastVal = axis.lastRepeatedValue;
@@ -290,7 +290,7 @@ void Halley::InputVirtual::update(Time t)
 		
 		if (intVal != 0) {
 			Time threshold = axis.numRepeats == 1 ? repeatDelayFirst : repeatDelayHold;
-			timeSinceRepeat += t;
+			timeSinceRepeat += t * std::fabs(curVal);
 			if (timeSinceRepeat >= threshold) {
 				axis.curRepeatValue = intVal;
 				axis.numRepeats++;
