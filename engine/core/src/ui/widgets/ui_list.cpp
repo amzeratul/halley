@@ -39,17 +39,17 @@ void UIList::addTextItem(const String& id, const String& label)
 	addItem(item);
 }
 
-void UIList::addItem(const String& id, std::shared_ptr<UIWidget> widget)
+void UIList::addItem(const String& id, std::shared_ptr<UIWidget> widget, Vector4f border)
 {
 	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()));
-	item->add(widget);
+	item->add(widget, 0, border);
 	addItem(item);
 }
 
-void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer)
+void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer, Vector4f border)
 {
 	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()));
-	item->add(sizer);
+	item->add(sizer, 0, border);
 	addItem(item);
 }
 
