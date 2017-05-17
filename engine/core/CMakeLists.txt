@@ -64,6 +64,7 @@ set(SOURCES
 
         "src/ui/widgets/ui_button.cpp"
         "src/ui/widgets/ui_checkbox.cpp"
+        "src/ui/widgets/ui_clickable.cpp"
         "src/ui/widgets/ui_dropdown.cpp"
         "src/ui/widgets/ui_image.cpp"
         "src/ui/widgets/ui_input.cpp"
@@ -156,6 +157,7 @@ set(HEADERS
 
         "include/halley/core/ui/widgets/ui_button.h"
         "include/halley/core/ui/widgets/ui_checkbox.h"
+        "include/halley/core/ui/widgets/ui_clickable.h"
         "include/halley/core/ui/widgets/ui_dropdown.h"
         "include/halley/core/ui/widgets/ui_image.h"
         "include/halley/core/ui/widgets/ui_input.h"

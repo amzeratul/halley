@@ -9,7 +9,8 @@ namespace Halley {
 		ButtonClicked,
 		CheckboxUpdated,
 		DropboxSelectionChanged,
-		ListSelectionChanged
+		ListSelectionChanged,
+		ListAccept
 	};
 
     class UIEvent {

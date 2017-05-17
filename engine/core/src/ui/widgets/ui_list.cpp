@@ -53,6 +53,11 @@ void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer)
 	addItem(item);
 }
 
+void UIList::setInputButton(int button)
+{
+	inputButton = button;
+}
+
 void UIList::addItem(std::shared_ptr<UIListItem> item)
 {
 	add(item);
@@ -83,6 +88,12 @@ void UIList::updateInputDevice(InputDevice& device)
 		newSel += y;
 	}
 	setSelectedOption(newSel);
+
+	if (inputButton >= 0) {
+		if (device.isButtonPressed(inputButton)) {
+			sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId()));
+		}
+	}
 }
 
 void UIList::update(Time t, bool moved)

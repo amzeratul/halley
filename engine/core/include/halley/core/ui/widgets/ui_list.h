@@ -22,6 +22,7 @@ namespace Halley {
 		void addItem(const String& id, std::shared_ptr<UIWidget> widget);
 		void addItem(const String& id, std::shared_ptr<UISizer> sizer);
 
+		void setInputButton(int button);
 		void updateInputDevice(InputDevice& device) override;
 
 	protected:
@@ -36,6 +37,7 @@ namespace Halley {
 
 		int curOptionHighlight = -1;
 		int curOption = -1;
+		int inputButton = -1;
 
 		void onItemClicked(UIListItem& item);
 		void addItem(std::shared_ptr<UIListItem> item);
