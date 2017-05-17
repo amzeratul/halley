@@ -20,7 +20,6 @@ namespace Halley {
 		virtual ~UIWidget();
 
 		void doDraw(UIPainter& painter) const;
-		virtual void updateInputDevice(InputDevice& shared);
 		void doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice);
 
 		Vector2f computeMinimumSize() const override;
@@ -66,14 +65,6 @@ namespace Halley {
 		bool isAlive() const;
 		void destroy();
 
-		std::shared_ptr<UIWidget> getWidget(const String& id);
-		
-		template <typename T>
-		std::shared_ptr<T> getWidgetAs(const String& id)
-		{
-			return std::static_pointer_cast<T>(getWidget(id));
-		}
-
 		void setEventHandler(std::shared_ptr<UIEventHandler> handler);
 		UIEventHandler& getEventHandler();
 		
@@ -87,6 +78,7 @@ namespace Halley {
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void update(Time t, bool moved);
+		virtual void updateInputDevice(InputDevice& device);
 
 		virtual void onFocus();
 		virtual void onFocusLost();

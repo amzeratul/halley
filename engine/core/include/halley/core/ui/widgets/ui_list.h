@@ -22,6 +22,8 @@ namespace Halley {
 		void addItem(const String& id, std::shared_ptr<UIWidget> widget);
 		void addItem(const String& id, std::shared_ptr<UISizer> sizer);
 
+		void updateInputDevice(InputDevice& device) override;
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -30,10 +32,10 @@ namespace Halley {
 		std::shared_ptr<UIStyle> style;
 		UISizerType orientation;
 		Sprite sprite;
-		UIListItem* selected = nullptr;
+		std::vector<std::shared_ptr<UIListItem>> items;
 
 		int curOptionHighlight = -1;
-		int curOption = 0;
+		int curOption = -1;
 
 		void onItemClicked(UIListItem& item);
 		void addItem(std::shared_ptr<UIListItem> item);
@@ -41,11 +43,12 @@ namespace Halley {
 
 	class UIListItem : public UIClickable {
 	public:
-		explicit UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style);
+		explicit UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, int index);
 
 		void onClicked(Vector2f mousePos) override;
 		void setSelected(bool selected);
-	
+		int getIndex() const;
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -53,6 +56,7 @@ namespace Halley {
 	private:
 		UIList& parent;
 		std::shared_ptr<UIStyle> style;
+		int index;
 		Sprite sprite;
 		bool selected = false;
 

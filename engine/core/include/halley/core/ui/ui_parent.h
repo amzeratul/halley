@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include "halley/text/halleystring.h"
 
 namespace Halley {
 	class UIEvent;
@@ -16,15 +17,26 @@ namespace Halley {
 
 		void addChild(std::shared_ptr<UIWidget> widget);
 		void removeChild(UIWidget& widget);
+
+		void addNewChildren();
 		void removeDeadChildren();
 
 		std::vector<std::shared_ptr<UIWidget>>& getChildren();
 		const std::vector<std::shared_ptr<UIWidget>>& getChildren() const;
+
+		std::shared_ptr<UIWidget> getWidget(const String& id);
+		
+		template <typename T>
+		std::shared_ptr<T> getWidgetAs(const String& id)
+		{
+			return std::static_pointer_cast<T>(getWidget(id));
+		}
 		
 	protected:
 		bool topChildChanged = false;
 
 	private:
 		std::vector<std::shared_ptr<UIWidget>> children;
+		std::vector<std::shared_ptr<UIWidget>> childrenWaiting;
 	};
 }

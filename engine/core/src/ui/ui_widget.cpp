@@ -46,6 +46,10 @@ void UIWidget::doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice)
 			c->doUpdate(t, inputType, inputDevice);
 		}
 		updateInputDevice(inputDevice);
+
+		if (eventHandler) {
+			eventHandler->pump();
+		}
 	}
 }
 
@@ -260,20 +264,6 @@ void UIWidget::destroy()
 	alive = false;
 }
 
-std::shared_ptr<UIWidget> UIWidget::getWidget(const String& id)
-{
-	for (auto& c: getChildren()) {
-		if (c->getId() == id) {
-			return c;
-		}
-		auto c2 = c->getWidget(id);
-		if (c2) {
-			return c2;
-		}
-	}
-	return {};
-}
-
 void UIWidget::setEventHandler(std::shared_ptr<UIEventHandler> handler)
 {
 	eventHandler = handler;
@@ -326,8 +316,12 @@ void UIWidget::onFocusLost()
 
 void UIWidget::sendEvent(UIEvent&& event) const
 {
-	if (!eventHandler || !eventHandler->handle(event)) {
-		parent->sendEvent(std::move(event));
+	if (eventHandler && eventHandler->canHandle(event)) {
+		eventHandler->queue(event);
+	} else {
+		if (parent) {
+			parent->sendEvent(std::move(event));
+		}
 	}
 }
 

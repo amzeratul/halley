@@ -11,7 +11,8 @@ UIRoot* UIRoot::getRoot()
 }
 
 UIRoot::UIRoot(AudioAPI* audio)
-	: audio(audio)
+	: dummyInput(std::make_shared<InputButtonBase>(4))
+	, audio(audio)
 {
 }
 
@@ -31,6 +32,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 
 	// Remove dead
 	removeDeadChildren();
+	addNewChildren();
 
 	// Update new windows
 	if (topChildChanged) {
@@ -43,7 +45,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 	// Update again, to reflect what happened >_>
 	runLayout();
 	for (auto& c: getChildren()) {
-		c->doUpdate(0, activeInputType, *manual);
+		c->doUpdate(0, activeInputType, *dummyInput);
 	}
 }
 
@@ -91,12 +93,14 @@ void UIRoot::updateTabbing(spInputDevice manual)
 {
 	int x = manual->getAxisRepeat(0);
 	int y = manual->getAxisRepeat(1);
-	
-	/*if (x > 0 || y > 0) {
+
+	/*	
+	if (x > 0 || y > 0) {
 		mouseOverNext(true);
 	} else if (x < 0 || y < 0) {
 		mouseOverNext(false);
-	}*/
+	}
+	*/
 }
 
 void UIRoot::mouseOverNext(bool forward)

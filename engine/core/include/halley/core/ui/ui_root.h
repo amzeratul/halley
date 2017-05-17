@@ -39,6 +39,7 @@ namespace Halley {
 		std::weak_ptr<UIWidget> currentMouseOver;
 		std::weak_ptr<UIWidget> currentFocus;
 		Vector2f lastMousePos;
+		std::shared_ptr<InputDevice> dummyInput;
 
 		AudioAPI* audio;
 		bool mouseHeld = false;

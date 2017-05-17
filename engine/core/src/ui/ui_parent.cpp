@@ -5,7 +5,7 @@ using namespace Halley;
 void UIParent::addChild(std::shared_ptr<UIWidget> widget)
 {
 	widget->setParent(*this);
-	children.push_back(widget);
+	childrenWaiting.push_back(widget);
 	topChildChanged = true;
 }
 
@@ -16,6 +16,17 @@ void UIParent::removeChild(UIWidget& widget)
 		return c.get() == &widget;
 	}), children.end());
 	topChildChanged = true;
+}
+
+void UIParent::addNewChildren()
+{
+	for (auto& c: childrenWaiting) {
+		children.emplace_back(std::move(c));
+	}
+	childrenWaiting.clear();
+	for (auto& c: children) {
+		c->addNewChildren();
+	}
 }
 
 void UIParent::removeDeadChildren()
@@ -37,4 +48,21 @@ std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()
 const std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren() const
 {
 	return children;
+}
+
+std::shared_ptr<UIWidget> UIParent::getWidget(const String& id)
+{
+	auto lists = { children, childrenWaiting };
+	for (auto& cs : lists) {
+		for (auto& c: cs) {
+			if (c->getId() == id) {
+				return c;
+			}
+			auto c2 = c->getWidget(id);
+			if (c2) {
+				return c2;
+			}
+		}
+	}
+	return {};
 }

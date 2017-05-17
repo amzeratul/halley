@@ -14,7 +14,16 @@ UIList::UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType ori
 
 void UIList::setSelectedOption(int option)
 {
-	curOption = option;
+	auto newSel = modulo(option, int(items.size()));
+	if (newSel != curOption) {
+		if (curOption >= 0) {
+			items[curOption]->setSelected(false);
+		}
+		curOption = newSel;
+		items[curOption]->setSelected(true);
+
+		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), items[curOption]->getId()));
+	}
 }
 
 int UIList::getSelectedOption() const
@@ -25,21 +34,21 @@ int UIList::getSelectedOption() const
 void UIList::addTextItem(const String& id, const String& label)
 {
 	auto widget = std::make_shared<UILabel>(style->label.clone().setText(label));
-	auto item = std::make_shared<UIListItem>(id, *this, style);
+	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()));
 	item->add(widget, 0, orientation == UISizerType::Vertical ? Vector4f(3, 0, 3, 0) : Vector4f(0, 3, 0, 3));
 	addItem(item);
 }
 
 void UIList::addItem(const String& id, std::shared_ptr<UIWidget> widget)
 {
-	auto item = std::make_shared<UIListItem>(id, *this, style);
+	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()));
 	item->add(widget);
 	addItem(item);
 }
 
 void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer)
 {
-	auto item = std::make_shared<UIListItem>(id, *this, style);
+	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()));
 	item->add(sizer);
 	addItem(item);
 }
@@ -47,9 +56,9 @@ void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer)
 void UIList::addItem(std::shared_ptr<UIListItem> item)
 {
 	add(item);
-	if (!selected) {
-		item->setSelected(true);
-		selected = item.get();
+	items.push_back(item);
+	if (curOption == -1) {
+		setSelectedOption(0);
 	}
 }
 
@@ -58,6 +67,22 @@ void UIList::draw(UIPainter& painter) const
 	if (sprite.hasMaterial()) {
 		painter.draw(sprite);
 	}
+}
+
+void UIList::updateInputDevice(InputDevice& device)
+{
+	int x = device.getAxisRepeat(0);
+	int y = device.getAxisRepeat(1);
+	
+	int newSel = curOption;
+
+	if (x && orientation == UISizerType::Horizontal) {
+		newSel += x;
+	}
+	if (y && orientation == UISizerType::Vertical) {
+		newSel += y;
+	}
+	setSelectedOption(newSel);
 }
 
 void UIList::update(Time t, bool moved)
@@ -71,16 +96,14 @@ void UIList::update(Time t, bool moved)
 
 void UIList::onItemClicked(UIListItem& item)
 {
-	sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), item.getId()));
-	selected->setSelected(false);
-	selected = &item;
-	selected->setSelected(true);
+	setSelectedOption(item.getIndex());
 }
 
-UIListItem::UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style)
+UIListItem::UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, int index)
 	: UIClickable(id, {}, UISizer(UISizerType::Vertical))
 	, parent(parent)
 	, style(style)
+	, index(index)
 {
 	sprite = style->listItemNormal;
 }
@@ -92,8 +115,11 @@ void UIListItem::onClicked(Vector2f mousePos)
 
 void UIListItem::setSelected(bool s)
 {
-	selected = s;
-	doSetState(getCurState());
+	if (selected != s) {
+		selected = s;
+		parent.curOption = selected ? index : -1;
+		doSetState(getCurState());
+	}
 }
 
 void UIListItem::draw(UIPainter& painter) const
@@ -136,4 +162,9 @@ void UIListItem::updateSpritePosition()
 	if (sprite.hasMaterial()) {
 		sprite.scaleTo(getSize()).setPos(getPosition());
 	}
+}
+
+int UIListItem::getIndex() const
+{
+	return index;
 }

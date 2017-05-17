@@ -5,6 +5,7 @@
 
 namespace Halley {
 	enum class UIEventType {
+		Undefined,
 		ButtonClicked,
 		CheckboxUpdated,
 		DropboxSelectionChanged,
@@ -13,6 +14,7 @@ namespace Halley {
 
     class UIEvent {
     public:
+		UIEvent();
 		UIEvent(UIEventType type, String sourceId, String data = "");
 		
     	UIEventType getType() const;
@@ -32,10 +34,16 @@ namespace Halley {
 		void setHandle(UIEventType type, UIEventCallback handler);
 		void setHandle(UIEventType type, String id, UIEventCallback handler);
 
-		bool handle(const UIEvent& event) const;
+		bool canHandle(const UIEvent& event) const;
+		void queue(const UIEvent& event);
+		void pump();
 
 	private:
 		std::map<UIEventType, UIEventCallback> handles;
 		std::map<std::pair<UIEventType, String>, UIEventCallback> specificHandles;
+
+		std::vector<UIEvent> eventQueue;
+
+		void handle(const UIEvent& event) const;
 	};
 }
