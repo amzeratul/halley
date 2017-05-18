@@ -9,7 +9,8 @@ namespace Halley {
 	enum class UISizerType {
 		Undefined,
 		Horizontal,
-		Vertical
+		Vertical,
+		Grid
 	};
 
 	namespace UISizerFillFlags {
@@ -71,7 +72,7 @@ namespace Halley {
 
 	class UISizer : public IUIElement, public IUISizer {
 	public:
-		explicit UISizer(UISizerType type = UISizerType::Horizontal, float gap = 1.0f);
+		explicit UISizer(UISizerType type = UISizerType::Horizontal, float gap = 1.0f, int nColumns = 0, bool evenColumns = false);
 
 		Vector2f computeMinimumSize() const override;
 		void setRect(Rect4f rect) override;
@@ -94,9 +95,18 @@ namespace Halley {
 	private:
 		std::vector<UISizerEntry> entries;
 		UISizerType type = UISizerType::Undefined;
-		float gap;
+		float gap = 1.0f;
+		int nColumns = false;
+		bool evenColumns = false;
 
 		Vector2f computeMinimumSize(bool includeProportional) const;
 		void addElement(UIElementPtr widget, float proportion, Vector4f border, int fillFlags);
+
+		Vector2f computeMinimumSizeBox(bool includeProportional) const;
+		void setRectBox(Rect4f rect);
+
+		void computeGridSizes(std::vector<float>& cols, std::vector<float>& rows) const;
+		Vector2f computeMinimumSizeGrid() const;
+		void setRectGrid(Rect4f rect);
 	};
 }

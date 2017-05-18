@@ -84,9 +84,11 @@ int UISizerEntry::getFillFlags() const
 	return fillFlags;
 }
 
-UISizer::UISizer(UISizerType type, float gap)
+UISizer::UISizer(UISizerType type, float gap, int nColumns, bool evenColumns)
 	: type(type)
 	, gap(gap)
+	, nColumns(nColumns)
+	, evenColumns(evenColumns)
 {
 }
 
@@ -97,101 +99,19 @@ Vector2f UISizer::computeMinimumSize() const
 
 Vector2f UISizer::computeMinimumSize(bool includeProportional) const
 {
-	float totalProportion = 0;
-
-	for (auto& e: entries) {
-		if (e.isEnabled()) {
-			totalProportion += e.getProportion();
-		}
+	if (type == UISizerType::Horizontal || type == UISizerType::Vertical) {
+		return computeMinimumSizeBox(includeProportional);
+	} else {
+		return computeMinimumSizeGrid();
 	}
-
-	int mainAxis = type == UISizerType::Horizontal ? 0 : 1;
-	int otherAxis = 1 - mainAxis;
-	
-	float main = 0;
-	float biggestProportional = 0;
-	float other = 0;
-	
-	bool first = true;
-	for (auto& e: entries) {
-		if (!e.isEnabled()) {
-			continue;
-		}
-
-		Vector2f sz = e.getMinimumSize();
-		auto border = e.getBorder();
-		if (!first) {
-			border[mainAxis] += gap;
-		}
-		first = false;
-		
-		other = std::max(other, sz[otherAxis] + border[otherAxis] + border[otherAxis + 2]);
-
-		float p = e.getProportion();
-		if (p > 0.0001f) {
-			float s = sz[mainAxis] / p;
-			biggestProportional = std::max(biggestProportional, s);
-		} else {
-			main += sz[mainAxis];
-		}
-
-		main += border[mainAxis] + border[mainAxis + 2];
-	}
-	if (includeProportional) {
-		main += biggestProportional * totalProportion;
-	}
-
-	Vector2f result;
-	result[mainAxis] = std::max(0.0f, main);
-	result[otherAxis] = std::max(0.0f, other);
-
-	return result;
 }
 
 void UISizer::setRect(Rect4f rect)
 {
-	Vector2f pos = rect.getTopLeft();
-
-	float totalProportion = 0;
-	for (auto& e: entries) {
-		if (e.isEnabled()) {
-			totalProportion += e.getProportion();
-		}
-	}
-
-	int mainAxis = type == UISizerType::Horizontal ? 0 : 1;
-	int otherAxis = 1 - mainAxis;
-
-	Vector2f sizerMinSize = computeMinimumSize(false);
-	float spare = (rect.getSize() - sizerMinSize)[mainAxis];
-	
-	bool first = true;
-	for (auto& e: entries) {
-		if (!e.isEnabled()) {
-			continue;
-		}
-
-		float p = e.getProportion();
-		auto border = e.getBorder();
-		if (!first) {
-			border[mainAxis] += gap;
-		}
-		first = false;
-
-		Vector2f minSize = e.getMinimumSize();
-		Vector2f cellSize = minSize;
-		if (p > 0.0001f) {
-			float propSize = std::floor(spare * p / totalProportion);
-			spare -= propSize;
-			totalProportion -= p;
-			cellSize[mainAxis] = propSize;
-		}
-		cellSize[otherAxis] = rect.getSize()[otherAxis] - border[otherAxis] - border[otherAxis + 2];
-
-		Vector2f curPos = pos + Vector2f(border.x, border.y);
-		e.placeInside(Rect4f(curPos, curPos + cellSize), minSize);
-
-		pos[mainAxis] += cellSize[mainAxis] + border[mainAxis] + border[mainAxis + 2];
+	if (type == UISizerType::Horizontal || type == UISizerType::Vertical) {
+		setRectBox(rect);
+	} else {
+		setRectGrid(rect);
 	}
 }
 
@@ -279,4 +199,199 @@ bool UISizer::isShown() const
 		}
 	}
 	return false;
+}
+
+Vector2f UISizer::computeMinimumSizeBox(bool includeProportional) const
+{
+	float totalProportion = 0;
+
+	for (auto& e: entries) {
+		if (e.isEnabled()) {
+			totalProportion += e.getProportion();
+		}
+	}
+
+	int mainAxis = type == UISizerType::Horizontal ? 0 : 1;
+	int otherAxis = 1 - mainAxis;
+	
+	float main = 0;
+	float biggestProportional = 0;
+	float other = 0;
+	
+	bool first = true;
+	for (auto& e: entries) {
+		if (!e.isEnabled()) {
+			continue;
+		}
+
+		Vector2f sz = e.getMinimumSize();
+		auto border = e.getBorder();
+		if (!first) {
+			border[mainAxis] += gap;
+		}
+		first = false;
+		
+		other = std::max(other, sz[otherAxis] + border[otherAxis] + border[otherAxis + 2]);
+
+		float p = e.getProportion();
+		if (p > 0.0001f) {
+			float s = sz[mainAxis] / p;
+			biggestProportional = std::max(biggestProportional, s);
+		} else {
+			main += sz[mainAxis];
+		}
+
+		main += border[mainAxis] + border[mainAxis + 2];
+	}
+	if (includeProportional) {
+		main += biggestProportional * totalProportion;
+	}
+
+	Vector2f result;
+	result[mainAxis] = std::max(0.0f, main);
+	result[otherAxis] = std::max(0.0f, other);
+
+	return result;
+}
+
+void UISizer::setRectBox(Rect4f rect)
+{
+	Vector2f pos = rect.getTopLeft();
+
+	float totalProportion = 0;
+	for (auto& e: entries) {
+		if (e.isEnabled()) {
+			totalProportion += e.getProportion();
+		}
+	}
+
+	int mainAxis = type == UISizerType::Horizontal ? 0 : 1;
+	int otherAxis = 1 - mainAxis;
+
+	Vector2f sizerMinSize = computeMinimumSizeBox(false);
+	float spare = (rect.getSize() - sizerMinSize)[mainAxis];
+	
+	bool first = true;
+	for (auto& e: entries) {
+		if (!e.isEnabled()) {
+			continue;
+		}
+
+		float p = e.getProportion();
+		auto border = e.getBorder();
+		if (!first) {
+			border[mainAxis] += gap;
+		}
+		first = false;
+
+		Vector2f minSize = e.getMinimumSize();
+		Vector2f cellSize = minSize;
+		if (p > 0.0001f) {
+			float propSize = std::floor(spare * p / totalProportion);
+			spare -= propSize;
+			totalProportion -= p;
+			cellSize[mainAxis] = propSize;
+		}
+		cellSize[otherAxis] = rect.getSize()[otherAxis] - border[otherAxis] - border[otherAxis + 2];
+
+		Vector2f curPos = pos + Vector2f(border.x, border.y);
+		e.placeInside(Rect4f(curPos, curPos + cellSize), minSize);
+
+		pos[mainAxis] += cellSize[mainAxis] + border[mainAxis] + border[mainAxis + 2];
+	}
+}
+
+void UISizer::computeGridSizes(std::vector<float>& colSize, std::vector<float>& rowSize) const
+{
+	Expects(nColumns > 0);
+	int nRows = int((entries.size() + nColumns - 1) / nColumns);
+
+	colSize.resize(nColumns, 0.0f);
+	rowSize.resize(nRows, 0.0f);
+
+	int i = 0;
+	for (auto& e: entries) {
+		int x = i % nColumns;
+		int y = i / nColumns;
+		++i;
+
+		if (!e.isEnabled()) {
+			continue;
+		}
+
+		Vector2f sz = e.getMinimumSize();
+		auto border = e.getBorder();
+		colSize[x] = std::max(colSize[x], sz.x + border.x + border.z);
+		rowSize[y] = std::max(rowSize[y], sz.y + border.y + border.w);
+	}
+
+	if (evenColumns) {
+		float maxWidth = 0;
+		for (auto c: colSize) {
+			maxWidth = std::max(maxWidth, c);
+		}
+		for (auto& c: colSize) {
+			c = maxWidth;
+		}
+	}
+}
+
+Vector2f UISizer::computeMinimumSizeGrid() const
+{
+	std::vector<float> colSize;
+	std::vector<float> rowSize;
+	computeGridSizes(colSize, rowSize);
+
+	Vector2f result((colSize.size() - 1) * gap, (rowSize.size() - 1) * gap);
+	for (auto c: colSize) {
+		result.x += c;
+	}
+	for (auto c: rowSize) {
+		result.y += c;
+	}
+	return result;
+}
+
+void UISizer::setRectGrid(Rect4f rect)
+{
+	Expects(nColumns > 0);
+	int nRows = int((entries.size() + nColumns - 1) / nColumns);
+	
+	Vector2f startPos = rect.getTopLeft();
+
+	std::vector<float> cols(nColumns);
+	std::vector<float> rows(nRows);
+	std::vector<float> colSize;
+	std::vector<float> rowSize;
+	computeGridSizes(colSize, rowSize);
+
+	{
+		float x = 0;
+		for (int i = 0; i < nColumns; ++i) {
+			cols[i] = x;
+			x += colSize[i] + gap;
+		}
+		float y = 0;
+		for (int i = 0; i < nRows; ++i) {
+			rows[i] = y;
+			y += rowSize[i] + gap;
+		}
+	}
+
+	int i = 0;
+	for (auto& e: entries) {
+		int x = i % nColumns;
+		int y = i / nColumns;
+		++i;
+
+		if (!e.isEnabled()) {
+			continue;
+		}
+
+		Vector2f cellSize(colSize[x], rowSize[y]);
+		Vector2f sz = e.getMinimumSize();
+		auto border = e.getBorder();
+		Vector2f curPos = Vector2f(cols[x], rows[y]) + startPos + Vector2f(border.x, border.y);
+		e.placeInside(Rect4f(curPos, curPos + cellSize), sz);
+	}
 }
