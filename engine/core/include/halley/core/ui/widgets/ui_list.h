@@ -13,6 +13,14 @@ namespace Halley {
 		friend class UIListItem;
 
 	public:
+		struct Buttons {
+			int accept = -1;
+			int next = -1;
+			int prev = -1;
+			bool xAxis = false;
+			bool yAxis = false;
+		};
+
 		explicit UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType orientation = UISizerType::Vertical);
 
 		void setSelectedOption(int option);
@@ -22,7 +30,7 @@ namespace Halley {
 		void addItem(const String& id, std::shared_ptr<UIWidget> widget, Vector4f border = {});
 		void addItem(const String& id, std::shared_ptr<UISizer> sizer, Vector4f border = {});
 
-		void setInputButton(int button);
+		void setInputButtons(const Buttons& button);
 		void updateInputDevice(InputDevice& device) override;
 
 	protected:
@@ -37,7 +45,7 @@ namespace Halley {
 
 		int curOptionHighlight = -1;
 		int curOption = -1;
-		int inputButton = -1;
+		Buttons inputButtons;
 
 		void onItemClicked(UIListItem& item);
 		void addItem(std::shared_ptr<UIListItem> item);

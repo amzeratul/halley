@@ -32,6 +32,7 @@ namespace Halley {
 		void sendEvent(UIEvent&& event) const override;
 
 		bool hasModalUI() const;
+		bool isMouseOverUI() const;
 
 		std::vector<std::shared_ptr<UIWidget>> collectWidgets();
 

@@ -239,3 +239,8 @@ bool UIRoot::hasModalUI() const
 	}
 	return false;
 }
+
+bool UIRoot::isMouseOverUI() const
+{
+	return static_cast<bool>(currentMouseOver.lock());
+}

@@ -53,9 +53,9 @@ void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer, Vector4f 
 	addItem(item);
 }
 
-void UIList::setInputButton(int button)
+void UIList::setInputButtons(const Buttons& button)
 {
-	inputButton = button;
+	inputButtons = button;
 }
 
 void UIList::addItem(std::shared_ptr<UIListItem> item)
@@ -76,23 +76,30 @@ void UIList::draw(UIPainter& painter) const
 
 void UIList::updateInputDevice(InputDevice& device)
 {
+	auto checkButton = [&] (int button) { return button >= 0 && device.isButtonPressed(button); };
+
 	int x = device.getAxisRepeat(0);
 	int y = device.getAxisRepeat(1);
 	
 	int newSel = curOption;
 
-	if (x && orientation == UISizerType::Horizontal) {
+	if (inputButtons.xAxis && x) {
 		newSel += x;
 	}
-	if (y && orientation == UISizerType::Vertical) {
+	if (inputButtons.yAxis && y) {
 		newSel += y;
 	}
+	if (checkButton(inputButtons.next)) {
+		newSel++;
+	}
+	if (checkButton(inputButtons.prev)) {
+		newSel--;
+	}
+
 	setSelectedOption(newSel);
 
-	if (inputButton >= 0) {
-		if (device.isButtonPressed(inputButton)) {
-			sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId()));
-		}
+	if (checkButton(inputButtons.accept)) {
+		sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId()));
 	}
 }
 
