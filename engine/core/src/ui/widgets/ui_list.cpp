@@ -85,27 +85,38 @@ void UIList::draw(UIPainter& painter) const
 
 void UIList::updateInputDevice(InputDevice& device)
 {
+	Expects(nColumns >= 1);
 	auto checkButton = [&] (int button) { return button >= 0 && device.isButtonPressed(button); };
 
-	int x = device.getAxisRepeat(0);
-	int y = device.getAxisRepeat(1);
-	
-	int newSel = curOption;
+	int option = curOption;
 
-	if (inputButtons.xAxis && x) {
-		newSel += x;
-	}
-	if (inputButtons.yAxis && y) {
-		newSel += y;
-	}
+	// Next/prev first
 	if (checkButton(inputButtons.next)) {
-		newSel++;
+		option++;
 	}
 	if (checkButton(inputButtons.prev)) {
-		newSel--;
+		option--;
 	}
+	option = modulo(option, int(items.size()));
 
-	setSelectedOption(newSel);
+	// Arrows
+	int nRows = (items.size() + nColumns - 1) / nColumns;
+	Vector2i cursorPos(option % nColumns, option / nColumns);
+	if (inputButtons.xAxis) {
+		cursorPos.x += device.getAxisRepeat(0);
+	}
+	if (inputButtons.yAxis) {
+		cursorPos.y += device.getAxisRepeat(1);
+	}
+	cursorPos.y = modulo(cursorPos.y, nRows);
+	int columnsThisRow = (cursorPos.y == nRows - 1) ? int(items.size()) % nColumns : nColumns;
+	if (columnsThisRow == 0) { // If the last column is full, this will happen
+		columnsThisRow = nColumns;
+	}
+	cursorPos.x = modulo(cursorPos.x, columnsThisRow); // The last row has fewer elements
+
+	// Actually update the selection, if it changed
+	setSelectedOption(cursorPos.x + cursorPos.y * nColumns);
 
 	if (checkButton(inputButtons.accept)) {
 		sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId()));
