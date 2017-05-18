@@ -20,6 +20,8 @@ if (MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /DEBUG:FASTLINK")
 	set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
 	set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
+
+	add_definitions(-D_WIN32_WINNT=0x0501 -DWINVER=0x0501)
 else()
 	if (NOT EMSCRIPTEN)
 		set(EXTRA_LIBS pthread)
@@ -183,7 +185,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 	
 	if(MSVC)
 		add_precompiled_header(${name} prec.h FORCEINCLUDE SOURCE_CXX prec.cpp)
-		add_definitions(-D_WIN32_WINNT=0x0600)
+		add_definitions(-D_WIN32_WINNT=0x0501 -DWINVER=0x0501)
 	endif()
 
 	if (EMSCRIPTEN)
