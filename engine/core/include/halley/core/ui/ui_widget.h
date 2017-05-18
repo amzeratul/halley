@@ -61,7 +61,8 @@ namespace Halley {
 		void setShown(bool shown);
 		bool isEnabled() const;
 		void setEnabled(bool enabled);
-		virtual bool isModal() const;
+		bool isModal() const;
+		void setModal(bool modal);
 
 		bool isAlive() const;
 		void destroy();
@@ -115,5 +116,6 @@ namespace Halley {
 		bool focused = false;
 		bool mouseOver = false;
 		bool positionUpdated = false;
+		bool modal = true;
 	};
 }

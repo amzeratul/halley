@@ -164,10 +164,18 @@ void UIRoot::updateMouseOver(const std::shared_ptr<UIWidget>& underMouse)
 
 std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos)
 {
-	if (getChildren().empty()) {
-		return {};
+	auto& cs = getChildren();
+	for (int i = int(cs.size()); --i >= 0; ) {
+		auto widget = getWidgetUnderMouse(cs[i], mousePos);
+		if (widget) {
+			return widget;
+		} else {
+			if (cs[i]->isModal()) {
+				return {};
+			}
+		}
 	}
-	return getWidgetUnderMouse(getChildren().back(), mousePos);
+	return {};
 }
 
 std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos)

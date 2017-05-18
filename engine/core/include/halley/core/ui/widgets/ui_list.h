@@ -21,7 +21,7 @@ namespace Halley {
 			bool yAxis = false;
 		};
 
-		explicit UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType orientation = UISizerType::Vertical);
+		explicit UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 
 		void setSelectedOption(int option);
 		int getSelectedOption() const;
@@ -29,6 +29,7 @@ namespace Halley {
 		void addTextItem(const String& id, const String& label);
 		void addItem(const String& id, std::shared_ptr<UIWidget> widget, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill);
 		void addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill);
+		void clear();
 
 		void setInputButtons(const Buttons& button);
 		void updateInputDevice(InputDevice& device) override;
@@ -45,6 +46,7 @@ namespace Halley {
 
 		int curOptionHighlight = -1;
 		int curOption = -1;
+		int nColumns = 1;
 		Buttons inputButtons;
 
 		void onItemClicked(UIListItem& item);

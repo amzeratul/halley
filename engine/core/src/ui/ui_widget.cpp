@@ -359,5 +359,10 @@ std::shared_ptr<UIValidator> UIWidget::getValidator() const
 
 bool UIWidget::isModal() const
 {
-	return true;
+	return modal;
+}
+
+void UIWidget::setModal(bool m)
+{
+	modal = m;
 }

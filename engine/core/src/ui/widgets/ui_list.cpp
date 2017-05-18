@@ -4,10 +4,11 @@
 
 using namespace Halley;
 
-UIList::UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType orientation)
-	: UIWidget(id, {}, UISizer(orientation))
+UIList::UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType orientation, int nColumns)
+	: UIWidget(id, {}, UISizer(orientation, 1, nColumns, true))
 	, style(style)
 	, orientation(orientation)
+	, nColumns(nColumns)
 {
 	sprite = style->listBackground;
 }
@@ -51,6 +52,14 @@ void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer, float pro
 	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()));
 	item->add(sizer, proportion, border, fillFlags);
 	addItem(item);
+}
+
+void UIList::clear()
+{
+	items.clear();
+	curOption = -1;
+	curOptionHighlight = -1;
+	getSizer().clear();
 }
 
 void UIList::setInputButtons(const Buttons& button)
