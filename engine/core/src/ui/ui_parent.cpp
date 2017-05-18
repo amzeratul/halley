@@ -31,12 +31,18 @@ void UIParent::addNewChildren()
 
 void UIParent::removeDeadChildren()
 {
+	auto before = children.size();
+
 	children.erase(std::remove_if(children.begin(), children.end(), [&] (auto& c)
 	{
 		return !c->isAlive();
 	}), children.end());
 	for (auto& c: children) {
 		c->removeDeadChildren();
+	}
+
+	if (before != children.size()) {
+		topChildChanged = true;
 	}
 }
 

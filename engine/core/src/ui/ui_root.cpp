@@ -37,7 +37,9 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 	// Update new windows
 	if (topChildChanged) {
 		topChildChanged = false;
-		if (activeInputType != UIInputType::Mouse) {
+		if (activeInputType == UIInputType::Mouse) {
+			lastMousePos = Vector2f(-100, -100);
+		} else {
 			//mouseOverNext();
 		}
 	}
