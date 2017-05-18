@@ -32,6 +32,11 @@ int UIList::getSelectedOption() const
 	return curOption;
 }
 
+const String& UIList::getSelectedOptionId() const
+{
+	return items[curOption]->getId();
+}
+
 void UIList::addTextItem(const String& id, const String& label)
 {
 	auto widget = std::make_shared<UILabel>(style->label.clone().setText(label));
@@ -205,4 +210,14 @@ void UIListItem::updateSpritePosition()
 int UIListItem::getIndex() const
 {
 	return index;
+}
+
+void UIList::setSelectedOptionId(const String& id)
+{
+	for (auto& i: items) {
+		if (i->getId() == id) {
+			setSelectedOption(i->getIndex());
+			return;
+		}
+	}
 }

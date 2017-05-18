@@ -24,7 +24,9 @@ namespace Halley {
 		explicit UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 
 		void setSelectedOption(int option);
+		void setSelectedOptionId(const String& id);
 		int getSelectedOption() const;
+		const String& getSelectedOptionId() const;
 
 		void addTextItem(const String& id, const String& label);
 		void addItem(const String& id, std::shared_ptr<UIWidget> widget, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill);
