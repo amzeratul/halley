@@ -10,7 +10,10 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
+		void setSprite(Sprite sprite);
+
 	private:
 		Sprite sprite;
+		bool dirty = true;
 	};
 }

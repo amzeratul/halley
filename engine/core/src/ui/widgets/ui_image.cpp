@@ -17,7 +17,15 @@ void UIImage::draw(UIPainter& painter) const
 
 void UIImage::update(Time t, bool moved)
 {
-	if (moved) {
+	if (moved || dirty) {
 		sprite.setPos(getPosition()).scaleTo(getSize());
+		dirty = false;
 	}
+}
+
+void UIImage::setSprite(Sprite s)
+{
+	sprite = s;
+	setMinSize(s.getScaledSize().abs());
+	dirty = true;
 }
