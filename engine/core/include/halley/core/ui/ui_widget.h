@@ -63,6 +63,8 @@ namespace Halley {
 		void setEnabled(bool enabled);
 		bool isModal() const;
 		void setModal(bool modal);
+		bool isMouseBlocker() const;
+		void setMouseBlocker(bool blocker);
 
 		bool isAlive() const;
 		void destroy();
@@ -117,5 +119,6 @@ namespace Halley {
 		bool mouseOver = false;
 		bool positionUpdated = false;
 		bool modal = true;
+		bool mouseBlocker = true;
 	};
 }

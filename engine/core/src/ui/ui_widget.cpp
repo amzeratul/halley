@@ -366,3 +366,13 @@ void UIWidget::setModal(bool m)
 {
 	modal = m;
 }
+
+bool UIWidget::isMouseBlocker() const
+{
+	return mouseBlocker;
+}
+
+void UIWidget::setMouseBlocker(bool blocker)
+{
+	mouseBlocker = blocker;
+}

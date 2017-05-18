@@ -170,7 +170,7 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos)
 		if (widget) {
 			return widget;
 		} else {
-			if (cs[i]->isModal()) {
+			if (cs[i]->isMouseBlocker()) {
 				return {};
 			}
 		}
