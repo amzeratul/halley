@@ -27,8 +27,8 @@ namespace Halley {
 		int getSelectedOption() const;
 
 		void addTextItem(const String& id, const String& label);
-		void addItem(const String& id, std::shared_ptr<UIWidget> widget, Vector4f border = {});
-		void addItem(const String& id, std::shared_ptr<UISizer> sizer, Vector4f border = {});
+		void addItem(const String& id, std::shared_ptr<UIWidget> widget, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill);
+		void addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill);
 
 		void setInputButtons(const Buttons& button);
 		void updateInputDevice(InputDevice& device) override;
