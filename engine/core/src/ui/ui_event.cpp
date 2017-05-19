@@ -56,10 +56,13 @@ void UIEventHandler::queue(const UIEvent& event)
 
 void UIEventHandler::pump()
 {
-	for (auto& event: eventQueue) {
-		handle(event);
+	while (!eventQueue.empty()) {
+		decltype(eventQueue) events = std::move(eventQueue);
+		eventQueue.clear();
+		for (auto& event: events) {
+			handle(event);
+		}
 	}
-	eventQueue.clear();
 }
 
 void UIEventHandler::handle(const UIEvent& event) const
