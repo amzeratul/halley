@@ -81,6 +81,7 @@ namespace Halley
 
 		Sprite& setClip(Rect4f clip);
 		Sprite& setClip();
+		Maybe<Rect4f> getClip() const;
 
 		Sprite clone() const;
 

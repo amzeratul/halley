@@ -3,9 +3,9 @@
 using namespace Halley;
 
 UIImage::UIImage(Sprite s, Maybe<UISizer> sizer, Vector4f innerBorder)
-	: UIWidget("", s.getScaledSize().abs(), sizer, innerBorder)
-	, sprite(s)
+	: UIWidget("", {}, sizer, innerBorder)
 {
+	setSprite(s);
 }
 
 void UIImage::draw(UIPainter& painter) const
@@ -26,6 +26,11 @@ void UIImage::update(Time t, bool moved)
 void UIImage::setSprite(Sprite s)
 {
 	sprite = s;
-	setMinSize(s.getScaledSize().abs());
+	auto c = s.getClip();
+	if (c) {
+		setMinSize(Vector2f::min(s.getScaledSize().abs(), c.get().getSize()));
+	} else {
+		setMinSize(s.getScaledSize().abs());
+	}
 	dirty = true;
 }

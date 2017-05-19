@@ -105,7 +105,7 @@ void UIList::updateInputDevice(InputDevice& device)
 	option = modulo(option, int(items.size()));
 
 	// Arrows
-	int nRows = (items.size() + nColumns - 1) / nColumns;
+	int nRows = int(items.size() + nColumns - 1) / nColumns;
 	Vector2i cursorPos(option % nColumns, option / nColumns);
 	if (inputButtons.xAxis) {
 		cursorPos.x += device.getAxisRepeat(0);

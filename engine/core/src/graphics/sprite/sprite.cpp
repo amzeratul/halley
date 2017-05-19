@@ -300,6 +300,11 @@ Sprite& Sprite::setClip()
 	return *this;
 }
 
+Maybe<Rect4f> Sprite::getClip() const
+{
+	return clip;
+}
+
 Sprite Sprite::clone() const
 {
 	return *this;

@@ -41,7 +41,7 @@ namespace Halley {
 		bool isMouseOver() const;
 		bool isFocused() const;
 
-		String getId() const;
+		const String& getId() const;
 
 		Vector2f getPosition() const;
 		Vector2f getSize() const;

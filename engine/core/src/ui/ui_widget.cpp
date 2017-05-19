@@ -156,7 +156,7 @@ bool UIWidget::isMouseOver() const
 	return mouseOver;
 }
 
-String UIWidget::getId() const
+const String& UIWidget::getId() const
 {
 	return id;
 }
