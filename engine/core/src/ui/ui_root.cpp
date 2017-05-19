@@ -26,8 +26,15 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 	updateMouse(mouse, uiOffset);
 
 	// Update children
-	for (auto& c: getChildren()) {
-		c->doUpdate(t, activeInputType, c == getChildren().back() ? *manual : *dummyInput);
+	{
+		bool allowInput = true;
+		auto& cs = getChildren();
+		for (int i = int(cs.size()); --i >= 0; ) {
+			cs[i]->doUpdate(t, activeInputType, allowInput ? *manual : *dummyInput);
+			if (cs[i]->isMouseBlocker()) {
+				allowInput = false;
+			}
+		}
 	}
 
 	// Remove dead

@@ -75,7 +75,7 @@ void UIClickable::setInputButton(int button)
 
 void UIClickable::updateInputDevice(InputDevice& device)
 {
-	if (inputButton != -1) {
+	if (inputButton != -1 && isEnabled()) {
 		if (device.isButtonPressed(inputButton)) {
 			onClicked(Vector2f());
 		}
