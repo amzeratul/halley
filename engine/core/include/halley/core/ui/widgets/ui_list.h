@@ -57,11 +57,12 @@ namespace Halley {
 
 	class UIListItem : public UIClickable {
 	public:
-		explicit UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, int index);
+		explicit UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, int index, Vector4f extraMouseArea);
 
 		void onClicked(Vector2f mousePos) override;
 		void setSelected(bool selected);
 		int getIndex() const;
+		Rect4f getMouseRect() const override;
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -72,6 +73,7 @@ namespace Halley {
 		std::shared_ptr<UIStyle> style;
 		int index;
 		Sprite sprite;
+		Vector4f extraMouseArea;
 		bool selected = false;
 
 		void doSetState(State state) override;

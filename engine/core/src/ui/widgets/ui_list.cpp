@@ -40,21 +40,21 @@ const String& UIList::getSelectedOptionId() const
 void UIList::addTextItem(const String& id, const String& label)
 {
 	auto widget = std::make_shared<UILabel>(style->getTextRenderer("label").clone().setText(label));
-	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()));
+	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()), style->getBorder("list.extraMouseBorder"));
 	item->add(widget, 0, orientation == UISizerType::Vertical ? Vector4f(3, 0, 3, 0) : Vector4f(0, 3, 0, 3));
 	addItem(item);
 }
 
 void UIList::addItem(const String& id, std::shared_ptr<UIWidget> widget, float proportion, Vector4f border, int fillFlags)
 {
-	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()));
+	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()), style->getBorder("list.extraMouseBorder"));
 	item->add(widget, proportion, border, fillFlags);
 	addItem(item);
 }
 
 void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion, Vector4f border, int fillFlags)
 {
-	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()));
+	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()), style->getBorder("list.extraMouseBorder"));
 	item->add(sizer, proportion, border, fillFlags);
 	addItem(item);
 }
@@ -142,11 +142,12 @@ void UIList::onItemClicked(UIListItem& item)
 	setSelectedOption(item.getIndex());
 }
 
-UIListItem::UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, int index)
+UIListItem::UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, int index, Vector4f extraMouseArea)
 	: UIClickable(id, {}, UISizer(UISizerType::Vertical))
 	, parent(parent)
 	, style(style)
 	, index(index)
+	, extraMouseArea(extraMouseArea)
 {
 	sprite = style->getSprite("list.itemNormal");
 }
@@ -210,6 +211,11 @@ void UIListItem::updateSpritePosition()
 int UIListItem::getIndex() const
 {
 	return index;
+}
+
+Rect4f UIListItem::getMouseRect() const
+{
+	return Rect4f(getPosition() - Vector2f(extraMouseArea.x, extraMouseArea.y), getPosition() + getSize() + Vector2f(extraMouseArea.z, extraMouseArea.w));
 }
 
 void UIList::setSelectedOptionId(const String& id)
