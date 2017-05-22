@@ -5,7 +5,7 @@
 using namespace Halley;
 
 UIList::UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType orientation, int nColumns)
-	: UIWidget(id, {}, UISizer(orientation, 1, nColumns, true))
+	: UIWidget(id, {}, UISizer(orientation, style->getFloat("list.gap"), nColumns, true))
 	, style(style)
 	, orientation(orientation)
 	, nColumns(nColumns)

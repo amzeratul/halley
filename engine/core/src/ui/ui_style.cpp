@@ -54,11 +54,17 @@ UIStyle::UIStyle(const ConfigNode& node, Resources& resources)
 			borders[n.first] = Vector4f(vals[0].asFloat(), vals[1].asFloat(), vals[2].asFloat(), vals[3].asFloat());
 		}
 	}
+
+	if (uiStyle.hasKey("floats")) {
+		for (auto& n: uiStyle["floats"].asMap()) {
+			floats[n.first] = n.second.asFloat();
+		}
+	}
 }
 
-void UIStyle::setParent(UIStyle& p)
+void UIStyle::setParent(std::shared_ptr<UIStyle> p)
 {
-	parent = &p;
+	parent = p;
 }
 
 const Sprite& UIStyle::getSprite(const String& name)
@@ -114,5 +120,19 @@ std::shared_ptr<const AudioClip> UIStyle::getAudioClip(const String& name)
 	} else {
 		Logger::logWarning("Audio clip not found in UI style: " + name);
 		return {};
+	}
+}
+
+float UIStyle::getFloat(const String& name)
+{
+	auto iter = floats.find(name);
+	if (iter != floats.end()) {
+		return iter->second;
+	}
+	if (parent) {
+		return parent->getFloat(name);
+	} else {
+		Logger::logWarning("Float not found in UI style: " + name);
+		return 0.0f;
 	}
 }

@@ -13,19 +13,21 @@ namespace Halley {
 		UIStyle();
 		UIStyle(const ConfigNode& node, Resources& resources);
 
-		void setParent(UIStyle& parent);
+		void setParent(std::shared_ptr<UIStyle> parent);
 
 		const Sprite& getSprite(const String& name);
 		const TextRenderer& getTextRenderer(const String& name);
 		Vector4f getBorder(const String& name);
 		std::shared_ptr<const AudioClip> getAudioClip(const String& name);
+		float getFloat(const String& name);
 
 	private:
-		UIStyle* parent = nullptr;
+		std::shared_ptr<UIStyle> parent;
 		FlatMap<String, Sprite> sprites;
 		FlatMap<String, TextRenderer> textRenderers;
 		FlatMap<String, Vector4f> borders;
 		FlatMap<String, std::shared_ptr<const AudioClip>> audioClips;
+		FlatMap<String, float> floats;
 
 		TextRenderer defaultText;
 		Sprite defaultSprite;
