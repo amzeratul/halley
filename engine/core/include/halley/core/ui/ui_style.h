@@ -26,5 +26,8 @@ namespace Halley {
 		FlatMap<String, TextRenderer> textRenderers;
 		FlatMap<String, Vector4f> borders;
 		FlatMap<String, std::shared_ptr<const AudioClip>> audioClips;
+
+		TextRenderer defaultText;
+		Sprite defaultSprite;
 	};
 }

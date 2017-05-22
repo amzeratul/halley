@@ -3,6 +3,7 @@
 #include "halley/audio/audio_clip.h"
 #include "halley/core/graphics/text/font.h"
 #include "resources/resources.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 UIStyle::UIStyle()
@@ -17,7 +18,11 @@ UIStyle::UIStyle(const ConfigNode& node, Resources& resources)
 		for (auto& spriteNode: uiStyle["sprites"].asMap()) {
 			String name = spriteNode.first;
 			if (spriteNode.second.getType() == ConfigNodeType::Scalar) {
-				sprites[name] = Sprite().setImage(resources, spriteNode.second.asString()).setSlicedFromMaterial();
+				if (spriteNode.second.asString().isEmpty()) {
+					sprites[name] = defaultSprite;
+				} else {
+					sprites[name] = Sprite().setImage(resources, spriteNode.second.asString()).setSlicedFromMaterial();
+				}
 			} else {
 				sprites[name] = Sprite().setImage(resources, spriteNode.second["img"].asString()).setColour(Colour4f::fromString(spriteNode.second["colour"].asString("#FFFFFF"))).setSlicedFromMaterial();
 			}
@@ -65,7 +70,8 @@ const Sprite& UIStyle::getSprite(const String& name)
 	if (parent) {
 		return parent->getSprite(name);
 	} else {
-		throw Exception("No sprite in UIStyle: " + name);
+		Logger::logWarning("Sprite not found in UI style: " + name);
+		return defaultSprite;
 	}
 }
 
@@ -78,7 +84,8 @@ const TextRenderer& UIStyle::getTextRenderer(const String& name)
 	if (parent) {
 		return parent->getTextRenderer(name);
 	} else {
-		throw Exception("No text renderer in UIStyle: " + name);
+		Logger::logWarning("Text renderer not found in UI style: " + name);
+		return defaultText;
 	}
 }
 
@@ -91,6 +98,7 @@ Vector4f UIStyle::getBorder(const String& name)
 	if (parent) {
 		return parent->getBorder(name);
 	} else {
+		Logger::logWarning("Border not found in UI style: " + name);
 		return {};
 	}
 }
@@ -104,6 +112,7 @@ std::shared_ptr<const AudioClip> UIStyle::getAudioClip(const String& name)
 	if (parent) {
 		return parent->getAudioClip(name);
 	} else {
+		Logger::logWarning("Audio clip not found in UI style: " + name);
 		return {};
 	}
 }
