@@ -2,53 +2,29 @@
 
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/text/text_renderer.h"
+#include "halley/data_structures/flat_map.h"
 
 namespace Halley {
+	class ConfigNode;
 	class AudioClip;
 
 	class UIStyle {
 	public:
-		Sprite windowBackground;
-		Vector4f windowInnerBorder;
+		UIStyle();
+		UIStyle(const ConfigNode& node, Resources& resources);
 
-		Sprite buttonNormal;
-		Sprite buttonHover;
-		Sprite buttonDown;
-		Sprite buttonDisabled;
-		Sprite buttonBorderOnly;
-		TextRenderer buttonLabel;
-		Vector4f buttonInnerBorder;
-		std::shared_ptr<const AudioClip> buttonHoverSound;
-		std::shared_ptr<const AudioClip> buttonDownSound;
-		std::shared_ptr<const AudioClip> buttonUpSound;
+		void setParent(UIStyle& parent);
 
-		Sprite inputBox;
-		TextRenderer inputLabel;
-		TextRenderer inputLabelGhost;
+		const Sprite& getSprite(const String& name);
+		const TextRenderer& getTextRenderer(const String& name);
+		Vector4f getBorder(const String& name);
+		std::shared_ptr<const AudioClip> getAudioClip(const String& name);
 
-		Sprite dropdownNormal;
-		Sprite dropdownHover;
-		Sprite dropdownDisabled;
-
-		TextRenderer label;
-
-		Sprite dialogueBackground;
-		Sprite dialogueTitleBar;
-		TextRenderer dialogueTitleLabel;
-
-		Sprite horizontalDiv;
-		Sprite verticalDiv;
-
-		Sprite checkboxNormal;
-		Sprite checkboxChecked;
-		Sprite checkboxNormalHover;
-		Sprite checkboxCheckedHover;
-		Sprite checkboxDisabled;
-		Sprite checkboxCheckedDisabled;
-
-		Sprite listBackground;
-		Sprite listItemNormal;
-		Sprite listItemHover;
-		Sprite listItemSelected;
+	private:
+		UIStyle* parent = nullptr;
+		FlatMap<String, Sprite> sprites;
+		FlatMap<String, TextRenderer> textRenderers;
+		FlatMap<String, Vector4f> borders;
+		FlatMap<String, std::shared_ptr<const AudioClip>> audioClips;
 	};
 }

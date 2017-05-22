@@ -10,7 +10,7 @@ UIList::UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType ori
 	, orientation(orientation)
 	, nColumns(nColumns)
 {
-	sprite = style->listBackground;
+	sprite = style->getSprite("list.background");
 }
 
 void UIList::setSelectedOption(int option)
@@ -39,7 +39,7 @@ const String& UIList::getSelectedOptionId() const
 
 void UIList::addTextItem(const String& id, const String& label)
 {
-	auto widget = std::make_shared<UILabel>(style->label.clone().setText(label));
+	auto widget = std::make_shared<UILabel>(style->getTextRenderer("label").clone().setText(label));
 	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()));
 	item->add(widget, 0, orientation == UISizerType::Vertical ? Vector4f(3, 0, 3, 0) : Vector4f(0, 3, 0, 3));
 	addItem(item);
@@ -148,7 +148,7 @@ UIListItem::UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle
 	, style(style)
 	, index(index)
 {
-	sprite = style->listItemNormal;
+	sprite = style->getSprite("list.itemNormal");
 }
 
 void UIListItem::onClicked(Vector2f mousePos)
@@ -183,17 +183,17 @@ void UIListItem::update(Time t, bool moved)
 void UIListItem::doSetState(State state)
 {
 	if (selected) {
-		sprite = style->listItemSelected;
+		sprite = style->getSprite("list.itemSelected");
 	} else {
 		switch (state) {
 		case State::Up:
-			sprite = style->listItemNormal;
+			sprite = style->getSprite("list.itemNormal");
 			break;
 		case State::Hover:
-			sprite = style->listItemHover;
+			sprite = style->getSprite("list.itemHover");
 			break;
 		case State::Down:
-			sprite = style->listItemSelected;
+			sprite = style->getSprite("list.itemSelected");
 			break;
 		}
 	}

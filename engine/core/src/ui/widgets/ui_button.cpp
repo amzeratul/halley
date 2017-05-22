@@ -8,7 +8,7 @@ UIButton::UIButton(String id, std::shared_ptr<UIStyle> s, Maybe<UISizer> sizer, 
 	: UIClickable(id, {}, sizer, innerBorder)
 	, style(s)
 {
-	sprite = style->buttonNormal;
+	sprite = style->getSprite("button.normal");
 }
 
 void UIButton::draw(UIPainter& painter) const
@@ -53,19 +53,19 @@ bool UIButton::isFocusLocked() const
 void UIButton::doSetState(State state)
 {
 	if (borderOnly) {
-		sprite = style->buttonBorderOnly;
+		sprite = style->getSprite("button.borderOnly");
 	} else {
 		if (!isEnabled()) {
-			sprite = style->buttonDisabled;
+			sprite = style->getSprite("button.disabled");
 		} else if (state == State::Up) {
-			sprite = style->buttonNormal;
-			playSound(style->buttonUpSound);
+			sprite = style->getSprite("button.normal");
+			playSound(style->getAudioClip("button.upSound"));
 		} else if (state == State::Down) {
-			sprite = style->buttonDown;
-			playSound(style->buttonDownSound);
+			sprite = style->getSprite("button.down");
+			playSound(style->getAudioClip("button.downSound"));
 		} else if (state == State::Hover) {
-			sprite = style->buttonHover;
-			playSound(style->buttonHoverSound);
+			sprite = style->getSprite("button.hover");
+			playSound(style->getAudioClip("button.hoverSound"));
 		}
 	}
 }

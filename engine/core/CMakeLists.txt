@@ -59,6 +59,7 @@ set(SOURCES
         "src/ui/ui_parent.cpp"
         "src/ui/ui_root.cpp"
         "src/ui/ui_sizer.cpp"
+        "src/ui/ui_style.cpp"
         "src/ui/ui_validator.cpp"
         "src/ui/ui_widget.cpp"
 

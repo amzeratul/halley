@@ -9,12 +9,12 @@ UIDropdown::UIDropdown(String id, std::shared_ptr<UIStyle> style, const std::vec
 	, options(os)
 	, curOption(defaultOption)
 {
-	sprite = style->dropdownNormal;
+	sprite = style->getSprite("dropdown.normal");
 	if (options.empty()) {
 		options.push_back("");
 	}
 	curOption = clamp(curOption, 0, int(options.size() - 1));
-	label = style->inputLabel.clone().setText(options[defaultOption]);
+	label = style->getTextRenderer("input.label").clone().setText(options[defaultOption]);
 
 	float maxExtents = 0;
 	for (auto& o: options) {
@@ -75,7 +75,7 @@ void UIDropdown::draw(UIPainter& painter) const
 void UIDropdown::update(Time t, bool moved)
 {
 	bool needUpdate = true;
-	sprite = isEnabled() ? (isMouseOver() ? style->dropdownHover : style->dropdownNormal) : style->dropdownDisabled;
+	sprite = isEnabled() ? (isMouseOver() ? style->getSprite("dropdown.hover") : style->getSprite("dropdown.normal")) : style->getSprite("dropdown.disabled");
 
 	if (needUpdate) {
 		sprite.setPos(getPosition()).scaleTo(getSize());
@@ -105,12 +105,12 @@ void UIDropdown::onClicked(Vector2f mousePos)
 		optionsLabels.clear();
 		optionsExtent = Vector2f(14, 14);
 		for (auto& o: options) {
-			optionsLabels.push_back(style->inputLabel.clone().setText(o));
+			optionsLabels.push_back(style->getTextRenderer("input.label").clone().setText(o));
 			auto ext = optionsLabels.back().getExtents();
 			optionsExtent.x = std::max(optionsExtent.x, ext.x + 14);
 			optionsExtent.y += 14;
 		}
-		dropdownSprite = style->dropdownNormal;
+		dropdownSprite = style->getSprite("dropdown.normal");
 		dropdownSprite.setPos(getPosition()).scaleTo(optionsExtent);
 	}
 }

@@ -8,7 +8,7 @@ UICheckbox::UICheckbox(String id, std::shared_ptr<UIStyle> style, bool checked)
 	, style(style)
 	, checked(checked)
 {
-	sprite = style->checkboxNormal;
+	sprite = style->getSprite("checkbox.normal");
 	setMinSize(sprite.getScaledSize().abs());
 }
 
@@ -48,11 +48,11 @@ void UICheckbox::doSetState(State state)
 {
 	if (isEnabled()) {
 		if (state == State::Hover) {
-			sprite = checked ? style->checkboxCheckedHover : style->checkboxNormalHover;
+			sprite = checked ? style->getSprite("checkbox.checkedHover") : style->getSprite("checkbox.hover");
 		} else {
-			sprite = checked ? style->checkboxChecked : style->checkboxNormal;
+			sprite = checked ? style->getSprite("checkbox.checked") : style->getSprite("checkbox.normal");
 		}
 	} else {
-		sprite = checked ? style->checkboxCheckedDisabled : style->checkboxDisabled;
+		sprite = checked ? style->getSprite("checkbox.checkedDisabled") : style->getSprite("checkbox.disabled");
 	}
 }

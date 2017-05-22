@@ -8,8 +8,8 @@ UIInput::UIInput(std::shared_ptr<InputDevice> keyboard, String id, std::shared_p
 	: UIWidget(id, {}, UISizer(UISizerType::Vertical), Vector4f(3, 3, 3, 3))
 	, keyboard(keyboard)
 	, style(style)
-	, sprite(style->inputBox)
-	, label(style->inputLabel)
+	, sprite(style->getSprite("input.box"))
+	, label(style->getTextRenderer("input.label"))
 	, text(text.getUTF32())
 	, ghostText(ghostText)
 {
@@ -82,10 +82,10 @@ void UIInput::update(Time t, bool moved)
 	}
 
 	if (text.empty() && !isFocused()) {
-		label = style->inputLabelGhost;
+		label = style->getTextRenderer("input.labelGhost");
 		label.setText(ghostText);
 	} else {
-		label = style->inputLabel;
+		label = style->getTextRenderer("input.label");
 		auto txt = String(text);
 		if (isFocused()) {
 			txt.appendCharacter(caretShowing ? '_' : ' ');
