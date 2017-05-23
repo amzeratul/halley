@@ -28,8 +28,8 @@ using namespace Halley;
 
 InputVirtual::InputVirtual(int nButtons, int nAxes)
 	: lastDeviceFrozen(false)
-	, repeatDelayFirst(0.3f)
-	, repeatDelayHold(0.15f)
+	, repeatDelayFirst(0.20f)
+	, repeatDelayHold(0.10f)
 {
 	buttons.resize(nButtons);
 	axes.resize(nAxes);
