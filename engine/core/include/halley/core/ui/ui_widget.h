@@ -57,8 +57,8 @@ namespace Halley {
 		virtual void releaseMouse(Vector2f mousePos, int button);
 		virtual Rect4f getMouseRect() const;
 
-		bool isShown() const override;
-		void setShown(bool shown);
+		bool isActive() const override;
+		void setActive(bool active);
 		bool isEnabled() const;
 		void setEnabled(bool enabled);
 		bool isModal() const;
@@ -112,7 +112,7 @@ namespace Halley {
 		std::shared_ptr<UIEventHandler> eventHandler;
 		std::shared_ptr<UIValidator> validator;
 
-		bool shown = true;
+		bool active = true;
 		bool enabled = true;
 		bool alive = true;
 		bool focused = false;

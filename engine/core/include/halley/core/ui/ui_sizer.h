@@ -85,7 +85,7 @@ namespace Halley {
 		void reparent(UIParent& parent);
 
 		void clear();
-		bool isShown() const override;
+		bool isActive() const override;
 
 		UISizerType getType() const;
 		size_t size() const;
