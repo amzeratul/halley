@@ -33,13 +33,13 @@ void UIWidget::updateInputDevice(InputDevice& device)
 
 void UIWidget::doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice)
 {
-	if (active) {
-		setInputType(inputType);
+	setInputType(inputType);
 	
-		if (validator) {
-			setEnabled(getValidator()->isEnabled());
-		}
+	if (validator) {
+		setEnabled(getValidator()->isEnabled());
+	}
 
+	if (active) {
 		update(t, positionUpdated);
 		positionUpdated = false;
 		for (auto& c: getChildren()) {
@@ -279,7 +279,9 @@ UIEventHandler& UIWidget::getEventHandler()
 
 void UIWidget::setInputType(UIInputType uiInput)
 {
-	active = onlyEnabledWithInputs.empty() || std::find(onlyEnabledWithInputs.begin(), onlyEnabledWithInputs.end(), uiInput) != onlyEnabledWithInputs.end();
+	if (!onlyEnabledWithInputs.empty()) {
+		active = std::find(onlyEnabledWithInputs.begin(), onlyEnabledWithInputs.end(), uiInput) != onlyEnabledWithInputs.end();
+	}
 }
 
 void UIWidget::setOnlyEnabledWithInputs(const std::vector<UIInputType>& uiInput)
