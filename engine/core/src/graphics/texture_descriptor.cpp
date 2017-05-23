@@ -66,7 +66,12 @@ int TextureDescriptor::getBitsPerPixel(TextureFormat format)
 	switch (format) {
 	case TextureFormat::RGBA:
 		return 4;
-	default:
+	case TextureFormat::DEPTH:
 		return 3;
+	case TextureFormat::RGB:
+		return 3;
+	case TextureFormat::Indexed:
+		return 1;
 	}
+	throw Exception("Unknown image format: " + toString(format));
 }

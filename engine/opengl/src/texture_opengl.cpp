@@ -126,6 +126,7 @@ void TextureOpenGL::create(size_t w, size_t h, TextureFormat format, bool useMip
 void TextureOpenGL::loadImage(const char* px, size_t w, size_t h, size_t stride, TextureFormat format, bool useMipMap)
 {
 #ifdef WITH_OPENGL
+	glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
 	glPixelStorei(GL_PACK_ROW_LENGTH, int(stride));
 #endif
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, int(w), int(h), getGLFormat(format), GL_UNSIGNED_BYTE, px);
