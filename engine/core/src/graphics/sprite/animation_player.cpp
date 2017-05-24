@@ -130,7 +130,10 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 		} else {
 			sprite.setMaterial(animation->getMaterial());
 		}
-		sprite.setSprite(*spriteData, applyPivot);
+		sprite.setSprite(*spriteData, false);
+		if (applyPivot) {
+			sprite.setPivot(spriteData->pivot + offsetPivot / sprite.getSize());
+		}
 		sprite.setFlip(dirFlip && !seqNoFlip);
 		hasUpdate = false;
 	}
@@ -196,6 +199,12 @@ const Animation& AnimationPlayer::getAnimation() const
 bool AnimationPlayer::hasAnimation() const
 {
 	return static_cast<bool>(animation);
+}
+
+void AnimationPlayer::setOffsetPivot(Vector2f offset)
+{
+	offsetPivot = offset;
+	hasUpdate = true;
 }
 
 void AnimationPlayer::resolveSprite()

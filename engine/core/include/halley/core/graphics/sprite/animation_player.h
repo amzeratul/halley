@@ -2,6 +2,7 @@
 #include "animation.h"
 #include "sprite_sheet.h"
 #include <halley/time/halleytime.h>
+#include "halley/data_structures/maybe.h"
 
 namespace Halley
 {
@@ -42,7 +43,9 @@ namespace Halley
 
 		const Animation& getAnimation() const;
 		bool hasAnimation() const;
-		
+
+		void setOffsetPivot(Vector2f offset);
+
 	private:
 		void resolveSprite();
 
@@ -65,6 +68,8 @@ namespace Halley
 		int curFrame;
 		float seqFPS;
 		float playbackSpeed = 1.0f;
+
+		Vector2f offsetPivot;
 
 		bool dirty;
 		bool seqLooping;

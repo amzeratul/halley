@@ -317,3 +317,8 @@ void Sprite::computeSize()
 		vertexAttrib.size.x *= -1;
 	}
 }
+
+Vector2f Sprite::getSize() const
+{
+	return size;
+}
