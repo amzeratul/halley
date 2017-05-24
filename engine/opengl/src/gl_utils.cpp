@@ -103,7 +103,7 @@ namespace Halley {
 			numUnits = 0;
 			curTexUnit = 0;
 			scissoring = false;
-			curBlend = BlendType::Opaque;
+			curBlend = BlendType::Undefined;
 			hasClearCol = false;
 		}
 
