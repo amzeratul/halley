@@ -18,9 +18,6 @@ UIRoot::UIRoot(AudioAPI* audio)
 
 void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual, Vector2f uiOffset)
 {
-	// Layout all widgets
-	runLayout();
-
 	// Update input
 	updateTabbing(manual);
 	updateMouse(mouse, uiOffset);
@@ -36,6 +33,9 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 			}
 		}
 	}
+
+	// Layout all widgets
+	runLayout();
 
 	// Remove dead
 	removeDeadChildren();

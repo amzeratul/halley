@@ -80,11 +80,12 @@ void UIWidget::setRect(Rect4f rect)
 	}
 }
 
-void UIWidget::layout(bool shrink)
+void UIWidget::layout()
 {
 	Vector2f minimumSize = computeMinimumSize();
-	Vector2f targetSize = Vector2f::max(shrink ? Vector2f() : size, minimumSize);
+	Vector2f targetSize = Vector2f::max(shrinkOnLayout ? Vector2f() : size, minimumSize);
 	setRect(Rect4f(getPosition(), getPosition() + targetSize));
+	onLayout();
 }
 
 void UIWidget::centerAt(Vector2f pos)
@@ -316,6 +317,10 @@ void UIWidget::onFocusLost()
 {
 }
 
+void UIWidget::onLayout()
+{
+}
+
 void UIWidget::sendEvent(UIEvent&& event) const
 {
 	if (eventHandler && eventHandler->canHandle(event)) {
@@ -377,4 +382,14 @@ bool UIWidget::isMouseBlocker() const
 void UIWidget::setMouseBlocker(bool blocker)
 {
 	mouseBlocker = blocker;
+}
+
+bool UIWidget::shrinksOnLayout() const
+{
+	return shrinkOnLayout;
+}
+
+void UIWidget::setShrinkOnLayout(bool shrink)
+{
+	shrinkOnLayout = shrink;
 }

@@ -25,7 +25,7 @@ namespace Halley {
 		Vector2f computeMinimumSize() const override;
 		void setRect(Rect4f rect) override;
 
-		void layout(bool shrink = false);
+		void layout();
 		void centerAt(Vector2f position);
 		
 		virtual Maybe<UISizer>& tryGetSizer();
@@ -65,6 +65,8 @@ namespace Halley {
 		void setModal(bool modal);
 		bool isMouseBlocker() const;
 		void setMouseBlocker(bool blocker);
+		bool shrinksOnLayout() const;
+		void setShrinkOnLayout(bool shrink);
 
 		bool isAlive() const;
 		void destroy();
@@ -86,6 +88,7 @@ namespace Halley {
 
 		virtual void onFocus();
 		virtual void onFocusLost();
+		virtual void onLayout();
 		UIRoot* getRoot() override;
 
 		virtual void onEnabledChanged();
@@ -120,5 +123,6 @@ namespace Halley {
 		bool positionUpdated = false;
 		bool modal = true;
 		bool mouseBlocker = true;
+		bool shrinkOnLayout = false;
 	};
 }
