@@ -238,6 +238,8 @@ std::unique_ptr<Image> AsepriteImporter::makeAtlas(const String& assetName, cons
 		spriteSheet.addSprite(img->filename, entry);
 	}
 
+	spriteSheet.setPivot(pivot);
+
 	return image;
 }
 
