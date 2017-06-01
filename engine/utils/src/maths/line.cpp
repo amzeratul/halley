@@ -61,3 +61,18 @@ void Halley::Line::doLine(Vector2i p0, Vector2i p1, std::function<void(Vector2i)
 		}
 	}
 }
+
+Vector2f Line::closestPointInSegment(Vector2f start, Vector2f end, Vector2f point)
+{
+	float len = (end - start).length();
+	Vector2f n = (end - start) / len;
+	Vector2f p = point - start;
+	float t = p.dot(n);
+	if (t < 0) {
+		return start;
+	} else if (t >= len) {
+		return end;
+	} else {
+		return start + n * t;
+	}
+}
