@@ -17,8 +17,10 @@ namespace Halley {
 			int accept = -1;
 			int next = -1;
 			int prev = -1;
-			bool xAxis = false;
-			bool yAxis = false;
+			int xAxis = -1;
+			int yAxis = -1;
+			int xAxisAlt = -1;
+			int yAxisAlt = -1;
 		};
 
 		explicit UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);

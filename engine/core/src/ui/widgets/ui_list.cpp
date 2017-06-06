@@ -107,11 +107,17 @@ void UIList::updateInputDevice(InputDevice& device)
 	// Arrows
 	int nRows = int(items.size() + nColumns - 1) / nColumns;
 	Vector2i cursorPos(option % nColumns, option / nColumns);
-	if (inputButtons.xAxis) {
-		cursorPos.x += device.getAxisRepeat(0);
+	if (inputButtons.xAxis != -1) {
+		cursorPos.x += device.getAxisRepeat(inputButtons.xAxis);
 	}
-	if (inputButtons.yAxis) {
-		cursorPos.y += device.getAxisRepeat(1);
+	if (inputButtons.yAxis != -1) {
+		cursorPos.y += device.getAxisRepeat(inputButtons.yAxis);
+	}
+	if (inputButtons.xAxisAlt != -1) {
+		cursorPos.x += device.getAxisRepeat(inputButtons.xAxisAlt);
+	}
+	if (inputButtons.yAxisAlt != -1) {
+		cursorPos.y += device.getAxisRepeat(inputButtons.yAxisAlt);
 	}
 	cursorPos.y = modulo(cursorPos.y, nRows);
 	int columnsThisRow = (cursorPos.y == nRows - 1) ? int(items.size()) % nColumns : nColumns;
