@@ -162,7 +162,7 @@ namespace Halley {
 		inline U angle () const
 		{
 			U angle;
-			angle.setRadians(atan2(y,x));
+			angle.setRadians(atan2(y, x));
 			return angle;
 		}
 
