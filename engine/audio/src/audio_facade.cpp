@@ -2,6 +2,7 @@
 #include "audio_engine.h"
 #include "audio_handle_impl.h"
 #include "audio_source_behaviour.h"
+#include "halley/support/console.h"
 
 using namespace Halley;
 
@@ -20,6 +21,12 @@ AudioFacade::~AudioFacade()
 
 void AudioFacade::init()
 {
+	std::cout << ConsoleColour(Console::GREEN) << "\nInitializing audio...\n" << ConsoleColour();
+	std::cout << "Audio devices available:" << std::endl;
+	int i = 0;
+	for (auto& device: getAudioDevices()) {
+		std::cout << "\t" << i++ << ": " << device->getName() << std::endl;
+	}
 }
 
 void AudioFacade::deInit()
@@ -34,6 +41,8 @@ Vector<std::unique_ptr<const AudioDevice>> AudioFacade::getAudioDevices()
 
 void AudioFacade::startPlayback(int deviceNumber)
 {
+	std::cout << "Using audio device: " << deviceNumber << std::endl;
+
 	if (running) {
 		stopPlayback();
 	}
