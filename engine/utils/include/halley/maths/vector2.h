@@ -80,6 +80,7 @@ namespace Halley {
 		inline Vector2D& operator = (T param) { x = param; y = param; return *this; }
 		inline bool operator == (Vector2D param) const { return x == param.x && y == param.y; }
 		inline bool operator != (Vector2D param) const { return x != param.x || y != param.y; }
+		inline bool operator < (Vector2D param) const { return y != param.y ? y < param.y : x < param.x; }
 
 		// Basic algebra
 		inline Vector2D operator + (Vector2D param) const { return Vector2D(x + param.x,y + param.y); }
