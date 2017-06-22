@@ -21,7 +21,7 @@ namespace Halley
 
 	private:
 		void loadImage(const char* px, size_t w, size_t h, size_t stride, TextureFormat format, bool useMipMap);
-		void create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering);
+		void create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering, bool clamp);
 
 		static unsigned int getGLFormat(TextureFormat format);
 

@@ -63,6 +63,7 @@ namespace Halley
 		PixelDataFormat pixelFormat = PixelDataFormat::Image;
 		bool useMipMap = false;
 		bool useFiltering = false;
+		bool clamp = true;
 		TextureDescriptorImageData pixelData;
 
 		static int getBitsPerPixel(TextureFormat format);

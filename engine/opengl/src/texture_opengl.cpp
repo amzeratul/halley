@@ -28,7 +28,7 @@ TextureOpenGL::~TextureOpenGL()
 
 void TextureOpenGL::load(TextureDescriptor&& d)
 {
-	create(d.size.x, d.size.y, d.format, d.useMipMap, d.useFiltering);
+	create(d.size.x, d.size.y, d.format, d.useMipMap, d.useFiltering, d.clamp);
 	if (!d.pixelData.empty()) {
 		loadImage(reinterpret_cast<const char*>(d.pixelData.getBytes()), d.size.x, d.size.y, d.size.x, d.format, d.useMipMap);
 	}
@@ -74,7 +74,7 @@ void TextureOpenGL::bind(int textureUnit) const
 	glUtils.bindTexture(textureId);
 }
 
-void TextureOpenGL::create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering)
+void TextureOpenGL::create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering, bool clamp)
 {
 	Expects(w > 0);
 	Expects(h > 0);
@@ -92,10 +92,14 @@ void TextureOpenGL::create(size_t w, size_t h, TextureFormat format, bool useMip
 #ifdef WITH_OPENGL
 	GLuint pixFormat = GL_UNSIGNED_BYTE;
 
-	if (useMipMap) glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glCheckError();
+	if (useMipMap) {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1);
+	}
+
+	GLuint wrap = clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 #else
 	GLuint pixFormat = GL_UNSIGNED_BYTE;
 #endif
