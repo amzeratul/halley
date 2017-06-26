@@ -1,0 +1,10 @@
+---
+name: Halley/SpriteAdd
+base: sprite_base.yaml
+textures:
+  - tex0: sampler2D
+passes:
+  - blend: Add
+    vertex: sprite.vertex.glsl
+    pixel: sprite.pixel.glsl
+...
