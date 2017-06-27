@@ -66,6 +66,7 @@ namespace Halley
 		Sprite& setScale(float scale);
 		Sprite& scaleTo(Vector2f size);
 		Sprite& setFlip(bool flip);
+		bool isFlipped() const;
 
 		Sprite& setPivot(Vector2f pivot);
 		Sprite& setAbsolutePivot(Vector2f pivot);

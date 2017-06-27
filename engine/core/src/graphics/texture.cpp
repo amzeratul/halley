@@ -15,14 +15,13 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	if (size.x == -1 && size.y == -1) {
 		throw Exception("Unable to load texture \"" + loader.getName() + "\" due to missing asset data.");
 	}
-	bool premultiply = meta.getBool("premultiply", true);
 
 	std::shared_ptr<Texture> texture = loader.getAPI().video->createTexture(size);
 	texture->setMeta(meta);
 	texture->computeSlice();
 
 	loader.getAsync()
-	.then([premultiply, texture](std::unique_ptr<ResourceDataStatic> data) -> TextureDescriptorImageData
+	.then([texture](std::unique_ptr<ResourceDataStatic> data) -> TextureDescriptorImageData
 	{
 		auto& meta = texture->getMeta();
 		if (meta.getString("compression") == "png") {

@@ -121,10 +121,12 @@ Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 
 Sprite& Sprite::setMaterial(std::shared_ptr<Material> m)
 {
+	bool hadMaterial = static_cast<bool>(material);
+
 	Expects(m);
 	material = m;
 
-	if (!material->getTextures().empty()) {
+	if (!hadMaterial && !material->getTextures().empty()) {
 		setImageData(*material->getTextures()[0]);
 	}
 
@@ -209,6 +211,11 @@ Sprite& Sprite::setFlip(bool v)
 		computeSize();
 	}
 	return *this;
+}
+
+bool Sprite::isFlipped() const
+{
+	return flip;
 }
 
 Sprite& Sprite::setPivot(Vector2f v)
