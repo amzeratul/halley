@@ -97,6 +97,11 @@ size_t SpriteSheet::getIndex(const String& name) const
 	}
 }
 
+bool SpriteSheet::hasSprite(const String& name) const
+{
+	return spriteIdx.find(name) != spriteIdx.end();
+}
+
 std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 {
 	auto result = std::make_unique<SpriteSheet>();

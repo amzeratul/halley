@@ -53,6 +53,7 @@ namespace Halley
 
 		size_t getSpriteCount() const;
 		size_t getIndex(const String& name) const;
+		bool hasSprite(const String& name) const;
 
 		void loadJson(gsl::span<const gsl::byte> data);
 		void loadTexture(Resources& resources);
