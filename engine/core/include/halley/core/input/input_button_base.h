@@ -45,6 +45,8 @@ namespace Halley {
 
 		void clearPresses();
 
+		void onButtonStatus(int code, bool down);
+
 	protected:
 		Vector<char> buttonPressed;
 		Vector<char> buttonPressedRepeat;
@@ -55,9 +57,6 @@ namespace Halley {
 
 		void onButtonPressed(int code);
 		void onButtonReleased(int code);
-		void onButtonStatus(int code, bool down);
-
-		friend class InputJoystickXInput;
 	};
 
 	typedef std::shared_ptr<InputButtonBase> spInputButtonBase;

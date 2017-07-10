@@ -155,7 +155,8 @@ int InputJoystickXInput::getButtonAtPosition(JoystickButtonPosition position) co
 		case JoystickButtonPosition::PlatformAcceptButton: return 0;
 		case JoystickButtonPosition::PlatformCancelButton: return 1;
 		default: throw Exception("Invalid parameter");
-	}}
+	}
+}
 
 
 void InputJoystickXInput::setVibration(float high, float low)
