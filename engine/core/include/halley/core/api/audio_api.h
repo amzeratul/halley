@@ -84,6 +84,8 @@ namespace Halley
 
 		virtual void queueAudio(gsl::span<const AudioSamplePack> data) = 0;
 		virtual size_t getQueuedSampleCount() const = 0;
+
+		virtual bool needsAudioThread() = 0;
 	};
 
 	class IAudioHandle

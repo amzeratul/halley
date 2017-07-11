@@ -56,6 +56,7 @@ namespace Halley {
 		std::map<int, AudioHandle> musicTracks;
 
 		size_t uniqueId = 0;
+		bool ownAudioThread;
 
 		void run();
 	    void stepAudio();

@@ -6,11 +6,10 @@
 
 using namespace Halley;
 
-constexpr bool ownAudioThread = false;
-
-AudioFacade::AudioFacade(AudioOutputAPI& output)
-	: output(output)
+AudioFacade::AudioFacade(AudioOutputAPI& o)
+	: output(o)
 	, running(false)
+	, ownAudioThread(o.needsAudioThread())
 {
 }
 

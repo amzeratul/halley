@@ -33,6 +33,8 @@ namespace Halley
 		size_t getQueuedSampleCount() const override;
 		void onCallback(unsigned char* stream, int len);
 
+		bool needsAudioThread() override;
+
 	private:
 		bool playing = false;
 		Uint32 device = 0;

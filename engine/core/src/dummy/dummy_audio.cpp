@@ -40,3 +40,8 @@ void DummyAudioAPI::init()
 void DummyAudioAPI::deInit()
 {
 }
+
+bool DummyAudioAPI::needsAudioThread()
+{
+	return false;
+}

@@ -13,5 +13,6 @@ namespace Halley {
 		size_t getQueuedSampleCount() const override;
 		void init() override;
 		void deInit() override;
+		bool needsAudioThread() override;
 	};
 }

@@ -22,6 +22,11 @@ void AudioSDL::init()
 	}
 }
 
+bool AudioSDL::needsAudioThread()
+{
+	return false;
+}
+
 void AudioSDL::deInit()
 {
 	closeAudioDevice();
