@@ -33,7 +33,10 @@ namespace Halley {
 	enum class JoystickType {
 		Generic,
 		Xbox,
-		Playstation
+		Playstation,
+		SwitchFull,
+		SwitchLeftJoycon,
+		SwitchRightJoycon
 	};
 
 	enum class JoystickButtonPosition
