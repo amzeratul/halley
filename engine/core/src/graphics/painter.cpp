@@ -129,8 +129,12 @@ void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites,
 void Painter::drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scale, Vector4f slices, const void* vertexData)
 {
 	Expects(vertexData != nullptr);
-	Expects(scale.x > 0.0001f);
-	Expects(scale.y > 0.0001f);
+	if (scale.x < 0.00001f || scale.y < 0.00001f) {
+		//throw Exception("Scale is zero for material with texture " + material->getTexture(0)->getAssetId());
+		return;
+	}
+	//Expects(scale.x > 0.0001f);
+	//Expects(scale.y > 0.0001f);
 
 	//         a        c
 	//   00 -- 01 ----- 02 -- 03

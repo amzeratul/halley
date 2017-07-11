@@ -69,9 +69,12 @@ namespace Halley
 
 		void setMeta(const Metadata& meta);
 		const Metadata& getMeta() const;
+		void setAssetId(const String& name);
+		const String& getAssetId() const;
 
 	private:
 		Metadata meta;
+		String assetId;
 	};
 
 	class AsyncResource : public Resource

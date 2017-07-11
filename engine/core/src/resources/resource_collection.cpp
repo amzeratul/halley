@@ -78,6 +78,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& assetId, R
 	}
 
 	// Store in cache
+	newRes->setAssetId(assetId);
 	resources.emplace(assetId, Wrapper(newRes, 0));
 
 	return newRes;

@@ -13,6 +13,16 @@ const Metadata& Resource::getMeta() const
 	return meta;
 }
 
+void Resource::setAssetId(const String& n)
+{
+	assetId = n;
+}
+
+const String& Resource::getAssetId() const
+{
+	return assetId;
+}
+
 AsyncResource::AsyncResource() 
 	: failed(false)
 	, loading(false)
