@@ -28,9 +28,9 @@ void DummyAudioAPI::queueAudio(gsl::span<const AudioSamplePack> data)
 {
 }
 
-size_t DummyAudioAPI::getQueuedSampleCount() const
+bool DummyAudioAPI::needsMoreAudio()
 {
-	return 2048;
+	return false;
 }
 
 void DummyAudioAPI::init()
@@ -41,7 +41,7 @@ void DummyAudioAPI::deInit()
 {
 }
 
-bool DummyAudioAPI::needsAudioThread()
+bool DummyAudioAPI::needsAudioThread() const
 {
 	return false;
 }

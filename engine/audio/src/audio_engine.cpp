@@ -30,16 +30,19 @@ void AudioEngine::run()
 {
 	//const size_t bufSize = spec.numChannels * sizeof(AudioConfig::SampleFormat) * spec.bufferSize;
 
-	using namespace std::chrono_literals;
-	while (out->getQueuedSampleCount() >= spec.bufferSize && running) {
+	// Generate one buffer
+	if (running && out->needsMoreAudio()) {
+		generateBuffer();
+	}
+
+	// OK, we've supplied it with enough buffers; if that was enough, then, sleep as long as no more buffers are needed
+	while (running && !out->needsMoreAudio()) {
+		using namespace std::chrono_literals;
 		std::this_thread::sleep_for(100us);
 	}
-
-	if (!running) {
-		return;
-	}
-
-	generateBuffer();
+	
+	// When we get here, it means that buffers are needed again (either one wasn't enough, or we waited long enough),
+	// but first return so we the AudioFacade can update the incoming sound data
 }
 
 void AudioEngine::addSource(size_t id, std::unique_ptr<AudioSource>&& src)

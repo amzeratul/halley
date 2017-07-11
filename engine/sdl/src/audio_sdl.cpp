@@ -22,7 +22,7 @@ void AudioSDL::init()
 	}
 }
 
-bool AudioSDL::needsAudioThread()
+bool AudioSDL::needsAudioThread() const
 {
 	return false;
 }
@@ -154,10 +154,15 @@ void AudioSDL::queueAudio(gsl::span<const AudioSamplePack> data)
 	}
 }
 
-size_t AudioSDL::getQueuedSampleCount() const
+bool AudioSDL::needsMoreAudio()
 {
+	/*
 	size_t sizePerSample = outputFormat.format == AudioSampleFormat::Int16 ? 2 : 4;
-	return queuedSize / (outputFormat.numChannels * sizePerSample);
+	size_t queuedAudioSize = queuedSize / (outputFormat.numChannels * sizePerSample);
+	 */
+
+	// Doesn't use threaded audio
+	return false;
 }
 
 void AudioSDL::doQueueAudio(gsl::span<const gsl::byte> data) 

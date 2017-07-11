@@ -30,10 +30,10 @@ namespace Halley
 		void stopPlayback() override;
 
 		void queueAudio(gsl::span<const AudioSamplePack> data) override;
-		size_t getQueuedSampleCount() const override;
+		bool needsMoreAudio() override;
 		void onCallback(unsigned char* stream, int len);
 
-		bool needsAudioThread() override;
+		bool needsAudioThread() const override;
 
 	private:
 		bool playing = false;
