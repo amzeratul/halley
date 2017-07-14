@@ -335,8 +335,8 @@ void Halley::InputVirtual::updateLastDevice()
 			auto& binds = buttons[code];
 			for (size_t i=0; i<binds.size(); i++) {
 				Bind& bind = binds[i];
-				if (bind.device->isButtonPressed(bind.a)) {
-					if (!std::dynamic_pointer_cast<InputManual>(bind.device)) {
+				if (!std::dynamic_pointer_cast<InputManual>(bind.device)) {
+					if ((bind.isAxis && bind.device->getAxis(bind.a)) || (!bind.isAxis && bind.device->isButtonPressed(bind.a))) {
 						lastDevice = bind.device;
 						return;
 					}
