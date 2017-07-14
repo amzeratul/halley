@@ -36,7 +36,6 @@ using namespace Halley;
 InputJoystickXInput::InputJoystickXInput(int number)
 	: index(number)
 	, cooldown(0)
-	, enabled(false)
 {
 	// Axes
 	axes.resize(6);
@@ -66,7 +65,7 @@ std::string InputJoystickXInput::getName() const
 void InputJoystickXInput::update(Time t)
 {
 	// If disabled, only check once every 30 steps, since XInputGetState() is fairly expensive
-	if (!enabled && cooldown > 0) {
+	if (!isEnabled() && cooldown > 0) {
 		cooldown--;
 		return;
 	}
@@ -76,7 +75,7 @@ void InputJoystickXInput::update(Time t)
 
 	DWORD result = XInputGetState(index, &state);
 	if (result == ERROR_SUCCESS) {	// WTF, Microsoft
-		if (!enabled) {
+		if (!isEnabled()) {
 			setEnabled(true);
 			if (t == 0) std::cout << "\t"; // Just so it aligns on the console during initialization
 			std::cout << "XInput controller connected on port " << (index+1) << std::endl;
@@ -112,10 +111,8 @@ void InputJoystickXInput::update(Time t)
 		hats[0]->onButtonStatus(1, (b & XINPUT_GAMEPAD_DPAD_RIGHT) != 0);
 		hats[0]->onButtonStatus(2, (b & XINPUT_GAMEPAD_DPAD_DOWN) != 0);
 		hats[0]->onButtonStatus(3, (b & XINPUT_GAMEPAD_DPAD_LEFT) != 0);
-
-		updateVibration(t);
 	} else {
-		if (enabled) {
+		if (isEnabled()) {
 			setEnabled(false);
 			std::cout << "XInput controller disconnected from port " << (index+1) << std::endl;
 		}
@@ -126,15 +123,8 @@ void InputJoystickXInput::update(Time t)
 		for (int i=0; i<10; i++) onButtonStatus(i, false);
 		for (int i=0; i<4; i++) hats[0]->onButtonStatus(i, false);
 	}
-}
 
-
-void InputJoystickXInput::setEnabled(bool e)
-{
-	if (enabled != e) {
-		enabled = e;
-		if (enabled) lastTime = clock();
-	}
+	InputJoystick::update(t);
 }
 
 int InputJoystickXInput::getButtonAtPosition(JoystickButtonPosition position) const
@@ -159,45 +149,13 @@ int InputJoystickXInput::getButtonAtPosition(JoystickButtonPosition position) co
 }
 
 
-void InputJoystickXInput::setVibration(float high, float low)
+void InputJoystickXInput::setVibration(float low, float high)
 {
 	XINPUT_VIBRATION vibration;
 	ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
 	vibration.wLeftMotorSpeed = static_cast<WORD>(clamp(low * 65535, 0.0f, 65535.0f));
 	vibration.wRightMotorSpeed = static_cast<WORD>(clamp(high * 65535, 0.0f, 65535.0f));
 	XInputSetState(index, &vibration);
-}
-
-
-void InputJoystickXInput::vibrate(spInputVibration vib)
-{
-	vibs.push_back(vib);
-}
-
-void InputJoystickXInput::stopVibrating()
-{
-	vibs.clear();
-}
-
-void Halley::InputJoystickXInput::updateVibration(Time /*_t*/)
-{
-	time_t curTime = clock();
-	Time t = Time(float(curTime - lastTime) / CLK_TCK);
-	lastTime = curTime;
-	
-	float high = 0;
-	float low = 0;
-	Vector<spInputVibration> vibs2 = vibs;
-	vibs.clear();
-	for (size_t i=0; i<vibs2.size(); i++) {
-		float h = 0;
-		float l = 0;
-		bool result = vibs2[i]->getState(t, h, l);
-		if (result) vibs.push_back(vibs2[i]);
-		high += h;
-		low += l;
-	}
-	setVibration(high, low);
 }
 
 #endif

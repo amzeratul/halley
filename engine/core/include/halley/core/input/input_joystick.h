@@ -22,6 +22,7 @@
 #pragma once
 
 #include <functional>
+#include <chrono>
 #include "input_button_base.h"
 
 #ifdef _MSC_VER
@@ -74,12 +75,27 @@ namespace Halley {
 
 		virtual int getButtonAtPosition(JoystickButtonPosition position) const;
 
-		virtual void update(Time /*t*/) {}
+		virtual void update(Time t);
+
+		void vibrate(spInputVibration vibration) override;
+		void stopVibrating() override;
+
+		bool isEnabled() const override;
+		void setEnabled(bool enabled);
 
 	protected:
 		Vector<float> axes;
 		Vector<spInputButtonBase> hats;
 		std::function<float (float)> axisAdjust;
+
+		virtual void setVibration(float low, float high);
+
+	private:
+		Vector<spInputVibration> vibs;
+		std::chrono::steady_clock::time_point lastTime;
+		bool enabled = false;
+
+		void updateVibration(Time t);
 	};
 
 	typedef std::shared_ptr<InputJoystick> spInputJoystick;

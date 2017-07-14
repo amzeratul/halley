@@ -79,3 +79,66 @@ int InputJoystick::getButtonAtPosition(JoystickButtonPosition position) const
 		default: throw Exception("Invalid parameter");
 	}
 }
+
+void InputJoystick::update(Time t)
+{
+	updateVibration(t);
+}
+
+void InputJoystick::vibrate(spInputVibration vibration)
+{
+	vibs.push_back(vibration);
+}
+
+void InputJoystick::stopVibrating()
+{
+	vibs.clear();
+}
+
+bool InputJoystick::isEnabled() const
+{
+	return enabled;
+}
+
+void InputJoystick::setEnabled(bool e)
+{
+	if (enabled != e) {
+		enabled = e;
+		if (enabled) {
+			lastTime = std::chrono::steady_clock::now();
+		}
+	}
+}
+
+void InputJoystick::setVibration(float, float)
+{
+}
+
+void InputJoystick::updateVibration(Time)
+{
+	if (!isEnabled()) {
+		stopVibrating();
+		return;
+	}
+
+	auto curTime = std::chrono::steady_clock::now();
+	std::chrono::duration<double> elapsed = curTime - lastTime;
+	Time t = elapsed.count();
+	lastTime = curTime;
+	
+	float high = 0;
+	float low = 0;
+	Vector<spInputVibration> vibs2 = vibs;
+	vibs.clear();
+	for (size_t i=0; i<vibs2.size(); i++) {
+		float h = 0;
+		float l = 0;
+		bool result = vibs2[i]->getState(t, h, l);
+		if (result) {
+			vibs.push_back(vibs2[i]);
+		}
+		high += h;
+		low += l;
+	}
+	setVibration(low, high);
+}

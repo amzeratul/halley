@@ -33,29 +33,16 @@ namespace Halley {
 		~InputJoystickXInput();
 
 		std::string getName() const override;
-
-		bool isEnabled() const override { return enabled; }
-
 		JoystickType getType() const override { return JoystickType::Xbox; }
 	
-		void vibrate(spInputVibration vib) override;
-		void stopVibrating() override;
-
 		void update(Time t) override;
-		void setEnabled(bool enabled);
-
 		int getButtonAtPosition(JoystickButtonPosition position) const override;
 
 	private:
 		int index;
 		int cooldown;
-		bool enabled;
-		time_t lastTime;
 
-		Vector<spInputVibration> vibs;
-
-		void updateVibration(Time t);
-		void setVibration(float high, float low);
+		void setVibration(float low, float high) override;
 	};
 }
 
