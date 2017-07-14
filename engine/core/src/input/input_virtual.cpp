@@ -331,12 +331,20 @@ Halley::spInputDevice Halley::InputVirtual::getLastDevice() const
 void Halley::InputVirtual::updateLastDevice()
 {
 	if (!lastDeviceFrozen) {
-		for (size_t code=0; code<buttons.size(); code++) {
-			auto& binds = buttons[code];
-			for (size_t i=0; i<binds.size(); i++) {
-				Bind& bind = binds[i];
-				if (!std::dynamic_pointer_cast<InputManual>(bind.device)) {
-					if ((bind.isAxis && bind.device->getAxis(bind.a)) || (!bind.isAxis && bind.device->isButtonPressed(bind.a))) {
+		for (auto& buttonBinds: buttons) {
+			for (auto& bind: buttonBinds) {
+				if (bind.device && !std::dynamic_pointer_cast<InputManual>(bind.device)) {
+					if (!bind.isAxis && bind.device->isButtonPressed(bind.a)) {
+						lastDevice = bind.device;
+						return;
+					}
+				}
+			}
+		}
+		for (auto& axisBind: axes) {
+			for (auto& bind: axisBind.binds) {
+				if (bind.device && !std::dynamic_pointer_cast<InputManual>(bind.device)) {
+					if (bind.isAxis && fabs(bind.device->getAxis(bind.a)) > 0.1f) {
 						lastDevice = bind.device;
 						return;
 					}

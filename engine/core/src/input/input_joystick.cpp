@@ -114,23 +114,27 @@ void InputJoystick::setVibration(float, float)
 {
 }
 
-void InputJoystick::updateVibration(Time)
+void InputJoystick::updateVibration(Time t)
 {
-	if (!isEnabled()) {
-		stopVibrating();
-		return;
-	}
-
+	/*
 	auto curTime = std::chrono::steady_clock::now();
 	std::chrono::duration<double> elapsed = curTime - lastTime;
 	Time t = elapsed.count();
 	lastTime = curTime;
+	*/
+
+	if (!isEnabled()) {
+		stopVibrating();
+		return;
+	}
 	
 	float high = 0;
 	float low = 0;
-	Vector<spInputVibration> vibs2 = vibs;
+	
+	Vector<spInputVibration> vibs2 = std::move(vibs);
 	vibs.clear();
-	for (size_t i=0; i<vibs2.size(); i++) {
+	
+	for (size_t i = 0; i < vibs2.size(); i++) {
 		float h = 0;
 		float l = 0;
 		bool result = vibs2[i]->getState(t, h, l);
