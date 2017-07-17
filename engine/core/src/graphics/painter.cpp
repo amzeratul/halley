@@ -394,8 +394,15 @@ void Painter::updateProjection()
 	camera->updateProjection(activeRenderTarget->flipVertical());
 	projection = camera->getProjection();
 	
+	auto old = halleyGlobalMaterial->clone();
 	halleyGlobalMaterial->set("u_mvp", projection);
+	if (*old != *halleyGlobalMaterial) {
+		onPreUpdateProjection();
+		halleyGlobalMaterial->uploadData(*this);
+		setMaterialData(*halleyGlobalMaterial);
+	}
+}
 
-	halleyGlobalMaterial->uploadData(*this);
-	setMaterialData(*halleyGlobalMaterial);
+void Painter::onPreUpdateProjection()
+{
 }

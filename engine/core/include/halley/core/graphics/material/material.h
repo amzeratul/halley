@@ -74,6 +74,7 @@ namespace Halley
 		static void resetBindCache();
 
 		bool operator==(const Material& material) const;
+		bool operator!=(const Material& material) const;
 
 		const MaterialDefinition& getDefinition() const { return *materialDefinition; }
 

@@ -203,6 +203,11 @@ bool Material::operator==(const Material& other) const
 	return true;
 }
 
+bool Material::operator!=(const Material& material) const
+{
+	return !(*this == material);
+}
+
 const std::vector<std::shared_ptr<const Texture>>& Material::getTextures() const
 {
 	return textures;
