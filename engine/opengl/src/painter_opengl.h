@@ -28,6 +28,7 @@ namespace Halley
 		void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly) override;
 		void drawTriangles(size_t numIndices) override;
 		void setViewPort(Rect4i rect) override;
+		void onUpdateProjection(Material& material) override;
 
 	private:
 #ifdef WITH_OPENGL

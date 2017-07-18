@@ -397,12 +397,6 @@ void Painter::updateProjection()
 	auto old = halleyGlobalMaterial->clone();
 	halleyGlobalMaterial->set("u_mvp", projection);
 	if (*old != *halleyGlobalMaterial) {
-		onPreUpdateProjection();
-		halleyGlobalMaterial->uploadData(*this);
-		setMaterialData(*halleyGlobalMaterial);
+		onUpdateProjection(*halleyGlobalMaterial);
 	}
-}
-
-void Painter::onPreUpdateProjection()
-{
 }

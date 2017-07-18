@@ -132,6 +132,12 @@ void PainterOpenGL::setViewPort(Rect4i rect)
 	glUtils->setViewPort(rect);
 }
 
+void PainterOpenGL::onUpdateProjection(Material& material)
+{
+	material.uploadData(*this);
+	setMaterialData(material);
+}
+
 void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly)
 {
 	Expects(numVertices > 0);

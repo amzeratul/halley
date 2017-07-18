@@ -76,7 +76,7 @@ namespace Halley
 		virtual void setViewPort(Rect4i rect) = 0;
 		virtual void setClip(Rect4i clip, bool enable) = 0;
 
-		virtual void onPreUpdateProjection();
+		virtual void onUpdateProjection(Material& material) = 0;
 		void generateQuadIndices(unsigned short firstVertex, size_t numQuads, unsigned short* target);
 		RenderTarget& getActiveRenderTarget();
 

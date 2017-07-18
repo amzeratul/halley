@@ -110,3 +110,5 @@ void DummyPainter::setViewPort(Rect4i rect) {}
 void DummyPainter::setClip(Rect4i clip, bool enable) {}
 
 void DummyPainter::setMaterialData(const Material& material) {}
+
+void DummyPainter::onUpdateProjection(Material& material) {}
