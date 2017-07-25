@@ -303,7 +303,10 @@ void Core::doRender(Time)
 		}
 
 		painter->endRender();
+
+		vsyncTimer.beginSample();
 		api->video->finishRender();
+		vsyncTimer.endSample();
 	}
 
 	t.endSample();
@@ -366,6 +369,11 @@ long long Core::getAverageTime(TimeLine tl) const
 long long Core::getElapsedTime(TimeLine tl) const
 {
 	return timers[int(tl)].lastElapsedNanoSeconds();
+}
+
+long long Core::getVsyncTime() const
+{
+	return vsyncTimer.averageElapsedNanoSeconds();
 }
 
 bool Core::transitionStage()

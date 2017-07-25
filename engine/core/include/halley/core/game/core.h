@@ -37,6 +37,7 @@ namespace Halley
 		const Environment& getEnvironment() override;
 		long long getAverageTime(TimeLine tl) const override;
 		long long getElapsedTime(TimeLine tl) const override;
+		long long getVsyncTime() const override;
 
 		void onFixedUpdate(Time time) override;
 		void onVariableUpdate(Time time) override;
@@ -75,6 +76,7 @@ namespace Halley
 
 	private:
 		std::array<StopwatchAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> timers;
+		StopwatchAveraging vsyncTimer;
 
 		Vector<String> args;
 

@@ -59,6 +59,13 @@ void WorldStatsView::draw(RenderContext& context)
 
 			text.setColour(Colour(0.8f, 0.8f, 0.8f));
 			drawStats("[World]", 0, worldTotal - sysTotal, pos);
+
+			if (timeline == TimeLine::Render) {
+				long long vsync = coreAPI.getVsyncTime();
+				worldTotal += vsync;
+				drawStats("[VSync]", 0, vsync, pos);
+			}
+
 			drawStats("[Engine]", 0, engineTotal - worldTotal, pos);
 			text.setColour(Colour(0.8f, 1.0f, 0.8f));
 			drawStats("Total", int(world.numEntities()), engineTotal, pos);

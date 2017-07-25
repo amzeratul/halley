@@ -24,5 +24,6 @@ namespace Halley
 
 		virtual long long getAverageTime(TimeLine tl) const = 0;
 		virtual long long getElapsedTime(TimeLine tl) const = 0;
+		virtual long long getVsyncTime() const = 0;
 	};
 }
