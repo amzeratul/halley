@@ -3,6 +3,7 @@
 #include "halley/resources/metadata.h"
 #include "halley/support/exception.h"
 #include <halley/concurrency/concurrent.h>
+#include "halley/file/compression.h"
 
 using namespace Halley;
 
@@ -67,6 +68,11 @@ String ResourceDataStatic::getString() const
 	return String(static_cast<const char*>(getData()), getSize());
 }
 
+void ResourceDataStatic::inflate()
+{
+	data = Compression::inflateRaw(getSpan(), size);
+}
+
 std::unique_ptr<ResourceDataStatic> ResourceDataStatic::loadFromFileSystem(Path path)
 {
 	std::ifstream fp(path.string(), std::ios::binary | std::ios::in);
@@ -123,6 +129,9 @@ std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
 {
 	auto result = locator.getStatic(name, type);
 	if (result) {
+		if (metadata->getString("compression", "") == "deflate") {
+			result->inflate();
+		}
 		loaded = true;
 	}
 	return result;

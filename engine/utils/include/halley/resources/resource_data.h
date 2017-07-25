@@ -65,6 +65,7 @@ namespace Halley {
 		gsl::span<const gsl::byte> getSpan() const;
 		size_t getSize() const;
 		String getString() const;
+		void inflate();
 
 		static std::unique_ptr<ResourceDataStatic> loadFromFileSystem(Path path);
 		void writeToFileSystem(String path) const;
