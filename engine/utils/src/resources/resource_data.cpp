@@ -70,7 +70,6 @@ String ResourceDataStatic::getString() const
 
 void ResourceDataStatic::inflate()
 {
-	std::cout << "Inflating...\n";
 	data = Compression::inflateRaw(getSpan(), size);
 }
 
