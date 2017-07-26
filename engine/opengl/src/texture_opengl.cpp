@@ -98,8 +98,8 @@ void TextureOpenGL::create(size_t w, size_t h, TextureFormat format, bool useMip
 
 	GLuint wrap = clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
 
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 #else
 	GLuint pixFormat = GL_UNSIGNED_BYTE;
 #endif
