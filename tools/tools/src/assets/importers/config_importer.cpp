@@ -10,7 +10,14 @@ void ConfigImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 {
 	ConfigFile config;
 	parseConfig(config, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
-	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::ConfigFile, Serializer::toBytes(config));
+	
+	Metadata meta;
+	if (asset.metadata) {
+		meta = *asset.metadata;
+	}
+	meta.set("asset_compression", "deflate");
+
+	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::ConfigFile, Serializer::toBytes(config), meta);
 }
 
 static ConfigNode parseYAMLNode(const YAML::Node& node)

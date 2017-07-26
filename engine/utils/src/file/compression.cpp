@@ -9,15 +9,16 @@ Bytes Compression::deflate(gsl::span<const gsl::byte> bytes)
 {
 	Expects (sizeof(uint64_t) == 8);
 
+	uint64_t inSize = bytes.size_bytes();
 	size_t outSize = 0;
 	unsigned char* out = nullptr;
 	
 	LodePNGCompressSettings settings;
 	lodepng_compress_settings_init(&settings);
-	lodepng_zlib_compress(&out, &outSize, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size_bytes(), &settings);
+	lodepng_zlib_compress(&out, &outSize, reinterpret_cast<const unsigned char*>(bytes.data()), inSize, &settings);
 
 	Bytes result(outSize + 8);
-	*reinterpret_cast<uint64_t*>(result.data()) = outSize;
+	memcpy(result.data(), &inSize, 8);
 	memcpy(result.data() + 8, out, outSize);
 	free(out);
 	
@@ -42,8 +43,8 @@ std::shared_ptr<const char> Compression::inflateRaw(gsl::span<const gsl::byte> b
 {
 	Expects (sizeof(uint64_t) == 8);
 	Expects (bytes.size_bytes() >= 8);
-	uint64_t expectedOutSize = *reinterpret_cast<const uint64_t*>(bytes.data());
-	Expects (bytes.size_bytes() == expectedOutSize + 8);
+	uint64_t expectedOutSize;
+	memcpy(&expectedOutSize, bytes.data(), 8);
 
 	unsigned char* out = nullptr;
 	size_t outSize = 0;

@@ -28,7 +28,7 @@ void AssetCollector::output(const String& name, AssetType type, gsl::span<const 
 	Path filePath = Path(toString(type)) / id;
 	Logger::logInfo("- Writing asset: " + (dstDir / filePath) + " (" + toString(data.size_bytes()) + " bytes)");
 
-	if (metadata && metadata->getString("compression", "") == "deflate") {
+	if (metadata && metadata->getString("asset_compression", "") == "deflate") {
 		FileSystem::writeFile(dstDir / filePath, Compression::deflate(data));
 	} else {
 		FileSystem::writeFile(dstDir / filePath, data);	

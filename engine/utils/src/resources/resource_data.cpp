@@ -70,6 +70,7 @@ String ResourceDataStatic::getString() const
 
 void ResourceDataStatic::inflate()
 {
+	std::cout << "Inflating...\n";
 	data = Compression::inflateRaw(getSpan(), size);
 }
 
@@ -129,7 +130,7 @@ std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
 {
 	auto result = locator.getStatic(name, type);
 	if (result) {
-		if (metadata->getString("compression", "") == "deflate") {
+		if (metadata->getString("asset_compression", "") == "deflate") {
 			result->inflate();
 		}
 		loaded = true;
@@ -151,8 +152,13 @@ Future<std::unique_ptr<ResourceDataStatic>> ResourceLoader::getAsync() const
 	std::reference_wrapper<IResourceLocator> loc = locator;
 	auto n = name;
 	auto t = type;
-	return Concurrent::execute(Executors::getDiskIO(), [loc, n, t] () -> std::unique_ptr<ResourceDataStatic>
+	auto meta = getMeta();
+	return Concurrent::execute(Executors::getDiskIO(), [meta, loc, n, t] () -> std::unique_ptr<ResourceDataStatic>
 	{
-		return loc.get().getStatic(n, t);
+		auto result = loc.get().getStatic(n, t);
+		if (meta.getString("asset_compression", "") == "deflate") {
+			result->inflate();
+		}
+		return result;
 	});
 }
