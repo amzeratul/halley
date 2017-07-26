@@ -858,8 +858,9 @@ Halley::String Halley::String::prettySize(long long bytes)
 		div <<= 10;
 		steps++;
 	}
-	String suffixes[] = { "", "kB", "MB", "GB", "TB", "PB" };
-	return toString(double(bytes) / double(div)) + " " + suffixes[steps];
+	String suffixes[] = { " B", " kB", " MB", " GB", " TB", " PB" };
+	int prec = steps == 0 ? 0 : 2;
+	return toString(double(bytes) / double(div), prec) + suffixes[steps];
 }
 
 Vector<String> Halley::String::split(char delimiter) const
