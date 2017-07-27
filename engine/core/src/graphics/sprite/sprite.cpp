@@ -135,6 +135,7 @@ Sprite& Sprite::setMaterial(std::shared_ptr<Material> m)
 
 Sprite& Sprite::setImage(Resources& resources, String imageName, String materialName)
 {
+	Expects (!imageName.isEmpty());
 	if (materialName == "") {
 		materialName = "Halley/Sprite";
 	}
@@ -247,6 +248,9 @@ Sprite& Sprite::setTexRect(Rect4f v)
 
 Sprite& Sprite::setSprite(Resources& resources, String spriteSheetName, String imageName, String materialName)
 {
+	Expects (!spriteSheetName.isEmpty());
+	Expects (!imageName.isEmpty());
+
 	if (materialName == "") {
 		materialName = "Halley/Sprite";
 	}
@@ -258,6 +262,7 @@ Sprite& Sprite::setSprite(Resources& resources, String spriteSheetName, String i
 
 Sprite& Sprite::setSprite(const SpriteSheet& sheet, String name)
 {
+	Expects (!name.isEmpty());
 	setSprite(sheet.getSprite(name));
 	return *this;
 }

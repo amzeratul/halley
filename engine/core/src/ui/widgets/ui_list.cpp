@@ -92,6 +92,9 @@ void UIList::draw(UIPainter& painter) const
 void UIList::updateInputDevice(InputDevice& device)
 {
 	Expects(nColumns >= 1);
+
+	int nCols;
+	int nRows;
 	auto checkButton = [&] (int button) { return button >= 0 && device.isButtonPressed(button); };
 
 	int option = curOption;
@@ -105,9 +108,22 @@ void UIList::updateInputDevice(InputDevice& device)
 	}
 	option = modulo(option, int(items.size()));
 
+	Vector2i cursorPos;
+	if (orientation == UISizerType::Horizontal) {
+		nRows = 1;
+		nCols = int(items.size());
+		cursorPos = Vector2i(option, 0);
+	} else if (orientation == UISizerType::Vertical) {
+		nRows = int(items.size());
+		nCols = 1;
+		cursorPos = Vector2i(0, option);
+	} else {
+		nRows = int(items.size() + nColumns - 1) / nColumns;
+		nCols = nColumns;
+		cursorPos = Vector2i(option % nCols, option / nCols);
+	}
+
 	// Arrows
-	int nRows = int(items.size() + nColumns - 1) / nColumns;
-	Vector2i cursorPos(option % nColumns, option / nColumns);
 	if (inputButtons.xAxis != -1) {
 		cursorPos.x += device.getAxisRepeat(inputButtons.xAxis);
 	}
@@ -121,14 +137,14 @@ void UIList::updateInputDevice(InputDevice& device)
 		cursorPos.y += device.getAxisRepeat(inputButtons.yAxisAlt);
 	}
 	cursorPos.y = modulo(cursorPos.y, nRows);
-	int columnsThisRow = (cursorPos.y == nRows - 1) ? int(items.size()) % nColumns : nColumns;
+	int columnsThisRow = (cursorPos.y == nRows - 1) ? int(items.size()) % nCols : nCols;
 	if (columnsThisRow == 0) { // If the last column is full, this will happen
-		columnsThisRow = nColumns;
+		columnsThisRow = nCols;
 	}
 	cursorPos.x = modulo(cursorPos.x, columnsThisRow); // The last row has fewer elements
 
 	// Actually update the selection, if it changed
-	setSelectedOption(cursorPos.x + cursorPos.y * nColumns);
+	setSelectedOption(cursorPos.x + cursorPos.y * nCols);
 
 	if (checkButton(inputButtons.accept)) {
 		sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId()));
