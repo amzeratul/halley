@@ -27,5 +27,7 @@ namespace Halley
 		virtual Vector<std::shared_ptr<InputTouch>> getTouchEvents() = 0;
 
 		virtual void setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction) = 0;
+
+		virtual void requestControllerSetup(int numControllers, std::function<void(bool)> callback) { callback(true); }
 	};
 }

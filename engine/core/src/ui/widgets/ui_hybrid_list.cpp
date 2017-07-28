@@ -20,7 +20,7 @@ UIHybridList::UIHybridList(const String& id, AddCallback callback, std::shared_p
 	UIWidget::add(buttons);
 }
 
-void UIHybridList::add(const String& id)
+void UIHybridList::addId(const String& id)
 {
 	list->addItem(id, callback(id), 0, innerBorder ? innerBorder.get() : style->getBorder("button.innerBorder"));
 

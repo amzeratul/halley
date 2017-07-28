@@ -8,7 +8,7 @@ namespace Halley {
 
 		explicit UIHybridList(const String& id, AddCallback callback, std::shared_ptr<UIStyle> style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1, Maybe<Vector4f> innerBorder = {});
 
-		void add(const String& id);
+		void addId(const String& id);
 
 		void setInputButtons(const UIList::Buttons& button);
 
