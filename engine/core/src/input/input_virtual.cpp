@@ -171,16 +171,25 @@ int InputVirtual::getAxisRepeat(int n)
 
 void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
 {
+	if (!lastDevice) {
+		lastDevice = device;
+	}
 	buttons.at(n).push_back(Bind(device, deviceN));
 }
 
 void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
 {
+	if (!lastDevice) {
+		lastDevice = device;
+	}
 	axes.at(n).binds.push_back(Bind(device, deviceN));
 }
 
 void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton)
 {
+	if (!lastDevice) {
+		lastDevice = device;
+	}
 	axes.at(n).binds.push_back(Bind(device, negativeButton, positiveButton));
 }
 

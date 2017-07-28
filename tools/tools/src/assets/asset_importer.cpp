@@ -57,7 +57,12 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 	} else if (root == "bitmap_font") {
 		type = ImportAssetType::BitmapFont;
 	} else if (root == "image") {
-		type = ImportAssetType::Image;
+		auto file = path.getFilename().toString();
+		if (file.endsWith(".ase") || file.endsWith(".ase.meta")) {
+			type = ImportAssetType::Aseprite;
+		} else {
+			type = ImportAssetType::Image;
+		}
 	} else if (root == "animation") {
 		type = ImportAssetType::Animation;
 	} else if (root == "material") {
@@ -66,8 +71,6 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 		type = ImportAssetType::Config;
 	} else if (root == "audio") {
 		type = ImportAssetType::Audio;
-	} else if (root == "aseprite") {
-		type = ImportAssetType::Aseprite;
 	} else if (root == "spritesheet") {
 		type = ImportAssetType::SpriteSheet;
 	} else if (root == "shader") {
