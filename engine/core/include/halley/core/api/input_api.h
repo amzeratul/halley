@@ -3,11 +3,19 @@
 #include <functional>
 #include "halley/maths/vector2.h"
 #include "halley/core/input/input_device.h"
+#include "halley/maths/colour.h"
+#include "halley/data_structures/maybe.h"
 
 namespace Halley
 {
 	class InputJoystick;
 	class InputTouch;
+
+	class InputControllerData {
+	public:
+		Colour colour;
+		String name;
+	};
 
 	class InputAPI
 	{
@@ -28,6 +36,6 @@ namespace Halley
 
 		virtual void setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction) = 0;
 
-		virtual void requestControllerSetup(int numControllers, std::function<void(bool)> callback) { callback(true); }
+		virtual void requestControllerSetup(int minControllers, int maxControllers, std::function<void(bool)> callback, Maybe<std::vector<InputControllerData>> controllerData = {}) { callback(true); }
 	};
 }
