@@ -20,19 +20,18 @@ void UIParent::removeChild(UIWidget& widget)
 
 bool UIParent::addNewChildren(UIInputType inputType)
 {
-	if (childrenWaiting.empty()) {
-		return false;
-	}
+	bool addedAny = !childrenWaiting.empty();
 
 	for (auto& c: childrenWaiting) {
 		c->setInputType(inputType);
 		children.emplace_back(std::move(c));
 	}
 	childrenWaiting.clear();
+
 	for (auto& c: children) {
-		c->addNewChildren(inputType);
+		addedAny |= c->addNewChildren(inputType);
 	}
-	return true;
+	return addedAny;
 }
 
 bool UIParent::removeDeadChildren()
