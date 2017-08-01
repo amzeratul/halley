@@ -1,6 +1,6 @@
 #pragma once
 #include "ui_image.h"
-#include "input/input_joystick.h"
+#include "halley/core/input/input_joystick.h"
 
 namespace Halley {
 	class UIGamepadImage : public UIImage {
