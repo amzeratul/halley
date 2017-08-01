@@ -39,7 +39,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 
 	// Remove dead
 	removeDeadChildren();
-	addNewChildren();
+	bool added = addNewChildren(activeInputType);
 
 	// Update new windows
 	if (topChildChanged) {

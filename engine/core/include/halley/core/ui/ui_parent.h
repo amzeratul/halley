@@ -4,6 +4,7 @@
 #include "halley/text/halleystring.h"
 
 namespace Halley {
+	enum class UIInputType;
 	class UIEvent;
 	class UIWidget;
 	class UIRoot;
@@ -18,8 +19,8 @@ namespace Halley {
 		void addChild(std::shared_ptr<UIWidget> widget);
 		void removeChild(UIWidget& widget);
 
-		void addNewChildren();
-		void removeDeadChildren();
+		bool addNewChildren(UIInputType inputType);
+		bool removeDeadChildren();
 
 		std::vector<std::shared_ptr<UIWidget>>& getChildren();
 		const std::vector<std::shared_ptr<UIWidget>>& getChildren() const;

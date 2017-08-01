@@ -18,18 +18,24 @@ void UIParent::removeChild(UIWidget& widget)
 	topChildChanged = true;
 }
 
-void UIParent::addNewChildren()
+bool UIParent::addNewChildren(UIInputType inputType)
 {
+	if (childrenWaiting.empty()) {
+		return false;
+	}
+
 	for (auto& c: childrenWaiting) {
+		c->setInputType(inputType);
 		children.emplace_back(std::move(c));
 	}
 	childrenWaiting.clear();
 	for (auto& c: children) {
-		c->addNewChildren();
+		c->addNewChildren(inputType);
 	}
+	return true;
 }
 
-void UIParent::removeDeadChildren()
+bool UIParent::removeDeadChildren()
 {
 	auto before = children.size();
 
@@ -43,6 +49,9 @@ void UIParent::removeDeadChildren()
 
 	if (before != children.size()) {
 		topChildChanged = true;
+		return true;
+	} else {
+		return false;
 	}
 }
 
