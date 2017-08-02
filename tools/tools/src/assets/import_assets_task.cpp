@@ -49,15 +49,40 @@ void ImportAssetsTask::run()
 	}
 }
 
-static void loadMetaData(Metadata& meta, const Path& path)
+static void loadMetaTable(Metadata& meta, const YAML::Node& root)
 {
-	auto data = ResourceDataStatic::loadFromFileSystem(path);
-	auto root = YAML::Load(data->getString());
-
 	for (YAML::const_iterator it = root.begin(); it != root.end(); ++it) {
 		String key = it->first.as<std::string>();
 		String value = it->second.as<std::string>();
 		meta.set(key, value);
+	}
+}
+
+static void loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta, String assetId)
+{
+	auto data = ResourceDataStatic::loadFromFileSystem(path);
+	auto root = YAML::Load(data->getString());
+
+	if (isDirectoryMeta) {
+		for (auto& rootList: root) {
+			bool matches = true;
+			for (YAML::const_iterator i0 = rootList.begin(); i0 != rootList.end(); ++i0) {
+				auto name = i0->first.as<std::string>();
+				if (name == "match") {
+					matches = false;
+					for (auto& pattern: i0->second) {
+						if (assetId.contains(pattern.as<std::string>())) {
+							matches = true;
+							break;
+						}
+					}
+				} else if (name == "data" && matches) {
+					loadMetaTable(meta, i0->second);
+				}
+			}
+		}
+	} else {
+		loadMetaTable(meta, root);
 	}
 }
 
@@ -72,7 +97,7 @@ static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& as
 
 			for (auto& i: asset.inputFiles) {
 				if (i.first.getExtension() == ".meta" && (i.first.getFilename() == "_dir.meta") == isDirectoryMeta) {
-					loadMetaData(*meta, asset.srcDir / i.first);
+					loadMetaData(*meta, asset.srcDir / i.first, isDirectoryMeta, asset.assetId);
 				}
 			}
 		}

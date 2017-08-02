@@ -54,9 +54,21 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 
 	bool codegen = srcPaths.size() == 1 && srcPaths[0] == project.getGenSrcPath();
 
+	std::vector<Path> directoryMetas;
+
 	// Enumerate all potential assets
 	for (auto srcPath : srcPaths) {
-		for (auto filePath : FileSystem::enumerateDirectory(srcPath)) {
+		auto allFiles = FileSystem::enumerateDirectory(srcPath);
+
+		// First, collect all directory metas
+		for (auto& filePath : allFiles) {
+			if (filePath.getFilename() == "_dir.meta") {
+				directoryMetas.push_back(filePath);
+			}
+		}
+
+		// Next, go through normal assets
+		for (auto& filePath : allFiles) {
 			if (filePath.getFilename() == "_dir.meta") {
 				continue;
 			}
@@ -76,9 +88,9 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 				asset.inputFiles.push_back(input);
 
 				// Check if there's a directory metafile to add
-				auto dirMetaPath = filePath.parentPath() / "_dir.meta";
-				if (FileSystem::exists(srcPath / dirMetaPath)) {
-					asset.inputFiles.push_back(TimestampedPath(dirMetaPath, FileSystem::getLastWriteTime(srcPath / dirMetaPath)));
+				auto dirMetaPath = findDirectoryMeta(directoryMetas, filePath);
+				if (dirMetaPath && FileSystem::exists(srcPath / dirMetaPath.get())) {
+					asset.inputFiles.push_back(TimestampedPath(dirMetaPath.get(), FileSystem::getLastWriteTime(srcPath / dirMetaPath.get())));
 				}
 			} else {
 				// Already exists
@@ -121,4 +133,16 @@ std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::filterNeedsImporting(Imp
 	}
 
 	return toImport;
+}
+
+Maybe<Path> CheckAssetsTask::findDirectoryMeta(const std::vector<Path>& metas, const Path& path) const
+{
+	auto parent = path.parentPath();
+	for (auto& m: metas) {
+		auto n = m.getNumberPaths() - 1;
+		if (m.getFront(n) == parent.getFront(n)) {
+			return m;
+		}
+	}
+	return {};
 }
