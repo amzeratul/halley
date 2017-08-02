@@ -196,7 +196,7 @@ std::unique_ptr<Image> AsepriteImporter::generateAtlas(const String& assetName, 
 	}
 
 	// Try packing
-	int maxSize = 2048;
+	int maxSize = 4096;
 	int curSize = 32;
 	bool wide = false;
 	while (curSize < maxSize) {
