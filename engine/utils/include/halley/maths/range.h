@@ -30,6 +30,11 @@ namespace Halley {
 		T s;
 		T e;
 
+		Range()
+			: s{}
+			, e{}
+		{}
+
 		Range(T start, T end) {
 			if (start < end) {
 				s = start;
