@@ -102,3 +102,8 @@ const Metadata& ResourceLocator::getMetaData(const String& asset, AssetType type
 		throw Exception("Unable to locate resource: " + asset);
 	}
 }
+
+bool ResourceLocator::exists(const String& asset)
+{
+	return locators.find(asset) != locators.end();
+}

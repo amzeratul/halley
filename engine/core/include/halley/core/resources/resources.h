@@ -63,6 +63,12 @@ namespace Halley {
 		}
 
 		template <typename T>
+		bool exists(const String& name)
+		{
+			return of<T>().exists(name);
+		}
+
+		template <typename T>
 		std::vector<String> enumerate()
 		{
 			return of<T>().enumerate();

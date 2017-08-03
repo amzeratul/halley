@@ -84,6 +84,17 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& assetId, R
 	return newRes;
 }
 
+bool ResourceCollectionBase::exists(const String& assetId)
+{
+	// Look in cache
+	auto res = resources.find(assetId);
+	if (res != resources.end()) {
+		return true;
+	}
+
+	return parent.locator->exists(assetId);
+}
+
 void ResourceCollectionBase::setResource(int curDepth, const String& name, std::shared_ptr<Resource> resource) {
 	resources.emplace(name, Wrapper(resource, curDepth));
 }
