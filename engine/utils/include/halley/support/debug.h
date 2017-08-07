@@ -43,6 +43,7 @@ namespace Halley {
 
 		static void trace(const char* filename, int line, const char* arg = nullptr);
 		static String getLastTraces();
+		static void printLastTraces();
 
 	private:
 		Debug();

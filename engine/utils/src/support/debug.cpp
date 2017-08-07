@@ -429,5 +429,21 @@ Halley::String Halley::Debug::getLastTraces()
 	return result;
 }
 
+void Debug::printLastTraces()
+{
+	const size_t n = lastTraces.size();
+	for (size_t i = 0; i < n; ++i) {
+		auto& trace = lastTraces[(i + tracePos) % n];
+		std::cout << " - " << trace.filename << ":" << toString(trace.line);
+		if (trace.arg[0] != 0) {
+			std::cout << " [" << trace.arg.data() << "]";
+		}
+		if (i == n - 1) {
+			std::cout << " [latest]";
+		}
+		std::cout << std::endl;
+	}
+}
+
 std::array<Halley::DebugTraceEntry, 32> Halley::Debug::lastTraces;
 int Halley::Debug::tracePos = 0;

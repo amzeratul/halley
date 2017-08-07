@@ -129,11 +129,18 @@ bool Executor::runPending()
 void Executor::runForever()
 {
 #if HAS_THREADS
-	while (running)	{
-		auto next = queue.getNext();
-		if (running) {
-			next();
+	try {
+		while (running)	{
+			auto next = queue.getNext();
+			if (running) {
+				next();
+			}
 		}
+	} catch (std::exception& e) {
+		Logger::logError("Executor aborting due to exception.");
+		Logger::logException(e);
+	} catch (...) {
+		Logger::logError("Executor aborting due to unknown exception.");
 	}
 #endif
 }

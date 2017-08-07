@@ -186,6 +186,7 @@ void World::onEntityDirty()
 
 void World::deleteEntity(Entity* entity)
 {
+	Expects (entity);
 	entity->~Entity();
 	PoolAllocator<Entity>::free(entity);
 }

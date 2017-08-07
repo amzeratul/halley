@@ -130,7 +130,11 @@ std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
 	auto result = locator.getStatic(name, type);
 	if (result) {
 		if (metadata->getString("asset_compression", "") == "deflate") {
-			result->inflate();
+			try {
+				result->inflate();
+			} catch (Exception &e) {
+				throw Exception("Failed to load resource \"" + getName() + "\" due to inflate exception: " + e.what());
+			}
 		}
 		loaded = true;
 	}

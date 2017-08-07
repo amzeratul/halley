@@ -2,6 +2,8 @@
 #include <memory>
 #include "halley/file/compression.h"
 #include "../../contrib/lodepng/lodepng.h"
+#include "halley/support/exception.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 
@@ -51,8 +53,10 @@ std::shared_ptr<const char> Compression::inflateRaw(gsl::span<const gsl::byte> b
 	LodePNGDecompressSettings settings;
 	lodepng_decompress_settings_init(&settings);
 	lodepng_zlib_decompress(&out, &outSize, reinterpret_cast<const unsigned char*>(bytes.data() + 8), bytes.size_bytes() - 8, &settings);
-	
-	Expects(outSize == expectedOutSize);
+
+	if (outSize != expectedOutSize) {
+		throw Exception("Unexpected outsize (" + toString(outSize) + ") when inflating data, expected (" + toString(expectedOutSize) + ").");
+	}
 	
 	size = outSize;
 	auto rawResult = new char[outSize];
