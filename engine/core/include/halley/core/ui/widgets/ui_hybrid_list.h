@@ -4,7 +4,12 @@
 namespace Halley {
     class UIHybridList : public UIWidget {
     public:
-		using AddCallback = std::function<std::shared_ptr<UIWidget>(const String&)>;
+		enum class AddType {
+			Button,
+			List
+		};
+
+		using AddCallback = std::function<std::shared_ptr<UIWidget>(const String&, AddType)>;
 
 		explicit UIHybridList(const String& id, AddCallback callback, std::shared_ptr<UIStyle> style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1, Maybe<Vector4f> innerBorder = {});
 

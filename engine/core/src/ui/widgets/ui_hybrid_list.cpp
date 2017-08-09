@@ -22,10 +22,10 @@ UIHybridList::UIHybridList(const String& id, AddCallback callback, std::shared_p
 
 void UIHybridList::addId(const String& id)
 {
-	list->addItem(id, callback(id), 0, innerBorder ? innerBorder.get() : style->getBorder("button.innerBorder"));
+	list->addItem(id, callback(id, AddType::List), 0, innerBorder ? innerBorder.get() : style->getBorder("button.innerBorder"));
 
 	auto button = std::make_shared<UIButton>(id, style, UISizer(UISizerType::Horizontal), innerBorder);
-	button->add(callback(id));
+	button->add(callback(id, AddType::Button));
 	buttons->add(button);
 }
 
