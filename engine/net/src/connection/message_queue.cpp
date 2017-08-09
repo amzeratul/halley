@@ -139,7 +139,7 @@ void MessageQueue::enqueue(std::unique_ptr<NetworkMessage> msg, int channelNumbe
 
 void MessageQueue::sendAll()
 {
-	int firstTag = nextPacketId;
+	//int firstTag = nextPacketId;
 	std::vector<ReliableSubPacket> toSend;
 
 	// Add packets which need to be re-sent

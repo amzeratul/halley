@@ -56,7 +56,11 @@ void AudioMixer::compressRange(gsl::span<AudioSamplePack> buffer)
 
 #ifdef HAS_SSE
 
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+
+#include <intrin.h>
+
+#else
 
 #include <cpuid.h>
 static inline unsigned long long _xgetbv(unsigned int index){

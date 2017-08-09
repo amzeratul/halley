@@ -55,7 +55,6 @@ void ReliableConnection::send(OutboundNetworkPacket&& packet)
 
 void ReliableConnection::sendTagged(gsl::span<ReliableSubPacket> subPackets)
 {
-	bool first = true;
 	unsigned short firstSeq = nextSequenceToSend;
 	std::array<gsl::byte, 2048> buffer;
 	gsl::span<gsl::byte, 2048> dst(buffer);

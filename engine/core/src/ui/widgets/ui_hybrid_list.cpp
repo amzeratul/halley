@@ -11,7 +11,7 @@ UIHybridList::UIHybridList(const String& id, AddCallback callback, std::shared_p
 	, innerBorder(innerBorder)
 {
 	list = std::make_shared<UIList>(id + "_list", style, orientation, nColumns);
-	list->setOnlyEnabledWithInputs({{ UIInputType::Gamepad, }});
+	list->setOnlyEnabledWithInputs({ UIInputType::Gamepad });
 
 	buttons = std::make_shared<UIWidget>(id + "_buttons", Vector2f(), UISizer(orientation, style->getFloat("list.gap"), nColumns));
 	buttons->setOnlyEnabledWithInputs({{ UIInputType::Mouse, UIInputType::Keyboard }});

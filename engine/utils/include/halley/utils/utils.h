@@ -31,6 +31,10 @@
 #include <functional>
 #include <halley/data_structures/vector.h>
 
+#ifdef _MSC_VER
+#include <xmmintrin.h>
+#endif
+
 
 namespace Halley {
 	// General aliases
