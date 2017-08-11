@@ -50,6 +50,7 @@ namespace Halley {
 
 		void setPosition(Vector2f pos);
 		void setMinSize(Vector2f size);
+		void setInnerBorder(Vector4f border);
 
 		void setFocused(bool focused);
 		void setMouseOver(bool mouseOver);

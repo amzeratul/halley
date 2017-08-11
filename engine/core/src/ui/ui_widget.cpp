@@ -50,7 +50,7 @@ void UIWidget::doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice)
 		if (eventHandler) {
 			eventHandler->pump();
 		}
-	}
+	}	
 }
 
 Vector2f UIWidget::computeMinimumSize() const
@@ -77,6 +77,10 @@ void UIWidget::setRect(Rect4f rect)
 		auto border = getInnerBorder();
 		auto p0 = getPosition();
 		sizer.get().setRect(Rect4f(p0 + Vector2f(border.x, border.y), p0 + rect.getSize() - Vector2f(border.z, border.w)));
+	} else {
+		for (auto& c: getChildren()) {
+			c->layout();
+		}
 	}
 }
 
@@ -191,6 +195,11 @@ void UIWidget::setPosition(Vector2f pos)
 void UIWidget::setMinSize(Vector2f size)
 {
 	minSize = size;
+}
+
+void UIWidget::setInnerBorder(Vector4f border)
+{
+	innerBorder = border;
 }
 
 void UIWidget::setFocused(bool f)
