@@ -230,11 +230,15 @@ std::unique_ptr<Image> AsepriteImporter::makeAtlas(const String& assetName, cons
 		ImageData* img = reinterpret_cast<ImageData*>(packedImg.data);
 		image->blitFrom(packedImg.rect.getTopLeft(), *img->img, img->clip, packedImg.rotated);
 
+		auto borderTL = img->clip.getTopLeft();
+		auto borderBR = img->img->getSize() - img->clip.getSize() - borderTL;
+
 		SpriteSheetEntry entry;
 		entry.size = Vector2f(img->clip.getSize());
 		entry.rotated = packedImg.rotated;
 		entry.pivot = Vector2f(pivot - img->clip.getTopLeft()) / entry.size;
 		entry.coords = Rect4f(packedImg.rect) / Vector2f(size);
+		entry.trimBorder = Vector4i(borderTL.x, borderTL.y, borderBR.x, borderBR.y);
 		spriteSheet.addSprite(img->filename, entry);
 	}
 

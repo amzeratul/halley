@@ -18,7 +18,10 @@ void UIImage::draw(UIPainter& painter) const
 void UIImage::update(Time t, bool moved)
 {
 	if (moved || dirty) {
-		sprite.setPos(getPosition()).scaleTo(getSize());
+		auto b = sprite.getOuterBorder();
+		auto tl = Vector2f(float(b.x), float(b.y));
+		auto br = Vector2f(float(b.z), float(b.w));
+		sprite.setPos(getPosition()).setScale(getSize() / (sprite.getRawSize() + tl + br));
 		dirty = false;
 	}
 }
@@ -26,11 +29,18 @@ void UIImage::update(Time t, bool moved)
 void UIImage::setSprite(Sprite s)
 {
 	sprite = s;
+
+	auto b = sprite.getOuterBorder();
+	auto tl = Vector2f(float(b.x), float(b.y));
+	auto br = Vector2f(float(b.z), float(b.w));
 	auto c = s.getClip();
+	
+	auto spriteSize = (s.getRawSize().abs() + tl + br) * s.getScale();
+	
 	if (c) {
-		setMinSize(Vector2f::min(s.getScaledSize().abs(), c.get().getSize()));
+		setMinSize(Vector2f::min(spriteSize, c.get().getSize()));
 	} else {
-		setMinSize(s.getScaledSize().abs());
+		setMinSize(spriteSize);
 	}
 	dirty = true;
 }

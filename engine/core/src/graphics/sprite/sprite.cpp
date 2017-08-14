@@ -270,6 +270,7 @@ Sprite& Sprite::setSprite(const SpriteSheet& sheet, String name)
 Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot)
 {
 	if (vertexAttrib.texRect != entry.coords) {
+		outerBorder = entry.trimBorder;
 		setSize(entry.size);
 		if (applyPivot) {
 			vertexAttrib.pivot = entry.pivot;
@@ -333,4 +334,19 @@ void Sprite::computeSize()
 Vector2f Sprite::getSize() const
 {
 	return size;
+}
+
+Vector2f Sprite::getRawSize() const
+{
+	return vertexAttrib.size;
+}
+
+Vector4i Sprite::getOuterBorder() const
+{
+	return outerBorder;
+}
+
+Vector2f Sprite::getScale() const
+{
+	return vertexAttrib.scale;
 }

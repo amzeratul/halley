@@ -33,6 +33,7 @@ void SpriteSheetEntry::serialize(Serializer& s) const
 	s << coords;
 	s << duration;
 	s << rotated;
+	s << trimBorder;
 }
 
 void SpriteSheetEntry::deserialize(Deserializer& s)
@@ -42,6 +43,7 @@ void SpriteSheetEntry::deserialize(Deserializer& s)
 	s >> coords;
 	s >> duration;
 	s >> rotated;
+	s >> trimBorder;
 }
 
 void SpriteSheetFrameTag::serialize(Serializer& s) const

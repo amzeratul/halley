@@ -7,6 +7,7 @@
 #include <halley/text/halleystring.h>
 #include <halley/data_structures/hash_map.h>
 #include <gsl/span>
+#include "halley/maths/vector4.h"
 
 namespace Halley
 {
@@ -25,6 +26,7 @@ namespace Halley
 		Rect4f coords;
 		int duration;
 		bool rotated;
+		Vector4i trimBorder;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

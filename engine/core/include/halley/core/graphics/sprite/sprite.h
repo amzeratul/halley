@@ -46,6 +46,9 @@ namespace Halley
 		bool isInView(Rect4f rect) const;
 		Vector2f getScaledSize() const;
 		Vector2f getSize() const;
+		Vector2f getRawSize() const;
+		Vector2f getScale() const;
+		Vector4i getOuterBorder() const;
 		
 		Sprite& setMaterial(Resources& resources, String materialName = "");
 		Sprite& setMaterial(std::shared_ptr<Material> m);
@@ -96,6 +99,7 @@ namespace Halley
 		bool flip = false;
 		bool sliced = false;
 		Maybe<Rect4f> clip;
+		Vector4i outerBorder;
 
 		void computeSize();
 	};

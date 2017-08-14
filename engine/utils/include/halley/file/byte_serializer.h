@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <utility>
 #include <boost/optional.hpp>
+#include "halley/maths/vector4.h"
 
 namespace Halley {
 	class String;
@@ -102,6 +103,12 @@ namespace Halley {
 		Serializer& operator<<(const Vector2D<T>& val)
 		{
 			return *this << val.x << val.y;
+		}
+
+		template <typename T>
+		Serializer& operator<<(const Vector4D<T>& val)
+		{
+			return *this << val.x << val.y << val.z << val.w;
 		}
 
 		template <typename T>
@@ -272,6 +279,16 @@ namespace Halley {
 		{
 			*this >> val.x;
 			*this >> val.y;
+			return *this;
+		}
+
+		template <typename T>
+		Deserializer& operator>>(Vector4D<T>& val)
+		{
+			*this >> val.x;
+			*this >> val.y;
+			*this >> val.z;
+			*this >> val.w;
 			return *this;
 		}
 
