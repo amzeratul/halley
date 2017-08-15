@@ -20,11 +20,14 @@ void main() {
 	float texGrad = max(dx, dy);
 
 	float a = texture(tex0, v_texCoord0).a;
-	float s = u_smoothness * texGrad;
+	float s = max(u_smoothness * texGrad, 0.001);
 	float inEdge = 0.5;
 	float outEdge = inEdge - clamp(u_outline, 0.0, 0.995) * 0.5;
 
-	float edge = smoothstep(clamp(outEdge - s, 0.01, 1.0), clamp(outEdge + s, 0.0, 0.99), a) * v_colour.a;
+	float edge0 = clamp(outEdge - s, 0.01, 0.98);
+	float edge1 = clamp(outEdge + s, edge0 + 0.01, 0.99);
+
+	float edge = smoothstep(edge0, edge1, a) * v_colour.a;
 	vec4 col = u_outlineColour;
 	outCol = vec4(col.rgb, col.a * edge);
 }
