@@ -225,6 +225,23 @@ void SystemSDL::showCursor(bool show)
 	SDL_ShowCursor(show ? 1 : 0);
 }
 
+Bytes SystemSDL::getSaveData(const String& path)
+{
+	// TODO
+	return {};
+}
+
+void SystemSDL::setSaveData(const String& path, const Bytes& data)
+{
+	// TODO
+}
+
+std::vector<String> SystemSDL::enumerateSaveData(const String& root)
+{
+	// TODO
+	return {};
+}
+
 void SystemSDL::printDebugInfo() const
 {
 	std::cout << std::endl << ConsoleColour(Console::GREEN) << "Initializing Video Display...\n" << ConsoleColour();

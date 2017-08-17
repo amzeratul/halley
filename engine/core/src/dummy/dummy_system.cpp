@@ -53,6 +53,20 @@ void DummySystemAPI::deInit()
 {
 }
 
+Bytes DummySystemAPI::getSaveData(const String& path)
+{
+	return Bytes();
+}
+
+void DummySystemAPI::setSaveData(const String& path, const Bytes& data)
+{
+}
+
+std::vector<String> DummySystemAPI::enumerateSaveData(const String& root)
+{
+	return {};
+}
+
 DummyWindow::DummyWindow(const WindowDefinition& definition) 
 	: definition(definition)
 {}

@@ -4,6 +4,9 @@
 namespace Halley {
 	class DummySystemAPI : public SystemAPIInternal {
 	public:
+		void init() override;
+		void deInit() override;
+
 		String getResourcesBasePath(const String& gamePath) const override;
 		std::unique_ptr<ResourceDataReader> getDataReader(String path, int64_t start, int64_t end) override;
 		std::unique_ptr<GLContext> createGLContext() override;
@@ -13,8 +16,10 @@ namespace Halley {
 		Rect4i getDisplayRect(int screen) const override;
 		void showCursor(bool show) override;
 		bool generateEvents(VideoAPI* video, InputAPI* input) override;
-		void init() override;
-		void deInit() override;
+
+		Bytes getSaveData(const String& path) override;
+		void setSaveData(const String& path, const Bytes& data) override;
+		std::vector<String> enumerateSaveData(const String& root) override;
 	};
 
 	class DummyWindow : public Window

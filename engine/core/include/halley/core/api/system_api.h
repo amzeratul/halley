@@ -35,6 +35,10 @@ namespace Halley
 
 		virtual void showCursor(bool show) = 0;
 
+		virtual Bytes getSaveData(const String& path) = 0;
+		virtual void setSaveData(const String& path, const Bytes& data) = 0;
+		virtual std::vector<String> enumerateSaveData(const String& root) = 0;
+
 	private:
 		friend class HalleyAPI;
 		friend class Core;

@@ -29,6 +29,10 @@ namespace Halley
 
 		void showCursor(bool show) override;
 
+		Bytes getSaveData(const String& path) override;
+		void setSaveData(const String& path, const Bytes& data) override;
+		std::vector<String> enumerateSaveData(const String& root) override;
+
 	private:
 		void processVideoEvent(VideoAPI* video, const SDL_Event& event);
 
