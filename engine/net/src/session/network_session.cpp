@@ -344,19 +344,19 @@ void NetworkSession::receiveControlMessage(int peerId, InboundNetworkPacket& pac
 	switch (header.type) {
 	case NetworkSessionControlMessageType::SetPeerId:
 		{
-			ControlMsgSetPeerId msg = Deserializer::fromBytes(packet.getBytes());
+			ControlMsgSetPeerId msg = Deserializer::fromBytes<ControlMsgSetPeerId>(packet.getBytes());
 			onControlMessage(peerId, msg);
 		}
 		break;
 	case NetworkSessionControlMessageType::SetSessionState:
 		{
-			ControlMsgSetSessionState msg = Deserializer::fromBytes(packet.getBytes());
+			ControlMsgSetSessionState msg = Deserializer::fromBytes<ControlMsgSetSessionState>(packet.getBytes());
 			onControlMessage(peerId, msg);
 		}
 		break;
 	case NetworkSessionControlMessageType::SetPeerState:
 		{
-			ControlMsgSetPeerState msg = Deserializer::fromBytes(packet.getBytes());
+			ControlMsgSetPeerState msg = Deserializer::fromBytes<ControlMsgSetPeerState>(packet.getBytes());
 			onControlMessage(peerId, msg);
 			retransmitControlMessage(peerId, origData);
 		}

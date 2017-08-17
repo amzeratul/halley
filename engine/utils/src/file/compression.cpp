@@ -7,6 +7,11 @@
 
 using namespace Halley;
 
+Bytes Compression::deflate(const Bytes& bytes)
+{
+	return deflate(gsl::as_bytes(gsl::span<const Byte>(bytes)));
+}
+
 Bytes Compression::deflate(gsl::span<const gsl::byte> bytes)
 {
 	Expects (sizeof(uint64_t) == 8);
@@ -25,6 +30,11 @@ Bytes Compression::deflate(gsl::span<const gsl::byte> bytes)
 	free(out);
 	
 	return result;
+}
+
+Bytes Compression::inflate(const Bytes& bytes)
+{
+	return inflate(gsl::as_bytes(gsl::span<const Byte>(bytes)));
 }
 
 Bytes Compression::inflate(gsl::span<const gsl::byte> bytes)

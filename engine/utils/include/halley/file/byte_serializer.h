@@ -163,43 +163,27 @@ namespace Halley {
 		}
 	};
 
-	class DeserializeHelper {
-    public:
-        DeserializeHelper(gsl::span<const gsl::byte> data)
-            : data(data)
-        {}
-
-        template <typename T> operator T() const;
-
-    private:
-        gsl::span<const gsl::byte> data;
-    };
-
-	class DeserializeBytesHelper {
-    public:
-        DeserializeBytesHelper(const Bytes& data)
-            : data(data)
-        {}
-
-        template <typename T> operator T() const;
-
-    private:
-        const Bytes& data;
-    };
-
 	class Deserializer {
 	public:
 		Deserializer(gsl::span<const gsl::byte> src);
 		explicit Deserializer(const Bytes& src);
-
-		static DeserializeBytesHelper fromBytes(const Bytes& src)
+		
+		template <typename T>
+		static T fromBytes(const Bytes& src)
 		{
-			return DeserializeBytesHelper(src);
+			T result;
+			Deserializer s(src);
+			s >> result;
+			return result;
 		}
 
-		static DeserializeHelper fromBytes(gsl::span<const gsl::byte> src)
+		template <typename T>
+		static T fromBytes(gsl::span<const gsl::byte> src)
 		{
-			return DeserializeHelper(src);
+			T result;
+			Deserializer s(src);
+			s >> result;
+			return result;
 		}
 
 		Deserializer& operator>>(bool& val) { return deserializePod(val); }
@@ -351,22 +335,4 @@ namespace Halley {
 			return *this;
 		}
 	};
-
-	template <typename T>
-	DeserializeHelper::operator T() const
-	{
-		T result;
-		Deserializer s(data);
-		s >> result;
-		return result;
-	}
-
-	template <typename T>
-	DeserializeBytesHelper::operator T() const
-	{
-		T result;
-		Deserializer s(data);
-		s >> result;
-		return result;
-	}
 }
