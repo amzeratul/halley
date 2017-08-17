@@ -36,6 +36,7 @@ namespace Halley {
 		virtual ComputerData getComputerData() override;
 		virtual String getUserDataDir() override;
 		void createDirectories(const Path& path) override;
+		std::vector<Path> enumerateDirectory(const Path& path) override;
 
 		int runCommand(String command) override;
 	};

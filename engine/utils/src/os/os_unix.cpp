@@ -151,4 +151,22 @@ void Halley::OSUnix::createDirectories(const Path& path)
 	mkpath(path.string().c_str(), 0777);
 }
 
+std::vector<Path> Halley::OSUnix::enumerateDirectory(const Path& path)
+{
+	std::vector<Path> result;
+
+	DIR* d;
+	struct dirent* dir;
+	d = opendir(path.string().c_str());
+	if (d) {
+		while ((dir = readdir(d)) != nullptr) {
+			result.push_back(Path(String(dir->d_name)));
+		}
+
+		closedir(d);
+	}
+
+	return result;
+}
+
 #endif
