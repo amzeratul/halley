@@ -92,6 +92,11 @@ void OS::createDirectories(const Path& path)
 {
 }
 
+std::vector<Path> OS::enumerateDirectory(const Path& path)
+{
+	return {};
+}
+
 void Halley::OS::setConsoleColor(int, int)
 {
 }

@@ -33,6 +33,8 @@ namespace Halley
 		void setSaveData(const String& path, const Bytes& data) override;
 		std::vector<String> enumerateSaveData(const String& root) override;
 
+		void setEnvironment(Environment* env) override;
+
 	private:
 		void processVideoEvent(VideoAPI* video, const SDL_Event& event);
 
@@ -41,7 +43,9 @@ namespace Halley
 		void initVideo() const;
 		void deInitVideo();
 
+	private:
 		std::vector<std::shared_ptr<SDLWindow>> windows;
 		mutable bool videoInit = false;
+		Path saveDir;
 	};
 }

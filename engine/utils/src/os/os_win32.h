@@ -42,6 +42,7 @@ namespace Halley {
 		Path parseProgramPath(const String&) override;
 		void setConsoleColor(int foreground, int background) override;
 		void createDirectories(const Path& path) override;
+		std::vector<Path> enumerateDirectory(const Path& path) override;
 
 		void onWindowCreated(void* window) override;
 
@@ -51,6 +52,7 @@ namespace Halley {
 		String runWMIQuery(String query, String parameter) const;
 		void loadWindowIcon(HWND hwnd);
 
+	private:
 		IWbemLocator *pLoc;
 		IWbemServices *pSvc;
 		HICON icon;

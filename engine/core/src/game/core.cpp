@@ -147,6 +147,7 @@ void Core::init()
 	// Initialize game
 	registerDefaultPlugins();
 	api = HalleyAPI::create(this, game->initPlugins(*this));
+	api->systemInternal->setEnvironment(environment.get());
 
 	// Resources
 	initResources();

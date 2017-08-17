@@ -61,6 +61,7 @@ namespace Halley
 	{
 	public:
 		virtual ~SystemAPIInternal() {}
+		virtual void setEnvironment(Environment* env) {}
 	};
 
 	class CoreAPIInternal : public CoreAPI, public IPluginRegistry {

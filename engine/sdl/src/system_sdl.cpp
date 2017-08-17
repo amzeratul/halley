@@ -1,5 +1,6 @@
 #include "system_sdl.h"
 #include <SDL.h>
+#include <fstream>
 #include "halley/core/api/halley_api_internal.h"
 #include <halley/support/console.h>
 #include <halley/support/exception.h>
@@ -227,19 +228,53 @@ void SystemSDL::showCursor(bool show)
 
 Bytes SystemSDL::getSaveData(const String& path)
 {
-	// TODO
-	return {};
+	Expects (!path.isEmpty());
+
+	Bytes result;
+
+	std::ifstream fp((saveDir / path).string(), std::ios::binary | std::ios::in);
+	if (!fp.is_open()) {
+		return result;
+	}
+
+	fp.seekg(0, std::ios::end);
+	size_t size = fp.tellg();
+	fp.seekg(0, std::ios::beg);
+	result.resize(size);
+
+	fp.read(reinterpret_cast<char*>(result.data()), size);
+	fp.close();
+
+	return result;
 }
 
 void SystemSDL::setSaveData(const String& path, const Bytes& data)
 {
-	// TODO
+	Expects (!path.isEmpty());
+
+	OS::get().createDirectories(saveDir);
+	std::ofstream fp((saveDir / path).string(), std::ios::binary | std::ios::out);
+	fp.write(reinterpret_cast<const char*>(data.data()), data.size());
+	fp.close();
 }
 
 std::vector<String> SystemSDL::enumerateSaveData(const String& root)
 {
-	// TODO
-	return {};
+	auto paths = OS::get().enumerateDirectory(saveDir);
+	std::vector<String> result;
+	for (auto& p: paths) {
+		auto path = p.string();
+		if (path != "." && path != "..") {
+			result.push_back(path);
+		}
+	}
+	return result;
+}
+
+void SystemSDL::setEnvironment(Environment* env)
+{
+	saveDir = env->getDataPath() / "save" / ".";
+	OS::get().createDirectories(saveDir);
 }
 
 void SystemSDL::printDebugInfo() const

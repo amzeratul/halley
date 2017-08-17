@@ -294,6 +294,24 @@ void OSWin32::createDirectories(const Path& path)
 	}
 }
 
+std::vector<Path> OSWin32::enumerateDirectory(const Path& path)
+{
+	std::vector<Path> result;
+
+	WIN32_FIND_DATAW ffd;
+	auto pathStr = path.getString() + "/*";
+	pathStr.replace("/", "\\", true);
+	auto handle = FindFirstFileW(pathStr.getUTF16().c_str(), &ffd);
+	if (handle != INVALID_HANDLE_VALUE) {
+		do {
+			auto filePath = Path(String(ffd.cFileName));
+			result.push_back(filePath);
+		} while (FindNextFileW(handle, &ffd) != 0);
+	}
+
+	return result;
+}
+
 int OSWin32::runCommand(String command)
 {
 	char buffer[1024];
