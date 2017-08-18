@@ -17,7 +17,7 @@ UIStyle::UIStyle(const ConfigNode& node, Resources& resources)
 	if (uiStyle.hasKey("sprites")) {
 		for (auto& spriteNode: uiStyle["sprites"].asMap()) {
 			String name = spriteNode.first;
-			if (spriteNode.second.getType() == ConfigNodeType::Scalar) {
+			if (spriteNode.second.getType() == ConfigNodeType::String) {
 				if (spriteNode.second.asString().isEmpty()) {
 					sprites[name] = defaultSprite;
 				} else {
