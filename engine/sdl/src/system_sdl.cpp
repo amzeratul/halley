@@ -263,8 +263,8 @@ std::vector<String> SystemSDL::enumerateSaveData(const String& root)
 	auto paths = OS::get().enumerateDirectory(saveDir);
 	std::vector<String> result;
 	for (auto& p: paths) {
-		auto path = p.string();
-		if (path != "." && path != "..") {
+		auto path = p.toString();
+		if (path.startsWith(root)) {
 			result.push_back(path);
 		}
 	}
