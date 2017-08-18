@@ -38,7 +38,16 @@ static ConfigNode parseYAMLNode(const YAML::Node& node)
 		}
 		result = std::move(list);
 	} else if (node.IsScalar()) {
-		result = String(node.as<std::string>());
+		auto str = String(node.as<std::string>());
+		if (str.isNumber()) {
+			if (str.isInteger()) {
+				result = str.toInteger();
+			} else {
+				result = str.toFloat();
+			}
+		} else {
+			result = str;
+		}
 	}
 
 	return result;
