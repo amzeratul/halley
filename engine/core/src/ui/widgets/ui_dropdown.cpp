@@ -1,5 +1,6 @@
 #include "halley/core/ui/widgets/ui_dropdown.h"
 #include "ui/ui_style.h"
+#include "ui/widgets/ui_image.h"
 
 using namespace Halley;
 
@@ -56,62 +57,38 @@ String UIDropdown::getSelectedOptionText() const
 
 void UIDropdown::draw(UIPainter& painter) const
 {
-	int offset = isOpen ? 1 : 0;
-
-	if (isOpen) {
-		painter.draw(dropdownSprite, offset);
-	}
-
-	painter.draw(sprite, offset);
-	painter.draw(label, offset);
-
-	if (isOpen) {
-		for (auto& label: optionsLabels) {
-			painter.draw(label, offset);
-		}
-	}
+	painter.draw(sprite);
+	painter.draw(label);
 }
 
 void UIDropdown::update(Time t, bool moved)
 {
+	if (isOpen) {
+		auto focus = getRoot()->getCurrentFocus();
+		if (!focus || (focus != this && !focus->isDescendentOf(*this))) {
+			close();
+		}
+	}
+
 	bool needUpdate = true;
 	sprite = isEnabled() ? (isMouseOver() ? style->getSprite("dropdown.hover") : style->getSprite("dropdown.normal")) : style->getSprite("dropdown.disabled");
 
 	if (needUpdate) {
 		sprite.setPos(getPosition()).scaleTo(getSize());
 		label.setAlignment(0.0f).setPosition(getPosition() + Vector2f(3, 0));
-		
-		for (size_t i = 0; i < optionsLabels.size(); ++i) {
-			optionsLabels[i].setPosition(getPosition() + Vector2f(3.0f, float((i + 1) * 14)));
-		}
-		dropdownSprite.setPos(getPosition());
-	}
 
-	if (!isOpen) {
-		optionsLabels.clear();
+		if (dropdownWindow) {
+			dropdownWindow->setPosition(getPosition() + Vector2f(0.0f, getSize().y));
+		}
 	}
 }
 
 void UIDropdown::onClicked(Vector2f mousePos)
 {
 	if (isOpen) {
-		isOpen = false;
-		Vector2f relPos = mousePos - getPosition();
-		float entryH = 14.0f;
-		int idx = clamp(int(std::floor(relPos.y / entryH)) - 1, 0, int(options.size() - 1));
-		setSelectedOption(idx);
+		close();
 	} else {
-		isOpen = true;
-		optionsLabels.clear();
-		optionsExtent = Vector2f(getSize().x, 14);
-		for (auto& o: options) {
-			optionsLabels.push_back(style->getTextRenderer("input.label").clone().setText(o));
-			auto ext = optionsLabels.back().getExtents();
-			optionsExtent.x = std::max(optionsExtent.x, ext.x + 14);
-			optionsExtent.y += 14;
-		}
-		dropdownSprite = style->getSprite("dropdown.normal");
-		dropdownSprite.setPos(getPosition()).scaleTo(optionsExtent);
+		open();
 	}
 }
 
@@ -124,16 +101,43 @@ bool UIDropdown::isFocusLocked() const
 	return isOpen || UIClickable::isFocusLocked();
 }
 
-void UIDropdown::onFocusLost()
+void UIDropdown::open()
 {
-	isOpen = false;
+	if (!isOpen) {
+		isOpen = true;
+	
+		dropdown = std::make_shared<UIList>(getId() + "_list", style);
+		int i = 0;
+		for (auto& o: options) {
+			dropdown->addTextItem(toString(i++), o);
+		}
+		dropdown->setSelectedOption(curOption);
+
+		dropdownWindow = std::make_shared<UIImage>(style->getSprite("dropdown.background"), UISizer(UISizerType::Vertical), style->getBorder("dropdown.innerBorder"));
+		dropdownWindow->add(dropdown);
+		dropdownWindow->setMinSize(Vector2f(getSize().x + 1, 16));
+		addChild(dropdownWindow);
+
+		dropdown->getEventHandler().setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
+		{
+			setSelectedOption(event.getData().toInteger());
+			close();
+		});
+	}
 }
 
-Rect4f UIDropdown::getMouseRect() const
+void UIDropdown::close()
 {
 	if (isOpen) {
-		return Rect4f(getPosition(), getPosition() + optionsExtent);
-	} else {
-		return UIWidget::getMouseRect();
+		isOpen = false;
+
+		dropdownWindow->destroy();
+		dropdownWindow.reset();
 	}
+}
+
+void UIDropdown::drawChildren(UIPainter& painter) const
+{
+	auto p = painter.withAdjustedLayer(1);
+	UIWidget::drawChildren(p);
 }

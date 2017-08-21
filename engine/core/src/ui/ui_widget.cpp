@@ -21,9 +21,7 @@ void UIWidget::doDraw(UIPainter& painter) const
 {
 	if (active) {
 		draw(painter);
-		for (auto& c: getChildren()) {
-			c->doDraw(painter);
-		}
+		drawChildren(painter);
 	}
 }
 
@@ -202,14 +200,14 @@ void UIWidget::setInnerBorder(Vector4f border)
 	innerBorder = border;
 }
 
-void UIWidget::setFocused(bool f)
+void UIWidget::setFocused(bool f, UIWidget* newFocus)
 {
 	if (focused != f) {
 		focused = f;
 		if (focused) {
 			onFocus();
 		} else {
-			onFocusLost();
+			onFocusLost(newFocus);
 		}
 	}
 }
@@ -274,6 +272,19 @@ void UIWidget::destroy()
 	alive = false;
 }
 
+bool UIWidget::isDescendentOf(const UIWidget& ancestor) const
+{
+	if (!parent) {
+		return false;
+	}
+
+	if (parent == &ancestor) {
+		return true;
+	}
+
+	return parent->isDescendentOf(ancestor);
+}
+
 void UIWidget::setEventHandler(std::shared_ptr<UIEventHandler> handler)
 {
 	eventHandler = handler;
@@ -314,6 +325,13 @@ void UIWidget::draw(UIPainter& painter) const
 {
 }
 
+void UIWidget::drawChildren(UIPainter& painter) const
+{
+	for (auto& c: getChildren()) {
+		c->doDraw(painter);
+	}
+}
+
 void UIWidget::update(Time t, bool moved)
 {
 }
@@ -322,7 +340,7 @@ void UIWidget::onFocus()
 {
 }
 
-void UIWidget::onFocusLost()
+void UIWidget::onFocusLost(UIWidget* newFocus)
 {
 }
 

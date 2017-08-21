@@ -4,6 +4,7 @@
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/text/text_renderer.h"
 #include "ui_button.h"
+#include "ui_list.h"
 
 namespace Halley {
 	class UIStyle;
@@ -20,28 +21,26 @@ namespace Halley {
 
 	protected:
 		void draw(UIPainter& painter) const override;
+		void drawChildren(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
 		void onClicked(Vector2f mousePos) override;
 		void doSetState(State state) override;
 
 		bool isFocusLocked() const override;
-		void onFocusLost() override;
-
-		Rect4f getMouseRect() const override;
 
 	private:
 		Sprite sprite;
-		Sprite dropdownSprite;
 		TextRenderer label;
 		std::shared_ptr<UIStyle> style;
-
-		int curOptionHighlight = -1;
-		Vector2f optionsExtent;
-		std::vector<TextRenderer> optionsLabels;
-
+		std::shared_ptr<UIWidget> dropdownWindow;
+		std::shared_ptr<UIList> dropdown;
+		
 		std::vector<String> options;
 		int curOption = 0;
 		bool isOpen = false;
+
+		void open();
+		void close();
     };
 }

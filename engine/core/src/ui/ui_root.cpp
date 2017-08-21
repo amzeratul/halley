@@ -144,12 +144,12 @@ void UIRoot::setFocus(std::shared_ptr<UIWidget> focus)
 	auto curFocus = currentFocus.lock();
 	if (curFocus != focus) {
 		if (curFocus) {
-			curFocus->setFocused(false);
+			curFocus->setFocused(false, focus.get());
 		}
 
 		currentFocus = focus;
 		if (focus) {
-			focus->setFocused(true);
+			focus->setFocused(true, focus.get());
 		}
 	}
 }
@@ -258,4 +258,9 @@ bool UIRoot::hasModalUI() const
 bool UIRoot::isMouseOverUI() const
 {
 	return static_cast<bool>(currentMouseOver.lock());
+}
+
+UIWidget* UIRoot::getCurrentFocus() const
+{
+	return currentFocus.lock().get();
 }

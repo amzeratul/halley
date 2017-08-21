@@ -10,12 +10,39 @@ UIPainter::UIPainter(SpritePainter& painter, int mask, int layer)
 {
 }
 
-void UIPainter::draw(const Sprite& sprite, int layerOffset)
+UIPainter UIPainter::clone() const
 {
-	painter.add(sprite, mask, layer + layerOffset, float(n++));
+	auto result = UIPainter(painter, mask, layer);
+	result.n = n;
+	return result;
 }
 
-void UIPainter::draw(const TextRenderer& sprite, int layerOffset)
+UIPainter UIPainter::withAdjustedLayer(int delta) const
 {
-	painter.add(sprite, mask, layer + layerOffset, float(n++));
+	auto result = clone();
+	result.layer += delta;
+	return result;
+}
+
+UIPainter UIPainter::withClip(Rect4i clip) const
+{
+	auto result = clone();
+	if (result.clip) {
+		auto prev = result.clip.get();
+		auto size = Vector2i::min(prev.getSize(), clip.getSize());
+		result.clip = Rect4i(prev.getTopLeft() + clip.getTopLeft(), size.x, size.y);
+	} else {
+		result.clip = clip;
+	}
+	return result;
+}
+
+void UIPainter::draw(const Sprite& sprite)
+{
+	painter.add(sprite, mask, layer, float(n++));
+}
+
+void UIPainter::draw(const TextRenderer& sprite)
+{
+	painter.add(sprite, mask, layer, float(n++));
 }
