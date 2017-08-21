@@ -12,15 +12,15 @@ namespace Halley {
 		UIPainter(SpritePainter& painter, int mask, int layer);
 
 		void draw(const Sprite& sprite);
-		void draw(const TextRenderer& sprite);
+		void draw(const TextRenderer& text);
 
 		UIPainter clone() const;
 		UIPainter withAdjustedLayer(int delta) const;
-		UIPainter withClip(Rect4i clip) const;
+		UIPainter withClip(Rect4f clip) const;
 
 	private:
 		SpritePainter& painter;
-		Maybe<Rect4i> clip;
+		Maybe<Rect4f> clip;
 		int mask;
 		int layer;
 		int n;

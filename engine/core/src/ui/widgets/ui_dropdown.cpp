@@ -1,6 +1,7 @@
 #include "halley/core/ui/widgets/ui_dropdown.h"
 #include "ui/ui_style.h"
 #include "ui/widgets/ui_image.h"
+#include "ui/widgets/ui_scroll_pane.h"
 
 using namespace Halley;
 
@@ -113,8 +114,11 @@ void UIDropdown::open()
 		}
 		dropdown->setSelectedOption(curOption);
 
+		auto clip = std::make_shared<UIScrollPane>(Vector2f(0, 80));
+		clip->add(dropdown);
+
 		dropdownWindow = std::make_shared<UIImage>(style->getSprite("dropdown.background"), UISizer(UISizerType::Vertical), style->getBorder("dropdown.innerBorder"));
-		dropdownWindow->add(dropdown);
+		dropdownWindow->add(clip);
 		dropdownWindow->setMinSize(Vector2f(getSize().x + 1, 16));
 		addChild(dropdownWindow);
 
