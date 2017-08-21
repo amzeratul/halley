@@ -56,14 +56,19 @@ String UIDropdown::getSelectedOptionText() const
 
 void UIDropdown::draw(UIPainter& painter) const
 {
-	int offset = isOpen ? 1 : 0;
-	
-	painter.draw(sprite, offset);
-	painter.draw(label, offset);
+	painter.draw(sprite);
+	painter.draw(label);
 }
 
 void UIDropdown::update(Time t, bool moved)
 {
+	if (isOpen) {
+		auto focus = getRoot()->getCurrentFocus();
+		if (!focus || (focus != this && !focus->isDescendentOf(*this))) {
+			close();
+		}
+	}
+
 	bool needUpdate = true;
 	sprite = isEnabled() ? (isMouseOver() ? style->getSprite("dropdown.hover") : style->getSprite("dropdown.normal")) : style->getSprite("dropdown.disabled");
 
@@ -80,24 +85,9 @@ void UIDropdown::update(Time t, bool moved)
 void UIDropdown::onClicked(Vector2f mousePos)
 {
 	if (isOpen) {
-		isOpen = false;
-		Vector2f relPos = mousePos - getPosition();
-		float entryH = 14.0f;
-		int idx = clamp(int(std::floor(relPos.y / entryH)) - 1, 0, int(options.size() - 1));
-		setSelectedOption(idx);
-
-		removeChild(*dropdown);
-		dropdown->destroy();
-		dropdown.reset();
+		close();
 	} else {
-		isOpen = true;
-		
-		dropdown = std::make_shared<UIList>(getId() + "_list", style);
-		int i = 0;
-		for (auto& o: options) {
-			dropdown->addTextItem("option_" + toString(i++), o);
-		}
-		addChild(dropdown);
+		open();
 	}
 }
 
@@ -110,7 +100,34 @@ bool UIDropdown::isFocusLocked() const
 	return isOpen || UIClickable::isFocusLocked();
 }
 
-void UIDropdown::onFocusLost()
+void UIDropdown::open()
+{
+	isOpen = true;
+		
+	dropdown = std::make_shared<UIList>(getId() + "_list", style);
+	dropdown->setMinSize(Vector2f(getSize().x, 1));
+	int i = 0;
+	for (auto& o: options) {
+		dropdown->addTextItem("option_" + toString(i++), o);
+	}
+	addChild(dropdown);
+
+	dropdown->getEventHandler().setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
+	{
+		
+	});
+}
+
+void UIDropdown::close()
 {
 	isOpen = false;
+
+	dropdown->destroy();
+	dropdown.reset();
+}
+
+void UIDropdown::drawChildren(UIPainter& painter) const
+{
+	auto p = painter.withAdjustedLayer(1);
+	UIWidget::drawChildren(p);
 }

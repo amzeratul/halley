@@ -52,7 +52,7 @@ namespace Halley {
 		void setMinSize(Vector2f size);
 		void setInnerBorder(Vector4f border);
 
-		void setFocused(bool focused);
+		void setFocused(bool focused, UIWidget* newFocus);
 		void setMouseOver(bool mouseOver);
 		virtual void pressMouse(Vector2f mousePos, int button);
 		virtual void releaseMouse(Vector2f mousePos, int button);
@@ -81,14 +81,17 @@ namespace Halley {
 
 		void setValidator(std::shared_ptr<UIValidator> validator);
 		std::shared_ptr<UIValidator> getValidator() const;
+		
+		bool isDescendentOf(const UIWidget& ancestor) const override;
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
+		virtual void drawChildren(UIPainter& painter) const;
 		virtual void update(Time t, bool moved);
 		virtual void updateInputDevice(InputDevice& device);
 
 		virtual void onFocus();
-		virtual void onFocusLost();
+		virtual void onFocusLost(UIWidget* newFocus);
 		virtual void onLayout();
 		UIRoot* getRoot() override;
 

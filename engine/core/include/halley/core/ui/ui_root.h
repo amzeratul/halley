@@ -34,6 +34,8 @@ namespace Halley {
 		bool hasModalUI() const;
 		bool isMouseOverUI() const;
 
+		UIWidget* getCurrentFocus() const;
+
 		std::vector<std::shared_ptr<UIWidget>> collectWidgets();
 
 	private:

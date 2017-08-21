@@ -32,7 +32,9 @@ namespace Halley {
 		{
 			return std::static_pointer_cast<T>(getWidget(id));
 		}
-		
+
+		virtual bool isDescendentOf(const UIWidget& ancestor) const;
+
 	protected:
 		bool topChildChanged = false;
 

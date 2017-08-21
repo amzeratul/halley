@@ -80,3 +80,8 @@ std::shared_ptr<UIWidget> UIParent::getWidget(const String& id)
 	}
 	return {};
 }
+
+bool UIParent::isDescendentOf(const UIWidget& ancestor) const
+{
+	return false;
+}

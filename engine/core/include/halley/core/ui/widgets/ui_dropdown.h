@@ -21,13 +21,13 @@ namespace Halley {
 
 	protected:
 		void draw(UIPainter& painter) const override;
+		void drawChildren(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
 		void onClicked(Vector2f mousePos) override;
 		void doSetState(State state) override;
 
 		bool isFocusLocked() const override;
-		void onFocusLost() override;
 
 	private:
 		Sprite sprite;
@@ -38,5 +38,8 @@ namespace Halley {
 		std::vector<String> options;
 		int curOption = 0;
 		bool isOpen = false;
+
+		void open();
+		void close();
     };
 }
