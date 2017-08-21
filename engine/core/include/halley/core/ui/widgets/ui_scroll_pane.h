@@ -3,7 +3,7 @@
 #include "../ui_widget.h"
 
 namespace Halley {
-    class UIScrollPanel : public UIWidget {
+    class UIScrollPane : public UIWidget {
 
     };
 }

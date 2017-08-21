@@ -73,7 +73,7 @@ set(SOURCES
         "src/ui/widgets/ui_input.cpp"
         "src/ui/widgets/ui_label.cpp"
         "src/ui/widgets/ui_list.cpp"
-        "src/ui/widgets/ui_scroll_panel.cpp"
+        "src/ui/widgets/ui_scroll_pane.cpp"
 
         "src/utils/world_stats.cpp"
         )
@@ -169,7 +169,7 @@ set(HEADERS
         "include/halley/core/ui/widgets/ui_input.h"
         "include/halley/core/ui/widgets/ui_label.h"
         "include/halley/core/ui/widgets/ui_list.h"
-        "include/halley/core/ui/widgets/ui_scroll_panel.h"
+        "include/halley/core/ui/widgets/ui_scroll_pane.h"
 
         "include/halley/core/utils/world_stats.h"
         "src/prec.h"
