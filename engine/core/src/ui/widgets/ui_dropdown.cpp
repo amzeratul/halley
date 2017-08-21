@@ -103,7 +103,7 @@ void UIDropdown::onClicked(Vector2f mousePos)
 	} else {
 		isOpen = true;
 		optionsLabels.clear();
-		optionsExtent = Vector2f(14, 14);
+		optionsExtent = Vector2f(getSize().x, 14);
 		for (auto& o: options) {
 			optionsLabels.push_back(style->getTextRenderer("input.label").clone().setText(o));
 			auto ext = optionsLabels.back().getExtents();
