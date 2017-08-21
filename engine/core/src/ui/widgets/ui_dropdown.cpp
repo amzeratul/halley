@@ -1,5 +1,6 @@
 #include "halley/core/ui/widgets/ui_dropdown.h"
 #include "ui/ui_style.h"
+#include "ui/widgets/ui_image.h"
 
 using namespace Halley;
 
@@ -76,8 +77,8 @@ void UIDropdown::update(Time t, bool moved)
 		sprite.setPos(getPosition()).scaleTo(getSize());
 		label.setAlignment(0.0f).setPosition(getPosition() + Vector2f(3, 0));
 
-		if (dropdown) {
-			dropdown->setPosition(getPosition() + Vector2f(0.0f, getSize().y));
+		if (dropdownWindow) {
+			dropdownWindow->setPosition(getPosition() + Vector2f(0.0f, getSize().y));
 		}
 	}
 }
@@ -102,28 +103,37 @@ bool UIDropdown::isFocusLocked() const
 
 void UIDropdown::open()
 {
-	isOpen = true;
-		
-	dropdown = std::make_shared<UIList>(getId() + "_list", style);
-	dropdown->setMinSize(Vector2f(getSize().x, 1));
-	int i = 0;
-	for (auto& o: options) {
-		dropdown->addTextItem("option_" + toString(i++), o);
-	}
-	addChild(dropdown);
+	if (!isOpen) {
+		isOpen = true;
+	
+		dropdown = std::make_shared<UIList>(getId() + "_list", style);
+		int i = 0;
+		for (auto& o: options) {
+			dropdown->addTextItem(toString(i++), o);
+		}
+		dropdown->setSelectedOption(curOption);
 
-	dropdown->getEventHandler().setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
-	{
-		
-	});
+		dropdownWindow = std::make_shared<UIImage>(style->getSprite("dropdown.background"), UISizer(UISizerType::Vertical), style->getBorder("dropdown.innerBorder"));
+		dropdownWindow->add(dropdown);
+		dropdownWindow->setMinSize(Vector2f(getSize().x + 1, 16));
+		addChild(dropdownWindow);
+
+		dropdown->getEventHandler().setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
+		{
+			setSelectedOption(event.getData().toInteger());
+			close();
+		});
+	}
 }
 
 void UIDropdown::close()
 {
-	isOpen = false;
+	if (isOpen) {
+		isOpen = false;
 
-	dropdown->destroy();
-	dropdown.reset();
+		dropdownWindow->destroy();
+		dropdownWindow.reset();
+	}
 }
 
 void UIDropdown::drawChildren(UIPainter& painter) const

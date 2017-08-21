@@ -33,6 +33,7 @@ namespace Halley {
 		Sprite sprite;
 		TextRenderer label;
 		std::shared_ptr<UIStyle> style;
+		std::shared_ptr<UIWidget> dropdownWindow;
 		std::shared_ptr<UIList> dropdown;
 		
 		std::vector<String> options;
