@@ -172,6 +172,7 @@ set(HEADERS
         "include/halley/core/ui/widgets/ui_label.h"
         "include/halley/core/ui/widgets/ui_list.h"
         "include/halley/core/ui/widgets/ui_scroll_pane.h"
+        "include/halley/core/ui/widgets/ui_scrollbar.h"
 
         "include/halley/core/utils/world_stats.h"
         "src/prec.h"

@@ -130,3 +130,11 @@ float UIScrollPane::getScrollSpeed() const
 {
 	return scrollSpeed;
 }
+
+void UIScrollPane::setRelativeScroll(float position, UIScrollDirection direction)
+{
+	int axis = direction == UIScrollDirection::Horizontal ? 0 : 1;
+	auto target = scrollPos;
+	target[axis] = position * contentsSize[axis];
+	scrollTo(target);
+}

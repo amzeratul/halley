@@ -18,6 +18,7 @@ namespace Halley {
 		void scrollTo(Vector2f position);
 		void scrollBy(Vector2f delta);
 		void scrollToShow(Rect4f rect, bool center);
+		void setRelativeScroll(float position, UIScrollDirection direction);
 
 		float getScrollSpeed() const;
 		void setScrollSpeed(float speed);

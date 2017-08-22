@@ -43,6 +43,30 @@ void UIScrollBar::setScrollPane(UIScrollPane& p)
 	pane = &p;
 }
 
+bool UIScrollBar::canInteractWithMouse() const
+{
+	return true;
+}
+
+void UIScrollBar::pressMouse(Vector2f mousePos, int button)
+{
+	if (pane) {
+		int axis = direction == UIScrollDirection::Horizontal ? 0 : 1;
+
+		auto relative = (mousePos - getPosition()) / getSize();
+		float clickPos = relative[axis];
+		float coverage = pane->getCoverageSize(direction);
+		auto curPos = pane->getRelativeScrollPosition()[axis];
+
+		float dir = clickPos < curPos + coverage * 0.5f ? -1.0f : 1.0f;
+		pane->setRelativeScroll(curPos + coverage * dir, direction);
+	}
+}
+
+void UIScrollBar::releaseMouse(Vector2f mousePos, int button)
+{
+}
+
 void UIScrollBar::checkActive()
 {
 	setActive(pane && pane->canScroll(direction));

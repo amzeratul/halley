@@ -10,6 +10,10 @@ namespace Halley {
 		UIScrollBar(UIScrollDirection direction, std::shared_ptr<UIStyle> style);
 		void setScrollPane(UIScrollPane& pane);
 
+	    bool canInteractWithMouse() const override;
+	    void pressMouse(Vector2f mousePos, int button) override;
+	    void releaseMouse(Vector2f mousePos, int button) override;
+
     protected:
 		void checkActive() override;
 		void update(Time t, bool moved) override;
@@ -20,7 +24,5 @@ namespace Halley {
 
 		std::shared_ptr<UIWidget> bar;
 		std::shared_ptr<UIWidget> thumb;
-
-		bool isNeeded() const;
     };
 }
