@@ -64,7 +64,7 @@ void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)
 	// If the mouse hasn't moved, keep the last one.
 	std::shared_ptr<UIWidget> underMouse;
 	Vector2f mousePos = mouse->getPosition() + uiOffset;
-	if ((mousePos - lastMousePos).squaredLength() > 0.01f) {
+	if (true || (mousePos - lastMousePos).squaredLength() > 0.01f) {
 		// Go through all root-level widgets and find the actual widget under the mouse
 		underMouse = getWidgetUnderMouse(mousePos);
 		lastMousePos = mousePos;
