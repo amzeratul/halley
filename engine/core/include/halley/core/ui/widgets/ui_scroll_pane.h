@@ -12,6 +12,7 @@ namespace Halley {
 	    void update(Time t, bool moved) override;
 	    void drawChildren(UIPainter& painter) const override;
 	    Vector2f getLayoutMinimumSize() const override;
+	    Vector2f getLayoutOriginPosition() const override;
 
    	private:
 		Vector2f clipSize;

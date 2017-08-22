@@ -5,6 +5,7 @@ using namespace Halley;
 UIScrollPane::UIScrollPane(Vector2f clipSize, bool scrollHorizontal, bool scrollVertical, Vector2f minSize)
 	: UIWidget("", minSize, UISizer(UISizerType::Vertical, 0))
 	, clipSize(clipSize)
+	, scrollPos()
 	, scrollHorizontal(scrollHorizontal)
 	, scrollVertical(scrollVertical)
 {
@@ -44,4 +45,9 @@ Vector2f UIScrollPane::getLayoutMinimumSize() const
 		size.y = std::min(size.y, clipSize.y);
 	}
 	return size;
+}
+
+Vector2f UIScrollPane::getLayoutOriginPosition() const
+{
+	return getPosition() - scrollPos;
 }

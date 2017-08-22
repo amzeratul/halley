@@ -73,7 +73,7 @@ void UIWidget::setRect(Rect4f rect)
 	setWidgetRect(rect);
 	if (sizer) {
 		auto border = getInnerBorder();
-		auto p0 = getPosition();
+		auto p0 = getLayoutOriginPosition();
 		sizer.get().setRect(Rect4f(p0 + Vector2f(border.x, border.y), p0 + rect.getSize() - Vector2f(border.z, border.w)));
 	} else {
 		for (auto& c: getChildren()) {
@@ -432,4 +432,9 @@ bool UIWidget::shrinksOnLayout() const
 void UIWidget::setShrinkOnLayout(bool shrink)
 {
 	shrinkOnLayout = shrink;
+}
+
+Vector2f UIWidget::getLayoutOriginPosition() const
+{
+	return getPosition();
 }
