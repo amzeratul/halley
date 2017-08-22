@@ -37,6 +37,8 @@ namespace Halley {
 
 		void setInputButtons(const Buttons& button);
 		void updateInputDevice(InputDevice& device) override;
+		
+		Rect4f getOptionRect(int curOption) const;
 
 	protected:
 		void draw(UIPainter& painter) const override;

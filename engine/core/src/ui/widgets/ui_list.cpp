@@ -254,3 +254,10 @@ void UIList::setSelectedOptionId(const String& id)
 		}
 	}
 }
+
+Rect4f UIList::getOptionRect(int curOption) const
+{
+	Expects(!items.empty());
+	auto& item = items[clamp(curOption, 0, int(items.size()) - 1)];
+	return item->getMouseRect();
+}

@@ -10,11 +10,12 @@ namespace Halley {
 		Vector2f getScrollPosition() const;
 		void scrollTo(Vector2f position);
 		void scrollBy(Vector2f delta);
+		void scrollToShow(Rect4f rect, bool center);
 
 		void setScrollSpeed(float speed);
+	    void update(Time t, bool moved) override;
 
     protected:
-	    void update(Time t, bool moved) override;
 	    void drawChildren(UIPainter& painter) const override;
 	    Vector2f getLayoutMinimumSize() const override;
 	    Vector2f getLayoutOriginPosition() const override;

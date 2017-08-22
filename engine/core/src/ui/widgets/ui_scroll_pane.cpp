@@ -88,3 +88,13 @@ Vector2f UIScrollPane::getLayoutOriginPosition() const
 {
 	return getPosition() - scrollPos.floor();
 }
+
+void UIScrollPane::scrollToShow(Rect4f rect, bool center)
+{
+	float minX = rect.getRight() - clipSize.x;
+	float maxX = rect.getLeft();
+	float minY = rect.getBottom() - clipSize.y;
+	float maxY = rect.getTop();
+	auto target = center ? (rect.getCenter() - 0.5f * clipSize) : scrollPos;
+	scrollTo(Vector2f(clamp(target.x, minX, maxX), clamp(target.y, minY, maxY)));
+}

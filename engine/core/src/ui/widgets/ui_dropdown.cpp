@@ -113,14 +113,12 @@ void UIDropdown::open()
 			dropdown->addTextItem(toString(i++), o);
 		}
 		dropdown->setSelectedOption(curOption);
-		auto sz = dropdown->getLayoutMinimumSize();
 
-		auto clip = std::make_shared<UIScrollPane>(Vector2f(0, 80));
-		clip->setScrollSpeed(ceil(sz.y / options.size()));
-		clip->add(dropdown);
+		auto scrollPane = std::make_shared<UIScrollPane>(Vector2f(0, 80));
+		scrollPane->add(dropdown);
 
 		dropdownWindow = std::make_shared<UIImage>(style->getSprite("dropdown.background"), UISizer(UISizerType::Vertical), style->getBorder("dropdown.innerBorder"));
-		dropdownWindow->add(clip);
+		dropdownWindow->add(scrollPane);
 		dropdownWindow->setMinSize(Vector2f(getSize().x + 1, getSize().y));
 		addChild(dropdownWindow);
 
@@ -129,6 +127,12 @@ void UIDropdown::open()
 			setSelectedOption(event.getData().toInteger());
 			close();
 		});
+
+		dropdownWindow->layout();
+		auto sz = dropdown->getSize();
+		scrollPane->setScrollSpeed(ceil(sz.y / options.size()));
+		scrollPane->update(0, false);
+		scrollPane->scrollToShow(dropdown->getOptionRect(curOption) - dropdown->getPosition(), true);
 	}
 }
 
