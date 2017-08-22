@@ -9,7 +9,7 @@ namespace Halley {
 	public:
 		explicit UIClickable(String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 
-		bool isFocusable() const override;
+		bool canInteractWithMouse() const override;
 		bool isFocusLocked() const override;
 
 		void pressMouse(Vector2f mousePos, int button) override;

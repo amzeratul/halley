@@ -22,7 +22,7 @@ namespace Halley {
 		void doDraw(UIPainter& painter) const;
 		void doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice);
 
-		Vector2f computeMinimumSize() const override;
+		Vector2f getLayoutMinimumSize() const override;
 		void setRect(Rect4f rect) override;
 
 		void layout();
@@ -36,7 +36,7 @@ namespace Halley {
 		void addSpacer(float size) override;
 		void addStretchSpacer(float proportion = 0) override;
 
-		virtual bool isFocusable() const;
+		virtual bool canInteractWithMouse() const;
 		virtual bool isFocusLocked() const;
 		bool isMouseOver() const;
 		bool isFocused() const;
@@ -44,6 +44,7 @@ namespace Halley {
 		const String& getId() const;
 
 		Vector2f getPosition() const;
+		virtual Vector2f getLayoutOriginPosition() const;
 		Vector2f getSize() const;
 		Vector2f getMinimumSize() const;
 		Vector4f getInnerBorder() const;
@@ -83,6 +84,7 @@ namespace Halley {
 		std::shared_ptr<UIValidator> getValidator() const;
 		
 		bool isDescendentOf(const UIWidget& ancestor) const override;
+		void setMouseClip(Maybe<Rect4f> mouseClip);
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
@@ -102,8 +104,8 @@ namespace Halley {
 		void playSound(const std::shared_ptr<const AudioClip>& clip);
 
 	private:
-		void setWidgetRect(Rect4f rect);
 		void setParent(UIParent& parent);
+		void setWidgetRect(Rect4f rect);
 
 		UIParent* parent = nullptr;
 		String id;
@@ -115,6 +117,7 @@ namespace Halley {
 
 		Vector4f innerBorder;
 		Maybe<UISizer> sizer;
+		Maybe<Rect4f> mouseClip;
 
 		std::shared_ptr<UIEventHandler> eventHandler;
 		std::shared_ptr<UIValidator> validator;

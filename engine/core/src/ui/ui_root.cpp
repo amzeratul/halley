@@ -64,7 +64,7 @@ void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)
 	// If the mouse hasn't moved, keep the last one.
 	std::shared_ptr<UIWidget> underMouse;
 	Vector2f mousePos = mouse->getPosition() + uiOffset;
-	if ((mousePos - lastMousePos).squaredLength() > 0.01f) {
+	if (true || (mousePos - lastMousePos).squaredLength() > 0.01f) {
 		// Go through all root-level widgets and find the actual widget under the mouse
 		underMouse = getWidgetUnderMouse(mousePos);
 		lastMousePos = mousePos;
@@ -88,6 +88,12 @@ void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)
 		if (focus) {
 			focus->releaseMouse(mousePos, 0);
 		}
+	}
+
+	// Mouse wheel
+	int wheelDelta = mouse->getWheelMove();
+	if (wheelDelta != 0 && underMouse) {
+		underMouse->sendEvent(UIEvent(UIEventType::MouseWheel, "mouse", wheelDelta));
 	}
 
 	// If the mouse is held, but it's over a different component from the focused one, don't mouse over anything
@@ -196,7 +202,7 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWi
 	}
 
 	auto rect = start->getMouseRect();
-	if (start->isFocusable() && rect.isInside(mousePos)) {
+	if (start->canInteractWithMouse() && rect.contains(mousePos)) {
 		return start;
 	} else {
 		return {};
@@ -219,7 +225,7 @@ void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<
 		collectWidgets(c, output);
 	}
 
-	if (start->isFocusable()) {
+	if (start->canInteractWithMouse()) {
 		output.push_back(start);
 	}
 }

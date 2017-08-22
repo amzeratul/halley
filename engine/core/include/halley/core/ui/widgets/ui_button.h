@@ -12,7 +12,7 @@ namespace Halley {
 		void onClicked(Vector2f mousePos) override;
 		void setInputType(UIInputType uiInput) override;
 
-		bool isFocusable() const override;
+		bool canInteractWithMouse() const override;
 		bool isFocusLocked() const override;
 
 	protected:

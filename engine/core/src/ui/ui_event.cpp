@@ -15,6 +15,38 @@ UIEvent::UIEvent(UIEventType type, String sourceId, String data)
 {
 }
 
+UIEvent::UIEvent(UIEventType type, String sourceId, int data)
+	: type(type)
+	, sourceId(sourceId)
+	, intData(data)
+{
+}
+
+UIEvent::UIEvent(UIEventType type, String sourceId, float data)
+	: type(type)
+	, sourceId(sourceId)
+	, floatData(data)
+{
+}
+
+UIEvent::UIEvent(UIEventType type, String sourceId, String data, int intData)
+	: type(type)
+	, sourceId(sourceId)
+	, data(data)
+	, intData(intData)
+{
+}
+
+int UIEvent::getIntData() const
+{
+	return intData;
+}
+
+float UIEvent::getFloatData() const
+{
+	return floatData;
+}
+
 UIEventType UIEvent::getType() const
 {
 	return type;

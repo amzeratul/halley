@@ -40,9 +40,9 @@ void UIButton::setInputType(UIInputType uiInput)
 	}
 }
 
-bool UIButton::isFocusable() const
+bool UIButton::canInteractWithMouse() const
 {
-	return borderOnly ? false : UIClickable::isFocusable();
+	return borderOnly ? false : UIClickable::canInteractWithMouse();
 }
 
 bool UIButton::isFocusLocked() const

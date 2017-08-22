@@ -255,6 +255,15 @@ void InputVirtual::setPositionLimits()
 	positionLimits.reset();
 }
 
+int InputVirtual::getWheelMove() const
+{
+	int val = 0;
+	for (auto& w: wheels) {
+		val += w->getWheelMove();
+	}
+	return val;
+}
+
 void Halley::InputVirtual::bindHat(int leftRight, int upDown, spInputDevice hat)
 {
 	bindAxisButton(leftRight, hat, 3, 1);
@@ -269,6 +278,11 @@ void InputVirtual::bindPosition(spInputDevice device)
 void InputVirtual::bindPositionRelative(spInputDevice device, int axisX, int axisY, float speed)
 {
 	positions.push_back(PositionBindData(device, axisX, axisY, speed));
+}
+
+void InputVirtual::bindWheel(spInputDevice device)
+{
+	wheels.push_back(device);
 }
 
 Halley::String Halley::InputVirtual::getButtonName(int code)

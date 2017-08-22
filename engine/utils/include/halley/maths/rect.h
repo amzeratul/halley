@@ -137,7 +137,7 @@ namespace Halley {
 		T getTop() const { return p1.y; }
 		T getBottom() const { return p2.y; }
 
-		bool isInside(Vector2D<T> p) const
+		bool contains(Vector2D<T> p) const
 		{
 			return (p.x >= p1.x && p.x < p2.x && p.y >= p1.y && p.y < p2.y);
 		}

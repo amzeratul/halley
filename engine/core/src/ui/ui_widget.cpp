@@ -51,7 +51,7 @@ void UIWidget::doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice)
 	}	
 }
 
-Vector2f UIWidget::computeMinimumSize() const
+Vector2f UIWidget::getLayoutMinimumSize() const
 {
 	if (!active) {
 		return {};
@@ -59,7 +59,7 @@ Vector2f UIWidget::computeMinimumSize() const
 	Vector2f minSize = getMinimumSize();
 	if (sizer) {
 		auto border = getInnerBorder();
-		Vector2f innerSize = sizer.get().computeMinimumSize();
+		Vector2f innerSize = sizer.get().getLayoutMinimumSize();
 		if (innerSize.x > 0.1f || innerSize.y > 0.1f) {
 			innerSize += Vector2f(border.x + border.z, border.y + border.w);
 		}
@@ -73,7 +73,7 @@ void UIWidget::setRect(Rect4f rect)
 	setWidgetRect(rect);
 	if (sizer) {
 		auto border = getInnerBorder();
-		auto p0 = getPosition();
+		auto p0 = getLayoutOriginPosition();
 		sizer.get().setRect(Rect4f(p0 + Vector2f(border.x, border.y), p0 + rect.getSize() - Vector2f(border.z, border.w)));
 	} else {
 		for (auto& c: getChildren()) {
@@ -84,7 +84,7 @@ void UIWidget::setRect(Rect4f rect)
 
 void UIWidget::layout()
 {
-	Vector2f minimumSize = computeMinimumSize();
+	Vector2f minimumSize = getLayoutMinimumSize();
 	Vector2f targetSize = Vector2f::max(shrinkOnLayout ? Vector2f() : size, minimumSize);
 	setRect(Rect4f(getPosition(), getPosition() + targetSize));
 	onLayout();
@@ -139,7 +139,7 @@ void UIWidget::addStretchSpacer(float proportion)
 	}
 }
 
-bool UIWidget::isFocusable() const
+bool UIWidget::canInteractWithMouse() const
 {
 	return false;
 }
@@ -258,6 +258,14 @@ UIRoot* UIWidget::getRoot()
 	return parent ? parent->getRoot() : nullptr;
 }
 
+void UIWidget::setMouseClip(Maybe<Rect4f> clip)
+{
+	mouseClip = clip;
+	for (auto& c: getChildren()) {
+		c->setMouseClip(clip);
+	}
+}
+
 void UIWidget::onEnabledChanged()
 {
 }
@@ -318,7 +326,12 @@ const std::vector<UIInputType>& UIWidget::getOnlyEnabledWithInput() const
 
 Rect4f UIWidget::getMouseRect() const
 {
-	return Rect4f(getPosition(), getPosition() + getSize());
+	auto rect = Rect4f(getPosition(), getPosition() + getSize());
+	if (mouseClip) {
+		return rect.intersection(mouseClip.get());
+	} else {
+		return rect;
+	}
 }
 
 void UIWidget::draw(UIPainter& painter) const
@@ -419,4 +432,9 @@ bool UIWidget::shrinksOnLayout() const
 void UIWidget::setShrinkOnLayout(bool shrink)
 {
 	shrinkOnLayout = shrink;
+}
+
+Vector2f UIWidget::getLayoutOriginPosition() const
+{
+	return getPosition();
 }
