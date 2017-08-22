@@ -3,6 +3,11 @@
 #include "../ui_widget.h"
 
 namespace Halley {
+	enum class UIScrollDirection {
+		Horizontal,
+		Vertical
+	};
+
     class UIScrollPane : public UIWidget {
     public:
 		UIScrollPane(Vector2f clipSize, bool scrollHorizontal = false, bool scrollVertical = true, Vector2f minSize = {});
@@ -12,8 +17,12 @@ namespace Halley {
 		void scrollBy(Vector2f delta);
 		void scrollToShow(Rect4f rect, bool center);
 
+		float getScrollSpeed() const;
 		void setScrollSpeed(float speed);
 	    void update(Time t, bool moved) override;
+
+		bool canScroll(UIScrollDirection direction) const;
+		float getCoverageSize(UIScrollDirection direction) const;
 
     protected:
 	    void drawChildren(UIPainter& painter) const override;

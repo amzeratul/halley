@@ -102,6 +102,7 @@ namespace Halley {
 		void sendEvent(UIEvent&& event) const override;
 
 		void playSound(const std::shared_ptr<const AudioClip>& clip);
+		virtual void checkActive();
 
 	private:
 		void setParent(UIParent& parent);

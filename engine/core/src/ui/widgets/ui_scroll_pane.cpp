@@ -58,6 +58,24 @@ void UIScrollPane::update(Time t, bool moved)
 	setMouseClip(Rect4f(getPosition(), getPosition() + getSize()));
 }
 
+bool UIScrollPane::canScroll(UIScrollDirection direction) const
+{
+	if (direction == UIScrollDirection::Horizontal) {
+		return scrollHorizontal && clipSize.x < contentsSize.x;
+	} else {
+		return scrollVertical && clipSize.y < contentsSize.y;
+	}
+}
+
+float UIScrollPane::getCoverageSize(UIScrollDirection direction) const
+{
+	if (direction == UIScrollDirection::Horizontal) {
+		return clipSize.x / contentsSize.x;
+	} else {
+		return clipSize.y / contentsSize.y;
+	}
+}
+
 void UIScrollPane::drawChildren(UIPainter& painter) const
 {
 	auto p = painter.withClip(Rect4f(getPosition(), getPosition() + clipSize));
@@ -101,4 +119,9 @@ void UIScrollPane::scrollToShow(Rect4f rect, bool center)
 	float minY = rect.getBottom() - size.y;
 	auto target = center ? (rect.getCenter() - 0.5f * size) : scrollPos;
 	scrollTo(Vector2f(clamp(target.x, minX, maxX), clamp(target.y, minY, maxY)));
+}
+
+float UIScrollPane::getScrollSpeed() const
+{
+	return scrollSpeed;
 }

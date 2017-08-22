@@ -37,6 +37,7 @@ void UIWidget::doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice)
 		setEnabled(getValidator()->isEnabled());
 	}
 
+	checkActive();
 	if (active) {
 		update(t, positionUpdated);
 		positionUpdated = false;
@@ -380,6 +381,10 @@ void UIWidget::playSound(const std::shared_ptr<const AudioClip>& clip)
 			root->playSound(clip);
 		}
 	}
+}
+
+void UIWidget::checkActive()
+{
 }
 
 void UIWidget::setWidgetRect(Rect4f rect)

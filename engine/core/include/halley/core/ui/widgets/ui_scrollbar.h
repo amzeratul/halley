@@ -1,23 +1,22 @@
 #pragma once
 
-#include "../ui_widget.h"
+#include "ui_scroll_pane.h"
 
 namespace Halley {
 	class UIStyle;
-	class UIScrollPane;
 
     class UIScrollBar : public UIWidget {
     public:
-		enum class Type {
-			Horizontal,
-			Vertical
-		};
-
-		UIScrollBar(Type type, std::shared_ptr<UIStyle> style);
+		UIScrollBar(UIScrollDirection direction, std::shared_ptr<UIStyle> style);
 		void setScrollPane(UIScrollPane& pane);
 
+    protected:
+		void checkActive() override;
+
     private:
-		Type type;
+		UIScrollDirection direction;
 		UIScrollPane* pane = nullptr;
+
+		bool isNeeded() const;
     };
 }
