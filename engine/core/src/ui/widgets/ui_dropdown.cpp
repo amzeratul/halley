@@ -32,7 +32,7 @@ void UIDropdown::setSelectedOption(int option)
 	if (curOption != nextOption) {
 		curOption = nextOption;
 		label.setText(options[curOption]);
-		sendEvent(UIEvent(UIEventType::DropboxSelectionChanged, getId(), options[curOption]));
+		sendEvent(UIEvent(UIEventType::DropboxSelectionChanged, getId(), options[curOption], curOption));
 	}
 }
 
@@ -113,13 +113,15 @@ void UIDropdown::open()
 			dropdown->addTextItem(toString(i++), o);
 		}
 		dropdown->setSelectedOption(curOption);
+		auto sz = dropdown->getLayoutMinimumSize();
 
 		auto clip = std::make_shared<UIScrollPane>(Vector2f(0, 80));
+		clip->setScrollSpeed(ceil(sz.y / options.size()));
 		clip->add(dropdown);
 
 		dropdownWindow = std::make_shared<UIImage>(style->getSprite("dropdown.background"), UISizer(UISizerType::Vertical), style->getBorder("dropdown.innerBorder"));
 		dropdownWindow->add(clip);
-		dropdownWindow->setMinSize(Vector2f(getSize().x + 1, 16));
+		dropdownWindow->setMinSize(Vector2f(getSize().x + 1, getSize().y));
 		addChild(dropdownWindow);
 
 		dropdown->getEventHandler().setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)

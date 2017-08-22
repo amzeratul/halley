@@ -11,7 +11,7 @@ namespace Halley {
 	class UIInput : public UIWidget {
 	public:
 		explicit UIInput(std::shared_ptr<InputDevice> keyboard, String id, std::shared_ptr<UIStyle> style, String text = "", String ghostText = "");
-		bool isFocusable() const override;
+		bool canInteractWithMouse() const override;
 
 		UIInput& setText(const String& text);
 		String getText() const;

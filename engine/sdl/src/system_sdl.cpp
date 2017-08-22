@@ -69,6 +69,7 @@ bool SystemSDL::generateEvents(VideoAPI* video, InputAPI* input)
 			case SDL_MOUSEMOTION:
 			case SDL_MOUSEBUTTONUP:
 			case SDL_MOUSEBUTTONDOWN:
+			case SDL_MOUSEWHEEL:
 			case SDL_FINGERUP:
 			case SDL_FINGERDOWN:
 			case SDL_FINGERMOTION:

@@ -10,22 +10,30 @@ namespace Halley {
 		CheckboxUpdated,
 		DropboxSelectionChanged,
 		ListSelectionChanged,
-		ListAccept
+		ListAccept,
+		MouseWheel
 	};
 
     class UIEvent {
     public:
 		UIEvent();
 		UIEvent(UIEventType type, String sourceId, String data = "");
+		UIEvent(UIEventType type, String sourceId, int data);
+		UIEvent(UIEventType type, String sourceId, float data);
+		UIEvent(UIEventType type, String sourceId, String data, int intData);
 		
     	UIEventType getType() const;
 		String getSourceId() const;
 		String getData() const;
+		int getIntData() const;
+		float getFloatData() const;
 
     private:
 		UIEventType type;
 		String sourceId;
 		String data;
+		int intData;
+		float floatData;
     };
 
 	using UIEventCallback = std::function<void(const UIEvent&)>;

@@ -6,7 +6,7 @@ UIClickable::UIClickable(String id, Vector2f minSize, Maybe<UISizer> sizer, Vect
 {
 }
 
-bool UIClickable::isFocusable() const
+bool UIClickable::canInteractWithMouse() const
 {
 	return true;
 }

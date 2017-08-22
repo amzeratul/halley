@@ -24,7 +24,7 @@ void UIList::setSelectedOption(int option)
 		items[curOption]->setSelected(true);
 
 		playSound(style->getAudioClip("list.selectionChangedSound"));
-		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), items[curOption]->getId()));
+		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), items[curOption]->getId(), curOption));
 	}
 }
 
@@ -147,7 +147,7 @@ void UIList::updateInputDevice(InputDevice& device)
 	setSelectedOption(cursorPos.x + cursorPos.y * nCols);
 
 	if (checkButton(inputButtons.accept)) {
-		sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId()));
+		sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId(), curOption));
 	}
 }
 

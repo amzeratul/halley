@@ -16,7 +16,7 @@ UIInput::UIInput(std::shared_ptr<InputDevice> keyboard, String id, std::shared_p
 	label.setText(text);
 }
 
-bool UIInput::isFocusable() const
+bool UIInput::canInteractWithMouse() const
 {
 	return true;
 }

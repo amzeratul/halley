@@ -139,7 +139,7 @@ void UIWidget::addStretchSpacer(float proportion)
 	}
 }
 
-bool UIWidget::isFocusable() const
+bool UIWidget::canInteractWithMouse() const
 {
 	return false;
 }

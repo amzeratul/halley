@@ -90,6 +90,12 @@ void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)
 		}
 	}
 
+	// Mouse wheel
+	int wheelDelta = mouse->getWheelMove();
+	if (wheelDelta != 0 && underMouse) {
+		underMouse->sendEvent(UIEvent(UIEventType::MouseWheel, "mouse", wheelDelta));
+	}
+
 	// If the mouse is held, but it's over a different component from the focused one, don't mouse over anything
 	auto activeMouseOver = underMouse;
 	if (mouseHeld && focus && focus != underMouse) {
@@ -196,7 +202,7 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWi
 	}
 
 	auto rect = start->getMouseRect();
-	if (start->isFocusable() && rect.contains(mousePos)) {
+	if (start->canInteractWithMouse() && rect.contains(mousePos)) {
 		return start;
 	} else {
 		return {};
@@ -219,7 +225,7 @@ void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<
 		collectWidgets(c, output);
 	}
 
-	if (start->isFocusable()) {
+	if (start->canInteractWithMouse()) {
 		output.push_back(start);
 	}
 }

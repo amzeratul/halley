@@ -62,6 +62,8 @@ namespace Halley {
 		void setPositionLimits(Rect4f limits);
 		void setPositionLimits();
 
+		int getWheelMove() const override;
+
 		void bindButton(int n, spInputDevice device, int deviceN);
 		void bindAxis(int n, spInputDevice device, int deviceN);
 		void bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton);
@@ -69,6 +71,7 @@ namespace Halley {
 		void bindHat(int leftRight, int upDown, spInputDevice hat);
 		void bindPosition(spInputDevice device);
 		void bindPositionRelative(spInputDevice device, int axisX, int axisY, float speed);
+		void bindWheel(spInputDevice device);
 
 		void unbindButton(int n);
 		void unbindAxis(int n);
@@ -125,6 +128,8 @@ namespace Halley {
 		Vector<PositionBindData> positions;
 		Maybe<Rect4f> positionLimits;
 		Vector2f position;
+
+		Vector<spInputDevice> wheels;
 
 		spInputDevice vibrationOverride;
 		spInputDevice lastDevice;

@@ -8,12 +8,38 @@ UIScrollPane::UIScrollPane(Vector2f clipSize, bool scrollHorizontal, bool scroll
 	, scrollPos()
 	, scrollHorizontal(scrollHorizontal)
 	, scrollVertical(scrollVertical)
+	, scrollSpeed(10.0f)
 {
+	getEventHandler().setHandle(UIEventType::MouseWheel, [this] (const UIEvent& event)
+	{
+		onMouseWheel(event);
+	});
+}
+
+Vector2f UIScrollPane::getScrollPosition() const
+{
+	return scrollPos;
 }
 
 void UIScrollPane::scrollTo(Vector2f position)
+{	
+	if (scrollHorizontal) {
+		scrollPos.x = clamp(position.x, 0.0f, contentsSize.x - clipSize.x);
+	}
+	
+	if (scrollVertical) {
+		scrollPos.y = clamp(position.y, 0.0f, contentsSize.y - clipSize.y);
+	}
+}
+
+void UIScrollPane::scrollBy(Vector2f delta)
 {
-	scrollPos = position;
+	scrollTo(scrollPos + delta);
+}
+
+void UIScrollPane::setScrollSpeed(float speed)
+{
+	scrollSpeed = speed;
 }
 
 void UIScrollPane::update(Time t, bool moved)
@@ -26,6 +52,7 @@ void UIScrollPane::update(Time t, bool moved)
 		clipSize.y = getSize().y;
 		scrollPos.y = 0;
 	}
+	contentsSize = UIWidget::getLayoutMinimumSize();
 	setMouseClip(Rect4f(getPosition(), getPosition() + getSize()));
 }
 
@@ -47,7 +74,17 @@ Vector2f UIScrollPane::getLayoutMinimumSize() const
 	return size;
 }
 
+bool UIScrollPane::canInteractWithMouse() const
+{
+	return true;
+}
+
+void UIScrollPane::onMouseWheel(const UIEvent& event)
+{
+	scrollBy(Vector2f(0.0f, -scrollSpeed * event.getIntData()));
+}
+
 Vector2f UIScrollPane::getLayoutOriginPosition() const
 {
-	return getPosition() - scrollPos;
+	return getPosition() - scrollPos.floor();
 }
