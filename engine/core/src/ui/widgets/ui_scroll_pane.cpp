@@ -21,6 +21,11 @@ Vector2f UIScrollPane::getScrollPosition() const
 	return scrollPos;
 }
 
+Vector2f UIScrollPane::getRelativeScrollPosition() const
+{
+	return scrollPos / contentsSize;
+}
+
 void UIScrollPane::scrollTo(Vector2f position)
 {	
 	auto size = Vector2f::min(clipSize, getSize());

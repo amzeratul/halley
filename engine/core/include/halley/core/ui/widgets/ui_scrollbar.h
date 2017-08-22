@@ -12,10 +12,14 @@ namespace Halley {
 
     protected:
 		void checkActive() override;
+		void update(Time t, bool moved) override;
 
     private:
 		UIScrollDirection direction;
 		UIScrollPane* pane = nullptr;
+
+		std::shared_ptr<UIWidget> bar;
+		std::shared_ptr<UIWidget> thumb;
 
 		bool isNeeded() const;
     };

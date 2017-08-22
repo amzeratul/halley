@@ -13,6 +13,8 @@ namespace Halley {
 		UIScrollPane(Vector2f clipSize, bool scrollHorizontal = false, bool scrollVertical = true, Vector2f minSize = {});
 
 		Vector2f getScrollPosition() const;
+		Vector2f getRelativeScrollPosition() const;
+
 		void scrollTo(Vector2f position);
 		void scrollBy(Vector2f delta);
 		void scrollToShow(Rect4f rect, bool center);

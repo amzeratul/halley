@@ -49,7 +49,7 @@ void UIWidget::doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice)
 		if (eventHandler) {
 			eventHandler->pump();
 		}
-	}	
+	}
 }
 
 Vector2f UIWidget::getLayoutMinimumSize() const
