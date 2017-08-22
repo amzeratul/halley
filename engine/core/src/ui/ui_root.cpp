@@ -196,7 +196,7 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWi
 	}
 
 	auto rect = start->getMouseRect();
-	if (start->isFocusable() && rect.isInside(mousePos)) {
+	if (start->isFocusable() && rect.contains(mousePos)) {
 		return start;
 	} else {
 		return {};

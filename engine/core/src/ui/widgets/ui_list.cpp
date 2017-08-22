@@ -238,7 +238,11 @@ int UIListItem::getIndex() const
 
 Rect4f UIListItem::getMouseRect() const
 {
-	return Rect4f(getPosition() - Vector2f(extraMouseArea.x, extraMouseArea.y), getPosition() + getSize() + Vector2f(extraMouseArea.z, extraMouseArea.w));
+	auto rect = UIWidget::getMouseRect();
+	if (rect.getWidth() <= 0.01f || rect.getHeight() <= 0.01f) {
+		return rect;
+	}
+	return Rect4f(rect.getTopLeft() - Vector2f(extraMouseArea.x, extraMouseArea.y), rect.getBottomRight() + Vector2f(extraMouseArea.z, extraMouseArea.w));
 }
 
 void UIList::setSelectedOptionId(const String& id)

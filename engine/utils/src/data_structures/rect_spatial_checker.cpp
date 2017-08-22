@@ -95,8 +95,8 @@ bool RectangleSpatialChecker::updateData(Entry& entry, Rect4i prev, Rect4i next)
 	for (int y = y0; y <= y1; y++) {
 		for (int x = x0; x <= x1; x++) {
 			Vector2i p(x, y);
-			bool removeHere = hasDel && delRect.isInside(p);
-			bool addHere = hasAdd && addRect.isInside(p);
+			bool removeHere = hasDel && delRect.contains(p);
+			bool addHere = hasAdd && addRect.contains(p);
 			
 			auto& contents = getGridCell(x, y);
 

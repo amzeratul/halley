@@ -25,6 +25,7 @@ void UIScrollPane::update(Time t, bool moved)
 		clipSize.y = getSize().y;
 		scrollPos.y = 0;
 	}
+	setMouseClip(Rect4f(getPosition(), getPosition() + getSize()));
 }
 
 void UIScrollPane::drawChildren(UIPainter& painter) const
@@ -44,16 +45,3 @@ Vector2f UIScrollPane::getLayoutMinimumSize() const
 	}
 	return size;
 }
-
-/*
-void UIScrollPane::setWidgetRect(Rect4f rect)
-{
-	if (scrollHorizontal) {
-		rect.setWidth(std::min(rect.getWidth(), clipSize.x));
-	}
-	if (scrollVertical) {
-		rect.setHeight(std::min(rect.getHeight(), clipSize.y));
-	}
-	UIWidget::setWidgetRect(rect);
-}
-*/

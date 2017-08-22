@@ -83,6 +83,7 @@ namespace Halley {
 		std::shared_ptr<UIValidator> getValidator() const;
 		
 		bool isDescendentOf(const UIWidget& ancestor) const override;
+		void setMouseClip(Maybe<Rect4f> mouseClip);
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
@@ -115,6 +116,7 @@ namespace Halley {
 
 		Vector4f innerBorder;
 		Maybe<UISizer> sizer;
+		Maybe<Rect4f> mouseClip;
 
 		std::shared_ptr<UIEventHandler> eventHandler;
 		std::shared_ptr<UIValidator> validator;

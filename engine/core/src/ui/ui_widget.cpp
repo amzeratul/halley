@@ -258,6 +258,14 @@ UIRoot* UIWidget::getRoot()
 	return parent ? parent->getRoot() : nullptr;
 }
 
+void UIWidget::setMouseClip(Maybe<Rect4f> clip)
+{
+	mouseClip = clip;
+	for (auto& c: getChildren()) {
+		c->setMouseClip(clip);
+	}
+}
+
 void UIWidget::onEnabledChanged()
 {
 }
@@ -318,7 +326,12 @@ const std::vector<UIInputType>& UIWidget::getOnlyEnabledWithInput() const
 
 Rect4f UIWidget::getMouseRect() const
 {
-	return Rect4f(getPosition(), getPosition() + getSize());
+	auto rect = Rect4f(getPosition(), getPosition() + getSize());
+	if (mouseClip) {
+		return rect.intersection(mouseClip.get());
+	} else {
+		return rect;
+	}
 }
 
 void UIWidget::draw(UIPainter& painter) const
