@@ -68,7 +68,7 @@ void UIList::clear()
 	getSizer().clear();
 }
 
-void UIList::setInputButtons(const Buttons& button)
+void UIList::setInputButtons(const UIInputButtons& button)
 {
 	inputButtons = button;
 }
@@ -163,6 +163,7 @@ void UIList::update(Time t, bool moved)
 void UIList::onItemClicked(UIListItem& item)
 {
 	setSelectedOption(item.getIndex());
+	sendEvent(UIEvent(UIEventType::ListAccept, getId(), curOption));
 }
 
 UIListItem::UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, int index, Vector4f extraMouseArea)
@@ -245,6 +246,11 @@ Rect4f UIListItem::getMouseRect() const
 	return Rect4f(rect.getTopLeft() - Vector2f(extraMouseArea.x, extraMouseArea.y), rect.getBottomRight() + Vector2f(extraMouseArea.z, extraMouseArea.w));
 }
 
+Rect4f UIListItem::getRawRect() const
+{
+	return Rect4f(getPosition(), getPosition() + getSize());
+}
+
 void UIList::setSelectedOptionId(const String& id)
 {
 	for (auto& i: items) {
@@ -259,5 +265,5 @@ Rect4f UIList::getOptionRect(int curOption) const
 {
 	Expects(!items.empty());
 	auto& item = items[clamp(curOption, 0, int(items.size()) - 1)];
-	return item->getMouseRect();
+	return item->getRawRect();
 }

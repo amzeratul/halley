@@ -29,7 +29,7 @@ void UIHybridList::addId(const String& id)
 	buttons->add(button);
 }
 
-void UIHybridList::setInputButtons(const UIList::Buttons& button)
+void UIHybridList::setInputButtons(const UIInputButtons& buttons)
 {
-	list->setInputButtons(button);
+	list->setInputButtons(buttons);
 }

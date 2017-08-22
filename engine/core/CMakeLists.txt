@@ -152,6 +152,7 @@ set(HEADERS
 
         "include/halley/core/ui/ui_element.h"
         "include/halley/core/ui/ui_event.h"
+        "include/halley/core/ui/ui_input_buttons.h"
         "include/halley/core/ui/ui_painter.h"
         "include/halley/core/ui/ui_parent.h"
         "include/halley/core/ui/ui_root.h"

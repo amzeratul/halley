@@ -15,7 +15,7 @@ namespace Halley {
 
 		void addId(const String& id);
 
-		void setInputButtons(const UIList::Buttons& button);
+		void setInputButtons(const UIInputButtons& button);
 
     private:
 		std::shared_ptr<UIList> list;

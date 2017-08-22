@@ -1,14 +1,16 @@
 #pragma once
 
 #include "../ui_widget.h"
+#include "../ui_input_buttons.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/text/text_renderer.h"
-#include "ui_button.h"
-#include "ui_list.h"
+#include "ui_clickable.h"
 
 namespace Halley {
 	class UIStyle;
 	class UIValidator;
+	class UIList;
+	class UIScrollPane;
 
 	class UIDropdown : public UIClickable {
 	public:
@@ -18,6 +20,8 @@ namespace Halley {
 		void setSelectedOption(const String& option);
 		int getSelectedOption() const;
 		String getSelectedOptionText() const;
+
+		void setInputButtons(const UIInputButtons& buttons);
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -32,9 +36,11 @@ namespace Halley {
 	private:
 		Sprite sprite;
 		TextRenderer label;
+		UIInputButtons inputButtons;
 		std::shared_ptr<UIStyle> style;
 		std::shared_ptr<UIWidget> dropdownWindow;
-		std::shared_ptr<UIList> dropdown;
+		std::shared_ptr<UIList> dropdownList;
+		std::shared_ptr<UIScrollPane> scrollPane;
 		
 		std::vector<String> options;
 		int curOption = 0;
@@ -42,5 +48,6 @@ namespace Halley {
 
 		void open();
 		void close();
+		void scrollToShow(int option, bool center);
     };
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../ui_widget.h"
+#include "../ui_input_buttons.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/text/text_renderer.h"
 #include "ui_button.h"
@@ -13,16 +14,6 @@ namespace Halley {
 		friend class UIListItem;
 
 	public:
-		struct Buttons {
-			int accept = -1;
-			int next = -1;
-			int prev = -1;
-			int xAxis = -1;
-			int yAxis = -1;
-			int xAxisAlt = -1;
-			int yAxisAlt = -1;
-		};
-
 		explicit UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 
 		void setSelectedOption(int option);
@@ -35,7 +26,7 @@ namespace Halley {
 		void addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill);
 		void clear();
 
-		void setInputButtons(const Buttons& button);
+		void setInputButtons(const UIInputButtons& buttons);
 		void updateInputDevice(InputDevice& device) override;
 		
 		Rect4f getOptionRect(int curOption) const;
@@ -53,7 +44,7 @@ namespace Halley {
 		int curOptionHighlight = -1;
 		int curOption = -1;
 		int nColumns = 1;
-		Buttons inputButtons;
+		UIInputButtons inputButtons;
 
 		void onItemClicked(UIListItem& item);
 		void addItem(std::shared_ptr<UIListItem> item);
@@ -67,6 +58,7 @@ namespace Halley {
 		void setSelected(bool selected);
 		int getIndex() const;
 		Rect4f getMouseRect() const override;
+		Rect4f getRawRect() const;
 
 	protected:
 		void draw(UIPainter& painter) const override;

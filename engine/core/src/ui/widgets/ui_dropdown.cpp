@@ -3,6 +3,7 @@
 #include "ui/widgets/ui_image.h"
 #include "ui/widgets/ui_scroll_pane.h"
 #include <ui/widgets/ui_scrollbar.h>
+#include "ui/widgets/ui_list.h"
 
 using namespace Halley;
 
@@ -57,6 +58,14 @@ String UIDropdown::getSelectedOptionText() const
 	return options[curOption];
 }
 
+void UIDropdown::setInputButtons(const UIInputButtons& buttons)
+{
+	inputButtons = buttons;
+	if (dropdownList) {
+		dropdownList->setInputButtons(buttons);
+	}
+}
+
 void UIDropdown::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);
@@ -108,15 +117,16 @@ void UIDropdown::open()
 	if (!isOpen) {
 		isOpen = true;
 	
-		dropdown = std::make_shared<UIList>(getId() + "_list", style);
+		dropdownList = std::make_shared<UIList>(getId() + "_list", style);
 		int i = 0;
 		for (auto& o: options) {
-			dropdown->addTextItem(toString(i++), o);
+			dropdownList->addTextItem(toString(i++), o);
 		}
-		dropdown->setSelectedOption(curOption);
+		dropdownList->setSelectedOption(curOption);
+		dropdownList->setInputButtons(inputButtons);
 
-		auto scrollPane = std::make_shared<UIScrollPane>(Vector2f(0, 80));
-		scrollPane->add(dropdown);
+		scrollPane = std::make_shared<UIScrollPane>(Vector2f(0, 80));
+		scrollPane->add(dropdownList);
 
 		auto scrollBar = std::make_shared<UIScrollBar>(UIScrollDirection::Vertical, style);
 		scrollBar->setScrollPane(*scrollPane);
@@ -127,17 +137,22 @@ void UIDropdown::open()
 		dropdownWindow->setMinSize(Vector2f(getSize().x, getSize().y));
 		addChild(dropdownWindow);
 
-		dropdown->getEventHandler().setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
+		dropdownList->getEventHandler().setHandle(UIEventType::ListAccept, [=] (const UIEvent& event)
 		{
-			setSelectedOption(event.getData().toInteger());
+			setSelectedOption(event.getIntData());
 			close();
 		});
 
+		dropdownList->getEventHandler().setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
+		{
+			scrollToShow(event.getIntData(), false);
+		});
+
 		dropdownWindow->layout();
-		auto sz = dropdown->getSize();
+		auto sz = dropdownList->getSize();
 		scrollPane->setScrollSpeed(ceil(sz.y / options.size()));
 		scrollPane->update(0, false);
-		scrollPane->scrollToShow(dropdown->getOptionRect(curOption) - dropdown->getPosition(), true);
+		scrollToShow(curOption, true);
 	}
 }
 
@@ -149,6 +164,11 @@ void UIDropdown::close()
 		dropdownWindow->destroy();
 		dropdownWindow.reset();
 	}
+}
+
+void UIDropdown::scrollToShow(int option, bool center)
+{
+	scrollPane->scrollToShow(dropdownList->getOptionRect(option) - dropdownList->getPosition(), center);
 }
 
 void UIDropdown::drawChildren(UIPainter& painter) const
