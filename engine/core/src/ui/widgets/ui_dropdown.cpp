@@ -2,6 +2,7 @@
 #include "ui/ui_style.h"
 #include "ui/widgets/ui_image.h"
 #include "ui/widgets/ui_scroll_pane.h"
+#include <ui/widgets/ui_scrollbar.h>
 
 using namespace Halley;
 
@@ -23,7 +24,7 @@ UIDropdown::UIDropdown(String id, std::shared_ptr<UIStyle> style, const std::vec
 		maxExtents = std::max(maxExtents, label.clone().setText(o).getExtents().x);
 	}
 
-	setMinSize(Vector2f(maxExtents + 14, 14));
+	setMinSize(Vector2f(maxExtents + 19, 14)); // HACK
 }
 
 void UIDropdown::setSelectedOption(int option)
@@ -117,8 +118,11 @@ void UIDropdown::open()
 		auto scrollPane = std::make_shared<UIScrollPane>(Vector2f(0, 80));
 		scrollPane->add(dropdown);
 
-		dropdownWindow = std::make_shared<UIImage>(style->getSprite("dropdown.background"), UISizer(UISizerType::Vertical), style->getBorder("dropdown.innerBorder"));
-		dropdownWindow->add(scrollPane);
+		auto scrollBar = std::make_shared<UIScrollBar>(UIScrollBar::Type::Vertical, style);
+
+		dropdownWindow = std::make_shared<UIImage>(style->getSprite("dropdown.background"), UISizer(UISizerType::Horizontal), style->getBorder("dropdown.innerBorder"));
+		dropdownWindow->add(scrollPane, 1);
+		dropdownWindow->add(scrollBar);
 		dropdownWindow->setMinSize(Vector2f(getSize().x, getSize().y));
 		addChild(dropdownWindow);
 

@@ -74,6 +74,7 @@ set(SOURCES
         "src/ui/widgets/ui_label.cpp"
         "src/ui/widgets/ui_list.cpp"
         "src/ui/widgets/ui_scroll_pane.cpp"
+        "src/ui/widgets/ui_scrollbar.cpp"
 
         "src/utils/world_stats.cpp"
         )
