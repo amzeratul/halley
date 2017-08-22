@@ -6,9 +6,9 @@ UIScrollPane::UIScrollPane(Vector2f clipSize, bool scrollHorizontal, bool scroll
 	: UIWidget("", minSize, UISizer(UISizerType::Vertical, 0))
 	, clipSize(clipSize)
 	, scrollPos()
+	, scrollSpeed(10.0f)
 	, scrollHorizontal(scrollHorizontal)
 	, scrollVertical(scrollVertical)
-	, scrollSpeed(10.0f)
 {
 	getEventHandler().setHandle(UIEventType::MouseWheel, [this] (const UIEvent& event)
 	{
@@ -23,12 +23,14 @@ Vector2f UIScrollPane::getScrollPosition() const
 
 void UIScrollPane::scrollTo(Vector2f position)
 {	
+	auto size = Vector2f::min(clipSize, getSize());
+
 	if (scrollHorizontal) {
-		scrollPos.x = clamp(position.x, 0.0f, contentsSize.x - clipSize.x);
+		scrollPos.x = clamp(position.x, 0.0f, contentsSize.x - size.x);
 	}
 	
 	if (scrollVertical) {
-		scrollPos.y = clamp(position.y, 0.0f, contentsSize.y - clipSize.y);
+		scrollPos.y = clamp(position.y, 0.0f, contentsSize.y - size.y);
 	}
 }
 
@@ -91,10 +93,12 @@ Vector2f UIScrollPane::getLayoutOriginPosition() const
 
 void UIScrollPane::scrollToShow(Rect4f rect, bool center)
 {
-	float minX = rect.getRight() - clipSize.x;
+	auto size = Vector2f::min(clipSize, getSize());
+
 	float maxX = rect.getLeft();
-	float minY = rect.getBottom() - clipSize.y;
+	float minX = rect.getRight() - size.x;
 	float maxY = rect.getTop();
-	auto target = center ? (rect.getCenter() - 0.5f * clipSize) : scrollPos;
+	float minY = rect.getBottom() - size.y;
+	auto target = center ? (rect.getCenter() - 0.5f * size) : scrollPos;
 	scrollTo(Vector2f(clamp(target.x, minX, maxX), clamp(target.y, minY, maxY)));
 }

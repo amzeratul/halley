@@ -16,7 +16,7 @@ UIDropdown::UIDropdown(String id, std::shared_ptr<UIStyle> style, const std::vec
 		options.push_back("");
 	}
 	curOption = clamp(curOption, 0, int(options.size() - 1));
-	label = style->getTextRenderer("input.label").clone().setText(options[defaultOption]);
+	label = style->getTextRenderer("dropdown.label").clone().setText(options[defaultOption]);
 
 	float maxExtents = 0;
 	for (auto& o: options) {
@@ -72,7 +72,7 @@ void UIDropdown::update(Time t, bool moved)
 	}
 
 	bool needUpdate = true;
-	sprite = isEnabled() ? (isMouseOver() ? style->getSprite("dropdown.hover") : style->getSprite("dropdown.normal")) : style->getSprite("dropdown.disabled");
+	sprite = isEnabled() ? (isOpen ? style->getSprite("dropdown.open") : (isMouseOver() ? style->getSprite("dropdown.hover") : style->getSprite("dropdown.normal"))) : style->getSprite("dropdown.disabled");
 
 	if (needUpdate) {
 		sprite.setPos(getPosition()).scaleTo(getSize());
@@ -119,7 +119,7 @@ void UIDropdown::open()
 
 		dropdownWindow = std::make_shared<UIImage>(style->getSprite("dropdown.background"), UISizer(UISizerType::Vertical), style->getBorder("dropdown.innerBorder"));
 		dropdownWindow->add(scrollPane);
-		dropdownWindow->setMinSize(Vector2f(getSize().x + 1, getSize().y));
+		dropdownWindow->setMinSize(Vector2f(getSize().x, getSize().y));
 		addChild(dropdownWindow);
 
 		dropdown->getEventHandler().setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
