@@ -22,7 +22,7 @@ namespace Halley {
 		void doDraw(UIPainter& painter) const;
 		void doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice);
 
-		Vector2f computeMinimumSize() const override;
+		Vector2f getLayoutMinimumSize() const override;
 		void setRect(Rect4f rect) override;
 
 		void layout();
@@ -102,8 +102,8 @@ namespace Halley {
 		void playSound(const std::shared_ptr<const AudioClip>& clip);
 
 	private:
-		void setWidgetRect(Rect4f rect);
 		void setParent(UIParent& parent);
+		void setWidgetRect(Rect4f rect);
 
 		UIParent* parent = nullptr;
 		String id;

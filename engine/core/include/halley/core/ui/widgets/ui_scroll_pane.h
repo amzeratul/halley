@@ -11,8 +11,9 @@ namespace Halley {
     protected:
 	    void update(Time t, bool moved) override;
 	    void drawChildren(UIPainter& painter) const override;
+	    Vector2f getLayoutMinimumSize() const override;
 
-    private:
+   	private:
 		Vector2f clipSize;
 		Vector2f scrollPos;
 		bool scrollHorizontal;

@@ -51,7 +51,7 @@ void UIWidget::doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice)
 	}	
 }
 
-Vector2f UIWidget::computeMinimumSize() const
+Vector2f UIWidget::getLayoutMinimumSize() const
 {
 	if (!active) {
 		return {};
@@ -59,7 +59,7 @@ Vector2f UIWidget::computeMinimumSize() const
 	Vector2f minSize = getMinimumSize();
 	if (sizer) {
 		auto border = getInnerBorder();
-		Vector2f innerSize = sizer.get().computeMinimumSize();
+		Vector2f innerSize = sizer.get().getLayoutMinimumSize();
 		if (innerSize.x > 0.1f || innerSize.y > 0.1f) {
 			innerSize += Vector2f(border.x + border.z, border.y + border.w);
 		}
@@ -84,7 +84,7 @@ void UIWidget::setRect(Rect4f rect)
 
 void UIWidget::layout()
 {
-	Vector2f minimumSize = computeMinimumSize();
+	Vector2f minimumSize = getLayoutMinimumSize();
 	Vector2f targetSize = Vector2f::max(shrinkOnLayout ? Vector2f() : size, minimumSize);
 	setRect(Rect4f(getPosition(), getPosition() + targetSize));
 	onLayout();

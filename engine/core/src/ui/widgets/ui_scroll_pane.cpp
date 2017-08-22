@@ -32,3 +32,28 @@ void UIScrollPane::drawChildren(UIPainter& painter) const
 	auto p = painter.withClip(Rect4f(getPosition(), getPosition() + clipSize));
 	UIWidget::drawChildren(p);
 }
+
+Vector2f UIScrollPane::getLayoutMinimumSize() const
+{
+	auto size = UIWidget::getLayoutMinimumSize();
+	if (scrollHorizontal) {
+		size.x = std::min(size.x, clipSize.x);
+	}
+	if (scrollVertical) {
+		size.y = std::min(size.y, clipSize.y);
+	}
+	return size;
+}
+
+/*
+void UIScrollPane::setWidgetRect(Rect4f rect)
+{
+	if (scrollHorizontal) {
+		rect.setWidth(std::min(rect.getWidth(), clipSize.x));
+	}
+	if (scrollVertical) {
+		rect.setHeight(std::min(rect.getHeight(), clipSize.y));
+	}
+	UIWidget::setWidgetRect(rect);
+}
+*/
