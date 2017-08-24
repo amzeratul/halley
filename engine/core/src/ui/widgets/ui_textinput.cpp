@@ -4,12 +4,12 @@
 
 using namespace Halley;
 
-UITextInput::UITextInput(std::shared_ptr<InputDevice> keyboard, String id, std::shared_ptr<UIStyle> style, String text, String ghostText)
+UITextInput::UITextInput(std::shared_ptr<InputDevice> keyboard, String id, UIStyle style, String text, String ghostText)
 	: UIWidget(id, {}, UISizer(UISizerType::Vertical), Vector4f(3, 3, 3, 3))
 	, keyboard(keyboard)
 	, style(style)
-	, sprite(style->getSprite("input.box"))
-	, label(style->getTextRenderer("input.label"))
+	, sprite(style.getSprite("box"))
+	, label(style.getTextRenderer("label"))
 	, text(text.getUTF32())
 	, ghostText(ghostText)
 {
@@ -82,10 +82,10 @@ void UITextInput::update(Time t, bool moved)
 	}
 
 	if (text.empty() && !isFocused()) {
-		label = style->getTextRenderer("input.labelGhost");
+		label = style.getTextRenderer("labelGhost");
 		label.setText(ghostText);
 	} else {
-		label = style->getTextRenderer("input.label");
+		label = style.getTextRenderer("label");
 		auto txt = String(text);
 		if (isFocused()) {
 			txt.appendCharacter(caretShowing ? '_' : ' ');

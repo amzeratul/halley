@@ -5,19 +5,19 @@
 
 using namespace Halley;
 
-UIScrollBar::UIScrollBar(UIScrollDirection direction, std::shared_ptr<UIStyle> style)
+UIScrollBar::UIScrollBar(UIScrollDirection direction, UIStyle style)
 	: UIWidget("", Vector2f(), UISizer(direction == UIScrollDirection::Horizontal ? UISizerType::Horizontal : UISizerType::Vertical))
 	, direction(direction)
 {
-	UIWidget::add(std::make_shared<UIImage>(style->getSprite("scrollbar.up.normal")));
+	UIWidget::add(std::make_shared<UIImage>(style.getSprite("up.normal")));
 
-	bar = std::make_shared<UIImage>(style->getSprite("scrollbar.bar.normal"));
-	thumb = std::make_shared<UIImage>(style->getSprite("scrollbar.thumb.normal"));
+	bar = std::make_shared<UIImage>(style.getSprite("bar.normal"));
+	thumb = std::make_shared<UIImage>(style.getSprite("thumb.normal"));
 	thumb->setMinSize(Vector2f(1, 1));
 	bar->add(thumb);
 	UIWidget::add(bar, 1);
 
-	UIWidget::add(std::make_shared<UIImage>(style->getSprite("scrollbar.down.normal")));
+	UIWidget::add(std::make_shared<UIImage>(style.getSprite("down.normal")));
 }
 
 void UIScrollBar::update(Time t, bool moved)
@@ -53,7 +53,7 @@ void UIScrollBar::pressMouse(Vector2f mousePos, int button)
 	if (pane) {
 		int axis = direction == UIScrollDirection::Horizontal ? 0 : 1;
 
-		auto relative = (mousePos - getPosition()) / getSize();
+		auto relative = (mousePos - bar->getPosition()) / bar->getSize();
 		float clickPos = relative[axis];
 		float coverage = pane->getCoverageSize(direction);
 		auto curPos = pane->getRelativeScrollPosition()[axis];

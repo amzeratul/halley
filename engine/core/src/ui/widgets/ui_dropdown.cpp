@@ -7,18 +7,20 @@
 
 using namespace Halley;
 
-UIDropdown::UIDropdown(String id, std::shared_ptr<UIStyle> style, const std::vector<String>& os, int defaultOption)
+UIDropdown::UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, const std::vector<String>& os, int defaultOption)
 	: UIClickable(id, {})
 	, style(style)
+	, scrollbarStyle(scrollbarStyle)
+	, listStyle(listStyle)
 	, options(os)
 	, curOption(defaultOption)
 {
-	sprite = style->getSprite("dropdown.normal");
+	sprite = style.getSprite("normal");
 	if (options.empty()) {
 		options.push_back("");
 	}
 	curOption = clamp(curOption, 0, int(options.size() - 1));
-	label = style->getTextRenderer("dropdown.label").clone().setText(options[defaultOption]);
+	label = style.getTextRenderer("label").clone().setText(options[defaultOption]);
 
 	float maxExtents = 0;
 	for (auto& o: options) {
@@ -82,7 +84,7 @@ void UIDropdown::update(Time t, bool moved)
 	}
 
 	bool needUpdate = true;
-	sprite = isEnabled() ? (isOpen ? style->getSprite("dropdown.open") : (isMouseOver() ? style->getSprite("dropdown.hover") : style->getSprite("dropdown.normal"))) : style->getSprite("dropdown.disabled");
+	sprite = isEnabled() ? (isOpen ? style.getSprite("open") : (isMouseOver() ? style.getSprite("hover") : style.getSprite("normal"))) : style.getSprite("disabled");
 
 	if (needUpdate) {
 		sprite.setPos(getPosition()).scaleTo(getSize());
@@ -117,7 +119,7 @@ void UIDropdown::open()
 	if (!isOpen) {
 		isOpen = true;
 	
-		dropdownList = std::make_shared<UIList>(getId() + "_list", style);
+		dropdownList = std::make_shared<UIList>(getId() + "_list", listStyle);
 		int i = 0;
 		for (auto& o: options) {
 			dropdownList->addTextItem(toString(i++), o);
@@ -129,10 +131,10 @@ void UIDropdown::open()
 		scrollPane = std::make_shared<UIScrollPane>(Vector2f(0, 80));
 		scrollPane->add(dropdownList);
 
-		auto scrollBar = std::make_shared<UIScrollBar>(UIScrollDirection::Vertical, style);
+		auto scrollBar = std::make_shared<UIScrollBar>(UIScrollDirection::Vertical, scrollbarStyle);
 		scrollBar->setScrollPane(*scrollPane);
 
-		dropdownWindow = std::make_shared<UIImage>(style->getSprite("dropdown.background"), UISizer(UISizerType::Horizontal), style->getBorder("dropdown.innerBorder"));
+		dropdownWindow = std::make_shared<UIImage>(style.getSprite("background"), UISizer(UISizerType::Horizontal), style.getBorder("innerBorder"));
 		dropdownWindow->add(scrollPane, 1);
 		dropdownWindow->add(scrollBar);
 		dropdownWindow->setMinSize(Vector2f(getSize().x, getSize().y));

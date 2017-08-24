@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../ui_widget.h"
+#include "../ui_style.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/text/text_renderer.h"
 #include "ui_button.h"
@@ -13,7 +14,7 @@ namespace Halley {
 		friend class UIListItem;
 
 	public:
-		explicit UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
+		explicit UIList(const String& id, UIStyle style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 
 		void setSelectedOption(int option);
 		void setSelectedOptionId(const String& id);
@@ -33,7 +34,7 @@ namespace Halley {
 		void onInput(const UIInputResults& input) override;
 
 	private:
-		std::shared_ptr<UIStyle> style;
+		UIStyle style;
 		UISizerType orientation;
 		Sprite sprite;
 		std::vector<std::shared_ptr<UIListItem>> items;
@@ -49,7 +50,7 @@ namespace Halley {
 
 	class UIListItem : public UIClickable {
 	public:
-		explicit UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, int index, Vector4f extraMouseArea);
+		explicit UIListItem(const String& id, UIList& parent, UIStyle style, int index, Vector4f extraMouseArea);
 
 		void onClicked(Vector2f mousePos) override;
 		void setSelected(bool selected);
@@ -63,7 +64,7 @@ namespace Halley {
 
 	private:
 		UIList& parent;
-		std::shared_ptr<UIStyle> style;
+		UIStyle style;
 		int index;
 		Sprite sprite;
 		Vector4f extraMouseArea;

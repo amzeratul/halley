@@ -7,7 +7,7 @@ namespace Halley {
 
     class UIScrollBar : public UIWidget {
     public:
-		UIScrollBar(UIScrollDirection direction, std::shared_ptr<UIStyle> style);
+		UIScrollBar(UIScrollDirection direction, UIStyle style);
 		void setScrollPane(UIScrollPane& pane);
 
 	    bool canInteractWithMouse() const override;

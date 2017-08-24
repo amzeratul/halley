@@ -1,11 +1,12 @@
 #pragma once
 #include "ui_clickable.h"
 #include "halley/core/graphics/sprite/sprite.h"
+#include "ui/ui_style.h"
 
 namespace Halley {
 	class UIButton : public UIClickable {
 	public:
-		explicit UIButton(String id, std::shared_ptr<UIStyle> style, Maybe<UISizer> sizer = {}, Maybe<Vector4f> innerBorder = {});
+		explicit UIButton(String id, UIStyle style, Maybe<UISizer> sizer = {}, Maybe<Vector4f> innerBorder = {});
 
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -20,7 +21,7 @@ namespace Halley {
 
 	private:
 		Sprite sprite;
-		std::shared_ptr<UIStyle> style;
+		UIStyle style;
 		UIInputType curInputType = UIInputType::Undefined;
 		bool borderOnly = false;
 	};

@@ -6,7 +6,7 @@ namespace Halley {
 
 	class UICheckbox : public UIClickable {
 	public:
-		explicit UICheckbox(String id, std::shared_ptr<UIStyle> style, bool checked = false);
+		explicit UICheckbox(String id, UIStyle style, bool checked = false);
 
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -19,7 +19,7 @@ namespace Halley {
 
 	private:
 		Sprite sprite;
-		std::shared_ptr<UIStyle> style;
+		UIStyle style;
         bool checked = false;
 	};
 }

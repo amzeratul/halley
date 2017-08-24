@@ -4,11 +4,11 @@
 
 using namespace Halley;
 
-UIButton::UIButton(String id, std::shared_ptr<UIStyle> s, Maybe<UISizer> sizer, Maybe<Vector4f> innerBorder)
-	: UIClickable(id, {}, sizer, innerBorder ? innerBorder.get() : s->getBorder("button.innerBorder"))
+UIButton::UIButton(String id, UIStyle s, Maybe<UISizer> sizer, Maybe<Vector4f> innerBorder)
+	: UIClickable(id, {}, sizer, innerBorder ? innerBorder.get() : s.getBorder("innerBorder"))
 	, style(s)
 {
-	sprite = style->getSprite("button.normal");
+	sprite = style.getSprite("normal");
 }
 
 void UIButton::draw(UIPainter& painter) const
@@ -54,19 +54,19 @@ bool UIButton::isFocusLocked() const
 void UIButton::doSetState(State state)
 {
 	if (borderOnly) {
-		sprite = style->getSprite("button.borderOnly");
+		sprite = style.getSprite("borderOnly");
 	} else {
 		if (!isEnabled()) {
-			sprite = style->getSprite("button.disabled");
+			sprite = style.getSprite("disabled");
 		} else if (state == State::Up) {
-			sprite = style->getSprite("button.normal");
-			playSound(style->getAudioClip("button.upSound"));
+			sprite = style.getSprite("normal");
+			playSound(style.getAudioClip("upSound"));
 		} else if (state == State::Down) {
-			sprite = style->getSprite("button.down");
-			playSound(style->getAudioClip("button.downSound"));
+			sprite = style.getSprite("down");
+			playSound(style.getAudioClip("downSound"));
 		} else if (state == State::Hover) {
-			sprite = style->getSprite("button.hover");
-			playSound(style->getAudioClip("button.hoverSound"));
+			sprite = style.getSprite("hover");
+			playSound(style.getAudioClip("hoverSound"));
 		}
 	}
 }

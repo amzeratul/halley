@@ -4,13 +4,13 @@
 
 using namespace Halley;
 
-UIList::UIList(const String& id, std::shared_ptr<UIStyle> style, UISizerType orientation, int nColumns)
-	: UIWidget(id, {}, UISizer(orientation, style->getFloat("list.gap"), nColumns, true))
+UIList::UIList(const String& id, UIStyle style, UISizerType orientation, int nColumns)
+	: UIWidget(id, {}, UISizer(orientation, style.getFloat("gap"), nColumns, true))
 	, style(style)
 	, orientation(orientation)
 	, nColumns(nColumns)
 {
-	sprite = style->getSprite("list.background");
+	sprite = style.getSprite("background");
 }
 
 void UIList::setSelectedOption(int option)
@@ -23,7 +23,7 @@ void UIList::setSelectedOption(int option)
 		curOption = newSel;
 		items[curOption]->setSelected(true);
 
-		playSound(style->getAudioClip("list.selectionChangedSound"));
+		playSound(style.getAudioClip("selectionChangedSound"));
 		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), items[curOption]->getId(), curOption));
 		sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
 	}
@@ -41,22 +41,22 @@ const String& UIList::getSelectedOptionId() const
 
 void UIList::addTextItem(const String& id, const String& label)
 {
-	auto widget = std::make_shared<UILabel>(style->getTextRenderer("label").clone().setText(label));
-	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()), style->getBorder("list.extraMouseBorder"));
+	auto widget = std::make_shared<UILabel>(style.getTextRenderer("label").clone().setText(label));
+	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()), style.getBorder("extraMouseBorder"));
 	item->add(widget, 0, orientation == UISizerType::Vertical ? Vector4f(3, 0, 3, 0) : Vector4f(0, 3, 0, 3));
 	addItem(item);
 }
 
 void UIList::addItem(const String& id, std::shared_ptr<UIWidget> widget, float proportion, Vector4f border, int fillFlags)
 {
-	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()), style->getBorder("list.extraMouseBorder"));
+	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()), style.getBorder("extraMouseBorder"));
 	item->add(widget, proportion, border, fillFlags);
 	addItem(item);
 }
 
 void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion, Vector4f border, int fillFlags)
 {
-	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()), style->getBorder("list.extraMouseBorder"));
+	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()), style.getBorder("extraMouseBorder"));
 	item->add(sizer, proportion, border, fillFlags);
 	addItem(item);
 }
@@ -157,14 +157,14 @@ void UIList::onItemClicked(UIListItem& item)
 	sendEvent(UIEvent(UIEventType::ListAccept, getId(), curOption));
 }
 
-UIListItem::UIListItem(const String& id, UIList& parent, std::shared_ptr<UIStyle> style, int index, Vector4f extraMouseArea)
+UIListItem::UIListItem(const String& id, UIList& parent, UIStyle style, int index, Vector4f extraMouseArea)
 	: UIClickable(id, {}, UISizer(UISizerType::Vertical))
 	, parent(parent)
 	, style(style)
 	, index(index)
 	, extraMouseArea(extraMouseArea)
 {
-	sprite = style->getSprite("list.itemNormal");
+	sprite = style.getSprite("itemNormal");
 }
 
 void UIListItem::onClicked(Vector2f mousePos)
@@ -199,17 +199,17 @@ void UIListItem::update(Time t, bool moved)
 void UIListItem::doSetState(State state)
 {
 	if (selected) {
-		sprite = style->getSprite("list.itemSelected");
+		sprite = style.getSprite("itemSelected");
 	} else {
 		switch (state) {
 		case State::Up:
-			sprite = style->getSprite("list.itemNormal");
+			sprite = style.getSprite("itemNormal");
 			break;
 		case State::Hover:
-			sprite = style->getSprite("list.itemHover");
+			sprite = style.getSprite("itemHover");
 			break;
 		case State::Down:
-			sprite = style->getSprite("list.itemSelected");
+			sprite = style.getSprite("itemSelected");
 			break;
 		}
 	}

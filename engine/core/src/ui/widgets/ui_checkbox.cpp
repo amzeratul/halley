@@ -3,12 +3,12 @@
 
 using namespace Halley;
 
-UICheckbox::UICheckbox(String id, std::shared_ptr<UIStyle> style, bool checked)
+UICheckbox::UICheckbox(String id, UIStyle style, bool checked)
 	: UIClickable(id, {})
 	, style(style)
 	, checked(checked)
 {
-	sprite = style->getSprite("checkbox.normal");
+	sprite = style.getSprite("normal");
 	setMinSize(sprite.getScaledSize().abs());
 }
 
@@ -48,11 +48,11 @@ void UICheckbox::doSetState(State state)
 {
 	if (isEnabled()) {
 		if (state == State::Hover) {
-			sprite = checked ? style->getSprite("checkbox.checkedHover") : style->getSprite("checkbox.hover");
+			sprite = checked ? style.getSprite("checkedHover") : style.getSprite("hover");
 		} else {
-			sprite = checked ? style->getSprite("checkbox.checked") : style->getSprite("checkbox.normal");
+			sprite = checked ? style.getSprite("checked") : style.getSprite("normal");
 		}
 	} else {
-		sprite = checked ? style->getSprite("checkbox.checkedDisabled") : style->getSprite("checkbox.disabled");
+		sprite = checked ? style.getSprite("checkedDisabled") : style.getSprite("disabled");
 	}
 }

@@ -4,6 +4,7 @@
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/text/text_renderer.h"
 #include "ui_clickable.h"
+#include "ui/ui_style.h"
 
 namespace Halley {
 	class UIStyle;
@@ -13,7 +14,7 @@ namespace Halley {
 
 	class UIDropdown : public UIClickable {
 	public:
-		explicit UIDropdown(String id, std::shared_ptr<UIStyle> style, const std::vector<String>& options, int defaultOption = 0);
+		explicit UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, const std::vector<String>& options, int defaultOption = 0);
 
 		void setSelectedOption(int option);
 		void setSelectedOption(const String& option);
@@ -36,7 +37,9 @@ namespace Halley {
 		Sprite sprite;
 		TextRenderer label;
 		UIInputButtons inputButtons;
-		std::shared_ptr<UIStyle> style;
+		UIStyle style;
+		UIStyle scrollbarStyle;
+		UIStyle listStyle;
 		std::shared_ptr<UIWidget> dropdownWindow;
 		std::shared_ptr<UIList> dropdownList;
 		std::shared_ptr<UIScrollPane> scrollPane;

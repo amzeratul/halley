@@ -7,6 +7,7 @@
 #include "halley/maths/vector4.h"
 #include "halley/data_structures/maybe.h"
 #include "ui_input.h"
+#include "ui_style.h"
 
 namespace Halley {
 	class UIEvent;

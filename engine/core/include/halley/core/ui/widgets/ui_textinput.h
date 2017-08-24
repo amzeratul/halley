@@ -10,7 +10,7 @@ namespace Halley {
 
 	class UITextInput : public UIWidget {
 	public:
-		explicit UITextInput(std::shared_ptr<InputDevice> keyboard, String id, std::shared_ptr<UIStyle> style, String text = "", String ghostText = "");
+		explicit UITextInput(std::shared_ptr<InputDevice> keyboard, String id, UIStyle style, String text = "", String ghostText = "");
 		bool canInteractWithMouse() const override;
 
 		UITextInput& setText(const String& text);
@@ -28,7 +28,7 @@ namespace Halley {
 		void updateTextInput();
 
 		std::shared_ptr<InputDevice> keyboard;
-		std::shared_ptr<UIStyle> style;
+		UIStyle style;
 		Sprite sprite;
 		TextRenderer label;
 
