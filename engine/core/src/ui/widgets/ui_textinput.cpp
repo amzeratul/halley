@@ -1,10 +1,10 @@
-#include "ui/widgets/ui_input.h"
+#include "ui/widgets/ui_textinput.h"
 #include "ui/ui_style.h"
 #include "ui/ui_validator.h"
 
 using namespace Halley;
 
-UIInput::UIInput(std::shared_ptr<InputDevice> keyboard, String id, std::shared_ptr<UIStyle> style, String text, String ghostText)
+UITextInput::UITextInput(std::shared_ptr<InputDevice> keyboard, String id, std::shared_ptr<UIStyle> style, String text, String ghostText)
 	: UIWidget(id, {}, UISizer(UISizerType::Vertical), Vector4f(3, 3, 3, 3))
 	, keyboard(keyboard)
 	, style(style)
@@ -16,40 +16,40 @@ UIInput::UIInput(std::shared_ptr<InputDevice> keyboard, String id, std::shared_p
 	label.setText(text);
 }
 
-bool UIInput::canInteractWithMouse() const
+bool UITextInput::canInteractWithMouse() const
 {
 	return true;
 }
 
-UIInput& UIInput::setText(const String& t)
+UITextInput& UITextInput::setText(const String& t)
 {
 	text = t.getUTF32();
 	return *this;
 }
 
-String UIInput::getText() const
+String UITextInput::getText() const
 {
 	return String(text);
 }
 
-UIInput& UIInput::setGhostText(const String& t)
+UITextInput& UITextInput::setGhostText(const String& t)
 {
 	ghostText = t;
 	return *this;
 }
 
-String UIInput::getGhostText() const
+String UITextInput::getGhostText() const
 {
 	return ghostText;
 }
 
-void UIInput::draw(UIPainter& painter) const
+void UITextInput::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);
 	painter.draw(label);
 }
 
-void UIInput::updateTextInput()
+void UITextInput::updateTextInput()
 {
 	bool modified = false;
 	for (int letter = keyboard->getNextLetter(); letter != 0; letter = keyboard->getNextLetter()) {
@@ -69,7 +69,7 @@ void UIInput::updateTextInput()
 	}
 }
 
-void UIInput::update(Time t, bool moved)
+void UITextInput::update(Time t, bool moved)
 {
 	caretTime += float(t);
 	if (caretTime > 0.4f) {
@@ -112,7 +112,7 @@ void UIInput::update(Time t, bool moved)
 	}
 }
 
-void UIInput::onFocus()
+void UITextInput::onFocus()
 {
 	caretTime = 0;
 	caretShowing = true;

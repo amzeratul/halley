@@ -55,6 +55,7 @@ set(SOURCES
         "src/stage/stage.cpp"
 
         "src/ui/ui_event.cpp"
+        "src/ui/ui_input.cpp"
         "src/ui/ui_painter.cpp"
         "src/ui/ui_parent.cpp"
         "src/ui/ui_root.cpp"
@@ -70,12 +71,12 @@ set(SOURCES
         "src/ui/widgets/ui_gamepad_image.cpp"
         "src/ui/widgets/ui_hybrid_list.cpp"
         "src/ui/widgets/ui_image.cpp"
-        "src/ui/widgets/ui_input.cpp"
         "src/ui/widgets/ui_label.cpp"
         "src/ui/widgets/ui_list.cpp"
         "src/ui/widgets/ui_scroll_pane.cpp"
         "src/ui/widgets/ui_scrollbar.cpp"
-
+        "src/ui/widgets/ui_textinput.cpp"
+        
         "src/utils/world_stats.cpp"
         )
 
@@ -152,7 +153,7 @@ set(HEADERS
 
         "include/halley/core/ui/ui_element.h"
         "include/halley/core/ui/ui_event.h"
-        "include/halley/core/ui/ui_input_buttons.h"
+        "include/halley/core/ui/ui_input.h"
         "include/halley/core/ui/ui_painter.h"
         "include/halley/core/ui/ui_parent.h"
         "include/halley/core/ui/ui_root.h"
@@ -168,12 +169,12 @@ set(HEADERS
         "include/halley/core/ui/widgets/ui_gamepad_image.h"
         "include/halley/core/ui/widgets/ui_hybrid_list.h"
         "include/halley/core/ui/widgets/ui_image.h"
-        "include/halley/core/ui/widgets/ui_input.h"
         "include/halley/core/ui/widgets/ui_label.h"
         "include/halley/core/ui/widgets/ui_list.h"
         "include/halley/core/ui/widgets/ui_scroll_pane.h"
         "include/halley/core/ui/widgets/ui_scrollbar.h"
-
+        "include/halley/core/ui/widgets/ui_textinput.h"
+        
         "include/halley/core/utils/world_stats.h"
         "src/prec.h"
         )

@@ -124,6 +124,7 @@ void UIDropdown::open()
 		}
 		dropdownList->setSelectedOption(curOption);
 		dropdownList->setInputButtons(inputButtons);
+		dropdownList->setFocused(true);
 
 		scrollPane = std::make_shared<UIScrollPane>(Vector2f(0, 80));
 		scrollPane->add(dropdownList);

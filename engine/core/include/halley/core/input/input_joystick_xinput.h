@@ -33,7 +33,7 @@ namespace Halley {
 		~InputJoystickXInput();
 
 		std::string getName() const override;
-		JoystickType getType() const override { return JoystickType::Xbox; }
+		JoystickType getJoystickType() const override { return JoystickType::Xbox; }
 	
 		void update(Time t) override;
 		int getButtonAtPosition(JoystickButtonPosition position) const override;

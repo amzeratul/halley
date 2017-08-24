@@ -8,14 +8,14 @@
 namespace Halley {
 	class UIStyle;
 
-	class UIInput : public UIWidget {
+	class UITextInput : public UIWidget {
 	public:
-		explicit UIInput(std::shared_ptr<InputDevice> keyboard, String id, std::shared_ptr<UIStyle> style, String text = "", String ghostText = "");
+		explicit UITextInput(std::shared_ptr<InputDevice> keyboard, String id, std::shared_ptr<UIStyle> style, String text = "", String ghostText = "");
 		bool canInteractWithMouse() const override;
 
-		UIInput& setText(const String& text);
+		UITextInput& setText(const String& text);
 		String getText() const;
-		UIInput& setGhostText(const String& text);
+		UITextInput& setGhostText(const String& text);
 		String getGhostText() const;
 
 	protected:

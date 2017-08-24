@@ -92,6 +92,11 @@ void InputDevice::stopVibrating()
 	
 }
 
+JoystickType InputDevice::getJoystickType() const
+{
+	return JoystickType::None;
+}
+
 Vector2f InputDevice::getPosition() const
 {
 	return {};

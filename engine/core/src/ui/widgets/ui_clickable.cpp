@@ -68,17 +68,10 @@ void UIClickable::doForceUpdate()
 	forceUpdate = true;
 }
 
-void UIClickable::setInputButton(int button)
+void UIClickable::onInput(const UIInputResults& input)
 {
-	inputButton = button;
-}
-
-void UIClickable::updateInputDevice(InputDevice& device)
-{
-	if (inputButton != -1 && isEnabled()) {
-		if (device.isButtonPressed(inputButton)) {
-			onClicked(Vector2f());
-		}
+	if (input.isButtonPressed(UIInput::Button::Accept)) {
+		onClicked(Vector2f());
 	}
 }
 

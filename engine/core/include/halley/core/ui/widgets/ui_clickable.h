@@ -18,8 +18,7 @@ namespace Halley {
 		void onClick(UIEventCallback callback);
 		virtual void onClicked(Vector2f mousePos) = 0;
 
-		void setInputButton(int button);
-		void updateInputDevice(InputDevice& device) override;
+		void onInput(const UIInputResults& input) override;
 
 	protected:
 		enum class State {
@@ -39,6 +38,5 @@ namespace Halley {
 		State curState = State::Up;
 		bool held = false;
 		bool forceUpdate = false;
-		int inputButton = -1;
 	};
 }

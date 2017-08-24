@@ -84,6 +84,8 @@ namespace Halley {
 		spInputDevice getLastDevice() const;
 		void setLastDeviceFreeze(bool frozen);
 
+		JoystickType getJoystickType() const override;
+
 	private:
 		void updateLastDevice();
 

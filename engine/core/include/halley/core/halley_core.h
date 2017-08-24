@@ -49,6 +49,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "ui/ui_element.h"
 #include "ui/ui_event.h"
+#include "ui/ui_input.h"
 #include "ui/ui_root.h"
 #include "ui/ui_sizer.h"
 #include "ui/ui_style.h"
@@ -61,11 +62,11 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "ui/widgets/ui_gamepad_image.h"
 #include "ui/widgets/ui_hybrid_list.h"
 #include "ui/widgets/ui_image.h"
-#include "ui/widgets/ui_input.h"
 #include "ui/widgets/ui_label.h"
 #include "ui/widgets/ui_list.h"
 #include "ui/widgets/ui_scroll_pane.h"
 #include "ui/widgets/ui_scrollbar.h"
+#include "ui/widgets/ui_textinput.h"
 
 #include "utils/world_stats.h"
 

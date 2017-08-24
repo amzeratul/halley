@@ -45,6 +45,11 @@ float InputJoystick::defaultAxisAdjust(float value)
 	return absVal * sign;
 }
 
+JoystickType InputJoystick::getJoystickType() const
+{
+	return JoystickType::Generic;
+}
+
 size_t InputJoystick::getNumberAxes()
 {
 	return axes.size();
@@ -62,7 +67,7 @@ std::shared_ptr<InputDevice> InputJoystick::getHat(int n)
 
 int InputJoystick::getButtonAtPosition(JoystickButtonPosition position) const
 {
-	bool isXbox = getType() == JoystickType::Xbox;
+	bool isXbox = getJoystickType() == JoystickType::Xbox;
 	switch (position) {
 		case JoystickButtonPosition::FaceTop: return isXbox ? 3 : 0;
 		case JoystickButtonPosition::FaceRight: return isXbox ? 1 : 1;

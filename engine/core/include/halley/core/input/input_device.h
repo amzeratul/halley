@@ -27,6 +27,16 @@
 
 namespace Halley {
 
+	enum class JoystickType {
+		None,
+		Generic,
+		Xbox,
+		Playstation,
+		SwitchFull,
+		SwitchLeftJoycon,
+		SwitchRightJoycon
+	};
+	
 	class InputDevice {
 	public:
 		virtual ~InputDevice();
@@ -56,6 +66,7 @@ namespace Halley {
 
 		virtual void vibrate(spInputVibration /*vib*/);
 		virtual void stopVibrating();
+		virtual JoystickType getJoystickType() const;
 
 		virtual Vector2f getPosition() const;
 		virtual int getWheelMove() const;

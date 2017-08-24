@@ -25,26 +25,29 @@ void UIWidget::doDraw(UIPainter& painter) const
 	}
 }
 
-void UIWidget::updateInputDevice(InputDevice& device)
+void UIWidget::doUpdate(bool full, Time t, UIInputType inputType, JoystickType joystickType)
 {
-}
-
-void UIWidget::doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice)
-{
-	setInputType(inputType);
+	if (full) {
+		setInputType(inputType);
+		setJoystickType(joystickType);
 	
-	if (validator) {
-		setEnabled(getValidator()->isEnabled());
+		if (validator) {
+			setEnabled(getValidator()->isEnabled());
+		}
+
+		checkActive();
 	}
 
-	checkActive();
 	if (active) {
 		update(t, positionUpdated);
 		positionUpdated = false;
 		for (auto& c: getChildren()) {
-			c->doUpdate(t, inputType, inputDevice);
+			c->doUpdate(full, t, inputType, joystickType);
 		}
-		updateInputDevice(inputDevice);
+		
+		if (inputButtons && full) {
+			onInput(inputResults);
+		}
 
 		if (eventHandler) {
 			eventHandler->pump();
@@ -201,14 +204,18 @@ void UIWidget::setInnerBorder(Vector4f border)
 	innerBorder = border;
 }
 
-void UIWidget::setFocused(bool f, UIWidget* newFocus)
+void UIWidget::setFocused(bool f)
 {
 	if (focused != f) {
 		focused = f;
 		if (focused) {
 			onFocus();
 		} else {
-			onFocusLost(newFocus);
+			onFocusLost();
+		}
+
+		for (auto& c: getChildren()) {
+			c->setFocused(f);
 		}
 	}
 }
@@ -257,6 +264,10 @@ bool UIWidget::isAlive() const
 UIRoot* UIWidget::getRoot()
 {
 	return parent ? parent->getRoot() : nullptr;
+}
+
+void UIWidget::onInput(const UIInputResults& input)
+{
 }
 
 void UIWidget::setMouseClip(Maybe<Rect4f> clip)
@@ -314,6 +325,10 @@ void UIWidget::setInputType(UIInputType uiInput)
 	}
 }
 
+void UIWidget::setJoystickType(JoystickType joystickType)
+{
+}
+
 void UIWidget::setOnlyEnabledWithInputs(const std::vector<UIInputType>& uiInput)
 {
 	onlyEnabledWithInputs = uiInput;
@@ -323,6 +338,11 @@ void UIWidget::setOnlyEnabledWithInputs(const std::vector<UIInputType>& uiInput)
 const std::vector<UIInputType>& UIWidget::getOnlyEnabledWithInput() const
 {
 	return onlyEnabledWithInputs;
+}
+
+void UIWidget::setInputButtons(const UIInputButtons& buttons)
+{
+	inputButtons = std::make_unique<UIInputButtons>(buttons);
 }
 
 Rect4f UIWidget::getMouseRect() const
@@ -354,7 +374,7 @@ void UIWidget::onFocus()
 {
 }
 
-void UIWidget::onFocusLost(UIWidget* newFocus)
+void UIWidget::onFocusLost()
 {
 }
 
@@ -442,4 +462,13 @@ void UIWidget::setShrinkOnLayout(bool shrink)
 Vector2f UIWidget::getLayoutOriginPosition() const
 {
 	return getPosition();
+}
+
+void UIWidget::updateInputDevice(const InputDevice& inputDevice)
+{
+}
+
+UIInput::Priority UIWidget::getInputPriority() const
+{
+	return focused ? UIInput::Priority::Focused : inputButtons->priorityLevel;
 }

@@ -68,11 +68,6 @@ void UIList::clear()
 	getSizer().clear();
 }
 
-void UIList::setInputButtons(const UIInputButtons& button)
-{
-	inputButtons = button;
-}
-
 void UIList::addItem(std::shared_ptr<UIListItem> item)
 {
 	add(item);
@@ -89,21 +84,21 @@ void UIList::draw(UIPainter& painter) const
 	}
 }
 
-void UIList::updateInputDevice(InputDevice& device)
+
+void UIList::onInput(const UIInputResults& input)
 {
 	Expects(nColumns >= 1);
 
 	int nCols;
 	int nRows;
-	auto checkButton = [&] (int button) { return button >= 0 && device.isButtonPressed(button); };
 
 	int option = curOption;
 
 	// Next/prev first
-	if (checkButton(inputButtons.next)) {
+	if (input.isButtonPressed(UIInput::Button::Next)) {
 		option++;
 	}
-	if (checkButton(inputButtons.prev)) {
+	if (input.isButtonPressed(UIInput::Button::Prev)) {
 		option--;
 	}
 	option = modulo(option, int(items.size()));
@@ -124,18 +119,8 @@ void UIList::updateInputDevice(InputDevice& device)
 	}
 
 	// Arrows
-	if (inputButtons.xAxis != -1) {
-		cursorPos.x += device.getAxisRepeat(inputButtons.xAxis);
-	}
-	if (inputButtons.yAxis != -1) {
-		cursorPos.y += device.getAxisRepeat(inputButtons.yAxis);
-	}
-	if (inputButtons.xAxisAlt != -1) {
-		cursorPos.x += device.getAxisRepeat(inputButtons.xAxisAlt);
-	}
-	if (inputButtons.yAxisAlt != -1) {
-		cursorPos.y += device.getAxisRepeat(inputButtons.yAxisAlt);
-	}
+	cursorPos.x += input.getAxisRepeat(UIInput::Axis::X);
+	cursorPos.y += input.getAxisRepeat(UIInput::Axis::Y);
 	cursorPos.y = modulo(cursorPos.y, nRows);
 	int columnsThisRow = (cursorPos.y == nRows - 1) ? int(items.size()) % nCols : nCols;
 	if (columnsThisRow == 0) { // If the last column is full, this will happen
@@ -146,7 +131,7 @@ void UIList::updateInputDevice(InputDevice& device)
 	// Actually update the selection, if it changed
 	setSelectedOption(cursorPos.x + cursorPos.y * nCols);
 
-	if (checkButton(inputButtons.accept)) {
+	if (input.isButtonPressed(UIInput::Button::Accept)) {
 		sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId(), curOption));
 	}
 }

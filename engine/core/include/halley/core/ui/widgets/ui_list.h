@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../ui_widget.h"
-#include "../ui_input_buttons.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/text/text_renderer.h"
 #include "ui_button.h"
@@ -26,14 +25,12 @@ namespace Halley {
 		void addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill);
 		void clear();
 
-		void setInputButtons(const UIInputButtons& buttons);
-		void updateInputDevice(InputDevice& device) override;
-		
 		Rect4f getOptionRect(int curOption) const;
 
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
+		void onInput(const UIInputResults& input) override;
 
 	private:
 		std::shared_ptr<UIStyle> style;
@@ -44,7 +41,6 @@ namespace Halley {
 		int curOptionHighlight = -1;
 		int curOption = -1;
 		int nColumns = 1;
-		UIInputButtons inputButtons;
 
 		void onItemClicked(UIListItem& item);
 		void addItem(std::shared_ptr<UIListItem> item);

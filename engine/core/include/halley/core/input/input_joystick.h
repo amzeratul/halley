@@ -31,15 +31,6 @@
 
 namespace Halley {
 
-	enum class JoystickType {
-		Generic,
-		Xbox,
-		Playstation,
-		SwitchFull,
-		SwitchLeftJoycon,
-		SwitchRightJoycon
-	};
-
 	enum class JoystickButtonPosition
 	{
 		FaceTop,
@@ -63,7 +54,7 @@ namespace Halley {
 		virtual ~InputJoystick() {}
 
 		virtual std::string getName() const = 0;
-		virtual JoystickType getType() const = 0;
+		JoystickType getJoystickType() const override;
 
 		size_t getNumberAxes() override;
 		size_t getNumberHats() override;

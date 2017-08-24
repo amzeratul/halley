@@ -413,3 +413,12 @@ void Halley::InputVirtual::setRepeat(float first, float hold)
 	repeatDelayFirst = first;
 	repeatDelayHold = hold;
 }
+
+JoystickType InputVirtual::getJoystickType() const
+{
+	if (lastDevice) {
+		return lastDevice->getJoystickType();
+	} else {
+		return JoystickType::None;
+	}
+}

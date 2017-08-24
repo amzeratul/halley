@@ -19,19 +19,13 @@ UIRoot::UIRoot(AudioAPI* audio)
 void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual, Vector2f uiOffset)
 {
 	// Update input
-	updateTabbing(manual);
 	updateMouse(mouse, uiOffset);
+	updateInput(manual);
 
 	// Update children
-	{
-		bool allowInput = true;
-		auto& cs = getChildren();
-		for (int i = int(cs.size()); --i >= 0; ) {
-			cs[i]->doUpdate(t, activeInputType, allowInput ? *manual : *dummyInput);
-			if (cs[i]->isMouseBlocker()) {
-				allowInput = false;
-			}
-		}
+	auto joystickType = manual->getJoystickType();
+	for (auto& c: getChildren()) {
+		c->doUpdate(true, t, activeInputType, joystickType);
 	}
 
 	// Layout all widgets
@@ -54,7 +48,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 	// Update again, to reflect what happened >_>
 	runLayout();
 	for (auto& c: getChildren()) {
-		c->doUpdate(0, activeInputType, *dummyInput);
+		c->doUpdate(false, 0, activeInputType, joystickType);
 	}
 }
 
@@ -104,18 +98,59 @@ void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)
 	updateMouseOver(activeMouseOver);
 }
 
-void UIRoot::updateTabbing(spInputDevice manual)
+void UIRoot::updateInputTree(const spInputDevice& input, UIWidget& widget, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting)
 {
-	int x = manual->getAxisRepeat(0);
-	int y = manual->getAxisRepeat(1);
-
-	/*	
-	if (x > 0 || y > 0) {
-		mouseOverNext(true);
-	} else if (x < 0 || y < 0) {
-		mouseOverNext(false);
+	if (!widget.isActive()) {
+		return;
 	}
-	*/
+
+	for (auto& c: widget.getChildren()) {
+		// Depth-first
+		updateInputTree(input, *c, inputTargets, bestPriority, accepting);
+	}
+
+	if (widget.inputButtons) {
+		widget.inputResults.reset();
+		if (accepting) {
+			auto priority = widget.getInputPriority();
+
+			if (int(priority) > int(bestPriority)) {
+				bestPriority = priority;
+				inputTargets.clear();
+			}
+			if (priority == bestPriority) {
+				inputTargets.push_back(&widget);
+			}
+		}
+	}
+}
+
+void UIRoot::updateInput(spInputDevice input)
+{
+	auto& cs = getChildren();
+	std::vector<UIWidget*> inputTargets;
+	UIInput::Priority bestPriority = UIInput::Priority::Lowest;
+
+	bool accepting = true;
+	for (int i = int(cs.size()); --i >= 0; ) {
+		auto& c = *cs[i];
+		updateInputTree(input, c, inputTargets, bestPriority, accepting);
+				
+		if (c.isMouseBlocker()) {
+			accepting = false;
+		}
+	}
+
+	for (auto& target: inputTargets) {
+		auto& b = *target->inputButtons;
+		auto& results = target->inputResults;
+		results.setButtonPressed(UIInput::Button::Accept, b.accept != -1 ? input->isButtonPressed(b.accept) : false);
+		results.setButtonPressed(UIInput::Button::Cancel, b.cancel != -1 ? input->isButtonPressed(b.cancel) : false);
+		results.setButtonPressed(UIInput::Button::Prev, b.prev != -1 ? input->isButtonPressed(b.prev) : false);
+		results.setButtonPressed(UIInput::Button::Next, b.next != -1 ? input->isButtonPressed(b.next) : false);
+		results.setAxisRepeat(UIInput::Axis::X, (b.xAxis != -1 ? input->getAxisRepeat(b.xAxis) : 0) + (b.xAxisAlt != -1 ? input->getAxisRepeat(b.xAxisAlt) : 0));
+		results.setAxisRepeat(UIInput::Axis::Y, (b.yAxis != -1 ? input->getAxisRepeat(b.yAxis) : 0) + (b.yAxisAlt != -1 ? input->getAxisRepeat(b.yAxisAlt) : 0));
+	}
 }
 
 void UIRoot::mouseOverNext(bool forward)
@@ -150,12 +185,12 @@ void UIRoot::setFocus(std::shared_ptr<UIWidget> focus)
 	auto curFocus = currentFocus.lock();
 	if (curFocus != focus) {
 		if (curFocus) {
-			curFocus->setFocused(false, focus.get());
+			curFocus->setFocused(false);
 		}
 
 		currentFocus = focus;
 		if (focus) {
-			focus->setFocused(true, focus.get());
+			focus->setFocused(true);
 		}
 	}
 }

@@ -6,6 +6,7 @@
 #include "halley/maths/rect.h"
 #include "halley/maths/vector4.h"
 #include "halley/data_structures/maybe.h"
+#include "ui_input.h"
 
 namespace Halley {
 	class UIEvent;
@@ -20,7 +21,7 @@ namespace Halley {
 		virtual ~UIWidget();
 
 		void doDraw(UIPainter& painter) const;
-		void doUpdate(Time t, UIInputType inputType, InputDevice& inputDevice);
+		void doUpdate(bool full, Time t, UIInputType inputType, JoystickType joystickType);
 
 		Vector2f getLayoutMinimumSize() const override;
 		void setRect(Rect4f rect) override;
@@ -53,7 +54,7 @@ namespace Halley {
 		void setMinSize(Vector2f size);
 		void setInnerBorder(Vector4f border);
 
-		void setFocused(bool focused, UIWidget* newFocus);
+		void setFocused(bool focused);
 		void setMouseOver(bool mouseOver);
 		virtual void pressMouse(Vector2f mousePos, int button);
 		virtual void releaseMouse(Vector2f mousePos, int button);
@@ -77,25 +78,31 @@ namespace Halley {
 		UIEventHandler& getEventHandler();
 		
 		virtual void setInputType(UIInputType uiInput);
+		virtual void setJoystickType(JoystickType joystickType);
 		void setOnlyEnabledWithInputs(const std::vector<UIInputType>& inputs);
 		const std::vector<UIInputType>& getOnlyEnabledWithInput() const;
+		virtual void setInputButtons(const UIInputButtons& buttons);
 
 		void setValidator(std::shared_ptr<UIValidator> validator);
 		std::shared_ptr<UIValidator> getValidator() const;
 		
 		bool isDescendentOf(const UIWidget& ancestor) const override;
 		void setMouseClip(Maybe<Rect4f> mouseClip);
+		
+		UIInput::Priority getInputPriority() const;
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawChildren(UIPainter& painter) const;
 		virtual void update(Time t, bool moved);
-		virtual void updateInputDevice(InputDevice& device);
 
 		virtual void onFocus();
-		virtual void onFocusLost(UIWidget* newFocus);
+		virtual void onFocusLost();
 		virtual void onLayout();
 		UIRoot* getRoot() override;
+
+		virtual void onInput(const UIInputResults& input);
+		virtual void updateInputDevice(const InputDevice& inputDevice);
 
 		virtual void onEnabledChanged();
 
@@ -111,6 +118,8 @@ namespace Halley {
 		UIParent* parent = nullptr;
 		String id;
 		std::vector<UIInputType> onlyEnabledWithInputs;
+		std::unique_ptr<UIInputButtons> inputButtons;
+		UIInputResults inputResults;
 
 		Vector2f position;
 		Vector2f size;

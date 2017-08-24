@@ -4,6 +4,7 @@
 #include "ui_event.h"
 #include "halley/core/input/input_virtual.h"
 #include "ui_parent.h"
+#include "ui_input.h"
 
 namespace Halley {
 	class SpritePainter;
@@ -48,7 +49,8 @@ namespace Halley {
 		bool mouseHeld = false;
 
 		void updateMouse(spInputDevice mouse, Vector2f uiOffset);
-		void updateTabbing(spInputDevice manual);
+		void updateInputTree(const spInputDevice& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting);
+		void updateInput(spInputDevice input);
 
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos);
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos);

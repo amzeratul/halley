@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../ui_widget.h"
-#include "../ui_input_buttons.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/text/text_renderer.h"
 #include "ui_clickable.h"
@@ -21,7 +20,7 @@ namespace Halley {
 		int getSelectedOption() const;
 		String getSelectedOptionText() const;
 
-		void setInputButtons(const UIInputButtons& buttons);
+		void setInputButtons(const UIInputButtons& buttons) override;
 
 	protected:
 		void draw(UIPainter& painter) const override;
