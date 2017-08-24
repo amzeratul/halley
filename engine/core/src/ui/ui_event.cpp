@@ -37,6 +37,13 @@ UIEvent::UIEvent(UIEventType type, String sourceId, String data, int intData)
 {
 }
 
+UIEvent::UIEvent(UIEventType type, String sourceId, Rect4f data)
+	: type(type)
+	, sourceId(sourceId)
+	, rectData(data)
+{
+}
+
 int UIEvent::getIntData() const
 {
 	return intData;
@@ -45,6 +52,11 @@ int UIEvent::getIntData() const
 float UIEvent::getFloatData() const
 {
 	return floatData;
+}
+
+Rect4f UIEvent::getRectData() const
+{
+	return rectData;
 }
 
 UIEventType UIEvent::getType() const

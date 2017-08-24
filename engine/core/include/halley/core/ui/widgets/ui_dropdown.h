@@ -47,6 +47,5 @@ namespace Halley {
 
 		void open();
 		void close();
-		void scrollToShow(int option, bool center);
     };
 }

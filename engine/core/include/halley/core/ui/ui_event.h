@@ -2,6 +2,8 @@
 #include <functional>
 #include "halley/text/halleystring.h"
 #include <map>
+#include "halley/maths/vector2.h"
+#include "halley/maths/rect.h"
 
 namespace Halley {
 	enum class UIEventType {
@@ -11,7 +13,9 @@ namespace Halley {
 		DropboxSelectionChanged,
 		ListSelectionChanged,
 		ListAccept,
-		MouseWheel
+		MouseWheel,
+		MakeAreaVisible,
+		MakeAreaVisibleCentered
 	};
 
     class UIEvent {
@@ -21,12 +25,14 @@ namespace Halley {
 		UIEvent(UIEventType type, String sourceId, int data);
 		UIEvent(UIEventType type, String sourceId, float data);
 		UIEvent(UIEventType type, String sourceId, String data, int intData);
+		UIEvent(UIEventType type, String sourceId, Rect4f data);
 		
     	UIEventType getType() const;
 		String getSourceId() const;
 		String getData() const;
 		int getIntData() const;
 		float getFloatData() const;
+		Rect4f getRectData() const;
 
     private:
 		UIEventType type;
@@ -34,6 +40,7 @@ namespace Halley {
 		String data;
 		int intData;
 		float floatData;
+		Rect4f rectData;
     };
 
 	using UIEventCallback = std::function<void(const UIEvent&)>;

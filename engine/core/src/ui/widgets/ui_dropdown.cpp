@@ -144,16 +144,10 @@ void UIDropdown::open()
 			close();
 		});
 
-		dropdownList->getEventHandler().setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
-		{
-			scrollToShow(event.getIntData(), false);
-		});
-
 		dropdownWindow->layout();
 		auto sz = dropdownList->getSize();
 		scrollPane->setScrollSpeed(ceil(sz.y / options.size()));
 		scrollPane->update(0, false);
-		scrollToShow(curOption, true);
 	}
 }
 
@@ -165,11 +159,6 @@ void UIDropdown::close()
 		dropdownWindow->destroy();
 		dropdownWindow.reset();
 	}
-}
-
-void UIDropdown::scrollToShow(int option, bool center)
-{
-	scrollPane->scrollToShow(dropdownList->getOptionRect(option) - dropdownList->getPosition(), center);
 }
 
 void UIDropdown::drawChildren(UIPainter& painter) const

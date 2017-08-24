@@ -14,6 +14,16 @@ UIScrollPane::UIScrollPane(Vector2f clipSize, bool scrollHorizontal, bool scroll
 	{
 		onMouseWheel(event);
 	});
+
+	getEventHandler().setHandle(UIEventType::MakeAreaVisible, [this] (const UIEvent& event)
+	{
+		scrollToShow(event.getRectData(), false);
+	});
+
+	getEventHandler().setHandle(UIEventType::MakeAreaVisibleCentered, [this] (const UIEvent& event)
+	{
+		scrollToShow(event.getRectData(), true);
+	});
 }
 
 Vector2f UIScrollPane::getScrollPosition() const

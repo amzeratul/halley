@@ -25,6 +25,7 @@ void UIList::setSelectedOption(int option)
 
 		playSound(style->getAudioClip("list.selectionChangedSound"));
 		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), items[curOption]->getId(), curOption));
+		sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
 	}
 }
 
@@ -143,6 +144,11 @@ void UIList::update(Time t, bool moved)
 			sprite.scaleTo(getSize()).setPos(getPosition());
 		}
 	}
+
+	if (firstUpdate) {
+		sendEvent(UIEvent(UIEventType::MakeAreaVisibleCentered, getId(), getOptionRect(curOption)));
+		firstUpdate = false;
+	}
 }
 
 void UIList::onItemClicked(UIListItem& item)
@@ -250,5 +256,5 @@ Rect4f UIList::getOptionRect(int curOption) const
 {
 	Expects(!items.empty());
 	auto& item = items[clamp(curOption, 0, int(items.size()) - 1)];
-	return item->getRawRect();
+	return item->getRawRect() - getPosition();
 }

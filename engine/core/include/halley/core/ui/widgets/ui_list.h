@@ -41,6 +41,7 @@ namespace Halley {
 		int curOptionHighlight = -1;
 		int curOption = -1;
 		int nColumns = 1;
+		bool firstUpdate = true;
 
 		void onItemClicked(UIListItem& item);
 		void addItem(std::shared_ptr<UIListItem> item);
