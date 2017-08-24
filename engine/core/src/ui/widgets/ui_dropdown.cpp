@@ -144,7 +144,7 @@ void UIDropdown::open()
 			close();
 		});
 
-		dropdownWindow->layout();
+		forceLayout();
 		auto sz = dropdownList->getSize();
 		scrollPane->setScrollSpeed(ceil(sz.y / options.size()));
 		scrollPane->update(0, false);

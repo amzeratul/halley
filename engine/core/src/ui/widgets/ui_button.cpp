@@ -31,6 +31,7 @@ void UIButton::onClicked(Vector2f)
 
 void UIButton::setInputType(UIInputType uiInput)
 {
+	UIWidget::setInputType(uiInput);
 	if (uiInput != curInputType) {
 		curInputType = uiInput;
 		borderOnly = !getOnlyEnabledWithInput().empty() && curInputType != UIInputType::Mouse && curInputType != UIInputType::Keyboard;

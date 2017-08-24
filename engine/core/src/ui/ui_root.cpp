@@ -18,38 +18,28 @@ UIRoot::UIRoot(AudioAPI* audio)
 
 void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual, Vector2f uiOffset)
 {
-	// Update input
+	auto joystickType = manual->getJoystickType();
+
+	// Spawn & Update input
+	addNewChildren(activeInputType);
 	updateMouse(mouse, uiOffset);
 	updateInput(manual);
 
 	// Update children
-	auto joystickType = manual->getJoystickType();
 	for (auto& c: getChildren()) {
 		c->doUpdate(true, t, activeInputType, joystickType);
 	}
+	removeDeadChildren();
 
 	// Layout all widgets
 	runLayout();
 
-	// Remove dead
-	removeDeadChildren();
-	bool added = addNewChildren(activeInputType);
-
-	// Update new windows
-	if (topChildChanged) {
-		topChildChanged = false;
-		if (activeInputType == UIInputType::Mouse) {
-			lastMousePos = Vector2f(-100, -100);
-		} else {
-			//mouseOverNext();
-		}
-	}
-
 	// Update again, to reflect what happened >_>
-	runLayout();
 	for (auto& c: getChildren()) {
 		c->doUpdate(false, 0, activeInputType, joystickType);
 	}
+	//addNewChildren(activeInputType);
+	runLayout();
 }
 
 void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)

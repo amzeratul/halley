@@ -75,6 +75,7 @@ void UIScrollPane::update(Time t, bool moved)
 
 bool UIScrollPane::canScroll(UIScrollDirection direction) const
 {
+	auto contentsSize = UIWidget::getLayoutMinimumSize();
 	if (direction == UIScrollDirection::Horizontal) {
 		return scrollHorizontal && clipSize.x < contentsSize.x;
 	} else {

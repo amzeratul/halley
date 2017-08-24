@@ -101,6 +101,10 @@ namespace Halley {
 		virtual void onLayout();
 		UIRoot* getRoot() override;
 
+		void forceLayout();
+		void forceAddChildren(UIInputType inputType);
+		UIInputType getLastInputType() const;
+
 		virtual void onInput(const UIInputResults& input);
 		virtual void updateInputDevice(const InputDevice& inputDevice);
 
@@ -120,6 +124,7 @@ namespace Halley {
 		std::vector<UIInputType> onlyEnabledWithInputs;
 		std::unique_ptr<UIInputButtons> inputButtons;
 		UIInputResults inputResults;
+		UIInputType lastInputType = UIInputType::Undefined;
 
 		Vector2f position;
 		Vector2f size;

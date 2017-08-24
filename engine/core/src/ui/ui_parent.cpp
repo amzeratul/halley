@@ -1,12 +1,12 @@
 #include "ui/ui_parent.h"
 #include "ui/ui_widget.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 void UIParent::addChild(std::shared_ptr<UIWidget> widget)
 {
 	widget->setParent(*this);
 	childrenWaiting.push_back(widget);
-	topChildChanged = true;
 }
 
 void UIParent::removeChild(UIWidget& widget)
@@ -15,7 +15,6 @@ void UIParent::removeChild(UIWidget& widget)
 	{
 		return c.get() == &widget;
 	}), children.end());
-	topChildChanged = true;
 }
 
 bool UIParent::addNewChildren(UIInputType inputType)
@@ -28,9 +27,6 @@ bool UIParent::addNewChildren(UIInputType inputType)
 	}
 	childrenWaiting.clear();
 
-	for (auto& c: children) {
-		addedAny |= c->addNewChildren(inputType);
-	}
 	return addedAny;
 }
 
@@ -42,12 +38,8 @@ bool UIParent::removeDeadChildren()
 	{
 		return !c->isAlive();
 	}), children.end());
-	for (auto& c: children) {
-		c->removeDeadChildren();
-	}
 
 	if (before != children.size()) {
-		topChildChanged = true;
 		return true;
 	} else {
 		return false;
@@ -56,6 +48,12 @@ bool UIParent::removeDeadChildren()
 
 std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()
 {
+	/*
+	if (!childrenWaiting.empty()) {
+		Logger::logWarning("Attempting to retrieve children of component which has unspawned children");
+	}
+	*/
+
 	return children;
 }
 

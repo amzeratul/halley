@@ -41,13 +41,18 @@ void UIWidget::doUpdate(bool full, Time t, UIInputType inputType, JoystickType j
 	if (active) {
 		update(t, positionUpdated);
 		positionUpdated = false;
-		for (auto& c: getChildren()) {
-			c->doUpdate(full, t, inputType, joystickType);
-		}
-		
+
 		if (inputButtons && full) {
 			onInput(inputResults);
 		}
+
+		addNewChildren(inputType);
+
+		for (auto& c: getChildren()) {
+			c->doUpdate(full, t, inputType, joystickType);
+		}
+
+		removeDeadChildren();
 
 		if (eventHandler) {
 			eventHandler->pump();
@@ -88,6 +93,7 @@ void UIWidget::setRect(Rect4f rect)
 
 void UIWidget::layout()
 {
+	checkActive();
 	Vector2f minimumSize = getLayoutMinimumSize();
 	Vector2f targetSize = Vector2f::max(shrinkOnLayout ? Vector2f() : size, minimumSize);
 	setRect(Rect4f(getPosition(), getPosition() + targetSize));
@@ -213,10 +219,6 @@ void UIWidget::setFocused(bool f)
 		} else {
 			onFocusLost();
 		}
-
-		for (auto& c: getChildren()) {
-			c->setFocused(f);
-		}
 	}
 }
 
@@ -264,6 +266,27 @@ bool UIWidget::isAlive() const
 UIRoot* UIWidget::getRoot()
 {
 	return parent ? parent->getRoot() : nullptr;
+}
+
+void UIWidget::forceLayout()
+{
+	Expects (lastInputType != UIInputType::Undefined);
+	forceAddChildren(lastInputType);
+	layout();
+}
+
+void UIWidget::forceAddChildren(UIInputType inputType)
+{
+	addNewChildren(inputType);
+	for (auto& c: getChildren()) {
+		c->forceAddChildren(inputType);
+	}
+	checkActive();
+}
+
+UIInputType UIWidget::getLastInputType() const
+{
+	return lastInputType;
 }
 
 void UIWidget::onInput(const UIInputResults& input)
@@ -320,6 +343,7 @@ UIEventHandler& UIWidget::getEventHandler()
 
 void UIWidget::setInputType(UIInputType uiInput)
 {
+	lastInputType = uiInput;
 	if (!onlyEnabledWithInputs.empty()) {
 		active = std::find(onlyEnabledWithInputs.begin(), onlyEnabledWithInputs.end(), uiInput) != onlyEnabledWithInputs.end();
 	}

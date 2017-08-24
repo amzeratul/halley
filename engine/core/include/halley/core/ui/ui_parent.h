@@ -34,10 +34,7 @@ namespace Halley {
 		}
 
 		virtual bool isDescendentOf(const UIWidget& ancestor) const;
-
-	protected:
-		bool topChildChanged = false;
-
+		
 	private:
 		std::vector<std::shared_ptr<UIWidget>> children;
 		std::vector<std::shared_ptr<UIWidget>> childrenWaiting;
