@@ -75,6 +75,7 @@ set(SOURCES
         "src/ui/widgets/ui_list.cpp"
         "src/ui/widgets/ui_scroll_pane.cpp"
         "src/ui/widgets/ui_scrollbar.cpp"
+        "src/ui/widgets/ui_scrollbar_pane.cpp"
         "src/ui/widgets/ui_textinput.cpp"
         
         "src/utils/world_stats.cpp"
@@ -173,6 +174,7 @@ set(HEADERS
         "include/halley/core/ui/widgets/ui_list.h"
         "include/halley/core/ui/widgets/ui_scroll_pane.h"
         "include/halley/core/ui/widgets/ui_scrollbar.h"
+        "include/halley/core/ui/widgets/ui_scrollbar_pane.h"
         "include/halley/core/ui/widgets/ui_textinput.h"
         
         "include/halley/core/utils/world_stats.h"

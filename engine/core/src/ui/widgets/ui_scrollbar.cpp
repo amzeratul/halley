@@ -30,7 +30,7 @@ void UIScrollBar::update(Time t, bool moved)
 		float sz = round(barSize * coverage);
 
 		Vector2f thumbPos;
-		thumbPos[axis] = pane->getRelativeScrollPosition()[axis] * barSize;
+		thumbPos[axis] = round(pane->getRelativeScrollPosition()[axis] * barSize);
 		auto thumbSize = Vector2f(bar->getSize()[1 - axis], sz);
 
 		thumb->setPosition(bar->getPosition() + thumbPos);
