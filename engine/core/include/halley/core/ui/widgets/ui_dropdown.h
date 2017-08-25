@@ -4,7 +4,6 @@
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/text/text_renderer.h"
 #include "ui_clickable.h"
-#include "ui/ui_style.h"
 
 namespace Halley {
 	class UIStyle;
