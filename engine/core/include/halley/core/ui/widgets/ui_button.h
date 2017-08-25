@@ -1,7 +1,6 @@
 #pragma once
 #include "ui_clickable.h"
 #include "halley/core/graphics/sprite/sprite.h"
-#include "ui/ui_style.h"
 
 namespace Halley {
 	class UIButton : public UIClickable {

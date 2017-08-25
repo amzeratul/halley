@@ -24,5 +24,7 @@ namespace Halley {
 
 		std::shared_ptr<UIWidget> bar;
 		std::shared_ptr<UIWidget> thumb;
+
+		void scrollLines(int lines);
     };
 }

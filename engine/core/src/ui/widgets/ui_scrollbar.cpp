@@ -19,6 +19,15 @@ UIScrollBar::UIScrollBar(UIScrollDirection direction, UIStyle style)
 	UIWidget::add(bar, 1);
 
 	UIWidget::add(std::make_shared<UIButton>("b1", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "right" : "down")));
+
+	getEventHandler().setHandle(UIEventType::ButtonClicked, [=] (const UIEvent& event)
+	{
+		if (event.getSourceId() == "b0") {
+			scrollLines(-1);
+		} else if (event.getSourceId() == "b1") {
+			scrollLines(1);
+		}
+	});
 }
 
 void UIScrollBar::update(Time t, bool moved)
@@ -61,6 +70,16 @@ void UIScrollBar::pressMouse(Vector2f mousePos, int button)
 
 		float dir = clickPos < curPos + coverage * 0.5f ? -1.0f : 1.0f;
 		pane->setRelativeScroll(curPos + coverage * dir, direction);
+	}
+}
+
+void UIScrollBar::scrollLines(int lines)
+{
+	if (pane) {
+		int axis = direction == UIScrollDirection::Horizontal ? 0 : 1;
+		auto pos = pane->getScrollPosition();
+		pos[axis] += pane->getScrollSpeed() * lines;
+		pane->scrollTo(pos);
 	}
 }
 
