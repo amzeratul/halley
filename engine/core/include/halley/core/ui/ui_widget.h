@@ -59,6 +59,7 @@ namespace Halley {
 		void setMouseOver(bool mouseOver);
 		virtual void pressMouse(Vector2f mousePos, int button);
 		virtual void releaseMouse(Vector2f mousePos, int button);
+		virtual void onMouseOver(Vector2f mousePos);
 		virtual Rect4f getMouseRect() const;
 
 		bool isActive() const override;

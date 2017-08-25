@@ -13,7 +13,7 @@ UIScrollBar::UIScrollBar(UIScrollDirection direction, UIStyle style)
 	UIWidget::add(std::make_shared<UIButton>("b0", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "left" : "up")));
 
 	bar = std::make_shared<UIImage>(style.getSprite("bar.normal"));
-	thumb = std::make_shared<UIButton>("thumb", style.getSubStyle("thumb"));
+	thumb = std::make_shared<UIScrollThumb>(style.getSubStyle("thumb"));
 	thumb->setMinSize(Vector2f(1, 1));
 	bar->add(thumb);
 	UIWidget::add(bar, 1);
@@ -27,6 +27,11 @@ UIScrollBar::UIScrollBar(UIScrollDirection direction, UIStyle style)
 		} else if (event.getSourceId() == "b1") {
 			scrollLines(1);
 		}
+	});
+
+	getEventHandler().setHandle(UIEventType::Dragged, [=] (const UIEvent& event)
+	{
+		onScrollDrag(event.getVectorData() - bar->getPosition());
 	});
 }
 
@@ -83,6 +88,14 @@ void UIScrollBar::scrollLines(int lines)
 	}
 }
 
+void UIScrollBar::onScrollDrag(Vector2f relativePos)
+{
+	int axis = direction == UIScrollDirection::Horizontal ? 0 : 1;
+	auto relative = relativePos / bar->getSize();
+	float clickPos = relative[axis];
+	pane->setRelativeScroll(clickPos, direction);
+}
+
 void UIScrollBar::releaseMouse(Vector2f mousePos, int button)
 {
 }
@@ -90,4 +103,42 @@ void UIScrollBar::releaseMouse(Vector2f mousePos, int button)
 void UIScrollBar::checkActive()
 {
 	setActive(pane && pane->canScroll(direction));
+}
+
+UIScrollThumb::UIScrollThumb(UIStyle style)
+	: UIButton("scrollThumb", style)
+{
+}
+
+void UIScrollThumb::onMouseOver(Vector2f mousePos)
+{
+	if (dragging) {
+		setDragPos(mousePos - mouseStartPos + myStartPos);
+	}
+}
+
+void UIScrollThumb::pressMouse(Vector2f mousePos, int button)
+{
+	UIButton::pressMouse(mousePos, button);
+	if (button == 0) {
+		dragging = true;
+		mouseStartPos = mousePos;
+		myStartPos = getPosition();
+	}
+}
+
+void UIScrollThumb::releaseMouse(Vector2f mousePos, int button)
+{
+	UIButton::releaseMouse(mousePos, button);
+	if (button == 0) {
+		if (dragging) {
+			onMouseOver(mousePos);
+			dragging = false;
+		}
+	}
+}
+
+void UIScrollThumb::setDragPos(Vector2f pos)
+{
+	sendEvent(UIEvent(UIEventType::Dragged, getId(), pos));
 }

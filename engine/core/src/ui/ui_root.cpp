@@ -82,8 +82,13 @@ void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)
 
 	// If the mouse is held, but it's over a different component from the focused one, don't mouse over anything
 	auto activeMouseOver = underMouse;
-	if (mouseHeld && focus && focus != underMouse) {
-		activeMouseOver.reset();
+	if (mouseHeld && focus) {
+		if (focus != underMouse) {
+			activeMouseOver.reset();
+		}
+		focus->onMouseOver(mousePos);
+	} else if (activeMouseOver) {
+		activeMouseOver->onMouseOver(mousePos);
 	}
 	updateMouseOver(activeMouseOver);
 }

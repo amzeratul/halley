@@ -15,7 +15,8 @@ namespace Halley {
 		ListAccept,
 		MouseWheel,
 		MakeAreaVisible,
-		MakeAreaVisibleCentered
+		MakeAreaVisibleCentered,
+		Dragged
 	};
 
     class UIEvent {
@@ -25,6 +26,7 @@ namespace Halley {
 		UIEvent(UIEventType type, String sourceId, int data);
 		UIEvent(UIEventType type, String sourceId, float data);
 		UIEvent(UIEventType type, String sourceId, String data, int intData);
+		UIEvent(UIEventType type, String sourceId, Vector2f data);
 		UIEvent(UIEventType type, String sourceId, Rect4f data);
 		
     	UIEventType getType() const;
@@ -32,6 +34,7 @@ namespace Halley {
 		String getData() const;
 		int getIntData() const;
 		float getFloatData() const;
+		Vector2f getVectorData() const;
 		Rect4f getRectData() const;
 
     private:
@@ -40,6 +43,7 @@ namespace Halley {
 		String data;
 		int intData;
 		float floatData;
+		Vector2f vectorData;
 		Rect4f rectData;
     };
 

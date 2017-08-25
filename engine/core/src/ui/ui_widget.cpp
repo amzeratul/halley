@@ -235,6 +235,10 @@ void UIWidget::releaseMouse(Vector2f mousePos, int button)
 {
 }
 
+void UIWidget::onMouseOver(Vector2f mousePos)
+{
+}
+
 bool UIWidget::isActive() const
 {
 	return active;
