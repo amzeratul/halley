@@ -11,6 +11,8 @@ UIList::UIList(const String& id, UIStyle style, UISizerType orientation, int nCo
 	, nColumns(nColumns)
 {
 	sprite = style.getSprite("background");
+
+	getEventHandler().setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) {});
 }
 
 void UIList::setSelectedOption(int option)
@@ -178,6 +180,8 @@ void UIListItem::setSelected(bool s)
 		selected = s;
 		parent.curOption = selected ? index : -1;
 		doSetState(getCurState());
+
+		sendEventDown(UIEvent(UIEventType::SetSelected, getId(), selected));
 	}
 }
 

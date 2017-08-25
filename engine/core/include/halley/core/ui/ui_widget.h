@@ -113,6 +113,7 @@ namespace Halley {
 		virtual void onEnabledChanged();
 
 		void sendEvent(UIEvent&& event) const override;
+		void sendEventDown(const UIEvent& event) const;
 
 		void playSound(const std::shared_ptr<const AudioClip>& clip);
 		virtual void checkActive();

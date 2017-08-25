@@ -421,6 +421,17 @@ void UIWidget::sendEvent(UIEvent&& event) const
 	}
 }
 
+void UIWidget::sendEventDown(const UIEvent& event) const
+{
+	if (eventHandler && eventHandler->canHandle(event)) {
+		eventHandler->queue(event);
+	} else {
+		for (auto& c: getChildren()) {
+			c->sendEventDown(event);
+		}
+	}
+}
+
 void UIWidget::playSound(const std::shared_ptr<const AudioClip>& clip)
 {
 	if (clip) {

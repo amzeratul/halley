@@ -15,6 +15,13 @@ UIEvent::UIEvent(UIEventType type, String sourceId, String data)
 {
 }
 
+UIEvent::UIEvent(UIEventType type, String sourceId, bool data)
+	: type(type)
+	, sourceId(sourceId)
+	, boolData(data)
+{
+}
+
 UIEvent::UIEvent(UIEventType type, String sourceId, int data)
 	: type(type)
 	, sourceId(sourceId)
@@ -49,6 +56,11 @@ UIEvent::UIEvent(UIEventType type, String sourceId, Rect4f data)
 	, sourceId(sourceId)
 	, rectData(data)
 {
+}
+
+bool UIEvent::getBoolData() const
+{
+	return boolData;
 }
 
 int UIEvent::getIntData() const
