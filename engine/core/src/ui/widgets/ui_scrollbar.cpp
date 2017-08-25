@@ -2,6 +2,7 @@
 #include "ui/ui_style.h"
 #include "ui/widgets/ui_image.h"
 #include "ui/widgets/ui_scroll_pane.h"
+#include "ui/widgets/ui_button.h"
 
 using namespace Halley;
 
@@ -9,15 +10,15 @@ UIScrollBar::UIScrollBar(UIScrollDirection direction, UIStyle style)
 	: UIWidget("", Vector2f(), UISizer(direction == UIScrollDirection::Horizontal ? UISizerType::Horizontal : UISizerType::Vertical))
 	, direction(direction)
 {
-	UIWidget::add(std::make_shared<UIImage>(style.getSprite("up.normal")));
+	UIWidget::add(std::make_shared<UIButton>("b0", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "left" : "up")));
 
 	bar = std::make_shared<UIImage>(style.getSprite("bar.normal"));
-	thumb = std::make_shared<UIImage>(style.getSprite("thumb.normal"));
+	thumb = std::make_shared<UIButton>("thumb", style.getSubStyle("thumb"));
 	thumb->setMinSize(Vector2f(1, 1));
 	bar->add(thumb);
 	UIWidget::add(bar, 1);
 
-	UIWidget::add(std::make_shared<UIImage>(style.getSprite("down.normal")));
+	UIWidget::add(std::make_shared<UIButton>("b1", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "right" : "down")));
 }
 
 void UIScrollBar::update(Time t, bool moved)

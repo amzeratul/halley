@@ -12,6 +12,11 @@ UIStyle::UIStyle(const String& baseName, std::shared_ptr<UIStyleSheet> styleShee
 	Expects(styleSheet);
 }
 
+UIStyle UIStyle::getSubStyle(const String& name) const
+{
+	return UIStyle(baseName + name, styleSheet);
+}
+
 const Sprite& UIStyle::getSprite(const String& name)
 {
 	return styleSheet->getSprite(baseName + name);

@@ -8,6 +8,8 @@ namespace Halley {
 		UIStyle();
 		UIStyle(const String& baseName, std::shared_ptr<UIStyleSheet> styleSheet);
 
+		UIStyle getSubStyle(const String& name) const;
+
 		const Sprite& getSprite(const String& name);
 		const TextRenderer& getTextRenderer(const String& name);
 		Vector4f getBorder(const String& name);
