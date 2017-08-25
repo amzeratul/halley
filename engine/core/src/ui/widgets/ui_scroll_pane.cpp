@@ -39,14 +39,14 @@ Vector2f UIScrollPane::getRelativeScrollPosition() const
 
 void UIScrollPane::scrollTo(Vector2f position)
 {	
-	auto size = Vector2f::min(clipSize, getSize());
+	auto size = getSize();
 
 	if (scrollHorizontal) {
-		scrollPos.x = clamp(position.x, 0.0f, contentsSize.x - size.x);
+		scrollPos.x = clamp2(position.x, 0.0f, contentsSize.x - size.x);
 	}
 	
 	if (scrollVertical) {
-		scrollPos.y = clamp(position.y, 0.0f, contentsSize.y - size.y);
+		scrollPos.y = clamp2(position.y, 0.0f, contentsSize.y - size.y);
 	}
 }
 
@@ -78,24 +78,24 @@ bool UIScrollPane::canScroll(UIScrollDirection direction) const
 {
 	auto contentsSize = UIWidget::getLayoutMinimumSize();
 	if (direction == UIScrollDirection::Horizontal) {
-		return scrollHorizontal && clipSize.x < contentsSize.x;
+		return scrollHorizontal && getSize().x < contentsSize.x;
 	} else {
-		return scrollVertical && clipSize.y < contentsSize.y;
+		return scrollVertical && getSize().y < contentsSize.y;
 	}
 }
 
 float UIScrollPane::getCoverageSize(UIScrollDirection direction) const
 {
 	if (direction == UIScrollDirection::Horizontal) {
-		return clipSize.x / contentsSize.x;
+		return getSize().x / contentsSize.x;
 	} else {
-		return clipSize.y / contentsSize.y;
+		return getSize().y / contentsSize.y;
 	}
 }
 
 void UIScrollPane::drawChildren(UIPainter& painter) const
 {
-	auto p = painter.withClip(Rect4f(getPosition(), getPosition() + clipSize));
+	auto p = painter.withClip(Rect4f(getPosition(), getPosition() + getSize()));
 	UIWidget::drawChildren(p);
 }
 
@@ -128,7 +128,7 @@ Vector2f UIScrollPane::getLayoutOriginPosition() const
 
 void UIScrollPane::scrollToShow(Rect4f rect, bool center)
 {
-	auto size = Vector2f::min(clipSize, getSize());
+	auto size = getSize();
 
 	float maxX = rect.getLeft();
 	float minX = rect.getRight() - size.x;

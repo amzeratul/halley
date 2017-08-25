@@ -48,6 +48,12 @@ namespace Halley {
 	}
 
 	template <typename T>
+	inline T clamp2(T value, T minValue, T maxValue)
+	{
+		return std::max(minValue, std::min(value, maxValue));
+	}
+
+	template <typename T>
 	inline T maxAbs(T a, T b)
 	{
 		return abs(a) > abs(b) ? a : b;
