@@ -13,10 +13,15 @@ UIList::UIList(const String& id, UIStyle style, UISizerType orientation, int nCo
 	sprite = style.getSprite("background");
 
 	getEventHandler().setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) {});
+	getEventHandler().setHandle(UIEventType::SetHovered, [=] (const UIEvent& event) {});
 }
 
 void UIList::setSelectedOption(int option)
 {
+	if (items.empty()) {
+		return;
+	}
+
 	auto newSel = modulo(option, int(items.size()));
 	if (newSel != curOption) {
 		if (curOption >= 0) {
@@ -208,9 +213,11 @@ void UIListItem::doSetState(State state)
 		switch (state) {
 		case State::Up:
 			sprite = style.getSprite("itemNormal");
+			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), false));
 			break;
 		case State::Hover:
 			sprite = style.getSprite("itemHover");
+			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), true));
 			break;
 		case State::Down:
 			sprite = style.getSprite("itemSelected");

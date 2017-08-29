@@ -618,8 +618,12 @@ size_t String::getUTF8Len(const wchar_t *utf16)
 
 ///////////////////////////////////////////////
 // Get the UTF-8 length out of a UTF-32 string
-size_t String::getUTF8Len(const StringUTF32 &str)
+size_t String::getUTF8Len(const StringUTF32& str)
 {
+	if (str.empty()) {
+		return 0;
+	}
+
 	const utf32type *utf32 = &str[0];
 	size_t len = 0;
 	for (int curChar; (curChar = *utf32) != 0; utf32++) {
@@ -635,7 +639,7 @@ size_t String::getUTF8Len(const StringUTF32 &str)
 
 ///////////////////////////
 // Convert UTF-16 to UTF-8
-size_t String::UTF16toUTF8(const wchar_t *utf16,char *utf8)
+size_t String::UTF16toUTF8(const wchar_t *utf16, char *utf8)
 {
 	wchar_t curChar = utf16[0];
 	size_t value;
