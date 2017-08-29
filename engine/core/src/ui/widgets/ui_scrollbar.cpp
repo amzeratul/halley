@@ -6,11 +6,13 @@
 
 using namespace Halley;
 
-UIScrollBar::UIScrollBar(UIScrollDirection direction, UIStyle style)
+UIScrollBar::UIScrollBar(UIScrollDirection direction, UIStyle style, bool alwaysShow)
 	: UIWidget("", Vector2f(), UISizer(direction == UIScrollDirection::Horizontal ? UISizerType::Horizontal : UISizerType::Vertical))
 	, direction(direction)
+	, alwaysShow(alwaysShow)
 {
-	UIWidget::add(std::make_shared<UIButton>("b0", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "left" : "up")));
+	b0 = std::make_shared<UIButton>("b0", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "left" : "up"));
+	UIWidget::add(b0);
 
 	bar = std::make_shared<UIImage>(style.getSprite("bar.normal"));
 	thumb = std::make_shared<UIScrollThumb>(style.getSubStyle("thumb"));
@@ -18,7 +20,8 @@ UIScrollBar::UIScrollBar(UIScrollDirection direction, UIStyle style)
 	bar->add(thumb);
 	UIWidget::add(bar, 1);
 
-	UIWidget::add(std::make_shared<UIButton>("b1", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "right" : "down")));
+	b1 = std::make_shared<UIButton>("b1", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "right" : "down"));
+	UIWidget::add(b1);
 
 	getEventHandler().setHandle(UIEventType::ButtonClicked, [=] (const UIEvent& event)
 	{
@@ -37,7 +40,12 @@ UIScrollBar::UIScrollBar(UIScrollDirection direction, UIStyle style)
 
 void UIScrollBar::update(Time t, bool moved)
 {
-	if (pane) {
+	checkActive();
+	thumb->setActive(isEnabled());
+	b0->setEnabled(isEnabled());
+	b1->setEnabled(isEnabled());
+
+	if (isEnabled()) {
 		int axis = direction == UIScrollDirection::Horizontal ? 0 : 1;
 
 		float coverage = pane->getCoverageSize(direction);
@@ -65,7 +73,7 @@ bool UIScrollBar::canInteractWithMouse() const
 
 void UIScrollBar::pressMouse(Vector2f mousePos, int button)
 {
-	if (pane) {
+	if (isEnabled()) {
 		int axis = direction == UIScrollDirection::Horizontal ? 0 : 1;
 
 		auto relative = (mousePos - bar->getPosition()) / bar->getSize();
@@ -78,9 +86,13 @@ void UIScrollBar::pressMouse(Vector2f mousePos, int button)
 	}
 }
 
+void UIScrollBar::releaseMouse(Vector2f mousePos, int button)
+{
+}
+
 void UIScrollBar::scrollLines(int lines)
 {
-	if (pane) {
+	if (isEnabled()) {
 		int axis = direction == UIScrollDirection::Horizontal ? 0 : 1;
 		auto pos = pane->getScrollPosition();
 		pos[axis] += pane->getScrollSpeed() * lines;
@@ -90,19 +102,19 @@ void UIScrollBar::scrollLines(int lines)
 
 void UIScrollBar::onScrollDrag(Vector2f relativePos)
 {
-	int axis = direction == UIScrollDirection::Horizontal ? 0 : 1;
-	auto relative = relativePos / bar->getSize();
-	float clickPos = relative[axis];
-	pane->setRelativeScroll(clickPos, direction);
-}
-
-void UIScrollBar::releaseMouse(Vector2f mousePos, int button)
-{
+	if (isEnabled()) {
+		int axis = direction == UIScrollDirection::Horizontal ? 0 : 1;
+		auto relative = relativePos / bar->getSize();
+		float clickPos = relative[axis];
+		pane->setRelativeScroll(clickPos, direction);
+	}
 }
 
 void UIScrollBar::checkActive()
 {
-	setActive(pane && pane->canScroll(direction));
+	bool enabled = pane && pane->canScroll(direction);
+	setEnabled(enabled);
+	setActive(alwaysShow || enabled);
 }
 
 UIScrollThumb::UIScrollThumb(UIStyle style)
@@ -141,4 +153,14 @@ void UIScrollThumb::releaseMouse(Vector2f mousePos, int button)
 void UIScrollThumb::setDragPos(Vector2f pos)
 {
 	sendEvent(UIEvent(UIEventType::Dragged, getId(), pos));
+}
+
+void UIScrollBar::setAlwaysShow(bool show)
+{
+	alwaysShow = show;
+}
+
+bool UIScrollBar::isAlwaysShow() const
+{
+	return alwaysShow;
 }

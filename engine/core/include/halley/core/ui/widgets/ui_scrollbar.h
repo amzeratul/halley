@@ -8,12 +8,15 @@ namespace Halley {
 
     class UIScrollBar : public UIWidget {
     public:
-		UIScrollBar(UIScrollDirection direction, UIStyle style);
+		UIScrollBar(UIScrollDirection direction, UIStyle style, bool alwaysShow = true);
 		void setScrollPane(UIScrollPane& pane);
 
 	    bool canInteractWithMouse() const override;
 	    void pressMouse(Vector2f mousePos, int button) override;
 	    void releaseMouse(Vector2f mousePos, int button) override;
+
+		void setAlwaysShow(bool show);
+		bool isAlwaysShow() const;
 
     protected:
 		void checkActive() override;
@@ -22,7 +25,10 @@ namespace Halley {
     private:
 		UIScrollDirection direction;
 		UIScrollPane* pane = nullptr;
+		bool alwaysShow = false;
 
+		std::shared_ptr<UIButton> b0;
+		std::shared_ptr<UIButton> b1;
 		std::shared_ptr<UIWidget> bar;
 		std::shared_ptr<UIWidget> thumb;
 
