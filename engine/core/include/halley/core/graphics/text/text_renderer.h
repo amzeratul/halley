@@ -47,6 +47,7 @@ namespace Halley
 		Colour getColour() const;
 		Colour getOutlineColour() const;
 		float getSmoothness() const;
+		Maybe<Rect4f> getClip() const;
 
 	private:
 		std::shared_ptr<const Font> font;

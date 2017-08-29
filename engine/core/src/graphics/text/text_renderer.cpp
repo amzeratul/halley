@@ -304,3 +304,8 @@ float TextRenderer::getSmoothness() const
 {
 	return smoothness;
 }
+
+Maybe<Rect4f> TextRenderer::getClip() const
+{
+	return clip;
+}

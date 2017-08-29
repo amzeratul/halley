@@ -46,7 +46,11 @@ void UIPainter::draw(const Sprite& sprite)
 		if (sprite.getClip()) {
 			targetClip = sprite.getClip().get().intersection(targetClip);
 		}
-		painter.addCopy(sprite.clone().setClip(targetClip), mask, layer, float(n++));
+
+		auto onScreen = sprite.getAABB().intersection(targetClip + sprite.getPosition());
+		if (onScreen.getWidth() > 0.1f && onScreen.getHeight() > 0.1f) {
+			painter.addCopy(sprite.clone().setClip(targetClip), mask, layer, float(n++));
+		}
 	} else {
 		painter.add(sprite, mask, layer, float(n++));
 	}
@@ -55,7 +59,15 @@ void UIPainter::draw(const Sprite& sprite)
 void UIPainter::draw(const TextRenderer& text)
 {
 	if (clip) {
-		painter.addCopy(text.clone().setClip(clip.get() - text.getPosition()), mask, layer, float(n++));
+		auto targetClip = clip.get() - text.getPosition();
+		if (text.getClip()) {
+			targetClip = text.getClip().get().intersection(targetClip);
+		}
+		
+		auto onScreen = Rect4f(Vector2f(), text.getExtents()).intersection(targetClip);
+		if (onScreen.getWidth() > 0.1f && onScreen.getHeight() > 0.1f) {
+			painter.addCopy(text.clone().setClip(clip.get() - text.getPosition()), mask, layer, float(n++));
+		}
 	} else {
 		painter.add(text, mask, layer, float(n++));
 	}
