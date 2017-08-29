@@ -120,6 +120,7 @@ void UIScrollBar::checkActive()
 UIScrollThumb::UIScrollThumb(UIStyle style)
 	: UIButton("scrollThumb", style)
 {
+	setShrinkOnLayout(true);
 }
 
 void UIScrollThumb::onMouseOver(Vector2f mousePos)

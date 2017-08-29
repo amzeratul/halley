@@ -103,6 +103,7 @@ namespace Halley {
 		virtual void onLayout();
 		UIRoot* getRoot() override;
 
+		void shrink();
 		void forceLayout();
 		void forceAddChildren(UIInputType inputType);
 		UIInputType getLastInputType() const;

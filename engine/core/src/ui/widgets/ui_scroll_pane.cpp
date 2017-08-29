@@ -39,14 +39,12 @@ Vector2f UIScrollPane::getRelativeScrollPosition() const
 
 void UIScrollPane::scrollTo(Vector2f position)
 {	
-	auto size = getSize();
-
 	if (scrollHorizontal) {
-		scrollPos.x = clamp2(position.x, 0.0f, contentsSize.x - size.x);
+		scrollPos.x = clamp2(position.x, 0.0f, contentsSize.x - getSize().x);
 	}
 	
 	if (scrollVertical) {
-		scrollPos.y = clamp2(position.y, 0.0f, contentsSize.y - size.y);
+		scrollPos.y = clamp2(position.y, 0.0f, contentsSize.y - getSize().y);
 	}
 }
 

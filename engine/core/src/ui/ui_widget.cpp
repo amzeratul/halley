@@ -272,6 +272,16 @@ UIRoot* UIWidget::getRoot()
 	return parent ? parent->getRoot() : nullptr;
 }
 
+void UIWidget::shrink()
+{
+	if (size.x > minSize.x + 0.5f || size.y > minSize.y + 0.5f) {
+		auto prevShrink = shrinkOnLayout;
+		shrinkOnLayout = true;
+		layout();
+		shrinkOnLayout = prevShrink;
+	}
+}
+
 void UIWidget::forceLayout()
 {
 	Expects (lastInputType != UIInputType::Undefined);

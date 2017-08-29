@@ -42,7 +42,11 @@ UIPainter UIPainter::withClip(Rect4f clip) const
 void UIPainter::draw(const Sprite& sprite)
 {
 	if (clip) {
-		painter.addCopy(sprite.clone().setClip(clip.get() - sprite.getPosition()), mask, layer, float(n++));
+		auto targetClip = clip.get() - sprite.getPosition();
+		if (sprite.getClip()) {
+			targetClip = sprite.getClip().get().intersection(targetClip);
+		}
+		painter.addCopy(sprite.clone().setClip(targetClip), mask, layer, float(n++));
 	} else {
 		painter.add(sprite, mask, layer, float(n++));
 	}
