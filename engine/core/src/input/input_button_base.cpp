@@ -69,6 +69,16 @@ void InputButtonBase::onButtonStatus(int code, bool down)
 	}
 }
 
+void InputButtonBase::setParent(InputDevice* p)
+{
+	parent = p;
+}
+
+InputDevice* InputButtonBase::getParent() const
+{
+	return parent;
+}
+
 void InputButtonBase::clearPresses()
 {
 	size_t len = buttonPressed.size();

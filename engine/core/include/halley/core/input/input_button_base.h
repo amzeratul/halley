@@ -47,11 +47,15 @@ namespace Halley {
 
 		void onButtonStatus(int code, bool down);
 
+		void setParent(InputDevice* parent) override;
+		InputDevice* getParent() const override;
+
 	protected:
 		Vector<char> buttonPressed;
 		Vector<char> buttonPressedRepeat;
 		Vector<char> buttonReleased;
 		Vector<char> buttonDown;
+		InputDevice* parent = nullptr;
 
 		void init(int nButtons);
 

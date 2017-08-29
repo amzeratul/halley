@@ -136,7 +136,7 @@ bool InputVirtual::isButtonDown(int code)
 	return false;
 }
 
-void Halley::InputVirtual::clearButton(int code)
+void InputVirtual::clearButton(int code)
 {
 	auto& binds = buttons.at(code);
 	for (size_t i=0; i<binds.size(); i++) {
@@ -172,7 +172,7 @@ int InputVirtual::getAxisRepeat(int n)
 void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
 {
 	if (!lastDevice) {
-		lastDevice = device;
+		setLastDevice(device.get());
 	}
 	buttons.at(n).push_back(Bind(device, deviceN));
 }
@@ -180,7 +180,7 @@ void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
 void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
 {
 	if (!lastDevice) {
-		lastDevice = device;
+		setLastDevice(device.get());
 	}
 	axes.at(n).binds.push_back(Bind(device, deviceN));
 }
@@ -188,7 +188,7 @@ void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
 void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton)
 {
 	if (!lastDevice) {
-		lastDevice = device;
+		setLastDevice(device.get());
 	}
 	axes.at(n).binds.push_back(Bind(device, negativeButton, positiveButton));
 }
@@ -219,17 +219,17 @@ void InputVirtual::clearBindings()
 	vibrationOverride = spInputDevice();
 }
 
-void Halley::InputVirtual::vibrate(spInputVibration vib)
+void InputVirtual::vibrate(spInputVibration vib)
 {
-	spInputDevice dev = vibrationOverride ? vibrationOverride : lastDevice;
+	auto dev = vibrationOverride ? vibrationOverride.get() : lastDevice;
 	if (dev) {
 		dev->vibrate(vib);
 	}
 }
 
-void Halley::InputVirtual::stopVibrating()
+void InputVirtual::stopVibrating()
 {
-	spInputDevice dev = vibrationOverride ? vibrationOverride : lastDevice;
+	auto dev = vibrationOverride ? vibrationOverride.get() : lastDevice;
 	if (dev) {
 		dev->stopVibrating();
 	}
@@ -264,7 +264,7 @@ int InputVirtual::getWheelMove() const
 	return val;
 }
 
-void Halley::InputVirtual::bindHat(int leftRight, int upDown, spInputDevice hat)
+void InputVirtual::bindHat(int leftRight, int upDown, spInputDevice hat)
 {
 	bindAxisButton(leftRight, hat, 3, 1);
 	bindAxisButton(upDown, hat, 0, 2);
@@ -285,7 +285,7 @@ void InputVirtual::bindWheel(spInputDevice device)
 	wheels.push_back(device);
 }
 
-Halley::String Halley::InputVirtual::getButtonName(int code)
+String InputVirtual::getButtonName(int code)
 {
 	auto& binds = buttons.at(code);
 	if (binds.size() > 0) {
@@ -296,7 +296,7 @@ Halley::String Halley::InputVirtual::getButtonName(int code)
 	}
 }
 
-void Halley::InputVirtual::update(Time t)
+void InputVirtual::update(Time t)
 {
 	updateLastDevice();
 
@@ -318,7 +318,7 @@ void Halley::InputVirtual::update(Time t)
 		
 		if (intVal != 0) {
 			Time threshold = axis.numRepeats == 1 ? repeatDelayFirst : repeatDelayHold;
-			timeSinceRepeat += t * std::fabs(curVal);
+			timeSinceRepeat += t * fabs(curVal);
 			if (timeSinceRepeat >= threshold) {
 				axis.curRepeatValue = intVal;
 				axis.numRepeats++;
@@ -346,19 +346,19 @@ void Halley::InputVirtual::update(Time t)
 	}
 }
 
-Halley::spInputDevice Halley::InputVirtual::getLastDevice() const
+InputDevice* InputVirtual::getLastDevice() const
 {
 	return lastDevice;
 }
 
-void Halley::InputVirtual::updateLastDevice()
+void InputVirtual::updateLastDevice()
 {
 	if (!lastDeviceFrozen) {
 		for (auto& buttonBinds: buttons) {
 			for (auto& bind: buttonBinds) {
 				if (bind.device && !std::dynamic_pointer_cast<InputManual>(bind.device)) {
 					if (!bind.isAxis && bind.device->isButtonPressed(bind.a)) {
-						lastDevice = bind.device;
+						setLastDevice(bind.device.get());
 						return;
 					}
 				}
@@ -367,8 +367,10 @@ void Halley::InputVirtual::updateLastDevice()
 		for (auto& axisBind: axes) {
 			for (auto& bind: axisBind.binds) {
 				if (bind.device && !std::dynamic_pointer_cast<InputManual>(bind.device)) {
-					if (bind.isAxis && fabs(bind.device->getAxis(bind.a)) > 0.1f) {
-						lastDevice = bind.device;
+					if ((bind.isAxis && fabs(bind.device->getAxis(bind.a)) > 0.1f)
+						|| (!bind.isAxis && bind.device->isButtonDown(bind.a))
+						|| (!bind.isAxis && bind.device->isButtonDown(bind.b))) {
+						setLastDevice(bind.device.get());
 						return;
 					}
 				}
@@ -403,12 +405,12 @@ InputVirtual::PositionBindData::PositionBindData(spInputDevice device, int axisX
 	, speed(speed)
 {}
 
-void Halley::InputVirtual::setLastDeviceFreeze(bool frozen)
+void InputVirtual::setLastDeviceFreeze(bool frozen)
 {
 	lastDeviceFrozen = frozen;
 }
 
-void Halley::InputVirtual::setRepeat(float first, float hold)
+void InputVirtual::setRepeat(float first, float hold)
 {
 	repeatDelayFirst = first;
 	repeatDelayHold = hold;
@@ -420,5 +422,15 @@ JoystickType InputVirtual::getJoystickType() const
 		return lastDevice->getJoystickType();
 	} else {
 		return JoystickType::None;
+	}
+}
+
+void InputVirtual::setLastDevice(InputDevice* device)
+{
+	auto parent = device->getParent();
+	if (parent) {
+		setLastDevice(parent);
+	} else {
+		lastDevice = device;
 	}
 }

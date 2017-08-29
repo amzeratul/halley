@@ -44,6 +44,7 @@ InputJoystickXInput::InputJoystickXInput(int number)
 	// Hat
 	hats.resize(1);
 	hats[0] = std::make_shared<InputButtonBase>(4);
+	hats[0]->setParent(this);
 
 	// Buttons
 	init(12);

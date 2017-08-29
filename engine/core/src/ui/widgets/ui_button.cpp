@@ -32,6 +32,8 @@ void UIButton::onClicked(Vector2f)
 void UIButton::setInputType(UIInputType uiInput)
 {
 	UIWidget::setInputType(uiInput);
+	setActive(true); // Method above will disable it, but buttons should always be enabled
+
 	if (uiInput != curInputType) {
 		curInputType = uiInput;
 		borderOnly = !getOnlyEnabledWithInput().empty() && curInputType != UIInputType::Mouse && curInputType != UIInputType::Keyboard;

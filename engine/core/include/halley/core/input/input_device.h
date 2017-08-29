@@ -72,6 +72,9 @@ namespace Halley {
 		virtual int getWheelMove() const;
 
 		virtual int getNextLetter();
+
+		virtual void setParent(InputDevice* parent);
+		virtual InputDevice* getParent() const;
 	};
 	
 }

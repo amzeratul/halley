@@ -111,3 +111,12 @@ int InputDevice::getNextLetter()
 {
 	return 0;
 }
+
+void InputDevice::setParent(InputDevice*)
+{
+}
+
+InputDevice* InputDevice::getParent() const
+{
+	return nullptr;
+}

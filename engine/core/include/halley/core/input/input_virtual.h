@@ -81,12 +81,13 @@ namespace Halley {
 
 		void setRepeat(float first, float hold);
 
-		spInputDevice getLastDevice() const;
+		InputDevice* getLastDevice() const;
 		void setLastDeviceFreeze(bool frozen);
 
 		JoystickType getJoystickType() const override;
 
 	private:
+		void setLastDevice(InputDevice* device);
 		void updateLastDevice();
 
 		struct Bind {
@@ -134,7 +135,7 @@ namespace Halley {
 		Vector<spInputDevice> wheels;
 
 		spInputDevice vibrationOverride;
-		spInputDevice lastDevice;
+		InputDevice* lastDevice = nullptr;
 		bool lastDeviceFrozen;
 		
 		float repeatDelayFirst;
