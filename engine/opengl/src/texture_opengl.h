@@ -20,13 +20,15 @@ namespace Halley
 		void load(TextureDescriptor&& descriptor) override;
 
 	private:
-		void loadImage(const char* px, size_t w, size_t h, size_t stride, TextureFormat format, bool useMipMap);
-		void create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering, bool clamp);
+		void loadImage(const char* px, Vector2i size, size_t stride, TextureFormat format, bool useMipMap);
+		void create(Vector2i size, TextureFormat format, bool useMipMap, bool useFiltering, bool clamp);
 
 		static unsigned int getGLFormat(TextureFormat format);
 
 		void waitForOpenGLLoad() const;
+		void finishLoading();
 
+		Vector2i texSize;
 		VideoOpenGL& parent;
 #ifdef WITH_OPENGL
 		mutable GLsync fence = nullptr;

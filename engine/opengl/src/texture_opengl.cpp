@@ -28,11 +28,21 @@ TextureOpenGL::~TextureOpenGL()
 
 void TextureOpenGL::load(TextureDescriptor&& d)
 {
-	create(d.size.x, d.size.y, d.format, d.useMipMap, d.useFiltering, d.clamp);
-	if (!d.pixelData.empty()) {
-		loadImage(reinterpret_cast<const char*>(d.pixelData.getBytes()), d.size.x, d.size.y, d.size.x, d.format, d.useMipMap);
-	}
+	GLUtils glUtils;
+	glUtils.bindTexture(textureId);
 	
+	if (texSize != d.size) {
+		create(d.size, d.format, d.useMipMap, d.useFiltering, d.clamp);
+	}
+
+	if (!d.pixelData.empty()) {
+		loadImage(reinterpret_cast<const char*>(d.pixelData.getBytes()), d.size, d.size.x, d.format, d.useMipMap);
+	}
+	finishLoading();
+}
+
+void TextureOpenGL::finishLoading()
+{
 	if (parent.isLoaderThread()) {
 #ifdef WITH_OPENGL
 		fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
@@ -74,20 +84,13 @@ void TextureOpenGL::bind(int textureUnit) const
 	glUtils.bindTexture(textureId);
 }
 
-void TextureOpenGL::create(size_t w, size_t h, TextureFormat format, bool useMipMap, bool useFiltering, bool clamp)
+void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, bool useFiltering, bool clamp)
 {
-	Expects(w > 0);
-	Expects(h > 0);
-	Expects(w <= 4096);
-	Expects(h <= 4096);
+	Expects(size.x > 0);
+	Expects(size.y > 0);
+	Expects(size.x <= 4096);
+	Expects(size.y <= 4096);
 	glCheckError();
-
-	int filtering = useFiltering ? GL_LINEAR : GL_NEAREST;
-
-	GLUtils glUtils;
-	glUtils.bindTexture(textureId);
-
-	//loader = TextureLoadQueue::getCurrent();
 
 #ifdef WITH_OPENGL
 	GLuint pixFormat = GL_UNSIGNED_BYTE;
@@ -103,6 +106,7 @@ void TextureOpenGL::create(size_t w, size_t h, TextureFormat format, bool useMip
 #else
 	GLuint pixFormat = GL_UNSIGNED_BYTE;
 #endif
+	int filtering = useFiltering ? GL_LINEAR : GL_NEAREST;
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, useMipMap ? GL_LINEAR_MIPMAP_LINEAR : filtering);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
 
@@ -114,7 +118,7 @@ void TextureOpenGL::create(size_t w, size_t h, TextureFormat format, bool useMip
 #endif
 
 	Vector<char> blank;
-	blank.resize(w * h * TextureDescriptor::getBitsPerPixel(format));
+	blank.resize(size.x * size.y * TextureDescriptor::getBitsPerPixel(format));
 	GLuint glFormat = getGLFormat(format);
 	GLuint format2 = glFormat;
 #ifdef WITH_OPENGL
@@ -125,15 +129,16 @@ void TextureOpenGL::create(size_t w, size_t h, TextureFormat format, bool useMip
 #endif
 	glTexImage2D(GL_TEXTURE_2D, 0, glFormat, size.x, size.y, 0, format2, pixFormat, blank.data());
 	glCheckError();
+	texSize = size;
 }
 
-void TextureOpenGL::loadImage(const char* px, size_t w, size_t h, size_t stride, TextureFormat format, bool useMipMap)
+void TextureOpenGL::loadImage(const char* px, Vector2i size, size_t stride, TextureFormat format, bool useMipMap)
 {
 #ifdef WITH_OPENGL
 	glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
 	glPixelStorei(GL_PACK_ROW_LENGTH, int(stride));
 #endif
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, int(w), int(h), getGLFormat(format), GL_UNSIGNED_BYTE, px);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y, getGLFormat(format), GL_UNSIGNED_BYTE, px);
 	glCheckError();
 
 #ifndef WITH_OPENGL_ES

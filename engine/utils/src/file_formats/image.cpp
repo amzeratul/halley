@@ -68,7 +68,10 @@ void Halley::Image::setSize(Vector2i size)
 	dataLen += (16 - (dataLen % 16)) % 16;
 	if (w > 0 && h > 0)	{
 		px = std::unique_ptr<char, void(*)(char*)>(new char[dataLen], [](char* data) { delete[] data; });
-		assert(px.get() != nullptr);
+		if (getBytesPerPixel() == 4) {
+			Ensures(size_t(px.get()) % 4 == 0);
+		}
+		Ensures(px.get() != nullptr);
 	} else {
 		px = std::unique_ptr<char, void(*)(char*)>(nullptr, [](char*) {});
 	}

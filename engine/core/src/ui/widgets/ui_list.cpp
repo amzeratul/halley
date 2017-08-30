@@ -81,6 +81,7 @@ void UIList::addItem(std::shared_ptr<UIListItem> item)
 	add(item);
 	items.push_back(item);
 	if (curOption == -1) {
+		forceAddChildren(UIInputType::Undefined);
 		setSelectedOption(0);
 	}
 }
