@@ -46,6 +46,15 @@ Byte* TextureDescriptorImageData::getBytes()
 	return isRaw ? rawBytes.data() : reinterpret_cast<Byte*>(img->getPixels());
 }
 
+gsl::span<const gsl::byte> TextureDescriptorImageData::getSpan() const
+{
+	if (isRaw) {
+		return gsl::as_bytes(gsl::span<const Byte>(rawBytes.data(), rawBytes.size()));
+	} else {
+		return gsl::as_bytes(gsl::span<char>(img->getPixels(), img->getByteSize()));
+	}
+}
+
 Bytes TextureDescriptorImageData::moveBytes()
 {
 	if (isRaw) {

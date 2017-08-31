@@ -45,6 +45,7 @@ namespace Halley
 
 		bool empty() const;
 		Byte* getBytes();
+		gsl::span<const gsl::byte> getSpan() const;
 
 		Bytes moveBytes();
 

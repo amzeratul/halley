@@ -37,7 +37,9 @@ namespace Halley
 		template <typename P, typename F>
 		static void setPromise(P promise, F&& callable)
 		{
-			promise.setValue(std::move(callable()));
+			if (!promise.isCancelled()) {
+				promise.setValue(std::move(callable()));
+			}
 		}
 	};
 
@@ -61,8 +63,10 @@ namespace Halley
 		template <typename P, typename F>
 		static void setPromise(P promise, F&& callable)
 		{
-			callable();
-			promise.set();
+			if (!promise.isCancelled()) {
+				callable();
+				promise.set();
+			}
 		}
 	};
 
@@ -72,6 +76,7 @@ namespace Halley
 	public:
 		FutureData()
 			: available(false)
+			, cancelled(false)
 		{}
 
 		FutureData(FutureData&&) = delete;
@@ -121,6 +126,16 @@ namespace Halley
 			}
 		}
 
+		void cancel()
+		{
+			cancelled = true;
+		}
+
+		bool isCancelled() const
+		{
+			return cancelled;
+		}
+
 	private:
 		void apply(std::function<void(T)> f) {
 			f(doGet<T>(0));
@@ -164,6 +179,7 @@ namespace Halley
 		}
 
 		std::atomic<bool> available;
+		std::atomic<bool> cancelled;
 		boost::optional<T> data;
 
 		std::vector<std::function<void(T)>> continuations;
@@ -203,6 +219,14 @@ namespace Halley
 				throw Exception("Future has not been bound.");
 			}
 			return data->wait();
+		}
+
+		void cancel()
+		{
+			if (!data) {
+				throw Exception("Future has not been bound.");
+			}
+			data->cancel();
 		}
 
 		bool hasValue() const
@@ -259,6 +283,11 @@ namespace Halley
 			return future;
 		}
 
+		bool isCancelled() const
+		{
+			return futureData->isCancelled();
+		}
+
 	private:
 		std::shared_ptr<FutureData<DataType>> futureData;
 		Future<T> future;
@@ -282,6 +311,11 @@ namespace Halley
 		Future<void> getFuture() const
 		{
 			return future;
+		}
+
+		bool isCancelled() const
+		{
+			return futureData->isCancelled();
 		}
 
 	private:
