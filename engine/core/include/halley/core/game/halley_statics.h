@@ -4,6 +4,7 @@
 namespace Halley
 {
 	class HalleyStaticsPimpl;
+	class SystemAPI;
 
 	class HalleyStatics
 	{
@@ -11,7 +12,7 @@ namespace Halley
 		HalleyStatics();
 		~HalleyStatics();
 		void setupGlobals() const;
-		void resume();
+		void resume(SystemAPI* system);
 		void suspend();
 
 	private:

@@ -16,7 +16,7 @@ namespace Halley {
 		friend class AudioHandleImpl;
 
     public:
-		explicit AudioFacade(AudioOutputAPI& output);
+		explicit AudioFacade(AudioOutputAPI& output, SystemAPI& system);
 		~AudioFacade();
 
 		void init() override;
@@ -42,6 +42,7 @@ namespace Halley {
 
     private:
 		AudioOutputAPI& output;
+		SystemAPI& system;
 		std::unique_ptr<AudioEngine> engine;
 
 		std::thread audioThread;

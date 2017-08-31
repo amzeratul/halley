@@ -18,7 +18,7 @@ int ImportTool::run(Vector<std::string> args)
 {
 	if (args.size() == 2) {
 		HalleyStatics statics;
-		statics.resume();
+		statics.resume(nullptr);
 		StdOutSink logSink;
 		Logger::addSink(logSink);
 

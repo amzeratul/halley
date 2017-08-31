@@ -28,7 +28,7 @@ using namespace Halley;
 
 Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 {
-	statics.resume();
+	statics.setupGlobals();
 	Logger::addSink(*this);
 
 	game = std::move(g);
@@ -57,7 +57,6 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 
 	// Debugging initialization
 	Debug::setErrorHandling();
-	Concurrent::setThreadName("main");
 
 	// Time
 	auto now = std::chrono::system_clock::now();
@@ -108,7 +107,8 @@ void Core::onReloaded()
 	if (game->shouldCreateSeparateConsole()) {
 		setOutRedirect(true);
 	}
-	statics.resume();
+	statics.resume(api->system);
+	Concurrent::setThreadName("main");
 
 	if (api->inputInternal) {
 		api->inputInternal->onResume();
@@ -144,10 +144,12 @@ void Core::init()
 	showComputerInfo();
 #endif
 
-	// Initialize game
+	// Initialize API
 	registerDefaultPlugins();
 	api = HalleyAPI::create(this, game->initPlugins(*this));
 	api->systemInternal->setEnvironment(environment.get());
+	statics.resume(api->system);
+	Concurrent::setThreadName("main");
 
 	// Resources
 	initResources();

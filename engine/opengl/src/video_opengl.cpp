@@ -131,7 +131,7 @@ void VideoOpenGL::initGLBindings()
 
 void VideoOpenGL::startLoaderThread()
 {
-	loaderThread = std::make_unique<LoaderThreadOpenGL>(*context);
+	loaderThread = std::make_unique<LoaderThreadOpenGL>(system, *context);
 }
 
 void VideoOpenGL::setupDebugCallback()

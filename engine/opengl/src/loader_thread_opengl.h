@@ -4,12 +4,13 @@
 
 namespace Halley
 {
+	class SystemAPI;
 	class GLContext;
 
 	class LoaderThreadOpenGL
 	{
 	public:
-		explicit LoaderThreadOpenGL(GLContext& context);
+		explicit LoaderThreadOpenGL(SystemAPI& system, GLContext& context);
 		~LoaderThreadOpenGL();
 		std::thread::id getThreadId();
 

@@ -104,7 +104,7 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 		if (plugins.size() > 0) {
 			std::cout << "Audio output plugin: " << plugins[0]->getName() << "\n";
 			audioOutput.reset(static_cast<AudioOutputAPIInternal*>(plugins[0]->createAPI(system.get())));
-			audio = std::make_unique<AudioFacade>(*audioOutput);
+			audio = std::make_unique<AudioFacade>(*audioOutput, *system);
 		} else {
 			throw Exception("No suitable audio plugins found.");
 		}

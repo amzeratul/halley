@@ -6,6 +6,7 @@
 #include <functional>
 #include <atomic>
 #include <vector>
+#include "halley/text/halleystring.h"
 
 namespace Halley
 {
@@ -75,10 +76,13 @@ namespace Halley
 	class ThreadPool
 	{
 	public:
-		ThreadPool(ExecutionQueue& queue, size_t n);
+		using MakeThread = std::function<std::thread(String, std::function<void()>)>;
+
+		ThreadPool(const String& name, ExecutionQueue& queue, size_t n, MakeThread makeThread);
 		~ThreadPool();
 
 	private:
+		String name;
 		std::vector<std::unique_ptr<Executor>> executors;
 		std::vector<std::thread> threads;
 	};

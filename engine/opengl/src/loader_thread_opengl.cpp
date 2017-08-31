@@ -6,12 +6,12 @@
 
 using namespace Halley;
 
-LoaderThreadOpenGL::LoaderThreadOpenGL(GLContext& context)
+LoaderThreadOpenGL::LoaderThreadOpenGL(SystemAPI& system, GLContext& context)
 	: executor(Executors::getVideoAux())
 	, context(context.createSharedContext())
 {
 #if HAS_THREADS
-	workerThread = std::thread([this]() { run(); });
+	workerThread = system.createThread("GLLoader", [this]() { run(); });
 #endif
 }
 

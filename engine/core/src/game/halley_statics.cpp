@@ -7,6 +7,7 @@
 #include <halley/concurrency/concurrent.h>
 #include <thread>
 #include "halley/support/logger.h"
+#include "api/system_api.h"
 
 using namespace Halley;
 
@@ -52,13 +53,25 @@ HalleyStatics::~HalleyStatics()
 	pimpl.reset();
 }
 
-void HalleyStatics::resume()
+void HalleyStatics::resume(SystemAPI* system)
 {
 	setupGlobals();
 
 #if HAS_THREADS
-	pimpl->cpuThreadPool = std::make_unique<ThreadPool>(pimpl->executors->getCPU(), std::thread::hardware_concurrency());
-	pimpl->diskIOThreadPool = std::make_unique<ThreadPool>(pimpl->executors->getDiskIO(), 1);
+	auto makeThread = [=] (String name, std::function<void()> runnable) -> std::thread
+	{
+		if (system) {
+			return system->createThread(name, runnable);
+		} else {
+			return std::thread([=] () {
+				Concurrent::setThreadName(name);
+				runnable();
+			});
+		}
+	};
+
+	pimpl->cpuThreadPool = std::make_unique<ThreadPool>("CPU", pimpl->executors->getCPU(), std::thread::hardware_concurrency(), makeThread);
+	pimpl->diskIOThreadPool = std::make_unique<ThreadPool>("IO", pimpl->executors->getDiskIO(), 1, makeThread);
 #endif
 }
 

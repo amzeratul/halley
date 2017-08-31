@@ -153,7 +153,8 @@ void Executor::stop()
 #endif
 }
 
-ThreadPool::ThreadPool(ExecutionQueue& queue, size_t n)
+ThreadPool::ThreadPool(const String& name, ExecutionQueue& queue, size_t n, MakeThread makeThread)
+	: name(name)
 {
 #if HAS_THREADS
 	for (size_t i = 0; i < n; i++) {
@@ -162,9 +163,8 @@ ThreadPool::ThreadPool(ExecutionQueue& queue, size_t n)
 	threads.resize(n);
 
 	for (size_t i = 0; i < n; i++) {
-		threads[i] = std::thread([this, i]()
+		threads[i] = makeThread(name + " Pool " + toString(i), [this, i]()
 		{
-			Concurrent::setThreadName("threadPool" + toString(i));
 			try {
 				executors[i]->runForever();
 			} catch (std::exception& e) {

@@ -6,8 +6,9 @@
 
 using namespace Halley;
 
-AudioFacade::AudioFacade(AudioOutputAPI& o)
+AudioFacade::AudioFacade(AudioOutputAPI& o, SystemAPI& system)
 	: output(o)
+	, system(system)
 	, running(false)
 	, ownAudioThread(o.needsAudioThread())
 {
@@ -62,7 +63,7 @@ void AudioFacade::startPlayback(int deviceNumber)
 		running = true;
 
 		if (ownAudioThread) {
-			audioThread = std::thread([this]() { run(); });
+			audioThread = system.createThread("Audio", [this]() { run(); });
 		}
 
 		output.startPlayback();

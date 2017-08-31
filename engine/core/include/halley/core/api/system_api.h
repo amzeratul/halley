@@ -1,6 +1,7 @@
 #pragma once
 #include "halley/resources/resource_data.h"
 #include "halley/core/graphics/window.h"
+#include "halley/concurrency/concurrent.h"
 
 namespace Halley
 {
@@ -38,6 +39,14 @@ namespace Halley
 		virtual Bytes getSaveData(const String& path) = 0;
 		virtual void setSaveData(const String& path, const Bytes& data) = 0;
 		virtual std::vector<String> enumerateSaveData(const String& root) = 0;
+
+		virtual std::thread createThread(const String& name, std::function<void()> runnable)
+		{
+			return std::thread([=] () {
+				Concurrent::setThreadName(name);
+				runnable();
+			});
+		}
 
 	private:
 		friend class HalleyAPI;
