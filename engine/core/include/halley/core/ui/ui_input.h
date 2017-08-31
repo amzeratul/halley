@@ -46,7 +46,7 @@ namespace Halley {
 	class UIInputResults {
 	public:
 		UIInputResults();
-		UIInputResults(std::array<bool, UIInput::NumberOfButtons> buttons, std::array<char, UIInput::NumberOfAxes> axes);
+		UIInputResults(std::array<bool, UIInput::NumberOfButtons> buttons, std::array<int8_t, UIInput::NumberOfAxes> axes);
 
 		void reset();
 
@@ -58,6 +58,6 @@ namespace Halley {
 
 	private:
 		std::array<bool, UIInput::NumberOfButtons> buttons;
-		std::array<char, UIInput::NumberOfAxes> axes;
+		std::array<int8_t, UIInput::NumberOfAxes> axes;
 	};
 }

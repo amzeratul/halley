@@ -8,7 +8,7 @@ UIInputResults::UIInputResults()
 	reset();
 }
 
-UIInputResults::UIInputResults(std::array<bool, UIInput::NumberOfButtons> buttons, std::array<char, UIInput::NumberOfAxes> axes)
+UIInputResults::UIInputResults(std::array<bool, UIInput::NumberOfButtons> buttons, std::array<int8_t, UIInput::NumberOfAxes> axes)
 	: buttons(buttons)
 	, axes(axes)
 {
