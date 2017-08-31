@@ -7,8 +7,25 @@ using namespace Halley;
 
 ConfigNode::ConfigNode()
 	: type(ConfigNodeType::Undefined)
-	, contents("")
 {
+}
+
+ConfigNode::ConfigNode(const ConfigNode& other)
+	: type(ConfigNodeType::Undefined)
+{
+	*this = other;
+}
+
+ConfigNode::ConfigNode(ConfigNode&& other)
+	: ptrData(other.ptrData)
+	, intData(other.intData)
+	, floatData(other.floatData)
+	, vec2iData(other.vec2iData)
+	, vec2fData(other.vec2fData)
+	, type(other.type)
+{
+	other.type = ConfigNodeType::Undefined;
+	other.ptrData = nullptr;
 }
 
 ConfigNode::ConfigNode(MapType&& entryMap)
@@ -51,87 +68,151 @@ ConfigNode::ConfigNode(Bytes&& value)
 	operator=(std::move(value));
 }
 
+ConfigNode::~ConfigNode()
+{
+	reset();
+}
+
+ConfigNode& ConfigNode::operator=(ConfigNode&& other)
+{
+	type = other.type;
+	ptrData = other.ptrData;
+	intData = other.intData;
+	floatData = other.floatData;
+	vec2iData = other.vec2iData;
+	vec2fData = other.vec2fData;
+	other.type = ConfigNodeType::Undefined;
+	return *this;
+}
+
 ConfigNode& ConfigNode::operator=(int value)
 {
+	reset();
 	type = ConfigNodeType::Int;
-	contents = value;
+	intData = value;
 	return *this;
 }
 
 ConfigNode& ConfigNode::operator=(float value)
 {
+	reset();
 	type = ConfigNodeType::Float;
-	contents = value;
+	floatData = value;
 	return *this;
 }
 
 ConfigNode& ConfigNode::operator=(Vector2i value)
 {
+	reset();
 	type = ConfigNodeType::Int2;
-	contents = value;
+	vec2iData = value;
 	return *this;
 }
 
 ConfigNode& ConfigNode::operator=(Vector2f value)
 {
+	reset();
 	type = ConfigNodeType::Float2;
-	contents = value;
-	return *this;
-}
-
-ConfigNode& ConfigNode::operator=(Bytes&& value)
-{
-	type = ConfigNodeType::Bytes;
-	contents = std::move(value);
+	vec2fData = value;
 	return *this;
 }
 
 ConfigNode& ConfigNode::operator=(const Bytes& value)
 {
+	reset();
 	type = ConfigNodeType::Bytes;
-	contents = std::move(value);
+	ptrData = new Bytes(value);
 	return *this;
 }
 
-ConfigNode& ConfigNode::operator=(MapType&& entry) 
+ConfigNode& ConfigNode::operator=(Bytes&& value)
 {
-	type = ConfigNodeType::Map;
-	contents = std::move(entry);
+	reset();
+	type = ConfigNodeType::Bytes;
+	ptrData = new Bytes(std::move(value));
 	return *this;
 }
 
-ConfigNode& ConfigNode::operator=(SequenceType&& entry) 
+ConfigNode& ConfigNode::operator=(const ConfigNode& other)
 {
-	type = ConfigNodeType::Sequence;
-	contents = std::move(entry);
-	return *this;
-}
-
-ConfigNode& ConfigNode::operator=(String&& entry) 
-{
-	type = ConfigNodeType::String;
-	contents = std::move(entry);
+	switch (other.type) {
+		case ConfigNodeType::String:
+			*this = other.asString();
+			break;
+		case ConfigNodeType::Sequence:
+			*this = other.asSequence();
+			break;
+		case ConfigNodeType::Map:
+			*this = other.asMap();
+			break;
+		case ConfigNodeType::Int:
+			*this = other.asInt();
+			break;
+		case ConfigNodeType::Float:
+			*this = other.asFloat();
+			break;
+		case ConfigNodeType::Int2:
+			*this = other.asVector2i();
+			break;
+		case ConfigNodeType::Float2:
+			*this = other.asVector2f();
+			break;
+		case ConfigNodeType::Bytes:
+			*this = other.asBytes();
+			break;
+		case ConfigNodeType::Undefined:
+			break;
+		default:
+			throw Exception("Unknown configuration node type.");
+	}
 	return *this;
 }
 
 ConfigNode& ConfigNode::operator=(const MapType& entry)
 {
+	reset();
 	type = ConfigNodeType::Map;
-	contents = entry;
+	ptrData = new MapType(entry);
+	return *this;
+}
+
+ConfigNode& ConfigNode::operator=(MapType&& entry) 
+{
+	reset();
+	type = ConfigNodeType::Map;
+	ptrData = new MapType(std::move(entry));
 	return *this;
 }
 
 ConfigNode& ConfigNode::operator=(const SequenceType& entry)
 {
+	reset();
 	type = ConfigNodeType::Sequence;
-	contents = entry;
+	ptrData = new SequenceType(entry);
+	return *this;
+}
+
+ConfigNode& ConfigNode::operator=(SequenceType&& entry) 
+{
+	reset();
+	type = ConfigNodeType::Sequence;
+	ptrData = new SequenceType(std::move(entry));
 	return *this;
 }
 
 ConfigNode& ConfigNode::operator=(const String& entry)
 {
+	reset();
 	type = ConfigNodeType::String;
-	contents = entry;
+	ptrData = new String(entry);
+	return *this;
+}
+
+ConfigNode& ConfigNode::operator=(String&& entry) 
+{
+	reset();
+	type = ConfigNodeType::String;
+	ptrData = new String(std::move(entry));
 	return *this;
 }
 
@@ -140,26 +221,66 @@ ConfigNodeType ConfigNode::getType() const
 	return type;
 }
 
-class SerializerVisitor : public boost::static_visitor<>
-{
-public:
-	SerializerVisitor(Serializer& s) : serializer(s) {}
-	template <typename T> void operator() (T& v) const { serializer << v; }
-private:
-	Serializer& serializer;
-};
-
 void ConfigNode::serialize(Serializer& s) const
 {
 	s << type;
-	boost::apply_visitor(SerializerVisitor(s), contents);
+
+	switch (type) {
+		case ConfigNodeType::String:
+		{
+			s << asString();
+			break;
+		}
+		case ConfigNodeType::Sequence:
+		{
+			s << asSequence();
+			break;
+		}
+		case ConfigNodeType::Map:
+		{
+			s << asMap();
+			break;
+		}
+		case ConfigNodeType::Int:
+		{
+			s << asInt();
+			break;
+		}
+		case ConfigNodeType::Float:
+		{
+			s << asFloat();
+			break;
+		}
+		case ConfigNodeType::Int2:
+		{
+			s << asVector2i();
+			break;
+		}
+		case ConfigNodeType::Float2:
+		{
+			s << asVector2f();
+			break;
+		}
+		case ConfigNodeType::Bytes:
+		{
+			s << asBytes();
+			break;
+		}
+		case ConfigNodeType::Undefined:
+		{
+			break;
+		}
+		default:
+			throw Exception("Unknown configuration node type.");
+	}
 }
 
 void ConfigNode::deserialize(Deserializer& s)
 {
-	s >> type;
+	ConfigNodeType incomingType;
+	s >> incomingType;
 
-	switch (type) {
+	switch (incomingType) {
 		case ConfigNodeType::String:
 		{
 			deserializeContents<String>(s);
@@ -212,9 +333,9 @@ void ConfigNode::deserialize(Deserializer& s)
 int ConfigNode::asInt() const
 {
 	if (type == ConfigNodeType::Int) {
-		return boost::get<int>(contents);
+		return intData;
 	} else if (type == ConfigNodeType::Float) {
-		return int(boost::get<float>(contents));
+		return int(floatData);
 	} else if (type == ConfigNodeType::String) {
 		return asString().toInteger();
 	} else {
@@ -225,9 +346,9 @@ int ConfigNode::asInt() const
 float ConfigNode::asFloat() const
 {
 	if (type == ConfigNodeType::Int) {
-		return float(boost::get<int>(contents));
+		return float(intData);
 	} else if (type == ConfigNodeType::Float) {
-		return boost::get<float>(contents);
+		return floatData;
 	} else if (type == ConfigNodeType::String) {
 		return asString().toFloat();
 	} else {
@@ -242,9 +363,9 @@ bool ConfigNode::asBool() const
 Vector2i ConfigNode::asVector2i() const
 {
 	if (type == ConfigNodeType::Int2) {
-		return boost::get<Vector2i>(contents);
+		return vec2iData;
 	} else if (type == ConfigNodeType::Float2) {
-		return Vector2i(boost::get<Vector2f>(contents));
+		return Vector2i(vec2fData);
 	} else {
 		throw Exception("Node is not a vector type");
 	}
@@ -253,9 +374,9 @@ Vector2i ConfigNode::asVector2i() const
 Vector2f ConfigNode::asVector2f() const
 {
 	if (type == ConfigNodeType::Int2) {
-		return Vector2f(boost::get<Vector2i>(contents));
+		return Vector2f(vec2iData);
 	} else if (type == ConfigNodeType::Float2) {
-		return boost::get<Vector2f>(contents);
+		return vec2fData;
 	} else {
 		throw Exception("Node is not a vector type");
 	}
@@ -264,7 +385,7 @@ Vector2f ConfigNode::asVector2f() const
 const Bytes& ConfigNode::asBytes() const
 {
 	if (type == ConfigNodeType::Bytes) {
-		return boost::get<Bytes>(contents);
+		return *reinterpret_cast<Bytes*>(ptrData);
 	} else {
 		throw Exception("Node is not a byte sequence type");
 	}
@@ -291,9 +412,9 @@ Vector2f ConfigNode::asVector2f(Vector2f defaultValue) const
 String ConfigNode::asString() const
 {
 	if (type == ConfigNodeType::String) {
-		return boost::get<String>(contents);
+		return *reinterpret_cast<String*>(ptrData);
 	} else {
-		throw Exception("Node is not a scalar type");
+		throw Exception("Node is not a string type");
 	}
 }
 
@@ -336,25 +457,25 @@ String ConfigNode::asString(const String& defaultValue) const
 const ConfigNode::SequenceType& ConfigNode::asSequence() const
 {
 	if (type == ConfigNodeType::Sequence) {
-		return boost::get<SequenceType>(contents);
+		return *reinterpret_cast<SequenceType*>(ptrData);
 	} else {
-		throw Exception("Node is not a scalar type");
+		throw Exception("Node is not a sequence type");
 	}
 }
 
 const ConfigNode::MapType& ConfigNode::asMap() const
 {
 	if (type == ConfigNodeType::Map) {
-		return boost::get<MapType>(contents);
+		return *reinterpret_cast<MapType*>(ptrData);
 	} else {
-		throw Exception("Node is not a scalar type");
+		throw Exception("Node is not a map type");
 	}
 }
 
 ConfigNode::SequenceType& ConfigNode::asSequence()
 {
 	if (type == ConfigNodeType::Sequence) {
-		return boost::get<SequenceType>(contents);
+		return *reinterpret_cast<SequenceType*>(ptrData);
 	} else {
 		throw Exception("Node is not a sequence type");
 	}
@@ -363,7 +484,7 @@ ConfigNode::SequenceType& ConfigNode::asSequence()
 ConfigNode::MapType& ConfigNode::asMap()
 {
 	if (type == ConfigNodeType::Map) {
-		return boost::get<MapType>(contents);
+		return *reinterpret_cast<MapType*>(ptrData);
 	} else {
 		throw Exception("Node is not a map type");
 	}
@@ -423,6 +544,21 @@ std::vector<ConfigNode>::const_iterator ConfigNode::begin() const
 std::vector<ConfigNode>::const_iterator ConfigNode::end() const
 {
 	return asSequence().end();
+}
+
+void ConfigNode::reset()
+{
+	if (type == ConfigNodeType::Map) {
+		delete reinterpret_cast<MapType*>(ptrData);
+	} else if (type == ConfigNodeType::Sequence) {
+		delete reinterpret_cast<SequenceType*>(ptrData);
+	} else if (type == ConfigNodeType::Bytes) {
+		delete reinterpret_cast<Bytes*>(ptrData);
+	} else if (type == ConfigNodeType::String) {
+		delete reinterpret_cast<String*>(ptrData);
+	}
+	ptrData = nullptr;
+	type = ConfigNodeType::Undefined;
 }
 
 ConfigNode& ConfigFile::getRoot()

@@ -33,6 +33,8 @@ namespace Halley
 		using SequenceType = std::vector<ConfigNode>;
 
 		ConfigNode();
+		ConfigNode(const ConfigNode& other);
+		ConfigNode(ConfigNode&& other);
 		ConfigNode(MapType&& entryMap);
 		ConfigNode(SequenceType&& entryList);
 		ConfigNode(String&& value);
@@ -41,7 +43,11 @@ namespace Halley
 		ConfigNode(Vector2i value);
 		ConfigNode(Vector2f value);
 		ConfigNode(Bytes&& value);
+
+		~ConfigNode();
 		
+		ConfigNode& operator=(const ConfigNode& other);
+		ConfigNode& operator=(ConfigNode&& other);
 		ConfigNode& operator=(int value);
 		ConfigNode& operator=(float value);
 		ConfigNode& operator=(Vector2i value);
@@ -96,9 +102,17 @@ namespace Halley
 		SequenceType::const_iterator begin() const;
 		SequenceType::const_iterator end() const;
 
+		void reset();
+
 	private:
+		union {
+			void* ptrData;
+			int intData;
+			float floatData;
+			Vector2i vec2iData;
+			Vector2f vec2fData;
+		};
 		ConfigNodeType type;
-		boost::variant<String, SequenceType, MapType, int, float, Vector2i, Vector2f, Bytes> contents;
 
 		static ConfigNode undefinedConfigNode;
 
@@ -106,7 +120,7 @@ namespace Halley
 		{
 			T v;
 			s >> v;
-			contents = v;
+			*this = std::move(v);
 		}
 	};
 

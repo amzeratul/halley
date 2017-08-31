@@ -239,7 +239,7 @@ namespace Halley {
 				T key;
 				U value;
 				*this >> key >> value;
-				val[key] = value;
+				val[key] = std::move(value);
 			}
 			return *this;
 		}
@@ -253,7 +253,7 @@ namespace Halley {
 				T key;
 				U value;
 				*this >> key >> value;
-				val[key] = value;
+				val[key] = std::move(value);
 			}
 			return *this;
 		}
