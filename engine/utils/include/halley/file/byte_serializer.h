@@ -74,7 +74,7 @@ namespace Halley {
 		{
 			*this << static_cast<unsigned int>(val.size());
 			for (auto& kv : val) {
-				*this << kv.first << kv.second;
+				*this << kv.first << kv.second; 
 			}
 			return *this;
 		}

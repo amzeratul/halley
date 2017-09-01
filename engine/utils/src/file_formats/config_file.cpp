@@ -17,15 +17,9 @@ ConfigNode::ConfigNode(const ConfigNode& other)
 }
 
 ConfigNode::ConfigNode(ConfigNode&& other)
-	: ptrData(other.ptrData)
-	, intData(other.intData)
-	, floatData(other.floatData)
-	, vec2iData(other.vec2iData)
-	, vec2fData(other.vec2fData)
-	, type(other.type)
+	: type(ConfigNodeType::Undefined)
 {
-	other.type = ConfigNodeType::Undefined;
-	other.ptrData = nullptr;
+	*this = std::move(other);
 }
 
 ConfigNode::ConfigNode(MapType&& entryMap)
@@ -82,6 +76,7 @@ ConfigNode& ConfigNode::operator=(ConfigNode&& other)
 	vec2iData = other.vec2iData;
 	vec2fData = other.vec2fData;
 	other.type = ConfigNodeType::Undefined;
+	other.ptrData = nullptr;
 	return *this;
 }
 
