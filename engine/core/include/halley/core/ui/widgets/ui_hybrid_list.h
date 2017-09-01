@@ -11,7 +11,7 @@ namespace Halley {
 
 		using AddCallback = std::function<std::shared_ptr<UIWidget>(const String&, AddType)>;
 
-		explicit UIHybridList(const String& id, AddCallback callback, UIStyle listStyle, UIStyle buttonStyle, UISizerType orientation = UISizerType::Vertical, int nColumns = 1, Maybe<Vector4f> innerBorder = {});
+		explicit UIHybridList(const String& id, AddCallback callback, UIStyle listStyle, UIStyle buttonStyle, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 
 		void addId(const String& id);
 
@@ -24,6 +24,5 @@ namespace Halley {
 		UIStyle buttonStyle;
 		AddCallback callback;
 		int nColumns;
-		Maybe<Vector4f> innerBorder;
     };
 }

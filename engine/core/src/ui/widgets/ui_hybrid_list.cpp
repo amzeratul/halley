@@ -3,13 +3,12 @@
 
 using namespace Halley;
 
-UIHybridList::UIHybridList(const String& id, AddCallback callback, UIStyle listStyle, UIStyle buttonStyle, UISizerType orientation, int nColumns, Maybe<Vector4f> innerBorder)
+UIHybridList::UIHybridList(const String& id, AddCallback callback, UIStyle listStyle, UIStyle buttonStyle, UISizerType orientation, int nColumns)
 	: UIWidget(id, {}, UISizer(orientation))
 	, listStyle(listStyle)
 	, buttonStyle(buttonStyle)
 	, callback(callback)
 	, nColumns(nColumns)
-	, innerBorder(innerBorder)
 {
 	list = std::make_shared<UIList>(id + "_list", listStyle, orientation, nColumns);
 	list->setOnlyEnabledWithInputs({ UIInputType::Gamepad });
@@ -23,9 +22,9 @@ UIHybridList::UIHybridList(const String& id, AddCallback callback, UIStyle listS
 
 void UIHybridList::addId(const String& id)
 {
-	list->addItem(id, callback(id, AddType::List), 0, innerBorder ? innerBorder.get() : listStyle.getBorder("innerBorder"));
+	list->addItem(id, callback(id, AddType::List));
 
-	auto button = std::make_shared<UIButton>(id, buttonStyle, UISizer(UISizerType::Horizontal), innerBorder);
+	auto button = std::make_shared<UIButton>(id, buttonStyle, UISizer(UISizerType::Horizontal), buttonStyle.getBorder("innerBorder"));
 	button->add(callback(id, AddType::Button));
 	buttons->add(button);
 }

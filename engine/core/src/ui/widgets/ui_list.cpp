@@ -5,7 +5,7 @@
 using namespace Halley;
 
 UIList::UIList(const String& id, UIStyle style, UISizerType orientation, int nColumns)
-	: UIWidget(id, {}, UISizer(orientation, style.getFloat("gap"), nColumns, true))
+	: UIWidget(id, {}, UISizer(orientation, style.getFloat("gap"), nColumns, true), style.getBorder("innerBorder"))
 	, style(style)
 	, orientation(orientation)
 	, nColumns(nColumns)
@@ -49,21 +49,21 @@ const String& UIList::getSelectedOptionId() const
 void UIList::addTextItem(const String& id, const String& label)
 {
 	auto widget = std::make_shared<UILabel>(style.getTextRenderer("label").clone().setText(label));
-	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()), style.getBorder("extraMouseBorder"));
-	item->add(widget, 0, orientation == UISizerType::Vertical ? Vector4f(3, 0, 3, 0) : Vector4f(0, 3, 0, 3));
+	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(items.size()), style.getBorder("extraMouseBorder"));
+	item->add(widget, 0);
 	addItem(item);
 }
 
 void UIList::addItem(const String& id, std::shared_ptr<UIWidget> widget, float proportion, Vector4f border, int fillFlags)
 {
-	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()), style.getBorder("extraMouseBorder"));
+	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(items.size()), style.getBorder("extraMouseBorder"));
 	item->add(widget, proportion, border, fillFlags);
 	addItem(item);
 }
 
 void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion, Vector4f border, int fillFlags)
 {
-	auto item = std::make_shared<UIListItem>(id, *this, style, int(items.size()), style.getBorder("extraMouseBorder"));
+	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(items.size()), style.getBorder("extraMouseBorder"));
 	item->add(sizer, proportion, border, fillFlags);
 	addItem(item);
 }
@@ -166,13 +166,13 @@ void UIList::onItemClicked(UIListItem& item)
 }
 
 UIListItem::UIListItem(const String& id, UIList& parent, UIStyle style, int index, Vector4f extraMouseArea)
-	: UIClickable(id, {}, UISizer(UISizerType::Vertical))
+	: UIClickable(id, {}, UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
 	, parent(parent)
 	, style(style)
 	, index(index)
 	, extraMouseArea(extraMouseArea)
 {
-	sprite = style.getSprite("itemNormal");
+	sprite = style.getSprite("normal");
 }
 
 void UIListItem::onClicked(Vector2f mousePos)
@@ -209,19 +209,19 @@ void UIListItem::update(Time t, bool moved)
 void UIListItem::doSetState(State state)
 {
 	if (selected) {
-		sprite = style.getSprite("itemSelected");
+		sprite = style.getSprite("selected");
 	} else {
 		switch (state) {
 		case State::Up:
-			sprite = style.getSprite("itemNormal");
+			sprite = style.getSprite("normal");
 			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), false));
 			break;
 		case State::Hover:
-			sprite = style.getSprite("itemHover");
+			sprite = style.getSprite("hover");
 			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), true));
 			break;
 		case State::Down:
-			sprite = style.getSprite("itemSelected");
+			sprite = style.getSprite("selected");
 			break;
 		}
 	}
