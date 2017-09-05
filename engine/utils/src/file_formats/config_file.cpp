@@ -37,6 +37,11 @@ ConfigNode::ConfigNode(String&& value)
 	operator=(std::move(value));
 }
 
+ConfigNode::ConfigNode(bool value)
+{
+	operator=(value);
+}
+
 ConfigNode::ConfigNode(int value)
 {
 	operator=(value);
@@ -77,6 +82,14 @@ ConfigNode& ConfigNode::operator=(ConfigNode&& other)
 	vec2fData = other.vec2fData;
 	other.type = ConfigNodeType::Undefined;
 	other.ptrData = nullptr;
+	return *this;
+}
+
+ConfigNode& ConfigNode::operator=(bool value)
+{
+	reset();
+	type = ConfigNodeType::Int;
+	intData = value ? 1 : 0;
 	return *this;
 }
 
@@ -348,11 +361,16 @@ float ConfigNode::asFloat() const
 		return asString().toFloat();
 	} else {
 		throw Exception("Not cannot be converted to float.");
-	}}
+	}
+}
 
 bool ConfigNode::asBool() const
 {
-	return asString() == "true";
+	if (type == ConfigNodeType::Int) {
+		return intData != 0;
+	} else {
+		return asString() == "true";
+	}
 }
 
 Vector2i ConfigNode::asVector2i() const

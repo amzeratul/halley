@@ -38,6 +38,7 @@ namespace Halley
 		ConfigNode(MapType&& entryMap);
 		ConfigNode(SequenceType&& entryList);
 		ConfigNode(String&& value);
+		ConfigNode(bool value);
 		ConfigNode(int value);
 		ConfigNode(float value);
 		ConfigNode(Vector2i value);
@@ -48,6 +49,7 @@ namespace Halley
 		
 		ConfigNode& operator=(const ConfigNode& other);
 		ConfigNode& operator=(ConfigNode&& other);
+		ConfigNode& operator=(bool value);
 		ConfigNode& operator=(int value);
 		ConfigNode& operator=(float value);
 		ConfigNode& operator=(Vector2i value);

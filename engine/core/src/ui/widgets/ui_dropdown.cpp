@@ -15,6 +15,11 @@ UIDropdown::UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle
 	, options(os)
 	, curOption(defaultOption)
 {
+	if (defaultOption < 0 || defaultOption >= int(os.size())) {
+		defaultOption = 0;
+		curOption = 0;
+	}
+
 	sprite = style.getSprite("normal");
 	if (options.empty()) {
 		options.push_back("");
