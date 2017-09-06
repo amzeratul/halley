@@ -53,16 +53,16 @@ void DummySystemAPI::deInit()
 {
 }
 
-Bytes DummySystemAPI::getSaveData(const String& path)
+Bytes DummySystemAPI::getSaveData(SaveDataType type, const String& path)
 {
 	return Bytes();
 }
 
-void DummySystemAPI::setSaveData(const String& path, const Bytes& data)
+void DummySystemAPI::setSaveData(SaveDataType type, const String& path, const Bytes& data)
 {
 }
 
-std::vector<String> DummySystemAPI::enumerateSaveData(const String& root)
+std::vector<String> DummySystemAPI::enumerateSaveData(SaveDataType type, const String& root)
 {
 	return {};
 }

@@ -17,6 +17,11 @@ namespace Halley
 		virtual std::unique_ptr<GLContext> createSharedContext() = 0;
 	};
 
+	enum class SaveDataType {
+		Save,
+		Cache
+	};
+
 	class SystemAPI
 	{
 	public:
@@ -36,9 +41,9 @@ namespace Halley
 
 		virtual void showCursor(bool show) = 0;
 
-		virtual Bytes getSaveData(const String& path) = 0;
-		virtual void setSaveData(const String& path, const Bytes& data) = 0;
-		virtual std::vector<String> enumerateSaveData(const String& root) = 0;
+		virtual Bytes getSaveData(SaveDataType type, const String& path) = 0;
+		virtual void setSaveData(SaveDataType type, const String& path, const Bytes& data) = 0;
+		virtual std::vector<String> enumerateSaveData(SaveDataType type, const String& root) = 0;
 
 		virtual std::thread createThread(const String& name, std::function<void()> runnable)
 		{

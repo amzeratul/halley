@@ -227,41 +227,27 @@ void SystemSDL::showCursor(bool show)
 	SDL_ShowCursor(show ? 1 : 0);
 }
 
-Bytes SystemSDL::getSaveData(const String& path)
+Bytes SystemSDL::getSaveData(SaveDataType type, const String& path)
 {
 	Expects (!path.isEmpty());
 
-	Bytes result;
-
-	std::ifstream fp((saveDir / path).string(), std::ios::binary | std::ios::in);
-	if (!fp.is_open()) {
-		return result;
-	}
-
-	fp.seekg(0, std::ios::end);
-	size_t size = fp.tellg();
-	fp.seekg(0, std::ios::beg);
-	result.resize(size);
-
-	fp.read(reinterpret_cast<char*>(result.data()), size);
-	fp.close();
-
-	return result;
+	auto dir = type == SaveDataType::Save ? saveDir : cacheDir;
+	return Path::readFile(dir / path);
 }
 
-void SystemSDL::setSaveData(const String& path, const Bytes& data)
+void SystemSDL::setSaveData(SaveDataType type, const String& path, const Bytes& data)
 {
 	Expects (!path.isEmpty());
 
-	OS::get().createDirectories(saveDir);
-	std::ofstream fp((saveDir / path).string(), std::ios::binary | std::ios::out);
-	fp.write(reinterpret_cast<const char*>(data.data()), data.size());
-	fp.close();
+	auto dir = type == SaveDataType::Save ? saveDir : cacheDir;
+	OS::get().createDirectories(dir);
+	Path::writeFile(dir / path, data);
 }
 
-std::vector<String> SystemSDL::enumerateSaveData(const String& root)
+std::vector<String> SystemSDL::enumerateSaveData(SaveDataType type, const String& root)
 {
-	auto paths = OS::get().enumerateDirectory(saveDir);
+	auto dir = type == SaveDataType::Save ? saveDir : cacheDir;
+	auto paths = OS::get().enumerateDirectory(dir);
 	std::vector<String> result;
 	for (auto& p: paths) {
 		auto path = p.toString();
@@ -275,7 +261,9 @@ std::vector<String> SystemSDL::enumerateSaveData(const String& root)
 void SystemSDL::setEnvironment(Environment* env)
 {
 	saveDir = env->getDataPath() / "save" / ".";
+	cacheDir = env->getDataPath() / "cache" / ".";
 	OS::get().createDirectories(saveDir);
+	OS::get().createDirectories(cacheDir);
 }
 
 void SystemSDL::printDebugInfo() const

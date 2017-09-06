@@ -29,9 +29,9 @@ namespace Halley
 
 		void showCursor(bool show) override;
 
-		Bytes getSaveData(const String& path) override;
-		void setSaveData(const String& path, const Bytes& data) override;
-		std::vector<String> enumerateSaveData(const String& root) override;
+		Bytes getSaveData(SaveDataType type, const String& path) override;
+		void setSaveData(SaveDataType type, const String& path, const Bytes& data) override;
+		std::vector<String> enumerateSaveData(SaveDataType type, const String& root) override;
 
 		void setEnvironment(Environment* env) override;
 
@@ -47,5 +47,6 @@ namespace Halley
 		std::vector<std::shared_ptr<SDLWindow>> windows;
 		mutable bool videoInit = false;
 		Path saveDir;
+		Path cacheDir;
 	};
 }

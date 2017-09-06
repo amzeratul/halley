@@ -91,6 +91,7 @@ namespace Halley
 		MapType& asMap();
 
 		bool hasKey(const String& key) const;
+		void removeKey(const String& key);
 
 		ConfigNode& operator[](const String& key);
 		ConfigNode& operator[](size_t idx);

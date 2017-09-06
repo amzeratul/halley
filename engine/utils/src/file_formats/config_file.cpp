@@ -67,6 +67,11 @@ ConfigNode::ConfigNode(Bytes&& value)
 	operator=(std::move(value));
 }
 
+void ConfigNode::removeKey(const String& key)
+{
+	asMap().erase(key);
+}
+
 ConfigNode::~ConfigNode()
 {
 	reset();
