@@ -1,5 +1,6 @@
 #include "halley/file/path.h"
 #include <sstream>
+#include <fstream>
 
 using namespace Halley;
 
@@ -224,6 +225,33 @@ bool Path::operator!=(const Path& other) const
 std::string Path::string() const
 {
 	return getString().cppStr();
+}
+
+void Path::writeFile(const Path& path, const Bytes& data)
+{
+	std::ofstream fp(path.string(), std::ios::binary | std::ios::out);
+	fp.write(reinterpret_cast<const char*>(data.data()), data.size());
+	fp.close();
+}
+
+Bytes Path::readFile(const Path& path)
+{
+	Bytes result;
+
+	std::ifstream fp(path.string(), std::ios::binary | std::ios::in);
+	if (!fp.is_open()) {
+		return result;
+	}
+
+	fp.seekg(0, std::ios::end);
+	size_t size = fp.tellg();
+	fp.seekg(0, std::ios::beg);
+	result.resize(size);
+
+	fp.read(reinterpret_cast<char*>(result.data()), size);
+	fp.close();
+
+	return result;
 }
 
 std::ostream& Halley::operator<<(std::ostream& os, const Path& p)

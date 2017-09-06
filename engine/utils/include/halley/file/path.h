@@ -1,6 +1,7 @@
 #pragma once
 
 #include "halley/text/halleystring.h"
+#include "halley/utils/utils.h"
 #include <iostream>
 
 namespace Halley
@@ -43,6 +44,9 @@ namespace Halley
 		bool operator!=(const Path& other) const;
 
 		std::string string() const;
+
+		static void writeFile(const Path& path, const Bytes& data);
+		static Bytes readFile(const Path& path);
 
 	private:
 		std::vector<String> pathParts;

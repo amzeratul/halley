@@ -26,11 +26,11 @@ namespace Halley
 		virtual void init() {}
 		virtual void deInit() {}
 
-	protected:
-		explicit Stage(String name = "unnamed");
-
 		HalleyAPI& getAPI() { return *api; }
 		const HalleyAPI& getAPI() const { return *api; }
+
+	protected:
+		explicit Stage(String name = "unnamed");
 
 		InputAPI& getInputAPI() const;
 		VideoAPI& getVideoAPI() const;
