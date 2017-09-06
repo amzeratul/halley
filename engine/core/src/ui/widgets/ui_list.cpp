@@ -96,6 +96,11 @@ void UIList::draw(UIPainter& painter) const
 
 void UIList::onInput(const UIInputResults& input)
 {
+	if (items.empty()) {
+		curOption = 0;
+		return;
+	}
+
 	Expects(nColumns >= 1);
 
 	int nCols;
@@ -266,7 +271,10 @@ void UIList::setSelectedOptionId(const String& id)
 
 Rect4f UIList::getOptionRect(int curOption) const
 {
-	Expects(!items.empty());
-	auto& item = items[clamp(curOption, 0, int(items.size()) - 1)];
-	return item->getRawRect() - getPosition();
+	if (items.empty()) {
+		return Rect4f();
+	} else {
+		auto& item = items[clamp(curOption, 0, int(items.size()) - 1)];
+		return item->getRawRect() - getPosition();
+	}
 }
