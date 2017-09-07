@@ -12,21 +12,21 @@ UIPainter::UIPainter(SpritePainter& painter, int mask, int layer)
 {
 }
 
-UIPainter UIPainter::clone() const
+UIPainter UIPainter::clone()
 {
 	auto result = UIPainter(painter, mask, layer);
-	result.n = n;
+	result.parent = this;
 	return result;
 }
 
-UIPainter UIPainter::withAdjustedLayer(int delta) const
+UIPainter UIPainter::withAdjustedLayer(int delta)
 {
 	auto result = clone();
 	result.layer += delta;
 	return result;
 }
 
-UIPainter UIPainter::withClip(Rect4f newClip) const
+UIPainter UIPainter::withClip(Rect4f newClip)
 {
 	auto result = clone();
 	if (clip) {
@@ -35,6 +35,15 @@ UIPainter UIPainter::withClip(Rect4f newClip) const
 		result.clip = newClip;
 	}
 	return result;
+}
+
+float UIPainter::getCurrentPriority()
+{
+	if (parent) {
+		return parent->getCurrentPriority();
+	} else {
+		return float(n++);
+	}
 }
 
 void UIPainter::draw(const Sprite& sprite)
@@ -47,10 +56,10 @@ void UIPainter::draw(const Sprite& sprite)
 
 		auto onScreen = sprite.getAABB().intersection(targetClip + sprite.getPosition());
 		if (onScreen.getWidth() > 0.1f && onScreen.getHeight() > 0.1f) {
-			painter.addCopy(sprite.clone().setClip(targetClip), mask, layer, float(n++));
+			painter.addCopy(sprite.clone().setClip(targetClip), mask, layer, getCurrentPriority());
 		}
 	} else {
-		painter.add(sprite, mask, layer, float(n++));
+		painter.add(sprite, mask, layer, getCurrentPriority());
 	}
 }
 
@@ -64,9 +73,9 @@ void UIPainter::draw(const TextRenderer& text)
 		
 		auto onScreen = Rect4f(Vector2f(), text.getExtents()).intersection(targetClip);
 		if (onScreen.getWidth() > 0.1f && onScreen.getHeight() > 0.1f) {
-			painter.addCopy(text.clone().setClip(clip.get() - text.getPosition()), mask, layer, float(n++));
+			painter.addCopy(text.clone().setClip(clip.get() - text.getPosition()), mask, layer, getCurrentPriority());
 		}
 	} else {
-		painter.add(text, mask, layer, float(n++));
+		painter.add(text, mask, layer, getCurrentPriority());
 	}
 }

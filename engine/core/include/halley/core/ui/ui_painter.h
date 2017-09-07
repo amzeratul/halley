@@ -14,9 +14,9 @@ namespace Halley {
 		void draw(const Sprite& sprite);
 		void draw(const TextRenderer& text);
 
-		UIPainter clone() const;
-		UIPainter withAdjustedLayer(int delta) const;
-		UIPainter withClip(Rect4f clip) const;
+		UIPainter clone();
+		UIPainter withAdjustedLayer(int delta);
+		UIPainter withClip(Rect4f clip);
 
 	private:
 		SpritePainter& painter;
@@ -24,5 +24,8 @@ namespace Halley {
 		int mask;
 		int layer;
 		int n;
+		UIPainter* parent = nullptr;
+
+		float getCurrentPriority();
 	};
 }
