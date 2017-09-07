@@ -26,15 +26,13 @@ UIPainter UIPainter::withAdjustedLayer(int delta) const
 	return result;
 }
 
-UIPainter UIPainter::withClip(Rect4f clip) const
+UIPainter UIPainter::withClip(Rect4f newClip) const
 {
 	auto result = clone();
-	if (result.clip) {
-		auto prev = result.clip.get();
-		auto size = Vector2f::min(prev.getSize(), clip.getSize());
-		result.clip = Rect4f(prev.getTopLeft() + clip.getTopLeft(), size.x, size.y);
+	if (clip) {
+		result.clip = clip.get().intersection(newClip);
 	} else {
-		result.clip = clip;
+		result.clip = newClip;
 	}
 	return result;
 }
