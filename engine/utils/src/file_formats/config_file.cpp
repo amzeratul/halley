@@ -6,18 +6,15 @@
 using namespace Halley;
 
 ConfigNode::ConfigNode()
-	: type(ConfigNodeType::Undefined)
 {
 }
 
 ConfigNode::ConfigNode(const ConfigNode& other)
-	: type(ConfigNodeType::Undefined)
 {
 	*this = other;
 }
 
 ConfigNode::ConfigNode(ConfigNode&& other)
-	: type(ConfigNodeType::Undefined)
 {
 	*this = std::move(other);
 }

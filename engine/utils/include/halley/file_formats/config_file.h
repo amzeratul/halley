@@ -115,7 +115,7 @@ namespace Halley
 			Vector2i vec2iData;
 			Vector2f vec2fData;
 		};
-		ConfigNodeType type;
+		ConfigNodeType type = ConfigNodeType::Undefined;
 
 		static ConfigNode undefinedConfigNode;
 
