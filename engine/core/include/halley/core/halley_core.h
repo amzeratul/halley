@@ -65,6 +65,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "ui/widgets/ui_image.h"
 #include "ui/widgets/ui_label.h"
 #include "ui/widgets/ui_list.h"
+#include "ui/widgets/ui_paged_pane.h"
 #include "ui/widgets/ui_scroll_pane.h"
 #include "ui/widgets/ui_scrollbar.h"
 #include "ui/widgets/ui_scrollbar_pane.h"
