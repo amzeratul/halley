@@ -1,6 +1,6 @@
-#include "ui/widgets/ui_button.h"
-#include "ui/ui_style.h"
-#include "ui/ui_painter.h"
+#include "widgets/ui_button.h"
+#include "ui_style.h"
+#include "ui_painter.h"
 
 using namespace Halley;
 

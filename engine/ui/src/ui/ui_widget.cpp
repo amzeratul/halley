@@ -1,6 +1,6 @@
-#include "ui/ui_widget.h"
-#include "ui/ui_root.h"
-#include "ui/ui_validator.h"
+#include "ui_widget.h"
+#include "ui_root.h"
+#include "ui_validator.h"
 
 using namespace Halley;
 

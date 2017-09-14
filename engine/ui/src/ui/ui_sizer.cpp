@@ -1,5 +1,5 @@
-#include "ui/ui_sizer.h"
-#include "ui/ui_widget.h"
+#include "ui_sizer.h"
+#include "ui_widget.h"
 
 using namespace Halley;
 

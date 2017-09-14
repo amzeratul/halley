@@ -1,4 +1,4 @@
-#include "ui/ui_style.h"
+#include "ui_style.h"
 using namespace Halley;
 
 UIStyle::UIStyle()

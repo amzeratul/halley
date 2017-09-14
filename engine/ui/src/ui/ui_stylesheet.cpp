@@ -1,8 +1,8 @@
-#include "ui/ui_stylesheet.h"
+#include "ui_stylesheet.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/audio/audio_clip.h"
 #include "halley/core/graphics/text/font.h"
-#include "resources/resources.h"
+#include "halley/core/resources/resources.h"
 #include "halley/support/logger.h"
 using namespace Halley;
 

@@ -1,4 +1,4 @@
-#include "ui/ui_validator.h"
+#include "ui_validator.h"
 
 using namespace Halley;
 

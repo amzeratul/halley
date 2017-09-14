@@ -1,7 +1,7 @@
-#include "ui/ui_root.h"
-#include "ui/ui_widget.h"
-#include "api/audio_api.h"
-#include "ui/ui_painter.h"
+#include "ui_root.h"
+#include "ui_widget.h"
+#include "halley/core/api/audio_api.h"
+#include "ui_painter.h"
 
 using namespace Halley;
 

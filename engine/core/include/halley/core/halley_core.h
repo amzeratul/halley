@@ -47,30 +47,6 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "stage/stage.h"
 #include "stage/entity_stage.h"
 
-#include "ui/ui_element.h"
-#include "ui/ui_event.h"
-#include "ui/ui_input.h"
-#include "ui/ui_root.h"
-#include "ui/ui_sizer.h"
-#include "ui/ui_style.h"
-#include "ui/ui_stylesheet.h"
-#include "ui/ui_validator.h"
-#include "ui/ui_widget.h"
-
-#include "ui/widgets/ui_button.h"
-#include "ui/widgets/ui_checkbox.h"
-#include "ui/widgets/ui_dropdown.h"
-#include "ui/widgets/ui_gamepad_image.h"
-#include "ui/widgets/ui_hybrid_list.h"
-#include "ui/widgets/ui_image.h"
-#include "ui/widgets/ui_label.h"
-#include "ui/widgets/ui_list.h"
-#include "ui/widgets/ui_paged_pane.h"
-#include "ui/widgets/ui_scroll_pane.h"
-#include "ui/widgets/ui_scrollbar.h"
-#include "ui/widgets/ui_scrollbar_pane.h"
-#include "ui/widgets/ui_textinput.h"
-
 #include "utils/world_stats.h"
 
 

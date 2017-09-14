@@ -1,4 +1,4 @@
-#include "halley/core/ui/widgets/ui_gamepad_image.h"
+#include "halley/ui/widgets/ui_gamepad_image.h"
 
 using namespace Halley;
 

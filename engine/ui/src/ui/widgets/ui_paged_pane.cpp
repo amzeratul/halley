@@ -1,4 +1,4 @@
-#include <halley/core/ui/widgets/ui_paged_pane.h>
+#include <halley/ui/widgets/ui_paged_pane.h>
 
 using namespace Halley;
 

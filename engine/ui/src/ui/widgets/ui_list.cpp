@@ -1,6 +1,6 @@
-#include "ui/widgets/ui_list.h"
-#include "ui/ui_style.h"
-#include "ui/widgets/ui_label.h"
+#include "widgets/ui_list.h"
+#include "ui_style.h"
+#include "widgets/ui_label.h"
 
 using namespace Halley;
 

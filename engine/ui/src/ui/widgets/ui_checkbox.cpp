@@ -1,5 +1,5 @@
-#include "ui/widgets/ui_checkbox.h"
-#include "ui/ui_style.h"
+#include "widgets/ui_checkbox.h"
+#include "ui_style.h"
 
 using namespace Halley;
 

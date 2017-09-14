@@ -1,4 +1,4 @@
-#include "ui/ui_event.h"
+#include "ui_event.h"
 #include "halley/support/exception.h"
 
 using namespace Halley;

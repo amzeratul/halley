@@ -1,4 +1,4 @@
-#include "ui/ui_input.h"
+#include "ui_input.h"
 #include "halley/utils/utils.h"
 
 using namespace Halley;

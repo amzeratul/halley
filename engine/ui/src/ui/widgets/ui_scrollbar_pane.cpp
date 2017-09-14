@@ -1,4 +1,4 @@
-#include "ui/widgets/ui_scrollbar_pane.h"
+#include "widgets/ui_scrollbar_pane.h"
 
 using namespace Halley;
 

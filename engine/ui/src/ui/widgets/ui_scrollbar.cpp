@@ -1,8 +1,8 @@
-#include "ui/widgets/ui_scrollbar.h"
-#include "ui/ui_style.h"
-#include "ui/widgets/ui_image.h"
-#include "ui/widgets/ui_scroll_pane.h"
-#include "ui/widgets/ui_button.h"
+#include "widgets/ui_scrollbar.h"
+#include "ui_style.h"
+#include "widgets/ui_image.h"
+#include "widgets/ui_scroll_pane.h"
+#include "widgets/ui_button.h"
 
 using namespace Halley;
 

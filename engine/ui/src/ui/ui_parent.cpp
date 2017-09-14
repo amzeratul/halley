@@ -1,5 +1,5 @@
-#include "ui/ui_parent.h"
-#include "ui/ui_widget.h"
+#include "ui_parent.h"
+#include "ui_widget.h"
 #include "halley/support/logger.h"
 using namespace Halley;
 

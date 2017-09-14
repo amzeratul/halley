@@ -1,9 +1,9 @@
-#include "halley/core/ui/widgets/ui_dropdown.h"
-#include "ui/ui_style.h"
-#include "ui/widgets/ui_image.h"
-#include "ui/widgets/ui_scroll_pane.h"
-#include <ui/widgets/ui_scrollbar.h>
-#include "ui/widgets/ui_list.h"
+#include "halley/ui/widgets/ui_dropdown.h"
+#include "ui_style.h"
+#include "widgets/ui_image.h"
+#include "widgets/ui_scroll_pane.h"
+#include "widgets/ui_scrollbar.h"
+#include "widgets/ui_list.h"
 
 using namespace Halley;
 

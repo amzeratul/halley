@@ -1,4 +1,4 @@
-#include "ui/widgets/ui_clickable.h"
+#include "widgets/ui_clickable.h"
 using namespace Halley;
 
 UIClickable::UIClickable(String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)

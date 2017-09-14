@@ -1,5 +1,5 @@
-#include "halley/core/ui/widgets/ui_hybrid_list.h"
-#include "ui/ui_style.h"
+#include "halley/ui/widgets/ui_hybrid_list.h"
+#include "ui_style.h"
 
 using namespace Halley;
 

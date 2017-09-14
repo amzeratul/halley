@@ -1,4 +1,4 @@
-#include "ui/widgets/ui_image.h"
+#include "widgets/ui_image.h"
 
 using namespace Halley;
 

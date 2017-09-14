@@ -1,4 +1,4 @@
-#include "ui/widgets/ui_label.h"
+#include "widgets/ui_label.h"
 
 using namespace Halley;
 

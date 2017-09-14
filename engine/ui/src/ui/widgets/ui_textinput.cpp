@@ -1,6 +1,6 @@
-#include "ui/widgets/ui_textinput.h"
-#include "ui/ui_style.h"
-#include "ui/ui_validator.h"
+#include "widgets/ui_textinput.h"
+#include "ui_style.h"
+#include "ui_validator.h"
 
 using namespace Halley;
 
