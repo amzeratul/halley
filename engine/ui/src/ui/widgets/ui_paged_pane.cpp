@@ -9,7 +9,7 @@ UIPagedPane::UIPagedPane(int nPages, Vector2f minSize)
 
 	for (int i = 0; i < nPages; ++i) {
 		pages[i] = std::make_shared<UIWidget>("page" + toString(i), minSize, UISizer());
-		UIWidget::add(pages[i]);
+		UIWidget::add(pages[i], 1);
 	}
 	setPage(0);
 }

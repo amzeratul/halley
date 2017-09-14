@@ -8,7 +8,7 @@ UICheckbox::UICheckbox(String id, UIStyle style, bool checked)
 	, style(style)
 	, checked(checked)
 {
-	sprite = style.getSprite("normal");
+	UICheckbox::doSetState(State::Up);
 	setMinSize(sprite.getScaledSize().abs());
 }
 
@@ -47,7 +47,7 @@ void UICheckbox::onClicked(Vector2f)
 void UICheckbox::doSetState(State state)
 {
 	if (isEnabled()) {
-		if (state == State::Hover) {
+		if (state == State::Hover || state == State::Down) {
 			sprite = checked ? style.getSprite("checkedHover") : style.getSprite("hover");
 		} else {
 			sprite = checked ? style.getSprite("checked") : style.getSprite("normal");
