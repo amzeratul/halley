@@ -223,6 +223,10 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos)
 
 std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos)
 {
+	if (!start->isActive()) {
+		return {};
+	}
+
 	// Depth first
 	for (auto& c: start->getChildren()) {
 		auto result = getWidgetUnderMouse(c, mousePos);
