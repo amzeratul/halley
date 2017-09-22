@@ -18,7 +18,8 @@ namespace Halley {
 		MakeAreaVisibleCentered,
 		Dragged,
 		SetSelected,
-		SetHovered
+		SetHovered,
+		TextChanged
 	};
 
     class UIEvent {

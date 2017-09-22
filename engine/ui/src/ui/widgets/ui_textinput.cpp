@@ -64,8 +64,11 @@ void UITextInput::updateTextInput()
 		}
 	}
 
-	if (modified && getValidator()) {
-		text = getValidator()->onTextChanged(text);
+	if (modified) {
+		if (getValidator()) {
+			text = getValidator()->onTextChanged(text);
+		}
+		sendEvent(UIEvent(UIEventType::TextChanged, getId(), String(text)));
 	}
 }
 
