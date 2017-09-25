@@ -84,11 +84,10 @@ int UISizerEntry::getFillFlags() const
 	return fillFlags;
 }
 
-UISizer::UISizer(UISizerType type, float gap, int nColumns, bool evenColumns)
+UISizer::UISizer(UISizerType type, float gap, int nColumns)
 	: type(type)
 	, gap(gap)
 	, nColumns(nColumns)
-	, evenColumns(evenColumns)
 {
 }
 
@@ -201,6 +200,19 @@ bool UISizer::isActive() const
 	return false;
 }
 
+void UISizer::setColumnProportions(const std::vector<float>& values)
+{
+	columnProportions = values;
+}
+
+void UISizer::setEvenColumns()
+{
+	columnProportions.resize(nColumns);
+	for (auto& c: columnProportions) {
+		c = 1.0f;
+	}
+}
+
 Vector2f UISizer::computeMinimumSizeBox(bool includeProportional) const
 {
 	float totalProportion = 0;
@@ -308,30 +320,42 @@ void UISizer::computeGridSizes(std::vector<float>& colSize, std::vector<float>& 
 
 	colSize.resize(nColumns, 0.0f);
 	rowSize.resize(nRows, 0.0f);
+	
+	// Update the minimum requirement for each cell
+	{
+		int i = 0;
+		for (auto& e: entries) {
+			int x = i % nColumns;
+			int y = i / nColumns;
+			++i;
 
-	int i = 0;
-	for (auto& e: entries) {
-		int x = i % nColumns;
-		int y = i / nColumns;
-		++i;
+			if (!e.isEnabled()) {
+				continue;
+			}
 
-		if (!e.isEnabled()) {
-			continue;
+			Vector2f sz = e.getMinimumSize();
+			auto border = e.getBorder();
+			colSize[x] = std::max(colSize[x], sz.x + border.x + border.z);
+			rowSize[y] = std::max(rowSize[y], sz.y + border.y + border.w);
 		}
-
-		Vector2f sz = e.getMinimumSize();
-		auto border = e.getBorder();
-		colSize[x] = std::max(colSize[x], sz.x + border.x + border.z);
-		rowSize[y] = std::max(rowSize[y], sz.y + border.y + border.w);
 	}
 
-	if (evenColumns) {
-		float maxWidth = 0;
-		for (auto c: colSize) {
-			maxWidth = std::max(maxWidth, c);
+	// From here on: ensure that columns respect the proportion between them
+	float minMult = 0;
+
+	// First pass: gather data
+	for (int i = 0; i < int(colSize.size()); ++i) {
+		float p = getColumnProportion(i);
+		if (p > 0) {
+			minMult = std::max(minMult, colSize[i] / p);
 		}
-		for (auto& c: colSize) {
-			c = maxWidth;
+	}
+
+	// Second pass: apply
+	for (int i = 0; i < int(colSize.size()); ++i) {
+		float p = getColumnProportion(i);
+		if (p > 0) {
+			colSize[i] = std::max(colSize[i], p * minMult);
 		}
 	}
 }
@@ -365,6 +389,25 @@ void UISizer::setRectGrid(Rect4f rect)
 	std::vector<float> rowSize;
 	computeGridSizes(colSize, rowSize);
 
+	// Add up min width
+	float minWidth = (colSize.size() - 1) * gap;
+	for (auto c: colSize) {
+		minWidth += c;
+	}
+	float spareWidth = std::max(0.0f, rect.getWidth() - minWidth);
+
+	// Respect proportion
+	float totalProportion = 0;
+	for (auto& p: columnProportions) {
+		totalProportion += p;
+	}
+	if (totalProportion > 0) {
+		// Distribute spare
+		for (int i = 0; i < nColumns; ++i) {
+			colSize[i] += spareWidth * getColumnProportion(i) / totalProportion;
+		}
+	}
+
 	{
 		float x = 0;
 		for (int i = 0; i < nColumns; ++i) {
@@ -394,4 +437,12 @@ void UISizer::setRectGrid(Rect4f rect)
 		Vector2f curPos = Vector2f(cols[x], rows[y]) + startPos + Vector2f(border.x, border.y);
 		e.placeInside(Rect4f(curPos, curPos + cellSize), sz);
 	}
+}
+
+float UISizer::getColumnProportion(int col) const
+{
+	if (col >= 0 && col < int(columnProportions.size())) {
+		return columnProportions[col];
+	}
+	return 0.0f;
 }

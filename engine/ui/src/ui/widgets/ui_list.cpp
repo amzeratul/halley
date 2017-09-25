@@ -5,11 +5,12 @@
 using namespace Halley;
 
 UIList::UIList(const String& id, UIStyle style, UISizerType orientation, int nColumns)
-	: UIWidget(id, {}, UISizer(orientation, style.getFloat("gap"), nColumns, true), style.getBorder("innerBorder"))
+	: UIWidget(id, {}, UISizer(orientation, style.getFloat("gap"), nColumns), style.getBorder("innerBorder"))
 	, style(style)
 	, orientation(orientation)
 	, nColumns(nColumns)
 {
+	getSizer().setEvenColumns();
 	sprite = style.getSprite("background");
 
 	getEventHandler().setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) {});

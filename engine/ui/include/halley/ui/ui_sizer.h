@@ -72,7 +72,7 @@ namespace Halley {
 
 	class UISizer : public IUIElement, public IUISizer {
 	public:
-		explicit UISizer(UISizerType type = UISizerType::Horizontal, float gap = 1.0f, int nColumns = 0, bool evenColumns = false);
+		explicit UISizer(UISizerType type = UISizerType::Horizontal, float gap = 1.0f, int nColumns = 0);
 
 		Vector2f getLayoutMinimumSize() const override;
 		void setRect(Rect4f rect) override;
@@ -87,6 +87,9 @@ namespace Halley {
 		void clear();
 		bool isActive() const override;
 
+		void setColumnProportions(const std::vector<float>& values);
+		void setEvenColumns();
+
 		UISizerType getType() const;
 		size_t size() const;
 		const UISizerEntry& operator[](size_t n) const;
@@ -94,10 +97,11 @@ namespace Halley {
 
 	private:
 		std::vector<UISizerEntry> entries;
+		std::vector<float> columnProportions;
+
 		UISizerType type = UISizerType::Undefined;
 		float gap = 1.0f;
 		int nColumns = false;
-		bool evenColumns = false;
 
 		Vector2f computeMinimumSize(bool includeProportional) const;
 		void addElement(UIElementPtr widget, float proportion, Vector4f border, int fillFlags);
@@ -108,5 +112,6 @@ namespace Halley {
 		void computeGridSizes(std::vector<float>& cols, std::vector<float>& rows) const;
 		Vector2f computeMinimumSizeGrid() const;
 		void setRectGrid(Rect4f rect);
+		float getColumnProportion(int column) const;
 	};
 }
