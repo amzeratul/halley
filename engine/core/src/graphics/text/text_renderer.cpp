@@ -103,6 +103,12 @@ TextRenderer& TextRenderer::setPixelOffset(Vector2f offset)
 	return *this;
 }
 
+TextRenderer& TextRenderer::setColourOverride(const std::vector<ColourOverride>& colOverride)
+{
+	colourOverrides = colOverride;
+	return *this;
+}
+
 TextRenderer TextRenderer::clone() const
 {
 	return *this;
@@ -157,9 +163,18 @@ void TextRenderer::draw(Painter& painter) const
 		lineOffset.x = 0;
 	};
 
+	auto curCol = colour;
+	size_t curOverride = 0;
+
 	const size_t n = text.size();
 	for (size_t i = 0; i < n; i++) {
 		int c = text[i];
+
+		// Check for colour override
+		if (curOverride < colourOverrides.size() && colourOverrides[curOverride].first == i) {
+			curCol = colourOverrides[curOverride].second;
+			++curOverride;
+		}
 		
 		if (c == '\n') {
 			flush();
@@ -170,7 +185,7 @@ void TextRenderer::draw(Painter& painter) const
 				.setMaterial(material)
 				.setSize(glyph.size)
 				.setTexRect(glyph.area)
-				.setColour(colour)
+				.setColour(curCol)
 				.setPivot(glyph.horizontalBearing / glyph.size * Vector2f(-1, 1))
 				.setScale(scale)
 				.setPos(p + lineOffset + pixelOffset));

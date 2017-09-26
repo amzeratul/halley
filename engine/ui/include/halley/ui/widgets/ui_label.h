@@ -9,6 +9,7 @@ namespace Halley {
 		explicit UILabel(TextRenderer text);
 
 		void setText(const String& text);
+		void setColourOverride(const std::vector<ColourOverride>& overrides);
 		void setMaxWidth(float maxWidth);
 
 		void setColour(Colour4f colour);

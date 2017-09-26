@@ -12,6 +12,8 @@ namespace Halley
 	class Painter;
 	class Material;
 
+	using ColourOverride = std::pair<size_t, Colour4f>;
+
 	class TextRenderer
 	{
 	public:
@@ -32,6 +34,7 @@ namespace Halley
 		TextRenderer& setClip();
 		TextRenderer& setSmoothness(float smoothness);
 		TextRenderer& setPixelOffset(Vector2f offset);
+		TextRenderer& setColourOverride(const std::vector<ColourOverride>& colOverride);
 
 		TextRenderer clone() const;
 
@@ -53,15 +56,19 @@ namespace Halley
 		std::shared_ptr<const Font> font;
 		std::shared_ptr<Material> material;
 		StringUTF32 text;
+		
 		float size = 20;
 		float outline = 0;
 		float align = 0;
 		float smoothness = 1.0f;
+		
 		Vector2f position;
 		Vector2f offset;
 		Vector2f pixelOffset;
 		Colour colour;
 		Colour outlineColour;
 		Maybe<Rect4f> clip;
+
+		std::vector<ColourOverride> colourOverrides;
 	};
 }

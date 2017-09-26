@@ -41,6 +41,11 @@ void UILabel::setText(const String& t)
 	}
 }
 
+void UILabel::setColourOverride(const std::vector<ColourOverride>& overrides)
+{
+	text.setColourOverride(overrides);
+}
+
 void UILabel::setMaxWidth(float m)
 {
 	maxWidth = m;
