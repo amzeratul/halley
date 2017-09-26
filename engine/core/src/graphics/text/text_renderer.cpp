@@ -171,8 +171,8 @@ void TextRenderer::draw(Painter& painter) const
 		int c = text[i];
 
 		// Check for colour override
-		if (curOverride < colourOverrides.size() && colourOverrides[curOverride].first == i) {
-			curCol = colourOverrides[curOverride].second;
+		while (curOverride < colourOverrides.size() && colourOverrides[curOverride].first == i) {
+			curCol = colourOverrides[curOverride].second ? colourOverrides[curOverride].second.get() : colour;
 			++curOverride;
 		}
 		

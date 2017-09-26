@@ -94,7 +94,7 @@ AnimationDirection::AnimationDirection(String name, String fileName, bool flip, 
 String AnimationDirection::getFrameName(int frameNumber, String baseName) const
 {
 	try {
-		baseName.replace("%dir%", fileName);
+		baseName = baseName.replaceAll("%dir%", fileName);
 
 		size_t frameToken = baseName.find("%f");
 		if (frameToken != std::string::npos) {

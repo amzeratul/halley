@@ -299,8 +299,7 @@ std::vector<Path> OSWin32::enumerateDirectory(const Path& path)
 	std::vector<Path> result;
 
 	WIN32_FIND_DATAW ffd;
-	auto pathStr = path.getString() + "/*";
-	pathStr.replace("/", "\\", true);
+	auto pathStr = (path.getString() + "/*").replaceAll("/", "\\");
 	auto handle = FindFirstFileW(pathStr.getUTF16().c_str(), &ffd);
 	if (handle != INVALID_HANDLE_VALUE) {
 		do {

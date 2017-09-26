@@ -76,7 +76,8 @@ namespace Halley {
 		bool contains(const String& string) const;
 		size_t find(String str) const;
 
-		void replace(String before, String after, bool all=true);
+		String replaceAll(const String& before, const String& after) const;
+		String replaceOne(const String& before, const String& after) const;
 		void shrink();
 
 		String left(size_t n) const;

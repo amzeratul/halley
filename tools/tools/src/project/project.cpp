@@ -116,8 +116,7 @@ void Project::initialisePlugins()
 Project::HalleyPluginPtr Project::loadPlugin(const Path& path)
 {
 	// HACK: abstract this/support OSX/support Linux
-	String nativePath = path.getString();
-	nativePath.replace("/", "\\", true);
+	String nativePath = path.getString().replaceAll("/", "\\");
 	auto module = LoadLibrary(nativePath.c_str());
 	if (!module) {
 		return {};

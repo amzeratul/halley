@@ -12,7 +12,7 @@ namespace Halley
 	class Painter;
 	class Material;
 
-	using ColourOverride = std::pair<size_t, Colour4f>;
+	using ColourOverride = std::pair<size_t, Maybe<Colour4f>>;
 
 	class TextRenderer
 	{

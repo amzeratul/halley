@@ -939,15 +939,25 @@ void String::appendCharacter(int unicode)
 	}
 }
 
-void String::replace(String before, String after, bool all)
+String String::replaceAll(const String& before, const String& after) const
 {
 	size_t pos = find(before);
-	if (pos != std::string::npos) {
+	if (pos == std::string::npos) {
+		return *this;
+	} else {
 		size_t len = before.length();
-		String post = substr(pos+len);
-		if (all) post.replace(before, after, true);
+		return substr(0, pos) + after + substr(pos + len).replaceAll(before, after);
+	}
+}
 
-		*this = substr(0,pos) + after + post;
+String String::replaceOne(const String& before, const String& after) const
+{
+	size_t pos = find(before);
+	if (pos == std::string::npos) {
+		return *this;
+	} else {
+		size_t len = before.length();
+		return substr(0, pos) + after + substr(pos + len);
 	}
 }
 

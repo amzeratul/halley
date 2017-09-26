@@ -26,7 +26,7 @@ void Path::setPath(const String& value)
 {
 	String rawPath = value;
 #ifdef _WIN32
-	rawPath.replace("\\", "/");
+	rawPath = rawPath.replaceAll("\\", "/");
 #endif
 
 	pathParts = rawPath.split('/');
