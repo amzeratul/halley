@@ -80,8 +80,10 @@ void UIList::clear()
 void UIList::addItem(std::shared_ptr<UIListItem> item)
 {
 	add(item);
+	bool wasEmpty = items.empty();
 	items.push_back(item);
-	if (curOption == -1) {
+	if (wasEmpty) {
+		curOption = -1;
 		forceAddChildren(UIInputType::Undefined);
 		setSelectedOption(0);
 	}
