@@ -65,4 +65,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-ui ${SOURCES} ${HEADERS})
-target_link_libraries(halley-ui halley-halley-utils)
+target_link_libraries(halley-ui halley-utils)
