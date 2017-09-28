@@ -2,6 +2,11 @@
 
 #ifdef HAS_SSE
 #include <xmmintrin.h>
+
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+
 using namespace Halley;
 
 void AudioMixerSSE::mixAudio(gsl::span<const AudioSamplePack> srcRaw, gsl::span<AudioSamplePack> dstRaw, float gain0, float gain1)
