@@ -11,6 +11,7 @@ LuaState::LuaState(Resources& resources)
 	: lua(luaL_newstate())
 	, resources(&resources)
 {
+	originalLuaState = lua;
 	luaL_openlibs(lua);
 			
 	// TODO: convert this into an automatic table
@@ -116,7 +117,10 @@ static int luaClosureInvoker(lua_State* lua)
 {
 	LuaCallback* callback = reinterpret_cast<LuaCallback*>(lua_touserdata(lua, lua_upvalueindex(1)));
 	LuaState* state = reinterpret_cast<LuaState*>(lua_touserdata(lua, lua_upvalueindex(2)));
-	return (*callback)(*state);
+	state->setActiveLuaState(lua);
+	int result = (*callback)(*state);
+	state->restoreLuaState();
+	return result;
 }
 
 void LuaState::pushCallback(LuaCallback&& callback)
@@ -272,4 +276,14 @@ String LuaState::printVariableAtTop(int maxDepth, bool quote)
 
 	lua_pop(lua, 1);
 	return result;
+}
+
+void LuaState::setActiveLuaState(lua_State* l)
+{
+	lua = l;
+}
+
+void LuaState::restoreLuaState()
+{
+	lua = originalLuaState;
 }

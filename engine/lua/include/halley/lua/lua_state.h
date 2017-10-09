@@ -30,9 +30,12 @@ namespace Halley {
 
 		void pushErrorHandler();
 		void popErrorHandler();
+		void setActiveLuaState(lua_State* lua);
+		void restoreLuaState();
 
 	private:
 		lua_State* lua;
+		lua_State* originalLuaState;
 		Resources* resources;
 
 		std::unordered_map<String, LuaReference> modules;
