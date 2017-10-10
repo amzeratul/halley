@@ -14,6 +14,8 @@ namespace Halley {
 
 		void setColour(Colour4f colour);
 
+		void setSelectable(Colour4f normalColour, Colour4f selColour);
+
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 

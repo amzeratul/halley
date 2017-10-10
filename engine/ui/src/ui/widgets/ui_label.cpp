@@ -56,3 +56,15 @@ void UILabel::setColour(Colour4f colour)
 {
 	text.setColour(colour);
 }
+
+void UILabel::setSelectable(Colour4f normalColour, Colour4f selColour)
+{
+	getEventHandler().setHandle(UIEventType::SetSelected, [=] (const UIEvent& event)
+	{
+		if (event.getBoolData()) {
+			setColour(selColour);
+		} else {
+			setColour(normalColour);
+		}
+	});
+}

@@ -53,6 +53,8 @@ void UIList::addTextItem(const String& id, const String& label, float maxWidth)
 	if (maxWidth > 0) {
 		widget->setMaxWidth(maxWidth);
 	}
+	widget->setSelectable(style.getTextRenderer("label").getColour(), style.getTextRenderer("selectedLabel").getColour());
+
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(items.size()), style.getBorder("extraMouseBorder"));
 	item->add(widget, 0);
 	addItem(item);
