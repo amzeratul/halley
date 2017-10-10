@@ -31,8 +31,7 @@ void UIButton::onClicked(Vector2f)
 
 void UIButton::setInputType(UIInputType uiInput)
 {
-	UIWidget::setInputType(uiInput);
-	setActive(true); // Method above will disable it, but buttons should always be enabled
+	lastInputType = uiInput;
 
 	if (uiInput != curInputType) {
 		curInputType = uiInput;

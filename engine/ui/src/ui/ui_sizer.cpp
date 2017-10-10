@@ -316,7 +316,7 @@ void UISizer::setRectBox(Rect4f rect)
 void UISizer::computeGridSizes(std::vector<float>& colSize, std::vector<float>& rowSize) const
 {
 	Expects(nColumns > 0);
-	int nRows = int((entries.size() + nColumns - 1) / nColumns);
+	int nRows = std::max(1, int((entries.size() + nColumns - 1) / nColumns));
 
 	colSize.resize(nColumns, 0.0f);
 	rowSize.resize(nRows, 0.0f);

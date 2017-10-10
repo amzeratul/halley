@@ -119,6 +119,8 @@ namespace Halley {
 		void playSound(const std::shared_ptr<const AudioClip>& clip);
 		virtual void checkActive();
 
+		UIInputType lastInputType = UIInputType::Undefined;
+
 	private:
 		void setParent(UIParent& parent);
 		void setWidgetRect(Rect4f rect);
@@ -128,7 +130,6 @@ namespace Halley {
 		std::vector<UIInputType> onlyEnabledWithInputs;
 		std::unique_ptr<UIInputButtons> inputButtons;
 		UIInputResults inputResults;
-		UIInputType lastInputType = UIInputType::Undefined;
 
 		Vector2f position;
 		Vector2f size;
