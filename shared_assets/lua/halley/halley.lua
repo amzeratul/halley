@@ -26,7 +26,6 @@ end
 local origTraceback = debug.traceback
 local origResume = coroutine.resume
 coroutine.resume = function(co, ...)
-    print("Resuming coroutine: " .. tostring(co) .. " (" .. coroutine.status(co) .. ")")
     local results = table.pack(origResume(co, ...))
     if results[1] then
         return table.unpack(results)
