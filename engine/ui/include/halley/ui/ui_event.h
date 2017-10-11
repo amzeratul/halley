@@ -46,9 +46,9 @@ namespace Halley {
 		UIEventType type;
 		String sourceId;
 		String data;
-		bool boolData;
-		int intData;
-		float floatData;
+		bool boolData = false;
+		int intData = 0;
+		float floatData = 0.0f;
 		Vector2f vectorData;
 		Rect4f rectData;
     };
