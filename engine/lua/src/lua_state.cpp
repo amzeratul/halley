@@ -7,11 +7,26 @@
 
 using namespace Halley;
 
+int handleCoroutineError(LuaState& state)
+{
+	auto coLua = lua_tothread(state.getRawState(), 1);
+	auto message = String(lua_tostring(state.getRawState(), 2));
+	lua_pop(state.getRawState(), 2);
+
+	String result;
+	{
+		LuaStateOverrider overrider(state, coLua);
+		result = state.errorHandler(message);
+	}
+	lua_pushstring(state.getRawState(), result.c_str());
+
+	return 1;
+}
+
 LuaState::LuaState(Resources& resources)
 	: lua(luaL_newstate())
 	, resources(&resources)
 {
-	originalLuaState = lua;
 	luaL_openlibs(lua);
 			
 	// TODO: convert this into an automatic table
@@ -20,6 +35,10 @@ LuaState::LuaState(Resources& resources)
 	u.setField("print", LuaCallbackBind(this, &LuaState::print));
 	u.setField("errorHandler", LuaCallbackBind(this, &LuaState::errorHandler));
 	u.setField("packageLoader", LuaCallbackBind(this, &LuaState::packageLoader));
+
+	pushCallback(&handleCoroutineError);
+	LuaStackOps(*this).setField("handleCoroutineError");
+
 	u.makeGlobal("halleyAPI");
 
 	lua_getglobal(lua, "halleyAPI");
@@ -117,9 +136,8 @@ static int luaClosureInvoker(lua_State* lua)
 {
 	LuaCallback* callback = reinterpret_cast<LuaCallback*>(lua_touserdata(lua, lua_upvalueindex(1)));
 	LuaState* state = reinterpret_cast<LuaState*>(lua_touserdata(lua, lua_upvalueindex(2)));
-	state->setActiveLuaState(lua);
+	LuaStateOverrider overrider(*state, lua);
 	int result = (*callback)(*state);
-	state->restoreLuaState();
 	return result;
 }
 
@@ -262,8 +280,17 @@ String LuaState::printVariableAtTop(int maxDepth, bool quote)
 		} else {
 			result = lua_tostring(lua, -1);
 		}
+
+		auto lineBreak = result.find("\n");
+		if (lineBreak != std::string::npos) {
+			result = result.left(lineBreak) + " ...";
+		}
+		if (result.length() > 50) {
+			result = result.left(50) + " ...";
+		}
 	} else if (lua_isnumber(lua, -1)) {
 		result = toString(lua_tonumber(lua, -1));
+
 	} else if (lua_isnoneornil(lua, -1)) {
 		result = "nil";
 	} else if (lua_isfunction(lua, -1)) {
@@ -278,12 +305,25 @@ String LuaState::printVariableAtTop(int maxDepth, bool quote)
 	return result;
 }
 
-void LuaState::setActiveLuaState(lua_State* l)
+void LuaState::pushLuaState(lua_State* l)
 {
+	pushedStates.push_back(lua);
 	lua = l;
 }
 
-void LuaState::restoreLuaState()
+void LuaState::popLuaState()
 {
-	lua = originalLuaState;
+	lua = pushedStates.back();
+	pushedStates.pop_back();
+}
+
+LuaStateOverrider::LuaStateOverrider(LuaState& state, lua_State* rawState)
+	: state(state)
+{
+	state.pushLuaState(rawState);
+}
+
+LuaStateOverrider::~LuaStateOverrider()
+{
+	state.popLuaState();
 }

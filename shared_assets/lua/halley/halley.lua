@@ -22,6 +22,19 @@ local function halleyPackageLoader(moduleName)
     end
 end
 
+-- Replace coroutine resume
+local origTraceback = debug.traceback
+local origResume = coroutine.resume
+coroutine.resume = function(co, ...)
+    print("Resuming coroutine: " .. tostring(co) .. " (" .. coroutine.status(co) .. ")")
+    local results = table.pack(origResume(co, ...))
+    if results[1] then
+        return table.unpack(results)
+    else
+        return false, "Coroutine Error:\n\t-- START OF COROUTINE STACK --\n" .. api.handleCoroutineError(co, results[2]) .. "\n\t-- END OF COROUTINE STACK ---\n"
+    end
+end
+
 package.searchers = {package.searchers[1], halleyPackageLoader}
 
 -- Disable unsafe tables

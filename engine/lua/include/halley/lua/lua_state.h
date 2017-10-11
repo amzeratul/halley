@@ -30,12 +30,13 @@ namespace Halley {
 
 		void pushErrorHandler();
 		void popErrorHandler();
-		void setActiveLuaState(lua_State* lua);
-		void restoreLuaState();
+		void pushLuaState(lua_State* lua);
+		void popLuaState();
+		String errorHandler(String message);
 
 	private:
 		lua_State* lua;
-		lua_State* originalLuaState;
+		std::vector<lua_State*> pushedStates;
 		Resources* resources;
 
 		std::unordered_map<String, LuaReference> modules;
@@ -46,8 +47,16 @@ namespace Halley {
 		LuaReference loadScript(const String& chunkName, gsl::span<const gsl::byte> data);
 
 		void print(String string);
-		String errorHandler(String message);
 		const LuaReference& packageLoader(String moduleName);
 		String printVariableAtTop(int maxDepth = 2, bool quote = true);
+	};
+
+	class LuaStateOverrider {
+	public:
+		LuaStateOverrider(LuaState& state, lua_State* rawState);
+		~LuaStateOverrider();
+
+	private:
+		LuaState& state;
 	};
 }
