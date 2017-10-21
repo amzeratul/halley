@@ -106,6 +106,13 @@ endfunction(assign_source_group)
 
 set(CMAKE_DEBUG_POSTFIX "_d")
 
+set(HALLEY_PROJECT_EXTERNAL_LIBS
+	${SDL2_LIBRARIES}
+	${OPENGL_LIBRARIES}
+	${X11_LIBRARIES}
+	${EXTRA_LIBS}
+	)
+
 set(HALLEY_PROJECT_LIBS
 	optimized halley-opengl
 	optimized halley-sdl
@@ -127,10 +134,7 @@ set(HALLEY_PROJECT_LIBS
 	debug halley-net_d
 	debug halley-lua_d
 	debug halley-utils_d
-	${SDL2_LIBRARIES}
-	${OPENGL_LIBRARIES}
-	${X11_LIBRARIES}
-	${EXTRA_LIBS}
+	${HALLEY_PROJECT_EXTERNAL_LIBS}
 	)
 
 set(HALLEY_PROJECT_INCLUDE_DIRS
@@ -151,6 +155,10 @@ set(HALLEY_PROJECT_LIB_DIRS
 	)
 
 function(halleyProject name sources headers genDefinitions targetDir)
+	if (HALLEY_PROJECT_EMBED)
+		add_subdirectory(halley)
+	endif()
+
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${targetDir})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${targetDir})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${targetDir})
@@ -174,7 +182,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		set(HALLEY_RUNNER_DEBUG_PATH ${HALLEY_PATH}\\bin\\halley-runner_d.exe)
 		configure_file(${HALLEY_PATH}/cmake/halley_game.vcxproj.user.in ${CMAKE_CURRENT_BINARY_DIR}/${name}.vcxproj.user @ONLY) 
 	endif()
-		
+
 	if (HOTRELOAD)
 		add_library(${name} SHARED ${proj_sources} ${proj_headers})
 		add_definitions(-DHALLEY_SHARED_LIBRARY)
@@ -182,7 +190,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		add_executable(${name} WIN32 ${proj_sources} ${proj_headers})
 		add_definitions(-DHALLEY_EXECUTABLE)
 	endif()
-	
+
 	if (MSVC)
 		add_definitions(-D_WIN32_WINNT=0x0501 -DWINVER=0x0501)
 		add_precompiled_header(${name} prec.h FORCEINCLUDE SOURCE_CXX prec.cpp)
@@ -192,8 +200,14 @@ function(halleyProject name sources headers genDefinitions targetDir)
 	if (EMSCRIPTEN)
 		set_target_properties(${name} PROPERTIES SUFFIX ".bc")
 	endif()
+
+	if (HALLEY_PROJECT_EMBED)
+		target_link_libraries(${name} halley-opengl halley-sdl halley-asio halley-ui halley-core halley-entity halley-audio halley-net halley-lua halley-utils ${HALLEY_PROJECT_EXTERNAL_LIBS})
+		#add_dependencies(${name} halley-opengl halley-sdl halley-asio halley-ui halley-core halley-entity halley-audio halley-net halley-lua halley-utils)
+	else ()
+		target_link_libraries(${name} ${HALLEY_PROJECT_LIBS})
+	endif ()
 	
-	target_link_libraries(${name} ${HALLEY_PROJECT_LIBS})
 	set_target_properties(${name} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 endfunction(halleyProject)
 
