@@ -76,7 +76,7 @@ public:
 
 	std::unique_ptr<Stage> startGame(HalleyAPI* api) override
 	{
-		api->video->setWindow(WindowDefinition(WindowType::Window, Vector2i(1280, 720), getName()), false);
+		api->video->setWindow(WindowDefinition(WindowType::Window, Vector2i(1280, 720), getName()), true);
 		return std::make_unique<TestStage>();
 	}
 };

@@ -14,6 +14,16 @@ AudioSource::AudioSource(std::shared_ptr<const AudioClip> clip, AudioSourcePosit
 AudioSource::~AudioSource()
 {}
 
+void AudioSource::setId(size_t i)
+{
+	id = i;
+}
+
+size_t AudioSource::getId() const
+{
+	return id;
+}
+
 void AudioSource::start()
 {
 	Expects(isReady());
@@ -47,6 +57,13 @@ bool AudioSource::isReady() const
 bool AudioSource::isDone() const
 {
 	return done;
+}
+
+void AudioSource::setBehaviour(std::shared_ptr<AudioSourceBehaviour> value)
+{
+	behaviour = std::move(value);
+	elapsedTime = 0;
+	behaviour->onAttach(*this);
 }
 
 void AudioSource::setGain(float g)
@@ -92,7 +109,15 @@ void AudioSource::update(gsl::span<const AudioChannelData> channels, const Audio
 	}
 }
 
-void AudioSource::mixToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<AudioSamplePack> out, AudioMixer& mixer, AudioBufferPool& pool)
+void AudioSource::mixToBuffer(size_t dstChannel, gsl::span<AudioSamplePack> out, AudioMixer& mixer, AudioBufferPool& pool)
+{
+	size_t nChannels = getNumberOfChannels();
+	for (size_t i = 0; i < nChannels; ++i) {
+		mixChannelToBuffer(i, dstChannel, out, mixer, pool);
+	}
+}
+
+void AudioSource::mixChannelToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<AudioSamplePack> out, AudioMixer& mixer, AudioBufferPool& pool)
 {
 	Expects(playing);
 	Expects(dstChannel < 8);
@@ -114,7 +139,7 @@ void AudioSource::mixToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<Au
 		mixer.mixAudio(gsl::span<const AudioSamplePack>(reinterpret_cast<const AudioSamplePack*>(src.data()), totalLen / 16), out, gain0, gain1);
 	} else {
 		auto tmp = pool.getBuffer(totalLen);
-		readSourceToBuffer(srcChannel, tmp.getSpan());
+		readSourceToBuffer(srcChannel, tmp.getSpan().subspan(0, totalLen));
 		mixer.mixAudio(tmp.getSpan(), out, gain0, gain1);
 	}
 }
@@ -162,21 +187,3 @@ void AudioSource::advancePlayback(size_t samples)
 		}
 	}
 }
-
-void AudioSource::setId(size_t i)
-{
-	id = i;
-}
-
-size_t AudioSource::getId() const
-{
-	return id;
-}
-
-void AudioSource::setBehaviour(std::shared_ptr<AudioSourceBehaviour> value)
-{
-	behaviour = std::move(value);
-	elapsedTime = 0;
-	behaviour->onAttach(*this);
-}
-

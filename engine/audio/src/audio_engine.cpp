@@ -150,17 +150,17 @@ void AudioEngine::postUpdateSources()
 
 void AudioEngine::mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst)
 {
+	// Clear with zeroes
 	for (auto& pack : dst) {
 		for (size_t i = 0; i < AudioSamplePack::NumSamples; ++i) {
 			pack.samples[i] = 0.0f;
 		}
 	}
+
+	// Mix all sources
 	for (auto& source : sources) {
 		if (source->isPlaying()) {
-			size_t nChannels = source->getNumberOfChannels();
-			for (size_t i = 0; i < nChannels; ++i) {
-				source->mixToBuffer(i, channelNum, dst, *mixer, *pool);
-			}
+			source->mixToBuffer(channelNum, dst, *mixer, *pool);
 		}
 	}
 }

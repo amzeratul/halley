@@ -107,7 +107,7 @@ std::unique_ptr<Stage> HalleyEditor::startGame(HalleyAPI* api)
 
 	if (!headless) {
 		Vector2i winSize(1280, 720);
-		api->video->setWindow(WindowDefinition(WindowType::ResizableWindow, winSize, getName()), false);
+		api->video->setWindow(WindowDefinition(WindowType::ResizableWindow, winSize, getName()), true);
 	}
 	return std::make_unique<EditorRootStage>(*this);
 }
