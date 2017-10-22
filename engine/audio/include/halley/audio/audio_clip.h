@@ -2,7 +2,6 @@
 #include "halley/resources/resource.h"
 #include "halley/resources/resource_data.h"
 #include "halley/core/api/audio_api.h"
-#include "audio_source.h"
 
 namespace Halley
 {

@@ -17,19 +17,19 @@ set(SOURCES
         )
 
 set(HEADERS
-        "include/halley/audio/audio_buffer.h"
         "include/halley/audio/audio_clip.h"
-        "include/halley/audio/audio_engine.h"
         "include/halley/audio/audio_facade.h"
-        "include/halley/audio/audio_mixer.h"
-        "include/halley/audio/audio_source.h"
         "include/halley/audio/audio_source_behaviour.h"
         "include/halley/audio/audio_source_position.h"
         "include/halley/audio/halley_audio.h"
         "include/halley/audio/vorbis_dec.h"
+        "src/audio_buffer.h"
+        "src/audio_engine.h"
         "src/audio_handle_impl.h"
+        "src/audio_mixer.h"
         "src/audio_mixer_avx.h"
         "src/audio_mixer_sse.h"
+        "src/audio_source.h"
         )
 
 file (GLOB_RECURSE OGG_FILES "../../contrib/libogg/*.c")
