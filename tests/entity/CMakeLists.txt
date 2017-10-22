@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.0)
 
-project (halley-entity-test)
+project (halley-test-entity)
 
 set (entity_test_sources
 	"prec.cpp"
@@ -18,4 +18,4 @@ set (entity_test_gen_definitions
 	"gen_src/test.yaml"
 	)
 
-halleyProjectCodegen(halley-entity-test "${entity_test_sources}" "${entity_test_headers}" "${entity_test_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+halleyProjectCodegen(halley-test-entity "${entity_test_sources}" "${entity_test_headers}" "${entity_test_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)

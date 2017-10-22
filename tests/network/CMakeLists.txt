@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.0)
 
-project (halley-network-test)
+project (halley-test-network)
 
 set (network_test_sources
 	"prec.cpp"
@@ -17,5 +17,5 @@ set (network_test_headers
 set (network_test_gen_definitions
 	)
 
-halleyProjectCodegen(halley-network-test "${network_test_sources}" "${network_test_headers}" "${network_test_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)
-add_dependencies(halley-network-test halley-cmd)
+halleyProjectCodegen(halley-test-network "${network_test_sources}" "${network_test_headers}" "${network_test_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+add_dependencies(halley-test-network halley-cmd)

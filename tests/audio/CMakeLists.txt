@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.0)
 
-project (halley-audio-test)
+project (halley-test-audio)
 
 set (audio_test_sources
 	"prec.cpp"
@@ -17,4 +17,4 @@ set (audio_test_headers
 set (audio_test_gen_definitions
 	)
 
-halleyProjectCodegen(halley-audio-test "${audio_test_sources}" "${audio_test_headers}" "${audio_test_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+halleyProjectCodegen(halley-test-audio "${audio_test_sources}" "${audio_test_headers}" "${audio_test_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)
