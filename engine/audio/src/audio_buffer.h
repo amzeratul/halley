@@ -23,7 +23,8 @@ namespace Halley
 
 		~AudioBufferRef();
 
-		AudioBuffer& get() const;
+		AudioBuffer& getBuffer() const;
+		gsl::span<AudioSamplePack> getSpan() const;
 
 	private:
 		AudioBuffer* buffer;

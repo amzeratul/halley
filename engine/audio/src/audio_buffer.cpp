@@ -23,9 +23,14 @@ AudioBufferRef::~AudioBufferRef()
 	}
 }
 
-AudioBuffer& AudioBufferRef::get() const
+AudioBuffer& AudioBufferRef::getBuffer() const
 {
 	return *buffer;
+}
+
+gsl::span<AudioSamplePack> AudioBufferRef::getSpan() const
+{
+	return gsl::span<AudioSamplePack>(buffer->packs);
 }
 
 AudioBufferRef AudioBufferPool::getBuffer(size_t numSamples)

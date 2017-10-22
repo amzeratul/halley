@@ -32,6 +32,7 @@ namespace Halley {
 		AudioSpec spec;
 		AudioOutputAPI* out;
 		std::unique_ptr<AudioMixer> mixer;
+		std::unique_ptr<AudioBufferPool> pool;
 
 		std::atomic<bool> running;
 		std::atomic<bool> needsBuffer;
@@ -42,7 +43,6 @@ namespace Halley {
 		std::vector<AudioChannelData> channels;
 
 		AudioBuffer backBuffer;
-		AudioBuffer tmpBuffer;
     	std::vector<AudioBuffer> channelBuffers;
 
 		std::map<size_t, AudioSource*> idToSource;

@@ -7,6 +7,7 @@ using namespace Halley;
 
 AudioEngine::AudioEngine()
 	: mixer(AudioMixer::makeMixer())
+	, pool(std::make_unique<AudioBufferPool>())
 	, running(true)
 	, needsBuffer(true)
 {
@@ -95,7 +96,6 @@ void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 	const size_t bufferSize = spec.bufferSize / 16;
 	backBuffer.packs.resize(bufferSize * spec.numChannels);
 
-	tmpBuffer.packs.resize(bufferSize);
 	channelBuffers.resize(spec.numChannels);
 	for (auto& b: channelBuffers) {
 		b.packs.resize(bufferSize);
@@ -159,7 +159,7 @@ void AudioEngine::mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst)
 		if (source->isPlaying()) {
 			size_t nChannels = source->getNumberOfChannels();
 			for (size_t i = 0; i < nChannels; ++i) {
-				source->mixToBuffer(i, channelNum, tmpBuffer.packs, dst, *mixer);
+				source->mixToBuffer(i, channelNum, dst, *mixer, *pool);
 			}
 		}
 	}

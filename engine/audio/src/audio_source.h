@@ -4,6 +4,7 @@
 #include "audio_source_behaviour.h"
 
 namespace Halley {
+	class AudioBufferPool;
 	class AudioMixer;
 	class AudioSourceBehaviour;
 
@@ -26,7 +27,7 @@ namespace Halley {
 		size_t getNumberOfChannels() const;
 
 		void update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener);
-		void mixToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<AudioSamplePack> tmp, gsl::span<AudioSamplePack> out, AudioMixer& mixer);
+		void mixToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<AudioSamplePack> out, AudioMixer& mixer, AudioBufferPool& pool);
 		void advancePlayback(size_t samples);
 		
 		void setId(size_t id);
