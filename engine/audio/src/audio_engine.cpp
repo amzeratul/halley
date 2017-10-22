@@ -151,7 +151,7 @@ void AudioEngine::postUpdateSources()
 void AudioEngine::mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst)
 {
 	for (auto& pack : dst) {
-		for (size_t i = 0; i < 16; ++i) {
+		for (size_t i = 0; i < AudioSamplePack::NumSamples; ++i) {
 			pack.samples[i] = 0.0f;
 		}
 	}

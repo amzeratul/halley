@@ -3,6 +3,7 @@ project (halley-audio)
 include_directories(${Boost_INCLUDE_DIR} "include/halley/audio" "../utils/include" "../core/include" "../../contrib/libogg/include" "../../contrib/libogg/lib" "../../contrib/libvorbis/include" "../../contrib/libvorbis/lib")
 
 set(SOURCES
+        "src/audio_buffer.cpp"
         "src/audio_clip.cpp"
         "src/audio_engine.cpp"
         "src/audio_facade.cpp"

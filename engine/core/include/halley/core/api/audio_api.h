@@ -29,7 +29,8 @@ namespace Halley
 
 	struct alignas(64) AudioSamplePack
 	{
-		std::array<AudioConfig::SampleFormat, 16> samples; // AVX-512 friendly
+		constexpr static int NumSamples = 16;
+		std::array<AudioConfig::SampleFormat, NumSamples> samples; // AVX-512 friendly
 	};
 
 	enum class AudioSampleFormat

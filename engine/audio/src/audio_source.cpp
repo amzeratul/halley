@@ -109,13 +109,44 @@ void AudioSource::mixToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<Au
 		return;
 	}
 
-	size_t totalLen = size_t(tmp.size()) * 16; 
+	size_t totalLen = size_t(out.size()) * 16; 
 	if (canDoDirectRead(totalLen)) {
 		auto src = clip->getChannelData(srcChannel, playbackPos, totalLen);
 		mixer.mixAudio(gsl::span<const AudioSamplePack>(reinterpret_cast<const AudioSamplePack*>(src.data()), totalLen / 16), out, gain0, gain1);
 	} else {
 		readSourceToBuffer(srcChannel, tmp);
 		mixer.mixAudio(tmp, out, gain0, gain1);
+	}
+}
+
+bool AudioSource::canDoDirectRead(size_t size) const
+{
+	return playbackPos % 4 == 0 && playbackPos + size <= playbackLength;
+}
+
+void AudioSource::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const
+{
+	Expects(clip);
+	Expects(srcChannel < 2);
+
+	size_t requestedLen = size_t(dst.size()) * 16;
+	size_t len = std::min(requestedLen, playbackLength - playbackPos);
+	size_t remainingLen = requestedLen - len;
+	auto src = clip->getChannelData(srcChannel, playbackPos, len);
+
+	memcpy(dst.data(), src.data(), src.size_bytes());
+
+	if (remainingLen > 0) {
+		size_t remainingBytes = remainingLen * sizeof(AudioConfig::SampleFormat);
+		char* dst2 = reinterpret_cast<char*>(dst.data()) + src.size_bytes();
+		if (looping) {
+			// Copy from start
+			auto src2 = clip->getChannelData(srcChannel, 0, len);
+			memcpy(dst2, src2.data(), remainingBytes);
+		} else {
+			// Pad with zeroes
+			memset(dst2, 0, remainingBytes);
+		}
 	}
 }
 
@@ -149,33 +180,3 @@ void AudioSource::setBehaviour(std::shared_ptr<AudioSourceBehaviour> value)
 	behaviour->onAttach(*this);
 }
 
-void AudioSource::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const
-{
-	Expects(clip);
-	Expects(srcChannel < 2);
-
-	size_t requestedLen = size_t(dst.size()) * 16;
-	size_t len = std::min(requestedLen, playbackLength - playbackPos);
-	size_t remainingLen = requestedLen - len;
-	auto src = clip->getChannelData(srcChannel, playbackPos, len);
-
-	memcpy(dst.data(), src.data(), src.size_bytes());
-
-	if (remainingLen > 0) {
-		size_t remainingBytes = remainingLen * sizeof(AudioConfig::SampleFormat);
-		char* dst2 = reinterpret_cast<char*>(dst.data()) + src.size_bytes();
-		if (looping) {
-			// Copy from start
-			auto src2 = clip->getChannelData(srcChannel, 0, len);
-			memcpy(dst2, src2.data(), remainingBytes);
-		} else {
-			// Pad with zeroes
-			memset(dst2, 0, remainingBytes);
-		}
-	}
-}
-
-bool AudioSource::canDoDirectRead(size_t size) const
-{
-	return playbackPos % 4 == 0 && playbackPos + size <= playbackLength;
-}

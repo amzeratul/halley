@@ -12,16 +12,16 @@ void AudioMixer::mixAudio(gsl::span<const AudioSamplePack> src, gsl::span<AudioS
 	if (gain0 == gain1) {
 		// If the gain doesn't change, the code is faster
 		for (size_t i = 0; i < nPacks; ++i) {
-			for (size_t j = 0; j < 16; ++j) {
+			for (size_t j = 0; j < AudioSamplePack::NumSamples; ++j) {
 				dst[i].samples[j] += src[i].samples[j] * gain0;
 			}
 		}
 	} else {
 		// Interpolate the gain
-		const float scale = 1.0f / (dst.size() * 16);
+		const float scale = 1.0f / (dst.size() * AudioSamplePack::NumSamples);
 		for (size_t i = 0; i < nPacks; ++i) {
-			for (size_t j = 0; j < 16; ++j) {
-				dst[i].samples[j] += src[i].samples[j] * lerp(gain0, gain1, (i * 16 + j) * scale);
+			for (size_t j = 0; j < AudioSamplePack::NumSamples; ++j) {
+				dst[i].samples[j] += src[i].samples[j] * lerp(gain0, gain1, (i * AudioSamplePack::NumSamples + j) * scale);
 			}
 		}
 	}
@@ -35,7 +35,7 @@ void AudioMixer::interleaveChannels(AudioBuffer& dstBuffer, gsl::span<const Audi
 		size_t srcIdx = i >> 1;
 		size_t srcOff = (i & 1) << 3;
 
-		for (size_t j = 0; j < 8; ++j) {
+		for (size_t j = 0; j < AudioSamplePack::NumSamples / 2; ++j) {
 			size_t srcPos = j + srcOff;
 			dst[2 * j] = src[0].packs[srcIdx].samples[srcPos];
 			dst[2 * j + 1] = src[1].packs[srcIdx].samples[srcPos];
@@ -47,7 +47,7 @@ void AudioMixer::interleaveChannels(AudioBuffer& dstBuffer, gsl::span<const Audi
 void AudioMixer::compressRange(gsl::span<AudioSamplePack> buffer)
 {
 	for (ptrdiff_t i = 0; i < buffer.size(); ++i) {
-		for (size_t j = 0; j < 16; ++j) {
+		for (size_t j = 0; j < AudioSamplePack::NumSamples; ++j) {
 			float& sample = buffer[i].samples[j];
 			sample = std::max(-0.99995f, std::min(sample, 0.99995f));
 		}

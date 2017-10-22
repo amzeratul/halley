@@ -8,4 +8,43 @@ namespace Halley
 	{
 		std::vector<AudioSamplePack> packs;
 	};
+
+	class AudioBufferPool;
+
+	class AudioBufferRef
+	{
+	public:
+		AudioBufferRef(AudioBuffer& buffer, AudioBufferPool& pool);
+		AudioBufferRef(const AudioBufferRef& other) = delete;
+		AudioBufferRef(AudioBufferRef&& other) noexcept;
+
+		AudioBufferRef& operator=(const AudioBufferRef& other) = delete;
+		AudioBufferRef& operator=(AudioBufferRef&& other) = delete;
+
+		~AudioBufferRef();
+
+		AudioBuffer& get() const;
+
+	private:
+		AudioBuffer* buffer;
+		AudioBufferPool& pool;
+	};
+
+	class AudioBufferPool
+	{
+	public:
+		AudioBufferRef getBuffer(size_t numSamples);
+		void returnBuffer(AudioBuffer& buffer);
+
+	private:
+		struct Entry
+		{
+			bool available = false;
+			std::unique_ptr<AudioBuffer> buffer;
+
+			explicit Entry(std::unique_ptr<AudioBuffer>&& buffer);
+		};
+
+		std::vector<Entry> buffers;
+	};
 }
