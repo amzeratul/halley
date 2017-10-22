@@ -139,7 +139,7 @@ void AudioSource::mixChannelToBuffer(size_t srcChannel, size_t dstChannel, gsl::
 		mixer.mixAudio(gsl::span<const AudioSamplePack>(reinterpret_cast<const AudioSamplePack*>(src.data()), totalLen / 16), out, gain0, gain1);
 	} else {
 		auto tmp = pool.getBuffer(totalLen);
-		readSourceToBuffer(srcChannel, tmp.getSpan().subspan(0, totalLen));
+		readSourceToBuffer(srcChannel, tmp.getSpan().subspan(0, out.size()));
 		mixer.mixAudio(tmp.getSpan(), out, gain0, gain1);
 	}
 }
