@@ -29,7 +29,7 @@ namespace Halley {
 
     protected:
 	    void drawChildren(UIPainter& painter) const override;
-	    Vector2f getLayoutMinimumSize() const override;
+	    Vector2f getLayoutMinimumSize(bool force) const override;
 	    Vector2f getLayoutOriginPosition() const override;
 	    bool canInteractWithMouse() const override;
 

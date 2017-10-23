@@ -22,7 +22,7 @@ float UISizerEntry::getProportion() const
 
 Vector2f UISizerEntry::getMinimumSize() const
 {
-	return widget ? widget->getLayoutMinimumSize() : Vector2f();
+	return widget ? widget->getLayoutMinimumSize(false) : Vector2f();
 }
 
 void UISizerEntry::placeInside(Rect4f rect, Vector2f minSize)
@@ -91,7 +91,7 @@ UISizer::UISizer(UISizerType type, float gap, int nColumns)
 {
 }
 
-Vector2f UISizer::getLayoutMinimumSize() const
+Vector2f UISizer::getLayoutMinimumSize(bool force) const
 {
 	return computeMinimumSize(true);
 }

@@ -24,7 +24,7 @@ namespace Halley {
 		void doDraw(UIPainter& painter) const;
 		void doUpdate(bool full, Time t, UIInputType inputType, JoystickType joystickType);
 
-		Vector2f getLayoutMinimumSize() const override;
+		Vector2f getLayoutMinimumSize(bool force) const override;
 		void setRect(Rect4f rect) override;
 
 		void layout();

@@ -60,15 +60,15 @@ void UIWidget::doUpdate(bool full, Time t, UIInputType inputType, JoystickType j
 	}
 }
 
-Vector2f UIWidget::getLayoutMinimumSize() const
+Vector2f UIWidget::getLayoutMinimumSize(bool force) const
 {
-	if (!active) {
+	if (!active && !force) {
 		return {};
 	}
 	Vector2f minSize = getMinimumSize();
 	if (sizer) {
 		auto border = getInnerBorder();
-		Vector2f innerSize = sizer.get().getLayoutMinimumSize();
+		Vector2f innerSize = sizer.get().getLayoutMinimumSize(false);
 		if (innerSize.x > 0.1f || innerSize.y > 0.1f) {
 			innerSize += Vector2f(border.x + border.z, border.y + border.w);
 		}
@@ -94,7 +94,7 @@ void UIWidget::setRect(Rect4f rect)
 void UIWidget::layout()
 {
 	checkActive();
-	Vector2f minimumSize = getLayoutMinimumSize();
+	Vector2f minimumSize = getLayoutMinimumSize(false);
 	Vector2f targetSize = Vector2f::max(shrinkOnLayout ? Vector2f() : size, minimumSize);
 	setRect(Rect4f(getPosition(), getPosition() + targetSize));
 	onLayout();

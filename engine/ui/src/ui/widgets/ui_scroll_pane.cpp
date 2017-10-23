@@ -68,13 +68,13 @@ void UIScrollPane::update(Time t, bool moved)
 		clipSize.y = getSize().y;
 		scrollPos.y = 0;
 	}
-	contentsSize = UIWidget::getLayoutMinimumSize();
+	contentsSize = UIWidget::getLayoutMinimumSize(false);
 	setMouseClip(Rect4f(getPosition(), getPosition() + getSize()));
 }
 
 bool UIScrollPane::canScroll(UIScrollDirection direction) const
 {
-	auto contentsSize = UIWidget::getLayoutMinimumSize();
+	auto contentsSize = UIWidget::getLayoutMinimumSize(false);
 	if (direction == UIScrollDirection::Horizontal) {
 		return scrollHorizontal && getSize().x < contentsSize.x;
 	} else {
@@ -97,9 +97,9 @@ void UIScrollPane::drawChildren(UIPainter& painter) const
 	UIWidget::drawChildren(p);
 }
 
-Vector2f UIScrollPane::getLayoutMinimumSize() const
+Vector2f UIScrollPane::getLayoutMinimumSize(bool force) const
 {
-	auto size = UIWidget::getLayoutMinimumSize();
+	auto size = UIWidget::getLayoutMinimumSize(false);
 	if (scrollHorizontal) {
 		size.x = std::min(size.x, clipSize.x);
 	}

@@ -33,6 +33,15 @@ int UIPagedPane::getNumberOfPages() const
 	return int(pages.size());
 }
 
+Vector2f UIPagedPane::getLayoutMinimumSize(bool force) const
+{
+	Vector2f size;
+	for (auto& p: pages) {
+		size = Vector2f::max(size, p->getLayoutMinimumSize(true));
+	}
+	return size;
+}
+
 std::shared_ptr<UIWidget> UIPagedPane::getPage(int n) const
 {
 	return pages.at(n);
