@@ -111,44 +111,45 @@ void AudioSource::update(gsl::span<const AudioChannelData> channels, const Audio
 
 void AudioSource::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBufferPool& pool)
 {
-	size_t nChannels = getNumberOfChannels();
-	for (size_t i = 0; i < nChannels; ++i) {
-		for (size_t dstChannel = 0; dstChannel < size_t(dst.size()); ++dstChannel) {
-			mixChannelToBuffer(i, dstChannel, dst[dstChannel].packs, mixer, pool);
-		}
-	}
-}
-
-void AudioSource::mixChannelToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<AudioSamplePack> out, AudioMixer& mixer, AudioBufferPool& pool)
-{
 	Expects(playing);
-	Expects(dstChannel < 8);
+	Expects(dst.size() > 0);
 
-	const size_t numChannels = clip->getNumberOfChannels();
-	Expects(srcChannel < numChannels);
+	const size_t numPacks = dst[0].packs.size();
+	const size_t numSamples = numPacks * 16;
+	const size_t nSrcChannels = getNumberOfChannels();
+	const size_t nDstChannels = size_t(dst.size());
 
-	const size_t mixIndex = (srcChannel * numChannels) + dstChannel;
-	const float gain0 = prevChannelMix[mixIndex];
-	const float gain1 = channelMix[mixIndex];
-	if (gain0 < 0.01f && gain1 < 0.01f) {
-		// Early out
+	// Figure out the total mix in the previous update, and now. If it's zero, then there's nothing to listen here.
+	float totalMix = 0.0f;
+	const size_t nMixes = nSrcChannels * nDstChannels;
+	for (size_t i = 0; i < nMixes; ++i) {
+		totalMix += prevChannelMix[i] + channelMix[i];
+	}
+	if (totalMix < 0.01f) {
+		// Early out, this sample is not audible
 		return;
 	}
+	
+	// Render each source channel
+	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
+		// Read to buffer
+		auto tmp = pool.getBuffer(numSamples);
+		readSourceToBuffer(srcChannel, tmp.getSpan().subspan(0, numPacks));
 
-	size_t totalLen = size_t(out.size()) * 16; 
-	if (canDoDirectRead(totalLen)) {
-		auto src = clip->getChannelData(srcChannel, playbackPos, totalLen);
-		mixer.mixAudio(gsl::span<const AudioSamplePack>(reinterpret_cast<const AudioSamplePack*>(src.data()), totalLen / 16), out, gain0, gain1);
-	} else {
-		auto tmp = pool.getBuffer(totalLen);
-		readSourceToBuffer(srcChannel, tmp.getSpan().subspan(0, out.size()));
-		mixer.mixAudio(tmp.getSpan(), out, gain0, gain1);
+		for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
+			// Compute mix
+			const size_t mixIndex = (srcChannel * clip->getNumberOfChannels()) + dstChannel;
+			const float gain0 = prevChannelMix[mixIndex];
+			const float gain1 = channelMix[mixIndex];
+
+			// Render to destination
+			if (gain0 + gain1 > 0.01f) {
+				mixer.mixAudio(tmp.getSpan(), dst[dstChannel].packs, gain0, gain1);
+			}
+		}
 	}
-}
 
-bool AudioSource::canDoDirectRead(size_t size) const
-{
-	return playbackPos % 4 == 0 && playbackPos + size <= playbackLength;
+	advancePlayback(numSamples);
 }
 
 void AudioSource::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const
@@ -179,8 +180,9 @@ void AudioSource::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePac
 
 void AudioSource::advancePlayback(size_t samples)
 {
-	playbackPos += samples;
 	elapsedTime += float(samples) / AudioConfig::sampleRate;
+
+	playbackPos += samples;
 	if (playbackPos >= playbackLength) {
 		if (looping) {
 			playbackPos %= playbackLength;

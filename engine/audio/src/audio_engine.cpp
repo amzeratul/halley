@@ -125,9 +125,7 @@ void AudioEngine::mixSources()
 		// Mix it in!
 		if (source->isPlaying()) {
 			source->update(channels, listener);
-			//source->mixToBuffer(channelNum, dst, *mixer, *pool);
 			source->mixTo(channelBuffers, *mixer, *pool);
-			source->advancePlayback(backBuffer.packs.size() * 16 / spec.numChannels);
 		}
 	}
 }

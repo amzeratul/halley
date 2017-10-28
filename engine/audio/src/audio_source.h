@@ -32,8 +32,6 @@ namespace Halley {
 
 		void update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener);
 		void mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBufferPool& pool);
-		void mixChannelToBuffer(size_t srcChannel, size_t dstChannel, gsl::span<AudioSamplePack> out, AudioMixer& mixer, AudioBufferPool& pool);
-		void advancePlayback(size_t samples);
 		
 		void setId(size_t id);
 		size_t getId() const;
@@ -61,6 +59,6 @@ namespace Halley {
 		size_t id = -1;
 
 		void readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const;
-	    bool canDoDirectRead(size_t size) const;
+		void advancePlayback(size_t samples);
     };
 }
