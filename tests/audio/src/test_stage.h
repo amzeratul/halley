@@ -10,4 +10,5 @@ public:
 	void onRender(Halley::RenderContext& context) const override;
 
 private:
+	bool playingMusic = true;
 };
