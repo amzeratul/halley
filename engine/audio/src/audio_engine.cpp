@@ -73,21 +73,6 @@ std::vector<size_t> AudioEngine::getPlayingSounds()
 	return result;
 }
 
-void AudioEngine::generateBuffer()
-{
-	updateSources();
-
-	for (size_t i = 0; i < spec.numChannels; ++i) {
-		mixChannel(i, channelBuffers[i].packs);
-	}
-
-	postUpdateSources();
-
-	mixer->interleaveChannels(backBuffer, channelBuffers);
-	mixer->compressRange(backBuffer.packs);
-	out->queueAudio(backBuffer.packs);
-}
-
 void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 {
 	spec = s;
@@ -113,54 +98,64 @@ void AudioEngine::stop()
 	backBufferCondition.notify_one();
 }
 
-void AudioEngine::updateSources()
+void AudioEngine::generateBuffer()
 {
+	mixSources();
+	removeFinishedSources();
+
+	mixer->interleaveChannels(backBuffer, channelBuffers);
+	mixer->compressRange(backBuffer.packs);
+	out->queueAudio(backBuffer.packs);
+}
+
+void AudioEngine::mixSources()
+{
+	// Clear buffers
+	for (size_t i = 0; i < spec.numChannels; ++i) {
+		clearBuffer(channelBuffers[i].packs);
+	}
+
+	// Mix every source
 	for (auto& source: sources) {
+		// Start playing if necessary
 		if (!source->isPlaying() && !source->isDone() && source->isReady()) {
 			source->start();
 		}
-		
+
+		// Mix it in!
 		if (source->isPlaying()) {
 			source->update(channels, listener);
+			//source->mixToBuffer(channelNum, dst, *mixer, *pool);
+			source->mixTo(channelBuffers, *mixer, *pool);
+			source->advancePlayback(backBuffer.packs.size() * 16 / spec.numChannels);
 		}
 	}
 }
 
-void AudioEngine::postUpdateSources()
+void AudioEngine::removeFinishedSources()
 {
 	size_t n = sources.size();
 	for (size_t i = 0; i < n; ++i) {
 		auto& source = sources[i];
 
-		if (source->isPlaying()) {
-			source->advancePlayback(backBuffer.packs.size() * 16 / spec.numChannels);
-		}
 		if (source->isDone()) {
 			// Remove source
 			idToSource.erase(source->getId());
 			if (sources.size() > 1) {
 				std::swap(source, sources.back());
 			}
-			sources.pop_back();
 			--i;
 			--n;
 		}
 	}
+	sources.resize(n);
 }
 
-void AudioEngine::mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst)
+void AudioEngine::clearBuffer(gsl::span<AudioSamplePack> dst)
 {
-	// Clear with zeroes
 	for (auto& pack : dst) {
 		for (size_t i = 0; i < AudioSamplePack::NumSamples; ++i) {
 			pack.samples[i] = 0.0f;
-		}
-	}
-
-	// Mix all sources
-	for (auto& source : sources) {
-		if (source->isPlaying()) {
-			source->mixToBuffer(channelNum, dst, *mixer, *pool);
 		}
 	}
 }

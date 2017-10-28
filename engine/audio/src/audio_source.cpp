@@ -109,11 +109,13 @@ void AudioSource::update(gsl::span<const AudioChannelData> channels, const Audio
 	}
 }
 
-void AudioSource::mixToBuffer(size_t dstChannel, gsl::span<AudioSamplePack> out, AudioMixer& mixer, AudioBufferPool& pool)
+void AudioSource::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBufferPool& pool)
 {
 	size_t nChannels = getNumberOfChannels();
 	for (size_t i = 0; i < nChannels; ++i) {
-		mixChannelToBuffer(i, dstChannel, out, mixer, pool);
+		for (size_t dstChannel = 0; dstChannel < size_t(dst.size()); ++dstChannel) {
+			mixChannelToBuffer(i, dstChannel, dst[dstChannel].packs, mixer, pool);
+		}
 	}
 }
 

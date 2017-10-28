@@ -11,4 +11,5 @@ public:
 
 private:
 	bool playingMusic = true;
+	float pan = 0.0f;
 };
