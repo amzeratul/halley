@@ -53,6 +53,7 @@ namespace Halley {
     	float gain;
 		float elapsedTime = 0.0f;
 
+		size_t nChannels = 0;
 		std::array<float, 16> channelMix;
 		std::array<float, 16> prevChannelMix;
 

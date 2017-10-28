@@ -32,8 +32,9 @@ void AudioSource::start()
 	playing = true;
 	playbackPos = 0;
 	playbackLength = clip->getLength();
+	nChannels = clip->getNumberOfChannels();
 
-	if (clip->getNumberOfChannels() > 1) {
+	if (nChannels > 1) {
 		sourcePos = AudioSourcePosition::makeFixed();
 	}
 }
@@ -73,7 +74,7 @@ void AudioSource::setGain(float g)
 
 void AudioSource::setAudioSourcePosition(AudioSourcePosition s)
 {
-	if (clip->getNumberOfChannels() == 1) {
+	if (nChannels == 1) {
 		sourcePos = s;
 	}
 }
@@ -85,7 +86,7 @@ float AudioSource::getGain() const
 
 size_t AudioSource::getNumberOfChannels() const
 {
-	return clip->getNumberOfChannels();
+	return nChannels;
 }
 
 void AudioSource::update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener)
@@ -101,7 +102,7 @@ void AudioSource::update(gsl::span<const AudioChannelData> channels, const Audio
 	}
 
 	prevChannelMix = channelMix;
-	sourcePos.setMix(clip->getNumberOfChannels(), channels, channelMix, gain, listener);
+	sourcePos.setMix(nChannels, channels, channelMix, gain, listener);
 	
 	if (isFirstUpdate) {
 		prevChannelMix = channelMix;
@@ -138,7 +139,7 @@ void AudioSource::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBuff
 
 		for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
 			// Compute mix
-			const size_t mixIndex = (srcChannel * clip->getNumberOfChannels()) + dstChannel;
+			const size_t mixIndex = (srcChannel * nChannels) + dstChannel;
 			const float gain0 = prevChannelMix[mixIndex];
 			const float gain1 = channelMix[mixIndex];
 
