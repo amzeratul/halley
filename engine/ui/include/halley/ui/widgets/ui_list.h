@@ -16,8 +16,8 @@ namespace Halley {
 	public:
 		explicit UIList(const String& id, UIStyle style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 
-		void setSelectedOption(int option);
-		void setSelectedOptionId(const String& id);
+		bool setSelectedOption(int option);
+		bool setSelectedOptionId(const String& id);
 		int getSelectedOption() const;
 		const String& getSelectedOptionId() const;
 		size_t getCount() const;

@@ -17,10 +17,10 @@ UIList::UIList(const String& id, UIStyle style, UISizerType orientation, int nCo
 	getEventHandler().setHandle(UIEventType::SetHovered, [=] (const UIEvent& event) {});
 }
 
-void UIList::setSelectedOption(int option)
+bool UIList::setSelectedOption(int option)
 {
 	if (items.empty()) {
-		return;
+		return false;
 	}
 
 	auto newSel = modulo(option, int(items.size()));
@@ -35,6 +35,7 @@ void UIList::setSelectedOption(int option)
 		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), items[curOption]->getId(), curOption));
 		sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
 	}
+	return true;
 }
 
 int UIList::getSelectedOption() const
@@ -272,14 +273,15 @@ Rect4f UIListItem::getRawRect() const
 	return Rect4f(getPosition(), getPosition() + getSize());
 }
 
-void UIList::setSelectedOptionId(const String& id)
+bool UIList::setSelectedOptionId(const String& id)
 {
 	for (auto& i: items) {
 		if (i->getId() == id) {
 			setSelectedOption(i->getIndex());
-			return;
+			return true;
 		}
 	}
+	return false;
 }
 
 Rect4f UIList::getOptionRect(int curOption) const
