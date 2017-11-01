@@ -132,21 +132,12 @@ void AudioEngine::mixSources()
 
 void AudioEngine::removeFinishedSources()
 {
-	size_t n = sources.size();
-	for (size_t i = 0; i < n; ++i) {
-		auto& source = sources[i];
-
-		if (source->isDone()) {
-			// Remove source
-			idToSource.erase(source->getId());
-			if (sources.size() > 1) {
-				std::swap(source, sources.back());
-			}
-			--i;
-			--n;
+	for (auto& s: sources) {
+		if (s->isDone()) {
+			idToSource.erase(s->getId());
 		}
 	}
-	sources.resize(n);
+	sources.erase(std::remove_if(sources.begin(), sources.end(), [&] (const std::unique_ptr<AudioSource>& src) { return src->isDone(); }), sources.end());
 }
 
 void AudioEngine::clearBuffer(gsl::span<AudioSamplePack> dst)
