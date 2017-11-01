@@ -51,9 +51,8 @@ namespace Halley {
 
 		void addSource(size_t id, std::unique_ptr<AudioSource>&& src);
 
-		void updateSources();
-	    void postUpdateSources();
-
-		void mixChannel(size_t channelNum, gsl::span<AudioSamplePack> dst);
+		void mixSources();
+	    void removeFinishedSources();
+		void clearBuffer(gsl::span<AudioSamplePack> dst);
     };
 }

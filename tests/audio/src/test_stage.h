@@ -10,4 +10,6 @@ public:
 	void onRender(Halley::RenderContext& context) const override;
 
 private:
+	bool playingMusic = true;
+	float pan = 0.0f;
 };
