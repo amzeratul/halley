@@ -113,6 +113,7 @@ void AudioSource::update(gsl::span<const AudioChannelData> channels, const Audio
 void AudioSource::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBufferPool& pool)
 {
 	Expects(dst.size() > 0);
+	Expects(this != nullptr);
 
 	const size_t numPacks = dst[0].packs.size();
 	const size_t numSamples = numPacks * 16;
@@ -122,6 +123,7 @@ void AudioSource::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBuff
 	// Figure out the total mix in the previous update, and now. If it's zero, then there's nothing to listen here.
 	float totalMix = 0.0f;
 	const size_t nMixes = nSrcChannels * nDstChannels;
+	Expects (nMixes < 16);
 	for (size_t i = 0; i < nMixes; ++i) {
 		totalMix += prevChannelMix[i] + channelMix[i];
 	}
@@ -156,17 +158,22 @@ void AudioSource::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePac
 {
 	Expects(clip);
 	Expects(srcChannel < 2);
+	Expects(playbackPos <= playbackLength);
 
-	size_t requestedLen = size_t(dst.size()) * 16;
-	size_t len = std::min(requestedLen, playbackLength - playbackPos);
-	size_t remainingLen = requestedLen - len;
-	auto src = clip->getChannelData(srcChannel, playbackPos, len);
+	const size_t requestedLen = size_t(dst.size()) * 16;
+	const size_t len = std::min(requestedLen, playbackLength - playbackPos);
+	const size_t remainingLen = requestedLen - len;
 
-	memcpy(dst.data(), src.data(), src.size_bytes());
+	if (len > 0) {
+		auto src = clip->getChannelData(srcChannel, playbackPos, len);
+		if (src.size_bytes() > 0) {
+			memcpy(dst.data(), src.data(), src.size_bytes());
+		}
+	}
 
 	if (remainingLen > 0) {
-		size_t remainingBytes = remainingLen * sizeof(AudioConfig::SampleFormat);
-		char* dst2 = reinterpret_cast<char*>(dst.data()) + src.size_bytes();
+		const size_t remainingBytes = remainingLen * sizeof(AudioConfig::SampleFormat);
+		char* dst2 = reinterpret_cast<char*>(dst.data()) + len * sizeof(AudioConfig::SampleFormat);
 		if (looping) {
 			// Copy from start
 			auto src2 = clip->getChannelData(srcChannel, 0, len);
@@ -187,6 +194,7 @@ void AudioSource::advancePlayback(size_t samples)
 		if (looping) {
 			playbackPos %= playbackLength;
 		} else {
+			playbackPos = playbackLength;
 			stop();
 		}
 	}
