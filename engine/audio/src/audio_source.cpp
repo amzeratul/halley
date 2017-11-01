@@ -112,7 +112,6 @@ void AudioSource::update(gsl::span<const AudioChannelData> channels, const Audio
 
 void AudioSource::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBufferPool& pool)
 {
-	Expects(playing);
 	Expects(dst.size() > 0);
 
 	const size_t numPacks = dst[0].packs.size();
