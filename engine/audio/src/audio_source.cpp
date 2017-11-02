@@ -166,7 +166,7 @@ void AudioSource::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePac
 
 	if (len > 0) {
 		auto src = clip->getChannelData(srcChannel, playbackPos, len);
-		Expects(src.size_bytes() < requestedLen * sizeof(AudioConfig::SampleFormat));
+		Expects(size_t(src.size_bytes()) <= requestedLen * sizeof(AudioConfig::SampleFormat));
 		if (src.size_bytes() > 0) {
 			memcpy(dst.data(), src.data(), src.size_bytes());
 		}
