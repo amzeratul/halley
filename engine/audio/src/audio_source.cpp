@@ -133,9 +133,9 @@ void AudioSource::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBuff
 	}
 	
 	// Render each source channel
+	auto tmp = pool.getBuffer(numSamples);
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
 		// Read to buffer
-		auto tmp = pool.getBuffer(numSamples);
 		readSourceToBuffer(srcChannel, tmp.getSpan().subspan(0, numPacks));
 
 		for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
@@ -166,6 +166,7 @@ void AudioSource::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePac
 
 	if (len > 0) {
 		auto src = clip->getChannelData(srcChannel, playbackPos, len);
+		Expects(src.size_bytes() < requestedLen * sizeof(AudioConfig::SampleFormat));
 		if (src.size_bytes() > 0) {
 			memcpy(dst.data(), src.data(), src.size_bytes());
 		}
