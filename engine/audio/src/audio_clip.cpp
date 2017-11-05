@@ -17,7 +17,7 @@ AudioClip::~AudioClip()
 {
 }
 
-void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data)
+void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadata meta)
 {
 	VorbisData vorbis(data);
 	if (vorbis.getSampleRate() != AudioConfig::sampleRate) {
@@ -25,6 +25,7 @@ void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data)
 	}	
 	numChannels = vorbis.getNumChannels();
 	sampleLength = vorbis.getNumSamples();
+	loopPoint = meta.getInt("loopPoint", 0);
 	streaming = false;
 
 	samples.resize(numChannels);
@@ -37,7 +38,7 @@ void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data)
 	doneLoading();
 }
 
-void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data)
+void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadata meta)
 {
 	vorbisData = std::make_unique<VorbisData>(data);
 	size_t nChannels = vorbisData->getNumChannels();
@@ -48,6 +49,7 @@ void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data)
 	samples.resize(nChannels);
 	numChannels = nChannels;
 	sampleLength = vorbisData->getNumSamples();
+	loopPoint = meta.getInt("loopPoint", 0);
 	streaming = true;
 	doneLoading();
 }
@@ -100,22 +102,29 @@ size_t AudioClip::getNumberOfChannels() const
 	return numChannels;
 }
 
+size_t AudioClip::getLoopPoint() const
+{
+	Expects(isLoaded());
+	return loopPoint;
+}
+
 std::shared_ptr<AudioClip> AudioClip::loadResource(ResourceLoader& loader)
 {
-	bool streaming = loader.getMeta().getBool("streaming", false);
-	int channels = loader.getMeta().getInt("channels", 1);
+	auto meta = loader.getMeta();
+	bool streaming = meta.getBool("streaming", false);
+	int channels = meta.getInt("channels", 1);
 	auto result = std::make_shared<AudioClip>(size_t(channels));
 
 	if (streaming) {
 		std::shared_ptr<ResourceDataStream> stream = loader.getStream();
-		Concurrent::execute([stream, result] ()	{
-			result->loadFromStream(stream);
+		Concurrent::execute([stream, result, meta] () {
+			result->loadFromStream(stream, meta);
 		});
 	} else {
 		loader
 			.getAsync()
-			.then([result](std::unique_ptr<ResourceDataStatic> data) {
-				result->loadFromStatic(std::shared_ptr<ResourceDataStatic>(std::move(data)));
+			.then([result, meta](std::unique_ptr<ResourceDataStatic> data) {
+				result->loadFromStatic(std::shared_ptr<ResourceDataStatic>(std::move(data)), meta);
 			});
 	}
 

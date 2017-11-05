@@ -40,7 +40,12 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, std::array<gsl::span
 		if (playbackPos >= playbackLength) {
 			// If we're at the end of playback, either loop, or flag as done
 			if (looping) {
-				playbackPos = 0;
+				playbackPos = clip->getLoopPoint();
+				if (playbackPos >= playbackLength) {
+					looping = false;
+					playbackPos = playbackLength;
+					isPlaying = false;
+				}
 			} else {
 				isPlaying = false;
 			}
