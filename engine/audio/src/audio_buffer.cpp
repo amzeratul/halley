@@ -131,22 +131,32 @@ AudioBuffersRef AudioBufferPool::getBuffers(size_t n, size_t numSamples)
 
 AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 {
+	Expects(AudioSamplePack::NumSamples == 16);
+	Expects(numSamples >= AudioSamplePack::NumSamples);
+	Expects(numSamples < 65536);
+
+	constexpr size_t log2NumSamples = 4;
+	size_t idx = fastLog2(numSamples) - log2NumSamples;
+	auto& buffers = buffersTable[idx];
+
 	for (auto& b: buffers) {
-		if (b.available && b.buffer->packs.size() * AudioSamplePack::NumSamples >= numSamples) {
+		if (b.available) {
 			b.available = false;
 			return *b.buffer;
 		}
 	}
 
 	// Couldn't find a free one, create new
-	size_t allocSize = nextPowerOf2((numSamples + AudioSamplePack::NumSamples - 1) / AudioSamplePack::NumSamples);
 	buffers.push_back(Entry(std::make_unique<AudioBuffer>()));
-	buffers.back().buffer->packs.resize(allocSize);
+	buffers.back().buffer->packs.resize(1LL << idx);
 	return *buffers.back().buffer;
 }
 
 void AudioBufferPool::returnBuffer(AudioBuffer& buffer)
 {
+	size_t idx = fastLog2(buffer.packs.size());
+	auto& buffers = buffersTable[idx];
+
 	for (auto& b: buffers) {
 		if (b.buffer.get() == &buffer) {
 			Expects(!b.available);
