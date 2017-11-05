@@ -137,7 +137,7 @@ void AudioEmitter::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBuf
 		bufferRefs[srcChannel] = pool.getBuffer(numSamples);
 		audioData[srcChannel] = bufferRefs[srcChannel].getSpan().subspan(0, numPacks);
 	}
-	source->getAudioData(numSamples, audioData);
+	bool playing = source->getAudioData(numSamples, audioData);
 	
 	// Render each emitter channel
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
@@ -156,6 +156,9 @@ void AudioEmitter::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBuf
 	}
 
 	advancePlayback(numSamples);
+	if (!playing) {
+		stop();
+	}
 }
 
 void AudioEmitter::advancePlayback(size_t samples)

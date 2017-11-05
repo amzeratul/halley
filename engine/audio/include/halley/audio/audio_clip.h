@@ -29,6 +29,7 @@ namespace Halley
 		size_t sampleLength;
 		size_t numChannels;
 		size_t loopPoint = 0;
+		mutable size_t streamPos = 0;
 		bool streaming;
 
 		// TODO: sort this mess?

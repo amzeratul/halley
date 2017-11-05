@@ -51,6 +51,7 @@ namespace Halley {
 		void close();
 		void reset();
 		void seek(double t);
+		void seek(size_t sample);
 
 	private:
 		void open();

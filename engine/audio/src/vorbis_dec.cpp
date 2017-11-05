@@ -160,6 +160,12 @@ void Halley::VorbisData::seek(double t)
 	ov_time_seek(file, t);
 }
 
+void VorbisData::seek(size_t sample)
+{
+	Expects(file);
+	ov_pcm_seek(file, ogg_int64_t(sample));
+}
+
 size_t VorbisData::vorbisRead(void* ptr, size_t size, size_t nmemb, void* datasource)
 {
 	VorbisData* data = static_cast<VorbisData*>(datasource);

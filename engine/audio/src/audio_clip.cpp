@@ -50,6 +50,7 @@ void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadat
 	numChannels = nChannels;
 	sampleLength = vorbisData->getNumSamples();
 	loopPoint = meta.getInt("loopPoint", 0);
+	streamPos = 0;
 	streaming = true;
 	doneLoading();
 }
@@ -65,8 +66,9 @@ gsl::span<const AudioConfig::SampleFormat> AudioClip::getChannelData(size_t chan
 		}
 
 		if (channelN == 0) { // TODO: this assumes the channels will be read in order. This will break threading.
-			if (pos == 0) {
-				vorbisData->seek(0);
+			if (pos != streamPos) {
+				vorbisData->seek(pos);
+				streamPos = pos;
 			}
 
 			size_t toRead = len;
@@ -76,6 +78,7 @@ gsl::span<const AudioConfig::SampleFormat> AudioClip::getChannelData(size_t chan
 				}
 			}
 			vorbisData->read(temp);
+			streamPos += len;
 		}
 
 		auto& buf = samples.at(channelN);
