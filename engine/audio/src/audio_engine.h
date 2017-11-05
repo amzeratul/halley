@@ -16,7 +16,7 @@ namespace Halley {
 	    AudioEngine();
 		~AudioEngine();
 
-	    void play(size_t id, std::shared_ptr<const AudioClip> clip, AudioPosition position, float volume, bool loop);
+	    void play(size_t id, std::shared_ptr<const AudioClip> clip, AudioPosition position, float volume, bool loop, float pitch);
 	    void setListener(AudioListenerData position);
 
 		AudioEmitter* getSource(size_t id);

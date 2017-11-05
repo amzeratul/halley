@@ -3,6 +3,7 @@
 #include <thread>
 #include <chrono>
 #include "audio_source_clip.h"
+#include "audio_filter_resample.h"
 
 using namespace Halley;
 
@@ -18,9 +19,13 @@ AudioEngine::~AudioEngine()
 {
 }
 
-void AudioEngine::play(size_t id, std::shared_ptr<const AudioClip> clip, AudioPosition position, float volume, bool loop)
+void AudioEngine::play(size_t id, std::shared_ptr<const AudioClip> clip, AudioPosition position, float volume, bool loop, float pitch)
 {
-	auto source = std::make_shared<AudioSourceClip>(clip, loop);
+	std::shared_ptr<AudioSource> source = std::make_shared<AudioSourceClip>(clip, loop);
+	if (std::abs(pitch - 1.0f) > 0.01f) {
+		pitch = clamp(pitch, 0.1f, 2.0f);
+		source = std::make_shared<AudioFilterResample>(source, int(48000 * pitch + 0.5f), 48000, *pool);
+	}
 	addEmitter(id, std::make_unique<AudioEmitter>(source, position, volume));
 }
 

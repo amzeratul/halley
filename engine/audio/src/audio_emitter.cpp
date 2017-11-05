@@ -131,13 +131,15 @@ void AudioEmitter::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBuf
 	}
 
 	// Read data from source
-	std::array<gsl::span<AudioSamplePack>, 8> audioData;
-	std::array<AudioBufferRef, 8> bufferRefs;
+	std::array<gsl::span<AudioSamplePack>, AudioConfig::maxChannels> audioData;
+	std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> audioSampleData;
+	std::array<AudioBufferRef, AudioConfig::maxChannels> bufferRefs;
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
 		bufferRefs[srcChannel] = pool.getBuffer(numSamples);
 		audioData[srcChannel] = bufferRefs[srcChannel].getSpan().subspan(0, numPacks);
+		audioSampleData[srcChannel] = audioData[srcChannel].data()->samples;
 	}
-	bool playing = source->getAudioData(numSamples, audioData);
+	bool playing = source->getAudioData(numSamples, audioSampleData);
 	
 	// Render each emitter channel
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {

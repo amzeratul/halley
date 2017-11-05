@@ -20,6 +20,17 @@ AudioResampler::AudioResampler(int from, int to, int nChannels, float quality)
 
 AudioResampler::~AudioResampler() = default;
 
+AudioResamplerResult AudioResampler::resample(gsl::span<const float> src, gsl::span<float> dst, size_t channel)
+{
+	unsigned inLen = unsigned(src.size() / nChannels);
+	unsigned outLen = unsigned(dst.size() / nChannels);
+	speex_resampler_process_float(resampler.get(), unsigned(channel), src.data(), &inLen, dst.data(), &outLen);
+	AudioResamplerResult result;
+	result.nRead = inLen;
+	result.nWritten = outLen;
+	return result;
+}
+
 AudioResamplerResult AudioResampler::resampleInterleaved(gsl::span<const float> src, gsl::span<float> dst)
 {
 	unsigned inLen = unsigned(src.size() / nChannels);

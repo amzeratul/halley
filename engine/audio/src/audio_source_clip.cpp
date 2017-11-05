@@ -23,7 +23,7 @@ bool AudioSourceClip::isReady() const
 	return clip->isLoaded();
 }
 
-bool AudioSourceClip::getAudioData(size_t samplesRequested, std::array<gsl::span<AudioSamplePack>, 8> dstChannels)
+bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData dstChannels)
 {
 	if (!initialised) {
 		playbackLength = clip->getLength();
@@ -59,8 +59,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, std::array<gsl::span
 			// We have some samples that we can read, so go ahead with reading them
 			for (size_t srcChannel = 0; srcChannel < nChannels; ++srcChannel) {
 				auto src = clip->getChannelData(srcChannel, playbackPos, samplesToRead);
-				auto dstBuf = dstChannels[srcChannel];
-				auto dst = dstBuf.data()->samples.data() + samplesWritten;
+				auto dst = dstChannels[srcChannel].data() + samplesWritten;
 
 				Expects(size_t(src.size_bytes()) <= samplesRequested * sizeof(AudioConfig::SampleFormat));
 				if (src.size_bytes() > 0) {
@@ -74,7 +73,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, std::array<gsl::span
 			// Reached end of playback, pad with zeroes
 			for (size_t srcChannel = 0; srcChannel < nChannels; ++srcChannel) {
 				auto dstBuf = dstChannels[srcChannel];
-				auto dst = dstBuf.data()->samples.data() + samplesWritten;
+				auto dst = dstBuf.data() + samplesWritten;
 				memset(dst, 0, samplesRemaining * sizeof(AudioConfig::SampleFormat));
 			}
 

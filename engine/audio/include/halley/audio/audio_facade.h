@@ -28,8 +28,8 @@ namespace Halley {
 		void startPlayback(int deviceNumber) override;
 		void stopPlayback() override;
 
-    	AudioHandle play(std::shared_ptr<const AudioClip> clip, AudioPosition position, float volume, bool loop) override;
-	    AudioHandle playUI(std::shared_ptr<const AudioClip> clip, float volume, float pan, bool loop) override;
+    	AudioHandle play(std::shared_ptr<const AudioClip> clip, AudioPosition position, float volume, bool loop, float pitch) override;
+	    AudioHandle playUI(std::shared_ptr<const AudioClip> clip, float volume, float pan, bool loop, float pitch) override;
 
 		AudioHandle playMusic(std::shared_ptr<const AudioClip> clip, int track = 0, float fadeInTime = 0.0f, bool loop = true) override;
 		AudioHandle getMusic(int track = 0) override;

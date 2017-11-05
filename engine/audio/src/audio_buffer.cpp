@@ -49,12 +49,92 @@ gsl::span<AudioSamplePack> AudioBufferRef::getSpan() const
 	return gsl::span<AudioSamplePack>(buffer->packs);
 }
 
+gsl::span<AudioConfig::SampleFormat> AudioBufferRef::getSampleSpan() const
+{
+	return gsl::span<AudioConfig::SampleFormat>(buffer->packs.data()->samples.data(), buffer->packs.size() * AudioSamplePack::NumSamples);
+}
+
+AudioBuffersRef::AudioBuffersRef()
+	: nBuffers(0)
+	, pool(nullptr)
+{
+}
+
+AudioBuffersRef::AudioBuffersRef(size_t n, std::array<AudioBuffer*, AudioConfig::maxChannels> buffers, AudioBufferPool& pool)
+	: buffers(buffers)
+	, nBuffers(n)
+	, pool(&pool)
+{
+	for (size_t i = 0; i < n; ++i) {
+		spans[i] = buffers[i]->packs;
+		sampleSpans[i] = gsl::span<AudioConfig::SampleFormat>(spans[i].data()->samples.data(), spans[i].size() * AudioSamplePack::NumSamples);
+	}
+}
+
+AudioBuffersRef::AudioBuffersRef(AudioBuffersRef&& other) noexcept
+{
+	buffers = other.buffers;
+	nBuffers = other.nBuffers;
+	pool = other.pool;
+
+	other.nBuffers = 0;
+	other.pool = nullptr;
+}
+
+AudioBuffersRef& AudioBuffersRef::operator=(AudioBuffersRef&& other) noexcept
+{
+	buffers = other.buffers;
+	nBuffers = other.nBuffers;
+	pool = other.pool;
+
+	other.nBuffers = 0;
+	other.pool = nullptr;
+
+	return *this;
+}
+
+AudioBuffersRef::~AudioBuffersRef()
+{
+	if (pool) {
+		for (size_t i = 0; i < nBuffers; ++i) {
+			pool->returnBuffer(*buffers[i]);
+		}
+	}
+	pool = nullptr;
+	nBuffers = 0;
+}
+
+std::array<gsl::span<AudioSamplePack>, AudioConfig::maxChannels> AudioBuffersRef::getSpans() const
+{
+	return spans;
+}
+
+std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> AudioBuffersRef::getSampleSpans() const
+{
+	return sampleSpans;
+}
+
 AudioBufferRef AudioBufferPool::getBuffer(size_t numSamples)
+{
+	return AudioBufferRef(allocBuffer(numSamples), *this);
+}
+
+AudioBuffersRef AudioBufferPool::getBuffers(size_t n, size_t numSamples)
+{
+	Expects(n <= AudioConfig::maxChannels);
+	std::array<AudioBuffer*, AudioConfig::maxChannels> buffers;
+	for (size_t i = 0; i < n; ++i) {
+		buffers[i] = &allocBuffer(numSamples);
+	}
+	return AudioBuffersRef(n, buffers, *this);
+}
+
+AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 {
 	for (auto& b: buffers) {
 		if (b.available && b.buffer->packs.size() * AudioSamplePack::NumSamples >= numSamples) {
 			b.available = false;
-			return AudioBufferRef(*b.buffer, *this);
+			return *b.buffer;
 		}
 	}
 
@@ -62,7 +142,7 @@ AudioBufferRef AudioBufferPool::getBuffer(size_t numSamples)
 	size_t allocSize = nextPowerOf2((numSamples + AudioSamplePack::NumSamples - 1) / AudioSamplePack::NumSamples);
 	buffers.push_back(Entry(std::make_unique<AudioBuffer>()));
 	buffers.back().buffer->packs.resize(allocSize);
-	return AudioBufferRef(*buffers.back().buffer, *this);
+	return *buffers.back().buffer;
 }
 
 void AudioBufferPool::returnBuffer(AudioBuffer& buffer)
