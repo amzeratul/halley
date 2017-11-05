@@ -51,10 +51,9 @@ bool AudioFilterResample::getAudioData(size_t numSamples, AudioSourceData dstBuf
 			tmp[i] = leftoverSamples[channel].samples[i];
 		}
 
-		size_t toWrite = numSamples + additionalPaddingSamples;
 		auto result = resamplers[channel]->resample(srcs[channel].subspan(0, numSamplesSrc), tmp.subspan(nLeftOver), 0);
 		Expects(result.nRead == numSamplesSrc);
-		Expects(result.nWritten >= numSamples);
+		Expects(result.nWritten >= samplesToGenerate);
 
 		// Store left overs
 		size_t leftOver = result.nWritten + nLeftOver - numSamples;
