@@ -1,30 +1,30 @@
-#include "audio_source.h"
+#include "audio_emitter.h"
 #include "audio_mixer.h"
-#include "audio_source_behaviour.h"
+#include "audio_emitter_behaviour.h"
 
 using namespace Halley;
 
-AudioSource::AudioSource(std::shared_ptr<const AudioClip> clip, AudioSourcePosition sourcePos, float gain, bool loop) 
+AudioEmitter::AudioEmitter(std::shared_ptr<const AudioClip> clip, AudioPosition sourcePos, float gain, bool loop) 
 	: clip(clip)
 	, sourcePos(sourcePos)
 	, looping(loop)
 	, gain(gain)
 {}
 
-AudioSource::~AudioSource()
+AudioEmitter::~AudioEmitter()
 {}
 
-void AudioSource::setId(size_t i)
+void AudioEmitter::setId(size_t i)
 {
 	id = i;
 }
 
-size_t AudioSource::getId() const
+size_t AudioEmitter::getId() const
 {
 	return id;
 }
 
-void AudioSource::start()
+void AudioEmitter::start()
 {
 	Expects(isReady());
 	Expects(!playing);
@@ -35,61 +35,61 @@ void AudioSource::start()
 	nChannels = clip->getNumberOfChannels();
 
 	if (nChannels > 1) {
-		sourcePos = AudioSourcePosition::makeFixed();
+		sourcePos = AudioPosition::makeFixed();
 	}
 }
 
-void AudioSource::stop()
+void AudioEmitter::stop()
 {
 	playing = false;
 	done = true;
 }
 
-bool AudioSource::isPlaying() const
+bool AudioEmitter::isPlaying() const
 {
 	return playing;
 }
 
-bool AudioSource::isReady() const
+bool AudioEmitter::isReady() const
 {
 	return clip->isLoaded();
 }
 
-bool AudioSource::isDone() const
+bool AudioEmitter::isDone() const
 {
 	return done;
 }
 
-void AudioSource::setBehaviour(std::shared_ptr<AudioSourceBehaviour> value)
+void AudioEmitter::setBehaviour(std::shared_ptr<AudioEmitterBehaviour> value)
 {
 	behaviour = std::move(value);
 	elapsedTime = 0;
 	behaviour->onAttach(*this);
 }
 
-void AudioSource::setGain(float g)
+void AudioEmitter::setGain(float g)
 {
 	gain = g;
 }
 
-void AudioSource::setAudioSourcePosition(AudioSourcePosition s)
+void AudioEmitter::setAudioSourcePosition(AudioPosition s)
 {
 	if (nChannels == 1) {
 		sourcePos = s;
 	}
 }
 
-float AudioSource::getGain() const
+float AudioEmitter::getGain() const
 {
 	return gain;
 }
 
-size_t AudioSource::getNumberOfChannels() const
+size_t AudioEmitter::getNumberOfChannels() const
 {
 	return nChannels;
 }
 
-void AudioSource::update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener)
+void AudioEmitter::update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener)
 {
 	Expects(playing);
 
@@ -110,7 +110,7 @@ void AudioSource::update(gsl::span<const AudioChannelData> channels, const Audio
 	}
 }
 
-void AudioSource::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBufferPool& pool)
+void AudioEmitter::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBufferPool& pool)
 {
 	Expects(dst.size() > 0);
 	Expects(this != nullptr);
@@ -132,7 +132,7 @@ void AudioSource::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBuff
 		return;
 	}
 	
-	// Render each source channel
+	// Render each emitter channel
 	auto tmp = pool.getBuffer(numSamples);
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
 		// Read to buffer
@@ -154,7 +154,7 @@ void AudioSource::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBuff
 	advancePlayback(numSamples);
 }
 
-void AudioSource::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const
+void AudioEmitter::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const
 {
 	Expects(clip);
 	Expects(srcChannel < 2);
@@ -186,7 +186,7 @@ void AudioSource::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePac
 	}
 }
 
-void AudioSource::advancePlayback(size_t samples)
+void AudioEmitter::advancePlayback(size_t samples)
 {
 	elapsedTime += float(samples) / AudioConfig::sampleRate;
 

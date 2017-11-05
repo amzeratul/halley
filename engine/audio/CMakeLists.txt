@@ -11,17 +11,17 @@ set(SOURCES
         "src/audio_mixer.cpp"
         "src/audio_mixer_avx.cpp"
         "src/audio_mixer_sse.cpp"
-        "src/audio_source.cpp"
-        "src/audio_source_behaviour.cpp"
-        "src/audio_source_position.cpp"
+        "src/audio_emitter.cpp"
+        "src/audio_emitter_behaviour.cpp"
+        "src/audio_position.cpp"
         "src/vorbis_dec.cpp"
         )
 
 set(HEADERS
         "include/halley/audio/audio_clip.h"
         "include/halley/audio/audio_facade.h"
-        "include/halley/audio/audio_source_behaviour.h"
-        "include/halley/audio/audio_source_position.h"
+        "include/halley/audio/audio_emitter_behaviour.h"
+        "include/halley/audio/audio_position.h"
         "include/halley/audio/halley_audio.h"
         "include/halley/audio/vorbis_dec.h"
         "src/audio_buffer.h"
@@ -30,7 +30,7 @@ set(HEADERS
         "src/audio_mixer.h"
         "src/audio_mixer_avx.h"
         "src/audio_mixer_sse.h"
-        "src/audio_source.h"
+        "src/audio_emitter.h"
         )
 
 file (GLOB_RECURSE OGG_FILES "../../contrib/libogg/*.c")

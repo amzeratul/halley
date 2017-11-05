@@ -1,7 +1,7 @@
 #pragma once
 #include "audio_clip.h"
-#include "audio_source_position.h"
-#include "audio_source_behaviour.h"
+#include "audio_position.h"
+#include "audio_emitter_behaviour.h"
 #include "audio_buffer.h"
 #include <boost/container/allocator_traits.hpp>
 #include <boost/predef/detail/_exception.h>
@@ -10,12 +10,12 @@
 namespace Halley {
 	class AudioBufferPool;
 	class AudioMixer;
-	class AudioSourceBehaviour;
+	class AudioEmitterBehaviour;
 
-	class AudioSource {
+	class AudioEmitter {
     public:
-		AudioSource(std::shared_ptr<const AudioClip> clip, AudioSourcePosition sourcePos, float gain, bool loop);
-		~AudioSource();
+		AudioEmitter(std::shared_ptr<const AudioClip> clip, AudioPosition sourcePos, float gain, bool loop);
+		~AudioEmitter();
 
 		void start();
 		void stop();
@@ -25,7 +25,7 @@ namespace Halley {
 		bool isDone() const;
 
 		void setGain(float gain);
-		void setAudioSourcePosition(AudioSourcePosition sourcePos);
+		void setAudioSourcePosition(AudioPosition sourcePos);
 
 		float getGain() const;
 		size_t getNumberOfChannels() const;
@@ -36,16 +36,16 @@ namespace Halley {
 		void setId(size_t id);
 		size_t getId() const;
 
-		void setBehaviour(std::shared_ptr<AudioSourceBehaviour> behaviour);
+		void setBehaviour(std::shared_ptr<AudioEmitterBehaviour> behaviour);
 
 	private:
 		std::shared_ptr<const AudioClip> clip;
-		std::shared_ptr<AudioSourceBehaviour> behaviour;
+		std::shared_ptr<AudioEmitterBehaviour> behaviour;
 
 		size_t playbackPos = 0;
 		size_t playbackLength = 0;
 
-    	AudioSourcePosition sourcePos;
+    	AudioPosition sourcePos;
 		bool playing = false;
 		bool done = false;
 		bool looping = false;

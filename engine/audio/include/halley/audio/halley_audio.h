@@ -4,5 +4,5 @@ namespace Halley {}
 
 #include "audio_clip.h"
 #include "audio_config.h"
-#include "audio_source_behaviour.h"
-#include "audio_source_position.h"
+#include "audio_emitter_behaviour.h"
+#include "audio_position.h"

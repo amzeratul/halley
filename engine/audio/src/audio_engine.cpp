@@ -17,9 +17,9 @@ AudioEngine::~AudioEngine()
 {
 }
 
-void AudioEngine::play(size_t id, std::shared_ptr<const AudioClip> clip, AudioSourcePosition position, float volume, bool loop)
+void AudioEngine::play(size_t id, std::shared_ptr<const AudioClip> clip, AudioPosition position, float volume, bool loop)
 {
-	addSource(id, std::make_unique<AudioSource>(clip, position, volume, loop));
+	addSource(id, std::make_unique<AudioEmitter>(clip, position, volume, loop));
 }
 
 void AudioEngine::setListener(AudioListenerData l)
@@ -46,14 +46,14 @@ void AudioEngine::run()
 	// but first return so we the AudioFacade can update the incoming sound data
 }
 
-void AudioEngine::addSource(size_t id, std::unique_ptr<AudioSource>&& src)
+void AudioEngine::addSource(size_t id, std::unique_ptr<AudioEmitter>&& src)
 {
-	sources.emplace_back(std::move(src));
-	sources.back()->setId(id);
-	idToSource[id] = sources.back().get();
+	emitters.emplace_back(std::move(src));
+	emitters.back()->setId(id);
+	idToSource[id] = emitters.back().get();
 }
 
-AudioSource* AudioEngine::getSource(size_t id)
+AudioEmitter* AudioEngine::getSource(size_t id)
 {
 	auto src = idToSource.find(id);
 	if (src != idToSource.end()) {
@@ -100,44 +100,44 @@ void AudioEngine::stop()
 
 void AudioEngine::generateBuffer()
 {
-	mixSources();
-	removeFinishedSources();
+	mixEmitters();
+	removeFinishedEmitters();
 
 	mixer->interleaveChannels(backBuffer, channelBuffers);
 	mixer->compressRange(backBuffer.packs);
 	out->queueAudio(backBuffer.packs);
 }
 
-void AudioEngine::mixSources()
+void AudioEngine::mixEmitters()
 {
 	// Clear buffers
 	for (size_t i = 0; i < spec.numChannels; ++i) {
 		clearBuffer(channelBuffers[i].packs);
 	}
 
-	// Mix every source
-	for (auto& source: sources) {
+	// Mix every emitter
+	for (auto& e: emitters) {
 		// Start playing if necessary
-		if (!source->isPlaying() && !source->isDone() && source->isReady()) {
-			source->start();
+		if (!e->isPlaying() && !e->isDone() && e->isReady()) {
+			e->start();
 		}
 
 		// Mix it in!
-		if (source->isPlaying()) {
-			source->update(channels, listener);
-			source->mixTo(channelBuffers, *mixer, *pool);
+		if (e->isPlaying()) {
+			e->update(channels, listener);
+			e->mixTo(channelBuffers, *mixer, *pool);
 		}
 	}
 }
 
-void AudioEngine::removeFinishedSources()
+void AudioEngine::removeFinishedEmitters()
 {
-	for (auto& s: sources) {
-		if (s->isDone()) {
-			idToSource.erase(s->getId());
+	for (auto& e: emitters) {
+		if (e->isDone()) {
+			idToSource.erase(e->getId());
 		}
 	}
-	sources.erase(std::remove_if(sources.begin(), sources.end(), [&] (const std::unique_ptr<AudioSource>& src) { return src->isDone(); }), sources.end());
+	emitters.erase(std::remove_if(emitters.begin(), emitters.end(), [&] (const std::unique_ptr<AudioEmitter>& src) { return src->isDone(); }), emitters.end());
 }
 
 void AudioEngine::clearBuffer(gsl::span<AudioSamplePack> dst)

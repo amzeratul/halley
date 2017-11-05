@@ -1,7 +1,7 @@
 #include "audio_facade.h"
 #include "audio_engine.h"
 #include "audio_handle_impl.h"
-#include "audio_source_behaviour.h"
+#include "audio_emitter_behaviour.h"
 #include "halley/support/console.h"
 
 using namespace Halley;
@@ -89,7 +89,7 @@ void AudioFacade::stopPlayback()
 
 AudioHandle AudioFacade::playUI(std::shared_ptr<const AudioClip> clip, float volume, float pan, bool loop)
 {
-	return play(clip, AudioSourcePosition::makeUI(pan), volume, loop);
+	return play(clip, AudioPosition::makeUI(pan), volume, loop);
 }
 
 AudioHandle AudioFacade::playMusic(std::shared_ptr<const AudioClip> clip, int track, float fadeInTime, bool loop)
@@ -97,17 +97,17 @@ AudioHandle AudioFacade::playMusic(std::shared_ptr<const AudioClip> clip, int tr
 	bool hasFade = fadeInTime > 0.0001f;
 	
 	stopMusic(track, fadeInTime);
-	auto handle = play(clip, AudioSourcePosition::makeFixed(), hasFade ? 0.0f : 1.0f, true);
+	auto handle = play(clip, AudioPosition::makeFixed(), hasFade ? 0.0f : 1.0f, true);
 	musicTracks[track] = handle;
 
 	if (hasFade) {
-		handle->setBehaviour(std::make_unique<AudioSourceFadeBehaviour>(fadeInTime, 1.0f, false));
+		handle->setBehaviour(std::make_unique<AudioEmitterFadeBehaviour>(fadeInTime, 1.0f, false));
 	}
 
 	return handle;
 }
 
-AudioHandle AudioFacade::play(std::shared_ptr<const AudioClip> clip, AudioSourcePosition position, float volume, bool loop)
+AudioHandle AudioFacade::play(std::shared_ptr<const AudioClip> clip, AudioPosition position, float volume, bool loop)
 {
 	size_t id = uniqueId++;
 	enqueue([=] () {
@@ -146,7 +146,7 @@ void AudioFacade::stopAllMusic(float fadeOutTime)
 void AudioFacade::stopMusic(AudioHandle& handle, float fadeOutTime)
 {
 	if (fadeOutTime > 0.001f) {
-		handle->setBehaviour(std::make_unique<AudioSourceFadeBehaviour>(fadeOutTime, 0.0f, true));
+		handle->setBehaviour(std::make_unique<AudioEmitterFadeBehaviour>(fadeOutTime, 0.0f, true));
 	} else {
 		handle->stop();
 	}

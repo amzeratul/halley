@@ -13,7 +13,7 @@ AudioHandleImpl::AudioHandleImpl(AudioFacade& facade, size_t id)
 
 void AudioHandleImpl::setGain(float gain)
 {
-	enqueue([gain] (AudioSource& src)
+	enqueue([gain] (AudioEmitter& src)
 	{
 		src.setGain(gain);
 	});
@@ -21,36 +21,36 @@ void AudioHandleImpl::setGain(float gain)
 
 void AudioHandleImpl::setPosition(Vector2f pos)
 {
-	enqueue([pos] (AudioSource& src)
+	enqueue([pos] (AudioEmitter& src)
 	{
-		src.setAudioSourcePosition(AudioSourcePosition::makePositional(Vector3f(pos)));
+		src.setAudioSourcePosition(AudioPosition::makePositional(Vector3f(pos)));
 	});
 }
 
 void AudioHandleImpl::setPan(float pan)
 {
-	enqueue([pan] (AudioSource& src)
+	enqueue([pan] (AudioEmitter& src)
 	{
-		src.setAudioSourcePosition(AudioSourcePosition::makeUI(pan));
+		src.setAudioSourcePosition(AudioPosition::makeUI(pan));
 	});
 }
 
 void AudioHandleImpl::stop(float fadeTime)
 {
-	enqueue([fadeTime] (AudioSource& src)
+	enqueue([fadeTime] (AudioEmitter& src)
 	{
 		if (fadeTime >= 0.001f) {
-			src.setBehaviour(std::make_unique<AudioSourceFadeBehaviour>(fadeTime, 0.0f, true));
+			src.setBehaviour(std::make_unique<AudioEmitterFadeBehaviour>(fadeTime, 0.0f, true));
 		} else {
 			src.stop();
 		}
 	});
 }
 
-void AudioHandleImpl::setBehaviour(std::unique_ptr<AudioSourceBehaviour> b)
+void AudioHandleImpl::setBehaviour(std::unique_ptr<AudioEmitterBehaviour> b)
 {
-	std::shared_ptr<AudioSourceBehaviour> behaviour = std::move(b);
-	enqueue([behaviour] (AudioSource& src) mutable
+	std::shared_ptr<AudioEmitterBehaviour> behaviour = std::move(b);
+	enqueue([behaviour] (AudioEmitter& src) mutable
 	{
 		src.setBehaviour(behaviour);
 	});
@@ -63,7 +63,7 @@ bool AudioHandleImpl::isPlaying() const
 }
 
 
-void AudioHandleImpl::enqueue(std::function<void(AudioSource& src)> f)
+void AudioHandleImpl::enqueue(std::function<void(AudioEmitter& src)> f)
 {
 	size_t id = handleId;
 	AudioEngine* engine = facade.engine.get();

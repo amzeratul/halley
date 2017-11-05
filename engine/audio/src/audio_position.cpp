@@ -1,32 +1,32 @@
-#include "audio_source_position.h"
+#include "audio_position.h"
 #include "halley/core/api/audio_api.h"
 
 using namespace Halley;
 
 
-AudioSourcePosition::AudioSourcePosition()
+AudioPosition::AudioPosition()
 	: isUI(true)
 	, isPannable(false)
 {
 }
 
-AudioSourcePosition AudioSourcePosition::makeUI(float pan)
+AudioPosition AudioPosition::makeUI(float pan)
 {
-	auto result = AudioSourcePosition();
+	auto result = AudioPosition();
 	result.pos = Vector3f(pan, 0, 0);
 	result.isUI = true;
 	result.isPannable = true;
 	return result;
 }
 
-AudioSourcePosition AudioSourcePosition::makePositional(Vector2f pos, float referenceDistance, float maxDistance)
+AudioPosition AudioPosition::makePositional(Vector2f pos, float referenceDistance, float maxDistance)
 {
 	return makePositional(Vector3f(pos), referenceDistance, maxDistance);
 }
 
-AudioSourcePosition AudioSourcePosition::makePositional(Vector3f pos, float referenceDistance, float maxDistance)
+AudioPosition AudioPosition::makePositional(Vector3f pos, float referenceDistance, float maxDistance)
 {
-	auto result = AudioSourcePosition();
+	auto result = AudioPosition();
 	result.pos = pos;
 	result.isUI = false;
 	result.isPannable = true;
@@ -35,9 +35,9 @@ AudioSourcePosition AudioSourcePosition::makePositional(Vector3f pos, float refe
 	return result;
 }
 
-AudioSourcePosition AudioSourcePosition::makeFixed()
+AudioPosition AudioPosition::makeFixed()
 {
-	auto result = AudioSourcePosition();
+	auto result = AudioPosition();
 	result.isUI = true;
 	result.isPannable = false;
 	return result;
@@ -49,7 +49,7 @@ static float gain2DPan(float srcPan, float dstPan)
 	return std::sin(std::max(0.0f, 1.0f - 0.5f * std::abs(srcPan - dstPan)) * piOverTwo);
 }
 
-void AudioSourcePosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const
+void AudioPosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const
 {
 	const size_t nDstChannels = size_t(dstChannels.size());
 

@@ -11,9 +11,9 @@
 
 namespace Halley
 {
-	class AudioSourcePosition;
+	class AudioPosition;
 	class AudioClip;
-	class AudioSourceBehaviour;
+	class AudioEmitterBehaviour;
 
     namespace AudioConfig {
         constexpr int sampleRate = 48000;
@@ -100,7 +100,7 @@ namespace Halley
 
 		virtual void stop(float fadeTime = 0.0f) = 0;
 		virtual bool isPlaying() const = 0;
-		virtual void setBehaviour(std::unique_ptr<AudioSourceBehaviour> behaviour) = 0;
+		virtual void setBehaviour(std::unique_ptr<AudioEmitterBehaviour> behaviour) = 0;
 	};
 	using AudioHandle = std::shared_ptr<IAudioHandle>;
 
@@ -113,7 +113,7 @@ namespace Halley
 		virtual void startPlayback(int deviceNumber = 0) = 0;
 		virtual void stopPlayback() = 0;
 
-		virtual AudioHandle play(std::shared_ptr<const AudioClip> clip, AudioSourcePosition position, float volume = 1.0f, bool loop = false) = 0;
+		virtual AudioHandle play(std::shared_ptr<const AudioClip> clip, AudioPosition position, float volume = 1.0f, bool loop = false) = 0;
 		virtual AudioHandle playUI(std::shared_ptr<const AudioClip> clip, float volume = 1.0f, float pan = 0.0f, bool loop = false) = 0;
 
 		virtual AudioHandle playMusic(std::shared_ptr<const AudioClip> clip, int track = 0, float fadeInTime = 0.0f, bool loop = true) = 0;

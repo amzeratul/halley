@@ -5,7 +5,7 @@
 #include <condition_variable>
 #include <map>
 #include <vector>
-#include "audio_source.h"
+#include "audio_emitter.h"
 
 namespace Halley {
 	class AudioMixer;
@@ -16,10 +16,10 @@ namespace Halley {
 	    AudioEngine();
 		~AudioEngine();
 
-	    void play(size_t id, std::shared_ptr<const AudioClip> clip, AudioSourcePosition position, float volume, bool loop);
+	    void play(size_t id, std::shared_ptr<const AudioClip> clip, AudioPosition position, float volume, bool loop);
 	    void setListener(AudioListenerData position);
 
-		AudioSource* getSource(size_t id);
+		AudioEmitter* getSource(size_t id);
 		std::vector<size_t> getPlayingSounds();
 
 		void run();
@@ -39,20 +39,20 @@ namespace Halley {
 		std::mutex mutex;
 		std::condition_variable backBufferCondition;
 
-		std::vector<std::unique_ptr<AudioSource>> sources;
+		std::vector<std::unique_ptr<AudioEmitter>> emitters;
 		std::vector<AudioChannelData> channels;
 
 		AudioBuffer backBuffer;
     	std::vector<AudioBuffer> channelBuffers;
 
-		std::map<size_t, AudioSource*> idToSource;
+		std::map<size_t, AudioEmitter*> idToSource;
 
 		AudioListenerData listener;
 
-		void addSource(size_t id, std::unique_ptr<AudioSource>&& src);
+		void addSource(size_t id, std::unique_ptr<AudioEmitter>&& src);
 
-		void mixSources();
-	    void removeFinishedSources();
+		void mixEmitters();
+	    void removeFinishedEmitters();
 		void clearBuffer(gsl::span<AudioSamplePack> dst);
     };
 }
