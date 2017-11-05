@@ -2,6 +2,7 @@
 #include "audio_mixer.h"
 #include <thread>
 #include <chrono>
+#include "audio_source_clip.h"
 
 using namespace Halley;
 
@@ -19,7 +20,8 @@ AudioEngine::~AudioEngine()
 
 void AudioEngine::play(size_t id, std::shared_ptr<const AudioClip> clip, AudioPosition position, float volume, bool loop)
 {
-	addSource(id, std::make_unique<AudioEmitter>(clip, position, volume, loop));
+	auto source = std::make_shared<AudioSourceClip>(clip, loop);
+	addEmitter(id, std::make_unique<AudioEmitter>(source, position, volume));
 }
 
 void AudioEngine::setListener(AudioListenerData l)
@@ -46,7 +48,7 @@ void AudioEngine::run()
 	// but first return so we the AudioFacade can update the incoming sound data
 }
 
-void AudioEngine::addSource(size_t id, std::unique_ptr<AudioEmitter>&& src)
+void AudioEngine::addEmitter(size_t id, std::unique_ptr<AudioEmitter>&& src)
 {
 	emitters.emplace_back(std::move(src));
 	emitters.back()->setId(id);

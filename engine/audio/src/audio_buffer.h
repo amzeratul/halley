@@ -14,12 +14,13 @@ namespace Halley
 	class AudioBufferRef
 	{
 	public:
+		AudioBufferRef();
 		AudioBufferRef(AudioBuffer& buffer, AudioBufferPool& pool);
 		AudioBufferRef(const AudioBufferRef& other) = delete;
 		AudioBufferRef(AudioBufferRef&& other) noexcept;
 
 		AudioBufferRef& operator=(const AudioBufferRef& other) = delete;
-		AudioBufferRef& operator=(AudioBufferRef&& other) = delete;
+		AudioBufferRef& operator=(AudioBufferRef&& other) noexcept;
 
 		~AudioBufferRef();
 
@@ -28,7 +29,7 @@ namespace Halley
 
 	private:
 		AudioBuffer* buffer;
-		AudioBufferPool& pool;
+		AudioBufferPool* pool;
 	};
 
 	class AudioBufferPool

@@ -49,7 +49,7 @@ namespace Halley {
 
 		AudioListenerData listener;
 
-		void addSource(size_t id, std::unique_ptr<AudioEmitter>&& src);
+		void addEmitter(size_t id, std::unique_ptr<AudioEmitter>&& src);
 
 		void mixEmitters();
 	    void removeFinishedEmitters();

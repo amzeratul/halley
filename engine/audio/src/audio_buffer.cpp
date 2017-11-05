@@ -2,9 +2,15 @@
 
 using namespace Halley;
 
+AudioBufferRef::AudioBufferRef()
+	: buffer(nullptr)
+	, pool(nullptr)
+{	
+}
+
 AudioBufferRef::AudioBufferRef(AudioBuffer& buffer, AudioBufferPool& pool)
 	: buffer(&buffer)
-	, pool(pool)
+	, pool(&pool)
 {
 }
 
@@ -13,12 +19,22 @@ AudioBufferRef::AudioBufferRef(AudioBufferRef&& other) noexcept
 	, pool(other.pool)
 {
 	other.buffer = nullptr;
+	other.pool = nullptr;
+}
+
+AudioBufferRef& AudioBufferRef::operator=(AudioBufferRef&& other) noexcept
+{
+	buffer = other.buffer;
+	pool = other.pool;
+	other.buffer = nullptr;
+	other.pool = nullptr;
+	return *this;
 }
 
 AudioBufferRef::~AudioBufferRef()
 {
-	if (buffer) {
-		pool.returnBuffer(*buffer);
+	if (buffer && pool) {
+		pool->returnBuffer(*buffer);
 		buffer = nullptr;
 	}
 }

@@ -1,13 +1,13 @@
 #include "audio_emitter.h"
 #include "audio_mixer.h"
 #include "audio_emitter_behaviour.h"
+#include "audio_source.h"
 
 using namespace Halley;
 
-AudioEmitter::AudioEmitter(std::shared_ptr<const AudioClip> clip, AudioPosition sourcePos, float gain, bool loop) 
-	: clip(clip)
+AudioEmitter::AudioEmitter(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain) 
+	: source(source)
 	, sourcePos(sourcePos)
-	, looping(loop)
 	, gain(gain)
 {}
 
@@ -30,9 +30,7 @@ void AudioEmitter::start()
 	Expects(!playing);
 
 	playing = true;
-	playbackPos = 0;
-	playbackLength = clip->getLength();
-	nChannels = clip->getNumberOfChannels();
+	nChannels = source->getNumberOfChannels();
 
 	if (nChannels > 1) {
 		sourcePos = AudioPosition::makeFixed();
@@ -52,7 +50,7 @@ bool AudioEmitter::isPlaying() const
 
 bool AudioEmitter::isReady() const
 {
-	return clip->isLoaded();
+	return source->isReady();
 }
 
 bool AudioEmitter::isDone() const
@@ -131,13 +129,19 @@ void AudioEmitter::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBuf
 		// Early out, this sample is not audible
 		return;
 	}
+
+	// Read data from source
+	std::array<gsl::span<AudioSamplePack>, 8> audioData;
+	std::array<AudioBufferRef, 8> bufferRefs;
+	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
+		bufferRefs[srcChannel] = pool.getBuffer(numSamples);
+		audioData[srcChannel] = bufferRefs[srcChannel].getSpan().subspan(0, numPacks);
+	}
+	source->getAudioData(numSamples, audioData);
 	
 	// Render each emitter channel
-	auto tmp = pool.getBuffer(numSamples);
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
 		// Read to buffer
-		readSourceToBuffer(srcChannel, tmp.getSpan().subspan(0, numPacks));
-
 		for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
 			// Compute mix
 			const size_t mixIndex = (srcChannel * nChannels) + dstChannel;
@@ -146,7 +150,7 @@ void AudioEmitter::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBuf
 
 			// Render to destination
 			if (gain0 + gain1 > 0.01f) {
-				mixer.mixAudio(tmp.getSpan(), dst[dstChannel].packs, gain0, gain1);
+				mixer.mixAudio(audioData[srcChannel], dst[dstChannel].packs, gain0, gain1);
 			}
 		}
 	}
@@ -154,49 +158,7 @@ void AudioEmitter::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBuf
 	advancePlayback(numSamples);
 }
 
-void AudioEmitter::readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const
-{
-	Expects(clip);
-	Expects(srcChannel < 2);
-	Expects(playbackPos <= playbackLength);
-
-	const size_t requestedLen = size_t(dst.size()) * 16;
-	const size_t len = std::min(requestedLen, playbackLength - playbackPos);
-	const size_t remainingLen = requestedLen - len;
-
-	if (len > 0) {
-		auto src = clip->getChannelData(srcChannel, playbackPos, len);
-		Expects(size_t(src.size_bytes()) <= requestedLen * sizeof(AudioConfig::SampleFormat));
-		if (src.size_bytes() > 0) {
-			memcpy(dst.data(), src.data(), src.size_bytes());
-		}
-	}
-
-	if (remainingLen > 0) {
-		const size_t remainingBytes = remainingLen * sizeof(AudioConfig::SampleFormat);
-		char* dst2 = reinterpret_cast<char*>(dst.data()) + len * sizeof(AudioConfig::SampleFormat);
-		if (looping) {
-			// Copy from start
-			auto src2 = clip->getChannelData(srcChannel, 0, len);
-			memcpy(dst2, src2.data(), remainingBytes);
-		} else {
-			// Pad with zeroes
-			memset(dst2, 0, remainingBytes);
-		}
-	}
-}
-
 void AudioEmitter::advancePlayback(size_t samples)
 {
 	elapsedTime += float(samples) / AudioConfig::sampleRate;
-
-	playbackPos += samples;
-	if (playbackPos >= playbackLength) {
-		if (looping) {
-			playbackPos %= playbackLength;
-		} else {
-			playbackPos = playbackLength;
-			stop();
-		}
-	}
 }

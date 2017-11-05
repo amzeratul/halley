@@ -1,5 +1,4 @@
 #pragma once
-#include "audio_clip.h"
 #include "audio_position.h"
 #include "audio_emitter_behaviour.h"
 #include "audio_buffer.h"
@@ -11,10 +10,11 @@ namespace Halley {
 	class AudioBufferPool;
 	class AudioMixer;
 	class AudioEmitterBehaviour;
+	class AudioSource;
 
 	class AudioEmitter {
     public:
-		AudioEmitter(std::shared_ptr<const AudioClip> clip, AudioPosition sourcePos, float gain, bool loop);
+		AudioEmitter(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain);
 		~AudioEmitter();
 
 		void start();
@@ -39,16 +39,12 @@ namespace Halley {
 		void setBehaviour(std::shared_ptr<AudioEmitterBehaviour> behaviour);
 
 	private:
-		std::shared_ptr<const AudioClip> clip;
+		std::shared_ptr<AudioSource> source;
 		std::shared_ptr<AudioEmitterBehaviour> behaviour;
-
-		size_t playbackPos = 0;
-		size_t playbackLength = 0;
 
     	AudioPosition sourcePos;
 		bool playing = false;
 		bool done = false;
-		bool looping = false;
 		bool isFirstUpdate = true;
     	float gain;
 		float elapsedTime = 0.0f;
@@ -59,7 +55,6 @@ namespace Halley {
 
 		size_t id = -1;
 
-		void readSourceToBuffer(size_t srcChannel, gsl::span<AudioSamplePack> dst) const;
 		void advancePlayback(size_t samples);
     };
 }
