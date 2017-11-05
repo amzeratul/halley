@@ -15,6 +15,19 @@ namespace Halley
 		ResizableWindow,
 		BorderlessWindow
 	};
+
+	template <>
+	struct EnumNames<WindowType> {
+		constexpr std::array<const char*, 5> operator()() const {
+			return {{
+				"none",
+				"fullscreen",
+				"window",
+				"resizeableWindow",
+				"borderlessWindow",
+			}};
+		}
+	};
 	
 	class WindowDefinition
 	{
