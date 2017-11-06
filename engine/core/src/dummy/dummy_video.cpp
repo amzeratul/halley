@@ -29,6 +29,11 @@ const Window& DummyVideoAPI::getWindow() const
 	return *window;
 }
 
+bool DummyVideoAPI::hasWindow() const
+{
+	return static_cast<bool>(window);
+}
+
 std::unique_ptr<Texture> DummyVideoAPI::createTexture(Vector2i size)
 {
 	return std::make_unique<DummyTexture>(size);

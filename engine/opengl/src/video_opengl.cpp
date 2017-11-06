@@ -81,6 +81,11 @@ const Window& VideoOpenGL::getWindow() const
 	return *window;
 }
 
+bool VideoOpenGL::hasWindow() const
+{
+	return window != nullptr;
+}
+
 void VideoOpenGL::initOpenGL()
 {
 	std::cout << ConsoleColour(Console::GREEN) << "Initializing OpenGL...\n" << ConsoleColour() << std::endl;

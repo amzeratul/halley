@@ -228,7 +228,9 @@ void Core::pumpEvents(Time time)
 void Core::pumpAudio()
 {
 	if (api->audio) {
+		HALLEY_DEBUG_TRACE();
 		api->audioInternal->pump();
+		HALLEY_DEBUG_TRACE();
 	}
 }
 

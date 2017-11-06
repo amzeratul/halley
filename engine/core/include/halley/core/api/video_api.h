@@ -27,6 +27,7 @@ namespace Halley
 
 		virtual void setWindow(WindowDefinition&& windowDescriptor, bool vsync) = 0;
 		virtual const Window& getWindow() const = 0;
+		virtual bool hasWindow() const = 0;
 
 		virtual std::unique_ptr<Texture> createTexture(Vector2i size) = 0;
 		virtual std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) = 0;

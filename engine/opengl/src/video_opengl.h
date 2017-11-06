@@ -20,6 +20,7 @@ namespace Halley {
 		
 		void setWindow(WindowDefinition&& window, bool vsync) override;
 		const Window& getWindow() const override;
+		bool hasWindow() const override;
 
 		std::unique_ptr<Painter> makePainter(Resources& resources) override;
 		std::unique_ptr<Texture> createTexture(Vector2i size) override;
