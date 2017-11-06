@@ -12,7 +12,7 @@ namespace Halley
 
 		size_t getNumberOfChannels() const override;
 		bool isReady() const override;
-		bool getAudioData(size_t numSamples, AudioSourceData dst) override;
+		bool getAudioData(size_t numSamples, AudioSourceData& dst) override;
 
 	private:
 		AudioBufferPool& pool;

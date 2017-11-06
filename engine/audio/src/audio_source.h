@@ -14,6 +14,6 @@ namespace Halley
 
 		virtual size_t getNumberOfChannels() const = 0;
 		virtual bool isReady() const { return true; }
-		virtual bool getAudioData(size_t numSamples, AudioSourceData dst) = 0;
+		virtual bool getAudioData(size_t numSamples, AudioSourceData& dst) = 0;
 	};
 }

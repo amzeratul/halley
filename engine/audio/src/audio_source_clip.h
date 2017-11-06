@@ -9,7 +9,7 @@ namespace Halley
 		AudioSourceClip(std::shared_ptr<const AudioClip> clip, bool looping);
 
 		size_t getNumberOfChannels() const override;
-		bool getAudioData(size_t numSamples, AudioSourceData dst) override;
+		bool getAudioData(size_t numSamples, AudioSourceData& dst) override;
 		bool isReady() const override;
 
 	private:
