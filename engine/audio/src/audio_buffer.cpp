@@ -136,7 +136,7 @@ AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 	Expects(numSamples < 65536);
 
 	constexpr size_t log2NumSamples = 4;
-	size_t idx = fastLog2(numSamples) - log2NumSamples;
+	size_t idx = fastLog2Ceil(numSamples) - log2NumSamples;
 	auto& buffers = buffersTable[idx];
 
 	for (auto& b: buffers) {
@@ -154,7 +154,7 @@ AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 
 void AudioBufferPool::returnBuffer(AudioBuffer& buffer)
 {
-	size_t idx = fastLog2(buffer.packs.size());
+	size_t idx = fastLog2Ceil(buffer.packs.size());
 	auto& buffers = buffersTable[idx];
 
 	for (auto& b: buffers) {
