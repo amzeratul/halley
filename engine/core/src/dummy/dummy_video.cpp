@@ -26,6 +26,7 @@ void DummyVideoAPI::setWindow(WindowDefinition&& windowDescriptor, bool vsync)
 
 const Window& DummyVideoAPI::getWindow() const
 {
+	Expects(window);
 	return *window;
 }
 
