@@ -40,6 +40,7 @@ AnimationPlayer& AnimationPlayer::setSequence(const String& sequence)
 		curTime = 0;
 		curFrame = 0;
 		curSeq = &animation->getSequence(sequence);
+		Expects(curSeq);
 
 		seqFPS = curSeq->getFPS();
 		seqLen = curSeq->numFrames();
@@ -209,6 +210,7 @@ void AnimationPlayer::setOffsetPivot(Vector2f offset)
 
 void AnimationPlayer::resolveSprite()
 {
+	Expects(curSeq);
 	spriteData = &curSeq->getFrame(curFrame).getSprite(dirId);
 	hasUpdate = true;
 }

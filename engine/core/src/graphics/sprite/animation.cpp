@@ -193,7 +193,7 @@ const AnimationSequence& Animation::getSequence(const String& name) const
 			return seq;
 		}
 	}
-	return sequences[0];
+	return sequences.at(0);
 }
 
 const AnimationDirection& Animation::getDirection(const String& name) const

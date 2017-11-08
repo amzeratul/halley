@@ -19,7 +19,11 @@ namespace Halley
 	{
 	public:
 		AnimationFrame(int frameNumber, const String& imageName, const SpriteSheet& sheet, const Vector<AnimationDirection>& directions);
-		const SpriteSheetEntry& getSprite(int dir) const { return *sprites[dir]; }
+		const SpriteSheetEntry& getSprite(int dir) const
+		{
+			Expects(dir >= 0 && dir < int(sprites.size()));
+			return *sprites[dir];
+		}
 
 	private:
 		Vector<const SpriteSheetEntry*> sprites;
@@ -50,7 +54,11 @@ namespace Halley
 
 		float getFPS() const { return fps; }
 		size_t numFrames() const { return frames.size(); }
-		const AnimationFrame& getFrame(size_t n) const { return frames[n]; }
+		const AnimationFrame& getFrame(size_t n) const
+		{
+			Expects(n < frames.size());
+			return frames[n];
+		}
 		const String& getName() const { return name; }
 		bool isLooping() const { return loop; }
 		bool isNoFlip() const { return noFlip; }
