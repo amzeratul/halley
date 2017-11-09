@@ -111,7 +111,6 @@ void AudioEmitter::update(gsl::span<const AudioChannelData> channels, const Audi
 void AudioEmitter::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBufferPool& pool)
 {
 	Expects(dst.size() > 0);
-	Expects(this != nullptr);
 
 	const size_t numPacks = dst[0].packs.size();
 	const size_t numSamples = numPacks * 16;
