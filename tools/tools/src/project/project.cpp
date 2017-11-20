@@ -28,7 +28,7 @@ Project::~Project()
 
 Path Project::getAssetsPath() const
 {
-	return rootPath / "bin" / "assets";
+	return rootPath / "assets";
 }
 
 Path Project::getAssetsSrcPath() const
