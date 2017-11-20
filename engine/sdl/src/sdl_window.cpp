@@ -57,8 +57,10 @@ void SDLWindow::update(const WindowDefinition& definition)
 	}
 	SDL_SetWindowBordered(window, windowType == WindowType::ResizableWindow || windowType == WindowType::Window ? SDL_TRUE : SDL_FALSE);
 
+#ifndef __APPLE__ // Hack until I update SDL2 to 2.0.7 on Mac
 #if SDL_MAJOR_VERSION > 2 || SDL_MINOR_VERSION > 0 || SDL_PATCHLEVEL >= 5
 	SDL_SetWindowResizable(window, windowType == WindowType::ResizableWindow ? SDL_TRUE : SDL_FALSE);
+#endif
 #endif
 
 	SDL_SetWindowPosition(window, windowPos.x, windowPos.y);
