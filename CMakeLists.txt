@@ -46,5 +46,5 @@ if (BUILD_HALLEY_TESTS)
 endif()
 
 if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../halley-external")
-    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../halley-external" "${CMAKE_CURRENT_BINARY_DIR}/../build-external")
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../halley-external" "${CMAKE_BINARY_DIR}/../build-external")
 endif()
