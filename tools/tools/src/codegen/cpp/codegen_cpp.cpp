@@ -303,7 +303,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 	sysClassGen.addAccessLevelSection(CPPAccess::Protected);
 
 	if ((int(system.access) & int(SystemAccess::API)) != 0) {
-		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::HalleyAPI&"), {}, "getAPI", true), "return doGetAPI();");
+		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("const Halley::HalleyAPI&"), {}, "getAPI", true), "return doGetAPI();");
 	}
 	if ((int(system.access) & int(SystemAccess::World)) != 0) {
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::World&"), {}, "getWorld", true), "return doGetWorld();");
