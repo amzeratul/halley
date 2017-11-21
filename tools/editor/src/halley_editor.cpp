@@ -97,7 +97,7 @@ void HalleyEditor::parseArguments(const std::vector<String>& args)
 	}
 }
 
-std::unique_ptr<Stage> HalleyEditor::startGame(HalleyAPI* api)
+std::unique_ptr<Stage> HalleyEditor::startGame(const HalleyAPI* api)
 {
 	if (gotProjectPath) {
 		loadProject(api->core->getStatics(), platform, Path(projectPath));

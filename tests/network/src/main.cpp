@@ -34,7 +34,7 @@ public:
 		return true;
 	}
 
-	std::unique_ptr<Stage> startGame(HalleyAPI* api) override
+	std::unique_ptr<Stage> startGame(const HalleyAPI* api) override
 	{
 		api->video->setWindow(WindowDefinition(WindowType::Window, Vector2i(1280, 720), getName()), false);
 		return std::make_unique<TestStage>();
