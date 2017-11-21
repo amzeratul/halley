@@ -7,8 +7,9 @@ set(SOURCES
         
         "src/dummy/dummy_audio.cpp"
         "src/dummy/dummy_input.cpp"
-        "src/dummy/dummy_plugins.cpp"
         "src/dummy/dummy_network.cpp"
+        "src/dummy/dummy_platform.cpp"
+        "src/dummy/dummy_plugins.cpp"
         "src/dummy/dummy_system.cpp"
         "src/dummy/dummy_video.cpp"
 

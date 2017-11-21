@@ -429,6 +429,7 @@ void Core::registerDefaultPlugins()
 	registerPlugin(std::make_unique<DummyAudioPlugin>());
 	registerPlugin(std::make_unique<DummyInputPlugin>());
 	registerPlugin(std::make_unique<DummyNetworkPlugin>());
+	registerPlugin(std::make_unique<DummyPlatformPlugin>());
 }
 
 void Core::registerPlugin(std::unique_ptr<Plugin> plugin)

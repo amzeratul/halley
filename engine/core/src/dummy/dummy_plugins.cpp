@@ -4,6 +4,7 @@
 #include "dummy_video.h"
 #include "dummy_input.h"
 #include "dummy_network.h"
+#include "dummy_platform.h"
 
 using namespace Halley;
 
@@ -63,6 +64,26 @@ HalleyAPIInternal* DummyNetworkPlugin::createAPI(SystemAPI*)
 }
 
 int DummyNetworkPlugin::getPriority() const
+{
+	return -1;
+}
+
+PluginType DummyPlatformPlugin::getType()
+{
+	return PluginType::PlatformAPI;
+}
+
+String DummyPlatformPlugin::getName()
+{
+	return "Platform/Dummy";
+}
+
+HalleyAPIInternal* DummyPlatformPlugin::createAPI(SystemAPI*)
+{
+	return new DummyPlatformAPI();
+}
+
+int DummyPlatformPlugin::getPriority() const
 {
 	return -1;
 }
