@@ -127,6 +127,16 @@ std::unique_ptr<const HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int fl
 		}
 	}
 
+	if (flags & HalleyAPIFlags::Platform) {
+		auto plugins = core->getPlugins(PluginType::PlatformAPI);
+		if (plugins.size() > 0) {
+			std::cout << "Platform plugin: " << plugins[0]->getName() << "\n";
+			api->platformInternal.reset(static_cast<PlatformAPIInternal*>(plugins[0]->createAPI(system.get())));
+		} else {
+			throw Exception("No suitable network plugins found.");
+		}
+	}
+
 	api->systemInternal = std::move(system);
 	api->init();
 	return std::move(api);
