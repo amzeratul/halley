@@ -25,7 +25,7 @@ namespace Halley {
 	class World
 	{
 	public:
-		World(HalleyAPI* api);
+		World(const HalleyAPI* api);
 		~World();
 
 		void step(TimeLine timeline, Time elapsed);
@@ -80,7 +80,7 @@ namespace Halley {
 		}
 		
 	private:
-		HalleyAPI* api;
+		const HalleyAPI* api;
 		std::array<Vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
 		bool entityDirty = false;
 		

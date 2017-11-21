@@ -5,45 +5,53 @@
 
 using namespace Halley;
 
-HalleyAPI::HalleyAPI(CoreAPIInternal* _core, std::unique_ptr<SystemAPIInternal> _system, std::unique_ptr<VideoAPIInternal> _video, std::unique_ptr<InputAPIInternal> _input, std::unique_ptr<AudioAPIInternal> _audio, std::unique_ptr<AudioOutputAPIInternal> _audioOutput, std::unique_ptr<NetworkAPIInternal> _network)
-	: coreInternal(_core)
-	, systemInternal(std::move(_system))
-	, videoInternal(std::move(_video))
-	, inputInternal(std::move(_input))
-	, audioInternal(std::move(_audio))
-	, audioOutputInternal(std::move(_audioOutput))
-	, networkInternal(std::move(_network))
-	, core(coreInternal)
-	, system(&*systemInternal)
-	, video(&*videoInternal)
-	, input(&*inputInternal)
-	, audio(&*audioInternal)
-	, network(&*networkInternal)
+HalleyAPI::~HalleyAPI()
 {
+	deInit();
+}
+
+void HalleyAPI::init()
+{
+	Expects(coreInternal);
+	Expects(systemInternal);
+	core = coreInternal;
+
 	if (systemInternal) {
 		systemInternal->init();
+		system = systemInternal.get();
 	}
 	if (videoInternal) {
 		videoInternal->init();
+		video = videoInternal.get();
 	}
 	if (inputInternal) {
 		inputInternal->init();
+		input = inputInternal.get();
 	}
 	if (audioOutputInternal) {
 		audioOutputInternal->init();
 	}
 	if (audioInternal) {
 		audioInternal->init();
+		audio = audioInternal.get();
+	}
+	if (platformInternal) {
+		platformInternal->init();
+		platform = platformInternal.get();
 	}
 	if (networkInternal) {
 		networkInternal->init();
+		network = networkInternal.get();
 	}
 }
 
-HalleyAPI::~HalleyAPI()
+void HalleyAPI::deInit()
 {
 	if (networkInternal) {
 		networkInternal->deInit();
+	}
+	if (platformInternal) {
+		platformInternal->deInit();
 	}
 	if (audioInternal) {
 		audioInternal->deInit();
@@ -62,8 +70,11 @@ HalleyAPI::~HalleyAPI()
 	}
 }
 
-std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
+std::unique_ptr<const HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 {
+	auto api = std::unique_ptr<HalleyAPI>(new HalleyAPI());
+	api->coreInternal = core;
+
 	std::unique_ptr<SystemAPIInternal> system;
 	{
 		auto plugins = core->getPlugins(PluginType::SystemAPI);
@@ -75,51 +86,48 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 		}
 	}
 
-	std::unique_ptr<VideoAPIInternal> video;
 	if (flags & HalleyAPIFlags::Video) {
 		auto plugins = core->getPlugins(PluginType::GraphicsAPI);
 		if (plugins.size() > 0) {
 			std::cout << "Video plugin: " << plugins[0]->getName() << "\n";
-			video.reset(static_cast<VideoAPIInternal*>(plugins[0]->createAPI(system.get())));
+			api->videoInternal.reset(static_cast<VideoAPIInternal*>(plugins[0]->createAPI(system.get())));
 		} else {
 			throw Exception("No suitable video plugins found.");
 		}
 	}
 
-	std::unique_ptr<InputAPIInternal> input;
 	if (flags & HalleyAPIFlags::Input) {
 		auto plugins = core->getPlugins(PluginType::InputAPI);
 		if (plugins.size() > 0) {
 			std::cout << "Input plugin: " << plugins[0]->getName() << "\n";
-			input.reset(static_cast<InputAPIInternal*>(plugins[0]->createAPI(system.get())));
+			api->inputInternal.reset(static_cast<InputAPIInternal*>(plugins[0]->createAPI(system.get())));
 		} else {
 			throw Exception("No suitable input plugins found.");
 		}
 	}
 
-	std::unique_ptr<AudioAPIInternal> audio;
-	std::unique_ptr<AudioOutputAPIInternal> audioOutput;
 	if (flags & HalleyAPIFlags::Audio) {
 		auto plugins = core->getPlugins(PluginType::AudioOutputAPI);
 		if (plugins.size() > 0) {
 			std::cout << "Audio output plugin: " << plugins[0]->getName() << "\n";
-			audioOutput.reset(static_cast<AudioOutputAPIInternal*>(plugins[0]->createAPI(system.get())));
-			audio = std::make_unique<AudioFacade>(*audioOutput, *system);
+			api->audioOutputInternal.reset(static_cast<AudioOutputAPIInternal*>(plugins[0]->createAPI(system.get())));
+			api->audioInternal = std::make_unique<AudioFacade>(*api->audioOutputInternal, *system);
 		} else {
 			throw Exception("No suitable audio plugins found.");
 		}
 	}
 
-	std::unique_ptr<NetworkAPIInternal> network;
 	if (flags & HalleyAPIFlags::Network) {
 		auto plugins = core->getPlugins(PluginType::NetworkAPI);
 		if (plugins.size() > 0) {
 			std::cout << "Network plugin: " << plugins[0]->getName() << "\n";
-			network.reset(static_cast<NetworkAPIInternal*>(plugins[0]->createAPI(system.get())));
+			api->networkInternal.reset(static_cast<NetworkAPIInternal*>(plugins[0]->createAPI(system.get())));
 		} else {
 			throw Exception("No suitable network plugins found.");
 		}
 	}
 
-	return std::unique_ptr<HalleyAPI>(new HalleyAPI(core, std::move(system), std::move(video), std::move(input), std::move(audio), std::move(audioOutput), std::move(network)));
+	api->systemInternal = std::move(system);
+	api->init();
+	return std::move(api);
 }

@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-Resources::Resources(std::unique_ptr<ResourceLocator> locator, HalleyAPI* api)
+Resources::Resources(std::unique_ptr<ResourceLocator> locator, const HalleyAPI* api)
 	: locator(std::move(locator))
 	, api(api)
 {}

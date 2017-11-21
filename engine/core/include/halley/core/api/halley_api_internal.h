@@ -7,6 +7,7 @@
 #include "input_api.h"
 #include "audio_api.h"
 #include "network_api.h"
+#include "platform_api.h"
 
 namespace Halley
 {
@@ -73,6 +74,12 @@ namespace Halley
 	{
 	public:
 		virtual ~NetworkAPIInternal() {}
+	};
+
+	class PlatformAPIInternal : public PlatformAPI, public HalleyAPIInternal
+	{
+	public:
+		virtual ~PlatformAPIInternal() {}
 	};
 }
 

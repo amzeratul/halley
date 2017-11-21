@@ -12,7 +12,7 @@ namespace Halley
 	public:
 		virtual ~IMainLoopable() {}
 
-		virtual HalleyAPI& getAPI() const = 0;
+		virtual const HalleyAPI& getAPI() const = 0;
 		virtual bool transitionStage() = 0;
 		virtual bool isRunning() const = 0;
 		virtual void onVariableUpdate(Time delta) = 0;

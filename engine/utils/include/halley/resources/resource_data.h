@@ -112,7 +112,7 @@ namespace Halley {
 	public:
 		const String& getName() const { return name; }
 		ResourceLoadPriority getPriority() const { return priority; }
-		HalleyAPI& getAPI() const { return *api; }
+		const HalleyAPI& getAPI() const { return *api; }
 		const Metadata& getMeta() const { return *metadata; }
 
 		std::unique_ptr<ResourceDataStatic> getStatic();
@@ -121,14 +121,14 @@ namespace Halley {
 
 	private:
 		ResourceLoader(ResourceLoader&& loader) noexcept;
-		ResourceLoader(IResourceLocator& locator, const String& name, AssetType type, ResourceLoadPriority priority, HalleyAPI* api);
+		ResourceLoader(IResourceLocator& locator, const String& name, AssetType type, ResourceLoadPriority priority, const HalleyAPI* api);
 		~ResourceLoader();
 
 		IResourceLocator& locator;
 		String name;
 		AssetType type;
 		ResourceLoadPriority priority;
-		HalleyAPI* api;
+		const HalleyAPI* api;
 		const Metadata* metadata;
 		bool loaded = false;
 	};

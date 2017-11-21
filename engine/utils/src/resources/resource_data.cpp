@@ -115,7 +115,7 @@ ResourceLoader::~ResourceLoader()
 {
 }
 
-ResourceLoader::ResourceLoader(IResourceLocator& locator, const String& name, AssetType type, ResourceLoadPriority priority, HalleyAPI* api)
+ResourceLoader::ResourceLoader(IResourceLocator& locator, const String& name, AssetType type, ResourceLoadPriority priority, const HalleyAPI* api)
 	: locator(locator)
 	, name(name)
 	, type(type)

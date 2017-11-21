@@ -43,7 +43,7 @@ namespace Halley {
 		void tryInit();
 
 	protected:
-		HalleyAPI& doGetAPI() const { return *api; }
+		const HalleyAPI& doGetAPI() const { return *api; }
 		World& doGetWorld() const { return *world; }
 
 		virtual void initBase() {}
@@ -127,7 +127,7 @@ namespace Halley {
 		Vector<std::pair<EntityId, MessageEntry>> outbox;
 
 		World* world = nullptr;
-		HalleyAPI* api = nullptr;
+		const HalleyAPI* api = nullptr;
 		String name;
 		int systemId = -1;
 		bool initialised = false;

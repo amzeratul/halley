@@ -12,7 +12,7 @@
 
 using namespace Halley;
 
-Halley::World::World(HalleyAPI* api)
+Halley::World::World(const HalleyAPI* api)
 	: api(api)
 {	
 }

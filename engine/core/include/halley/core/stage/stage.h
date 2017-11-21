@@ -26,7 +26,6 @@ namespace Halley
 		virtual void init() {}
 		virtual void deInit() {}
 
-		HalleyAPI& getAPI() { return *api; }
 		const HalleyAPI& getAPI() const { return *api; }
 
 	protected:
@@ -51,12 +50,12 @@ namespace Halley
 		friend class Core;
 
 		void setGame(Game& game);
-		void doInit(HalleyAPI* api);
+		void doInit(const HalleyAPI* api);
 		void doDeInit();
 
 		Game* game = nullptr;
 		String name;
-		HalleyAPI* api = nullptr;
+		const HalleyAPI* api = nullptr;
 	};
 
 }

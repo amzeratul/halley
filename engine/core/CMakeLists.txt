@@ -71,6 +71,7 @@ set(HEADERS
         "include/halley/core/api/halley_api_internal.h"
         "include/halley/core/api/input_api.h"
         "include/halley/core/api/network_api.h"
+        "include/halley/core/api/platform_api.h"
         "include/halley/core/api/system_api.h"
         "include/halley/core/api/video_api.h"
         

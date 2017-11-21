@@ -23,7 +23,7 @@ namespace Halley
 		virtual bool isDevBuild() const = 0;
 		virtual bool shouldCreateSeparateConsole() const { return isDevBuild(); }
 
-		virtual std::unique_ptr<Stage> startGame(HalleyAPI*) = 0;
+		virtual std::unique_ptr<Stage> startGame(const HalleyAPI*) = 0;
 		virtual void endGame() {}
 
 		virtual std::unique_ptr<Stage> makeStage(StageID id) { return std::unique_ptr<Stage>(); }

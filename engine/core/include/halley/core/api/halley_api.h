@@ -18,24 +18,26 @@ namespace Halley
 	{
 		// Beware of member order
 		CoreAPIInternal* coreInternal;
-		const std::unique_ptr<SystemAPIInternal> systemInternal;
-		const std::unique_ptr<VideoAPIInternal> videoInternal;
-		const std::unique_ptr<InputAPIInternal> inputInternal;
-		const std::unique_ptr<AudioAPIInternal> audioInternal;
-		const std::unique_ptr<AudioOutputAPIInternal> audioOutputInternal;
-		const std::unique_ptr<NetworkAPIInternal> networkInternal;
+		std::unique_ptr<SystemAPIInternal> systemInternal;
+		std::unique_ptr<VideoAPIInternal> videoInternal;
+		std::unique_ptr<InputAPIInternal> inputInternal;
+		std::unique_ptr<AudioAPIInternal> audioInternal;
+		std::unique_ptr<AudioOutputAPIInternal> audioOutputInternal;
+		std::unique_ptr<PlatformAPIInternal> platformInternal;
+		std::unique_ptr<NetworkAPIInternal> networkInternal;
 
 	public:
 		~HalleyAPI();
-		CoreAPI* const core;
-		SystemAPI* const system;
-		VideoAPI* const video;
-		InputAPI* const input;
-		AudioAPI* const audio;
-		NetworkAPI* const network;
+		CoreAPI* core;
+		SystemAPI* system;
+		VideoAPI* video;
+		InputAPI* input;
+		AudioAPI* audio;
+		PlatformAPI* platform;
+		NetworkAPI* network;
 		
 		template <typename T>
-		std::shared_ptr<const T> getResource(String name)
+		std::shared_ptr<const T> getResource(String name) const
 		{
 			return core->getResources().of<T>().get(name);
 		}
@@ -43,7 +45,8 @@ namespace Halley
 	private:
 		friend class Core;
 
-		HalleyAPI(CoreAPIInternal* core, std::unique_ptr<SystemAPIInternal> system, std::unique_ptr<VideoAPIInternal> video, std::unique_ptr<InputAPIInternal> input, std::unique_ptr<AudioAPIInternal> audio, std::unique_ptr<AudioOutputAPIInternal> audioOutput, std::unique_ptr<NetworkAPIInternal> network);
-		static std::unique_ptr<HalleyAPI> create(CoreAPIInternal* core, int flags);
+		void init();
+		void deInit();
+		static std::unique_ptr<const HalleyAPI> create(CoreAPIInternal* core, int flags);
 	};
 }

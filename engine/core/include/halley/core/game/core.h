@@ -43,7 +43,7 @@ namespace Halley
 		void onVariableUpdate(Time time) override;
 		bool isRunning() const override	{ return running; }
 		bool transitionStage() override;
-		HalleyAPI& getAPI() const override { return *api; }
+		const HalleyAPI& getAPI() const override { return *api; }
 		const HalleyStatics& getStatics() override;
 
 		void onSuspended() override;
@@ -82,7 +82,7 @@ namespace Halley
 
 		std::unique_ptr<Environment> environment;
 		std::unique_ptr<Game> game;
-		std::unique_ptr<HalleyAPI> api;
+		std::unique_ptr<const HalleyAPI> api;
 		std::unique_ptr<Resources> resources;
 
 		std::unique_ptr<Painter> painter;
