@@ -10,7 +10,8 @@ namespace Halley
 			Video = 1,
 			Audio = 2,
 			Input = 4,
-			Network = 8
+			Network = 8,
+			Platform = 16
 		};
 	}
 
