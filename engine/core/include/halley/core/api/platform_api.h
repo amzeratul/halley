@@ -20,6 +20,11 @@ namespace Halley
 	public:
 		virtual ~PlatformAPI() {}
 
+		virtual void update() = 0;
+
 		virtual std::unique_ptr<HTTPRequest> makeHTTPRequest(const String& method, const String& url) = 0;
+
+		virtual bool canProvideAuthToken() const = 0;
+		virtual Future<Bytes> getAuthToken() = 0;
 	};
 }

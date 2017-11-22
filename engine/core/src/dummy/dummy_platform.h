@@ -7,6 +7,11 @@ namespace Halley {
 		void init() override;
 		void deInit() override;
 
+		void update() override;
+
 		std::unique_ptr<HTTPRequest> makeHTTPRequest(const String& method, const String& url) override;
+
+		bool canProvideAuthToken() const override;
+		Future<Bytes> getAuthToken() override;
 	};
 }

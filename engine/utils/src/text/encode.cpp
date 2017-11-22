@@ -23,8 +23,10 @@
 #include "halley/text/encode.h"
 #include "halley/support/assert.h"
 
+using namespace Halley;
+
 static const char* base64dict = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-static Halley::Vector<char> base64reverse;
+static Bytes base64reverse;
 
 static void initBase64()
 {
@@ -41,10 +43,10 @@ static void initBase64()
 
 typedef unsigned char uchar;
 
-Halley::String Halley::Encode::encodeBase64(const Vector<char>& in)
+String Encode::encodeBase64(const Bytes& in)
 {
 	size_t sz = in.size();
-	Vector<char> result(((sz+2) / 3) * 4);
+	Bytes result(((sz+2) / 3) * 4);
 
 	for (size_t i=0; i<sz; i+=3) {
 		// Input bytes
@@ -65,10 +67,10 @@ Halley::String Halley::Encode::encodeBase64(const Vector<char>& in)
 		result[outPos+3] = available >= 3 ? base64dict[o3] : '=';
 	}
 
-	return String(result.data(), result.size());
+	return String(reinterpret_cast<const char*>(result.data()), result.size());
 }
 
-Halley::Vector<char> Halley::Encode::decodeBase64(const String& in)
+Bytes Encode::decodeBase64(const String& in)
 {
 	initBase64();
 
@@ -77,7 +79,7 @@ Halley::Vector<char> Halley::Encode::decodeBase64(const String& in)
 	size_t resLen = sz * 3 / 4;
 	if (in[sz-2] == '=') resLen -= 2;
 	else if (in[sz-1] == '=') resLen -= 1;
-	Vector<char> result(resLen);
+	Bytes result(resLen);
 
 	for (size_t i=0; i<sz; i+=4) {
 		int b0 = base64reverse[in[i]];
@@ -106,7 +108,7 @@ Halley::Vector<char> Halley::Encode::decodeBase64(const String& in)
 	return result;
 }
 
-static void flushTo(Halley::Vector<char>& toFlush, Halley::Vector<char>& dest)
+static void flushTo(Vector<char>& toFlush, Vector<char>& dest)
 {
 	if (toFlush.size() > 0) {
 		for (size_t i=0; i<toFlush.size(); i += 127) {
@@ -118,7 +120,7 @@ static void flushTo(Halley::Vector<char>& toFlush, Halley::Vector<char>& dest)
 	toFlush.clear();
 }
 
-Halley::Vector<char> Halley::Encode::encodeRLE(const Vector<char>& in)
+Vector<char> Encode::encodeRLE(const Vector<char>& in)
 {
 	Vector<char> result;
 	Vector<char> toFlush;
@@ -151,7 +153,7 @@ Halley::Vector<char> Halley::Encode::encodeRLE(const Vector<char>& in)
 	return result;
 }
 
-Halley::Vector<char> Halley::Encode::decodeRLE(const Vector<char>& in)
+Vector<char> Encode::decodeRLE(const Vector<char>& in)
 {
 	Vector<char> result;
 	for (size_t i=0; i<in.size(); ) {

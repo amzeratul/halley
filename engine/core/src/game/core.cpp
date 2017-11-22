@@ -283,6 +283,10 @@ void Core::doVariableUpdate(Time time)
 	}
 	pumpAudio();
 
+	if (api->platform) {
+		api->platform->update();
+	}
+
 	t.endSample();
 	HALLEY_DEBUG_TRACE();
 }
