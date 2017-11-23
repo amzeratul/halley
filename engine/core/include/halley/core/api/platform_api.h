@@ -15,6 +15,17 @@ namespace Halley
 		virtual Future<std::unique_ptr<HTTPResponse>> send() = 0;
 	};
 
+	class AuthorisationToken {
+	public:
+		virtual ~AuthorisationToken() {}
+
+		virtual bool isSingleUse() const = 0;
+		virtual bool isCancellable() const = 0;
+
+		virtual void cancel() = 0;
+		virtual const Bytes& getData() const = 0;
+	};
+
 	class PlatformAPI
 	{
 	public:
@@ -25,6 +36,6 @@ namespace Halley
 		virtual std::unique_ptr<HTTPRequest> makeHTTPRequest(const String& method, const String& url) = 0;
 
 		virtual bool canProvideAuthToken() const = 0;
-		virtual Future<Bytes> getAuthToken() = 0;
+		virtual Future<std::unique_ptr<AuthorisationToken>> getAuthToken() = 0;
 	};
 }

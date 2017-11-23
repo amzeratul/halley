@@ -16,7 +16,7 @@ bool DummyPlatformAPI::canProvideAuthToken() const
 	return false;
 }
 
-Future<Bytes> DummyPlatformAPI::getAuthToken()
+Future<std::unique_ptr<AuthorisationToken>> DummyPlatformAPI::getAuthToken()
 {
 	return {};
 }
