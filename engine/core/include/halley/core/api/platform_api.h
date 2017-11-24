@@ -6,12 +6,14 @@ namespace Halley
 	public:
 		virtual ~HTTPResponse() {}
 
+		virtual int getResponseCode() const = 0;
 		virtual const String& getBody() const = 0;
 	};
 
 	class HTTPRequest {
 	public:
 		virtual ~HTTPRequest() {}
+		virtual void setPostData(const String& contentType, const Bytes& data) = 0;
 		virtual Future<std::unique_ptr<HTTPResponse>> send() = 0;
 	};
 
