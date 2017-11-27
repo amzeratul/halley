@@ -7,7 +7,7 @@ namespace Halley
 		virtual ~HTTPResponse() {}
 
 		virtual int getResponseCode() const = 0;
-		virtual const String& getBody() const = 0;
+		virtual const Bytes& getBody() const = 0;
 	};
 
 	class HTTPRequest {
