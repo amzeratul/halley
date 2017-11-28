@@ -25,6 +25,8 @@
 
 namespace Halley {
 	namespace Encode {
+		String encodeBase16(const Bytes& in);
+
 		String encodeBase64(const Bytes& in);
 		Bytes decodeBase64(const String& in);
 
