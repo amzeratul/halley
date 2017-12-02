@@ -43,6 +43,21 @@ static void initBase64()
 
 typedef unsigned char uchar;
 
+String Encode::encodeBase16(const Bytes& in)
+{
+	const char characters[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
+	String result;
+	result.cppStr().resize(in.size() * 2, '0');
+	for (size_t i = 0; i < in.size(); ++i) {
+		unsigned char c = in[i];
+		result[i * 2] = characters[(c & 0xF0) >> 4];
+		result[i * 2 + 1] = characters[c & 0x0F];
+	}
+
+	return result;
+}
+
 String Encode::encodeBase64(const Bytes& in)
 {
 	size_t sz = in.size();

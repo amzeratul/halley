@@ -99,6 +99,7 @@ set(HEADERS
         "include/halley/file_formats/text_reader.h"
         "include/halley/file_formats/xml_file.h"
         "include/halley/file_formats/xml_forward.h"
+        "include/halley/halley_json.h"
         "include/halley/halley_utils.h"
         "include/halley/maths/aabb.h"
         "include/halley/maths/angle.h"
