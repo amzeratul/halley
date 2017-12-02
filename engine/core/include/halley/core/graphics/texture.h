@@ -4,6 +4,7 @@
 #include "halley/maths/vector2.h"
 #include <memory>
 #include "halley/maths/vector4.h"
+#include <limits>
 
 namespace Halley
 {
@@ -24,7 +25,7 @@ namespace Halley
 		Vector4s getSlices() const;
 
 	protected:
-		unsigned int textureId = -1;
+		unsigned int textureId = std::numeric_limits<unsigned int>::max();
 		Vector2i size;
 		Vector4s slices;
 

@@ -1,4 +1,4 @@
-#include <yaml-cpp/yaml.h>
+#include "../yaml/halley-yamlcpp.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>

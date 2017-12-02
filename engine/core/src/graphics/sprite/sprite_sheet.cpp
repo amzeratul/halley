@@ -169,17 +169,17 @@ void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)
 	reader.parse(src, src + data.size(), root);
 
 	// Read Metadata
-	auto meta = root["meta"];
+	auto metadataNode = root["meta"];
 	Vector2f scale = Vector2f(1, 1);
 	textureName = "";
-	if (meta) {
-		if (meta["image"]) {
-			textureName = meta["image"].asString();
-			Vector2f textureSize = readSize<Vector2f>(meta["size"]);
+	if (metadataNode) {
+		if (metadataNode["image"]) {
+			textureName = metadataNode["image"].asString();
+			Vector2f textureSize = readSize<Vector2f>(metadataNode["size"]);
 			scale = Vector2f(1.0f / textureSize.x, 1.0f / textureSize.y);
 		}
-		if (meta["frameTags"]) {
-			for (auto& frameTag: meta["frameTags"]) {
+		if (metadataNode["frameTags"]) {
+			for (auto& frameTag: metadataNode["frameTags"]) {
 				frameTags.push_back(SpriteSheetFrameTag());
 				auto& f = frameTags.back();
 				f.name = frameTag["name"].asString();
@@ -208,8 +208,8 @@ void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)
 
 		const Vector2i sourceSize = readSize<Vector2i>(sprite["sourceSize"]);
 		const Rect4i spriteSourceSize = readRect<Rect4i>(sprite["spriteSourceSize"]);
-		Vector2f pivot = readVector<Vector2f>(sprite["pivot"]);
-		Vector2i pivotPos = Vector2i(int(pivot.x * sourceSize.x + 0.5f), int(pivot.y * sourceSize.y + 0.5f));
+		Vector2f rawPivot = readVector<Vector2f>(sprite["pivot"]);
+		Vector2i pivotPos = Vector2i(int(rawPivot.x * sourceSize.x + 0.5f), int(rawPivot.y * sourceSize.y + 0.5f));
 		Vector2i newPivotPos = pivotPos - spriteSourceSize.getTopLeft();
 		entry.pivot = Vector2f(newPivotPos) / Vector2f(spriteSourceSize.getSize());
 

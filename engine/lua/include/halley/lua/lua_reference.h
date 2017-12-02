@@ -89,7 +89,7 @@ namespace Halley {
 	
 	template <>
 	struct ToLua<const LuaReference&> {
-		inline void operator()(LuaState& state, const LuaReference& value) const {
+		inline void operator()(LuaState& /*state*/, const LuaReference& value) const {
 			value.pushToLuaStack();
 		}
 	};

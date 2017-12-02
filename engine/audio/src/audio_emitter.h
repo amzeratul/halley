@@ -5,6 +5,7 @@
 #include <boost/container/allocator_traits.hpp>
 #include <boost/predef/detail/_exception.h>
 #include <boost/predef/detail/_exception.h>
+#include <limits>
 
 namespace Halley {
 	class AudioBufferPool;
@@ -53,7 +54,7 @@ namespace Halley {
 		std::array<float, 16> channelMix;
 		std::array<float, 16> prevChannelMix;
 
-		size_t id = -1;
+		size_t id = std::numeric_limits<size_t>::max();
 
 		void advancePlayback(size_t samples);
     };

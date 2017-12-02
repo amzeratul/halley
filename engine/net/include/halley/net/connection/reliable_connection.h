@@ -6,6 +6,7 @@
 #include <vector>
 #include <chrono>
 #include <deque>
+#include <limits>
 
 namespace Halley
 {
@@ -24,7 +25,7 @@ namespace Halley
 		int tag = -1;
 		//bool reliable = false;
 		bool resends = false;
-		unsigned short seq = -1;
+		unsigned short seq = std::numeric_limits<unsigned short>::max();
 		unsigned short resendSeq = 0;
 
 		ReliableSubPacket()

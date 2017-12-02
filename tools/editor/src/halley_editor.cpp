@@ -112,9 +112,9 @@ std::unique_ptr<Stage> HalleyEditor::startGame(const HalleyAPI* api)
 	return std::make_unique<EditorRootStage>(*this);
 }
 
-Project& HalleyEditor::loadProject(const HalleyStatics& statics, const String& platform, Path path)
+Project& HalleyEditor::loadProject(const HalleyStatics& statics, const String& activePlatform, Path path)
 {
-	project = std::make_unique<Project>(statics, platform, path, rootPath);
+	project = std::make_unique<Project>(statics, activePlatform, path, rootPath);
 
 	if (!project) {
 		throw Exception("Unable to load project at " + path.string());

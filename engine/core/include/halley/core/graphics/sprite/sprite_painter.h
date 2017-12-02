@@ -3,6 +3,7 @@
 #include <halley/data_structures/vector.h>
 #include <cstddef>
 #include "halley/maths/rect.h"
+#include <limits>
 
 namespace Halley
 {
@@ -35,7 +36,7 @@ namespace Halley
 
 	private:
 		const void* ptr = nullptr;
-		unsigned int index = -1;
+		unsigned int index = std::numeric_limits<unsigned int>::max();
 		SpritePainterEntryType type;
 		int layer;
 		int mask;

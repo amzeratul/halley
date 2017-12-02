@@ -1,4 +1,4 @@
-#include <yaml-cpp/yaml.h>
+#include "../yaml/halley-yamlcpp.h"
 #include <halley/tools/codegen/message_schema.h>
 
 using namespace Halley;

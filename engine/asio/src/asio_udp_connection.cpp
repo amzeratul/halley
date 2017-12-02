@@ -134,7 +134,7 @@ void AsioUDPConnection::sendNext()
 	size_t size = packet.copyTo(sendBuffer);
 	pendingSend.pop_front();
 
-	socket.async_send_to(boost::asio::buffer(sendBuffer, size), remote, [this] (const boost::system::error_code& error, std::size_t size)
+	socket.async_send_to(boost::asio::buffer(sendBuffer, size), remote, [this] (const boost::system::error_code& error, std::size_t)
 	{
 		if (error) {
 			std::cout << "Error sending packet: " << error.message() << std::endl;

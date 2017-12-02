@@ -2,7 +2,7 @@
 #include "halley/file/byte_serializer.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/support/exception.h"
-#include <yaml-cpp/yaml.h>
+#include "../../yaml/halley-yamlcpp.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/text/string_converter.h"
 

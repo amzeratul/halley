@@ -101,6 +101,8 @@ set(HEADERS
     "src/assets/importers/shader_importer.h"
     "src/assets/importers/texture_importer.h"
 
+    "src/yaml/halley-yamlcpp.h"
+
     "include/halley/tools/tasks/editor_task.h"
     "include/halley/tools/tasks/editor_task_set.h"
 

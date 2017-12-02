@@ -251,7 +251,7 @@ namespace Halley
 		template <typename F>
 		auto thenNotify(F joinFuture) -> void
 		{
-			data->addContinuation([joinFuture](typename TaskHelper<T>::DataType v) mutable {
+			data->addContinuation([joinFuture](typename TaskHelper<T>::DataType /*v*/) mutable {
 				joinFuture.notify();
 			});
 		}

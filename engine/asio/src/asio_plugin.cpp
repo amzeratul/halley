@@ -4,7 +4,7 @@
 namespace Halley {
 	
 	class AsioPlugin : public Plugin {
-		HalleyAPIInternal* createAPI(SystemAPI* system) override { return new AsioNetworkAPI(); }
+		HalleyAPIInternal* createAPI(SystemAPI*) override { return new AsioNetworkAPI(); }
 		PluginType getType() override { return PluginType::NetworkAPI; }
 		String getName() override { return "Network/ASIO"; }
 	};

@@ -44,9 +44,9 @@ void AssetCollector::output(const String& name, AssetType type, gsl::span<const 
 	assets.emplace_back(result);
 }
 
-void AssetCollector::addAdditionalAsset(ImportingAsset&& asset)
+void AssetCollector::addAdditionalAsset(ImportingAsset&& additionalAsset)
 {
-	additionalAssets.emplace_back(std::move(asset));
+	additionalAssets.emplace_back(std::move(additionalAsset));
 }
 
 bool AssetCollector::reportProgress(float progress, const String& label)

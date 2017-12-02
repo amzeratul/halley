@@ -32,7 +32,7 @@ ConsoleWindow::~ConsoleWindow()
 	Logger::removeSink(*this);
 }
 
-void ConsoleWindow::log(LoggerLevel level, const String& msg)
+void ConsoleWindow::log(LoggerLevel, const String& msg)
 {
 	printLn(msg);
 }

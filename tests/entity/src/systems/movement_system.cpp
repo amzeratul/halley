@@ -27,7 +27,7 @@ public:
 		}
 	}
 
-	void onMessageReceived(const ExpireMessage& msg, MainFamily& e)
+	void onMessageReceived(const ExpireMessage&, MainFamily& e)
 	{
 		getWorld().destroyEntity(e.entityId);
 	}

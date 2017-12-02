@@ -4,7 +4,7 @@
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/resources/resource_data.h"
-#include <yaml-cpp/yaml.h>
+#include "../yaml/halley-yamlcpp.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/assets/asset_collector.h"
 
@@ -64,7 +64,7 @@ static void loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta,
 	auto root = YAML::Load(data->getString());
 
 	if (isDirectoryMeta) {
-		for (auto& rootList: root) {
+		for (const auto& rootList: root) {
 			bool matches = true;
 			for (YAML::const_iterator i0 = rootList.begin(); i0 != rootList.end(); ++i0) {
 				auto name = i0->first.as<std::string>();
@@ -136,9 +136,9 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 			auto cur = std::move(toLoad.front());
 			toLoad.pop_front();
 			
-			AssetCollector collector(cur, assetsPath, importer.getAssetsSrc(), [=] (float progress, const String& label) -> bool
+			AssetCollector collector(cur, assetsPath, importer.getAssetsSrc(), [=] (float assetProgress, const String& label) -> bool
 			{
-				setProgress(lerp(curFileProgressStart, curFileProgressEnd, progress), curFileLabel + " " + label);
+				setProgress(lerp(curFileProgressStart, curFileProgressEnd, assetProgress), curFileLabel + " " + label);
 				return !isCancelled();
 			});
 			

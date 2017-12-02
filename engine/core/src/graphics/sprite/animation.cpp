@@ -186,22 +186,22 @@ void Animation::addDirection(const AnimationDirection& direction)
 	directions.push_back(direction);
 }
 
-const AnimationSequence& Animation::getSequence(const String& name) const
+const AnimationSequence& Animation::getSequence(const String& seqName) const
 {
 	for (auto& seq: sequences) {
-		if (seq.name == name) {
+		if (seq.name == seqName) {
 			return seq;
 		}
 	}
 	return sequences.at(0);
 }
 
-const AnimationDirection& Animation::getDirection(const String& name) const
+const AnimationDirection& Animation::getDirection(const String& dirName) const
 {
 	Expects(directions.size() > 0);
 
 	for (auto& dir : directions) {
-		if (dir.name == name) {
+		if (dir.name == dirName) {
 			return dir;
 		}
 	}
@@ -220,10 +220,10 @@ const AnimationDirection& Animation::getDirection(int id) const
 	}
 }
 
-bool Animation::hasSequence(const String& name) const
+bool Animation::hasSequence(const String& seqName) const
 {
 	for (auto& s: sequences) {
-		if (s.getName() == name) {
+		if (s.getName() == seqName) {
 			return true;
 		}
 	}

@@ -1,4 +1,4 @@
-#include <yaml-cpp/yaml.h>
+#include "../yaml/halley-yamlcpp.h"
 #include "halley/tools/codegen/custom_type_schema.h"
 
 using namespace Halley;

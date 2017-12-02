@@ -17,7 +17,7 @@ AudioClip::~AudioClip()
 {
 }
 
-void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadata meta)
+void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadata metadata)
 {
 	VorbisData vorbis(data);
 	if (vorbis.getSampleRate() != AudioConfig::sampleRate) {
@@ -25,7 +25,7 @@ void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadat
 	}	
 	numChannels = vorbis.getNumChannels();
 	sampleLength = vorbis.getNumSamples();
-	loopPoint = meta.getInt("loopPoint", 0);
+	loopPoint = metadata.getInt("loopPoint", 0);
 	streaming = false;
 
 	samples.resize(numChannels);
@@ -38,7 +38,7 @@ void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadat
 	doneLoading();
 }
 
-void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadata meta)
+void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadata metadata)
 {
 	vorbisData = std::make_unique<VorbisData>(data);
 	size_t nChannels = vorbisData->getNumChannels();
@@ -49,7 +49,7 @@ void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadat
 	samples.resize(nChannels);
 	numChannels = nChannels;
 	sampleLength = vorbisData->getNumSamples();
-	loopPoint = meta.getInt("loopPoint", 0);
+	loopPoint = metadata.getInt("loopPoint", 0);
 	streamPos = 0;
 	streaming = true;
 	doneLoading();

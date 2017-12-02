@@ -18,7 +18,7 @@ void DummyVideoAPI::finishRender()
 {
 }
 
-void DummyVideoAPI::setWindow(WindowDefinition&& windowDescriptor, bool vsync)
+void DummyVideoAPI::setWindow(WindowDefinition&& windowDescriptor, bool)
 {
 	//window = system.createWindow(windowDescriptor);
 	window = std::make_shared<DummyWindow>(windowDescriptor);
@@ -78,22 +78,22 @@ DummyTexture::DummyTexture(Vector2i s)
 	size = s;
 }
 
-void DummyTexture::load(TextureDescriptor&& descriptor)
+void DummyTexture::load(TextureDescriptor&&)
 {
 	doneLoading();
 }
 
-int DummyShader::getUniformLocation(const String& name, ShaderType stage)
+int DummyShader::getUniformLocation(const String&, ShaderType)
 {
 	return 0;
 }
 
-int DummyShader::getBlockLocation(const String& name, ShaderType stage)
+int DummyShader::getBlockLocation(const String&, ShaderType)
 {
 	return 0;
 }
 
-void DummyMaterialConstantBuffer::update(const MaterialDataBlock& dataBlock) {}
+void DummyMaterialConstantBuffer::update(const MaterialDataBlock&) {}
 
 DummyPainter::DummyPainter(Resources& resources)
 	: Painter(resources)
@@ -101,20 +101,20 @@ DummyPainter::DummyPainter(Resources& resources)
 
 void DummyPainter::clear(Colour colour) {}
 
-void DummyPainter::setMaterialPass(const Material& material, int pass) {}
+void DummyPainter::setMaterialPass(const Material&, int) {}
 
 void DummyPainter::doStartRender() {}
 
 void DummyPainter::doEndRender() {}
 
-void DummyPainter::setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly) {}
+void DummyPainter::setVertices(const MaterialDefinition&, size_t, void*, size_t, unsigned short*, bool) {}
 
-void DummyPainter::drawTriangles(size_t numIndices) {}
+void DummyPainter::drawTriangles(size_t) {}
 
-void DummyPainter::setViewPort(Rect4i rect) {}
+void DummyPainter::setViewPort(Rect4i) {}
 
-void DummyPainter::setClip(Rect4i clip, bool enable) {}
+void DummyPainter::setClip(Rect4i, bool) {}
 
-void DummyPainter::setMaterialData(const Material& material) {}
+void DummyPainter::setMaterialData(const Material&) {}
 
-void DummyPainter::onUpdateProjection(Material& material) {}
+void DummyPainter::onUpdateProjection(Material&) {}

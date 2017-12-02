@@ -25,7 +25,7 @@ struct HandshakeOpen
 
 
 AsioNetworkService::AsioNetworkService(int port, IPVersion version)
-	: localEndpoint(version == IPVersion::IPv4 ? asio::ip::udp::v4() : asio::ip::udp::v6(), port)
+	: localEndpoint(version == IPVersion::IPv4 ? asio::ip::udp::v4() : asio::ip::udp::v6(), static_cast<unsigned short>(port))
 	, socket(service, localEndpoint)
 {
 	Expects(port == 0 || port > 1024);
@@ -102,7 +102,7 @@ std::shared_ptr<IConnection> AsioNetworkService::connect(String addr, int port)
 	Expects(port > 1024);
 	Expects(port < 65536);
 	auto remoteAddr = asio::ip::address::from_string(addr.cppStr());
-	auto remote = UDPEndpoint(remoteAddr, port); 
+	auto remote = UDPEndpoint(remoteAddr, static_cast<unsigned short>(port)); 
 	auto conn = std::make_shared<AsioUDPConnection>(socket, remote);
 	activeConnections[0] = conn;
 
@@ -246,7 +246,7 @@ short AsioNetworkService::getFreeId() const
 {
 	for (int i = 1; i < 1024; i++) {
 		if (activeConnections.find(i) == activeConnections.end()) {
-			return i;
+			return static_cast<short>(i);
 		}
 	}
 	throw Exception("Unable to find empty connection id");

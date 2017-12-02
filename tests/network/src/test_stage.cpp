@@ -10,8 +10,8 @@ class NoOpMsg : public NetworkMessage
 {
 public:
 	size_t getSerializedSize() const override { return 0; }	
-	void serializeTo(gsl::span<gsl::byte> dst) const override {}	
-	void deserializeFrom(gsl::span<const gsl::byte> src) override {}
+	void serializeTo(gsl::span<gsl::byte> /*dst*/) const override {}	
+	void deserializeFrom(gsl::span<const gsl::byte> /*src*/) override {}
 };
 
 class TextMsg : public NetworkMessage
@@ -55,7 +55,7 @@ void TestStage::init()
 
 }
 
-void TestStage::onVariableUpdate(Time time)
+void TestStage::onVariableUpdate(Time)
 {
 	auto key = getInputAPI().getKeyboard();
 	if (key->isButtonDown(Keys::Esc)) {

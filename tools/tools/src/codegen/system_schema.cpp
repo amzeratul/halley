@@ -1,4 +1,4 @@
-#include <yaml-cpp/yaml.h>
+#include "../yaml/halley-yamlcpp.h"
 #include <halley/support/exception.h>
 #include <halley/tools/codegen/system_schema.h>
 
@@ -84,15 +84,15 @@ SystemSchema::SystemSchema(YAML::Node node)
 	if (node["access"].IsDefined()) {
 		int accessValue = 0;
 		for(auto accessOpt : node["access"]) {
-			String name = accessOpt.as<std::string>();
-			if (name == "api") {
+			String nodeName = accessOpt.as<std::string>();
+			if (nodeName == "api") {
 				accessValue |= int(SystemAccess::API);
-			} else if (name == "world") {
+			} else if (nodeName == "world") {
 				accessValue |= int(SystemAccess::World);
-			} else if (name == "resources") {
+			} else if (nodeName == "resources") {
 				accessValue |= int(SystemAccess::Resources);
 			} else {
-				throw Exception("Unknown access type: " + name);
+				throw Exception("Unknown access type: " + nodeName);
 			}
 		}
 		access = SystemAccess(accessValue);
