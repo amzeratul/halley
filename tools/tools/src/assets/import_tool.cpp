@@ -16,7 +16,7 @@ using namespace std::chrono_literals;
 
 int ImportTool::run(Vector<std::string> args)
 {
-	if (args.size() == 2) {
+	if (args.size() >= 2) {
 		HalleyStatics statics;
 		statics.resume(nullptr);
 		StdOutSink logSink;
@@ -25,7 +25,16 @@ int ImportTool::run(Vector<std::string> args)
 		Path projectPath = FileSystem::getAbsolute(Path(args[0]));
 		Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));
 
-		auto proj = std::make_unique<Project>(statics, "pc", projectPath, halleyRootPath);
+		String platform = "pc";
+
+		for (size_t i = 2; i < args.size(); ++i) {
+			String arg = args[i];
+			if (arg.startsWith("--platform=")) {
+				platform = arg.mid(11);
+			}
+		}
+
+		auto proj = std::make_unique<Project>(statics, platform, projectPath, halleyRootPath);
 		std::cout << "Importing project at " << projectPath << ", with Halley root at " << halleyRootPath << "" << std::endl;
 
 		auto tasks = std::make_unique<EditorTaskSet>();
