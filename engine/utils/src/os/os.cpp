@@ -78,6 +78,11 @@ String OS::getUserDataDir()
 	return "";
 }
 
+String OS::getEnvironmentVariable(const String&)
+{
+	return "";
+}
+
 Halley::String Halley::OS::makeDataPath(String appDataPath, String userProvidedPath)
 {
 	return appDataPath + userProvidedPath;

@@ -58,6 +58,7 @@ _ReSharper*/
 
 # Build system
 build
+build-external
 
 # External folder
 external

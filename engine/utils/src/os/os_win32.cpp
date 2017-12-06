@@ -254,6 +254,14 @@ Halley::String Halley::OSWin32::getUserDataDir()
 	return String(path) + "\\";
 }
 
+String OSWin32::getEnvironmentVariable(const String& name)
+{
+	auto bufferSize = GetEnvironmentVariable(name.c_str(), nullptr, 0);
+	std::string buffer(bufferSize - 1, 0);
+	GetEnvironmentVariable(name.c_str(), &buffer[0], bufferSize);
+	return buffer;
+}
+
 Path OSWin32::parseProgramPath(const String&)
 {
 	HMODULE hModule = GetModuleHandleW(nullptr);
@@ -311,20 +319,24 @@ std::vector<Path> OSWin32::enumerateDirectory(const Path& path)
 	return result;
 }
 
-int OSWin32::runCommand(String command)
+int OSWin32::runCommand(String rawCommand)
 {
-	char buffer[1024];
-	strcpy_s(buffer, 1024, command.c_str());
+	auto command = rawCommand.getUTF16();
+	if (command.length() >= 1024) {
+		throw Exception("Command is too long!");
+	}
+	wchar_t buffer[1024];
+	memcpy(buffer, command.c_str(), command.size() * sizeof(wchar_t));
 	buffer[command.size()] = 0;
 
-	STARTUPINFO si;
+	STARTUPINFOW si;
     PROCESS_INFORMATION pi;
 	DWORD exitCode = -2;
 
 	memset(&si, 0, sizeof(STARTUPINFO));
 	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
 
-	if (!CreateProcessA(nullptr, buffer, nullptr, nullptr, false, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
+	if (!CreateProcessW(nullptr, buffer, nullptr, nullptr, false, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
 		return -1;
 	}
 	WaitForSingleObject(pi.hProcess, INFINITE);
