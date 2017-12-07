@@ -21,6 +21,7 @@ namespace Halley
 	public:
 		virtual ~AuthorisationToken() {}
 
+		virtual String getType() const = 0;
 		virtual bool isSingleUse() const = 0;
 		virtual bool isCancellable() const = 0;
 
