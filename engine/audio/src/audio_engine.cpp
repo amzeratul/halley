@@ -4,6 +4,7 @@
 #include <chrono>
 #include "audio_source_clip.h"
 #include "audio_filter_resample.h"
+#include "halley/support/debug.h"
 
 using namespace Halley;
 
@@ -97,7 +98,7 @@ void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 	channels[1].pan = 1.0f;
 
 	if (spec.sampleRate != 48000) {
-		outResampler = std::make_unique<AudioResampler>(48000, spec.sampleRate, spec.numChannels, 0.5f);
+		outResampler = std::make_unique<AudioResampler>(48000, spec.sampleRate, spec.numChannels, Debug::isDebug() ? 0.0f : 0.5f);
 	}
 }
 

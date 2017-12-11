@@ -1,4 +1,5 @@
 #include "audio_filter_resample.h"
+#include "halley/support/debug.h"
 
 using namespace Halley;
 
@@ -30,7 +31,7 @@ bool AudioFilterResample::getAudioData(size_t numSamples, AudioSourceData& dstBu
 
 	if (resamplers.empty()) {
 		for (size_t i = 0; i < nChannels; ++i) {
-			resamplers.push_back(std::make_unique<AudioResampler>(fromHz, toHz, 1, 0.3f));
+			resamplers.push_back(std::make_unique<AudioResampler>(fromHz, toHz, 1, Debug::isDebug() ? 0.0f : 0.3f));
 		}
 	}
 
