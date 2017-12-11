@@ -84,7 +84,7 @@ namespace Halley
 		virtual void startPlayback() = 0;
 		virtual void stopPlayback() = 0;
 
-		virtual void queueAudio(gsl::span<const AudioSamplePack> data) = 0;
+		virtual void queueAudio(gsl::span<const float> data) = 0;
 		virtual bool needsMoreAudio() = 0;
 
 		virtual bool needsAudioThread() const = 0;

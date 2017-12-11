@@ -86,7 +86,6 @@ void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 	out = &o;
 
 	const size_t bufferSize = spec.bufferSize / 16;
-	backBuffer.packs.resize(bufferSize * spec.numChannels);
 
 	channelBuffers.resize(spec.numChannels);
 	for (auto& b: channelBuffers) {
@@ -96,23 +95,40 @@ void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 	channels.resize(spec.numChannels);
 	channels[0].pan = -1.0f;
 	channels[1].pan = 1.0f;
+
+	if (spec.sampleRate != 48000) {
+		outResampler = std::make_unique<AudioResampler>(48000, spec.sampleRate, spec.numChannels, 0.5f);
+	}
 }
 
 void AudioEngine::stop()
 {
 	running = false;
 	needsBuffer = false;
-	backBufferCondition.notify_one();
 }
 
 void AudioEngine::generateBuffer()
 {
+	const size_t samplesToRead = spec.bufferSize;
+
 	mixEmitters();
 	removeFinishedEmitters();
 
-	mixer->interleaveChannels(backBuffer, channelBuffers);
-	mixer->compressRange(backBuffer.packs);
-	out->queueAudio(backBuffer.packs);
+	auto buffer = pool->getBuffer(samplesToRead * spec.numChannels);
+	mixer->interleaveChannels(buffer.getBuffer(), channelBuffers);
+	mixer->compressRange(buffer.getSpan());
+
+	// Resample to output sample rate, if necessary
+	if (outResampler) {
+		auto resampledBuffer = pool->getBuffer(samplesToRead * spec.numChannels * spec.sampleRate / 48000 + 16);
+		auto result = outResampler->resampleInterleaved(buffer.getSampleSpan(), resampledBuffer.getSampleSpan());
+		if (result.nRead != samplesToRead) {
+			throw Exception("Failed to read all input sample data");
+		}
+		out->queueAudio(resampledBuffer.getSampleSpan().subspan(0, result.nWritten * spec.numChannels));
+	} else {
+		out->queueAudio(buffer.getSampleSpan());
+	}
 }
 
 void AudioEngine::mixEmitters()

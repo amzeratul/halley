@@ -6,6 +6,7 @@
 #include <map>
 #include <vector>
 #include "audio_emitter.h"
+#include "halley/audio/resampler.h"
 
 namespace Halley {
 	class AudioMixer;
@@ -33,6 +34,7 @@ namespace Halley {
 		AudioOutputAPI* out;
 		std::unique_ptr<AudioMixer> mixer;
 		std::unique_ptr<AudioBufferPool> pool;
+		std::unique_ptr<AudioResampler> outResampler;
 
 		std::atomic<bool> running;
 		std::atomic<bool> needsBuffer;
@@ -42,7 +44,6 @@ namespace Halley {
 		std::vector<std::unique_ptr<AudioEmitter>> emitters;
 		std::vector<AudioChannelData> channels;
 
-		AudioBuffer backBuffer;
     	std::vector<AudioBuffer> channelBuffers;
 
 		std::map<size_t, AudioEmitter*> idToSource;

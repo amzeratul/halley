@@ -9,7 +9,7 @@ namespace Halley {
 		void closeAudioDevice() override;
 		void startPlayback() override;
 		void stopPlayback() override;
-		void queueAudio(gsl::span<const AudioSamplePack> data) override;
+		void queueAudio(gsl::span<const float> data) override;
 		bool needsMoreAudio() override;
 		void init() override;
 		void deInit() override;

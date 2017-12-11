@@ -24,7 +24,7 @@ void DummyAudioAPI::stopPlayback()
 {
 }
 
-void DummyAudioAPI::queueAudio(gsl::span<const AudioSamplePack> data)
+void DummyAudioAPI::queueAudio(gsl::span<const float> data)
 {
 }
 

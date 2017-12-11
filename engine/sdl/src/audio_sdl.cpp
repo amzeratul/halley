@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <cstdint>
 #include "halley/text/string_converter.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -35,13 +36,10 @@ void AudioSDL::deInit()
 Vector<std::unique_ptr<const AudioDevice>> AudioSDL::getAudioDevices()
 {
 	Vector<std::unique_ptr<const AudioDevice>> result;
+	result.emplace_back(std::make_unique<AudioDeviceSDL>("[Default]"));
 	int nDevices = SDL_GetNumAudioDevices(0);
-	if (nDevices == 0) {
-		result.emplace_back(std::make_unique<AudioDeviceSDL>(""));
-	} else {
-		for (int i = 0; i < nDevices; i++) {
-			result.emplace_back(std::make_unique<AudioDeviceSDL>(SDL_GetAudioDeviceName(i, 0)));
-		}
+	for (int i = 0; i < nDevices; i++) {
+		result.emplace_back(std::make_unique<AudioDeviceSDL>(SDL_GetAudioDeviceName(i, 0)));
 	}
 	return result;
 }
@@ -55,8 +53,8 @@ AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, const Audi
 {
 	prepareAudioCallback = callback;
 
-	String name = dev ? dev->getName() : "";
-	const char* deviceName = name != "" ? name.c_str() : nullptr;
+	String name = dev ? dev->getName() : "[Default]";
+	const char* deviceName = name != "[Default]" ? name.c_str() : nullptr;
 
 	auto f = requestedFormat.format;
 	SDL_AudioSpec desired;
@@ -69,7 +67,7 @@ AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, const Audi
 
 	SDL_AudioSpec obtained;
 
-	device = SDL_OpenAudioDevice(deviceName, 0, &desired, &obtained, 1);
+	device = SDL_OpenAudioDevice(deviceName, 0, &desired, &obtained, SDL_AUDIO_ALLOW_ANY_CHANGE);
 	if (device == 0) {
 		throw Exception("Unable to open audio device \"" + (name != "" ? name : "default") + "\"");
 	}
@@ -114,11 +112,11 @@ void AudioSDL::stopPlayback()
 	}
 }
 
-void AudioSDL::queueAudio(gsl::span<const AudioSamplePack> data)
+void AudioSDL::queueAudio(gsl::span<const float> data)
 {
 	Expects(device);
 
-	const size_t numSamples = data.size() * 16;
+	const size_t numSamples = data.size();
 
 	// Float
 	if (outputFormat.format == AudioSampleFormat::Float) {
@@ -131,9 +129,7 @@ void AudioSDL::queueAudio(gsl::span<const AudioSamplePack> data)
 			tmpShort.resize(numSamples);
 		}
 		for (ptrdiff_t i = 0; i < data.size(); ++i) {
-			for (size_t j = 0; j < 16; ++j) {
-				tmpShort[i * 16 + j] = static_cast<short>(data[i].samples[j] * 32768.0f);
-			}
+			tmpShort[i] = static_cast<short>(data[i] * 32768.0f);
 		}
 
 		doQueueAudio(gsl::as_bytes(gsl::span<short>(tmpShort)));
@@ -145,9 +141,7 @@ void AudioSDL::queueAudio(gsl::span<const AudioSamplePack> data)
 			tmpInt.resize(numSamples);
 		}
 		for (ptrdiff_t i = 0; i < data.size(); ++i) {
-			for (size_t j = 0; j < 16; ++j) {
-				tmpInt[i * 16 + j] = static_cast<int>(data[i].samples[j] * 2147483648.0f);
-			}
+			tmpInt[i] = static_cast<int>(data[i] * 2147483648.0f);
 		}
 
 		doQueueAudio(gsl::as_bytes(gsl::span<int>(tmpInt)));
@@ -184,26 +178,39 @@ void AudioSDL::onCallback(unsigned char* stream, int len)
 	size_t remaining = size_t(len);
 	size_t pos = 0;
 
-	std::unique_lock<std::mutex> lock(mutex);
-	while (remaining > 0 && !audioQueue.empty()) {
-		auto& front = audioQueue.front();
-		size_t toCopy = std::min(remaining, front.size() - readPos);
+	while (remaining > 0) {
+		std::unique_lock<std::mutex> lock(mutex);
+		if (audioQueue.empty()) {
+			lock.unlock();
+			if (prepareAudioCallback) {
+				prepareAudioCallback();
+			}
+			
+			// Either no callback, or callback didn't add anything
+			if (audioQueue.empty()) {
+				break;
+			}
+		} else {
+			auto& front = audioQueue.front();
+			size_t toCopy = std::min(remaining, front.size() - readPos);
 
-		memcpy(stream + pos, front.data() + readPos, toCopy);
+			memcpy(stream + pos, front.data() + readPos, toCopy);
 
-		remaining -= toCopy;
-		queuedSize -= toCopy;
-		pos += toCopy;
-		readPos += toCopy;
+			remaining -= toCopy;
+			queuedSize -= toCopy;
+			pos += toCopy;
+			readPos += toCopy;
 
-		if (readPos == front.size()) {
-			readPos = 0;
-			audioQueue.pop_front();
+			if (readPos == front.size()) {
+				readPos = 0;
+				audioQueue.pop_front();
+			}
 		}
 	}
 
 	if (remaining > 0) {
 		// :(
+		Logger::logWarning("Insufficient audio data, padding with zeroes.");
 		memset(stream + pos, 0, remaining);
 	}
 }
