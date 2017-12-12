@@ -43,16 +43,14 @@ namespace Halley {
 
 		std::vector<std::unique_ptr<AudioEmitter>> emitters;
 		std::vector<AudioChannelData> channels;
-
-    	std::vector<AudioBuffer> channelBuffers;
-
+		
 		std::map<size_t, AudioEmitter*> idToSource;
 
 		AudioListenerData listener;
 
 		void addEmitter(size_t id, std::unique_ptr<AudioEmitter>&& src);
 
-		void mixEmitters();
+		void mixEmitters(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
 	    void removeFinishedEmitters();
 		void clearBuffer(gsl::span<AudioSamplePack> dst);
     };

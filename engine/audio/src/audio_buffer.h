@@ -46,6 +46,7 @@ namespace Halley
 
 		~AudioBuffersRef();
 
+		gsl::span<AudioBuffer*> getBuffers();
 		std::array<gsl::span<AudioSamplePack>, AudioConfig::maxChannels> getSpans() const;
 		std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> getSampleSpans() const;
 

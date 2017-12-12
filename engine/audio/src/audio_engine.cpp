@@ -86,13 +86,6 @@ void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 	spec = s;
 	out = &o;
 
-	const size_t bufferSize = spec.bufferSize / 16;
-
-	channelBuffers.resize(spec.numChannels);
-	for (auto& b: channelBuffers) {
-		b.packs.resize(bufferSize);
-	}
-
 	channels.resize(spec.numChannels);
 	channels[0].pan = -1.0f;
 	channels[1].pan = 1.0f;
@@ -110,33 +103,36 @@ void AudioEngine::stop()
 
 void AudioEngine::generateBuffer()
 {
-	const size_t samplesToRead = spec.bufferSize;
-
-	mixEmitters();
+	const size_t samplesToRead = alignUp(spec.bufferSize * 48000 / spec.sampleRate, 16);
+	const size_t numChannels = spec.numChannels;
+	
+	auto channelBuffersRef = pool->getBuffers(numChannels, samplesToRead);
+	auto channelBuffers = channelBuffersRef.getBuffers();
+	mixEmitters(samplesToRead, numChannels, channelBuffers);
 	removeFinishedEmitters();
 
-	auto buffer = pool->getBuffer(samplesToRead * spec.numChannels);
-	mixer->interleaveChannels(buffer.getBuffer(), channelBuffers);
-	mixer->compressRange(buffer.getSpan());
+	auto bufferRef = pool->getBuffer(samplesToRead * numChannels);
+	mixer->interleaveChannels(bufferRef.getBuffer(), channelBuffers);
+	mixer->compressRange(bufferRef.getSpan());
 
 	// Resample to output sample rate, if necessary
 	if (outResampler) {
-		auto resampledBuffer = pool->getBuffer(samplesToRead * spec.numChannels * spec.sampleRate / 48000 + 16);
-		auto result = outResampler->resampleInterleaved(buffer.getSampleSpan(), resampledBuffer.getSampleSpan());
+		auto resampledBuffer = pool->getBuffer(samplesToRead * numChannels * spec.sampleRate / 48000 + 16);
+		auto result = outResampler->resampleInterleaved(bufferRef.getSampleSpan(), resampledBuffer.getSampleSpan());
 		if (result.nRead != samplesToRead) {
 			throw Exception("Failed to read all input sample data");
 		}
-		out->queueAudio(resampledBuffer.getSampleSpan().subspan(0, result.nWritten * spec.numChannels));
+		out->queueAudio(resampledBuffer.getSampleSpan().subspan(0, result.nWritten * numChannels));
 	} else {
-		out->queueAudio(buffer.getSampleSpan());
+		out->queueAudio(bufferRef.getSampleSpan());
 	}
 }
 
-void AudioEngine::mixEmitters()
+void AudioEngine::mixEmitters(size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers)
 {
 	// Clear buffers
-	for (size_t i = 0; i < spec.numChannels; ++i) {
-		clearBuffer(channelBuffers[i].packs);
+	for (size_t i = 0; i < nChannels; ++i) {
+		clearBuffer(buffers[i]->packs);
 	}
 
 	// Mix every emitter
@@ -149,7 +145,7 @@ void AudioEngine::mixEmitters()
 		// Mix it in!
 		if (e->isPlaying()) {
 			e->update(channels, listener);
-			e->mixTo(channelBuffers, *mixer, *pool);
+			e->mixTo(buffers, *mixer, *pool);
 		}
 	}
 }

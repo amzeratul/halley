@@ -104,6 +104,11 @@ AudioBuffersRef::~AudioBuffersRef()
 	nBuffers = 0;
 }
 
+gsl::span<AudioBuffer*> AudioBuffersRef::getBuffers()
+{
+	return gsl::span<AudioBuffer*>(buffers.data(), nBuffers);
+}
+
 std::array<gsl::span<AudioSamplePack>, AudioConfig::maxChannels> AudioBuffersRef::getSpans() const
 {
 	return spans;

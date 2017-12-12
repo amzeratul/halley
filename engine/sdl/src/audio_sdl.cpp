@@ -171,10 +171,6 @@ void AudioSDL::doQueueAudio(gsl::span<const gsl::byte> data)
 
 void AudioSDL::onCallback(unsigned char* stream, int len) 
 {
-	if (prepareAudioCallback) {
-		prepareAudioCallback();
-	}
-
 	size_t remaining = size_t(len);
 	size_t pos = 0;
 

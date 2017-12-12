@@ -23,7 +23,7 @@ namespace Halley
 		virtual ~AudioMixer() {}
 
 		virtual void mixAudio(gsl::span<const AudioSamplePack> src, gsl::span<AudioSamplePack> dst, float gainStart, float gainEnd);
-		virtual void interleaveChannels(AudioBuffer& dstBuffer, gsl::span<const AudioBuffer> src);
+		virtual void interleaveChannels(AudioBuffer& dstBuffer, gsl::span<AudioBuffer*> src);
 		virtual void compressRange(gsl::span<AudioSamplePack> buffer);
 		static std::unique_ptr<AudioMixer> makeMixer();
 	};

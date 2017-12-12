@@ -108,11 +108,11 @@ void AudioEmitter::update(gsl::span<const AudioChannelData> channels, const Audi
 	}
 }
 
-void AudioEmitter::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBufferPool& pool)
+void AudioEmitter::mixTo(gsl::span<AudioBuffer*> dst, AudioMixer& mixer, AudioBufferPool& pool)
 {
 	Expects(dst.size() > 0);
 
-	const size_t numPacks = dst[0].packs.size();
+	const size_t numPacks = dst[0]->packs.size();
 	const size_t numSamples = numPacks * 16;
 	const size_t nSrcChannels = getNumberOfChannels();
 	const size_t nDstChannels = size_t(dst.size());
@@ -151,7 +151,7 @@ void AudioEmitter::mixTo(gsl::span<AudioBuffer> dst, AudioMixer& mixer, AudioBuf
 
 			// Render to destination
 			if (gain0 + gain1 > 0.01f) {
-				mixer.mixAudio(audioData[srcChannel], dst[dstChannel].packs, gain0, gain1);
+				mixer.mixAudio(audioData[srcChannel], dst[dstChannel]->packs, gain0, gain1);
 			}
 		}
 	}
