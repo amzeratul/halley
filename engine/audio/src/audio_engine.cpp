@@ -104,6 +104,7 @@ void AudioEngine::stop()
 void AudioEngine::generateBuffer()
 {
 	const size_t samplesToRead = alignUp(spec.bufferSize * 48000 / spec.sampleRate, 16);
+	const size_t packsToRead = samplesToRead / 16;
 	const size_t numChannels = spec.numChannels;
 	
 	auto channelBuffersRef = pool->getBuffers(numChannels, samplesToRead);
@@ -112,13 +113,14 @@ void AudioEngine::generateBuffer()
 	removeFinishedEmitters();
 
 	auto bufferRef = pool->getBuffer(samplesToRead * numChannels);
-	mixer->interleaveChannels(bufferRef.getBuffer(), channelBuffers);
-	mixer->compressRange(bufferRef.getSpan());
+	auto buffer = bufferRef.getSpan().subspan(0, packsToRead * numChannels);
+	mixer->interleaveChannels(buffer, channelBuffers);
+	mixer->compressRange(buffer);
 
 	// Resample to output sample rate, if necessary
 	if (outResampler) {
 		auto resampledBuffer = pool->getBuffer(samplesToRead * numChannels * spec.sampleRate / 48000 + 16);
-		auto result = outResampler->resampleInterleaved(bufferRef.getSampleSpan(), resampledBuffer.getSampleSpan());
+		auto result = outResampler->resampleInterleaved(bufferRef.getSampleSpan().subspan(0, samplesToRead * numChannels), resampledBuffer.getSampleSpan());
 		if (result.nRead != samplesToRead) {
 			throw Exception("Failed to read all input sample data");
 		}
@@ -145,7 +147,7 @@ void AudioEngine::mixEmitters(size_t numSamples, size_t nChannels, gsl::span<Aud
 		// Mix it in!
 		if (e->isPlaying()) {
 			e->update(channels, listener);
-			e->mixTo(buffers, *mixer, *pool);
+			e->mixTo(numSamples, buffers, *mixer, *pool);
 		}
 	}
 }

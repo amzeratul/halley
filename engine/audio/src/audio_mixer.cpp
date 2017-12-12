@@ -27,11 +27,11 @@ void AudioMixer::mixAudio(gsl::span<const AudioSamplePack> src, gsl::span<AudioS
 	}
 }
 
-void AudioMixer::interleaveChannels(AudioBuffer& dstBuffer, gsl::span<AudioBuffer*> src)
+void AudioMixer::interleaveChannels(gsl::span<AudioSamplePack> dstBuffer, gsl::span<AudioBuffer*> src)
 {
 	size_t n = 0;
-	for (size_t i = 0; i < dstBuffer.packs.size(); ++i) {
-		gsl::span<AudioConfig::SampleFormat> dst = dstBuffer.packs[i].samples;
+	for (size_t i = 0; i < size_t(dstBuffer.size()); ++i) {
+		gsl::span<AudioConfig::SampleFormat> dst = dstBuffer[i].samples;
 		size_t srcIdx = i >> 1;
 		size_t srcOff = (i & 1) << 3;
 
