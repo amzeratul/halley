@@ -41,8 +41,6 @@ Vector<std::unique_ptr<const AudioDevice>> AudioFacade::getAudioDevices()
 
 void AudioFacade::startPlayback(int deviceNumber)
 {
-	std::cout << "Using audio device: " << deviceNumber << std::endl;
-
 	if (running) {
 		stopPlayback();
 	}
@@ -58,7 +56,7 @@ void AudioFacade::startPlayback(int deviceNumber)
 		format.sampleRate = 48000;
 		
 		AudioSpec obtained = output.openAudioDevice(format, devices.at(deviceNumber).get(), [this]() { onNeedBuffer(); });
-
+		
 		engine->start(obtained, output);
 		running = true;
 
@@ -67,6 +65,13 @@ void AudioFacade::startPlayback(int deviceNumber)
 		}
 
 		output.startPlayback();
+
+		std::cout << "Audio Playback started.\n";
+		std::cout << "\tDevice: " << devices.at(deviceNumber)->getName() << " [" << deviceNumber << "]\n";
+		std::cout << "\tSample rate: " << obtained.sampleRate << "\n";
+		std::cout << "\tChannels: " << obtained.numChannels << "\n";
+		std::cout << "\tFormat: " << toString(obtained.format) << "\n";
+		std::cout << "\tBuffer size: " << obtained.bufferSize << std::endl;
 	}
 }
 

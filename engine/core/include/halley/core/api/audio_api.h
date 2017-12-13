@@ -42,6 +42,18 @@ namespace Halley
 		Float
 	};
 
+	template <>
+	struct EnumNames<AudioSampleFormat> {
+		constexpr std::array<const char*, 4> operator()() const {
+			return{{
+				"undefined",
+				"int16",
+				"int32",
+				"float"
+			}};
+		}
+	};
+
 	class AudioSpec
 	{
 	public:

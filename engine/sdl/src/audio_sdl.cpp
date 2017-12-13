@@ -67,7 +67,7 @@ AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, const Audi
 
 	SDL_AudioSpec obtained;
 
-	device = SDL_OpenAudioDevice(deviceName, 0, &desired, &obtained, SDL_AUDIO_ALLOW_ANY_CHANGE);
+	device = SDL_OpenAudioDevice(deviceName, 0, &desired, &obtained, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE | SDL_AUDIO_ALLOW_FORMAT_CHANGE);
 	if (device == 0) {
 		throw Exception("Unable to open audio device \"" + (name != "" ? name : "default") + "\"");
 	}
