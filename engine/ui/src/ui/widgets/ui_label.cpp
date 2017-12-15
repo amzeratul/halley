@@ -11,7 +11,11 @@ UILabel::UILabel(TextRenderer text)
 
 void UILabel::draw(UIPainter& painter) const
 {
-	painter.draw(text);
+	if (needsClip) {
+		painter.withClip(Rect4f(getPosition(), getPosition() + getMinimumSize())).draw(text);
+	} else {
+		painter.draw(text);
+	}
 
 	UIWidget::draw(painter);
 }
@@ -25,10 +29,15 @@ void UILabel::update(Time t, bool moved)
 
 void UILabel::updateMinSize()
 {
+	needsClip = false;
 	auto extents = text.getExtents();
 	if (extents.x > maxWidth) {
 		text.setText(text.split(maxWidth));
 		extents = text.getExtents();
+	}
+	if (extents.y > maxHeight) {
+		extents.y = maxHeight;
+		needsClip = true;
 	}
 	setMinSize(extents);
 }
@@ -49,6 +58,12 @@ void UILabel::setColourOverride(const std::vector<ColourOverride>& overrides)
 void UILabel::setMaxWidth(float m)
 {
 	maxWidth = m;
+	updateMinSize();
+}
+
+void UILabel::setMaxHeight(float m)
+{
+	maxHeight = m;
 	updateMinSize();
 }
 

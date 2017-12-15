@@ -11,6 +11,7 @@ namespace Halley {
 		void setText(const String& text);
 		void setColourOverride(const std::vector<ColourOverride>& overrides);
 		void setMaxWidth(float maxWidth);
+		void setMaxHeight(float maxHeight);
 
 		void setColour(Colour4f colour);
 
@@ -22,6 +23,8 @@ namespace Halley {
 	private:
 		TextRenderer text;
 		float maxWidth = std::numeric_limits<float>::infinity();
+		float maxHeight = std::numeric_limits<float>::infinity();
+		bool needsClip = false;
 
 		void updateMinSize();
 	};
