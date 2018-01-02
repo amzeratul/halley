@@ -92,11 +92,6 @@ void AudioFacade::stopPlayback()
 	}
 }
 
-AudioHandle AudioFacade::playUI(std::shared_ptr<const AudioClip> clip, float volume, float pan, bool loop, float pitch)
-{
-	return play(clip, AudioPosition::makeUI(pan), volume, loop, pitch);
-}
-
 AudioHandle AudioFacade::playMusic(std::shared_ptr<const AudioClip> clip, int track, float fadeInTime, bool loop)
 {
 	bool hasFade = fadeInTime > 0.0001f;

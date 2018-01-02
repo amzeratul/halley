@@ -2,6 +2,7 @@
 #include "ui_widget.h"
 #include "halley/core/api/audio_api.h"
 #include "ui_painter.h"
+#include "halley/audio/audio_position.h"
 
 using namespace Halley;
 
@@ -276,7 +277,7 @@ void UIRoot::draw(SpritePainter& painter, int mask, int layer)
 void UIRoot::playSound(const std::shared_ptr<const AudioClip>& clip)
 {
 	if (audio && clip) {
-		audio->playUI(clip);
+		audio->play(clip, AudioPosition::makeUI(0.0f));
 	}
 }
 
