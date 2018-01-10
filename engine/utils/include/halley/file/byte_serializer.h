@@ -222,6 +222,8 @@ namespace Halley {
 		{
 			unsigned int sz;
 			*this >> sz;
+			ensureSufficientBytesRemaining(sz); // Expect at least one byte per vector entry
+
 			val.clear();
 			val.reserve(sz);
 			for (unsigned int i = 0; i < sz; i++) {
@@ -236,6 +238,8 @@ namespace Halley {
 		{
 			unsigned int sz;
 			*this >> sz;
+			ensureSufficientBytesRemaining(sz); // Expect at least one byte per map entry
+
 			std::vector<std::pair<T, U>> tmpData(sz);
 			for (unsigned int i = 0; i < sz; i++) {
 				*this >> tmpData[i].first >> tmpData[i].second;
@@ -344,9 +348,26 @@ namespace Halley {
 		template <typename T>
 		Deserializer& deserializePod(T& val)
 		{
+			ensureSufficientBytesRemaining(sizeof(T));
 			memcpy(&val, src.data() + pos, sizeof(T));
 			pos += sizeof(T);
 			return *this;
+		}
+
+		void ensureSufficientBytesRemaining(size_t bytes)
+		{
+			if (bytes > getBytesRemaining()) {
+				throw Exception("Attempt to deserialize out of bounds");
+			}
+		}
+
+		size_t getBytesRemaining() const
+		{
+			if (pos > size_t(src.size_bytes())) {
+				return 0;
+			} else {
+				return size_t(src.size_bytes()) - pos;
+			}
 		}
 	};
 }
