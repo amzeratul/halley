@@ -186,6 +186,20 @@ namespace Halley {
 			return result;
 		}
 
+		template <typename T>
+		static void fromBytes(T& target, const Bytes& src)
+		{
+			Deserializer s(src);
+			s >> target;
+		}
+
+		template <typename T>
+		static void fromBytes(T& target, gsl::span<const gsl::byte> src)
+		{
+			Deserializer s(src);
+			s >> target;
+		}
+
 		Deserializer& operator>>(bool& val) { return deserializePod(val); }
 		Deserializer& operator>>(int8_t& val) { return deserializePod(val); }
 		Deserializer& operator>>(uint8_t& val) { return deserializePod(val); }
