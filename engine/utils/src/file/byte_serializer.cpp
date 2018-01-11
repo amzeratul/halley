@@ -64,6 +64,9 @@ Deserializer& Deserializer::operator>>(std::string& str)
 {
 	unsigned int sz;
 	*this >> sz;
+
+	ensureSufficientBytesRemaining(sz);
+
 	Expects(sz < 100 * 1024 * 1024);
 	str = std::string(reinterpret_cast<const char*>(src.data() + pos), sz);
 	pos += sz;
@@ -89,7 +92,26 @@ Deserializer& Deserializer::operator>>(Path& p)
 Deserializer& Deserializer::operator>>(gsl::span<gsl::byte>& span)
 {
 	Expects(span.size_bytes() > 0);
+
+	ensureSufficientBytesRemaining(size_t(span.size_bytes()));
+
 	memcpy(span.data(), src.data() + pos, span.size_bytes());
 	pos += span.size_bytes();
 	return *this;
+}
+
+void Deserializer::ensureSufficientBytesRemaining(size_t bytes)
+{
+	if (bytes > getBytesRemaining()) {
+		throw Exception("Attempt to deserialize out of bounds");
+	}
+}
+
+size_t Deserializer::getBytesRemaining() const
+{
+	if (pos > size_t(src.size_bytes())) {
+		return 0;
+	} else {
+		return size_t(src.size_bytes()) - pos;
+	}
 }

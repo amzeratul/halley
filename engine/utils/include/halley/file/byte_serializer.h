@@ -354,20 +354,7 @@ namespace Halley {
 			return *this;
 		}
 
-		void ensureSufficientBytesRemaining(size_t bytes)
-		{
-			if (bytes > getBytesRemaining()) {
-				throw Exception("Attempt to deserialize out of bounds");
-			}
-		}
-
-		size_t getBytesRemaining() const
-		{
-			if (pos > size_t(src.size_bytes())) {
-				return 0;
-			} else {
-				return size_t(src.size_bytes()) - pos;
-			}
-		}
+		void ensureSufficientBytesRemaining(size_t bytes);
+		size_t getBytesRemaining() const;
 	};
 }
