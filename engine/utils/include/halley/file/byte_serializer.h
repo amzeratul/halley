@@ -36,7 +36,7 @@ namespace Halley {
 		template <typename T, typename std::enable_if<!std::is_convertible<T, std::function<void(Serializer&)>>::value, int>::type = 0>
 		static Bytes toBytes(const T& value)
 		{
-			return toBytes([&value](Serializer& s) { value.serialize(s); });
+			return toBytes([&value](Serializer& s) { s << value; });
 		}
 
 		size_t getSize() const { return size; }
