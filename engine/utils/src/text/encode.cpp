@@ -36,7 +36,7 @@ static void initBase64()
 		for (size_t i=0; i<64; i++) {
 			base64reverse[base64dict[i]] = char(i);
 		}
-		base64reverse['='] = -1;
+		base64reverse['='] = 255;
 		hasInit = true;
 	}
 }
@@ -103,11 +103,11 @@ Bytes Encode::decodeBase64(const String& in)
 		int b3 = base64reverse[in[i+3]];
 
 		int available = 3;
-		if (b3 == -1) {
+		if (b3 == 255) {
 			available = 2;
 			b3 = 0;
 		}
-		if (b2 == -1) {
+		if (b2 == 255) {
 			available = 1;
 			b2 = 0;
 		}
