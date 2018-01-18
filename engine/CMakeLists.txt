@@ -8,3 +8,7 @@ add_subdirectory(audio)
 add_subdirectory(core)
 add_subdirectory(lua)
 add_subdirectory(ui)
+
+if (MSVC)
+    add_subdirectory(dx11)
+endif ()

@@ -137,6 +137,14 @@ set(HALLEY_PROJECT_LIBS
 	${HALLEY_PROJECT_EXTERNAL_LIBS}
 	)
 
+if (MSVC)
+	set(HALLEY_PROJECT_LIBS
+		optimized halley-dx11
+		debug halley-dx11_d
+		${HALLEY_PROJECT_LIBS}
+		)
+endif ()
+
 set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/include
 	${HALLEY_PATH}/contrib
@@ -203,7 +211,9 @@ function(halleyProject name sources headers genDefinitions targetDir)
 
 	if (HALLEY_PROJECT_EMBED)
 		target_link_libraries(${name} halley-opengl halley-sdl halley-asio halley-ui halley-core halley-entity halley-audio halley-net halley-lua halley-utils ${HALLEY_PROJECT_EXTERNAL_LIBS})
-		#add_dependencies(${name} halley-opengl halley-sdl halley-asio halley-ui halley-core halley-entity halley-audio halley-net halley-lua halley-utils)
+		if (MSVC)
+			target_link_libraries(${name} halley-dx11)
+		endif ()
 	else ()
 		target_link_libraries(${name} ${HALLEY_PROJECT_LIBS})
 	endif ()
