@@ -5,6 +5,7 @@
 #include "halley/core/api/halley_api_internal.h"
 #include "halley/core/graphics/window.h"
 #include <d3d11.h>
+#include <DXGI1_2.h>
 #undef min
 #undef max
 
@@ -39,7 +40,7 @@ namespace Halley {
 		std::shared_ptr<Window> window;
 
 		bool initialised = false;
-		IDXGISwapChain *swapChain;
+		IDXGISwapChain1 *swapChain;
 		ID3D11Device *device;
 		ID3D11DeviceContext *deviceContext;
 		ID3D11RenderTargetView *backbuffer;
