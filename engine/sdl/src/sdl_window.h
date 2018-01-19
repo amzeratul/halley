@@ -23,6 +23,9 @@ namespace Halley
 		const WindowDefinition& getDefinition() const override { return *curDefinition; }
 
 		void destroy();
+
+		void* getNativeHandle() override;
+
 	private:
 		SDL_Window* window;
 		std::unique_ptr<WindowDefinition> curDefinition;

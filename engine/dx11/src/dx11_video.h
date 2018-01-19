@@ -4,6 +4,9 @@
 #include <mutex>
 #include "halley/core/api/halley_api_internal.h"
 #include "halley/core/graphics/window.h"
+#include <d3d11.h>
+#undef min
+#undef max
 
 namespace Halley {
 	class SystemAPI;
@@ -34,5 +37,14 @@ namespace Halley {
 	private:
 		SystemAPI& system;
 		std::shared_ptr<Window> window;
+
+		bool initialised = false;
+		IDXGISwapChain *swapChain;
+		ID3D11Device *device;
+		ID3D11DeviceContext *deviceContext;
+		ID3D11RenderTargetView *backbuffer;
+
+		void initD3D(HWND hWnd, Rect4i view);
+		void releaseD3D();
 	};
 }

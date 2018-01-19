@@ -105,6 +105,18 @@ void SDLWindow::destroy()
 	window = nullptr;
 }
 
+void* SDLWindow::getNativeHandle()
+{
+#ifdef _WIN32
+	SDL_SysWMinfo wminfo;
+	SDL_VERSION(&wminfo.version);
+	if (SDL_GetWindowWMInfo(window, &wminfo) == 1) {
+		return wminfo.info.win.window;
+	}
+#endif
+	return nullptr;
+}
+
 Rect4i SDLWindow::getWindowRect() const
 {
 	int x, y, w, h;
