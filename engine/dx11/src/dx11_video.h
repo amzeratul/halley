@@ -45,7 +45,7 @@ namespace Halley {
 		ID3D11DeviceContext *deviceContext;
 		ID3D11RenderTargetView *backbuffer;
 
-		void initD3D(HWND hWnd, Rect4i view);
+		void initD3D(Window& window, Rect4i view);
 		void releaseD3D();
 	};
 }

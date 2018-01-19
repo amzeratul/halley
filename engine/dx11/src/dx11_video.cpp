@@ -28,7 +28,7 @@ void DX11Video::deInit()
 	releaseD3D();
 }
 
-void DX11Video::initD3D(HWND hWnd, Rect4i view)
+void DX11Video::initD3D(Window& window, Rect4i view)
 {
 	if (initialised) {
 		return;
@@ -42,20 +42,31 @@ void DX11Video::initD3D(HWND hWnd, Rect4i view)
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.SampleDesc.Count = 1;
 
-	/*
-	HRESULT result = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &swapChainDesc, &swapChain, &device, nullptr, &deviceContext);
+	auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &deviceContext);
 	if (result != S_OK) {
 		throw Exception("Unable to initialise DX11");
 	}
-	*/
-	D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &deviceContext);
+
 	IDXGIDevice2* pDXGIDevice;
 	device->QueryInterface(__uuidof(IDXGIDevice2), reinterpret_cast<void **>(&pDXGIDevice));
 	IDXGIAdapter * pDXGIAdapter;
 	pDXGIDevice->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void **>(&pDXGIAdapter));
 	IDXGIFactory2 * pIDXGIFactory;
 	pDXGIAdapter->GetParent(__uuidof(IDXGIFactory2), reinterpret_cast<void **>(&pIDXGIFactory));
-	pIDXGIFactory->CreateSwapChainForHwnd(device, hWnd, &swapChainDesc, nullptr, nullptr, &swapChain);
+
+	if (window.getNativeHandleType() == "HWND") {
+		auto hWnd = reinterpret_cast<HWND>(window.getNativeHandle());
+		result = pIDXGIFactory->CreateSwapChainForHwnd(device, hWnd, &swapChainDesc, nullptr, nullptr, &swapChain);
+		if (result != S_OK) {
+			throw Exception("Unable to create swap chain for HWND");
+		}
+	} else if (window.getNativeHandleType() == "CoreWindow") {
+		IUnknown* coreWindow = reinterpret_cast<IUnknown*>(window.getNativeHandle());
+		result = pIDXGIFactory->CreateSwapChainForCoreWindow(device, coreWindow, &swapChainDesc, nullptr, &swapChain);
+		if (result != S_OK) {
+			throw Exception("Unable to create swap chain for CoreWindow");
+		}
+	}
 
 	ID3D11Texture2D *pBackBuffer;
     swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&pBackBuffer));
@@ -101,7 +112,7 @@ void DX11Video::setWindow(WindowDefinition&& windowDescriptor, bool vsync)
 	if (!window) {
 		window = system.createWindow(windowDescriptor);
 
-		initD3D(reinterpret_cast<HWND>(window->getNativeHandle()), Rect4i({}, window->getWindowRect().getSize()));
+		initD3D(*window, Rect4i({}, window->getWindowRect().getSize()));
 	} else {
 		window->update(windowDescriptor);
 	}

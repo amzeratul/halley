@@ -25,6 +25,7 @@ namespace Halley
 		void destroy();
 
 		void* getNativeHandle() override;
+		String getNativeHandleType() override;
 
 	private:
 		SDL_Window* window;

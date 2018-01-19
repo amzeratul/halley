@@ -117,6 +117,15 @@ void* SDLWindow::getNativeHandle()
 	return nullptr;
 }
 
+String SDLWindow::getNativeHandleType()
+{
+#ifdef _WIN32
+	return "HWND";
+#else
+	return "";
+#endif
+}
+
 Rect4i SDLWindow::getWindowRect() const
 {
 	int x, y, w, h;

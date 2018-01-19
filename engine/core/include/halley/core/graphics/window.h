@@ -74,5 +74,6 @@ namespace Halley
 		virtual const WindowDefinition& getDefinition() const = 0;
 
 		virtual void* getNativeHandle() { return nullptr; }
+		virtual String getNativeHandleType() { return ""; }
 	};
 }
