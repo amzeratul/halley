@@ -83,7 +83,11 @@ void ReliableConnection::sendTagged(gsl::span<ReliableSubPacket> subPackets)
 		}
 
 		// Add data
+#ifdef _MSC_VER
 		memcpy_s(dst.subspan(pos).data(), dst.subspan(pos).size_bytes(), subPacket.data.data(), subPacket.data.size());
+#else
+		memcpy(dst.subspan(pos).data(), subPacket.data.data(), subPacket.data.size());
+#endif
 		pos += subPacket.data.size();
 
 		// Get sequence
@@ -107,7 +111,11 @@ void ReliableConnection::sendTagged(gsl::span<ReliableSubPacket> subPackets)
 	header.ack = highestReceived;
 	header.ackBits = generateAckBits();
 	auto headerData = gsl::as_bytes(gsl::span<ReliableHeader>(&header, 1));
+#ifdef _MSC_VER
 	memcpy_s(dst.data(), dst.size_bytes(), headerData.data(), headerData.size());
+#else
+	memcpy(dst.data(), headerData.data(), headerData.size());
+#endif
 
 	// Send
 	parent->send(OutboundNetworkPacket(dst.subspan(0, pos)));
