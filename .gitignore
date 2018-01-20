@@ -39,6 +39,7 @@ bin
 *.so
 *.dylib
 *.lib
+*.pri
 *.exe
 *.exp
 halley-cmd
