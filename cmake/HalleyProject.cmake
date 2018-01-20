@@ -61,10 +61,6 @@ if (EMSCRIPTEN)
 	set(USE_ASIO 0)
 endif()
 
-if (MSVC)
-	set(USE_DX11 1)
-endif ()
-
 if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
 	set(USE_DX11 1)
 	set(USE_SDL2 0)
