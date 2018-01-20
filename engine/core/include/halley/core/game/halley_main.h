@@ -37,13 +37,6 @@ namespace Halley
 
 #ifdef _MSC_VER
 	#define HALLEY_EXPORT extern "C" __declspec(dllexport)
-	#if HAS_EASTL
-		#ifndef _DEBUG
-			#pragma comment(lib, "EASTL.lib")
-		#else
-			#pragma comment(lib, "EASTLd.lib")
-		#endif
-	#endif
 #else
 	#define HALLEY_EXPORT
 #endif
