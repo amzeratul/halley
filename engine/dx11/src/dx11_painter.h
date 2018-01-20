@@ -3,10 +3,12 @@
 
 namespace Halley
 {
+	class DX11Video;
+
 	class DX11Painter : public Painter
 	{
 	public:
-		explicit DX11Painter(Resources& resources);
+		explicit DX11Painter(DX11Video& video, Resources& resources);
 		
 		void clear(Colour colour) override;
 		void setMaterialPass(const Material& material, int pass) override;
@@ -21,5 +23,8 @@ namespace Halley
 		void setClip(Rect4i clip, bool enable) override;
 
 		void onUpdateProjection(Material& material) override;
+
+	private:
+		DX11Video& video;
 	};
 }

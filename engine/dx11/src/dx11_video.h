@@ -35,17 +35,22 @@ namespace Halley {
 		
 		std::unique_ptr<Painter> makePainter(Resources& resources) override;
 
+		ID3D11Device& getDevice();
+		ID3D11DeviceContext& getDeviceContext();
+		ID3D11RenderTargetView& getRenderTarget();
+
 	private:
 		SystemAPI& system;
 		std::shared_ptr<Window> window;
 
 		bool initialised = false;
-		IDXGISwapChain1 *swapChain;
-		ID3D11Device *device;
-		ID3D11DeviceContext *deviceContext;
-		ID3D11RenderTargetView *backbuffer;
+		IDXGISwapChain1* swapChain;
+		ID3D11Device* device;
+		ID3D11DeviceContext* deviceContext;
+		ID3D11RenderTargetView* backbuffer;
+		bool useVsync = false;
 
-		void initD3D(Window& window, Rect4i view);
+		void initD3D(Window& window, Rect4i view, bool vsync);
 		void releaseD3D();
 	};
 }

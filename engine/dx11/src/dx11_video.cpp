@@ -9,6 +9,7 @@
 #include <windowsx.h>
 #include <d3d11.h>
 #include <DXGI1_2.h>
+#include <DXGI.h>
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "Dxgi.lib")
@@ -28,7 +29,7 @@ void DX11Video::deInit()
 	releaseD3D();
 }
 
-void DX11Video::initD3D(Window& window, Rect4i view)
+void DX11Video::initD3D(Window& window, Rect4i view, bool vsync)
 {
 	if (initialised) {
 		return;
@@ -83,6 +84,7 @@ void DX11Video::initD3D(Window& window, Rect4i view)
     deviceContext->RSSetViewports(1, &viewport);
 
 	initialised = true;
+	useVsync = vsync;
 }
 
 void DX11Video::releaseD3D()
@@ -100,19 +102,19 @@ void DX11Video::releaseD3D()
 
 void DX11Video::startRender()
 {
-	float colour[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-	deviceContext->ClearRenderTargetView(backbuffer, colour);
-    swapChain->Present(0, 0);
 }
 
-void DX11Video::finishRender() {}
+void DX11Video::finishRender()
+{
+    swapChain->Present(useVsync ? 1 : 0, 0);
+}
 
 void DX11Video::setWindow(WindowDefinition&& windowDescriptor, bool vsync)
 {
 	if (!window) {
 		window = system.createWindow(windowDescriptor);
 
-		initD3D(*window, Rect4i({}, window->getWindowRect().getSize()));
+		initD3D(*window, Rect4i({}, window->getWindowRect().getSize()), vsync);
 	} else {
 		window->update(windowDescriptor);
 	}
@@ -125,7 +127,7 @@ const Window& DX11Video::getWindow() const
 
 bool DX11Video::hasWindow() const
 {
-	return false;
+	return !!window;
 }
 
 std::unique_ptr<Texture> DX11Video::createTexture(Vector2i size)
@@ -155,5 +157,20 @@ std::unique_ptr<MaterialConstantBuffer> DX11Video::createConstantBuffer()
 
 std::unique_ptr<Painter> DX11Video::makePainter(Resources& resources)
 {
-	return std::make_unique<DX11Painter>(resources);
+	return std::make_unique<DX11Painter>(*this, resources);
+}
+
+ID3D11Device& DX11Video::getDevice()
+{
+	return *device;
+}
+
+ID3D11DeviceContext& DX11Video::getDeviceContext()
+{
+	return *deviceContext;
+}
+
+ID3D11RenderTargetView& DX11Video::getRenderTarget()
+{
+	return *backbuffer;
 }

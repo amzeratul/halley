@@ -1,11 +1,18 @@
 #include "dx11_painter.h"
+#include "dx11_video.h"
 using namespace Halley;
 
-DX11Painter::DX11Painter(Resources& resources)
+DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
 	: Painter(resources)
-{}
+	, video(video)
+{
+}
 
-void DX11Painter::clear(Colour colour) {}
+void DX11Painter::clear(Colour colour)
+{
+	const float col[] = { colour.r, colour.g, colour.b, colour.a };
+	video.getDeviceContext().ClearRenderTargetView(&video.getRenderTarget(), col);
+}
 
 void DX11Painter::setMaterialPass(const Material& material, int pass) {}
 
