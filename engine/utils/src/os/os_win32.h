@@ -21,7 +21,7 @@
 
 #pragma once
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
 #include <halley/os/os.h>
 #define _WIN32_DCOM
 #define WIN32_LEAN_AND_MEAN

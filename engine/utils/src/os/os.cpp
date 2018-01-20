@@ -41,7 +41,7 @@ void OS::setInstance(OS* os)
 
 OS* OS::createOS()
 {
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
 	return new OSWin32();
 #elif defined(__APPLE__)
 	return new OSMac();

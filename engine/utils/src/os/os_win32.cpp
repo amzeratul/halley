@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 #include "halley/text/string_converter.h"
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
 #include "halley/support/exception.h"
 
 #pragma warning(disable: 6387)

@@ -36,7 +36,7 @@
 // so we need not to check the version (because we only support _MSC_VER >= 1100)!
 #pragma once
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
 
 #include <windows.h>
 

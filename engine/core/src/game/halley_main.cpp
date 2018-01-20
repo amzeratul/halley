@@ -40,7 +40,7 @@ int HalleyMain::runMain(GameLoader& loader, const Vector<std::string>& args)
 Vector<std::string> HalleyMain::getWin32Args()
 {
 	Vector<std::string> args;
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
 	auto cmd = GetCommandLineW();
 	int argc;
 	auto argv = CommandLineToArgvW(cmd, &argc);

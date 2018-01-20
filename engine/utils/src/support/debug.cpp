@@ -48,7 +48,7 @@ Halley::Debug::Debug()
 ////////
 
 
-#ifdef _MSC_VER
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
 #include "StackWalker/StackWalker.h"
 #include <dbghelp.h> 
 #include <tchar.h>
@@ -361,7 +361,7 @@ BOOL PreventSetUnhandledExceptionFilter()
 
 void Halley::Debug::setErrorHandling()
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
 #ifndef _DEBUG
 	//SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER) onUnhandledException);
 	//PreventSetUnhandledExceptionFilter();
@@ -371,7 +371,7 @@ void Halley::Debug::setErrorHandling()
 
 void Halley::Debug::printCallStack()
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
 	std::cout << ConsoleColour(Console::RED) << "===== CALL STACK =====" << ConsoleColour(Console::DARK_RED) << std::endl;
 	CoutStackWalker walker;
 	walker.ShowCallstack();
@@ -381,7 +381,7 @@ void Halley::Debug::printCallStack()
 
 Halley::String Halley::Debug::getCallStack()
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
 	std::stringstream str;
 	StringStackWalker walker(str, 3);
 	walker.ShowCallstack();

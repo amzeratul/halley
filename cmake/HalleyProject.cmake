@@ -1,5 +1,6 @@
 include(PrecompiledHeader)
 
+
 # C++14 support
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -11,6 +12,7 @@ if (EMSCRIPTEN)
 	add_definitions(-s USE_SDL=2)
 endif()
 
+
 # Compiler-specific flags
 if (MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /fp:fast")
@@ -21,7 +23,11 @@ if (MSVC)
 	set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
 	set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
 
-	add_definitions(-D_WIN32_WINNT=0x0501 -DWINVER=0x0501)
+	if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
+		add_definitions(-D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00 -DWINDOWS_STORE)
+	else()
+		add_definitions(-D_WIN32_WINNT=0x0501 -DWINVER=0x0501)
+	endif()
 else()
 	if (NOT EMSCRIPTEN)
 		set(EXTRA_LIBS pthread)
@@ -44,18 +50,44 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DGSL_UNEN
 set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -DGSL_UNENFORCED_ON_CONTRACT_VIOLATION")
 
 
+# Pick dependencies
+set(USE_OPENGL 1)
+set(USE_DX11 0)
+set(USE_SDL2 1)
+set(USE_ASIO 1)
+
+if (EMSCRIPTEN)
+	set(USE_SDL2 0)
+	set(USE_ASIO 0)
+endif()
+
+if (MSVC)
+	set(USE_DX11 1)
+endif ()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
+	set(USE_DX11 1)
+	set(USE_SDL2 0)
+	set(USE_OPENGL 0)
+	set(USE_ASIO 0)
+endif ()
+
+
 # Libs
 if (CMAKE_LIBRARY_PATH)
 	link_directories(${CMAKE_LIBRARY_PATH})
 endif()
 
 # SDL2
-if(EMSCRIPTEN)
-	set(SDL2_INCLUDE_DIR "")
-	set(SDL2_LIBRARIES "")
-else()
-	set (SDL2_BUILDING_LIBRARY 1)
-	find_Package(SDL2 REQUIRED)
+if (USE_SDL2)
+	add_definitions(-DWITH_SDL2)
+	if(EMSCRIPTEN)
+		set(SDL2_INCLUDE_DIR "")
+		set(SDL2_LIBRARIES "")
+	else()
+		set (SDL2_BUILDING_LIBRARY 1)
+		find_Package(SDL2 REQUIRED)
+	endif()
 endif()
 
 # Boost
@@ -67,12 +99,25 @@ else()
 endif()
 
 # OpenGL
-find_package(OpenGL REQUIRED)
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    find_library(X11 REQUIRED)
-else()
-	SET(X11_LIBRARIES "")
+if (USE_OPENGL)
+	add_definitions(-DWITH_OPENGL)
+	find_package(OpenGL REQUIRED)
+	if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+		find_library(X11 REQUIRED)
+	else()
+		set(X11_LIBRARIES "")
+	endif ()
 endif ()
+
+# Asio
+if (USE_ASIO)
+	add_definitions(-DWITH_ASIO)
+endif ()
+
+# DX11
+if (USE_DX11)
+	add_definitions(-DWITH_DX11)
+endif()
 
 # Apple frameworks
 if (APPLE)
@@ -104,6 +149,8 @@ function(assign_source_group)
 	endforeach()
 endfunction(assign_source_group)
 
+
+# Setup libraries
 set(CMAKE_DEBUG_POSTFIX "_d")
 
 set(HALLEY_PROJECT_EXTERNAL_LIBS
@@ -114,9 +161,6 @@ set(HALLEY_PROJECT_EXTERNAL_LIBS
 	)
 
 set(HALLEY_PROJECT_LIBS
-	optimized halley-opengl
-	optimized halley-sdl
-	optimized halley-asio
 	optimized halley-ui
 	optimized halley-core
 	optimized halley-entity
@@ -124,9 +168,6 @@ set(HALLEY_PROJECT_LIBS
 	optimized halley-net
 	optimized halley-lua
 	optimized halley-utils
-	debug halley-asio_d
-	debug halley-opengl_d
-	debug halley-sdl_d
 	debug halley-ui_d
 	debug halley-core_d
 	debug halley-entity_d
@@ -137,13 +178,39 @@ set(HALLEY_PROJECT_LIBS
 	${HALLEY_PROJECT_EXTERNAL_LIBS}
 	)
 
-if (MSVC)
+if (USE_DX11)
 	set(HALLEY_PROJECT_LIBS
 		optimized halley-dx11
 		debug halley-dx11_d
 		${HALLEY_PROJECT_LIBS}
 		)
 endif ()
+
+if (USE_SDL2)
+set(HALLEY_PROJECT_LIBS
+	optimized halley-sdl
+	debug halley-sdl_d
+	${HALLEY_PROJECT_LIBS}
+	)
+endif ()
+
+if (USE_ASIO)
+set(HALLEY_PROJECT_LIBS
+	optimized halley-asio
+	debug halley-asio_d
+	${HALLEY_PROJECT_LIBS}
+	)
+endif ()
+
+if (USE_OPENGL)
+set(HALLEY_PROJECT_LIBS
+	optimized halley-opengl
+	debug halley-opengl_d
+	${HALLEY_PROJECT_LIBS}
+	)
+endif ()
+
+
 
 set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/include
@@ -161,6 +228,8 @@ set(HALLEY_PROJECT_INCLUDE_DIRS
 set(HALLEY_PROJECT_LIB_DIRS
 	${HALLEY_PATH}/lib
 	)
+
+
 
 function(halleyProject name sources headers genDefinitions targetDir)
 	if (HALLEY_PROJECT_EMBED)
@@ -210,8 +279,17 @@ function(halleyProject name sources headers genDefinitions targetDir)
 	endif()
 
 	if (HALLEY_PROJECT_EMBED)
-		target_link_libraries(${name} halley-opengl halley-sdl halley-asio halley-ui halley-core halley-entity halley-audio halley-net halley-lua halley-utils ${HALLEY_PROJECT_EXTERNAL_LIBS})
-		if (MSVC)
+		target_link_libraries(${name} halley-ui halley-core halley-entity halley-audio halley-net halley-lua halley-utils ${HALLEY_PROJECT_EXTERNAL_LIBS})
+		if (USE_OPENGL)
+			target_link_libraries(${name} halley-opengl)
+		endif ()
+		if (USE_SDL2)
+			target_link_libraries(${name} halley-sdl)
+		endif ()
+		if (USE_ASIO)
+			target_link_libraries(${name} halley-asio)
+		endif ()
+		if (USE_DX11)
 			target_link_libraries(${name} halley-dx11)
 		endif ()
 	else ()

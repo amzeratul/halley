@@ -30,7 +30,7 @@ using namespace Halley;
 static thread_local String threadName;
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
 #include <windows.h>
 const DWORD MS_VC_EXCEPTION=0x406D1388;
 
@@ -70,7 +70,7 @@ namespace Concurrent {
 
 	void setThreadName(String name)
 	{
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
 #ifdef _DEBUG
 		if (name != "main") {
 			SetThreadName(static_cast<DWORD>(-1), name.c_str());
