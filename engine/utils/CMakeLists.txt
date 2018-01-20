@@ -51,6 +51,7 @@ set(SOURCES
         "src/text/halleystring.cpp"
         "src/time/stopwatch.cpp"
         "src/utils/boost_system.cpp"
+        "src/utils/hash.cpp"
         
         "contrib/json/jsoncpp.cpp"
         "contrib/lodepng/lodepng.cpp"
@@ -61,6 +62,7 @@ set(SOURCES
         "contrib/tinyxml/tinyxml.cpp"
         "contrib/tinyxml/tinyxmlerror.cpp"
         "contrib/tinyxml/tinyxmlparser.cpp"
+        "contrib/xxhash/xxhash.c"
         )
 
 set(HEADERS
@@ -138,6 +140,7 @@ set(HEADERS
         "include/halley/time/halleytime.h"
         "include/halley/time/stopwatch.h"
         "include/halley/utils/algorithm.h"
+        "include/halley/utils/hash.h"
         "include/halley/utils/type_traits.h"
         "include/halley/utils/utils.h"
         "src/os/os_android.h"
@@ -160,6 +163,7 @@ set(HEADERS
         "contrib/speex/fixed_generic.h"
         "contrib/speex/speex_resampler.h"
         "contrib/speex/stack_alloc.h"
+        "contrib/xxhash/xxhash.h"
         )
 
 assign_source_group(${SOURCES})
