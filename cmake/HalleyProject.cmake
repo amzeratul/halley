@@ -292,7 +292,9 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		target_link_libraries(${name} ${HALLEY_PROJECT_LIBS})
 	endif ()
 	
-	set_target_properties(${name} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+	if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
+		set_target_properties(${name} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+	endif ()
 endfunction(halleyProject)
 
 function(halleyProjectCodegen name sources headers genDefinitions targetDir)
