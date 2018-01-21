@@ -1,15 +1,17 @@
 #include "winrt_system.h"
 using namespace Halley;
 
+#include "winrt/Windows.Foundation.h"
+using namespace winrt;
+
 void WinRTSystem::init()
 {
-	// TODO
-	std::cout << "Hello WinRT world!" << std::endl;
+	init_apartment();
 }
 
 void WinRTSystem::deInit()
 {
-	// TODO
+	uninit_apartment();
 }
 
 String WinRTSystem::getResourcesBasePath(const String& gamePath) const
