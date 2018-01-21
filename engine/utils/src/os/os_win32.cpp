@@ -62,7 +62,7 @@ Halley::OSWin32::OSWin32()
 		hr = CoCreateInstance(CLSID_WbemAdministrativeLocator, nullptr, CLSCTX_INPROC_SERVER, IID_IWbemLocator, reinterpret_cast<void**>(&pLoc));
 		if (FAILED(hr)) throw Exception("Unable to obtain locator");
 		//hr = pLoc->ConnectServer(BSTR(L"ROOT\\DEFAULT"), nullptr, nullptr, 0, 0, 0, 0, &pSvc);
-		hr = pLoc->ConnectServer( L"root\\cimv2", nullptr, nullptr, nullptr, WBEM_FLAG_CONNECT_USE_MAX_WAIT, nullptr, nullptr, &pSvc);
+		hr = pLoc->ConnectServer(BSTR(L"root\\cimv2"), nullptr, nullptr, nullptr, WBEM_FLAG_CONNECT_USE_MAX_WAIT, nullptr, nullptr, &pSvc);
 		if (FAILED(hr)) throw Exception("Unable to connect to WMI service");
 
 		// Set security on WMI connection

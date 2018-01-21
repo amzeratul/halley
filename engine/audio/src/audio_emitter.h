@@ -2,9 +2,6 @@
 #include "audio_position.h"
 #include "audio_emitter_behaviour.h"
 #include "audio_buffer.h"
-#include <boost/container/allocator_traits.hpp>
-#include <boost/predef/detail/_exception.h>
-#include <boost/predef/detail/_exception.h>
 #include <limits>
 
 namespace Halley {

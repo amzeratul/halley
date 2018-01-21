@@ -4,7 +4,6 @@
 #include "halley/text/halleystring.h"
 #include "halley/core/graphics/texture.h"
 #include <gsl/gsl>
-#include <boost/predef/detail/_exception.h>
 
 namespace Halley
 {
