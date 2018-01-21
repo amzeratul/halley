@@ -59,6 +59,7 @@ set(USE_OPENGL 1)
 set(USE_DX11 0)
 set(USE_SDL2 1)
 set(USE_ASIO 1)
+set(USE_WINRT 0)
 
 if (EMSCRIPTEN)
 	set(USE_SDL2 0)
@@ -70,6 +71,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
 	set(USE_SDL2 0)
 	set(USE_OPENGL 0)
 	set(USE_ASIO 0)
+	set(USE_WINRT 1)
 endif ()
 
 
