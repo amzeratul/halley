@@ -122,6 +122,12 @@ if (USE_DX11)
 	add_definitions(-DWITH_DX11)
 endif()
 
+# WinRT
+if (USE_WINRT)
+	add_definitions(-DWITH_WINRT)
+endif()
+
+
 # Apple frameworks
 if (APPLE)
 	find_library(CARBON_LIBRARY Carbon)
@@ -213,6 +219,14 @@ set(HALLEY_PROJECT_LIBS
 	)
 endif ()
 
+if (USE_WINRT)
+set(HALLEY_PROJECT_LIBS
+	optimized halley-winrt
+	debug halley-winrt_d
+	${HALLEY_PROJECT_LIBS}
+	)
+endif ()
+
 
 
 set(HALLEY_PROJECT_INCLUDE_DIRS
@@ -294,6 +308,9 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		endif ()
 		if (USE_DX11)
 			target_link_libraries(${name} halley-dx11)
+		endif ()
+		if (USE_WINRT)
+			target_link_libraries(${name} halley-winrt)
 		endif ()
 	else ()
 		target_link_libraries(${name} ${HALLEY_PROJECT_LIBS})
