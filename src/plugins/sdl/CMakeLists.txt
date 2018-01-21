@@ -1,6 +1,6 @@
 project (halley-sdl)
 
-include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} "include/halley/sdl" "../utils/include" "../core/include")
+include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} "include/halley/sdl" "../../engine/utils/include" "../../engine/core/include")
 
 set(SOURCES
     "src/audio_sdl.cpp"

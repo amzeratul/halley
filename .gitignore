@@ -30,8 +30,8 @@ Thumbs.db
 .vscode
 
 # Binaries
-assets
-bin
+/assets/
+/bin/
 *.dll
 *.hi
 *.o
@@ -58,8 +58,8 @@ _ReSharper*/
 *.sbr
 
 # Build system
-build
-build-external
+/build/
+/build-external/
 
 # External folder
-external
+/external/

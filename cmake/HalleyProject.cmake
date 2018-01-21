@@ -32,6 +32,7 @@ if (MSVC)
 	else()
 		add_definitions(-D_WIN32_WINNT=0x0501 -DWINVER=0x0501)
 	endif()
+	add_definitions(-D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
 else()
 	if (NOT EMSCRIPTEN)
 		set(EXTRA_LIBS pthread)
@@ -216,14 +217,14 @@ endif ()
 
 set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/include
-	${HALLEY_PATH}/contrib
-	${HALLEY_PATH}/engine/core/include
-	${HALLEY_PATH}/engine/net/include
-	${HALLEY_PATH}/engine/utils/include
-	${HALLEY_PATH}/engine/entity/include
-	${HALLEY_PATH}/engine/audio/include
-	${HALLEY_PATH}/engine/lua/include
-	${HALLEY_PATH}/engine/ui/include
+	${HALLEY_PATH}/src/contrib
+	${HALLEY_PATH}/src/engine/core/include
+	${HALLEY_PATH}/src/engine/net/include
+	${HALLEY_PATH}/src/engine/utils/include
+	${HALLEY_PATH}/src/engine/entity/include
+	${HALLEY_PATH}/src/engine/audio/include
+	${HALLEY_PATH}/src/engine/lua/include
+	${HALLEY_PATH}/src/engine/ui/include
 	${Boost_INCLUDE_DIR} 
 	)
 	

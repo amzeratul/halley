@@ -1,11 +1,3 @@
-add_subdirectory(utils)
-add_subdirectory(net)
-add_subdirectory(entity)
-add_subdirectory(audio)
-add_subdirectory(core)
-add_subdirectory(lua)
-add_subdirectory(ui)
-
 if (USE_DX11)
     add_subdirectory(dx11)
 endif ()
@@ -20,4 +12,8 @@ endif ()
 
 if (USE_ASIO)
     add_subdirectory(asio)
+endif ()
+
+if (USE_WINRT)
+    add_subdirectory(winrt)
 endif ()

@@ -1,6 +1,6 @@
 project (halley-asio)
 
-include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} "include/halley/asio" "../utils/include" "../core/include" "../net/include")
+include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} "include/halley/asio" "../../engine/utils/include" "../../engine/core/include" "../../engine/net/include")
 
 set(SOURCES
     "src/asio_network_api.cpp"

@@ -13,7 +13,7 @@ else ()
     include(HalleyProject)
 endif ()
 
-include_directories(contrib)
+include_directories(src/contrib)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/bin)
@@ -35,15 +35,7 @@ SET(HALLEY_VERSION_MINOR "0")
 SET(HALLEY_VERSION_PATCH "0")
 SET(HALLEY_VERSION "${HALLEY_VERSION_MAJOR}.${HALLEY_VERSION_MINOR}.${HALLEY_VERSION_PATCH}")
 
-add_subdirectory(engine)
-
-if (BUILD_HALLEY_TOOLS)
-    add_subdirectory(tools)
-endif()
-
-if (BUILD_HALLEY_TESTS)
-    add_subdirectory(tests)
-endif()
+add_subdirectory(src)
 
 if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../halley-external")
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../halley-external" "${CMAKE_BINARY_DIR}/../build-external")

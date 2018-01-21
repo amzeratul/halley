@@ -1,6 +1,6 @@
 project (halley-opengl)
 
-include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} "../utils/include" "../core/include")
+include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include")
 
 set(SOURCES
         "src/constant_buffer_opengl.cpp"
