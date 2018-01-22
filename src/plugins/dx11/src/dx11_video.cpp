@@ -38,10 +38,18 @@ void DX11Video::initD3D(Window& window, Rect4i view, bool vsync)
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
 	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC1));
 
+	auto size = window.getWindowRect().getSize();
+
+	swapChainDesc.Width = size.x;
+	swapChainDesc.Height = size.y;
 	swapChainDesc.BufferCount = 1;
 	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapChainDesc.BufferCount = 2;
 	swapChainDesc.SampleDesc.Count = 1;
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
+	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
 	auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &deviceContext);
 	if (result != S_OK) {

@@ -20,58 +20,55 @@ using namespace Windows::UI::Core;
 
 #pragma comment(lib, "windowsapp")
 
-
-class WinRTDataReader : public ResourceDataReader {
+class StdioDataReader : public ResourceDataReader {
 public:
 
-	WinRTDataReader(StorageFile&& _file)
-		: file(std::move(_file))
+	StdioDataReader(const String& path)
 	{
-		stream = file.OpenReadAsync().get();
-		open = true;
+		_wfopen_s(&fp, path.getUTF16().c_str(), L"rb");
+	}
+
+	~StdioDataReader()
+	{
+		StdioDataReader::close();
 	}
 
 	size_t size() const override
 	{
-		//return file.GetBasicPropertiesAsync().GetResults().Size();
-		return stream.Size();
+		const long startPos = ftell(fp);
+		fseek(fp, 0, SEEK_END);
+		const size_t size = size_t(ftell(fp));
+		fseek(fp, startPos, SEEK_SET);
+		return size;
 	}
 	
 	int read(gsl::span<gsl::byte> dst) override
 	{
-		Streams::DataReader reader(stream);
-		size_t bytesLoaded = size_t(reader.LoadAsync(uint32_t(dst.size_bytes())).get());
-		const auto dstData = reinterpret_cast<uint8_t*>(dst.data());
-		reader.ReadBytes(array_view<uint8_t>(dstData, dstData + dst.size_bytes()));
-		return int(bytesLoaded);
+		return int(fread(dst.data(), 1, dst.size_bytes(), fp));
 	}
 	
 	void seek(int64_t pos, int whence) override
 	{
-		int64_t basePos = 0;
-		if (whence == SEEK_CUR) {
-			basePos = tell();
-		} else if (whence == SEEK_END) {
-			basePos = size();
-		}
-		stream.Seek(pos);
+		fseek(fp, long(pos), whence);
 	}
 	
 	size_t tell() const override
 	{
-		return stream.Position();
+		return size_t(ftell(fp));
 	}
 	
 	void close() override
 	{
-		open = false;
+		if (fp) {
+			fclose(fp);
+			fp = nullptr;
+		}
 	}
 
 private:
-	StorageFile file;
-	Streams::IRandomAccessStreamWithContentType stream;
-	bool open = false;
+	FILE* fp = nullptr;
 };
+
 
 class WinRTWindow : public Window
 {
@@ -115,7 +112,7 @@ public:
 
 	void* getNativeHandle() override
 	{
-		return static_cast<winrt::Windows::Foundation::IUnknown*>(&window);
+		return winrt::get_abi(window);
 	}
 
 	String getNativeHandleType() override
@@ -139,25 +136,14 @@ void WinRTSystem::deInit()
 
 String WinRTSystem::getResourcesBasePath(const String& gamePath) const
 {
-	return "Assets\\";
+	static auto path = String(Windows::ApplicationModel::Package::Current().InstalledLocation().Path().data()) + String("/Assets/");
+	return path;
+	//return "Assets\\";
 }
 
 std::unique_ptr<ResourceDataReader> WinRTSystem::getDataReader(String path, int64_t start, int64_t end)
 {
-	try {
-		StorageFolder assetFolder = Windows::ApplicationModel::Package::Current().InstalledLocation();
-		StorageFile file = assetFolder.GetFileAsync(param::hstring(path.replaceAll("/", "\\").getUTF16().c_str())).get();
-		if (file) {
-			return std::make_unique<WinRTDataReader>(std::move(file));
-		} else {
-			return {};
-		}
-	} catch (hresult_error& e) {
-		OutputDebugString(e.message().c_str());
-		return {};
-	} catch (...) {
-		return {};
-	}
+	return std::make_unique<StdioDataReader>(path);
 }
 
 std::unique_ptr<GLContext> WinRTSystem::createGLContext()
