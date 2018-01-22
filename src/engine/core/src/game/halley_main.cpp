@@ -16,9 +16,11 @@ int HalleyMain::runMain(GameLoader& loader, const Vector<std::string>& args)
 	try {
 		core = std::make_unique<Core>(loader.createGame(), args);
 		loader.setCore(*core);
-		core->init();
-		MainLoop loop(*core, loader);
-		loop.run();
+		core->getAPI().system->runGame([&]() {
+			core->init();
+			MainLoop loop(*core, loader);
+			loop.run();
+		});
 		return core->getExitCode();
 	} catch (std::exception& e) {
 		if (core) {

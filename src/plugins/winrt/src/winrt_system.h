@@ -23,5 +23,7 @@ namespace Halley {
 		std::vector<String> enumerateSaveData(SaveDataType type, const String& root) override;
 
 		bool generateEvents(VideoAPI* video, InputAPI* input) override;
+
+		void runGame(std::function<void()> runnable) override;
 	};
 }

@@ -53,6 +53,8 @@ namespace Halley
 			});
 		}
 
+		virtual void runGame(std::function<void()> runnable) { runnable(); }
+
 	private:
 		friend class HalleyAPI;
 		friend class Core;

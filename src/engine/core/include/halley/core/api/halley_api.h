@@ -48,6 +48,7 @@ namespace Halley
 
 		void init();
 		void deInit();
-		static std::unique_ptr<const HalleyAPI> create(CoreAPIInternal* core, int flags);
+		void assign();
+		static std::unique_ptr<HalleyAPI> create(CoreAPIInternal* core, int flags);
 	};
 }

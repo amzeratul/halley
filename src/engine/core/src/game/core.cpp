@@ -72,6 +72,15 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	// Info
 	std::cout << "Program dir: " << ConsoleColour(Console::DARK_GREY) << environment->getProgramPath() << ConsoleColour() << std::endl;
 	std::cout << "Data dir: " << ConsoleColour(Console::DARK_GREY) << environment->getDataPath() << ConsoleColour() << std::endl;
+
+	// Computer info
+#ifndef _DEBUG
+	showComputerInfo();
+#endif
+
+	// Create API
+	registerDefaultPlugins();
+	api = HalleyAPI::create(this, game->initPlugins(*this));
 }
 
 Core::~Core()
@@ -139,14 +148,8 @@ int Core::getTargetFPS()
 
 void Core::init()
 {
-	// Computer info
-#ifndef _DEBUG
-	showComputerInfo();
-#endif
-
 	// Initialize API
-	registerDefaultPlugins();
-	api = HalleyAPI::create(this, game->initPlugins(*this));
+	api->init();
 	api->systemInternal->setEnvironment(environment.get());
 	statics.resume(api->system);
 	Concurrent::setThreadName("main");

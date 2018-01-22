@@ -10,38 +10,54 @@ HalleyAPI::~HalleyAPI()
 	deInit();
 }
 
-void HalleyAPI::init()
+void HalleyAPI::assign()
 {
 	Expects(coreInternal);
 	Expects(systemInternal);
 	core = coreInternal;
 
 	if (systemInternal) {
-		systemInternal->init();
 		system = systemInternal.get();
 	}
 	if (videoInternal) {
-		videoInternal->init();
 		video = videoInternal.get();
 	}
 	if (inputInternal) {
-		inputInternal->init();
 		input = inputInternal.get();
+	}
+	if (audioInternal) {
+		audio = audioInternal.get();
+	}
+	if (platformInternal) {
+		platform = platformInternal.get();
+	}
+	if (networkInternal) {
+		network = networkInternal.get();
+	}
+}
+
+void HalleyAPI::init()
+{
+	if (systemInternal) {
+		systemInternal->init();
+	}
+	if (videoInternal) {
+		videoInternal->init();
+	}
+	if (inputInternal) {
+		inputInternal->init();
 	}
 	if (audioOutputInternal) {
 		audioOutputInternal->init();
 	}
 	if (audioInternal) {
 		audioInternal->init();
-		audio = audioInternal.get();
 	}
 	if (platformInternal) {
 		platformInternal->init();
-		platform = platformInternal.get();
 	}
 	if (networkInternal) {
 		networkInternal->init();
-		network = networkInternal.get();
 	}
 }
 
@@ -70,7 +86,7 @@ void HalleyAPI::deInit()
 	}
 }
 
-std::unique_ptr<const HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
+std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 {
 	auto api = std::unique_ptr<HalleyAPI>(new HalleyAPI());
 	api->coreInternal = core;
@@ -138,6 +154,6 @@ std::unique_ptr<const HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int fl
 	}
 
 	api->systemInternal = std::move(system);
-	api->init();
+	api->assign();
 	return std::move(api);
 }
