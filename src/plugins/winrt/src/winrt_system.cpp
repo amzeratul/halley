@@ -8,7 +8,15 @@ using namespace Halley;
 #include "winrt/Windows.Storage.Streams.h"
 #include "winrt/Windows.Storage.FileProperties.h"
 #include "winrt/Windows.ApplicationModel.h"
+#include "winrt/Windows.ApplicationModel.Core.h"
+#include "winrt/Windows.UI.Core.h"
+
 using namespace winrt;
+using namespace Windows::Foundation;
+using namespace Windows::Storage;
+using namespace Windows::ApplicationModel;
+using namespace Windows::ApplicationModel::Core;
+using namespace Windows::UI::Core;
 
 #pragma comment(lib, "windowsapp")
 
@@ -16,7 +24,7 @@ using namespace winrt;
 class WinRTDataReader : public ResourceDataReader {
 public:
 
-	WinRTDataReader(Windows::Storage::StorageFile&& _file)
+	WinRTDataReader(StorageFile&& _file)
 		: file(std::move(_file))
 	{
 		stream = file.OpenReadAsync().get();
@@ -31,8 +39,8 @@ public:
 	
 	int read(gsl::span<gsl::byte> dst) override
 	{
-		Windows::Storage::Streams::DataReader reader(stream);
-		size_t bytesLoaded = size_t(reader.LoadAsync(dst.size_bytes()).get());
+		Streams::DataReader reader(stream);
+		size_t bytesLoaded = size_t(reader.LoadAsync(uint32_t(dst.size_bytes())).get());
 		const auto dstData = reinterpret_cast<uint8_t*>(dst.data());
 		reader.ReadBytes(array_view<uint8_t>(dstData, dstData + dst.size_bytes()));
 		return int(bytesLoaded);
@@ -60,15 +68,131 @@ public:
 	}
 
 private:
-	Windows::Storage::StorageFile file;
-	Windows::Storage::Streams::IRandomAccessStreamWithContentType stream;
+	StorageFile file;
+	Streams::IRandomAccessStreamWithContentType stream;
 	bool open = false;
+};
+
+class WinRTWindow : public Window
+{
+public:
+	WinRTWindow(CoreWindow window, const WindowDefinition& definition)
+		: window(window)
+		, definition(definition)
+	{}
+
+	void update(const WindowDefinition& def) override
+	{
+		definition = def;
+	}
+
+	void show() override
+	{
+	}
+
+	void hide() override
+	{
+	}
+
+	void setVsync(bool vsync) override
+	{
+	}
+
+	void swap() override
+	{
+	}
+
+	Rect4i getWindowRect() const override
+	{
+		auto bounds = window.Bounds();
+		return Rect4i(Rect4f(bounds.X, bounds.Y, bounds.Width, bounds.Height));
+	}
+
+	const WindowDefinition& getDefinition() const override
+	{
+		return definition;
+	}
+
+	void* getNativeHandle() override
+	{
+		return &window;
+	}
+
+	String getNativeHandleType() override
+	{
+		return "CoreWindow";
+	}
+
+private:
+	CoreWindow window;
+	WindowDefinition definition;
 };
 
 
 void WinRTSystem::init()
 {
 	init_apartment();
+
+	struct View : implements<View, IFrameworkView>
+	{
+		View(WinRTSystem& system)
+			: system(system)
+		{}
+
+		~View()
+		{
+			OutputDebugString(L"Bye");
+		}
+
+		void Initialize(CoreApplicationView const &view)
+		{
+			OutputDebugString(L"Initialized");
+		}
+		
+		void Load(hstring entryPoint)
+		{
+		}
+		
+		void Uninitialize()
+		{
+			OutputDebugString(L"Uninitialized");
+		}
+		
+		void Run()
+		{
+			CoreWindow window = CoreWindow::GetForCurrentThread();
+			window.Activate();
+			CoreDispatcher dispatcher = window.Dispatcher();
+			dispatcher.ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+		}
+
+		void SetWindow(CoreWindow const & window)
+		{
+			
+		}
+
+	private:
+		WinRTSystem& system;
+	};
+
+	struct Source : implements<Source, IFrameworkViewSource>
+	{
+		Source(WinRTSystem& system)
+			: system(system)
+		{}
+
+		IFrameworkView CreateView()
+		{
+			return make<View>(system);
+		}
+
+	private:
+		WinRTSystem& system;
+	};
+	//CoreApplication::Run(make<Source>(*this));
+
+	CoreWindow window = CoreWindow::GetForCurrentThread();
+	window.Activate();
 }
 
 void WinRTSystem::deInit()
@@ -84,8 +208,8 @@ String WinRTSystem::getResourcesBasePath(const String& gamePath) const
 std::unique_ptr<ResourceDataReader> WinRTSystem::getDataReader(String path, int64_t start, int64_t end)
 {
 	try {
-		Windows::Storage::StorageFolder assetFolder = Windows::ApplicationModel::Package::Current().InstalledLocation();
-		Windows::Storage::StorageFile file = assetFolder.GetFileAsync(param::hstring(path.replaceAll("/", "\\").getUTF16().c_str())).get();
+		StorageFolder assetFolder = Windows::ApplicationModel::Package::Current().InstalledLocation();
+		StorageFile file = assetFolder.GetFileAsync(param::hstring(path.replaceAll("/", "\\").getUTF16().c_str())).get();
 		if (file) {
 			return std::make_unique<WinRTDataReader>(std::move(file));
 		} else {
@@ -107,13 +231,11 @@ std::unique_ptr<GLContext> WinRTSystem::createGLContext()
 
 std::shared_ptr<Window> WinRTSystem::createWindow(const WindowDefinition& window)
 {
-	// TODO
-	return {};
+	return std::make_shared<WinRTWindow>(CoreWindow::GetForCurrentThread(), window);
 }
 
 void WinRTSystem::destroyWindow(std::shared_ptr<Window> window)
 {
-	// TODO
 }
 
 Vector2i WinRTSystem::getScreenSize(int n) const
