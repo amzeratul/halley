@@ -115,7 +115,7 @@ public:
 
 	void* getNativeHandle() override
 	{
-		return &window;
+		return static_cast<winrt::Windows::Foundation::IUnknown*>(&window);
 	}
 
 	String getNativeHandleType() override
