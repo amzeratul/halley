@@ -148,7 +148,7 @@ std::unique_ptr<Texture> DX11Video::createTexture(Vector2i size)
 
 std::unique_ptr<Shader> DX11Video::createShader(const ShaderDefinition& definition)
 {
-	return std::make_unique<DX11Shader>(definition);
+	return std::make_unique<DX11Shader>(*this, definition);
 }
 
 std::unique_ptr<TextureRenderTarget> DX11Video::createTextureRenderTarget()
