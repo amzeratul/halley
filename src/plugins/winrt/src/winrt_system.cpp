@@ -76,7 +76,8 @@ public:
 	WinRTWindow(CoreWindow window, const WindowDefinition& definition)
 		: window(window)
 		, definition(definition)
-	{}
+	{
+	}
 
 	void update(const WindowDefinition& def) override
 	{

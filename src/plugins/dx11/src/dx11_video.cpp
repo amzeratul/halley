@@ -47,9 +47,12 @@ void DX11Video::initD3D(Window& window, Rect4i view, bool vsync)
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.BufferCount = 2;
 	swapChainDesc.SampleDesc.Count = 1;
+
+#ifdef WITH_UWP
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
 	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+#endif
 
 	auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &deviceContext);
 	if (result != S_OK) {
