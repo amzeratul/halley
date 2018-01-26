@@ -155,5 +155,5 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 
 	api->systemInternal = std::move(system);
 	api->assign();
-	return std::move(api);
+	return api;
 }
