@@ -66,8 +66,9 @@ Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& mater
 
 	PainterVertexData result;
 
-	result.vertexSize = material->getDefinition().getVertexStride();
-	result.dataSize = numVertices * result.vertexSize;
+	result.vertexSize = material->getDefinition().getVertexSize();
+	result.vertexStride = material->getDefinition().getVertexStride();
+	result.dataSize = numVertices * result.vertexStride;
 	makeSpaceForPendingVertices(result.dataSize);
 	makeSpaceForPendingIndices(numIndices);
 
@@ -108,8 +109,8 @@ void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites,
 
 	for (size_t i = 0; i < numSprites; i++) {
 		for (size_t j = 0; j < verticesPerSprite; j++) {
-			size_t srcOffset = i * result.vertexSize;
-			size_t dstOffset = (i * verticesPerSprite + j) * result.vertexSize;
+			size_t srcOffset = i * result.vertexStride;
+			size_t dstOffset = (i * verticesPerSprite + j) * result.vertexStride;
 			memmove(result.dstVertex + dstOffset, src + srcOffset, result.vertexSize);
 
 			// j -> vertPos
@@ -159,7 +160,7 @@ void Painter::drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scal
 	for (size_t i = 0; i < numVertices; i++) {
 		const size_t ix = i & 3;
 		const size_t iy = i >> 2;
-		const size_t dstOffset = i * result.vertexSize;
+		const size_t dstOffset = i * result.vertexStride;
 
 		memmove(result.dstVertex + dstOffset, src, result.vertexSize);
 

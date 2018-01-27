@@ -43,7 +43,6 @@ namespace Halley {
 		static Matrix4f makeScaling2D(float scaleX, float scaleY);
 		static Matrix4f makeTranslation2D(float x, float y);
 		static Matrix4f makeOrtho2D(float left, float right, float bottom, float top, float near, float far);
-		static Matrix4f makeTranspose();
 
 		void loadIdentity();
 		void rotateZ(Angle1f angle);

@@ -69,7 +69,7 @@ Matrix4f Matrix4f::operator*(const Matrix4f& param) const
 	return result;
 }
 
-Halley::Vector2f Halley::Matrix4f::operator*(const Vector2f& param) const
+Vector2f Matrix4f::operator*(const Vector2f& param) const
 {
 	float src[4] = { param.x, param.y, 0.0f, 1.0f };
 	float result[4];
@@ -107,9 +107,18 @@ void Matrix4f::translate2D(float x, float y)
 	(*this) *= makeTranslation2D(x, y);
 }
 
-void Halley::Matrix4f::transpose()
+void Matrix4f::transpose()
 {
-	(*this) *= makeTranspose();
+	auto& e = elements;
+	
+	std::swap(e[1], e[4]);
+	std::swap(e[2], e[8]);
+	std::swap(e[3], e[12]);
+
+	std::swap(e[6], e[9]);
+	std::swap(e[7], e[13]);
+
+	std::swap(e[11], e[14]);
 }
 
 float* Matrix4f::getElements()
@@ -161,7 +170,7 @@ Matrix4f Matrix4f::makeTranslation2D(float x, float y)
 	return result;
 }
 
-Halley::Matrix4f Halley::Matrix4f::makeOrtho2D(float left, float right, float bottom, float top, float _near, float _far)
+Matrix4f Matrix4f::makeOrtho2D(float left, float right, float bottom, float top, float _near, float _far)
 {
 	// Replacement for glOrtho(), as that doesn't exist in OpenGL ES
 	// See http://www.khronos.org/opengles/documentation/opengles1_0/html/glOrtho.html
@@ -170,14 +179,5 @@ Halley::Matrix4f Halley::Matrix4f::makeOrtho2D(float left, float right, float bo
 							0.0f, 2.0f/(top-bottom), 0.0f, 0.0f,
 							0.0f, 0.0f, -2.0f / (_far-_near), 0.0f,
 							-(right+left)/(right-left), -(top+bottom)/(top-bottom), -(_far+_near)/(_far-_near), 1.0f };
-	return Matrix4f(mat);
-}
-
-Halley::Matrix4f Halley::Matrix4f::makeTranspose()
-{
-	const float mat[16] = { 0.0f, 1.0f, 0.0f, 0.0f,
-							1.0f, 0.0f, 0.0f, 0.0f,
-							0.0f, 0.0f, 1.0f, 0.0f,
-							0.0f, 0.0f, 0.0f, 1.0f };
 	return Matrix4f(mat);
 }

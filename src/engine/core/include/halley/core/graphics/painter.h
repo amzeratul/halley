@@ -23,6 +23,7 @@ namespace Halley
 			char* dstVertex;
 			unsigned short* dstIndex;
 			size_t vertexSize;
+			size_t vertexStride;
 			size_t dataSize;
 			unsigned short firstIndex;
 		};

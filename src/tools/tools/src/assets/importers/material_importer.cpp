@@ -157,7 +157,7 @@ ShaderParameterType MaterialImporter::parseParameterType(String rawType)
 void MaterialImporter::loadAttributes(MaterialDefinition& material, const YAML::Node& topNode)
 {
 	int location = int(material.attributes.size());
-	int offset = material.vertexStride;
+	int offset = material.vertexSize;
 
 	auto attribSeqNode = topNode.as<YAML::Node>();
 	for (auto attribEntry : attribSeqNode) {
@@ -181,5 +181,5 @@ void MaterialImporter::loadAttributes(MaterialDefinition& material, const YAML::
 		}
 	}
 
-	material.vertexStride = offset;
+	material.vertexSize = offset;
 }

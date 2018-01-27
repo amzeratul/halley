@@ -138,6 +138,25 @@ const String& MaterialDefinition::getName() const
 	return name;
 }
 
+size_t MaterialDefinition::getVertexSize() const
+{
+	return size_t(vertexSize);
+}
+
+size_t MaterialDefinition::getVertexStride() const
+{
+	if (vertexSize % 16 != 0) {
+		return size_t(vertexSize + 16 - vertexSize % 16);
+	} else {
+		return size_t(vertexSize);
+	}
+}
+
+size_t MaterialDefinition::getVertexPosOffset() const
+{
+	return size_t(vertexPosOffset);
+}
+
 std::unique_ptr<MaterialDefinition> MaterialDefinition::loadResource(ResourceLoader& loader)
 {
 	return std::make_unique<MaterialDefinition>(loader);
@@ -150,7 +169,7 @@ void MaterialDefinition::serialize(Serializer& s) const
 	s << textures;
 	s << uniformBlocks;
 	s << attributes;
-	s << vertexStride;
+	s << vertexSize;
 	s << vertexPosOffset;
 }
 
@@ -161,7 +180,7 @@ void MaterialDefinition::deserialize(Deserializer& s)
 	s >> textures;
 	s >> uniformBlocks;
 	s >> attributes;
-	s >> vertexStride;
+	s >> vertexSize;
 	s >> vertexPosOffset;
 }
 

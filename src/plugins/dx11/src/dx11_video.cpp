@@ -163,7 +163,7 @@ std::unique_ptr<ScreenRenderTarget> DX11Video::createScreenRenderTarget()
 
 std::unique_ptr<MaterialConstantBuffer> DX11Video::createConstantBuffer()
 {
-	return std::make_unique<DX11MaterialConstantBuffer>();
+	return std::make_unique<DX11MaterialConstantBuffer>(*this);
 }
 
 std::unique_ptr<Painter> DX11Video::makePainter(Resources& resources)

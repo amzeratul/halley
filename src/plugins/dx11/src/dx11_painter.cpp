@@ -3,6 +3,7 @@
 #include "halley/core/graphics/material/material.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include "dx11_shader.h"
+#include "dx11_material_constant_buffer.h"
 using namespace Halley;
 
 DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
@@ -37,7 +38,12 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 
 void DX11Painter::setMaterialData(const Material& material)
 {
-	// TODO: constant buffers
+	for (auto& block: material.getDataBlocks()) {
+		if (block.getType() != MaterialDataBlockType::SharedExternal) {
+			auto buffer = static_cast<DX11MaterialConstantBuffer&>(block.getConstantBuffer()).getBuffer().getBuffer();
+			video.getDeviceContext().VSSetConstantBuffers(block.getBindPoint(), 1, &buffer);
+		}
+	}
 }
 
 void DX11Painter::setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly)
@@ -74,5 +80,6 @@ void DX11Painter::setClip(Rect4i clip, bool enable)
 
 void DX11Painter::onUpdateProjection(Material& material)
 {
-	// TODO
+	material.uploadData(*this);
+	setMaterialData(material);
 }

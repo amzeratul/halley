@@ -91,8 +91,9 @@ namespace Halley
 		MaterialPass& getPass(int n);
 
 		const String& getName() const;
-		int getVertexStride() const { return vertexStride; }
-		int getVertexPosOffset() const { return vertexPosOffset; }
+		size_t getVertexSize() const;
+		size_t getVertexStride() const;
+		size_t getVertexPosOffset() const;
 		const Vector<MaterialAttribute>& getAttributes() const { return attributes; }
 		const Vector<MaterialUniformBlock>& getUniformBlocks() const { return uniformBlocks; }
 		const Vector<String>& getTextures() const { return textures; }
@@ -111,7 +112,7 @@ namespace Halley
 		Vector<String> textures;
 		Vector<MaterialUniformBlock> uniformBlocks;
 		Vector<MaterialAttribute> attributes;
-		int vertexStride = 0;
+		int vertexSize = 0;
 		int vertexPosOffset = 0;
 	};
 

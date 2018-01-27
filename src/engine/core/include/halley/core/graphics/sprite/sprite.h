@@ -29,6 +29,7 @@ namespace Halley
 		Rect4f texRect;
 		float rotation = 0;
 		float textureRotation = 0;
+		char _padding[8];
 	};
 
 	class Sprite

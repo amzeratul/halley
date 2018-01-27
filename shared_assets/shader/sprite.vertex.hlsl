@@ -19,7 +19,7 @@ struct VOut {
     float2 texCoord0 : TEXCOORD0;
     float2 pixelTexCoord0 : TEXCOORD1;
     float4 colour : COLOR0;
-    float4 colourAdd : COLOUR1;
+    float4 colourAdd : COLOR1;
     float2 vertPos : POSITION1;
     float2 pixelPos : POSITION2;
 };
