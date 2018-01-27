@@ -28,7 +28,9 @@ namespace Halley {
 		std::unique_ptr<TextureRenderTarget> createTextureRenderTarget() override;
 		std::unique_ptr<ScreenRenderTarget> createScreenRenderTarget() override;
 		std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() override;
-		
+
+		String getShaderLanguage() override;
+
 		bool isLoaderThread() const;
 
 	protected:

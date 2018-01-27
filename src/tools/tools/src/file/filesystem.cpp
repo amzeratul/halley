@@ -18,14 +18,15 @@ bool FileSystem::exists(const Path& p)
 
 bool FileSystem::createDir(const Path& p)
 {
-	if (!exists(p)) {
-		try {
+	try {
+		if (!exists(p)) {
 			return create_directories(getNative(p));
-		} catch (...) {
+		} else {
 			return false;
 		}
+	} catch (...) {
+		return false;
 	}
-	return false;
 }
 
 bool FileSystem::createParentDir(const Path& p)

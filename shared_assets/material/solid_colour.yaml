@@ -3,6 +3,8 @@ name: Halley/SolidColour
 base: sprite_base.yaml
 passes:
   - blend: Alpha
-    vertex: sprite.vertex.glsl
-    pixel: solid_colour.pixel.glsl
+    shader:
+      - language: glsl
+        vertex: sprite.vertex.glsl
+        pixel: solid_colour.pixel.glsl
 ...

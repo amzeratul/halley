@@ -73,6 +73,11 @@ std::unique_ptr<Painter> DummyVideoAPI::makePainter(Resources& resources)
 	return std::make_unique<DummyPainter>(resources);
 }
 
+String DummyVideoAPI::getShaderLanguage()
+{
+	return "glsl";
+}
+
 DummyTexture::DummyTexture(Vector2i s)
 {
 	size = s;

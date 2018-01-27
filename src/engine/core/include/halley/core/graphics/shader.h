@@ -41,7 +41,7 @@ namespace Halley
 	class ShaderFile : public Resource
 	{
 	public:
-		std::map<int, Bytes> shaders; // Key is ShaderType enum
+		std::map<ShaderType, Bytes> shaders;
 
 		static std::unique_ptr<ShaderFile> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Shader; }

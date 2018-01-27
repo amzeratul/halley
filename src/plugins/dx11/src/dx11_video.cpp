@@ -171,6 +171,11 @@ std::unique_ptr<Painter> DX11Video::makePainter(Resources& resources)
 	return std::make_unique<DX11Painter>(*this, resources);
 }
 
+String DX11Video::getShaderLanguage()
+{
+	return "hlsl";
+}
+
 ID3D11Device& DX11Video::getDevice()
 {
 	return *device;

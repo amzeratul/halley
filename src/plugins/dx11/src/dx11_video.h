@@ -35,6 +35,8 @@ namespace Halley {
 		
 		std::unique_ptr<Painter> makePainter(Resources& resources) override;
 
+		String getShaderLanguage() override;
+
 		ID3D11Device& getDevice();
 		ID3D11DeviceContext& getDeviceContext();
 		ID3D11RenderTargetView& getRenderTarget();

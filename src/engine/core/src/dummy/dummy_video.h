@@ -24,6 +24,7 @@ namespace Halley {
 		void init() override;
 		void deInit() override;
 		std::unique_ptr<Painter> makePainter(Resources& resources) override;
+		String getShaderLanguage() override;
 
 	private:
 		std::shared_ptr<Window> window;

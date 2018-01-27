@@ -351,6 +351,11 @@ std::unique_ptr<MaterialConstantBuffer> VideoOpenGL::createConstantBuffer()
 	return std::make_unique<ConstantBufferOpenGL>();
 }
 
+String VideoOpenGL::getShaderLanguage()
+{
+	return "glsl";
+}
+
 std::unique_ptr<Painter> VideoOpenGL::makePainter(Resources& resources)
 {
 	return std::make_unique<PainterOpenGL>(resources);

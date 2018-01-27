@@ -34,5 +34,7 @@ namespace Halley
 		virtual std::unique_ptr<TextureRenderTarget> createTextureRenderTarget() = 0;
 		virtual std::unique_ptr<ScreenRenderTarget> createScreenRenderTarget() = 0;
 		virtual std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() = 0;
+
+		virtual String getShaderLanguage() = 0;
 	};
 }

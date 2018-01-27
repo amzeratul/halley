@@ -8,6 +8,8 @@ uniforms:
     - u_distance: float
 passes:
   - blend: Opaque
-    vertex: sprite.vertex.glsl
-    pixel: scanline.pixel.glsl
+    shader:
+      - language: glsl
+        vertex: sprite.vertex.glsl
+        pixel: scanline.pixel.glsl
 ...

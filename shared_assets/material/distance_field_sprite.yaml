@@ -10,6 +10,8 @@ uniforms:
     - u_outlineColour: vec4
 passes:
   - blend: Alpha
-    vertex: sprite.vertex.glsl
-    pixel: distance_field_sprite.pixel.glsl
+    shader:
+      - language: glsl
+        vertex: sprite.vertex.glsl
+        pixel: distance_field_sprite.pixel.glsl
 ...

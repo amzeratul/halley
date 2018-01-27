@@ -67,22 +67,28 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const YAML::Node& 
 		throw Exception("Unknown blend type: " + blend);
 	}
 
-	auto shaderType = { "vertex", "geometry", "pixel" };
+	auto shaderTypes = { "vertex", "geometry", "pixel" };
 
-	String shaderName = material.getName() + "_pass_" + toString(passN);
+	String passName = material.getName() + "_pass_" + toString(passN);
 
-	ImportingAsset shaderAsset;
-	shaderAsset.assetId = shaderName;
-	shaderAsset.assetType = ImportAssetType::Shader;
-	for (auto& curType: shaderType) {
-		if (node[curType].IsDefined()) {
-			auto data = collector.readAdditionalFile("shader/" + node[curType].as<std::string>());
-			shaderAsset.inputFiles.emplace_back(ImportingAssetFile(shaderName + "." + curType, std::move(data)));
+	for (auto& shaderEntry: node["shader"]) {
+		String language = shaderEntry["language"].as<std::string>();
+		String shaderName = passName;
+		ImportingAsset shaderAsset;
+		shaderAsset.assetId = shaderName + ":" + language;
+		shaderAsset.assetType = ImportAssetType::Shader;
+		for (auto& curType: shaderTypes) {
+			if (shaderEntry[curType].IsDefined()) {
+				auto data = collector.readAdditionalFile("shader/" + shaderEntry[curType].as<std::string>());
+				shaderAsset.inputFiles.emplace_back(ImportingAssetFile(shaderName + "." + curType, std::move(data)));
+			}
 		}
+		shaderAsset.metadata = std::make_unique<Metadata>();
+		shaderAsset.metadata->set("language", language);
+		collector.addAdditionalAsset(std::move(shaderAsset));
 	}
-	collector.addAdditionalAsset(std::move(shaderAsset));
 
-	material.passes.emplace_back(MaterialPass(blendType, shaderName));
+	material.passes.emplace_back(MaterialPass(blendType, passName));
 }
 
 void MaterialImporter::loadUniforms(MaterialDefinition& material, const YAML::Node& topNode)

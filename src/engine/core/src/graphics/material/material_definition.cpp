@@ -185,14 +185,14 @@ void MaterialPass::deserialize(Deserializer& s)
 
 void MaterialPass::createShader(ResourceLoader& loader, String name, const Vector<MaterialAttribute>& attributes)
 {
+	auto& api = loader.getAPI();
+	auto& video = *api.video;
+	auto shaderData = api.getResource<ShaderFile>(shaderAssetId + ":" + video.getShaderLanguage());
+
 	ShaderDefinition definition;
 	definition.name = name;
 	definition.vertexAttributes = attributes;
+	definition.shaders = shaderData->shaders;
 
-	auto shaderData = loader.getAPI().getResource<ShaderFile>(shaderAssetId);
-	for (auto& shader: shaderData->shaders) {
-		definition.shaders[ShaderType(shader.first)] = shader.second;
-	}
-
-	shader = loader.getAPI().video->createShader(definition);
+	shader = video.createShader(definition);
 }
