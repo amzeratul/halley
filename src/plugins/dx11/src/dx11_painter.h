@@ -1,10 +1,12 @@
 #pragma once
 #include "halley/core/graphics/painter.h"
 #include "dx11_buffer.h"
+#include <map>
 
 namespace Halley
 {
 	class DX11Video;
+	class DX11Blend;
 
 	class DX11Painter : public Painter
 	{
@@ -32,5 +34,8 @@ namespace Halley
 		DX11Buffer indexBuffer;
 		ID3D11InputLayout* layout;
 		ID3D11RasterizerState* rasterizer = nullptr;
+		std::map<BlendType, DX11Blend> blendModes;
+
+		DX11Blend& getBlendMode(BlendType type);
 	};
 }

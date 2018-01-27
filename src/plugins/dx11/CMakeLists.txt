@@ -3,6 +3,7 @@ project (halley-dx11)
 include_directories(${Boost_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include")
 
 set(SOURCES
+        "src/dx11_blend.cpp"
         "src/dx11_buffer.cpp"
         "src/dx11_material_constant_buffer.cpp"
         "src/dx11_plugin.cpp"
@@ -14,6 +15,7 @@ set(SOURCES
         )
 
 set(HEADERS
+        "src/dx11_blend.h"
         "src/dx11_buffer.h"
         "src/dx11_material_constant_buffer.h"
         "src/dx11_painter.h"

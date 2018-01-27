@@ -4,6 +4,7 @@
 #include "halley/core/graphics/material/material_definition.h"
 #include "dx11_shader.h"
 #include "dx11_material_constant_buffer.h"
+#include "dx11_blend.h"
 using namespace Halley;
 
 DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
@@ -56,6 +57,8 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 	auto& shader = static_cast<DX11Shader&>(pass.getShader());
 	shader.setMaterialLayout(video, material.getDefinition().getAttributes());
 	shader.bind(video);
+
+	getBlendMode(pass.getBlend()).bind(video);
 }
 
 void DX11Painter::setMaterialData(const Material& material)
@@ -106,4 +109,15 @@ void DX11Painter::onUpdateProjection(Material& material)
 {
 	material.uploadData(*this);
 	setMaterialData(material);
+}
+
+DX11Blend& DX11Painter::getBlendMode(BlendType type)
+{
+	auto iter = blendModes.find(type);
+	if (iter != blendModes.end()) {
+		return iter->second;
+	}
+
+	blendModes.emplace(std::make_pair(type, DX11Blend(video, type)));
+	return getBlendMode(type);
 }
