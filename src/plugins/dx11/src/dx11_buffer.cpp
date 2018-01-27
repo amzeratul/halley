@@ -3,8 +3,9 @@
 #include "dx11_video.h"
 using namespace Halley;
 
-DX11Buffer::DX11Buffer(DX11Video& video)
+DX11Buffer::DX11Buffer(DX11Video& video, Type type)
 	: video(video)
+	, type(type)
 {
 }
 
@@ -46,8 +47,19 @@ void DX11Buffer::resize(size_t size)
 
 	bd.Usage = D3D11_USAGE_DYNAMIC;
 	bd.ByteWidth = size;
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	switch (type) {
+	case Type::Constant:
+		bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		break;
+	case Type::Index:
+		bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		break;
+	case Type::Vertex:
+		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		break;
+	}
 
 	HRESULT result = video.getDevice().CreateBuffer(&bd, nullptr, &buffer);
 	if (result != S_OK) {

@@ -19,12 +19,15 @@ namespace Halley
 		int getBlockLocation(const String& name, ShaderType stage) override;
 
 		void bind(DX11Video& video);
+		void setMaterialLayout(DX11Video& video, const std::vector<MaterialAttribute>& attributes);
 
 	private:
 		String name;
 		ID3D11VertexShader* vertexShader = nullptr;
 		ID3D11PixelShader* pixelShader = nullptr;
 		ID3D11GeometryShader* geometryShader = nullptr;
+		ID3D11InputLayout* layout = nullptr;
+		ID3D10Blob* vertexBlob = nullptr;
 
 		void loadShader(DX11Video& video, ShaderType type, const Bytes& bytes);
 	};

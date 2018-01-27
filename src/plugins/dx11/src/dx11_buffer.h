@@ -9,7 +9,14 @@ namespace Halley {
 
 	class DX11Buffer {
     public:
-        DX11Buffer(DX11Video& video);
+		enum class Type
+		{
+			Vertex,
+			Index,
+			Constant
+		};
+
+        DX11Buffer(DX11Video& video, Type type);
 		~DX11Buffer();
 
 		void setData(gsl::span<const gsl::byte> data);
@@ -17,6 +24,7 @@ namespace Halley {
 
 	private:
 		DX11Video& video;
+		Type type;
 		ID3D11Buffer* buffer = nullptr;
 		size_t curSize = 0;
 

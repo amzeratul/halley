@@ -8,8 +8,8 @@ using namespace Halley;
 DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
 	: Painter(resources)
 	, video(video)
-	, vertexBuffer(video)
-	, indexBuffer(video)
+	, vertexBuffer(video, DX11Buffer::Type::Vertex)
+	, indexBuffer(video, DX11Buffer::Type::Index)
 {
 }
 
@@ -31,12 +31,13 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 {
 	auto& pass = material.getDefinition().getPass(passN);
 	auto& shader = static_cast<DX11Shader&>(pass.getShader());
+	shader.setMaterialLayout(video, material.getDefinition().getAttributes());
 	shader.bind(video);
 }
 
 void DX11Painter::setMaterialData(const Material& material)
 {
-	// TODO
+	// TODO: constant buffers
 }
 
 void DX11Painter::setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly)
@@ -56,7 +57,9 @@ void DX11Painter::setVertices(const MaterialDefinition& material, size_t numVert
 
 void DX11Painter::drawTriangles(size_t numIndices)
 {
-	video.getDeviceContext().Draw(UINT(numIndices), 0);
+	auto& devCon = video.getDeviceContext();
+	devCon.IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	devCon.DrawIndexed(UINT(numIndices), 0, 0);
 }
 
 void DX11Painter::setViewPort(Rect4i rect)
