@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/core/graphics/painter.h"
+#include "dx11_buffer.h"
 
 namespace Halley
 {
@@ -26,5 +27,7 @@ namespace Halley
 
 	private:
 		DX11Video& video;
+
+		DX11Buffer vertexBuffer;
 	};
 }

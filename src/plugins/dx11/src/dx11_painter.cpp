@@ -8,6 +8,15 @@ using namespace Halley;
 DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
 	: Painter(resources)
 	, video(video)
+	, vertexBuffer(video)
+{
+}
+
+void DX11Painter::doStartRender()
+{
+}
+
+void DX11Painter::doEndRender()
 {
 }
 
@@ -25,16 +34,6 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 }
 
 void DX11Painter::setMaterialData(const Material& material)
-{
-	// TODO
-}
-
-void DX11Painter::doStartRender()
-{
-	// TODO
-}
-
-void DX11Painter::doEndRender()
 {
 	// TODO
 }
