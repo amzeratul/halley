@@ -254,7 +254,10 @@ set(HALLEY_PROJECT_LIB_DIRS
 
 
 function(halleyProject name sources headers genDefinitions targetDir)
-	if (HALLEY_PROJECT_EMBED)
+	set(EMBED ${HALLEY_PROJECT_EMBED})
+	set(HALLEY_PROJECT_EMBED 0)
+
+	if (EMBED)
 		add_subdirectory(halley)
 	endif()
 
@@ -299,7 +302,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		set_target_properties(${name} PROPERTIES SUFFIX ".bc")
 	endif()
 
-	if (HALLEY_PROJECT_EMBED)
+	if (EMBED)
 		target_link_libraries(${name} halley-ui halley-core halley-entity halley-audio halley-net halley-lua halley-utils ${HALLEY_PROJECT_EXTERNAL_LIBS})
 		if (USE_OPENGL)
 			target_link_libraries(${name} halley-opengl)
