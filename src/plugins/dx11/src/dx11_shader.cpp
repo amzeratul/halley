@@ -155,15 +155,28 @@ void DX11Shader::setMaterialLayout(DX11Video& video, const std::vector<MaterialA
 
 	Expects(vertexBlob);
 
+	std::vector<std::array<char, 64>> names(attributes.size());
 	std::vector<D3D11_INPUT_ELEMENT_DESC> desc(attributes.size());
+
 	for (size_t i = 0; i < desc.size(); ++i) {
 		auto& a = attributes[i];
-		const char* name = a.name == "a_position" ? "POSITION" : a.name.c_str();
-		DXGI_FORMAT format = getDX11Format(a.type);
+		
 		UINT semanticIndex = 0;
 		UINT inputSlot = 0;
+		DXGI_FORMAT format = getDX11Format(a.type);
 		UINT byteOffset = a.offset;
-		desc[i] = { name, semanticIndex, format, inputSlot, byteOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+
+		String name = a.name.asciiUpper();
+		if (name.startsWith("A_")) {
+			name = name.mid(2);
+		}
+		if (name.right(1).isNumber()) {
+			semanticIndex = name.right(1).toInteger();
+			name = name.left(name.length() - 1);
+		}
+		strcpy_s(names[i].data(), 64, name.c_str());
+
+		desc[i] = { names[i].data(), semanticIndex, format, inputSlot, byteOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 	}
 
 	HRESULT result = video.getDevice().CreateInputLayout(desc.data(), UINT(desc.size()), vertexBlob->GetBufferPointer(), vertexBlob->GetBufferSize(), &layout);
