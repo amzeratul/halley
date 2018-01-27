@@ -1,5 +1,6 @@
 #include "dx11_shader.h"
 #include "dx11_video.h"
+#include "halley/core/graphics/material/material_definition.h"
 using namespace Halley;
 
 // TODO: REMOVE THESE TWO
@@ -122,6 +123,30 @@ void DX11Shader::bind(DX11Video& video)
 	devCon.IASetInputLayout(layout);
 }
 
+static DXGI_FORMAT getDX11Format(ShaderParameterType type)
+{
+	switch (type) {
+	case ShaderParameterType::Float:
+		return DXGI_FORMAT_R32_FLOAT;
+	case ShaderParameterType::Float2:
+		return DXGI_FORMAT_R32G32_FLOAT;
+	case ShaderParameterType::Float3:
+		return DXGI_FORMAT_R32G32B32_FLOAT;
+	case ShaderParameterType::Float4:
+		return DXGI_FORMAT_R32G32B32A32_FLOAT;
+	case ShaderParameterType::Int:
+		return DXGI_FORMAT_R32_SINT;
+	case ShaderParameterType::Int2:
+		return DXGI_FORMAT_R32G32_SINT;
+	case ShaderParameterType::Int3:
+		return DXGI_FORMAT_R32G32B32_SINT;
+	case ShaderParameterType::Int4:
+		return DXGI_FORMAT_R32G32B32A32_SINT;
+	default:
+		throw Exception("Unknown shader parameter type: " + toString(int(type)));
+	}
+}
+
 void DX11Shader::setMaterialLayout(DX11Video& video, const std::vector<MaterialAttribute>& attributes)
 {
 	if (layout) {
@@ -130,14 +155,18 @@ void DX11Shader::setMaterialLayout(DX11Video& video, const std::vector<MaterialA
 
 	Expects(vertexBlob);
 
-	D3D11_INPUT_ELEMENT_DESC ied[] =
-	{
-		//{"a_vertPos", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"a_color", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12 * 4, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	};
+	std::vector<D3D11_INPUT_ELEMENT_DESC> desc(attributes.size());
+	for (size_t i = 0; i < desc.size(); ++i) {
+		auto& a = attributes[i];
+		const char* name = a.name == "a_position" ? "POSITION" : a.name.c_str();
+		DXGI_FORMAT format = getDX11Format(a.type);
+		UINT semanticIndex = 0;
+		UINT inputSlot = 0;
+		UINT byteOffset = a.offset;
+		desc[i] = { name, semanticIndex, format, inputSlot, byteOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+	}
 
-	HRESULT result = video.getDevice().CreateInputLayout(ied, 1, vertexBlob->GetBufferPointer(), vertexBlob->GetBufferSize(), &layout);
+	HRESULT result = video.getDevice().CreateInputLayout(desc.data(), UINT(desc.size()), vertexBlob->GetBufferPointer(), vertexBlob->GetBufferSize(), &layout);
 	if (result != S_OK) {
 		throw Exception("Unable to create input layout for shader " + name);
 	}
