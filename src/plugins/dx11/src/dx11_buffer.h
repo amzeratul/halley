@@ -13,6 +13,7 @@ namespace Halley {
 		~DX11Buffer();
 
 		void setData(gsl::span<const gsl::byte> data);
+		ID3D11Buffer*& getBuffer();
 
 	private:
 		DX11Video& video;

@@ -29,6 +29,11 @@ void DX11Buffer::setData(gsl::span<const gsl::byte> data)
 	devCon.Unmap(buffer, 0);
 }
 
+ID3D11Buffer*& DX11Buffer::getBuffer()
+{
+	return buffer;
+}
+
 void DX11Buffer::resize(size_t size)
 {
 	if (buffer) {

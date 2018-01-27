@@ -29,5 +29,6 @@ namespace Halley
 		DX11Video& video;
 
 		DX11Buffer vertexBuffer;
+		DX11Buffer indexBuffer;
 	};
 }
