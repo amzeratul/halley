@@ -47,7 +47,7 @@ float4 getVertexPosition(float2 position, float2 pivot, float2 size, float2 vert
 
 VOut VShader(VIn input) {
     VOut result;
-    result.position = float4(0, 0, 0, 0);
+
     result.texCoord0 = getTexCoord(input.texCoord0, input.vertPos.zw, input.textureRotation);
     result.pixelTexCoord0 = result.texCoord0 * input.size;
     result.vertPos = input.vertPos.xy;
