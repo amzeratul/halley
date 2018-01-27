@@ -56,7 +56,7 @@ void DX11Painter::setVertices(const MaterialDefinition& material, size_t numVert
 
 void DX11Painter::drawTriangles(size_t numIndices)
 {
-	// TODO
+	video.getDeviceContext().Draw(UINT(numIndices), 0);
 }
 
 void DX11Painter::setViewPort(Rect4i rect)
