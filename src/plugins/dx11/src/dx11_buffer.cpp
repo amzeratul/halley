@@ -20,7 +20,7 @@ DX11Buffer::~DX11Buffer()
 void DX11Buffer::setData(gsl::span<const gsl::byte> data)
 {
 	if (size_t(data.size_bytes()) > curSize) {
-		resize(nextPowerOf2(size_t(data.size_bytes())));
+		resize(size_t(data.size_bytes()));
 	}
 
 	D3D11_MAPPED_SUBRESOURCE ms;
@@ -35,8 +35,10 @@ ID3D11Buffer*& DX11Buffer::getBuffer()
 	return buffer;
 }
 
-void DX11Buffer::resize(size_t size)
+void DX11Buffer::resize(size_t requestedSize)
 {
+	size_t targetSize = std::max(size_t(16), nextPowerOf2(requestedSize));
+
 	if (buffer) {
 		buffer->Release();
 		buffer = nullptr;
@@ -46,7 +48,7 @@ void DX11Buffer::resize(size_t size)
 	ZeroMemory(&bd, sizeof(bd));
 
 	bd.Usage = D3D11_USAGE_DYNAMIC;
-	bd.ByteWidth = size;
+	bd.ByteWidth = UINT(targetSize);
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	switch (type) {
@@ -63,8 +65,8 @@ void DX11Buffer::resize(size_t size)
 
 	HRESULT result = video.getDevice().CreateBuffer(&bd, nullptr, &buffer);
 	if (result != S_OK) {
-		throw Exception("Unable to create DX buffer with size " + toString(size));
+		throw Exception("Unable to create DX buffer with size " + toString(targetSize));
 	}
 
-	curSize = size;
+	curSize = targetSize;
 }

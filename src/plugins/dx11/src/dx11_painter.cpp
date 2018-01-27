@@ -60,10 +60,12 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 
 void DX11Painter::setMaterialData(const Material& material)
 {
+	auto& devCon = video.getDeviceContext();
 	for (auto& block: material.getDataBlocks()) {
 		if (block.getType() != MaterialDataBlockType::SharedExternal) {
 			auto buffer = static_cast<DX11MaterialConstantBuffer&>(block.getConstantBuffer()).getBuffer().getBuffer();
-			video.getDeviceContext().VSSetConstantBuffers(block.getBindPoint(), 1, &buffer);
+			devCon.VSSetConstantBuffers(block.getBindPoint(), 1, &buffer);
+			devCon.PSSetConstantBuffers(block.getBindPoint(), 1, &buffer);
 		}
 	}
 }
