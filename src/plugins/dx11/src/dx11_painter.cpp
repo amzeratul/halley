@@ -16,10 +16,32 @@ DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
 
 void DX11Painter::doStartRender()
 {
+	if (!rasterizer) {
+		D3D11_RASTERIZER_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+
+		desc.FillMode = D3D11_FILL_SOLID;
+		desc.CullMode = D3D11_CULL_NONE;
+		desc.FrontCounterClockwise = TRUE;
+		desc.DepthBias = 0;
+		desc.SlopeScaledDepthBias = 0.0f;
+		desc.DepthBiasClamp = 0.0f;
+		desc.DepthClipEnable = FALSE;
+		desc.ScissorEnable = FALSE;
+		desc.MultisampleEnable = FALSE;
+		desc.AntialiasedLineEnable = FALSE;
+
+		video.getDevice().CreateRasterizerState(&desc, &rasterizer);
+		video.getDeviceContext().RSSetState(rasterizer);
+	}
 }
 
 void DX11Painter::doEndRender()
 {
+	if (rasterizer) {
+		rasterizer->Release();
+		rasterizer = nullptr;
+	}
 }
 
 void DX11Painter::clear(Colour colour)

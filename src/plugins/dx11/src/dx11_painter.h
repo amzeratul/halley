@@ -31,5 +31,6 @@ namespace Halley
 		DX11Buffer vertexBuffer;
 		DX11Buffer indexBuffer;
 		ID3D11InputLayout* layout;
+		ID3D11RasterizerState* rasterizer = nullptr;
 	};
 }
