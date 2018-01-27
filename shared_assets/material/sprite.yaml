@@ -9,4 +9,7 @@ passes:
       - language: glsl
         vertex: sprite.vertex.glsl
         pixel: sprite.pixel.glsl
+      - language: hlsl
+        vertex: sprite.vertex.hlsl
+        pixel: sprite.pixel.hlsl
 ...

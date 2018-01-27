@@ -14,4 +14,7 @@ passes:
       - language: glsl
         vertex: sprite.vertex.glsl
         pixel: distance_field_sprite.pixel.glsl
+      - language: hlsl
+        vertex: sprite.vertex.hlsl
+        pixel: distance_field_sprite.pixel.hlsl
 ...
