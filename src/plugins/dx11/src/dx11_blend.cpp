@@ -27,8 +27,8 @@ DX11Blend::DX11Blend(DX11Video& video, BlendType blend)
 
 	case BlendType::AlphaPremultiplied:
 		target.BlendOp = D3D11_BLEND_OP_ADD;
-		target.SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		target.DestBlend = D3D11_BLEND_ONE;
+		target.SrcBlend = D3D11_BLEND_ONE;
+		target.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
 		target.BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		target.SrcBlendAlpha = D3D11_BLEND_ONE;
 		target.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
