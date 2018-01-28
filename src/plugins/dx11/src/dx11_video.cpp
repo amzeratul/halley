@@ -10,6 +10,7 @@
 #include <d3d11.h>
 #include <DXGI1_2.h>
 #include <DXGI.h>
+#include "dx11_loader.h"
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "Dxgi.lib")
@@ -22,10 +23,12 @@ DX11Video::DX11Video(SystemAPI& system)
 
 void DX11Video::init()
 {
+	loader = std::make_unique<DX11Loader>(*this);
 }
 
 void DX11Video::deInit()
 {
+	loader.reset();
 	releaseD3D();
 }
 
@@ -143,7 +146,7 @@ bool DX11Video::hasWindow() const
 
 std::unique_ptr<Texture> DX11Video::createTexture(Vector2i size)
 {
-	return std::make_unique<DX11Texture>(size);
+	return std::make_unique<DX11Texture>(*this, size);
 }
 
 std::unique_ptr<Shader> DX11Video::createShader(const ShaderDefinition& definition)
@@ -189,4 +192,9 @@ ID3D11DeviceContext& DX11Video::getDeviceContext()
 ID3D11RenderTargetView& DX11Video::getRenderTarget()
 {
 	return *backbuffer;
+}
+
+SystemAPI& DX11Video::getSystem()
+{
+	return system;
 }

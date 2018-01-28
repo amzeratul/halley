@@ -10,11 +10,10 @@
 
 using namespace Halley;
 
-TextureOpenGL::TextureOpenGL(VideoOpenGL& parent, Vector2i s)
-	: parent(parent)
+TextureOpenGL::TextureOpenGL(VideoOpenGL& parent, Vector2i size)
+	: Texture(size)
+	, parent(parent)
 {
-	size = s;
-
 	glGenTextures(1, &textureId);
 	startLoading();
 }

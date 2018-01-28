@@ -78,9 +78,9 @@ String DummyVideoAPI::getShaderLanguage()
 	return "glsl";
 }
 
-DummyTexture::DummyTexture(Vector2i s)
+DummyTexture::DummyTexture(Vector2i size)
+	: Texture(size)
 {
-	size = s;
 }
 
 void DummyTexture::load(TextureDescriptor&&)

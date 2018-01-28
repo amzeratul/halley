@@ -8,6 +8,10 @@
 
 using namespace Halley;
 
+Texture::Texture(Vector2i size)
+	: size(size)
+{}
+
 std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 {
 	auto& meta = loader.getMeta();

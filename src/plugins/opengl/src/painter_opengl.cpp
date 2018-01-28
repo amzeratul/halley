@@ -170,7 +170,7 @@ void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVe
 void PainterOpenGL::setupVertexAttributes(const MaterialDefinition& material)
 {
 	// Set vertex attribute pointers in VBO
-	int vertexStride = material.getVertexStride();
+	size_t vertexStride = material.getVertexStride();
 	for (auto& attribute : material.getAttributes()) {
 		int count = 0;
 		int type = 0;
@@ -212,7 +212,7 @@ void PainterOpenGL::setupVertexAttributes(const MaterialDefinition& material)
 		}
 		glEnableVertexAttribArray(attribute.location);
 		size_t offset = attribute.offset;
-		glVertexAttribPointer(attribute.location, count, type, GL_FALSE, vertexStride, reinterpret_cast<GLvoid*>(offset));
+		glVertexAttribPointer(attribute.location, count, type, GL_FALSE, GLsizei(vertexStride), reinterpret_cast<GLvoid*>(offset));
 		glCheckError();
 	}
 

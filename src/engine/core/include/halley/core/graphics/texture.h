@@ -14,6 +14,8 @@ namespace Halley
 	class Texture : public AsyncResource
 	{
 	public:
+		Texture(Vector2i size);
+
 		virtual void load(TextureDescriptor&& descriptor) = 0;
 
 		static std::shared_ptr<Texture> loadResource(ResourceLoader& loader);

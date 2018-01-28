@@ -21,6 +21,5 @@ namespace Halley
 		std::unique_ptr<GLContext> context;
 		
 		void run();
-		void waitForGPU();
 	};
 }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-#include <mutex>
 #include "halley/core/api/halley_api_internal.h"
 #include "halley/core/graphics/window.h"
 #include <d3d11.h>
@@ -11,6 +9,7 @@
 
 namespace Halley {
 	class SystemAPI;
+	class DX11Loader;
 
 	class DX11Video final : public VideoAPIInternal
 	{
@@ -40,6 +39,8 @@ namespace Halley {
 		ID3D11Device& getDevice();
 		ID3D11DeviceContext& getDeviceContext();
 		ID3D11RenderTargetView& getRenderTarget();
+		
+		SystemAPI& getSystem();
 
 	private:
 		SystemAPI& system;
@@ -51,6 +52,8 @@ namespace Halley {
 		ID3D11DeviceContext* deviceContext;
 		ID3D11RenderTargetView* backbuffer;
 		bool useVsync = false;
+
+		std::unique_ptr<DX11Loader> loader;
 
 		void initD3D(Window& window, Rect4i view, bool vsync);
 		void releaseD3D();

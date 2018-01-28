@@ -1,4 +1,4 @@
-Texture2D tex0;
+Texture2D tex0 : register(t0);
 
 SamplerState pixelSampler {
 	FILTER = D3D11_FILTER_MIN_MAG_MIP_POINT;

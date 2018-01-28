@@ -5,6 +5,8 @@
 #include "dx11_shader.h"
 #include "dx11_material_constant_buffer.h"
 #include "dx11_blend.h"
+#include "halley/core/graphics/material/material_parameter.h"
+#include "dx11_texture.h"
 using namespace Halley;
 
 DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
@@ -54,11 +56,27 @@ void DX11Painter::clear(Colour colour)
 void DX11Painter::setMaterialPass(const Material& material, int passN)
 {
 	auto& pass = material.getDefinition().getPass(passN);
+
+	// Shader
 	auto& shader = static_cast<DX11Shader&>(pass.getShader());
 	shader.setMaterialLayout(video, material.getDefinition().getAttributes());
 	shader.bind(video);
 
+	// Blend
 	getBlendMode(pass.getBlend()).bind(video);
+
+	// Texture
+	int textureUnit = 0;
+	for (auto& tex: material.getTextureUniforms()) {
+		auto texture = std::static_pointer_cast<const DX11Texture>(material.getTexture(textureUnit));
+		if (!texture) {
+			throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.");					
+		} else {
+			ID3D11ShaderResourceView* srvs[] = { texture->getShaderResourceView() };
+			video.getDeviceContext().PSSetShaderResources(textureUnit, 1, srvs);
+		}
+		++textureUnit;
+	}
 }
 
 void DX11Painter::setMaterialData(const Material& material)
