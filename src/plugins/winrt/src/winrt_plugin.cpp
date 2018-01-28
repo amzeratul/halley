@@ -1,7 +1,7 @@
 #include "winrt_system.h"
 #include <halley/plugin/plugin.h>
 #include "winrt_input.h"
-#include "winrt_audio_output.h"
+#include "xaudio2_audio_output.h"
 
 namespace Halley {
 	
@@ -18,7 +18,7 @@ namespace Halley {
 	};
 
 	class WinRTAudioPlugin : public Plugin {
-		HalleyAPIInternal* createAPI(SystemAPI* system) override { return new WinRTAudioOutput(); }
+		HalleyAPIInternal* createAPI(SystemAPI* system) override { return new XAudio2AudioOutput(); }
 		PluginType getType() override { return PluginType::AudioOutputAPI; }
 		String getName() override { return "AudioOutput/WinRT"; }
 	};
