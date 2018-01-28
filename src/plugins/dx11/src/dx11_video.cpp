@@ -42,6 +42,7 @@ void DX11Video::initD3D(Window& window, Rect4i view, bool vsync)
 	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC1));
 
 	auto size = window.getWindowRect().getSize();
+	const bool usingCoreWindow = window.getNativeHandleType() == "CoreWindow";
 
 	swapChainDesc.Width = size.x;
 	swapChainDesc.Height = size.y;
@@ -51,11 +52,11 @@ void DX11Video::initD3D(Window& window, Rect4i view, bool vsync)
 	swapChainDesc.BufferCount = 2;
 	swapChainDesc.SampleDesc.Count = 1;
 
-#ifdef WITH_UWP
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
-	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
-#endif
+	if (usingCoreWindow) {
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
+		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+	}
 
 	auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &deviceContext);
 	if (result != S_OK) {
@@ -69,17 +70,17 @@ void DX11Video::initD3D(Window& window, Rect4i view, bool vsync)
 	IDXGIFactory2 * pIDXGIFactory;
 	pDXGIAdapter->GetParent(__uuidof(IDXGIFactory2), reinterpret_cast<void **>(&pIDXGIFactory));
 
-	if (window.getNativeHandleType() == "HWND") {
-		auto hWnd = reinterpret_cast<HWND>(window.getNativeHandle());
-		result = pIDXGIFactory->CreateSwapChainForHwnd(device, hWnd, &swapChainDesc, nullptr, nullptr, &swapChain);
-		if (result != S_OK) {
-			throw Exception("Unable to create swap chain for HWND");
-		}
-	} else if (window.getNativeHandleType() == "CoreWindow") {
+	if (usingCoreWindow) {
 		IUnknown* coreWindow = reinterpret_cast<IUnknown*>(window.getNativeHandle());
 		result = pIDXGIFactory->CreateSwapChainForCoreWindow(device, coreWindow, &swapChainDesc, nullptr, &swapChain);
 		if (result != S_OK) {
 			throw Exception("Unable to create swap chain for CoreWindow");
+		}
+	} else {
+		auto hWnd = reinterpret_cast<HWND>(window.getNativeHandle());
+		result = pIDXGIFactory->CreateSwapChainForHwnd(device, hWnd, &swapChainDesc, nullptr, nullptr, &swapChain);
+		if (result != S_OK) {
+			throw Exception("Unable to create swap chain for HWND");
 		}
 	}
 

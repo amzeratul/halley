@@ -54,7 +54,7 @@ bool DX11TextureRenderTarget::getViewportFlipVertical() const
 void DX11TextureRenderTarget::onBind(Painter& painter)
 {
 	update();
-	video.getDeviceContext().OMSetRenderTargets(views.size(), views.data(), depthStencilView);
+	video.getDeviceContext().OMSetRenderTargets(UINT(views.size()), views.data(), depthStencilView);
 }
 
 ID3D11RenderTargetView* DX11TextureRenderTarget::getRenderTargetView()
