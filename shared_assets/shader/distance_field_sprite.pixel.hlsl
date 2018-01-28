@@ -1,33 +1,39 @@
-uniform sampler2D tex0;
-layout(std140) uniform MaterialBlock {
-	float u_smoothness;
-	float u_outline;
-	vec4 u_outlineColour;
+Texture2D tex0 : register(t0);
+SamplerState sampler0 : register(s0) {
+	Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 };
 
-in vec2 v_texCoord0;
-in vec2 v_pixelTexCoord0;
-in vec4 v_colour;
-in vec4 v_colourAdd;
+cbuffer MaterialBlock : register(b1) {
+	float u_smoothness;
+	float u_outline;
+	float4 u_outlineColour;
+};
 
-in vec4 gl_FragCoord;
+struct VOut {
+    float4 position : SV_POSITION;
+    float2 texCoord0 : TEXCOORD0;
+    float2 pixelTexCoord0 : TEXCOORD1;
+    float4 colour : COLOR0;
+    float4 colourAdd : COLOR1;
+    float2 vertPos : POSITION1;
+    float2 pixelPos : POSITION2;
+};
 
-out vec4 outCol;
 
-void main() {
-	float dx = abs(dFdx(v_pixelTexCoord0.x) / dFdx(gl_FragCoord.x));
-	float dy = abs(dFdy(v_pixelTexCoord0.y) / dFdy(gl_FragCoord.y));
+float4 PShader(VOut input) : SV_TARGET {
+	float dx = abs(ddx(input.pixelTexCoord0.x) / ddx(input.position.x));
+	float dy = abs(ddy(input.pixelTexCoord0.y) / ddy(input.position.y));
 	float texGrad = max(dx, dy);
 
-	float a = texture(tex0, v_texCoord0).a;
+	float a = tex0.Sample(sampler0, input.texCoord0).a;
 	float s = u_smoothness * texGrad;
 	float inEdge = 0.5;
 	float outEdge = inEdge - clamp(u_outline, 0.0, 0.995) * 0.5;
 
 	float edge = smoothstep(clamp(outEdge - s, 0.001, 1.0), clamp(outEdge + s, 0.0, 0.999), a);
 	float outline = 1.0 - smoothstep(inEdge - s, inEdge + s, a);
-	vec4 colFill = v_colour;
-	vec4 colOutline = u_outlineColour;
-	vec4 col = mix(colFill, colOutline, outline);
-	outCol = vec4(col.rgb, col.a * edge);
+	float4 colFill = input.colour;
+	float4 colOutline = u_outlineColour;
+	float4 col = lerp(colFill, colOutline, outline);
+	return float4(col.rgb, col.a * edge);
 }

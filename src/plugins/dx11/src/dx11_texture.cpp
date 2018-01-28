@@ -52,17 +52,25 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 	}
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
-	desc.Usage = D3D11_USAGE_IMMUTABLE;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	desc.CPUAccessFlags = 0;
 	desc.MiscFlags = 0;
 
-	D3D11_SUBRESOURCE_DATA subResData;
-	subResData.pSysMem = descriptor.pixelData.getSpan().data();
-	subResData.SysMemPitch = bpp * size.x;
-	subResData.SysMemSlicePitch = subResData.SysMemPitch;
+	D3D11_SUBRESOURCE_DATA* res = nullptr;
 
-	HRESULT result = video.getDevice().CreateTexture2D(&desc, &subResData, &texture);
+	if (descriptor.pixelData.empty()) {
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	} else {
+		desc.Usage = D3D11_USAGE_IMMUTABLE;
+		desc.CPUAccessFlags = 0;
+		D3D11_SUBRESOURCE_DATA subResData;
+		subResData.pSysMem = descriptor.pixelData.getSpan().data();
+		subResData.SysMemPitch = bpp * size.x;
+		subResData.SysMemSlicePitch = subResData.SysMemPitch;
+		res = &subResData;
+	}
+
+	HRESULT result = video.getDevice().CreateTexture2D(&desc, res, &texture);
 	if (result != S_OK) {
 		throw Exception("Error loading texture.");
 	}
