@@ -4,7 +4,9 @@ include_directories(${Boost_INCLUDE_DIR} "../../engine/utils/include" "../../eng
 
 set(SOURCES
     "src/winrt_gamepad.cpp"
+    "src/winrt_http.cpp"
     "src/winrt_input.cpp"
+    "src/winrt_platform.cpp"
     "src/winrt_plugin.cpp"
     "src/winrt_system.cpp"
     "src/xaudio2_audio_output.cpp"
@@ -12,7 +14,9 @@ set(SOURCES
 
 set(HEADERS
     "src/winrt_gamepad.h"
+    "src/winrt_http.h"
     "src/winrt_input.h"
+    "src/winrt_platform.h"
     "src/winrt_system.h"
     "src/xaudio2_audio_output.h"
     )

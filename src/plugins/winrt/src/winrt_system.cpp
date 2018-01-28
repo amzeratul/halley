@@ -18,6 +18,7 @@ using namespace Windows::Storage;
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::UI::Core;
+using namespace Windows::UI::ViewManagement;
 
 #pragma comment(lib, "windowsapp")
 
