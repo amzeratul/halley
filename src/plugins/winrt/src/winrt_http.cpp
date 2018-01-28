@@ -37,48 +37,6 @@ void WinRTHTTPRequest::setPostData(const String& type, const Bytes& bytes)
 	data->postData = bytes;
 }
 
-struct __declspec(uuid("905a0fef-bc53-11df-8c49-001e4fc686da")) IBufferByteAccess : ::IUnknown
-{
-    virtual HRESULT __stdcall Buffer(uint8_t** value) = 0;
-};
-
-struct CustomBuffer : implements<CustomBuffer, IBuffer, IBufferByteAccess>
-{
-    std::vector<uint8_t> m_buffer;
-    uint32_t m_length{};
-
-    CustomBuffer(uint32_t size) :
-        m_buffer(size)
-    {
-    }
-
-    uint32_t Capacity() const
-    {
-        return m_buffer.size();
-    }
-
-    uint32_t Length() const
-    {
-        return m_length;
-    }
-
-    void Length(uint32_t value)
-    {
-        if (value > m_buffer.size())
-        {
-            throw hresult_invalid_argument();
-        }
-
-        m_length = value;
-    }
-
-    HRESULT __stdcall Buffer(uint8_t** value) final
-    {
-        *value = m_buffer.data();
-        return S_OK;
-    }
-};
-
 Future<std::unique_ptr<HTTPResponse>> WinRTHTTPRequest::send()
 {
 	auto data = this->data;
