@@ -10,6 +10,7 @@ using namespace Halley;
 #include "winrt/Windows.ApplicationModel.h"
 #include "winrt/Windows.ApplicationModel.Core.h"
 #include "winrt/Windows.UI.Core.h"
+#include "winrt/Windows.System.Diagnostics.h"
 
 using namespace winrt;
 using namespace Windows::Foundation;
@@ -75,13 +76,17 @@ class WinRTWindow : public Window
 public:
 	WinRTWindow(CoreWindow window, const WindowDefinition& definition)
 		: window(window)
-		, definition(definition)
+		, definition(definition.withSize(Vector2i(window.Bounds().Width, window.Bounds().Height)))
 	{
+		window.SizeChanged([=] (CoreWindow win, WindowSizeChangedEventArgs args)
+		{
+			notifySizeChange(Vector2i(args.Size().Width, args.Size().Height));
+		});
 	}
 
 	void update(const WindowDefinition& def) override
 	{
-		definition = def;
+		//definition = def;
 	}
 
 	void show() override
@@ -119,6 +124,11 @@ public:
 	String getNativeHandleType() override
 	{
 		return "CoreWindow";
+	}
+
+	void notifySizeChange(Vector2i size)
+	{
+		definition = definition.withSize(size);
 	}
 
 private:

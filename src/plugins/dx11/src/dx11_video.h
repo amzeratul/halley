@@ -45,16 +45,21 @@ namespace Halley {
 		SystemAPI& system;
 		std::shared_ptr<Window> window;
 
+		ID3D11Device* device = nullptr;
+		ID3D11DeviceContext* deviceContext = nullptr;
+		IDXGISwapChain1* swapChain = nullptr;
+		ID3D11RenderTargetView* backbuffer = nullptr;
+
+		Vector2i swapChainSize;
 		bool initialised = false;
-		IDXGISwapChain1* swapChain;
-		ID3D11Device* device;
-		ID3D11DeviceContext* deviceContext;
-		ID3D11RenderTargetView* backbuffer;
 		bool useVsync = false;
 
 		std::unique_ptr<DX11Loader> loader;
 
-		void initD3D(Window& window, Rect4i view, bool vsync);
+		void initD3D(Window& window, bool vsync);
+		void initSwapChain(Window& window);
+		void initBackBuffer();
+		void resizeSwapChain(Vector2i size);
 		void releaseD3D();
 	};
 }

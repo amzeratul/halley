@@ -32,18 +32,42 @@ void DX11Video::deInit()
 	releaseD3D();
 }
 
-void DX11Video::initD3D(Window& window, Rect4i view, bool vsync)
+void DX11Video::initD3D(Window& window, bool vsync)
 {
 	if (initialised) {
 		return;
 	}
 
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
-	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC1));
+	auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &deviceContext);
+	if (result != S_OK) {
+		throw Exception("Unable to initialise DX11");
+	}
+
+	initSwapChain(window);
+
+	initialised = true;
+	useVsync = vsync;
+}
+
+void DX11Video::initSwapChain(Window& window)
+{
+	if (swapChain) {
+		swapChain->Release();
+		swapChain = nullptr;
+	}
 
 	auto size = window.getWindowRect().getSize();
 	const bool usingCoreWindow = window.getNativeHandleType() == "CoreWindow";
 
+	IDXGIDevice2* pDXGIDevice;
+	device->QueryInterface(__uuidof(IDXGIDevice2), reinterpret_cast<void **>(&pDXGIDevice));
+	IDXGIAdapter * pDXGIAdapter;
+	pDXGIDevice->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void **>(&pDXGIAdapter));
+	IDXGIFactory2 * pIDXGIFactory;
+	pDXGIAdapter->GetParent(__uuidof(IDXGIFactory2), reinterpret_cast<void **>(&pIDXGIFactory));
+
+	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
+	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC1));
 	swapChainDesc.Width = size.x;
 	swapChainDesc.Height = size.y;
 	swapChainDesc.BufferCount = 1;
@@ -56,50 +80,53 @@ void DX11Video::initD3D(Window& window, Rect4i view, bool vsync)
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
 		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
-	}
 
-	auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &deviceContext);
-	if (result != S_OK) {
-		throw Exception("Unable to initialise DX11");
-	}
-
-	IDXGIDevice2* pDXGIDevice;
-	device->QueryInterface(__uuidof(IDXGIDevice2), reinterpret_cast<void **>(&pDXGIDevice));
-	IDXGIAdapter * pDXGIAdapter;
-	pDXGIDevice->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void **>(&pDXGIAdapter));
-	IDXGIFactory2 * pIDXGIFactory;
-	pDXGIAdapter->GetParent(__uuidof(IDXGIFactory2), reinterpret_cast<void **>(&pIDXGIFactory));
-
-	if (usingCoreWindow) {
 		IUnknown* coreWindow = reinterpret_cast<IUnknown*>(window.getNativeHandle());
-		result = pIDXGIFactory->CreateSwapChainForCoreWindow(device, coreWindow, &swapChainDesc, nullptr, &swapChain);
+		auto result = pIDXGIFactory->CreateSwapChainForCoreWindow(device, coreWindow, &swapChainDesc, nullptr, &swapChain);
 		if (result != S_OK) {
 			throw Exception("Unable to create swap chain for CoreWindow");
 		}
 	} else {
 		auto hWnd = reinterpret_cast<HWND>(window.getNativeHandle());
-		result = pIDXGIFactory->CreateSwapChainForHwnd(device, hWnd, &swapChainDesc, nullptr, nullptr, &swapChain);
+		auto result = pIDXGIFactory->CreateSwapChainForHwnd(device, hWnd, &swapChainDesc, nullptr, nullptr, &swapChain);
 		if (result != S_OK) {
 			throw Exception("Unable to create swap chain for HWND");
 		}
+	}
+
+	swapChainSize = size;
+
+	initBackBuffer();
+}
+
+void DX11Video::initBackBuffer()
+{
+	if (backbuffer) {
+		backbuffer->Release();
+		backbuffer = nullptr;
 	}
 
 	ID3D11Texture2D *pBackBuffer;
     swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&pBackBuffer));
     device->CreateRenderTargetView(pBackBuffer, nullptr, &backbuffer);
     pBackBuffer->Release();
-    deviceContext->OMSetRenderTargets(1, &backbuffer, nullptr);
+}
 
-	D3D11_VIEWPORT viewport;
-    ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
-    viewport.TopLeftX = float(view.getLeft());
-    viewport.TopLeftY = float(view.getTop());
-    viewport.Width = float(view.getWidth());
-    viewport.Height = float(view.getHeight());
-    deviceContext->RSSetViewports(1, &viewport);
+void DX11Video::resizeSwapChain(Vector2i size)
+{
+	if (backbuffer) {
+		backbuffer->Release();
+		backbuffer = nullptr;
+	}
+	
+	HRESULT result = swapChain->ResizeBuffers(0, size.x, size.y, DXGI_FORMAT_UNKNOWN, 0);
+	if (result != S_OK) {
+		throw Exception("Unable to resize swap chain");
+	}
 
-	initialised = true;
-	useVsync = vsync;
+	swapChainSize = size;
+
+	initBackBuffer();
 }
 
 void DX11Video::releaseD3D()
@@ -108,8 +135,16 @@ void DX11Video::releaseD3D()
 		return;
 	}
 
-	backbuffer->Release();
-	swapChain->Release();
+	if (backbuffer) {
+		backbuffer->Release();
+		backbuffer = nullptr;
+	}
+
+	if (swapChain) {
+		swapChain->Release();
+		swapChain = nullptr;
+	}
+
 	device->Release();
 	deviceContext->Release();
 	initialised = false;
@@ -129,7 +164,7 @@ void DX11Video::setWindow(WindowDefinition&& windowDescriptor, bool vsync)
 	if (!window) {
 		window = system.createWindow(windowDescriptor);
 
-		initD3D(*window, Rect4i({}, window->getWindowRect().getSize()), vsync);
+		initD3D(*window, vsync);
 	} else {
 		window->update(windowDescriptor);
 	}
@@ -162,7 +197,12 @@ std::unique_ptr<TextureRenderTarget> DX11Video::createTextureRenderTarget()
 
 std::unique_ptr<ScreenRenderTarget> DX11Video::createScreenRenderTarget()
 {
-	return std::make_unique<DX11ScreenRenderTarget>(*this, Rect4i(Vector2i(), window->getWindowRect().getSize()), backbuffer);
+	auto view = Rect4i(Vector2i(), window->getWindowRect().getSize());
+	if (swapChainSize != view.getSize()) {
+		resizeSwapChain(view.getSize());
+	}
+
+	return std::make_unique<DX11ScreenRenderTarget>(*this, view, backbuffer);
 }
 
 std::unique_ptr<MaterialConstantBuffer> DX11Video::createConstantBuffer()
