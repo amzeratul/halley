@@ -1,9 +1,12 @@
 #include "winrt_input.h"
+#include "winrt_gamepad.h"
 using namespace Halley;
 
 void WinRTInput::init()
 {
-	
+	for (int i = 0; i < 4; ++i) {
+		gamepads.push_back(std::make_shared<WinRTGamepad>(i));
+	}
 }
 
 void WinRTInput::deInit()
@@ -13,7 +16,10 @@ void WinRTInput::deInit()
 
 void WinRTInput::beginEvents(Time t)
 {
-	
+	for (auto& g: gamepads) {
+		g->clearPresses();
+		g->update(t);
+	}
 }
 
 size_t WinRTInput::getNumberOfKeyboards() const
@@ -28,14 +34,12 @@ std::shared_ptr<InputDevice> WinRTInput::getKeyboard(int id) const
 
 size_t WinRTInput::getNumberOfJoysticks() const
 {
-	// TODO
-	return 0;
+	return 4;
 }
 
 std::shared_ptr<InputJoystick> WinRTInput::getJoystick(int id) const
 {
-	// TODO
-	return {};
+	return gamepads.at(id);
 }
 
 size_t WinRTInput::getNumberOfMice() const

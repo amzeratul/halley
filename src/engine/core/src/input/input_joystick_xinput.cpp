@@ -120,9 +120,9 @@ void InputJoystickXInput::update(Time t)
 		cooldown = 30;
 
 		// Reset everything
-		for (int i=0; i<6; i++) axes[i] = 0;
-		for (int i=0; i<10; i++) onButtonStatus(i, false);
-		for (int i=0; i<4; i++) hats[0]->onButtonStatus(i, false);
+		clearAxes();
+		clearPresses();
+		hats[0]->clearPresses();
 	}
 
 	InputJoystick::update(t);

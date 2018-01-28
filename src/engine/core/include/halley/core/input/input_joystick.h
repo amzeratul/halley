@@ -25,7 +25,7 @@
 #include <chrono>
 #include "input_button_base.h"
 
-#ifdef _MSC_VER
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
 #define XINPUT_AVAILABLE
 #endif
 
@@ -73,6 +73,8 @@ namespace Halley {
 
 		bool isEnabled() const override;
 		void setEnabled(bool enabled);
+
+		void clearAxes();
 
 	protected:
 		Vector<float> axes;

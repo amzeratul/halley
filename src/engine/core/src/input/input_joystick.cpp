@@ -115,6 +115,13 @@ void InputJoystick::setEnabled(bool e)
 	}
 }
 
+void InputJoystick::clearAxes()
+{
+	for (auto& axis: axes) {
+		axis = 0;
+	}
+}
+
 void InputJoystick::setVibration(float, float)
 {
 }

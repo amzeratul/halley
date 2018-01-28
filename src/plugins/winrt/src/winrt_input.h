@@ -22,5 +22,8 @@ namespace Halley
 
 		Vector<std::shared_ptr<InputTouch>> getNewTouchEvents() override;
 		Vector<std::shared_ptr<InputTouch>> getTouchEvents() override;
+
+	private:
+		std::vector<std::shared_ptr<InputJoystick>> gamepads;
 	};
 }
