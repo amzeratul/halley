@@ -37,6 +37,11 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
 	switch (descriptor.format) {
+	case TextureFormat::Indexed:
+		desc.Format = DXGI_FORMAT_R8_UNORM;
+		desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
+		bpp = 1;
+		break;
 	case TextureFormat::RGB:
 		throw Exception("RGB textures are not supported");
 		break;
