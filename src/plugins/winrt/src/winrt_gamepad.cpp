@@ -98,5 +98,16 @@ int WinRTGamepad::getButtonAtPosition(JoystickButtonPosition position) const
 
 void WinRTGamepad::setVibration(float low, float high)
 {
-	// TODO
+	auto gamepads = Gamepad::Gamepads();
+	if (index < int(gamepads.Size())) {
+		auto gamepad = gamepads.GetAt(index);
+		
+		GamepadVibration vibration;
+		vibration.LeftMotor = clamp(low, 0.0f, 1.0f);
+		vibration.RightMotor = clamp(high, 0.0f, 1.0f);
+		vibration.LeftTrigger = 0;
+		vibration.RightTrigger = 0;
+		
+		gamepad.Vibration(vibration);
+	}
 }
