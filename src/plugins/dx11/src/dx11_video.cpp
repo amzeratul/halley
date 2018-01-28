@@ -161,7 +161,7 @@ std::unique_ptr<TextureRenderTarget> DX11Video::createTextureRenderTarget()
 
 std::unique_ptr<ScreenRenderTarget> DX11Video::createScreenRenderTarget()
 {
-	return std::make_unique<DX11ScreenRenderTarget>(*this, Rect4i(Vector2i(), window->getWindowRect().getSize()));
+	return std::make_unique<DX11ScreenRenderTarget>(*this, Rect4i(Vector2i(), window->getWindowRect().getSize()), backbuffer);
 }
 
 std::unique_ptr<MaterialConstantBuffer> DX11Video::createConstantBuffer()
@@ -187,11 +187,6 @@ ID3D11Device& DX11Video::getDevice()
 ID3D11DeviceContext& DX11Video::getDeviceContext()
 {
 	return *deviceContext;
-}
-
-ID3D11RenderTargetView& DX11Video::getRenderTarget()
-{
-	return *backbuffer;
 }
 
 SystemAPI& DX11Video::getSystem()

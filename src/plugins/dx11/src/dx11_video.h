@@ -38,7 +38,6 @@ namespace Halley {
 
 		ID3D11Device& getDevice();
 		ID3D11DeviceContext& getDeviceContext();
-		ID3D11RenderTargetView& getRenderTarget();
 		
 		SystemAPI& getSystem();
 

@@ -18,7 +18,10 @@ DX11Rasterizer::DX11Rasterizer(DX11Video& video, bool enableScissor)
 	desc.MultisampleEnable = FALSE;
 	desc.AntialiasedLineEnable = FALSE;
 
-	video.getDevice().CreateRasterizerState(&desc, &rasterizer);
+	HRESULT result = video.getDevice().CreateRasterizerState(&desc, &rasterizer);
+	if (result != S_OK) {
+		throw Exception("Unable to create rasterizer");
+	}
 }
 
 DX11Rasterizer::~DX11Rasterizer()

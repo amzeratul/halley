@@ -17,11 +17,15 @@ namespace Halley
 		void load(TextureDescriptor&& descriptor) override;
 
 		void bind(DX11Video& video, int textureUnit) const;
+		
+		DXGI_FORMAT getFormat() const;
+		ID3D11Texture2D* getTexture() const;
 
 	private:
 		DX11Video& video;
 		ID3D11Texture2D* texture = nullptr;
 		ID3D11ShaderResourceView* srv = nullptr;
 		ID3D11SamplerState* samplerState = nullptr;
+		DXGI_FORMAT format;
 	};
 }

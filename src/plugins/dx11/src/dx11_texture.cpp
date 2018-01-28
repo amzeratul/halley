@@ -34,6 +34,7 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 	desc.Width = size.x;
 	desc.Height = size.y;
 	desc.MipLevels = desc.ArraySize = 1;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
 	switch (descriptor.format) {
 	case TextureFormat::RGB:
@@ -41,10 +42,12 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 		break;
 	case TextureFormat::RGBA:
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
 		bpp = 4;
 		break;
 	case TextureFormat::DEPTH:
 		desc.Format = DXGI_FORMAT_D32_FLOAT;
+		desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
 		bpp = 4;
 		break;
 	default:
@@ -52,8 +55,8 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 	}
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
-	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	desc.MiscFlags = 0;
+	format = desc.Format;
 
 	D3D11_SUBRESOURCE_DATA* res = nullptr;
 
@@ -61,7 +64,7 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 		desc.Usage = D3D11_USAGE_DEFAULT;
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	} else {
-		desc.Usage = D3D11_USAGE_IMMUTABLE;
+		desc.Usage = D3D11_USAGE_DEFAULT;
 		desc.CPUAccessFlags = 0;
 		D3D11_SUBRESOURCE_DATA subResData;
 		subResData.pSysMem = descriptor.pixelData.getSpan().data();
@@ -105,4 +108,14 @@ void DX11Texture::bind(DX11Video& video, int textureUnit) const
 	ID3D11SamplerState* samplers[] = { samplerState };
 	video.getDeviceContext().PSSetShaderResources(textureUnit, 1, srvs);
 	video.getDeviceContext().PSSetSamplers(textureUnit, 1, samplers);
+}
+
+DXGI_FORMAT DX11Texture::getFormat() const
+{
+	return format;
+}
+
+ID3D11Texture2D* DX11Texture::getTexture() const
+{
+	return texture;
 }

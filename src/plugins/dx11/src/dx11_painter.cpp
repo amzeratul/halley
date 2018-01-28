@@ -8,6 +8,8 @@
 #include "halley/core/graphics/material/material_parameter.h"
 #include "dx11_texture.h"
 #include "dx11_rasterizer.h"
+#include "halley/core/graphics/render_target/render_target.h"
+#include "dx11_render_target.h"
 using namespace Halley;
 
 DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
@@ -34,7 +36,8 @@ void DX11Painter::doEndRender()
 void DX11Painter::clear(Colour colour)
 {
 	const float col[] = { colour.r, colour.g, colour.b, colour.a };
-	video.getDeviceContext().ClearRenderTargetView(&video.getRenderTarget(), col);
+	auto view = dynamic_cast<IDX11RenderTarget&>(getActiveRenderTarget()).getRenderTargetView();
+	video.getDeviceContext().ClearRenderTargetView(view, col);
 }
 
 void DX11Painter::setMaterialPass(const Material& material, int passN)
