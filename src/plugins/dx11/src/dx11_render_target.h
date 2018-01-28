@@ -8,6 +8,9 @@ namespace Halley
 	{
 	public:
 		explicit DX11ScreenRenderTarget(const Rect4i& viewPort);
+
+		bool flipVertical() const override;
+		void onStartDrawCall(Painter&) override;
 	};
 
 	class DX11TextureRenderTarget : public TextureRenderTarget

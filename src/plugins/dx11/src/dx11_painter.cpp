@@ -72,8 +72,7 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 		if (!texture) {
 			throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.");					
 		} else {
-			ID3D11ShaderResourceView* srvs[] = { texture->getShaderResourceView() };
-			video.getDeviceContext().PSSetShaderResources(textureUnit, 1, srvs);
+			texture->bind(video, textureUnit);
 		}
 		++textureUnit;
 	}

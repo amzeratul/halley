@@ -7,6 +7,15 @@ DX11ScreenRenderTarget::DX11ScreenRenderTarget(const Rect4i& viewPort)
 	
 }
 
+bool DX11ScreenRenderTarget::flipVertical() const
+{
+	return true;
+}
+
+void DX11ScreenRenderTarget::onStartDrawCall(Painter&)
+{
+}
+
 DX11TextureRenderTarget::DX11TextureRenderTarget()
 {
 	
