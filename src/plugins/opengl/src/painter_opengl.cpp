@@ -116,12 +116,6 @@ void PainterOpenGL::setMaterialData(const Material& material)
 	}
 }
 
-static Rect4i flipRectangle(Rect4i r, int h)
-{
-	int y = h - r.getBottom();
-	return Rect4i(Vector2i(r.getLeft(), y), r.getWidth(), r.getHeight());
-}
-
 void PainterOpenGL::setClip(Rect4i clip, bool enable)
 {
 	glUtils->setScissor(clip, enable);

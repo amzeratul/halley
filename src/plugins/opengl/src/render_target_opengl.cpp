@@ -78,7 +78,12 @@ void TextureRenderTargetOpenGL::deInit()
 	}
 }
 
-bool ScreenRenderTargetOpenGL::flipVertical() const
+bool ScreenRenderTargetOpenGL::getProjectionFlipVertical() const
+{
+	return true;
+}
+
+bool ScreenRenderTargetOpenGL::getViewportFlipVertical() const
 {
 	return true;
 }

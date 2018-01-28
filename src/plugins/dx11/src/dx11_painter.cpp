@@ -7,6 +7,7 @@
 #include "dx11_blend.h"
 #include "halley/core/graphics/material/material_parameter.h"
 #include "dx11_texture.h"
+#include "dx11_rasterizer.h"
 using namespace Halley;
 
 DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
@@ -19,32 +20,15 @@ DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
 
 void DX11Painter::doStartRender()
 {
-	if (!rasterizer) {
-		D3D11_RASTERIZER_DESC desc;
-		ZeroMemory(&desc, sizeof(desc));
-
-		desc.FillMode = D3D11_FILL_SOLID;
-		desc.CullMode = D3D11_CULL_NONE;
-		desc.FrontCounterClockwise = TRUE;
-		desc.DepthBias = 0;
-		desc.SlopeScaledDepthBias = 0.0f;
-		desc.DepthBiasClamp = 0.0f;
-		desc.DepthClipEnable = FALSE;
-		desc.ScissorEnable = FALSE;
-		desc.MultisampleEnable = FALSE;
-		desc.AntialiasedLineEnable = FALSE;
-
-		video.getDevice().CreateRasterizerState(&desc, &rasterizer);
-		video.getDeviceContext().RSSetState(rasterizer);
+	if (!normalRaster) {
+		normalRaster = std::make_unique<DX11Rasterizer>(video, false);
+		scissorRaster = std::make_unique<DX11Rasterizer>(video, true);
 	}
+	normalRaster->bind(video);
 }
 
 void DX11Painter::doEndRender()
 {
-	if (rasterizer) {
-		rasterizer->Release();
-		rasterizer = nullptr;
-	}
 }
 
 void DX11Painter::clear(Colour colour)
@@ -114,12 +98,32 @@ void DX11Painter::drawTriangles(size_t numIndices)
 
 void DX11Painter::setViewPort(Rect4i rect)
 {
-	// TODO
+	auto fRect = Rect4f(rect);
+
+	D3D11_VIEWPORT viewport;
+	viewport.TopLeftX = fRect.getTopLeft().x;
+	viewport.TopLeftY = fRect.getTopLeft().y;
+	viewport.Width = fRect.getWidth();
+	viewport.Height = fRect.getHeight();
+	viewport.MinDepth = -1.0f;
+	viewport.MaxDepth = 1.0f;
+
+	video.getDeviceContext().RSSetViewports(1, &viewport);
 }
 
 void DX11Painter::setClip(Rect4i clip, bool enable)
 {
-	// TODO
+	if (enable) {
+		scissorRaster->bind(video);
+		D3D11_RECT rect;
+		rect.top = clip.getTop();
+		rect.bottom = clip.getBottom();
+		rect.left = clip.getLeft();
+		rect.right = clip.getRight();
+		video.getDeviceContext().RSSetScissorRects(1, &rect);
+	} else {
+		normalRaster->bind(video);
+	}
 }
 
 void DX11Painter::onUpdateProjection(Material& material)

@@ -26,7 +26,8 @@ namespace Halley
 	public:
 		ScreenRenderTargetOpenGL(Rect4i rect) : ScreenRenderTarget(rect) {}
 
-		bool flipVertical() const override;
+		bool getProjectionFlipVertical() const override;
+		bool getViewportFlipVertical() const override;
 
 		void onBind(Painter&) override;
 	};

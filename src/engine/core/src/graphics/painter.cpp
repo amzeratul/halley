@@ -256,7 +256,7 @@ Rect4i Painter::getRectangleForActiveRenderTarget(Rect4i r)
 {
 	Expects(activeRenderTarget);
 	int h = activeRenderTarget->getViewPort().getHeight();
-	if (activeRenderTarget->flipVertical()) {
+	if (activeRenderTarget->getViewportFlipVertical()) {
 		int y = h - r.getBottom();
 		return Rect4i(Vector2i(r.getLeft(), y), r.getWidth(), r.getHeight());
 	} else {
@@ -392,7 +392,7 @@ void Painter::generateQuadIndicesOffset(unsigned short pos, unsigned short lineS
 
 void Painter::updateProjection()
 {
-	camera->updateProjection(activeRenderTarget->flipVertical());
+	camera->updateProjection(activeRenderTarget->getProjectionFlipVertical());
 	projection = camera->getProjection();
 	
 	auto old = halleyGlobalMaterial->clone();

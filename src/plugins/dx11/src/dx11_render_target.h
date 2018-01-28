@@ -11,8 +11,9 @@ namespace Halley
 	public:
 		explicit DX11ScreenRenderTarget(DX11Video& video, const Rect4i& viewPort);
 
-		bool flipVertical() const override;
-
+		bool getProjectionFlipVertical() const override;
+		bool getViewportFlipVertical() const override;
+		
 		void onBind(Painter& painter) override;
 
 	private:

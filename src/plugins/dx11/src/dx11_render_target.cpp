@@ -9,9 +9,14 @@ DX11ScreenRenderTarget::DX11ScreenRenderTarget(DX11Video& video, const Rect4i& v
 	
 }
 
-bool DX11ScreenRenderTarget::flipVertical() const
+bool DX11ScreenRenderTarget::getProjectionFlipVertical() const
 {
 	return true;
+}
+
+bool DX11ScreenRenderTarget::getViewportFlipVertical() const
+{
+	return false;
 }
 
 void DX11ScreenRenderTarget::onBind(Painter& painter)

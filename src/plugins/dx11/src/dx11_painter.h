@@ -7,6 +7,7 @@ namespace Halley
 {
 	class DX11Video;
 	class DX11Blend;
+	class DX11Rasterizer;
 
 	class DX11Painter : public Painter
 	{
@@ -33,8 +34,9 @@ namespace Halley
 		DX11Buffer vertexBuffer;
 		DX11Buffer indexBuffer;
 		ID3D11InputLayout* layout;
-		ID3D11RasterizerState* rasterizer = nullptr;
 		std::map<BlendType, DX11Blend> blendModes;
+		std::unique_ptr<DX11Rasterizer> normalRaster;
+		std::unique_ptr<DX11Rasterizer> scissorRaster;
 
 		DX11Blend& getBlendMode(BlendType type);
 	};

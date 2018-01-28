@@ -31,7 +31,9 @@ namespace Halley {
 		virtual ~RenderTarget() {}
 
 		virtual Rect4i getViewPort() const = 0;
-		virtual bool flipVertical() const { return false; }
+		
+		virtual bool getProjectionFlipVertical() const { return false; };
+		virtual bool getViewportFlipVertical() const { return false; };
 
 		virtual void onBind(Painter&) {}
 		virtual void onUnbind(Painter&) {}
