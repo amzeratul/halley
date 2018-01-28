@@ -22,7 +22,7 @@ void AssetCollector::output(const String& name, AssetType type, const Bytes& dat
 
 void AssetCollector::output(const String& name, AssetType type, gsl::span<const gsl::byte> data, Maybe<Metadata> metadata)
 {
-	String id = asset.assetId.replaceAll("_", "__").replaceAll("/", "_");
+	String id = asset.assetId.replaceAll("_", "__").replaceAll("/", "_-_").replaceAll(":", "_c_");
 	Path filePath = Path(toString(type)) / id;
 
 	if (metadata && metadata->getString("asset_compression", "") == "deflate") {
