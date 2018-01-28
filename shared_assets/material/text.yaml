@@ -14,10 +14,16 @@ passes:
       - language: glsl
         vertex: sprite.vertex.glsl
         pixel: distance_field_sprite_outline.pixel.glsl
+      - language: hlsl
+        vertex: sprite.vertex.hlsl
+        pixel: distance_field_sprite_outline.pixel.hlsl
     condition: u_outline > 0
   - blend: Alpha
     shader:
       - language: glsl
         vertex: sprite.vertex.glsl
         pixel: distance_field_sprite_fill.pixel.glsl
+      - language: hlsl
+        vertex: sprite.vertex.hlsl
+        pixel: distance_field_sprite_fill.pixel.hlsl
 ...

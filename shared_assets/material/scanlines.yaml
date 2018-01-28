@@ -12,4 +12,7 @@ passes:
       - language: glsl
         vertex: sprite.vertex.glsl
         pixel: scanline.pixel.glsl
+      - language: hlsl
+        vertex: sprite.vertex.hlsl
+        pixel: scanline.pixel.hlsl
 ...
