@@ -77,7 +77,11 @@ void DX11Video::initSwapChain(Window& window)
 	swapChainDesc.SampleDesc.Count = 1;
 
 	if (usingCoreWindow) {
+#if WINVER >= 0x0A00
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+#else
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+#endif
 		swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
 		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
