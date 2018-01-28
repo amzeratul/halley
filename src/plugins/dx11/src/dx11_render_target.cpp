@@ -41,6 +41,16 @@ DX11TextureRenderTarget::~DX11TextureRenderTarget()
 	clear();
 }
 
+bool DX11TextureRenderTarget::getProjectionFlipVertical() const
+{
+	return true;
+}
+
+bool DX11TextureRenderTarget::getViewportFlipVertical() const
+{
+	return false;
+}
+
 void DX11TextureRenderTarget::onBind(Painter& painter)
 {
 	update();

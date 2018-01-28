@@ -40,6 +40,9 @@ namespace Halley
 		DX11TextureRenderTarget(DX11Video& video);
 		~DX11TextureRenderTarget();
 
+		bool getProjectionFlipVertical() const override;
+		bool getViewportFlipVertical() const override;
+		
 		void onBind(Painter& painter) override;
 
 		ID3D11RenderTargetView* getRenderTargetView() override;

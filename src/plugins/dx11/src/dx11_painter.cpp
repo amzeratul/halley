@@ -108,7 +108,7 @@ void DX11Painter::setViewPort(Rect4i rect)
 	viewport.TopLeftY = fRect.getTopLeft().y;
 	viewport.Width = fRect.getWidth();
 	viewport.Height = fRect.getHeight();
-	viewport.MinDepth = -1.0f;
+	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
 	video.getDeviceContext().RSSetViewports(1, &viewport);
