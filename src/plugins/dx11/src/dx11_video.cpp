@@ -156,12 +156,12 @@ std::unique_ptr<Shader> DX11Video::createShader(const ShaderDefinition& definiti
 
 std::unique_ptr<TextureRenderTarget> DX11Video::createTextureRenderTarget()
 {
-	return std::make_unique<DX11TextureRenderTarget>();
+	return std::make_unique<DX11TextureRenderTarget>(*this);
 }
 
 std::unique_ptr<ScreenRenderTarget> DX11Video::createScreenRenderTarget()
 {
-	return std::make_unique<DX11ScreenRenderTarget>(Rect4i(Vector2i(), window->getWindowRect().getSize()));
+	return std::make_unique<DX11ScreenRenderTarget>(*this, Rect4i(Vector2i(), window->getWindowRect().getSize()));
 }
 
 std::unique_ptr<MaterialConstantBuffer> DX11Video::createConstantBuffer()

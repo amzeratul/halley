@@ -4,18 +4,29 @@
 
 namespace Halley
 {
+	class DX11Video;
+
 	class DX11ScreenRenderTarget : public ScreenRenderTarget
 	{
 	public:
-		explicit DX11ScreenRenderTarget(const Rect4i& viewPort);
+		explicit DX11ScreenRenderTarget(DX11Video& video, const Rect4i& viewPort);
 
 		bool flipVertical() const override;
-		void onStartDrawCall(Painter&) override;
+
+		void onBind(Painter& painter) override;
+
+	private:
+		DX11Video& video;
 	};
 
 	class DX11TextureRenderTarget : public TextureRenderTarget
 	{
 	public:
-		DX11TextureRenderTarget();
+		DX11TextureRenderTarget(DX11Video& video);
+
+		void onBind(Painter& painter) override;
+
+	private:
+		DX11Video& video;
 	};
 }
