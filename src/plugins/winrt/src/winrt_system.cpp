@@ -83,6 +83,16 @@ public:
 		{
 			notifySizeChange(Vector2i(args.Size().Width, args.Size().Height));
 		});
+
+		window.KeyDown([=] (CoreWindow win, KeyEventArgs args)
+		{
+			args.Handled(true);
+		});
+
+		window.KeyUp([=] (CoreWindow win, KeyEventArgs args)
+		{
+			args.Handled(true);
+		});
 	}
 
 	void update(const WindowDefinition& def) override
@@ -175,14 +185,12 @@ void WinRTSystem::destroyWindow(std::shared_ptr<Window> window)
 
 Vector2i WinRTSystem::getScreenSize(int n) const
 {
-	// TODO
-	return Vector2i();
+	return Vector2i(1920, 1080);
 }
 
 Rect4i WinRTSystem::getDisplayRect(int screen) const
 {
-	// TODO
-	return Rect4i();
+	return Rect4i(0, 0, 1920, 1080);
 }
 
 void WinRTSystem::showCursor(bool show)
