@@ -27,12 +27,17 @@ The Halley Game Engine is licensed under the Apache 2.0 license.
 Halley is divided in a several sub-projects:
 * **engine**
   * **core**: Core features of the engine, including looper, API management, resouces, and graphics engine
-  * **opengl**: Video/OpenGL implementation
-  * **sdl**: System/SDL, Input/SDL and AudioOut/SDL implementations
   * **audio**: Audio engine
   * **entity**: Framework for dealing with entities, components, and systems
   * **utils**: Utilities library
   * **net**: Networking library
+  * **ui**: UI library
+* **plugins**
+  * **asio**: Network/Asio implementation
+  * **dx11**: Video/DX11 implementation
+  * **opengl**: Video/OpenGL implementation
+  * **sdl**: System/SDL, Input/SDL and AudioOut/SDL implementations
+  * **winrt**: System/WinRT, Input/WinRT, Platform/WinRT and AudioOut/XAudio2 implementations
 * **tools**
   * **editor**: Editor UI
   * **cmd**: Command-line interface to tools
@@ -53,19 +58,20 @@ The following platforms are supported:
 ## Installation
 
 ### Tools required
-* CMake 3.x
+* CMake 3.10+
 * C++14 capable compiler:
-  * Visual C++ 14 Update 3 (Visual Studio 2015)
+  * Visual C++ 15.3 (Visual Studio 2017)
   * Clang 3.5
   * GCC 5.0
 
 ### Library dependencies
 * Engine:
-  * OpenGL
-  * Boost 1.59.0 (header only)
-  * SDL 2.0.2
+  * Boost 1.66.0 (header only)
+  * OpenGL [optional]
+  * SDL 2.0.2 (2.0.7 recommended) [optional]
+  * Windows 10 SDK [optional]
 * Also required if building Tools:
-  * Boost 1.59.0 libraries: filesystem, system
+  * Boost 1.66.0 libraries: filesystem, system
   * Freetype 2.6.3
   * yaml-cpp 0.5.3
 
