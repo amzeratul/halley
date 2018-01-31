@@ -4,8 +4,8 @@
 using namespace Halley;
 
 // TODO: REMOVE THESE TWO
-#include <D3Dcompiler.h>
-#pragma comment(lib, "D3DCompiler.lib")
+//#include <D3Dcompiler.h>
+//#pragma comment(lib, "D3DCompiler.lib")
 
 DX11Shader::DX11Shader(DX11Video& video, const ShaderDefinition& definition)
 	: name(definition.name)
@@ -41,6 +41,8 @@ DX11Shader::~DX11Shader()
 
 void DX11Shader::loadShader(DX11Video& video, ShaderType type, const Bytes& bytes)
 {
+	throw Exception("Loading HLSL is temporarily disabled until D3D shader situation is sorted");
+
 	String entry;
 	String target;
 
@@ -66,7 +68,8 @@ void DX11Shader::loadShader(DX11Video& video, ShaderType type, const Bytes& byte
 
 	ID3D10Blob *codeBlob = nullptr;
 	ID3D10Blob *errorBlob = nullptr;
-	HRESULT result = D3DCompile2(bytes.data(), bytes.size(), name.c_str(), nullptr, nullptr, entry.c_str(), target.c_str(), 0, 0, 0, nullptr, 0, &codeBlob, &errorBlob);
+	//HRESULT result = D3DCompile2(bytes.data(), bytes.size(), name.c_str(), nullptr, nullptr, entry.c_str(), target.c_str(), 0, 0, 0, nullptr, 0, &codeBlob, &errorBlob);
+	HRESULT result = 100; // dunno
 	if (result != S_OK) {
 		String errorMessage = String(reinterpret_cast<const char*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
 		errorBlob->Release();
