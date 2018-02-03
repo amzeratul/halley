@@ -207,16 +207,9 @@ void Halley::World::step(TimeLine timeline, Time elapsed)
 	t.beginSample();
 
 	spawnPending();
-	updateEntities();
 
 	initSystems();
 	updateSystems(timeline, elapsed);
-	
-	if (timeline == TimeLine::VariableUpdate) {
-		// The variable update timeline runs before render, so give everything a chance to spawn before rendering
-		spawnPending();
-		updateEntities();
-	}
 
 	t.endSample();
 }
@@ -250,6 +243,8 @@ void World::spawnPending()
 		entityDirty = true;
 		HALLEY_DEBUG_TRACE();
 	}
+
+	updateEntities();
 }
 
 void World::updateEntities()
@@ -352,6 +347,7 @@ void World::updateSystems(TimeLine timeline, Time time)
 {
 	for (auto& system : getSystems(timeline)) {
 		system->doUpdate(time);
+		spawnPending();
 	}
 }
 
