@@ -30,10 +30,12 @@ void CheckAssetsTask::run()
 	bool first = true;
 	while (!isCancelled()) {
 		if (first | monitorAssets.poll() | monitorAssetsSrc.poll() | monitorSharedAssetsSrc.poll()) { // Don't short-circuit
+			Logger::logInfo("Scanning for asset changes...");
 			checkAllAssets(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, project.getAssetsPath(), "Importing assets");
 		}
 
 		if (first | monitorGen.poll() | monitorGenSrc.poll()) {
+			Logger::logInfo("Scanning for codegen changes...");
 			checkAllAssets(project.getCodegenDatabase(), { project.getGenSrcPath() }, project.getGenPath(), "Generating code");
 		}
 
@@ -46,7 +48,7 @@ void CheckAssetsTask::run()
 		if (headless) {
 			return;
 		}
-		std::this_thread::sleep_for(monitorAssets.hasRealImplementation() ? 25ms : 100ms);
+		std::this_thread::sleep_for(monitorAssets.hasRealImplementation() ? 100ms : 1000ms);
 	}
 }
 
@@ -103,8 +105,9 @@ static Metadata getMetaData(Path inputFilePath, Maybe<Path> dirMetaPath, Maybe<P
 	return meta;
 }
 
-void CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry>& assets, const bool isCodegen, const std::vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath) {
+bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry>& assets, const bool isCodegen, const std::vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath) {
 	std::array<int64_t, 3> timestamps = {{ 0, 0, 0 }};
+	bool dbChanged = false;
 
 	// Collect data on main file
 	timestamps[0] = FileSystem::getLastWriteTime(srcPath / filePath);
@@ -130,6 +133,7 @@ void CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 	if (db.needToLoadInputMetadata(filePath, timestamps)) {
 		Metadata meta = getMetaData(filePath, dirMetaPath, privateMetaPath);
 		db.setInputFileMetadata(filePath, timestamps, meta);
+		dbChanged = true;
 	}
 
 	// Figure out the right importer and assetId for this file
@@ -160,6 +164,8 @@ void CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 			throw Exception("Mixed source dir input for " + assetId);
 		}
 	}
+
+	return dbChanged;
 }
 
 void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, Path dstPath, String taskName)
@@ -167,13 +173,13 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 	std::map<String, ImportAssetsDatabaseEntry> assets;
 
 	bool isCodegen = srcPaths.size() == 1 && srcPaths[0] == project.getGenSrcPath();
+	bool dbChanged = false;
 
 	std::vector<Path> directoryMetas;
 
 	// Enumerate all potential assets
 	for (auto srcPath : srcPaths) {
 		auto allFiles = FileSystem::enumerateDirectory(srcPath);
-		Logger::logInfo("Checking input files in \"" + srcPath + "\" (" + toString(allFiles.size()) + " files)...");
 
 		// First, collect all directory metas
 		for (auto& filePath : allFiles) {
@@ -188,25 +194,26 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 				continue;
 			}
 
-			importFile(db, assets, isCodegen, directoryMetas, srcPath, filePath);
+			dbChanged = dbChanged | importFile(db, assets, isCodegen, directoryMetas, srcPath, filePath);
 		}
 	}
 
-	Logger::logInfo("Done checking input files.");
-	db.save();
+	if (dbChanged) {
+		db.save();
+	}
 
 	// Check for missing input files
 	db.markAssetsAsStillPresent(assets);
 	auto toDelete = db.getAllMissing();
-	Logger::logInfo("Assets to be deleted: " + toString(toDelete.size()));
 	if (!toDelete.empty()) {
+		Logger::logInfo("Assets to be deleted: " + toString(toDelete.size()));
 		addPendingTask(EditorTaskAnchor(std::make_unique<DeleteAssetsTask>(db, dstPath, std::move(toDelete))));
 	}
 
 	// Import assets
 	auto toImport = filterNeedsImporting(db, assets);
-	Logger::logInfo("Assets to be imported: " + toString(toImport.size()));
 	if (!toImport.empty()) {
+		Logger::logInfo("Assets to be imported: " + toString(toImport.size()));
 		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(taskName, db, project.getAssetImporter(), dstPath, std::move(toImport))));
 	}
 }

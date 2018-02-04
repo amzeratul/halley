@@ -34,6 +34,7 @@ ConsoleWindow::~ConsoleWindow()
 
 void ConsoleWindow::log(LoggerLevel, const String& msg)
 {
+	std::unique_lock<std::mutex> lock(mutex);
 	printLn(msg);
 }
 
@@ -52,6 +53,8 @@ void ConsoleWindow::update(InputDevice& keyboard)
 
 void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 {
+	std::unique_lock<std::mutex> lock(mutex);
+
 	Rect4f innerBounds = bounds.shrink(12);
 	Rect4f outerBounds = bounds.grow(8);
 

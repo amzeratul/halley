@@ -31,7 +31,7 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	});
 	auto result = gen.generateFont(asset.assetId, data, imgSize, radius, supersample, Range<int>(0, 255));
 	if (!result.success) {
-		throw Exception("Failed to generate font: " + asset.assetId);
+		return;
 	}
 
 	collector.output(result.font->getName(), AssetType::Font, Serializer::toBytes(*result.font));

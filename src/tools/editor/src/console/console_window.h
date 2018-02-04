@@ -30,5 +30,7 @@ namespace Halley
 		std::vector<String> buffer;
 		std::vector<String> history;
 		std::shared_ptr<const Font> font;
+
+		mutable std::mutex mutex;
 	};
 }

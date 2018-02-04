@@ -6,6 +6,7 @@
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/assets/asset_collector.h"
+#include "halley/concurrency/concurrent.h"
 
 using namespace Halley;
 
@@ -22,25 +23,30 @@ void ImportAssetsTask::run()
 	using namespace std::chrono_literals;
 	auto lastSave = std::chrono::steady_clock::now();
 
+	assetsImported = 0;
+	assetsToImport = files.size();
+	std::vector<Future<void>> tasks;
+
 	for (size_t i = 0; i < files.size(); ++i) {
-		if (isCancelled()) {
-			break;
-		}
+		tasks.push_back(Concurrent::execute(Executors::getCPUAux(), [&, i] () {
+			if (isCancelled()) {
+				return;
+			}
 
-		curFileProgressStart = float(i) / float(files.size());
-		curFileProgressEnd = float(i + 1) / float(files.size());
-		curFileLabel = files[i].assetId;
-		setProgress(curFileProgressStart, curFileLabel);
+			if (importAsset(files[i])) {
+				++assetsImported;
+				setProgress(float(assetsImported) * 0.98f / float(assetsToImport), files[i].assetId);
+			}
 
-		if (importAsset(files[i])) {
-			// Check if db needs saving
 			auto now = std::chrono::steady_clock::now();
 			if (now - lastSave > 1s) {
 				db.save();
 				lastSave = now;
 			}
-		}
+		}));
 	}
+
+	Concurrent::whenAll(tasks.begin(), tasks.end()).get();
 	db.save();
 
 	if (!isCancelled()) {
@@ -84,7 +90,7 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 			
 			AssetCollector collector(cur, assetsPath, importer.getAssetsSrc(), [=] (float assetProgress, const String& label) -> bool
 			{
-				setProgress(lerp(curFileProgressStart, curFileProgressEnd, assetProgress), curFileLabel + " " + label);
+				//setProgress(lerp(curFileProgressStart, curFileProgressEnd, assetProgress), curFileLabel + " " + label);
 				return !isCancelled();
 			});
 			

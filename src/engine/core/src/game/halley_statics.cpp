@@ -29,6 +29,7 @@ namespace Halley {
 		{
 			diskIOThreadPool.reset();
 			cpuThreadPool.reset();
+			cpuAuxThreadPool.reset();
 			executors.reset();
 		}
 
@@ -39,6 +40,7 @@ namespace Halley {
 		
 		std::unique_ptr<Executors> executors;
 		std::unique_ptr<ThreadPool> cpuThreadPool;
+		std::unique_ptr<ThreadPool> cpuAuxThreadPool;
 		std::unique_ptr<ThreadPool> diskIOThreadPool;
 	};
 }
@@ -71,6 +73,7 @@ void HalleyStatics::resume(SystemAPI* system)
 	};
 
 	pimpl->cpuThreadPool = std::make_unique<ThreadPool>("CPU", pimpl->executors->getCPU(), std::thread::hardware_concurrency(), makeThread);
+	pimpl->cpuAuxThreadPool = std::make_unique<ThreadPool>("CPUAux", pimpl->executors->getCPUAux(), std::thread::hardware_concurrency(), makeThread);
 	pimpl->diskIOThreadPool = std::make_unique<ThreadPool>("IO", pimpl->executors->getDiskIO(), 1, makeThread);
 #endif
 }
@@ -90,4 +93,5 @@ void HalleyStatics::suspend()
 {
 	pimpl->diskIOThreadPool.reset();
 	pimpl->cpuThreadPool.reset();
+	pimpl->cpuAuxThreadPool.reset();
 }
