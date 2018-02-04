@@ -79,7 +79,7 @@ namespace Halley
 		virtual void import(const ImportingAsset&, IAssetCollector&) {}
 		virtual int dropFrontCount() const { return 1; }
 
-		virtual String getAssetId(const Path& file) const
+		virtual String getAssetId(const Path& file, const Maybe<Metadata>& metadata) const
 		{
 			String name = file.dropFront(dropFrontCount()).string();
 			if (name.endsWith(".meta")) {

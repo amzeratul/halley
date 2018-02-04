@@ -8,7 +8,7 @@
 
 using namespace Halley;
 
-String BitmapFontImporter::getAssetId(const Path& file) const
+String BitmapFontImporter::getAssetId(const Path& file, const Maybe<Metadata>& metadata) const
 {
 	return file.getStem().getString();
 }

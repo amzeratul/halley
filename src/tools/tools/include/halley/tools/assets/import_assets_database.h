@@ -51,8 +51,17 @@ namespace Halley
 		struct AssetEntry
 		{
 			ImportAssetsDatabaseEntry asset;
-
 			bool present;
+
+			void serialize(Serializer& s) const;
+			void deserialize(Deserializer& s);
+		};
+
+		class InputFileEntry
+		{
+		public:
+			std::array<int64_t, 3> timestamp;
+			Metadata metadata;
 
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
@@ -64,11 +73,14 @@ namespace Halley
 		void load();
 		void save() const;
 
+		bool needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const;
+		void setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data);
+		Maybe<Metadata> getMetadata(const Path& path) const;
+
 		bool needsImporting(const ImportAssetsDatabaseEntry& asset) const;
 		void markAsImported(const ImportAssetsDatabaseEntry& asset);
 		void markDeleted(const ImportAssetsDatabaseEntry& asset);
 		void markFailed(const ImportAssetsDatabaseEntry& asset);
-
 		void markAssetsAsStillPresent(const std::map<String, ImportAssetsDatabaseEntry>& assets);
 		std::vector<ImportAssetsDatabaseEntry> getAllMissing() const;
 
@@ -85,6 +97,7 @@ namespace Halley
 
 		std::map<String, AssetEntry> assetsImported;
 		std::map<String, AssetEntry> assetsFailed; // Ephemeral
+		std::map<String, InputFileEntry> inputFiles;
 		
 		mutable std::mutex mutex;
 

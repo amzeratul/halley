@@ -4,7 +4,6 @@
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/resources/resource_data.h"
-#include "../yaml/halley-yamlcpp.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/assets/asset_collector.h"
 
@@ -49,70 +48,6 @@ void ImportAssetsTask::run()
 	}
 }
 
-static void loadMetaTable(Metadata& meta, const YAML::Node& root)
-{
-	for (YAML::const_iterator it = root.begin(); it != root.end(); ++it) {
-		String key = it->first.as<std::string>();
-		String value = it->second.as<std::string>();
-		meta.set(key, value);
-	}
-}
-
-static void loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta, String assetId)
-{
-	auto data = ResourceDataStatic::loadFromFileSystem(path);
-	auto root = YAML::Load(data->getString());
-
-	if (isDirectoryMeta) {
-		for (const auto& rootList: root) {
-			bool matches = true;
-			for (YAML::const_iterator i0 = rootList.begin(); i0 != rootList.end(); ++i0) {
-				auto name = i0->first.as<std::string>();
-				if (name == "match") {
-					matches = false;
-					for (auto& pattern: i0->second) {
-						if (assetId.contains(pattern.as<std::string>())) {
-							matches = true;
-							break;
-						}
-					}
-				} else if (name == "data" && matches) {
-					loadMetaTable(meta, i0->second);
-				}
-			}
-		}
-	} else {
-		loadMetaTable(meta, root);
-	}
-}
-
-static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& asset)
-{
-	try {
-		auto meta = std::make_unique<Metadata>();
-
-		Maybe<Path> dirMetaPath;
-		Maybe<Path> myMetaPath;
-
-		for (auto& i: asset.inputFiles) {
-			if (i.first.getExtension() == ".meta") {
-				(i.first.getFilename() == "_dir.meta" ? dirMetaPath : myMetaPath) = asset.srcDir / i.first;
-			}
-		}
-
-		if (dirMetaPath) {
-			loadMetaData(*meta, dirMetaPath.get(), true, asset.assetId);
-		}
-		if (myMetaPath) {
-			loadMetaData(*meta, myMetaPath.get(), false, asset.assetId);
-		}
-		
-		return meta;
-	} catch (std::exception& e) {
-		throw Exception("Error parsing metafile for " + asset.assetId + ": " + e.what());
-	}
-}
-
 bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
 	std::vector<AssetResource> out;
@@ -125,14 +60,20 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 		ImportingAsset importingAsset;
 		importingAsset.assetId = asset.assetId;
 		importingAsset.assetType = asset.assetType;
-		importingAsset.metadata = getMetaData(asset);
 		for (auto& f: asset.inputFiles) {
-			if (f.first.getExtension() != ".meta") {
-				importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.first, FileSystem::readFile(asset.srcDir / f.first)));
+			auto meta = db.getMetadata(f.first);
+			if (meta) {
+				if (importingAsset.metadata) {
+					// Already has metadata, ensure they're compatible
+					if (*importingAsset.metadata != meta.get()) {
+						throw Exception("Asset \"" + asset.assetId + "\" has different files with incompatible metadata");
+					}
+				} else {
+					importingAsset.metadata = std::make_unique<Metadata>(meta.get());
+				}
 			}
-		}
-		if (importingAsset.inputFiles.empty()) {
-			throw Exception("No input files found for asset " + asset.assetId + " - do you have a stray meta file?");
+
+			importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.first, FileSystem::readFile(asset.srcDir / f.first)));
 		}
 		toLoad.emplace_back(std::move(importingAsset));
 
