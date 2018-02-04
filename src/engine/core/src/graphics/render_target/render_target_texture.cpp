@@ -10,7 +10,7 @@ void TextureRenderTarget::setTarget(int attachmentNumber, std::shared_ptr<Textur
 	Expects(attachmentNumber < 8);
 	Expects(tex != std::shared_ptr<Texture>());
 
-	if (attachments.size() <= attachmentNumber) {
+	if (int(attachments.size()) <= attachmentNumber) {
 		attachments.resize(attachmentNumber + 1);
 	}
 	attachments[attachmentNumber] = tex;

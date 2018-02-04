@@ -26,11 +26,11 @@ namespace Halley
 		constexpr static AssetType getAssetType() { return AssetType::AudioClip; }
 
 	private:
-		size_t sampleLength;
-		size_t numChannels;
+		size_t sampleLength = 0;
+		size_t numChannels = 0;
 		size_t loopPoint = 0;
 		mutable size_t streamPos = 0;
-		bool streaming;
+		bool streaming = false;
 
 		// TODO: sort this mess?
 		mutable std::vector<std::vector<AudioConfig::SampleFormat>> temp0;

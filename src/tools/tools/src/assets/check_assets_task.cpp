@@ -75,7 +75,7 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 
 			auto& assetImporter = codegen ? project.getAssetImporter().getImporter(ImportAssetType::Codegen) : project.getAssetImporter().getImporter(filePath);
 			String assetId = assetImporter.getAssetId(filePath);
-
+			
 			auto input = TimestampedPath(filePath, FileSystem::getLastWriteTime(srcPath / filePath));
 
 			auto iter = assets.find(assetId);

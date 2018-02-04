@@ -24,8 +24,8 @@ namespace Halley
 		Vector2f pivot;
 		Vector2f size;
 		Rect4f coords;
-		int duration;
-		bool rotated;
+		int duration = 0;
+		bool rotated = false;
 		Vector4i trimBorder;
 
 		void serialize(Serializer& s) const;

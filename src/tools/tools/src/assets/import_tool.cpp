@@ -42,7 +42,7 @@ int ImportTool::run(Vector<std::string> args)
 		tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(*proj, true)));
 		auto last = std::chrono::steady_clock::now();
 
-		while (tasks->getTasks().size() > 0) {
+		while (!tasks->getTasks().empty()) {
 			std::this_thread::sleep_for(50ms);
 
 			auto now = std::chrono::steady_clock::now();
@@ -59,8 +59,7 @@ int ImportTool::run(Vector<std::string> args)
 			std::cout << "Import done." << std::endl;
 			return 0;
 		}
-	}
-	else {
+	} else {
 		std::cout << "Usage: halley-cmd import projDir halleyDir" << std::endl;
 		return 1;
 	}

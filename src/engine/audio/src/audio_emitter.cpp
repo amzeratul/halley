@@ -1,4 +1,5 @@
 #include "audio_emitter.h"
+#include <utility>
 #include "audio_mixer.h"
 #include "audio_emitter_behaviour.h"
 #include "audio_source.h"
@@ -6,13 +7,12 @@
 using namespace Halley;
 
 AudioEmitter::AudioEmitter(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain) 
-	: source(source)
-	, sourcePos(sourcePos)
+	: source(std::move(source))
+	, sourcePos(std::move(sourcePos))
 	, gain(gain)
 {}
 
-AudioEmitter::~AudioEmitter()
-{}
+AudioEmitter::~AudioEmitter() = default;
 
 void AudioEmitter::setId(size_t i)
 {
@@ -73,7 +73,7 @@ void AudioEmitter::setGain(float g)
 void AudioEmitter::setAudioSourcePosition(AudioPosition s)
 {
 	if (nChannels == 1) {
-		sourcePos = s;
+		sourcePos = std::move(s);
 	}
 }
 
@@ -116,7 +116,7 @@ void AudioEmitter::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMi
 	const size_t numPacks = numSamples / 16;
 	Expects(dst[0]->packs.size() >= numPacks);
 	const size_t nSrcChannels = getNumberOfChannels();
-	const size_t nDstChannels = size_t(dst.size());
+	const auto nDstChannels = size_t(dst.size());
 
 	// Figure out the total mix in the previous update, and now. If it's zero, then there's nothing to listen here.
 	float totalMix = 0.0f;

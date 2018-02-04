@@ -152,7 +152,7 @@ AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 	}
 
 	// Couldn't find a free one, create new
-	buffers.push_back(Entry(std::make_unique<AudioBuffer>()));
+	buffers.emplace_back(std::make_unique<AudioBuffer>());
 	buffers.back().buffer->packs.resize(1LL << idx);
 	return *buffers.back().buffer;
 }

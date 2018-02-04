@@ -213,7 +213,7 @@ const AnimationDirection& Animation::getDirection(int id) const
 	Expects(id >= 0);
 	Expects(directions.size() > 0);
 
-	if (id < directions.size()) {
+	if (id < int(directions.size())) {
 		return directions[id];
 	} else {
 		return directions[0];
