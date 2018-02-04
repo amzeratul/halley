@@ -10,15 +10,14 @@ using namespace Halley;
 
 void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
+	auto& input = asset.inputFiles.at(0);
+
 	// Prepare metadata
-	Metadata meta;
-	if (asset.metadata) {
-		meta = *asset.metadata;
-	}
+	Metadata meta = input.metadata;
 
 	// Load image
 	Path mainFile = asset.inputFiles.at(0).name;
-	auto span = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
+	auto span = gsl::as_bytes(gsl::span<const Byte>(input.data));
 	std::unique_ptr<Image> image;
 	if (meta.getString("compression", "png") == "png") {
 		image = std::make_unique<Image>(span, fromString<Image::Format>(meta.getString("format", "undefined")));
@@ -46,8 +45,7 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	ImportingAsset imageAsset;
 	imageAsset.assetId = asset.assetId;
 	imageAsset.assetType = ImportAssetType::Texture;
-	imageAsset.metadata = std::make_unique<Metadata>(meta);
-	imageAsset.inputFiles.emplace_back(ImportingAssetFile(asset.assetId, Serializer::toBytes(*image)));
+	imageAsset.inputFiles.emplace_back(ImportingAssetFile(asset.assetId, Serializer::toBytes(*image), meta));
 	collector.addAdditionalAsset(std::move(imageAsset));
 }
 

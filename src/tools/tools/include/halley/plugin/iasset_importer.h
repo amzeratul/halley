@@ -16,11 +16,13 @@ namespace Halley
 	public:
 		Path name;
 		Bytes data;
+		Metadata metadata;
 
 		ImportingAssetFile() {}
-		ImportingAssetFile(const Path& path, Bytes&& data)
+		ImportingAssetFile(const Path& path, Bytes&& data, const Metadata& meta)
 			: name(path)
 			, data(data)
+			, metadata(meta)
 		{}
 	};
 
@@ -29,7 +31,6 @@ namespace Halley
 	public:
 		String assetId;
 		std::vector<ImportingAssetFile> inputFiles;
-		std::unique_ptr<Metadata> metadata;
 		ImportAssetType assetType = ImportAssetType::Undefined;
 	};
 

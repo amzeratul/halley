@@ -14,18 +14,17 @@ using namespace Halley;
 
 void AsepriteImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
+	const ImportingAssetFile& file = asset.inputFiles.at(0);
+
 	// Meta
-	Metadata meta;
+	Metadata meta = file.metadata;
 	Vector2i pivot;
-	if (asset.metadata) {
-		meta = *asset.metadata;
-		pivot.x = meta.getInt("pivotX", 0);
-		pivot.y = meta.getInt("pivotY", 0);
-	}
+	pivot.x = meta.getInt("pivotX", 0);
+	pivot.y = meta.getInt("pivotY", 0);
 
 	// Import
 	String spriteName = Path(asset.assetId).replaceExtension("").string();
-	auto frames = importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data)));
+	auto frames = importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(file.data)));
 
 	// Write animation
 	Animation animation = generateAnimation(spriteName, meta.getString("material", "Halley/Sprite"), frames);
@@ -52,8 +51,7 @@ void AsepriteImporter::import(const ImportingAsset& asset, IAssetCollector& coll
 	ImportingAsset image;
 	image.assetId = spriteName;
 	image.assetType = ImportAssetType::Image;
-	image.metadata = std::make_unique<Metadata>(meta);
-	image.inputFiles.emplace_back(ImportingAssetFile(spriteName, Serializer::toBytes(*atlasImage)));
+	image.inputFiles.emplace_back(ImportingAssetFile(spriteName, Serializer::toBytes(*atlasImage), meta));
 	collector.addAdditionalAsset(std::move(image));
 }
 

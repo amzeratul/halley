@@ -11,10 +11,7 @@ void ConfigImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	ConfigFile config;
 	parseConfig(config, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
 	
-	Metadata meta;
-	if (asset.metadata) {
-		meta = *asset.metadata;
-	}
+	Metadata meta = asset.inputFiles.at(0).metadata;
 	meta.set("asset_compression", "deflate");
 
 	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::ConfigFile, Serializer::toBytes(config), meta);

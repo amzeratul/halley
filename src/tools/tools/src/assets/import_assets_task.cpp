@@ -68,18 +68,7 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 		importingAsset.assetType = asset.assetType;
 		for (auto& f: asset.inputFiles) {
 			auto meta = db.getMetadata(f.first);
-			if (meta) {
-				if (importingAsset.metadata) {
-					// Already has metadata, ensure they're compatible
-					if (*importingAsset.metadata != meta.get()) {
-						throw Exception("Asset \"" + asset.assetId + "\" has different files with incompatible metadata");
-					}
-				} else {
-					importingAsset.metadata = std::make_unique<Metadata>(meta.get());
-				}
-			}
-
-			importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.first, FileSystem::readFile(asset.srcDir / f.first)));
+			importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.first, FileSystem::readFile(asset.srcDir / f.first), meta ? meta.get() : Metadata()));
 		}
 		toLoad.emplace_back(std::move(importingAsset));
 

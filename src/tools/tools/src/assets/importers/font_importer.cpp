@@ -15,13 +15,11 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	Vector2i imgSize(512, 512);
 	float radius = 8;
 	int supersample = 4;
-	auto& meta = asset.metadata;
-	if (meta) {
-		radius = meta->getFloat("radius", 8);
-		supersample = meta->getInt("supersample", 4);
-		imgSize.x = meta->getInt("width", 512);
-		imgSize.y = meta->getInt("height", 512);
-	}
+	const auto& meta = asset.inputFiles.at(0).metadata;
+	radius = meta.getFloat("radius", 8);
+	supersample = meta.getInt("supersample", 4);
+	imgSize.x = meta.getInt("width", 512);
+	imgSize.y = meta.getInt("height", 512);
 
 	auto data = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
 
@@ -39,7 +37,6 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	ImportingAsset image;
 	image.assetId = result.font->getName();
 	image.assetType = ImportAssetType::Image;
-	image.metadata = std::move(result.imageMeta);
-	image.inputFiles.emplace_back(ImportingAssetFile(result.font->getName(), Serializer::toBytes(*result.image)));
+	image.inputFiles.emplace_back(ImportingAssetFile(result.font->getName(), Serializer::toBytes(*result.image), *result.imageMeta));
 	collector.addAdditionalAsset(std::move(image));
 }

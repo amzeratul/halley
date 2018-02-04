@@ -69,10 +69,7 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	}
 
 	// Write metadata
-	Metadata meta;
-	if (asset.metadata) {
-		meta = *asset.metadata;
-	}
+	Metadata meta = asset.inputFiles.at(0).metadata;
 	meta.set("channels", numChannels);
 	meta.set("sampleRate", sampleRate);
 
