@@ -20,7 +20,8 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	Maybe<String> palette;
 
 	for (auto& inputFile: asset.inputFiles) {
-		String spriteName = Path(inputFile.name).dropFront(1).replaceExtension("").string();
+		auto fileInputId = Path(inputFile.name).dropFront(1);
+		const String spriteName = fileInputId.replaceExtension("").string();
 
 		// Meta
 		Metadata meta = inputFile.metadata;
@@ -53,13 +54,13 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			imgData.clip = image->getTrimRect(); // Be careful, make sure this is done before the std::move() below
 			imgData.img = std::move(image);
 			imgData.duration = 100;
-			imgData.filename = inputFile.name.toString();
+			imgData.filename = fileInputId.toString();
 			imgData.frameNumber = 0;
 			imgData.sequenceName = "";
 		}
 
 		// Split into a grid
-		Vector2i grid(meta.getInt("tileWidth", 0), meta.getInt("tileHeight", 0));
+		const Vector2i grid(meta.getInt("tileWidth", 0), meta.getInt("tileHeight", 0));
 		if (grid.x > 0 && grid.y > 0) {
 			frames = splitImagesInGrid(frames, grid);
 		}
