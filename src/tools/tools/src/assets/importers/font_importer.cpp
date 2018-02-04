@@ -1,6 +1,5 @@
 #include "font_importer.h"
 #include "halley/tools/assets/import_assets_database.h"
-#include <iostream>
 #include "halley/maths/vector2.h"
 #include "halley/maths/range.h"
 #include "halley/tools/make_font/font_generator.h"
@@ -12,12 +11,10 @@ using namespace Halley;
 
 void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	Vector2i imgSize(512, 512);
-	float radius = 8;
-	int supersample = 4;
 	const auto& meta = asset.inputFiles.at(0).metadata;
-	radius = meta.getFloat("radius", 8);
-	supersample = meta.getInt("supersample", 4);
+	const float radius = meta.getFloat("radius", 8);
+	const int supersample = meta.getInt("supersample", 4);
+	Vector2i imgSize;
 	imgSize.x = meta.getInt("width", 512);
 	imgSize.y = meta.getInt("height", 512);
 
