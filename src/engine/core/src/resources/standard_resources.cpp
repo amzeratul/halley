@@ -17,6 +17,7 @@ void StandardResources::initialize(Resources& resources)
 {
 	resources.init<Animation>();
 	resources.init<SpriteSheet>();
+	resources.init<SpriteResource>();
 	resources.init<Texture>();
 	resources.init<MaterialDefinition>();
 	resources.init<ShaderFile>();
@@ -25,4 +26,18 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<Font>();
 	resources.init<ConfigFile>();
 	resources.init<AudioClip>();
+
+	resources.of<SpriteResource>().setResourceLoader([&] (const String& name, ResourceLoadPriority) -> std::shared_ptr<Resource>
+	{
+		auto& ss = resources.of<SpriteSheet>();
+		for (auto& sheetName: ss.enumerate()) {
+			auto sheet = ss.get(sheetName);
+			if (sheet->hasSprite(name)) {
+				return std::make_shared<SpriteResource>(sheet, sheet->getIndex(name));
+			}
+		}
+
+		// Failed to find it
+		return {};
+	});
 }

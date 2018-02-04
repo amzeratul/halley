@@ -77,4 +77,21 @@ namespace Halley
 		std::vector<SpriteSheetFrameTag> frameTags;
 		String textureName;
 	};
+
+	class SpriteResource : public Resource
+	{
+	public:
+		SpriteResource(std::shared_ptr<const SpriteSheet> spriteSheet, int idx);
+
+		const SpriteSheetEntry& getSprite() const;
+		int getIdx() const;
+		std::shared_ptr<const SpriteSheet> getSpriteSheet() const;
+
+		constexpr static AssetType getAssetType() { return AssetType::Sprite; }
+		static std::unique_ptr<SpriteResource> loadResource(ResourceLoader& loader);
+
+	private:
+		std::weak_ptr<const SpriteSheet> spriteSheet;
+		int idx = -1;
+	};
 }

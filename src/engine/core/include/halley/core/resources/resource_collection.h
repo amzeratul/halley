@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <memory>
+#include <functional>
 #include <halley/text/halleystring.h>
 #include <halley/resources/resource_data.h>
 #include <halley/data_structures/hash_map.h>
@@ -34,10 +35,14 @@ namespace Halley
 		};
 
 	public:
+		using ResourceLoaderFunc = std::function<std::shared_ptr<Resource>(const String&, ResourceLoadPriority)>;
+
 		explicit ResourceCollectionBase(Resources& parent, AssetType type);
 		virtual ~ResourceCollectionBase() {}
 
 		void setResource(int curDepth, const String& assetId, std::shared_ptr<Resource> resource);
+		void setResourceLoader(ResourceLoaderFunc loader);
+
 		void clear();
 		void unload(const String& assetId);
 		void unloadAll(int minDepth = 0);
@@ -54,6 +59,7 @@ namespace Halley
 		Resources& parent;
 		HashMap<String, Wrapper> resources;
 		AssetType type;
+		ResourceLoaderFunc resourceLoader;
 	};
 
 	template <typename T>

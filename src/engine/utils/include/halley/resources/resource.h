@@ -36,6 +36,7 @@ namespace Halley
 		Texture,
 		Image,
 		MaterialDefinition,
+		Sprite,
 		SpriteSheet,
 		Animation,
 		Font,
@@ -45,7 +46,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<AssetType> {
-		constexpr std::array<const char*, 11> operator()() const {
+		constexpr std::array<const char*, 12> operator()() const {
 			return{{
 				"binaryFile",
 				"textFile",
@@ -53,6 +54,7 @@ namespace Halley
 				"texture",
 				"image",
 				"materialDefinition",
+				"sprite",
 				"spriteSheet",
 				"animation",
 				"font",

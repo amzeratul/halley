@@ -20,7 +20,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	Maybe<String> palette;
 
 	for (auto& inputFile: asset.inputFiles) {
-		String spriteName = Path(inputFile.name).replaceExtension("").string();
+		String spriteName = Path(inputFile.name).dropFront(1).replaceExtension("").string();
 
 		// Meta
 		Metadata meta = inputFile.metadata;

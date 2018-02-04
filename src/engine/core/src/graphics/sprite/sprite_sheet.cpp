@@ -210,3 +210,30 @@ void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)
 		addSprite(iter.memberName(), entry);
 	}	
 }
+
+
+SpriteResource::SpriteResource(std::shared_ptr<const SpriteSheet> spriteSheet, int idx)
+	: spriteSheet(spriteSheet)
+	, idx(idx)
+{
+}
+
+const SpriteSheetEntry& SpriteResource::getSprite() const
+{
+	return getSpriteSheet()->getSprite(idx);
+}
+
+int SpriteResource::getIdx() const
+{
+	return idx;
+}
+
+std::shared_ptr<const SpriteSheet> SpriteResource::getSpriteSheet() const
+{
+	return spriteSheet.lock();
+}
+
+std::unique_ptr<SpriteResource> SpriteResource::loadResource(ResourceLoader& loader)
+{
+	throw Exception("Not implemented.");
+}
