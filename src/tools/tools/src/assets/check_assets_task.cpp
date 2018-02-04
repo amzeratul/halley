@@ -100,16 +100,15 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 				}
 				if (asset.srcDir == srcPath) { // Don't mix files from two different source paths
 					asset.inputFiles.push_back(input);
+				} else {
+					throw Exception("Mixed source dir input for " + assetId);
 				}
 			}
 		}
 	}
 
 	// Check for missing input files
-	db.markAllInputsAsMissing();
-	for (auto& a : assets) {
-		db.markInputAsPresent(a.second);
-	}
+	db.markAssetsAsStillPresent(assets);
 	auto missing = db.getAllMissing();
 	if (!missing.empty()) {
 		addPendingTask(EditorTaskAnchor(std::make_unique<DeleteAssetsTask>(db, dstPath, std::move(missing))));

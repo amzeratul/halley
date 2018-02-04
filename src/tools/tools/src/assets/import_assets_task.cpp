@@ -91,15 +91,20 @@ static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& as
 	try {
 		auto meta = std::make_unique<Metadata>();
 
-		for (int j = 0; j < 2; ++j) {
-			// First load the directory meta, then load private meta on top of it, so it overrides
-			bool isDirectoryMeta = j == 0;
+		Maybe<Path> dirMetaPath;
+		Maybe<Path> myMetaPath;
 
-			for (auto& i: asset.inputFiles) {
-				if (i.first.getExtension() == ".meta" && (i.first.getFilename() == "_dir.meta") == isDirectoryMeta) {
-					loadMetaData(*meta, asset.srcDir / i.first, isDirectoryMeta, asset.assetId);
-				}
+		for (auto& i: asset.inputFiles) {
+			if (i.first.getExtension() == ".meta") {
+				(i.first.getFilename() == "_dir.meta" ? dirMetaPath : myMetaPath) = asset.srcDir / i.first;
 			}
+		}
+
+		if (dirMetaPath) {
+			loadMetaData(*meta, dirMetaPath.get(), true, asset.assetId);
+		}
+		if (myMetaPath) {
+			loadMetaData(*meta, myMetaPath.get(), false, asset.assetId);
 		}
 		
 		return meta;

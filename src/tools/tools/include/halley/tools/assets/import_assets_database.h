@@ -69,8 +69,7 @@ namespace Halley
 		void markDeleted(const ImportAssetsDatabaseEntry& asset);
 		void markFailed(const ImportAssetsDatabaseEntry& asset);
 
-		void markAllInputsAsMissing();
-		void markInputAsPresent(const ImportAssetsDatabaseEntry& asset);
+		void markAssetsAsStillPresent(const std::map<String, ImportAssetsDatabaseEntry>& assets);
 		std::vector<ImportAssetsDatabaseEntry> getAllMissing() const;
 
 		std::vector<AssetResource> getOutFiles(String assetId) const;

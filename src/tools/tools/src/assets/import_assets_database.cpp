@@ -163,20 +163,11 @@ void ImportAssetsDatabase::markFailed(const ImportAssetsDatabaseEntry& asset)
 	assetsFailed[asset.assetId] = entry;
 }
 
-void ImportAssetsDatabase::markAllInputsAsMissing()
+void ImportAssetsDatabase::markAssetsAsStillPresent(const std::map<String, ImportAssetsDatabaseEntry>& assets)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	for (auto& e: assetsImported) {
-		e.second.present = false;
-	}
-}
-
-void ImportAssetsDatabase::markInputAsPresent(const ImportAssetsDatabaseEntry& asset)
-{
-	std::lock_guard<std::mutex> lock(mutex);
-	auto iter = assetsImported.find(asset.assetId);
-	if (iter != assetsImported.end()) {
-		iter->second.present = true;
+		e.second.present = assets.find(e.first) != assets.end();
 	}
 }
 
