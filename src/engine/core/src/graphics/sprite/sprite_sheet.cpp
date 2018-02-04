@@ -29,6 +29,7 @@ static T readSize(JSONValue value)
 void SpriteSheetEntry::serialize(Serializer& s) const
 {
 	s << pivot;
+	s << origPivot;
 	s << size;
 	s << coords;
 	s << duration;
@@ -39,6 +40,7 @@ void SpriteSheetEntry::serialize(Serializer& s) const
 void SpriteSheetEntry::deserialize(Deserializer& s)
 {
 	s >> pivot;
+	s >> origPivot;
 	s >> size;
 	s >> coords;
 	s >> duration;
@@ -137,7 +139,6 @@ void SpriteSheet::serialize(Serializer& s) const
 	s << sprites;
 	s << spriteIdx;
 	s << frameTags;
-	s << pivot;
 }
 
 void SpriteSheet::deserialize(Deserializer& s)
@@ -146,17 +147,6 @@ void SpriteSheet::deserialize(Deserializer& s)
 	s >> sprites;
 	s >> spriteIdx;
 	s >> frameTags;
-	s >> pivot;
-}
-
-void SpriteSheet::setPivot(Vector2i p)
-{
-	pivot = p;
-}
-
-Vector2i SpriteSheet::getPivot() const
-{
-	return pivot;
 }
 
 void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)

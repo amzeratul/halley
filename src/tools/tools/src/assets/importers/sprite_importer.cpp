@@ -1,4 +1,4 @@
-#include "aseprite_importer.h"
+#include "sprite_importer.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/file/byte_serializer.h"
 #include "halley/resources/metadata.h"
@@ -12,50 +12,91 @@
 
 using namespace Halley;
 
-void AsepriteImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
+void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	const ImportingAssetFile& file = asset.inputFiles.at(0);
+	String atlasName = Path(asset.assetId).replaceExtension("").string();
+	std::vector<ImageData> totalFrames;
 
-	// Meta
-	Metadata meta = file.metadata;
-	Vector2i pivot;
-	pivot.x = meta.getInt("pivotX", 0);
-	pivot.y = meta.getInt("pivotY", 0);
+	Maybe<String> palette;
 
-	// Import
-	String spriteName = Path(asset.assetId).replaceExtension("").string();
-	auto frames = importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(file.data)));
+	for (auto& inputFile: asset.inputFiles) {
+		// Meta
+		Metadata meta = inputFile.metadata;
+		Vector2i pivot;
+		pivot.x = meta.getInt("pivotX", 0);
+		pivot.y = meta.getInt("pivotY", 0);
 
-	// Write animation
-	Animation animation = generateAnimation(spriteName, meta.getString("material", "Halley/Sprite"), frames);
-	collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation));
+		// Palette
+		auto thisPalette = meta.getString("palette", "");
+		if (palette) {
+			if (thisPalette != palette.get()) {
+				throw Exception("Incompatible palettes in atlas \"" + atlasName + "\". Previously using \"" + palette.get() + "\", now trying to use \"" + thisPalette + "\"");
+			}
+		} else {
+			palette = thisPalette;
+		}
 
-	// Split grid
-	Vector2i grid(meta.getInt("tileWidth", 0), meta.getInt("tileHeight", 0));
-	if (grid.x > 0 && grid.y > 0) {
-		frames = splitImagesInGrid(frames, grid);
+		std::vector<ImageData> frames;
+		if (inputFile.name.getExtension() == ".ase") {
+			// Aseprite
+			// Import
+			String spriteName = Path(inputFile.name).replaceExtension("").string();
+			frames = importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), pivot);
+
+			// Write animation
+			Animation animation = generateAnimation(spriteName, atlasName, meta.getString("material", "Halley/Sprite"), frames);
+			collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation));
+		} else {
+			// Bitmap
+			auto span = gsl::as_bytes(gsl::span<const Byte>(inputFile.data));
+			auto image = std::make_unique<Image>(span, fromString<Image::Format>(meta.getString("format", "undefined")));
+
+			frames.emplace_back();
+			auto& imgData = frames.back();
+			imgData.pivot = pivot;
+			imgData.clip = image->getTrimRect(); // Be careful, make sure this is done before the std::move() below
+			imgData.img = std::move(image);
+			imgData.duration = 100;
+			imgData.filename = inputFile.name.toString();
+			imgData.frameNumber = 0;
+			imgData.sequenceName = "";
+		}
+
+		// Split into a grid
+		Vector2i grid(meta.getInt("tileWidth", 0), meta.getInt("tileHeight", 0));
+		if (grid.x > 0 && grid.y > 0) {
+			frames = splitImagesInGrid(frames, grid);
+		}
+
+		std::move(frames.begin(), frames.end(), std::back_inserter(totalFrames));
 	}
 
 	// Generate atlas + spritesheet
 	SpriteSheet spriteSheet;
-	auto atlasImage = generateAtlas(spriteName, frames, spriteSheet, pivot);
-	collector.output(spriteName, AssetType::SpriteSheet, Serializer::toBytes(spriteSheet));
+	auto atlasImage = generateAtlas(atlasName, totalFrames, spriteSheet);
 
 	// Image metafile
 	auto size = atlasImage->getSize();
+	Metadata meta;
+	if (palette) {
+		meta.set("palette", palette.get());
+	}
 	meta.set("width", size.x);
 	meta.set("height", size.y);
 	meta.set("compression", "raw_image");
 
-	// Write image
+	// Write atlas image
 	ImportingAsset image;
-	image.assetId = spriteName;
+	image.assetId = atlasName;
 	image.assetType = ImportAssetType::Image;
-	image.inputFiles.emplace_back(ImportingAssetFile(spriteName, Serializer::toBytes(*atlasImage), meta));
+	image.inputFiles.emplace_back(ImportingAssetFile(atlasName, Serializer::toBytes(*atlasImage), meta));
 	collector.addAdditionalAsset(std::move(image));
+
+	// Write spritesheet
+	collector.output(atlasName, AssetType::SpriteSheet, Serializer::toBytes(spriteSheet));
 }
 
-std::vector<AsepriteImporter::ImageData> AsepriteImporter::loadImagesFromPath(Path tmp) {
+std::vector<SpriteImporter::ImageData> SpriteImporter::loadImagesFromPath(Path tmp, Vector2i pivot) {
 	std::vector<ImageData> frameData;
 	for (auto p : FileSystem::enumerateDirectory(tmp)) {
 		if (p.getExtension() == ".png") {
@@ -70,13 +111,14 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::loadImagesFromPath(Pa
 			data.sequenceName = parsedName[1];
 			data.frameNumber = parsedName[2].toInteger();
 			data.clip = data.img->getTrimRect();
+			data.pivot = pivot;
 			frameData.push_back(std::move(data));
 		}
 	}
 	return frameData;
 }
 
-std::map<int, int> AsepriteImporter::getSpriteDurations(Path jsonPath) {
+std::map<int, int> SpriteImporter::getSpriteDurations(Path jsonPath) {
 	std::map<int, int> durations;
 	SpriteSheet spriteSheet;
 	auto jsonData = FileSystem::readFile(jsonPath);
@@ -93,7 +135,7 @@ std::map<int, int> AsepriteImporter::getSpriteDurations(Path jsonPath) {
 	return durations;
 }
 
-void AsepriteImporter::processFrameData(String baseName, std::vector<ImageData>& frameData, std::map<int, int> durations) {
+void SpriteImporter::processFrameData(String baseName, std::vector<ImageData>& frameData, std::map<int, int> durations) {
 	std::sort(frameData.begin(), frameData.end(), [] (const ImageData& a, const ImageData& b) -> bool {
 		return a.frameNumber < b.frameNumber;
 	});
@@ -127,7 +169,7 @@ void AsepriteImporter::processFrameData(String baseName, std::vector<ImageData>&
 	}
 }
 
-std::vector<AsepriteImporter::ImageData> AsepriteImporter::importAseprite(String baseName, gsl::span<const gsl::byte> fileData)
+std::vector<SpriteImporter::ImageData> SpriteImporter::importAseprite(String baseName, gsl::span<const gsl::byte> fileData, Vector2i pivot)
 {
 	// Make temporary folder
 	Path tmp = FileSystem::getTemporaryPath();
@@ -144,7 +186,7 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::importAseprite(String
 	}
 
 	// Load all images
-	std::vector<ImageData> frameData = loadImagesFromPath(tmp);
+	std::vector<ImageData> frameData = loadImagesFromPath(tmp, pivot);
 	std::map<int, int> durations = getSpriteDurations(jsonPath);
 
 	// Remove temp
@@ -155,13 +197,13 @@ std::vector<AsepriteImporter::ImageData> AsepriteImporter::importAseprite(String
 	return frameData;
 }
 
-Animation AsepriteImporter::generateAnimation(const String& assetName, const String& materialName, const std::vector<ImageData>& frameData)
+Animation SpriteImporter::generateAnimation(const String& spriteName, const String& atlasName, const String& materialName, const std::vector<ImageData>& frameData)
 {
 	Animation animation;
 
-	animation.setName(assetName);
+	animation.setName(spriteName);
 	animation.setMaterialName(materialName);
-	animation.setSpriteSheetName(assetName);
+	animation.setSpriteSheetName(atlasName);
 
 	std::map<String, AnimationSequence> sequences;
 
@@ -185,7 +227,7 @@ Animation AsepriteImporter::generateAnimation(const String& assetName, const Str
 	return animation;
 }
 
-std::unique_ptr<Image> AsepriteImporter::generateAtlas(const String& assetName, std::vector<ImageData>& images, SpriteSheet& spriteSheet, Vector2i pivot)
+std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& assetName, std::vector<ImageData>& images, SpriteSheet& spriteSheet)
 {
 	// Generate entries
 	std::vector<BinPackEntry> entries;
@@ -202,7 +244,7 @@ std::unique_ptr<Image> AsepriteImporter::generateAtlas(const String& assetName, 
 		auto res = BinPack::pack(entries, size);
 		if (res.is_initialized()) {
 			// Found a pack
-			return makeAtlas(assetName, res.get(), size, spriteSheet, pivot);
+			return makeAtlas(assetName, res.get(), size, spriteSheet);
 		} else {
 			// Try 64x64, then 128x64, 128x128, 256x128, etc
 			if (wide) {
@@ -217,7 +259,7 @@ std::unique_ptr<Image> AsepriteImporter::generateAtlas(const String& assetName, 
 	throw Exception("Unable to pack sprites in a reasonably sized atlas!");
 }
 
-std::unique_ptr<Image> AsepriteImporter::makeAtlas(const String& assetName, const std::vector<BinPackResult>& result, Vector2i size, SpriteSheet& spriteSheet, Vector2i pivot)
+std::unique_ptr<Image> SpriteImporter::makeAtlas(const String& assetName, const std::vector<BinPackResult>& result, Vector2i size, SpriteSheet& spriteSheet)
 {
 	auto image = std::make_unique<Image>(Image::Format::RGBA, size);
 	image->clear(0);
@@ -234,18 +276,17 @@ std::unique_ptr<Image> AsepriteImporter::makeAtlas(const String& assetName, cons
 		SpriteSheetEntry entry;
 		entry.size = Vector2f(img->clip.getSize());
 		entry.rotated = packedImg.rotated;
-		entry.pivot = Vector2f(pivot - img->clip.getTopLeft()) / entry.size;
+		entry.pivot = Vector2f(img->pivot - img->clip.getTopLeft()) / entry.size;
+		entry.origPivot = img->pivot;
 		entry.coords = Rect4f(packedImg.rect) / Vector2f(size);
 		entry.trimBorder = Vector4i(borderTL.x, borderTL.y, borderBR.x, borderBR.y);
 		spriteSheet.addSprite(img->filename, entry);
 	}
 
-	spriteSheet.setPivot(pivot);
-
 	return image;
 }
 
-std::vector<AsepriteImporter::ImageData> AsepriteImporter::splitImagesInGrid(const std::vector<ImageData>& images, Vector2i grid)
+std::vector<SpriteImporter::ImageData> SpriteImporter::splitImagesInGrid(const std::vector<ImageData>& images, Vector2i grid)
 {
 	std::vector<ImageData> result;
 

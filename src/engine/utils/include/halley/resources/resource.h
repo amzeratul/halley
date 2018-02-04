@@ -23,7 +23,7 @@ namespace Halley
 		Animation,
 		Config,
 		Audio,
-		Aseprite,
+		Sprite,
 		SpriteSheet,
 		Shader
 	};

@@ -220,6 +220,11 @@ const AnimationDirection& Animation::getDirection(int id) const
 	}
 }
 
+Vector2i Animation::getPivot() const
+{
+	return sequences.at(0).getFrame(0).getSprite(0).origPivot;
+}
+
 bool Animation::hasSequence(const String& seqName) const
 {
 	for (auto& s: sequences) {

@@ -22,6 +22,7 @@ namespace Halley
 	{
 	public:
 		Vector2f pivot;
+		Vector2i origPivot;
 		Vector2f size;
 		Rect4f coords;
 		int duration = 0;
@@ -69,15 +70,11 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
-		void setPivot(Vector2i pivot);
-		Vector2i getPivot() const;
-
 	private:
 		std::shared_ptr<const Texture> texture;
 		std::vector<SpriteSheetEntry> sprites;
 		HashMap<String, uint32_t> spriteIdx;
 		std::vector<SpriteSheetFrameTag> frameTags;
 		String textureName;
-		Vector2i pivot;
 	};
 }

@@ -3,6 +3,7 @@
 #include <halley/text/halleystring.h>
 #include <memory>
 #include <halley/resources/resource.h>
+#include "halley/maths/vector2.h"
 
 namespace Halley
 {
@@ -116,6 +117,7 @@ namespace Halley
 		const AnimationSequence& getSequence(const String& name) const;
 		const AnimationDirection& getDirection(const String& name) const;
 		const AnimationDirection& getDirection(int id) const;
+		Vector2i getPivot() const;
 
 		bool hasSequence(const String& name) const;
 
