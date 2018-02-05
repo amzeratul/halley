@@ -39,7 +39,7 @@ void StandardResources::initialize(Resources& resources)
 			for (auto& spriteName: sheet->getSpriteNames()) {
 				if (spriteName.startsWith(":img:")) {
 					auto res = std::make_shared<SpriteResource>(sheet, sheet->getIndex(spriteName));
-					sprites.setResource(0, spriteName, res);
+					sprites.setResource(0, spriteName.mid(5), res);
 
 					if (spriteName == ":img:" + name) {
 						result = res;
