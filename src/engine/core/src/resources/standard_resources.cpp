@@ -29,11 +29,13 @@ void StandardResources::initialize(Resources& resources)
 
 	resources.of<SpriteResource>().setResourceLoader([&] (const String& name, ResourceLoadPriority) -> std::shared_ptr<Resource>
 	{
+		String spriteName = ":img:" + name;
+
 		auto& ss = resources.of<SpriteSheet>();
 		for (auto& sheetName: ss.enumerate()) {
 			auto sheet = ss.get(sheetName);
-			if (sheet->hasSprite(name)) {
-				return std::make_shared<SpriteResource>(sheet, sheet->getIndex(name));
+			if (sheet->hasSprite(spriteName)) {
+				return std::make_shared<SpriteResource>(sheet, sheet->getIndex(spriteName));
 			}
 		}
 

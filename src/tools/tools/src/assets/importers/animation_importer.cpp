@@ -54,7 +54,7 @@ void AnimationImporter::parseAnimation(Animation& animation, gsl::span<const gsl
 		// Load frames
 		size_t framesAdded = 0;
 		if (sequenceNode["frames"].IsDefined()) {
-			for (auto frameNode : sequenceNode["frames"]) {
+			for (const auto& frameNode : sequenceNode["frames"]) {
 				String value = frameNode.as<std::string>();
 				Vector<int> values;
 				if (value.isInteger()) {

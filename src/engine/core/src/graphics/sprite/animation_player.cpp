@@ -39,7 +39,7 @@ AnimationPlayer& AnimationPlayer::setSequence(const String& sequence)
 	if (animation && (!curSeq || curSeq->getName() != sequence)) {
 		curSeqTime = 0;
 		curFrameTime = 0;
-		curFrame = -1;
+		curFrame = 0;
 		curFrameLen = 0;
 		curSeq = &animation->getSequence(sequence);
 		Expects(curSeq);
@@ -49,7 +49,6 @@ AnimationPlayer& AnimationPlayer::setSequence(const String& sequence)
 		seqNoFlip = curSeq->isNoFlip();
 
 		dirty = true;
-		update(0.0001);
 
 		onSequenceStarted();
 	}
@@ -101,12 +100,23 @@ AnimationPlayer& AnimationPlayer::setApplyPivot(bool apply)
 
 void AnimationPlayer::update(Time time)
 {
-	if (animation) {
-		const int prevFrame = curFrame;
+	if (!animation) {
+		return;
+	}
 
-		curSeqTime += time * playbackSpeed;
-		curFrameTime += time * playbackSpeed;
-		while (curFrameTime >= curFrameLen) {
+	if (dirty) {
+		resolveSprite();
+		dirty = false;
+	}
+		
+	const int prevFrame = curFrame;
+
+	curSeqTime += time * playbackSpeed;
+	curFrameTime += time * playbackSpeed;
+		
+	// Next frame time!
+	if (curFrameTime >= curFrameLen) {
+		for (int i = 0; i < 5 && curFrameTime >= curFrameLen; ++i) {
 			curFrame++;
 			curFrameTime -= curFrameLen;
 			
@@ -119,12 +129,10 @@ void AnimationPlayer::update(Time time)
 				}
 			}
 		}
+	}
 
-		dirty |= curFrame != prevFrame;
-		if (dirty) {
-			resolveSprite();
-			dirty = false;
-		}
+	if (curFrame != prevFrame) {
+		resolveSprite();
 	}
 }
 
@@ -217,7 +225,7 @@ void AnimationPlayer::resolveSprite()
 {
 	Expects(curSeq);
 	auto& frame = curSeq->getFrame(curFrame);
-	curFrameLen = frame.getDuration() * 0.001;
+	curFrameLen = std::max(1, frame.getDuration()) * 0.001; // 1ms minimum
 	spriteData = &frame.getSprite(dirId);
 	hasUpdate = true;
 }
