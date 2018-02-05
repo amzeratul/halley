@@ -104,7 +104,6 @@ void TaskBar::draw(Painter& painter)
 		auto sprite = Sprite()
 			.setMaterial(t.material)
 			.setPos(drawPos)
-			.setSlicedFromMaterial()
 			.scaleTo(size + Vector2f(24, 24));
 
 		// Background

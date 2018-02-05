@@ -281,15 +281,15 @@ Sprite& Sprite::setSprite(const SpriteSheet& sheet, String name)
 
 Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot)
 {
-	if (vertexAttrib.texRect != entry.coords) {
-		outerBorder = entry.trimBorder;
-		setSize(entry.size);
-		if (applyPivot) {
-			vertexAttrib.pivot = entry.pivot;
-		}
-		vertexAttrib.texRect = entry.coords;
-		vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
+	outerBorder = entry.trimBorder;
+	slices = entry.slices;
+	sliced = slices.x != 0 || slices.y != 0 || slices.z != 0 || slices.w != 0;
+	setSize(entry.size);
+	if (applyPivot) {
+		vertexAttrib.pivot = entry.pivot;
 	}
+	vertexAttrib.texRect = entry.coords;
+	vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
 	return *this;
 }
 
@@ -300,14 +300,7 @@ Sprite& Sprite::setSliced(Vector4s s)
 	return *this;
 }
 
-Sprite& Sprite::setSlicedFromMaterial()
-{
-	Expects (material);
-	Expects (!material->getTextures().empty());
-	return setSliced(material->getTextures()[0]->getSlices());
-}
-
-Sprite& Sprite::setNormal()
+Sprite& Sprite::setNotSliced()
 {
 	sliced = false;
 	return *this;
@@ -353,7 +346,7 @@ Vector2f Sprite::getRawSize() const
 	return vertexAttrib.size;
 }
 
-Vector4i Sprite::getOuterBorder() const
+Vector4s Sprite::getOuterBorder() const
 {
 	return outerBorder;
 }

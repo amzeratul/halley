@@ -28,6 +28,11 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		Vector2i pivot;
 		pivot.x = meta.getInt("pivotX", 0);
 		pivot.y = meta.getInt("pivotY", 0);
+		Vector4s slices;
+		slices.x = gsl::narrow<short, int>(meta.getInt("slice_left", 0));
+		slices.y = gsl::narrow<short, int>(meta.getInt("slice_top", 0));
+		slices.z = gsl::narrow<short, int>(meta.getInt("slice_right", 0));
+		slices.w = gsl::narrow<short, int>(meta.getInt("slice_bottom", 0));
 
 		// Palette
 		auto thisPalette = meta.getString("palette", "");
@@ -39,10 +44,11 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			palette = thisPalette;
 		}
 
+		// Import image data
 		std::vector<ImageData> frames;
 		if (inputFile.name.getExtension() == ".ase") {
 			// Import Aseprite file
-			frames = AsepriteReader::importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), pivot);
+			frames = AsepriteReader::importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)));
 		} else {
 			// Bitmap
 			auto span = gsl::as_bytes(gsl::span<const Byte>(inputFile.data));
@@ -50,13 +56,18 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 			frames.emplace_back();
 			auto& imgData = frames.back();
-			imgData.pivot = pivot;
 			imgData.clip = image->getTrimRect(); // Be careful, make sure this is done before the std::move() below
 			imgData.img = std::move(image);
 			imgData.duration = 100;
 			imgData.filename = fileInputId.toString();
 			imgData.frameNumber = 0;
 			imgData.sequenceName = "";
+		}
+
+		// Update frames with pivot and slices
+		for (auto& f: frames) {
+			f.pivot = pivot;
+			f.slices = slices;
 		}
 
 		// Split into a grid
@@ -192,7 +203,8 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const String& assetName, const 
 		entry.pivot = Vector2f(img->pivot - img->clip.getTopLeft()) / entry.size;
 		entry.origPivot = img->pivot;
 		entry.coords = Rect4f(packedImg.rect) / Vector2f(size);
-		entry.trimBorder = Vector4i(borderTL.x, borderTL.y, borderBR.x, borderBR.y);
+		entry.trimBorder = Vector4s(short(borderTL.x), short(borderTL.y), short(borderBR.x), short(borderBR.y));
+		entry.slices = img->slices;
 		spriteSheet.addSprite(img->filename, entry);
 	}
 

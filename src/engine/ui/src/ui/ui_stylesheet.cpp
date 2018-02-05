@@ -21,10 +21,10 @@ UIStyleSheet::UIStyleSheet(const ConfigNode& node, Resources& resources)
 				if (spriteNode.second.asString().isEmpty()) {
 					sprites[name] = defaultSprite;
 				} else {
-					sprites[name] = Sprite().setImage(resources, spriteNode.second.asString()).setSlicedFromMaterial();
+					sprites[name] = Sprite().setImage(resources, spriteNode.second.asString());
 				}
 			} else {
-				sprites[name] = Sprite().setImage(resources, spriteNode.second["img"].asString()).setColour(Colour4f::fromString(spriteNode.second["colour"].asString("#FFFFFF"))).setSlicedFromMaterial();
+				sprites[name] = Sprite().setImage(resources, spriteNode.second["img"].asString()).setColour(Colour4f::fromString(spriteNode.second["colour"].asString("#FFFFFF")));
 			}
 		}
 	}

@@ -25,9 +25,11 @@ namespace Halley
 		Vector2i origPivot;
 		Vector2f size;
 		Rect4f coords;
+		Vector4s trimBorder;
+		Vector4s slices;
 		int duration = 0;
 		bool rotated = false;
-		Vector4i trimBorder;
+		bool sliced = false;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
