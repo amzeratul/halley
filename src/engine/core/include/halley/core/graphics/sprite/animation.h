@@ -19,22 +19,25 @@ namespace Halley
 	class AnimationFrame
 	{
 	public:
-		AnimationFrame(int frameNumber, const String& imageName, const SpriteSheet& sheet, const Vector<AnimationDirection>& directions);
+		AnimationFrame(int frameNumber, int duration, const String& imageName, const SpriteSheet& sheet, const Vector<AnimationDirection>& directions);
+
 		const SpriteSheetEntry& getSprite(int dir) const
 		{
 			Expects(dir >= 0 && dir < int(sprites.size()));
 			return *sprites[dir];
 		}
+		int getDuration() const;
 
 	private:
 		Vector<const SpriteSheetEntry*> sprites;
+		int duration;
 	};
 
 	class AnimationFrameDefinition
 	{
 	public:
 		AnimationFrameDefinition();
-		AnimationFrameDefinition(int frameNumber, const String& imageName);
+		AnimationFrameDefinition(int frameNumber, int duration, const String& imageName);
 		AnimationFrame makeFrame(const SpriteSheet& sheet, const Vector<AnimationDirection>& directions) const;
 
 		void serialize(Serializer& s) const;
@@ -43,6 +46,7 @@ namespace Halley
 	private:
 		String imageName;
 		int frameNumber;
+		int duration;
 	};
 
 	class AnimationSequence
@@ -51,9 +55,8 @@ namespace Halley
 
 	public:
 		AnimationSequence();
-		AnimationSequence(String name, float fps, bool loop, bool noFlip);
+		AnimationSequence(String name, bool loop, bool noFlip);
 
-		float getFPS() const { return fps; }
 		size_t numFrames() const { return frames.size(); }
 		const AnimationFrame& getFrame(size_t n) const
 		{
@@ -73,7 +76,6 @@ namespace Halley
 		Vector<AnimationFrame> frames;
 		Vector<AnimationFrameDefinition> frameDefinitions;
 		String name;
-		float fps = 0;
 		bool loop = false;
 		bool noFlip = false;
 	};

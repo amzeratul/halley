@@ -83,10 +83,10 @@ namespace Halley
 	class SpriteResource : public Resource
 	{
 	public:
-		SpriteResource(std::shared_ptr<const SpriteSheet> spriteSheet, int idx);
+		SpriteResource(std::shared_ptr<const SpriteSheet> spriteSheet, size_t idx);
 
 		const SpriteSheetEntry& getSprite() const;
-		int getIdx() const;
+		size_t getIdx() const;
 		std::shared_ptr<const SpriteSheet> getSpriteSheet() const;
 
 		constexpr static AssetType getAssetType() { return AssetType::Sprite; }
@@ -94,6 +94,6 @@ namespace Halley
 
 	private:
 		std::weak_ptr<const SpriteSheet> spriteSheet;
-		int idx = -1;
+		size_t idx = -1;
 	};
 }

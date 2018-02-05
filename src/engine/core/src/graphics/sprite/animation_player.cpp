@@ -37,18 +37,20 @@ AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> 
 AnimationPlayer& AnimationPlayer::setSequence(const String& sequence)
 {
 	if (animation && (!curSeq || curSeq->getName() != sequence)) {
-		curTime = 0;
-		curFrame = 0;
+		curSeqTime = 0;
+		curFrameTime = 0;
+		curFrame = -1;
+		curFrameLen = 0;
 		curSeq = &animation->getSequence(sequence);
 		Expects(curSeq);
 
-		seqFPS = curSeq->getFPS();
 		seqLen = curSeq->numFrames();
 		seqLooping = curSeq->isLooping();
-		seqTimeLen = seqLen / seqFPS;
 		seqNoFlip = curSeq->isNoFlip();
 
 		dirty = true;
+		update(0.0001);
+
 		onSequenceStarted();
 	}
 	return *this;
@@ -100,25 +102,28 @@ AnimationPlayer& AnimationPlayer::setApplyPivot(bool apply)
 void AnimationPlayer::update(Time time)
 {
 	if (animation) {
-		int prevFrame = curFrame;
-		curFrame = std::min(int(curTime * seqFPS), int(seqLen - 1));
+		const int prevFrame = curFrame;
+
+		curSeqTime += time * playbackSpeed;
+		curFrameTime += time * playbackSpeed;
+		while (curFrameTime >= curFrameLen) {
+			curFrame++;
+			curFrameTime -= curFrameLen;
+			
+			if (curFrame >= int(seqLen)) {
+				if (seqLooping) {
+					curFrame = 0;
+					curSeqTime = curFrameTime;
+				} else {
+					onSequenceDone();
+				}
+			}
+		}
 
 		dirty |= curFrame != prevFrame;
 		if (dirty) {
 			resolveSprite();
 			dirty = false;
-		}
-		
-		curTime += time * playbackSpeed;
-
-		if (curTime > seqTimeLen) {
-			// Reached end of sequence			
-			if (seqLooping) {
-				curTime = ::fmod(curTime, seqTimeLen);
-			} else {
-				curTime = seqTimeLen;
-				onSequenceDone();
-			}
 		}
 	}
 }
@@ -168,7 +173,7 @@ String AnimationPlayer::getCurrentSequenceName() const
 
 Time AnimationPlayer::getCurrentSequenceTime() const
 {
-	return curTime;
+	return curSeqTime;
 }
 
 int AnimationPlayer::getCurrentSequenceFrame() const
@@ -211,7 +216,9 @@ void AnimationPlayer::setOffsetPivot(Vector2f offset)
 void AnimationPlayer::resolveSprite()
 {
 	Expects(curSeq);
-	spriteData = &curSeq->getFrame(curFrame).getSprite(dirId);
+	auto& frame = curSeq->getFrame(curFrame);
+	curFrameLen = frame.getDuration() * 0.001;
+	spriteData = &frame.getSprite(dirId);
 	hasUpdate = true;
 }
 

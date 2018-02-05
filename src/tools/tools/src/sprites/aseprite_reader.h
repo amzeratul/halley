@@ -16,11 +16,12 @@ namespace Halley
 		int frameNumber;
 		int duration;
 		String sequenceName;
-		String filename;
-		std::unique_ptr<Image> img;
 		Rect4i clip;
 		Vector2i pivot;
 		Vector4s slices;
+
+		std::unique_ptr<Image> img;
+		std::vector<String> filenames;
 	};
 
 	class AsepriteReader

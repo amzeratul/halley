@@ -59,7 +59,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			imgData.clip = image->getTrimRect(); // Be careful, make sure this is done before the std::move() below
 			imgData.img = std::move(image);
 			imgData.duration = 100;
-			imgData.filename = fileInputId.toString();
+			imgData.filenames.emplace_back(":img:" + fileInputId.toString());
 			imgData.frameNumber = 0;
 			imgData.sequenceName = "";
 		}
@@ -135,11 +135,11 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 	for (auto& frame: frameData) {
 		auto i = sequences.find(frame.sequenceName);
 		if (i == sequences.end()) {
-			sequences[frame.sequenceName] = AnimationSequence(frame.sequenceName, 1000.0f / float(frame.duration), true, false);
+			sequences[frame.sequenceName] = AnimationSequence(frame.sequenceName, true, false);
 		}
 		auto& seq = sequences[frame.sequenceName];
 
-		seq.addFrame(AnimationFrameDefinition(frame.frameNumber, frame.filename));
+		seq.addFrame(AnimationFrameDefinition(frame.frameNumber, frame.duration, frame.filenames.at(0)));
 	}
 
 	for (auto& seq: sequences) {
@@ -153,8 +153,10 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& assetName, st
 {
 	// Generate entries
 	std::vector<BinPackEntry> entries;
+	entries.reserve(images.size());
 	for (auto& img: images) {
-		entries.push_back(BinPackEntry(img.clip.getSize(), &img));
+		
+		entries.emplace_back(img.clip.getSize(), &img);
 	}
 
 	// Try packing
@@ -205,7 +207,10 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const String& assetName, const 
 		entry.coords = Rect4f(packedImg.rect) / Vector2f(size);
 		entry.trimBorder = Vector4s(short(borderTL.x), short(borderTL.y), short(borderBR.x), short(borderBR.y));
 		entry.slices = img->slices;
-		spriteSheet.addSprite(img->filename, entry);
+
+		for (auto& filename: img->filenames) {
+			spriteSheet.addSprite(filename, entry);
+		}
 	}
 
 	return image;
@@ -246,7 +251,7 @@ std::vector<ImageData> SpriteImporter::splitImagesInGrid(const std::vector<Image
 
 					dst.duration = src.duration;
 					dst.frameNumber = src.frameNumber;
-					dst.filename = src.filename + suffix;
+					dst.filenames.emplace_back(src.filenames.at(0) + suffix);
 					dst.sequenceName = src.sequenceName + suffix;
 					dst.img = std::move(img);
 					dst.clip = Rect4i({}, grid);

@@ -214,7 +214,7 @@ void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)
 }
 
 
-SpriteResource::SpriteResource(std::shared_ptr<const SpriteSheet> spriteSheet, int idx)
+SpriteResource::SpriteResource(std::shared_ptr<const SpriteSheet> spriteSheet, size_t idx)
 	: spriteSheet(spriteSheet)
 	, idx(idx)
 {
@@ -225,7 +225,7 @@ const SpriteSheetEntry& SpriteResource::getSprite() const
 	return getSpriteSheet()->getSprite(idx);
 }
 
-int SpriteResource::getIdx() const
+size_t SpriteResource::getIdx() const
 {
 	return idx;
 }

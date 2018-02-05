@@ -43,7 +43,9 @@ std::map<int, int> AsepriteReader::getSpriteDurations(Path jsonPath) {
 	return durations;
 }
 
-void AsepriteReader::processFrameData(String baseName, std::vector<ImageData>& frameData, std::map<int, int> durations) {
+void AsepriteReader::processFrameData(String spriteName, std::vector<ImageData>& frameData, std::map<int, int> durations) {
+	String baseName = Path(spriteName).getFilename().string();
+
 	std::sort(frameData.begin(), frameData.end(), [] (const ImageData& a, const ImageData& b) -> bool {
 		return a.frameNumber < b.frameNumber;
 	});
@@ -59,6 +61,8 @@ void AsepriteReader::processFrameData(String baseName, std::vector<ImageData>& f
 	}
 
 	for (auto& frame: frameData) {
+		int origFrameNumber = frame.frameNumber;
+
 		auto& tag = tags[frame.sequenceName];
 		frame.duration = durations[frame.frameNumber];
 		frame.frameNumber = tag.cur++;
@@ -73,11 +77,15 @@ void AsepriteReader::processFrameData(String baseName, std::vector<ImageData>& f
 		if (hasFrameNumber) {
 			ss << "_" << std::setw(3) << std::setfill('0') << frame.frameNumber;
 		}
-		frame.filename = ss.str();
+
+		frame.filenames.emplace_back(ss.str());
+		if (origFrameNumber == 0) {
+			frame.filenames.emplace_back(":img:" + spriteName);
+		}
 	}
 }
 
-std::vector<ImageData> AsepriteReader::importAseprite(String baseName, gsl::span<const gsl::byte> fileData)
+std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData)
 {
 	// Make temporary folder
 	Path tmp = FileSystem::getTemporaryPath();
@@ -101,6 +109,6 @@ std::vector<ImageData> AsepriteReader::importAseprite(String baseName, gsl::span
 	FileSystem::remove(tmp);
 
 	// Process images
-	processFrameData(Path(baseName).getFilename().string(), frameData, durations);
+	processFrameData(spriteName, frameData, durations);
 	return frameData;
 }
