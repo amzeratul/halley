@@ -81,6 +81,7 @@ static void loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta,
 					}
 				} else if (name == "data" && matches) {
 					loadMetaTable(meta, i0->second);
+					return;
 				}
 			}
 		}

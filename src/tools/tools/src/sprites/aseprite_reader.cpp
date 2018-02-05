@@ -5,7 +5,7 @@
 #include "halley/file_formats/image.h"
 using namespace Halley;
 
-std::vector<ImageData> AsepriteReader::loadImagesFromPath(Path tmp) {
+std::vector<ImageData> AsepriteReader::loadImagesFromPath(Path tmp, bool trim) {
 	std::vector<ImageData> frameData;
 	for (auto p : FileSystem::enumerateDirectory(tmp)) {
 		if (p.getExtension() == ".png") {
@@ -19,7 +19,7 @@ std::vector<ImageData> AsepriteReader::loadImagesFromPath(Path tmp) {
 			}
 			data.sequenceName = parsedName[1];
 			data.frameNumber = parsedName[2].toInteger();
-			data.clip = data.img->getTrimRect();
+			data.clip = trim ? data.img->getTrimRect() : data.img->getRect();
 			frameData.push_back(std::move(data));
 		}
 	}
@@ -85,7 +85,7 @@ void AsepriteReader::processFrameData(String spriteName, std::vector<ImageData>&
 	}
 }
 
-std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData)
+std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData, bool trim)
 {
 	// Make temporary folder
 	Path tmp = FileSystem::getTemporaryPath();
@@ -102,7 +102,7 @@ std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::sp
 	}
 
 	// Load all images
-	std::vector<ImageData> frameData = loadImagesFromPath(tmp);
+	std::vector<ImageData> frameData = loadImagesFromPath(tmp, trim);
 	std::map<int, int> durations = getSpriteDurations(jsonPath);
 
 	// Remove temp

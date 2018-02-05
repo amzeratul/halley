@@ -14,7 +14,8 @@ using namespace Halley;
 
 void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	String atlasName = Path(asset.assetId).replaceExtension("").string();
+	String atlasName = asset.assetId;
+	String spriteSheetName = Path(asset.assetId).replaceExtension("").string();
 	std::vector<ImageData> totalFrames;
 
 	Maybe<String> palette;
@@ -33,6 +34,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		slices.y = gsl::narrow<short, int>(meta.getInt("slice_top", 0));
 		slices.z = gsl::narrow<short, int>(meta.getInt("slice_right", 0));
 		slices.w = gsl::narrow<short, int>(meta.getInt("slice_bottom", 0));
+		bool trim = meta.getBool("trim", true);
 
 		// Palette
 		auto thisPalette = meta.getString("palette", "");
@@ -48,7 +50,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		std::vector<ImageData> frames;
 		if (inputFile.name.getExtension() == ".ase") {
 			// Import Aseprite file
-			frames = AsepriteReader::importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)));
+			frames = AsepriteReader::importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), trim);
 		} else {
 			// Bitmap
 			auto span = gsl::as_bytes(gsl::span<const Byte>(inputFile.data));
@@ -56,7 +58,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 			frames.emplace_back();
 			auto& imgData = frames.back();
-			imgData.clip = image->getTrimRect(); // Be careful, make sure this is done before the std::move() below
+			imgData.clip = trim ? image->getTrimRect() : image->getRect(); // Be careful, make sure this is done before the std::move() below
 			imgData.img = std::move(image);
 			imgData.duration = 100;
 			imgData.filenames.emplace_back(":img:" + fileInputId.toString());
@@ -77,7 +79,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		}
 
 		// Write animation
-		Animation animation = generateAnimation(spriteName, atlasName, meta.getString("material", "Halley/Sprite"), frames);
+		Animation animation = generateAnimation(spriteName, spriteSheetName, meta.getString("material", "Halley/Sprite"), frames);
 		collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation));
 
 		std::move(frames.begin(), frames.end(), std::back_inserter(totalFrames));
@@ -85,7 +87,8 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 	// Generate atlas + spritesheet
 	SpriteSheet spriteSheet;
-	auto atlasImage = generateAtlas(atlasName, totalFrames, spriteSheet);
+	auto atlasImage = generateAtlas(totalFrames, spriteSheet);
+	spriteSheet.setTextureName(atlasName);
 
 	// Image metafile
 	auto size = atlasImage->getSize();
@@ -105,7 +108,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	collector.addAdditionalAsset(std::move(image));
 
 	// Write spritesheet
-	collector.output(atlasName, AssetType::SpriteSheet, Serializer::toBytes(spriteSheet));
+	collector.output(spriteSheetName, AssetType::SpriteSheet, Serializer::toBytes(spriteSheet));
 }
 
 String SpriteImporter::getAssetId(const Path& file, const Maybe<Metadata>& metadata) const
@@ -119,13 +122,13 @@ String SpriteImporter::getAssetId(const Path& file, const Maybe<Metadata>& metad
 	return IAssetImporter::getAssetId(file, metadata);
 }
 
-Animation SpriteImporter::generateAnimation(const String& spriteName, const String& atlasName, const String& materialName, const std::vector<ImageData>& frameData)
+Animation SpriteImporter::generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const std::vector<ImageData>& frameData)
 {
 	Animation animation;
 
 	animation.setName(spriteName);
 	animation.setMaterialName(materialName);
-	animation.setSpriteSheetName(atlasName);
+	animation.setSpriteSheetName(spriteSheetName);
 
 	std::map<String, AnimationSequence> sequences;
 
@@ -149,13 +152,12 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 	return animation;
 }
 
-std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& assetName, std::vector<ImageData>& images, SpriteSheet& spriteSheet)
+std::unique_ptr<Image> SpriteImporter::generateAtlas(std::vector<ImageData>& images, SpriteSheet& spriteSheet)
 {
 	// Generate entries
 	std::vector<BinPackEntry> entries;
 	entries.reserve(images.size());
 	for (auto& img: images) {
-		
 		entries.emplace_back(img.clip.getSize(), &img);
 	}
 
@@ -168,7 +170,7 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& assetName, st
 		auto res = BinPack::pack(entries, size);
 		if (res.is_initialized()) {
 			// Found a pack
-			return makeAtlas(assetName, res.get(), size, spriteSheet);
+			return makeAtlas(res.get(), size, spriteSheet);
 		} else {
 			// Try 64x64, then 128x64, 128x128, 256x128, etc
 			if (wide) {
@@ -183,14 +185,12 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& assetName, st
 	throw Exception("Unable to pack sprites in a reasonably sized atlas!");
 }
 
-std::unique_ptr<Image> SpriteImporter::makeAtlas(const String& assetName, const std::vector<BinPackResult>& result, Vector2i origSize, SpriteSheet& spriteSheet)
+std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult>& result, Vector2i origSize, SpriteSheet& spriteSheet)
 {
 	Vector2i size = shrinkAtlas(result);
 
 	auto image = std::make_unique<Image>(Image::Format::RGBA, size);
 	image->clear(0);
-
-	spriteSheet.setTextureName(assetName);
 
 	for (auto& packedImg: result) {
 		ImageData* img = reinterpret_cast<ImageData*>(packedImg.data);
@@ -244,7 +244,7 @@ std::vector<ImageData> SpriteImporter::splitImagesInGrid(const std::vector<Image
 				img->blitFrom(Vector2i(), *src.img, Rect4i(Vector2i(x, y) * grid, grid.x, grid.y));
 				Rect4i trimRect = img->getTrimRect();
 				if (trimRect.getWidth() > 0 && trimRect.getHeight() > 0) {
-					result.push_back(ImageData());
+					result.emplace_back();
 					auto& dst = result.back();
 
 					String suffix = "_" + toString(x) + "_" + toString(y);

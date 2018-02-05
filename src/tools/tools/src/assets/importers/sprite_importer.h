@@ -18,10 +18,10 @@ namespace Halley
 		String getAssetId(const Path& file, const Maybe<Metadata>& metadata) const override;
 
 	private:
-		Animation generateAnimation(const String& spriteName, const String& atlasName, const String& materialName, const std::vector<ImageData>& data);
+		Animation generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const std::vector<ImageData>& frameData);
 
-		std::unique_ptr<Image> generateAtlas(const String& assetName, std::vector<ImageData>& images, SpriteSheet& spriteSheet);
-		std::unique_ptr<Image> makeAtlas(const String& assetName, const std::vector<BinPackResult>& pack, Vector2i size, SpriteSheet& spriteSheet);
+		std::unique_ptr<Image> generateAtlas(std::vector<ImageData>& images, SpriteSheet& spriteSheet);
+		std::unique_ptr<Image> makeAtlas(const std::vector<BinPackResult>& result, Vector2i size, SpriteSheet& spriteSheet);
 		Vector2i shrinkAtlas(const std::vector<BinPackResult>& results) const;
 
 		std::vector<ImageData> splitImagesInGrid(const std::vector<ImageData>& images, Vector2i grid);

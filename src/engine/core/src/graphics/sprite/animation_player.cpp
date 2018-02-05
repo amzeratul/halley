@@ -108,7 +108,7 @@ void AnimationPlayer::update(Time time)
 		resolveSprite();
 		dirty = false;
 	}
-		
+
 	const int prevFrame = curFrame;
 
 	curSeqTime += time * playbackSpeed;
@@ -125,6 +125,7 @@ void AnimationPlayer::update(Time time)
 					curFrame = 0;
 					curSeqTime = curFrameTime;
 				} else {
+					curFrame = seqLen - 1;
 					onSequenceDone();
 				}
 			}

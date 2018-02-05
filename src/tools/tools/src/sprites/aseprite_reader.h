@@ -27,10 +27,10 @@ namespace Halley
 	class AsepriteReader
 	{
 	public:
-		static std::vector<ImageData> importAseprite(String baseName, gsl::span<const gsl::byte> fileData);
+		static std::vector<ImageData> importAseprite(String baseName, gsl::span<const gsl::byte> fileData, bool trim);
 
 	private:
-		static std::vector<ImageData> loadImagesFromPath(Path tmp);
+		static std::vector<ImageData> loadImagesFromPath(Path tmp, bool crop);
 		static std::map<int, int> getSpriteDurations(Path jsonPath);
 		static void processFrameData(String baseName, std::vector<ImageData>& frameData, std::map<int, int> durations);
 	};
