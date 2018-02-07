@@ -9,16 +9,16 @@ using namespace Halley;
 
 ConsoleWindow::ConsoleWindow(Resources& resources)
 {
-	auto backgroundMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("Halley/DistanceFieldSprite"));
-	backgroundMaterial
-		->set("tex0", resources.get<Texture>("round_rect.png"))
+	background = Sprite()
+		.setImage(resources, "round_rect.png", "Halley/DistanceFieldSprite")
+		.setColour(Colour4f(0.0f, 0.0f, 0.0f, 0.4f))
+		.setPivot(Vector2f(0, 0));
+
+	background.getMaterial()
+		.set("tex0", resources.get<Texture>("round_rect.png"))
 		.set("u_smoothness", 1.0f / 16.0f)
 		.set("u_outline", 0.5f)
 		.set("u_outlineColour", Colour(0.47f, 0.47f, 0.47f));
-
-	background = Sprite()
-		.setMaterial(backgroundMaterial)
-		.setColour(Colour4f(0.0f, 0.0f, 0.0f, 0.4f));
 
 	font = resources.get<Font>("Inconsolata Medium");
 
