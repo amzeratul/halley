@@ -434,6 +434,9 @@ void Debug::printLastTraces()
 	const size_t n = lastTraces.size();
 	for (size_t i = 0; i < n; ++i) {
 		auto& trace = lastTraces[(i + tracePos) % n];
+		if (!trace.filename) {
+			break;
+		}
 		std::cout << " - " << trace.filename << ":" << toString(trace.line);
 		if (trace.arg[0] != 0) {
 			std::cout << " [" << trace.arg.data() << "]";
