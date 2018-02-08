@@ -51,7 +51,7 @@ namespace Halley {
 		void setSize(Vector2i size);
 
 		void load(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined);
-		Bytes savePNGToBytes() const;
+		Bytes savePNGToBytes(bool allowDepthReduce = true) const;
 		static Vector2i getImageSize(gsl::span<const gsl::byte> bytes);
 		static Format getImageFormat(gsl::span<const gsl::byte> bytes);
 		static bool isPNG(gsl::span<const gsl::byte> bytes);

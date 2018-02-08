@@ -349,7 +349,7 @@ int Halley::Image::getPixelAlpha(Vector2i pos) const
 	return pixel >> 24;
 }
 
-Halley::Bytes Halley::Image::savePNGToBytes() const
+Halley::Bytes Halley::Image::savePNGToBytes(bool allowDepthReduce) const
 {
 	unsigned char* bytes;
 	size_t size;
@@ -366,7 +366,22 @@ Halley::Bytes Halley::Image::savePNGToBytes() const
 		colFormat = LCT_RGBA;
 	}
 
-	lodepng_encode_memory(&bytes, &size, reinterpret_cast<unsigned char*>(px.get()), w, h, colFormat, 8);
+	//lodepng_encode_memory(&bytes, &size, reinterpret_cast<unsigned char*>(px.get()), w, h, colFormat, 8);
+	LodePNGState state;
+	lodepng_state_init(&state);
+	state.info_raw.colortype = colFormat;
+	state.info_raw.bitdepth = 8;
+	state.info_png.color.colortype = colFormat;
+	state.info_png.color.bitdepth = 8;
+	state.encoder.auto_convert = allowDepthReduce ? 1 : 0;
+	lodepng_encode(&bytes, &size, reinterpret_cast<unsigned char*>(px.get()), w, h, &state);
+	auto errorCode = state.error;
+	lodepng_state_cleanup(&state);
+
+	if (errorCode != 0) {
+		throw Exception("Failed to encode PNG");
+	}
+	
 	Bytes result;
 	result.resize(size);
 	memcpy(result.data(), bytes, size);
