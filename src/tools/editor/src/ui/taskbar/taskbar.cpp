@@ -95,8 +95,8 @@ void TaskBar::draw(Painter& painter)
 
 		auto sprite = Sprite()
 			.setImage(resources, "round_rect.png", "Halley/DistanceFieldSprite")
-			.setPos(drawPos)
-			.scaleTo(size + Vector2f(24, 24))
+			.setPos(drawPos + Vector2f(6.0f, 6.0f))
+			.scaleTo(size + Vector2f(12, 12))
 			.setPivot(Vector2f(0, 0));
 
 		sprite.getMaterial()
@@ -110,11 +110,11 @@ void TaskBar::draw(Painter& painter)
 			.draw(painter);
 
 		// Progress
-		painter.setClip(Rect4i(Rect4f(drawPos + Vector2f(12, 12), size.x * t.progressDisplay + 24, size.y + 24)));
 		sprite
+			.setClip(Rect4f(Vector2f(), (size.x + 10) * t.progressDisplay, size.y + 10))
+			.scaleTo(size + Vector2f(10, 10))
 			.setColour(col)
 			.draw(painter);
-		painter.setClip();
 
 		// Text
 		text.setSize(14).setText(t.task->getName()).setPosition(drawPos + Vector2f(24, 12)).draw(painter);
