@@ -280,8 +280,8 @@ void ImportAssetsDatabase::deserialize(Deserializer& s)
 		s >> platformRead;
 		if (platformRead == platform) {
 			s >> assetsImported;
+			s >> inputFiles;
 		}
-		s >> inputFiles;
 	}
 }
 
