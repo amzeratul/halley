@@ -76,6 +76,10 @@ void ResourceDataStatic::inflate()
 std::unique_ptr<ResourceDataStatic> ResourceDataStatic::loadFromFileSystem(Path path)
 {
 	std::ifstream fp(path.string(), std::ios::binary | std::ios::in);
+	if (!fp) {
+		return {};
+	}
+
 	fp.seekg(0, std::ios::end);
 	size_t size = fp.tellg();
 	fp.seekg(0, std::ios::beg);

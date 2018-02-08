@@ -8,8 +8,7 @@ using namespace Halley;
 void TextureImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	// Update metadata
-	Expects(asset.metadata);
-	auto& meta = *asset.metadata;
+	auto meta = asset.inputFiles.at(0).metadata;
 	meta.set("compression", "png");
 
 	// Get image
@@ -20,5 +19,5 @@ void TextureImporter::import(const ImportingAsset& asset, IAssetCollector& colle
 	// Encode to PNG and save
 	auto bytes = image.savePNGToBytes();
 	auto span = gsl::as_bytes(gsl::span<const Byte>(bytes));
-	collector.output(asset.assetId, AssetType::Texture, span, *asset.metadata);
+	collector.output(asset.assetId, AssetType::Texture, span, meta);
 }

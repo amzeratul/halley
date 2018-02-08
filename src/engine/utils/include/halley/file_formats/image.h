@@ -73,6 +73,7 @@ namespace Halley {
 		Format getFormat() const;
 
 		Rect4i getTrimRect() const;
+		Rect4i getRect() const;
 
 		void clear(int colour);
 		void blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp);

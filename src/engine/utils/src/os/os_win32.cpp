@@ -224,6 +224,7 @@ void OSWin32::initializeConsole()
 Halley::ComputerData Halley::OSWin32::getComputerData()
 {
 	ComputerData data;
+	return data;
 
 	TCHAR chrComputerName[MAX_COMPUTERNAME_LENGTH + 1];
 	DWORD dwBufferSize = MAX_COMPUTERNAME_LENGTH + 1;

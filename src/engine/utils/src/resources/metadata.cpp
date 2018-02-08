@@ -122,3 +122,13 @@ void Metadata::deserialize(Deserializer& s)
 {
 	s >> entries;
 }
+
+bool Metadata::operator==(const Metadata& rhs) const
+{
+	return entries == rhs.entries;
+}
+
+bool Metadata::operator!=(const Metadata& rhs) const
+{
+	return entries != rhs.entries;
+}

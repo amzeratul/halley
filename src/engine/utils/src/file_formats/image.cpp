@@ -144,6 +144,11 @@ Halley::Rect4i Halley::Image::getTrimRect() const
 	return Rect4i(Vector2i(x0, y0), Vector2i(x1 + 1, y1 + 1));
 }
 
+Halley::Rect4i Halley::Image::getRect() const
+{
+	return Rect4i(Vector2i(), w, h);
+}
+
 void Halley::Image::clear(int colour)
 {
 	int* dst = reinterpret_cast<int*>(px.get());

@@ -67,13 +67,23 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& assetId, R
 	}
 	
 	// Load resource from disk
-	auto resLoader = ResourceLoader(*(parent.locator), assetId, type, priority, parent.api);
-	auto newRes = loadResource(resLoader);
-	if (!newRes) {
-		if (resLoader.loaded) {
-			throw Exception("Unable to construct resource from data: " + assetId);
-		} else {
+	std::shared_ptr<Resource> newRes;
+	if (resourceLoader) {
+		// Overriding loader
+		newRes = resourceLoader(assetId, priority);
+		if (!newRes) {
 			throw Exception("Unable to load resource data: " + assetId);
+		}
+	} else {
+		// Normal loading
+		auto resLoader = ResourceLoader(*(parent.locator), assetId, type, priority, parent.api);
+		newRes = loadResource(resLoader);
+		if (!newRes) {
+			if (resLoader.loaded) {
+				throw Exception("Unable to construct resource from data: " + assetId);
+			} else {
+				throw Exception("Unable to load resource data: " + assetId);
+			}
 		}
 	}
 
@@ -97,4 +107,9 @@ bool ResourceCollectionBase::exists(const String& assetId)
 
 void ResourceCollectionBase::setResource(int curDepth, const String& name, std::shared_ptr<Resource> resource) {
 	resources.emplace(name, Wrapper(resource, curDepth));
+}
+
+void ResourceCollectionBase::setResourceLoader(ResourceLoaderFunc loader)
+{
+	resourceLoader = loader;
 }

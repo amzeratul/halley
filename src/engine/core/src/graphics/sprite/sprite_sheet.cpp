@@ -29,21 +29,25 @@ static T readSize(JSONValue value)
 void SpriteSheetEntry::serialize(Serializer& s) const
 {
 	s << pivot;
+	s << origPivot;
 	s << size;
 	s << coords;
 	s << duration;
 	s << rotated;
 	s << trimBorder;
+	s << slices;
 }
 
 void SpriteSheetEntry::deserialize(Deserializer& s)
 {
 	s >> pivot;
+	s >> origPivot;
 	s >> size;
 	s >> coords;
 	s >> duration;
 	s >> rotated;
 	s >> trimBorder;
+	s >> slices;
 }
 
 void SpriteSheetFrameTag::serialize(Serializer& s) const
@@ -137,7 +141,6 @@ void SpriteSheet::serialize(Serializer& s) const
 	s << sprites;
 	s << spriteIdx;
 	s << frameTags;
-	s << pivot;
 }
 
 void SpriteSheet::deserialize(Deserializer& s)
@@ -146,17 +149,6 @@ void SpriteSheet::deserialize(Deserializer& s)
 	s >> sprites;
 	s >> spriteIdx;
 	s >> frameTags;
-	s >> pivot;
-}
-
-void SpriteSheet::setPivot(Vector2i p)
-{
-	pivot = p;
-}
-
-Vector2i SpriteSheet::getPivot() const
-{
-	return pivot;
 }
 
 void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)
@@ -219,4 +211,31 @@ void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)
 		
 		addSprite(iter.memberName(), entry);
 	}	
+}
+
+
+SpriteResource::SpriteResource(std::shared_ptr<const SpriteSheet> spriteSheet, size_t idx)
+	: spriteSheet(spriteSheet)
+	, idx(idx)
+{
+}
+
+const SpriteSheetEntry& SpriteResource::getSprite() const
+{
+	return getSpriteSheet()->getSprite(idx);
+}
+
+size_t SpriteResource::getIdx() const
+{
+	return idx;
+}
+
+std::shared_ptr<const SpriteSheet> SpriteResource::getSpriteSheet() const
+{
+	return spriteSheet.lock();
+}
+
+std::unique_ptr<SpriteResource> SpriteResource::loadResource(ResourceLoader& loader)
+{
+	throw Exception("Not implemented.");
 }

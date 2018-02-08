@@ -12,6 +12,7 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/text/string_converter.h"
 #include "halley/resources/resource_data.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -52,6 +53,7 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	// Resample
 	if (needsResampling) {
 		// Resample
+		Logger::logWarning(asset.assetId + " requires resampling from " + toString(sampleRate) + " to 48000 Hz.");
 		Concurrent::foreach(std::begin(samples), std::end(samples), [&] (std::vector<float>& s) {
 			s = resampleChannel(sampleRate, 48000, s);
 		});
@@ -67,10 +69,7 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	}
 
 	// Write metadata
-	Metadata meta;
-	if (asset.metadata) {
-		meta = *asset.metadata;
-	}
+	Metadata meta = asset.inputFiles.at(0).metadata;
 	meta.set("channels", numChannels);
 	meta.set("sampleRate", sampleRate);
 

@@ -3,7 +3,7 @@
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
 
-constexpr static int currentAssetVersion = 29;
+constexpr static int currentAssetVersion = 31;
 
 using namespace Halley;
 
@@ -40,6 +40,31 @@ void ImportAssetsDatabase::AssetEntry::deserialize(Deserializer& s)
 	s >> asset;
 }
 
+void ImportAssetsDatabase::InputFileEntry::serialize(Serializer& s) const
+{
+	const int nTimestamps = int(timestamp.size());
+	s << nTimestamps;
+	for (int i = 0; i < nTimestamps; ++i) {
+		s << timestamp[i];
+	}
+	s << metadata;
+}
+
+void ImportAssetsDatabase::InputFileEntry::deserialize(Deserializer& s)
+{
+	int nTimestamps;
+	s >> nTimestamps;
+	for (int i = 0; i < nTimestamps; ++i) {
+		if (i < int(timestamp.size())) {
+			s >> timestamp[i];
+		}
+	}
+	for (int i = nTimestamps; i < int(timestamp.size()); ++i) {
+		timestamp[i] = 0;
+	}
+	s >> metadata;
+}
+
 ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, const String& platform)
 	: platform(platform)
 	, directory(directory)
@@ -65,6 +90,50 @@ void ImportAssetsDatabase::save() const
 	FileSystem::writeFile(dbFile, Serializer::toBytes(*this));
 	auto assetDb = makeAssetDatabase();
 	FileSystem::writeFile(assetsDbFile, Serializer::toBytes(*assetDb));
+}
+
+bool ImportAssetsDatabase::needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const
+{
+	std::lock_guard<std::mutex> lock(mutex);
+
+	// Is it an unknown file?
+	auto pathStr = path.toString();
+	auto iter = inputFiles.find(pathStr);
+	if (iter == inputFiles.end()) {
+		return true;
+	}
+
+	// Any of the timestamps changed?
+	for (int i = 0; i < timestamps.size(); ++i) {
+		if (iter->second.timestamp[i] != timestamps[i]) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void ImportAssetsDatabase::setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+
+	auto pathStr = path.toString();
+	auto& input = inputFiles[pathStr];
+	input.timestamp = timestamps;
+	input.metadata = data;
+}
+
+Maybe<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) const
+{
+	std::lock_guard<std::mutex> lock(mutex);
+
+	auto pathStr = path.toString();
+	auto iter = inputFiles.find(pathStr);
+	if (iter == inputFiles.end()) {
+		return {};
+	} else {
+		return iter->second.metadata;
+	}
 }
 
 bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset) const
@@ -163,20 +232,11 @@ void ImportAssetsDatabase::markFailed(const ImportAssetsDatabaseEntry& asset)
 	assetsFailed[asset.assetId] = entry;
 }
 
-void ImportAssetsDatabase::markAllInputsAsMissing()
+void ImportAssetsDatabase::markAssetsAsStillPresent(const std::map<String, ImportAssetsDatabaseEntry>& assets)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	for (auto& e: assetsImported) {
-		e.second.present = false;
-	}
-}
-
-void ImportAssetsDatabase::markInputAsPresent(const ImportAssetsDatabaseEntry& asset)
-{
-	std::lock_guard<std::mutex> lock(mutex);
-	auto iter = assetsImported.find(asset.assetId);
-	if (iter != assetsImported.end()) {
-		iter->second.present = true;
+		e.second.present = assets.find(e.first) != assets.end();
 	}
 }
 
@@ -208,6 +268,7 @@ void ImportAssetsDatabase::serialize(Serializer& s) const
 	s << version;
 	s << platform;
 	s << assetsImported;
+	s << inputFiles;
 }
 
 void ImportAssetsDatabase::deserialize(Deserializer& s)
@@ -220,6 +281,7 @@ void ImportAssetsDatabase::deserialize(Deserializer& s)
 		if (platformRead == platform) {
 			s >> assetsImported;
 		}
+		s >> inputFiles;
 	}
 }
 

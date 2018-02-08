@@ -36,7 +36,11 @@ bool FileSystem::createParentDir(const Path& p)
 
 int64_t FileSystem::getLastWriteTime(const Path& p)
 {
-	return last_write_time(getNative(p));
+	try {
+		return last_write_time(getNative(p));
+	} catch (...) {
+		return 0;
+	}
 }
 
 bool FileSystem::isFile(const Path& p)

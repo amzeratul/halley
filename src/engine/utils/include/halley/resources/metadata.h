@@ -41,6 +41,9 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		bool operator==(const Metadata& rhs) const;
+		bool operator!=(const Metadata& rhs) const;
+
 	private:
 		std::map<String, String> entries;
 	};

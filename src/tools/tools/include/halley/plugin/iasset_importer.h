@@ -16,11 +16,13 @@ namespace Halley
 	public:
 		Path name;
 		Bytes data;
+		Metadata metadata;
 
 		ImportingAssetFile() {}
-		ImportingAssetFile(const Path& path, Bytes&& data)
+		ImportingAssetFile(const Path& path, Bytes&& data, const Metadata& meta)
 			: name(path)
 			, data(data)
+			, metadata(meta)
 		{}
 	};
 
@@ -29,7 +31,6 @@ namespace Halley
 	public:
 		String assetId;
 		std::vector<ImportingAssetFile> inputFiles;
-		std::unique_ptr<Metadata> metadata;
 		ImportAssetType assetType = ImportAssetType::Undefined;
 	};
 
@@ -79,13 +80,9 @@ namespace Halley
 		virtual void import(const ImportingAsset&, IAssetCollector&) {}
 		virtual int dropFrontCount() const { return 1; }
 
-		virtual String getAssetId(const Path& file) const
+		virtual String getAssetId(const Path& file, const Maybe<Metadata>& metadata) const
 		{
-			String name = file.dropFront(dropFrontCount()).string();
-			if (name.endsWith(".meta")) {
-				name = name.substr(0, name.length() - 5);
-			}
-			return name;
+			return file.dropFront(dropFrontCount()).string();
 		}
 	};
 }

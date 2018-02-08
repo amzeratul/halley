@@ -129,8 +129,9 @@ void ShaderOpenGL::compile()
 		int infolen;
 		glGetProgramiv(id, GL_INFO_LOG_LENGTH, &infolen);
 		glCheckError();
-		char* logRaw = new char[infolen];
+		char* logRaw = new char[infolen + 1];
 		glGetProgramInfoLog(id, infolen, &infolen, logRaw);
+		logRaw[infolen] = 0;
 		String log = logRaw;
 		delete[] logRaw;
 		glCheckError();

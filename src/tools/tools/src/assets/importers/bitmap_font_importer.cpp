@@ -8,7 +8,7 @@
 
 using namespace Halley;
 
-String BitmapFontImporter::getAssetId(const Path& file) const
+String BitmapFontImporter::getAssetId(const Path& file, const Maybe<Metadata>& metadata) const
 {
 	return file.getStem().getString();
 }
@@ -16,16 +16,12 @@ String BitmapFontImporter::getAssetId(const Path& file) const
 void BitmapFontImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	Bytes xmlData;
-	Path xmlPath;
 	Bytes pngData;
-	Path pngPath;
 
 	for (auto& file: asset.inputFiles) {
 		if (file.name.getExtension() == ".xml") {
-			xmlPath = Path("font") / file.name.getFilename();
 			xmlData = file.data;
 		} else if (file.name.getExtension() == ".png") {
-			pngPath = Path("font") / file.name.getFilename();
 			pngData = file.data;
 		}
 	}
@@ -48,7 +44,7 @@ void BitmapFontImporter::import(const ImportingAsset& asset, IAssetCollector& co
 	ImportingAsset image;
 	image.assetId = font.getName();
 	image.assetType = ImportAssetType::Image;
-	image.inputFiles.emplace_back(ImportingAssetFile(font.getName(), std::move(pngData)));
+	image.inputFiles.emplace_back(ImportingAssetFile(font.getName(), std::move(pngData), Metadata()));
 	collector.addAdditionalAsset(std::move(image));
 }
 

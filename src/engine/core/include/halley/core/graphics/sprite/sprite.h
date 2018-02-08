@@ -49,7 +49,7 @@ namespace Halley
 		Vector2f getSize() const;
 		Vector2f getRawSize() const;
 		Vector2f getScale() const;
-		Vector4i getOuterBorder() const;
+		Vector4s getOuterBorder() const;
 		
 		Sprite& setMaterial(Resources& resources, String materialName = "");
 		Sprite& setMaterial(std::shared_ptr<Material> m);
@@ -82,8 +82,7 @@ namespace Halley
 		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true);
 
 		Sprite& setSliced(Vector4s slices);
-		Sprite& setSlicedFromMaterial();
-		Sprite& setNormal();
+		Sprite& setNotSliced();
 
 		Sprite& setClip(Rect4f clip);
 		Sprite& setClip();
@@ -97,10 +96,10 @@ namespace Halley
 
 		Vector2f size;
 		Vector4s slices;
+		Vector4s outerBorder;
+		Maybe<Rect4f> clip;
 		bool flip = false;
 		bool sliced = false;
-		Maybe<Rect4f> clip;
-		Vector4i outerBorder;
 
 		void computeSize();
 	};

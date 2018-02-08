@@ -3,15 +3,8 @@
 using namespace Halley;
 
 TaskBar::TaskBar(Resources& resources)
+	: resources(resources)
 {
-	{
-		taskMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("Halley/DistanceFieldSprite"));
-		taskMaterial
-			->set("tex0", resources.get<Texture>("round_rect.png"))
-			.set("u_smoothness", 1.0f / 16.0f)
-			.set("u_outline", 0.4f);
-	}
-
 	{
 		auto col = Colour4f(0.9882f, 0.15686f, 0.27843f, 1);
 		halleyLogo = Sprite()
@@ -99,13 +92,17 @@ void TaskBar::draw(Painter& painter)
 		Vector2f drawPos = baseDrawPos + Vector2f((size.x + 20) * t.displaySlot, 0);
 
 		Colour col = t.task->hasError() ? Colour(0.93f, 0.2f, 0.2f) : (t.task->getProgress() > 0.9999f ? Colour(0.16f, 0.69f, 0.34f) : Colour(0.18f, 0.53f, 0.87f));
-		t.material->set("u_outlineColour", col);
 
 		auto sprite = Sprite()
-			.setMaterial(t.material)
-			.setPos(drawPos)
-			.setSlicedFromMaterial()
-			.scaleTo(size + Vector2f(24, 24));
+			.setImage(resources, "round_rect.png", "Halley/DistanceFieldSprite")
+			.setPos(drawPos + Vector2f(6.0f, 6.0f))
+			.scaleTo(size + Vector2f(12, 12))
+			.setPivot(Vector2f(0, 0));
+
+		sprite.getMaterial()
+			.set("u_smoothness", 1.0f / 16.0f)
+			.set("u_outline", 0.4f)
+			.set("u_outlineColour", col);
 
 		// Background
 		sprite
@@ -113,11 +110,11 @@ void TaskBar::draw(Painter& painter)
 			.draw(painter);
 
 		// Progress
-		painter.setClip(Rect4i(Rect4f(drawPos + Vector2f(12, 12), size.x * t.progressDisplay + 24, size.y + 24)));
 		sprite
+			.setClip(Rect4f(Vector2f(), (size.x + 10) * t.progressDisplay, size.y + 10))
+			.scaleTo(size + Vector2f(10, 10))
 			.setColour(col)
 			.draw(painter);
-		painter.setClip();
 
 		// Text
 		text.setSize(14).setText(t.task->getName()).setPosition(drawPos + Vector2f(24, 12)).draw(painter);
@@ -143,7 +140,6 @@ TaskBar::TaskDisplay& TaskBar::getDisplayFor(const std::shared_ptr<EditorTaskAnc
 	tasks.push_back(TaskDisplay());
 	TaskDisplay& display = tasks.back();
 
-	display.material = std::make_shared<Material>(*taskMaterial);
 	display.task = task;
 	return display;
 }

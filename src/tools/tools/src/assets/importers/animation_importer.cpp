@@ -45,15 +45,16 @@ void AnimationImporter::parseAnimation(Animation& animation, gsl::span<const gsl
 	for (auto sequenceNode : root["sequences"]) {
 		String name = sequenceNode["name"].as<std::string>("default");
 		float fps = sequenceNode["fps"].as<float>(0.0f);
+		int frameDuration = lround(1000.0 / fps);
 		bool loop = sequenceNode["loop"].as<bool>(true);
 		bool noFlip = sequenceNode["noFlip"].as<bool>(false);
-		AnimationSequence sequence(name, fps, loop, noFlip);
+		AnimationSequence sequence(name, loop, noFlip);
 		String fileName = sequenceNode["fileName"].as<std::string>();
 
 		// Load frames
 		size_t framesAdded = 0;
 		if (sequenceNode["frames"].IsDefined()) {
-			for (auto frameNode : sequenceNode["frames"]) {
+			for (const auto& frameNode : sequenceNode["frames"]) {
 				String value = frameNode.as<std::string>();
 				Vector<int> values;
 				if (value.isInteger()) {
@@ -73,7 +74,7 @@ void AnimationImporter::parseAnimation(Animation& animation, gsl::span<const gsl
 				}
 
 				for (int number : values) {
-					sequence.addFrame(AnimationFrameDefinition(number, fileName));
+					sequence.addFrame(AnimationFrameDefinition(number, frameDuration, fileName));
 					framesAdded++;
 				}
 			}
@@ -81,7 +82,7 @@ void AnimationImporter::parseAnimation(Animation& animation, gsl::span<const gsl
 
 		// No frames listed, 
 		if (framesAdded == 0) {
-			sequence.addFrame(AnimationFrameDefinition(0, fileName));
+			sequence.addFrame(AnimationFrameDefinition(0, frameDuration, fileName));
 		}
 
 		animation.addSequence(sequence);

@@ -10,7 +10,8 @@
 
 using namespace Halley;
 
-AnimationFrame::AnimationFrame(int frameNumber, const String& imageName, const SpriteSheet& sheet, const Vector<AnimationDirection>& directions)
+AnimationFrame::AnimationFrame(int frameNumber, int duration, const String& imageName, const SpriteSheet& sheet, const Vector<AnimationDirection>& directions)
+	: duration(duration)
 {
 	const size_t n = directions.size();
 	sprites.resize(n);
@@ -19,38 +20,45 @@ AnimationFrame::AnimationFrame(int frameNumber, const String& imageName, const S
 	}
 }
 
+int AnimationFrame::getDuration() const
+{
+	return duration;
+}
+
 AnimationFrameDefinition::AnimationFrameDefinition()
 	: frameNumber(-1)
 {}
 
-AnimationFrameDefinition::AnimationFrameDefinition(int frameNumber, const String& imageName)
+AnimationFrameDefinition::AnimationFrameDefinition(int frameNumber, int duration, const String& imageName)
 	: imageName(imageName)
 	, frameNumber(frameNumber)
+	, duration(duration)
 {
 }
 
 AnimationFrame AnimationFrameDefinition::makeFrame(const SpriteSheet& sheet, const Vector<AnimationDirection>& directions) const
 {
-	return AnimationFrame(frameNumber, imageName, sheet, directions);
+	return AnimationFrame(frameNumber, duration, imageName, sheet, directions);
 }
 
 void AnimationFrameDefinition::serialize(Serializer& s) const
 {
 	s << imageName;
 	s << frameNumber;
+	s << duration;
 }
 
 void AnimationFrameDefinition::deserialize(Deserializer& s)
 {
 	s >> imageName;
 	s >> frameNumber;
+	s >> duration;
 }
 
 AnimationSequence::AnimationSequence() {}
 
-AnimationSequence::AnimationSequence(String name, float fps, bool loop, bool noFlip)
+AnimationSequence::AnimationSequence(String name, bool loop, bool noFlip)
 	: name(name)
-	, fps(fps)
 	, loop(loop)
 	, noFlip(noFlip)
 {}
@@ -59,7 +67,6 @@ void AnimationSequence::serialize(Serializer& s) const
 {
 	s << frameDefinitions;
 	s << name;
-	s << fps;
 	s << loop;
 	s << noFlip;
 }
@@ -68,7 +75,6 @@ void AnimationSequence::deserialize(Deserializer& s)
 {
 	s >> frameDefinitions;
 	s >> name;
-	s >> fps;
 	s >> loop;
 	s >> noFlip;
 }
@@ -218,6 +224,11 @@ const AnimationDirection& Animation::getDirection(int id) const
 	} else {
 		return directions[0];
 	}
+}
+
+Vector2i Animation::getPivot() const
+{
+	return sequences.at(0).getFrame(0).getSprite(0).origPivot;
 }
 
 bool Animation::hasSequence(const String& seqName) const

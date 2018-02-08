@@ -80,11 +80,11 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const YAML::Node& 
 		for (auto& curType: shaderTypes) {
 			if (shaderEntry[curType].IsDefined()) {
 				auto data = collector.readAdditionalFile("shader/" + shaderEntry[curType].as<std::string>());
-				shaderAsset.inputFiles.emplace_back(ImportingAssetFile(shaderName + "." + curType, std::move(data)));
+				Metadata meta;
+				meta.set("language", language);
+				shaderAsset.inputFiles.emplace_back(ImportingAssetFile(shaderName + "." + curType, std::move(data), meta));
 			}
 		}
-		shaderAsset.metadata = std::make_unique<Metadata>();
-		shaderAsset.metadata->set("language", language);
 		collector.addAdditionalAsset(std::move(shaderAsset));
 	}
 

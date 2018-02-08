@@ -45,6 +45,7 @@ namespace Halley
 		static void set(Executors& e);
 
 		static ExecutionQueue& getCPU() { return instance->cpu; }
+		static ExecutionQueue& getCPUAux() { return instance->cpuAux; }
 		static ExecutionQueue& getVideoAux() { return instance->videoAux; }
 		static ExecutionQueue& getMainThread() { return instance->mainThread; }
 		static ExecutionQueue& getDiskIO() { return instance->diskIO; }
@@ -53,6 +54,7 @@ namespace Halley
 		static Executors* instance;
 
 		ExecutionQueue cpu;
+		ExecutionQueue cpuAux;
 		ExecutionQueue videoAux;
 		ExecutionQueue mainThread;
 		ExecutionQueue diskIO;

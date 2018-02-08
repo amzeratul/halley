@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-String CodegenImporter::getAssetId(const Path& file) const
+String CodegenImporter::getAssetId(const Path& file, const Maybe<Metadata>& metadata) const
 {
 	return ":codegen";
 }

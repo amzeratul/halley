@@ -1,6 +1,5 @@
 #include "font_importer.h"
 #include "halley/tools/assets/import_assets_database.h"
-#include <iostream>
 #include "halley/maths/vector2.h"
 #include "halley/maths/range.h"
 #include "halley/tools/make_font/font_generator.h"
@@ -12,16 +11,12 @@ using namespace Halley;
 
 void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	Vector2i imgSize(512, 512);
-	float radius = 8;
-	int supersample = 4;
-	auto& meta = asset.metadata;
-	if (meta) {
-		radius = meta->getFloat("radius", 8);
-		supersample = meta->getInt("supersample", 4);
-		imgSize.x = meta->getInt("width", 512);
-		imgSize.y = meta->getInt("height", 512);
-	}
+	const auto& meta = asset.inputFiles.at(0).metadata;
+	const float radius = meta.getFloat("radius", 8);
+	const int supersample = meta.getInt("supersample", 4);
+	Vector2i imgSize;
+	imgSize.x = meta.getInt("width", 512);
+	imgSize.y = meta.getInt("height", 512);
 
 	auto data = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
 
@@ -31,7 +26,7 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	});
 	auto result = gen.generateFont(asset.assetId, data, imgSize, radius, supersample, Range<int>(0, 255));
 	if (!result.success) {
-		throw Exception("Failed to generate font: " + asset.assetId);
+		return;
 	}
 
 	collector.output(result.font->getName(), AssetType::Font, Serializer::toBytes(*result.font));
@@ -39,7 +34,6 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	ImportingAsset image;
 	image.assetId = result.font->getName();
 	image.assetType = ImportAssetType::Image;
-	image.metadata = std::move(result.imageMeta);
-	image.inputFiles.emplace_back(ImportingAssetFile(result.font->getName(), Serializer::toBytes(*result.image)));
+	image.inputFiles.emplace_back(ImportingAssetFile(result.font->getName(), Serializer::toBytes(*result.image), *result.imageMeta));
 	collector.addAdditionalAsset(std::move(image));
 }

@@ -22,11 +22,14 @@ namespace Halley
 	{
 	public:
 		Vector2f pivot;
+		Vector2i origPivot;
 		Vector2f size;
 		Rect4f coords;
+		Vector4s trimBorder;
+		Vector4s slices;
 		int duration = 0;
 		bool rotated = false;
-		Vector4i trimBorder;
+		bool sliced = false;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -69,15 +72,28 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
-		void setPivot(Vector2i pivot);
-		Vector2i getPivot() const;
-
 	private:
 		std::shared_ptr<const Texture> texture;
 		std::vector<SpriteSheetEntry> sprites;
 		HashMap<String, uint32_t> spriteIdx;
 		std::vector<SpriteSheetFrameTag> frameTags;
 		String textureName;
-		Vector2i pivot;
+	};
+
+	class SpriteResource : public Resource
+	{
+	public:
+		SpriteResource(std::shared_ptr<const SpriteSheet> spriteSheet, size_t idx);
+
+		const SpriteSheetEntry& getSprite() const;
+		size_t getIdx() const;
+		std::shared_ptr<const SpriteSheet> getSpriteSheet() const;
+
+		constexpr static AssetType getAssetType() { return AssetType::Sprite; }
+		static std::unique_ptr<SpriteResource> loadResource(ResourceLoader& loader);
+
+	private:
+		std::weak_ptr<const SpriteSheet> spriteSheet;
+		size_t idx = -1;
 	};
 }

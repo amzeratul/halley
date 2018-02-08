@@ -37,18 +37,19 @@ AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> 
 AnimationPlayer& AnimationPlayer::setSequence(const String& sequence)
 {
 	if (animation && (!curSeq || curSeq->getName() != sequence)) {
-		curTime = 0;
+		curSeqTime = 0;
+		curFrameTime = 0;
 		curFrame = 0;
+		curFrameLen = 0;
 		curSeq = &animation->getSequence(sequence);
 		Expects(curSeq);
 
-		seqFPS = curSeq->getFPS();
 		seqLen = curSeq->numFrames();
 		seqLooping = curSeq->isLooping();
-		seqTimeLen = seqLen / seqFPS;
 		seqNoFlip = curSeq->isNoFlip();
 
 		dirty = true;
+
 		onSequenceStarted();
 	}
 	return *this;
@@ -99,27 +100,40 @@ AnimationPlayer& AnimationPlayer::setApplyPivot(bool apply)
 
 void AnimationPlayer::update(Time time)
 {
-	if (animation) {
-		int prevFrame = curFrame;
-		curFrame = std::min(int(curTime * seqFPS), int(seqLen - 1));
+	if (!animation) {
+		return;
+	}
 
-		dirty |= curFrame != prevFrame;
-		if (dirty) {
-			resolveSprite();
-			dirty = false;
-		}
+	if (dirty) {
+		resolveSprite();
+		dirty = false;
+	}
+
+	const int prevFrame = curFrame;
+
+	curSeqTime += time * playbackSpeed;
+	curFrameTime += time * playbackSpeed;
 		
-		curTime += time * playbackSpeed;
-
-		if (curTime > seqTimeLen) {
-			// Reached end of sequence			
-			if (seqLooping) {
-				curTime = ::fmod(curTime, seqTimeLen);
-			} else {
-				curTime = seqTimeLen;
-				onSequenceDone();
+	// Next frame time!
+	if (curFrameTime >= curFrameLen) {
+		for (int i = 0; i < 5 && curFrameTime >= curFrameLen; ++i) {
+			curFrame++;
+			curFrameTime -= curFrameLen;
+			
+			if (curFrame >= int(seqLen)) {
+				if (seqLooping) {
+					curFrame = 0;
+					curSeqTime = curFrameTime;
+				} else {
+					curFrame = seqLen - 1;
+					onSequenceDone();
+				}
 			}
 		}
+	}
+
+	if (curFrame != prevFrame) {
+		resolveSprite();
 	}
 }
 
@@ -168,7 +182,7 @@ String AnimationPlayer::getCurrentSequenceName() const
 
 Time AnimationPlayer::getCurrentSequenceTime() const
 {
-	return curTime;
+	return curSeqTime;
 }
 
 int AnimationPlayer::getCurrentSequenceFrame() const
@@ -211,7 +225,9 @@ void AnimationPlayer::setOffsetPivot(Vector2f offset)
 void AnimationPlayer::resolveSprite()
 {
 	Expects(curSeq);
-	spriteData = &curSeq->getFrame(curFrame).getSprite(dirId);
+	auto& frame = curSeq->getFrame(curFrame);
+	curFrameLen = std::max(1, frame.getDuration()) * 0.001; // 1ms minimum
+	spriteData = &frame.getSprite(dirId);
 	hasUpdate = true;
 }
 

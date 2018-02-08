@@ -24,8 +24,9 @@ namespace Halley
 
 		Vector<ImportAssetsDatabaseEntry> files;
 		
-		float curFileProgressStart = 0;
-		float curFileProgressEnd = 0;
+		std::atomic<size_t> assetsImported;
+		size_t assetsToImport;
+		
 		std::string curFileLabel;
 
 		bool importAsset(ImportAssetsDatabaseEntry& asset);

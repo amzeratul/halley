@@ -13,7 +13,7 @@ void ShaderImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	for (auto& input: asset.inputFiles) {
 		auto shaderType = fromString<ShaderType>(input.name.getExtension().mid(1));
 		String strData = String(reinterpret_cast<const char*>(input.data.data()), input.data.size());
-		if (asset.metadata->getString("language", "") == "glsl") {
+		if (input.metadata.getString("language", "") == "glsl") {
 			strData = "#version 330\n" + strData;
 		}
 		Bytes data(strData.size());
@@ -21,5 +21,5 @@ void ShaderImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		shader.shaders[shaderType] = data;
 	}
 
-	collector.output(asset.assetId, AssetType::Shader, Serializer::toBytes(shader), *asset.metadata);
+	collector.output(asset.assetId, AssetType::Shader, Serializer::toBytes(shader), asset.inputFiles.at(0).metadata);
 }

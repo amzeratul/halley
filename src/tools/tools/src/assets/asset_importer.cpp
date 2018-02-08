@@ -8,7 +8,7 @@
 #include "importers/material_importer.h"
 #include "importers/config_importer.h"
 #include "importers/audio_importer.h"
-#include "importers/aseprite_importer.h"
+#include "importers/sprite_importer.h"
 #include "importers/spritesheet_importer.h"
 #include "importers/bitmap_font_importer.h"
 #include "importers/shader_importer.h"
@@ -32,7 +32,7 @@ AssetImporter::AssetImporter(Project& project, const std::vector<Path>& assetsSr
 		std::make_unique<ConfigImporter>(),
 		std::make_unique<CodegenImporter>(),
 		std::make_unique<AudioImporter>(),
-		std::make_unique<AsepriteImporter>(),
+		std::make_unique<SpriteImporter>(),
 		std::make_unique<SpriteSheetImporter>(),
 		std::make_unique<ShaderImporter>(),
 		std::make_unique<TextureImporter>(),
@@ -56,13 +56,8 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 		type = ImportAssetType::Font;
 	} else if (root == "bitmap_font") {
 		type = ImportAssetType::BitmapFont;
-	} else if (root == "image") {
-		auto file = path.getFilename().toString();
-		if (file.endsWith(".ase") || file.endsWith(".ase.meta")) {
-			type = ImportAssetType::Aseprite;
-		} else {
-			type = ImportAssetType::Image;
-		}
+	} else if (root == "image" || root == "sprite") {
+		type = ImportAssetType::Sprite;
 	} else if (root == "animation") {
 		type = ImportAssetType::Animation;
 	} else if (root == "material") {

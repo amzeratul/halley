@@ -110,57 +110,6 @@ Vector2f Sprite::getScaledSize() const
 	return vertexAttrib.scale * vertexAttrib.size;
 }
 
-Sprite& Sprite::setMaterial(Resources& resources, String materialName)
-{
-	if (materialName == "") {
-		materialName = "Halley/Sprite";
-	}
-	setMaterial(std::make_shared<Material>(resources.get<MaterialDefinition>(materialName)));
-	return *this;
-}
-
-Sprite& Sprite::setMaterial(std::shared_ptr<Material> m)
-{
-	bool hadMaterial = static_cast<bool>(material);
-
-	Expects(m);
-	material = m;
-
-	if (!hadMaterial && !material->getTextures().empty()) {
-		setImageData(*material->getTextures()[0]);
-	}
-
-	return *this;
-}
-
-Sprite& Sprite::setImage(Resources& resources, String imageName, String materialName)
-{
-	Expects (!imageName.isEmpty());
-	if (materialName == "") {
-		materialName = "Halley/Sprite";
-	}
-	setImage(resources.get<Texture>(imageName), resources.get<MaterialDefinition>(materialName));
-	return *this;
-}
-
-Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> materialDefinition)
-{
-	Expects(image);
-	Expects(materialDefinition);
-
-	auto mat = std::make_shared<Material>(materialDefinition);
-	mat->set("tex0", image);
-	setMaterial(mat);
-	return *this;
-}
-
-Sprite& Sprite::setImageData(const Texture& image)
-{
-	setSize(Vector2f(image.getSize()));
-	setTexRect(Rect4f(0, 0, 1, 1));
-	return *this;
-}
-
 Vector2f Sprite::getPosition() const
 {
 	return vertexAttrib.pos;
@@ -246,6 +195,69 @@ Sprite& Sprite::setTexRect(Rect4f v)
 	return *this;
 }
 
+Sprite& Sprite::setMaterial(Resources& resources, String materialName)
+{
+	if (materialName == "") {
+		materialName = "Halley/Sprite";
+	}
+	setMaterial(std::make_shared<Material>(resources.get<MaterialDefinition>(materialName)));
+	return *this;
+}
+
+Sprite& Sprite::setMaterial(std::shared_ptr<Material> m)
+{
+	bool hadMaterial = static_cast<bool>(material);
+
+	Expects(m);
+	material = m;
+
+	if (!hadMaterial && !material->getTextures().empty()) {
+		setImageData(*material->getTextures()[0]);
+	}
+
+	return *this;
+}
+
+Sprite& Sprite::setImageData(const Texture& image)
+{
+	setSize(Vector2f(image.getSize()));
+	setTexRect(Rect4f(0, 0, 1, 1));
+	return *this;
+}
+
+Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> materialDefinition)
+{
+	Expects(image);
+	Expects(materialDefinition);
+
+	auto mat = std::make_shared<Material>(materialDefinition);
+	mat->set("tex0", image);
+	setMaterial(mat);
+	return *this;
+}
+
+Sprite& Sprite::setImage(Resources& resources, String imageName, String materialName)
+{
+	/*
+	Expects (!imageName.isEmpty());
+	if (materialName == "") {
+		materialName = "Halley/Sprite";
+	}
+	setImage(resources.get<Texture>(imageName), resources.get<MaterialDefinition>(materialName));
+	return *this;
+	*/
+
+	Expects (!imageName.isEmpty());
+	if (materialName == "") {
+		materialName = "Halley/Sprite";
+	}
+	const auto sprite = resources.get<SpriteResource>(imageName);
+	const auto spriteSheet = sprite->getSpriteSheet();
+	setImage(spriteSheet->getTexture(), resources.get<MaterialDefinition>(materialName));
+	setSprite(sprite->getSprite());
+	return *this;
+}
+
 Sprite& Sprite::setSprite(Resources& resources, String spriteSheetName, String imageName, String materialName)
 {
 	Expects (!spriteSheetName.isEmpty());
@@ -269,15 +281,15 @@ Sprite& Sprite::setSprite(const SpriteSheet& sheet, String name)
 
 Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot)
 {
-	if (vertexAttrib.texRect != entry.coords) {
-		outerBorder = entry.trimBorder;
-		setSize(entry.size);
-		if (applyPivot) {
-			vertexAttrib.pivot = entry.pivot;
-		}
-		vertexAttrib.texRect = entry.coords;
-		vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
+	outerBorder = entry.trimBorder;
+	slices = entry.slices;
+	sliced = slices.x != 0 || slices.y != 0 || slices.z != 0 || slices.w != 0;
+	setSize(entry.size);
+	if (applyPivot) {
+		vertexAttrib.pivot = entry.pivot;
 	}
+	vertexAttrib.texRect = entry.coords;
+	vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
 	return *this;
 }
 
@@ -288,14 +300,7 @@ Sprite& Sprite::setSliced(Vector4s s)
 	return *this;
 }
 
-Sprite& Sprite::setSlicedFromMaterial()
-{
-	Expects (material);
-	Expects (!material->getTextures().empty());
-	return setSliced(material->getTextures()[0]->getSlices());
-}
-
-Sprite& Sprite::setNormal()
+Sprite& Sprite::setNotSliced()
 {
 	sliced = false;
 	return *this;
@@ -341,7 +346,7 @@ Vector2f Sprite::getRawSize() const
 	return vertexAttrib.size;
 }
 
-Vector4i Sprite::getOuterBorder() const
+Vector4s Sprite::getOuterBorder() const
 {
 	return outerBorder;
 }

@@ -59,14 +59,14 @@ namespace Halley
 		const AnimationSequence* curSeq = nullptr;
 		const AnimationDirection* curDir = nullptr;
 
-		Time seqTimeLen;
-		Time curTime;
+		Time curSeqTime;
+		Time curFrameTime;
+		Time curFrameLen;
 
 		size_t seqLen;
 
 		int dirId;
 		int curFrame;
-		float seqFPS;
 		float playbackSpeed = 1.0f;
 
 		Vector2f offsetPivot;

@@ -3,6 +3,29 @@ project (halley-tools)
 include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../../engine/core/include" "../../engine/utils/include" "../../engine/audio/include" "../../contrib/libogg/include" "../../contrib/libvorbis/include")
 
 set(SOURCES
+
+    "src/assets/asset_collector.cpp"
+    "src/assets/asset_importer.cpp"
+    "src/assets/check_assets_task.cpp"
+    "src/assets/delete_assets_task.cpp"
+    "src/assets/import_assets_task.cpp"
+    "src/assets/import_assets_database.cpp"
+    "src/assets/import_tool.cpp"
+
+    "src/assets/importers/animation_importer.cpp"
+    "src/assets/importers/audio_importer.cpp"
+    "src/assets/importers/bitmap_font_importer.cpp"
+    "src/assets/importers/codegen_importer.cpp"
+    "src/assets/importers/config_importer.cpp"
+    "src/assets/importers/copy_file_importer.cpp"
+    "src/assets/importers/font_importer.cpp"
+    "src/assets/importers/image_importer.cpp"
+    "src/assets/importers/material_importer.cpp"
+    "src/assets/importers/sprite_importer.cpp"
+    "src/assets/importers/spritesheet_importer.cpp"
+    "src/assets/importers/shader_importer.cpp"
+    "src/assets/importers/texture_importer.cpp"
+
     "src/codegen/cpp/codegen_cpp.cpp"
     "src/codegen/cpp/cpp_class_gen.cpp"
     "src/codegen/codegen.cpp"
@@ -23,27 +46,7 @@ set(SOURCES
 
     "src/tool/cli_tool.cpp"
 
-    "src/assets/asset_collector.cpp"
-    "src/assets/asset_importer.cpp"
-    "src/assets/check_assets_task.cpp"
-    "src/assets/delete_assets_task.cpp"
-    "src/assets/import_assets_task.cpp"
-    "src/assets/import_assets_database.cpp"
-    "src/assets/import_tool.cpp"
-
-    "src/assets/importers/animation_importer.cpp"
-    "src/assets/importers/aseprite_importer.cpp"
-    "src/assets/importers/audio_importer.cpp"
-    "src/assets/importers/bitmap_font_importer.cpp"
-    "src/assets/importers/codegen_importer.cpp"
-    "src/assets/importers/config_importer.cpp"
-    "src/assets/importers/copy_file_importer.cpp"
-    "src/assets/importers/font_importer.cpp"
-    "src/assets/importers/image_importer.cpp"
-    "src/assets/importers/material_importer.cpp"
-    "src/assets/importers/spritesheet_importer.cpp"
-    "src/assets/importers/shader_importer.cpp"
-    "src/assets/importers/texture_importer.cpp"
+    "src/sprites/aseprite_reader.cpp"
 
     "src/tasks/editor_task.cpp"
     "src/tasks/editor_task_set.cpp"
@@ -76,9 +79,6 @@ set(HEADERS
     "include/halley/tools/codegen/message_schema.h"
     "include/halley/tools/codegen/system_schema.h"
     
-    "src/codegen/cpp/codegen_cpp.h"
-    "src/codegen/cpp/cpp_class_gen.h"
-
     "include/halley/tools/assets/asset_collector.h"
     "include/halley/tools/assets/asset_importer.h"
     "include/halley/tools/assets/check_assets_task.h"
@@ -87,8 +87,12 @@ set(HEADERS
     "include/halley/tools/assets/import_assets_database.h"
     "include/halley/tools/assets/import_tool.h"
 
+    "include/halley/tools/tasks/editor_task.h"
+    "include/halley/tools/tasks/editor_task_set.h"
+
+    "include/halley/tools/project/project.h"
+
     "src/assets/importers/animation_importer.h"
-    "src/assets/importers/aseprite_importer.h"
     "src/assets/importers/audio_importer.h"
     "src/assets/importers/bitmap_font_importer.h"
     "src/assets/importers/codegen_importer.h"
@@ -97,16 +101,17 @@ set(HEADERS
     "src/assets/importers/font_importer.h"
     "src/assets/importers/image_importer.h"
     "src/assets/importers/material_importer.h"
+    "src/assets/importers/sprite_importer.h"
     "src/assets/importers/spritesheet_importer.h"
     "src/assets/importers/shader_importer.h"
     "src/assets/importers/texture_importer.h"
 
+    "src/codegen/cpp/codegen_cpp.h"
+    "src/codegen/cpp/cpp_class_gen.h"
+
+    "src/sprites/aseprite_reader.h"
+
     "src/yaml/halley-yamlcpp.h"
-
-    "include/halley/tools/tasks/editor_task.h"
-    "include/halley/tools/tasks/editor_task_set.h"
-
-    "include/halley/tools/project/project.h"
     )
 
 assign_source_group(${SOURCES})

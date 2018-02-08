@@ -15,8 +15,6 @@ namespace Halley
 			float progressDisplay = 0;
 			float completeTime = 0;
 			float displaySlot = -1;
-
-			std::shared_ptr<Material> material;
 		};
 
 	public:
@@ -25,11 +23,12 @@ namespace Halley
 		void draw(Painter& painter);
 
 	private:
+		Resources& resources;
+
 		Sprite barSolid;
 		Sprite barFade;
 		Sprite halleyLogo;
 
-		std::shared_ptr<Material> taskMaterial;
 		std::shared_ptr<const Font> font;
 
 		std::vector<TaskDisplay> tasks;

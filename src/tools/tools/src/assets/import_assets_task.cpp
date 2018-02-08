@@ -4,9 +4,9 @@
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/resources/resource_data.h"
-#include "../yaml/halley-yamlcpp.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/assets/asset_collector.h"
+#include "halley/concurrency/concurrent.h"
 
 using namespace Halley;
 
@@ -23,88 +23,34 @@ void ImportAssetsTask::run()
 	using namespace std::chrono_literals;
 	auto lastSave = std::chrono::steady_clock::now();
 
+	assetsImported = 0;
+	assetsToImport = files.size();
+	std::vector<Future<void>> tasks;
+
 	for (size_t i = 0; i < files.size(); ++i) {
-		if (isCancelled()) {
-			break;
-		}
+		tasks.push_back(Concurrent::execute(Executors::getCPUAux(), [&, i] () {
+			if (isCancelled()) {
+				return;
+			}
 
-		curFileProgressStart = float(i) / float(files.size());
-		curFileProgressEnd = float(i + 1) / float(files.size());
-		curFileLabel = files[i].assetId;
-		setProgress(curFileProgressStart, curFileLabel);
+			if (importAsset(files[i])) {
+				++assetsImported;
+				setProgress(float(assetsImported) * 0.98f / float(assetsToImport), files[i].assetId);
+			}
 
-		if (importAsset(files[i])) {
-			// Check if db needs saving
 			auto now = std::chrono::steady_clock::now();
 			if (now - lastSave > 1s) {
 				db.save();
 				lastSave = now;
 			}
-		}
+		}));
 	}
+
+	Concurrent::whenAll(tasks.begin(), tasks.end()).get();
 	db.save();
 
 	if (!isCancelled()) {
 		setProgress(1.0f, "");
-	}
-}
-
-static void loadMetaTable(Metadata& meta, const YAML::Node& root)
-{
-	for (YAML::const_iterator it = root.begin(); it != root.end(); ++it) {
-		String key = it->first.as<std::string>();
-		String value = it->second.as<std::string>();
-		meta.set(key, value);
-	}
-}
-
-static void loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta, String assetId)
-{
-	auto data = ResourceDataStatic::loadFromFileSystem(path);
-	auto root = YAML::Load(data->getString());
-
-	if (isDirectoryMeta) {
-		for (const auto& rootList: root) {
-			bool matches = true;
-			for (YAML::const_iterator i0 = rootList.begin(); i0 != rootList.end(); ++i0) {
-				auto name = i0->first.as<std::string>();
-				if (name == "match") {
-					matches = false;
-					for (auto& pattern: i0->second) {
-						if (assetId.contains(pattern.as<std::string>())) {
-							matches = true;
-							break;
-						}
-					}
-				} else if (name == "data" && matches) {
-					loadMetaTable(meta, i0->second);
-				}
-			}
-		}
-	} else {
-		loadMetaTable(meta, root);
-	}
-}
-
-static std::unique_ptr<Metadata> getMetaData(const ImportAssetsDatabaseEntry& asset)
-{
-	try {
-		auto meta = std::make_unique<Metadata>();
-
-		for (int j = 0; j < 2; ++j) {
-			// First load the directory meta, then load private meta on top of it, so it overrides
-			bool isDirectoryMeta = j == 0;
-
-			for (auto& i: asset.inputFiles) {
-				if (i.first.getExtension() == ".meta" && (i.first.getFilename() == "_dir.meta") == isDirectoryMeta) {
-					loadMetaData(*meta, asset.srcDir / i.first, isDirectoryMeta, asset.assetId);
-				}
-			}
-		}
-		
-		return meta;
-	} catch (std::exception& e) {
-		throw Exception("Error parsing metafile for " + asset.assetId + ": " + e.what());
 	}
 }
 
@@ -120,14 +66,9 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 		ImportingAsset importingAsset;
 		importingAsset.assetId = asset.assetId;
 		importingAsset.assetType = asset.assetType;
-		importingAsset.metadata = getMetaData(asset);
 		for (auto& f: asset.inputFiles) {
-			if (f.first.getExtension() != ".meta") {
-				importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.first, FileSystem::readFile(asset.srcDir / f.first)));
-			}
-		}
-		if (importingAsset.inputFiles.empty()) {
-			throw Exception("No input files found for asset " + asset.assetId + " - do you have a stray meta file?");
+			auto meta = db.getMetadata(f.first);
+			importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.first, FileSystem::readFile(asset.srcDir / f.first), meta ? meta.get() : Metadata()));
 		}
 		toLoad.emplace_back(std::move(importingAsset));
 
@@ -138,7 +79,7 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 			
 			AssetCollector collector(cur, assetsPath, importer.getAssetsSrc(), [=] (float assetProgress, const String& label) -> bool
 			{
-				setProgress(lerp(curFileProgressStart, curFileProgressEnd, assetProgress), curFileLabel + " " + label);
+				//setProgress(lerp(curFileProgressStart, curFileProgressEnd, assetProgress), curFileLabel + " " + label);
 				return !isCancelled();
 			});
 			
