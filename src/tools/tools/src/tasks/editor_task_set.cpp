@@ -41,7 +41,7 @@ void EditorTaskSet::update(Time time)
 		}
 
 		if (task->getStatus() == EditorTaskStatus::Done) {
-			auto newTasks = std::move(task->getContinuations());
+			auto newTasks = task->getContinuations();
 			for (auto& t : newTasks) {
 				addTask(std::move(t));
 			}

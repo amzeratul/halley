@@ -24,7 +24,7 @@
 
 using namespace Halley;
 
-Exception::Exception(const String& _msg, bool logCallStack)
+Exception::Exception(const String& _msg, bool logCallStack) noexcept
 {
 	if (logCallStack) {
 		String stack = Debug::getCallStack();
