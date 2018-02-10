@@ -3,10 +3,6 @@
 #include "halley/core/graphics/material/material_definition.h"
 using namespace Halley;
 
-// TODO: REMOVE THESE TWO
-//#include <D3Dcompiler.h>
-//#pragma comment(lib, "D3DCompiler.lib")
-
 DX11Shader::DX11Shader(DX11Video& video, const ShaderDefinition& definition)
 	: name(definition.name)
 {
@@ -33,71 +29,30 @@ DX11Shader::~DX11Shader()
 		layout->Release();
 		layout = nullptr;
 	}
-	if (vertexBlob) {
-		vertexBlob->Release();
-		vertexBlob = nullptr;
-	}
 }
 
 void DX11Shader::loadShader(DX11Video& video, ShaderType type, const Bytes& bytes)
 {
-	throw Exception("Loading HLSL is temporarily disabled until D3D shader situation is sorted");
-
-	String entry;
-	String target;
+	HRESULT result = S_OK;
 
 	switch (type) {
 	case ShaderType::Vertex:
-		entry = "VShader";
-		target = "vs_4_0";
+		result = video.getDevice().CreateVertexShader(bytes.data(), bytes.size(), nullptr, &vertexShader);
+		vertexBlob = bytes;
 		break;
 
 	case ShaderType::Pixel:
-		entry = "PShader";
-		target = "ps_4_0";
+		result = video.getDevice().CreatePixelShader(bytes.data(), bytes.size(), nullptr, &pixelShader);
 		break;
 
 	case ShaderType::Geometry:
-		entry = "GShader";
-		target = "gs_4_0";
-		break;
-
-	default:
-		throw Exception("Unsupported shader type: " + toString(type));
-	}
-
-	ID3D10Blob *codeBlob = nullptr;
-	ID3D10Blob *errorBlob = nullptr;
-	//HRESULT result = D3DCompile2(bytes.data(), bytes.size(), name.c_str(), nullptr, nullptr, entry.c_str(), target.c_str(), 0, 0, 0, nullptr, 0, &codeBlob, &errorBlob);
-	HRESULT result = 100; // dunno
-	if (result != S_OK) {
-		String errorMessage = String(reinterpret_cast<const char*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
-		errorBlob->Release();
-		throw Exception("Failed to compile shader " + name + " (" + toString(type) + "):\n" + errorMessage);
-	}
-
-	switch (type) {
-	case ShaderType::Vertex:
-		result = video.getDevice().CreateVertexShader(codeBlob->GetBufferPointer(), codeBlob->GetBufferSize(), nullptr, &vertexShader);
-		vertexBlob = codeBlob;
-		codeBlob = nullptr;
-		break;
-
-	case ShaderType::Pixel:
-		result = video.getDevice().CreatePixelShader(codeBlob->GetBufferPointer(), codeBlob->GetBufferSize(), nullptr, &pixelShader);
-		break;
-
-	case ShaderType::Geometry:
-		result = video.getDevice().CreateGeometryShader(codeBlob->GetBufferPointer(), codeBlob->GetBufferSize(), nullptr, &geometryShader);
+		result = video.getDevice().CreateGeometryShader(bytes.data(), bytes.size(), nullptr, &geometryShader);
 		break;
 
 	default:
 		break;
 	}
 
-	if (codeBlob) {
-		codeBlob->Release();
-	}
 	if (result != S_OK) {
 		throw Exception("Unable to create shader " + name + " (" + toString(type) + ").");
 	}
@@ -156,7 +111,7 @@ void DX11Shader::setMaterialLayout(DX11Video& video, const std::vector<MaterialA
 		return;
 	}
 
-	Expects(vertexBlob);
+	Expects(!vertexBlob.empty());
 
 	std::vector<std::array<char, 64>> names(attributes.size());
 	std::vector<D3D11_INPUT_ELEMENT_DESC> desc(attributes.size());
@@ -182,10 +137,9 @@ void DX11Shader::setMaterialLayout(DX11Video& video, const std::vector<MaterialA
 		desc[i] = { names[i].data(), semanticIndex, format, inputSlot, byteOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 	}
 
-	HRESULT result = video.getDevice().CreateInputLayout(desc.data(), UINT(desc.size()), vertexBlob->GetBufferPointer(), vertexBlob->GetBufferSize(), &layout);
+	HRESULT result = video.getDevice().CreateInputLayout(desc.data(), UINT(desc.size()), vertexBlob.data(), vertexBlob.size(), &layout);
 	if (result != S_OK) {
 		throw Exception("Unable to create input layout for shader " + name);
 	}
-	vertexBlob->Release();
-	vertexBlob = nullptr;
+	vertexBlob.clear();
 }

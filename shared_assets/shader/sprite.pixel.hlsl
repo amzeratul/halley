@@ -11,7 +11,7 @@ struct VOut {
     float2 pixelPos : POSITION2;
 };
 
-float4 PShader(VOut input) : SV_TARGET {
+float4 main(VOut input) : SV_TARGET {
 	float4 col = tex0.Sample(sampler0, input.texCoord0.xy);
 	return col * input.colour + input.colourAdd * col.a;
 }

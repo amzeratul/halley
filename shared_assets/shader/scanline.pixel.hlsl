@@ -14,7 +14,7 @@ struct VOut {
     float2 pixelPos : POSITION2;
 };
 
-float4 PShader(VOut input) : SV_TARGET {
+float4 main(VOut input) : SV_TARGET {
 	float4 col = lerp(u_col0, u_col1, frac(input.texCoord0.y / u_distance));
 	return col * input.colour;
 }

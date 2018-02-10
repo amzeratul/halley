@@ -27,7 +27,7 @@ namespace Halley
 		ID3D11PixelShader* pixelShader = nullptr;
 		ID3D11GeometryShader* geometryShader = nullptr;
 		ID3D11InputLayout* layout = nullptr;
-		ID3D10Blob* vertexBlob = nullptr;
+		Bytes vertexBlob;
 
 		void loadShader(DX11Video& video, ShaderType type, const Bytes& bytes);
 	};

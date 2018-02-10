@@ -45,7 +45,7 @@ float4 getVertexPosition(float2 position, float2 pivot, float2 size, float2 vert
     return mul(u_mvp, float4(pos, 0.0, 1.0));
 }
 
-VOut VShader(VIn input) {
+VOut main(VIn input) {
     VOut result;
 
     result.texCoord0 = getTexCoord(input.texCoord0, input.vertPos.zw, input.textureRotation);

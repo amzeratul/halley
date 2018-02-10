@@ -20,7 +20,7 @@ struct VOut {
 };
 
 
-float4 PShader(VOut input) : SV_TARGET {
+float4 main(VOut input) : SV_TARGET {
 	float dx = abs(ddx(input.pixelTexCoord0.x) / ddx(input.position.x));
 	float dy = abs(ddy(input.pixelTexCoord0.y) / ddy(input.position.y));
 	float texGrad = max(dx, dy);

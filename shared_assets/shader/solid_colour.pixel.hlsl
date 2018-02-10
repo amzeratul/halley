@@ -8,6 +8,6 @@ struct VOut {
     float2 pixelPos : POSITION2;
 };
 
-float4 PShader(VOut input) : SV_TARGET {
+float4 main(VOut input) : SV_TARGET {
 	return input.colour;
 }
