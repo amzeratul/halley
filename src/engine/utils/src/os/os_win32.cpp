@@ -20,6 +20,7 @@
 \*****************************************************************/
 
 #include "halley/text/string_converter.h"
+#include "halley/support/logger.h"
 #if defined(_WIN32) && !defined(WINDOWS_STORE)
 #include "halley/support/exception.h"
 
@@ -320,8 +321,26 @@ std::vector<Path> OSWin32::enumerateDirectory(const Path& path)
 	return result;
 }
 
+static String readPipeToString(HANDLE pipe)
+{
+	DWORD bytesRead;
+	DWORD bytesAvailable;
+
+	char buffer[4096];
+	String result;
+
+	while (PeekNamedPipe(pipe, nullptr, 0, nullptr, &bytesAvailable, nullptr) && bytesAvailable) {
+		ReadFile(pipe, buffer, sizeof(buffer) - 1, &bytesRead, nullptr);
+		buffer[bytesRead] = 0;
+		result += buffer;
+	}
+
+	return result;
+}
+
 int OSWin32::runCommand(String rawCommand)
 {
+	// Create the commandline
 	auto command = rawCommand.getUTF16();
 	if (command.length() >= 1024) {
 		throw Exception("Command is too long!");
@@ -330,20 +349,61 @@ int OSWin32::runCommand(String rawCommand)
 	memcpy(buffer, command.c_str(), command.size() * sizeof(wchar_t));
 	buffer[command.size()] = 0;
 
+
+	// Create pipes for reading process output
+	SECURITY_ATTRIBUTES saAttr;
+	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES); 
+	saAttr.bInheritHandle = TRUE; 
+	saAttr.lpSecurityDescriptor = nullptr;
+	HANDLE outRead;
+	HANDLE outWrite;
+	HANDLE errorRead;
+	HANDLE errorWrite;
+	CreatePipe(&outRead, &outWrite, &saAttr, 0);
+	SetHandleInformation(outRead, HANDLE_FLAG_INHERIT, 0);
+	CreatePipe(&errorRead, &errorWrite, &saAttr, 0);
+	SetHandleInformation(errorRead, HANDLE_FLAG_INHERIT, 0);
+
+	// Startup info
 	STARTUPINFOW si;
-    PROCESS_INFORMATION pi;
-	DWORD exitCode = -2;
-
 	memset(&si, 0, sizeof(STARTUPINFO));
-	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
+	si.hStdOutput = outRead;
+	si.hStdError = errorRead;
 
+	// Create the process
+	PROCESS_INFORMATION pi;
+	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
 	if (!CreateProcessW(nullptr, buffer, nullptr, nullptr, false, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
 		return -1;
 	}
-	WaitForSingleObject(pi.hProcess, INFINITE);
+
+	// Wait for process to end
+	HANDLE waitHandles[] = { pi.hProcess, outRead, errorRead };
+	WaitForMultipleObjects(3, waitHandles, TRUE, INFINITE);
+
+	// Read output
+	{
+		String out = readPipeToString(outRead);
+		if (!out.isEmpty()) {
+			Logger::logInfo(out);
+		}
+		String error = readPipeToString(errorRead);
+		if (!error.isEmpty()) {
+			Logger::logError(error);
+		}
+	}
+
+	// Get exit code
+	DWORD exitCode = -2;
 	GetExitCodeProcess(pi.hProcess, &exitCode);
+
+	// Cleanup
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
+	CloseHandle(outRead);
+	CloseHandle(outWrite);
+	CloseHandle(errorRead);
+	CloseHandle(errorWrite);
 
 	return int(exitCode);
 }
