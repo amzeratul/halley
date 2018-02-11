@@ -18,9 +18,16 @@ void UIButton::draw(UIPainter& painter) const
 
 void UIButton::update(Time t, bool moved)
 {
-	bool dirty = updateButton() | moved;
+	const bool dirty = updateButton() | moved;
+
 	if (dirty) {
-		sprite.scaleTo(getSize()).setPos(getPosition());
+		const auto b = sprite.getOuterBorder();
+		const auto topLeftBorder = Vector2f(float(b.x), float(b.y));
+		const auto bottomRightBorder = Vector2f(float(b.z), float(b.w));
+
+		sprite
+			.setPos(getPosition())
+			.setScale(getSize() / (sprite.getRawSize().abs() + topLeftBorder + bottomRightBorder));
 	}
 }
 

@@ -14,6 +14,8 @@ namespace Halley {
 
 	private:
 		Sprite sprite;
+		Vector2f topLeftBorder;
+		Vector2f bottomRightBorder;
 		bool dirty = true;
 	};
 }
