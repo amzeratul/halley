@@ -39,7 +39,6 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 	switch (descriptor.format) {
 	case TextureFormat::Indexed:
 		desc.Format = DXGI_FORMAT_R8_UNORM;
-		desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
 		bpp = 1;
 		break;
 	case TextureFormat::RGB:
@@ -47,16 +46,20 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 		break;
 	case TextureFormat::RGBA:
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
 		bpp = 4;
 		break;
 	case TextureFormat::DEPTH:
 		desc.Format = DXGI_FORMAT_D32_FLOAT;
-		desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
 		bpp = 4;
 		break;
 	default:
 		throw Exception("Unknown texture format");
+	}
+	if (descriptor.isRenderTarget) {
+		desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
+	}
+	if (descriptor.isDepthStencil) {
+		desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
 	}
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
@@ -69,7 +72,11 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 		desc.Usage = D3D11_USAGE_DEFAULT;
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	} else {
-		desc.Usage = D3D11_USAGE_DEFAULT;
+		if (descriptor.canBeUpdated) {
+			desc.Usage = D3D11_USAGE_DEFAULT;
+		} else {
+			desc.Usage = D3D11_USAGE_IMMUTABLE;
+		}
 		desc.CPUAccessFlags = 0;
 		D3D11_SUBRESOURCE_DATA subResData;
 		subResData.pSysMem = descriptor.pixelData.getSpan().data();

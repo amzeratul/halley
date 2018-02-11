@@ -62,17 +62,21 @@ namespace Halley
 		size_t padding = 0;
 		TextureFormat format = TextureFormat::RGBA;
 		PixelDataFormat pixelFormat = PixelDataFormat::Image;
+		TextureDescriptorImageData pixelData;
+
 		bool useMipMap = false;
 		bool useFiltering = false;
 		bool clamp = true;
-		TextureDescriptorImageData pixelData;
-
-		static int getBitsPerPixel(TextureFormat format);
+		bool canBeUpdated = false;
+		bool isRenderTarget = false;
+		bool isDepthStencil = false;
 
 		TextureDescriptor() {}
 		TextureDescriptor(Vector2i size, TextureFormat format = TextureFormat::RGBA)
 			: size(size)
 			, format(format)
 		{}
+
+		static int getBitsPerPixel(TextureFormat format);
 	};
 }

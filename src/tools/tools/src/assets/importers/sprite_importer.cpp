@@ -196,15 +196,17 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult
 		ImageData* img = reinterpret_cast<ImageData*>(packedImg.data);
 		image->blitFrom(packedImg.rect.getTopLeft(), *img->img, img->clip, packedImg.rotated);
 
-		auto borderTL = img->clip.getTopLeft();
-		auto borderBR = img->img->getSize() - img->clip.getSize() - borderTL;
+		const auto borderTL = img->clip.getTopLeft();
+		const auto borderBR = img->img->getSize() - img->clip.getSize() - borderTL;
+
+		const auto offset = Vector2f(0.0001f, 0.0001f);
 
 		SpriteSheetEntry entry;
 		entry.size = Vector2f(img->clip.getSize());
 		entry.rotated = packedImg.rotated;
 		entry.pivot = Vector2f(img->pivot - img->clip.getTopLeft()) / entry.size;
 		entry.origPivot = img->pivot;
-		entry.coords = Rect4f(packedImg.rect) / Vector2f(size);
+		entry.coords = (Rect4f(Vector2f(packedImg.rect.getTopLeft()) + offset, Vector2f(packedImg.rect.getBottomRight()) + offset)) / Vector2f(size);
 		entry.trimBorder = Vector4s(short(borderTL.x), short(borderTL.y), short(borderBR.x), short(borderBR.y));
 		entry.slices = img->slices;
 
