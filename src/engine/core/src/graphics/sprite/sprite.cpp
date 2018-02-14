@@ -102,7 +102,7 @@ Rect4f Sprite::getAABB() const
 
 bool Sprite::isInView(Rect4f v) const
 {
-	return getAABB().overlaps(v);
+	return isVisible() && getAABB().overlaps(v);
 }
 
 Vector2f Sprite::getScaledSize() const
@@ -304,6 +304,17 @@ Sprite& Sprite::setNotSliced()
 {
 	sliced = false;
 	return *this;
+}
+
+Sprite& Sprite::setVisible(bool v)
+{
+	visible = v;
+	return *this;
+}
+
+bool Sprite::isVisible() const
+{
+	return visible;
 }
 
 Sprite& Sprite::setClip(Rect4f c)
