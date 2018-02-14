@@ -18,7 +18,7 @@ DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
 {
 #ifdef WINDOWS_STORE
 	// Due to the architecture of "some" platforms available here, updating a dynamic buffer is extremely slow if it's still in use
-	constexpr size_t numBuffers = 16;
+	constexpr size_t numBuffers = 128;
 #else
 	constexpr size_t numBuffers = 1;
 #endif
