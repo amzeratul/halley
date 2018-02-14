@@ -31,12 +31,14 @@ namespace Halley
 	private:
 		DX11Video& video;
 
-		DX11Buffer vertexBuffer;
-		DX11Buffer indexBuffer;
+		std::vector<DX11Buffer> vertexBuffers;
+		std::vector<DX11Buffer> indexBuffers;
 		ID3D11InputLayout* layout;
 		std::map<BlendType, DX11Blend> blendModes;
 		std::unique_ptr<DX11Rasterizer> normalRaster;
 		std::unique_ptr<DX11Rasterizer> scissorRaster;
+
+		size_t curBuffer = 0;
 
 		DX11Blend& getBlendMode(BlendType type);
 	};

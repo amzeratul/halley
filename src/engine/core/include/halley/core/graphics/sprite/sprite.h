@@ -16,7 +16,7 @@ namespace Halley
 	class MaterialDefinition;
 	class Painter;
 
-	struct SpriteVertexAttrib
+	struct alignas(16) SpriteVertexAttrib
 	{
 		// This structure must match the layout of the shader
 		// See shared_assets/material/sprite_base.yaml for reference
