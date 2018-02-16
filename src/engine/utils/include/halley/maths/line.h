@@ -26,6 +26,7 @@
 namespace Halley {
 	class Line {
 	public:
+		static std::vector<Vector2i> generateLine(Vector2i p0, Vector2i p1);
 		static void doLine(Vector2i p0, Vector2i p1, std::function<void(Vector2i)> callback);
 		static Vector2f closestPointInSegment(Vector2f start, Vector2f end, Vector2f p);
 	};
