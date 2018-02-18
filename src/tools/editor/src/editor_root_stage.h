@@ -27,6 +27,7 @@ namespace Halley {
 		
 		std::unique_ptr<EditorTaskSet> tasks;
 		std::unique_ptr<TaskBar> taskBar;
+		std::unique_ptr<DevConServer> devConServer;
 
 		void initSprites();
 	};

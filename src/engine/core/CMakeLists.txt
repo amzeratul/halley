@@ -138,4 +138,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-core ${SOURCES} ${HEADERS})
-target_link_libraries(halley-core halley-entity halley-utils halley-audio)
+target_link_libraries(halley-core halley-entity halley-utils halley-audio halley-net)

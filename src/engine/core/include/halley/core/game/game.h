@@ -29,5 +29,8 @@ namespace Halley
 		virtual std::unique_ptr<Stage> makeStage(StageID /*id*/) { return std::unique_ptr<Stage>(); }
 
 		virtual int getTargetFPS() const { return 60; }
+
+		virtual String getDevConAddress() const { return ""; }
+		virtual int getDevConPort() const { return 12500; }
 	};
 }

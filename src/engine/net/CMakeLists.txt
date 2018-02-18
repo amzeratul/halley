@@ -1,6 +1,6 @@
 project (halley-net)
 
-include_directories(${Boost_INCLUDE_DIR} "include/halley/net" "../utils/include")
+include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/net" "../utils/include")
 
 set(SOURCES
         "src/connection/http.cpp"
@@ -8,6 +8,10 @@ set(SOURCES
         "src/connection/message_queue.cpp"
         "src/connection/network_packet.cpp"
         "src/connection/reliable_connection.cpp"
+
+        "src/devcon/devcon_client.cpp"
+        "src/devcon/devcon_messages.cpp"
+        "src/devcon/devcon_server.cpp"
 
         "src/session/network_session_control_messages.cpp"
         "src/session/network_session.cpp"
@@ -27,6 +31,10 @@ set(HEADERS
         "include/halley/net/connection/network_service.h"
         "include/halley/net/connection/reliable_connection.h"
         "include/halley/net/connection/standard_message_stream.h"
+
+        "include/halley/net/devcon/devcon_client.h"
+        "include/halley/net/devcon/devcon_messages.h"
+        "include/halley/net/devcon/devcon_server.h"
 
         "include/halley/net/session/network_session_control_messages.h"
         "include/halley/net/session/network_session_messages.h"

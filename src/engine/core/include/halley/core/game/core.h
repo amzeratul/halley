@@ -22,6 +22,7 @@ namespace Halley
 	class Camera;
 	class RenderTarget;
 	class Environment;
+	class DevConClient;
 
 	class Core final : public CoreAPIInternal, public IMainLoopable, public ILoggerSink
 	{
@@ -99,6 +100,8 @@ namespace Halley
 		bool hasConsole = false;
 		int exitCode = 0;
 		std::unique_ptr<RedirectStream> out;
+
+		std::unique_ptr<DevConClient> devConClient;
 
 		TreeMap<PluginType, Vector<std::unique_ptr<Plugin>>> plugins;
 		HalleyStatics statics;

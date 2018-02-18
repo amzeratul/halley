@@ -26,6 +26,8 @@ void EditorRootStage::init()
 		taskBar = std::make_unique<TaskBar>(getResources());
 		console = std::make_unique<ConsoleWindow>(getResources());
 	}
+
+	devConServer = std::make_unique<DevConServer>(getNetworkAPI().createService(devConPort), devConPort);
 }
 
 void EditorRootStage::onVariableUpdate(Time time)
@@ -44,6 +46,10 @@ void EditorRootStage::onVariableUpdate(Time time)
 
 	if (console) {
 		console->update(kb);
+	}
+
+	if (devConServer) {
+		devConServer->update();
 	}
 }
 

@@ -10,6 +10,7 @@ void initOpenGLPlugin(IPluginRegistry &registry);
 void initSDLSystemPlugin(IPluginRegistry &registry);
 void initSDLAudioPlugin(IPluginRegistry &registry);
 void initSDLInputPlugin(IPluginRegistry &registry);
+void initAsioPlugin(IPluginRegistry &registry);
 
 HalleyEditor::HalleyEditor()
 {
@@ -22,13 +23,15 @@ HalleyEditor::~HalleyEditor()
 int HalleyEditor::initPlugins(IPluginRegistry &registry)
 {
 	initSDLSystemPlugin(registry);
+	initAsioPlugin(registry);
 	if (headless) {
-		return 0;
+		return HalleyAPIFlags::Network;
 	} else {
 		initSDLAudioPlugin(registry);
 		initSDLInputPlugin(registry);
 		initOpenGLPlugin(registry);
-		return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input;
+		
+		return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input | HalleyAPIFlags::Network;
 	}
 }
 

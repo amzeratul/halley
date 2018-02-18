@@ -19,6 +19,8 @@
 #include <chrono>
 #include <ctime>
 #include "../dummy/dummy_plugins.h"
+#include "halley/net/devcon/devcon_client.h"
+#include "halley/net/connection/network_service.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
@@ -157,6 +159,12 @@ void Core::init()
 	// Resources
 	initResources();
 
+	// Create devcon connection
+	String devConAddress = game->getDevConAddress();
+	if (!devConAddress.isEmpty()) {
+		devConClient = std::make_unique<DevConClient>(api->network->createService(0), devConAddress, game->getDevConPort());
+	}
+
 	// Start game
 	setStage(game->startGame(&*api));
 	
@@ -225,6 +233,10 @@ void Core::pumpEvents(Time time)
 	input->beginEvents(time);
 	if (!api->system->generateEvents(video, input)) {
 		quit(0); // System close event
+	}
+
+	if (devConClient) {
+		devConClient->update();
 	}
 }
 
