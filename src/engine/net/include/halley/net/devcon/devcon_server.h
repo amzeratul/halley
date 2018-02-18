@@ -3,8 +3,8 @@
 #include "devcon_messages.h"
 #include <vector>
 #include <memory>
-#include "connection/reliable_connection.h"
-#include "connection/message_queue.h"
+#include "halley/net/connection/reliable_connection.h"
+#include "halley/net/connection/message_queue.h"
 
 namespace Halley
 {
