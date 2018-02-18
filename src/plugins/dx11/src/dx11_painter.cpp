@@ -15,9 +15,17 @@ using namespace Halley;
 DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
 	: Painter(resources)
 	, video(video)
-	, vertexBuffer(video, DX11Buffer::Type::Vertex)
-	, indexBuffer(video, DX11Buffer::Type::Index)
 {
+#ifdef WINDOWS_STORE
+	// Due to the architecture of "some" platforms available here, updating a dynamic buffer is extremely slow if it's still in use
+	constexpr size_t numBuffers = 128;
+#else
+	constexpr size_t numBuffers = 1;
+#endif
+	for (size_t i = 0; i < numBuffers; ++i) {
+		vertexBuffers.emplace_back(video, DX11Buffer::Type::Vertex);
+		indexBuffers.emplace_back(video, DX11Buffer::Type::Index);
+	}
 }
 
 void DX11Painter::doStartRender()
@@ -81,15 +89,17 @@ void DX11Painter::setVertices(const MaterialDefinition& material, size_t numVert
 {
 	const size_t stride = material.getVertexStride();
 	const size_t vertexDataSize = stride * numVertices;
-	vertexBuffer.setData(gsl::span<const gsl::byte>(reinterpret_cast<const gsl::byte*>(vertexData), vertexDataSize));
+	vertexBuffers[curBuffer].setData(gsl::span<const gsl::byte>(reinterpret_cast<const gsl::byte*>(vertexData), vertexDataSize));
 
-	ID3D11Buffer* buffers[] = { vertexBuffer.getBuffer() };
+	ID3D11Buffer* buffers[] = { vertexBuffers[curBuffer].getBuffer() };
 	UINT strides[] = { UINT(stride) };
 	UINT offsets[] = { 0 };
 	video.getDeviceContext().IASetVertexBuffers(0, 1, buffers, strides, offsets);
 
-	indexBuffer.setData(gsl::as_bytes(gsl::span<unsigned short>(indices, numIndices)));
-	video.getDeviceContext().IASetIndexBuffer(indexBuffer.getBuffer(), DXGI_FORMAT_R16_UINT, 0);
+	indexBuffers[curBuffer].setData(gsl::as_bytes(gsl::span<unsigned short>(indices, numIndices)));
+	video.getDeviceContext().IASetIndexBuffer(indexBuffers[curBuffer].getBuffer(), DXGI_FORMAT_R16_UINT, 0);
+
+	curBuffer = (curBuffer + 1) % vertexBuffers.size();
 }
 
 void DX11Painter::drawTriangles(size_t numIndices)

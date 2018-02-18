@@ -42,15 +42,15 @@ Bytes ShaderImporter::compileHLSL(const String& name, ShaderType type, const Byt
 
 	switch (type) {
 	case ShaderType::Vertex:
-		target = "vs_5_0";
+		target = "vs_4_0";
 		break;
 
 	case ShaderType::Pixel:
-		target = "ps_5_0";
+		target = "ps_4_0";
 		break;
 
 	case ShaderType::Geometry:
-		target = "gs_5_0";
+		target = "gs_4_0";
 		break;
 
 	default:

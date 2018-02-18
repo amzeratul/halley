@@ -118,8 +118,9 @@ public:
 
 	Rect4i getWindowRect() const override
 	{
-		auto bounds = window.Bounds();
-		return Rect4i(Rect4f(bounds.X, bounds.Y, bounds.Width, bounds.Height));
+		//auto bounds = window.Bounds();
+		//return Rect4i(Rect4f(bounds.X, bounds.Y, bounds.Width, bounds.Height));
+		return Rect4i(Vector2i(), Vector2i(1920, 1080));
 	}
 
 	const WindowDefinition& getDefinition() const override
@@ -139,7 +140,8 @@ public:
 
 	void notifySizeChange(Vector2i size)
 	{
-		definition = definition.withSize(size);
+		//definition = definition.withSize(size);
+		definition = definition.withSize(Vector2i(1920, 1080));
 	}
 
 private:
