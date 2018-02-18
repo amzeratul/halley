@@ -19,12 +19,14 @@ namespace Halley
 	private:
 		std::shared_ptr<ReliableConnection> connection;
 		std::shared_ptr<MessageQueue> queue;
+
+		void onReceiveLogMsg(const DevCon::LogMsg& msg);
 	};
 
 	class DevConServer
 	{
 	public:
-		DevConServer(std::unique_ptr<NetworkService> service, int port = devConPort);
+		DevConServer(std::unique_ptr<NetworkService> service, int port = DevCon::devConPort);
 
 		void update();
 

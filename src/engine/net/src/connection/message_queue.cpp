@@ -399,8 +399,7 @@ void MessageQueue::receiveMessages()
 
 std::unique_ptr<NetworkMessage> MessageQueue::deserializeMessage(gsl::span<const gsl::byte> data, unsigned short msgType, unsigned short seq)
 {
-	auto msg = factories.at(msgType)->create();
-	msg->deserializeFrom(data);
+	auto msg = factories.at(msgType)->create(data);
 	msg->seq = seq;
 	return msg;
 }

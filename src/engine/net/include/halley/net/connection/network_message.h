@@ -1,6 +1,9 @@
 #pragma once
 #include <gsl/gsl>
 #include <typeindex>
+#include "halley/utils/utils.h"
+#include "halley/data_structures/maybe.h"
+#include "halley/file/byte_serializer.h"
 
 namespace Halley
 {
@@ -12,15 +15,31 @@ namespace Halley
 		friend class MessageQueue;
 
 	public:
-		virtual ~NetworkMessage() {}
+		virtual ~NetworkMessage() = default;
 
-		virtual size_t getSerializedSize() const = 0;
-		virtual void serializeTo(gsl::span<gsl::byte> dst) const = 0;
-		virtual void deserializeFrom(gsl::span<const gsl::byte> src) = 0;
+		size_t getSerializedSize() const
+		{
+			if (!serialized) {
+				serialized = Serializer::toBytes(*this);
+			}
+			return serialized.get().size();
+		}
+
+		void serializeTo(gsl::span<gsl::byte> dst) const
+		{
+			if (!serialized) {
+				serialized = Serializer::toBytes(*this);
+			}
+			memcpy(dst.data(), serialized.get().data(), serialized.get().size());
+		}
+
+		virtual void serialize(Serializer& s) const = 0;
 
 	private:
 		unsigned short seq = 0;
 		char channel = -1;
+
+		mutable Maybe<Bytes> serialized;
 	};
 
 	class NetworkMessageFactoryBase
@@ -28,7 +47,7 @@ namespace Halley
 	public:
 		virtual ~NetworkMessageFactoryBase() {}
 
-		virtual std::unique_ptr<NetworkMessage> create() const = 0;
+		virtual std::unique_ptr<NetworkMessage> create(gsl::span<const gsl::byte> src) const = 0;
 		virtual std::type_index getTypeIndex() const = 0;
 	};
 
@@ -36,9 +55,9 @@ namespace Halley
 	class NetworkMessageFactory : public NetworkMessageFactoryBase
 	{
 	public:
-		std::unique_ptr<NetworkMessage> create() const override
+		std::unique_ptr<NetworkMessage> create(gsl::span<const gsl::byte> src) const override
 		{
-			return std::make_unique<T>();
+			return std::make_unique<T>(src);
 		}
 
 		std::type_index getTypeIndex() const override

@@ -26,10 +26,12 @@ void DevConClient::connect()
 {
 	connection = std::make_shared<ReliableConnection>(service->connect(address, port));
 	queue = std::make_shared<MessageQueue>(connection);
-	queue->setChannel(0, ChannelSettings(true, true));
+	DevCon::setupMessageQueue(*queue);
 }
 
 void DevConClient::log(LoggerLevel level, const String& msg)
 {
-	//queue->enqueue();
+	queue->enqueue(std::make_unique<DevCon::LogMsg>(level, msg), 0);
+	queue->sendAll();
+	service->update();
 }

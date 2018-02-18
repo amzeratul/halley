@@ -27,7 +27,7 @@ void EditorRootStage::init()
 		console = std::make_unique<ConsoleWindow>(getResources());
 	}
 
-	devConServer = std::make_unique<DevConServer>(getNetworkAPI().createService(devConPort), devConPort);
+	devConServer = std::make_unique<DevConServer>(getNetworkAPI().createService(DevCon::devConPort), DevCon::devConPort);
 }
 
 void EditorRootStage::onVariableUpdate(Time time)

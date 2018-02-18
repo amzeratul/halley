@@ -1,20 +1,37 @@
 #include "devcon/devcon_server.h"
 #include "connection/network_service.h"
 #include "halley/support/logger.h"
+#include <memory>
 using namespace Halley;
 
 DevConServerConnection::DevConServerConnection(std::shared_ptr<IConnection> conn)
 	: connection(std::make_shared<ReliableConnection>(conn))
 	, queue(std::make_shared<MessageQueue>(connection))
 {
-	queue->setChannel(0, ChannelSettings(true, true));
+	DevCon::setupMessageQueue(*queue);
 }
 
 void DevConServerConnection::update()
 {
-	for (auto& msg: queue->receiveAll()) {
-		// TODO
+	for (auto& m: queue->receiveAll()) {
+		auto& msg = dynamic_cast<DevCon::DevConMessage&>(*m);
+		switch (msg.getMessageType()) {
+		case DevCon::MessageType::Log:
+			onReceiveLogMsg(dynamic_cast<DevCon::LogMsg&>(msg));
+			break;
+
+		case DevCon::MessageType::ReloadAssets:
+			// TODO;
+
+		default:
+			break;
+		}
 	}
+}
+
+void DevConServerConnection::onReceiveLogMsg(const DevCon::LogMsg& msg)
+{
+	Logger::log(msg.getLevel(), "[REMOTE] " + msg.getMessage());
 }
 
 DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)

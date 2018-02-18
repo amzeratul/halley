@@ -13,7 +13,7 @@ namespace Halley
 	class DevConClient : private ILoggerSink
 	{
 	public:
-		DevConClient(std::unique_ptr<NetworkService> service, const String& address, int port = devConPort);
+		DevConClient(std::unique_ptr<NetworkService> service, const String& address, int port = DevCon::devConPort);
 		~DevConClient();
 
 		void update();
