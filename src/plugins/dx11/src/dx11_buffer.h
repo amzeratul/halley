@@ -22,6 +22,8 @@ namespace Halley {
 		void setData(gsl::span<const gsl::byte> data);
 		ID3D11Buffer*& getBuffer();
 
+		void clear();
+
 	private:
 		DX11Video& video;
 		Type type;
