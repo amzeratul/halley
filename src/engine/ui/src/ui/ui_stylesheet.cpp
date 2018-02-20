@@ -21,10 +21,13 @@ UIStyleSheet::UIStyleSheet(const ConfigNode& node, Resources& resources)
 				if (spriteNode.second.asString().isEmpty()) {
 					sprites[name] = defaultSprite;
 				} else {
-					sprites[name] = Sprite().setImage(resources, spriteNode.second.asString());
+					sprites[name] = Sprite()
+						.setImage(resources, spriteNode.second.asString());
 				}
 			} else {
-				sprites[name] = Sprite().setImage(resources, spriteNode.second["img"].asString()).setColour(Colour4f::fromString(spriteNode.second["colour"].asString("#FFFFFF")));
+				sprites[name] = Sprite()
+					.setImage(resources, spriteNode.second["img"].asString())
+					.setColour(Colour4f::fromString(spriteNode.second["colour"].asString("#FFFFFF")));
 			}
 		}
 	}
@@ -33,7 +36,12 @@ UIStyleSheet::UIStyleSheet(const ConfigNode& node, Resources& resources)
 		for (auto& textNode: UIStyleSheet["textRenderers"].asMap()) {
 			String name = textNode.first;
 			auto& text = textNode.second;
-			textRenderers[name] = TextRenderer().setFont(resources.get<Font>(text["font"].asString())).setSize(text["size"].asFloat()).setColour(Colour4f::fromString(text["colour"].asString()));
+			textRenderers[name] = TextRenderer()
+				.setFont(resources.get<Font>(text["font"].asString()))
+				.setSize(text["size"].asFloat())
+				.setColour(Colour4f::fromString(text["colour"].asString()))
+				.setOutline(text["outline"].asFloat(0.0f))
+				.setOutlineColour(Colour4f::fromString(text["outlineColour"].asString("#000000")));
 		}
 	}
 

@@ -9,6 +9,9 @@ static float getDistanceAt(const int* src, int srcW, int srcH, int xCentre, int 
 {
 	auto getAlpha = [&](int x, int y) { return (src[x + y * srcW] & 0xFF000000) >> 24; };
 	bool isInside = getAlpha(xCentre, yCentre) > 127;
+	if (radius < 0.001f) {
+		return isInside ? 1.0f : 0.0f;
+	}
 
 	int iRadius = int(ceil(radius));
 	int x0 = std::max(0, xCentre - iRadius);
@@ -28,9 +31,9 @@ static float getDistanceAt(const int* src, int srcW, int srcH, int xCentre, int 
 		}
 	}
 
-	float dist = float(sqrt(bestDistSqr));
-	float normalDistance = dist / (2 * radius);
-	float finalValue = isInside ? 0.5f + normalDistance : 0.5f - normalDistance;
+	const float dist = float(sqrt(bestDistSqr));
+	const float normalDistance = (2 * dist - 1) / (2 * radius);
+	const float finalValue = 0.5f * (isInside ? 1.0f + normalDistance : 1.0f - normalDistance);
 
 	return finalValue;
 }

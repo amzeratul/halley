@@ -17,6 +17,7 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	Vector2i imgSize;
 	imgSize.x = meta.getInt("width", 512);
 	imgSize.y = meta.getInt("height", 512);
+	int fontSize = meta.getInt("fontSize", 0);
 
 	auto data = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
 
@@ -24,16 +25,30 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	{
 		return collector.reportProgress(progress, label);
 	});
-	auto result = gen.generateFont(asset.assetId, data, imgSize, radius, supersample, Range<int>(0, 255));
+
+	FontGenerator::FontSizeInfo sizeInfo;
+	if (fontSize != 0) {
+		sizeInfo.fontSize = fontSize;
+	} else {
+		sizeInfo.imageSize = imgSize;
+	}
+
+	auto result = gen.generateFont(meta, data, sizeInfo, radius, supersample, Range<int>(0, 255));
 	if (!result.success) {
 		return;
 	}
 
-	collector.output(result.font->getName(), AssetType::Font, Serializer::toBytes(*result.font));
+	auto fontName = result.font->getName();
+
+	collector.output(fontName, AssetType::Font, Serializer::toBytes(*result.font));
+
+	if (meta.hasKey("filtering")) {
+		result.imageMeta->set("filtering", meta.getBool("filtering"));
+	}
 
 	ImportingAsset image;
-	image.assetId = result.font->getName();
+	image.assetId = fontName;
 	image.assetType = ImportAssetType::Image;
-	image.inputFiles.emplace_back(ImportingAssetFile(result.font->getName(), Serializer::toBytes(*result.image), *result.imageMeta));
+	image.inputFiles.emplace_back(ImportingAssetFile(fontName, Serializer::toBytes(*result.image), *result.imageMeta));
 	collector.addAdditionalAsset(std::move(image));
 }

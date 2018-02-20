@@ -4,6 +4,7 @@
 #include <halley/maths/rect.h>
 #include "halley/file/path.h"
 #include "halley/resources/metadata.h"
+#include "halley/data_structures/maybe.h"
 
 namespace Halley
 {
@@ -40,11 +41,17 @@ namespace Halley
 		static bool ignoreReport(float, String) { return true; }
 
 	public:
+		struct FontSizeInfo
+		{
+			Maybe<Vector2i> imageSize;
+			Maybe<float> fontSize;
+		};
+
 		explicit FontGenerator(bool verbose = false, std::function<bool(float, String)> progressReporter = ignoreReport);
-		FontGeneratorResult generateFont(String assetName, gsl::span<const gsl::byte> fontFile, Vector2i size, float radius, int supersample, Range<int> range);
+		FontGeneratorResult generateFont(const Metadata& meta, gsl::span<const gsl::byte> fontFile, FontSizeInfo sizeInfo, float radius, int supersample, Range<int> range);
 
 	private:
-		std::unique_ptr<Font> generateFontMapBinary(FontFace& font, Vector<CharcodeEntry>& entries, float scale, float radius, Vector2i imageSize) const;
+		std::unique_ptr<Font> generateFontMapBinary(const Metadata& meta, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float radius, Vector2i imageSize) const;
 		static std::unique_ptr<Metadata> generateTextureMeta();
 
 		bool verbose;

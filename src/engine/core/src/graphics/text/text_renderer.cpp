@@ -134,7 +134,7 @@ void TextRenderer::draw(Painter& painter) const
 	}
 
 	float scale = size / font->getSizePoints();
-	Vector2f p = position + Vector2f(0, font->getAscenderDistance() * scale);
+	Vector2f p = (position + Vector2f(0, font->getAscenderDistance() * scale)).floor();
 	if (offset != Vector2f(0, 0)) {
 		p -= (getExtents() * offset).floor();
 	}
