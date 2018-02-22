@@ -12,6 +12,7 @@ namespace Halley {
 		void setColourOverride(const std::vector<ColourOverride>& overrides);
 		void setMaxWidth(float maxWidth);
 		void setMaxHeight(float maxHeight);
+		void setTextRenderer(TextRenderer renderer);
 
 		void setColour(Colour4f colour);
 

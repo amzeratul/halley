@@ -2,9 +2,11 @@
 
 using namespace Halley;
 
-UIMenuButton::UIMenuButton(String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)
+UIMenuButton::UIMenuButton(std::shared_ptr<UIMenuButtonGroup> group, String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)
 	: UIClickable(id, minSize, sizer, innerBorder)
+	, group(group)
 {
+	Expects(group);
 }
 
 void UIMenuButton::onClicked(Vector2f mousePos)
@@ -19,7 +21,8 @@ void UIMenuButton::onOptionChosen()
 
 void UIMenuButton::setGroupFocused(bool focused)
 {
-	groupFocused = true;
+	groupFocused = focused;
+	onGroupState(groupFocused ? State::Hover : State::Up);
 }
 
 void UIMenuButton::doSetState(State state)
@@ -41,7 +44,7 @@ void UIMenuButton::onGroupState(State state)
 
 void UIMenuButtonGroup::addButton(std::shared_ptr<UIMenuButton> button, const String& up, const String& down, const String& left, const String& right)
 {
-	buttons.push_back({button, up, down, left, right});
+	buttons.push_back({ button, button->getId(), up, down, left, right });
 }
 
 void UIMenuButtonGroup::setCancelId(const String& id)

@@ -6,7 +6,7 @@ namespace Halley {
 
 	class UIMenuButton : public UIClickable {
 	public:
-		UIMenuButton(String id, Vector2f minSize = {}, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
+		UIMenuButton(std::shared_ptr<UIMenuButtonGroup> group, String id, Vector2f minSize = {}, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 
 		void onClicked(Vector2f mousePos) override;
 		void onOptionChosen();

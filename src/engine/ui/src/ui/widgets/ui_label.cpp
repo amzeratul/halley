@@ -67,6 +67,13 @@ void UILabel::setMaxHeight(float m)
 	updateMinSize();
 }
 
+void UILabel::setTextRenderer(TextRenderer renderer)
+{
+	renderer.setText(text.getText()).setPosition(text.getPosition());
+	text = renderer;
+	updateMinSize();
+}
+
 void UILabel::setColour(Colour4f colour)
 {
 	text.setColour(colour);
