@@ -7,7 +7,7 @@ namespace Halley {
 
 	class UIClickable : public UIWidget {
 	public:
-		explicit UIClickable(String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
+		UIClickable(String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 
 		bool canInteractWithMouse() const override;
 		bool isFocusLocked() const override;
