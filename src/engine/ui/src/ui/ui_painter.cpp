@@ -37,6 +37,13 @@ UIPainter UIPainter::withClip(Rect4f newClip)
 	return result;
 }
 
+UIPainter UIPainter::withMask(int mask)
+{
+	auto result = clone();
+	result.mask = mask;
+	return result;
+}
+
 float UIPainter::getCurrentPriority()
 {
 	if (parent) {

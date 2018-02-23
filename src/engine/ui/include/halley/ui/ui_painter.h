@@ -17,6 +17,7 @@ namespace Halley {
 		UIPainter clone();
 		UIPainter withAdjustedLayer(int delta);
 		UIPainter withClip(Rect4f clip);
+		UIPainter withMask(int mask);
 
 	private:
 		SpritePainter& painter;

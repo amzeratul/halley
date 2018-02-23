@@ -25,6 +25,11 @@ void UIMenuButton::setGroupFocused(bool focused)
 	onGroupState(groupFocused ? State::Hover : State::Up);
 }
 
+bool UIMenuButton::isGroupFocused() const
+{
+	return groupFocused;
+}
+
 void UIMenuButton::doSetState(State state)
 {
 	switch (state) {

@@ -11,6 +11,7 @@ namespace Halley {
 		void onClicked(Vector2f mousePos) override;
 		void onOptionChosen();
 		void setGroupFocused(bool focused);
+		bool isGroupFocused() const;
 
 	protected:
 		void doSetState(State state) override final;
