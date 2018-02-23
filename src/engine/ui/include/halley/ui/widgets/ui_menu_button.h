@@ -31,6 +31,7 @@ namespace Halley {
 		bool setFocus(UIMenuButton& uiMenuButton);
 		bool setFocus(const String& id);
 		std::shared_ptr<UIMenuButton> getCurrentFocus() const;
+		size_t size() const;
 
 	private:
 		struct ButtonEntry {

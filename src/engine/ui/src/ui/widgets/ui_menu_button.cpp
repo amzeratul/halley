@@ -50,6 +50,9 @@ void UIMenuButton::onGroupState(State state)
 void UIMenuButtonGroup::addButton(std::shared_ptr<UIMenuButton> button, const String& up, const String& down, const String& left, const String& right)
 {
 	buttons.push_back({ button, button->getId(), up, down, left, right });
+	if (buttons.size() == 1) {
+		setFocus(*button);
+	}
 }
 
 void UIMenuButtonGroup::setCancelId(const String& id)
@@ -59,6 +62,10 @@ void UIMenuButtonGroup::setCancelId(const String& id)
 
 void UIMenuButtonGroup::onInput(const UIInputResults& input)
 {
+	if (size() == 0) {
+		return;
+	}
+
 	const int x = input.getAxisRepeat(UIInput::Axis::X);
 	const int y = input.getAxisRepeat(UIInput::Axis::Y);
 
@@ -121,6 +128,11 @@ bool UIMenuButtonGroup::setFocus(const String& id)
 std::shared_ptr<UIMenuButton> UIMenuButtonGroup::getCurrentFocus() const
 {
 	return getCurFocusEntry().button.lock();
+}
+
+size_t UIMenuButtonGroup::size() const
+{
+	return buttons.size();
 }
 
 const UIMenuButtonGroup::ButtonEntry& UIMenuButtonGroup::getCurFocusEntry() const
