@@ -186,9 +186,19 @@ namespace Halley {
 			return Rect2D<T>(p1 + v, p2 + v);
 		}
 
+		Rect2D<T> operator+(Rect2D<T> v) const
+		{
+			return Rect2D<T>(p1 + v.p1, p2 + v.p2);
+		}
+
 		Rect2D<T> operator-(Vector2D<T> v) const
 		{
 			return Rect2D<T>(p1 - v, p2 - v);
+		}
+
+		Rect2D<T> operator-(Rect2D<T> v) const
+		{
+			return Rect2D<T>(p1 - v.p1, p2 - v.p2);
 		}
 
 		Rect2D<T>& operator+=(Vector2D<T> v)
