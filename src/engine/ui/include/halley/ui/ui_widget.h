@@ -95,6 +95,7 @@ namespace Halley {
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
+		virtual void drawAfterChildren(UIPainter& painter) const;
 		virtual void drawChildren(UIPainter& painter) const;
 		virtual void update(Time t, bool moved);
 

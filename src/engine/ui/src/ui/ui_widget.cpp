@@ -22,6 +22,7 @@ void UIWidget::doDraw(UIPainter& painter) const
 	if (active) {
 		draw(painter);
 		drawChildren(painter);
+		drawAfterChildren(painter);
 	}
 }
 
@@ -394,6 +395,10 @@ Rect4f UIWidget::getMouseRect() const
 }
 
 void UIWidget::draw(UIPainter& painter) const
+{
+}
+
+void UIWidget::drawAfterChildren(UIPainter& painter) const
 {
 }
 
