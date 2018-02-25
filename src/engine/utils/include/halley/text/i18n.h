@@ -21,6 +21,10 @@ namespace Halley {
 
 		const String& getString() const;
 
+		bool operator==(const LocalisedString& other) const;
+		bool operator!=(const LocalisedString& other) const;
+		bool operator<(const LocalisedString& other) const;
+
 	private:
 		explicit LocalisedString(const String& string);
 
@@ -46,3 +50,4 @@ namespace Halley {
 		LocalisedString missingStr;
 	};
 }
+

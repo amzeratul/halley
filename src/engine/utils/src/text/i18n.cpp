@@ -87,3 +87,18 @@ const String& LocalisedString::getString() const
 {
 	return string;
 }
+
+bool LocalisedString::operator==(const LocalisedString& other) const
+{
+	return string == other.string;
+}
+
+bool LocalisedString::operator!=(const LocalisedString& other) const
+{
+	return string != other.string;
+}
+
+bool LocalisedString::operator<(const LocalisedString& other) const
+{
+	return string < other.string;
+}

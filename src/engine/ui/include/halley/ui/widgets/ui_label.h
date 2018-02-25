@@ -2,11 +2,12 @@
 #include "../ui_widget.h"
 #include "halley/core/graphics/text/text_renderer.h"
 #include <climits>
+#include "halley/text/i18n.h"
 
 namespace Halley {
 	class UILabel : public UIWidget {
 	public:
-		explicit UILabel(TextRenderer text);
+		explicit UILabel(TextRenderer style, const LocalisedString& text);
 
 		void setText(const LocalisedString& text);
 		void setColourOverride(const std::vector<ColourOverride>& overrides);
@@ -22,7 +23,9 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 	private:
-		TextRenderer text;
+		TextRenderer renderer;
+		LocalisedString text;
+
 		float maxWidth = std::numeric_limits<float>::infinity();
 		float maxHeight = std::numeric_limits<float>::infinity();
 		bool needsClip = false;

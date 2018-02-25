@@ -3,19 +3,21 @@
 
 using namespace Halley;
 
-UILabel::UILabel(TextRenderer text)
+UILabel::UILabel(TextRenderer style, const LocalisedString& text)
 	: UIWidget("", {})
+	, renderer(style)
 	, text(text)
 {
+	renderer.setText(text);
 	updateMinSize();
 }
 
 void UILabel::draw(UIPainter& painter) const
 {
 	if (needsClip) {
-		painter.withClip(Rect4f(getPosition(), getPosition() + getMinimumSize())).draw(text);
+		painter.withClip(Rect4f(getPosition(), getPosition() + getMinimumSize())).draw(renderer);
 	} else {
-		painter.draw(text);
+		painter.draw(renderer);
 	}
 
 	UIWidget::draw(painter);
@@ -24,17 +26,17 @@ void UILabel::draw(UIPainter& painter) const
 void UILabel::update(Time t, bool moved)
 {
 	if (moved) {
-		text.setPosition(getPosition());
+		renderer.setPosition(getPosition());
 	}
 }
 
 void UILabel::updateMinSize()
 {
 	needsClip = false;
-	auto extents = text.getExtents();
+	auto extents = renderer.getExtents();
 	if (extents.x > maxWidth) {
-		text.setText(text.split(maxWidth));
-		extents = text.getExtents();
+		renderer.setText(renderer.split(maxWidth));
+		extents = renderer.getExtents();
 	}
 	if (extents.y > maxHeight) {
 		extents.y = maxHeight;
@@ -45,15 +47,16 @@ void UILabel::updateMinSize()
 
 void UILabel::setText(const LocalisedString& t)
 {
-	if (text.getText() != t.getString()) {
-		text.setText(t);
+	if (text != t) {
+		text = t;
+		renderer.setText(text);
 		updateMinSize();
 	}
 }
 
 void UILabel::setColourOverride(const std::vector<ColourOverride>& overrides)
 {
-	text.setColourOverride(overrides);
+	renderer.setColourOverride(overrides);
 }
 
 void UILabel::setMaxWidth(float m)
@@ -70,14 +73,14 @@ void UILabel::setMaxHeight(float m)
 
 void UILabel::setTextRenderer(TextRenderer renderer)
 {
-	renderer.setText(text.getText()).setPosition(text.getPosition());
-	text = renderer;
+	renderer.setText(renderer.getText()).setPosition(renderer.getPosition());
+	renderer = renderer;
 	updateMinSize();
 }
 
 void UILabel::setColour(Colour4f colour)
 {
-	text.setColour(colour);
+	renderer.setColour(colour);
 }
 
 void UILabel::setSelectable(Colour4f normalColour, Colour4f selColour)
