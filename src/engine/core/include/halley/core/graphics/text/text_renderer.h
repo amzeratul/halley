@@ -8,6 +8,7 @@
 
 namespace Halley
 {
+	class LocalisedString;
 	class Font;
 	class Painter;
 	class Material;
@@ -24,6 +25,7 @@ namespace Halley
 		TextRenderer& setFont(std::shared_ptr<const Font> font);
 		TextRenderer& setText(const String& text);
 		TextRenderer& setText(const StringUTF32& text);
+		TextRenderer& setText(const LocalisedString& text);
 		TextRenderer& setSize(float size);
 		TextRenderer& setColour(Colour colour);
 		TextRenderer& setOutlineColour(Colour colour);

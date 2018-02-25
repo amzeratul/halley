@@ -53,7 +53,7 @@ size_t UIList::getCount() const
 	return items.size();
 }
 
-void UIList::addTextItem(const String& id, const String& label, float maxWidth)
+void UIList::addTextItem(const String& id, const LocalisedString& label, float maxWidth)
 {
 	auto widget = std::make_shared<UILabel>(style.getTextRenderer("label").clone().setText(label));
 	if (maxWidth > 0) {

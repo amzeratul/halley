@@ -4,10 +4,11 @@
 #include "widgets/ui_scroll_pane.h"
 #include "widgets/ui_scrollbar.h"
 #include "widgets/ui_list.h"
+#include "halley/text/i18n.h"
 
 using namespace Halley;
 
-UIDropdown::UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, const std::vector<String>& os, int defaultOption)
+UIDropdown::UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, const std::vector<LocalisedString>& os, int defaultOption)
 	: UIClickable(id, {})
 	, style(style)
 	, scrollbarStyle(scrollbarStyle)
@@ -22,7 +23,7 @@ UIDropdown::UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle
 
 	sprite = style.getSprite("normal");
 	if (options.empty()) {
-		options.push_back("");
+		options.push_back(LocalisedString());
 	}
 	curOption = clamp(curOption, 0, int(options.size() - 1));
 	label = style.getTextRenderer("label").clone().setText(options[defaultOption]);
@@ -41,7 +42,7 @@ void UIDropdown::setSelectedOption(int option)
 	if (curOption != nextOption) {
 		curOption = nextOption;
 		label.setText(options[curOption]);
-		sendEvent(UIEvent(UIEventType::DropboxSelectionChanged, getId(), options[curOption], curOption));
+		sendEvent(UIEvent(UIEventType::DropboxSelectionChanged, getId(), options[curOption].getString(), curOption));
 	}
 }
 
@@ -60,7 +61,7 @@ int UIDropdown::getSelectedOption() const
 	return curOption;
 }
 
-String UIDropdown::getSelectedOptionText() const
+LocalisedString UIDropdown::getSelectedOptionText() const
 {
 	return options[curOption];
 }

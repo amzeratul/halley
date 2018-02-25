@@ -13,12 +13,12 @@ namespace Halley {
 
 	class UIDropdown : public UIClickable {
 	public:
-		explicit UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, const std::vector<String>& options, int defaultOption = 0);
+		explicit UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, const std::vector<LocalisedString>& options, int defaultOption = 0);
 
 		void setSelectedOption(int option);
 		void setSelectedOption(const String& option);
 		int getSelectedOption() const;
-		String getSelectedOptionText() const;
+		LocalisedString getSelectedOptionText() const;
 
 		void setInputButtons(const UIInputButtons& buttons) override;
 
@@ -43,7 +43,7 @@ namespace Halley {
 		std::shared_ptr<UIList> dropdownList;
 		std::shared_ptr<UIScrollPane> scrollPane;
 		
-		std::vector<String> options;
+		std::vector<LocalisedString> options;
 		int curOption = 0;
 		bool isOpen = false;
 

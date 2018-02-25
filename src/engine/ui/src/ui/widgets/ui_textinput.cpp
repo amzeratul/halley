@@ -1,10 +1,11 @@
 #include "widgets/ui_textinput.h"
 #include "ui_style.h"
 #include "ui_validator.h"
+#include "halley/text/i18n.h"
 
 using namespace Halley;
 
-UITextInput::UITextInput(std::shared_ptr<InputDevice> keyboard, String id, UIStyle style, String text, String ghostText)
+UITextInput::UITextInput(std::shared_ptr<InputDevice> keyboard, String id, UIStyle style, String text, LocalisedString ghostText)
 	: UIWidget(id, {}, UISizer(UISizerType::Vertical), Vector4f(3, 3, 3, 3))
 	, keyboard(keyboard)
 	, style(style)
@@ -32,13 +33,13 @@ String UITextInput::getText() const
 	return String(text);
 }
 
-UITextInput& UITextInput::setGhostText(const String& t)
+UITextInput& UITextInput::setGhostText(const LocalisedString& t)
 {
 	ghostText = t;
 	return *this;
 }
 
-String UITextInput::getGhostText() const
+LocalisedString UITextInput::getGhostText() const
 {
 	return ghostText;
 }

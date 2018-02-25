@@ -4,6 +4,7 @@
 #include "halley/core/graphics/material/material.h"
 #include "halley/core/graphics/material/material_parameter.h"
 #include <gsl/gsl_assert>
+#include "halley/text/i18n.h"
 
 using namespace Halley;
 
@@ -46,6 +47,12 @@ TextRenderer& TextRenderer::setText(const String& v)
 TextRenderer& TextRenderer::setText(const StringUTF32& v)
 {
 	text = v;
+	return *this;
+}
+
+TextRenderer& TextRenderer::setText(const LocalisedString& v)
+{
+	text = v.getString().getUTF32();
 	return *this;
 }
 

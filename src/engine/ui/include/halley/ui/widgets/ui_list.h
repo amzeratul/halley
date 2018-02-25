@@ -22,7 +22,7 @@ namespace Halley {
 		const String& getSelectedOptionId() const;
 		size_t getCount() const;
 
-		void addTextItem(const String& id, const String& label, float maxWidth = -1);
+		void addTextItem(const String& id, const LocalisedString& label, float maxWidth = -1);
 		void addItem(const String& id, std::shared_ptr<UIWidget> widget, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill);
 		void addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill);
 		void clear();

@@ -1,4 +1,5 @@
 #include "widgets/ui_label.h"
+#include "halley/text/i18n.h"
 
 using namespace Halley;
 
@@ -42,9 +43,9 @@ void UILabel::updateMinSize()
 	setMinSize(extents);
 }
 
-void UILabel::setText(const String& t)
+void UILabel::setText(const LocalisedString& t)
 {
-	if (text.getText() != t) {
+	if (text.getText() != t.getString()) {
 		text.setText(t);
 		updateMinSize();
 	}
