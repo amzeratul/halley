@@ -220,8 +220,8 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 		int32_t charcode = c.charcode;
 		Rect4f area = Rect4f(c.rect) / Vector2f(imageSize);
 		Vector2f size = Vector2f(c.rect.getSize());
-		Vector2f horizontalBearing = metrics.bearingHorizontal + Vector2f(-padding, padding);
-		Vector2f verticalBearing = metrics.bearingVertical + Vector2f(-padding, padding);
+		Vector2f horizontalBearing = metrics.bearingHorizontal + Vector2f(float(-padding), float(padding));
+		Vector2f verticalBearing = metrics.bearingVertical + Vector2f(float(-padding), float(padding));
 		Vector2f advance = metrics.advance;
 
 		result->addGlyph(Font::Glyph(charcode, area, size, horizontalBearing, verticalBearing, advance));

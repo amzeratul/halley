@@ -101,7 +101,7 @@ void ReliableConnection::sendTagged(gsl::span<ReliableSubPacket> subPackets)
 		// Update caller on the sequence number of this
 		subPacket.seq = seq;
 		if (subPacket.resends) {
-			std::cout << "Re-sending " << subPacket.resendSeq << " as " << seq << std::endl;
+			//std::cout << "Re-sending " << subPacket.resendSeq << " as " << seq << std::endl;
 		}
 	}
 
