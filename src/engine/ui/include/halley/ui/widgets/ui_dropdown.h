@@ -16,7 +16,6 @@ namespace Halley {
 		explicit UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, const std::vector<LocalisedString>& options, int defaultOption = 0);
 
 		void setSelectedOption(int option);
-		void setSelectedOption(const String& option);
 		int getSelectedOption() const;
 		LocalisedString getSelectedOptionText() const;
 
