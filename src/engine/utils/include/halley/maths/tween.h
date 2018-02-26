@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../utils/utils.h"
+#include "../time/halleytime.h"
 
 namespace Halley {
 	enum class TweenCurve {
