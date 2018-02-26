@@ -116,6 +116,7 @@ set(HEADERS
         "include/halley/maths/random.h"
         "include/halley/maths/range.h"
         "include/halley/maths/rect.h"
+        "include/halley/maths/tween.h"
         "include/halley/maths/vector2.h"
 		"include/halley/maths/vector2.natvis"
         "include/halley/maths/vector3.h"
