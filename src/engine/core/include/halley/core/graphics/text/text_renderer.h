@@ -37,6 +37,7 @@ namespace Halley
 		TextRenderer& setSmoothness(float smoothness);
 		TextRenderer& setPixelOffset(Vector2f offset);
 		TextRenderer& setColourOverride(const std::vector<ColourOverride>& colOverride);
+		TextRenderer& setLineSpacing(float spacing);
 
 		TextRenderer clone() const;
 
@@ -53,6 +54,7 @@ namespace Halley
 		Colour getOutlineColour() const;
 		float getSmoothness() const;
 		Maybe<Rect4f> getClip() const;
+		float getLineHeight() const;
 
 	private:
 		std::shared_ptr<const Font> font;
@@ -63,6 +65,7 @@ namespace Halley
 		float outline = 0;
 		float align = 0;
 		float smoothness = 1.0f;
+		float lineSpacing = 0.0f;
 		
 		Vector2f position;
 		Vector2f offset;

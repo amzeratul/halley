@@ -116,6 +116,12 @@ TextRenderer& TextRenderer::setColourOverride(const std::vector<ColourOverride>&
 	return *this;
 }
 
+TextRenderer& TextRenderer::setLineSpacing(float spacing)
+{
+	lineSpacing = spacing;
+	return *this;
+}
+
 TextRenderer TextRenderer::clone() const
 {
 	return *this;
@@ -163,7 +169,7 @@ void TextRenderer::draw(Painter& painter) const
 		}
 
 		// Move pen
-		p.y += font->getHeight() * scale;
+		p.y += getLineHeight();
 
 		// Reset
 		startPos = sprites.size();
@@ -219,7 +225,7 @@ Vector2f TextRenderer::getExtents() const
 	Vector2f p;
 	float w = 0;
 	float scale = size / font->getSizePoints();
-	float lineH = font->getHeight() * scale;
+	float lineH = getLineHeight();
 
 	for (auto& c : text) {
 		if (c == '\n') {
@@ -330,4 +336,10 @@ float TextRenderer::getSmoothness() const
 Maybe<Rect4f> TextRenderer::getClip() const
 {
 	return clip;
+}
+
+float TextRenderer::getLineHeight() const
+{
+	float scale = size / font->getSizePoints();
+	return roundf(font->getHeight() * scale + lineSpacing);
 }
