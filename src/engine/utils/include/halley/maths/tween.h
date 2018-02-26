@@ -44,7 +44,7 @@ namespace Halley {
 
 		void update(Time t)
 		{
-			time = std::clamp(time + t * direction, 0.0, length);
+			time = clamp(time + t * direction, 0.0, length);
 		}
 
 		Tween& setLength(Time t)
