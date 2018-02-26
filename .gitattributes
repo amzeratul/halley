@@ -1,4 +1,4 @@
-contrib/* linguist-vendored
-engine/utils/contrib/* linguist-vendored
-engine/opengl/src/gl_core_3_3.c linguist-vendored
-engine/opengl/include/halley/opengl/gl_core_3_3.h linguist-vendored
+src/contrib/* linguist-vendored
+src/engine/utils/contrib/* linguist-vendored
+src/plugins/opengl/src/gl_core_3_3.c linguist-vendored
+src/plugins/opengl/include/halley/opengl/gl_core_3_3.h linguist-vendored
