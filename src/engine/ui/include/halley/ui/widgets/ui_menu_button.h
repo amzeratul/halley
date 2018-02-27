@@ -32,6 +32,8 @@ namespace Halley {
 		bool setFocus(const String& id);
 		std::shared_ptr<UIMenuButton> getCurrentFocus() const;
 		size_t size() const;
+		
+		void setEnabled(bool enabled);
 
 	private:
 		struct ButtonEntry {
@@ -46,6 +48,7 @@ namespace Halley {
 		std::vector<ButtonEntry> buttons;
 		String curFocus;
 		String cancelId;
+		bool enabled = true;
 
 		const ButtonEntry& getCurFocusEntry() const;
 		ButtonEntry& getCurFocusEntry();

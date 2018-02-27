@@ -62,7 +62,7 @@ void UIMenuButtonGroup::setCancelId(const String& id)
 
 void UIMenuButtonGroup::onInput(const UIInputResults& input)
 {
-	if (size() == 0) {
+	if (size() == 0 || !enabled) {
 		return;
 	}
 
@@ -100,6 +100,10 @@ void UIMenuButtonGroup::onInput(const UIInputResults& input)
 
 bool UIMenuButtonGroup::setFocus(UIMenuButton& uiMenuButton)
 {
+	if (!enabled) {
+		return false;
+	}
+
 	auto iter = std::find_if(buttons.begin(), buttons.end(), [&] (const ButtonEntry& e) { return e.button.lock().get() == &uiMenuButton; });
 	if (iter == buttons.end()) {
 		return false;
@@ -117,9 +121,11 @@ bool UIMenuButtonGroup::setFocus(UIMenuButton& uiMenuButton)
 
 bool UIMenuButtonGroup::setFocus(const String& id)
 {
-	for (auto& b: buttons) {
-		if (b.id == id) {
-			return setFocus(*b.button.lock());
+	if (enabled) {
+		for (auto& b: buttons) {
+			if (b.id == id) {
+				return setFocus(*b.button.lock());
+			}
 		}
 	}
 	return false;
@@ -133,6 +139,11 @@ std::shared_ptr<UIMenuButton> UIMenuButtonGroup::getCurrentFocus() const
 size_t UIMenuButtonGroup::size() const
 {
 	return buttons.size();
+}
+
+void UIMenuButtonGroup::setEnabled(bool e)
+{
+	enabled = e;
 }
 
 const UIMenuButtonGroup::ButtonEntry& UIMenuButtonGroup::getCurFocusEntry() const
