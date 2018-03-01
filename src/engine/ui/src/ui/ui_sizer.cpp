@@ -74,6 +74,11 @@ bool UISizerEntry::isEnabled() const
 	return !widget || widget->isActive();
 }
 
+void UISizerEntry::setBorder(const Vector4f& b)
+{
+	border = b;
+}
+
 Vector4f UISizerEntry::getBorder() const
 {
 	return border;
