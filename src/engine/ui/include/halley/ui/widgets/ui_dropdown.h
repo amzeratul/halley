@@ -20,6 +20,7 @@ namespace Halley {
 		LocalisedString getSelectedOptionText() const;
 
 		void setInputButtons(const UIInputButtons& buttons) override;
+		void setOptions(const std::vector<LocalisedString>& options);
 
 	protected:
 		void draw(UIPainter& painter) const override;

@@ -13,27 +13,11 @@ UIDropdown::UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle
 	, style(style)
 	, scrollbarStyle(scrollbarStyle)
 	, listStyle(listStyle)
-	, options(os)
 	, curOption(defaultOption)
 {
-	if (defaultOption < 0 || defaultOption >= int(os.size())) {
-		defaultOption = 0;
-		curOption = 0;
-	}
-
 	sprite = style.getSprite("normal");
-	if (options.empty()) {
-		options.push_back(LocalisedString());
-	}
-	curOption = clamp(curOption, 0, int(options.size() - 1));
-	label = style.getTextRenderer("label").clone().setText(options[defaultOption]);
 
-	float maxExtents = 0;
-	for (auto& o: options) {
-		maxExtents = std::max(maxExtents, label.clone().setText(o).getExtents().x);
-	}
-
-	setMinSize(Vector2f(maxExtents + 19, 14)); // HACK
+	setOptions(os);
 }
 
 void UIDropdown::setSelectedOption(int option)
@@ -41,7 +25,7 @@ void UIDropdown::setSelectedOption(int option)
 	int nextOption = clamp(option, 0, int(options.size()));
 	if (curOption != nextOption) {
 		curOption = nextOption;
-		label.setText(options[curOption]);
+		label.setText(options.at(curOption));
 		sendEvent(UIEvent(UIEventType::DropboxSelectionChanged, getId(), options[curOption].getString(), curOption));
 	}
 }
@@ -62,6 +46,22 @@ void UIDropdown::setInputButtons(const UIInputButtons& buttons)
 	if (dropdownList) {
 		dropdownList->setInputButtons(buttons);
 	}
+}
+
+void UIDropdown::setOptions(const std::vector<LocalisedString>& os)
+{
+	options = os;
+	if (options.empty()) {
+		options.emplace_back();
+	}
+	curOption = clamp(curOption, 0, int(options.size() - 1));
+	label = style.getTextRenderer("label").clone().setText(options[curOption]);
+
+	float maxExtents = 0;
+	for (auto& o: options) {
+		maxExtents = std::max(maxExtents, label.clone().setText(o).getExtents().x);
+	}
+	setMinSize(Vector2f(maxExtents + 19, 14)); // HACK
 }
 
 void UIDropdown::draw(UIPainter& painter) const
