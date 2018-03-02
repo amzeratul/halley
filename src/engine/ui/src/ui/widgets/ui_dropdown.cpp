@@ -64,6 +64,11 @@ void UIDropdown::setOptions(const std::vector<LocalisedString>& os)
 	setMinSize(Vector2f(maxExtents + 19, 14)); // HACK
 }
 
+void UIDropdown::onCycleValue(int delta)
+{
+	setSelectedOption(modulo(curOption + delta, int(options.size())));
+}
+
 void UIDropdown::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);

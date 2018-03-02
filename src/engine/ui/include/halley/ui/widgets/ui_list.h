@@ -29,6 +29,8 @@ namespace Halley {
 
 		Rect4f getOptionRect(int curOption) const;
 
+		void onCycleValue(int delta) override;
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;

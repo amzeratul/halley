@@ -293,3 +293,8 @@ Rect4f UIList::getOptionRect(int curOption) const
 		return item->getRawRect() - getPosition();
 	}
 }
+
+void UIList::onCycleValue(int delta)
+{
+	setSelectedOption(modulo(curOption + delta, int(items.size())));
+}

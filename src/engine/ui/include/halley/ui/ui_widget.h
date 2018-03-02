@@ -90,6 +90,8 @@ namespace Halley {
 		
 		bool isDescendentOf(const UIWidget& ancestor) const override;
 		void setMouseClip(Maybe<Rect4f> mouseClip);
+
+		virtual void onCycleValue(int delta);
 		
 		UIInput::Priority getInputPriority() const;
 
