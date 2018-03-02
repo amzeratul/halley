@@ -14,6 +14,7 @@ namespace Halley {
 		explicit UIHybridList(const String& id, AddCallback callback, UIStyle listStyle, UIStyle buttonStyle, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 
 		void addId(const String& id);
+	    void addDivider();
 
 		void setInputButtons(const UIInputButtons& button);
 

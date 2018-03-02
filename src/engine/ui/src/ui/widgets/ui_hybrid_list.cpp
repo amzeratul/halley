@@ -24,9 +24,14 @@ void UIHybridList::addId(const String& id)
 {
 	list->addItem(id, callback(id, AddType::List));
 
-	auto button = std::make_shared<UIButton>(id, buttonStyle, UISizer(UISizerType::Horizontal), buttonStyle.getBorder("innerBorder"));
+	auto button = std::make_shared<UIButton>(id, buttonStyle, UISizer(UISizerType::Vertical), buttonStyle.getBorder("innerBorder"));
 	button->add(callback(id, AddType::Button));
 	buttons->add(button);
+}
+
+void UIHybridList::addDivider()
+{
+	// TODO
 }
 
 void UIHybridList::setInputButtons(const UIInputButtons& buttons)
