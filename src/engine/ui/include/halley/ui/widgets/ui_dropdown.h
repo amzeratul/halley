@@ -23,6 +23,7 @@ namespace Halley {
 		void setOptions(const std::vector<LocalisedString>& options);
 
 		void onManualControlCycleValue(int delta) override;
+		void onManualControlActivate() override;
 
 	protected:
 		void draw(UIPainter& painter) const override;

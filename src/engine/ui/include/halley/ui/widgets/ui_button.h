@@ -15,6 +15,8 @@ namespace Halley {
 		bool canInteractWithMouse() const override;
 		bool isFocusLocked() const override;
 
+		void onManualControlActivate() override;
+
 	protected:
 		void doSetState(State state) override;
 
