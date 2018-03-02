@@ -23,7 +23,9 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 
 	// Spawn & Update input
 	addNewChildren(activeInputType);
-	updateMouse(mouse, uiOffset);
+	if (activeInputType == UIInputType::Mouse) {
+		updateMouse(mouse, uiOffset);
+	}
 	updateInput(manual);
 
 	// Update children

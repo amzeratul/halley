@@ -272,6 +272,11 @@ void SystemSDL::setEnvironment(Environment* env)
 	OS::get().createDirectories(cacheDir);
 }
 
+bool SystemSDL::canExit()
+{
+	return true;
+}
+
 void SystemSDL::printDebugInfo() const
 {
 	std::cout << std::endl << ConsoleColour(Console::GREEN) << "Initializing Video Display...\n" << ConsoleColour();

@@ -35,6 +35,8 @@ namespace Halley
 
 		void setEnvironment(Environment* env) override;
 
+		bool canExit() override;
+
 	private:
 		void processVideoEvent(VideoAPI* video, const SDL_Event& event);
 

@@ -54,6 +54,7 @@ namespace Halley
 		}
 
 		virtual void runGame(std::function<void()> runnable) { runnable(); }
+		virtual bool canExit() { return false; }
 
 	private:
 		friend class HalleyAPI;
