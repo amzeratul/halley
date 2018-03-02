@@ -71,6 +71,7 @@ void UIDropdown::onManualControlCycleValue(int delta)
 
 void UIDropdown::onManualControlActivate()
 {
+	getRoot()->setFocus(shared_from_this());
 	open();
 }
 
