@@ -29,7 +29,8 @@ namespace Halley {
 
 		Rect4f getOptionRect(int curOption) const;
 
-		void onCycleValue(int delta) override;
+		void onManualControlCycleValue(int delta) override;
+		void onManualControlActivate() override;
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -49,6 +50,7 @@ namespace Halley {
 
 		void onItemClicked(UIListItem& item);
 		void addItem(std::shared_ptr<UIListItem> item);
+		void onAccept();
 	};
 
 	class UIListItem : public UIClickable {

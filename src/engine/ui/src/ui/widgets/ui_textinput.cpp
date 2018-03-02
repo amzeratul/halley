@@ -44,6 +44,29 @@ LocalisedString UITextInput::getGhostText() const
 	return ghostText;
 }
 
+Maybe<int> UITextInput::getMaxLength() const
+{
+	return maxLength;
+}
+
+void UITextInput::setMaxLength(Maybe<int> length)
+{
+	maxLength = length;
+}
+
+void UITextInput::onManualControlActivate()
+{
+	if (keyboard->isSoftwareKeyboard()) {
+		SoftwareKeyboardData data;
+		data.initial = String(text);
+		data.minLength = 0;
+		data.maxLength = maxLength ? maxLength.get() : -1;
+		setText(keyboard->getSoftwareKeyboardInput(data));
+	} else {
+		getRoot()->setFocus(shared_from_this());
+	}
+}
+
 void UITextInput::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);

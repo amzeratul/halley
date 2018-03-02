@@ -17,15 +17,6 @@ namespace Halley
 		String name;
 	};
 
-	struct SoftwareKeyboardData {
-		String initial;
-		String title;
-		String subText;
-		String guideText;
-		int minLength = 0;
-		int maxLength = -1;
-	};
-
 	class InputAPI
 	{
 	public:
@@ -46,8 +37,5 @@ namespace Halley
 		virtual void setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction) = 0;
 
 		virtual void requestControllerSetup(int /*minControllers*/, int /*maxControllers*/, std::function<void(bool)> callback, Maybe<std::vector<InputControllerData>> /*controllerData*/ = {}) { callback(true); }
-
-		virtual bool hasSoftwareKeyboard() { return false; }
-		virtual String getSoftwareKeyboardInput(const SoftwareKeyboardData& data) { return data.initial; }
 	};
 }

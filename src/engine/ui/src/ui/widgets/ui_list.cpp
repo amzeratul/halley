@@ -108,6 +108,11 @@ void UIList::draw(UIPainter& painter) const
 }
 
 
+void UIList::onAccept()
+{
+	sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId(), curOption));
+}
+
 void UIList::onInput(const UIInputResults& input)
 {
 	if (items.empty()) {
@@ -160,7 +165,7 @@ void UIList::onInput(const UIInputResults& input)
 	setSelectedOption(cursorPos.x + cursorPos.y * nCols);
 
 	if (input.isButtonPressed(UIInput::Button::Accept)) {
-		sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId(), curOption));
+		onAccept();
 	}
 }
 
@@ -294,7 +299,12 @@ Rect4f UIList::getOptionRect(int curOption) const
 	}
 }
 
-void UIList::onCycleValue(int delta)
+void UIList::onManualControlCycleValue(int delta)
 {
 	setSelectedOption(modulo(curOption + delta, int(items.size())));
+}
+
+void UIList::onManualControlActivate()
+{
+	onAccept();
 }

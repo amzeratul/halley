@@ -59,6 +59,11 @@ bool UIButton::isFocusLocked() const
 	return borderOnly ? false : UIClickable::isFocusLocked();
 }
 
+void UIButton::onManualControlActivate()
+{
+	onClicked(getPosition());
+}
+
 void UIButton::doSetState(State state)
 {
 	if (borderOnly) {

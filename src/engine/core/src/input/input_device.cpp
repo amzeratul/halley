@@ -112,6 +112,16 @@ int InputDevice::getNextLetter()
 	return 0;
 }
 
+bool InputDevice::isSoftwareKeyboard()
+{
+	return false;
+}
+
+String InputDevice::getSoftwareKeyboardInput(const SoftwareKeyboardData& data)
+{
+	return data.initial;
+}
+
 void InputDevice::setParent(InputDevice*)
 {
 }

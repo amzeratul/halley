@@ -22,7 +22,7 @@ namespace Halley {
 		void setInputButtons(const UIInputButtons& buttons) override;
 		void setOptions(const std::vector<LocalisedString>& options);
 
-		void onCycleValue(int delta) override;
+		void onManualControlCycleValue(int delta) override;
 
 	protected:
 		void draw(UIPainter& painter) const override;

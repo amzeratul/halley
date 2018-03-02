@@ -316,7 +316,11 @@ void UIWidget::setMouseClip(Maybe<Rect4f> clip)
 	}
 }
 
-void UIWidget::onCycleValue(int delta)
+void UIWidget::onManualControlCycleValue(int delta)
+{
+}
+
+void UIWidget::onManualControlActivate()
 {
 }
 

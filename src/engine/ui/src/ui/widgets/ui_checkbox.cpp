@@ -56,3 +56,17 @@ void UICheckbox::doSetState(State state)
 		sprite = checked ? style.getSprite("checkedDisabled") : style.getSprite("disabled");
 	}
 }
+
+void UICheckbox::onManualControlCycleValue(int delta)
+{
+	if (delta > 0) {
+		setChecked(true);
+	} else if (delta < 0) {
+		setChecked(false);
+	}
+}
+
+void UICheckbox::onManualControlActivate()
+{
+	setChecked(!checked);
+}

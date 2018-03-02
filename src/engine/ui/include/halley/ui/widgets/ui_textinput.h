@@ -19,6 +19,11 @@ namespace Halley {
 		UITextInput& setGhostText(const LocalisedString& text);
 		LocalisedString getGhostText() const;
 
+		Maybe<int> getMaxLength() const;
+		void setMaxLength(Maybe<int> length);
+
+		void onManualControlActivate() override;
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -37,6 +42,7 @@ namespace Halley {
 		LocalisedString ghostText;
 
 		float caretTime = 0;
+		Maybe<int> maxLength;
 		bool caretShowing = false;
 	};
 }

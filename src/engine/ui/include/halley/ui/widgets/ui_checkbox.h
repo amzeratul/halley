@@ -17,6 +17,9 @@ namespace Halley {
 		void onClicked(Vector2f mousePos) override;
 		void doSetState(State state) override;
 
+		void onManualControlCycleValue(int delta) override;
+		void onManualControlActivate() override;
+
 	private:
 		Sprite sprite;
 		UIStyle style;

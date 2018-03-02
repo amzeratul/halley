@@ -13,7 +13,7 @@ namespace Halley {
 	class UIEvent;
 	class UIValidator;
 
-	class UIWidget : public IUIElement, public UIParent, public IUISizer {
+	class UIWidget : public IUIElement, public UIParent, public IUISizer, public std::enable_shared_from_this<UIWidget> {
 		friend class UIParent;
 		friend class UIRoot;
 
@@ -91,7 +91,8 @@ namespace Halley {
 		bool isDescendentOf(const UIWidget& ancestor) const override;
 		void setMouseClip(Maybe<Rect4f> mouseClip);
 
-		virtual void onCycleValue(int delta);
+		virtual void onManualControlCycleValue(int delta);
+		virtual void onManualControlActivate();
 		
 		UIInput::Priority getInputPriority() const;
 
