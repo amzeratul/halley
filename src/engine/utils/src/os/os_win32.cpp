@@ -304,18 +304,36 @@ void OSWin32::createDirectories(const Path& path)
 	}
 }
 
-std::vector<Path> OSWin32::enumerateDirectory(const Path& path)
+std::vector<Path> OSWin32::enumerateDirectory(const Path& rootPath)
 {
+	std::list<String> dirsToList;
+	dirsToList.push_back(".");
+
 	std::vector<Path> result;
 
 	WIN32_FIND_DATAW ffd;
-	auto pathStr = (path.getString() + "/*").replaceAll("/", "\\");
-	auto handle = FindFirstFileW(pathStr.getUTF16().c_str(), &ffd);
-	if (handle != INVALID_HANDLE_VALUE) {
-		do {
-			auto filePath = Path(String(ffd.cFileName));
-			result.push_back(filePath);
-		} while (FindNextFileW(handle, &ffd) != 0);
+	while (!dirsToList.empty()) {
+		const auto curDir = dirsToList.front();
+		const auto curPath = (rootPath / curDir).getString();
+		const auto pathStr = (curPath + "/*").replaceAll("/", "\\");
+		dirsToList.pop_front();
+
+		const auto handle = FindFirstFileW(pathStr.getUTF16().c_str(), &ffd);
+		if (handle != INVALID_HANDLE_VALUE) {
+			do {
+				String curFile = String(ffd.cFileName);
+
+				const DWORD attrib = GetFileAttributesW((rootPath / curDir / curFile).getString().getUTF16().c_str());
+				if ((attrib & FILE_ATTRIBUTE_DIRECTORY) != 0) {
+					if (curFile != "." && curFile != "..") {
+						dirsToList.emplace_back(curDir + "/" + curFile);
+					}
+				} else {
+					auto res = (Path(curDir) / curFile).dropFront(1);
+					result.emplace_back(res);
+				}
+			} while (FindNextFileW(handle, &ffd) != 0);
+		}
 	}
 
 	return result;
