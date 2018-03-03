@@ -62,6 +62,7 @@ set(USE_DX11 0)
 set(USE_SDL2 1)
 set(USE_ASIO 1)
 set(USE_WINRT 0)
+set(USE_MEDIA_FOUNDATION 0)
 
 if (EMSCRIPTEN)
 	set(USE_SDL2 0)
@@ -70,10 +71,12 @@ endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(USE_DX11 1)
+	set(USE_MEDIA_FOUNDATION 1)
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
 	set(USE_DX11 1)
+	set(USE_MEDIA_FOUNDATION 1)
 	set(USE_SDL2 0)
 	set(USE_OPENGL 0)
 	set(USE_ASIO 0)
@@ -130,6 +133,11 @@ endif()
 # WinRT
 if (USE_WINRT)
 	add_definitions(-DWITH_WINRT)
+endif()
+
+# Microsoft Media Foundation
+if (USE_MEDIA_FOUNDATION)
+	add_definitions(-DWITH_MEDIA_FOUNDATION)
 endif()
 
 
@@ -196,6 +204,14 @@ if (USE_DX11)
 	set(HALLEY_PROJECT_LIBS
 		optimized halley-dx11
 		debug halley-dx11_d
+		${HALLEY_PROJECT_LIBS}
+		)
+endif ()
+
+if (USE_MEDIA_FOUNDATION)
+	set(HALLEY_PROJECT_LIBS
+		optimized halley-mf
+		debug halley-mf_d
 		${HALLEY_PROJECT_LIBS}
 		)
 endif ()
@@ -318,6 +334,9 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		endif ()
 		if (USE_WINRT)
 			target_link_libraries(${name} halley-winrt)
+		endif ()
+		if (USE_MEDIA_FOUNDATION)
+			target_link_libraries(${name} halley-mf)
 		endif ()
 	else ()
 		target_link_libraries(${name} ${HALLEY_PROJECT_LIBS})
