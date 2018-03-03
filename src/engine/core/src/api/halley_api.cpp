@@ -59,10 +59,16 @@ void HalleyAPI::init()
 	if (networkInternal) {
 		networkInternal->init();
 	}
+	if (movieInternal) {
+		movieInternal->init();
+	}
 }
 
 void HalleyAPI::deInit()
 {
+	if (movieInternal) {
+		movieInternal->deInit();
+	}
 	if (networkInternal) {
 		networkInternal->deInit();
 	}
@@ -150,6 +156,16 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 			api->platformInternal.reset(static_cast<PlatformAPIInternal*>(plugins[0]->createAPI(system.get())));
 		} else {
 			throw Exception("No suitable network plugins found.");
+		}
+	}
+
+	if (flags & HalleyAPIFlags::Movie) {
+		auto plugins = core->getPlugins(PluginType::MovieAPI);
+		if (plugins.size() > 0) {
+			std::cout << "Movie plugin: " << plugins[0]->getName() << "\n";
+			api->movieInternal.reset(static_cast<MovieAPIInternal*>(plugins[0]->createAPI(system.get())));
+		} else {
+			throw Exception("No suitable movie plugins found.");
 		}
 	}
 

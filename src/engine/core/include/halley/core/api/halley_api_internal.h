@@ -8,6 +8,7 @@
 #include "audio_api.h"
 #include "network_api.h"
 #include "platform_api.h"
+#include "movie_api.h"
 
 namespace Halley
 {
@@ -80,6 +81,12 @@ namespace Halley
 	{
 	public:
 		virtual ~PlatformAPIInternal() {}
+	};
+
+	class MovieAPIInternal : public MovieAPI, public HalleyAPIInternal
+	{
+	public:
+		virtual ~MovieAPIInternal() {}
 	};
 }
 

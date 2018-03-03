@@ -11,7 +11,8 @@ namespace Halley
 			Audio = 2,
 			Input = 4,
 			Network = 8,
-			Platform = 16
+			Platform = 16,
+			Movie = 32
 		};
 	}
 
@@ -26,6 +27,7 @@ namespace Halley
 		std::unique_ptr<AudioOutputAPIInternal> audioOutputInternal;
 		std::unique_ptr<PlatformAPIInternal> platformInternal;
 		std::unique_ptr<NetworkAPIInternal> networkInternal;
+		std::unique_ptr<MovieAPIInternal> movieInternal;
 
 	public:
 		~HalleyAPI();
@@ -36,6 +38,7 @@ namespace Halley
 		AudioAPI* audio;
 		PlatformAPI* platform;
 		NetworkAPI* network;
+		MovieAPI* movie;
 		
 		template <typename T>
 		std::shared_ptr<const T> getResource(String name) const

@@ -49,4 +49,12 @@ namespace Halley {
 		HalleyAPIInternal* createAPI(SystemAPI*) override;
 		int getPriority() const override;
 	};
+
+	class DummyMoviePlugin : public Plugin {
+	public:
+		PluginType getType() override;
+		String getName() override;
+		HalleyAPIInternal* createAPI(SystemAPI*) override;
+		int getPriority() const override;
+	};
 }
