@@ -4,7 +4,7 @@
 namespace Halley {
 	
 	class MFPlugin : public Plugin {
-		HalleyAPIInternal* createAPI(SystemAPI* system) override { return new MFMovieAPI(); }
+		HalleyAPIInternal* createAPI(SystemAPI* system) override { return new MFMovieAPI(*system); }
 		PluginType getType() override { return PluginType::MovieAPI; }
 		String getName() override { return "Movie/MediaFoundation"; }
 		int getPriority() const override { return 1; }

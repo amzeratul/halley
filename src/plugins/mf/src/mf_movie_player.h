@@ -2,18 +2,22 @@
 #include "halley/core/api/movie_api.h"
 #include <memory>
 #include "halley/resources/resource_data.h"
+#include "halley/time/halleytime.h"
 
 #include <Mfapi.h>
 #include <Mfidl.h>
 #include <Mfreadwrite.h>
-#include "halley/time/halleytime.h"
+#undef min
+#undef max
 
 namespace Halley
 {
+	class VideoAPI;
+
 	class MFMoviePlayer : public MoviePlayer
 	{
 	public:
-		MFMoviePlayer(std::shared_ptr<ResourceDataStream> data);
+		MFMoviePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data);
 		~MFMoviePlayer() noexcept;
 
 		void play() override;
@@ -28,10 +32,13 @@ namespace Halley
 		HRESULT onReadSample(HRESULT hrStatus, DWORD dwStreamIndex, DWORD dwStreamFlags, LONGLONG llTimestamp, IMFSample* pSample);
 
 	private:
+		VideoAPI& video;
+		AudioAPI& audio;
 		std::shared_ptr<ResourceDataStream> data;
+
 		IMFByteStream* inputByteStream = nullptr;
 		IMFSourceReader *reader = nullptr;
-		IMFSourceReaderCallback* sampleReceiver = nullptr;
+		//IMFSourceReaderCallback* sampleReceiver = nullptr;
 		MoviePlayerState state = MoviePlayerState::Uninitialised;
 
 		std::vector<int> videoStreams;
@@ -44,6 +51,7 @@ namespace Halley
 		void deInit();
 	};
 
+	/*
 	class MoviePlayerSampleReceiver final : public IMFSourceReaderCallback2
 	{
 	public:
@@ -62,4 +70,5 @@ namespace Halley
 		MFMoviePlayer& player;
 		long refCount = 0;
 	};
+	*/
 }

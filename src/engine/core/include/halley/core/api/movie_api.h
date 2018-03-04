@@ -5,6 +5,8 @@
 
 namespace Halley {
 	class ResourceDataStream;
+	class VideoAPI;
+	class AudioAPI;
 
 	enum class MoviePlayerState
 	{
@@ -34,6 +36,6 @@ namespace Halley {
 	public:
 		virtual ~MovieAPI() = default;
 
-		virtual std::shared_ptr<MoviePlayer> makePlayer(std::shared_ptr<ResourceDataStream> data) = 0;
+		virtual std::shared_ptr<MoviePlayer> makePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data) = 0;
     };
 }

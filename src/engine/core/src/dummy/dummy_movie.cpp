@@ -9,7 +9,7 @@ void DummyMovieAPI::deInit()
 {
 }
 
-std::shared_ptr<MoviePlayer> DummyMovieAPI::makePlayer(std::shared_ptr<ResourceDataStream> data)
+std::shared_ptr<MoviePlayer> DummyMovieAPI::makePlayer(VideoAPI&, AudioAPI&, std::shared_ptr<ResourceDataStream> data)
 {
 	return {};
 }

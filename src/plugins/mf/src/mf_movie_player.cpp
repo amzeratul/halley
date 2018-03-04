@@ -1,13 +1,15 @@
 #include "mf_movie_player.h"
 #include "halley/resources/resource_data.h"
-#include <Mfapi.h>
-#include <Mfidl.h>
-#include <Mfreadwrite.h>
+#include "halley/core/api/audio_api.h"
+#include "halley/core/api/video_api.h"
 #include <Mferror.h>
+#include "resource_data_byte_stream.h"
 using namespace Halley;
 
-MFMoviePlayer::MFMoviePlayer(std::shared_ptr<ResourceDataStream> data)
-	: data(std::move(data))
+MFMoviePlayer::MFMoviePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data)
+	: video(video)
+	, audio(audio)
+	, data(std::move(data))
 {
 	init();
 }
@@ -73,29 +75,41 @@ Vector2f MFMoviePlayer::getSize() const
 
 void MFMoviePlayer::init()
 {
+	/*
 	// HACK
 	HRESULT hr = MFCreateFile(MF_ACCESSMODE_READ, MF_OPENMODE_FAIL_IF_NOT_EXIST, MF_FILEFLAGS_NOBUFFERING, L"c:\\users\\amz\\desktop\\test.mp4", &inputByteStream);
 	if (!SUCCEEDED(hr)) {
 		throw Exception("Unable to load media file");
 	}
+	*/
+	inputByteStream = new ResourceDataByteStream(data);
+	inputByteStream->AddRef();
 
 	IMFAttributes* attributes = nullptr;
+	HRESULT hr = MFCreateAttributes(&attributes, 1);
+	if (!SUCCEEDED(hr)) {
+		throw Exception("Unable to create attributes");
+	}
+
 	constexpr bool useAsync = false;
 	if (useAsync) {
-		MFCreateAttributes(&attributes, 1);
-		sampleReceiver = new MoviePlayerSampleReceiver(*this);
-		sampleReceiver->AddRef();
-		attributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK, sampleReceiver);
+		//sampleReceiver = new MoviePlayerSampleReceiver(*this);
+		//sampleReceiver->AddRef();
+		//attributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK, sampleReceiver);
 	}
 
 	// DX11 acceleration
-	constexpr bool useDX11 = false;
+	auto dx11Device = nullptr;//static_cast<IUnknown*>(video.getImplementationPointer("ID3D11Device"));
 	IMFDXGIDeviceManager* deviceManager = nullptr;
-	if (useDX11) {
+	if (dx11Device) {
 		UINT resetToken;
 		hr = MFCreateDXGIDeviceManager(&resetToken, &deviceManager);
 		if (!SUCCEEDED(hr)) {
 			throw Exception("Unable to create DXGI Device Manager");
+		}
+		hr = deviceManager->ResetDevice(dx11Device, resetToken);
+		if (!SUCCEEDED(hr)) {
+			throw Exception("Unable to reset DXGI Device Manager with device");
 		}
 		attributes->SetUnknown(MF_SOURCE_READER_D3D_MANAGER, deviceManager);
 	}
@@ -113,9 +127,9 @@ void MFMoviePlayer::init()
 		deviceManager->Release();
 	}
 
-	//reader->SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS, false);
-	//reader->SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM, true);
-	//reader->SetStreamSelection(MF_SOURCE_READER_FIRST_AUDIO_STREAM, true);
+	reader->SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS, false);
+	reader->SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM, true);
+	reader->SetStreamSelection(MF_SOURCE_READER_FIRST_AUDIO_STREAM, true);
 
 	// Setup the right decoding formats
 	bool hasMoreStreams = true;
@@ -147,9 +161,20 @@ void MFMoviePlayer::init()
 					}
 
 					if (majorType == MFMediaType_Video) {
+						UINT64 frameSize;
+						nativeType->GetUINT64(MF_MT_FRAME_SIZE, &frameSize);
+						auto size = Vector2i(int(frameSize >> 32), int(frameSize & 0xFFFFFFFFull));
+						std::cout << "Video is " << size.x << " x " << size.y << std::endl;
+
 						videoStreams.push_back(streamIndex);
 						subType = MFVideoFormat_NV12; // NV12 is the only format supported by DX accelerated decoding
 					} else if (majorType == MFMediaType_Audio) {
+						UINT32 sampleRate;
+						UINT32 numChannels;
+						nativeType->GetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, &sampleRate);
+						nativeType->GetUINT32(MF_MT_AUDIO_NUM_CHANNELS, &numChannels);
+						std::cout << "Audio has " << numChannels << " channels at " << sampleRate << " Hz." << std::endl;
+
 						audioStreams.push_back(streamIndex);
 						subType = MFAudioFormat_PCM;
 					}
@@ -184,10 +209,12 @@ void MFMoviePlayer::init()
 
 void MFMoviePlayer::deInit()
 {
+	/*
 	if (sampleReceiver) {
 		sampleReceiver->Release();
 		sampleReceiver = nullptr;
 	}
+	*/
 	if (reader) {
 		reader->Release();
 		reader = nullptr;
@@ -196,11 +223,6 @@ void MFMoviePlayer::deInit()
 		inputByteStream->Release();
 		inputByteStream = nullptr;
 	}
-}
-
-MoviePlayerSampleReceiver::MoviePlayerSampleReceiver(MFMoviePlayer& player)
-	: player(player)
-{
 }
 
 HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamFlags, LONGLONG timestamp, IMFSample* sample)
@@ -214,6 +236,12 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 	}
 
 	return S_OK;
+}
+
+/*
+MoviePlayerSampleReceiver::MoviePlayerSampleReceiver(MFMoviePlayer& player)
+	: player(player)
+{
 }
 
 
@@ -275,3 +303,4 @@ HRESULT MoviePlayerSampleReceiver::OnStreamError(DWORD dwStreamIndex, HRESULT hr
 {
 	return S_OK;
 }
+*/
