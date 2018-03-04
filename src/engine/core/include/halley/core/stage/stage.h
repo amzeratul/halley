@@ -37,6 +37,7 @@ namespace Halley
 		CoreAPI& getCoreAPI() const;
 		SystemAPI& getSystemAPI() const;
 		NetworkAPI& getNetworkAPI() const;
+		MovieAPI& getMovieAPI() const;
 		Resources& getResources() const;
 
 		Game& getGame() const;

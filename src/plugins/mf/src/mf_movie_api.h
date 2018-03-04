@@ -7,5 +7,7 @@ namespace Halley {
     public:
         void init() override;
         void deInit() override;
+
+	    std::shared_ptr<MoviePlayer> makePlayer(std::shared_ptr<ResourceDataStream> data) override;
     };
 }

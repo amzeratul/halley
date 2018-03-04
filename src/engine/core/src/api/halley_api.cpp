@@ -34,6 +34,9 @@ void HalleyAPI::assign()
 	if (networkInternal) {
 		network = networkInternal.get();
 	}
+	if (movieInternal) {
+		movie = movieInternal.get();
+	}
 }
 
 void HalleyAPI::init()
