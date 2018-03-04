@@ -90,6 +90,9 @@ void MFMoviePlayer::update(Time t)
 			if (!pendingFrames.empty()) {
 				auto& next = pendingFrames.front();
 				if (!currentTexture || time >= next.time) {
+					if (currentTexture) {
+						//recycleTexture.push_back(currentTexture);
+					}
 					currentTexture = next.texture;
 					pendingFrames.pop_front();
 				}
@@ -339,7 +342,13 @@ void MFMoviePlayer::readVideoSample(Time time, gsl::span<const gsl::byte> data, 
 	Bytes myData(data.size());
 	memcpy(myData.data(), data.data(), data.size());
 
-	std::shared_ptr<Texture> tex = video.createTexture(texSize);
+	std::shared_ptr<Texture> tex;
+	if (recycleTexture.empty()) {
+		tex = video.createTexture(texSize);
+	} else {
+		tex = recycleTexture.front();
+		recycleTexture.pop_front();
+	}
 	tex->startLoading();
 	pendingFrames.push_back({tex, time});
 

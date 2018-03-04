@@ -20,7 +20,7 @@ AudioEngine::~AudioEngine()
 {
 }
 
-void AudioEngine::play(size_t id, std::shared_ptr<const AudioClip> clip, AudioPosition position, float volume, bool loop, float pitch)
+void AudioEngine::play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop, float pitch)
 {
 	std::shared_ptr<AudioSource> source = std::make_shared<AudioSourceClip>(clip, loop);
 	if (std::abs(pitch - 1.0f) > 0.01f) {

@@ -20,8 +20,8 @@ namespace Halley
 		void load(TextureDescriptor&& descriptor) override;
 
 	private:
-		void loadImage(const char* px, Vector2i size, size_t stride, TextureFormat format, bool useMipMap);
-		void create(Vector2i size, TextureFormat format, bool useMipMap, bool useFiltering, bool clamp);
+		void updateImage(TextureDescriptorImageData& pixelData, TextureFormat format, bool useMipMap);
+		void create(Vector2i size, TextureFormat format, bool useMipMap, bool useFiltering, bool clamp, TextureDescriptorImageData& imgData);
 
 		static unsigned int getGLFormat(TextureFormat format);
 

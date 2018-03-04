@@ -70,6 +70,7 @@ namespace Halley
 		Vector2i videoSize;
 		std::shared_ptr<Texture> currentTexture;
 		std::list<PendingFrame> pendingFrames;
+		std::list<std::shared_ptr<Texture>> recycleTexture;
 
 		Time time = 0;
 

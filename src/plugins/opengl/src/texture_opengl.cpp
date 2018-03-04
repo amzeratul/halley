@@ -31,11 +31,9 @@ void TextureOpenGL::load(TextureDescriptor&& d)
 	glUtils.bindTexture(textureId);
 	
 	if (texSize != d.size) {
-		create(d.size, d.format, d.useMipMap, d.useFiltering, d.clamp);
-	}
-
-	if (!d.pixelData.empty()) {
-		loadImage(reinterpret_cast<const char*>(d.pixelData.getBytes()), d.size, d.pixelData.getStrideOr(d.size.x), d.format, d.useMipMap);
+		create(d.size, d.format, d.useMipMap, d.useFiltering, d.clamp, d.pixelData);
+	} else if (!d.pixelData.empty()) {
+		updateImage(d.pixelData, d.format, d.useMipMap);
 	}
 	finishLoading();
 }
@@ -83,7 +81,7 @@ void TextureOpenGL::bind(int textureUnit) const
 	glUtils.bindTexture(textureId);
 }
 
-void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, bool useFiltering, bool clamp)
+void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, bool useFiltering, bool clamp, TextureDescriptorImageData& pixelData)
 {
 	Expects(size.x > 0);
 	Expects(size.y > 0);
@@ -116,38 +114,47 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 	}
 #endif
 
-	Vector<char> blank;
-	blank.resize(size.x * size.y * TextureDescriptor::getBitsPerPixel(format));
 	GLuint glFormat = getGLFormat(format);
 	GLuint format2 = glFormat;
+	int stride = pixelData.empty() ? size.x : pixelData.getStrideOr(size.x);
 #ifdef WITH_OPENGL
 	if (format2 == GL_RGBA16F || format2 == GL_RGBA16) format2 = GL_RGBA;
 	if (format2 == GL_DEPTH_COMPONENT24) format2 = GL_DEPTH_COMPONENT;
+	glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
+	glPixelStorei(GL_PACK_ROW_LENGTH, stride);
 #else
 	if (format2 == GL_DEPTH_COMPONENT16) format2 = GL_DEPTH_COMPONENT;
 #endif
-	glTexImage2D(GL_TEXTURE_2D, 0, glFormat, size.x, size.y, 0, format2, pixFormat, blank.data());
+
+	if (pixelData.empty()) {
+		Vector<char> blank;
+		blank.resize(size.x * size.y * TextureDescriptor::getBitsPerPixel(format));
+		glTexImage2D(GL_TEXTURE_2D, 0, glFormat, size.x, size.y, 0, format2, pixFormat, blank.data());
+	} else {
+		glTexImage2D(GL_TEXTURE_2D, 0, glFormat, size.x, size.y, 0, format2, pixFormat, pixelData.getBytes());
+	}
 	glCheckError();
+
 	texSize = size;
 }
 
-void TextureOpenGL::loadImage(const char* px, Vector2i size, size_t stride, TextureFormat format, bool useMipMap)
+void TextureOpenGL::updateImage(TextureDescriptorImageData& pixelData, TextureFormat format, bool useMipMap)
 {
+	int stride = pixelData.getStrideOr(size.x);
+
 #ifdef WITH_OPENGL
 	glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
-	glPixelStorei(GL_PACK_ROW_LENGTH, int(stride));
+	glPixelStorei(GL_PACK_ROW_LENGTH, stride);
 #endif
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y, getGLFormat(format), GL_UNSIGNED_BYTE, px);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y, getGLFormat(format), GL_UNSIGNED_BYTE, pixelData.getBytes());
 	glCheckError();
 
 #ifndef WITH_OPENGL_ES
-
 	// Generate mipmap
 	if (useMipMap) {
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glCheckError();
 	}
-
 #endif
 }
 

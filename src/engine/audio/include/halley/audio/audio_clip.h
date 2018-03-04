@@ -8,7 +8,19 @@ namespace Halley
 	class ResourceLoader;
 	class VorbisData;
 
-	class AudioClip : public AsyncResource
+	class IAudioClip
+	{
+	public:
+		virtual ~IAudioClip() = default;
+
+		virtual size_t copyChannelData(size_t channelN, size_t pos, size_t len, gsl::span<AudioConfig::SampleFormat> dst) const = 0;
+		virtual size_t getNumberOfChannels() const = 0;
+		virtual size_t getLength() const = 0; // in samples
+		virtual size_t getLoopPoint() const { return 0; } // in samples
+		virtual bool isLoaded() const { return true; }
+	};
+
+	class AudioClip : public AsyncResource, public IAudioClip
 	{
 	public:
 		AudioClip(size_t numChannels);
@@ -17,11 +29,12 @@ namespace Halley
 		void loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadata meta);
 		void loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadata meta);
 
-		gsl::span<const AudioConfig::SampleFormat> getChannelData(size_t channelN, size_t pos, size_t len) const;
+		size_t copyChannelData(size_t channelN, size_t pos, size_t len, gsl::span<AudioConfig::SampleFormat> dst) const override;
+		size_t getNumberOfChannels() const override;
+		size_t getLength() const override; // in samples
+		size_t getLoopPoint() const override; // in samples
+		bool isLoaded() const override;
 
-		size_t getLength() const; // in samples
-		size_t getNumberOfChannels() const;
-		size_t getLoopPoint() const; // in samples
 		static std::shared_ptr<AudioClip> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::AudioClip; }
 

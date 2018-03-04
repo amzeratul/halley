@@ -3,6 +3,7 @@
 #include "halley/core/api/audio_api.h"
 #include "ui_painter.h"
 #include "halley/audio/audio_position.h"
+#include "halley/audio/audio_clip.h"
 
 using namespace Halley;
 

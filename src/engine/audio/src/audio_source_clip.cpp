@@ -4,7 +4,7 @@
 using namespace Halley;
 
 
-AudioSourceClip::AudioSourceClip(std::shared_ptr<const AudioClip> clip, bool looping)
+AudioSourceClip::AudioSourceClip(std::shared_ptr<const IAudioClip> clip, bool looping)
 	: clip(clip)
 	, looping(looping)
 {
@@ -58,13 +58,9 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData& dst
 		if (samplesToRead > 0) {
 			// We have some samples that we can read, so go ahead with reading them
 			for (size_t srcChannel = 0; srcChannel < nChannels; ++srcChannel) {
-				auto src = clip->getChannelData(srcChannel, playbackPos, samplesToRead);
-				auto dst = dstChannels[srcChannel].data() + samplesWritten;
-
-				Expects(size_t(src.size_bytes()) <= samplesRequested * sizeof(AudioConfig::SampleFormat));
-				if (src.size_bytes() > 0) {
-					memcpy(dst, src.data(), src.size_bytes());
-				}
+				auto dst = gsl::span<AudioConfig::SampleFormat>(dstChannels[srcChannel].data() + samplesWritten, samplesToRead);
+				size_t nCopied = clip->copyChannelData(srcChannel, playbackPos, samplesToRead, dst);
+				Expects(nCopied <= samplesRequested * sizeof(AudioConfig::SampleFormat));
 			}
 
 			playbackPos += samplesToRead;

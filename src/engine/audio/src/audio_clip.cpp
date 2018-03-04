@@ -55,7 +55,7 @@ void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadat
 	doneLoading();
 }
 
-gsl::span<const AudioConfig::SampleFormat> AudioClip::getChannelData(size_t channelN, size_t pos, size_t len) const
+size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, gsl::span<AudioConfig::SampleFormat> dst) const
 {
 	Expects(pos + len <= sampleLength);
 
@@ -86,11 +86,11 @@ gsl::span<const AudioConfig::SampleFormat> AudioClip::getChannelData(size_t chan
 			buf.resize(len);
 		}
 
-		memcpy(samples[channelN].data(), temp[channelN].data(), len * sizeof(AudioConfig::SampleFormat));
-		
-		return gsl::span<const AudioConfig::SampleFormat>(samples[channelN].data(), len);
+		memcpy(dst.data(), temp[channelN].data(), len * sizeof(AudioConfig::SampleFormat));
+		return len;
 	} else {
-		return gsl::span<const AudioConfig::SampleFormat>(samples.at(channelN).data() + pos, len);
+		memcpy(dst.data(), samples.at(channelN).data() + pos, len * sizeof(AudioConfig::SampleFormat));
+		return len;
 	}
 }
 
@@ -109,6 +109,11 @@ size_t AudioClip::getLoopPoint() const
 {
 	Expects(isLoaded());
 	return loopPoint;
+}
+
+bool AudioClip::isLoaded() const
+{
+	return AsyncResource::isLoaded();
 }
 
 std::shared_ptr<AudioClip> AudioClip::loadResource(ResourceLoader& loader)
