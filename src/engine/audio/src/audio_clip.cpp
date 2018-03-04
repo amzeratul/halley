@@ -138,3 +138,58 @@ std::shared_ptr<AudioClip> AudioClip::loadResource(ResourceLoader& loader)
 
 	return result;
 }
+
+StreamingAudioClip::StreamingAudioClip(size_t numChannels)
+	: numChannels(numChannels)
+{
+	buffers.resize(numChannels);
+}
+
+void StreamingAudioClip::addInterleavedSamples(gsl::span<const AudioConfig::SampleFormat> src)
+{
+	std::unique_lock<std::mutex> lock(mutex);
+
+	const size_t nSamples = src.size() / numChannels;
+
+	for (size_t i = 0; i < numChannels; ++i) {
+		const size_t startSize = buffers[i].size();
+		buffers[i].resize(startSize + nSamples);
+		for (size_t j = 0; j < nSamples; ++j) {
+			buffers[i][j + startSize] = src[i + j * numChannels];
+		}
+	}
+
+	length += nSamples;
+}
+
+size_t StreamingAudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, gsl::span<AudioConfig::SampleFormat> dst) const
+{
+	std::unique_lock<std::mutex> lock(mutex);
+
+	auto& buffer = buffers[channelN];
+	const size_t toWrite = std::min(len, buffer.size());
+
+	memcpy(dst.data(), buffer.data(), toWrite * sizeof(AudioConfig::SampleFormat));
+	buffer.erase(buffer.begin(), buffer.begin() + toWrite);
+
+	if (toWrite < len) {
+		memcpy(dst.data() + toWrite, buffer.data() + toWrite, (len - toWrite) * sizeof(AudioConfig::SampleFormat));
+	}
+
+	return len;
+}
+
+size_t StreamingAudioClip::getNumberOfChannels() const
+{
+	return numChannels;
+}
+
+size_t StreamingAudioClip::getLength() const
+{
+	return length;
+}
+
+size_t StreamingAudioClip::getSamplesLeft() const
+{
+	return buffers.at(0).size();
+}

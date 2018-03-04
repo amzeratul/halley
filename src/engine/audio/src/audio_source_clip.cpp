@@ -26,10 +26,9 @@ bool AudioSourceClip::isReady() const
 bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData& dstChannels)
 {
 	if (!initialised) {
-		playbackLength = clip->getLength();
 		initialised = true;
 	}
-
+	playbackLength = clip->getLength();
 	Expects(playbackPos <= playbackLength);
 
 	bool isPlaying = true;

@@ -1,6 +1,6 @@
 project (halley-mf)
 
-include_directories(${Boost_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include")
+include_directories(${Boost_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include" "../../engine/audio/include")
 
 set(SOURCES
     "src/mf_plugin.cpp"
@@ -19,4 +19,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-mf ${SOURCES} ${HEADERS})
-target_link_libraries(halley-mf halley-core)
+target_link_libraries(halley-mf halley-core halley-audio)

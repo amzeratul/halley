@@ -51,4 +51,23 @@ namespace Halley
 		mutable std::vector<std::vector<AudioConfig::SampleFormat>> samples;
 		mutable std::unique_ptr<VorbisData> vorbisData;
 	};
+
+	class StreamingAudioClip : public IAudioClip
+	{
+	public:
+		StreamingAudioClip(size_t numChannels);
+
+		void addInterleavedSamples(gsl::span<const AudioConfig::SampleFormat> src);
+
+		size_t copyChannelData(size_t channelN, size_t pos, size_t len, gsl::span<AudioConfig::SampleFormat> dst) const override;
+		size_t getNumberOfChannels() const override;
+		size_t getLength() const override;
+		size_t getSamplesLeft() const;
+
+	private:
+		size_t numChannels = 0;
+		size_t length = 0;
+		mutable std::vector<std::vector<AudioConfig::SampleFormat>> buffers;
+		mutable std::mutex mutex;
+	};
 }

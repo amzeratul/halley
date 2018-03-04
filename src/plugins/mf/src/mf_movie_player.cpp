@@ -69,10 +69,12 @@ void MFMoviePlayer::update(Time t)
 		time += t;
 
 		MoviePlayerStream* videoStream = nullptr;
+		MoviePlayerStream* audioStream = nullptr;
 		for (auto& s: streams) {
 			if (s.type == MoviePlayerStreamType::Video) {
 				videoStream = &s;
-				break;
+			} else if (s.type == MoviePlayerStreamType::Audio) {
+				audioStream = &s;
 			}
 		}
 
@@ -100,6 +102,26 @@ void MFMoviePlayer::update(Time t)
 
 			if (pendingFrames.empty() && videoStream->eof) {
 				state = MoviePlayerState::Finished;
+			}
+		}
+
+		if (audioStream) {
+			bool play = false;
+			if (!streamingClip) {
+				streamingClip = std::make_shared<StreamingAudioClip>(2);
+				play = true;
+			}
+			if (streamingClip->getSamplesLeft() < 10000) {
+				const DWORD controlFlags = 0;
+				DWORD streamIndex;
+				DWORD streamFlags;
+				LONGLONG timestamp;
+				IMFSample* sample;
+				auto hr = reader->ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM, controlFlags, &streamIndex, &streamFlags, &timestamp, &sample);
+				onReadSample(hr, streamIndex, streamFlags, timestamp, sample);
+			}
+			if (play) {
+				audio.playMusic(streamingClip);
 			}
 		}
 	}
@@ -367,6 +389,13 @@ void MFMoviePlayer::readVideoSample(Time time, gsl::span<const gsl::byte> data, 
 void MFMoviePlayer::readAudioSample(Time time, gsl::span<const gsl::byte> data)
 {
 	//std::cout << "Audio at " << time << " (" << data.size_bytes() << " bytes).\n";
+	auto src = gsl::span<const short>(reinterpret_cast<const short*>(data.data()), data.size() / sizeof(short));
+
+	std::vector<AudioConfig::SampleFormat> samples(src.size());
+	for (int i = 0; i < src.size(); ++i) {
+		samples[i] = src[i] / 32768.0f;
+	}
+	streamingClip->addInterleavedSamples(samples);
 }
 
 /*

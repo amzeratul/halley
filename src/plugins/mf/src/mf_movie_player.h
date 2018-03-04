@@ -5,6 +5,7 @@
 #include "halley/time/halleytime.h"
 #include "halley/core/graphics/texture.h"
 #include "halley/core/graphics/sprite/sprite.h"
+#include <halley/audio/audio_clip.h>
 
 #include <Mfapi.h>
 #include <Mfidl.h>
@@ -71,6 +72,8 @@ namespace Halley
 		std::shared_ptr<Texture> currentTexture;
 		std::list<PendingFrame> pendingFrames;
 		std::list<std::shared_ptr<Texture>> recycleTexture;
+
+		std::shared_ptr<StreamingAudioClip> streamingClip;
 
 		Time time = 0;
 
