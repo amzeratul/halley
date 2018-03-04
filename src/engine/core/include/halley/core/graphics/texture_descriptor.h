@@ -76,11 +76,11 @@ namespace Halley
 		bool isRenderTarget = false;
 		bool isDepthStencil = false;
 
-		TextureDescriptor() {}
-		TextureDescriptor(Vector2i size, TextureFormat format = TextureFormat::RGBA)
-			: size(size)
-			, format(format)
-		{}
+		TextureDescriptor() = default;
+		TextureDescriptor(TextureDescriptor&& other) noexcept = default;
+		TextureDescriptor(Vector2i size, TextureFormat format = TextureFormat::RGBA);
+
+		TextureDescriptor& operator=(TextureDescriptor&& other) noexcept;
 
 		static int getBitsPerPixel(TextureFormat format);
 	};

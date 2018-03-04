@@ -6,6 +6,7 @@
 #include "halley/core/graphics/texture.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include <halley/audio/audio_clip.h>
+#include "halley/core/graphics/movie/movie_player.h"
 
 #include <Mfapi.h>
 #include <Mfidl.h>
@@ -18,64 +19,23 @@ namespace Halley
 {
 	class VideoAPI;
 
-	enum class MoviePlayerStreamType
-	{
-		Unknown,
-		Video,
-		Audio,
-		Other
-	};
-
-	class MoviePlayerStream
-	{
-	public:
-		MoviePlayerStreamType type = MoviePlayerStreamType::Unknown;
-		bool playing = true;
-		bool eof = false;
-	};
-
-	struct PendingFrame
-	{
-		std::shared_ptr<Texture> texture;
-		Time time;
-	};
-	
 	class MFMoviePlayer : public MoviePlayer
 	{
 	public:
 		MFMoviePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data);
 		~MFMoviePlayer() noexcept;
 
-		void play() override;
-		void pause() override;
-		void reset();
-
-		void update(Time t) override;
-		Sprite getSprite(Resources& resources) override;
-
-		MoviePlayerState getState() const override;
-		Vector2i getSize() const override;
+	protected:
+		void requestVideoFrame() override;
+		void requestAudioFrame() override;
+		void onReset() override;
 
 	private:
-		VideoAPI& video;
-		AudioAPI& audio;
 		std::shared_ptr<ResourceDataStream> data;
 
 		IMFByteStream* inputByteStream = nullptr;
 		IMFSourceReader *reader = nullptr;
 		IMFSourceReaderCallback* sampleReceiver = nullptr;
-		MoviePlayerState state = MoviePlayerState::Uninitialised;
-
-		std::vector<MoviePlayerStream> streams;
-
-		Vector2i videoSize;
-		std::shared_ptr<Texture> currentTexture;
-		std::list<PendingFrame> pendingFrames;
-		std::list<std::shared_ptr<Texture>> recycleTexture;
-
-		std::shared_ptr<StreamingAudioClip> streamingClip;
-
-		Time time = 0;
 
 		void init();
 		void deInit();

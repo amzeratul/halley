@@ -19,6 +19,8 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "graphics/material/material_definition.h"
 #include "graphics/material/material_parameter.h"
 
+#include "graphics/movie/movie_player.h"
+
 #include "graphics/render_target/render_target.h"
 #include "graphics/render_target/render_target_screen.h"
 #include "graphics/render_target/render_target_texture.h"

@@ -89,6 +89,28 @@ int TextureDescriptorImageData::getStrideOr(int assumedStride) const
 	}
 }
 
+TextureDescriptor::TextureDescriptor(Vector2i size, TextureFormat format)
+	: size(size)
+	, format(format)
+{
+}
+
+TextureDescriptor& TextureDescriptor::operator=(TextureDescriptor&& other) noexcept
+{
+	size = other.size;
+	padding = other.padding;
+	format = other.format;
+	pixelFormat = other.pixelFormat;
+	pixelData = std::move(other.pixelData);
+	useMipMap = other.useMipMap;
+	useFiltering = other.useFiltering;
+	clamp = other.clamp;
+	canBeUpdated = other.canBeUpdated;
+	isRenderTarget = other.isRenderTarget;
+	isDepthStencil = other.isDepthStencil;
+	return *this;
+}
+
 int TextureDescriptor::getBitsPerPixel(TextureFormat format)
 {
 	switch (format) {
