@@ -7,7 +7,7 @@ Halley::ResourceDataByteStream::ResourceDataByteStream(std::shared_ptr<ResourceD
 	len = reader->size();
 }
 
-HRESULT ResourceDataByteStream::QueryInterface(const IID& riid, void** ppvObject)
+HRESULT __stdcall ResourceDataByteStream::QueryInterface(const IID& riid, void** ppvObject)
 {
 	if (!ppvObject) {
 		return E_INVALIDARG;
@@ -23,12 +23,12 @@ HRESULT ResourceDataByteStream::QueryInterface(const IID& riid, void** ppvObject
 	}
 }
 
-ULONG ResourceDataByteStream::AddRef()
+ULONG __stdcall ResourceDataByteStream::AddRef()
 {
 	return InterlockedIncrement(&refCount);
 }
 
-ULONG ResourceDataByteStream::Release()
+ULONG __stdcall ResourceDataByteStream::Release()
 {
 	ULONG uCount = InterlockedDecrement(&refCount);
     if (uCount == 0) {
@@ -37,48 +37,48 @@ ULONG ResourceDataByteStream::Release()
     return uCount;
 }
 
-HRESULT ResourceDataByteStream::GetCapabilities(DWORD* pdwCapabilities)
+HRESULT __stdcall ResourceDataByteStream::GetCapabilities(DWORD* pdwCapabilities)
 {
 	*pdwCapabilities = MFBYTESTREAM_IS_READABLE | MFBYTESTREAM_IS_SEEKABLE;
 	return S_OK;
 }
 
-HRESULT ResourceDataByteStream::GetLength(QWORD* pqwLength)
+HRESULT __stdcall ResourceDataByteStream::GetLength(QWORD* pqwLength)
 {
 	*pqwLength = len;
 	return S_OK;
 }
 
-HRESULT ResourceDataByteStream::SetLength(QWORD qwLength)
+HRESULT __stdcall ResourceDataByteStream::SetLength(QWORD qwLength)
 {
 	return E_NOTIMPL;
 }
 
-HRESULT ResourceDataByteStream::GetCurrentPosition(QWORD* pqwPosition)
+HRESULT __stdcall ResourceDataByteStream::GetCurrentPosition(QWORD* pqwPosition)
 {
 	*pqwPosition = reader->tell();
 	return S_OK;
 }
 
-HRESULT ResourceDataByteStream::SetCurrentPosition(QWORD qwPosition)
+HRESULT __stdcall ResourceDataByteStream::SetCurrentPosition(QWORD qwPosition)
 {
 	reader->seek(qwPosition, SEEK_SET);
 	return S_OK;
 }
 
-HRESULT ResourceDataByteStream::IsEndOfStream(BOOL* pfEndOfStream)
+HRESULT __stdcall ResourceDataByteStream::IsEndOfStream(BOOL* pfEndOfStream)
 {
 	*pfEndOfStream = reader->tell() == len;
 	return S_OK;
 }
 
-HRESULT ResourceDataByteStream::Read(BYTE* pb, ULONG cb, ULONG* pcbRead)
+HRESULT __stdcall ResourceDataByteStream::Read(BYTE* pb, ULONG cb, ULONG* pcbRead)
 {
 	*pcbRead = reader->read(gsl::as_writeable_bytes(gsl::span<BYTE>(pb, cb)));
 	return S_OK;
 }
 
-HRESULT ResourceDataByteStream::BeginRead(BYTE* pb, ULONG cb, IMFAsyncCallback* pCallback, IUnknown* punkState)
+HRESULT __stdcall ResourceDataByteStream::BeginRead(BYTE* pb, ULONG cb, IMFAsyncCallback* pCallback, IUnknown* punkState)
 {
 	ULONG nRead;
 	Read(pb, cb, &nRead);
@@ -93,7 +93,7 @@ HRESULT ResourceDataByteStream::BeginRead(BYTE* pb, ULONG cb, IMFAsyncCallback* 
 	return S_OK;
 }
 
-HRESULT ResourceDataByteStream::EndRead(IMFAsyncResult* pResult, ULONG* pcbRead)
+HRESULT __stdcall ResourceDataByteStream::EndRead(IMFAsyncResult* pResult, ULONG* pcbRead)
 {
 	auto iter = asyncNumRead.find(pResult);
 	if (iter == asyncNumRead.end()) {
@@ -106,22 +106,22 @@ HRESULT ResourceDataByteStream::EndRead(IMFAsyncResult* pResult, ULONG* pcbRead)
 	return S_OK;
 }
 
-HRESULT ResourceDataByteStream::Write(const BYTE* pb, ULONG cb, ULONG* pcbWritten)
+HRESULT __stdcall ResourceDataByteStream::Write(const BYTE* pb, ULONG cb, ULONG* pcbWritten)
 {
 	return E_NOTIMPL;
 }
 
-HRESULT ResourceDataByteStream::BeginWrite(const BYTE* pb, ULONG cb, IMFAsyncCallback* pCallback, IUnknown* punkState)
+HRESULT __stdcall ResourceDataByteStream::BeginWrite(const BYTE* pb, ULONG cb, IMFAsyncCallback* pCallback, IUnknown* punkState)
 {
 	return E_NOTIMPL;
 }
 
-HRESULT ResourceDataByteStream::EndWrite(IMFAsyncResult* pResult, ULONG* pcbWritten)
+HRESULT __stdcall ResourceDataByteStream::EndWrite(IMFAsyncResult* pResult, ULONG* pcbWritten)
 {
 	return E_NOTIMPL;
 }
 
-HRESULT ResourceDataByteStream::Seek(MFBYTESTREAM_SEEK_ORIGIN SeekOrigin, LONGLONG llSeekOffset, DWORD dwSeekFlags, QWORD* pqwCurrentPosition)
+HRESULT __stdcall ResourceDataByteStream::Seek(MFBYTESTREAM_SEEK_ORIGIN SeekOrigin, LONGLONG llSeekOffset, DWORD dwSeekFlags, QWORD* pqwCurrentPosition)
 {
 	int whence = SEEK_SET;
 	if (SeekOrigin == msoCurrent) {
@@ -134,12 +134,12 @@ HRESULT ResourceDataByteStream::Seek(MFBYTESTREAM_SEEK_ORIGIN SeekOrigin, LONGLO
 	return S_OK;
 }
 
-HRESULT ResourceDataByteStream::Flush()
+HRESULT __stdcall ResourceDataByteStream::Flush()
 {
 	return S_OK;
 }
 
-HRESULT ResourceDataByteStream::Close()
+HRESULT __stdcall ResourceDataByteStream::Close()
 {
 	reader->close();
 	return S_OK;
