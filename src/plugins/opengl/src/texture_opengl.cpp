@@ -35,7 +35,7 @@ void TextureOpenGL::load(TextureDescriptor&& d)
 	}
 
 	if (!d.pixelData.empty()) {
-		loadImage(reinterpret_cast<const char*>(d.pixelData.getBytes()), d.size, d.size.x, d.format, d.useMipMap);
+		loadImage(reinterpret_cast<const char*>(d.pixelData.getBytes()), d.size, d.pixelData.getStrideOr(d.size.x), d.format, d.useMipMap);
 	}
 	finishLoading();
 }

@@ -3,10 +3,13 @@
 #include <memory>
 #include "halley/resources/resource_data.h"
 #include "halley/time/halleytime.h"
+#include "halley/core/graphics/texture.h"
+#include "halley/core/graphics/sprite/sprite.h"
 
 #include <Mfapi.h>
 #include <Mfidl.h>
 #include <Mfreadwrite.h>
+#include <Mferror.h>
 #undef min
 #undef max
 
@@ -14,6 +17,28 @@ namespace Halley
 {
 	class VideoAPI;
 
+	enum class MoviePlayerStreamType
+	{
+		Unknown,
+		Video,
+		Audio,
+		Other
+	};
+
+	class MoviePlayerStream
+	{
+	public:
+		MoviePlayerStreamType type = MoviePlayerStreamType::Unknown;
+		bool playing = true;
+		bool eof = false;
+	};
+
+	struct PendingFrame
+	{
+		std::shared_ptr<Texture> texture;
+		Time time;
+	};
+	
 	class MFMoviePlayer : public MoviePlayer
 	{
 	public:
@@ -25,11 +50,10 @@ namespace Halley
 		void reset();
 
 		void update(Time t) override;
+		Sprite getSprite(Resources& resources) override;
 
 		MoviePlayerState getState() const override;
-		Vector2f getSize() const override;
-
-		HRESULT onReadSample(HRESULT hrStatus, DWORD dwStreamIndex, DWORD dwStreamFlags, LONGLONG llTimestamp, IMFSample* pSample);
+		Vector2i getSize() const override;
 
 	private:
 		VideoAPI& video;
@@ -38,17 +62,24 @@ namespace Halley
 
 		IMFByteStream* inputByteStream = nullptr;
 		IMFSourceReader *reader = nullptr;
-		//IMFSourceReaderCallback* sampleReceiver = nullptr;
+		IMFSourceReaderCallback* sampleReceiver = nullptr;
 		MoviePlayerState state = MoviePlayerState::Uninitialised;
 
-		std::vector<int> videoStreams;
-		std::vector<int> audioStreams;
+		std::vector<MoviePlayerStream> streams;
+
+		Vector2i videoSize;
+		std::shared_ptr<Texture> currentTexture;
+		std::list<PendingFrame> pendingFrames;
 
 		Time time = 0;
-		Time nextTime = 0;
 
 		void init();
 		void deInit();
+
+		HRESULT onReadSample(HRESULT hrStatus, DWORD dwStreamIndex, DWORD dwStreamFlags, LONGLONG llTimestamp, IMFSample* pSample);
+
+		void readVideoSample(Time time, gsl::span<const gsl::byte> data, int stride);
+		void readAudioSample(Time time, gsl::span<const gsl::byte> data);
 	};
 
 	/*

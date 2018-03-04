@@ -2,6 +2,7 @@
 
 #include <halley/maths/vector2.h>
 #include "halley/file_formats/image.h"
+#include "halley/data_structures/maybe.h"
 
 namespace Halley
 {
@@ -37,9 +38,9 @@ namespace Halley
 	public:
 		TextureDescriptorImageData();
 		TextureDescriptorImageData(std::unique_ptr<Image> img);
-		TextureDescriptorImageData(Bytes&& bytes);
+		TextureDescriptorImageData(Bytes&& bytes, Maybe<int> stride = {});
 		TextureDescriptorImageData(TextureDescriptorImageData&& other) noexcept;
-		TextureDescriptorImageData(gsl::span<const gsl::byte> bytes);
+		TextureDescriptorImageData(gsl::span<const gsl::byte> bytes, Maybe<int> stride = {});
 
 		TextureDescriptorImageData& operator=(TextureDescriptorImageData&& other) noexcept;
 
@@ -49,9 +50,13 @@ namespace Halley
 
 		Bytes moveBytes();
 
+		Maybe<int> getStride() const;
+		int getStrideOr(int assumedStride) const;
+
 	private:
 		std::unique_ptr<Image> img;
 		Bytes rawBytes;
+		Maybe<int> stride;
 		bool isRaw = false;
 	};
 

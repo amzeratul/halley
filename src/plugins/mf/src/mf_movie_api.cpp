@@ -1,5 +1,8 @@
-#include "mf_movie_api.h"
 #include <Mfapi.h>
+#undef min
+#undef max
+
+#include "mf_movie_api.h"
 #include "mf_movie_player.h"
 using namespace Halley;
 

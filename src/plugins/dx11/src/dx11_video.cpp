@@ -42,6 +42,11 @@ void DX11Video::initD3D(Window& window, bool vsync)
 	if (result != S_OK) {
 		throw Exception("Unable to initialise DX11");
 	}
+	ID3D10Multithread* mt;
+	device->QueryInterface(__uuidof(ID3D10Multithread), reinterpret_cast<void**>(&mt));
+	if (mt) {
+		mt->SetMultithreadProtected(true);
+	}
 
 	initSwapChain(window);
 

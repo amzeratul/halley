@@ -2,9 +2,20 @@
 #include "halley/resources/resource_data.h"
 #include "halley/core/api/audio_api.h"
 #include "halley/core/api/video_api.h"
-#include <Mferror.h>
 #include "resource_data_byte_stream.h"
+#include "halley/core/graphics/texture_descriptor.h"
+#include "halley/concurrency/concurrent.h"
+#include "halley/core/resources/resources.h"
+#include "halley/core/graphics/material/material_definition.h"
+
 using namespace Halley;
+
+/*
+#include <D3D9.h>
+#pragma comment(lib, "Mfuuid.lib")
+#pragma comment(lib, "Mf.lib")
+#pragma comment(lib, "strmiids.lib")
+*/
 
 MFMoviePlayer::MFMoviePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data)
 	: video(video)
@@ -23,6 +34,10 @@ void MFMoviePlayer::play()
 {
 	if (state == MoviePlayerState::Paused) {
 		state = MoviePlayerState::Playing;
+
+		for (auto& s: streams) {
+			s.playing = true;
+		}
 	}
 }
 
@@ -30,6 +45,10 @@ void MFMoviePlayer::pause()
 {
 	if (state == MoviePlayerState::Playing) {
 		state = MoviePlayerState::Paused;
+
+		for (auto& s: streams) {
+			s.playing = false;
+		}
 	}
 }
 
@@ -37,6 +56,11 @@ void MFMoviePlayer::reset()
 {
 	state = MoviePlayerState::Paused;
 	time = 0;
+
+	PROPVARIANT pos;
+	pos.vt = VT_I8;
+	pos.hVal.QuadPart = 0;
+	reader->SetCurrentPosition(GUID_NULL, pos);
 }
 
 void MFMoviePlayer::update(Time t)
@@ -44,23 +68,40 @@ void MFMoviePlayer::update(Time t)
 	if (state == MoviePlayerState::Playing) {
 		time += t;
 
-		if (true || time >= nextTime) {
-			const DWORD controlFlags = 0;
+		MoviePlayerStream* videoStream = nullptr;
+		for (auto& s: streams) {
+			if (s.type == MoviePlayerStreamType::Video) {
+				videoStream = &s;
+				break;
+			}
+		}
 
-			DWORD streamIndex;
-			DWORD streamFlags;
-			LONGLONG timestamp;
-			IMFSample* sample;
-
-			for (int i = 0; i < 10; ++i) {
-				auto hr = reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, controlFlags, &streamIndex, &streamFlags, &timestamp, &sample);
-				if (sample) {
-					std::cout << "[t = " << time << "] ";
-				}
+		if (videoStream) {
+			if (pendingFrames.size() < 5 && !videoStream->eof) {
+				const DWORD controlFlags = 0;
+				DWORD streamIndex;
+				DWORD streamFlags;
+				LONGLONG timestamp;
+				IMFSample* sample;
+				auto hr = reader->ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM, controlFlags, &streamIndex, &streamFlags, &timestamp, &sample);
 				onReadSample(hr, streamIndex, streamFlags, timestamp, sample);
+			}
+
+			if (!pendingFrames.empty()) {
+				auto& next = pendingFrames.front();
+				if (!currentTexture || time >= next.time) {
+					currentTexture = next.texture;
+					pendingFrames.pop_front();
+				}
 			}
 		}
 	}
+}
+
+Sprite MFMoviePlayer::getSprite(Resources& resources)
+{
+	auto matDef = resources.get<MaterialDefinition>("Halley/Sprite");
+	return Sprite().setImage(currentTexture, matDef).setTexRect(Rect4f(0, 0, 1, 1)).setSize(Vector2f(videoSize));
 }
 
 MoviePlayerState MFMoviePlayer::getState() const
@@ -68,20 +109,13 @@ MoviePlayerState MFMoviePlayer::getState() const
 	return state;
 }
 
-Vector2f MFMoviePlayer::getSize() const
+Vector2i MFMoviePlayer::getSize() const
 {
-	return {};
+	return videoSize;
 }
 
 void MFMoviePlayer::init()
 {
-	/*
-	// HACK
-	HRESULT hr = MFCreateFile(MF_ACCESSMODE_READ, MF_OPENMODE_FAIL_IF_NOT_EXIST, MF_FILEFLAGS_NOBUFFERING, L"c:\\users\\amz\\desktop\\test.mp4", &inputByteStream);
-	if (!SUCCEEDED(hr)) {
-		throw Exception("Unable to load media file");
-	}
-	*/
 	inputByteStream = new ResourceDataByteStream(data);
 	inputByteStream->AddRef();
 
@@ -91,15 +125,17 @@ void MFMoviePlayer::init()
 		throw Exception("Unable to create attributes");
 	}
 
+	/*
 	constexpr bool useAsync = false;
 	if (useAsync) {
-		//sampleReceiver = new MoviePlayerSampleReceiver(*this);
-		//sampleReceiver->AddRef();
-		//attributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK, sampleReceiver);
+		sampleReceiver = new MoviePlayerSampleReceiver(*this);
+		sampleReceiver->AddRef();
+		attributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK, sampleReceiver);
 	}
+	*/
 
 	// DX11 acceleration
-	auto dx11Device = nullptr;//static_cast<IUnknown*>(video.getImplementationPointer("ID3D11Device"));
+	auto dx11Device = static_cast<IUnknown*>(video.getImplementationPointer("ID3D11Device"));
 	IMFDXGIDeviceManager* deviceManager = nullptr;
 	if (dx11Device) {
 		UINT resetToken;
@@ -134,6 +170,9 @@ void MFMoviePlayer::init()
 	// Setup the right decoding formats
 	bool hasMoreStreams = true;
 	for (int streamIndex = 0; hasMoreStreams; ++streamIndex) {
+		streams.emplace_back();
+		auto& curStream = streams.back();
+
 		for (int mediaTypeIndex = 0; ; ++mediaTypeIndex) {
 			IMFMediaType *nativeType = nullptr;
 			hr = reader->GetNativeMediaType(streamIndex, mediaTypeIndex, &nativeType);
@@ -163,10 +202,16 @@ void MFMoviePlayer::init()
 					if (majorType == MFMediaType_Video) {
 						UINT64 frameSize;
 						nativeType->GetUINT64(MF_MT_FRAME_SIZE, &frameSize);
-						auto size = Vector2i(int(frameSize >> 32), int(frameSize & 0xFFFFFFFFull));
-						std::cout << "Video is " << size.x << " x " << size.y << std::endl;
+						videoSize = Vector2i(int(frameSize >> 32), int(frameSize & 0xFFFFFFFFull));
+						UINT32 strideRaw;
+						nativeType->GetUINT32(MF_MT_DEFAULT_STRIDE, &strideRaw);
+						INT32 stride = static_cast<INT32>(strideRaw);
+						UINT64 aspectRatioRaw;
+						nativeType->GetUINT64(MF_MT_PIXEL_ASPECT_RATIO, &aspectRatioRaw);
+						float par = float(aspectRatioRaw >> 32) / float(aspectRatioRaw & 0xFFFFFFFFull);
+						std::cout << "Video is " << videoSize.x << " x " << videoSize.y << ", stride: " << stride << ", PAR: " << par << std::endl;
 
-						videoStreams.push_back(streamIndex);
+						curStream.type = MoviePlayerStreamType::Video;
 						subType = MFVideoFormat_NV12; // NV12 is the only format supported by DX accelerated decoding
 					} else if (majorType == MFMediaType_Audio) {
 						UINT32 sampleRate;
@@ -175,7 +220,7 @@ void MFMoviePlayer::init()
 						nativeType->GetUINT32(MF_MT_AUDIO_NUM_CHANNELS, &numChannels);
 						std::cout << "Audio has " << numChannels << " channels at " << sampleRate << " Hz." << std::endl;
 
-						audioStreams.push_back(streamIndex);
+						curStream.type = MoviePlayerStreamType::Audio;
 						subType = MFAudioFormat_PCM;
 					}
 
@@ -209,12 +254,10 @@ void MFMoviePlayer::init()
 
 void MFMoviePlayer::deInit()
 {
-	/*
 	if (sampleReceiver) {
 		sampleReceiver->Release();
 		sampleReceiver = nullptr;
 	}
-	*/
 	if (reader) {
 		reader->Release();
 		reader = nullptr;
@@ -227,15 +270,90 @@ void MFMoviePlayer::deInit()
 
 HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamFlags, LONGLONG timestamp, IMFSample* sample)
 {
+	auto& curStream = streams.at(streamIndex);
+	if (streamFlags & MF_SOURCE_READERF_ENDOFSTREAM) {
+		curStream.eof = true;
+	}
+
 	if (sample) {
-		std::cout << "Read sample on " << streamIndex << ", flags = " << streamFlags << ", timestamp = " << (Time(timestamp) / 10000000.0) << std::endl;
-		if (streamIndex == 0) {
-			nextTime = Time(timestamp) / 10000000.0;
+		Time sampleTime = Time(timestamp) / 10000000.0;
+
+		DWORD bufferCount;
+		sample->GetBufferCount(&bufferCount);
+		for (int i = 0; i < int(bufferCount); ++i) {
+			IMFMediaBuffer* buffer;
+			sample->GetBufferByIndex(i, &buffer);
+
+			if (curStream.type == MoviePlayerStreamType::Video) {
+				/*
+				IDirect3DSurface9 *surface = nullptr;
+				auto hr = MFGetService(buffer, MR_BUFFER_SERVICE, __uuidof(IDirect3DSurface9), reinterpret_cast<void**>(&surface));
+				if (SUCCEEDED(hr)) {
+					std::cout << Release();
+				}"Got DX9 surface!\n";
+				surface->Release();
+				*/
+				
+				IMF2DBuffer* buffer2d;
+				hr = buffer->QueryInterface(__uuidof(IMF2DBuffer), reinterpret_cast<void**>(&buffer2d));
+				if (!SUCCEEDED(hr)) {
+					throw Exception("Unable to read video frame");
+				}
+				
+				BYTE* src;
+				LONG pitch;
+				buffer2d->Lock2D(&src, &pitch);
+				readVideoSample(sampleTime, gsl::as_bytes(gsl::span<const BYTE>(src, pitch * videoSize.y)), pitch);
+				buffer2d->Unlock2D();
+				buffer2d->Release();
+			}
+
+			if (curStream.type == MoviePlayerStreamType::Audio) {
+				DWORD length;
+				buffer->GetCurrentLength(&length);
+				BYTE* data;
+				DWORD maxLen;
+				DWORD curLen;
+				buffer->Lock(&data, &maxLen, &curLen);
+				readAudioSample(sampleTime, gsl::as_bytes(gsl::span<const BYTE>(data, curLen)));
+				buffer->Unlock();
+			}
+
+			buffer->Release();
 		}
+
 		sample->Release();
 	}
 
 	return S_OK;
+}
+
+void MFMoviePlayer::readVideoSample(Time time, gsl::span<const gsl::byte> data, int stride)
+{
+	Vector2i texSize = videoSize;
+
+	Bytes myData(data.size());
+	memcpy(myData.data(), data.data(), data.size());
+
+	std::shared_ptr<Texture> tex = video.createTexture(videoSize);
+	tex->startLoading();
+	pendingFrames.push_back({tex, time});
+
+	Concurrent::execute(Executors::getVideoAux(), [tex, texSize, stride, data = std::move(myData)] () mutable
+	{
+		TextureDescriptor descriptor;
+		descriptor.format = TextureFormat::Indexed;
+		descriptor.pixelFormat = PixelDataFormat::Image;
+		descriptor.size = texSize;
+		descriptor.pixelData = TextureDescriptorImageData(std::move(data), stride);
+		
+		tex->load(std::move(descriptor));
+	});
+}
+
+void MFMoviePlayer::readAudioSample(Time time, gsl::span<const gsl::byte> data)
+{
+	//std::cout << "Audio at " << time << " (" << data.size_bytes() << " bytes).\n";
 }
 
 /*

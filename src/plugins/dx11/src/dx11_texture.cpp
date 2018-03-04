@@ -80,7 +80,7 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 		desc.CPUAccessFlags = 0;
 		D3D11_SUBRESOURCE_DATA subResData;
 		subResData.pSysMem = descriptor.pixelData.getSpan().data();
-		subResData.SysMemPitch = bpp * size.x;
+		subResData.SysMemPitch = descriptor.pixelData.getStrideOr(bpp * size.x);
 		subResData.SysMemSlicePitch = subResData.SysMemPitch;
 		res = &subResData;
 	}

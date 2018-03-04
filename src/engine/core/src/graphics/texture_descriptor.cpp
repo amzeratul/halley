@@ -8,21 +8,26 @@ TextureDescriptorImageData::TextureDescriptorImageData()
 TextureDescriptorImageData::TextureDescriptorImageData(std::unique_ptr<Image> img)
 	: img(move(img))
 	, isRaw(false)
-{}
+{
+	stride = this->img->getWidth();
+}
 
-TextureDescriptorImageData::TextureDescriptorImageData(Bytes&& bytes)
+TextureDescriptorImageData::TextureDescriptorImageData(Bytes&& bytes, Maybe<int> stride)
 	: rawBytes(move(bytes))
+	, stride(stride)
 	, isRaw(true)
 {}
 
 TextureDescriptorImageData::TextureDescriptorImageData(TextureDescriptorImageData&& other) noexcept
 	: img(move(other.img))
 	, rawBytes(move(other.rawBytes))
+	, stride(other.stride)
 	, isRaw(other.isRaw)
 {}
 
-TextureDescriptorImageData::TextureDescriptorImageData(gsl::span<const gsl::byte> bytes)
+TextureDescriptorImageData::TextureDescriptorImageData(gsl::span<const gsl::byte> bytes, Maybe<int> stride)
 	: rawBytes(bytes.size_bytes())
+	, stride(stride)
     , isRaw(true)
 {
 	memcpy(rawBytes.data(), bytes.data(), bytes.size_bytes());
@@ -32,7 +37,8 @@ TextureDescriptorImageData& TextureDescriptorImageData::operator=(TextureDescrip
 {
 	img = move(other.img);
 	rawBytes = move(other.rawBytes);
-	isRaw = std::move(other.isRaw);
+	stride = other.stride;
+	isRaw = other.isRaw;
 	return *this;
 }
 
@@ -67,6 +73,20 @@ Bytes TextureDescriptorImageData::moveBytes()
 		memcpy(result.data(), img->getPixels(), img->getByteSize());
 		img.reset();
 		return result;
+	}
+}
+
+Maybe<int> TextureDescriptorImageData::getStride() const
+{
+	return stride;
+}
+
+int TextureDescriptorImageData::getStrideOr(int assumedStride) const
+{
+	if (stride) {
+		return stride.get();
+	} else {
+		return assumedStride;
 	}
 }
 
