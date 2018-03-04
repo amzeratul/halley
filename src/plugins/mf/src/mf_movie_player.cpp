@@ -104,7 +104,7 @@ void MFMoviePlayer::update(Time t)
 
 Sprite MFMoviePlayer::getSprite(Resources& resources)
 {
-	auto matDef = resources.get<MaterialDefinition>("Halley/Sprite");
+	auto matDef = resources.get<MaterialDefinition>("Halley/NV12Video");
 	return Sprite().setImage(currentTexture, matDef).setTexRect(Rect4f(0, 0, 1, 1)).setSize(Vector2f(videoSize));
 }
 
@@ -307,7 +307,7 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 				BYTE* src;
 				LONG pitch;
 				buffer2d->Lock2D(&src, &pitch);
-				readVideoSample(sampleTime, gsl::as_bytes(gsl::span<const BYTE>(src, pitch * videoSize.y)), pitch);
+				readVideoSample(sampleTime, gsl::as_bytes(gsl::span<const BYTE>(src, pitch * videoSize.y * 3 / 2)), pitch);
 				buffer2d->Unlock2D();
 				buffer2d->Release();
 			}
@@ -334,12 +334,12 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 
 void MFMoviePlayer::readVideoSample(Time time, gsl::span<const gsl::byte> data, int stride)
 {
-	Vector2i texSize = videoSize;
+	Vector2i texSize = Vector2i(videoSize.x, videoSize.y * 3 / 2);
 
 	Bytes myData(data.size());
 	memcpy(myData.data(), data.data(), data.size());
 
-	std::shared_ptr<Texture> tex = video.createTexture(videoSize);
+	std::shared_ptr<Texture> tex = video.createTexture(texSize);
 	tex->startLoading();
 	pendingFrames.push_back({tex, time});
 

@@ -1,0 +1,15 @@
+---
+name: Halley/NV12Video
+base: sprite_base.yaml
+textures:
+  - tex0: sampler2D
+passes:
+  - blend: Alpha
+    shader:
+      - language: glsl
+        vertex: sprite.vertex.glsl
+        pixel: nv12_video.pixel.glsl
+      - language: hlsl
+        vertex: sprite.vertex.hlsl
+        pixel: nv12_video.pixel.hlsl
+...
