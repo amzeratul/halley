@@ -9,7 +9,6 @@ TextureDescriptorImageData::TextureDescriptorImageData(std::unique_ptr<Image> im
 	: img(move(img))
 	, isRaw(false)
 {
-	stride = this->img->getWidth();
 }
 
 TextureDescriptorImageData::TextureDescriptorImageData(Bytes&& bytes, Maybe<int> stride)

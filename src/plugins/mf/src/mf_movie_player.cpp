@@ -94,6 +94,10 @@ void MFMoviePlayer::update(Time t)
 					pendingFrames.pop_front();
 				}
 			}
+
+			if (pendingFrames.empty() && videoStream->eof) {
+				state = MoviePlayerState::Finished;
+			}
 		}
 	}
 }
