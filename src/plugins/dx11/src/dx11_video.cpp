@@ -38,7 +38,7 @@ void DX11Video::initD3D(Window& window, bool vsync)
 		return;
 	}
 
-	auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &deviceContext);
+	auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_VIDEO_SUPPORT, nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &deviceContext);
 	if (result != S_OK) {
 		throw Exception("Unable to initialise DX11");
 	}
@@ -237,4 +237,12 @@ ID3D11DeviceContext& DX11Video::getDeviceContext()
 SystemAPI& DX11Video::getSystem()
 {
 	return system;
+}
+
+void* DX11Video::getImplementationPointer(const String& id)
+{
+	if (id == "ID3D11Device") {
+		return static_cast<IUnknown*>(device);
+	}
+	return nullptr;
 }

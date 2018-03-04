@@ -41,6 +41,8 @@ namespace Halley {
 		
 		SystemAPI& getSystem();
 
+		void* getImplementationPointer(const String& id) override;
+
 	private:
 		SystemAPI& system;
 		std::shared_ptr<Window> window;
