@@ -42,16 +42,21 @@ void MFMoviePlayer::update(Time t)
 	if (state == MoviePlayerState::Playing) {
 		time += t;
 
-		const DWORD controlFlags = 0;
-		DWORD streamFlags;
-		DWORD streamIndex;
-		LONGLONG timestamp;
-		IMFSample* sample;
-		reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, controlFlags, &streamIndex, &streamFlags, &timestamp, &sample);
+		if (true || time >= nextTime) {
+			const DWORD controlFlags = 0;
 
-		if (sample) {
-			std::cout << "Read sample on " << streamIndex << std::endl;
-			sample->Release();
+			DWORD streamIndex;
+			DWORD streamFlags;
+			LONGLONG timestamp;
+			IMFSample* sample;
+
+			for (int i = 0; i < 10; ++i) {
+				auto hr = reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, controlFlags, &streamIndex, &streamFlags, &timestamp, &sample);
+				if (sample) {
+					std::cout << "[t = " << time << "] ";
+				}
+				onReadSample(hr, streamIndex, streamFlags, timestamp, sample);
+			}
 		}
 	}
 }
@@ -75,16 +80,25 @@ void MFMoviePlayer::init()
 	}
 
 	IMFAttributes* attributes = nullptr;
+	constexpr bool useAsync = false;
+	if (useAsync) {
+		MFCreateAttributes(&attributes, 1);
+		sampleReceiver = new MoviePlayerSampleReceiver(*this);
+		sampleReceiver->AddRef();
+		attributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK, sampleReceiver);
+	}
 
 	// DX11 acceleration
+	constexpr bool useDX11 = false;
 	IMFDXGIDeviceManager* deviceManager = nullptr;
-	UINT resetToken;
-	hr = MFCreateDXGIDeviceManager(&resetToken, &deviceManager);
-	if (!SUCCEEDED(hr)) {
-		throw Exception("Unable to create DXGI Device Manager");
+	if (useDX11) {
+		UINT resetToken;
+		hr = MFCreateDXGIDeviceManager(&resetToken, &deviceManager);
+		if (!SUCCEEDED(hr)) {
+			throw Exception("Unable to create DXGI Device Manager");
+		}
+		attributes->SetUnknown(MF_SOURCE_READER_D3D_MANAGER, deviceManager);
 	}
-	MFCreateAttributes(&attributes, 1);
-	attributes->SetUnknown(MF_SOURCE_READER_D3D_MANAGER, deviceManager);
 
 	hr = MFCreateSourceReaderFromByteStream(inputByteStream, attributes, &reader);
 	if (!SUCCEEDED(hr)) {
@@ -99,9 +113,9 @@ void MFMoviePlayer::init()
 		deviceManager->Release();
 	}
 
-	reader->SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS, false);
-	reader->SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM, true);
-	reader->SetStreamSelection(MF_SOURCE_READER_FIRST_AUDIO_STREAM, true);
+	//reader->SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS, false);
+	//reader->SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM, true);
+	//reader->SetStreamSelection(MF_SOURCE_READER_FIRST_AUDIO_STREAM, true);
 
 	// Setup the right decoding formats
 	bool hasMoreStreams = true;
@@ -170,6 +184,10 @@ void MFMoviePlayer::init()
 
 void MFMoviePlayer::deInit()
 {
+	if (sampleReceiver) {
+		sampleReceiver->Release();
+		sampleReceiver = nullptr;
+	}
 	if (reader) {
 		reader->Release();
 		reader = nullptr;
@@ -178,4 +196,82 @@ void MFMoviePlayer::deInit()
 		inputByteStream->Release();
 		inputByteStream = nullptr;
 	}
+}
+
+MoviePlayerSampleReceiver::MoviePlayerSampleReceiver(MFMoviePlayer& player)
+	: player(player)
+{
+}
+
+HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamFlags, LONGLONG timestamp, IMFSample* sample)
+{
+	if (sample) {
+		std::cout << "Read sample on " << streamIndex << ", flags = " << streamFlags << ", timestamp = " << (Time(timestamp) / 10000000.0) << std::endl;
+		if (streamIndex == 0) {
+			nextTime = Time(timestamp) / 10000000.0;
+		}
+		sample->Release();
+	}
+
+	return S_OK;
+}
+
+
+HRESULT MoviePlayerSampleReceiver::OnReadSample(HRESULT hr, DWORD streamIndex, DWORD streamFlags, LONGLONG timestamp, IMFSample* sample)
+{
+	return player.onReadSample(hr, streamIndex, streamFlags, timestamp, sample);
+}
+
+HRESULT MoviePlayerSampleReceiver::QueryInterface(const IID& riid, void** ppvObject)
+{
+	if (!ppvObject) {
+		return E_INVALIDARG;
+	}
+	*ppvObject = nullptr;
+
+	if (riid == __uuidof(IMFSourceReaderCallback)) {
+		AddRef();
+		*ppvObject = static_cast<IMFSourceReaderCallback*>(this);
+		return NOERROR;
+	} else if (riid == __uuidof(IMFSourceReaderCallback2)) {
+		AddRef();
+		*ppvObject = static_cast<IMFSourceReaderCallback2*>(this);
+		return NOERROR;
+	} else {
+		return E_NOINTERFACE;
+	}
+}
+
+ULONG MoviePlayerSampleReceiver::AddRef()
+{
+	return InterlockedIncrement(&refCount);
+}
+
+ULONG MoviePlayerSampleReceiver::Release()
+{
+	ULONG uCount = InterlockedDecrement(&refCount);
+    if (uCount == 0) {
+		delete this;
+    }
+    return uCount;
+}
+
+HRESULT MoviePlayerSampleReceiver::OnFlush(DWORD dwStreamIndex)
+{
+	return S_OK;
+}
+
+HRESULT MoviePlayerSampleReceiver::OnEvent(DWORD dwStreamIndex, IMFMediaEvent* pEvent)
+{
+	return S_OK;
+}
+
+HRESULT MoviePlayerSampleReceiver::OnTransformChange()
+{
+	return S_OK;
+}
+
+HRESULT MoviePlayerSampleReceiver::OnStreamError(DWORD dwStreamIndex, HRESULT hrStatus)
+{
+	return S_OK;
 }
