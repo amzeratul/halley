@@ -15,7 +15,7 @@ namespace Halley
 	class AudioPosition
 	{
 	public:
-		static AudioPosition makeUI(float pan);
+		static AudioPosition makeUI(float pan = 0.0f); // -1.0f = left, 1.0f = right
 		static AudioPosition makePositional(Vector2f pos, float referenceDistance = 200.0f, float maxDistance = 400.0f);
 		static AudioPosition makePositional(Vector3f pos, float referenceDistance = 200.0f, float maxDistance = 400.0f);
 		static AudioPosition makeFixed();

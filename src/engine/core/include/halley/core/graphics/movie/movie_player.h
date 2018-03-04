@@ -4,13 +4,19 @@
 #include <halley/time/halleytime.h>
 #include <halley/core/graphics/sprite/sprite.h>
 #include <gsl/gsl>
+#include <thread>
+#include <mutex>
+#include <atomic>
 
 namespace Halley
 {
+	class RenderContext;
 	class TextureDescriptor;
 	class VideoAPI;
 	class AudioAPI;
 	class StreamingAudioClip;
+	class IAudioHandle;
+	class TextureRenderTarget;
 
 	enum class MoviePlayerState
 	{
@@ -48,13 +54,14 @@ namespace Halley
 	{
 	public:
 		MoviePlayer(VideoAPI& video, AudioAPI& audio);
-		virtual ~MoviePlayer() = default;
+		virtual ~MoviePlayer();
 
 		void play();
 		void pause();
 		void reset();
 
 		void update(Time t);
+		void render(Resources& resources, RenderContext& rc);
 		Sprite getSprite(Resources& resources);
 
 		MoviePlayerState getState() const;
@@ -85,9 +92,24 @@ namespace Halley
 		std::shared_ptr<Texture> currentTexture;
 		std::list<PendingFrame> pendingFrames;
 		std::list<std::shared_ptr<Texture>> recycleTexture;
+		std::shared_ptr<TextureRenderTarget> renderTarget;
+		std::shared_ptr<Texture> renderTexture;
 
 		std::shared_ptr<StreamingAudioClip> streamingClip;
+		std::shared_ptr<IAudioHandle> audioHandle;
+
+		std::atomic<bool> threadRunning;
+		std::thread workerThread;
+		mutable std::mutex mutex;
 
 		Time time = 0;
+
+		void startThread();
+		void stopThread();
+		void threadEntry();
+
+		bool needsMoreVideoFrames() const;
+		bool needsMoreAudioFrames() const;
 	};
 }
+

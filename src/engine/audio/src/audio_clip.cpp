@@ -191,5 +191,6 @@ size_t StreamingAudioClip::getLength() const
 
 size_t StreamingAudioClip::getSamplesLeft() const
 {
+	std::unique_lock<std::mutex> lock(mutex);
 	return buffers.at(0).size();
 }
