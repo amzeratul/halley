@@ -50,8 +50,9 @@ void MFMoviePlayer::init()
 	*/
 
 	// DX11 acceleration
-	auto dx11Device = static_cast<IUnknown*>(getVideoAPI().getImplementationPointer("ID3D11Device"));
 	IMFDXGIDeviceManager* deviceManager = nullptr;
+	/*
+	auto dx11Device = static_cast<IUnknown*>(getVideoAPI().getImplementationPointer("ID3D11Device"));
 	if (dx11Device) {
 		UINT resetToken;
 		hr = MFCreateDXGIDeviceManager(&resetToken, &deviceManager);
@@ -64,6 +65,7 @@ void MFMoviePlayer::init()
 		}
 		attributes->SetUnknown(MF_SOURCE_READER_D3D_MANAGER, deviceManager);
 	}
+	*/
 
 	hr = MFCreateSourceReaderFromByteStream(inputByteStream, attributes, &reader);
 	if (!SUCCEEDED(hr)) {

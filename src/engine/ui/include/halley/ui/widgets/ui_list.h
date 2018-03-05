@@ -27,6 +27,8 @@ namespace Halley {
 		void addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill);
 		void clear();
 
+		void setItemEnabled(const String& id, bool enabled);
+
 		Rect4f getOptionRect(int curOption) const;
 
 		void onManualControlCycleValue(int delta) override;
@@ -59,6 +61,7 @@ namespace Halley {
 
 		void onClicked(Vector2f mousePos) override;
 		void setSelected(bool selected);
+		
 		int getIndex() const;
 		Rect4f getMouseRect() const override;
 		Rect4f getRawRect() const;
