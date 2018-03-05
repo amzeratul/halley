@@ -255,23 +255,27 @@ AudioAPI& MoviePlayer::getAudioAPI() const
 
 void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descriptor)
 {
-	std::unique_lock<std::mutex> lock(mutex);
-
-	std::shared_ptr<Texture> tex;
-	if (recycleTexture.empty()) {
-		tex = video.createTexture(descriptor.size);
-	} else {
-		tex = recycleTexture.front();
-		recycleTexture.pop_front();
-	}
-	tex->startLoading();
-	pendingFrames.push_back({tex, time});
-
 	auto desc = std::make_shared<TextureDescriptor>(std::move(descriptor));
 
-	Concurrent::execute(Executors::getVideoAux(), [tex, desc(std::move(desc))] ()
+	Concurrent::execute(Executors::getVideoAux(), [this, time, desc(std::move(desc))] ()
 	{
-		tex->load(TextureDescriptor(std::move(*desc)));
+		auto descriptor = TextureDescriptor(std::move(*desc));
+		std::shared_ptr<Texture> tex;
+
+		{
+			std::unique_lock<std::mutex> lock(mutex);
+
+			if (recycleTexture.empty()) {
+				tex = video.createTexture(descriptor.size);
+			} else {
+				tex = recycleTexture.front();
+				recycleTexture.pop_front();
+			}
+			tex->startLoading();
+			pendingFrames.push_back({tex, time});
+		}
+
+		tex->load(std::move(descriptor));
 	});
 }
 
