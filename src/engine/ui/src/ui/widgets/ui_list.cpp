@@ -19,12 +19,18 @@ UIList::UIList(const String& id, UIStyle style, UISizerType orientation, int nCo
 
 bool UIList::setSelectedOption(int option)
 {
+	forceAddChildren(UIInputType::Undefined);
+
 	if (items.empty()) {
 		return false;
 	}
 
-	auto newSel = modulo(option, int(items.size()));
+	auto newSel = clamp(option, 0, int(items.size()));
 	if (newSel != curOption) {
+		if (!items.at(newSel)->isEnabled()) {
+			return false;
+		}
+
 		if (curOption >= 0) {
 			items[curOption]->setSelected(false);
 		}
@@ -34,8 +40,9 @@ bool UIList::setSelectedOption(int option)
 		playSound(style.getAudioClip("selectionChangedSound"));
 		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), items[curOption]->getId(), curOption));
 		sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
+		return true;
 	}
-	return true;
+	return false;
 }
 
 int UIList::getSelectedOption() const
@@ -88,6 +95,15 @@ void UIList::clear()
 	getSizer().clear();
 }
 
+void UIList::setItemEnabled(const String& id, bool enabled)
+{
+	for (auto& item: items) {
+		if (item->getId() == id) {
+			item->setEnabled(enabled);
+		}
+	}
+}
+
 void UIList::addItem(std::shared_ptr<UIListItem> item)
 {
 	add(item);
@@ -95,7 +111,6 @@ void UIList::addItem(std::shared_ptr<UIListItem> item)
 	items.push_back(item);
 	if (wasEmpty) {
 		curOption = -1;
-		forceAddChildren(UIInputType::Undefined);
 		setSelectedOption(0);
 	}
 }
@@ -208,7 +223,6 @@ void UIListItem::setSelected(bool s)
 {
 	if (selected != s) {
 		selected = s;
-		parent.curOption = selected ? index : -1;
 		doSetState(getCurState());
 
 		sendEventDown(UIEvent(UIEventType::SetSelected, getId(), selected));
@@ -301,7 +315,13 @@ Rect4f UIList::getOptionRect(int curOption) const
 
 void UIList::onManualControlCycleValue(int delta)
 {
-	setSelectedOption(modulo(curOption + delta, int(items.size())));
+	int start = curOption;
+	for (int i = 1; i < int(items.size()); ++i) {
+		int opt = modulo(start + delta * i, int(items.size()));
+		if (setSelectedOption(opt)) {
+			return;
+		}
+	}
 }
 
 void UIList::onManualControlActivate()
