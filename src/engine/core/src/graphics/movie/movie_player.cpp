@@ -68,6 +68,8 @@ void MoviePlayer::pause()
 
 void MoviePlayer::reset()
 {
+	stopThread();
+
 	state = MoviePlayerState::Paused;
 	time = 0;
 
@@ -78,8 +80,6 @@ void MoviePlayer::reset()
 		audioHandle->stop();
 		audioHandle.reset();
 	}
-
-	stopThread();
 
 	onReset();
 }

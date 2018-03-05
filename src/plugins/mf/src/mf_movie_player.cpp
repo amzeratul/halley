@@ -25,6 +25,7 @@ MFMoviePlayer::MFMoviePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<R
 
 MFMoviePlayer::~MFMoviePlayer() noexcept
 {
+	reset();
 	deInit();
 }
 
