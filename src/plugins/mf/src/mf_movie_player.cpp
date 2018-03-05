@@ -224,6 +224,8 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 		for (int i = 0; i < int(bufferCount); ++i) {
 			IMFMediaBuffer* buffer;
 			sample->GetBufferByIndex(i, &buffer);
+			DWORD length;
+			buffer->GetCurrentLength(&length);
 
 			if (curStream.type == MoviePlayerStreamType::Video) {
 				/*
@@ -244,14 +246,12 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 				BYTE* src;
 				LONG pitch;
 				buffer2d->Lock2D(&src, &pitch);
-				readVideoSample(sampleTime, gsl::as_bytes(gsl::span<const BYTE>(src, pitch * getSize().y * 3 / 2)), pitch);
+				readVideoSample(sampleTime, reinterpret_cast<gsl::byte*>(src), pitch);
 				buffer2d->Unlock2D();
 				buffer2d->Release();
 			}
 
 			if (curStream.type == MoviePlayerStreamType::Audio) {
-				DWORD length;
-				buffer->GetCurrentLength(&length);
 				BYTE* data;
 				DWORD maxLen;
 				DWORD curLen;
@@ -269,19 +269,23 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 	return S_OK;
 }
 
-void MFMoviePlayer::readVideoSample(Time time, gsl::span<const gsl::byte> data, int stride)
+void MFMoviePlayer::readVideoSample(Time time, const gsl::byte* data, int stride)
 {
-	auto videoSize = getSize();
-	Vector2i texSize = Vector2i(videoSize.x, videoSize.y * 3 / 2);
+	const auto videoSize = getSize();
+	const int yPlaneHeight = alignUp(videoSize.y, 16);
+	const int uvPlaneHeight = alignUp(videoSize.y / 2, 16);
+	const int width = alignUp(videoSize.x, 16);
+	const int height = yPlaneHeight + uvPlaneHeight;
 
-	Bytes myData(data.size());
-	memcpy(myData.data(), data.data(), data.size());
+	auto srcData = gsl::span<const gsl::byte>(data, stride * height);
+	Bytes myData(srcData.size_bytes());
+	memcpy(myData.data(), data, myData.size());
 
 	TextureDescriptor descriptor;
 	descriptor.format = TextureFormat::Indexed;
 	descriptor.pixelFormat = PixelDataFormat::Image;
-	descriptor.size = texSize;
-	descriptor.pixelData = TextureDescriptorImageData(data, stride);
+	descriptor.size = Vector2i(width, height);
+	descriptor.pixelData = TextureDescriptorImageData(srcData, stride);
 
 	onVideoFrameAvailable(time, std::move(descriptor));
 }

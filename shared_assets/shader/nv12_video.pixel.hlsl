@@ -12,16 +12,23 @@ struct VOut {
 };
 
 float4 main(VOut input) : SV_TARGET {
-    const float uvPlaneY = 0.66666667 + (6 / 1080.0);
+    const float frameWidth = 1920.0;
+    const float frameHeight = 1080.0;
+    const float width = 1920.0;
+    const float halfWidth = floor(width * 0.5);
+    const float yHeight = 1088.0;
+    const float uvHeight = 544.0;
+    const float height = yHeight + uvHeight;
+    const float uvPlaneY = yHeight / height;
 
     float2 yPlaneStart = float2(0.0, 0.0);
     float2 uPlaneStart = float2(0.0, uvPlaneY);
-    float2 vPlaneStart = float2(1.0 / 1920.0, uvPlaneY);
+    float2 vPlaneStart = float2(1.0 / width, uvPlaneY);
 
-    float2 texCoord = float2(input.texCoord0.x, input.texCoord0.y * uvPlaneY);
-    float2 uvTexCoord = float2(floor(texCoord.x * 960.0) / 960.0 + (0.5 / 1920.0), texCoord.y * 0.5);
+    float2 texCoord = float2(input.texCoord0.x, input.texCoord0.y * frameHeight / height);
+    float2 uvTexCoord = float2(floor(texCoord.x * halfWidth) / halfWidth + (0.5 / width), texCoord.y * 0.5);
 
-	float y =tex0.Sample(sampler0, texCoord + yPlaneStart).r;
+	float y = tex0.Sample(sampler0, texCoord + yPlaneStart).r;
     float u = tex0.Sample(sampler0, uvTexCoord + uPlaneStart).r;
     float v = tex0.Sample(sampler0, uvTexCoord + vPlaneStart).r;
     

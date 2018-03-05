@@ -7,14 +7,21 @@ in vec4 v_colourAdd;
 out vec4 outCol;
 
 void main() {
-    const float uvPlaneY = 0.66666667 + (6 / 1080.0);
+    const float frameWidth = 1920.0;
+    const float frameHeight = 1080.0;
+    const float width = 1920.0;
+    const float halfWidth = floor(width * 0.5);
+    const float yHeight = 1088.0;
+    const float uvHeight = 544.0;
+    const float height = yHeight + uvHeight;
+    const float uvPlaneY = yHeight / height;
 
     vec2 yPlaneStart = vec2(0.0, 0.0);
     vec2 uPlaneStart = vec2(0.0, uvPlaneY);
-    vec2 vPlaneStart = vec2(1.0 / 1920.0, uvPlaneY);
+    vec2 vPlaneStart = vec2(1.0 / width, uvPlaneY);
 
-    vec2 texCoord = vec2(v_texCoord0.x, v_texCoord0.y * uvPlaneY);
-    vec2 uvTexCoord = vec2(floor(texCoord.x * 960.0) / 960.0 + (0.5 / 1920.0), texCoord.y * 0.5);
+    vec2 texCoord = vec2(v_texCoord0.x, v_texCoord0.y * frameHeight / height);
+    vec2 uvTexCoord = vec2(floor(texCoord.x * halfWidth) / halfWidth + (0.5 / width), texCoord.y * 0.5);
 
 	float y = texture(tex0, texCoord + yPlaneStart).r;
     float u = texture(tex0, uvTexCoord + uPlaneStart).r;
