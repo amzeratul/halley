@@ -109,6 +109,7 @@ namespace Halley
 		virtual ~IAudioHandle() {}
 
 		virtual void setGain(float gain) = 0;
+		virtual void setVolume(float volume) = 0;
 		virtual void setPosition(Vector2f pos) = 0;
 		virtual void setPan(float pan) = 0;
 

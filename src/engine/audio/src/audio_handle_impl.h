@@ -13,6 +13,7 @@ namespace Halley
 		AudioHandleImpl(AudioFacade& facade, size_t id);
 		
 		void setGain(float gain) override;
+		void setVolume(float volume) override;
 		void setPosition(Vector2f pos) override;
 		void setPan(float pan) override;
 		void stop(float fadeTime) override;
