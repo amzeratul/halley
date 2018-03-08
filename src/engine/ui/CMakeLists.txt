@@ -14,6 +14,7 @@ set(SOURCES
         "src/ui/ui_validator.cpp"
         "src/ui/ui_widget.cpp"
 
+        "src/ui/widgets/ui_animation.cpp"
         "src/ui/widgets/ui_button.cpp"
         "src/ui/widgets/ui_checkbox.cpp"
         "src/ui/widgets/ui_clickable.cpp"
@@ -46,6 +47,7 @@ set(HEADERS
         "include/halley/ui/ui_validator.h"
         "include/halley/ui/ui_widget.h"
 
+        "include/halley/ui/widgets/ui_animation.h"
         "include/halley/ui/widgets/ui_button.h"
         "include/halley/ui/widgets/ui_checkbox.h"
         "include/halley/ui/widgets/ui_clickable.h"
@@ -67,4 +69,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-ui ${SOURCES} ${HEADERS})
-target_link_libraries(halley-ui halley-utils)
+target_link_libraries(halley-ui halley-utils halley-core)

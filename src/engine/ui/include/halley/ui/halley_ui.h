@@ -12,6 +12,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "ui_validator.h"
 #include "ui_widget.h"
 
+#include "widgets/ui_animation.h"
 #include "widgets/ui_button.h"
 #include "widgets/ui_checkbox.h"
 #include "widgets/ui_dropdown.h"
