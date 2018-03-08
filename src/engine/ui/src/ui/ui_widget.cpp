@@ -21,7 +21,14 @@ void UIWidget::doDraw(UIPainter& painter) const
 {
 	if (active) {
 		draw(painter);
-		drawChildren(painter);
+
+		if (childLayerAdjustment == 0) {
+			drawChildren(painter);
+		} else {
+			UIPainter p2 = painter.withAdjustedLayer(childLayerAdjustment);
+			drawChildren(p2);
+		}
+
 		drawAfterChildren(painter);
 	}
 }
@@ -533,4 +540,14 @@ void UIWidget::updateInputDevice(const InputDevice& inputDevice)
 UIInput::Priority UIWidget::getInputPriority() const
 {
 	return focused ? UIInput::Priority::Focused : inputButtons->priorityLevel;
+}
+
+void UIWidget::setChildLayerAdjustment(int delta)
+{
+	childLayerAdjustment = delta;
+}
+
+int UIWidget::getChildLayerAdjustment() const
+{
+	return childLayerAdjustment;
 }

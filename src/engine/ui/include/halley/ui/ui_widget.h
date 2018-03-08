@@ -18,7 +18,7 @@ namespace Halley {
 		friend class UIRoot;
 
 	public:
-		UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
+		UIWidget(String id = "", Vector2f minSize = {}, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 		virtual ~UIWidget();
 
 		void doDraw(UIPainter& painter) const;
@@ -96,6 +96,12 @@ namespace Halley {
 		
 		UIInput::Priority getInputPriority() const;
 
+		void setChildLayerAdjustment(int delta);
+		int getChildLayerAdjustment() const;
+
+		void sendEvent(UIEvent&& event) const override;
+		void sendEventDown(const UIEvent& event) const;
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;
@@ -116,9 +122,6 @@ namespace Halley {
 		virtual void updateInputDevice(const InputDevice& inputDevice);
 
 		virtual void onEnabledChanged();
-
-		void sendEvent(UIEvent&& event) const override;
-		void sendEventDown(const UIEvent& event) const;
 
 		void playSound(const std::shared_ptr<const AudioClip>& clip);
 		virtual void checkActive();
@@ -145,6 +148,8 @@ namespace Halley {
 
 		std::shared_ptr<UIEventHandler> eventHandler;
 		std::shared_ptr<UIValidator> validator;
+
+		int childLayerAdjustment = 0;
 
 		bool active = true;
 		bool enabled = true;
