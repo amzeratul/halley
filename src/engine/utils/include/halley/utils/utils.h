@@ -110,6 +110,7 @@ namespace Halley {
 	// True modulo definition
 	template <typename T> inline T modulo (T a, T b)
 	{
+		static_assert(std::is_signed<T>::value, "Must be signed to use modulo operation");
 		T res = a % b;
 		if (res < 0) res = b+res;
 		return res;

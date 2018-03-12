@@ -30,6 +30,16 @@ bool UIMenuButton::isGroupFocused() const
 	return groupFocused;
 }
 
+void UIMenuButton::setOnGroupStateCallback(OnGroupStateCallback callback)
+{
+	onGroupStateCallback = callback;
+}
+
+void UIMenuButton::update(Time t, bool moved)
+{
+	updateButton();
+}
+
 void UIMenuButton::doSetState(State state)
 {
 	switch (state) {
@@ -45,6 +55,9 @@ void UIMenuButton::doSetState(State state)
 
 void UIMenuButton::onGroupState(State state)
 {
+	if (onGroupStateCallback) {
+		onGroupStateCallback(state);
+	}
 }
 
 void UIMenuButtonGroup::addButton(std::shared_ptr<UIMenuButton> button, const String& up, const String& down, const String& left, const String& right)
@@ -175,4 +188,54 @@ UIMenuButtonControlWidget::UIMenuButtonControlWidget(std::shared_ptr<UIMenuButto
 void UIMenuButtonControlWidget::onInput(const UIInputResults& input)
 {
 	group->onInput(input);
+}
+
+UIMenuButtonGroupHighlight::UIMenuButtonGroupHighlight(std::shared_ptr<UIMenuButtonGroup> group)
+	: group(group)
+{
+}
+
+void UIMenuButtonGroupHighlight::setFocusChangedCallback(std::function<void(const String&)> callback)
+{
+	focusChangedCallback = callback;
+}
+
+void UIMenuButtonGroupHighlight::update(Time time)
+{
+	constexpr Time transitionAnimLen = 0.1;
+
+	elapsedTime += time;
+
+	const auto focused = group->getCurrentFocus();
+	const String curFocus = focused->getId();
+
+	if (lastFocus != curFocus) {
+		transitionTime = lastFocus.isEmpty() ? transitionAnimLen : 0;
+		lastFocus = curFocus;
+		prevRect = targetRect;
+		onFocusChanged(curFocus);
+	}
+
+	transitionTime += time;
+	targetRect = focused->getMouseRect();
+
+	const float t = smoothCos(clamp(float(transitionTime / transitionAnimLen), 0.0f, 1.0f));
+	curRect = lerp(prevRect, targetRect, t);
+}
+
+Rect4f UIMenuButtonGroupHighlight::getCurRect() const
+{
+	return curRect;
+}
+
+Time UIMenuButtonGroupHighlight::getElapsedTime() const
+{
+	return elapsedTime;
+}
+
+void UIMenuButtonGroupHighlight::onFocusChanged(const String& id)
+{
+	if (focusChangedCallback) {
+		focusChangedCallback(id);
+	}
 }

@@ -7,6 +7,12 @@ namespace Halley {
 
 	class UIClickable : public UIWidget {
 	public:
+		enum class State {
+			Up,
+			Down,
+			Hover
+		};
+
 		UIClickable(String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 
 		bool canInteractWithMouse() const override;
@@ -21,11 +27,6 @@ namespace Halley {
 		void onInput(const UIInputResults& input) override;
 
 	protected:
-		enum class State {
-			Up,
-			Down,
-			Hover
-		};
 
 		bool setState(State state);
 		virtual void doSetState(State state) = 0;

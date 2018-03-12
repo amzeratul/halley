@@ -6,6 +6,8 @@ namespace Halley {
 
 	class UIMenuButton : public UIClickable {
 	public:
+		using OnGroupStateCallback = std::function<void(State)>;
+
 		UIMenuButton(std::shared_ptr<UIMenuButtonGroup> group, String id, Vector2f minSize = {}, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
 
 		void onClicked(Vector2f mousePos) override;
@@ -13,12 +15,16 @@ namespace Halley {
 		void setGroupFocused(bool focused);
 		bool isGroupFocused() const;
 
+		void setOnGroupStateCallback(OnGroupStateCallback callback);
+
 	protected:
+		void update(Time t, bool moved) override;
 		void doSetState(State state) override final;
 		virtual void onGroupState(State state);
 
 	private:
 		std::shared_ptr<UIMenuButtonGroup> group;
+		OnGroupStateCallback onGroupStateCallback;
 		bool groupFocused = false;
 	};
 
@@ -63,5 +69,31 @@ namespace Halley {
 
 	private:
 		std::shared_ptr<UIMenuButtonGroup> group;
+	};
+
+	class UIMenuButtonGroupHighlight {
+	public:
+		explicit UIMenuButtonGroupHighlight(std::shared_ptr<UIMenuButtonGroup> group);
+
+		void setFocusChangedCallback(std::function<void(const String&)> callback);
+
+		void update(Time t);
+		Rect4f getCurRect() const;
+		Time getElapsedTime() const;
+
+	private:
+		std::shared_ptr<UIMenuButtonGroup> group;
+
+		Time transitionTime = -1;
+		Time elapsedTime = 0;
+	
+		String lastFocus;
+		Rect4f prevRect;
+		Rect4f targetRect;
+		Rect4f curRect;
+
+		std::function<void(const String&)> focusChangedCallback;
+
+		void onFocusChanged(const String& id);
 	};
 }

@@ -11,6 +11,8 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 		void setSprite(Sprite sprite);
+		Sprite& getSprite();
+		const Sprite& getSprite() const;
 
 	private:
 		Sprite sprite;

@@ -43,3 +43,13 @@ void UIImage::setSprite(Sprite s)
 	}
 	dirty = true;
 }
+
+Sprite& UIImage::getSprite()
+{
+	return sprite;
+}
+
+const Sprite& UIImage::getSprite() const
+{
+	return sprite;
+}
