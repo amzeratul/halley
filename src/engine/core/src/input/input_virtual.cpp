@@ -152,12 +152,12 @@ float InputVirtual::getAxis(int n)
 
 	for (size_t i=0; i<binds.size(); i++) {
 		Bind& b = binds[i];
-		if (b.isAxis) {
-			value += b.device->getAxis(b.a);
-		} else {
+		if (b.isAxisEmulation) {
 			int left = b.device->isButtonDown(b.a) ? 1 : 0;
 			int right = b.device->isButtonDown(b.b) ? 1 : 0;
 			value += right - left;
+		} else {
+			value += b.device->getAxis(b.a);
 		}
 	}
 
@@ -174,7 +174,7 @@ void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
 	if (!lastDevice) {
 		setLastDevice(device.get());
 	}
-	buttons.at(n).push_back(Bind(device, deviceN));
+	buttons.at(n).push_back(Bind(device, deviceN, false));
 }
 
 void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
@@ -182,7 +182,7 @@ void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
 	if (!lastDevice) {
 		setLastDevice(device.get());
 	}
-	axes.at(n).binds.push_back(Bind(device, deviceN));
+	axes.at(n).binds.push_back(Bind(device, deviceN, true));
 }
 
 void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton)
@@ -190,7 +190,7 @@ void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButto
 	if (!lastDevice) {
 		setLastDevice(device.get());
 	}
-	axes.at(n).binds.push_back(Bind(device, negativeButton, positiveButton));
+	axes.at(n).binds.push_back(Bind(device, negativeButton, positiveButton, true));
 }
 
 void InputVirtual::bindVibrationOverride(spInputDevice joy)
@@ -357,7 +357,7 @@ void InputVirtual::updateLastDevice()
 		for (auto& buttonBinds: buttons) {
 			for (auto& bind: buttonBinds) {
 				if (bind.device && !std::dynamic_pointer_cast<InputManual>(bind.device)) {
-					if (!bind.isAxis && bind.device->isButtonPressed(bind.a)) {
+					if (!bind.isAxisEmulation && bind.device->isButtonPressed(bind.a)) {
 						setLastDevice(bind.device.get());
 						return;
 					}
@@ -367,9 +367,9 @@ void InputVirtual::updateLastDevice()
 		for (auto& axisBind: axes) {
 			for (auto& bind: axisBind.binds) {
 				if (bind.device && !std::dynamic_pointer_cast<InputManual>(bind.device)) {
-					if ((bind.isAxis && fabs(bind.device->getAxis(bind.a)) > 0.1f)
-						|| (!bind.isAxis && bind.device->isButtonDown(bind.a))
-						|| (!bind.isAxis && bind.device->isButtonDown(bind.b))) {
+					if ((!bind.isAxisEmulation && fabs(bind.device->getAxis(bind.a)) > 0.1f)
+						|| (bind.isAxisEmulation && bind.device->isButtonDown(bind.a))
+						|| (bind.isAxisEmulation && bind.device->isButtonDown(bind.b))) {
 						setLastDevice(bind.device.get());
 						return;
 					}
@@ -379,9 +379,21 @@ void InputVirtual::updateLastDevice()
 	}
 }
 
-InputVirtual::Bind::Bind(spInputDevice d, int n): device(d), a(n), b(0), isAxis(true) {}
+InputVirtual::Bind::Bind(spInputDevice d, int n, bool axis)
+	: device(d)
+	, a(n)
+	, b(0)
+	, isAxis(axis)
+	, isAxisEmulation(false)
+{}
 
-InputVirtual::Bind::Bind(spInputDevice d, int _a, int _b): device(d), a(_a), b(_b), isAxis(false) {}
+InputVirtual::Bind::Bind(spInputDevice d, int _a, int _b, bool axis)
+	: device(d)
+	, a(_a)
+	, b(_b)
+	, isAxis(axis)
+	, isAxisEmulation(true)
+{}
 
 InputVirtual::AxisData::AxisData()
 {}

@@ -40,12 +40,16 @@ void UIButton::setInputType(UIInputType uiInput)
 {
 	lastInputType = uiInput;
 
-	if (uiInput != curInputType) {
-		curInputType = uiInput;
-		borderOnly = !getOnlyEnabledWithInput().empty() && curInputType != UIInputType::Mouse && curInputType != UIInputType::Keyboard;
-		doForceUpdate();
-		setState(State::Up);
-		doSetState(State::Up);
+	if (canDoBorderOnly) {
+		if (uiInput != curInputType) {
+			curInputType = uiInput;
+			borderOnly = !getOnlyEnabledWithInput().empty() && curInputType != UIInputType::Mouse && curInputType != UIInputType::Keyboard;
+			doForceUpdate();
+			setState(State::Up);
+			doSetState(State::Up);
+		}		
+	} else {
+		UIWidget::setInputType(uiInput);
 	}
 }
 
@@ -62,6 +66,11 @@ bool UIButton::isFocusLocked() const
 void UIButton::onManualControlActivate()
 {
 	onClicked(getPosition());
+}
+
+void UIButton::setCanDoBorderOnly(bool canDo)
+{
+	canDoBorderOnly = canDo;
 }
 
 void UIButton::doSetState(State state)

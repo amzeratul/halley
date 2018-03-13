@@ -167,6 +167,11 @@ bool UIWidget::isFocused() const
 	return focused;
 }
 
+void UIWidget::setId(const String& i)
+{
+	id = i;
+}
+
 bool UIWidget::isFocusLocked() const
 {
 	return false;

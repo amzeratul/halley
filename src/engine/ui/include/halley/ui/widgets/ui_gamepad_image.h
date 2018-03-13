@@ -10,6 +10,7 @@ namespace Halley {
 
 	protected:
 		void setJoystickType(JoystickType type) override;
+		void onInput(const UIInputResults& input) override;
 
 	private:
 		JoystickButtonPosition button;

@@ -43,6 +43,7 @@ namespace Halley {
 		bool isMouseOver() const;
 		bool isFocused() const;
 
+		void setId(const String& id);
 		const String& getId() const;
 
 		Vector2f getPosition() const;
@@ -101,6 +102,7 @@ namespace Halley {
 
 		void sendEvent(UIEvent&& event) const override;
 		void sendEventDown(const UIEvent& event) const;
+		void forceAddChildren(UIInputType inputType);
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
@@ -115,7 +117,6 @@ namespace Halley {
 
 		void shrink();
 		void forceLayout();
-		void forceAddChildren(UIInputType inputType);
 		UIInputType getLastInputType() const;
 
 		virtual void onInput(const UIInputResults& input);

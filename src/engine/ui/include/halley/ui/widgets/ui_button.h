@@ -17,6 +17,8 @@ namespace Halley {
 
 		void onManualControlActivate() override;
 
+		void setCanDoBorderOnly(bool canDo);
+
 	protected:
 		void doSetState(State state) override;
 
@@ -25,5 +27,6 @@ namespace Halley {
 		UIStyle style;
 		UIInputType curInputType = UIInputType::Undefined;
 		bool borderOnly = false;
+		bool canDoBorderOnly = true;
 	};
 }

@@ -5,7 +5,7 @@ using namespace Halley;
 UIGamepadImage::UIGamepadImage(JoystickButtonPosition button, std::function<Sprite(JoystickButtonPosition, JoystickType)> iconRetriever, Colour4f col)
 	: UIImage(Sprite())
 	, button(button)
-	, iconRetriever(iconRetriever)
+	, iconRetriever(std::move(iconRetriever))
 	, colour(col)
 {
 	setOnlyEnabledWithInputs({ UIInputType::Gamepad });
@@ -22,5 +22,12 @@ void UIGamepadImage::setJoystickType(JoystickType type)
 		curType = type;
 
 		setSprite(iconRetriever(button, type).setColour(colour));
+	}
+}
+
+void UIGamepadImage::onInput(const UIInputResults& input)
+{
+	if (input.isButtonPressed(UIInput::Button::Accept)) {
+		sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));
 	}
 }

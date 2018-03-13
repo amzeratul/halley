@@ -92,12 +92,13 @@ namespace Halley {
 
 		struct Bind {
 			spInputDevice device;
-			int a;
-			int b;
-			bool isAxis;
+			int a = -1;
+			int b = -1;
+			bool isAxis = false;
+			bool isAxisEmulation = false;
 
-			Bind(spInputDevice d, int n);
-			Bind(spInputDevice d, int _a, int _b);
+			Bind(spInputDevice d, int n, bool axis);
+			Bind(spInputDevice d, int _a, int _b, bool axis);
 		};
 
 		struct AxisData {
