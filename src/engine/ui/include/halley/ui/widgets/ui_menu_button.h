@@ -73,9 +73,11 @@ namespace Halley {
 
 	class UIMenuButtonGroupHighlight {
 	public:
+		using FocusChangedCallback = std::function<void(const String&, bool)>; // Id of focus, is this the initial change?
+
 		explicit UIMenuButtonGroupHighlight(std::shared_ptr<UIMenuButtonGroup> group);
 
-		void setFocusChangedCallback(std::function<void(const String&)> callback);
+		void setFocusChangedCallback(FocusChangedCallback callback);
 
 		void update(Time t);
 		Rect4f getCurRect() const;
@@ -92,8 +94,8 @@ namespace Halley {
 		Rect4f targetRect;
 		Rect4f curRect;
 
-		std::function<void(const String&)> focusChangedCallback;
+		FocusChangedCallback focusChangedCallback;
 
-		void onFocusChanged(const String& id);
+		void onFocusChanged(const String& id, const String& previous);
 	};
 }
