@@ -63,6 +63,12 @@ namespace Halley {
 		}
 
 		template <typename T>
+		std::shared_ptr<const T> unload(const String& name)
+		{
+			return of<T>().unload(name);
+		}
+
+		template <typename T>
 		bool exists(const String& name)
 		{
 			return of<T>().exists(name);
