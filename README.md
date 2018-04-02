@@ -82,3 +82,6 @@ The following platforms are supported:
   * Engine only: "cmake -DBUILD_HALLEY_TOOLS=0 -DBUILD_HALLEY_TESTS=0 [...]"
 * Run "halley-editor tests/entity" (or whichever other project you want to test)
 * Launch that project
+
+## Documentation
+The full documentation is available on the [Wiki](https://github.com/amzeratul/halley/wiki).

@@ -195,9 +195,9 @@ UIMenuButtonGroupHighlight::UIMenuButtonGroupHighlight(std::shared_ptr<UIMenuBut
 {
 }
 
-void UIMenuButtonGroupHighlight::setFocusChangedCallback(std::function<void(const String&)> callback)
+void UIMenuButtonGroupHighlight::setFocusChangedCallback(FocusChangedCallback callback)
 {
-	focusChangedCallback = callback;
+	focusChangedCallback = std::move(callback);
 }
 
 void UIMenuButtonGroupHighlight::update(Time time)
@@ -211,9 +211,10 @@ void UIMenuButtonGroupHighlight::update(Time time)
 
 	if (lastFocus != curFocus) {
 		transitionTime = lastFocus.isEmpty() ? transitionAnimLen : 0;
+		auto prevFocus = lastFocus;
 		lastFocus = curFocus;
 		prevRect = targetRect;
-		onFocusChanged(curFocus);
+		onFocusChanged(curFocus, prevFocus);
 	}
 
 	transitionTime += time;
@@ -233,9 +234,9 @@ Time UIMenuButtonGroupHighlight::getElapsedTime() const
 	return elapsedTime;
 }
 
-void UIMenuButtonGroupHighlight::onFocusChanged(const String& id)
+void UIMenuButtonGroupHighlight::onFocusChanged(const String& id, const String& previous)
 {
 	if (focusChangedCallback) {
-		focusChangedCallback(id);
+		focusChangedCallback(id, previous.isEmpty());
 	}
 }
