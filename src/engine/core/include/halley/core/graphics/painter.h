@@ -13,10 +13,12 @@ namespace Halley
 	class MaterialDefinition;
 	class Camera;
 	class RenderContext;
+	class Core;
 
 	class Painter
 	{
 		friend class RenderContext;
+		friend class Core;
 
 		struct PainterVertexData
 		{
@@ -32,10 +34,6 @@ namespace Halley
 		Painter(Resources& resources);
 		virtual ~Painter();
 
-		void startRender();
-		void endRender();
-		virtual void startDrawCall() {}
-		virtual void endDrawCall() {}
 		void flush();
 
 		Rect4i getViewPort() const { return viewPort; }
@@ -69,6 +67,8 @@ namespace Halley
 		size_t getPrevTriangles() const { return prevTriangles; }
 
 	protected:
+		virtual void startDrawCall() {}
+		virtual void endDrawCall() {}
 		virtual void doStartRender() = 0;
 		virtual void doEndRender() = 0;
 		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly) = 0;
@@ -82,9 +82,6 @@ namespace Halley
 		RenderTarget& getActiveRenderTarget();
 
 	private:
-		void bind(RenderContext& context);
-		void unbind(RenderContext& context);
-
 		RenderContext* activeContext = nullptr;
 		RenderTarget* activeRenderTarget = nullptr;
 		Matrix4f projection;
@@ -109,6 +106,12 @@ namespace Halley
 
 		Vector<unsigned short> stdQuadIndexCache;
 
+		void bind(RenderContext& context);
+		void unbind(RenderContext& context);
+		
+		void startRender();
+		void endRender();
+		
 		void resetPending();
 		void startDrawCall(std::shared_ptr<Material>& material);
 		void flushPending();

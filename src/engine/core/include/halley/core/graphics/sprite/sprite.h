@@ -60,6 +60,10 @@ namespace Halley
 		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material);
 		Sprite& setImageData(const Texture& image);
 
+		Sprite& setSprite(Resources& resources, String spriteSheetName, String imageName, String materialName = "");
+		Sprite& setSprite(const SpriteSheet& sheet, String name);
+		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true);
+
 		Vector2f getPosition() const;
 		Colour4f getColour() const;
 
@@ -76,10 +80,6 @@ namespace Halley
 		Sprite& setAbsolutePivot(Vector2f pivot);
 		Sprite& setSize(Vector2f size);
 		Sprite& setTexRect(Rect4f texRect);
-
-		Sprite& setSprite(Resources& resources, String spriteSheetName, String imageName, String materialName = "");
-		Sprite& setSprite(const SpriteSheet& sheet, String name);
-		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true);
 
 		Sprite& setSliced(Vector4s slices);
 		Sprite& setNotSliced();
