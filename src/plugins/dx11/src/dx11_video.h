@@ -3,6 +3,7 @@
 #include "halley/core/api/halley_api_internal.h"
 #include "halley/core/graphics/window.h"
 #include <d3d11.h>
+#include <D3D11_1.h>
 #include <DXGI1_2.h>
 #undef min
 #undef max
@@ -37,7 +38,7 @@ namespace Halley {
 		String getShaderLanguage() override;
 
 		ID3D11Device& getDevice();
-		ID3D11DeviceContext& getDeviceContext();
+		ID3D11DeviceContext1& getDeviceContext();
 		
 		SystemAPI& getSystem();
 
@@ -48,7 +49,7 @@ namespace Halley {
 		std::shared_ptr<Window> window;
 
 		ID3D11Device* device = nullptr;
-		ID3D11DeviceContext* deviceContext = nullptr;
+		ID3D11DeviceContext1* deviceContext = nullptr;
 		IDXGISwapChain1* swapChain = nullptr;
 		ID3D11RenderTargetView* backbuffer = nullptr;
 

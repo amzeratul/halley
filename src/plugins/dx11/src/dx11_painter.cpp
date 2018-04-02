@@ -18,13 +18,13 @@ DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
 {
 #ifdef WINDOWS_STORE
 	// Due to the architecture of "some" platforms available here, updating a dynamic buffer is extremely slow if it's still in use
-	constexpr size_t numBuffers = 128;
+	constexpr size_t numBuffers = 2;
 #else
 	constexpr size_t numBuffers = 1;
 #endif
 	for (size_t i = 0; i < numBuffers; ++i) {
-		vertexBuffers.emplace_back(video, DX11Buffer::Type::Vertex);
-		indexBuffers.emplace_back(video, DX11Buffer::Type::Index);
+		vertexBuffers.emplace_back(video, DX11Buffer::Type::Vertex, 8 * 1024 * 1024);
+		indexBuffers.emplace_back(video, DX11Buffer::Type::Index, 1 * 1024 * 1024);
 	}
 }
 
@@ -78,9 +78,14 @@ void DX11Painter::setMaterialData(const Material& material)
 	auto& devCon = video.getDeviceContext();
 	for (auto& block: material.getDataBlocks()) {
 		if (block.getType() != MaterialDataBlockType::SharedExternal) {
-			auto buffer = static_cast<DX11MaterialConstantBuffer&>(block.getConstantBuffer()).getBuffer().getBuffer();
-			devCon.VSSetConstantBuffers(block.getBindPoint(), 1, &buffer);
-			devCon.PSSetConstantBuffers(block.getBindPoint(), 1, &buffer);
+			auto& buffer = static_cast<DX11MaterialConstantBuffer&>(block.getConstantBuffer()).getBuffer();
+			auto dxBuffer = buffer.getBuffer();
+			UINT firstConstant[] = { buffer.getOffset() / 16 };
+			UINT numConstants[] = { buffer.getLastSize() / 16 };
+			devCon.VSSetConstantBuffers1(block.getBindPoint(), 1, &dxBuffer, firstConstant, numConstants);
+			devCon.PSSetConstantBuffers1(block.getBindPoint(), 1, &dxBuffer, firstConstant, numConstants);
+			//devCon.VSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
+			//devCon.PSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
 		}
 	}
 }
@@ -89,17 +94,25 @@ void DX11Painter::setVertices(const MaterialDefinition& material, size_t numVert
 {
 	const size_t stride = material.getVertexStride();
 	const size_t vertexDataSize = stride * numVertices;
-	vertexBuffers[curBuffer].setData(gsl::span<const gsl::byte>(reinterpret_cast<const gsl::byte*>(vertexData), vertexDataSize));
 
-	ID3D11Buffer* buffers[] = { vertexBuffers[curBuffer].getBuffer() };
-	UINT strides[] = { UINT(stride) };
-	UINT offsets[] = { 0 };
-	video.getDeviceContext().IASetVertexBuffers(0, 1, buffers, strides, offsets);
+	if (!vertexBuffers[curBuffer].canFit(vertexDataSize) || !indexBuffers[curBuffer].canFit(numIndices * sizeof(unsigned short))) {
+		rotateBuffers();
+	}
 
-	indexBuffers[curBuffer].setData(gsl::as_bytes(gsl::span<unsigned short>(indices, numIndices)));
-	video.getDeviceContext().IASetIndexBuffer(indexBuffers[curBuffer].getBuffer(), DXGI_FORMAT_R16_UINT, 0);
+	{
+		auto& vb = vertexBuffers[curBuffer];
+		vb.setData(gsl::span<const gsl::byte>(reinterpret_cast<const gsl::byte*>(vertexData), vertexDataSize));
+		ID3D11Buffer* buffers[] = { vb.getBuffer() };
+		UINT strides[] = { UINT(stride) };
+		UINT offsets[] = { vb.getOffset() };
+		video.getDeviceContext().IASetVertexBuffers(0, 1, buffers, strides, offsets);
+	}
 
-	curBuffer = (curBuffer + 1) % vertexBuffers.size();
+	{
+		auto& ib = indexBuffers[curBuffer];
+		ib.setData(gsl::as_bytes(gsl::span<unsigned short>(indices, numIndices)));
+		video.getDeviceContext().IASetIndexBuffer(ib.getBuffer(), DXGI_FORMAT_R16_UINT, ib.getOffset());
+	}
 }
 
 void DX11Painter::drawTriangles(size_t numIndices)
@@ -154,4 +167,11 @@ DX11Blend& DX11Painter::getBlendMode(BlendType type)
 
 	blendModes.emplace(std::make_pair(type, DX11Blend(video, type)));
 	return getBlendMode(type);
+}
+
+void DX11Painter::rotateBuffers()
+{
+	curBuffer = (curBuffer + 1) % vertexBuffers.size();
+	indexBuffers[curBuffer].reset();
+	vertexBuffers[curBuffer].reset();
 }

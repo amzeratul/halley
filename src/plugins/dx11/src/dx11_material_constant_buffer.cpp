@@ -8,6 +8,7 @@ DX11MaterialConstantBuffer::DX11MaterialConstantBuffer(DX11Video& video)
 
 void DX11MaterialConstantBuffer::update(const MaterialDataBlock& dataBlock)
 {
+	buffer.reset();
 	buffer.setData(dataBlock.getData());
 }
 

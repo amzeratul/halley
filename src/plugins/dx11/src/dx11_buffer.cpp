@@ -3,10 +3,13 @@
 #include "dx11_video.h"
 using namespace Halley;
 
-DX11Buffer::DX11Buffer(DX11Video& video, Type type)
+DX11Buffer::DX11Buffer(DX11Video& video, Type type, size_t initialSize)
 	: video(video)
 	, type(type)
 {
+	if (initialSize > 0) {
+		resize(initialSize);
+	}
 }
 
 DX11Buffer::~DX11Buffer()
@@ -17,7 +20,7 @@ DX11Buffer::~DX11Buffer()
 void DX11Buffer::setData(gsl::span<const gsl::byte> data)
 {
 #ifdef WINDOWS_STORE
-	constexpr bool useImmutable = true;
+	constexpr bool useImmutable = false;
 #else
 	constexpr bool useImmutable = false;
 #endif
@@ -53,17 +56,45 @@ void DX11Buffer::setData(gsl::span<const gsl::byte> data)
 			resize(size_t(data.size_bytes()));
 		}
 
+		lastPos = curPos;
+		lastSize = alignUp(size_t(data.size_bytes()), size_t(256));
+
 		D3D11_MAPPED_SUBRESOURCE ms;
 		auto& devCon = video.getDeviceContext();
-		devCon.Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
-		memcpy(ms.pData, data.data(), data.size_bytes());
+		devCon.Map(buffer, 0, waitingReset ? D3D11_MAP_WRITE_DISCARD : D3D11_MAP_WRITE_NO_OVERWRITE, 0, &ms);
+		memcpy(reinterpret_cast<char*>(ms.pData) + lastPos, data.data(), data.size_bytes());
 		devCon.Unmap(buffer, 0);
+
+		curPos = alignUp(size_t(lastPos + lastSize), size_t(256));
+		waitingReset = false;
 	}
 }
 
 ID3D11Buffer*& DX11Buffer::getBuffer()
 {
 	return buffer;
+}
+
+UINT DX11Buffer::getOffset() const
+{
+	return UINT(lastPos);
+}
+
+UINT DX11Buffer::getLastSize() const
+{
+	return UINT(lastSize);
+}
+
+bool DX11Buffer::canFit(size_t size) const
+{
+	return curPos + alignUp(size, size_t(256)) <= curSize;
+}
+
+void DX11Buffer::reset()
+{
+	waitingReset = true;
+	curPos = 0;
+	lastPos = 0;
 }
 
 void DX11Buffer::clear()
