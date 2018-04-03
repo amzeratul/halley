@@ -1,6 +1,7 @@
 #include "dx11_buffer.h"
 #include "halley/utils/utils.h"
 #include "dx11_video.h"
+#include <minwinbase.h>
 using namespace Halley;
 
 DX11Buffer::DX11Buffer(DX11Video& video, Type type, size_t initialSize)
@@ -12,6 +13,19 @@ DX11Buffer::DX11Buffer(DX11Video& video, Type type, size_t initialSize)
 	}
 }
 
+DX11Buffer::DX11Buffer(DX11Buffer&& other) noexcept
+	: video(other.video)
+	, type(other.type)
+	, buffer(other.buffer)
+	, curSize(other.curSize)
+	, curPos(other.curPos)
+	, lastSize(other.lastSize)
+	, lastPos(other.lastPos)
+	, waitingReset(other.waitingReset)
+{
+	other.buffer = nullptr;
+}
+
 DX11Buffer::~DX11Buffer()
 {
 	clear();
@@ -19,6 +33,8 @@ DX11Buffer::~DX11Buffer()
 
 void DX11Buffer::setData(gsl::span<const gsl::byte> data)
 {
+	Expects(data.size_bytes() > 0);
+
 #ifdef WINDOWS_STORE
 	constexpr bool useImmutable = false;
 #else
@@ -60,9 +76,15 @@ void DX11Buffer::setData(gsl::span<const gsl::byte> data)
 		lastSize = alignUp(size_t(data.size_bytes()), size_t(256));
 
 		D3D11_MAPPED_SUBRESOURCE ms;
+		ZeroMemory(&ms, sizeof(ms));
+
 		auto& devCon = video.getDeviceContext();
-		devCon.Map(buffer, 0, waitingReset ? D3D11_MAP_WRITE_DISCARD : D3D11_MAP_WRITE_NO_OVERWRITE, 0, &ms);
-		memcpy(reinterpret_cast<char*>(ms.pData) + lastPos, data.data(), data.size_bytes());
+		HRESULT result = devCon.Map(buffer, 0, waitingReset ? D3D11_MAP_WRITE_DISCARD : D3D11_MAP_WRITE_NO_OVERWRITE, 0, &ms);
+		if (!SUCCEEDED(result)) {
+			throw Exception("Failed to map buffer memory");
+		}
+		void* dst = reinterpret_cast<char*>(ms.pData) + lastPos;
+		memcpy(dst, data.data(), data.size_bytes());
 		devCon.Unmap(buffer, 0);
 
 		curPos = alignUp(size_t(lastPos + lastSize), size_t(256));
@@ -108,7 +130,7 @@ void DX11Buffer::clear()
 
 void DX11Buffer::resize(size_t requestedSize)
 {
-	size_t targetSize = std::max(size_t(16), nextPowerOf2(requestedSize));
+	size_t targetSize = std::max(size_t(256), nextPowerOf2(requestedSize));
 
 	if (buffer) {
 		buffer->Release();
@@ -140,4 +162,5 @@ void DX11Buffer::resize(size_t requestedSize)
 	}
 
 	curSize = targetSize;
+	reset();
 }

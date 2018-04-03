@@ -17,7 +17,13 @@ namespace Halley {
 		};
 
         DX11Buffer(DX11Video& video, Type type, size_t initialSize = 0);
+		DX11Buffer(DX11Buffer&& other) noexcept;
 		~DX11Buffer();
+
+		DX11Buffer(const DX11Buffer& other) = delete;
+
+		DX11Buffer& operator=(const DX11Buffer& other) = delete;
+		DX11Buffer& operator=(DX11Buffer&& other) = delete;
 
 		void setData(gsl::span<const gsl::byte> data);
 		ID3D11Buffer*& getBuffer();

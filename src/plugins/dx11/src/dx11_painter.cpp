@@ -24,7 +24,7 @@ DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
 #endif
 	for (size_t i = 0; i < numBuffers; ++i) {
 		vertexBuffers.emplace_back(video, DX11Buffer::Type::Vertex, 8 * 1024 * 1024);
-		indexBuffers.emplace_back(video, DX11Buffer::Type::Index, 1 * 1024 * 1024);
+		indexBuffers.emplace_back(video, DX11Buffer::Type::Index, 128 * 1024);
 	}
 }
 
@@ -171,6 +171,7 @@ DX11Blend& DX11Painter::getBlendMode(BlendType type)
 
 void DX11Painter::rotateBuffers()
 {
+	Expects (vertexBuffers.size() == indexBuffers.size());
 	curBuffer = (curBuffer + 1) % vertexBuffers.size();
 	indexBuffers[curBuffer].reset();
 	vertexBuffers[curBuffer].reset();
