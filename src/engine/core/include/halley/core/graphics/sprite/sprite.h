@@ -43,14 +43,6 @@ namespace Halley
 		void drawSliced(Painter& painter, Vector4s slices) const;
 		static void draw(const Sprite* sprites, size_t n, Painter& painter);
 
-		Rect4f getAABB() const;
-		bool isInView(Rect4f rect) const;
-		Vector2f getScaledSize() const;
-		Vector2f getSize() const;
-		Vector2f getRawSize() const;
-		Vector2f getScale() const;
-		Vector4s getOuterBorder() const;
-		
 		Sprite& setMaterial(Resources& resources, String materialName = "");
 		Sprite& setMaterial(std::shared_ptr<Material> m);
 		Material& getMaterial() const { return *material; }
@@ -64,21 +56,30 @@ namespace Halley
 		Sprite& setSprite(const SpriteSheet& sheet, String name);
 		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true);
 
-		Vector2f getPosition() const;
-		Colour4f getColour() const;
-
 		Sprite& setPos(Vector2f pos);
-		Sprite& setRotation(Angle1f angle);
-		Sprite& setColour(Colour4f colour);
-		Sprite& setScale(Vector2f scale);
-		Sprite& setScale(float scale);
-		Sprite& scaleTo(Vector2f size);
-		Sprite& setFlip(bool flip);
-		bool isFlipped() const;
+		Sprite& setPosition(Vector2f pos);
+		Vector2f getPosition() const;
 
 		Sprite& setPivot(Vector2f pivot);
 		Sprite& setAbsolutePivot(Vector2f pivot);
+
+		Sprite& setRotation(Angle1f angle);
+
 		Sprite& setSize(Vector2f size);
+		Sprite& setScale(Vector2f scale);
+		Sprite& setScale(float scale);
+		Sprite& scaleTo(Vector2f size);
+		Vector2f getSize() const;
+		Vector2f getScale() const;
+		Vector2f getScaledSize() const;
+		Vector2f getRawSize() const;
+
+		Sprite& setFlip(bool flip);
+		bool isFlipped() const;
+
+		Sprite& setColour(Colour4f colour);
+		Colour4f getColour() const;
+
 		Sprite& setTexRect(Rect4f texRect);
 
 		Sprite& setSliced(Vector4s slices);
@@ -90,6 +91,10 @@ namespace Halley
 		Sprite& setClip(Rect4f clip);
 		Sprite& setClip();
 		Maybe<Rect4f> getClip() const;
+
+		Rect4f getAABB() const;
+		bool isInView(Rect4f rect) const;
+		Vector4s getOuterBorder() const;
 
 		Sprite clone() const;
 

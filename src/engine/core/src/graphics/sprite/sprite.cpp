@@ -126,6 +126,12 @@ Sprite& Sprite::setPos(Vector2f v)
 	return *this;
 }
 
+Sprite& Sprite::setPosition(Vector2f v)
+{
+	vertexAttrib.pos = v;
+	return *this;
+}
+
 Sprite& Sprite::setRotation(Angle1f v)
 {
 	vertexAttrib.rotation = v.getRadians();
