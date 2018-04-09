@@ -63,6 +63,8 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const YAML::Node& 
 		blendType = BlendType::AlphaPremultiplied;
 	} else if (blend == "Add") {
 		blendType = BlendType::Add;
+	} else if (blend == "Multiply") {
+		blendType = BlendType::Multiply;
 	} else {
 		throw Exception("Unknown blend type: " + blend);
 	}

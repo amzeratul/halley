@@ -196,7 +196,7 @@ void GLUtils::setBlendType(BlendType type)
 				glCheckError();
 			}
 			else if (type == BlendType::Multiply) {
-				glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+				glBlendFunc(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
 				glCheckError();
 			}
 			else {
