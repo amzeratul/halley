@@ -33,6 +33,9 @@ FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, Path _ba
 	// Read assetDb
 	assetDb = std::make_unique<AssetDatabase>();
 	auto reader = system.getDataReader((basePath / "assets.db").string());
+	if (!reader) {
+		throw Exception("Unable to load assets.");
+	}
 
 	Bytes result(reader->size());
 	reader->read(gsl::as_writeable_bytes(gsl::span<Byte>(result)));

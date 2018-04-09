@@ -64,6 +64,10 @@ void OS::initializeConsole()
 {
 }
 
+void OS::displayError(const std::string& cs)
+{
+}
+
 void OS::onWindowCreated(void* windowHandle)
 {
 }

@@ -45,6 +45,7 @@ namespace Halley {
 		void createDirectories(const Path& path) override;
 		std::vector<Path> enumerateDirectory(const Path& path) override;
 
+		void displayError(const std::string& cs) override;
 		void onWindowCreated(void* window) override;
 
 		int runCommand(String command) override;

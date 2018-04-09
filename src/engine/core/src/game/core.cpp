@@ -132,11 +132,14 @@ void Core::onReloaded()
 
 void Core::onTerminatedInError(const std::string& error)
 {
-	if (error != "") {
+	if (!error.empty()) {
 		std::cout << ConsoleColour(Console::RED) << "\n\nUnhandled exception: " << ConsoleColour(Console::DARK_RED) << error << ConsoleColour() << std::endl;
 	} else {
 		std::cout << ConsoleColour(Console::RED) << "\n\nUnknown unhandled exception." << ConsoleColour() << std::endl;
 	}
+
+	OS::get().displayError(error);
+
 	std::cout << ConsoleColour(Console::RED) << "Last traces:\n" << ConsoleColour(Console::DARK_RED);
 	Debug::printLastTraces();
 	std::cout << ConsoleColour() << std::endl;

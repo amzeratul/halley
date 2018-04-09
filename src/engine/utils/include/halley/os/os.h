@@ -44,6 +44,7 @@ namespace Halley {
 
 		virtual void createLogConsole(String name);
 		virtual void initializeConsole();
+		virtual void displayError(const std::string& cs);
 
 		virtual void onWindowCreated(void* windowHandle);
 

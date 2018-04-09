@@ -1300,8 +1300,16 @@ void StackWalker::OnCallstackEntry(CallstackEntryType eType, CallstackEntry &ent
         MyStrCpy(entry.moduleName, STACKWALK_MAX_NAMELEN, "(module-name not available)");
       _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%p (%s): %s: %s\n", (LPVOID) entry.offset, entry.moduleName, entry.lineFileName, entry.name);
     }
-    else
-      _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%s (%d): %s\n", entry.lineFileName, entry.lineNumber, entry.name);
+    else {
+		int len = strlen(entry.lineFileName);
+		int start = 0;
+		for (int i = 0; i < len; ++i) {
+			if (entry.lineFileName[i] == '\\') {
+				start = i + 1;
+			}
+		}
+		_snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%s (%d): %s\n", entry.lineFileName + start, entry.lineNumber, entry.name);
+	}
     buffer[STACKWALK_MAX_NAMELEN-1] = 0;
     OnOutput(buffer);
   }
