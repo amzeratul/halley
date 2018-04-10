@@ -25,7 +25,7 @@ bool UIList::setSelectedOption(int option)
 		return false;
 	}
 
-	auto newSel = clamp(option, 0, int(items.size()));
+	auto newSel = clamp(option, 0, int(items.size()) - 1);
 	if (newSel != curOption) {
 		if (!items.at(newSel)->isEnabled()) {
 			return false;

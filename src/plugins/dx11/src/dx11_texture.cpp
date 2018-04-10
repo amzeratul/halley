@@ -67,6 +67,7 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 	format = desc.Format;
 
 	D3D11_SUBRESOURCE_DATA* res = nullptr;
+	D3D11_SUBRESOURCE_DATA subResData;
 
 	if (descriptor.pixelData.empty()) {
 		desc.Usage = D3D11_USAGE_DEFAULT;
@@ -78,7 +79,6 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 			desc.Usage = D3D11_USAGE_IMMUTABLE;
 		}
 		desc.CPUAccessFlags = 0;
-		D3D11_SUBRESOURCE_DATA subResData;
 		subResData.pSysMem = descriptor.pixelData.getSpan().data();
 		subResData.SysMemPitch = descriptor.pixelData.getStrideOr(bpp * size.x);
 		subResData.SysMemSlicePitch = subResData.SysMemPitch;
