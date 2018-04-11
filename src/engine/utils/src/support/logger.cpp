@@ -2,12 +2,23 @@
 #include "halley/text/halleystring.h"
 #include <gsl/gsl_assert>
 #include <iostream>
+#include "halley/support/console.h"
 
 using namespace Halley;
 
 void StdOutSink::log(LoggerLevel level, const String& msg)
 {
-	std::cout << msg << std::endl;
+	std::unique_lock<std::mutex> lock(mutex);
+
+	switch (level) {
+	case LoggerLevel::Error:
+		std::cout << ConsoleColour(Console::RED);
+		break;
+	case LoggerLevel::Warning:
+		std::cout << ConsoleColour(Console::YELLOW);
+		break;
+	}
+	std::cout << msg << ConsoleColour() << std::endl;
 }
 
 void Logger::setInstance(Logger& logger)

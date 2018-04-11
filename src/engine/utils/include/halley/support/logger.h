@@ -2,6 +2,7 @@
 
 #include <exception>
 #include <set>
+#include <mutex>
 
 namespace Halley
 {
@@ -24,6 +25,9 @@ namespace Halley
 	class StdOutSink : public ILoggerSink {
 	public:
 		void log(LoggerLevel level, const String& msg) override;
+
+	private:
+		std::mutex mutex;
 	};
 
 	class Logger
