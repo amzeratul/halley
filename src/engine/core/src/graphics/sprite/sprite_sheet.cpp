@@ -97,7 +97,21 @@ size_t SpriteSheet::getIndex(const String& name) const
 {
 	auto iter = spriteIdx.find(name);
 	if (iter == spriteIdx.end()) {
-		throw Exception("Spritesheet does not contain sprite \"" + name + "\".");
+		String names = "";
+		bool first = true;
+		for (auto& f: spriteIdx) {
+			if (first) {
+				first = false;
+				names += "\"";
+			} else {
+				names += "\", \"";
+			}
+			names += f.first;
+		}
+		if (!spriteIdx.empty()) {
+			names += "\"";
+		}
+		throw Exception("Spritesheet does not contain sprite \"" + name + "\".\nSprites: { " + names + " }.");
 	} else {
 		return size_t(iter->second);
 	}
