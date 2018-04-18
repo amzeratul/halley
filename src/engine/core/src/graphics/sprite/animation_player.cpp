@@ -216,10 +216,11 @@ bool AnimationPlayer::hasAnimation() const
 	return static_cast<bool>(animation);
 }
 
-void AnimationPlayer::setOffsetPivot(Vector2f offset)
+AnimationPlayer& AnimationPlayer::setOffsetPivot(Vector2f offset)
 {
 	offsetPivot = offset;
 	hasUpdate = true;
+	return *this;
 }
 
 void AnimationPlayer::resolveSprite()

@@ -44,7 +44,7 @@ namespace Halley
 		const Animation& getAnimation() const;
 		bool hasAnimation() const;
 
-		void setOffsetPivot(Vector2f offset);
+		AnimationPlayer& setOffsetPivot(Vector2f offset);
 
 	private:
 		void resolveSprite();
