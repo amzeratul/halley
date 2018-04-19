@@ -35,6 +35,7 @@ void UIImage::setSprite(Sprite s)
 	auto c = s.getClip();
 	
 	auto spriteSize = (s.getRawSize().abs() + topLeftBorder + bottomRightBorder) * s.getScale();
+	sprite.setAbsolutePivot(-topLeftBorder);
 	
 	if (c) {
 		setMinSize(Vector2f::min(spriteSize, c.get().getSize()));
