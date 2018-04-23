@@ -94,7 +94,9 @@ namespace Halley
 
 		Rect4f getAABB() const;
 		bool isInView(Rect4f rect) const;
+
 		Vector4s getOuterBorder() const;
+		Sprite& setOuterBorder(Vector4s border);
 
 		Sprite clone() const;
 

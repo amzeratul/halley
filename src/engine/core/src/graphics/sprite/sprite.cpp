@@ -368,6 +368,12 @@ Vector4s Sprite::getOuterBorder() const
 	return outerBorder;
 }
 
+Sprite& Sprite::setOuterBorder(Vector4s border)
+{
+	outerBorder = border;
+	return *this;
+}
+
 Vector2f Sprite::getScale() const
 {
 	return vertexAttrib.scale;
