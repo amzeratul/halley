@@ -14,6 +14,7 @@ namespace Halley
 	public:
 		virtual ~HTTPRequest() {}
 		virtual void setPostData(const String& contentType, const Bytes& data) = 0;
+		virtual void setHeader(const String& headerName, const String& headerValue) = 0;
 		virtual Future<std::unique_ptr<HTTPResponse>> send() = 0;
 	};
 
