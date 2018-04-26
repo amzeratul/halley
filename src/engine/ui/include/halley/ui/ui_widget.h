@@ -28,7 +28,8 @@ namespace Halley {
 		void setRect(Rect4f rect) override;
 
 		void layout();
-		void centerAt(Vector2f position);
+		void alignAt(Vector2f position, Vector2f alignment, Maybe<Rect4f> bounds = {});
+		void centerAt(Vector2f position, Maybe<Rect4f> bounds = {});
 		
 		virtual Maybe<UISizer>& tryGetSizer();
 		virtual UISizer& getSizer();

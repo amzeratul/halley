@@ -108,10 +108,20 @@ void UIWidget::layout()
 	onLayout();
 }
 
-void UIWidget::centerAt(Vector2f pos)
+void UIWidget::alignAt(Vector2f pos, Vector2f alignment, Maybe<Rect4f> bounds)
 {
 	layout();
-	setPosition(pos - (size / 2.0f).floor());
+	Vector2f targetPos = pos - (size * alignment).floor();
+	if (bounds) {
+		targetPos.x = clamp(targetPos.x, bounds->getLeft(), bounds->getRight() - size.x);
+		targetPos.y = clamp(targetPos.y, bounds->getTop(), bounds->getBottom() - size.y);
+	}
+	setPosition(targetPos);
+}
+
+void UIWidget::centerAt(Vector2f pos, Maybe<Rect4f> bounds)
+{
+	alignAt(pos, Vector2f(0.5f, 0.5f), bounds);
 }
 
 Maybe<UISizer>& UIWidget::tryGetSizer()
