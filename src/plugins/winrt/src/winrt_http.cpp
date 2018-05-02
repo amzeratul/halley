@@ -37,6 +37,11 @@ void WinRTHTTPRequest::setPostData(const String& type, const Bytes& bytes)
 	data->postData = bytes;
 }
 
+void WinRTHTTPRequest::setHeader(const String& headerName, const String& headerValue)
+{
+	// TODO
+}
+
 Future<std::unique_ptr<HTTPResponse>> WinRTHTTPRequest::send()
 {
 	auto data = this->data;
