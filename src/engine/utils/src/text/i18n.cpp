@@ -83,6 +83,11 @@ LocalisedString LocalisedString::fromNumber(int number)
 	return LocalisedString(toString(number));
 }
 
+LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok) const
+{
+	return LocalisedString(string.replaceAll("{0}", tok.getString()));
+}
+
 const String& LocalisedString::getString() const
 {
 	return string;

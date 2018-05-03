@@ -19,6 +19,8 @@ namespace Halley {
 		static LocalisedString fromUserString(const String& str);
 		static LocalisedString fromNumber(int number);
 
+		LocalisedString replaceTokens(const LocalisedString& tok) const;
+
 		const String& getString() const;
 
 		bool operator==(const LocalisedString& other) const;
