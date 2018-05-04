@@ -18,9 +18,16 @@ void UIImage::draw(UIPainter& painter) const
 void UIImage::update(Time t, bool moved)
 {
 	if (moved || dirty) {
+		Vector2f basePos = getPosition();
+		Vector2f imgBaseSize = sprite.getRawSize().abs() + topLeftBorder + bottomRightBorder;
+		if (sprite.getClip()) {
+			auto c = sprite.getClip().get();
+			basePos -= c.getTopLeft();
+			imgBaseSize = std::min(c.getSize(), imgBaseSize);
+		}
 		sprite
-			.setPos(getPosition())
-			.setScale(getSize() / (sprite.getRawSize().abs() + topLeftBorder + bottomRightBorder));
+			.setPos(basePos)
+			.setScale(getSize() / imgBaseSize);
 		dirty = false;
 	}
 }
