@@ -41,7 +41,7 @@ namespace Halley {
 		void encrypt(const String& key);
 		void decrypt(const String& key);
 	    
-    	void readData(size_t pos, gsl::span<std::byte> dst) const;
+    	void readData(size_t pos, gsl::span<gsl::byte> dst) const;
 
     private:
 		std::unique_ptr<AssetDatabase> assetDb;

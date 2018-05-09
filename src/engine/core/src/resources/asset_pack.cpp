@@ -142,7 +142,7 @@ void AssetPack::decrypt(const String& key)
 	// TODO
 }
 
-void AssetPack::readData(size_t pos, gsl::span<std::byte> dst) const
+void AssetPack::readData(size_t pos, gsl::span<gsl::byte> dst) const
 {
 	if (reader) {
 		// TODO
