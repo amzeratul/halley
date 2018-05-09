@@ -1,29 +1,9 @@
-/*****************************************************************\
-           __
-          / /
-		 / /                     __  __
-		/ /______    _______    / / / / ________   __       __
-	   / ______  \  /_____  \  / / / / / _____  | / /      / /
-	  / /      | / _______| / / / / / / /____/ / / /      / /
-	 / /      / / / _____  / / / / / / _______/ / /      / /
-	/ /      / / / /____/ / / / / / / |______  / |______/ /
-   /_/      /_/ |________/ / / / /  \_______/  \_______  /
-                          /_/ /_/                     / /
-			                                         / /
-		       High Level Game Framework            /_/
-
-  ---------------------------------------------------------------
-
-  Copyright (c) 2007-2011 - Rodrigo Braz Monteiro.
-  This file is subject to the terms of halley_license.txt.
-
-\*****************************************************************/
-
+#include "resource_filesystem.h"
 #include "resources/resource_locator.h"
-#include "resources/resource_filesystem.h"
 #include <iostream>
 #include <set>
 #include <halley/support/exception.h>
+#include "resource_pack.h"
 
 using namespace Halley;
 
@@ -88,9 +68,14 @@ std::vector<String> ResourceLocator::enumerate(const AssetType type)
 	return result;
 }
 
-void ResourceLocator::addFileSystem(Path path)
+void ResourceLocator::addFileSystem(const Path& path)
 {
 	add(std::make_unique<FileSystemResourceLocator>(system, path));
+}
+
+void ResourceLocator::addPack(const Path& path, const String& encryptionKey, bool preLoad)
+{
+	add(std::make_unique<PackResourceLocator>(system, path, encryptionKey, preLoad));
 }
 
 const Metadata& ResourceLocator::getMetaData(const String& asset, AssetType type) const

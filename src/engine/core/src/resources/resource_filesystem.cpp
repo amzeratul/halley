@@ -20,13 +20,13 @@
 \*****************************************************************/
 
 #include <cassert>
-#include "resources/resource_filesystem.h"
+#include "resource_filesystem.h"
 #include "halley/core/api/system_api.h"
 #include "halley/file/byte_serializer.h"
 
 using namespace Halley;
 
-FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, Path _basePath)
+FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, const Path& _basePath)
 	: system(system)
     , basePath(system.getResourcesBasePath(_basePath.string()))
 {

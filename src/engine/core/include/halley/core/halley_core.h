@@ -43,6 +43,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "input/input_virtual.h"
 
 #include "resources/asset_database.h"
+#include "resources/asset_pack.h"
 #include "resources/resources.h"
 #include "resources/resource_locator.h"
 

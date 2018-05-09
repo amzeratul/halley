@@ -48,9 +48,11 @@ set(SOURCES
         "src/input/input_virtual.cpp"
 
         "src/resources/asset_database.cpp"
+        "src/resources/asset_pack.cpp"
         "src/resources/resource_collection.cpp"
         "src/resources/resource_filesystem.cpp"
         "src/resources/resource_locator.cpp"
+        "src/resources/resource_pack.cpp"
         "src/resources/resources.cpp"
         "src/resources/standard_resources.cpp"
 
@@ -126,11 +128,14 @@ set(HEADERS
         "include/halley/core/input/input_virtual.h"
         
         "include/halley/core/resources/asset_database.h"
+        "include/halley/core/resources/asset_pack.h"
         "include/halley/core/resources/resource_collection.h"
-        "include/halley/core/resources/resource_filesystem.h"
         "include/halley/core/resources/resource_locator.h"
         "include/halley/core/resources/resources.h"
         "include/halley/core/resources/standard_resources.h"
+
+        "src/resources/resource_filesystem.h"
+        "src/resources/resource_pack.h"
 
         "include/halley/core/stage/entity_stage.h"
         "include/halley/core/stage/stage.h"

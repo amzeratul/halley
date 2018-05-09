@@ -5,25 +5,26 @@
 #include "halley/support/logger.h"
 #include "halley/tools/packer/asset_pack_manifest.h"
 #include "halley/resources/resource.h"
+#include "halley/core/resources/asset_pack.h"
 using namespace Halley;
 
 
-AssetPack::AssetPack()
+AssetPackListing::AssetPackListing()
 {
 }
 
-AssetPack::AssetPack(String name, String encryptionKey)
+AssetPackListing::AssetPackListing(String name, String encryptionKey)
 	: name(name)
 	, encryptionKey(encryptionKey)
 {
 }
 
-void AssetPack::addFile(AssetType type, const String& name, const AssetDatabase::Entry& entry)
+void AssetPackListing::addFile(AssetType type, const String& name, const AssetDatabase::Entry& entry)
 {
 	entries.push_back(Entry{ type, name, entry.path, entry.meta });
 }
 
-const std::vector<AssetPack::Entry>& AssetPack::getEntries() const
+const std::vector<AssetPackListing::Entry>& AssetPackListing::getEntries() const
 {
 	return entries;
 }
@@ -38,15 +39,15 @@ void AssetPacker::pack(const AssetPackManifest& manifest, const Path& src, const
 	AssetDatabase srcAssetDb = Deserializer::fromBytes<AssetDatabase>(assetDbData);
 
 	// Sort into packs
-	std::map<String, AssetPack> packs = sortIntoPacks(manifest, srcAssetDb);
+	std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, srcAssetDb);
 
 	// Generate packs
 	generatePacks(packs, src, dst);
 }
 
-std::map<String, AssetPack> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb)
+std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb)
 {
-	std::map<String, AssetPack> packs;
+	std::map<String, AssetPackListing> packs;
 	for (auto typeName: EnumNames<AssetType>()()) {
 		const auto type = fromString<AssetType>(typeName);
 		auto& db = srcAssetDb.getDatabase(type);
@@ -62,7 +63,7 @@ std::map<String, AssetPack> AssetPacker::sortIntoPacks(const AssetPackManifest& 
 
 			auto iter = packs.find(key);
 			if (iter == packs.end()) {
-				packs[key] = AssetPack(key, encryptionKey);
+				packs[key] = AssetPackListing(key, encryptionKey);
 				iter = packs.find(key);
 			}
 
@@ -72,50 +73,46 @@ std::map<String, AssetPack> AssetPacker::sortIntoPacks(const AssetPackManifest& 
 	return packs;
 }
 
-void AssetPacker::generatePacks(std::map<String, AssetPack> packs, const Path& src, const Path& dst)
+void AssetPacker::generatePacks(std::map<String, AssetPackListing> packs, const Path& src, const Path& dst)
 {
-	// New asset database
-	AssetDatabase db;
-
-	for (auto& pack: packs) {
-		if (pack.first.isEmpty()) {
+	for (auto& packListing: packs) {
+		if (packListing.first.isEmpty()) {
 			Logger::logWarning("The following assets will not be packed:");
-			for (auto& entry: pack.second.getEntries()) {
+			for (auto& entry: packListing.second.getEntries()) {
 				Logger::logWarning("  [" + toString(entry.type) + "] " + entry.name);
 			}
 			Logger::logWarning("-----------------------\n");
 		} else {
-			generatePack(db, pack.first, pack.second, src, dst);
+			generatePack(packListing.first, packListing.second, src, dst);
 		}
 	}
-
-	// Write new asset database
-	FileSystem::writeFile(dst / "assets.db", Serializer::toBytes(db));
 }
 
-void AssetPacker::generatePack(AssetDatabase& db, const String& packId, const AssetPack& pack, const Path& src, const Path& dst)
+void AssetPacker::generatePack(const String& packId, const AssetPackListing& packListing, const Path& src, const Path& dst)
 {
-	Bytes packData;
+	AssetPack pack;
+	AssetDatabase& db = pack.getAssetDatabase();
+	Bytes& data = pack.getData();
 
 	Logger::logInfo("Pack \"" + packId + "\" --------------");
-	for (auto& entry: pack.getEntries()) {
+	for (auto& entry: packListing.getEntries()) {
 		Logger::logInfo("  [" + toString(entry.type) + "] " + entry.name);
 
 		// Read original file
 		auto fileData = FileSystem::readFile(src / entry.path);
-		size_t pos = packData.size();
+		size_t pos = data.size();
 		size_t size = fileData.size();
 		String packPath = packId + ".dat";
 		
 		// Read data into pack data
-		packData.reserve(nextPowerOf2(pos + size));
-		packData.resize(pos + size);
-		memcpy(packData.data() + pos, fileData.data(), size);
+		data.reserve(nextPowerOf2(pos + size));
+		data.resize(pos + size);
+		memcpy(data.data() + pos, fileData.data(), size);
 
-		db.addAsset(entry.name, entry.type, AssetDatabase::Entry(":pack:" + packPath + ":" + toString(pos) + ":" + toString(size), entry.metadata));
+		db.addAsset(entry.name, entry.type, AssetDatabase::Entry(toString(pos) + ":" + toString(size), entry.metadata));
 	}
 	Logger::logInfo("-----------------------\n");
 
 	// Write pack
-	FileSystem::writeFile(dst / packId + ".dat", packData);
+	FileSystem::writeFile(dst / packId + ".dat", Serializer::toBytes(pack));
 }

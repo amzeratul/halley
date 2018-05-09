@@ -48,6 +48,15 @@ Serializer& Serializer::operator<<(gsl::span<const gsl::byte> span)
 	return *this;
 }
 
+Serializer& Serializer::operator<<(const Bytes& bytes)
+{
+	if (!dryRun) {
+		memcpy(dst.data() + size, bytes.data(), bytes.size());
+	}
+	size += bytes.size();
+	return *this;
+}
+
 Deserializer::Deserializer(gsl::span<const gsl::byte> src)
 	: pos(0)
 	, src(src)
@@ -67,7 +76,10 @@ Deserializer& Deserializer::operator>>(std::string& str)
 
 	ensureSufficientBytesRemaining(sz);
 
-	Expects(sz < 100 * 1024 * 1024);
+	if (sz > 100 * 1024 * 1024) {
+		throw Exception("String is too big.");
+	}
+
 	str = std::string(reinterpret_cast<const char*>(src.data() + pos), sz);
 	pos += sz;
 	return *this;
@@ -97,6 +109,17 @@ Deserializer& Deserializer::operator>>(gsl::span<gsl::byte>& span)
 
 	memcpy(span.data(), src.data() + pos, span.size_bytes());
 	pos += span.size_bytes();
+	return *this;
+}
+
+Deserializer& Deserializer::operator>>(Bytes& bytes)
+{
+	unsigned int sz;
+	*this >> sz;
+	ensureSufficientBytesRemaining(sz);
+
+	auto dst = gsl::as_writeable_bytes(gsl::span<Byte>(bytes));
+	*this >> dst;
 	return *this;
 }
 

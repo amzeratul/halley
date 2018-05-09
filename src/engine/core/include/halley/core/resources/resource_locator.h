@@ -46,7 +46,8 @@ namespace Halley {
 	public:
 		explicit ResourceLocator(SystemAPI& system);
 		void add(std::unique_ptr<IResourceLocatorProvider> locator);
-		void addFileSystem(Path path);
+		void addFileSystem(const Path& path);
+		void addPack(const Path& path, const String& encryptionKey = "", bool preLoad = false);
 		
 		const Metadata& getMetaData(const String& resource, AssetType type) const override;
 

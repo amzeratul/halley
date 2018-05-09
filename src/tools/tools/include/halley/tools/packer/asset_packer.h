@@ -8,7 +8,7 @@ namespace Halley {
 	class AssetPackManifest;
 	class Path;
 		
-	class AssetPack {
+	class AssetPackListing {
 	public:
 		struct Entry {
 			AssetType type;
@@ -17,8 +17,8 @@ namespace Halley {
 			Metadata metadata;
 		};
 		
-		AssetPack();
-		AssetPack(String name, String encryptionKey);
+		AssetPackListing();
+		AssetPackListing(String name, String encryptionKey);
 		
 		void addFile(AssetType type, const String& name, const AssetDatabase::Entry& entry);
 		const std::vector<Entry>& getEntries() const;
@@ -35,8 +35,8 @@ namespace Halley {
 		static void pack(const AssetPackManifest& manifest, const Path& assetsDir, const Path& dst);
 
 	private:
-		static std::map<String, AssetPack> sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb);
-		static void generatePacks(std::map<String, AssetPack> packs, const Path& src, const Path& dst);
-		static void generatePack(AssetDatabase& db, const String& packId, const AssetPack& pack, const Path& src, const Path& dst);
+		static std::map<String, AssetPackListing> sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb);
+		static void generatePacks(std::map<String, AssetPackListing> packs, const Path& src, const Path& dst);
+		static void generatePack(const String& packId, const AssetPackListing& pack, const Path& src, const Path& dst);
 	};
 }

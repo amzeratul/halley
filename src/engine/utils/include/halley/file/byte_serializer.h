@@ -57,6 +57,7 @@ namespace Halley {
 		Serializer& operator<<(const String& str);
 		Serializer& operator<<(const Path& path);
 		Serializer& operator<<(gsl::span<const gsl::byte> span);
+		Serializer& operator<<(const Bytes& bytes);
 
 		template <typename T>
 		Serializer& operator<<(const std::vector<T>& val)
@@ -216,6 +217,7 @@ namespace Halley {
 		Deserializer& operator>>(String& str);
 		Deserializer& operator>>(Path& p);
 		Deserializer& operator>>(gsl::span<gsl::byte>& span);
+		Deserializer& operator>>(Bytes& bytes);
 
 		template <typename T>
 		Deserializer& operator>>(std::vector<T>& val)
