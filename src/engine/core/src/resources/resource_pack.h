@@ -5,6 +5,7 @@
 
 namespace Halley {
 	class SystemAPI;
+	class AssetPack;
 
 	class PackResourceLocator : public IResourceLocatorProvider {
 	public:
@@ -14,7 +15,6 @@ namespace Halley {
 		std::unique_ptr<ResourceData> getData(const String& asset, AssetType type, bool stream) override;
 		const AssetDatabase& getAssetDatabase() const override;
 
-		SystemAPI& system;
-		std::unique_ptr<AssetDatabase> assetDb;
+		std::unique_ptr<AssetPack> assetPack;
 	};
 }

@@ -9,11 +9,17 @@ namespace Halley {
 	class AssetDatabase;
 	class ResourceDataReader;
 
+	struct AssetPackHeader {
+		std::array<char, 8> identifier;
+		uint64_t assetDbSize;
+		uint64_t dataStartPos;
+	};
+
     class AssetPack {
     public:
 		AssetPack();
 		AssetPack(AssetPack&& other);
-		AssetPack(std::unique_ptr<ResourceDataReader> reader, const String& encryptionKey = "", bool readToMemory = false);
+		AssetPack(std::unique_ptr<ResourceDataReader> reader, const String& encryptionKey = "", bool preLoad = false);
 		~AssetPack();
 
 		AssetPack& operator=(AssetPack&& other);
@@ -23,10 +29,11 @@ namespace Halley {
 		Bytes& getData();
 		const Bytes& getData() const;
 
-		void serialize(Serializer& s) const;
-		void deserialize(Deserializer& s);
-		void writeHeader(Serializer& s) const;
-		void readHeader(Deserializer& s);
+		Bytes writeOut() const;
+
+		void readToMemory();
+		void encrypt(const String& key);
+		void decrypt(const String& key);
 
     private:
 		std::unique_ptr<AssetDatabase> assetDb;

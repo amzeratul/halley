@@ -114,5 +114,5 @@ void AssetPacker::generatePack(const String& packId, const AssetPackListing& pac
 	Logger::logInfo("-----------------------\n");
 
 	// Write pack
-	FileSystem::writeFile(dst / packId + ".dat", Serializer::toBytes(pack));
+	FileSystem::writeFile(dst / packId + ".dat", pack.writeOut());
 }
