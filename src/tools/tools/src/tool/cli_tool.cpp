@@ -4,6 +4,7 @@
 #include "halley/tools/distance_field/distance_field_tool.h"
 #include "halley/tools/make_font/make_font_tool.h"
 #include "halley/tools/assets/import_tool.h"
+#include "halley/tools/packer/asset_packer_tool.h"
 
 using namespace Halley;
 
@@ -13,6 +14,7 @@ CommandLineTools::CommandLineTools()
 	factories["codegen"] = []() { return std::make_unique<CodegenTool>(); };
 	factories["distField"] = []() { return std::make_unique<DistanceFieldTool>(); };
 	factories["makeFont"] = []() { return std::make_unique<MakeFontTool>(); };
+	factories["pack"] = []() { return std::make_unique<AssetPackerTool>(); };
 }
 
 Vector<std::string> CommandLineTools::getToolNames()

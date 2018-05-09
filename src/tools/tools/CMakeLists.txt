@@ -44,6 +44,10 @@ set(SOURCES
     "src/make_font/font_generator.cpp"
     "src/make_font/make_font_tool.cpp"
 
+    "src/packer/asset_pack_manifest.cpp"
+    "src/packer/asset_packer.cpp"
+    "src/packer/asset_packer_tool.cpp"
+
     "src/tool/cli_tool.cpp"
 
     "src/sprites/aseprite_reader.cpp"
@@ -89,6 +93,10 @@ set(HEADERS
 
     "include/halley/tools/tasks/editor_task.h"
     "include/halley/tools/tasks/editor_task_set.h"
+
+    "include/halley/tools/packer/asset_pack_manifest.h"
+    "include/halley/tools/packer/asset_packer.h"
+    "include/halley/tools/packer/asset_packer_tool.h"
 
     "include/halley/tools/project/project.h"
 
