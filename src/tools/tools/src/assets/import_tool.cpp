@@ -1,6 +1,5 @@
 #include "halley/tools/assets/import_tool.h"
 #include "halley/tools/codegen/codegen.h"
-#include <iostream>
 #include "halley/tools/project/project.h"
 #include "halley/tools/tasks/editor_task_set.h"
 #include "halley/tools/assets/check_assets_task.h"
@@ -17,11 +16,6 @@ using namespace std::chrono_literals;
 int ImportTool::run(Vector<std::string> args)
 {
 	if (args.size() >= 2) {
-		HalleyStatics statics;
-		statics.resume(nullptr);
-		StdOutSink logSink;
-		Logger::addSink(logSink);
-
 		Path projectPath = FileSystem::getAbsolute(Path(args[0]));
 		Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));
 
@@ -34,8 +28,8 @@ int ImportTool::run(Vector<std::string> args)
 			}
 		}
 
-		auto proj = std::make_unique<Project>(statics, platform, projectPath, halleyRootPath);
-		std::cout << "Importing project at " << projectPath << ", with Halley root at " << halleyRootPath << "" << std::endl;
+		auto proj = std::make_unique<Project>(*statics, platform, projectPath, halleyRootPath);
+		Logger::logInfo("Importing project at \"" + projectPath + "\", with Halley root at \"" + halleyRootPath + "\"");
 
 		auto tasks = std::make_unique<EditorTaskSet>();
 		tasks->setListener(*this);
@@ -53,14 +47,14 @@ int ImportTool::run(Vector<std::string> args)
 		}
 
 		if (hasError) {
-			std::cout << "Import failed." << std::endl;
+			Logger::logError("Import failed.");
 			return 1;
 		} else {
-			std::cout << "Import done." << std::endl;
+			Logger::logInfo("Import done.");
 			return 0;
 		}
 	} else {
-		std::cout << "Usage: halley-cmd import projDir halleyDir" << std::endl;
+		Logger::logError("Usage: halley-cmd import projDir halleyDir");
 		return 1;
 	}
 }

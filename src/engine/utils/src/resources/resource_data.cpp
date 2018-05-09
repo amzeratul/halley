@@ -7,6 +7,13 @@
 
 using namespace Halley;
 
+Bytes ResourceDataReader::readAll()
+{
+	Bytes result(size());
+	read(gsl::as_writeable_bytes(gsl::span<Byte>(result)));
+	return result;
+}
+
 ResourceData::ResourceData(String p)
 	: path(p)
 {

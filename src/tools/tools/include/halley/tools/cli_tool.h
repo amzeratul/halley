@@ -7,13 +7,18 @@
 
 namespace Halley
 {
+	class HalleyStatics;
+
 	class CommandLineTool
 	{
 	public:
-		virtual ~CommandLineTool() {}
+		virtual ~CommandLineTool();
 
 		int runRaw(int argc, char** argv);
 		virtual int run(Vector<std::string> args) = 0;
+
+	protected:
+		std::unique_ptr<HalleyStatics> statics;
 	};
 
 	class CommandLineTools

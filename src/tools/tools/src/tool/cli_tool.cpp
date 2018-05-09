@@ -5,6 +5,8 @@
 #include "halley/tools/make_font/make_font_tool.h"
 #include "halley/tools/assets/import_tool.h"
 #include "halley/tools/packer/asset_packer_tool.h"
+#include "halley/support/logger.h"
+#include "halley/core/game/halley_statics.h"
 
 using namespace Halley;
 
@@ -36,11 +38,21 @@ std::unique_ptr<CommandLineTool> CommandLineTools::getTool(std::string name)
 	}
 }
 
+CommandLineTool::~CommandLineTool()
+{
+}
+
 int CommandLineTool::runRaw(int argc, char** argv)
 {
 	Vector<std::string> args(argc);
 	for (int i = 0; i < argc; i++) {
 		args[i] = argv[i];
 	}
+
+	statics = std::make_unique<HalleyStatics>();
+	statics->resume(nullptr);
+	StdOutSink logSink;
+	Logger::addSink(logSink);
+
 	return run(args);
 }

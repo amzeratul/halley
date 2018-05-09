@@ -37,10 +37,7 @@ FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, Path _ba
 		throw Exception("Unable to load assets.");
 	}
 
-	Bytes result(reader->size());
-	reader->read(gsl::as_writeable_bytes(gsl::span<Byte>(result)));
-	Deserializer s(result);
-	s >> *assetDb;
+	Deserializer::fromBytes<AssetDatabase>(*assetDb, reader->readAll());
 }
 
 const AssetDatabase& FileSystemResourceLocator::getAssetDatabase() const

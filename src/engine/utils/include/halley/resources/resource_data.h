@@ -40,6 +40,8 @@ namespace Halley {
 		virtual void seek(int64_t pos, int whence) = 0;
 		virtual size_t tell() const = 0;
 		virtual void close() = 0;
+
+		Bytes readAll();
 	};
 
 	class ResourceData {

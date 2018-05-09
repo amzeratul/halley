@@ -17,7 +17,7 @@ void ConfigImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::ConfigFile, Serializer::toBytes(config), meta);
 }
 
-static ConfigNode parseYAMLNode(const YAML::Node& node)
+ConfigNode ConfigImporter::parseYAMLNode(const YAML::Node& node)
 {
 	ConfigNode result;
 
