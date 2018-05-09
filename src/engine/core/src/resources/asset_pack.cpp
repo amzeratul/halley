@@ -98,6 +98,33 @@ Bytes AssetPack::writeOut() const
 	return result;
 }
 
+std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType type, bool stream)
+{
+	auto path = asset;
+	auto ps = assetDb->getDatabase(type).get(asset).path.split(':');
+	size_t pos = size_t(ps.at(0).toInteger());
+	size_t size = size_t(ps.at(1).toInteger());
+
+	if (stream) {
+		return std::make_unique<ResourceDataStream>(path, [=] () -> std::unique_ptr<ResourceDataReader> {
+			return std::make_unique<PackDataReader>(*this, pos, size);
+		});
+	} else {
+		if (reader) {
+			// Stream from reader
+
+			// TODO
+		} else {
+			// Preloaded
+			if (pos + size > data.size()) {
+				throw Exception("Asset \"" + asset + "\" is out of pack bounds.");
+			}
+
+			return std::make_unique<ResourceDataStatic>(data.data() + pos, size, path, false);
+		}
+	}
+}
+
 void AssetPack::readToMemory()
 {
 	reader->seek(dataOffset, SEEK_SET);
@@ -113,4 +140,63 @@ void AssetPack::encrypt(const String& key)
 void AssetPack::decrypt(const String& key)
 {
 	// TODO
+}
+
+void AssetPack::readData(size_t pos, gsl::span<std::byte> dst) const
+{
+	if (reader) {
+		// TODO
+	} else {
+		if (pos + size_t(dst.size()) > data.size()) {
+			throw Exception("Asset data is out of pack bounds.");
+		}
+		memcpy(dst.data(), data.data() + pos, dst.size());
+	}
+}
+
+PackDataReader::PackDataReader(AssetPack& pack, size_t startPos, size_t fileSize)
+	: pack(pack)
+	, startPos(startPos)
+	, fileSize(fileSize)
+{
+}
+
+size_t PackDataReader::size() const
+{
+	return fileSize;
+}
+
+int PackDataReader::read(gsl::span<gsl::byte> dst)
+{
+	size_t available = fileSize - curPos;
+	size_t toRead = std::min(available, size_t(dst.size()));
+
+	pack.readData(curPos, dst.subspan(0, toRead));
+	curPos += toRead;
+
+	return int(toRead);
+}
+
+void PackDataReader::seek(int64_t pos, int whence)
+{
+	switch (whence) {
+	case SEEK_SET:
+		curPos = pos;
+		break;
+	case SEEK_CUR:
+		curPos += pos;
+		break;
+	case SEEK_END:
+		curPos = fileSize + pos;
+		break;
+	}
+}
+
+size_t PackDataReader::tell() const
+{
+	return curPos;
+}
+
+void PackDataReader::close()
+{
 }

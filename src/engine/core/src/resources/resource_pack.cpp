@@ -14,7 +14,7 @@ PackResourceLocator::PackResourceLocator(SystemAPI& system, const Path& filePath
 
 std::unique_ptr<ResourceData> PackResourceLocator::getData(const String& asset, AssetType type, bool stream)
 {
-	return {};
+	return assetPack->getData(asset, type, stream);
 }
 
 const AssetDatabase& PackResourceLocator::getAssetDatabase() const

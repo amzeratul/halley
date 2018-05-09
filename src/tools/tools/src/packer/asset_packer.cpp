@@ -53,7 +53,7 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 		auto& db = srcAssetDb.getDatabase(type);
 		for (auto& assetEntry: db.getAssets()) {
 			const String assetName = String(typeName) + ":" + assetEntry.first;
-			auto packEntry = manifest.getPack(assetName);
+			auto packEntry = manifest.getPack("~:" + assetName);
 			String key;
 			String encryptionKey;
 			if (packEntry) {

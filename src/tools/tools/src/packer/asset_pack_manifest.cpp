@@ -27,7 +27,7 @@ const String& AssetPackManifestEntry::getName() const
 bool AssetPackManifestEntry::checkMatch(const String& asset) const
 {
 	for (auto& m: matches) {
-		if (asset.startsWith(m)) {
+		if (asset.contains(m)) {
 			return true;
 		}
 	}
@@ -64,7 +64,7 @@ AssetPackManifest::AssetPackManifest(const ConfigFile& file)
 Maybe<std::reference_wrapper<const AssetPackManifestEntry>> AssetPackManifest::getPack(const String& asset) const
 {
 	for (auto& e: exclude) {
-		if (asset.startsWith(e)) {
+		if (asset.contains(e)) {
 			return {};
 		}
 	}
