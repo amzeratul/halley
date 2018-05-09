@@ -205,6 +205,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float radius, Vector2i imageSize) const
 {
 	String fontName = meta.getString("fontName", font.getName());
+	String imageName = "fontTex/" + fontName;
 
 	const float ascender = float(lround(font.getAscender() * scale) + meta.getInt("ascenderAdjustment", 0));
 	const float height = float(lround(font.getHeight() * scale) + meta.getInt("lineSpacing", 0));
@@ -212,7 +213,7 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 	const float smoothRadius = radius * scale;
 	const int padding = lround(radius);
 
-	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, fontName, ascender, height, sizePt, smoothRadius);
+	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, ascender, height, sizePt, smoothRadius);
 
 	for (auto& c: entries) {
 		auto metrics = font.getMetrics(c.charcode, scale);

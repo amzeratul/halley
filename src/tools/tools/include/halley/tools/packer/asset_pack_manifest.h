@@ -14,9 +14,11 @@ namespace Halley {
 		const String& getName() const;
 		bool checkMatch(const String& asset) const;
 		bool isEncrypted() const;
+		const String& getEncryptionKey() const;
 
 	private:
 		String name;
+		String encryptionKey;
 		std::vector<String> matches;
 		bool encrypted = false;
 	};

@@ -15,18 +15,23 @@ using namespace Halley;
 int AssetPackerTool::run(Vector<std::string> args)
 {
 	try {
-		const auto data = FileSystem::readFile(args[0]);
-		ConfigFile config;
-		String strData(reinterpret_cast<const char*>(data.data()), data.size());
-		YAML::Node root = YAML::Load(strData.cppStr());
-		config.getRoot() = ConfigImporter::parseYAMLNode(root);
+		if (args.size() >= 3) {
+			const auto data = FileSystem::readFile(args[0]);
+			ConfigFile config;
+			String strData(reinterpret_cast<const char*>(data.data()), data.size());
+			YAML::Node root = YAML::Load(strData.cppStr());
+			config.getRoot() = ConfigImporter::parseYAMLNode(root);
 
-		const auto manifest = AssetPackManifest(config);
-		const auto src = Path(args[1]);
-		const auto dst = Path(args[2]);
+			const auto manifest = AssetPackManifest(config);
+			const auto src = Path(args[1]);
+			const auto dst = Path(args[2]);
 
-		AssetPacker::pack(manifest, src, dst);
-		return 0;
+			AssetPacker::pack(manifest, src, dst);
+			return 0;
+		} else {
+			Logger::logError("Usage: halley-cmd pack path/to/manifest.yaml path/to/assets/ path/to/dst/");
+			return 1;
+		}
 	} catch (std::exception& e) {
 		Logger::logException(e);
 		return 1;

@@ -47,7 +47,7 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	}
 
 	ImportingAsset image;
-	image.assetId = fontName;
+	image.assetId = "fontTex/" + fontName;
 	image.assetType = ImportAssetType::Image;
 	image.inputFiles.emplace_back(ImportingAssetFile(fontName, Serializer::toBytes(*result.image), *result.imageMeta));
 	collector.addAdditionalAsset(std::move(image));
