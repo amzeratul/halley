@@ -10,6 +10,7 @@ namespace Halley {
 	class PackResourceLocator : public IResourceLocatorProvider {
 	public:
 		PackResourceLocator(SystemAPI& system, const Path& filePath, const String& encryptionKey = "", bool preLoad = false);
+		~PackResourceLocator();
 
 	protected:
 		std::unique_ptr<ResourceData> getData(const String& asset, AssetType type, bool stream) override;

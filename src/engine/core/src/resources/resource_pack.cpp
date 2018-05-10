@@ -12,6 +12,10 @@ PackResourceLocator::PackResourceLocator(SystemAPI& system, const Path& filePath
 	assetPack = std::make_unique<AssetPack>(std::move(dataReader), encryptionKey, preLoad);
 }
 
+PackResourceLocator::~PackResourceLocator()
+{
+}
+
 std::unique_ptr<ResourceData> PackResourceLocator::getData(const String& asset, AssetType type, bool stream)
 {
 	return assetPack->getData(asset, type, stream);
