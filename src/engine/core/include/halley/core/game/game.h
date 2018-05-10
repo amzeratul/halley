@@ -16,7 +16,7 @@ namespace Halley
 
 		virtual void init(const Environment&, const Vector<String>& /*args*/) {}
 		virtual int initPlugins(IPluginRegistry &registry) = 0;
-		virtual void initResourceLocator(Path, ResourceLocator&) {}
+		virtual void initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator) {}
 
 		virtual String getName() const = 0;
 		virtual String getDataPath() const = 0;

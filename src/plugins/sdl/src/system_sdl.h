@@ -13,7 +13,8 @@ namespace Halley
 		void init() override;
 		void deInit() override;
 
-		String getResourcesBasePath(const String& gamePath) const override;
+		Path getAssetsPath(const Path& gamePath) const override;
+		Path getUnpackedAssetsPath(const Path& gamePath) const override;
 
 		bool generateEvents(VideoAPI* video, InputAPI* input) override;
 

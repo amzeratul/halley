@@ -31,6 +31,7 @@ Thumbs.db
 
 # Binaries
 /assets/
+/assets_unpacked/
 /bin/
 *.dll
 *.hi

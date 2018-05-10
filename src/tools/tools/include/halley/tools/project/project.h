@@ -15,7 +15,8 @@ namespace Halley
 		Project(const HalleyStatics& statics, const String& platform, Path projectRootPath, Path halleyRootPath);
 		~Project();
 		
-		Path getAssetsPath() const;
+		Path getUnpackedAssetsPath() const;
+		Path getPackedAssetsPath() const;
 		Path getAssetsSrcPath() const;
 		Path getSharedAssetsSrcPath() const;
 

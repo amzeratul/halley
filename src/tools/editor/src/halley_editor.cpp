@@ -35,9 +35,9 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 	}
 }
 
-void HalleyEditor::initResourceLocator(Path dataPath, ResourceLocator& locator)
+void HalleyEditor::initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator)
 {
-	locator.addFileSystem(dataPath);
+	locator.addFileSystem(unpackedAssetsPath);
 }
 
 String HalleyEditor::getName() const

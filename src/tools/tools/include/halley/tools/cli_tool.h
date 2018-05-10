@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <halley/data_structures/vector.h>
+#include <halley/text/halleystring.h>
 #include <memory>
 #include <functional>
 #include <map>
@@ -19,6 +20,7 @@ namespace Halley
 
 	protected:
 		std::unique_ptr<HalleyStatics> statics;
+		String platform;
 	};
 
 	class CommandLineTools

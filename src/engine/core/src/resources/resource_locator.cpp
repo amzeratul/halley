@@ -4,6 +4,8 @@
 #include <set>
 #include <halley/support/exception.h>
 #include "resource_pack.h"
+#include "halley/support/logger.h"
+#include "api/system_api.h"
 
 using namespace Halley;
 
@@ -73,9 +75,18 @@ void ResourceLocator::addFileSystem(const Path& path)
 	add(std::make_unique<FileSystemResourceLocator>(system, path));
 }
 
-void ResourceLocator::addPack(const Path& path, const String& encryptionKey, bool preLoad)
+void ResourceLocator::addPack(const Path& path, const String& encryptionKey, bool preLoad, bool allowFailure)
 {
-	add(std::make_unique<PackResourceLocator>(system, path, encryptionKey, preLoad));
+	auto dataReader = system.getDataReader(path.string());
+	if (dataReader) {
+		add(std::make_unique<PackResourceLocator>(std::move(dataReader), encryptionKey, preLoad));
+	} else {
+		if (allowFailure) {
+			Logger::logWarning("Resource pack not found: \"" + path.string() + "\"");
+		} else {
+			throw Exception("Unable to load resource pack \"" + path.string() + "\"");
+		}
+	}
 }
 
 const Metadata& ResourceLocator::getMetaData(const String& asset, AssetType type) const

@@ -17,7 +17,7 @@ using namespace std::chrono_literals;
 CheckAssetsTask::CheckAssetsTask(Project& project, bool headless)
 	: EditorTask("Check assets", true, false)
 	, project(project)
-	, monitorAssets(project.getAssetsPath())
+	, monitorAssets(project.getUnpackedAssetsPath())
 	, monitorAssetsSrc(project.getAssetsSrcPath())
 	, monitorSharedAssetsSrc(project.getSharedAssetsSrcPath())
 	, monitorGen(project.getGenPath())
@@ -31,7 +31,7 @@ void CheckAssetsTask::run()
 	while (!isCancelled()) {
 		if (first | monitorAssets.poll() | monitorAssetsSrc.poll() | monitorSharedAssetsSrc.poll()) { // Don't short-circuit
 			Logger::logInfo("Scanning for asset changes...");
-			checkAllAssets(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, project.getAssetsPath(), "Importing assets");
+			checkAllAssets(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, project.getUnpackedAssetsPath(), "Importing assets");
 		}
 
 		if (first | monitorGen.poll() | monitorGenSrc.poll()) {

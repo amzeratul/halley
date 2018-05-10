@@ -1,15 +1,10 @@
 #include "resource_pack.h"
-#include "api/system_api.h"
 #include "resources/asset_pack.h"
 using namespace Halley;
 
-PackResourceLocator::PackResourceLocator(SystemAPI& system, const Path& filePath, const String& encryptionKey, bool preLoad)
+PackResourceLocator::PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, const String& encryptionKey, bool preLoad)
 {
-	auto dataReader = system.getDataReader(filePath.string());
-	if (!dataReader) {
-		throw Exception("Unable to load resource pack \"" + filePath.string() + "\"");
-	}
-	assetPack = std::make_unique<AssetPack>(std::move(dataReader), encryptionKey, preLoad);
+	assetPack = std::make_unique<AssetPack>(std::move(reader), encryptionKey, preLoad);
 }
 
 PackResourceLocator::~PackResourceLocator()

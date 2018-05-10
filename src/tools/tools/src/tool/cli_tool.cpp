@@ -44,9 +44,18 @@ CommandLineTool::~CommandLineTool()
 
 int CommandLineTool::runRaw(int argc, char** argv)
 {
-	Vector<std::string> args(argc);
+	platform = "pc";
+
+	Vector<std::string> args;
 	for (int i = 0; i < argc; i++) {
-		args[i] = argv[i];
+		String arg = argv[i];
+		if (arg.startsWith("--")) {
+			if (arg.startsWith("--platform=")) {
+				platform = arg.mid(11);
+			}
+		} else {
+			args.push_back(arg.cppStr());
+		}
 	}
 
 	statics = std::make_unique<HalleyStatics>();
