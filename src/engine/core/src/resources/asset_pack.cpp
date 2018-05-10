@@ -3,12 +3,23 @@
 #include "halley/resources/resource_data.h"
 #include "halley/file/byte_serializer.h"
 #include "halley/file/compression.h"
+#include "halley/maths/random.h"
+#include "halley/utils/encrypt.h"
 
 using namespace Halley;
+
+void AssetPackHeader::init(size_t assetDbSize)
+{
+	memcpy(identifier.data(), "HALLEYPK", 8);
+	assetDbStartPos = sizeof(AssetPackHeader);
+	dataStartPos = assetDbStartPos + assetDbSize;
+	memset(iv.data(), 0, iv.size());
+}
 
 AssetPack::AssetPack()
 	: assetDb(std::make_unique<AssetDatabase>())
 {
+	memset(iv.data(), 0, iv.size());
 }
 
 AssetPack::AssetPack(AssetPack&& other)
@@ -29,11 +40,13 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& 
 	if (memcmp(header.identifier.data(), "HALLEYPK", 8) != 0) {
 		throw Exception("Asset pack is invalid (invalid identifier)");
 	}
+	iv = header.iv;
 	dataOffset = header.dataStartPos;
 
 	// Read asset database
 	{
-		auto assetDbBytes = Bytes(header.assetDbSize);
+		const size_t assetDbSize = header.dataStartPos - header.assetDbStartPos;
+		auto assetDbBytes = Bytes(assetDbSize);
 		reader->read(gsl::as_writeable_bytes(gsl::span<Byte>(assetDbBytes)));
 		assetDb = std::make_unique<AssetDatabase>();
 		Deserializer::fromBytes<AssetDatabase>(*assetDb, Compression::inflate(assetDbBytes));
@@ -85,15 +98,13 @@ const Bytes& AssetPack::getData() const
 Bytes AssetPack::writeOut() const
 {
 	auto assetDbBytes = Compression::deflate(Serializer::toBytes(*assetDb));
-
 	AssetPackHeader header;
-	memcpy(header.identifier.data(), "HALLEYPK", 8);
-	header.assetDbSize = assetDbBytes.size();
-	header.dataStartPos = sizeof(AssetPackHeader) + assetDbBytes.size();
+	header.init(assetDbBytes.size());
+	header.iv = iv;
 
 	auto result = Bytes(header.dataStartPos + data.size());
 	memcpy(result.data(), &header, sizeof(AssetPackHeader));
-	memcpy(result.data() + sizeof(AssetPackHeader), assetDbBytes.data(), assetDbBytes.size());
+	memcpy(result.data() + header.assetDbStartPos, assetDbBytes.data(), assetDbBytes.size());
 	memcpy(result.data() + header.dataStartPos, data.data(), data.size());
 	return result;
 }
@@ -134,12 +145,20 @@ void AssetPack::readToMemory()
 
 void AssetPack::encrypt(const String& key)
 {
-	// TODO
+	// Generate IV
+	Random::getGlobal().getBytes(gsl::as_writeable_bytes(gsl::span<char>(iv)));
+	Bytes ivBytes(iv.size());
+	memcpy(ivBytes.data(), iv.data(), iv.size());
+
+	data = Encrypt::encrypt(ivBytes, key, data);
 }
 
 void AssetPack::decrypt(const String& key)
 {
-	// TODO
+	Bytes ivBytes(iv.size());
+	memcpy(ivBytes.data(), iv.data(), iv.size());
+
+	data = Encrypt::decrypt(ivBytes, key, data);
 }
 
 void AssetPack::readData(size_t pos, gsl::span<gsl::byte> dst) const

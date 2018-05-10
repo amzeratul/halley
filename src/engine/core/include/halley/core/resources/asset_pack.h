@@ -15,8 +15,11 @@ namespace Halley {
 
 	struct AssetPackHeader {
 		std::array<char, 8> identifier;
-		uint64_t assetDbSize;
+		std::array<char, 16> iv;
+		uint64_t assetDbStartPos;
 		uint64_t dataStartPos;
+
+		void init(size_t assetDbSize);
 	};
 
     class AssetPack {
@@ -48,6 +51,7 @@ namespace Halley {
 		std::unique_ptr<ResourceDataReader> reader;
 		size_t dataOffset = 0;
 		Bytes data;
+		std::array<char, 16> iv;
     };
 
 

@@ -22,6 +22,7 @@ namespace Halley {
 		
 		void addFile(AssetType type, const String& name, const AssetDatabase::Entry& entry);
 		const std::vector<Entry>& getEntries() const;
+		const String& getEncryptionKey() const;
 
 	private:
 		String name;

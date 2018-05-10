@@ -28,17 +28,17 @@ Random::Random()
 {
 }
 
-Halley::Random::Random(long seed)
+Random::Random(long seed)
 	: generator(int(seed))
 {
 }
 
-Halley::Random::Random(char* bytes, size_t nBytes)
+Random::Random(char* bytes, size_t nBytes)
 {
 	setSeed(bytes, nBytes);
 }
 
-Random& Halley::Random::getGlobal()
+Random& Random::getGlobal()
 {
 	static Random* global = nullptr;
 	if (!global) {
@@ -51,12 +51,29 @@ Random& Halley::Random::getGlobal()
 	return *global;
 }
 
-void Halley::Random::setSeed(long seed)
+void Random::getBytes(gsl::span<gsl::byte> dst)
+{
+	int step = 0;
+	uint_fast32_t number = generator();
+
+	for (int pos = 0; pos < dst.size_bytes(); ++pos) {
+		dst[pos] = gsl::byte(uint_fast8_t(number & 0xFF));
+
+		number >>= 8;
+		++step;
+		if (step == 4) {
+			number = generator();
+			step = 0;
+		}
+	}
+}
+
+void Random::setSeed(long seed)
 {
 	generator.seed(static_cast<int>(seed));
 }
 
-void Halley::Random::setSeed(char* bytes, size_t nBytes)
+void Random::setSeed(char* bytes, size_t nBytes)
 {
 	std::seed_seq seq(bytes, bytes+nBytes);
 	generator.seed(seq);

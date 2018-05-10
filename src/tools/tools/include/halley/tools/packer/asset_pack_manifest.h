@@ -20,7 +20,6 @@ namespace Halley {
 		String name;
 		String encryptionKey;
 		std::vector<String> matches;
-		bool encrypted = false;
 	};
 
 	class AssetPackManifest {

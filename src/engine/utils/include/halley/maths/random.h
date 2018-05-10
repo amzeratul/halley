@@ -23,6 +23,7 @@
 
 #include <random>
 #include <halley/utils/utils.h>
+#include <gsl/span>
 
 namespace Halley {
 	typedef std::mt19937 RandomGenType;
@@ -56,6 +57,7 @@ namespace Halley {
 			return dist(generator);
 		}
 
+		void getBytes(gsl::span<gsl::byte> dst);
 		void setSeed(long seed);
 		void setSeed(char* bytes, size_t nBytes);
 

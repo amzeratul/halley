@@ -29,6 +29,11 @@ const std::vector<AssetPackListing::Entry>& AssetPackListing::getEntries() const
 	return entries;
 }
 
+const String& AssetPackListing::getEncryptionKey() const
+{
+	return encryptionKey;
+}
+
 void AssetPacker::pack(const AssetPackManifest& manifest, const Path& src, const Path& dst)
 {
 	// Retrieve assets database
@@ -112,6 +117,12 @@ void AssetPacker::generatePack(const String& packId, const AssetPackListing& pac
 		db.addAsset(entry.name, entry.type, AssetDatabase::Entry(toString(pos) + ":" + toString(size), entry.metadata));
 	}
 	Logger::logInfo("-----------------------\n");
+
+	if (!packListing.getEncryptionKey().isEmpty()) {
+		Logger::logInfo("Encrypting " + packId + "...");
+		pack.encrypt(packListing.getEncryptionKey());
+		Logger::logInfo("Done\n");
+	}
 
 	// Write pack
 	FileSystem::writeFile(dst / packId + ".dat", pack.writeOut());

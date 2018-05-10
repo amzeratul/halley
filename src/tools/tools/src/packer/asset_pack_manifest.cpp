@@ -10,7 +10,6 @@ AssetPackManifestEntry::AssetPackManifestEntry()
 AssetPackManifestEntry::AssetPackManifestEntry(const ConfigNode& node)
 {
 	name = node["name"].asString();
-	encrypted = node["encrypted"].asBool(false);
 	encryptionKey = node["encryptionKey"].asString("");
 	if (node.hasKey("matches")) {
 		for (auto& m: node["matches"].asSequence()) {
@@ -36,7 +35,7 @@ bool AssetPackManifestEntry::checkMatch(const String& asset) const
 
 bool AssetPackManifestEntry::isEncrypted() const
 {
-	return encrypted;
+	return !encryptionKey.isEmpty();
 }
 
 const String& AssetPackManifestEntry::getEncryptionKey() const
