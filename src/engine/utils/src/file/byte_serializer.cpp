@@ -50,6 +50,9 @@ Serializer& Serializer::operator<<(gsl::span<const gsl::byte> span)
 
 Serializer& Serializer::operator<<(const Bytes& bytes)
 {
+	unsigned int byteSize = static_cast<unsigned int>(bytes.size());
+	*this << byteSize;
+
 	if (!dryRun) {
 		memcpy(dst.data() + size, bytes.data(), bytes.size());
 	}

@@ -112,8 +112,8 @@ std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType 
 	} else {
 		if (reader) {
 			// Stream from reader
-
 			// TODO
+			return {};
 		} else {
 			// Preloaded
 			if (pos + size > data.size()) {
