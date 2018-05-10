@@ -158,11 +158,16 @@ void WinRTSystem::deInit()
 {
 }
 
-String WinRTSystem::getResourcesBasePath(const String& gamePath) const
+Path WinRTSystem::getAssetsPath(const Path& gamePath) const
 {
 	static auto path = String(Windows::ApplicationModel::Package::Current().InstalledLocation().Path().data()) + String("/Assets/");
 	return path;
-	//return "Assets\\";
+}
+
+Path WinRTSystem::getUnpackedAssetsPath(const Path& gamePath) const
+{
+	static auto path = String(Windows::ApplicationModel::Package::Current().InstalledLocation().Path().data()) + String("/Assets/");
+	return path;
 }
 
 std::unique_ptr<ResourceDataReader> WinRTSystem::getDataReader(String path, int64_t start, int64_t end)

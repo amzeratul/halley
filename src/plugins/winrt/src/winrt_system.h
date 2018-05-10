@@ -7,7 +7,8 @@ namespace Halley {
 		void init() override;
 		void deInit() override;
 
-		String getResourcesBasePath(const String& gamePath) const override;
+		Path getAssetsPath(const Path& gamePath) const override;
+		Path getUnpackedAssetsPath(const Path& gamePath) const override;
 		std::unique_ptr<ResourceDataReader> getDataReader(String path, int64_t start, int64_t end) override;
 
 		std::unique_ptr<GLContext> createGLContext() override;
