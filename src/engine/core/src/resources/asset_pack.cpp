@@ -161,10 +161,11 @@ void AssetPack::decrypt(const String& key)
 	data = Encrypt::decrypt(ivBytes, key, data);
 }
 
-void AssetPack::readData(size_t pos, gsl::span<gsl::byte> dst) const
+void AssetPack::readData(size_t pos, gsl::span<gsl::byte> dst)
 {
 	if (reader) {
-		// TODO
+		reader->seek(pos + dataOffset, SEEK_SET);
+		reader->read(dst);
 	} else {
 		if (pos + size_t(dst.size()) > data.size()) {
 			throw Exception("Asset data is out of pack bounds.");
@@ -190,7 +191,7 @@ int PackDataReader::read(gsl::span<gsl::byte> dst)
 	size_t available = fileSize - curPos;
 	size_t toRead = std::min(available, size_t(dst.size()));
 
-	pack.readData(curPos, dst.subspan(0, toRead));
+	pack.readData(startPos + curPos, dst.subspan(0, toRead));
 	curPos += toRead;
 
 	return int(toRead);
