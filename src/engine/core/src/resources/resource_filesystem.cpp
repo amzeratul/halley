@@ -45,6 +45,11 @@ const AssetDatabase& FileSystemResourceLocator::getAssetDatabase() const
 	return *assetDb;
 }
 
+int FileSystemResourceLocator::getPriority() const
+{
+	return 1;
+}
+
 std::unique_ptr<ResourceData> FileSystemResourceLocator::getData(const String& asset, AssetType type, bool stream)
 {
 	auto path = (basePath / assetDb->getDatabase(type).get(asset).path).string();

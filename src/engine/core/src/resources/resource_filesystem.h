@@ -13,7 +13,7 @@ namespace Halley {
 	protected:
 		std::unique_ptr<ResourceData> getData(const String& asset, AssetType type, bool stream) override;
 		const AssetDatabase& getAssetDatabase() const override;
-		int getPriority() const override { return -1; }
+		int getPriority() const override;
 
 		SystemAPI& system;
 		Path basePath;
