@@ -29,7 +29,7 @@ namespace Halley
 
 		String getName() const override;
 		String getDataPath() const override;
-		bool isDevBuild() const override;
+		bool isDevMode() const override;
 		bool shouldCreateSeparateConsole() const override;
 
 	private:

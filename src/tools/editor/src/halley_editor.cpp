@@ -50,7 +50,7 @@ String HalleyEditor::getDataPath() const
 	return "halley/editor";
 }
 
-bool HalleyEditor::isDevBuild() const
+bool HalleyEditor::isDevMode() const
 {
 	return true;
 }
@@ -58,7 +58,7 @@ bool HalleyEditor::isDevBuild() const
 bool HalleyEditor::shouldCreateSeparateConsole() const
 {
 #ifdef _DEBUG
-	return !headless && isDevBuild();
+	return !headless && isDevMode();
 #else
 	return false;
 #endif
