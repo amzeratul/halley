@@ -10,6 +10,7 @@ namespace Halley
 
 	enum class LoggerLevel
 	{
+		Dev,
 		Info,
 		Warning,
 		Error
@@ -24,10 +25,12 @@ namespace Halley
 
 	class StdOutSink : public ILoggerSink {
 	public:
+		explicit StdOutSink(bool devMode);
 		void log(LoggerLevel level, const String& msg) override;
 
 	private:
 		std::mutex mutex;
+		bool devMode;
 	};
 
 	class Logger
@@ -39,6 +42,7 @@ namespace Halley
 		static void removeSink(ILoggerSink& sink);
 
 		static void log(LoggerLevel level, const String& msg);
+		static void logDev(const String& msg);
 		static void logInfo(const String& msg);
 		static void logWarning(const String& msg);
 		static void logError(const String& msg);

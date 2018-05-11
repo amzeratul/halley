@@ -60,7 +60,7 @@ int CommandLineTool::runRaw(int argc, char** argv)
 
 	statics = std::make_unique<HalleyStatics>();
 	statics->resume(nullptr);
-	StdOutSink logSink;
+	StdOutSink logSink(true);
 	Logger::addSink(logSink);
 
 	return run(args);

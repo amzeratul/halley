@@ -473,6 +473,10 @@ Vector<Plugin*> Core::getPlugins(PluginType type)
 
 void Core::log(LoggerLevel level, const String& msg)
 {
+	if (level == LoggerLevel::Dev && !game->isDevMode()) {
+		return;
+	}
+
 	if (level == LoggerLevel::Error) {
 		std::cout << ConsoleColour(Console::RED);
 	} else if (level == LoggerLevel::Warning) {

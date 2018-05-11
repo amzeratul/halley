@@ -6,8 +6,17 @@
 
 using namespace Halley;
 
+StdOutSink::StdOutSink(bool devMode)
+	: devMode(devMode)
+{
+}
+
 void StdOutSink::log(LoggerLevel level, const String& msg)
 {
+	if (level == LoggerLevel::Dev && !devMode) {
+		return;
+	}
+
 	std::unique_lock<std::mutex> lock(mutex);
 
 	switch (level) {
@@ -47,6 +56,11 @@ void Logger::log(LoggerLevel level, const String& msg)
 	} else {
 		std::cout << msg << std::endl;
 	}
+}
+
+void Logger::logDev(const String& msg)
+{
+	log(LoggerLevel::Dev, msg);
 }
 
 void Logger::logInfo(const String& msg)

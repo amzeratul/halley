@@ -75,7 +75,6 @@ namespace Halley
 		void pumpEvents(Time time);
 		void pumpAudio();
 
-	private:
 		std::array<StopwatchAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> timers;
 		StopwatchAveraging vsyncTimer;
 
