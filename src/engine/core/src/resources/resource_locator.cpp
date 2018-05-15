@@ -43,18 +43,22 @@ std::unique_ptr<ResourceData> ResourceLocator::getResource(const String& asset, 
 
 std::unique_ptr<ResourceDataStatic> ResourceLocator::getStatic(const String& asset, AssetType type)
 {
-	auto ptr = dynamic_cast<ResourceDataStatic*>(getResource(asset, type, false).release());
+	auto rawPtr = getResource(asset, type, false).release();
+	auto ptr = dynamic_cast<ResourceDataStatic*>(rawPtr);
 	if (!ptr) {
-		throw Exception("Resource " + asset + " obtained, but is not static data. Memory leak has ocurred.");
+		delete rawPtr;
+		throw Exception("Resource " + asset + " obtained, but is not static data.");
 	}
 	return std::unique_ptr<ResourceDataStatic>(ptr);
 }
 
 std::unique_ptr<ResourceDataStream> ResourceLocator::getStream(const String& asset, AssetType type)
 {
-	auto ptr = dynamic_cast<ResourceDataStream*>(getResource(asset, type, true).release());
+	auto rawPtr = getResource(asset, type, true).release();
+	auto ptr = dynamic_cast<ResourceDataStream*>(rawPtr);
 	if (!ptr) {
-		throw Exception("Resource " + asset + " obtained, but is not stream data. Memory leak has ocurred.");
+		delete rawPtr;
+		throw Exception("Resource " + asset + " obtained, but is not stream data.");
 	}
 	return std::unique_ptr<ResourceDataStream>(ptr);
 }
