@@ -8,6 +8,7 @@
 #include "halley/file/byte_serializer.h"
 #include "halley/text/string_converter.h"
 #include "halley/file_formats/binary_file.h"
+#include "halley/file_formats/config_file.h"
 
 using namespace Halley;
 
@@ -114,9 +115,22 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	}
 }
 
-MaterialPass::MaterialPass()
-	: blend(BlendType::Undefined)
-{}
+void MaterialDefinition::load(const ConfigNode& root)
+{
+	// Load name
+	name = root["name"].asString("Unknown");
+
+	// Load attributes & uniforms
+	if (root.hasKey("attributes")) {
+		loadAttributes(root["attributes"]);
+	}
+	if (root.hasKey("uniforms")) {
+		loadUniforms(root["uniforms"]);
+	}
+	if (root.hasKey("textures")) {
+		loadTextures(root["textures"]);
+	}
+}
 
 int MaterialDefinition::getNumPasses() const
 {
@@ -157,6 +171,11 @@ size_t MaterialDefinition::getVertexPosOffset() const
 	return size_t(vertexPosOffset);
 }
 
+void MaterialDefinition::addPass(const MaterialPass& materialPass)
+{
+	passes.push_back(materialPass);
+}
+
 std::unique_ptr<MaterialDefinition> MaterialDefinition::loadResource(ResourceLoader& loader)
 {
 	return std::make_unique<MaterialDefinition>(loader);
@@ -184,22 +203,249 @@ void MaterialDefinition::deserialize(Deserializer& s)
 	s >> vertexPosOffset;
 }
 
-MaterialPass::MaterialPass(BlendType blend, String shaderAssetId)
-	: blend(blend)
-	, shaderAssetId(shaderAssetId)
+void MaterialDefinition::loadUniforms(const ConfigNode& node)
 {
+	for (auto& attribEntry : node.asSequence()) {
+		for (auto& it: attribEntry.asMap()) {
+			const String& blockName = it.first;
+			auto& uniformNodes = it.second;
+
+			std::vector<MaterialUniform> uniforms;
+			for (auto& uniformEntry: uniformNodes.asSequence()) {
+				for (auto& uit: uniformEntry.asMap()) {
+					String uniformName = uit.first;
+					ShaderParameterType type = parseParameterType(uit.second.asString());
+					uniforms.push_back(MaterialUniform(uniformName, type));
+				}
+			}
+			
+			uniformBlocks.push_back(MaterialUniformBlock(blockName, uniforms));
+		}
+	}
+}
+
+void MaterialDefinition::loadTextures(const ConfigNode& node)
+{
+	for (auto& attribEntry: node.asSequence()) {
+		for (auto& it: attribEntry.asMap()) {
+			String name = it.first;
+			ShaderParameterType type = parseParameterType(it.second.asString());
+			if (type != ShaderParameterType::Texture2D) {
+				throw Exception("Texture \"" + name + "\" must be sampler2D");
+			}
+
+			textures.push_back(name);
+		}
+	}
+}
+
+void MaterialDefinition::loadAttributes(const ConfigNode& node)
+{
+	int location = int(attributes.size());
+	int offset = vertexSize;
+
+	for (auto& attribEntry: node.asSequence()) {
+		for (auto& it: attribEntry.asMap()) {
+			String name = it.first;
+			ShaderParameterType type = parseParameterType(it.second.asString());
+
+			attributes.push_back(MaterialAttribute());
+			auto& a = attributes.back();
+			a.name = name;
+			a.type = type;
+			a.location = location++;
+			a.offset = offset;
+
+			int size = int(MaterialAttribute::getAttributeSize(type));
+			offset += size;
+
+			if (a.name == "a_vertPos") {
+				vertexPosOffset = a.offset;
+			}
+		}
+	}
+
+	vertexSize = offset;
+}
+
+ShaderParameterType MaterialDefinition::parseParameterType(String rawType) const
+{
+	if (rawType == "float") {
+		return ShaderParameterType::Float;
+	} else if (rawType == "vec2") {
+		return ShaderParameterType::Float2;
+	} else if (rawType == "vec3") {
+		return ShaderParameterType::Float3;
+	} else if (rawType == "vec4") {
+		return ShaderParameterType::Float4;
+	} else if (rawType == "mat4") {
+		return ShaderParameterType::Matrix4;
+	} else if (rawType == "sampler2D") {
+		return ShaderParameterType::Texture2D;
+	} else {
+		throw Exception("Unknown attribute type: " + rawType);
+	}
+}
+
+MaterialDepthStencil::MaterialDepthStencil()
+{
+}
+
+void MaterialDepthStencil::loadDepth(const ConfigNode& node)
+{
+	enableDepthTest = node["test"].asBool(false);
+	enableDepthWrite = node["write"].asBool(false);
+	depthComparison = fromString<DepthStencilComparisonFunction>(node["comparison"].asString("Always"));
+}
+
+void MaterialDepthStencil::loadStencil(const ConfigNode& node)
+{
+	enableStencilTest = node["test"].asBool(false);
+	stencilComparison = fromString<DepthStencilComparisonFunction>(node["comparison"].asString("Always"));
+
+	stencilReference = node["reference"].asInt(0);
+	stencilReadMask = node["readMask"].asInt(0xFF);
+	stencilWriteMask = node["writeMask"].asInt(0xFF);
+
+	stencilOpPass = fromString<StencilWriteOperation>(node["opPass"].asString("Keep"));
+	stencilOpDepthFail = fromString<StencilWriteOperation>(node["opDepthFail"].asString("Keep"));
+	stencilOpStencilFail = fromString<StencilWriteOperation>(node["opStencilFail"].asString("Keep"));
+}
+
+void MaterialDepthStencil::serialize(Serializer& s) const
+{
+	s << enableDepthTest;
+	s << enableDepthWrite;
+	s << enableStencilTest;
+
+	s << stencilReference;
+	s << stencilWriteMask;
+	s << stencilReadMask;
+
+	s << depthComparison;
+	s << stencilComparison;
+
+	s << stencilOpPass;
+	s << stencilOpDepthFail;
+	s << stencilOpStencilFail;
+}
+
+void MaterialDepthStencil::deserialize(Deserializer& s)
+{
+	s >> enableDepthTest;
+	s >> enableDepthWrite;
+	s >> enableStencilTest;
+
+	s >> stencilReference;
+	s >> stencilWriteMask;
+	s >> stencilReadMask;
+
+	s >> depthComparison;
+	s >> stencilComparison;
+
+	s >> stencilOpPass;
+	s >> stencilOpDepthFail;
+	s >> stencilOpStencilFail;
+}
+
+bool MaterialDepthStencil::isDepthTestEnabled() const
+{
+	return enableDepthTest;
+}
+
+bool MaterialDepthStencil::isDepthWriteEnabled() const
+{
+	return enableDepthWrite;
+}
+
+bool MaterialDepthStencil::isStencilTestEnabled() const
+{
+	return enableStencilTest;
+}
+
+int MaterialDepthStencil::getStencilReference() const
+{
+	return stencilReference;
+}
+
+int MaterialDepthStencil::getStencilWriteMask() const
+{
+	return stencilWriteMask;
+}
+
+int MaterialDepthStencil::getStencilReadMask() const
+{
+	return stencilReadMask;
+}
+
+DepthStencilComparisonFunction MaterialDepthStencil::getDepthComparisonFunction() const
+{
+	return depthComparison;
+}
+
+DepthStencilComparisonFunction MaterialDepthStencil::getStencilComparisonFunction() const
+{
+	return stencilComparison;
+}
+
+StencilWriteOperation MaterialDepthStencil::getStencilOpPass() const
+{
+	return stencilOpPass;
+}
+
+StencilWriteOperation MaterialDepthStencil::getStencilOpDepthFail() const
+{
+	return stencilOpDepthFail;
+}
+
+StencilWriteOperation MaterialDepthStencil::getStencilOpStencilFail() const
+{
+	return stencilOpStencilFail;
+}
+
+
+MaterialPass::MaterialPass()
+	: blend(BlendType::Undefined)
+{}
+
+MaterialPass::MaterialPass(const String& shaderAssetId, const ConfigNode& node)
+	: shaderAssetId(shaderAssetId)
+{
+	String blendName = node["blend"].asString("Opaque");
+	if (blendName == "Opaque") {
+		blend = BlendType::Opaque;
+	} else if (blendName == "Alpha") {
+		blend = BlendType::Alpha;
+	} else if (blendName == "AlphaPremultiplied") {
+		blend = BlendType::AlphaPremultiplied;
+	} else if (blendName == "Add") {
+		blend = BlendType::Add;
+	} else if (blendName == "Multiply") {
+		blend = BlendType::Multiply;
+	} else {
+		throw Exception("Unknown blend type: " + blendName);
+	}
+
+	if (node.hasKey("depth")) {
+		depthStencil.loadDepth(node["depth"]);
+	}
+	if (node.hasKey("stencil")) {
+		depthStencil.loadStencil(node["stencil"]);
+	}
 }
 
 void MaterialPass::serialize(Serializer& s) const
 {
 	s << blend;
 	s << shaderAssetId;
+	s << depthStencil;
 }
 
 void MaterialPass::deserialize(Deserializer& s)
 {
 	s >> blend;
 	s >> shaderAssetId;
+	s >> depthStencil;
 }
 
 void MaterialPass::createShader(ResourceLoader& loader, String name, const Vector<MaterialAttribute>& attributes)

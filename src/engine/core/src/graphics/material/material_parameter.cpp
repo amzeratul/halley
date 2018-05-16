@@ -1,10 +1,8 @@
 #include "halley/core/graphics/material/material_parameter.h"
-#include "halley/core/graphics/material/uniform_type.h"
 #include "halley/core/graphics/material/material.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/core/graphics/shader.h"
-#include "halley/core/graphics/texture.h"
 #include <gsl/gsl_assert>
 
 using namespace Halley;

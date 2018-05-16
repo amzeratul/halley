@@ -4,6 +4,7 @@
 
 namespace Halley
 {
+	class ConfigNode;
 	class Deserializer;
 	class Serializer;
 	class MaterialPass;
@@ -29,6 +30,62 @@ namespace Halley
 		Matrix4,
 		Texture2D,
 		Invalid
+	};
+
+	enum class DepthStencilComparisonFunction
+	{
+		Never,
+		Less,
+		Equal,
+		LessEqual,
+		Greater,
+		NotEqual,
+		GreaterEqual,
+		Always
+	};
+
+	template <>
+	struct EnumNames<DepthStencilComparisonFunction> {
+		constexpr std::array<const char*, 8> operator()() const {
+			return{{
+				"Never",
+				"Less",
+				"Equal",
+				"LessEqual",
+				"Greater",
+				"NotEqual",
+				"GreaterEqual",
+				"Always"
+			}};
+		}
+	};
+
+	enum class StencilWriteOperation
+	{
+		Keep,
+		Zero,
+		Replace,
+		IncrementClamp,
+		DecrementClamp,
+		Invert,
+		IncrementWrap,
+		DecrementWrap
+	};
+
+	template <>
+	struct EnumNames<StencilWriteOperation> {
+		constexpr std::array<const char*, 8> operator()() const {
+			return{{
+				"Keep",
+				"Zero",
+				"Replace",
+				"IncrementClamp",
+				"DecrementClamp",
+				"Invert",
+				"IncrementWrap",
+				"DecrementWrap"
+			}};
+		}
 	};
 
 	
@@ -80,11 +137,12 @@ namespace Halley
 		friend class Material;
 		friend class MaterialParameter;
 		friend class MaterialTextureParameter;
-		friend class MaterialImporter;
 
 	public:
 		MaterialDefinition();
 		explicit MaterialDefinition(ResourceLoader& loader);
+
+		void load(const ConfigNode& node);
 
 		int getNumPasses() const;
 		const MaterialPass& getPass(int n) const;
@@ -97,6 +155,8 @@ namespace Halley
 		const Vector<MaterialAttribute>& getAttributes() const { return attributes; }
 		const Vector<MaterialUniformBlock>& getUniformBlocks() const { return uniformBlocks; }
 		const Vector<String>& getTextures() const { return textures; }
+		
+		void addPass(const MaterialPass& materialPass);
 
 		static std::unique_ptr<MaterialDefinition> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::MaterialDefinition; }
@@ -114,6 +174,54 @@ namespace Halley
 		Vector<MaterialAttribute> attributes;
 		int vertexSize = 0;
 		int vertexPosOffset = 0;
+
+		void loadUniforms(const ConfigNode& node);
+		void loadTextures(const ConfigNode& node);
+		void loadAttributes(const ConfigNode& node);
+		ShaderParameterType parseParameterType(String rawType) const;
+	};
+
+	class MaterialDepthStencil
+	{
+	public:
+		MaterialDepthStencil();
+
+		void loadDepth(const ConfigNode& node);
+		void loadStencil(const ConfigNode& node);
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+
+		bool isDepthTestEnabled() const;
+		bool isDepthWriteEnabled() const;
+		bool isStencilTestEnabled() const;
+
+		int getStencilReference() const;
+		int getStencilWriteMask() const;
+		int getStencilReadMask() const;
+
+		DepthStencilComparisonFunction getDepthComparisonFunction() const;
+		DepthStencilComparisonFunction getStencilComparisonFunction() const;
+
+		StencilWriteOperation getStencilOpPass() const;
+		StencilWriteOperation getStencilOpDepthFail() const;
+		StencilWriteOperation getStencilOpStencilFail() const;
+
+	private:
+		bool enableDepthTest = false;
+		bool enableDepthWrite = false;
+		bool enableStencilTest = false;
+
+		int stencilReference = 0;
+		int stencilWriteMask = 0xFF;
+		int stencilReadMask = 0xFF;
+
+		DepthStencilComparisonFunction depthComparison = DepthStencilComparisonFunction::Always;
+		DepthStencilComparisonFunction stencilComparison = DepthStencilComparisonFunction::Always;
+
+		StencilWriteOperation stencilOpPass = StencilWriteOperation::Keep;
+		StencilWriteOperation stencilOpDepthFail = StencilWriteOperation::Keep;
+		StencilWriteOperation stencilOpStencilFail = StencilWriteOperation::Keep;
 	};
 
 	class MaterialPass
@@ -122,10 +230,11 @@ namespace Halley
 
 	public:
 		MaterialPass();
-		MaterialPass(BlendType blend, String shaderAsset);
+		explicit MaterialPass(const String& shaderAssetId, const ConfigNode& node);
 
 		BlendType getBlend() const { return blend; }
 		Shader& getShader() const { return *shader; }
+		const MaterialDepthStencil& getDepthStencil() const { return depthStencil; }
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -135,6 +244,7 @@ namespace Halley
 	private:
 		std::shared_ptr<Shader> shader;
 		BlendType blend;
+		MaterialDepthStencil depthStencil;
 		
 		String shaderAssetId;
 	};
