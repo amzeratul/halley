@@ -39,7 +39,7 @@ void getColours(float4 inColour, out float4 baseColour, out float4 addColour) {
 float4 getVertexPosition(float2 position, float2 pivot, float2 size, float2 vertPos, float angle) {
     float c = cos(angle);
     float s = sin(angle);
-    float2x2 m = { c, s, -s, c };
+    float2x2 m = { c, -s, s, c };
     
     float2 pos = position + mul(m, ((vertPos - pivot) * size));
     return mul(u_mvp, float4(pos, 0.0, 1.0));
