@@ -28,7 +28,6 @@ using namespace Halley;
 Camera::Camera()
 	: zoom(1.0f)
 {
-	pos = Vector2f(640, 360);
 }
 
 
