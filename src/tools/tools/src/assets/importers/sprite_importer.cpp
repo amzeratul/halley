@@ -9,6 +9,7 @@
 #include "halley/data_structures/bin_pack.h"
 #include "halley/text/string_converter.h"
 #include "../../sprites/aseprite_reader.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -87,7 +88,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 	// Generate atlas + spritesheet
 	SpriteSheet spriteSheet;
-	auto atlasImage = generateAtlas(totalFrames, spriteSheet);
+	auto atlasImage = generateAtlas(atlasName, totalFrames, spriteSheet);
 	spriteSheet.setTextureName(atlasName);
 
 	// Image metafile
@@ -152,24 +153,40 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 	return animation;
 }
 
-std::unique_ptr<Image> SpriteImporter::generateAtlas(std::vector<ImageData>& images, SpriteSheet& spriteSheet)
+std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, std::vector<ImageData>& images, SpriteSheet& spriteSheet)
 {
+	if (images.size() > 1) {
+		Logger::logInfo("Generating atlas \"" + atlasName + "\" with " + toString(images.size()) + " sprites...");
+	}
+
 	// Generate entries
+	int64_t totalImageArea = 0;
 	std::vector<BinPackEntry> entries;
 	entries.reserve(images.size());
 	for (auto& img: images) {
-		entries.emplace_back(img.clip.getSize(), &img);
+		auto size = img.clip.getSize();
+		totalImageArea += size.x * size.y;
+		entries.emplace_back(size, &img);
 	}
 
+	// Figure out a reasonable pack size to start with
+	const int minSize = nextPowerOf2(int(sqrt(double(totalImageArea))));
+	const int64_t guessArea = int64_t(minSize) * int64_t(minSize);
+	const int maxSize = 4096;
+	int curSize = std::min(maxSize, std::max(32, int(minSize)));
+
 	// Try packing
-	int maxSize = 4096;
-	int curSize = 32;
-	bool wide = false;
+	bool wide = guessArea > 2 * totalImageArea;
 	while (curSize < maxSize) {
 		Vector2i size(curSize * (wide ? 2 : 1), curSize);
+		Logger::logInfo("Trying " + toString(size.x) + "x" + toString(size.y) + " px...");
 		auto res = BinPack::pack(entries, size);
 		if (res.is_initialized()) {
 			// Found a pack
+			if (images.size() > 1) {
+				Logger::logInfo("Atlas \"" + atlasName + "\" generated at " + toString(size.x) + "x" + toString(size.y) + " px.");
+			}
+
 			return makeAtlas(res.get(), size, spriteSheet);
 		} else {
 			// Try 64x64, then 128x64, 128x128, 256x128, etc

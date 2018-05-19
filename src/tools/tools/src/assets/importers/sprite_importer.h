@@ -20,7 +20,7 @@ namespace Halley
 	private:
 		Animation generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const std::vector<ImageData>& frameData);
 
-		std::unique_ptr<Image> generateAtlas(std::vector<ImageData>& images, SpriteSheet& spriteSheet);
+		std::unique_ptr<Image> generateAtlas(const String& atlasName, std::vector<ImageData>& images, SpriteSheet& spriteSheet);
 		std::unique_ptr<Image> makeAtlas(const std::vector<BinPackResult>& result, Vector2i size, SpriteSheet& spriteSheet);
 		Vector2i shrinkAtlas(const std::vector<BinPackResult>& results) const;
 
