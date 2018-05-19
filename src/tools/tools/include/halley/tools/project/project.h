@@ -3,16 +3,20 @@
 #include "halley/file/path.h"
 #include "halley/tools/assets/asset_importer.h"
 #include "halley/plugin/halley_plugin.h"
+#include <memory>
 
 namespace Halley
 {
-	class HalleyStatics;
 	class ImportAssetsDatabase;
+
+	class HalleyStatics;
+	class IHalleyPlugin;
+	using HalleyPluginPtr = std::shared_ptr<IHalleyPlugin>;
 
 	class Project
 	{
 	public:
-		Project(const HalleyStatics& statics, const String& platform, Path projectRootPath, Path halleyRootPath);
+		Project(const String& platform, Path projectRootPath, Path halleyRootPath, std::vector<HalleyPluginPtr> plugins);
 		~Project();
 		
 		Path getRootPath() const;
@@ -27,14 +31,13 @@ namespace Halley
 		void setAssetPackManifest(const Path& path);
 		Path getAssetPackManifestPath() const;
 
-		ImportAssetsDatabase& getImportAssetsDatabase();
-		ImportAssetsDatabase& getCodegenDatabase();
+		ImportAssetsDatabase& getImportAssetsDatabase() const;
+		ImportAssetsDatabase& getCodegenDatabase() const;
 
 		const AssetImporter& getAssetImporter() const;
 		std::unique_ptr<IAssetImporter> getAssetImporterOverride(ImportAssetType type) const;
 
 	private:
-		const HalleyStatics& statics;
 		String platform;
 		Path rootPath;
 		Path halleyRootPath;
@@ -44,10 +47,6 @@ namespace Halley
 		std::unique_ptr<ImportAssetsDatabase> codegenDatabase;
 		std::unique_ptr<AssetImporter> assetImporter;
 
-		using HalleyPluginPtr = std::unique_ptr<IHalleyPlugin, std::function<void(IHalleyPlugin*)>>;
 		std::vector<HalleyPluginPtr> plugins;
-
-		void initialisePlugins();
-		HalleyPluginPtr loadPlugin(const Path& path);
 	};
 }

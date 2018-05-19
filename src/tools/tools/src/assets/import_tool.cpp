@@ -9,6 +9,7 @@
 #include "halley/os/os.h"
 #include "halley/core/game/halley_statics.h"
 #include "halley/support/logger.h"
+#include "halley/tools/project/project_loader.h"
 
 using namespace Halley;
 using namespace std::chrono_literals;
@@ -19,7 +20,9 @@ int ImportTool::run(Vector<std::string> args)
 		Path projectPath = FileSystem::getAbsolute(Path(args[0]));
 		Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));
 
-		auto proj = std::make_unique<Project>(*statics, platform, projectPath, halleyRootPath);
+		ProjectLoader loader(*statics, halleyRootPath);
+		loader.setPlatform(platform);
+		auto proj = loader.loadProject(projectPath);
 		Logger::logInfo("Importing project at \"" + projectPath + "\", with Halley root at \"" + halleyRootPath + "\"");
 
 		auto tasks = std::make_unique<EditorTaskSet>();

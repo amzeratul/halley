@@ -3,6 +3,8 @@
 #include "halley/tools/project/project.h"
 #include "preferences.h"
 #include "halley/core/game/environment.h"
+#include "halley/tools/file/filesystem.h"
+#include "halley/tools/project/project_loader.h"
 
 using namespace Halley;
 
@@ -102,10 +104,11 @@ void HalleyEditor::parseArguments(const std::vector<String>& args)
 
 std::unique_ptr<Stage> HalleyEditor::startGame(const HalleyAPI* api)
 {
+	projectLoader = std::make_unique<ProjectLoader>(api->core->getStatics(), rootPath);
+	projectLoader->setPlatform(platform);
+
 	if (gotProjectPath) {
-		loadProject(api->core->getStatics(), platform, Path(projectPath));
-	} else {
-		throw Exception("Please specify a project path.");
+		loadProject(Path(projectPath));
 	}
 
 	if (!headless) {
@@ -115,9 +118,9 @@ std::unique_ptr<Stage> HalleyEditor::startGame(const HalleyAPI* api)
 	return std::make_unique<EditorRootStage>(*this);
 }
 
-Project& HalleyEditor::loadProject(const HalleyStatics& statics, const String& activePlatform, Path path)
+Project& HalleyEditor::loadProject(Path path)
 {
-	project = std::make_unique<Project>(statics, activePlatform, path, rootPath);
+	project = projectLoader->loadProject(path);
 
 	if (!project) {
 		throw Exception("Unable to load project at " + path.string());
