@@ -2,11 +2,7 @@ core
 - child stages?
 
 core/resources
-- asset database
-- shader importer/validator
-- auto atlas spritesheets
-- atlas sprite trimming
-- resources hot reloading [RESEARCH]
+- resources hot reloading
 
 core/graphics
 - render graph [from old Halley?]
@@ -16,21 +12,23 @@ core/graphics
 - multi-pass: conditional enabling of pass
 - multi-pass: disable batching
 - fallback shaders
-- shaders for other graphics APIs? [RESEARCH]
 - Codegen vertex attribute data? [RESEARCH]
+- depth buffer
+- stencil buffer
 
 input
 - input context system [RESEARCH]
 - use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
+- audio events
+- multiple "layers" (with individual listeners for them)
 - mixing groups
 - range compression/ducking
 - audio environments
 - source filters
 - listener filters
 - effects/DSP
-  - pitch bending [RESEARCH]
   - low-pass [RESEARCH]
   - reverb [RESEARCH]
   - doppler shift [RESEARCH]
@@ -47,19 +45,14 @@ entity
 - defragment/optimize memory? [RESEARCH]
 - snapshot world
 
-codegen
-- components registry [RESEARCH] (does this even make sense?)
-- components serialization [RESEARCH]
-
 lua
 - codegen Lua
 - Lua systems
 - codegen component
 - codegen system
-- Moonscript support
+- lua bindings for C++ objects
 
-editor/tools
-- load assets in parallel?
+editor
 - project selector
 - create project from template
 - connect to game via sockets
@@ -73,20 +66,20 @@ editor/tools
 - state machine editor? [RESEARCH]
 - compile game
 - launch game
-- assets bundler
 - remember window position
+- pack assets
+
+asset importing
+- only pack bundles that changed
+- load ase without external process
 - generate fonts with OpenCL
 
 utils
 - collision detection & triggers
 - consider replacing STL with EASTL or similar?
-- fix Maybe<T>?
 - improve Halley::String?
 - write my own memory pool/replace boost::pool?
 - DirectoryMonitor support on Linux and Mac
-
-net
-- better HTTP library/replace boost::asio?
 
 samples
 - make a minimal "template" sample
@@ -103,18 +96,12 @@ samples
   - sh05 ("Bunkermaster") - from Allegro
 
 misc/refactor
-- Use C++ modules? (waiting on standard)
-- use GSL through code base
+- Use C++ modules?
 
 platforms
-- PS4?
-- XBox One?
 - Android?
 - iOS?
 - Emscripten?
-
-directx 11/12?
-- future support?
 
 vulkan?
 - future support?

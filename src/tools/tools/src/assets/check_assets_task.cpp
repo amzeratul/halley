@@ -31,12 +31,12 @@ void CheckAssetsTask::run()
 	while (!isCancelled()) {
 		if (first | monitorAssets.poll() | monitorAssetsSrc.poll() | monitorSharedAssetsSrc.poll()) { // Don't short-circuit
 			Logger::logInfo("Scanning for asset changes...");
-			checkAllAssets(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, project.getUnpackedAssetsPath(), "Importing assets");
+			checkAllAssets(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, project.getUnpackedAssetsPath(), "Importing assets", true);
 		}
 
 		if (first | monitorGen.poll() | monitorGenSrc.poll()) {
 			Logger::logInfo("Scanning for codegen changes...");
-			checkAllAssets(project.getCodegenDatabase(), { project.getGenSrcPath() }, project.getGenPath(), "Generating code");
+			checkAllAssets(project.getCodegenDatabase(), { project.getGenSrcPath() }, project.getGenPath(), "Generating code", false);
 		}
 
 		first = false;
@@ -169,7 +169,7 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 	return dbChanged;
 }
 
-void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, Path dstPath, String taskName)
+void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, Path dstPath, String taskName, bool packAfter)
 {
 	std::map<String, ImportAssetsDatabaseEntry> assets;
 
@@ -215,7 +215,7 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 	auto toImport = filterNeedsImporting(db, assets);
 	if (!toImport.empty()) {
 		Logger::logInfo("Assets to be imported: " + toString(toImport.size()));
-		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(taskName, db, project.getAssetImporter(), dstPath, std::move(toImport))));
+		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(taskName, db, project.getAssetImporter(), dstPath, std::move(toImport), project, packAfter)));
 	}
 }
 

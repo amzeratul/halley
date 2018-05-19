@@ -46,6 +46,7 @@ set(SOURCES
 
     "src/packer/asset_pack_manifest.cpp"
     "src/packer/asset_packer.cpp"
+    "src/packer/asset_packer_task.cpp"
     "src/packer/asset_packer_tool.cpp"
 
     "src/tool/cli_tool.cpp"
@@ -96,6 +97,7 @@ set(HEADERS
 
     "include/halley/tools/packer/asset_pack_manifest.h"
     "include/halley/tools/packer/asset_packer.h"
+    "include/halley/tools/packer/asset_packer_task.h"
     "include/halley/tools/packer/asset_packer_tool.h"
 
     "include/halley/tools/project/project.h"

@@ -2,7 +2,6 @@
 #include "halley/tools/tasks/editor_task.h"
 #include "halley/file/path.h"
 #include <vector>
-#include "halley/resources/metadata.h"
 #include "import_assets_database.h"
 
 namespace Halley
@@ -12,7 +11,7 @@ namespace Halley
 	class ImportAssetsTask : public EditorTask
 	{
 	public:
-		ImportAssetsTask(String taskName, ImportAssetsDatabase& db, const AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files);
+		ImportAssetsTask(String taskName, ImportAssetsDatabase& db, const AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files, Project& project, bool packAfter);
 
 	protected:
 		void run() override;
@@ -21,11 +20,13 @@ namespace Halley
 		ImportAssetsDatabase& db;
 		const AssetImporter& importer;
 		Path assetsPath;
+		Project& project;
+		const bool packAfter;
 
 		Vector<ImportAssetsDatabaseEntry> files;
 		
-		std::atomic<size_t> assetsImported;
-		size_t assetsToImport;
+		std::atomic<size_t> assetsImported{};
+		size_t assetsToImport{};
 		
 		std::string curFileLabel;
 

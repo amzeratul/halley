@@ -15,6 +15,7 @@ namespace Halley
 		Project(const HalleyStatics& statics, const String& platform, Path projectRootPath, Path halleyRootPath);
 		~Project();
 		
+		Path getRootPath() const;
 		Path getUnpackedAssetsPath() const;
 		Path getPackedAssetsPath() const;
 		Path getAssetsSrcPath() const;
@@ -23,17 +24,21 @@ namespace Halley
 		Path getGenPath() const;
 		Path getGenSrcPath() const;
 
+		void setAssetPackManifest(const Path& path);
+		Path getAssetPackManifestPath() const;
+
 		ImportAssetsDatabase& getImportAssetsDatabase();
 		ImportAssetsDatabase& getCodegenDatabase();
 
 		const AssetImporter& getAssetImporter() const;
 		std::unique_ptr<IAssetImporter> getAssetImporterOverride(ImportAssetType type) const;
-	
+
 	private:
 		const HalleyStatics& statics;
 		String platform;
 		Path rootPath;
 		Path halleyRootPath;
+		Path assetPackManifest;
 
 		std::unique_ptr<ImportAssetsDatabase> importAssetsDatabase;
 		std::unique_ptr<ImportAssetsDatabase> codegenDatabase;

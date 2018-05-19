@@ -7,15 +7,18 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/assets/asset_collector.h"
 #include "halley/concurrency/concurrent.h"
+#include "halley/tools/packer/asset_packer_task.h"
 
 using namespace Halley;
 
-ImportAssetsTask::ImportAssetsTask(String taskName, ImportAssetsDatabase& db, const AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files)
+ImportAssetsTask::ImportAssetsTask(String taskName, ImportAssetsDatabase& db, const AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files, Project& project, bool packAfter)
 	: EditorTask(taskName, true, true)
 	, db(db)
 	, importer(importer)
 	, assetsPath(assetsPath)
 	, files(std::move(files))
+	, project(project)
+	, packAfter(packAfter)
 {}
 
 void ImportAssetsTask::run()
@@ -51,6 +54,10 @@ void ImportAssetsTask::run()
 
 	if (!isCancelled()) {
 		setProgress(1.0f, "");
+
+		if (packAfter) {
+			addContinuation(EditorTaskAnchor(std::make_unique<AssetPackerTask>(project)));
+		}
 	}
 }
 

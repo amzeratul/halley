@@ -6,6 +6,8 @@
 #include "halley/tools/packer/asset_pack_manifest.h"
 #include "halley/resources/resource.h"
 #include "halley/core/resources/asset_pack.h"
+#include "halley/tools/project/project.h"
+#include "halley/tools/assets/import_assets_database.h"
 using namespace Halley;
 
 
@@ -34,17 +36,15 @@ const String& AssetPackListing::getEncryptionKey() const
 	return encryptionKey;
 }
 
-void AssetPacker::pack(const AssetPackManifest& manifest, const Path& src, const Path& dst)
+void AssetPacker::pack(Project& project)
 {
-	// Retrieve assets database
-	auto assetDbData = FileSystem::readFile(src / "assets.db");
-	if (assetDbData.empty()) {
-		throw Exception("Unable to find assets.db at \"" + src.string() + "\"");
-	}
-	AssetDatabase srcAssetDb = Deserializer::fromBytes<AssetDatabase>(assetDbData);
+	auto db = project.getImportAssetsDatabase().makeAssetDatabase();
+	auto src = project.getUnpackedAssetsPath();
+	auto dst = project.getPackedAssetsPath();
+	auto manifest = AssetPackManifest(FileSystem::readFile(project.getAssetPackManifestPath()));
 
 	// Sort into packs
-	std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, srcAssetDb);
+	std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, *db);
 
 	// Generate packs
 	generatePacks(packs, src, dst);
@@ -99,9 +99,9 @@ void AssetPacker::generatePack(const String& packId, const AssetPackListing& pac
 	AssetDatabase& db = pack.getAssetDatabase();
 	Bytes& data = pack.getData();
 
-	Logger::logInfo("Pack \"" + packId + "\" --------------");
+	Logger::logInfo("Packing \"" + packId + "\"...");
 	for (auto& entry: packListing.getEntries()) {
-		Logger::logInfo("  [" + toString(entry.type) + "] " + entry.name);
+		//Logger::logDev("  [" + toString(entry.type) + "] " + entry.name);
 
 		// Read original file
 		auto fileData = FileSystem::readFile(src / entry.path);
@@ -116,7 +116,7 @@ void AssetPacker::generatePack(const String& packId, const AssetPackListing& pac
 
 		db.addAsset(entry.name, entry.type, AssetDatabase::Entry(toString(pos) + ":" + toString(size), entry.metadata));
 	}
-	Logger::logInfo("-----------------------\n");
+	Logger::logInfo("Packed " + toString(packListing.getEntries().size()) + " entries on \"" + packId + "\"");
 
 	if (!packListing.getEncryptionKey().isEmpty()) {
 		Logger::logInfo("Encrypting " + packId + "...");

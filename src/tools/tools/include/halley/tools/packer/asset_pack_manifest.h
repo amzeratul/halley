@@ -1,6 +1,7 @@
 #pragma once
 #include "halley/text/halleystring.h"
 #include "halley/data_structures/maybe.h"
+#include "halley/utils/utils.h"
 
 namespace Halley {
 	class ConfigNode;
@@ -24,7 +25,10 @@ namespace Halley {
 
 	class AssetPackManifest {
 	public:
+		explicit AssetPackManifest(const Bytes& data);
 		explicit AssetPackManifest(const ConfigFile& file);
+
+		void load(const ConfigFile& file);
 
 		Maybe<std::reference_wrapper<const AssetPackManifestEntry>> getPack(const String& asset) const;
 

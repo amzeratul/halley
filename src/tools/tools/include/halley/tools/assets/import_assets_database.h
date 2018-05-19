@@ -72,6 +72,7 @@ namespace Halley
 
 		void load();
 		void save() const;
+		std::unique_ptr<AssetDatabase> makeAssetDatabase() const;
 
 		bool needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const;
 		void setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data);
@@ -100,7 +101,5 @@ namespace Halley
 		std::map<String, InputFileEntry> inputFiles;
 		
 		mutable std::mutex mutex;
-
-		std::unique_ptr<AssetDatabase> makeAssetDatabase() const;
 	};
 }

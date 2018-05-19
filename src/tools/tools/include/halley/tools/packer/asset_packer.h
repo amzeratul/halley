@@ -5,6 +5,7 @@
 #include "halley/core/resources/asset_database.h"
 
 namespace Halley {
+	class Project;
 	class AssetPackManifest;
 	class Path;
 		
@@ -33,7 +34,7 @@ namespace Halley {
 
 	class AssetPacker {
 	public:
-		static void pack(const AssetPackManifest& manifest, const Path& assetsDir, const Path& dst);
+		static void pack(Project& project);
 
 	private:
 		static std::map<String, AssetPackListing> sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb);

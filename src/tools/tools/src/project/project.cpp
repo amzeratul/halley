@@ -26,6 +26,11 @@ Project::~Project()
 	plugins.clear();
 }
 
+Path Project::getRootPath() const
+{
+	return rootPath;
+}
+
 Path Project::getUnpackedAssetsPath() const
 {
 	return rootPath / "assets_unpacked";
@@ -56,6 +61,11 @@ Path Project::getGenSrcPath() const
 	return rootPath / "gen_src";
 }
 
+Path Project::getAssetPackManifestPath() const
+{
+	return assetPackManifest;
+}
+
 ImportAssetsDatabase& Project::getImportAssetsDatabase()
 {
 	return *importAssetsDatabase;
@@ -80,6 +90,11 @@ std::unique_ptr<IAssetImporter> Project::getAssetImporterOverride(ImportAssetTyp
 		}
 	}
 	return {};
+}
+
+void Project::setAssetPackManifest(const Path& path)
+{
+	assetPackManifest = path;
 }
 
 void Project::initialisePlugins()
