@@ -171,8 +171,16 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& node)
 std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& node)
 {
 	auto id = node["id"].asString();
-	auto style = node["style"].asString("button");
-	auto sizer = UISizer(); // TODO
-	auto innerBorder = asVector4f(node["innerBorder"], Vector4f(0, 0, 0, 0));
-	return std::make_shared<UIButton>(id, UIStyle(style, styleSheet), std::move(sizer), innerBorder);
+	auto style = UIStyle(node["style"].asString("button"), styleSheet);
+	auto label = parseLabel(node);
+
+	auto sizer = makeSizer(node["sizer"]);
+	if (!sizer) {
+		sizer = UISizer();
+	}
+	if (!label.getString().isEmpty()) {
+		sizer->add(std::make_shared<UILabel>(style.getTextRenderer("label"), label), 1, Vector4f(), UISizerAlignFlags::Centre);
+	}
+
+	return std::make_shared<UIButton>(id, style, std::move(sizer));
 }

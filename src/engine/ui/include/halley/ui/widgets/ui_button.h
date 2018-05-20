@@ -5,7 +5,7 @@
 namespace Halley {
 	class UIButton : public UIClickable {
 	public:
-		explicit UIButton(String id, UIStyle style, Maybe<UISizer> sizer = {}, Maybe<Vector4f> innerBorder = {});
+		explicit UIButton(String id, UIStyle style, Maybe<UISizer> sizer = {});
 
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;

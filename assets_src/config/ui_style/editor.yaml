@@ -1,10 +1,13 @@
 ---
 
 uiStyle:
-  sprites: {}
+  sprites:
+    button.normal: { img: ui/ui_button.png, colour: "#9C5BB5" }
+    button.down: { img: ui/ui_button.png, colour: "#913DA3" }
+    button.hover: { img: ui/ui_button.png, colour: "#9861B6" }
 
   borders:
-    button.innerBorder: [ 3, 3, 3, 3 ]
+    button.innerBorder: [ 5, 5, 5, 5 ]
     list.innerBorder: [ 0, 0, 0, 0 ]
     list.item.innerBorder: [ 3, 0, 3, 0 ]
     list.extraMouseBorder: [ 0, 0, 1, 1 ]
@@ -30,6 +33,7 @@ uiStyle:
 
   textRenderers:
     label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    button.label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
 
   floats:
     list.gap: 1
