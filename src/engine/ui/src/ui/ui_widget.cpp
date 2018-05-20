@@ -9,8 +9,11 @@ UIWidget::UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f i
 	, size(minSize)
 	, minSize(minSize)
 	, innerBorder(innerBorder)
-	, sizer(sizer)
+	, sizer(std::move(sizer))
 {
+	if (this->sizer) {
+		this->sizer.get().reparent(*this);
+	}
 }
 
 UIWidget::~UIWidget()
@@ -350,9 +353,15 @@ void UIWidget::onEnabledChanged()
 {
 }
 
-void UIWidget::setParent(UIParent& p)
+void UIWidget::setParent(UIParent* p)
 {
-	parent = &p;
+	Expects((parent == nullptr) ^ (p == nullptr));
+	parent = p;
+}
+
+UIParent* UIWidget::getParent() const
+{
+	return parent;
 }
 
 void UIWidget::destroy()

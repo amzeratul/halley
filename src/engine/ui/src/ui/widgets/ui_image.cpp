@@ -3,7 +3,7 @@
 using namespace Halley;
 
 UIImage::UIImage(Sprite s, Maybe<UISizer> sizer, Vector4f innerBorder)
-	: UIWidget("", {}, sizer, innerBorder)
+	: UIWidget("", {}, std::move(sizer), innerBorder)
 {
 	setSprite(s);
 }

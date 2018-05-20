@@ -96,6 +96,25 @@ UISizer::UISizer(UISizerType type, float gap, int nColumns)
 {
 }
 
+UISizer::UISizer(UISizer&& other)
+{
+	*this = std::move(other);
+}
+
+UISizer& UISizer::operator=(UISizer&& other)
+{
+	type = other.type;
+	gap = other.gap;
+	nColumns = other.nColumns;
+
+	entries = std::move(other.entries);
+	columnProportions = std::move(other.columnProportions);
+
+	curParent = other.curParent;
+
+	return *this;
+}
+
 Vector2f UISizer::getLayoutMinimumSize(bool force) const
 {
 	return computeMinimumSize(true);
@@ -129,6 +148,12 @@ void UISizer::add(std::shared_ptr<UISizer> sizer, float proportion, Vector4f bor
 	addElement(sizer, proportion, border, fillFlags);
 }
 
+void UISizer::addElement(UIElementPtr widget, float proportion, Vector4f border, int fillFlags)
+{
+	entries.emplace_back(UISizerEntry(widget, proportion, border, fillFlags));
+	reparentEntry(entries.back());
+}
+
 void UISizer::addSpacer(float size)
 {
 	entries.emplace_back(UISizerEntry({}, 0, Vector4f(type == UISizerType::Horizontal ? size : 0.0f, type == UISizerType::Vertical ? size : 0.0f, 0.0f, 0.0f), {}));
@@ -141,22 +166,43 @@ void UISizer::addStretchSpacer(float proportion)
 
 void UISizer::reparent(UIParent& parent)
 {
-	for (auto& e: entries) {
-		auto widget = std::dynamic_pointer_cast<UIWidget>(e.getPointer());
+	if (curParent != &parent) {
+		if (curParent) {
+			for (auto& e: entries) {
+				unparentEntry(e);
+			}
+		}
+
+		curParent = &parent;
+		for (auto& e: entries) {
+			reparentEntry(e);
+		}
+	}
+}
+
+void UISizer::reparentEntry(UISizerEntry& entry)
+{
+	if (curParent != nullptr) {
+		auto widget = std::dynamic_pointer_cast<UIWidget>(entry.getPointer());
 		if (widget) {
-			parent.addChild(widget);
+			curParent->addChild(widget);
 		} else {
-			auto sizer = std::dynamic_pointer_cast<UISizer>(e.getPointer());
+			auto sizer = std::dynamic_pointer_cast<UISizer>(entry.getPointer());
 			if (sizer) {
-				sizer->reparent(parent);
+				sizer->reparent(*curParent);
 			}
 		}
 	}
 }
 
-void UISizer::addElement(UIElementPtr widget, float proportion, Vector4f border, int fillFlags)
+void UISizer::unparentEntry(UISizerEntry& entry)
 {
-	entries.emplace_back(UISizerEntry(widget, proportion, border, fillFlags));
+	if (curParent != nullptr) {
+		auto widget = std::dynamic_pointer_cast<UIWidget>(entry.getPointer());
+		if (widget) {
+			curParent->removeChild(*widget);
+		}
+	}
 }
 
 UISizerType UISizer::getType() const

@@ -3,7 +3,7 @@
 using namespace Halley;
 
 UIMenuButton::UIMenuButton(std::shared_ptr<UIMenuButtonGroup> group, String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)
-	: UIClickable(id, minSize, sizer, innerBorder)
+	: UIClickable(id, minSize, std::move(sizer), innerBorder)
 	, group(group)
 {
 	Expects(group);

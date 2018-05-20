@@ -5,12 +5,19 @@ using namespace Halley;
 
 void UIParent::addChild(std::shared_ptr<UIWidget> widget)
 {
-	widget->setParent(*this);
-	childrenWaiting.push_back(widget);
+	Expects(widget->getParent() == nullptr || widget->getParent() == this);
+
+	if (widget->getParent() == nullptr) {
+		widget->setParent(this);
+		childrenWaiting.push_back(widget);
+	}
 }
 
 void UIParent::removeChild(UIWidget& widget)
 {
+	Expects(widget.getParent() == this);
+	widget.setParent(nullptr);
+
 	children.erase(std::remove_if(children.begin(), children.end(), [&] (auto& c)
 	{
 		return c.get() == &widget;
@@ -39,11 +46,7 @@ bool UIParent::removeDeadChildren()
 		return !c->isAlive();
 	}), children.end());
 
-	if (before != children.size()) {
-		return true;
-	} else {
-		return false;
-	}
+	return before != children.size();
 }
 
 std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()

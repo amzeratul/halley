@@ -88,6 +88,11 @@ namespace Halley {
 	public:
 		explicit UISizer(UISizerType type = UISizerType::Horizontal, float gap = 1.0f, int nColumns = 0);
 
+		UISizer(UISizer&& other);
+		UISizer(const UISizer& other) = delete;
+		UISizer& operator=(UISizer&& other);
+		UISizer& operator=(const UISizer& other) = delete;
+
 		Vector2f getLayoutMinimumSize(bool force) const override;
 		void setRect(Rect4f rect) override;
 
@@ -116,6 +121,11 @@ namespace Halley {
 		UISizerType type = UISizerType::Undefined;
 		float gap = 1.0f;
 		int nColumns = false;
+
+		UIParent* curParent = nullptr;
+
+		void reparentEntry(UISizerEntry& entry);
+		void unparentEntry(UISizerEntry& entry);
 
 		Vector2f computeMinimumSize(bool includeProportional) const;
 		void addElement(UIElementPtr widget, float proportion, Vector4f border, int fillFlags);

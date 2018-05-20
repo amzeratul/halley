@@ -45,7 +45,7 @@ Maybe<UISizer> UIFactory::makeSizer(const ConfigNode& node)
 
 		loadSizerChildren(sizer, node);
 
-		return sizer;
+		return std::move(sizer);
 	}
 }
 
@@ -174,5 +174,5 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& node)
 	auto style = node["style"].asString("button");
 	auto sizer = UISizer(); // TODO
 	auto innerBorder = asVector4f(node["innerBorder"], Vector4f(0, 0, 0, 0));
-	return std::make_shared<UIButton>(id, UIStyle(style, styleSheet), sizer, innerBorder);
+	return std::make_shared<UIButton>(id, UIStyle(style, styleSheet), std::move(sizer), innerBorder);
 }

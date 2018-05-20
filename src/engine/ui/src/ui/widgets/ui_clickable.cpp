@@ -2,7 +2,7 @@
 using namespace Halley;
 
 UIClickable::UIClickable(String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)
-	: UIWidget(id, minSize, sizer, innerBorder)
+	: UIWidget(id, minSize, std::move(sizer), innerBorder)
 {
 }
 

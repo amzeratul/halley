@@ -5,7 +5,7 @@
 using namespace Halley;
 
 UIButton::UIButton(String id, UIStyle s, Maybe<UISizer> sizer, Maybe<Vector4f> innerBorder)
-	: UIClickable(id, s.getSprite("normal").getScaledSize(), sizer, innerBorder ? innerBorder.get() : s.getBorder("innerBorder"))
+	: UIClickable(id, s.getSprite("normal").getScaledSize(), std::move(sizer), innerBorder ? innerBorder.get() : s.getBorder("innerBorder"))
 	, style(s)
 {
 	sprite = style.getSprite("normal");

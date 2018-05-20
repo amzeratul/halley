@@ -131,7 +131,9 @@ namespace Halley {
 		UIInputType lastInputType = UIInputType::Undefined;
 
 	private:
-		void setParent(UIParent& parent);
+		void setParent(UIParent* parent);
+		UIParent* getParent() const;
+
 		void setWidgetRect(Rect4f rect);
 
 		UIParent* parent = nullptr;
