@@ -64,7 +64,6 @@ namespace Halley
 	public:
 		virtual ~IAssetCollector() {}
 		virtual void output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata = {}) = 0;
-		virtual void output(const String& name, AssetType type, gsl::span<const gsl::byte> data, Maybe<Metadata> metadata = {}) = 0;
 		virtual void addAdditionalAsset(ImportingAsset&& asset) = 0;
 		virtual bool reportProgress(float progress, const String& label = "") = 0;
 		virtual Bytes readAdditionalFile(const Path& filePath) = 0;

@@ -17,7 +17,5 @@ void TextureImporter::import(const ImportingAsset& asset, IAssetCollector& colle
 	s >> image;
 
 	// Encode to PNG and save
-	auto bytes = image.savePNGToBytes();
-	auto span = gsl::as_bytes(gsl::span<const Byte>(bytes));
-	collector.output(asset.assetId, AssetType::Texture, span, meta);
+	collector.output(asset.assetId, AssetType::Texture, image.savePNGToBytes(), meta);
 }

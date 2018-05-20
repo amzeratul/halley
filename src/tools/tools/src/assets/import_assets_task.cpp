@@ -67,6 +67,7 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 	Logger::logInfo("Importing " + asset.assetId);
 
 	std::vector<AssetResource> out;
+	std::vector<std::pair<Path, Bytes>> outFiles;
 	std::vector<TimestampedPath> additionalInputs;
 	try {
 		// Create queue
@@ -99,6 +100,10 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 				toLoad.emplace_front(std::move(additional));
 			}
 
+			for (auto& outFile: collector.collectOutFiles()) {
+				outFiles.push_back(std::move(outFile));
+			}
+
 			for (auto& o: collector.getAssets()) {
 				out.push_back(o);
 			}
@@ -123,10 +128,17 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 	// Retrieve previous output from this asset, and remove any files which went missing
 	auto previous = db.getOutFiles(asset.assetId);
 	for (auto& f: previous) {
-		if (std::find_if(out.begin(), out.end(), [&] (const AssetResource& r) { return r.filepath == f.filepath; }) == out.end()) {
+		if (std::find_if(outFiles.begin(), outFiles.end(), [&] (const std::pair<Path, Bytes>& r) { return r.first == f.filepath; }) == outFiles.end()) {
 			// File no longer exists as part of this asset, remove it
 			FileSystem::remove(assetsPath / f.filepath);
 		}
+	}
+
+	// Write files
+	for (auto& outFile: outFiles) {
+		auto path = assetsPath / outFile.first;
+		Logger::logInfo("- " + asset.assetId + " -> " + path + " (" + String::prettySize(outFile.second.size()) + ")");
+		FileSystem::writeFile(path, outFile.second);
 	}
 
 	// Add to list of output assets

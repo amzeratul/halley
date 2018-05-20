@@ -22,7 +22,7 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	auto& rawData = asset.inputFiles[0].data;
 	auto resData = std::make_shared<ResourceDataStatic>(rawData.data(), rawData.size(), mainFile.string(), false);
 	Bytes encodedData;
-	gsl::span<const gsl::byte> fileData(gsl::as_bytes(gsl::span<const Halley::Byte>(rawData)));
+	const Bytes* fileData = &rawData;
 
 	std::vector<std::vector<float>> samples;
 	int numChannels = 0;
@@ -64,7 +64,7 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	// Encode to vorbis
 	if (needsEncoding) {
 		encodedData = encodeVorbis(numChannels, sampleRate, samples);
-		fileData = gsl::as_bytes(gsl::span<const Halley::Byte>(encodedData));
+		fileData = &encodedData;
 		samples.clear();
 	}
 
@@ -74,7 +74,7 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	meta.set("sampleRate", sampleRate);
 
 	// Output
-	collector.output(asset.assetId, AssetType::AudioClip, fileData, meta);
+	collector.output(asset.assetId, AssetType::AudioClip, *fileData, meta);
 }
 
 static void onVorbisError(int error)

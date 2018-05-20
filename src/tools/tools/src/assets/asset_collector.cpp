@@ -17,21 +17,14 @@ AssetCollector::AssetCollector(const ImportingAsset& asset, const Path& dstDir, 
 
 void AssetCollector::output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata)
 {
-	output(name, type, gsl::as_bytes(gsl::span<const Byte>(data)), metadata);
-}
-
-void AssetCollector::output(const String& name, AssetType type, gsl::span<const gsl::byte> data, Maybe<Metadata> metadata)
-{
-	String id = name.replaceAll("_", "__").replaceAll("/", "_-_").replaceAll(":", "_c_");
+	const String id = name.replaceAll("_", "__").replaceAll("/", "_-_").replaceAll(":", "_c_");
 	Path filePath = Path(toString(type)) / id;
 
 	if (metadata && metadata->getString("asset_compression", "") == "deflate") {
 		auto newData = Compression::deflate(data);
-		Logger::logInfo("- Writing compressed asset: " + (dstDir / filePath) + " (" + String::prettySize(newData.size()) + ")");
-		FileSystem::writeFile(dstDir / filePath, newData);
+		outFiles.emplace_back(filePath, newData);
 	} else {
-		Logger::logInfo("- Writing asset: " + (dstDir / filePath) + " (" + String::prettySize(data.size_bytes()) + ")");
-		FileSystem::writeFile(dstDir / filePath, data);	
+		outFiles.emplace_back(filePath, data);
 	}
 
 	AssetResource result;
@@ -79,6 +72,11 @@ const std::vector<AssetResource>& AssetCollector::getAssets() const
 std::vector<ImportingAsset> AssetCollector::collectAdditionalAssets()
 {
 	return std::move(additionalAssets);
+}
+
+std::vector<std::pair<Path, Bytes>> AssetCollector::collectOutFiles()
+{
+	return std::move(outFiles);
 }
 
 const std::vector<TimestampedPath>& AssetCollector::getAdditionalInputs() const
