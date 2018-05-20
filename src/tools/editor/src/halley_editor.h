@@ -22,6 +22,8 @@ namespace Halley
 		Project& getProject() const;
 		bool isHeadless() const { return headless; }
 
+		Preferences& getPreferences();
+
 	protected:
 		void init(const Environment& environment, const Vector<String>& args) override;
 		int initPlugins(IPluginRegistry &registry) override;

@@ -4,17 +4,35 @@
 
 namespace Halley
 {
+	class SystemAPI;
+
 	class Preferences
 	{
 	public:
-		explicit Preferences(String path);
-		void addRecent(String path);
-		Rect4i getWindowRect() const;
+		explicit Preferences(SystemAPI& system);
 
-		void save() const;
-		void load();
+		ConfigNode save() const;
+		void load(const ConfigNode& config);
+
+		bool isDirty() const;
+		void saveToFile() const;
+		void loadFromFile();
+
+		void addRecent(Path path);
+		const std::vector<String>& getRecents() const;
+
+		WindowDefinition getWindowDefinition() const;
+		void updateWindowDefinition(const Window& window);
 
 	private:
-		String filePath;
+		SystemAPI& system;
+
+		mutable bool dirty = false;
+
+		std::vector<String> recents;
+
+		Maybe<Vector2i> windowPosition;
+		Vector2i windowSize;
+		WindowState windowState = WindowState::Normal;
 	};
 }

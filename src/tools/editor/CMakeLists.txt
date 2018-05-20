@@ -27,7 +27,7 @@ set (editor_headers
 
 if (MSVC)
 	set (editor_headers
-		${EDITOR_HEADERS}
+		${editor_headers}
 		"res/halley-editor.rc"
 		"res/resource.h"
 		"res/halley.ico"

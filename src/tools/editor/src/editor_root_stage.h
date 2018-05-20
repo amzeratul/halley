@@ -30,5 +30,7 @@ namespace Halley {
 		std::unique_ptr<DevConServer> devConServer;
 
 		void initSprites();
+
+		void loadProject();
 	};
 }

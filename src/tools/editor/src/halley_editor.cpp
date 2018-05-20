@@ -13,6 +13,7 @@ void initSDLSystemPlugin(IPluginRegistry &registry);
 void initSDLAudioPlugin(IPluginRegistry &registry);
 void initSDLInputPlugin(IPluginRegistry &registry);
 void initAsioPlugin(IPluginRegistry &registry);
+void initDX11Plugin(IPluginRegistry &registry);
 
 HalleyEditor::HalleyEditor()
 {
@@ -31,7 +32,12 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 	} else {
 		initSDLAudioPlugin(registry);
 		initSDLInputPlugin(registry);
+
+#ifdef _WIN32
+		initDX11Plugin(registry);
+#else
 		initOpenGLPlugin(registry);
+#endif
 		
 		return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input | HalleyAPIFlags::Network;
 	}
@@ -66,12 +72,14 @@ bool HalleyEditor::shouldCreateSeparateConsole() const
 #endif
 }
 
+Preferences& HalleyEditor::getPreferences()
+{
+	return *preferences;
+}
+
 void HalleyEditor::init(const Environment& environment, const Vector<String>& args)
 {
 	rootPath = environment.getProgramPath().parentPath();
-
-	preferences = std::make_unique<Preferences>((environment.getDataPath() / "settings.yaml").string());
-	preferences->load();
 
 	parseArguments(args);
 }
@@ -104,6 +112,8 @@ void HalleyEditor::parseArguments(const std::vector<String>& args)
 
 std::unique_ptr<Stage> HalleyEditor::startGame(const HalleyAPI* api)
 {
+	preferences = std::make_unique<Preferences>(*api->system);
+
 	projectLoader = std::make_unique<ProjectLoader>(api->core->getStatics(), rootPath);
 	projectLoader->setPlatform(platform);
 
@@ -112,8 +122,7 @@ std::unique_ptr<Stage> HalleyEditor::startGame(const HalleyAPI* api)
 	}
 
 	if (!headless) {
-		Vector2i winSize(1280, 720);
-		api->video->setWindow(WindowDefinition(WindowType::ResizableWindow, winSize, getName()), true);
+		api->video->setWindow(preferences->getWindowDefinition(), true);
 	}
 	return std::make_unique<EditorRootStage>(*this);
 }
@@ -125,7 +134,10 @@ Project& HalleyEditor::loadProject(Path path)
 	if (!project) {
 		throw Exception("Unable to load project at " + path.string());
 	}
+
 	preferences->addRecent(path.string());
+	preferences->saveToFile();
+	
 	return *project;
 }
 
@@ -136,7 +148,10 @@ Project& HalleyEditor::createProject(Path path)
 	if (!project) {
 		throw Exception("Unable to create project at " + path.string());
 	}
+	
 	preferences->addRecent(path.string());
+	preferences->saveToFile();
+	
 	return *project;
 }
 

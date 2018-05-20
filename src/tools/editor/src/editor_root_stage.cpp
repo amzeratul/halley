@@ -4,6 +4,7 @@
 #include "ui/taskbar/taskbar.h"
 #include "halley/tools/assets/check_assets_task.h"
 #include "halley/audio/resampler.h"
+#include "preferences.h"
 
 using namespace Halley;
 
@@ -19,15 +20,16 @@ EditorRootStage::~EditorRootStage()
 
 void EditorRootStage::init()
 {
-	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(editor.getProject(), editor.isHeadless())));
-
 	if (!editor.isHeadless()) {
 		initSprites();
 		taskBar = std::make_unique<TaskBar>(getResources());
-		console = std::make_unique<ConsoleWindow>(getResources());
 	}
 
 	devConServer = std::make_unique<DevConServer>(getNetworkAPI().createService(DevCon::devConPort), DevCon::devConPort);
+
+	if (editor.hasProjectLoaded()) {
+		loadProject();
+	}
 }
 
 void EditorRootStage::onVariableUpdate(Time time)
@@ -50,6 +52,14 @@ void EditorRootStage::onVariableUpdate(Time time)
 
 	if (devConServer) {
 		devConServer->update();
+	}
+
+	auto& prefs = editor.getPreferences();
+	if (!editor.isHeadless()) {
+		prefs.updateWindowDefinition(getVideoAPI().getWindow());
+	}
+	if (prefs.isDirty()) {
+		prefs.saveToFile();
 	}
 }
 
@@ -98,8 +108,17 @@ void EditorRootStage::initSprites()
 			.setScale(Vector2f(8, 8))
 			.setPos(Vector2f(640, 360));
 		halleyLogo.getMaterial()
-			.set("u_smoothness", 0.1f)
+			.set("u_smoothness", 0.125f)
 			.set("u_outline", 0.0f)
 			.set("u_outlineColour", col);
+	}
+}
+
+void EditorRootStage::loadProject()
+{
+	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(editor.getProject(), editor.isHeadless())));
+
+	if (!editor.isHeadless()) {
+		console = std::make_unique<ConsoleWindow>(getResources());
 	}
 }

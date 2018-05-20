@@ -1,25 +1,115 @@
 #include "preferences.h"
+using namespace Halley;
 
-Halley::Preferences::Preferences(String path) 
-	: filePath(path)
-{}
-
-void Halley::Preferences::addRecent(String path)
+Preferences::Preferences(SystemAPI& system) 
+	: system(system)
+	, windowSize(Vector2i(1280, 720))
 {
-	
+	loadFromFile();
 }
 
-Halley::Rect4i Halley::Preferences::getWindowRect() const
+ConfigNode Preferences::save() const
 {
-	return Rect4i(0, 0, 1280, 720);
+	ConfigNode::MapType root;
+
+	{
+		ConfigNode::SequenceType recentsNode;
+		for (auto& r: recents) {
+			recentsNode.push_back(String(r));
+		}
+		root["recents"] = std::move(recentsNode);
+	}
+
+	{
+		ConfigNode::MapType windowNode;
+		if (windowPosition) {
+			windowNode["position"] = windowPosition.get();
+		}
+		windowNode["size"] = windowSize;
+		windowNode["state"] = int(windowState);
+		root["window"] = std::move(windowNode);
+	}
+
+	return std::move(root);
 }
 
-void Halley::Preferences::save() const
+void Preferences::load(const ConfigNode& root)
 {
-	
+	recents.clear();
+	windowPosition = {};
+	windowSize = Vector2i(1280, 720);
+	windowState = WindowState::Normal;
+
+	if (root.hasKey("recents")) {
+		for (auto& r: root["recents"]) {
+			recents.push_back(r.asString());
+		}
+	}
+	if (root.hasKey("window")) {
+		auto& windowNode = root["window"];
+		if (windowNode.hasKey("position")) {
+			windowPosition = windowNode["position"].asVector2i();
+		}
+		windowSize = windowNode["size"].asVector2i();
+		windowState = WindowState(windowNode["state"].asInt());
+	}
 }
 
-void Halley::Preferences::load()
+bool Preferences::isDirty() const
 {
-	
+	return dirty;
+}
+
+void Preferences::saveToFile() const
+{
+	ConfigFile file;
+	file.getRoot() = save();
+	system.setSaveData(SaveDataType::Save, "preferences", Serializer::toBytes(file));
+	dirty = false;
+}
+
+void Preferences::loadFromFile()
+{
+	auto data = system.getSaveData(SaveDataType::Save, "preferences");
+	if (!data.empty()) {
+		auto config = Deserializer::fromBytes<ConfigFile>(data);
+		load(config.getRoot());
+	}
+}
+
+void Preferences::addRecent(Path path)
+{
+	auto name = path.string();
+	recents.erase(std::remove(recents.begin(), recents.end(), name), recents.end());
+	recents.push_back(name);
+	dirty = true;
+}
+
+const std::vector<String>& Preferences::getRecents() const
+{
+	return recents;
+}
+
+WindowDefinition Preferences::getWindowDefinition() const
+{
+	return WindowDefinition(WindowType::ResizableWindow, windowPosition, windowSize, "Halley Editor").withState(windowState);
+}
+
+void Preferences::updateWindowDefinition(const Window& window)
+{
+	auto rect = window.getWindowRect();
+	auto state = window.getDefinition().getWindowState();
+	auto size = rect.getSize();
+	auto pos = rect.getTopLeft();
+
+	if (windowState != state) {
+		windowState = state;
+		dirty = true;
+	}
+
+	if (state == WindowState::Normal && (windowPosition != pos || windowSize != size)) {
+		windowPosition = pos;
+		windowSize = size;
+		dirty = true;
+	}
 }
