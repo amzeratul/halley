@@ -191,14 +191,14 @@ void Core::deInit()
 	// Deinit painter
 	painter.reset();
 	
+	// Deinit API
+	api.reset();
+	
 	// Stop thread pool and other statics
 	statics.suspend();
 
 	// Deinit resources
 	resources.reset();
-
-	// Deinit API
-	api.reset();
 
 	// Deinit console redirector
 	std::cout << "Goodbye!" << std::endl;
