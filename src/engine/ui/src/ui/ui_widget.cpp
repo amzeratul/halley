@@ -385,12 +385,13 @@ bool UIWidget::isDescendentOf(const UIWidget& ancestor) const
 void UIWidget::setEventHandler(std::shared_ptr<UIEventHandler> handler)
 {
 	eventHandler = handler;
+	handler->setWidget(this);
 }
 
 UIEventHandler& UIWidget::getEventHandler()
 {
 	if (!eventHandler) {
-		eventHandler = std::make_shared<UIEventHandler>();
+		setEventHandler(std::make_shared<UIEventHandler>());
 	}
 	return *eventHandler;
 }

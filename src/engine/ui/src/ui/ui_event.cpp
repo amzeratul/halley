@@ -83,6 +83,16 @@ Rect4f UIEvent::getRectData() const
 	return rectData;
 }
 
+UIWidget& UIEvent::getCurWidget() const
+{
+	return *curWidget;
+}
+
+void UIEvent::setCurWidget(UIWidget* widget)
+{
+	curWidget = widget;
+}
+
 UIEventType UIEvent::getType() const
 {
 	return type;
@@ -133,10 +143,16 @@ void UIEventHandler::pump()
 	}
 }
 
-void UIEventHandler::handle(const UIEvent& event) const
+void UIEventHandler::setWidget(UIWidget* uiWidget)
+{
+	widget = uiWidget;
+}
+
+void UIEventHandler::handle(UIEvent& event)
 {
 	auto iter = specificHandles.find(std::make_pair(event.getType(), event.getSourceId()));
 	if (iter != specificHandles.end()) {
+		event.setCurWidget(widget);
 		iter->second(event);
 	} else {
 		auto iter2 = handles.find(event.getType());

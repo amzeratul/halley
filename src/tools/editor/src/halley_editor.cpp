@@ -109,18 +109,19 @@ std::unique_ptr<Stage> HalleyEditor::startGame(const HalleyAPI* api)
 
 	projectLoader = std::make_unique<ProjectLoader>(api->core->getStatics(), rootPath);
 	projectLoader->setPlatform(platform);
+	std::unique_ptr<Project> project;
 
 	if (gotProjectPath) {
-		loadProject(Path(projectPath));
+		project = loadProject(Path(projectPath));
 	}
 
 	api->video->setWindow(preferences->getWindowDefinition(), true);
-	return std::make_unique<EditorRootStage>(*this);
+	return std::make_unique<EditorRootStage>(*this, std::move(project));
 }
 
-Project& HalleyEditor::loadProject(Path path)
+std::unique_ptr<Project> HalleyEditor::loadProject(Path path)
 {
-	project = projectLoader->loadProject(path);
+	auto project = projectLoader->loadProject(path);
 
 	if (!project) {
 		throw Exception("Unable to load project at " + path.string());
@@ -129,12 +130,14 @@ Project& HalleyEditor::loadProject(Path path)
 	preferences->addRecent(path.string());
 	preferences->saveToFile();
 	
-	return *project;
+	return std::move(project);
 }
 
-Project& HalleyEditor::createProject(Path path)
+std::unique_ptr<Project> HalleyEditor::createProject(Path path)
 {
-	project.reset();
+	std::unique_ptr<Project> project;
+
+	// TODO
 
 	if (!project) {
 		throw Exception("Unable to create project at " + path.string());
@@ -143,20 +146,7 @@ Project& HalleyEditor::createProject(Path path)
 	preferences->addRecent(path.string());
 	preferences->saveToFile();
 	
-	return *project;
-}
-
-bool HalleyEditor::hasProjectLoaded() const
-{
-	return static_cast<bool>(project);
-}
-
-Project& HalleyEditor::getProject() const
-{
-	if (!project) {
-		throw Exception("No project loaded.");
-	}
-	return *project;
+	return std::move(project);
 }
 
 HalleyGame(HalleyEditor);

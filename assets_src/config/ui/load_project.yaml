@@ -11,7 +11,7 @@ widget:
         widget:
           id: topLabel
           class: label
-          text: "Hello world!"
+          text: "Enter the path of the project to load:"
       - proportion: 0
         fill: centre
         sizer:

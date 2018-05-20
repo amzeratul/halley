@@ -4,6 +4,7 @@
 #include <map>
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
+#include "ui_parent.h"
 
 namespace Halley {
 	enum class UIEventType {
@@ -41,6 +42,9 @@ namespace Halley {
 		float getFloatData() const;
 		Vector2f getVectorData() const;
 		Rect4f getRectData() const;
+		UIWidget& getCurWidget() const;
+	    
+	    void setCurWidget(UIWidget* widget);
 
     private:
 		UIEventType type;
@@ -51,6 +55,7 @@ namespace Halley {
 		float floatData = 0.0f;
 		Vector2f vectorData;
 		Rect4f rectData;
+		UIWidget* curWidget = nullptr;
     };
 
 	using UIEventCallback = std::function<void(const UIEvent&)>;
@@ -63,13 +68,15 @@ namespace Halley {
 		bool canHandle(const UIEvent& event) const;
 		void queue(const UIEvent& event);
 		void pump();
+		void setWidget(UIWidget* uiWidget);
 
 	private:
+		UIWidget* widget = nullptr;
 		std::map<UIEventType, UIEventCallback> handles;
 		std::map<std::pair<UIEventType, String>, UIEventCallback> specificHandles;
 
 		std::vector<UIEvent> eventQueue;
 
-		void handle(const UIEvent& event) const;
+		void handle(UIEvent& event);
 	};
 }

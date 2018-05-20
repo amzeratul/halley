@@ -15,11 +15,8 @@ namespace Halley
 		HalleyEditor();
 		~HalleyEditor();
 
-		Project& loadProject(Path path);
-		Project& createProject(Path path);
-
-		bool hasProjectLoaded() const;
-		Project& getProject() const;
+		std::unique_ptr<Project> loadProject(Path path);
+		std::unique_ptr<Project> createProject(Path path);
 
 		Preferences& getPreferences();
 
@@ -36,7 +33,6 @@ namespace Halley
 
 	private:
 		std::unique_ptr<ProjectLoader> projectLoader;
-		std::unique_ptr<Project> project;
 		std::unique_ptr<Preferences> preferences;
 		Path rootPath;
 

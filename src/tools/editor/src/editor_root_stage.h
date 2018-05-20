@@ -8,11 +8,12 @@ namespace Halley {
 	class ConsoleWindow;
 	class TaskBar;
 	class EditorUIFactory;
+	class Project;
 
 	class EditorRootStage final : public Stage
 	{
 	public:
-		EditorRootStage(HalleyEditor& editor);
+		EditorRootStage(HalleyEditor& editor, std::unique_ptr<Project> project);
 		~EditorRootStage();
 
 		void init() override;
@@ -22,6 +23,8 @@ namespace Halley {
 	private:
 		HalleyEditor& editor;
 		I18N i18n;
+
+		std::unique_ptr<Project> project;
 
 		Sprite halleyLogo;
 		Sprite background;

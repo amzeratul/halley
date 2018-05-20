@@ -6,11 +6,13 @@
 #include "halley/audio/resampler.h"
 #include "preferences.h"
 #include "ui/editor_ui_factory.h"
+#include "halley/tools/project/project.h"
 
 using namespace Halley;
 
-EditorRootStage::EditorRootStage(HalleyEditor& editor)
+EditorRootStage::EditorRootStage(HalleyEditor& editor, std::unique_ptr<Project> project)
 	: editor(editor)
+	, project(std::move(project))
 	, tasks(std::make_unique<EditorTaskSet>())
 {
 }
@@ -27,7 +29,7 @@ void EditorRootStage::init()
 
 	devConServer = std::make_unique<DevConServer>(getNetworkAPI().createService(DevCon::devConPort), DevCon::devConPort);
 
-	if (editor.hasProjectLoaded()) {
+	if (project) {
 		loadProject();
 	} else {
 		createLoadProjectUI();
@@ -121,8 +123,19 @@ void EditorRootStage::createUI()
 
 void EditorRootStage::createLoadProjectUI()
 {
-	auto test = uiFactory->makeUI(getResources().get<ConfigFile>("ui/load_project")->getRoot());
-	uiMainPanel->add(test, 1, Vector4f(), UISizerAlignFlags::Centre);
+	auto loadProjectUI = uiFactory->makeUI(getResources().get<ConfigFile>("ui/load_project")->getRoot());
+
+	loadProjectUI->getEventHandler().setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
+	{
+		auto input = event.getCurWidget().getWidgetAs<UITextInput>("input");
+		project = editor.loadProject(input->getText());
+		if (project) {
+			event.getCurWidget().destroy();
+			loadProject();
+		}
+	});
+
+	uiMainPanel->add(loadProjectUI, 1, Vector4f(), UISizerAlignFlags::Centre);
 }
 
 void EditorRootStage::updateUI(Time time)
@@ -144,7 +157,7 @@ void EditorRootStage::updateUI(Time time)
 
 void EditorRootStage::loadProject()
 {
-	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(editor.getProject(), false)));
+	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(*project, false)));
 
 	console = std::make_unique<ConsoleWindow>(getResources());
 }
