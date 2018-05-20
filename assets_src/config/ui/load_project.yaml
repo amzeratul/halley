@@ -7,10 +7,7 @@ widget:
   children:
     - proportion: 0
       fill: centre
-      widget:
-        id: topLabel
-        class: label
-        text: "Enter the path of the project to load:"
+      widget: { id: topLabel, class: label, text: "Enter the path of the project to load:" }
     - proportion: 1
       border: [0, 10, 0, 10]
       widget:
@@ -19,22 +16,14 @@ widget:
         sizer: { type: vertical }
         children:
           - proportion: 1
-            widget:
-              id: recent
-              class: list
+            widget: { id: recent, class: list }
     - proportion: 0
       fill: centre
       sizer: { type: horizontal }
       children:
         - proportion: 1
-          widget:
-            id: input
-            class: textInput
-            size: [400, 20]
+          widget: { id: input, class: textInput, size: [400, 20] }
         - proportion: 0
-          widget:
-            id: ok
-            class: button
-            text: "OK"
+          widget: { id: ok, class: button, text: "OK" }
 
 ...
