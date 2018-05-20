@@ -10,6 +10,8 @@ namespace Halley
 		SDLWindow(SDL_Window* window);
 
 		void update(const WindowDefinition& definition) override;
+		void updateDefinition(const WindowDefinition& definition);
+
 		void show() override;
 		void hide() override;
 		void setVsync(bool vsync) override;

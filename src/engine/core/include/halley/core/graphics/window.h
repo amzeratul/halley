@@ -16,6 +16,13 @@ namespace Halley
 		BorderlessWindow
 	};
 
+	enum class WindowState
+	{
+		Normal,
+		Minimized,
+		Maximized
+	};
+
 	template <>
 	struct EnumNames<WindowType> {
 		constexpr std::array<const char*, 5> operator()() const {
@@ -46,15 +53,35 @@ namespace Halley
 		{}
 
 		WindowType getWindowType() const { return windowType; }
+		WindowState getWindowState() const { return windowState; }
 		boost::optional<Vector2i> getPosition() const { return position; }
 		Vector2i getSize() const { return size; }
 		String getTitle() const { return title; }
 
-		WindowDefinition withPosition(boost::optional<Vector2i> newPos) const { return WindowDefinition(windowType, newPos, size, title); }
-		WindowDefinition withSize(Vector2i newSize) const { return WindowDefinition(windowType, position, newSize, title); }
+		WindowDefinition withPosition(boost::optional<Vector2i> newPos) const
+		{
+			auto w = *this;
+			w.position = newPos;
+			return w;
+		}
+		
+		WindowDefinition withSize(Vector2i newSize) const
+		{
+			auto w = *this;
+			w.size = newSize;
+			return w;
+		}
+
+		WindowDefinition withState(WindowState newState) const
+		{
+			auto w = *this;
+			w.windowState = newState;
+			return w;
+		}
 
 	private:
-		WindowType windowType;
+		WindowType windowType = WindowType::Fullscreen;
+		WindowState windowState = WindowState::Normal;
 		boost::optional<Vector2i> position;
 		Vector2i size;
 		String title;

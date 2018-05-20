@@ -104,13 +104,18 @@ bool SystemSDL::generateEvents(VideoAPI* video, InputAPI* input)
 
 void SystemSDL::processVideoEvent(VideoAPI* video, const SDL_Event& event)
 {
-	if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-		int x, y;
-		SDL_GetWindowPosition(SDL_GetWindowFromID(event.window.windowID), &x, &y);
-
-		for (auto& w : windows) {
-			if (w->getId() == event.window.windowID) {
-				w->resize(Rect4i(x, y, event.window.data1, event.window.data2));
+	for (auto& w : windows) {
+		if (w->getId() == int(event.window.windowID)) {
+			if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+				int x, y;
+				SDL_GetWindowPosition(SDL_GetWindowFromID(event.window.windowID), &x, &y);
+				w->updateDefinition(w->getDefinition().withPosition(Vector2i(x, y)).withSize(Vector2i(event.window.data1, event.window.data2)));
+			} else if (event.window.event == SDL_WINDOWEVENT_MAXIMIZED) {
+				w->updateDefinition(w->getDefinition().withState(WindowState::Maximized));
+			} else if (event.window.event == SDL_WINDOWEVENT_MINIMIZED) {
+				w->updateDefinition(w->getDefinition().withState(WindowState::Minimized));
+			} else if (event.window.event == SDL_WINDOWEVENT_RESTORED) {
+				w->updateDefinition(w->getDefinition().withState(WindowState::Normal));
 			}
 		}
 	}

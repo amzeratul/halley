@@ -44,9 +44,10 @@ void SDLWindow::update(const WindowDefinition& definition)
 	// Update window position & size
 	// For windowed, get out of fullscreen first, then set size.
 	// For fullscreen, set size before going to fullscreen.
-	WindowType windowType = definition.getWindowType();
-	Vector2i windowSize = definition.getSize();
-	Vector2i windowPos = definition.getPosition().get_value_or(getCenteredWindow(windowSize, 0));
+	const WindowType windowType = definition.getWindowType();
+	const WindowState windowState = definition.getWindowState();
+	const Vector2i windowSize = definition.getSize();
+	const Vector2i windowPos = definition.getPosition().get_value_or(getCenteredWindow(windowSize, 0));
 
 	if (windowType != WindowType::Fullscreen) {
 		SDL_SetWindowFullscreen(window, SDL_FALSE);
@@ -65,6 +66,23 @@ void SDLWindow::update(const WindowDefinition& definition)
 
 	SDL_SetWindowPosition(window, windowPos.x, windowPos.y);
 
+	switch (windowState) {
+	case WindowState::Normal:
+		SDL_RestoreWindow(window);
+		break;
+	case WindowState::Minimized:
+		SDL_MinimizeWindow(window);
+		break;
+	case WindowState::Maximized:
+		SDL_MaximizeWindow(window);
+		break;
+	}
+
+	updateDefinition(definition);
+}
+
+void SDLWindow::updateDefinition(const WindowDefinition& definition)
+{
 	curDefinition = std::make_unique<WindowDefinition>(definition);
 }
 
