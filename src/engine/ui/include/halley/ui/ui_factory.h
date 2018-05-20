@@ -8,6 +8,7 @@
 
 namespace Halley
 {
+	class HalleyAPI;
 	class ConfigNode;
 	class Resources;
 	class I18N;
@@ -18,11 +19,12 @@ namespace Halley
 	public:
 		using WidgetFactory = std::function<std::shared_ptr<UIWidget>(const ConfigNode&)>;
 
-		UIFactory(Resources& resources, I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet);
+		UIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet);
 
 		std::shared_ptr<UIWidget> makeUI(const ConfigNode& node);
 
 	private:
+		const HalleyAPI& api;
 		Resources& resources;
 		I18N& i18n;
 		std::shared_ptr<UIStyleSheet> styleSheet;
@@ -41,5 +43,6 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeBaseWidget(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeLabel(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeButton(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeTextInput(const ConfigNode& node);
 	};
 }

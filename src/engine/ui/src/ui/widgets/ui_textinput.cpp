@@ -6,7 +6,7 @@
 using namespace Halley;
 
 UITextInput::UITextInput(std::shared_ptr<InputDevice> keyboard, String id, UIStyle style, String text, LocalisedString ghostText)
-	: UIWidget(id, {}, UISizer(UISizerType::Vertical), Vector4f(3, 3, 3, 3))
+	: UIWidget(id, {}, UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
 	, keyboard(keyboard)
 	, style(style)
 	, sprite(style.getSprite("box"))
@@ -121,17 +121,18 @@ void UITextInput::update(Time t, bool moved)
 	}
 
 	float length = label.getExtents().x;
-	float capacity = getSize().x - 6;
-	if (length > capacity) {
+	float capacityX = getSize().x - getInnerBorder().x - getInnerBorder().z;
+	float capacityY = getSize().y - getInnerBorder().y - getInnerBorder().w;
+	if (length > capacityX) {
 		label
 			.setAlignment(1.0f)
-			.setClip(Rect4f(Vector2f(-capacity, 0), Vector2f(capacity, 20)))
-			.setPosition(getPosition() + Vector2f(3 + capacity, 0));
+			.setClip(Rect4f(Vector2f(-capacityX, 0), Vector2f(capacityX, capacityY)))
+			.setPosition(getPosition() + Vector2f(getInnerBorder().x + capacityX, getInnerBorder().y));
 	} else {
 		label
 			.setAlignment(0.0f)
 			.setClip()
-			.setPosition(getPosition() + Vector2f(3, 0));
+			.setPosition(getPosition() + Vector2f(getInnerBorder().x, getInnerBorder().y));
 	}
 
 	if (moved) {

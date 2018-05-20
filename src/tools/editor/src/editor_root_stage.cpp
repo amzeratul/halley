@@ -110,7 +110,7 @@ void EditorRootStage::initSprites()
 
 void EditorRootStage::createUI()
 {
-	uiFactory = std::make_unique<EditorUIFactory>(getResources(), i18n);
+	uiFactory = std::make_unique<EditorUIFactory>(getAPI(), getResources(), i18n);
 	ui = std::make_unique<UIRoot>(&getAudioAPI());
 
 	uiMainPanel = std::make_shared<UIWidget>("mainPanel", Vector2f(), UISizer(UISizerType::Vertical));

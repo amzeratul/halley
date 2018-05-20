@@ -4,6 +4,6 @@
 namespace Halley {
     class EditorUIFactory : public UIFactory {
     public:
-		EditorUIFactory(Resources& resources, I18N& i18n);
+		EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n);
     };
 }

@@ -3,17 +3,21 @@
 #include "halley/ui/ui_widget.h"
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_button.h"
+#include "halley/ui/widgets/ui_textinput.h"
+#include "halley/core/api/halley_api.h"
 
 using namespace Halley;
 
-UIFactory::UIFactory(Resources& resources, I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet)
-	: resources(resources)
+UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet)
+	: api(api)
+	, resources(resources)
 	, i18n(i18n)
 	, styleSheet(styleSheet)
 {
 	factories["widget"] = [=] (const ConfigNode& node) { return makeBaseWidget(node); };
 	factories["label"] = [=] (const ConfigNode& node) { return makeLabel(node); };
 	factories["button"] = [=] (const ConfigNode& node) { return makeButton(node); };
+	factories["textInput"] = [=] (const ConfigNode& node) { return makeTextInput(node); };
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeUI(const ConfigNode& node)
@@ -105,6 +109,8 @@ void UIFactory::loadSizerChildren(UISizer& sizer, const ConfigNode& node)
 				for (auto& fillNode: childNode["fill"].asSequence()) {
 					addFill(fillNode.asString());
 				}
+			} else {
+				fill = UISizerFillFlags::Fill;
 			}
 
 			if (childNode.hasKey("widget")) {
@@ -137,7 +143,7 @@ LocalisedString UIFactory::parseLabel(const ConfigNode& node) {
 	if (node.hasKey("textKey")) {
 		label = i18n.get(node["textKey"].asString());
 	} else if (node.hasKey("text")) {
-		label = LocalisedString::fromHardcodedString(node["text"].asString());
+		label = LocalisedString::fromUserString(node["text"].asString());
 	}
 	return label;
 }
@@ -182,5 +188,24 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& node)
 		sizer->add(std::make_shared<UILabel>(style.getTextRenderer("label"), label), 1, Vector4f(), UISizerAlignFlags::Centre);
 	}
 
-	return std::make_shared<UIButton>(id, style, std::move(sizer));
+	auto button = std::make_shared<UIButton>(id, style, std::move(sizer));
+	if (node.hasKey("size")) {
+		auto minSize = asVector2f(node["size"], {});
+		button->setMinSize(minSize);
+	}
+	return button;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& node)
+{
+	auto id = node["id"].asString();
+	auto style = UIStyle(node["style"].asString("input"), styleSheet);
+	auto label = parseLabel(node);
+
+	auto input = std::make_shared<UITextInput>(api.input->getKeyboard(), id, style, "", label);
+	if (node.hasKey("size")) {
+		auto minSize = asVector2f(node["size"], {});
+		input->setMinSize(minSize);
+	}
+	return input;
 }

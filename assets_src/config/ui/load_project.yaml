@@ -7,18 +7,25 @@ widget:
     type: vertical
     children:
       - proportion: 0
-        border: [0, 0, 0, 0]
-        fill: fill
+        fill: centre
         widget:
           id: topLabel
           class: label
           text: "Hello world!"
       - proportion: 0
-        border: [0, 0, 0, 0]
         fill: centre
-        widget:
-          id: ok
-          class: button
-          text: "OK"
+        sizer:
+          type: horizontal
+          children:
+            - proportion: 1
+              widget:
+                id: input
+                class: textInput
+                size: [400, 20]
+            - proportion: 0
+              widget:
+                id: ok
+                class: button
+                text: "OK"
 
 ...
