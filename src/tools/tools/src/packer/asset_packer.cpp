@@ -36,7 +36,17 @@ const String& AssetPackListing::getEncryptionKey() const
 	return encryptionKey;
 }
 
-void AssetPacker::pack(Project& project)
+void AssetPackListing::setActive(bool a)
+{
+	active = a;
+}
+
+bool AssetPackListing::isActive() const
+{
+	return active;
+}
+
+void AssetPacker::pack(Project& project, Maybe<std::set<String>> assetsToPack)
 {
 	auto db = project.getImportAssetsDatabase().makeAssetDatabase();
 	auto src = project.getUnpackedAssetsPath();
@@ -44,13 +54,13 @@ void AssetPacker::pack(Project& project)
 	auto manifest = AssetPackManifest(FileSystem::readFile(project.getAssetPackManifestPath()));
 
 	// Sort into packs
-	std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, *db);
+	std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, *db, assetsToPack);
 
 	// Generate packs
 	generatePacks(packs, src, dst);
 }
 
-std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb)
+std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, Maybe<std::set<String>> assetsToPack)
 {
 	std::map<String, AssetPackListing> packs;
 	for (auto typeName: EnumNames<AssetType>()()) {
@@ -58,20 +68,37 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 		auto& db = srcAssetDb.getDatabase(type);
 		for (auto& assetEntry: db.getAssets()) {
 			const String assetName = String(typeName) + ":" + assetEntry.first;
+
+			// Find which pack this asset goes into
 			auto packEntry = manifest.getPack("~:" + assetName);
-			String key;
+			String packName;
 			String encryptionKey;
 			if (packEntry) {
-				key = packEntry.get().get().getName();
+				packName = packEntry.get().get().getName();
 				encryptionKey = packEntry.get().get().getEncryptionKey();
 			}
 
-			auto iter = packs.find(key);
+			// Retrieve pack
+			auto iter = packs.find(packName);
 			if (iter == packs.end()) {
-				packs[key] = AssetPackListing(key, encryptionKey);
-				iter = packs.find(key);
+				// Pack doesn't exist yet, create it first
+				packs[packName] = AssetPackListing(packName, encryptionKey);
+				iter = packs.find(packName);
+
+				// Initialise it to active if there's no asset list to pack
+				if (!assetsToPack) {
+					iter->second.setActive(true);
+				}
 			}
 
+			// Activate the pack if this asset was actually supposed to be packed
+			if (assetsToPack) {
+				if (assetsToPack.get().find(assetName) != assetsToPack.get().end()) {
+					iter->second.setActive(true);
+				}
+			}
+
+			// Add file to pack
 			iter->second.addFile(type, assetEntry.first, assetEntry.second);
 		}
 	}
@@ -88,7 +115,10 @@ void AssetPacker::generatePacks(std::map<String, AssetPackListing> packs, const 
 			}
 			Logger::logWarning("-----------------------\n");
 		} else {
-			generatePack(packListing.first, packListing.second, src, dst);
+			// Only pack if this pack listing is active
+			if (packListing.second.isActive()) {
+				generatePack(packListing.first, packListing.second, src, dst);
+			}
 		}
 	}
 }

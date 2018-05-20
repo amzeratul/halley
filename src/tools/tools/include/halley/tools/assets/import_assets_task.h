@@ -1,8 +1,9 @@
 #pragma once
 #include "halley/tools/tasks/editor_task.h"
 #include "halley/file/path.h"
-#include <vector>
 #include "import_assets_database.h"
+#include <vector>
+#include <set>
 
 namespace Halley
 {
@@ -24,6 +25,7 @@ namespace Halley
 		const bool packAfter;
 
 		Vector<ImportAssetsDatabaseEntry> files;
+		std::set<String> outputAssets;
 		
 		std::atomic<size_t> assetsImported{};
 		size_t assetsToImport{};

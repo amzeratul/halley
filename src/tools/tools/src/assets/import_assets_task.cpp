@@ -16,9 +16,9 @@ ImportAssetsTask::ImportAssetsTask(String taskName, ImportAssetsDatabase& db, co
 	, db(db)
 	, importer(importer)
 	, assetsPath(assetsPath)
-	, files(std::move(files))
 	, project(project)
 	, packAfter(packAfter)
+	, files(std::move(files))
 {}
 
 void ImportAssetsTask::run()
@@ -56,7 +56,7 @@ void ImportAssetsTask::run()
 		setProgress(1.0f, "");
 
 		if (packAfter) {
-			addContinuation(EditorTaskAnchor(std::make_unique<AssetPackerTask>(project)));
+			addContinuation(EditorTaskAnchor(std::make_unique<AssetPackerTask>(project, std::move(outputAssets))));
 		}
 	}
 }
@@ -123,6 +123,11 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 			// File no longer exists as part of this asset, remove it
 			FileSystem::remove(assetsPath / f.filepath);
 		}
+	}
+
+	// Add to list of output assets
+	for (auto& o: out) {
+		outputAssets.insert(toString(o.type) + ":" + o.name);
 	}
 
 	// Store output in db

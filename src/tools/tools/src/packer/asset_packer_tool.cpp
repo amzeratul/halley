@@ -4,9 +4,7 @@
 #include "halley/tools/packer/asset_packer.h"
 #include "halley/support/logger.h"
 #include "halley/file/byte_serializer.h"
-#include "halley/tools/file/filesystem.h"
 #include "halley/tools/project/project.h"
-#include "halley/tools/assets/import_assets_database.h"
 #include "halley/tools/project/project_loader.h"
 
 using namespace Halley;
@@ -27,7 +25,7 @@ int AssetPackerTool::run(Vector<std::string> args)
 			const auto src = Path(args[1]);
 			const auto dst = Path(args[2]);
 
-			AssetPacker::pack(*project);
+			AssetPacker::pack(*project, {});
 			return 0;
 		} else {
 			Logger::logError("Usage: halley-cmd pack path/to/manifest.yaml projDir halleyDir");
