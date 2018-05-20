@@ -81,7 +81,7 @@ void Preferences::addRecent(Path path)
 {
 	auto name = path.string();
 	recents.erase(std::remove(recents.begin(), recents.end(), name), recents.end());
-	recents.push_back(name);
+	recents.insert(recents.begin(), name);
 	dirty = true;
 }
 

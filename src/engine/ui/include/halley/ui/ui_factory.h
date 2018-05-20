@@ -44,5 +44,6 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeLabel(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeButton(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeTextInput(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeList(const ConfigNode& node);
 	};
 }

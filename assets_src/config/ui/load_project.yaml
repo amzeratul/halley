@@ -12,6 +12,11 @@ widget:
           id: topLabel
           class: label
           text: "Enter the path of the project to load:"
+      - proportion: 1
+        border: [0, 10, 0, 10]
+        widget:
+          id: recent
+          class: list
       - proportion: 0
         fill: centre
         sizer:

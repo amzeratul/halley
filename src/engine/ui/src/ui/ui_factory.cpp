@@ -1,10 +1,11 @@
 #include "halley/file_formats/config_file.h"
+#include "halley/core/api/halley_api.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/ui_widget.h"
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_button.h"
 #include "halley/ui/widgets/ui_textinput.h"
-#include "halley/core/api/halley_api.h"
+#include "halley/ui/widgets/ui_list.h"
 
 using namespace Halley;
 
@@ -18,6 +19,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, std
 	factories["label"] = [=] (const ConfigNode& node) { return makeLabel(node); };
 	factories["button"] = [=] (const ConfigNode& node) { return makeButton(node); };
 	factories["textInput"] = [=] (const ConfigNode& node) { return makeTextInput(node); };
+	factories["list"] = [=] (const ConfigNode& node) { return makeList(node); };
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeUI(const ConfigNode& node)
@@ -31,9 +33,13 @@ std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& node)
 	auto iter = factories.find(widgetClass);
 	if (iter == factories.end()) {
 		throw Exception("Unknown widget class: " + widgetClass);
-	} else {
-		return iter->second(node);
 	}
+	
+	auto widget = iter->second(node);
+	if (node.hasKey("size")) {
+		widget->setMinSize(asVector2f(node["size"], {}));
+	}
+	return widget;
 }
 
 Maybe<UISizer> UIFactory::makeSizer(const ConfigNode& node)
@@ -188,12 +194,7 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& node)
 		sizer->add(std::make_shared<UILabel>(style.getTextRenderer("label"), label), 1, Vector4f(), UISizerAlignFlags::Centre);
 	}
 
-	auto button = std::make_shared<UIButton>(id, style, std::move(sizer));
-	if (node.hasKey("size")) {
-		auto minSize = asVector2f(node["size"], {});
-		button->setMinSize(minSize);
-	}
-	return button;
+	return std::make_shared<UIButton>(id, style, std::move(sizer));
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& node)
@@ -202,10 +203,17 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& node)
 	auto style = UIStyle(node["style"].asString("input"), styleSheet);
 	auto label = parseLabel(node);
 
-	auto input = std::make_shared<UITextInput>(api.input->getKeyboard(), id, style, "", label);
-	if (node.hasKey("size")) {
-		auto minSize = asVector2f(node["size"], {});
-		input->setMinSize(minSize);
-	}
-	return input;
+	return std::make_shared<UITextInput>(api.input->getKeyboard(), id, style, "", label);
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& node)
+{
+	auto id = node["id"].asString();
+	auto style = UIStyle(node["style"].asString("list"), styleSheet);
+	auto label = parseLabel(node);
+
+	auto orientation = fromString<UISizerType>(node["type"].asString("vertical"));
+	int nColumns = node["columns"].asInt(1);
+
+	return std::make_shared<UIList>(id, style, orientation, nColumns);
 }

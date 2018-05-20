@@ -125,15 +125,25 @@ void EditorRootStage::createLoadProjectUI()
 {
 	auto loadProjectUI = uiFactory->makeUI(getResources().get<ConfigFile>("ui/load_project")->getRoot());
 
+	loadProjectUI->getEventHandler().setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
+	{
+		event.getCurWidget().getWidgetAs<UITextInput>("input")->setText(event.getData());
+	});
+
 	loadProjectUI->getEventHandler().setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
 	{
-		auto input = event.getCurWidget().getWidgetAs<UITextInput>("input");
-		project = editor.loadProject(input->getText());
+		project = editor.loadProject(event.getCurWidget().getWidgetAs<UITextInput>("input")->getText());
 		if (project) {
 			event.getCurWidget().destroy();
 			loadProject();
 		}
 	});
+
+	auto recent = loadProjectUI->getWidgetAs<UIList>("recent");
+	for (auto& r: editor.getPreferences().getRecents()) {
+		recent->addTextItem(r, LocalisedString::fromUserString(r));
+	}
+	recent->addTextItem("", LocalisedString::fromHardcodedString("New location..."));
 
 	uiMainPanel->add(loadProjectUI, 1, Vector4f(), UISizerAlignFlags::Centre);
 }

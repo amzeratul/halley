@@ -157,6 +157,7 @@ void UIEventHandler::handle(UIEvent& event)
 	} else {
 		auto iter2 = handles.find(event.getType());
 		if (iter2 != handles.end()) {
+			event.setCurWidget(widget);
 			iter2->second(event);
 		} else {
 			throw Exception("Unable to handle event!");
