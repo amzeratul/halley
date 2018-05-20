@@ -139,6 +139,9 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 
 	// Figure out the right importer and assetId for this file
 	auto& assetImporter = isCodegen ? project.getAssetImporter().getImporter(ImportAssetType::Codegen) : project.getAssetImporter().getImporter(filePath);
+	if (assetImporter.getType() == ImportAssetType::Skip) {
+		return false;
+	}
 	String assetId = assetImporter.getAssetId(filePath, db.getMetadata(filePath));
 
 	// Build timestamped path
@@ -223,7 +226,7 @@ std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::filterNeedsImporting(Imp
 {
 	Vector<ImportAssetsDatabaseEntry> toImport;
 
-	for (auto &a : assets) {
+	for (auto& a: assets) {
 		if (db.needsImporting(a.second)) {
 			toImport.push_back(a.second);
 		}

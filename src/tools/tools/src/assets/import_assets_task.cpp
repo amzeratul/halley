@@ -8,6 +8,7 @@
 #include "halley/tools/assets/asset_collector.h"
 #include "halley/concurrency/concurrent.h"
 #include "halley/tools/packer/asset_packer_task.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -63,6 +64,8 @@ void ImportAssetsTask::run()
 
 bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
+	Logger::logInfo("Importing " + asset.assetId);
+
 	std::vector<AssetResource> out;
 	std::vector<TimestampedPath> additionalInputs;
 	try {
@@ -106,6 +109,7 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 		}
 	} catch (std::exception& e) {
 		addError("\"" + asset.assetId + "\" - " + e.what());
+		asset.additionalInputFiles = std::move(additionalInputs);
 		db.markFailed(asset);
 
 		return false;
