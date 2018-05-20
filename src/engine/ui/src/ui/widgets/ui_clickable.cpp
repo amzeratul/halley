@@ -35,7 +35,7 @@ void UIClickable::releaseMouse(Vector2f mousePos, int button)
 
 void UIClickable::onClick(UIEventCallback callback)
 {
-	getEventHandler().setHandle(UIEventType::ButtonClicked, callback);
+	setHandle(UIEventType::ButtonClicked, callback);
 }
 
 UIClickable::State UIClickable::getCurState() const

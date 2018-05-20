@@ -21,7 +21,8 @@ namespace Halley
 
 		UIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet);
 
-		std::shared_ptr<UIWidget> makeUI(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeUI(const String& configName);
+		std::shared_ptr<UIWidget> makeUIFromNode(const ConfigNode& node);
 
 	private:
 		const HalleyAPI& api;

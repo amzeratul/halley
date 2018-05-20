@@ -147,7 +147,7 @@ void UIDropdown::open()
 		dropdownWindow->setMinSize(Vector2f(getSize().x, getSize().y));
 		addChild(dropdownWindow);
 
-		dropdownList->getEventHandler().setHandle(UIEventType::ListAccept, [=] (const UIEvent& event)
+		dropdownList->setHandle(UIEventType::ListAccept, [=] (const UIEvent& event)
 		{
 			setSelectedOption(event.getIntData());
 			close();

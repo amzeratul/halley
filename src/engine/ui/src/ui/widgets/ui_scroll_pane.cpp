@@ -6,22 +6,21 @@ using namespace Halley;
 UIScrollPane::UIScrollPane(Vector2f clipSize, bool scrollHorizontal, bool scrollVertical, Vector2f minSize)
 	: UIWidget("", minSize, UISizer(UISizerType::Vertical, 0))
 	, clipSize(clipSize)
-	, scrollPos()
 	, scrollSpeed(10.0f)
 	, scrollHorizontal(scrollHorizontal)
 	, scrollVertical(scrollVertical)
 {
-	getEventHandler().setHandle(UIEventType::MouseWheel, [this] (const UIEvent& event)
+	setHandle(UIEventType::MouseWheel, [this] (const UIEvent& event)
 	{
 		onMouseWheel(event);
 	});
 
-	getEventHandler().setHandle(UIEventType::MakeAreaVisible, [this] (const UIEvent& event)
+	setHandle(UIEventType::MakeAreaVisible, [this] (const UIEvent& event)
 	{
 		scrollToShow(event.getRectData(), false);
 	});
 
-	getEventHandler().setHandle(UIEventType::MakeAreaVisibleCentered, [this] (const UIEvent& event)
+	setHandle(UIEventType::MakeAreaVisibleCentered, [this] (const UIEvent& event)
 	{
 		scrollToShow(event.getRectData(), true);
 	});

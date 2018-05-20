@@ -22,7 +22,12 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, std
 	factories["list"] = [=] (const ConfigNode& node) { return makeList(node); };
 }
 
-std::shared_ptr<UIWidget> UIFactory::makeUI(const ConfigNode& node)
+std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName)
+{
+	return makeUIFromNode(resources.get<ConfigFile>(configName)->getRoot());
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeUIFromNode(const ConfigNode& node)
 {
 	return makeWidget(node["widget"]);
 }

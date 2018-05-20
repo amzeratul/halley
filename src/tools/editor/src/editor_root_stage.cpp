@@ -123,14 +123,14 @@ void EditorRootStage::createUI()
 
 void EditorRootStage::createLoadProjectUI()
 {
-	auto loadProjectUI = uiFactory->makeUI(getResources().get<ConfigFile>("ui/load_project")->getRoot());
+	auto loadProjectUI = uiFactory->makeUI("ui/load_project");
 
-	loadProjectUI->getEventHandler().setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
+	loadProjectUI->setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
 	{
 		event.getCurWidget().getWidgetAs<UITextInput>("input")->setText(event.getData());
 	});
 
-	loadProjectUI->getEventHandler().setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
+	loadProjectUI->setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
 	{
 		project = editor.loadProject(event.getCurWidget().getWidgetAs<UITextInput>("input")->getText());
 		if (project) {

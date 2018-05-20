@@ -80,6 +80,8 @@ namespace Halley {
 
 		void setEventHandler(std::shared_ptr<UIEventHandler> handler);
 		UIEventHandler& getEventHandler();
+		void setHandle(UIEventType type, UIEventCallback handler);
+		void setHandle(UIEventType type, String id, UIEventCallback handler);
 		
 		virtual void setInputType(UIInputType uiInput);
 		virtual void setJoystickType(JoystickType joystickType);

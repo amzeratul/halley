@@ -23,7 +23,7 @@ UIScrollBar::UIScrollBar(UIScrollDirection direction, UIStyle style, bool always
 	b1 = std::make_shared<UIButton>("b1", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "right" : "down"));
 	UIWidget::add(b1);
 
-	getEventHandler().setHandle(UIEventType::ButtonClicked, [=] (const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, [=] (const UIEvent& event)
 	{
 		if (event.getSourceId() == "b0") {
 			scrollLines(-1);
@@ -32,7 +32,7 @@ UIScrollBar::UIScrollBar(UIScrollDirection direction, UIStyle style, bool always
 		}
 	});
 
-	getEventHandler().setHandle(UIEventType::Dragged, [=] (const UIEvent& event)
+	setHandle(UIEventType::Dragged, [=] (const UIEvent& event)
 	{
 		onScrollDrag(event.getVectorData() - bar->getPosition());
 	});

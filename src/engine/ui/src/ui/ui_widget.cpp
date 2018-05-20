@@ -396,6 +396,16 @@ UIEventHandler& UIWidget::getEventHandler()
 	return *eventHandler;
 }
 
+void UIWidget::setHandle(UIEventType type, UIEventCallback handler)
+{
+	getEventHandler().setHandle(type, std::move(handler));
+}
+
+void UIWidget::setHandle(UIEventType type, String id, UIEventCallback handler)
+{
+	getEventHandler().setHandle(type, std::move(id), std::move(handler));
+}
+
 void UIWidget::setInputType(UIInputType uiInput)
 {
 	lastInputType = uiInput;

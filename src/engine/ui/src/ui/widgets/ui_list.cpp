@@ -13,8 +13,8 @@ UIList::UIList(const String& id, UIStyle style, UISizerType orientation, int nCo
 	getSizer().setEvenColumns();
 	sprite = style.getSprite("background");
 
-	getEventHandler().setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) {});
-	getEventHandler().setHandle(UIEventType::SetHovered, [=] (const UIEvent& event) {});
+	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) {});
+	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event) {});
 }
 
 bool UIList::setSelectedOption(int option)
