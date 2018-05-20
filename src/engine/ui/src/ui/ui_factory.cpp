@@ -76,17 +76,16 @@ Maybe<UISizer> UIFactory::makeSizer(const ConfigNode& entryNode)
 		return {};
 	}
 
-	if (!hasSizer) {
-		// Need sizer for children, return default
-		return UISizer();
-	}
-
-	auto& sizerNode = entryNode["sizer"];
-	auto sizerType = fromString<UISizerType>(sizerNode["type"].asString("horizontal"));
-	float gap = sizerNode["gap"].asFloat(1.0f);
-	int nColumns = sizerNode["columns"].asInt(1);
+	UISizer sizer;
 	
-	auto sizer = UISizer(sizerType, gap, nColumns);
+	if (hasSizer) {
+		auto& sizerNode = entryNode["sizer"];
+		auto sizerType = fromString<UISizerType>(sizerNode["type"].asString("horizontal"));
+		float gap = sizerNode["gap"].asFloat(1.0f);
+		int nColumns = sizerNode["columns"].asInt(1);
+		
+		sizer = UISizer(sizerType, gap, nColumns);
+	}
 
 	loadSizerChildren(sizer, entryNode["children"]);
 
@@ -158,7 +157,7 @@ void UIFactory::loadSizerChildren(UISizer& sizer, const ConfigNode& node)
 
 			if (childNode.hasKey("widget")) {
 				sizer.add(makeWidget(childNode), proportion, border, fill);
-			} else if (childNode.hasKey("sizer")) {
+			} else if (childNode.hasKey("sizer") || childNode.hasKey("children")) {
 				sizer.add(makeSizerPtr(childNode), proportion, border, fill);
 			} else if (childNode.hasKey("spacer")) {
 				sizer.addSpacer(proportion);
