@@ -1,15 +1,9 @@
 #pragma once
+#include "halley/ui/ui_factory.h"
 
 namespace Halley {
-    class EditorUIFactory {
+    class EditorUIFactory : public UIFactory {
     public:
-		EditorUIFactory(Resources& resources);
-
-		std::shared_ptr<UILabel> makeLabel(const String& label);
-
-    private:
-		Resources& resources;
-    	I18N i18n;
-		UIStyleSheet styleSheet;
+		EditorUIFactory(Resources& resources, I18N& i18n);
     };
 }

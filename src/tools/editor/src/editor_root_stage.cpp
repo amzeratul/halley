@@ -110,7 +110,7 @@ void EditorRootStage::initSprites()
 
 void EditorRootStage::createUI()
 {
-	uiFactory = std::make_unique<EditorUIFactory>(getResources());
+	uiFactory = std::make_unique<EditorUIFactory>(getResources(), i18n);
 	ui = std::make_unique<UIRoot>(&getAudioAPI());
 
 	uiMainPanel = std::make_shared<UIWidget>("mainPanel", Vector2f(), UISizer(UISizerType::Vertical));
@@ -121,7 +121,7 @@ void EditorRootStage::createUI()
 
 void EditorRootStage::createLoadProjectUI()
 {
-	auto test = uiFactory->makeLabel("Test!");
+	auto test = uiFactory->makeUI(getResources().get<ConfigFile>("ui/load_project")->getRoot());
 	uiMainPanel->add(test, 1, Vector4f(), UISizerAlignFlags::Centre);
 }
 

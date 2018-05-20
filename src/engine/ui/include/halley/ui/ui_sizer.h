@@ -13,6 +13,18 @@ namespace Halley {
 		Grid
 	};
 
+	template <>
+	struct EnumNames<UISizerType> {
+		constexpr std::array<const char*, 4> operator()() const {
+			return {{
+				"undefined",
+				"horizontal",
+				"vertical",
+				"grid"
+			}};
+		}
+	};
+
 	namespace UISizerFillFlags {
 		enum Type {
 			FillHorizontal = 0x1,

@@ -1,0 +1,24 @@
+---
+
+widget:
+  id: ""
+  class: widget
+  sizer:
+    type: vertical
+    children:
+      - proportion: 0
+        border: [0, 0, 0, 0]
+        fill: fill
+        widget:
+          id: topLabel
+          class: label
+          text: "Hello world!"
+      - proportion: 0
+        border: [0, 0, 0, 0]
+        fill: fill
+        widget:
+          id: ok
+          class: button
+          text: "OK"
+
+...
