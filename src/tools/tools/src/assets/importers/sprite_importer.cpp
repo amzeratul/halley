@@ -19,6 +19,8 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	String spriteSheetName = Path(asset.assetId).replaceExtension("").string();
 	std::vector<ImageData> totalFrames;
 
+	Maybe<Metadata> startMeta;
+
 	Maybe<String> palette;
 
 	for (auto& inputFile: asset.inputFiles) {
@@ -27,6 +29,9 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 		// Meta
 		Metadata meta = inputFile.metadata;
+		if (!startMeta) {
+			startMeta = meta;
+		}
 		Vector2i pivot;
 		pivot.x = meta.getInt("pivotX", 0);
 		pivot.y = meta.getInt("pivotY", 0);
@@ -94,6 +99,9 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	// Image metafile
 	auto size = atlasImage->getSize();
 	Metadata meta;
+	if (startMeta) {
+		meta = startMeta.get();
+	}
 	if (palette) {
 		meta.set("palette", palette.get());
 	}
