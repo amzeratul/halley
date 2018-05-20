@@ -5,6 +5,7 @@
 #include "halley/tools/assets/check_assets_task.h"
 #include "halley/audio/resampler.h"
 #include "preferences.h"
+#include "ui/editor_ui_factory.h"
 
 using namespace Halley;
 
@@ -21,28 +22,23 @@ EditorRootStage::~EditorRootStage()
 void EditorRootStage::init()
 {
 	initSprites();
-	taskBar = std::make_unique<TaskBar>(getResources());
+
+	createUI();
 
 	devConServer = std::make_unique<DevConServer>(getNetworkAPI().createService(DevCon::devConPort), DevCon::devConPort);
 
 	if (editor.hasProjectLoaded()) {
 		loadProject();
+	} else {
+		createLoadProjectUI();
 	}
 }
 
 void EditorRootStage::onVariableUpdate(Time time)
 {
 	tasks->update(time);
-	
-	if (taskBar) {
-		taskBar->update(tasks->getTasks(), time);
-	}
 
-	auto& kb = *getInputAPI().getKeyboard();
-
-	if (console) {
-		console->update(kb);
-	}
+	updateUI(time);
 
 	if (devConServer) {
 		devConServer->update();
@@ -65,6 +61,12 @@ void EditorRootStage::onRender(RenderContext& context) const
 		Sprite bg = background;
 		bg.setTexRect(view).setSize(view.getSize()).draw(painter);
 		halleyLogo.clone().setPos(Vector2f(getVideoAPI().getWindow().getDefinition().getSize() / 2)).draw(painter);
+
+		// UI
+		SpritePainter spritePainter;
+		spritePainter.start(100);
+		ui->draw(spritePainter, 0, 0);
+		spritePainter.draw(0, painter);
 
 		// Taskbar
 		taskBar->draw(painter);
@@ -103,6 +105,40 @@ void EditorRootStage::initSprites()
 			.set("u_smoothness", 0.125f)
 			.set("u_outline", 0.0f)
 			.set("u_outlineColour", col);
+	}
+}
+
+void EditorRootStage::createUI()
+{
+	uiFactory = std::make_unique<EditorUIFactory>(getResources());
+	ui = std::make_unique<UIRoot>(&getAudioAPI());
+
+	uiMainPanel = std::make_shared<UIWidget>("mainPanel", Vector2f(), UISizer(UISizerType::Vertical));
+	ui->addChild(uiMainPanel);
+
+	taskBar = std::make_unique<TaskBar>(getResources());
+}
+
+void EditorRootStage::createLoadProjectUI()
+{
+	auto test = uiFactory->makeLabel("Test!");
+	uiMainPanel->add(test, 1, Vector4f(), UISizerAlignFlags::Centre);
+}
+
+void EditorRootStage::updateUI(Time time)
+{
+	if (taskBar) {
+		taskBar->update(tasks->getTasks(), time);
+	}
+
+	auto kb = getInputAPI().getKeyboard();
+
+	auto size = getVideoAPI().getWindow().getDefinition().getSize();
+	uiMainPanel->setMinSize(Vector2f(size));
+	ui->update(time, UIInputType::Mouse, getInputAPI().getMouse(), kb);
+
+	if (console) {
+		console->update(*kb);
 	}
 }
 

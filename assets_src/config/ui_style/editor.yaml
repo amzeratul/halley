@@ -1,0 +1,39 @@
+---
+
+uiStyle:
+  sprites: {}
+
+  borders:
+    button.innerBorder: [ 3, 3, 3, 3 ]
+    list.innerBorder: [ 0, 0, 0, 0 ]
+    list.item.innerBorder: [ 3, 0, 3, 0 ]
+    list.extraMouseBorder: [ 0, 0, 1, 1 ]
+    colourList.innerBorder: [ 0, 0, 0, 0 ]
+    colourList.item.innerBorder: [ 1, 1, 1, 1 ]
+    colourList.extraMouseBorder: [ 1, 1, 1, 1 ]
+    tabs.innerBorder: [ 10, 0, 10, 0 ]
+    tabs.item.innerBorder: [ 3, 1, 3, 1 ]
+    tabs.extraMouseBorder: [ 0, 0, 0, 0 ]
+    dropdown.innerBorder: [ 2, 1, 2, 2 ]
+    dialogue.innerBorder: [ 3, 3, 4, 4 ]
+    innerWindow.innerBorder: [ 3, 3, 4, 4 ]
+    scrollbar.up.innerBorder: [ 3, 3, 3, 3 ]
+    scrollbar.down.innerBorder: [ 3, 3, 3, 3 ]
+    scrollbar.thumb.innerBorder: [ 3, 3, 3, 3 ]
+    scrollDialogue.innerBorder: [ 6, 6, 6, 6 ]
+    staticBox.innerBorder: [ 3, 3, 3, 3 ]
+
+  audioClips:
+    button.upSound: ""
+    button.downSound: ""
+    button.hoverSound: ""
+
+  textRenderers:
+    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+
+  floats:
+    list.gap: 1
+    colourList.gap: 0
+    tabs.gap: 1
+
+...

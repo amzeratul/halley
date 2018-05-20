@@ -7,6 +7,7 @@ namespace Halley {
 	class HalleyEditor;
 	class ConsoleWindow;
 	class TaskBar;
+	class EditorUIFactory;
 
 	class EditorRootStage final : public Stage
 	{
@@ -24,7 +25,9 @@ namespace Halley {
 		Sprite halleyLogo;
 		Sprite background;
 
+		std::unique_ptr<EditorUIFactory> uiFactory;
 		std::unique_ptr<UIRoot> ui;
+		std::shared_ptr<UIWidget> uiMainPanel;
 
 		std::unique_ptr<ConsoleWindow> console;
 		
@@ -33,6 +36,10 @@ namespace Halley {
 		std::unique_ptr<DevConServer> devConServer;
 
 		void initSprites();
+		void createUI();
+		void createLoadProjectUI();
+
+		void updateUI(Time time);
 
 		void loadProject();
 	};

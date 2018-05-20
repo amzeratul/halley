@@ -11,6 +11,7 @@ set (editor_sources
 
 	"src/console/console_window.cpp"
 
+	"src/ui/editor_ui_factory.cpp"
 	"src/ui/taskbar/taskbar.cpp"
 	)
 
@@ -22,6 +23,7 @@ set (editor_headers
 
 	"src/console/console_window.h"
 
+	"src/ui/editor_ui_factory.h"
 	"src/ui/taskbar/taskbar.h"
 	)
 
