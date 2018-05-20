@@ -13,6 +13,19 @@ uiStyle:
     list.item.hover: { img: ui/ui_list_item.png, colour: "#B68FCB" }
     list.item.selected: { img: ui/ui_list_item.png, colour: "#913DA3" }
 
+    scrollbar.bar.normal: { img: ui/ui_scrollbar.png, colour: "#5E3962" }
+    scrollbar.up.normal: { img: ui/ui_scrollbar.png, colour: "#9C5BB5" }
+    scrollbar.up.disabled: { img: ui/ui_scrollbar.png, colour: "#8D7B95" }
+    scrollbar.up.down: { img: ui/ui_scrollbar.png, colour: "#913DA3" }
+    scrollbar.up.hover: { img: ui/ui_scrollbar.png, colour: "#B68FCB" }
+    scrollbar.down.normal: { img: ui/ui_scrollbar.png, colour: "#9C5BB5" }
+    scrollbar.down.disabled: { img: ui/ui_scrollbar.png, colour: "#8D7B95" }
+    scrollbar.down.down: { img: ui/ui_scrollbar.png, colour: "#913DA3" }
+    scrollbar.down.hover: { img: ui/ui_scrollbar.png, colour: "#B68FCB" }
+    scrollbar.thumb.normal: { img: ui/ui_scrollbar.png, colour: "#9C5BB5" }
+    scrollbar.thumb.down: { img: ui/ui_scrollbar.png, colour: "#913DA3" }
+    scrollbar.thumb.hover: { img: ui/ui_scrollbar.png, colour: "#B68FCB" }
+
   borders:
     button.innerBorder: [ 5, 5, 5, 5 ]
 
@@ -43,6 +56,16 @@ uiStyle:
     button.hoverSound: ""
 
     list.selectionChangedSound: ""
+
+    scrollbar.up.upSound: ""
+    scrollbar.up.downSound: ""
+    scrollbar.up.hoverSound: ""
+    scrollbar.down.upSound: ""
+    scrollbar.down.downSound: ""
+    scrollbar.down.hoverSound: ""
+    scrollbar.thumb.upSound: ""
+    scrollbar.thumb.downSound: ""
+    scrollbar.thumb.hoverSound: ""
 
   textRenderers:
     label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }

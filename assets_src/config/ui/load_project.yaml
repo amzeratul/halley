@@ -15,8 +15,15 @@ widget:
       - proportion: 1
         border: [0, 10, 0, 10]
         widget:
-          id: recent
-          class: list
+          class: scrollBarPane
+          size: [200, 250]
+          sizer:
+            type: vertical
+            children:
+              - proportion: 1
+                widget:
+                  id: recent
+                  class: list
       - proportion: 0
         fill: centre
         sizer:
