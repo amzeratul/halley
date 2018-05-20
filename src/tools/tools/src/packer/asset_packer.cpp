@@ -115,9 +115,10 @@ void AssetPacker::generatePacks(std::map<String, AssetPackListing> packs, const 
 			}
 			Logger::logWarning("-----------------------\n");
 		} else {
-			// Only pack if this pack listing is active
-			if (packListing.second.isActive()) {
-				generatePack(packListing.first, packListing.second, src, dst);
+			// Only pack if this pack listing is active or if it doesn't exist
+			auto dstPack = dst / packListing.first + ".dat";
+			if (packListing.second.isActive() || !FileSystem::exists(dstPack)) {
+				generatePack(packListing.first, packListing.second, src, dstPack);
 			}
 		}
 	}
@@ -137,7 +138,6 @@ void AssetPacker::generatePack(const String& packId, const AssetPackListing& pac
 		auto fileData = FileSystem::readFile(src / entry.path);
 		size_t pos = data.size();
 		size_t size = fileData.size();
-		String packPath = packId + ".dat";
 		
 		// Read data into pack data
 		data.reserve(nextPowerOf2(pos + size));
@@ -146,14 +146,13 @@ void AssetPacker::generatePack(const String& packId, const AssetPackListing& pac
 
 		db.addAsset(entry.name, entry.type, AssetDatabase::Entry(toString(pos) + ":" + toString(size), entry.metadata));
 	}
-	Logger::logInfo("Packed " + toString(packListing.getEntries().size()) + " entries on \"" + packId + "\"");
 
 	if (!packListing.getEncryptionKey().isEmpty()) {
-		Logger::logInfo("Encrypting " + packId + "...");
+		Logger::logInfo("Encrypting \"" + packId + "\"...");
 		pack.encrypt(packListing.getEncryptionKey());
-		Logger::logInfo("Done\n");
 	}
+	Logger::logInfo("Done. Packed " + toString(packListing.getEntries().size()) + " entries on \"" + packId + "\".");
 
 	// Write pack
-	FileSystem::writeFile(dst / packId + ".dat", pack.writeOut());
+	FileSystem::writeFile(dst, pack.writeOut());
 }
