@@ -144,6 +144,8 @@ void TextRenderer::draw(Painter& painter) const
 			->set("u_smoothness", smooth)
 			.set("u_outline", outlineSize)
 			.set("u_outlineColour", outlineColour);
+
+		material->setPassEnabled(0, outline > 0.0001f);
 	}
 
 	float scale = size / font->getSizePoints();

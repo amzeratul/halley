@@ -68,6 +68,7 @@ namespace Halley
 	public:
 		Material(const Material& other);
 		explicit Material(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks = false); // forceLocalBlocks is for engine use only
+
 		void bind(int pass, Painter& painter);
 		void uploadData(Painter& painter);
 		static void resetBindCache();
@@ -86,6 +87,9 @@ namespace Halley
 		const Vector<MaterialParameter>& getUniforms() const;
 		const Vector<MaterialDataBlock>& getDataBlocks() const;
 
+		void setPassEnabled(int pass, bool enabled);
+		bool isPassEnabled(int pass) const;
+
 		Material& set(const String& name, const std::shared_ptr<const Texture>& texture);
 		Material& set(const String& name, const std::shared_ptr<Texture>& texture);
 
@@ -103,6 +107,9 @@ namespace Halley
 		Vector<MaterialTextureParameter> textureUniforms;
 		Vector<MaterialDataBlock> dataBlocks;
 		std::vector<std::shared_ptr<const Texture>> textures;
+
+		std::vector<char> passEnabled;
+
 		bool dirty = true;
 
 		void initUniforms(bool forceLocalBlocks);

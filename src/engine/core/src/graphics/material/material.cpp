@@ -105,6 +105,7 @@ Material::Material(const Material& other)
 	, textureUniforms(other.textureUniforms)
 	, dataBlocks(other.dataBlocks)
 	, textures(other.textures)
+	, passEnabled(other.passEnabled)
 {
 	for (auto& u: uniforms) {
 		u.rebind(*this);
@@ -114,6 +115,7 @@ Material::Material(const Material& other)
 Material::Material(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks)
 	: materialDefinition(materialDefinition)
 {
+	passEnabled.resize(materialDefinition->getNumPasses(), 1);
 	initUniforms(forceLocalBlocks);
 }
 
@@ -199,6 +201,13 @@ bool Material::operator==(const Material& other) const
 		}
 	}
 
+	// Different passes enabled
+	for (size_t i = 0; i < passEnabled.size(); ++i) {
+		if (passEnabled[i] != other.passEnabled[i]) {
+			return false;
+		}
+	}
+
 	// Must be the same
 	return true;
 }
@@ -232,6 +241,16 @@ const Vector<MaterialParameter>& Material::getUniforms() const
 const Vector<MaterialDataBlock>& Material::getDataBlocks() const
 {
 	return dataBlocks;
+}
+
+void Material::setPassEnabled(int pass, bool enabled)
+{
+	passEnabled.at(pass) = enabled ? 1 : 0;
+}
+
+bool Material::isPassEnabled(int pass) const
+{
+	return passEnabled[pass];
 }
 
 const Vector<MaterialTextureParameter>& Material::getTextureUniforms() const

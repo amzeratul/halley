@@ -308,16 +308,18 @@ void Painter::executeDrawTriangles(Material& material, size_t numVertices, void*
 
 	// Go through each pass
 	for (int i = 0; i < material.getDefinition().getNumPasses(); i++) {
-		// Bind pass
-		material.bind(i, *this);
+		if (material.isPassEnabled(i)) {
+			// Bind pass
+			material.bind(i, *this);
 
-		// Draw
-		drawTriangles(numIndices);
+			// Draw
+			drawTriangles(numIndices);
 
-		// Log stats
-		nDrawCalls++;
-		nTriangles += numIndices / 3;
-		nVertices += numVertices;
+			// Log stats
+			nDrawCalls++;
+			nTriangles += numIndices / 3;
+			nVertices += numVertices;
+		}
 	}
 
 	endDrawCall();
