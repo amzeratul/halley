@@ -5,7 +5,6 @@ UIAnimation::UIAnimation(const String& id, Vector2f size, Vector2f animationOffs
 	: UIWidget(id, size)
 	, offset(animationOffset)
 	, animation(animation)
-	, sprite(Sprite())
 {}
 
 AnimationPlayer& UIAnimation::getPlayer()

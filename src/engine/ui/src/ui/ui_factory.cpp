@@ -6,6 +6,14 @@
 #include "halley/ui/widgets/ui_button.h"
 #include "halley/ui/widgets/ui_textinput.h"
 #include "halley/ui/widgets/ui_list.h"
+#include "halley/ui/widgets/ui_dropdown.h"
+#include "halley/ui/widgets/ui_image.h"
+#include "halley/ui/widgets/ui_animation.h"
+#include "halley/ui/widgets/ui_scrollbar.h"
+#include "halley/ui/widgets/ui_scroll_pane.h"
+#include "halley/ui/widgets/ui_scrollbar_pane.h"
+#include "halley/ui/widgets/ui_checkbox.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -20,6 +28,13 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, std
 	factories["button"] = [=] (const ConfigNode& node) { return makeButton(node); };
 	factories["textInput"] = [=] (const ConfigNode& node) { return makeTextInput(node); };
 	factories["list"] = [=] (const ConfigNode& node) { return makeList(node); };
+	factories["dropdown"] = [=] (const ConfigNode& node) { return makeDropdown(node); };
+	factories["checkbox"] = [=] (const ConfigNode& node) { return makeCheckbox(node); };
+	factories["image"] = [=] (const ConfigNode& node) { return makeImage(node); };
+	factories["animation"] = [=] (const ConfigNode& node) { return makeAnimation(node); };
+	factories["scrollBar"] = [=] (const ConfigNode& node) { return makeScrollBar(node); };
+	factories["scrollPane"] = [=] (const ConfigNode& node) { return makeScrollPane(node); };
+	factories["scrollBarPane"] = [=] (const ConfigNode& node) { return makeScrollBarPane(node); };
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName)
@@ -30,6 +45,11 @@ std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName)
 std::shared_ptr<UIWidget> UIFactory::makeUIFromNode(const ConfigNode& node)
 {
 	return makeWidget(node["widget"]);
+}
+
+void UIFactory::setInputButtons(const String& key, UIInputButtons buttons)
+{
+	inputButtons[key] = buttons;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& node)
@@ -61,6 +81,16 @@ Maybe<UISizer> UIFactory::makeSizer(const ConfigNode& node)
 		loadSizerChildren(sizer, node);
 
 		return std::move(sizer);
+	}
+}
+
+UISizer UIFactory::makeSizerOrDefault(const ConfigNode& node, UISizer&& defaultSizer)
+{
+	auto sizer = makeSizer(node);
+	if (sizer) {
+		return std::move(sizer.get());
+	} else {
+		return std::move(defaultSizer);
 	}
 }
 
@@ -133,6 +163,18 @@ void UIFactory::loadSizerChildren(UISizer& sizer, const ConfigNode& node)
 			} else if (childNode.hasKey("stretchSpacer")) {
 				sizer.addStretchSpacer(proportion);
 			}
+		}
+	}
+}
+
+void UIFactory::applyInputButtons(UIWidget& widget, const String& key)
+{
+	if (!key.isEmpty()) {
+		auto iter = inputButtons.find(key);
+		if (iter == inputButtons.end()) {
+			Logger::logWarning("Input buttons binding not found: \"" + key + "\".");
+		} else {
+			widget.setInputButtons(iter->second);
 		}
 	}
 }
@@ -220,5 +262,86 @@ std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& node)
 	auto orientation = fromString<UISizerType>(node["type"].asString("vertical"));
 	int nColumns = node["columns"].asInt(1);
 
-	return std::make_shared<UIList>(id, style, orientation, nColumns);
+	auto widget = std::make_shared<UIList>(id, style, orientation, nColumns);
+	applyInputButtons(*widget, node["inputButtons"].asString("list"));
+	return widget;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeDropdown(const ConfigNode& node)
+{
+	auto id = node["id"].asString();
+	auto style = UIStyle(node["style"].asString("dropdown"), styleSheet);
+	auto scrollStyle = UIStyle(node["ScrollBarStyle"].asString("scrollbar"), styleSheet);
+	auto listStyle = UIStyle(node["listStyle"].asString("list"), styleSheet);
+	auto label = parseLabel(node);
+
+	// TODO?
+	std::vector<LocalisedString> options;
+	int defaultOption = 0;
+
+	auto widget = std::make_shared<UIDropdown>(id, style, scrollStyle, listStyle, options, defaultOption);
+	applyInputButtons(*widget, node["inputButtons"].asString("list"));
+	return widget;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeCheckbox(const ConfigNode& node)
+{
+	auto id = node["id"].asString();
+	auto style = UIStyle(node["style"].asString("checkbox"), styleSheet);
+	auto checked = node["checked"].asBool(false);
+
+	return std::make_shared<UICheckbox>(id, style, checked);
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& node)
+{
+	auto imageName = node["image"].asString();
+	auto materialName = node["material"].asString("");
+	auto sprite = Sprite().setImage(resources, imageName, materialName);
+	Vector4f innerBorder = asVector4f(node["innerBorder"], Vector4f());
+
+	return std::make_shared<UIImage>(sprite, makeSizer(node["sizer"]), innerBorder);
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& node)
+{
+	auto id = node["id"].asString();
+	auto size = asVector2f(node["size"], Vector2f());
+	auto animationOffset = asVector2f(node["offset"], Vector2f());
+	auto animationName = node["animation"].asString();
+	auto sequence = node["sequence"].asString("default");
+	auto direction = node["direction"].asString("default");
+
+	auto animation = AnimationPlayer(resources.get<Animation>(animationName), sequence, direction);
+
+	return std::make_shared<UIAnimation>(id, size, animationOffset, animation);
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeScrollPane(const ConfigNode& node)
+{
+	auto clipSize = asVector2f(node["clipSize"], Vector2f());
+	auto scrollHorizontal = node["scrollHorizontal"].asBool(false);
+	auto scrollVertical = node["scrollVertical"].asBool(true);
+
+	return std::make_shared<UIScrollPane>(clipSize, makeSizerOrDefault(node["sizer"], UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical);
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeScrollBar(const ConfigNode& node)
+{
+	auto style = UIStyle(node["style"].asString("scrollbar"), styleSheet);
+	auto scrollDirection = fromString<UIScrollDirection>(node["scrollDirection"].asString("vertical"));
+	auto alwaysShow = !node["autoHide"].asBool(false);
+
+	return std::make_shared<UIScrollBar>(scrollDirection, style, alwaysShow);
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeScrollBarPane(const ConfigNode& node)
+{
+	auto clipSize = asVector2f(node["clipSize"], Vector2f());
+	auto style = UIStyle(node["style"].asString("scrollbar"), styleSheet);
+	auto scrollHorizontal = node["scrollHorizontal"].asBool(false);
+	auto scrollVertical = node["scrollVertical"].asBool(true);
+	auto alwaysShow = !node["autoHide"].asBool(false);
+
+	return std::make_shared<UIScrollBarPane>(clipSize, style, makeSizerOrDefault(node["sizer"], UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow);
 }

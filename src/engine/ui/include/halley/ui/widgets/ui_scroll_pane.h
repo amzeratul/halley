@@ -8,9 +8,19 @@ namespace Halley {
 		Vertical
 	};
 
+	template <>
+	struct EnumNames<UIScrollDirection> {
+		constexpr std::array<const char*, 2> operator()() const {
+			return {{
+				"horizontal",
+				"vertical"
+			}};
+		}
+	};
+
     class UIScrollPane : public UIWidget {
     public:
-		UIScrollPane(Vector2f clipSize, bool scrollHorizontal = false, bool scrollVertical = true, Vector2f minSize = {});
+		UIScrollPane(Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal = false, bool scrollVertical = true);
 
 		Vector2f getScrollPosition() const;
 		Vector2f getRelativeScrollPosition() const;

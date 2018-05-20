@@ -6,7 +6,9 @@
 namespace Halley {
 	class UIScrollBarPane : public UIWidget {
 	public:
-		UIScrollBarPane(Vector2f clipSize, UIStyle style, bool scrollHorizontal = false, bool scrollVertical = true, bool alwaysShow = true, Vector2f minSize = {});
+		UIScrollBarPane(Vector2f clipSize, UIStyle style, UISizer&& sizer, bool scrollHorizontal = false, bool scrollVertical = true, bool alwaysShow = true, Vector2f minSize = {});
+
+		std::shared_ptr<UIScrollPane> getPane() const;
 
 		void add(std::shared_ptr<UIWidget> widget, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
 		void add(std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;

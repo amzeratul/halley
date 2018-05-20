@@ -3,8 +3,8 @@
 
 using namespace Halley;
 
-UIScrollPane::UIScrollPane(Vector2f clipSize, bool scrollHorizontal, bool scrollVertical, Vector2f minSize)
-	: UIWidget("", minSize, UISizer(UISizerType::Vertical, 0))
+UIScrollPane::UIScrollPane(Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal, bool scrollVertical)
+	: UIWidget("", Vector2f(), std::move(sizer))
 	, clipSize(clipSize)
 	, scrollSpeed(10.0f)
 	, scrollHorizontal(scrollHorizontal)
