@@ -14,7 +14,7 @@
 using namespace Halley;
 using namespace std::chrono_literals;
 
-CheckAssetsTask::CheckAssetsTask(Project& project, bool headless)
+CheckAssetsTask::CheckAssetsTask(Project& project, bool oneShot)
 	: EditorTask("Check assets", true, false)
 	, project(project)
 	, monitorAssets(project.getUnpackedAssetsPath())
@@ -22,7 +22,7 @@ CheckAssetsTask::CheckAssetsTask(Project& project, bool headless)
 	, monitorSharedAssetsSrc(project.getSharedAssetsSrcPath())
 	, monitorGen(project.getGenPath())
 	, monitorGenSrc(project.getGenSrcPath())
-	, headless(headless)
+	, oneShot(oneShot)
 {}
 
 void CheckAssetsTask::run()
@@ -45,7 +45,7 @@ void CheckAssetsTask::run()
 			std::this_thread::sleep_for(5ms);
 		}
 
-		if (headless) {
+		if (oneShot) {
 			return;
 		}
 		std::this_thread::sleep_for(monitorAssets.hasRealImplementation() ? 100ms : 1000ms);

@@ -20,10 +20,8 @@ EditorRootStage::~EditorRootStage()
 
 void EditorRootStage::init()
 {
-	if (!editor.isHeadless()) {
-		initSprites();
-		taskBar = std::make_unique<TaskBar>(getResources());
-	}
+	initSprites();
+	taskBar = std::make_unique<TaskBar>(getResources());
 
 	devConServer = std::make_unique<DevConServer>(getNetworkAPI().createService(DevCon::devConPort), DevCon::devConPort);
 
@@ -35,11 +33,7 @@ void EditorRootStage::init()
 void EditorRootStage::onVariableUpdate(Time time)
 {
 	tasks->update(time);
-
-	if (editor.isHeadless() && tasks->getTasks().empty()) {
-		getCoreAPI().quit();
-	}
-
+	
 	if (taskBar) {
 		taskBar->update(tasks->getTasks(), time);
 	}
@@ -55,9 +49,7 @@ void EditorRootStage::onVariableUpdate(Time time)
 	}
 
 	auto& prefs = editor.getPreferences();
-	if (!editor.isHeadless()) {
-		prefs.updateWindowDefinition(getVideoAPI().getWindow());
-	}
+	prefs.updateWindowDefinition(getVideoAPI().getWindow());
 	if (prefs.isDirty()) {
 		prefs.saveToFile();
 	}
@@ -116,9 +108,7 @@ void EditorRootStage::initSprites()
 
 void EditorRootStage::loadProject()
 {
-	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(editor.getProject(), editor.isHeadless())));
+	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(editor.getProject(), false)));
 
-	if (!editor.isHeadless()) {
-		console = std::make_unique<ConsoleWindow>(getResources());
-	}
+	console = std::make_unique<ConsoleWindow>(getResources());
 }

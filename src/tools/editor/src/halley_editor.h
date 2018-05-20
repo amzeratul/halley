@@ -20,7 +20,6 @@ namespace Halley
 
 		bool hasProjectLoaded() const;
 		Project& getProject() const;
-		bool isHeadless() const { return headless; }
 
 		Preferences& getPreferences();
 
@@ -41,7 +40,6 @@ namespace Halley
 		std::unique_ptr<Preferences> preferences;
 		Path rootPath;
 
-		bool headless = true;
 		String platform;
 		String projectPath;
 		bool gotProjectPath = false;

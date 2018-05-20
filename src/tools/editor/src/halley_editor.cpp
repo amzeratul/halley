@@ -27,20 +27,16 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 {
 	initSDLSystemPlugin(registry);
 	initAsioPlugin(registry);
-	if (headless) {
-		return HalleyAPIFlags::Network;
-	} else {
-		initSDLAudioPlugin(registry);
-		initSDLInputPlugin(registry);
+	initSDLAudioPlugin(registry);
+	initSDLInputPlugin(registry);
 
 #ifdef _WIN32
-		initDX11Plugin(registry);
+	initDX11Plugin(registry);
 #else
-		initOpenGLPlugin(registry);
+	initOpenGLPlugin(registry);
 #endif
-		
-		return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input | HalleyAPIFlags::Network;
-	}
+	
+	return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input | HalleyAPIFlags::Network;
 }
 
 void HalleyEditor::initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator)
@@ -66,7 +62,7 @@ bool HalleyEditor::isDevMode() const
 bool HalleyEditor::shouldCreateSeparateConsole() const
 {
 #ifdef _DEBUG
-	return !headless && isDevMode();
+	return isDevMode();
 #else
 	return false;
 #endif
@@ -86,15 +82,12 @@ void HalleyEditor::init(const Environment& environment, const Vector<String>& ar
 
 void HalleyEditor::parseArguments(const std::vector<String>& args)
 {
-	headless = false;
 	platform = "pc";
 	gotProjectPath = false;
 
 	for (auto& arg : args) {
 		if (arg.startsWith("--")) {
-			if (arg == "--headless") {
-				headless = true;
-			} if (arg.startsWith("--platform=")) {
+			if (arg.startsWith("--platform=")) {
 				platform = arg.mid(String("--platform=").length());
 			} else {
 				std::cout << "Unknown argument \"" << arg << "\".\n";
@@ -121,9 +114,7 @@ std::unique_ptr<Stage> HalleyEditor::startGame(const HalleyAPI* api)
 		loadProject(Path(projectPath));
 	}
 
-	if (!headless) {
-		api->video->setWindow(preferences->getWindowDefinition(), true);
-	}
+	api->video->setWindow(preferences->getWindowDefinition(), true);
 	return std::make_unique<EditorRootStage>(*this);
 }
 

@@ -23,6 +23,9 @@ namespace Halley {
 
 		Sprite halleyLogo;
 		Sprite background;
+
+		std::unique_ptr<UIRoot> ui;
+
 		std::unique_ptr<ConsoleWindow> console;
 		
 		std::unique_ptr<EditorTaskSet> tasks;
