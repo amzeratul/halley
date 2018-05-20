@@ -69,16 +69,17 @@ std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& node)
 
 Maybe<UISizer> UIFactory::makeSizer(const ConfigNode& node)
 {
-	if (node.getType() == ConfigNodeType::Undefined) {
+	auto sizerNode = node["sizer"];
+	if (sizerNode.getType() == ConfigNodeType::Undefined) {
 		return {};
 	} else {
-		auto sizerType = fromString<UISizerType>(node["type"].asString("horizontal"));
-		float gap = node["gap"].asFloat(1.0f);
-		int nColumns = node["columns"].asInt(1);
+		auto sizerType = fromString<UISizerType>(sizerNode["type"].asString("horizontal"));
+		float gap = sizerNode["gap"].asFloat(1.0f);
+		int nColumns = sizerNode["columns"].asInt(1);
 		
 		auto sizer = UISizer(sizerType, gap, nColumns);
 
-		loadSizerChildren(sizer, node);
+		loadSizerChildren(sizer, node["children"]);
 
 		return std::move(sizer);
 	}
@@ -96,16 +97,17 @@ UISizer UIFactory::makeSizerOrDefault(const ConfigNode& node, UISizer&& defaultS
 
 std::shared_ptr<UISizer> UIFactory::makeSizerPtr(const ConfigNode& node)
 {
-	if (node.getType() == ConfigNodeType::Undefined) {
+	auto sizerNode = node["sizer"];
+	if (sizerNode.getType() == ConfigNodeType::Undefined) {
 		return {};
 	} else {
-		auto sizerType = fromString<UISizerType>(node["type"].asString("horizontal"));
-		float gap = node["gap"].asFloat(1.0f);
-		int nColumns = node["columns"].asInt(1);
+		auto sizerType = fromString<UISizerType>(sizerNode["type"].asString("horizontal"));
+		float gap = sizerNode["gap"].asFloat(1.0f);
+		int nColumns = sizerNode["columns"].asInt(1);
 		
 		auto sizer = std::make_shared<UISizer>(sizerType, gap, nColumns);
 
-		loadSizerChildren(*sizer, node);
+		loadSizerChildren(*sizer, node["children"]);
 
 		return sizer;
 	}
@@ -113,8 +115,8 @@ std::shared_ptr<UISizer> UIFactory::makeSizerPtr(const ConfigNode& node)
 
 void UIFactory::loadSizerChildren(UISizer& sizer, const ConfigNode& node)
 {
-	if (node.hasKey("children")) {
-		for (auto& childNode: node["children"].asSequence()) {
+	if (node.getType() == ConfigNodeType::Sequence) {
+		for (auto& childNode: node.asSequence()) {
 			float proportion = childNode["proportion"].asFloat(0);
 			Vector4f border = asVector4f(childNode["border"], Vector4f());
 			int fill = 0;
@@ -157,7 +159,7 @@ void UIFactory::loadSizerChildren(UISizer& sizer, const ConfigNode& node)
 			if (childNode.hasKey("widget")) {
 				sizer.add(makeWidget(childNode["widget"]), proportion, border, fill);
 			} else if (childNode.hasKey("sizer")) {
-				sizer.add(makeSizerPtr(childNode["sizer"]), proportion, border, fill);
+				sizer.add(makeSizerPtr(childNode), proportion, border, fill);
 			} else if (childNode.hasKey("spacer")) {
 				sizer.addSpacer(proportion);
 			} else if (childNode.hasKey("stretchSpacer")) {
@@ -218,7 +220,7 @@ std::shared_ptr<UIWidget> UIFactory::makeBaseWidget(const ConfigNode& node)
 	auto id = node["id"].asString("");
 	auto minSize = asVector2f(node["minSize"], Vector2f(0, 0));
 	auto innerBorder = asVector4f(node["innerBorder"], Vector4f(0, 0, 0, 0));
-	return std::make_shared<UIWidget>(id, minSize, makeSizer(node["sizer"]), innerBorder);
+	return std::make_shared<UIWidget>(id, minSize, makeSizer(node), innerBorder);
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& node)
@@ -233,7 +235,7 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& node)
 	auto style = UIStyle(node["style"].asString("button"), styleSheet);
 	auto label = parseLabel(node);
 
-	auto sizer = makeSizer(node["sizer"]);
+	auto sizer = makeSizer(node);
 	if (!sizer) {
 		sizer = UISizer();
 	}
@@ -300,7 +302,7 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& node)
 	auto sprite = Sprite().setImage(resources, imageName, materialName);
 	Vector4f innerBorder = asVector4f(node["innerBorder"], Vector4f());
 
-	return std::make_shared<UIImage>(sprite, makeSizer(node["sizer"]), innerBorder);
+	return std::make_shared<UIImage>(sprite, makeSizer(node), innerBorder);
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& node)
@@ -323,7 +325,7 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollPane(const ConfigNode& node)
 	auto scrollHorizontal = node["scrollHorizontal"].asBool(false);
 	auto scrollVertical = node["scrollVertical"].asBool(true);
 
-	return std::make_shared<UIScrollPane>(clipSize, makeSizerOrDefault(node["sizer"], UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical);
+	return std::make_shared<UIScrollPane>(clipSize, makeSizerOrDefault(node, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical);
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeScrollBar(const ConfigNode& node)
@@ -343,5 +345,5 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollBarPane(const ConfigNode& node)
 	auto scrollVertical = node["scrollVertical"].asBool(true);
 	auto alwaysShow = !node["autoHide"].asBool(false);
 
-	return std::make_shared<UIScrollBarPane>(clipSize, style, makeSizerOrDefault(node["sizer"], UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow);
+	return std::make_shared<UIScrollBarPane>(clipSize, style, makeSizerOrDefault(node, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow);
 }
