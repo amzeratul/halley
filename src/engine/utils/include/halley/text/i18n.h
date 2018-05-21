@@ -42,6 +42,17 @@ namespace Halley {
 		void loadLanguage(const String& code, const ConfigFile& config);
 
 		LocalisedString get(const String& key) const;
+
+		template <typename T>
+		std::vector<LocalisedString> getVector(const String& keyPrefix, const T& keys) const
+		{
+			std::vector<LocalisedString> result;
+			for (auto& k: keys) {
+				result.push_back(get(keyPrefix + k));
+			}
+			return result;
+		}
+
 		const String& getCurrentLanguage() const;
 
 	private:

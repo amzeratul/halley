@@ -48,7 +48,7 @@ void UIDropdown::setInputButtons(const UIInputButtons& buttons)
 	}
 }
 
-void UIDropdown::setOptions(const std::vector<LocalisedString>& os)
+void UIDropdown::setOptions(const std::vector<LocalisedString>& os, int defaultOption)
 {
 	options = os;
 	if (options.empty()) {
@@ -62,6 +62,10 @@ void UIDropdown::setOptions(const std::vector<LocalisedString>& os)
 		maxExtents = std::max(maxExtents, label.clone().setText(o).getExtents().x);
 	}
 	setMinSize(Vector2f(maxExtents + 19, 14)); // HACK
+
+	if (defaultOption != -1) {
+		setSelectedOption(defaultOption);
+	}
 }
 
 void UIDropdown::onManualControlCycleValue(int delta)

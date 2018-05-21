@@ -20,7 +20,7 @@ namespace Halley {
 		LocalisedString getSelectedOptionText() const;
 
 		void setInputButtons(const UIInputButtons& buttons) override;
-		void setOptions(const std::vector<LocalisedString>& options);
+		void setOptions(const std::vector<LocalisedString>& options, int defaultOption = -1);
 
 		void onManualControlCycleValue(int delta) override;
 		void onManualControlActivate() override;

@@ -14,6 +14,7 @@
 #include "halley/ui/widgets/ui_scrollbar_pane.h"
 #include "halley/ui/widgets/ui_checkbox.h"
 #include "halley/support/logger.h"
+#include "ui_validator.h"
 
 using namespace Halley;
 
@@ -272,7 +273,20 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 	auto style = UIStyle(node["style"].asString("input"), styleSheet);
 	auto label = parseLabel(node);
 
-	return std::make_shared<UITextInput>(api.input->getKeyboard(), id, style, "", label);
+	auto result = std::make_shared<UITextInput>(api.input->getKeyboard(), id, style, "", label);;
+
+	auto validatorName = node["validator"].asString("");
+	if (!validatorName.isEmpty()) {
+		if (validatorName == "numeric") {
+			result->setValidator(std::make_shared<UINumericValidator>(true));
+		} else if (validatorName == "numericPositive") {
+		result->setValidator(std::make_shared<UINumericValidator>(false));
+		} else {
+			throw Exception("Unknown text input validator: " + validatorName);
+		}
+	}
+
+	return result;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
