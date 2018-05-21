@@ -22,6 +22,8 @@ namespace Halley
 
 		UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet);
 
+		void addFactory(const String& key, WidgetFactory factory);
+
 		std::shared_ptr<UIWidget> makeUI(const String& configName);
 		std::shared_ptr<UIWidget> makeUIFromNode(const ConfigNode& node);
 
@@ -29,15 +31,11 @@ namespace Halley
 
 		std::shared_ptr<UIStyleSheet> getStyleSheet() const;
 
-	private:
+	protected:
 		const HalleyAPI& api;
 		Resources& resources;
 		const I18N& i18n;
-		std::shared_ptr<UIStyleSheet> styleSheet;
-
-		std::map<String, WidgetFactory> factories;
-		std::map<String, UIInputButtons> inputButtons;
-
+		
 		std::shared_ptr<UIWidget> makeWidget(const ConfigNode& node);
 		std::shared_ptr<UISizer> makeSizerPtr(const ConfigNode& node);
 		Maybe<UISizer> makeSizer(const ConfigNode& node);
@@ -46,6 +44,7 @@ namespace Halley
 
 		void applyInputButtons(UIWidget& widget, const String& key);
 
+		static Maybe<Vector2f> asMaybeVector2f(const ConfigNode& node);
 		static Vector2f asVector2f(const ConfigNode& node, Maybe<Vector2f> defaultValue);
 		static Vector4f asVector4f(const ConfigNode& node, Maybe<Vector4f> defaultValue);
 		LocalisedString parseLabel(const ConfigNode& node);
@@ -62,5 +61,11 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeScrollPane(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeScrollBar(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeScrollBarPane(const ConfigNode& node);
+
+	private:
+		std::shared_ptr<UIStyleSheet> styleSheet;
+
+		std::map<String, WidgetFactory> factories;
+		std::map<String, UIInputButtons> inputButtons;
 	};
 }

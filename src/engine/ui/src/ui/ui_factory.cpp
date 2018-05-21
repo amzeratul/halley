@@ -23,18 +23,23 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	, i18n(i18n)
 	, styleSheet(styleSheet)
 {
-	factories["widget"] = [=] (const ConfigNode& node) { return makeBaseWidget(node); };
-	factories["label"] = [=] (const ConfigNode& node) { return makeLabel(node); };
-	factories["button"] = [=] (const ConfigNode& node) { return makeButton(node); };
-	factories["textInput"] = [=] (const ConfigNode& node) { return makeTextInput(node); };
-	factories["list"] = [=] (const ConfigNode& node) { return makeList(node); };
-	factories["dropdown"] = [=] (const ConfigNode& node) { return makeDropdown(node); };
-	factories["checkbox"] = [=] (const ConfigNode& node) { return makeCheckbox(node); };
-	factories["image"] = [=] (const ConfigNode& node) { return makeImage(node); };
-	factories["animation"] = [=] (const ConfigNode& node) { return makeAnimation(node); };
-	factories["scrollBar"] = [=] (const ConfigNode& node) { return makeScrollBar(node); };
-	factories["scrollPane"] = [=] (const ConfigNode& node) { return makeScrollPane(node); };
-	factories["scrollBarPane"] = [=] (const ConfigNode& node) { return makeScrollBarPane(node); };
+	addFactory("widget", [=] (const ConfigNode& node) { return makeBaseWidget(node); });
+	addFactory("label", [=] (const ConfigNode& node) { return makeLabel(node); });
+	addFactory("button", [=] (const ConfigNode& node) { return makeButton(node); });
+	addFactory("textInput", [=] (const ConfigNode& node) { return makeTextInput(node); });
+	addFactory("list", [=] (const ConfigNode& node) { return makeList(node); });
+	addFactory("dropdown", [=] (const ConfigNode& node) { return makeDropdown(node); });
+	addFactory("checkbox", [=] (const ConfigNode& node) { return makeCheckbox(node); });
+	addFactory("image", [=] (const ConfigNode& node) { return makeImage(node); });
+	addFactory("animation", [=] (const ConfigNode& node) { return makeAnimation(node); });
+	addFactory("scrollBar", [=] (const ConfigNode& node) { return makeScrollBar(node); });
+	addFactory("scrollPane", [=] (const ConfigNode& node) { return makeScrollPane(node); });
+	addFactory("scrollBarPane", [=] (const ConfigNode& node) { return makeScrollBarPane(node); });
+}
+
+void UIFactory::addFactory(const String& key, WidgetFactory factory)
+{
+	factories[key] = factory;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName)
@@ -182,6 +187,16 @@ void UIFactory::applyInputButtons(UIWidget& widget, const String& key)
 		} else {
 			widget.setInputButtons(iter->second);
 		}
+	}
+}
+
+Maybe<Vector2f> UIFactory::asMaybeVector2f(const ConfigNode& node)
+{
+	if (node.getType() == ConfigNodeType::Sequence) {
+		auto seq = node.asSequence();
+		return Vector2f(seq.at(0).asFloat(), seq.at(1).asFloat());
+	} else {
+		return {};
 	}
 }
 
