@@ -23,7 +23,7 @@ UIDropdown::UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle
 
 void UIDropdown::setSelectedOption(int option)
 {
-	int nextOption = clamp(option, 0, int(options.size()));
+	int nextOption = clamp(option, 0, int(options.size()) - 1);
 	if (curOption != nextOption) {
 		curOption = nextOption;
 		label.setText(options.at(curOption));
