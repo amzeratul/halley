@@ -575,6 +575,30 @@ void UIWidget::readFromDataBind()
 {
 }
 
+void UIWidget::bindData(const String& childId, int initialValue, UIDataBindInt::WriteCallback callback)
+{
+	auto widget = getWidget(childId);
+	if (widget) {
+		widget->setDataBind(std::make_shared<UIDataBindInt>(initialValue, std::move(callback)));
+	}
+}
+
+void UIWidget::bindData(const String& childId, float initialValue, UIDataBindFloat::WriteCallback callback)
+{
+	auto widget = getWidget(childId);
+	if (widget) {
+		widget->setDataBind(std::make_shared<UIDataBindFloat>(initialValue, std::move(callback)));
+	}
+}
+
+void UIWidget::bindData(const String& childId, const String& initialValue, UIDataBindString::WriteCallback callback)
+{
+	auto widget = getWidget(childId);
+	if (widget) {
+		widget->setDataBind(std::make_shared<UIDataBindString>(initialValue, std::move(callback)));
+	}
+}
+
 bool UIWidget::isModal() const
 {
 	return modal;

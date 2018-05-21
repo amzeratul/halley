@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include "halley/text/halleystring.h"
 
 namespace Halley {
 	class UIWidget;
@@ -46,6 +47,46 @@ namespace Halley {
 
 	private:
 		int initialValue;
+		WriteCallback writeCallback;
+	};
+
+	class UIDataBindFloat : public UIDataBind {
+	public:
+		using WriteCallback = std::function<void(float)>;
+
+		UIDataBindFloat(float initialValue, WriteCallback writeCallback);
+
+		int getIntData() override;
+		float getFloatData() override;
+		String getStringData() override;
+
+	protected:
+		void onDataFromWidget(int data) override;
+		void onDataFromWidget(float data) override;
+		void onDataFromWidget(const String& data) override;
+
+	private:
+		float initialValue;
+		WriteCallback writeCallback;
+	};
+
+	class UIDataBindString : public UIDataBind {
+	public:
+		using WriteCallback = std::function<void(String)>;
+
+		UIDataBindString(String initialValue, WriteCallback writeCallback);
+
+		int getIntData() override;
+		float getFloatData() override;
+		String getStringData() override;
+
+	protected:
+		void onDataFromWidget(int data) override;
+		void onDataFromWidget(float data) override;
+		void onDataFromWidget(const String& data) override;
+
+	private:
+		String initialValue;
 		WriteCallback writeCallback;
 	};
 }

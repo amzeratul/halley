@@ -8,6 +8,7 @@
 #include "halley/data_structures/maybe.h"
 #include "ui_input.h"
 #include "ui_style.h"
+#include "ui_data_bind.h"
 
 namespace Halley {
 	class UIEvent;
@@ -92,9 +93,13 @@ namespace Halley {
 
 		void setValidator(std::shared_ptr<UIValidator> validator);
 		std::shared_ptr<UIValidator> getValidator() const;
+
 		void setDataBind(std::shared_ptr<UIDataBind> dataBind);
 		std::shared_ptr<UIDataBind> getDataBind() const;
 		virtual void readFromDataBind();
+		void bindData(const String& childId, int initialValue, UIDataBindInt::WriteCallback callback = {});
+		void bindData(const String& childId, float initialValue, UIDataBindFloat::WriteCallback callback = {});
+		void bindData(const String& childId, const String& initialValue, UIDataBindString::WriteCallback callback = {});
 		
 		bool isDescendentOf(const UIWidget& ancestor) const override;
 		void setMouseClip(Maybe<Rect4f> mouseClip);
