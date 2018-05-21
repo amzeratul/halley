@@ -20,6 +20,8 @@ namespace Halley {
 		void onManualControlCycleValue(int delta) override;
 		void onManualControlActivate() override;
 
+		void readFromDataBind() override;
+
 	private:
 		Sprite sprite;
 		UIStyle style;

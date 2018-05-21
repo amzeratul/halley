@@ -5,6 +5,7 @@
 #include "widgets/ui_scrollbar.h"
 #include "widgets/ui_list.h"
 #include "halley/text/i18n.h"
+#include "halley/ui/ui_data_bind.h"
 
 using namespace Halley;
 
@@ -27,6 +28,7 @@ void UIDropdown::setSelectedOption(int option)
 		curOption = nextOption;
 		label.setText(options.at(curOption));
 		sendEvent(UIEvent(UIEventType::DropboxSelectionChanged, getId(), options[curOption].getString(), curOption));
+		notifyDataBind(curOption);
 	}
 }
 
@@ -123,6 +125,11 @@ void UIDropdown::doSetState(State state)
 bool UIDropdown::isFocusLocked() const
 {
 	return isOpen || UIClickable::isFocusLocked();
+}
+
+void UIDropdown::readFromDataBind()
+{
+	setSelectedOption(getDataBind()->getIntData());
 }
 
 void UIDropdown::open()

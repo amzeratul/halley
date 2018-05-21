@@ -35,6 +35,8 @@ namespace Halley {
 
 		bool isFocusLocked() const override;
 
+		void readFromDataBind() override;
+
 	private:
 		Sprite sprite;
 		TextRenderer label;

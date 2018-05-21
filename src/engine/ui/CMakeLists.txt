@@ -3,6 +3,7 @@ project (halley-ui)
 include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/ui" "../core/include" "../utils/include" "../audio/include")
 
 set(SOURCES
+        "src/ui/ui_data_bind.cpp"
         "src/ui/ui_event.cpp"
         "src/ui/ui_factory.cpp"
         "src/ui/ui_input.cpp"
@@ -36,6 +37,7 @@ set(SOURCES
 set(HEADERS
         "include/halley/ui/halley_ui.h"
         
+        "include/halley/ui/ui_data_bind.h"
         "include/halley/ui/ui_element.h"
         "include/halley/ui/ui_event.h"
         "include/halley/ui/ui_factory.h"

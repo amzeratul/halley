@@ -2,6 +2,7 @@
 #include "ui_style.h"
 #include "ui_validator.h"
 #include "halley/text/i18n.h"
+#include "halley/ui/ui_data_bind.h"
 
 using namespace Halley;
 
@@ -92,7 +93,9 @@ void UITextInput::updateTextInput()
 		if (getValidator()) {
 			text = getValidator()->onTextChanged(text);
 		}
-		sendEvent(UIEvent(UIEventType::TextChanged, getId(), String(text)));
+		const auto str = String(text);
+		sendEvent(UIEvent(UIEventType::TextChanged, getId(), str));
+		notifyDataBind(str);
 	}
 }
 
@@ -145,4 +148,9 @@ void UITextInput::onFocus()
 	caretTime = 0;
 	caretShowing = true;
 	while (keyboard->getNextLetter()) {}
+}
+
+void UITextInput::readFromDataBind()
+{
+	setText(getDataBind()->getStringData());
 }

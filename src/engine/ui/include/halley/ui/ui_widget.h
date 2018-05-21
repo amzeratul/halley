@@ -12,6 +12,7 @@
 namespace Halley {
 	class UIEvent;
 	class UIValidator;
+	class UIDataBind;
 
 	class UIWidget : public IUIElement, public UIParent, public IUISizer, public std::enable_shared_from_this<UIWidget> {
 		friend class UIParent;
@@ -91,6 +92,9 @@ namespace Halley {
 
 		void setValidator(std::shared_ptr<UIValidator> validator);
 		std::shared_ptr<UIValidator> getValidator() const;
+		void setDataBind(std::shared_ptr<UIDataBind> dataBind);
+		std::shared_ptr<UIDataBind> getDataBind() const;
+		virtual void readFromDataBind();
 		
 		bool isDescendentOf(const UIWidget& ancestor) const override;
 		void setMouseClip(Maybe<Rect4f> mouseClip);
@@ -117,6 +121,10 @@ namespace Halley {
 		virtual void onFocusLost();
 		virtual void onLayout();
 		UIRoot* getRoot() override;
+
+		void notifyDataBind(int data) const;
+		void notifyDataBind(float data) const;
+		void notifyDataBind(const String& data) const;
 
 		void shrink();
 		void forceLayout();
@@ -154,6 +162,7 @@ namespace Halley {
 
 		std::shared_ptr<UIEventHandler> eventHandler;
 		std::shared_ptr<UIValidator> validator;
+		std::shared_ptr<UIDataBind> dataBind;
 
 		int childLayerAdjustment = 0;
 

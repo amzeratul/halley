@@ -1,6 +1,7 @@
 #include "ui_widget.h"
 #include "ui_root.h"
 #include "ui_validator.h"
+#include "ui_data_bind.h"
 
 using namespace Halley;
 
@@ -18,6 +19,10 @@ UIWidget::UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f i
 
 UIWidget::~UIWidget()
 {
+	if (dataBind) {
+		dataBind->setWidget(nullptr);
+		dataBind.reset();
+	}
 }
 
 void UIWidget::doDraw(UIPainter& painter) const
@@ -298,6 +303,27 @@ UIRoot* UIWidget::getRoot()
 	return parent ? parent->getRoot() : nullptr;
 }
 
+void UIWidget::notifyDataBind(int data) const
+{
+	if (dataBind) {
+		dataBind->onDataFromWidget(data);
+	}
+}
+
+void UIWidget::notifyDataBind(float data) const
+{
+	if (dataBind) {
+		dataBind->onDataFromWidget(data);
+	}
+}
+
+void UIWidget::notifyDataBind(const String& data) const
+{
+	if (dataBind) {
+		dataBind->onDataFromWidget(data);
+	}
+}
+
 void UIWidget::shrink()
 {
 	if (size.x > minSize.x + 0.5f || size.y > minSize.y + 0.5f) {
@@ -531,6 +557,22 @@ void UIWidget::setValidator(std::shared_ptr<UIValidator> v)
 std::shared_ptr<UIValidator> UIWidget::getValidator() const
 {
 	return validator;
+}
+
+void UIWidget::setDataBind(std::shared_ptr<UIDataBind> d)
+{
+	dataBind = d;
+	dataBind->setWidget(this);
+	readFromDataBind();
+}
+
+std::shared_ptr<UIDataBind> UIWidget::getDataBind() const
+{
+	return dataBind;
+}
+
+void UIWidget::readFromDataBind()
+{
 }
 
 bool UIWidget::isModal() const

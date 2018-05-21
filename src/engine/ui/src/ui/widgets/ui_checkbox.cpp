@@ -1,5 +1,6 @@
 #include "widgets/ui_checkbox.h"
 #include "ui_style.h"
+#include "halley/ui/ui_data_bind.h"
 
 using namespace Halley;
 
@@ -36,6 +37,7 @@ void UICheckbox::setChecked(bool c)
 		checked = c;
 		doForceUpdate();
 		sendEvent(UIEvent(UIEventType::CheckboxUpdated, getId(), checked));
+		notifyDataBind(checked ? 1 : 0);
 	}
 }
 
@@ -69,4 +71,9 @@ void UICheckbox::onManualControlCycleValue(int delta)
 void UICheckbox::onManualControlActivate()
 {
 	setChecked(!checked);
+}
+
+void UICheckbox::readFromDataBind()
+{
+	setChecked(getDataBind()->getIntData() != 0);
 }

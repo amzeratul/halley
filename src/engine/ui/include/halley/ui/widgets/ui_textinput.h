@@ -30,6 +30,8 @@ namespace Halley {
 
 		void onFocus() override;
 
+		void readFromDataBind() override;
+
 	private:
 		void updateTextInput();
 
