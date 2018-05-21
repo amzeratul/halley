@@ -17,7 +17,7 @@
 
 using namespace Halley;
 
-UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet)
+UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet)
 	: api(api)
 	, resources(resources)
 	, i18n(i18n)
@@ -50,6 +50,11 @@ std::shared_ptr<UIWidget> UIFactory::makeUIFromNode(const ConfigNode& node)
 void UIFactory::setInputButtons(const String& key, UIInputButtons buttons)
 {
 	inputButtons[key] = buttons;
+}
+
+std::shared_ptr<UIStyleSheet> UIFactory::getStyleSheet() const
+{
+	return styleSheet;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)

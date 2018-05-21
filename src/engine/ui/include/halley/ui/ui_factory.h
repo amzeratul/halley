@@ -20,17 +20,19 @@ namespace Halley
 	public:
 		using WidgetFactory = std::function<std::shared_ptr<UIWidget>(const ConfigNode&)>;
 
-		UIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet);
+		UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet);
 
 		std::shared_ptr<UIWidget> makeUI(const String& configName);
 		std::shared_ptr<UIWidget> makeUIFromNode(const ConfigNode& node);
 
 		void setInputButtons(const String& key, UIInputButtons buttons);
 
+		std::shared_ptr<UIStyleSheet> getStyleSheet() const;
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
-		I18N& i18n;
+		const I18N& i18n;
 		std::shared_ptr<UIStyleSheet> styleSheet;
 
 		std::map<String, WidgetFactory> factories;
