@@ -115,7 +115,8 @@ std::unique_ptr<Stage> HalleyEditor::startGame(const HalleyAPI* api)
 		project = loadProject(Path(projectPath));
 	}
 
-	api->video->setWindow(preferences->getWindowDefinition(), true);
+	api->video->setWindow(preferences->getWindowDefinition());
+	api->video->setVsync(true);
 	return std::make_unique<EditorRootStage>(*this, std::move(project));
 }
 
