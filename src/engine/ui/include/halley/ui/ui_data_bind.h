@@ -11,6 +11,12 @@ namespace Halley {
 		friend class UIWidget;
 
     public:
+		enum class Format {
+			Int,
+			Float,
+			String
+		};
+
 		virtual ~UIDataBind();
 
 		virtual int getIntData();
@@ -18,6 +24,8 @@ namespace Halley {
 		virtual String getStringData();
 
 		void pushData();
+
+		virtual Format getFormat() const = 0;
 
 	protected:
 		virtual void onDataFromWidget(int data);
@@ -40,6 +48,8 @@ namespace Halley {
 		float getFloatData() override;
 		String getStringData() override;
 
+		Format getFormat() const override;
+
 	protected:
 		void onDataFromWidget(int data) override;
 		void onDataFromWidget(float data) override;
@@ -60,6 +70,8 @@ namespace Halley {
 		float getFloatData() override;
 		String getStringData() override;
 
+		Format getFormat() const override;
+
 	protected:
 		void onDataFromWidget(int data) override;
 		void onDataFromWidget(float data) override;
@@ -79,6 +91,8 @@ namespace Halley {
 		int getIntData() override;
 		float getFloatData() override;
 		String getStringData() override;
+
+		Format getFormat() const override;
 
 	protected:
 		void onDataFromWidget(int data) override;

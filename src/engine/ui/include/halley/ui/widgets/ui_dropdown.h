@@ -6,6 +6,7 @@
 #include "ui_clickable.h"
 
 namespace Halley {
+	class I18N;
 	class UIStyle;
 	class UIValidator;
 	class UIList;
@@ -13,14 +14,18 @@ namespace Halley {
 
 	class UIDropdown : public UIClickable {
 	public:
-		explicit UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, const std::vector<LocalisedString>& options, int defaultOption = 0);
+		explicit UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, std::vector<LocalisedString> options = {}, int defaultOption = 0);
 
 		void setSelectedOption(int option);
+		void setSelectedOption(const String& id);
 		int getSelectedOption() const;
+		String getSelectedOptionId() const;
 		LocalisedString getSelectedOptionText() const;
 
 		void setInputButtons(const UIInputButtons& buttons) override;
-		void setOptions(const std::vector<LocalisedString>& options, int defaultOption = -1);
+		void setOptions(std::vector<LocalisedString> options, int defaultOption = -1);
+		void setOptions(std::vector<String> optionIds, std::vector<LocalisedString> options, int defaultOption = -1);
+		void setOptions(const I18N& i18n, const String& i18nPrefix, std::vector<String> optionIds, int defaultOption = -1);
 
 		void onManualControlCycleValue(int delta) override;
 		void onManualControlActivate() override;
@@ -49,6 +54,7 @@ namespace Halley {
 		std::shared_ptr<UIScrollPane> scrollPane;
 		
 		std::vector<LocalisedString> options;
+		std::vector<String> optionIds;
 		int curOption = 0;
 		bool isOpen = false;
 

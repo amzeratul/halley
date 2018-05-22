@@ -70,6 +70,11 @@ String UIDataBindInt::getStringData()
 	return toString(initialValue);
 }
 
+UIDataBind::Format UIDataBindInt::getFormat() const
+{
+	return Format::Int;
+}
+
 void UIDataBindInt::onDataFromWidget(int data)
 {
 	if (writeCallback) {
@@ -112,6 +117,11 @@ String UIDataBindFloat::getStringData()
 	return toString(initialValue);
 }
 
+UIDataBind::Format UIDataBindFloat::getFormat() const
+{
+	return Format::Float;
+}
+
 void UIDataBindFloat::onDataFromWidget(int data)
 {
 	if (writeCallback) {
@@ -152,6 +162,11 @@ float UIDataBindString::getFloatData()
 String UIDataBindString::getStringData()
 {
 	return initialValue;
+}
+
+UIDataBind::Format UIDataBindString::getFormat() const
+{
+	return Format::String;
 }
 
 void UIDataBindString::onDataFromWidget(int data)

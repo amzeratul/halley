@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-UIDropdown::UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, const std::vector<LocalisedString>& os, int defaultOption)
+UIDropdown::UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, std::vector<LocalisedString> os, int defaultOption)
 	: UIClickable(id, {})
 	, style(style)
 	, scrollbarStyle(scrollbarStyle)
@@ -18,7 +18,7 @@ UIDropdown::UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle
 {
 	sprite = style.getSprite("normal");
 
-	setOptions(os);
+	setOptions(std::move(os));
 }
 
 void UIDropdown::setSelectedOption(int option)
@@ -27,14 +27,32 @@ void UIDropdown::setSelectedOption(int option)
 	if (curOption != nextOption) {
 		curOption = nextOption;
 		label.setText(options.at(curOption));
-		sendEvent(UIEvent(UIEventType::DropboxSelectionChanged, getId(), options[curOption].getString(), curOption));
-		notifyDataBind(curOption);
+		sendEvent(UIEvent(UIEventType::DropboxSelectionChanged, getId(), optionIds[curOption], curOption));
+
+		if (getDataBind()->getFormat() == UIDataBind::Format::String) {
+			notifyDataBind(optionIds[curOption]);
+		} else {
+			notifyDataBind(curOption);
+		}
+	}
+}
+
+void UIDropdown::setSelectedOption(const String& id)
+{
+	auto iter = std::find(optionIds.begin(), optionIds.end(), id);
+	if (iter != optionIds.end()) {
+		setSelectedOption(iter - optionIds.begin());
 	}
 }
 
 int UIDropdown::getSelectedOption() const
 {
 	return curOption;
+}
+
+String UIDropdown::getSelectedOptionId() const
+{
+	return optionIds[curOption];
 }
 
 LocalisedString UIDropdown::getSelectedOptionText() const
@@ -50,9 +68,27 @@ void UIDropdown::setInputButtons(const UIInputButtons& buttons)
 	}
 }
 
-void UIDropdown::setOptions(const std::vector<LocalisedString>& os, int defaultOption)
+void UIDropdown::setOptions(std::vector<LocalisedString> os, int defaultOption)
 {
+	setOptions({}, std::move(os), defaultOption);
+}
+
+void UIDropdown::setOptions(std::vector<String> oIds, std::vector<LocalisedString> os, int defaultOption)
+{
+	if (oIds.empty()) {
+		oIds.resize(os.size());
+		for (size_t i = 0; i < oIds.size(); ++i) {
+			oIds[i] = toString(i);
+		}
+	}
+
+	if (oIds.size() != os.size()) {
+		throw Exception("Size mismatch between options and option ids");
+	}
+
 	options = os;
+	optionIds = oIds;
+
 	if (options.empty()) {
 		options.emplace_back();
 	}
@@ -63,11 +99,18 @@ void UIDropdown::setOptions(const std::vector<LocalisedString>& os, int defaultO
 	for (auto& o: options) {
 		maxExtents = std::max(maxExtents, label.clone().setText(o).getExtents().x);
 	}
-	setMinSize(Vector2f(maxExtents + 19, 14)); // HACK
+
+	auto minSize = Vector2f(maxExtents + 19, 14); // HACK
+	setMinSize(std::max(getMinimumSize(), minSize));
 
 	if (defaultOption != -1) {
 		setSelectedOption(defaultOption);
 	}
+}
+
+void UIDropdown::setOptions(const I18N& i18n, const String& i18nPrefix, std::vector<String> optionIds, int defaultOption)
+{
+	setOptions(optionIds, i18n.getVector(i18nPrefix, optionIds), defaultOption);
 }
 
 void UIDropdown::onManualControlCycleValue(int delta)
@@ -129,7 +172,12 @@ bool UIDropdown::isFocusLocked() const
 
 void UIDropdown::readFromDataBind()
 {
-	setSelectedOption(getDataBind()->getIntData());
+	auto data = getDataBind();
+	if (data->getFormat() == UIDataBind::Format::String) {
+		setSelectedOption(data->getStringData());
+	} else {
+		setSelectedOption(data->getIntData());
+	}
 }
 
 void UIDropdown::open()
