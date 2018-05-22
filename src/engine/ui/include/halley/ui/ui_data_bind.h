@@ -32,10 +32,14 @@ namespace Halley {
 		virtual void onDataFromWidget(float data);
 		virtual void onDataFromWidget(const String& data);
 
+		bool canWriteData() const;
+
 	private:
 		UIWidget* widgetBound = nullptr;
+		bool acceptingData = false;
 
 		void setWidget(UIWidget* widget);
+		void setAcceptingDataFromWidget(bool accepting);
     };
 
 	class UIDataBindInt : public UIDataBind {

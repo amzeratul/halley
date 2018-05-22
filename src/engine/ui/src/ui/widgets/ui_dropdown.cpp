@@ -41,7 +41,7 @@ void UIDropdown::setSelectedOption(const String& id)
 {
 	auto iter = std::find(optionIds.begin(), optionIds.end(), id);
 	if (iter != optionIds.end()) {
-		setSelectedOption(iter - optionIds.begin());
+		setSelectedOption(int(iter - optionIds.begin()));
 	}
 }
 

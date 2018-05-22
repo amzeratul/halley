@@ -562,8 +562,10 @@ std::shared_ptr<UIValidator> UIWidget::getValidator() const
 void UIWidget::setDataBind(std::shared_ptr<UIDataBind> d)
 {
 	dataBind = d;
+	dataBind->setAcceptingDataFromWidget(false);
 	dataBind->setWidget(this);
 	readFromDataBind();
+	dataBind->setAcceptingDataFromWidget(true);
 }
 
 std::shared_ptr<UIDataBind> UIWidget::getDataBind() const
