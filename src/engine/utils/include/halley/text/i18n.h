@@ -37,9 +37,11 @@ namespace Halley {
 	public:
 		I18N();
 
+		void loadLocalisationFile(const ConfigFile& config);
+
 		void setCurrentLanguage(const String& code);
-		void setDefaultLanguage(const String& code);
-		void loadLanguage(const String& code, const ConfigFile& config);
+		void setFallbackLanguage(const String& code);
+		std::vector<String> getLanguagesAvailable() const;
 
 		LocalisedString get(const String& key) const;
 
@@ -57,7 +59,7 @@ namespace Halley {
 
 	private:
 		String currentLanguage;
-		String defaultLanguage;
+		String fallbackLanguage;
 		std::map<String, std::map<String, String>> strings;
 
 		LocalisedString missingStr;

@@ -13,19 +13,29 @@ void I18N::setCurrentLanguage(const String& code)
 	currentLanguage = code;
 }
 
-void I18N::setDefaultLanguage(const String& code)
+void I18N::setFallbackLanguage(const String& code)
 {
-	defaultLanguage = code;
+	fallbackLanguage = code;
 }
 
-void I18N::loadLanguage(const String& code, const ConfigFile& config)
+void I18N::loadLocalisationFile(const ConfigFile& config)
 {
-	std::map<String, String> result;
-	for (auto e: config.getRoot().asMap()) {
-		result[e.first] = e.second.asString();
+	for (auto& language: config.getRoot().asMap()) {
+		auto& langCode = language.first;
+		auto& lang = strings[langCode];
+		for (auto& e: language.second.asMap()) {
+			lang[e.first] = e.second.asString();
+		}
 	}
+}
 
-	strings[code] = std::move(result);
+std::vector<String> I18N::getLanguagesAvailable() const
+{
+	std::vector<String> result;
+	for (auto& e: strings) {
+		result.push_back(e.first);
+	}
+	return result;
 }
 
 LocalisedString I18N::get(const String& key) const
@@ -38,11 +48,13 @@ LocalisedString I18N::get(const String& key) const
 		}
 	}
 
-	auto defLang = strings.find(defaultLanguage);
-	if (defLang != strings.end()) {
-		auto i = defLang->second.find(key);
-		if (i != defLang->second.end()) {
-			return LocalisedString(i->second);
+	if (!fallbackLanguage.isEmpty() && fallbackLanguage != currentLanguage) {
+		auto defLang = strings.find(fallbackLanguage);
+		if (defLang != strings.end()) {
+			auto i = defLang->second.find(key);
+			if (i != defLang->second.end()) {
+				return LocalisedString(i->second);
+			}
 		}
 	}
 
