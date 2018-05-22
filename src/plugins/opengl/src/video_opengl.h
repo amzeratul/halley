@@ -18,9 +18,10 @@ namespace Halley {
 		void startRender() override;
 		void finishRender() override;
 		
-		void setWindow(WindowDefinition&& window, bool vsync) override;
+		void setWindow(WindowDefinition&& window) override;
 		const Window& getWindow() const override;
 		bool hasWindow() const override;
+		void setVsync(bool vsync) override;
 
 		std::unique_ptr<Painter> makePainter(Resources& resources) override;
 		std::unique_ptr<Texture> createTexture(Vector2i size) override;
@@ -63,5 +64,6 @@ namespace Halley {
 		std::unique_ptr<LoaderThreadOpenGL> loaderThread;
 				
 		std::shared_ptr<Window> window;
+		bool useVsync = false;
 	};
 }

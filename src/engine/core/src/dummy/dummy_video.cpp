@@ -18,7 +18,7 @@ void DummyVideoAPI::finishRender()
 {
 }
 
-void DummyVideoAPI::setWindow(WindowDefinition&& windowDescriptor, bool)
+void DummyVideoAPI::setWindow(WindowDefinition&& windowDescriptor)
 {
 	//window = system.createWindow(windowDescriptor);
 	window = std::make_shared<DummyWindow>(windowDescriptor);

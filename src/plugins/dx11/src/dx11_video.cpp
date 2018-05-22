@@ -32,7 +32,7 @@ void DX11Video::deInit()
 	releaseD3D();
 }
 
-void DX11Video::initD3D(Window& window, bool vsync)
+void DX11Video::initD3D(Window& window)
 {
 	if (initialised) {
 		return;
@@ -57,7 +57,6 @@ void DX11Video::initD3D(Window& window, bool vsync)
 	initSwapChain(window);
 
 	initialised = true;
-	useVsync = vsync;
 }
 
 void DX11Video::initSwapChain(Window& window)
@@ -174,12 +173,11 @@ void DX11Video::finishRender()
     swapChain->Present(useVsync ? 1 : 0, 0);
 }
 
-void DX11Video::setWindow(WindowDefinition&& windowDescriptor, bool vsync)
+void DX11Video::setWindow(WindowDefinition&& windowDescriptor)
 {
 	if (!window) {
 		window = system.createWindow(windowDescriptor);
-
-		initD3D(*window, vsync);
+		initD3D(*window);
 	} else {
 		window->update(windowDescriptor);
 	}
@@ -193,6 +191,11 @@ const Window& DX11Video::getWindow() const
 bool DX11Video::hasWindow() const
 {
 	return !!window;
+}
+
+void DX11Video::setVsync(bool vsync)
+{
+	useVsync = vsync;
 }
 
 std::unique_ptr<Texture> DX11Video::createTexture(Vector2i size)

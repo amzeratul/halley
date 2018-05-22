@@ -57,13 +57,13 @@ VideoOpenGL::VideoOpenGL(SystemAPI& system)
 
 /////////////
 // Set video
-void VideoOpenGL::setWindow(WindowDefinition&& windowDefinition, bool vsync)
+void VideoOpenGL::setWindow(WindowDefinition&& windowDefinition)
 {
 	// Initialize video mode
 	if (!initialized) {
 		window = system.createWindow(windowDefinition);
 		initOpenGL();
-		window->setVsync(vsync);
+		window->setVsync(useVsync);
 
 		clearScreen();
 		window->show();
@@ -84,6 +84,14 @@ const Window& VideoOpenGL::getWindow() const
 bool VideoOpenGL::hasWindow() const
 {
 	return window != nullptr;
+}
+
+void VideoOpenGL::setVsync(bool vsync)
+{
+	useVsync = vsync;
+	if (window) {
+		window->setVsync(vsync);
+	}
 }
 
 void VideoOpenGL::initOpenGL()
