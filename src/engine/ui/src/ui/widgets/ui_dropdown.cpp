@@ -29,7 +29,7 @@ void UIDropdown::setSelectedOption(int option)
 		label.setText(options.at(curOption));
 		sendEvent(UIEvent(UIEventType::DropboxSelectionChanged, getId(), optionIds[curOption], curOption));
 
-		if (getDataBind()->getFormat() == UIDataBind::Format::String) {
+		if (getDataBindFormat() == UIDataBind::Format::String) {
 			notifyDataBind(optionIds[curOption]);
 		} else {
 			notifyDataBind(curOption);

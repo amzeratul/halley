@@ -23,6 +23,9 @@ namespace Halley
 		UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet);
 
 		void addFactory(const String& key, WidgetFactory factory);
+		
+		void setConditions(std::vector<String> conditions);
+		void clearConditions();
 
 		std::shared_ptr<UIWidget> makeUI(const String& configName);
 		std::shared_ptr<UIWidget> makeUIFromNode(const ConfigNode& node);
@@ -62,8 +65,12 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeScrollBar(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeScrollBarPane(const ConfigNode& node);
 
+		bool hasCondition(const String& condition) const;
+		bool resolveConditions(const ConfigNode& node) const;
+
 	private:
 		std::shared_ptr<UIStyleSheet> styleSheet;
+		std::vector<String> conditions;
 
 		std::map<String, WidgetFactory> factories;
 		std::map<String, UIInputButtons> inputButtons;

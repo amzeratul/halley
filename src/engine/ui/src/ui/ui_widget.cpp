@@ -559,6 +559,15 @@ std::shared_ptr<UIValidator> UIWidget::getValidator() const
 	return validator;
 }
 
+UIDataBind::Format UIWidget::getDataBindFormat() const
+{
+	if (dataBind) {
+		return dataBind->getFormat();
+	} else {
+		return UIDataBind::Format::Undefined;
+	}
+}
+
 void UIWidget::setDataBind(std::shared_ptr<UIDataBind> d)
 {
 	dataBind = d;

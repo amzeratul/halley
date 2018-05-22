@@ -12,6 +12,7 @@ namespace Halley {
 
     public:
 		enum class Format {
+			Undefined,
 			Int,
 			Float,
 			String

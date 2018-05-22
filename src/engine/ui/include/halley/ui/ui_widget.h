@@ -94,6 +94,7 @@ namespace Halley {
 		void setValidator(std::shared_ptr<UIValidator> validator);
 		std::shared_ptr<UIValidator> getValidator() const;
 
+		UIDataBind::Format getDataBindFormat() const;
 		void setDataBind(std::shared_ptr<UIDataBind> dataBind);
 		std::shared_ptr<UIDataBind> getDataBind() const;
 		virtual void readFromDataBind();

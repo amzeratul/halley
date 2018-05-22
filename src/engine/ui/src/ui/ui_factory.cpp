@@ -43,6 +43,16 @@ void UIFactory::addFactory(const String& key, WidgetFactory factory)
 	factories[key] = factory;
 }
 
+void UIFactory::setConditions(std::vector<String> conds)
+{
+	conditions = std::move(conds);
+}
+
+void UIFactory::clearConditions()
+{
+	conditions.clear();
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName)
 {
 	return makeUIFromNode(resources.get<ConfigFile>(configName)->getRoot());
@@ -388,4 +398,31 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollBarPane(const ConfigNode& entryNo
 	auto alwaysShow = !node["autoHide"].asBool(false);
 
 	return std::make_shared<UIScrollBarPane>(clipSize, style, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow);
+}
+
+bool UIFactory::hasCondition(const String& condition) const
+{
+	return std::find(conditions.begin(), conditions.end(), condition) != conditions.end();
+}
+
+bool UIFactory::resolveConditions(const ConfigNode& node) const
+{
+	auto resolveCondition = [&] (const String& cond) -> bool
+	{
+		if (cond.startsWith("!")) {
+			return !hasCondition(cond.mid(1));
+		} else {
+			return hasCondition(cond);
+		}
+	};
+
+	if (node.getType() == ConfigNodeType::Sequence) {
+		bool ok = true;
+		for (auto& c: node.asSequence()) {
+			ok &= hasCondition(c.asString());
+		}
+		return ok;
+	} else {
+		return resolveCondition(node.asString());
+	}
 }
