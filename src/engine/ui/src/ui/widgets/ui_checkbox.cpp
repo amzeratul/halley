@@ -37,7 +37,7 @@ void UICheckbox::setChecked(bool c)
 		checked = c;
 		doForceUpdate();
 		sendEvent(UIEvent(UIEventType::CheckboxUpdated, getId(), checked));
-		notifyDataBind(checked ? 1 : 0);
+		notifyDataBind(checked);
 	}
 }
 

@@ -303,6 +303,13 @@ UIRoot* UIWidget::getRoot()
 	return parent ? parent->getRoot() : nullptr;
 }
 
+void UIWidget::notifyDataBind(bool data) const
+{
+	if (dataBind) {
+		dataBind->onDataFromWidget(data);
+	}
+}
+
 void UIWidget::notifyDataBind(int data) const
 {
 	if (dataBind) {
@@ -584,6 +591,14 @@ std::shared_ptr<UIDataBind> UIWidget::getDataBind() const
 
 void UIWidget::readFromDataBind()
 {
+}
+
+void UIWidget::bindData(const String& childId, bool initialValue, UIDataBindBool::WriteCallback callback)
+{
+	auto widget = getWidget(childId);
+	if (widget) {
+		widget->setDataBind(std::make_shared<UIDataBindBool>(initialValue, std::move(callback)));
+	}
 }
 
 void UIWidget::bindData(const String& childId, int initialValue, UIDataBindInt::WriteCallback callback)

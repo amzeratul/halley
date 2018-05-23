@@ -10,6 +10,10 @@ UIDataBind::~UIDataBind()
 {
 }
 
+void UIDataBind::onDataFromWidget(bool data)
+{
+}
+
 void UIDataBind::onDataFromWidget(int)
 {
 }
@@ -25,6 +29,11 @@ void UIDataBind::onDataFromWidget(const String&)
 bool UIDataBind::canWriteData() const
 {
 	return acceptingData;
+}
+
+bool UIDataBind::getBoolData()
+{
+	return getIntData() != 0;
 }
 
 int UIDataBind::getIntData()
@@ -80,9 +89,82 @@ UIDataBind::Format UIDataBindInt::getFormat() const
 	return Format::Int;
 }
 
+void UIDataBindInt::onDataFromWidget(bool data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(data ? 1 : 0);
+	}
+}
+
+void UIDataBindFloat::onDataFromWidget(bool data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(data ? 1.0f : 0.0f);
+	}
+}
+
 void UIDataBind::setAcceptingDataFromWidget(bool accepting)
 {
 	acceptingData = accepting;
+}
+
+UIDataBindBool::UIDataBindBool(bool initialValue, WriteCallback writeCallback)
+	: initialValue(initialValue)
+	, writeCallback(writeCallback)
+{
+}
+
+bool UIDataBindBool::getBoolData()
+{
+	return initialValue;
+}
+
+int UIDataBindBool::getIntData()
+{
+	return initialValue ? 1 : 0;
+}
+
+float UIDataBindBool::getFloatData()
+{
+	return initialValue ? 1.0f : 0.0f;
+}
+
+String UIDataBindBool::getStringData()
+{
+	return initialValue ? "true" : "false";
+}
+
+UIDataBind::Format UIDataBindBool::getFormat() const
+{
+	return Format::Bool;
+}
+
+void UIDataBindBool::onDataFromWidget(bool data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(data);
+	}
+}
+
+void UIDataBindBool::onDataFromWidget(int data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(data != 0);
+	}
+}
+
+void UIDataBindBool::onDataFromWidget(float data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(data != 0);
+	}
+}
+
+void UIDataBindBool::onDataFromWidget(const String& data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(data == "true");
+	}
 }
 
 void UIDataBindInt::onDataFromWidget(int data)
@@ -159,6 +241,11 @@ UIDataBindString::UIDataBindString(String initialValue, WriteCallback writeCallb
 {
 }
 
+bool UIDataBindString::getBoolData()
+{
+	return initialValue == "true";
+}
+
 int UIDataBindString::getIntData()
 {
 	return initialValue.toInteger();
@@ -177,6 +264,13 @@ String UIDataBindString::getStringData()
 UIDataBind::Format UIDataBindString::getFormat() const
 {
 	return Format::String;
+}
+
+void UIDataBindString::onDataFromWidget(bool data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(data ? "true" : "false");
+	}
 }
 
 void UIDataBindString::onDataFromWidget(int data)

@@ -13,6 +13,7 @@ namespace Halley {
     public:
 		enum class Format {
 			Undefined,
+			Bool,
 			Int,
 			Float,
 			String
@@ -20,6 +21,7 @@ namespace Halley {
 
 		virtual ~UIDataBind();
 
+		virtual bool getBoolData();
 		virtual int getIntData();
 		virtual float getFloatData();
 		virtual String getStringData();
@@ -29,6 +31,7 @@ namespace Halley {
 		virtual Format getFormat() const = 0;
 
 	protected:
+		virtual void onDataFromWidget(bool data);
 		virtual void onDataFromWidget(int data);
 		virtual void onDataFromWidget(float data);
 		virtual void onDataFromWidget(const String& data);
@@ -43,6 +46,30 @@ namespace Halley {
 		void setAcceptingDataFromWidget(bool accepting);
     };
 
+	class UIDataBindBool : public UIDataBind {
+	public:
+		using WriteCallback = std::function<void(bool)>;
+
+		UIDataBindBool(bool initialValue, WriteCallback writeCallback);
+
+		bool getBoolData() override;
+		int getIntData() override;
+		float getFloatData() override;
+		String getStringData() override;
+
+		Format getFormat() const override;
+
+	protected:
+		void onDataFromWidget(bool data) override;
+		void onDataFromWidget(int data) override;
+		void onDataFromWidget(float data) override;
+		void onDataFromWidget(const String& data) override;
+
+	private:
+		int initialValue;
+		WriteCallback writeCallback;
+	};
+
 	class UIDataBindInt : public UIDataBind {
 	public:
 		using WriteCallback = std::function<void(int)>;
@@ -56,6 +83,7 @@ namespace Halley {
 		Format getFormat() const override;
 
 	protected:
+		void onDataFromWidget(bool data) override;
 		void onDataFromWidget(int data) override;
 		void onDataFromWidget(float data) override;
 		void onDataFromWidget(const String& data) override;
@@ -78,6 +106,7 @@ namespace Halley {
 		Format getFormat() const override;
 
 	protected:
+		void onDataFromWidget(bool data) override;
 		void onDataFromWidget(int data) override;
 		void onDataFromWidget(float data) override;
 		void onDataFromWidget(const String& data) override;
@@ -93,6 +122,7 @@ namespace Halley {
 
 		UIDataBindString(String initialValue, WriteCallback writeCallback);
 
+		bool getBoolData() override;
 		int getIntData() override;
 		float getFloatData() override;
 		String getStringData() override;
@@ -100,6 +130,7 @@ namespace Halley {
 		Format getFormat() const override;
 
 	protected:
+		void onDataFromWidget(bool data) override;
 		void onDataFromWidget(int data) override;
 		void onDataFromWidget(float data) override;
 		void onDataFromWidget(const String& data) override;

@@ -98,6 +98,7 @@ namespace Halley {
 		void setDataBind(std::shared_ptr<UIDataBind> dataBind);
 		std::shared_ptr<UIDataBind> getDataBind() const;
 		virtual void readFromDataBind();
+		void bindData(const String& childId, bool initialValue, UIDataBindBool::WriteCallback callback = {});
 		void bindData(const String& childId, int initialValue, UIDataBindInt::WriteCallback callback = {});
 		void bindData(const String& childId, float initialValue, UIDataBindFloat::WriteCallback callback = {});
 		void bindData(const String& childId, const String& initialValue, UIDataBindString::WriteCallback callback = {});
@@ -128,6 +129,7 @@ namespace Halley {
 		virtual void onLayout();
 		UIRoot* getRoot() override;
 
+		void notifyDataBind(bool data) const;
 		void notifyDataBind(int data) const;
 		void notifyDataBind(float data) const;
 		void notifyDataBind(const String& data) const;
