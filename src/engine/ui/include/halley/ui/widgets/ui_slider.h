@@ -35,6 +35,7 @@ namespace Halley {
 		bool isFocusLocked() const override;
 	    void pressMouse(Vector2f mousePos, int button) override;
 	    void releaseMouse(Vector2f mousePos, int button) override;
+		void onMouseOver(Vector2f mousePos) override;
 
 	protected:
 		void draw(UIPainter& painter) const override;

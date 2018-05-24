@@ -7,7 +7,7 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 	, maxValue(maxValue)
 {
 	sliderBar = std::make_shared<UISliderBar>(*this, style);
-	UIWidget::add(sliderBar, 1, {}, UISizerAlignFlags::Centre);
+	UIWidget::add(sliderBar, 1, {}, UISizerAlignFlags::CentreVertical | UISizerFillFlags::FillHorizontal);
 
 	setValue(value);
 }
@@ -81,8 +81,7 @@ void UISliderBar::pressMouse(Vector2f mousePos, int button)
 	if (button == 0 && isEnabled()) {
 		held = true;
 		auto relative = (mousePos - getPosition()) / getSize();
-		float clickPos = relative.x;
-		parent.setRelativeValue(clickPos);
+		parent.setRelativeValue(relative.x);
 	}
 }
 
@@ -90,6 +89,14 @@ void UISliderBar::releaseMouse(Vector2f mousePos, int button)
 {
 	if (button == 0 && isEnabled()) {
 		held = false;
+	}
+}
+
+void UISliderBar::onMouseOver(Vector2f mousePos)
+{
+	if (held) {
+		auto relative = (mousePos - getPosition()) / getSize();
+		parent.setRelativeValue(relative.x);
 	}
 }
 
