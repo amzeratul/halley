@@ -59,7 +59,7 @@ void UIWidget::doUpdate(bool full, Time t, UIInputType inputType, JoystickType j
 		positionUpdated = false;
 
 		if (inputButtons && full) {
-			onInput(inputResults);
+			onInput(inputResults, t);
 		}
 
 		addNewChildren(inputType);
@@ -362,7 +362,7 @@ UIInputType UIWidget::getLastInputType() const
 	return lastInputType;
 }
 
-void UIWidget::onInput(const UIInputResults& input)
+void UIWidget::onInput(const UIInputResults& input, Time time)
 {
 }
 
@@ -375,6 +375,10 @@ void UIWidget::setMouseClip(Maybe<Rect4f> clip)
 }
 
 void UIWidget::onManualControlCycleValue(int delta)
+{
+}
+
+void UIWidget::onManualControlAnalogueAdjustValue(float delta)
 {
 }
 

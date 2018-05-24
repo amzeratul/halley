@@ -33,7 +33,7 @@ namespace Halley {
 		void addButton(std::shared_ptr<UIMenuButton> button, const String& up = "", const String& down = "", const String& left = "", const String& right = "");
 		void setCancelId(const String& id);
 
-		void onInput(const UIInputResults& input);
+		void onInput(const UIInputResults& input, Time time);
 		bool setFocus(UIMenuButton& uiMenuButton);
 		bool setFocus(const String& id);
 		std::shared_ptr<UIMenuButton> getCurrentFocus() const;
@@ -65,7 +65,7 @@ namespace Halley {
 		UIMenuButtonControlWidget(std::shared_ptr<UIMenuButtonGroup> group);
 
 	protected:
-		void onInput(const UIInputResults& input) override;
+		void onInput(const UIInputResults& input, Time time) override;
 
 	private:
 		std::shared_ptr<UIMenuButtonGroup> group;

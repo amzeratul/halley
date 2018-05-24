@@ -128,7 +128,7 @@ void UIList::onAccept()
 	sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId(), curOption));
 }
 
-void UIList::onInput(const UIInputResults& input)
+void UIList::onInput(const UIInputResults& input, Time time)
 {
 	if (items.empty()) {
 		curOption = 0;

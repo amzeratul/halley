@@ -73,7 +73,7 @@ void UIMenuButtonGroup::setCancelId(const String& id)
 	cancelId = id;
 }
 
-void UIMenuButtonGroup::onInput(const UIInputResults& input)
+void UIMenuButtonGroup::onInput(const UIInputResults& input, Time time)
 {
 	if (size() == 0 || !enabled) {
 		return;
@@ -185,9 +185,9 @@ UIMenuButtonControlWidget::UIMenuButtonControlWidget(std::shared_ptr<UIMenuButto
 {
 }
 
-void UIMenuButtonControlWidget::onInput(const UIInputResults& input)
+void UIMenuButtonControlWidget::onInput(const UIInputResults& input, Time time)
 {
-	group->onInput(input);
+	group->onInput(input, time);
 }
 
 UIMenuButtonGroupHighlight::UIMenuButtonGroupHighlight(std::shared_ptr<UIMenuButtonGroup> group)

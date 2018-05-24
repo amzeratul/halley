@@ -25,7 +25,7 @@ void UIGamepadImage::setJoystickType(JoystickType type)
 	}
 }
 
-void UIGamepadImage::onInput(const UIInputResults& input)
+void UIGamepadImage::onInput(const UIInputResults& input, Time time)
 {
 	if (input.isButtonPressed(UIInput::Button::Accept)) {
 		sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));

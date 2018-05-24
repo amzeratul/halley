@@ -16,6 +16,8 @@ namespace Halley {
 		float getRelativeValue() const; // 0..1 range
 		void readFromDataBind() override;
 
+		void onManualControlAnalogueAdjustValue(float delta) override;
+
 	protected:
 		void update(Time t, bool moved) override;
 

@@ -68,7 +68,7 @@ void UIClickable::doForceUpdate()
 	forceUpdate = true;
 }
 
-void UIClickable::onInput(const UIInputResults& input)
+void UIClickable::onInput(const UIInputResults& input, Time time)
 {
 	if (input.isButtonPressed(UIInput::Button::Accept)) {
 		onClicked(Vector2f());

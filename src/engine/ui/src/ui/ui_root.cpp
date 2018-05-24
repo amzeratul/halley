@@ -147,6 +147,8 @@ void UIRoot::updateInput(spInputDevice input)
 		results.setButtonPressed(UIInput::Button::Cancel, b.cancel != -1 ? input->isButtonPressed(b.cancel) : false);
 		results.setButtonPressed(UIInput::Button::Prev, b.prev != -1 ? input->isButtonPressed(b.prev) : false);
 		results.setButtonPressed(UIInput::Button::Next, b.next != -1 ? input->isButtonPressed(b.next) : false);
+		results.setAxis(UIInput::Axis::X, (b.xAxis != -1 ? input->getAxis(b.xAxis) : 0) + (b.xAxisAlt != -1 ? input->getAxis(b.xAxisAlt) : 0));
+		results.setAxis(UIInput::Axis::Y, (b.yAxis != -1 ? input->getAxis(b.yAxis) : 0) + (b.yAxisAlt != -1 ? input->getAxis(b.yAxisAlt) : 0));
 		results.setAxisRepeat(UIInput::Axis::X, (b.xAxis != -1 ? input->getAxisRepeat(b.xAxis) : 0) + (b.xAxisAlt != -1 ? input->getAxisRepeat(b.xAxisAlt) : 0));
 		results.setAxisRepeat(UIInput::Axis::Y, (b.yAxis != -1 ? input->getAxisRepeat(b.yAxis) : 0) + (b.yAxisAlt != -1 ? input->getAxisRepeat(b.yAxisAlt) : 0));
 	}

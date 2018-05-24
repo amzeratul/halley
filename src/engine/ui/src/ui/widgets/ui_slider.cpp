@@ -52,6 +52,11 @@ void UISlider::readFromDataBind()
 	}
 }
 
+void UISlider::onManualControlAnalogueAdjustValue(float delta)
+{
+	setValue(getValue() + delta * 1.2f);
+}
+
 void UISlider::update(Time t, bool moved)
 {
 }

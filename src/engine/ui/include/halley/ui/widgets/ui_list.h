@@ -37,7 +37,7 @@ namespace Halley {
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
-		void onInput(const UIInputResults& input) override;
+		void onInput(const UIInputResults& input, Time time) override;
 
 	private:
 		UIStyle style;

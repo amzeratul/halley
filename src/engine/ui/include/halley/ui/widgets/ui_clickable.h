@@ -24,7 +24,7 @@ namespace Halley {
 		void onClick(UIEventCallback callback);
 		virtual void onClicked(Vector2f mousePos) = 0;
 
-		void onInput(const UIInputResults& input) override;
+		void onInput(const UIInputResults& input, Time time) override;
 
 	protected:
 
