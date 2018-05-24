@@ -82,6 +82,8 @@ ConfigNode& ConfigNode::operator=(ConfigNode&& other)
 	floatData = other.floatData;
 	vec2iData = other.vec2iData;
 	vec2fData = other.vec2fData;
+	line = other.line;
+	column = other.column;
 	other.type = ConfigNodeType::Undefined;
 	other.ptrData = nullptr;
 	return *this;
@@ -283,6 +285,9 @@ void ConfigNode::serialize(Serializer& s) const
 		default:
 			throw Exception("Unknown configuration node type.");
 	}
+
+	s << line;
+	s << column;
 }
 
 void ConfigNode::deserialize(Deserializer& s)
@@ -338,6 +343,11 @@ void ConfigNode::deserialize(Deserializer& s)
 		default:
 			throw Exception("Unknown configuration node type.");
 	}
+
+	if (s.getVersion() >= 2) {
+		s >> line;
+		s >> column;
+	}
 }
 
 int ConfigNode::asInt() const
@@ -349,7 +359,7 @@ int ConfigNode::asInt() const
 	} else if (type == ConfigNodeType::String) {
 		return asString().toInteger();
 	} else {
-		throw Exception("Not cannot be converted to int.");
+		throw Exception(getNodeDebugId() + " cannot be converted to int.");
 	}
 }
 
@@ -362,7 +372,7 @@ float ConfigNode::asFloat() const
 	} else if (type == ConfigNodeType::String) {
 		return asString().toFloat();
 	} else {
-		throw Exception("Not cannot be converted to float.");
+		throw Exception(getNodeDebugId() + " cannot be converted to float.");
 	}
 }
 
@@ -382,7 +392,7 @@ Vector2i ConfigNode::asVector2i() const
 	} else if (type == ConfigNodeType::Float2) {
 		return Vector2i(vec2fData);
 	} else {
-		throw Exception("Node is not a vector type");
+		throw Exception(getNodeDebugId() + " is not a vector type");
 	}
 }
 
@@ -393,7 +403,7 @@ Vector2f ConfigNode::asVector2f() const
 	} else if (type == ConfigNodeType::Float2) {
 		return vec2fData;
 	} else {
-		throw Exception("Node is not a vector type");
+		throw Exception(getNodeDebugId() + " is not a vector type");
 	}
 }
 
@@ -402,7 +412,7 @@ const Bytes& ConfigNode::asBytes() const
 	if (type == ConfigNodeType::Bytes) {
 		return *reinterpret_cast<Bytes*>(ptrData);
 	} else {
-		throw Exception("Node is not a byte sequence type");
+		throw Exception(getNodeDebugId() + " is not a byte sequence type");
 	}
 }
 
@@ -429,7 +439,7 @@ String ConfigNode::asString() const
 	if (type == ConfigNodeType::String) {
 		return *reinterpret_cast<String*>(ptrData);
 	} else {
-		throw Exception("Node is not a string type");
+		throw Exception(getNodeDebugId() + " is not a string type");
 	}
 }
 
@@ -474,7 +484,7 @@ const ConfigNode::SequenceType& ConfigNode::asSequence() const
 	if (type == ConfigNodeType::Sequence) {
 		return *reinterpret_cast<SequenceType*>(ptrData);
 	} else {
-		throw Exception("Node is not a sequence type");
+		throw Exception(getNodeDebugId() + " is not a sequence type");
 	}
 }
 
@@ -483,7 +493,7 @@ const ConfigNode::MapType& ConfigNode::asMap() const
 	if (type == ConfigNodeType::Map) {
 		return *reinterpret_cast<MapType*>(ptrData);
 	} else {
-		throw Exception("Node is not a map type");
+		throw Exception(getNodeDebugId() + " is not a map type");
 	}
 }
 
@@ -492,7 +502,7 @@ ConfigNode::SequenceType& ConfigNode::asSequence()
 	if (type == ConfigNodeType::Sequence) {
 		return *reinterpret_cast<SequenceType*>(ptrData);
 	} else {
-		throw Exception("Node is not a sequence type");
+		throw Exception(getNodeDebugId() + " is not a sequence type");
 	}
 }
 
@@ -501,7 +511,7 @@ ConfigNode::MapType& ConfigNode::asMap()
 	if (type == ConfigNodeType::Map) {
 		return *reinterpret_cast<MapType*>(ptrData);
 	} else {
-		throw Exception("Node is not a map type");
+		throw Exception(getNodeDebugId() + " is not a map type");
 	}
 }
 
@@ -576,6 +586,106 @@ void ConfigNode::reset()
 	type = ConfigNodeType::Undefined;
 }
 
+void ConfigNode::setOriginalPosition(int l, int c)
+{
+	line = l;
+	column = c;
+}
+
+void ConfigNode::setParent(const ConfigNode* p, int idx)
+{
+	parent = p;
+	parentIdx = idx;
+}
+
+void ConfigNode::propagateParentingInformation(const ConfigFile* file)
+{
+	parentFile = file;
+	if (type == ConfigNodeType::Sequence) {
+		int i = 0;
+		for (auto& e: asSequence()) {
+			e.setParent(this, i++);
+			e.propagateParentingInformation(file);
+		}
+	} else if (type == ConfigNodeType::Map) {
+		int i = 0;
+		for (auto& e: asMap()) {
+			e.second.setParent(this, i++);
+			e.second.propagateParentingInformation(file);
+		}
+	}
+}
+
+String ConfigNode::getNodeDebugId() const
+{
+	String value;
+	switch (type) {
+		case ConfigNodeType::String:
+			value = "\"" + asString() + "\"";
+			break;
+		case ConfigNodeType::Sequence:
+			value = "Sequence[" + toString(asSequence().size()) + "]";
+			break;
+		case ConfigNodeType::Map:
+			value = "Map";
+			break;
+		case ConfigNodeType::Int:
+			value = toString(asInt());
+			break;
+		case ConfigNodeType::Float:
+			value = toString(asFloat());
+			break;
+		case ConfigNodeType::Int2:
+			{
+				auto v = asVector2i();
+				value = "Vector2i(" + toString(v.x) + ", " + toString(v.y) + ")";
+			}
+			break;
+		case ConfigNodeType::Float2:
+			{
+				auto v = asVector2f();
+				value = "Vector2f(" + toString(v.x) + ", " + toString(v.y) + ")";
+			}
+			break;
+		case ConfigNodeType::Bytes:
+			value = "Bytes (" + String::prettySize(asBytes().size()) + ")";
+			break;
+		case ConfigNodeType::Undefined:
+			value = "null";
+			break;
+	}
+
+	String assetId = "unknown";
+	if (parentFile) {
+		assetId = parentFile->getAssetId();
+	}
+	return "Node \"" + backTrackFullNodeName() + "\" (" + value + ") at \"" + assetId + "(" + toString(line + 1) + ":" + toString(column + 1) + ")\"";
+}
+
+String ConfigNode::backTrackFullNodeName() const
+{
+	if (parent) {
+		if (parent->type == ConfigNodeType::Sequence) {
+			return parent->backTrackFullNodeName() + "[" + toString(parentIdx) + "]";
+		} else if (parent->type == ConfigNodeType::Map) {
+			auto& parentMap = parent->asMap();
+			int i = 0;
+			String name = "?";
+			for (auto& e: parentMap) {
+				if (i++ == parentIdx) {
+					name = e.first;
+					break;
+				}
+			}
+			return parent->backTrackFullNodeName() + "." + name;
+		} else {
+			return "?";
+		}
+	} else {
+		return "~";
+	}
+}
+
 ConfigNode& ConfigFile::getRoot()
 {
 	return root;
@@ -586,7 +696,7 @@ const ConfigNode& ConfigFile::getRoot() const
 	return root;
 }
 
-constexpr int curVersion = 1;
+constexpr int curVersion = 2;
 
 void ConfigFile::serialize(Serializer& s) const
 {
@@ -599,7 +709,10 @@ void ConfigFile::deserialize(Deserializer& s)
 {
 	int version;
 	s >> version;
+	s.setVersion(version);
 	s >> root;
+
+	root.propagateParentingInformation(this);
 }
 
 std::unique_ptr<ConfigFile> ConfigFile::loadResource(ResourceLoader& loader)

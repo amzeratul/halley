@@ -47,6 +47,7 @@ ConfigNode ConfigImporter::parseYAMLNode(const YAML::Node& node)
 		}
 	}
 
+	result.setOriginalPosition(node.Mark().line, node.Mark().column);
 	return result;
 }
 

@@ -4,7 +4,6 @@
 #include <vector>
 #include "halley/text/halleystring.h"
 #include "halley/maths/vector2.h"
-#include <boost/variant.hpp>
 #include "halley/resources/resource.h"
 
 namespace Halley
@@ -25,6 +24,25 @@ namespace Halley
 		Float2,
 		Bytes
 	};
+
+	template <>
+	struct EnumNames<ConfigNodeType> {
+		constexpr std::array<const char*, 9> operator()() const {
+			return{{
+				"undefined",
+				"string",
+				"sequence",
+				"map",
+				"int",
+				"float",
+				"int2",
+				"float2",
+				"bytes"
+			}};
+		}
+	};
+
+	class ConfigFile;
 	
 	class ConfigNode
 	{
@@ -106,6 +124,9 @@ namespace Halley
 		SequenceType::const_iterator end() const;
 
 		void reset();
+		void setOriginalPosition(int line, int column);
+		void setParent(const ConfigNode* parent, int idx);
+		void propagateParentingInformation(const ConfigFile* parentFile);
 
 	private:
 		union {
@@ -116,6 +137,11 @@ namespace Halley
 			Vector2f vec2fData;
 		};
 		ConfigNodeType type = ConfigNodeType::Undefined;
+		int line = 0;
+		int column = 0;
+		int parentIdx = 0;
+		const ConfigNode* parent = nullptr;
+		const ConfigFile* parentFile = nullptr;
 
 		static ConfigNode undefinedConfigNode;
 
@@ -125,6 +151,9 @@ namespace Halley
 			s >> v;
 			*this = std::move(v);
 		}
+
+		String getNodeDebugId() const;
+		String backTrackFullNodeName() const;
 	};
 
 	class ConfigFile : public Resource
