@@ -127,6 +127,16 @@ Deserializer& Deserializer::operator>>(Bytes& bytes)
 	return *this;
 }
 
+void Deserializer::setVersion(int v)
+{
+	version = v;
+}
+
+int Deserializer::getVersion() const
+{
+	return version;
+}
+
 void Deserializer::ensureSufficientBytesRemaining(size_t bytes)
 {
 	if (bytes > getBytesRemaining()) {

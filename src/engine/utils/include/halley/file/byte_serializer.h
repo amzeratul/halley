@@ -343,9 +343,13 @@ namespace Halley {
 			return *this;
 		}
 
+		void setVersion(int version);
+		int getVersion() const;
+
 	private:
 		size_t pos = 0;
 		gsl::span<const gsl::byte> src;
+		int version = 0;
 
 		template <typename T>
 		Deserializer& deserializePod(T& val)
