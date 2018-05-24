@@ -363,6 +363,11 @@ Vector2f Sprite::getRawSize() const
 	return vertexAttrib.size;
 }
 
+Vector2f Sprite::getOriginalSize() const
+{
+	return getRawSize() + Vector2f(Vector2i(outerBorder.x + outerBorder.z, outerBorder.y + outerBorder.z));
+}
+
 Vector4s Sprite::getOuterBorder() const
 {
 	return outerBorder;

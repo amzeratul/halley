@@ -64,6 +64,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeScrollPane(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeScrollBar(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeScrollBarPane(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeSlider(const ConfigNode& node);
 
 		bool hasCondition(const String& condition) const;
 		bool resolveConditions(const ConfigNode& node) const;

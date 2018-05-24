@@ -13,6 +13,7 @@
 #include "halley/ui/widgets/ui_scroll_pane.h"
 #include "halley/ui/widgets/ui_scrollbar_pane.h"
 #include "halley/ui/widgets/ui_checkbox.h"
+#include "halley/ui/widgets/ui_slider.h"
 #include "halley/support/logger.h"
 #include "ui_validator.h"
 
@@ -36,6 +37,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("scrollBar", [=] (const ConfigNode& node) { return makeScrollBar(node); });
 	addFactory("scrollPane", [=] (const ConfigNode& node) { return makeScrollPane(node); });
 	addFactory("scrollBarPane", [=] (const ConfigNode& node) { return makeScrollBarPane(node); });
+	addFactory("slider", [=] (const ConfigNode& node) { return makeSlider(node); });
 }
 
 void UIFactory::addFactory(const String& key, WidgetFactory factory)
@@ -398,6 +400,18 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollBarPane(const ConfigNode& entryNo
 	auto alwaysShow = !node["autoHide"].asBool(false);
 
 	return std::make_shared<UIScrollBarPane>(clipSize, style, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow);
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeSlider(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto style = UIStyle(node["style"].asString("slider"), styleSheet);
+	auto minValue = node["minValue"].asFloat(0);
+	auto maxValue = node["maxValue"].asFloat(1);
+	auto value = node["value"].asFloat(0.5f);
+
+	return std::make_shared<UISlider>(id, style, minValue, maxValue, value);
 }
 
 bool UIFactory::hasCondition(const String& condition) const

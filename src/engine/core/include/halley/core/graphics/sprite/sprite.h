@@ -73,6 +73,7 @@ namespace Halley
 		Vector2f getScale() const;
 		Vector2f getScaledSize() const;
 		Vector2f getRawSize() const;
+		Vector2f getOriginalSize() const;
 
 		Sprite& setFlip(bool flip);
 		bool isFlipped() const;
