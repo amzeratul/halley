@@ -53,7 +53,7 @@ float UIPainter::getCurrentPriority()
 	}
 }
 
-void UIPainter::draw(const Sprite& sprite)
+void UIPainter::draw(const Sprite& sprite, bool forceCopy)
 {
 	if (clip) {
 		auto targetClip = clip.get() - sprite.getPosition();
@@ -66,11 +66,15 @@ void UIPainter::draw(const Sprite& sprite)
 			painter.addCopy(sprite.clone().setClip(targetClip), mask, layer, getCurrentPriority());
 		}
 	} else {
-		painter.add(sprite, mask, layer, getCurrentPriority());
+		if (forceCopy) {
+			painter.addCopy(sprite, mask, layer, getCurrentPriority());
+		} else {
+			painter.add(sprite, mask, layer, getCurrentPriority());
+		}
 	}
 }
 
-void UIPainter::draw(const TextRenderer& text)
+void UIPainter::draw(const TextRenderer& text, bool forceCopy)
 {
 	if (clip) {
 		auto targetClip = clip.get() - text.getPosition();
@@ -83,6 +87,10 @@ void UIPainter::draw(const TextRenderer& text)
 			painter.addCopy(text.clone().setClip(clip.get() - text.getPosition()), mask, layer, getCurrentPriority());
 		}
 	} else {
-		painter.add(text, mask, layer, getCurrentPriority());
+		if (forceCopy) {
+			painter.addCopy(text, mask, layer, getCurrentPriority());
+		} else {
+			painter.add(text, mask, layer, getCurrentPriority());
+		}
 	}
 }

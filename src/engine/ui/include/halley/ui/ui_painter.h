@@ -11,8 +11,8 @@ namespace Halley {
 	public:
 		UIPainter(SpritePainter& painter, int mask, int layer);
 
-		void draw(const Sprite& sprite);
-		void draw(const TextRenderer& text);
+		void draw(const Sprite& sprite, bool forceCopy = false);
+		void draw(const TextRenderer& text, bool forceCopy = false);
 
 		UIPainter clone();
 		UIPainter withAdjustedLayer(int delta);

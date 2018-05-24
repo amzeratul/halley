@@ -36,6 +36,7 @@ namespace Halley {
 	    void pressMouse(Vector2f mousePos, int button) override;
 	    void releaseMouse(Vector2f mousePos, int button) override;
 		void onMouseOver(Vector2f mousePos) override;
+		Rect4f getMouseRect() const override;
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -44,9 +45,14 @@ namespace Halley {
 	private:
 		UISlider& parent;
 		bool held = false;
+		Vector4f extra;
 
 		Sprite bar;
 		Sprite barFull;
 		Sprite thumb;
+		Sprite left;
+		Sprite right;
+
+		void fill(UIPainter& painter, Rect4f rect, Sprite sprite) const;
 	};
 }
