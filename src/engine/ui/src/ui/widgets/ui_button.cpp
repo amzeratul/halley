@@ -92,3 +92,16 @@ void UIButton::doSetState(State state)
 		}
 	}
 }
+
+void UIButton::onStateChanged(State prev, State next)
+{
+	if (isEnabled() && !borderOnly && prev != next) {
+		if (next == State::Up) {
+			playSound(style.getAudioClip("upSound"));
+		} else if (next == State::Down) {
+			playSound(style.getAudioClip("downSound"));
+		} else if (next == State::Hover) {
+			playSound(style.getAudioClip("hoverSound"));
+		}
+	}
+}

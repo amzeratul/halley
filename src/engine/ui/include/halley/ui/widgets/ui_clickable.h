@@ -28,6 +28,7 @@ namespace Halley {
 
 	protected:
 
+		virtual void onStateChanged(State prev, State next);
 		bool setState(State state);
 		virtual void doSetState(State state) = 0;
 		State getCurState() const;

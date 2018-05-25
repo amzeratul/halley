@@ -95,9 +95,14 @@ LocalisedString LocalisedString::fromNumber(int number)
 	return LocalisedString(toString(number));
 }
 
-LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok) const
+LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0) const
 {
-	return LocalisedString(string.replaceAll("{0}", tok.getString()));
+	return LocalisedString(string.replaceAll("{0}", tok0.getString()));
+}
+
+LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1) const
+{
+	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()));
 }
 
 const String& LocalisedString::getString() const

@@ -75,8 +75,15 @@ void UIClickable::onInput(const UIInputResults& input, Time time)
 	}
 }
 
+void UIClickable::onStateChanged(State prev, State next)
+{
+}
+
 bool UIClickable::setState(State state)
 {
+	if (state != curState) {
+		onStateChanged(curState, state);
+	}
 	if (state != curState || forceUpdate) {
 		curState = state;
 		doSetState(state);

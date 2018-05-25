@@ -19,7 +19,8 @@ namespace Halley {
 		static LocalisedString fromUserString(const String& str);
 		static LocalisedString fromNumber(int number);
 
-		LocalisedString replaceTokens(const LocalisedString& tok) const;
+		LocalisedString replaceTokens(const LocalisedString& tok0) const;
+		LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1) const;
 
 		const String& getString() const;
 

@@ -4,6 +4,7 @@
 #include "ui_painter.h"
 #include "halley/audio/audio_position.h"
 #include "halley/audio/audio_clip.h"
+#include "halley/maths/random.h"
 
 using namespace Halley;
 
@@ -282,7 +283,7 @@ void UIRoot::draw(SpritePainter& painter, int mask, int layer)
 void UIRoot::playSound(const std::shared_ptr<const AudioClip>& clip)
 {
 	if (audio && clip) {
-		audio->play(clip, AudioPosition::makeUI(0.0f));
+		audio->play(clip, AudioPosition::makeUI(0.0f), 1.0f, false, Random::getGlobal().getFloat(0.95f, 1.05f));
 	}
 }
 

@@ -21,6 +21,7 @@ namespace Halley {
 
 	protected:
 		void doSetState(State state) override;
+		void onStateChanged(State prev, State next) override;
 
 	private:
 		Sprite sprite;
