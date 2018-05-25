@@ -107,7 +107,7 @@ namespace Halley {
 		void setMouseClip(Maybe<Rect4f> mouseClip);
 
 		virtual void onManualControlCycleValue(int delta);
-		virtual void onManualControlAnalogueAdjustValue(float delta);
+		virtual void onManualControlAnalogueAdjustValue(float delta, Time t);
 		virtual void onManualControlActivate();
 		
 		UIInput::Priority getInputPriority() const;

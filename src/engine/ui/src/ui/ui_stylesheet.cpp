@@ -41,7 +41,8 @@ UIStyleSheet::UIStyleSheet(const ConfigNode& node, Resources& resources)
 				.setSize(text["size"].asFloat())
 				.setColour(Colour4f::fromString(text["colour"].asString()))
 				.setOutline(text["outline"].asFloat(0.0f))
-				.setOutlineColour(Colour4f::fromString(text["outlineColour"].asString("#000000")));
+				.setOutlineColour(Colour4f::fromString(text["outlineColour"].asString("#000000")))
+				.setAlignment(text["alignment"].asFloat(0.0f));
 		}
 	}
 

@@ -3,6 +3,7 @@
 
 namespace Halley {
 	class UISliderBar;
+	class UILabel;
 
 	class UISlider : public UIWidget {
 	public:
@@ -16,17 +17,20 @@ namespace Halley {
 		float getRelativeValue() const; // 0..1 range
 		void readFromDataBind() override;
 
-		void onManualControlAnalogueAdjustValue(float delta) override;
+		void onManualControlAnalogueAdjustValue(float delta, Time t) override;
 
 	protected:
 		void update(Time t, bool moved) override;
 
 	private:
 		std::shared_ptr<UISliderBar> sliderBar;
+		std::shared_ptr<UILabel> label;
 
 		const float minValue;
 		const float maxValue;
 		float value;
+		float maxSpeed = 0;
+		Time timeSinceMove = 0;
 	};
 	
 	class UISliderBar : public UIWidget {

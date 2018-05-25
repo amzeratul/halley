@@ -1,4 +1,6 @@
 #include "halley/ui/widgets/ui_slider.h"
+#include "halley/ui/widgets/ui_label.h"
+#include "halley/ui/widgets/ui_image.h"
 using namespace Halley;
 
 UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxValue, float value)
@@ -7,7 +9,15 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 	, maxValue(maxValue)
 {
 	sliderBar = std::make_shared<UISliderBar>(*this, style);
-	UIWidget::add(sliderBar, 1, {}, UISizerAlignFlags::CentreVertical | UISizerFillFlags::FillHorizontal);
+	UIWidget::add(sliderBar, 1, style.getBorder("barBorder"), UISizerAlignFlags::CentreVertical | UISizerFillFlags::FillHorizontal);
+	
+	auto box = std::make_shared<UIImage>(style.getSprite("labelBorder"), UISizer(UISizerType::Vertical), style.getBorder("labelInnerBorder"));
+	auto font = style.getTextRenderer("label");
+	label = std::make_shared<UILabel>(font, LocalisedString::fromNumber(int(lround(maxValue))));
+	box->add(label, 0, {}, UISizerAlignFlags::Centre);
+	box->layout();
+	box->setMinSize(box->getSize());
+	UIWidget::add(box, 0, {}, UISizerAlignFlags::Centre);
 
 	setValue(value);
 }
@@ -15,6 +25,7 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 void UISlider::setValue(float v)
 {
 	value = clamp(v, minValue, maxValue);
+	label->setText(LocalisedString::fromNumber(int(lround(value))));
 
 	notifyDataBind(value);
 }
@@ -52,13 +63,35 @@ void UISlider::readFromDataBind()
 	}
 }
 
-void UISlider::onManualControlAnalogueAdjustValue(float delta)
+void UISlider::onManualControlAnalogueAdjustValue(float input, Time t)
 {
-	setValue(getValue() + delta * 1.2f);
+	timeSinceMove = 0;
+
+	constexpr float targetSpeed = 3.0f;
+	constexpr float accel = 3.0f;
+	const float inputSpeed = input * targetSpeed;
+	
+	float speed = inputSpeed;
+	if (speed * maxSpeed < 0) {
+		maxSpeed = 0;
+	}
+	if (std::abs(speed) < std::abs(maxSpeed)) {
+		maxSpeed = speed;
+	}
+	if (std::abs(speed) > std::abs(maxSpeed)) {
+		speed = maxSpeed;
+		maxSpeed = advance(maxSpeed, inputSpeed, float(t * accel));
+	}
+
+	setRelativeValue(getRelativeValue() + float(maxSpeed * t));
 }
 
 void UISlider::update(Time t, bool moved)
 {
+	timeSinceMove += t;
+	if (timeSinceMove > 0.1f) {
+		maxSpeed = 0;
+	}
 }
 
 UISliderBar::UISliderBar(UISlider& parent, UIStyle style)

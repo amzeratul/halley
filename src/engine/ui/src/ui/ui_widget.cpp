@@ -378,7 +378,7 @@ void UIWidget::onManualControlCycleValue(int delta)
 {
 }
 
-void UIWidget::onManualControlAnalogueAdjustValue(float delta)
+void UIWidget::onManualControlAnalogueAdjustValue(float delta, Time t)
 {
 }
 
