@@ -11,9 +11,6 @@ NetworkPacketBase::NetworkPacketBase()
 NetworkPacketBase::NetworkPacketBase(gsl::span<const gsl::byte> src, size_t prePadding)
 	: dataStart(prePadding)
 {
-	if (src.size_bytes() + prePadding > 1500) {
-		throw Exception("Packet too big for network.");
-	}
 	data.resize(src.size_bytes() + prePadding);
 	memcpy(data.data() + prePadding, src.data(), src.size_bytes());
 }
@@ -29,7 +26,6 @@ size_t NetworkPacketBase::copyTo(gsl::span<gsl::byte> dst) const
 
 size_t NetworkPacketBase::getSize() const
 {
-	Expects(dataStart < 1500);
 	Expects(data.size() >= dataStart);
 	return data.size() - dataStart;
 }
@@ -68,8 +64,6 @@ void OutboundNetworkPacket::addHeader(gsl::span<const gsl::byte> src)
 	
 	dataStart -= src.size_bytes();
 	memcpy(data.data() + dataStart, src.data(), src.size_bytes());
-
-	Ensures(dataStart <= 1500);
 }
 
 OutboundNetworkPacket& OutboundNetworkPacket::operator=(OutboundNetworkPacket&& other) noexcept
@@ -102,8 +96,6 @@ void InboundNetworkPacket::extractHeader(gsl::span<gsl::byte> dst)
 
 	memcpy(dst.data(), data.data() + dataStart, dst.size_bytes());
 	dataStart += dst.size_bytes();
-
-	Ensures(dataStart <= 1500);
 }
 
 InboundNetworkPacket& InboundNetworkPacket::operator=(InboundNetworkPacket&& other)

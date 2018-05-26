@@ -23,8 +23,8 @@ namespace Halley
 		bool acceptingConnection = false;
 		Maybe<TCPSocket> acceptingSocket;
 
-		std::vector<std::shared_ptr<IConnection>> pendingConnections;
-		std::vector<std::shared_ptr<IConnection>> activeConnections;
+		std::vector<std::shared_ptr<AsioTCPConnection>> pendingConnections;
+		std::vector<std::shared_ptr<AsioTCPConnection>> activeConnections;
 
 		void onConnectionAccepted();
 	};

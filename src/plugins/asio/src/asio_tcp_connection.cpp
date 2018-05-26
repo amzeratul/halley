@@ -26,7 +26,7 @@ AsioTCPConnection::AsioTCPConnection(asio::io_service& service, String host, int
 				boost::system::error_code ec2;
 				socket.connect(r, ec2);
 				if (!ec2) {
-					Logger::logInfo("Connected");
+					Logger::logDev("Connected to " + host + ":" + toString(port));
 					status = ConnectionStatus::Connected;
 					break;
 				}
@@ -47,11 +47,15 @@ AsioTCPConnection::~AsioTCPConnection()
 
 void AsioTCPConnection::update()
 {
+	needsPoll = false;
+
 	if (status == ConnectionStatus::Closing) {
 		close();
 	}
 	if (status == ConnectionStatus::Connected) {
 		tryReceive();
+		trySend();
+
 		if (!socket.is_open()) {
 			close();
 		}
@@ -89,14 +93,12 @@ void AsioTCPConnection::send(OutboundNetworkPacket&& packet)
 	sendQueue.emplace_back(std::move(bs));
 
 	if (sendQueue.size() == 1) {
-		sendMore();
+		trySend();
 	}
 }
 
 bool AsioTCPConnection::receive(InboundNetworkPacket& packet)
 {
-	tryReceive();
-
 	if (receiveQueue.size() >= sizeof(uint32_t)) {
 		const uint32_t size = *reinterpret_cast<uint32_t*>(receiveQueue.data());
 		if (size > 128 * 1024 * 1024) {
@@ -117,50 +119,66 @@ bool AsioTCPConnection::receive(InboundNetworkPacket& packet)
 	return false;
 }
 
-void AsioTCPConnection::sendMore()
+bool AsioTCPConnection::needsPolling() const
 {
-	if (!sendQueue.empty()) {
-		sendBuffer(sendQueue.front());
-	}
+	return needsPoll;
 }
 
-void AsioTCPConnection::sendBuffer(Bytes& toSend)
+void AsioTCPConnection::trySend()
 {
-	socket.async_write_some(asio::buffer(toSend.data(), toSend.size()), [=] (const boost::system::error_code& ec, size_t bytesWritten)
-	{
-		if (ec) {
-			Logger::logError("Error sending data on TCP socket: " + ec.message());
-			close();
-		} else {
-			auto& front = sendQueue.front();
-			if (bytesWritten == front.size()) {
-				sendQueue.pop_front();
-			} else {
-				front.erase(front.begin(), front.begin() + bytesWritten);
-			}
+	if (!sendQueue.empty()) {
+		needsPoll = true;
 
-			sendMore();
-		}
-	});	
+		sendingQueue.emplace_back(std::move(sendQueue.front()));
+		sendQueue.pop_front();
+		auto& toSend = sendingQueue.back();
+
+		socket.async_write_some(asio::buffer(toSend.data(), toSend.size()), [=] (const boost::system::error_code& ec, size_t bytesWritten)
+		{
+			if (ec) {
+				Logger::logError("Error sending data on TCP socket: " + ec.message());
+				close();
+			} else {
+				auto& front = sendingQueue.front();
+				if (bytesWritten == front.size()) {
+					sendingQueue.pop_front();
+				} else {
+					front.erase(front.begin(), front.begin() + bytesWritten);
+				}
+
+				trySend();
+			}
+		});
+	}
 }
 
 void AsioTCPConnection::tryReceive()
 {
-	if (receiveBuffer.size() < 1024) {
-		receiveBuffer.resize(1024);
-	}
+	if (!reading) {
+		needsPoll = true;
+		reading = true;
 
-	socket.async_read_some(asio::mutable_buffer(receiveBuffer.data(), receiveBuffer.size()), [=] (const boost::system::error_code& ec, size_t bytesReceived)
-	{
-		if (ec) {
-			Logger::logError("Error reading data on TCP socket: " + ec.message());
-			close();
-		} else {
-			size_t curPos = receiveQueue.size();
-			receiveQueue.resize(curPos + bytesReceived);
-			memcpy(receiveQueue.data() + curPos, receiveBuffer.data(), bytesReceived);
-
-			tryReceive();
+		if (receiveBuffer.size() < 4096) {
+			receiveBuffer.resize(4096);
 		}
-	});
+
+		socket.async_read_some(asio::mutable_buffer(receiveBuffer.data(), receiveBuffer.size()), [=] (const boost::system::error_code& ec, size_t nBytesReceived)
+		{
+			if (ec) {
+				Logger::logError("Error reading data on TCP socket: " + ec.message());
+				close();
+			} else {
+				size_t curQueueSize = receiveQueue.size();
+				receiveQueue.resize(curQueueSize + nBytesReceived);
+				memcpy(receiveQueue.data() + curQueueSize, receiveBuffer.data(), nBytesReceived);
+
+				reading = false;
+
+				if (nBytesReceived == 4096) {
+					tryReceive();
+					needsPoll = true;
+				}
+			}
+		});
+	}
 }

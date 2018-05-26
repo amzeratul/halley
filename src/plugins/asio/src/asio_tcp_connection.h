@@ -21,6 +21,7 @@ namespace Halley
 		~AsioTCPConnection();
 
 		void update();
+		bool needsPolling() const;
 
 		void close() override;
 		ConnectionStatus getStatus() const override;
@@ -34,12 +35,13 @@ namespace Halley
 		ConnectionStatus status;
 
 		std::list<Bytes> sendQueue;
-		Bytes receiveBuffer;
+		std::list<Bytes> sendingQueue;
 		Bytes receiveQueue;
+		Bytes receiveBuffer;
+		bool reading = false;
+		bool needsPoll = false;
 
-		void sendMore();
-		void sendBuffer(Bytes& buffer);
-
+		void trySend();
 		void tryReceive();
 	};
 }

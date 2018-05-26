@@ -13,7 +13,15 @@ AsioTCPNetworkService::AsioTCPNetworkService(int port, IPVersion version)
 
 void AsioTCPNetworkService::update()
 {
-	service.poll();
+	bool needsPoll;
+	do {
+		needsPoll = false;
+		for (auto& conn: activeConnections) {
+			needsPoll |= conn->needsPolling();
+			conn->update();
+		}
+		service.poll();
+	} while (needsPoll);
 
 	activeConnections.erase(std::remove_if(activeConnections.begin(), activeConnections.end(), [] (const std::shared_ptr<IConnection>& conn) { return conn->getStatus() == ConnectionStatus::Closed; }), activeConnections.end());
 }

@@ -413,6 +413,8 @@ int64_t Core::getTime(CoreAPITimer timerType, TimeLine tl, StopwatchAveraging::M
 		return gameTimers[int(tl)].elapsedNanoSeconds(mode);
 	case CoreAPITimer::Vsync:
 		return vsyncTimer.elapsedNanoSeconds(mode);
+	default:
+		return 0;
 	}
 }
 

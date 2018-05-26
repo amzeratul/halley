@@ -32,7 +32,9 @@ void DevConClient::connect()
 
 void DevConClient::log(LoggerLevel level, const String& msg)
 {
-	queue->enqueue(std::make_unique<DevCon::LogMsg>(level, msg), 0);
-	queue->sendAll();
-	service->update();
+	if (level != LoggerLevel::Dev) {
+		queue->enqueue(std::make_unique<DevCon::LogMsg>(level, msg), 0);
+		queue->sendAll();
+		service->update();
+	}
 }
