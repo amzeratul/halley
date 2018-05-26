@@ -9,7 +9,7 @@ namespace Halley
 	{
 		Undefined,
 		Connecting,
-		Open,
+		Connected,
 		Closing,
 		Closed
 	};

@@ -42,7 +42,7 @@ void AsioUDPConnection::terminateConnection()
 
 void AsioUDPConnection::send(OutboundNetworkPacket&& packet)
 {
-	if (status == ConnectionStatus::Open || status == ConnectionStatus::Connecting) {
+	if (status == ConnectionStatus::Connected || status == ConnectionStatus::Connecting) {
 		// Insert header
 		std::array<unsigned char, 2> id = { 0, 0 };
 		size_t len = 0;
@@ -93,7 +93,7 @@ void AsioUDPConnection::onReceive(gsl::span<const gsl::byte> data)
 				onOpen(accept.id);
 			}
 		}
-	} else if (status == ConnectionStatus::Open) {
+	} else if (status == ConnectionStatus::Connected) {
 		if (data.size() <= 1500) {
 			pendingReceive.push_back(InboundNetworkPacket(data));
 		}
@@ -121,7 +121,7 @@ void AsioUDPConnection::onOpen(short id)
 {
 	std::cout << "Connection open on id = " << id << std::endl;
 	connectionId = id;
-	status = ConnectionStatus::Open;
+	status = ConnectionStatus::Connected;
 }
 
 void AsioUDPConnection::sendNext()

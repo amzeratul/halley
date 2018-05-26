@@ -4,10 +4,10 @@
 #define BOOST_SYSTEM_NO_DEPRECATED
 #define BOOST_ERROR_CODE_HEADER_ONLY
 #include <boost/asio.hpp>
+namespace asio = boost::asio;
 
 #include "asio_udp_connection.h"
 #include <unordered_map>
-namespace asio = boost::asio;
 
 namespace Halley
 {

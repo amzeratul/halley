@@ -170,7 +170,7 @@ void MessageQueueUDP::receiveMessages()
 
 std::vector<std::unique_ptr<NetworkMessage>> MessageQueueUDP::receiveAll()
 {
-	if (connection->getStatus() == ConnectionStatus::Open) {
+	if (connection->getStatus() == ConnectionStatus::Connected) {
 		receiveMessages();
 	}
 

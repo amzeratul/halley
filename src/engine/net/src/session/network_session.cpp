@@ -74,7 +74,7 @@ int NetworkSession::getClientCount() const
 	} else if (type == NetworkSessionType::Host) {
 		int i = 1;
 		for (auto& c: connections) {
-			if (c->getStatus() == ConnectionStatus::Open) {
+			if (c->getStatus() == ConnectionStatus::Connected) {
 				++i;
 			}
 		}
@@ -218,14 +218,14 @@ ConnectionStatus NetworkSession::getStatus() const
 		if (connections.empty()) {
 			return ConnectionStatus::Closed;
 		} else {
-			if (connections[0]->getStatus() == ConnectionStatus::Open) {
-				return myPeerId != -1 && sessionSharedData ? ConnectionStatus::Open : ConnectionStatus::Connecting;
+			if (connections[0]->getStatus() == ConnectionStatus::Connected) {
+				return myPeerId != -1 && sessionSharedData ? ConnectionStatus::Connected : ConnectionStatus::Connecting;
 			} else {
 				return connections[0]->getStatus();
 			}
 		}
 	} else if (type == NetworkSessionType::Host) {
-		return ConnectionStatus::Open;
+		return ConnectionStatus::Connected;
 	} else {
 		throw Exception("Unknown session type.");
 	}
