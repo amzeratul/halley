@@ -5,7 +5,7 @@ using namespace Halley;
 void DummyNetworkAPI::init() {}
 void DummyNetworkAPI::deInit() {}
 
-std::unique_ptr<NetworkService> DummyNetworkAPI::createService(int port)
+std::unique_ptr<NetworkService> DummyNetworkAPI::createService(NetworkProtocol protocol, int port)
 {
 	return std::make_unique<DummyNetworkService>();
 }

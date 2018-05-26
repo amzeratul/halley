@@ -6,7 +6,7 @@ namespace Halley
 	class AsioNetworkAPI : public NetworkAPIInternal
 	{
 	public:
-		std::unique_ptr<NetworkService> createService(int port) override;
+		std::unique_ptr<NetworkService> createService(NetworkProtocol protocol, int port) override;
 		void init() override;
 		void deInit() override;
 	};

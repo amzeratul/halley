@@ -2,11 +2,12 @@
 #include "connection/network_service.h"
 #include "halley/support/logger.h"
 #include <memory>
+#include "connection/message_queue_tcp.h"
 using namespace Halley;
 
 DevConServerConnection::DevConServerConnection(std::shared_ptr<IConnection> conn)
-	: connection(std::make_shared<ReliableConnection>(conn))
-	, queue(std::make_shared<MessageQueue>(connection))
+	: connection(conn)
+	, queue(std::make_shared<MessageQueueTCP>(connection))
 {
 	DevCon::setupMessageQueue(*queue);
 }

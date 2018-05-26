@@ -27,7 +27,7 @@ void EditorRootStage::init()
 
 	createUI();
 
-	devConServer = std::make_unique<DevConServer>(getNetworkAPI().createService(DevCon::devConPort), DevCon::devConPort);
+	devConServer = std::make_unique<DevConServer>(getNetworkAPI().createService(NetworkProtocol::TCP, DevCon::devConPort), DevCon::devConPort);
 
 	if (project) {
 		loadProject();

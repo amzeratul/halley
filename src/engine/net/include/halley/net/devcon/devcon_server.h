@@ -3,7 +3,7 @@
 #include "devcon_messages.h"
 #include <vector>
 #include <memory>
-#include "halley/net/connection/reliable_connection.h"
+#include "halley/net/connection/iconnection.h"
 #include "halley/net/connection/message_queue.h"
 
 namespace Halley
@@ -17,7 +17,7 @@ namespace Halley
 		void update();
 
 	private:
-		std::shared_ptr<ReliableConnection> connection;
+		std::shared_ptr<IConnection> connection;
 		std::shared_ptr<MessageQueue> queue;
 
 		void onReceiveLogMsg(const DevCon::LogMsg& msg);

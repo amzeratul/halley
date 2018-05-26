@@ -6,6 +6,8 @@ set(SOURCES
         "src/connection/http.cpp"
         "src/connection/instability_simulator.cpp"
         "src/connection/message_queue.cpp"
+        "src/connection/message_queue_tcp.cpp"
+        "src/connection/message_queue_udp.cpp"
         "src/connection/network_packet.cpp"
         "src/connection/reliable_connection.cpp"
 
@@ -26,6 +28,8 @@ set(HEADERS
         "include/halley/net/connection/imessage_stream.h"
         "include/halley/net/connection/instability_simulator.h"
         "include/halley/net/connection/message_queue.h"
+        "include/halley/net/connection/message_queue_tcp.h"
+        "include/halley/net/connection/message_queue_udp.h"
         "include/halley/net/connection/network_message.h"
         "include/halley/net/connection/network_packet.h"
         "include/halley/net/connection/network_service.h"

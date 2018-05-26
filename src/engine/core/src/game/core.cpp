@@ -165,7 +165,7 @@ void Core::init()
 	// Create devcon connection
 	String devConAddress = game->getDevConAddress();
 	if (!devConAddress.isEmpty()) {
-		devConClient = std::make_unique<DevConClient>(api->network->createService(0), devConAddress, game->getDevConPort());
+		devConClient = std::make_unique<DevConClient>(api->network->createService(NetworkProtocol::TCP), devConAddress, game->getDevConPort());
 	}
 
 	// Start game

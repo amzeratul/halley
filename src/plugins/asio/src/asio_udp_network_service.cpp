@@ -1,7 +1,7 @@
 #include <vector>
 #include <list>
 #include "halley/net/connection/network_packet.h"
-#include "asio_network_service.h"
+#include "asio_udp_network_service.h"
 #include "asio_udp_connection.h"
 #include <iostream>
 #include <unordered_map>
@@ -24,7 +24,7 @@ struct HandshakeOpen
 
 
 
-AsioNetworkService::AsioNetworkService(int port, IPVersion version)
+AsioUDPNetworkService::AsioUDPNetworkService(int port, IPVersion version)
 	: localEndpoint(version == IPVersion::IPv4 ? asio::ip::udp::v4() : asio::ip::udp::v6(), static_cast<unsigned short>(port))
 	, socket(service, localEndpoint)
 {
@@ -33,7 +33,7 @@ AsioNetworkService::AsioNetworkService(int port, IPVersion version)
 }
 
 
-AsioNetworkService::~AsioNetworkService()
+AsioUDPNetworkService::~AsioUDPNetworkService()
 {
 	for (auto& conn : activeConnections) {
 		try {
@@ -50,7 +50,7 @@ AsioNetworkService::~AsioNetworkService()
 	}
 }
 
-void AsioNetworkService::update()
+void AsioUDPNetworkService::update()
 {
 	// Remove closed connections
 	std::vector<short> toErase;
@@ -70,7 +70,7 @@ void AsioNetworkService::update()
 	service.poll();
 }
 
-void AsioNetworkService::setAcceptingConnections(bool accepting)
+void AsioUDPNetworkService::setAcceptingConnections(bool accepting)
 {
 	acceptingConnections = accepting;
 	if (accepting) {
@@ -80,7 +80,7 @@ void AsioNetworkService::setAcceptingConnections(bool accepting)
 	}
 }
 
-std::shared_ptr<IConnection> AsioNetworkService::tryAcceptConnection()
+std::shared_ptr<IConnection> AsioUDPNetworkService::tryAcceptConnection()
 {
 	auto& pending = pendingIncomingConnections;
 
@@ -97,7 +97,7 @@ std::shared_ptr<IConnection> AsioNetworkService::tryAcceptConnection()
 	}
 }
 
-std::shared_ptr<IConnection> AsioNetworkService::connect(String addr, int port)
+std::shared_ptr<IConnection> AsioUDPNetworkService::connect(String addr, int port)
 {
 	Expects(port > 1024);
 	Expects(port < 65536);
@@ -115,7 +115,7 @@ std::shared_ptr<IConnection> AsioNetworkService::connect(String addr, int port)
 	return conn;
 }
 
-void AsioNetworkService::startListening()
+void AsioUDPNetworkService::startListening()
 {
 	if (!startedListening) {
 		startedListening = true;
@@ -123,7 +123,7 @@ void AsioNetworkService::startListening()
 	}
 }
 
-void AsioNetworkService::receiveNext()
+void AsioUDPNetworkService::receiveNext()
 {
 	auto buffer = asio::buffer(receiveBuffer);
 	socket.async_receive_from(buffer, remoteEndpoint, [this] (const boost::system::error_code& error, size_t size)
@@ -147,7 +147,7 @@ void AsioNetworkService::receiveNext()
 	});
 }
 
-void AsioNetworkService::receivePacket(gsl::span<gsl::byte> received, std::string* error)
+void AsioUDPNetworkService::receivePacket(gsl::span<gsl::byte> received, std::string* error)
 {
 	if (error) {
 		std::cout << "Error receiving packet: " << (*error) << std::endl;
@@ -236,13 +236,13 @@ void AsioNetworkService::receivePacket(gsl::span<gsl::byte> received, std::strin
 	}
 }
 
-bool AsioNetworkService::isValidConnectionRequest(gsl::span<const gsl::byte> data)
+bool AsioUDPNetworkService::isValidConnectionRequest(gsl::span<const gsl::byte> data)
 {
 	HandshakeOpen open;
 	return acceptingConnections && data.size() == sizeof(open) && memcmp(data.data(), &open, sizeof(open.handshake)) == 0;
 }
 
-short AsioNetworkService::getFreeId() const
+short AsioUDPNetworkService::getFreeId() const
 {
 	for (int i = 1; i < 1024; i++) {
 		if (activeConnections.find(i) == activeConnections.end()) {

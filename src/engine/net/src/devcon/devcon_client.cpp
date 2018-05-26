@@ -1,6 +1,7 @@
 #include "devcon/devcon_client.h"
 #include "connection/network_service.h"
 #include "halley/support/logger.h"
+#include "connection/message_queue_tcp.h"
 using namespace Halley;
 
 DevConClient::DevConClient(std::unique_ptr<NetworkService> service, const String& address, int port)
@@ -24,8 +25,8 @@ void DevConClient::update()
 
 void DevConClient::connect()
 {
-	connection = std::make_shared<ReliableConnection>(service->connect(address, port));
-	queue = std::make_shared<MessageQueue>(connection);
+	connection = service->connect(address, port);
+	queue = std::make_shared<MessageQueueTCP>(connection);
 	DevCon::setupMessageQueue(*queue);
 }
 

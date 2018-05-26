@@ -9,7 +9,7 @@ namespace Halley {
 		void init() override;
 		void deInit() override;
 
-		std::unique_ptr<NetworkService> createService(int port) override;
+		std::unique_ptr<NetworkService> createService(NetworkProtocol protocol, int port) override;
 	};
 
 	class DummyNetworkService : public NetworkService

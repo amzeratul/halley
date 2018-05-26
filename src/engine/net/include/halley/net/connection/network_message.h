@@ -9,10 +9,14 @@ namespace Halley
 {
 	class IMessageStream;
 	class MessageQueue;
+	class MessageQueueUDP;
+	class MessageQueueTCP;
 
 	class NetworkMessage
 	{
 		friend class MessageQueue;
+		friend class MessageQueueUDP;
+		friend class MessageQueueTCP;
 
 	public:
 		virtual ~NetworkMessage() = default;

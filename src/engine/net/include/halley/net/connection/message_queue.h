@@ -4,14 +4,9 @@
 #include <memory>
 #include <vector>
 #include <map>
-#include "reliable_connection.h"
-#include <list>
-#include <chrono>
 
 namespace Halley
-{
-	class ReliableConnection;
-
+{	
 	struct ChannelSettings
 	{
 	public:
@@ -20,70 +15,31 @@ namespace Halley
 		bool ordered;
 		bool keepLastSent;
 	};
-	
-	class MessageQueue : private IReliableConnectionAckListener
+
+	class MessageQueue
 	{
-		struct PendingPacket
-		{
-			std::vector<std::unique_ptr<NetworkMessage>> msgs;
-			std::chrono::steady_clock::time_point timeSent;
-			size_t size;
-			unsigned short seq;
-			bool reliable;
-		};
-
-		struct Channel
-		{
-			std::vector<std::unique_ptr<NetworkMessage>> receiveQueue;
-			std::unique_ptr<NetworkMessage> lastAck;
-			unsigned short lastAckSeq = 0;
-			unsigned short lastSentSeq = 0;
-			unsigned short lastReceivedSeq = 0;
-			ChannelSettings settings;
-			bool initialized = false;
-
-			void getReadyMessages(std::vector<std::unique_ptr<NetworkMessage>>& out);
-		};
-
 	public:
-		MessageQueue(std::shared_ptr<ReliableConnection> connection);
-		~MessageQueue();
+		virtual ~MessageQueue();
 		
-		void setChannel(int channel, ChannelSettings settings);
-
 		template <typename T>
 		void addFactory()
 		{
 			addFactory(std::make_unique<NetworkMessageFactory<T>>());
 		}
 
-		std::vector<std::unique_ptr<NetworkMessage>> receiveAll();
+		virtual void enqueue(std::unique_ptr<NetworkMessage> msg, int channel) = 0;
+		virtual void sendAll() = 0;
+		virtual std::vector<std::unique_ptr<NetworkMessage>> receiveAll() = 0;
 
-		void enqueue(std::unique_ptr<NetworkMessage> msg, int channel);
-		void sendAll();
+		virtual void setChannel(int channel, ChannelSettings settings);
 
-	private:
-		std::shared_ptr<ReliableConnection> connection;
-		std::vector<Channel> channels;
-
-		std::map<std::type_index, int> typeToMsgIndex;
-		std::vector<std::unique_ptr<NetworkMessageFactoryBase>> factories;
-
-		std::list<std::unique_ptr<NetworkMessage>> pendingMsgs;
-		std::map<int, PendingPacket> pendingPackets;
-		int nextPacketId = 0;
-
-		void onPacketAcked(int tag) override;
-		void checkReSend(std::vector<ReliableSubPacket>& collect);
-
-		ReliableSubPacket createPacket();
-		ReliableSubPacket makeTaggedPacket(std::vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends = false, unsigned short resendSeq = 0);
-		std::vector<gsl::byte> serializeMessages(const std::vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size) const;
-
-		void receiveMessages();
-		std::unique_ptr<NetworkMessage> deserializeMessage(gsl::span<const gsl::byte> data, unsigned short msgType, unsigned short seq);
-
+	protected:
 		void addFactory(std::unique_ptr<NetworkMessageFactoryBase> factory);
 		int getMessageType(NetworkMessage& msg) const;
+		std::unique_ptr<NetworkMessage> deserializeMessage(gsl::span<const gsl::byte> data, unsigned short msgType, unsigned short seq);
+
+	private:
+		std::map<std::type_index, int> typeToMsgIndex;
+		std::vector<std::unique_ptr<NetworkMessageFactoryBase>> factories;
 	};
 }

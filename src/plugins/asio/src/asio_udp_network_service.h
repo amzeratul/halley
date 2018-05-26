@@ -11,11 +11,11 @@ namespace asio = boost::asio;
 
 namespace Halley
 {
-	class AsioNetworkService : public NetworkService
+	class AsioUDPNetworkService : public NetworkService
 	{
 	public:
-		AsioNetworkService(int port, IPVersion version = IPVersion::IPv4);
-		~AsioNetworkService();
+		AsioUDPNetworkService(int port, IPVersion version = IPVersion::IPv4);
+		~AsioUDPNetworkService();
 
 		void update() override;
 

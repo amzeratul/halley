@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include "halley/text/halleystring.h"
-#include "halley/net/connection/reliable_connection.h"
+#include "halley/net/connection/iconnection.h"
 #include "halley/net/connection/message_queue.h"
 #include "halley/support/logger.h"
 #include "devcon_messages.h"
@@ -23,7 +23,7 @@ namespace Halley
 		String address;
 		int port;
 
-		std::shared_ptr<ReliableConnection> connection;
+		std::shared_ptr<IConnection> connection;
 		std::shared_ptr<MessageQueue> queue;
 
 		void connect();
