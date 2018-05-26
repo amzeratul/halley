@@ -36,9 +36,7 @@ namespace Halley
 		void quit(int exitCode = 0) override;
 		Resources& getResources() override;
 		const Environment& getEnvironment() override;
-		long long getAverageTime(TimeLine tl) const override;
-		long long getElapsedTime(TimeLine tl) const override;
-		long long getVsyncTime() const override;
+		int64_t getTime(CoreAPITimer timer, TimeLine tl, StopwatchAveraging::Mode mode) const override;
 
 		void onFixedUpdate(Time time) override;
 		void onVariableUpdate(Time time) override;
@@ -75,7 +73,8 @@ namespace Halley
 		void pumpEvents(Time time);
 		void pumpAudio();
 
-		std::array<StopwatchAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> timers;
+		std::array<StopwatchAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> engineTimers;
+		std::array<StopwatchAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> gameTimers;
 		StopwatchAveraging vsyncTimer;
 
 		Vector<String> args;

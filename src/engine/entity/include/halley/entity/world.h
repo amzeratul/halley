@@ -32,7 +32,7 @@ namespace Halley {
 		void render(RenderContext& rc) const;
 		bool hasSystemsOnTimeLine(TimeLine timeline) const;
 		
-		long long getAverageTime(TimeLine timeline) const;
+		int64_t getAverageTime(TimeLine timeline) const;
 
 		System& addSystem(std::unique_ptr<System> system, TimeLine timeline);
 		void removeSystem(System& system);

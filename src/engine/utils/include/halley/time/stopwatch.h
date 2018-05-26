@@ -23,6 +23,7 @@
 
 #include "halleytime.h"
 #include <chrono>
+#include <cstdint>
 
 namespace Halley {
 	class Stopwatch {
@@ -34,24 +35,31 @@ namespace Halley {
 		void reset();
 
 		Time elapsedSeconds() const;
-		long long elapsedMicroSeconds() const;
-		long long elapsedNanoSeconds() const;
+		int64_t elapsedMicroSeconds() const;
+		int64_t elapsedNanoSeconds() const;
 
 	private:
 		std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
-		long long measuredTime = 0;
+		int64_t measuredTime = 0;
 		bool running = false;
 	};
 
 	class StopwatchAveraging
 	{
 	public:
+		enum class Mode
+		{
+			Average,
+			Latest
+		};
+
 		explicit StopwatchAveraging(int nSamples = 30);
 		void beginSample();
 		void endSample();
 
-		long long averageElapsedNanoSeconds() const;
-		long long lastElapsedNanoSeconds() const;
+		int64_t elapsedNanoSeconds(Mode mode) const;
+		int64_t averageElapsedNanoSeconds() const;
+		int64_t lastElapsedNanoSeconds() const;
 
 	private:
 		int nSamples;
@@ -59,8 +67,8 @@ namespace Halley {
 
 		std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
 
-		long long nsTaken = 0;
-		long long nsTakenAvg = 0;
-		long long nsTakenAvgAccum = 0;
+		int64_t nsTaken = 0;
+		int64_t nsTakenAvg = 0;
+		int64_t nsTakenAvgAccum = 0;
 	};
 }

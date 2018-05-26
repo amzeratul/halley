@@ -274,47 +274,51 @@ void Core::onVariableUpdate(Time time)
 void Core::doFixedUpdate(Time time)
 {
 	HALLEY_DEBUG_TRACE();
-	auto& t = timers[int(TimeLine::FixedUpdate)];
-	t.beginSample();
+	auto& engineTimer = engineTimers[int(TimeLine::FixedUpdate)];
+	auto& gameTimer = gameTimers[int(TimeLine::FixedUpdate)];
+	engineTimer.beginSample();
 
-	if (running) {
-		if (currentStage) {
-			currentStage->onFixedUpdate(time);
-		}
+	gameTimer.beginSample();
+	if (running && currentStage) {
+		currentStage->onFixedUpdate(time);
 	}
+	gameTimer.endSample();
 	pumpAudio();
 
-	t.endSample();
+	engineTimer.endSample();
 	HALLEY_DEBUG_TRACE();
 }
 
 void Core::doVariableUpdate(Time time)
 {
 	HALLEY_DEBUG_TRACE();
-	auto& t = timers[int(TimeLine::VariableUpdate)];
-	t.beginSample();
+	auto& engineTimer = engineTimers[int(TimeLine::VariableUpdate)];
+	auto& gameTimer = gameTimers[int(TimeLine::VariableUpdate)];
+	engineTimer.beginSample();
 
 	pumpEvents(time);
-	if (running) {
-		if (currentStage) {
-			currentStage->onVariableUpdate(time);
-		}
+	gameTimer.beginSample();
+	if (running && currentStage) {
+		currentStage->onVariableUpdate(time);
 	}
+	gameTimer.endSample();
 	pumpAudio();
 
 	if (api->platform) {
 		api->platform->update();
 	}
 
-	t.endSample();
+	engineTimer.endSample();
 	HALLEY_DEBUG_TRACE();
 }
 
 void Core::doRender(Time)
 {
 	HALLEY_DEBUG_TRACE();
-	auto& t = timers[int(TimeLine::Render)];
-	t.beginSample();
+	auto& engineTimer = engineTimers[int(TimeLine::Render)];
+	auto& gameTimer = gameTimers[int(TimeLine::Render)];
+	bool gameSampled = false;
+	engineTimer.beginSample();
 
 	if (api->video) {
 		api->video->startRender();
@@ -329,7 +333,11 @@ void Core::doRender(Time)
 				prevWindowSize = windowSize;
 			}
 			RenderContext context(*painter, *camera, *screenTarget);
+
+			gameTimer.beginSample();
 			currentStage->onRender(context);
+			gameTimer.endSample();
+			gameSampled = true;
 		}
 
 		painter->endRender();
@@ -339,7 +347,12 @@ void Core::doRender(Time)
 		vsyncTimer.endSample();
 	}
 
-	t.endSample();
+	if (!gameSampled) {
+		gameTimer.beginSample();
+		gameTimer.endSample();
+	}
+
+	engineTimer.endSample();
 	HALLEY_DEBUG_TRACE();
 }
 
@@ -391,19 +404,16 @@ const Environment& Core::getEnvironment()
 	return *environment;
 }
 
-long long Core::getAverageTime(TimeLine tl) const
+int64_t Core::getTime(CoreAPITimer timerType, TimeLine tl, StopwatchAveraging::Mode mode) const
 {
-	return timers[int(tl)].averageElapsedNanoSeconds();
-}
-
-long long Core::getElapsedTime(TimeLine tl) const
-{
-	return timers[int(tl)].lastElapsedNanoSeconds();
-}
-
-long long Core::getVsyncTime() const
-{
-	return vsyncTimer.averageElapsedNanoSeconds();
+	switch (timerType) {
+	case CoreAPITimer::Engine:
+		return engineTimers[int(tl)].elapsedNanoSeconds(mode);
+	case CoreAPITimer::Game:
+		return gameTimers[int(tl)].elapsedNanoSeconds(mode);
+	case CoreAPITimer::Vsync:
+		return vsyncTimer.elapsedNanoSeconds(mode);
+	}
 }
 
 bool Core::transitionStage()

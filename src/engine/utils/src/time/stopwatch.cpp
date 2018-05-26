@@ -59,12 +59,12 @@ Time Stopwatch::elapsedSeconds() const
 	return measuredTime / 1'000'000'000.0;
 }
 
-long long Stopwatch::elapsedMicroSeconds() const
+int64_t Stopwatch::elapsedMicroSeconds() const
 {
 	return (measuredTime + 500) / 1000;
 }
 
-long long Stopwatch::elapsedNanoSeconds() const
+int64_t Stopwatch::elapsedNanoSeconds() const
 {
 	return measuredTime;
 }
@@ -93,12 +93,17 @@ void StopwatchAveraging::endSample()
 	}
 }
 
-long long StopwatchAveraging::averageElapsedNanoSeconds() const
+int64_t StopwatchAveraging::elapsedNanoSeconds(Mode mode) const
+{
+	return mode == Mode::Average ? averageElapsedNanoSeconds() : lastElapsedNanoSeconds();
+}
+
+int64_t StopwatchAveraging::averageElapsedNanoSeconds() const
 {
 	return nsTakenAvg;
 }
 
-long long StopwatchAveraging::lastElapsedNanoSeconds() const
+int64_t StopwatchAveraging::lastElapsedNanoSeconds() const
 {
 	return nsTaken;
 }

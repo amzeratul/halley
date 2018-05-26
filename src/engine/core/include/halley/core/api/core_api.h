@@ -2,12 +2,21 @@
 #include "halley/core/stage/stage_id.h"
 #include <halley/time/halleytime.h>
 #include "halley/core/game/environment.h"
+#include "halley/time/stopwatch.h"
+#include <cstdint>
 
 namespace Halley
 {
 	class Resources;
 	class Stage;
 	class HalleyStatics;
+
+	enum class CoreAPITimer
+	{
+		Engine,
+		Game,
+		Vsync
+	};
 
 	class CoreAPI
 	{
@@ -22,8 +31,6 @@ namespace Halley
 		virtual Resources& getResources() = 0;
 		virtual const Environment& getEnvironment() = 0;
 
-		virtual long long getAverageTime(TimeLine tl) const = 0;
-		virtual long long getElapsedTime(TimeLine tl) const = 0;
-		virtual long long getVsyncTime() const = 0;
+		virtual int64_t getTime(CoreAPITimer timer, TimeLine tl, StopwatchAveraging::Mode mode) const = 0;
 	};
 }

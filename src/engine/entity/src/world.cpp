@@ -196,12 +196,12 @@ bool World::hasSystemsOnTimeLine(TimeLine timeline) const
 	return getSystems(timeline).size() > 0;
 }
 
-long long World::getAverageTime(TimeLine timeline) const
+int64_t World::getAverageTime(TimeLine timeline) const
 {
 	return timer[int(timeline)].averageElapsedNanoSeconds();
 }
 
-void Halley::World::step(TimeLine timeline, Time elapsed)
+void World::step(TimeLine timeline, Time elapsed)
 {
 	auto& t = timer[int(timeline)];
 	t.beginSample();
