@@ -43,7 +43,14 @@ void ResourceCollectionBase::reload(const String& assetId)
 	auto res = resources.find(assetId);
 	if (res != resources.end()) {
 		auto& resWrap = res->second;
-		resWrap.res->reload(std::move(*loadAsset(assetId, ResourceLoadPriority::High)));
+		try {
+			std::shared_ptr<Resource> newAsset = loadAsset(assetId, ResourceLoadPriority::High);
+			resWrap.res->reload(std::move(*newAsset));
+		} catch (std::exception& e) {
+			Logger::logError("Error while reloading " + assetId + ": " + e.what());
+		} catch (...) {
+			Logger::logError("Unknown error while reloading " + assetId);
+		}
 	}
 }
 
