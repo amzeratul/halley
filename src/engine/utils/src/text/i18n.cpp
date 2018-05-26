@@ -29,6 +29,7 @@ void I18N::loadLocalisationFile(const ConfigFile& config)
 			lang[e.first] = e.second.asString();
 		}
 	}
+	++version;
 }
 
 std::vector<String> I18N::getLanguagesAvailable() const
