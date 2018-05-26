@@ -28,20 +28,23 @@ namespace Halley
 		Shader
 	};
 
+	// This order matters.
+	// Assets which depend on other types should show up on the list AFTER
+	// e.g. since materials depend on shaders, they show after shaders
 	enum class AssetType
 	{
 		BinaryFile,
 		TextFile,
-		ConfigFile,
 		Texture,
-		Image,
+		Shader,
 		MaterialDefinition,
+		Image,
 		Sprite,
 		SpriteSheet,
 		Animation,
 		Font,
 		AudioClip,
-		Shader
+		ConfigFile
 	};
 
 	template <>
@@ -50,16 +53,16 @@ namespace Halley
 			return{{
 				"binaryFile",
 				"textFile",
-				"configFile",
 				"texture",
-				"image",
+				"shader",
 				"materialDefinition",
+				"image",
 				"sprite",
 				"spriteSheet",
 				"animation",
 				"font",
 				"audioClip",
-				"shader"
+				"configFile"
 			}};
 		}
 	};

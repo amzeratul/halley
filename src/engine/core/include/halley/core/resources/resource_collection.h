@@ -46,7 +46,9 @@ namespace Halley
 		void unload(const String& assetId);
 		void unloadAll(int minDepth = 0);
 		bool exists(const String& assetId);
+
 		void reload(const String& assetId);
+		void purge(const String& assetId);
 
 		std::vector<String> enumerate() const;
 

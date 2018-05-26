@@ -174,6 +174,11 @@ void AssetPack::readData(size_t pos, gsl::span<gsl::byte> dst)
 	}
 }
 
+std::unique_ptr<ResourceDataReader> AssetPack::extractReader()
+{
+	return std::move(reader);
+}
+
 PackDataReader::PackDataReader(AssetPack& pack, size_t startPos, size_t fileSize)
 	: pack(pack)
 	, startPos(startPos)
@@ -220,3 +225,4 @@ size_t PackDataReader::tell() const
 void PackDataReader::close()
 {
 }
+

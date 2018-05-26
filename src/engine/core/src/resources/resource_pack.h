@@ -9,13 +9,22 @@ namespace Halley {
 
 	class PackResourceLocator : public IResourceLocatorProvider {
 	public:
-		explicit PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, const String& encryptionKey = "", bool preLoad = false);
+		explicit PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, String encryptionKey = "", bool preLoad = false);
 		~PackResourceLocator();
 
 	protected:
 		std::unique_ptr<ResourceData> getData(const String& asset, AssetType type, bool stream) override;
-		const AssetDatabase& getAssetDatabase() const override;
+		const AssetDatabase& getAssetDatabase() override;
+		void purge(SystemAPI& system, const String& asset, AssetType type) override;
+
+	private:
+		void loadAfterPurge();
 
 		std::unique_ptr<AssetPack> assetPack;
+
+		Path path;
+		String encryptionKey; // :(
+		bool preLoad;
+		SystemAPI* system = nullptr;
 	};
 }

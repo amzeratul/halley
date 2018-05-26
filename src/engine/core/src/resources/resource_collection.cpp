@@ -47,6 +47,13 @@ void ResourceCollectionBase::reload(const String& assetId)
 	}
 }
 
+void ResourceCollectionBase::purge(const String& assetId)
+{
+	if (!resourceLoader) {
+		parent.locator->purge(assetId, type);
+	}
+}
+
 std::vector<String> ResourceCollectionBase::enumerate() const
 {
 	return parent.locator->enumerate(type);

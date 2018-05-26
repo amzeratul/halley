@@ -44,6 +44,7 @@ namespace Halley
 		std::map<ShaderType, Bytes> shaders;
 
 		static std::unique_ptr<ShaderFile> loadResource(ResourceLoader& loader);
+		void reload(Resource&& resource) override;
 		constexpr static AssetType getAssetType() { return AssetType::Shader; }
 
 		void serialize(Serializer& s) const;

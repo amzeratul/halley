@@ -63,6 +63,14 @@ std::unique_ptr<ResourceDataStream> ResourceLocator::getStream(const String& ass
 	return std::unique_ptr<ResourceDataStream>(ptr);
 }
 
+void ResourceLocator::purge(const String& asset, AssetType type)
+{
+	auto result = locators.find(asset);
+	if (result != locators.end()) {
+		result->second->purge(system, asset, type);
+	}
+}
+
 std::vector<String> ResourceLocator::enumerate(const AssetType type)
 {
 	std::vector<String> result;
@@ -83,7 +91,7 @@ void ResourceLocator::addPack(const Path& path, const String& encryptionKey, boo
 {
 	auto dataReader = system.getDataReader(path.string());
 	if (dataReader) {
-		add(std::make_unique<PackResourceLocator>(std::move(dataReader), encryptionKey, preLoad));
+		add(std::make_unique<PackResourceLocator>(std::move(dataReader), path, encryptionKey, preLoad));
 	} else {
 		if (allowFailure) {
 			Logger::logWarning("Resource pack not found: \"" + path.string() + "\"");

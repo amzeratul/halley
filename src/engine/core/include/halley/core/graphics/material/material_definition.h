@@ -142,6 +142,7 @@ namespace Halley
 		MaterialDefinition();
 		explicit MaterialDefinition(ResourceLoader& loader);
 
+		void reload(Resource&& resource) override;
 		void load(const ConfigNode& node);
 
 		int getNumPasses() const;

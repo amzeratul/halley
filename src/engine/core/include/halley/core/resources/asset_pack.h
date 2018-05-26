@@ -46,6 +46,8 @@ namespace Halley {
 	    
     	void readData(size_t pos, gsl::span<gsl::byte> dst);
 
+		std::unique_ptr<ResourceDataReader> extractReader();
+
     private:
 		std::unique_ptr<AssetDatabase> assetDb;
 		std::unique_ptr<ResourceDataReader> reader;

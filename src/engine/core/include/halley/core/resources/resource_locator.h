@@ -37,8 +37,9 @@ namespace Halley {
 	public:
 		virtual ~IResourceLocatorProvider() {}
 		virtual std::unique_ptr<ResourceData> getData(const String& path, AssetType type, bool stream) = 0;
-		virtual const AssetDatabase& getAssetDatabase() const = 0;
+		virtual const AssetDatabase& getAssetDatabase() = 0;
 		virtual int getPriority() const { return 0; }
+		virtual void purge(SystemAPI& system, const String& asset, AssetType type) = 0;
 	};
 
 	class ResourceLocator : public IResourceLocator
@@ -53,6 +54,8 @@ namespace Halley {
 
 		std::unique_ptr<ResourceDataStatic> getStatic(const String& asset, AssetType type) override;
 		std::unique_ptr<ResourceDataStream> getStream(const String& asset, AssetType type) override;
+		void purge(const String& asset, AssetType type);
+
 		std::vector<String> enumerate(const AssetType type);
 		bool exists(const String& asset);
 

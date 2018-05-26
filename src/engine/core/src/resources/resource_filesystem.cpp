@@ -40,7 +40,7 @@ FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, const Pa
 	Deserializer::fromBytes<AssetDatabase>(*assetDb, reader->readAll());
 }
 
-const AssetDatabase& FileSystemResourceLocator::getAssetDatabase() const
+const AssetDatabase& FileSystemResourceLocator::getAssetDatabase()
 {
 	return *assetDb;
 }
@@ -48,6 +48,10 @@ const AssetDatabase& FileSystemResourceLocator::getAssetDatabase() const
 int FileSystemResourceLocator::getPriority() const
 {
 	return 1;
+}
+
+void FileSystemResourceLocator::purge(SystemAPI& system, const String& asset, AssetType type)
+{
 }
 
 std::unique_ptr<ResourceData> FileSystemResourceLocator::getData(const String& asset, AssetType type, bool stream)

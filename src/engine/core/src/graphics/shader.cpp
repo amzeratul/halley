@@ -13,6 +13,11 @@ std::unique_ptr<ShaderFile> ShaderFile::loadResource(ResourceLoader& loader)
 	return result;
 }
 
+void ShaderFile::reload(Resource&& resource)
+{
+	*this = std::move(dynamic_cast<ShaderFile&>(resource));
+}
+
 void ShaderFile::serialize(Serializer& s) const
 {
 	s << shaders;

@@ -46,13 +46,32 @@ void DevConClient::update()
 
 void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 {
+	// Build this map first, so it gets sorted by AssetType
+	// The order in which asset types are reloaded is important, since they have dependencies
+	std::map<AssetType, std::vector<String>> byType;
+
 	for (auto& id: msg.getIds()) {
 		auto splitPos = id.find(':');
 		auto type = fromString<AssetType>(id.left(splitPos));
 		String name = id.mid(splitPos + 1);
+		byType[type].emplace_back(std::move(name));
+	}
 
-		Logger::logInfo("Reloading " + id);
-		api.core->getResources().ofType(type).reload(name);
+	// Purge assets first, to force re-loading of any affected packs
+	for (auto& curType: byType) {
+		auto& resources = api.core->getResources().ofType(curType.first);
+		for (auto& asset: curType.second) {
+			resources.purge(asset);
+		}
+	}
+
+	// Reload assets
+	for (auto& curType: byType) {
+		auto& resources = api.core->getResources().ofType(curType.first);
+		for (auto& asset: curType.second) {
+			Logger::logInfo("Reloading " + curType.first + ": " + asset);
+			resources.reload(asset);
+		}
 	}
 }
 
