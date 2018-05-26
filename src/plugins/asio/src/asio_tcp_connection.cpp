@@ -2,6 +2,7 @@
 #include "halley/support/logger.h"
 #include "halley/text/halleystring.h"
 #include "halley/text/string_converter.h"
+#include "halley/net/connection/network_packet.h"
 using namespace Halley;
 
 AsioTCPConnection::AsioTCPConnection(asio::io_service& service, TCPSocket socket)
@@ -49,8 +50,11 @@ void AsioTCPConnection::update()
 	if (status == ConnectionStatus::Closing) {
 		close();
 	}
-	if (status == ConnectionStatus::Connected && !socket.is_open()) {
-		close();
+	if (status == ConnectionStatus::Connected) {
+		tryReceive();
+		if (!socket.is_open()) {
+			close();
+		}
 	}
 }
 
@@ -77,11 +81,86 @@ ConnectionStatus AsioTCPConnection::getStatus() const
 
 void AsioTCPConnection::send(OutboundNetworkPacket&& packet)
 {
-	// TODO
+	packet.addHeader(uint32_t(packet.getSize()));
+
+	auto bytes = packet.getBytes();
+	auto bs = Bytes(bytes.size_bytes());
+	memcpy(bs.data(), bytes.data(), bytes.size());
+	sendQueue.emplace_back(std::move(bs));
+
+	if (sendQueue.size() == 1) {
+		sendMore();
+	}
 }
 
 bool AsioTCPConnection::receive(InboundNetworkPacket& packet)
 {
-	// TODO
+	tryReceive();
+
+	if (receiveQueue.size() >= sizeof(uint32_t)) {
+		const uint32_t size = *reinterpret_cast<uint32_t*>(receiveQueue.data());
+		if (size > 128 * 1024 * 1024) {
+			Logger::logError("Invalid packet size.");
+			close();
+		}
+
+		const auto packetSize = sizeof(uint32_t) + size;
+		if (receiveQueue.size() >= packetSize) {
+			packet = InboundNetworkPacket(gsl::as_bytes(gsl::span<Byte>(receiveQueue.data(), packetSize)));
+			uint32_t size2;
+			packet.extractHeader(size2);
+			receiveQueue.erase(receiveQueue.begin(), receiveQueue.begin() + packetSize);
+			return true;
+		}
+	}
+	
 	return false;
+}
+
+void AsioTCPConnection::sendMore()
+{
+	if (!sendQueue.empty()) {
+		sendBuffer(sendQueue.front());
+	}
+}
+
+void AsioTCPConnection::sendBuffer(Bytes& toSend)
+{
+	socket.async_write_some(asio::buffer(toSend.data(), toSend.size()), [=] (const boost::system::error_code& ec, size_t bytesWritten)
+	{
+		if (ec) {
+			Logger::logError("Error sending data on TCP socket: " + ec.message());
+			close();
+		} else {
+			auto& front = sendQueue.front();
+			if (bytesWritten == front.size()) {
+				sendQueue.pop_front();
+			} else {
+				front.erase(front.begin(), front.begin() + bytesWritten);
+			}
+
+			sendMore();
+		}
+	});	
+}
+
+void AsioTCPConnection::tryReceive()
+{
+	if (receiveBuffer.size() < 1024) {
+		receiveBuffer.resize(1024);
+	}
+
+	socket.async_read_some(asio::mutable_buffer(receiveBuffer.data(), receiveBuffer.size()), [=] (const boost::system::error_code& ec, size_t bytesReceived)
+	{
+		if (ec) {
+			Logger::logError("Error reading data on TCP socket: " + ec.message());
+			close();
+		} else {
+			size_t curPos = receiveQueue.size();
+			receiveQueue.resize(curPos + bytesReceived);
+			memcpy(receiveQueue.data() + curPos, receiveBuffer.data(), bytesReceived);
+
+			tryReceive();
+		}
+	});
 }

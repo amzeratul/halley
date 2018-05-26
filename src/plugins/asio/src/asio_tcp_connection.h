@@ -4,6 +4,7 @@
 #define BOOST_ERROR_CODE_HEADER_ONLY
 #include <boost/asio.hpp>
 #include "halley/net/connection/iconnection.h"
+#include "halley/utils/utils.h"
 namespace asio = boost::asio;
 
 namespace Halley
@@ -31,5 +32,14 @@ namespace Halley
 		std::unique_ptr<asio::ip::tcp::resolver> resolver;
 		TCPSocket socket;
 		ConnectionStatus status;
+
+		std::list<Bytes> sendQueue;
+		Bytes receiveBuffer;
+		Bytes receiveQueue;
+
+		void sendMore();
+		void sendBuffer(Bytes& buffer);
+
+		void tryReceive();
 	};
 }
