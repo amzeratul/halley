@@ -58,6 +58,10 @@ set(SOURCES
 
         "src/stage/entity_stage.cpp"
         "src/stage/stage.cpp"
+
+        "src/devcon/devcon_client.cpp"
+        "src/devcon/devcon_messages.cpp"
+        "src/devcon/devcon_server.cpp"
         
         "src/utils/world_stats.cpp"
         )
@@ -140,6 +144,10 @@ set(HEADERS
         "include/halley/core/stage/entity_stage.h"
         "include/halley/core/stage/stage.h"
         "include/halley/core/stage/stage_id.h"
+
+        "include/halley/core/devcon/devcon_client.h"
+        "include/halley/core/devcon/devcon_messages.h"
+        "include/halley/core/devcon/devcon_server.h"
         
         "include/halley/core/utils/world_stats.h"
         "src/prec.h"

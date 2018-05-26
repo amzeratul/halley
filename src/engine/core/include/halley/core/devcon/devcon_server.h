@@ -1,20 +1,30 @@
 #pragma once
 
-#include "devcon_messages.h"
 #include <vector>
 #include <memory>
-#include "halley/net/connection/iconnection.h"
-#include "halley/net/connection/message_queue.h"
+#include "halley/text/halleystring.h"
+#include <set>
 
 namespace Halley
 {
 	class NetworkService;
+	class IConnection;
+	class MessageQueue;
+
+	namespace DevCon {
+		constexpr static int devConPort = 12500;
+		class LogMsg;
+		class ReloadAssetsMsg;
+	}
 
 	class DevConServerConnection
 	{
 	public:
 		DevConServerConnection(std::shared_ptr<IConnection> connection);
+		
 		void update();
+		
+		void reloadAssets(const std::vector<String>& assetIds);
 
 	private:
 		std::shared_ptr<IConnection> connection;
@@ -29,6 +39,9 @@ namespace Halley
 		DevConServer(std::unique_ptr<NetworkService> service, int port = DevCon::devConPort);
 
 		void update();
+
+		void reloadAssets(std::vector<String> assetIds);
+		void reloadAssets(std::set<String> assetIds);
 
 	private:
 		std::unique_ptr<NetworkService> service;

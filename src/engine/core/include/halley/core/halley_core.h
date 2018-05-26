@@ -52,5 +52,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "utils/world_stats.h"
 
+#include "devcon/devcon_client.h"
+#include "devcon/devcon_server.h"
 
 #include <halley/halley_utils.h>

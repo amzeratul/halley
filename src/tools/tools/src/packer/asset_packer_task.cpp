@@ -1,5 +1,6 @@
 #include "halley/tools/packer/asset_packer_task.h"
 #include "halley/tools/project/project.h"
+#include "halley/core/devcon/devcon_server.h"
 
 using namespace Halley;
 
@@ -17,5 +18,9 @@ void AssetPackerTask::run()
 
 	if (!isCancelled()) {
 		setProgress(1.0f, "");
+
+		if (project.getDevConServer() && assetsToPack) {
+			project.getDevConServer()->reloadAssets(assetsToPack.get());
+		}
 	}
 }

@@ -29,7 +29,6 @@ namespace Halley
 				, depth(loadDepth)
 			{}
 
-			void flush();
 			std::shared_ptr<Resource> res;
 			int depth;
 		};
@@ -46,14 +45,16 @@ namespace Halley
 		void clear();
 		void unload(const String& assetId);
 		void unloadAll(int minDepth = 0);
-		void flush(const String& assetId);
 		bool exists(const String& assetId);
+		void reload(const String& assetId);
+
 		std::vector<String> enumerate() const;
 
 	protected:
 		virtual std::shared_ptr<Resource> loadResource(ResourceLoader& loader) = 0;
 
 		std::shared_ptr<Resource> doGet(const String& name, ResourceLoadPriority priority);
+		std::shared_ptr<Resource> loadAsset(const String& assetId, ResourceLoadPriority priority);
 
 	private:
 		Resources& parent;

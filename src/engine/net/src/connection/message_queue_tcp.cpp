@@ -7,11 +7,18 @@ MessageQueueTCP::MessageQueueTCP(std::shared_ptr<IConnection> connection)
 {
 }
 
+bool MessageQueueTCP::isConnected() const
+{
+	return connection->getStatus() == ConnectionStatus::Connected;
+}
+
 void MessageQueueTCP::enqueue(std::unique_ptr<NetworkMessage> msg, int channel)
 {
-	auto packet = OutboundNetworkPacket(Serializer::toBytes(*msg));
-	packet.addHeader(getMessageType(*msg));
-	connection->send(std::move(packet));
+	if (isConnected()) {
+		auto packet = OutboundNetworkPacket(Serializer::toBytes(*msg));
+		packet.addHeader(getMessageType(*msg));
+		connection->send(std::move(packet));
+	}
 }
 
 void MessageQueueTCP::sendAll()
@@ -22,11 +29,13 @@ std::vector<std::unique_ptr<NetworkMessage>> MessageQueueTCP::receiveAll()
 {
 	std::vector<std::unique_ptr<NetworkMessage>> result;
 
-	InboundNetworkPacket packet;
-	while (connection->receive(packet)) {
-		int messageType = -1;
-		packet.extractHeader(messageType);
-		result.push_back(deserializeMessage(packet.getBytes(), messageType, 0));
+	if (isConnected()) {
+		InboundNetworkPacket packet;
+		while (connection->receive(packet)) {
+			int messageType = -1;
+			packet.extractHeader(messageType);
+			result.push_back(deserializeMessage(packet.getBytes(), messageType, 0));
+		}
 	}
 
 	return result;

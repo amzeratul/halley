@@ -15,11 +15,10 @@
 #include <halley/support/console.h>
 #include <halley/concurrency/concurrent.h>
 #include <fstream>
-#include <halley/support/debug.h>
 #include <chrono>
 #include <ctime>
 #include "../dummy/dummy_plugins.h"
-#include "halley/net/devcon/devcon_client.h"
+#include "halley/core/devcon/devcon_client.h"
 #include "halley/net/connection/network_service.h"
 
 #ifdef _MSC_VER
@@ -165,7 +164,7 @@ void Core::init()
 	// Create devcon connection
 	String devConAddress = game->getDevConAddress();
 	if (!devConAddress.isEmpty()) {
-		devConClient = std::make_unique<DevConClient>(api->network->createService(NetworkProtocol::TCP), devConAddress, game->getDevConPort());
+		devConClient = std::make_unique<DevConClient>(*api, api->network->createService(NetworkProtocol::TCP), devConAddress, game->getDevConPort());
 	}
 
 	// Start game

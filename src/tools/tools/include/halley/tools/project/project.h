@@ -11,6 +11,7 @@ namespace Halley
 
 	class HalleyStatics;
 	class IHalleyPlugin;
+	class DevConServer;
 	using HalleyPluginPtr = std::shared_ptr<IHalleyPlugin>;
 
 	class Project
@@ -37,11 +38,15 @@ namespace Halley
 		const AssetImporter& getAssetImporter() const;
 		std::unique_ptr<IAssetImporter> getAssetImporterOverride(ImportAssetType type) const;
 
+		void setDevConServer(DevConServer* server);
+		DevConServer* getDevConServer() const;
+
 	private:
 		String platform;
 		Path rootPath;
 		Path halleyRootPath;
 		Path assetPackManifest;
+		DevConServer* devConServer = nullptr;
 
 		std::unique_ptr<ImportAssetsDatabase> importAssetsDatabase;
 		std::unique_ptr<ImportAssetsDatabase> codegenDatabase;

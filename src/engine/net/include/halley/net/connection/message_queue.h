@@ -27,6 +27,7 @@ namespace Halley
 			addFactory(std::make_unique<NetworkMessageFactory<T>>());
 		}
 
+		virtual bool isConnected() const = 0;
 		virtual void enqueue(std::unique_ptr<NetworkMessage> msg, int channel) = 0;
 		virtual void sendAll() = 0;
 		virtual std::vector<std::unique_ptr<NetworkMessage>> receiveAll() = 0;

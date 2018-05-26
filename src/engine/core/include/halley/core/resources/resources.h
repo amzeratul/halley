@@ -52,8 +52,12 @@ namespace Halley {
 		template <typename T>
 		ResourceCollection<T>& of()
 		{
-			AssetType assetType = T::getAssetType();
-			return static_cast<ResourceCollection<T>&>(*resources[int(assetType)]);
+			return static_cast<ResourceCollection<T>&>(ofType(T::getAssetType()));
+		}
+
+		ResourceCollectionBase& ofType(AssetType assetType)
+		{
+			return *resources[int(assetType)];
 		}
 
 		template <typename T>

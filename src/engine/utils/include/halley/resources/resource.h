@@ -73,6 +73,8 @@ namespace Halley
 		const Metadata& getMeta() const;
 		void setAssetId(const String& name);
 		const String& getAssetId() const;
+		
+		virtual void reload(Resource&& resource);
 
 	private:
 		Metadata meta;

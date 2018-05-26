@@ -13,7 +13,4 @@ namespace Halley {}
 #include <halley/net/connection/reliable_connection.h>
 #include <halley/net/connection/standard_message_stream.h>
 
-#include <halley/net/devcon/devcon_client.h>
-#include <halley/net/devcon/devcon_server.h>
-
 #include <halley/net/session/network_session.h>

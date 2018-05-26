@@ -23,6 +23,10 @@ const String& Resource::getAssetId() const
 	return assetId;
 }
 
+void Resource::reload(Resource&& resource)
+{
+}
+
 AsyncResource::AsyncResource() 
 	: failed(false)
 	, loading(false)

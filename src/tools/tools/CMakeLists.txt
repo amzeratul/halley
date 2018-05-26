@@ -1,6 +1,6 @@
 project (halley-tools)
 
-include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../../engine/core/include" "../../engine/utils/include" "../../engine/audio/include" "../../contrib/libogg/include" "../../contrib/libvorbis/include")
+include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../../engine/core/include" "../../engine/utils/include" "../../engine/audio/include" "../../engine/net/include" "../../contrib/libogg/include" "../../contrib/libvorbis/include")
 
 set(SOURCES
 
@@ -134,6 +134,7 @@ add_library (halley-tools ${SOURCES} ${HEADERS} ${YAMLCPP_INCLUDE_DIR})
 target_link_libraries (halley-tools
     halley-core
     halley-audio
+    halley-net
     ${FREETYPE_LIBRARIES}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}

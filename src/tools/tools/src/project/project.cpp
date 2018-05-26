@@ -92,3 +92,13 @@ void Project::setAssetPackManifest(const Path& path)
 {
 	assetPackManifest = path;
 }
+
+void Project::setDevConServer(DevConServer* server)
+{
+	devConServer = server;
+}
+
+DevConServer* Project::getDevConServer() const
+{
+	return devConServer;
+}

@@ -33,11 +33,13 @@ AsioTCPConnection::AsioTCPConnection(asio::io_service& service, String host, int
 			}
 
 			if (status != ConnectionStatus::Connected) {
-				Logger::logError("Error trying to connect to " + host + ":" + toString(port) + ". None of the endpoints were suitable.");
+				Logger::logError("Error trying to connect to " + host + ":" + toString(port) + ".");
 				status = ConnectionStatus::Closing;
 			}
 		}
 	});
+
+	service.poll();
 }
 
 AsioTCPConnection::~AsioTCPConnection()
@@ -47,12 +49,11 @@ AsioTCPConnection::~AsioTCPConnection()
 
 void AsioTCPConnection::update()
 {
-	needsPoll = false;
-
 	if (status == ConnectionStatus::Closing) {
 		close();
 	}
 	if (status == ConnectionStatus::Connected) {
+		needsPoll = false;
 		tryReceive();
 		trySend();
 
@@ -85,21 +86,23 @@ ConnectionStatus AsioTCPConnection::getStatus() const
 
 void AsioTCPConnection::send(OutboundNetworkPacket&& packet)
 {
-	packet.addHeader(uint32_t(packet.getSize()));
+	if (status == ConnectionStatus::Connected) {
+		packet.addHeader(uint32_t(packet.getSize()));
 
-	auto bytes = packet.getBytes();
-	auto bs = Bytes(bytes.size_bytes());
-	memcpy(bs.data(), bytes.data(), bytes.size());
-	sendQueue.emplace_back(std::move(bs));
+		auto bytes = packet.getBytes();
+		auto bs = Bytes(bytes.size_bytes());
+		memcpy(bs.data(), bytes.data(), bytes.size());
+		sendQueue.emplace_back(std::move(bs));
 
-	if (sendQueue.size() == 1) {
-		trySend();
+		if (sendQueue.size() == 1) {
+			trySend();
+		}
 	}
 }
 
 bool AsioTCPConnection::receive(InboundNetworkPacket& packet)
 {
-	if (receiveQueue.size() >= sizeof(uint32_t)) {
+	if (receiveQueue.size() >= sizeof(uint32_t) && status == ConnectionStatus::Connected) {
 		const uint32_t size = *reinterpret_cast<uint32_t*>(receiveQueue.data());
 		if (size > 128 * 1024 * 1024) {
 			Logger::logError("Invalid packet size.");
@@ -126,7 +129,7 @@ bool AsioTCPConnection::needsPolling() const
 
 void AsioTCPConnection::trySend()
 {
-	if (!sendQueue.empty()) {
+	if (!sendQueue.empty() && status == ConnectionStatus::Connected) {
 		needsPoll = true;
 
 		sendingQueue.emplace_back(std::move(sendQueue.front()));
@@ -154,7 +157,7 @@ void AsioTCPConnection::trySend()
 
 void AsioTCPConnection::tryReceive()
 {
-	if (!reading) {
+	if (!reading && status == ConnectionStatus::Connected) {
 		needsPoll = true;
 		reading = true;
 

@@ -1,16 +1,16 @@
 #pragma once
-#include "halley/net/connection/message_queue.h"
 #include "halley/support/logger.h"
+#include "halley/net/connection/network_message.h"
+#include <gsl/gsl>
 
 namespace Halley
 {
 	class Serializer;
 	class String;
+	class MessageQueue;
 
 	namespace DevCon
 	{
-		constexpr static int devConPort = 12500;
-		
 		void setupMessageQueue(MessageQueue& queue);
 
 		
@@ -43,6 +43,22 @@ namespace Halley
 		private:
 			LoggerLevel level;
 			String msg;
+		};
+
+		class ReloadAssetsMsg : public DevConMessage
+		{
+		public:
+			ReloadAssetsMsg(gsl::span<const gsl::byte> data);
+			ReloadAssetsMsg(std::vector<String> ids);
+
+			void serialize(Serializer& s) const override;
+
+			std::vector<String> getIds() const;
+
+			MessageType getMessageType() const override;
+
+		private:
+			std::vector<String> ids;
 		};
 	}
 }

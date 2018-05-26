@@ -167,6 +167,7 @@ void EditorRootStage::updateUI(Time time)
 
 void EditorRootStage::loadProject()
 {
+	project->setDevConServer(devConServer.get());
 	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(*project, false)));
 
 	console = std::make_unique<ConsoleWindow>(getResources());
