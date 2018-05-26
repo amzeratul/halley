@@ -31,5 +31,6 @@ namespace Halley {
 		bool needsClip = false;
 
 		void updateMinSize();
+		void updateText();
 	};
 }

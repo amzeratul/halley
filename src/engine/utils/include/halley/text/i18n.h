@@ -28,10 +28,16 @@ namespace Halley {
 		bool operator!=(const LocalisedString& other) const;
 		bool operator<(const LocalisedString& other) const;
 
-	private:
-		explicit LocalisedString(const String& string);
+		bool checkForUpdates();
 
+	private:
+		explicit LocalisedString(String string);
+		explicit LocalisedString(const I18N& i18n, String key, String string);
+
+		const I18N* i18n = nullptr;
+		String key;
 		String string;
+		int i18nVersion = 0;
 	};
 
 	class I18N {
@@ -57,11 +63,13 @@ namespace Halley {
 		}
 
 		const String& getCurrentLanguage() const;
+		int getVersion() const;
 
 	private:
 		String currentLanguage;
 		String fallbackLanguage;
 		std::map<String, std::map<String, String>> strings;
+		int version = 0;
 
 		LocalisedString missingStr;
 	};

@@ -60,5 +60,6 @@ namespace Halley {
 
 		void open();
 		void close();
+		void updateOptionLabels();
     };
 }

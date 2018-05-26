@@ -8,8 +8,7 @@ UILabel::UILabel(TextRenderer style, const LocalisedString& text)
 	, renderer(style)
 	, text(text)
 {
-	renderer.setText(text);
-	updateMinSize();
+	updateText();
 }
 
 void UILabel::draw(UIPainter& painter) const
@@ -25,6 +24,9 @@ void UILabel::draw(UIPainter& painter) const
 
 void UILabel::update(Time t, bool moved)
 {
+	if (text.checkForUpdates()) {
+		updateText();
+	}
 	if (moved) {
 		renderer.setPosition(getPosition());
 	}
@@ -45,12 +47,16 @@ void UILabel::updateMinSize()
 	setMinSize(extents);
 }
 
+void UILabel::updateText() {
+	renderer.setText(text);
+	updateMinSize();
+}
+
 void UILabel::setText(const LocalisedString& t)
 {
 	if (text != t) {
 		text = t;
-		renderer.setText(text);
-		updateMinSize();
+		updateText();
 	}
 }
 

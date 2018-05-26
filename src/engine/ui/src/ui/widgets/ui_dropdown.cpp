@@ -73,6 +73,18 @@ void UIDropdown::setOptions(std::vector<LocalisedString> os, int defaultOption)
 	setOptions({}, std::move(os), defaultOption);
 }
 
+void UIDropdown::updateOptionLabels() {
+	label = style.getTextRenderer("label").clone().setText(options[curOption]);
+
+	float maxExtents = 0;
+	for (auto& o: options) {
+		maxExtents = std::max(maxExtents, label.clone().setText(o).getExtents().x);
+	}
+
+	auto minSize = Vector2f(maxExtents + 19, 14); // HACK
+	setMinSize(std::max(getMinimumSize(), minSize));
+}
+
 void UIDropdown::setOptions(std::vector<String> oIds, std::vector<LocalisedString> os, int defaultOption)
 {
 	if (oIds.empty()) {
@@ -93,15 +105,7 @@ void UIDropdown::setOptions(std::vector<String> oIds, std::vector<LocalisedStrin
 		options.emplace_back();
 	}
 	curOption = clamp(curOption, 0, int(options.size() - 1));
-	label = style.getTextRenderer("label").clone().setText(options[curOption]);
-
-	float maxExtents = 0;
-	for (auto& o: options) {
-		maxExtents = std::max(maxExtents, label.clone().setText(o).getExtents().x);
-	}
-
-	auto minSize = Vector2f(maxExtents + 19, 14); // HACK
-	setMinSize(std::max(getMinimumSize(), minSize));
+	updateOptionLabels();
 
 	if (defaultOption != -1) {
 		setSelectedOption(defaultOption);
@@ -132,6 +136,16 @@ void UIDropdown::draw(UIPainter& painter) const
 
 void UIDropdown::update(Time t, bool moved)
 {
+	bool optionsUpdated = false;
+	for (auto& o: options) {
+		if (o.checkForUpdates()) {
+			optionsUpdated = true;
+		}
+	}
+	if (optionsUpdated) {
+		updateOptionLabels();
+	}
+
 	if (isOpen) {
 		auto focus = getRoot()->getCurrentFocus();
 		if (!focus || (focus != this && !focus->isDescendentOf(*this))) {

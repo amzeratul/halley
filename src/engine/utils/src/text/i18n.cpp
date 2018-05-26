@@ -1,3 +1,4 @@
+#include <utility>
 #include "halley/text/i18n.h"
 #include "halley/file_formats/config_file.h"
 
@@ -11,6 +12,7 @@ I18N::I18N()
 void I18N::setCurrentLanguage(const String& code)
 {
 	currentLanguage = code;
+	++version;
 }
 
 void I18N::setFallbackLanguage(const String& code)
@@ -44,7 +46,7 @@ LocalisedString I18N::get(const String& key) const
 	if (curLang != strings.end()) {
 		auto i = curLang->second.find(key);
 		if (i != curLang->second.end()) {
-			return LocalisedString(i->second);
+			return LocalisedString(*this, key, i->second);
 		}
 	}
 
@@ -53,7 +55,7 @@ LocalisedString I18N::get(const String& key) const
 		if (defLang != strings.end()) {
 			auto i = defLang->second.find(key);
 			if (i != defLang->second.end()) {
-				return LocalisedString(i->second);
+				return LocalisedString(*this, key, i->second);
 			}
 		}
 	}
@@ -66,12 +68,25 @@ const String& I18N::getCurrentLanguage() const
 	return currentLanguage;
 }
 
+int I18N::getVersion() const
+{
+	return version;
+}
+
 LocalisedString::LocalisedString()
 {
 }
 
-LocalisedString::LocalisedString(const String& string)
-	: string(string)
+LocalisedString::LocalisedString(String string)
+	: string(std::move(string))
+{
+}
+
+LocalisedString::LocalisedString(const I18N& i18n, String key, String string)
+	: i18n(&i18n)
+	, key(std::move(key))
+	, string(std::move(string))
+	, i18nVersion(i18n.getVersion())
 {
 }
 
@@ -123,4 +138,20 @@ bool LocalisedString::operator!=(const LocalisedString& other) const
 bool LocalisedString::operator<(const LocalisedString& other) const
 {
 	return string < other.string;
+}
+
+bool LocalisedString::checkForUpdates()
+{
+	if (i18n) {
+		const auto curVersion = i18n->getVersion();
+		if (i18nVersion != curVersion) {
+			const auto newValue = i18n->get(key);
+			i18nVersion = curVersion;
+			if (string != newValue.string) {
+				string = newValue.string;
+				return true;
+			}
+		}
+	}
+	return false;
 }

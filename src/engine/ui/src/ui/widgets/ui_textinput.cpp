@@ -112,6 +112,7 @@ void UITextInput::update(Time t, bool moved)
 	}
 
 	if (text.empty() && !isFocused()) {
+		ghostText.checkForUpdates();
 		label = style.getTextRenderer("labelGhost");
 		label.setText(ghostText);
 	} else {
