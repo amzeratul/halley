@@ -132,6 +132,13 @@ void UIWidget::centerAt(Vector2f pos, Maybe<Rect4f> bounds)
 	alignAt(pos, Vector2f(0.5f, 0.5f), bounds);
 }
 
+void UIWidget::setScreenRelativePosition(Vector2f screenRelativePos, Vector2f alignment)
+{
+	auto rect = getRoot()->getRect();
+	auto pos = Vector2f(lerp(rect.getLeft(), rect.getRight(), screenRelativePos.x), lerp(rect.getTop(), rect.getBottom(), screenRelativePos.y));
+	alignAt(pos, alignment);
+}
+
 Maybe<UISizer>& UIWidget::tryGetSizer()
 {
 	return sizer;

@@ -2,7 +2,6 @@ core/game
 - child stages?
 
 core/resources
-* hot reload adaptor for ConfigFile
 - hot reload AudioClips
 
 core/graphics

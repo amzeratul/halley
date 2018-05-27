@@ -32,6 +32,7 @@ namespace Halley {
 		void layout();
 		virtual void alignAt(Vector2f position, Vector2f alignment, Maybe<Rect4f> bounds = {});
 		void centerAt(Vector2f position, Maybe<Rect4f> bounds = {});
+		void setScreenRelativePosition(Vector2f screenRelativePos, Vector2f alignment = Vector2f(0.5f, 0.5f));
 		
 		virtual Maybe<UISizer>& tryGetSizer();
 		virtual UISizer& getSizer();

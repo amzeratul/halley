@@ -13,20 +13,31 @@ UIRoot* UIRoot::getRoot()
 	return this;
 }
 
-UIRoot::UIRoot(AudioAPI* audio)
+UIRoot::UIRoot(AudioAPI* audio, Rect4f rect)
 	: dummyInput(std::make_shared<InputButtonBase>(4))
+	, uiRect(rect)
 	, audio(audio)
 {
 }
 
-void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual, Vector2f uiOffset)
+void UIRoot::setRect(Rect4f rect)
+{
+	uiRect = rect;
+}
+
+Rect4f UIRoot::getRect() const
+{
+	return uiRect;
+}
+
+void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual)
 {
 	auto joystickType = manual->getJoystickType();
 
 	// Spawn & Update input
 	addNewChildren(activeInputType);
 	if (activeInputType == UIInputType::Mouse) {
-		updateMouse(mouse, uiOffset);
+		updateMouse(mouse);
 	}
 	updateInput(manual);
 
@@ -47,12 +58,12 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 	runLayout();
 }
 
-void UIRoot::updateMouse(spInputDevice mouse, Vector2f uiOffset)
+void UIRoot::updateMouse(spInputDevice mouse)
 {
 	// Check where we should be mouse overing.
 	// If the mouse hasn't moved, keep the last one.
 	std::shared_ptr<UIWidget> underMouse;
-	Vector2f mousePos = mouse->getPosition() + uiOffset;
+	Vector2f mousePos = mouse->getPosition() + uiRect.getTopLeft();
 	if (true || (mousePos - lastMousePos).squaredLength() > 0.01f) {
 		// Go through all root-level widgets and find the actual widget under the mouse
 		underMouse = getWidgetUnderMouse(mousePos);

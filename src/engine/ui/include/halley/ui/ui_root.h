@@ -22,9 +22,12 @@ namespace Halley {
 	public:
 		UIRoot* getRoot() override;
 
-		explicit UIRoot(AudioAPI* audio);
+		explicit UIRoot(AudioAPI* audio, Rect4f rect = {});
 
-		void update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual, Vector2f uiOffset = {});
+		void setRect(Rect4f rect);
+		Rect4f getRect() const;
+
+		void update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual);
 		void draw(SpritePainter& painter, int mask, int layer);
 		void mouseOverNext(bool forward = true);
 		void runLayout();
@@ -45,11 +48,12 @@ namespace Halley {
 		std::weak_ptr<UIWidget> currentFocus;
 		Vector2f lastMousePos;
 		std::shared_ptr<InputDevice> dummyInput;
+		Rect4f uiRect;
 
 		AudioAPI* audio;
 		bool mouseHeld = false;
 
-		void updateMouse(spInputDevice mouse, Vector2f uiOffset);
+		void updateMouse(spInputDevice mouse);
 		void updateInputTree(const spInputDevice& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting);
 		void updateInput(spInputDevice input);
 

@@ -158,6 +158,7 @@ void EditorRootStage::updateUI(Time time)
 
 	auto size = getVideoAPI().getWindow().getDefinition().getSize();
 	uiMainPanel->setMinSize(Vector2f(size));
+	ui->setRect(Rect4f(Vector2f(), Vector2f(size)));
 	ui->update(time, UIInputType::Mouse, getInputAPI().getMouse(), kb);
 
 	if (console) {
