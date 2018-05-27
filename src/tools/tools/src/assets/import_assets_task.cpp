@@ -9,6 +9,7 @@
 #include "halley/concurrency/concurrent.h"
 #include "halley/tools/packer/asset_packer_task.h"
 #include "halley/support/logger.h"
+#include "halley/time/stopwatch.h"
 
 using namespace Halley;
 
@@ -24,6 +25,7 @@ ImportAssetsTask::ImportAssetsTask(String taskName, ImportAssetsDatabase& db, co
 
 void ImportAssetsTask::run()
 {
+	Stopwatch timer;
 	using namespace std::chrono_literals;
 	auto lastSave = std::chrono::steady_clock::now();
 
@@ -60,11 +62,17 @@ void ImportAssetsTask::run()
 			addContinuation(EditorTaskAnchor(std::make_unique<AssetPackerTask>(project, std::move(outputAssets))));
 		}
 	}
+
+	timer.pause();
+	Time realTime = timer.elapsedNanoSeconds() / 1000000000.0;
+	Time importTime = totalImportTime / 1000000000.0;
+	Logger::logInfo("Import took " + toString(realTime) + " seconds, on which " + toString(importTime) + " seconds of work were performed (" + toString(importTime / realTime) + "x realtime)");
 }
 
 bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 {
 	Logger::logInfo("Importing " + asset.assetId);
+	Stopwatch timer;
 
 	std::vector<AssetResource> out;
 	std::vector<std::pair<Path, Bytes>> outFiles;
@@ -150,6 +158,9 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 	asset.additionalInputFiles = std::move(additionalInputs);
 	asset.outputFiles = std::move(out);
 	db.markAsImported(asset);
+
+	timer.pause();
+	totalImportTime += timer.elapsedNanoSeconds();
 
 	return true;
 }

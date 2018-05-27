@@ -1,29 +1,29 @@
-core
+core/game
 - child stages?
 
 core/resources
-- resources hot reloading
+* hot reload adaptor for ConfigFile
+- hot reload AudioClips
 
 core/graphics
+- depth buffer
+- stencil buffer
 - render graph [from old Halley?]
 - convert uniforms into attributes for distance_field_sprite?
 - optimise SpritePainter
 - run rendering on another thread? [RESEARCH]
-- multi-pass: conditional enabling of pass
 - multi-pass: disable batching
 - fallback shaders
 - Codegen vertex attribute data? [RESEARCH]
-- depth buffer
-- stencil buffer
 
 input
 - input context system [RESEARCH]
 - use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
-- audio events
-- multiple "layers" (with individual listeners for them)
-- mixing groups
+* audio events
+* mixing groups
+* multiple "layers" (with individual listeners for them)
 - range compression/ducking
 - audio environments
 - source filters
@@ -34,10 +34,10 @@ audio
   - doppler shift [RESEARCH]
 
 entity
+- load prefabs
 - generalised rendering
 - universal hierarchical transforms [RESEARCH]
 - query other entities? [RESEARCH]
-- load prefabs
 - smearing systems
 - systems as parallel tasks [RESEARCH]
 - better timelines?
@@ -46,19 +46,19 @@ entity
 - snapshot world
 
 lua
+- lua bindings for C++ objects
 - codegen Lua
 - Lua systems
 - codegen component
 - codegen system
-- lua bindings for C++ objects
 
 editor
-- project selector
+* project properties
+- asset view/edit meta
 - create project from template
-- connect to game via sockets
 - game stats display
 - console commands back-end
-- asset/prefab editor?
+- prefab editor?
 - scene editor? [RESEARCH]
 - animation editor
 - system/component/message editor
@@ -66,11 +66,11 @@ editor
 - state machine editor? [RESEARCH]
 - compile game
 - launch game
-- remember window position
-- pack assets
+
+ui
+* ui test scene
 
 asset importing
-- only pack bundles that changed
 - load ase without external process
 - generate fonts with OpenCL
 
