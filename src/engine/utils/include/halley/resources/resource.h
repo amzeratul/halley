@@ -67,10 +67,12 @@ namespace Halley
 		}
 	};
 
+	class ResourceObserver;
+
 	class Resource
 	{
 	public:
-		virtual ~Resource() = default;
+		virtual ~Resource();
 
 		void setMeta(const Metadata& meta);
 		const Metadata& getMeta() const;
@@ -86,6 +88,25 @@ namespace Halley
 	private:
 		Metadata meta;
 		String assetId;
+		int assetVersion = 0;
+	};
+
+	class ResourceObserver
+	{
+	public:
+		ResourceObserver();
+		ResourceObserver(const Resource& res);
+		virtual ~ResourceObserver();
+
+		void startObserving(const Resource& res);
+		void stopObserving();
+		
+		const Resource* getResourceBeingObserved() const;
+		bool needsUpdate() const;
+		virtual void update();
+
+	private:
+		const Resource* res = nullptr;
 		int assetVersion = 0;
 	};
 

@@ -3,6 +3,8 @@
 
 using namespace Halley;
 
+Resource::~Resource() = default;
+
 void Resource::setMeta(const Metadata& m)
 {
 	meta = m;
@@ -37,6 +39,47 @@ void Resource::reloadResource(Resource&& resource)
 
 void Resource::reload(Resource&& resource)
 {
+}
+
+ResourceObserver::ResourceObserver()
+{
+}
+
+ResourceObserver::ResourceObserver(const Resource& res)
+{
+	startObserving(res);
+}
+
+ResourceObserver::~ResourceObserver()
+{
+	stopObserving();
+}
+
+void ResourceObserver::startObserving(const Resource& r)
+{
+	res = &r;
+	assetVersion = res->getAssetVersion();
+}
+
+void ResourceObserver::stopObserving()
+{
+	res = nullptr;
+	assetVersion = 0;
+}
+
+bool ResourceObserver::needsUpdate() const
+{
+	return res && res->getAssetVersion() != assetVersion;
+}
+
+void ResourceObserver::update()
+{
+	assetVersion = res->getAssetVersion();
+}
+
+const Resource* ResourceObserver::getResourceBeingObserved() const
+{
+	return res;
 }
 
 AsyncResource::AsyncResource() 

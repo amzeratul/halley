@@ -12,6 +12,8 @@ AnimationPlayer::AnimationPlayer(std::shared_ptr<const Animation> animation, con
 
 AnimationPlayer& AnimationPlayer::playOnce(const String& sequence)
 {
+	updateIfNeeded();
+
 	curSeq = nullptr;
 	setSequence(sequence);
 	seqLooping = false;
@@ -22,10 +24,17 @@ AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> 
 {
 	if (animation != v) {
 		animation = v;
+		if (animation) {
+			observer.startObserving(*animation);
+		} else {
+			observer.stopObserving();
+		}
 		curDir = nullptr;
 		curSeq = nullptr;
 		dirId = -1;
 	}
+
+	updateIfNeeded();
 
 	if (animation) {
 		setSequence(sequence);
@@ -36,6 +45,9 @@ AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> 
 
 AnimationPlayer& AnimationPlayer::setSequence(const String& sequence)
 {
+	curSeqName = sequence;
+	updateIfNeeded();
+
 	if (animation && (!curSeq || curSeq->getName() != sequence)) {
 		curSeqTime = 0;
 		curFrameTime = 0;
@@ -57,6 +69,8 @@ AnimationPlayer& AnimationPlayer::setSequence(const String& sequence)
 
 AnimationPlayer& AnimationPlayer::setDirection(int direction)
 {
+	updateIfNeeded();
+
 	if (animation && dirId != direction) {
 		auto newDir = &animation->getDirection(direction);
 		if (curDir != newDir) {
@@ -71,6 +85,9 @@ AnimationPlayer& AnimationPlayer::setDirection(int direction)
 
 AnimationPlayer& AnimationPlayer::setDirection(const String& direction)
 {
+	curDirName = direction;
+	updateIfNeeded();
+
 	if (animation && (!curDir || curDir->getName() != direction)) {
 		auto newDir = &animation->getDirection(direction);
 		if (curDir != newDir) {
@@ -85,6 +102,7 @@ AnimationPlayer& AnimationPlayer::setDirection(const String& direction)
 
 bool AnimationPlayer::trySetSequence(const String& sequence)
 {
+	updateIfNeeded();
 	if (animation && animation->hasSequence(sequence)) {
 		setSequence(sequence);
 		return true;
@@ -100,6 +118,8 @@ AnimationPlayer& AnimationPlayer::setApplyPivot(bool apply)
 
 void AnimationPlayer::update(Time time)
 {
+	updateIfNeeded();
+
 	if (!animation) {
 		return;
 	}
@@ -225,6 +245,8 @@ AnimationPlayer& AnimationPlayer::setOffsetPivot(Vector2f offset)
 
 void AnimationPlayer::resolveSprite()
 {
+	updateIfNeeded();
+
 	Expects(curSeq);
 	auto& frame = curSeq->getFrame(curFrame);
 	curFrameLen = std::max(1, frame.getDuration()) * 0.001; // 1ms minimum
@@ -240,4 +262,16 @@ void AnimationPlayer::onSequenceStarted()
 void AnimationPlayer::onSequenceDone()
 {
 	playing = false;
+}
+
+void AnimationPlayer::updateIfNeeded()
+{
+	if (observer.needsUpdate()) {
+		observer.update();
+		dirId = -1;
+		curDir = nullptr;
+		curSeq = nullptr;
+		setSequence(curSeqName);
+		setDirection(curDirName);
+	}
 }

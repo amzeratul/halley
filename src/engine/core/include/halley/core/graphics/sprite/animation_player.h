@@ -52,12 +52,18 @@ namespace Halley
 		void onSequenceStarted();
 		void onSequenceDone();
 
+		void updateIfNeeded();
+
 		std::shared_ptr<Material> materialOverride;
 		std::shared_ptr<const Animation> animation;
 		const SpriteSheetEntry* spriteData = nullptr;
 
 		const AnimationSequence* curSeq = nullptr;
 		const AnimationDirection* curDir = nullptr;
+		
+		String curSeqName;
+		String curDirName;
+		ResourceObserver observer;
 
 		Time curSeqTime;
 		Time curFrameTime;
