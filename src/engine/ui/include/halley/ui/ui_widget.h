@@ -7,13 +7,14 @@
 #include "halley/maths/vector4.h"
 #include "halley/data_structures/maybe.h"
 #include "ui_input.h"
-#include "ui_style.h"
 #include "ui_data_bind.h"
+#include "ui_style.h"
 
 namespace Halley {
 	class UIEvent;
 	class UIValidator;
 	class UIDataBind;
+	class UIAnchor;
 
 	class UIWidget : public IUIElement, public UIParent, public IUISizer, public std::enable_shared_from_this<UIWidget> {
 		friend class UIParent;
@@ -29,12 +30,15 @@ namespace Halley {
 		Vector2f getLayoutMinimumSize(bool force) const override;
 		void setRect(Rect4f rect) override;
 
+		UIRoot* getRoot() override;
+		UIParent* getParent() const;
+
 		void layout();
-		virtual void alignAt(Vector2f position, Vector2f alignment, Maybe<Rect4f> bounds = {});
-		void centerAt(Vector2f position, Maybe<Rect4f> bounds = {});
-		void center();
-		void setScreenRelativePosition(Vector2f screenRelativePos, Vector2f alignment = Vector2f(0.5f, 0.5f));
-		
+
+		virtual void alignAt(const UIAnchor& anchor);
+		void setAnchor(UIAnchor&& anchor);
+		void setAnchor();
+
 		virtual Maybe<UISizer>& tryGetSizer();
 		virtual UISizer& getSizer();
 
@@ -55,6 +59,7 @@ namespace Halley {
 		Vector2f getSize() const;
 		Vector2f getMinimumSize() const;
 		Vector4f getInnerBorder() const;
+		Rect4f getRect() const override;
 
 		void setPosition(Vector2f pos);
 		void setMinSize(Vector2f size);
@@ -129,7 +134,6 @@ namespace Halley {
 		virtual void onFocus();
 		virtual void onFocusLost();
 		virtual void onLayout();
-		UIRoot* getRoot() override;
 
 		void notifyDataBind(bool data) const;
 		void notifyDataBind(int data) const;
@@ -152,12 +156,12 @@ namespace Halley {
 
 	private:
 		void setParent(UIParent* parent);
-		UIParent* getParent() const;
 
 		void setWidgetRect(Rect4f rect);
 
 		UIParent* parent = nullptr;
 		String id;
+
 		std::vector<UIInputType> onlyEnabledWithInputs;
 		std::unique_ptr<UIInputButtons> inputButtons;
 		UIInputResults inputResults;
@@ -165,14 +169,15 @@ namespace Halley {
 		Vector2f position;
 		Vector2f size;
 		Vector2f minSize;
+		Maybe<Rect4f> mouseClip;
 
 		Vector4f innerBorder;
 		Maybe<UISizer> sizer;
-		Maybe<Rect4f> mouseClip;
 
 		std::shared_ptr<UIEventHandler> eventHandler;
 		std::shared_ptr<UIValidator> validator;
 		std::shared_ptr<UIDataBind> dataBind;
+		std::unique_ptr<UIAnchor> anchor;
 
 		int childLayerAdjustment = 0;
 

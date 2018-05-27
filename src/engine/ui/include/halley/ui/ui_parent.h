@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include "halley/text/halleystring.h"
+#include "halley/maths/rect.h"
 
 namespace Halley {
 	enum class UIInputType;
@@ -15,6 +16,8 @@ namespace Halley {
 
 		virtual UIRoot* getRoot() = 0;
 		virtual void sendEvent(UIEvent&& event) const = 0;
+
+		virtual Rect4f getRect() const = 0;
 
 		void addChild(std::shared_ptr<UIWidget> widget);
 		void removeChild(UIWidget& widget);

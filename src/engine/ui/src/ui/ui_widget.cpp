@@ -2,6 +2,7 @@
 #include "ui_root.h"
 #include "ui_validator.h"
 #include "ui_data_bind.h"
+#include "ui_anchor.h"
 
 using namespace Halley;
 
@@ -113,35 +114,27 @@ void UIWidget::layout()
 	Vector2f minimumSize = getLayoutMinimumSize(false);
 	Vector2f targetSize = Vector2f::max(shrinkOnLayout ? Vector2f() : size, minimumSize);
 	setRect(Rect4f(getPosition(), getPosition() + targetSize));
+
+	if (anchor) {
+		anchor->position(*this);
+	}
+
 	onLayout();
 }
 
-void UIWidget::alignAt(Vector2f pos, Vector2f alignment, Maybe<Rect4f> bounds)
+void UIWidget::alignAt(const UIAnchor& a)
 {
-	layout();
-	Vector2f targetPos = pos - (size * alignment).floor();
-	if (bounds) {
-		targetPos.x = clamp(targetPos.x, bounds->getLeft(), bounds->getRight() - size.x);
-		targetPos.y = clamp(targetPos.y, bounds->getTop(), bounds->getBottom() - size.y);
-	}
-	setPosition(targetPos);
+	a.position(*this);
 }
 
-void UIWidget::centerAt(Vector2f pos, Maybe<Rect4f> bounds)
+void UIWidget::setAnchor(UIAnchor&& a)
 {
-	alignAt(pos, Vector2f(0.5f, 0.5f), bounds);
+	anchor = std::make_unique<UIAnchor>(std::move(a));
 }
 
-void UIWidget::center()
+void UIWidget::setAnchor()
 {
-	setScreenRelativePosition(Vector2f(0.5f, 0.5f), Vector2f(0.f, 0.5f));
-}
-
-void UIWidget::setScreenRelativePosition(Vector2f screenRelativePos, Vector2f alignment)
-{
-	auto rect = getRoot()->getRect();
-	auto pos = Vector2f(lerp(rect.getLeft(), rect.getRight(), screenRelativePos.x), lerp(rect.getTop(), rect.getBottom(), screenRelativePos.y));
-	alignAt(pos, alignment);
+	anchor.reset();
 }
 
 Maybe<UISizer>& UIWidget::tryGetSizer()
@@ -235,6 +228,11 @@ Vector2f UIWidget::getMinimumSize() const
 Vector4f UIWidget::getInnerBorder() const
 {
 	return innerBorder;
+}
+
+Rect4f UIWidget::getRect() const
+{
+	return Rect4f(getPosition(), getPosition() + getSize());
 }
 
 void UIWidget::setPosition(Vector2f pos)
@@ -406,6 +404,11 @@ void UIWidget::setParent(UIParent* p)
 {
 	Expects((parent == nullptr) ^ (p == nullptr));
 	parent = p;
+
+	if (anchor) {
+		layout();
+		anchor->position(*this);
+	}
 }
 
 UIParent* UIWidget::getParent() const

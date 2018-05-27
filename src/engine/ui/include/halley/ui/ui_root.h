@@ -25,7 +25,7 @@ namespace Halley {
 		explicit UIRoot(AudioAPI* audio, Rect4f rect = {});
 
 		void setRect(Rect4f rect);
-		Rect4f getRect() const;
+		Rect4f getRect() const override;
 
 		void update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual);
 		void draw(SpritePainter& painter, int mask, int layer);
