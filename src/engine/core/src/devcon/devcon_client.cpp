@@ -77,8 +77,7 @@ void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 
 void DevConClient::connect()
 {
-	connection = service->connect(address, port);
-	queue = std::make_shared<MessageQueueTCP>(connection);
+	queue = std::make_shared<MessageQueueTCP>(service->connect(address, port));
 	DevCon::setupMessageQueue(*queue);
 }
 

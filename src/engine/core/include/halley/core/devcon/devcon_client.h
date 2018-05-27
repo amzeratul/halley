@@ -27,7 +27,6 @@ namespace Halley
 		String address;
 		int port;
 
-		std::shared_ptr<IConnection> connection;
 		std::shared_ptr<MessageQueue> queue;
 
 		void connect();

@@ -5,6 +5,7 @@
 #include <boost/asio.hpp>
 #include "halley/net/connection/iconnection.h"
 #include "halley/utils/utils.h"
+#include <mutex>
 namespace asio = boost::asio;
 
 namespace Halley
@@ -40,6 +41,8 @@ namespace Halley
 		Bytes receiveBuffer;
 		bool reading = false;
 		bool needsPoll = false;
+
+		mutable std::mutex mutex;
 
 		void trySend();
 		void tryReceive();

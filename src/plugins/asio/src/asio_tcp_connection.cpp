@@ -53,9 +53,12 @@ void AsioTCPConnection::update()
 		close();
 	}
 	if (status == ConnectionStatus::Connected) {
-		needsPoll = false;
-		tryReceive();
-		trySend();
+		{
+			std::unique_lock<std::mutex> lock(mutex);
+			needsPoll = false;
+			tryReceive();
+			trySend();
+		}
 
 		if (!socket.is_open()) {
 			close();
@@ -65,6 +68,7 @@ void AsioTCPConnection::update()
 
 void AsioTCPConnection::close()
 {
+	std::unique_lock<std::mutex> lock(mutex);
 	resolver.reset();
 	if (status != ConnectionStatus::Closed) {
 		Logger::logInfo("Disconnected");
@@ -86,12 +90,13 @@ ConnectionStatus AsioTCPConnection::getStatus() const
 
 void AsioTCPConnection::send(OutboundNetworkPacket&& packet)
 {
-	if (status == ConnectionStatus::Connected) {
-		packet.addHeader(uint32_t(packet.getSize()));
+	packet.addHeader(uint32_t(packet.getSize()));
+	auto bytes = packet.getBytes();
+	auto bs = Bytes(bytes.size_bytes());
+	memcpy(bs.data(), bytes.data(), bytes.size());
 
-		auto bytes = packet.getBytes();
-		auto bs = Bytes(bytes.size_bytes());
-		memcpy(bs.data(), bytes.data(), bytes.size());
+	std::unique_lock<std::mutex> lock(mutex);
+	if (status == ConnectionStatus::Connected) {
 		sendQueue.emplace_back(std::move(bs));
 
 		if (sendQueue.size() == 1) {
@@ -102,6 +107,7 @@ void AsioTCPConnection::send(OutboundNetworkPacket&& packet)
 
 bool AsioTCPConnection::receive(InboundNetworkPacket& packet)
 {
+	std::unique_lock<std::mutex> lock(mutex);
 	if (receiveQueue.size() >= sizeof(uint32_t) && status == ConnectionStatus::Connected) {
 		const uint32_t size = *reinterpret_cast<uint32_t*>(receiveQueue.data());
 		if (size > 128 * 1024 * 1024) {
