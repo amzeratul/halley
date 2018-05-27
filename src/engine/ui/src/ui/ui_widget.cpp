@@ -115,23 +115,29 @@ void UIWidget::layout()
 	Vector2f targetSize = Vector2f::max(shrinkOnLayout ? Vector2f() : size, minimumSize);
 	setRect(Rect4f(getPosition(), getPosition() + targetSize));
 
-	if (anchor) {
-		alignAt(*anchor);
-	}
-
+	alignAtAnchor();
 	onLayout();
 }
 
 void UIWidget::alignAt(const UIAnchor& a)
 {
-	a.position(*this);
+	if (parent) {
+		a.position(*this);
+	}
+}
+
+void UIWidget::alignAtAnchor()
+{
+	if (anchor) {
+		alignAt(*anchor);
+	}
 }
 
 void UIWidget::setAnchor(UIAnchor a)
 {
 	anchor = std::make_unique<UIAnchor>(std::move(a));
 	if (parent) {
-		alignAt(*anchor);
+		layout();
 	}
 }
 
@@ -410,7 +416,6 @@ void UIWidget::setParent(UIParent* p)
 
 	if (anchor) {
 		layout();
-		alignAt(*anchor);
 	}
 }
 

@@ -36,6 +36,7 @@ namespace Halley {
 		void layout();
 
 		virtual void alignAt(const UIAnchor& anchor);
+		void alignAtAnchor();
 		void setAnchor(UIAnchor anchor);
 		void setAnchor();
 
