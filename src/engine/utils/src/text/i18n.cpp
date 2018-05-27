@@ -9,6 +9,16 @@ I18N::I18N()
 {
 }
 
+void I18N::update()
+{
+	for (auto& o: observers) {
+		if (o.second.needsUpdate()) {
+			o.second.update();
+			loadLocalisation(o.second.getRoot());
+		}
+	}
+}
+
 void I18N::setCurrentLanguage(const String& code)
 {
 	currentLanguage = code;
@@ -22,7 +32,13 @@ void I18N::setFallbackLanguage(const String& code)
 
 void I18N::loadLocalisationFile(const ConfigFile& config)
 {
-	for (auto& language: config.getRoot().asMap()) {
+	loadLocalisation(config.getRoot());
+	observers[config.getAssetId()] = ConfigObserver(config);
+}
+
+void I18N::loadLocalisation(const ConfigNode& root)
+{
+	for (auto& language: root.asMap()) {
 		auto& langCode = language.first;
 		auto& lang = strings[langCode];
 		for (auto& e: language.second.asMap()) {

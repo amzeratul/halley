@@ -4,7 +4,9 @@
 #include <map>
 
 namespace Halley {
+	class ConfigNode;
 	class ConfigFile;
+	class ConfigObserver;
 	class I18N;
 
 	class LocalisedString
@@ -44,6 +46,7 @@ namespace Halley {
 	public:
 		I18N();
 
+		void update();
 		void loadLocalisationFile(const ConfigFile& config);
 
 		void setCurrentLanguage(const String& code);
@@ -69,9 +72,12 @@ namespace Halley {
 		String currentLanguage;
 		String fallbackLanguage;
 		std::map<String, std::map<String, String>> strings;
+		std::map<String, ConfigObserver> observers;
 		int version = 0;
 
 		LocalisedString missingStr;
+
+		void loadLocalisation(const ConfigNode& node);
 	};
 }
 
