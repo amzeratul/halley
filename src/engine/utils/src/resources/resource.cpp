@@ -23,6 +23,18 @@ const String& Resource::getAssetId() const
 	return assetId;
 }
 
+int Resource::getAssetVersion() const
+{
+	return assetVersion;
+}
+
+void Resource::reloadResource(Resource&& resource)
+{
+	++assetVersion;
+	resource.assetVersion = assetVersion;
+	reload(std::move(resource));
+}
+
 void Resource::reload(Resource&& resource)
 {
 }

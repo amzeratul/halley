@@ -731,4 +731,47 @@ void ConfigFile::reload(Resource&& resource)
 	*this = std::move(dynamic_cast<ConfigFile&>(resource));
 }
 
+ConfigObserver::ConfigObserver()
+{
+}
+
+ConfigObserver::ConfigObserver(const ConfigNode& node)
+	: node(&node)
+{
+}
+
+ConfigObserver::ConfigObserver(const ConfigFile& file)
+	: file(&file)
+	, node(&file.getRoot())
+{
+}
+
+const ConfigNode& ConfigObserver::getRoot() const
+{
+	Expects(node);
+	return *node;
+}
+
+bool ConfigObserver::needsUpdate() const
+{
+	return file && assetVersion != file->getAssetVersion();
+}
+
+void ConfigObserver::update()
+{
+	if (file) {
+		assetVersion = file->getAssetVersion();
+		node = &file->getRoot();
+	}
+}
+
+String ConfigObserver::getAssetId() const
+{
+	if (file) {
+		return file->getAssetId();
+	} else {
+		return "";
+	}
+}
+
 ConfigNode ConfigNode::undefinedConfigNode;

@@ -70,18 +70,23 @@ namespace Halley
 	class Resource
 	{
 	public:
-		virtual ~Resource() {}
+		virtual ~Resource() = default;
 
 		void setMeta(const Metadata& meta);
 		const Metadata& getMeta() const;
 		void setAssetId(const String& name);
 		const String& getAssetId() const;
 		
+		int getAssetVersion() const;
+		void reloadResource(Resource&& resource);
+
+	protected:
 		virtual void reload(Resource&& resource);
 
 	private:
 		Metadata meta;
 		String assetId;
+		int assetVersion = 0;
 	};
 
 	class AsyncResource : public Resource

@@ -173,4 +173,23 @@ namespace Halley
 	private:
 		ConfigNode root;
 	};
+
+	class ConfigObserver
+	{
+	public:
+		ConfigObserver();
+		ConfigObserver(const ConfigNode& node);
+		ConfigObserver(const ConfigFile& file);
+
+		const ConfigNode& getRoot() const;
+		
+		bool needsUpdate() const;
+		void update();
+		String getAssetId() const;
+
+	private:
+		int assetVersion = 0;
+		const ConfigFile* file = nullptr;
+		const ConfigNode* node = nullptr;
+	};
 }
