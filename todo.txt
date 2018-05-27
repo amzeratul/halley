@@ -5,8 +5,8 @@ core/resources
 - hot reload AudioClips
 
 core/graphics
-- depth buffer
-- stencil buffer
+* depth buffer
+* stencil buffer
 - render graph [from old Halley?]
 - convert uniforms into attributes for distance_field_sprite?
 - optimise SpritePainter
@@ -44,6 +44,12 @@ entity
 - defragment/optimize memory? [RESEARCH]
 - snapshot world
 
+ui
+* refactor UIStyle
+* improve UITextInput
+* tab order
+- reduce draw calls
+
 lua
 - lua bindings for C++ objects
 - codegen Lua
@@ -66,11 +72,8 @@ editor
 - compile game
 - launch game
 
-ui
-* ui test scene
-
 asset importing
-- load ase without external process
+* load ase without external process
 - generate fonts with OpenCL
 
 utils
