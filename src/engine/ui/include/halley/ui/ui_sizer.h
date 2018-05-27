@@ -78,8 +78,7 @@ namespace Halley {
 	public:
 		virtual ~IUISizer() {}
 
-		virtual void add(std::shared_ptr<UIWidget> widget, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) = 0;
-		virtual void add(std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) = 0;
+		virtual void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) = 0;
 		virtual void addSpacer(float size) = 0;
 		virtual void addStretchSpacer(float proportion = 0) = 0;
 	};
@@ -96,8 +95,7 @@ namespace Halley {
 		Vector2f getLayoutMinimumSize(bool force) const override;
 		void setRect(Rect4f rect) override;
 
-		void add(std::shared_ptr<UIWidget> widget, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
-		void add(std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
+		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
 		void addSpacer(float size) override;
 		void addStretchSpacer(float proportion = 0) override;
 
@@ -128,7 +126,6 @@ namespace Halley {
 		void unparentEntry(UISizerEntry& entry);
 
 		Vector2f computeMinimumSize(bool includeProportional) const;
-		void addElement(UIElementPtr widget, float proportion, Vector4f border, int fillFlags);
 
 		Vector2f computeMinimumSizeBox(bool includeProportional) const;
 		void setRectBox(Rect4f rect);

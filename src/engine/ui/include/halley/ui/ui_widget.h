@@ -32,13 +32,13 @@ namespace Halley {
 		void layout();
 		virtual void alignAt(Vector2f position, Vector2f alignment, Maybe<Rect4f> bounds = {});
 		void centerAt(Vector2f position, Maybe<Rect4f> bounds = {});
+		void center();
 		void setScreenRelativePosition(Vector2f screenRelativePos, Vector2f alignment = Vector2f(0.5f, 0.5f));
 		
 		virtual Maybe<UISizer>& tryGetSizer();
 		virtual UISizer& getSizer();
 
-		void add(std::shared_ptr<UIWidget> widget, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
-		void add(std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
+		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
 		void addSpacer(float size) override;
 		void addStretchSpacer(float proportion = 0) override;
 

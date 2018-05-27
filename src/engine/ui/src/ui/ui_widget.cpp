@@ -132,6 +132,11 @@ void UIWidget::centerAt(Vector2f pos, Maybe<Rect4f> bounds)
 	alignAt(pos, Vector2f(0.5f, 0.5f), bounds);
 }
 
+void UIWidget::center()
+{
+	setScreenRelativePosition(Vector2f(0.5f, 0.5f), Vector2f(0.f, 0.5f));
+}
+
 void UIWidget::setScreenRelativePosition(Vector2f screenRelativePos, Vector2f alignment)
 {
 	auto rect = getRoot()->getRect();
@@ -152,19 +157,19 @@ UISizer& UIWidget::getSizer()
 	return sizer.get();
 }
 
-void UIWidget::add(std::shared_ptr<UIWidget> widget, float porportion, Vector4f border, int fillFlags)
+void UIWidget::add(std::shared_ptr<IUIElement> element, float porportion, Vector4f border, int fillFlags)
 {
-	addChild(widget);
-	if (sizer) {
-		sizer.get().add(widget, porportion, border, fillFlags);
+	auto widget = std::dynamic_pointer_cast<UIWidget>(element);
+	if (widget) {
+		addChild(widget);
+	} else {
+		auto s = std::dynamic_pointer_cast<UISizer>(element);
+		if (s) {
+			s->reparent(*this);
+		}
 	}
-}
-
-void UIWidget::add(std::shared_ptr<UISizer> s, float proportion, Vector4f border, int fillFlags)
-{
-	s->reparent(*this);
 	if (sizer) {
-		sizer.get().add(s, proportion, border, fillFlags);
+		sizer.get().add(element, porportion, border, fillFlags);
 	}
 }
 

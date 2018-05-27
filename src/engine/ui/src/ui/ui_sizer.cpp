@@ -138,19 +138,9 @@ void UISizer::setRect(Rect4f rect)
 	}
 }
 
-void UISizer::add(std::shared_ptr<UIWidget> widget, float proportion, Vector4f border, int fillFlags)
+void UISizer::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags)
 {
-	addElement(widget, proportion, border, fillFlags);
-}
-
-void UISizer::add(std::shared_ptr<UISizer> sizer, float proportion, Vector4f border, int fillFlags)
-{
-	addElement(sizer, proportion, border, fillFlags);
-}
-
-void UISizer::addElement(UIElementPtr widget, float proportion, Vector4f border, int fillFlags)
-{
-	entries.emplace_back(UISizerEntry(widget, proportion, border, fillFlags));
+	entries.emplace_back(UISizerEntry(element, proportion, border, fillFlags));
 	reparentEntry(entries.back());
 }
 
