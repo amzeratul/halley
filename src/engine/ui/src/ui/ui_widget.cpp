@@ -116,7 +116,7 @@ void UIWidget::layout()
 	setRect(Rect4f(getPosition(), getPosition() + targetSize));
 
 	if (anchor) {
-		anchor->position(*this);
+		alignAt(*anchor);
 	}
 
 	onLayout();
@@ -127,9 +127,12 @@ void UIWidget::alignAt(const UIAnchor& a)
 	a.position(*this);
 }
 
-void UIWidget::setAnchor(UIAnchor&& a)
+void UIWidget::setAnchor(UIAnchor a)
 {
 	anchor = std::make_unique<UIAnchor>(std::move(a));
+	if (parent) {
+		alignAt(*anchor);
+	}
 }
 
 void UIWidget::setAnchor()
@@ -407,7 +410,7 @@ void UIWidget::setParent(UIParent* p)
 
 	if (anchor) {
 		layout();
-		anchor->position(*this);
+		alignAt(*anchor);
 	}
 }
 

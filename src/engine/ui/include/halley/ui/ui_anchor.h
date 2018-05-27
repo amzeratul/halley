@@ -18,8 +18,8 @@ namespace Halley {
 		Vector2f getAbsoluteOffset() const;
 		Maybe<Rect4f> getBounds() const;
 
-		void setBounds(UIParent& parent);
-		void setAutoBounds(bool enabled);
+		UIAnchor& setBounds(UIParent& parent);
+		UIAnchor& setAutoBounds(bool enabled);
 		
 		void position(UIWidget& widget) const;
 

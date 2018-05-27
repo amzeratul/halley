@@ -30,14 +30,16 @@ Maybe<Rect4f> UIAnchor::getBounds() const
 	return bounds;
 }
 
-void UIAnchor::setBounds(UIParent& parent)
+UIAnchor& UIAnchor::setBounds(UIParent& parent)
 {
 	bounds = parent.getRect();
+	return *this;
 }
 
-void UIAnchor::setAutoBounds(bool enabled)
+UIAnchor& UIAnchor::setAutoBounds(bool enabled)
 {
 	autoBounds = enabled;
+	return *this;
 }
 
 void UIAnchor::position(UIWidget& widget) const
