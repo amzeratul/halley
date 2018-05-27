@@ -149,6 +149,11 @@ void SpriteSheet::setTextureName(String name)
 	textureName = name;
 }
 
+void SpriteSheet::reload(Resource&& resource)
+{
+	*this = std::move(dynamic_cast<SpriteSheet&>(resource));
+}
+
 void SpriteSheet::serialize(Serializer& s) const
 {
 	s << textureName;
@@ -252,4 +257,9 @@ std::shared_ptr<const SpriteSheet> SpriteResource::getSpriteSheet() const
 std::unique_ptr<SpriteResource> SpriteResource::loadResource(ResourceLoader& loader)
 {
 	throw Exception("Not implemented.");
+}
+
+void SpriteResource::reload(Resource&& resource)
+{
+	*this = std::move(dynamic_cast<SpriteResource&>(resource));
 }

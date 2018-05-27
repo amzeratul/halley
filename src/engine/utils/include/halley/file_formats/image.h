@@ -83,8 +83,10 @@ namespace Halley {
 
 		static std::unique_ptr<Image> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Image; }
+		void reload(Resource&& resource) override;
 
 		Image& operator=(const Image& o) = delete;
+		Image& operator=(Image&& o) = default;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

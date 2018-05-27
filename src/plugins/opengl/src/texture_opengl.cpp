@@ -21,8 +21,21 @@ TextureOpenGL::TextureOpenGL(VideoOpenGL& parent, Vector2i size)
 TextureOpenGL::~TextureOpenGL()
 {
 	waitForOpenGLLoad();
-	glDeleteTextures(1, &textureId);
-	textureId = 0;
+	if (textureId != 0) {
+		glDeleteTextures(1, &textureId);
+		textureId = 0;
+	}
+}
+
+TextureOpenGL& TextureOpenGL::operator=(TextureOpenGL&& other) noexcept
+{
+	other.waitForOpenGLLoad();
+
+	size = other.size;
+	textureId = other.textureId;
+	texSize = other.texSize;
+
+	return *this;
 }
 
 void TextureOpenGL::load(TextureDescriptor&& d)
@@ -36,6 +49,16 @@ void TextureOpenGL::load(TextureDescriptor&& d)
 		updateImage(d.pixelData, d.format, d.useMipMap);
 	}
 	finishLoading();
+}
+
+void TextureOpenGL::reload(Resource&& resource)
+{
+	*this = std::move(dynamic_cast<TextureOpenGL&>(resource));
+}
+
+unsigned TextureOpenGL::getNativeId() const
+{
+	return textureId;
 }
 
 void TextureOpenGL::finishLoading()

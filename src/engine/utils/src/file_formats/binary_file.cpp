@@ -38,6 +38,11 @@ std::unique_ptr<BinaryFile> BinaryFile::loadResource(ResourceLoader& loader)
 	}
 }
 
+void BinaryFile::reload(Resource&& resource)
+{
+	*this = std::move(dynamic_cast<BinaryFile&>(resource));
+}
+
 const Bytes& BinaryFile::getBytes() const
 {
 	Expects(!streaming);

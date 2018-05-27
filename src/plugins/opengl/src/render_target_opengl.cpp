@@ -4,6 +4,7 @@
 #include <halley/core/graphics/texture.h>
 #include <halley/data_structures/flat_map.h>
 #include <gsl/gsl_assert>
+#include "texture_opengl.h"
 
 using namespace Halley;
 
@@ -47,11 +48,11 @@ void TextureRenderTargetOpenGL::init()
 		glCheckError();
 
 		for (size_t i = 0; i < attachments.size(); i++) {
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + int(i), GL_TEXTURE_2D, attachments[i]->getNativeId(), 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + int(i), GL_TEXTURE_2D, dynamic_cast<TextureOpenGL&>(*attachments[i]).getNativeId(), 0);
 			glCheckError();
 		}
 		if (depth) {
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth->getNativeId(), 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, dynamic_cast<TextureOpenGL&>(*depth).getNativeId(), 0);
 			glCheckError();
 		}
 

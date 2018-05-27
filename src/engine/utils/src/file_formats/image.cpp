@@ -28,7 +28,9 @@
 #include "halley/text/string_converter.h"
 #include "halley/file/byte_serializer.h"
 
-Halley::Image::Image(Format format, Vector2i size)
+using namespace Halley;
+
+Image::Image(Format format, Vector2i size)
 	: px(nullptr, [](char*){})
 	, dataLen(0)
 	, format(format)
@@ -36,31 +38,31 @@ Halley::Image::Image(Format format, Vector2i size)
 	setSize(size);
 }
 
-Halley::Image::Image(gsl::span<const gsl::byte> bytes, Format targetFormat)
+Image::Image(gsl::span<const gsl::byte> bytes, Format targetFormat)
 	: px(nullptr, [](char*) {})
 {
 	load(bytes, targetFormat);
 }
 
-Halley::Image::Image(const ResourceDataStatic& data)
+Image::Image(const ResourceDataStatic& data)
 	: px(nullptr, [](char*) {})
 {
 	load(data.getSpan(), Format::Undefined);
 }
 
-Halley::Image::Image(const ResourceDataStatic& data, const Metadata& meta)
+Image::Image(const ResourceDataStatic& data, const Metadata& meta)
 	: px(nullptr, [](char*) {})
 {
 	auto format = fromString<Format>(meta.getString("format", "undefined"));
 	load(data.getSpan(), format);
 }
 
-Halley::Image::~Image()
+Image::~Image()
 {
 	px.reset();
 }
 
-void Halley::Image::setSize(Vector2i size)
+void Image::setSize(Vector2i size)
 {
 	w = size.x;
 	h = size.y;
@@ -77,17 +79,17 @@ void Halley::Image::setSize(Vector2i size)
 	}
 }
 
-size_t Halley::Image::getByteSize() const
+size_t Image::getByteSize() const
 {
 	return dataLen;
 }
 
-unsigned int Halley::Image::convertRGBAToInt(unsigned int r, unsigned int g, unsigned int b, unsigned int a)
+unsigned int Image::convertRGBAToInt(unsigned int r, unsigned int g, unsigned int b, unsigned int a)
 {
 	return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
-void Halley::Image::convertIntToRGBA(unsigned int col, unsigned int& r, unsigned int& g, unsigned int& b, unsigned int& a)
+void Image::convertIntToRGBA(unsigned int col, unsigned int& r, unsigned int& g, unsigned int& b, unsigned int& a)
 {
 	r = col & 0xFF;
 	g = (col >> 8) & 0xFF;
@@ -95,7 +97,7 @@ void Halley::Image::convertIntToRGBA(unsigned int col, unsigned int& r, unsigned
 	a = (col >> 24) & 0xFF;
 }
 
-int Halley::Image::getBytesPerPixel() const
+int Image::getBytesPerPixel() const
 {
 	switch (format) {
 	case Format::RGBA:
@@ -110,12 +112,12 @@ int Halley::Image::getBytesPerPixel() const
 	}
 }
 
-Halley::Image::Format Halley::Image::getFormat() const
+Image::Format Image::getFormat() const
 {
 	return format;
 }
 
-Halley::Rect4i Halley::Image::getTrimRect() const
+Rect4i Image::getTrimRect() const
 {
 	int x0 = w;
 	int x1 = 0;
@@ -144,12 +146,12 @@ Halley::Rect4i Halley::Image::getTrimRect() const
 	return Rect4i(Vector2i(x0, y0), Vector2i(x1 + 1, y1 + 1));
 }
 
-Halley::Rect4i Halley::Image::getRect() const
+Rect4i Image::getRect() const
 {
 	return Rect4i(Vector2i(), w, h);
 }
 
-void Halley::Image::clear(int colour)
+void Image::clear(int colour)
 {
 	int* dst = reinterpret_cast<int*>(px.get());
 	for (unsigned int y = 0; y < h; y++) {
@@ -159,7 +161,7 @@ void Halley::Image::clear(int colour)
 	}
 }
 
-void Halley::Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp)
+void Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp)
 {
 	size_t xMin = std::max(0, -pos.x);
 	size_t yMin = std::max(0, -pos.y);
@@ -196,7 +198,7 @@ void Halley::Image::blitFrom(Vector2i pos, const char* buffer, size_t width, siz
 	}
 }
 
-void Halley::Image::blitFromRotated(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp)
+void Image::blitFromRotated(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp)
 {
 	Expects(getBytesPerPixel() == 4);
 
@@ -224,7 +226,7 @@ void Halley::Image::blitFromRotated(Vector2i pos, const char* buffer, size_t wid
 	}
 }
 
-void Halley::Image::blitFrom(Vector2i pos, Image& srcImg, bool rotated)
+void Image::blitFrom(Vector2i pos, Image& srcImg, bool rotated)
 {
 	if (rotated) {
 		blitFromRotated(pos, srcImg.getPixels(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), getBytesPerPixel() * 8);
@@ -233,7 +235,7 @@ void Halley::Image::blitFrom(Vector2i pos, Image& srcImg, bool rotated)
 	}
 }
 
-void Halley::Image::blitFrom(Vector2i pos, Image& srcImg, Rect4i srcArea, bool rotated)
+void Image::blitFrom(Vector2i pos, Image& srcImg, Rect4i srcArea, bool rotated)
 {
 	Rect4i src = Rect4i(Vector2i(), srcImg.getSize()).intersection(srcArea);
 	size_t stride = srcImg.getWidth();
@@ -245,12 +247,17 @@ void Halley::Image::blitFrom(Vector2i pos, Image& srcImg, Rect4i srcArea, bool r
 	}
 }
 
-std::unique_ptr<Halley::Image> Halley::Image::loadResource(ResourceLoader& loader)
+std::unique_ptr<Image> Image::loadResource(ResourceLoader& loader)
 {
 	return std::make_unique<Image>(*loader.getStatic(), loader.getMeta());
 }
 
-void Halley::Image::serialize(Serializer& s) const
+void Image::reload(Resource&& resource)
+{
+	*this = std::move(dynamic_cast<Image&>(resource));
+}
+
+void Image::serialize(Serializer& s) const
 {
 	s << w;
 	s << h;
@@ -259,7 +266,7 @@ void Halley::Image::serialize(Serializer& s) const
 	s << gsl::as_bytes(gsl::span<char>(px.get(), dataLen));
 }
 
-void Halley::Image::deserialize(Deserializer& s)
+void Image::deserialize(Deserializer& s)
 {
 	s >> w;
 	s >> h;
@@ -268,12 +275,12 @@ void Halley::Image::deserialize(Deserializer& s)
 	uint64_t len;
 	s >> len;
 	dataLen = size_t(len);
-	px = std::unique_ptr<char, void(*)(char*)>(static_cast<char*>(malloc(dataLen)), [](char* data) { ::free(data); });
+	px = std::unique_ptr<char, void(*)(char*)>(static_cast<char*>(malloc(dataLen)), [](char* data) { free(data); });
 	auto span = gsl::as_writeable_bytes(gsl::span<char>(px.get(), dataLen));
 	s >> span;
 }
 
-void Halley::Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
+void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 {
 	if (isPNG(bytes)) {
 		unsigned char* pixels;
@@ -292,7 +299,7 @@ void Halley::Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 		}
 		lodepng_decode_memory(&pixels, &x, &y, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size(), colorFormat, 8);
 
-		px = std::unique_ptr<char, void(*)(char*)>(reinterpret_cast<char*>(pixels), [](char* data) { ::free(data); });
+		px = std::unique_ptr<char, void(*)(char*)>(reinterpret_cast<char*>(pixels), [](char* data) { free(data); });
 		w = x;
 		h = y;
 		format = targetFormat != Format::Undefined ? targetFormat : Format::RGBA;
@@ -315,7 +322,7 @@ void Halley::Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 	}
 }
 
-void Halley::Image::preMultiply()
+void Image::preMultiply()
 {
 	Expects(format == Format::RGBA);
 
@@ -335,7 +342,7 @@ void Halley::Image::preMultiply()
 	format = Format::RGBAPremultiplied;
 }
 
-int Halley::Image::getPixel(Vector2i pos) const
+int Image::getPixel(Vector2i pos) const
 {
 	Expects(getBytesPerPixel() == 4);
 
@@ -343,13 +350,13 @@ int Halley::Image::getPixel(Vector2i pos) const
 	return *reinterpret_cast<const int*>(getPixels() + 4*(pos.x + pos.y*w));
 }
 
-int Halley::Image::getPixelAlpha(Vector2i pos) const
+int Image::getPixelAlpha(Vector2i pos) const
 {
 	unsigned int pixel = static_cast<unsigned int>(getPixel(pos));
 	return pixel >> 24;
 }
 
-Halley::Bytes Halley::Image::savePNGToBytes(bool allowDepthReduce) const
+Bytes Image::savePNGToBytes(bool allowDepthReduce) const
 {
 	unsigned char* bytes;
 	size_t size;
@@ -389,7 +396,7 @@ Halley::Bytes Halley::Image::savePNGToBytes(bool allowDepthReduce) const
 	return result;
 }
 
-Halley::Vector2i Halley::Image::getImageSize(gsl::span<const gsl::byte> bytes)
+Vector2i Image::getImageSize(gsl::span<const gsl::byte> bytes)
 {
 	if (isPNG(bytes))	{
 		unsigned w, h;
@@ -403,7 +410,7 @@ Halley::Vector2i Halley::Image::getImageSize(gsl::span<const gsl::byte> bytes)
 	}
 }
 
-Halley::Image::Format Halley::Image::getImageFormat(gsl::span<const gsl::byte> bytes)
+Image::Format Image::getImageFormat(gsl::span<const gsl::byte> bytes)
 {
 	unsigned int x, y;
 	LodePNGState state;
@@ -420,7 +427,7 @@ Halley::Image::Format Halley::Image::getImageFormat(gsl::span<const gsl::byte> b
 	}
 }
 
-bool Halley::Image::isPNG(gsl::span<const gsl::byte> bytes)
+bool Image::isPNG(gsl::span<const gsl::byte> bytes)
 {
 	unsigned char pngHeader[] = { 137, 80, 78, 71, 13, 10, 26, 10 };
 	return bytes.size() >= 8 && memcmp(bytes.data(), pngHeader, 8) == 0;

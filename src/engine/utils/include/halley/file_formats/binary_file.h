@@ -20,6 +20,7 @@ namespace Halley
 
 		static std::unique_ptr<BinaryFile> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::BinaryFile; }
+		void reload(Resource&& resource) override;
 
 		const Bytes& getBytes() const;
 		Bytes& getBytes();

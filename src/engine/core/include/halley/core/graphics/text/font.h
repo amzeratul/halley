@@ -40,17 +40,19 @@ namespace Halley
 		Font(String name, String imageName, float ascender, float height, float sizePt, float distanceFieldSmoothRadius);
 
 		explicit Font(ResourceLoader& loader);
+
 		static std::unique_ptr<Font> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Font; }
+		void reload(Resource&& resource) override;
 
 		const Glyph& getGlyph(int code) const;
-		float getLineHeightAtSize(float size) const { return height * size / sizePt; }
-		float getAscenderDistance() const { return ascender; }
-		float getHeight() const { return height; }
-		float getSizePoints() const { return sizePt; }
-		float getSmoothRadius() const { return smoothRadius; }
-		String getName() const { return name; }
-		bool isDistanceField() const { return distanceField; }
+		float getLineHeightAtSize(float size) const;
+		float getAscenderDistance() const;
+		float getHeight() const;
+		float getSizePoints() const;
+		float getSmoothRadius() const;
+		String getName() const;
+		bool isDistanceField() const;
 
 		void addGlyph(const Glyph& glyph);
 

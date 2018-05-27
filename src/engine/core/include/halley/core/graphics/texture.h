@@ -3,7 +3,6 @@
 #include "halley/resources/resource.h"
 #include "halley/maths/vector2.h"
 #include <memory>
-#include <limits>
 
 namespace Halley
 {
@@ -19,12 +18,10 @@ namespace Halley
 
 		static std::shared_ptr<Texture> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Texture; }
-		unsigned int getNativeId() const { return textureId; }
 
 		Vector2i getSize() const { return size; }
 
 	protected:
-		unsigned int textureId = std::numeric_limits<unsigned int>::max();
 		Vector2i size;
 	};
 }

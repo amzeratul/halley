@@ -11,12 +11,16 @@ namespace Halley
 	{
 	public:
 		TextFile();
-		explicit TextFile(const String& data);
-		explicit TextFile(String&& data);
+		explicit TextFile(String data);
 
-		String data;
+		String& getData();
+		const String& getData() const;
 
 		static std::unique_ptr<TextFile> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::TextFile; }
+		void reload(Resource&& resource) override;
+
+	private:
+		String data;
 	};
 }

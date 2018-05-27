@@ -168,6 +168,8 @@ namespace Halley
 		static std::unique_ptr<ConfigFile> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::ConfigFile; }
 
+		void reload(Resource&& resource) override;
+
 	private:
 		ConfigNode root;
 	};

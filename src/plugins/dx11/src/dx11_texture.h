@@ -14,7 +14,10 @@ namespace Halley
 		DX11Texture(DX11Video& video, Vector2i size);
 		~DX11Texture();
 
+		DX11Texture& operator=(DX11Texture&& other) noexcept;
+
 		void load(TextureDescriptor&& descriptor) override;
+		void reload(Resource&& resource) override;
 
 		void bind(DX11Video& video, int textureUnit) const;
 		

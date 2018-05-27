@@ -26,6 +26,23 @@ DX11Texture::~DX11Texture()
 	}
 }
 
+DX11Texture& DX11Texture::operator=(DX11Texture&& other) noexcept
+{
+	other.waitForLoad();
+
+	texture = other.texture;
+	srv = other.srv;
+	samplerState = other.samplerState;
+	format = other.format;
+	size = other.size;
+
+	other.texture = nullptr;
+	other.srv = nullptr;
+	other.samplerState = nullptr;
+
+	return *this;
+}
+
 void DX11Texture::load(TextureDescriptor&& descriptor)
 {
 	int bpp = 0;
@@ -110,6 +127,11 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 	}
 
 	doneLoading();
+}
+
+void DX11Texture::reload(Resource&& resource)
+{
+	*this = std::move(dynamic_cast<DX11Texture&>(resource));
 }
 
 void DX11Texture::bind(DX11Video& video, int textureUnit) const

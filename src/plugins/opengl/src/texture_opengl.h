@@ -2,7 +2,6 @@
 
 #include <halley/core/graphics/texture.h>
 #include <halley/core/graphics/texture_descriptor.h>
-#include <condition_variable>
 #include "halley_gl.h"
 
 namespace Halley
@@ -16,8 +15,13 @@ namespace Halley
 		explicit TextureOpenGL(VideoOpenGL& parent, Vector2i size);
 		~TextureOpenGL();
 
+		TextureOpenGL& operator=(TextureOpenGL&& other) noexcept;
+
 		void bind(int textureUnit) const;
+		unsigned int getNativeId() const;
+
 		void load(TextureDescriptor&& descriptor) override;
+		void reload(Resource&& resource) override;
 
 	private:
 		void updateImage(TextureDescriptorImageData& pixelData, TextureFormat format, bool useMipMap);
@@ -28,6 +32,7 @@ namespace Halley
 		void waitForOpenGLLoad() const;
 		void finishLoading();
 
+		unsigned int textureId = 0;
 		Vector2i texSize;
 		VideoOpenGL& parent;
 #ifdef WITH_OPENGL

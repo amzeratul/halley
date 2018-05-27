@@ -78,6 +78,11 @@ std::unique_ptr<Font> Font::loadResource(ResourceLoader& loader)
 	return std::make_unique<Font>(loader);
 }
 
+void Font::reload(Resource&& resource)
+{
+	*this = std::move(dynamic_cast<Font&>(resource));
+}
+
 const Font::Glyph& Font::getGlyph(int code) const
 {
 	auto iter = glyphs.find(code);
@@ -89,6 +94,41 @@ const Font::Glyph& Font::getGlyph(int code) const
 		return iter->second;
 	}
 	return iter->second;
+}
+
+float Font::getLineHeightAtSize(float size) const
+{
+	return height * size / sizePt;
+}
+
+float Font::getAscenderDistance() const
+{
+	return ascender;
+}
+
+float Font::getHeight() const
+{
+	return height;
+}
+
+float Font::getSizePoints() const
+{
+	return sizePt;
+}
+
+float Font::getSmoothRadius() const
+{
+	return smoothRadius;
+}
+
+String Font::getName() const
+{
+	return name;
+}
+
+bool Font::isDistanceField() const
+{
+	return distanceField;
 }
 
 void Font::addGlyph(const Glyph& glyph)

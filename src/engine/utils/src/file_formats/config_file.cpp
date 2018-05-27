@@ -726,4 +726,9 @@ std::unique_ptr<ConfigFile> ConfigFile::loadResource(ResourceLoader& loader)
 	return config;
 }
 
+void ConfigFile::reload(Resource&& resource)
+{
+	*this = std::move(dynamic_cast<ConfigFile&>(resource));
+}
+
 ConfigNode ConfigNode::undefinedConfigNode;
