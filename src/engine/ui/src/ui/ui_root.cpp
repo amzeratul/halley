@@ -227,11 +227,12 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos)
 {
 	auto& cs = getChildren();
 	for (int i = int(cs.size()); --i >= 0; ) {
-		auto widget = getWidgetUnderMouse(cs[i], mousePos);
+		auto curRootWidget = cs[i];
+		auto widget = getWidgetUnderMouse(curRootWidget, mousePos);
 		if (widget) {
 			return widget;
 		} else {
-			if (cs[i]->isMouseBlocker()) {
+			if (curRootWidget->isMouseBlocker()) {
 				return {};
 			}
 		}
