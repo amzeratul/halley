@@ -109,6 +109,7 @@ UISizer& UISizer::operator=(UISizer&& other)
 
 	entries = std::move(other.entries);
 	columnProportions = std::move(other.columnProportions);
+	rowProportions = std::move(other.rowProportions);
 
 	curParent = other.curParent;
 
@@ -254,6 +255,12 @@ void UISizer::setEvenColumns()
 	}
 }
 
+
+void UISizer::setRowProportions(const std::vector<float>& values)
+{
+	rowProportions = values;
+}
+
 Vector2f UISizer::computeMinimumSizeBox(bool includeProportional) const
 {
 	float totalProportion = 0;
@@ -382,13 +389,19 @@ void UISizer::computeGridSizes(std::vector<float>& colSize, std::vector<float>& 
 	}
 
 	// From here on: ensure that columns respect the proportion between them
-	float minMult = 0;
+	Vector2f minMult;
 
 	// First pass: gather data
 	for (int i = 0; i < int(colSize.size()); ++i) {
 		float p = getColumnProportion(i);
 		if (p > 0) {
-			minMult = std::max(minMult, colSize[i] / p);
+			minMult.x = std::max(minMult.x, colSize[i] / p);
+		}
+	}
+	for (int i = 0; i < int(rowSize.size()); ++i) {
+		float p = getRowProportion(i);
+		if (p > 0) {
+			minMult.y = std::max(minMult.y, rowSize[i] / p);
 		}
 	}
 
@@ -396,7 +409,13 @@ void UISizer::computeGridSizes(std::vector<float>& colSize, std::vector<float>& 
 	for (int i = 0; i < int(colSize.size()); ++i) {
 		float p = getColumnProportion(i);
 		if (p > 0) {
-			colSize[i] = std::max(colSize[i], p * minMult);
+			colSize[i] = std::max(colSize[i], p * minMult.x);
+		}
+	}
+	for (int i = 0; i < int(rowSize.size()); ++i) {
+		float p = getRowProportion(i);
+		if (p > 0) {
+			rowSize[i] = std::max(rowSize[i], p * minMult.y);
 		}
 	}
 }
@@ -432,20 +451,35 @@ void UISizer::setRectGrid(Rect4f rect)
 
 	// Add up min width
 	float minWidth = (colSize.size() - 1) * gap;
+	float minHeight = (rowSize.size() - 1) * gap;
 	for (auto c: colSize) {
 		minWidth += c;
 	}
+	for (auto r: rowSize) {
+		minHeight += r;
+	}
 	float spareWidth = std::max(0.0f, rect.getWidth() - minWidth);
+	float spareHeight = std::max(0.0f, rect.getHeight() - minHeight);
 
 	// Respect proportion
-	float totalProportion = 0;
+	float totalColProportion = 0;
 	for (auto& p: columnProportions) {
-		totalProportion += p;
+		totalColProportion += p;
 	}
-	if (totalProportion > 0) {
+	if (totalColProportion > 0) {
 		// Distribute spare
 		for (int i = 0; i < nColumns; ++i) {
-			colSize[i] += spareWidth * getColumnProportion(i) / totalProportion;
+			colSize[i] += spareWidth * getColumnProportion(i) / totalColProportion;
+		}
+	}
+	float totalRowProportion = 0;
+	for (auto& p: rowProportions) {
+		totalRowProportion += p;
+	}
+	if (totalRowProportion > 0) {
+		// Distribute spare
+		for (int i = 0; i < nRows; ++i) {
+			rowSize[i] += spareHeight * getRowProportion(i) / totalRowProportion;
 		}
 	}
 
@@ -484,6 +518,14 @@ float UISizer::getColumnProportion(int col) const
 {
 	if (col >= 0 && col < int(columnProportions.size())) {
 		return columnProportions[col];
+	}
+	return 0.0f;
+}
+
+float UISizer::getRowProportion(int row) const
+{
+	if (row >= 0 && row < int(rowProportions.size())) {
+		return rowProportions[row];
 	}
 	return 0.0f;
 }

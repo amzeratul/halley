@@ -3,10 +3,12 @@
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/text/text_renderer.h"
 #include "halley/data_structures/flat_map.h"
+#include <map>
 
 namespace Halley {
 	class ConfigFile;
 	class ConfigNode;
+	class ConfigObserver;
 	class AudioClip;
 	class UISTyle;
 
@@ -44,10 +46,15 @@ namespace Halley {
 
 		void load(const ConfigFile& file);
 
+		bool needsUpdate() const;
+		void update();
+
 	private:
 		Resources& resources;
 		FlatMap<String, std::shared_ptr<UIStyleDefinition>> styles;
+		std::map<String, ConfigObserver> observers;
 
+		void load(const ConfigNode& node);
 		std::shared_ptr<const UIStyleDefinition> getStyle(const String& styleName) const;
 	};
 }

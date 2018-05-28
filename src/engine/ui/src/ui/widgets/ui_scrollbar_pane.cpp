@@ -7,7 +7,10 @@ UISizer makeSizer(bool scrollHorizontal, bool scrollVertical)
 	Expects(scrollHorizontal || scrollVertical);
 
 	if (scrollHorizontal && scrollVertical) {
-		return UISizer(UISizerType::Grid, 1, 2);
+		auto sizer = UISizer(UISizerType::Grid, 1, 2);
+		sizer.setColumnProportions({{ 1.0f, 0.0f }});
+		sizer.setRowProportions({{ 1.0f, 0.0f }});
+		return sizer;
 	} else if (scrollHorizontal) {
 		return UISizer(UISizerType::Vertical);
 	} else {

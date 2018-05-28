@@ -14,7 +14,8 @@ UIScrollBar::UIScrollBar(UIScrollDirection direction, UIStyle style, bool always
 	b0 = std::make_shared<UIButton>("b0", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "left" : "up"));
 	UIWidget::add(b0);
 
-	bar = std::make_shared<UIImage>(style.getSprite("bar.normal"));
+	auto barStyle = style.getSubStyle("bar");
+	bar = std::make_shared<UIImage>(barStyle.getSprite(direction == UIScrollDirection::Horizontal ? "horizontal" : "vertical"));
 	thumb = std::make_shared<UIScrollThumb>(style.getSubStyle("thumb"));
 	thumb->setMinSize(Vector2f(1, 1));
 	bar->add(thumb);
@@ -53,8 +54,9 @@ void UIScrollBar::update(Time t, bool moved)
 		float sz = round(barSize * coverage);
 
 		Vector2f thumbPos;
+		auto thumbSize = bar->getSize();
 		thumbPos[axis] = round(pane->getRelativeScrollPosition()[axis] * barSize);
-		auto thumbSize = Vector2f(bar->getSize()[1 - axis], sz);
+		thumbSize[axis] = sz;
 
 		thumb->setPosition(bar->getPosition() + thumbPos);
 		thumb->setMinSize(thumbSize);

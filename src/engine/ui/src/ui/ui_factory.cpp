@@ -452,7 +452,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 					continue;
 				}
 			}
-			auto label = i18n.get(tabNode["textKey"].asString(""));
+			auto label = tabNode.hasKey("textKey") ? i18n.get(tabNode["textKey"].asString("")) : LocalisedString::fromUserString(tabNode["text"].asString(""));
 			tabs->addTextItem(id + "_tab_" + toString(tabNodes.size()), label);
 			tabNodes.push_back(&tabNode);
 		}

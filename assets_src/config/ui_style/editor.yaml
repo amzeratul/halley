@@ -32,7 +32,9 @@ uiStyle:
     gap: 1
 
   scrollbar:
-    bar.normal: { img: ui/ui_scrollbar.png, colour: "#5E3962" }
+    bar:
+      horizontal: { img: ui/ui_scrollbar.png, colour: "#5E3962" }
+      vertical: { img: ui/ui_scrollbar.png, colour: "#5E3962" }
     up:
       normal: { img: ui/ui_scrollbar.png, colour: "#9C5BB5" }
       disabled: { img: ui/ui_scrollbar.png, colour: "#8D7B95" }

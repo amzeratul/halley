@@ -152,8 +152,31 @@ UIStyleSheet::UIStyleSheet(Resources& resources, const ConfigFile& file)
 
 void UIStyleSheet::load(const ConfigFile& file)
 {
-	auto& root = file.getRoot()["uiStyle"];
-	for (const auto& node: root.asMap()) {
+	load(file.getRoot());
+	observers[file.getAssetId()] = ConfigObserver(file);
+}
+
+bool UIStyleSheet::needsUpdate() const
+{
+	for (auto& o: observers) {
+		if (o.second.needsUpdate()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void UIStyleSheet::update()
+{
+	for (auto& o: observers) {
+		o.second.update();
+		load(o.second.getRoot());
+	}
+}
+
+void UIStyleSheet::load(const ConfigNode& root)
+{
+	for (const auto& node: root["uiStyle"].asMap()) {
 		styles[node.first] = std::make_unique<UIStyleDefinition>(node.first, node.second, resources);
 	}
 }

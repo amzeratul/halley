@@ -19,8 +19,19 @@ UIFactoryTester::~UIFactoryTester() = default;
 
 void UIFactoryTester::update()
 {
+	bool updated = false;
+	
 	if (curObserver && curObserver->needsUpdate()) {
 		curObserver->update();
+		updated = true;
+	}
+
+	if (factory.getStyleSheet()->needsUpdate()) {
+		factory.getStyleSheet()->update();
+		updated = true;
+	}
+
+	if (updated) {
 		loadFromObserver();
 	}
 }
