@@ -259,8 +259,8 @@ std::shared_ptr<UIWidget> UIFactory::makeBaseWidget(const ConfigNode& entryNode)
 std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto style = node["style"].asString("label");
-	return std::make_shared<UILabel>(styleSheet->getTextRenderer(style), parseLabel(node));
+	auto style = UIStyle(node["style"].asString("label"), styleSheet);
+	return std::make_shared<UILabel>(style.getTextRenderer("label"), parseLabel(node));
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)

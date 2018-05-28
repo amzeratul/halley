@@ -68,7 +68,7 @@ uiStyle:
     scrollbar.thumb.hoverSound: ""
 
   textRenderers:
-    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    label.label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
     
     button.label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
     

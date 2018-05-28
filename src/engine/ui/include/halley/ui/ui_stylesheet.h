@@ -7,19 +7,16 @@
 namespace Halley {
 	class ConfigNode;
 	class AudioClip;
+	class UISTyle;
 
 	class UIStyleSheet {
+		friend class UIStyle;
+
 	public:
 		UIStyleSheet();
 		UIStyleSheet(const ConfigNode& node, Resources& resources);
 
 		void setParent(std::shared_ptr<UIStyleSheet> parent);
-
-		const Sprite& getSprite(const String& name);
-		const TextRenderer& getTextRenderer(const String& name);
-		Vector4f getBorder(const String& name);
-		std::shared_ptr<const AudioClip> getAudioClip(const String& name);
-		float getFloat(const String& name);
 
 	private:
 		std::shared_ptr<UIStyleSheet> parent;
@@ -31,5 +28,11 @@ namespace Halley {
 
 		TextRenderer defaultText;
 		Sprite defaultSprite;
+
+		const Sprite& getSprite(const String& name);
+		const TextRenderer& getTextRenderer(const String& name);
+		Vector4f getBorder(const String& name);
+		std::shared_ptr<const AudioClip> getAudioClip(const String& name);
+		float getFloat(const String& name);
 	};
 }
