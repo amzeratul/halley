@@ -14,6 +14,7 @@ namespace Halley
 	class Resources;
 	class I18N;
 	class UIWidget;
+	class UIStyle;
 
 	class UIFactory
 	{
