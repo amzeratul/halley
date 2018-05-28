@@ -234,14 +234,31 @@ Vector2f UIFactory::asVector2f(const ConfigNode& node, Maybe<Vector2f> defaultVa
 	}
 }
 
-LocalisedString UIFactory::parseLabel(const ConfigNode& node) {
+LocalisedString UIFactory::parseLabel(const ConfigNode& node, const String& defaultOption) {
 	LocalisedString label;
 	if (node.hasKey("textKey")) {
 		label = i18n.get(node["textKey"].asString());
 	} else if (node.hasKey("text")) {
-		label = LocalisedString::fromUserString(node["text"].asString());
+		label = LocalisedString::fromUserString(node["text"].asString(defaultOption));
 	}
 	return label;
+}
+
+std::vector<std::pair<String, LocalisedString>> UIFactory::parseOptions(const ConfigNode& node)
+{
+	std::vector<std::pair<String, LocalisedString>> result;
+	if (node.getType() == ConfigNodeType::Sequence) {
+		for (auto& n: node.asSequence()) {
+			auto id = n["id"].asString("");
+			auto label = parseLabel(n, id);
+			if (id.isEmpty()) {
+				id = label.getString();
+			}
+
+			result.emplace_back(id, label);
+		}
+	}
+	return result;
 }
 
 Vector4f UIFactory::asVector4f(const ConfigNode& node, Maybe<Vector4f> defaultValue)
@@ -281,7 +298,7 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 
 	auto sizer = makeSizerOrDefault(entryNode, UISizer());
 	if (!label.getString().isEmpty()) {
-		sizer.add(std::make_shared<UILabel>(style.getTextRenderer("label"), label), 1, Vector4f(), UISizerAlignFlags::Centre);
+		sizer.add(std::make_shared<UILabel>(style.getTextRenderer("label"), label), 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
 	}
 
 	return std::make_shared<UIButton>(id, style, std::move(sizer));
@@ -319,9 +336,13 @@ std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
 
 	auto orientation = fromString<UISizerType>(node["type"].asString("vertical"));
 	int nColumns = node["columns"].asInt(1);
+	auto options = parseOptions(node["options"]);
 
 	auto widget = std::make_shared<UIList>(id, style, orientation, nColumns);
 	applyInputButtons(*widget, node["inputButtons"].asString("list"));
+	for (auto& o: options) {
+		widget->addTextItem(o.first, o.second);
+	}
 	return widget;
 }
 
@@ -333,13 +354,18 @@ std::shared_ptr<UIWidget> UIFactory::makeDropdown(const ConfigNode& entryNode)
 	auto scrollStyle = UIStyle(node["ScrollBarStyle"].asString("scrollbar"), styleSheet);
 	auto listStyle = UIStyle(node["listStyle"].asString("list"), styleSheet);
 	auto label = parseLabel(node);
+	auto options = parseOptions(node["options"]);
 
-	// TODO?
-	std::vector<LocalisedString> options;
-	int defaultOption = 0;
+	std::vector<String> optionIds;
+	std::vector<LocalisedString> optionLabels;
+	for (auto& o: options) {
+		optionIds.push_back(o.first);
+		optionLabels.push_back(o.second);
+	}
 
-	auto widget = std::make_shared<UIDropdown>(id, style, scrollStyle, listStyle, options, defaultOption);
+	auto widget = std::make_shared<UIDropdown>(id, style, scrollStyle, listStyle);
 	applyInputButtons(*widget, node["inputButtons"].asString("list"));
+	widget->setOptions(optionIds, optionLabels);
 	return widget;
 }
 
@@ -452,7 +478,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 					continue;
 				}
 			}
-			auto label = tabNode.hasKey("textKey") ? i18n.get(tabNode["textKey"].asString("")) : LocalisedString::fromUserString(tabNode["text"].asString(""));
+			auto label = parseLabel(tabNode);
 			tabs->addTextItem(id + "_tab_" + toString(tabNodes.size()), label);
 			tabNodes.push_back(&tabNode);
 		}
