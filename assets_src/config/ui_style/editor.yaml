@@ -13,6 +13,7 @@ uiStyle:
 
   input:
     box: { img: ui/ui_input.png, colour: "#9861B6" }
+    caret: ui/ui_caret.png
     innerBorder: [ 6, 5, 6, 2 ]
     label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
     labelGhost: { font: Ubuntu Bold, size: 18, colour: "#7F7F7F" }
