@@ -6,142 +6,163 @@
 #include "halley/support/logger.h"
 using namespace Halley;
 
-UIStyleSheet::UIStyleSheet()
+template <typename T>
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, T& data) {}
+
+template <>
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, Sprite& data)
 {
-}
-
-UIStyleSheet::UIStyleSheet(const ConfigNode& node, Resources& resources)
-{
-	auto& UIStyleSheet = node["uiStyle"];
-
-	if (UIStyleSheet.hasKey("sprites")) {
-		for (auto& spriteNode: UIStyleSheet["sprites"].asMap()) {
-			String name = spriteNode.first;
-			if (spriteNode.second.getType() == ConfigNodeType::String) {
-				if (spriteNode.second.asString().isEmpty()) {
-					sprites[name] = defaultSprite;
-				} else {
-					sprites[name] = Sprite()
-						.setImage(resources, spriteNode.second.asString());
-				}
-			} else {
-				sprites[name] = Sprite()
-					.setImage(resources, spriteNode.second["img"].asString())
-					.setColour(Colour4f::fromString(spriteNode.second["colour"].asString("#FFFFFF")));
-			}
+	if (node.getType() == ConfigNodeType::String) {
+		if (!node.asString().isEmpty()) {
+			data = Sprite().setImage(resources, node.asString());
 		}
-	}
-
-	if (UIStyleSheet.hasKey("textRenderers")) {
-		for (auto& textNode: UIStyleSheet["textRenderers"].asMap()) {
-			String name = textNode.first;
-			auto& text = textNode.second;
-			textRenderers[name] = TextRenderer()
-				.setFont(resources.get<Font>(text["font"].asString()))
-				.setSize(text["size"].asFloat())
-				.setColour(Colour4f::fromString(text["colour"].asString()))
-				.setOutline(text["outline"].asFloat(0.0f))
-				.setOutlineColour(Colour4f::fromString(text["outlineColour"].asString("#000000")))
-				.setAlignment(text["alignment"].asFloat(0.0f));
-		}
-	}
-
-	if (UIStyleSheet.hasKey("audioClips")) {
-		for (auto& n: UIStyleSheet["audioClips"].asMap()) {
-			String clip = n.second.asString();
-			if (clip.isEmpty()) {
-				audioClips[n.first] = {};
-			} else {
-				audioClips[n.first] = resources.get<AudioClip>(clip);
-			}
-		}
-	}
-
-	if (UIStyleSheet.hasKey("borders")) {
-		for (auto& n: UIStyleSheet["borders"].asMap()) {
-			auto vals = n.second.asSequence();
-			borders[n.first] = Vector4f(vals[0].asFloat(), vals[1].asFloat(), vals[2].asFloat(), vals[3].asFloat());
-		}
-	}
-
-	if (UIStyleSheet.hasKey("floats")) {
-		for (auto& n: UIStyleSheet["floats"].asMap()) {
-			floats[n.first] = n.second.asFloat();
-		}
+	} else {
+		data = Sprite()
+			.setImage(resources, node["img"].asString())
+			.setColour(Colour4f::fromString(node["colour"].asString("#FFFFFF")));
 	}
 }
 
-void UIStyleSheet::setParent(std::shared_ptr<UIStyleSheet> p)
+template <>
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, TextRenderer& data)
 {
-	parent = p;
+	data = TextRenderer()
+		.setFont(resources.get<Font>(node["font"].asString()))
+		.setSize(node["size"].asFloat())
+		.setColour(Colour4f::fromString(node["colour"].asString()))
+		.setOutline(node["outline"].asFloat(0.0f))
+		.setOutlineColour(Colour4f::fromString(node["outlineColour"].asString("#000000")))
+		.setAlignment(node["alignment"].asFloat(0.0f));
 }
 
-const Sprite& UIStyleSheet::getSprite(const String& name)
+template <>
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, std::shared_ptr<const AudioClip>& data)
 {
-	auto iter = sprites.find(name);
-	if (iter != sprites.end()) {
+	if (node.asString().isEmpty()) {
+		data = {};
+	} else {
+		data = resources.get<AudioClip>(node.asString());
+	}
+}
+
+template <>
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, Vector4f& data)
+{
+	auto& vals = node.asSequence();
+	data = Vector4f(vals[0].asFloat(), vals[1].asFloat(), vals[2].asFloat(), vals[3].asFloat());
+}
+
+template <>
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, float& data)
+{
+	data = node.asFloat();
+}
+
+template <>
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, std::shared_ptr<const UIStyleDefinition>& data)
+{
+	if (node.getType() != ConfigNodeType::Map) {
+		data = {};
+	} else {
+		data = std::make_shared<UIStyleDefinition>(name, node, resources);
+	}
+}
+
+template <typename T>
+const T& getValue(const ConfigNode& node, Resources& resources, const String& name, const String& key, FlatMap<String, T>& cache)
+{
+	// Is it already in cache?
+	const auto iter = cache.find(key);
+	if (iter != cache.end()) {
 		return iter->second;
 	}
-	if (parent) {
-		return parent->getSprite(name);
+
+	// Not in cache, try to load it
+	if (node.hasKey(key)) {
+		T data;
+		loadStyleData(resources, key, node[key], data);
+		cache[key] = data;
+		return cache[key];
 	} else {
-		Logger::logWarning("Sprite not found in UI style: " + name);
-		return defaultSprite;
+		// Not found. Use a default.
+		const auto iter2 = cache.find(":default");
+		if (iter2 != cache.end()) {
+			Logger::logWarning(String(typeid(T).name()) + " not found in UI style: " + name + "." + key);
+			return iter2->second;
+		} else {
+			throw Exception(String(typeid(T).name()) + " not found in UI style: " + name + "." + key + ". Additionally, default was not set.");
+		}
 	}
 }
 
-const TextRenderer& UIStyleSheet::getTextRenderer(const String& name)
+UIStyleDefinition::UIStyleDefinition(String styleName, const ConfigNode& node, Resources& resources)
+	: styleName(std::move(styleName))
+	, node(node)
+	, resources(resources)
 {
-	auto iter = textRenderers.find(name);
-	if (iter != textRenderers.end()) {
-		return iter->second;
-	}
-	if (parent) {
-		return parent->getTextRenderer(name);
-	} else {
-		Logger::logWarning("Text renderer not found in UI style: " + name);
-		return defaultText;
+	// Load defaults
+	sprites[":default"] = Sprite();
+	textRenderers[":default"] = TextRenderer();
+	floats[":default"] = 0.0f;
+	borders[":default"] = Vector4f();
+	audioClips[":default"] = {};
+	subStyles[":default"] = {};
+}
+
+std::shared_ptr<const UIStyleDefinition> UIStyleDefinition::getSubStyle(const String& name) const
+{
+	return getValue(node, resources, styleName, name, subStyles);
+}
+
+const Sprite& UIStyleDefinition::getSprite(const String& name) const
+{
+	return getValue(node, resources, styleName, name, sprites);
+}
+
+const TextRenderer& UIStyleDefinition::getTextRenderer(const String& name) const
+{
+	return getValue(node, resources, styleName, name, textRenderers);
+}
+
+Vector4f UIStyleDefinition::getBorder(const String& name) const
+{
+	return getValue(node, resources, styleName, name, borders);
+}
+
+std::shared_ptr<const AudioClip> UIStyleDefinition::getAudioClip(const String& name) const
+{
+	return getValue(node, resources, styleName, name, audioClips);
+}
+
+float UIStyleDefinition::getFloat(const String& name) const
+{
+	return getValue(node, resources, styleName, name, floats);
+}
+
+UIStyleSheet::UIStyleSheet(Resources& resources)
+	: resources(resources)
+{
+}
+
+UIStyleSheet::UIStyleSheet(Resources& resources, const ConfigFile& file)
+	: resources(resources)
+{
+	load(file);
+}
+
+void UIStyleSheet::load(const ConfigFile& file)
+{
+	auto& root = file.getRoot()["uiStyle"];
+	for (const auto& node: root.asMap()) {
+		styles[node.first] = std::make_unique<UIStyleDefinition>(node.first, node.second, resources);
 	}
 }
 
-Vector4f UIStyleSheet::getBorder(const String& name)
+std::shared_ptr<const UIStyleDefinition> UIStyleSheet::getStyle(const String& styleName) const
 {
-	auto iter = borders.find(name);
-	if (iter != borders.end()) {
-		return iter->second;
+	auto iter = styles.find(styleName);
+	if (iter == styles.end()) {
+		throw Exception("Unknown style: " + styleName);
 	}
-	if (parent) {
-		return parent->getBorder(name);
-	} else {
-		Logger::logWarning("Border not found in UI style: " + name);
-		return {};
-	}
-}
-
-std::shared_ptr<const AudioClip> UIStyleSheet::getAudioClip(const String& name)
-{
-	auto iter = audioClips.find(name);
-	if (iter != audioClips.end()) {
-		return iter->second;
-	}
-	if (parent) {
-		return parent->getAudioClip(name);
-	} else {
-		Logger::logWarning("Audio clip not found in UI style: " + name);
-		return {};
-	}
-}
-
-float UIStyleSheet::getFloat(const String& name)
-{
-	auto iter = floats.find(name);
-	if (iter != floats.end()) {
-		return iter->second;
-	}
-	if (parent) {
-		return parent->getFloat(name);
-	} else {
-		Logger::logWarning("Float not found in UI style: " + name);
-		return 0.0f;
-	}
+	return iter->second;
 }

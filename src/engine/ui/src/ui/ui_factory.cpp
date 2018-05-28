@@ -70,6 +70,11 @@ void UIFactory::setInputButtons(const String& key, UIInputButtons buttons)
 	inputButtons[key] = buttons;
 }
 
+UIStyle UIFactory::getStyle(const String& name) const
+{
+	return UIStyle(name, styleSheet);
+}
+
 std::shared_ptr<UIStyleSheet> UIFactory::getStyleSheet() const
 {
 	return styleSheet;

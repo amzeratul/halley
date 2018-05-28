@@ -6,8 +6,8 @@ namespace Halley {
 	class UIStyle {
 	public:
 		UIStyle();
-		UIStyle(std::shared_ptr<UIStyleSheet> styleSheet);
-		UIStyle(const String& baseName, std::shared_ptr<UIStyleSheet> styleSheet);
+		UIStyle(std::shared_ptr<const UIStyleDefinition>);
+		UIStyle(const String& name, std::shared_ptr<UIStyleSheet> styleSheet);
 
 		UIStyle getSubStyle(const String& name) const;
 
@@ -18,7 +18,6 @@ namespace Halley {
 		float getFloat(const String& name) const;
 
 	private:
-		String baseName;
-		std::shared_ptr<UIStyleSheet> styleSheet;
+		std::shared_ptr<const UIStyleDefinition> style;
 	};
 }

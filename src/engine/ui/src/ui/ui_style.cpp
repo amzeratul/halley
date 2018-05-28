@@ -5,45 +5,43 @@ UIStyle::UIStyle()
 {
 }
 
-UIStyle::UIStyle(std::shared_ptr<UIStyleSheet> styleSheet)
-	: styleSheet(styleSheet)
+UIStyle::UIStyle(std::shared_ptr<const UIStyleDefinition> style)
+	: style(std::move(style))
 {
-	Expects(styleSheet);
 }
 
-UIStyle::UIStyle(const String& baseName, std::shared_ptr<UIStyleSheet> styleSheet)
-	: baseName(baseName + ".")
-	, styleSheet(styleSheet)
+UIStyle::UIStyle(const String& styleName, std::shared_ptr<UIStyleSheet> styleSheet)
 {
 	Expects(styleSheet);
+	style = styleSheet->getStyle(styleName);
 }
 
 UIStyle UIStyle::getSubStyle(const String& name) const
 {
-	return UIStyle(baseName + name, styleSheet);
+	return UIStyle(style->getSubStyle(name));
 }
 
 const Sprite& UIStyle::getSprite(const String& name) const
 {
-	return styleSheet->getSprite(baseName + name);
+	return style->getSprite(name);
 }
 
 const TextRenderer& UIStyle::getTextRenderer(const String& name) const
 {
-	return styleSheet->getTextRenderer(baseName + name);
+	return style->getTextRenderer(name);
 }
 
 Vector4f UIStyle::getBorder(const String& name) const
 {
-	return styleSheet->getBorder(baseName + name);
+	return style->getBorder(name);
 }
 
 std::shared_ptr<const AudioClip> UIStyle::getAudioClip(const String& name) const
 {
-	return styleSheet->getAudioClip(baseName + name);
+	return style->getAudioClip(name);
 }
 
 float UIStyle::getFloat(const String& name) const
 {
-	return styleSheet->getFloat(baseName + name);
+	return style->getFloat(name);
 }

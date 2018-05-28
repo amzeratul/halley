@@ -5,34 +5,49 @@
 #include "halley/data_structures/flat_map.h"
 
 namespace Halley {
+	class ConfigFile;
 	class ConfigNode;
 	class AudioClip;
 	class UISTyle;
+
+	class UIStyleDefinition
+	{
+	public:
+		UIStyleDefinition(String styleName, const ConfigNode& node, Resources& resources);
+
+		const Sprite& getSprite(const String& name) const;
+		const TextRenderer& getTextRenderer(const String& name) const;
+		Vector4f getBorder(const String& name) const;
+		std::shared_ptr<const AudioClip> getAudioClip(const String& name) const;
+		float getFloat(const String& name) const;
+		std::shared_ptr<const UIStyleDefinition> getSubStyle(const String& name) const;
+
+	private:
+		const String styleName;
+		const ConfigNode& node;
+		Resources& resources;
+
+		mutable FlatMap<String, Sprite> sprites;
+		mutable FlatMap<String, TextRenderer> textRenderers;
+		mutable FlatMap<String, Vector4f> borders;
+		mutable FlatMap<String, std::shared_ptr<const AudioClip>> audioClips;
+		mutable FlatMap<String, float> floats;
+		mutable FlatMap<String, std::shared_ptr<const UIStyleDefinition>> subStyles;
+	};
 
 	class UIStyleSheet {
 		friend class UIStyle;
 
 	public:
-		UIStyleSheet();
-		UIStyleSheet(const ConfigNode& node, Resources& resources);
+		UIStyleSheet(Resources& resources);
+		UIStyleSheet(Resources& resources, const ConfigFile& file);
 
-		void setParent(std::shared_ptr<UIStyleSheet> parent);
+		void load(const ConfigFile& file);
 
 	private:
-		std::shared_ptr<UIStyleSheet> parent;
-		FlatMap<String, Sprite> sprites;
-		FlatMap<String, TextRenderer> textRenderers;
-		FlatMap<String, Vector4f> borders;
-		FlatMap<String, std::shared_ptr<const AudioClip>> audioClips;
-		FlatMap<String, float> floats;
+		Resources& resources;
+		FlatMap<String, std::shared_ptr<UIStyleDefinition>> styles;
 
-		TextRenderer defaultText;
-		Sprite defaultSprite;
-
-		const Sprite& getSprite(const String& name);
-		const TextRenderer& getTextRenderer(const String& name);
-		Vector4f getBorder(const String& name);
-		std::shared_ptr<const AudioClip> getAudioClip(const String& name);
-		float getFloat(const String& name);
+		std::shared_ptr<const UIStyleDefinition> getStyle(const String& styleName) const;
 	};
 }

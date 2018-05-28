@@ -32,7 +32,7 @@ namespace Halley
 
 		void setInputButtons(const String& key, UIInputButtons buttons);
 
-		std::shared_ptr<UIStyleSheet> getStyleSheet() const;
+		UIStyle getStyle(const String& name) const;
 
 	protected:
 		const HalleyAPI& api;
@@ -75,5 +75,7 @@ namespace Halley
 
 		std::map<String, WidgetFactory> factories;
 		std::map<String, UIInputButtons> inputButtons;
+
+		std::shared_ptr<UIStyleSheet> getStyleSheet() const;
 	};
 }
