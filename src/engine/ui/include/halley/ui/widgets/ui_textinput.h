@@ -29,11 +29,13 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 		void onFocus() override;
+		void pressMouse(Vector2f mousePos, int button) override;
 
 		void readFromDataBind() override;
 
 	private:
 		void updateTextInput();
+		void setCaretPosition(int pos);
 
 		std::shared_ptr<InputDevice> keyboard;
 		UIStyle style;

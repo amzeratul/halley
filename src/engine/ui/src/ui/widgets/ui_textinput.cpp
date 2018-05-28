@@ -84,37 +84,35 @@ void UITextInput::draw(UIPainter& painter) const
 void UITextInput::updateTextInput()
 {
 	bool modified = false;
-	int startCaret = caretPos;
+	int caret = caretPos;
 
 	if (keyboard->isButtonPressedRepeat(Keys::Delete)) {
-		if (caretPos < int(text.size())) {
-			text.erase(text.begin() + caretPos);
+		if (caret < int(text.size())) {
+			text.erase(text.begin() + caret);
 			modified = true;
 		}
 	}
 	
 	if (keyboard->isButtonPressedRepeat(Keys::Backspace)) {
-		if (caretPos > 0) {
-			text.erase(text.begin() + (caretPos - 1));
-			--caretPos;
+		if (caret > 0) {
+			text.erase(text.begin() + (caret - 1));
+			--caret;
 			modified = true;
 		}
 	}
 
 	int dx = (keyboard->isButtonPressedRepeat(Keys::Left) ? -1 : 0) + (keyboard->isButtonPressedRepeat(Keys::Right) ? 1 : 0);
-	caretPos = clamp(caretPos + dx, 0, int(text.size()));
+	caret = clamp(caret + dx, 0, int(text.size()));
 
 	for (int letter = keyboard->getNextLetter(); letter != 0; letter = keyboard->getNextLetter()) {
 		if (letter >= 32) {
-			text.insert(text.begin() + caretPos, letter);
-			caretPos++;
+			text.insert(text.begin() + caret, letter);
+			caret++;
 			modified = true;
 		}
 	}
 
-	if (caretPos != startCaret || modified) {
-		caretPhysicalPos = label.getCharacterPosition(caretPos, text).x;
-	}
+	setCaretPosition(caret);
 
 	if (modified) {
 		if (getValidator()) {
@@ -123,6 +121,15 @@ void UITextInput::updateTextInput()
 		const auto str = String(text);
 		sendEvent(UIEvent(UIEventType::TextChanged, getId(), str));
 		notifyDataBind(str);
+	}
+}
+
+void UITextInput::setCaretPosition(int pos)
+{
+	pos = clamp(pos, 0, int(text.size()));
+	if (pos != caretPos) {
+		caretPos = pos;
+		caretPhysicalPos = label.getCharacterPosition(caretPos, text).x;
 	}
 }
 
@@ -182,6 +189,14 @@ void UITextInput::onFocus()
 	caretTime = 0;
 	caretShowing = true;
 	while (keyboard->getNextLetter()) {}
+}
+
+void UITextInput::pressMouse(Vector2f mousePos, int button)
+{
+	if (button == 0) {
+		Vector2f labelClickPos = mousePos - label.getPosition();
+		setCaretPosition(int(label.getCharacterAt(labelClickPos)));
+	}
 }
 
 void UITextInput::readFromDataBind()

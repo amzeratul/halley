@@ -231,8 +231,8 @@ Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 {
 	Vector2f p;
 	float w = 0;
-	float scale = size / font->getSizePoints();
-	float lineH = getLineHeight();
+	const float scale = size / font->getSizePoints();
+	const float lineH = getLineHeight();
 
 	for (auto& c : str) {
 		if (c == '\n') {
@@ -258,8 +258,8 @@ Vector2f TextRenderer::getCharacterPosition(size_t character) const
 Vector2f TextRenderer::getCharacterPosition(size_t character, const StringUTF32& str) const
 {
 	Vector2f p;
-	float scale = size / font->getSizePoints();
-	float lineH = getLineHeight();
+	const float scale = size / font->getSizePoints();
+	const float lineH = getLineHeight();
 
 	for (size_t i = 0; i < character && i < str.size(); ++i) {
 		auto c = str[i];
@@ -274,6 +274,56 @@ Vector2f TextRenderer::getCharacterPosition(size_t character, const StringUTF32&
 	}
 
 	return p;
+}
+
+size_t TextRenderer::getCharacterAt(const Vector2f& position) const
+{
+	return getCharacterAt(position, text);
+}
+
+size_t TextRenderer::getCharacterAt(const Vector2f& position, const StringUTF32& str) const
+{
+	const float scale = size / font->getSizePoints();
+	const float lineH = getLineHeight();
+	const int targetLine = int(floor(position.y / lineH));
+	Vector2f p;
+	int curLine = 0;
+	float bestDist2 = std::numeric_limits<float>::max();
+	bool gotLineMatch = false;
+	size_t bestAnswer = 0;
+	const size_t nChars = str.size();
+
+	for (size_t i = 0; i <= nChars; ++i) {
+		auto c = i == nChars ? 0 : str[i]; // Add a sigil at the end
+
+		const float dist2 = (p - position).squaredLength();
+		if (!gotLineMatch && curLine == targetLine) {
+			gotLineMatch = true;
+			bestDist2 = dist2;
+			bestAnswer = i;
+		}
+		if (curLine == targetLine || !gotLineMatch) {
+			if (dist2 < bestDist2) {
+				bestDist2 = dist2;
+				bestAnswer = i;
+			}
+		}
+
+		if (c == '\n') {
+			// Line break!
+			curLine++;
+			if (curLine > targetLine) {
+				break;
+			}
+			p.x = 0;
+			p.y += lineH;
+		} else if (c != 0) {
+			auto& glyph = font->getGlyph(c);
+			p += Vector2f(glyph.advance.x, 0) * scale;
+		}
+	}
+
+	return bestAnswer;
 }
 
 StringUTF32 TextRenderer::split(float maxWidth) const
