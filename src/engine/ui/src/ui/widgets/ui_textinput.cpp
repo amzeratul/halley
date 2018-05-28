@@ -29,6 +29,7 @@ bool UITextInput::canInteractWithMouse() const
 UITextInput& UITextInput::setText(const String& t)
 {
 	text = t.getUTF32();
+	setCaretPosition(int(text.size()));
 	return *this;
 }
 
@@ -128,6 +129,8 @@ void UITextInput::setCaretPosition(int pos)
 {
 	pos = clamp(pos, 0, int(text.size()));
 	if (pos != caretPos) {
+		caretTime = 0;
+		caretShowing = true;
 		caretPos = pos;
 		caretPhysicalPos = label.getCharacterPosition(caretPos, text).x;
 	}
@@ -161,23 +164,22 @@ void UITextInput::update(Time t, bool moved)
 		label.setText(text);
 	}
 
-	// Draw label
+	// Position the text
 	const float length = label.getExtents().x;
 	const float capacityX = getSize().x - getInnerBorder().x - getInnerBorder().z;
 	const float capacityY = getSize().y - getInnerBorder().y - getInnerBorder().w;
 	const Vector2f startPos = getPosition() + Vector2f(getInnerBorder().x, getInnerBorder().y);
-	Vector2f textStart = startPos;
 	if (length > capacityX) {
-		textStart += Vector2f(capacityX - length, 0);
-		label
-			.setClip(Rect4f(Vector2f(length - capacityX, 0), Vector2f(length, capacityY)))
-			.setPosition(textStart);
+		textScrollPos.x = clamp(textScrollPos.x, std::max(0.0f, caretPhysicalPos - capacityX), std::min(length - capacityX, caretPhysicalPos));
+		
+		label.setClip(Rect4f(textScrollPos, textScrollPos + Vector2f(capacityX, capacityY)));
 	} else {
-		label
-			.setClip()
-			.setPosition(startPos);
+		label.setClip();
 	}
-	caret.setPos(textStart + Vector2f(caretPhysicalPos, 0));
+	label.setPosition(startPos - textScrollPos);
+
+	// Position the caret
+	caret.setPos(startPos - textScrollPos + Vector2f(caretPhysicalPos, 0));
 
 	if (moved) {
 		sprite.setPos(getPosition()).scaleTo(getSize());

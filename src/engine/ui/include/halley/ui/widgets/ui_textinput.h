@@ -48,6 +48,7 @@ namespace Halley {
 
 		Maybe<int> maxLength;
 
+		Vector2f textScrollPos;
 		int caretPos = 0;
 		float caretPhysicalPos = 0;
 		float caretTime = 0;
