@@ -14,6 +14,7 @@
 #include "halley/ui/widgets/ui_scrollbar_pane.h"
 #include "halley/ui/widgets/ui_checkbox.h"
 #include "halley/ui/widgets/ui_slider.h"
+#include "halley/ui/widgets/ui_paged_pane.h"
 #include "halley/support/logger.h"
 #include "ui_validator.h"
 
@@ -38,6 +39,9 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("scrollPane", [=] (const ConfigNode& node) { return makeScrollPane(node); });
 	addFactory("scrollBarPane", [=] (const ConfigNode& node) { return makeScrollBarPane(node); });
 	addFactory("slider", [=] (const ConfigNode& node) { return makeSlider(node); });
+	addFactory("horizontalDiv", [=] (const ConfigNode& node) { return makeHorizontalDiv(node); });
+	addFactory("verticalDiv", [=] (const ConfigNode& node) { return makeVerticalDiv(node); });
+	addFactory("tabbedPane", [=] (const ConfigNode& node) { return makeTabbedPane(node); });
 }
 
 void UIFactory::addFactory(const String& key, WidgetFactory factory)
@@ -417,6 +421,58 @@ std::shared_ptr<UIWidget> UIFactory::makeSlider(const ConfigNode& entryNode)
 	auto value = node["value"].asFloat(0.5f);
 
 	return std::make_shared<UISlider>(id, style, minValue, maxValue, value);
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeHorizontalDiv(const ConfigNode& node)
+{
+	auto style = getStyle("horizontalDiv");
+	return std::make_shared<UIImage>(style.getSprite("image"));
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeVerticalDiv(const ConfigNode& node)
+{
+	auto style = getStyle("verticalDiv");
+	return std::make_shared<UIImage>(style.getSprite("image"));
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
+{
+	const auto& widgetNode = entryNode["widget"];
+
+	const String& id = widgetNode["id"].asString();
+
+	auto tabs = std::make_shared<UIList>(id, getStyle("tabs"), UISizerType::Horizontal, 1);
+	applyInputButtons(*tabs, widgetNode["inputButtons"].asString("tabs"));
+
+	std::vector<const ConfigNode*> tabNodes;
+	if (widgetNode.hasKey("tabs")) {
+		for (auto& tabNode: widgetNode["tabs"].asSequence()) {
+			if (tabNode.hasKey("if")) {
+				if (!resolveConditions(tabNode["if"])) {
+					continue;
+				}
+			}
+			auto label = i18n.get(tabNode["textKey"].asString(""));
+			tabs->addTextItem(id + "_tab_" + toString(tabNodes.size()), label);
+			tabNodes.push_back(&tabNode);
+		}
+	}
+
+	auto pane = std::make_shared<UIPagedPane>(int(tabNodes.size()), Vector2f());
+	for (int i = 0; i < int(tabNodes.size()); ++i) {
+		auto& tabNode = *tabNodes[i];
+		pane->getPage(i)->add(makeSizerPtr(tabNode), 1);
+	}
+
+	tabs->setHandle(UIEventType::ListSelectionChanged, [pane] (const UIEvent& event)
+	{
+		pane->setPage(event.getIntData());
+	});
+
+	auto result = std::make_shared<UIWidget>(id + "_container", Vector2f(), UISizer(UISizerType::Vertical));
+	result->add(tabs);
+	result->add(pane, 1);
+	return result;
 }
 
 bool UIFactory::hasCondition(const String& condition) const

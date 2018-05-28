@@ -32,6 +32,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeUIFromNode(const ConfigNode& node);
 
 		void setInputButtons(const String& key, UIInputButtons buttons);
+		void applyInputButtons(UIWidget& widget, const String& key);
 
 		UIStyle getStyle(const String& name) const;
 
@@ -45,8 +46,6 @@ namespace Halley
 		Maybe<UISizer> makeSizer(const ConfigNode& node);
 		UISizer makeSizerOrDefault(const ConfigNode& node, UISizer&& defaultSizer);
 		void loadSizerChildren(UISizer& sizer, const ConfigNode& node);
-
-		void applyInputButtons(UIWidget& widget, const String& key);
 
 		static Maybe<Vector2f> asMaybeVector2f(const ConfigNode& node);
 		static Vector2f asVector2f(const ConfigNode& node, Maybe<Vector2f> defaultValue);
@@ -66,6 +65,9 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeScrollBar(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeScrollBarPane(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeSlider(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeHorizontalDiv(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeVerticalDiv(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeTabbedPane(const ConfigNode& entryNode);
 
 		bool hasCondition(const String& condition) const;
 		bool resolveConditions(const ConfigNode& node) const;
