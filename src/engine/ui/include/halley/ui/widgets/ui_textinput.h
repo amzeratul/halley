@@ -38,13 +38,17 @@ namespace Halley {
 		std::shared_ptr<InputDevice> keyboard;
 		UIStyle style;
 		Sprite sprite;
+		Sprite caret;
 		TextRenderer label;
 
 		StringUTF32 text;
 		LocalisedString ghostText;
 
-		float caretTime = 0;
 		Maybe<int> maxLength;
+
+		int caretPos = 0;
+		float caretPhysicalPos = 0;
+		float caretTime = 0;
 		bool caretShowing = false;
 	};
 }

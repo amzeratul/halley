@@ -3,6 +3,8 @@
 #include "ui_validator.h"
 #include "halley/text/i18n.h"
 #include "halley/ui/ui_data_bind.h"
+#include "halley/support/logger.h"
+#include "halley/core/input/input_keys.h"
 
 using namespace Halley;
 
@@ -11,6 +13,7 @@ UITextInput::UITextInput(std::shared_ptr<InputDevice> keyboard, String id, UISty
 	, keyboard(keyboard)
 	, style(style)
 	, sprite(style.getSprite("box"))
+	, caret(style.getSprite("caret"))
 	, label(style.getTextRenderer("label"))
 	, text(text.getUTF32())
 	, ghostText(ghostText)
@@ -72,21 +75,45 @@ void UITextInput::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);
 	painter.draw(label);
+
+	if (caretShowing && caret.hasMaterial()) {
+		painter.draw(caret);
+	}
 }
 
 void UITextInput::updateTextInput()
 {
 	bool modified = false;
-	for (int letter = keyboard->getNextLetter(); letter != 0; letter = keyboard->getNextLetter()) {
-		if (letter == 8) { // Backspace
-			if (!text.empty()) {
-				text.pop_back();
-				modified = true;
-			}
-		} else if (letter >= 32) {
-			text.push_back(letter);
+	int startCaret = caretPos;
+
+	if (keyboard->isButtonPressedRepeat(Keys::Delete)) {
+		if (caretPos < int(text.size())) {
+			text.erase(text.begin() + caretPos);
 			modified = true;
 		}
+	}
+	
+	if (keyboard->isButtonPressedRepeat(Keys::Backspace)) {
+		if (caretPos > 0) {
+			text.erase(text.begin() + (caretPos - 1));
+			--caretPos;
+			modified = true;
+		}
+	}
+
+	int dx = (keyboard->isButtonPressedRepeat(Keys::Left) ? -1 : 0) + (keyboard->isButtonPressedRepeat(Keys::Right) ? 1 : 0);
+	caretPos = clamp(caretPos + dx, 0, int(text.size()));
+
+	for (int letter = keyboard->getNextLetter(); letter != 0; letter = keyboard->getNextLetter()) {
+		if (letter >= 32) {
+			text.insert(text.begin() + caretPos, letter);
+			caretPos++;
+			modified = true;
+		}
+	}
+
+	if (caretPos != startCaret || modified) {
+		caretPhysicalPos = label.getCharacterPosition(caretPos, text).x;
 	}
 
 	if (modified) {
@@ -101,43 +128,49 @@ void UITextInput::updateTextInput()
 
 void UITextInput::update(Time t, bool moved)
 {
-	caretTime += float(t);
-	if (caretTime > 0.4f) {
-		caretTime -= 0.4f;
-		caretShowing = !caretShowing;
-	}
-
 	if (isFocused()) {
-		updateTextInput();
+		caretTime += float(t);
+		if (caretTime > 0.4f) {
+			caretTime -= 0.4f;
+			caretShowing = !caretShowing;
+		}
+
+		if (t > 0.000001f) {
+			// Update can be called more than once. Only one of them will have non-zero time.
+			updateTextInput();
+		}
+	} else {
+		caretTime = 0;
+		caretShowing = false;
 	}
 
+	// Update text label
 	if (text.empty() && !isFocused()) {
 		ghostText.checkForUpdates();
 		label = style.getTextRenderer("labelGhost");
 		label.setText(ghostText);
 	} else {
 		label = style.getTextRenderer("label");
-		auto txt = String(text);
-		if (isFocused()) {
-			txt.appendCharacter(caretShowing ? '_' : ' ');
-		}
-		label.setText(txt);
+		label.setText(text);
 	}
 
-	float length = label.getExtents().x;
-	float capacityX = getSize().x - getInnerBorder().x - getInnerBorder().z;
-	float capacityY = getSize().y - getInnerBorder().y - getInnerBorder().w;
+	// Draw label
+	const float length = label.getExtents().x;
+	const float capacityX = getSize().x - getInnerBorder().x - getInnerBorder().z;
+	const float capacityY = getSize().y - getInnerBorder().y - getInnerBorder().w;
+	const Vector2f startPos = getPosition() + Vector2f(getInnerBorder().x, getInnerBorder().y);
+	Vector2f textStart = startPos;
 	if (length > capacityX) {
+		textStart += Vector2f(capacityX - length, 0);
 		label
-			.setAlignment(1.0f)
-			.setClip(Rect4f(Vector2f(-capacityX, 0), Vector2f(capacityX, capacityY)))
-			.setPosition(getPosition() + Vector2f(getInnerBorder().x + capacityX, getInnerBorder().y));
+			.setClip(Rect4f(Vector2f(length - capacityX, 0), Vector2f(length, capacityY)))
+			.setPosition(textStart);
 	} else {
 		label
-			.setAlignment(0.0f)
 			.setClip()
-			.setPosition(getPosition() + Vector2f(getInnerBorder().x, getInnerBorder().y));
+			.setPosition(startPos);
 	}
+	caret.setPos(textStart + Vector2f(caretPhysicalPos, 0));
 
 	if (moved) {
 		sprite.setPos(getPosition()).scaleTo(getSize());

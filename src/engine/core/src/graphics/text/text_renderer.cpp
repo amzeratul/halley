@@ -224,12 +224,17 @@ void TextRenderer::draw(Painter& painter) const
 
 Vector2f TextRenderer::getExtents() const
 {
+	return getExtents(text);
+}
+
+Vector2f TextRenderer::getExtents(const StringUTF32& str) const
+{
 	Vector2f p;
 	float w = 0;
 	float scale = size / font->getSizePoints();
 	float lineH = getLineHeight();
 
-	for (auto& c : text) {
+	for (auto& c : str) {
 		if (c == '\n') {
 			// Line break!
 			w = std::max(w, p.x);
@@ -245,6 +250,31 @@ Vector2f TextRenderer::getExtents() const
 	return Vector2f(w, p.y + lineH);
 }
 
+Vector2f TextRenderer::getCharacterPosition(size_t character) const
+{
+	return getCharacterPosition(character, text);
+}
+
+Vector2f TextRenderer::getCharacterPosition(size_t character, const StringUTF32& str) const
+{
+	Vector2f p;
+	float scale = size / font->getSizePoints();
+	float lineH = getLineHeight();
+
+	for (size_t i = 0; i < character && i < str.size(); ++i) {
+		auto c = str[i];
+		if (c == '\n') {
+			// Line break!
+			p.x = 0;
+			p.y += lineH;
+		} else {
+			auto& glyph = font->getGlyph(c);
+			p += Vector2f(glyph.advance.x, 0) * scale;
+		}
+	}
+
+	return p;
+}
 
 StringUTF32 TextRenderer::split(float maxWidth) const
 {
