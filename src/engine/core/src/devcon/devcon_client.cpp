@@ -22,6 +22,7 @@ DevConClient::DevConClient(const HalleyAPI& api, std::unique_ptr<NetworkService>
 DevConClient::~DevConClient()
 {
 	Logger::removeSink(*this);
+	queue.reset();
 }
 
 void DevConClient::update()

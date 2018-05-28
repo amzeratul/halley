@@ -187,6 +187,11 @@ void Core::deInit()
 	game->endGame();
 	game.reset();
 
+	// Terminate devcon
+	if (devConClient) {
+		devConClient.reset();
+	}
+
 	// Deinit painter
 	painter.reset();
 	
