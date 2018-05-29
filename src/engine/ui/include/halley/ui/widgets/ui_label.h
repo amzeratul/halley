@@ -7,7 +7,7 @@
 namespace Halley {
 	class UILabel : public UIWidget {
 	public:
-		explicit UILabel(TextRenderer style, const LocalisedString& text);
+		explicit UILabel(const String& id, TextRenderer style, const LocalisedString& text);
 
 		void setText(const LocalisedString& text);
 		void setColourOverride(const std::vector<ColourOverride>& overrides);

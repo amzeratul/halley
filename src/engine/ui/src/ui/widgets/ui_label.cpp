@@ -3,8 +3,8 @@
 
 using namespace Halley;
 
-UILabel::UILabel(TextRenderer style, const LocalisedString& text)
-	: UIWidget("", {})
+UILabel::UILabel(const String& id, TextRenderer style, const LocalisedString& text)
+	: UIWidget(id, {})
 	, renderer(style)
 	, text(text)
 {

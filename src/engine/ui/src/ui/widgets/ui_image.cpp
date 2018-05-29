@@ -8,6 +8,12 @@ UIImage::UIImage(Sprite s, Maybe<UISizer> sizer, Vector4f innerBorder)
 	setSprite(s);
 }
 
+UIImage::UIImage(const String& id, Sprite s, Maybe<UISizer> sizer, Vector4f innerBorder)
+	: UIWidget(id, {}, std::move(sizer), innerBorder)
+{
+	setSprite(s);
+}
+
 void UIImage::draw(UIPainter& painter) const
 {
 	if (sprite.hasMaterial()) {

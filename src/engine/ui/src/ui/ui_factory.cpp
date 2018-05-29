@@ -285,8 +285,9 @@ std::shared_ptr<UIWidget> UIFactory::makeBaseWidget(const ConfigNode& entryNode)
 std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("label"), styleSheet);
-	return std::make_shared<UILabel>(style.getTextRenderer("label"), parseLabel(node));
+	return std::make_shared<UILabel>(id, style.getTextRenderer("label"), parseLabel(node));
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
@@ -298,7 +299,7 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 
 	auto sizer = makeSizerOrDefault(entryNode, UISizer());
 	if (!label.getString().isEmpty()) {
-		sizer.add(std::make_shared<UILabel>(style.getTextRenderer("label"), label), 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
+		sizer.add(std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label), 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
 	}
 
 	return std::make_shared<UIButton>(id, style, std::move(sizer));
@@ -382,12 +383,13 @@ std::shared_ptr<UIWidget> UIFactory::makeCheckbox(const ConfigNode& entryNode)
 std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
+	auto id = node["id"].asString("");
 	auto imageName = node["image"].asString();
 	auto materialName = node["material"].asString("");
 	auto sprite = Sprite().setImage(resources, imageName, materialName);
 	Vector4f innerBorder = asVector4f(node["innerBorder"], Vector4f());
 
-	return std::make_shared<UIImage>(sprite, makeSizer(entryNode), innerBorder);
+	return std::make_shared<UIImage>(id, sprite, makeSizer(entryNode), innerBorder);
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
