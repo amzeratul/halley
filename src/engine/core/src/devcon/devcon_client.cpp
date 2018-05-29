@@ -74,6 +74,10 @@ void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 			Logger::logInfo("Reloading " + curType.first + ": " + asset);
 			resources.reload(asset);
 		}
+
+		if (curType.first == AssetType::SpriteSheet) {
+			api.core->getResources().ofType(AssetType::Sprite).unloadAll();
+		}
 	}
 }
 

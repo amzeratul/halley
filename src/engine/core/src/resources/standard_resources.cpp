@@ -30,6 +30,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.of<SpriteResource>().setResourceLoader([&] (const String& name, ResourceLoadPriority) -> std::shared_ptr<Resource>
 	{
 		auto& sprites = resources.of<SpriteResource>();
+		const String targetName = ":img:" + name;
 
 		std::shared_ptr<Resource> result;
 
@@ -41,7 +42,7 @@ void StandardResources::initialize(Resources& resources)
 					auto res = std::make_shared<SpriteResource>(sheet, sheet->getIndex(spriteName));
 					sprites.setResource(0, spriteName.mid(5), res);
 
-					if (spriteName == ":img:" + name) {
+					if (spriteName == targetName) {
 						result = res;
 					}
 				}
