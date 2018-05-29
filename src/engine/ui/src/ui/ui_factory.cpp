@@ -287,7 +287,11 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("label"), styleSheet);
-	return std::make_shared<UILabel>(id, style.getTextRenderer("label"), parseLabel(node));
+	auto label = std::make_shared<UILabel>(id, style.getTextRenderer("label"), parseLabel(node));
+	if (node.hasKey("maxWidth")) {
+		label->setMaxWidth(node["maxWidth"].asFloat());
+	}
+	return label;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
@@ -386,7 +390,8 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 	auto id = node["id"].asString("");
 	auto imageName = node["image"].asString();
 	auto materialName = node["material"].asString("");
-	auto sprite = Sprite().setImage(resources, imageName, materialName);
+	auto col = node["colour"].asString("#FFFFFF");
+	auto sprite = Sprite().setImage(resources, imageName, materialName).setColour(Colour4f::fromString(col));
 	Vector4f innerBorder = asVector4f(node["innerBorder"], Vector4f());
 
 	return std::make_shared<UIImage>(id, sprite, makeSizer(entryNode), innerBorder);
