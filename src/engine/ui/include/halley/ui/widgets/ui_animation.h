@@ -14,6 +14,8 @@ namespace Halley
 
 		AnimationPlayer& getPlayer();
 		const AnimationPlayer& getPlayer() const;
+		Sprite& getSprite();
+		const Sprite& getSprite() const;
 
 	protected:
 		void update(Time t, bool moved) override;

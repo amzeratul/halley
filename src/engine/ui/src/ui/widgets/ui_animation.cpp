@@ -17,6 +17,16 @@ const AnimationPlayer& UIAnimation::getPlayer() const
 	return animation;
 }
 
+Sprite& UIAnimation::getSprite()
+{
+	return sprite;
+}
+
+const Sprite& UIAnimation::getSprite() const
+{
+	return sprite;
+}
+
 void UIAnimation::update(Time t, bool moved)
 {
 	if (animation.hasAnimation()) {
