@@ -113,11 +113,13 @@ ConfigNode& ConfigNode::operator=(ConfigNode&& other)
 	vec2fData = other.vec2fData;
 	line = other.line;
 	column = other.column;
-	other.type = ConfigNodeType::Undefined;
-	other.ptrData = nullptr;
 	parent = other.parent;
 	parentIdx = other.parentIdx;
 	parentFile = other.parentFile;
+	
+	other.type = ConfigNodeType::Undefined;
+	other.ptrData = nullptr;
+	
 	return *this;
 }
 
