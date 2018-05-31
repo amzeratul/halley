@@ -45,6 +45,7 @@ void ResourceCollectionBase::reload(const String& assetId)
 		auto& resWrap = res->second;
 		try {
 			std::shared_ptr<Resource> newAsset = loadAsset(assetId, ResourceLoadPriority::High);
+			newAsset->setAssetId(assetId);
 			resWrap.res->reloadResource(std::move(*newAsset));
 		} catch (std::exception& e) {
 			Logger::logError("Error while reloading " + assetId + ": " + e.what());

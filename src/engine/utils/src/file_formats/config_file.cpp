@@ -11,7 +11,36 @@ ConfigNode::ConfigNode()
 
 ConfigNode::ConfigNode(const ConfigNode& other)
 {
-	*this = other;
+	switch (other.type) {
+		case ConfigNodeType::String:
+			*this = other.asString();
+			break;
+		case ConfigNodeType::Sequence:
+			*this = other.asSequence();
+			break;
+		case ConfigNodeType::Map:
+			*this = other.asMap();
+			break;
+		case ConfigNodeType::Int:
+			*this = other.asInt();
+			break;
+		case ConfigNodeType::Float:
+			*this = other.asFloat();
+			break;
+		case ConfigNodeType::Int2:
+			*this = other.asVector2i();
+			break;
+		case ConfigNodeType::Float2:
+			*this = other.asVector2f();
+			break;
+		case ConfigNodeType::Bytes:
+			*this = other.asBytes();
+			break;
+		case ConfigNodeType::Undefined:
+			break;
+		default:
+			throw Exception("Unknown configuration node type.");
+	}
 }
 
 ConfigNode::ConfigNode(ConfigNode&& other)
@@ -86,6 +115,9 @@ ConfigNode& ConfigNode::operator=(ConfigNode&& other)
 	column = other.column;
 	other.type = ConfigNodeType::Undefined;
 	other.ptrData = nullptr;
+	parent = other.parent;
+	parentIdx = other.parentIdx;
+	parentFile = other.parentFile;
 	return *this;
 }
 
@@ -142,41 +174,6 @@ ConfigNode& ConfigNode::operator=(Bytes&& value)
 	reset();
 	type = ConfigNodeType::Bytes;
 	ptrData = new Bytes(std::move(value));
-	return *this;
-}
-
-ConfigNode& ConfigNode::operator=(const ConfigNode& other)
-{
-	switch (other.type) {
-		case ConfigNodeType::String:
-			*this = other.asString();
-			break;
-		case ConfigNodeType::Sequence:
-			*this = other.asSequence();
-			break;
-		case ConfigNodeType::Map:
-			*this = other.asMap();
-			break;
-		case ConfigNodeType::Int:
-			*this = other.asInt();
-			break;
-		case ConfigNodeType::Float:
-			*this = other.asFloat();
-			break;
-		case ConfigNodeType::Int2:
-			*this = other.asVector2i();
-			break;
-		case ConfigNodeType::Float2:
-			*this = other.asVector2f();
-			break;
-		case ConfigNodeType::Bytes:
-			*this = other.asBytes();
-			break;
-		case ConfigNodeType::Undefined:
-			break;
-		default:
-			throw Exception("Unknown configuration node type.");
-	}
 	return *this;
 }
 
@@ -729,6 +726,7 @@ std::unique_ptr<ConfigFile> ConfigFile::loadResource(ResourceLoader& loader)
 void ConfigFile::reload(Resource&& resource)
 {
 	*this = std::move(dynamic_cast<ConfigFile&>(resource));
+	root.propagateParentingInformation(this);
 }
 
 ConfigObserver::ConfigObserver()

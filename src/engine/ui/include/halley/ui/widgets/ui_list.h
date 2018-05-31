@@ -19,7 +19,7 @@ namespace Halley {
 		bool setSelectedOption(int option);
 		bool setSelectedOptionId(const String& id);
 		int getSelectedOption() const;
-		const String& getSelectedOptionId() const;
+		String getSelectedOptionId() const;
 		size_t getCount() const;
 
 		void addTextItem(const String& id, const LocalisedString& label, float maxWidth = -1);

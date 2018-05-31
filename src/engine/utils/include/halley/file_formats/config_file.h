@@ -51,7 +51,7 @@ namespace Halley
 		using SequenceType = std::vector<ConfigNode>;
 
 		ConfigNode();
-		ConfigNode(const ConfigNode& other);
+		explicit ConfigNode(const ConfigNode& other);
 		ConfigNode(ConfigNode&& other);
 		ConfigNode(MapType&& entryMap);
 		ConfigNode(SequenceType&& entryList);
@@ -65,7 +65,7 @@ namespace Halley
 
 		~ConfigNode();
 		
-		ConfigNode& operator=(const ConfigNode& other);
+		ConfigNode& operator=(const ConfigNode& other) = delete;
 		ConfigNode& operator=(ConfigNode&& other);
 		ConfigNode& operator=(bool value);
 		ConfigNode& operator=(int value);

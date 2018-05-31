@@ -50,8 +50,11 @@ int UIList::getSelectedOption() const
 	return curOption;
 }
 
-const String& UIList::getSelectedOptionId() const
+String UIList::getSelectedOptionId() const
 {
+	if (curOption < 0 || curOption >= int(items.size())) {
+		return "";
+	}
 	return items[curOption]->getId();
 }
 

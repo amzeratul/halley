@@ -33,7 +33,7 @@ MaterialDefinition MaterialImporter::parseMaterial(Path basePath, gsl::span<cons
 	// Load passes
 	int passN = 0;
 	if (root.hasKey("passes")) {
-		for (auto passNode : root["passes"].asSequence()) {
+		for (auto& passNode: root["passes"].asSequence()) {
 			loadPass(material, passNode, collector, passN++);
 		}
 	}

@@ -120,7 +120,7 @@ void World::loadSystems(const ConfigNode& root, std::function<std::unique_ptr<Sy
 			throw Exception("Unknown timeline: " + timelineName);
 		}
 
-		for (auto sysName : iter->second) {
+		for (auto& sysName: iter->second) {
 			String name = sysName.asString();
 			addSystem(createFunction(name + "System"), timeline).setName(name);
 		}
