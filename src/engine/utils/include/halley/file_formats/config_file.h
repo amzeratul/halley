@@ -46,6 +46,8 @@ namespace Halley
 	
 	class ConfigNode
 	{
+		friend class ConfigFile;
+
 	public:
 		using MapType = std::map<String, ConfigNode>;
 		using SequenceType = std::vector<ConfigNode>;
@@ -144,6 +146,7 @@ namespace Halley
 		const ConfigFile* parentFile = nullptr;
 
 		static ConfigNode undefinedConfigNode;
+		static String undefinedConfigNodeName;
 
 		template <typename T> void deserializeContents(Deserializer& s)
 		{
@@ -159,6 +162,13 @@ namespace Halley
 	class ConfigFile : public Resource
 	{
 	public:
+		ConfigFile();
+		ConfigFile(const ConfigFile& other) = delete;
+		ConfigFile(ConfigFile&& other);
+
+		ConfigFile& operator=(const ConfigFile& other) = delete;
+		ConfigFile& operator=(ConfigFile&& other);
+
 		ConfigNode& getRoot();
 		const ConfigNode& getRoot() const;
 
@@ -172,6 +182,8 @@ namespace Halley
 
 	private:
 		ConfigNode root;
+
+		void updateRoot();
 	};
 
 	class ConfigObserver

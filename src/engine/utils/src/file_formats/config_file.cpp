@@ -539,6 +539,10 @@ const ConfigNode& ConfigNode::operator[](const String& key) const
 	if (iter != map.end()) {
 		return iter->second;
 	} else {
+		// WARNING: NOT THREAD SAFE
+		undefinedConfigNode.setParent(this, -1);
+		undefinedConfigNode.parentFile = parentFile;
+		undefinedConfigNodeName = key;
 		return undefinedConfigNode;
 	}
 }
@@ -668,10 +672,14 @@ String ConfigNode::backTrackFullNodeName() const
 			auto& parentMap = parent->asMap();
 			int i = 0;
 			String name = "?";
-			for (auto& e: parentMap) {
-				if (i++ == parentIdx) {
-					name = e.first;
-					break;
+			if (parentIdx == -1) {
+				name = ConfigNode::undefinedConfigNodeName;
+			} else {
+				for (auto& e: parentMap) {
+					if (i++ == parentIdx) {
+						name = e.first;
+						break;
+					}
 				}
 			}
 			return parent->backTrackFullNodeName() + "." + name;
@@ -681,6 +689,23 @@ String ConfigNode::backTrackFullNodeName() const
 	} else {
 		return "~";
 	}
+}
+
+ConfigFile::ConfigFile()
+{
+}
+
+ConfigFile::ConfigFile(ConfigFile&& other)
+{
+	root = std::move(other.root);
+	updateRoot();
+}
+
+ConfigFile& ConfigFile::operator=(ConfigFile&& other)
+{
+	root = std::move(other.root);
+	updateRoot();
+	return *this;
 }
 
 ConfigNode& ConfigFile::getRoot()
@@ -709,7 +734,7 @@ void ConfigFile::deserialize(Deserializer& s)
 	s.setVersion(version);
 	s >> root;
 
-	root.propagateParentingInformation(this);
+	updateRoot();
 }
 
 std::unique_ptr<ConfigFile> ConfigFile::loadResource(ResourceLoader& loader)
@@ -726,7 +751,15 @@ std::unique_ptr<ConfigFile> ConfigFile::loadResource(ResourceLoader& loader)
 void ConfigFile::reload(Resource&& resource)
 {
 	*this = std::move(dynamic_cast<ConfigFile&>(resource));
+	updateRoot();
+}
+
+void ConfigFile::updateRoot()
+{
 	root.propagateParentingInformation(this);
+	Ensures(root.parentIdx == 0);
+	Ensures(root.parent == nullptr);
+	Ensures(root.parentFile == this);
 }
 
 ConfigObserver::ConfigObserver()
@@ -773,3 +806,4 @@ String ConfigObserver::getAssetId() const
 }
 
 ConfigNode ConfigNode::undefinedConfigNode;
+String ConfigNode::undefinedConfigNodeName;
