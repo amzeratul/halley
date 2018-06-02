@@ -78,11 +78,23 @@ AudioEventActionPlay::AudioEventActionPlay(const ConfigNode& node)
 			clips.push_back(clipNode.asString());
 		}
 	}
-	if (node.hasKey("pitch")) {
+	
+	if (node["pitch"].getType() == ConfigNodeType::Sequence) {
 		auto seq = node["pitch"].asSequence();
 		pitch = Range<float>(seq.at(0).asFloat(), seq.at(1).asFloat());
+	} else {
+		float val = node["pitch"].asFloat(1.0f);
+		pitch = Range<float>(val, val);
 	}
-	volume = node["volume"].asFloat(1.0f);
+
+	if (node["volume"].getType() == ConfigNodeType::Sequence) {
+		auto seq = node["volume"].asSequence();
+		volume = Range<float>(seq.at(0).asFloat(), seq.at(1).asFloat());
+	} else {
+		float val = node["volume"].asFloat(1.0f);
+		volume = Range<float>(val, val);
+	}
+	
 	delay = node["delay"].asFloat(0.0f);
 	loop = node["loop"].asBool(false);
 }
@@ -97,12 +109,10 @@ void AudioEventActionPlay::run(AudioEngine& engine, size_t id, const AudioPositi
 	int clipN = rng.getInt(0, int(clips.size()) - 1);
 	auto clip = engine.getResources().get<AudioClip>(clips[clipN]);
 
-	float curPitch = 1.0f;
-	if (pitch) {
-		curPitch = rng.getFloat(pitch.get().s, pitch.get().e);
-	}
+	const float curVolume = rng.getFloat(volume.s, volume.e);
+	const float curPitch = rng.getFloat(pitch.s, pitch.e);
 
-	engine.play(id, clip, position, volume, loop, curPitch);
+	engine.play(id, clip, position, curVolume, loop, curPitch);
 }
 
 AudioEventActionType AudioEventActionPlay::getType() const

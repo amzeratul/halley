@@ -71,8 +71,8 @@ namespace Halley
 	private:
 		std::vector<String> clips;
 		String group;
-		Maybe<Range<float>> pitch;
-		float volume = 1.0f;
+		Range<float> pitch;
+		Range<float> volume;
 		float delay = 0.0f;
 		bool loop = false;
 	};
