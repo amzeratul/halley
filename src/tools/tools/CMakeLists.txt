@@ -13,6 +13,7 @@ set(SOURCES
     "src/assets/import_tool.cpp"
 
     "src/assets/importers/animation_importer.cpp"
+    "src/assets/importers/audio_event_importer.cpp"
     "src/assets/importers/audio_importer.cpp"
     "src/assets/importers/bitmap_font_importer.cpp"
     "src/assets/importers/codegen_importer.cpp"
@@ -105,6 +106,7 @@ set(HEADERS
     "include/halley/tools/project/project_loader.h"
 
     "src/assets/importers/animation_importer.h"
+    "src/assets/importers/audio_event_importer.h"
     "src/assets/importers/audio_importer.h"
     "src/assets/importers/bitmap_font_importer.h"
     "src/assets/importers/codegen_importer.h"

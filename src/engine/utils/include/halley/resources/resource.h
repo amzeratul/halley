@@ -23,6 +23,7 @@ namespace Halley
 		Animation,
 		Config,
 		Audio,
+		AudioEvent,
 		Sprite,
 		SpriteSheet,
 		Shader
@@ -35,6 +36,7 @@ namespace Halley
 	{
 		BinaryFile,
 		TextFile,
+		ConfigFile,
 		Texture,
 		Shader,
 		MaterialDefinition,
@@ -44,15 +46,16 @@ namespace Halley
 		Animation,
 		Font,
 		AudioClip,
-		ConfigFile
+		AudioEvent
 	};
 
 	template <>
 	struct EnumNames<AssetType> {
-		constexpr std::array<const char*, 12> operator()() const {
+		constexpr std::array<const char*, 13> operator()() const {
 			return{{
 				"binaryFile",
 				"textFile",
+				"configFile",
 				"texture",
 				"shader",
 				"materialDefinition",
@@ -62,7 +65,7 @@ namespace Halley
 				"animation",
 				"font",
 				"audioClip",
-				"configFile"
+				"audioEvent"
 			}};
 		}
 	};

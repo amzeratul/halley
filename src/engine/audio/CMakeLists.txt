@@ -8,6 +8,7 @@ set(SOURCES
         "src/audio_emitter.cpp"
         "src/audio_emitter_behaviour.cpp"
         "src/audio_engine.cpp"
+        "src/audio_event.cpp"
         "src/audio_facade.cpp"
         "src/audio_filter_resample.cpp"
         "src/audio_handle_impl.cpp"
@@ -22,6 +23,7 @@ set(SOURCES
 set(HEADERS
         "include/halley/audio/audio_clip.h"
         "include/halley/audio/audio_emitter_behaviour.h"
+        "include/halley/audio/audio_event.h"
         "include/halley/audio/audio_facade.h"
         "include/halley/audio/audio_position.h"
         "include/halley/audio/halley_audio.h"

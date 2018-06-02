@@ -8,6 +8,7 @@
 #include "importers/material_importer.h"
 #include "importers/config_importer.h"
 #include "importers/audio_importer.h"
+#include "importers/audio_event_importer.h"
 #include "importers/sprite_importer.h"
 #include "importers/spritesheet_importer.h"
 #include "importers/bitmap_font_importer.h"
@@ -32,6 +33,7 @@ AssetImporter::AssetImporter(Project& project, const std::vector<Path>& assetsSr
 		std::make_unique<ConfigImporter>(),
 		std::make_unique<CodegenImporter>(),
 		std::make_unique<AudioImporter>(),
+		std::make_unique<AudioEventImporter>(),
 		std::make_unique<SpriteImporter>(),
 		std::make_unique<SpriteSheetImporter>(),
 		std::make_unique<ShaderImporter>(),
@@ -51,7 +53,7 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 {
 	ImportAssetType type = ImportAssetType::SimpleCopy;
 	
-	auto root = path.getRoot();
+	const auto root = path.getRoot();
 	if (root == "font") {
 		type = ImportAssetType::Font;
 	} else if (root == "bitmap_font") {
@@ -66,6 +68,8 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 		type = ImportAssetType::Config;
 	} else if (root == "audio") {
 		type = ImportAssetType::Audio;
+	} else if (root == "audio_event") {
+		type = ImportAssetType::AudioEvent;
 	} else if (root == "spritesheet") {
 		type = ImportAssetType::SpriteSheet;
 	} else if (root == "shader") {
