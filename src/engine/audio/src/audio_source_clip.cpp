@@ -1,11 +1,12 @@
 #include "audio_source_clip.h"
+#include <utility>
 #include "audio_clip.h"
 
 using namespace Halley;
 
 
-AudioSourceClip::AudioSourceClip(std::shared_ptr<const IAudioClip> clip, bool looping)
-	: clip(clip)
+AudioSourceClip::AudioSourceClip(std::shared_ptr<const IAudioClip> c, bool looping)
+	: clip(std::move(c))
 	, looping(looping)
 {
 	Expects(clip);

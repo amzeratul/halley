@@ -94,7 +94,8 @@ AudioEventActionPlay::AudioEventActionPlay(const ConfigNode& node)
 		float val = node["volume"].asFloat(1.0f);
 		volume = Range<float>(val, val);
 	}
-	
+
+	minimumSpace = node["minimumSpace"].asFloat(0.0f);
 	delay = node["delay"].asFloat(0.0f);
 	loop = node["loop"].asBool(false);
 }
@@ -127,6 +128,7 @@ void AudioEventActionPlay::serialize(Serializer& s) const
 	s << pitch;
 	s << volume;
 	s << delay;
+	s << minimumSpace;
 	s << loop;
 }
 
@@ -137,5 +139,6 @@ void AudioEventActionPlay::deserialize(Deserializer& s)
 	s >> pitch;
 	s >> volume;
 	s >> delay;
+	s >> minimumSpace;
 	s >> loop;
 }

@@ -74,6 +74,7 @@ namespace Halley
 		Range<float> pitch;
 		Range<float> volume;
 		float delay = 0.0f;
+		float minimumSpace = 0.0f;
 		bool loop = false;
 	};
 }
