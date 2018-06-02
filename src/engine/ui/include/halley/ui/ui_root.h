@@ -32,7 +32,7 @@ namespace Halley {
 		void mouseOverNext(bool forward = true);
 		void runLayout();
 		
-		void playSound(const std::shared_ptr<const AudioClip>& clip);
+		void playSound(const String& eventName);
 		void sendEvent(UIEvent&& event) const override;
 
 		bool hasModalUI() const;

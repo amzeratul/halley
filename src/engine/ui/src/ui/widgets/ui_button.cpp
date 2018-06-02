@@ -82,13 +82,13 @@ void UIButton::doSetState(State state)
 			sprite = style.getSprite("disabled");
 		} else if (state == State::Up) {
 			sprite = style.getSprite("normal");
-			playSound(style.getAudioClip("upSound"));
+			playSound(style.getString("upSound"));
 		} else if (state == State::Down) {
 			sprite = style.getSprite("down");
-			playSound(style.getAudioClip("downSound"));
+			playSound(style.getString("downSound"));
 		} else if (state == State::Hover) {
 			sprite = style.getSprite("hover");
-			playSound(style.getAudioClip("hoverSound"));
+			playSound(style.getString("hoverSound"));
 		}
 	}
 }
@@ -97,11 +97,11 @@ void UIButton::onStateChanged(State prev, State next)
 {
 	if (isEnabled() && !borderOnly && prev != next) {
 		if (next == State::Up) {
-			playSound(style.getAudioClip("upSound"));
+			playSound(style.getString("upSound"));
 		} else if (next == State::Down) {
-			playSound(style.getAudioClip("downSound"));
+			playSound(style.getString("downSound"));
 		} else if (next == State::Hover) {
-			playSound(style.getAudioClip("hoverSound"));
+			playSound(style.getString("hoverSound"));
 		}
 	}
 }

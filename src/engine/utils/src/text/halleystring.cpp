@@ -122,7 +122,11 @@ String::String(double number)
 }
 
 String& String::operator=(const char* utf8) {
-	str = utf8;
+	if (utf8) {
+		str = utf8;
+	} else {
+		str = "";
+	}
 	return *this;
 }
 

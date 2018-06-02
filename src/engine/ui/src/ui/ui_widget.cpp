@@ -557,12 +557,12 @@ void UIWidget::sendEventDown(const UIEvent& event) const
 	}
 }
 
-void UIWidget::playSound(const std::shared_ptr<const AudioClip>& clip)
+void UIWidget::playSound(const String& eventName)
 {
-	if (clip) {
+	if (!eventName.isEmpty()) {
 		auto root = getRoot();
 		if (root) {
-			root->playSound(clip);
+			root->playSound(eventName);
 		}
 	}
 }

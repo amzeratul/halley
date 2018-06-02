@@ -150,7 +150,7 @@ namespace Halley {
 
 		virtual void onEnabledChanged();
 
-		void playSound(const std::shared_ptr<const AudioClip>& clip);
+		void playSound(const String& eventName);
 		virtual void checkActive();
 
 		UIInputType lastInputType = UIInputType::Undefined;

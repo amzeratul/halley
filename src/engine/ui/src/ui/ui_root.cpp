@@ -292,10 +292,10 @@ void UIRoot::draw(SpritePainter& painter, int mask, int layer)
 	}
 }
 
-void UIRoot::playSound(const std::shared_ptr<const AudioClip>& clip)
+void UIRoot::playSound(const String& eventName)
 {
-	if (audio && clip) {
-		audio->play(clip, AudioPosition::makeUI(0.0f), 1.0f, false, Random::getGlobal().getFloat(0.95f, 1.05f));
+	if (audio && !eventName.isEmpty()) {
+		audio->postEvent(eventName, AudioPosition::makeUI(0.0f));
 	}
 }
 

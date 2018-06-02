@@ -36,9 +36,9 @@ Vector4f UIStyle::getBorder(const String& name) const
 	return style->getBorder(name);
 }
 
-std::shared_ptr<const AudioClip> UIStyle::getAudioClip(const String& name) const
+const String& UIStyle::getString(const String& name) const
 {
-	return style->getAudioClip(name);
+	return style->getString(name);
 }
 
 float UIStyle::getFloat(const String& name) const

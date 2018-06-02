@@ -36,12 +36,12 @@ void loadStyleData(Resources& resources, const String& name, const ConfigNode& n
 }
 
 template <>
-void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, std::shared_ptr<const AudioClip>& data)
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, String& data)
 {
 	if (node.asString().isEmpty()) {
-		data = {};
+		data = "";
 	} else {
-		data = resources.get<AudioClip>(node.asString());
+		data = node.asString();
 	}
 }
 
@@ -105,7 +105,7 @@ UIStyleDefinition::UIStyleDefinition(String styleName, const ConfigNode& node, R
 	textRenderers[":default"] = TextRenderer();
 	floats[":default"] = 0.0f;
 	borders[":default"] = Vector4f();
-	audioClips[":default"] = {};
+	strings[":default"] = "";
 	subStyles[":default"] = {};
 }
 
@@ -129,9 +129,9 @@ Vector4f UIStyleDefinition::getBorder(const String& name) const
 	return getValue(node, resources, styleName, name, borders);
 }
 
-std::shared_ptr<const AudioClip> UIStyleDefinition::getAudioClip(const String& name) const
+const String& UIStyleDefinition::getString(const String& name) const
 {
-	return getValue(node, resources, styleName, name, audioClips);
+	return getValue(node, resources, styleName, name, strings);
 }
 
 float UIStyleDefinition::getFloat(const String& name) const

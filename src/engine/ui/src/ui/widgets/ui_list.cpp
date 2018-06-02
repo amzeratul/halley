@@ -37,7 +37,7 @@ bool UIList::setSelectedOption(int option)
 		curOption = newSel;
 		items[curOption]->setSelected(true);
 
-		playSound(style.getAudioClip("selectionChangedSound"));
+		playSound(style.getString("selectionChangedSound"));
 		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), items[curOption]->getId(), curOption));
 		sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
 		return true;
