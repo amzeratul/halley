@@ -11,6 +11,7 @@
 #include "halley/audio/audio_clip.h"
 #include "halley/audio/audio_event.h"
 #include "halley/file_formats/binary_file.h"
+#include "halley/file_formats/image.h"
 
 using namespace Halley;
 
@@ -20,6 +21,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<SpriteSheet>();
 	resources.init<SpriteResource>();
 	resources.init<Texture>();
+	resources.init<Image>();
 	resources.init<MaterialDefinition>();
 	resources.init<ShaderFile>();
 	resources.init<BinaryFile>();

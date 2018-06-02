@@ -1,5 +1,7 @@
 #pragma once
 #include "halley/resources/resource.h"
+#include "halley/maths/range.h"
+#include "halley/data_structures/maybe.h"
 
 namespace Halley
 {
@@ -8,6 +10,7 @@ namespace Halley
 	class ConfigNode;
 	class ConfigFile;
 	class ResourceLoader;
+	class IAudioEventAction;
 
 	class AudioEvent : public Resource
 	{
@@ -23,5 +26,54 @@ namespace Halley
 		void reload(Resource&& resource) override;
 		static std::shared_ptr<AudioEvent> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::AudioEvent; }
+
+	private:
+		std::vector<std::unique_ptr<const IAudioEventAction>> actions;
+	};
+
+	enum class AudioEventActionType
+	{
+		Play
+	};
+
+	template <>
+	struct EnumNames<AudioEventActionType> {
+		constexpr std::array<const char*, 1> operator()() const {
+			return{{
+				"play"
+			}};
+		}
+	};
+
+	class IAudioEventAction
+	{
+	public:
+		virtual ~IAudioEventAction() {}
+		virtual void run(AudioEngine& engine, size_t id, const AudioPosition& position) const = 0;
+		virtual AudioEventActionType getType() const = 0;
+
+		virtual void serialize(Serializer& s) const = 0;
+		virtual void deserialize(Deserializer& s) = 0;
+	};
+
+	class AudioEventActionPlay : public IAudioEventAction
+	{
+	public:
+		AudioEventActionPlay();
+		explicit AudioEventActionPlay(const ConfigNode& config);
+
+		void run(AudioEngine& engine, size_t id, const AudioPosition& position) const override;
+		AudioEventActionType getType() const override;
+
+		void serialize(Serializer& s) const override;
+		void deserialize(Deserializer& s) override;
+
+	private:
+		std::vector<String> clips;
+		String group;
+		Maybe<Range<float>> pitch;
+		float volume = 1.0f;
+		float delay = 0.0f;
+		bool loop = false;
 	};
 }

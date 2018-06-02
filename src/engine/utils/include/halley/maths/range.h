@@ -35,13 +35,13 @@ namespace Halley {
 			, e{}
 		{}
 
-		Range(T start, T end) {
-			if (start < end) {
-				s = start;
-				e = end;
+		Range(T _start, T _end) {
+			if (_start < _end) {
+				s = _start;
+				e = _end;
 			} else {
-				s = end;
-				e = start;
+				s = _end;
+				e = _start;
 			}
 		}
 

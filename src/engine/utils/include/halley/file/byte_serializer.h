@@ -134,6 +134,12 @@ namespace Halley {
 			}
 		}
 
+		template <typename T>
+		Serializer& operator<<(const Range<T>& p)
+		{
+			return *this << p.s << p.e;
+		}
+
 		template <typename T, std::enable_if_t<std::is_enum<T>::value == true, int> = 0>
 		Serializer& operator<<(const T& val)
 		{
@@ -310,6 +316,12 @@ namespace Halley {
 		Deserializer& operator>>(std::pair<T, U>& p)
 		{
 			return *this >> p.first >> p.second;
+		}
+
+		template <typename T>
+		Deserializer& operator>>(Range<T>& p)
+		{
+			return *this >> p.s >> p.e;
 		}
 
 		template <typename T>

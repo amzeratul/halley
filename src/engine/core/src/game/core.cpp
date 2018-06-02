@@ -224,6 +224,7 @@ void Core::initResources()
 	game->initResourceLocator(gamePath, api->system->getAssetsPath(gamePath.string()), api->system->getUnpackedAssetsPath(gamePath.string()), *locator);
 	resources = std::make_unique<Resources>(std::move(locator), &*api);
 	StandardResources::initialize(*resources);
+	api->audioInternal->setResources(*resources);
 }
 
 void Core::setOutRedirect(bool appendToExisting)
@@ -400,11 +401,13 @@ void Core::quit(int code)
 
 Resources& Core::getResources()
 {
+	Expects(resources);
 	return *resources;
 }
 
 const Environment& Core::getEnvironment()
 {
+	Expects(environment);
 	return *environment;
 }
 

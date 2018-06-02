@@ -17,6 +17,7 @@ AudioEngine::AudioEngine(Resources& resources)
 	, running(true)
 	, needsBuffer(true)
 {
+	rng.setSeed(Random::getGlobal().getInt<long>(std::numeric_limits<long>::min(), std::numeric_limits<long>::max()));
 }
 
 AudioEngine::~AudioEngine()
@@ -33,7 +34,7 @@ void AudioEngine::play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioP
 	std::shared_ptr<AudioSource> source = std::make_shared<AudioSourceClip>(clip, loop);
 	if (std::abs(pitch - 1.0f) > 0.01f) {
 		pitch = clamp(pitch, 0.1f, 2.0f);
-		source = std::make_shared<AudioFilterResample>(source, int(48000 * pitch + 0.5f), 48000, *pool);
+		source = std::make_shared<AudioFilterResample>(source, int(lround(48000 * pitch)), 48000, *pool);
 	}
 	addEmitter(id, std::make_unique<AudioEmitter>(source, position, volume));
 }
@@ -136,6 +137,16 @@ void AudioEngine::generateBuffer()
 	} else {
 		out->queueAudio(bufferRef.getSampleSpan());
 	}
+}
+
+Random& AudioEngine::getRNG()
+{
+	return rng;
+}
+
+Resources& AudioEngine::getResources() const
+{
+	return resources;
 }
 
 void AudioEngine::mixEmitters(size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers)

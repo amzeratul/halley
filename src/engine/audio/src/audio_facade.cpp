@@ -6,9 +6,8 @@
 
 using namespace Halley;
 
-AudioFacade::AudioFacade(Resources& resources, AudioOutputAPI& o, SystemAPI& system)
-	: resources(resources)
-	, output(o)
+AudioFacade::AudioFacade(AudioOutputAPI& o, SystemAPI& system)
+	: output(o)
 	, system(system)
 	, running(false)
 	, ownAudioThread(o.needsAudioThread())
@@ -18,6 +17,11 @@ AudioFacade::AudioFacade(Resources& resources, AudioOutputAPI& o, SystemAPI& sys
 AudioFacade::~AudioFacade()
 {
 	AudioFacade::stopPlayback();
+}
+
+void AudioFacade::setResources(Resources& res)
+{
+	resources = &res;
 }
 
 void AudioFacade::init()
@@ -48,7 +52,7 @@ void AudioFacade::startPlayback(int deviceNumber)
 
 	auto devices = getAudioDevices();
 	if (int(devices.size()) > deviceNumber) {
-		engine = std::make_unique<AudioEngine>(resources);
+		engine = std::make_unique<AudioEngine>(*resources);
 
 		AudioSpec format;
 		format.bufferSize = 1024;

@@ -7,6 +7,7 @@
 #include <vector>
 #include "audio_emitter.h"
 #include "halley/audio/resampler.h"
+#include "halley/maths/random.h"
 
 namespace Halley {
 	class AudioMixer;
@@ -31,6 +32,9 @@ namespace Halley {
 		void stop();
 
 		void generateBuffer();
+	    
+    	Random& getRNG();
+		Resources& getResources() const;
 
     private:
 		Resources& resources;
@@ -52,6 +56,8 @@ namespace Halley {
 		std::map<size_t, AudioEmitter*> idToSource;
 
 		AudioListenerData listener;
+
+		Random rng;
 
 		void addEmitter(size_t id, std::unique_ptr<AudioEmitter>&& src);
 
