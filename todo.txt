@@ -20,7 +20,6 @@ input
 - use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
-* audio events
 * mixing groups
 * multiple "layers" (with individual listeners for them)
 - range compression/ducking
@@ -45,9 +44,8 @@ entity
 - snapshot world
 
 ui
-* refactor UIStyle
-* improve UITextInput
 * tab order
+* research CJK
 - reduce draw calls
 
 lua
