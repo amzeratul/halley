@@ -8,6 +8,7 @@
 #include "audio_emitter.h"
 #include "halley/audio/resampler.h"
 #include "halley/maths/random.h"
+#include "halley/data_structures/flat_map.h"
 
 namespace Halley {
 	class AudioMixer;
@@ -39,6 +40,10 @@ namespace Halley {
 		Resources& getResources() const;
 		AudioBufferPool& getPool() const;
 
+		void setMasterGain(float gain);
+		void setGroupGain(const String& name, float gain);
+		int getGroupId(const String& group);
+
     private:
 		Resources& resources;
 
@@ -58,6 +63,10 @@ namespace Halley {
 		
 		std::map<size_t, AudioEmitter*> idToSource;
 
+		float masterGain = 1.0f;
+		std::vector<String> groupNames;
+    	std::vector<float> groupGains;
+
 		AudioListenerData listener;
 
 		Random rng;
@@ -65,5 +74,7 @@ namespace Halley {
 		void mixEmitters(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
 	    void removeFinishedEmitters();
 		void clearBuffer(gsl::span<AudioSamplePack> dst);
+
+    	float getGroupGain(int group) const;
     };
 }

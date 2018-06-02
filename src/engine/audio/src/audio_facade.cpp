@@ -106,12 +106,14 @@ AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
 	return std::make_shared<AudioHandleImpl>(*this, id);
 }
 
-AudioHandle AudioFacade::playMusic(std::shared_ptr<const IAudioClip> clip, int track, float fadeInTime, bool loop)
+AudioHandle AudioFacade::playMusic(const String& eventName, int track)
 {
+	float fadeInTime = 0.5f;
 	bool hasFade = fadeInTime > 0.0001f;
 	
 	stopMusic(track, fadeInTime);
-	auto handle = play(clip, AudioPosition::makeFixed(), hasFade ? 0.0f : 1.0f, true);
+	auto handle = postEvent(eventName, AudioPosition::makeFixed());
+	handle->setGain(0.0f);
 	musicTracks[track] = handle;
 
 	if (hasFade) {
@@ -157,6 +159,20 @@ void AudioFacade::stopAllMusic(float fadeOutTime)
 	musicTracks.clear();
 }
 
+void AudioFacade::setMasterVolume(float volume)
+{
+	enqueue([=] () {
+		engine->setMasterGain(volumeToGain(volume));
+	});
+}
+
+void AudioFacade::setGroupVolume(const String& groupName, float volume)
+{
+	enqueue([=] () {
+		engine->setGroupGain(groupName, volumeToGain(volume));
+	});
+}
+
 void AudioFacade::stopMusic(AudioHandle& handle, float fadeOutTime)
 {
 	if (fadeOutTime > 0.001f) {
@@ -171,11 +187,6 @@ void AudioFacade::onNeedBuffer()
 	if (!ownAudioThread) {
 		stepAudio();
 	}
-}
-
-void AudioFacade::setGroupVolume(String groupName, float gain)
-{
-	// TODO
 }
 
 void AudioFacade::setListener(AudioListenerData listener)

@@ -21,11 +21,7 @@ void AudioHandleImpl::setGain(float gain)
 
 void AudioHandleImpl::setVolume(float volume)
 {
-	constexpr float a = 0.01f;
-	constexpr float b = 4.6051701859880913680359829093687f;
-	const float gain = clamp(a * ::expf(volume * b), 0.0f, 1.0f);
-	const float linearRolloff = clamp(gain * 10, 0.0f, 1.0f);
-	setGain(gain * linearRolloff);
+	setGain(volumeToGain(volume));
 }
 
 void AudioHandleImpl::setPosition(Vector2f pos)

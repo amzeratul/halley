@@ -34,12 +34,13 @@ namespace Halley {
 	    AudioHandle postEvent(const String& name, AudioPosition position) override;
 
     	AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop) override;
-		AudioHandle playMusic(std::shared_ptr<const IAudioClip> clip, int track = 0, float fadeInTime = 0.0f, bool loop = true) override;
+		AudioHandle playMusic(const String& eventName, int track = 0) override;
 		AudioHandle getMusic(int track = 0) override;
 		void stopMusic(int track = 0, float fadeOutTime = 0.0f) override;
 		void stopAllMusic(float fadeOutTime = 0.0f) override;
 
-		void setGroupVolume(String groupName, float gain = 1.0f) override;
+		void setMasterVolume(float volume = 1.0f) override;
+		void setGroupVolume(const String& groupName, float volume = 1.0f) override;
 
 	    void setListener(AudioListenerData listener) override;
 
@@ -71,4 +72,25 @@ namespace Halley {
 
 		void onNeedBuffer();
     };
+
+	inline float volumeToGain(float volume)
+	{
+		constexpr float a = 0.01f;
+		constexpr float b = 4.6051701859880913680359829093687f;
+		const float gain = clamp(a * ::expf(volume * b), 0.0f, 1.0f);
+		const float linearRolloff = clamp(gain * 10, 0.0f, 1.0f);
+		return gain * linearRolloff;
+	}
+
+	inline float gainToVolume(float gain)
+	{
+		constexpr float a = 0.01f;
+		constexpr float b = 4.6051701859880913680359829093687f;
+		float baseGain = gain;
+		if (baseGain < 0.1f) {
+			// Undo linear rolloff
+			baseGain = sqrt(baseGain * 0.1f);
+		}
+		return clamp(logf(baseGain / a) / b, 0.0f, 1.0f);
+	}
 }

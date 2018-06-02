@@ -31,7 +31,7 @@ void AudioEngine::postEvent(size_t id, const String& name, const AudioPosition& 
 
 void AudioEngine::play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)
 {
-	addEmitter(id, std::make_unique<AudioEmitter>(std::make_shared<AudioSourceClip>(clip, loop, 0), position, volume));
+	addEmitter(id, std::make_unique<AudioEmitter>(std::make_shared<AudioSourceClip>(clip, loop, 0), position, volume, getGroupId("")));
 }
 
 void AudioEngine::setListener(AudioListenerData l)
@@ -149,6 +149,16 @@ AudioBufferPool& AudioEngine::getPool() const
 	return *pool;
 }
 
+void AudioEngine::setMasterGain(float gain)
+{
+	masterGain = gain;
+}
+
+void AudioEngine::setGroupGain(const String& name, float gain)
+{
+	groupGains[getGroupId(name)] = gain;
+}
+
 void AudioEngine::mixEmitters(size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers)
 {
 	// Clear buffers
@@ -165,7 +175,7 @@ void AudioEngine::mixEmitters(size_t numSamples, size_t nChannels, gsl::span<Aud
 
 		// Mix it in!
 		if (e->isPlaying()) {
-			e->update(channels, listener);
+			e->update(channels, listener, masterGain * getGroupGain(e->getGroup()));
 			e->mixTo(numSamples, buffers, *mixer, *pool);
 		}
 	}
@@ -188,4 +198,21 @@ void AudioEngine::clearBuffer(gsl::span<AudioSamplePack> dst)
 			pack.samples[i] = 0.0f;
 		}
 	}
+}
+
+int AudioEngine::getGroupId(const String& group)
+{
+	auto iter = std::find(groupNames.begin(), groupNames.end(), group);
+	if (iter != groupNames.end()) {
+		return iter - groupNames.begin();
+	} else {
+		groupNames.push_back(group);
+		groupGains.push_back(1.0f);
+		return int(groupNames.size()) - 1;
+	}
+}
+
+float AudioEngine::getGroupGain(int id) const
+{
+	return groupGains[id];
 }

@@ -12,7 +12,7 @@ namespace Halley {
 
 	class AudioEmitter {
     public:
-		AudioEmitter(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain);
+		AudioEmitter(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, int group);
 		~AudioEmitter();
 
 		void start();
@@ -28,19 +28,22 @@ namespace Halley {
 		float getGain() const;
 		size_t getNumberOfChannels() const;
 
-		void update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener);
+		void update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener, float groupGain);
 		void mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixer& mixer, AudioBufferPool& pool);
 		
 		void setId(size_t id);
 		size_t getId() const;
 
 		void setBehaviour(std::shared_ptr<AudioEmitterBehaviour> behaviour);
+		
+		int getGroup() const;
 
 	private:
 		std::shared_ptr<AudioSource> source;
 		std::shared_ptr<AudioEmitterBehaviour> behaviour;
-
     	AudioPosition sourcePos;
+		int group;
+
 		bool playing = false;
 		bool done = false;
 		bool isFirstUpdate = true;

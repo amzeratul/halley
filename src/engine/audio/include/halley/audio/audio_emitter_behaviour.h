@@ -12,7 +12,7 @@ namespace Halley {
 
 	class AudioEmitterFadeBehaviour: public AudioEmitterBehaviour {
 	public:
-		AudioEmitterFadeBehaviour(float fadeTime, float targetGain, bool stopAtEnd);
+		AudioEmitterFadeBehaviour(float fadeTime, float targetVolume, bool stopAtEnd);
 
 		void onAttach(AudioEmitter& audioSource) override;
 		bool update(float elapsedTime, AudioEmitter& audioSource) override;

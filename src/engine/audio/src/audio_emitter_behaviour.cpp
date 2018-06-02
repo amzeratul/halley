@@ -1,16 +1,17 @@
 #include "audio_emitter_behaviour.h"
 #include "audio_emitter.h"
+#include "audio_facade.h"
 
 using namespace Halley;
 
 AudioEmitterBehaviour::~AudioEmitterBehaviour() {}
 void AudioEmitterBehaviour::onAttach(AudioEmitter& audioSource) {}
 
-AudioEmitterFadeBehaviour::AudioEmitterFadeBehaviour(float fadeTime, float targetGain, bool stopAtEnd)
+AudioEmitterFadeBehaviour::AudioEmitterFadeBehaviour(float fadeTime, float targetVolume, bool stopAtEnd)
 	: curTime(0)
 	, fadeTime(fadeTime)
 	, gain0(0)
-	, gain1(targetGain)
+	, gain1(volumeToGain(targetVolume))
 	, stopAtEnd(stopAtEnd)
 {	
 }
@@ -25,7 +26,9 @@ bool AudioEmitterFadeBehaviour::update(float elapsedTime, AudioEmitter& audioSou
 	curTime += elapsedTime;
 	float t = clamp(curTime / fadeTime, 0.0f, 1.0f);
 	float gain = lerp(gain0, gain1, t);
+	
 	audioSource.setGain(gain);
+	
 	if (curTime >= fadeTime) {
 		if (stopAtEnd) {
 			audioSource.stop();

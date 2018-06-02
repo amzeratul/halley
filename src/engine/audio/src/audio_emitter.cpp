@@ -3,12 +3,14 @@
 #include "audio_mixer.h"
 #include "audio_emitter_behaviour.h"
 #include "audio_source.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
-AudioEmitter::AudioEmitter(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain) 
+AudioEmitter::AudioEmitter(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, int group) 
 	: source(std::move(source))
 	, sourcePos(std::move(sourcePos))
+	, group(group)
 	, gain(gain)
 {}
 
@@ -65,6 +67,11 @@ void AudioEmitter::setBehaviour(std::shared_ptr<AudioEmitterBehaviour> value)
 	behaviour->onAttach(*this);
 }
 
+int AudioEmitter::getGroup() const
+{
+	return group;
+}
+
 void AudioEmitter::setGain(float g)
 {
 	gain = g;
@@ -87,7 +94,7 @@ size_t AudioEmitter::getNumberOfChannels() const
 	return nChannels;
 }
 
-void AudioEmitter::update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener)
+void AudioEmitter::update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener, float groupGain)
 {
 	Expects(playing);
 
@@ -100,7 +107,7 @@ void AudioEmitter::update(gsl::span<const AudioChannelData> channels, const Audi
 	}
 
 	prevChannelMix = channelMix;
-	sourcePos.setMix(nChannels, channels, channelMix, gain, listener);
+	sourcePos.setMix(nChannels, channels, channelMix, gain * groupGain, listener);
 	
 	if (isFirstUpdate) {
 		prevChannelMix = channelMix;
@@ -125,10 +132,6 @@ void AudioEmitter::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMi
 	for (size_t i = 0; i < nMixes; ++i) {
 		totalMix += prevChannelMix[i] + channelMix[i];
 	}
-	if (totalMix < 0.01f) {
-		// Early out, this sample is not audible
-		return;
-	}
 
 	// Read data from source
 	std::array<gsl::span<AudioSamplePack>, AudioConfig::maxChannels> audioData;
@@ -140,19 +143,22 @@ void AudioEmitter::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMi
 		audioSampleData[srcChannel] = audioData[srcChannel].data()->samples;
 	}
 	bool isPlaying = source->getAudioData(numSamples, audioSampleData);
-	
-	// Render each emitter channel
-	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
-		// Read to buffer
-		for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
-			// Compute mix
-			const size_t mixIndex = (srcChannel * nChannels) + dstChannel;
-			const float gain0 = prevChannelMix[mixIndex];
-			const float gain1 = channelMix[mixIndex];
 
-			// Render to destination
-			if (gain0 + gain1 > 0.01f) {
-				mixer.mixAudio(audioData[srcChannel], dst[dstChannel]->packs, gain0, gain1);
+	// If we're audible, render
+	if (totalMix >= 0.01f) {
+		// Render each emitter channel
+		for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
+			// Read to buffer
+			for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
+				// Compute mix
+				const size_t mixIndex = (srcChannel * nChannels) + dstChannel;
+				const float gain0 = prevChannelMix[mixIndex];
+				const float gain1 = channelMix[mixIndex];
+
+				// Render to destination
+				if (gain0 + gain1 > 0.01f) {
+					mixer.mixAudio(audioData[srcChannel], dst[dstChannel]->packs, gain0, gain1);
+				}
 			}
 		}
 	}
