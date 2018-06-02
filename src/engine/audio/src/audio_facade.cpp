@@ -6,8 +6,9 @@
 
 using namespace Halley;
 
-AudioFacade::AudioFacade(AudioOutputAPI& o, SystemAPI& system)
-	: output(o)
+AudioFacade::AudioFacade(Resources& resources, AudioOutputAPI& o, SystemAPI& system)
+	: resources(resources)
+	, output(o)
 	, system(system)
 	, running(false)
 	, ownAudioThread(o.needsAudioThread())
@@ -47,7 +48,7 @@ void AudioFacade::startPlayback(int deviceNumber)
 
 	auto devices = getAudioDevices();
 	if (int(devices.size()) > deviceNumber) {
-		engine = std::make_unique<AudioEngine>();
+		engine = std::make_unique<AudioEngine>(resources);
 
 		AudioSpec format;
 		format.bufferSize = 1024;
@@ -90,6 +91,15 @@ void AudioFacade::stopPlayback()
 		output.stopPlayback();
 		engine.reset();
 	}
+}
+
+AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
+{
+	size_t id = uniqueId++;
+	enqueue([=] () {
+		engine->postEvent(id, name, position);
+	});
+	return std::make_shared<AudioHandleImpl>(*this, id);
 }
 
 AudioHandle AudioFacade::playMusic(std::shared_ptr<const IAudioClip> clip, int track, float fadeInTime, bool loop)

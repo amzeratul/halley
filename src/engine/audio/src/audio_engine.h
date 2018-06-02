@@ -11,13 +11,15 @@
 namespace Halley {
 	class AudioMixer;
 	class IAudioClip;
+	class Resources;
 
     class AudioEngine
     {
     public:
-	    AudioEngine();
+	    explicit AudioEngine(Resources& resources);
 		~AudioEngine();
 
+	    void postEvent(size_t id, const String& name, const AudioPosition& position);
 	    void play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop, float pitch);
 	    void setListener(AudioListenerData position);
 
@@ -30,7 +32,9 @@ namespace Halley {
 
 		void generateBuffer();
 
-   	private:
+    private:
+		Resources& resources;
+
 		AudioSpec spec;
 		AudioOutputAPI* out;
 		std::unique_ptr<AudioMixer> mixer;

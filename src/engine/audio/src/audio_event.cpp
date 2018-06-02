@@ -14,6 +14,11 @@ AudioEvent::AudioEvent(const ConfigNode& config)
 	
 }
 
+void AudioEvent::run(AudioEngine& engine, size_t id, const AudioPosition& position) const
+{
+	// TODO
+}
+
 void AudioEvent::serialize(Serializer& s) const
 {
 }

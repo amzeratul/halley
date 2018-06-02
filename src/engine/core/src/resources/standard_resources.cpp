@@ -9,6 +9,7 @@
 #include "graphics/text/font.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/audio/audio_clip.h"
+#include "halley/audio/audio_event.h"
 #include "halley/file_formats/binary_file.h"
 
 using namespace Halley;
@@ -26,6 +27,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<Font>();
 	resources.init<ConfigFile>();
 	resources.init<AudioClip>();
+	resources.init<AudioEvent>();
 
 	resources.of<SpriteResource>().setResourceLoader([&] (const String& name, ResourceLoadPriority) -> std::shared_ptr<Resource>
 	{

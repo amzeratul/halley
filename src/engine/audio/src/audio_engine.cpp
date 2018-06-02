@@ -5,11 +5,14 @@
 #include "audio_source_clip.h"
 #include "audio_filter_resample.h"
 #include "halley/support/debug.h"
+#include "halley/core/resources/resources.h"
+#include "audio_event.h"
 
 using namespace Halley;
 
-AudioEngine::AudioEngine()
-	: mixer(AudioMixer::makeMixer())
+AudioEngine::AudioEngine(Resources& resources)
+	: resources(resources)
+	, mixer(AudioMixer::makeMixer())
 	, pool(std::make_unique<AudioBufferPool>())
 	, running(true)
 	, needsBuffer(true)
@@ -18,6 +21,11 @@ AudioEngine::AudioEngine()
 
 AudioEngine::~AudioEngine()
 {
+}
+
+void AudioEngine::postEvent(size_t id, const String& name, const AudioPosition& position)
+{
+	resources.get<AudioEvent>(name)->run(*this, id, position);
 }
 
 void AudioEngine::play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop, float pitch)

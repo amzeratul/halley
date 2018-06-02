@@ -50,43 +50,43 @@ namespace Halley {
 		}
 
 		template <typename T>
-		ResourceCollection<T>& of()
+		ResourceCollection<T>& of() const
 		{
 			return static_cast<ResourceCollection<T>&>(ofType(T::getAssetType()));
 		}
 
-		ResourceCollectionBase& ofType(AssetType assetType)
+		ResourceCollectionBase& ofType(AssetType assetType) const
 		{
 			return *resources[int(assetType)];
 		}
 
 		template <typename T>
-		std::shared_ptr<const T> get(const String& name, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
+		std::shared_ptr<const T> get(const String& name, ResourceLoadPriority priority = ResourceLoadPriority::Normal) const
 		{
 			return of<T>().get(name, priority);
 		}
 
 		template <typename T>
-		std::shared_ptr<const T> unload(const String& name)
+		std::shared_ptr<const T> unload(const String& name) const
 		{
 			return of<T>().unload(name);
 		}
 
 		template <typename T>
-		bool exists(const String& name)
+		bool exists(const String& name) const
 		{
 			return of<T>().exists(name);
 		}
 
 		template <typename T>
-		std::vector<String> enumerate()
+		std::vector<String> enumerate() const
 		{
 			return of<T>().enumerate();
 		}
 		
 	private:
-		std::unique_ptr<ResourceLocator> locator;
+		const std::unique_ptr<ResourceLocator> locator;
 		Vector<std::unique_ptr<ResourceCollectionBase>> resources;
-		const HalleyAPI* api;
+		const HalleyAPI* const api;
 	};
 }

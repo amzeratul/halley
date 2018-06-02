@@ -3,6 +3,8 @@
 
 namespace Halley
 {
+	class AudioPosition;
+	class AudioEngine;
 	class ConfigNode;
 	class ConfigFile;
 	class ResourceLoader;
@@ -12,6 +14,8 @@ namespace Halley
 	public:
 		AudioEvent();
 		explicit AudioEvent(const ConfigNode& config);
+
+		void run(AudioEngine& engine, size_t id, const AudioPosition& position) const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

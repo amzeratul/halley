@@ -17,7 +17,7 @@ namespace Halley {
 		friend class AudioHandleImpl;
 
     public:
-		explicit AudioFacade(AudioOutputAPI& output, SystemAPI& system);
+		explicit AudioFacade(Resources& resources, AudioOutputAPI& output, SystemAPI& system);
 		~AudioFacade();
 
 		void init() override;
@@ -29,8 +29,9 @@ namespace Halley {
 		void startPlayback(int deviceNumber) override;
 		void stopPlayback() override;
 
-    	AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop, float pitch) override;
+	    AudioHandle postEvent(const String& name, AudioPosition position) override;
 
+    	AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop, float pitch) override;
 		AudioHandle playMusic(std::shared_ptr<const IAudioClip> clip, int track = 0, float fadeInTime = 0.0f, bool loop = true) override;
 		AudioHandle getMusic(int track = 0) override;
 		void stopMusic(int track = 0, float fadeOutTime = 0.0f) override;
@@ -41,6 +42,7 @@ namespace Halley {
 	    void setListener(AudioListenerData listener) override;
 
     private:
+		Resources& resources;
 		AudioOutputAPI& output;
 		SystemAPI& system;
 		std::unique_ptr<AudioEngine> engine;
