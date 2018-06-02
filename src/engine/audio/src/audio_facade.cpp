@@ -111,7 +111,7 @@ AudioHandle AudioFacade::playMusic(std::shared_ptr<const IAudioClip> clip, int t
 	bool hasFade = fadeInTime > 0.0001f;
 	
 	stopMusic(track, fadeInTime);
-	auto handle = play(clip, AudioPosition::makeFixed(), hasFade ? 0.0f : 1.0f, true, 1.0f);
+	auto handle = play(clip, AudioPosition::makeFixed(), hasFade ? 0.0f : 1.0f, true);
 	musicTracks[track] = handle;
 
 	if (hasFade) {
@@ -121,11 +121,11 @@ AudioHandle AudioFacade::playMusic(std::shared_ptr<const IAudioClip> clip, int t
 	return handle;
 }
 
-AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop, float pitch)
+AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)
 {
 	size_t id = uniqueId++;
 	enqueue([=] () {
-		engine->play(id, clip, position, volume, loop, pitch);
+		engine->play(id, clip, position, volume, loop);
 	});
 	return std::make_shared<AudioHandleImpl>(*this, id);
 }

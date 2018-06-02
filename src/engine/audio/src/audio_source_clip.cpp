@@ -5,13 +5,12 @@
 using namespace Halley;
 
 
-AudioSourceClip::AudioSourceClip(std::shared_ptr<const IAudioClip> c, bool looping)
+AudioSourceClip::AudioSourceClip(std::shared_ptr<const IAudioClip> c, bool looping, int64_t delaySamples)
 	: clip(std::move(c))
+	, playbackPos(-delaySamples)
 	, looping(looping)
 {
 	Expects(clip);
-	playbackPos = 0;
-	playbackLength = 0;
 }
 
 size_t AudioSourceClip::getNumberOfChannels() const
@@ -29,18 +28,32 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData& dst
 	if (!initialised) {
 		initialised = true;
 	}
-	playbackLength = clip->getLength();
-	Expects(playbackPos <= playbackLength);
+	const auto playbackLength = int64_t(clip->getLength());
 
 	bool isPlaying = true;
 	const size_t nChannels = getNumberOfChannels();
 	size_t samplesWritten = 0;
 
+	// On delay, pad with zeroes
+	if (playbackPos < 0) {
+		const size_t delaySamples = std::min(size_t(-playbackPos), samplesRequested);
+
+		for (size_t srcChannel = 0; srcChannel < nChannels; ++srcChannel) {
+			auto dstBuf = dstChannels[srcChannel];
+			auto dst = dstBuf.data() + samplesWritten;
+			memset(dst, 0, delaySamples * sizeof(AudioConfig::SampleFormat));
+		}
+
+		samplesWritten += delaySamples;
+		playbackPos += delaySamples;
+	}
+
+	// Playback pos is positive
 	while (samplesWritten < samplesRequested) {
 		if (playbackPos >= playbackLength) {
 			// If we're at the end of playback, either loop, or flag as done
 			if (looping) {
-				playbackPos = clip->getLoopPoint();
+				playbackPos = int64_t(clip->getLoopPoint());
 				if (playbackPos >= playbackLength) {
 					looping = false;
 					playbackPos = playbackLength;
@@ -51,7 +64,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData& dst
 			}
 		}
 
-		const size_t samplesAvailable = playbackLength - playbackPos;
+		const size_t samplesAvailable = size_t(playbackLength - playbackPos);
 		const size_t samplesRemaining = samplesRequested - samplesWritten;
 		const size_t samplesToRead = std::min(samplesRemaining, samplesAvailable);
 
@@ -59,11 +72,11 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData& dst
 			// We have some samples that we can read, so go ahead with reading them
 			for (size_t srcChannel = 0; srcChannel < nChannels; ++srcChannel) {
 				auto dst = gsl::span<AudioConfig::SampleFormat>(dstChannels[srcChannel].data() + samplesWritten, samplesToRead);
-				size_t nCopied = clip->copyChannelData(srcChannel, playbackPos, samplesToRead, dst);
+				size_t nCopied = clip->copyChannelData(srcChannel, size_t(playbackPos), samplesToRead, dst);
 				Expects(nCopied <= samplesRequested * sizeof(AudioConfig::SampleFormat));
 			}
 
-			playbackPos += samplesToRead;
+			playbackPos += int64_t(samplesToRead);
 			samplesWritten += samplesToRead;
 		} else {
 			// Reached end of playback, pad with zeroes

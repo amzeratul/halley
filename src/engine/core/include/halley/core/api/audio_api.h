@@ -131,7 +131,7 @@ namespace Halley
 
 		virtual AudioHandle postEvent(const String& name, AudioPosition position) = 0;
 
-		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume = 1.0f, bool loop = false, float pitch = 1.0f) = 0;
+		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume = 1.0f, bool loop = false) = 0;
 		virtual AudioHandle playMusic(std::shared_ptr<const IAudioClip> clip, int track = 0, float fadeInTime = 0.0f, bool loop = true) = 0;
 		virtual AudioHandle getMusic(int track = 0) = 0;
 		virtual void stopMusic(int track = 0, float fadeOutTime = 0.0f) = 0;

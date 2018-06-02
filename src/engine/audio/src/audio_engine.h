@@ -21,8 +21,10 @@ namespace Halley {
 		~AudioEngine();
 
 	    void postEvent(size_t id, const String& name, const AudioPosition& position);
-	    void play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop, float pitch);
+	    void play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop);
 	    void setListener(AudioListenerData position);
+
+		void addEmitter(size_t id, std::unique_ptr<AudioEmitter>&& src);
 
 		AudioEmitter* getSource(size_t id);
 		std::vector<size_t> getPlayingSounds();
@@ -35,6 +37,7 @@ namespace Halley {
 	    
     	Random& getRNG();
 		Resources& getResources() const;
+		AudioBufferPool& getPool() const;
 
     private:
 		Resources& resources;
@@ -58,8 +61,6 @@ namespace Halley {
 		AudioListenerData listener;
 
 		Random rng;
-
-		void addEmitter(size_t id, std::unique_ptr<AudioEmitter>&& src);
 
 		void mixEmitters(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
 	    void removeFinishedEmitters();

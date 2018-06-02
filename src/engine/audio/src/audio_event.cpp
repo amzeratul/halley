@@ -6,6 +6,8 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/text/string_converter.h"
 #include "halley/core/resources/resources.h"
+#include "audio_source_clip.h"
+#include "audio_filter_resample.h"
 
 using namespace Halley;
 
@@ -111,9 +113,15 @@ void AudioEventActionPlay::run(AudioEngine& engine, size_t id, const AudioPositi
 	auto clip = engine.getResources().get<AudioClip>(clips[clipN]);
 
 	const float curVolume = rng.getFloat(volume.s, volume.e);
-	const float curPitch = rng.getFloat(pitch.s, pitch.e);
+	const float curPitch = clamp(rng.getFloat(pitch.s, pitch.e), 0.1f, 2.0f);
 
-	engine.play(id, clip, position, curVolume, loop, curPitch);
+	constexpr int sampleRate = 48000;
+
+	std::shared_ptr<AudioSource> source = std::make_shared<AudioSourceClip>(clip, loop, lround(delay * sampleRate));
+	if (std::abs(curPitch - 1.0f) > 0.01f) {
+		source = std::make_shared<AudioFilterResample>(source, int(lround(sampleRate * curPitch)), sampleRate, engine.getPool());
+	}
+	engine.addEmitter(id, std::make_unique<AudioEmitter>(source, position, curVolume));
 }
 
 AudioEventActionType AudioEventActionPlay::getType() const

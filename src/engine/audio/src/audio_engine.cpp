@@ -29,14 +29,9 @@ void AudioEngine::postEvent(size_t id, const String& name, const AudioPosition& 
 	resources.get<AudioEvent>(name)->run(*this, id, position);
 }
 
-void AudioEngine::play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop, float pitch)
+void AudioEngine::play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)
 {
-	std::shared_ptr<AudioSource> source = std::make_shared<AudioSourceClip>(clip, loop);
-	if (std::abs(pitch - 1.0f) > 0.01f) {
-		pitch = clamp(pitch, 0.1f, 2.0f);
-		source = std::make_shared<AudioFilterResample>(source, int(lround(48000 * pitch)), 48000, *pool);
-	}
-	addEmitter(id, std::make_unique<AudioEmitter>(source, position, volume));
+	addEmitter(id, std::make_unique<AudioEmitter>(std::make_shared<AudioSourceClip>(clip, loop, 0), position, volume));
 }
 
 void AudioEngine::setListener(AudioListenerData l)
@@ -147,6 +142,11 @@ Random& AudioEngine::getRNG()
 Resources& AudioEngine::getResources() const
 {
 	return resources;
+}
+
+AudioBufferPool& AudioEngine::getPool() const
+{
+	return *pool;
 }
 
 void AudioEngine::mixEmitters(size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers)
