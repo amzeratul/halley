@@ -20,6 +20,7 @@ input
 - use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
+* rate limiting
 * multiple "layers" (with individual listeners for them)
 - range compression/ducking
 - audio environments

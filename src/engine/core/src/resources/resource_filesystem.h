@@ -19,5 +19,8 @@ namespace Halley {
 		SystemAPI& system;
 		Path basePath;
 		std::unique_ptr<AssetDatabase> assetDb;
+
+	private:
+		void loadAssetDb();
 	};
 }

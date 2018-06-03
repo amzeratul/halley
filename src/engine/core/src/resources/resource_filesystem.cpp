@@ -30,18 +30,14 @@ FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, const Pa
 	: system(system)
     , basePath(_basePath)
 {
-	// Read assetDb
-	assetDb = std::make_unique<AssetDatabase>();
-	auto reader = system.getDataReader((basePath / "assets.db").string());
-	if (!reader) {
-		throw Exception("Unable to load assets.");
-	}
-
-	Deserializer::fromBytes<AssetDatabase>(*assetDb, reader->readAll());
+	loadAssetDb();
 }
 
 const AssetDatabase& FileSystemResourceLocator::getAssetDatabase()
 {
+	if (!assetDb) {
+		loadAssetDb();
+	}
 	return *assetDb;
 }
 
@@ -52,10 +48,26 @@ int FileSystemResourceLocator::getPriority() const
 
 void FileSystemResourceLocator::purge(SystemAPI& system, const String& asset, AssetType type)
 {
+	assetDb.reset();
+}
+
+void FileSystemResourceLocator::loadAssetDb()
+{
+	assetDb = std::make_unique<AssetDatabase>();
+	auto reader = system.getDataReader((basePath / "assets.db").string());
+	if (!reader) {
+		throw Exception("Unable to load assets.");
+	}
+
+	Deserializer::fromBytes<AssetDatabase>(*assetDb, reader->readAll());
 }
 
 std::unique_ptr<ResourceData> FileSystemResourceLocator::getData(const String& asset, AssetType type, bool stream)
 {
+	if (!assetDb) {
+		loadAssetDb();
+	}
+
 	auto path = (basePath / assetDb->getDatabase(type).get(asset).path).string();
 
 	if (stream) {
