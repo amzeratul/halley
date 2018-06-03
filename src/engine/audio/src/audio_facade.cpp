@@ -46,7 +46,7 @@ Vector<std::unique_ptr<const AudioDevice>> AudioFacade::getAudioDevices()
 
 void AudioFacade::startPlayback(int deviceNumber)
 {
-	if (running) {
+	if (started) {
 		stopPlayback();
 	}
 
@@ -60,9 +60,38 @@ void AudioFacade::startPlayback(int deviceNumber)
 		format.numChannels = 2;
 		format.sampleRate = 48000;
 		
-		AudioSpec obtained = output.openAudioDevice(format, devices.at(deviceNumber).get(), [this]() { onNeedBuffer(); });
-		
-		engine->start(obtained, output);
+		audioSpec = output.openAudioDevice(format, devices.at(deviceNumber).get(), [this]() { onNeedBuffer(); });
+		started = true;
+
+		std::cout << "Audio Playback started.\n";
+		std::cout << "\tDevice: " << devices.at(deviceNumber)->getName() << " [" << deviceNumber << "]\n";
+		std::cout << "\tSample rate: " << audioSpec.sampleRate << "\n";
+		std::cout << "\tChannels: " << audioSpec.numChannels << "\n";
+		std::cout << "\tFormat: " << toString(audioSpec.format) << "\n";
+		std::cout << "\tBuffer size: " << audioSpec.bufferSize << std::endl;
+
+		resumePlayback();
+	}
+}
+
+void AudioFacade::stopPlayback()
+{
+	if (started) {
+		pausePlayback();
+		musicTracks.clear();
+		engine.reset();
+		started = false;
+	}
+}
+
+void AudioFacade::resumePlayback()
+{
+	if (started) {
+		if (running) {
+			pausePlayback();
+		}
+
+		engine->start(audioSpec, output);
 		running = true;
 
 		if (ownAudioThread) {
@@ -70,30 +99,22 @@ void AudioFacade::startPlayback(int deviceNumber)
 		}
 
 		output.startPlayback();
-
-		std::cout << "Audio Playback started.\n";
-		std::cout << "\tDevice: " << devices.at(deviceNumber)->getName() << " [" << deviceNumber << "]\n";
-		std::cout << "\tSample rate: " << obtained.sampleRate << "\n";
-		std::cout << "\tChannels: " << obtained.numChannels << "\n";
-		std::cout << "\tFormat: " << toString(obtained.format) << "\n";
-		std::cout << "\tBuffer size: " << obtained.bufferSize << std::endl;
 	}
 }
 
-void AudioFacade::stopPlayback()
+void AudioFacade::pausePlayback()
 {
 	if (running) {
 		{
 			std::unique_lock<std::mutex> lock(audioMutex);
-			musicTracks.clear();
 			running = false;
-			engine->stop();
+			engine->pause();
 		}
 		if (ownAudioThread) {
 			audioThread.join();
+			audioThread = {};
 		}
 		output.stopPlayback();
-		engine.reset();
 	}
 }
 

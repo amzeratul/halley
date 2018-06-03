@@ -99,7 +99,13 @@ void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 	}
 }
 
-void AudioEngine::stop()
+void AudioEngine::resume()
+{
+	running = true;
+	needsBuffer = false;
+}
+
+void AudioEngine::pause()
 {
 	running = false;
 	needsBuffer = false;

@@ -128,6 +128,8 @@ namespace Halley
 		virtual Vector<std::unique_ptr<const AudioDevice>> getAudioDevices() = 0;
 		virtual void startPlayback(int deviceNumber = 0) = 0;
 		virtual void stopPlayback() = 0;
+		virtual void pausePlayback() = 0;
+		virtual void resumePlayback() = 0;
 
 		virtual AudioHandle postEvent(const String& name, AudioPosition position) = 0;
 

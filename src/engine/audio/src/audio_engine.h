@@ -32,7 +32,8 @@ namespace Halley {
 
 		void run();
 		void start(AudioSpec spec, AudioOutputAPI& out);
-		void stop();
+		void resume();
+		void pause();
 
 		void generateBuffer();
 	    

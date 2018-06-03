@@ -30,6 +30,8 @@ namespace Halley {
 		Vector<std::unique_ptr<const AudioDevice>> getAudioDevices() override;
 		void startPlayback(int deviceNumber) override;
 		void stopPlayback() override;
+		void pausePlayback() override;
+		void resumePlayback() override;
 
 	    AudioHandle postEvent(const String& name, AudioPosition position) override;
 
@@ -53,6 +55,8 @@ namespace Halley {
 		std::thread audioThread;
 		std::mutex audioMutex;
 		std::atomic<bool> running;
+		std::atomic<bool> started;
+	    AudioSpec audioSpec;
 
 		std::vector<std::function<void()>> outbox;
 		std::vector<std::function<void()>> inbox;
@@ -64,7 +68,7 @@ namespace Halley {
 		size_t uniqueId = 0;
 		bool ownAudioThread;
 
-		void run();
+	    void run();
 	    void stepAudio();
 	    void enqueue(std::function<void()> action);
 		
