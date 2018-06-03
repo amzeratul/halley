@@ -32,7 +32,7 @@ const AssetDatabase& PackResourceLocator::getAssetDatabase()
 	return assetPack->getAssetDatabase();
 }
 
-void PackResourceLocator::purge(SystemAPI& sys, const String& asset, AssetType type)
+void PackResourceLocator::purge(SystemAPI& sys)
 {
 	assetPack.reset();
 	system = &sys;

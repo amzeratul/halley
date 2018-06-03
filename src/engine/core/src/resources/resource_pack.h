@@ -15,7 +15,7 @@ namespace Halley {
 	protected:
 		std::unique_ptr<ResourceData> getData(const String& asset, AssetType type, bool stream) override;
 		const AssetDatabase& getAssetDatabase() override;
-		void purge(SystemAPI& system, const String& asset, AssetType type) override;
+		void purge(SystemAPI& system) override;
 
 	private:
 		void loadAfterPurge();

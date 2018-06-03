@@ -358,7 +358,11 @@ namespace Halley
 	public:
 		JoinFuture(int n)
 			: data(std::make_shared<JoinFutureData>(n))
-		{}
+		{
+			if (n == 0) {
+				promise.set();
+			}
+		}
 
 		void notify()
 		{

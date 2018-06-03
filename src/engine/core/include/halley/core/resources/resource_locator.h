@@ -39,7 +39,7 @@ namespace Halley {
 		virtual std::unique_ptr<ResourceData> getData(const String& path, AssetType type, bool stream) = 0;
 		virtual const AssetDatabase& getAssetDatabase() = 0;
 		virtual int getPriority() const { return 0; }
-		virtual void purge(SystemAPI& system, const String& asset, AssetType type) = 0;
+		virtual void purge(SystemAPI& system) = 0;
 	};
 
 	class ResourceLocator : public IResourceLocator

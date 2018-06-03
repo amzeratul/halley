@@ -46,7 +46,7 @@ int FileSystemResourceLocator::getPriority() const
 	return 1;
 }
 
-void FileSystemResourceLocator::purge(SystemAPI& system, const String& asset, AssetType type)
+void FileSystemResourceLocator::purge(SystemAPI& system)
 {
 	assetDb.reset();
 }

@@ -12,7 +12,7 @@ namespace Halley
 	class ImportAssetsTask : public EditorTask
 	{
 	public:
-		ImportAssetsTask(String taskName, ImportAssetsDatabase& db, const AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry>&& files, Project& project, bool packAfter);
+		ImportAssetsTask(String taskName, ImportAssetsDatabase& db, const AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry> files, std::vector<String> deletedAssets, Project& project, bool packAfter);
 
 	protected:
 		void run() override;
@@ -25,6 +25,7 @@ namespace Halley
 		const bool packAfter;
 
 		Vector<ImportAssetsDatabaseEntry> files;
+		std::vector<String> deletedAssets;
 		std::set<String> outputAssets;
 		
 		std::atomic<int64_t> totalImportTime;

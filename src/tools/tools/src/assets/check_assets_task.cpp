@@ -209,16 +209,23 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 	// Check for missing input files
 	db.markAssetsAsStillPresent(assets);
 	auto toDelete = db.getAllMissing();
+	std::vector<String> deletedAssets;
 	if (!toDelete.empty()) {
+		for (auto& a: toDelete) {
+			for (auto& out: a.outputFiles) {
+				deletedAssets.push_back(toString(out.type) + ":" + out.name);
+			}
+		}
+
 		Logger::logInfo("Assets to be deleted: " + toString(toDelete.size()));
 		addPendingTask(EditorTaskAnchor(std::make_unique<DeleteAssetsTask>(db, dstPath, std::move(toDelete))));
 	}
 
 	// Import assets
 	auto toImport = filterNeedsImporting(db, assets);
-	if (!toImport.empty()) {
+	if (!toImport.empty() || !deletedAssets.empty()) {
 		Logger::logInfo("Assets to be imported: " + toString(toImport.size()));
-		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(taskName, db, project.getAssetImporter(), dstPath, std::move(toImport), project, packAfter)));
+		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(taskName, db, project.getAssetImporter(), dstPath, std::move(toImport), std::move(deletedAssets), project, packAfter)));
 	}
 }
 

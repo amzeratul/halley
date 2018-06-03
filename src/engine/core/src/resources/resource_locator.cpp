@@ -67,7 +67,13 @@ void ResourceLocator::purge(const String& asset, AssetType type)
 {
 	auto result = locators.find(asset);
 	if (result != locators.end()) {
-		result->second->purge(system, asset, type);
+		// Found the locator for this file, purge it
+		result->second->purge(system);
+	} else {
+		// Couldn't find a locator (new file?), purge everything
+		for (auto& l: locatorList) {
+			l->purge(system);
+		}
 	}
 }
 

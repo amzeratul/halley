@@ -46,7 +46,7 @@ bool AssetPackListing::isActive() const
 	return active;
 }
 
-void AssetPacker::pack(Project& project, Maybe<std::set<String>> assetsToPack)
+void AssetPacker::pack(Project& project, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets)
 {
 	auto db = project.getImportAssetsDatabase().makeAssetDatabase();
 	auto src = project.getUnpackedAssetsPath();
@@ -54,13 +54,13 @@ void AssetPacker::pack(Project& project, Maybe<std::set<String>> assetsToPack)
 	auto manifest = AssetPackManifest(FileSystem::readFile(project.getAssetPackManifestPath()));
 
 	// Sort into packs
-	std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, *db, assetsToPack);
+	std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, *db, assetsToPack, deletedAssets);
 
 	// Generate packs
 	generatePacks(packs, src, dst);
 }
 
-std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, Maybe<std::set<String>> assetsToPack)
+std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets)
 {
 	std::map<String, AssetPackListing> packs;
 	for (auto typeName: EnumNames<AssetType>()()) {
@@ -102,6 +102,22 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 			iter->second.addFile(type, assetEntry.first, assetEntry.second);
 		}
 	}
+
+	// Activate any packs that contain deleted assets
+	for (auto& assetName: deletedAssets) {
+		String packName;
+		auto packEntry = manifest.getPack("~:" + assetName);
+		if (packEntry) {
+			packName = packEntry.get().get().getName();
+		}
+
+		auto iter = packs.find(packName);
+		if (iter != packs.end()) {
+			// Pack found, so mark it as needing repacking
+			iter->second.setActive(true);
+		}
+	}
+
 	return packs;
 }
 
