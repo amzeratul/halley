@@ -26,6 +26,8 @@ namespace Halley
 		AudioClip(size_t numChannels);
 		~AudioClip();
 
+		AudioClip& operator=(AudioClip&& other) noexcept;
+
 		void loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadata meta);
 		void loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadata meta);
 
@@ -37,6 +39,7 @@ namespace Halley
 
 		static std::shared_ptr<AudioClip> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::AudioClip; }
+		void reload(Resource&& resource) override;
 
 	private:
 		size_t sampleLength = 0;

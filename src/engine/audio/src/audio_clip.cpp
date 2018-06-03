@@ -17,6 +17,26 @@ AudioClip::~AudioClip()
 {
 }
 
+AudioClip& AudioClip::operator=(AudioClip&& other) noexcept
+{
+	other.waitForLoad();
+
+	sampleLength = other.sampleLength;
+	numChannels = other.numChannels;
+	loopPoint = other.loopPoint;
+	streamPos = other.streamPos;
+	streaming = other.streaming;
+
+	temp0 = std::move(other.temp0);
+	temp1 = std::move(other.temp1);
+	samples = std::move(other.samples);
+	vorbisData = std::move(other.vorbisData);
+
+	doneLoading();
+
+	return *this;
+}
+
 void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadata metadata)
 {
 	VorbisData vorbis(data);
@@ -137,6 +157,11 @@ std::shared_ptr<AudioClip> AudioClip::loadResource(ResourceLoader& loader)
 	}
 
 	return result;
+}
+
+void AudioClip::reload(Resource&& resource)
+{
+	*this = std::move(dynamic_cast<AudioClip&>(resource));
 }
 
 StreamingAudioClip::StreamingAudioClip(size_t numChannels)

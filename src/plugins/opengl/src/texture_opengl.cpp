@@ -35,6 +35,8 @@ TextureOpenGL& TextureOpenGL::operator=(TextureOpenGL&& other) noexcept
 	textureId = other.textureId;
 	texSize = other.texSize;
 
+	doneLoading();
+
 	return *this;
 }
 

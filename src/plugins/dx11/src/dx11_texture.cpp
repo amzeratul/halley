@@ -40,6 +40,8 @@ DX11Texture& DX11Texture::operator=(DX11Texture&& other) noexcept
 	other.srv = nullptr;
 	other.samplerState = nullptr;
 
+	doneLoading();
+
 	return *this;
 }
 

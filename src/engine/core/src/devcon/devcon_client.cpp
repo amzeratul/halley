@@ -69,6 +69,10 @@ void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 
 	// Reload assets
 	for (auto& curType: byType) {
+		if (curType.first == AssetType::AudioClip) {
+			api.audio->pausePlayback();
+		}
+
 		auto& resources = api.core->getResources().ofType(curType.first);
 		for (auto& asset: curType.second) {
 			Logger::logInfo("Reloading " + curType.first + ": " + asset);
@@ -77,6 +81,9 @@ void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 
 		if (curType.first == AssetType::SpriteSheet) {
 			api.core->getResources().ofType(AssetType::Sprite).unloadAll();
+		}
+		if (curType.first == AssetType::AudioClip) {
+			api.audio->resumePlayback();
 		}
 	}
 }
