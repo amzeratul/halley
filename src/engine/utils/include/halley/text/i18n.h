@@ -15,6 +15,8 @@ namespace Halley {
 
 	public:
 		LocalisedString();
+		
+		LocalisedString& operator+=(const LocalisedString& str);
 
 		static LocalisedString fromHardcodedString(const char* str);
 		static LocalisedString fromHardcodedString(const String& str);
@@ -23,6 +25,7 @@ namespace Halley {
 
 		LocalisedString replaceTokens(const LocalisedString& tok0) const;
 		LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1) const;
+		LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2) const;
 
 		const String& getString() const;
 

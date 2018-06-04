@@ -94,6 +94,12 @@ LocalisedString::LocalisedString()
 {
 }
 
+LocalisedString& LocalisedString::operator+=(const LocalisedString& str)
+{
+	string += str.string;
+	return *this;
+}
+
 LocalisedString::LocalisedString(String string)
 	: string(std::move(string))
 {
@@ -135,6 +141,11 @@ LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0) cons
 LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1) const
 {
 	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()));
+}
+
+LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2) const
+{
+	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()).replaceAll("{2}", tok2.getString()));
 }
 
 const String& LocalisedString::getString() const
