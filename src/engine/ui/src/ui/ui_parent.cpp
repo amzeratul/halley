@@ -70,12 +70,14 @@ std::shared_ptr<UIWidget> UIParent::getWidget(const String& id)
 	auto lists = { children, childrenWaiting };
 	for (auto& cs : lists) {
 		for (auto& c: cs) {
-			if (c->getId() == id) {
-				return c;
-			}
-			auto c2 = c->getWidget(id);
-			if (c2) {
-				return c2;
+			if (c->isAlive()) {
+				if (c->getId() == id) {
+					return c;
+				}
+				auto c2 = c->getWidget(id);
+				if (c2) {
+					return c2;
+				}
 			}
 		}
 	}

@@ -33,7 +33,7 @@ namespace Halley {
 		template <typename T>
 		std::shared_ptr<T> getWidgetAs(const String& id)
 		{
-			return std::static_pointer_cast<T>(getWidget(id));
+			return std::dynamic_pointer_cast<T>(getWidget(id));
 		}
 
 		virtual bool isDescendentOf(const UIWidget& ancestor) const;
