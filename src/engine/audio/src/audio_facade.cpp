@@ -129,15 +129,15 @@ AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
 
 AudioHandle AudioFacade::playMusic(const String& eventName, int track)
 {
-	float fadeInTime = 0.5f;
+	float fadeInTime = 0;
 	bool hasFade = fadeInTime > 0.0001f;
 	
-	stopMusic(track, fadeInTime);
+	stopMusic(track, 0.5f);
 	auto handle = postEvent(eventName, AudioPosition::makeFixed());
-	handle->setGain(0.0f);
 	musicTracks[track] = handle;
 
 	if (hasFade) {
+		handle->setGain(0.0f);
 		handle->setBehaviour(std::make_unique<AudioEmitterFadeBehaviour>(fadeInTime, 1.0f, false));
 	}
 

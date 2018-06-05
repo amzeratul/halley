@@ -25,6 +25,7 @@ bool AudioSourceClip::isReady() const
 
 bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData& dstChannels)
 {
+	Expects(isReady());
 	if (!initialised) {
 		initialised = true;
 	}
