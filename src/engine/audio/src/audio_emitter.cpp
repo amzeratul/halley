@@ -145,7 +145,7 @@ void AudioEmitter::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMi
 	bool isPlaying = source->getAudioData(numSamples, audioSampleData);
 
 	// If we're audible, render
-	if (totalMix >= 0.01f) {
+	if (totalMix >= 0.0001f) {
 		// Render each emitter channel
 		for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
 			// Read to buffer
@@ -156,7 +156,7 @@ void AudioEmitter::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMi
 				const float gain1 = channelMix[mixIndex];
 
 				// Render to destination
-				if (gain0 + gain1 > 0.01f) {
+				if (gain0 + gain1 > 0.0001f) {
 					mixer.mixAudio(audioData[srcChannel], dst[dstChannel]->packs, gain0, gain1);
 				}
 			}
