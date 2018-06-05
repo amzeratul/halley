@@ -70,6 +70,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeHorizontalDiv(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeVerticalDiv(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeTabbedPane(const ConfigNode& entryNode);
+		std::shared_ptr<UIWidget> makeFramedImage(const ConfigNode& entryNode);
 
 		bool hasCondition(const String& condition) const;
 		bool resolveConditions(const ConfigNode& node) const;

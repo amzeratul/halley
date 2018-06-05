@@ -17,6 +17,7 @@
 #include "halley/ui/widgets/ui_paged_pane.h"
 #include "halley/support/logger.h"
 #include "ui_validator.h"
+#include "widgets/ui_framed_image.h"
 
 using namespace Halley;
 
@@ -42,6 +43,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("horizontalDiv", [=] (const ConfigNode& node) { return makeHorizontalDiv(node); });
 	addFactory("verticalDiv", [=] (const ConfigNode& node) { return makeVerticalDiv(node); });
 	addFactory("tabbedPane", [=] (const ConfigNode& node) { return makeTabbedPane(node); });
+	addFactory("framedImage", [=] (const ConfigNode& node) { return makeFramedImage(node); });
 }
 
 void UIFactory::addFactory(const String& key, WidgetFactory factory)
@@ -508,6 +510,20 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 	result->add(tabs);
 	result->add(pane, 1);
 	return result;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeFramedImage(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+
+	const auto id = node["id"].asString("");
+	const auto scrollPos = asVector2f(node["scrollPos"], Vector2f());
+	const auto scrollSpeed = asVector2f(node["scrollSpeed"], Vector2f());
+	const auto style = getStyle(node["style"].asString());
+	
+	auto image = std::make_shared<UIFramedImage>(id, style, makeSizer(entryNode));
+	image->setScrolling(scrollSpeed, scrollPos);
+	return image;
 }
 
 bool UIFactory::hasCondition(const String& condition) const
