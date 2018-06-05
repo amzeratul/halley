@@ -19,8 +19,15 @@ void UIFramedImage::draw(UIPainter& painter) const
 	auto clippedPainter = painter.withClip(rect);
 
 	const auto frameSize = framedSprite.getSize();	
-	for (float y = rect.getTop(); y < rect.getBottom(); y += frameSize.y) {
-		for (float x = rect.getLeft(); x < rect.getRight(); x += frameSize.x) {
+	const auto startPos = rect.getTopLeft() + scrollPos - frameSize;
+	for (float y = startPos.y; y < rect.getBottom(); y += frameSize.y) {
+		if (y + frameSize.y < rect.getTop()) {
+			continue;
+		}
+		for (float x = startPos.x; x < rect.getRight(); x += frameSize.x) {
+			if (x + frameSize.x < rect.getLeft()) {
+				continue;
+			}
 			clippedPainter.draw(framedSprite.clone().setPos(Vector2f(x, y)), true);
 		}
 	}
@@ -30,7 +37,8 @@ void UIFramedImage::draw(UIPainter& painter) const
 
 void UIFramedImage::update(Time t, bool moved)
 {
-	scrollPos += scrollSpeed * t;
+	const auto bgSize = framedSprite.getSize();
+	scrollPos = (scrollPos + float(t) * scrollSpeed).modulo(bgSize);
 	UIImage::update(t, moved);
 }
 
