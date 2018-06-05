@@ -62,16 +62,16 @@ void AudioEngine::addEmitter(size_t id, std::unique_ptr<AudioEmitter>&& src)
 {
 	emitters.emplace_back(std::move(src));
 	emitters.back()->setId(id);
-	idToSource[id] = emitters.back().get();
+	idToSource[id].push_back(emitters.back().get());
 }
 
-AudioEmitter* AudioEngine::getSource(size_t id)
+const std::vector<AudioEmitter*>& AudioEngine::getSources(size_t id)
 {
 	auto src = idToSource.find(id);
 	if (src != idToSource.end()) {
 		return src->second;
 	} else {
-		return nullptr;
+		return dummyIdSource;
 	}
 }
 
@@ -191,7 +191,15 @@ void AudioEngine::removeFinishedEmitters()
 {
 	for (auto& e: emitters) {
 		if (e->isDone()) {
-			idToSource.erase(e->getId());
+			auto iter = idToSource.find(e->getId());
+			if (iter != idToSource.end()) {
+				auto& ems = iter->second;
+				if (ems.size() > 1) {
+					ems.erase(std::remove_if(ems.begin(), ems.end(), [] (const AudioEmitter* e) { return e->isDone(); }), ems.end());
+				} else {
+					idToSource.erase(iter);
+				}
+			}
 		}
 	}
 	emitters.erase(std::remove_if(emitters.begin(), emitters.end(), [&] (const std::unique_ptr<AudioEmitter>& src) { return src->isDone(); }), emitters.end());

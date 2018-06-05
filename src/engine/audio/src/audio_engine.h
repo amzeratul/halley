@@ -27,7 +27,7 @@ namespace Halley {
 
 		void addEmitter(size_t id, std::unique_ptr<AudioEmitter>&& src);
 
-		AudioEmitter* getSource(size_t id);
+		const std::vector<AudioEmitter*>& getSources(size_t id);
 		std::vector<size_t> getPlayingSounds();
 
 		void run();
@@ -62,7 +62,8 @@ namespace Halley {
 		std::vector<std::unique_ptr<AudioEmitter>> emitters;
 		std::vector<AudioChannelData> channels;
 		
-		std::map<size_t, AudioEmitter*> idToSource;
+		std::map<size_t, std::vector<AudioEmitter*>> idToSource;
+		std::vector<AudioEmitter*> dummyIdSource;
 
 		float masterGain = 1.0f;
 		std::vector<String> groupNames;

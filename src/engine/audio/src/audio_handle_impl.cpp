@@ -73,8 +73,7 @@ void AudioHandleImpl::enqueue(std::function<void(AudioEmitter& src)> f)
 	size_t id = handleId;
 	AudioEngine* engine = facade.engine.get();
 	facade.enqueue([id, engine, f] () {
-		auto src = engine->getSource(id);
-		if (src) {
+		for (auto& src: engine->getSources(id)) {
 			f(*src);
 		}
 	});
