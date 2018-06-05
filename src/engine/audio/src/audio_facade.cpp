@@ -3,6 +3,7 @@
 #include "audio_handle_impl.h"
 #include "audio_emitter_behaviour.h"
 #include "halley/support/console.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -217,6 +218,12 @@ void AudioFacade::setListener(AudioListenerData listener)
 	});
 }
 
+void AudioFacade::onAudioException(std::exception& e)
+{
+	std::unique_lock<std::mutex> lock(exceptionMutex);
+	exceptions.push_back(e.what());
+}
+
 void AudioFacade::run()
 {
 	while (running) {
@@ -226,25 +233,29 @@ void AudioFacade::run()
 
 void AudioFacade::stepAudio()
 {
-	std::vector<std::function<void()>> toDo;
-	{
-		std::unique_lock<std::mutex> lock(audioMutex);
-		if (!running) {
-			return;
+	try {
+		std::vector<std::function<void()>> toDo;
+		{
+			std::unique_lock<std::mutex> lock(audioMutex);
+			if (!running) {
+				return;
+			}
+			toDo = std::move(inbox);
+			inbox.clear();
+			playingSoundsNext = engine->getPlayingSounds();
 		}
-		toDo = std::move(inbox);
-		inbox.clear();
-		playingSoundsNext = engine->getPlayingSounds();
-	}
 
-	for (auto& action : toDo) {
-		action();
-	}
+		for (auto& action : toDo) {
+			action();
+		}
 
-	if (ownAudioThread) {
-		engine->run();
-	} else {
-		engine->generateBuffer();
+		if (ownAudioThread) {
+			engine->run();
+		} else {
+			engine->generateBuffer();
+		}
+	} catch (std::exception& e) {
+		onAudioException(e);
 	}
 }
 
@@ -257,9 +268,21 @@ void AudioFacade::enqueue(std::function<void()> action)
 
 void AudioFacade::pump()
 {
+	{
+		std::unique_lock<std::mutex> lock(exceptionMutex);
+		if (!exceptions.empty()) {
+			for (size_t i = 0; i + 1 < exceptions.size(); ++i) {
+				Logger::logError(exceptions[i]);
+			}
+			const auto e = exceptions.back();
+			exceptions.clear();
+			stopPlayback();
+			throw Exception(e);
+		}
+	}
+
 	if (running) {
 		std::unique_lock<std::mutex> lock(audioMutex);
-	
 		if (!outbox.empty()) {
 			size_t i = inbox.size();
 			inbox.resize(i + outbox.size());

@@ -46,6 +46,8 @@ namespace Halley {
 
 	    void setListener(AudioListenerData listener) override;
 
+		void onAudioException(std::exception& e);
+
     private:
 		Resources* resources;
 		AudioOutputAPI& output;
@@ -54,12 +56,14 @@ namespace Halley {
 
 		std::thread audioThread;
 		std::mutex audioMutex;
+		std::mutex exceptionMutex;
 		std::atomic<bool> running;
 		std::atomic<bool> started;
 	    AudioSpec audioSpec;
 
 		std::vector<std::function<void()>> outbox;
 		std::vector<std::function<void()>> inbox;
+		std::vector<String> exceptions;
 		std::vector<size_t> playingSounds;
 		std::vector<size_t> playingSoundsNext;
 
