@@ -5,13 +5,6 @@
 
 using namespace Halley;
 
-#ifndef _MSC_VER
-void memcpy_s(void* dst, size_t size, const void* src, size_t)
-{
-	memcpy(dst, src, size);
-}
-#endif
-
 Serializer::Serializer()
 	: dryRun(true)
 {}
