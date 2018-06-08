@@ -4,6 +4,8 @@
 #include "audio_emitter_behaviour.h"
 #include "halley/support/console.h"
 #include "halley/support/logger.h"
+#include "halley/core/resources/resources.h"
+#include "audio_event.h"
 
 using namespace Halley;
 
@@ -53,7 +55,7 @@ void AudioFacade::startPlayback(int deviceNumber)
 
 	auto devices = getAudioDevices();
 	if (int(devices.size()) > deviceNumber) {
-		engine = std::make_unique<AudioEngine>(*resources);
+		engine = std::make_unique<AudioEngine>();
 
 		AudioSpec format;
 		format.bufferSize = 1024;
@@ -121,9 +123,12 @@ void AudioFacade::pausePlayback()
 
 AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
 {
+	auto event = resources->get<AudioEvent>(name);
+	event->loadDependencies(*resources);
+
 	size_t id = uniqueId++;
 	enqueue([=] () {
-		engine->postEvent(id, name, position);
+		engine->postEvent(id, event, position);
 	});
 	return std::make_shared<AudioHandleImpl>(*this, id);
 }

@@ -10,9 +10,8 @@
 
 using namespace Halley;
 
-AudioEngine::AudioEngine(Resources& resources)
-	: resources(resources)
-	, mixer(AudioMixer::makeMixer())
+AudioEngine::AudioEngine()
+	: mixer(AudioMixer::makeMixer())
 	, pool(std::make_unique<AudioBufferPool>())
 	, running(true)
 	, needsBuffer(true)
@@ -24,9 +23,9 @@ AudioEngine::~AudioEngine()
 {
 }
 
-void AudioEngine::postEvent(size_t id, const String& name, const AudioPosition& position)
+void AudioEngine::postEvent(size_t id, std::shared_ptr<const AudioEvent> event, const AudioPosition& position)
 {
-	resources.get<AudioEvent>(name)->run(*this, id, position);
+	event->run(*this, id, position);
 }
 
 void AudioEngine::play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)
@@ -143,11 +142,6 @@ void AudioEngine::generateBuffer()
 Random& AudioEngine::getRNG()
 {
 	return rng;
-}
-
-Resources& AudioEngine::getResources() const
-{
-	return resources;
 }
 
 AudioBufferPool& AudioEngine::getPool() const

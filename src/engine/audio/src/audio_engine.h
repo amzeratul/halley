@@ -18,10 +18,10 @@ namespace Halley {
     class AudioEngine
     {
     public:
-	    explicit AudioEngine(Resources& resources);
+	    AudioEngine();
 		~AudioEngine();
 
-	    void postEvent(size_t id, const String& name, const AudioPosition& position);
+	    void postEvent(size_t id, std::shared_ptr<const AudioEvent> event, const AudioPosition& position);
 	    void play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop);
 	    void setListener(AudioListenerData position);
 
@@ -38,7 +38,6 @@ namespace Halley {
 		void generateBuffer();
 	    
     	Random& getRNG();
-		Resources& getResources() const;
 		AudioBufferPool& getPool() const;
 
 		void setMasterGain(float gain);
@@ -46,8 +45,6 @@ namespace Halley {
 		int getGroupId(const String& group);
 
     private:
-		Resources& resources;
-
 		AudioSpec spec;
 		AudioOutputAPI* out;
 		std::unique_ptr<AudioMixer> mixer;

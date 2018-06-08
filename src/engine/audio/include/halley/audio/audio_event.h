@@ -2,6 +2,7 @@
 #include "halley/resources/resource.h"
 #include "halley/maths/range.h"
 #include "halley/data_structures/maybe.h"
+#include "audio_clip.h"
 
 namespace Halley
 {
@@ -11,6 +12,7 @@ namespace Halley
 	class ConfigFile;
 	class ResourceLoader;
 	class IAudioEventAction;
+	class Resources;
 
 	class AudioEvent : public Resource
 	{
@@ -23,12 +25,14 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		void loadDependencies(Resources& resources) const;
+
 		void reload(Resource&& resource) override;
 		static std::shared_ptr<AudioEvent> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::AudioEvent; }
 
 	private:
-		std::vector<std::unique_ptr<const IAudioEventAction>> actions;
+		std::vector<std::unique_ptr<IAudioEventAction>> actions;
 	};
 
 	enum class AudioEventActionType
@@ -54,6 +58,7 @@ namespace Halley
 
 		virtual void serialize(Serializer& s) const = 0;
 		virtual void deserialize(Deserializer& s) = 0;
+		virtual void loadDependencies(const Resources& resources) {}
 	};
 
 	class AudioEventActionPlay : public IAudioEventAction
@@ -68,8 +73,11 @@ namespace Halley
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
 
+		void loadDependencies(const Resources& resources) override;
+
 	private:
 		std::vector<String> clips;
+		std::vector<std::shared_ptr<const AudioClip>> clipData;
 		String group;
 		Range<float> pitch;
 		Range<float> volume;

@@ -109,9 +109,13 @@ void AudioEventActionPlay::run(AudioEngine& engine, size_t id, const AudioPositi
 		return;
 	}
 
+	if (clips.size() != clipData.size()) {
+		throw Exception("AudioEvent has not had its dependencies loaded correctly.");
+	}
+
 	auto& rng = engine.getRNG();
 	int clipN = rng.getInt(0, int(clips.size()) - 1);
-	auto clip = engine.getResources().get<AudioClip>(clips[clipN]);
+	auto clip = clipData[clipN];
 
 	const float curVolume = rng.getFloat(volume.s, volume.e);
 	const float curPitch = clamp(rng.getFloat(pitch.s, pitch.e), 0.1f, 2.0f);
@@ -150,4 +154,23 @@ void AudioEventActionPlay::deserialize(Deserializer& s)
 	s >> delay;
 	s >> minimumSpace;
 	s >> loop;
+}
+
+void AudioEventActionPlay::loadDependencies(const Resources& resources)
+{
+	if (clipData.size() != clips.size()) {
+		clipData.clear();
+		clipData.reserve(clips.size());
+			
+		for (auto& c: clips) {
+			clipData.push_back(resources.get<AudioClip>(c));
+		}
+	}
+}
+
+void AudioEvent::loadDependencies(Resources& resources) const
+{
+	for (auto& a: actions) {
+		a->loadDependencies(resources);
+	}
 }
