@@ -84,21 +84,9 @@ namespace Halley {
 	inline float volumeToGain(float volume)
 	{
 		constexpr float a = 0.01f;
-		constexpr float b = 4.6051701859880913680359829093687f;
+		constexpr float b = 4.6051701859880913680359829093687f; // -ln(a)
 		const float gain = clamp(a * ::expf(volume * b), 0.0f, 1.0f);
-		const float linearRolloff = clamp(gain * 10, 0.0f, 1.0f);
+		const float linearRolloff = clamp(volume * 10, 0.0f, 1.0f);
 		return gain * linearRolloff;
-	}
-
-	inline float gainToVolume(float gain)
-	{
-		constexpr float a = 0.01f;
-		constexpr float b = 4.6051701859880913680359829093687f;
-		float baseGain = gain;
-		if (baseGain < 0.1f) {
-			// Undo linear rolloff
-			baseGain = sqrt(baseGain * 0.1f);
-		}
-		return clamp(logf(baseGain / a) / b, 0.0f, 1.0f);
 	}
 }
