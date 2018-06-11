@@ -1,6 +1,12 @@
 include(PrecompiledHeader)
 
 
+# Gitlab CI support
+add_definitions(-DCI_PIPELINE_ID=$ENV{CI_PIPELINE_ID})
+add_definitions(-DCI_COMMIT_SHA=$ENV{CI_COMMIT_SHA})
+add_definitions(-DCI_COMMIT_REF_SLUG=$ENV{CI_COMMIT_REF_SLUG})
+
+
 # C++14 support
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
