@@ -13,13 +13,13 @@ set(DEV_BUILD 1)
 
 
 # Gitlab CI support
-if ($ENV{CI_PIPELINE_ID})
+if (DEFINED ENV{CI_PIPELINE_ID})
 	add_definitions(-DCI_PIPELINE_ID=$ENV{CI_PIPELINE_ID})
 endif()
-if ($ENV{CI_COMMIT_SHA})
+if (DEFINED ENV{CI_COMMIT_SHA})
 	add_definitions(-DCI_COMMIT_SHA=$ENV{CI_COMMIT_SHA})
 endif()
-if ($ENV{CI_COMMIT_REF_SLUG})
+if (DEFINED ENV{CI_COMMIT_REF_SLUG})
 	add_definitions(-DCI_COMMIT_REF_SLUG=$ENV{CI_COMMIT_REF_SLUG})
 	if (string_starts_with($ENV{CI_COMMIT_REF_SLUG} release))
 		set(DEV_BUILD 0)
