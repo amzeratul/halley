@@ -1,6 +1,17 @@
 include(PrecompiledHeader)
 
 
+function(string_starts_with str search)
+  string(FIND "${str}" "${search}" out)
+  if("${out}" EQUAL 0)
+    return(true)
+  endif()
+  return(false)
+endfunction()
+
+set(DEV_BUILD 1)
+
+
 # Gitlab CI support
 if ($ENV{CI_PIPELINE_ID})
 	add_definitions(-DCI_PIPELINE_ID=$ENV{CI_PIPELINE_ID})
@@ -10,6 +21,13 @@ if ($ENV{CI_COMMIT_SHA})
 endif()
 if ($ENV{CI_COMMIT_REF_SLUG})
 	add_definitions(-DCI_COMMIT_REF_SLUG=$ENV{CI_COMMIT_REF_SLUG})
+	if (string_starts_with($ENV{CI_COMMIT_REF_SLUG} release))
+		set(DEV_BUILD 0)
+	endif()
+endif()
+
+if (DEV_BUILD EQUAL 1)
+	add_definitions(-DDEV_BUILD)
 endif()
 
 
@@ -33,7 +51,12 @@ if (MSVC)
 	endif ()
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL /sdl /Oi /Ot /Oy /Ob2 /Zi")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /sdl /Oi /Ot /Ob2")
-	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG /DEBUG")
+	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG")
+
+	if(DEV_BUILD EQUAL 0)
+		set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
+	endif()
+
 	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /DEBUG:FASTLINK")
 	set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
 	set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
