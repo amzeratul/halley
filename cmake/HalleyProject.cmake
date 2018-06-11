@@ -2,9 +2,15 @@ include(PrecompiledHeader)
 
 
 # Gitlab CI support
-add_definitions(-DCI_PIPELINE_ID=$ENV{CI_PIPELINE_ID})
-add_definitions(-DCI_COMMIT_SHA=$ENV{CI_COMMIT_SHA})
-add_definitions(-DCI_COMMIT_REF_SLUG=$ENV{CI_COMMIT_REF_SLUG})
+if ($ENV{CI_PIPELINE_ID})
+	add_definitions(-DCI_PIPELINE_ID=$ENV{CI_PIPELINE_ID})
+endif()
+if ($ENV{CI_COMMIT_SHA})
+	add_definitions(-DCI_COMMIT_SHA=$ENV{CI_COMMIT_SHA})
+endif()
+if ($ENV{CI_COMMIT_REF_SLUG})
+	add_definitions(-DCI_COMMIT_REF_SLUG=$ENV{CI_COMMIT_REF_SLUG})
+endif()
 
 
 # C++14 support
