@@ -99,6 +99,9 @@ std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 	if (widgetNode.hasKey("size")) {
 		widget->setMinSize(asVector2f(widgetNode["size"], {}));
 	}
+	if (widgetNode.hasKey("enabled")) {
+		widget->setEnabled(widgetNode["enabled"].asBool(true));
+	}
 	return widget;
 }
 
