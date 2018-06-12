@@ -14,7 +14,6 @@ AssetPackerTask::AssetPackerTask(Project& project, Maybe<std::set<String>> asset
 
 void AssetPackerTask::run()
 {
-	project.setAssetPackManifest(project.getRootPath() / "scripts" / "wargroove_manifest.yaml"); // HACK
 	AssetPacker::pack(project, assetsToPack, deletedAssets);
 
 	if (!isCancelled()) {

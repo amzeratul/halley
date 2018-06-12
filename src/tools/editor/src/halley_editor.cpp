@@ -143,7 +143,7 @@ std::unique_ptr<Project> HalleyEditor::createProject(Path path)
 	if (!project) {
 		throw Exception("Unable to create project at " + path.string());
 	}
-	
+
 	preferences->addRecent(path.string());
 	preferences->saveToFile();
 	

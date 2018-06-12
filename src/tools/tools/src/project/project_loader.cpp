@@ -12,7 +12,9 @@ ProjectLoader::ProjectLoader(const HalleyStatics& statics, const Path& halleyPat
 
 std::unique_ptr<Project> ProjectLoader::loadProject(const Path& path) const
 {
-	return std::make_unique<Project>(curPlatform, path, halleyPath, plugins);
+	auto project = std::make_unique<Project>(curPlatform, path, halleyPath, plugins);
+	project->setAssetPackManifest(path / "halley_project" / "asset_manifest.yaml"); // HACK
+	return std::move(project);
 }
 
 void ProjectLoader::setPlatform(const String& platform)

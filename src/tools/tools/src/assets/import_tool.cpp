@@ -16,14 +16,19 @@ using namespace std::chrono_literals;
 
 int ImportTool::run(Vector<std::string> args)
 {
-	if (args.size() == 2) {
-		Path projectPath = FileSystem::getAbsolute(Path(args[0]));
-		Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));
-
+	if (args.size() >= 2) {
+		const Path projectPath = FileSystem::getAbsolute(Path(args[0]));
+		const Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));
+		
 		ProjectLoader loader(*statics, halleyRootPath);
 		loader.setPlatform(platform);
 		auto proj = loader.loadProject(projectPath);
-		Logger::logInfo("Importing project at \"" + projectPath + "\", with Halley root at \"" + halleyRootPath + "\"");
+
+		if (args.size() >= 3) {
+			const Path manifestPath = FileSystem::getAbsolute(Path(args[2]));
+			proj->setAssetPackManifest(manifestPath);
+		}
+		Logger::logInfo("Importing project at \"" + projectPath + "\", with Halley root at \"" + halleyRootPath + "\" and manifest at \"" + proj->getAssetPackManifestPath() + "\"");
 
 		auto tasks = std::make_unique<EditorTaskSet>();
 		tasks->setListener(*this);
