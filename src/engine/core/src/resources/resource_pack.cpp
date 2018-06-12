@@ -4,9 +4,9 @@
 #include "api/system_api.h"
 using namespace Halley;
 
-PackResourceLocator::PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, String encryptionKey, bool preLoad)
+PackResourceLocator::PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, String key, bool preLoad)
 	: path(std::move(path))
-	, encryptionKey(std::move(encryptionKey))
+	, encryptionKey(std::move(key))
 	, preLoad(preLoad)
 {
 	assetPack = std::make_unique<AssetPack>(std::move(reader), encryptionKey, preLoad);
