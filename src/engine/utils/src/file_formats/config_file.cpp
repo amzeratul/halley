@@ -437,6 +437,10 @@ String ConfigNode::asString() const
 {
 	if (type == ConfigNodeType::String) {
 		return *reinterpret_cast<String*>(ptrData);
+	} else if (type == ConfigNodeType::Int) {
+		return toString(asInt());
+	} else if (type == ConfigNodeType::Float) {
+		return toString(asFloat());
 	} else {
 		throw Exception(getNodeDebugId() + " is not a string type");
 	}
