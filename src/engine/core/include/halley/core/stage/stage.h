@@ -24,7 +24,6 @@ namespace Halley
 		virtual void onRender(RenderContext&) const {}
 
 		virtual void init() {}
-		virtual void deInit() {}
 
 		const HalleyAPI& getAPI() const { return *api; }
 

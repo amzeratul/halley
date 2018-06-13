@@ -425,6 +425,13 @@ int64_t Core::getTime(CoreAPITimer timerType, TimeLine tl, StopwatchAveraging::M
 	}
 }
 
+void Core::initStage(Stage& stage)
+{
+	stage.api = &*api;
+	stage.setGame(*game);
+	stage.init();
+}
+
 bool Core::transitionStage()
 {
 	// If it's not running anymore, reset stage
@@ -438,7 +445,6 @@ bool Core::transitionStage()
 		// Get rid of current stage
 		if (currentStage) {
 			HALLEY_DEBUG_TRACE();
-			currentStage->deInit();
 			currentStage.reset();
 			HALLEY_DEBUG_TRACE();
 		}
@@ -449,9 +455,7 @@ bool Core::transitionStage()
 		// Prepare next stage
 		if (currentStage) {
 			HALLEY_DEBUG_TRACE();
-			currentStage->api = &*api;
-			currentStage->setGame(*game);
-			currentStage->init();
+			initStage(*currentStage);
 			HALLEY_DEBUG_TRACE();
 		} else {
 			quit(0);

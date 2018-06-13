@@ -69,8 +69,3 @@ void Stage::doInit(const HalleyAPI* _api)
 	api = _api;
 	init();
 }
-
-void Stage::doDeInit()
-{
-	deInit();
-}

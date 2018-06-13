@@ -33,6 +33,7 @@ namespace Halley
 
 		void setStage(StageID stage) override;
 		void setStage(std::unique_ptr<Stage> stage) override;
+		void initStage(Stage& stage) override;
 		void quit(int exitCode = 0) override;
 		Resources& getResources() override;
 		const Environment& getEnvironment() override;

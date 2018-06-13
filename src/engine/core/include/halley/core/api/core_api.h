@@ -25,6 +25,7 @@ namespace Halley
 		virtual void quit(int exitCode = 0) = 0;
 		virtual void setStage(StageID stage) = 0;
 		virtual void setStage(std::unique_ptr<Stage> stage) = 0;
+		virtual void initStage(Stage& stage) = 0;
 
 		virtual const HalleyStatics& getStatics() = 0;
 		
