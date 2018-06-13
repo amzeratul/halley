@@ -334,6 +334,10 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 		}
 	}
 
+	if (node.hasKey("maxLength")) {
+		result->setMaxLength(node["maxLength"].asInt());
+	}
+
 	return result;
 }
 
