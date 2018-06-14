@@ -26,8 +26,14 @@
 #include <cstring>
 #include "halley/os/os.h"
 #include "halley/text/string_converter.h"
-#include <boost/stacktrace.hpp>
 #include <csignal>
+
+#ifndef _MSC_VER
+#define BOOST_STACKTRACE_USE_BACKTRACE
+#define BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED
+#endif
+#include <boost/stacktrace.hpp>
+
 
 using namespace Halley;
 
