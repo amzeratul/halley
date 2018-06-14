@@ -186,6 +186,16 @@ Sprite& Sprite::setAbsolutePivot(Vector2f v)
 	return *this;
 }
 
+Vector2f Sprite::getPivot() const
+{
+	return vertexAttrib.pivot;
+}
+
+Vector2f Sprite::getAbsolutePivot() const
+{
+	return vertexAttrib.pivot * size;
+}
+
 Sprite& Sprite::setSize(Vector2f v)
 {
 	if (size != v) {

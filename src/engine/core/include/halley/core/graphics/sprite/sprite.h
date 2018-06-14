@@ -62,6 +62,8 @@ namespace Halley
 
 		Sprite& setPivot(Vector2f pivot);
 		Sprite& setAbsolutePivot(Vector2f pivot);
+		Vector2f getPivot() const;
+		Vector2f getAbsolutePivot() const;
 
 		Sprite& setRotation(Angle1f angle);
 
