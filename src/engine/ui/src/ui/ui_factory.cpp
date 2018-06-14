@@ -397,12 +397,24 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString("");
-	auto imageName = node["image"].asString();
 	auto materialName = node["material"].asString("");
 	auto col = node["colour"].asString("#FFFFFF");
 	auto flip = node["flip"].asBool(false);
 	auto pivot = asMaybeVector2f(node["pivot"]);
-	auto sprite = Sprite().setImage(resources, imageName, materialName).setColour(Colour4f::fromString(col)).setFlip(flip);
+
+	auto sprite = Sprite();
+	
+	if (node.hasKey("image")) {
+		auto imageName = node["image"].asString();
+		sprite.setImage(resources, imageName, materialName);
+	} else if (node.hasKey("sprite")) {
+		auto spriteName = node["sprite"].asString();
+		auto spriteSheetName = node["spriteSheet"].asString();
+		sprite.setSprite(resources, spriteSheetName, spriteName, materialName);
+	}
+
+	sprite.setColour(Colour4f::fromString(col)).setFlip(flip);
+	
 	if (pivot) {
 		sprite.setPivot(pivot.get());
 	}
