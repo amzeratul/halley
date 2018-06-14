@@ -57,6 +57,8 @@ namespace Halley {
 		Entity* tryGetEntity(EntityId id);
 		size_t numEntities() const;
 
+		void spawnPending(); // Warning: use with care, will invalidate entities
+
 		void onEntityDirty();
 
 		template <typename T>
@@ -97,7 +99,6 @@ namespace Halley {
 		mutable std::array<StopwatchAveraging, 3> timer;
 
 		void allocateEntity(Entity* entity);
-		void spawnPending();
 		void updateEntities();
 		void initSystems() const;
 		void deleteEntity(Entity* entity);
