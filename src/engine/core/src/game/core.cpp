@@ -57,7 +57,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	std::cout << ConsoleColour(Console::GREEN) << "Halley is initializing..." << ConsoleColour() << std::endl;
 
 	// Debugging initialization
-	Debug::setErrorHandling();
+	Debug::setErrorHandling((environment->getDataPath() / "stack.dmp").string(), [=] (const std::string& error) { onTerminatedInError(error); });
 
 	// Time
 	auto now = std::chrono::system_clock::now();
@@ -141,7 +141,7 @@ void Core::onTerminatedInError(const std::string& error)
 
 	std::cout << ConsoleColour(Console::RED) << "Last traces:\n" << ConsoleColour(Console::DARK_RED);
 	Debug::printLastTraces();
-	std::cout << ConsoleColour() << std::endl;
+	std::cout << "\nEnd of traces." << ConsoleColour() << std::endl;
 	hasError = true;
 }
 

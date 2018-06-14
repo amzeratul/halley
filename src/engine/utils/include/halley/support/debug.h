@@ -24,6 +24,7 @@
 #include "halley/text/halleystring.h"
 #include <list>
 #include <array>
+#include <functional>
 
 namespace Halley {
 	struct DebugTraceEntry
@@ -37,9 +38,8 @@ namespace Halley {
 	public:
 		static bool isDebug();
 
-		static void setErrorHandling();
-		static void printCallStack();
-		static String getCallStack();
+		static void setErrorHandling(const String& dumpFilePath, std::function<void(const std::string&)> errorHandler);
+		static String getCallStack(int skip = 3);
 
 		static void trace(const char* filename, int line, const char* arg = nullptr);
 		static String getLastTraces();

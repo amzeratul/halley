@@ -21,20 +21,18 @@
 
 #include "halley/support/exception.h"
 #include "halley/support/debug.h"
+#include <sstream>
 
 using namespace Halley;
 
 Exception::Exception(const String& _msg, bool logCallStack) noexcept
 {
+	std::stringstream ss;
+	ss << _msg;
 	if (logCallStack) {
-		String stack = Debug::getCallStack();
-		if (stack != "") {
-			msg = _msg + "\n" + stack;
-			return;
-		}
+		ss << "\n" << Debug::getCallStack(4);
 	}
-
-	msg = _msg;
+	msg = ss.str();
 }
 
 const char* Exception::what() const noexcept
