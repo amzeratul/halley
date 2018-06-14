@@ -28,11 +28,10 @@
 #include "halley/text/string_converter.h"
 #include <csignal>
 
-#ifndef _MSC_VER
-#define BOOST_STACKTRACE_USE_BACKTRACE
-#define BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED
-#endif
+#ifdef _MSC_VER
+#define HAS_STACKTRACE
 #include <boost/stacktrace.hpp>
+#endif
 
 
 using namespace Halley;
@@ -59,7 +58,9 @@ static void signalHandler(int signum)
     ::signal(SIGSEGV, SIG_DFL);
 	::signal(SIGABRT, SIG_DFL);
 
+#ifdef HAS_STACKTRACE
 	boost::stacktrace::safe_dump_to(dumpFile.c_str());
+#endif
 
 	std::stringstream ss;
 	ss << "Process aborting with signal #";
@@ -85,7 +86,10 @@ static void signalHandler(int signum)
 	default:
 		ss << "UNKNOWN (" << signum << ")";
 	}
+
+#ifdef HAS_STACKTRACE
 	ss << "\n" << boost::stacktrace::stacktrace(3, 99);
+#endif
 	errorHandler(ss.str());
 
 	::raise(SIGABRT);
@@ -94,7 +98,10 @@ static void signalHandler(int signum)
 static void terminateHandler()
 {
 	std::stringstream ss;
-	ss << "std::terminate() invoked.\n" << boost::stacktrace::stacktrace(3, 99);
+	ss << "std::terminate() invoked.";
+#ifdef HAS_STACKTRACE
+	ss << "\n" << boost::stacktrace::stacktrace(3, 99);
+#endif
 	errorHandler(ss.str());
 
 	::signal(SIGSEGV, SIG_DFL);
@@ -116,7 +123,9 @@ void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(cons
 String Debug::getCallStack(int skip)
 {
 	std::stringstream ss;
+#ifdef HAS_STACKTRACE
 	ss << boost::stacktrace::stacktrace(skip, 99);
+#endif
 	return ss.str();
 }
 
