@@ -73,9 +73,6 @@ static void signalHandler(int signum)
 	case SIGTERM:
 		ss << "SIGTERM (15)";
 		break;
-	case SIGBREAK:
-		ss << "SIGBREAK (21)";
-		break;
 	case SIGABRT:
 		ss << "SIGABRT (22)";
 		break;
