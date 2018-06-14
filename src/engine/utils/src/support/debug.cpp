@@ -33,6 +33,10 @@
 #include <boost/stacktrace.hpp>
 #endif
 
+#ifndef __NX_TOOLCHAIN_MAJOR__
+#define HAS_SIGNAL
+#endif
+
 
 using namespace Halley;
 
@@ -53,6 +57,7 @@ static String dumpFile;
 static std::function<void(const std::string&)> errorHandler;
 
 
+#ifdef HAS_SIGNAL
 static void signalHandler(int signum)
 {
     ::signal(SIGSEGV, SIG_DFL);
@@ -94,6 +99,7 @@ static void signalHandler(int signum)
 
 	::raise(SIGABRT);
 }
+#endif
 
 static void terminateHandler()
 {
@@ -104,17 +110,19 @@ static void terminateHandler()
 #endif
 	errorHandler(ss.str());
 
-	::signal(SIGSEGV, SIG_DFL);
-	::signal(SIGABRT, SIG_DFL);
-	::raise(SIGABRT);
+	std::abort();
 }
 
 
 void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(const std::string&)> eh)
 {
 	dumpFile = dumpFilePath;
+
+#ifdef HAS_SIGNAL
 	::signal(SIGSEGV, &signalHandler);
 	::signal(SIGABRT, &signalHandler);
+#endif
+
 	std::set_terminate(&terminateHandler);
 	errorHandler = eh;
 }
