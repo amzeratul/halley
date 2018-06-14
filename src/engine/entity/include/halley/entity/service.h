@@ -7,7 +7,14 @@ namespace Halley
 	class Service
 	{
 	public:
-		virtual ~Service() {}
+		Service() = default;
+		Service(const Service& other) = delete;
+		Service(Service&& other) = default;
+		virtual ~Service() = default;
+
+		Service& operator=(const Service& other) = delete;
+		Service& operator=(Service&& other) = default;
+
 		String getName() const { return typeid(*this).name(); }
 	};
 }
