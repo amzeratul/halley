@@ -107,9 +107,11 @@ void UITextInput::updateTextInput()
 
 	for (int letter = keyboard->getNextLetter(); letter != 0; letter = keyboard->getNextLetter()) {
 		if (letter >= 32) {
-			text.insert(text.begin() + caret, letter);
-			caret++;
-			modified = true;
+			if (!maxLength || int(text.size()) < maxLength.get()) {
+				text.insert(text.begin() + caret, letter);
+				caret++;
+				modified = true;
+			}
 		}
 	}
 
@@ -118,7 +120,9 @@ void UITextInput::updateTextInput()
 	if (modified) {
 		if (getValidator()) {
 			text = getValidator()->onTextChanged(text);
+			setCaretPosition(caret);
 		}
+
 		const auto str = String(text);
 		sendEvent(UIEvent(UIEventType::TextChanged, getId(), str));
 		notifyDataBind(str);
