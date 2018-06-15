@@ -84,6 +84,7 @@ namespace Halley
 		ConfigNode& operator=(const SequenceType& entryList);
 		ConfigNode& operator=(const String& value);
 		ConfigNode& operator=(const Bytes& value);
+		ConfigNode& operator=(const char* value);
 
 		ConfigNodeType getType() const;
 

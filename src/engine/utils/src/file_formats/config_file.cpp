@@ -171,6 +171,12 @@ ConfigNode& ConfigNode::operator=(const Bytes& value)
 	return *this;
 }
 
+ConfigNode& ConfigNode::operator=(const char* value)
+{
+	*this = String(value);
+	return *this;
+}
+
 ConfigNode& ConfigNode::operator=(Bytes&& value)
 {
 	reset();
