@@ -46,7 +46,7 @@ namespace Halley {
 		String(const char* utf8);
 		String(const char* utf8,size_t bytes);
 		String(const std::basic_string<Character>& str);
-		String(const String& str);
+		String(const String& str) noexcept;
 		String(String&& str) noexcept;
 
 		explicit String(const wchar_t* utf16);

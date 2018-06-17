@@ -75,7 +75,7 @@ String::String(const StringUTF32& utf32)
 	if (len > 0) UTF32toUTF8(&utf32[0],getCharPointer(0));
 }
 
-String::String(const String& other)
+String::String(const String& other) noexcept
 {
 	str = other.str;
 }
