@@ -26,15 +26,15 @@
 #include <cstring>
 #include "halley/os/os.h"
 #include "halley/text/string_converter.h"
-#include <csignal>
 
 #ifdef _MSC_VER
 #define HAS_STACKTRACE
 #include <boost/stacktrace.hpp>
 #endif
 
-#ifndef __NX_TOOLCHAIN_MAJOR__
+#if !defined(__NX_TOOLCHAIN_MAJOR__) && !defined(__ORBIS__)
 #define HAS_SIGNAL
+#include <csignal>
 #endif
 
 
