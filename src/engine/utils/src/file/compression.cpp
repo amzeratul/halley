@@ -57,6 +57,9 @@ std::shared_ptr<const char> Compression::inflateRaw(gsl::span<const gsl::byte> b
 	Expects (bytes.size_bytes() >= 8);
 	uint64_t expectedOutSize;
 	memcpy(&expectedOutSize, bytes.data(), 8);
+	if (expectedOutSize > 100 * 1024 * 1024) {
+		throw Exception("File is too big to inflate: " + String::prettySize(expectedOutSize));
+	}
 
 	unsigned char* out = nullptr;
 	size_t outSize = 0;

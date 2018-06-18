@@ -36,7 +36,10 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& 
 		throw Exception("Asset pack is invalid (too small)");
 	}
 	AssetPackHeader header;
-	reader->read(gsl::as_writeable_bytes(gsl::span<AssetPackHeader>(&header, 1)));
+	int nRead = reader->read(gsl::as_writeable_bytes(gsl::span<AssetPackHeader>(&header, 1)));
+	if (nRead != int(sizeof(header))) {
+		throw Exception("Unable to read header");
+	}
 	if (memcmp(header.identifier.data(), "HALLEYPK", 8) != 0) {
 		throw Exception("Asset pack is invalid (invalid identifier)");
 	}
@@ -47,7 +50,10 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& 
 	{
 		const size_t assetDbSize = header.dataStartPos - header.assetDbStartPos;
 		auto assetDbBytes = Bytes(assetDbSize);
-		reader->read(gsl::as_writeable_bytes(gsl::span<Byte>(assetDbBytes)));
+		nRead = reader->read(gsl::as_writeable_bytes(gsl::span<Byte>(assetDbBytes)));
+		if (nRead != int(assetDbBytes.size())) {
+			throw Exception("Unable to read header");
+		}
 		assetDb = std::make_unique<AssetDatabase>();
 		Deserializer::fromBytes<AssetDatabase>(*assetDb, Compression::inflate(assetDbBytes));
 	}
