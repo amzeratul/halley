@@ -420,7 +420,11 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 	}
 	Vector4f innerBorder = asVector4f(node["innerBorder"], Vector4f());
 
-	return std::make_shared<UIImage>(id, sprite, makeSizer(entryNode), innerBorder);
+	auto image = std::make_shared<UIImage>(id, sprite, makeSizer(entryNode), innerBorder);
+	if (node.hasKey("layerAdjustment")) {
+		image->setLayerAdjustment(node["layerAdjustment"].asInt());
+	}
+	return image;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)

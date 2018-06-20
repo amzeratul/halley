@@ -15,10 +15,13 @@ namespace Halley {
 		Sprite& getSprite();
 		const Sprite& getSprite() const;
 
+		void setLayerAdjustment(int adjustment);
+
 	private:
 		Sprite sprite;
 		Vector2f topLeftBorder;
 		Vector2f bottomRightBorder;
+		int layerAdjustment = 0;
 		bool dirty = true;
 	};
 }

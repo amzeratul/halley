@@ -17,7 +17,12 @@ UIImage::UIImage(const String& id, Sprite s, Maybe<UISizer> sizer, Vector4f inne
 void UIImage::draw(UIPainter& painter) const
 {
 	if (sprite.hasMaterial()) {
-		painter.draw(sprite);
+		if (layerAdjustment != 0) {
+			auto p2 = painter.withAdjustedLayer(layerAdjustment);
+			p2.draw(sprite);
+		} else {
+			painter.draw(sprite);
+		}
 	}
 }
 
@@ -66,4 +71,9 @@ Sprite& UIImage::getSprite()
 const Sprite& UIImage::getSprite() const
 {
 	return sprite;
+}
+
+void UIImage::setLayerAdjustment(int adjustment)
+{
+	layerAdjustment = adjustment;
 }
