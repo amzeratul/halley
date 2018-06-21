@@ -404,6 +404,7 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 	auto col = node["colour"].asString("#FFFFFF");
 	auto flip = node["flip"].asBool(false);
 	auto pivot = asMaybeVector2f(node["pivot"]);
+	auto rotation = Angle1f::fromDegrees(node["rotation"].asFloat(0.0f));
 
 	auto sprite = Sprite();
 	
@@ -416,7 +417,7 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 		sprite.setSprite(resources, spriteSheetName, spriteName, materialName);
 	}
 
-	sprite.setColour(Colour4f::fromString(col)).setFlip(flip);
+	sprite.setColour(Colour4f::fromString(col)).setFlip(flip).setRotation(rotation);
 	
 	if (pivot) {
 		sprite.setPivot(pivot.get());

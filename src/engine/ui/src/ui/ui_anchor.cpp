@@ -55,7 +55,7 @@ void UIAnchor::position(UIWidget& widget) const
 		targetPos.y = clamp(targetPos.y, curBounds->getTop(), curBounds->getBottom() - size.y);
 	}
 	
-	widget.setPosition(targetPos);
+	widget.setPosition(targetPos.round());
 }
 
 UIAnchor UIAnchor::operator*(float f) const

@@ -128,6 +128,7 @@ namespace Halley {
 		void forceAddChildren(UIInputType inputType);
 
 		void addBehaviour(std::shared_ptr<UIBehaviour> behaviour);
+		void clearBehaviours();
 
 	protected:
 		virtual void draw(UIPainter& painter) const;

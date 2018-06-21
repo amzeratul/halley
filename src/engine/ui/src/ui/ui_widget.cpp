@@ -384,6 +384,14 @@ void UIWidget::addBehaviour(std::shared_ptr<UIBehaviour> behaviour)
 	behaviours.back()->doInit(*this);
 }
 
+void UIWidget::clearBehaviours()
+{
+	for (auto& b: behaviours) {
+		b->doDeInit();
+	}
+	behaviours.clear();
+}
+
 UIInputType UIWidget::getLastInputType() const
 {
 	return lastInputType;
