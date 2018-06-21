@@ -57,3 +57,25 @@ void UIAnchor::position(UIWidget& widget) const
 	
 	widget.setPosition(targetPos);
 }
+
+UIAnchor UIAnchor::operator*(float f) const
+{
+	Maybe<Rect4f> b;
+	if (bounds) {
+		b = bounds.get() * f;
+	}
+	auto result = UIAnchor(relativePos * f, relativeAlignment * f, absoluteOffset * f, b);
+	result.setAutoBounds(autoBounds);
+	return result;
+}
+
+UIAnchor UIAnchor::operator+(const UIAnchor& other) const
+{
+	Maybe<Rect4f> b;
+	if (bounds) {
+		b = bounds.get();
+	}
+	auto result = UIAnchor(relativePos + other.relativePos, relativeAlignment + other.relativeAlignment, absoluteOffset + other.absoluteOffset, b);
+	result.setAutoBounds(autoBounds);
+	return result;
+}

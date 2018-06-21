@@ -15,6 +15,11 @@ void UIBehaviour::update(Time time)
 {
 }
 
+bool UIBehaviour::onParentDestroyed()
+{
+	return true;
+}
+
 bool UIBehaviour::isAlive() const
 {
 	return true;

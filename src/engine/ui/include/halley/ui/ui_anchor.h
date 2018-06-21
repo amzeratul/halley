@@ -23,6 +23,9 @@ namespace Halley {
 		
 		void position(UIWidget& widget) const;
 
+		UIAnchor operator*(float f) const;
+		UIAnchor operator+(const UIAnchor& other) const;
+
 	private:
 		Vector2f relativePos;
 		Vector2f relativeAlignment;

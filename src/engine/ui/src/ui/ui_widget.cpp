@@ -434,7 +434,15 @@ UIParent* UIWidget::getParent() const
 
 void UIWidget::destroy()
 {
-	alive = false;
+	if (alive) {
+		bool ok = true;
+		for (auto& b: behaviours) {
+			ok = ok && b->onParentDestroyed();
+		}
+		if (ok) {
+			alive = false;
+		}
+	}
 }
 
 bool UIWidget::isDescendentOf(const UIWidget& ancestor) const
