@@ -11,11 +11,18 @@ namespace Halley {
 
 		void setText(const LocalisedString& text);
 		void setColourOverride(const std::vector<ColourOverride>& overrides);
+
 		void setMaxWidth(float maxWidth);
 		void setMaxHeight(float maxHeight);
+		float getMaxWidth() const;
+		float getMaxHeight() const;
+
 		void setTextRenderer(TextRenderer renderer);
+		TextRenderer& getTextRenderer();
+		const TextRenderer& getTextRenderer() const;
 
 		void setColour(Colour4f colour);
+		Colour4f getColour() const;
 
 		void setSelectable(Colour4f normalColour, Colour4f selColour);
 

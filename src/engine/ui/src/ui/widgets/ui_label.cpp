@@ -77,6 +77,31 @@ void UILabel::setMaxHeight(float m)
 	updateMinSize();
 }
 
+float UILabel::getMaxWidth() const
+{
+	return maxWidth;
+}
+
+float UILabel::getMaxHeight() const
+{
+	return maxHeight;
+}
+
+TextRenderer& UILabel::getTextRenderer()
+{
+	return renderer;
+}
+
+const TextRenderer& UILabel::getTextRenderer() const
+{
+	return renderer;
+}
+
+Colour4f UILabel::getColour() const
+{
+	return renderer.getColour();
+}
+
 void UILabel::setTextRenderer(TextRenderer r)
 {
 	r.setText(renderer.getText()).setPosition(renderer.getPosition());
