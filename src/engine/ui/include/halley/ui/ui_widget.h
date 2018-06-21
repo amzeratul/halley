@@ -15,6 +15,7 @@ namespace Halley {
 	class UIValidator;
 	class UIDataBind;
 	class UIAnchor;
+	class UIBehaviour;
 
 	class UIWidget : public IUIElement, public UIParent, public IUISizer, public std::enable_shared_from_this<UIWidget> {
 		friend class UIParent;
@@ -126,11 +127,15 @@ namespace Halley {
 		void sendEventDown(const UIEvent& event) const;
 		void forceAddChildren(UIInputType inputType);
 
+		void addBehaviour(std::shared_ptr<UIBehaviour> behaviour);
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;
 		virtual void drawChildren(UIPainter& painter) const;
 		virtual void update(Time t, bool moved);
+
+		void updateBehaviours(Time t);
 
 		virtual void onFocus();
 		virtual void onFocusLost();
@@ -179,6 +184,7 @@ namespace Halley {
 		std::shared_ptr<UIValidator> validator;
 		std::shared_ptr<UIDataBind> dataBind;
 		std::unique_ptr<UIAnchor> anchor;
+		std::vector<std::shared_ptr<UIBehaviour>> behaviours;
 
 		int childLayerAdjustment = 0;
 

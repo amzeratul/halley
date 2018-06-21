@@ -111,7 +111,7 @@ void UIRoot::updateMouse(spInputDevice mouse)
 
 void UIRoot::updateInputTree(const spInputDevice& input, UIWidget& widget, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting)
 {
-	if (!widget.isActive()) {
+	if (!widget.isActive() || !widget.isEnabled()) {
 		return;
 	}
 
@@ -242,7 +242,7 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos)
 
 std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos)
 {
-	if (!start->isActive()) {
+	if (!start->isActive() || !start->isEnabled()) {
 		return {};
 	}
 

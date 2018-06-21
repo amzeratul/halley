@@ -3,6 +3,7 @@
 namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "ui_anchor.h"
+#include "ui_behaviour.h"
 #include "ui_data_bind.h"
 #include "ui_element.h"
 #include "ui_event.h"

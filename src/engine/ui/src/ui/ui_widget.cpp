@@ -3,6 +3,7 @@
 #include "ui_validator.h"
 #include "ui_data_bind.h"
 #include "ui_anchor.h"
+#include "ui_behaviour.h"
 
 using namespace Halley;
 
@@ -56,6 +57,7 @@ void UIWidget::doUpdate(bool full, Time t, UIInputType inputType, JoystickType j
 	}
 
 	if (active) {
+		updateBehaviours(t);
 		update(t, positionUpdated);
 		positionUpdated = false;
 
@@ -376,6 +378,12 @@ void UIWidget::forceAddChildren(UIInputType inputType)
 	checkActive();
 }
 
+void UIWidget::addBehaviour(std::shared_ptr<UIBehaviour> behaviour)
+{
+	behaviours.push_back(std::move(behaviour));
+	behaviours.back()->doInit(*this);
+}
+
 UIInputType UIWidget::getLastInputType() const
 {
 	return lastInputType;
@@ -521,6 +529,19 @@ void UIWidget::drawChildren(UIPainter& painter) const
 
 void UIWidget::update(Time t, bool moved)
 {
+}
+
+void UIWidget::updateBehaviours(Time t)
+{
+	for (auto& behaviour: behaviours) {
+		behaviour->update(t);
+	}
+
+	auto firstRemoved = std::remove_if(behaviours.begin(), behaviours.end(), [] (const std::shared_ptr<UIBehaviour>& behaviour) { return !behaviour->isAlive(); });
+	for (auto iter = firstRemoved; iter != behaviours.end(); ++iter) {
+		(*iter)->doDeInit();
+	}
+	behaviours.erase(firstRemoved, behaviours.end());
 }
 
 void UIWidget::onFocus()

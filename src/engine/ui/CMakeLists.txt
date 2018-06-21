@@ -4,6 +4,7 @@ include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/ui" "../core/
 
 set(SOURCES
         "src/ui/ui_anchor.cpp"
+        "src/ui/ui_behaviour.cpp"
         "src/ui/ui_data_bind.cpp"
         "src/ui/ui_event.cpp"
         "src/ui/ui_factory.cpp"
@@ -42,6 +43,7 @@ set(HEADERS
         "include/halley/ui/halley_ui.h"
         
         "include/halley/ui/ui_anchor.h"
+        "include/halley/ui/ui_behaviour.h"
         "include/halley/ui/ui_data_bind.h"
         "include/halley/ui/ui_element.h"
         "include/halley/ui/ui_event.h"
