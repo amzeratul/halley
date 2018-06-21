@@ -80,6 +80,15 @@ LocalisedString I18N::get(const String& key) const
 	return missingStr;
 }
 
+LocalisedString I18N::getPreProcessedUserString(const String& string) const
+{
+	if (string.startsWith("$")) {
+		return get(string.mid(1));
+	} else {
+		return LocalisedString::fromUserString(string);
+	}
+}
+
 const String& I18N::getCurrentLanguage() const
 {
 	return currentLanguage;

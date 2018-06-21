@@ -57,6 +57,7 @@ namespace Halley {
 		std::vector<String> getLanguagesAvailable() const;
 
 		LocalisedString get(const String& key) const;
+		LocalisedString getPreProcessedUserString(const String& string) const;
 
 		template <typename T>
 		std::vector<LocalisedString> getVector(const String& keyPrefix, const T& keys) const
