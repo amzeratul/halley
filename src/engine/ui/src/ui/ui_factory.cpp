@@ -102,6 +102,9 @@ std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 	if (widgetNode.hasKey("enabled")) {
 		widget->setEnabled(widgetNode["enabled"].asBool(true));
 	}
+	if (widgetNode.hasKey("childLayerAdjustment")) {
+		widget->setChildLayerAdjustment(widgetNode["childLayerAdjustment"].asInt());
+	}
 	return widget;
 }
 

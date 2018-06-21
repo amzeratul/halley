@@ -17,8 +17,8 @@ UIImage::UIImage(const String& id, Sprite s, Maybe<UISizer> sizer, Vector4f inne
 void UIImage::draw(UIPainter& painter) const
 {
 	if (sprite.hasMaterial()) {
-		if (layerAdjustment != 0) {
-			auto p2 = painter.withAdjustedLayer(layerAdjustment);
+		if (layerAdjustment != 0 || worldClip) {
+			auto p2 = painter.withAdjustedLayer(layerAdjustment).withClip(worldClip);
 			p2.draw(sprite);
 		} else {
 			painter.draw(sprite);
@@ -76,4 +76,9 @@ const Sprite& UIImage::getSprite() const
 void UIImage::setLayerAdjustment(int adjustment)
 {
 	layerAdjustment = adjustment;
+}
+
+void UIImage::setWorldClip(Maybe<Rect4f> wc)
+{
+	worldClip = wc;
 }

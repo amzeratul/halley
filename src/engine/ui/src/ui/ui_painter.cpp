@@ -16,6 +16,7 @@ UIPainter UIPainter::clone()
 {
 	auto result = UIPainter(painter, mask, layer);
 	result.parent = this;
+	result.clip = clip;
 	return result;
 }
 
@@ -26,13 +27,15 @@ UIPainter UIPainter::withAdjustedLayer(int delta)
 	return result;
 }
 
-UIPainter UIPainter::withClip(Rect4f newClip)
+UIPainter UIPainter::withClip(Maybe<Rect4f> newClip)
 {
 	auto result = clone();
-	if (clip) {
-		result.clip = clip.get().intersection(newClip);
-	} else {
-		result.clip = newClip;
+	if (newClip) {
+		if (clip) {
+			result.clip = clip.get().intersection(newClip.get());
+		} else {
+			result.clip = newClip;
+		}
 	}
 	return result;
 }

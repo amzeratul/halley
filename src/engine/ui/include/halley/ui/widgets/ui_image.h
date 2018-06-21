@@ -16,6 +16,7 @@ namespace Halley {
 		const Sprite& getSprite() const;
 
 		void setLayerAdjustment(int adjustment);
+		void setWorldClip(Maybe<Rect4f> worldClip);
 
 	private:
 		Sprite sprite;
@@ -23,5 +24,6 @@ namespace Halley {
 		Vector2f bottomRightBorder;
 		int layerAdjustment = 0;
 		bool dirty = true;
+		Maybe<Rect4f> worldClip;
 	};
 }
