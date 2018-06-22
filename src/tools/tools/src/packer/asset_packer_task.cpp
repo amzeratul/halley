@@ -15,7 +15,7 @@ AssetPackerTask::AssetPackerTask(Project& project, Maybe<std::set<String>> asset
 
 void AssetPackerTask::run()
 {
-	Logger::logInfo("Packing assets (" + toString(assetsToPack->size()) + " modified.");
+	Logger::logInfo("Packing assets (" + toString(assetsToPack->size()) + " modified).");
 	AssetPacker::pack(project, assetsToPack, deletedAssets);
 	Logger::logInfo("Done packing assets");
 

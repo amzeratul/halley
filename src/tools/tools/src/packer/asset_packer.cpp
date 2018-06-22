@@ -48,15 +48,18 @@ bool AssetPackListing::isActive() const
 
 void AssetPacker::pack(Project& project, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets)
 {
+	Logger::logInfo("Loading manifest...");
 	auto db = project.getImportAssetsDatabase().makeAssetDatabase();
 	auto src = project.getUnpackedAssetsPath();
 	auto dst = project.getPackedAssetsPath();
 	auto manifest = AssetPackManifest(FileSystem::readFile(project.getAssetPackManifestPath()));
 
 	// Sort into packs
+	Logger::logInfo("Sorting assets into packs...");
 	std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, *db, assetsToPack, deletedAssets);
 
 	// Generate packs
+	Logger::logInfo("Generating packs...");
 	generatePacks(packs, src, dst);
 }
 
