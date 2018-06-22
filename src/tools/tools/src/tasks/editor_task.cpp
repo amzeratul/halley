@@ -5,6 +5,7 @@
 #include "halley/concurrency/concurrent.h"
 #include <iostream>
 #include "halley/support/logger.h"
+#include <chrono>
 
 using namespace Halley;
 
@@ -20,11 +21,13 @@ EditorTask::EditorTask(String name, bool isCancellable, bool isVisible)
 
 void EditorTask::addContinuation(EditorTaskAnchor&& task)
 {
+	std::lock_guard<std::mutex> lock(mutex);
 	continuations.emplace_back(std::move(task));
 }
 
 void EditorTask::setContinuations(Vector<EditorTaskAnchor>&& tasks)
 {
+	std::lock_guard<std::mutex> lock(mutex);
 	continuations = std::move(tasks);
 }
 
@@ -112,7 +115,13 @@ void EditorTaskAnchor::terminate()
 			// Wait for task to join
 			if (status != EditorTaskStatus::Done) {
 				cancel();
-				while (status == EditorTaskStatus::Started && !taskFuture.hasValue()) {}
+				while (status == EditorTaskStatus::Started && !taskFuture.hasValue()) {
+					using namespace std::chrono_literals;
+					std::this_thread::sleep_for(500ms);
+					if (status == EditorTaskStatus::Started && !taskFuture.hasValue()) {
+						Logger::logInfo("Waiting for task thread to join...");
+					}
+				}
 			}
 
 			if (parent) {
@@ -127,8 +136,8 @@ void EditorTaskAnchor::update(float time)
 	if (status == EditorTaskStatus::WaitingToStart) {
 		timeToStart -= time;
 		if (timeToStart <= 0) {
-			taskFuture = Concurrent::execute(Task<void>([this]() { task->run(); }));
 			status = EditorTaskStatus::Started;
+			taskFuture = Concurrent::execute(Task<void>([this]() { task->run(); }));
 		}
 	} else if (status == EditorTaskStatus::Started) {
 		bool done = taskFuture.hasValue();
@@ -144,6 +153,11 @@ void EditorTaskAnchor::update(float time)
 			progressLabel = task->progressLabel;
 		}
 	}
+}
+
+EditorTaskStatus EditorTaskAnchor::getStatus() const
+{
+	return status;
 }
 
 String EditorTaskAnchor::getName() const
@@ -193,6 +207,7 @@ const String& EditorTaskAnchor::getError() const
 
 Vector<EditorTaskAnchor> EditorTaskAnchor::getContinuations()
 {
+	std::lock_guard<std::mutex> lock(task->mutex);
 	return std::move(task->continuations);
 }
 

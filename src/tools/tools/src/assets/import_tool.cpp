@@ -58,15 +58,18 @@ int ImportTool::run(Vector<std::string> args)
 	}
 }
 
-void ImportTool::onTaskAdded(const std::shared_ptr<EditorTaskAnchor>&)
+void ImportTool::onTaskAdded(const std::shared_ptr<EditorTaskAnchor>& task)
 {
+	Logger::logInfo("Task added: " + task->getName());
 }
 
-void ImportTool::onTaskTerminated(const std::shared_ptr<EditorTaskAnchor>&)
+void ImportTool::onTaskTerminated(const std::shared_ptr<EditorTaskAnchor>& task)
 {
+	Logger::logInfo("Task ended: " + task->getName());
 }
 
-void ImportTool::onTaskError(const std::shared_ptr<EditorTaskAnchor>&)
+void ImportTool::onTaskError(const std::shared_ptr<EditorTaskAnchor>& task)
 {
+	Logger::logError("Task ended in error: " + task->getName() + ": " + task->getError());
 	hasError = true;
 }

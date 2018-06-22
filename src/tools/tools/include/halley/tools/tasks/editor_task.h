@@ -67,14 +67,16 @@ namespace Halley
 	public:
 		EditorTaskAnchor(std::unique_ptr<EditorTask> task, float delay = 0);
 		EditorTaskAnchor(EditorTaskAnchor&& other) noexcept;
+		EditorTaskAnchor(const EditorTaskAnchor& other) = delete;
 		~EditorTaskAnchor();
 
 		EditorTaskAnchor& operator=(EditorTaskAnchor&& other) noexcept;
+		EditorTaskAnchor& operator=(const EditorTaskAnchor& other) = delete;
 
 		void terminate();
 		void update(float time);
 
-		EditorTaskStatus getStatus() const { return status; }
+		EditorTaskStatus getStatus() const;
 		String getName() const;
 		String getProgressLabel() const;
 		float getProgress() const { return progress; }

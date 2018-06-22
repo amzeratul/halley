@@ -28,6 +28,8 @@ EditorTaskSet::~EditorTaskSet()
 
 void EditorTaskSet::update(Time time)
 {
+	Vector<EditorTaskAnchor> toAdd;
+
 	auto next = tasks.begin();
 	for (auto iter = tasks.begin(); iter != tasks.end(); iter = next) {
 		++next;
@@ -37,13 +39,13 @@ void EditorTaskSet::update(Time time)
 
 		auto subTasks = task->getPendingTasks();
 		for (auto& t : subTasks) {
-			addTask(std::move(t));
+			toAdd.push_back(std::move(t));
 		}
 
 		if (task->getStatus() == EditorTaskStatus::Done) {
 			auto newTasks = task->getContinuations();
 			for (auto& t : newTasks) {
-				addTask(std::move(t));
+				toAdd.push_back(std::move(t));
 			}
 			task->terminate();
 			if (listener) {
@@ -54,6 +56,10 @@ void EditorTaskSet::update(Time time)
 			}
 			tasks.erase(iter);
 		}
+	}
+
+	for (auto& t: toAdd) {
+		addTask(std::move(t));
 	}
 }
 

@@ -167,8 +167,8 @@ void AssetPacker::generatePack(const String& packId, const AssetPackListing& pac
 		Logger::logInfo("Encrypting \"" + packId + "\"...");
 		pack.encrypt(packListing.getEncryptionKey());
 	}
-	Logger::logInfo("Done. Packed " + toString(packListing.getEntries().size()) + " entries on \"" + packId + "\".");
 
 	// Write pack
 	FileSystem::writeFile(dst, pack.writeOut());
+	Logger::logInfo("Done. Packed " + toString(packListing.getEntries().size()) + " entries on \"" + packId + "\".");
 }
