@@ -130,6 +130,8 @@ namespace Halley {
 		void addBehaviour(std::shared_ptr<UIBehaviour> behaviour);
 		void clearBehaviours();
 
+		void playSound(const String& eventName);
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;
@@ -156,7 +158,6 @@ namespace Halley {
 
 		virtual void onEnabledChanged();
 
-		void playSound(const String& eventName);
 		virtual void checkActive();
 
 		UIInputType lastInputType = UIInputType::Undefined;
