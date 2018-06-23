@@ -77,6 +77,7 @@ void UIRoot::updateMouse(spInputDevice mouse)
 		mouseHeld = true;
 		setFocus(underMouse);
 		if (underMouse) {
+			mouse->clearButtonPress(0);
 			underMouse->pressMouse(mousePos, 0);
 		}
 	}
@@ -87,6 +88,7 @@ void UIRoot::updateMouse(spInputDevice mouse)
 		mouseHeld = false;
 		if (focus) {
 			focus->releaseMouse(mousePos, 0);
+			mouse->clearButtonRelease(0);
 		}
 	}
 

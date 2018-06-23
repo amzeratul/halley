@@ -40,6 +40,8 @@ namespace Halley {
 		bool isButtonDown(int code) override;
 
 		void clearButton(int code) override;
+		void clearButtonPress(int code) override;
+		void clearButtonRelease(int code) override;
 
 		String getButtonName(int code) override;
 

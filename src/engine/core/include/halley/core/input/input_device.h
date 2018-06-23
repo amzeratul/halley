@@ -66,6 +66,8 @@ namespace Halley {
 		virtual bool isButtonDown(int code);
 
 		virtual void clearButton(int code);
+		virtual void clearButtonPress(int code);
+		virtual void clearButtonRelease(int code);
 
 		virtual float getAxis(int /*n*/);;
 		virtual int getAxisRepeat(int /*n*/);

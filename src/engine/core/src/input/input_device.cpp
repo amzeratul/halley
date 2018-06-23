@@ -62,6 +62,16 @@ void InputDevice::clearButton(int code)
 	
 }
 
+void InputDevice::clearButtonPress(int code)
+{
+	
+}
+
+void InputDevice::clearButtonRelease(int code)
+{
+	
+}
+
 float InputDevice::getAxis(int)
 {
 	return 0;

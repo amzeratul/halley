@@ -145,6 +145,24 @@ void InputVirtual::clearButton(int code)
 	}
 }
 
+void InputVirtual::clearButtonPress(int code)
+{
+	auto& binds = buttons.at(code);
+	for (size_t i=0; i<binds.size(); i++) {
+		Bind& bind = binds[i];
+		bind.device->clearButtonPress(bind.a);
+	}
+}
+
+void InputVirtual::clearButtonRelease(int code)
+{
+	auto& binds = buttons.at(code);
+	for (size_t i=0; i<binds.size(); i++) {
+		Bind& bind = binds[i];
+		bind.device->clearButtonRelease(bind.a);
+	}
+}
+
 float InputVirtual::getAxis(int n)
 {
 	auto& binds = axes.at(n).binds;
