@@ -73,7 +73,10 @@ void AsioTCPConnection::close()
 	if (status != ConnectionStatus::Closed) {
 		Logger::logInfo("Disconnected");
 		try {
-			socket.close();
+			if (!socket.is_open()) {
+				socket.shutdown(TCPSocket::shutdown_both);
+				socket.close();
+			}
 		} catch (std::exception& e) {
 			Logger::logException(e);
 		} catch (...) {
