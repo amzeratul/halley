@@ -5,8 +5,11 @@
 #include <gsl/gsl>
 #include "halley/maths/vector2.h"
 #include "halley/maths/colour.h"
+#include "halley/file_formats/image.h"
 
 namespace Halley {
+	enum class AsepriteBlendMode;
+
 	enum class AsepriteDepth
 	{
 		RGBA32,
@@ -25,6 +28,10 @@ namespace Halley {
 		bool linked = false;
 
 		Bytes rawData;
+		std::unique_ptr<Image> imgData;
+
+		void loadImage(AsepriteDepth depth, const std::vector<Colour4c>& palette);
+		void drawAt(Image& image, uint8_t opacity, AsepriteBlendMode blendMode) const;
 	};
 
 	struct AsepriteFrame
@@ -68,6 +75,7 @@ namespace Halley {
 	struct AsepriteLayer
 	{
 		AsepriteLayerType type = AsepriteLayerType::Normal;
+		AsepriteBlendMode blendMode = AsepriteBlendMode::Normal;
 		int childLevel = 0;
 		bool visible = true;
 		bool editable = true;
@@ -102,7 +110,12 @@ namespace Halley {
 
 		void load(gsl::span<const gsl::byte> data);
 
-	private:
+		const std::vector<AsepriteTag>& getTags() const;
+		std::unique_ptr<Image> makeFrameImage(int n);
+	    const AsepriteFrame& getFrame(int n) const;
+	    size_t getNumberOfFrames() const;
+
+    private:
 	    void addFrame(uint16_t duration);
 	    void addChunk(uint16_t chunkType, gsl::span<const std::byte> data);
 
@@ -137,6 +150,8 @@ namespace Halley {
 			data = data.subspan(size);
 			return result;
 		}
+
+	    AsepriteCel* getCelAt(int frameNumber, int layerNumber);
 
 		Vector2i size;
 		uint32_t flags;

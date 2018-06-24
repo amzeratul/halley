@@ -131,6 +131,16 @@ struct AsepriteFileTagsEntryData
 };
 
 
+void AsepriteCel::loadImage(AsepriteDepth depth, const std::vector<Colour4c>& palette)
+{
+	// TODO
+}
+
+void AsepriteCel::drawAt(Image& image, uint8_t opacity, AsepriteBlendMode blendMode) const
+{
+	// TODO
+}
+
 AsepriteFrame::AsepriteFrame(uint16_t duration)
 	: duration(duration)
 {}
@@ -261,6 +271,7 @@ void AsepriteFile::addLayerChunk(gsl::span<const std::byte> span)
 	auto& layer = layers.back();
 
 	layer.type = AsepriteLayerType(data.layerType);
+	layer.blendMode = AsepriteBlendMode(data.blendMode);
 	layer.childLevel = data.childLevel;
 	layer.visible = (data.flags & 1) != 0;
 	layer.editable = (data.flags & 2) != 0;
@@ -361,4 +372,63 @@ void AsepriteFile::addTagsChunk(gsl::span<const std::byte> span)
 		tag.toFrame = entry.toFrame;
 		tag.animDirection = AsepriteAnimationDirection();
 	}
+}
+
+AsepriteCel* AsepriteFile::getCelAt(int frameNumber, int layerNumber)
+{
+	if (frameNumber < 0 || frameNumber >= int(frames.size())) {
+		throw Exception("Invalid frame number");
+	}
+
+	auto& frame = frames[frameNumber];
+	for (auto& cel: frame.cels) {
+		if (cel.layer == layerNumber) {
+			if (cel.linked) {
+				return getCelAt(cel.linkedFrame, layerNumber);
+			} else {
+				return &cel;
+			}
+		}
+	}
+	return nullptr;
+}
+
+const std::vector<AsepriteTag>& AsepriteFile::getTags() const
+{
+	return tags;
+}
+
+std::unique_ptr<Image> AsepriteFile::makeFrameImage(int frameNumber)
+{
+	auto frameImage = std::make_unique<Image>(Image::Format::RGBA, size);
+	frameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));
+
+	for (int layerNumber = 0; layerNumber < layers.size(); ++layerNumber) {
+		auto& layer = layers[layerNumber];
+		if (layer.visible) {
+			auto* cel = getCelAt(frameNumber, layerNumber);
+			if (cel) {
+				const uint8_t opacity = uint8_t(clamp((uint32_t(cel->opacity) * uint32_t(layer.opacity)) / 255, uint32_t(0), uint32_t(255)));
+				if (!cel->imgData) {
+					cel->loadImage(colourDepth, palette);
+				}
+				cel->drawAt(*frameImage, opacity, layer.blendMode);
+			}
+		}
+	}
+
+	return std::move(frameImage);
+}
+
+const AsepriteFrame& AsepriteFile::getFrame(int frameNumber) const
+{
+	if (frameNumber < 0 || frameNumber >= int(frames.size())) {
+		throw Exception("Invalid frame number");
+	}
+	return frames[frameNumber];
+}
+
+size_t AsepriteFile::getNumberOfFrames() const
+{
+	return frames.size();
 }
