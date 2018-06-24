@@ -131,14 +131,47 @@ struct AsepriteFileTagsEntryData
 };
 
 
-void AsepriteCel::loadImage(AsepriteDepth depth, const std::vector<Colour4c>& palette)
+void AsepriteCel::loadImage(AsepriteDepth depth, const std::vector<uint32_t>& palette)
 {
-	// TODO
+	imgData = std::make_unique<Image>(Image::Format::RGBA, size);
+	imgData->clear(Image::convertRGBAToInt(0, 0, 0, 0));
+
+	auto dst = imgData->getPixels();
+	const size_t n = size_t(size.x * size.y);
+
+	if (depth == AsepriteDepth::Indexed8) {
+		const auto src = reinterpret_cast<uint8_t*>(rawData.data());
+		for (size_t i = 0; i < n; ++i) {
+			dst[i] = src[i];
+		}
+	} else if (depth == AsepriteDepth::Greyscale16) {
+		const auto src = reinterpret_cast<uint16_t*>(rawData.data());
+		for (size_t i = 0; i < n; ++i) {
+			const auto s = src[i];
+			const auto col = uint8_t(s & 0xFF);
+			const auto alpha = uint8_t((s >> 8) & 0xFF);
+			dst[i] = Image::convertRGBAToInt(col, col, col, alpha);
+		}
+	} else if (depth == AsepriteDepth::RGBA32) {
+		const auto src = reinterpret_cast<uint32_t*>(rawData.data());
+		for (size_t i = 0; i < n; ++i) {
+			dst[i] = palette[src[i]];
+		}
+	}
 }
 
 void AsepriteCel::drawAt(Image& image, uint8_t opacity, AsepriteBlendMode blendMode) const
 {
-	// TODO
+	if (!imgData) {
+		throw Exception("imgData not loaded.");
+	}
+
+	if (blendMode == AsepriteBlendMode::Normal) {
+		// TODO: alpha blend
+		image.blitFrom(pos, *imgData);
+	} else {
+		throw Exception("Unsupported blending mode: " + toString(int(blendMode)));
+	}
 }
 
 AsepriteFrame::AsepriteFrame(uint16_t duration)
@@ -308,7 +341,7 @@ void AsepriteFile::addCelChunk(gsl::span<const std::byte> span)
 		if (type == 0) {
 			// Raw
 			cel.rawData.resize(cel.size.x * cel.size.y);
-			if (span.size() < cel.rawData.size()) {
+			if (span.size() < int(cel.rawData.size())) {
 				throw Exception("Invalid cel data");
 			}
 			memcpy(cel.rawData.data(), span.data(), cel.rawData.size());
@@ -349,7 +382,7 @@ void AsepriteFile::addPaletteChunk(gsl::span<const std::byte> span)
 		AsepriteFilePaletteEntryData entry;
 		readData(entry, span);
 
-		palette.at(i) = Colour4c(entry.red, entry.green, entry.blue, entry.alpha);
+		palette.at(i) = Image::convertRGBAToInt(entry.red, entry.green, entry.blue, entry.alpha);
 		if ((entry.flags & 1) != 0) {
 			// Discard name
 			readString(span);

@@ -127,8 +127,10 @@ std::vector<ImageData> AsepriteExternalReader::importAseprite(String spriteName,
 ////////////
 
 
-std::vector<ImageData> AsepriteReader::importAseprite(String baseName, gsl::span<const gsl::byte> fileData, bool trim)
+std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData, bool trim)
 {
+	const String baseName = Path(spriteName).getFilename().string();
+
 	AsepriteFile aseFile;
 	aseFile.load(fileData);
 
@@ -172,22 +174,20 @@ std::vector<ImageData> AsepriteReader::importAseprite(String baseName, gsl::span
 			imgData.sequenceName = t.first;
 			imgData.duration = aseFile.getFrame(frameN).duration;
 			imgData.clip = trim ? imgData.img->getTrimRect() : imgData.img->getRect();
-			imgData.filenames;
-
-			bool hasFrameNumber = t.second.size() > 0;
 
 			std::stringstream ss;
 			ss << baseName.cppStr();
 			if (imgData.sequenceName != "") {
 				ss << "_" << imgData.sequenceName.cppStr();
 			}
+			const bool hasFrameNumber = !t.second.empty();
 			if (hasFrameNumber) {
 				ss << "_" << std::setw(3) << std::setfill('0') << imgData.frameNumber;
 			}
 
 			imgData.filenames.emplace_back(ss.str());
 			if (frameN == 0) {
-				imgData.filenames.emplace_back(":img:" + baseName);
+				imgData.filenames.emplace_back(":img:" + spriteName);
 			}
 
 			i++;

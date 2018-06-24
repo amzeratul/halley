@@ -30,7 +30,7 @@ namespace Halley {
 		Bytes rawData;
 		std::unique_ptr<Image> imgData;
 
-		void loadImage(AsepriteDepth depth, const std::vector<Colour4c>& palette);
+		void loadImage(AsepriteDepth depth, const std::vector<uint32_t>& palette);
 		void drawAt(Image& image, uint8_t opacity, AsepriteBlendMode blendMode) const;
 	};
 
@@ -162,6 +162,6 @@ namespace Halley {
 		std::vector<AsepriteFrame> frames;
 		std::vector<AsepriteLayer> layers;
 		std::vector<AsepriteTag> tags;
-		std::vector<Colour4c> palette;
+		std::vector<uint32_t> palette;
     };
 }
