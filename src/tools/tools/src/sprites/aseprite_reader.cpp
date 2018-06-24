@@ -5,6 +5,7 @@
 #include "halley/file_formats/image.h"
 #include "../assets/importers/sprite_importer.h"
 #include "halley/support/logger.h"
+#include "aseprite_file.h"
 using namespace Halley;
 
 std::vector<ImageData> AsepriteExternalReader::loadImagesFromPath(Path tmp, bool trim) {
@@ -123,47 +124,8 @@ std::vector<ImageData> AsepriteExternalReader::importAseprite(String spriteName,
 
 std::vector<ImageData> AsepriteReader::importAseprite(String baseName, gsl::span<const gsl::byte> fileData, bool trim)
 {
-	Expects(sizeof(AsepriteFileHeader) == 128);
-
-	size_t pos = 0;
-
-	AsepriteFileHeader fileHeader;
-	if (fileData.size() < sizeof(fileHeader)) {
-		throw Exception("Invalid Aseprite file (too small)");
-	}
-	memcpy(&fileHeader, fileData.data(), sizeof(fileHeader));
-	pos += sizeof(fileHeader);
-
-	if (fileHeader.magicNumber != 0xA5E0) {
-		throw Exception("Invalid Aseprite file (invalid file magic number)");
-	}
-
-	for (int i = 0; i < int(fileHeader.frames); ++i) {
-		const size_t frameStartPos = pos;
-
-		AsepriteFrameHeader frameHeader;
-		memcpy(&frameHeader, fileData.data() + frameStartPos, sizeof(frameHeader));
-		if (frameHeader.magicNumber != 0xF1FA) {
-			throw Exception("Invalid Aseprite file (invalid frame magic number)");
-		}
-
-		for (int j = 0; j < int(frameHeader.chunks); ++j) {
-			const size_t chunkStartPos = pos;
-
-			AsepriteChunkHeader chunkHeader;
-			memcpy(&chunkHeader, fileData.data() + chunkStartPos, sizeof(chunkHeader));
-			Bytes chunkData(chunkHeader.dataSize - sizeof(chunkHeader));
-			memcpy(chunkData.data(), fileData.data() + chunkStartPos + sizeof(chunkHeader), chunkData.size());
-
-			pos = chunkStartPos + chunkHeader.dataSize;
-		}
-
-		// Next frame
-		pos = frameStartPos + frameHeader.dataSize;
-	}
-
-	Logger::logInfo("Parsed ase file just fine");
-	// Now just do everything else.
+	AsepriteFile file;
+	file.load(fileData);
 
 	// TODO
 	return {};

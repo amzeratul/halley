@@ -52,6 +52,7 @@ set(SOURCES
 
     "src/tool/cli_tool.cpp"
 
+	"src/sprites/aseprite_file.cpp"
     "src/sprites/aseprite_reader.cpp"
 
     "src/tasks/editor_task.cpp"
@@ -123,6 +124,7 @@ set(HEADERS
     "src/codegen/cpp/codegen_cpp.h"
     "src/codegen/cpp/cpp_class_gen.h"
 
+	"src/sprites/aseprite_file.h"
     "src/sprites/aseprite_reader.h"
 
     "src/yaml/halley-yamlcpp.h"
