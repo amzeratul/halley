@@ -77,7 +77,7 @@ String ResourceDataStatic::getString() const
 
 void ResourceDataStatic::inflate()
 {
-	data = Compression::inflateRaw(getSpan(), size);
+	data = Compression::inflateToSharedPtr(getSpan(), size);
 }
 
 std::unique_ptr<ResourceDataStatic> ResourceDataStatic::loadFromFileSystem(Path path)

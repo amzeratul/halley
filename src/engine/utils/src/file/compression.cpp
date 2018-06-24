@@ -40,7 +40,7 @@ Bytes Compression::inflate(const Bytes& bytes)
 Bytes Compression::inflate(gsl::span<const gsl::byte> bytes)
 {
 	size_t outSize;
-	auto b = inflateRaw(bytes, outSize);
+	auto b = inflateToSharedPtr(bytes, outSize);
 	Bytes result(outSize);
 	memcpy(result.data(), b.get(), outSize);
 	return result;
@@ -51,7 +51,7 @@ static void deleter(const char* data)
 	delete[] data;
 }
 
-std::shared_ptr<const char> Compression::inflateRaw(gsl::span<const gsl::byte> bytes, size_t& size)
+std::shared_ptr<const char> Compression::inflateToSharedPtr(gsl::span<const gsl::byte> bytes, size_t& size)
 {
 	Expects (sizeof(uint64_t) == 8);
 	Expects (bytes.size_bytes() >= 8);
@@ -61,11 +61,8 @@ std::shared_ptr<const char> Compression::inflateRaw(gsl::span<const gsl::byte> b
 		throw Exception("File is too big to inflate: " + String::prettySize(expectedOutSize));
 	}
 
-	unsigned char* out = nullptr;
 	size_t outSize = 0;
-	LodePNGDecompressSettings settings;
-	lodepng_decompress_settings_init(&settings);
-	lodepng_zlib_decompress(&out, &outSize, reinterpret_cast<const unsigned char*>(bytes.data() + 8), bytes.size_bytes() - 8, &settings);
+	auto out = inflateRaw(bytes.subspan(8), outSize);
 
 	if (outSize != expectedOutSize) {
 		throw Exception("Unexpected outsize (" + toString(outSize) + ") when inflating data, expected (" + toString(expectedOutSize) + ").");
@@ -77,4 +74,13 @@ std::shared_ptr<const char> Compression::inflateRaw(gsl::span<const gsl::byte> b
 	auto result = std::shared_ptr<const char>(rawResult, deleter);
 	free(out);
 	return result;
+}
+
+unsigned char* Compression::inflateRaw(gsl::span<const gsl::byte> bytes, size_t& outSize)
+{
+	unsigned char* out = nullptr;
+	LodePNGDecompressSettings settings;
+	lodepng_decompress_settings_init(&settings);
+	lodepng_zlib_decompress(&out, &outSize, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size_bytes(), &settings);
+	return out;
 }

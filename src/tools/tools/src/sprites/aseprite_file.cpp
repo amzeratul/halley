@@ -50,7 +50,7 @@ struct AsepriteFileChunkHeader
 
 struct AsepriteFileLayerData
 {
-	constexpr static size_t size = 18;
+	constexpr static size_t size = 16;
 
 	uint16_t flags;
 	uint16_t layerType;
@@ -59,8 +59,7 @@ struct AsepriteFileLayerData
 	uint16_t defaultHeight;
 	uint16_t blendMode;
 	uint8_t opacity;
-	std::array<uint8_t, 3> reserved;
-	uint16_t nameLength;
+	std::array<uint8_t, 3> _reserved;
 };
 
 struct AsepriteFileCelData
@@ -73,7 +72,7 @@ struct AsepriteFileCelData
 	uint8_t opacity;
 	uint8_t type_a; // wtf is this misaligned bullshit :(
 	uint8_t type_b;
-	std::array<uint8_t, 7> reserved;
+	std::array<uint8_t, 7> _reserved;
 };
 
 struct AsepriteFileRawCelData
@@ -89,6 +88,46 @@ struct AsepriteFileLinkedCelData
 	constexpr static size_t size = 2;
 
 	uint16_t framePosition;
+};
+
+struct AsepriteFilePaletteData
+{
+	constexpr static size_t size = 20;
+
+	uint32_t numEntries;
+	uint32_t firstIndex;
+	uint32_t lastIndex;
+	std::array<uint8_t, 8> _reserved;
+};
+
+struct AsepriteFilePaletteEntryData
+{
+	constexpr static size_t size = 6;
+	uint16_t flags;
+	uint8_t red;
+	uint8_t green;
+	uint8_t blue;
+	uint8_t alpha;
+};
+
+struct AsepriteFileTagsData
+{
+	constexpr static size_t size = 10;
+
+	uint16_t numOfTags;
+	std::array<uint8_t, 8> _reserved;
+};
+
+struct AsepriteFileTagsEntryData
+{
+	constexpr static size_t size = 17;
+
+	uint16_t fromFrame;
+	uint16_t toFrame;
+	uint8_t loopDirection;
+	std::array<uint8_t, 8> _reserved0;
+	std::array<uint8_t, 3> tagColourRGB;
+	uint8_t _reserved1;
 };
 
 
@@ -216,11 +255,7 @@ void AsepriteFile::addChunk(uint16_t chunkType, gsl::span<const std::byte> data)
 void AsepriteFile::addLayerChunk(gsl::span<const std::byte> span)
 {
 	AsepriteFileLayerData data;
-	if (span.size() < AsepriteFileLayerData::size) {
-		throw Exception("Invalid layer data");
-	}
-	memcpy(&data, span.data(), AsepriteFileLayerData::size);
-	span = span.subspan(AsepriteFileLayerData::size);
+	readData(data, span);
 
 	layers.push_back(AsepriteLayer());
 	auto& layer = layers.back();
@@ -236,7 +271,7 @@ void AsepriteFile::addLayerChunk(gsl::span<const std::byte> span)
 	layer.referenceLayer = (data.flags & 64) != 0;
 	layer.opacity = (flags & 1) != 0 ? data.opacity : 255;
 
-	layer.layerName = String(reinterpret_cast<const char*>(span.data()), data.nameLength);
+	layer.layerName = readString(span);
 }
 
 void AsepriteFile::addCelChunk(gsl::span<const std::byte> span)
@@ -244,11 +279,7 @@ void AsepriteFile::addCelChunk(gsl::span<const std::byte> span)
 	AsepriteCel cel;
 
 	AsepriteFileCelData baseData;
-	if (span.size() < AsepriteFileCelData::size) {
-		throw Exception("Invalid cel data");
-	}
-	memcpy(&baseData, span.data(), AsepriteFileCelData::size);
-	span = span.subspan(AsepriteFileCelData::size);
+	readData(baseData, span);
 
 	cel.opacity = baseData.opacity;
 	cel.pos = Vector2i(int(baseData.x), int(baseData.y));
@@ -258,11 +289,7 @@ void AsepriteFile::addCelChunk(gsl::span<const std::byte> span)
 	if (type == 0 || type == 2) {
 		// Raw or compressed
 		AsepriteFileRawCelData header;
-		if (span.size() < AsepriteFileRawCelData::size) {
-			throw Exception("Invalid cel data");
-		}
-		memcpy(&header, span.data(), AsepriteFileRawCelData::size);
-		span = span.subspan(AsepriteFileRawCelData::size);
+		readData(header, span);
 
 		cel.size = Vector2i(int(header.width), int(header.height));
 
@@ -276,15 +303,16 @@ void AsepriteFile::addCelChunk(gsl::span<const std::byte> span)
 			memcpy(cel.rawData.data(), span.data(), cel.rawData.size());
 		} else if (type == 2) {
 			// ZLIB compressed
-			cel.rawData = Compression::inflate(span);
+			size_t outSize = 0;
+			auto out = Compression::inflateRaw(span, outSize);
+			cel.rawData.resize(outSize);
+			memcpy(cel.rawData.data(), out, outSize);
+			free(out);
 		}
 	} else if (type == 1) {
 		// Linked
 		AsepriteFileLinkedCelData header;
-		if (span.size() < AsepriteFileLinkedCelData::size) {
-			throw Exception("Invalid cel data");
-		}
-		memcpy(&header, span.data(), AsepriteFileLinkedCelData::size);
+		readData(header, span);
 
 		cel.linked = true;
 		cel.linkedFrame = header.framePosition;
@@ -302,10 +330,35 @@ void AsepriteFile::addCelExtraChunk(gsl::span<const std::byte> span)
 
 void AsepriteFile::addPaletteChunk(gsl::span<const std::byte> span)
 {
-	// TODO
+	AsepriteFilePaletteData baseData;
+	readData(baseData, span);
+
+	palette.resize(baseData.numEntries);
+	for (size_t i = baseData.firstIndex; i <= baseData.lastIndex; ++i) {
+		AsepriteFilePaletteEntryData entry;
+		readData(entry, span);
+
+		palette.at(i) = Colour4c(entry.red, entry.green, entry.blue, entry.alpha);
+		if ((entry.flags & 1) != 0) {
+			// Discard name
+			readString(span);
+		}
+	}
 }
 
 void AsepriteFile::addTagsChunk(gsl::span<const std::byte> span)
 {
-	// TODO
+	AsepriteFileTagsData baseData;
+	readData(baseData, span);
+
+	for (int i = 0; i < baseData.numOfTags; ++i) {
+		tags.push_back(AsepriteTag());
+		auto& tag = tags.back();
+
+		AsepriteFileTagsEntryData entry;
+		readData(entry, span);
+		tag.fromFrame = entry.fromFrame;
+		tag.toFrame = entry.toFrame;
+		tag.animDirection = AsepriteAnimationDirection();
+	}
 }

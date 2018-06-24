@@ -4,6 +4,7 @@
 #include <array>
 #include <gsl/gsl>
 #include "halley/maths/vector2.h"
+#include "halley/maths/colour.h"
 
 namespace Halley {
 	enum class AsepriteDepth
@@ -78,6 +79,22 @@ namespace Halley {
 		uint8_t opacity = 255;
 		String layerName;
 	};
+
+	enum class AsepriteAnimationDirection
+	{
+		Forward,
+		Reverse,
+		PingPong
+	};
+
+	struct AsepriteTag
+	{
+		int fromFrame = -1;
+		int toFrame = -1;
+		AsepriteAnimationDirection animDirection = AsepriteAnimationDirection::Forward;
+		
+		String name;
+	};
         
     class AsepriteFile {
     public:
@@ -95,6 +112,32 @@ namespace Halley {
 		void addPaletteChunk(gsl::span<const std::byte> span);
 		void addTagsChunk(gsl::span<const std::byte> span);
 
+		template <typename T>
+		void readData(T& dst, gsl::span<const gsl::byte>& data) const
+		{
+			if (data.size() < T::size) {
+				throw Exception("Insufficient data to decode Aseprite entry");
+			}
+			memcpy(&dst, data.data(), T::size);
+			data = data.subspan(T::size);
+		}
+
+		String readString(gsl::span<const gsl::byte>& data) const
+		{
+			if (data.size() < 2) {
+				throw Exception("Insufficient data to decode Aseprite entry");
+			}
+			uint16_t size;
+			memcpy(&size, data.data(), 2);
+			data = data.subspan(2);
+			if (data.size() < size) {
+				throw Exception("Insufficient data to decode Aseprite entry");
+			}
+			String result = String(reinterpret_cast<const char*>(data.data()), size);
+			data = data.subspan(size);
+			return result;
+		}
+
 		Vector2i size;
 		uint32_t flags;
 		AsepriteDepth colourDepth;
@@ -103,5 +146,7 @@ namespace Halley {
 
 		std::vector<AsepriteFrame> frames;
 		std::vector<AsepriteLayer> layers;
+		std::vector<AsepriteTag> tags;
+		std::vector<Colour4c> palette;
     };
 }
