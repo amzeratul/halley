@@ -395,7 +395,7 @@ void Core::setStage(std::unique_ptr<Stage> next)
 void Core::quit(int code)
 {
 	exitCode = code;
-	std::cout << "Game terminating via CoreAPI::quit()." << std::endl;
+	std::cout << "Game terminating via CoreAPI::quit(" << code << ")." << std::endl;
 	running = false;
 }
 

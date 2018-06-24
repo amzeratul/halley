@@ -12,12 +12,13 @@
 
 using namespace Halley;
 
-Halley::World::World(const HalleyAPI* api)
+World::World(const HalleyAPI* api, bool collectMetrics)
 	: api(api)
+	, collectMetrics(collectMetrics)
 {	
 }
 
-Halley::World::~World()
+World::~World()
 {
 	for (auto& f: families) {
 		//f.second->clearEntities();
@@ -36,9 +37,10 @@ Halley::World::~World()
 	services.clear();
 }
 
-Halley::System& Halley::World::addSystem(std::unique_ptr<System> system, TimeLine timelineType)
+System& World::addSystem(std::unique_ptr<System> system, TimeLine timelineType)
 {
 	system->api = api;
+	system->setCollectSamples(collectMetrics);
 	auto& ref = *system.get();
 	auto& timeline = getSystems(timelineType);
 	timeline.emplace_back(std::move(system));
@@ -204,25 +206,33 @@ int64_t World::getAverageTime(TimeLine timeline) const
 void World::step(TimeLine timeline, Time elapsed)
 {
 	auto& t = timer[int(timeline)];
-	t.beginSample();
+	if (collectMetrics) {
+		t.beginSample();
+	}
 
 	spawnPending();
 
 	initSystems();
 	updateSystems(timeline, elapsed);
 
-	t.endSample();
+	if (collectMetrics) {
+		t.endSample();
+	}
 }
 
 void World::render(RenderContext& rc) const
 {
 	auto& t = timer[int(TimeLine::Render)];
-	t.beginSample();
+	if (collectMetrics) {
+		t.beginSample();
+	}
 
 	initSystems();
 	renderSystems(rc);
 
-	t.endSample();
+	if (collectMetrics) {
+		t.endSample();
+	}
 }
 
 void World::allocateEntity(Entity* entity) {

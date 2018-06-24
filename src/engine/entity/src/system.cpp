@@ -27,6 +27,11 @@ void System::tryInit()
 	}
 }
 
+void System::setCollectSamples(bool collect)
+{
+	collectSamples = collect;
+}
+
 void System::onAddedToWorld(World& w, int id) {
 	world = &w;
 	systemId = id;
@@ -106,7 +111,9 @@ void System::dispatchMessages()
 
 void System::doUpdate(Time time) {
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
-	timer.beginSample();
+	if (collectSamples) {
+		timer.beginSample();
+	}
 
 	purgeMessages();
 	if (!messageTypesReceived.empty()) {
@@ -115,17 +122,23 @@ void System::doUpdate(Time time) {
 	
 	updateBase(time);
 	dispatchMessages();
-	
-	timer.endSample();
+
+	if (collectSamples) {
+		timer.endSample();
+	}
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 }
 
 void System::doRender(RenderContext& rc) {
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
-	timer.beginSample();
+	if (collectSamples) {
+		timer.beginSample();
+	}
 
 	renderBase(rc);
 
-	timer.endSample();
+	if (collectSamples) {
+		timer.endSample();
+	}
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 }

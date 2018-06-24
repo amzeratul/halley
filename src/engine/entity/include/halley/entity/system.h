@@ -37,10 +37,12 @@ namespace Halley {
 
 		String getName() const { return name; }
 		void setName(String n) { name = n; }
-		long long getNanoSecondsTaken() const { return timer.lastElapsedNanoSeconds(); }
-		long long getNanoSecondsTakenAvg() const { return timer.averageElapsedNanoSeconds(); }
 		size_t getEntityCount() const;
 		void tryInit();
+
+		long long getNanoSecondsTaken() const { return timer.lastElapsedNanoSeconds(); }
+		long long getNanoSecondsTakenAvg() const { return timer.averageElapsedNanoSeconds(); }
+		void setCollectSamples(bool collect);
 
 	protected:
 		const HalleyAPI& doGetAPI() const { return *api; }
@@ -131,6 +133,7 @@ namespace Halley {
 		String name;
 		int systemId = -1;
 		bool initialised = false;
+		bool collectSamples = false;
 
 		StopwatchAveraging timer;
 

@@ -11,6 +11,10 @@ Texture::Texture(Vector2i size)
 	: size(size)
 {}
 
+void Texture::load(TextureDescriptor&& descriptor)
+{
+}
+
 std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 {
 	auto& meta = loader.getMeta();
