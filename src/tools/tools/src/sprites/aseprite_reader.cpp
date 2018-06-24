@@ -3,9 +3,11 @@
 #include "halley/core/graphics/sprite/sprite_sheet.h"
 #include "halley/file/path.h"
 #include "halley/file_formats/image.h"
+#include "../assets/importers/sprite_importer.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
-std::vector<ImageData> AsepriteReader::loadImagesFromPath(Path tmp, bool trim) {
+std::vector<ImageData> AsepriteExternalReader::loadImagesFromPath(Path tmp, bool trim) {
 	std::vector<ImageData> frameData;
 	for (auto p : FileSystem::enumerateDirectory(tmp)) {
 		if (p.getExtension() == ".png") {
@@ -26,7 +28,7 @@ std::vector<ImageData> AsepriteReader::loadImagesFromPath(Path tmp, bool trim) {
 	return frameData;
 }
 
-std::map<int, int> AsepriteReader::getSpriteDurations(Path jsonPath) {
+std::map<int, int> AsepriteExternalReader::getSpriteDurations(Path jsonPath) {
 	std::map<int, int> durations;
 	SpriteSheet spriteSheet;
 	auto jsonData = FileSystem::readFile(jsonPath);
@@ -43,7 +45,7 @@ std::map<int, int> AsepriteReader::getSpriteDurations(Path jsonPath) {
 	return durations;
 }
 
-void AsepriteReader::processFrameData(String spriteName, std::vector<ImageData>& frameData, std::map<int, int> durations) {
+void AsepriteExternalReader::processFrameData(String spriteName, std::vector<ImageData>& frameData, std::map<int, int> durations) {
 	String baseName = Path(spriteName).getFilename().string();
 
 	std::sort(frameData.begin(), frameData.end(), [] (const ImageData& a, const ImageData& b) -> bool {
@@ -85,8 +87,10 @@ void AsepriteReader::processFrameData(String spriteName, std::vector<ImageData>&
 	}
 }
 
-std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData, bool trim)
+std::vector<ImageData> AsepriteExternalReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData, bool trim)
 {
+	//return AsepriteReader::importAseprite(spriteName, fileData, trim);
+
 	// Make temporary folder
 	Path tmp = FileSystem::getTemporaryPath();
 	FileSystem::createDir(tmp);
@@ -111,4 +115,56 @@ std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::sp
 	// Process images
 	processFrameData(spriteName, frameData, durations);
 	return frameData;
+}
+
+
+////////////
+
+
+std::vector<ImageData> AsepriteReader::importAseprite(String baseName, gsl::span<const gsl::byte> fileData, bool trim)
+{
+	Expects(sizeof(AsepriteFileHeader) == 128);
+
+	size_t pos = 0;
+
+	AsepriteFileHeader fileHeader;
+	if (fileData.size() < sizeof(fileHeader)) {
+		throw Exception("Invalid Aseprite file (too small)");
+	}
+	memcpy(&fileHeader, fileData.data(), sizeof(fileHeader));
+	pos += sizeof(fileHeader);
+
+	if (fileHeader.magicNumber != 0xA5E0) {
+		throw Exception("Invalid Aseprite file (invalid file magic number)");
+	}
+
+	for (int i = 0; i < int(fileHeader.frames); ++i) {
+		const size_t frameStartPos = pos;
+
+		AsepriteFrameHeader frameHeader;
+		memcpy(&frameHeader, fileData.data() + frameStartPos, sizeof(frameHeader));
+		if (frameHeader.magicNumber != 0xF1FA) {
+			throw Exception("Invalid Aseprite file (invalid frame magic number)");
+		}
+
+		for (int j = 0; j < int(frameHeader.chunks); ++j) {
+			const size_t chunkStartPos = pos;
+
+			AsepriteChunkHeader chunkHeader;
+			memcpy(&chunkHeader, fileData.data() + chunkStartPos, sizeof(chunkHeader));
+			Bytes chunkData(chunkHeader.dataSize - sizeof(chunkHeader));
+			memcpy(chunkData.data(), fileData.data() + chunkStartPos + sizeof(chunkHeader), chunkData.size());
+
+			pos = chunkStartPos + chunkHeader.dataSize;
+		}
+
+		// Next frame
+		pos = frameStartPos + frameHeader.dataSize;
+	}
+
+	Logger::logInfo("Parsed ase file just fine");
+	// Now just do everything else.
+
+	// TODO
+	return {};
 }

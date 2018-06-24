@@ -56,7 +56,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		std::vector<ImageData> frames;
 		if (inputFile.name.getExtension() == ".ase") {
 			// Import Aseprite file
-			frames = AsepriteReader::importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), trim);
+			frames = AsepriteExternalReader::importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), trim);
 		} else {
 			// Bitmap
 			auto span = gsl::as_bytes(gsl::span<const Byte>(inputFile.data));

@@ -7,7 +7,19 @@
 namespace Halley
 {
 	class Animation;
-	struct ImageData;
+	
+	struct ImageData
+	{
+		int frameNumber;
+		int duration;
+		String sequenceName;
+		Rect4i clip;
+		Vector2i pivot;
+		Vector4s slices;
+
+		std::unique_ptr<Image> img;
+		std::vector<String> filenames;
+	};
 
 	class SpriteImporter : public IAssetImporter
 	{
