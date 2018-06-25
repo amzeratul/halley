@@ -72,7 +72,7 @@ void UIList::addTextItem(const String& id, const LocalisedString& label, float m
 	widget->setSelectable(style.getTextRenderer("label").getColour(), style.getTextRenderer("selectedLabel").getColour());
 
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(items.size()), style.getBorder("extraMouseBorder"));
-	item->add(widget, 0, Vector4f(), centre ? UISizerFillFlags::Fill : UISizerAlignFlags::CentreHorizontal);
+	item->add(widget, 0, Vector4f(), centre ? UISizerAlignFlags::CentreHorizontal : UISizerFillFlags::Fill);
 	addItem(item);
 }
 
