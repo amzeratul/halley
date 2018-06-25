@@ -82,6 +82,7 @@ namespace Halley {
 		void blitFrom(Vector2i pos, Image& img, Rect4i srcArea, bool rotated = false);
 
 		void drawImageAlpha(const Image& src, Vector2i pos, uint8_t opacity = 255);
+		void drawImageLighten(const Image& src, Vector2i pos, uint8_t opacity = 255);
 
 		static std::unique_ptr<Image> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Image; }

@@ -22,7 +22,7 @@ bool ImageData::operator==(const ImageData& other) const
 		&& pivot == other.pivot
 		&& slices == other.slices
 		&& filenames == other.filenames
-		&& img->getByteSize() == other.img->getByteSize();
+		&& img->getSize() == other.img->getSize();
 }
 
 bool ImageData::operator!=(const ImageData& other) const
@@ -73,7 +73,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		std::vector<ImageData> frames;
 		if (inputFile.name.getExtension() == ".ase") {
 			// Import Aseprite file
-			frames = AsepriteExternalReader::importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), trim);
+			frames = AsepriteReader::importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), trim);
 		} else {
 			// Bitmap
 			auto span = gsl::as_bytes(gsl::span<const Byte>(inputFile.data));

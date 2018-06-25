@@ -113,19 +113,6 @@ std::vector<ImageData> AsepriteExternalReader::importAseprite(String spriteName,
 
 	// Process images
 	processFrameData(spriteName, frameData, durations);
-
-
-	auto newResult = AsepriteReader::importAseprite(spriteName, fileData, trim);
-	if (newResult.size() != frameData.size()) {
-		throw Exception("Wrong number of sprites!");
-	}
-	for (size_t i = 0; i < newResult.size(); ++i) {
-		if (frameData[i] != newResult[i]) {
-			throw Exception("Sprite difference!");
-		}
-	}
-
-
 	return frameData;
 }
 
@@ -157,8 +144,8 @@ std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::sp
 	// Create empty tag
 	{
 		std::vector<int> untagged;
-		for (auto& i: frameTagged) {
-			if (i == 0) {
+		for (int i = 0; i < int(frameTagged.size()); ++i) {
+			if (frameTagged[i] == 0) {
 				untagged.push_back(i);
 			}
 		}
