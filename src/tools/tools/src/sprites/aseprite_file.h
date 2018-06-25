@@ -152,6 +152,7 @@ namespace Halley {
 		}
 
 	    AsepriteCel* getCelAt(int frameNumber, int layerNumber);
+	    size_t getBPP() const;
 
 		Vector2i size;
 		uint32_t flags;

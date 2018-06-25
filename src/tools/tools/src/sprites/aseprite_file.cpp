@@ -136,13 +136,13 @@ void AsepriteCel::loadImage(AsepriteDepth depth, const std::vector<uint32_t>& pa
 	imgData = std::make_unique<Image>(Image::Format::RGBA, size);
 	imgData->clear(Image::convertRGBAToInt(0, 0, 0, 0));
 
-	auto dst = imgData->getPixels();
+	auto dst = reinterpret_cast<uint32_t*>(imgData->getPixels());
 	const size_t n = size_t(size.x * size.y);
 
 	if (depth == AsepriteDepth::Indexed8) {
 		const auto src = reinterpret_cast<uint8_t*>(rawData.data());
 		for (size_t i = 0; i < n; ++i) {
-			dst[i] = src[i];
+			dst[i] = palette[src[i]];
 		}
 	} else if (depth == AsepriteDepth::Greyscale16) {
 		const auto src = reinterpret_cast<uint16_t*>(rawData.data());
@@ -155,7 +155,15 @@ void AsepriteCel::loadImage(AsepriteDepth depth, const std::vector<uint32_t>& pa
 	} else if (depth == AsepriteDepth::RGBA32) {
 		const auto src = reinterpret_cast<uint32_t*>(rawData.data());
 		for (size_t i = 0; i < n; ++i) {
-			dst[i] = palette[src[i]];
+			/*
+			const auto s = src[i];
+			const auto r = s & 0xFF;
+			const auto g = (s >> 8) & 0xFF;
+			const auto b = (s >> 16) & 0xFF;
+			const auto a = (s >> 24) & 0xFF;
+			dst[i] = (r << 24) | (g << 16) | (b << 8) | a;
+			*/
+			dst[i] = src[i];
 		}
 	}
 }
@@ -340,7 +348,7 @@ void AsepriteFile::addCelChunk(gsl::span<const std::byte> span)
 		// Read pixels
 		if (type == 0) {
 			// Raw
-			cel.rawData.resize(cel.size.x * cel.size.y);
+			cel.rawData.resize(cel.size.x * cel.size.y * getBPP());
 			if (span.size() < int(cel.rawData.size())) {
 				throw Exception("Invalid cel data");
 			}
@@ -377,7 +385,7 @@ void AsepriteFile::addPaletteChunk(gsl::span<const std::byte> span)
 	AsepriteFilePaletteData baseData;
 	readData(baseData, span);
 
-	palette.resize(baseData.numEntries);
+	palette.resize(baseData.numEntries, 0);
 	for (size_t i = baseData.firstIndex; i <= baseData.lastIndex; ++i) {
 		AsepriteFilePaletteEntryData entry;
 		readData(entry, span);
@@ -404,6 +412,7 @@ void AsepriteFile::addTagsChunk(gsl::span<const std::byte> span)
 		tag.fromFrame = entry.fromFrame;
 		tag.toFrame = entry.toFrame;
 		tag.animDirection = AsepriteAnimationDirection();
+		tag.name = readString(span);
 	}
 }
 
@@ -424,6 +433,20 @@ AsepriteCel* AsepriteFile::getCelAt(int frameNumber, int layerNumber)
 		}
 	}
 	return nullptr;
+}
+
+size_t AsepriteFile::getBPP() const
+{
+	switch (colourDepth) {
+	case AsepriteDepth::Indexed8:
+		return 1;
+	case AsepriteDepth::Greyscale16:
+		return 2;
+	case AsepriteDepth::RGBA32:
+		return 4;
+	default:
+		throw Exception("Unknown depth");
+	}
 }
 
 const std::vector<AsepriteTag>& AsepriteFile::getTags() const

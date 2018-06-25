@@ -190,6 +190,8 @@ std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::sp
 				imgData.filenames.emplace_back(":img:" + spriteName);
 			}
 
+			FileSystem::writeFile(Path("c:/users/amz/desktop/aseprite_test") / (ss.str() + ".png"), imgData.img->savePNGToBytes());
+
 			i++;
 		}
 	}
