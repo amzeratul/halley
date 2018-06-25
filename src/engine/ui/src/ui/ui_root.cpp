@@ -113,8 +113,12 @@ void UIRoot::updateMouse(spInputDevice mouse)
 
 void UIRoot::updateInputTree(const spInputDevice& input, UIWidget& widget, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting)
 {
-	if (!widget.isActive() || !widget.isEnabled()) {
+	if (!widget.isActive()) {
 		return;
+	}
+
+	if (!widget.isEnabled()) {
+		accepting = false;
 	}
 
 	for (auto& c: widget.getChildren()) {

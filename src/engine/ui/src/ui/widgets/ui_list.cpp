@@ -63,7 +63,7 @@ size_t UIList::getCount() const
 	return items.size();
 }
 
-void UIList::addTextItem(const String& id, const LocalisedString& label, float maxWidth)
+void UIList::addTextItem(const String& id, const LocalisedString& label, float maxWidth, bool centre)
 {
 	auto widget = std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label);
 	if (maxWidth > 0) {
@@ -72,7 +72,7 @@ void UIList::addTextItem(const String& id, const LocalisedString& label, float m
 	widget->setSelectable(style.getTextRenderer("label").getColour(), style.getTextRenderer("selectedLabel").getColour());
 
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(items.size()), style.getBorder("extraMouseBorder"));
-	item->add(widget, 0);
+	item->add(widget, 0, Vector4f(), centre ? UISizerAlignFlags::CentreHorizontal : UISizerFillFlags::Fill);
 	addItem(item);
 }
 
@@ -131,6 +131,11 @@ void UIList::onAccept()
 	sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId(), curOption));
 }
 
+void UIList::onCancel()
+{
+	sendEvent(UIEvent(UIEventType::ListCancel, getId(), items[curOption]->getId(), curOption));
+}
+
 void UIList::onInput(const UIInputResults& input, Time time)
 {
 	if (items.empty()) {
@@ -184,6 +189,10 @@ void UIList::onInput(const UIInputResults& input, Time time)
 
 	if (input.isButtonPressed(UIInput::Button::Accept)) {
 		onAccept();
+	}
+
+	if (input.isButtonPressed(UIInput::Button::Cancel)) {
+		onCancel();
 	}
 }
 

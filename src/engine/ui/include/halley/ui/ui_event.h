@@ -14,6 +14,7 @@ namespace Halley {
 		DropboxSelectionChanged,
 		ListSelectionChanged,
 		ListAccept,
+		ListCancel,
 		MouseWheel,
 		MakeAreaVisible,
 		MakeAreaVisibleCentered,
