@@ -63,7 +63,7 @@ size_t UIList::getCount() const
 	return items.size();
 }
 
-void UIList::addTextItem(const String& id, const LocalisedString& label, float maxWidth)
+void UIList::addTextItem(const String& id, const LocalisedString& label, float maxWidth, bool centre)
 {
 	auto widget = std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label);
 	if (maxWidth > 0) {
@@ -72,7 +72,7 @@ void UIList::addTextItem(const String& id, const LocalisedString& label, float m
 	widget->setSelectable(style.getTextRenderer("label").getColour(), style.getTextRenderer("selectedLabel").getColour());
 
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(items.size()), style.getBorder("extraMouseBorder"));
-	item->add(widget, 0);
+	item->add(widget, 0, Vector4f(), centre ? UISizerFillFlags::Fill : UISizerAlignFlags::CentreHorizontal);
 	addItem(item);
 }
 
