@@ -19,6 +19,9 @@ namespace Halley
 
 		std::unique_ptr<Image> img;
 		std::vector<String> filenames;
+
+		bool operator==(const ImageData& other) const;
+		bool operator!=(const ImageData& other) const;
 	};
 
 	class SpriteImporter : public IAssetImporter

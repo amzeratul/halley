@@ -13,6 +13,23 @@
 
 using namespace Halley;
 
+bool ImageData::operator==(const ImageData& other) const
+{
+	return frameNumber == other.frameNumber
+		&& duration == other.duration
+		&& sequenceName == other.sequenceName
+		&& clip == other.clip
+		&& pivot == other.pivot
+		&& slices == other.slices
+		&& filenames == other.filenames
+		&& img->getByteSize() == other.img->getByteSize();
+}
+
+bool ImageData::operator!=(const ImageData& other) const
+{
+	return !(*this == other);
+}
+
 void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	String atlasName = asset.assetId;

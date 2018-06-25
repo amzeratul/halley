@@ -90,13 +90,6 @@ void AsepriteExternalReader::processFrameData(String spriteName, std::vector<Ima
 
 std::vector<ImageData> AsepriteExternalReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData, bool trim)
 {
-	/*
-	auto result = AsepriteReader::importAseprite(spriteName, fileData, trim);
-	if (!result.empty()) {
-		return std::move(result);
-	}
-	*/
-
 	// Make temporary folder
 	Path tmp = FileSystem::getTemporaryPath();
 	FileSystem::createDir(tmp);
@@ -120,6 +113,19 @@ std::vector<ImageData> AsepriteExternalReader::importAseprite(String spriteName,
 
 	// Process images
 	processFrameData(spriteName, frameData, durations);
+
+
+	auto newResult = AsepriteReader::importAseprite(spriteName, fileData, trim);
+	if (newResult.size() != frameData.size()) {
+		throw Exception("Wrong number of sprites!");
+	}
+	for (size_t i = 0; i < newResult.size(); ++i) {
+		if (frameData[i] != newResult[i]) {
+			throw Exception("Sprite difference!");
+		}
+	}
+
+
 	return frameData;
 }
 
