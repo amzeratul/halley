@@ -21,12 +21,12 @@ UIHybridList::UIHybridList(const String& id, UIStyle listStyle, UIStyle buttonSt
 
 	setHandle(UIEventType::ButtonClicked, [=] (const UIEvent& event)
 	{
-		sendEvent(UIEvent(UIEventType::ListAccept, id, event.getSourceId()));
+		sendEvent(UIEvent(UIEventType::ListAccept, event.getCurWidget().getId(), event.getSourceId()));
 	});
 
 	setHandle(UIEventType::ListCancel, [=] (const UIEvent& event)
 	{
-		sendEvent(UIEvent(UIEventType::ListAccept, id, "cancel"));
+		sendEvent(UIEvent(UIEventType::ListAccept, event.getCurWidget().getId(), String("cancel")));
 	});
 }
 
