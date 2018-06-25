@@ -19,14 +19,13 @@ struct AsepriteFileHeader
     uint16_t colourDepth;
     uint32_t flags;
     uint16_t speed;
-    uint32_t _reserved0;
-    uint32_t _reserved1;
+    std::array<uint8_t, 8> _reserved0;
     uint8_t transparentPaletteEntry;
-    std::array<uint8_t, 3> _reserved2;
+    std::array<uint8_t, 3> _reserved1;
     uint16_t numberOfColours;
     uint8_t pixelWidth;
     uint8_t pixelHeight;
-    std::array<uint8_t, 88> _reserved3;
+    std::array<uint8_t, 92> _reserved2;
 };
 
 struct AsepriteFileFrameHeader
@@ -166,17 +165,18 @@ void AsepriteCel::loadImage(AsepriteDepth depth, const std::vector<uint32_t>& pa
 			dst[i] = src[i];
 		}
 	}
+
+	imgData->preMultiply();
 }
 
-void AsepriteCel::drawAt(Image& image, uint8_t opacity, AsepriteBlendMode blendMode) const
+void AsepriteCel::drawAt(Image& dstImage, uint8_t opacity, AsepriteBlendMode blendMode) const
 {
 	if (!imgData) {
 		throw Exception("imgData not loaded.");
 	}
 
 	if (blendMode == AsepriteBlendMode::Normal) {
-		// TODO: alpha blend
-		image.blitFrom(pos, *imgData);
+		dstImage.drawImageAlpha(*imgData, pos, opacity);
 	} else {
 		throw Exception("Unsupported blending mode: " + toString(int(blendMode)));
 	}
@@ -251,9 +251,6 @@ void AsepriteFile::load(gsl::span<const gsl::byte> data)
 		// Next frame
 		pos = frameStartPos + frameHeader.dataSize;
 	}
-
-	Logger::logInfo("Parsed ase file just fine");
-	// Now just do everything else.
 }
 
 void AsepriteFile::addFrame(uint16_t duration)
@@ -385,17 +382,23 @@ void AsepriteFile::addPaletteChunk(gsl::span<const std::byte> span)
 	AsepriteFilePaletteData baseData;
 	readData(baseData, span);
 
-	palette.resize(baseData.numEntries, 0);
+	if (paletteBg.empty()) {
+		paletteBg.resize(256, 0);
+	}
+
 	for (size_t i = baseData.firstIndex; i <= baseData.lastIndex; ++i) {
 		AsepriteFilePaletteEntryData entry;
 		readData(entry, span);
 
-		palette.at(i) = Image::convertRGBAToInt(entry.red, entry.green, entry.blue, entry.alpha);
+		paletteBg.at(i) = Image::convertRGBAToInt(entry.red, entry.green, entry.blue, entry.alpha);
 		if ((entry.flags & 1) != 0) {
 			// Discard name
 			readString(span);
 		}
 	}
+
+	paletteTransparent = paletteBg;
+	paletteTransparent[transparentEntry] = 0;
 }
 
 void AsepriteFile::addTagsChunk(gsl::span<const std::byte> span)
@@ -456,7 +459,7 @@ const std::vector<AsepriteTag>& AsepriteFile::getTags() const
 
 std::unique_ptr<Image> AsepriteFile::makeFrameImage(int frameNumber)
 {
-	auto frameImage = std::make_unique<Image>(Image::Format::RGBA, size);
+	auto frameImage = std::make_unique<Image>(Image::Format::RGBAPremultiplied, size);
 	frameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));
 
 	for (int layerNumber = 0; layerNumber < layers.size(); ++layerNumber) {
@@ -466,7 +469,7 @@ std::unique_ptr<Image> AsepriteFile::makeFrameImage(int frameNumber)
 			if (cel) {
 				const uint8_t opacity = uint8_t(clamp((uint32_t(cel->opacity) * uint32_t(layer.opacity)) / 255, uint32_t(0), uint32_t(255)));
 				if (!cel->imgData) {
-					cel->loadImage(colourDepth, palette);
+					cel->loadImage(colourDepth, layer.background ? paletteBg : paletteTransparent);
 				}
 				cel->drawAt(*frameImage, opacity, layer.blendMode);
 			}

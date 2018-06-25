@@ -163,6 +163,7 @@ namespace Halley {
 		std::vector<AsepriteFrame> frames;
 		std::vector<AsepriteLayer> layers;
 		std::vector<AsepriteTag> tags;
-		std::vector<uint32_t> palette;
+		std::vector<uint32_t> paletteBg;
+		std::vector<uint32_t> paletteTransparent;
     };
 }

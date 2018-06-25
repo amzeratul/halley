@@ -13,6 +13,6 @@ namespace Halley
 
 	private:
 		static std::unique_ptr<Image> convertToIndexed(const Image& image, const Image& palette);
-		static std::unordered_map<int, int> makePaletteConversion(const Image& palette);
+		static std::unordered_map<uint32_t, uint32_t> makePaletteConversion(const Image& palette);
 	};
 }

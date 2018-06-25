@@ -81,6 +81,8 @@ namespace Halley {
 		void blitFrom(Vector2i pos, Image& img, bool rotated = false);
 		void blitFrom(Vector2i pos, Image& img, Rect4i srcArea, bool rotated = false);
 
+		void drawImageAlpha(const Image& src, Vector2i pos, uint8_t opacity = 255);
+
 		static std::unique_ptr<Image> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Image; }
 		void reload(Resource&& resource) override;
@@ -91,14 +93,14 @@ namespace Halley {
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		void preMultiply();
+
 	private:
 		std::unique_ptr<char, void(*)(char*)> px;
 		size_t dataLen = 0;
 		unsigned int w = 0;
 		unsigned int h = 0;
 		Format format = Format::Undefined;
-		
-		void preMultiply();
 	};
 
 	template <>

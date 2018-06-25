@@ -27,6 +27,7 @@
 #include "halley/resources/resource_data.h"
 #include "halley/text/string_converter.h"
 #include "halley/file/byte_serializer.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -244,6 +245,57 @@ void Image::blitFrom(Vector2i pos, Image& srcImg, Rect4i srcArea, bool rotated)
 		blitFromRotated(pos, srcImg.getPixels() + offset * getBytesPerPixel(), src.getWidth(), src.getHeight(), stride, getBytesPerPixel() * 8);
 	} else {
 		blitFrom(pos, srcImg.getPixels() + offset * getBytesPerPixel(), src.getWidth(), src.getHeight(), stride, getBytesPerPixel() * 8);
+	}
+}
+
+constexpr static uint32_t alphaBlend(uint32_t src, uint32_t dst, uint32_t opacity)
+{
+	// :(
+
+	const uint32_t sr = src & 0xFF;
+	const uint32_t sg = (src >> 8) & 0xFF;
+	const uint32_t sb = (src >> 16) & 0xFF;
+	const uint32_t sa = (src >> 24) & 0xFF;
+	const uint32_t srcAlpha = (sa * opacity) / 255;
+
+	if (srcAlpha == 0) {
+		return dst;
+	} else {
+		const uint32_t dr = dst & 0xFF;
+		const uint32_t dg = (dst >> 8) & 0xFF;
+		const uint32_t db = (dst >> 16) & 0xFF;
+		const uint32_t da = (dst >> 24) & 0xFF;
+
+		const uint32_t oneMinusSrcAlpha = 255 - srcAlpha;
+		const uint32_t dstAlpha = (oneMinusSrcAlpha * da) / 255;
+
+		const uint32_t r = sr + dr * oneMinusSrcAlpha / 255;
+		const uint32_t g = sg + dg * oneMinusSrcAlpha / 255;
+		const uint32_t b = sb + db * oneMinusSrcAlpha / 255;
+		const uint32_t a = srcAlpha + dstAlpha * oneMinusSrcAlpha / 255;
+
+		return r | (g << 8) | (b << 16) | (a << 24);
+	}
+}
+
+void Image::drawImageAlpha(const Image& src, Vector2i pos, uint8_t opacity)
+{
+	if (format != Format::RGBAPremultiplied || src.format != Format::RGBAPremultiplied) {
+		throw Exception("Both images must be RGBA32Premultiplied for drawing with alpha");
+	}
+	uint32_t opacity32 = opacity;
+
+	const Rect4i srcRect = src.getRect().intersection(getRect() - pos);
+	const Rect4i dstRect = getRect().intersection(src.getRect() + pos);
+
+	const size_t rectW = srcRect.getWidth();
+	const size_t rectH = srcRect.getHeight();
+	for (size_t i = 0; i < rectH; ++i) {
+		const uint32_t* srcData = reinterpret_cast<const uint32_t*>(src.getPixels()) + ((i + srcRect.getTop()) * src.getWidth() + srcRect.getLeft());
+		uint32_t* dstData = reinterpret_cast<uint32_t*>(getPixels()) + ((i + dstRect.getTop()) * getWidth() + dstRect.getLeft());
+		for (size_t j = 0; j < rectW; ++j) {
+			dstData[j] = alphaBlend(srcData[j], dstData[j], opacity32);
+		}
 	}
 }
 

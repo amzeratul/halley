@@ -180,7 +180,7 @@ std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::sp
 			if (imgData.sequenceName != "") {
 				ss << "_" << imgData.sequenceName.cppStr();
 			}
-			const bool hasFrameNumber = !t.second.empty();
+			const bool hasFrameNumber = t.second.size() > 1;
 			if (hasFrameNumber) {
 				ss << "_" << std::setw(3) << std::setfill('0') << imgData.frameNumber;
 			}
@@ -189,8 +189,6 @@ std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::sp
 			if (frameN == 0) {
 				imgData.filenames.emplace_back(":img:" + spriteName);
 			}
-
-			FileSystem::writeFile(Path("c:/users/amz/desktop/aseprite_test") / (ss.str() + ".png"), imgData.img->savePNGToBytes());
 
 			i++;
 		}

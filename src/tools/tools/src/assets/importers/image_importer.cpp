@@ -54,8 +54,8 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const Image& image, const
 	auto lookup = makePaletteConversion(palette);
 
 	auto result = std::make_unique<Image>(Image::Format::Indexed, image.getSize());
-	auto dst = result->getPixels();
-	auto src = reinterpret_cast<const int*>(image.getPixels());
+	auto dst = reinterpret_cast<uint8_t*>(result->getPixels());
+	auto src = reinterpret_cast<const uint32_t*>(image.getPixels());
 	size_t n = image.getWidth() * image.getHeight();
 
 	std::vector<int> coloursMissing;
@@ -67,7 +67,7 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const Image& image, const
 				coloursMissing.push_back(src[i]);
 			}
 		} else {
-			dst[i] = res->second;
+			dst[i] = uint8_t(res->second);
 		}
 	}
 
@@ -84,20 +84,20 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const Image& image, const
 	return result;
 }
 
-std::unordered_map<int, int> ImageImporter::makePaletteConversion(const Image& palette)
+std::unordered_map<uint32_t, uint32_t> ImageImporter::makePaletteConversion(const Image& palette)
 {
-	auto src = reinterpret_cast<const int*>(palette.getPixels());
+	auto src = reinterpret_cast<const uint32_t*>(palette.getPixels());
 	size_t w = palette.getWidth();
 	size_t h = palette.getHeight();
 
-	std::unordered_map<int, int> lookup;
+	std::unordered_map<uint32_t, uint32_t> lookup;
 	for (size_t y = 0; y < h; ++y) {
 		for (size_t x = 0; x < w; ++x) {
 			auto colour = src[y * w + x];
 
 			auto res = lookup.find(colour);
 			if (res == lookup.end()) {
-				lookup[colour] = int(x);
+				lookup[colour] = uint32_t(x);
 			} else if (colour != 0) {
 				unsigned int r, g, b, a;
 				Image::convertIntToRGBA(colour, r, g, b, a);
