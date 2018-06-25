@@ -165,8 +165,6 @@ void AsepriteCel::loadImage(AsepriteDepth depth, const std::vector<uint32_t>& pa
 			dst[i] = src[i];
 		}
 	}
-
-	imgData->preMultiply();
 }
 
 void AsepriteCel::drawAt(Image& dstImage, uint8_t opacity, AsepriteBlendMode blendMode) const
@@ -461,7 +459,7 @@ const std::vector<AsepriteTag>& AsepriteFile::getTags() const
 
 std::unique_ptr<Image> AsepriteFile::makeFrameImage(int frameNumber)
 {
-	auto frameImage = std::make_unique<Image>(Image::Format::RGBAPremultiplied, size);
+	auto frameImage = std::make_unique<Image>(Image::Format::RGBA, size);
 	frameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));
 
 	for (int layerNumber = 0; layerNumber < layers.size(); ++layerNumber) {
@@ -478,6 +476,7 @@ std::unique_ptr<Image> AsepriteFile::makeFrameImage(int frameNumber)
 		}
 	}
 
+	frameImage->preMultiply();
 	return std::move(frameImage);
 }
 

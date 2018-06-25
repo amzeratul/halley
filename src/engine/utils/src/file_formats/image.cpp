@@ -266,10 +266,11 @@ inline constexpr static uint32_t alphaBlend(uint32_t src, uint32_t dst, uint32_t
 
 		const uint32_t oneMinusSrcAlpha = 255 - srcAlpha;
 		const uint32_t dstAlpha = (oneMinusSrcAlpha * da) / 255;
+		const uint32_t totalAlpha = srcAlpha + dstAlpha;
 
-		const uint32_t r = sr + dr * oneMinusSrcAlpha / 255;
-		const uint32_t g = sg + dg * oneMinusSrcAlpha / 255;
-		const uint32_t b = sb + db * oneMinusSrcAlpha / 255;
+		const uint32_t r = (sr * srcAlpha + dr * dstAlpha) / totalAlpha;
+		const uint32_t g = (sg * srcAlpha + dg * dstAlpha) / totalAlpha;
+		const uint32_t b = (sb * srcAlpha + db * dstAlpha) / totalAlpha;
 		const uint32_t a = srcAlpha + dstAlpha * oneMinusSrcAlpha / 255;
 
 		return r | (g << 8) | (b << 16) | (a << 24);
@@ -295,9 +296,9 @@ inline constexpr static uint32_t lightenBlend(uint32_t src, uint32_t dst, uint32
 		const uint32_t oneMinusSrcAlpha = 255 - srcAlpha;
 		const uint32_t dstAlpha = (oneMinusSrcAlpha * da) / 255;
 
-		const uint32_t r = std::max(sr, dr);
-		const uint32_t g = std::max(sg, dg);
-		const uint32_t b = std::max(sb, db);
+		const uint32_t r = std::max(sr * srcAlpha / 255, dr);
+		const uint32_t g = std::max(sg * srcAlpha / 255, dg);
+		const uint32_t b = std::max(sb * srcAlpha / 255, db);
 		const uint32_t a = srcAlpha + dstAlpha * oneMinusSrcAlpha / 255;
 
 		return r | (g << 8) | (b << 16) | (a << 24);
@@ -307,8 +308,8 @@ inline constexpr static uint32_t lightenBlend(uint32_t src, uint32_t dst, uint32
 template<typename F>
 void blendImages(F f, const Image& src, Image& dst, Vector2i pos, uint8_t opacity)
 {
-	if (dst.getFormat() != Image::Format::RGBAPremultiplied || src.getFormat() != Image::Format::RGBAPremultiplied) {
-		throw Exception("Both images must be RGBA32Premultiplied for drawing with alpha");
+	if (dst.getFormat() != Image::Format::RGBA || src.getFormat() != Image::Format::RGBA) {
+		throw Exception("Both images must be RGBA for drawing with alpha");
 	}
 	uint32_t opacity32 = opacity;
 
