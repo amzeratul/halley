@@ -18,6 +18,16 @@ UIHybridList::UIHybridList(const String& id, UIStyle listStyle, UIStyle buttonSt
 
 	UIWidget::add(list);
 	UIWidget::add(buttons);
+
+	setHandle(UIEventType::ButtonClicked, [=] (const UIEvent& event)
+	{
+		sendEvent(UIEvent(UIEventType::ListAccept, id, event.getSourceId()));
+	});
+
+	setHandle(UIEventType::ListCancel, [=] (const UIEvent& event)
+	{
+		sendEvent(UIEvent(UIEventType::ListAccept, id, "cancel"));
+	});
 }
 
 void UIHybridList::addTextItem(const String& id, const LocalisedString& label)

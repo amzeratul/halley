@@ -53,6 +53,7 @@ namespace Halley {
 		void onItemClicked(UIListItem& item);
 		void addItem(std::shared_ptr<UIListItem> item);
 		void onAccept();
+		void onCancel();
 	};
 
 	class UIListItem : public UIClickable {

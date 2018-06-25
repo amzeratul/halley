@@ -131,6 +131,11 @@ void UIList::onAccept()
 	sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId(), curOption));
 }
 
+void UIList::onCancel()
+{
+	sendEvent(UIEvent(UIEventType::ListCancel, getId(), items[curOption]->getId(), curOption));
+}
+
 void UIList::onInput(const UIInputResults& input, Time time)
 {
 	if (items.empty()) {
@@ -184,6 +189,10 @@ void UIList::onInput(const UIInputResults& input, Time time)
 
 	if (input.isButtonPressed(UIInput::Button::Accept)) {
 		onAccept();
+	}
+
+	if (input.isButtonPressed(UIInput::Button::Cancel)) {
+		onCancel();
 	}
 }
 
