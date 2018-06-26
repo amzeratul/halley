@@ -38,8 +38,16 @@ bool UIList::setSelectedOption(int option)
 		items[curOption]->setSelected(true);
 
 		playSound(style.getString("selectionChangedSound"));
+
 		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), items[curOption]->getId(), curOption));
 		sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
+		
+		if (getDataBindFormat() == UIDataBind::Format::String) {
+			notifyDataBind(items[curOption]->getId());
+		} else {
+			notifyDataBind(curOption);
+		}
+
 		return true;
 	}
 	return false;
@@ -339,4 +347,14 @@ void UIList::onManualControlCycleValue(int delta)
 void UIList::onManualControlActivate()
 {
 	onAccept();
+}
+
+void UIList::readFromDataBind()
+{
+	auto data = getDataBind();
+	if (data->getFormat() == UIDataBind::Format::String) {
+		setSelectedOptionId(data->getStringData());
+	} else {
+		setSelectedOption(data->getIntData());
+	}
 }

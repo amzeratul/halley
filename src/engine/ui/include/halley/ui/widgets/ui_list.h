@@ -34,6 +34,8 @@ namespace Halley {
 		void onManualControlCycleValue(int delta) override;
 		void onManualControlActivate() override;
 
+		void readFromDataBind() override;
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
