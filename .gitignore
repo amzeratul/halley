@@ -64,3 +64,4 @@ _ReSharper*/
 
 # External folder
 /external/
+/gen/
