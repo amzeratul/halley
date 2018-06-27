@@ -24,7 +24,10 @@ TextRenderer::TextRenderer(std::shared_ptr<const Font> font, String text, float 
 
 TextRenderer& TextRenderer::setPosition(Vector2f pos)
 {
-	position = pos;
+	if (position != pos) {
+		position = pos;
+		positionDirty = true;
+	}
 	return *this;
 }
 
@@ -41,50 +44,75 @@ TextRenderer& TextRenderer::setFont(std::shared_ptr<const Font> v)
 
 TextRenderer& TextRenderer::setText(const String& v)
 {
-	text = v.getUTF32();
+	const auto newText = v.getUTF32();
+	if (newText != text) {
+		text = newText;
+		glyphsDirty = true;
+	}
 	return *this;
 }
 
 TextRenderer& TextRenderer::setText(const StringUTF32& v)
 {
-	text = v;
+	if (v != text) {
+		text = v;
+		glyphsDirty = true;
+	}
 	return *this;
 }
 
 TextRenderer& TextRenderer::setText(const LocalisedString& v)
 {
-	text = v.getString().getUTF32();
+	const auto newText = v.getString().getUTF32();
+	if (newText != text) {
+		text = newText;
+		glyphsDirty = true;
+	}
 	return *this;
 }
 
 TextRenderer& TextRenderer::setSize(float v)
 {
-	size = v;
+	if (size != v) {
+		size = v;
+		glyphsDirty = true;
+	}
 	return *this;
 }
 
 TextRenderer& TextRenderer::setColour(Colour v)
 {
-	colour = v;
+	if (colour != v) {
+		colour = v;
+		glyphsDirty = true;
+	}
 	return *this;
 }
 
 TextRenderer& TextRenderer::setOutline(float v)
 {
-	outline = v;
-	materialDirty = true;
+	if (outline != v) {
+		outline = v;
+		materialDirty = true;
+	}
 	return *this;
 }
 
 TextRenderer& TextRenderer::setAlignment(float v)
 {
-	align = v;
+	if (align != v) {
+		align = v;
+		glyphsDirty = true;
+	}
 	return *this;
 }
 
 TextRenderer& TextRenderer::setOffset(Vector2f v)
 {
-	offset = v;
+	if (offset != v) {
+		offset = v;
+		glyphsDirty = true;
+	}
 	return *this;
 }
 
@@ -102,37 +130,51 @@ TextRenderer& TextRenderer::setClip()
 
 TextRenderer& TextRenderer::setSmoothness(float s)
 {
-	smoothness = s;
-	materialDirty = true;
+	if (smoothness != s) {
+		smoothness = s;
+		materialDirty = true;
+	}
 	return *this;
 }
 
 TextRenderer& TextRenderer::setPixelOffset(Vector2f offset)
 {
-	pixelOffset = offset;
+	if (pixelOffset != offset) {
+		pixelOffset = offset;
+		glyphsDirty = true;
+	}
 	return *this;
 }
 
 TextRenderer& TextRenderer::setColourOverride(const std::vector<ColourOverride>& colOverride)
 {
-	colourOverrides = colOverride;
+	if (colourOverrides != colOverride) {
+		colourOverrides = colOverride;
+		glyphsDirty = true;
+	}
 	return *this;
 }
 
 TextRenderer& TextRenderer::setLineSpacing(float spacing)
 {
-	lineSpacing = spacing;
-	return *this;
-}
-
-TextRenderer TextRenderer::clone() const
-{
+	if (lineSpacing != spacing) {
+		lineSpacing = spacing;
+		glyphsDirty = true;
+	}
 	return *this;
 }
 
 TextRenderer& TextRenderer::setOutlineColour(Colour v)
 {
-	outlineColour = v;
+	if (outlineColour != v) {
+		outlineColour = v;
+		materialDirty = true;
+	}
+	return *this;
+}
+
+TextRenderer TextRenderer::clone() const
+{
 	return *this;
 }
 
@@ -153,81 +195,93 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 		materialDirty = false;
 	}
 
-	float scale = size / font->getSizePoints();
-	Vector2f p = (position + Vector2f(0, font->getAscenderDistance() * scale)).floor();
-	if (offset != Vector2f(0, 0)) {
-		p -= (getExtents() * offset).floor();
-	}
+	if (glyphsDirty || positionDirty) {
+		float scale = size / font->getSizePoints();
+		Vector2f p = (position + Vector2f(0, font->getAscenderDistance() * scale)).floor();
+		if (offset != Vector2f(0, 0)) {
+			p -= (getExtents() * offset).floor();
+		}
 
-	size_t startPos = 0;
-	size_t spritesInserted = 0;
-	Vector2f lineOffset;
+		size_t startPos = 0;
+		size_t spritesInserted = 0;
+		Vector2f lineOffset;
 
-	auto flush = [&] ()
-	{
-		// Line break, update previous characters!
-		if (align != 0) {
-			Vector2f off = (-lineOffset * align).floor();
-			for (size_t j = startPos; j < spritesInserted; j++) {
-				auto& sprite = sprites[j];
-				sprite.setPos(sprite.getPosition() + off);
+		auto flush = [&] ()
+		{
+			// Line break, update previous characters!
+			if (align != 0) {
+				Vector2f off = (-lineOffset * align).floor();
+				for (size_t j = startPos; j < spritesInserted; j++) {
+					auto& sprite = sprites[j];
+					sprite.setPos(sprite.getPosition() + off);
+				}
+			}
+
+			// Move pen
+			p.y += getLineHeight();
+
+			// Reset
+			startPos = spritesInserted;
+			lineOffset.x = 0;
+		};
+
+		auto curCol = colour;
+		size_t curOverride = 0;
+
+		const size_t n = text.size();
+
+		size_t nGlyphs = 0;
+		for (size_t i = 0; i < n; i++) {
+			if (text[i] != '\n') {
+				++nGlyphs;
 			}
 		}
+		sprites.resize(nGlyphs);
 
-		// Move pen
-		p.y += getLineHeight();
+		for (size_t i = 0; i < n; i++) {
+			int c = text[i];
 
-		// Reset
-		startPos = spritesInserted;
-		lineOffset.x = 0;
-	};
-
-	auto curCol = colour;
-	size_t curOverride = 0;
-
-	const size_t n = text.size();
-	for (size_t i = 0; i < n; i++) {
-		int c = text[i];
-
-		// Check for colour override
-		while (curOverride < colourOverrides.size() && colourOverrides[curOverride].first == i) {
-			curCol = colourOverrides[curOverride].second ? colourOverrides[curOverride].second.get() : colour;
-			++curOverride;
-		}
-		
-		if (c == '\n') {
-			flush();
-		} else {
-			auto& glyph = font->getGlyph(c);
-
-			sprites.push_back(Sprite()
-				.setMaterial(material)
-				.setSize(glyph.size)
-				.setTexRect(glyph.area)
-				.setColour(curCol)
-				.setPivot(glyph.horizontalBearing / glyph.size * Vector2f(-1, 1))
-				.setScale(scale)
-				.setPos(p + lineOffset + pixelOffset));
-			++spritesInserted;
-
-			lineOffset.x += glyph.advance.x * scale;
-
-			if (i == n - 1) {
+			// Check for colour override
+			while (curOverride < colourOverrides.size() && colourOverrides[curOverride].first == i) {
+				curCol = colourOverrides[curOverride].second ? colourOverrides[curOverride].second.get() : colour;
+				++curOverride;
+			}
+			
+			if (c == '\n') {
 				flush();
+			} else {
+				auto& glyph = font->getGlyph(c);
+
+				sprites[spritesInserted++] = Sprite()
+					.setMaterial(material)
+					.setSize(glyph.size)
+					.setTexRect(glyph.area)
+					.setColour(curCol)
+					.setPivot(glyph.horizontalBearing / glyph.size * Vector2f(-1, 1))
+					.setScale(scale)
+					.setPos(p + lineOffset + pixelOffset);
+
+				lineOffset.x += glyph.advance.x * scale;
+
+				if (i == n - 1) {
+					flush();
+				}
 			}
 		}
+
+		glyphsDirty = false;
+		positionDirty = false;
 	}
 }
 
 void TextRenderer::draw(Painter& painter) const
 {
-	Vector<Sprite> sprites;
-	generateSprites(sprites);
+	generateSprites(spritesCache);
 
 	if (clip) {
 		painter.setRelativeClip(clip.get() + position);
 	}
-	Sprite::draw(sprites.data(), sprites.size(), painter);
+	Sprite::draw(spritesCache.data(), spritesCache.size(), painter);
 	if (clip) {
 		painter.setClip();
 	}
@@ -235,14 +289,13 @@ void TextRenderer::draw(Painter& painter) const
 
 void TextRenderer::drawWithSpriteFilter(Painter& painter, SpriteFilter f)
 {
-	Vector<Sprite> sprites;
-	generateSprites(sprites);
-	f(gsl::span<Sprite>(sprites.data(), sprites.size()));
+	generateSprites(spritesCache);
+	f(gsl::span<Sprite>(spritesCache.data(), spritesCache.size()));
 
 	if (clip) {
 		painter.setRelativeClip(clip.get() + position);
 	}
-	Sprite::draw(sprites.data(), sprites.size(), painter);
+	Sprite::draw(spritesCache.data(), spritesCache.size(), painter);
 	if (clip) {
 		painter.setClip();
 	}

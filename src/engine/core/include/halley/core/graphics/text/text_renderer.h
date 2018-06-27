@@ -79,10 +79,6 @@ namespace Halley
 		float smoothness = 1.0f;
 		float lineSpacing = 0.0f;
 
-		mutable bool materialDirty = true;
-		mutable bool glyphsDirty = true;
-		mutable bool positionDirty = true;
-		
 		Vector2f position;
 		Vector2f offset;
 		Vector2f pixelOffset;
@@ -91,5 +87,10 @@ namespace Halley
 		Maybe<Rect4f> clip;
 
 		std::vector<ColourOverride> colourOverrides;
+
+		mutable Vector<Sprite> spritesCache;
+		mutable bool materialDirty = true;
+		mutable bool glyphsDirty = true;
+		mutable bool positionDirty = true;
 	};
 }
