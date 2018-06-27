@@ -287,10 +287,14 @@ void TextRenderer::draw(Painter& painter) const
 	}
 }
 
-void TextRenderer::drawWithSpriteFilter(Painter& painter, SpriteFilter f)
+void TextRenderer::drawWithSpriteFilter(Painter& painter, SpriteFilter f) const
 {
 	generateSprites(spritesCache);
+
+	// We don't know what the user will do with glyphs, so mark them as dirty
 	f(gsl::span<Sprite>(spritesCache.data(), spritesCache.size()));
+	glyphsDirty = true;
+	positionDirty = true;
 
 	if (clip) {
 		painter.setRelativeClip(clip.get() + position);

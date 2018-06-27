@@ -47,7 +47,7 @@ namespace Halley
 
 		void generateSprites(std::vector<Sprite>& sprites) const;
 		void draw(Painter& painter) const;
-		void drawWithSpriteFilter(Painter& painter, SpriteFilter f);
+		void drawWithSpriteFilter(Painter& painter, SpriteFilter f) const;
 
 		Vector2f getExtents() const;
 		Vector2f getExtents(const StringUTF32& str) const;
