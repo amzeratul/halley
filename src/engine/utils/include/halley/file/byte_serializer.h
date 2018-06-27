@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <cstdint>
 #include <utility>
+#include <set>
 #include <boost/optional.hpp>
 #include "halley/maths/vector4.h"
 
@@ -96,6 +97,17 @@ namespace Halley {
 			*this << static_cast<unsigned int>(val.size());
 			for (auto& kv : val) {
 				*this << kv.first << kv.second;
+			}
+			return *this;
+		}
+
+		template <typename T>
+		Serializer& operator<<(const std::set<T>& val)
+		{
+			unsigned int sz = static_cast<unsigned int>(val.size());
+			*this << sz;
+			for (auto& v: val) {
+				*this << v;
 			}
 			return *this;
 		}
@@ -280,6 +292,22 @@ namespace Halley {
 				U value;
 				*this >> key >> value;
 				val[key] = std::move(value);
+			}
+			return *this;
+		}
+
+		template <typename T>
+		Deserializer& operator>>(std::set<T>& val)
+		{
+			unsigned int sz;
+			*this >> sz;
+			ensureSufficientBytesRemaining(sz); // Expect at least one byte per vector entry
+
+			val.clear();
+			for (unsigned int i = 0; i < sz; i++) {
+				T v;
+				*this >> v;
+				val.insert(std::move(v));
 			}
 			return *this;
 		}
