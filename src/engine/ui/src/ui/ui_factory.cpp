@@ -17,7 +17,8 @@
 #include "halley/ui/widgets/ui_paged_pane.h"
 #include "halley/support/logger.h"
 #include "ui_validator.h"
-#include "widgets/ui_framed_image.h"
+#include "halley/ui/widgets/ui_framed_image.h"
+#include "halley/ui/widgets/ui_hybrid_list.h"
 
 using namespace Halley;
 
@@ -44,6 +45,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("verticalDiv", [=] (const ConfigNode& node) { return makeVerticalDiv(node); });
 	addFactory("tabbedPane", [=] (const ConfigNode& node) { return makeTabbedPane(node); });
 	addFactory("framedImage", [=] (const ConfigNode& node) { return makeFramedImage(node); });
+	addFactory("hybridList", [=] (const ConfigNode& node) { return makeHybridList(node); });
 }
 
 void UIFactory::addFactory(const String& key, WidgetFactory factory)
@@ -556,6 +558,34 @@ std::shared_ptr<UIWidget> UIFactory::makeFramedImage(const ConfigNode& entryNode
 	auto image = std::make_shared<UIFramedImage>(id, style, makeSizer(entryNode));
 	image->setScrolling(scrollSpeed, scrollPos);
 	return image;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeHybridList(const ConfigNode& node)
+{
+	auto& widgetNode = node["widget"];
+	auto style = getStyle(node["style"].asString("hybridList"));
+	auto list = std::make_shared<UIHybridList>(widgetNode["id"].asString(), style);
+	if (widgetNode.hasKey("options")) {
+		for (auto& optionsNode: widgetNode["options"].asSequence()) {
+			if (optionsNode.getType() == ConfigNodeType::Map) {
+				if (optionsNode.hasKey("if")) {
+					if (!resolveConditions(optionsNode["if"])) {
+						continue;
+					}
+				}
+
+				const auto id = optionsNode["id"].asString();
+				const auto label = parseLabel(optionsNode);
+				list->addTextItem(id, label);
+			} else {
+				if (optionsNode.asString() == "divider") {
+					list->addDivider();
+				}
+			}
+		}
+	}
+	applyInputButtons(*list, "list");
+	return list;
 }
 
 bool UIFactory::hasCondition(const String& condition) const

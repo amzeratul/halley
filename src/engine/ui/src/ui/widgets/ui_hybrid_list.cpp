@@ -1,15 +1,16 @@
 #include "halley/ui/widgets/ui_hybrid_list.h"
 #include "halley/ui/widgets/ui_label.h"
 #include "ui_style.h"
+#include "widgets/ui_image.h"
 
 using namespace Halley;
 
-UIHybridList::UIHybridList(const String& id, UIStyle listStyle, UIStyle buttonStyle, UISizerType orientation, int nColumns)
+UIHybridList::UIHybridList(const String& id, UIStyle style, UISizerType orientation, int nColumns)
 	: UIWidget(id, {}, UISizer(orientation))
-	, listStyle(listStyle)
-	, buttonStyle(buttonStyle)
+	, style(style)
 	, nColumns(nColumns)
 {
+	auto listStyle = style.getSubStyle("list");
 	list = std::make_shared<UIList>(id + "_list", listStyle, orientation, nColumns);
 	list->setOnlyEnabledWithInputs({ UIInputType::Gamepad });
 
@@ -34,6 +35,7 @@ void UIHybridList::addTextItem(const String& id, const LocalisedString& label)
 {
 	list->addTextItem(id, label, -1, true);
 
+	auto buttonStyle = style.getSubStyle("button");
 	auto button = std::make_shared<UIButton>(id, buttonStyle, UISizer(UISizerType::Vertical));
 	button->add(std::make_shared<UILabel>("", buttonStyle.getTextRenderer("label"), label), 0, buttonStyle.getBorder("labelBorder"), UISizerAlignFlags::Centre);
 	buttons->add(button);
@@ -41,7 +43,9 @@ void UIHybridList::addTextItem(const String& id, const LocalisedString& label)
 
 void UIHybridList::addDivider()
 {
-	// TODO
+	auto dividerStyle = style.getSubStyle("divider");
+	buttons->add(std::make_shared<UIImage>(dividerStyle.getSprite("image")), 0, dividerStyle.getBorder("border"));
+	list->add(std::make_shared<UIImage>(dividerStyle.getSprite("image")), 0, dividerStyle.getBorder("border"));
 }
 
 void UIHybridList::setInputButtons(const UIInputButtons& buttons)
