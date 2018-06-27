@@ -53,19 +53,41 @@ void UIFactory::addFactory(const String& key, WidgetFactory factory)
 	factories[key] = factory;
 }
 
-void UIFactory::setConditions(std::vector<String> conds)
+void UIFactory::pushConditions(std::vector<String> conds)
 {
-	conditions = std::move(conds);
+	conditionStack.push_back(conds.size());
+	for (auto& c: conds) {
+		conditions.emplace_back(std::move(c));
+	}
 }
 
-void UIFactory::clearConditions()
+void UIFactory::popConditions()
 {
-	conditions.clear();
+	if (conditionStack.empty()) {
+		throw Exception("No conditions to pop!");
+	}
+	const size_t n = conditionStack.back();
+
+	conditions.erase(conditions.begin() + (conditions.size() - n), conditions.end());
+	conditionStack.pop_back();
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName)
 {
 	return makeUIFromNode(resources.get<ConfigFile>(configName)->getRoot());
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName, std::vector<String> conditions)
+{
+	pushConditions(std::move(conditions));
+	try {
+		auto result = makeUI(configName);
+		popConditions();
+		return result;
+	} catch (...) {
+		popConditions();
+		throw;
+	}
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeUIFromNode(const ConfigNode& node)
@@ -567,20 +589,18 @@ std::shared_ptr<UIWidget> UIFactory::makeHybridList(const ConfigNode& node)
 	auto list = std::make_shared<UIHybridList>(widgetNode["id"].asString(), style);
 	if (widgetNode.hasKey("options")) {
 		for (auto& optionsNode: widgetNode["options"].asSequence()) {
-			if (optionsNode.getType() == ConfigNodeType::Map) {
-				if (optionsNode.hasKey("if")) {
-					if (!resolveConditions(optionsNode["if"])) {
-						continue;
-					}
+			if (optionsNode.hasKey("if")) {
+				if (!resolveConditions(optionsNode["if"])) {
+					continue;
 				}
+			}
 
+			if (optionsNode["divider"].asBool(false)) {
+				list->addDivider();
+			} else {
 				const auto id = optionsNode["id"].asString();
 				const auto label = parseLabel(optionsNode);
 				list->addTextItem(id, label);
-			} else {
-				if (optionsNode.asString() == "divider") {
-					list->addDivider();
-				}
 			}
 		}
 	}

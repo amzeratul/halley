@@ -25,10 +25,11 @@ namespace Halley
 
 		void addFactory(const String& key, WidgetFactory factory);
 		
-		void setConditions(std::vector<String> conditions);
-		void clearConditions();
+		void pushConditions(std::vector<String> conditions);
+		void popConditions();
 
 		std::shared_ptr<UIWidget> makeUI(const String& configName);
+		std::shared_ptr<UIWidget> makeUI(const String& configName, std::vector<String> conditions);
 		std::shared_ptr<UIWidget> makeUIFromNode(const ConfigNode& node);
 
 		void setInputButtons(const String& key, UIInputButtons buttons);
@@ -79,6 +80,7 @@ namespace Halley
 	private:
 		std::shared_ptr<UIStyleSheet> styleSheet;
 		std::vector<String> conditions;
+		std::vector<size_t> conditionStack;
 
 		std::map<String, WidgetFactory> factories;
 		std::map<String, UIInputButtons> inputButtons;
