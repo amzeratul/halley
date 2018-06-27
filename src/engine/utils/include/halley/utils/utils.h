@@ -43,31 +43,31 @@ namespace Halley {
 	using Bytes = Vector<Byte>;
 	
 	template <typename T>
-	inline T clamp(T value, T minValue, T maxValue)
+	constexpr inline T clamp(T value, T minValue, T maxValue)
 	{
 		return std::min(std::max(minValue, value), maxValue);
 	}
 
 	template <typename T>
-	inline T clamp2(T value, T minValue, T maxValue)
+	constexpr inline T clamp2(T value, T minValue, T maxValue)
 	{
 		return std::max(minValue, std::min(value, maxValue));
 	}
 
 	template <typename T>
-	inline T maxAbs(T a, T b)
+	constexpr inline T maxAbs(T a, T b)
 	{
 		return abs(a) > abs(b) ? a : b;
 	}
 
 	template <typename T>
-	inline T minAbs(T a, T b)
+	constexpr inline T minAbs(T a, T b)
 	{
 		return abs(a) < abs(b) ? a : b;
 	}
 
 	template <typename T>
-	inline bool rangeIntersection(T s1, T e1, T s2, T e2)
+	constexpr inline bool rangeIntersection(T s1, T e1, T s2, T e2)
 	{
 		return (s1 < e2) && (s2 < e1);
 	}
@@ -83,7 +83,7 @@ namespace Halley {
 	constexpr bool IS_BIG_ENDIAN = false;
 
 	template <typename T>
-	inline T FixEndian(T t)
+	constexpr inline T FixEndian(T t)
 	{
 		if (IS_BIG_ENDIAN) {
 			T temp = t;
@@ -98,17 +98,17 @@ namespace Halley {
 	}
 
 	template<>
-	inline char FixEndian<char>(char t) {
+	constexpr inline char FixEndian<char>(char t) {
 		return t;
 	}
 
 	template<>
-	inline unsigned char FixEndian<unsigned char>(unsigned char t) {
+	constexpr inline unsigned char FixEndian<unsigned char>(unsigned char t) {
 		return t;
 	}
 
 	// True modulo definition
-	template <typename T> inline T modulo (T a, T b)
+	template <typename T> constexpr inline T modulo (T a, T b)
 	{
 		static_assert(std::is_signed<T>::value, "Must be signed to use modulo operation");
 		T res = a % b;
@@ -116,24 +116,24 @@ namespace Halley {
 		return res;
 	}
 
-	template <typename T> inline T floatModulo (T a, T b)
+	template <typename T> constexpr inline T floatModulo (T a, T b)
 	{
 		if (b == 0) return a;
-		return a - b * floor(a/b);
+		return a - b * std::floor(a/b);
 	}
-	template <> inline float modulo (float a, float b) { return floatModulo(a, b); }
-	template <> inline double modulo (double a, double b) { return floatModulo(a, b); }
+	template <> constexpr inline float modulo (float a, float b) { return floatModulo(a, b); }
+	template <> constexpr inline double modulo (double a, double b) { return floatModulo(a, b); }
 
 	// Float floor division (e.g. -0.5 / 2 = -1.0)
 	template <typename T>
-	inline T floorDivFloat (T a, T b)
+	constexpr inline T floorDivFloat (T a, T b)
 	{
 		return floor(a / b);
 	}
 
 	// Int floor division (e.g. -2 / 3 = -1)
 	template <typename T>
-	inline T floorDivInt (T a, T b)
+	constexpr inline T floorDivInt (T a, T b)
 	{
 		T result = a / b;
 		if (a % b < 0) {
@@ -143,27 +143,27 @@ namespace Halley {
 	}
 
 	// Generic floor divs
-	inline float floorDiv (float a, float b) { return floorDivFloat(a, b); }
-	inline double floorDiv (double a, double b) { return floorDivFloat(a, b); }
-	inline long floorDiv (long a, long b) { return floorDivInt(a, b); }
-	inline int floorDiv (int a, int b) { return floorDivInt(a, b); }
-	inline short floorDiv (short a, short b) { return floorDivInt(a, b); }
-	inline char floorDiv (char a, char b) { return floorDivInt(a, b); }
+	constexpr inline float floorDiv (float a, float b) { return floorDivFloat(a, b); }
+	constexpr inline double floorDiv (double a, double b) { return floorDivFloat(a, b); }
+	constexpr inline long floorDiv (long a, long b) { return floorDivInt(a, b); }
+	constexpr inline int floorDiv (int a, int b) { return floorDivInt(a, b); }
+	constexpr inline short floorDiv (short a, short b) { return floorDivInt(a, b); }
+	constexpr inline char floorDiv (char a, char b) { return floorDivInt(a, b); }
 
 	// Interpolation
 	template <typename T>
-	inline T interpolate(T a, T b, float factor) {
+	constexpr inline T interpolate(T a, T b, float factor) {
 		return static_cast<T>(a * (1 - factor) + b * factor);
 	}
 
 	template <typename T>
-	inline T lerp(T a, T b, float factor) {
+	constexpr inline T lerp(T a, T b, float factor) {
 		return static_cast<T>(a * (1 - factor) + b * factor);
 	}
 
 	// Smoothing
 	template <typename T>
-	inline T smoothCos(T a) {
+	constexpr inline T smoothCos(T a) {
 		return T((1-cos(a * 3.1415926535897932384626433832795))*0.5);
 	}
 
@@ -171,7 +171,7 @@ namespace Halley {
 	// Returns 0 at start of attack and end of release, 1 during sustain
 	// Attack and release are linear interpolations
 	template <typename T>
-	inline T asr(T x, T a, T s, T r) {
+	constexpr inline T asr(T x, T a, T s, T r) {
 		if (x < a) return x/a;
 		T as = a+s;
 		if (x < as) return 1;
@@ -180,7 +180,7 @@ namespace Halley {
 
 	// Next power of 2
 	template<typename T>
-	static T nextPowerOf2(T val)
+	constexpr static T nextPowerOf2(T val)
 	{
 		--val;
 		val = (val >> 1) | val;
@@ -191,9 +191,9 @@ namespace Halley {
 		return val+1;
 	}
 
-	inline int fastLog2Floor (uint32_t value) {
+	constexpr inline int fastLog2Floor (uint32_t value) {
 		// From https://stackoverflow.com/questions/11376288/fast-computing-of-log2-for-64-bit-integers
-		constexpr static int tab32[32] = { 0, 9, 1, 10, 13, 21, 2, 29, 11, 14, 16, 18, 22, 25, 3, 30, 8, 12, 20, 28, 15, 17, 24, 7, 19, 27, 23, 6, 26, 5, 4, 31 };
+		constexpr int tab32[32] = { 0, 9, 1, 10, 13, 21, 2, 29, 11, 14, 16, 18, 22, 25, 3, 30, 8, 12, 20, 28, 15, 17, 24, 7, 19, 27, 23, 6, 26, 5, 4, 31 };
 
 		Expects(value > 0);
 		value |= value >> 1;
@@ -204,10 +204,10 @@ namespace Halley {
 		return tab32[uint32_t(value * 0x07C4ACDD) >> 27];
 	}
 
-	inline int fastLog2Floor (uint64_t value)
+	constexpr inline int fastLog2Floor (uint64_t value)
 	{
 		// From https://stackoverflow.com/questions/11376288/fast-computing-of-log2-for-64-bit-integers
-		constexpr static int tab64[64] = { 63,  0, 58,  1, 59, 47, 53,  2, 60, 39, 48, 27, 54, 33, 42,  3, 61, 51, 37, 40, 49, 18, 28, 20,  55, 30, 34, 11, 43, 14, 22,  4, 62, 57, 46, 52, 38, 26, 32, 41, 50, 36, 17, 19, 29, 10, 13, 21, 56, 45, 25, 31, 35, 16,  9, 12, 44, 24, 15,  8, 23,  7,  6,  5};
+		constexpr int tab64[64] = { 63,  0, 58,  1, 59, 47, 53,  2, 60, 39, 48, 27, 54, 33, 42,  3, 61, 51, 37, 40, 49, 18, 28, 20,  55, 30, 34, 11, 43, 14, 22,  4, 62, 57, 46, 52, 38, 26, 32, 41, 50, 36, 17, 19, 29, 10, 13, 21, 56, 45, 25, 31, 35, 16,  9, 12, 44, 24, 15,  8, 23,  7,  6,  5};
 
 		Expects(value > 0);
 		value |= value >> 1;
@@ -219,19 +219,19 @@ namespace Halley {
 		return tab64[uint64_t((value - (value >> 1)) * 0x07EDD5E59A4E28C2) >> 58];
 	}
 
-	inline int fastLog2Ceil (uint32_t value)
+	constexpr inline int fastLog2Ceil (uint32_t value)
 	{
 		return fastLog2Floor(value - 1) + 1;
 	}
 
-	inline int fastLog2Ceil (uint64_t value)
+	constexpr inline int fastLog2Ceil (uint64_t value)
 	{
 		return fastLog2Floor(value - 1) + 1;
 	}
 
 	// Advance a to b by up to inc
 	template<typename T>
-	static T advance(T a, T b, T inc)
+	constexpr static T advance(T a, T b, T inc)
 	{
 		if (a < b) return std::min(a+inc, b);
 		else return std::max(a-inc, b);
@@ -239,13 +239,13 @@ namespace Halley {
 
 	// Align address
 	template <typename T>
-	T alignUp(T val, T align)
+	constexpr T alignUp(T val, T align)
 	{
 		return val + (align - (val % align)) % align;
 	}
 
 	template <typename T>
-	T alignDown(T val, T align)
+	constexpr T alignDown(T val, T align)
 	{
 		return (val / align) * align;
 	}

@@ -42,18 +42,18 @@ namespace Halley {
 	template <typename T=float, class U=Angle<float>>
 	class Vector2D {
 	private:
-		T mod(T a, T b) const { return a % b; }
+		constexpr T mod(T a, T b) const { return a % b; }
 
 	public:
 		T x,y;
 
 		// Constructors
-		Vector2D () : x(0), y(0) {}
+		constexpr Vector2D () : x(0), y(0) {}
 		
-		Vector2D (T _x, T _y) : x(_x), y(_y) {}
+		constexpr Vector2D (T _x, T _y) : x(_x), y(_y) {}
 		
 		template <typename V>
-		explicit Vector2D (Vector2D<V> vec) : x(T(vec.x)), y(T(vec.y)) {}
+		constexpr explicit Vector2D (Vector2D<V> vec) : x(T(vec.x)), y(T(vec.y)) {}
 
 		Vector2D (T length, U angle)
 		{
@@ -83,14 +83,14 @@ namespace Halley {
 		inline bool operator < (Vector2D param) const { return y != param.y ? y < param.y : x < param.x; }
 
 		// Basic algebra
-		inline Vector2D operator + (Vector2D param) const { return Vector2D(x + param.x,y + param.y); }
-		inline Vector2D operator - (Vector2D param) const { return Vector2D(x - param.x,y - param.y); }
-		inline Vector2D operator * (Vector2D param) const { return Vector2D(x * param.x,y * param.y); }
-		inline Vector2D operator / (Vector2D param) const { return Vector2D(x / param.x,y / param.y); }
-		inline Vector2D operator % (Vector2D param) const { return Vector2D(mod(x, param.x), mod(y, param.y)); }
+		constexpr inline Vector2D operator + (Vector2D param) const { return Vector2D(x + param.x,y + param.y); }
+		constexpr inline Vector2D operator - (Vector2D param) const { return Vector2D(x - param.x,y - param.y); }
+		constexpr inline Vector2D operator * (Vector2D param) const { return Vector2D(x * param.x,y * param.y); }
+		constexpr inline Vector2D operator / (Vector2D param) const { return Vector2D(x / param.x,y / param.y); }
+		constexpr inline Vector2D operator % (Vector2D param) const { return Vector2D(mod(x, param.x), mod(y, param.y)); }
 
-		inline Vector2D modulo(Vector2D param) const { return Vector2D(Halley::modulo<T>(x, param.x), Halley::modulo<T>(y, param.y)); }
-		inline Vector2D floorDiv(Vector2D param) const { return Vector2D(Halley::floorDiv(x, param.x), Halley::floorDiv(y, param.y)); }
+		constexpr inline Vector2D modulo(Vector2D param) const { return Vector2D(Halley::modulo<T>(x, param.x), Halley::modulo<T>(y, param.y)); }
+		constexpr inline Vector2D floorDiv(Vector2D param) const { return Vector2D(Halley::floorDiv(x, param.x), Halley::floorDiv(y, param.y)); }
 
 		inline Vector2D operator - () const { return Vector2D(-x,-y); }
 
@@ -126,22 +126,22 @@ namespace Halley {
 		}
 
 		// Get the orthogonal vector
-		inline Vector2D orthoLeft () const { return Vector2D(-y, x); }
-		inline Vector2D orthoRight () const { return Vector2D(y, -x); }
+		constexpr inline Vector2D orthoLeft () const { return Vector2D(-y, x); }
+		constexpr inline Vector2D orthoRight () const { return Vector2D(y, -x); }
 
 		// Cross product (the Z component of it)
-		inline T cross (Vector2D param) const { return x * param.y - y * param.x; }
+		constexpr inline T cross (Vector2D param) const { return x * param.y - y * param.x; }
 
 		// Dot product
-		inline T dot (Vector2D param) const { return (x * param.x) + (y * param.y); }
+		constexpr inline T dot (Vector2D param) const { return (x * param.x) + (y * param.y); }
 
 		// Length
-		inline T length () const { return std::sqrt(squaredLength()); }
-		inline T len () const { return length(); }
-		inline T manhattanLength() const { return std::abs(x) + std::abs(y); }
+		constexpr inline T length () const { return std::sqrt(squaredLength()); }
+		constexpr inline T len () const { return length(); }
+		constexpr inline T manhattanLength() const { return std::abs(x) + std::abs(y); }
 
 		// Squared length, often useful and much faster
-		inline T squaredLength () const { return x*x+y*y; }
+		constexpr inline T squaredLength () const { return x*x+y*y; }
 
 		// Projection on another vector
 		inline Vector2D projection (Vector2D param) const
@@ -155,9 +155,9 @@ namespace Halley {
 		}
 
 		// Rounding
-		inline Vector2D floor() const { return Vector2D(std::floor(x), std::floor(y)); }
-		inline Vector2D ceil() const { return Vector2D(std::ceil(x), std::ceil(y)); }
-		inline Vector2D round() const { return Vector2D(std::round(x), std::round(y)); }
+		constexpr inline Vector2D floor() const { return Vector2D(std::floor(x), std::floor(y)); }
+		constexpr inline Vector2D ceil() const { return Vector2D(std::ceil(x), std::ceil(y)); }
+		constexpr inline Vector2D round() const { return Vector2D(std::round(x), std::round(y)); }
 
 		// Gets the angle that this vector is pointing to
 		inline U angle () const
@@ -192,17 +192,17 @@ namespace Halley {
 			return String("(") + x + ", " + y + ")";
 		}
 
-		Vector2D abs() const
+		constexpr Vector2D abs() const
 		{
 			return Vector2D(std::abs(x), std::abs(y));
 		}
 
-		inline static Vector2D<T,U> min(Vector2D<T,U> a, Vector2D<T,U> b)
+		constexpr inline static Vector2D<T,U> min(Vector2D<T,U> a, Vector2D<T,U> b)
 		{
 			return Vector2D<T,U>(std::min(a.x, b.x), std::min(a.y, b.y));
 		}
 
-		inline static Vector2D<T,U> max(Vector2D<T,U> a, Vector2D<T,U> b)
+		constexpr inline static Vector2D<T,U> max(Vector2D<T,U> a, Vector2D<T,U> b)
 		{
 			return Vector2D<T,U>(std::max(a.x, b.x), std::max(a.y, b.y));
 		}
