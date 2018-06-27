@@ -24,6 +24,7 @@ namespace Halley {
 
 		bool addNewChildren(UIInputType inputType);
 		bool removeDeadChildren();
+		bool isWaitingToSpawnChildren() const;
 
 		std::vector<std::shared_ptr<UIWidget>>& getChildren();
 		const std::vector<std::shared_ptr<UIWidget>>& getChildren() const;

@@ -49,6 +49,11 @@ bool UIParent::removeDeadChildren()
 	return before != children.size();
 }
 
+bool UIParent::isWaitingToSpawnChildren() const
+{
+	return !childrenWaiting.empty();
+}
+
 std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()
 {
 	/*

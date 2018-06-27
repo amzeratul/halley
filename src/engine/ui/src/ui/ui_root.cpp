@@ -34,28 +34,32 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 {
 	auto joystickType = manual->getJoystickType();
 
-	// Spawn & Update input
-	addNewChildren(activeInputType);
-	if (activeInputType == UIInputType::Mouse) {
-		updateMouse(mouse);
-	}
-	updateInput(manual);
+	do {
+		// Spawn & Update input
+		addNewChildren(activeInputType);
+		if (activeInputType == UIInputType::Mouse) {
+			updateMouse(mouse);
+		}
+		updateInput(manual);
 
-	// Update children
-	for (auto& c: getChildren()) {
-		c->doUpdate(true, t, activeInputType, joystickType);
-	}
-	removeDeadChildren();
+		// Update children
+		for (auto& c: getChildren()) {
+			c->doUpdate(true, t, activeInputType, joystickType);
+		}
+		removeDeadChildren();
 
-	// Layout all widgets
-	runLayout();
+		// Layout all widgets
+		runLayout();
 
-	// Update again, to reflect what happened >_>
-	for (auto& c: getChildren()) {
-		c->doUpdate(false, 0, activeInputType, joystickType);
-	}
-	//addNewChildren(activeInputType);
-	runLayout();
+		// Update again, to reflect what happened >_>
+		for (auto& c: getChildren()) {
+			c->doUpdate(false, 0, activeInputType, joystickType);
+		}
+		runLayout();
+
+		// For subsequent iterations, make sure t = 0
+		t = 0;
+	} while (isWaitingToSpawnChildren());
 }
 
 void UIRoot::updateMouse(spInputDevice mouse)
