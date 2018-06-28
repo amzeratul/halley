@@ -14,6 +14,8 @@ namespace Halley {
 		void addSpacer(float size) override;
 		void addStretchSpacer(float proportion = 0) override;
 
+		void setAlwaysShow(bool alwaysShow);
+
 	private:
 		std::shared_ptr<UIScrollPane> pane;
 		std::shared_ptr<UIScrollBar> hBar;

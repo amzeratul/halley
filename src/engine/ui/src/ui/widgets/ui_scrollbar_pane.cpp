@@ -55,3 +55,13 @@ void UIScrollBarPane::addStretchSpacer(float proportion)
 {
 	pane->addStretchSpacer(proportion);
 }
+
+void UIScrollBarPane::setAlwaysShow(bool alwaysShow)
+{
+	if (hBar) {
+		hBar->setAlwaysShow(alwaysShow);
+	}
+	if (vBar) {
+		vBar->setAlwaysShow(alwaysShow);
+	}
+}
