@@ -266,12 +266,12 @@ Vector2f UIFactory::asVector2f(const ConfigNode& node, Maybe<Vector2f> defaultVa
 	}
 }
 
-LocalisedString UIFactory::parseLabel(const ConfigNode& node, const String& defaultOption) {
+LocalisedString UIFactory::parseLabel(const ConfigNode& node, const String& defaultOption, const String& key) {
 	LocalisedString label;
-	if (node.hasKey("textKey")) {
-		label = i18n.get(node["textKey"].asString());
-	} else if (node.hasKey("text")) {
-		label = LocalisedString::fromUserString(node["text"].asString(defaultOption));
+	if (node.hasKey(key + "Key")) {
+		label = i18n.get(node[key + "Key"].asString());
+	} else if (node.hasKey(key)) {
+		label = LocalisedString::fromUserString(node[key].asString(defaultOption));
 	}
 	return label;
 }
@@ -347,8 +347,12 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 	auto id = node["id"].asString();
 	auto style = UIStyle(node["style"].asString("input"), styleSheet);
 	auto label = parseLabel(node);
+	auto ghostText = parseLabel(node, "", "ghost");
 
 	auto result = std::make_shared<UITextInput>(api.input->getKeyboard(), id, style, "", label);;
+	if (!ghostText.getString().isEmpty()) {
+		result->setGhostText(ghostText);
+	}
 
 	auto validatorName = node["validator"].asString("");
 	if (!validatorName.isEmpty()) {

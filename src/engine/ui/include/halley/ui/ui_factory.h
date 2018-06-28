@@ -52,7 +52,7 @@ namespace Halley
 		static Maybe<Vector2f> asMaybeVector2f(const ConfigNode& node);
 		static Vector2f asVector2f(const ConfigNode& node, Maybe<Vector2f> defaultValue);
 		static Vector4f asVector4f(const ConfigNode& node, Maybe<Vector4f> defaultValue);
-		LocalisedString parseLabel(const ConfigNode& node, const String& defaultOption = "");
+		LocalisedString parseLabel(const ConfigNode& node, const String& defaultOption = "", const String& key = "text");
 		std::vector<std::pair<String, LocalisedString>> parseOptions(const ConfigNode& node);
 
 		std::shared_ptr<UIWidget> makeBaseWidget(const ConfigNode& node);
