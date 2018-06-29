@@ -28,6 +28,7 @@ namespace Halley {
 		void clear();
 
 		void setItemEnabled(const String& id, bool enabled);
+		void setItemActive(const String& id, bool active);
 
 		Rect4f getOptionRect(int curOption) const;
 
@@ -56,6 +57,9 @@ namespace Halley {
 		void addItem(std::shared_ptr<UIListItem> item);
 		void onAccept();
 		void onCancel();
+		void reassignIds();
+		std::shared_ptr<UIListItem> getItem(int n) const;
+		size_t getNumberOfItems() const;
 	};
 
 	class UIListItem : public UIClickable {
@@ -66,6 +70,7 @@ namespace Halley {
 		void setSelected(bool selected);
 		
 		int getIndex() const;
+		void setIndex(int index);
 		Rect4f getMouseRect() const override;
 		Rect4f getRawRect() const;
 

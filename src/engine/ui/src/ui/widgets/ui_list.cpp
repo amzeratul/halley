@@ -21,29 +21,30 @@ bool UIList::setSelectedOption(int option)
 {
 	forceAddChildren(UIInputType::Undefined);
 
-	if (items.empty()) {
+	if (getNumberOfItems() == 0) {
 		return false;
 	}
 
-	auto newSel = clamp(option, 0, int(items.size()) - 1);
+	auto newSel = clamp(option, 0, int(getNumberOfItems()) - 1);
 	if (newSel != curOption) {
 		if (!items.at(newSel)->isEnabled()) {
 			return false;
 		}
 
 		if (curOption >= 0) {
-			items[curOption]->setSelected(false);
+			getItem(curOption)->setSelected(false);
 		}
 		curOption = newSel;
-		items[curOption]->setSelected(true);
+		auto curItem = getItem(curOption);
+		curItem->setSelected(true);
 
 		playSound(style.getString("selectionChangedSound"));
 
-		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), items[curOption]->getId(), curOption));
+		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), curItem->getId(), curOption));
 		sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
 		
 		if (getDataBindFormat() == UIDataBind::Format::String) {
-			notifyDataBind(items[curOption]->getId());
+			notifyDataBind(curItem->getId());
 		} else {
 			notifyDataBind(curOption);
 		}
@@ -60,15 +61,15 @@ int UIList::getSelectedOption() const
 
 String UIList::getSelectedOptionId() const
 {
-	if (curOption < 0 || curOption >= int(items.size())) {
+	if (curOption < 0 || curOption >= int(getNumberOfItems())) {
 		return "";
 	}
-	return items[curOption]->getId();
+	return getItem(curOption)->getId();
 }
 
 size_t UIList::getCount() const
 {
-	return items.size();
+	return getNumberOfItems();
 }
 
 void UIList::addTextItem(const String& id, const LocalisedString& label, float maxWidth, bool centre)
@@ -79,21 +80,21 @@ void UIList::addTextItem(const String& id, const LocalisedString& label, float m
 	}
 	widget->setSelectable(style.getTextRenderer("label").getColour(), style.getTextRenderer("selectedLabel").getColour());
 
-	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(items.size()), style.getBorder("extraMouseBorder"));
+	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 	item->add(widget, 0, Vector4f(), centre ? UISizerAlignFlags::CentreHorizontal : UISizerFillFlags::Fill);
 	addItem(item);
 }
 
 void UIList::addItem(const String& id, std::shared_ptr<UIWidget> widget, float proportion, Vector4f border, int fillFlags)
 {
-	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(items.size()), style.getBorder("extraMouseBorder"));
+	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 	item->add(widget, proportion, border, fillFlags);
 	addItem(item);
 }
 
 void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion, Vector4f border, int fillFlags)
 {
-	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(items.size()), style.getBorder("extraMouseBorder"));
+	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 	item->add(sizer, proportion, border, fillFlags);
 	addItem(item);
 }
@@ -115,10 +116,24 @@ void UIList::setItemEnabled(const String& id, bool enabled)
 	}
 }
 
+void UIList::setItemActive(const String& id, bool active)
+{
+	auto curId = getSelectedOptionId();
+	for (auto& item: items) {
+		if (item->getId() == id) {
+			item->setActive(active);
+		}
+	}
+	reassignIds();
+	if (!setSelectedOptionId(curId)) {
+		setSelectedOption(0);
+	}
+}
+
 void UIList::addItem(std::shared_ptr<UIListItem> item)
 {
 	add(item);
-	bool wasEmpty = items.empty();
+	bool wasEmpty = getNumberOfItems() == 0;
 	items.push_back(item);
 	if (wasEmpty) {
 		curOption = -1;
@@ -136,17 +151,54 @@ void UIList::draw(UIPainter& painter) const
 
 void UIList::onAccept()
 {
-	sendEvent(UIEvent(UIEventType::ListAccept, getId(), items[curOption]->getId(), curOption));
+	sendEvent(UIEvent(UIEventType::ListAccept, getId(), getItem(curOption)->getId(), curOption));
 }
 
 void UIList::onCancel()
 {
-	sendEvent(UIEvent(UIEventType::ListCancel, getId(), items[curOption]->getId(), curOption));
+	sendEvent(UIEvent(UIEventType::ListCancel, getId(), getItem(curOption)->getId(), curOption));
+}
+
+void UIList::reassignIds()
+{
+	int i = 0;
+	for (auto& item: items) {
+		if (item->isActive()) {
+			item->setIndex(i++);
+		}
+	}
+}
+
+std::shared_ptr<UIListItem> UIList::getItem(int n) const
+{
+	if (n < 0) {
+		throw Exception("Invalid item");
+	}
+	int i = 0;
+	for (auto& item: items) {
+		if (item->isActive()) {
+			if (i++ == n) {
+				return item;
+			}
+		}
+	}
+	throw Exception("Invalid item");
+}
+
+size_t UIList::getNumberOfItems() const
+{
+	size_t n = 0;
+	for (auto& item: items) {
+		if (item->isActive()) {
+			++n;
+		}
+	}
+	return n;
 }
 
 void UIList::onInput(const UIInputResults& input, Time time)
 {
-	if (items.empty()) {
+	if (getNumberOfItems() == 0) {
 		curOption = 0;
 		return;
 	}
@@ -165,19 +217,20 @@ void UIList::onInput(const UIInputResults& input, Time time)
 	if (input.isButtonPressed(UIInput::Button::Prev)) {
 		option--;
 	}
-	option = modulo(option, int(items.size()));
+	const auto nItems = int(getNumberOfItems());
+	option = modulo(option, nItems);
 
 	Vector2i cursorPos;
 	if (orientation == UISizerType::Horizontal) {
 		nRows = 1;
-		nCols = int(items.size());
+		nCols = nItems;
 		cursorPos = Vector2i(option, 0);
 	} else if (orientation == UISizerType::Vertical) {
-		nRows = int(items.size());
+		nRows = nItems;
 		nCols = 1;
 		cursorPos = Vector2i(0, option);
 	} else {
-		nRows = int(items.size() + nColumns - 1) / nColumns;
+		nRows = (nItems + nColumns - 1) / nColumns;
 		nCols = nColumns;
 		cursorPos = Vector2i(option % nCols, option / nCols);
 	}
@@ -186,7 +239,7 @@ void UIList::onInput(const UIInputResults& input, Time time)
 	cursorPos.x += input.getAxisRepeat(UIInput::Axis::X);
 	cursorPos.y += input.getAxisRepeat(UIInput::Axis::Y);
 	cursorPos.y = modulo(cursorPos.y, nRows);
-	int columnsThisRow = (cursorPos.y == nRows - 1) ? int(items.size()) % nCols : nCols;
+	int columnsThisRow = (cursorPos.y == nRows - 1) ? nItems % nCols : nCols;
 	if (columnsThisRow == 0) { // If the last column is full, this will happen
 		columnsThisRow = nCols;
 	}
@@ -298,6 +351,11 @@ int UIListItem::getIndex() const
 	return index;
 }
 
+void UIListItem::setIndex(int i)
+{
+	index = i;
+}
+
 Rect4f UIListItem::getMouseRect() const
 {
 	auto rect = UIWidget::getMouseRect();
@@ -325,19 +383,20 @@ bool UIList::setSelectedOptionId(const String& id)
 
 Rect4f UIList::getOptionRect(int curOption) const
 {
-	if (items.empty()) {
+	if (getNumberOfItems() == 0) {
 		return Rect4f();
 	} else {
-		auto& item = items[clamp(curOption, 0, int(items.size()) - 1)];
+		const auto item = getItem(clamp(curOption, 0, int(getNumberOfItems()) - 1));
 		return item->getRawRect() - getPosition();
 	}
 }
 
 void UIList::onManualControlCycleValue(int delta)
 {
-	int start = curOption;
-	for (int i = 1; i < int(items.size()); ++i) {
-		int opt = modulo(start + delta * i, int(items.size()));
+	const int start = curOption;
+	const int nItems = int(getNumberOfItems());
+	for (int i = 1; i < nItems; ++i) {
+		int opt = modulo(start + delta * i, nItems);
 		if (setSelectedOption(opt)) {
 			return;
 		}
