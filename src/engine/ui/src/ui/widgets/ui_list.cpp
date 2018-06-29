@@ -21,17 +21,18 @@ bool UIList::setSelectedOption(int option)
 {
 	forceAddChildren(UIInputType::Undefined);
 
-	if (getNumberOfItems() == 0) {
+	const auto numberOfItems = int(getNumberOfItems());
+	if (numberOfItems == 0) {
 		return false;
 	}
 
-	auto newSel = clamp(option, 0, int(getNumberOfItems()) - 1);
+	auto newSel = clamp(option, 0, numberOfItems - 1);
 	if (newSel != curOption) {
 		if (!items.at(newSel)->isEnabled()) {
 			return false;
 		}
 
-		if (curOption >= 0) {
+		if (curOption >= 0 && curOption < numberOfItems) {
 			getItem(curOption)->setSelected(false);
 		}
 		curOption = newSel;
@@ -112,6 +113,9 @@ void UIList::setItemEnabled(const String& id, bool enabled)
 	auto curId = getSelectedOptionId();
 	for (auto& item: items) {
 		if (item->getId() == id) {
+			if (!enabled) {
+				item->setSelected(false);
+			}
 			item->setEnabled(enabled);
 		}
 	}
@@ -126,6 +130,9 @@ void UIList::setItemActive(const String& id, bool active)
 	auto curId = getSelectedOptionId();
 	for (auto& item: items) {
 		if (item->getId() == id) {
+			if (!active) {
+				item->setSelected(false);
+			}
 			item->setActive(active);
 		}
 	}
@@ -170,6 +177,8 @@ void UIList::reassignIds()
 	for (auto& item: items) {
 		if (item->isActive() && item->isEnabled()) {
 			item->setIndex(i++);
+		} else {
+			item->setIndex(-1);
 		}
 	}
 }
