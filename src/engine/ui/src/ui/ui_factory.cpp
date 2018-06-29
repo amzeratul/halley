@@ -564,6 +564,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 	tabs->setHandle(UIEventType::ListSelectionChanged, [pane] (const UIEvent& event)
 	{
 		pane->setPage(event.getIntData());
+		event.getCurWidget().sendEvent(UIEvent(UIEventType::TabChanged, event.getSourceId(), event.getIntData()));
 	});
 
 	auto result = std::make_shared<UIWidget>(id + "_container", Vector2f(), UISizer(UISizerType::Vertical));

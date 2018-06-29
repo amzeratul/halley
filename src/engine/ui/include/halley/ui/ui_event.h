@@ -21,7 +21,8 @@ namespace Halley {
 		Dragged,
 		SetSelected,
 		SetHovered,
-		TextChanged
+		TextChanged,
+		TabChanged
 	};
 
     class UIEvent {
