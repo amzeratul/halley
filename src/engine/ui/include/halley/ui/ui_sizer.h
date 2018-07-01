@@ -116,6 +116,8 @@ namespace Halley {
 		const UISizerEntry& operator[](size_t n) const;
 		UISizerEntry& operator[](size_t n);
 
+		void updateEnabled() const;
+
 	private:
 		std::vector<UISizerEntry> entries;
 		std::vector<float> columnProportions;

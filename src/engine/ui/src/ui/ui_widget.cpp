@@ -633,6 +633,9 @@ void UIWidget::markAsNeedingLayout()
 	if (parent) {
 		parent->markAsNeedingLayout();
 	}
+	if (sizer) {
+		sizer->updateEnabled();
+	}
 }
 
 void UIWidget::checkActive()

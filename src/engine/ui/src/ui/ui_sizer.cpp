@@ -129,9 +129,7 @@ Vector2f UISizer::getLayoutMinimumSize(bool force) const
 
 Vector2f UISizer::computeMinimumSize(bool includeProportional) const
 {
-	for (auto& e: entries) {
-		e.updateEnabled();
-	}
+	updateEnabled();
 	if (type == UISizerType::Horizontal || type == UISizerType::Vertical) {
 		return computeMinimumSizeBox(includeProportional);
 	} else {
@@ -223,6 +221,13 @@ const UISizerEntry& UISizer::operator[](size_t n) const
 UISizerEntry& UISizer::operator[](size_t n)
 {
 	return entries[n];
+}
+
+void UISizer::updateEnabled() const
+{
+	for (auto& e: entries) {
+		e.updateEnabled();
+	}
 }
 
 void UISizer::clear()
