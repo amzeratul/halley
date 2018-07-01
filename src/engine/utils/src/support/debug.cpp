@@ -27,7 +27,7 @@
 #include "halley/os/os.h"
 #include "halley/text/string_converter.h"
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(WINDOWS_STORE)
 #define HAS_STACKTRACE
 #include <boost/stacktrace.hpp>
 #endif
