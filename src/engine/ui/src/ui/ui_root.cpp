@@ -55,7 +55,6 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 		for (auto& c: getChildren()) {
 			c->doUpdate(false, 0, activeInputType, joystickType);
 		}
-		runLayout();
 
 		// For subsequent iterations, make sure t = 0
 		t = 0;
