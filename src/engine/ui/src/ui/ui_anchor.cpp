@@ -79,3 +79,17 @@ UIAnchor UIAnchor::operator+(const UIAnchor& other) const
 	result.setAutoBounds(autoBounds);
 	return result;
 }
+
+bool UIAnchor::operator==(const UIAnchor& other) const
+{
+	return relativePos == other.relativePos
+		&& relativeAlignment == other.relativeAlignment
+		&& absoluteOffset == other.absoluteOffset
+		&& bounds == other.bounds
+		&& autoBounds == other.autoBounds;
+}
+
+bool UIAnchor::operator!=(const UIAnchor& other) const
+{
+	return !(*this == other);
+}

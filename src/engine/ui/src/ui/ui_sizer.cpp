@@ -13,6 +13,7 @@ UISizerEntry::UISizerEntry(UIElementPtr widget, float proportion, Vector4f borde
 	, border(border)
 	, fillFlags(fillFlags)
 {
+	updateEnabled();
 }
 
 float UISizerEntry::getProportion() const
@@ -71,7 +72,12 @@ UIElementPtr UISizerEntry::getPointer() const
 
 bool UISizerEntry::isEnabled() const
 {
-	return !widget || widget->isActive();
+	return enabled;
+}
+
+void UISizerEntry::updateEnabled() const
+{
+	enabled = !widget || widget->isActive();
 }
 
 void UISizerEntry::setBorder(const Vector4f& b)
@@ -123,6 +129,9 @@ Vector2f UISizer::getLayoutMinimumSize(bool force) const
 
 Vector2f UISizer::computeMinimumSize(bool includeProportional) const
 {
+	for (auto& e: entries) {
+		e.updateEnabled();
+	}
 	if (type == UISizerType::Horizontal || type == UISizerType::Vertical) {
 		return computeMinimumSizeBox(includeProportional);
 	} else {
@@ -271,8 +280,8 @@ Vector2f UISizer::computeMinimumSizeBox(bool includeProportional) const
 		}
 	}
 
-	int mainAxis = type == UISizerType::Horizontal ? 0 : 1;
-	int otherAxis = 1 - mainAxis;
+	const size_t mainAxis = type == UISizerType::Vertical ? 1 : 0;
+	const size_t otherAxis = 1 - mainAxis;
 	
 	float main = 0;
 	float biggestProportional = 0;

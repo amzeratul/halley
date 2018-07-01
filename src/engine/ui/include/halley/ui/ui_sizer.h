@@ -59,7 +59,9 @@ namespace Halley {
 		void placeInside(Rect4f rect, Vector2f minSize);
 
 		UIElementPtr getPointer() const;
+
 		bool isEnabled() const;
+		void updateEnabled() const;
 
 		void setBorder(const Vector4f& border);
 
@@ -68,6 +70,7 @@ namespace Halley {
 		float proportion;
 		Vector4f border;
 		int fillFlags;
+		mutable bool enabled = true;
 	};
 
 	class UIWidget;

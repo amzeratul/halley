@@ -26,6 +26,9 @@ namespace Halley {
 		UIAnchor operator*(float f) const;
 		UIAnchor operator+(const UIAnchor& other) const;
 
+		bool operator==(const UIAnchor& other) const;
+		bool operator!=(const UIAnchor& other) const;
+
 	private:
 		Vector2f relativePos;
 		Vector2f relativeAlignment;

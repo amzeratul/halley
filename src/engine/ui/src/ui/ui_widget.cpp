@@ -137,9 +137,11 @@ void UIWidget::alignAtAnchor()
 
 void UIWidget::setAnchor(UIAnchor a)
 {
-	anchor = std::make_unique<UIAnchor>(std::move(a));
-	if (parent) {
-		layout();
+	if (!anchor || a != *anchor) {
+		anchor = std::make_unique<UIAnchor>(std::move(a));
+		if (parent) {
+			layout();
+		}
 	}
 }
 

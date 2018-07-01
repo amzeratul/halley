@@ -24,10 +24,10 @@
 
 #include <cmath>
 #include <iostream>
-#include <cassert>
 #include "angle.h"
 #include <halley/utils/utils.h>
 #include "halley/text/string_converter.h"
+#include <gsl/gsl>
 
 #ifdef min
 #undef min
@@ -64,23 +64,23 @@ namespace Halley {
 		}
 
 		// Getter
-		inline T& operator[](size_t n)
+		constexpr inline T& operator[](size_t n)
 		{
-			assert(n <= 1);
-			return n == 0? x : y;
+			Expects(n <= 1);
+			return (&x)[n];
 		}
-		inline T operator[](size_t n) const
+		constexpr inline T operator[](size_t n) const
 		{
-			assert(n <= 1);
-			return n == 0? x : y;
+			Expects(n <= 1);
+			return (&x)[n];
 		}
 
 		// Assignment and comparison
-		inline Vector2D& operator = (Vector2D param) { x = param.x; y = param.y; return *this; }
-		inline Vector2D& operator = (T param) { x = param; y = param; return *this; }
-		inline bool operator == (Vector2D param) const { return x == param.x && y == param.y; }
-		inline bool operator != (Vector2D param) const { return x != param.x || y != param.y; }
-		inline bool operator < (Vector2D param) const { return y != param.y ? y < param.y : x < param.x; }
+		constexpr inline Vector2D& operator = (Vector2D param) { x = param.x; y = param.y; return *this; }
+		constexpr inline Vector2D& operator = (T param) { x = param; y = param; return *this; }
+		constexpr inline bool operator == (Vector2D param) const { return x == param.x && y == param.y; }
+		constexpr inline bool operator != (Vector2D param) const { return x != param.x || y != param.y; }
+		constexpr inline bool operator < (Vector2D param) const { return y != param.y ? y < param.y : x < param.x; }
 
 		// Basic algebra
 		constexpr inline Vector2D operator + (Vector2D param) const { return Vector2D(x + param.x,y + param.y); }
@@ -92,22 +92,22 @@ namespace Halley {
 		constexpr inline Vector2D modulo(Vector2D param) const { return Vector2D(Halley::modulo<T>(x, param.x), Halley::modulo<T>(y, param.y)); }
 		constexpr inline Vector2D floorDiv(Vector2D param) const { return Vector2D(Halley::floorDiv(x, param.x), Halley::floorDiv(y, param.y)); }
 
-		inline Vector2D operator - () const { return Vector2D(-x,-y); }
+		constexpr inline Vector2D operator - () const { return Vector2D(-x,-y); }
 
 		template <typename V>
-		inline Vector2D operator * (V param) const { return Vector2D(T(x * param), T(y * param)); }
+		constexpr inline Vector2D operator * (V param) const { return Vector2D(T(x * param), T(y * param)); }
 
 		template <typename V>
-		inline Vector2D operator / (V param) const { return Vector2D(T(x / param), T(y / param)); }
+		constexpr inline Vector2D operator / (V param) const { return Vector2D(T(x / param), T(y / param)); }
 
 		// In-place operations
-		inline Vector2D& operator += (Vector2D param) { x += param.x; y += param.y; return *this; }
-		inline Vector2D& operator -= (Vector2D param) { x -= param.x; y -= param.y; return *this; }
-		inline Vector2D& operator *= (const T param) { x *= param; y *= param; return *this; }
-		inline Vector2D& operator /= (const T param) { x /= param; y /= param; return *this; }
+		constexpr inline Vector2D& operator += (Vector2D param) { x += param.x; y += param.y; return *this; }
+		constexpr inline Vector2D& operator -= (Vector2D param) { x -= param.x; y -= param.y; return *this; }
+		constexpr inline Vector2D& operator *= (const T param) { x *= param; y *= param; return *this; }
+		constexpr inline Vector2D& operator /= (const T param) { x /= param; y /= param; return *this; }
 
 		// Get the normalized vector (unit vector)
-		inline Vector2D unit () const
+		constexpr inline Vector2D unit () const
 		{
 			float len = length();
 			if (len != 0) {
@@ -116,11 +116,11 @@ namespace Halley {
 				return Vector2D(0, 0);
 			}
 		}
-		inline Vector2D normalized() const
+		constexpr inline Vector2D normalized() const
 		{
 			return unit();
 		}
-		inline void normalize()
+		constexpr inline void normalize()
 		{
 			*this = unit();
 		}
@@ -136,7 +136,7 @@ namespace Halley {
 		constexpr inline T dot (Vector2D param) const { return (x * param.x) + (y * param.y); }
 
 		// Length
-		constexpr inline T length () const { return std::sqrt(squaredLength()); }
+		constexpr inline T length () const { return static_cast<T>(std::sqrt(squaredLength())); }
 		constexpr inline T len () const { return length(); }
 		constexpr inline T manhattanLength() const { return std::abs(x) + std::abs(y); }
 
@@ -182,7 +182,7 @@ namespace Halley {
 		}
 
 		// Removes the length of the vector along the given axis
-		inline Vector2D neutralize (Vector2D param) const
+		constexpr inline Vector2D neutralize (Vector2D param) const
 		{
 			return *this - dot(param)*param;
 		}
