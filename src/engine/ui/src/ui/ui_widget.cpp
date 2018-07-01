@@ -629,7 +629,7 @@ bool UIWidget::needsLayout() const
 
 void UIWidget::markAsNeedingLayout()
 {
-	layoutNeeded = 2;
+	layoutNeeded = 1;
 	if (parent) {
 		parent->markAsNeedingLayout();
 	}
