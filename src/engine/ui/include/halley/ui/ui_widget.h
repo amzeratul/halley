@@ -132,6 +132,9 @@ namespace Halley {
 
 		void playSound(const String& eventName);
 
+		bool needsLayout() const;
+		void markAsNeedingLayout() override;
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;
@@ -181,6 +184,9 @@ namespace Halley {
 
 		Vector4f innerBorder;
 		Maybe<UISizer> sizer;
+
+		mutable Vector2f layoutSize;
+		mutable int layoutNeeded = 1;
 
 		std::shared_ptr<UIEventHandler> eventHandler;
 		std::shared_ptr<UIValidator> validator;

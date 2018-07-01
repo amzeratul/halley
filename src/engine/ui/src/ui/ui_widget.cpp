@@ -85,13 +85,17 @@ Vector2f UIWidget::getLayoutMinimumSize(bool force) const
 		return {};
 	}
 	Vector2f minSize = getMinimumSize();
+
 	if (sizer) {
-		auto border = getInnerBorder();
-		Vector2f innerSize = sizer.get().getLayoutMinimumSize(false);
-		if (innerSize.x > 0.1f || innerSize.y > 0.1f) {
-			innerSize += Vector2f(border.x + border.z, border.y + border.w);
+		if (layoutNeeded > 0) {
+			--layoutNeeded;
+			auto border = getInnerBorder();
+			layoutSize = sizer.get().getLayoutMinimumSize(false);
+			if (layoutSize.x > 0.1f || layoutSize.y > 0.1f) {
+				layoutSize += Vector2f(border.x + border.z, border.y + border.w);
+			}
 		}
-		return Vector2f::max(minSize, innerSize);
+		return Vector2f::max(minSize, layoutSize);
 	}
 	return minSize;
 }
@@ -256,12 +260,18 @@ void UIWidget::setPosition(Vector2f pos)
 
 void UIWidget::setMinSize(Vector2f size)
 {
-	minSize = size;
+	if (minSize != size) {
+		minSize = size;
+		markAsNeedingLayout();
+	}
 }
 
 void UIWidget::setInnerBorder(Vector4f border)
 {
-	innerBorder = border;
+	if (innerBorder != border) {
+		innerBorder = border;
+		markAsNeedingLayout();
+	}
 }
 
 void UIWidget::setFocused(bool f)
@@ -300,7 +310,10 @@ bool UIWidget::isActive() const
 
 void UIWidget::setActive(bool s)
 {
-	active = s;
+	if (active != s) {
+		active = s;
+		markAsNeedingLayout();
+	}
 }
 
 bool UIWidget::isEnabled() const
@@ -312,6 +325,7 @@ void UIWidget::setEnabled(bool e)
 {
 	if (enabled != e) {
 		enabled = e;
+		markAsNeedingLayout();
 		onEnabledChanged();
 	}
 }
@@ -431,6 +445,8 @@ void UIWidget::setParent(UIParent* p)
 {
 	Expects((parent == nullptr) ^ (p == nullptr));
 	parent = p;
+
+	parent->markAsNeedingLayout();
 
 	if (anchor) {
 		layout();
@@ -606,6 +622,19 @@ void UIWidget::playSound(const String& eventName)
 	}
 }
 
+bool UIWidget::needsLayout() const
+{
+	return layoutNeeded > 0;
+}
+
+void UIWidget::markAsNeedingLayout()
+{
+	layoutNeeded = 2;
+	if (parent) {
+		parent->markAsNeedingLayout();
+	}
+}
+
 void UIWidget::checkActive()
 {
 }
@@ -718,7 +747,10 @@ bool UIWidget::shrinksOnLayout() const
 
 void UIWidget::setShrinkOnLayout(bool shrink)
 {
-	shrinkOnLayout = shrink;
+	if (shrink != shrinksOnLayout()) {
+		markAsNeedingLayout();
+		shrinkOnLayout = shrink;
+	}
 }
 
 Vector2f UIWidget::getLayoutOriginPosition() const

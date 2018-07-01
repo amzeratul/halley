@@ -11,6 +11,8 @@ void UIParent::addChild(std::shared_ptr<UIWidget> widget)
 		widget->setParent(this);
 		childrenWaiting.push_back(widget);
 	}
+
+	markAsNeedingLayout();
 }
 
 void UIParent::removeChild(UIWidget& widget)
@@ -22,17 +24,23 @@ void UIParent::removeChild(UIWidget& widget)
 	{
 		return c.get() == &widget;
 	}), children.end());
+
+	markAsNeedingLayout();
 }
 
 bool UIParent::addNewChildren(UIInputType inputType)
 {
-	bool addedAny = !childrenWaiting.empty();
+	const bool addedAny = !childrenWaiting.empty();
 
 	for (auto& c: childrenWaiting) {
 		c->setInputType(inputType);
 		children.emplace_back(std::move(c));
 	}
 	childrenWaiting.clear();
+
+	if (addedAny) {
+		markAsNeedingLayout();
+	}
 
 	return addedAny;
 }
@@ -46,13 +54,19 @@ bool UIParent::removeDeadChildren()
 		return !c->isAlive();
 	}), children.end());
 
-	return before != children.size();
+	const bool removedAny = before != children.size();
+	if (removedAny) {
+		markAsNeedingLayout();
+	}
+	return removedAny;
 }
 
 bool UIParent::isWaitingToSpawnChildren() const
 {
 	return !childrenWaiting.empty();
 }
+
+void UIParent::markAsNeedingLayout() {}
 
 std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()
 {
