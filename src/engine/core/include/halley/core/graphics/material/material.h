@@ -57,7 +57,7 @@ namespace Halley
 		int bindPoint = 0;
 		bool dirty = true;
 
-		void setUniform(size_t offset, ShaderParameterType type, void* data);
+		bool setUniform(size_t offset, ShaderParameterType type, void* data);
 		void upload(VideoAPI* api);
 	};
 	

@@ -74,15 +74,21 @@ MaterialDataBlockType MaterialDataBlock::getType() const
 	return dataBlockType;
 }
 
-void MaterialDataBlock::setUniform(size_t offset, ShaderParameterType type, void* srcData)
+bool MaterialDataBlock::setUniform(size_t offset, ShaderParameterType type, void* srcData)
 {
 	Expects(dataBlockType != MaterialDataBlockType::SharedExternal);
 
 	const size_t size = MaterialAttribute::getAttributeSize(type);
 	Expects(size + offset <= data.size());
 	Expects(offset % 4 == 0); // Alignment
-	memcpy(data.data() + offset, srcData, size);
-	dirty = true;
+
+	if (memcmp(data.data() + offset, srcData, size) != 0) {
+		memcpy(data.data() + offset, srcData, size);
+		dirty = true;
+		return true;
+	} else {
+		return false;
+	}
 }
 
 void MaterialDataBlock::upload(VideoAPI* api)
@@ -224,8 +230,9 @@ const std::vector<std::shared_ptr<const Texture>>& Material::getTextures() const
 
 void Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, void* data)
 {
-	dataBlocks[blockNumber].setUniform(offset, type, data);
-	dirty = true;
+	if (dataBlocks[blockNumber].setUniform(offset, type, data)) {
+		dirty = true;
+	}
 }
 
 const std::shared_ptr<const Texture>& Material::getTexture(int textureUnit) const

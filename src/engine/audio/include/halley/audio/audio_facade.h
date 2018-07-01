@@ -63,6 +63,7 @@ namespace Halley {
 
 		std::vector<std::function<void()>> outbox;
 		std::vector<std::function<void()>> inbox;
+		std::vector<std::function<void()>> inboxProcessing;
 		std::vector<String> exceptions;
 		std::vector<size_t> playingSounds;
 		std::vector<size_t> playingSoundsNext;

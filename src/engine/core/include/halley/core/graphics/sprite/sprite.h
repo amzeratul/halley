@@ -8,6 +8,7 @@
 
 namespace Halley
 {
+	class SpriteResource;
 	class Resources;
 	class SpriteSheetEntry;
 	class SpriteSheet;
@@ -53,7 +54,8 @@ namespace Halley
 		Sprite& setImageData(const Texture& image);
 
 		Sprite& setSprite(Resources& resources, String spriteSheetName, String imageName, String materialName = "");
-		Sprite& setSprite(const SpriteSheet& sheet, String name);
+		Sprite& setSprite(const SpriteResource& sprite, bool applyPivot = true);
+		Sprite& setSprite(const SpriteSheet& sheet, String name, bool applyPivot = true);
 		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true);
 
 		Sprite& setPos(Vector2f pos);

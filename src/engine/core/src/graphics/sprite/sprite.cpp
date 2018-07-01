@@ -288,10 +288,16 @@ Sprite& Sprite::setSprite(Resources& resources, String spriteSheetName, String i
 	return *this;
 }
 
-Sprite& Sprite::setSprite(const SpriteSheet& sheet, String name)
+Sprite& Sprite::setSprite(const SpriteResource& sprite, bool applyPivot)
+{
+	setSprite(sprite.getSprite(), applyPivot);
+	return *this;
+}
+
+Sprite& Sprite::setSprite(const SpriteSheet& sheet, String name, bool applyPivot)
 {
 	Expects (!name.isEmpty());
-	setSprite(sheet.getSprite(name));
+	setSprite(sheet.getSprite(name), applyPivot);
 	return *this;
 }
 

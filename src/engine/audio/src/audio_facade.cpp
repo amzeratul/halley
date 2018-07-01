@@ -226,7 +226,7 @@ void AudioFacade::setListener(AudioListenerData listener)
 void AudioFacade::onAudioException(std::exception& e)
 {
 	std::unique_lock<std::mutex> lock(exceptionMutex);
-	exceptions.push_back(e.what());
+	exceptions.emplace_back(e.what());
 }
 
 void AudioFacade::run()
@@ -239,18 +239,17 @@ void AudioFacade::run()
 void AudioFacade::stepAudio()
 {
 	try {
-		std::vector<std::function<void()>> toDo;
 		{
 			std::unique_lock<std::mutex> lock(audioMutex);
 			if (!running) {
 				return;
 			}
-			toDo = std::move(inbox);
+			std::swap(inbox, inboxProcessing);
 			inbox.clear();
 			playingSoundsNext = engine->getPlayingSounds();
 		}
 
-		for (auto& action : toDo) {
+		for (auto& action : inboxProcessing) {
 			action();
 		}
 
@@ -267,7 +266,7 @@ void AudioFacade::stepAudio()
 void AudioFacade::enqueue(std::function<void()> action)
 {
 	if (running) {
-		outbox.push_back(action);
+		outbox.emplace_back(std::move(action));
 	}
 }
 
