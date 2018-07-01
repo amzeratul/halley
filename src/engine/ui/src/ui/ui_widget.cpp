@@ -512,7 +512,7 @@ void UIWidget::setInputType(UIInputType uiInput)
 {
 	lastInputType = uiInput;
 	if (!onlyEnabledWithInputs.empty()) {
-		active = std::find(onlyEnabledWithInputs.begin(), onlyEnabledWithInputs.end(), uiInput) != onlyEnabledWithInputs.end();
+		setActive(std::find(onlyEnabledWithInputs.begin(), onlyEnabledWithInputs.end(), uiInput) != onlyEnabledWithInputs.end());
 	}
 }
 
