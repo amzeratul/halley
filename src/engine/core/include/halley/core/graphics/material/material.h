@@ -100,6 +100,8 @@ namespace Halley
 			return *this;
 		}
 
+		uint64_t getHash() const;
+
 	private:
 		std::shared_ptr<const MaterialDefinition> materialDefinition;
 		
@@ -110,11 +112,14 @@ namespace Halley
 
 		std::vector<char> passEnabled;
 
-		bool dirty = true;
+		mutable uint64_t hashValue;
+		mutable bool needToUpdateHash = true;
+		bool needToUploadData = true;
 
 		void initUniforms(bool forceLocalBlocks);
 		MaterialParameter& getParameter(const String& name);
 
 		void setUniform(int blockNumber, size_t offset, ShaderParameterType type, void* data);
+		uint64_t computeHash() const;
 	};
 }

@@ -5,6 +5,7 @@
 #include "halley/core/graphics/painter.h"
 #include "halley/core/graphics/shader.h"
 #include "api/video_api.h"
+#include "halley/utils/hash.h"
 
 using namespace Halley;
 
@@ -154,7 +155,7 @@ void Material::initUniforms(bool forceLocalBlocks)
 void Material::bind(int passNumber, Painter& painter)
 {
 	// Avoid redundant work
-	if (currentMaterial == this && currentPass == passNumber && !dirty) {
+	if (currentMaterial == this && currentPass == passNumber && !needToUploadData) {
 		return;
 	}
 	currentMaterial = this;
@@ -165,11 +166,11 @@ void Material::bind(int passNumber, Painter& painter)
 
 void Material::uploadData(Painter& painter)
 {	
-	if (dirty) {
+	if (needToUploadData) {
 		for (auto& block: dataBlocks) {
 			block.upload(getDefinition().api);
 		}
-		dirty = false;
+		needToUploadData = false;
 	}
 }
 
@@ -191,31 +192,39 @@ bool Material::operator==(const Material& other) const
 		return false;
 	}
 
-	// TODO: hash all this stuff
+	constexpr bool useHash = true;
 
-	// Different textures (only need to check pointer equality)
-	for (size_t i = 0; i < textures.size(); ++i) {
-		if (textures[i] != other.textures[i]) {
-			return false;
+	if (useHash) {
+		// If the hashes match, we'll assume they're the same
+		// There's a chance this will fail, but... what are the odds? :D
+		// :D :D
+		// :D :D :D
+		return getHash() == other.getHash();
+	} else {
+		// Different textures (only need to check pointer equality)
+		for (size_t i = 0; i < textures.size(); ++i) {
+			if (textures[i] != other.textures[i]) {
+				return false;
+			}
 		}
-	}
 
-	// Different data
-	for (size_t i = 0; i < dataBlocks.size(); ++i) {
-		if (dataBlocks[i].getData() != other.dataBlocks[i].getData()) {
-			return false;
+		// Different data
+		for (size_t i = 0; i < dataBlocks.size(); ++i) {
+			if (dataBlocks[i].getData() != other.dataBlocks[i].getData()) {
+				return false;
+			}
 		}
-	}
 
-	// Different passes enabled
-	for (size_t i = 0; i < passEnabled.size(); ++i) {
-		if (passEnabled[i] != other.passEnabled[i]) {
-			return false;
+		// Different passes enabled
+		for (size_t i = 0; i < passEnabled.size(); ++i) {
+			if (passEnabled[i] != other.passEnabled[i]) {
+				return false;
+			}
 		}
-	}
 
-	// Must be the same
-	return true;
+		// Must be the same
+		return true;
+	}
 }
 
 bool Material::operator!=(const Material& material) const
@@ -231,8 +240,26 @@ const std::vector<std::shared_ptr<const Texture>>& Material::getTextures() const
 void Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, void* data)
 {
 	if (dataBlocks[blockNumber].setUniform(offset, type, data)) {
-		dirty = true;
+		needToUploadData = true;
+		needToUpdateHash = true;
 	}
+}
+
+uint64_t Material::computeHash() const
+{
+	Hash::Hasher hasher;
+	
+	for (const auto& texture: textures) {
+		hasher.feed(texture.get());
+	}
+
+	for (const auto& dataBlock: dataBlocks) {
+		hasher.feedBytes(dataBlock.getData());
+	}
+
+	hasher.feedBytes(gsl::as_bytes(gsl::span<const char>(passEnabled.data(), passEnabled.size())));
+
+	return hasher.digest();
 }
 
 const std::shared_ptr<const Texture>& Material::getTexture(int textureUnit) const
@@ -252,7 +279,12 @@ const Vector<MaterialDataBlock>& Material::getDataBlocks() const
 
 void Material::setPassEnabled(int pass, bool enabled)
 {
-	passEnabled.at(pass) = enabled ? 1 : 0;
+	const auto value = enabled ? 1 : 0;
+	auto& p = passEnabled.at(pass);
+	if (p != value) {
+		needToUpdateHash = true;
+		p = value;
+	}
 }
 
 bool Material::isPassEnabled(int pass) const
@@ -270,8 +302,11 @@ Material& Material::set(const String& name, const std::shared_ptr<const Texture>
 	auto& texs = materialDefinition->getTextures();
 	for (size_t i = 0; i < texs.size(); ++i) {
 		if (texs[i] == name) {
-			auto textureUnit = i;
-			textures[textureUnit] = texture;
+			const auto textureUnit = i;
+			if (textures[textureUnit] != texture) {
+				textures[textureUnit] = texture;
+				needToUpdateHash = true;
+			}
 			return *this;
 		}
 	}
@@ -282,6 +317,15 @@ Material& Material::set(const String& name, const std::shared_ptr<const Texture>
 Material& Material::set(const String& name, const std::shared_ptr<Texture>& texture)
 {
 	return set(name, std::shared_ptr<const Texture>(texture));
+}
+
+uint64_t Material::getHash() const
+{
+	if (needToUpdateHash) {
+		hashValue = computeHash();
+		needToUpdateHash = false;
+	}
+	return hashValue;
 }
 
 MaterialParameter& Material::getParameter(const String& name)

@@ -4,6 +4,9 @@
 #include <gsl/gsl>
 #include "utils.h"
 
+struct XXH64_state_s;
+typedef struct XXH64_state_s XXH64_state_t;
+
 namespace Halley {
     class Hash {
     public:
@@ -17,5 +20,27 @@ namespace Halley {
     	}
 
 		static uint32_t compressTo32(uint64_t value);
+
+
+		class Hasher
+		{
+		public:
+			Hasher();
+			~Hasher();
+
+			template<typename T>
+			void feed(const T& data)
+			{
+				feedBytes(gsl::as_bytes(gsl::span<const T>(&data, 1)));
+			}
+			
+			void feedBytes(gsl::span<const gsl::byte> bytes);
+
+			uint64_t digest();
+
+		private:
+			bool ready;
+			XXH64_state_t* data;
+		};
     };
 }
