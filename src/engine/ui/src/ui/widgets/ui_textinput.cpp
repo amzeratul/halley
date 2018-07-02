@@ -29,16 +29,28 @@ bool UITextInput::canInteractWithMouse() const
 
 UITextInput& UITextInput::setText(const String& t)
 {
-	text = t.replaceAll("\r", "").getUTF32();
+	setText(t.getUTF32());
+	return *this;
+}
 
-	for (auto& c: text) {
-		if (c == '\n' && !isMultiLine) {
-			c = ' ';
-		}
+UITextInput& UITextInput::setText(StringUTF32 t)
+{
+	if (t != text) {
+		text = std::move(t);
+		setCaretPosition(int(text.size()));
+		onTextModified();
 	}
+	return *this;
+}
 
-	text = getValidator()->onTextChanged(text);
-	setCaretPosition(int(text.size()));
+UITextInput& UITextInput::insertText(const String& t, size_t pos)
+{
+	if (!t.isEmpty()) {
+		auto toInsert = t.getUTF32();
+		text.insert(pos, toInsert);
+		setCaretPosition(int(pos + toInsert.length()));
+		onTextModified();
+	}
 	return *this;
 }
 
@@ -112,7 +124,7 @@ void UITextInput::updateTextInput()
 			if (keyboard->isButtonPressed(Keys::V)) {
 				auto str = clipboard->getStringData();
 				if (str) {
-					setText(str.get());
+					insertText(str.get(), caretPos);
 				}
 			}
 		}
@@ -140,7 +152,7 @@ void UITextInput::updateTextInput()
 		caret = 0;
 	}
 	if (keyboard->isButtonPressedRepeat(Keys::End) || keyboard->isButtonPressedRepeat(Keys::PageDown)) {
-		caret = text.size();
+		caret = int(text.size());
 	}
 
 	int dx = (keyboard->isButtonPressedRepeat(Keys::Left) ? -1 : 0) + (keyboard->isButtonPressedRepeat(Keys::Right) ? 1 : 0);
@@ -159,14 +171,7 @@ void UITextInput::updateTextInput()
 	setCaretPosition(caret);
 
 	if (modified) {
-		if (getValidator()) {
-			text = getValidator()->onTextChanged(text);
-			setCaretPosition(caret);
-		}
-
-		const auto str = String(text);
-		sendEvent(UIEvent(UIEventType::TextChanged, getId(), str));
-		notifyDataBind(str);
+		onTextModified();
 	}
 }
 
@@ -178,6 +183,36 @@ void UITextInput::setCaretPosition(int pos)
 		caretShowing = true;
 		caretPos = pos;
 		caretPhysicalPos = label.getCharacterPosition(caretPos, text).x;
+	}
+}
+
+void UITextInput::onTextModified()
+{
+	if (getValidator()) {
+		text = getValidator()->onTextChanged(text);
+	}
+	setCaretPosition(caretPos);
+
+	const auto str = String(text);
+	sendEvent(UIEvent(UIEventType::TextChanged, getId(), str));
+	notifyDataBind(str);
+}
+
+void UITextInput::validateText()
+{
+	size_t removePos;
+	while ((removePos = text.find('\r')) != StringUTF32::npos) {
+		text = text.erase(removePos);
+	}
+
+	for (auto& c: text) {
+		if (c == '\n' && !isMultiLine) {
+			c = ' ';
+		}
+	}
+
+	if (getValidator()) {
+		text = getValidator()->onTextChanged(text);
 	}
 }
 
@@ -216,9 +251,9 @@ void UITextInput::update(Time t, bool moved)
 	const Vector2f startPos = getPosition() + Vector2f(getInnerBorder().x, getInnerBorder().y);
 	if (length > capacityX) {
 		textScrollPos.x = clamp(textScrollPos.x, std::max(0.0f, caretPhysicalPos - capacityX), std::min(length - capacityX, caretPhysicalPos));
-		
 		label.setClip(Rect4f(textScrollPos, textScrollPos + Vector2f(capacityX, capacityY)));
 	} else {
+		textScrollPos.x = 0;
 		label.setClip();
 	}
 	label.setPosition(startPos - textScrollPos);

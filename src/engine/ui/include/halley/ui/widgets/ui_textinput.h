@@ -16,6 +16,9 @@ namespace Halley {
 		bool canInteractWithMouse() const override;
 
 		UITextInput& setText(const String& text);
+		UITextInput& setText(StringUTF32 text);
+		UITextInput& insertText(const String& text, size_t pos);
+
 		String getText() const;
 		UITextInput& setGhostText(const LocalisedString& text);
 		LocalisedString getGhostText() const;
@@ -38,6 +41,9 @@ namespace Halley {
 	private:
 		void updateTextInput();
 		void setCaretPosition(int pos);
+
+		void onTextModified();
+		void validateText();
 
 		std::shared_ptr<InputDevice> keyboard;
 		std::shared_ptr<Clipboard> clipboard;
