@@ -115,4 +115,9 @@ int OS::runCommand(String)
 	throw Exception("Running commands is not implemented in this platform.");
 }
 
+std::shared_ptr<Clipboard> OS::getClipboard()
+{
+	return {};
+}
+
 OS* OS::osInstance = nullptr;

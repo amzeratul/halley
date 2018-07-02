@@ -443,4 +443,66 @@ int OSWin32::runCommand(String rawCommand)
 	return int(exitCode);
 }
 
+class Win32Clipboard : public Clipboard {
+public:
+	void setData(const String& stringData) override
+	{
+		if (!OpenClipboard(nullptr)) {
+			throw Exception("Unable to open clipboard.");
+		}
+		
+		if (!EmptyClipboard()) {
+			CloseClipboard();
+			throw Exception("Unable to empty clipboard");
+		}
+		auto utf16str = stringData.getUTF16();
+		auto data = GlobalAlloc(GMEM_MOVEABLE, (utf16str.length() + 1) * sizeof(wchar_t));
+		auto dst = GlobalLock(data);
+		memcpy(dst, utf16str.data(), (utf16str.size() + 1) * sizeof(wchar_t));
+		GlobalUnlock(data);
+
+		if (!SetClipboardData(CF_UNICODETEXT, data)) {
+			CloseClipboard();
+			throw Exception("Unable to set clipboard data");
+		}
+
+		CloseClipboard();
+	}
+
+	Maybe<String> getStringData() override
+	{
+		if (!OpenClipboard(nullptr)) {
+			throw Exception("Unable to open clipboard.");
+		}
+
+		if (!IsClipboardFormatAvailable(CF_UNICODETEXT)) {
+			CloseClipboard();
+			return {};
+		}
+
+		HANDLE data = GetClipboardData(CF_UNICODETEXT);
+		if (data == nullptr) {
+			CloseClipboard();
+			throw Exception("Unable to read clipboard data.");
+		}
+
+		auto src = reinterpret_cast<const wchar_t*>(GlobalLock(data));
+		auto result = String(src);
+		GlobalUnlock(data);
+
+		CloseClipboard();
+
+		return result;
+	}
+};
+
+std::shared_ptr<Clipboard> OSWin32::getClipboard()
+{
+	try {
+		return std::make_shared<Win32Clipboard>();
+	} catch (...) {
+		return {};
+	}
+}
+
 #endif

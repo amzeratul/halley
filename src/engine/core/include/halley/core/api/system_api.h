@@ -2,6 +2,7 @@
 #include "halley/resources/resource_data.h"
 #include "halley/core/graphics/window.h"
 #include "halley/concurrency/concurrent.h"
+#include "halley/data_structures/maybe.h"
 
 namespace Halley
 {
@@ -20,6 +21,15 @@ namespace Halley
 	enum class SaveDataType {
 		Save,
 		Cache
+	};
+
+	class Clipboard
+	{
+	public:
+		virtual ~Clipboard() = default;
+		
+		virtual void setData(const String& stringData) = 0;
+		virtual Maybe<String> getStringData() = 0;
 	};
 
 	class SystemAPI
@@ -56,6 +66,8 @@ namespace Halley
 
 		virtual void runGame(std::function<void()> runnable) { runnable(); }
 		virtual bool canExit() { return false; }
+
+		virtual std::shared_ptr<Clipboard> getClipboard() const { return {}; }
 
 	private:
 		friend class HalleyAPI;

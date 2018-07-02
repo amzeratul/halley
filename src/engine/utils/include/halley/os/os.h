@@ -23,6 +23,7 @@
 
 #include "halley/text/halleystring.h"
 #include "halley/file/path.h"
+#include "halley/core/api/system_api.h"
 
 namespace Halley {
 	class ComputerData {
@@ -58,6 +59,8 @@ namespace Halley {
 
 		virtual void setConsoleColor(int foreground, int background);
 		virtual int runCommand(String command);
+
+		virtual std::shared_ptr<Clipboard> getClipboard();
 
 	private:
 		static OS* osInstance;

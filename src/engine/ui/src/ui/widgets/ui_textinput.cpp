@@ -5,6 +5,7 @@
 #include "halley/ui/ui_data_bind.h"
 #include "halley/support/logger.h"
 #include "halley/core/input/input_keys.h"
+#include "halley/core/api/system_api.h"
 
 using namespace Halley;
 
@@ -28,7 +29,15 @@ bool UITextInput::canInteractWithMouse() const
 
 UITextInput& UITextInput::setText(const String& t)
 {
-	text = t.getUTF32();
+	text = t.replaceAll("\r", "").getUTF32();
+
+	for (auto& c: text) {
+		if (c == '\n' && !isMultiLine) {
+			c = ' ';
+		}
+	}
+
+	text = getValidator()->onTextChanged(text);
 	setCaretPosition(int(text.size()));
 	return *this;
 }
@@ -72,6 +81,11 @@ void UITextInput::onManualControlActivate()
 	}
 }
 
+void UITextInput::setClipboard(std::shared_ptr<Clipboard> c)
+{
+	clipboard = std::move(c);
+}
+
 void UITextInput::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);
@@ -84,6 +98,26 @@ void UITextInput::draw(UIPainter& painter) const
 
 void UITextInput::updateTextInput()
 {
+	const bool ctrlDown = keyboard->isButtonDown(Keys::LCtrl) || keyboard->isButtonDown(Keys::RCtrl);
+
+	if (ctrlDown) {
+		if (clipboard) {
+			if (keyboard->isButtonPressed(Keys::C)) {
+				clipboard->setData(String(text));
+			}
+			if (keyboard->isButtonPressed(Keys::X)) {
+				clipboard->setData(String(text));
+				setText("");
+			}
+			if (keyboard->isButtonPressed(Keys::V)) {
+				auto str = clipboard->getStringData();
+				if (str) {
+					setText(str.get());
+				}
+			}
+		}
+	}
+
 	bool modified = false;
 	int caret = caretPos;
 
@@ -102,11 +136,18 @@ void UITextInput::updateTextInput()
 		}
 	}
 
+	if (keyboard->isButtonPressedRepeat(Keys::Home) || keyboard->isButtonPressedRepeat(Keys::PageUp)) {
+		caret = 0;
+	}
+	if (keyboard->isButtonPressedRepeat(Keys::End) || keyboard->isButtonPressedRepeat(Keys::PageDown)) {
+		caret = text.size();
+	}
+
 	int dx = (keyboard->isButtonPressedRepeat(Keys::Left) ? -1 : 0) + (keyboard->isButtonPressedRepeat(Keys::Right) ? 1 : 0);
 	caret = clamp(caret + dx, 0, int(text.size()));
 
 	for (int letter = keyboard->getNextLetter(); letter != 0; letter = keyboard->getNextLetter()) {
-		if (letter >= 32) {
+		if (!ctrlDown && letter >= 32) {
 			if (!maxLength || int(text.size()) < maxLength.get()) {
 				text.insert(text.begin() + caret, letter);
 				caret++;

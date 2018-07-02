@@ -38,6 +38,9 @@ void SystemSDL::init()
 	}
 
 	SDL_ShowCursor(SDL_DISABLE);
+
+	// Init clipboard
+	clipboard = OS::get().getClipboard();
 }
 
 void SystemSDL::deInit()
@@ -285,6 +288,11 @@ void SystemSDL::setEnvironment(Environment* env)
 bool SystemSDL::canExit()
 {
 	return true;
+}
+
+std::shared_ptr<Clipboard> SystemSDL::getClipboard() const
+{
+	return clipboard;
 }
 
 void SystemSDL::printDebugInfo() const

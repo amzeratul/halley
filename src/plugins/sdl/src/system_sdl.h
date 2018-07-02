@@ -38,6 +38,7 @@ namespace Halley
 
 		bool canExit() override;
 
+		std::shared_ptr<Clipboard> getClipboard() const override;
 	private:
 		void processVideoEvent(VideoAPI* video, const SDL_Event& event);
 
@@ -51,5 +52,6 @@ namespace Halley
 		mutable bool videoInit = false;
 		Path saveDir;
 		Path cacheDir;
+		std::shared_ptr<Clipboard> clipboard;
 	};
 }

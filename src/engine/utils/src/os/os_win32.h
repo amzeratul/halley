@@ -50,6 +50,8 @@ namespace Halley {
 
 		int runCommand(String command) override;
 
+		std::shared_ptr<Clipboard> getClipboard() override;
+
 	private:
 		String runWMIQuery(String query, String parameter) const;
 		void loadWindowIcon(HWND hwnd);

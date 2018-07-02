@@ -369,6 +369,8 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 		result->setMaxLength(node["maxLength"].asInt());
 	}
 
+	result->setClipboard(api.system->getClipboard());
+
 	return result;
 }
 

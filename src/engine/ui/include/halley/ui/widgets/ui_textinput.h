@@ -8,6 +8,7 @@
 
 namespace Halley {
 	class UIStyle;
+	class Clipboard;
 
 	class UITextInput : public UIWidget {
 	public:
@@ -23,6 +24,7 @@ namespace Halley {
 		void setMaxLength(Maybe<int> length);
 
 		void onManualControlActivate() override;
+		void setClipboard(std::shared_ptr<Clipboard> clipboard);
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -38,6 +40,7 @@ namespace Halley {
 		void setCaretPosition(int pos);
 
 		std::shared_ptr<InputDevice> keyboard;
+		std::shared_ptr<Clipboard> clipboard;
 		UIStyle style;
 		Sprite sprite;
 		Sprite caret;
@@ -52,6 +55,8 @@ namespace Halley {
 		int caretPos = 0;
 		float caretPhysicalPos = 0;
 		float caretTime = 0;
+
+		bool isMultiLine = false;
 		bool caretShowing = false;
 	};
 }
