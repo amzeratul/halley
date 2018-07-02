@@ -25,9 +25,16 @@ void UIButton::update(Time t, bool moved)
 		const auto topLeftBorder = Vector2f(float(b.x), float(b.y));
 		const auto bottomRightBorder = Vector2f(float(b.z), float(b.w));
 
+		Vector2f basePos = getPosition();
+		Vector2f imgBaseSize = sprite.getRawSize().abs() + topLeftBorder + bottomRightBorder;
+		if (sprite.getClip()) {
+			auto c = sprite.getClip().get();
+			basePos -= c.getTopLeft();
+			imgBaseSize = std::min(c.getSize(), imgBaseSize);
+		}
 		sprite
-			.setPos(getPosition())
-			.setScale(getSize() / (sprite.getRawSize().abs() + topLeftBorder + bottomRightBorder));
+			.setPos(basePos)
+			.setScale(getSize() / imgBaseSize);
 	}
 }
 

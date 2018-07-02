@@ -47,7 +47,8 @@ namespace Halley
 
 		void generateSprites(std::vector<Sprite>& sprites) const;
 		void draw(Painter& painter) const;
-		void drawWithSpriteFilter(Painter& painter, SpriteFilter f) const;
+
+		void setSpriteFilter(SpriteFilter f);
 
 		Vector2f getExtents() const;
 		Vector2f getExtents(const StringUTF32& str) const;
@@ -72,6 +73,7 @@ namespace Halley
 		std::shared_ptr<const Font> font;
 		std::shared_ptr<Material> material;
 		StringUTF32 text;
+		SpriteFilter spriteFilter;
 		
 		float size = 20;
 		float outline = 0;
