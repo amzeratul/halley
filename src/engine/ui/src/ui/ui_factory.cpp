@@ -338,7 +338,13 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 		sizer.add(std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label), 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
 	}
 
-	return std::make_shared<UIButton>(id, style, std::move(sizer));
+	auto result = std::make_shared<UIButton>(id, style, std::move(sizer));
+
+	if (node.hasKey("mouseBorder")) {
+		result->setMouseExtraBorder(asVector4f(node["mouseBorder"], Vector4f()));
+	}
+
+	return result;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)

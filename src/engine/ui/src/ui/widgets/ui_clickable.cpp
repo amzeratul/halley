@@ -75,6 +75,18 @@ void UIClickable::onInput(const UIInputResults& input, Time time)
 	}
 }
 
+Rect4f UIClickable::getMouseRect() const
+{
+	auto rect = UIWidget::getMouseRect();
+
+	if (mouseExtraBorder) {
+		auto& b = mouseExtraBorder.get();
+		return Rect4f(rect.getTopLeft() - Vector2f(b.x, b.y), rect.getBottomRight() + Vector2f(b.z, b.w));
+	}
+
+	return rect;
+}
+
 void UIClickable::onStateChanged(State prev, State next)
 {
 }
@@ -98,4 +110,9 @@ void UIClickable::onEnabledChanged()
 		held = false;
 	}
 	doForceUpdate();
+}
+
+void UIClickable::setMouseExtraBorder(Maybe<Vector4f> override)
+{
+	mouseExtraBorder = override;
 }

@@ -26,6 +26,9 @@ namespace Halley {
 
 		void onInput(const UIInputResults& input, Time time) override;
 
+		Rect4f getMouseRect() const override;
+		void setMouseExtraBorder(Maybe<Vector4f> override);
+
 	protected:
 
 		virtual void onStateChanged(State prev, State next);
@@ -38,6 +41,7 @@ namespace Halley {
 
 	private:
 		State curState = State::Up;
+		Maybe<Vector4f> mouseExtraBorder;
 		bool held = false;
 		bool forceUpdate = false;
 	};
