@@ -67,9 +67,15 @@ namespace Halley {
 		}
 
 		template <typename T>
-		std::shared_ptr<const T> unload(const String& name) const
+		void unload(const String& name) const
 		{
-			return of<T>().unload(name);
+			of<T>().unload(name);
+		}
+
+		template <typename T>
+		void unload(const std::shared_ptr<const T>& res)
+		{
+			of<T>().unload(res->getAssetId());
 		}
 
 		template <typename T>
