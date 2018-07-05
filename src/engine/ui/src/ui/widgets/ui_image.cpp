@@ -82,3 +82,15 @@ void UIImage::setWorldClip(Maybe<Rect4f> wc)
 {
 	worldClip = wc;
 }
+
+void UIImage::setSelectable(Colour4f normalColour, Colour4f selColour)
+{
+	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event)
+	{
+		if (event.getBoolData()) {
+			sprite.setColour(selColour);
+		} else {
+			sprite.setColour(normalColour);
+		}
+	});
+}
