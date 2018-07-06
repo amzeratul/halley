@@ -12,6 +12,8 @@ namespace Halley {
 		ButtonClicked,
 		CheckboxUpdated,
 		DropboxSelectionChanged,
+		DropdownOpened,
+		DropdownClosed,
 		ListSelectionChanged,
 		ListAccept,
 		ListCancel,

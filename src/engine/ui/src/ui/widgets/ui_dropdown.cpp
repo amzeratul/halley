@@ -226,6 +226,8 @@ void UIDropdown::open()
 			close();
 		});
 
+		sendEvent(UIEvent(UIEventType::DropdownOpened, getId(), optionIds[curOption], curOption));
+
 		forceLayout();
 		auto sz = dropdownList->getSize();
 		scrollPane->setScrollSpeed(ceil(sz.y / options.size()));
@@ -240,6 +242,8 @@ void UIDropdown::close()
 
 		dropdownWindow->destroy();
 		dropdownWindow.reset();
+
+		sendEvent(UIEvent(UIEventType::DropdownClosed, getId(), optionIds[curOption], curOption));
 	}
 }
 
