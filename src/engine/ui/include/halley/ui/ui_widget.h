@@ -54,7 +54,7 @@ namespace Halley {
 		bool isFocused() const;
 
 		void setId(const String& id);
-		const String& getId() const;
+		const String& getId() const override;
 
 		Vector2f getPosition() const;
 		virtual Vector2f getLayoutOriginPosition() const;

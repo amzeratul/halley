@@ -14,6 +14,7 @@ namespace Halley {
 	public:
 		virtual ~UIParent() {}
 
+		virtual const String& getId() const = 0;
 		virtual UIRoot* getRoot() = 0;
 		virtual void sendEvent(UIEvent&& event) const = 0;
 
@@ -32,11 +33,27 @@ namespace Halley {
 		const std::vector<std::shared_ptr<UIWidget>>& getChildren() const;
 
 		std::shared_ptr<UIWidget> getWidget(const String& id);
+		std::shared_ptr<UIWidget> tryGetWidget(const String& id);
 		
+		template <typename T>
+		std::shared_ptr<T> tryGetWidgetAs(const String& id)
+		{
+			return std::dynamic_pointer_cast<T>(tryGetWidget(id));
+		}
+
 		template <typename T>
 		std::shared_ptr<T> getWidgetAs(const String& id)
 		{
-			return std::dynamic_pointer_cast<T>(getWidget(id));
+			auto widget = getWidget(id);
+			if (widget) {
+				auto w = std::dynamic_pointer_cast<T>(widget);
+				if (!w) {
+					throw Exception("Widget with id \"" + id + "\" was found, but it is not of type " + String(typeid(T).name()));
+				}
+				return w;
+			} else {
+				return {};
+			}
 		}
 
 		virtual bool isDescendentOf(const UIWidget& ancestor) const;
@@ -44,5 +61,7 @@ namespace Halley {
 	private:
 		std::vector<std::shared_ptr<UIWidget>> children;
 		std::vector<std::shared_ptr<UIWidget>> childrenWaiting;
+
+		std::shared_ptr<UIWidget> doGetWidget(const String& id) const;
 	};
 }

@@ -537,15 +537,17 @@ std::shared_ptr<UIWidget> UIFactory::makeSlider(const ConfigNode& entryNode)
 std::shared_ptr<UIWidget> UIFactory::makeHorizontalDiv(const ConfigNode& entryNode)
 {
 	const auto& widgetNode = entryNode["widget"];
+	auto id = widgetNode["id"].asString("");
 	auto style = getStyle(widgetNode["style"].asString("horizontalDiv"));
-	return std::make_shared<UIImage>(style.getSprite("image"));
+	return std::make_shared<UIImage>(id, style.getSprite("image"));
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeVerticalDiv(const ConfigNode& entryNode)
 {
 	const auto& widgetNode = entryNode["widget"];
+	auto id = widgetNode["id"].asString("");
 	auto style = getStyle(widgetNode["style"].asString("verticalDiv"));
-	return std::make_shared<UIImage>(style.getSprite("image"));
+	return std::make_shared<UIImage>(id, style.getSprite("image"));
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)

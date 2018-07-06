@@ -13,8 +13,14 @@ UIRoot* UIRoot::getRoot()
 	return this;
 }
 
+const String& UIRoot::getId() const
+{
+	return id;
+}
+
 UIRoot::UIRoot(AudioAPI* audio, Rect4f rect)
-	: dummyInput(std::make_shared<InputButtonBase>(4))
+	: id("root")
+	, dummyInput(std::make_shared<InputButtonBase>(4))
 	, uiRect(rect)
 	, audio(audio)
 {

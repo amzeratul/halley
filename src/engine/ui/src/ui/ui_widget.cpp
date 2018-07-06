@@ -693,7 +693,7 @@ void UIWidget::readFromDataBind()
 
 void UIWidget::bindData(const String& childId, bool initialValue, UIDataBindBool::WriteCallback callback)
 {
-	auto widget = getWidget(childId);
+	auto widget = tryGetWidget(childId);
 	if (widget) {
 		widget->setDataBind(std::make_shared<UIDataBindBool>(initialValue, std::move(callback)));
 	}
@@ -701,7 +701,7 @@ void UIWidget::bindData(const String& childId, bool initialValue, UIDataBindBool
 
 void UIWidget::bindData(const String& childId, int initialValue, UIDataBindInt::WriteCallback callback)
 {
-	auto widget = getWidget(childId);
+	auto widget = tryGetWidget(childId);
 	if (widget) {
 		widget->setDataBind(std::make_shared<UIDataBindInt>(initialValue, std::move(callback)));
 	}
@@ -709,7 +709,7 @@ void UIWidget::bindData(const String& childId, int initialValue, UIDataBindInt::
 
 void UIWidget::bindData(const String& childId, float initialValue, UIDataBindFloat::WriteCallback callback)
 {
-	auto widget = getWidget(childId);
+	auto widget = tryGetWidget(childId);
 	if (widget) {
 		widget->setDataBind(std::make_shared<UIDataBindFloat>(initialValue, std::move(callback)));
 	}
@@ -717,7 +717,7 @@ void UIWidget::bindData(const String& childId, float initialValue, UIDataBindFlo
 
 void UIWidget::bindData(const String& childId, const String& initialValue, UIDataBindString::WriteCallback callback)
 {
-	auto widget = getWidget(childId);
+	auto widget = tryGetWidget(childId);
 	if (widget) {
 		widget->setDataBind(std::make_shared<UIDataBindString>(initialValue, std::move(callback)));
 	}

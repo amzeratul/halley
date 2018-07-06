@@ -20,9 +20,10 @@ namespace Halley {
 	
 	class UIRoot : public UIParent {
 	public:
-		UIRoot* getRoot() override;
-
 		explicit UIRoot(AudioAPI* audio, Rect4f rect = {});
+
+		UIRoot* getRoot() override;
+		const String& getId() const override;
 
 		void setRect(Rect4f rect);
 		Rect4f getRect() const override;
@@ -44,6 +45,7 @@ namespace Halley {
 		std::vector<std::shared_ptr<UIWidget>> collectWidgets();
 
 	private:
+		String id;
 		std::weak_ptr<UIWidget> currentMouseOver;
 		std::weak_ptr<UIWidget> currentFocus;
 		Vector2f lastMousePos;
