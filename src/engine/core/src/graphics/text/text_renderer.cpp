@@ -502,3 +502,8 @@ float TextRenderer::getLineHeight() const
 	float scale = size / font->getSizePoints();
 	return roundf(font->getHeight() * scale + lineSpacing);
 }
+
+float TextRenderer::getAlignment() const
+{
+	return align;
+}

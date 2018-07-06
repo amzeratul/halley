@@ -17,6 +17,8 @@ namespace Halley {
 		float getMaxWidth() const;
 		float getMaxHeight() const;
 
+		void setAlignment(float alignment);
+
 		void setTextRenderer(TextRenderer renderer);
 		TextRenderer& getTextRenderer();
 		const TextRenderer& getTextRenderer() const;
@@ -33,6 +35,7 @@ namespace Halley {
 		TextRenderer renderer;
 		LocalisedString text;
 
+		Vector2f textExtents;
 		float maxWidth = std::numeric_limits<float>::infinity();
 		float maxHeight = std::numeric_limits<float>::infinity();
 		bool needsClip = false;

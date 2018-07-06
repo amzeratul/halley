@@ -326,6 +326,9 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 	if (node.hasKey("maxWidth")) {
 		label->setMaxWidth(node["maxWidth"].asFloat());
 	}
+	if (node.hasKey("alignment")) {
+		label->setAlignment(node["alignment"].asFloat());
+	}
 	return label;
 }
 

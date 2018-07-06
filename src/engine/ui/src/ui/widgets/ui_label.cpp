@@ -28,23 +28,23 @@ void UILabel::update(Time t, bool moved)
 		updateText();
 	}
 	if (moved) {
-		renderer.setPosition(getPosition());
+		renderer.setPosition(getPosition() + Vector2f(renderer.getAlignment() * textExtents.x, 0.0f));
 	}
 }
 
 void UILabel::updateMinSize()
 {
 	needsClip = false;
-	auto extents = renderer.getExtents();
-	if (extents.x > maxWidth) {
+	textExtents = renderer.getExtents();
+	if (textExtents.x > maxWidth) {
 		renderer.setText(renderer.split(maxWidth));
-		extents = renderer.getExtents();
+		textExtents = renderer.getExtents();
 	}
-	if (extents.y > maxHeight) {
-		extents.y = maxHeight;
+	if (textExtents.y > maxHeight) {
+		textExtents.y = maxHeight;
 		needsClip = true;
 	}
-	setMinSize(extents);
+	setMinSize(textExtents);
 }
 
 void UILabel::updateText() {
@@ -85,6 +85,11 @@ float UILabel::getMaxWidth() const
 float UILabel::getMaxHeight() const
 {
 	return maxHeight;
+}
+
+void UILabel::setAlignment(float alignment)
+{
+	renderer.setAlignment(alignment);
 }
 
 TextRenderer& UILabel::getTextRenderer()

@@ -68,6 +68,7 @@ namespace Halley
 		float getSmoothness() const;
 		Maybe<Rect4f> getClip() const;
 		float getLineHeight() const;
+		float getAlignment() const;
 
 	private:
 		std::shared_ptr<const Font> font;
