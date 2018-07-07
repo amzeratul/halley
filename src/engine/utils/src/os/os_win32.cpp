@@ -390,29 +390,43 @@ int OSWin32::runCommand(String rawCommand)
 	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES); 
 	saAttr.bInheritHandle = TRUE; 
 	saAttr.lpSecurityDescriptor = nullptr;
+	HANDLE inRead;
+	HANDLE inWrite;
 	HANDLE outRead;
 	HANDLE outWrite;
 	HANDLE errorRead;
 	HANDLE errorWrite;
-	CreatePipe(&outRead, &outWrite, &saAttr, 0);
+	if (!CreatePipe(&outRead, &outWrite, &saAttr, 0)) {
+		throw Exception("Unable to create stdout pipe");
+	}
 	SetHandleInformation(outRead, HANDLE_FLAG_INHERIT, 0);
-	CreatePipe(&errorRead, &errorWrite, &saAttr, 0);
+	if (!CreatePipe(&errorRead, &errorWrite, &saAttr, 0)) {
+		throw Exception("Unable to create stderr pipe");
+	}
 	SetHandleInformation(errorRead, HANDLE_FLAG_INHERIT, 0);
+	if (!CreatePipe(&inRead, &inWrite, &saAttr, 0)) {
+		throw Exception("Unable to create stdin pipe");
+	}
+	SetHandleInformation(inWrite, HANDLE_FLAG_INHERIT, 0);
 
 	// Startup info
 	STARTUPINFOW si;
 	memset(&si, 0, sizeof(STARTUPINFO));
-	si.hStdOutput = outRead;
-	si.hStdError = errorRead;
+	si.cb = sizeof(STARTUPINFO);
+	si.hStdOutput = outWrite;
+	si.hStdError = errorWrite;
+	si.hStdInput = inRead;
+	si.dwFlags |= STARTF_USESTDHANDLES;
 
 	// Create the process
 	PROCESS_INFORMATION pi;
 	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
-	if (!CreateProcessW(nullptr, buffer, nullptr, nullptr, false, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
+	if (!CreateProcessW(nullptr, buffer, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
 		return -1;
 	}
 
 	// Wait for process to end
+	CloseHandle(inWrite);
 	HANDLE waitHandles[] = { pi.hProcess, outRead, errorRead };
 	WaitForMultipleObjects(3, waitHandles, TRUE, INFINITE);
 
@@ -435,6 +449,7 @@ int OSWin32::runCommand(String rawCommand)
 	// Cleanup
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
+	CloseHandle(inRead);
 	CloseHandle(outRead);
 	CloseHandle(outWrite);
 	CloseHandle(errorRead);
