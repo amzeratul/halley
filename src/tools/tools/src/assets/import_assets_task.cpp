@@ -59,7 +59,7 @@ void ImportAssetsTask::run()
 	if (!isCancelled()) {
 		setProgress(1.0f, "");
 
-		if (packAfter) {
+		if (packAfter && !hasError()) {
 			addContinuation(EditorTaskAnchor(std::make_unique<AssetPackerTask>(project, std::move(outputAssets), std::move(deletedAssets))));
 		}
 	}
