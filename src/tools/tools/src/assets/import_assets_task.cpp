@@ -34,8 +34,10 @@ void ImportAssetsTask::run()
 	assetsToImport = files.size();
 	std::vector<Future<void>> tasks;
 
+	constexpr bool parallelImport = true;
+
 	for (size_t i = 0; i < files.size(); ++i) {
-		tasks.push_back(Concurrent::execute(Executors::getCPUAux(), [&, i] () {
+		auto importFunc = [&, i] () {
 			if (isCancelled()) {
 				return;
 			}
@@ -50,7 +52,13 @@ void ImportAssetsTask::run()
 				db.save();
 				lastSave = now;
 			}
-		}));
+		};
+
+		if (parallelImport) {
+			tasks.push_back(Concurrent::execute(Executors::getCPUAux(), importFunc));
+		} else {
+			importFunc();
+		}
 	}
 
 	Concurrent::whenAll(tasks.begin(), tasks.end()).get();
