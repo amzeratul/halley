@@ -10,6 +10,7 @@
 #include "halley/tools/packer/asset_packer_task.h"
 #include "halley/support/logger.h"
 #include "halley/time/stopwatch.h"
+#include "halley/support/debug.h"
 
 using namespace Halley;
 
@@ -34,7 +35,7 @@ void ImportAssetsTask::run()
 	assetsToImport = files.size();
 	std::vector<Future<void>> tasks;
 
-	constexpr bool parallelImport = true;
+	constexpr bool parallelImport = !Debug::isDebug();
 
 	for (size_t i = 0; i < files.size(); ++i) {
 		auto importFunc = [&, i] () {

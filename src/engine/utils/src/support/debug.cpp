@@ -40,15 +40,6 @@
 
 using namespace Halley;
 
-bool Debug::isDebug()
-{
-#ifdef _DEBUG
-	return true;
-#else
-	return false;
-#endif
-}
-
 Debug::Debug()
 {
 }

@@ -36,7 +36,14 @@ namespace Halley {
 
 	class Debug {
 	public:
-		static bool isDebug();
+		static constexpr bool isDebug()
+		{
+		#ifdef _DEBUG
+			return true;
+		#else
+			return false;
+		#endif
+		}
 
 		static void setErrorHandling(const String& dumpFilePath, std::function<void(const std::string&)> errorHandler);
 		static String getCallStack(int skip = 3);
