@@ -91,7 +91,8 @@ set(HEADERS
         "include/halley/core/game/environment.h"
         "include/halley/core/game/game.h"
         "include/halley/core/game/halley_main.h"
-		"include/halley/core/game/halley_statics.h"
+        "include/halley/core/game/halley_statics.h"
+        "include/halley/core/game/platform.h"
         
         "include/halley/core/graphics/blend.h"
         "include/halley/core/graphics/camera.h"

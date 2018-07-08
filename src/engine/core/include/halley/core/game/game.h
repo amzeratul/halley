@@ -8,7 +8,7 @@ namespace Halley
 	class ResourceLocator;
 	class Stage;
 	class Environment;
-
+	
 	class Game
 	{
 	public:
