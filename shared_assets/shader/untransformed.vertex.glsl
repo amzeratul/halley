@@ -7,5 +7,5 @@ out vec4 v_colour;
 
 void main() {
     v_colour = a_colour;
-    gl_Position = float4(a_position + a_size * a_vertPos.xy, 0.0, 1.0);
+    gl_Position = vec4(a_position + a_size * a_vertPos.xy, 0.0, 1.0);
 }
