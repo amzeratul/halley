@@ -80,7 +80,7 @@ void Entity::refresh()
 
 EntityId Entity::getEntityId() const
 {
-	if (uid.isValid()) {
+	if (!uid.isValid()) {
 		//throw Exception("Entity ID not yet assigned - are you using this before it's spawned?");
 	}
 	return uid;

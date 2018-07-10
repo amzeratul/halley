@@ -71,7 +71,7 @@ namespace Halley {
 			std::swap(next, block.data[localIdx].nextFreeEntryIndex);
 
 			// External index composes the revision with the index, so it's unique, but easily mappable
-			int64_t externalIdx = static_cast<int64_t>(entryIdx & 0xFFFFFFFF) | (static_cast<int64_t>(rev & 0x7FFFFFFF) << 32); // TODO: compute properly
+			int64_t externalIdx = static_cast<int64_t>(entryIdx) | (static_cast<int64_t>(rev & 0x7FFFFFFF) << 32); // TODO: compute properly
 			return std::pair<T*, int64_t>(result, externalIdx);
 		}
 
