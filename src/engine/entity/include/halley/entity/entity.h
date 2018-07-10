@@ -76,7 +76,7 @@ namespace Halley {
 		Vector<std::pair<int, Component*>> components;
 		Vector<MessageEntry> inbox;
 		FamilyMaskType mask;
-		EntityId uid = -1;
+		EntityId uid;
 		int liveComponents = 0;
 		bool dirty = false;
 		bool alive = true;

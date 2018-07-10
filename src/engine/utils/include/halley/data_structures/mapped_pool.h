@@ -21,13 +21,15 @@
 
 \*****************************************************************/
 
+#include <cstdint>
+
 namespace Halley {
 	template <typename T, size_t blockLen = 16384>
 	class MappedPool {
 		struct Entry {
 			alignas(T) std::array<char, sizeof(T)> data;
-			unsigned short nextFreeEntryIndex;
-			unsigned short revision;
+			uint32_t nextFreeEntryIndex;
+			uint32_t revision;
 		};
 
 		struct Block {
@@ -39,7 +41,7 @@ namespace Halley {
 				size_t base = blockIndex * blockLen;
 				for (size_t i = 0; i < blockLen - 1; i++) {
 					// Each entry points to the next
-					data[i].nextFreeEntryIndex = static_cast<unsigned short>(i + 1 + base);
+					data[i].nextFreeEntryIndex = static_cast<uint32_t>(i + 1 + base);
 					data[i].revision = 0;
 				}
 				data[blockLen - 1].nextFreeEntryIndex = 0xFFFF;
@@ -48,7 +50,7 @@ namespace Halley {
 		};
 
 	public:
-		std::pair<T*, int> alloc() {
+		std::pair<T*, int64_t> alloc() {
 			// Next entry will be at position "entryIdx", which is just what was stored on next
 			int entryIdx = next;
 
@@ -69,8 +71,8 @@ namespace Halley {
 			std::swap(next, block.data[localIdx].nextFreeEntryIndex);
 
 			// External index composes the revision with the index, so it's unique, but easily mappable
-			int externalIdx = static_cast<signed int>(entryIdx & 0xFFFF) | (static_cast<signed int>(rev & 0x7FFF) << 16); // TODO: compute properly
-			return std::pair<T*, int>(result, externalIdx);
+			int64_t externalIdx = static_cast<int64_t>(entryIdx & 0xFFFFFFFF) | (static_cast<int64_t>(rev & 0x7FFFFFFF) << 32); // TODO: compute properly
+			return std::pair<T*, int64_t>(result, externalIdx);
 		}
 
 		void free(T* p) {
@@ -82,16 +84,16 @@ namespace Halley {
 			++entry->revision;
 		}
 
-		void freeId(int externalIdx) {
+		void freeId(int64_t externalIdx) {
 			free(get(externalIdx));
 		}
 
-		T* get(int externalIdx) {
-			unsigned short idx = static_cast<unsigned short>(externalIdx & 0xFFFF);
-			unsigned short rev = static_cast<unsigned short>(externalIdx >> 16);
+		T* get(int64_t externalIdx) {
+			auto idx = static_cast<uint32_t>(externalIdx & 0xFFFFFFFFll);
+			auto rev = static_cast<uint32_t>(externalIdx >> 32);
 
 			int blockN = idx / blockLen;
-			if (blockN < 0 || blockN >= signed(blocks.size())) {
+			if (blockN < 0 || blockN >= int(blocks.size())) {
 				return nullptr;
 			}
 
@@ -108,6 +110,6 @@ namespace Halley {
 
 	private:
 		Vector<Block> blocks;
-		unsigned short next = 0;
+		uint32_t next = 0;
 	};
 }

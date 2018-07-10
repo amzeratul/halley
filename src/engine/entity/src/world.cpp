@@ -169,7 +169,7 @@ EntityRef World::getEntity(EntityId id)
 
 Entity* World::tryGetEntity(EntityId id)
 {
-	auto v = entityMap.get(id);
+	auto v = entityMap.get(id.value);
 	if (v == nullptr) {
 		return nullptr;
 	}
@@ -238,7 +238,7 @@ void World::render(RenderContext& rc) const
 void World::allocateEntity(Entity* entity) {
 	auto res = entityMap.alloc();
 	*res.first = entity;
-	entity->uid = res.second;
+	entity->uid.value = res.second;
 }
 
 void World::spawnPending()
@@ -331,7 +331,7 @@ void World::updateEntities()
 			auto& entity = *entities[idx];
 
 			// Remove
-			entityMap.freeId(entity.getEntityId());
+			entityMap.freeId(entity.getEntityId().value);
 			deleteEntity(&entity);
 
 			// Put it at the back of the array, so it's removed when the array gets resized
