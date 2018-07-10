@@ -89,7 +89,10 @@ namespace Halley {
 	class FamilyImpl : public Family
 	{
 		constexpr static size_t storageSize = sizeof(T) - alignUp(sizeof(FamilyBase), alignof(void*));
-		static_assert(T::Type::getNumComponents() * sizeof(void*) == storageSize, "Family type has unexpected storage size");
+		static_assert(std::is_base_of<FamilyBase, T>::value, "Family type does not derive from FamilyBase");
+
+		// I don't know why this needs to be aligned up to 8 on Win32. :|
+		static_assert(alignUp(T::Type::getNumComponents() * sizeof(void*), size_t(8)) == storageSize, "Family type has unexpected storage size");
 
 		struct StorageType : public FamilyBase
 		{
