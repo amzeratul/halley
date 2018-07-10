@@ -8,6 +8,7 @@
 #include "halley/data_structures/nullable_reference.h"
 #include "halley/support/exception.h"
 #include "halley/support/debug.h"
+#include "halley/utils/utils.h"
 
 namespace Halley {
 	class Entity;
@@ -87,11 +88,13 @@ namespace Halley {
 	template <typename T>
 	class FamilyImpl : public Family
 	{
+		constexpr static size_t storageSize = sizeof(T) - alignUp(sizeof(FamilyBase), alignof(void*));
+		static_assert(T::Type::getNumComponents() * sizeof(void*) == storageSize, "Family type has unexpected storage size");
+
 		struct StorageType : public FamilyBase
 		{
-			alignas(alignof(void*)) std::array<char, sizeof(T) - maxSize(sizeof(FamilyBase), 2 * sizeof(void*))> data;
+			alignas(alignof(void*)) std::array<char, storageSize> data;
 		};
-		static_assert(((T::Type::getNumComponents() + 2) * sizeof(void*)) == sizeof(T), "Family type has unexpected storage size");
 
 	public:
 		FamilyImpl() : Family(T::Type::inclusionMask()) {}

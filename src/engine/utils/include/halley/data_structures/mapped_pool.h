@@ -39,30 +39,33 @@ namespace Halley {
 				: data(blockLen)
 			{
 				size_t base = blockIndex * blockLen;
-				for (size_t i = 0; i < blockLen - 1; i++) {
+				for (size_t i = 0; i < blockLen; i++) {
 					// Each entry points to the next
 					data[i].nextFreeEntryIndex = static_cast<uint32_t>(i + 1 + base);
 					data[i].revision = 0;
 				}
-				data[blockLen - 1].nextFreeEntryIndex = 0xFFFF;
-				data[blockLen - 1].revision = 0;
 			}
+
+			Block(const Block& other) = delete;
+			Block& operator=(const Block& other) = delete;
+			Block(Block&& other) = default;
+			Block& operator=(Block&& other) = default;
 		};
 
 	public:
 		std::pair<T*, int64_t> alloc() {
 			// Next entry will be at position "entryIdx", which is just what was stored on next
-			int entryIdx = next;
+			uint32_t entryIdx = next;
 
 			// Figure which block it goes into, and make sure that exists
-			int blockIdx = entryIdx / blockLen;
+			size_t blockIdx = entryIdx / blockLen;
 			if (blockIdx >= blocks.size()) {
 				blocks.push_back(Block(blocks.size()));
 			}
 			auto& block = blocks[blockIdx];
 
 			// Find the local entry inside that block and initialize it
-			int localIdx = entryIdx % blockLen;
+			size_t localIdx = entryIdx % blockLen;
 			auto& data = block.data[localIdx];
 			int rev = data.revision;
 			T* result = reinterpret_cast<T*>(&(data.data));
