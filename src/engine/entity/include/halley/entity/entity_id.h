@@ -5,7 +5,7 @@
 #include "halley/text/string_converter.h"
 
 namespace Halley {
-	struct EntityId {
+	struct alignas(8) EntityId {
 		int64_t value;
 
 		EntityId() : value(-1) {}
