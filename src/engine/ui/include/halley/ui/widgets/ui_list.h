@@ -23,8 +23,8 @@ namespace Halley {
 		size_t getCount() const;
 
 		void addTextItem(const String& id, const LocalisedString& label, float maxWidth = -1, bool centre = false);
-		void addItem(const String& id, std::shared_ptr<UIWidget> widget, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill);
-		void addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill);
+		void addItem(const String& id, std::shared_ptr<UIWidget> widget, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, Maybe<UIStyle> styleOverride = {});
+		void addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, Maybe<UIStyle> styleOverride = {});
 		void clear();
 
 		void setItemEnabled(const String& id, bool enabled);

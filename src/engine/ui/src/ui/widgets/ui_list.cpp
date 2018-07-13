@@ -86,16 +86,18 @@ void UIList::addTextItem(const String& id, const LocalisedString& label, float m
 	addItem(item);
 }
 
-void UIList::addItem(const String& id, std::shared_ptr<UIWidget> widget, float proportion, Vector4f border, int fillFlags)
+void UIList::addItem(const String& id, std::shared_ptr<UIWidget> widget, float proportion, Vector4f border, int fillFlags, Maybe<UIStyle> styleOverride)
 {
-	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
+	const auto& itemStyle = styleOverride ? *styleOverride : style;
+	auto item = std::make_shared<UIListItem>(id, *this, itemStyle.getSubStyle("item"), int(getNumberOfItems()), itemStyle.getBorder("extraMouseBorder"));
 	item->add(widget, proportion, border, fillFlags);
 	addItem(item);
 }
 
-void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion, Vector4f border, int fillFlags)
+void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion, Vector4f border, int fillFlags, Maybe<UIStyle> styleOverride)
 {
-	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
+	const auto& itemStyle = styleOverride ? *styleOverride : style;
+	auto item = std::make_shared<UIListItem>(id, *this, itemStyle.getSubStyle("item"), int(getNumberOfItems()), itemStyle.getBorder("extraMouseBorder"));
 	item->add(sizer, proportion, border, fillFlags);
 	addItem(item);
 }
