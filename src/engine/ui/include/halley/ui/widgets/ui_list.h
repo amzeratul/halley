@@ -37,6 +37,8 @@ namespace Halley {
 
 		void readFromDataBind() override;
 
+		std::shared_ptr<UIListItem> getItem(int n) const;
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -58,7 +60,6 @@ namespace Halley {
 		void onAccept();
 		void onCancel();
 		void reassignIds();
-		std::shared_ptr<UIListItem> getItem(int n) const;
 		size_t getNumberOfItems() const;
 	};
 
