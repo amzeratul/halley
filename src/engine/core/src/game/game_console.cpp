@@ -1,34 +1,50 @@
 #include "halley/core/game/game_console.h"
 #include "halley/text/halleystring.h"
 
-void Halley::GameConsole::registerConsoleListener(IGameConsoleListener* listener)
+using namespace Halley;
+
+void GameConsole::registerConsoleListener(IGameConsoleListener* listener)
 {
 	listeners.insert(listener);
 }
 
-void Halley::GameConsole::removeConsoleListener(IGameConsoleListener* listener)
+void GameConsole::removeConsoleListener(IGameConsoleListener* listener)
 {
 	listeners.erase(listener);
 }
 
-void Halley::GameConsole::registerConsoleCommand(const String& command, GameConsoleCallback callback)
+void GameConsole::registerConsoleCommand(const String& command, GameConsoleCallback callback)
 {
 	commands[command] = std::move(callback);
 }
 
-void Halley::GameConsole::removeConsoleCommand(const String& command)
+void GameConsole::removeConsoleCommand(const String& command)
 {
 	commands.erase(command);
 }
 
-void Halley::GameConsole::sendMessage(const String& string)
+String GameConsole::onHelp(std::vector<String> args)
+{
+	String result = "Commands available:";
+	for (auto& c: commands) {
+		result += "\n  " + c.first;
+	}
+	return result;
+}
+
+GameConsole::GameConsole()
+{
+	registerConsoleCommand("help", [=](std::vector<String> args) -> String { return onHelp(std::move(args)); });
+}
+
+void GameConsole::sendMessage(const String& string)
 {
 	for (auto& l: listeners) {
 		l->onConsoleMessage(string);
 	}
 }
 
-void Halley::GameConsole::sendCommand(const String& string)
+void GameConsole::sendCommand(const String& string)
 {
 	auto splitStr = string.split(' ');
 	auto command = std::move(splitStr[0]);

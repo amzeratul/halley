@@ -20,6 +20,8 @@ namespace Halley {
 
     class GameConsole {
     public:
+		GameConsole();
+
 		void sendMessage(const String& string);
 	    void sendCommand(const String& string);
 
@@ -32,5 +34,7 @@ namespace Halley {
     private:
 		std::set<IGameConsoleListener*> listeners;
 		std::map<String, GameConsoleCallback> commands;
+
+		String onHelp(std::vector<String> args);
     };
 }
