@@ -16,6 +16,7 @@ set(SOURCES
 
         "src/game/core.cpp"
         "src/game/environment.cpp"
+        "src/game/game_console.cpp"
         "src/game/halley_main.cpp"
 		"src/game/halley_statics.cpp"
 
@@ -90,6 +91,7 @@ set(HEADERS
         "include/halley/core/game/core.h"
         "include/halley/core/game/environment.h"
         "include/halley/core/game/game.h"
+        "include/halley/core/game/game_console.h"
         "include/halley/core/game/halley_main.h"
         "include/halley/core/game/halley_statics.h"
         "include/halley/core/game/platform.h"

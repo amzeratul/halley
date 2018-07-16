@@ -8,6 +8,7 @@ namespace Halley
 	class ResourceLocator;
 	class Stage;
 	class Environment;
+	class GameConsole;
 	
 	class Game
 	{
@@ -32,5 +33,7 @@ namespace Halley
 
 		virtual String getDevConAddress() const { return ""; }
 		virtual int getDevConPort() const { return 12500; }
+
+		virtual std::shared_ptr<GameConsole> getGameConsole() const { return {}; }
 	};
 }
