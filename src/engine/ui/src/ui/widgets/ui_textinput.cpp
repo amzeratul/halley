@@ -149,6 +149,12 @@ void UITextInput::updateTextInput()
 		}
 	}
 
+	if (keyboard->isButtonPressed(Keys::Enter) || keyboard->isButtonPressed(Keys::KP_Enter)) {
+		if (!isMultiLine) {
+			sendEvent(UIEvent(UIEventType::TextSubmit, getId(), getText()));
+		}
+	}
+
 	if (keyboard->isButtonPressedRepeat(Keys::Home) || keyboard->isButtonPressedRepeat(Keys::PageUp)) {
 		caret = 0;
 	}
@@ -215,6 +221,14 @@ void UITextInput::validateText()
 	if (getValidator()) {
 		text = getValidator()->onTextChanged(text);
 	}
+}
+
+void UITextInput::onValidatorSet()
+{
+	if (getValidator()) {
+		text = getValidator()->onTextChanged(text);
+	}
+	setCaretPosition(caretPos);
 }
 
 void UITextInput::update(Time t, bool moved)

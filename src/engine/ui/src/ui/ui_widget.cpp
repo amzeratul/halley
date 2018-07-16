@@ -657,11 +657,18 @@ void UIWidget::setWidgetRect(Rect4f rect)
 void UIWidget::setValidator(std::shared_ptr<UIValidator> v)
 {
 	validator = v;
+	if (validator) {
+		onValidatorSet();
+	}
 }
 
 std::shared_ptr<UIValidator> UIWidget::getValidator() const
 {
 	return validator;
+}
+
+void UIWidget::onValidatorSet()
+{
 }
 
 UIDataBind::Format UIWidget::getDataBindFormat() const

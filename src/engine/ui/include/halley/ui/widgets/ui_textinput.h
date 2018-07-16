@@ -44,6 +44,7 @@ namespace Halley {
 
 		void onTextModified();
 		void validateText();
+		void onValidatorSet() override;
 
 		std::shared_ptr<InputDevice> keyboard;
 		std::shared_ptr<Clipboard> clipboard;

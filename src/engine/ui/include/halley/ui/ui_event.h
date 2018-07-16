@@ -24,6 +24,7 @@ namespace Halley {
 		SetSelected,
 		SetHovered,
 		TextChanged,
+		TextSubmit,
 		TabChanged
 	};
 
