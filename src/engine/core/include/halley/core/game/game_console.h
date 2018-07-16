@@ -2,6 +2,7 @@
 
 #include <set>
 #include <functional>
+#include <vector>
 #include <map>
 
 namespace Halley {
