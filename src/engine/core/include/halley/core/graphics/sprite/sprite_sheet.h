@@ -49,7 +49,7 @@ namespace Halley
 	class SpriteSheet : public Resource
 	{
 	public:
-		const std::shared_ptr<const Texture>& getTexture() const { return texture; }
+		const std::shared_ptr<const Texture>& getTexture() const;
 		const SpriteSheetEntry& getSprite(const String& name) const;
 		const SpriteSheetEntry& getSprite(size_t idx) const;
 
@@ -61,7 +61,6 @@ namespace Halley
 		bool hasSprite(const String& name) const;
 
 		void loadJson(gsl::span<const gsl::byte> data);
-		void loadTexture(Resources& resources);
 
 		void addSprite(String name, const SpriteSheetEntry& sprite);
 		void setTextureName(String name);
@@ -74,11 +73,15 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 	private:
-		std::shared_ptr<const Texture> texture;
+		Resources* resources = nullptr;
+
+		mutable std::shared_ptr<const Texture> texture;
 		std::vector<SpriteSheetEntry> sprites;
 		HashMap<String, uint32_t> spriteIdx;
 		std::vector<SpriteSheetFrameTag> frameTags;
 		String textureName;
+
+		void loadTexture(Resources& resources) const;
 	};
 
 	class SpriteResource : public Resource

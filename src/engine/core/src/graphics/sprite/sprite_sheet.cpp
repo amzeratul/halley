@@ -64,6 +64,15 @@ void SpriteSheetFrameTag::deserialize(Deserializer& s)
 	s >> from;
 }
 
+const std::shared_ptr<const Texture>& SpriteSheet::getTexture() const
+{
+	Expects(resources != nullptr);
+	if (!texture) {
+		loadTexture(*resources);
+	}
+	return texture;
+}
+
 const SpriteSheetEntry& SpriteSheet::getSprite(const String& name) const
 {
 	return getSprite(getIndex(name));
@@ -125,15 +134,15 @@ bool SpriteSheet::hasSprite(const String& name) const
 std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 {
 	auto result = std::make_unique<SpriteSheet>();
+	result->resources = &loader.getAPI().core->getResources();
 	auto data = loader.getStatic();
 	Deserializer s(data->getSpan());
 	result->deserialize(s);
-	result->loadTexture(loader.getAPI().core->getResources());
 
 	return result;
 }
 
-void SpriteSheet::loadTexture(Resources& resources)
+void SpriteSheet::loadTexture(Resources& resources) const
 {
 	texture = resources.get<Texture>(textureName);
 }

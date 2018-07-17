@@ -285,7 +285,9 @@ void UITextInput::onFocus()
 {
 	caretTime = 0;
 	caretShowing = true;
-	while (keyboard->getNextLetter()) {}
+	if (keyboard) {
+		while (keyboard->getNextLetter()) {}
+	}
 }
 
 void UITextInput::pressMouse(Vector2f mousePos, int button)
