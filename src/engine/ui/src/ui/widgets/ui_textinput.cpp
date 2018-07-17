@@ -111,6 +111,10 @@ void UITextInput::draw(UIPainter& painter) const
 
 void UITextInput::updateTextInput()
 {
+	if (!keyboard) {
+		return;
+	}
+
 	const bool ctrlDown = keyboard->isButtonDown(Keys::LCtrl) || keyboard->isButtonDown(Keys::RCtrl);
 
 	if (ctrlDown) {
