@@ -10,6 +10,7 @@
 #include "sdl_window.h"
 #include "sdl_gl_context.h"
 #include "input_sdl.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -261,6 +262,8 @@ void SystemSDL::setSaveData(SaveDataType type, const String& path, const Bytes& 
 	auto dir = type == SaveDataType::Save ? saveDir : cacheDir;
 	OS::get().createDirectories(dir);
 	Path::writeFile(dir / path, data);
+
+	Logger::logDev("Saving \"" + path + "\", " + String::prettySize(data.size()));
 }
 
 std::vector<String> SystemSDL::enumerateSaveData(SaveDataType type, const String& root)
