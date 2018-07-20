@@ -23,6 +23,16 @@ namespace Halley
 		Cache
 	};
 
+	template <>
+	struct EnumNames<SaveDataType> {
+		constexpr std::array<const char*, 2> operator()() const {
+			return{{
+				"save",
+				"cache"
+			}};
+		}
+	};
+
 	class Clipboard
 	{
 	public:
