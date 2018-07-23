@@ -181,6 +181,7 @@ void Core::deInit()
 	std::cout << "Game shutting down." << std::endl;
 
 	// Ensure stage is cleaned up
+	running = false;
 	transitionStage();
 
 	// Deinit game
@@ -194,15 +195,15 @@ void Core::deInit()
 
 	// Deinit painter
 	painter.reset();
-	
+
+	// Deinit resources
+	resources.reset();
+
 	// Deinit API
 	api.reset();
 	
 	// Stop thread pool and other statics
 	statics.suspend();
-
-	// Deinit resources
-	resources.reset();
 
 	// Deinit console redirector
 	std::cout << "Goodbye!" << std::endl;
