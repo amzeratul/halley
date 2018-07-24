@@ -311,7 +311,10 @@ void Core::doVariableUpdate(Time time)
 	pumpAudio();
 
 	if (api->platform) {
-		api->platform->update();
+		api->platformInternal->update();
+	}
+	if (api->system) {
+		api->systemInternal->update(time);
 	}
 
 	engineTimer.endSample();
