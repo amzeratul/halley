@@ -36,6 +36,11 @@ namespace Halley
 
 		virtual void setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction) = 0;
 
-		virtual void requestControllerSetup(int /*minControllers*/, int /*maxControllers*/, std::function<void(bool)> callback, Maybe<std::vector<InputControllerData>> /*controllerData*/ = {}) { callback(true); }
+		virtual Future<bool> requestControllerSetup(int minControllers, int maxControllers, Maybe<std::vector<InputControllerData>> controllerData = {})
+		{
+			Promise<bool> promise;
+			promise.setValue(true);
+			return promise.getFuture();
+		}
 	};
 }
