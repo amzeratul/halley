@@ -7,6 +7,7 @@
 #include "halley/tools/packer/asset_packer_tool.h"
 #include "halley/support/logger.h"
 #include "halley/core/game/halley_statics.h"
+#include "halley/tools/vs_project/vs_project_tool.h"
 
 using namespace Halley;
 
@@ -17,6 +18,7 @@ CommandLineTools::CommandLineTools()
 	factories["distField"] = []() { return std::make_unique<DistanceFieldTool>(); };
 	factories["makeFont"] = []() { return std::make_unique<MakeFontTool>(); };
 	factories["pack"] = []() { return std::make_unique<AssetPackerTool>(); };
+	factories["vs_project"] = []() { return std::make_unique<VSProjectTool>(); };
 }
 
 Vector<std::string> CommandLineTools::getToolNames()

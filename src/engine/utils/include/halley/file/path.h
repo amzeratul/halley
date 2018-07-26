@@ -3,6 +3,7 @@
 #include "halley/text/halleystring.h"
 #include "halley/utils/utils.h"
 #include <iostream>
+#include <xtree>
 
 namespace Halley
 {
@@ -47,6 +48,9 @@ namespace Halley
 
 		static void writeFile(const Path& path, const Bytes& data);
 		static Bytes readFile(const Path& path);
+
+		Path makeRelativeTo(const Path& path) const;
+		Path changeRelativeRoot(const Path& currentParent, const Path& newParent) const;
 
 	private:
 		std::vector<String> pathParts;

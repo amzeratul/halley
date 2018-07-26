@@ -254,6 +254,38 @@ Bytes Path::readFile(const Path& path)
 	return result;
 }
 
+Path Path::makeRelativeTo(const Path& path) const
+{
+	const Path& me = *this;
+	size_t sharedRoot = 0;
+	size_t maxLen = std::min(me.pathParts.size(), path.pathParts.size());
+
+	std::vector<String> result;
+	for (size_t i = 0; i < maxLen; ++i) {
+		if (me.pathParts[i] == path.pathParts[i]) {
+			sharedRoot = i + 1;
+		} else {
+			break;
+		}
+	}
+
+	for (int i = 0; i < int(path.getNumberPaths()) - int(sharedRoot); ++i) {
+		result.emplace_back("..");
+	}
+
+	for (size_t i = sharedRoot; i < me.pathParts.size(); ++i) {
+		result.emplace_back(me.pathParts[i]);
+	}
+
+	return Path(result);
+}
+
+Path Path::changeRelativeRoot(const Path& currentParent, const Path& newParent) const
+{
+	const auto absolute = (currentParent / (*this));
+	return absolute.makeRelativeTo(newParent);
+}
+
 std::ostream& Halley::operator<<(std::ostream& os, const Path& p)
 {
 	return (os << p.string());
