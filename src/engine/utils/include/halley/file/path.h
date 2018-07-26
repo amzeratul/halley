@@ -3,7 +3,6 @@
 #include "halley/text/halleystring.h"
 #include "halley/utils/utils.h"
 #include <iostream>
-#include <xtree>
 
 namespace Halley
 {
