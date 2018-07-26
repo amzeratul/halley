@@ -1,6 +1,7 @@
 #include "halley/tools/vs_project/vs_project_manipulator.h"
 #include "../../../engine/utils/contrib/tinyxml/ticpp.h"
 #include "halley/support/logger.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 
@@ -84,6 +85,8 @@ void VSProjectManipulator::rewriteFiles(String toolName, const std::set<String>&
 			toAdd.insert(v);
 		}
 	}
+
+	Logger::logInfo(toolName + ": adding " + toString(toAdd.size()) + " files, removing " + toString(toDelete.size()) + " files.");
 
 	auto& doc = *document;
 

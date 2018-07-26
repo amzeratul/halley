@@ -49,7 +49,7 @@ int CommandLineTool::runRaw(int argc, char** argv)
 	platform = "pc";
 
 	Vector<std::string> args;
-	for (int i = 0; i < argc; i++) {
+	for (int i = 2; i < argc; i++) {
 		String arg = argv[i];
 		if (arg.startsWith("--")) {
 			if (arg.startsWith("--platform=")) {
@@ -64,6 +64,7 @@ int CommandLineTool::runRaw(int argc, char** argv)
 	statics->resume(nullptr);
 	StdOutSink logSink(true);
 	Logger::addSink(logSink);
+	env.parseProgramPath(argv[0]);
 
 	return run(args);
 }

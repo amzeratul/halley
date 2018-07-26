@@ -5,6 +5,7 @@
 #include <memory>
 #include <functional>
 #include <map>
+#include "halley/core/game/environment.h"
 
 namespace Halley
 {
@@ -21,6 +22,7 @@ namespace Halley
 	protected:
 		std::unique_ptr<HalleyStatics> statics;
 		String platform;
+		Environment env;
 	};
 
 	class CommandLineTools

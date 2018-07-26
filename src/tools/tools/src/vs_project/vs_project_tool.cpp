@@ -4,6 +4,8 @@
 #include "halley/tools/vs_project/vs_project_manipulator.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/file/path.h"
+#include "halley/core/game/environment.h"
+#include "halley/os/os.h"
 using namespace Halley;
 
 int VSProjectTool::run(Vector<std::string> args)
@@ -59,14 +61,17 @@ int VSProjectTool::copyFiles(const std::vector<std::string>& args)
 		}
 	}
 
+	const auto rootPath = Path(OS::get().getCurrentWorkingDir());
+
 	std::set<String> compile;
 	std::set<String> include;
 
-	const auto outputPath = Path(output);
+	const auto outputPath = Path(output).isAbsolute() ? Path(output) : rootPath / Path(output);
 	const auto outputDir = outputPath.parentPath();
+	Logger::logInfo("Updating " + outputPath.string());
 
 	for (auto& in: input) {
-		const auto inputPath = Path(in);
+		const auto inputPath = Path(in).isAbsolute() ? Path(in) : rootPath / Path(in);
 
 		VSProjectManipulator inProj;
 		inProj.load(FileSystem::readFile(inputPath));

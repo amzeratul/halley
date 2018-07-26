@@ -82,6 +82,11 @@ String OS::getUserDataDir()
 	return "";
 }
 
+String OS::getCurrentWorkingDir()
+{
+	return "";
+}
+
 String OS::getEnvironmentVariable(const String&)
 {
 	return "";

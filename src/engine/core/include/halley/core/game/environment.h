@@ -7,17 +7,15 @@ namespace Halley
 {
 	class Environment
 	{
-		friend class Core;
-
 	public:
 		Path getProgramPath() const;
 		Path getDataPath() const;
 		Path getGameDataPath() const;
 
-	private:
 		void parseProgramPath(const String& commandLine);
 		void setDataPath(Path pathName);
 
+	private:
 		Path programPath;
 		Path dataPath;
 		Path gameDataPath;

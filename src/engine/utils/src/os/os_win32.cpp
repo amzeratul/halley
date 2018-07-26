@@ -256,6 +256,14 @@ Halley::String Halley::OSWin32::getUserDataDir()
 	return String(path) + "\\";
 }
 
+String OSWin32::getCurrentWorkingDir()
+{
+	DWORD bufferSize = GetCurrentDirectory(0, nullptr);
+	std::string buffer(bufferSize - 1, 0);
+	GetCurrentDirectory(bufferSize, &buffer[0]);
+	return buffer;
+}
+
 String OSWin32::getEnvironmentVariable(const String& name)
 {
 	auto bufferSize = GetEnvironmentVariable(name.c_str(), nullptr, 0);

@@ -39,6 +39,7 @@ namespace Halley {
 
 		ComputerData getComputerData() override;
 		String getUserDataDir() override;
+		String getCurrentWorkingDir() override;
 		String getEnvironmentVariable(const String& name) override;
 		Path parseProgramPath(const String&) override;
 		void setConsoleColor(int foreground, int background) override;

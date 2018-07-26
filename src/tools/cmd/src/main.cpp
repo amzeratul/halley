@@ -1,6 +1,7 @@
 #include <iostream>
 #include <halley/data_structures/vector.h>
 #include <halley/tools/cli_tool.h>
+#include "halley/core/game/environment.h"
 
 int main(int argc, char** argv)
 {
@@ -24,7 +25,7 @@ int main(int argc, char** argv)
 		}
 
 		try {
-			return tool->runRaw(argc - 2, argv + 2);
+			return tool->runRaw(argc, argv);
 		} catch (std::exception& e) {
 			std::cout << "Exception: " << e.what() << std::endl;
 			return 2;
