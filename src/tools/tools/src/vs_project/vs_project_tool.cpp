@@ -68,13 +68,13 @@ int VSProjectTool::copyFiles(const std::vector<std::string>& args)
 
 	const auto outputPath = Path(output).isAbsolute() ? Path(output) : rootPath / Path(output);
 	const auto outputDir = outputPath.parentPath();
-	Logger::logInfo("Updating " + outputPath.string());
+	Logger::logInfo("Updating project file: " + outputPath.string());
 
 	for (auto& in: input) {
 		const auto inputPath = Path(in).isAbsolute() ? Path(in) : rootPath / Path(in);
 
 		VSProjectManipulator inProj;
-		inProj.load(FileSystem::readFile(inputPath));
+		inProj.load(inputPath);
 
 		for (auto& i: inProj.getCompileFiles()) {
 			compile.insert(Path(i).changeRelativeRoot(inputPath, outputDir).getString().replaceAll("/", "\\"));
@@ -85,7 +85,7 @@ int VSProjectTool::copyFiles(const std::vector<std::string>& args)
 	}
 	
 	VSProjectManipulator outProj;
-	outProj.load(FileSystem::readFile(outputPath));
+	outProj.load(outputPath);
 	outProj.setCompileFiles(compile);
 	outProj.setIncludeFiles(include);
 	FileSystem::writeFile(outputPath.string(), outProj.write());

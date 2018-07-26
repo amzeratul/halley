@@ -1,3 +1,5 @@
+#ifdef WINDOWS_STORE
+
 #include "winrt_system.h"
 #include <ppltasks.h>
 using namespace Halley;
@@ -28,6 +30,9 @@ public:
 	StdioDataReader(const String& path)
 	{
 		_wfopen_s(&fp, path.getUTF16().c_str(), L"rb");
+		if (!fp) {
+			throw Exception("Unable to load " + path);
+		}
 	}
 
 	~StdioDataReader()
@@ -300,3 +305,5 @@ void WinRTSystem::runGame(std::function<void()> runnable)
 {
 	CoreApplication::Run(make<Source>(*this, std::move(runnable)));
 }
+
+#endif

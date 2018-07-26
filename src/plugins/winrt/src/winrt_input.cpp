@@ -1,3 +1,5 @@
+#ifdef WINDOWS_STORE
+
 #include "winrt_input.h"
 #include "winrt_gamepad.h"
 using namespace Halley;
@@ -65,3 +67,5 @@ Vector<std::shared_ptr<InputTouch>> WinRTInput::getTouchEvents()
 {
 	return {};
 }
+
+#endif

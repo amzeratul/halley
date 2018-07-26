@@ -1,3 +1,5 @@
+#ifdef WINDOWS_STORE
+
 #include "winrt_system.h"
 #include <halley/plugin/plugin.h>
 #include "winrt_input.h"
@@ -39,3 +41,5 @@ void initWinRTPlugin(Halley::IPluginRegistry &registry)
 	registry.registerPlugin(std::make_unique<Halley::WinRTAudioPlugin>());
 	registry.registerPlugin(std::make_unique<Halley::WinRTPlatformPlugin>());
 }
+
+#endif

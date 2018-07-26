@@ -1,3 +1,5 @@
+#ifdef WINDOWS_STORE
+
 #include "winrt_http.h"
 using namespace Halley;
 
@@ -74,3 +76,5 @@ Future<std::unique_ptr<HTTPResponse>> WinRTHTTPRequest::send()
 		return std::make_unique<WinRTHTTPResponse>(code, std::move(bodyData));
 	});
 }
+
+#endif

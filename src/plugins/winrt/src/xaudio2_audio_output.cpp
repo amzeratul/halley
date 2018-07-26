@@ -1,3 +1,5 @@
+#ifdef WINDOWS_STORE
+
 #include "xaudio2_audio_output.h"
 #include "Xaudio2.h"
 using namespace Halley;
@@ -189,3 +191,5 @@ IXAudio2& XAudio2AudioOutput::getXAudio2()
 {
 	return *xAudio2;
 }
+
+#endif

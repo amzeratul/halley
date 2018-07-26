@@ -1,3 +1,5 @@
+#ifdef WINDOWS_STORE
+
 #include "winrt_platform.h"
 #include "winrt_http.h"
 using namespace Halley;
@@ -25,3 +27,5 @@ Future<std::unique_ptr<AuthorisationToken>> WinRTPlatform::getAuthToken()
 	promise.setValue({});
 	return promise.getFuture();
 }
+
+#endif

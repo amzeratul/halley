@@ -2,9 +2,22 @@
 #include "../../../engine/utils/contrib/tinyxml/ticpp.h"
 #include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
+#include "halley/tools/file/filesystem.h"
+#include "halley/file/path.h"
 
 using namespace Halley;
 
+
+void VSProjectManipulator::load(Path path)
+{
+	try {
+		load(FileSystem::readFile(path));
+	} catch (std::exception& e) {
+		Logger::logError("Unable to read input file: " + path);
+		Logger::logException(e);
+		throw Exception("Failed to parse VS Project");
+	}
+}
 
 void VSProjectManipulator::load(const Bytes& data)
 {

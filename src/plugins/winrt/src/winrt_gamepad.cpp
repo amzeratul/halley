@@ -1,3 +1,5 @@
+#ifdef WINDOWS_STORE
+
 #include "winrt_gamepad.h"
 using namespace Halley;
 
@@ -111,3 +113,5 @@ void WinRTGamepad::setVibration(float low, float high)
 		gamepad.Vibration(vibration);
 	}
 }
+
+#endif

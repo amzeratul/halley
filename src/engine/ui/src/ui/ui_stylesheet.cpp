@@ -4,6 +4,7 @@
 #include "halley/core/graphics/text/font.h"
 #include "halley/core/resources/resources.h"
 #include "halley/support/logger.h"
+#include "halley/maths/vector4.h"
 using namespace Halley;
 
 template <typename T>

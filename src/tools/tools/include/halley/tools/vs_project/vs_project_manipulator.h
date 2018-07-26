@@ -8,8 +8,11 @@ namespace ticpp {
 }
 
 namespace Halley {
+	class Path;
+
 	class VSProjectManipulator {
 	public:
+		void load(Path path);
 		void load(const Bytes& data);
 		Bytes write();
 

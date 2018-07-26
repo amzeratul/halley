@@ -113,6 +113,7 @@ endif()
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(USE_DX11 1)
 	set(USE_MEDIA_FOUNDATION 1)
+	set(USE_WINRT 1)
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")

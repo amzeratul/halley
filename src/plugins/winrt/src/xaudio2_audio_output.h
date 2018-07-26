@@ -25,17 +25,17 @@ namespace Halley
 		void queueAudio(gsl::span<const float> samples);
 		void play();
 
-		void OnVoiceProcessingPassStart(UINT32 BytesRequired) override;
-		void OnVoiceProcessingPassEnd() override;
+		void __stdcall OnVoiceProcessingPassStart(UINT32 BytesRequired) override;
+		void __stdcall OnVoiceProcessingPassEnd() override;
 
-		void OnStreamEnd() override;
+		void __stdcall OnStreamEnd() override;
 
-		void OnBufferStart(void* pBufferContext) override;
-		void OnBufferEnd(void* pBufferContext) override;
+		void __stdcall OnBufferStart(void* pBufferContext) override;
+		void __stdcall OnBufferEnd(void* pBufferContext) override;
 
-		void OnLoopEnd(void* pBufferContext) override;
+		void __stdcall OnLoopEnd(void* pBufferContext) override;
 
-		void OnVoiceError(void* pBufferContext, HRESULT Error) override;
+		void __stdcall OnVoiceError(void* pBufferContext, HRESULT Error) override;
 
 	private:
 		bool running;
