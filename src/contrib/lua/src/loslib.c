@@ -163,6 +163,9 @@ static int os_rename (lua_State *L) {
   return luaL_fileresult(L, rename(fromname, toname) == 0, NULL);
 }
 
+#ifndef L_tmpnam
+#define L_tmpnam 32
+#endif
 
 static int os_tmpname (lua_State *L) {
   char buff[LUA_TMPNAMBUFSIZE];
