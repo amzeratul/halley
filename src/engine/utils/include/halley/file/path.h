@@ -52,6 +52,8 @@ namespace Halley
 		Path makeRelativeTo(const Path& path) const;
 		Path changeRelativeRoot(const Path& currentParent, const Path& newParent) const;
 
+		bool isAbsolute() const;
+
 	private:
 		std::vector<String> pathParts;
 		void normalise();

@@ -4,11 +4,12 @@
 
 using namespace Halley;
 
+
 void VSProjectManipulator::load(const Bytes& data)
 {
-	origXmlData = String(reinterpret_cast<const char*>(data.data()), data.size());
-
-	ticpp::Document doc;
+	auto origXmlData = String(reinterpret_cast<const char*>(data.data()), data.size());
+	document = std::make_shared<ticpp::Document>();
+	auto& doc = *document;
 	doc.Parse(origXmlData);
 
 	std::string name;
@@ -34,7 +35,16 @@ void VSProjectManipulator::load(const Bytes& data)
 
 Bytes VSProjectManipulator::write()
 {
-	return Bytes();
+	TiXmlPrinter printer;
+	printer.SetIndent("  ");
+	document->Accept(&printer);
+	String str = printer.CStr();
+
+	str = str.replaceAll("&apos;", "'"); // lol
+
+	Bytes result(str.size());
+	memcpy(result.data(), str.c_str(), str.size());
+	return result;
 }
 
 std::set<String> VSProjectManipulator::getCompileFiles()
@@ -49,10 +59,70 @@ std::set<String> VSProjectManipulator::getIncludeFiles()
 
 void VSProjectManipulator::setCompileFiles(const std::set<String>& files)
 {
+	rewriteFiles("ClCompile", compileFiles, files);
 	compileFiles = files;
 }
 
 void VSProjectManipulator::setIncludeFiles(const std::set<String>& files)
 {
+	rewriteFiles("ClInclude", includeFiles, files);
 	includeFiles = files;
+}
+
+void VSProjectManipulator::rewriteFiles(String toolName, const std::set<String>& oldSet, const std::set<String>& newSet)
+{
+	std::set<String> toDelete;
+	std::set<String> toAdd;
+
+	for (auto& v: oldSet) {
+		if (newSet.find(v) == newSet.end()) {
+			toDelete.insert(v);
+		}
+	}
+	for (auto& v: newSet) {
+		if (oldSet.find(v) == oldSet.end()) {
+			toAdd.insert(v);
+		}
+	}
+
+	auto& doc = *document;
+
+	bool addedValues = false;
+
+	std::string name;
+	for (ticpp::Element* l0Node = doc.FirstChildElement(); l0Node != nullptr; l0Node = l0Node->NextSiblingElement(false)) {
+		l0Node->GetValue(&name);
+		if (name == "Project") {
+			for (ticpp::Element* l1Node = l0Node->FirstChildElement(); l1Node != nullptr; l1Node = l1Node->NextSiblingElement(false)) {
+				l1Node->GetValue(&name);
+				if (name == "ItemGroup") {
+					bool compatibleItemGroup = false;
+					for (ticpp::Element* l2Node = l1Node->FirstChildElement(); l2Node != nullptr;) {
+						auto nextNode = l2Node->NextSiblingElement(false);
+						l2Node->GetValue(&name);
+						if (String(name) == toolName) {
+							compatibleItemGroup = true;
+
+							// Does it need to be removed?
+							auto path = l2Node->GetAttribute("Include");
+							if (toDelete.find(path) != toDelete.end()) {
+								// Delete
+								l1Node->RemoveChild(l2Node);
+							}
+						}
+						l2Node = nextNode;
+					}
+
+					if (compatibleItemGroup && !addedValues) {
+						addedValues = true;
+						for (auto& v: toAdd) {
+							ticpp::Element element(toolName);
+							element.SetAttribute("Include", v.cppStr());
+							l1Node->InsertEndChild(element);
+						}
+					}
+				}
+			}
+		}
+	}
 }

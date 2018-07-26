@@ -3,6 +3,10 @@
 #include "halley/text/halleystring.h"
 #include <set>
 
+namespace ticpp {
+	class Document;
+}
+
 namespace Halley {
 	class VSProjectManipulator {
 	public:
@@ -16,8 +20,10 @@ namespace Halley {
 		void setIncludeFiles(const std::set<String>& files);
 
 	private:
-		String origXmlData;
 		std::set<String> includeFiles;
 		std::set<String> compileFiles;
+		std::shared_ptr<ticpp::Document> document;
+
+		void rewriteFiles(String toolName, const std::set<String>& oldSet, const std::set<String>& newSet);
 	};
 }

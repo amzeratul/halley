@@ -63,6 +63,7 @@ int VSProjectTool::copyFiles(const std::vector<std::string>& args)
 	std::set<String> include;
 
 	const auto outputPath = Path(output);
+	const auto outputDir = outputPath.parentPath();
 
 	for (auto& in: input) {
 		const auto inputPath = Path(in);
@@ -71,18 +72,18 @@ int VSProjectTool::copyFiles(const std::vector<std::string>& args)
 		inProj.load(FileSystem::readFile(inputPath));
 
 		for (auto& i: inProj.getCompileFiles()) {
-			compile.insert(Path(i).changeRelativeRoot(inputPath, outputPath).getString());
+			compile.insert(Path(i).changeRelativeRoot(inputPath, outputDir).getString().replaceAll("/", "\\"));
 		}
 		for (auto& i: inProj.getIncludeFiles()) {
-			include.insert(Path(i).changeRelativeRoot(inputPath, outputPath).getString());
+			include.insert(Path(i).changeRelativeRoot(inputPath, outputDir).getString().replaceAll("/", "\\"));
 		}
 	}
-
+	
 	VSProjectManipulator outProj;
 	outProj.load(FileSystem::readFile(outputPath));
 	outProj.setCompileFiles(compile);
 	outProj.setIncludeFiles(include);
-	FileSystem::writeFile(outputPath, outProj.write());
+	FileSystem::writeFile(outputPath.string(), outProj.write());
 
 	return 0;
 }

@@ -269,7 +269,7 @@ Path Path::makeRelativeTo(const Path& path) const
 		}
 	}
 
-	for (int i = 0; i < int(path.getNumberPaths()) - int(sharedRoot); ++i) {
+	for (int i = 0; i < int(path.getNumberPaths()) - int(sharedRoot) - 1; ++i) {
 		result.emplace_back("..");
 	}
 
@@ -282,8 +282,17 @@ Path Path::makeRelativeTo(const Path& path) const
 
 Path Path::changeRelativeRoot(const Path& currentParent, const Path& newParent) const
 {
-	const auto absolute = (currentParent / (*this));
+	const auto absolute = isAbsolute() ? *this : (currentParent / (*this));
 	return absolute.makeRelativeTo(newParent);
+}
+
+bool Path::isAbsolute() const
+{
+	if (pathParts.empty()) {
+		return false;
+	} else {
+		return pathParts[0].endsWith(":") || pathParts[0].isEmpty();
+	}
 }
 
 std::ostream& Halley::operator<<(std::ostream& os, const Path& p)
