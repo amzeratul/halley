@@ -174,7 +174,9 @@ endif()
 
 # WinRT
 if (USE_WINRT)
-	add_definitions(-DWITH_WINRT)
+	if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
+		add_definitions(-DWITH_WINRT)
+	endif()
 endif()
 
 # Microsoft Media Foundation
