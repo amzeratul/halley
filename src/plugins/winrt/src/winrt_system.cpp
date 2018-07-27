@@ -303,6 +303,7 @@ private:
 
 void WinRTSystem::runGame(std::function<void()> runnable)
 {
+	winrt::init_apartment();
 	CoreApplication::Run(make<Source>(*this, std::move(runnable)));
 }
 
