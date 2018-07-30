@@ -2,6 +2,8 @@
 #include "halley/core/api/halley_api_internal.h"
 
 namespace Halley {
+	class WinRTPlatform;
+
 	class WinRTSystem : public SystemAPIInternal {
 	public:
 		void init() override;
@@ -26,5 +28,10 @@ namespace Halley {
 		bool generateEvents(VideoAPI* video, InputAPI* input) override;
 
 		void runGame(std::function<void()> runnable) override;
+		
+		void setPlatform(WinRTPlatform* platform);
+
+	private:
+		WinRTPlatform* platform;
 	};
 }

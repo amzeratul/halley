@@ -3,11 +3,14 @@
 
 namespace Halley
 {
+	class WinRTSystem;
 	class XBLManager;
 
 	class WinRTPlatform : public PlatformAPIInternal
 	{
 	public:
+		explicit WinRTPlatform(WinRTSystem* system);
+
 		void init() override;
 		void deInit() override;
 
@@ -18,7 +21,10 @@ namespace Halley
 		bool canProvideAuthToken() const override;
 		Future<std::unique_ptr<AuthorisationToken>> getAuthToken() override;
 
+		void onGameStarted();
+
 	private:
 		std::shared_ptr<XBLManager> xbl;
+		WinRTSystem* system;
 	};
 }

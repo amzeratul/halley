@@ -1,7 +1,7 @@
+#include "winrt_platform.h"
 #ifdef WINDOWS_STORE
 
 #include "winrt_system.h"
-#include <ppltasks.h>
 using namespace Halley;
 
 #include "winrt/Windows.ApplicationModel.Core.h"
@@ -14,7 +14,6 @@ using namespace Halley;
 #include "winrt/Windows.UI.Core.h"
 #include "winrt/Windows.System.Diagnostics.h"
 
-using namespace winrt;
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Storage;
 using namespace winrt::Windows::ApplicationModel;
@@ -238,7 +237,7 @@ bool WinRTSystem::generateEvents(VideoAPI* video, InputAPI* input)
 
 
 
-struct View : implements<View, IFrameworkView>
+struct View : winrt::implements<View, IFrameworkView>
 {
 	View(WinRTSystem& system, std::function<void()>&& runnable)
 		: system(system)
@@ -255,7 +254,7 @@ struct View : implements<View, IFrameworkView>
 		OutputDebugString(L"Initialized");
 	}
 
-	void Load(hstring entryPoint)
+	void Load(winrt::hstring entryPoint)
 	{
 	}
 
@@ -284,7 +283,7 @@ private:
 	std::function<void()> runnable;
 };
 
-struct Source : implements<Source, IFrameworkViewSource>
+struct Source : winrt::implements<Source, IFrameworkViewSource>
 {
 	Source(WinRTSystem& system, std::function<void()>&& runnable)
 		: system(system)
@@ -293,7 +292,7 @@ struct Source : implements<Source, IFrameworkViewSource>
 
 	IFrameworkView CreateView()
 	{
-		return make<View>(system, std::move(runnable));
+		return winrt::make<View>(system, std::move(runnable));
 	}
 
 private:
@@ -304,7 +303,13 @@ private:
 void WinRTSystem::runGame(std::function<void()> runnable)
 {
 	winrt::init_apartment();
-	CoreApplication::Run(make<Source>(*this, std::move(runnable)));
+	platform->onGameStarted();
+	CoreApplication::Run(winrt::make<Source>(*this, std::move(runnable)));
+}
+
+void WinRTSystem::setPlatform(WinRTPlatform* pl)
+{
+	platform = pl;
 }
 
 #endif

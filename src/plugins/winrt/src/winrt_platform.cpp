@@ -1,3 +1,4 @@
+#include "winrt_system.h"
 #ifdef WINDOWS_STORE
 
 #include "winrt_platform.h"
@@ -6,9 +7,16 @@
 using namespace Halley;
 
 
+WinRTPlatform::WinRTPlatform(WinRTSystem* system)
+	: system(system)
+{
+	system->setPlatform(this);
+}
+
 void WinRTPlatform::init()
 {
 	xbl = std::make_shared<XBLManager>();
+	xbl->init();
 }
 
 void WinRTPlatform::deInit()
@@ -33,6 +41,10 @@ Future<std::unique_ptr<AuthorisationToken>> WinRTPlatform::getAuthToken()
 	Promise<std::unique_ptr<AuthorisationToken>> promise;
 	promise.setValue({});
 	return promise.getFuture();
+}
+
+void WinRTPlatform::onGameStarted()
+{
 }
 
 #endif

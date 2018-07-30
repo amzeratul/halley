@@ -27,7 +27,7 @@ namespace Halley {
 	};
 
 	class WinRTPlatformPlugin : public Plugin {
-		HalleyAPIInternal* createAPI(SystemAPI* system) override { return new WinRTPlatform(); }
+		HalleyAPIInternal* createAPI(SystemAPI* system) override { return new WinRTPlatform(dynamic_cast<WinRTSystem*>(system)); }
 		PluginType getType() override { return PluginType::PlatformAPI; }
 		String getName() override { return "Platform/WinRT"; }
 	};

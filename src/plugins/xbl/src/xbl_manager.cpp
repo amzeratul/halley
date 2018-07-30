@@ -11,8 +11,20 @@ using namespace Halley;
 
 XBLManager::XBLManager()
 {
+	
+}
+
+XBLManager::~XBLManager()
+{
+	deInit();
+}
+
+void XBLManager::init()
+{
 	xboxUser = std::make_shared<xbox_live_user>(nullptr);
-	xboxUser->signin_silently(nullptr).then([=] (xbox::services::xbox_live_result<sign_in_result> result)
+	auto dispatcher = ::Windows::UI::Core::CoreWindow::GetForCurrentThread()->Dispatcher;
+
+	xboxUser->signin_silently(dispatcher).then([=] (xbox::services::xbox_live_result<sign_in_result> result)
 	{
 		if (result.err()) {
 			Logger::logError(String("Error signing in to Xbox Live: ") + result.err_message());
@@ -24,7 +36,7 @@ XBLManager::XBLManager()
 				break;
 
 			case sign_in_status::user_interaction_required:
-				xboxUser->signin(::Windows::UI::Core::CoreWindow::GetForCurrentThread()->Dispatcher).then([&](xbox::services::xbox_live_result<xbox::services::system::sign_in_result> loudResult)
+				xboxUser->signin(dispatcher).then([&](xbox::services::xbox_live_result<xbox::services::system::sign_in_result> loudResult)
                 {
                     if (!loudResult.err()) {
                         auto resPayload = loudResult.payload();
@@ -36,7 +48,7 @@ XBLManager::XBLManager()
                             break;
                         }
                     }
-                }, concurrency::task_continuation_context::use_current());				break;
+                }, concurrency::task_continuation_context::use_current());
 			}
 
 			if (loggedIn) {
@@ -52,7 +64,6 @@ XBLManager::XBLManager()
 	});
 }
 
-XBLManager::~XBLManager()
+void XBLManager::deInit()
 {
-	
 }
