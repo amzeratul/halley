@@ -7,8 +7,8 @@ using namespace Halley;
 #include "winrt/Windows.Storage.h"
 #include "winrt/Windows.Web.Http.Headers.h"
 
-using namespace Windows::Web::Http;
-using namespace Windows::Storage::Streams;
+using namespace winrt::Windows::Web::Http;
+using namespace winrt::Windows::Storage::Streams;
 
 WinRTHTTPResponse::WinRTHTTPResponse(int code, Bytes body)
 	: responseCode(code)
@@ -52,7 +52,7 @@ Future<std::unique_ptr<HTTPResponse>> WinRTHTTPRequest::send()
 	{
 		HttpClient client;
 		HttpResponseMessage response;
-		auto uri = Windows::Foundation::Uri(data->url.getUTF16().c_str());
+		auto uri = winrt::Windows::Foundation::Uri(data->url.getUTF16().c_str());
 
 		if (data->method == "GET") {
 			response = client.GetAsync(uri).get();

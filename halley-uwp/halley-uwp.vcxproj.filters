@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="input">
+      <UniqueIdentifier>{dd0b26b9-0305-49cd-a4c6-0c6bb0e34d50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="platform">
+      <UniqueIdentifier>{3d920941-32f9-44c4-8401-e5c836f99d46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="system">
+      <UniqueIdentifier>{3dad5396-1dd1-4b6b-90e6-842cad2def54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="audio">
+      <UniqueIdentifier>{d2fadc13-f16c-4673-a637-49c65226e94e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="xbl">
+      <UniqueIdentifier>{f87033aa-4179-48e7-a5f0-61b861d162d8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\plugins\winrt\src\xaudio2_audio_output.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\plugins\winrt\src\winrt_gamepad.cpp">
+      <Filter>input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\plugins\winrt\src\winrt_input.cpp">
+      <Filter>input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\plugins\winrt\src\winrt_platform.cpp">
+      <Filter>platform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\plugins\winrt\src\winrt_http.cpp">
+      <Filter>platform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\plugins\winrt\src\winrt_system.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\plugins\winrt\src\winrt_plugin.cpp" />
+    <ClCompile Include="..\src\plugins\xbl\src\xbl_manager.cpp">
+      <Filter>xbl</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\plugins\winrt\src\winrt_input.h">
+      <Filter>input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\plugins\winrt\src\winrt_gamepad.h">
+      <Filter>input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\plugins\winrt\src\winrt_platform.h">
+      <Filter>platform</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\plugins\winrt\src\winrt_http.h">
+      <Filter>platform</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\plugins\winrt\src\winrt_system.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\plugins\winrt\src\xaudio2_audio_output.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\plugins\xbl\src\xbl_manager.h">
+      <Filter>xbl</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

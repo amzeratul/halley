@@ -3,6 +3,8 @@
 
 namespace Halley
 {
+	class XBLManager;
+
 	class WinRTPlatform : public PlatformAPIInternal
 	{
 	public:
@@ -15,5 +17,8 @@ namespace Halley
 
 		bool canProvideAuthToken() const override;
 		Future<std::unique_ptr<AuthorisationToken>> getAuthToken() override;
+
+	private:
+		std::shared_ptr<XBLManager> xbl;
 	};
 }

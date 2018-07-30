@@ -2,12 +2,19 @@
 
 #include "winrt_platform.h"
 #include "winrt_http.h"
+#include "xbl_manager.h"
 using namespace Halley;
 
 
-void WinRTPlatform::init() {}
+void WinRTPlatform::init()
+{
+	xbl = std::make_shared<XBLManager>();
+}
 
-void WinRTPlatform::deInit() {}
+void WinRTPlatform::deInit()
+{
+	xbl.reset();
+}
 
 void WinRTPlatform::update() {}
 

@@ -15,12 +15,12 @@ using namespace Halley;
 #include "winrt/Windows.System.Diagnostics.h"
 
 using namespace winrt;
-using namespace Windows::Foundation;
-using namespace Windows::Storage;
-using namespace Windows::ApplicationModel;
-using namespace Windows::ApplicationModel::Core;
-using namespace Windows::UI::Core;
-using namespace Windows::UI::ViewManagement;
+using namespace winrt::Windows::Foundation;
+using namespace winrt::Windows::Storage;
+using namespace winrt::Windows::ApplicationModel;
+using namespace winrt::Windows::ApplicationModel::Core;
+using namespace winrt::Windows::UI::Core;
+using namespace winrt::Windows::UI::ViewManagement;
 
 #pragma comment(lib, "windowsapp")
 
@@ -165,13 +165,13 @@ void WinRTSystem::deInit()
 
 Path WinRTSystem::getAssetsPath(const Path& gamePath) const
 {
-	static auto path = String(Windows::ApplicationModel::Package::Current().InstalledLocation().Path().data()) + String("/Assets/");
+	static auto path = String(winrt::Windows::ApplicationModel::Package::Current().InstalledLocation().Path().data()) + String("/Assets/");
 	return path;
 }
 
 Path WinRTSystem::getUnpackedAssetsPath(const Path& gamePath) const
 {
-	static auto path = String(Windows::ApplicationModel::Package::Current().InstalledLocation().Path().data()) + String("/Assets/");
+	static auto path = String(winrt::Windows::ApplicationModel::Package::Current().InstalledLocation().Path().data()) + String("/Assets/");
 	return path;
 }
 
