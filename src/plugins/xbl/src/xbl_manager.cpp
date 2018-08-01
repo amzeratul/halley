@@ -109,5 +109,15 @@ winrt::Windows::Foundation::IAsyncAction XBLManager::getConnectedStorage()
 	if (result.Status() == GameSaveErrorStatus::Ok) {
 		gameSaveProvider = result.Value();
 		Logger::logInfo("Got game save provider");
+
+		auto container = gameSaveProvider.get().CreateContainer(L"save");
+
+		auto dataWriter = winrt::Windows::Storage::Streams::DataWriter();
+		//dataWriter.WriteBytes()
+		auto buffer = dataWriter.DetachBuffer();
+		auto updates = std::map<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer>();
+		//auto view = winrt::param::async_map_view<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer>(updates);
+
+		//container.SubmitUpdatesAsync(view);
 	}
 }
