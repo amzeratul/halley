@@ -142,11 +142,12 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;WINDOWS_STORE;WITH_DX11;WITH_WINRT;WITH_MEDIA_FOUNDATION;_WIN32_WINNT=0x0A00;_WIN32;WINVER=0x0A00;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;WINDOWS_STORE;WITH_DX11;WITH_WINRT;WITH_MEDIA_FOUNDATION;_WIN32_WINNT=0x0A00;_WIN32;WINVER=0x0A00;_CRT_SECURE_NO_WARNINGS;XSAPI_CPPWINRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\src\engine\core\include;..\src\engine\utils\include;..\src\contrib;..\src\engine\core\include\halley\core;..\src\engine\audio\include\halley\audio;..\..\lib\boost\include;..\include;..\src\plugins\winrt\src;..\src\plugins\xbl\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -159,11 +160,12 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;WINDOWS_STORE;WITH_DX11;WITH_WINRT;WITH_MEDIA_FOUNDATION;_WIN32_WINNT=0x0A00;_WIN32;WINVER=0x0A00;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;WINDOWS_STORE;WITH_DX11;WITH_WINRT;WITH_MEDIA_FOUNDATION;_WIN32_WINNT=0x0A00;_WIN32;WINVER=0x0A00;_CRT_SECURE_NO_WARNINGS;XSAPI_CPPWINRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\src\engine\core\include;..\src\engine\utils\include;..\src\contrib;..\src\engine\core\include\halley\core;..\src\engine\audio\include\halley\audio;..\..\lib\boost\include;..\include;..\src\plugins\winrt\src;..\src\plugins\xbl\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -176,11 +178,12 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;WINDOWS_STORE;WITH_DX11;WITH_WINRT;WITH_MEDIA_FOUNDATION;_WIN32_WINNT=0x0A00;_WIN32;WINVER=0x0A00;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;WINDOWS_STORE;WITH_DX11;WITH_WINRT;WITH_MEDIA_FOUNDATION;_WIN32_WINNT=0x0A00;_WIN32;WINVER=0x0A00;_CRT_SECURE_NO_WARNINGS;XSAPI_CPPWINRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\src\engine\core\include;..\src\engine\utils\include;..\src\contrib;..\src\engine\core\include\halley\core;..\src\engine\audio\include\halley\audio;..\..\lib\boost\include;..\include;..\src\plugins\winrt\src;..\src\plugins\xbl\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -193,11 +196,12 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;WINDOWS_STORE;WITH_DX11;WITH_WINRT;WITH_MEDIA_FOUNDATION;_WIN32_WINNT=0x0A00;_WIN32;WINVER=0x0A00;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;WINDOWS_STORE;WITH_DX11;WITH_WINRT;WITH_MEDIA_FOUNDATION;_WIN32_WINNT=0x0A00;_WIN32;WINVER=0x0A00;_CRT_SECURE_NO_WARNINGS;XSAPI_CPPWINRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\src\engine\core\include;..\src\engine\utils\include;..\src\contrib;..\src\engine\core\include\halley\core;..\src\engine\audio\include\halley\audio;..\..\lib\boost\include;..\include;..\src\plugins\winrt\src;..\src\plugins\xbl\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -210,11 +214,12 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;WINDOWS_STORE;WITH_DX11;WITH_WINRT;WITH_MEDIA_FOUNDATION;_WIN32_WINNT=0x0A00;_WIN32;WINVER=0x0A00;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;WINDOWS_STORE;WITH_DX11;WITH_WINRT;WITH_MEDIA_FOUNDATION;_WIN32_WINNT=0x0A00;_WIN32;WINVER=0x0A00;_CRT_SECURE_NO_WARNINGS;XSAPI_CPPWINRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\src\engine\core\include;..\src\engine\utils\include;..\src\contrib;..\src\engine\core\include\halley\core;..\src\engine\audio\include\halley\audio;..\..\lib\boost\include;..\include;..\src\plugins\winrt\src;..\src\plugins\xbl\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -227,11 +232,12 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;WINDOWS_STORE;WITH_DX11;WITH_WINRT;WITH_MEDIA_FOUNDATION;_WIN32_WINNT=0x0A00;_WIN32;WINVER=0x0A00;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;WINDOWS_STORE;WITH_DX11;WITH_WINRT;WITH_MEDIA_FOUNDATION;_WIN32_WINNT=0x0A00;_WIN32;WINVER=0x0A00;_CRT_SECURE_NO_WARNINGS;XSAPI_CPPWINRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\src\engine\core\include;..\src\engine\utils\include;..\src\contrib;..\src\engine\core\include\halley\core;..\src\engine\audio\include\halley\audio;..\..\lib\boost\include;..\include;..\src\plugins\winrt\src;..\src\plugins\xbl\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
