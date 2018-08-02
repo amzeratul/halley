@@ -86,7 +86,8 @@ Path OSLinux::parseProgramPath(const String& path)
 {
 	constexpr size_t len = 1024;
 	char buffer[len];
-	if (readlink("/proc/self/exe", buffer, len) != -1) {
+	memset(buffer, 0, len);
+	if (readlink("/proc/self/exe", buffer, len) > 0) {
 		return Path(String(buffer)).parentPath() / ".";
 	} else {
 		return OSUnix::parseProgramPath(path);

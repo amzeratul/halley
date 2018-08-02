@@ -23,6 +23,7 @@ ImportAssetsTask::ImportAssetsTask(String taskName, ImportAssetsDatabase& db, co
 	, packAfter(packAfter)
 	, files(std::move(files))
 	, deletedAssets(std::move(deletedAssets))
+	, totalImportTime(0)
 {}
 
 void ImportAssetsTask::run()
