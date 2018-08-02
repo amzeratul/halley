@@ -5,7 +5,7 @@
 #endif
 
 namespace Halley {
-	enum class Platform {
+	enum class GamePlatform {
 		Unknown,
 		Windows,
 		MacOS,
@@ -20,7 +20,7 @@ namespace Halley {
 	};
 
 	template <>
-	struct EnumNames<Platform> {
+	struct EnumNames<GamePlatform> {
 		constexpr std::array<const char*, 11> operator()() const {
 			return {{
 				"unknown",
@@ -38,32 +38,32 @@ namespace Halley {
 		}
 	};
 
-    constexpr inline Platform getPlatform()
+    constexpr inline GamePlatform getPlatform()
     {
     #if defined(__NX_TOOLCHAIN_MAJOR__)
-        return Platform::Switch;
+        return GamePlatform::Switch;
     #elif defined(__ORBIS__)
-        return Platform::PS4;
+        return GamePlatform::PS4;
     #elif defined(_XBOX_ONE)
-        return Platform::XboxOne;
+        return GamePlatform::XboxOne;
     #elif defined(WINDOWS_STORE)
-        return Platform::UWP;
+        return GamePlatform::UWP;
     #elif defined(_WIN32)
-        return Platform::Windows;
+        return GamePlatform::Windows;
     #elif defined(__ANDROID__)
-        return Platform::Android;
+        return GamePlatform::Android;
     #elif defined(__EMSCRIPTEN__)
-        return Platform::Emscripten;
+        return GamePlatform::Emscripten;
     #elif defined(__APPLE__)
         #if defined(TARGET_OS_IPHONE)
-            return Platform::iOS;
+            return GamePlatform::iOS;
         #else
-            return Platform::Mac;
+            return GamePlatform::Mac;
         #endif
     #elif defined(__linux)
-        return Platform::Linux;
+        return GamePlatform::Linux;
     #else
-        return Platform::Unknown;
+        return GamePlatform::Unknown;
     #endif
     }
 }

@@ -7,6 +7,7 @@
 #include "halley/concurrency/concurrent.h"
 
 #include <winrt/Windows.System.UserProfile.h>
+#include <winrt/Windows.Foundation.Collections.h>
 
 using namespace Halley;
 
@@ -45,6 +46,27 @@ void XBLManager::init()
 
 void XBLManager::deInit()
 {
+}
+
+Bytes XBLManager::getSaveData(SaveDataType type, const String& path)
+{
+	return {};
+}
+
+void XBLManager::setSaveData(SaveDataType type, const String& path, const Bytes& data)
+{
+	auto container = gameSaveProvider.get().CreateContainer(L"save");
+
+	auto dataWriter = winrt::Windows::Storage::Streams::DataWriter();
+	dataWriter.WriteBytes(winrt::array_view<const uint8_t>(data.data(), data.data() + data.size()));
+	auto buffer = dataWriter.DetachBuffer();
+
+	auto updates = std::map<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer>();
+	updates[winrt::hstring(path.getUTF16())] = std::move(buffer);
+
+	auto view = winrt::param::async_map_view<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer>(std::move(updates));
+
+	container.SubmitUpdatesAsync(view, {}, L"");
 }
 
 void XBLManager::signIn()
@@ -109,15 +131,5 @@ winrt::Windows::Foundation::IAsyncAction XBLManager::getConnectedStorage()
 	if (result.Status() == GameSaveErrorStatus::Ok) {
 		gameSaveProvider = result.Value();
 		Logger::logInfo("Got game save provider");
-
-		auto container = gameSaveProvider.get().CreateContainer(L"save");
-
-		auto dataWriter = winrt::Windows::Storage::Streams::DataWriter();
-		//dataWriter.WriteBytes()
-		auto buffer = dataWriter.DetachBuffer();
-		auto updates = std::map<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer>();
-		//auto view = winrt::param::async_map_view<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer>(updates);
-
-		//container.SubmitUpdatesAsync(view);
 	}
 }
