@@ -224,7 +224,7 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 		}
 	}
 
-	throw Exception("Unable to pack sprites in a reasonably sized atlas!");
+	throw Exception("Unable to pack " + toString(images.size()) + " sprites in a reasonably sized atlas! curSize at " + toString(curSize) + ", maxSize is " + toString(maxSize) + ". Total image area is " + toString(totalImageArea) + " px^2, sqrt = " + toString(lround(sqrt(totalImageArea))) + " px.");
 }
 
 std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult>& result, Vector2i origSize, SpriteSheet& spriteSheet)
