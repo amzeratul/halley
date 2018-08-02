@@ -1,13 +1,19 @@
 #include "xbl_manager.h"
 #include "halley/support/logger.h"
 #include "halley/text/halleystring.h"
-#include <winrt/Windows.UI.Core.h>
-#include <winrt/Windows.Gaming.XboxLive.Storage.h>
-#include "xsapi/services.h"
 #include "halley/concurrency/concurrent.h"
 
+#include <map>
+
+#include <vccorlib.h>
 #include <winrt/Windows.System.UserProfile.h>
+#include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Foundation.Collections.h>
+#include <winrt/Windows.UI.Core.h>
+#include <winrt/Windows.Gaming.XboxLive.Storage.h>
+#include <winrt/Windows.Storage.Streams.h>
+#include "xsapi/services.h"
+#include <ppltasks.h>
 
 using namespace Halley;
 
@@ -50,23 +56,38 @@ void XBLManager::deInit()
 
 Bytes XBLManager::getSaveData(SaveDataType type, const String& path)
 {
-	return {};
+	if (!gameSaveContainer) {
+		throw Exception("Unable to load save data, gameSaveContainer is not available!");
+	}
+
+	winrt::Windows::Storage::Streams::IBuffer buffer;
+
+	winrt::Windows::Foundation::Collections::IMap<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer> updates;
+	updates.Insert(winrt::hstring(path.getUTF16()), buffer);
+
+	gameSaveContainer->ReadAsync(updates.GetView()).get(); // Fuck it
+
+	auto size = buffer.Length();
+	Bytes result(size);
+	auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(buffer);
+	dataReader.ReadBytes(winrt::array_view<uint8_t>(result));
+
+	return result;
 }
 
 void XBLManager::setSaveData(SaveDataType type, const String& path, const Bytes& data)
 {
-	auto container = gameSaveProvider.get().CreateContainer(L"save");
-
+	if (!gameSaveContainer) {
+		throw Exception("Unable to set save data, gameSaveContainer is not available!");
+	}
+	
 	auto dataWriter = winrt::Windows::Storage::Streams::DataWriter();
-	dataWriter.WriteBytes(winrt::array_view<const uint8_t>(data.data(), data.data() + data.size()));
-	auto buffer = dataWriter.DetachBuffer();
+	dataWriter.WriteBytes(winrt::array_view<const uint8_t>(data));
 
-	auto updates = std::map<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer>();
-	updates[winrt::hstring(path.getUTF16())] = std::move(buffer);
+	winrt::Windows::Foundation::Collections::IMap<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer> updates;
+	updates.Insert(winrt::hstring(path.getUTF16()), dataWriter.DetachBuffer());
 
-	auto view = winrt::param::async_map_view<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer>(std::move(updates));
-
-	container.SubmitUpdatesAsync(view, {}, L"");
+	gameSaveContainer->SubmitUpdatesAsync(updates.GetView(), {}, L"");
 }
 
 void XBLManager::signIn()
@@ -125,11 +146,12 @@ winrt::Windows::Foundation::IAsyncAction XBLManager::getConnectedStorage()
 	
 	auto windowsUser = co_await winrt::Windows::System::User::FindAllAsync();
 
-	//auto user = from_cx<winrt::Windows::System::User>(windowsUser.First());
 	GameSaveProviderGetResult result = co_await GameSaveProvider::GetForUserAsync(*windowsUser.First(), xboxLiveContext->application_config()->scid());
 
 	if (result.Status() == GameSaveErrorStatus::Ok) {
 		gameSaveProvider = result.Value();
 		Logger::logInfo("Got game save provider");
+
+		gameSaveContainer = gameSaveProvider.get().CreateContainer(L"save");
 	}
 }
