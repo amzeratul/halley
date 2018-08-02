@@ -95,7 +95,7 @@ HalleyPluginPtr ProjectLoader::loadPlugin(const Path& path)
 #else
 
 	// Warning: untested on Mac/Linux :)
-	auto module = dlopen(path.c_str(), RTLD_LAZY);
+	auto module = dlopen(path.getString().c_str(), RTLD_LAZY);
 	if (!module) {
 		return {};
 	}
