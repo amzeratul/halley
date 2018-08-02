@@ -43,7 +43,7 @@ namespace Halley
 
 // Macro to implement program
 #if defined(HALLEY_EXECUTABLE)
-	#if defined(_WIN32) || !defined(WINDOWS_STORE)
+	#if defined(_WIN32) && !defined(WINDOWS_STORE)
 		#define HalleyGame(T) int __stdcall WinMain(void*, void*, char*, int) { return Halley::HalleyMain::winMain<T>(); }
 	#else
 		#define HalleyGame(T) int main(int argc, char* argv[]) { return Halley::HalleyMain::main<T>(argc, argv); }
