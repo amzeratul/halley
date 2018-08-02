@@ -6,6 +6,7 @@
 #include <map>
 
 #include <vccorlib.h>
+#include <winrt/base.h>
 #include <winrt/Windows.System.UserProfile.h>
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Foundation.Collections.h>
@@ -62,17 +63,29 @@ Bytes XBLManager::getSaveData(SaveDataType type, const String& path)
 
 	winrt::Windows::Storage::Streams::IBuffer buffer;
 
-	winrt::Windows::Foundation::Collections::IMap<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer> updates;
-	updates.Insert(winrt::hstring(path.getUTF16()), buffer);
+	//winrt::Windows::Foundation::Collections::IMap<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer> updates;
+	//updates.Insert(winrt::hstring(path.getUTF16()), buffer);
 
-	gameSaveContainer->ReadAsync(updates.GetView()).get(); // Fuck it
+	auto key = winrt::hstring(path.getUTF16());
+	std::vector<winrt::hstring> updates;
+	updates.push_back(key);
 
-	auto size = buffer.Length();
-	Bytes result(size);
-	auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(buffer);
-	dataReader.ReadBytes(winrt::array_view<uint8_t>(result));
+	auto gameBlob = gameSaveContainer->GetAsync(winrt::single_threaded_vector<winrt::hstring>(std::move(updates)).GetView()).get();
+	//gameSaveContainer->ReadAsync(updates.GetView()).get(); // Fuck it
+	if (gameBlob.Status() == winrt::Windows::Gaming::XboxLive::Storage::GameSaveErrorStatus::Ok) {
+		if (gameBlob.Value().HasKey(key)) {
+			auto buffer = gameBlob.Value().Lookup(key);
 
-	return result;
+			auto size = buffer.Length();
+			Bytes result(size);
+			auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(buffer);
+			dataReader.ReadBytes(winrt::array_view<uint8_t>(result));
+
+			return result;
+		}
+	}
+
+	return {};
 }
 
 void XBLManager::setSaveData(SaveDataType type, const String& path, const Bytes& data)
@@ -84,10 +97,11 @@ void XBLManager::setSaveData(SaveDataType type, const String& path, const Bytes&
 	auto dataWriter = winrt::Windows::Storage::Streams::DataWriter();
 	dataWriter.WriteBytes(winrt::array_view<const uint8_t>(data));
 
-	winrt::Windows::Foundation::Collections::IMap<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer> updates;
-	updates.Insert(winrt::hstring(path.getUTF16()), dataWriter.DetachBuffer());
+	std::map<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer> updates;
+	updates[winrt::hstring(path.getUTF16())] = dataWriter.DetachBuffer();
+	auto view = winrt::single_threaded_map(std::move(updates)).GetView();
 
-	gameSaveContainer->SubmitUpdatesAsync(updates.GetView(), {}, L"");
+	gameSaveContainer->SubmitUpdatesAsync(view, {}, L"");
 }
 
 void XBLManager::signIn()

@@ -209,9 +209,10 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 		if (res.is_initialized()) {
 			// Found a pack
 			if (images.size() > 1) {
-				Logger::logInfo("Atlas \"" + atlasName + "\" generated at " + toString(size.x) + "x" + toString(size.y) + " px.");
+				Logger::logInfo("Atlas \"" + atlasName + "\" generated at " + toString(size.x) + "x" + toString(size.y) + " px with " + toString(images.size()) + " sprites. Total image area is " + toString(totalImageArea) + " px^2, sqrt = " + toString(lround(sqrt(totalImageArea))) + " px.");
 			}
 
+			
 			return makeAtlas(res.get(), size, spriteSheet);
 		} else {
 			// Try 64x64, then 128x64, 128x128, 256x128, etc

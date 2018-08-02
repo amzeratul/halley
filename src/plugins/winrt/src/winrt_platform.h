@@ -23,6 +23,8 @@ namespace Halley
 
 		void onGameStarted();
 
+		std::shared_ptr<XBLManager> getXboxLive() const;
+
 	private:
 		std::shared_ptr<XBLManager> xbl;
 		WinRTSystem* system;

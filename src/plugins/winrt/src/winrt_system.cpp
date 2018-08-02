@@ -1,4 +1,5 @@
 #include "winrt_platform.h"
+#include "xbl_manager.h"
 #ifdef WINDOWS_STORE
 
 #include "winrt_system.h"
@@ -81,7 +82,7 @@ class WinRTWindow : public Window
 public:
 	WinRTWindow(CoreWindow window, const WindowDefinition& definition)
 		: window(window)
-		, definition(definition.withSize(Vector2i(window.Bounds().Width, window.Bounds().Height)))
+		, definition(definition.withSize(Vector2i(Vector2f(window.Bounds().Width, window.Bounds().Height))))
 	{
 		window.SizeChanged([=] (CoreWindow win, WindowSizeChangedEventArgs args)
 		{
@@ -211,13 +212,12 @@ void WinRTSystem::showCursor(bool show)
 
 Bytes WinRTSystem::getSaveData(SaveDataType type, const String& path)
 {
-	// TODO
-	return {};
+	return platform->getXboxLive()->getSaveData(type, path);
 }
 
 void WinRTSystem::setSaveData(SaveDataType type, const String& path, const Bytes& data)
 {
-	// TODO
+	platform->getXboxLive()->setSaveData(type, path, data);
 }
 
 std::vector<String> WinRTSystem::enumerateSaveData(SaveDataType type, const String& root)

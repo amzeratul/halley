@@ -47,4 +47,9 @@ void WinRTPlatform::onGameStarted()
 {
 }
 
+std::shared_ptr<XBLManager> WinRTPlatform::getXboxLive() const
+{
+	return xbl;
+}
+
 #endif
