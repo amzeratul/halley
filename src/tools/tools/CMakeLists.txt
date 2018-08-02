@@ -149,4 +149,5 @@ target_link_libraries (halley-tools
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${YAMLCPP_LIBRARY}
+    ${CMAKE_DL_LIBS}
     )
