@@ -196,10 +196,15 @@ void Core::deInit()
 	// Deinit painter
 	painter.reset();
 
+	// Stop audio playback before releasing resources
+	if (api->audio) {
+		api->audio->stopPlayback();
+	}
+
 	// Deinit resources
 	resources.reset();
 
-	// Deinit API
+	// Deinit API (note that this has to happen after resources, otherwise resources which rely on an API to de-init, such as textures, will crash)
 	api.reset();
 	
 	// Stop thread pool and other statics
