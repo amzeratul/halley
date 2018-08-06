@@ -18,9 +18,16 @@ namespace Halley {
 		void showCursor(bool show) override;
 		bool generateEvents(VideoAPI* video, InputAPI* input) override;
 
-		Bytes getSaveData(SaveDataType type, const String& path) override;
-		void setSaveData(SaveDataType type, const String& path, const Bytes& data) override;
-		std::vector<String> enumerateSaveData(SaveDataType type, const String& root) override;
+		std::shared_ptr<ISaveData> getStorageContainer(SaveDataType type, const String& containerName) override;
+	};
+
+	class DummySaveData : public ISaveData {
+	public:
+		bool isReady() const override;
+		Bytes getData(const String& path) override;
+		std::vector<String> enumerate(const String& root) override;
+		void setData(const String& path, const Bytes& data) override;
+		void commit() override;
 	};
 
 	class DummyWindow : public Window

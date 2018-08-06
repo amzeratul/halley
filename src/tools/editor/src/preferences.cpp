@@ -64,13 +64,13 @@ void Preferences::saveToFile() const
 {
 	ConfigFile file;
 	file.getRoot() = save();
-	system.setSaveData(SaveDataType::Save, "preferences", Serializer::toBytes(file));
+	system.getStorageContainer(SaveDataType::Save)->setData("preferences", Serializer::toBytes(file));
 	dirty = false;
 }
 
 void Preferences::loadFromFile()
 {
-	auto data = system.getSaveData(SaveDataType::Save, "preferences");
+	auto data = system.getStorageContainer(SaveDataType::Save)->getData("preferences");
 	if (!data.empty()) {
 		auto config = Deserializer::fromBytes<ConfigFile>(data);
 		load(config.getRoot());

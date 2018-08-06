@@ -8,7 +8,7 @@
 
 namespace Halley {
 	class UIStyle;
-	class Clipboard;
+	class IClipboard;
 
 	class UITextInput : public UIWidget {
 	public:
@@ -27,7 +27,7 @@ namespace Halley {
 		void setMaxLength(Maybe<int> length);
 
 		void onManualControlActivate() override;
-		void setClipboard(std::shared_ptr<Clipboard> clipboard);
+		void setClipboard(std::shared_ptr<IClipboard> clipboard);
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -47,7 +47,7 @@ namespace Halley {
 		void onValidatorSet() override;
 
 		std::shared_ptr<InputDevice> keyboard;
-		std::shared_ptr<Clipboard> clipboard;
+		std::shared_ptr<IClipboard> clipboard;
 		UIStyle style;
 		Sprite sprite;
 		Sprite caret;

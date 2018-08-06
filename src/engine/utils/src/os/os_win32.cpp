@@ -466,7 +466,7 @@ int OSWin32::runCommand(String rawCommand)
 	return int(exitCode);
 }
 
-class Win32Clipboard : public Clipboard {
+class Win32Clipboard : public IClipboard {
 public:
 	void setData(const String& stringData) override
 	{
@@ -519,7 +519,7 @@ public:
 	}
 };
 
-std::shared_ptr<Clipboard> OSWin32::getClipboard()
+std::shared_ptr<IClipboard> OSWin32::getClipboard()
 {
 	try {
 		return std::make_shared<Win32Clipboard>();

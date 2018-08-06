@@ -353,7 +353,7 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 	return result;
 }
 
-std::shared_ptr<Clipboard> UIFactory::getClipboard() const
+std::shared_ptr<IClipboard> UIFactory::getClipboard() const
 {
 	return api.system->getClipboard();
 }

@@ -51,7 +51,7 @@ namespace Halley {
 
 		int runCommand(String command) override;
 
-		std::shared_ptr<Clipboard> getClipboard() override;
+		std::shared_ptr<IClipboard> getClipboard() override;
 
 	private:
 		String runWMIQuery(String query, String parameter) const;

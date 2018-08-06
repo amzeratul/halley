@@ -41,5 +41,8 @@ namespace Halley
 
 		virtual bool canProvideAuthToken() const = 0;
 		virtual Future<std::unique_ptr<AuthorisationToken>> getAuthToken() = 0;
+
+		virtual bool canProvideCloudSave() const { return false; }
+		virtual std::shared_ptr<ISaveData> getCloudSaveContainer(const String& containerName = "") { return {}; }
 	};
 }

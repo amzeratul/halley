@@ -78,6 +78,7 @@ set(HEADERS
         "src/dummy/dummy_video.h"
 
         "include/halley/core/api/audio_api.h"
+        "include/halley/core/api/clipboard.h"
         "include/halley/core/api/core_api.h"
         "include/halley/core/api/halley_api.h"
         "include/halley/core/api/halley_api_internal.h"
@@ -85,6 +86,7 @@ set(HEADERS
         "include/halley/core/api/movie_api.h"
         "include/halley/core/api/network_api.h"
         "include/halley/core/api/platform_api.h"
+        "include/halley/core/api/save_data.h"
         "include/halley/core/api/system_api.h"
         "include/halley/core/api/video_api.h"
         

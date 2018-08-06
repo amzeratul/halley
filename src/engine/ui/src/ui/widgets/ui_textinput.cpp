@@ -94,7 +94,7 @@ void UITextInput::onManualControlActivate()
 	}
 }
 
-void UITextInput::setClipboard(std::shared_ptr<Clipboard> c)
+void UITextInput::setClipboard(std::shared_ptr<IClipboard> c)
 {
 	clipboard = std::move(c);
 }

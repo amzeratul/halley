@@ -15,7 +15,7 @@ namespace Halley
 	class I18N;
 	class UIWidget;
 	class UIStyle;
-	class Clipboard;
+	class IClipboard;
 
 	class UIFactory
 	{
@@ -38,7 +38,7 @@ namespace Halley
 
 		UIStyle getStyle(const String& name) const;
 		std::shared_ptr<UIStyleSheet> getStyleSheet() const;
-		std::shared_ptr<Clipboard> getClipboard() const;
+		std::shared_ptr<IClipboard> getClipboard() const;
 
 	protected:
 		const HalleyAPI& api;

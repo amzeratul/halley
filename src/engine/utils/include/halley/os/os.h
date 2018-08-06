@@ -61,7 +61,7 @@ namespace Halley {
 		virtual void setConsoleColor(int foreground, int background);
 		virtual int runCommand(String command);
 
-		virtual std::shared_ptr<Clipboard> getClipboard();
+		virtual std::shared_ptr<IClipboard> getClipboard();
 
 	private:
 		static OS* osInstance;

@@ -40,6 +40,34 @@ bool DummySystemAPI::generateEvents(VideoAPI* video, InputAPI* input)
 	return true;
 }
 
+std::shared_ptr<ISaveData> DummySystemAPI::getStorageContainer(SaveDataType type, const String& containerName)
+{
+	return std::make_shared<DummySaveData>();
+}
+
+bool DummySaveData::isReady() const
+{
+	return true;
+}
+
+Bytes DummySaveData::getData(const String& path)
+{
+	return {};
+}
+
+std::vector<String> DummySaveData::enumerate(const String& root)
+{
+	return {};
+}
+
+void DummySaveData::setData(const String& path, const Bytes& data)
+{
+}
+
+void DummySaveData::commit()
+{
+}
+
 void DummySystemAPI::init()
 {
 }
@@ -58,19 +86,6 @@ Path DummySystemAPI::getUnpackedAssetsPath(const Path& gamePath) const
 	return gamePath;
 }
 
-Bytes DummySystemAPI::getSaveData(SaveDataType type, const String& path)
-{
-	return Bytes();
-}
-
-void DummySystemAPI::setSaveData(SaveDataType type, const String& path, const Bytes& data)
-{
-}
-
-std::vector<String> DummySystemAPI::enumerateSaveData(SaveDataType type, const String& root)
-{
-	return {};
-}
 
 DummyWindow::DummyWindow(const WindowDefinition& definition) 
 	: definition(definition)

@@ -1,4 +1,6 @@
 #pragma once
+#include "save_data.h"
+#include "clipboard.h"
 #include "halley/resources/resource_data.h"
 #include "halley/core/graphics/window.h"
 #include "halley/concurrency/concurrent.h"
@@ -16,30 +18,6 @@ namespace Halley
 		virtual ~GLContext() {}
 		virtual void bind() = 0;
 		virtual std::unique_ptr<GLContext> createSharedContext() = 0;
-	};
-
-	enum class SaveDataType {
-		Save,
-		Cache
-	};
-
-	template <>
-	struct EnumNames<SaveDataType> {
-		constexpr std::array<const char*, 2> operator()() const {
-			return{{
-				"save",
-				"cache"
-			}};
-		}
-	};
-
-	class Clipboard
-	{
-	public:
-		virtual ~Clipboard() = default;
-		
-		virtual void setData(const String& stringData) = 0;
-		virtual Maybe<String> getStringData() = 0;
 	};
 
 	class SystemAPI
@@ -62,9 +40,7 @@ namespace Halley
 
 		virtual void showCursor(bool show) = 0;
 
-		virtual Bytes getSaveData(SaveDataType type, const String& path) = 0;
-		virtual void setSaveData(SaveDataType type, const String& path, const Bytes& data) = 0;
-		virtual std::vector<String> enumerateSaveData(SaveDataType type, const String& root) = 0;
+		virtual std::shared_ptr<ISaveData> getStorageContainer(SaveDataType type, const String& containerName = "") = 0;
 
 		virtual std::thread createThread(const String& name, std::function<void()> runnable)
 		{
@@ -77,7 +53,7 @@ namespace Halley
 		virtual void runGame(std::function<void()> runnable) { runnable(); }
 		virtual bool canExit() { return false; }
 
-		virtual std::shared_ptr<Clipboard> getClipboard() const { return {}; }
+		virtual std::shared_ptr<IClipboard> getClipboard() const { return {}; }
 
 	private:
 		friend class HalleyAPI;

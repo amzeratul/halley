@@ -120,7 +120,7 @@ int OS::runCommand(String)
 	throw Exception("Running commands is not implemented in this platform.");
 }
 
-std::shared_ptr<Clipboard> OS::getClipboard()
+std::shared_ptr<IClipboard> OS::getClipboard()
 {
 	return {};
 }

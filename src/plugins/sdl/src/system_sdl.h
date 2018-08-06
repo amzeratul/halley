@@ -30,15 +30,13 @@ namespace Halley
 
 		void showCursor(bool show) override;
 
-		Bytes getSaveData(SaveDataType type, const String& path) override;
-		void setSaveData(SaveDataType type, const String& path, const Bytes& data) override;
-		std::vector<String> enumerateSaveData(SaveDataType type, const String& root) override;
+		std::shared_ptr<ISaveData> getStorageContainer(SaveDataType type, const String& containerName) override;
 
 		void setEnvironment(Environment* env) override;
 
 		bool canExit() override;
 
-		std::shared_ptr<Clipboard> getClipboard() const override;
+		std::shared_ptr<IClipboard> getClipboard() const override;
 	private:
 		void processVideoEvent(VideoAPI* video, const SDL_Event& event);
 
@@ -50,8 +48,20 @@ namespace Halley
 	private:
 		std::vector<std::shared_ptr<SDLWindow>> windows;
 		mutable bool videoInit = false;
-		Path saveDir;
-		Path cacheDir;
-		std::shared_ptr<Clipboard> clipboard;
+		std::map<SaveDataType, Path> saveDir;
+		std::shared_ptr<IClipboard> clipboard;
+	};
+
+	class SDLSaveData : public ISaveData {
+	public:
+		explicit SDLSaveData(Path dir);
+		bool isReady() const override;
+		Bytes getData(const String& path) override;
+		std::vector<String> enumerate(const String& root) override;
+		void setData(const String& path, const Bytes& data) override;
+		void commit() override;
+
+	private:
+		Path dir;
 	};
 }

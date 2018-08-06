@@ -247,45 +247,24 @@ void SystemSDL::showCursor(bool show)
 	SDL_ShowCursor(show ? 1 : 0);
 }
 
-Bytes SystemSDL::getSaveData(SaveDataType type, const String& path)
+std::shared_ptr<ISaveData> SystemSDL::getStorageContainer(SaveDataType type, const String& containerName)
 {
-	Expects (!path.isEmpty());
-
-	auto dir = type == SaveDataType::Save ? saveDir : cacheDir;
-	return Path::readFile(dir / path);
-}
-
-void SystemSDL::setSaveData(SaveDataType type, const String& path, const Bytes& data)
-{
-	Expects (!path.isEmpty());
-
-	auto dir = type == SaveDataType::Save ? saveDir : cacheDir;
-	OS::get().createDirectories(dir);
-	Path::writeFile(dir / path, data);
-
-	Logger::logDev("Saving \"" + path + "\", " + String::prettySize(data.size()));
-}
-
-std::vector<String> SystemSDL::enumerateSaveData(SaveDataType type, const String& root)
-{
-	auto dir = type == SaveDataType::Save ? saveDir : cacheDir;
-	auto paths = OS::get().enumerateDirectory(dir);
-	std::vector<String> result;
-	for (auto& p: paths) {
-		auto path = p.toString();
-		if (path.startsWith(root)) {
-			result.push_back(path);
-		}
+	Path dir = saveDir[type];
+	if (!containerName.isEmpty()) {
+		dir = dir / containerName / ".";
 	}
-	return result;
+
+	OS::get().createDirectories(dir);
+	return std::make_shared<SDLSaveData>(dir);
 }
 
 void SystemSDL::setEnvironment(Environment* env)
 {
-	saveDir = env->getDataPath() / "save" / ".";
-	cacheDir = env->getDataPath() / "cache" / ".";
-	OS::get().createDirectories(saveDir);
-	OS::get().createDirectories(cacheDir);
+	for (int i = 0; i < int(SaveDataType::Cache); ++i) {
+		SaveDataType type = SaveDataType(i);
+		auto dir = env->getDataPath() / toString(type) / ".";
+		saveDir[type] = dir;
+	}
 }
 
 bool SystemSDL::canExit()
@@ -293,7 +272,7 @@ bool SystemSDL::canExit()
 	return true;
 }
 
-std::shared_ptr<Clipboard> SystemSDL::getClipboard() const
+std::shared_ptr<IClipboard> SystemSDL::getClipboard() const
 {
 	return clipboard;
 }
@@ -327,4 +306,47 @@ void SystemSDL::deInitVideo()
 		SDL_QuitSubSystem(SDL_INIT_VIDEO);
 		videoInit = false;
 	}
+}
+
+SDLSaveData::SDLSaveData(Path dir)
+	: dir(dir)
+{
+}
+
+bool SDLSaveData::isReady() const
+{
+	return true;
+}
+
+Bytes SDLSaveData::getData(const String& path)
+{
+	Expects (!path.isEmpty());
+	return Path::readFile(dir / path);
+}
+
+std::vector<String> SDLSaveData::enumerate(const String& root)
+{
+	auto paths = OS::get().enumerateDirectory(dir);
+	std::vector<String> result;
+	for (auto& p: paths) {
+		auto path = p.toString();
+		if (path.startsWith(root)) {
+			result.push_back(path);
+		}
+	}
+	return result;
+}
+
+void SDLSaveData::setData(const String& path, const Bytes& data)
+{
+	Expects (!path.isEmpty());
+
+	OS::get().createDirectories(dir);
+	Path::writeFile(dir / path, data);
+
+	Logger::logDev("Saving \"" + path + "\", " + String::prettySize(data.size()));
+}
+
+void SDLSaveData::commit()
+{
 }
