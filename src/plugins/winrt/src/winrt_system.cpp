@@ -86,7 +86,7 @@ public:
 	{
 		window.SizeChanged([=] (CoreWindow win, WindowSizeChangedEventArgs args)
 		{
-			notifySizeChange(Vector2i(args.Size().Width, args.Size().Height));
+			notifySizeChange(Vector2i(Vector2f(args.Size().Width, args.Size().Height)));
 		});
 
 		window.KeyDown([=] (CoreWindow win, KeyEventArgs args)
@@ -210,19 +210,8 @@ void WinRTSystem::showCursor(bool show)
 	// TODO
 }
 
-Bytes WinRTSystem::getSaveData(SaveDataType type, const String& path)
+std::shared_ptr<ISaveData> WinRTSystem::getStorageContainer(SaveDataType type, const String& containerName)
 {
-	return platform->getXboxLive()->getSaveData(type, path);
-}
-
-void WinRTSystem::setSaveData(SaveDataType type, const String& path, const Bytes& data)
-{
-	platform->getXboxLive()->setSaveData(type, path, data);
-}
-
-std::vector<String> WinRTSystem::enumerateSaveData(SaveDataType type, const String& root)
-{
-	// TODO
 	return {};
 }
 
@@ -303,13 +292,8 @@ private:
 void WinRTSystem::runGame(std::function<void()> runnable)
 {
 	winrt::init_apartment();
-	platform->onGameStarted();
 	CoreApplication::Run(winrt::make<Source>(*this, std::move(runnable)));
 }
 
-void WinRTSystem::setPlatform(WinRTPlatform* pl)
-{
-	platform = pl;
-}
 
 #endif

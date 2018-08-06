@@ -10,7 +10,6 @@ using namespace Halley;
 WinRTPlatform::WinRTPlatform(WinRTSystem* system)
 	: system(system)
 {
-	system->setPlatform(this);
 }
 
 void WinRTPlatform::init()
@@ -43,13 +42,14 @@ Future<std::unique_ptr<AuthorisationToken>> WinRTPlatform::getAuthToken()
 	return promise.getFuture();
 }
 
-void WinRTPlatform::onGameStarted()
+bool WinRTPlatform::canProvideCloudSave() const
 {
+	return true;
 }
 
-std::shared_ptr<XBLManager> WinRTPlatform::getXboxLive() const
+std::shared_ptr<ISaveData> WinRTPlatform::getCloudSaveContainer(const String& containerName)
 {
-	return xbl;
+	return xbl->getSaveContainer(containerName);
 }
 
 #endif

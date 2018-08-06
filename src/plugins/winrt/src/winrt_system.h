@@ -21,17 +21,10 @@ namespace Halley {
 		Rect4i getDisplayRect(int screen) const override;
 		void showCursor(bool show) override;
 
-		Bytes getSaveData(SaveDataType type, const String& path) override;
-		void setSaveData(SaveDataType type, const String& path, const Bytes& data) override;
-		std::vector<String> enumerateSaveData(SaveDataType type, const String& root) override;
+		std::shared_ptr<ISaveData> getStorageContainer(SaveDataType type, const String& containerName) override;
 
 		bool generateEvents(VideoAPI* video, InputAPI* input) override;
 
 		void runGame(std::function<void()> runnable) override;
-		
-		void setPlatform(WinRTPlatform* platform);
-
-	private:
-		WinRTPlatform* platform;
 	};
 }

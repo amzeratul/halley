@@ -21,9 +21,8 @@ namespace Halley
 		bool canProvideAuthToken() const override;
 		Future<std::unique_ptr<AuthorisationToken>> getAuthToken() override;
 
-		void onGameStarted();
-
-		std::shared_ptr<XBLManager> getXboxLive() const;
+		bool canProvideCloudSave() const override;
+		std::shared_ptr<ISaveData> getCloudSaveContainer(const String& containerName) override;
 
 	private:
 		std::shared_ptr<XBLManager> xbl;

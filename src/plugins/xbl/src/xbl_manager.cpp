@@ -55,53 +55,16 @@ void XBLManager::deInit()
 {
 }
 
-Bytes XBLManager::getSaveData(SaveDataType type, const String& path)
+std::shared_ptr<ISaveData> XBLManager::getSaveContainer(const String& name)
 {
-	if (!gameSaveContainer) {
-		throw Exception("Unable to load save data, gameSaveContainer is not available!");
+	auto iter = saveStorage.find(name);
+	if (iter == saveStorage.end()) {
+		auto save = std::make_shared<XBLSaveData>(gameSaveProvider.get().CreateContainer(name.getUTF16().c_str()));
+		saveStorage[name] = save;
+		return save;
+	} else {
+		return iter->second;
 	}
-
-	winrt::Windows::Storage::Streams::IBuffer buffer;
-
-	//winrt::Windows::Foundation::Collections::IMap<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer> updates;
-	//updates.Insert(winrt::hstring(path.getUTF16()), buffer);
-
-	auto key = winrt::hstring(path.getUTF16());
-	std::vector<winrt::hstring> updates;
-	updates.push_back(key);
-
-	auto gameBlob = gameSaveContainer->GetAsync(winrt::single_threaded_vector<winrt::hstring>(std::move(updates)).GetView()).get();
-	//gameSaveContainer->ReadAsync(updates.GetView()).get(); // Fuck it
-	if (gameBlob.Status() == winrt::Windows::Gaming::XboxLive::Storage::GameSaveErrorStatus::Ok) {
-		if (gameBlob.Value().HasKey(key)) {
-			auto buffer = gameBlob.Value().Lookup(key);
-
-			auto size = buffer.Length();
-			Bytes result(size);
-			auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(buffer);
-			dataReader.ReadBytes(winrt::array_view<uint8_t>(result));
-
-			return result;
-		}
-	}
-
-	return {};
-}
-
-void XBLManager::setSaveData(SaveDataType type, const String& path, const Bytes& data)
-{
-	if (!gameSaveContainer) {
-		throw Exception("Unable to set save data, gameSaveContainer is not available!");
-	}
-	
-	auto dataWriter = winrt::Windows::Storage::Streams::DataWriter();
-	dataWriter.WriteBytes(winrt::array_view<const uint8_t>(data));
-
-	std::map<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer> updates;
-	updates[winrt::hstring(path.getUTF16())] = dataWriter.DetachBuffer();
-	auto view = winrt::single_threaded_map(std::move(updates)).GetView();
-
-	gameSaveContainer->SubmitUpdatesAsync(view, {}, L"");
 }
 
 void XBLManager::signIn()
@@ -164,8 +127,63 @@ winrt::Windows::Foundation::IAsyncAction XBLManager::getConnectedStorage()
 
 	if (result.Status() == GameSaveErrorStatus::Ok) {
 		gameSaveProvider = result.Value();
-		Logger::logInfo("Got game save provider");
-
-		gameSaveContainer = gameSaveProvider.get().CreateContainer(L"save");
 	}
 }
+
+XBLSaveData::XBLSaveData(winrt::Windows::Gaming::XboxLive::Storage::GameSaveContainer container)
+	: gameSaveContainer(container)
+{
+}
+
+bool XBLSaveData::isReady() const
+{
+	return false;
+}
+
+Bytes XBLSaveData::getData(const String& path)
+{
+	auto key = winrt::hstring(path.getUTF16());
+	std::vector<winrt::hstring> updates;
+	updates.push_back(key);
+
+	auto gameBlob = gameSaveContainer.GetAsync(winrt::single_threaded_vector<winrt::hstring>(std::move(updates)).GetView()).get();
+	//gameSaveContainer->ReadAsync(updates.GetView()).get(); // Fuck it
+	if (gameBlob.Status() == winrt::Windows::Gaming::XboxLive::Storage::GameSaveErrorStatus::Ok) {
+		if (gameBlob.Value().HasKey(key)) {
+			auto buffer = gameBlob.Value().Lookup(key);
+
+			auto size = buffer.Length();
+			Bytes result(size);
+			auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(buffer);
+			dataReader.ReadBytes(winrt::array_view<uint8_t>(result));
+
+			return result;
+		}
+	}
+
+	return {};
+}
+
+std::vector<String> XBLSaveData::enumerate(const String& root)
+{
+	// TODO
+	return {};
+}
+
+void XBLSaveData::setData(const String& path, const Bytes& data, bool commit)
+{
+	auto dataWriter = winrt::Windows::Storage::Streams::DataWriter();
+	dataWriter.WriteBytes(winrt::array_view<const uint8_t>(data));
+
+	std::map<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer> updates;
+	updates[winrt::hstring(path.getUTF16())] = dataWriter.DetachBuffer();
+	auto view = winrt::single_threaded_map(std::move(updates)).GetView();
+
+	gameSaveContainer.SubmitUpdatesAsync(view, {}, L"");	
+}
+
+void XBLSaveData::commit()
+{
+	
+}
+
