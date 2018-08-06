@@ -14,6 +14,7 @@ using namespace Halley;
 #include "winrt/Windows.ApplicationModel.Core.h"
 #include "winrt/Windows.UI.Core.h"
 #include "winrt/Windows.System.Diagnostics.h"
+#include "winrt/Windows.Storage.Search.h"
 
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Storage;

@@ -199,8 +199,25 @@ std::vector<String> XBLSaveData::enumerate(const String& root)
 		throw Exception("Container is not ready yet!");
 	}
 
-	// TODO
-	return {};
+		if (!isReady()) {
+		throw Exception("Container is not ready yet!");
+	}
+
+	return Concurrent::execute([&] () -> std::vector<String>
+	{
+		std::vector<String> results;
+
+		auto query = gameSaveContainer->CreateBlobInfoQuery(root.getUTF16().c_str());
+		auto info = query.GetBlobInfoAsync().get();
+		if (info.Status() == winrt::Windows::Gaming::XboxLive::Storage::GameSaveErrorStatus::Ok) {
+			auto& entries = info.Value();
+			for (uint32_t i = 0; i < entries.Size(); ++i) {
+				results.push_back(String(entries.GetAt(i).Name().c_str()));
+			}
+		}
+
+		return results;
+	}).get();
 }
 
 void XBLSaveData::setData(const String& path, const Bytes& data, bool commit)
