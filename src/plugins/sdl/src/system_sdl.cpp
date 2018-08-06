@@ -337,7 +337,7 @@ std::vector<String> SDLSaveData::enumerate(const String& root)
 	return result;
 }
 
-void SDLSaveData::setData(const String& path, const Bytes& data)
+void SDLSaveData::setData(const String& path, const Bytes& data, bool commit)
 {
 	Expects (!path.isEmpty());
 
