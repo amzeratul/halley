@@ -17,6 +17,12 @@ namespace xbox {
 }
 
 namespace Halley {
+	enum class XBLStatus {
+		Disconnected,
+		Connecting,
+		Connected
+	};
+
 	class XBLManager {
 	public:
 		XBLManager();
@@ -27,11 +33,16 @@ namespace Halley {
 
 		std::shared_ptr<ISaveData> getSaveContainer(const String& name);
 
+		Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> getProvider() const;
+		XBLStatus getStatus() const;
+
 	private:
 		std::shared_ptr<xbox::services::system::xbox_live_user> xboxUser;
 		std::shared_ptr<xbox::services::xbox_live_context> xboxLiveContext;
 		Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> gameSaveProvider;
 		std::map<String, std::shared_ptr<ISaveData>> saveStorage;
+
+		XBLStatus status = XBLStatus::Disconnected;
 
 		void signIn();
 		winrt::Windows::Foundation::IAsyncAction getConnectedStorage();
@@ -39,7 +50,7 @@ namespace Halley {
 
 	class XBLSaveData : public ISaveData {
 	public:
-		explicit XBLSaveData(winrt::Windows::Gaming::XboxLive::Storage::GameSaveContainer container);
+		explicit XBLSaveData(XBLManager& manager, String containerName);
 
 		bool isReady() const override;
 		Bytes getData(const String& path) override;
@@ -48,6 +59,10 @@ namespace Halley {
 		void commit() override;
 
 	private:
-		winrt::Windows::Gaming::XboxLive::Storage::GameSaveContainer gameSaveContainer;
+		XBLManager& manager;
+		String containerName;
+		Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveContainer> gameSaveContainer;
+
+		void updateContainer();
 	};
 }

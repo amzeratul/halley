@@ -59,7 +59,7 @@ std::shared_ptr<ISaveData> XBLManager::getSaveContainer(const String& name)
 {
 	auto iter = saveStorage.find(name);
 	if (iter == saveStorage.end()) {
-		auto save = std::make_shared<XBLSaveData>(gameSaveProvider.get().CreateContainer(name.getUTF16().c_str()));
+		auto save = std::make_shared<XBLSaveData>(*this, name);
 		saveStorage[name] = save;
 		return save;
 	} else {
@@ -67,8 +67,20 @@ std::shared_ptr<ISaveData> XBLManager::getSaveContainer(const String& name)
 	}
 }
 
+Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> XBLManager::getProvider() const
+{
+	return gameSaveProvider;
+}
+
+XBLStatus XBLManager::getStatus() const
+{
+	return status;
+}
+
 void XBLManager::signIn()
 {
+	status = XBLStatus::Connecting;
+
 	using namespace xbox::services::system;
 	xboxUser = std::make_shared<xbox_live_user>(nullptr);
 	auto dispatcher = to_cx<Platform::Object>(winrt::Windows::UI::Core::CoreWindow::GetForCurrentThread().Dispatcher());
@@ -77,6 +89,7 @@ void XBLManager::signIn()
 	{
 		if (result.err()) {
 			Logger::logError(String("Error signing in to Xbox Live: ") + result.err_message());
+			status = XBLStatus::Disconnected;
 		} else {
 			bool loggedIn = false;
 			switch (result.payload().status()) {
@@ -108,12 +121,15 @@ void XBLManager::signIn()
 				{
 					xboxUser.reset();
 					xboxLiveContext.reset();
+					gameSaveProvider.reset();
+					status = XBLStatus::Disconnected;
 				});
+
+				co_await getConnectedStorage();
+			} else {
+				status = XBLStatus::Disconnected;
 			}
 		}
-
-		co_await getConnectedStorage();
-		Logger::logInfo("Storage thread done.");
 	});
 }
 
@@ -127,27 +143,36 @@ winrt::Windows::Foundation::IAsyncAction XBLManager::getConnectedStorage()
 
 	if (result.Status() == GameSaveErrorStatus::Ok) {
 		gameSaveProvider = result.Value();
+		status = XBLStatus::Connected;
+	} else {
+		status = XBLStatus::Disconnected;
 	}
 }
 
-XBLSaveData::XBLSaveData(winrt::Windows::Gaming::XboxLive::Storage::GameSaveContainer container)
-	: gameSaveContainer(container)
+XBLSaveData::XBLSaveData(XBLManager& manager, String containerName)
+	: manager(manager)
+	, containerName(std::move(containerName))
 {
+	updateContainer();
 }
 
 bool XBLSaveData::isReady() const
 {
-	return false;
+	return gameSaveContainer.is_initialized();
 }
 
 Bytes XBLSaveData::getData(const String& path)
 {
+	if (!isReady()) {
+		throw Exception("Container is not ready yet!");
+	}
+
 	auto key = winrt::hstring(path.getUTF16());
 	std::vector<winrt::hstring> updates;
 	updates.push_back(key);
 
-	auto gameBlob = gameSaveContainer.GetAsync(winrt::single_threaded_vector<winrt::hstring>(std::move(updates)).GetView()).get();
-	//gameSaveContainer->ReadAsync(updates.GetView()).get(); // Fuck it
+	auto gameBlob = gameSaveContainer->GetAsync(winrt::single_threaded_vector<winrt::hstring>(std::move(updates)).GetView()).get();
+
 	if (gameBlob.Status() == winrt::Windows::Gaming::XboxLive::Storage::GameSaveErrorStatus::Ok) {
 		if (gameBlob.Value().HasKey(key)) {
 			auto buffer = gameBlob.Value().Lookup(key);
@@ -166,12 +191,20 @@ Bytes XBLSaveData::getData(const String& path)
 
 std::vector<String> XBLSaveData::enumerate(const String& root)
 {
+	if (!isReady()) {
+		throw Exception("Container is not ready yet!");
+	}
+
 	// TODO
 	return {};
 }
 
 void XBLSaveData::setData(const String& path, const Bytes& data, bool commit)
 {
+	if (!isReady()) {
+		throw Exception("Container is not ready yet!");
+	}
+
 	auto dataWriter = winrt::Windows::Storage::Streams::DataWriter();
 	dataWriter.WriteBytes(winrt::array_view<const uint8_t>(data));
 
@@ -179,7 +212,7 @@ void XBLSaveData::setData(const String& path, const Bytes& data, bool commit)
 	updates[winrt::hstring(path.getUTF16())] = dataWriter.DetachBuffer();
 	auto view = winrt::single_threaded_map(std::move(updates)).GetView();
 
-	gameSaveContainer.SubmitUpdatesAsync(view, {}, L"");	
+	gameSaveContainer->SubmitUpdatesAsync(view, {}, L"");	
 }
 
 void XBLSaveData::commit()
@@ -187,3 +220,13 @@ void XBLSaveData::commit()
 	
 }
 
+void XBLSaveData::updateContainer()
+{
+	if (manager.getStatus() == XBLStatus::Connected) {
+		if (!gameSaveContainer) {
+			manager.getProvider()->CreateContainer(containerName.getUTF16().c_str());
+		}
+	} else {
+		gameSaveContainer.reset();
+	}
+}

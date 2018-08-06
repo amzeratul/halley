@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/core/api/halley_api_internal.h"
+#include "winrt/Windows.Storage.h"
 
 namespace Halley {
 	class WinRTPlatform;
@@ -26,5 +27,19 @@ namespace Halley {
 		bool generateEvents(VideoAPI* video, InputAPI* input) override;
 
 		void runGame(std::function<void()> runnable) override;
+	};
+
+	class WinRTLocalSave : public ISaveData {
+	public:
+		WinRTLocalSave(String prefix);
+		bool isReady() const override;
+		Bytes getData(const String& path) override;
+		std::vector<String> enumerate(const String& root) override;
+		void setData(const String& path, const Bytes& data, bool commit) override;
+		void commit() override;
+
+	private:
+		winrt::Windows::Storage::StorageFolder folder;
+		static winrt::Windows::Storage::StorageFolder makeFolder(String prefix);
 	};
 }

@@ -212,7 +212,11 @@ void WinRTSystem::showCursor(bool show)
 
 std::shared_ptr<ISaveData> WinRTSystem::getStorageContainer(SaveDataType type, const String& containerName)
 {
-	return {};
+	String prefix = toString(type);
+	if (!containerName.isEmpty()) {
+		prefix = prefix + "/" + containerName;
+	}
+	return std::make_shared<WinRTLocalSave>(prefix);
 }
 
 bool WinRTSystem::generateEvents(VideoAPI* video, InputAPI* input)
@@ -293,6 +297,61 @@ void WinRTSystem::runGame(std::function<void()> runnable)
 {
 	winrt::init_apartment();
 	CoreApplication::Run(winrt::make<Source>(*this, std::move(runnable)));
+}
+
+WinRTLocalSave::WinRTLocalSave(String prefix)
+	: folder(makeFolder(prefix))
+{
+}
+
+bool WinRTLocalSave::isReady() const
+{
+	return true;
+}
+
+Bytes WinRTLocalSave::getData(const String& path)
+{
+	return Concurrent::execute([&] () -> Bytes {
+		try {
+			auto file = folder.GetFileAsync(path.getUTF16().c_str()).get();
+			auto buffer = FileIO::ReadBufferAsync(file).get();
+
+			auto size = buffer.Length();
+			Bytes result(size);
+			auto dataReader = Streams::DataReader::FromBuffer(buffer);
+			dataReader.ReadBytes(winrt::array_view<uint8_t>(result));
+
+			return result;
+		} catch (...) {
+			return {};
+		}
+	}).get();
+}
+
+std::vector<String> WinRTLocalSave::enumerate(const String& root)
+{
+	// TODO
+	return {};
+}
+
+void WinRTLocalSave::setData(const String& path, const Bytes& data, bool commit)
+{
+	Concurrent::execute([&] () {
+		auto file = folder.CreateFileAsync(path.getUTF16().c_str(), CreationCollisionOption::ReplaceExisting).get();
+		FileIO::WriteBytesAsync(file, data).get();
+	}).get(); // This .get() is not necessary, but gives me peace of mind
+}
+
+void WinRTLocalSave::commit()
+{
+}
+
+StorageFolder WinRTLocalSave::makeFolder(String prefix)
+{
+	return Concurrent::execute([&] () -> StorageFolder {
+		auto localFolder = ApplicationData::Current().LocalFolder();
+		return localFolder.CreateFolderAsync(prefix.getUTF16().c_str(), CreationCollisionOption::OpenIfExists).get();
+	}).get();
 }
 
 

@@ -6,16 +6,18 @@
 
 namespace Halley {
 	enum class SaveDataType {
-		Save,
+		SaveRoaming,
+		SaveLocal,
 		Downloads,
 		Cache
 	};
 
 	template <>
 	struct EnumNames<SaveDataType> {
-		constexpr std::array<const char*, 3> operator()() const {
+		constexpr std::array<const char*, 4> operator()() const {
 			return{{
 				"save",
+				"save_local",
 				"downloads",
 				"cache"
 			}};
