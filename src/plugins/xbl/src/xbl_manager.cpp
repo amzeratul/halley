@@ -151,13 +151,14 @@ winrt::Windows::Foundation::IAsyncAction XBLManager::getConnectedStorage()
 
 XBLSaveData::XBLSaveData(XBLManager& manager, String containerName)
 	: manager(manager)
-	, containerName(std::move(containerName))
+	, containerName(containerName.isEmpty() ? "save" : containerName)
 {
 	updateContainer();
 }
 
 bool XBLSaveData::isReady() const
 {
+	updateContainer();
 	return gameSaveContainer.is_initialized();
 }
 
@@ -167,26 +168,29 @@ Bytes XBLSaveData::getData(const String& path)
 		throw Exception("Container is not ready yet!");
 	}
 
-	auto key = winrt::hstring(path.getUTF16());
-	std::vector<winrt::hstring> updates;
-	updates.push_back(key);
+	return Concurrent::execute([&] () -> Bytes
+	{
+		auto key = winrt::hstring(path.getUTF16());
+		std::vector<winrt::hstring> updates;
+		updates.push_back(key);
 
-	auto gameBlob = gameSaveContainer->GetAsync(winrt::single_threaded_vector<winrt::hstring>(std::move(updates)).GetView()).get();
+		auto gameBlob = gameSaveContainer->GetAsync(winrt::single_threaded_vector<winrt::hstring>(std::move(updates)).GetView()).get();
 
-	if (gameBlob.Status() == winrt::Windows::Gaming::XboxLive::Storage::GameSaveErrorStatus::Ok) {
-		if (gameBlob.Value().HasKey(key)) {
-			auto buffer = gameBlob.Value().Lookup(key);
+		if (gameBlob.Status() == winrt::Windows::Gaming::XboxLive::Storage::GameSaveErrorStatus::Ok) {
+			if (gameBlob.Value().HasKey(key)) {
+				auto buffer = gameBlob.Value().Lookup(key);
 
-			auto size = buffer.Length();
-			Bytes result(size);
-			auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(buffer);
-			dataReader.ReadBytes(winrt::array_view<uint8_t>(result));
+				auto size = buffer.Length();
+				Bytes result(size);
+				auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(buffer);
+				dataReader.ReadBytes(winrt::array_view<uint8_t>(result));
 
-			return result;
+				return result;
+			}
 		}
-	}
 
-	return {};
+		return {};
+	}).get();
 }
 
 std::vector<String> XBLSaveData::enumerate(const String& root)
@@ -220,11 +224,11 @@ void XBLSaveData::commit()
 	
 }
 
-void XBLSaveData::updateContainer()
+void XBLSaveData::updateContainer() const
 {
 	if (manager.getStatus() == XBLStatus::Connected) {
 		if (!gameSaveContainer) {
-			manager.getProvider()->CreateContainer(containerName.getUTF16().c_str());
+			gameSaveContainer = manager.getProvider()->CreateContainer(containerName.getUTF16().c_str());
 		}
 	} else {
 		gameSaveContainer.reset();

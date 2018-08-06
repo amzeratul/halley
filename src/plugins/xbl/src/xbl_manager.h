@@ -61,8 +61,8 @@ namespace Halley {
 	private:
 		XBLManager& manager;
 		String containerName;
-		Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveContainer> gameSaveContainer;
+		mutable Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveContainer> gameSaveContainer;
 
-		void updateContainer();
+		void updateContainer() const;
 	};
 }
