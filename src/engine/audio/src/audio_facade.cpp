@@ -83,6 +83,7 @@ void AudioFacade::stopPlayback()
 		pausePlayback();
 		musicTracks.clear();
 		engine.reset();
+		output.closeAudioDevice();
 		started = false;
 	}
 }
