@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+#include <halley/concurrency/future.h>
+
 namespace Halley
 {
 	class HTTPResponse {
