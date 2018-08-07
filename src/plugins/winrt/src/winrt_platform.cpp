@@ -32,13 +32,44 @@ std::unique_ptr<HTTPRequest> WinRTPlatform::makeHTTPRequest(const String& method
 
 bool WinRTPlatform::canProvideAuthToken() const
 {
-	return false;
+	return true;
 }
+
+class XboxLiveAuthorisationToken : public AuthorisationToken {
+public:
+	String getType() const override
+	{
+		return "xboxlive";
+	}
+
+	bool isSingleUse() const override
+	{
+		return false;
+	}
+
+	bool isCancellable() const override
+	{
+		return false;
+	}
+
+	void cancel() override
+	{
+		
+	}
+
+	const Bytes& getData() const override
+	{
+		return data; // Empty. This is because the authorisation token will be automatically inserted by IXMLHttpRequest2
+	}
+
+private:
+	Bytes data;
+};
 
 Future<std::unique_ptr<AuthorisationToken>> WinRTPlatform::getAuthToken()
 {
 	Promise<std::unique_ptr<AuthorisationToken>> promise;
-	promise.setValue({});
+	promise.setValue(std::make_unique<XboxLiveAuthorisationToken>());
 	return promise.getFuture();
 }
 

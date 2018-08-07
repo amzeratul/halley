@@ -6,6 +6,8 @@
 #include "halley/data_structures/maybe.h"
 #include "halley/utils/utils.h"
 #include <halley/core/api/save_data.h>
+#include "api/platform_api.h"
+#include "halley/concurrency/future.h"
 
 namespace xbox {
 	namespace services {
