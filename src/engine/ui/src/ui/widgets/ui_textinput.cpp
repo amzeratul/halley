@@ -115,8 +115,6 @@ void UITextInput::updateTextInput()
 		}
 	}
 
-	bool modified = false;
-
 	if (keyboard->isButtonPressedRepeat(Keys::Delete)) {
 		text.onDelete();
 	}
@@ -148,9 +146,7 @@ void UITextInput::updateTextInput()
 
 	updateCaret();
 
-	if (modified) {
-		onTextModified();
-	}
+	onTextModified();
 	
 	if (keyboard->isButtonPressed(Keys::Enter) || keyboard->isButtonPressed(Keys::KP_Enter)) {
 		if (!isMultiLine) {

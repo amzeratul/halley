@@ -99,8 +99,9 @@ void TextInputData::onBackspace()
 {
 	if (selection.start == selection.end) {
 		if (selection.start > 0) { // If selection.s == 0, -1 causes it to overflow (unsigned). Shouldn't do anything in that case.
-			setText(text.substr(0, selection.start - 1) + text.substr(selection.start));
-			setSelection(selection.start - 1);
+			const auto start = selection.start;
+			setText(text.substr(0, start - 1) + text.substr(start));
+			setSelection(start - 1);
 		}
 	} else {
 		setText(text.substr(0, selection.start) + text.substr(selection.end));

@@ -33,9 +33,9 @@ namespace Halley {
 
 	typedef char Character;
 	typedef wchar_t utf16type;
-	typedef int utf32type;
+	typedef char32_t utf32type;
 	typedef std::wstring StringUTF16;
-	typedef std::basic_string<utf32type> StringUTF32;
+	typedef std::u32string StringUTF32;
 
 	// String class
 	class String {
