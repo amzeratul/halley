@@ -117,8 +117,8 @@ void AudioEventActionPlay::run(AudioEngine& engine, size_t id, const AudioPositi
 	int clipN = rng.getInt(0, int(clips.size()) - 1);
 	auto clip = clipData[clipN];
 
-	const float curVolume = rng.getFloat(volume.s, volume.e);
-	const float curPitch = clamp(rng.getFloat(pitch.s, pitch.e), 0.1f, 2.0f);
+	const float curVolume = rng.getFloat(volume.start, volume.end);
+	const float curPitch = clamp(rng.getFloat(pitch.start, pitch.end), 0.1f, 2.0f);
 
 	constexpr int sampleRate = 48000;
 

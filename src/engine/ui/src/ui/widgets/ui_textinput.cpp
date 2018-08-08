@@ -10,7 +10,7 @@
 
 using namespace Halley;
 
-UITextInput::UITextInput(std::shared_ptr<InputDevice> keyboard, String id, UIStyle style, String text, LocalisedString ghostText)
+UITextInput::UITextInput(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, String text, LocalisedString ghostText)
 	: UIWidget(id, {}, UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
 	, keyboard(std::move(keyboard))
 	, style(style)
@@ -38,7 +38,6 @@ UITextInput& UITextInput::setText(StringUTF32 t)
 {
 	if (t != text.getText()) {
 		text.setText(std::move(t));
-		setCaretPosition(text.getSelection().e);
 		onTextModified();
 	}
 	return *this;
@@ -135,22 +134,19 @@ void UITextInput::updateTextInput()
 
 	int dx = (keyboard->isButtonPressedRepeat(Keys::Left) ? -1 : 0) + (keyboard->isButtonPressedRepeat(Keys::Right) ? 1 : 0);
 	if (dx == -1) {
-		text.setSelection(text.getSelection().s - 1);
+		text.setSelection(text.getSelection().start - 1);
 	} else if (dx == 1) {
-		text.setSelection(text.getSelection().e + 1);
+		text.setSelection(text.getSelection().end + 1);
 	}
 
-	for (int letter = keyboard->getNextLetter(); letter != 0; letter = keyboard->getNextLetter()) {
-		if (!ctrlDown && letter >= 32) {
-			if (!maxLength || int(text.size()) < maxLength.get()) {
-				text.insert(text.begin() + caret, letter);
-				caret++;
-				modified = true;
-			}
+	if (capture) {
+		bool ok = capture->update();
+		if (!ok) {
+			capture = {};
 		}
 	}
 
-	setCaretPosition(text.getSelection().e);
+	updateCaret();
 
 	if (modified) {
 		onTextModified();
@@ -163,14 +159,14 @@ void UITextInput::updateTextInput()
 	}
 }
 
-void UITextInput::setCaretPosition(int pos)
+void UITextInput::updateCaret()
 {
-	pos = clamp(pos, 0, int(text.size()));
+	int pos = clamp(text.getSelection().end, 0, int(text.getText().size()));
 	if (pos != caretPos) {
 		caretTime = 0;
 		caretShowing = true;
 		caretPos = pos;
-		caretPhysicalPos = label.getCharacterPosition(caretPos, text).x;
+		caretPhysicalPos = label.getCharacterPosition(caretPos, text.getText()).x;
 	}
 }
 
@@ -179,7 +175,7 @@ void UITextInput::onTextModified()
 	if (getValidator()) {
 		text.setText(getValidator()->onTextChanged(text.getText()));
 	}
-	setCaretPosition(caretPos);
+	updateCaret();
 
 	const auto str = String(text.getText());
 	sendEvent(UIEvent(UIEventType::TextChanged, getId(), str));
@@ -188,6 +184,8 @@ void UITextInput::onTextModified()
 
 void UITextInput::validateText()
 {
+	// TODO
+	/*
 	size_t removePos;
 	while ((removePos = text.find('\r')) != StringUTF32::npos) {
 		text = text.erase(removePos);
@@ -202,14 +200,15 @@ void UITextInput::validateText()
 	if (getValidator()) {
 		text = getValidator()->onTextChanged(text);
 	}
+	*/
 }
 
 void UITextInput::onValidatorSet()
 {
 	if (getValidator()) {
-		text = getValidator()->onTextChanged(text);
+		text.setText(getValidator()->onTextChanged(text.getText()));
 	}
-	setCaretPosition(caretPos);
+	updateCaret();
 }
 
 void UITextInput::update(Time t, bool moved)
@@ -266,13 +265,21 @@ void UITextInput::onFocus()
 {
 	caretTime = 0;
 	caretShowing = true;
+
+	capture = std::make_unique<TextInputCapture>(keyboard->captureText(text, {}));
+}
+
+void UITextInput::onFocusLost()
+{
+	capture.reset();
 }
 
 void UITextInput::pressMouse(Vector2f mousePos, int button)
 {
 	if (button == 0) {
 		Vector2f labelClickPos = mousePos - label.getPosition();
-		setCaretPosition(int(label.getCharacterAt(labelClickPos)));
+		text.setSelection(int(label.getCharacterAt(labelClickPos)));
+		updateCaret();
 	}
 }
 

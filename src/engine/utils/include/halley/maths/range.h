@@ -27,62 +27,62 @@ namespace Halley {
 	template <typename T>
 	class Range {
 	public:
-		T s;
-		T e;
+		T start;
+		T end;
 
 		Range()
-			: s{}
-			, e{}
+			: start(0)
+			, end(0)
 		{}
 
 		Range(T _start, T _end) {
 			if (_start < _end) {
-				s = _start;
-				e = _end;
+				start = _start;
+				end = _end;
 			} else {
-				s = _end;
-				e = _start;
+				start = _end;
+				end = _start;
 			}
 		}
 
 		bool contains(T elem) const
 		{
-			return elem >= s && elem < e;
+			return elem >= start && elem < end;
 		}
 
-		inline T getLength() { return e - s; }
+		inline T getLength() { return end - start; }
 
 		inline bool overlaps(const Range &p) const
 		{
-			return (s < p.e) && (p.s < e);
+			return (start < p.end) && (p.start < end);
 		}
 
 		inline Range getOverlap(const Range &p) const
 		{
-			T start = std::max(s, p.s);
-			T end = std::min(e, p.e);
-			if (start < end) {
-				return Range(start, end);
+			T s = std::max(start, p.start);
+			T e = std::min(end, p.end);
+			if (s < e) {
+				return Range(s, e);
 			} else {
-				T avg = (start+end)/2;
+				T avg = (s + e) / 2;
 				return Range(avg, avg);
 			}
 		}
 		
 		inline Range getSweepOverlap(T len) const
 		{
-			return Range(s - len, e);
+			return Range(start - len, end);
 		}
 
 		T getTimeToOverlap(const Range& p, T factor=1) const
 		{
-			T sx = p.s;
-			T ex = p.e;
+			T sx = p.start;
+			T ex = p.end;
 			T divisor = ex - sx;
 			if (divisor == 0) return 0;
 
-			T t1 = (s-sx)*factor/divisor;
-			T t2 = (e-sx)*factor/divisor;
+			T t1 = (start-sx)*factor/divisor;
+			T t2 = (end-sx)*factor/divisor;
 			return min(abs(t1), abs(t2));
 		}
 	};

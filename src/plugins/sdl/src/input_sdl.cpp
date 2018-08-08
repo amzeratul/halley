@@ -83,7 +83,7 @@ void InputSDL::deInit()
 	joysticks.clear();
 }
 
-std::shared_ptr<InputDevice> InputSDL::getKeyboard(int id) const
+std::shared_ptr<InputKeyboard> InputSDL::getKeyboard(int id) const
 {
 	return keyboards.at(id);
 }

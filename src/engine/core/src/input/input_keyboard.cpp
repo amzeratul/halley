@@ -6,13 +6,13 @@ TextInputData::TextInputData()
 }
 
 TextInputData::TextInputData(const String& str)
-	: text(str.getUTF32())
 {
+	setText(str.getUTF32());
 }
 
 TextInputData::TextInputData(StringUTF32 str)
-	: text(std::move(str))
 {
+	setText(std::move(str));
 }
 
 const StringUTF32& TextInputData::getText() const
@@ -25,11 +25,11 @@ void TextInputData::setText(StringUTF32 _text)
 	if (text != _text) {
 		text = std::move(_text);
 		const int textSize = int(text.size());
-		if (selection.s > textSize) {
-			selection.s = textSize;
+		if (selection.start > textSize) {
+			selection.start = textSize;
 		}
-		if (selection.e > textSize) {
-			selection.e = textSize;
+		if (selection.end > textSize) {
+			selection.end = textSize;
 		}
 		onTextModified();
 	}
@@ -42,18 +42,18 @@ Range<int> TextInputData::getSelection() const
 
 void TextInputData::setSelection(int sel)
 {
-	selection.s = selection.e = sel;
+	setSelection(Range<int>(sel, sel));
 }
 
 void TextInputData::setSelection(Range<int> sel)
 {
-	selection = sel;
 	const int textSize = int(text.size());
-	sel.s = clamp(sel.s, 0, textSize);
-	sel.e = clamp(sel.e, 0, textSize);
-	if (sel.s > sel.e) {
-		std::swap(sel.s, sel.e);
+	sel.start = clamp(sel.start, 0, textSize);
+	sel.end = clamp(sel.end, 0, textSize);
+	if (sel.start > sel.end) {
+		std::swap(sel.start, sel.end);
 	}
+	selection = sel;
 }
 
 void TextInputData::setLengthLimits(int min, Maybe<int> max)
@@ -80,30 +80,30 @@ void TextInputData::insertText(const String& text)
 void TextInputData::insertText(const StringUTF32& t)
 {
 	if (!t.empty()) {
-		const auto newEnd = int(selection.s + t.length());
-		setText(text.substr(0, selection.s) + t + text.substr(selection.e));
+		const auto newEnd = int(selection.start + t.length());
+		setText(text.substr(0, selection.start) + t + text.substr(selection.end));
 		setSelection(newEnd);
 	}
 }
 
 void TextInputData::onDelete()
 {
-	if (selection.s == selection.e) {
-		setText(text.substr(0, selection.s) + text.substr(selection.s + 1));
+	if (selection.start == selection.end) {
+		setText(text.substr(0, selection.start) + text.substr(selection.start + 1));
 	} else {
-		setText(text.substr(0, selection.s) + text.substr(selection.e));
+		setText(text.substr(0, selection.start) + text.substr(selection.end));
 	}
 }
 
 void TextInputData::onBackspace()
 {
-	if (selection.s == selection.e) {
-		if (selection.s > 0) { // If selection.s == 0, -1 causes it to overflow (unsigned). Shouldn't do anything in that case.
-			setText(text.substr(0, selection.s - 1) + text.substr(selection.s));
-			setSelection(selection.s - 1);
+	if (selection.start == selection.end) {
+		if (selection.start > 0) { // If selection.s == 0, -1 causes it to overflow (unsigned). Shouldn't do anything in that case.
+			setText(text.substr(0, selection.start - 1) + text.substr(selection.start));
+			setSelection(selection.start - 1);
 		}
 	} else {
-		setText(text.substr(0, selection.s) + text.substr(selection.e));
+		setText(text.substr(0, selection.start) + text.substr(selection.end));
 	}
 }
 
@@ -121,7 +121,9 @@ TextInputCapture::TextInputCapture(TextInputData& inputData, SoftwareKeyboardDat
 
 TextInputCapture::~TextInputCapture()
 {
-	capture->close();
+	if (capture) {
+		capture->close();
+	}
 }
 
 bool TextInputCapture::update() const
@@ -130,6 +132,23 @@ bool TextInputCapture::update() const
 		capture->update(inputData);
 	}
 	return capture->isOpen();
+}
+
+/*
+	for (int letter = keyboard->getNextLetter(); letter != 0; letter = keyboard->getNextLetter()) {
+		if (!ctrlDown && letter >= 32) {
+			if (!maxLength || int(text.size()) < maxLength.get()) {
+				text.insert(text.begin() + caret, letter);
+				caret++;
+				modified = true;
+			}
+		}
+	}
+ */
+
+InputKeyboard::InputKeyboard(int nButtons)
+	: InputButtonBase(nButtons)
+{
 }
 
 TextInputCapture InputKeyboard::captureText(TextInputData& textInputData, SoftwareKeyboardData data)

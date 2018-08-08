@@ -39,7 +39,7 @@ namespace Halley {
 		~InputSDL();
 
 		size_t getNumberOfKeyboards() const override;
-		std::shared_ptr<InputDevice> getKeyboard(int id=0) const override;
+		std::shared_ptr<InputKeyboard> getKeyboard(int id=0) const override;
 
 		size_t getNumberOfJoysticks() const override;
 		std::shared_ptr<InputJoystick> getJoystick(int id=0) const override;

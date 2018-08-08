@@ -163,7 +163,7 @@ namespace Halley {
 			Range<T> y0(p1.y, p2.y);
 			Range<T> y1(p.p1.y, p.p2.y);
 			Range<T> y = y0.getOverlap(y1);
-			return Rect2D<T>(Vector2D<T>(x.s, y.s), Vector2D<T>(x.e, y.e));
+			return Rect2D<T>(Vector2D<T>(x.start, y.start), Vector2D<T>(x.end, y.end));
 		}
 
 		Range<T> getHorizontal() const

@@ -37,15 +37,7 @@ void ConsoleWindow::log(LoggerLevel, const String& msg)
 
 void ConsoleWindow::update(InputDevice& keyboard)
 {
-	for (int next; (next = keyboard.getNextLetter()) != 0;) {
-		if (next == '\b') {
-			input.setSize(std::max(0, int(input.size()) - 1));
-		} else if (next == '\n') {
-			submit();
-		} else {
-			input.appendCharacter(next);
-		}
-	}
+	// TODO
 }
 
 void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const

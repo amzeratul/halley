@@ -13,7 +13,13 @@ namespace Halley {
 
 	class UITextInput : public UIWidget {
 	public:
-		explicit UITextInput(std::shared_ptr<InputDevice> keyboard, String id, UIStyle style, String text = "", LocalisedString ghostText = LocalisedString());
+		explicit UITextInput(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, String text = "", LocalisedString ghostText = LocalisedString());
+
+		UITextInput(UITextInput&& other) = default;
+		UITextInput(const UITextInput& other) = delete;
+		UITextInput& operator=(UITextInput&& other) = default;
+		UITextInput& operator=(const UITextInput& other) = delete;
+
 		bool canInteractWithMouse() const override;
 
 		UITextInput& setText(const String& text);
@@ -34,20 +40,23 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 		void onFocus() override;
+		void onFocusLost() override;
 		void pressMouse(Vector2f mousePos, int button) override;
 
 		void readFromDataBind() override;
 
 	private:
 		void updateTextInput();
-		void setCaretPosition(int pos);
+		void updateCaret();
 
 		void onTextModified();
 		void validateText();
 		void onValidatorSet() override;
 
-		std::shared_ptr<InputDevice> keyboard;
+		std::shared_ptr<InputKeyboard> keyboard;
 		std::shared_ptr<IClipboard> clipboard;
+		std::unique_ptr<TextInputCapture> capture;
+
 		UIStyle style;
 		Sprite sprite;
 		Sprite caret;
@@ -59,6 +68,7 @@ namespace Halley {
 		Vector2f textScrollPos;
 		float caretPhysicalPos = 0;
 		float caretTime = 0;
+		int caretPos = 0;
 
 		bool isMultiLine = false;
 		bool caretShowing = false;

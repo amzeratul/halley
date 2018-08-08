@@ -9,6 +9,7 @@
 namespace Halley
 {
 	class InputJoystick;
+	class InputKeyboard;
 	class InputTouch;
 
 	class InputControllerData {
@@ -23,7 +24,7 @@ namespace Halley
 		virtual ~InputAPI() {}
 		
 		virtual size_t getNumberOfKeyboards() const = 0;
-		virtual std::shared_ptr<InputDevice> getKeyboard(int id = 0) const = 0;
+		virtual std::shared_ptr<InputKeyboard> getKeyboard(int id = 0) const = 0;
 
 		virtual size_t getNumberOfJoysticks() const = 0;
 		virtual std::shared_ptr<InputJoystick> getJoystick(int id = 0) const = 0;

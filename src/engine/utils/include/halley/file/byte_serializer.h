@@ -149,7 +149,7 @@ namespace Halley {
 		template <typename T>
 		Serializer& operator<<(const Range<T>& p)
 		{
-			return *this << p.s << p.e;
+			return *this << p.start << p.end;
 		}
 
 		template <typename T, std::enable_if_t<std::is_enum<T>::value == true, int> = 0>
@@ -349,7 +349,7 @@ namespace Halley {
 		template <typename T>
 		Deserializer& operator>>(Range<T>& p)
 		{
-			return *this >> p.s >> p.e;
+			return *this >> p.start >> p.end;
 		}
 
 		template <typename T>

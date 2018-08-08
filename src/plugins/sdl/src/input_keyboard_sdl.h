@@ -1,33 +1,47 @@
 #pragma once
 
-#include <deque>
-#include "halley/core/input/input_button_base.h"
+#include <set>
+#include "halley/core/input/input_keyboard.h"
 struct SDL_KeyboardEvent;
 
 namespace Halley {
 
-#ifdef _MSC_VER
-#pragma warning(disable: 4250)
-#endif
+	class InputKeyboardSDL;
 
-	class InputKeyboardSDL : public InputButtonBase {
+	class SDLTextInputCapture : public ITextInputCapture {
 	public:
-		int getNextLetter() override;
-		String getButtonName(int code) override;
+		SDLTextInputCapture(InputKeyboardSDL& parent);
+		~SDLTextInputCapture();
+
+		void open(const TextInputData& input, SoftwareKeyboardData softKeyboardData) override;
+		void close() override;
+		bool isOpen() const override;
+		void update(TextInputData& input) override;
+		
+		void onTextEntered(const StringUTF32& text);
 
 	private:
-		std::deque<int> letters;
+		bool currentlyOpen = false;
+		InputKeyboardSDL& parent;
+		StringUTF32 buffer;
+	};
 
+	class InputKeyboardSDL : public InputKeyboard {
+	public:
+		std::unique_ptr<ITextInputCapture> makeTextInputCapture() override;
+		String getButtonName(int code) override;
+
+		void removeCapture(SDLTextInputCapture* capture);
+
+	private:
 		InputKeyboardSDL();
 
 		void processEvent(const SDL_Event &event);
 		void onTextEntered(const char* text);
 
+		std::set<SDLTextInputCapture*> captures;
+
 		friend class InputSDL;
 	};
-
-#ifdef _MSC_VER
-#pragma warning(default: 4250)
-#endif
-
+	
 }

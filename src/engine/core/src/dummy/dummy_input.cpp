@@ -7,7 +7,7 @@ size_t DummyInputAPI::getNumberOfKeyboards() const
 	return 0;
 }
 
-std::shared_ptr<InputDevice> DummyInputAPI::getKeyboard(int id) const
+std::shared_ptr<InputKeyboard> DummyInputAPI::getKeyboard(int id) const
 {
 	return {};
 }

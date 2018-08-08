@@ -24,14 +24,8 @@
 #include "halley/core/input/input_keys.h"
 using namespace Halley;
 
-#if (SDL_MAJOR_VERSION >= 1 && SDL_MINOR_VERSION >= 3) || SDL_MAJOR_VERSION >= 2
-#define SDL_KEYS SDL_NUM_SCANCODES
-#else
-#define SDL_KEYS SDLK_LAST
-#endif
-
 InputKeyboardSDL::InputKeyboardSDL()
-	: InputButtonBase(SDL_KEYS)
+	: InputKeyboard(SDL_NUM_SCANCODES)
 {
 	SDL_StartTextInput();
 }
@@ -54,13 +48,13 @@ void InputKeyboardSDL::processEvent(const SDL_Event &_event)
 				int scancode = event.keysym.scancode;
 				onButtonPressed(scancode);
 				if (scancode == Keys::Backspace) {
-					letters.push_back('\b');
+					onTextEntered("\b");
 				}
 				if (scancode == Keys::Enter || scancode == Keys::KP_Enter) {
-					letters.push_back('\n');
+					onTextEntered("\n");
 				}
 				if (scancode == Keys::Tab) {
-					letters.push_back('\t');
+					onTextEntered("\t");
 				}
 				break;
 			}
@@ -72,20 +66,56 @@ void InputKeyboardSDL::processEvent(const SDL_Event &_event)
 void InputKeyboardSDL::onTextEntered(const char* text)
 {
 	auto str = String(text).getUTF32();
-	for (size_t i=0; i<str.size(); i++) {
-		letters.push_back(str[i]);
+	for (auto& c: captures) {
+		c->onTextEntered(str);
 	}
 }
 
-int InputKeyboardSDL::getNextLetter()
+SDLTextInputCapture::SDLTextInputCapture(InputKeyboardSDL& parent)
+	: parent(parent)
 {
-	if (letters.size()) {
-		int letter = letters.front();
-		letters.pop_front();
-		return letter;
-	} else {
-		return 0;
+}
+
+SDLTextInputCapture::~SDLTextInputCapture()
+{
+	parent.removeCapture(this);
+}
+
+void SDLTextInputCapture::open(const TextInputData& input, SoftwareKeyboardData softKeyboardData)
+{
+	currentlyOpen = true;
+	buffer.clear();
+}
+
+void SDLTextInputCapture::close()
+{
+	currentlyOpen = false;
+	buffer.clear();
+}
+
+bool SDLTextInputCapture::isOpen() const
+{
+	return currentlyOpen;
+}
+
+void SDLTextInputCapture::update(TextInputData& input)
+{
+	if (isOpen() && !buffer.empty()) {
+		input.insertText(buffer);
+		buffer.clear();
 	}
+}
+
+void SDLTextInputCapture::onTextEntered(const StringUTF32& text)
+{
+	buffer += text;
+}
+
+std::unique_ptr<ITextInputCapture> InputKeyboardSDL::makeTextInputCapture()
+{
+	auto ptr = std::make_unique<SDLTextInputCapture>(*this);
+	captures.insert(ptr.get());
+	return ptr;
 }
 
 String InputKeyboardSDL::getButtonName(int code)
@@ -102,4 +132,9 @@ String InputKeyboardSDL::getButtonName(int code)
 			return SDL_GetKeyName(SDL_Keycode(code));
 		}
 	}
+}
+
+void InputKeyboardSDL::removeCapture(SDLTextInputCapture* capture)
+{
+	captures.erase(capture);
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "input_device.h"
+#include "input_button_base.h"
 #include "halley/data_structures/maybe.h"
 #include "halley/maths/range.h"
 
@@ -72,8 +72,9 @@ namespace Halley {
 		std::unique_ptr<ITextInputCapture> capture;
 	};
 
-	class InputKeyboard : public InputDevice {
+	class InputKeyboard : public InputButtonBase {
 	public:
+		explicit InputKeyboard(int nButtons = -1);
 		virtual ~InputKeyboard() = default;
 
 		virtual TextInputCapture captureText(TextInputData& textInputData, SoftwareKeyboardData softKeyboardData);

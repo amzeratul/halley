@@ -5,7 +5,7 @@ namespace Halley {
 	class DummyInputAPI : public InputAPIInternal {
 	public:
 		size_t getNumberOfKeyboards() const override;
-		std::shared_ptr<InputDevice> getKeyboard(int id) const override;
+		std::shared_ptr<InputKeyboard> getKeyboard(int id) const override;
 		size_t getNumberOfJoysticks() const override;
 		std::shared_ptr<InputJoystick> getJoystick(int id) const override;
 		size_t getNumberOfMice() const override;
