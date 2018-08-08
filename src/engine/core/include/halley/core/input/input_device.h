@@ -36,15 +36,6 @@ namespace Halley {
 		SwitchLeftJoycon,
 		SwitchRightJoycon
 	};
-
-	struct SoftwareKeyboardData {
-		String initial;
-		String title;
-		String subText;
-		String guideText;
-		int minLength = 0;
-		int maxLength = -1;
-	};
 	
 	class InputDevice {
 	public:
@@ -81,10 +72,6 @@ namespace Halley {
 
 		virtual Vector2f getPosition() const;
 		virtual int getWheelMove() const;
-
-		virtual int getNextLetter();
-		virtual bool isSoftwareKeyboard();
-		virtual String getSoftwareKeyboardInput(const SoftwareKeyboardData& data);
 
 		virtual void setParent(InputDevice* parent);
 		virtual InputDevice* getParent() const;

@@ -5,6 +5,7 @@
 #include "halley/core/graphics/text/text_renderer.h"
 #include "halley/core/input/input_device.h"
 #include "halley/text/i18n.h"
+#include "halley/core/input/input_keyboard.h"
 
 namespace Halley {
 	class UIStyle;
@@ -17,7 +18,6 @@ namespace Halley {
 
 		UITextInput& setText(const String& text);
 		UITextInput& setText(StringUTF32 text);
-		UITextInput& insertText(const String& text, size_t pos);
 
 		String getText() const;
 		UITextInput& setGhostText(const LocalisedString& text);
@@ -53,13 +53,10 @@ namespace Halley {
 		Sprite caret;
 		TextRenderer label;
 
-		StringUTF32 text;
+		TextInputData text;
 		LocalisedString ghostText;
 
-		Maybe<int> maxLength;
-
 		Vector2f textScrollPos;
-		int caretPos = 0;
 		float caretPhysicalPos = 0;
 		float caretTime = 0;
 

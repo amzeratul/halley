@@ -36,20 +36,9 @@ UITextInput& UITextInput::setText(const String& t)
 
 UITextInput& UITextInput::setText(StringUTF32 t)
 {
-	if (t != text) {
-		text = std::move(t);
-		setCaretPosition(int(text.size()));
-		onTextModified();
-	}
-	return *this;
-}
-
-UITextInput& UITextInput::insertText(const String& t, size_t pos)
-{
-	if (!t.isEmpty()) {
-		auto toInsert = t.getUTF32();
-		text.insert(pos, toInsert);
-		setCaretPosition(int(pos + toInsert.length()));
+	if (t != text.getText()) {
+		text.setText(std::move(t));
+		setCaretPosition(text.getSelection().e);
 		onTextModified();
 	}
 	return *this;
@@ -57,7 +46,7 @@ UITextInput& UITextInput::insertText(const String& t, size_t pos)
 
 String UITextInput::getText() const
 {
-	return String(text);
+	return String(text.getText());
 }
 
 UITextInput& UITextInput::setGhostText(const LocalisedString& t)
@@ -73,25 +62,17 @@ LocalisedString UITextInput::getGhostText() const
 
 Maybe<int> UITextInput::getMaxLength() const
 {
-	return maxLength;
+	return text.getMaxLength();
 }
 
 void UITextInput::setMaxLength(Maybe<int> length)
 {
-	maxLength = length;
+	text.setLengthLimits(0, length);
 }
 
 void UITextInput::onManualControlActivate()
 {
-	if (keyboard->isSoftwareKeyboard()) {
-		SoftwareKeyboardData data;
-		data.initial = String(text);
-		data.minLength = 0;
-		data.maxLength = maxLength ? maxLength.get() : -1;
-		setText(keyboard->getSoftwareKeyboardInput(data));
-	} else {
-		getRoot()->setFocus(shared_from_this());
-	}
+	getRoot()->setFocus(shared_from_this());
 }
 
 void UITextInput::setClipboard(std::shared_ptr<IClipboard> c)
@@ -120,54 +101,44 @@ void UITextInput::updateTextInput()
 	if (ctrlDown) {
 		if (clipboard) {
 			if (keyboard->isButtonPressed(Keys::C)) {
-				clipboard->setData(String(text));
+				clipboard->setData(String(text.getText()));
 			}
 			if (keyboard->isButtonPressed(Keys::X)) {
-				clipboard->setData(String(text));
+				clipboard->setData(String(text.getText()));
 				setText("");
 			}
 			if (keyboard->isButtonPressed(Keys::V)) {
 				auto str = clipboard->getStringData();
 				if (str) {
-					insertText(str.get(), caretPos);
+					text.insertText(str.get());
 				}
 			}
 		}
 	}
 
 	bool modified = false;
-	int caret = caretPos;
 
 	if (keyboard->isButtonPressedRepeat(Keys::Delete)) {
-		if (caret < int(text.size())) {
-			text.erase(text.begin() + caret);
-			modified = true;
-		}
+		text.onDelete();
 	}
 	
 	if (keyboard->isButtonPressedRepeat(Keys::Backspace)) {
-		if (caret > 0) {
-			text.erase(text.begin() + (caret - 1));
-			--caret;
-			modified = true;
-		}
-	}
-
-	if (keyboard->isButtonPressed(Keys::Enter) || keyboard->isButtonPressed(Keys::KP_Enter)) {
-		if (!isMultiLine) {
-			sendEvent(UIEvent(UIEventType::TextSubmit, getId(), getText()));
-		}
+		text.onBackspace();
 	}
 
 	if (keyboard->isButtonPressedRepeat(Keys::Home) || keyboard->isButtonPressedRepeat(Keys::PageUp)) {
-		caret = 0;
+		text.setSelection(0);
 	}
 	if (keyboard->isButtonPressedRepeat(Keys::End) || keyboard->isButtonPressedRepeat(Keys::PageDown)) {
-		caret = int(text.size());
+		text.setSelection(int(text.getText().size()));
 	}
 
 	int dx = (keyboard->isButtonPressedRepeat(Keys::Left) ? -1 : 0) + (keyboard->isButtonPressedRepeat(Keys::Right) ? 1 : 0);
-	caret = clamp(caret + dx, 0, int(text.size()));
+	if (dx == -1) {
+		text.setSelection(text.getSelection().s - 1);
+	} else if (dx == 1) {
+		text.setSelection(text.getSelection().e + 1);
+	}
 
 	for (int letter = keyboard->getNextLetter(); letter != 0; letter = keyboard->getNextLetter()) {
 		if (!ctrlDown && letter >= 32) {
@@ -179,10 +150,16 @@ void UITextInput::updateTextInput()
 		}
 	}
 
-	setCaretPosition(caret);
+	setCaretPosition(text.getSelection().e);
 
 	if (modified) {
 		onTextModified();
+	}
+	
+	if (keyboard->isButtonPressed(Keys::Enter) || keyboard->isButtonPressed(Keys::KP_Enter)) {
+		if (!isMultiLine) {
+			sendEvent(UIEvent(UIEventType::TextSubmit, getId(), getText()));
+		}
 	}
 }
 
@@ -200,11 +177,11 @@ void UITextInput::setCaretPosition(int pos)
 void UITextInput::onTextModified()
 {
 	if (getValidator()) {
-		text = getValidator()->onTextChanged(text);
+		text.setText(getValidator()->onTextChanged(text.getText()));
 	}
 	setCaretPosition(caretPos);
 
-	const auto str = String(text);
+	const auto str = String(text.getText());
 	sendEvent(UIEvent(UIEventType::TextChanged, getId(), str));
 	notifyDataBind(str);
 }
@@ -254,13 +231,13 @@ void UITextInput::update(Time t, bool moved)
 	}
 
 	// Update text label
-	if (text.empty() && !isFocused()) {
+	if (text.getText().empty() && !isFocused()) {
 		ghostText.checkForUpdates();
 		label = style.getTextRenderer("labelGhost");
 		label.setText(ghostText);
 	} else {
 		label = style.getTextRenderer("label");
-		label.setText(text);
+		label.setText(text.getText());
 	}
 
 	// Position the text
@@ -289,9 +266,6 @@ void UITextInput::onFocus()
 {
 	caretTime = 0;
 	caretShowing = true;
-	if (keyboard) {
-		while (keyboard->getNextLetter()) {}
-	}
 }
 
 void UITextInput::pressMouse(Vector2f mousePos, int button)
