@@ -29,7 +29,7 @@ size_t WinRTInput::getNumberOfKeyboards() const
 	return 0;
 }
 
-std::shared_ptr<InputDevice> WinRTInput::getKeyboard(int id) const
+std::shared_ptr<InputKeyboard> WinRTInput::getKeyboard(int id) const
 {
 	return {};
 }

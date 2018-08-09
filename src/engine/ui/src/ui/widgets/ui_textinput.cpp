@@ -93,7 +93,7 @@ void UITextInput::updateTextInput()
 	if (capture) {
 		bool ok = capture->update();
 		if (!ok) {
-			capture = {};
+			getRoot()->setFocus({});
 		}
 	}
 
