@@ -5,6 +5,9 @@
 
 namespace Halley {
 	class WinRTKeyboard : public InputKeyboard {
+	public:
+		void update();
+
 	protected:
 		std::unique_ptr<ITextInputCapture> makeTextInputCapture() override;
 	};

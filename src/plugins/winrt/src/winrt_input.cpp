@@ -27,6 +27,8 @@ void WinRTInput::beginEvents(Time t)
 		g->clearPresses();
 		g->update(t);
 	}
+	keyboard->update();
+	mouse->update();
 }
 
 size_t WinRTInput::getNumberOfKeyboards() const
@@ -51,16 +53,17 @@ std::shared_ptr<InputJoystick> WinRTInput::getJoystick(int id) const
 
 size_t WinRTInput::getNumberOfMice() const
 {
-	return 0;
+	return 1;
 }
 
 std::shared_ptr<InputDevice> WinRTInput::getMouse(int id) const
 {
-	return {};
+	return mouse;
 }
 
 void WinRTInput::setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction)
 {
+	mouse->setRemap(remapFunction);
 }
 
 Vector<std::shared_ptr<InputTouch>> WinRTInput::getNewTouchEvents()

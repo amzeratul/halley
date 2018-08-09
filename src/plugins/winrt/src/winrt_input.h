@@ -4,6 +4,9 @@
 
 namespace Halley
 {
+	class WinRTKeyboard;
+	class WinRTMouse;
+
 	class WinRTInput : public InputAPIInternal
 	{
 	public:
@@ -26,7 +29,7 @@ namespace Halley
 
 	private:
 		std::vector<std::shared_ptr<InputJoystick>> gamepads;
-		std::shared_ptr<InputKeyboard> keyboard;
-		std::shared_ptr<InputDevice> mouse;
+		std::shared_ptr<WinRTKeyboard> keyboard;
+		std::shared_ptr<WinRTMouse> mouse;
 	};
 }

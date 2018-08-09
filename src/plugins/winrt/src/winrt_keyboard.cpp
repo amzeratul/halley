@@ -9,6 +9,10 @@ std::unique_ptr<ITextInputCapture> WinRTKeyboard::makeTextInputCapture()
 	return std::make_unique<WinRTTextInputCapture>();
 }
 
+void WinRTKeyboard::update()
+{
+}
+
 void WinRTTextInputCapture::open(TextInputData& input_, SoftwareKeyboardData softKeyboardData)
 {
 	using namespace winrt::Windows::UI::Text::Core;
