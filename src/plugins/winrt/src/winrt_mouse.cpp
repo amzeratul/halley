@@ -75,9 +75,9 @@ void WinRTMouse::update()
 {
 	auto pos = window->PointerPosition();
 	auto bounds = window->Bounds();
-	auto windowPos = Vector2f((pos.X - bounds.X) / float(bounds.Width), (pos.Y - bounds.Y) / float(bounds.Height));
-
-	nativePos = Vector2i(windowPos * Vector2f(1920, 1080));
+	//auto windowPos = Vector2f((pos.X - bounds.X) / float(bounds.Width), (pos.Y - bounds.Y) / float(bounds.Height));
+	//nativePos = Vector2i(windowPos * Vector2f(1920, 1080));
+	nativePos = Vector2i(pos.X - bounds.X, pos.Y - bounds.Y);
 }
 
 void WinRTMouse::setRemap(std::function<Vector2f(Vector2i)> remapFunction)
