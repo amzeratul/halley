@@ -39,6 +39,7 @@ namespace Halley {
 		explicit TextInputData(StringUTF32 str);
 
 		const StringUTF32& getText() const;
+		void setText(const String& text);
 		void setText(StringUTF32 text);
 
 		Range<int> getSelection() const;

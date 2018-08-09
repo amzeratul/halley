@@ -9,7 +9,7 @@ TextInputData::TextInputData()
 
 TextInputData::TextInputData(const String& str)
 {
-	setText(str.getUTF32());
+	setText(str);
 }
 
 TextInputData::TextInputData(StringUTF32 str)
@@ -20,6 +20,11 @@ TextInputData::TextInputData(StringUTF32 str)
 const StringUTF32& TextInputData::getText() const
 {
 	return text;
+}
+
+void TextInputData::setText(const String& text)
+{
+	setText(text.getUTF32());
 }
 
 void TextInputData::setText(StringUTF32 _text)
