@@ -15,6 +15,7 @@ using namespace Halley;
 #include "winrt/Windows.UI.Core.h"
 #include "winrt/Windows.System.Diagnostics.h"
 #include "winrt/Windows.Storage.Search.h"
+#include "winrt/Windows.UI.ViewManagement.h"
 
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Storage;
@@ -124,9 +125,9 @@ public:
 
 	Rect4i getWindowRect() const override
 	{
-		//auto bounds = window.Bounds();
-		//return Rect4i(Rect4f(bounds.X, bounds.Y, bounds.Width, bounds.Height));
-		return Rect4i(Vector2i(), Vector2i(1920, 1080));
+		auto bounds = window.Bounds();
+		return Rect4i(Rect4f(bounds.X, bounds.Y, bounds.Width, bounds.Height));
+		//return Rect4i(Vector2i(), Vector2i(1920, 1080));
 	}
 
 	const WindowDefinition& getDefinition() const override
@@ -146,8 +147,8 @@ public:
 
 	void notifySizeChange(Vector2i size)
 	{
-		//definition = definition.withSize(size);
-		definition = definition.withSize(Vector2i(1920, 1080));
+		definition = definition.withSize(size);
+		//definition = definition.withSize(Vector2i(1920, 1080));
 	}
 
 private:
@@ -297,6 +298,7 @@ private:
 void WinRTSystem::runGame(std::function<void()> runnable)
 {
 	winrt::init_apartment();
+	ApplicationViewScaling::TrySetDisableLayoutScaling(true);
 	CoreApplication::Run(winrt::make<Source>(*this, std::move(runnable)));
 }
 
