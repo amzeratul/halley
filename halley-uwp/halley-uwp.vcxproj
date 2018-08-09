@@ -30,6 +30,8 @@
     <ClCompile Include="..\src\plugins\winrt\src\winrt_gamepad.cpp" />
     <ClCompile Include="..\src\plugins\winrt\src\winrt_http.cpp" />
     <ClCompile Include="..\src\plugins\winrt\src\winrt_input.cpp" />
+    <ClCompile Include="..\src\plugins\winrt\src\winrt_keyboard.cpp" />
+    <ClCompile Include="..\src\plugins\winrt\src\winrt_mouse.cpp" />
     <ClCompile Include="..\src\plugins\winrt\src\winrt_platform.cpp" />
     <ClCompile Include="..\src\plugins\winrt\src\winrt_plugin.cpp" />
     <ClCompile Include="..\src\plugins\winrt\src\winrt_system.cpp" />
@@ -40,6 +42,8 @@
     <ClInclude Include="..\src\plugins\winrt\src\winrt_gamepad.h" />
     <ClInclude Include="..\src\plugins\winrt\src\winrt_http.h" />
     <ClInclude Include="..\src\plugins\winrt\src\winrt_input.h" />
+    <ClInclude Include="..\src\plugins\winrt\src\winrt_keyboard.h" />
+    <ClInclude Include="..\src\plugins\winrt\src\winrt_mouse.h" />
     <ClInclude Include="..\src\plugins\winrt\src\winrt_platform.h" />
     <ClInclude Include="..\src\plugins\winrt\src\winrt_system.h" />
     <ClInclude Include="..\src\plugins\winrt\src\xaudio2_audio_output.h" />

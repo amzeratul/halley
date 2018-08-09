@@ -40,6 +40,12 @@
     <ClCompile Include="..\src\plugins\xbl\src\xbl_manager.cpp">
       <Filter>xbl</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\plugins\winrt\src\winrt_keyboard.cpp">
+      <Filter>input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\plugins\winrt\src\winrt_mouse.cpp">
+      <Filter>input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\plugins\winrt\src\winrt_input.h">
@@ -62,6 +68,12 @@
     </ClInclude>
     <ClInclude Include="..\src\plugins\xbl\src\xbl_manager.h">
       <Filter>xbl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\plugins\winrt\src\winrt_keyboard.h">
+      <Filter>input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\plugins\winrt\src\winrt_mouse.h">
+      <Filter>input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
