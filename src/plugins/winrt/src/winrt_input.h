@@ -44,6 +44,7 @@ namespace Halley
 
 	private:
 		TextInputData* input = nullptr;
+		Maybe<winrt::Windows::UI::Text::Core::CoreTextServicesManager> servicesManager;
 		Maybe<winrt::Windows::UI::Text::Core::CoreTextEditContext> editContext;
 	};
 }
