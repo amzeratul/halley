@@ -74,11 +74,6 @@ void UITextInput::onManualControlActivate()
 	getRoot()->setFocus(shared_from_this());
 }
 
-void UITextInput::setClipboard(std::shared_ptr<IClipboard> c)
-{
-	clipboard = std::move(c);
-}
-
 void UITextInput::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);
@@ -93,48 +88,6 @@ void UITextInput::updateTextInput()
 {
 	if (!keyboard) {
 		return;
-	}
-
-	const bool ctrlDown = keyboard->isButtonDown(Keys::LCtrl) || keyboard->isButtonDown(Keys::RCtrl);
-
-	if (ctrlDown) {
-		if (clipboard) {
-			if (keyboard->isButtonPressed(Keys::C)) {
-				clipboard->setData(String(text.getText()));
-			}
-			if (keyboard->isButtonPressed(Keys::X)) {
-				clipboard->setData(String(text.getText()));
-				setText("");
-			}
-			if (keyboard->isButtonPressed(Keys::V)) {
-				auto str = clipboard->getStringData();
-				if (str) {
-					text.insertText(str.get());
-				}
-			}
-		}
-	}
-
-	if (keyboard->isButtonPressedRepeat(Keys::Delete)) {
-		text.onDelete();
-	}
-	
-	if (keyboard->isButtonPressedRepeat(Keys::Backspace)) {
-		text.onBackspace();
-	}
-
-	if (keyboard->isButtonPressedRepeat(Keys::Home) || keyboard->isButtonPressedRepeat(Keys::PageUp)) {
-		text.setSelection(0);
-	}
-	if (keyboard->isButtonPressedRepeat(Keys::End) || keyboard->isButtonPressedRepeat(Keys::PageDown)) {
-		text.setSelection(int(text.getText().size()));
-	}
-
-	int dx = (keyboard->isButtonPressedRepeat(Keys::Left) ? -1 : 0) + (keyboard->isButtonPressedRepeat(Keys::Right) ? 1 : 0);
-	if (dx == -1) {
-		text.setSelection(text.getSelection().start - 1);
-	} else if (dx == 1) {
-		text.setSelection(text.getSelection().end + 1);
 	}
 
 	if (capture) {

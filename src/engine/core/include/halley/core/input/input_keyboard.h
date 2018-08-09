@@ -5,6 +5,33 @@
 #include "halley/maths/range.h"
 
 namespace Halley {
+	enum class TextControlCharacter {
+		Enter,
+		Delete,
+		Backspace,
+		Left,
+		Right,
+		Up,
+		Down,
+		PageUp,
+		PageDown,
+		Home,
+		End,
+		Tab,
+		Copy,
+		Paste,
+		Cut,
+		Undo,
+		Redo,
+		SelectAll,
+		SelectLeft,
+		SelectRight,
+		SelectUp,
+		SelectDown
+	};
+
+	class IClipboard;
+
 	class TextInputData {
 	public:
 		explicit TextInputData();
@@ -25,8 +52,7 @@ namespace Halley {
 		void insertText(const String& text);
 		void insertText(const StringUTF32& text);
 		
-		void onDelete();
-		void onBackspace();
+		void onControlCharacter(TextControlCharacter c, std::shared_ptr<IClipboard> clipboard);
 
 	private:
 		StringUTF32 text;
@@ -36,6 +62,8 @@ namespace Halley {
 		Maybe<int> maxLength = {};
 
 		void onTextModified();
+		void onDelete();
+		void onBackspace();
 	};
 
 	struct SoftwareKeyboardData {
@@ -48,11 +76,11 @@ namespace Halley {
 	public:
 		virtual ~ITextInputCapture() = default;
 		
-		virtual void open(const TextInputData& input, SoftwareKeyboardData softKeyboardData) = 0;
+		virtual void open(TextInputData& input, SoftwareKeyboardData softKeyboardData) = 0;
 		virtual void close() = 0;
 
 		virtual bool isOpen() const = 0;
-		virtual void update(TextInputData& input) = 0;
+		virtual void update() = 0;
 	};
 
 	class TextInputCapture {
@@ -68,7 +96,6 @@ namespace Halley {
 		bool update() const; // Returns if the capture is still open
 
 	private:
-		TextInputData& inputData;
 		std::unique_ptr<ITextInputCapture> capture;
 	};
 
@@ -78,6 +105,10 @@ namespace Halley {
 		virtual ~InputKeyboard() = default;
 
 		virtual TextInputCapture captureText(TextInputData& textInputData, SoftwareKeyboardData softKeyboardData);
+		
+		void onButtonPressed(int scanCode) override;
+		void onButtonReleased(int scanCode) override;
+		virtual void onTextControlCharacterGenerated(TextControlCharacter c);
 
 	protected:
 		virtual std::unique_ptr<ITextInputCapture> makeTextInputCapture() = 0;

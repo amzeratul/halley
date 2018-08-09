@@ -33,7 +33,6 @@ namespace Halley {
 		void setMaxLength(Maybe<int> length);
 
 		void onManualControlActivate() override;
-		void setClipboard(std::shared_ptr<IClipboard> clipboard);
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -54,7 +53,6 @@ namespace Halley {
 		void onValidatorSet() override;
 
 		std::shared_ptr<InputKeyboard> keyboard;
-		std::shared_ptr<IClipboard> clipboard;
 		std::unique_ptr<TextInputCapture> capture;
 
 		UIStyle style;

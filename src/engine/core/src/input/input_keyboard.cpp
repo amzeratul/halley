@@ -1,4 +1,6 @@
 #include <halley/core/input/input_keyboard.h>
+#include "input/input_keys.h"
+#include "api/clipboard.h"
 using namespace Halley;
 
 TextInputData::TextInputData()
@@ -86,10 +88,58 @@ void TextInputData::insertText(const StringUTF32& t)
 	}
 }
 
+void TextInputData::onControlCharacter(TextControlCharacter c, std::shared_ptr<IClipboard> clipboard)
+{
+	switch (c) {
+	case TextControlCharacter::Delete:
+		onDelete();
+		break;
+	case TextControlCharacter::Backspace:
+		onBackspace();
+		break;
+	case TextControlCharacter::Home:
+	case TextControlCharacter::PageUp:
+		setSelection(0);
+		break;
+	case TextControlCharacter::End:
+	case TextControlCharacter::PageDown:
+		setSelection(int(text.size()));
+		break;
+	case TextControlCharacter::Left:
+		setSelection(getSelection().start - 1);
+		break;
+	case TextControlCharacter::Right:
+		setSelection(getSelection().start + 1);
+		break;
+	}
+
+	if (clipboard) {
+		switch (c) {
+		case TextControlCharacter::Copy:
+			clipboard->setData(String(text));
+			break;
+		case TextControlCharacter::Paste:
+		{
+			auto str = clipboard->getStringData();
+			if (str) {
+				insertText(str.get());
+			}
+			break;
+		}
+		case TextControlCharacter::Cut:
+			clipboard->setData(String(text));
+			setText(StringUTF32());
+			break;
+		}
+	}
+}
+
 void TextInputData::onDelete()
 {
 	if (selection.start == selection.end) {
-		setText(text.substr(0, selection.start) + text.substr(selection.start + 1));
+		if (selection.start < int(text.size())) {
+			setText(text.substr(0, selection.start) + text.substr(selection.start + 1));
+		}
 	} else {
 		setText(text.substr(0, selection.start) + text.substr(selection.end));
 	}
@@ -114,8 +164,7 @@ void TextInputData::onTextModified()
 }
 
 TextInputCapture::TextInputCapture(TextInputData& inputData, SoftwareKeyboardData softKeyboardData, std::unique_ptr<ITextInputCapture> _capture)
-	: inputData(inputData)
-	, capture(std::move(_capture))
+	: capture(std::move(_capture))
 {
 	capture->open(inputData, std::move(softKeyboardData));
 }
@@ -130,22 +179,10 @@ TextInputCapture::~TextInputCapture()
 bool TextInputCapture::update() const
 {
 	if (capture->isOpen()) {
-		capture->update(inputData);
+		capture->update();
 	}
 	return capture->isOpen();
 }
-
-/*
-	for (int letter = keyboard->getNextLetter(); letter != 0; letter = keyboard->getNextLetter()) {
-		if (!ctrlDown && letter >= 32) {
-			if (!maxLength || int(text.size()) < maxLength.get()) {
-				text.insert(text.begin() + caret, letter);
-				caret++;
-				modified = true;
-			}
-		}
-	}
- */
 
 InputKeyboard::InputKeyboard(int nButtons)
 	: InputButtonBase(nButtons)
@@ -155,4 +192,108 @@ InputKeyboard::InputKeyboard(int nButtons)
 TextInputCapture InputKeyboard::captureText(TextInputData& textInputData, SoftwareKeyboardData data)
 {
 	return TextInputCapture(textInputData, std::move(data), makeTextInputCapture());
+}
+
+void InputKeyboard::onButtonPressed(int scanCode)
+{
+	const bool shiftDown = isButtonDown(Keys::LShift) || isButtonDown(Keys::RShift);
+	const bool ctrlDown = isButtonDown(Keys::LCtrl) || isButtonDown(Keys::RCtrl);
+
+	Maybe<TextControlCharacter> code;
+
+	if (!shiftDown && !ctrlDown) {
+		switch (scanCode) {
+		case Keys::Backspace:
+			code = TextControlCharacter::Backspace;
+			break;
+		case Keys::Delete:
+			code = TextControlCharacter::Delete;
+			break;
+		case Keys::Enter:
+		case Keys::KP_Enter:
+			code = TextControlCharacter::Enter;
+			break;
+		case Keys::Tab:
+			code = TextControlCharacter::Tab;
+			break;
+		case Keys::Left:
+			code = TextControlCharacter::Left;
+			break;
+		case Keys::Right:
+			code = TextControlCharacter::Right;
+			break;
+		case Keys::Up:
+			code = TextControlCharacter::Up;
+			break;
+		case Keys::Down:
+			code = TextControlCharacter::Down;
+			break;
+		case Keys::PageUp:
+			code = TextControlCharacter::PageUp;
+			break;
+		case Keys::PageDown:
+			code = TextControlCharacter::PageDown;
+			break;
+		case Keys::Home:
+			code = TextControlCharacter::Home;
+			break;
+		case Keys::End:
+			code = TextControlCharacter::End;
+			break;
+		}
+	}
+
+	if (ctrlDown && !shiftDown) {
+		switch (scanCode) {
+		case Keys::C:
+			code = TextControlCharacter::Copy;
+			break;
+		case Keys::V:
+			code = TextControlCharacter::Paste;
+			break;
+		case Keys::X:
+			code = TextControlCharacter::Cut;
+			break;
+		case Keys::Z:
+			code = TextControlCharacter::Undo;
+			break;
+		case Keys::Y:
+			code = TextControlCharacter::Redo;
+			break;
+		case Keys::A:
+			code = TextControlCharacter::SelectAll;
+			break;
+		}
+	}
+
+	if (shiftDown && !ctrlDown) {
+		switch (scanCode) {
+		case Keys::Left:
+			code = TextControlCharacter::SelectLeft;
+			break;
+		case Keys::Right:
+			code = TextControlCharacter::SelectRight;
+			break;
+		case Keys::Up:
+			code = TextControlCharacter::SelectUp;
+			break;
+		case Keys::Down:
+			code = TextControlCharacter::SelectDown;
+			break;
+		}
+	}
+
+	if (code) {
+		onTextControlCharacterGenerated(code.get());
+	}
+	InputButtonBase::onButtonPressed(scanCode);
+}
+
+void InputKeyboard::onButtonReleased(int scanCode)
+{
+	InputButtonBase::onButtonReleased(scanCode);
+}
+
+void InputKeyboard::onTextControlCharacterGenerated(TextControlCharacter c)
+{
 }

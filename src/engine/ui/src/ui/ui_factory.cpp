@@ -353,11 +353,6 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 	return result;
 }
 
-std::shared_ptr<IClipboard> UIFactory::getClipboard() const
-{
-	return api.system->getClipboard();
-}
-
 std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
@@ -385,8 +380,6 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 	if (node.hasKey("maxLength")) {
 		result->setMaxLength(node["maxLength"].asInt());
 	}
-
-	result->setClipboard(getClipboard());
 
 	return result;
 }

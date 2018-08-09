@@ -24,8 +24,9 @@
 #include "halley/core/input/input_keys.h"
 using namespace Halley;
 
-InputKeyboardSDL::InputKeyboardSDL()
+InputKeyboardSDL::InputKeyboardSDL(std::shared_ptr<IClipboard> clipboard)
 	: InputKeyboard(SDL_NUM_SCANCODES)
+	, clipboard(clipboard)
 {
 	SDL_StartTextInput();
 }
@@ -47,15 +48,6 @@ void InputKeyboardSDL::processEvent(const SDL_Event &_event)
 			{
 				int scancode = event.keysym.scancode;
 				onButtonPressed(scancode);
-				if (scancode == Keys::Backspace) {
-					onTextEntered("\b");
-				}
-				if (scancode == Keys::Enter || scancode == Keys::KP_Enter) {
-					onTextEntered("\n");
-				}
-				if (scancode == Keys::Tab) {
-					onTextEntered("\t");
-				}
 				break;
 			}
 		}
@@ -71,6 +63,13 @@ void InputKeyboardSDL::onTextEntered(const char* text)
 	}
 }
 
+void InputKeyboardSDL::onTextControlCharacterGenerated(TextControlCharacter chr)
+{
+	for (auto& c: captures) {
+		c->onControlCharacter(chr, clipboard);
+	}
+}
+
 SDLTextInputCapture::SDLTextInputCapture(InputKeyboardSDL& parent)
 	: parent(parent)
 {
@@ -81,16 +80,16 @@ SDLTextInputCapture::~SDLTextInputCapture()
 	parent.removeCapture(this);
 }
 
-void SDLTextInputCapture::open(const TextInputData& input, SoftwareKeyboardData softKeyboardData)
+void SDLTextInputCapture::open(TextInputData& input, SoftwareKeyboardData softKeyboardData)
 {
 	currentlyOpen = true;
-	buffer.clear();
+	textInput = &input;
 }
 
 void SDLTextInputCapture::close()
 {
 	currentlyOpen = false;
-	buffer.clear();
+	textInput = nullptr;
 }
 
 bool SDLTextInputCapture::isOpen() const
@@ -98,17 +97,18 @@ bool SDLTextInputCapture::isOpen() const
 	return currentlyOpen;
 }
 
-void SDLTextInputCapture::update(TextInputData& input)
+void SDLTextInputCapture::update()
 {
-	if (isOpen() && !buffer.empty()) {
-		input.insertText(buffer);
-		buffer.clear();
-	}
 }
 
 void SDLTextInputCapture::onTextEntered(const StringUTF32& text)
 {
-	buffer += text;
+	textInput->insertText(text);
+}
+
+void SDLTextInputCapture::onControlCharacter(TextControlCharacter c, std::shared_ptr<IClipboard> clipboard)
+{
+	textInput->onControlCharacter(c, clipboard);
 }
 
 std::unique_ptr<ITextInputCapture> InputKeyboardSDL::makeTextInputCapture()

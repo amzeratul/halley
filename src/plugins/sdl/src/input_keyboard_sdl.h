@@ -2,6 +2,7 @@
 
 #include <set>
 #include "halley/core/input/input_keyboard.h"
+#include "halley/core/api/clipboard.h"
 struct SDL_KeyboardEvent;
 
 namespace Halley {
@@ -13,17 +14,18 @@ namespace Halley {
 		SDLTextInputCapture(InputKeyboardSDL& parent);
 		~SDLTextInputCapture();
 
-		void open(const TextInputData& input, SoftwareKeyboardData softKeyboardData) override;
+		void open(TextInputData& input, SoftwareKeyboardData softKeyboardData) override;
 		void close() override;
 		bool isOpen() const override;
-		void update(TextInputData& input) override;
+		void update() override;
 		
 		void onTextEntered(const StringUTF32& text);
+		void onControlCharacter(TextControlCharacter c, std::shared_ptr<IClipboard> clipboard);
 
 	private:
 		bool currentlyOpen = false;
 		InputKeyboardSDL& parent;
-		StringUTF32 buffer;
+		TextInputData* textInput;
 	};
 
 	class InputKeyboardSDL : public InputKeyboard {
@@ -34,12 +36,14 @@ namespace Halley {
 		void removeCapture(SDLTextInputCapture* capture);
 
 	private:
-		InputKeyboardSDL();
+		InputKeyboardSDL(std::shared_ptr<IClipboard> clipboard);
 
 		void processEvent(const SDL_Event &event);
 		void onTextEntered(const char* text);
+		void onTextControlCharacterGenerated(TextControlCharacter c) override;
 
 		std::set<SDLTextInputCapture*> captures;
+		std::shared_ptr<IClipboard> clipboard;
 
 		friend class InputSDL;
 	};

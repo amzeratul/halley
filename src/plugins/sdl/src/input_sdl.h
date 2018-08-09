@@ -35,7 +35,7 @@ namespace Halley {
 		friend class HalleyAPI;
 
 	public:
-		InputSDL();
+		explicit InputSDL(SystemAPI& system);
 		~InputSDL();
 
 		size_t getNumberOfKeyboards() const override;
@@ -61,6 +61,8 @@ namespace Halley {
 
 		void processJoyEvent(int n, SDL_Event& event);
 		void processTouch(int type, long long touchId, long long fingerId, float x, float y);
+
+		SystemAPI& system;
 		
 		Vector<std::shared_ptr<InputKeyboardSDL>> keyboards;
 		Vector<std::shared_ptr<InputJoystick>> joysticks;

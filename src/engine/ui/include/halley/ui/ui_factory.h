@@ -38,7 +38,6 @@ namespace Halley
 
 		UIStyle getStyle(const String& name) const;
 		std::shared_ptr<UIStyleSheet> getStyleSheet() const;
-		std::shared_ptr<IClipboard> getClipboard() const;
 
 	protected:
 		const HalleyAPI& api;

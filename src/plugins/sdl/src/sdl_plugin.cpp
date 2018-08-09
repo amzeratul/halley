@@ -12,7 +12,7 @@ namespace Halley {
 	};
 
 	class SDLInputPlugin : public Plugin {
-		HalleyAPIInternal* createAPI(SystemAPI*) override { return new InputSDL(); }
+		HalleyAPIInternal* createAPI(SystemAPI* system) override { return new InputSDL(*system); }
 		PluginType getType() override { return PluginType::InputAPI; }
 		String getName() override { return "Input/SDL"; }
 	};

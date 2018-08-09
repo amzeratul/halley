@@ -34,14 +34,18 @@
 
 using namespace Halley;
 
-InputSDL::InputSDL() = default;
+InputSDL::InputSDL(SystemAPI& system)
+	: system(system)
+{
+}
+
 InputSDL::~InputSDL() = default;
 
 void InputSDL::init()
 {
 	mouseRemap = [] (Vector2i p) { return Vector2f(p); };
 
-	keyboards.push_back(std::unique_ptr<InputKeyboardSDL>(new InputKeyboardSDL()));
+	keyboards.push_back(std::unique_ptr<InputKeyboardSDL>(new InputKeyboardSDL(system.getClipboard())));
 	mice.push_back(std::unique_ptr<InputMouseSDL>(new InputMouseSDL()));
 
 	// XInput controllers
