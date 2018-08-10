@@ -65,6 +65,8 @@ std::string InputJoystickXInput::getName() const
 
 void InputJoystickXInput::update(Time t)
 {
+	clearPresses();
+
 	// If disabled, only check once every 30 steps, since XInputGetState() is fairly expensive
 	if (!isEnabled() && cooldown > 0) {
 		cooldown--;

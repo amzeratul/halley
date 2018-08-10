@@ -73,6 +73,8 @@ WinRTMouse::~WinRTMouse()
 
 void WinRTMouse::update()
 {
+	clearPresses();
+
 	auto pos = window->PointerPosition();
 	auto bounds = window->Bounds();
 	//auto windowPos = Vector2f((pos.X - bounds.X) / float(bounds.Width), (pos.Y - bounds.Y) / float(bounds.Height));

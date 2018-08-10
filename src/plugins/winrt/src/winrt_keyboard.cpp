@@ -38,23 +38,57 @@ WinRTKeyboard::WinRTKeyboard()
 	initMapping();
 
 	window = CoreWindow::GetForCurrentThread();
+	window->Dispatcher().AcceleratorKeyActivated([=] (CoreDispatcher dispatcher, const AcceleratorKeyEventArgs& args)
+	{
+		auto maybeKey = getHalleyKey(args.VirtualKey());
+		if (maybeKey) {
+			auto key = maybeKey.get();
+
+			if (args.EventType() == CoreAcceleratorKeyEventType::KeyDown) {
+				onButtonPressed(key);
+				args.Handled(true);
+			} else if (args.EventType() == CoreAcceleratorKeyEventType::KeyUp) {
+				onButtonReleased(key);
+				args.Handled(true);
+			} else if (args.EventType() == CoreAcceleratorKeyEventType::SystemKeyDown) {
+				onButtonPressed(key);
+				args.Handled(true);
+			} else if (args.EventType() == CoreAcceleratorKeyEventType::SystemKeyUp) {
+				if (key == Keys::LAlt) {
+					onButtonReleased(key);
+				} else {
+					onButtonPressed(key);
+					onButtonReleased(key);
+				}
+				args.Handled(true);
+			} else {
+				args.Handled(false);
+			}
+		} else {
+			args.Handled(false);
+		}
+	});
 	
 	keyDownEvent = window->KeyDown([=] (CoreWindow window, const KeyEventArgs& args)
 	{
+		/*
 		auto key = getHalleyKey(args.VirtualKey());
 		if (key) {
 			onButtonPressed(key.get());
 		}
 		args.Handled(key.is_initialized());
+		*/
 	});
 
 	keyUpEvent = window->KeyDown([=] (CoreWindow window, const KeyEventArgs& args)
 	{
+		/*
 		auto key = getHalleyKey(args.VirtualKey());
 		if (key) {
 			onButtonReleased(key.get());
 		}
 		args.Handled(key.is_initialized());
+		*/
 	});
 }
 
@@ -66,6 +100,7 @@ WinRTKeyboard::~WinRTKeyboard()
 
 void WinRTKeyboard::update()
 {
+	clearPresses();
 }
 
 void WinRTKeyboard::addCapture(WinRTTextInputCapture* capture)
@@ -116,10 +151,13 @@ void WinRTKeyboard::initMapping()
 	set(VirtualKey::PageUp, Keys::PageUp);
 	set(VirtualKey::PageDown, Keys::PageDown);
 
+	set(VirtualKey::Control, Keys::LCtrl);
 	set(VirtualKey::LeftControl, Keys::LCtrl);
 	set(VirtualKey::RightControl, Keys::RCtrl);
+	set(VirtualKey::Shift, Keys::LShift);
 	set(VirtualKey::LeftShift, Keys::LShift);
 	set(VirtualKey::RightShift, Keys::RShift);
+	set(VirtualKey::Menu, Keys::LAlt);
 	set(VirtualKey::LeftMenu, Keys::LAlt);
 	set(VirtualKey::RightMenu, Keys::LAlt);
 

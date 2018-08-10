@@ -104,7 +104,16 @@ public:
 
 	void update(const WindowDefinition& def) override
 	{
-		//definition = def;
+		auto curView = ApplicationView::GetForCurrentView();
+		bool currentlyFullscreen = curView.IsFullScreenMode();
+		bool wantsFullscreen = def.getWindowType() == WindowType::Fullscreen;
+		if (currentlyFullscreen != wantsFullscreen) {
+			if (wantsFullscreen) {
+				curView.TryEnterFullScreenMode();
+			} else {
+				curView.ExitFullScreenMode();
+			}
+		}
 	}
 
 	void show() override

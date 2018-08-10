@@ -30,6 +30,8 @@ namespace Halley {
 		~InputJoystickSDL();
 		std::string getName() const final override;
 
+		void update(Time t) override;
+
 		JoystickType getJoystickType() const override {
 			return JoystickType::Generic;
 		}

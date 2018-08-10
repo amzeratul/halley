@@ -63,17 +63,18 @@ void InputMouseSDL::processEvent(const SDL_Event& event, std::function<Vector2f(
 	}
 }
 
-Halley::Vector2f Halley::InputMouseSDL::getPosition() const
+Vector2f InputMouseSDL::getPosition() const
 {
 	return pos;
 }
 
-int Halley::InputMouseSDL::getWheelMove() const
+int InputMouseSDL::getWheelMove() const
 {
 	return wheelMove;
 }
 
-void Halley::InputMouseSDL::update()
+void InputMouseSDL::update()
 {
+	clearPresses();
 	wheelMove = 0;
 }

@@ -122,21 +122,18 @@ void InputSDL::beginEvents(Time t)
 	// Keyboards
 	size_t n = getNumberOfKeyboards();
 	for (size_t i=0; i < n; i++) {
-		keyboards[i]->clearPresses();
+		keyboards[i]->update();
 	}
 
 	// Joysticks
 	n = getNumberOfJoysticks();
 	for (size_t i=0; i < n; i++) {
-		auto& j = joysticks[i];
-		j->clearPresses();
-		j->update(t);
+		joysticks[i]->update(t);
 	}
 
 	// Mice
 	n = getNumberOfMice();
 	for (size_t i=0; i < n; i++) {
-		mice[i]->clearPresses();
 		mice[i]->update();
 	}
 

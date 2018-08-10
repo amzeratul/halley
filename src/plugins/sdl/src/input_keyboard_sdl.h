@@ -34,6 +34,7 @@ namespace Halley {
 		String getButtonName(int code) override;
 
 		void removeCapture(SDLTextInputCapture* capture);
+		void update();
 
 	private:
 		InputKeyboardSDL(std::shared_ptr<IClipboard> clipboard);

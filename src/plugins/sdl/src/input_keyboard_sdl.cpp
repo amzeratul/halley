@@ -138,3 +138,8 @@ void InputKeyboardSDL::removeCapture(SDLTextInputCapture* capture)
 {
 	captures.erase(capture);
 }
+
+void InputKeyboardSDL::update()
+{
+	clearPresses();
+}

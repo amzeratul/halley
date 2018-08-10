@@ -59,6 +59,12 @@ InputJoystickSDL::~InputJoystickSDL()
 	}
 }
 
+void InputJoystickSDL::update(Time t)
+{
+	clearPresses();
+	InputJoystick::update(t);
+}
+
 std::string InputJoystickSDL::getName() const
 {
 	return SDL_JoystickName(reinterpret_cast<SDL_Joystick*>(joystick));
