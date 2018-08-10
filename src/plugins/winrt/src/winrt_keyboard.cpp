@@ -38,7 +38,7 @@ WinRTKeyboard::WinRTKeyboard()
 	initMapping();
 
 	window = CoreWindow::GetForCurrentThread();
-	window->Dispatcher().AcceleratorKeyActivated([=] (CoreDispatcher dispatcher, const AcceleratorKeyEventArgs& args)
+	acceleratorKeyEvent = window->Dispatcher().AcceleratorKeyActivated([=] (CoreDispatcher dispatcher, const AcceleratorKeyEventArgs& args)
 	{
 		args.Handled(false);
 		auto maybeKey = getHalleyKey(args.VirtualKey());
@@ -61,34 +61,11 @@ WinRTKeyboard::WinRTKeyboard()
 			}
 		}
 	});
-	
-	keyDownEvent = window->KeyDown([=] (CoreWindow window, const KeyEventArgs& args)
-	{
-		/*
-		auto key = getHalleyKey(args.VirtualKey());
-		if (key) {
-			onButtonPressed(key.get());
-		}
-		args.Handled(key.is_initialized());
-		*/
-	});
-
-	keyUpEvent = window->KeyDown([=] (CoreWindow window, const KeyEventArgs& args)
-	{
-		/*
-		auto key = getHalleyKey(args.VirtualKey());
-		if (key) {
-			onButtonReleased(key.get());
-		}
-		args.Handled(key.is_initialized());
-		*/
-	});
 }
 
 WinRTKeyboard::~WinRTKeyboard()
 {
-	window->KeyDown(keyDownEvent);
-	window->KeyUp(keyUpEvent);
+	window->Dispatcher().AcceleratorKeyActivated(acceleratorKeyEvent);
 }
 
 void WinRTKeyboard::update()

@@ -20,8 +20,7 @@ namespace Halley {
 
 	protected:
 		Maybe<winrt::Windows::UI::Core::CoreWindow> window;
-		winrt::event_token keyDownEvent;
-		winrt::event_token keyUpEvent;
+		winrt::event_token acceleratorKeyEvent;
 
 		std::vector<int> keyMapping;
 		std::set<WinRTTextInputCapture*> captures;
