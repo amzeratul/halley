@@ -40,19 +40,17 @@ WinRTKeyboard::WinRTKeyboard()
 	window = CoreWindow::GetForCurrentThread();
 	window->Dispatcher().AcceleratorKeyActivated([=] (CoreDispatcher dispatcher, const AcceleratorKeyEventArgs& args)
 	{
+		args.Handled(false);
 		auto maybeKey = getHalleyKey(args.VirtualKey());
 		if (maybeKey) {
 			auto key = maybeKey.get();
 
 			if (args.EventType() == CoreAcceleratorKeyEventType::KeyDown) {
 				onButtonPressed(key);
-				args.Handled(true);
 			} else if (args.EventType() == CoreAcceleratorKeyEventType::KeyUp) {
 				onButtonReleased(key);
-				args.Handled(true);
 			} else if (args.EventType() == CoreAcceleratorKeyEventType::SystemKeyDown) {
 				onButtonPressed(key);
-				args.Handled(true);
 			} else if (args.EventType() == CoreAcceleratorKeyEventType::SystemKeyUp) {
 				if (key == Keys::LAlt) {
 					onButtonReleased(key);
@@ -60,12 +58,7 @@ WinRTKeyboard::WinRTKeyboard()
 					onButtonPressed(key);
 					onButtonReleased(key);
 				}
-				args.Handled(true);
-			} else {
-				args.Handled(false);
 			}
-		} else {
-			args.Handled(false);
 		}
 	});
 	
