@@ -244,11 +244,14 @@ std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::filterNeedsImporting(Imp
 Maybe<Path> CheckAssetsTask::findDirectoryMeta(const std::vector<Path>& metas, const Path& path) const
 {
 	auto parent = path.parentPath();
+	Maybe<Path> longestPath;
 	for (auto& m: metas) {
-		auto n = m.getNumberPaths() - 1;
-		if (m.getFront(n) == parent.getFront(n)) {
-			return m;
+		if (!longestPath || longestPath->getNumberPaths() < m.getNumberPaths()) {
+			auto n = m.getNumberPaths() - 1;
+			if (m.getFront(n) == parent.getFront(n)) {
+				longestPath = m;
+			}
 		}
 	}
-	return {};
+	return longestPath;
 }
