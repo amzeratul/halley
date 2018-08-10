@@ -69,20 +69,19 @@ static void loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta,
 	if (isDirectoryMeta) {
 		for (const auto& rootList: root) {
 			bool matches = true;
-			for (YAML::const_iterator i0 = rootList.begin(); i0 != rootList.end(); ++i0) {
-				auto name = i0->first.as<std::string>();
-				if (name == "match") {
-					matches = false;
-					for (auto& pattern: i0->second) {
-						if (assetId.contains(pattern.as<std::string>())) {
-							matches = true;
-							break;
-						}
+			if (rootList["match"]) {
+				matches = false;
+				for (auto& pattern: rootList["match"]) {
+					auto p = pattern.as<std::string>();
+					if (assetId.contains(p)) {
+						matches = true;
+						break;
 					}
-				} else if (name == "data" && matches) {
-					loadMetaTable(meta, i0->second);
-					return;
 				}
+			}
+			if (matches && rootList["data"]) {
+				loadMetaTable(meta, rootList["data"]);
+				return;
 			}
 		}
 	} else {
