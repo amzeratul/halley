@@ -17,6 +17,7 @@ namespace Halley {
 		ListSelectionChanged,
 		ListAccept,
 		ListCancel,
+		ListItemsSwapped,
 		MouseWheel,
 		MakeAreaVisible,
 		MakeAreaVisibleCentered,
@@ -34,6 +35,7 @@ namespace Halley {
 		UIEvent(UIEventType type, String sourceId, String data = "");
 		UIEvent(UIEventType type, String sourceId, bool data);
 		UIEvent(UIEventType type, String sourceId, int data);
+		UIEvent(UIEventType type, String sourceId, int data1, int data2);
 		UIEvent(UIEventType type, String sourceId, float data);
 		UIEvent(UIEventType type, String sourceId, String data, int intData);
 		UIEvent(UIEventType type, String sourceId, Vector2f data);
@@ -44,6 +46,7 @@ namespace Halley {
 		String getData() const;
 		bool getBoolData() const;
 		int getIntData() const;
+		int getIntData2() const;
 		float getFloatData() const;
 		Vector2f getVectorData() const;
 		Rect4f getRectData() const;
@@ -57,6 +60,7 @@ namespace Halley {
 		String data;
 		bool boolData = false;
 		int intData = 0;
+		int intData2 = 0;
 		float floatData = 0.0f;
 		Vector2f vectorData;
 		Rect4f rectData;

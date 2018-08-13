@@ -29,6 +29,14 @@ UIEvent::UIEvent(UIEventType type, String sourceId, int data)
 {
 }
 
+UIEvent::UIEvent(UIEventType type, String sourceId, int data1, int data2)
+	: type(type)
+	, sourceId(sourceId)
+	, intData(data1)
+	, intData2(data2)
+{
+}
+
 UIEvent::UIEvent(UIEventType type, String sourceId, float data)
 	: type(type)
 	, sourceId(sourceId)
@@ -66,6 +74,11 @@ bool UIEvent::getBoolData() const
 int UIEvent::getIntData() const
 {
 	return intData;
+}
+
+int UIEvent::getIntData2() const
+{
+	return intData2;
 }
 
 float UIEvent::getFloatData() const

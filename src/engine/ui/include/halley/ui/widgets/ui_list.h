@@ -56,11 +56,14 @@ namespace Halley {
 		bool firstUpdate = true;
 
 		void onItemClicked(UIListItem& item);
+		void onItemDragged(UIListItem& item, int index, Vector2f pos);
 		void addItem(std::shared_ptr<UIListItem> item);
 		void onAccept();
 		void onCancel();
 		void reassignIds();
 		size_t getNumberOfItems() const;
+
+		void swapItems(int idxA, int idxB);
 	};
 
 	class UIListItem : public UIClickable {
@@ -79,6 +82,11 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
+		void onMouseOver(Vector2f mousePos) override;
+		void pressMouse(Vector2f mousePos, int button) override;
+		void releaseMouse(Vector2f mousePos, int button) override;
+		void setDragPos(Vector2f pos);
+
 	private:
 		UIList& parent;
 		UIStyle style;
@@ -86,6 +94,12 @@ namespace Halley {
 		Sprite sprite;
 		Vector4f extraMouseArea;
 		bool selected = false;
+		
+		bool held = false;
+		bool dragged = false;
+		Vector2f mouseStartPos;
+		Vector2f myStartPos;
+		Vector2f curDragPos;
 
 		void doSetState(State state) override;
 		void updateSpritePosition();

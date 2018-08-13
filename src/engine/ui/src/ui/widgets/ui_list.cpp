@@ -1,6 +1,7 @@
 #include "widgets/ui_list.h"
 #include "ui_style.h"
 #include "widgets/ui_label.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -212,6 +213,12 @@ size_t UIList::getNumberOfItems() const
 	return n;
 }
 
+void UIList::swapItems(int idxA, int idxB)
+{
+	// TODO
+	//sendEvent(UIEvent(UIEventType::ListItemsSwapped, getId(), idxA, idxB));
+}
+
 void UIList::onInput(const UIInputResults& input, Time time)
 {
 	if (getNumberOfItems() == 0) {
@@ -293,6 +300,23 @@ void UIList::onItemClicked(UIListItem& item)
 	sendEvent(UIEvent(UIEventType::ListAccept, getId(), curOption));
 }
 
+void UIList::onItemDragged(UIListItem& item, int index, Vector2f pos)
+{
+	if (index > 0) {
+		auto& prev = items[index - 1];
+		if (pos.y < prev->getPosition().y) {
+			swapItems(index - 1, index);
+		}
+	}
+
+	if (index < int(items.size()) - 1) {
+		auto& next = items[index + 1];
+		if (pos.y > next->getPosition().y) {
+			swapItems(index, index + 1);
+		}
+	}
+}
+
 UIListItem::UIListItem(const String& id, UIList& parent, UIStyle style, int index, Vector4f extraMouseArea)
 	: UIClickable(id, {}, UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
 	, parent(parent)
@@ -327,10 +351,49 @@ void UIListItem::draw(UIPainter& painter) const
 
 void UIListItem::update(Time t, bool moved)
 {
-	bool dirty = updateButton() | moved;
+	bool dirty = updateButton() || moved || dragged;
 	if (dirty) {
 		updateSpritePosition();
 	}
+}
+
+void UIListItem::onMouseOver(Vector2f mousePos)
+{
+	if (held && (mousePos - mouseStartPos).length() > 2.0f) {
+		dragged = true;
+	}
+	if (dragged) {
+		setDragPos(mousePos - mouseStartPos + myStartPos);
+	}
+}
+
+void UIListItem::pressMouse(Vector2f mousePos, int button)
+{
+	UIClickable::pressMouse(mousePos, button);
+	if (button == 0) {
+		held = true;
+		dragged = false;
+		mouseStartPos = mousePos;
+		myStartPos = getPosition();
+	}
+}
+
+void UIListItem::releaseMouse(Vector2f mousePos, int button)
+{
+	UIClickable::releaseMouse(mousePos, button);
+	if (button == 0) {
+		if (held) {
+			onMouseOver(mousePos);
+			held = false;
+			dragged = false;
+		}
+	}
+}
+
+void UIListItem::setDragPos(Vector2f pos)
+{
+	curDragPos = dragged ? curDragPos : pos;
+	parent.onItemDragged(*this, index, pos);
 }
 
 void UIListItem::doSetState(State state)
@@ -358,7 +421,8 @@ void UIListItem::doSetState(State state)
 void UIListItem::updateSpritePosition()
 {
 	if (sprite.hasMaterial()) {
-		sprite.scaleTo(getSize()).setPos(getPosition());
+		Vector2f pos = getPosition();
+		sprite.scaleTo(getSize()).setPos(pos);
 	}
 }
 
