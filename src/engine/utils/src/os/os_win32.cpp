@@ -27,6 +27,8 @@
 #pragma warning(disable: 6387)
 #include "os_win32.h"
 
+#include <thread>
+#include <chrono>
 #include <iostream>
 #include <winuser.h>
 #include <Lmcons.h>
@@ -383,6 +385,9 @@ static String readPipeToString(HANDLE pipe)
 
 int OSWin32::runCommand(String rawCommand)
 {
+	using namespace std::chrono_literals;
+	std::this_thread::sleep_for(100ms);
+
 	// Create the commandline
 	auto command = rawCommand.getUTF16();
 	if (command.length() >= 1024) {
