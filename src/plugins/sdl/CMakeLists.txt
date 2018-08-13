@@ -31,4 +31,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-sdl ${SOURCES} ${HEADERS})
-target_link_libraries(halley-sdl halley-core)
+target_link_libraries(halley-sdl halley-core ${SDL2_LIBRARIES})
