@@ -570,6 +570,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 	}
 
 	auto pane = std::make_shared<UIPagedPane>(int(tabNodes.size()), Vector2f());
+	pane->setId(id + "_pagedPane");
 	for (int i = 0; i < int(tabNodes.size()); ++i) {
 		auto& tabNode = *tabNodes[i];
 		pane->getPage(i)->add(makeSizerPtr(tabNode), 1);
