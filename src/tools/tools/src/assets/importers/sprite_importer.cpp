@@ -195,15 +195,20 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 	}
 
 	// Figure out a reasonable pack size to start with
-	const int minSize = nextPowerOf2(int(sqrt(double(totalImageArea))));
+	const int minSize = nextPowerOf2(int(sqrt(double(totalImageArea)))) / 2;
 	const int64_t guessArea = int64_t(minSize) * int64_t(minSize);
 	const int maxSize = 4096;
 	int curSize = std::min(maxSize, std::max(32, int(minSize)));
 
 	// Try packing
 	bool wide = guessArea > 2 * totalImageArea;
-	while (curSize < maxSize) {
+	while (true) {
 		Vector2i size(curSize * (wide ? 2 : 1), curSize);
+		if (size.x > maxSize || size.y > maxSize) {
+			// Give up!
+			throw Exception("Unable to pack " + toString(images.size()) + " sprites in a reasonably sized atlas! curSize at " + toString(curSize) + ", maxSize is " + toString(maxSize) + ". Total image area is " + toString(totalImageArea) + " px^2, sqrt = " + toString(lround(sqrt(totalImageArea))) + " px.");
+		}
+
 		Logger::logInfo("Trying " + toString(size.x) + "x" + toString(size.y) + " px...");
 		auto res = BinPack::pack(entries, size);
 		if (res.is_initialized()) {
@@ -224,8 +229,6 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 			}
 		}
 	}
-
-	throw Exception("Unable to pack " + toString(images.size()) + " sprites in a reasonably sized atlas! curSize at " + toString(curSize) + ", maxSize is " + toString(maxSize) + ". Total image area is " + toString(totalImageArea) + " px^2, sqrt = " + toString(lround(sqrt(totalImageArea))) + " px.");
 }
 
 std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult>& result, Vector2i origSize, SpriteSheet& spriteSheet)
