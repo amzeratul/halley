@@ -47,5 +47,10 @@ namespace Halley {
 		TextInputData* input = nullptr;
 		Maybe<winrt::Windows::UI::Text::Core::CoreTextServicesManager> servicesManager;
 		Maybe<winrt::Windows::UI::Text::Core::CoreTextEditContext> editContext;
+		
+		Range<int> lastSel;
+		int lastRevision = 0;
+
+		static winrt::Windows::UI::Text::Core::CoreTextRange getRange(Range<int> range);
 	};	
 }

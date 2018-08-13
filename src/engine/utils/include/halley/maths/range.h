@@ -85,5 +85,15 @@ namespace Halley {
 			T t2 = (end-sx)*factor/divisor;
 			return min(abs(t1), abs(t2));
 		}
+
+		bool operator==(const Range& other) const
+		{
+			return start == other.start && end == other.end;
+		}
+
+		bool operator!=(const Range& other) const
+		{
+			return start != other.start || end != other.end;
+		}
 	};
 }

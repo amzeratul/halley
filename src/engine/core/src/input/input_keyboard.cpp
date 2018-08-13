@@ -139,6 +139,16 @@ void TextInputData::onControlCharacter(TextControlCharacter c, std::shared_ptr<I
 	}
 }
 
+int TextInputData::getTextRevision() const
+{
+	return textRevision;
+}
+
+Range<int> TextInputData::getTotalRange() const
+{
+	return Range<int>(0, int(text.size()));
+}
+
 void TextInputData::onDelete()
 {
 	if (selection.start == selection.end) {
@@ -165,7 +175,7 @@ void TextInputData::onBackspace()
 
 void TextInputData::onTextModified()
 {
-	// TODO
+	++textRevision;
 }
 
 TextInputCapture::TextInputCapture(TextInputData& inputData, SoftwareKeyboardData softKeyboardData, std::unique_ptr<ITextInputCapture> _capture)

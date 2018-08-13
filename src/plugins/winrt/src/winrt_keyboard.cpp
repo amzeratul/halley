@@ -199,10 +199,9 @@ void WinRTTextInputCapture::open(TextInputData& input_, SoftwareKeyboardData sof
 		args.Result(CoreTextSelectionUpdatingResult::Succeeded);
 	});
 
-	CoreTextRange newSel;
-	newSel.StartCaretPosition = input->getSelection().start;
-	newSel.EndCaretPosition = input->getSelection().end;
-	editContext->NotifyTextChanged(CoreTextRange(), int32_t(input->getText().size()), newSel);
+	lastSel = input->getSelection();
+	lastRevision = input->getTextRevision();
+	editContext->NotifyTextChanged(getRange(input->getTotalRange()), int32_t(input->getText().size()), getRange(lastSel));
 	editContext->NotifyFocusEnter();
 }
 
@@ -220,31 +219,41 @@ bool WinRTTextInputCapture::isOpen() const
 
 void WinRTTextInputCapture::update()
 {
+	const auto curSel = input->getSelection();
+	const auto curRevision = input->getTextRevision();
+	if (curRevision != lastRevision) {
+		lastRevision = curRevision;
+		lastSel = curSel;
+		editContext->NotifyTextChanged(getRange(input->getTotalRange()), int32_t(input->getText().size()), getRange(lastSel));
+	} else if (curSel != lastSel) {
+		lastSel = curSel;
+		editContext->NotifySelectionChanged(getRange(curSel));
+	}
 }
 
 void WinRTTextInputCapture::onControlCharacter(TextControlCharacter chr)
 {
 	using namespace winrt::Windows::UI::Text::Core;
 
-	auto oldText = input->getText();
-
-	CoreTextRange fullRange;
-	fullRange.StartCaretPosition = 0;
-	fullRange.EndCaretPosition = int(input->getText().size());
-
-	CoreTextRange oldSel;
-	oldSel.StartCaretPosition = input->getSelection().start;
-	oldSel.EndCaretPosition = input->getSelection().end;
+	const auto oldText = input->getText();
+	const auto fullRange = getRange(Range<int>(0, int(input->getText().size())));
+	const auto oldSel = getRange(input->getSelection());
 
 	input->onControlCharacter(chr, {});
 
-	CoreTextRange newSel;
-	newSel.StartCaretPosition = input->getSelection().start;
-	newSel.EndCaretPosition = input->getSelection().end;
+	const auto newSel = getRange(input->getSelection());
 
 	if (oldText != input->getText()) {
 		editContext->NotifyTextChanged(fullRange, int32_t(input->getText().size()), newSel);
 	} else if (oldSel != newSel) {
 		editContext->NotifySelectionChanged(newSel);
 	}
+}
+
+winrt::Windows::UI::Text::Core::CoreTextRange WinRTTextInputCapture::getRange(Range<int> src)
+{
+	winrt::Windows::UI::Text::Core::CoreTextRange range;
+	range.StartCaretPosition = src.start;
+	range.EndCaretPosition = src.end;
+	return range;
 }

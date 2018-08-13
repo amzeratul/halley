@@ -55,12 +55,16 @@ namespace Halley {
 		
 		void onControlCharacter(TextControlCharacter c, std::shared_ptr<IClipboard> clipboard);
 
+		int getTextRevision() const;
+		Range<int> getTotalRange() const;
+
 	private:
 		StringUTF32 text;
 		Range<int> selection;
 
 		int minLength = 0;
 		Maybe<int> maxLength = {};
+		int textRevision = 0;
 
 		void onTextModified();
 		void onDelete();
