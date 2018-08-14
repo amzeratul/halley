@@ -114,8 +114,10 @@ namespace Halley {
 		Vector2f swapFrom;
 		Vector2f swapTo;
 		Time swapTime = 0;
+		int manualDragTime = 0;
 
 		void doSetState(State state) override;
 		void updateSpritePosition();
+		bool isManualDragging() const;
 	};
 }

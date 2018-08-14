@@ -430,6 +430,16 @@ void UIListItem::update(Time t, bool moved)
 		}
 	}
 
+	bool manualDragging = isManualDragging();
+	if (dragged || manualDragging || manualDragTime > 0) {
+		if (manualDragging) {
+			manualDragTime = 1;
+		} else {
+			manualDragTime = 0;
+		}
+		doSetState(getCurState());
+	}
+
 	if (dirty) {
 		updateSpritePosition();
 	}
@@ -437,7 +447,7 @@ void UIListItem::update(Time t, bool moved)
 
 void UIListItem::onMouseOver(Vector2f mousePos)
 {
-	if (parent.canDrag() && held && (mousePos - mouseStartPos).length() > 2.0f) {
+	if (parent.canDrag() && held /* && (mousePos - mouseStartPos).length() > 2.0f */) {
 		dragged = true;
 	}
 	if (dragged) {
@@ -477,7 +487,9 @@ void UIListItem::setDragPos(Vector2f pos)
 
 void UIListItem::doSetState(State state)
 {
-	if (selected) {
+	if (dragged || isManualDragging()) {
+		sprite = style.getSprite("drag");
+	} else if (selected) {
 		sprite = style.getSprite("selected");
 	} else {
 		switch (state) {
@@ -503,6 +515,11 @@ void UIListItem::updateSpritePosition()
 		Vector2f pos = getPosition();
 		sprite.scaleTo(getSize()).setPos(pos);
 	}
+}
+
+bool UIListItem::isManualDragging() const
+{
+	return parent.isManualDragging() && parent.getSelectedOption() == index;
 }
 
 int UIListItem::getIndex() const
