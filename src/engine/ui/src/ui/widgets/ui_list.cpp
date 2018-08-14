@@ -481,8 +481,8 @@ void UIListItem::releaseMouse(Vector2f mousePos, int button)
 
 void UIListItem::setDragPos(Vector2f pos)
 {
-	curDragPos = pos;
-	parent.onItemDragged(*this, index, pos);
+	curDragPos = pos.round();
+	parent.onItemDragged(*this, index, curDragPos);
 }
 
 void UIListItem::doSetState(State state)
