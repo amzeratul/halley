@@ -57,6 +57,7 @@ namespace Halley {
 		int nColumns = 1;
 		bool firstUpdate = true;
 		bool dragEnabled = false;
+		bool manualDragging = false;
 
 		void onItemClicked(UIListItem& item);
 		void onItemDragged(UIListItem& item, int index, Vector2f pos);
@@ -67,6 +68,7 @@ namespace Halley {
 		size_t getNumberOfItems() const;
 
 		void swapItems(int idxA, int idxB);
+		bool isManualDragging() const;
 	};
 
 	class UIListItem : public UIClickable {

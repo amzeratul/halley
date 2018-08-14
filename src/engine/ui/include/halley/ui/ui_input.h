@@ -10,6 +10,7 @@ namespace Halley {
 			Cancel,
 			Next,
 			Prev,
+			Hold,
 			NumberOfButtons
 		};
 
@@ -38,6 +39,7 @@ namespace Halley {
 		int cancel = -1;
 		int next = -1;
 		int prev = -1;
+		int hold = -1;
 		int xAxis = -1;
 		int yAxis = -1;
 		int xAxisAlt = -1;
@@ -47,20 +49,23 @@ namespace Halley {
 	class UIInputResults {
 	public:
 		UIInputResults();
-		UIInputResults(std::array<bool, UIInput::NumberOfButtons> buttons, std::array<float, UIInput::NumberOfAxes> axes, std::array<int8_t, UIInput::NumberOfAxes> axesRepeat);
 
 		void reset();
 
 		bool isButtonPressed(UIInput::Button button) const;
+		bool isButtonReleased(UIInput::Button button) const;
+		bool isButtonHeld(UIInput::Button button) const;
 		float getAxis(UIInput::Axis axis) const;
 		int getAxisRepeat(UIInput::Axis axis) const;
 		
-		void setButtonPressed(UIInput::Button button, bool pressed);
+		void setButton(UIInput::Button button, bool pressed, bool released, bool held);
 		void setAxis(UIInput::Axis axis, float value);
 		void setAxisRepeat(UIInput::Axis axis, int value);
 
 	private:
-		std::array<bool, UIInput::NumberOfButtons> buttons;
+		std::array<bool, UIInput::NumberOfButtons> buttonsPressed;
+		std::array<bool, UIInput::NumberOfButtons> buttonsReleased;
+		std::array<bool, UIInput::NumberOfButtons> buttonsHeld;
 		std::array<float, UIInput::NumberOfAxes> axes;
 		std::array<int8_t, UIInput::NumberOfAxes> axesRepeat;
 	};

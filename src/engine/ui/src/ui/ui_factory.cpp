@@ -400,6 +400,9 @@ std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
 	for (auto& o: options) {
 		widget->addTextItem(o.first, o.second);
 	}
+
+	widget->setDrag(node["canDrag"].asBool(false));
+
 	return widget;
 }
 

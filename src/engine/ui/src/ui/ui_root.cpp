@@ -170,10 +170,22 @@ void UIRoot::updateInput(spInputDevice input)
 	for (auto& target: inputTargets) {
 		auto& b = *target->inputButtons;
 		auto& results = target->inputResults;
-		results.setButtonPressed(UIInput::Button::Accept, b.accept != -1 ? input->isButtonPressed(b.accept) : false);
-		results.setButtonPressed(UIInput::Button::Cancel, b.cancel != -1 ? input->isButtonPressed(b.cancel) : false);
-		results.setButtonPressed(UIInput::Button::Prev, b.prev != -1 ? input->isButtonPressed(b.prev) : false);
-		results.setButtonPressed(UIInput::Button::Next, b.next != -1 ? input->isButtonPressed(b.next) : false);
+		results.reset();
+		if (b.accept != -1) {
+			results.setButton(UIInput::Button::Accept, input->isButtonPressed(b.accept), input->isButtonReleased(b.accept), input->isButtonDown(b.accept));
+		}
+		if (b.cancel != -1) {
+			results.setButton(UIInput::Button::Cancel, input->isButtonPressed(b.cancel), input->isButtonReleased(b.cancel), input->isButtonDown(b.cancel));
+		}
+		if (b.prev != -1) {
+			results.setButton(UIInput::Button::Prev, input->isButtonPressed(b.prev), input->isButtonReleased(b.prev), input->isButtonDown(b.prev));
+		}
+		if (b.next != -1) {
+			results.setButton(UIInput::Button::Next, input->isButtonPressed(b.next), input->isButtonReleased(b.next), input->isButtonDown(b.next));
+		}
+		if (b.hold != -1) {
+			results.setButton(UIInput::Button::Hold, input->isButtonPressed(b.hold), input->isButtonReleased(b.hold), input->isButtonDown(b.hold));
+		}
 		results.setAxis(UIInput::Axis::X, (b.xAxis != -1 ? input->getAxis(b.xAxis) : 0) + (b.xAxisAlt != -1 ? input->getAxis(b.xAxisAlt) : 0));
 		results.setAxis(UIInput::Axis::Y, (b.yAxis != -1 ? input->getAxis(b.yAxis) : 0) + (b.yAxisAlt != -1 ? input->getAxis(b.yAxisAlt) : 0));
 		results.setAxisRepeat(UIInput::Axis::X, (b.xAxis != -1 ? input->getAxisRepeat(b.xAxis) : 0) + (b.xAxisAlt != -1 ? input->getAxisRepeat(b.xAxisAlt) : 0));

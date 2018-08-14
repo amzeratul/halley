@@ -16,8 +16,6 @@ UIList::UIList(const String& id, UIStyle style, UISizerType orientation, int nCo
 
 	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) {});
 	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event) {});
-
-	dragEnabled = true; // Hack
 }
 
 bool UIList::setSelectedOption(int option)
@@ -238,6 +236,11 @@ void UIList::swapItems(int idxA, int idxB)
 	sendEvent(UIEvent(UIEventType::ListItemsSwapped, getId(), idxA, idxB));
 }
 
+bool UIList::isManualDragging() const
+{
+	return manualDragging;
+}
+
 void UIList::onInput(const UIInputResults& input, Time time)
 {
 	if (getNumberOfItems() == 0) {
@@ -247,48 +250,73 @@ void UIList::onInput(const UIInputResults& input, Time time)
 
 	Expects(nColumns >= 1);
 
-	int nCols;
-	int nRows;
+	// Drag
+	if (input.isButtonHeld(UIInput::Button::Hold)) {
+		// Manual dragging
+		manualDragging = true;
 
-	int option = curOption;
-
-	// Next/prev first
-	if (input.isButtonPressed(UIInput::Button::Next)) {
-		option++;
-	}
-	if (input.isButtonPressed(UIInput::Button::Prev)) {
-		option--;
-	}
-	const auto nItems = int(getNumberOfItems());
-	option = modulo(option, nItems);
-
-	Vector2i cursorPos;
-	if (orientation == UISizerType::Horizontal) {
-		nRows = 1;
-		nCols = nItems;
-		cursorPos = Vector2i(option, 0);
-	} else if (orientation == UISizerType::Vertical) {
-		nRows = nItems;
-		nCols = 1;
-		cursorPos = Vector2i(0, option);
+		int dir = 0;
+		if (input.isButtonPressed(UIInput::Button::Next)) {
+			dir++;
+		} else if (input.isButtonPressed(UIInput::Button::Prev)) {
+			dir--;
+		} else if (orientation == UISizerType::Horizontal) {
+			dir += input.getAxisRepeat(UIInput::Axis::X);
+		} else if (orientation == UISizerType::Vertical) {
+			dir += input.getAxisRepeat(UIInput::Axis::Y);
+		}
+		dir = clamp(dir, -1, 1);
+		if (dir != 0) {
+			int other = clamp(0, curOption + dir, int(getCount()) - 1);
+			if (curOption != other) {
+				swapItems(curOption, other);
+			}
+		}
 	} else {
-		nRows = (nItems + nColumns - 1) / nColumns;
-		nCols = nColumns;
-		cursorPos = Vector2i(option % nCols, option / nCols);
-	}
+		// Not (manually) dragging!
+		manualDragging = false;
+		int nCols;
+		int nRows;
+		int option = curOption;
 
-	// Arrows
-	cursorPos.x += input.getAxisRepeat(UIInput::Axis::X);
-	cursorPos.y += input.getAxisRepeat(UIInput::Axis::Y);
-	cursorPos.y = modulo(cursorPos.y, nRows);
-	int columnsThisRow = (cursorPos.y == nRows - 1) ? nItems % nCols : nCols;
-	if (columnsThisRow == 0) { // If the last column is full, this will happen
-		columnsThisRow = nCols;
-	}
-	cursorPos.x = modulo(cursorPos.x, columnsThisRow); // The last row has fewer elements
+		// Next/prev first
+		if (input.isButtonPressed(UIInput::Button::Next)) {
+			option++;
+		}
+		if (input.isButtonPressed(UIInput::Button::Prev)) {
+			option--;
+		}
+		const auto nItems = int(getNumberOfItems());
+		option = modulo(option, nItems);
 
-	// Actually update the selection, if it changed
-	setSelectedOption(cursorPos.x + cursorPos.y * nCols);
+		Vector2i cursorPos;
+		if (orientation == UISizerType::Horizontal) {
+			nRows = 1;
+			nCols = nItems;
+			cursorPos = Vector2i(option, 0);
+		} else if (orientation == UISizerType::Vertical) {
+			nRows = nItems;
+			nCols = 1;
+			cursorPos = Vector2i(0, option);
+		} else {
+			nRows = (nItems + nColumns - 1) / nColumns;
+			nCols = nColumns;
+			cursorPos = Vector2i(option % nCols, option / nCols);
+		}
+
+		// Arrows
+		cursorPos.x += input.getAxisRepeat(UIInput::Axis::X);
+		cursorPos.y += input.getAxisRepeat(UIInput::Axis::Y);
+		cursorPos.y = modulo(cursorPos.y, nRows);
+		int columnsThisRow = (cursorPos.y == nRows - 1) ? nItems % nCols : nCols;
+		if (columnsThisRow == 0) { // If the last column is full, this will happen
+			columnsThisRow = nCols;
+		}
+		cursorPos.x = modulo(cursorPos.x, columnsThisRow); // The last row has fewer elements
+
+		// Actually update the selection, if it changed
+		setSelectedOption(cursorPos.x + cursorPos.y * nCols);
+	}
 
 	if (input.isButtonPressed(UIInput::Button::Accept)) {
 		onAccept();

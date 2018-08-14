@@ -8,16 +8,15 @@ UIInputResults::UIInputResults()
 	reset();
 }
 
-UIInputResults::UIInputResults(std::array<bool, UIInput::NumberOfButtons> buttons, std::array<float, UIInput::NumberOfAxes> axes, std::array<int8_t, UIInput::NumberOfAxes> axesRepeat)
-	: buttons(buttons)
-	, axes(axes)
-	, axesRepeat(axesRepeat)
-{
-}
-
 void UIInputResults::reset()
 {
-	for (auto& b: buttons) {
+	for (auto& b: buttonsPressed) {
+		b = false;
+	}
+	for (auto& b: buttonsReleased) {
+		b = false;
+	}
+	for (auto& b: buttonsHeld) {
 		b = false;
 	}
 	for (auto& a: axes) {
@@ -30,7 +29,17 @@ void UIInputResults::reset()
 
 bool UIInputResults::isButtonPressed(UIInput::Button button) const
 {
-	return buttons[int(button)];
+	return buttonsPressed[int(button)];
+}
+
+bool UIInputResults::isButtonReleased(UIInput::Button button) const
+{
+	return buttonsReleased[int(button)];
+}
+
+bool UIInputResults::isButtonHeld(UIInput::Button button) const
+{
+	return buttonsHeld[int(button)];
 }
 
 float UIInputResults::getAxis(UIInput::Axis axis) const
@@ -43,9 +52,11 @@ int UIInputResults::getAxisRepeat(UIInput::Axis axis) const
 	return axesRepeat[int(axis)];
 }
 
-void UIInputResults::setButtonPressed(UIInput::Button button, bool pressed)
+void UIInputResults::setButton(UIInput::Button button, bool pressed, bool released, bool held)
 {
-	buttons[int(button)] = pressed;
+	buttonsPressed[int(button)] = pressed;
+	buttonsReleased[int(button)] = released;
+	buttonsHeld[int(button)] = held;
 }
 
 void UIInputResults::setAxis(UIInput::Axis axis, float value)
