@@ -230,6 +230,11 @@ void UISizer::updateEnabled() const
 	}
 }
 
+void UISizer::swapItems(int idxA, int idxB)
+{
+	std::swap(entries[idxA], entries[idxB]);
+}
+
 void UISizer::clear()
 {
 	for (auto& e: entries) {

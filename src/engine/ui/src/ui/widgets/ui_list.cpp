@@ -87,19 +87,11 @@ void UIList::addTextItem(const String& id, const LocalisedString& label, float m
 	addItem(item);
 }
 
-void UIList::addItem(const String& id, std::shared_ptr<UIWidget> widget, float proportion, Vector4f border, int fillFlags, Maybe<UIStyle> styleOverride)
+void UIList::addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, Maybe<UIStyle> styleOverride)
 {
 	const auto& itemStyle = styleOverride ? *styleOverride : style;
 	auto item = std::make_shared<UIListItem>(id, *this, itemStyle.getSubStyle("item"), int(getNumberOfItems()), itemStyle.getBorder("extraMouseBorder"));
-	item->add(widget, proportion, border, fillFlags);
-	addItem(item);
-}
-
-void UIList::addItem(const String& id, std::shared_ptr<UISizer> sizer, float proportion, Vector4f border, int fillFlags, Maybe<UIStyle> styleOverride)
-{
-	const auto& itemStyle = styleOverride ? *styleOverride : style;
-	auto item = std::make_shared<UIListItem>(id, *this, itemStyle.getSubStyle("item"), int(getNumberOfItems()), itemStyle.getBorder("extraMouseBorder"));
-	item->add(sizer, proportion, border, fillFlags);
+	item->add(element, proportion, border, fillFlags);
 	addItem(item);
 }
 
@@ -215,8 +207,10 @@ size_t UIList::getNumberOfItems() const
 
 void UIList::swapItems(int idxA, int idxB)
 {
-	// TODO
-	//sendEvent(UIEvent(UIEventType::ListItemsSwapped, getId(), idxA, idxB));
+	std::swap(items[idxA], items[idxB]);
+	reassignIds();
+	getSizer().swapItems(idxA, idxB);
+	sendEvent(UIEvent(UIEventType::ListItemsSwapped, getId(), idxA, idxB));
 }
 
 void UIList::onInput(const UIInputResults& input, Time time)
@@ -302,16 +296,18 @@ void UIList::onItemClicked(UIListItem& item)
 
 void UIList::onItemDragged(UIListItem& item, int index, Vector2f pos)
 {
+	const int axis = orientation == UISizerType::Horizontal ? 0 : 1;
+
 	if (index > 0) {
 		auto& prev = items[index - 1];
-		if (pos.y < prev->getPosition().y) {
+		if (pos[axis] < prev->getPosition()[axis] + 2.0f) {
 			swapItems(index - 1, index);
 		}
 	}
 
 	if (index < int(items.size()) - 1) {
 		auto& next = items[index + 1];
-		if (pos.y > next->getPosition().y) {
+		if (pos[axis] > next->getPosition()[axis] - 2.0f) {
 			swapItems(index, index + 1);
 		}
 	}
@@ -329,7 +325,6 @@ UIListItem::UIListItem(const String& id, UIList& parent, UIStyle style, int inde
 
 void UIListItem::onClicked(Vector2f mousePos)
 {
-	parent.onItemClicked(*this);
 }
 
 void UIListItem::setSelected(bool s)
@@ -345,13 +340,30 @@ void UIListItem::setSelected(bool s)
 void UIListItem::draw(UIPainter& painter) const
 {
 	if (sprite.hasMaterial()) {
-		painter.draw(sprite);
+		if (dragged) {
+			auto p2 = painter.withAdjustedLayer(1);
+			p2.draw(sprite);
+		} else {
+			painter.draw(sprite);
+		}
 	}
 }
 
 void UIListItem::update(Time t, bool moved)
 {
-	bool dirty = updateButton() || moved || dragged;
+	bool dirty = updateButton() || moved;
+
+	if (dragged) {
+		setChildLayerAdjustment(1);
+		const auto parentRect = parent.getRect();
+		const auto myTargetRect = Rect4f(curDragPos, curDragPos + getSize());
+		setPosition(myTargetRect.fitWithin(parentRect).getTopLeft());
+		layout();
+		dirty = true;
+	} else {
+		setChildLayerAdjustment(0);
+	}
+
 	if (dirty) {
 		updateSpritePosition();
 	}
@@ -375,6 +387,7 @@ void UIListItem::pressMouse(Vector2f mousePos, int button)
 		dragged = false;
 		mouseStartPos = mousePos;
 		myStartPos = getPosition();
+		parent.onItemClicked(*this);
 	}
 }
 
@@ -392,7 +405,7 @@ void UIListItem::releaseMouse(Vector2f mousePos, int button)
 
 void UIListItem::setDragPos(Vector2f pos)
 {
-	curDragPos = dragged ? curDragPos : pos;
+	curDragPos = pos;
 	parent.onItemDragged(*this, index, pos);
 }
 

@@ -251,6 +251,24 @@ namespace Halley {
 		{
 			return Rect2D(p1 / param, p2 / param);
 		}
+
+		Rect2D fitWithin(const Rect2D& container) const
+		{
+			Rect2D r = *this;
+			if (r.p2.x > container.p2.x) {
+				r -= Vector2D<T>(r.p2.x - container.p2.x, 0);
+			}
+			if (r.p2.y > container.p2.y) {
+				r -= Vector2D<T>(0, r.p2.y - container.p2.y);
+			}
+			if (r.p1.x < container.p1.x) {
+				r -= Vector2D<T>(r.p1.x - container.p1.x, 0);
+			}
+			if (r.p1.y < container.p1.y) {
+				r -= Vector2D<T>(0, r.p1.y - container.p1.y);
+			}
+			return r;
+		}
 	};
 
 	template <typename T>
