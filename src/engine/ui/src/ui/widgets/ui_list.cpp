@@ -16,6 +16,8 @@ UIList::UIList(const String& id, UIStyle style, UISizerType orientation, int nCo
 
 	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) {});
 	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event) {});
+
+	dragEnabled = true; // Hack
 }
 
 bool UIList::setSelectedOption(int option)
@@ -194,6 +196,16 @@ std::shared_ptr<UIListItem> UIList::getItem(int n) const
 	throw Exception("Invalid item");
 }
 
+bool UIList::canDrag() const
+{
+	return dragEnabled;
+}
+
+void UIList::setDrag(bool drag)
+{
+	dragEnabled = drag;
+}
+
 size_t UIList::getNumberOfItems() const
 {
 	size_t n = 0;
@@ -207,9 +219,22 @@ size_t UIList::getNumberOfItems() const
 
 void UIList::swapItems(int idxA, int idxB)
 {
+	if (curOption == idxA) {
+		curOption = idxB;
+	} else if (curOption == idxB) {
+		curOption = idxA;
+	}
+	if (curOptionHighlight == idxA) {
+		curOptionHighlight = idxB;
+	} else if (curOptionHighlight == idxB) {
+		curOptionHighlight = idxA;
+	}
+
 	std::swap(items[idxA], items[idxB]);
 	reassignIds();
 	getSizer().swapItems(idxA, idxB);
+	items[idxA]->notifySwap(items[idxB]->getOrigPosition());
+	items[idxB]->notifySwap(items[idxA]->getOrigPosition());
 	sendEvent(UIEvent(UIEventType::ListItemsSwapped, getId(), idxA, idxB));
 }
 
@@ -300,14 +325,14 @@ void UIList::onItemDragged(UIListItem& item, int index, Vector2f pos)
 
 	if (index > 0) {
 		auto& prev = items[index - 1];
-		if (pos[axis] < prev->getPosition()[axis] + 2.0f) {
+		if (prev->canSwap() && pos[axis] < prev->getPosition()[axis] + 2.0f) {
 			swapItems(index - 1, index);
 		}
 	}
 
 	if (index < int(items.size()) - 1) {
 		auto& next = items[index + 1];
-		if (pos[axis] > next->getPosition()[axis] - 2.0f) {
+		if (next->canSwap() && pos[axis] > next->getPosition()[axis] - 2.0f) {
 			swapItems(index, index + 1);
 		}
 	}
@@ -353,6 +378,8 @@ void UIListItem::update(Time t, bool moved)
 {
 	bool dirty = updateButton() || moved;
 
+	origPos = getPosition();
+
 	if (dragged) {
 		setChildLayerAdjustment(1);
 		const auto parentRect = parent.getRect();
@@ -360,8 +387,19 @@ void UIListItem::update(Time t, bool moved)
 		setPosition(myTargetRect.fitWithin(parentRect).getTopLeft());
 		layout();
 		dirty = true;
-	} else {
+	} else  {
 		setChildLayerAdjustment(0);
+		if (swapping) {
+			swapTime += t;
+			constexpr Time totalTime = 0.15;
+			if (swapTime > totalTime) {
+				swapping = false;
+			}
+			float p = clamp(float(swapTime / totalTime), 0.0f, 1.0f);
+			setPosition(lerp(swapFrom, swapTo, p));
+			layout();
+			dirty = true;
+		}
 	}
 
 	if (dirty) {
@@ -371,7 +409,7 @@ void UIListItem::update(Time t, bool moved)
 
 void UIListItem::onMouseOver(Vector2f mousePos)
 {
-	if (held && (mousePos - mouseStartPos).length() > 2.0f) {
+	if (parent.canDrag() && held && (mousePos - mouseStartPos).length() > 2.0f) {
 		dragged = true;
 	}
 	if (dragged) {
@@ -461,6 +499,26 @@ Rect4f UIListItem::getMouseRect() const
 Rect4f UIListItem::getRawRect() const
 {
 	return Rect4f(getPosition(), getPosition() + getSize());
+}
+
+void UIListItem::notifySwap(Vector2f to)
+{
+	if (!dragged) {
+		swapping = true;
+		swapTime = 0;
+		swapFrom = getPosition();
+		swapTo = to;
+	}
+}
+
+bool UIListItem::canSwap() const
+{
+	return !swapping;
+}
+
+Vector2f UIListItem::getOrigPosition() const
+{
+	return origPos;
 }
 
 bool UIList::setSelectedOptionId(const String& id)

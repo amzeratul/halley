@@ -37,6 +37,9 @@ namespace Halley {
 		void readFromDataBind() override;
 
 		std::shared_ptr<UIListItem> getItem(int n) const;
+		
+		bool canDrag() const;
+		void setDrag(bool drag);
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -53,6 +56,7 @@ namespace Halley {
 		int curOption = -1;
 		int nColumns = 1;
 		bool firstUpdate = true;
+		bool dragEnabled = false;
 
 		void onItemClicked(UIListItem& item);
 		void onItemDragged(UIListItem& item, int index, Vector2f pos);
@@ -76,6 +80,9 @@ namespace Halley {
 		void setIndex(int index);
 		Rect4f getMouseRect() const override;
 		Rect4f getRawRect() const;
+		void notifySwap(Vector2f to);
+		bool canSwap() const;
+		Vector2f getOrigPosition() const;
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -98,7 +105,13 @@ namespace Halley {
 		bool dragged = false;
 		Vector2f mouseStartPos;
 		Vector2f myStartPos;
+		Vector2f origPos;
 		Vector2f curDragPos;
+
+		bool swapping = false;
+		Vector2f swapFrom;
+		Vector2f swapTo;
+		Time swapTime = 0;
 
 		void doSetState(State state) override;
 		void updateSpritePosition();
