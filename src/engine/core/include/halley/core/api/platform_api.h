@@ -2,9 +2,13 @@
 
 #include <memory>
 #include <halley/concurrency/future.h>
+#include <halley/utils/utils.h>
 
 namespace Halley
 {
+	class ISaveData;
+	class String;
+
 	class HTTPResponse {
 	public:
 		virtual ~HTTPResponse() {}
