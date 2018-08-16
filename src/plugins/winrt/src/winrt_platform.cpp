@@ -53,17 +53,8 @@ public:
 	}
 
 	void cancel() override
-	{
-		
+	{	
 	}
-
-	const Bytes& getData() const override
-	{
-		return data; // Empty. This is because the authorisation token will be automatically inserted by IXMLHttpRequest2
-	}
-
-private:
-	Bytes data;
 };
 
 Future<std::unique_ptr<AuthorisationToken>> WinRTPlatform::getAuthToken()
