@@ -75,15 +75,24 @@ void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
 	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 
 	size_t spriteSize = sizeof(SpriteVertexAttrib);
-	Vector<char> vertices(n * spriteSize);
+	char buffer[4096];
+	char* vertexData;
+	std::vector<char> vertices;
+	const size_t vertexDataSize = n * spriteSize;
+	if (vertexDataSize <= 4096) {
+		vertexData = buffer;
+	} else {
+		vertices.resize(vertexDataSize);
+		vertexData = vertices.data();
+	}
 
 	for (size_t i = 0; i < n; i++) {
 		auto& sprite = sprites[i];
 		Expects(sprite.material == material);
-		memcpy(&vertices[i * spriteSize], &sprite.vertexAttrib, spriteSize);
+		memcpy(&vertexData[i * spriteSize], &sprite.vertexAttrib, spriteSize);
 	}
 
-	painter.drawSprites(material, n, vertices.data());
+	painter.drawSprites(material, n, vertexData);
 }
 
 Rect4f Sprite::getAABB() const
