@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <map>
 #include <halley/concurrency/future.h>
 #include <halley/utils/utils.h>
 
@@ -34,7 +35,7 @@ namespace Halley
 		virtual bool isCancellable() const = 0;
 
 		virtual void cancel() = 0;
-		virtual const Bytes& getData() const = 0;
+		virtual std::map<String, String> getMapData() const { return {}; }
 	};
 
 	class PlatformAPI
