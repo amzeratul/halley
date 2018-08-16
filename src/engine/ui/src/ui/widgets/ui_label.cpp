@@ -18,8 +18,6 @@ void UILabel::draw(UIPainter& painter) const
 	} else {
 		painter.draw(renderer);
 	}
-
-	UIWidget::draw(painter);
 }
 
 void UILabel::update(Time t, bool moved)

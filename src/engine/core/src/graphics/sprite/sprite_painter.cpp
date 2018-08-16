@@ -79,6 +79,7 @@ void SpritePainter::start(size_t nSprites)
 	}
 	sprites.clear();
 	cachedSprites.clear();
+	cachedText.clear();
 }
 
 void SpritePainter::add(const Sprite& sprite, int mask, int layer, float tieBreaker)
