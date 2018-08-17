@@ -2,6 +2,7 @@
 #include <boost/filesystem.hpp>
 #include <halley/file/path.h>
 #include "halley/os/os.h"
+#include "halley/maths/random.h"
 
 using namespace Halley;
 using namespace boost::filesystem;
@@ -131,7 +132,13 @@ size_t FileSystem::fileSize(const Path& path)
 
 Path FileSystem::getTemporaryPath() 
 {
-	return (temp_directory_path() / unique_path("%%%%%%%%%%%%%%%%")).string();
+	auto& rng = Random::getGlobal();
+	std::array<char, 16> name;
+	const std::array<char, 16> digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+	for (size_t i = 0; i < name.size(); ++i) {
+		name[i] = digits[rng.getInt(0, 15)];
+	}
+	return Path(temp_directory_path().string()) / Path(String(name.data(), name.size()));
 }
 
 int FileSystem::runCommand(const String& command)
