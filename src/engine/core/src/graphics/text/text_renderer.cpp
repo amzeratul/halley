@@ -416,54 +416,46 @@ StringUTF32 TextRenderer::split(const String& str, float maxWidth) const
 StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth) const
 {
 	StringUTF32 result;
-	if (str.empty()) {
-		return result;
-	}
 
-	float scale = size / font->getSizePoints();
-	float curWidth = 0.0f;
-	size_t startPoint = 0;
-	size_t lastSplitPoint = 0;
+	const float scale = size / font->getSizePoints();
 
-	auto split = [&] (size_t i, bool last = false)
-	{
-		if (last) {
-			result += str.substr(startPoint);
-		} else {
-			if (lastSplitPoint > startPoint) {
-				result += str.substr(startPoint, lastSplitPoint - startPoint);
-				startPoint = lastSplitPoint + 1;
-			} else {
-				lastSplitPoint = i - 1;
-				result += str.substr(startPoint, lastSplitPoint - startPoint + 1);
-				startPoint = i;
+	gsl::span<const char32_t> src = str;
+
+	// Keep doing this while src is not exhausted
+	while (!src.empty()) {
+		float curWidth = 0.0f;
+		Maybe<gsl::span<const char32_t>> lastValid;
+
+		for (std::ptrdiff_t i = 0; i < src.length(); ++i) {
+			const int32_t c = src[i];
+			const bool isLastChar = i == src.length() - 1;
+			if (c == '\n' || c == ' ' || c == '\t' || isLastChar) {
+				lastValid = src.subspan(0, i + 1);
 			}
-			result += '\n';
-			curWidth = 0;
-		}
-	};
 
-	for (size_t i = 0; i < str.length(); ++i) {
-		auto c = str[i];
-		if (c == '\n') {
-			lastSplitPoint = i;
-			split(i);
-		} else {
-			if (c == ' ' || c == '\t') {
-				lastSplitPoint = i;
-			}
 			auto& glyph = font->getGlyph(c);
-			float w = glyph.advance.x * scale;
-			if (curWidth + w < maxWidth) {
-				curWidth += w;
-			} else {
-				split(i);
-				i = lastSplitPoint;
+			const float w = glyph.advance.x * scale;
+			curWidth += w;
+
+			if (c == '\n' || curWidth > maxWidth || isLastChar) {
+				int advanceAdjust = -1;
+				if (!lastValid || isLastChar) {
+					// lastValid won't be set if there were no suitable breaking spaces
+					lastValid = src.subspan(0, i + 1);
+					advanceAdjust = 0;
+				}
+				const int advance = lastValid.get().size();
+				Expects(advance > 0);
+
+				if (!result.empty()) {
+					result.push_back('\n');
+				}
+				result += StringUTF32(lastValid.get().data(), advance + advanceAdjust);
+				src = src.subspan(advance);
+				break;
 			}
 		}
 	}
-	split(str.length() - 1, true);
-
 	return result;
 }
 
