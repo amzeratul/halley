@@ -27,10 +27,13 @@
 namespace Halley {
 	class Exception : public std::exception {
 	public:
+		Exception() noexcept = default;
 		Exception(const String& msg, bool logCallStack = true) noexcept;
 		Exception(const Exception& other) noexcept = default;
 		Exception(Exception&& other) noexcept = default;
 		~Exception() noexcept {}
+
+		Exception& operator=(const Exception& other) = default;
 
 		const char* what() const noexcept override;
 

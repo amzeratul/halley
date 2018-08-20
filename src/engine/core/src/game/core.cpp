@@ -291,7 +291,11 @@ void Core::doFixedUpdate(Time time)
 
 	gameTimer.beginSample();
 	if (running && currentStage) {
-		currentStage->onFixedUpdate(time);
+		try {
+			currentStage->onFixedUpdate(time);
+		} catch (Exception& e) {
+			game->onUncaughtException(e, TimeLine::FixedUpdate);
+		}
 	}
 	gameTimer.endSample();
 	pumpAudio();
@@ -310,7 +314,11 @@ void Core::doVariableUpdate(Time time)
 	pumpEvents(time);
 	gameTimer.beginSample();
 	if (running && currentStage) {
-		currentStage->onVariableUpdate(time);
+		try {
+			currentStage->onVariableUpdate(time);
+		} catch (Exception& e) {
+			game->onUncaughtException(e, TimeLine::VariableUpdate);
+		}
 	}
 	gameTimer.endSample();
 	pumpAudio();
@@ -349,7 +357,13 @@ void Core::doRender(Time)
 			RenderContext context(*painter, *camera, *screenTarget);
 
 			gameTimer.beginSample();
-			currentStage->onRender(context);
+
+			try {
+				currentStage->onRender(context);
+			} catch (Exception& e) {
+				game->onUncaughtException(e, TimeLine::Render);
+			}
+
 			gameTimer.endSample();
 			gameSampled = true;
 		}
@@ -439,6 +453,11 @@ void Core::initStage(Stage& stage)
 	stage.api = &*api;
 	stage.setGame(*game);
 	stage.init();
+}
+
+Stage& Core::getCurrentStage()
+{
+	return *currentStage;
 }
 
 bool Core::transitionStage()

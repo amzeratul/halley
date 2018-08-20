@@ -35,5 +35,10 @@ namespace Halley
 		virtual int getDevConPort() const { return 12500; }
 
 		virtual std::shared_ptr<GameConsole> getGameConsole() const { return {}; }
+		
+		virtual void onUncaughtException(const Exception& exception, TimeLine timeLine)
+		{
+			throw exception;
+		}
 	};
 }
