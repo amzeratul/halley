@@ -220,6 +220,11 @@ Sprite& Sprite::setTexRect(Rect4f v)
 	return *this;
 }
 
+Rect4f Sprite::getTexRect() const
+{
+	return vertexAttrib.texRect;
+}
+
 Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 {
 	if (materialName == "") {

@@ -86,6 +86,7 @@ namespace Halley
 		Colour4f getColour() const;
 
 		Sprite& setTexRect(Rect4f texRect);
+		Rect4f getTexRect() const;
 
 		Sprite& setSliced(Vector4s slices);
 		Sprite& setNotSliced();
