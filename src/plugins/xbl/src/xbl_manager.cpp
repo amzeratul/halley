@@ -165,7 +165,7 @@ bool XBLSaveData::isReady() const
 Bytes XBLSaveData::getData(const String& path)
 {
 	if (!isReady()) {
-		throw Exception("Container is not ready yet!");
+		throw Exception("Container is not ready yet!", HalleyExceptions::PlatformPlugin);
 	}
 
 	return Concurrent::execute([&] () -> Bytes
@@ -196,11 +196,11 @@ Bytes XBLSaveData::getData(const String& path)
 std::vector<String> XBLSaveData::enumerate(const String& root)
 {
 	if (!isReady()) {
-		throw Exception("Container is not ready yet!");
+		throw Exception("Container is not ready yet!", HalleyExceptions::PlatformPlugin);
 	}
 
 		if (!isReady()) {
-		throw Exception("Container is not ready yet!");
+		throw Exception("Container is not ready yet!", HalleyExceptions::PlatformPlugin);
 	}
 
 	return Concurrent::execute([&] () -> std::vector<String>
@@ -223,7 +223,7 @@ std::vector<String> XBLSaveData::enumerate(const String& root)
 void XBLSaveData::setData(const String& path, const Bytes& data, bool commit)
 {
 	if (!isReady()) {
-		throw Exception("Container is not ready yet!");
+		throw Exception("Container is not ready yet!", HalleyExceptions::PlatformPlugin);
 	}
 
 	auto dataWriter = winrt::Windows::Storage::Streams::DataWriter();

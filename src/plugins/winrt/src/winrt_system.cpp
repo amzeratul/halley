@@ -33,7 +33,7 @@ public:
 	{
 		_wfopen_s(&fp, path.getUTF16().c_str(), L"rb");
 		if (!fp) {
-			throw Exception("Unable to load " + path);
+			throw Exception("Unable to load " + path, HalleyExceptions::File);
 		}
 	}
 

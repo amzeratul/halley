@@ -8,7 +8,7 @@ XAudio2MasteringVoice::XAudio2MasteringVoice(XAudio2AudioOutput& audio, const Au
 {
 	auto result = audio.getXAudio2().CreateMasteringVoice(&masteringVoice, spec.numChannels, spec.sampleRate, 0, deviceId.isEmpty() ? nullptr : deviceId.getUTF16().c_str());
 	if (result != S_OK) {
-		throw Exception("Unable to create mastering voice");
+		throw Exception("Unable to create mastering voice", HalleyExceptions::AudioOutPlugin);
 	}	
 }
 
@@ -38,7 +38,7 @@ XAudio2SourceVoice::XAudio2SourceVoice(XAudio2AudioOutput& audio, const AudioSpe
 
 	auto result = audio.getXAudio2().CreateSourceVoice(&voice, &format, 0, 1.0, this);
 	if (result != S_OK) {
-		throw Exception("Unable to create source voice");
+		throw Exception("Unable to create source voice", HalleyExceptions::AudioOutPlugin);
 	}
 }
 
@@ -82,7 +82,7 @@ void XAudio2SourceVoice::play()
 	running = true;
 	auto result = voice->Start();
 	if (result != S_OK) {
-		throw Exception("Unable to start voice playback");
+		throw Exception("Unable to start voice playback", HalleyExceptions::AudioOutPlugin);
 	}
 	callback();
 }
@@ -125,7 +125,7 @@ void XAudio2AudioOutput::init()
 {
 	HRESULT result = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	if (result != S_OK) {
-		throw Exception("Unable to initialise XAudio2");
+		throw Exception("Unable to initialise XAudio2", HalleyExceptions::AudioOutPlugin);
 	}
 }
 

@@ -260,18 +260,18 @@ Future<std::unique_ptr<HTTPResponse>> WinRTHTTPRequest::send()
 		IXMLHTTPRequest2* request;
 		auto hr = CoCreateInstance(CLSID_FreeThreadedXMLHTTP60, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&request));
 		if (!SUCCEEDED(hr)) {
-			throw Exception("Unable to create IXMLHTTPRequest2");
+			throw Exception("Unable to create IXMLHTTPRequest2", HalleyExceptions::PlatformPlugin);
 		}
 
 		hr = request->Open(data->method.getUTF16().c_str(), data->url.getUTF16().c_str(), response->getCallback(), nullptr, nullptr, nullptr, nullptr);
 		if (!SUCCEEDED(hr)) {
-			throw Exception("Unable to open HTTP request");
+			throw Exception("Unable to open HTTP request", HalleyExceptions::PlatformPlugin);
 		}
 
 		for (auto& header: data->headers) {
 			hr = request->SetRequestHeader(header.first.getUTF16().c_str(), header.second.getUTF16().c_str());
 			if (!SUCCEEDED(hr)) {
-				throw Exception("Unable to set HTTP header: \"" + header.first + ": " + header.second + "\"");
+				throw Exception("Unable to set HTTP header: \"" + header.first + ": " + header.second + "\"", HalleyExceptions::PlatformPlugin);
 			}
 		}
 

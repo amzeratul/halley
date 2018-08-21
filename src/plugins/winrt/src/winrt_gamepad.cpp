@@ -94,7 +94,7 @@ int WinRTGamepad::getButtonAtPosition(JoystickButtonPosition position) const
 		case JoystickButtonPosition::RightStick: return 7;
 		case JoystickButtonPosition::PlatformAcceptButton: return 0;
 		case JoystickButtonPosition::PlatformCancelButton: return 1;
-		default: throw Exception("Invalid parameter");
+		default: throw Exception("Invalid parameter", HalleyExceptions::InputPlugin);
 	}
 }
 
