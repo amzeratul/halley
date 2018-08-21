@@ -74,7 +74,7 @@ void GLUtils::doGlCheckError(const char* file, long line)
 			if (String(file) != "") {
 				msg += " at " + String(file) + ":" + toString(line);
 			}
-			throw Exception(msg);
+			throw Exception(msg, HalleyExceptions::VideoPlugin);
 		}
 	}
 }

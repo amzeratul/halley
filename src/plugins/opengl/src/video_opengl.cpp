@@ -136,7 +136,7 @@ void VideoOpenGL::initGLBindings()
 {
 #ifdef WITH_OPENGL
 	if (ogl_LoadFunctions() == ogl_LOAD_FAILED) {
-		throw Exception(String("Error initializing glLoadGen."));
+		throw Exception(String("Error initializing glLoadGen."), HalleyExceptions::VideoPlugin);
 	}
 	glCheckError();
 #endif
@@ -350,7 +350,7 @@ static std::function<void(int, void*)> getUniformBinding(UniformType type, int n
 			};
 		}
 		default:
-			throw Exception("Unsupported uniform type: " + toString(static_cast<int>(type)));
+			throw Exception("Unsupported uniform type: " + toString(static_cast<int>(type)), HalleyExceptions::VideoPlugin);
 	}
 }
 

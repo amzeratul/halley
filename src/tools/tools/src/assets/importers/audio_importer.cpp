@@ -47,7 +47,7 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 			needsResampling = true;
 		}
 	} else {
-		throw Exception("Unsupported audio format: " + mainFile.getExtension());
+		throw Exception("Unsupported audio format: " + mainFile.getExtension(), HalleyExceptions::Tools);
 	}
 
 	// Resample
@@ -92,7 +92,7 @@ static void onVorbisError(int error)
 	case OV_ENOSEEK: str = "Stream is not seekable."; break;
 	default: str = "Unknown error.";
 	}
-	throw Exception("Error opening Ogg Vorbis: "+str);
+	throw Exception("Error opening Ogg Vorbis: "+str, HalleyExceptions::Tools);
 }
 
 static void writeBytes(Bytes& dst, gsl::span<const gsl::byte> src)
@@ -239,10 +239,10 @@ std::vector<float> AudioImporter::resampleChannel(int from, int to, gsl::span<co
 	std::vector<float> dst(resampler.numOutputSamples(src.size()) + 1024);
 	auto result = resampler.resampleInterleaved(src, dst);
 	if (result.nRead != src.size()) {
-		throw Exception("Only read " + toString(result.nRead) + " samples, expected " + toString(src.size()));
+		throw Exception("Only read " + toString(result.nRead) + " samples, expected " + toString(src.size()), HalleyExceptions::Tools);
 	}
 	if (result.nWritten == dst.size()) {
-		throw Exception("Resample dst buffer overflow.");
+		throw Exception("Resample dst buffer overflow.", HalleyExceptions::Tools);
 	}
 	dst.resize(result.nWritten);
 	return dst;

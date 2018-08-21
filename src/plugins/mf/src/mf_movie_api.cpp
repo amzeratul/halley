@@ -21,7 +21,7 @@ void MFMovieAPI::init()
 {
 	auto hr = MFStartup(MF_VERSION);	
 	if (!SUCCEEDED(hr)) {
-		throw Exception("Unable to initialise MediaFoundation");
+		throw Exception("Unable to initialise MediaFoundation", HalleyExceptions::MoviePlugin);
 	}
 }
 

@@ -60,7 +60,7 @@ DX11Blend::DX11Blend(DX11Video& video, BlendType blend)
 
 	HRESULT result = video.getDevice().CreateBlendState(&desc, &state);
 	if (result != S_OK) {
-		throw Exception("Unable to create blend state");
+		throw Exception("Unable to create blend state", HalleyExceptions::VideoPlugin);
 	}
 }
 

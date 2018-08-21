@@ -101,7 +101,7 @@ static Metadata getMetaData(Path inputFilePath, Maybe<Path> dirMetaPath, Maybe<P
 			loadMetaData(meta, privateMetaPath.get(), false, inputFilePath.toString());
 		}
 	} catch (std::exception& e) {
-		throw Exception("Error parsing metafile for " + inputFilePath + ": " + e.what());
+		throw Exception("Error parsing metafile for " + inputFilePath + ": " + e.what(), HalleyExceptions::Tools);
 	}
 	return meta;
 }
@@ -160,12 +160,12 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 		// Already exists
 		auto& asset = iter->second;
 		if (asset.assetType != assetImporter.getType()) { // Ensure it has the correct type
-			throw Exception("AssetId conflict on " + assetId);
+			throw Exception("AssetId conflict on " + assetId, HalleyExceptions::Tools);
 		}
 		if (asset.srcDir == srcPath) { // Don't mix files from two different source paths
 			asset.inputFiles.push_back(input);
 		} else {
-			throw Exception("Mixed source dir input for " + assetId);
+			throw Exception("Mixed source dir input for " + assetId, HalleyExceptions::Tools);
 		}
 	}
 

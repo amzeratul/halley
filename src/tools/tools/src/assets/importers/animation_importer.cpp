@@ -69,7 +69,7 @@ void AnimationImporter::parseAnimation(Animation& animation, gsl::span<const gsl
 							values.push_back(i);
 						}
 					} else {
-						throw Exception("Invalid frame token: " + value);
+						throw Exception("Invalid frame token: " + value, HalleyExceptions::Tools);
 					}
 				}
 

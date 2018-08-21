@@ -91,7 +91,7 @@ const T& getValue(const ConfigNode& node, Resources& resources, const String& na
 			Logger::logWarning(String(typeid(T).name()) + " not found in UI style: " + name + "." + key);
 			return iter2->second;
 		} else {
-			throw Exception(String(typeid(T).name()) + " not found in UI style: " + name + "." + key + ". Additionally, default was not set.");
+			throw Exception(String(typeid(T).name()) + " not found in UI style: " + name + "." + key + ". Additionally, default was not set.", HalleyExceptions::Tools);
 		}
 	}
 }
@@ -186,7 +186,7 @@ std::shared_ptr<const UIStyleDefinition> UIStyleSheet::getStyle(const String& st
 {
 	auto iter = styles.find(styleName);
 	if (iter == styles.end()) {
-		throw Exception("Unknown style: " + styleName);
+		throw Exception("Unknown style: " + styleName, HalleyExceptions::UI);
 	}
 	return iter->second;
 }

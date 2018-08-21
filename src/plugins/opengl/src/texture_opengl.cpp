@@ -199,6 +199,6 @@ unsigned TextureOpenGL::getGLFormat(TextureFormat format)
 		return GL_DEPTH_COMPONENT16;
 #endif
 	default:
-		throw Exception("Unknown texture format: " + toString(static_cast<int>(format)));
+		throw Exception("Unknown texture format: " + toString(static_cast<int>(format)), HalleyExceptions::VideoPlugin);
 	}
 }

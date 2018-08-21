@@ -87,7 +87,7 @@ IAssetImporter& AssetImporter::getImporter(ImportAssetType type) const
 	if (i != importers.end()) {
 		return *i->second;
 	} else {
-		throw Exception("Unknown asset type: " + toString(int(type)));
+		throw Exception("Unknown asset type: " + toString(int(type)), HalleyExceptions::Tools);
 	}
 }
 

@@ -81,7 +81,7 @@ void DX11Buffer::setData(gsl::span<const gsl::byte> data)
 		auto& devCon = video.getDeviceContext();
 		HRESULT result = devCon.Map(buffer, 0, waitingReset ? D3D11_MAP_WRITE_DISCARD : D3D11_MAP_WRITE_NO_OVERWRITE, 0, &ms);
 		if (!SUCCEEDED(result)) {
-			throw Exception("Failed to map buffer memory");
+			throw Exception("Failed to map buffer memory", HalleyExceptions::VideoPlugin);
 		}
 		void* dst = reinterpret_cast<char*>(ms.pData) + lastPos;
 		memcpy(dst, data.data(), data.size_bytes());
@@ -158,7 +158,7 @@ void DX11Buffer::resize(size_t requestedSize)
 
 	HRESULT result = video.getDevice().CreateBuffer(&bd, nullptr, &buffer);
 	if (result != S_OK) {
-		throw Exception("Unable to create DX buffer with size " + toString(targetSize));
+		throw Exception("Unable to create DX buffer with size " + toString(targetSize), HalleyExceptions::VideoPlugin);
 	}
 
 	curSize = targetSize;

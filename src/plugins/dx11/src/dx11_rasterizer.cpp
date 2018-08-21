@@ -20,7 +20,7 @@ DX11Rasterizer::DX11Rasterizer(DX11Video& video, bool enableScissor)
 
 	HRESULT result = video.getDevice().CreateRasterizerState(&desc, &rasterizer);
 	if (result != S_OK) {
-		throw Exception("Unable to create rasterizer");
+		throw Exception("Unable to create rasterizer", HalleyExceptions::VideoPlugin);
 	}
 }
 

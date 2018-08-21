@@ -61,7 +61,7 @@ Bytes AssetCollector::readAdditionalFile(const Path& filePath)
 			return FileSystem::readFile(f);
 		}
 	}
-	throw Exception("Unable to find asset dependency: \"" + filePath.getString() + "\"");
+	throw Exception("Unable to find asset dependency: \"" + filePath.getString() + "\"", HalleyExceptions::Tools);
 }
 
 const std::vector<AssetResource>& AssetCollector::getAssets() const

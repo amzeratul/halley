@@ -249,5 +249,5 @@ short AsioUDPNetworkService::getFreeId() const
 			return static_cast<short>(i);
 		}
 	}
-	throw Exception("Unable to find empty connection id");
+	throw Exception("Unable to find empty connection id", HalleyExceptions::NetworkPlugin);
 }

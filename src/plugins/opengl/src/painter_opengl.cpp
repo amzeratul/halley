@@ -97,7 +97,7 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 		if (location != -1) {
 			auto texture = std::static_pointer_cast<const TextureOpenGL>(material.getTexture(textureUnit));
 			if (!texture) {
-				throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.");					
+				throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.", HalleyExceptions::VideoPlugin);					
 			} else {
 				glUniform1i(location, textureUnit);
 				texture->bind(textureUnit);

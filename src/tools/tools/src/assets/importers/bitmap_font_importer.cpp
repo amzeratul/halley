@@ -27,10 +27,10 @@ void BitmapFontImporter::import(const ImportingAsset& asset, IAssetCollector& co
 	}
 
 	if (xmlData.empty()) {
-		throw Exception("Missing XML data for bitmap font.");
+		throw Exception("Missing XML data for bitmap font.", HalleyExceptions::Tools);
 	}
 	if (pngData.empty()) {
-		throw Exception("Missing PNG data for bitmap font.");
+		throw Exception("Missing PNG data for bitmap font.", HalleyExceptions::Tools);
 	}
 
 	// Parse image
@@ -103,5 +103,5 @@ Font BitmapFontImporter::parseBitmapFontXML(Vector2i imageSize, const Bytes& dat
 		}
 	}
 
-	throw Exception("Invalid bitmap font format");
+	throw Exception("Invalid bitmap font format", HalleyExceptions::Tools);
 }

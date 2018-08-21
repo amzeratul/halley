@@ -162,7 +162,7 @@ Maybe<UISizer>& UIWidget::tryGetSizer()
 UISizer& UIWidget::getSizer()
 {
 	if (!sizer) {
-		throw Exception("UIWidget does not have a sizer.");
+		throw Exception("UIWidget does not have a sizer.", HalleyExceptions::UI);
 	}
 	return sizer.get();
 }
