@@ -31,14 +31,14 @@ SystemSchema::SystemSchema(YAML::Node node)
 							} else if (d == "optional") {
 								component.optional = true;
 							} else {
-								throw Exception("Unknown component descriptor: " + d + ", in family " + name);
+								throw Exception("Unknown component descriptor: " + d + ", in family " + name, HalleyExceptions::Resources);
 							}
 						}
 						if (!read && !write) {
-							throw Exception("Component must be either read or write, in family " + name);
+							throw Exception("Component must be either read or write, in family " + name, HalleyExceptions::Resources);
 						}
 						if (read && write) {
-							throw Exception("Component mark as read and write, simply tag it write, in family " + name);
+							throw Exception("Component mark as read and write, simply tag it write, in family " + name, HalleyExceptions::Resources);
 						}
 						component.write = desc.contains("write");
 						component.optional = desc.contains("optional");
@@ -59,7 +59,7 @@ SystemSchema::SystemSchema(YAML::Node node)
 	} else if (methodStr == "render") {
 		method = SystemMethod::Render;
 	} else {
-		throw Exception("Unknown method type: " + methodStr);
+		throw Exception("Unknown method type: " + methodStr, HalleyExceptions::Resources);
 	}
 
 	String strategyStr = node["strategy"].as<std::string>(families.empty() ? "global" : "individual");
@@ -67,7 +67,7 @@ SystemSchema::SystemSchema(YAML::Node node)
 		strategy = SystemStrategy::Global;
 	} else {
 		if (families.empty()) {
-			throw Exception("Systems with no families must use the global strategy.");
+			throw Exception("Systems with no families must use the global strategy.", HalleyExceptions::Resources);
 		}
 
 		if (strategyStr == "individual") {
@@ -75,7 +75,7 @@ SystemSchema::SystemSchema(YAML::Node node)
 		} else if (strategyStr == "parallel") {
 			strategy = SystemStrategy::Parallel;
 		} else {
-			throw Exception("Unknown strategy type: " + strategyStr);
+			throw Exception("Unknown strategy type: " + strategyStr, HalleyExceptions::Resources);
 		}
 	}
 
@@ -92,7 +92,7 @@ SystemSchema::SystemSchema(YAML::Node node)
 			} else if (nodeName == "resources") {
 				accessValue |= int(SystemAccess::Resources);
 			} else {
-				throw Exception("Unknown access type: " + nodeName);
+				throw Exception("Unknown access type: " + nodeName, HalleyExceptions::Resources);
 			}
 		}
 		access = SystemAccess(accessValue);
@@ -105,7 +105,7 @@ SystemSchema::SystemSchema(YAML::Node node)
 		} else if (lang == "lua") {
 			language = CodegenLanguage::Lua;
 		} else {
-			throw Exception("Unknown language: " + lang);
+			throw Exception("Unknown language: " + lang, HalleyExceptions::Resources);
 		}
 	}
 

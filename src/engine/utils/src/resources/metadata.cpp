@@ -35,7 +35,7 @@ String Metadata::getString(String key) const
 	if (result != entries.end()) {
 		return result->second;
 	} else {
-		throw Exception("Key " + key + " not found in metafile.");
+		throw Exception("Key " + key + " not found in metafile.", HalleyExceptions::Resources);
 	}
 }
 

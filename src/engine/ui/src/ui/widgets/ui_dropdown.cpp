@@ -95,7 +95,7 @@ void UIDropdown::setOptions(std::vector<String> oIds, std::vector<LocalisedStrin
 	}
 
 	if (oIds.size() != os.size()) {
-		throw Exception("Size mismatch between options and option ids");
+		throw Exception("Size mismatch between options and option ids", HalleyExceptions::UI);
 	}
 
 	options = os;

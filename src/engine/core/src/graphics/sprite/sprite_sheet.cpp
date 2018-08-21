@@ -120,7 +120,7 @@ size_t SpriteSheet::getIndex(const String& name) const
 		if (!spriteIdx.empty()) {
 			names += "\"";
 		}
-		throw Exception("Spritesheet does not contain sprite \"" + name + "\".\nSprites: { " + names + " }.");
+		throw Exception("Spritesheet does not contain sprite \"" + name + "\".\nSprites: { " + names + " }.", HalleyExceptions::Resources);
 	} else {
 		return size_t(iter->second);
 	}
@@ -265,7 +265,7 @@ std::shared_ptr<const SpriteSheet> SpriteResource::getSpriteSheet() const
 
 std::unique_ptr<SpriteResource> SpriteResource::loadResource(ResourceLoader& loader)
 {
-	throw Exception("Not implemented.");
+	throw Exception("Not implemented.", HalleyExceptions::Resources);
 }
 
 void SpriteResource::reload(Resource&& resource)

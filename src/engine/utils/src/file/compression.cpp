@@ -58,14 +58,14 @@ std::shared_ptr<const char> Compression::inflateToSharedPtr(gsl::span<const gsl:
 	uint64_t expectedOutSize;
 	memcpy(&expectedOutSize, bytes.data(), 8);
 	if (expectedOutSize > 100 * 1024 * 1024) {
-		throw Exception("File is too big to inflate: " + String::prettySize(expectedOutSize));
+		throw Exception("File is too big to inflate: " + String::prettySize(expectedOutSize), HalleyExceptions::File);
 	}
 
 	size_t outSize = 0;
 	auto out = inflateRaw(bytes.subspan(8), outSize);
 
 	if (outSize != expectedOutSize) {
-		throw Exception("Unexpected outsize (" + toString(outSize) + ") when inflating data, expected (" + toString(expectedOutSize) + ").");
+		throw Exception("Unexpected outsize (" + toString(outSize) + ") when inflating data, expected (" + toString(expectedOutSize) + ").", HalleyExceptions::File);
 	}
 	
 	size = outSize;

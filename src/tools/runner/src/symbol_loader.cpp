@@ -37,7 +37,7 @@ static void loadSymbolsImpl(DynamicLibrary& dll, Vector<DebugSymbol>& vector)
 
 	HANDLE hProcess = GetCurrentProcess();
 	if(!SymInitialize(hProcess, nullptr, true)) {
-		throw Exception("Unable to initialize Symbol loading");
+		throw Exception("Unable to initialize Symbol loading", HalleyExceptions::Core);
 	}
 
 	long long baseAddr = long long(dll.getBaseAddress());

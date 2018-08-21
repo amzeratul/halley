@@ -129,7 +129,7 @@ namespace Halley {
 		void readData(T& dst, gsl::span<const gsl::byte>& data) const
 		{
 			if (data.size() < T::size) {
-				throw Exception("Insufficient data to decode Aseprite entry");
+				throw Exception("Insufficient data to decode Aseprite entry", HalleyExceptions::Tools);
 			}
 			memcpy(&dst, data.data(), T::size);
 			data = data.subspan(T::size);
@@ -138,13 +138,13 @@ namespace Halley {
 		String readString(gsl::span<const gsl::byte>& data) const
 		{
 			if (data.size() < 2) {
-				throw Exception("Insufficient data to decode Aseprite entry");
+				throw Exception("Insufficient data to decode Aseprite entry", HalleyExceptions::Tools);
 			}
 			uint16_t size;
 			memcpy(&size, data.data(), 2);
 			data = data.subspan(2);
 			if (data.size() < size) {
-				throw Exception("Insufficient data to decode Aseprite entry");
+				throw Exception("Insufficient data to decode Aseprite entry", HalleyExceptions::Tools);
 			}
 			String result = String(reinterpret_cast<const char*>(data.data()), size);
 			data = data.subspan(size);

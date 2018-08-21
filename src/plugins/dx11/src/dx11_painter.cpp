@@ -65,7 +65,7 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 	for (auto& tex: material.getTextureUniforms()) {
 		auto texture = std::static_pointer_cast<const DX11Texture>(material.getTexture(textureUnit));
 		if (!texture) {
-			throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.");					
+			throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.", HalleyExceptions::VideoPlugin);
 		} else {
 			texture->bind(video, textureUnit);
 		}

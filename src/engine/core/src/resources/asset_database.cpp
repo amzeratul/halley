@@ -33,7 +33,7 @@ const AssetDatabase::Entry& AssetDatabase::TypedDB::get(const String& name) cons
 {
 	auto i = assets.find(name);
 	if (i == assets.end()) {
-		throw Exception("Asset not found: " + name);
+		throw Exception("Asset not found: " + name, HalleyExceptions::Resources);
 	}
 	return i->second;
 }

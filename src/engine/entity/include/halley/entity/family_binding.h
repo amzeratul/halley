@@ -123,7 +123,7 @@ namespace Halley {
 		{
 			auto res = tryMatch(f);
 			if (res) return *res;
-			throw Exception("No element in family matches predicate.");
+			throw Exception("No element in family matches predicate.", HalleyExceptions::Entity);
 		}
 
 		template <typename F>
@@ -131,7 +131,7 @@ namespace Halley {
 		{
 			auto res = tryMatch(f);
 			if (res) return *res;
-			throw Exception("No element in family matches predicate.");
+			throw Exception("No element in family matches predicate.", HalleyExceptions::Entity);
 		}
 
 	protected:

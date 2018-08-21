@@ -18,7 +18,7 @@ std::vector<ImageData> AsepriteExternalReader::loadImagesFromPath(Path tmp, bool
 			data.img = std::make_unique<Image>(gsl::as_bytes(gsl::span<Byte>(bytes)));
 			auto parsedName = p.getStem().getString().split("___");
 			if (parsedName.size() != 3 || parsedName[0] != "out") {
-				throw Exception("Error parsing filename: " + p.getStem().getString());
+				throw Exception("Error parsing filename: " + p.getStem().getString(), HalleyExceptions::Tools);
 			}
 			data.sequenceName = parsedName[1];
 			data.frameNumber = parsedName[2].toInteger();
@@ -101,7 +101,7 @@ std::vector<ImageData> AsepriteExternalReader::importAseprite(String spriteName,
 	Path jsonPath = tmpFilePath.parentPath() / "data.json";
 	Path baseOutputPath = tmpFilePath.parentPath() / "out";
 	if (FileSystem::runCommand("aseprite -b " + tmpFilePath.getString() + " --list-tags --data " + jsonPath.getString() + " --filename-format {path}/out___{tag}___{frame000}.png --save-as " + baseOutputPath.getString() + ".png") != 0) {
-		throw Exception("Unable to execute aseprite.");
+		throw Exception("Unable to execute aseprite.", HalleyExceptions::Tools);
 	}
 
 	// Load all images

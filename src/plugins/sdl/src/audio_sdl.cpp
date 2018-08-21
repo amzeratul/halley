@@ -19,7 +19,7 @@ String AudioDeviceSDL::getName() const
 void AudioSDL::init()
 {
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) == -1) {
-		throw Exception(String("Exception initializing audio: ") + SDL_GetError());
+		throw Exception(String("Exception initializing audio: ") + SDL_GetError(), HalleyExceptions::AudioOutPlugin);
 	}
 }
 
@@ -69,13 +69,13 @@ AudioSpec AudioSDL::openAudioDevice(const AudioSpec& requestedFormat, const Audi
 
 	device = SDL_OpenAudioDevice(deviceName, 0, &desired, &obtained, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE | SDL_AUDIO_ALLOW_FORMAT_CHANGE);
 	if (device == 0) {
-		throw Exception("Unable to open audio device \"" + (name != "" ? name : "default") + "\"");
+		throw Exception("Unable to open audio device \"" + (name != "" ? name : "default") + "\"", HalleyExceptions::AudioOutPlugin);
 	}
 
 	AudioSpec result;
 	result.format = obtained.format == AUDIO_S16SYS ? AudioSampleFormat::Int16 : (obtained.format == AUDIO_S32SYS ? AudioSampleFormat::Int32 : (obtained.format == AUDIO_F32SYS ? AudioSampleFormat::Float : AudioSampleFormat::Undefined));
 	if (result.format == AudioSampleFormat::Undefined) {
-		throw Exception("Invalid format returned from audio device: " + toString(int(result.format)));
+		throw Exception("Invalid format returned from audio device: " + toString(int(result.format)), HalleyExceptions::AudioOutPlugin);
 	}
 	result.bufferSize = obtained.samples;
 	result.numChannels = obtained.channels;
@@ -96,7 +96,7 @@ void AudioSDL::closeAudioDevice()
 void AudioSDL::startPlayback()
 {
 	if (!device) {
-		throw Exception("Audio not initialised.");
+		throw Exception("Audio not initialised.", HalleyExceptions::AudioOutPlugin);
 	}
 	if (!playing) {
 		SDL_PauseAudioDevice(device, 0);

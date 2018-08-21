@@ -125,7 +125,7 @@ std::unique_ptr<Project> HalleyEditor::loadProject(Path path)
 	auto project = projectLoader->loadProject(path);
 
 	if (!project) {
-		throw Exception("Unable to load project at " + path.string());
+		throw Exception("Unable to load project at " + path.string(), HalleyExceptions::Tools);
 	}
 
 	preferences->addRecent(path.string());
@@ -141,7 +141,7 @@ std::unique_ptr<Project> HalleyEditor::createProject(Path path)
 	// TODO
 
 	if (!project) {
-		throw Exception("Unable to create project at " + path.string());
+		throw Exception("Unable to create project at " + path.string(), HalleyExceptions::Tools);
 	}
 
 	preferences->addRecent(path.string());

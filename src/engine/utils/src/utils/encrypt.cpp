@@ -44,7 +44,7 @@ Bytes Encrypt::decrypt(const Bytes& iv, const String& key, const Bytes& data)
 	// Remove padding
 	unsigned char padSize = result.back();
 	if (padSize >= result.size()) {
-		throw Exception("Unable to undo padding");
+		throw Exception("Unable to undo padding", HalleyExceptions::Utils);
 	}
 	result.resize(result.size() - padSize);
 

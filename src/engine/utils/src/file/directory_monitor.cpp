@@ -35,7 +35,7 @@ namespace Halley {
 				} else if (result == WAIT_TIMEOUT) {
 					break;
 				} else if (result == WAIT_FAILED || WAIT_ABANDONED) {
-					throw Exception("Failed to wait for object.");
+					throw Exception("Failed to wait for object.", HalleyExceptions::Utils);
 				}
 			}
 			return changed;

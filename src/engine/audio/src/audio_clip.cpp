@@ -41,7 +41,7 @@ void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadat
 {
 	VorbisData vorbis(data);
 	if (vorbis.getSampleRate() != AudioConfig::sampleRate) {
-		throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.");
+		throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.", HalleyExceptions::AudioEngine);
 	}	
 	numChannels = vorbis.getNumChannels();
 	sampleLength = vorbis.getNumSamples();
@@ -63,7 +63,7 @@ void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadat
 	vorbisData = std::make_unique<VorbisData>(data);
 	size_t nChannels = vorbisData->getNumChannels();
 	if (vorbisData->getSampleRate() != AudioConfig::sampleRate) {
-		throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.");
+		throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.", HalleyExceptions::AudioEngine);
 	}
 	
 	samples.resize(nChannels);

@@ -28,14 +28,14 @@ void SystemSDL::init()
 	// Initialize SDL
 	if (!SDL_WasInit(0)) {
 		if (SDL_Init(0) == -1) {
-			throw Exception(String("Exception initializing SDL: ") + SDL_GetError());
+			throw Exception(String("Exception initializing SDL: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
 		}
 	}
 	if (SDL_InitSubSystem(SDL_INIT_TIMER) == -1) {
-		throw Exception(String("Exception initializing timer: ") + SDL_GetError());
+		throw Exception(String("Exception initializing timer: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
 	}
 	if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) == -1) {
-		throw Exception(String("Exception initializing joystick: ") + SDL_GetError());
+		throw Exception(String("Exception initializing joystick: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
 	}
 
 	SDL_ShowCursor(SDL_DISABLE);
@@ -185,7 +185,7 @@ std::shared_ptr<Window> SystemSDL::createWindow(const WindowDefinition& windowDe
 	// Create window
 	auto sdlWindow = SDL_CreateWindow(windowDef.getTitle().c_str(), winPos.x, winPos.y, windowSize.x, windowSize.y, flags);
 	if (!sdlWindow) {
-		throw Exception(String("Error creating SDL window: ") + SDL_GetError());
+		throw Exception(String("Error creating SDL window: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
 	}
 
 	// Show window
@@ -291,7 +291,7 @@ void SystemSDL::initVideo() const
 {
 	if (!videoInit) {
 		if (SDL_InitSubSystem(SDL_INIT_VIDEO) == -1) {
-			throw Exception(String("Exception initializing video: ") + SDL_GetError());
+			throw Exception(String("Exception initializing video: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
 		}
 		SDL_VideoInit(nullptr);
 		printDebugInfo();

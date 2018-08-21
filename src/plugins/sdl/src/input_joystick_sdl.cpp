@@ -33,7 +33,7 @@ InputJoystickSDL::InputJoystickSDL(int number)
 {
 	// Open
 	auto joy = SDL_JoystickOpen(index);
-	if (!joy) throw Exception("Could not open Joystick");
+	if (!joy) throw Exception("Could not open Joystick", HalleyExceptions::InputPlugin);
 	joystick = joy;
 
 	// Axes

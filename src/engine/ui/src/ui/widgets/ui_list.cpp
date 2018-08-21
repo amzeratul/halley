@@ -181,7 +181,7 @@ void UIList::reassignIds()
 std::shared_ptr<UIListItem> UIList::getItem(int n) const
 {
 	if (n < 0) {
-		throw Exception("Invalid item");
+		throw Exception("Invalid item", HalleyExceptions::UI);
 	}
 	int i = 0;
 	for (auto& item: items) {
@@ -191,7 +191,7 @@ std::shared_ptr<UIListItem> UIList::getItem(int n) const
 			}
 		}
 	}
-	throw Exception("Invalid item");
+	throw Exception("Invalid item", HalleyExceptions::UI);
 }
 
 bool UIList::canDrag() const

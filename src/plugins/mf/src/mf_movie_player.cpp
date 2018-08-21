@@ -37,7 +37,7 @@ void MFMoviePlayer::init()
 	IMFAttributes* attributes = nullptr;
 	HRESULT hr = MFCreateAttributes(&attributes, 1);
 	if (!SUCCEEDED(hr)) {
-		throw Exception("Unable to create attributes");
+		throw Exception("Unable to create attributes", HalleyExceptions::MoviePlugin);
 	}
 
 	/*
@@ -69,7 +69,7 @@ void MFMoviePlayer::init()
 
 	hr = MFCreateSourceReaderFromByteStream(inputByteStream, attributes, &reader);
 	if (!SUCCEEDED(hr)) {
-		throw Exception("Unable to create source reader");
+		throw Exception("Unable to create source reader", HalleyExceptions::MoviePlugin);
 	}
 
 	// Release these temporaries
@@ -107,13 +107,13 @@ void MFMoviePlayer::init()
 				try {
 					hr = nativeType->GetGUID(MF_MT_MAJOR_TYPE, &majorType);
 					if (!SUCCEEDED(hr)) {
-						throw Exception("Unable to read major type");
+						throw Exception("Unable to read major type", HalleyExceptions::MoviePlugin);
 					}
 
 					MFCreateMediaType(&targetType);
 					hr = targetType->SetGUID(MF_MT_MAJOR_TYPE, majorType);
 					if (!SUCCEEDED(hr)) {
-						throw Exception("Unable to write major type");
+						throw Exception("Unable to write major type", HalleyExceptions::MoviePlugin);
 					}
 
 					if (majorType == MFMediaType_Video) {
@@ -139,12 +139,12 @@ void MFMoviePlayer::init()
 
 					hr = targetType->SetGUID(MF_MT_SUBTYPE, subType);
 					if (!SUCCEEDED(hr)) {
-						throw Exception("Unable to write subtype");
+						throw Exception("Unable to write subtype", HalleyExceptions::MoviePlugin);
 					}
 
 					hr = reader->SetCurrentMediaType(streamIndex, nullptr, targetType);
 					if (!SUCCEEDED(hr)) {
-						throw Exception("Unable to set current media type");
+						throw Exception("Unable to set current media type", HalleyExceptions::MoviePlugin);
 					}
 				} catch (...) {
 					if (targetType) {
@@ -157,7 +157,7 @@ void MFMoviePlayer::init()
 				targetType->Release();
 				nativeType->Release();
 			} else {
-				throw Exception("Error reading stream info");
+				throw Exception("Error reading stream info", HalleyExceptions::MoviePlugin);
 			}
 		}
 	}
@@ -242,7 +242,7 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 				IMF2DBuffer* buffer2d;
 				hr = buffer->QueryInterface(__uuidof(IMF2DBuffer), reinterpret_cast<void**>(&buffer2d));
 				if (!SUCCEEDED(hr)) {
-					throw Exception("Unable to read video frame");
+					throw Exception("Unable to read video frame", HalleyExceptions::MoviePlugin);
 				}
 				
 				BYTE* src;

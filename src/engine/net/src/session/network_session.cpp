@@ -69,7 +69,7 @@ int NetworkSession::getMyPeerId() const
 int NetworkSession::getClientCount() const
 {
 	if (type == NetworkSessionType::Client) {
-		throw Exception("Client shouldn't bet rying to query client count!");
+		throw Exception("Client shouldn't bet rying to query client count!", HalleyExceptions::Network);
 		//return getStatus() != ConnectionStatus::Open ? 0 : 2; // TODO
 	} else if (type == NetworkSessionType::Host) {
 		int i = 1;
@@ -150,11 +150,11 @@ NetworkSessionType NetworkSession::getType() const
 SharedData& NetworkSession::doGetMySharedData()
 {
 	if (type == NetworkSessionType::Undefined || myPeerId == -1) {
-		throw Exception("Not connected.");
+		throw Exception("Not connected.", HalleyExceptions::Network);
 	}
 	auto iter = sharedData.find(myPeerId);
 	if (iter == sharedData.end()) {
-		throw Exception("Not connected.");
+		throw Exception("Not connected.", HalleyExceptions::Network);
 	}
 	return *iter->second;
 }
@@ -162,7 +162,7 @@ SharedData& NetworkSession::doGetMySharedData()
 SharedData& NetworkSession::doGetMutableSessionSharedData()
 {
 	if (type != NetworkSessionType::Host) {
-		throw Exception("Only the host can modify shared session data.");
+		throw Exception("Only the host can modify shared session data.", HalleyExceptions::Network);
 	}
 	return *sessionSharedData;
 }
@@ -176,7 +176,7 @@ const SharedData& NetworkSession::doGetClientSharedData(int clientId) const
 {
 	auto result = doTryGetClientSharedData(clientId);
 	if (!result) {
-		throw Exception("Unknown client with id: " + toString(clientId));
+		throw Exception("Unknown client with id: " + toString(clientId), HalleyExceptions::Network);
 	}
 	return *result;
 }
@@ -227,7 +227,7 @@ ConnectionStatus NetworkSession::getStatus() const
 	} else if (type == NetworkSessionType::Host) {
 		return ConnectionStatus::Connected;
 	} else {
-		throw Exception("Unknown session type.");
+		throw Exception("Unknown session type.", HalleyExceptions::Network);
 	}
 }
 
@@ -314,7 +314,7 @@ void NetworkSession::processReceive()
 			}
 
 			else {
-				throw Exception("NetworkSession in invalid state.");
+				throw Exception("NetworkSession in invalid state.", HalleyExceptions::Network);
 			}
 		}
 	}

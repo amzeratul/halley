@@ -38,17 +38,17 @@ bool UIDataBind::getBoolData()
 
 int UIDataBind::getIntData()
 {
-	throw Exception("Not implemented");
+	throw Exception("Not implemented", HalleyExceptions::UI);
 }
 
 float UIDataBind::getFloatData()
 {
-	throw Exception("Not implemented");
+	throw Exception("Not implemented", HalleyExceptions::UI);
 }
 
 String UIDataBind::getStringData()
 {
-	throw Exception("Not implemented");
+	throw Exception("Not implemented", HalleyExceptions::UI);
 }
 
 void UIDataBind::pushData()

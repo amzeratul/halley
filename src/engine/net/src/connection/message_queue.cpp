@@ -24,7 +24,7 @@ int MessageQueue::getMessageType(NetworkMessage& msg) const
 {
 	auto idxIter = typeToMsgIndex.find(std::type_index(typeid(msg)));
 	if (idxIter == typeToMsgIndex.end()) {
-		throw Exception("No appropriate factory for this type of message: " + String(typeid(msg).name()));
+		throw Exception("No appropriate factory for this type of message: " + String(typeid(msg).name()), HalleyExceptions::Network);
 	}
 	return idxIter->second;
 }

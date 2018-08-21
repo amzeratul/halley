@@ -145,7 +145,7 @@ namespace Halley
 		T0 doGet(typename std::enable_if<std::is_copy_constructible<T0>::value, int>::type)
 		{
 			if (!data.is_initialized()) {
-				throw Exception("Data is not initialized.");
+				throw Exception("Data is not initialized.", HalleyExceptions::Utils);
 			}
 			return data.get();
 		}
@@ -154,7 +154,7 @@ namespace Halley
 		T0 doGet(typename std::enable_if<!std::is_copy_constructible<T0>::value, int>::type)
 		{
 			if (!data.is_initialized()) {
-				throw Exception("Data is not initialized.");
+				throw Exception("Data is not initialized.", HalleyExceptions::Utils);
 			}
 			auto result = std::move(data.get());
 			data.reset();
@@ -208,7 +208,7 @@ namespace Halley
 		DataType get()
 		{
 			if (!data) {
-				throw Exception("Future has not been bound.");
+				throw Exception("Future has not been bound.", HalleyExceptions::Utils);
 			}
 			return data->get();
 		}
@@ -216,7 +216,7 @@ namespace Halley
 		void wait()
 		{
 			if (!data) {
-				throw Exception("Future has not been bound.");
+				throw Exception("Future has not been bound.", HalleyExceptions::Utils);
 			}
 			return data->wait();
 		}
@@ -224,7 +224,7 @@ namespace Halley
 		void cancel()
 		{
 			if (!data) {
-				throw Exception("Future has not been bound.");
+				throw Exception("Future has not been bound.", HalleyExceptions::Utils);
 			}
 			data->cancel();
 		}

@@ -78,7 +78,7 @@ void MessageQueueUDP::setChannel(int channel, ChannelSettings settings)
 	Expects(channel < 32);
 
 	if (channels[channel].initialized) {
-		throw Exception("Channel " + toString(channel) + " already set");
+		throw Exception("Channel " + toString(channel) + " already set", HalleyExceptions::Network);
 	}
 
 	auto& c = channels[channel];
@@ -99,7 +99,7 @@ void MessageQueueUDP::receiveMessages()
 				memcpy(&channelN, data.data(), 1);
 				data = data.subspan(1);
 				if (channelN < 0 || channelN >= 32) {
-					throw Exception("Received invalid channel");
+					throw Exception("Received invalid channel", HalleyExceptions::Network);
 				}
 				auto& channel = channels[channelN];
 
@@ -107,7 +107,7 @@ void MessageQueueUDP::receiveMessages()
 				unsigned short sequence = 0;
 				if (channel.settings.ordered) {
 					if (data.size() < 2) {
-						throw Exception("Missing sequence data");
+						throw Exception("Missing sequence data", HalleyExceptions::Network);
 					}
 					memcpy(&sequence, data.data(), 2);
 					data = data.subspan(2);
@@ -117,13 +117,13 @@ void MessageQueueUDP::receiveMessages()
 				size_t size;
 				unsigned char b0;
 				if (data.size() < 1) {
-					throw Exception("Missing size data");
+					throw Exception("Missing size data", HalleyExceptions::Network);
 				}
 				memcpy(&b0, data.data(), 1);
 				data = data.subspan(1);
 				if (b0 & 0x80) {
 					if (data.size() < 1) {
-						throw Exception("Missing size data");
+						throw Exception("Missing size data", HalleyExceptions::Network);
 					}
 					unsigned char b1;
 					memcpy(&b1, data.data(), 1);
@@ -136,13 +136,13 @@ void MessageQueueUDP::receiveMessages()
 				// Read message type
 				unsigned short msgType;
 				if (data.size() < 1) {
-					throw Exception("Missing msgType data");
+					throw Exception("Missing msgType data", HalleyExceptions::Network);
 				}
 				memcpy(&b0, data.data(), 1);
 				data = data.subspan(1);
 				if (b0 & 0x80) {
 					if (data.size() < 1) {
-						throw Exception("Missing msgType data");
+						throw Exception("Missing msgType data", HalleyExceptions::Network);
 					}
 					unsigned char b1;
 					memcpy(&b1, data.data(), 1);
@@ -154,7 +154,7 @@ void MessageQueueUDP::receiveMessages()
 
 				// Read message
 				if (data.size() < signed(size)) {
-					throw Exception("Message does not contain enough data");
+					throw Exception("Message does not contain enough data", HalleyExceptions::Network);
 				}
 				channel.receiveQueue.emplace_back(deserializeMessage(data.subspan(0, size), msgType, sequence));
 				data = data.subspan(size);
@@ -187,7 +187,7 @@ void MessageQueueUDP::enqueue(std::unique_ptr<NetworkMessage> msg, int channelNu
 	Expects(channelNumber < 32);
 
 	if (!channels[channelNumber].initialized) {
-		throw Exception("Channel " + toString(channelNumber) + " has not been set up");
+		throw Exception("Channel " + toString(channelNumber) + " has not been set up", HalleyExceptions::Network);
 	}
 	auto& channel = channels[channelNumber];
 
@@ -296,7 +296,7 @@ ReliableSubPacket MessageQueueUDP::createPacket()
 	}
 
 	if (sentMsgs.empty()) {
-		throw Exception("Was not able to fit any messages into packet!");
+		throw Exception("Was not able to fit any messages into packet!", HalleyExceptions::Network);
 	}
 
 	return makeTaggedPacket(sentMsgs, size);

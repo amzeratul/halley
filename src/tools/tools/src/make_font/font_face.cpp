@@ -32,11 +32,11 @@ FontFace::FontFace(String filename)
 {
 	int error = FT_Init_FreeType(&pimpl->library);
 	if (error) {
-		throw Exception("Unable to initialize FreeType");
+		throw Exception("Unable to initialize FreeType", HalleyExceptions::Graphics);
 	}
 	error = FT_New_Face(pimpl->library, filename.c_str(), 0, &pimpl->face);
 	if (error) {
-		throw Exception("Unable to load font face");
+		throw Exception("Unable to load font face", HalleyExceptions::Graphics);
 	}
 }
 
@@ -45,11 +45,11 @@ FontFace::FontFace(gsl::span<const gsl::byte> data)
 {
 	int error = FT_Init_FreeType(&pimpl->library);
 	if (error) {
-		throw Exception("Unable to initialize FreeType");
+		throw Exception("Unable to initialize FreeType", HalleyExceptions::Graphics);
 	}
 	error = FT_New_Memory_Face(pimpl->library, reinterpret_cast<const FT_Byte*>(data.data()), FT_Long(data.size()), 0, &pimpl->face);
 	if (error) {
-		throw Exception("Unable to load font face");
+		throw Exception("Unable to load font face", HalleyExceptions::Graphics);
 	}
 }
 
@@ -106,7 +106,7 @@ Vector2i FontFace::getGlyphSize(int charCode) const
 	int index = charCode == 0 ? 0 : FT_Get_Char_Index(pimpl->face, charCode);
 	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
 	if (error) {
-		throw Exception("Unable to load glyph " + toString(charCode));
+		throw Exception("Unable to load glyph " + toString(charCode), HalleyExceptions::Graphics);
 	}
 	auto metrics = pimpl->face->glyph->metrics;
 	return Vector2i(metrics.width, metrics.height) / 64;
@@ -120,12 +120,12 @@ void FontFace::drawGlyph(Image& image, int charcode, Vector2i pos) const
 	
 	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
 	if (error) {
-		throw Exception("Unable to load glyph " + toString(charcode));
+		throw Exception("Unable to load glyph " + toString(charcode), HalleyExceptions::Graphics);
 	}
 	
 	error = FT_Render_Glyph(glyph, FT_RENDER_MODE_MONO);
 	if (error != 0) {
-		throw Exception("Unable to render glyph " + toString(charcode));
+		throw Exception("Unable to render glyph " + toString(charcode), HalleyExceptions::Graphics);
 	}
 	
 	auto bmp = glyph->bitmap;
@@ -138,7 +138,7 @@ FontMetrics FontFace::getMetrics(int charcode, float scale) const
 
 	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
 	if (error) {
-		throw Exception("Unable to load glyph " + toString(charcode));
+		throw Exception("Unable to load glyph " + toString(charcode), HalleyExceptions::Graphics);
 	}
 
 	FontMetrics result;

@@ -15,7 +15,7 @@ void VSProjectManipulator::load(Path path)
 	} catch (std::exception& e) {
 		Logger::logError("Unable to read input file: " + path);
 		Logger::logException(e);
-		throw Exception("Failed to parse VS Project");
+		throw Exception("Failed to parse VS Project", HalleyExceptions::Tools);
 	}
 }
 

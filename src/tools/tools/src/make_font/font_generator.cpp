@@ -109,11 +109,11 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 			return tryPacking(font, float(curFontSize), imageSize, scale, borderSuperSample, range);
 		}, minFont, maxFont, fontSize);
 	} else {
-		throw Exception("Neither font size nor image size were specified");
+		throw Exception("Neither font size nor image size were specified", HalleyExceptions::Tools);
 	}
 	
 	if (!result) {
-		throw Exception("Unable to generate font");
+		throw Exception("Unable to generate font", HalleyExceptions::Tools);
 	}
 	font.setSize(float(fontSize));
 	

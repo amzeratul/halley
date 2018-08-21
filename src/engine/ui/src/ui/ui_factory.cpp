@@ -64,7 +64,7 @@ void UIFactory::pushConditions(std::vector<String> conds)
 void UIFactory::popConditions()
 {
 	if (conditionStack.empty()) {
-		throw Exception("No conditions to pop!");
+		throw Exception("No conditions to pop!", HalleyExceptions::UI);
 	}
 	const size_t n = conditionStack.back();
 
@@ -116,7 +116,7 @@ std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 	auto widgetClass = widgetNode["class"].asString();
 	auto iter = factories.find(widgetClass);
 	if (iter == factories.end()) {
-		throw Exception("Unknown widget class: " + widgetClass);
+		throw Exception("Unknown widget class: " + widgetClass, HalleyExceptions::UI);
 	}
 	
 	auto widget = iter->second(entryNode);
@@ -265,7 +265,7 @@ Vector2f UIFactory::asVector2f(const ConfigNode& node, Maybe<Vector2f> defaultVa
 	} else if (defaultValue) {
 		return defaultValue.get();
 	} else {
-		throw Exception("Unable to parse node as Vector2f.");
+		throw Exception("Unable to parse node as Vector2f.", HalleyExceptions::UI);
 	}
 }
 
@@ -304,7 +304,7 @@ Vector4f UIFactory::asVector4f(const ConfigNode& node, Maybe<Vector4f> defaultVa
 	} else if (defaultValue) {
 		return defaultValue.get();
 	} else {
-		throw Exception("Unable to parse node as Vector2f.");
+		throw Exception("Unable to parse node as Vector2f.", HalleyExceptions::UI);
 	}
 }
 
@@ -373,7 +373,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 		} else if (validatorName == "numericPositive") {
 		result->setValidator(std::make_shared<UINumericValidator>(false));
 		} else {
-			throw Exception("Unknown text input validator: " + validatorName);
+			throw Exception("Unknown text input validator: " + validatorName, HalleyExceptions::UI);
 		}
 	}
 

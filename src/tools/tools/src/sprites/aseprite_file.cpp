@@ -170,7 +170,7 @@ void AsepriteCel::loadImage(AsepriteDepth depth, const std::vector<uint32_t>& pa
 void AsepriteCel::drawAt(Image& dstImage, uint8_t opacity, AsepriteBlendMode blendMode) const
 {
 	if (!imgData) {
-		throw Exception("imgData not loaded.");
+		throw Exception("imgData not loaded.", HalleyExceptions::Tools);
 	}
 
 	if (blendMode == AsepriteBlendMode::Normal) {
@@ -178,7 +178,7 @@ void AsepriteCel::drawAt(Image& dstImage, uint8_t opacity, AsepriteBlendMode ble
 	} else if (blendMode == AsepriteBlendMode::Lighten) {
 		dstImage.drawImageLighten(*imgData, pos, opacity);
 	} else {
-		throw Exception("Unsupported blending mode: " + toString(int(blendMode)));
+		throw Exception("Unsupported blending mode: " + toString(int(blendMode)), HalleyExceptions::Tools);
 	}
 }
 
@@ -198,11 +198,11 @@ void AsepriteFile::load(gsl::span<const gsl::byte> data)
 	// Read header
 	AsepriteFileHeader fileHeader;
 	if (data.size() < AsepriteFileHeader::size) {
-		throw Exception("Invalid Aseprite file (too small)");
+		throw Exception("Invalid Aseprite file (too small)", HalleyExceptions::Tools);
 	}
 	memcpy(&fileHeader, data.data(), AsepriteFileHeader::size);
 	if (fileHeader.magicNumber != 0xA5E0) {
-		throw Exception("Invalid Aseprite file (invalid file magic number)");
+		throw Exception("Invalid Aseprite file (invalid file magic number)", HalleyExceptions::Tools);
 	}
 	pos += AsepriteFileHeader::size;
 
@@ -222,7 +222,7 @@ void AsepriteFile::load(gsl::span<const gsl::byte> data)
 		colourDepth = AsepriteDepth::RGBA32;
 		break;
 	default:
-		throw Exception("Unknow colour depth in Aseprite: " + toString(fileHeader.colourDepth));
+		throw Exception("Unknow colour depth in Aseprite: " + toString(fileHeader.colourDepth), HalleyExceptions::Tools);
 	}
 
 	// Read each frame
@@ -232,7 +232,7 @@ void AsepriteFile::load(gsl::span<const gsl::byte> data)
 		AsepriteFileFrameHeader frameHeader;
 		memcpy(&frameHeader, data.data() + frameStartPos, AsepriteFileFrameHeader::size);
 		if (frameHeader.magicNumber != 0xF1FA) {
-			throw Exception("Invalid Aseprite file (invalid frame magic number)");
+			throw Exception("Invalid Aseprite file (invalid frame magic number)", HalleyExceptions::Tools);
 		}
 		addFrame(frameHeader.duration);
 		pos += AsepriteFileFrameHeader::size;
@@ -347,7 +347,7 @@ void AsepriteFile::addCelChunk(gsl::span<const std::byte> span)
 			// Raw
 			cel.rawData.resize(cel.size.x * cel.size.y * getBPP());
 			if (span.size() < int(cel.rawData.size())) {
-				throw Exception("Invalid cel data");
+				throw Exception("Invalid cel data", HalleyExceptions::Tools);
 			}
 			memcpy(cel.rawData.data(), span.data(), cel.rawData.size());
 		} else if (type == 2) {
@@ -366,7 +366,7 @@ void AsepriteFile::addCelChunk(gsl::span<const std::byte> span)
 		cel.linked = true;
 		cel.linkedFrame = header.framePosition;
 	} else {
-		throw Exception("Invalid cel type: " + toString(type));
+		throw Exception("Invalid cel type: " + toString(type), HalleyExceptions::Tools);
 	}
 
 	frames.back().cels.push_back(std::move(cel));
@@ -422,7 +422,7 @@ void AsepriteFile::addTagsChunk(gsl::span<const std::byte> span)
 AsepriteCel* AsepriteFile::getCelAt(int frameNumber, int layerNumber)
 {
 	if (frameNumber < 0 || frameNumber >= int(frames.size())) {
-		throw Exception("Invalid frame number");
+		throw Exception("Invalid frame number", HalleyExceptions::Tools);
 	}
 
 	auto& frame = frames[frameNumber];
@@ -448,7 +448,7 @@ size_t AsepriteFile::getBPP() const
 	case AsepriteDepth::RGBA32:
 		return 4;
 	default:
-		throw Exception("Unknown depth");
+		throw Exception("Unknown depth", HalleyExceptions::Tools);
 	}
 }
 
@@ -483,7 +483,7 @@ std::unique_ptr<Image> AsepriteFile::makeFrameImage(int frameNumber)
 const AsepriteFrame& AsepriteFile::getFrame(int frameNumber) const
 {
 	if (frameNumber < 0 || frameNumber >= int(frames.size())) {
-		throw Exception("Invalid frame number");
+		throw Exception("Invalid frame number", HalleyExceptions::Tools);
 	}
 	return frames[frameNumber];
 }

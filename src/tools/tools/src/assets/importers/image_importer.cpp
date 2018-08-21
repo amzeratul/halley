@@ -78,7 +78,7 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const Image& image, const
 			Image::convertIntToRGBA(col, r, g, b, a);
 			message += "\n" + Colour4<int>(r, g, b, a).toString();
 		}
-		throw Exception(message, false);
+		throw Exception(message);
 	}
 
 	return result;
@@ -103,7 +103,7 @@ std::unordered_map<uint32_t, uint32_t> ImageImporter::makePaletteConversion(cons
 				Image::convertIntToRGBA(colour, r, g, b, a);
 				throw Exception("Colour " + Colour4<int>(r, g, b, a).toString()
 					+ " is duplicated in the palette. Found at " + toString(x) + ", " + toString(y) + "; previously found at index "
-					+ toString(res->second), false);
+					+ toString(res->second));
 			}
 		}
 	}

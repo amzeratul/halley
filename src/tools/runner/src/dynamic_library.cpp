@@ -55,7 +55,7 @@ void DynamicLibrary::load(bool withAnotherName)
 	handle = LoadLibrary(libPath.string().c_str());
 	#endif
 	if (!handle) {
-		throw Exception("Unable to load library: " + libPath.string());
+		throw Exception("Unable to load library: " + libPath.string(), HalleyExceptions::Core);
 	}
 
 	// Store write times
@@ -72,7 +72,7 @@ void DynamicLibrary::unload()
 	if (loaded) {
 		#ifdef _WIN32
 		if (!FreeLibrary(handle)) {
-			throw Exception("Unable to release library " + libPath.string() + " due to error " + toString(GetLastError()));
+			throw Exception("Unable to release library " + libPath.string() + " due to error " + toString(GetLastError()), HalleyExceptions::Core);
 		}
 		#endif
 		handle = nullptr;

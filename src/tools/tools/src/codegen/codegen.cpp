@@ -27,7 +27,7 @@ using namespace Halley;
 
 void Codegen::run(Path inDir, Path outDir)
 {
-	throw Exception("Not supported");
+	throw Exception("Not supported", HalleyExceptions::Tools);
 }
 
 Codegen::Codegen(bool verbose)
@@ -62,36 +62,36 @@ void Codegen::validate(ProgressReporter progress)
 				hasMain = true;
 			}
 			if (famNames.find(fam.name) != famNames.end()) {
-				throw Exception("System " + sys.second.name + " already has a family named " + fam.name);
+				throw Exception("System " + sys.second.name + " already has a family named " + fam.name, HalleyExceptions::Tools);
 			}
 			famNames.emplace(fam.name);
 
 			for (auto& comp : fam.components) {
 				if (components.find(comp.name) == components.end()) {
-					throw Exception("Unknown component \"" + comp.name + "\" in family \"" + fam.name + "\" of system \"" + sys.second.name + "\".");
+					throw Exception("Unknown component \"" + comp.name + "\" in family \"" + fam.name + "\" of system \"" + sys.second.name + "\".", HalleyExceptions::Tools);
 				}
 			}
 		}
 
 		for (auto& msg: sys.second.messages) {
 			if (messages.find(msg.name) == messages.end()) {
-				throw Exception("Unknown message \"" + msg.name + "\" in system \"" + sys.second.name + "\".");
+				throw Exception("Unknown message \"" + msg.name + "\" in system \"" + sys.second.name + "\".", HalleyExceptions::Tools);
 			}
 		}
 
 		for (auto& service: sys.second.services) {
 			if (types.find(service.name) == types.end()) {
-				throw Exception("Unknown service \"" + service.name + "\" in system \"" + sys.second.name + "\".");
+				throw Exception("Unknown service \"" + service.name + "\" in system \"" + sys.second.name + "\".", HalleyExceptions::Tools);
 			}
 		}
 
 		if (sys.second.strategy == SystemStrategy::Individual || sys.second.strategy == SystemStrategy::Parallel) {
 			if (!hasMain) {
-				throw Exception("System " + sys.second.name + " needs to have a main family due to its strategy.");
+				throw Exception("System " + sys.second.name + " needs to have a main family due to its strategy.", HalleyExceptions::Tools);
 			}
 			if (sys.second.strategy == SystemStrategy::Parallel) {
 				if (sys.second.families.size() != 1) {
-					throw Exception("System " + sys.second.name + " can only have one family due to its strategy.");
+					throw Exception("System " + sys.second.name + " can only have one family due to its strategy.", HalleyExceptions::Tools);
 				}
 			}
 		}
@@ -268,11 +268,11 @@ void Codegen::addSource(String path, gsl::span<const gsl::byte> data)
 		String curPos = path + ":" + toString(document.Mark().line) + ":" + toString(document.Mark().column);
 
 		if (!document.IsDefined() || document.IsNull()) {
-			throw Exception("Invalid document in stream.");
+			throw Exception("Invalid document in stream.", HalleyExceptions::Tools);
 		}
 			
 		if (document.IsScalar()) {
-			throw Exception("YAML parse error in codegen definitions:\n\"" + document.as<std::string>() + "\"\nat " + curPos);
+			throw Exception("YAML parse error in codegen definitions:\n\"" + document.as<std::string>() + "\"\nat " + curPos, HalleyExceptions::Tools);
 		} else if (document["component"].IsDefined()) {
 			addComponent(document);
 		} else if (document["system"].IsDefined()) {
@@ -282,7 +282,7 @@ void Codegen::addSource(String path, gsl::span<const gsl::byte> data)
 		} else if (document["type"].IsDefined()) {
 			addType(document);
 		} else {
-			throw Exception("YAML parse error in codegen definitions: unknown type\nat " + curPos);
+			throw Exception("YAML parse error in codegen definitions: unknown type\nat " + curPos, HalleyExceptions::Tools);
 		}
 	}
 }
@@ -294,7 +294,7 @@ void Codegen::addComponent(YAML::Node rootNode)
 	if (components.find(comp.name) == components.end()) {
 		components[comp.name] = comp;
 	} else {
-		throw Exception("Component already declared: " + comp.name);
+		throw Exception("Component already declared: " + comp.name, HalleyExceptions::Tools);
 	}
 }
 
@@ -305,7 +305,7 @@ void Codegen::addSystem(YAML::Node rootNode)
 	if (systems.find(sys.name) == systems.end()) {
 		systems[sys.name] = sys;
 	} else {
-		throw Exception("System already declared: " + sys.name);
+		throw Exception("System already declared: " + sys.name, HalleyExceptions::Tools);
 	}
 }
 
@@ -316,7 +316,7 @@ void Codegen::addMessage(YAML::Node rootNode)
 	if (messages.find(msg.name) == messages.end()) {
 		messages[msg.name] = msg;
 	} else {
-		throw Exception("Message already declared: " + msg.name);
+		throw Exception("Message already declared: " + msg.name, HalleyExceptions::Tools);
 	}
 }
 
@@ -327,7 +327,7 @@ void Codegen::addType(YAML::Node rootNode)
 	if (types.find(t.name) == types.end()) {
 		types[t.name] = t;
 	} else {
-		throw Exception("Type already declared: " + t.name);
+		throw Exception("Type already declared: " + t.name, HalleyExceptions::Tools);
 	}
 }
 

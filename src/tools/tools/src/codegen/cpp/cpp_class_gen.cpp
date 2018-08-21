@@ -152,7 +152,7 @@ CPPClassGenerator& CPPClassGenerator::addCustomConstructor(const Vector<Variable
 void CPPClassGenerator::writeTo(Vector<String>& out, int nTabs)
 {
 	if (!finished) {
-		throw Exception("Class not finished yet.");
+		throw Exception("Class not finished yet.", HalleyExceptions::Tools);
 	}
 
 	String prefix;
@@ -168,7 +168,7 @@ void CPPClassGenerator::writeTo(Vector<String>& out, int nTabs)
 void CPPClassGenerator::ensureOK() const
 {
 	if (finished) {
-		throw Exception("finish() has already been called!");
+		throw Exception("finish() has already been called!", HalleyExceptions::Tools);
 	}
 }
 
@@ -182,7 +182,7 @@ String CPPClassGenerator::getAccessString(CPPAccess access)
 	case CPPAccess::Private:
 		return "private";
 	}
-	throw Exception("Unknown access type.");
+	throw Exception("Unknown access type.", HalleyExceptions::Tools);
 }
 
 String CPPClassGenerator::getTypeString(TypeSchema type)

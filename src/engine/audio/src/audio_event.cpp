@@ -110,7 +110,7 @@ void AudioEventActionPlay::run(AudioEngine& engine, size_t id, const AudioPositi
 	}
 
 	if (clips.size() != clipData.size()) {
-		throw Exception("AudioEvent has not had its dependencies loaded correctly.");
+		throw Exception("AudioEvent has not had its dependencies loaded correctly.", HalleyExceptions::AudioEngine);
 	}
 
 	auto& rng = engine.getRNG();

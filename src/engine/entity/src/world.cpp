@@ -96,7 +96,7 @@ System& World::getSystem(const String& name)
 			}
 		}
 	}
-	throw Exception("System not found: " + name);
+	throw Exception("System not found: " + name, HalleyExceptions::Entity);
 }
 
 Service& World::addService(std::shared_ptr<Service> service)
@@ -119,7 +119,7 @@ void World::loadSystems(const ConfigNode& root, std::function<std::unique_ptr<Sy
 		} else if (timelineName == "render") {
 			timeline = TimeLine::Render;
 		} else {
-			throw Exception("Unknown timeline: " + timelineName);
+			throw Exception("Unknown timeline: " + timelineName, HalleyExceptions::Entity);
 		}
 
 		for (auto& sysName: iter->second) {
@@ -133,7 +133,7 @@ Service& World::getService(const String& name) const
 {
 	auto iter = services.find(name);
 	if (iter == services.end()) {
-		throw Exception("Service not found: " + name);
+		throw Exception("Service not found: " + name, HalleyExceptions::Entity);
 	}
 	return *iter->second;
 }
@@ -142,7 +142,7 @@ EntityRef World::createEntity()
 {
 	Entity* entity = new(PoolAllocator<Entity>::alloc()) Entity();
 	if (entity == nullptr) {
-		throw Exception("Error creating entity - out of memory?");
+		throw Exception("Error creating entity - out of memory?", HalleyExceptions::Entity);
 	}
 	entitiesPendingCreation.push_back(entity);
 	allocateEntity(entity);
@@ -162,7 +162,7 @@ EntityRef World::getEntity(EntityId id)
 {
 	Entity* entity = tryGetEntity(id);
 	if (entity == nullptr) {
-		throw Exception("Entity does not exist: " + toString(id));
+		throw Exception("Entity does not exist: " + toString(id), HalleyExceptions::Entity);
 	}
 	return EntityRef(*entity, *this);
 }

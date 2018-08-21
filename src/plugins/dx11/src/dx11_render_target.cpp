@@ -99,7 +99,7 @@ void DX11TextureRenderTarget::createViews()
 
 		auto result = video.getDevice().CreateRenderTargetView(texture.getTexture(), &desc, &views[i]);
 		if (result != S_OK) {
-			throw Exception("Unable to create render target view for texture attachment #" + toString(i));
+			throw Exception("Unable to create render target view for texture attachment #" + toString(i), HalleyExceptions::VideoPlugin);
 		}
 	}
 
@@ -115,7 +115,7 @@ void DX11TextureRenderTarget::createViews()
 
 		auto result = video.getDevice().CreateDepthStencilView(depthTexture.getTexture(), &desc, &depthStencilView);
 		if (result != S_OK) {
-			throw Exception("Unable to create render target view for depth texture.");
+			throw Exception("Unable to create render target view for depth texture.", HalleyExceptions::VideoPlugin);
 		}
 	}
 }

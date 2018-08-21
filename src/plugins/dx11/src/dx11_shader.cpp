@@ -54,7 +54,7 @@ void DX11Shader::loadShader(DX11Video& video, ShaderType type, const Bytes& byte
 	}
 
 	if (result != S_OK) {
-		throw Exception("Unable to create shader " + name + " (" + toString(type) + ").");
+		throw Exception("Unable to create shader " + name + " (" + toString(type) + ").", HalleyExceptions::VideoPlugin);
 	}
 }
 
@@ -101,7 +101,7 @@ static DXGI_FORMAT getDX11Format(ShaderParameterType type)
 	case ShaderParameterType::Int4:
 		return DXGI_FORMAT_R32G32B32A32_SINT;
 	default:
-		throw Exception("Unknown shader parameter type: " + toString(int(type)));
+		throw Exception("Unknown shader parameter type: " + toString(int(type)), HalleyExceptions::VideoPlugin);
 	}
 }
 
@@ -139,7 +139,7 @@ void DX11Shader::setMaterialLayout(DX11Video& video, const std::vector<MaterialA
 
 	HRESULT result = video.getDevice().CreateInputLayout(desc.data(), UINT(desc.size()), vertexBlob.data(), vertexBlob.size(), &layout);
 	if (result != S_OK) {
-		throw Exception("Unable to create input layout for shader " + name);
+		throw Exception("Unable to create input layout for shader " + name, HalleyExceptions::VideoPlugin);
 	}
 	vertexBlob.clear();
 }

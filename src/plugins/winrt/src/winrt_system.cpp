@@ -5,16 +5,16 @@
 #include "winrt_system.h"
 using namespace Halley;
 
-#include "winrt/Windows.ApplicationModel.Core.h"
-#include "winrt/Windows.Foundation.h"
-#include "winrt/Windows.Storage.h"
-#include "winrt/Windows.Storage.Streams.h"
-#include "winrt/Windows.Storage.FileProperties.h"
 #include "winrt/Windows.ApplicationModel.h"
 #include "winrt/Windows.ApplicationModel.Core.h"
-#include "winrt/Windows.UI.Core.h"
-#include "winrt/Windows.System.Diagnostics.h"
+#include "winrt/Windows.Foundation.h"
+#include "winrt/Windows.Foundation.Diagnostics.h"
+#include "winrt/Windows.Storage.h"
+#include "winrt/Windows.Storage.FileProperties.h"
 #include "winrt/Windows.Storage.Search.h"
+#include "winrt/Windows.Storage.Streams.h"
+#include "winrt/Windows.System.Diagnostics.h"
+#include "winrt/Windows.UI.Core.h"
 #include "winrt/Windows.UI.ViewManagement.h"
 
 using namespace winrt::Windows::Foundation;
@@ -168,6 +168,14 @@ private:
 
 void WinRTSystem::init()
 {
+	// Setup logging
+	using namespace winrt::Windows::Foundation::Diagnostics;
+	LoggingChannel channel(L"halleyLog", LoggingChannelOptions());
+	FileLoggingSession session(L"halleyLog");
+	session.AddLoggingChannel(channel);
+
+	channel.LogMessage(L"Hello world!");
+	session.CloseAndSaveToFileAsync();
 }
 
 void WinRTSystem::deInit()

@@ -109,7 +109,7 @@ int Image::getBytesPerPixel() const
 	case Format::Indexed:
 		return 1;
 	default:
-		throw Exception("Image format is undefined.");
+		throw Exception("Image format is undefined.", HalleyExceptions::Utils);
 	}
 }
 
@@ -195,7 +195,7 @@ void Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t heig
 			}
 		}
 	} else {
-		throw Exception("Unknown amount of bits per pixel: " + toString(bpp));
+		throw Exception("Unknown amount of bits per pixel: " + toString(bpp), HalleyExceptions::Utils);
 	}
 }
 
@@ -223,7 +223,7 @@ void Image::blitFromRotated(Vector2i pos, const char* buffer, size_t width, size
 			}
 		}
 	} else {
-		throw Exception("Unknown amount of bits per pixel: " + toString(bpp));
+		throw Exception("Unknown amount of bits per pixel: " + toString(bpp), HalleyExceptions::Utils);
 	}
 }
 
@@ -309,7 +309,7 @@ template<typename F>
 void blendImages(F f, const Image& src, Image& dst, Vector2i pos, uint8_t opacity)
 {
 	if (dst.getFormat() != Image::Format::RGBA || src.getFormat() != Image::Format::RGBA) {
-		throw Exception("Both images must be RGBA for drawing with alpha");
+		throw Exception("Both images must be RGBA for drawing with alpha", HalleyExceptions::Utils);
 	}
 	uint32_t opacity32 = opacity;
 
@@ -399,7 +399,7 @@ void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 		format = Format::RGBA;
 		char *pixels = reinterpret_cast<char*>(stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &x, &y, &nComp, 4));
 		if (!pixels) {
-			throw Exception("Unable to load image data.");
+			throw Exception("Unable to load image data.", HalleyExceptions::Utils);
 		}
 		px = std::unique_ptr<char, void(*)(char*)>(pixels, [](char* data) { stbi_image_free(data); });
 		w = x;
@@ -476,7 +476,7 @@ Bytes Image::savePNGToBytes(bool allowDepthReduce) const
 	lodepng_state_cleanup(&state);
 
 	if (errorCode != 0) {
-		throw Exception("Failed to encode PNG");
+		throw Exception("Failed to encode PNG", HalleyExceptions::Utils);
 	}
 	
 	Bytes result;

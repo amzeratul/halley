@@ -6,5 +6,5 @@ using namespace Halley;
 
 int MakeFontTool::run(Vector<std::string> args)
 {
-	throw Exception("Not supported");
+	throw Exception("Not supported", HalleyExceptions::Tools);
 }

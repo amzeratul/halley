@@ -173,7 +173,7 @@ void UIEventHandler::handle(UIEvent& event)
 			event.setCurWidget(widget);
 			iter2->second(event);
 		} else {
-			throw Exception("Unable to handle event!");
+			throw Exception("Unable to handle event!", HalleyExceptions::UI);
 		}
 	}
 }

@@ -97,7 +97,7 @@ HRESULT __stdcall ResourceDataByteStream::EndRead(IMFAsyncResult* pResult, ULONG
 {
 	auto iter = asyncNumRead.find(pResult);
 	if (iter == asyncNumRead.end()) {
-		throw Exception("Invalid EndRead");
+		throw Exception("Invalid EndRead", HalleyExceptions::MoviePlugin);
 	}
 	*pcbRead = iter->second;
 	asyncNumRead.erase(iter);

@@ -122,7 +122,7 @@ void AsyncResource::waitForLoad() const
 		}
 	}
 	if (failed) {
-		throw Exception("Resource failed to load.");
+		throw Exception("Resource failed to load.", HalleyExceptions::Resources);
 	}
 }
 

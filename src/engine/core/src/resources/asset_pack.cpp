@@ -33,15 +33,15 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& 
 	// Read header
 	size_t totalSize = reader->size();
 	if (totalSize < sizeof(AssetPackHeader)) {
-		throw Exception("Asset pack is invalid (too small)");
+		throw Exception("Asset pack is invalid (too small)", HalleyExceptions::Resources);
 	}
 	AssetPackHeader header;
 	int nRead = reader->read(gsl::as_writeable_bytes(gsl::span<AssetPackHeader>(&header, 1)));
 	if (nRead != int(sizeof(header))) {
-		throw Exception("Unable to read header");
+		throw Exception("Unable to read header", HalleyExceptions::Resources);
 	}
 	if (memcmp(header.identifier.data(), "HALLEYPK", 8) != 0) {
-		throw Exception("Asset pack is invalid (invalid identifier)");
+		throw Exception("Asset pack is invalid (invalid identifier)", HalleyExceptions::Resources);
 	}
 	iv = header.iv;
 	dataOffset = header.dataStartPos;
@@ -52,7 +52,7 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& 
 		auto assetDbBytes = Bytes(assetDbSize);
 		nRead = reader->read(gsl::as_writeable_bytes(gsl::span<Byte>(assetDbBytes)));
 		if (nRead != int(assetDbBytes.size())) {
-			throw Exception("Unable to read header");
+			throw Exception("Unable to read header", HalleyExceptions::Resources);
 		}
 		assetDb = std::make_unique<AssetDatabase>();
 		Deserializer::fromBytes<AssetDatabase>(*assetDb, Compression::inflate(assetDbBytes));
@@ -134,7 +134,7 @@ std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType 
 		} else {
 			// Preloaded
 			if (pos + size > data.size()) {
-				throw Exception("Asset \"" + asset + "\" is out of pack bounds.");
+				throw Exception("Asset \"" + asset + "\" is out of pack bounds.", HalleyExceptions::Resources);
 			}
 
 			return std::make_unique<ResourceDataStatic>(data.data() + pos, size, path, false);
@@ -174,7 +174,7 @@ void AssetPack::readData(size_t pos, gsl::span<gsl::byte> dst)
 		reader->read(dst);
 	} else {
 		if (pos + size_t(dst.size()) > data.size()) {
-			throw Exception("Asset data is out of pack bounds.");
+			throw Exception("Asset data is out of pack bounds.", HalleyExceptions::Resources);
 		}
 		memcpy(dst.data(), data.data() + pos, dst.size());
 	}

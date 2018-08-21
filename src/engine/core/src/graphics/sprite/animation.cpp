@@ -119,7 +119,7 @@ String AnimationDirection::getFrameName(int frameNumber, String baseName) const
 
 		return baseName;
 	} catch (...) {
-		throw Exception("Invalid frame name: " + baseName);
+		throw Exception("Invalid frame name: " + baseName, HalleyExceptions::Graphics);
 	}
 }
 

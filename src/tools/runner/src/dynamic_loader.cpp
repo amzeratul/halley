@@ -30,7 +30,7 @@ std::unique_ptr<IMainLoopable> DynamicGameLoader::createCore(std::vector<std::st
 
 std::unique_ptr<Game> DynamicGameLoader::createGame()
 {
-	throw Exception("Cannot create game from DynamicGameLoader");
+	throw Exception("Cannot create game from DynamicGameLoader", HalleyExceptions::Core);
 }
 
 bool DynamicGameLoader::needsToReload() const
@@ -72,7 +72,7 @@ void DynamicGameLoader::load()
 	auto getHalleyEntry = reinterpret_cast<IHalleyEntryPoint*(STDCALL*)()>(lib.getFunction("getHalleyEntry"));
 	if (!getHalleyEntry) {
 		lib.unload();
-		throw Exception("getHalleyEntry not found.");
+		throw Exception("getHalleyEntry not found.", HalleyExceptions::Core);
 	}
 
 	prevSymbols = std::move(symbols);

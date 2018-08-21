@@ -34,10 +34,10 @@ std::unique_ptr<ResourceData> ResourceLocator::getResource(const String& asset, 
 		if (data) {
 			return data;
 		} else {
-			throw Exception("Unable to load resource: " + asset);
+			throw Exception("Unable to load resource: " + asset, HalleyExceptions::Resources);
 		}
 	} else {
-		throw Exception("Unable to locate resource: " + asset);
+		throw Exception("Unable to locate resource: " + asset, HalleyExceptions::Resources);
 	}
 }
 
@@ -47,7 +47,7 @@ std::unique_ptr<ResourceDataStatic> ResourceLocator::getStatic(const String& ass
 	auto ptr = dynamic_cast<ResourceDataStatic*>(rawPtr);
 	if (!ptr) {
 		delete rawPtr;
-		throw Exception("Resource " + asset + " obtained, but is not static data.");
+		throw Exception("Resource " + asset + " obtained, but is not static data.", HalleyExceptions::Resources);
 	}
 	return std::unique_ptr<ResourceDataStatic>(ptr);
 }
@@ -58,7 +58,7 @@ std::unique_ptr<ResourceDataStream> ResourceLocator::getStream(const String& ass
 	auto ptr = dynamic_cast<ResourceDataStream*>(rawPtr);
 	if (!ptr) {
 		delete rawPtr;
-		throw Exception("Resource " + asset + " obtained, but is not stream data.");
+		throw Exception("Resource " + asset + " obtained, but is not stream data.", HalleyExceptions::Resources);
 	}
 	return std::unique_ptr<ResourceDataStream>(ptr);
 }
@@ -102,7 +102,7 @@ void ResourceLocator::addPack(const Path& path, const String& encryptionKey, boo
 		if (allowFailure) {
 			Logger::logWarning("Resource pack not found: \"" + path.string() + "\"");
 		} else {
-			throw Exception("Unable to load resource pack \"" + path.string() + "\"");
+			throw Exception("Unable to load resource pack \"" + path.string() + "\"", HalleyExceptions::Resources);
 		}
 	}
 }
@@ -113,7 +113,7 @@ const Metadata& ResourceLocator::getMetaData(const String& asset, AssetType type
 	if (result != locators.end()) {
 		return result->second->getAssetDatabase().getDatabase(type).get(asset).meta;
 	} else {
-		throw Exception("Unable to locate resource: " + asset);
+		throw Exception("Unable to locate resource: " + asset, HalleyExceptions::Resources);
 	}
 }
 

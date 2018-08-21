@@ -25,17 +25,38 @@
 
 using namespace Halley;
 
-Exception::Exception(const String& _msg, bool logCallStack) noexcept
+Exception::Exception(String msg, int errorCode) noexcept
+	: msg(std::move(msg))
+	, errorCode(errorCode)
 {
+	stackTrace = Debug::getCallStack(4);
+
 	std::stringstream ss;
-	ss << _msg;
-	if (logCallStack) {
-		ss << "\n" << Debug::getCallStack(4);
-	}
-	msg = ss.str();
+	ss << this->msg << "\n" << stackTrace;
+	fullMsg = ss.str();
 }
 
 const char* Exception::what() const noexcept
 {
-	return msg.c_str();
+	return fullMsg.c_str();
+}
+
+const String& Exception::getMessage() const
+{
+	return msg;
+}
+
+const String& Exception::getStackTrace() const
+{
+	return stackTrace;
+}
+
+const String& Exception::getFullMessage() const
+{
+	return fullMsg;
+}
+
+int Exception::getErrorCode() const
+{
+	return errorCode;
 }

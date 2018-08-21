@@ -54,7 +54,7 @@ Bytes ShaderImporter::compileHLSL(const String& name, ShaderType type, const Byt
 		break;
 
 	default:
-		throw Exception("Unsupported shader type: " + toString(type));
+		throw Exception("Unsupported shader type: " + toString(type), HalleyExceptions::Tools);
 	}
 
 	ID3D10Blob *codeBlob = nullptr;
@@ -63,7 +63,7 @@ Bytes ShaderImporter::compileHLSL(const String& name, ShaderType type, const Byt
 	if (hResult != S_OK) {
 		const auto errorMessage = String(reinterpret_cast<const char*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
 		errorBlob->Release();
-		throw Exception("Failed to compile shader " + name + " (" + toString(type) + "):\n" + errorMessage);
+		throw Exception("Failed to compile shader " + name + " (" + toString(type) + "):\n" + errorMessage, HalleyExceptions::Tools);
 	}
 
 	auto result = Bytes(codeBlob->GetBufferSize());

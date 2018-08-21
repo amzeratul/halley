@@ -18,7 +18,7 @@ NetworkPacketBase::NetworkPacketBase(gsl::span<const gsl::byte> src, size_t preP
 size_t NetworkPacketBase::copyTo(gsl::span<gsl::byte> dst) const
 {
 	if (dst.size() < signed(getSize())) {
-		throw Exception("Destination buffer is too small for network packet.");
+		throw Exception("Destination buffer is too small for network packet.", HalleyExceptions::Network);
 	}
 	memcpy(dst.data(), data.data() + dataStart, getSize());
 	return getSize();

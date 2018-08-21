@@ -131,7 +131,7 @@ void AudioEngine::generateBuffer()
 		auto resampledBuffer = pool->getBuffer(samplesToRead * numChannels * spec.sampleRate / 48000 + 16);
 		auto result = outResampler->resampleInterleaved(bufferRef.getSampleSpan().subspan(0, samplesToRead * numChannels), resampledBuffer.getSampleSpan());
 		if (result.nRead != samplesToRead) {
-			throw Exception("Failed to read all input sample data");
+			throw Exception("Failed to read all input sample data", HalleyExceptions::AudioEngine);
 		}
 		out->queueAudio(resampledBuffer.getSampleSpan().subspan(0, result.nWritten * numChannels));
 	} else {

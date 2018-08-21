@@ -50,7 +50,7 @@ void ResourceDataStatic::set(const void* _data, size_t _size, bool owning)
 
 const void* ResourceDataStatic::getData() const
 {
-	if (!loaded) throw Exception("Resource data not yet loaded");
+	if (!loaded) throw Exception("Resource data not yet loaded", HalleyExceptions::Resources);
 	return data.get();
 }
 
@@ -61,7 +61,7 @@ gsl::span<const gsl::byte> ResourceDataStatic::getSpan() const
 
 size_t ResourceDataStatic::getSize() const
 {
-	if (!loaded) throw Exception("Resource data not yet loaded");
+	if (!loaded) throw Exception("Resource data not yet loaded", HalleyExceptions::Resources);
 	return size;
 }
 
@@ -144,7 +144,7 @@ std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
 			try {
 				result->inflate();
 			} catch (Exception &e) {
-				throw Exception("Failed to load resource \"" + getName() + "\" due to inflate exception: " + e.what());
+				throw Exception("Failed to load resource \"" + getName() + "\" due to inflate exception: " + e.what(), HalleyExceptions::Resources);
 			}
 		}
 		loaded = true;

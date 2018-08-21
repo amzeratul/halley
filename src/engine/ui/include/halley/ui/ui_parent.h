@@ -48,7 +48,7 @@ namespace Halley {
 			if (widget) {
 				auto w = std::dynamic_pointer_cast<T>(widget);
 				if (!w) {
-					throw Exception("Widget with id \"" + id + "\" was found, but it is not of type " + String(typeid(T).name()));
+					throw Exception("Widget with id \"" + id + "\" was found, but it is not of type " + String(typeid(T).name()), HalleyExceptions::UI);
 				}
 				return w;
 			} else {

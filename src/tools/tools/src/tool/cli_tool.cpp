@@ -36,7 +36,7 @@ std::unique_ptr<CommandLineTool> CommandLineTools::getTool(std::string name)
 	if (result != factories.end()) {
 		return result->second();
 	} else {
-		throw Exception("Unknown tool name");
+		throw Exception("Unknown tool name", HalleyExceptions::Tools);
 	}
 }
 

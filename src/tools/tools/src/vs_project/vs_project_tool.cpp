@@ -44,7 +44,7 @@ int VSProjectTool::copyFiles(const std::vector<std::string>& args)
 			} else if (arg == "-output") {
 				mode = Mode::CollectingOutput;
 			} else {
-				throw Exception("Invalid switch: " + arg);
+				throw Exception("Invalid switch: " + arg, HalleyExceptions::Tools);
 			}
 		} else {
 			if (mode == Mode::CollectingInput) {
@@ -53,10 +53,10 @@ int VSProjectTool::copyFiles(const std::vector<std::string>& args)
 				if (output.isEmpty()) {
 					output = arg;
 				} else {
-					throw Exception("Output already specified");
+					throw Exception("Output already specified", HalleyExceptions::Tools);
 				}
 			} else {
-				throw Exception("Unknown parameter");
+				throw Exception("Unknown parameter", HalleyExceptions::Tools);
 			}
 		}
 	}

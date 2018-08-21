@@ -164,7 +164,7 @@ void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 
 	while (packet.getSize() > 0) {
 		if (packet.getSize() < 1) {
-			throw Exception("Sub-packet header not found.");
+			throw Exception("Sub-packet header not found.", HalleyExceptions::Network);
 		}
 
 		// Sub-packets header
@@ -175,7 +175,7 @@ void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 		bool resend = (sizeBytes[0] & 0x80) != 0;
 		if (sizeBytes[0] & 0x40) {
 			if (packet.getSize() < 1) {
-				throw Exception("Sub-packet header incomplete.");
+				throw Exception("Sub-packet header incomplete.", HalleyExceptions::Network);
 			}
 			packet.extractHeader(data.subspan(1, 1));
 			size = static_cast<unsigned short>(sizeBytes[0] & 0x3F) << 8 | sizeBytes[1];
@@ -185,7 +185,7 @@ void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 		unsigned short resendOf = 0;
 		if (resend) {
 			if (packet.getSize() < 2) {
-				throw Exception("Sub-packet header missing resend data");
+				throw Exception("Sub-packet header missing resend data", HalleyExceptions::Network);
 			}
 			packet.extractHeader(gsl::as_writeable_bytes(gsl::span<unsigned short>(&resendOf, 1)));
 		}
@@ -193,7 +193,7 @@ void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 		// Extract data
 		std::array<char, 2048> buffer;
 		if (size > buffer.size() || size > packet.getSize()) {
-			throw Exception("Unexpected sub-packet size: " + toString(size) + " bytes, packet is " + toString(packet.getSize()) + " bytes.");
+			throw Exception("Unexpected sub-packet size: " + toString(size) + " bytes, packet is " + toString(packet.getSize()) + " bytes.", HalleyExceptions::Network);
 		}
 		auto subPacketData = gsl::span<char, 2048>(buffer).subspan(0, size);
 		packet.extractHeader(gsl::as_writeable_bytes(subPacketData));

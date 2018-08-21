@@ -41,11 +41,11 @@ void DX11Video::initD3D(Window& window)
 	ID3D11DeviceContext* dc;
 	auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_VIDEO_SUPPORT, nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &dc);
 	if (result != S_OK) {
-		throw Exception("Unable to initialise DX11");
+		throw Exception("Unable to initialise DX11", HalleyExceptions::VideoPlugin);
 	}
 	dc->QueryInterface(__uuidof(ID3D11DeviceContext1), reinterpret_cast<void**>(&deviceContext));
 	if (!dc) {
-		throw Exception("Unable to initialise DX11.1");
+		throw Exception("Unable to initialise DX11.1", HalleyExceptions::VideoPlugin);
 	}
 
 	ID3D10Multithread* mt;
@@ -98,13 +98,13 @@ void DX11Video::initSwapChain(Window& window)
 		IUnknown* coreWindow = reinterpret_cast<IUnknown*>(window.getNativeHandle());
 		auto result = pIDXGIFactory->CreateSwapChainForCoreWindow(device, coreWindow, &swapChainDesc, nullptr, &swapChain);
 		if (result != S_OK) {
-			throw Exception("Unable to create swap chain for CoreWindow");
+			throw Exception("Unable to create swap chain for CoreWindow", HalleyExceptions::VideoPlugin);
 		}
 	} else {
 		auto hWnd = reinterpret_cast<HWND>(window.getNativeHandle());
 		auto result = pIDXGIFactory->CreateSwapChainForHwnd(device, hWnd, &swapChainDesc, nullptr, nullptr, &swapChain);
 		if (result != S_OK) {
-			throw Exception("Unable to create swap chain for HWND");
+			throw Exception("Unable to create swap chain for HWND", HalleyExceptions::VideoPlugin);
 		}
 	}
 
@@ -135,7 +135,7 @@ void DX11Video::resizeSwapChain(Vector2i size)
 	
 	HRESULT result = swapChain->ResizeBuffers(0, size.x, size.y, DXGI_FORMAT_UNKNOWN, 0);
 	if (result != S_OK) {
-		throw Exception("Unable to resize swap chain");
+		throw Exception("Unable to resize swap chain", HalleyExceptions::VideoPlugin);
 	}
 
 	swapChainSize = size;

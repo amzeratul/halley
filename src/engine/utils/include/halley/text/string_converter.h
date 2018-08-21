@@ -35,7 +35,7 @@ namespace Halley
 			auto names = n();
 			auto res = std::find_if(std::begin(names), std::end(names), [&](const char* v) { return str == v; });
 			if (res == std::end(names)) {
-				throw Exception("String \"" + str + "\" does not exist in enum \"" + typeid(T).name() + "\".");
+				throw Exception("String \"" + str + "\" does not exist in enum \"" + typeid(T).name() + "\".", HalleyExceptions::Utils);
 			}
 			return T(res - std::begin(names));
 		}

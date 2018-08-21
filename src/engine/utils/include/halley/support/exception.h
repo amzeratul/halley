@@ -25,10 +25,41 @@
 #include "halley/text/halleystring.h"
 
 namespace Halley {
+	namespace HalleyExceptions {
+		enum Type {
+			Unknown,
+			
+			SystemPlugin = 100,
+			VideoPlugin = 101,
+			AudioOutPlugin = 102,
+			PlatformPlugin = 103,
+			NetworkPlugin = 104,
+			InputPlugin = 105,
+			MoviePlugin = 106,
+			
+			Core = 200,
+			Entity = 201,
+			UI = 202,
+			AudioEngine = 203,
+			Concurrency = 204,
+			File = 205,
+			OS = 206,
+			Resources = 207,
+			Tools = 208,
+			Lua = 209,
+			Utils = 210,
+			Network = 211,
+			Graphics = 212,
+			Input = 213,
+
+			LastHalleyReserved = 999
+		};
+	}
+
 	class Exception : public std::exception {
 	public:
 		Exception() = default;
-		Exception(const String& msg, bool logCallStack = true) noexcept;
+		Exception(String msg, int errorCode) noexcept;
 		Exception(const Exception& other) noexcept = default;
 		Exception(Exception&& other) noexcept = default;
 		~Exception() noexcept {}
@@ -37,7 +68,15 @@ namespace Halley {
 
 		const char* what() const noexcept override;
 
+		const String& getMessage() const;
+		const String& getStackTrace() const;
+		const String& getFullMessage() const;
+		int getErrorCode() const;
+
 	private:
 		String msg;
+		String stackTrace;
+		String fullMsg;
+		int errorCode = 0;
 	};
 }

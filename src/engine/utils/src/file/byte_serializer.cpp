@@ -73,7 +73,7 @@ Deserializer& Deserializer::operator>>(std::string& str)
 	ensureSufficientBytesRemaining(sz);
 
 	if (sz > 100 * 1024 * 1024) {
-		throw Exception("String is too big.");
+		throw Exception("String is too big.", HalleyExceptions::File);
 	}
 
 	str = std::string(reinterpret_cast<const char*>(src.data() + pos), sz);
@@ -133,7 +133,7 @@ int Deserializer::getVersion() const
 void Deserializer::ensureSufficientBytesRemaining(size_t bytes)
 {
 	if (bytes > getBytesRemaining()) {
-		throw Exception("Attempt to deserialize out of bounds");
+		throw Exception("Attempt to deserialize out of bounds", HalleyExceptions::File);
 	}
 }
 

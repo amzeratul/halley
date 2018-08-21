@@ -39,7 +39,7 @@ ConfigNode::ConfigNode(const ConfigNode& other)
 		case ConfigNodeType::Undefined:
 			break;
 		default:
-			throw Exception("Unknown configuration node type.");
+			throw Exception("Unknown configuration node type.", HalleyExceptions::Resources);
 	}
 }
 
@@ -288,7 +288,7 @@ void ConfigNode::serialize(Serializer& s) const
 			break;
 		}
 		default:
-			throw Exception("Unknown configuration node type.");
+			throw Exception("Unknown configuration node type.", HalleyExceptions::Resources);
 	}
 
 	s << line;
@@ -346,7 +346,7 @@ void ConfigNode::deserialize(Deserializer& s)
 			break;
 		}
 		default:
-			throw Exception("Unknown configuration node type.");
+			throw Exception("Unknown configuration node type.", HalleyExceptions::Resources);
 	}
 
 	if (s.getVersion() >= 2) {
@@ -364,7 +364,7 @@ int ConfigNode::asInt() const
 	} else if (type == ConfigNodeType::String) {
 		return asString().toInteger();
 	} else {
-		throw Exception(getNodeDebugId() + " cannot be converted to int.");
+		throw Exception(getNodeDebugId() + " cannot be converted to int.", HalleyExceptions::Resources);
 	}
 }
 
@@ -377,7 +377,7 @@ float ConfigNode::asFloat() const
 	} else if (type == ConfigNodeType::String) {
 		return asString().toFloat();
 	} else {
-		throw Exception(getNodeDebugId() + " cannot be converted to float.");
+		throw Exception(getNodeDebugId() + " cannot be converted to float.", HalleyExceptions::Resources);
 	}
 }
 
@@ -397,7 +397,7 @@ Vector2i ConfigNode::asVector2i() const
 	} else if (type == ConfigNodeType::Float2) {
 		return Vector2i(vec2fData);
 	} else {
-		throw Exception(getNodeDebugId() + " is not a vector type");
+		throw Exception(getNodeDebugId() + " is not a vector type", HalleyExceptions::Resources);
 	}
 }
 
@@ -408,7 +408,7 @@ Vector2f ConfigNode::asVector2f() const
 	} else if (type == ConfigNodeType::Float2) {
 		return vec2fData;
 	} else {
-		throw Exception(getNodeDebugId() + " is not a vector type");
+		throw Exception(getNodeDebugId() + " is not a vector type", HalleyExceptions::Resources);
 	}
 }
 
@@ -417,7 +417,7 @@ const Bytes& ConfigNode::asBytes() const
 	if (type == ConfigNodeType::Bytes) {
 		return *reinterpret_cast<Bytes*>(ptrData);
 	} else {
-		throw Exception(getNodeDebugId() + " is not a byte sequence type");
+		throw Exception(getNodeDebugId() + " is not a byte sequence type", HalleyExceptions::Resources);
 	}
 }
 
@@ -448,7 +448,7 @@ String ConfigNode::asString() const
 	} else if (type == ConfigNodeType::Float) {
 		return toString(asFloat());
 	} else {
-		throw Exception(getNodeDebugId() + " is not a string type");
+		throw Exception(getNodeDebugId() + " is not a string type", HalleyExceptions::Resources);
 	}
 }
 
@@ -493,7 +493,7 @@ const ConfigNode::SequenceType& ConfigNode::asSequence() const
 	if (type == ConfigNodeType::Sequence) {
 		return *reinterpret_cast<SequenceType*>(ptrData);
 	} else {
-		throw Exception(getNodeDebugId() + " is not a sequence type");
+		throw Exception(getNodeDebugId() + " is not a sequence type", HalleyExceptions::Resources);
 	}
 }
 
@@ -502,7 +502,7 @@ const ConfigNode::MapType& ConfigNode::asMap() const
 	if (type == ConfigNodeType::Map) {
 		return *reinterpret_cast<MapType*>(ptrData);
 	} else {
-		throw Exception(getNodeDebugId() + " is not a map type");
+		throw Exception(getNodeDebugId() + " is not a map type", HalleyExceptions::Resources);
 	}
 }
 
@@ -511,7 +511,7 @@ ConfigNode::SequenceType& ConfigNode::asSequence()
 	if (type == ConfigNodeType::Sequence) {
 		return *reinterpret_cast<SequenceType*>(ptrData);
 	} else {
-		throw Exception(getNodeDebugId() + " is not a sequence type");
+		throw Exception(getNodeDebugId() + " is not a sequence type", HalleyExceptions::Resources);
 	}
 }
 
@@ -520,7 +520,7 @@ ConfigNode::MapType& ConfigNode::asMap()
 	if (type == ConfigNodeType::Map) {
 		return *reinterpret_cast<MapType*>(ptrData);
 	} else {
-		throw Exception(getNodeDebugId() + " is not a map type");
+		throw Exception(getNodeDebugId() + " is not a map type", HalleyExceptions::Resources);
 	}
 }
 

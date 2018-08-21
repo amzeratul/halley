@@ -71,7 +71,7 @@ const LuaReference& LuaState::getModule(const String& moduleName) const
 {
 	auto result = tryGetModule(moduleName);
 	if (!result) {
-		throw Exception("Module not found: " + moduleName);
+		throw Exception("Module not found: " + moduleName, HalleyExceptions::Lua);
 	}
 	return *result;
 }
@@ -96,7 +96,7 @@ void LuaState::unloadModule(const String& moduleName)
 {
 	auto iter = modules.find(moduleName);
 	if (iter == modules.end()) {
-		throw Exception("Module not loaded: " + moduleName);
+		throw Exception("Module not loaded: " + moduleName, HalleyExceptions::Lua);
 	}
 	modules.erase(iter);
 }
@@ -106,7 +106,7 @@ void LuaState::call(int nArgs, int nRets)
 	int result = lua_pcall(lua, nArgs, nRets, errorHandlerStackPos.empty() ? 0 : errorHandlerStackPos.back());
 
 	if (result != 0) {
-		throw Exception("Lua exception:\n\t" + LuaStackOps(*this).popString());
+		throw Exception("Lua exception:\n\t" + LuaStackOps(*this).popString(), HalleyExceptions::Lua);
 	}
 }
 
@@ -119,7 +119,7 @@ LuaReference LuaState::loadScript(const String& chunkName, gsl::span<const gsl::
 {
 	int result = luaL_loadbuffer(lua, reinterpret_cast<const char*>(data.data()), data.size_bytes(), chunkName.c_str());
 	if (result != 0) {
-		throw Exception("Error loading Lua chunk:\n\t" + LuaStackOps(*this).popString());
+		throw Exception("Error loading Lua chunk:\n\t" + LuaStackOps(*this).popString(), HalleyExceptions::Lua);
 	}
 	call(0, 1);
 
@@ -162,10 +162,10 @@ void LuaState::popErrorHandler()
 {
 	if (errorHandlerRef) {
 		if (errorHandlerStackPos.empty()) {
-			throw Exception("Error handler not set.");
+			throw Exception("Error handler not set.", HalleyExceptions::Lua);
 		}
 		if (errorHandlerStackPos.back() != lua_gettop(lua)) {
-			throw Exception("Stack corruption.");
+			throw Exception("Stack corruption.", HalleyExceptions::Lua);
 		}
 		lua_pop(lua, 1);
 		errorHandlerStackPos.pop_back();

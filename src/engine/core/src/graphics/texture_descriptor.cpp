@@ -123,5 +123,5 @@ int TextureDescriptor::getBitsPerPixel(TextureFormat format)
 	case TextureFormat::Indexed:
 		return 1;
 	}
-	throw Exception("Unknown image format: " + toString(format));
+	throw Exception("Unknown image format: " + toString(format), HalleyExceptions::Graphics);
 }

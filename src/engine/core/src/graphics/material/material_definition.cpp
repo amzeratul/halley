@@ -96,7 +96,7 @@ size_t MaterialAttribute::getAttributeSize(ShaderParameterType type)
 		case ShaderParameterType::Matrix3: return 36;
 		case ShaderParameterType::Matrix4: return 64;
 		case ShaderParameterType::Texture2D: return 4;
-		default: throw Exception("Unknown type: " + toString(int(type)));
+		default: throw Exception("Unknown type: " + toString(int(type)), HalleyExceptions::Resources);
 	}
 }
 
@@ -237,7 +237,7 @@ void MaterialDefinition::loadTextures(const ConfigNode& node)
 			String name = it.first;
 			ShaderParameterType type = parseParameterType(it.second.asString());
 			if (type != ShaderParameterType::Texture2D) {
-				throw Exception("Texture \"" + name + "\" must be sampler2D");
+				throw Exception("Texture \"" + name + "\" must be sampler2D", HalleyExceptions::Resources);
 			}
 
 			textures.push_back(name);
@@ -289,7 +289,7 @@ ShaderParameterType MaterialDefinition::parseParameterType(String rawType) const
 	} else if (rawType == "sampler2D") {
 		return ShaderParameterType::Texture2D;
 	} else {
-		throw Exception("Unknown attribute type: " + rawType);
+		throw Exception("Unknown attribute type: " + rawType, HalleyExceptions::Resources);
 	}
 }
 
@@ -429,7 +429,7 @@ MaterialPass::MaterialPass(const String& shaderAssetId, const ConfigNode& node)
 	} else if (blendName == "Multiply") {
 		blend = BlendType::Multiply;
 	} else {
-		throw Exception("Unknown blend type: " + blendName);
+		throw Exception("Unknown blend type: " + blendName, HalleyExceptions::Resources);
 	}
 
 	if (node.hasKey("depth")) {

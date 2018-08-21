@@ -51,7 +51,7 @@ void ProjectLoader::setPlatform(const String& platform)
 	}
 	
 	if (!knownPlatform) {
-		throw Exception("Unknown platform: " + platform);
+		throw Exception("Unknown platform: " + platform, HalleyExceptions::Tools);
 	}
 
 	curPlatform = platform;

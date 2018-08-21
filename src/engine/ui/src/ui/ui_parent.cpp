@@ -89,14 +89,14 @@ std::shared_ptr<UIWidget> UIParent::getWidget(const String& id)
 	if (getId() == id) {
 		auto widgetThis = dynamic_cast<UIWidget*>(this);
 		if (!widgetThis) {
-			throw Exception("Found \"" + id + "\", but it is not a widget");
+			throw Exception("Found \"" + id + "\", but it is not a widget", HalleyExceptions::UI);
 		}
 		return widgetThis->shared_from_this();
 	}
 
 	auto widget = doGetWidget(id);
 	if (!widget) {
-		throw Exception("Widget with id \"" + id + "\" not found.");
+		throw Exception("Widget with id \"" + id + "\" not found.", HalleyExceptions::UI);
 	}
 	return widget;
 }

@@ -61,7 +61,7 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 		bpp = 1;
 		break;
 	case TextureFormat::RGB:
-		throw Exception("RGB textures are not supported");
+		throw Exception("RGB textures are not supported", HalleyExceptions::VideoPlugin);
 		break;
 	case TextureFormat::RGBA:
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -72,7 +72,7 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 		bpp = 4;
 		break;
 	default:
-		throw Exception("Unknown texture format");
+		throw Exception("Unknown texture format", HalleyExceptions::VideoPlugin);
 	}
 	if (descriptor.isRenderTarget) {
 		desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
@@ -106,7 +106,7 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 
 	HRESULT result = video.getDevice().CreateTexture2D(&desc, res, &texture);
 	if (result != S_OK) {
-		throw Exception("Error loading texture.");
+		throw Exception("Error loading texture.", HalleyExceptions::VideoPlugin);
 	}
 
 	CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -117,7 +117,7 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 
 	result = video.getDevice().CreateShaderResourceView(texture, &srvDesc, &srv);
 	if (result != S_OK) {
-		throw Exception("Error creating shader resource view");
+		throw Exception("Error creating shader resource view", HalleyExceptions::VideoPlugin);
 	}
 
 	auto samplerDesc = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
@@ -125,7 +125,7 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 	samplerDesc.AddressU = samplerDesc.AddressV = samplerDesc.AddressW = descriptor.clamp ? D3D11_TEXTURE_ADDRESS_CLAMP : D3D11_TEXTURE_ADDRESS_WRAP;
 	result = video.getDevice().CreateSamplerState(&samplerDesc, &samplerState);
 	if (result != S_OK) {
-		throw Exception("Error creating sampler");
+		throw Exception("Error creating sampler", HalleyExceptions::VideoPlugin);
 	}
 
 	doneLoading();

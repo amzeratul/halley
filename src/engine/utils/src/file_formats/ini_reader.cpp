@@ -69,7 +69,7 @@ Halley::String Halley::INIFile::getString(String key) const
 {
 	auto result = entries.find(key.asciiLower());
 	if (result != entries.end()) return result->second;
-	throw Exception("Key \""+key+"\" not found (" + toString(entries.size()) +" keys loaded).");
+	throw Exception("Key \""+key+"\" not found (" + toString(entries.size()) +" keys loaded).", HalleyExceptions::File);
 }
 
 int Halley::INIFile::getInt(String key) const

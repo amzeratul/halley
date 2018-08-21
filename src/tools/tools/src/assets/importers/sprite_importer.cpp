@@ -63,7 +63,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		auto thisPalette = meta.getString("palette", "");
 		if (palette) {
 			if (thisPalette != palette.get()) {
-				throw Exception("Incompatible palettes in atlas \"" + atlasName + "\". Previously using \"" + palette.get() + "\", now trying to use \"" + thisPalette + "\"");
+				throw Exception("Incompatible palettes in atlas \"" + atlasName + "\". Previously using \"" + palette.get() + "\", now trying to use \"" + thisPalette + "\"", HalleyExceptions::Tools);
 			}
 		} else {
 			palette = thisPalette;
@@ -206,7 +206,7 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 		Vector2i size(curSize * (wide ? 2 : 1), curSize);
 		if (size.x > maxSize || size.y > maxSize) {
 			// Give up!
-			throw Exception("Unable to pack " + toString(images.size()) + " sprites in a reasonably sized atlas! curSize at " + toString(curSize) + ", maxSize is " + toString(maxSize) + ". Total image area is " + toString(totalImageArea) + " px^2, sqrt = " + toString(lround(sqrt(totalImageArea))) + " px.");
+			throw Exception("Unable to pack " + toString(images.size()) + " sprites in a reasonably sized atlas! curSize at " + toString(curSize) + ", maxSize is " + toString(maxSize) + ". Total image area is " + toString(totalImageArea) + " px^2, sqrt = " + toString(lround(sqrt(totalImageArea))) + " px.", HalleyExceptions::Tools);
 		}
 
 		Logger::logInfo("Trying " + toString(size.x) + "x" + toString(size.y) + " px...");

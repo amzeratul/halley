@@ -126,7 +126,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"		static SystemFactoryMap factories = makeSystemFactories();",
 		"		auto result = factories.find(name);",
 		"		if (result == factories.end()) {",
-		"			throw Exception(\"System not found: \" + name);",
+		"			throw Exception(\"System not found: \" + name, HalleyExceptions::Entity);",
 		"		}",
 		"		return std::unique_ptr<System>(result->second());",
 		"	}",
@@ -210,7 +210,7 @@ public:
 			methodConst = true;
 		}
 		else {
-			throw Exception("Unsupported method in " + system.name + "System");
+			throw Exception("Unsupported method in " + system.name + "System", HalleyExceptions::Tools);
 		}
 
 		familyArgs = { VariableSchema(TypeSchema(methodArgType), methodArgName) };
@@ -223,7 +223,7 @@ public:
 			familyArgs.push_back(VariableSchema(TypeSchema("MainFamily&"), "e"));
 			stratImpl = "invokeParallel([this, &" + methodArgName + "] (auto& e) { static_cast<T*>(this)->" + methodName + "(" + methodArgName + ", e); }, mainFamily);";
 		} else {
-			throw Exception("Unsupported strategy in " + system.name + "System");
+			throw Exception("Unsupported strategy in " + system.name + "System", HalleyExceptions::Tools);
 		}
 	}
 

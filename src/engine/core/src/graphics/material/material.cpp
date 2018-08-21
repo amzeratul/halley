@@ -311,7 +311,7 @@ Material& Material::set(const String& name, const std::shared_ptr<const Texture>
 		}
 	}
 
-	throw Exception("Texture sampler \"" + name + "\" not available in material \"" + materialDefinition->getName() + "\"");
+	throw Exception("Texture sampler \"" + name + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
 }
 
 Material& Material::set(const String& name, const std::shared_ptr<Texture>& texture)
@@ -336,7 +336,7 @@ MaterialParameter& Material::getParameter(const String& name)
 		}
 	}
 
-	throw Exception("Uniform \"" + name + "\" not available in material \"" + materialDefinition->getName() + "\"");
+	throw Exception("Uniform \"" + name + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
 }
 
 std::shared_ptr<Material> Material::clone() const

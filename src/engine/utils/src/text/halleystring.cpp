@@ -530,7 +530,7 @@ int String::toInteger() const
 			firstChar = false;
 			continue;
 		}
-		else throw Exception("OUT OF RANGE");
+		else throw Exception("Out of Range", HalleyExceptions::Utils);
 		firstChar = false;
 	}
 	return value * mult;
@@ -553,7 +553,7 @@ long long String::toInteger64() const
 			firstChar = false;
 			continue;
 		}
-		else throw Exception("OUT OF RANGE");
+		else throw Exception("Out of Range", HalleyExceptions::Utils);
 		firstChar = false;
 	}
 	return value * mult;

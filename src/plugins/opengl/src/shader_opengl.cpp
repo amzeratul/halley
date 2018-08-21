@@ -83,7 +83,7 @@ static GLuint loadShader(const Bytes& src, GLenum type, String name)
 		String msg = String("Error compiling shader \"" + name + "\":\n") + log;
 		delete[] log;
 		glCheckError();
-		throw Exception(msg);
+		throw Exception(msg, HalleyExceptions::VideoPlugin);
 	}
 
 	return shader;
@@ -107,7 +107,7 @@ void ShaderOpenGL::loadShaders(const std::map<ShaderType, Bytes>& sources)
 			break;
 #endif
 		default:
-			throw Exception("Unsupported shader type: " + toString(type));
+			throw Exception("Unsupported shader type: " + toString(type), HalleyExceptions::VideoPlugin);
 		}
 
 		shaders.push_back(loadShader(s.second, glType, name + "/" + toString(type)));
@@ -141,7 +141,7 @@ void ShaderOpenGL::compile()
 		glGetProgramiv(id, GL_LINK_STATUS, &result);
 		glCheckError();
 		if (result == GL_FALSE) {
-			throw Exception("Error loading shader: " + log);
+			throw Exception("Error loading shader: " + log, HalleyExceptions::VideoPlugin);
 		} else if (infolen > 0) {
 			std::cout << ConsoleColour(Console::YELLOW) << "\nIn shader \"" << name << "\":\n==========\n" << log << "\n==========" << ConsoleColour() << std::endl;
 		}

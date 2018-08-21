@@ -106,7 +106,7 @@ String LuaStackOps::popString()
 Vector2i LuaStackOps::popVector2i()
 {
 	if (!lua_istable(state.getRawState(), -1)) {
-		throw Exception("Invalid value at Lua stack");
+		throw Exception("Invalid value at Lua stack", HalleyExceptions::Lua);
 	}
 	Vector2i result;
 	lua_getfield(state.getRawState(), -1, "x");

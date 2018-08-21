@@ -76,7 +76,7 @@ int Halley::OSUnix::runCommand(String command)
 
 	auto pid = fork();
 	if (pid == -1) {
-		throw Exception("Unable to fork process.");
+		throw Exception("Unable to fork process.", HalleyExceptions::OS);
 	} else if (pid == 0) {
 		// Child
 		execvp(cmd.c_str(), argsPtr.data());

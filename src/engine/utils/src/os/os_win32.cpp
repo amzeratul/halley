@@ -57,20 +57,20 @@ Halley::OSWin32::OSWin32()
 		// Initialize COM
 		HRESULT hr;
 		hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
-		if (FAILED(hr)) throw Exception("Unable to initialize COM.");
+		if (FAILED(hr)) throw Exception("Unable to initialize COM.", HalleyExceptions::OS);
 		hr = CoInitializeSecurity(nullptr, -1, nullptr, nullptr, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE, nullptr);
-		if (FAILED(hr)) throw Exception("Unable to initialize COM security.");
+		if (FAILED(hr)) throw Exception("Unable to initialize COM security.", HalleyExceptions::OS);
 
 		// Initialize WMI
 		hr = CoCreateInstance(CLSID_WbemAdministrativeLocator, nullptr, CLSCTX_INPROC_SERVER, IID_IWbemLocator, reinterpret_cast<void**>(&pLoc));
-		if (FAILED(hr)) throw Exception("Unable to obtain locator");
+		if (FAILED(hr)) throw Exception("Unable to obtain locator", HalleyExceptions::OS);
 		//hr = pLoc->ConnectServer(BSTR(L"ROOT\\DEFAULT"), nullptr, nullptr, 0, 0, 0, 0, &pSvc);
 		hr = pLoc->ConnectServer(BSTR(L"root\\cimv2"), nullptr, nullptr, nullptr, WBEM_FLAG_CONNECT_USE_MAX_WAIT, nullptr, nullptr, &pSvc);
-		if (FAILED(hr)) throw Exception("Unable to connect to WMI service");
+		if (FAILED(hr)) throw Exception("Unable to connect to WMI service", HalleyExceptions::OS);
 
 		// Set security on WMI connection
 		hr = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE);
-		if (FAILED(hr)) throw Exception("Unable to set WMI security");
+		if (FAILED(hr)) throw Exception("Unable to set WMI security", HalleyExceptions::OS);
 	} catch (std::exception& e) {
 		std::cout << "Exception initializing COM/WMI: " << e.what() << std::endl;
 		pSvc = nullptr;
@@ -119,17 +119,17 @@ Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter) cons
 			BSTR lang = CComBSTR(L"WQL");
 			BSTR q = CComBSTR(query.c_str());
 			hr = pSvc->ExecQuery(lang, q, WBEM_FLAG_FORWARD_ONLY, nullptr, &enumerator);
-			if (FAILED(hr)) throw Exception("Error running WMI query: "+getCOMError(hr));
+			if (FAILED(hr)) throw Exception("Error running WMI query: "+getCOMError(hr), HalleyExceptions::OS);
 
 			ULONG retcnt;
 			CComPtr<IWbemClassObject> result;
 			hr = enumerator->Next(WBEM_INFINITE, 1L, &result, &retcnt);
 			if (retcnt == 0) return "Unknown";
-			if (FAILED(hr)) throw Exception("Error obtaining WMI enumeration");
+			if (FAILED(hr)) throw Exception("Error obtaining WMI enumeration", HalleyExceptions::OS);
 
 			_variant_t var_val;
 			hr = result->Get(parameter.getUTF16().c_str(), 0, &var_val, nullptr, nullptr);
-			if (FAILED(hr)) throw Exception("Error retrieving name from WMI query result");
+			if (FAILED(hr)) throw Exception("Error retrieving name from WMI query result", HalleyExceptions::OS);
 
 			if (var_val.vt == VT_NULL) {
 				return "";
@@ -308,7 +308,7 @@ void OSWin32::createDirectories(const Path& path)
 		Path curPath = path.getFront(i);
 		if (!hasDirectory(curPath)) {
 			if (!CreateDirectoryW(curPath.getString().getUTF16().c_str(), 0)) {
-				throw Exception("Unable to create directory: " + curPath + " (trying to make " + path + ")");
+				throw Exception("Unable to create directory: " + curPath + " (trying to make " + path + ")", HalleyExceptions::OS);
 			}
 		}
 	}
@@ -391,7 +391,7 @@ int OSWin32::runCommand(String rawCommand)
 	// Create the commandline
 	auto command = rawCommand.getUTF16();
 	if (command.length() >= 1024) {
-		throw Exception("Command is too long!");
+		throw Exception("Command is too long!", HalleyExceptions::OS);
 	}
 	wchar_t buffer[1024];
 	memcpy(buffer, command.c_str(), command.size() * sizeof(wchar_t));
@@ -410,15 +410,15 @@ int OSWin32::runCommand(String rawCommand)
 	HANDLE errorRead;
 	HANDLE errorWrite;
 	if (!CreatePipe(&outRead, &outWrite, &saAttr, 0)) {
-		throw Exception("Unable to create stdout pipe");
+		throw Exception("Unable to create stdout pipe", HalleyExceptions::OS);
 	}
 	SetHandleInformation(outRead, HANDLE_FLAG_INHERIT, 0);
 	if (!CreatePipe(&errorRead, &errorWrite, &saAttr, 0)) {
-		throw Exception("Unable to create stderr pipe");
+		throw Exception("Unable to create stderr pipe", HalleyExceptions::OS);
 	}
 	SetHandleInformation(errorRead, HANDLE_FLAG_INHERIT, 0);
 	if (!CreatePipe(&inRead, &inWrite, &saAttr, 0)) {
-		throw Exception("Unable to create stdin pipe");
+		throw Exception("Unable to create stdin pipe", HalleyExceptions::OS);
 	}
 	SetHandleInformation(inWrite, HANDLE_FLAG_INHERIT, 0);
 
@@ -476,12 +476,12 @@ public:
 	void setData(const String& stringData) override
 	{
 		if (!OpenClipboard(nullptr)) {
-			throw Exception("Unable to open clipboard.");
+			throw Exception("Unable to open clipboard.", HalleyExceptions::OS);
 		}
 		
 		if (!EmptyClipboard()) {
 			CloseClipboard();
-			throw Exception("Unable to empty clipboard");
+			throw Exception("Unable to empty clipboard", HalleyExceptions::OS);
 		}
 		auto utf16str = stringData.getUTF16();
 		auto data = GlobalAlloc(GMEM_MOVEABLE, (utf16str.length() + 1) * sizeof(wchar_t));
@@ -491,7 +491,7 @@ public:
 
 		if (!SetClipboardData(CF_UNICODETEXT, data)) {
 			CloseClipboard();
-			throw Exception("Unable to set clipboard data");
+			throw Exception("Unable to set clipboard data", HalleyExceptions::OS);
 		}
 
 		CloseClipboard();
@@ -500,7 +500,7 @@ public:
 	Maybe<String> getStringData() override
 	{
 		if (!OpenClipboard(nullptr)) {
-			throw Exception("Unable to open clipboard.");
+			throw Exception("Unable to open clipboard.", HalleyExceptions::OS);
 		}
 
 		if (!IsClipboardFormatAvailable(CF_UNICODETEXT)) {
@@ -511,7 +511,7 @@ public:
 		HANDLE data = GetClipboardData(CF_UNICODETEXT);
 		if (data == nullptr) {
 			CloseClipboard();
-			throw Exception("Unable to read clipboard data.");
+			throw Exception("Unable to read clipboard data.", HalleyExceptions::OS);
 		}
 
 		auto src = reinterpret_cast<const wchar_t*>(GlobalLock(data));

@@ -117,7 +117,7 @@ void Halley::OS::setConsoleColor(int, int)
 
 int OS::runCommand(String)
 {
-	throw Exception("Running commands is not implemented in this platform.");
+	throw Exception("Running commands is not implemented in this platform.", HalleyExceptions::OS);
 }
 
 std::shared_ptr<IClipboard> OS::getClipboard()

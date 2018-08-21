@@ -52,7 +52,7 @@ LuaReference LuaReference::operator[](const String& name) const
 	pushToLuaStack();
 	lua_getfield(lua->getRawState(), -1, name.c_str());
 	if (lua_isnil(lua->getRawState(), -1)) {
-		throw Exception("Unknown field: " + name);
+		throw Exception("Unknown field: " + name, HalleyExceptions::Lua);
 	}
 	lua_remove(lua->getRawState(), -2);
 	return LuaReference(*lua);

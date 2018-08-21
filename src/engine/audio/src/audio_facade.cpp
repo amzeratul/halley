@@ -282,7 +282,7 @@ void AudioFacade::pump()
 			const auto e = exceptions.back();
 			exceptions.clear();
 			stopPlayback();
-			throw Exception(e);
+			throw Exception(e, HalleyExceptions::AudioEngine);
 		}
 	}
 

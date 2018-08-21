@@ -51,7 +51,7 @@ static void onVorbisError(int error)
 	case OV_ENOSEEK: str = "Stream is not seekable."; break;
 	default: str = "Unknown error.";
 	}
-	throw Exception("Error opening Ogg Vorbis: "+str);
+	throw Exception("Error opening Ogg Vorbis: "+str, HalleyExceptions::Resources);
 }
 
 Halley::VorbisData::VorbisData(std::shared_ptr<ResourceData> resource)

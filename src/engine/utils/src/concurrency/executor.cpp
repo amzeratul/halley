@@ -57,7 +57,7 @@ void ExecutionQueue::addToQueue(TaskBase task)
 Executors& Executors::get()
 {
 	if (!instance) {
-		throw Exception("Executors instance not defined");
+		throw Exception("Executors instance not defined", HalleyExceptions::Concurrency);
 	}
 	return *instance;
 }
