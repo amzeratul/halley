@@ -82,6 +82,7 @@ void AsioTCPConnection::close()
 		} catch (...) {
 			Logger::logError(String("Unknown error closing TCP connection"));
 		}
+		needsPoll = false;
 		status = ConnectionStatus::Closed;
 	}
 }
