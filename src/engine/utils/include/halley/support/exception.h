@@ -27,7 +27,7 @@
 namespace Halley {
 	namespace HalleyExceptions {
 		enum Type {
-			Unknown,
+			Unknown = 0,
 			
 			SystemPlugin = 100,
 			VideoPlugin = 101,
