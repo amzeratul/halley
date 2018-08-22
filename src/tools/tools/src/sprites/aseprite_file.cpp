@@ -258,7 +258,7 @@ void AsepriteFile::addFrame(uint16_t duration)
 	frames.emplace_back(duration);
 }
 
-void AsepriteFile::addChunk(uint16_t chunkType, gsl::span<const std::byte> data)
+void AsepriteFile::addChunk(uint16_t chunkType, gsl::span<const gsl::byte> data)
 {
 	switch (chunkType) {
 	case 0x0004:
@@ -300,7 +300,7 @@ void AsepriteFile::addChunk(uint16_t chunkType, gsl::span<const std::byte> data)
 	}
 }
 
-void AsepriteFile::addLayerChunk(gsl::span<const std::byte> span)
+void AsepriteFile::addLayerChunk(gsl::span<const gsl::byte> span)
 {
 	AsepriteFileLayerData data;
 	readData(data, span);
@@ -323,7 +323,7 @@ void AsepriteFile::addLayerChunk(gsl::span<const std::byte> span)
 	layer.layerName = readString(span);
 }
 
-void AsepriteFile::addCelChunk(gsl::span<const std::byte> span)
+void AsepriteFile::addCelChunk(gsl::span<const gsl::byte> span)
 {
 	AsepriteCel cel;
 
@@ -372,12 +372,12 @@ void AsepriteFile::addCelChunk(gsl::span<const std::byte> span)
 	frames.back().cels.push_back(std::move(cel));
 }
 
-void AsepriteFile::addCelExtraChunk(gsl::span<const std::byte> span)
+void AsepriteFile::addCelExtraChunk(gsl::span<const gsl::byte> span)
 {
 	// TODO
 }
 
-void AsepriteFile::addPaletteChunk(gsl::span<const std::byte> span)
+void AsepriteFile::addPaletteChunk(gsl::span<const gsl::byte> span)
 {
 	AsepriteFilePaletteData baseData;
 	readData(baseData, span);
@@ -401,7 +401,7 @@ void AsepriteFile::addPaletteChunk(gsl::span<const std::byte> span)
 	paletteTransparent[transparentEntry] = 0;
 }
 
-void AsepriteFile::addTagsChunk(gsl::span<const std::byte> span)
+void AsepriteFile::addTagsChunk(gsl::span<const gsl::byte> span)
 {
 	AsepriteFileTagsData baseData;
 	readData(baseData, span);

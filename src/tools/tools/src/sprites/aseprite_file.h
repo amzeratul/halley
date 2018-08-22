@@ -117,13 +117,13 @@ namespace Halley {
 
     private:
 	    void addFrame(uint16_t duration);
-	    void addChunk(uint16_t chunkType, gsl::span<const std::byte> data);
+	    void addChunk(uint16_t chunkType, gsl::span<const gsl::byte> data);
 
-	    void addLayerChunk(gsl::span<const std::byte> span);
-		void addCelChunk(gsl::span<const std::byte> span);
-		void addCelExtraChunk(gsl::span<const std::byte> span);
-		void addPaletteChunk(gsl::span<const std::byte> span);
-		void addTagsChunk(gsl::span<const std::byte> span);
+	    void addLayerChunk(gsl::span<const gsl::byte> span);
+		void addCelChunk(gsl::span<const gsl::byte> span);
+		void addCelExtraChunk(gsl::span<const gsl::byte> span);
+		void addPaletteChunk(gsl::span<const gsl::byte> span);
+		void addTagsChunk(gsl::span<const gsl::byte> span);
 
 		template <typename T>
 		void readData(T& dst, gsl::span<const gsl::byte>& data) const
