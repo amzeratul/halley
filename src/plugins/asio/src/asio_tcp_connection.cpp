@@ -177,19 +177,23 @@ void AsioTCPConnection::tryReceive()
 
 		socket.async_read_some(asio::mutable_buffer(receiveBuffer.data(), receiveBuffer.size()), [=] (const boost::system::error_code& ec, size_t nBytesReceived)
 		{
+			reading = false;
+
 			if (ec) {
-				Logger::logError("Error reading data on TCP socket: " + ec.message());
-				close();
+				// retry on would_block and try_again errors, close connection on any other errors
+				if (ec.value() == asio::error::would_block || ec.value() == asio::error::try_again) {
+					tryReceive();
+				} else {
+					Logger::logError("Error reading data on TCP socket: " + ec.message());
+					close();
+				}
 			} else {
 				size_t curQueueSize = receiveQueue.size();
 				receiveQueue.resize(curQueueSize + nBytesReceived);
 				memcpy(receiveQueue.data() + curQueueSize, receiveBuffer.data(), nBytesReceived);
 
-				reading = false;
-
 				if (nBytesReceived == 4096) {
 					tryReceive();
-					needsPoll = true;
 				}
 			}
 		});
