@@ -35,33 +35,9 @@ bool WinRTPlatform::canProvideAuthToken() const
 	return true;
 }
 
-class XboxLiveAuthorisationToken : public AuthorisationToken {
-public:
-	String getType() const override
-	{
-		return "xboxlive";
-	}
-
-	bool isSingleUse() const override
-	{
-		return false;
-	}
-
-	bool isCancellable() const override
-	{
-		return false;
-	}
-
-	void cancel() override
-	{	
-	}
-};
-
 Future<std::unique_ptr<AuthorisationToken>> WinRTPlatform::getAuthToken()
 {
-	Promise<std::unique_ptr<AuthorisationToken>> promise;
-	promise.setValue(std::make_unique<XboxLiveAuthorisationToken>());
-	return promise.getFuture();
+	return xbl->getAuthToken();
 }
 
 bool WinRTPlatform::canProvideCloudSave() const

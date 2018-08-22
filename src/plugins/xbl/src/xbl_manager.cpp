@@ -77,6 +77,58 @@ XBLStatus XBLManager::getStatus() const
 	return status;
 }
 
+class XboxLiveAuthorisationToken : public AuthorisationToken {
+public:
+	XboxLiveAuthorisationToken(String token)
+	{
+		data["token"] = std::move(token);
+	}
+
+	String getType() const override
+	{
+		return "xboxlive";
+	}
+
+	bool isSingleUse() const override
+	{
+		return false;
+	}
+
+	bool isCancellable() const override
+	{
+		return false;
+	}
+
+	void cancel() override
+	{	
+	}
+
+	std::map<String, String> getMapData() const override
+	{
+		return data;
+	}
+
+private:
+	std::map<String, String> data;
+};
+
+Future<std::unique_ptr<AuthorisationToken>> XBLManager::getAuthToken()
+{
+	Promise<std::unique_ptr<AuthorisationToken>> promise;
+	if (status == XBLStatus::Connected) {
+		auto future = promise.getFuture();
+  		xboxLiveContext->user()->get_token_and_signature(L"POST", L"https://wargroove-multiplayer.chucklefish.org/xboxlive_login", L"").then([=, promise = std::move(promise)](xbox::services::xbox_live_result<xbox::services::system::token_and_signature_result> result) mutable
+ 		{
+			auto token = String(result.payload().token().c_str());
+			promise.setValue(std::make_unique<XboxLiveAuthorisationToken>(token));
+		});
+		return future;
+	} else {
+		promise.setValue({});
+		return promise.getFuture();
+	}
+}
+
 void XBLManager::signIn()
 {
 	status = XBLStatus::Connecting;
@@ -199,7 +251,7 @@ std::vector<String> XBLSaveData::enumerate(const String& root)
 		throw Exception("Container is not ready yet!", HalleyExceptions::PlatformPlugin);
 	}
 
-		if (!isReady()) {
+	if (!isReady()) {
 		throw Exception("Container is not ready yet!", HalleyExceptions::PlatformPlugin);
 	}
 
