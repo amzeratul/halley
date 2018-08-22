@@ -32,8 +32,8 @@ if (DEV_BUILD EQUAL 1)
 endif()
 
 
-# C++14 support
-set(CMAKE_CXX_STANDARD 14)
+# C++17 support
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=libc++") # Apparently Clang on Mac needs this...
