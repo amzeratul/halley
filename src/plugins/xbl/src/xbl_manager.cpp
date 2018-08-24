@@ -79,8 +79,10 @@ XBLStatus XBLManager::getStatus() const
 
 class XboxLiveAuthorisationToken : public AuthorisationToken {
 public:
-	XboxLiveAuthorisationToken(String token)
+	XboxLiveAuthorisationToken(String gamertag, String userId, String token)
 	{
+		data["gamertag"] = std::move(gamertag);
+		data["userId"] = std::move(userId);
 		data["token"] = std::move(token);
 	}
 
@@ -117,11 +119,17 @@ Future<std::unique_ptr<AuthorisationToken>> XBLManager::getAuthToken()
 	Promise<std::unique_ptr<AuthorisationToken>> promise;
 	if (status == XBLStatus::Connected) {
 		auto future = promise.getFuture();
+		/*
   		xboxLiveContext->user()->get_token_and_signature(L"POST", L"https://wargroove-multiplayer.chucklefish.org/xboxlive_login", L"").then([=, promise = std::move(promise)](xbox::services::xbox_live_result<xbox::services::system::token_and_signature_result> result) mutable
  		{
 			auto token = String(result.payload().token().c_str());
 			promise.setValue(std::make_unique<XboxLiveAuthorisationToken>(token));
 		});
+		*/
+		String token;
+		auto gamertag = String(xboxLiveContext->user()->gamertag().c_str());
+		auto userId = String(xboxLiveContext->user()->xbox_user_id().c_str());
+		promise.setValue(std::make_unique<XboxLiveAuthorisationToken>(gamertag, userId, token));
 		return future;
 	} else {
 		promise.setValue({});
