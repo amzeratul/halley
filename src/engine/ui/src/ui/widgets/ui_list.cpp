@@ -251,7 +251,7 @@ void UIList::onInput(const UIInputResults& input, Time time)
 	Expects(nColumns >= 1);
 
 	// Drag
-	if (input.isButtonHeld(UIInput::Button::Hold)) {
+	if (dragEnabled && input.isButtonHeld(UIInput::Button::Hold)) {
 		// Manual dragging
 		manualDragging = true;
 
