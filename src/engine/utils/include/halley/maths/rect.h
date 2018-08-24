@@ -109,6 +109,26 @@ namespace Halley {
 			p2 = p1 + size;
 		}
 
+		void setLeft(T value)
+		{
+			p1.x = value;
+		}
+
+		void setRight(T value)
+		{
+			p2.x = value;
+		}
+
+		void setTop(T value)
+		{
+			p1.y = value;
+		}
+
+		void setBottom(T value)
+		{
+			p2.y = value;
+		}
+
 		Rect2D<T> shrink(T amount)
 		{
 			auto offset = Vector2D<T>(amount, amount);
