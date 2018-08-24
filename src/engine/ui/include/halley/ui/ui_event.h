@@ -23,6 +23,7 @@ namespace Halley {
 		MakeAreaVisibleCentered,
 		Dragged,
 		SetSelected,
+		SetEnabled,
 		SetHovered,
 		TextChanged,
 		TextSubmit,

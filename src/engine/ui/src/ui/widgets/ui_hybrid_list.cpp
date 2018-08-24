@@ -52,3 +52,9 @@ void UIHybridList::setInputButtons(const UIInputButtons& buttons)
 {
 	list->setInputButtons(buttons);
 }
+
+void UIHybridList::setItemEnabled(const String& id, bool enabled)
+{
+	buttons->getWidget(id)->setEnabled(enabled);
+	list->getItem(id)->setEnabled(enabled);
+}

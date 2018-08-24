@@ -81,6 +81,7 @@ void UIList::addTextItem(const String& id, const LocalisedString& label, float m
 		widget->setMaxWidth(maxWidth);
 	}
 	widget->setSelectable(style.getTextRenderer("label").getColour(), style.getTextRenderer("selectedLabel").getColour());
+	widget->setDisablable(style.getTextRenderer("label").getColour(), style.getTextRenderer("disabledLabel").getColour());
 
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 	item->add(widget, 0, Vector4f(), centre ? UISizerAlignFlags::CentreHorizontal : UISizerFillFlags::Fill);
@@ -189,6 +190,16 @@ std::shared_ptr<UIListItem> UIList::getItem(int n) const
 			if (i++ == n) {
 				return item;
 			}
+		}
+	}
+	throw Exception("Invalid item", HalleyExceptions::UI);
+}
+
+std::shared_ptr<UIListItem> UIList::getItem(const String& id) const
+{
+	for (auto& item: items) {
+		if (item->getId() == id) {
+			return item;
 		}
 	}
 	throw Exception("Invalid item", HalleyExceptions::UI);
@@ -390,6 +401,13 @@ void UIListItem::setSelected(bool s)
 	}
 }
 
+void UIListItem::onEnabledChanged()
+{
+	addNewChildren(getLastInputType());
+	doSetState(getCurState());
+	sendEventDown(UIEvent(UIEventType::SetEnabled, getId(), isEnabled()));
+}
+
 void UIListItem::draw(UIPainter& painter) const
 {
 	if (sprite.hasMaterial()) {
@@ -491,6 +509,8 @@ void UIListItem::doSetState(State state)
 		sprite = style.getSprite("drag");
 	} else if (selected) {
 		sprite = style.getSprite("selected");
+	} else if (!isEnabled()) {
+		sprite = style.getSprite("disabled");
 	} else {
 		switch (state) {
 		case State::Up:

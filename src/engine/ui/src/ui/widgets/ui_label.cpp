@@ -128,3 +128,15 @@ void UILabel::setSelectable(Colour4f normalColour, Colour4f selColour)
 		}
 	});
 }
+
+void UILabel::setDisablable(Colour4f normalColour, Colour4f disabledColour)
+{
+	setHandle(UIEventType::SetEnabled, [=] (const UIEvent& event)
+	{
+		if (event.getBoolData()) {
+			setColour(normalColour);
+		} else {
+			setColour(disabledColour);
+		}
+	});
+}

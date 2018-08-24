@@ -37,6 +37,7 @@ namespace Halley {
 		void readFromDataBind() override;
 
 		std::shared_ptr<UIListItem> getItem(int n) const;
+		std::shared_ptr<UIListItem> getItem(const String& id) const;
 		
 		bool canDrag() const;
 		void setDrag(bool drag);
@@ -94,6 +95,7 @@ namespace Halley {
 		void pressMouse(Vector2f mousePos, int button) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
 		void setDragPos(Vector2f pos);
+		void onEnabledChanged() override;
 
 	private:
 		UIList& parent;

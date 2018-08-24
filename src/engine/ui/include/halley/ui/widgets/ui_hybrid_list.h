@@ -10,6 +10,7 @@ namespace Halley {
 	    void addDivider();
 
 		void setInputButtons(const UIInputButtons& button);
+		void setItemEnabled(const String& id, bool enabled);
 
     private:
 		UIStyle style;
