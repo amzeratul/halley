@@ -10,14 +10,6 @@
 
 using namespace Halley;
 
-#ifdef _MSC_VER
-#ifdef _DEBUG
-#pragma comment(lib, "freetyped.lib")
-#else
-#pragma comment(lib, "freetype.lib")
-#endif
-#endif
-
 namespace Halley {
 	class FontFacePimpl
 	{
