@@ -88,7 +88,7 @@ std::unique_ptr<ResourceDataStatic> ResourceDataStatic::loadFromFileSystem(Path 
 	}
 
 	fp.seekg(0, std::ios::end);
-	size_t size = fp.tellg();
+	const size_t size = size_t(fp.tellg());
 	fp.seekg(0, std::ios::beg);
 	char* buffer = new char[size]; // ResourceDataStatic will own this
 	try {

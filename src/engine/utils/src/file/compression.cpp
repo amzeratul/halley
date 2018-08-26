@@ -22,7 +22,7 @@ Bytes Compression::deflate(gsl::span<const gsl::byte> bytes)
 	
 	LodePNGCompressSettings settings;
 	lodepng_compress_settings_init(&settings);
-	lodepng_zlib_compress(&out, &outSize, reinterpret_cast<const unsigned char*>(bytes.data()), inSize, &settings);
+	lodepng_zlib_compress(&out, &outSize, reinterpret_cast<const unsigned char*>(bytes.data()), size_t(inSize), &settings);
 
 	Bytes result(outSize + 8);
 	memcpy(result.data(), &inSize, 8);
