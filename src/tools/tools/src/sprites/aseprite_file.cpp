@@ -3,6 +3,7 @@
 #include "halley/utils/utils.h"
 #include "halley/support/logger.h"
 #include "halley/file/compression.h"
+#include <limits>
 using namespace Halley;
 
 // Specs are at https://github.com/aseprite/aseprite/blob/master/docs/ase-file-specs.md
@@ -353,7 +354,7 @@ void AsepriteFile::addCelChunk(gsl::span<const gsl::byte> span)
 		} else if (type == 2) {
 			// ZLIB compressed
 			size_t outSize = 0;
-			auto out = Compression::inflateRaw(span, outSize);
+			auto out = Compression::inflateRaw(span, outSize, std::numeric_limits<size_t>::max());
 			cel.rawData.resize(outSize);
 			memcpy(cel.rawData.data(), out, outSize);
 			free(out);

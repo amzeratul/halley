@@ -46,7 +46,7 @@ endif()
 
 # Compiler-specific flags
 if (MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /fp:fast")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /fp:fast /WX")
 	if (MSVC_VERSION GREATER_EQUAL 1910)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++14 /permissive-")
 	endif ()

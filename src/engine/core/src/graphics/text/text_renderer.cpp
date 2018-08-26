@@ -444,7 +444,7 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth) const
 					lastValid = src.subspan(0, i + 1);
 					advanceAdjust = 0;
 				}
-				const int advance = lastValid.get().size();
+				const int advance = int(lastValid.get().size());
 				Expects(advance > 0);
 
 				if (!result.empty()) {
