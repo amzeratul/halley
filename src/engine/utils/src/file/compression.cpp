@@ -39,7 +39,7 @@ Bytes Compression::decompress(gsl::span<const gsl::byte> bytes, size_t maxSize)
 	Expects (bytes.size_bytes() >= 8);
 	uint64_t expectedOutSize;
 	memcpy(&expectedOutSize, bytes.data(), 8);
-	auto out = decompressRaw(bytes.subspan(8), maxSize, expectedOutSize);
+	auto out = decompressRaw(bytes.subspan(8), maxSize, size_t(expectedOutSize));
 	return out;
 }
 
@@ -65,7 +65,7 @@ Bytes Compression::compressRaw(gsl::span<const gsl::byte> bytes, bool insertLeng
 
 	const uint64_t inSize = bytes.size_bytes();
 	const size_t headerSize = insertLength ? 8 : 0;
-	Bytes result(inSize + headerSize + 16); // Header size, plus 16 bytes for headroom, should be enough for any compression
+	Bytes result(size_t(inSize) + headerSize + 16); // Header size, plus 16 bytes for headroom, should be enough for any compression
 
 	if (insertLength) {
 		memcpy(result.data(), &inSize, 8);
