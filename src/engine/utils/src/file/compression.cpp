@@ -1,49 +1,46 @@
 #include <cstdlib>
 #include <memory>
 #include "halley/file/compression.h"
-#include "../../contrib/lodepng/lodepng.h"
+//#include "../../contrib/lodepng/lodepng.h"
+#include "../../contrib/zlib/zlib.h"
 #include "halley/support/exception.h"
 #include "halley/text/string_converter.h"
 
 using namespace Halley;
 
-Bytes Compression::deflate(const Bytes& bytes)
+static voidpf zlibAlloc (voidpf opaque, uInt items, uInt size)
 {
-	return deflate(gsl::as_bytes(gsl::span<const Byte>(bytes)));
+	return malloc(size_t(items * size));
 }
 
-Bytes Compression::deflate(gsl::span<const gsl::byte> bytes)
+static void zlibFree(voidpf opaque, voidpf address)
+{
+	free(address);
+}
+
+Bytes Compression::compress(const Bytes& bytes)
+{
+	return compress(gsl::as_bytes(gsl::span<const Byte>(bytes)));
+}
+
+Bytes Compression::compress(gsl::span<const gsl::byte> bytes)
+{
+	return compressRaw(bytes, true);
+}
+
+Bytes Compression::decompress(const Bytes& bytes, size_t maxSize)
+{
+	return decompress(gsl::as_bytes(gsl::span<const Byte>(bytes)), maxSize);
+}
+
+Bytes Compression::decompress(gsl::span<const gsl::byte> bytes, size_t maxSize)
 {
 	Expects (sizeof(uint64_t) == 8);
-
-	uint64_t inSize = bytes.size_bytes();
-	size_t outSize = 0;
-	unsigned char* out = nullptr;
-	
-	LodePNGCompressSettings settings;
-	lodepng_compress_settings_init(&settings);
-	lodepng_zlib_compress(&out, &outSize, reinterpret_cast<const unsigned char*>(bytes.data()), size_t(inSize), &settings);
-
-	Bytes result(outSize + 8);
-	memcpy(result.data(), &inSize, 8);
-	memcpy(result.data() + 8, out, outSize);
-	free(out);
-	
-	return result;
-}
-
-Bytes Compression::inflate(const Bytes& bytes, size_t maxSize)
-{
-	return inflate(gsl::as_bytes(gsl::span<const Byte>(bytes)), maxSize);
-}
-
-Bytes Compression::inflate(gsl::span<const gsl::byte> bytes, size_t maxSize)
-{
-	size_t outSize;
-	auto b = inflateToSharedPtr(bytes, outSize, maxSize);
-	Bytes result(outSize);
-	memcpy(result.data(), b.get(), outSize);
-	return result;
+	Expects (bytes.size_bytes() >= 8);
+	uint64_t expectedOutSize;
+	memcpy(&expectedOutSize, bytes.data(), 8);
+	auto out = decompressRaw(bytes.subspan(8), maxSize, expectedOutSize);
+	return out;
 }
 
 static void deleter(const char* data)
@@ -51,36 +48,123 @@ static void deleter(const char* data)
 	delete[] data;
 }
 
-std::shared_ptr<const char> Compression::inflateToSharedPtr(gsl::span<const gsl::byte> bytes, size_t& size, size_t maxSize)
+std::shared_ptr<const char> Compression::decompressToSharedPtr(gsl::span<const gsl::byte> bytes, size_t& size, size_t maxSize)
 {
-	Expects (sizeof(uint64_t) == 8);
-	Expects (bytes.size_bytes() >= 8);
-	uint64_t expectedOutSize;
-	memcpy(&expectedOutSize, bytes.data(), 8);
-	if (expectedOutSize > uint64_t(maxSize)) {
-		throw Exception("File is too big to inflate: " + String::prettySize(expectedOutSize), HalleyExceptions::File);
-	}
-
-	size_t outSize = 0;
-	auto out = inflateRaw(bytes.subspan(8), outSize, maxSize);
-
-	if (outSize != expectedOutSize) {
-		throw Exception("Unexpected outsize (" + toString(outSize) + ") when inflating data, expected (" + toString(expectedOutSize) + ").", HalleyExceptions::File);
-	}
+	auto out = decompress(bytes, maxSize);
 	
-	size = outSize;
-	auto rawResult = new char[outSize];
-	memcpy(rawResult, out, outSize);
+	size = out.size();
+	auto rawResult = new char[out.size()];
+	memcpy(rawResult, out.data(), out.size());
 	auto result = std::shared_ptr<const char>(rawResult, deleter);
-	free(out);
 	return result;
 }
 
-unsigned char* Compression::inflateRaw(gsl::span<const gsl::byte> bytes, size_t& outSize, size_t maxSize)
+Bytes Compression::compressRaw(gsl::span<const gsl::byte> bytes, bool insertLength)
 {
-	unsigned char* out = nullptr;
-	LodePNGDecompressSettings settings;
-	lodepng_decompress_settings_init(&settings);
-	lodepng_zlib_decompress(&out, &outSize, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size_bytes(), &settings);
-	return out;
+	Expects (sizeof(uint64_t) == 8);
+
+	const uint64_t inSize = bytes.size_bytes();
+	const size_t headerSize = insertLength ? 8 : 0;
+	Bytes result(inSize + headerSize + 16); // Header size, plus 16 bytes for headroom, should be enough for any compression
+
+	if (insertLength) {
+		memcpy(result.data(), &inSize, 8);
+	}
+
+	z_stream stream;
+	stream.zalloc = &zlibAlloc;
+	stream.zfree = &zlibFree;
+	stream.opaque = nullptr;
+	int res = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
+	if (res != Z_OK) {
+		throw Exception("Unable to initialize zlib compression", HalleyExceptions::File);
+	}
+
+	stream.avail_in = uInt(bytes.size_bytes());
+	stream.next_in = reinterpret_cast<unsigned char*>(const_cast<gsl::byte*>(bytes.data()));
+	stream.avail_out = uInt(result.size() - headerSize);
+	stream.next_out = result.data() + headerSize;
+
+	do {
+		res = deflate(&stream, Z_FINISH);
+		if (res == Z_STREAM_ERROR || res == Z_BUF_ERROR) {
+			deflateEnd(&stream);
+			throw Exception("Unable to compress data.", HalleyExceptions::File);
+		}
+	} while (res != Z_STREAM_END);
+
+	const size_t outSize = size_t(stream.total_out);
+	deflateEnd(&stream);
+
+	result.resize(headerSize + outSize);
+	
+	return result;
+}
+
+Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSize, size_t expectedSize)
+{
+	if (expectedSize > uint64_t(maxSize)) {
+		throw Exception("File is too big to inflate: " + String::prettySize(expectedSize), HalleyExceptions::File);
+	}
+	
+	z_stream stream;
+	stream.zalloc = &zlibAlloc;
+	stream.zfree = &zlibFree;
+	stream.opaque = nullptr;
+	stream.avail_in = 0;
+	stream.next_in = nullptr;
+	int ret = inflateInit(&stream);
+	if (ret != Z_OK) {
+		throw Exception("Unable to initialise zlib", HalleyExceptions::File);
+	}
+	stream.avail_in = uInt(bytes.size_bytes());
+	stream.next_in = reinterpret_cast<unsigned char*>(const_cast<gsl::byte*>(bytes.data()));
+
+	if (expectedSize > 0) {
+		Bytes result(expectedSize);
+		stream.avail_out = uInt(result.size());
+		stream.next_out = result.data();
+		
+		const int res = inflate(&stream, Z_NO_FLUSH);
+		const size_t totalOut = size_t(stream.total_out);
+		inflateEnd(&stream);
+
+		if (res != Z_STREAM_END) {
+			throw Exception("Unable to inflate stream.", HalleyExceptions::File);
+		}
+		if (totalOut != expectedSize) {
+			throw Exception("Unexpected outsize (" + toString(result.size()) + ") when inflating data, expected (" + toString(expectedSize) + ").", HalleyExceptions::File);
+		}
+
+		return result;
+	} else {
+		constexpr size_t blockSize = 256 * 1024;
+		Bytes result(std::min(blockSize, maxSize));
+
+		int res = 0;
+		do {
+			// Expand if needed
+			if (result.size() - size_t(stream.total_out) < blockSize / 2) {
+				if (result.size() >= maxSize) {
+					inflateEnd(&stream);
+					throw Exception("Unable to inflate stream, maximum size has been exceeded.", HalleyExceptions::File);
+				}
+				auto newSize = std::min(result.size() + blockSize, maxSize);
+				result.resize(newSize);
+			}
+			stream.avail_out = uInt(result.size()) - stream.total_out;
+			stream.next_out = result.data() + size_t(stream.total_out);
+			res = inflate(&stream, Z_NO_FLUSH);
+		} while (res == Z_OK);
+
+		const size_t totalOut = size_t(stream.total_out);
+		inflateEnd(&stream);
+
+		if (res != Z_STREAM_END) {
+			throw Exception("Unable to inflate stream.", HalleyExceptions::File);
+		}
+		result.resize(totalOut);
+
+		return result;
+	}
 }

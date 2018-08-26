@@ -55,7 +55,7 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& 
 			throw Exception("Unable to read header", HalleyExceptions::Resources);
 		}
 		assetDb = std::make_unique<AssetDatabase>();
-		Deserializer::fromBytes<AssetDatabase>(*assetDb, Compression::inflate(assetDbBytes));
+		Deserializer::fromBytes<AssetDatabase>(*assetDb, Compression::decompress(assetDbBytes));
 	}
 
 	if (preLoad || !encryptionKey.isEmpty()) {
@@ -103,7 +103,7 @@ const Bytes& AssetPack::getData() const
 
 Bytes AssetPack::writeOut() const
 {
-	auto assetDbBytes = Compression::deflate(Serializer::toBytes(*assetDb));
+	auto assetDbBytes = Compression::compress(Serializer::toBytes(*assetDb));
 	AssetPackHeader header;
 	header.init(assetDbBytes.size());
 	header.iv = iv;

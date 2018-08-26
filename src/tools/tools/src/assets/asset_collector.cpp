@@ -21,7 +21,7 @@ void AssetCollector::output(const String& name, AssetType type, const Bytes& dat
 	Path filePath = Path(toString(type)) / id;
 
 	if (metadata && metadata->getString("asset_compression", "") == "deflate") {
-		auto newData = Compression::deflate(data);
+		auto newData = Compression::compress(data);
 		outFiles.emplace_back(filePath, newData);
 	} else {
 		outFiles.emplace_back(filePath, data);

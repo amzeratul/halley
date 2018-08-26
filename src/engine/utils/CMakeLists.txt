@@ -56,16 +56,34 @@ set(SOURCES
         "src/utils/hash.cpp"
         
         "contrib/json/jsoncpp.cpp"
+
         "contrib/lodepng/lodepng.cpp"
+
         "contrib/speex/resample.c"
+
         "contrib/stb_image/stb_image.c"
+
         "contrib/tiny-aes/aes.c"
+
         "contrib/tinyxml/ticpp.cpp"
         "contrib/tinyxml/tinystr.cpp"
         "contrib/tinyxml/tinyxml.cpp"
         "contrib/tinyxml/tinyxmlerror.cpp"
         "contrib/tinyxml/tinyxmlparser.cpp"
+
         "contrib/xxhash/xxhash.c"
+
+        "contrib/zlib/adler32.c"
+        "contrib/zlib/compress.c"
+        "contrib/zlib/crc32.c"
+        "contrib/zlib/deflate.c"
+        "contrib/zlib/infback.c"
+        "contrib/zlib/inffast.c"
+        "contrib/zlib/inflate.c"
+        "contrib/zlib/inftrees.c"
+        "contrib/zlib/trees.c"
+        "contrib/zlib/uncompr.c"
+        "contrib/zlib/zutil.c"
         )
 
 set(HEADERS
@@ -159,19 +177,36 @@ set(HEADERS
 
         "contrib/json/json-forwards.h"
         "contrib/json/json.h"
+        
         "contrib/lodepng/lodepng.h"
+        
         "contrib/stb_image/stb_image.h"
+        
         "contrib/tiny-aes/aes.h"
         "contrib/tiny-aes/aes.hpp"
+        
         "contrib/tinyxml/ticpp.h"
         "contrib/tinyxml/ticpprc.h"
         "contrib/tinyxml/tinystr.h"
         "contrib/tinyxml/tinyxml.h"
+        
         "contrib/speex/arch.h"
         "contrib/speex/fixed_generic.h"
         "contrib/speex/speex_resampler.h"
         "contrib/speex/stack_alloc.h"
+        
         "contrib/xxhash/xxhash.h"
+
+        "contrib/zlib/crc32.h"
+        "contrib/zlib/deflate.h"
+        "contrib/zlib/inffast.h"
+        "contrib/zlib/inffixed.h"
+        "contrib/zlib/inflate.h"
+        "contrib/zlib/inftrees.h"
+        "contrib/zlib/trees.h"
+        "contrib/zlib/zconf.h"
+        "contrib/zlib/zlib.h"
+        "contrib/zlib/zutil.h"
         )
 
 assign_source_group(${SOURCES})
