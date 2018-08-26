@@ -58,6 +58,7 @@ namespace Halley {
 		explicit String(double number);
 
 		String& operator=(const char* utf8);
+		String& operator=(std::basic_string<Character>&& str);
 		String& operator=(const std::basic_string<Character>& str);
 		String& operator=(String&& str) noexcept;
 		String& operator=(const String& str);

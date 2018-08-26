@@ -130,6 +130,12 @@ String& String::operator=(const char* utf8) {
 	return *this;
 }
 
+String& String::operator=(std::basic_string<Character>&& s)
+{
+	str = std::move(s);
+	return *this;
+}
+
 String& String::operator=(const std::basic_string<Character>& s) {
 	str = s;
 	return *this;

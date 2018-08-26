@@ -16,7 +16,7 @@ Serializer::Serializer(gsl::span<gsl::byte> dst)
 
 Serializer& Serializer::operator<<(const std::string& str)
 {
-	unsigned int sz = static_cast<unsigned int>(str.size());
+	const unsigned int sz = static_cast<unsigned int>(str.size());
 	*this << sz;
 	*this << gsl::as_bytes(gsl::span<const char>(str.data(), sz));
 	return *this;
@@ -43,7 +43,7 @@ Serializer& Serializer::operator<<(gsl::span<const gsl::byte> span)
 
 Serializer& Serializer::operator<<(const Bytes& bytes)
 {
-	unsigned int byteSize = static_cast<unsigned int>(bytes.size());
+	const unsigned int byteSize = static_cast<unsigned int>(bytes.size());
 	*this << byteSize;
 
 	if (!dryRun) {
@@ -72,10 +72,6 @@ Deserializer& Deserializer::operator>>(std::string& str)
 
 	ensureSufficientBytesRemaining(sz);
 
-	if (sz > 100 * 1024 * 1024) {
-		throw Exception("String is too big.", HalleyExceptions::File);
-	}
-
 	str = std::string(reinterpret_cast<const char*>(src.data() + pos), sz);
 	pos += sz;
 	return *this;
@@ -85,7 +81,7 @@ Deserializer& Deserializer::operator>>(String& str)
 {
 	std::string s;
 	*this >> s;
-	str = s;
+	str = std::move(s);
 	return *this;
 }
 

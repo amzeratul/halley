@@ -258,7 +258,7 @@ namespace Halley {
 		{
 			unsigned int sz;
 			*this >> sz;
-			ensureSufficientBytesRemaining(sz); // Expect at least one byte per map entry
+			ensureSufficientBytesRemaining(sz * 2); // Expect at least two bytes per map entry
 
 			std::vector<std::pair<T, U>> tmpData(sz);
 			for (unsigned int i = 0; i < sz; i++) {
@@ -273,6 +273,8 @@ namespace Halley {
 		{
 			unsigned int sz;
 			*this >> sz;
+			ensureSufficientBytesRemaining(sz * 2); // Expect at least two bytes per map entry
+
 			for (unsigned int i = 0; i < sz; i++) {
 				T key;
 				U value;
@@ -287,6 +289,8 @@ namespace Halley {
 		{
 			unsigned int sz;
 			*this >> sz;
+			ensureSufficientBytesRemaining(sz * 2); // Expect at least two bytes per map entry
+
 			for (unsigned int i = 0; i < sz; i++) {
 				T key;
 				U value;
@@ -301,7 +305,7 @@ namespace Halley {
 		{
 			unsigned int sz;
 			*this >> sz;
-			ensureSufficientBytesRemaining(sz); // Expect at least one byte per vector entry
+			ensureSufficientBytesRemaining(sz); // Expect at least one byte per set entry
 
 			val.clear();
 			for (unsigned int i = 0; i < sz; i++) {
