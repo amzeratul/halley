@@ -44,11 +44,11 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& 
 		throw Exception("Asset pack is invalid (invalid identifier)", HalleyExceptions::Resources);
 	}
 	iv = header.iv;
-	dataOffset = header.dataStartPos;
+	dataOffset = size_t(header.dataStartPos);
 
 	// Read asset database
 	{
-		const size_t assetDbSize = header.dataStartPos - header.assetDbStartPos;
+		const size_t assetDbSize = size_t(header.dataStartPos - header.assetDbStartPos);
 		auto assetDbBytes = Bytes(assetDbSize);
 		nRead = reader->read(gsl::as_writeable_bytes(gsl::span<Byte>(assetDbBytes)));
 		if (nRead != int(assetDbBytes.size())) {
@@ -108,7 +108,7 @@ Bytes AssetPack::writeOut() const
 	header.init(assetDbBytes.size());
 	header.iv = iv;
 
-	auto result = Bytes(header.dataStartPos + data.size());
+	auto result = Bytes(size_t(header.dataStartPos + data.size()));
 	memcpy(result.data(), &header, sizeof(AssetPackHeader));
 	memcpy(result.data() + header.assetDbStartPos, assetDbBytes.data(), assetDbBytes.size());
 	memcpy(result.data() + header.dataStartPos, data.data(), data.size());
@@ -212,13 +212,13 @@ void PackDataReader::seek(int64_t pos, int whence)
 {
 	switch (whence) {
 	case SEEK_SET:
-		curPos = pos;
+		curPos = size_t(pos);
 		break;
 	case SEEK_CUR:
-		curPos += pos;
+		curPos = size_t(curPos + pos);
 		break;
 	case SEEK_END:
-		curPos = fileSize + pos;
+		curPos = size_t(fileSize + pos);
 		break;
 	}
 }

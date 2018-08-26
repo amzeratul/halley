@@ -49,7 +49,7 @@ SDLRWOps::~SDLRWOps()
 
 size_t SDLRWOps::size() const
 {
-	return end - start;
+	return size_t(end - start);
 }
 
 int SDLRWOps::read(gsl::span<gsl::byte> dst)
@@ -84,5 +84,5 @@ void SDLRWOps::seek(int64_t offset, int whence)
 
 size_t SDLRWOps::tell() const
 {
-	return pos - start;
+	return size_t(pos - start);
 }
