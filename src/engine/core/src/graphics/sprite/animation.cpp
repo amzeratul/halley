@@ -7,6 +7,7 @@
 #include "resources/resources.h"
 #include "halley/file/byte_serializer.h"
 #include <gsl/gsl_assert>
+#include <utility>
 
 using namespace Halley;
 
@@ -16,7 +17,7 @@ AnimationFrame::AnimationFrame(int frameNumber, int duration, const String& imag
 	const size_t n = directions.size();
 	sprites.resize(n);
 	for (size_t i = 0; i < n; i++) {
-		sprites[i] = &sheet.getSprite(directions[i].getFrameName(frameNumber, imageName));
+		sprites[i] = &sheet.getSprite(directions[i].needsToProcessFrameName(imageName) ? directions[i].getFrameName(frameNumber, imageName) : imageName);
 	}
 }
 
@@ -29,8 +30,8 @@ AnimationFrameDefinition::AnimationFrameDefinition()
 	: frameNumber(-1)
 {}
 
-AnimationFrameDefinition::AnimationFrameDefinition(int frameNumber, int duration, const String& imageName)
-	: imageName(imageName)
+AnimationFrameDefinition::AnimationFrameDefinition(int frameNumber, int duration, String imageName)
+	: imageName(std::move(imageName))
 	, frameNumber(frameNumber)
 	, duration(duration)
 {
@@ -58,7 +59,7 @@ void AnimationFrameDefinition::deserialize(Deserializer& s)
 AnimationSequence::AnimationSequence() {}
 
 AnimationSequence::AnimationSequence(String name, bool loop, bool noFlip)
-	: name(name)
+	: name(std::move(name))
 	, loop(loop)
 	, noFlip(noFlip)
 {}
@@ -90,11 +91,16 @@ AnimationDirection::AnimationDirection()
 {}
 
 AnimationDirection::AnimationDirection(String name, String fileName, bool flip, int id)
-	: name(name)
-	, fileName(fileName)
+	: name(std::move(name))
+	, fileName(std::move(fileName))
 	, id(id)
 	, flip(flip)
 {
+}
+
+bool AnimationDirection::needsToProcessFrameName(const String& baseName) const
+{
+	return baseName.find("%f") != std::string::npos || baseName.find("%dir%") != std::string::npos;
 }
 
 String AnimationDirection::getFrameName(int frameNumber, String baseName) const

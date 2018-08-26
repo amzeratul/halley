@@ -78,7 +78,7 @@ std::vector<size_t> AudioEngine::getPlayingSounds()
 {
 	std::vector<size_t> result(idToSource.size());
 	size_t i = 0;
-	for (auto& kv: idToSource) {
+	for (const auto& kv: idToSource) {
 		result[i++] = kv.first;
 	}
 	return result;

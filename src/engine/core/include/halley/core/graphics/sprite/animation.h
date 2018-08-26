@@ -37,7 +37,7 @@ namespace Halley
 	{
 	public:
 		AnimationFrameDefinition();
-		AnimationFrameDefinition(int frameNumber, int duration, const String& imageName);
+		AnimationFrameDefinition(int frameNumber, int duration, String imageName);
 		AnimationFrame makeFrame(const SpriteSheet& sheet, const Vector<AnimationDirection>& directions) const;
 
 		void serialize(Serializer& s) const;
@@ -92,6 +92,8 @@ namespace Halley
 		String getFileName() const { return fileName; }
 		bool shouldFlip() const { return flip; }
 		int getId() const { return id; }
+
+		bool needsToProcessFrameName(const String& baseName) const;
 		String getFrameName(int frameNumber, String baseName) const;
 
 		void serialize(Serializer& s) const;
