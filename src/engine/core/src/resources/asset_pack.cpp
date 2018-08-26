@@ -18,6 +18,7 @@ void AssetPackHeader::init(size_t assetDbSize)
 
 AssetPack::AssetPack()
 	: assetDb(std::make_unique<AssetDatabase>())
+	, hasReader(false)
 {
 	memset(iv.data(), 0, iv.size());
 }
@@ -29,6 +30,7 @@ AssetPack::AssetPack(AssetPack&& other)
 
 AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& encryptionKey, bool preLoad)
 	: reader(std::move(_reader))
+	, hasReader(true)
 {
 	// Read header
 	size_t totalSize = reader->size();
@@ -73,10 +75,16 @@ AssetPack::~AssetPack()
 
 AssetPack& AssetPack::operator=(AssetPack&& other)
 {
+	std::unique_lock<std::mutex> lock(other.readerMutex);
+
 	assetDb = std::move(other.assetDb);
 	dataOffset = other.dataOffset;
 	reader = std::move(other.reader);
 	data = std::move(other.data);
+	hasReader = !!reader;
+
+	other.hasReader = false;
+	other.reader.reset();
 
 	return *this;
 }
@@ -127,10 +135,15 @@ std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType 
 			return std::make_unique<PackDataReader>(*this, pos, size);
 		});
 	} else {
-		if (reader) {
-			// Stream from reader
-			// TODO
-			return {};
+		if (hasReader) {
+			auto result = new char[size];
+			try {
+				readData(pos, gsl::as_writeable_bytes(gsl::span<char>(result, size)));
+				return std::make_unique<ResourceDataStatic>(result, size, path, true);
+			} catch (...) {
+				delete[] result;
+				throw;
+			}
 		} else {
 			// Preloaded
 			if (pos + size > data.size()) {
@@ -144,8 +157,10 @@ std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType 
 
 void AssetPack::readToMemory()
 {
+	std::unique_lock<std::mutex> lock(readerMutex);
 	reader->seek(dataOffset, SEEK_SET);
 	data = reader->readAll();
+	hasReader = false;
 	reader.reset();
 }
 
@@ -169,19 +184,26 @@ void AssetPack::decrypt(const String& key)
 
 void AssetPack::readData(size_t pos, gsl::span<gsl::byte> dst)
 {
-	if (reader) {
-		reader->seek(pos + dataOffset, SEEK_SET);
-		reader->read(dst);
-	} else {
-		if (pos + size_t(dst.size()) > data.size()) {
-			throw Exception("Asset data is out of pack bounds.", HalleyExceptions::Resources);
+	if (hasReader) {
+		std::unique_lock<std::mutex> lock(readerMutex);
+		if (reader) {
+			reader->seek(pos + dataOffset, SEEK_SET);
+			reader->read(dst);
+			return;
 		}
-		memcpy(dst.data(), data.data() + pos, dst.size());
 	}
+
+	// Didn't read with reader, read from data
+	if (pos + size_t(dst.size()) > data.size()) {
+		throw Exception("Asset data is out of pack bounds.", HalleyExceptions::Resources);
+	}
+	memcpy(dst.data(), data.data() + pos, dst.size());
 }
 
 std::unique_ptr<ResourceDataReader> AssetPack::extractReader()
 {
+	std::unique_lock<std::mutex> lock(readerMutex);
+	hasReader = false;
 	return std::move(reader);
 }
 

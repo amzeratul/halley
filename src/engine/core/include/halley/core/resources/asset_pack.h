@@ -25,10 +25,12 @@ namespace Halley {
     class AssetPack {
     public:
 		AssetPack();
+		AssetPack(const AssetPack& other) = delete;
 		AssetPack(AssetPack&& other);
 		AssetPack(std::unique_ptr<ResourceDataReader> reader, const String& encryptionKey = "", bool preLoad = false);
 		~AssetPack();
 
+		AssetPack& operator=(const AssetPack& other) = delete;
 		AssetPack& operator=(AssetPack&& other);
 
 		AssetDatabase& getAssetDatabase();
@@ -51,6 +53,8 @@ namespace Halley {
     private:
 		std::unique_ptr<AssetDatabase> assetDb;
 		std::unique_ptr<ResourceDataReader> reader;
+		std::atomic<bool> hasReader;
+		std::mutex readerMutex;
 		size_t dataOffset = 0;
 		Bytes data;
 		std::array<char, 16> iv;
