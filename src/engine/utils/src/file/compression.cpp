@@ -32,15 +32,15 @@ Bytes Compression::deflate(gsl::span<const gsl::byte> bytes)
 	return result;
 }
 
-Bytes Compression::inflate(const Bytes& bytes)
+Bytes Compression::inflate(const Bytes& bytes, size_t maxSize)
 {
-	return inflate(gsl::as_bytes(gsl::span<const Byte>(bytes)));
+	return inflate(gsl::as_bytes(gsl::span<const Byte>(bytes)), maxSize);
 }
 
-Bytes Compression::inflate(gsl::span<const gsl::byte> bytes)
+Bytes Compression::inflate(gsl::span<const gsl::byte> bytes, size_t maxSize)
 {
 	size_t outSize;
-	auto b = inflateToSharedPtr(bytes, outSize);
+	auto b = inflateToSharedPtr(bytes, outSize, maxSize);
 	Bytes result(outSize);
 	memcpy(result.data(), b.get(), outSize);
 	return result;
@@ -51,18 +51,18 @@ static void deleter(const char* data)
 	delete[] data;
 }
 
-std::shared_ptr<const char> Compression::inflateToSharedPtr(gsl::span<const gsl::byte> bytes, size_t& size)
+std::shared_ptr<const char> Compression::inflateToSharedPtr(gsl::span<const gsl::byte> bytes, size_t& size, size_t maxSize)
 {
 	Expects (sizeof(uint64_t) == 8);
 	Expects (bytes.size_bytes() >= 8);
 	uint64_t expectedOutSize;
 	memcpy(&expectedOutSize, bytes.data(), 8);
-	if (expectedOutSize > 100 * 1024 * 1024) {
+	if (expectedOutSize > uint64_t(maxSize)) {
 		throw Exception("File is too big to inflate: " + String::prettySize(expectedOutSize), HalleyExceptions::File);
 	}
 
 	size_t outSize = 0;
-	auto out = inflateRaw(bytes.subspan(8), outSize);
+	auto out = inflateRaw(bytes.subspan(8), outSize, maxSize);
 
 	if (outSize != expectedOutSize) {
 		throw Exception("Unexpected outsize (" + toString(outSize) + ") when inflating data, expected (" + toString(expectedOutSize) + ").", HalleyExceptions::File);
@@ -76,7 +76,7 @@ std::shared_ptr<const char> Compression::inflateToSharedPtr(gsl::span<const gsl:
 	return result;
 }
 
-unsigned char* Compression::inflateRaw(gsl::span<const gsl::byte> bytes, size_t& outSize)
+unsigned char* Compression::inflateRaw(gsl::span<const gsl::byte> bytes, size_t& outSize, size_t maxSize)
 {
 	unsigned char* out = nullptr;
 	LodePNGDecompressSettings settings;
