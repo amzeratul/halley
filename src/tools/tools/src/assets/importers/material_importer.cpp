@@ -1,5 +1,5 @@
 #include "material_importer.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include "../../yaml/halley-yamlcpp.h"
 #include "halley/tools/file/filesystem.h"

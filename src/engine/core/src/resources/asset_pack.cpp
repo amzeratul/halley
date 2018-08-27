@@ -1,8 +1,8 @@
 #include "resources/asset_pack.h"
 #include "resources/asset_database.h"
 #include "halley/resources/resource_data.h"
-#include "halley/file/byte_serializer.h"
-#include "halley/file/compression.h"
+#include "halley/bytes/byte_serializer.h"
+#include "halley/bytes/compression.h"
 #include "halley/maths/random.h"
 #include "halley/utils/encrypt.h"
 

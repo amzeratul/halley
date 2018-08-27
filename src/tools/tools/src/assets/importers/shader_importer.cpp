@@ -1,6 +1,6 @@
 #include "shader_importer.h"
 #include "halley/tools/assets/import_assets_database.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/resources/metadata.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/core/graphics/shader.h"

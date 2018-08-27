@@ -1,5 +1,5 @@
 #include "config_importer.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/file_formats/config_file.h"
 #include "../../yaml/halley-yamlcpp.h"
 #include "halley/tools/file/filesystem.h"

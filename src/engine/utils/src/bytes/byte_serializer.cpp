@@ -1,6 +1,6 @@
 #include <cstring>
 #include <string>
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/text/halleystring.h"
 
 using namespace Halley;

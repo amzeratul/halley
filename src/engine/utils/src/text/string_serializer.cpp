@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "halley/file/string_serializer.h"
+#include "halley/text/string_serializer.h"
 #include "halley/text/string_converter.h"
 
 using namespace Halley;

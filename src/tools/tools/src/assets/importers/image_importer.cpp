@@ -1,6 +1,6 @@
 #include "image_importer.h"
 #include "halley/tools/assets/import_assets_database.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/resources/metadata.h"
 #include "halley/file_formats/image.h"
 #include "halley/tools/file/filesystem.h"

@@ -1,6 +1,6 @@
 #pragma once
 #include "halley/utils/utils.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "../connection/iconnection.h"
 #include "../connection/network_packet.h"
 #include "network_session_messages.h"

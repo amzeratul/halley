@@ -2,7 +2,7 @@
 #include <halley/support/exception.h>
 #include "halley/utils/utils.h"
 #include "halley/support/logger.h"
-#include "halley/file/compression.h"
+#include "halley/bytes/compression.h"
 #include <limits>
 using namespace Halley;
 

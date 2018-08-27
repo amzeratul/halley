@@ -1,5 +1,5 @@
 #include "halley/file_formats/config_file.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/support/exception.h"
 #include "halley/core/resources/resource_collection.h"
 

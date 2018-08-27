@@ -7,7 +7,7 @@
 #include "halley/resources/metadata.h"
 #include "halley/resources/resource.h"
 #include "halley/data_structures/maybe.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 
 namespace Halley
 {

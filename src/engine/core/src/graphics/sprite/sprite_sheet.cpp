@@ -4,7 +4,7 @@
 #include "resources/resources.h"
 #include "halley/file_formats/json/json.h"
 #include <halley/file_formats/json_file.h>
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 
 using namespace Halley;
 

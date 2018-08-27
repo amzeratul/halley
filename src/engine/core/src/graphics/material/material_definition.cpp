@@ -5,7 +5,7 @@
 #include "halley/core/graphics/painter.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/material/material_parameter.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/text/string_converter.h"
 #include "halley/file_formats/binary_file.h"
 #include "halley/file_formats/config_file.h"

@@ -1,7 +1,7 @@
 #include "spritesheet_importer.h"
 #include "halley/core/graphics/sprite/sprite_sheet.h"
 #include "halley/tools/file/filesystem.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 
 using namespace Halley;
 

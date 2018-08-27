@@ -3,7 +3,7 @@
 #include "halley/resources/metadata.h"
 #include "halley/support/exception.h"
 #include <halley/concurrency/concurrent.h>
-#include "halley/file/compression.h"
+#include "halley/bytes/compression.h"
 
 using namespace Halley;
 

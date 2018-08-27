@@ -2,7 +2,7 @@
 #include "audio_engine.h"
 #include "audio_clip.h"
 #include "halley/resources/resource_data.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/text/string_converter.h"
 #include "halley/core/resources/resources.h"

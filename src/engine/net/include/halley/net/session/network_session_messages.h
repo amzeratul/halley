@@ -1,6 +1,6 @@
 #pragma once
 #include "halley/utils/utils.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 
 namespace Halley {
 	enum class NetworkSessionType {

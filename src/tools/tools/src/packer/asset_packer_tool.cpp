@@ -3,7 +3,7 @@
 #include "halley/file/path.h"
 #include "halley/tools/packer/asset_packer.h"
 #include "halley/support/logger.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/project/project_loader.h"
 

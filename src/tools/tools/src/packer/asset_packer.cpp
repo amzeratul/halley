@@ -1,7 +1,7 @@
 #include "halley/tools/packer/asset_packer.h"
 #include "halley/core/resources/asset_database.h"
 #include "halley/tools/file/filesystem.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/support/logger.h"
 #include "halley/tools/packer/asset_pack_manifest.h"
 #include "halley/resources/resource.h"

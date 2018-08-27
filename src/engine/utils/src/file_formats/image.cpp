@@ -26,7 +26,7 @@
 #include "halley/support/exception.h"
 #include "halley/resources/resource_data.h"
 #include "halley/text/string_converter.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;

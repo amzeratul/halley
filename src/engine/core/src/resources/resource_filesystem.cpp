@@ -22,7 +22,7 @@
 #include <cassert>
 #include "resource_filesystem.h"
 #include "halley/core/api/system_api.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 
 using namespace Halley;
 

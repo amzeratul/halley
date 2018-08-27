@@ -3,7 +3,7 @@
 #include "../contrib/tinyxml/ticpp.h"
 #include "halley/core/graphics/text/font.h"
 #include "halley/tools/file/filesystem.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/file_formats/image.h"
 
 using namespace Halley;

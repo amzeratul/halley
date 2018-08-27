@@ -1,5 +1,5 @@
 #include "halley/core/resources/asset_database.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/support/exception.h"
 #include <set>
 

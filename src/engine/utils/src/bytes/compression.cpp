@@ -1,6 +1,6 @@
 #include <cstdlib>
 #include <memory>
-#include "halley/file/compression.h"
+#include "halley/bytes/compression.h"
 //#include "../../contrib/lodepng/lodepng.h"
 #include "../../contrib/zlib/zlib.h"
 #include "halley/support/exception.h"

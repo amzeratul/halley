@@ -4,6 +4,10 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "concurrency/concurrent.h"
 
+#include "bytes/byte_serializer.h"
+#include "bytes/compression.h"
+#include "bytes/fuzzer.h"
+
 #include "data_structures/bin_pack.h"
 #include "data_structures/circular_buffer.h"
 #include "data_structures/dynamic_grid.h"
@@ -17,10 +21,8 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "data_structures/tree_map.h"
 #include "data_structures/vector.h"
 
-#include "file/byte_serializer.h"
-#include "file/compression.h"
 #include "file/directory_monitor.h"
-#include "file/string_serializer.h"
+#include "file/path.h"
 
 #include "file_formats/binary_file.h"
 #include "file_formats/config_file.h"
@@ -66,6 +68,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "text/halleystring.h"
 #include "text/i18n.h"
 #include "text/string_converter.h"
+#include "text/string_serializer.h"
 
 #include "time/halleytime.h"
 #include "time/stopwatch.h"

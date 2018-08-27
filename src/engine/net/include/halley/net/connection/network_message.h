@@ -3,7 +3,7 @@
 #include <typeindex>
 #include "halley/utils/utils.h"
 #include "halley/data_structures/maybe.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 
 namespace Halley
 {

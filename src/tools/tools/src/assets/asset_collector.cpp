@@ -1,9 +1,9 @@
 #include "halley/tools/assets/asset_collector.h"
 #include "halley/tools/file/filesystem.h"
-#include "halley/file/byte_serializer.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/resources/metadata.h"
 #include "halley/support/logger.h"
-#include "halley/file/compression.h"
+#include "halley/bytes/compression.h"
 
 using namespace Halley;
 
