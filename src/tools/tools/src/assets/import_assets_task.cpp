@@ -112,8 +112,10 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 				//setProgress(lerp(curFileProgressStart, curFileProgressEnd, assetProgress), curFileLabel + " " + label);
 				return !isCancelled();
 			});
-			
-			importer.getImporter(cur.assetType).import(cur, collector);
+
+			for (auto& importer: importer.getImporters(cur.assetType)) {
+				importer.get().import(cur, collector);
+			}
 			
 			for (auto& additional: collector.collectAdditionalAssets()) {
 				toLoad.emplace_front(std::move(additional));
@@ -147,9 +149,11 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 	// Retrieve previous output from this asset, and remove any files which went missing
 	auto previous = db.getOutFiles(asset.assetId);
 	for (auto& f: previous) {
-		if (std::find_if(outFiles.begin(), outFiles.end(), [&] (const std::pair<Path, Bytes>& r) { return r.first == f.filepath; }) == outFiles.end()) {
-			// File no longer exists as part of this asset, remove it
-			FileSystem::remove(assetsPath / f.filepath);
+		for (auto& v: f.platformVersions) {
+			if (std::find_if(outFiles.begin(), outFiles.end(), [&] (const std::pair<Path, Bytes>& r) { return r.first == v.second.filepath; }) == outFiles.end()) {
+				// File no longer exists as part of this asset, remove it
+				FileSystem::remove(assetsPath / v.second.filepath);
+			}
 		}
 	}
 

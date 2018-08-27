@@ -12,36 +12,47 @@ ProjectLoader::ProjectLoader(const HalleyStatics& statics, const Path& halleyPat
 
 std::unique_ptr<Project> ProjectLoader::loadProject(const Path& path) const
 {
-	auto project = std::make_unique<Project>(curPlatform, path, halleyPath, plugins);
+	auto project = std::make_unique<Project>(curPlatforms, path, halleyPath, plugins);
 	project->setAssetPackManifest(path / "halley_project" / "asset_manifest.yaml"); // HACK
 	return std::move(project);
 }
 
-void ProjectLoader::setPlatform(const String& platform)
+static String getDLLExtension()
+{
+#if defined (_WIN32)
+	return ".dll";
+#elif defined(__APPLE__)
+	return ".dylib";
+#else
+	return ".so";
+#endif	
+}
+
+void ProjectLoader::setPlatforms(std::vector<String> platforms)
 {
 	plugins.clear();
-	bool knownPlatform = platform == "pc";
 
-	String extension;
-#if defined (_WIN32)
-	extension = ".dll";
-#elif defined(__APPLE__)
-	extension = ".dylib";
-#else
-	extension = ".so";
-#endif
+	// Initialize known platforms
+	std::vector<bool> knownPlatforms(platforms.size());
+	for (size_t i = 0; i < platforms.size(); ++i) {
+		knownPlatforms[i] = platforms[i] == "pc";
+	}
 
+	// Look for plugins
 	auto pluginPath = halleyPath / "plugins";
 	auto files = FileSystem::enumerateDirectory(pluginPath);
 	for (auto& file: files) {
-		if (file.getExtension() == extension) {
+		if (file.getExtension() == getDLLExtension()) {
 			auto plugin = loadPlugin(pluginPath / file);
 			if (plugin && plugin->isDebug() == Debug::isDebug()) {
-				auto platforms = plugin->getSupportedPlatforms();
+				// Valid plugin, check platform compatibility
+				auto pluginPlatforms = plugin->getSupportedPlatforms();
 				bool accepted = false;
-				for (auto& plat: platforms) {
-					accepted = plat == "*" || plat == platform;
-					knownPlatform |= plat == platform;
+				for (size_t i = 0; i < platforms.size(); ++i) {
+					for (auto& pluginPlatform: pluginPlatforms) {
+						accepted |= pluginPlatform == "*" || pluginPlatform == platforms[i];
+						knownPlatforms[i] = knownPlatforms[i] || pluginPlatform == platforms[i];
+					}
 				}
 				if (accepted) {
 					plugins.emplace_back(std::move(plugin));
@@ -50,11 +61,13 @@ void ProjectLoader::setPlatform(const String& platform)
 		}
 	}
 	
-	if (!knownPlatform) {
-		throw Exception("Unknown platform: " + platform, HalleyExceptions::Tools);
+	for (size_t i = 0; i < platforms.size(); ++i) {
+		if (!knownPlatforms[i]) {
+			throw Exception("Unknown platform: " + platforms[i], HalleyExceptions::Tools);
+		}
 	}
 
-	curPlatform = platform;
+	curPlatforms = std::move(platforms);
 }
 
 #ifdef _WIN32

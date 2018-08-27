@@ -5,14 +5,14 @@
 
 using namespace Halley;
 
-Project::Project(const String& platform, Path projectRootPath, Path halleyRootPath, std::vector<HalleyPluginPtr> plugins)
-	: platform(platform)
+Project::Project(std::vector<String> _platforms, Path projectRootPath, Path halleyRootPath, std::vector<HalleyPluginPtr> plugins)
+	: platforms(std::move(_platforms))
 	, rootPath(projectRootPath)
 	, halleyRootPath(halleyRootPath)
 	, plugins(std::move(plugins))
 {
-	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platform);
-	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", "");
+	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platforms);
+	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", std::vector<String>{ "" });
 	assetImporter = std::make_unique<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
 }
 
@@ -20,6 +20,11 @@ Project::~Project()
 {
 	assetImporter.reset();
 	plugins.clear();
+}
+
+std::vector<String> Project::getPlatforms() const
+{
+	return platforms;
 }
 
 Path Project::getRootPath() const
@@ -32,9 +37,10 @@ Path Project::getUnpackedAssetsPath() const
 	return rootPath / "assets_unpacked";
 }
 
-Path Project::getPackedAssetsPath() const
+Path Project::getPackedAssetsPath(const String& platform) const
 {
-	return rootPath / "assets";
+	String suffix = platform == "pc" ? "" : "-" + platform;
+	return rootPath / ("assets" + suffix);
 }
 
 Path Project::getAssetsSrcPath() const
@@ -77,15 +83,16 @@ const AssetImporter& Project::getAssetImporter() const
 	return *assetImporter;
 }
 
-std::unique_ptr<IAssetImporter> Project::getAssetImporterOverride(ImportAssetType type) const
+std::vector<std::unique_ptr<IAssetImporter>> Project::getAssetImportersFromPlugins(ImportAssetType type) const
 {
+	std::vector<std::unique_ptr<IAssetImporter>> result;
 	for (auto& plugin: plugins) {
 		auto importer = plugin->getAssetImporter(type);
 		if (importer) {
-			return importer;
+			result.emplace_back(std::move(importer));
 		}
 	}
-	return {};
+	return std::move(result);
 }
 
 void Project::setAssetPackManifest(const Path& path)

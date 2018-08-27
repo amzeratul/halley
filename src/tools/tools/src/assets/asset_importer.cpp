@@ -41,15 +41,17 @@ AssetImporter::AssetImporter(Project& project, const std::vector<Path>& assetsSr
 		std::make_unique<IAssetImporter>()
 	};
 
-	for (auto& i: defaultImporters) {
-		auto type = i->getType();
-		auto overrider = project.getAssetImporterOverride(type);
-		auto& importer = overrider ? overrider : i;
-		importers[type] = std::move(importer);
+	for (auto& importer: defaultImporters) {
+		auto type = importer->getType();
+		auto& importerSet = importers[type];
+		importerSet.emplace_back(std::move(importer));
+		for (auto& pluginImporter: project.getAssetImportersFromPlugins(type)) {
+			importerSet.emplace_back(std::move(pluginImporter));
+		}
 	}
 }
 
-IAssetImporter& AssetImporter::getImporter(Path path) const
+IAssetImporter& AssetImporter::getRootImporter(Path path) const
 {
 	ImportAssetType type = ImportAssetType::SimpleCopy;
 	
@@ -78,17 +80,22 @@ IAssetImporter& AssetImporter::getImporter(Path path) const
 		type = ImportAssetType::Texture;
 	}
 
-	return getImporter(type);
+	return getImporters(type).at(0);
 }
 
-IAssetImporter& AssetImporter::getImporter(ImportAssetType type) const
+std::vector<std::reference_wrapper<IAssetImporter>> AssetImporter::getImporters(ImportAssetType type) const
 {
+	std::vector<std::reference_wrapper<IAssetImporter>> result;
+
 	auto i = importers.find(type);
 	if (i != importers.end()) {
-		return *i->second;
-	} else {
-		throw Exception("Unknown asset type: " + toString(int(type)), HalleyExceptions::Tools);
+		for (auto& importer: i->second) {
+			result.push_back(*importer);
+		}
+		return result;
 	}
+
+	throw Exception("Unknown asset type: " + toString(int(type)), HalleyExceptions::Tools);
 }
 
 const std::vector<Path>& AssetImporter::getAssetsSrc() const

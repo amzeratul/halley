@@ -23,7 +23,9 @@ void DeleteAssetsTask::run()
 
 		try {
 			for (auto& f : asset.outputFiles) {
-				FileSystem::remove(assetsPath / f.filepath);
+				for (auto& v: f.platformVersions) {
+					FileSystem::remove(assetsPath / v.second.filepath);
+				}
 			}
 			db.markDeleted(asset);
 		} catch (std::exception& e) {

@@ -48,18 +48,24 @@ bool AssetPackListing::isActive() const
 
 void AssetPacker::pack(Project& project, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets)
 {
-	Logger::logInfo("Loading manifest...");
-	auto db = project.getImportAssetsDatabase().makeAssetDatabase();
-	auto src = project.getUnpackedAssetsPath();
-	auto dst = project.getPackedAssetsPath();
-	auto manifest = AssetPackManifest(FileSystem::readFile(project.getAssetPackManifestPath()));
+	for (auto& platform: project.getPlatforms()) {
+		packPlatform(project, assetsToPack, deletedAssets, platform);
+	}
+}
+
+void AssetPacker::packPlatform(Project& project, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets, const String& platform)
+{
+	const auto src = project.getUnpackedAssetsPath();
+	const auto dst = project.getPackedAssetsPath(platform);
+
+	Logger::logInfo("Packing for platform \"" + platform + "\" at \"" + dst.string() + "\".");
+	const auto db = project.getImportAssetsDatabase().makeAssetDatabase(platform);
+	const auto manifest = AssetPackManifest(FileSystem::readFile(project.getAssetPackManifestPath()));
 
 	// Sort into packs
-	Logger::logInfo("Sorting assets into packs...");
-	std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, *db, assetsToPack, deletedAssets);
+	const std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, *db, assetsToPack, deletedAssets);
 
 	// Generate packs
-	Logger::logInfo("Generating packs...");
 	generatePacks(packs, src, dst);
 }
 
@@ -149,14 +155,16 @@ void AssetPacker::generatePack(const String& packId, const AssetPackListing& pac
 	AssetDatabase& db = pack.getAssetDatabase();
 	Bytes& data = pack.getData();
 
-	Logger::logInfo("Packing \"" + packId + "\"...");
 	for (auto& entry: packListing.getEntries()) {
 		//Logger::logDev("  [" + toString(entry.type) + "] " + entry.name);
 
 		// Read original file
 		auto fileData = FileSystem::readFile(src / entry.path);
-		size_t pos = data.size();
-		size_t size = fileData.size();
+		const size_t pos = data.size();
+		const size_t size = fileData.size();
+		if (size == 0) {
+			throw Exception("Unable to pack: \"" + (src / entry.path) + "\". File not found or empty.", HalleyExceptions::Tools);
+		}
 		
 		// Read data into pack data
 		data.reserve(nextPowerOf2(pos + size));
@@ -167,11 +175,11 @@ void AssetPacker::generatePack(const String& packId, const AssetPackListing& pac
 	}
 
 	if (!packListing.getEncryptionKey().isEmpty()) {
-		Logger::logInfo("Encrypting \"" + packId + "\"...");
+		Logger::logInfo("- Encrypting \"" + packId + "\"...");
 		pack.encrypt(packListing.getEncryptionKey());
 	}
 
 	// Write pack
 	FileSystem::writeFile(dst, pack.writeOut());
-	Logger::logInfo("Done. Packed " + toString(packListing.getEntries().size()) + " entries on \"" + packId + "\".");
+	Logger::logInfo("- Packed " + toString(packListing.getEntries().size()) + " entries on \"" + packId + "\" (" + String::prettySize(data.size()) + ").");
 }

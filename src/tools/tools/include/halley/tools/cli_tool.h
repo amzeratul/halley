@@ -21,7 +21,7 @@ namespace Halley
 
 	protected:
 		std::unique_ptr<HalleyStatics> statics;
-		String platform;
+		std::vector<String> platforms;
 		Environment env;
 	};
 

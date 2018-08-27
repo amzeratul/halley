@@ -15,26 +15,40 @@ AssetCollector::AssetCollector(const ImportingAsset& asset, const Path& dstDir, 
 	, reporter(reporter)
 {}
 
-void AssetCollector::output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata)
+void AssetCollector::output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata, const String& platform)
 {
 	const String id = name.replaceAll("_", "__").replaceAll("/", "_-_").replaceAll(":", "_c_");
 	Path filePath = Path(toString(type)) / id;
+	Path fullPath = Path(platform) / filePath;
 
 	if (metadata && metadata->getString("asset_compression", "") == "deflate") {
 		auto newData = Compression::compress(data);
-		outFiles.emplace_back(filePath, newData);
+		outFiles.emplace_back(fullPath, newData);
 	} else {
-		outFiles.emplace_back(filePath, data);
+		outFiles.emplace_back(fullPath, data);
 	}
 
-	AssetResource result;
-	result.name = name;
-	result.type = type;
-	result.filepath = filePath.string();
-	if (metadata) {
-		result.metadata = metadata.get();
+	// Find existing entry, otherwise create a new one
+	AssetResource* result = nullptr;
+	for (auto& a: assets) {
+		if (a.name == name && a.type == type) {
+			result = &a;
+		}
 	}
-	assets.emplace_back(result);
+	if (!result) {
+		assets.emplace_back();
+		result = &assets.back();
+		result->name = name;
+		result->type = type;
+	}
+
+	// Store information about this asset version
+	AssetResource::PlatformVersion version;
+	version.filepath = fullPath.string();
+	if (metadata) {
+		version.metadata = metadata.get();
+	}
+	result->platformVersions[platform] = std::move(version);
 }
 
 void AssetCollector::addAdditionalAsset(ImportingAsset&& additionalAsset)

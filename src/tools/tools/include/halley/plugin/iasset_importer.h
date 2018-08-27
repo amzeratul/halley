@@ -37,25 +37,40 @@ namespace Halley
 	class AssetResource
 	{
 	public:
+		struct PlatformVersion
+		{
+			String filepath;
+			Metadata metadata;
+
+			void serialize(Serializer& s) const
+			{
+				s << filepath;
+				s << metadata;
+			}
+			
+			void deserialize(Deserializer& s)
+			{
+				s >> filepath;
+				s >> metadata;
+			}
+		};
+
 		String name;
 		AssetType type;
-		String filepath;
-		Metadata metadata;
+		std::map<String, PlatformVersion> platformVersions;
 
 		void serialize(Serializer& s) const
 		{
 			s << name;
 			s << type;
-			s << filepath;
-			s << metadata;
+			s << platformVersions;
 		}
 		
 		void deserialize(Deserializer& s)
 		{
 			s >> name;
 			s >> type;
-			s >> filepath;
-			s >> metadata;
+			s >> platformVersions;
 		}
 	};
 
@@ -63,7 +78,7 @@ namespace Halley
 	{
 	public:
 		virtual ~IAssetCollector() {}
-		virtual void output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata = {}) = 0;
+		virtual void output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata = {}, const String& platform = "pc") = 0;
 		virtual void addAdditionalAsset(ImportingAsset&& asset) = 0;
 		virtual bool reportProgress(float progress, const String& label = "") = 0;
 		virtual Bytes readAdditionalFile(const Path& filePath) = 0;

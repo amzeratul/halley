@@ -3,7 +3,7 @@
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
 
-constexpr static int currentAssetVersion = 46;
+constexpr static int currentAssetVersion = 47;
 
 using namespace Halley;
 
@@ -65,8 +65,8 @@ void ImportAssetsDatabase::InputFileEntry::deserialize(Deserializer& s)
 	s >> metadata;
 }
 
-ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, const String& platform)
-	: platform(platform)
+ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, std::vector<String> platforms)
+	: platforms(std::move(platforms))
 	, directory(directory)
 	, dbFile(dbFile)
 	, assetsDbFile(assetsDbFile)
@@ -88,8 +88,11 @@ void ImportAssetsDatabase::save() const
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	FileSystem::writeFile(dbFile, Serializer::toBytes(*this));
-	auto assetDb = makeAssetDatabase();
-	FileSystem::writeFile(assetsDbFile, Serializer::toBytes(*assetDb));
+	for (auto& platform: platforms) {
+		// TODO: fix this
+		auto assetDb = makeAssetDatabase(platform);
+		FileSystem::writeFile(assetsDbFile, Serializer::toBytes(*assetDb));
+	}
 }
 
 bool ImportAssetsDatabase::needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const
@@ -192,8 +195,10 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 	// Have any of the output files gone missing?
 	if (!failed) {
 		for (auto& o: oldAsset.outputFiles) {
-			if (!FileSystem::exists(directory / o.filepath)) {
-				return true;
+			for (auto& version: o.platformVersions) {
+				if (!FileSystem::exists(directory / version.second.filepath)) {
+					return true;
+				}
 			}
 		}
 	}
@@ -266,7 +271,7 @@ void ImportAssetsDatabase::serialize(Serializer& s) const
 {
 	int version = currentAssetVersion;
 	s << version;
-	s << platform;
+	s << platforms;
 	s << assetsImported;
 	s << inputFiles;
 }
@@ -276,22 +281,35 @@ void ImportAssetsDatabase::deserialize(Deserializer& s)
 	int version;
 	s >> version;
 	if (version == currentAssetVersion) {
-		String platformRead;
-		s >> platformRead;
-		if (platformRead == platform) {
+		std::vector<String> platformsRead;
+		s >> platformsRead;
+		if (platformsRead == platforms) {
 			s >> assetsImported;
 			s >> inputFiles;
 		}
 	}
 }
 
-std::unique_ptr<AssetDatabase> ImportAssetsDatabase::makeAssetDatabase() const
+std::unique_ptr<AssetDatabase> ImportAssetsDatabase::makeAssetDatabase(const String& platform) const
 {
 	auto result = std::make_unique<AssetDatabase>();
 	for (auto& a: assetsImported) {
 		auto& asset = a.second.asset;
 		for (auto& o: asset.outputFiles) {
-			result->addAsset(o.name, o.type, AssetDatabase::Entry(o.filepath, o.metadata));
+			auto iter = o.platformVersions.find(platform);
+			const AssetResource::PlatformVersion* version = nullptr;
+			if (iter != o.platformVersions.end()) {
+				version = &iter->second;
+			} else {
+				iter = o.platformVersions.find("pc");
+				if (iter != o.platformVersions.end()) {
+					version = &iter->second;
+				}
+			}
+
+			if (version) {
+				result->addAsset(o.name, o.type, AssetDatabase::Entry(version->filepath, version->metadata));
+			}
 		}
 	}
 	return result;

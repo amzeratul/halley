@@ -17,12 +17,14 @@ namespace Halley
 	class Project
 	{
 	public:
-		Project(const String& platform, Path projectRootPath, Path halleyRootPath, std::vector<HalleyPluginPtr> plugins);
+		Project(std::vector<String> platforms, Path projectRootPath, Path halleyRootPath, std::vector<HalleyPluginPtr> plugins);
 		~Project();
 		
+		std::vector<String> getPlatforms() const;
+
 		Path getRootPath() const;
 		Path getUnpackedAssetsPath() const;
-		Path getPackedAssetsPath() const;
+		Path getPackedAssetsPath(const String& platform) const;
 		Path getAssetsSrcPath() const;
 		Path getSharedAssetsSrcPath() const;
 
@@ -36,13 +38,13 @@ namespace Halley
 		ImportAssetsDatabase& getCodegenDatabase() const;
 
 		const AssetImporter& getAssetImporter() const;
-		std::unique_ptr<IAssetImporter> getAssetImporterOverride(ImportAssetType type) const;
+		std::vector<std::unique_ptr<IAssetImporter>> getAssetImportersFromPlugins(ImportAssetType type) const;
 
 		void setDevConServer(DevConServer* server);
 		DevConServer* getDevConServer() const;
 
 	private:
-		String platform;
+		std::vector<String> platforms;
 		Path rootPath;
 		Path halleyRootPath;
 		Path assetPackManifest;
