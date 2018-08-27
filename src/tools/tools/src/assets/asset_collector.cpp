@@ -15,22 +15,23 @@ AssetCollector::AssetCollector(const ImportingAsset& asset, const Path& dstDir, 
 	, reporter(reporter)
 {}
 
-void AssetCollector::output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata)
+void AssetCollector::output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata, const String& platform)
 {
 	const String id = name.replaceAll("_", "__").replaceAll("/", "_-_").replaceAll(":", "_c_");
 	Path filePath = Path(toString(type)) / id;
+	Path fullPath = Path(platform) / filePath;
 
 	if (metadata && metadata->getString("asset_compression", "") == "deflate") {
 		auto newData = Compression::compress(data);
-		outFiles.emplace_back(filePath, newData);
+		outFiles.emplace_back(fullPath, newData);
 	} else {
-		outFiles.emplace_back(filePath, data);
+		outFiles.emplace_back(fullPath, data);
 	}
 
 	AssetResource result;
 	result.name = name;
 	result.type = type;
-	result.filepath = filePath.string();
+	result.filepath = fullPath.string();
 	if (metadata) {
 		result.metadata = metadata.get();
 	}

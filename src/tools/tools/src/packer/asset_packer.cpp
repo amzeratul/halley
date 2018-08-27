@@ -157,6 +157,9 @@ void AssetPacker::generatePack(const String& packId, const AssetPackListing& pac
 		auto fileData = FileSystem::readFile(src / entry.path);
 		size_t pos = data.size();
 		size_t size = fileData.size();
+		if (size == 0) {
+			throw Exception("Unable to pack: \"" + (src / entry.path) + "\". File not found or empty.", HalleyExceptions::Tools);
+		}
 		
 		// Read data into pack data
 		data.reserve(nextPowerOf2(pos + size));
