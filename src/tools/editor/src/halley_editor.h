@@ -36,7 +36,7 @@ namespace Halley
 		std::unique_ptr<Preferences> preferences;
 		Path rootPath;
 
-		String platform;
+		std::vector<String> platforms;
 		String projectPath;
 		bool gotProjectPath = false;
 

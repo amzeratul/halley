@@ -19,7 +19,7 @@ int AssetPackerTool::run(Vector<std::string> args)
 						
 			// Create project
 			ProjectLoader loader(*statics, halleyDir);
-			loader.setPlatform(platform);
+			loader.setPlatforms(platforms);
 			auto project = loader.loadProject(projDir);
 			project->setAssetPackManifest(Path(args[0]));
 			const auto src = Path(args[1]);

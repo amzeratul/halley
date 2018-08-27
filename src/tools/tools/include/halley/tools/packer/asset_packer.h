@@ -42,6 +42,7 @@ namespace Halley {
 	class AssetPacker {
 	public:
 		static void pack(Project& project, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets);
+		static void packPlatform(Project& project, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets, const String& platform);
 
 	private:
 		static std::map<String, AssetPackListing> sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets);

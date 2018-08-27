@@ -17,9 +17,11 @@ namespace Halley
 	class Project
 	{
 	public:
-		Project(const String& platform, Path projectRootPath, Path halleyRootPath, std::vector<HalleyPluginPtr> plugins);
+		Project(std::vector<String> platforms, Path projectRootPath, Path halleyRootPath, std::vector<HalleyPluginPtr> plugins);
 		~Project();
 		
+		std::vector<String> getPlatforms() const;
+
 		Path getRootPath() const;
 		Path getUnpackedAssetsPath() const;
 		Path getPackedAssetsPath() const;
@@ -42,7 +44,7 @@ namespace Halley
 		DevConServer* getDevConServer() const;
 
 	private:
-		String platform;
+		std::vector<String> platforms;
 		Path rootPath;
 		Path halleyRootPath;
 		Path assetPackManifest;

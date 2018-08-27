@@ -68,11 +68,11 @@ namespace Halley
 		};
 
 	public:
-		ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, const String& Platform);
+		ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, std::vector<String> platforms);
 
 		void load();
 		void save() const;
-		std::unique_ptr<AssetDatabase> makeAssetDatabase() const;
+		std::unique_ptr<AssetDatabase> makeAssetDatabase(const String& platform) const;
 
 		bool needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const;
 		void setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data);
@@ -91,7 +91,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 	private:
-		String platform;
+		std::vector<String> platforms;
 		Path directory;
 		Path dbFile;
 		Path assetsDbFile;

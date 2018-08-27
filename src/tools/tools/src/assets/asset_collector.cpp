@@ -28,14 +28,27 @@ void AssetCollector::output(const String& name, AssetType type, const Bytes& dat
 		outFiles.emplace_back(fullPath, data);
 	}
 
-	AssetResource result;
-	result.name = name;
-	result.type = type;
-	result.filepath = fullPath.string();
-	if (metadata) {
-		result.metadata = metadata.get();
+	// Find existing entry, otherwise create a new one
+	AssetResource* result = nullptr;
+	for (auto& a: assets) {
+		if (a.name == name && a.type == type) {
+			result = &a;
+		}
 	}
-	assets.emplace_back(result);
+	if (!result) {
+		assets.emplace_back();
+		result = &assets.back();
+		result->name = name;
+		result->type = type;
+	}
+
+	// Store information about this asset version
+	AssetResource::PlatformVersion version;
+	version.filepath = fullPath.string();
+	if (metadata) {
+		version.metadata = metadata.get();
+	}
+	result->platformVersions[platform] = std::move(version);
 }
 
 void AssetCollector::addAdditionalAsset(ImportingAsset&& additionalAsset)

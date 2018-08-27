@@ -5,14 +5,14 @@
 
 using namespace Halley;
 
-Project::Project(const String& platform, Path projectRootPath, Path halleyRootPath, std::vector<HalleyPluginPtr> plugins)
-	: platform(platform)
+Project::Project(std::vector<String> _platforms, Path projectRootPath, Path halleyRootPath, std::vector<HalleyPluginPtr> plugins)
+	: platforms(std::move(_platforms))
 	, rootPath(projectRootPath)
 	, halleyRootPath(halleyRootPath)
 	, plugins(std::move(plugins))
 {
-	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platform);
-	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", "");
+	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platforms);
+	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", std::vector<String>{ "" });
 	assetImporter = std::make_unique<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
 }
 
@@ -20,6 +20,11 @@ Project::~Project()
 {
 	assetImporter.reset();
 	plugins.clear();
+}
+
+std::vector<String> Project::getPlatforms() const
+{
+	return platforms;
 }
 
 Path Project::getRootPath() const

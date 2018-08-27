@@ -48,8 +48,15 @@ bool AssetPackListing::isActive() const
 
 void AssetPacker::pack(Project& project, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets)
 {
+	for (auto& platform: project.getPlatforms()) {
+		packPlatform(project, assetsToPack, deletedAssets, platform);
+	}
+}
+
+void AssetPacker::packPlatform(Project& project, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets, const String& platform)
+{
 	Logger::logInfo("Loading manifest...");
-	auto db = project.getImportAssetsDatabase().makeAssetDatabase();
+	auto db = project.getImportAssetsDatabase().makeAssetDatabase(platform);
 	auto src = project.getUnpackedAssetsPath();
 	auto dst = project.getPackedAssetsPath();
 	auto manifest = AssetPackManifest(FileSystem::readFile(project.getAssetPackManifestPath()));
