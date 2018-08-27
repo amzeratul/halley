@@ -112,8 +112,10 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 				//setProgress(lerp(curFileProgressStart, curFileProgressEnd, assetProgress), curFileLabel + " " + label);
 				return !isCancelled();
 			});
-			
-			importer.getImporter(cur.assetType).import(cur, collector);
+
+			for (auto& importer: importer.getImporters(cur.assetType)) {
+				importer.get().import(cur, collector);
+			}
 			
 			for (auto& additional: collector.collectAdditionalAssets()) {
 				toLoad.emplace_front(std::move(additional));

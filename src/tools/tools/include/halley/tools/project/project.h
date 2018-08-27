@@ -38,7 +38,7 @@ namespace Halley
 		ImportAssetsDatabase& getCodegenDatabase() const;
 
 		const AssetImporter& getAssetImporter() const;
-		std::unique_ptr<IAssetImporter> getAssetImporterOverride(ImportAssetType type) const;
+		std::vector<std::unique_ptr<IAssetImporter>> getAssetImportersFromPlugins(ImportAssetType type) const;
 
 		void setDevConServer(DevConServer* server);
 		DevConServer* getDevConServer() const;

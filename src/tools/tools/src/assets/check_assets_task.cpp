@@ -137,7 +137,7 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 	}
 
 	// Figure out the right importer and assetId for this file
-	auto& assetImporter = isCodegen ? project.getAssetImporter().getImporter(ImportAssetType::Codegen) : project.getAssetImporter().getImporter(filePath);
+	auto& assetImporter = isCodegen ? project.getAssetImporter().getImporters(ImportAssetType::Codegen).at(0).get() : project.getAssetImporter().getRootImporter(filePath);
 	if (assetImporter.getType() == ImportAssetType::Skip) {
 		return false;
 	}

@@ -39,7 +39,7 @@ Path Project::getUnpackedAssetsPath() const
 
 Path Project::getPackedAssetsPath(const String& platform) const
 {
-	String suffix = platform == "pc" ? ":" : "-" + platform;
+	String suffix = platform == "pc" ? "" : "-" + platform;
 	return rootPath / ("assets" + suffix);
 }
 
@@ -83,15 +83,16 @@ const AssetImporter& Project::getAssetImporter() const
 	return *assetImporter;
 }
 
-std::unique_ptr<IAssetImporter> Project::getAssetImporterOverride(ImportAssetType type) const
+std::vector<std::unique_ptr<IAssetImporter>> Project::getAssetImportersFromPlugins(ImportAssetType type) const
 {
+	std::vector<std::unique_ptr<IAssetImporter>> result;
 	for (auto& plugin: plugins) {
 		auto importer = plugin->getAssetImporter(type);
 		if (importer) {
-			return importer;
+			result.emplace_back(std::move(importer));
 		}
 	}
-	return {};
+	return std::move(result);
 }
 
 void Project::setAssetPackManifest(const Path& path)
