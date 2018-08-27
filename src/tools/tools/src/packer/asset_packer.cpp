@@ -58,7 +58,7 @@ void AssetPacker::packPlatform(Project& project, Maybe<std::set<String>> assetsT
 	Logger::logInfo("Loading manifest...");
 	auto db = project.getImportAssetsDatabase().makeAssetDatabase(platform);
 	auto src = project.getUnpackedAssetsPath();
-	auto dst = project.getPackedAssetsPath();
+	auto dst = project.getPackedAssetsPath(platform);
 	auto manifest = AssetPackManifest(FileSystem::readFile(project.getAssetPackManifestPath()));
 
 	// Sort into packs

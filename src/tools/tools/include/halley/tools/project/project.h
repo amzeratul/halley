@@ -24,7 +24,7 @@ namespace Halley
 
 		Path getRootPath() const;
 		Path getUnpackedAssetsPath() const;
-		Path getPackedAssetsPath() const;
+		Path getPackedAssetsPath(const String& platform) const;
 		Path getAssetsSrcPath() const;
 		Path getSharedAssetsSrcPath() const;
 

@@ -37,9 +37,10 @@ Path Project::getUnpackedAssetsPath() const
 	return rootPath / "assets_unpacked";
 }
 
-Path Project::getPackedAssetsPath() const
+Path Project::getPackedAssetsPath(const String& platform) const
 {
-	return rootPath / "assets";
+	String suffix = platform == "pc" ? ":" : "-" + platform;
+	return rootPath / ("assets" + suffix);
 }
 
 Path Project::getAssetsSrcPath() const
