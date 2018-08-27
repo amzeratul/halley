@@ -51,6 +51,7 @@ namespace Halley {
 			Network = 211,
 			Graphics = 212,
 			Input = 213,
+			Compression = 214,
 
 			LastHalleyReserved = 999
 		};

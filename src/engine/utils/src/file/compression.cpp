@@ -77,7 +77,7 @@ Bytes Compression::compressRaw(gsl::span<const gsl::byte> bytes, bool insertLeng
 	stream.opaque = nullptr;
 	int res = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
 	if (res != Z_OK) {
-		throw Exception("Unable to initialize zlib compression", HalleyExceptions::File);
+		throw Exception("Unable to initialize zlib compression", HalleyExceptions::Compression);
 	}
 
 	stream.avail_in = uInt(bytes.size_bytes());
@@ -89,7 +89,7 @@ Bytes Compression::compressRaw(gsl::span<const gsl::byte> bytes, bool insertLeng
 		res = deflate(&stream, Z_FINISH);
 		if (res == Z_STREAM_ERROR || res == Z_BUF_ERROR) {
 			deflateEnd(&stream);
-			throw Exception("Unable to compress data.", HalleyExceptions::File);
+			throw Exception("Unable to compress data.", HalleyExceptions::Compression);
 		}
 	} while (res != Z_STREAM_END);
 
@@ -104,7 +104,7 @@ Bytes Compression::compressRaw(gsl::span<const gsl::byte> bytes, bool insertLeng
 Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSize, size_t expectedSize)
 {
 	if (expectedSize > uint64_t(maxSize)) {
-		throw Exception("File is too big to inflate: " + String::prettySize(expectedSize), HalleyExceptions::File);
+		throw Exception("File is too big to inflate: " + String::prettySize(expectedSize), HalleyExceptions::Compression);
 	}
 	
 	z_stream stream;
@@ -115,7 +115,7 @@ Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSiz
 	stream.next_in = nullptr;
 	int ret = inflateInit(&stream);
 	if (ret != Z_OK) {
-		throw Exception("Unable to initialise zlib", HalleyExceptions::File);
+		throw Exception("Unable to initialise zlib", HalleyExceptions::Compression);
 	}
 	stream.avail_in = uInt(bytes.size_bytes());
 	stream.next_in = reinterpret_cast<unsigned char*>(const_cast<gsl::byte*>(bytes.data()));
@@ -130,10 +130,10 @@ Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSiz
 		inflateEnd(&stream);
 
 		if (res != Z_STREAM_END) {
-			throw Exception("Unable to inflate stream.", HalleyExceptions::File);
+			throw Exception("Unable to inflate stream.", HalleyExceptions::Compression);
 		}
 		if (totalOut != expectedSize) {
-			throw Exception("Unexpected outsize (" + toString(result.size()) + ") when inflating data, expected (" + toString(expectedSize) + ").", HalleyExceptions::File);
+			throw Exception("Unexpected outsize (" + toString(result.size()) + ") when inflating data, expected (" + toString(expectedSize) + ").", HalleyExceptions::Compression);
 		}
 
 		return result;
@@ -147,7 +147,7 @@ Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSiz
 			if (result.size() - size_t(stream.total_out) < blockSize / 2) {
 				if (result.size() >= maxSize) {
 					inflateEnd(&stream);
-					throw Exception("Unable to inflate stream, maximum size has been exceeded.", HalleyExceptions::File);
+					throw Exception("Unable to inflate stream, maximum size has been exceeded.", HalleyExceptions::Compression);
 				}
 				auto newSize = std::min(result.size() + blockSize, maxSize);
 				result.resize(newSize);
@@ -161,7 +161,7 @@ Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSiz
 		inflateEnd(&stream);
 
 		if (res != Z_STREAM_END) {
-			throw Exception("Unable to inflate stream.", HalleyExceptions::File);
+			throw Exception("Unable to inflate stream.", HalleyExceptions::Compression);
 		}
 		result.resize(totalOut);
 
