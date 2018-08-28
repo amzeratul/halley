@@ -29,7 +29,9 @@ Exception::Exception(String msg, int errorCode) noexcept
 	: msg(std::move(msg))
 	, errorCode(errorCode)
 {
-	stackTrace = Debug::getCallStack(4);
+	if (collectStackTrace) {
+		stackTrace = Debug::getCallStack(4);
+	}
 
 	std::stringstream ss;
 	ss << this->msg << "\n" << stackTrace;
@@ -60,3 +62,10 @@ int Exception::getErrorCode() const
 {
 	return errorCode;
 }
+
+void Exception::setCollectStackTrace(bool collect)
+{
+	collectStackTrace = collect;
+}
+
+bool Exception::collectStackTrace = true;

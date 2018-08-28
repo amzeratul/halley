@@ -74,10 +74,14 @@ namespace Halley {
 		const String& getFullMessage() const;
 		int getErrorCode() const;
 
+		static void setCollectStackTrace(bool collect);
+
 	private:
 		String msg;
 		String stackTrace;
 		String fullMsg;
 		int errorCode = 0;
+
+		static bool collectStackTrace;
 	};
 }

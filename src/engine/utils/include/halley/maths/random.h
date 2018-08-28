@@ -57,6 +57,18 @@ namespace Halley {
 			return dist(generator);
 		}
 
+		template <typename T>
+		size_t getRandomIndex(const T& vec)
+		{
+			return getInt<size_t>(0, vec.size() - 1);
+		}
+
+		template <typename T>
+		auto getRandomElement(T& vec) -> decltype(vec[0])&
+		{
+			return vec[getRandomIndex(vec)];
+		}
+
 		void getBytes(gsl::span<gsl::byte> dst);
 		void setSeed(long seed);
 		void setSeed(char* bytes, size_t nBytes);
