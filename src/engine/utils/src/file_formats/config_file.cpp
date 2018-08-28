@@ -398,6 +398,9 @@ Vector2i ConfigNode::asVector2i() const
 		return vec2iData;
 	} else if (type == ConfigNodeType::Float2) {
 		return Vector2i(vec2fData);
+	} else if (type == ConfigNodeType::Sequence) {
+		auto& seq = asSequence();
+		return Vector2i(seq.at(0).asInt(), seq.at(1).asInt());
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector type", HalleyExceptions::Resources);
 	}
@@ -409,6 +412,9 @@ Vector2f ConfigNode::asVector2f() const
 		return Vector2f(vec2iData);
 	} else if (type == ConfigNodeType::Float2) {
 		return vec2fData;
+	} else if (type == ConfigNodeType::Sequence) {
+		auto& seq = asSequence();
+		return Vector2f(seq.at(0).asFloat(), seq.at(1).asFloat());
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector type", HalleyExceptions::Resources);
 	}
