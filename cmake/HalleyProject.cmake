@@ -353,7 +353,9 @@ function(halleyProject name sources headers genDefinitions targetDir)
 	endif()
 
 	if (MSVC)
-		add_precompiled_header(${name} prec.h FORCEINCLUDE SOURCE_CXX prec.cpp)
+		if (USE_PCH)
+			add_precompiled_header(${name} prec.h FORCEINCLUDE SOURCE_CXX prec.cpp)
+		endif ()
 		set_target_properties(${name} PROPERTIES LINK_FLAGS_RELEASE "/PDBSTRIPPED:\"${targetDir}/${name}_stripped.pdb\"")
 	endif()
 
