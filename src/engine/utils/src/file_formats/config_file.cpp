@@ -105,6 +105,8 @@ ConfigNode::~ConfigNode()
 
 ConfigNode& ConfigNode::operator=(ConfigNode&& other)
 {
+	reset();
+
 	type = other.type;
 	ptrData = other.ptrData;
 	intData = other.intData;
