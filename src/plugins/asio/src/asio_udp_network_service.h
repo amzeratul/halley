@@ -1,6 +1,9 @@
 #pragma once
 #include "halley/net/connection/network_service.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4834)
+#endif
 #define BOOST_SYSTEM_NO_DEPRECATED
 #define BOOST_ERROR_CODE_HEADER_ONLY
 #include <boost/asio.hpp>
