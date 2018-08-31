@@ -94,3 +94,16 @@ void UIImage::setSelectable(Colour4f normalColour, Colour4f selColour)
 		}
 	});
 }
+
+void UIImage::setSelectable(Sprite normalSprite, Sprite selectedSprite)
+{
+	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event)
+	{
+		if (event.getBoolData()) {
+			sprite = selectedSprite;
+		} else {
+			sprite = normalSprite;
+		}
+		dirty = true;
+	});
+}

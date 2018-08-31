@@ -405,9 +405,15 @@ std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
 	applyInputButtons(*widget, node["inputButtons"].asString("list"));
 	for (auto& o: options) {
 		if (!o.image.isEmpty()) {
-			Sprite sprite;
-			sprite.setImage(resources, o.image);
-			auto image = std::make_shared<UIImage>(sprite);
+			Sprite normalSprite = Sprite().setImage(resources, o.image);
+			auto image = std::make_shared<UIImage>(normalSprite);
+
+			if (!o.inactiveImage.isEmpty()) {
+				Sprite inactiveSprite = Sprite().setImage(resources, o.inactiveImage);
+				image->setSelectable(inactiveSprite, normalSprite);
+				image->setSprite(inactiveSprite);
+			}
+
 			widget->addItem(o.id, image, 1, {}, UISizerAlignFlags::Centre);
 		} else {
 			widget->addTextItem(o.id, o.text);
