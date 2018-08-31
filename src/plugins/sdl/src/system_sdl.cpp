@@ -260,7 +260,7 @@ std::shared_ptr<ISaveData> SystemSDL::getStorageContainer(SaveDataType type, con
 
 void SystemSDL::setEnvironment(Environment* env)
 {
-	for (int i = 0; i < int(SaveDataType::Cache); ++i) {
+	for (int i = 0; i <= int(SaveDataType::Cache); ++i) {
 		SaveDataType type = SaveDataType(i);
 		auto dir = env->getDataPath() / toString(type) / ".";
 		saveDir[type] = dir;
