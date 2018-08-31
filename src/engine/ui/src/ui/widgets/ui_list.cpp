@@ -117,6 +117,7 @@ void UIList::setItemEnabled(const String& id, bool enabled)
 	}
 	reassignIds();
 	if (!setSelectedOptionId(curId)) {
+		curOption = -1;
 		setSelectedOption(0);
 	}
 }
@@ -134,6 +135,7 @@ void UIList::setItemActive(const String& id, bool active)
 	}
 	reassignIds();
 	if (!setSelectedOptionId(curId)) {
+		curOption = -1;
 		setSelectedOption(0);
 	}
 }
@@ -590,8 +592,10 @@ bool UIList::setSelectedOptionId(const String& id)
 {
 	for (auto& i: items) {
 		if (i->getId() == id) {
-			setSelectedOption(i->getIndex());
-			return true;
+			if (i->isActive()) {
+				setSelectedOption(i->getIndex());
+				return true;
+			}
 		}
 	}
 	return false;

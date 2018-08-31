@@ -2,16 +2,20 @@
 
 using namespace Halley;
 
-UIPagedPane::UIPagedPane(int nPages, Vector2f minSize)
-	: UIWidget("pagedPane", minSize, UISizer())
+UIPagedPane::UIPagedPane(String id, int nPages, Vector2f minSize)
+	: UIWidget(id, minSize, UISizer())
 {
-	pages.resize(nPages);
-
+	pages.reserve(nPages);
 	for (int i = 0; i < nPages; ++i) {
-		pages[i] = std::make_shared<UIWidget>("page" + toString(i), minSize, UISizer());
-		UIWidget::add(pages[i], 1);
+		addPage();
 	}
 	setPage(0);
+}
+
+void UIPagedPane::addPage()
+{
+	pages.push_back(std::make_shared<UIWidget>("page" + toString(pages.size()), getMinimumSize(), UISizer()));
+	UIWidget::add(pages.back(), 1);
 }
 
 void UIPagedPane::setPage(int n)

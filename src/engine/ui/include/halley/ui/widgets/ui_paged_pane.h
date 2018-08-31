@@ -5,8 +5,9 @@
 namespace Halley {
     class UIPagedPane : public UIWidget {
     public:
-        UIPagedPane(int nPages, Vector2f minSize = {});
-        
+        UIPagedPane(String id, int nPages = 0, Vector2f minSize = {});
+
+		void addPage();
         void setPage(int n);
         int getCurrentPage() const;
 		int getNumberOfPages() const;

@@ -44,6 +44,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("horizontalDiv", [=] (const ConfigNode& node) { return makeHorizontalDiv(node); });
 	addFactory("verticalDiv", [=] (const ConfigNode& node) { return makeVerticalDiv(node); });
 	addFactory("tabbedPane", [=] (const ConfigNode& node) { return makeTabbedPane(node); });
+	addFactory("pagedPane", [=] (const ConfigNode& node) { return makePagedPane(node); });
 	addFactory("framedImage", [=] (const ConfigNode& node) { return makeFramedImage(node); });
 	addFactory("hybridList", [=] (const ConfigNode& node) { return makeHybridList(node); });
 }
@@ -552,9 +553,7 @@ std::shared_ptr<UIWidget> UIFactory::makeVerticalDiv(const ConfigNode& entryNode
 std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 {
 	const auto& widgetNode = entryNode["widget"];
-
-	const String& id = widgetNode["id"].asString();
-
+	auto id = widgetNode["id"].asString();
 	auto tabs = std::make_shared<UIList>(id, getStyle("tabs"), UISizerType::Horizontal, 1);
 	applyInputButtons(*tabs, widgetNode["inputButtons"].asString("tabs"));
 
@@ -572,8 +571,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 		}
 	}
 
-	auto pane = std::make_shared<UIPagedPane>(int(tabNodes.size()), Vector2f());
-	pane->setId(id + "_pagedPane");
+	auto pane = std::make_shared<UIPagedPane>(id + "_pagedPane", int(tabNodes.size()), Vector2f());
 	for (int i = 0; i < int(tabNodes.size()); ++i) {
 		auto& tabNode = *tabNodes[i];
 		pane->getPage(i)->add(makeSizerPtr(tabNode), 1);
@@ -589,6 +587,31 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 	result->add(tabs);
 	result->add(pane, 1);
 	return result;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makePagedPane(const ConfigNode& entryNode)
+{
+	const auto& widgetNode = entryNode["widget"];
+
+	std::vector<const ConfigNode*> pageNodes;
+	if (widgetNode.hasKey("pages")) {
+		for (auto& pageNode: widgetNode["pages"].asSequence()) {
+			if (pageNode.hasKey("if")) {
+				if (!resolveConditions(pageNode["if"])) {
+					continue;
+				}
+			}
+			pageNodes.push_back(&pageNode);
+		}
+	}
+
+	auto pane = std::make_shared<UIPagedPane>(widgetNode["id"].asString(), int(pageNodes.size()));
+	for (int i = 0; i < int(pageNodes.size()); ++i) {
+		auto& pageNode = *pageNodes[i];
+		pane->getPage(i)->add(makeSizerPtr(pageNode), 1);
+	}
+
+	return pane;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeFramedImage(const ConfigNode& entryNode)
