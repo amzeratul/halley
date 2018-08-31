@@ -6,6 +6,7 @@
 #include <map>
 #include <functional>
 #include "ui_input.h"
+#include "halley/text/i18n.h"
 
 namespace Halley
 {
@@ -40,6 +41,13 @@ namespace Halley
 		std::shared_ptr<UIStyleSheet> getStyleSheet() const;
 
 	protected:
+		struct ParsedOption {
+			String id;
+			LocalisedString text;
+			String image;
+			String inactiveImage;
+		};
+		
 		const HalleyAPI& api;
 		Resources& resources;
 		const I18N& i18n;
@@ -54,7 +62,7 @@ namespace Halley
 		static Vector2f asVector2f(const ConfigNode& node, Maybe<Vector2f> defaultValue);
 		static Vector4f asVector4f(const ConfigNode& node, Maybe<Vector4f> defaultValue);
 		LocalisedString parseLabel(const ConfigNode& node, const String& defaultOption = "", const String& key = "text");
-		std::vector<std::pair<String, LocalisedString>> parseOptions(const ConfigNode& node);
+		std::vector<ParsedOption> parseOptions(const ConfigNode& node);
 
 		std::shared_ptr<UIWidget> makeBaseWidget(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeLabel(const ConfigNode& node);

@@ -142,7 +142,7 @@ void UIList::setItemActive(const String& id, bool active)
 
 void UIList::addItem(std::shared_ptr<UIListItem> item)
 {
-	add(item);
+	add(item, uniformSizedItems ? 1.0f : 0.0f);
 	bool wasEmpty = getNumberOfItems() == 0;
 	items.push_back(item);
 	if (wasEmpty) {
@@ -215,6 +215,11 @@ bool UIList::canDrag() const
 void UIList::setDrag(bool drag)
 {
 	dragEnabled = drag;
+}
+
+void UIList::setUniformSizedItems(bool enabled)
+{
+	uniformSizedItems = enabled;
 }
 
 size_t UIList::getNumberOfItems() const

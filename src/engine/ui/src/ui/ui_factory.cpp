@@ -280,9 +280,9 @@ LocalisedString UIFactory::parseLabel(const ConfigNode& node, const String& defa
 	return label;
 }
 
-std::vector<std::pair<String, LocalisedString>> UIFactory::parseOptions(const ConfigNode& node)
+std::vector<UIFactory::ParsedOption> UIFactory::parseOptions(const ConfigNode& node)
 {
-	std::vector<std::pair<String, LocalisedString>> result;
+	std::vector<ParsedOption> result;
 	if (node.getType() == ConfigNodeType::Sequence) {
 		for (auto& n: node.asSequence()) {
 			auto id = n["id"].asString("");
@@ -291,7 +291,12 @@ std::vector<std::pair<String, LocalisedString>> UIFactory::parseOptions(const Co
 				id = label.getString();
 			}
 
-			result.emplace_back(id, label);
+			ParsedOption option;
+			option.id = id;
+			option.text = label;
+			option.image = n["image"].asString("");
+			option.inactiveImage = n["inactiveImage"].asString("");
+			result.push_back(option);
 		}
 	}
 	return result;
@@ -399,10 +404,18 @@ std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
 	auto widget = std::make_shared<UIList>(id, style, orientation, nColumns);
 	applyInputButtons(*widget, node["inputButtons"].asString("list"));
 	for (auto& o: options) {
-		widget->addTextItem(o.first, o.second);
+		if (!o.image.isEmpty()) {
+			Sprite sprite;
+			sprite.setImage(resources, o.image);
+			auto image = std::make_shared<UIImage>(sprite);
+			widget->addItem(o.id, image, 1, {}, UISizerAlignFlags::Centre);
+		} else {
+			widget->addTextItem(o.id, o.text);
+		}
 	}
 
 	widget->setDrag(node["canDrag"].asBool(false));
+	widget->setUniformSizedItems(node["uniformSizedItems"].asBool(false));
 
 	return widget;
 }
@@ -420,8 +433,8 @@ std::shared_ptr<UIWidget> UIFactory::makeDropdown(const ConfigNode& entryNode)
 	std::vector<String> optionIds;
 	std::vector<LocalisedString> optionLabels;
 	for (auto& o: options) {
-		optionIds.push_back(o.first);
-		optionLabels.push_back(o.second);
+		optionIds.push_back(o.id);
+		optionLabels.push_back(o.text);
 	}
 
 	auto widget = std::make_shared<UIDropdown>(id, style, scrollStyle, listStyle);

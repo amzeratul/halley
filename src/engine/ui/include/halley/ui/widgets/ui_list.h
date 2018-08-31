@@ -23,7 +23,7 @@ namespace Halley {
 		size_t getCount() const;
 
 		void addTextItem(const String& id, const LocalisedString& label, float maxWidth = -1, bool centre = false);
-		void addItem(const String& id, std::shared_ptr<IUIElement> sizer, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, Maybe<UIStyle> styleOverride = {});
+		void addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, Maybe<UIStyle> styleOverride = {});
 		void clear();
 
 		void setItemEnabled(const String& id, bool enabled);
@@ -42,6 +42,8 @@ namespace Halley {
 		bool canDrag() const;
 		void setDrag(bool drag);
 
+		void setUniformSizedItems(bool enabled);
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -59,6 +61,7 @@ namespace Halley {
 		bool firstUpdate = true;
 		bool dragEnabled = false;
 		bool manualDragging = false;
+		bool uniformSizedItems = false;
 
 		void onItemClicked(UIListItem& item);
 		void onItemDragged(UIListItem& item, int index, Vector2f pos);
