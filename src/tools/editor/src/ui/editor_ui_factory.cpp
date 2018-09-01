@@ -1,4 +1,6 @@
 #include "editor_ui_factory.h"
+#include "halley/core/resources/resources.h"
+#include <halley/file_formats/config_file.h>
 using namespace Halley;
 
 EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n)

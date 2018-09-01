@@ -2,6 +2,7 @@
 #include <halley/core/graphics/sprite/sprite.h>
 #include <halley/core/graphics/text/text_renderer.h>
 #include <halley/core/graphics/material/material.h>
+#include <halley/core/graphics/material/material_parameter.h>
 
 using namespace Halley;
 
