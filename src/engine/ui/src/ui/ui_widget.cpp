@@ -408,6 +408,11 @@ void UIWidget::clearBehaviours()
 	behaviours.clear();
 }
 
+const std::vector<std::shared_ptr<UIBehaviour>>& UIWidget::getBehaviours() const
+{
+	return behaviours;
+}
+
 UIInputType UIWidget::getLastInputType() const
 {
 	return lastInputType;

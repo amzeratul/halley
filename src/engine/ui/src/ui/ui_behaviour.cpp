@@ -30,6 +30,16 @@ UIWidget* UIBehaviour::getWidget() const
 	return widget;
 }
 
+void UIBehaviour::setReversed(bool r)
+{
+	reversed = r;
+}
+
+bool UIBehaviour::isReversed() const
+{
+	return reversed;
+}
+
 void UIBehaviour::doInit(UIWidget& w)
 {
 	widget = &w;

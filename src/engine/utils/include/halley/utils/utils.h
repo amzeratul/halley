@@ -163,8 +163,15 @@ namespace Halley {
 
 	// Smoothing
 	template <typename T>
-	constexpr inline T smoothCos(T a) {
-		return T((1-cos(a * 3.1415926535897932384626433832795))*0.5);
+	constexpr inline T smoothCos(T a)
+	{
+		return (T(1) - T(std::cos(a * pi()))) * T(0.5);
+	}
+
+	template <typename T>
+	constexpr inline T overshootCurve(T x)
+	{
+		return T(pow(1.0f - x, 3.0f) * sin(2.5f * pi() * pow(x, 3.0f)) * 4.0f + (1.0f - pow(1.0f - x, 3.0f)) * sin(x * pi() * 0.5f));
 	}
 
 	// ASR (attack-sustain-release) envelope

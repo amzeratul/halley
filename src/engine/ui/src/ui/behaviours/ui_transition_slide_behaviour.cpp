@@ -2,20 +2,21 @@
 #include "ui_widget.h"
 using namespace Halley;
 
-UITransitionSlideBehaviour::UITransitionSlideBehaviour(Time length, UIAnchor base, UIAnchor fadeIn, UIAnchor fadeOut)
+UITransitionSlideBehaviour::UITransitionSlideBehaviour(Time length, UIAnchor base, UIAnchor startPos, UIAnchor endPos, TransitionCurve curve)
 	: length(length)
 	, time(0.0)
 	, mode(Mode::FadeIn)
+	, curve(std::move(curve))
 	, base(std::move(base))
-	, fadeIn(std::move(fadeIn))
-	, fadeOut(std::move(fadeOut))
+	, startPos(std::move(startPos))
+	, endPos(std::move(endPos))
 {
 }
 
 void UITransitionSlideBehaviour::init()
 {
 	getWidget()->setEnabled(false);
-	getWidget()->setAnchor(fadeIn);
+	getWidget()->setAnchor(startPos);
 }
 
 void UITransitionSlideBehaviour::deInit()
@@ -28,20 +29,16 @@ void UITransitionSlideBehaviour::update(Time dt)
 		time += dt;
 		
 		const float x = clamp(mode == Mode::FadeIn ? float(time / length) : 1.0f - float(time / length), 0.0f, 1.0f);
-		constexpr float pi = 3.141592653592f;
-		//const float t = smoothCos(x);
-		//const float t = ::sin(1.7f * x * x) / ::sin(1.7f);
-		//const float t = (1.0f - x) * ::sin(2.5f * 3.1415926535 * ::pow(x, 5.0f)) * 1.2 + x;
-		const float t = float(pow(1.0f - x, 3.0f) * sin(2.5f * pi * pow(x, 3.0f)) * 4.0f + (1.0f - pow(1.0f - x, 3.0f)) * sin(x * pi * 0.5f));
+		const float t = curve(x);
 
 		if (mode == Mode::FadeIn) {
 			if (time >= length) {
 				mode = Mode::Normal;
 				getWidget()->setEnabled(true);
 			}
-			getWidget()->setAnchor(lerp(fadeIn, base, t));
+			getWidget()->setAnchor(lerp(isReversed() ? endPos : startPos, base, t));
 		} else if (mode == Mode::FadeOut) {
-			getWidget()->setAnchor(lerp(base, fadeOut, 1.0f - t));
+			getWidget()->setAnchor(lerp(base, isReversed() ? startPos : endPos, 1.0f - t));
 			if (time >= length) {
 				getWidget()->destroy();
 			}

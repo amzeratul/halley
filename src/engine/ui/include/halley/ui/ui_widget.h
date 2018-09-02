@@ -130,6 +130,7 @@ namespace Halley {
 
 		void addBehaviour(std::shared_ptr<UIBehaviour> behaviour);
 		void clearBehaviours();
+		const std::vector<std::shared_ptr<UIBehaviour>>& getBehaviours() const;
 
 		void playSound(const String& eventName);
 

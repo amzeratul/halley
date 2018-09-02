@@ -18,10 +18,14 @@ namespace Halley {
 		virtual bool isAlive() const;
 		UIWidget* getWidget() const;
 
+		virtual void setReversed(bool reversed);
+		virtual bool isReversed() const;
+
 	private:
 		friend class UIWidget;
 
 		UIWidget* widget = nullptr;
+		bool reversed = false;
 
 		void doInit(UIWidget& widget);
 		void doDeInit();

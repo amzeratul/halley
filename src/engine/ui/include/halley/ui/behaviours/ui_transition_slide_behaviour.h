@@ -14,7 +14,9 @@ namespace Halley {
 		};
 
     public:
-		UITransitionSlideBehaviour(Time length, UIAnchor base, UIAnchor fadeIn, UIAnchor fadeOut);
+		using TransitionCurve = std::function<float(float)>;
+
+		UITransitionSlideBehaviour(Time length, UIAnchor base, UIAnchor startPos, UIAnchor endPos, TransitionCurve curve);
 
 	    void init() override;
 	    void deInit() override;
@@ -26,9 +28,10 @@ namespace Halley {
 		Time length;
 		Time time;
 		Mode mode;
+		TransitionCurve curve;
 
 		UIAnchor base;
-		UIAnchor fadeIn;
-		UIAnchor fadeOut;
+		UIAnchor startPos;
+		UIAnchor endPos;
     };
 }
