@@ -550,7 +550,12 @@ std::shared_ptr<UIWidget> UIFactory::makeSlider(const ConfigNode& entryNode)
 	auto maxValue = node["maxValue"].asFloat(1);
 	auto value = node["value"].asFloat(0.5f);
 
-	return std::make_shared<UISlider>(id, style, minValue, maxValue, value);
+	auto slider = std::make_shared<UISlider>(id, style, minValue, maxValue, value);
+	if (node.hasKey("granularity")) {
+		slider->setGranularity(node["granularity"].asFloat());
+	}
+
+	return slider;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeHorizontalDiv(const ConfigNode& entryNode)

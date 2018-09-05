@@ -24,7 +24,11 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 
 void UISlider::setValue(float v)
 {
+	if (granularity) {
+		v = lround((v - minValue) / granularity.get()) * granularity.get() + minValue;
+	}
 	value = clamp(v, minValue, maxValue);
+
 	label->setText(LocalisedString::fromNumber(int(lround(value))));
 
 	notifyDataBind(value);
@@ -61,6 +65,16 @@ void UISlider::readFromDataBind()
 	if (data) {
 		setValue(data->getFloatData());
 	}
+}
+
+void UISlider::setGranularity(Maybe<float> g)
+{
+	granularity = g;
+}
+
+Maybe<float> UISlider::getGranularity() const
+{
+	return granularity;
 }
 
 void UISlider::onManualControlAnalogueAdjustValue(float input, Time t)

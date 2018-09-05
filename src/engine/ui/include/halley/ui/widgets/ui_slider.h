@@ -16,6 +16,8 @@ namespace Halley {
 		float getMaxValue() const;
 		float getRelativeValue() const; // 0..1 range
 		void readFromDataBind() override;
+		void setGranularity(Maybe<float> granularity);
+		Maybe<float> getGranularity() const;
 
 		void onManualControlAnalogueAdjustValue(float delta, Time t) override;
 
@@ -28,6 +30,7 @@ namespace Halley {
 
 		const float minValue;
 		const float maxValue;
+		Maybe<float> granularity;
 		float value;
 		float maxSpeed = 0;
 		Time timeSinceMove = 0;
