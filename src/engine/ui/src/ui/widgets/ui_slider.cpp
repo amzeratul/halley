@@ -24,14 +24,11 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 
 void UISlider::setValue(float v)
 {
-	if (granularity) {
-		v = lround((v - minValue) / granularity.get()) * granularity.get() + minValue;
-	}
 	value = clamp(v, minValue, maxValue);
 
-	label->setText(LocalisedString::fromNumber(int(lround(value))));
+	label->setText(LocalisedString::fromNumber(int(lround(getValue()))));
 
-	notifyDataBind(value);
+	notifyDataBind(getValue());
 }
 
 void UISlider::setRelativeValue(float v)
@@ -41,7 +38,11 @@ void UISlider::setRelativeValue(float v)
 
 float UISlider::getValue() const
 {
-	return value;
+	if (granularity) {
+		return clamp(lround((value - minValue) / granularity.get()) * granularity.get() + minValue, minValue, maxValue);
+	} else {
+		return value;
+	}
 }
 
 float UISlider::getMinValue() const
