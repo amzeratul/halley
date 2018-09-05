@@ -1,7 +1,6 @@
 #include "audio_event_importer.h"
 #include "halley/audio/audio_event.h"
-#include <yaml-cpp/node/node.h>
-#include <yaml-cpp/node/parse.h>
+#include <yaml-cpp/yaml.h>
 #include "config_importer.h"
 using namespace Halley;
 

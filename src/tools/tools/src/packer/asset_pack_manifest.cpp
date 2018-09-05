@@ -1,8 +1,7 @@
 #include "halley/tools/packer/asset_pack_manifest.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/tools/packer/asset_packer.h"
-#include <yaml-cpp/node/node.h>
-#include <yaml-cpp/node/parse.h>
+#include <yaml-cpp/yaml.h>
 #include "../assets/importers/config_importer.h"
 using namespace Halley;
 
