@@ -5,6 +5,7 @@
 #include "halley/core/input/input_virtual.h"
 #include "ui_parent.h"
 #include "ui_input.h"
+#include "halley/core/api/audio_api.h"
 
 namespace Halley {
 	class SpritePainter;
@@ -33,7 +34,7 @@ namespace Halley {
 		void mouseOverNext(bool forward = true);
 		void runLayout();
 		
-		void playSound(const String& eventName);
+		Maybe<AudioHandle> playSound(const String& eventName);
 		void sendEvent(UIEvent&& event) const override;
 
 		bool hasModalUI() const;

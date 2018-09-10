@@ -617,14 +617,16 @@ void UIWidget::sendEventDown(const UIEvent& event) const
 	}
 }
 
-void UIWidget::playSound(const String& eventName)
+Maybe<AudioHandle> UIWidget::playSound(const String& eventName)
 {
 	if (!eventName.isEmpty()) {
 		auto root = getRoot();
 		if (root) {
-			root->playSound(eventName);
+			return root->playSound(eventName);
 		}
 	}
+
+	return {};
 }
 
 bool UIWidget::needsLayout() const

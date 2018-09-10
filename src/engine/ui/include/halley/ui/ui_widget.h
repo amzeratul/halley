@@ -9,6 +9,7 @@
 #include "ui_input.h"
 #include "ui_data_bind.h"
 #include "ui_style.h"
+#include "halley/core/api/audio_api.h"
 
 namespace Halley {
 	class UIEvent;
@@ -132,7 +133,7 @@ namespace Halley {
 		void clearBehaviours();
 		const std::vector<std::shared_ptr<UIBehaviour>>& getBehaviours() const;
 
-		void playSound(const String& eventName);
+		Maybe<AudioHandle> playSound(const String& eventName);
 
 		bool needsLayout() const;
 		void markAsNeedingLayout() override;
