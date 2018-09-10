@@ -319,11 +319,13 @@ void UIRoot::draw(SpritePainter& painter, int mask, int layer)
 	}
 }
 
-void UIRoot::playSound(const String& eventName)
+Maybe<AudioHandle> UIRoot::playSound(const String& eventName)
 {
 	if (audio && !eventName.isEmpty()) {
-		audio->postEvent(eventName, AudioPosition::makeUI(0.0f));
+		return audio->postEvent(eventName, AudioPosition::makeUI(0.0f));
 	}
+
+	return {};
 }
 
 void UIRoot::sendEvent(UIEvent&&) const
