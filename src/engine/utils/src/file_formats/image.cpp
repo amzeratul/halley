@@ -98,6 +98,16 @@ void Image::convertIntToRGBA(unsigned int col, unsigned int& r, unsigned int& g,
 	a = (col >> 24) & 0xFF;
 }
 
+Colour4c Image::convertIntToColour(unsigned col)
+{
+	Colour4c result;
+	result.r = col & 0xFF;
+	result.g = (col >> 8) & 0xFF;
+	result.b = (col >> 16) & 0xFF;
+	result.a = (col >> 24) & 0xFF;
+	return result;
+}
+
 int Image::getBytesPerPixel() const
 {
 	switch (format) {

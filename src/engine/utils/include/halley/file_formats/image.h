@@ -27,6 +27,7 @@
 #include "halley/resources/resource.h"
 #include "halley/file/path.h"
 #include "halley/maths/rect.h"
+#include "halley/maths/colour.h"
 
 namespace Halley {
 	class ResourceDataStatic;
@@ -64,6 +65,7 @@ namespace Halley {
 
 		static unsigned int convertRGBAToInt(unsigned int r, unsigned int g, unsigned int b, unsigned int a=255);
 		static void convertIntToRGBA(unsigned int col, unsigned int& r, unsigned int& g, unsigned int& b, unsigned int& a);
+		static Colour4c convertIntToColour(unsigned int col);
 
 		unsigned int getWidth() const { return w; }
 		unsigned int getHeight() const { return h; }
