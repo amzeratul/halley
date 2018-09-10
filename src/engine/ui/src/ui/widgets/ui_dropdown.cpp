@@ -52,7 +52,7 @@ int UIDropdown::getSelectedOption() const
 
 String UIDropdown::getSelectedOptionId() const
 {
-	return optionIds[curOption];
+	return curOption >= 0 && curOption < int(optionIds.size()) ? optionIds[curOption] : "";
 }
 
 LocalisedString UIDropdown::getSelectedOptionText() const
@@ -226,7 +226,7 @@ void UIDropdown::open()
 			close();
 		});
 
-		sendEvent(UIEvent(UIEventType::DropdownOpened, getId(), optionIds[curOption], curOption));
+		sendEvent(UIEvent(UIEventType::DropdownOpened, getId(), getSelectedOptionId(), curOption));
 
 		forceLayout();
 		auto sz = dropdownList->getSize();
@@ -243,7 +243,7 @@ void UIDropdown::close()
 		dropdownWindow->destroy();
 		dropdownWindow.reset();
 
-		sendEvent(UIEvent(UIEventType::DropdownClosed, getId(), optionIds[curOption], curOption));
+		sendEvent(UIEvent(UIEventType::DropdownClosed, getId(), getSelectedOptionId(), curOption));
 	}
 }
 
