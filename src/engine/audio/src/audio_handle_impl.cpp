@@ -28,7 +28,7 @@ void AudioHandleImpl::setPosition(Vector2f pos)
 {
 	enqueue([pos] (AudioEmitter& src)
 	{
-		src.setAudioSourcePosition(AudioPosition::makePositional(Vector3f(pos)));
+		src.setAudioSourcePosition(Vector3f(pos));
 	});
 }
 

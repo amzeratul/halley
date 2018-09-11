@@ -23,6 +23,7 @@ namespace Halley {
 		bool isDone() const;
 
 		void setGain(float gain);
+		void setAudioSourcePosition(Vector3f position);
 		void setAudioSourcePosition(AudioPosition sourcePos);
 
 		float getGain() const;

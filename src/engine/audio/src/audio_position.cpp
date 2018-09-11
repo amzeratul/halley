@@ -84,3 +84,8 @@ void AudioPosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData
 		}
 	}
 }
+
+void AudioPosition::setPosition(Vector3f position)
+{
+	pos = position;
+}

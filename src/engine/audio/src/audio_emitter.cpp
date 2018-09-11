@@ -77,6 +77,13 @@ void AudioEmitter::setGain(float g)
 	gain = g;
 }
 
+void AudioEmitter::setAudioSourcePosition(Vector3f position)
+{
+	if (nChannels == 1) {
+		sourcePos.setPosition(position);
+	}
+}
+
 void AudioEmitter::setAudioSourcePosition(AudioPosition s)
 {
 	if (nChannels == 1) {
