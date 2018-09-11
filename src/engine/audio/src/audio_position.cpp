@@ -152,10 +152,10 @@ void AudioPosition::setMixPositional(gsl::span<const AudioChannelData> dstChanne
 			auto delta = s.pos - listener.position;
 			const float localPan = clamp(delta.x * 0.01f, -1.0f, 1.0f);
 			const float len = delta.length();
-			const float proximity = 1.0f - clamp((len - s.referenceDistance) / (s.maxDistance - s.referenceDistance), 0.0f, 1.0f);
+			const float localProximity = 1.0f - clamp((len - s.referenceDistance) / (s.maxDistance - s.referenceDistance), 0.0f, 1.0f);
 
-			panAccum += proximity * localPan;
-			proximityAccum += proximity;
+			panAccum += localProximity * localPan;
+			proximityAccum += localProximity;
 		}
 
 		if (proximityAccum > 0.01f) {
