@@ -58,7 +58,7 @@ void AudioFacade::startPlayback(int deviceNumber)
 		engine = std::make_unique<AudioEngine>();
 
 		AudioSpec format;
-		format.bufferSize = 256;
+		format.bufferSize = 512;
 		format.format = AudioSampleFormat::Float;
 		format.numChannels = 2;
 		format.sampleRate = 48000;
