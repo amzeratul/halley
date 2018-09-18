@@ -42,13 +42,15 @@ namespace Halley
 
 		virtual std::shared_ptr<ISaveData> getStorageContainer(SaveDataType type, const String& containerName = "") = 0;
 
-		virtual std::thread createThread(const String& name, std::function<void()> runnable)
+		virtual std::thread createThread(const String& name, ThreadPriority priority, std::function<void()> runnable)
 		{
 			return std::thread([=] () {
-				Concurrent::setThreadName(name);
+				setThreadName(name);
 				runnable();
 			});
 		}
+
+		virtual void setThreadName(const String& name) {}
 
 		virtual void runGame(std::function<void()> runnable) { runnable(); }
 		virtual bool canExit() { return false; }

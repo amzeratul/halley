@@ -58,7 +58,7 @@ void AudioFacade::startPlayback(int deviceNumber)
 		engine = std::make_unique<AudioEngine>();
 
 		AudioSpec format;
-		format.bufferSize = 1024;
+		format.bufferSize = 256;
 		format.format = AudioSampleFormat::Float;
 		format.numChannels = 2;
 		format.sampleRate = 48000;
@@ -99,7 +99,7 @@ void AudioFacade::resumePlayback()
 		running = true;
 
 		if (ownAudioThread) {
-			audioThread = system.createThread("Audio", [this]() { run(); });
+			audioThread = system.createThread("Audio", ThreadPriority::High, [this]() { run(); });
 		}
 
 		output.startPlayback();

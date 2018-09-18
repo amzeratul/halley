@@ -10,6 +10,12 @@
 
 namespace Halley
 {
+	enum class ThreadPriority {
+		Low,
+		Normal,
+		High
+	};
+
 	namespace Concurrent
 	{
 		template <typename T>
@@ -75,8 +81,5 @@ namespace Halley
 		{
 			foreach(ExecutionQueue::getDefault(), begin, end, f);
 		}
-
-		void setThreadName(String name);
-		String getThreadName();
 	}
 }

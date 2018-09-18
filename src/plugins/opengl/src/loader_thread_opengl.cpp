@@ -11,7 +11,7 @@ LoaderThreadOpenGL::LoaderThreadOpenGL(SystemAPI& system, GLContext& context)
 	, context(context.createSharedContext())
 {
 #if HAS_THREADS
-	workerThread = system.createThread("GLLoader", [this]() { run(); });
+	workerThread = system.createThread("OpenGL Loader", ThreadPriority::Normal, [this]() { run(); });
 #endif
 }
 
@@ -36,7 +36,6 @@ std::thread::id LoaderThreadOpenGL::getThreadId()
 void LoaderThreadOpenGL::run()
 {
 #if HAS_THREADS
-	Concurrent::setThreadName("OpenGL loader");
 	context->bind();
 	executor.runForever();
 #endif

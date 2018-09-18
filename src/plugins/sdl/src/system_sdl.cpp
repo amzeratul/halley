@@ -277,6 +277,50 @@ std::shared_ptr<IClipboard> SystemSDL::getClipboard() const
 	return clipboard;
 }
 
+
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
+#pragma warning(default: 6320 6322)
+#include <Windows.h>
+const DWORD MS_VC_EXCEPTION=0x406D1388;
+
+#pragma pack(push,8)
+typedef struct tagTHREADNAME_INFO
+{
+	DWORD dwType; // Must be 0x1000.
+	LPCSTR szName; // Pointer to name (in user addr space).
+	DWORD dwThreadID; // Thread ID (-1=caller thread).
+	DWORD dwFlags; // Reserved for future use, must be zero.
+} THREADNAME_INFO;
+#pragma pack(pop)
+#pragma warning(disable: 6320 6322)
+
+void SetThreadName( DWORD dwThreadID, const char* name)
+{
+	THREADNAME_INFO info;
+	info.dwType = 0x1000;
+	info.szName = name;
+	info.dwThreadID = dwThreadID;
+	info.dwFlags = 0;
+
+	__try
+	{
+		RaiseException( MS_VC_EXCEPTION, 0, sizeof(info)/sizeof(ULONG_PTR), reinterpret_cast<ULONG_PTR*>(&info) );
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+	}
+}
+#endif
+
+void SystemSDL::setThreadName(const String& name)
+{
+#if defined(_WIN32) && !defined(WINDOWS_STORE) && defined(_DEBUG)
+	if (name != "main") {
+		SetThreadName(static_cast<DWORD>(-1), name.c_str());
+	}
+#endif
+}
+
 void SystemSDL::printDebugInfo() const
 {
 	std::cout << std::endl << ConsoleColour(Console::GREEN) << "Initializing Video Display...\n" << ConsoleColour();

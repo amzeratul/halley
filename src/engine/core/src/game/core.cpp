@@ -118,8 +118,10 @@ void Core::onReloaded()
 		setOutRedirect(true);
 	}
 	statics.resume(api->system);
-	Concurrent::setThreadName("main");
-
+	if (api->system) {
+		api->system->setThreadName("main");
+	}
+	
 	if (api->inputInternal) {
 		api->inputInternal->onResume();
 	}
@@ -156,7 +158,9 @@ void Core::init()
 	api->init();
 	api->systemInternal->setEnvironment(environment.get());
 	statics.resume(api->system);
-	Concurrent::setThreadName("main");
+	if (api->system) {
+		api->system->setThreadName("main");
+	}
 
 	// Resources
 	initResources();

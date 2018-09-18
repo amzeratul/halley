@@ -37,6 +37,9 @@ namespace Halley
 		bool canExit() override;
 
 		std::shared_ptr<IClipboard> getClipboard() const override;
+
+		void setThreadName(const String& name) override;
+
 	private:
 		void processVideoEvent(VideoAPI* video, const SDL_Event& event);
 

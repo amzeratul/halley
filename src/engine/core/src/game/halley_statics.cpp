@@ -63,10 +63,9 @@ void HalleyStatics::resume(SystemAPI* system)
 	auto makeThread = [=] (String name, std::function<void()> runnable) -> std::thread
 	{
 		if (system) {
-			return system->createThread(name, runnable);
+			return system->createThread(name, ThreadPriority::Normal, runnable);
 		} else {
 			return std::thread([=] () {
-				Concurrent::setThreadName(name);
 				runnable();
 			});
 		}

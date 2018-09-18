@@ -9,14 +9,17 @@
 
 #include <chrono>
 #include <thread>
+#include <cstdint>
 
-Halley::MainLoop::MainLoop(IMainLoopable& target, GameLoader& reloader)
+using namespace Halley;
+
+MainLoop::MainLoop(IMainLoopable& target, GameLoader& reloader)
 	: target(target)
 	, reloader(reloader)
 {
 }
 
-void Halley::MainLoop::run()
+void MainLoop::run()
 {
 	capFrameRate = true;
 	fps = target.getTargetFPS();
@@ -26,14 +29,14 @@ void Halley::MainLoop::run()
 	} while (tryReload());
 }
 
-void Halley::MainLoop::runLoop()
+void MainLoop::runLoop()
 {
 	std::cout << ConsoleColour(Console::GREEN) << "\nStarting main loop." << ConsoleColour() << std::endl;
 
 	using Clock = std::chrono::steady_clock;
 	using namespace std::chrono_literals;
 
-	int nSteps = 0;
+	int64_t nSteps = 0;
 	Clock::time_point startTime;
 	Clock::time_point targetTime;
 	Clock::time_point lastTime;
@@ -64,7 +67,7 @@ void Halley::MainLoop::runLoop()
 
 					nSteps++;
 					curTime = Clock::now();
-					targetTime = startTime + std::chrono::microseconds((static_cast<long long>(nSteps) * 1000000) / fps);
+					targetTime = startTime + std::chrono::microseconds((nSteps * 1000000ll) / fps);
 				}
 			} else {
 				// Nope, release CPU
@@ -79,12 +82,12 @@ void Halley::MainLoop::runLoop()
 	std::cout << ConsoleColour(Console::GREEN) << "Main loop terminated." << ConsoleColour() << std::endl;
 }
 
-bool Halley::MainLoop::isRunning() const
+bool MainLoop::isRunning() const
 {
 	return target.isRunning() && !reloader.needsToReload();
 }
 
-bool Halley::MainLoop::tryReload() const
+bool MainLoop::tryReload() const
 {
 	if (reloader.needsToReload()) {
 		reloader.reload();

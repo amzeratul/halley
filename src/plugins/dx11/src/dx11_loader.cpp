@@ -5,7 +5,7 @@ using namespace Halley;
 DX11Loader::DX11Loader(DX11Video& video)
 	: executor(Executors::getVideoAux())
 {
-	thread = video.getSystem().createThread("DX11 Loader", [this] ()
+	thread = video.getSystem().createThread("DX11 Loader", ThreadPriority::Normal, [this] ()
 	{
 		executor.runForever();
 	});
