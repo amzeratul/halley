@@ -13,6 +13,7 @@ AudioFacade::AudioFacade(AudioOutputAPI& o, SystemAPI& system)
 	: output(o)
 	, system(system)
 	, running(false)
+	, started(false)
 	, ownAudioThread(o.needsAudioThread())
 {
 }
