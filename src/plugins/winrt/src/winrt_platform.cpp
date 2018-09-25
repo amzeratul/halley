@@ -42,7 +42,7 @@ Future<std::unique_ptr<AuthorisationToken>> WinRTPlatform::getAuthToken()
 
 bool WinRTPlatform::canProvideCloudSave() const
 {
-	return true;
+	return false;
 }
 
 std::shared_ptr<ISaveData> WinRTPlatform::getCloudSaveContainer(const String& containerName)
