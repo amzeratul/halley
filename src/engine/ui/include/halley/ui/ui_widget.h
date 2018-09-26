@@ -172,6 +172,7 @@ namespace Halley {
 		void setParent(UIParent* parent);
 
 		void setWidgetRect(Rect4f rect);
+		void resetInputResults();
 
 		UIParent* parent = nullptr;
 		String id;

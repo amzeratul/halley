@@ -312,6 +312,10 @@ void UIWidget::setActive(bool s)
 {
 	if (active != s) {
 		active = s;
+		if (!active) {
+			resetInputResults();
+		}
+
 		markAsNeedingLayout();
 	}
 }
@@ -325,6 +329,10 @@ void UIWidget::setEnabled(bool e)
 {
 	if (enabled != e) {
 		enabled = e;
+		if (!enabled) {
+			resetInputResults();
+		}
+
 		markAsNeedingLayout();
 		onEnabledChanged();
 	}
@@ -658,6 +666,14 @@ void UIWidget::setWidgetRect(Rect4f rect)
 	if (size != rect.getSize()) {
 		size = rect.getSize();
 		positionUpdated = true;
+	}
+}
+
+void UIWidget::resetInputResults()
+{
+	inputResults.reset();
+	for (auto& c: getChildren()) {
+		c->resetInputResults();
 	}
 }
 
