@@ -97,14 +97,17 @@ Path OSLinux::parseProgramPath(const String& path)
 String OSLinux::getUserDataDir()
 {
 	String result;
-	struct passwd* pwd = getpwuid(getuid());
-	if (pwd) {
-		result = pwd->pw_dir;
-	} else {
-		result = getenv("HOME");
+
+	if (!(result = getenv("XDG_DATA_HOME")).isEmpty()) {
+		return result;
+	} else if ((result = getenv("HOME")).isEmpty()) {
+		struct passwd* pwd = getpwuid(getuid());
+		if ((result = pwd->pw_dir).isEmpty()) {
+			throw Exception("Unable to find path to user data directory.", HalleyExceptions::OS);
+		}
 	}
 
-	return result + "/Library/";
+	return result + "/.local/share";
 }
 
 #endif
