@@ -1,0 +1,15 @@
+---
+name: Halley/SpriteAlpha
+base: sprite_base.yaml
+textures:
+  - tex0: sampler2D
+passes:
+  - blend: Alpha
+    shader:
+      - language: glsl
+        vertex: sprite.vertex.glsl
+        pixel: sprite.pixel.glsl
+      - language: hlsl
+        vertex: sprite.vertex.hlsl
+        pixel: sprite.pixel.hlsl
+...
