@@ -37,6 +37,26 @@ namespace Halley
 		virtual void cancel() = 0;
 		virtual std::map<String, String> getMapData() const { return {}; }
 	};
+	
+	enum class AuthTokenRetrievalResult {
+		OK,
+		Error,
+		ErrorAlreadyReported,
+		Cancelled
+	};
+
+	struct AuthTokenResult {
+		AuthTokenRetrievalResult result = AuthTokenRetrievalResult::Error;
+		std::unique_ptr<AuthorisationToken> token;
+
+		AuthTokenResult(AuthTokenRetrievalResult result)
+			: result(result)
+		{}
+		AuthTokenResult(std::unique_ptr<AuthorisationToken> token)
+			: result(AuthTokenRetrievalResult::OK)
+			, token(std::move(token))
+		{}
+	};
 
 	class PlatformAPI
 	{
@@ -48,7 +68,12 @@ namespace Halley
 		virtual std::unique_ptr<HTTPRequest> makeHTTPRequest(const String& method, const String& url) = 0;
 
 		virtual bool canProvideAuthToken() const = 0;
-		virtual Future<std::unique_ptr<AuthorisationToken>> getAuthToken() = 0;
+		virtual Future<AuthTokenResult> getAuthToken() = 0;
+
+		virtual bool canShowSubscriptionNeeded() const { return false; }
+
+		// Returns true if the user has potentially accepted subscription
+		virtual bool showSubscriptionNeeded() const { return false; }
 
 		virtual bool canProvideCloudSave() const { return false; }
 		virtual std::shared_ptr<ISaveData> getCloudSaveContainer(const String& containerName = "") { return {}; }

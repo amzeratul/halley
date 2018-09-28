@@ -19,7 +19,7 @@ namespace Halley
 		std::unique_ptr<HTTPRequest> makeHTTPRequest(const String& method, const String& url) override;
 
 		bool canProvideAuthToken() const override;
-		Future<std::unique_ptr<AuthorisationToken>> getAuthToken() override;
+		Future<AuthTokenResult> getAuthToken() override;
 
 		bool canProvideCloudSave() const override;
 		std::shared_ptr<ISaveData> getCloudSaveContainer(const String& containerName) override;

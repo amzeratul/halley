@@ -35,7 +35,7 @@ bool WinRTPlatform::canProvideAuthToken() const
 	return true;
 }
 
-Future<std::unique_ptr<AuthorisationToken>> WinRTPlatform::getAuthToken()
+Future<AuthTokenResult> WinRTPlatform::getAuthToken()
 {
 	return xbl->getAuthToken();
 }

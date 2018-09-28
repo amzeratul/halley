@@ -8,7 +8,7 @@ UIValidator::~UIValidator()
 
 StringUTF32 UIValidator::onTextChanged(StringUTF32 changedTo)
 {
-	return std::move(changedTo);
+	return changedTo;
 }
 
 bool UIValidator::isEnabled()
