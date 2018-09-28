@@ -75,6 +75,7 @@ void Image::setSize(Vector2i size)
 			Ensures(size_t(px.get()) % 4 == 0);
 		}
 		Ensures(px.get() != nullptr);
+		memset(px.get(), 0, dataLen);
 	} else {
 		px = std::unique_ptr<char, void(*)(char*)>(nullptr, [](char*) {});
 	}
