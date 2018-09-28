@@ -16,6 +16,12 @@ namespace Halley
 
 		virtual int getResponseCode() const = 0;
 		virtual const Bytes& getBody() const = 0;
+
+		void setCancelled() { cancelled = true; }
+		bool isCancelled() const { return cancelled; }
+
+	private:
+		bool cancelled = false;
 	};
 
 	class HTTPRequest {
