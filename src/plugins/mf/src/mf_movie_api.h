@@ -9,6 +9,7 @@ namespace Halley {
         void init() override;
         void deInit() override;
 
+		bool canPlayVideo() const override { return true; }
 	    std::shared_ptr<MoviePlayer> makePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data) override;
 
     private:
