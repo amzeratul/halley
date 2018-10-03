@@ -78,6 +78,8 @@ namespace Halley
 		AudioAPI& getAudioAPI() const;
 
 		void onVideoFrameAvailable(Time time, TextureDescriptor&& descriptor);
+		void onVideoFrameAvailable(Time time, std::shared_ptr<Texture> texture);
+		void onAudioFrameAvailable(Time time, gsl::span<const short> samples);
 		void onAudioFrameAvailable(Time time, gsl::span<const float> samples);
 
 		std::vector<MoviePlayerStream> streams;

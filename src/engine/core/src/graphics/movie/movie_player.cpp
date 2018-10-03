@@ -279,6 +279,20 @@ void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descripto
 	});
 }
 
+void MoviePlayer::onVideoFrameAvailable(Time time, std::shared_ptr<Texture> texture)
+{
+	pendingFrames.push_back({texture, time});
+}
+
+void MoviePlayer::onAudioFrameAvailable(Time time, gsl::span<const short> origSamples)
+{
+	std::vector<AudioConfig::SampleFormat> samples(origSamples.size());
+	for (size_t i = 0; i < origSamples.size(); ++i) {
+		samples[i] = origSamples[i] / 32768.0f;
+	}
+	onAudioFrameAvailable(time, gsl::span<const AudioConfig::SampleFormat>(samples.data(), samples.size()));
+}
+
 void MoviePlayer::onAudioFrameAvailable(Time time, gsl::span<const AudioConfig::SampleFormat> samples)
 {
 	streamingClip->addInterleavedSamples(samples);	
