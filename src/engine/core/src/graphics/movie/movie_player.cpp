@@ -10,6 +10,7 @@
 #include "halley/audio/audio_clip.h"
 #include <chrono>
 #include "halley/audio/audio_position.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 using namespace std::chrono_literals;
@@ -96,12 +97,15 @@ void MoviePlayer::update(Time t)
 	}
 
 	if (state == MoviePlayerState::Playing || state == MoviePlayerState::StartingToPlay) {
-		if (!pendingFrames.empty()) {
-			auto& next = pendingFrames.front();
-			if (time >= next.time) {
-				//recycleTexture.push_back(currentTexture);
-				currentTexture = next.texture;
-				pendingFrames.pop_front();
+		{
+			std::unique_lock<std::mutex> lock(mutex);
+			if (!pendingFrames.empty()) {
+				auto& next = pendingFrames.front();
+				if (time >= next.time) {
+					//recycleTexture.push_back(currentTexture);
+					currentTexture = next.texture;
+					pendingFrames.pop_front();
+				}
 			}
 		}
 
