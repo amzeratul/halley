@@ -75,6 +75,7 @@ namespace Halley
 		bool canBeUpdated = false;
 		bool isRenderTarget = false;
 		bool isDepthStencil = false;
+		bool isHardwareVideoDecodeTexture = false;
 
 		TextureDescriptor() = default;
 		TextureDescriptor(TextureDescriptor&& other) noexcept = default;

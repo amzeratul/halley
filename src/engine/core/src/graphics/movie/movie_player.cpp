@@ -35,20 +35,25 @@ void MoviePlayer::play()
 			streamingClip = std::make_shared<StreamingAudioClip>(2);
 		}
 
-		renderTexture = video.createTexture(getSize());
-		auto desc = TextureDescriptor(getSize(), TextureFormat::RGBA);
-		desc.useFiltering = true;
-		desc.isRenderTarget = true;
-		renderTexture->load(std::move(desc));
-
-		renderTarget = video.createTextureRenderTarget();
-		renderTarget->setTarget(0, renderTexture);
-		renderTarget->setViewPort(Rect4i(Vector2i(), getSize()));
-
 		state = MoviePlayerState::StartingToPlay;
 
 		for (auto& s: streams) {
 			s.playing = true;
+		}
+
+		onStartPlay();
+		waitForVideoInfo();
+
+		if (needsYV12Conversion()) {
+			renderTexture = video.createTexture(getSize());
+			auto desc = TextureDescriptor(getSize(), TextureFormat::RGBA);
+			desc.useFiltering = true;
+			desc.isRenderTarget = true;
+			renderTexture->load(std::move(desc));
+
+			renderTarget = video.createTextureRenderTarget();
+			renderTarget->setTarget(0, renderTexture);
+			renderTarget->setViewPort(Rect4i(Vector2i(), getSize()));
 		}
 	}
 }
@@ -94,6 +99,7 @@ void MoviePlayer::update(Time t)
 		if (!pendingFrames.empty()) {
 			auto& next = pendingFrames.front();
 			if (time >= next.time) {
+				//recycleTexture.push_back(currentTexture);
 				currentTexture = next.texture;
 				pendingFrames.pop_front();
 			}
@@ -117,7 +123,7 @@ void MoviePlayer::update(Time t)
 
 void MoviePlayer::render(Resources& resources, RenderContext& rc)
 {
-	if (currentTexture) {
+	if (needsYV12Conversion() && currentTexture) {
 		Camera cam;
 		cam.setPosition(Vector2f(videoSize) * 0.5f);
 		cam.setZoom(1.0f);
@@ -134,11 +140,20 @@ void MoviePlayer::render(Resources& resources, RenderContext& rc)
 
 Sprite MoviePlayer::getSprite(Resources& resources)
 {
-	if (renderTexture) {
-		auto matDef = resources.get<MaterialDefinition>("Halley/Sprite");
-		return Sprite().setImage(renderTexture, matDef).setTexRect(Rect4f(0, 0, 1, 1)).setSize(Vector2f(videoSize));
+	if (needsYV12Conversion()) {
+		if (renderTexture) {
+			auto matDef = resources.get<MaterialDefinition>("Halley/Sprite");
+			return Sprite().setImage(renderTexture, matDef).setTexRect(Rect4f(0, 0, 1, 1)).setSize(Vector2f(videoSize));
+		} else {
+			return Sprite().setMaterial(resources, "Halley/SolidColour").setColour(Colour4f(0, 0, 0)).setSize(Vector2f(videoSize));
+		}
 	} else {
-		return Sprite().setMaterial(resources, "Halley/SolidColour").setColour(Colour4f(0, 0, 0)).setSize(Vector2f(videoSize));
+		if (currentTexture) {
+			auto matDef = resources.get<MaterialDefinition>("Halley/Sprite");
+			return Sprite().setImage(currentTexture, matDef).setTexRect(Rect4f(0, 0, 1, 1)).setSize(Vector2f(videoSize));
+		} else {
+			return Sprite().setMaterial(resources, "Halley/SolidColour").setColour(Colour4f(0, 0, 0)).setSize(Vector2f(videoSize));
+		}
 	}
 }
 
@@ -238,6 +253,23 @@ bool MoviePlayer::needsMoreAudioFrames() const
 	return streamingClip->getSamplesLeft() < 20000 && !audioStream->eof;
 }
 
+void MoviePlayer::onReset()
+{
+}
+
+void MoviePlayer::onStartPlay()
+{
+}
+
+void MoviePlayer::waitForVideoInfo()
+{
+}
+
+bool MoviePlayer::needsYV12Conversion() const
+{
+	return true;
+}
+
 void MoviePlayer::setVideoSize(Vector2i size)
 {
 	videoSize = size;
@@ -257,7 +289,7 @@ void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descripto
 {
 	auto desc = std::make_shared<TextureDescriptor>(std::move(descriptor));
 
-	Concurrent::execute(Executors::getVideoAux(), [this, time, desc(std::move(desc))] ()
+	Concurrent::execute(Executors::getVideoAux(), [this, time, desc = std::move(desc)] ()
 	{
 		auto descriptor = TextureDescriptor(std::move(*desc));
 		std::shared_ptr<Texture> tex;
@@ -271,7 +303,6 @@ void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descripto
 				tex = recycleTexture.front();
 				recycleTexture.pop_front();
 			}
-			tex->startLoading();
 			pendingFrames.push_back({tex, time});
 		}
 
@@ -281,6 +312,7 @@ void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descripto
 
 void MoviePlayer::onVideoFrameAvailable(Time time, std::shared_ptr<Texture> texture)
 {
+	std::unique_lock<std::mutex> lock(mutex);
 	pendingFrames.push_back({texture, time});
 }
 

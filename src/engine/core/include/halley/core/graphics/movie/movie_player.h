@@ -70,7 +70,10 @@ namespace Halley
 	protected:
 		virtual void requestVideoFrame() = 0;
 		virtual void requestAudioFrame() = 0;
-		virtual void onReset() {}
+		virtual void onReset();
+		virtual void onStartPlay();
+		virtual void waitForVideoInfo();
+		virtual bool needsYV12Conversion() const;
 		
 		void setVideoSize(Vector2i size);
 
@@ -83,6 +86,7 @@ namespace Halley
 		void onAudioFrameAvailable(Time time, gsl::span<const float> samples);
 
 		std::vector<MoviePlayerStream> streams;
+		std::list<std::shared_ptr<Texture>> recycleTexture;
 
 	private:
 		VideoAPI& video;
@@ -93,7 +97,6 @@ namespace Halley
 		Vector2i videoSize;
 		std::shared_ptr<Texture> currentTexture;
 		std::list<PendingFrame> pendingFrames;
-		std::list<std::shared_ptr<Texture>> recycleTexture;
 		std::shared_ptr<TextureRenderTarget> renderTarget;
 		std::shared_ptr<Texture> renderTexture;
 
