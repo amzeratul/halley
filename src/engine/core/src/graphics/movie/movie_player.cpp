@@ -238,7 +238,7 @@ bool MoviePlayer::needsMoreVideoFrames() const
 		return false;
 	}
 
-	return pendingFrames.size() < maxVideoFrames && !videoStream->eof;
+	return int(pendingFrames.size()) < maxVideoFrames && !videoStream->eof;
 }
 
 bool MoviePlayer::needsMoreAudioFrames() const
