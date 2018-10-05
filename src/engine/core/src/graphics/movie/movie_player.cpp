@@ -264,7 +264,7 @@ bool MoviePlayer::needsMoreAudioFrames() const
 		return false;
 	}
 
-	return streamingClip->getSamplesLeft() < maxAudioSamples && !audioStream->eof;
+	return int(streamingClip->getSamplesLeft()) < maxAudioSamples && !audioStream->eof;
 }
 
 void MoviePlayer::onReset()
