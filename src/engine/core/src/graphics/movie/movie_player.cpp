@@ -104,10 +104,12 @@ void MoviePlayer::update(Time t)
 			if (!pendingFrames.empty()) {
 				auto& next = pendingFrames.front();
 				if (time >= next.time) {
-					if (shouldRecycleTextures()) {
-						recycleTexture.push_back(currentTexture);
+					if (currentTexture) {
+						if (shouldRecycleTextures()) {
+							recycleTexture.push_back(currentTexture);
+						}
+						onDoneUsingTexture(currentTexture);
 					}
-					onDoneUsingTexture(currentTexture);
 					currentTexture = next.texture;
 					pendingFrames.pop_front();
 				}
@@ -119,7 +121,7 @@ void MoviePlayer::update(Time t)
 		}
 
 		if (state == MoviePlayerState::StartingToPlay) {
-			if (!needsMoreVideoFrames() && !needsMoreAudioFrames()) {
+			if (pendingFrames.size() >= 3) {
 				if (streamingClip) {
 					audioHandle = audio.play(streamingClip, AudioPosition::makeUI(), 0.5f);
 				}
