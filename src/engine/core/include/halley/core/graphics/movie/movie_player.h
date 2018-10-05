@@ -74,6 +74,9 @@ namespace Halley
 		virtual void onStartPlay();
 		virtual void waitForVideoInfo();
 		virtual bool needsYV12Conversion() const;
+		virtual bool shouldRecycleTextures() const;
+		virtual void onDoneUsingTexture(std::shared_ptr<Texture> texture);
+		virtual Rect4i getCropRect() const;
 		
 		void setVideoSize(Vector2i size);
 
@@ -87,6 +90,8 @@ namespace Halley
 
 		std::vector<MoviePlayerStream> streams;
 		std::list<std::shared_ptr<Texture>> recycleTexture;
+		int maxVideoFrames;
+		int maxAudioSamples;
 
 	private:
 		VideoAPI& video;

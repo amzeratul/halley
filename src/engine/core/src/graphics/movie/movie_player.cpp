@@ -19,6 +19,8 @@ MoviePlayer::MoviePlayer(VideoAPI& video, AudioAPI& audio)
 	: video(video)
 	, audio(audio)
 	, threadRunning(false)
+	, maxVideoFrames(7)
+	, maxAudioSamples(20000)
 {
 }
 
@@ -102,7 +104,10 @@ void MoviePlayer::update(Time t)
 			if (!pendingFrames.empty()) {
 				auto& next = pendingFrames.front();
 				if (time >= next.time) {
-					//recycleTexture.push_back(currentTexture);
+					if (shouldRecycleTextures()) {
+						recycleTexture.push_back(currentTexture);
+					}
+					onDoneUsingTexture(currentTexture);
 					currentTexture = next.texture;
 					pendingFrames.pop_front();
 				}
@@ -144,17 +149,20 @@ void MoviePlayer::render(Resources& resources, RenderContext& rc)
 
 Sprite MoviePlayer::getSprite(Resources& resources)
 {
+	Rect4i crop = getCropRect();
+	Rect4f texRect = Rect4f(crop) / Vector2f(videoSize);
+
 	if (needsYV12Conversion()) {
 		if (renderTexture) {
 			auto matDef = resources.get<MaterialDefinition>("Halley/Sprite");
-			return Sprite().setImage(renderTexture, matDef).setTexRect(Rect4f(0, 0, 1, 1)).setSize(Vector2f(videoSize));
+			return Sprite().setImage(renderTexture, matDef).setTexRect(texRect).setSize(Vector2f(videoSize));
 		} else {
 			return Sprite().setMaterial(resources, "Halley/SolidColour").setColour(Colour4f(0, 0, 0)).setSize(Vector2f(videoSize));
 		}
 	} else {
 		if (currentTexture) {
 			auto matDef = resources.get<MaterialDefinition>("Halley/Sprite");
-			return Sprite().setImage(currentTexture, matDef).setTexRect(Rect4f(0, 0, 1, 1)).setSize(Vector2f(videoSize));
+			return Sprite().setImage(currentTexture, matDef).setTexRect(texRect).setSize(Vector2f(videoSize));
 		} else {
 			return Sprite().setMaterial(resources, "Halley/SolidColour").setColour(Colour4f(0, 0, 0)).setSize(Vector2f(videoSize));
 		}
@@ -228,7 +236,7 @@ bool MoviePlayer::needsMoreVideoFrames() const
 		return false;
 	}
 
-	return pendingFrames.size() < 7 && !videoStream->eof;
+	return pendingFrames.size() < maxVideoFrames && !videoStream->eof;
 }
 
 bool MoviePlayer::needsMoreAudioFrames() const
@@ -254,7 +262,7 @@ bool MoviePlayer::needsMoreAudioFrames() const
 		return false;
 	}
 
-	return streamingClip->getSamplesLeft() < 20000 && !audioStream->eof;
+	return streamingClip->getSamplesLeft() < maxAudioSamples && !audioStream->eof;
 }
 
 void MoviePlayer::onReset()
@@ -272,6 +280,20 @@ void MoviePlayer::waitForVideoInfo()
 bool MoviePlayer::needsYV12Conversion() const
 {
 	return true;
+}
+
+bool MoviePlayer::shouldRecycleTextures() const
+{
+	return false;
+}
+
+void MoviePlayer::onDoneUsingTexture(std::shared_ptr<Texture> texture)
+{
+}
+
+Rect4i MoviePlayer::getCropRect() const
+{
+	return Rect4i(0, 0, videoSize.x, videoSize.y);
 }
 
 void MoviePlayer::setVideoSize(Vector2i size)
