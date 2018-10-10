@@ -348,6 +348,11 @@ UIRoot* UIWidget::getRoot()
 	return parent ? parent->getRoot() : nullptr;
 }
 
+const UIRoot* UIWidget::getRoot() const
+{
+	return parent ? parent->getRoot() : nullptr;
+}
+
 void UIWidget::notifyDataBind(bool data) const
 {
 	if (dataBind) {

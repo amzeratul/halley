@@ -13,6 +13,11 @@ UIRoot* UIRoot::getRoot()
 	return this;
 }
 
+const UIRoot* UIRoot::getRoot() const
+{
+	return this;
+}
+
 const String& UIRoot::getId() const
 {
 	return id;

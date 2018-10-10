@@ -24,6 +24,7 @@ namespace Halley {
 		explicit UIRoot(AudioAPI* audio, Rect4f rect = {});
 
 		UIRoot* getRoot() override;
+		const UIRoot* getRoot() const override;
 		const String& getId() const override;
 
 		void setRect(Rect4f rect);

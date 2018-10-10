@@ -33,6 +33,7 @@ namespace Halley {
 		void setRect(Rect4f rect) override;
 
 		UIRoot* getRoot() override;
+		const UIRoot* getRoot() const override;
 		UIParent* getParent() const;
 
 		void layout();
