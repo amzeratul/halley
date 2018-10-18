@@ -44,6 +44,9 @@ namespace Halley {
 
 		UIWidget* getCurrentFocus() const;
 
+		void setUIMouseRemapping(std::function<Vector2f(Vector2f)> remapFunction);
+		void unsetUIMouseRemapping();
+
 		std::vector<std::shared_ptr<UIWidget>> collectWidgets();
 
 	private:
@@ -57,12 +60,14 @@ namespace Halley {
 		AudioAPI* audio;
 		bool mouseHeld = false;
 
+		std::function<Vector2f(Vector2f)> mouseRemap;
+
 		void updateMouse(spInputDevice mouse);
 		void updateInputTree(const spInputDevice& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting);
 		void updateInput(spInputDevice input);
 
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos);
-		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos);
+		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos);		
 		void updateMouseOver(const std::shared_ptr<UIWidget>& underMouse);
 		void collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output);
 	};

@@ -28,7 +28,9 @@ UIRoot::UIRoot(AudioAPI* audio, Rect4f rect)
 	, dummyInput(std::make_shared<InputButtonBase>(4))
 	, uiRect(rect)
 	, audio(audio)
+	, mouseRemap([](Vector2f p) { return p; })
 {
+
 }
 
 void UIRoot::setRect(Rect4f rect)
@@ -78,6 +80,7 @@ void UIRoot::updateMouse(spInputDevice mouse)
 	// If the mouse hasn't moved, keep the last one.
 	std::shared_ptr<UIWidget> underMouse;
 	Vector2f mousePos = mouse->getPosition() + uiRect.getTopLeft();
+	mousePos = mouseRemap(mousePos);
 	if (true || (mousePos - lastMousePos).squaredLength() > 0.01f) {
 		// Go through all root-level widgets and find the actual widget under the mouse
 		underMouse = getWidgetUnderMouse(mousePos);
@@ -292,6 +295,14 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWi
 	} else {
 		return {};
 	}
+}
+
+void UIRoot::setUIMouseRemapping(std::function<Vector2f(Vector2f)> remapFunction) {
+	mouseRemap = remapFunction;
+}
+
+void UIRoot::unsetUIMouseRemapping() {
+	mouseRemap = [](Vector2f p) { return p; };
 }
 
 std::vector<std::shared_ptr<UIWidget>> UIRoot::collectWidgets()
