@@ -79,8 +79,7 @@ void UIRoot::updateMouse(spInputDevice mouse)
 	// Check where we should be mouse overing.
 	// If the mouse hasn't moved, keep the last one.
 	std::shared_ptr<UIWidget> underMouse;
-	Vector2f mousePos = mouse->getPosition() + uiRect.getTopLeft();
-	mousePos = mouseRemap(mousePos);
+	Vector2f mousePos = mouseRemap(mouse->getPosition() + uiRect.getTopLeft());
 	if (true || (mousePos - lastMousePos).squaredLength() > 0.01f) {
 		// Go through all root-level widgets and find the actual widget under the mouse
 		underMouse = getWidgetUnderMouse(mousePos);
@@ -298,6 +297,7 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWi
 }
 
 void UIRoot::setUIMouseRemapping(std::function<Vector2f(Vector2f)> remapFunction) {
+	Expects(remapFunction);
 	mouseRemap = remapFunction;
 }
 
