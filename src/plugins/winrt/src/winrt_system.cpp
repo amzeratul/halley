@@ -1,3 +1,4 @@
+#include <halley/support/logger.h>
 #include "winrt_platform.h"
 #include "xbl_manager.h"
 #ifdef WINDOWS_STORE
@@ -351,14 +352,16 @@ Bytes WinRTLocalSave::getData(const String& path)
 std::vector<String> WinRTLocalSave::enumerate(const String& root)
 {
 	return Concurrent::execute([&] () -> std::vector<String> {
-		auto files = folder.GetFilesAsync(winrt::Windows::Storage::Search::CommonFileQuery::OrderByDate, 0, 256).get();
 		std::vector<String> result;
-		for (auto& f: files) {
-			String name = String(f.Name().c_str());
-			if (name.startsWith(root)) {
-				result.push_back(name);
+		try {
+			auto files = folder.GetFilesAsync(winrt::Windows::Storage::Search::CommonFileQuery::OrderByDate, 0, 256).get();
+			for (auto& f: files) {
+				String name = String(f.Name().c_str());
+				if (name.startsWith(root)) {
+					result.push_back(name);
+				}
 			}
-		}
+		} catch (...) {}
 		return result;
 	}).get();
 }
