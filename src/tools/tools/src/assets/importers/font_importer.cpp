@@ -17,7 +17,7 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	Vector2i imgSize;
 	imgSize.x = meta.getInt("width", 512);
 	imgSize.y = meta.getInt("height", 512);
-	int fontSize = meta.getInt("fontSize", 0);
+	float fontSize = meta.getFloat("fontSize", 0);
 
 	auto data = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
 
@@ -33,7 +33,9 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 		sizeInfo.imageSize = imgSize;
 	}
 
-	auto result = gen.generateFont(meta, data, sizeInfo, radius, supersample, Range<int>(0, 255));
+	auto range = Range<int>(meta.getInt("rangeStart", 0), meta.getInt("rangeEnd", 255));
+
+	auto result = gen.generateFont(meta, data, sizeInfo, radius, supersample, range);
 	if (!result.success) {
 		return;
 	}

@@ -32,7 +32,12 @@ static boost::optional<Vector<BinPackResult>> tryPacking(FontFace& font, float f
 		}
 	}
 
-	return BinPack::pack(entries, packSize);
+	constexpr bool fastPack = true;
+	if (fastPack) {
+		return BinPack::fastPack(entries, packSize);
+	} else {
+		return BinPack::pack(entries, packSize);
+	}
 }
 
 static boost::optional<Vector<BinPackResult>> binarySearch(std::function<boost::optional<Vector<BinPackResult>>(int)> f, int minBound, int maxBound, int &best)

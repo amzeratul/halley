@@ -58,7 +58,7 @@ FontFace::~FontFace()
 void FontFace::setSize(float sz)
 {
 	size = sz;
-	FT_Set_Char_Size(pimpl->face, int(size * 64), 0, 72, 0);
+	FT_Set_Char_Size(pimpl->face, lround(size * 64), 0, 72, 0);
 }
 
 String FontFace::getName() const
