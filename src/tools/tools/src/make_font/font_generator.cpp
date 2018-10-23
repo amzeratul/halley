@@ -218,7 +218,15 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 	const float smoothRadius = radius * scale;
 	const int padding = lround(radius);
 
-	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, ascender, height, sizePt, smoothRadius);
+	std::vector<String> fallback;
+	for (auto& name: meta.getString("fallback", "").split(",")) {
+		auto trimmedName = name.trimBoth();
+		if (!trimmedName.isEmpty()) {
+			fallback.push_back(trimmedName);
+		}
+	}
+
+	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, ascender, height, sizePt, smoothRadius, fallback);
 
 	for (auto& c: entries) {
 		auto metrics = font.getMetrics(c.charcode, scale);

@@ -50,7 +50,7 @@ Font::Font(String name, String imageName, float ascender, float height, float si
 {
 }
 
-Font::Font(String name, String imageName, float ascender, float height, float sizePt, float distanceFieldSmoothRadius)
+Font::Font(String name, String imageName, float ascender, float height, float sizePt, float distanceFieldSmoothRadius, std::vector<String> fallback)
 	: name(name)
 	, imageName(imageName)
 	, ascender(ascender)
@@ -58,6 +58,7 @@ Font::Font(String name, String imageName, float ascender, float height, float si
 	, sizePt(sizePt)
 	, smoothRadius(distanceFieldSmoothRadius)
 	, distanceField(true)
+	, fallback(std::move(fallback))
 {
 }
 
@@ -83,17 +84,38 @@ void Font::reload(Resource&& resource)
 	*this = std::move(dynamic_cast<Font&>(resource));
 }
 
+void Font::onLoaded(Resources& resources)
+{
+	for (auto& fontName: fallback) {
+		fallbackFont.push_back(resources.get<Font>(fontName));
+	}
+}
+
 const Font::Glyph& Font::getGlyph(int code) const
 {
-	auto iter = glyphs.find(code);
-	if (iter == glyphs.end()) {
-		iter = glyphs.find(0);
-		if (iter == glyphs.end()) {
+	auto& font = getFontForGlyph(code);
+	auto iter = font.glyphs.find(code);
+	if (iter == font.glyphs.end()) {
+		iter = font.glyphs.find(0);
+		if (iter == font.glyphs.end()) {
 			throw Exception("Unable to load fallback character, needed for character " + toString(code), HalleyExceptions::Graphics);
 		}
 		return iter->second;
 	}
 	return iter->second;
+}
+
+const Font& Font::getFontForGlyph(int code) const
+{
+	auto iter = glyphs.find(code);
+	if (iter == glyphs.end()) {
+		for (auto& font: fallbackFont) {
+			if (font->glyphs.find(code) != font->glyphs.end()) {
+				return *font;
+			}
+		}
+	}
+	return *this;
 }
 
 float Font::getLineHeightAtSize(float size) const
@@ -151,6 +173,7 @@ void Font::serialize(Serializer& s) const
 	s << distanceField;
 	s << smoothRadius;
 	s << glyphs;
+	s << fallback;
 }
 
 void Font::deserialize(Deserializer& s)
@@ -163,6 +186,7 @@ void Font::deserialize(Deserializer& s)
 	s >> distanceField;
 	s >> smoothRadius;
 	s >> glyphs;
+	s >> fallback;
 
 	for (auto& g: glyphs) {
 		g.second.charcode = g.first;

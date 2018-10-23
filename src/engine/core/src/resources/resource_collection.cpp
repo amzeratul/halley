@@ -46,6 +46,7 @@ void ResourceCollectionBase::reload(const String& assetId)
 		try {
 			std::shared_ptr<Resource> newAsset = loadAsset(assetId, ResourceLoadPriority::High);
 			newAsset->setAssetId(assetId);
+			newAsset->onLoaded(parent);
 			resWrap.res->reloadResource(std::move(*newAsset));
 		} catch (std::exception& e) {
 			Logger::logError("Error while reloading " + assetId + ": " + e.what());
@@ -102,6 +103,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& assetId, R
 	// Store in cache
 	newRes->setAssetId(assetId);
 	resources.emplace(assetId, Wrapper(newRes, 0));
+	newRes->onLoaded(parent);
 
 	return newRes;
 }

@@ -37,15 +37,17 @@ namespace Halley
 		};
 
 		Font(String name, String imageName, float ascender, float height, float sizePt);
-		Font(String name, String imageName, float ascender, float height, float sizePt, float distanceFieldSmoothRadius);
+		Font(String name, String imageName, float ascender, float height, float sizePt, float distanceFieldSmoothRadius, std::vector<String> fallback);
 
 		explicit Font(ResourceLoader& loader);
 
 		static std::unique_ptr<Font> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Font; }
 		void reload(Resource&& resource) override;
+		void onLoaded(Resources& resources) override;
 
 		const Glyph& getGlyph(int code) const;
+		const Font& getFontForGlyph(int code) const;
 		float getLineHeightAtSize(float size) const;
 		float getAscenderDistance() const;
 		float getHeight() const;
@@ -69,6 +71,8 @@ namespace Halley
 		float sizePt;
 		float smoothRadius;
 		bool distanceField;
+		std::vector<std::shared_ptr<const Font>> fallbackFont;
+		std::vector<String> fallback;
 
 		std::shared_ptr<Material> material;
 		FlatMap<int, Glyph> glyphs;

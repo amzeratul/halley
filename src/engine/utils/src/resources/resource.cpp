@@ -25,6 +25,10 @@ const String& Resource::getAssetId() const
 	return assetId;
 }
 
+void Resource::onLoaded(Resources& resources)
+{
+}
+
 int Resource::getAssetVersion() const
 {
 	return assetVersion;

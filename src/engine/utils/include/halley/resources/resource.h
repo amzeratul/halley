@@ -71,6 +71,7 @@ namespace Halley
 	};
 
 	class ResourceObserver;
+	class Resources;
 
 	class Resource
 	{
@@ -81,6 +82,7 @@ namespace Halley
 		const Metadata& getMeta() const;
 		void setAssetId(const String& name);
 		const String& getAssetId() const;
+		virtual void onLoaded(Resources& resources);
 		
 		int getAssetVersion() const;
 		void reloadResource(Resource&& resource);

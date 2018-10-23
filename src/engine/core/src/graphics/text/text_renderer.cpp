@@ -199,8 +199,6 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 	}
 
 	if (glyphsDirty || positionDirty) {
-		std::shared_ptr<Material> materialToUse = material ? material : font->getMaterial();
-
 		float scale = getScale();
 		Vector2f p = (position + Vector2f(0, font->getAscenderDistance() * scale)).floor();
 		if (offset != Vector2f(0, 0)) {
@@ -255,7 +253,10 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 			if (c == '\n') {
 				flush();
 			} else {
-				auto& glyph = font->getGlyph(c);
+				auto& fontForGlyph = font->getFontForGlyph(c);
+				auto& glyph = fontForGlyph.getGlyph(c);
+
+				std::shared_ptr<Material> materialToUse = material ? material : fontForGlyph.getMaterial();
 
 				sprites[spritesInserted++] = Sprite()
 					.setMaterial(materialToUse)
