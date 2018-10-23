@@ -5,7 +5,6 @@
 using namespace Halley;
 
 I18N::I18N()
-	: missingStr("#MISSING#")
 {
 }
 
@@ -77,7 +76,7 @@ LocalisedString I18N::get(const String& key) const
 		}
 	}
 
-	return missingStr;
+	return LocalisedString(*this, key, "#MISSING#");
 }
 
 LocalisedString I18N::getPreProcessedUserString(const String& string) const

@@ -79,8 +79,6 @@ namespace Halley {
 		std::map<String, ConfigObserver> observers;
 		int version = 0;
 
-		LocalisedString missingStr;
-
 		void loadLocalisation(const ConfigNode& node);
 	};
 }
