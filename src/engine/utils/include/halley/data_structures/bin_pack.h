@@ -20,9 +20,9 @@ namespace Halley
 			int bMaj = std::max(other.size.x, other.size.y);
 			int bMin = std::min(other.size.x, other.size.y);
 			if (aMaj != bMaj) {
-				return aMaj > bMaj;
+				return aMaj < bMaj;
 			}
-			return aMin > bMin;
+			return aMin < bMin;
 		}
 
 		Vector2i size;

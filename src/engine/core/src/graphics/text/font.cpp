@@ -136,7 +136,7 @@ void Font::addGlyph(const Glyph& glyph)
 	glyphs[glyph.charcode] = glyph;
 }
 
-std::shared_ptr<const Material> Font::getMaterial() const
+std::shared_ptr<Material> Font::getMaterial() const
 {
 	return material;
 }

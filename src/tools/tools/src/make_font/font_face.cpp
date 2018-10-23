@@ -73,12 +73,20 @@ float FontFace::getSize() const
 
 float FontFace::getHeight() const
 {
-	return pimpl->face->height * size / pimpl->face->units_per_EM;
+	if (pimpl->face->height > 0 && pimpl->face->units_per_EM > 0) {
+		return pimpl->face->height * size / pimpl->face->units_per_EM;
+	} else {
+		return pimpl->face->size->metrics.height / 64.0f;
+	}
 }
 
 float FontFace::getAscender() const
 {
-	return pimpl->face->ascender * size / pimpl->face->units_per_EM;
+	if (pimpl->face->units_per_EM > 0) {
+		return pimpl->face->ascender * size / pimpl->face->units_per_EM;
+	} else {
+		return pimpl->face->size->metrics.ascender / 64.0f;
+	}
 }
 
 Vector<int> FontFace::getCharCodes() const

@@ -35,8 +35,11 @@ TextRenderer& TextRenderer::setFont(std::shared_ptr<const Font> v)
 {
 	if (font != v) {
 		font = v;
-		material = font->getMaterial()->clone();
-		materialDirty = true;
+
+		if (font->isDistanceField()) {
+			material = font->getMaterial()->clone();
+			materialDirty = true;
+		}
 	}
 
 	return *this;
@@ -182,7 +185,7 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 {
 	Expects(font);
 
-	if (font->isDistanceField() && materialDirty) {
+	if (material && materialDirty) {
 		float smooth = clamp(smoothness / font->getSmoothRadius(), 0.001f, 0.999f);
 		float outlineSize = clamp(outline / font->getSmoothRadius(), 0.0f, 0.995f);
 		material
@@ -196,7 +199,9 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 	}
 
 	if (glyphsDirty || positionDirty) {
-		float scale = size / font->getSizePoints();
+		std::shared_ptr<Material> materialToUse = material ? material : font->getMaterial();
+
+		float scale = getScale();
 		Vector2f p = (position + Vector2f(0, font->getAscenderDistance() * scale)).floor();
 		if (offset != Vector2f(0, 0)) {
 			p -= (getExtents() * offset).floor();
@@ -253,7 +258,7 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 				auto& glyph = font->getGlyph(c);
 
 				sprites[spritesInserted++] = Sprite()
-					.setMaterial(material)
+					.setMaterial(materialToUse)
 					.setSize(glyph.size)
 					.setTexRect(glyph.area)
 					.setColour(curCol)
@@ -308,7 +313,7 @@ Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 {
 	Vector2f p;
 	float w = 0;
-	const float scale = size / font->getSizePoints();
+	const float scale = getScale();
 	const float lineH = getLineHeight();
 
 	for (auto& c : str) {
@@ -335,7 +340,7 @@ Vector2f TextRenderer::getCharacterPosition(size_t character) const
 Vector2f TextRenderer::getCharacterPosition(size_t character, const StringUTF32& str) const
 {
 	Vector2f p;
-	const float scale = size / font->getSizePoints();
+	const float scale = getScale();
 	const float lineH = getLineHeight();
 
 	for (size_t i = 0; i < character && i < str.size(); ++i) {
@@ -360,7 +365,7 @@ size_t TextRenderer::getCharacterAt(const Vector2f& position) const
 
 size_t TextRenderer::getCharacterAt(const Vector2f& position, const StringUTF32& str) const
 {
-	const float scale = size / font->getSizePoints();
+	const float scale = getScale();
 	const float lineH = getLineHeight();
 	const int targetLine = int(floor(position.y / lineH));
 	Vector2f p;
@@ -417,7 +422,7 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth) const
 {
 	StringUTF32 result;
 
-	const float scale = size / font->getSizePoints();
+	const float scale = getScale();
 
 	gsl::span<const char32_t> src = str;
 
@@ -439,9 +444,13 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth) const
 
 			if (c == '\n' || curWidth > maxWidth || isLastChar) {
 				int advanceAdjust = -1;
-				if (!lastValid || isLastChar) {
+				if (!lastValid) {
 					// lastValid won't be set if there were no suitable breaking spaces
-					lastValid = src.subspan(0, i + 1);
+					if (isLastChar) {
+						lastValid = src.subspan(0, i + 1);
+					} else {
+						lastValid = src.subspan(0, i);
+					}
 					advanceAdjust = 0;
 				}
 				const int advance = int(lastValid.get().size());
@@ -491,11 +500,15 @@ Maybe<Rect4f> TextRenderer::getClip() const
 
 float TextRenderer::getLineHeight() const
 {
-	float scale = size / font->getSizePoints();
-	return roundf(font->getHeight() * scale + lineSpacing);
+	return roundf(font->getHeight() * getScale() + lineSpacing);
 }
 
 float TextRenderer::getAlignment() const
 {
 	return align;
+}
+
+float TextRenderer::getScale() const
+{
+	return size / font->getSizePoints();
 }

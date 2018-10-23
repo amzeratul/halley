@@ -56,7 +56,7 @@ namespace Halley
 
 		void addGlyph(const Glyph& glyph);
 
-		std::shared_ptr<const Material> getMaterial() const;
+		std::shared_ptr<Material> getMaterial() const;
 
 		void serialize(Serializer& deserializer) const;
 		void deserialize(Deserializer& deserializer);
