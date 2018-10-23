@@ -43,6 +43,7 @@ namespace Halley
 		void drawSliced(Painter& painter) const;
 		void drawSliced(Painter& painter, Vector4s slices) const;
 		static void draw(const Sprite* sprites, size_t n, Painter& painter);
+		static void drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painter);
 
 		Sprite& setMaterial(Resources& resources, String materialName = "");
 		Sprite& setMaterial(std::shared_ptr<Material> m);

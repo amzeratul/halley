@@ -95,6 +95,25 @@ void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
 	painter.drawSprites(material, n, vertexData);
 }
 
+void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painter)
+{
+	if (n == 0) {
+		return;
+	}
+
+	size_t start = 0;
+	auto* lastMaterial = sprites[0].material.get();
+	for (size_t i = 0; i < n; ++i) {
+		auto* material = sprites[i].material.get();
+		if (material != lastMaterial) {
+			draw(sprites + start, i - start, painter);
+			start = i;
+			lastMaterial = material;
+		}
+	}
+	draw(sprites + start, n - start, painter);
+}
+
 Rect4f Sprite::getAABB() const
 {
 	Vector2f pos = vertexAttrib.pos;

@@ -286,7 +286,7 @@ void TextRenderer::draw(Painter& painter) const
 	if (clip) {
 		painter.setRelativeClip(clip.get() + position);
 	}
-	Sprite::draw(spritesCache.data(), spritesCache.size(), painter);
+	Sprite::drawMixedMaterials(spritesCache.data(), spritesCache.size(), painter);
 	if (clip) {
 		painter.setClip();
 	}
