@@ -37,7 +37,6 @@ TextRenderer& TextRenderer::setFont(std::shared_ptr<const Font> v)
 		font = v;
 
 		if (font->isDistanceField()) {
-			material = font->getMaterial()->clone();
 			materialDirty = true;
 		}
 	}
@@ -185,16 +184,9 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 {
 	Expects(font);
 
-	if (material && materialDirty) {
-		float smooth = clamp(smoothness / font->getSmoothRadius(), 0.001f, 0.999f);
-		float outlineSize = clamp(outline / font->getSmoothRadius(), 0.0f, 0.995f);
-		material
-			->set("u_smoothness", smooth)
-			.set("u_outline", outlineSize)
-			.set("u_outlineColour", outlineColour);
-
-		material->setPassEnabled(0, outline > 0.0001f);
-
+	const bool hasMaterialOverride = font->isDistanceField();
+	if (hasMaterialOverride && materialDirty) {
+		updateMaterials();
 		materialDirty = false;
 	}
 
@@ -256,7 +248,7 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 				auto& fontForGlyph = font->getFontForGlyph(c);
 				auto& glyph = fontForGlyph.getGlyph(c);
 
-				std::shared_ptr<Material> materialToUse = material ? material : fontForGlyph.getMaterial();
+				std::shared_ptr<Material> materialToUse = hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial();
 
 				sprites[spritesInserted++] = Sprite()
 					.setMaterial(materialToUse)
@@ -444,7 +436,7 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth) const
 			curWidth += w;
 
 			if (c == '\n' || curWidth > maxWidth || isLastChar) {
-				int advanceAdjust = -1;
+				int advanceAdjust = isLastChar ? 0 : -1;
 				if (!lastValid) {
 					// lastValid won't be set if there were no suitable breaking spaces
 					if (isLastChar) {
@@ -512,4 +504,42 @@ float TextRenderer::getAlignment() const
 float TextRenderer::getScale() const
 {
 	return size / font->getSizePoints();
+}
+
+std::shared_ptr<Material> TextRenderer::getMaterial(const Font& font) const
+{
+	const auto iter = materials.find(&font);
+	if (iter == materials.end()) {
+		auto material = font.getMaterial()->clone();
+		materials[&font] = material;
+		updateMaterial(*material, font);
+		return material;
+	} else {
+		return iter->second;
+	}
+}
+
+void TextRenderer::updateMaterial(Material& material, const Font& font) const
+{
+	float smooth = clamp(smoothness / font.getSmoothRadius(), 0.001f, 0.999f);
+	float outlineSize = clamp(outline / font.getSmoothRadius(), 0.0f, 0.995f);
+	material
+		.set("u_smoothness", smooth)
+		.set("u_outline", outlineSize)
+		.set("u_outlineColour", outlineColour);
+
+	material.setPassEnabled(0, outline > 0.0001f);
+}
+
+void TextRenderer::updateMaterialForFont(const Font& font) const
+{
+	auto material = getMaterial(font);
+	updateMaterial(*material, font);
+}
+
+void TextRenderer::updateMaterials() const
+{
+	for (auto& m: materials) {
+		updateMaterial(*m.second, *m.first);
+	}
 }

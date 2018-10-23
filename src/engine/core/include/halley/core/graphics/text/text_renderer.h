@@ -6,6 +6,7 @@
 #include "halley/maths/rect.h"
 #include "halley/data_structures/maybe.h"
 #include <gsl/span>
+#include <map>
 
 namespace Halley
 {
@@ -73,7 +74,7 @@ namespace Halley
 
 	private:
 		std::shared_ptr<const Font> font;
-		std::shared_ptr<Material> material;
+		mutable std::map<const Font*, std::shared_ptr<Material>> materials;
 		StringUTF32 text;
 		SpriteFilter spriteFilter;
 		
@@ -96,5 +97,10 @@ namespace Halley
 		mutable bool materialDirty = true;
 		mutable bool glyphsDirty = true;
 		mutable bool positionDirty = true;
+
+		std::shared_ptr<Material> getMaterial(const Font& font) const;
+		void updateMaterial(Material& material, const Font& font) const;
+		void updateMaterialForFont(const Font& font) const;
+		void updateMaterials() const;
 	};
 }
