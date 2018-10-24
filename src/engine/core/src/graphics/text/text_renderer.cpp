@@ -247,6 +247,7 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 			} else {
 				auto& fontForGlyph = font->getFontForGlyph(c);
 				auto& glyph = fontForGlyph.getGlyph(c);
+				const auto fontAdjustment = (Vector2f(0, fontForGlyph.getAscenderDistance() - font->getAscenderDistance()) * scale).floor();
 
 				std::shared_ptr<Material> materialToUse = hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial();
 
@@ -257,7 +258,7 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 					.setColour(curCol)
 					.setPivot(glyph.horizontalBearing / glyph.size * Vector2f(-1, 1))
 					.setScale(scale)
-					.setPos(p + lineOffset + pixelOffset);
+					.setPos(p + lineOffset + pixelOffset + fontAdjustment);
 
 				lineOffset.x += glyph.advance.x * scale;
 
