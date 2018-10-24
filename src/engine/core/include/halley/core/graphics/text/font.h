@@ -63,6 +63,8 @@ namespace Halley
 		void serialize(Serializer& deserializer) const;
 		void deserialize(Deserializer& deserializer);
 
+		void printGlyphs() const;
+
 	private:
 		String name;
 		String imageName;

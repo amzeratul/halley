@@ -191,4 +191,35 @@ void Font::deserialize(Deserializer& s)
 	for (auto& g: glyphs) {
 		g.second.charcode = g.first;
 	}
+
+	//printGlyphs();
+}
+
+void Font::printGlyphs() const
+{
+	Maybe<Range<int>> curRange;
+	std::vector<Range<int>> ranges;
+	for (auto& g: glyphs) {
+		int c = g.first;
+		if (curRange && curRange->end == c - 1) {
+			curRange->end = c;
+		} else {
+			if (curRange) {
+				ranges.push_back(*curRange);
+			}
+			curRange = Range<int>(c, c);
+		}
+	}
+	if (curRange) {
+		ranges.push_back(*curRange);
+	}
+	std::cout << name << ": [";
+	for (auto& r: ranges) {
+		if (r.start != r.end) {
+			std::cout << "[" << r.start << ", " << r.end << "], ";
+		} else {
+			std::cout << "[" << r.start << "], ";
+		}
+	}
+	std::cout << "]\n";
 }
