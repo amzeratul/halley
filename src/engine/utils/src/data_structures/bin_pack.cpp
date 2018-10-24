@@ -51,7 +51,7 @@ boost::optional<Vector<BinPackResult>> BinPack::fastPack(const std::vector<BinPa
 		auto& next = queue.top();
 		auto nextSize = next.size;
 		bool rotated = false;
-		if (nextSize.x > nextSize.y) {
+		if (next.canRotate && nextSize.x > nextSize.y) {
 			rotated = true;
 			std::swap(nextSize.x, nextSize.y);
 		}

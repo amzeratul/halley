@@ -8,25 +8,34 @@ namespace Halley
 	class BinPackEntry
 	{
 	public:
-		BinPackEntry(Vector2i size, void* data = nullptr)
+		BinPackEntry(Vector2i size, void* data = nullptr, bool canRotate = false)
 			: size(size)
 			, data(data)
+			, canRotate(canRotate)
 		{}
 
 		bool operator<(const BinPackEntry& other) const
 		{
-			int aMaj = std::max(size.x, size.y);
-			int aMin = std::min(size.x, size.y);
-			int bMaj = std::max(other.size.x, other.size.y);
-			int bMin = std::min(other.size.x, other.size.y);
-			if (aMaj != bMaj) {
-				return aMaj < bMaj;
+			if (canRotate) {
+				int aMaj = std::max(size.x, size.y);
+				int aMin = std::min(size.x, size.y);
+				int bMaj = std::max(other.size.x, other.size.y);
+				int bMin = std::min(other.size.x, other.size.y);
+				if (aMaj != bMaj) {
+					return aMaj < bMaj;
+				}
+				return aMin < bMin;
+			} else {
+				if (size.y != other.size.y) {
+					return size.y < other.size.y;
+				}
+				return size.x < other.size.x;
 			}
-			return aMin < bMin;
 		}
 
 		Vector2i size;
 		void* data;
+		bool canRotate;
 	};
 
 	class BinPackResult
