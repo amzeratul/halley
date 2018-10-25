@@ -99,6 +99,11 @@ uint64_t Random::getInt(uint64_t min, uint64_t max)
 	return base % range + min;
 }
 
+size_t Random::getSizeT(size_t min, size_t max)
+{
+	return size_t(getInt(uint64_t(min), uint64_t(max)));
+}
+
 float Random::getFloat(float min, float max)
 {
 	if (min > max) {
