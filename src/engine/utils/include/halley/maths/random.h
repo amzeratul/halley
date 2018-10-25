@@ -38,9 +38,9 @@ namespace Halley {
 		~Random();
 
 		Random(const Random& other) = delete;
-		Random(Random&& other) = default;
+		Random(Random&& other);
 		Random& operator=(const Random& other) = delete;
-		Random& operator=(Random&& other) = default;
+		Random& operator=(Random&& other);
 
 		int32_t getInt(int32_t min, int32_t max); // [min, max]
 		uint32_t getInt(uint32_t min, uint32_t max); // [min, max]

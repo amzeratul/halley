@@ -42,10 +42,11 @@ Random::Random(gsl::span<const gsl::byte> data)
 	setSeed(data);
 }
 
-Random::~Random()
-{
+Random::~Random() = default;
 
-}
+Random::Random(Random&& other) = default;
+
+Random& Random::operator=(Random&& other) = default;
 
 int32_t Random::getInt(int32_t min, int32_t max)
 {
