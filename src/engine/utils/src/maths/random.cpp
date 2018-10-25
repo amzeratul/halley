@@ -107,22 +107,12 @@ size_t Random::getSizeT(size_t min, size_t max)
 
 float Random::getFloat(float min, float max)
 {
-	if (min > max) {
-		std::swap(min, max);
-	} else if (min == max) {
-		return min;
-	}
-	return std::fmod(getRawFloat(), max - min) + min;
+	return getRawFloat() * (max - min) + min;
 }
 
 double Random::getDouble(double min, double max)
 {
-	if (min > max) {
-		std::swap(min, max);
-	} else if (min == max) {
-		return min;
-	}
-	return std::fmod(getRawDouble(), max - min) + min;
+	return getRawDouble() * (max - min) + min;
 }
 
 Random& Random::getGlobal()
