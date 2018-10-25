@@ -83,5 +83,7 @@ namespace Halley
 
 		virtual bool canProvideCloudSave() const { return false; }
 		virtual std::shared_ptr<ISaveData> getCloudSaveContainer(const String& containerName = "") { return {}; }
+
+		virtual bool areParentalLimitsEnabled(bool showUI) const { return false; }
 	};
 }
