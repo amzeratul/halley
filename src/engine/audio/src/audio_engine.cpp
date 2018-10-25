@@ -16,7 +16,7 @@ AudioEngine::AudioEngine()
 	, running(true)
 	, needsBuffer(true)
 {
-	rng.setSeed(Random::getGlobal().getInt<long>(std::numeric_limits<long>::min(), std::numeric_limits<long>::max()));
+	rng.setSeed(Random::getGlobal().getRawInt());
 }
 
 AudioEngine::~AudioEngine()

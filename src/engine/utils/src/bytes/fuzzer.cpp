@@ -7,7 +7,7 @@ Fuzzer::Fuzzer()
 {
 	std::vector<gsl::byte> initVec(128);
 	Random::getGlobal().getBytes(initVec);
-	rng.setSeed(reinterpret_cast<char*>(initVec.data()), initVec.size());
+	rng.setSeed(gsl::span<gsl::byte>(initVec.data(), initVec.size()));
 
 	setupMutators();
 }
@@ -75,7 +75,7 @@ void Fuzzer::setupMutators()
 	mutators.emplace_back([=] (Bytes& data)
 	{
 		// Insert random
-		data.insert(data.begin() + rng.getRandomIndex(data), static_cast<unsigned char>(rng.getInt<int>(0, 0xFF)));
+		data.insert(data.begin() + rng.getRandomIndex(data), static_cast<unsigned char>(rng.getInt(0, 0xFF)));
 	});
 }
 

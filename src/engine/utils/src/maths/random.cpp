@@ -22,20 +22,101 @@
 #include "halley/maths/random.h"
 #include <ctime>
 #include <cstdlib>
+#include "mt199937ar.h"
 using namespace Halley;
 
 Random::Random()
+	: generator(std::make_unique<MT199937AR>())
 {
 }
 
-Random::Random(long seed)
-	: generator(int(seed))
+Random::Random(uint32_t seed)
+	: generator(std::make_unique<MT199937AR>())
 {
+	setSeed(seed);
 }
 
-Random::Random(char* bytes, size_t nBytes)
+Random::Random(gsl::span<const gsl::byte> data)
+	: generator(std::make_unique<MT199937AR>())
 {
-	setSeed(bytes, nBytes);
+	setSeed(data);
+}
+
+Random::~Random()
+{
+
+}
+
+int32_t Random::getInt(int32_t min, int32_t max)
+{
+	if (min > max) {
+		std::swap(min, max);
+	}
+	const uint32_t base = getRawInt();
+	const uint32_t range = uint32_t(max - min + 1);
+	if (range == 0) { // If min and max correspond to the whole range represented, this blows up
+		return int32_t(base);
+	}
+	return int32_t(base % range) + min;
+}
+
+uint32_t Random::getInt(uint32_t min, uint32_t max)
+{
+	if (min > max) {
+		std::swap(min, max);
+	}
+	const uint32_t base = getRawInt();
+	const uint32_t range = max - min + 1;
+	if (range == 0) { // If min and max correspond to the whole range represented, this blows up
+		return base;
+	}
+	return base % range + min;
+}
+
+int64_t Random::getInt(int64_t min, int64_t max)
+{
+	if (min > max) {
+		std::swap(min, max);
+	}
+	const int64_t base = int64_t((uint64_t(getRawInt()) << 32ull) | uint64_t(getRawInt()));
+	const uint64_t range = uint64_t(max - min + 1);
+	if (range == 0) { // If min and max correspond to the whole range represented, this blows up
+		return int64_t(base);
+	}
+	return int64_t(base % range) + min;
+}
+
+uint64_t Random::getInt(uint64_t min, uint64_t max)
+{
+	if (min > max) {
+		std::swap(min, max);
+	}
+	const uint64_t base = (uint64_t(getRawInt()) << 32ull) | uint64_t(getRawInt());
+	const uint64_t range = max - min + 1;
+	if (range == 0) { // If min and max correspond to the whole range represented, this blows up
+		return base;
+	}
+	return base % range + min;
+}
+
+float Random::getFloat(float min, float max)
+{
+	if (min > max) {
+		std::swap(min, max);
+	} else if (min == max) {
+		return min;
+	}
+	return std::fmod(getRawFloat(), max - min) + min;
+}
+
+double Random::getDouble(double min, double max)
+{
+	if (min > max) {
+		std::swap(min, max);
+	} else if (min == max) {
+		return min;
+	}
+	return std::fmod(getRawDouble(), max - min) + min;
 }
 
 Random& Random::getGlobal()
@@ -46,7 +127,7 @@ Random& Random::getGlobal()
 		int curClock = int(clock());
 		int salt = 0x3F29AB51;
 		int seed[] = { int(curTime & 0xFFFFFFFF), int(static_cast<long long>(curTime) >> 32), curClock, salt };
-		global = new Random(reinterpret_cast<char*>(seed), sizeof(seed));
+		global = new Random(gsl::as_bytes(gsl::span<char>(reinterpret_cast<char*>(seed), sizeof(seed))));
 	}
 	return *global;
 }
@@ -54,27 +135,44 @@ Random& Random::getGlobal()
 void Random::getBytes(gsl::span<gsl::byte> dst)
 {
 	int step = 0;
-	uint_fast32_t number = generator();
+	uint32_t number = getRawInt();
 
 	for (int pos = 0; pos < dst.size_bytes(); ++pos) {
-		dst[pos] = gsl::byte(uint_fast8_t(number & 0xFF));
+		dst[pos] = gsl::byte(uint8_t(number & 0xFF));
 
 		number >>= 8;
 		++step;
 		if (step == 4) {
-			number = generator();
+			number = getRawInt();
 			step = 0;
 		}
 	}
 }
 
-void Random::setSeed(long seed)
+void Random::setSeed(uint32_t seed)
 {
-	generator.seed(static_cast<int>(seed));
+	 generator->init_genrand(seed);
 }
 
-void Random::setSeed(char* bytes, size_t nBytes)
+void Random::setSeed(gsl::span<const gsl::byte> data)
 {
-	std::seed_seq seq(bytes, bytes+nBytes);
-	generator.seed(seq);
+	std::vector<uint32_t> initData(alignUp(size_t(data.size_bytes()), sizeof(uint32_t)) / sizeof(uint32_t), 0);
+	memcpy(initData.data(), data.data(), data.size_bytes());
+	generator->init_by_array(initData.data(), initData.size());
 }
+
+uint32_t Random::getRawInt()
+{
+	return generator->genrand_int32();
+}
+
+float Random::getRawFloat()
+{
+	return float(generator->genrand_real2());
+}
+
+double Random::getRawDouble()
+{
+	return generator->genrand_res53();
+}
+

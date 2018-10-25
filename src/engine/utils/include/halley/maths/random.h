@@ -21,46 +21,33 @@
 
 #pragma once
 
-#include <random>
 #include <halley/utils/utils.h>
 #include <gsl/span>
+#include <cstdint>
 
 namespace Halley {
-	typedef std::mt19937 RandomGenType;
+	class MT199937AR;
 
 	class Random {
 	public:
 		static Random& getGlobal();
 
 		Random();
-		Random(long seed);
-		Random(char* bytes, size_t nBytes);
+		Random(uint32_t seed);
+		Random(gsl::span<const gsl::byte> data);
+		~Random();
 
-		template <typename T> T get(T max) { return get(T(0), max); }
-		template <typename T> T get(T min, T max);
-
-		template <typename T>
-		T getInt(T min, T max)
-		{
-			if (min > max) {
-				std::swap(min, max);
-			}
-			std::uniform_int_distribution<T> dist(min, max);
-			return dist(generator);
-		}
-
-		template <typename T>
-		T getFloat(T min, T max)
-		{
-			if (min > max) std::swap(min, max);
-			std::uniform_real_distribution<T> dist(min, max);
-			return dist(generator);
-		}
+		int32_t getInt(int32_t min, int32_t max); // [min, max]
+		uint32_t getInt(uint32_t min, uint32_t max); // [min, max]
+		int64_t getInt(int64_t min, int64_t max); // [min, max]
+		uint64_t getInt(uint64_t min, uint64_t max); // [min, max]
+		float getFloat(float min, float max); // [min, max)
+		double getDouble(double min, double max); // [min, max)
 
 		template <typename T>
 		size_t getRandomIndex(const T& vec)
 		{
-			return getInt<size_t>(0, vec.size() - 1);
+			return getInt(size_t(0), size_t(vec.size() - 1));
 		}
 
 		template <typename T>
@@ -70,33 +57,15 @@ namespace Halley {
 		}
 
 		void getBytes(gsl::span<gsl::byte> dst);
-		void setSeed(long seed);
-		void setSeed(char* bytes, size_t nBytes);
+		void setSeed(uint32_t seed);
+		void setSeed(gsl::span<const gsl::byte> data);
+
+		uint32_t getRawInt();
+		float getRawFloat();
+		double getRawDouble();
 
 	private:
-		RandomGenType generator;
+		std::unique_ptr<MT199937AR> generator;
 	};
-
-
-	template <typename T>
-	struct _getHack {
-		static T get(Random* rng, T min, T max) { return rng->getInt(min, max); }
-	};
-
-	template <>
-	struct _getHack<float> {
-		static float get(Random *rng, float min, float max) { return rng->getFloat(min, max); }
-	};
-
-	template <>
-	struct _getHack<double> {
-		static double get(Random *rng, double min, double max) { return rng->getFloat(min, max); }
-	};
-
-	template <typename T>
-	T Random::get(T min, T max)
-	{
-		return _getHack<T>::get(this, min, max);
-	}
 
 }
