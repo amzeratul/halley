@@ -124,6 +124,22 @@ void MFMoviePlayer::init()
 						nativeType->GetUINT64(MF_MT_PIXEL_ASPECT_RATIO, &aspectRatioRaw);
 						float par = float(aspectRatioRaw >> 32) / float(aspectRatioRaw & 0xFFFFFFFFull);
 
+						uint32_t stride;
+						hr = nativeType->GetUINT32(MF_MT_DEFAULT_STRIDE, &stride);
+						if (SUCCEEDED(hr)) {
+							minStride = int(stride);
+						} else {
+							GUID subType = GUID_NULL;
+							hr = nativeType->GetGUID(MF_MT_SUBTYPE, &subType);
+							if (SUCCEEDED(hr)) {
+								LONG tmp;
+								hr = MFGetStrideForBitmapInfoHeader(subType.Data1, videoSize.x, &tmp);
+								if (SUCCEEDED(hr)) {
+									minStride = int(tmp);
+								}
+							}
+						}
+
 						setVideoSize(videoSize);
 						curStream.type = MoviePlayerStreamType::Video;
 						subType = MFVideoFormat_NV12; // NV12 is the only format supported by DX accelerated decoding
@@ -239,18 +255,26 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 				surface->Release();
 				*/
 				
-				IMF2DBuffer* buffer2d;
+				IMF2DBuffer* buffer2d = nullptr;
 				hr = buffer->QueryInterface(__uuidof(IMF2DBuffer), reinterpret_cast<void**>(&buffer2d));
-				if (!SUCCEEDED(hr)) {
-					throw Exception("Unable to read video frame", HalleyExceptions::MoviePlugin);
+				if (SUCCEEDED(hr)) {
+					BYTE* src;
+					LONG pitch;
+					buffer2d->Lock2D(&src, &pitch);
+					readVideoSample(sampleTime, reinterpret_cast<gsl::byte*>(src), pitch);
+					buffer2d->Unlock2D();
+					buffer2d->Release();
+				} else if (hr == E_NOINTERFACE) {
+					BYTE* src;
+					DWORD maxLen;
+					DWORD curLen;
+					buffer->Lock(&src, &maxLen, &curLen);
+					readVideoSample(sampleTime, reinterpret_cast<gsl::byte*>(src), minStride);
+					buffer->Unlock();
+					buffer->Release();
+				} else {
+					throw Exception("Error while querying for 2D buffer: " + toString(hr), HalleyExceptions::MoviePlugin);
 				}
-				
-				BYTE* src;
-				LONG pitch;
-				buffer2d->Lock2D(&src, &pitch);
-				readVideoSample(sampleTime, reinterpret_cast<gsl::byte*>(src), pitch);
-				buffer2d->Unlock2D();
-				buffer2d->Release();
 			}
 
 			if (curStream.type == MoviePlayerStreamType::Audio) {
@@ -303,70 +327,3 @@ void MFMoviePlayer::readAudioSample(Time time, gsl::span<const gsl::byte> data)
 
 	onAudioFrameAvailable(time, samples);
 }
-
-/*
-MoviePlayerSampleReceiver::MoviePlayerSampleReceiver(MFMoviePlayer& player)
-	: player(player)
-{
-}
-
-
-HRESULT MoviePlayerSampleReceiver::OnReadSample(HRESULT hr, DWORD streamIndex, DWORD streamFlags, LONGLONG timestamp, IMFSample* sample)
-{
-	return player.onReadSample(hr, streamIndex, streamFlags, timestamp, sample);
-}
-
-HRESULT MoviePlayerSampleReceiver::QueryInterface(const IID& riid, void** ppvObject)
-{
-	if (!ppvObject) {
-		return E_INVALIDARG;
-	}
-	*ppvObject = nullptr;
-
-	if (riid == __uuidof(IMFSourceReaderCallback)) {
-		AddRef();
-		*ppvObject = static_cast<IMFSourceReaderCallback*>(this);
-		return NOERROR;
-	} else if (riid == __uuidof(IMFSourceReaderCallback2)) {
-		AddRef();
-		*ppvObject = static_cast<IMFSourceReaderCallback2*>(this);
-		return NOERROR;
-	} else {
-		return E_NOINTERFACE;
-	}
-}
-
-ULONG MoviePlayerSampleReceiver::AddRef()
-{
-	return InterlockedIncrement(&refCount);
-}
-
-ULONG MoviePlayerSampleReceiver::Release()
-{
-	ULONG uCount = InterlockedDecrement(&refCount);
-    if (uCount == 0) {
-		delete this;
-    }
-    return uCount;
-}
-
-HRESULT MoviePlayerSampleReceiver::OnFlush(DWORD dwStreamIndex)
-{
-	return S_OK;
-}
-
-HRESULT MoviePlayerSampleReceiver::OnEvent(DWORD dwStreamIndex, IMFMediaEvent* pEvent)
-{
-	return S_OK;
-}
-
-HRESULT MoviePlayerSampleReceiver::OnTransformChange()
-{
-	return S_OK;
-}
-
-HRESULT MoviePlayerSampleReceiver::OnStreamError(DWORD dwStreamIndex, HRESULT hrStatus)
-{
-	return S_OK;
-}
-*/

@@ -94,6 +94,10 @@ void MoviePlayer::reset()
 
 void MoviePlayer::update(Time t)
 {
+	if (threadRunning && threadAborted) {
+		reset();
+	}
+
 	if (state == MoviePlayerState::Playing) {
 		time += t;
 	}
@@ -185,8 +189,14 @@ void MoviePlayer::startThread()
 {
 	if (!threadRunning) {
 		threadRunning = true;
+		threadAborted = false;
 		workerThread = std::thread([=] () {
-			threadEntry();
+			try {
+				threadEntry();
+			} catch (Exception& e) {
+				Logger::logException(e);
+				threadAborted = true;
+			}
 		});
 	}
 }

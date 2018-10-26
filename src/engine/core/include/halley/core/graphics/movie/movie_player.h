@@ -109,6 +109,7 @@ namespace Halley
 		std::shared_ptr<IAudioHandle> audioHandle;
 
 		std::atomic<bool> threadRunning;
+		std::atomic<bool> threadAborted;
 		std::thread workerThread;
 		mutable std::mutex mutex;
 

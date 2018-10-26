@@ -36,6 +36,7 @@ namespace Halley
 		IMFByteStream* inputByteStream = nullptr;
 		IMFSourceReader *reader = nullptr;
 		IMFSourceReaderCallback* sampleReceiver = nullptr;
+		int minStride;
 
 		void init();
 		void deInit();
@@ -45,25 +46,4 @@ namespace Halley
 		void readVideoSample(Time time, const gsl::byte* data, int stride);
 		void readAudioSample(Time time, gsl::span<const gsl::byte> data);
 	};
-
-	/*
-	class MoviePlayerSampleReceiver final : public IMFSourceReaderCallback2
-	{
-	public:
-		explicit MoviePlayerSampleReceiver(MFMoviePlayer& player);
-
-		HRESULT QueryInterface(const IID& riid, void** ppvObject) override;
-		ULONG AddRef() override;
-		ULONG Release() override;
-		HRESULT OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex, DWORD dwStreamFlags, LONGLONG llTimestamp, IMFSample* pSample) override;
-		HRESULT OnFlush(DWORD dwStreamIndex) override;
-		HRESULT OnEvent(DWORD dwStreamIndex, IMFMediaEvent* pEvent) override;
-		HRESULT OnTransformChange() override;
-		HRESULT OnStreamError(DWORD dwStreamIndex, HRESULT hrStatus) override;
-
-	private:
-		MFMoviePlayer& player;
-		long refCount = 0;
-	};
-	*/
 }
