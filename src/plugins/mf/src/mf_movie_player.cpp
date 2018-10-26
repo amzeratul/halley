@@ -129,6 +129,7 @@ void MFMoviePlayer::init()
 						if (SUCCEEDED(hr)) {
 							minStride = int(stride);
 						} else {
+#ifndef WINDOWS_STORE
 							GUID subType = GUID_NULL;
 							hr = nativeType->GetGUID(MF_MT_SUBTYPE, &subType);
 							if (SUCCEEDED(hr)) {
@@ -138,6 +139,7 @@ void MFMoviePlayer::init()
 									minStride = int(tmp);
 								}
 							}
+#endif
 						}
 
 						setVideoSize(videoSize);
