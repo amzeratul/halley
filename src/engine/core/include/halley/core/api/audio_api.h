@@ -77,11 +77,20 @@ namespace Halley
 	{
 	public:
 		Vector3f position;
+		float referenceDistance = 100.0f;
 
 		AudioListenerData() {}
-		AudioListenerData(Vector3f position)
+		AudioListenerData(Vector3f position, float referenceDistance = 100.0f)
 			: position(position)
+			, referenceDistance(referenceDistance)
 		{}
+	};
+
+	class AudioChannelData
+	{
+	public:
+		float pan;
+		float gain = 1.0f;
 	};
 
 	using AudioCallback = std::function<void()>;
@@ -141,6 +150,7 @@ namespace Halley
 
 		virtual void setMasterVolume(float gain = 1.0f) = 0;
 		virtual void setGroupVolume(const String& groupName, float gain = 1.0f) = 0;
+		virtual void setOutputChannels(std::vector<AudioChannelData> audioChannelData) = 0;
 
 		virtual void setListener(AudioListenerData listener) = 0;
 	};

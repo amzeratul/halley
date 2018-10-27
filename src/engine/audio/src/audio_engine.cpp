@@ -38,6 +38,13 @@ void AudioEngine::setListener(AudioListenerData l)
 	listener = l;
 }
 
+void AudioEngine::setOutputChannels(std::vector<AudioChannelData> channelData)
+{
+	if (channels.size() == channelData.size()) {
+		channels = std::move(channelData);
+	}
+}
+
 void AudioEngine::run()
 {
 	//const size_t bufSize = spec.numChannels * sizeof(AudioConfig::SampleFormat) * spec.bufferSize;

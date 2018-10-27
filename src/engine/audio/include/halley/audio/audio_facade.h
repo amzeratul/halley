@@ -44,6 +44,7 @@ namespace Halley {
 		void setMasterVolume(float volume = 1.0f) override;
 		void setGroupVolume(const String& groupName, float volume = 1.0f) override;
 
+	    void setOutputChannels(std::vector<AudioChannelData> audioChannelData) override;
 	    void setListener(AudioListenerData listener) override;
 
 		void onAudioException(std::exception& e);

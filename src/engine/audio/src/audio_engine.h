@@ -24,6 +24,7 @@ namespace Halley {
 	    void postEvent(size_t id, std::shared_ptr<const AudioEvent> event, const AudioPosition& position);
 	    void play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop);
 	    void setListener(AudioListenerData position);
+		void setOutputChannels(std::vector<AudioChannelData> channelData);
 
 		void addEmitter(size_t id, std::unique_ptr<AudioEmitter>&& src);
 

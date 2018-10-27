@@ -5,12 +5,7 @@
 namespace Halley
 {
 	class AudioListenerData;
-
-	class AudioChannelData
-	{
-	public:
-		float pan; // TODO, do this right
-	};
+	class AudioChannelData;
 
 	class AudioPosition
 	{

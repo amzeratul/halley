@@ -85,7 +85,15 @@ void AudioPosition::setPosition(Vector3f position)
 static float gain2DPan(float srcPan, float dstPan)
 {
 	constexpr float piOverTwo = 3.1415926535897932384626433832795f / 2.0f;
-	return std::sin(std::max(0.0f, 1.0f - 0.5f * std::abs(srcPan - dstPan)) * piOverTwo);
+	const float panDistance = std::abs(srcPan - dstPan);
+	return std::sin(std::max(0.0f, 1.0f - 0.5f * panDistance) * piOverTwo);
+}
+
+static void getPanAndDistance(Vector3f pos, const AudioListenerData& listener, float& pan, float& distance)
+{
+	auto delta = pos - listener.position;
+	pan = clamp(delta.x / listener.referenceDistance, -1.0f, 1.0f);
+	distance = delta.length();
 }
 
 void AudioPosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const
@@ -109,7 +117,7 @@ void AudioPosition::setMixFixed(size_t nSrcChannels, gsl::span<const AudioChanne
 	for (size_t i = 0; i < nSrcChannels; ++i) {
 		float srcPan = i == 0 ? -1.0f : 1.0f;
 		for (size_t j = 0; j < nDstChannels; ++j) {
-			dst[i * nSrcChannels + j] = gain2DPan(srcPan, dstChannels[j].pan) * gain;
+			dst[i * nSrcChannels + j] = gain2DPan(srcPan, dstChannels[j].pan) * gain * dstChannels[i].gain;
 		}
 	}
 }
@@ -118,7 +126,7 @@ void AudioPosition::setMixUI(gsl::span<const AudioChannelData> dstChannels, gsl:
 {
 	const size_t nDstChannels = size_t(dstChannels.size());
 	for (size_t i = 0; i < nDstChannels; ++i) {
-		dst[i] = gain2DPan(pan, dstChannels[i].pan) * gain;
+		dst[i] = gain2DPan(pan, dstChannels[i].pan) * gain * dstChannels[i].gain;
 	}
 }
 
@@ -139,9 +147,8 @@ void AudioPosition::setMixPositional(gsl::span<const AudioChannelData> dstChanne
 
 	if (sources.size() == 1) {
 		// One source, do the simple algorithm
-		auto delta = sources[0].pos - listener.position;
-		resultPan = clamp(delta.x * 0.01f, -1.0f, 1.0f);
-		const float len = delta.length();
+		float len;
+		getPanAndDistance(sources[0].pos, listener, resultPan, len);
 		proximity = 1.0f - clamp((len - sources[0].referenceDistance) / (sources[0].maxDistance - sources[0].referenceDistance), 0.0f, 1.0f);
 	} else {
 		// Multiple sources, average them
@@ -149,9 +156,9 @@ void AudioPosition::setMixPositional(gsl::span<const AudioChannelData> dstChanne
 		float proximityAccum = 0;
 
 		for (auto& s: sources) {
-			auto delta = s.pos - listener.position;
-			const float localPan = clamp(delta.x * 0.01f, -1.0f, 1.0f);
-			const float len = delta.length();
+			float localPan;
+			float len;
+			getPanAndDistance(s.pos, listener, localPan, len);
 			const float localProximity = 1.0f - clamp((len - s.referenceDistance) / (s.maxDistance - s.referenceDistance), 0.0f, 1.0f);
 
 			panAccum += localProximity * localPan;
@@ -165,6 +172,6 @@ void AudioPosition::setMixPositional(gsl::span<const AudioChannelData> dstChanne
 	}
 
 	for (size_t i = 0; i < nDstChannels; ++i) {
-		dst[i] = gain2DPan(resultPan, dstChannels[i].pan) * gain * proximity;
+		dst[i] = gain2DPan(resultPan, dstChannels[i].pan) * gain * proximity * dstChannels[i].gain;
 	}
 }

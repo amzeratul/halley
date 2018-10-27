@@ -202,6 +202,14 @@ void AudioFacade::setGroupVolume(const String& groupName, float volume)
 	});
 }
 
+void AudioFacade::setOutputChannels(std::vector<AudioChannelData> audioChannelData)
+{
+	enqueue([=, audioChannelData = std::move(audioChannelData)] () mutable
+	{
+		engine->setOutputChannels(std::move(audioChannelData));
+	});
+}
+
 void AudioFacade::stopMusic(AudioHandle& handle, float fadeOutTime)
 {
 	if (fadeOutTime > 0.001f) {
