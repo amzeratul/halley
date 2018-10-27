@@ -87,8 +87,17 @@ void TextInputData::insertText(const String& text)
 void TextInputData::insertText(const StringUTF32& t)
 {
 	if (!t.empty()) {
-		const auto newEnd = int(selection.start + t.length());
-		setText(text.substr(0, selection.start) + t + text.substr(selection.end));
+		size_t insertSize = t.length();
+		if (maxLength) {
+			const int curSelLen = selection.end - selection.start;
+			const size_t finalLen = text.size() - size_t(curSelLen) + insertSize;
+			if (int(finalLen) > maxLength.get()) {
+				insertSize = size_t(std::max(int64_t(0), int64_t(insertSize) + int64_t(maxLength.get()) - int64_t(finalLen)));
+			}
+		}
+
+		const auto newEnd = int(selection.start + insertSize);
+		setText(text.substr(0, selection.start) + t.substr(0, insertSize) + text.substr(selection.end));
 		setSelection(newEnd);
 	}
 }
