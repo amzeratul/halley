@@ -1,4 +1,3 @@
-#include <halley/support/logger.h>
 #include "winrt_platform.h"
 #include "xbl_manager.h"
 #ifdef WINDOWS_STORE
@@ -170,6 +169,7 @@ private:
 void WinRTSystem::init()
 {
 	// Setup logging
+	/*
 	using namespace winrt::Windows::Foundation::Diagnostics;
 	LoggingChannel channel(L"halleyLog", LoggingChannelOptions());
 	FileLoggingSession session(L"halleyLog");
@@ -177,10 +177,19 @@ void WinRTSystem::init()
 
 	channel.LogMessage(L"Hello world!");
 	session.CloseAndSaveToFileAsync();
+	*/
+
+	Logger::addSink(*this);
 }
 
 void WinRTSystem::deInit()
 {
+	Logger::removeSink(*this);
+}
+
+void WinRTSystem::log(LoggerLevel level, const String& msg)
+{
+	OutputDebugStringW((msg + "\n").getUTF16().c_str());
 }
 
 Path WinRTSystem::getAssetsPath(const Path& gamePath) const

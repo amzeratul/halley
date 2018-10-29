@@ -37,7 +37,7 @@ namespace Halley {
 
 		Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> getProvider() const;
 		XBLStatus getStatus() const;
-		Future<AuthTokenResult> getAuthToken();
+		Future<AuthTokenResult> getAuthToken(const AuthTokenParameters& parameters);
 
 	private:
 		std::shared_ptr<xbox::services::system::xbox_live_user> xboxUser;

@@ -12,6 +12,6 @@ namespace Halley {
 		std::unique_ptr<HTTPRequest> makeHTTPRequest(const String& method, const String& url) override;
 
 		bool canProvideAuthToken() const override;
-		Future<AuthTokenResult> getAuthToken() override;
+		Future<AuthTokenResult> getAuthToken(const AuthTokenParameters& parameters) override;
 	};
 }

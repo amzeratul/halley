@@ -16,7 +16,7 @@ bool DummyPlatformAPI::canProvideAuthToken() const
 	return false;
 }
 
-Future<AuthTokenResult> DummyPlatformAPI::getAuthToken()
+Future<AuthTokenResult> DummyPlatformAPI::getAuthToken(const AuthTokenParameters& parameters)
 {
 	return {};
 }

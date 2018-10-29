@@ -114,18 +114,21 @@ private:
 	std::map<String, String> data;
 };
 
-Future<AuthTokenResult> XBLManager::getAuthToken()
+Future<AuthTokenResult> XBLManager::getAuthToken(const AuthTokenParameters& parameters)
 {
 	Promise<AuthTokenResult> promise;
 	if (status == XBLStatus::Connected) {
 		auto future = promise.getFuture();
 
-  		xboxLiveContext->user()->get_token_and_signature(L"POST", L"", L"").then([=, promise = std::move(promise)](xbox::services::xbox_live_result<xbox::services::system::token_and_signature_result> result) mutable
+  		xboxLiveContext->user()->get_token_and_signature(parameters.method.getUTF16().c_str(), parameters.url.getUTF16().c_str(), parameters.headers.getUTF16().c_str())
+			.then([=, promise = std::move(promise)](xbox::services::xbox_live_result<xbox::services::system::token_and_signature_result> result) mutable
  		{
 			if (result.err()) {
+				Logger::logError(result.err_message());
 				promise.setValue(AuthTokenRetrievalResult::Error);
 			} else {
 				auto payload = result.payload();
+				auto privileges = String(payload.privileges().c_str());
 				auto gamerTag = String(payload.gamertag().c_str());
 				auto userId = String(payload.xbox_user_id().c_str());
 				auto token = String(payload.token().c_str());
@@ -142,11 +145,27 @@ Future<AuthTokenResult> XBLManager::getAuthToken()
 
 void XBLManager::signIn()
 {
+	xbox::services::system::xbox_live_services_settings::get_singleton_instance()->set_diagnostics_trace_level(xbox::services::xbox_services_diagnostics_trace_level::verbose);
 	status = XBLStatus::Connecting;
 
 	using namespace xbox::services::system;
 	xboxUser = std::make_shared<xbox_live_user>(nullptr);
 	auto dispatcher = to_cx<Platform::Object>(winrt::Windows::UI::Core::CoreWindow::GetForCurrentThread().Dispatcher());
+
+	auto onLoggedIn = [=] () -> winrt::Windows::Foundation::IAsyncAction
+	{
+		xboxLiveContext = std::make_shared<xbox::services::xbox_live_context>(xboxUser);
+
+		xbox_live_user::add_sign_out_completed_handler([this](const sign_out_completed_event_args&)
+		{
+			xboxUser.reset();
+			xboxLiveContext.reset();
+			gameSaveProvider.reset();
+			status = XBLStatus::Disconnected;
+		});
+
+		co_await getConnectedStorage();
+	};
 
 	xboxUser->signin_silently(dispatcher).then([=] (xbox::services::xbox_live_result<sign_in_result> result) -> winrt::Windows::Foundation::IAsyncAction
 	{
@@ -154,42 +173,32 @@ void XBLManager::signIn()
 			Logger::logError(String("Error signing in to Xbox Live: ") + result.err_message());
 			status = XBLStatus::Disconnected;
 		} else {
-			bool loggedIn = false;
-			switch (result.payload().status()) {
+			auto resultStatus = result.payload().status();
+			switch (resultStatus) {
 			case success:
-				loggedIn = true;
+				co_await onLoggedIn();
 				break;
 
 			case user_interaction_required:
-				xboxUser->signin(dispatcher).then([&](xbox::services::xbox_live_result<sign_in_result> loudResult)
+				xboxUser->signin(dispatcher).then([&](xbox::services::xbox_live_result<sign_in_result> loudResult) -> winrt::Windows::Foundation::IAsyncAction
                 {
-                    if (!loudResult.err()) {
+                    if (loudResult.err()) {
+						Logger::logError("Error signing in to Xbox live: " + String(loudResult.err_message().c_str()));
+					} else {
                         auto resPayload = loudResult.payload();
                         switch (resPayload.status()) {
                         case success:
-                            loggedIn = true;
+							co_await onLoggedIn();
                             break;
-                        case user_cancel:
+						default:
+							status = XBLStatus::Disconnected;
                             break;
                         }
                     }
                 }, concurrency::task_continuation_context::use_current());
 				break;
-			}
 
-			if (loggedIn) {
-				xboxLiveContext = std::make_shared<xbox::services::xbox_live_context>(xboxUser);
-
-				xbox_live_user::add_sign_out_completed_handler([this](const sign_out_completed_event_args&)
-				{
-					xboxUser.reset();
-					xboxLiveContext.reset();
-					gameSaveProvider.reset();
-					status = XBLStatus::Disconnected;
-				});
-
-				co_await getConnectedStorage();
-			} else {
+			default:
 				status = XBLStatus::Disconnected;
 			}
 		}

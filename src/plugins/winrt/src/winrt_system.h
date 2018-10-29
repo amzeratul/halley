@@ -1,11 +1,12 @@
 #pragma once
+#include <halley/support/logger.h>
 #include "halley/core/api/halley_api_internal.h"
 #include "winrt/Windows.Storage.h"
 
 namespace Halley {
 	class WinRTPlatform;
 
-	class WinRTSystem : public SystemAPIInternal {
+	class WinRTSystem : public SystemAPIInternal, public ILoggerSink {
 	public:
 		void init() override;
 		void deInit() override;
@@ -27,6 +28,7 @@ namespace Halley {
 		bool generateEvents(VideoAPI* video, InputAPI* input) override;
 
 		void runGame(std::function<void()> runnable) override;
+		void log(LoggerLevel level, const String& msg) override;
 	};
 
 	class WinRTLocalSave : public ISaveData {

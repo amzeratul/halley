@@ -35,9 +35,9 @@ bool WinRTPlatform::canProvideAuthToken() const
 	return true;
 }
 
-Future<AuthTokenResult> WinRTPlatform::getAuthToken()
+Future<AuthTokenResult> WinRTPlatform::getAuthToken(const AuthTokenParameters& parameters)
 {
-	return xbl->getAuthToken();
+	return xbl->getAuthToken(parameters);
 }
 
 bool WinRTPlatform::canProvideCloudSave() const

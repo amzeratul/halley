@@ -64,6 +64,12 @@ namespace Halley
 		{}
 	};
 
+	struct AuthTokenParameters {
+		String url;
+		String method;
+		String headers;
+	};
+
 	class PlatformAPI
 	{
 	public:
@@ -74,7 +80,7 @@ namespace Halley
 		virtual std::unique_ptr<HTTPRequest> makeHTTPRequest(const String& method, const String& url) = 0;
 
 		virtual bool canProvideAuthToken() const = 0;
-		virtual Future<AuthTokenResult> getAuthToken() = 0;
+		virtual Future<AuthTokenResult> getAuthToken(const AuthTokenParameters& parameters) = 0;
 
 		virtual bool canShowSubscriptionNeeded() const { return false; }
 
