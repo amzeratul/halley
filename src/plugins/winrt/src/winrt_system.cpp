@@ -189,7 +189,9 @@ void WinRTSystem::deInit()
 
 void WinRTSystem::log(LoggerLevel level, const String& msg)
 {
+#ifdef _DEBUG
 	OutputDebugStringW((msg + "\n").getUTF16().c_str());
+#endif
 }
 
 Path WinRTSystem::getAssetsPath(const Path& gamePath) const
