@@ -39,6 +39,8 @@ namespace Halley
 		virtual String getType() const = 0;
 		virtual bool isSingleUse() const = 0;
 		virtual bool isCancellable() const = 0;
+		virtual bool canPlayOnline() const { return true; }
+		virtual bool canShareUGC() const { return true; }
 
 		virtual void cancel() = 0;
 		virtual std::map<String, String> getMapData() const { return {}; }
