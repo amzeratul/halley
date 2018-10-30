@@ -5,7 +5,7 @@
 
 namespace Halley {
 	namespace FamilyMask {
-		using RealType = std::bitset<128>;
+		using RealType = std::bitset<256>;
 
 
 		class Handle
