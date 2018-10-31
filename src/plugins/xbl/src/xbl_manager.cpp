@@ -79,20 +79,11 @@ XBLStatus XBLManager::getStatus() const
 
 class XboxLiveAuthorisationToken : public AuthorisationToken {
 public:
-	XboxLiveAuthorisationToken(String gamertag, String userId, String token, String privileges)
+	XboxLiveAuthorisationToken(String gamertag, String userId, String token)
 	{
 		data["gamertag"] = std::move(gamertag);
 		data["userId"] = std::move(userId);
 		data["token"] = std::move(token);
-
-		for (const auto& priv: privileges.split(' ')) {
-			const int privNumber = priv.toInteger();
-			if (privNumber == 254) { // XPRIVILEGE_MULTIPLAYER_SESSIONS
-				playOnline = true;
-			} else if (privNumber == 247) { // XPRIVILEGE_USER_CREATED_CONTENT
-				shareUGC = true;
-			}
-		}
 	}
 
 	String getType() const override
@@ -119,16 +110,6 @@ public:
 		return data;
 	}
 
-	bool canPlayOnline() const override
-	{
-		return playOnline;
-	}
-
-	bool canShareUGC() const override
-	{
-		return shareUGC;
-	}
-
 private:
 	std::map<String, String> data;
 	bool playOnline = false;
@@ -153,7 +134,18 @@ Future<AuthTokenResult> XBLManager::getAuthToken(const AuthTokenParameters& para
 				auto gamerTag = String(payload.gamertag().c_str());
 				auto userId = String(payload.xbox_user_id().c_str());
 				auto token = String(payload.token().c_str());
-				promise.setValue(AuthTokenResult(std::make_unique<XboxLiveAuthorisationToken>(gamerTag, userId, token, privileges)));
+
+				OnlineCapabilities capabilities;
+				for (const auto& priv: privileges.split(' ')) {
+					const int privNumber = priv.toInteger();
+					if (privNumber == 254) { // XPRIVILEGE_MULTIPLAYER_SESSIONS
+						capabilities.onlinePlay = true;
+					} else if (privNumber == 247) { // XPRIVILEGE_USER_CREATED_CONTENT
+						capabilities.ugc = true;
+					}
+				}
+
+				promise.setValue(AuthTokenResult(std::make_unique<XboxLiveAuthorisationToken>(gamerTag, userId, token), capabilities));
 			}
 		});
 

@@ -39,8 +39,6 @@ namespace Halley
 		virtual String getType() const = 0;
 		virtual bool isSingleUse() const = 0;
 		virtual bool isCancellable() const = 0;
-		virtual bool canPlayOnline() const { return true; }
-		virtual bool canShareUGC() const { return true; }
 
 		virtual void cancel() = 0;
 		virtual std::map<String, String> getMapData() const { return {}; }
@@ -48,21 +46,52 @@ namespace Halley
 	
 	enum class AuthTokenRetrievalResult {
 		OK,
-		Error,
+		Cancelled,
 		ErrorAlreadyReported,
-		Cancelled
+		Error,
+		Unknown
+	};
+
+	struct OnlineCapabilities {
+		bool onlinePlay = false;
+		bool ugc = false;
+
+		OnlineCapabilities() {}
+		OnlineCapabilities(bool onlinePlay, bool ugc)
+			: onlinePlay(onlinePlay)
+			, ugc(ugc)
+		{
+		}
+		
+		void setAll(bool value)
+		{
+			onlinePlay = value;
+			ugc = value;
+		}
+		
+		bool includes(const OnlineCapabilities& other)
+		{
+			auto check = [](bool has, bool otherHas)
+			{
+				return otherHas ? has : true;
+			};
+			return check(onlinePlay, other.onlinePlay)
+				&& check(ugc, other.ugc);
+		}
 	};
 
 	struct AuthTokenResult {
-		AuthTokenRetrievalResult result = AuthTokenRetrievalResult::Error;
+		AuthTokenRetrievalResult result = AuthTokenRetrievalResult::Unknown;
 		std::unique_ptr<AuthorisationToken> token;
+		OnlineCapabilities capabilitiesSupported;
 
 		AuthTokenResult(AuthTokenRetrievalResult result)
 			: result(result)
 		{}
-		AuthTokenResult(std::unique_ptr<AuthorisationToken> token)
+		AuthTokenResult(std::unique_ptr<AuthorisationToken> token, OnlineCapabilities capabilities)
 			: result(AuthTokenRetrievalResult::OK)
 			, token(std::move(token))
+			, capabilitiesSupported(capabilities)
 		{}
 	};
 
@@ -70,6 +99,7 @@ namespace Halley
 		String url;
 		String method;
 		String headers;
+		OnlineCapabilities capabilitiesRequired;
 	};
 
 	class PlatformAPI
@@ -84,14 +114,10 @@ namespace Halley
 		virtual bool canProvideAuthToken() const = 0;
 		virtual Future<AuthTokenResult> getAuthToken(const AuthTokenParameters& parameters) = 0;
 
-		virtual bool canShowSubscriptionNeeded() const { return false; }
-
-		// Returns true if the user has potentially accepted subscription
-		virtual bool showSubscriptionNeeded() const { return false; }
-
 		virtual bool canProvideCloudSave() const { return false; }
 		virtual std::shared_ptr<ISaveData> getCloudSaveContainer(const String& containerName = "") { return {}; }
 
-		virtual bool areParentalLimitsEnabled(bool showUI) const { return false; }
+		virtual bool canShowSubscriptionNeeded() const { return false; }
+		virtual bool showSubscriptionNeeded() const { return true; }
 	};
 }
