@@ -27,6 +27,16 @@ const Sprite& UIAnimation::getSprite() const
 	return sprite;
 }
 
+Vector2f UIAnimation::getOffset() const
+{
+	return offset;
+}
+
+void UIAnimation::setOffset(Vector2f o)
+{
+	offset = o;
+}
+
 void UIAnimation::update(Time t, bool moved)
 {
 	if (animation.hasAnimation()) {

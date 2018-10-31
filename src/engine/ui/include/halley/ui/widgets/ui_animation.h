@@ -17,6 +17,9 @@ namespace Halley
 		Sprite& getSprite();
 		const Sprite& getSprite() const;
 
+		Vector2f getOffset() const;
+		void setOffset(Vector2f offset);
+
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
