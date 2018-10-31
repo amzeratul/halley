@@ -20,6 +20,7 @@
 \*****************************************************************/
 
 #include "halley/maths/random.h"
+#include <cstring>
 #include <ctime>
 #include <cstdlib>
 #include "mt199937ar.h"
