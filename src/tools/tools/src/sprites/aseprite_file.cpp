@@ -379,8 +379,8 @@ void AsepriteFile::addPaletteChunk(gsl::span<const gsl::byte> span)
 	AsepriteFilePaletteData baseData;
 	readData(baseData, span);
 
-	if (paletteBg.empty()) {
-		paletteBg.resize(256, 0);
+	if (paletteBg.size() < baseData.lastIndex + 1) {
+		paletteBg.resize(std::max(256, int(baseData.lastIndex + 1)), 0);
 	}
 
 	for (size_t i = baseData.firstIndex; i <= baseData.lastIndex; ++i) {
