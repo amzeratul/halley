@@ -135,9 +135,8 @@ AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
 	return std::make_shared<AudioHandleImpl>(*this, id);
 }
 
-AudioHandle AudioFacade::playMusic(const String& eventName, int track)
+AudioHandle AudioFacade::playMusic(const String& eventName, int track, float fadeInTime)
 {
-	float fadeInTime = 0;
 	bool hasFade = fadeInTime > 0.0001f;
 	
 	stopMusic(track, 0.5f);

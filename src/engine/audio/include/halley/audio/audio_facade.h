@@ -36,7 +36,7 @@ namespace Halley {
 	    AudioHandle postEvent(const String& name, AudioPosition position) override;
 
     	AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop) override;
-		AudioHandle playMusic(const String& eventName, int track = 0) override;
+		AudioHandle playMusic(const String& eventName, int track = 0, float fadeInTime = 0.0f) override;
 		AudioHandle getMusic(int track = 0) override;
 		void stopMusic(int track = 0, float fadeOutTime = 0.0f) override;
 		void stopAllMusic(float fadeOutTime = 0.0f) override;
