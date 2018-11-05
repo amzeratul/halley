@@ -22,6 +22,7 @@
 #pragma once
 
 #include <halley/utils/utils.h>
+#include <halley/support/exception.h>
 #include <gsl/span>
 #include <cstdint>
 
@@ -53,7 +54,11 @@ namespace Halley {
 		template <typename T>
 		size_t getRandomIndex(const T& vec)
 		{
-			return getSizeT(size_t(0), size_t(vec.size() - 1));
+			size_t size = std::end(vec) - std::begin(vec);
+			if (size == 0) {
+				throw Exception("Can't get random index of empty sequence.", HalleyExceptions::Utils);
+			}
+			return getSizeT(size_t(0), size_t(size - 1));
 		}
 
 		template <typename T>
