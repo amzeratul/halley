@@ -44,6 +44,6 @@ namespace Halley {
 		const WindowDefinition& getDefinition() const override;
 
 	private:
-		const WindowDefinition& definition;
+		const WindowDefinition definition;
 	};
 }
