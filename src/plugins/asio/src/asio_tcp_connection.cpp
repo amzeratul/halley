@@ -159,6 +159,7 @@ void AsioTCPConnection::trySend()
 					front.erase(front.begin(), front.begin() + bytesWritten);
 				}
 
+				std::unique_lock<std::mutex> lock(mutex);
 				trySend();
 			}
 		});
