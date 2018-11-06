@@ -102,6 +102,22 @@ namespace Halley
 		OnlineCapabilities capabilitiesRequired;
 	};
 
+	class MultiplayerSession {
+	public:
+		virtual ~MultiplayerSession() = default;
+
+		virtual void update() = 0; // This is called once per frame by the game
+		virtual void setParameter(const String& key, const String& data) = 0;
+		virtual void setLobbyCapacity(int numPlayers, int maxPlayers) = 0;
+	};
+
+	// This is the join callback, see PlatformAPI's method for more details
+	struct PlatformJoinCallbackParameters {
+		// Fill these as necessary
+		String param;
+	};
+	using PlatformJoinCallback = std::function<void(PlatformJoinCallbackParameters)>;
+
 	class PlatformAPI
 	{
 	public:
@@ -119,5 +135,15 @@ namespace Halley
 
 		virtual bool canShowSubscriptionNeeded() const { return false; }
 		virtual bool showSubscriptionNeeded() const { return true; }
+
+		// Complete when currentProgress == maximumValue
+		virtual void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue) {}
+
+		// Return empty unique_ptr if not supported
+		virtual std::unique_ptr<MultiplayerSession> makeMultiplayerSession() { return {}; }
+
+		// When the user joins a session, this function should be called back to let the game know what session they should join
+		// If the join happens before this method is called, then wait for this method to be called, and then call the callback
+		virtual void setJoinCallback(PlatformJoinCallback callback) {}
 	};
 }
