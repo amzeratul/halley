@@ -26,7 +26,7 @@ namespace Halley {
 		template <typename T, typename... Ts>
 		struct Evaluator <T, Ts...> {
 			static void buildEntity(Entity& entity, void** data, size_t offset) {
-				data[offset] = entity.getComponent<typename StripMaybeRef<T>::type>();
+				data[offset] = entity.tryGetComponent<typename StripMaybeRef<T>::type>();
 				Evaluator<Ts...>::buildEntity(entity, data, offset + 1);
 			}
 		};
