@@ -7,13 +7,14 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 	: UIWidget(id, {}, UISizer(UISizerType::Horizontal, 0), style.getBorder("innerBorder"))
 	, minValue(minValue)
 	, maxValue(maxValue)
+	, value(maxValue)
 {
 	sliderBar = std::make_shared<UISliderBar>(*this, style);
 	UIWidget::add(sliderBar, 1, style.getBorder("barBorder"), UISizerAlignFlags::CentreVertical | UISizerFillFlags::FillHorizontal);
 	
-	auto box = std::make_shared<UIImage>(style.getSprite("labelBorder"), UISizer(UISizerType::Vertical), style.getBorder("labelInnerBorder"));
+	box = std::make_shared<UIImage>(style.getSprite("labelBorder"), UISizer(UISizerType::Vertical), style.getBorder("labelInnerBorder"));
 	auto font = style.getTextRenderer("label");
-	label = std::make_shared<UILabel>(id + "_label", font, LocalisedString::fromNumber(int(lround(maxValue))));
+	label = std::make_shared<UILabel>(id + "_label", font, makeLabel());
 	box->add(label, 0, {}, UISizerAlignFlags::Centre);
 	box->layout();
 	box->setMinSize(box->getSize());
@@ -25,9 +26,9 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 void UISlider::setValue(float v)
 {
 	value = clamp(v, minValue, maxValue);
-
-	label->setText(LocalisedString::fromNumber(int(lround(getValue()))));
-
+	label->setText(makeLabel());
+	box->layout();
+	box->setMinSize(Vector2f::max(box->getMinimumSize(), box->getSize()));
 	notifyDataBind(getValue());
 }
 
@@ -38,11 +39,17 @@ void UISlider::setRelativeValue(float v)
 
 float UISlider::getValue() const
 {
+	float val;
 	if (granularity) {
-		return clamp(lround((value - minValue) / granularity.get()) * granularity.get() + minValue, minValue, maxValue);
+		val = clamp(lround((value - minValue) / granularity.get()) * granularity.get() + minValue, minValue, maxValue);
 	} else {
-		return value;
+		val = value;
 	}
+
+	if (transformation) {
+		val = transformation(val);
+	}
+	return val;
 }
 
 float UISlider::getMinValue() const
@@ -78,6 +85,16 @@ Maybe<float> UISlider::getGranularity() const
 	return granularity;
 }
 
+void UISlider::setLabelConversion(std::function<LocalisedString(float)> f)
+{
+	labelConversion = f;
+}
+
+void UISlider::setTransformation(std::function<float(float)> f)
+{
+	transformation = f;
+}
+
 void UISlider::onManualControlAnalogueAdjustValue(float input, Time t)
 {
 	timeSinceMove = 0;
@@ -101,11 +118,25 @@ void UISlider::onManualControlAnalogueAdjustValue(float input, Time t)
 	setRelativeValue(getRelativeValue() + float(maxSpeed * t));
 }
 
+std::shared_ptr<UIWidget> UISlider::getLabelBox() const
+{
+	return box;
+}
+
 void UISlider::update(Time t, bool moved)
 {
 	timeSinceMove += t;
 	if (timeSinceMove > 0.1f) {
 		maxSpeed = 0;
+	}
+}
+
+LocalisedString UISlider::makeLabel() const
+{
+	if (labelConversion) {
+		return labelConversion(getValue());
+	} else {
+		return LocalisedString::fromNumber(int(lround(getValue())));
 	}
 }
 

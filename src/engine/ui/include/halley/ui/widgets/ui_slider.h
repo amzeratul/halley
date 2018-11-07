@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/ui/ui_widget.h"
+#include "ui_image.h"
 
 namespace Halley {
 	class UISliderBar;
@@ -19,7 +20,12 @@ namespace Halley {
 		void setGranularity(Maybe<float> granularity);
 		Maybe<float> getGranularity() const;
 
+		void setLabelConversion(std::function<LocalisedString(float)> f);
+		void setTransformation(std::function<float(float)> f);
+
 		void onManualControlAnalogueAdjustValue(float delta, Time t) override;
+
+		std::shared_ptr<UIWidget> getLabelBox() const;
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -27,6 +33,7 @@ namespace Halley {
 	private:
 		std::shared_ptr<UISliderBar> sliderBar;
 		std::shared_ptr<UILabel> label;
+		std::shared_ptr<UIImage> box;
 
 		const float minValue;
 		const float maxValue;
@@ -34,6 +41,11 @@ namespace Halley {
 		float value;
 		float maxSpeed = 0;
 		Time timeSinceMove = 0;
+
+		std::function<LocalisedString(float)> labelConversion;
+		std::function<float(float)> transformation;
+
+		LocalisedString makeLabel() const;
 	};
 	
 	class UISliderBar : public UIWidget {
