@@ -368,6 +368,12 @@ Bytes SDLSaveData::getData(const String& path)
 	return Path::readFile(dir / path);
 }
 
+void SDLSaveData::removeData(const String& path)
+{
+	Expects (!path.isEmpty());
+	return Path::removeFile(dir / path);
+}
+
 std::vector<String> SDLSaveData::enumerate(const String& root)
 {
 	auto paths = OS::get().enumerateDirectory(dir);

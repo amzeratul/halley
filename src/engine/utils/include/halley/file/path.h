@@ -47,6 +47,7 @@ namespace Halley
 
 		static void writeFile(const Path& path, const Bytes& data);
 		static Bytes readFile(const Path& path);
+		static void removeFile(const Path& path);
 
 		Path makeRelativeTo(const Path& path) const;
 		Path changeRelativeRoot(const Path& currentParent, const Path& newParent) const;

@@ -31,6 +31,7 @@ namespace Halley {
 		virtual bool isReady() const = 0;
 
 		virtual Bytes getData(const String& path) = 0;
+		virtual void removeData(const String& path) {};
 		virtual std::vector<String> enumerate(const String& root) = 0;
 
 		virtual void setData(const String& path, const Bytes& data, bool commit = true) = 0;

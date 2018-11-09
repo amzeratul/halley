@@ -254,6 +254,11 @@ Bytes Path::readFile(const Path& path)
 	return result;
 }
 
+void Path::removeFile(const Path& path)
+{
+	std::remove(path.string().c_str());
+}
+
 Path Path::makeRelativeTo(const Path& path) const
 {
 	const Path& me = *this;
