@@ -174,6 +174,7 @@ namespace Halley {
 
 		void setWidgetRect(Rect4f rect);
 		void resetInputResults();
+		void updateActive(bool wasActiveBefore);
 
 		UIParent* parent = nullptr;
 		String id;
@@ -201,7 +202,8 @@ namespace Halley {
 
 		int childLayerAdjustment = 0;
 
-		bool active = true;
+		bool activeByUser = true;
+		bool activeByInput = true;
 		bool enabled = true;
 		bool alive = true;
 		bool focused = false;

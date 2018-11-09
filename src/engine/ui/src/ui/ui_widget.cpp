@@ -29,7 +29,7 @@ UIWidget::~UIWidget()
 
 void UIWidget::doDraw(UIPainter& painter) const
 {
-	if (active) {
+	if (isActive()) {
 		draw(painter);
 
 		if (childLayerAdjustment == 0) {
@@ -56,7 +56,7 @@ void UIWidget::doUpdate(bool full, Time t, UIInputType inputType, JoystickType j
 		checkActive();
 	}
 
-	if (active) {
+	if (isActive()) {
 		updateBehaviours(t);
 		update(t, positionUpdated);
 		positionUpdated = false;
@@ -81,7 +81,7 @@ void UIWidget::doUpdate(bool full, Time t, UIInputType inputType, JoystickType j
 
 Vector2f UIWidget::getLayoutMinimumSize(bool force) const
 {
-	if (!active && !force) {
+	if (!isActive() && !force) {
 		return {};
 	}
 	Vector2f minSize = getMinimumSize();
@@ -305,14 +305,20 @@ void UIWidget::onMouseOver(Vector2f mousePos)
 
 bool UIWidget::isActive() const
 {
-	return active;
+	return activeByUser && activeByInput;
 }
 
 void UIWidget::setActive(bool s)
 {
-	if (active != s) {
-		active = s;
-		if (!active) {
+	const bool wasActive = isActive();
+	activeByUser = s;
+	updateActive(wasActive);
+}
+
+void UIWidget::updateActive(bool wasActiveBefore)
+{
+	if (isActive() != wasActiveBefore) {
+		if (!isActive()) {
 			resetInputResults();
 		}
 
@@ -530,7 +536,9 @@ void UIWidget::setInputType(UIInputType uiInput)
 {
 	lastInputType = uiInput;
 	if (!onlyEnabledWithInputs.empty()) {
-		setActive(std::find(onlyEnabledWithInputs.begin(), onlyEnabledWithInputs.end(), uiInput) != onlyEnabledWithInputs.end());
+		const bool wasActive = isActive();
+		activeByInput = std::find(onlyEnabledWithInputs.begin(), onlyEnabledWithInputs.end(), uiInput) != onlyEnabledWithInputs.end();
+		updateActive(wasActive);
 	}
 }
 
