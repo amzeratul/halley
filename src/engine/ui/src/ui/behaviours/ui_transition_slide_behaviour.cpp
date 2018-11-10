@@ -40,7 +40,7 @@ void UITransitionSlideBehaviour::update(Time dt)
 		} else if (mode == Mode::FadeOut) {
 			getWidget()->setAnchor(lerp(base, isReversed() ? startPos : endPos, 1.0f - t));
 			if (time >= length) {
-				getWidget()->destroy();
+				getWidget()->forceDestroy();
 			}
 		}
 	}

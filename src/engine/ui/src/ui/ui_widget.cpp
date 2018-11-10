@@ -484,15 +484,23 @@ UIParent* UIWidget::getParent() const
 
 void UIWidget::destroy()
 {
-	if (alive) {
+	if (alive && !destroying) {
+		destroying = true;
+		onDestroyRequested();
 		bool ok = true;
 		for (auto& b: behaviours) {
 			ok = ok && b->onParentDestroyed();
 		}
 		if (ok) {
-			alive = false;
+			forceDestroy();
 		}
 	}
+}
+
+void UIWidget::forceDestroy()
+{
+	destroying = true;
+	alive = false;
 }
 
 bool UIWidget::isDescendentOf(const UIWidget& ancestor) const
@@ -613,6 +621,10 @@ void UIWidget::onFocusLost()
 }
 
 void UIWidget::onLayout()
+{
+}
+
+void UIWidget::onDestroyRequested()
 {
 }
 

@@ -89,6 +89,7 @@ namespace Halley {
 
 		bool isAlive() const;
 		void destroy();
+		void forceDestroy();
 
 		void setEventHandler(std::shared_ptr<UIEventHandler> handler);
 		UIEventHandler& getEventHandler();
@@ -150,6 +151,7 @@ namespace Halley {
 		virtual void onFocus();
 		virtual void onFocusLost();
 		virtual void onLayout();
+		virtual void onDestroyRequested();
 
 		void notifyDataBind(bool data) const;
 		void notifyDataBind(int data) const;
@@ -212,5 +214,6 @@ namespace Halley {
 		bool modal = true;
 		bool mouseBlocker = true;
 		bool shrinkOnLayout = false;
+		bool destroying = false;
 	};
 }
