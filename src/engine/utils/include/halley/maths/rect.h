@@ -129,13 +129,13 @@ namespace Halley {
 			p2.y = value;
 		}
 
-		Rect2D<T> shrink(T amount)
+		Rect2D<T> shrink(T amount) const
 		{
 			auto offset = Vector2D<T>(amount, amount);
 			return Rect2D(p1 + offset, p2 - offset);
 		}
 
-		Rect2D<T> grow(T amount)
+		Rect2D<T> grow(T amount) const
 		{
 			auto offset = Vector2D<T>(amount, amount);
 			return Rect2D(p1 - offset, p2 + offset);
@@ -288,6 +288,11 @@ namespace Halley {
 				r -= Vector2D<T>(0, r.p1.y - container.p1.y);
 			}
 			return r;
+		}
+
+		String toString() const
+		{
+			return String("[") + p1.toString() + " " + p2.toString() + "]";
 		}
 	};
 

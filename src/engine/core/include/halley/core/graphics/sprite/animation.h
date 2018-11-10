@@ -4,6 +4,7 @@
 #include <memory>
 #include <halley/resources/resource.h>
 #include "halley/maths/vector2.h"
+#include "halley/maths/rect.h"
 
 namespace Halley
 {
@@ -71,6 +72,8 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 		void addFrame(const AnimationFrameDefinition& animationFrameDefinition);
+
+		Rect4i getBounds() const;
 
 	private:
 		Vector<AnimationFrame> frames;
