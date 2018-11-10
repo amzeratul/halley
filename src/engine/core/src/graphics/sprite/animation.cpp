@@ -87,14 +87,14 @@ void AnimationSequence::addFrame(const AnimationFrameDefinition& animationFrameD
 
 Rect4i AnimationSequence::getBounds() const
 {
-	Vector2i topLeft;
+	Vector2i topLeft(99999, 99999);
 	Vector2i bottomRight;
 	for (auto& frame: frames) {
 		auto& sprite = frame.getSprite(0);
 		if (sprite.size.x >= 0.1f && sprite.size.y > 0.0f) {
 			auto offset = Vector2i(Vector2f(sprite.pivot * sprite.size).round());
 			const Vector2i tl = -offset;
-			const Vector2i br = Vector2i(sprite.size) - offset;			
+			const Vector2i br = tl + Vector2i(sprite.size);
 
 			topLeft = Vector2i::min(topLeft, tl);
 			bottomRight = Vector2i::max(bottomRight, br);
