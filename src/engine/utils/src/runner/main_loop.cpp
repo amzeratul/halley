@@ -58,23 +58,27 @@ void MainLoop::runLoop()
 			}
 			Clock::time_point curTime = Clock::now();
 
-			// Got anything to do?
+			// Got any fixed updates to do?
 			if (curTime >= targetTime) {
-				// Step until we're up-to-date
-				for (int i = 0; i < 10 && curTime >= targetTime; i++) {
-					Time fixedDelta = 1.0 / fps;
-					target.onFixedUpdate(fixedDelta);
+				// Figure out how many steps we need...
+				const Time fixedDelta = 1.0 / fps;
+				int stepsNeeded = int(std::chrono::duration<float>(targetTime - curTime).count() * fps);
 
-					nSteps++;
-					curTime = Clock::now();
-					targetTime = startTime + std::chrono::microseconds((nSteps * 1000000ll) / fps);
+				// Run up to 5 (if we're more than 5 frames late, ignore them. C'est la vie)
+				for (int i = 0; i < std::min(stepsNeeded, 5); i++) {
+					target.onFixedUpdate(fixedDelta);
 				}
+
+				// Update target
+				nSteps += stepsNeeded;
+				targetTime = startTime + std::chrono::microseconds((nSteps * 1000000ll) / fps);
 			} else {
 				// Nope, release CPU
 				std::this_thread::yield();
 			}
 
-			target.onVariableUpdate(std::chrono::duration<float>(curTime - lastTime).count());
+			// Run variable update
+			target.onVariableUpdate(std::min(std::chrono::duration<float>(curTime - lastTime).count(), 0.1f)); // Never step by more than 100ms
 			lastTime = curTime;
 		}
 	}
