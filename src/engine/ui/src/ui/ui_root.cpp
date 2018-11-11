@@ -364,6 +364,11 @@ bool UIRoot::isMouseOverUI() const
 	return static_cast<bool>(currentMouseOver.lock());
 }
 
+std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse() const
+{
+	return currentMouseOver.lock();
+}
+
 UIWidget* UIRoot::getCurrentFocus() const
 {
 	return currentFocus.lock().get();

@@ -27,7 +27,8 @@ namespace Halley {
 		SetHovered,
 		TextChanged,
 		TextSubmit,
-		TabChanged
+		TabChanged,
+		WidgetHighlighted
 	};
 
     class UIEvent {
