@@ -28,6 +28,8 @@ namespace Halley {
 		TextChanged,
 		TextSubmit,
 		TabChanged,
+		TabbedIn,
+		TabbedOut,
 		WidgetHighlighted
 	};
 
