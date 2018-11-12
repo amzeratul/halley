@@ -365,7 +365,7 @@ std::vector<String> WinRTLocalSave::enumerate(const String& root)
 	return Concurrent::execute([&] () -> std::vector<String> {
 		std::vector<String> result;
 		try {
-			auto files = folder.GetFilesAsync(winrt::Windows::Storage::Search::CommonFileQuery::OrderByDate, 0, 256).get();
+			auto files = folder.GetFilesAsync(winrt::Windows::Storage::Search::CommonFileQuery::OrderByName, 0, 256).get();
 			for (auto& f: files) {
 				String name = String(f.Name().c_str());
 				if (name.startsWith(root)) {
