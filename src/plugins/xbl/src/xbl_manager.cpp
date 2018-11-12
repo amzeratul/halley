@@ -53,6 +53,8 @@ void XBLManager::init()
 
 void XBLManager::deInit()
 {
+	achievementsStatus = XBLAchievementsStatus::Uninitialized;
+	achievementStatus.clear();
 }
 
 std::shared_ptr<ISaveData> XBLManager::getSaveContainer(const String& name)
@@ -156,6 +158,54 @@ Future<AuthTokenResult> XBLManager::getAuthToken(const AuthTokenParameters& para
 	}
 }
 
+void XBLManager::setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue)
+{
+	if (xboxUser != nullptr && xboxLiveContext != nullptr)
+	{
+		string_t id (achievementId.cppStr().begin(), achievementId.cppStr().end());
+		int progress = (int)floor(((float)currentProgress / (float)maximumValue) * 100.f);
+		xboxLiveContext->achievement_service().update_achievement(xboxUser->xbox_user_id(), id, progress).then([=] (xbox::services::xbox_live_result<void> result)
+		{ 
+			if (result.err())
+			{
+				Logger::logError(String("Error unlocking achievement '") + achievementId + String("': ") + result.err().value() + " "  + result.err_message());
+			}
+			else if (progress == 100)
+			{
+				achievementStatus[id] = true;
+			}
+		});
+	}
+}
+
+bool XBLManager::isAchievementUnlocked(const String& achievementId, bool defaultValue)
+{
+	if (achievementsStatus == XBLAchievementsStatus::Uninitialized)
+	{
+		Logger::logWarning(String("Trying to get the achievement status before starting the retrieve task!"));
+		return false;
+	}
+	else if (achievementsStatus == XBLAchievementsStatus::Retrieving)
+	{
+		unsigned long long timeout = GetTickCount64() + 5000;
+		while (achievementsStatus == XBLAchievementsStatus::Retrieving && GetTickCount64() < timeout) {}
+
+		if (achievementsStatus == XBLAchievementsStatus::Retrieving)
+		{
+			Logger::logWarning(String("Achievements are taking too long to load!"));
+			return false;
+		}
+	}
+
+	string_t id(achievementId.cppStr().begin(), achievementId.cppStr().end());
+	auto iterator = achievementStatus.find(id);
+	if (iterator != achievementStatus.end())
+	{
+		return iterator->second;
+	}
+	return defaultValue;
+}
+
 void XBLManager::signIn()
 {
 	xbox::services::system::xbox_live_services_settings::get_singleton_instance()->set_diagnostics_trace_level(xbox::services::xbox_services_diagnostics_trace_level::verbose);
@@ -175,7 +225,11 @@ void XBLManager::signIn()
 			xboxLiveContext.reset();
 			gameSaveProvider.reset();
 			status = XBLStatus::Disconnected;
+			achievementsStatus = XBLAchievementsStatus::Uninitialized;
+			achievementStatus.clear();
 		});
+
+		retrieveUserAchievementsState();
 
 		co_await getConnectedStorage();
 	};
@@ -232,6 +286,63 @@ winrt::Windows::Foundation::IAsyncAction XBLManager::getConnectedStorage()
 	} else {
 		status = XBLStatus::Disconnected;
 	}
+}
+
+void XBLManager::retrieveUserAchievementsState()
+{
+	achievementsStatus = XBLAchievementsStatus::Retrieving;
+	achievementStatus.clear();
+
+	xboxLiveContext->achievement_service().get_achievements_for_title_id(
+		xboxUser->xbox_user_id(),
+		xboxLiveContext->application_config()->title_id(),
+		xbox::services::achievements::achievement_type::all,
+		false,
+		xbox::services::achievements::achievement_order_by::title_id,
+		0,
+		0)
+		.then([=](xbox::services::xbox_live_result<xbox::services::achievements::achievements_result> result)
+	{
+		try
+		{
+			bool receivedMoreAchievements;
+			do
+			{
+				receivedMoreAchievements = false;
+				if (result.err())
+				{
+					Logger::logError(String("Error retrieving achievements for user '") + xboxUser->gamertag().c_str() + String("': ") + result.err().value() + " " + result.err_message());
+					achievementsStatus = XBLAchievementsStatus::Uninitialized;
+				}
+				else
+				{
+					std::vector<xbox::services::achievements::achievement> achievements = result.payload().items();
+					for (unsigned int i = 0; i < achievements.size(); ++i)
+					{
+						xbox::services::achievements::achievement achievement = achievements[i];
+						bool isAchieved = (achievement.progress_state() == xbox::services::achievements::achievement_progress_state::achieved);
+						Logger::logInfo(String("Achievement '") + achievement.name().c_str() + String("' (ID '") + achievement.id().c_str() + String("'): ") + (isAchieved ? String("Achieved") : String("Locked")));
+						achievementStatus[achievement.id()] = isAchieved;
+					}
+
+					if (result.payload().has_next())
+					{
+						result = result.payload().get_next(32).get();
+						receivedMoreAchievements = true;
+					}
+					else
+					{
+						achievementsStatus = XBLAchievementsStatus::Ready;
+					}
+				}
+			} while (receivedMoreAchievements);
+		}
+		catch (...)
+		{
+			achievementsStatus = XBLAchievementsStatus::Uninitialized;
+			Logger::logError(String("Error retrieving achievements for user '") + xboxUser->gamertag().c_str() + String("'"));
+		}
+	});
 }
 
 XBLSaveData::XBLSaveData(XBLManager& manager, String containerName)

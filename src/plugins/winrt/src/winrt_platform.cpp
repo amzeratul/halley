@@ -50,4 +50,14 @@ std::shared_ptr<ISaveData> WinRTPlatform::getCloudSaveContainer(const String& co
 	return xbl->getSaveContainer(containerName);
 }
 
+void WinRTPlatform::setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue)
+{
+	xbl->setAchievementProgress(achievementId, currentProgress, maximumValue);
+}
+
+bool WinRTPlatform::isAchievementUnlocked(const String& achievementId, bool defaultValue)
+{
+	return xbl->isAchievementUnlocked(achievementId, defaultValue);
+}
+
 #endif

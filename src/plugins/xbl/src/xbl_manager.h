@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <map>
 #include <winrt/base.h>
 #include <winrt/Windows.Gaming.XboxLive.Storage.h>
 #include "halley/data_structures/maybe.h"
@@ -25,6 +26,12 @@ namespace Halley {
 		Connected
 	};
 
+	enum class XBLAchievementsStatus {
+		Uninitialized,
+		Retrieving,
+		Ready
+	};
+
 	class XBLManager {
 	public:
 		XBLManager();
@@ -38,18 +45,23 @@ namespace Halley {
 		Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> getProvider() const;
 		XBLStatus getStatus() const;
 		Future<AuthTokenResult> getAuthToken(const AuthTokenParameters& parameters);
+		void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue);
+		bool isAchievementUnlocked(const String& achievementId, bool defaultValue);
 
 	private:
 		std::shared_ptr<xbox::services::system::xbox_live_user> xboxUser;
 		std::shared_ptr<xbox::services::xbox_live_context> xboxLiveContext;
 		Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> gameSaveProvider;
 		std::map<String, std::shared_ptr<ISaveData>> saveStorage;
-
+		std::map<std::wstring, bool> achievementStatus;
+		
+		XBLAchievementsStatus achievementsStatus;
 		XBLStatus status = XBLStatus::Disconnected;
 
 		void signIn();
 
 		winrt::Windows::Foundation::IAsyncAction getConnectedStorage();
+		void retrieveUserAchievementsState();
 	};
 
 	class XBLSaveData : public ISaveData {
