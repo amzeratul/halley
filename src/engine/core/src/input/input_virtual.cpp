@@ -37,7 +37,12 @@ InputVirtual::InputVirtual(int nButtons, int nAxes)
 
 bool InputVirtual::isEnabled() const
 {
-	return true;
+	for (auto& d: getAllDevices()) {
+		if (d->isEnabled()) {
+			return true;
+		}
+	}
+	return false;
 }
 
 size_t InputVirtual::getNumberHats()
@@ -69,7 +74,7 @@ bool InputVirtual::isAnyButtonPressed()
 			if (bind.device->isAnyButtonPressed()) {
 				return true;
 			}
-		};
+		}
 	}
 	return false;
 }
@@ -83,7 +88,7 @@ bool InputVirtual::isAnyButtonReleased()
 			if (bind.device->isAnyButtonReleased()) {
 				return true;
 			}
-		};
+		}
 	}
 	return false;
 }
@@ -97,7 +102,7 @@ bool InputVirtual::isAnyButtonDown()
 			if (bind.device->isAnyButtonDown()) {
 				return true;
 			}
-		};
+		}
 	}
 	return false;
 }
@@ -110,7 +115,7 @@ bool InputVirtual::isButtonPressed(int code)
 		if (bind.device->isButtonPressed(bind.a)) {
 			return true;
 		}
-	};
+	}
 	return false;
 }
 
@@ -122,7 +127,7 @@ bool InputVirtual::isButtonPressedRepeat(int code)
 		if (bind.device->isButtonPressedRepeat(bind.a)) {
 			return true;
 		}
-	};
+	}
 	return false;
 }
 
@@ -448,6 +453,28 @@ InputVirtual::PositionBindData::PositionBindData(spInputDevice device, int axisX
 	, axisY(axisY)
 	, speed(speed)
 {}
+
+std::set<spInputDevice> InputVirtual::getAllDevices() const
+{
+	std::set<spInputDevice> devices;
+
+	for (auto& axisBind: axes) {
+		for (auto& bind: axisBind.binds) {
+			if (bind.device) {
+				devices.insert(bind.device);
+			}
+		}
+	}
+	for (auto& buttonBinds: buttons) {
+		for (auto& bind: buttonBinds) {
+			if (bind.device) {
+				devices.insert(bind.device);
+			}
+		}
+	}
+
+	return devices;
+}
 
 void InputVirtual::setLastDeviceFreeze(bool frozen)
 {

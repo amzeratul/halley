@@ -24,6 +24,7 @@
 #include "input_button_base.h"
 #include "halley/maths/rect.h"
 #include "halley/data_structures/maybe.h"
+#include <set>
 
 namespace Halley {
 	using spInputDevice = std::shared_ptr<InputDevice>;
@@ -144,6 +145,8 @@ namespace Halley {
 		
 		float repeatDelayFirst;
 		float repeatDelayHold;
+
+		std::set<spInputDevice> getAllDevices() const;
 	};
 
 	typedef std::shared_ptr<InputVirtual> spInputVirtual;
