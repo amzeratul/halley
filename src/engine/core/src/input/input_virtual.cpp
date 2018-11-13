@@ -88,6 +88,20 @@ bool InputVirtual::isAnyButtonReleased()
 	return false;
 }
 
+bool InputVirtual::isAnyButtonDown()
+{
+	for (size_t j=0; j < buttons.size(); j++) {
+		auto& binds = buttons[j];
+		for (size_t i=0; i<binds.size(); i++) {
+			Bind& bind = binds[i];
+			if (bind.device->isAnyButtonDown()) {
+				return true;
+			}
+		};
+	}
+	return false;
+}
+
 bool InputVirtual::isButtonPressed(int code)
 {
 	auto& binds = buttons.at(code);

@@ -109,6 +109,16 @@ bool InputButtonBase::isAnyButtonReleased()
 	return false;
 }
 
+bool InputButtonBase::isAnyButtonDown()
+{
+	for (size_t i=0; i<buttonDown.size(); i++) {
+		if (buttonDown[i] != 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
 bool InputButtonBase::isButtonPressed(int code)
 {
 	if (code < 0 || code >= int(buttonPressed.size())) return false;

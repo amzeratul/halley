@@ -37,6 +37,11 @@ bool InputDevice::isAnyButtonReleased()
 	return false;
 }
 
+bool InputDevice::isAnyButtonDown()
+{
+	return false;
+}
+
 bool InputDevice::isButtonPressed(int code)
 {
 	return false;

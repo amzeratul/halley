@@ -33,6 +33,7 @@ namespace Halley {
 
 		bool isAnyButtonPressed() override;
 		bool isAnyButtonReleased() override;
+		bool isAnyButtonDown() override;
 
 		bool isButtonPressed(int code) override;
 		bool isButtonPressedRepeat(int code) override;
