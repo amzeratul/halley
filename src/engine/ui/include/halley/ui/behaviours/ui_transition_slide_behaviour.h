@@ -24,6 +24,8 @@ namespace Halley {
 	    bool isAlive() const override;
 	    bool onParentDestroyed() override;
 
+		void updateAnchors(UIAnchor newBase, UIAnchor newStartPos, UIAnchor newEndPos);
+
     private:
 		Time length;
 		Time time;

@@ -13,6 +13,25 @@ UITransitionSlideBehaviour::UITransitionSlideBehaviour(Time length, UIAnchor bas
 {
 }
 
+void UITransitionSlideBehaviour::updateAnchors(UIAnchor newBase, UIAnchor newStartPos, UIAnchor newEndPos) {
+	base = newBase;
+	startPos = newStartPos;
+	endPos = newEndPos;
+
+	const float x = clamp(mode == Mode::FadeIn ? float(time / length) : 1.0f - float(time / length), 0.0f, 1.0f);
+	const float t = curve(x);
+
+	if (mode == Mode::FadeIn) {
+		getWidget()->setAnchor(lerp(isReversed() ? endPos : startPos, base, t));
+	}
+	else if (mode == Mode::FadeOut) {
+		getWidget()->setAnchor(lerp(base, isReversed() ? startPos : endPos, 1.0f - t));
+	}
+	else {
+		getWidget()->setAnchor(base);
+	}
+}
+
 void UITransitionSlideBehaviour::init()
 {
 	getWidget()->setEnabled(false);
