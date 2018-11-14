@@ -137,7 +137,9 @@ namespace Halley
 		virtual bool showSubscriptionNeeded() const { return true; }
 
 		// Complete when currentProgress == maximumValue
+		virtual String getId() { return ""; }
 		virtual void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue) {}
+		virtual bool isAchievementUnlocked(const String& achievementId, bool defaultValue) { return defaultValue; }
 
 		// Return empty unique_ptr if not supported
 		virtual std::unique_ptr<MultiplayerSession> makeMultiplayerSession() { return {}; }
