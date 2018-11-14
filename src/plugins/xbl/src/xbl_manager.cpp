@@ -348,6 +348,7 @@ void XBLManager::retrieveUserAchievementsState()
 XBLSaveData::XBLSaveData(XBLManager& manager, String containerName)
 	: manager(manager)
 	, containerName(containerName.isEmpty() ? "save" : containerName)
+	, isSaving(false)
 {
 	updateContainer();
 }
@@ -366,11 +367,23 @@ Bytes XBLSaveData::getData(const String& path)
 
 	return Concurrent::execute([&] () -> Bytes
 	{
+		if (isSaving)
+		{
+			unsigned long long timeout = GetTickCount64() + 3000;
+			while (isSaving && GetTickCount64() < timeout) {}
+
+			if (isSaving)
+			{
+				Logger::logWarning(String("Saving data to connected storage is taking too long!"));
+			}
+		}
+
 		auto key = winrt::hstring(path.getUTF16());
 		std::vector<winrt::hstring> updates;
 		updates.push_back(key);
+		auto view = winrt::single_threaded_vector(std::move(updates)).GetView();
 
-		auto gameBlob = gameSaveContainer->GetAsync(winrt::single_threaded_vector<winrt::hstring>(std::move(updates)).GetView()).get();
+		auto gameBlob = gameSaveContainer->GetAsync(view).get();
 
 		if (gameBlob.Status() == winrt::Windows::Gaming::XboxLive::Storage::GameSaveErrorStatus::Ok) {
 			if (gameBlob.Value().HasKey(key)) {
@@ -384,6 +397,10 @@ Bytes XBLSaveData::getData(const String& path)
 				return result;
 			}
 		}
+		else
+		{
+			Logger::logError(String("Error getting Blob '") + path + String("': ") + (int)gameBlob.Status());
+		}
 
 		return {};
 	}).get();
@@ -391,10 +408,6 @@ Bytes XBLSaveData::getData(const String& path)
 
 std::vector<String> XBLSaveData::enumerate(const String& root)
 {
-	if (!isReady()) {
-		throw Exception("Container is not ready yet!", HalleyExceptions::PlatformPlugin);
-	}
-
 	if (!isReady()) {
 		throw Exception("Container is not ready yet!", HalleyExceptions::PlatformPlugin);
 	}
@@ -422,14 +435,24 @@ void XBLSaveData::setData(const String& path, const Bytes& data, bool commit)
 		throw Exception("Container is not ready yet!", HalleyExceptions::PlatformPlugin);
 	}
 
-	auto dataWriter = winrt::Windows::Storage::Streams::DataWriter();
-	dataWriter.WriteBytes(winrt::array_view<const uint8_t>(data));
+	isSaving = true;
+	Concurrent::execute([=]() -> void
+	{
+		auto dataWriter = winrt::Windows::Storage::Streams::DataWriter();
+		dataWriter.WriteBytes(winrt::array_view<const uint8_t>(data));
 
-	std::map<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer> updates;
-	updates[winrt::hstring(path.getUTF16())] = dataWriter.DetachBuffer();
-	auto view = winrt::single_threaded_map(std::move(updates)).GetView();
+		std::map<winrt::hstring, winrt::Windows::Storage::Streams::IBuffer> updates;
+		updates[winrt::hstring(path.getUTF16())] = dataWriter.DetachBuffer();
+		auto view = winrt::single_threaded_map(std::move(updates)).GetView();
 
-	gameSaveContainer->SubmitUpdatesAsync(view, {}, L"");	
+		auto result = gameSaveContainer->SubmitUpdatesAsync(view, {}, L"").get();
+		if (result.Status() != winrt::Windows::Gaming::XboxLive::Storage::GameSaveErrorStatus::Ok)
+		{
+			Logger::logError(String("Error saving Blob '") + path + String("': ") + (int)result.Status());
+		}
+
+		isSaving = false;
+	});
 }
 
 void XBLSaveData::commit()
