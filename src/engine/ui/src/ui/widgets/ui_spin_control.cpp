@@ -3,12 +3,12 @@
 #include "halley/ui/ui_validator.h"
 using namespace Halley;
 
-UISpinControl::UISpinControl(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, int value)
+UISpinControl::UISpinControl(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, float value)
 	: UIWidget(id, {}, UISizer())
 	, value(value)
 {
-	textInput = std::make_shared<UITextInput>(keyboard, id + "_textinput", style.getSubStyle("input"), toString(value));
-	textInput->setValidator(std::make_shared<UINumericValidator>(true));
+	textInput = std::make_shared<UITextInput>(keyboard, id + "_textinput", style.getSubStyle("input"), "99999");
+	textInput->setValidator(std::make_shared<UINumericValidator>(true, false));
 
 	const auto leftButton = std::make_shared<UIButton>(id + "_left", style.getSubStyle("leftButton"));
 	const auto rightButton = std::make_shared<UIButton>(id + "_right", style.getSubStyle("rightButton"));
@@ -18,26 +18,29 @@ UISpinControl::UISpinControl(std::shared_ptr<InputKeyboard> keyboard, String id,
 
 	setHandle(UIEventType::ButtonClicked, id + "_left", [=] (const UIEvent& event)
 	{
-		setValue(getValue() - 1);
+		setValue(getValue() - increment);
 	});
 	setHandle(UIEventType::ButtonClicked, id + "_right", [=] (const UIEvent& event)
 	{
-		setValue(getValue() + 1);
+		setValue(getValue() + increment);
 	});
 	setHandle(UIEventType::TextChanged, id + "_textinput", [=] (const UIEvent& event)
 	{
-		setValue(event.getData().toInteger());
+		setValue(event.getData().toFloat());
 	});
+
+	setValue(value);
 }
 
-void UISpinControl::setValue(int v)
+void UISpinControl::setValue(float v)
 {
-	int finalValue = v;
+	float finalValue = lround(v / increment) * increment;
+
 	if (minValue) {
-		finalValue = std::max(finalValue, int(*minValue));
+		finalValue = std::max(finalValue, float(*minValue));
 	}
 	if (maxValue) {
-		finalValue = std::max(finalValue, int(*maxValue));
+		finalValue = std::max(finalValue, float(*maxValue));
 	}
 
 	if (value != v) {
@@ -47,17 +50,25 @@ void UISpinControl::setValue(int v)
 	}
 }
 
-int UISpinControl::getValue() const
+float UISpinControl::getValue() const
 {
 	return value;
 }
 
-void UISpinControl::setMinimumValue(Maybe<int> value)
+void UISpinControl::setIncrement(float inc)
+{
+	increment = inc;
+
+	const bool isFloat = std::fabs(std::fmod(inc, 1.0f)) > 0.0001f;
+	textInput->setValidator(std::make_shared<UINumericValidator>(true, isFloat));
+}
+
+void UISpinControl::setMinimumValue(Maybe<float> value)
 {
 	minValue = value;
 }
 
-void UISpinControl::setMaximumValue(Maybe<int> value)
+void UISpinControl::setMaximumValue(Maybe<float> value)
 {
 	maxValue = value;
 }
@@ -69,10 +80,14 @@ void UISpinControl::onManualControlActivate()
 
 void UISpinControl::onManualControlCycleValue(int delta)
 {
-	setValue(getValue() + delta);
+	setValue(getValue() + delta * increment);
 }
 
 void UISpinControl::readFromDataBind()
 {
-	setValue(getDataBind()->getIntData());
+	if (getDataBind()->getFormat() == UIDataBind::Format::Float) {
+		setValue(getDataBind()->getFloatData());
+	} else {
+		setValue(float(getDataBind()->getIntData()));
+	}
 }

@@ -13,11 +13,12 @@ namespace Halley {
 
 	class UINumericValidator : public UIValidator {
 	public:
-		explicit UINumericValidator(bool allowNegative);
+		UINumericValidator(bool allowNegative, bool allowFloatingPoint = false);
 		StringUTF32 onTextChanged(StringUTF32) override;
 
 	private:
 		bool allowNegative;
+		bool allowFloat;
 	};
 
 	class UIFunctionValidator : public UIValidator {

@@ -16,8 +16,9 @@ bool UIValidator::isEnabled()
 	return true;
 }
 
-UINumericValidator::UINumericValidator(bool allowNegative)
+UINumericValidator::UINumericValidator(bool allowNegative, bool allowFloat)
 	: allowNegative(allowNegative)
+	, allowFloat(allowFloat)
 {
 }
 
@@ -26,7 +27,7 @@ StringUTF32 UINumericValidator::onTextChanged(StringUTF32 src)
 	std::vector<utf32type> result(src.length());
 	size_t j = 0;
 	for (size_t i = 0; i < result.size(); ++i) {
-		if ((src[i] >= '0' && src[i] <= '9') || (i == 0 && src[i] == '-' && allowNegative)) {
+		if ((src[i] >= '0' && src[i] <= '9') || (i == 0 && src[i] == '-' && allowNegative) || (src[i] == '.' && allowFloat)) {
 			result[j++] = src[i];
 		}
 	}

@@ -7,18 +7,20 @@ namespace Halley {
 
 	class UISpinControl : public UIWidget {
 	public:
-		explicit UISpinControl(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, int value);
+		explicit UISpinControl(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, float value);
 
 		UISpinControl(UISpinControl&& other) = default;
 		UISpinControl(const UISpinControl& other) = delete;
 		UISpinControl& operator=(UISpinControl&& other) = default;
 		UISpinControl& operator=(const UISpinControl& other) = delete;
 
-		void setValue(int value);
-		int getValue() const;
+		void setValue(float value);
+		float getValue() const;
 
-		void setMinimumValue(Maybe<int> value);
-		void setMaximumValue(Maybe<int> value);
+		void setIncrement(float inc);
+
+		void setMinimumValue(Maybe<float> value);
+		void setMaximumValue(Maybe<float> value);
 
 		void onManualControlActivate() override;
 		void onManualControlCycleValue(int delta) override;
@@ -27,8 +29,9 @@ namespace Halley {
 
 	private:
 		std::shared_ptr<UITextInput> textInput;
-		int value;
-		Maybe<int> minValue;
-		Maybe<int> maxValue;
+		float value = 0;
+		float increment = 1;
+		Maybe<float> minValue;
+		Maybe<float> maxValue;
     };
 }

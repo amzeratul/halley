@@ -398,13 +398,16 @@ std::shared_ptr<UIWidget> UIFactory::makeSpinControl(const ConfigNode& entryNode
 	auto id = node["id"].asString();
 	auto style = UIStyle(node["style"].asString("spinControl"), styleSheet);
 
-	auto result = std::make_shared<UISpinControl>(api.input->getKeyboard(), id, style, 0);
+	auto result = std::make_shared<UISpinControl>(api.input->getKeyboard(), id, style, 0.0f);
 
 	if (node.hasKey("minValue")) {
-		result->setMinimumValue(node["minValue"].asInt());
+		result->setMinimumValue(node["minValue"].asFloat());
 	}
 	if (node.hasKey("maxValue")) {
-		result->setMaximumValue(node["maxValue"].asInt());
+		result->setMaximumValue(node["maxValue"].asFloat());
+	}
+	if (node.hasKey("increment")) {
+		result->setIncrement(node["increment"].asFloat());
 	}
 
 	return result;
