@@ -5,6 +5,7 @@
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_button.h"
 #include "halley/ui/widgets/ui_textinput.h"
+#include "halley/ui/widgets/ui_spin_control.h"
 #include "halley/ui/widgets/ui_list.h"
 #include "halley/ui/widgets/ui_dropdown.h"
 #include "halley/ui/widgets/ui_image.h"
@@ -32,6 +33,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("label", [=] (const ConfigNode& node) { return makeLabel(node); });
 	addFactory("button", [=] (const ConfigNode& node) { return makeButton(node); });
 	addFactory("textInput", [=] (const ConfigNode& node) { return makeTextInput(node); });
+	addFactory("spinControl", [=] (const ConfigNode& node) { return makeSpinControl(node); });
 	addFactory("list", [=] (const ConfigNode& node) { return makeList(node); });
 	addFactory("dropdown", [=] (const ConfigNode& node) { return makeDropdown(node); });
 	addFactory("checkbox", [=] (const ConfigNode& node) { return makeCheckbox(node); });
@@ -385,6 +387,24 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 
 	if (node.hasKey("maxLength")) {
 		result->setMaxLength(node["maxLength"].asInt());
+	}
+
+	return result;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeSpinControl(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto style = UIStyle(node["style"].asString("spinControl"), styleSheet);
+
+	auto result = std::make_shared<UISpinControl>(api.input->getKeyboard(), id, style, 0);
+
+	if (node.hasKey("minValue")) {
+		result->setMinimumValue(node["minValue"].asInt());
+	}
+	if (node.hasKey("maxValue")) {
+		result->setMaximumValue(node["maxValue"].asInt());
 	}
 
 	return result;

@@ -38,6 +38,7 @@ set(SOURCES
         "src/ui/widgets/ui_scrollbar.cpp"
         "src/ui/widgets/ui_scrollbar_pane.cpp"
         "src/ui/widgets/ui_slider.cpp"
+        "src/ui/widgets/ui_spin_control.cpp"
         "src/ui/widgets/ui_textinput.cpp"
         )
 
@@ -80,6 +81,7 @@ set(HEADERS
         "include/halley/ui/widgets/ui_scrollbar.h"
         "include/halley/ui/widgets/ui_scrollbar_pane.h"
         "include/halley/ui/widgets/ui_slider.h"
+        "include/halley/ui/widgets/ui_spin_control.h"
         "include/halley/ui/widgets/ui_textinput.h"
         )
 

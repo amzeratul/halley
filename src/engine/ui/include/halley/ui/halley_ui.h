@@ -35,4 +35,5 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "widgets/ui_scrollbar.h"
 #include "widgets/ui_scrollbar_pane.h"
 #include "widgets/ui_slider.h"
+#include "widgets/ui_spin_control.h"
 #include "widgets/ui_textinput.h"
