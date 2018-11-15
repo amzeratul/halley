@@ -75,6 +75,7 @@ namespace Halley {
 		void commit() override;
 
 	private:
+		bool isSaving;
 		XBLManager& manager;
 		String containerName;
 		mutable Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveContainer> gameSaveContainer;
