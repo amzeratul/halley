@@ -104,6 +104,10 @@ namespace Halley {
 
 		HRESULT __stdcall OnError(IXMLHTTPRequest2* pXHR, HRESULT hrError) override
 		{
+			std::unique_lock<std::mutex> lock(mutex);
+			done = true;
+			condition.notify_all();
+
 			return S_OK;
 		}
 
