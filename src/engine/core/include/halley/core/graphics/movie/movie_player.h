@@ -59,8 +59,11 @@ namespace Halley
 		void play();
 		void pause();
 		void reset();
+		void stop();
 
-		void update(Time t);
+		virtual bool hasError() const;
+
+		virtual void update(Time t);
 		void render(Resources& resources, RenderContext& rc);
 		Sprite getSprite(Resources& resources);
 

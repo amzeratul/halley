@@ -92,6 +92,18 @@ void MoviePlayer::reset()
 	onReset();
 }
 
+void MoviePlayer::stop()
+{
+	pause();
+	reset();
+	state = MoviePlayerState::Finished;
+}
+
+bool MoviePlayer::hasError() const
+{
+	return false;
+}
+
 void MoviePlayer::update(Time t)
 {
 	if (threadRunning && threadAborted) {
