@@ -540,6 +540,11 @@ void UIWidget::setHandle(UIEventType type, String id, UIEventCallback handler)
 	getEventHandler().setHandle(type, std::move(id), std::move(handler));
 }
 
+void UIWidget::setCanSendEvents(bool canSend)
+{
+	canSendEvents = canSend;
+}
+
 void UIWidget::setInputType(UIInputType uiInput)
 {
 	lastInputType = uiInput;
@@ -630,11 +635,13 @@ void UIWidget::onDestroyRequested()
 
 void UIWidget::sendEvent(UIEvent&& event) const
 {
-	if (eventHandler && eventHandler->canHandle(event)) {
-		eventHandler->queue(event);
-	} else {
-		if (parent) {
-			parent->sendEvent(std::move(event));
+	if (canSendEvents) {
+		if (eventHandler && eventHandler->canHandle(event)) {
+			eventHandler->queue(event);
+		} else {
+			if (parent) {
+				parent->sendEvent(std::move(event));
+			}
 		}
 	}
 }

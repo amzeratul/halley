@@ -95,6 +95,8 @@ namespace Halley {
 		UIEventHandler& getEventHandler();
 		void setHandle(UIEventType type, UIEventCallback handler);
 		void setHandle(UIEventType type, String id, UIEventCallback handler);
+
+		void setCanSendEvents(bool canSend);
 		
 		virtual void setInputType(UIInputType uiInput);
 		virtual void setJoystickType(JoystickType joystickType);
@@ -215,5 +217,6 @@ namespace Halley {
 		bool mouseBlocker = true;
 		bool shrinkOnLayout = false;
 		bool destroying = false;
+		bool canSendEvents = true;
 	};
 }

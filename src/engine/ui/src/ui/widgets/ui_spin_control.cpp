@@ -1,11 +1,12 @@
 #include "halley/ui/widgets/ui_spin_control.h"
 #include "halley/ui/widgets/ui_button.h"
 #include "halley/ui/ui_validator.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 UISpinControl::UISpinControl(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, float value)
 	: UIWidget(id, {}, UISizer())
-	, value(value)
+	, value(99999)
 {
 	textInput = std::make_shared<UITextInput>(keyboard, id + "_textinput", style.getSubStyle("input"), "99999");
 	textInput->setValidator(std::make_shared<UINumericValidator>(true, false));
@@ -24,6 +25,7 @@ UISpinControl::UISpinControl(std::shared_ptr<InputKeyboard> keyboard, String id,
 	{
 		setValue(getValue() + increment);
 	});
+
 	setHandle(UIEventType::TextChanged, id + "_textinput", [=] (const UIEvent& event)
 	{
 		setValue(event.getData().toFloat());
@@ -40,12 +42,14 @@ void UISpinControl::setValue(float v)
 		finalValue = std::max(finalValue, float(*minValue));
 	}
 	if (maxValue) {
-		finalValue = std::max(finalValue, float(*maxValue));
+		finalValue = std::min(finalValue, float(*maxValue));
 	}
 
-	if (value != v) {
-		value = v;
-		textInput->setText(toString(v));
+	if (value != finalValue) {
+		value = finalValue;
+		textInput->setCanSendEvents(false);
+		textInput->setText(toString(finalValue));
+		textInput->setCanSendEvents(true);
 		notifyDataBind(value);
 	}
 }
