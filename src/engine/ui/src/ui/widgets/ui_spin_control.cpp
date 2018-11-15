@@ -12,9 +12,9 @@ UISpinControl::UISpinControl(std::shared_ptr<InputKeyboard> keyboard, String id,
 
 	const auto leftButton = std::make_shared<UIButton>(id + "_left", style.getSubStyle("leftButton"));
 	const auto rightButton = std::make_shared<UIButton>(id + "_right", style.getSubStyle("rightButton"));
-	UIWidget::add(leftButton);
+	UIWidget::add(leftButton, 0, Vector4f(), UISizerAlignFlags::Centre);
 	UIWidget::add(textInput, 1);
-	UIWidget::add(rightButton);
+	UIWidget::add(rightButton, 0, Vector4f(), UISizerAlignFlags::Centre);
 
 	setHandle(UIEventType::ButtonClicked, id + "_left", [=] (const UIEvent& event)
 	{
@@ -23,6 +23,10 @@ UISpinControl::UISpinControl(std::shared_ptr<InputKeyboard> keyboard, String id,
 	setHandle(UIEventType::ButtonClicked, id + "_right", [=] (const UIEvent& event)
 	{
 		setValue(getValue() + 1);
+	});
+	setHandle(UIEventType::TextChanged, id + "_textinput", [=] (const UIEvent& event)
+	{
+		setValue(event.getData().toInteger());
 	});
 }
 
