@@ -4,6 +4,7 @@
 #include <halley/core/graphics/shader.h>
 #include <halley/core/graphics/render_target/render_target_texture.h>
 #include "dummy_system.h"
+#include <chrono>
 
 using namespace Halley;
 
@@ -16,6 +17,8 @@ void DummyVideoAPI::startRender()
 
 void DummyVideoAPI::finishRender()
 {
+	using namespace std::chrono_literals;
+	std::this_thread::sleep_for(10ms);
 }
 
 void DummyVideoAPI::setWindow(WindowDefinition&& windowDescriptor)
