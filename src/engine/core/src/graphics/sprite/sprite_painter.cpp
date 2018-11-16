@@ -125,7 +125,7 @@ void SpritePainter::draw(int mask, Painter& painter)
 
 	// Draw!
 	for (auto& s : sprites) {
-		if (s.getMask() == mask) {
+		if ((s.getMask() & mask) != 0) {
 			auto type = s.getType();
 			if (type == SpritePainterEntryType::SpriteRef) {
 				draw(s.getSprite(), painter, view);
