@@ -319,6 +319,16 @@ Material& Material::set(const String& name, const std::shared_ptr<Texture>& text
 	return set(name, std::shared_ptr<const Texture>(texture));
 }
 
+bool Material::hasParameter(const String& name) const
+{
+	for (auto& u: uniforms) {
+		if (u.name == name) {
+			return true;
+		}
+	}
+	return false;
+}
+
 uint64_t Material::getHash() const
 {
 	if (needToUpdateHash) {
