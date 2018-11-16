@@ -27,7 +27,7 @@ namespace Halley {
 		const UIRoot* getRoot() const override;
 		const String& getId() const override;
 
-		void setRect(Rect4f rect);
+		void setRect(Rect4f rect, Vector2f overscan = Vector2f());
 		Rect4f getRect() const override;
 
 		void update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual);
@@ -57,6 +57,7 @@ namespace Halley {
 		Vector2f lastMousePos;
 		std::shared_ptr<InputDevice> dummyInput;
 		Rect4f uiRect;
+		Vector2f overscan;
 
 		AudioAPI* audio;
 		bool mouseHeld = false;

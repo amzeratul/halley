@@ -33,9 +33,10 @@ UIRoot::UIRoot(AudioAPI* audio, Rect4f rect)
 
 }
 
-void UIRoot::setRect(Rect4f rect)
+void UIRoot::setRect(Rect4f rect, Vector2f overscan)
 {
-	uiRect = rect;
+	uiRect = Rect4f(rect.getTopLeft() + overscan, rect.getBottomRight() - overscan);
+	this->overscan = overscan;
 }
 
 Rect4f UIRoot::getRect() const
@@ -79,7 +80,7 @@ void UIRoot::updateMouse(spInputDevice mouse)
 	// Check where we should be mouse overing.
 	// If the mouse hasn't moved, keep the last one.
 	std::shared_ptr<UIWidget> underMouse;
-	Vector2f mousePos = mouseRemap(mouse->getPosition() + uiRect.getTopLeft());
+	Vector2f mousePos = mouseRemap(mouse->getPosition() + uiRect.getTopLeft() - overscan);
 	if (true || (mousePos - lastMousePos).squaredLength() > 0.01f) {
 		// Go through all root-level widgets and find the actual widget under the mouse
 		underMouse = getWidgetUnderMouse(mousePos);
