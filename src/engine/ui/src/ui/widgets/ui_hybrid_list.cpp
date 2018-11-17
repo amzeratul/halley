@@ -37,6 +37,14 @@ void UIHybridList::addTextItem(const String& id, const LocalisedString& label)
 
 	auto buttonStyle = style.getSubStyle("button");
 	auto button = std::make_shared<UIButton>(id, buttonStyle, UISizer(UISizerType::Vertical));
+
+	if (id == "cancel") {
+		cancelButton = button;
+		UIInputButtons inputButtons;
+		inputButtons.accept = uiInputButtons.cancel;
+		cancelButton->setInputButtons(inputButtons);
+	}
+
 	button->add(std::make_shared<UILabel>("", buttonStyle.getTextRenderer("label"), label), 0, buttonStyle.getBorder("labelBorder"), UISizerAlignFlags::Centre);
 	buttons->add(button);
 }
@@ -48,9 +56,15 @@ void UIHybridList::addDivider()
 	list->add(std::make_shared<UIImage>(dividerStyle.getSprite("image")), 0, dividerStyle.getBorder("border"));
 }
 
-void UIHybridList::setInputButtons(const UIInputButtons& buttons)
+void UIHybridList::setInputButtons(const UIInputButtons& inputButtons)
 {
-	list->setInputButtons(buttons);
+	list->setInputButtons(inputButtons);
+	if (cancelButton) {
+		UIInputButtons buttonInputButtons;
+		buttonInputButtons.accept = inputButtons.cancel;
+		cancelButton->setInputButtons(buttonInputButtons);
+	}
+	uiInputButtons = inputButtons;
 }
 
 void UIHybridList::setItemEnabled(const String& id, bool enabled)

@@ -16,6 +16,8 @@ namespace Halley {
 		UIStyle style;
 		std::shared_ptr<UIList> list;
 		std::shared_ptr<UIWidget> buttons;
+		std::shared_ptr<UIWidget> cancelButton;
 		int nColumns;
+		UIInputButtons uiInputButtons;
     };
 }
