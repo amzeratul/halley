@@ -25,5 +25,8 @@ namespace Halley
 
 		static ShaderParameterType parseParameterType(String rawType);
 		static int getAttributeSize(ShaderParameterType type);
+
+		static Bytes loadShader(const String& name, IAssetCollector& collector);
+		static Bytes doLoadShader(const String& name, IAssetCollector& collector, std::set<String>& loaded);		
 	};
 }

@@ -55,7 +55,7 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const ConfigNode& 
 		shaderAsset.assetType = ImportAssetType::Shader;
 		for (auto& curType: shaderTypes) {
 			if (shaderEntry.hasKey(curType)) {
-				auto data = collector.readAdditionalFile("shader/" + shaderEntry[curType].asString());
+				auto data = loadShader(shaderEntry[curType].asString(), collector);
 				Metadata meta;
 				meta.set("language", language);
 				shaderAsset.inputFiles.emplace_back(ImportingAssetFile(shaderName + "." + curType, std::move(data), meta));
@@ -65,4 +65,47 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const ConfigNode& 
 	}
 
 	material.addPass(MaterialPass(passName, node));
+}
+
+Bytes MaterialImporter::loadShader(const String& name, IAssetCollector& collector)
+{
+	std::set<String> loaded;
+	return doLoadShader(name, collector, loaded);
+}
+
+Bytes MaterialImporter::doLoadShader(const String& name, IAssetCollector& collector, std::set<String>& loaded)
+{
+	Bytes finalResult;
+	const auto appendLine = [&] (const void* data, size_t size)
+	{
+		const size_t curSize = finalResult.size();
+		finalResult.resize(curSize + size + 1);
+		memcpy(finalResult.data() + curSize, data, size);
+		memcpy(finalResult.data() + curSize + size, "\n", 1);
+	};
+
+	Bytes rawData = collector.readAdditionalFile("shader/" + name);
+	String strData = String(reinterpret_cast<const char*>(rawData.data()), rawData.size());
+	auto lines = strData.split('\n');
+	for (size_t i = 0; i < lines.size(); ++i) {
+		const auto& curLine = lines[i];
+		if (curLine.startsWith("#include")) {
+			auto words = curLine.split(' ');
+			auto quoted = words.at(1).trimBoth();
+			if (quoted.startsWith("\"") && quoted.endsWith("\"")) {
+				auto includeFile = quoted.mid(1, quoted.size() - 2);
+				if (loaded.find(includeFile) == loaded.end()) {
+					loaded.insert(includeFile);
+					auto includeData = doLoadShader(includeFile, collector, loaded);
+					appendLine(includeData.data(), includeData.size());
+				}
+			} else {
+				throw Exception("Invalid syntax in #include in shader", HalleyExceptions::Tools);
+			}
+		} else {
+			appendLine(curLine.c_str(), curLine.size());
+		}
+	}
+
+	return finalResult;
 }
