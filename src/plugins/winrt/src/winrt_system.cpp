@@ -385,6 +385,17 @@ void WinRTLocalSave::setData(const String& path, const Bytes& data, bool commit)
 	}).get(); // This .get() is not necessary, but gives me peace of mind
 }
 
+void WinRTLocalSave::removeData(const String& path)
+{
+	Concurrent::execute([&]() {
+		try {
+			auto file = folder.GetFileAsync(path.getUTF16().c_str()).get();
+			file.DeleteAsync().get();
+		}
+		catch (...) {}
+	}).get();
+}
+
 void WinRTLocalSave::commit()
 {
 }

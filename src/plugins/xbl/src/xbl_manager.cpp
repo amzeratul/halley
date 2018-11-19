@@ -455,6 +455,27 @@ void XBLSaveData::setData(const String& path, const Bytes& data, bool commit)
 	});
 }
 
+void XBLSaveData::removeData(const String& path)
+{
+	if (!isReady()) {
+		throw Exception("Container is not ready yet!", HalleyExceptions::PlatformPlugin);
+	}
+
+	Concurrent::execute([=]() -> void
+	{
+		auto key = winrt::hstring(path.getUTF16());
+		std::vector<winrt::hstring> updates;
+		updates.push_back(key);
+		auto view = winrt::single_threaded_vector(std::move(updates)).GetView();
+
+		auto result = gameSaveContainer->SubmitUpdatesAsync({}, view, L"").get();
+		if (result.Status() != winrt::Windows::Gaming::XboxLive::Storage::GameSaveErrorStatus::Ok)
+		{
+			Logger::logError(String("Error deleting Blob '") + path + String("': ") + (int)result.Status());
+		}
+	}).get();
+}
+
 void XBLSaveData::commit()
 {
 	
