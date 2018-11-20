@@ -28,6 +28,8 @@ namespace Halley
 		void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue) override;
 		bool isAchievementUnlocked(const String& achievementId, bool defaultValue) override;
 
+		void recreateCloudSaveContainer();
+
 	private:
 		std::shared_ptr<XBLManager> xbl;
 		WinRTSystem* system;

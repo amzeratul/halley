@@ -41,6 +41,7 @@ namespace Halley {
 		void deInit();
 
 		std::shared_ptr<ISaveData> getSaveContainer(const String& name);
+		void recreateCloudSaveContainer();
 
 		Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> getProvider() const;
 		XBLStatus getStatus() const;
@@ -75,6 +76,7 @@ namespace Halley {
 		void removeData(const String& path) override;
 		void commit() override;
 
+		void recreate();
 	private:
 		bool isSaving;
 		XBLManager& manager;

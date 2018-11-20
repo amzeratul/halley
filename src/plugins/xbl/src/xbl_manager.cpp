@@ -69,6 +69,25 @@ std::shared_ptr<ISaveData> XBLManager::getSaveContainer(const String& name)
 	}
 }
 
+void XBLManager::recreateCloudSaveContainer()
+{
+	if (status == XBLStatus::Connected)
+	{
+		Concurrent::execute([=]() -> void
+		{
+			gameSaveProvider.reset();
+			status = XBLStatus::Disconnected;
+			getConnectedStorage().get();
+
+			std::map<String, std::shared_ptr<ISaveData>>::iterator iter;
+			for (iter = saveStorage.begin(); iter != saveStorage.end(); ++iter)
+			{
+				std::dynamic_pointer_cast<XBLSaveData>(iter->second)->recreate();
+			}
+		}).get();
+	}
+}
+
 Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> XBLManager::getProvider() const
 {
 	return gameSaveProvider;
@@ -479,6 +498,12 @@ void XBLSaveData::removeData(const String& path)
 void XBLSaveData::commit()
 {
 	
+}
+
+void XBLSaveData::recreate()
+{
+	gameSaveContainer.reset();
+	gameSaveContainer = manager.getProvider()->CreateContainer(containerName.getUTF16().c_str());
 }
 
 void XBLSaveData::updateContainer() const

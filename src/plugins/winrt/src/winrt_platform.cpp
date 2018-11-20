@@ -10,6 +10,7 @@ using namespace Halley;
 WinRTPlatform::WinRTPlatform(WinRTSystem* system)
 	: system(system)
 {
+	system->setPlatform(this);
 }
 
 void WinRTPlatform::init()
@@ -58,6 +59,11 @@ void WinRTPlatform::setAchievementProgress(const String& achievementId, int curr
 bool WinRTPlatform::isAchievementUnlocked(const String& achievementId, bool defaultValue)
 {
 	return xbl->isAchievementUnlocked(achievementId, defaultValue);
+}
+
+void WinRTPlatform::recreateCloudSaveContainer()
+{
+	xbl->recreateCloudSaveContainer();
 }
 
 #endif

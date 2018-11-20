@@ -29,6 +29,11 @@ namespace Halley {
 
 		void runGame(std::function<void()> runnable) override;
 		void log(LoggerLevel level, const String& msg) override;
+
+		void setPlatform(WinRTPlatform* winrtPlatform);
+		WinRTPlatform* getPlatform();
+	private:
+		WinRTPlatform* platform;
 	};
 
 	class WinRTLocalSave : public ISaveData {

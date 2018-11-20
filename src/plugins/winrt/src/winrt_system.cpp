@@ -82,8 +82,9 @@ private:
 class WinRTWindow : public Window
 {
 public:
-	WinRTWindow(CoreWindow window, const WindowDefinition& definition)
+	WinRTWindow(CoreWindow window, const WindowDefinition& definition, WinRTSystem* system)
 		: window(window)
+		, system(system)
 		, definition(definition.withSize(Vector2i(Vector2f(window.Bounds().Width, window.Bounds().Height))))
 	{
 		window.SizeChanged([=] (CoreWindow win, WindowSizeChangedEventArgs args)
@@ -99,6 +100,13 @@ public:
 		window.KeyUp([=] (CoreWindow win, KeyEventArgs args)
 		{
 			args.Handled(true);
+		});
+
+		window.Activated([=](CoreWindow win, WindowActivatedEventArgs args)
+		{
+			if (args.WindowActivationState() == CoreWindowActivationState::CodeActivated) {
+				system->getPlatform()->recreateCloudSaveContainer();
+			}
 		});
 	}
 
@@ -163,6 +171,7 @@ public:
 private:
 	CoreWindow window;
 	WindowDefinition definition;
+	WinRTSystem* system;
 };
 
 
@@ -219,7 +228,7 @@ std::unique_ptr<GLContext> WinRTSystem::createGLContext()
 
 std::shared_ptr<Window> WinRTSystem::createWindow(const WindowDefinition& window)
 {
-	return std::make_shared<WinRTWindow>(CoreWindow::GetForCurrentThread(), window);
+	return std::make_shared<WinRTWindow>(CoreWindow::GetForCurrentThread(), window, this); 
 }
 
 void WinRTSystem::destroyWindow(std::shared_ptr<Window> window)
@@ -259,7 +268,15 @@ bool WinRTSystem::generateEvents(VideoAPI* video, InputAPI* input)
 	return true;
 }
 
+void WinRTSystem::setPlatform(WinRTPlatform* winrtPlatform)
+{
+	platform = winrtPlatform;
+}
 
+WinRTPlatform* WinRTSystem::getPlatform()
+{
+	return platform;
+}
 
 struct View : winrt::implements<View, IFrameworkView>
 {
