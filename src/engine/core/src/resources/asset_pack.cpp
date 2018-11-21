@@ -221,6 +221,7 @@ size_t PackDataReader::size() const
 
 int PackDataReader::read(gsl::span<gsl::byte> dst)
 {
+	std::unique_lock<std::mutex> lock(mutex);
 	size_t available = fileSize - curPos;
 	size_t toRead = std::min(available, size_t(dst.size()));
 
@@ -232,6 +233,7 @@ int PackDataReader::read(gsl::span<gsl::byte> dst)
 
 void PackDataReader::seek(int64_t pos, int whence)
 {
+	std::unique_lock<std::mutex> lock(mutex);
 	switch (whence) {
 	case SEEK_SET:
 		curPos = size_t(pos);
@@ -247,6 +249,7 @@ void PackDataReader::seek(int64_t pos, int whence)
 
 size_t PackDataReader::tell() const
 {
+	std::unique_lock<std::mutex> lock(mutex);
 	return curPos;
 }
 

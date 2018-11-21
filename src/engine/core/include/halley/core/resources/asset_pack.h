@@ -76,5 +76,6 @@ namespace Halley {
 		const size_t startPos;
 		const size_t fileSize;
 		size_t curPos = 0;
+		mutable std::mutex mutex;
 	};
 }
