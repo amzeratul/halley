@@ -16,6 +16,7 @@ namespace Halley {
 		void setMaxHeight(float maxHeight);
 		float getMaxWidth() const;
 		float getMaxHeight() const;
+		bool isClipped() const;
 
 		void setAlignment(float alignment);
 

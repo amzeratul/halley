@@ -85,6 +85,11 @@ float UILabel::getMaxHeight() const
 	return maxHeight;
 }
 
+bool UILabel::isClipped() const
+{
+	return needsClip;
+}
+
 void UILabel::setAlignment(float alignment)
 {
 	renderer.setAlignment(alignment);
