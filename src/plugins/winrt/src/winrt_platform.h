@@ -30,7 +30,6 @@ namespace Halley
 
 		void recreateCloudSaveContainer();
 
-		bool canShowPlayerName() const override { return true; };
 		String getPlayerName() override;
 
 	private:
