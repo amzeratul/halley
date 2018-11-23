@@ -149,5 +149,8 @@ namespace Halley
 		// When the user joins a session, this function should be called back to let the game know what session they should join
 		// If the join happens before this method is called, then wait for this method to be called, and then call the callback
 		virtual void setJoinCallback(PlatformJoinCallback callback) {}
+
+		virtual bool canShowPlayerInfo() const { return false; }
+		virtual void showPlayerInfo(String playerId) {}
 	};
 }

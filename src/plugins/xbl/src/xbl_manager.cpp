@@ -373,6 +373,11 @@ void XBLManager::retrieveUserAchievementsState()
 	});
 }
 
+void XBLManager::showPlayerInfo(String playerId)
+{
+	xbox::services::system::title_callable_ui::show_profile_card_ui(playerId.getUTF16());
+}
+
 XBLSaveData::XBLSaveData(XBLManager& manager, String containerName)
 	: manager(manager)
 	, containerName(containerName.isEmpty() ? "save" : containerName)

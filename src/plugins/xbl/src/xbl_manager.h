@@ -51,6 +51,8 @@ namespace Halley {
 
 		String getPlayerName();
 
+		void showPlayerInfo(String playerId);
+
 	private:
 		std::shared_ptr<xbox::services::system::xbox_live_user> xboxUser;
 		std::shared_ptr<xbox::services::xbox_live_context> xboxLiveContext;
