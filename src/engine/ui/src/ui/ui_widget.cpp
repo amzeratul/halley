@@ -280,8 +280,10 @@ void UIWidget::setFocused(bool f)
 		focused = f;
 		if (focused) {
 			onFocus();
+			sendEvent(UIEvent(UIEventType::FocusGained, getId()));
 		} else {
 			onFocusLost();
+			sendEvent(UIEvent(UIEventType::FocusLost, getId()));
 		}
 	}
 }

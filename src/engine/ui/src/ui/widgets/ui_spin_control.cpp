@@ -26,9 +26,13 @@ UISpinControl::UISpinControl(std::shared_ptr<InputKeyboard> keyboard, String id,
 		setValue(getValue() + increment);
 	});
 
-	setHandle(UIEventType::TextChanged, id + "_textinput", [=] (const UIEvent& event)
+	setHandle(UIEventType::FocusLost, id + "_textinput", [=] (const UIEvent& event)
 	{
-		setValue(event.getData().toFloat());
+		setValue(textInput->getText().toFloat());
+	});
+	setHandle(UIEventType::TextSubmit, id + "_textinput", [=] (const UIEvent& event)
+	{
+		setValue(textInput->getText().toFloat());
 	});
 
 	setValue(value);
