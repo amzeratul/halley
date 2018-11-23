@@ -16,6 +16,8 @@ namespace Halley {
 		void setMaxHeight(float maxHeight);
 		float getMaxWidth() const;
 		float getMaxHeight() const;
+		void setWordWrapped(bool wrapped);
+		bool isWordWrapped() const;
 		bool isClipped() const;
 
 		void setAlignment(float alignment);
@@ -40,6 +42,7 @@ namespace Halley {
 		Vector2f textExtents;
 		float maxWidth = std::numeric_limits<float>::infinity();
 		float maxHeight = std::numeric_limits<float>::infinity();
+		bool wordWrapped = true;
 		bool needsClip = false;
 
 		void updateMinSize();

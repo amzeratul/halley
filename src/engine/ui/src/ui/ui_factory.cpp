@@ -337,6 +337,9 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 	if (node.hasKey("maxHeight")) {
 		label->setMaxHeight(node["maxHeight"].asFloat());
 	}
+	if (node.hasKey("wordWrapped")) {
+		label->setWordWrapped(node["wordWrapped"].asBool());
+	}
 	if (node.hasKey("alignment")) {
 		label->setAlignment(node["alignment"].asFloat());
 	}

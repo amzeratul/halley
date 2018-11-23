@@ -35,8 +35,13 @@ void UILabel::updateMinSize()
 	needsClip = false;
 	textExtents = renderer.getExtents();
 	if (textExtents.x > maxWidth) {
-		renderer.setText(renderer.split(maxWidth));
-		textExtents = renderer.getExtents();
+		if (wordWrapped) {
+			renderer.setText(renderer.split(maxWidth));
+			textExtents = renderer.getExtents();
+		} else {
+			textExtents.x = maxWidth;
+			needsClip = true;
+		}
 	}
 	if (textExtents.y > maxHeight) {
 		textExtents.y = maxHeight;
@@ -83,6 +88,16 @@ float UILabel::getMaxWidth() const
 float UILabel::getMaxHeight() const
 {
 	return maxHeight;
+}
+
+void UILabel::setWordWrapped(bool wrapped)
+{
+	wordWrapped = wrapped;
+}
+
+bool UILabel::isWordWrapped() const
+{
+	return wordWrapped;
 }
 
 bool UILabel::isClipped() const
