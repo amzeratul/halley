@@ -240,6 +240,10 @@ void UIDropdown::close()
 	if (isOpen) {
 		isOpen = false;
 
+		scrollPane->destroy();
+		scrollPane.reset();
+		dropdownList->destroy();
+		dropdownList.reset();
 		dropdownWindow->destroy();
 		dropdownWindow.reset();
 
