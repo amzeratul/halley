@@ -32,6 +32,9 @@ namespace Halley
 
 		String getPlayerName() override;
 
+		bool canShowPlayerInfo() const override { return true; }
+		void showPlayerInfo(String playerId) override;
+
 	private:
 		std::shared_ptr<XBLManager> xbl;
 		WinRTSystem* system;

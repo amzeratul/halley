@@ -71,4 +71,9 @@ String WinRTPlatform::getPlayerName()
 	return xbl->getPlayerName();
 }
 
+void WinRTPlatform::showPlayerInfo(String playerId)
+{
+	xbl->showPlayerInfo(playerId);
+}
+
 #endif
