@@ -30,6 +30,9 @@ namespace Halley
 
 		void recreateCloudSaveContainer();
 
+		bool canShowPlayerName() const override { return true; };
+		String getPlayerName() override;
+
 	private:
 		std::shared_ptr<XBLManager> xbl;
 		WinRTSystem* system;

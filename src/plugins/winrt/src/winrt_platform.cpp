@@ -66,4 +66,9 @@ void WinRTPlatform::recreateCloudSaveContainer()
 	xbl->recreateCloudSaveContainer();
 }
 
+String WinRTPlatform::getPlayerName()
+{
+	return xbl->getPlayerName();
+}
+
 #endif

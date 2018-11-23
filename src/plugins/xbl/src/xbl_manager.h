@@ -49,6 +49,8 @@ namespace Halley {
 		void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue);
 		bool isAchievementUnlocked(const String& achievementId, bool defaultValue);
 
+		String getPlayerName();
+
 	private:
 		std::shared_ptr<xbox::services::system::xbox_live_user> xboxUser;
 		std::shared_ptr<xbox::services::xbox_live_context> xboxLiveContext;

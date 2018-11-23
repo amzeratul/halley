@@ -225,6 +225,15 @@ bool XBLManager::isAchievementUnlocked(const String& achievementId, bool default
 	return defaultValue;
 }
 
+String XBLManager::getPlayerName()
+{
+	if (xboxUser)
+	{
+		return String(xboxUser->gamertag().c_str());
+	}
+	return "";
+}
+
 void XBLManager::signIn()
 {
 	xbox::services::system::xbox_live_services_settings::get_singleton_instance()->set_diagnostics_trace_level(xbox::services::xbox_services_diagnostics_trace_level::verbose);

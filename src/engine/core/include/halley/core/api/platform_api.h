@@ -136,6 +136,9 @@ namespace Halley
 		virtual bool canShowSubscriptionNeeded() const { return false; }
 		virtual bool showSubscriptionNeeded() const { return true; }
 
+		virtual bool canShowPlayerName() const { return false; };
+		virtual String getPlayerName() { return ""; }
+
 		// Complete when currentProgress == maximumValue
 		virtual String getId() { return ""; }
 		virtual void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue) {}
