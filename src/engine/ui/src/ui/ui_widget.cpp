@@ -472,7 +472,9 @@ void UIWidget::setParent(UIParent* p)
 	Expects((parent == nullptr) ^ (p == nullptr));
 	parent = p;
 
-	parent->markAsNeedingLayout();
+	if (parent) {
+		parent->markAsNeedingLayout();
+	}
 
 	if (anchor) {
 		layout();

@@ -12,7 +12,7 @@ namespace Halley {
 
 	class UIParent {
 	public:
-		virtual ~UIParent() {}
+		virtual ~UIParent();
 
 		virtual const String& getId() const = 0;
 		virtual UIRoot* getRoot() = 0;

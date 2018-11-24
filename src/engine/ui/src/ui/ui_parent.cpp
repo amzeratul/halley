@@ -3,6 +3,13 @@
 #include "halley/support/logger.h"
 using namespace Halley;
 
+UIParent::~UIParent()
+{
+	for (auto& c: children) {
+		c->setParent(nullptr);
+	}
+}
+
 void UIParent::addChild(std::shared_ptr<UIWidget> widget)
 {
 	Expects(widget->getParent() == nullptr || widget->getParent() == this);
