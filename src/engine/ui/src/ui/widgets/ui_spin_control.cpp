@@ -49,11 +49,18 @@ void UISpinControl::setValue(float v)
 		finalValue = std::min(finalValue, float(*maxValue));
 	}
 
-	if (value != finalValue) {
+	const bool changed = value != finalValue;
+	if (changed) {
 		value = finalValue;
+	}
+
+	if (changed || finalValue != v) {
 		textInput->setCanSendEvents(false);
 		textInput->setText(toString(finalValue));
 		textInput->setCanSendEvents(true);
+	}
+
+	if (changed) {
 		notifyDataBind(value);
 	}
 }
