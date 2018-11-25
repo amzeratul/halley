@@ -152,5 +152,23 @@ namespace Halley
 
 		virtual bool canShowPlayerInfo() const { return false; }
 		virtual void showPlayerInfo(String playerId) {}
+
+		virtual String getSystemLanguage() const { return "en-GB"; }
+
+		virtual void setProfanityCheckLanguage(const String& language) {};
+
+		// Some platforms have different methods to check for profanity on names. If not, default to standard.
+		virtual Future<String> performNameProfanityCheck(String name)
+		{
+			return performProfanityCheck(std::move(name));
+		}
+
+		// Returns a censored version of this string
+		virtual Future<String> performProfanityCheck(String text)
+		{
+			Promise<String> promise;
+			promise.setValue(std::move(text));
+			return promise.getFuture();
+		}
 	};
 }
