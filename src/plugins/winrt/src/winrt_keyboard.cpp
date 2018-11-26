@@ -144,12 +144,19 @@ void WinRTKeyboard::initMapping()
 	set(VirtualKey::F11, Keys::F11);
 	set(VirtualKey::F12, Keys::F12);
 
+	set( VirtualKey::Number0, Keys::Num0 );
+	set( VirtualKey::Number1, Keys::Num1 );
+	set( VirtualKey::Number2, Keys::Num2 );
+	set( VirtualKey::Number3, Keys::Num3 );
+	set( VirtualKey::Number4, Keys::Num4 );
+	set( VirtualKey::Number5, Keys::Num5 );
+	set( VirtualKey::Number6, Keys::Num6 );
+	set( VirtualKey::Number7, Keys::Num7 );
+	set( VirtualKey::Number8, Keys::Num8 );
+	set( VirtualKey::Number9, Keys::Num9 );
+
 	for (int i = 0; i < 26; ++i) {
 		set(VirtualKey(int(VirtualKey::A) + i), Keys::A + i);
-	}
-
-	for (int i = 0; i < 10; ++i) {
-		set(VirtualKey(int(VirtualKey::Number0) + i), Keys::Num0 + i);
 	}
 }
 
