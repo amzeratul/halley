@@ -20,15 +20,25 @@ void UIFramedImage::draw(UIPainter& painter) const
 
 	const auto frameSize = framedSprite.getSize();	
 	const auto startPos = rect.getTopLeft() + scrollPos - frameSize;
-	for (float y = startPos.y; y < rect.getBottom(); y += frameSize.y) {
-		if (y + frameSize.y < rect.getTop()) {
+
+	int xCount = int(std::ceil((rect.getRight() - startPos.x) / frameSize.x));
+	int yCount = int(std::ceil((rect.getBottom() - startPos.y) / frameSize.y));
+
+	for (int iy = 0; iy < yCount; ++iy) {
+		float y0 = startPos.y + iy * frameSize.y;
+		float y1 = startPos.y + (iy + 1) * frameSize.y;
+		if (y1 < rect.getTop()) {
 			continue;
 		}
-		for (float x = startPos.x; x < rect.getRight(); x += frameSize.x) {
-			if (x + frameSize.x < rect.getLeft()) {
+		for (int ix = 0; ix < xCount; ++ix) {
+			float x0 = startPos.x + ix * frameSize.x;
+			float x1 = startPos.x + (ix + 1) * frameSize.x;
+			if (x1 < rect.getLeft()) {
 				continue;
 			}
-			clippedPainter.draw(framedSprite.clone().setPos(Vector2f(x, y)), true);
+			const Vector2f drawPos = Vector2f(x0, y0);
+			const Vector2f drawSize = Vector2f(x1 - x0, y1 - y0);
+			clippedPainter.draw(framedSprite.clone().setPos(drawPos).setSize(drawSize), true);
 		}
 	}
 	
