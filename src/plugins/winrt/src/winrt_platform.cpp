@@ -24,7 +24,17 @@ void WinRTPlatform::deInit()
 	xbl.reset();
 }
 
-void WinRTPlatform::update() {}
+void WinRTPlatform::update()
+{
+	xbl->update();
+
+	// Check for invite
+	if (getMultiplayerStatus() != MultiplayerStatus::Unsupported) {
+		if (xbl->incommingInvitation()) {
+			xbl->acceptInvitation();
+		}
+	}
+}
 
 std::unique_ptr<HTTPRequest> WinRTPlatform::makeHTTPRequest(const String& method, const String& url)
 {
@@ -71,9 +81,44 @@ String WinRTPlatform::getPlayerName()
 	return xbl->getPlayerName();
 }
 
+void WinRTPlatform::setJoinCallback(PlatformJoinCallback callback)
+{
+	xbl->setJoinCallback(callback);
+}
+
+void WinRTPlatform::setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback)
+{
+	xbl->setPreparingToJoinCallback(callback);
+}
+
+void WinRTPlatform::showInviteUI()
+{
+	xbl->showInviteUI();
+}
+
 void WinRTPlatform::showPlayerInfo(String playerId)
 {
 	xbl->showPlayerInfo(playerId);
+}
+
+void WinRTPlatform::invitationArrived(const std::wstring& uri)
+{ 
+	xbl->invitationArrived(uri);
+}
+
+void WinRTPlatform::openHost(const String& key) 
+{ 
+	xbl->openHost(key); 
+}
+
+MultiplayerStatus WinRTPlatform::getMultiplayerStatus() const
+{
+	return xbl->getMultiplayerStatus(); 
+}
+
+void WinRTPlatform::closeMultiplayer( ) 
+{ 
+	xbl->closeMultiplayer();
 }
 
 #endif

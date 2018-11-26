@@ -32,6 +32,16 @@ namespace Halley
 
 		String getPlayerName() override;
 
+		void invitationArrived(const std::wstring& uri);
+
+		void setJoinCallback(PlatformJoinCallback callback) override;
+		void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback) override;
+
+		void openHost(const String& key) override;
+		MultiplayerStatus getMultiplayerStatus() const override;
+		void showInviteUI() override;
+		void closeMultiplayer() override;
+
 		bool canShowPlayerInfo() const override { return true; }
 		void showPlayerInfo(String playerId) override;
 

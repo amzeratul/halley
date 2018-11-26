@@ -7,6 +7,7 @@ using namespace Halley;
 
 #include "winrt/Windows.ApplicationModel.h"
 #include "winrt/Windows.ApplicationModel.Core.h"
+#include "winrt/Windows.ApplicationModel.Activation.h"
 #include "winrt/Windows.Foundation.h"
 #include "winrt/Windows.Foundation.Diagnostics.h"
 #include "winrt/Windows.Networking.Connectivity.h"
@@ -24,6 +25,7 @@ using namespace winrt::Windows::ApplicationModel;
 using namespace winrt::Windows::ApplicationModel::Core;
 using namespace winrt::Windows::UI::Core;
 using namespace winrt::Windows::UI::ViewManagement;
+using namespace winrt::Windows::ApplicationModel;
 
 #pragma comment(lib, "windowsapp")
 
@@ -323,6 +325,40 @@ struct View : winrt::implements<View, IFrameworkView>
 
 	void Initialize(CoreApplicationView const &view)
 	{
+		view.Activated([=](CoreApplicationView const& view, Activation::IActivatedEventArgs const& args)
+		{
+			if (args.Kind() == Activation::ActivationKind::Launch)
+			{
+				OutputDebugString(L"Launch params received!\n");
+			}
+
+			if (args.Kind() == Activation::ActivationKind::Protocol)
+			{   
+				Concurrent::execute([=]()
+				{
+					auto eventArgs{ args.as<Activation::ProtocolActivatedEventArgs>() };
+
+					// Wait until platform is created
+					if (!system.getPlatform())
+					{
+						unsigned long long timeout = GetTickCount64() + 5000;
+						while (!system.getPlatform() && GetTickCount64() < timeout) {}
+						if (!system.getPlatform())
+						{
+							Logger::logWarning(String("Platform is taking too long to being created!"));
+							return;
+						}
+					}
+
+					// Then start the process
+					system.getPlatform()->invitationArrived(eventArgs.Uri().RawUri().c_str());
+				});
+				
+			}
+	
+			CoreWindow::GetForCurrentThread().Activate();
+		});
+
 		OutputDebugString(L"Initialized");
 	}
 

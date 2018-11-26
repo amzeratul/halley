@@ -102,6 +102,14 @@ namespace Halley
 		OnlineCapabilities capabilitiesRequired;
 	};
 
+	enum class MultiplayerStatus {
+		NotInit,
+		Initializing,
+		Running,
+		Error,
+		Unsupported
+	};
+
 	class MultiplayerSession {
 	public:
 		virtual ~MultiplayerSession() = default;
@@ -117,6 +125,7 @@ namespace Halley
 		String param;
 	};
 	using PlatformJoinCallback = std::function<void(PlatformJoinCallbackParameters)>;
+	using PlatformPreparingToJoinCallback = std::function<void(void)>;
 
 	class PlatformAPI
 	{
@@ -149,6 +158,12 @@ namespace Halley
 		// When the user joins a session, this function should be called back to let the game know what session they should join
 		// If the join happens before this method is called, then wait for this method to be called, and then call the callback
 		virtual void setJoinCallback(PlatformJoinCallback callback) {}
+		virtual void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback) {}
+
+		virtual void openHost(const String& key) {}
+		virtual MultiplayerStatus getMultiplayerStatus() const { return MultiplayerStatus::Unsupported; }
+		virtual void showInviteUI() {}
+		virtual void closeMultiplayer() {}
 
 		virtual bool canShowPlayerInfo() const { return false; }
 		virtual void showPlayerInfo(String playerId) {}
