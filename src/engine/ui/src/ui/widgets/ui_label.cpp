@@ -44,7 +44,8 @@ void UILabel::updateMinSize()
 		}
 	}
 	if (textExtents.y > maxHeight) {
-		textExtents.y = maxHeight;
+		float maxLines = std::floor(maxHeight / renderer.getLineHeight());
+		textExtents.y = maxLines * renderer.getLineHeight();
 		needsClip = true;
 	}
 	setMinSize(textExtents);
