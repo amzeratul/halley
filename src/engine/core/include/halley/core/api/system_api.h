@@ -39,6 +39,7 @@ namespace Halley
 		virtual Rect4i getDisplayRect(int screen) const = 0;
 
 		virtual void showCursor(bool show) = 0;
+		virtual bool hasBeenDisconnectedFromTheInternet() { return false; }
 
 		virtual std::shared_ptr<ISaveData> getStorageContainer(SaveDataType type, const String& containerName = "") = 0;
 

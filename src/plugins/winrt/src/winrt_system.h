@@ -21,7 +21,9 @@ namespace Halley {
 		void destroyWindow(std::shared_ptr<Window> window) override;
 		Vector2i getScreenSize(int n) const override;
 		Rect4i getDisplayRect(int screen) const override;
+
 		void showCursor(bool show) override;
+		bool hasBeenDisconnectedFromTheInternet() override;
 
 		std::shared_ptr<ISaveData> getStorageContainer(SaveDataType type, const String& containerName) override;
 
@@ -34,6 +36,8 @@ namespace Halley {
 		WinRTPlatform* getPlatform();
 	private:
 		WinRTPlatform* platform;
+		int checkIfConnectedToTheInternetDelay;
+		bool isConnectedToTheInternet;
 	};
 
 	class WinRTLocalSave : public ISaveData {

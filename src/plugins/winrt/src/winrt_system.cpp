@@ -9,6 +9,7 @@ using namespace Halley;
 #include "winrt/Windows.ApplicationModel.Core.h"
 #include "winrt/Windows.Foundation.h"
 #include "winrt/Windows.Foundation.Diagnostics.h"
+#include "winrt/Windows.Networking.Connectivity.h"
 #include "winrt/Windows.Storage.h"
 #include "winrt/Windows.Storage.FileProperties.h"
 #include "winrt/Windows.Storage.Search.h"
@@ -188,6 +189,13 @@ void WinRTSystem::init()
 	session.CloseAndSaveToFileAsync();
 	*/
 
+	checkIfConnectedToTheInternetDelay = 0;
+	isConnectedToTheInternet = true;
+	winrt::Windows::Networking::Connectivity::NetworkInformation::NetworkStatusChanged([=](auto sender) {
+		// Give some margin for quick network status' changes
+		checkIfConnectedToTheInternetDelay = 60;
+	});
+
 	Logger::addSink(*this);
 }
 
@@ -248,6 +256,29 @@ Rect4i WinRTSystem::getDisplayRect(int screen) const
 void WinRTSystem::showCursor(bool show)
 {
 	// TODO
+}
+
+bool WinRTSystem::hasBeenDisconnectedFromTheInternet()
+{
+	using namespace winrt::Windows::Networking::Connectivity;
+
+	bool wasConnectedToTheInternet = isConnectedToTheInternet;
+
+	if (checkIfConnectedToTheInternetDelay > 0) {
+		--checkIfConnectedToTheInternetDelay;
+	} else if (checkIfConnectedToTheInternetDelay == 0) {
+		checkIfConnectedToTheInternetDelay = -1;
+
+		NetworkConnectivityLevel connectivityLevel = NetworkConnectivityLevel::None;
+		auto internetProfile = NetworkInformation::GetInternetConnectionProfile();
+		if (internetProfile != nullptr) {
+			connectivityLevel = internetProfile.GetNetworkConnectivityLevel();
+		}
+
+		isConnectedToTheInternet = (connectivityLevel == NetworkConnectivityLevel::InternetAccess);
+	}
+
+	return (!isConnectedToTheInternet && wasConnectedToTheInternet);
 }
 
 std::shared_ptr<ISaveData> WinRTSystem::getStorageContainer(SaveDataType type, const String& containerName)
