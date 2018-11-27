@@ -37,7 +37,7 @@ void UIFramedImage::draw(UIPainter& painter) const
 				continue;
 			}
 			const Vector2f drawPos = Vector2f(x0, y0);
-			const Vector2f drawSize = Vector2f(x1 - x0, y1 - y0);
+			const Vector2f drawSize = Vector2f(x1 - x0 + 0.25f, y1 - y0 + 0.25f);
 			clippedPainter.draw(framedSprite.clone().setPos(drawPos).setSize(drawSize), true);
 		}
 	}
