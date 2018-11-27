@@ -111,11 +111,6 @@ void WinRTKeyboard::initMapping()
 	set(VirtualKey::Left, Keys::Left);
 	set(VirtualKey::Right, Keys::Right);
 
-	set(VirtualKey::GamepadDPadUp, Keys::Up);
-	set(VirtualKey::GamepadDPadDown, Keys::Down);
-	set(VirtualKey::GamepadDPadLeft, Keys::Left);
-	set(VirtualKey::GamepadDPadRight, Keys::Right);
-
 	set(VirtualKey::Home, Keys::Home);
 	set(VirtualKey::End, Keys::End);
 	set(VirtualKey::PageUp, Keys::PageUp);
