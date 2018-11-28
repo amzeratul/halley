@@ -113,10 +113,8 @@ namespace Halley
 	class MultiplayerSession {
 	public:
 		virtual ~MultiplayerSession() = default;
-
-		virtual void update() = 0; // This is called once per frame by the game
-		virtual void setParameter(const String& key, const String& data) = 0;
-		virtual void setLobbyCapacity(int numPlayers, int maxPlayers) = 0;
+		virtual MultiplayerStatus getStatus() const = 0;
+		virtual void showInviteUI() = 0;
 	};
 
 	// This is the join callback, see PlatformAPI's method for more details
@@ -153,17 +151,16 @@ namespace Halley
 		virtual bool isAchievementUnlocked(const String& achievementId, bool defaultValue) { return defaultValue; }
 
 		// Return empty unique_ptr if not supported
-		virtual std::unique_ptr<MultiplayerSession> makeMultiplayerSession() { return {}; }
+		virtual std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key) { return {}; }
+
+		virtual bool multiplayerProcessingInvitation()	{ return false; }
+		virtual bool multiplayerProcessingInvitationError() { return false; }
+		virtual void multiplayerInvitationCancel() { }
 
 		// When the user joins a session, this function should be called back to let the game know what session they should join
 		// If the join happens before this method is called, then wait for this method to be called, and then call the callback
 		virtual void setJoinCallback(PlatformJoinCallback callback) {}
 		virtual void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback) {}
-
-		virtual void openHost(const String& key) {}
-		virtual MultiplayerStatus getMultiplayerStatus() const { return MultiplayerStatus::Unsupported; }
-		virtual void showInviteUI() {}
-		virtual void closeMultiplayer() {}
 
 		virtual bool canShowPlayerInfo() const { return false; }
 		virtual void showPlayerInfo(String playerId) {}

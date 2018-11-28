@@ -62,14 +62,17 @@ namespace Halley {
 
 		void update();
 
+		std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key);
+
 		void invitationArrived(const std::wstring& uri);
 		bool incommingInvitation();
-		void acceptInvitation();
-		void openHost(const String& key);
-		void showInviteUI();
-		MultiplayerStatus getMultiplayerStatus() const;
+		int  acceptInvitation();
+
+		int openHost(const String& key);
+		MultiplayerStatus getMultiplayerStatus(int session=-1) const;
 		bool isMultiplayerAsHost() const;
 		bool isMultiplayerAsGuest() const;
+		void showInviteUI();
 		void closeMultiplayer();
 
 		void setJoinCallback(PlatformJoinCallback callback);
@@ -93,58 +96,59 @@ namespace Halley {
 		void retrieveUserAchievementsState();
 
 		enum class MultiplayerMode {
-			MultiplayerModeNone, 
-			MultiplayerModeInviter, 
-			MultiplayerModeInvitee
+			None, 
+			Inviter, 
+			Invitee
 		};
 
 		enum class MultiplayerState {
-			MultiplayerStateNotInitialized,
-			MultiplayerStateInitializing,
-			MultiplayerStateRunning,
-			MultiplayerStateEnding,
-			MultiplayerStateError
+			NotInitialized,
+			Initializing,
+			Running,
+			Ending,
+			Error
 		};
 
 		enum class XBLMPMOperationState { 
-			XBLMPMOperationStateNotRequested,
-			XBLMPMOperationStateRequested,
-			XBLMPMOperationStateDoneOk,
-			XBLMPMOperationStateError
+			NotRequested,
+			Requested,
+			DoneOk,
+			Error
 		};
 
-		XBLMPMOperationState    xblOperation_add_local_user;    // INVITER
-		XBLMPMOperationState    xblOperation_set_property;      // INVITER
-		XBLMPMOperationState    xblOperation_set_joinability;   // INVITER
-		XBLMPMOperationState    xblOperation_join_lobby;        // INVITEE
+		XBLMPMOperationState xblOperation_add_local_user;    // INVITER
+		XBLMPMOperationState xblOperation_set_property;      // INVITER
+		XBLMPMOperationState xblOperation_set_joinability;   // INVITER
+		XBLMPMOperationState xblOperation_join_lobby;        // INVITEE
 
-		struct MultiplayerSetup
-		{
+		struct MultiplayerSetup {
 			MultiplayerMode mode;
-			String          key;
-			std::wstring    invitationUri;
+			String key;
+			std::wstring invitationUri;
+			int	sessionId;
 		};
 
-		std::wstring                            multiplayerIncommingInvitationUri;
+		std::wstring multiplayerIncommingInvitationUri;
 
-		MultiplayerSetup                        multiplayerCurrentSetup;
-		MultiplayerSetup                        multiplayerTargetSetup;
+		MultiplayerSetup multiplayerCurrentSetup;
+		MultiplayerSetup multiplayerTargetSetup;
 
-		MultiplayerState                        multiplayerState;
+		MultiplayerState multiplayerState;
+		int	multiplayerNextSessionId;
 
-		std::shared_ptr<multiplayer_manager>    xblMultiplayerManager;
-		uint64_t                                xblMultiplayerContext;
+		std::shared_ptr<multiplayer_manager> xblMultiplayerManager;
+		uint64_t xblMultiplayerContext;
 
-		void                                    multiplayerUpdate();
-		void                                    multiplayerUpdate_NotInitialized();
-		void                                    multiplayerUpdate_Initializing();
-		void                                    multiplayerUpdate_Initializing_Iniviter();
-		void                                    multiplayerUpdate_Initializing_Inivitee();
-		void                                    multiplayerUpdate_Running();
-		void                                    multiplayerUpdate_Ending();
+		void multiplayerUpdate();
+		void multiplayerUpdate_NotInitialized();
+		void multiplayerUpdate_Initializing();
+		void multiplayerUpdate_Initializing_Iniviter();
+		void multiplayerUpdate_Initializing_Inivitee();
+		void multiplayerUpdate_Running();
+		void multiplayerUpdate_Ending();
 
-		void                                    multiplayerDone();
-		void                                    xblMultiplayerPoolProcess();
+		void multiplayerDone();
+		void xblMultiplayerPoolProcess();
 	};
 
 	class XBLSaveData : public ISaveData {
@@ -166,5 +170,18 @@ namespace Halley {
 		mutable Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveContainer> gameSaveContainer;
 
 		void updateContainer() const;
+	};
+
+	class XBLMultiplayerSession : public MultiplayerSession {
+	public:
+		explicit XBLMultiplayerSession(XBLManager& manager,const String& key);
+		virtual ~XBLMultiplayerSession();
+
+		MultiplayerStatus getStatus() const override;
+		void showInviteUI() override;
+	private:
+		XBLManager& manager;
+		String key;
+		int sessionId;
 	};
 }

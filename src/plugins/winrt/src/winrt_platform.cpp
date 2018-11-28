@@ -28,11 +28,8 @@ void WinRTPlatform::update()
 {
 	xbl->update();
 
-	// Check for invite
-	if (getMultiplayerStatus() != MultiplayerStatus::Unsupported) {
-		if (xbl->incommingInvitation()) {
-			xbl->acceptInvitation();
-		}
+	if (xbl->incommingInvitation()) {
+		xbl->acceptInvitation();
 	}
 }
 
@@ -71,6 +68,26 @@ bool WinRTPlatform::isAchievementUnlocked(const String& achievementId, bool defa
 	return xbl->isAchievementUnlocked(achievementId, defaultValue);
 }
 
+std::unique_ptr<MultiplayerSession> WinRTPlatform::makeMultiplayerSession(const String& key)
+{
+	return xbl->makeMultiplayerSession(key);
+}
+
+bool WinRTPlatform::multiplayerProcessingInvitation()
+{
+	return (xbl->getMultiplayerStatus()==MultiplayerStatus::Initializing);
+}
+
+bool WinRTPlatform::multiplayerProcessingInvitationError()
+{
+	return (xbl->getMultiplayerStatus()==MultiplayerStatus::Error);
+}
+
+void WinRTPlatform::multiplayerInvitationCancel()
+{
+	return xbl->closeMultiplayer();	
+}
+
 void WinRTPlatform::recreateCloudSaveContainer()
 {
 	xbl->recreateCloudSaveContainer();
@@ -91,11 +108,6 @@ void WinRTPlatform::setPreparingToJoinCallback(PlatformPreparingToJoinCallback c
 	xbl->setPreparingToJoinCallback(callback);
 }
 
-void WinRTPlatform::showInviteUI()
-{
-	xbl->showInviteUI();
-}
-
 void WinRTPlatform::showPlayerInfo(String playerId)
 {
 	xbl->showPlayerInfo(playerId);
@@ -104,21 +116,6 @@ void WinRTPlatform::showPlayerInfo(String playerId)
 void WinRTPlatform::invitationArrived(const std::wstring& uri)
 { 
 	xbl->invitationArrived(uri);
-}
-
-void WinRTPlatform::openHost(const String& key) 
-{ 
-	xbl->openHost(key); 
-}
-
-MultiplayerStatus WinRTPlatform::getMultiplayerStatus() const
-{
-	return xbl->getMultiplayerStatus(); 
-}
-
-void WinRTPlatform::closeMultiplayer( ) 
-{ 
-	xbl->closeMultiplayer();
 }
 
 #endif

@@ -28,6 +28,12 @@ namespace Halley
 		void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue) override;
 		bool isAchievementUnlocked(const String& achievementId, bool defaultValue) override;
 
+		std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key);
+
+		bool multiplayerProcessingInvitation() override;
+		bool multiplayerProcessingInvitationError() override;
+		void multiplayerInvitationCancel() override;
+
 		void recreateCloudSaveContainer();
 
 		String getPlayerName() override;
@@ -36,11 +42,6 @@ namespace Halley
 
 		void setJoinCallback(PlatformJoinCallback callback) override;
 		void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback) override;
-
-		void openHost(const String& key) override;
-		MultiplayerStatus getMultiplayerStatus() const override;
-		void showInviteUI() override;
-		void closeMultiplayer() override;
 
 		bool canShowPlayerInfo() const override { return true; }
 		void showPlayerInfo(String playerId) override;
