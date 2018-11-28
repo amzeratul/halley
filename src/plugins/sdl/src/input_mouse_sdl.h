@@ -40,6 +40,7 @@ namespace Halley {
 	private:
 		InputMouseSDL();
 		void processEvent(const SDL_Event& event, std::function<Vector2f(Vector2i)> remap);
+		void updateRemap(std::function<Vector2f(Vector2i)> remap);
 
 		Vector2f pos;
 		int wheelMove;
