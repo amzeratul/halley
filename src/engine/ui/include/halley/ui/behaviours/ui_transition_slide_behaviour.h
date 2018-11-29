@@ -26,6 +26,8 @@ namespace Halley {
 
 		void updateAnchors(UIAnchor newBase, UIAnchor newStartPos, UIAnchor newEndPos);
 
+		bool isFinished() const;
+
     private:
 		Time length;
 		Time time;
@@ -35,5 +37,7 @@ namespace Halley {
 		UIAnchor base;
 		UIAnchor startPos;
 		UIAnchor endPos;
+
+		bool finished;
     };
 }

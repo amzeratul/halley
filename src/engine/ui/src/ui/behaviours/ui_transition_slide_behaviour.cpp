@@ -1,5 +1,6 @@
 #include "behaviours/ui_transition_slide_behaviour.h"
 #include "ui_widget.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 UITransitionSlideBehaviour::UITransitionSlideBehaviour(Time length, UIAnchor base, UIAnchor startPos, UIAnchor endPos, TransitionCurve curve)
@@ -10,6 +11,7 @@ UITransitionSlideBehaviour::UITransitionSlideBehaviour(Time length, UIAnchor bas
 	, base(std::move(base))
 	, startPos(std::move(startPos))
 	, endPos(std::move(endPos))
+	, finished(false)
 {
 }
 
@@ -30,6 +32,10 @@ void UITransitionSlideBehaviour::updateAnchors(UIAnchor newBase, UIAnchor newSta
 	else {
 		getWidget()->setAnchor(base);
 	}
+}
+
+bool UITransitionSlideBehaviour::isFinished() const {
+	return finished;
 }
 
 void UITransitionSlideBehaviour::init()
@@ -60,6 +66,7 @@ void UITransitionSlideBehaviour::update(Time dt)
 			getWidget()->setAnchor(lerp(base, isReversed() ? startPos : endPos, 1.0f - t));
 			if (time >= length) {
 				getWidget()->forceDestroy();
+				finished = true;
 			}
 		}
 	}
