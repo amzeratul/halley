@@ -206,6 +206,10 @@ void InputSDL::processEvent(SDL_Event& event)
 void InputSDL::setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction)
 {
 	mouseRemap = remapFunction;
+	size_t n = getNumberOfMice();
+	for (size_t i = 0; i < n; i++) {
+		mice[i]->updateRemap(mouseRemap);
+	}
 }
 
 void InputSDL::processJoyEvent(int n, SDL_Event& event)

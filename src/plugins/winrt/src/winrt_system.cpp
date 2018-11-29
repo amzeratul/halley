@@ -257,7 +257,13 @@ Rect4i WinRTSystem::getDisplayRect(int screen) const
 
 void WinRTSystem::showCursor(bool show)
 {
-	// TODO
+	CoreWindow window = CoreWindow::GetForCurrentThread();
+	if (show) {
+		window.PointerCursor ( CoreCursor( CoreCursorType::Arrow, 0 ) );
+	}
+	else {
+		window.PointerCursor( nullptr );
+	}
 }
 
 bool WinRTSystem::hasBeenDisconnectedFromTheInternet()
