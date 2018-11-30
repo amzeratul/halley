@@ -226,12 +226,19 @@ void UIDropdown::open()
 			close();
 		});
 
+		dropdownList->setHandle(UIEventType::ListCancel, [=] (const UIEvent& event)
+		{
+			close();
+		});
+
 		sendEvent(UIEvent(UIEventType::DropdownOpened, getId(), getSelectedOptionId(), curOption));
 
 		forceLayout();
 		auto sz = dropdownList->getSize();
 		scrollPane->setScrollSpeed(ceil(sz.y / options.size()));
 		scrollPane->update(0, false);
+
+		playSound(style.getString("openSound"));
 	}
 }
 
@@ -248,6 +255,7 @@ void UIDropdown::close()
 		dropdownWindow.reset();
 
 		sendEvent(UIEvent(UIEventType::DropdownClosed, getId(), getSelectedOptionId(), curOption));
+		playSound(style.getString("closeSound"));
 	}
 }
 
