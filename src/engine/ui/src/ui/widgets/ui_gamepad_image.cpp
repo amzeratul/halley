@@ -2,8 +2,9 @@
 
 using namespace Halley;
 
-UIGamepadImage::UIGamepadImage(JoystickButtonPosition button, std::function<Sprite(JoystickButtonPosition, JoystickType)> iconRetriever, Colour4f col)
+UIGamepadImage::UIGamepadImage(UIStyle style, JoystickButtonPosition button, std::function<Sprite(JoystickButtonPosition, JoystickType)> iconRetriever, Colour4f col)
 	: UIImage(Sprite())
+	, style(style)
 	, button(button)
 	, iconRetriever(std::move(iconRetriever))
 	, colour(col)
@@ -29,5 +30,6 @@ void UIGamepadImage::onInput(const UIInputResults& input, Time time)
 {
 	if (input.isButtonPressed(UIInput::Button::Accept)) {
 		sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));
+		playSound(style.getString("downSound"));
 	}
 }

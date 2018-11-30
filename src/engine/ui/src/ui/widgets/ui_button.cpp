@@ -112,3 +112,8 @@ void UIButton::onStateChanged(State prev, State next)
 		}
 	}
 }
+
+void UIButton::onShortcutPressed()
+{
+	playSound(style.getString("shortcutPressedSound"));
+}

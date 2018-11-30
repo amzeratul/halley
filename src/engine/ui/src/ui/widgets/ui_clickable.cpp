@@ -71,6 +71,7 @@ void UIClickable::doForceUpdate()
 void UIClickable::onInput(const UIInputResults& input, Time time)
 {
 	if (input.isButtonPressed(UIInput::Button::Accept)) {
+		onShortcutPressed();
 		onClicked(Vector2f());
 	}
 }
@@ -110,6 +111,10 @@ void UIClickable::onEnabledChanged()
 		held = false;
 	}
 	doForceUpdate();
+}
+
+void UIClickable::onShortcutPressed()
+{
 }
 
 void UIClickable::setMouseExtraBorder(Maybe<Vector4f> override)

@@ -22,6 +22,7 @@ namespace Halley {
 	protected:
 		void doSetState(State state) override;
 		void onStateChanged(State prev, State next) override;
+		void onShortcutPressed() override;
 
 	private:
 		Sprite sprite;

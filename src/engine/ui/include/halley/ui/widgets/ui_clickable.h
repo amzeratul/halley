@@ -38,6 +38,7 @@ namespace Halley {
 		bool updateButton();
 		void doForceUpdate();
 		void onEnabledChanged() override;
+		virtual void onShortcutPressed();
 
 	private:
 		State curState = State::Up;
