@@ -16,7 +16,9 @@ void UIMenuButton::onClicked(Vector2f mousePos)
 
 void UIMenuButton::onOptionChosen()
 {
-	sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));
+	if (isEnabled()) {
+		sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));
+	}
 }
 
 void UIMenuButton::setGroupFocused(bool focused)
