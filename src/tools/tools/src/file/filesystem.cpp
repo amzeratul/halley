@@ -3,6 +3,7 @@
 #include <halley/file/path.h>
 #include "halley/os/os.h"
 #include "halley/maths/random.h"
+#include <cstdio>
 
 using namespace Halley;
 using namespace boost::filesystem;
@@ -63,7 +64,8 @@ void FileSystem::copyFile(const Path& src, const Path& dst)
 bool FileSystem::remove(const Path& path)
 {
 	boost::system::error_code ec;
-	return boost::filesystem::remove_all(getNative(path), ec) > 0;
+	int nRemoved = boost::filesystem::remove_all(getNative(path), ec) > 0;
+	return nRemoved > 0 && ec.value() == 0;
 }
 
 void FileSystem::writeFile(const Path& path, gsl::span<const gsl::byte> data)
@@ -158,8 +160,16 @@ ScopedTemporaryFile::ScopedTemporaryFile(const String& extension)
 
 ScopedTemporaryFile::~ScopedTemporaryFile()
 {
+	using namespace std::chrono_literals;
+
 	if (path) {
-		FileSystem::remove(*path);
+		for (int i = 0; i < 5; ++i) {
+			bool ok = FileSystem::remove(*path);
+			if (ok) {
+				break;
+			}
+			std::this_thread::sleep_for(20ms * (i + 1));
+		}
 	}
 }
 
