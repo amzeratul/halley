@@ -145,3 +145,41 @@ int FileSystem::runCommand(const String& command)
 {
 	return OS::get().runCommand(command);
 }
+
+ScopedTemporaryFile::ScopedTemporaryFile()
+{
+	path = FileSystem::getTemporaryPath();
+}
+
+ScopedTemporaryFile::ScopedTemporaryFile(const String& extension)
+{
+	path = FileSystem::getTemporaryPath().replaceExtension(extension);
+}
+
+ScopedTemporaryFile::~ScopedTemporaryFile()
+{
+	if (path) {
+		FileSystem::remove(*path);
+	}
+}
+
+ScopedTemporaryFile::ScopedTemporaryFile(ScopedTemporaryFile&& other)
+{
+	path = std::move(other.path);
+	other.path.reset();
+}
+
+ScopedTemporaryFile& ScopedTemporaryFile::operator=(ScopedTemporaryFile&& other)
+{
+	path = std::move(other.path);
+	other.path.reset();
+	return *this;
+}
+
+const Path& ScopedTemporaryFile::getPath() const
+{
+	if (path) {
+		return *path;
+	}
+	throw Exception("Path not available", HalleyExceptions::File);
+}

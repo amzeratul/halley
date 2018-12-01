@@ -3,6 +3,8 @@
 #include <gsl/gsl>
 #include "halley/utils/utils.h"
 #include <vector>
+#include "halley/file/path.h"
+#include "halley/data_structures/maybe.h"
 
 namespace Halley {
 	class String;
@@ -36,6 +38,23 @@ namespace Halley {
 		static Path getTemporaryPath();
 
 		static int runCommand(const String& command);
+	};
+
+	class ScopedTemporaryFile final {
+	public:
+		ScopedTemporaryFile();
+		ScopedTemporaryFile(const String& extension);
+		~ScopedTemporaryFile();
+
+		ScopedTemporaryFile(const ScopedTemporaryFile& other) = delete;
+		ScopedTemporaryFile(ScopedTemporaryFile&& other);
+		ScopedTemporaryFile& operator=(const ScopedTemporaryFile& other) = delete;
+		ScopedTemporaryFile& operator=(ScopedTemporaryFile&& other);
+
+		const Path& getPath() const;
+
+	private:
+		Maybe<Path> path;
 	};
 }
 
