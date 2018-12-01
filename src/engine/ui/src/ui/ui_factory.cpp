@@ -297,7 +297,11 @@ std::vector<UIFactory::ParsedOption> UIFactory::parseOptions(const ConfigNode& n
 			option.id = id;
 			option.text = label;
 			option.image = n["image"].asString("");
+			option.spriteSheet = n["spriteSheet"].asString("");
+			option.sprite = n["sprite"].asString("");
 			option.inactiveImage = n["inactiveImage"].asString("");
+			option.border = asVector4f(n["border"], Vector4f());
+			option.active = n["active"].asBool(true);
 			result.push_back(option);
 		}
 	}
@@ -433,8 +437,15 @@ std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
 	auto widget = std::make_shared<UIList>(id, style, orientation, nColumns);
 	applyInputButtons(*widget, node["inputButtons"].asString("list"));
 	for (auto& o: options) {
-		if (!o.image.isEmpty()) {
-			Sprite normalSprite = Sprite().setImage(resources, o.image);
+		if (!o.image.isEmpty() || !o.sprite.isEmpty()) {
+			Sprite normalSprite;
+			
+			if (!o.image.isEmpty()) {
+				normalSprite.setImage(resources, o.image);
+			} else {
+				normalSprite.setSprite(resources, o.spriteSheet, o.sprite);
+			}
+			
 			auto image = std::make_shared<UIImage>(normalSprite);
 
 			if (!o.inactiveImage.isEmpty()) {
@@ -443,10 +454,11 @@ std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
 				image->setSprite(inactiveSprite);
 			}
 
-			widget->addItem(o.id, image, 1, {}, UISizerAlignFlags::Centre);
+			widget->addItem(o.id, image, 1, o.border, UISizerAlignFlags::Centre);
 		} else {
 			widget->addTextItem(o.id, o.text);
 		}
+		widget->setItemActive(o.id, o.active);
 	}
 
 	widget->setDrag(node["canDrag"].asBool(false));

@@ -45,7 +45,11 @@ namespace Halley
 			String id;
 			LocalisedString text;
 			String image;
+			String spriteSheet;
+			String sprite;
 			String inactiveImage;
+			Vector4f border;
+			bool active;
 		};
 		
 		const HalleyAPI& api;
