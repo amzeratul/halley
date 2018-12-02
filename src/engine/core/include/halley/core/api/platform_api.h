@@ -56,20 +56,16 @@ namespace Halley
 		bool onlinePlay = false;
 		bool ugc = false;
 		bool communication = false;
+		bool viewProfiles = false;
 
 		OnlineCapabilities() {}
-		OnlineCapabilities(bool onlinePlay, bool ugc, bool communication)
-			: onlinePlay(onlinePlay)
-			, ugc(ugc)
-			, communication(communication)
-		{
-		}
 		
 		void setAll(bool value)
 		{
 			onlinePlay = value;
 			ugc = value;
 			communication = value;
+			viewProfiles = value;
 		}
 		
 		bool includes(const OnlineCapabilities& other)
@@ -80,7 +76,8 @@ namespace Halley
 			};
 			return check(onlinePlay, other.onlinePlay)
 				&& check(ugc, other.ugc)
-				&& check(communication, other.communication);
+				&& check(communication, other.communication)
+				&& check(viewProfiles, other.viewProfiles);
 		}
 	};
 

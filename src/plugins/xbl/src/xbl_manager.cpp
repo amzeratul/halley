@@ -179,10 +179,14 @@ Future<AuthTokenResult> XBLManager::getAuthToken(const AuthTokenParameters& para
 				OnlineCapabilities capabilities;
 				for (const auto& priv: privileges.split(' ')) {
 					const int privNumber = priv.toInteger();
-					if (privNumber == 254) { // XPRIVILEGE_MULTIPLAYER_SESSIONS
+					if (privNumber == 254) { // MULTIPLAYER_SESSIONS
 						capabilities.onlinePlay = true;
-					} else if (privNumber == 247) { // XPRIVILEGE_USER_CREATED_CONTENT
+					} else if (privNumber == 247) { // USER_CREATED_CONTENT
 						capabilities.ugc = true;
+					} else if (privNumber == 252) { // COMMUNICATIONS
+						capabilities.communication = true;
+					} else if (privNumber == 249) { // PROFILE_VIEWING
+						capabilities.viewProfiles = true;
 					}
 				}
 
