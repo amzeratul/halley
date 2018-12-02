@@ -55,11 +55,13 @@ namespace Halley
 	struct OnlineCapabilities {
 		bool onlinePlay = false;
 		bool ugc = false;
+		bool communication = false;
 
 		OnlineCapabilities() {}
-		OnlineCapabilities(bool onlinePlay, bool ugc)
+		OnlineCapabilities(bool onlinePlay, bool ugc, bool communication)
 			: onlinePlay(onlinePlay)
 			, ugc(ugc)
+			, communication(communication)
 		{
 		}
 		
@@ -67,6 +69,7 @@ namespace Halley
 		{
 			onlinePlay = value;
 			ugc = value;
+			communication = value;
 		}
 		
 		bool includes(const OnlineCapabilities& other)
@@ -76,7 +79,8 @@ namespace Halley
 				return otherHas ? has : true;
 			};
 			return check(onlinePlay, other.onlinePlay)
-				&& check(ugc, other.ugc);
+				&& check(ugc, other.ugc)
+				&& check(communication, other.communication);
 		}
 	};
 
