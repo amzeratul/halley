@@ -347,6 +347,9 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 	if (node.hasKey("alignment")) {
 		label->setAlignment(node["alignment"].asFloat());
 	}
+	if (node.hasKey("marquee")) {
+		label->setMarquee(node["marquee"].asBool());
+	}
 	return label;
 }
 

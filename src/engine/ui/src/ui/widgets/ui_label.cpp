@@ -22,11 +22,24 @@ void UILabel::draw(UIPainter& painter) const
 
 void UILabel::update(Time t, bool moved)
 {
+	if (marquee) {
+		updateMarquee(t);
+	}
 	if (text.checkForUpdates()) {
 		updateText();
 	}
-	if (moved) {
-		renderer.setPosition(getPosition() + Vector2f(renderer.getAlignment() * textExtents.x, 0.0f));
+	if (moved || marquee) {
+		renderer.setPosition(getPosition() + Vector2f(renderer.getAlignment() * textExtents.x - marqueePos, 0.0f));
+	}
+}
+
+void UILabel::setMarquee(bool enabled)
+{
+	marquee = enabled;
+	if (!marquee) {
+		marqueePos = 0;
+		marqueeIdle = 0;
+		marqueeDirection = -1;
 	}
 }
 
@@ -34,11 +47,14 @@ void UILabel::updateMinSize()
 {
 	needsClip = false;
 	textExtents = renderer.getExtents();
+	unclippedWidth = textExtents.x;
 	if (textExtents.x > maxWidth) {
 		if (wordWrapped) {
 			renderer.setText(renderer.split(maxWidth));
 			textExtents = renderer.getExtents();
+			unclippedWidth = textExtents.x;
 		} else {
+			unclippedWidth = textExtents.x;
 			textExtents.x = maxWidth;
 			needsClip = true;
 		}
@@ -54,6 +70,28 @@ void UILabel::updateMinSize()
 void UILabel::updateText() {
 	renderer.setText(text);
 	updateMinSize();
+}
+
+void UILabel::updateMarquee(Time t)
+{
+	if (needsClip) {
+		if (marqueeIdle > 0) {
+			marqueeIdle -= t;
+			return;
+		}
+		constexpr float speed = 10.0f;
+		const float maxMarquee = unclippedWidth - maxWidth;
+		marqueePos += marqueeDirection * float(t) * speed;
+		if (marqueePos < 0 || marqueePos > maxMarquee) {
+			marqueePos = clamp(marqueePos, 0.0f, maxMarquee);
+			marqueeDirection = -marqueeDirection;
+			marqueeIdle = 0.5;
+		}
+	} else {
+		marqueePos = 0;
+		marqueeIdle = 0;
+		marqueeDirection = -1;
+	}
 }
 
 void UILabel::setText(const LocalisedString& t)
