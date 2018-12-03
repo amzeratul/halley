@@ -60,6 +60,9 @@ WinRTMouse::WinRTMouse()
 	{
 		args.Handled(true);
 	});
+
+	// Initialise internals
+	update();
 }
 
 WinRTMouse::~WinRTMouse()
