@@ -69,6 +69,8 @@ gsl::span<gsl::byte> BinaryFile::getSpan()
 
 std::shared_ptr<ResourceDataStream> BinaryFile::getStream() const
 {
-	Expects(streaming);
+	if (!streaming) {
+		throw Exception("Attempting to stream non-streaming resource", HalleyExceptions::Resources);
+	}
 	return stream;
 }

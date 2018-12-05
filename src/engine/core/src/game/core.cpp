@@ -50,8 +50,8 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	if (game->shouldCreateSeparateConsole()) {
 		hasConsole = true;
 		OS::get().createLogConsole(game->getName());
+		OS::get().initializeConsole();
 	}
-	OS::get().initializeConsole();
 	setOutRedirect(false);
 
 	std::cout << ConsoleColour(Console::GREEN) << "Halley is initializing..." << ConsoleColour() << std::endl;
