@@ -6,6 +6,7 @@
 #include "halley/core/graphics/texture_descriptor.h"
 #include "halley/concurrency/concurrent.h"
 #include "halley/core/resources/resources.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -27,6 +28,15 @@ MFMoviePlayer::~MFMoviePlayer() noexcept
 {
 	reset();
 	deInit();
+}
+
+static String guidToString(GUID guid)
+{
+	OLECHAR* guidString;
+	StringFromCLSID(guid, &guidString);
+	auto result = String(guidString);
+	::CoTaskMemFree(guidString);
+	return result;
 }
 
 void MFMoviePlayer::init()
@@ -124,27 +134,45 @@ void MFMoviePlayer::init()
 						nativeType->GetUINT64(MF_MT_PIXEL_ASPECT_RATIO, &aspectRatioRaw);
 						float par = float(aspectRatioRaw >> 32) / float(aspectRatioRaw & 0xFFFFFFFFull);
 
+						Logger::logInfo("Video stream found with majorType " + guidToString(majorType) + ", frameSize " + toString(videoSize) );
+
 						uint32_t stride;
 						hr = nativeType->GetUINT32(MF_MT_DEFAULT_STRIDE, &stride);
+
+						setVideoSize(videoSize);
+						curStream.type = MoviePlayerStreamType::Video;
+						subType = MFVideoFormat_NV12; // NV12 is the only format supported by DX accelerated decoding
+
 						if (SUCCEEDED(hr)) {
 							minStride = int(stride);
 						} else {
-#ifndef WINDOWS_STORE
-							GUID subType = GUID_NULL;
-							hr = nativeType->GetGUID(MF_MT_SUBTYPE, &subType);
+							minStride = -1;
+							auto origSubType = GUID_NULL;
+							hr = nativeType->GetGUID(MF_MT_SUBTYPE, &origSubType);
+							Logger::logInfo("Original subType: " + guidToString(origSubType));
+
 							if (SUCCEEDED(hr)) {
+#ifndef WINDOWS_STORE
 								LONG tmp;
 								hr = MFGetStrideForBitmapInfoHeader(subType.Data1, videoSize.x, &tmp);
 								if (SUCCEEDED(hr)) {
 									minStride = int(tmp);
 								}
-							}
 #endif
+							}
+							if (minStride == -1) {
+								if (subType == MFVideoFormat_NV12) {
+									Logger::logInfo("Setting stride based on NV12 video format");
+									minStride = videoSize.x;
+								} else if (subType == MFVideoFormat_RGB32) {
+									Logger::logInfo("Setting stride based on RGB32 video format");
+									minStride = videoSize.x * 4;
+								} else {
+									Logger::logInfo("Unknown type: " + guidToString(subType));
+									minStride = videoSize.x;
+								}
+							}
 						}
-
-						setVideoSize(videoSize);
-						curStream.type = MoviePlayerStreamType::Video;
-						subType = MFVideoFormat_NV12; // NV12 is the only format supported by DX accelerated decoding
 					} else if (majorType == MFMediaType_Audio) {
 						UINT32 sampleRate;
 						UINT32 numChannels;
@@ -299,6 +327,13 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 
 void MFMoviePlayer::readVideoSample(Time time, const gsl::byte* data, int stride)
 {
+	if (!data) {
+		throw Exception("Null pointer provided to MFMoviePlayer::readVideoSample.", HalleyExceptions::MoviePlugin);
+	}
+	if (stride <= 0) {
+		throw Exception("MFMoviePlayer::readVideoSample, Stride is not positive: " + toString(stride), HalleyExceptions::MoviePlugin);
+	}
+
 	const auto videoSize = getSize();
 	const int yPlaneHeight = alignUp(videoSize.y, 16);
 	const int uvPlaneHeight = alignUp(videoSize.y / 2, 16);
