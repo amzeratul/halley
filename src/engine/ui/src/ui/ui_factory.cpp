@@ -20,6 +20,8 @@
 #include "ui_validator.h"
 #include "halley/ui/widgets/ui_framed_image.h"
 #include "halley/ui/widgets/ui_hybrid_list.h"
+#include "widgets/ui_spin_list.h"
+#include "widgets/ui_option_list_morpher.h"
 
 using namespace Halley;
 
@@ -49,6 +51,8 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("pagedPane", [=] (const ConfigNode& node) { return makePagedPane(node); });
 	addFactory("framedImage", [=] (const ConfigNode& node) { return makeFramedImage(node); });
 	addFactory("hybridList", [=] (const ConfigNode& node) { return makeHybridList(node); });
+	addFactory("spinList", [=](const ConfigNode& node) { return makeSpinList(node); });
+	addFactory("optionListMorpher", [=](const ConfigNode& node) { return makeOptionListMorpher(node); });
 }
 
 void UIFactory::addFactory(const String& key, WidgetFactory factory)
@@ -720,6 +724,49 @@ std::shared_ptr<UIWidget> UIFactory::makeHybridList(const ConfigNode& node)
 	}
 	applyInputButtons(*list, "list");
 	return list;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeSpinList(const ConfigNode& entryNode) {
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto style = UIStyle(node["style"].asString("spinlist"), styleSheet);
+	auto label = parseLabel(node);
+	auto options = parseOptions(node["options"]);
+
+	std::vector<String> optionIds;
+	std::vector<LocalisedString> optionLabels;
+	for (auto& o : options) {
+		optionIds.push_back(o.id);
+		optionLabels.push_back(o.text);
+	}
+
+	auto widget = std::make_shared<UISpinList>(id, style);
+	applyInputButtons(*widget, node["inputButtons"].asString("list"));
+	widget->setOptions(optionIds, optionLabels);
+	return widget;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeOptionListMorpher(const ConfigNode& entryNode) {
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto dropdownStyle = UIStyle(node["dropdownStyle"].asString("dropdown"), styleSheet);
+	auto spinlistStyle = UIStyle(node["spinlistStyle"].asString("spinlist"), styleSheet);
+	auto scrollStyle = UIStyle(node["ScrollBarStyle"].asString("scrollbar"), styleSheet);
+	auto listStyle = UIStyle(node["listStyle"].asString("list"), styleSheet);
+	auto label = parseLabel(node);
+	auto options = parseOptions(node["options"]);
+
+	std::vector<String> optionIds;
+	std::vector<LocalisedString> optionLabels;
+	for (auto& o : options) {
+		optionIds.push_back(o.id);
+		optionLabels.push_back(o.text);
+	}
+
+	auto widget = std::make_shared<UIOptionListMorpher>(id, dropdownStyle, spinlistStyle, scrollStyle, listStyle);
+	applyInputButtons(*widget, node["inputButtons"].asString("list"));
+	widget->setOptions(optionIds, optionLabels);
+	return widget;
 }
 
 bool UIFactory::hasCondition(const String& condition) const

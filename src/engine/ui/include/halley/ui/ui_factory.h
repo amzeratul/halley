@@ -88,6 +88,8 @@ namespace Halley
 		std::shared_ptr<UIWidget> makePagedPane(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeFramedImage(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeHybridList(const ConfigNode& entryNode);
+		std::shared_ptr<UIWidget> makeSpinList(const ConfigNode& entryNode);
+		std::shared_ptr<UIWidget> makeOptionListMorpher(const ConfigNode& entryNode);
 
 		bool hasCondition(const String& condition) const;
 		bool resolveConditions(const ConfigNode& node) const;
