@@ -147,19 +147,27 @@ namespace Halley
 
 	
 	template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
-	String toString(T src, int prec = -1)
+	String toString(T src, int precisionDigits = -1, char decimalSeparator = '.')
 	{
-		Expects(prec >= -1 && prec <= 20);
+		Expects(precisionDigits >= -1 && precisionDigits <= 20);
 		std::stringstream str;
-		if (prec != -1) {
-			str << std::fixed << std::setprecision(prec);
+		if (precisionDigits != -1) {
+			str << std::fixed << std::setprecision(precisionDigits);
 		}
 		str << src;
-		if (prec == -1) {
-			return String::prettyFloat(str.str());
+
+		String result;
+		if (precisionDigits == -1) {
+			result = String::prettyFloat(str.str());
 		} else {
-			return str.str();
+			result = str.str();
 		}
+
+		if (decimalSeparator != '.') {
+			result = result.replaceAll(String("."), String(decimalSeparator));
+		}
+
+		return result;
 	}
 
 	template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>

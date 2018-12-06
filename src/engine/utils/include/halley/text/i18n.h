@@ -71,6 +71,8 @@ namespace Halley {
 
 		const String& getCurrentLanguage() const;
 		int getVersion() const;
+		
+		char getDecimalSeparator() const;
 
 	private:
 		String currentLanguage;

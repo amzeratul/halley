@@ -591,13 +591,14 @@ int String::subToInteger(size_t start,size_t end) const
 // Pretty float
 String String::prettyFloat(String src)
 {
-	if (src.contains(".")) {
+	if (src.contains(".") || src.contains(",")) {
 		size_t len = src.length();
 		while (src.endsWith("0")) {
 			len--;
 			src.truncate(len);
 		}
-		if (src.endsWith(".")) {
+
+		if (src.endsWith(".") || src.endsWith(",")) {
 			len--;
 			src.truncate(len);
 		}

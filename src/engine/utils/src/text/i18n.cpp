@@ -98,6 +98,14 @@ int I18N::getVersion() const
 	return version;
 }
 
+char I18N::getDecimalSeparator() const
+{
+	if (currentLanguage.startsWith("fr") || currentLanguage.startsWith("pt") || currentLanguage.startsWith("es") || currentLanguage.startsWith("it")) {
+		return ',';
+	}
+	return '.';
+}
+
 LocalisedString::LocalisedString()
 {
 }
