@@ -33,12 +33,14 @@ set(SOURCES
         "src/ui/widgets/ui_label.cpp"
         "src/ui/widgets/ui_list.cpp"
         "src/ui/widgets/ui_menu_button.cpp"
+		"src/ui/widgets/ui_option_list_morpher.cpp"
         "src/ui/widgets/ui_paged_pane.cpp"
         "src/ui/widgets/ui_scroll_pane.cpp"
         "src/ui/widgets/ui_scrollbar.cpp"
         "src/ui/widgets/ui_scrollbar_pane.cpp"
         "src/ui/widgets/ui_slider.cpp"
         "src/ui/widgets/ui_spin_control.cpp"
+		"src/ui/widgets/ui_spin_list.cpp"
         "src/ui/widgets/ui_textinput.cpp"
         )
 
@@ -76,12 +78,14 @@ set(HEADERS
         "include/halley/ui/widgets/ui_label.h"
         "include/halley/ui/widgets/ui_list.h"
         "include/halley/ui/widgets/ui_menu_button.h"
+		"include/halley/ui/widgets/ui_option_list_morpher.h"
         "include/halley/ui/widgets/ui_paged_pane.h"
         "include/halley/ui/widgets/ui_scroll_pane.h"
         "include/halley/ui/widgets/ui_scrollbar.h"
         "include/halley/ui/widgets/ui_scrollbar_pane.h"
         "include/halley/ui/widgets/ui_slider.h"
         "include/halley/ui/widgets/ui_spin_control.h"
+		"include/halley/ui/widgets/ui_spin_list.h"
         "include/halley/ui/widgets/ui_textinput.h"
         )
 
