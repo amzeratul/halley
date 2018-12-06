@@ -301,7 +301,6 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 					buffer->Lock(&src, &maxLen, &curLen);
 					readVideoSample(sampleTime, reinterpret_cast<gsl::byte*>(src), minStride);
 					buffer->Unlock();
-					buffer->Release();
 				} else {
 					throw Exception("Error while querying for 2D buffer: " + toString(hr), HalleyExceptions::MoviePlugin);
 				}
