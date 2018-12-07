@@ -145,6 +145,7 @@ namespace Halley
 		virtual bool showSubscriptionNeeded() const { return true; }
 
 		virtual String getPlayerName() { return "Player"; }
+		virtual bool playerHasLoggedOut() { return false; }
 
 		// Complete when currentProgress == maximumValue
 		virtual String getId() { return ""; }

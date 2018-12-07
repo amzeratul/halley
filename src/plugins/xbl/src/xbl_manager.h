@@ -30,8 +30,7 @@ namespace Halley {
 	enum class XBLStatus {
 		Disconnected,
 		Connecting,
-		Connected,
-		TryAgain
+		Connected
 	};
 
 	enum class XBLAchievementsStatus {
@@ -58,6 +57,7 @@ namespace Halley {
 		bool isAchievementUnlocked(const String& achievementId, bool defaultValue);
 
 		String getPlayerName();
+		bool playerHasLoggedOut();
 
 		void showPlayerInfo(String playerId);
 
@@ -87,6 +87,8 @@ namespace Halley {
 		std::map<std::wstring, bool> achievementStatus;
 		PlatformJoinCallback joinCallback;
 		PlatformPreparingToJoinCallback preparingToJoinCallback;
+		int32_t signOutHandler;
+		bool playerLoggedOut;
 		
 		XBLAchievementsStatus achievementsStatus;
 		XBLStatus status = XBLStatus::Disconnected;
@@ -94,6 +96,7 @@ namespace Halley {
 		void signIn();
 
 		winrt::Windows::Foundation::IAsyncAction getConnectedStorage();
+		winrt::Windows::Foundation::IAsyncAction onLoggedIn();
 		void retrieveUserAchievementsState();
 
 		enum class MultiplayerMode {

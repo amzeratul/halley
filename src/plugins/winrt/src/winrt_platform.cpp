@@ -98,6 +98,11 @@ String WinRTPlatform::getPlayerName()
 	return xbl->getPlayerName();
 }
 
+bool WinRTPlatform::playerHasLoggedOut()
+{
+	return xbl->playerHasLoggedOut();
+}
+
 void WinRTPlatform::setJoinCallback(PlatformJoinCallback callback)
 {
 	xbl->setJoinCallback(callback);

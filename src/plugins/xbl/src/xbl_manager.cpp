@@ -59,6 +59,8 @@ XBLManager::XBLManager()
 	
 	xblMultiplayerManager = nullptr;
 	xblMultiplayerContext = 0;
+
+	playerLoggedOut = false;
 }
 
 XBLManager::~XBLManager()
@@ -68,11 +70,26 @@ XBLManager::~XBLManager()
 
 void XBLManager::init()
 {
+	using namespace xbox::services::system;
+	signOutHandler = xbox_live_user::add_sign_out_completed_handler([this](const sign_out_completed_event_args&)
+	{
+		xboxUser.reset();
+		xboxLiveContext.reset();
+		gameSaveProvider.reset();
+		status = XBLStatus::Disconnected;
+		achievementsStatus = XBLAchievementsStatus::Uninitialized;
+		achievementStatus.clear();
+		playerLoggedOut = true;
+	});
+
 	signIn();
 }
 
 void XBLManager::deInit()
 {
+	using namespace xbox::services::system;
+	xbox_live_user::remove_sign_out_completed_handler(signOutHandler);
+
 	achievementsStatus = XBLAchievementsStatus::Uninitialized;
 	achievementStatus.clear();
 }
@@ -258,34 +275,33 @@ String XBLManager::getPlayerName()
 	return "";
 }
 
+bool XBLManager::playerHasLoggedOut()
+{
+	bool loggedOut = playerLoggedOut;
+	if (loggedOut) {
+		playerLoggedOut = false;
+	}
+	return loggedOut;
+}
+
+winrt::Windows::Foundation::IAsyncAction XBLManager::onLoggedIn()
+{
+	xboxLiveContext = std::make_shared<xbox::services::xbox_live_context>(xboxUser);
+
+	retrieveUserAchievementsState();
+
+	co_await getConnectedStorage();
+}
+
 void XBLManager::signIn()
 {
 	xbox::services::system::xbox_live_services_settings::get_singleton_instance()->set_diagnostics_trace_level(xbox::services::xbox_services_diagnostics_trace_level::verbose);
 	status = XBLStatus::Connecting;
-
+	
 	using namespace xbox::services::system;
 	xboxUser = std::make_shared<xbox_live_user>(nullptr);
 	auto dispatcher = to_cx<Platform::Object>(winrt::Windows::UI::Core::CoreWindow::GetForCurrentThread().Dispatcher());
-
-	auto onLoggedIn = [=] () -> winrt::Windows::Foundation::IAsyncAction
-	{
-		xboxLiveContext = std::make_shared<xbox::services::xbox_live_context>(xboxUser);
-
-		xbox_live_user::add_sign_out_completed_handler([this](const sign_out_completed_event_args&)
-		{
-			xboxUser.reset();
-			xboxLiveContext.reset();
-			gameSaveProvider.reset();
-			status = XBLStatus::Disconnected;
-			achievementsStatus = XBLAchievementsStatus::Uninitialized;
-			achievementStatus.clear();
-		});
-
-		retrieveUserAchievementsState();
-
-		co_await getConnectedStorage();
-	};
-
+	
 	xboxUser->signin_silently(dispatcher).then([=] (xbox::services::xbox_live_result<sign_in_result> result) -> winrt::Windows::Foundation::IAsyncAction
 	{
 		if (result.err()) {
@@ -309,9 +325,6 @@ void XBLManager::signIn()
                         case success:
 							co_await onLoggedIn();
                             break;
-						case user_cancel:
-							status = XBLStatus::TryAgain;
-							break;
 						default:
 							status = XBLStatus::Disconnected;
                             break;
@@ -543,8 +556,10 @@ void XBLSaveData::commit()
 
 void XBLSaveData::recreate()
 {
-	gameSaveContainer.reset();
-	gameSaveContainer = manager.getProvider()->CreateContainer(containerName.getUTF16().c_str());
+	if (manager.getStatus() == XBLStatus::Connected) {
+		gameSaveContainer.reset();
+		gameSaveContainer = manager.getProvider()->CreateContainer(containerName.getUTF16().c_str());
+	}
 }
 
 void XBLSaveData::updateContainer() const
@@ -560,7 +575,7 @@ void XBLSaveData::updateContainer() const
 
 void XBLManager::update()
 {
-	if (status == XBLStatus::TryAgain) {
+	if ((!xboxUser || !xboxUser->is_signed_in()) && status == XBLStatus::Disconnected) {
 		signIn();
 	}
 

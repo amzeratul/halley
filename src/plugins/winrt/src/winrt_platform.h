@@ -37,6 +37,7 @@ namespace Halley
 		void recreateCloudSaveContainer();
 
 		String getPlayerName() override;
+		bool playerHasLoggedOut() override;
 
 		void invitationArrived(const std::wstring& uri);
 
