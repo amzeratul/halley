@@ -17,12 +17,12 @@ UIScrollPane::UIScrollPane(Vector2f clipSize, UISizer&& sizer, bool scrollHorizo
 
 	setHandle(UIEventType::MakeAreaVisible, [this] (const UIEvent& event)
 	{
-		scrollToShow(event.getRectData(), false);
+		scrollToShow(event.getRectData() + getBasePosition(event.getSourceId()), false);
 	});
 
 	setHandle(UIEventType::MakeAreaVisibleCentered, [this] (const UIEvent& event)
 	{
-		scrollToShow(event.getRectData(), true);
+		scrollToShow(event.getRectData() + getBasePosition(event.getSourceId()), true);
 	});
 }
 
@@ -116,6 +116,16 @@ bool UIScrollPane::canInteractWithMouse() const
 void UIScrollPane::onMouseWheel(const UIEvent& event)
 {
 	scrollBy(Vector2f(0.0f, -scrollSpeed * event.getIntData()));
+}
+
+Vector2f UIScrollPane::getBasePosition(const String& widgetId)
+{
+	auto widget = tryGetWidget(widgetId);
+	if (widget) {
+		return widget->getPosition() + scrollPos - getPosition();
+	} else {
+		return Vector2f();
+	}
 }
 
 Vector2f UIScrollPane::getLayoutOriginPosition() const

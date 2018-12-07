@@ -52,5 +52,6 @@ namespace Halley {
 		bool scrollVertical;
 
 		void onMouseWheel(const UIEvent& event);
+		Vector2f getBasePosition(const String& widgetId);
     };
 }
