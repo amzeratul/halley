@@ -309,6 +309,9 @@ void XBLManager::signIn()
                         case success:
 							co_await onLoggedIn();
                             break;
+						case user_cancel:
+							status = XBLStatus::TryAgain;
+							break;
 						default:
 							status = XBLStatus::Disconnected;
                             break;
@@ -557,6 +560,10 @@ void XBLSaveData::updateContainer() const
 
 void XBLManager::update()
 {
+	if (status == XBLStatus::TryAgain) {
+		signIn();
+	}
+
 	multiplayerUpdate();
 }
 

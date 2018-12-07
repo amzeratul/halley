@@ -30,7 +30,8 @@ namespace Halley {
 	enum class XBLStatus {
 		Disconnected,
 		Connecting,
-		Connected
+		Connected,
+		TryAgain
 	};
 
 	enum class XBLAchievementsStatus {
