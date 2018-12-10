@@ -55,6 +55,7 @@ namespace Halley
 	struct OnlineCapabilities {
 		bool onlinePlay = false;
 		bool ugc = false;
+		bool ugcShare = false;
 		bool communication = false;
 		bool viewProfiles = false;
 
@@ -64,6 +65,7 @@ namespace Halley
 		{
 			onlinePlay = value;
 			ugc = value;
+			ugcShare = value;
 			communication = value;
 			viewProfiles = value;
 		}
