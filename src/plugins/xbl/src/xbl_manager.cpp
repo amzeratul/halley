@@ -201,7 +201,7 @@ Future<AuthTokenResult> XBLManager::getAuthToken(const AuthTokenParameters& para
 					} else if (privNumber == 247) { // USER_CREATED_CONTENT
 						capabilities.ugc = true;
 					} else if (privNumber == 211) { // SHARE_CONTENT
-						capabilities.ugc_share = true;
+						capabilities.ugcShare = true;
 					} else if (privNumber == 252) { // COMMUNICATIONS
 						capabilities.communication = true;
 					} else if (privNumber == 249) { // PROFILE_VIEWING
