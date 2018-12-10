@@ -124,6 +124,7 @@ namespace Halley {
 		XBLMPMOperationState xblOperation_set_property;      // INVITER
 		XBLMPMOperationState xblOperation_set_joinability;   // INVITER
 		XBLMPMOperationState xblOperation_join_lobby;        // INVITEE
+		XBLMPMOperationState xblOperation_remove_local_user; // INVITER & INVITEE
 
 		struct MultiplayerSetup {
 			MultiplayerMode mode;

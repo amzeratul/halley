@@ -25,19 +25,19 @@ using namespace Halley;
 template <typename T>
 T from_cx(Platform::Object^ from)
 {
-    T to{ nullptr };
+	T to{ nullptr };
 
-    winrt::check_hresult(reinterpret_cast<::IUnknown*>(from)
-        ->QueryInterface(winrt::guid_of<T>(),
-            reinterpret_cast<void**>(winrt::put_abi(to))));
+	winrt::check_hresult(reinterpret_cast<::IUnknown*>(from)
+		->QueryInterface(winrt::guid_of<T>(),
+			reinterpret_cast<void**>(winrt::put_abi(to))));
 
-    return to;
+	return to;
 }
 
 template <typename T>
 T^ to_cx(winrt::Windows::Foundation::IUnknown const& from)
 {
-    return safe_cast<T^>(reinterpret_cast<Platform::Object^>(winrt::get_abi(from)));
+	return safe_cast<T^>(reinterpret_cast<Platform::Object^>(winrt::get_abi(from)));
 }
 
 XBLManager::XBLManager()
@@ -180,9 +180,9 @@ Future<AuthTokenResult> XBLManager::getAuthToken(const AuthTokenParameters& para
 	if (status == XBLStatus::Connected) {
 		auto future = promise.getFuture();
 
-  		xboxLiveContext->user()->get_token_and_signature(parameters.method.getUTF16().c_str(), parameters.url.getUTF16().c_str(), parameters.headers.getUTF16().c_str())
+		xboxLiveContext->user()->get_token_and_signature(parameters.method.getUTF16().c_str(), parameters.url.getUTF16().c_str(), parameters.headers.getUTF16().c_str())
 			.then([=, promise = std::move(promise)](xbox::services::xbox_live_result<xbox::services::system::token_and_signature_result> result) mutable
- 		{
+		{
 			if (result.err()) {
 				Logger::logError(result.err_message());
 				promise.setValue(AuthTokenRetrievalResult::Error);
@@ -316,21 +316,21 @@ void XBLManager::signIn()
 
 			case user_interaction_required:
 				xboxUser->signin(dispatcher).then([&](xbox::services::xbox_live_result<sign_in_result> loudResult) -> winrt::Windows::Foundation::IAsyncAction
-                {
-                    if (loudResult.err()) {
+				{
+					if (loudResult.err()) {
 						Logger::logError("Error signing in to Xbox live: " + String(loudResult.err_message().c_str()));
 					} else {
-                        auto resPayload = loudResult.payload();
-                        switch (resPayload.status()) {
-                        case success:
+						auto resPayload = loudResult.payload();
+						switch (resPayload.status()) {
+						case success:
 							co_await onLoggedIn();
-                            break;
+							break;
 						default:
 							status = XBLStatus::Disconnected;
-                            break;
-                        }
-                    }
-                }, concurrency::task_continuation_context::use_current());
+							break;
+						}
+					}
+				}, concurrency::task_continuation_context::use_current());
 				break;
 
 			default:
@@ -754,6 +754,7 @@ void XBLManager::multiplayerUpdate_NotInitialized()
 		xblOperation_set_property = XBLMPMOperationState::NotRequested;
 		xblOperation_set_joinability = XBLMPMOperationState::NotRequested;
 		xblOperation_join_lobby = XBLMPMOperationState::NotRequested;
+		xblOperation_remove_local_user = XBLMPMOperationState::NotRequested;
 		
 		// MPM Initialization
 		Logger::logInfo("NFO: Initialize multiplayer Manager\n");
@@ -799,7 +800,7 @@ void XBLManager::multiplayerUpdate_Initializing_Iniviter()
 
 	// Check 'set_property' Operation
 	if (xblOperation_set_property == XBLMPMOperationState::NotRequested && xblOperation_add_local_user == XBLMPMOperationState::DoneOk) {
-		Logger::logDev("NFO: Set server user GameKey property\n");
+		Logger::logDev("NFO: Set server user GameKey property:\n"+toString(multiplayerCurrentSetup.key.c_str()));
 		std::string lobbyKey = multiplayerCurrentSetup.key.c_str();
 		std::wstring lobbyKeyW (lobbyKey.begin(), lobbyKey.end());
 		xblMultiplayerManager->lobby_session()->set_synchronized_properties(L"GameKey", web::json::value::string(lobbyKeyW), (void*)InterlockedIncrement(&xblMultiplayerContext));
@@ -918,17 +919,40 @@ void XBLManager::multiplayerUpdate_Ending()
 						 || xblOperation_set_joinability == XBLMPMOperationState::Requested
 						 || xblOperation_join_lobby == XBLMPMOperationState::Requested
 						);
+
 	if (!opsInProgress) {
 		bool removeUserNeeded = (xblOperation_add_local_user == XBLMPMOperationState::DoneOk
 								|| xblOperation_join_lobby == XBLMPMOperationState::DoneOk
 								);
 
 		if (removeUserNeeded) {
-			xblMultiplayerManager->lobby_session()->remove_local_user(xboxUser);
-		}
 
-		// Ending done
-		multiplayerState = MultiplayerState::NotInitialized;
+			// Check 'remove_local_user' Operation
+			if ( xblOperation_remove_local_user==XBLMPMOperationState::NotRequested )
+			{				
+				auto result = xblMultiplayerManager->lobby_session()->remove_local_user(xboxUser);
+				xblOperation_remove_local_user=XBLMPMOperationState::Requested;
+				if (result.err()) {
+					Logger::logError("ERR: Unable to remove local user: "+toString(result.err_message().c_str())+"\n" );
+					xblOperation_remove_local_user = XBLMPMOperationState::Error;
+				}
+			}
+
+			// Check NotInitialized state based on Operations status
+			if (  xblOperation_remove_local_user==XBLMPMOperationState::DoneOk
+			   || xblOperation_remove_local_user==XBLMPMOperationState::Error
+			   )
+			{
+				// Ending done
+				multiplayerState = MultiplayerState::NotInitialized;
+			}
+
+		}
+		else
+		{
+			// Ending done
+			multiplayerState = MultiplayerState::NotInitialized;
+		}
 	}
 }
 
@@ -1003,7 +1027,16 @@ void XBLManager::xblMultiplayerPoolProcess()
 					break;
 
 				case multiplayer_event_type::user_removed:
-					Logger::logDev("NFO: multiplayer_event_type::user_removed\n");
+					{
+						if (e.err()) {
+							Logger::logError("ERR: multiplayer_event_type::user_removed failed: "+toString(e.err_message().c_str())+"\n");
+							xblOperation_remove_local_user==XBLMPMOperationState::Error;
+						}
+						else {
+							Logger::logDev("NFO: multiplayer_event_type::user_removed ok!...\n");
+							xblOperation_remove_local_user=XBLMPMOperationState::DoneOk; 
+						}
+					}
 					break;
 
 				case multiplayer_event_type::join_game_completed:
