@@ -79,6 +79,9 @@ namespace Halley {
 		void setJoinCallback(PlatformJoinCallback callback);
 		void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback);
 
+		void setProfanityCheckForbiddenWordsList(std::vector<String> words);
+		String performProfanityCheck(String text);
+
 	private:
 		std::shared_ptr<xbox::services::system::xbox_live_user> xboxUser;
 		std::shared_ptr<xbox::services::xbox_live_context> xboxLiveContext;
@@ -89,7 +92,7 @@ namespace Halley {
 		PlatformPreparingToJoinCallback preparingToJoinCallback;
 		int32_t signOutHandler;
 		bool playerLoggedOut;
-		
+		std::vector<String> forbiddenWords;
 		XBLAchievementsStatus achievementsStatus;
 		XBLStatus status = XBLStatus::Disconnected;
 

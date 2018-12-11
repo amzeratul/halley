@@ -426,6 +426,45 @@ XBLSaveData::XBLSaveData(XBLManager& manager, String containerName)
 	updateContainer();
 }
 
+void XBLManager::setProfanityCheckForbiddenWordsList(std::vector<String> words)
+{
+	forbiddenWords.clear();
+	forbiddenWords.resize(words.size());
+	for (size_t i = 0; i < words.size(); ++i) {
+		string_t word = words[i].getUTF16();
+		std::transform(word.begin(), word.end(), word.begin(), ::towlower);
+		forbiddenWords[i] = String(word.c_str());
+	}
+}
+
+String XBLManager::performProfanityCheck(String text)
+{
+	string_t finalText = text.getUTF16();
+	string_t lowercaseText = finalText;
+	std::transform(lowercaseText.begin(), lowercaseText.end(), lowercaseText.begin(), ::towlower);
+	
+	for (size_t i = 0; i < forbiddenWords.size(); ++i)
+	{
+		string_t forbiddenWord = forbiddenWords[i].getUTF16();
+		size_t startPos = 0;
+		while ((startPos = lowercaseText.find(forbiddenWord, startPos)) != std::wstring::npos) {
+			// Replace only full words
+			bool validFirstChar = (startPos == 0 || (!isdigit(lowercaseText[startPos - 1]) && !isalpha(lowercaseText[startPos - 1])));
+			bool validLastChar = ((startPos + forbiddenWord.length()) >= lowercaseText.length() || (!isdigit(lowercaseText[startPos + forbiddenWord.length()]) && !isalpha(lowercaseText[startPos + forbiddenWord.length()])));
+
+			if (validFirstChar && validLastChar)
+			{
+				string_t replacement(forbiddenWord.length(), '*');
+				finalText.replace(startPos, forbiddenWord.length(), replacement);
+			}
+
+			startPos += forbiddenWord.length();
+		}
+	}
+
+	return String(finalText.c_str());
+}
+
 bool XBLSaveData::isReady() const
 {
 	updateContainer();
@@ -1030,7 +1069,7 @@ void XBLManager::xblMultiplayerPoolProcess()
 					{
 						if (e.err()) {
 							Logger::logError("ERR: multiplayer_event_type::user_removed failed: "+toString(e.err_message().c_str())+"\n");
-							xblOperation_remove_local_user==XBLMPMOperationState::Error;
+							xblOperation_remove_local_user=XBLMPMOperationState::Error;
 						}
 						else {
 							Logger::logDev("NFO: multiplayer_event_type::user_removed ok!...\n");
