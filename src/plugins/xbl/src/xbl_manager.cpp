@@ -61,6 +61,7 @@ XBLManager::XBLManager()
 	xblMultiplayerContext = 0;
 
 	playerLoggedOut = false;
+	loginDelay = 0;
 }
 
 XBLManager::~XBLManager()
@@ -328,6 +329,7 @@ void XBLManager::signIn()
 							co_await onLoggedIn();
 							break;
 						default:
+							loginDelay = 180;
 							status = XBLStatus::Disconnected;
 							break;
 						}
@@ -577,8 +579,14 @@ void XBLSaveData::updateContainer() const
 
 void XBLManager::update()
 {
-	if ((!xboxUser || !xboxUser->is_signed_in()) && status == XBLStatus::Disconnected) {
-		signIn();
+	if (loginDelay > 0) {
+		if (status != XBLStatus::Connecting) {
+			--loginDelay;
+		}
+	} else {
+		if ((!xboxUser || !xboxUser->is_signed_in()) && status == XBLStatus::Disconnected) {
+			signIn();
+		}
 	}
 
 	multiplayerUpdate();

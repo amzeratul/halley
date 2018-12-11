@@ -89,6 +89,7 @@ namespace Halley {
 		PlatformPreparingToJoinCallback preparingToJoinCallback;
 		int32_t signOutHandler;
 		bool playerLoggedOut;
+		int loginDelay;
 		
 		XBLAchievementsStatus achievementsStatus;
 		XBLStatus status = XBLStatus::Disconnected;
