@@ -47,6 +47,7 @@ namespace Halley
 		bool canShowPlayerInfo() const override { return true; }
 		void showPlayerInfo(String playerId) override;
 
+		bool needsStringFiltering() const override { return true; }
 		void setProfanityCheckForbiddenWordsList(std::vector<String> words) override;
 		Future<String> performProfanityCheck(String text) override;
 

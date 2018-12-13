@@ -442,7 +442,8 @@ String XBLManager::performProfanityCheck(String text)
 	string_t finalText = text.getUTF16();
 	string_t lowercaseText = finalText;
 	std::transform(lowercaseText.begin(), lowercaseText.end(), lowercaseText.begin(), ::towlower);
-	
+
+	string_t replacement(256, '*');
 	for (size_t i = 0; i < forbiddenWords.size(); ++i)
 	{
 		string_t forbiddenWord = forbiddenWords[i].getUTF16();
@@ -452,10 +453,8 @@ String XBLManager::performProfanityCheck(String text)
 			bool validFirstChar = (startPos == 0 || (!isdigit(lowercaseText[startPos - 1]) && !isalpha(lowercaseText[startPos - 1])));
 			bool validLastChar = ((startPos + forbiddenWord.length()) >= lowercaseText.length() || (!isdigit(lowercaseText[startPos + forbiddenWord.length()]) && !isalpha(lowercaseText[startPos + forbiddenWord.length()])));
 
-			if (validFirstChar && validLastChar)
-			{
-				string_t replacement(forbiddenWord.length(), '*');
-				finalText.replace(startPos, forbiddenWord.length(), replacement);
+			if (validFirstChar && validLastChar) {
+				finalText.replace(startPos, forbiddenWord.length(), replacement, 0, forbiddenWord.length());
 			}
 
 			startPos += forbiddenWord.length();

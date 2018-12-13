@@ -169,6 +169,7 @@ namespace Halley
 
 		virtual String getSystemLanguage() const { return "en-GB"; }
 
+		virtual bool needsStringFiltering() const { return false; }
 		virtual void setProfanityCheckLanguage(const String& language) {};
 		virtual void setProfanityCheckForbiddenWordsList(std::vector<String> words) {}
 
