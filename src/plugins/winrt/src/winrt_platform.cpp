@@ -4,6 +4,7 @@
 #include "winrt_platform.h"
 #include "winrt_http.h"
 #include "xbl_manager.h"
+
 using namespace Halley;
 
 
@@ -121,6 +122,18 @@ void WinRTPlatform::showPlayerInfo(String playerId)
 void WinRTPlatform::invitationArrived(const std::wstring& uri)
 { 
 	xbl->invitationArrived(uri);
+}
+
+void WinRTPlatform::setProfanityCheckForbiddenWordsList(std::vector<String> words)
+{
+	xbl->setProfanityCheckForbiddenWordsList(std::move(words));
+}
+
+Future<String> WinRTPlatform::performProfanityCheck(String text)
+{
+	Promise<String> promise;
+	promise.setValue(xbl->performProfanityCheck(text));
+	return promise.getFuture();
 }
 
 #endif
