@@ -85,9 +85,11 @@ void UISpinList::updateLabelPositions() {
 
 	for (auto& c : spinner->getChildren()) {
 		auto label = std::dynamic_pointer_cast<UILabel>(c);
-		auto offsetFromStart = currentLabel->getPosition() - c->getPosition();
+		const auto offsetFromStart = currentLabel->getPosition() - c->getPosition();
 		std::dynamic_pointer_cast<UILabel>(c)->getTextRenderer().setClip(Rect4f(offsetFromStart, c->getSize().x, c->getSize().y));
 	}
+
+	spinner->layout();
 }
 
 void UISpinList::updateOptionLabels() {
@@ -103,8 +105,8 @@ void UISpinList::updateOptionLabels() {
 	if (spinner) {
 		spinner->destroy();
 	}
-
 	spinner = std::make_shared<UIWidget>("spinner_" + getId(), Vector2f(), UISizer(UISizerType::Horizontal, 0));
+
 	auto i = 0;
 	for (auto& o : options) {
 		auto optionLabel = std::make_shared<UILabel>("spinner_option_" + optionIds[i], style.getTextRenderer("label"), o);
@@ -178,7 +180,7 @@ void UISpinList::update(Time t, bool moved)
 	sprite = isEnabled() ? (isMouseOver() ? style.getSprite("hover") : style.getSprite("normal")) : style.getSprite("disabled");
 	sprite.setPos(getPosition()).scaleTo(getSize());
 
-	if (spinner && int(spinner->getChildren().size()) > 1) {
+	if (spinner && int(spinner->getChildren().size()) > 0) {
 		updateLabelPositions();
 	}
 }
