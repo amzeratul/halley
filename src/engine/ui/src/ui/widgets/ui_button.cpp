@@ -9,6 +9,7 @@ UIButton::UIButton(String id, UIStyle s, Maybe<UISizer> sizer)
 	, style(s)
 {
 	sprite = style.getSprite("normal");
+	setMinSize(sprite.getOriginalSize());
 }
 
 void UIButton::draw(UIPainter& painter) const
