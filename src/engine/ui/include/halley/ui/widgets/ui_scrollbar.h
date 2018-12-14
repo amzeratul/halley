@@ -26,6 +26,7 @@ namespace Halley {
 		UIScrollDirection direction;
 		UIScrollPane* pane = nullptr;
 		bool alwaysShow = false;
+		Vector2f thumbMinSize;
 
 		std::shared_ptr<UIButton> b0;
 		std::shared_ptr<UIButton> b1;
