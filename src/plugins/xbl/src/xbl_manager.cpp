@@ -710,30 +710,39 @@ void XBLManager::showInviteUI()
 
 MultiplayerStatus XBLManager::getMultiplayerStatus(int session) const
 {
-	if ( multiplayerTargetSetup.sessionId==session ) {
-		return MultiplayerStatus::Initializing;
+	if ( multiplayerTargetSetup.sessionId!=-1 ) {
+		if ( session==-1 || session==multiplayerTargetSetup.sessionId )
+			return MultiplayerStatus::Initializing;
+		else
+			return MultiplayerStatus::Error;
 	}
 	else {
-		if ( multiplayerCurrentSetup.sessionId==session )
-		{
-			switch (multiplayerState) {
-				case MultiplayerState::Initializing:
-					return MultiplayerStatus::Initializing;
+		if ( multiplayerCurrentSetup.sessionId!=-1 ) {
+			if ( session==-1 || session==multiplayerCurrentSetup.sessionId ) {
+				switch (multiplayerState) {
+					case MultiplayerState::Initializing:
+						return MultiplayerStatus::Initializing;
 
-				case MultiplayerState::Running:
-					return MultiplayerStatus::Running;
+					case MultiplayerState::Running:
+						return MultiplayerStatus::Running;
 
-				case MultiplayerState::Error:
-					return MultiplayerStatus::Error;
+					case MultiplayerState::Error:
+						return MultiplayerStatus::Error;
 
-				case MultiplayerState::Ending:
-				case MultiplayerState::NotInitialized:
-				default:
-					return MultiplayerStatus::NotInit; 
+					case MultiplayerState::Ending:
+					case MultiplayerState::NotInitialized:
+					default:
+						return MultiplayerStatus::NotInit; 
+				}
 			}
+			else
+				return MultiplayerStatus::Error;
 		}
 		else {
-			return MultiplayerStatus::NotInit;
+			if ( session==-1 ) 
+				return MultiplayerStatus::NotInit;
+			else
+				return MultiplayerStatus::Error;
 		}
 	}
 
@@ -917,24 +926,30 @@ void XBLManager::multiplayerUpdate_Initializing_Inivitee()
 	if (xblOperation_join_lobby == XBLMPMOperationState::DoneOk) {
 
 		// Everthing ok : initaliziation successful
-		multiplayerState = MultiplayerState::Running;
+		try {
+			// Get game key
+			Logger::logDev("NFO: Get server user GameKey property\n");
+			auto lobbySession = xblMultiplayerManager->lobby_session();
+			web::json::value lobbyJson = lobbySession->properties();
+			auto lobbyJsonKey = lobbyJson[L"GameKey"];
 
-		// Get game key
-		Logger::logDev("NFO: Get server user GameKey property\n");
-		auto lobbySession = xblMultiplayerManager->lobby_session();
-		web::json::value lobbyJson = lobbySession->properties();
-		auto lobbyJsonKey = lobbyJson[L"GameKey"];
-		std::wstring lobbyKey = lobbyJsonKey.as_string();
-		Logger::logInfo("Got server user GameKey property:"+toString(lobbyKey.c_str())+"\n" ); 
-		multiplayerCurrentSetup.key = String(lobbyKey.c_str());
+			std::wstring lobbyKey = lobbyJsonKey.as_string();
+			Logger::logInfo("Got server user GameKey property:" + toString(lobbyKey.c_str()) + "\n");
+			multiplayerCurrentSetup.key = String(lobbyKey.c_str());
 
-		// Call join callback
-		PlatformJoinCallbackParameters params;
-		params.param = multiplayerCurrentSetup.key;
-		joinCallback(params);
+			// Call join callback
+			multiplayerState = MultiplayerState::Running;
+			PlatformJoinCallbackParameters params;
+			params.param = multiplayerCurrentSetup.key;
+			joinCallback(params);
 
-		// Done multiplayer
-		multiplayerDone();
+			// Done multiplayer
+			multiplayerDone();
+
+
+		} catch (...) {
+			multiplayerState = MultiplayerState::Error;
+		}
 	}
 	else {
 		if (xblOperation_join_lobby == XBLMPMOperationState::Error) {
