@@ -76,6 +76,10 @@ namespace Halley {
 
 		void clearAxes();
 
+		bool isAnyButtonPressed() override;
+		bool isAnyButtonReleased() override;
+		bool isAnyButtonDown() override;
+
 	protected:
 		Vector<float> axes;
 		Vector<spInputButtonBase> hats;
