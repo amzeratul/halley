@@ -122,6 +122,36 @@ void InputJoystick::clearAxes()
 	}
 }
 
+bool InputJoystick::isAnyButtonPressed()
+{
+	for (auto& hat: hats) {
+		if (hat->isAnyButtonPressed()) {
+			return true;
+		}
+	}
+	return InputButtonBase::isAnyButtonPressed();
+}
+
+bool InputJoystick::isAnyButtonReleased()
+{
+	for (auto& hat: hats) {
+		if (hat->isAnyButtonReleased()) {
+			return true;
+		}
+	}
+	return InputButtonBase::isAnyButtonReleased();
+}
+
+bool InputJoystick::isAnyButtonDown()
+{
+	for (auto& hat: hats) {
+		if (hat->isAnyButtonDown()) {
+			return true;
+		}
+	}
+	return InputButtonBase::isAnyButtonDown();
+}
+
 void InputJoystick::setVibration(float, float)
 {
 }
