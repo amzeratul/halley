@@ -49,6 +49,12 @@ namespace Halley
 		std::shared_ptr<Texture> texture;
 		Time time;
 	};
+
+	struct MoviePlayerAliveFlag
+	{
+		bool isAlive = true;
+		mutable std::mutex mutex;
+	};
 	
 	class MoviePlayer
 	{
@@ -91,6 +97,8 @@ namespace Halley
 		void onAudioFrameAvailable(Time time, gsl::span<const short> samples);
 		void onAudioFrameAvailable(Time time, gsl::span<const float> samples);
 
+		std::shared_ptr<MoviePlayerAliveFlag> getAliveFlag() const;
+
 		std::vector<MoviePlayerStream> streams;
 		std::list<std::shared_ptr<Texture>> recycleTexture;
 		int maxVideoFrames;
@@ -114,7 +122,7 @@ namespace Halley
 		std::atomic<bool> threadRunning;
 		std::atomic<bool> threadAborted;
 		std::thread workerThread;
-		mutable std::mutex mutex;
+		std::shared_ptr<MoviePlayerAliveFlag> aliveFlag;
 
 		Time time = 0;
 
