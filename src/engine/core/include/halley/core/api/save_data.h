@@ -36,5 +36,6 @@ namespace Halley {
 
 		virtual void setData(const String& path, const Bytes& data, bool commit = true) = 0;
 		virtual void commit() = 0;
+		virtual int getFreeSpace() { return 10 * 1024 * 1024; }
 	};
 }
