@@ -45,13 +45,14 @@ namespace Halley
 		{
 			Maybe<Vector2i> imageSize;
 			Maybe<float> fontSize;
+			float replacementScale = 1.0f;
 		};
 
 		explicit FontGenerator(bool verbose = false, std::function<bool(float, String)> progressReporter = ignoreReport);
 		FontGeneratorResult generateFont(const Metadata& meta, gsl::span<const gsl::byte> fontFile, FontSizeInfo sizeInfo, float radius, int supersample, std::vector<int> characters);
 
 	private:
-		std::unique_ptr<Font> generateFontMapBinary(const Metadata& meta, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float radius, Vector2i imageSize) const;
+		std::unique_ptr<Font> generateFontMapBinary(const Metadata& meta, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float renderScale, float radius, Vector2i imageSize) const;
 		static std::unique_ptr<Metadata> generateTextureMeta();
 
 		bool verbose;

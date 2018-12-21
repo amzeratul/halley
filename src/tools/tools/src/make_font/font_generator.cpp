@@ -201,7 +201,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 
 	FontGeneratorResult genResult;
 	genResult.success = true;
-	genResult.font = generateFontMapBinary(meta, font, codes, scale, radius, imageSize);
+	genResult.font = generateFontMapBinary(meta, font, codes, scale, sizeInfo.replacementScale, radius, imageSize);
 	genResult.image = std::move(dstImg);
 	genResult.imageMeta = generateTextureMeta();
 	progressReporter(1.0f, "Done");
@@ -209,7 +209,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 	return genResult;
 }
 
-std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float radius, Vector2i imageSize) const
+std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float replacementScale, float radius, Vector2i imageSize) const
 {
 	String fontName = meta.getString("fontName", font.getName());
 	String imageName = "fontTex/" + fontName;
@@ -228,7 +228,7 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 		}
 	}
 
-	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, ascender, height, sizePt, smoothRadius, fallback);
+	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, ascender, height, sizePt, replacementScale, smoothRadius, fallback);
 
 	for (auto& c: entries) {
 		auto metrics = font.getMetrics(c.charcode, scale);

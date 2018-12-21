@@ -66,7 +66,7 @@ Font BitmapFontImporter::parseBitmapFontXML(Vector2i imageSize, const Bytes& dat
 			fontElem->GetAttribute("height", &fontHeight);
 			fontElem->GetAttribute("size", &fontSize);
 
-			Font font(family, family, 0, float(fontHeight), float(fontSize));
+			Font font(family, family, 0, float(fontHeight), float(fontSize), 1.0f);
 
 			ticpp::Iterator<ticpp::Element> child("Char");
 			for (child = child.begin(fontIter); child != child.end(); ++child) {

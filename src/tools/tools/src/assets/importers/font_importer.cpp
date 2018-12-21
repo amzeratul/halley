@@ -17,7 +17,8 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	Vector2i imgSize;
 	imgSize.x = meta.getInt("width", 512);
 	imgSize.y = meta.getInt("height", 512);
-	float fontSize = meta.getFloat("fontSize", 0);
+	const float fontSize = meta.getFloat("fontSize", 0);
+	const float replacementScale = meta.getFloat("replacementScale", 1.0f);
 
 	auto data = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
 
@@ -32,6 +33,7 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	} else {
 		sizeInfo.imageSize = imgSize;
 	}
+	sizeInfo.replacementScale = replacementScale;
 
 	auto range = Range<int>(meta.getInt("rangeStart", 0), meta.getInt("rangeEnd", 255));
 	std::set<int> characterSet;

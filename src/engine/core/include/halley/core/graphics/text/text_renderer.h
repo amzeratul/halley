@@ -70,7 +70,6 @@ namespace Halley
 		Maybe<Rect4f> getClip() const;
 		float getLineHeight() const;
 		float getAlignment() const;
-		float getScale() const;
 
 	private:
 		std::shared_ptr<const Font> font;
@@ -102,5 +101,6 @@ namespace Halley
 		void updateMaterial(Material& material, const Font& font) const;
 		void updateMaterialForFont(const Font& font) const;
 		void updateMaterials() const;
+		float getScale(const Font& font) const;
 	};
 }
