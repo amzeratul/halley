@@ -477,6 +477,11 @@ Colour TextRenderer::getColour() const
 	return colour;
 }
 
+float TextRenderer::getOutline() const
+{
+	return outline;
+}
+
 Colour TextRenderer::getOutlineColour() const
 {
 	return outlineColour;

@@ -366,7 +366,16 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 
 	auto sizer = makeSizerOrDefault(entryNode, UISizer());
 	if (!label.getString().isEmpty()) {
-		sizer.add(std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label), 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
+		const auto& renderer = style.getTextRenderer("label");
+		auto uiLabel = std::make_shared<UILabel>(id + "_label", renderer, label);
+		if (style.hasTextRenderer("hoveredLabel")) {
+			uiLabel->setHoverable(style.getTextRenderer("label"), style.getTextRenderer("hoveredLabel"));
+		}
+		if (style.hasTextRenderer("selectedLabel"))
+		{
+			uiLabel->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
+		}
+		sizer.add(uiLabel, 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
 	}
 
 	auto result = std::make_shared<UIButton>(id, style, std::move(sizer));

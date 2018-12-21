@@ -31,6 +31,11 @@ const TextRenderer& UIStyle::getTextRenderer(const String& name) const
 	return style->getTextRenderer(name);
 }
 
+bool UIStyle::hasTextRenderer(const String& name) const
+{
+	return style->hasTextRenderer(name);
+}
+
 Vector4f UIStyle::getBorder(const String& name) const
 {
 	return style->getBorder(name);

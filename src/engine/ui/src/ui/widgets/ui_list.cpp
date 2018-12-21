@@ -80,8 +80,14 @@ void UIList::addTextItem(const String& id, const LocalisedString& label, float m
 	if (maxWidth > 0) {
 		widget->setMaxWidth(maxWidth);
 	}
-	widget->setSelectable(style.getTextRenderer("label").getColour(), style.getTextRenderer("selectedLabel").getColour());
-	widget->setDisablable(style.getTextRenderer("label").getColour(), style.getTextRenderer("disabledLabel").getColour());
+
+	if (style.hasTextRenderer("selectedLabel")) {
+		widget->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
+	}
+
+	if (style.hasTextRenderer("disabledStyle")) {
+		widget->setDisablable(style.getTextRenderer("label"), style.getTextRenderer("disabledStyle"));
+	}
 
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 	item->add(widget, 0, Vector4f(), centre ? UISizerAlignFlags::CentreHorizontal : UISizerFillFlags::Fill);

@@ -65,6 +65,7 @@ namespace Halley
 		Vector2f getPosition() const;
 		String getText() const;
 		Colour getColour() const;
+		float getOutline() const;
 		Colour getOutlineColour() const;
 		float getSmoothness() const;
 		Maybe<Rect4f> getClip() const;

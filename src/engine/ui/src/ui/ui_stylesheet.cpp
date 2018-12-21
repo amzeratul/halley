@@ -32,7 +32,7 @@ void loadStyleData(Resources& resources, const String& name, const ConfigNode& n
 		.setSize(node["size"].asFloat())
 		.setColour(Colour4f::fromString(node["colour"].asString()))
 		.setOutline(node["outline"].asFloat(0.0f))
-		.setOutlineColour(Colour4f::fromString(node["outlineColour"].asString("#000000")))
+		.setOutlineColour(Colour4f::fromString(node["outlineColour"].asString("#000000")))		
 		.setAlignment(node["alignment"].asFloat(0.0f));
 }
 
@@ -96,6 +96,18 @@ const T& getValue(const ConfigNode& node, Resources& resources, const String& na
 	}
 }
 
+template <typename T>
+bool hasValue(const ConfigNode& node, Resources& resources, const String& name, const String& key, FlatMap<String, T>& cache)
+{
+	// Is it already in cache?
+	const auto iter = cache.find(key);
+	if (iter != cache.end()) {
+		return true;
+	}
+
+	return node.hasKey(key);
+}
+
 UIStyleDefinition::UIStyleDefinition(String styleName, const ConfigNode& node, Resources& resources)
 	: styleName(std::move(styleName))
 	, node(node)
@@ -123,6 +135,11 @@ const Sprite& UIStyleDefinition::getSprite(const String& name) const
 const TextRenderer& UIStyleDefinition::getTextRenderer(const String& name) const
 {
 	return getValue(node, resources, styleName, name, textRenderers);
+}
+
+bool UIStyleDefinition::hasTextRenderer(const String& name) const
+{
+	return hasValue(node, resources, styleName, name, textRenderers);
 }
 
 Vector4f UIStyleDefinition::getBorder(const String& name) const

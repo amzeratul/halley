@@ -176,26 +176,52 @@ void UILabel::setColour(Colour4f colour)
 	renderer.setColour(colour);
 }
 
-void UILabel::setSelectable(Colour4f normalColour, Colour4f selColour)
+void UILabel::setSelectable(TextRenderer normalRenderer, TextRenderer selectedRenderer)
 {
 	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event)
 	{
 		if (event.getBoolData()) {
-			setColour(selColour);
+			setColour(selectedRenderer.getColour());
+			renderer.setOutline(selectedRenderer.getOutline());
+			renderer.setOutlineColour(selectedRenderer.getOutlineColour());
 		} else {
-			setColour(normalColour);
+			setColour(normalRenderer.getColour());
+			renderer.setOutline(normalRenderer.getOutline());
+			renderer.setOutlineColour(normalRenderer.getOutlineColour());
 		}
 	});
 }
 
-void UILabel::setDisablable(Colour4f normalColour, Colour4f disabledColour)
+void UILabel::setDisablable(TextRenderer normalRenderer, TextRenderer disabledRenderer)
 {
 	setHandle(UIEventType::SetEnabled, [=] (const UIEvent& event)
 	{
 		if (event.getBoolData()) {
-			setColour(normalColour);
-		} else {
-			setColour(disabledColour);
+			setColour(normalRenderer.getColour());
+			renderer.setOutline(normalRenderer.getOutline());
+			renderer.setOutlineColour(normalRenderer.getOutlineColour());
+		}
+		else {
+			setColour(disabledRenderer.getColour());
+			renderer.setOutline(disabledRenderer.getOutline());
+			renderer.setOutlineColour(disabledRenderer.getOutlineColour());
+		}
+	});
+}
+
+void UILabel::setHoverable(TextRenderer normalRenderer, TextRenderer hoveredRenderer)
+{
+	setHandle(UIEventType::SetHovered, [=](const UIEvent& event)
+	{
+		if (event.getBoolData()) {
+			setColour(hoveredRenderer.getColour());
+			renderer.setOutline(hoveredRenderer.getOutline());
+			renderer.setOutlineColour(hoveredRenderer.getOutlineColour());
+		}
+		else {
+			setColour(normalRenderer.getColour());
+			renderer.setOutline(normalRenderer.getOutline());
+			renderer.setOutlineColour(normalRenderer.getOutlineColour());
 		}
 	});
 }
