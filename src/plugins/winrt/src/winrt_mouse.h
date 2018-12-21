@@ -25,5 +25,6 @@ namespace Halley {
 		winrt::event_token pointerWheelEvent;
 		winrt::event_token pointerPressedEvent;
 		winrt::event_token pointerReleasedEvent;
+		winrt::event_token pointerMovedEvent;
 	};
 }

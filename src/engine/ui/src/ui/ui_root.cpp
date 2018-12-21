@@ -258,12 +258,12 @@ void UIRoot::updateMouseOver(const std::shared_ptr<UIWidget>& underMouse)
 }
 
 
-std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos)
+std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled) const
 {
 	auto& cs = getChildren();
 	for (int i = int(cs.size()); --i >= 0; ) {
 		auto curRootWidget = cs[i];
-		auto widget = getWidgetUnderMouse(curRootWidget, mousePos);
+		auto widget = getWidgetUnderMouse(curRootWidget, mousePos, includeDisabled);
 		if (widget) {
 			return widget;
 		} else {
@@ -275,15 +275,15 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos)
 	return {};
 }
 
-std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos)
+std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos, bool includeDisabled) const
 {
-	if (!start->isActive() || !start->isEnabled()) {
+	if (!start->isActive() || (!includeDisabled && !start->isEnabled())) {
 		return {};
 	}
 
 	// Depth first
 	for (auto& c: start->getChildren()) {
-		auto result = getWidgetUnderMouse(c, mousePos);
+		auto result = getWidgetUnderMouse(c, mousePos, includeDisabled);
 		if (result) {
 			return result;
 		}
@@ -368,6 +368,11 @@ bool UIRoot::isMouseOverUI() const
 std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse() const
 {
 	return currentMouseOver.lock();
+}
+
+std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouseIncludingDisabled() const
+{
+	return getWidgetUnderMouse(lastMousePos, true);
 }
 
 UIWidget* UIRoot::getCurrentFocus() const

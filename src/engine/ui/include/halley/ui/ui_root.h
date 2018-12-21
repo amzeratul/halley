@@ -41,6 +41,7 @@ namespace Halley {
 		bool hasModalUI() const;
 		bool isMouseOverUI() const;
 		std::shared_ptr<UIWidget> getWidgetUnderMouse() const;
+		std::shared_ptr<UIWidget> getWidgetUnderMouseIncludingDisabled() const;
 		void setFocus(std::shared_ptr<UIWidget> focus);
 
 		UIWidget* getCurrentFocus() const;
@@ -68,8 +69,8 @@ namespace Halley {
 		void updateInputTree(const spInputDevice& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting);
 		void updateInput(spInputDevice input);
 
-		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos);
-		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos);		
+		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled = false) const;
+		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos, bool includeDisabled = false) const;
 		void updateMouseOver(const std::shared_ptr<UIWidget>& underMouse);
 		void collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output);
 	};
