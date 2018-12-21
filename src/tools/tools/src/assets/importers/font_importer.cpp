@@ -17,7 +17,8 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	Vector2i imgSize;
 	imgSize.x = meta.getInt("width", 512);
 	imgSize.y = meta.getInt("height", 512);
-	float fontSize = meta.getFloat("fontSize", 0);
+	const float fontSize = meta.getFloat("fontSize", 0);
+	const float replacementScale = meta.getFloat("replacementScale", 1.0f);
 
 	auto data = gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles[0].data));
 
@@ -32,10 +33,24 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	} else {
 		sizeInfo.imageSize = imgSize;
 	}
+	sizeInfo.replacementScale = replacementScale;
 
 	auto range = Range<int>(meta.getInt("rangeStart", 0), meta.getInt("rangeEnd", 255));
+	std::set<int> characterSet;
+	for (int i = range.start; i <= range.end; ++i) {
+		characterSet.insert(i);
+	}
+	auto extraChars = meta.getString("extraCharacters", "");
+	for (int c: extraChars.getUTF32()) {
+		characterSet.insert(c);
+	}
+	std::vector<int> characters;
+	characters.reserve(characterSet.size());
+	for (auto& c: characterSet) {
+		characters.push_back(c);
+	}
 
-	auto result = gen.generateFont(meta, data, sizeInfo, radius, supersample, range);
+	auto result = gen.generateFont(meta, data, sizeInfo, radius, supersample, characters);
 	if (!result.success) {
 		return;
 	}

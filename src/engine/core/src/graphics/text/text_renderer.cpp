@@ -191,8 +191,8 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 	}
 
 	if (glyphsDirty || positionDirty) {
-		float scale = getScale();
-		Vector2f p = (position + Vector2f(0, font->getAscenderDistance() * scale)).floor();
+		float mainScale = getScale(*font);
+		Vector2f p = (position + Vector2f(0, font->getAscenderDistance() * mainScale)).floor();
 		if (offset != Vector2f(0, 0)) {
 			p -= (getExtents() * offset).floor();
 		}
@@ -247,6 +247,7 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 			} else {
 				auto& fontForGlyph = font->getFontForGlyph(c);
 				auto& glyph = fontForGlyph.getGlyph(c);
+				const float scale = getScale(fontForGlyph);
 				const auto fontAdjustment = (Vector2f(0, fontForGlyph.getAscenderDistance() - font->getAscenderDistance()) * scale).floor();
 
 				std::shared_ptr<Material> materialToUse = hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial();
@@ -307,7 +308,6 @@ Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 {
 	Vector2f p;
 	float w = 0;
-	const float scale = getScale();
 	const float lineH = getLineHeight();
 
 	for (auto& c : str) {
@@ -317,7 +317,9 @@ Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 			p.x = 0;
 			p.y += lineH;
 		} else {
-			auto& glyph = font->getGlyph(c);
+			const auto& f = font->getFontForGlyph(c);
+			const float scale = getScale(f);
+			auto& glyph = f.getGlyph(c);
 			p += Vector2f(glyph.advance.x, 0) * scale;
 		}
 	}
@@ -334,7 +336,6 @@ Vector2f TextRenderer::getCharacterPosition(size_t character) const
 Vector2f TextRenderer::getCharacterPosition(size_t character, const StringUTF32& str) const
 {
 	Vector2f p;
-	const float scale = getScale();
 	const float lineH = getLineHeight();
 
 	for (size_t i = 0; i < character && i < str.size(); ++i) {
@@ -344,7 +345,9 @@ Vector2f TextRenderer::getCharacterPosition(size_t character, const StringUTF32&
 			p.x = 0;
 			p.y += lineH;
 		} else {
-			auto& glyph = font->getGlyph(c);
+			const auto& f = font->getFontForGlyph(c);
+			const float scale = getScale(f);
+			auto& glyph = f.getGlyph(c);
 			p += Vector2f(glyph.advance.x, 0) * scale;
 		}
 	}
@@ -359,7 +362,6 @@ size_t TextRenderer::getCharacterAt(const Vector2f& position) const
 
 size_t TextRenderer::getCharacterAt(const Vector2f& position, const StringUTF32& str) const
 {
-	const float scale = getScale();
 	const float lineH = getLineHeight();
 	const int targetLine = int(floor(position.y / lineH));
 	Vector2f p;
@@ -394,7 +396,9 @@ size_t TextRenderer::getCharacterAt(const Vector2f& position, const StringUTF32&
 			p.x = 0;
 			p.y += lineH;
 		} else if (c != 0) {
-			auto& glyph = font->getGlyph(c);
+			const auto& f = font->getFontForGlyph(c);
+			const float scale = getScale(f);
+			auto& glyph = f.getGlyph(c);
 			p += Vector2f(glyph.advance.x, 0) * scale;
 		}
 	}
@@ -416,8 +420,6 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth) const
 {
 	StringUTF32 result;
 
-	const float scale = getScale();
-
 	gsl::span<const char32_t> src = str;
 
 	// Keep doing this while src is not exhausted
@@ -432,7 +434,9 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth) const
 				lastValid = src.subspan(0, i + 1);
 			}
 
-			auto& glyph = font->getGlyph(c);
+			const auto& f = font->getFontForGlyph(c);
+			auto& glyph = f.getGlyph(c);
+			const float scale = getScale(f);
 			const float w = glyph.advance.x * scale;
 			curWidth += w;
 
@@ -499,7 +503,7 @@ Maybe<Rect4f> TextRenderer::getClip() const
 
 float TextRenderer::getLineHeight() const
 {
-	return roundf(font->getHeight() * getScale() + lineSpacing);
+	return roundf(font->getHeight() * getScale(*font) + lineSpacing);
 }
 
 float TextRenderer::getAlignment() const
@@ -507,9 +511,10 @@ float TextRenderer::getAlignment() const
 	return align;
 }
 
-float TextRenderer::getScale() const
+float TextRenderer::getScale(const Font& f) const
 {
-	return size / font->getSizePoints();
+	const bool usingReplacement = &f != font.get();
+	return size / f.getSizePoints() * (usingReplacement ? font->getReplacementScale() : 1.0f);
 }
 
 std::shared_ptr<Material> TextRenderer::getMaterial(const Font& font) const

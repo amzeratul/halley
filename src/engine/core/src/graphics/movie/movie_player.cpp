@@ -21,11 +21,17 @@ MoviePlayer::MoviePlayer(VideoAPI& video, AudioAPI& audio)
 	, threadRunning(false)
 	, maxVideoFrames(7)
 	, maxAudioSamples(20000)
+	, aliveFlag(std::make_shared<MoviePlayerAliveFlag>())
 {
 }
 
 MoviePlayer::~MoviePlayer()
 {
+	{
+		std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
+		std::unique_lock<std::mutex> lock(alive->mutex);
+		alive->isAlive = false;
+	}
 	stopThread();
 }
 
@@ -116,7 +122,8 @@ void MoviePlayer::update(Time t)
 
 	if (state == MoviePlayerState::Playing || state == MoviePlayerState::StartingToPlay) {
 		{
-			std::unique_lock<std::mutex> lock(mutex);
+			std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
+			std::unique_lock<std::mutex> lock(alive->mutex);
 			if (!pendingFrames.empty()) {
 				auto& next = pendingFrames.front();
 				if (time >= next.time) {
@@ -242,7 +249,8 @@ void MoviePlayer::threadEntry()
 
 bool MoviePlayer::needsMoreVideoFrames() const
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
+	std::unique_lock<std::mutex> lock(alive->mutex);
 
 	if (state != MoviePlayerState::Playing && state != MoviePlayerState::StartingToPlay) {
 		return false;
@@ -265,7 +273,8 @@ bool MoviePlayer::needsMoreVideoFrames() const
 
 bool MoviePlayer::needsMoreAudioFrames() const
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
+	std::unique_lock<std::mutex> lock(alive->mutex);
 
 	if (state != MoviePlayerState::Playing && state != MoviePlayerState::StartingToPlay) {
 		return false;
@@ -338,31 +347,38 @@ AudioAPI& MoviePlayer::getAudioAPI() const
 void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descriptor)
 {
 	auto desc = std::make_shared<TextureDescriptor>(std::move(descriptor));
+	auto alive = getAliveFlag();
 
-	Concurrent::execute(Executors::getVideoAux(), [this, time, desc = std::move(desc)] ()
+	Concurrent::execute(Executors::getVideoAux(), [this, time, alive, desc = std::move(desc)] ()
 	{
 		auto descriptor = TextureDescriptor(std::move(*desc));
 		std::shared_ptr<Texture> tex;
 
 		{
-			std::unique_lock<std::mutex> lock(mutex);
+			std::unique_lock<std::mutex> lock(alive->mutex);
 
-			if (recycleTexture.empty()) {
-				tex = video.createTexture(descriptor.size);
-			} else {
-				tex = recycleTexture.front();
-				recycleTexture.pop_front();
+			if (alive->isAlive) {
+				if (recycleTexture.empty()) {
+					tex = video.createTexture(descriptor.size);
+				}
+				else {
+					tex = recycleTexture.front();
+					recycleTexture.pop_front();
+				}
+				pendingFrames.push_back({ tex, time });
 			}
-			pendingFrames.push_back({tex, time});
 		}
 
-		tex->load(std::move(descriptor));
+		if (tex) {
+			tex->load(std::move(descriptor));
+		}
 	});
 }
 
 void MoviePlayer::onVideoFrameAvailable(Time time, std::shared_ptr<Texture> texture)
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
+	std::unique_lock<std::mutex> lock(alive->mutex);
 	pendingFrames.push_back({texture, time});
 }
 
@@ -378,4 +394,9 @@ void MoviePlayer::onAudioFrameAvailable(Time time, gsl::span<const short> origSa
 void MoviePlayer::onAudioFrameAvailable(Time time, gsl::span<const AudioConfig::SampleFormat> samples)
 {
 	streamingClip->addInterleavedSamples(samples);	
+}
+
+std::shared_ptr<MoviePlayerAliveFlag> MoviePlayer::getAliveFlag() const
+{
+	return aliveFlag;
 }

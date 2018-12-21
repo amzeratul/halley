@@ -36,8 +36,8 @@ namespace Halley
 			void deserialize(Deserializer& deserializer);
 		};
 
-		Font(String name, String imageName, float ascender, float height, float sizePt);
-		Font(String name, String imageName, float ascender, float height, float sizePt, float distanceFieldSmoothRadius, std::vector<String> fallback);
+		Font(String name, String imageName, float ascender, float height, float sizePt, float replacementScale);
+		Font(String name, String imageName, float ascender, float height, float sizePt, float replacementScale, float distanceFieldSmoothRadius, std::vector<String> fallback);
 
 		explicit Font(ResourceLoader& loader);
 
@@ -53,6 +53,7 @@ namespace Halley
 		float getHeight() const;
 		float getSizePoints() const;
 		float getSmoothRadius() const;
+		float getReplacementScale() const;
 		String getName() const;
 		bool isDistanceField() const;
 
@@ -72,6 +73,7 @@ namespace Halley
 		float height;
 		float sizePt;
 		float smoothRadius;
+		float replacementScale = 1.0f;
 		bool distanceField;
 		std::vector<std::shared_ptr<const Font>> fallbackFont;
 		std::vector<String> fallback;

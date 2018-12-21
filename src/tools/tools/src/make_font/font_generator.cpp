@@ -15,13 +15,13 @@
 
 using namespace Halley;
 
-static boost::optional<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float borderSuperSampled, Range<int> range)
+static boost::optional<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float borderSuperSampled, const std::vector<int>& characters)
 {
 	font.setSize(fontSize);
 
 	Vector<BinPackEntry> entries;
 	for (int code : font.getCharCodes()) {
-		if (range.contains(code)) {
+		if (std::binary_search(characters.begin(), characters.end(), code)) {
 			Vector2i glyphSize = font.getGlyphSize(code);
 			int padding = int(2 * borderSuperSampled);
 			Vector2i superSampleSize = glyphSize + Vector2i(padding, padding);
@@ -73,7 +73,9 @@ FontGenerator::FontGenerator(bool verbose, std::function<bool(float, String)> pr
 {
 }
 
-FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<const gsl::byte> fontFile, FontSizeInfo sizeInfo, float radius, int superSample, Range<int> range) {
+FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<const gsl::byte> fontFile, FontSizeInfo sizeInfo, float radius, int superSample, std::vector<int> characters) {
+	std::sort(characters.begin(), characters.end());
+
 	const float scale = 1.0f / superSample;
 	const float borderFinal = ceil(radius);
 	const float borderSuperSample = borderFinal * superSample;
@@ -95,7 +97,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 		constexpr int maxSize = 4096;
 		for (int i = 0; i < (2 * fastLog2Floor(uint32_t(maxSize / minSize))); ++i) {
 			auto curSize = Vector2i(minSize << ((i + 1) / 2), minSize << (i / 2));
-			result = tryPacking(font, float(fontSize), curSize, scale, borderSuperSample, range);
+			result = tryPacking(font, float(fontSize), curSize, scale, borderSuperSample, characters);
 			if (result) {
 				imageSize = curSize;
 				break;
@@ -111,7 +113,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 		constexpr int maxFont = 1000;
 		result = binarySearch([&](int curFontSize) -> boost::optional<Vector<BinPackResult>>
 		{
-			return tryPacking(font, float(curFontSize), imageSize, scale, borderSuperSample, range);
+			return tryPacking(font, float(curFontSize), imageSize, scale, borderSuperSample, characters);
 		}, minFont, maxFont, fontSize);
 	} else {
 		throw Exception("Neither font size nor image size were specified", HalleyExceptions::Tools);
@@ -199,7 +201,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 
 	FontGeneratorResult genResult;
 	genResult.success = true;
-	genResult.font = generateFontMapBinary(meta, font, codes, scale, radius, imageSize);
+	genResult.font = generateFontMapBinary(meta, font, codes, scale, sizeInfo.replacementScale, radius, imageSize);
 	genResult.image = std::move(dstImg);
 	genResult.imageMeta = generateTextureMeta();
 	progressReporter(1.0f, "Done");
@@ -207,7 +209,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 	return genResult;
 }
 
-std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float radius, Vector2i imageSize) const
+std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float replacementScale, float radius, Vector2i imageSize) const
 {
 	String fontName = meta.getString("fontName", font.getName());
 	String imageName = "fontTex/" + fontName;
@@ -226,7 +228,7 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 		}
 	}
 
-	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, ascender, height, sizePt, smoothRadius, fallback);
+	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, ascender, height, sizePt, replacementScale, smoothRadius, fallback);
 
 	for (auto& c: entries) {
 		auto metrics = font.getMetrics(c.charcode, scale);
