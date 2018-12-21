@@ -34,8 +34,21 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	}
 
 	auto range = Range<int>(meta.getInt("rangeStart", 0), meta.getInt("rangeEnd", 255));
+	std::set<int> characterSet;
+	for (int i = range.start; i <= range.end; ++i) {
+		characterSet.insert(i);
+	}
+	auto extraChars = meta.getString("extraCharacters", "");
+	for (int c: extraChars.getUTF32()) {
+		characterSet.insert(c);
+	}
+	std::vector<int> characters;
+	characters.reserve(characterSet.size());
+	for (auto& c: characterSet) {
+		characters.push_back(c);
+	}
 
-	auto result = gen.generateFont(meta, data, sizeInfo, radius, supersample, range);
+	auto result = gen.generateFont(meta, data, sizeInfo, radius, supersample, characters);
 	if (!result.success) {
 		return;
 	}
