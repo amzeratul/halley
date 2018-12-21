@@ -27,9 +27,11 @@ MoviePlayer::MoviePlayer(VideoAPI& video, AudioAPI& audio)
 
 MoviePlayer::~MoviePlayer()
 {
-	std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
-	std::unique_lock<std::mutex> lock(alive->mutex);
-	alive->isAlive = false;
+	{
+		std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
+		std::unique_lock<std::mutex> lock(alive->mutex);
+		alive->isAlive = false;
+	}
 	stopThread();
 }
 
