@@ -59,7 +59,7 @@ namespace Halley
 		size_t getCharacterAt(const Vector2f& position, const StringUTF32& str) const;
 
 		StringUTF32 split(const String& str, float width) const;
-		StringUTF32 split(const StringUTF32& str, float width) const;
+		StringUTF32 split(const StringUTF32& str, float width, std::function<bool(int32_t)> filter = {}) const;
 		StringUTF32 split(float width) const;
 
 		Vector2f getPosition() const;
