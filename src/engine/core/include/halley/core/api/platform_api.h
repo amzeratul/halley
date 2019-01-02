@@ -4,6 +4,7 @@
 #include <map>
 #include <halley/concurrency/future.h>
 #include <halley/utils/utils.h>
+#include "halley/text/i18n.h"
 
 namespace Halley
 {
@@ -169,7 +170,7 @@ namespace Halley
 		virtual bool canShowPlayerInfo() const { return false; }
 		virtual void showPlayerInfo(String playerId) {}
 
-		virtual String getSystemLanguage() const { return "en-GB"; }
+		virtual I18NLanguage getSystemLanguage() const { return I18NLanguage("en-GB"); }
 
 		virtual bool canShowReportedUserContent() const { return true; }
 

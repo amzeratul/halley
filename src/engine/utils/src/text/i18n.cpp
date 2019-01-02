@@ -38,7 +38,7 @@ void I18N::loadLocalisationFile(const ConfigFile& config)
 void I18N::loadLocalisation(const ConfigNode& root)
 {
 	for (auto& language: root.asMap()) {
-		auto& langCode = language.first;
+		auto langCode = I18NLanguage(language.first);
 		auto& lang = strings[langCode];
 		for (auto& e: language.second.asMap()) {
 			lang[e.first] = e.second.asString();
@@ -138,22 +138,24 @@ I18NLanguage::I18NLanguage(const String& code)
 {
 	if (code.contains("-")) {
 		auto split = code.split('-');
-		languageCode = split.at(0).asciiLower();
-		countryCode = split.at(1).asciiLower();
+		set(split.at(0), split.at(1));
 	} else if (code.contains("_")) {
 		auto split = code.split('_');
-		languageCode = split.at(0).asciiLower();
-		countryCode = split.at(1).asciiLower();
+		set(split.at(0), split.at(1));
 	} else {
-		languageCode = code;
-		countryCode = {};
+		set(code, {});
 	}
 }
 
 I18NLanguage::I18NLanguage(String languageCode, Maybe<String> countryCode)
-	: languageCode(std::move(languageCode))
-	, countryCode(std::move(countryCode))
 {
+	set(std::move(languageCode), std::move(countryCode));
+}
+
+void I18NLanguage::set(String languageCode, Maybe<String> countryCode)
+{
+	this->languageCode = std::move(languageCode);
+	this->countryCode = std::move(countryCode);
 }
 
 const String& I18NLanguage::getLanguageCode() const
@@ -169,7 +171,7 @@ const Maybe<String>& I18NLanguage::getCountryCode() const
 String I18NLanguage::getISOCode() const
 {
 	if (countryCode) {
-		return languageCode + "-" + countryCode.get().asciiUpper();
+		return languageCode + "-" + countryCode.get();
 	} else {
 		return languageCode;
 	}

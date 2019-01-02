@@ -55,8 +55,10 @@ namespace Halley {
 	class I18NLanguage {
 	public:
 		I18NLanguage();
-		I18NLanguage(const String& code);
+		explicit I18NLanguage(const String& code);
 		I18NLanguage(String languageCode, Maybe<String> countryCode);
+
+		void set(String languageCode, Maybe<String> countryCode);
 
 		const String& getLanguageCode() const;
 		const Maybe<String>& getCountryCode() const;
@@ -106,7 +108,7 @@ namespace Halley {
 		I18NLanguage currentLanguage;
 		Maybe<I18NLanguage> fallbackLanguage;
 		std::map<I18NLanguage, std::map<String, String>> strings;
-		std::map<I18NLanguage, ConfigObserver> observers;
+		std::map<String, ConfigObserver> observers;
 		int version = 0;
 
 		void loadLocalisation(const ConfigNode& node);
