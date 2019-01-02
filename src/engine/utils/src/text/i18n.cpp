@@ -18,13 +18,13 @@ void I18N::update()
 	}
 }
 
-void I18N::setCurrentLanguage(const String& code)
+void I18N::setCurrentLanguage(const I18NLanguage& code)
 {
 	currentLanguage = code;
 	++version;
 }
 
-void I18N::setFallbackLanguage(const String& code)
+void I18N::setFallbackLanguage(const I18NLanguage& code)
 {
 	fallbackLanguage = code;
 }
@@ -47,9 +47,9 @@ void I18N::loadLocalisation(const ConfigNode& root)
 	++version;
 }
 
-std::vector<String> I18N::getLanguagesAvailable() const
+std::vector<I18NLanguage> I18N::getLanguagesAvailable() const
 {
-	std::vector<String> result;
+	std::vector<I18NLanguage> result;
 	for (auto& e: strings) {
 		result.push_back(e.first);
 	}
@@ -66,8 +66,8 @@ LocalisedString I18N::get(const String& key) const
 		}
 	}
 
-	if (!fallbackLanguage.isEmpty() && fallbackLanguage != currentLanguage) {
-		auto defLang = strings.find(fallbackLanguage);
+	if (fallbackLanguage && fallbackLanguage.get() != currentLanguage) {
+		auto defLang = strings.find(fallbackLanguage.get());
 		if (defLang != strings.end()) {
 			auto i = defLang->second.find(key);
 			if (i != defLang->second.end()) {
@@ -88,7 +88,7 @@ LocalisedString I18N::getPreProcessedUserString(const String& string) const
 	}
 }
 
-const String& I18N::getCurrentLanguage() const
+const I18NLanguage& I18N::getCurrentLanguage() const
 {
 	return currentLanguage;
 }
@@ -100,7 +100,8 @@ int I18N::getVersion() const
 
 char I18N::getDecimalSeparator() const
 {
-	if (currentLanguage.startsWith("fr") || currentLanguage.startsWith("pt") || currentLanguage.startsWith("es") || currentLanguage.startsWith("it")) {
+	const auto& lang = currentLanguage.getLanguageCode();
+	if (lang == "fr" || lang == "pt" || lang == "es" || lang == "it") {
 		return ',';
 	}
 	return '.';
@@ -127,6 +128,89 @@ LocalisedString::LocalisedString(const I18N& i18n, String key, String string)
 	, string(std::move(string))
 	, i18nVersion(i18n.getVersion())
 {
+}
+
+I18NLanguage::I18NLanguage()
+{
+}
+
+I18NLanguage::I18NLanguage(const String& code)
+{
+	if (code.contains("-")) {
+		auto split = code.split('-');
+		languageCode = split.at(0).asciiLower();
+		countryCode = split.at(1).asciiLower();
+	} else if (code.contains("_")) {
+		auto split = code.split('_');
+		languageCode = split.at(0).asciiLower();
+		countryCode = split.at(1).asciiLower();
+	} else {
+		languageCode = code;
+		countryCode = {};
+	}
+}
+
+I18NLanguage::I18NLanguage(String languageCode, Maybe<String> countryCode)
+	: languageCode(std::move(languageCode))
+	, countryCode(std::move(countryCode))
+{
+}
+
+const String& I18NLanguage::getLanguageCode() const
+{
+	return languageCode;
+}
+
+const Maybe<String>& I18NLanguage::getCountryCode() const
+{
+	return countryCode;
+}
+
+String I18NLanguage::getISOCode() const
+{
+	if (countryCode) {
+		return languageCode + "-" + countryCode.get().asciiUpper();
+	} else {
+		return languageCode;
+	}
+}
+
+I18NLanguageMatch I18NLanguage::getMatch(const I18NLanguage& other) const
+{
+	if (languageCode != other.languageCode) {
+		return I18NLanguageMatch::None;
+	}
+	if (countryCode != other.countryCode) {
+		return I18NLanguageMatch::Good;
+	}
+	return I18NLanguageMatch::Exact;
+}
+
+bool I18NLanguage::operator==(const I18NLanguage& other) const
+{
+	return languageCode == other.languageCode && countryCode == other.countryCode;
+}
+
+bool I18NLanguage::operator!=(const I18NLanguage& other) const
+{
+	return languageCode != other.languageCode || countryCode != other.countryCode;
+}
+
+bool I18NLanguage::operator<(const I18NLanguage& other) const
+{
+	if (languageCode != other.languageCode) {
+		return languageCode < other.languageCode;
+	}
+	if (countryCode == other.countryCode) {
+		return false;
+	}
+	if (!countryCode) {
+		return true;
+	}
+	if (!other.countryCode) {
+		return false;
+	}
+	return countryCode.get() < other.countryCode.get();
 }
 
 LocalisedString LocalisedString::fromHardcodedString(const char* str)
