@@ -5,6 +5,10 @@
 #include <halley/text/string_converter.h>
 #include <limits>
 
+#ifdef max
+#undef max
+#endif
+
 namespace Halley {
 	enum class SaveDataType {
 		SaveRoaming,
