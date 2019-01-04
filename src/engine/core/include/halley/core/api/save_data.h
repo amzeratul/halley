@@ -3,6 +3,7 @@
 #include <array>
 #include <halley/utils/utils.h>
 #include <halley/text/string_converter.h>
+#include <limits>
 
 namespace Halley {
 	enum class SaveDataType {
@@ -36,6 +37,6 @@ namespace Halley {
 
 		virtual void setData(const String& path, const Bytes& data, bool commit = true) = 0;
 		virtual void commit() = 0;
-		virtual int getFreeSpace() { return 10 * 1024 * 1024; }
+		virtual size_t getFreeSpace() { return std::numeric_limits<size_t>::max(); }
 	};
 }
