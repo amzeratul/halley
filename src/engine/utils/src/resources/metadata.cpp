@@ -82,12 +82,12 @@ void Metadata::set(String key, bool value)
 
 void Metadata::set(String key, int value)
 {
-	entries[key] = toString(value);
+	entries[key] = Halley::toString(value);
 }
 
 void Metadata::set(String key, float value)
 {
-	entries[key] = toString(value);
+	entries[key] = Halley::toString(value);
 }
 
 void Metadata::set(String key, const char* value)
@@ -131,4 +131,15 @@ bool Metadata::operator==(const Metadata& rhs) const
 bool Metadata::operator!=(const Metadata& rhs) const
 {
 	return entries != rhs.entries;
+}
+
+String Metadata::toString() const
+{
+	std::stringstream ss;
+	ss << "{ ";
+	for (auto& e: entries) {
+		ss << "\"" << e.first << "\": \"" << e.second << "\" ";
+	}
+	ss << "}";
+	return ss.str();
 }

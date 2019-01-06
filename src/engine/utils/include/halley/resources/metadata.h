@@ -44,6 +44,8 @@ namespace Halley
 		bool operator==(const Metadata& rhs) const;
 		bool operator!=(const Metadata& rhs) const;
 
+		String toString() const;
+
 	private:
 		std::map<String, String> entries;
 	};
