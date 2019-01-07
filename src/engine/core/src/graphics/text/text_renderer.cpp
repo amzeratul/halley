@@ -478,6 +478,11 @@ String TextRenderer::getText() const
 	return String(text);
 }
 
+const StringUTF32& TextRenderer::getTextUTF32() const
+{
+	return text;
+}
+
 Colour TextRenderer::getColour() const
 {
 	return colour;

@@ -64,6 +64,7 @@ namespace Halley
 
 		Vector2f getPosition() const;
 		String getText() const;
+		const StringUTF32& getTextUTF32() const;
 		Colour getColour() const;
 		float getOutline() const;
 		Colour getOutlineColour() const;
