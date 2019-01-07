@@ -11,6 +11,11 @@
 using namespace Halley;
 
 
+bool AssetPackListing::Entry::operator<(const Entry& other) const
+{
+	return name < other.name;
+}
+
 AssetPackListing::AssetPackListing()
 {
 }
@@ -44,6 +49,11 @@ void AssetPackListing::setActive(bool a)
 bool AssetPackListing::isActive() const
 {
 	return active;
+}
+
+void AssetPackListing::sort()
+{
+	std::sort(entries.begin(), entries.end());
 }
 
 void AssetPacker::pack(Project& project, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets)
@@ -110,6 +120,11 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 			// Add file to pack
 			iter->second.addFile(type, assetEntry.first, assetEntry.second);
 		}
+	}
+
+	// Sort all packs
+	for (auto& p: packs) {
+		p.second.sort();
 	}
 
 	// Activate any packs that contain deleted assets

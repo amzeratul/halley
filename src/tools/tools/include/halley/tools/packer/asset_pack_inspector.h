@@ -16,19 +16,24 @@ namespace Halley {
 		String name;
 		size_t rawTableSize;
 		size_t tableSize;
+		uint64_t totalHash;
+	    uint64_t dataStartPos;
 
-		struct Entry
+	    struct Entry
 		{
 			int assetType;
+			uint64_t hash;
 			String key;
 			AssetDatabase::Entry entry;
 
-			Entry(int assetType, String key, AssetDatabase::Entry entry);
+			Entry(int assetType, uint64_t hash, String key, AssetDatabase::Entry entry);
 		};
 		std::vector<Entry> entries;
+		std::vector<int> sortedEntries;
 
-		void parseTable(Bytes data);
-	    void parseTypedDB(Deserializer& s);
+		void parseTable(Deserializer s, const Bytes& packBytes);
+	    void parseTypedDB(Deserializer& s, const Bytes& packBytes);
+		void computeHash();
     };
 
 	class AssetPackInspectorTool : public CommandLineTool

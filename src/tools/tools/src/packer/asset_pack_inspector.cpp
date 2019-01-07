@@ -6,6 +6,7 @@
 #include "halley/bytes/compression.h"
 #include "halley/support/console.h"
 #include "halley/core/resources/asset_database.h"
+#include "halley/utils/hash.h"
 
 using namespace Halley;
 
@@ -21,6 +22,7 @@ void AssetPackInspector::parse(const Bytes& bytes)
 	AssetPackHeader header;
 	auto headerSpan = gsl::as_writeable_bytes(gsl::span<AssetPackHeader>(&header, 1));
 	s >> headerSpan;
+	dataStartPos = header.dataStartPos;
 
 	Bytes tableData(header.dataStartPos - header.assetDbStartPos);
 	auto tableSpan = gsl::as_writeable_bytes(gsl::span<Byte>(tableData.data(), tableData.size()));
@@ -29,21 +31,32 @@ void AssetPackInspector::parse(const Bytes& bytes)
 	rawTableSize = tableData.size();
 	auto rawTableData = Compression::decompress(tableData);
 	tableSize = rawTableData.size();
-	parseTable(std::move(rawTableData));
+	parseTable(Deserializer(rawTableData), bytes);
+
+	// Generated sorted entries
+	sortedEntries.resize(entries.size());
+	for (size_t i = 0; i < sortedEntries.size(); ++i) {
+		sortedEntries[i] = int(i);
+	}
+	std::sort(sortedEntries.begin(), sortedEntries.end(), [&] (int a, int b) -> bool
+	{
+		return entries[a].key < entries[b].key;
+	});
+
+	computeHash();
 }
 
-void AssetPackInspector::parseTable(Bytes bytes)
+void AssetPackInspector::parseTable(Deserializer s, const Bytes& packBytes)
 {
-	auto s = Deserializer(bytes);
 	unsigned int numTypedDbs;
 	s >> numTypedDbs;
 
 	for (unsigned int i = 0; i < numTypedDbs; ++i) {
-		parseTypedDB(s);
+		parseTypedDB(s, packBytes);
 	}
 }
 
-void AssetPackInspector::parseTypedDB(Deserializer& s)
+void AssetPackInspector::parseTypedDB(Deserializer& s, const Bytes& packBytes)
 {
 	int curAssetType;
 	s >> curAssetType;
@@ -58,8 +71,25 @@ void AssetPackInspector::parseTypedDB(Deserializer& s)
 		AssetDatabase::Entry entry;
 		s >> key >> entry;
 
-		entries.emplace_back(curAssetType, std::move(key), std::move(entry));
+		auto splitPath = entry.path.split(':');
+		size_t pos = splitPath.at(0).toInteger64();
+		size_t size = splitPath.at(1).toInteger64();
+		auto hash = Hash::hash(gsl::as_bytes(gsl::span<const Byte>(packBytes.data() + pos + dataStartPos, size)));
+
+		entries.emplace_back(curAssetType, hash, std::move(key), std::move(entry));
 	}
+}
+
+void AssetPackInspector::computeHash()
+{
+	Hash::Hasher hasher;
+	for (auto& e: sortedEntries) {
+		auto& entry = entries[e];
+		hasher.feedBytes(gsl::as_bytes(gsl::span<const char>(entry.key.c_str(), entry.key.length())));
+		hasher.feed(entry.assetType);
+		hasher.feed(entry.hash);
+	}
+	totalHash = hasher.digest();
 }
 
 void AssetPackInspector::printData() const
@@ -81,16 +111,19 @@ void AssetPackInspector::printData() const
 		}
 
 		auto splitPath = entry.entry.path.split(':');
-		std::cout << "    [" << i << "] " << strCol << entry.key << stdCol << ": at " << infoCol << splitPath.at(0) << stdCol << ", " << infoCol << splitPath.at(1) << stdCol << " bytes, " << strCol << toString(entry.entry.meta) <<  stdCol << "\n";
+		std::cout << "    [" << i << "] " << strCol << entry.key << stdCol << " [" << infoCol << toString(entry.hash, 16) << stdCol << "]: at " << infoCol << splitPath.at(0) << stdCol << ", " << infoCol << splitPath.at(1) << stdCol << " bytes, " << strCol << toString(entry.entry.meta) <<  stdCol << "\n";
 
 		++i;
 	}
 
+	std::cout << "Hash: " << infoCol << toString(totalHash, 16) << stdCol << "\n";
+
 	std::cout << std::endl;
 }
 
-AssetPackInspector::Entry::Entry(int assetType, String key, AssetDatabase::Entry entry)
+AssetPackInspector::Entry::Entry(int assetType, uint64_t hash, String key, AssetDatabase::Entry entry)
 	: assetType(assetType)
+	, hash(hash)
 	, key(std::move(key))
 	, entry(std::move(entry))
 {
