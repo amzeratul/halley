@@ -30,8 +30,6 @@ namespace Halley
 
 		std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key);
 
-		bool multiplayerProcessingInvitation() override;
-		bool multiplayerProcessingInvitationError() override;
 		void multiplayerInvitationCancel() override;
 
 		void recreateCloudSaveContainer();
@@ -43,6 +41,7 @@ namespace Halley
 
 		void setJoinCallback(PlatformJoinCallback callback) override;
 		void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback) override;
+		void setJoinErrorCallback(PlatformJoinErrorCallback callback) override;
 
 		bool canShowPlayerInfo() const override { return true; }
 		void showPlayerInfo(String playerId) override;

@@ -128,6 +128,7 @@ namespace Halley
 	};
 	using PlatformJoinCallback = std::function<void(PlatformJoinCallbackParameters)>;
 	using PlatformPreparingToJoinCallback = std::function<void(void)>;
+	using PlatformJoinErrorCallback = std::function<void(void)>;
 
 	class PlatformAPI
 	{
@@ -158,14 +159,13 @@ namespace Halley
 		// Return empty unique_ptr if not supported
 		virtual std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key) { return {}; }
 
-		virtual bool multiplayerProcessingInvitation()	{ return false; }
-		virtual bool multiplayerProcessingInvitationError() { return false; }
 		virtual void multiplayerInvitationCancel() { }
 
 		// When the user joins a session, this function should be called back to let the game know what session they should join
 		// If the join happens before this method is called, then wait for this method to be called, and then call the callback
 		virtual void setJoinCallback(PlatformJoinCallback callback) {}
 		virtual void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback) {}
+		virtual void setJoinErrorCallback(PlatformJoinErrorCallback callback) {}
 
 		virtual bool canShowPlayerInfo() const { return false; }
 		virtual void showPlayerInfo(String playerId) {}
