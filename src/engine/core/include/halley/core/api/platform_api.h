@@ -114,11 +114,19 @@ namespace Halley
 		Unsupported
 	};
 
+	enum class MultiplayerPrivacy {
+		Private,
+		FriendsOnly,
+		Public
+	};
+
 	class MultiplayerSession {
 	public:
 		virtual ~MultiplayerSession() = default;
 		virtual MultiplayerStatus getStatus() const = 0;
 		virtual void showInviteUI() = 0;
+		virtual bool canSetPrivacy() const { return false; }
+		virtual void setPrivacy(MultiplayerPrivacy privacy) { }
 	};
 
 	// This is the join callback, see PlatformAPI's method for more details
