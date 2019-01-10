@@ -322,6 +322,7 @@ void XBLManager::signIn()
 				{
 					if (loudResult.err()) {
 						Logger::logError("Error signing in to Xbox live: " + String(loudResult.err_message().c_str()));
+						status = XBLStatus::Disconnected;
 					} else {
 						auto resPayload = loudResult.payload();
 						switch (resPayload.status()) {
