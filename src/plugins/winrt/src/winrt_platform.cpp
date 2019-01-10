@@ -136,4 +136,22 @@ Future<String> WinRTPlatform::performProfanityCheck(String text)
 	return promise.getFuture();
 }
 
+I18NLanguage WinRTPlatform::getSystemLanguage() const
+{
+	wchar_t localeName[LOCALE_NAME_MAX_LENGTH] = { 0 };
+	int ret = GetUserDefaultLocaleName(localeName, LOCALE_NAME_MAX_LENGTH);
+	if (ret > 0)
+	{
+		String language(localeName);
+		if (language.asciiLower() == "zh-cn") {
+			language = "zh-Hans";
+		} else if (language.asciiLower() == "zh-tw") {
+			language = "zh-Hant";
+		}
+		return I18NLanguage(language);
+	}
+
+	return I18NLanguage("en-GB");
+}
+
 #endif

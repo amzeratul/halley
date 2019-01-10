@@ -53,6 +53,8 @@ namespace Halley
 		void setProfanityCheckForbiddenWordsList(std::vector<String> words) override;
 		Future<String> performProfanityCheck(String text) override;
 
+		I18NLanguage getSystemLanguage() const override;
+
 	private:
 		std::shared_ptr<XBLManager> xbl;
 		WinRTSystem* system;
