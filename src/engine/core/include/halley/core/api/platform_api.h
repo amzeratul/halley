@@ -154,6 +154,7 @@ namespace Halley
 		virtual String getId() { return ""; }
 		virtual void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue) {}
 		virtual bool isAchievementUnlocked(const String& achievementId, bool defaultValue) { return defaultValue; }
+		virtual bool isAchievementSystemReady() { return true; }
 
 		// Return empty unique_ptr if not supported
 		virtual std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key) { return {}; }
