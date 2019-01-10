@@ -139,6 +139,7 @@ namespace Halley {
 		};
 
 		std::wstring multiplayerIncommingInvitationUri;
+		std::mutex multiplayerIncommingInvitationMutex;
 
 		MultiplayerSetup multiplayerCurrentSetup;
 		MultiplayerSetup multiplayerTargetSetup;

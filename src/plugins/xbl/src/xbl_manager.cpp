@@ -641,6 +641,8 @@ void XBLManager::invitationArrived (const std::wstring& uri)
 	Logger::logInfo(String("Invite received: ") + String(uri.c_str()));
 	Concurrent::execute([=]()
 	{
+		multiplayerIncommingInvitationMutex.lock();
+
 		// Wait until join callback was set
 		if (!joinCallback) {
 			unsigned long long timeout = GetTickCount64() + 30000;
@@ -661,9 +663,18 @@ void XBLManager::invitationArrived (const std::wstring& uri)
 		}
 
 		// Then start multiplayer
-		multiplayerIncommingInvitationUri = uri;
+		if (multiplayerIncommingInvitationUri != uri && multiplayerTargetSetup.invitationUri != uri && multiplayerCurrentSetup.invitationUri != uri)
+		{
+			multiplayerIncommingInvitationUri = uri;
 
-		preparingToJoinCallback();
+			preparingToJoinCallback();
+		}
+		else
+		{
+			Logger::logWarning(String("Discarding repeated invite!"));
+		}
+
+		multiplayerIncommingInvitationMutex.unlock();
 	});
 }
 
