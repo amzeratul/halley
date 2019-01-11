@@ -10,6 +10,7 @@ namespace Halley
 {
 	class ISaveData;
 	class String;
+	class InputKeyboard;
 
 	class HTTPResponse {
 	public:
