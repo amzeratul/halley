@@ -138,9 +138,8 @@ XBLStatus XBLManager::getStatus() const
 
 class XboxLiveAuthorisationToken : public AuthorisationToken {
 public:
-	XboxLiveAuthorisationToken(String gamertag, String userId, String token)
+	XboxLiveAuthorisationToken(String userId, String token)
 	{
-		data["gamertag"] = std::move(gamertag);
 		data["userId"] = std::move(userId);
 		data["token"] = std::move(token);
 	}
@@ -190,7 +189,6 @@ Future<AuthTokenResult> XBLManager::getAuthToken(const AuthTokenParameters& para
 			} else {
 				auto payload = result.payload();
 				auto privileges = String(payload.privileges().c_str());
-				auto gamerTag = String(payload.gamertag().c_str());
 				auto userId = String(payload.xbox_user_id().c_str());
 				auto token = String(payload.token().c_str());
 
@@ -210,7 +208,7 @@ Future<AuthTokenResult> XBLManager::getAuthToken(const AuthTokenParameters& para
 					}
 				}
 
-				promise.setValue(AuthTokenResult(std::make_unique<XboxLiveAuthorisationToken>(gamerTag, userId, token), capabilities));
+				promise.setValue(AuthTokenResult(std::make_unique<XboxLiveAuthorisationToken>(userId, token), capabilities));
 			}
 		});
 
@@ -309,6 +307,7 @@ void XBLManager::signIn()
 	{
 		if (result.err()) {
 			Logger::logError(String("Error signing in to Xbox Live: ") + result.err_message());
+			loginDelay = 180;
 			status = XBLStatus::Disconnected;
 		} else {
 			auto resultStatus = result.payload().status();
@@ -322,6 +321,7 @@ void XBLManager::signIn()
 				{
 					if (loudResult.err()) {
 						Logger::logError("Error signing in to Xbox live: " + String(loudResult.err_message().c_str()));
+						loginDelay = 180;
 						status = XBLStatus::Disconnected;
 					} else {
 						auto resPayload = loudResult.payload();
