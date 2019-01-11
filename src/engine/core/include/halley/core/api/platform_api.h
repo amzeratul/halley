@@ -199,5 +199,8 @@ namespace Halley
 			promise.setValue(std::move(text));
 			return promise.getFuture();
 		}
+
+		virtual bool hasKeyboard() const { return false; }
+		virtual std::shared_ptr<InputKeyboard> getKeyboard() const { return {}; }
 	};
 }

@@ -17,6 +17,7 @@ namespace Halley
 	class UIWidget;
 	class UIStyle;
 	class IClipboard;
+	class InputKeyboard;
 
 	class UIFactory
 	{
@@ -55,7 +56,9 @@ namespace Halley
 		const HalleyAPI& api;
 		Resources& resources;
 		const I18N& i18n;
-		
+
+		std::shared_ptr<InputKeyboard> keyboard;
+
 		std::shared_ptr<UIWidget> makeWidget(const ConfigNode& node);
 		std::shared_ptr<UISizer> makeSizerPtr(const ConfigNode& node);
 		Maybe<UISizer> makeSizer(const ConfigNode& node);
