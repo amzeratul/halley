@@ -92,6 +92,12 @@ namespace Halley
 		AuthTokenResult(AuthTokenRetrievalResult result)
 			: result(result)
 		{}
+
+		AuthTokenResult(AuthTokenRetrievalResult result, OnlineCapabilities capabilities)
+			: result(result)
+			, capabilitiesSupported(capabilities)
+		{}
+
 		AuthTokenResult(std::unique_ptr<AuthorisationToken> token, OnlineCapabilities capabilities)
 			: result(AuthTokenRetrievalResult::OK)
 			, token(std::move(token))
@@ -155,6 +161,10 @@ namespace Halley
 		virtual void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue) {}
 		virtual bool isAchievementUnlocked(const String& achievementId, bool defaultValue) { return defaultValue; }
 		virtual bool isAchievementSystemReady() { return true; }
+
+		// Some platforms require custom handling when missing UGC capabilities
+		virtual bool hasOfflineUGCCapabilities() { return true; };
+		virtual bool handleMissingUGCCapabilities() { return false; }; //returns true if has handled ugc access errors
 
 		// Return empty unique_ptr if not supported
 		virtual std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key) { return {}; }
