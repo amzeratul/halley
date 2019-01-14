@@ -20,6 +20,8 @@
 #define GAME_SESSION_TEMPLATE_NAME L"Standard_game_session_without_matchmaking"
 #define LOBBY_TEMPLATE_NAME L"test_lobby_invite"
 
+#define LOGIN_DELAY	180
+
 using namespace Halley;
 
 template <typename T>
@@ -379,7 +381,7 @@ void XBLManager::signIn()
 	{
 		if (result.err()) {
 			Logger::logError(String("Error signing in to Xbox Live: ") + result.err_message());
-			loginDelay = 180;
+			loginDelay = LOGIN_DELAY;
 			status = XBLStatus::Disconnected;
 		} else {
 			auto resultStatus = result.payload().status();
@@ -393,7 +395,7 @@ void XBLManager::signIn()
 				{
 					if (loudResult.err()) {
 						Logger::logError("Error signing in to Xbox live: " + String(loudResult.err_message().c_str()));
-						loginDelay = 180;
+						loginDelay = LOGIN_DELAY;
 						status = XBLStatus::Disconnected;
 					} else {
 						auto resPayload = loudResult.payload();
@@ -402,7 +404,7 @@ void XBLManager::signIn()
 							co_await onLoggedIn();
 							break;
 						default:
-							loginDelay = 180;
+							loginDelay = LOGIN_DELAY;
 							status = XBLStatus::Disconnected;
 							break;
 						}
@@ -420,16 +422,37 @@ void XBLManager::signIn()
 winrt::Windows::Foundation::IAsyncAction XBLManager::getConnectedStorage()
 {
 	using namespace winrt::Windows::Gaming::XboxLive::Storage;
-	
-	auto windowsUser = co_await winrt::Windows::System::User::FindAllAsync();
 
-	GameSaveProviderGetResult result = co_await GameSaveProvider::GetForUserAsync(*windowsUser.First(), xboxLiveContext->application_config()->scid());
+	try
+	{
+		auto windowsUser = co_await winrt::Windows::System::User::FindAllAsync();
 
-	if (result.Status() == GameSaveErrorStatus::Ok) {
-		gameSaveProvider = result.Value();
-		status = XBLStatus::Connected;
-	} else {
+		GameSaveProviderGetResult result = co_await GameSaveProvider::GetForUserAsync(*windowsUser.First(), xboxLiveContext->application_config()->scid());
+
+		if (result.Status() == GameSaveErrorStatus::Ok) {
+			gameSaveProvider = result.Value();
+			status = XBLStatus::Connected;
+		}
+		else {
+			status = XBLStatus::Disconnected;
+		}
+	}
+	catch (...)
+	{
 		status = XBLStatus::Disconnected;
+	}
+
+	if (status != XBLStatus::Connected)
+	{
+		Logger::logError(String("Error getting the connected storage for user '") + xboxUser->gamertag().c_str() + String("'"));
+
+		loginDelay = LOGIN_DELAY;
+		xboxUser.reset();
+		xboxLiveContext.reset();
+		gameSaveProvider.reset();
+		achievementsStatus = XBLAchievementsStatus::Uninitialized;
+		achievementStatus.clear();
+		playerLoggedOut = true;
 	}
 }
 
