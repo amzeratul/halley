@@ -4,11 +4,13 @@
 #include <map>
 #include <halley/concurrency/future.h>
 #include <halley/utils/utils.h>
+#include "halley/text/i18n.h"
 
 namespace Halley
 {
 	class ISaveData;
 	class String;
+	class InputKeyboard;
 
 	class HTTPResponse {
 	public:
@@ -113,11 +115,19 @@ namespace Halley
 		Unsupported
 	};
 
+	enum class MultiplayerPrivacy {
+		Private,
+		FriendsOnly,
+		Public
+	};
+
 	class MultiplayerSession {
 	public:
 		virtual ~MultiplayerSession() = default;
 		virtual MultiplayerStatus getStatus() const = 0;
 		virtual void showInviteUI() = 0;
+		virtual bool canSetPrivacy() const { return false; }
+		virtual void setPrivacy(MultiplayerPrivacy privacy) { }
 	};
 
 	// This is the join callback, see PlatformAPI's method for more details
@@ -127,6 +137,7 @@ namespace Halley
 	};
 	using PlatformJoinCallback = std::function<void(PlatformJoinCallbackParameters)>;
 	using PlatformPreparingToJoinCallback = std::function<void(void)>;
+	using PlatformJoinErrorCallback = std::function<void(void)>;
 
 	class PlatformAPI
 	{
@@ -157,19 +168,18 @@ namespace Halley
 		// Return empty unique_ptr if not supported
 		virtual std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key) { return {}; }
 
-		virtual bool multiplayerProcessingInvitation()	{ return false; }
-		virtual bool multiplayerProcessingInvitationError() { return false; }
 		virtual void multiplayerInvitationCancel() { }
 
 		// When the user joins a session, this function should be called back to let the game know what session they should join
 		// If the join happens before this method is called, then wait for this method to be called, and then call the callback
 		virtual void setJoinCallback(PlatformJoinCallback callback) {}
 		virtual void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback) {}
+		virtual void setJoinErrorCallback(PlatformJoinErrorCallback callback) {}
 
 		virtual bool canShowPlayerInfo() const { return false; }
 		virtual void showPlayerInfo(String playerId) {}
 
-		virtual String getSystemLanguage() const { return "en-GB"; }
+		virtual I18NLanguage getSystemLanguage() const { return I18NLanguage("en-GB"); }
 
 		virtual bool canShowReportedUserContent() const { return true; }
 
@@ -190,5 +200,8 @@ namespace Halley
 			promise.setValue(std::move(text));
 			return promise.getFuture();
 		}
+
+		virtual bool hasKeyboard() const { return false; }
+		virtual std::shared_ptr<InputKeyboard> getKeyboard() const { return {}; }
 	};
 }

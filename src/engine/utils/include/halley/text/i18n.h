@@ -2,6 +2,7 @@
 
 #include "halleystring.h"
 #include <map>
+#include "halley/data_structures/maybe.h"
 
 namespace Halley {
 	class ConfigNode;
@@ -45,6 +46,35 @@ namespace Halley {
 		int i18nVersion = 0;
 	};
 
+	enum class I18NLanguageMatch {
+		None,
+		Good,
+		Exact
+	};
+
+	class I18NLanguage {
+	public:
+		I18NLanguage();
+		explicit I18NLanguage(const String& code);
+		I18NLanguage(String languageCode, Maybe<String> countryCode);
+
+		void set(String languageCode, Maybe<String> countryCode);
+
+		const String& getLanguageCode() const;
+		const Maybe<String>& getCountryCode() const;
+		String getISOCode() const;
+
+		I18NLanguageMatch getMatch(const I18NLanguage& other) const;
+
+		bool operator==(const I18NLanguage& other) const;
+		bool operator!=(const I18NLanguage& other) const;
+		bool operator<(const I18NLanguage& other) const;
+
+	private:
+		String languageCode;
+		Maybe<String> countryCode;
+	};
+
 	class I18N {
 	public:
 		I18N();
@@ -52,9 +82,9 @@ namespace Halley {
 		void update();
 		void loadLocalisationFile(const ConfigFile& config);
 
-		void setCurrentLanguage(const String& code);
-		void setFallbackLanguage(const String& code);
-		std::vector<String> getLanguagesAvailable() const;
+		void setCurrentLanguage(const I18NLanguage& code);
+		void setFallbackLanguage(const I18NLanguage& code);
+		std::vector<I18NLanguage> getLanguagesAvailable() const;
 
 		LocalisedString get(const String& key) const;
 		LocalisedString getPreProcessedUserString(const String& string) const;
@@ -69,15 +99,15 @@ namespace Halley {
 			return result;
 		}
 
-		const String& getCurrentLanguage() const;
+		const I18NLanguage& getCurrentLanguage() const;
 		int getVersion() const;
 		
 		char getDecimalSeparator() const;
 
 	private:
-		String currentLanguage;
-		String fallbackLanguage;
-		std::map<String, std::map<String, String>> strings;
+		I18NLanguage currentLanguage;
+		Maybe<I18NLanguage> fallbackLanguage;
+		std::map<I18NLanguage, std::map<String, String>> strings;
 		std::map<String, ConfigObserver> observers;
 		int version = 0;
 

@@ -18,6 +18,8 @@ namespace Halley {
 			String name;
 			String path;
 			Metadata metadata;
+
+			bool operator<(const Entry& other) const;
 		};
 		
 		AssetPackListing();
@@ -29,6 +31,7 @@ namespace Halley {
 		
 		void setActive(bool active);
 		bool isActive() const;
+		void sort();
 
 	private:
 		String name;

@@ -78,6 +78,7 @@ namespace Halley {
 
 		void setJoinCallback(PlatformJoinCallback callback);
 		void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback);
+		void setJoinErrorCallback(PlatformJoinErrorCallback callback);
 
 		void setProfanityCheckForbiddenWordsList(std::vector<String> words);
 		String performProfanityCheck(String text);
@@ -90,6 +91,7 @@ namespace Halley {
 		std::map<std::wstring, bool> achievementStatus;
 		PlatformJoinCallback joinCallback;
 		PlatformPreparingToJoinCallback preparingToJoinCallback;
+		PlatformJoinErrorCallback joinErrorCallback;
 		int32_t signOutHandler;
 		bool playerLoggedOut;
 		int loginDelay;

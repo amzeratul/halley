@@ -416,7 +416,7 @@ StringUTF32 TextRenderer::split(const String& str, float maxWidth) const
 	return split(str.getUTF32(), maxWidth);
 }
 
-StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth) const
+StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::function<bool(int32_t)> filter) const
 {
 	StringUTF32 result;
 
@@ -429,15 +429,17 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth) const
 
 		for (std::ptrdiff_t i = 0; i < src.length(); ++i) {
 			const int32_t c = src[i];
+			const bool accepted = filter ? filter(c) : true;
+
 			const bool isLastChar = i == src.length() - 1;
-			if (c == '\n' || c == ' ' || c == '\t' || isLastChar) {
+			if (isLastChar || (accepted && (c == '\n' || c == ' ' || c == '\t'))) {
 				lastValid = src.subspan(0, i + 1);
 			}
 
 			const auto& f = font->getFontForGlyph(c);
 			auto& glyph = f.getGlyph(c);
 			const float scale = getScale(f);
-			const float w = glyph.advance.x * scale;
+			const float w = accepted ? glyph.advance.x * scale : 0.0f;
 			curWidth += w;
 
 			if (c == '\n' || curWidth > maxWidth || isLastChar) {
@@ -474,6 +476,11 @@ Vector2f TextRenderer::getPosition() const
 String TextRenderer::getText() const
 {
 	return String(text);
+}
+
+const StringUTF32& TextRenderer::getTextUTF32() const
+{
+	return text;
 }
 
 Colour TextRenderer::getColour() const
