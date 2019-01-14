@@ -1,5 +1,8 @@
 #include "winrt_platform.h"
 #include "xbl_manager.h"
+
+#include "api/halley_api.h"
+
 #ifdef WINDOWS_STORE
 
 #include "winrt_system.h"
@@ -107,8 +110,17 @@ public:
 
 		window.Activated([=](CoreWindow win, WindowActivatedEventArgs args)
 		{
+			if (args.WindowActivationState() == CoreWindowActivationState::Deactivated) {
+				Logger::logError("CoreWindowActivationState::Deactivated\n");
+			}
+
 			if (args.WindowActivationState() == CoreWindowActivationState::CodeActivated) {
+				Logger::logError("CoreWindowActivationState::CodeActivated\n");
 				system->getPlatform()->recreateCloudSaveContainer();
+			}
+
+			if (args.WindowActivationState() == CoreWindowActivationState::CodeActivated) {
+				Logger::logError("CoreWindowActivationState::CodeActivated\n");
 			}
 		});
 	}
