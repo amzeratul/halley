@@ -106,7 +106,7 @@ namespace Halley {
 		bool isMultiplayerAsHost() const;
 		bool isMultiplayerAsGuest() const;
 		void showInviteUI();
-		void closeMultiplayer();
+		void closeMultiplayer(bool deepReset);
 
 		void setJoinCallback(PlatformJoinCallback callback);
 		void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback);

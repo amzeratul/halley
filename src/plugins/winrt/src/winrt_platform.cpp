@@ -86,7 +86,7 @@ bool WinRTPlatform::multiplayerProcessingInvitationError()
 
 void WinRTPlatform::multiplayerInvitationCancel()
 {
-	return xbl->closeMultiplayer();	
+	return xbl->closeMultiplayer(true);	
 }
 
 void WinRTPlatform::recreateCloudSaveContainer()
