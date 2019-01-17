@@ -874,9 +874,19 @@ bool XBLManager::isMultiplayerAsGuest () const
 	return (mode == MultiplayerMode::Invitee);
 }
 
-void XBLManager::closeMultiplayer (bool deepReset)
+void XBLManager::closeMultiplayer (bool deepReset, int session)
 {
-	multiplayerDone();
+	if (session == -1 || session == multiplayerCurrentSetup.sessionId) {
+		multiplayerDone();
+	}
+
+	if (session == multiplayerTargetSetup.sessionId)
+	{
+		multiplayerTargetSetup.mode = MultiplayerMode::None;
+		multiplayerTargetSetup.key = "";
+		multiplayerTargetSetup.invitationUri = L"";
+		multiplayerTargetSetup.sessionId = -1;
+	}
 
 	// Reset some stuff
 	if (deepReset)
@@ -1325,7 +1335,7 @@ void XBLManager::setPreparingToJoinCallback(PlatformPreparingToJoinCallback call
 
 XBLMultiplayerSession::~XBLMultiplayerSession()
 {
-	manager.closeMultiplayer(false);
+	manager.closeMultiplayer(false, sessionId);
 }
 
 MultiplayerStatus XBLMultiplayerSession::getStatus() const
