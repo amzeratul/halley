@@ -1,6 +1,7 @@
 #include "halley/file/path.h"
 #include <sstream>
 #include <fstream>
+#include "halley/core/halley_core.h"
 
 using namespace Halley;
 
@@ -229,9 +230,7 @@ std::string Path::string() const
 
 void Path::writeFile(const Path& path, const Bytes& data)
 {
-	std::ofstream fp(path.string(), std::ios::binary | std::ios::out);
-	fp.write(reinterpret_cast<const char*>(data.data()), data.size());
-	fp.close();
+	OS::get().atomicWriteFile(path, data);
 }
 
 Bytes Path::readFile(const Path& path)

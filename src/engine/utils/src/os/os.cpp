@@ -26,6 +26,7 @@
 #include "os_ios.h"
 #include "os_linux.h"
 #include "halley/support/exception.h"
+#include <fstream>
 
 using namespace Halley;
 
@@ -104,6 +105,13 @@ Path OS::parseProgramPath(const String& commandLine)
 
 void OS::createDirectories(const Path& path)
 {
+}
+
+void OS::atomicWriteFile(const Path& path, const Bytes& data)
+{
+	std::ofstream fp(path.string(), std::ios::binary | std::ios::out);
+	fp.write(reinterpret_cast<const char*>(data.data()), data.size());
+	fp.close();
 }
 
 std::vector<Path> OS::enumerateDirectory(const Path& path)

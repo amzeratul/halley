@@ -38,6 +38,7 @@
 #include <comutil.h>
 #include <objbase.h>
 #include <atlbase.h>
+#include <fstream>
 
 #pragma comment(lib, "wbemuuid.lib")
 //#pragma comment(lib, "comsupp.lib")
@@ -312,6 +313,17 @@ void OSWin32::createDirectories(const Path& path)
 			}
 		}
 	}
+}
+
+void OSWin32::atomicWriteFile(const Path& path, const Bytes& data)
+{
+	auto temp = path.replaceExtension(path.getExtension() + ".tmp");
+
+	std::ofstream fp(temp.string(), std::ios::binary | std::ios::out);
+	fp.write(reinterpret_cast<const char*>(data.data()), data.size());
+	fp.close();
+
+	ReplaceFileW(path.getString().getUTF16().c_str(), temp.getString().getUTF16().c_str(), nullptr, REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr);
 }
 
 std::vector<Path> OSWin32::enumerateDirectory(const Path& rootPath)

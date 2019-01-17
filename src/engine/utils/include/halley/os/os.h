@@ -56,6 +56,7 @@ namespace Halley {
 		virtual String makeDataPath(String appDataPath, String userProvidedPath);
 		virtual Path parseProgramPath(const String& commandLine);
 		virtual void createDirectories(const Path& path);
+		virtual void atomicWriteFile(const Path& path, const Bytes& data);
 		virtual std::vector<Path> enumerateDirectory(const Path& path);
 
 		virtual void setConsoleColor(int foreground, int background);
