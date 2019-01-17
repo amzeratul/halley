@@ -22,6 +22,8 @@ namespace Halley {
 		String getSelectedOptionId() const;
 		size_t getCount() const;
 
+		UIStyle getStyle() const;
+
 		void addTextItem(const String& id, const LocalisedString& label, float maxWidth = -1, bool centre = false);
 		void addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, Maybe<UIStyle> styleOverride = {});
 		void clear();
@@ -81,7 +83,9 @@ namespace Halley {
 
 		void onClicked(Vector2f mousePos) override;
 		void setSelected(bool selected);
-		
+
+		void setStyle(UIStyle style);
+
 		int getIndex() const;
 		void setIndex(int index);
 		Rect4f getMouseRect() const override;

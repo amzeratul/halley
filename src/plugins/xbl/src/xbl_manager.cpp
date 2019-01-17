@@ -884,6 +884,9 @@ void XBLManager::multiplayerUpdate_Initializing_Iniviter()
 		 || xblOperation_set_joinability == XBLMPMOperationState::Error
 		) {
 			multiplayerState = MultiplayerState::Error;
+			if (joinErrorCallback) {
+				joinErrorCallback();
+			}
 		}
 	}
 }
@@ -949,11 +952,17 @@ void XBLManager::multiplayerUpdate_Initializing_Inivitee()
 
 		} catch (...) {
 			multiplayerState = MultiplayerState::Error;
+			if (joinErrorCallback) {
+				joinErrorCallback();
+			}
 		}
 	}
 	else {
 		if (xblOperation_join_lobby == XBLMPMOperationState::Error) {
 			multiplayerState = MultiplayerState::Error;
+			if (joinErrorCallback) {
+				joinErrorCallback();
+			}
 		}
 	}
 }
@@ -1192,6 +1201,14 @@ void XBLManager::setPreparingToJoinCallback(PlatformPreparingToJoinCallback call
 	preparingToJoinCallback = callback;
 }
 
+void XBLManager::setJoinErrorCallback(PlatformJoinErrorCallback callback)
+{
+	joinErrorCallback = callback;
+	if (callback && multiplayerState == MultiplayerState::Error) {
+		callback();
+	}
+}
+
  XBLMultiplayerSession::XBLMultiplayerSession(XBLManager& manager,const String& key) 
 	: manager(manager)
 	, key(key)
@@ -1214,4 +1231,3 @@ void XBLMultiplayerSession::showInviteUI()
 {
 	manager.showInviteUI ();
 }
-
