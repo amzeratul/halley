@@ -31,6 +31,12 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	, i18n(i18n)
 	, styleSheet(styleSheet)
 {
+	if (api.platform->hasKeyboard()) {
+		keyboard = api.platform->getKeyboard();
+	} else {
+		keyboard = api.input->getKeyboard();
+	}
+
 	addFactory("widget", [=] (const ConfigNode& node) { return makeBaseWidget(node); });
 	addFactory("label", [=] (const ConfigNode& node) { return makeLabel(node); });
 	addFactory("button", [=] (const ConfigNode& node) { return makeButton(node); });
@@ -395,7 +401,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 	auto label = parseLabel(node);
 	auto ghostText = parseLabel(node, "", "ghost");
 
-	auto result = std::make_shared<UITextInput>(api.input->getKeyboard(), id, style, "", label);;
+	auto result = std::make_shared<UITextInput>(keyboard, id, style, "", label);;
 	if (!ghostText.getString().isEmpty()) {
 		result->setGhostText(ghostText);
 	}
@@ -424,7 +430,7 @@ std::shared_ptr<UIWidget> UIFactory::makeSpinControl(const ConfigNode& entryNode
 	auto id = node["id"].asString();
 	auto style = UIStyle(node["style"].asString("spinControl"), styleSheet);
 
-	auto result = std::make_shared<UISpinControl>(api.input->getKeyboard(), id, style, 0.0f);
+	auto result = std::make_shared<UISpinControl>(keyboard, id, style, 0.0f);
 
 	if (node.hasKey("minValue")) {
 		result->setMinimumValue(node["minValue"].asFloat());
