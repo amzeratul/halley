@@ -74,6 +74,11 @@ size_t UIList::getCount() const
 	return getNumberOfItems();
 }
 
+UIStyle UIList::getStyle() const
+{
+	return style;
+}
+
 void UIList::addTextItem(const String& id, const LocalisedString& label, float maxWidth, bool centre)
 {
 	auto widget = std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label);
@@ -414,6 +419,12 @@ void UIListItem::setSelected(bool s)
 	}
 }
 
+void UIListItem::setStyle(UIStyle style)
+{
+	this->style = style;
+	doSetState(getCurState());
+}
+
 void UIListItem::onEnabledChanged()
 {
 	addNewChildren(getLastInputType());
@@ -441,6 +452,7 @@ void UIListItem::update(Time t, bool moved)
 
 	if (dragged) {
 		setChildLayerAdjustment(1);
+		
 		const auto parentRect = parent.getRect();
 		const auto myTargetRect = Rect4f(curDragPos, curDragPos + getSize());
 		setPosition(myTargetRect.fitWithin(parentRect).getTopLeft());

@@ -39,6 +39,38 @@ namespace Halley {
 		Ready
 	};
 
+	class XBLMPMOperationStateCtrl { 
+	public:
+
+		XBLMPMOperationStateCtrl();
+
+		void reset();
+
+		void setStateRequested();
+		void setStateError();
+		void setStateDoneOk();
+
+		bool checkStateNotRequested();
+		bool checkStateRequested();
+		bool checkStateError();
+		bool checkStateDoneOk();
+
+	private:
+
+		enum class OpState { 
+			NotRequested,
+			Requested,
+			DoneOk,
+			Error
+		};
+		 
+		OpState getState() const;
+
+		mutable OpState state;
+		mutable bool timeOut;
+		ULONGLONG requestStartTime;
+	};
+
 	class XBLManager {
 	public:
 		XBLManager();
@@ -74,10 +106,11 @@ namespace Halley {
 		bool isMultiplayerAsHost() const;
 		bool isMultiplayerAsGuest() const;
 		void showInviteUI();
-		void closeMultiplayer();
+		void closeMultiplayer(bool deepReset, int session = -1);
 
 		void setJoinCallback(PlatformJoinCallback callback);
 		void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback);
+		void setJoinErrorCallback(PlatformJoinErrorCallback callback);
 
 		void setProfanityCheckForbiddenWordsList(std::vector<String> words);
 		String performProfanityCheck(String text);
@@ -90,6 +123,7 @@ namespace Halley {
 		std::map<std::wstring, bool> achievementStatus;
 		PlatformJoinCallback joinCallback;
 		PlatformPreparingToJoinCallback preparingToJoinCallback;
+		PlatformJoinErrorCallback joinErrorCallback;
 		int32_t signOutHandler;
 		bool playerLoggedOut;
 		int loginDelay;
@@ -118,18 +152,11 @@ namespace Halley {
 			Error
 		};
 
-		enum class XBLMPMOperationState { 
-			NotRequested,
-			Requested,
-			DoneOk,
-			Error
-		};
-
-		XBLMPMOperationState xblOperation_add_local_user;    // INVITER
-		XBLMPMOperationState xblOperation_set_property;      // INVITER
-		XBLMPMOperationState xblOperation_set_joinability;   // INVITER
-		XBLMPMOperationState xblOperation_join_lobby;        // INVITEE
-		XBLMPMOperationState xblOperation_remove_local_user; // INVITER & INVITEE
+		XBLMPMOperationStateCtrl xblOperation_add_local_user;    // INVITER
+		XBLMPMOperationStateCtrl xblOperation_set_property;      // INVITER
+		XBLMPMOperationStateCtrl xblOperation_set_joinability;   // INVITER
+		XBLMPMOperationStateCtrl xblOperation_join_lobby;        // INVITEE
+		XBLMPMOperationStateCtrl xblOperation_remove_local_user; // INVITER & INVITEE
 
 		struct MultiplayerSetup {
 			MultiplayerMode mode;

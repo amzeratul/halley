@@ -12,6 +12,9 @@ namespace Halley
 	class InputAPI;
 	class HalleyAPIInternal;
 
+	using SystemOnSuspendCallback = std::function<void(void)>;
+	using SystemOnResumeCallback = std::function<void(void)>;
+
 	class GLContext
 	{
 	public:
@@ -57,6 +60,9 @@ namespace Halley
 		virtual bool canExit() { return false; }
 
 		virtual std::shared_ptr<IClipboard> getClipboard() const { return {}; }
+
+		virtual void setOnSuspendCallback(SystemOnSuspendCallback callback) {}
+		virtual void setOnResumeCallback(SystemOnResumeCallback callback) {}
 
 	private:
 		friend class HalleyAPI;

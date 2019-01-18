@@ -74,19 +74,9 @@ std::unique_ptr<MultiplayerSession> WinRTPlatform::makeMultiplayerSession(const 
 	return xbl->makeMultiplayerSession(key);
 }
 
-bool WinRTPlatform::multiplayerProcessingInvitation()
-{
-	return (xbl->getMultiplayerStatus()==MultiplayerStatus::Initializing);
-}
-
-bool WinRTPlatform::multiplayerProcessingInvitationError()
-{
-	return (xbl->getMultiplayerStatus()==MultiplayerStatus::Error);
-}
-
 void WinRTPlatform::multiplayerInvitationCancel()
 {
-	return xbl->closeMultiplayer();	
+	return xbl->closeMultiplayer(true);	
 }
 
 void WinRTPlatform::recreateCloudSaveContainer()
@@ -112,6 +102,11 @@ void WinRTPlatform::setJoinCallback(PlatformJoinCallback callback)
 void WinRTPlatform::setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback)
 {
 	xbl->setPreparingToJoinCallback(callback);
+}
+
+void WinRTPlatform::setJoinErrorCallback(PlatformJoinErrorCallback callback)
+{
+	xbl->setJoinErrorCallback(callback);
 }
 
 void WinRTPlatform::showPlayerInfo(String playerId)

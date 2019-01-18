@@ -1,5 +1,8 @@
 #include "winrt_platform.h"
 #include "xbl_manager.h"
+
+#include "api/halley_api.h"
+
 #ifdef WINDOWS_STORE
 
 #include "winrt_system.h"
@@ -107,8 +110,20 @@ public:
 
 		window.Activated([=](CoreWindow win, WindowActivatedEventArgs args)
 		{
+			if (args.WindowActivationState() == CoreWindowActivationState::Deactivated) {
+				Logger::logError("CoreWindowActivationState::Deactivated\n");
+				system->callOnSuspendCallback();
+			}
+
 			if (args.WindowActivationState() == CoreWindowActivationState::CodeActivated) {
+				Logger::logError("CoreWindowActivationState::CodeActivated\n");
 				system->getPlatform()->recreateCloudSaveContainer();
+				system->callOnResumeCallback();
+			}
+
+			if (args.WindowActivationState() == CoreWindowActivationState::PointerActivated) {
+				Logger::logError("CoreWindowActivationState::PointerActivated\n");
+				system->callOnResumeCallback();
 			}
 		});
 	}
@@ -315,6 +330,20 @@ void WinRTSystem::setPlatform(WinRTPlatform* winrtPlatform)
 WinRTPlatform* WinRTSystem::getPlatform()
 {
 	return platform;
+}
+
+void WinRTSystem::callOnSuspendCallback()
+{
+	if (onSuspendCallback) {
+		onSuspendCallback();
+	}
+}
+
+void WinRTSystem::callOnResumeCallback()
+{
+	if (onResumeCallback) {
+		onResumeCallback();
+	}
 }
 
 struct View : winrt::implements<View, IFrameworkView>

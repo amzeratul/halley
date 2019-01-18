@@ -20,6 +20,8 @@
 #define GAME_SESSION_TEMPLATE_NAME L"Standard_game_session_without_matchmaking"
 #define LOBBY_TEMPLATE_NAME L"test_lobby_invite"
 
+#define LOGIN_DELAY	180
+
 using namespace Halley;
 
 template <typename T>
@@ -38,6 +40,78 @@ template <typename T>
 T^ to_cx(winrt::Windows::Foundation::IUnknown const& from)
 {
 	return safe_cast<T^>(reinterpret_cast<Platform::Object^>(winrt::get_abi(from)));
+}
+
+XBLMPMOperationStateCtrl::XBLMPMOperationStateCtrl()
+{
+	reset();
+}
+
+void XBLMPMOperationStateCtrl::reset()
+{
+	state = OpState::NotRequested;
+	requestStartTime = 0L;
+	timeOut = false;
+}
+
+void XBLMPMOperationStateCtrl::setStateRequested()
+{
+	assert ( state==OpState::NotRequested );
+
+	state = OpState::Requested;
+	requestStartTime = GetTickCount64();
+}
+
+void XBLMPMOperationStateCtrl::setStateError()
+{
+	assert ( state==OpState::NotRequested || state==OpState::Requested );
+
+	state = OpState::Error;
+}
+
+void XBLMPMOperationStateCtrl::setStateDoneOk()
+{
+	assert ( state==OpState::NotRequested || state==OpState::Requested );
+
+	state = OpState::DoneOk;
+}
+
+bool XBLMPMOperationStateCtrl::checkStateNotRequested()
+{ 
+	return getState()==OpState::NotRequested; 
+}
+
+bool XBLMPMOperationStateCtrl::checkStateRequested()
+{ 
+	return getState()==OpState::Requested; 
+}
+
+bool XBLMPMOperationStateCtrl::checkStateError()
+{ 
+	return getState()==OpState::Error; 
+}
+
+bool XBLMPMOperationStateCtrl::checkStateDoneOk()
+{ 
+	return getState()==OpState::DoneOk; 
+}
+
+XBLMPMOperationStateCtrl::OpState XBLMPMOperationStateCtrl::getState() const
+{
+	if ( state==OpState::Requested )
+	{
+		const ULONGLONG requestTimeout = 4000;
+
+		ULONGLONG sinceRequestedElapsedTime = GetTickCount64()-requestStartTime;
+		if ( sinceRequestedElapsedTime>requestTimeout )
+		{
+			Logger::logWarning(String("Operation time out!"));
+			state=OpState::Error;
+			timeOut=true;
+		}
+	}
+	
+	return state;
 }
 
 XBLManager::XBLManager()
@@ -307,7 +381,7 @@ void XBLManager::signIn()
 	{
 		if (result.err()) {
 			Logger::logError(String("Error signing in to Xbox Live: ") + result.err_message());
-			loginDelay = 180;
+			loginDelay = LOGIN_DELAY;
 			status = XBLStatus::Disconnected;
 		} else {
 			auto resultStatus = result.payload().status();
@@ -321,7 +395,7 @@ void XBLManager::signIn()
 				{
 					if (loudResult.err()) {
 						Logger::logError("Error signing in to Xbox live: " + String(loudResult.err_message().c_str()));
-						loginDelay = 180;
+						loginDelay = LOGIN_DELAY;
 						status = XBLStatus::Disconnected;
 					} else {
 						auto resPayload = loudResult.payload();
@@ -330,7 +404,7 @@ void XBLManager::signIn()
 							co_await onLoggedIn();
 							break;
 						default:
-							loginDelay = 180;
+							loginDelay = LOGIN_DELAY;
 							status = XBLStatus::Disconnected;
 							break;
 						}
@@ -348,16 +422,37 @@ void XBLManager::signIn()
 winrt::Windows::Foundation::IAsyncAction XBLManager::getConnectedStorage()
 {
 	using namespace winrt::Windows::Gaming::XboxLive::Storage;
-	
-	auto windowsUser = co_await winrt::Windows::System::User::FindAllAsync();
 
-	GameSaveProviderGetResult result = co_await GameSaveProvider::GetForUserAsync(*windowsUser.First(), xboxLiveContext->application_config()->scid());
+	try
+	{
+		auto windowsUser = co_await winrt::Windows::System::User::FindAllAsync();
 
-	if (result.Status() == GameSaveErrorStatus::Ok) {
-		gameSaveProvider = result.Value();
-		status = XBLStatus::Connected;
-	} else {
+		GameSaveProviderGetResult result = co_await GameSaveProvider::GetForUserAsync(*windowsUser.First(), xboxLiveContext->application_config()->scid());
+
+		if (result.Status() == GameSaveErrorStatus::Ok) {
+			gameSaveProvider = result.Value();
+			status = XBLStatus::Connected;
+		}
+		else {
+			status = XBLStatus::Disconnected;
+		}
+	}
+	catch (...)
+	{
 		status = XBLStatus::Disconnected;
+	}
+
+	if (status != XBLStatus::Connected)
+	{
+		Logger::logError(String("Error getting the connected storage for user '") + xboxUser->gamertag().c_str() + String("'"));
+
+		loginDelay = LOGIN_DELAY;
+		xboxUser.reset();
+		xboxLiveContext.reset();
+		gameSaveProvider.reset();
+		achievementsStatus = XBLAchievementsStatus::Uninitialized;
+		achievementStatus.clear();
+		playerLoggedOut = true;
 	}
 }
 
@@ -662,16 +757,18 @@ void XBLManager::invitationArrived (const std::wstring& uri)
 			}
 		}
 
-		// Then start multiplayer
-		if (multiplayerIncommingInvitationUri != uri && multiplayerTargetSetup.invitationUri != uri && multiplayerCurrentSetup.invitationUri != uri)
+		// Then start multiplayer discarding  repeated invitations
+		if ( multiplayerIncommingInvitationUri == uri || multiplayerTargetSetup.invitationUri == uri 
+		   || ( multiplayerCurrentSetup.invitationUri == uri && multiplayerState!=MultiplayerState::Error ) 
+		)
+		{
+			Logger::logWarning(String("Discarding repeated invite!"));
+		}
+		else
 		{
 			multiplayerIncommingInvitationUri = uri;
 
 			preparingToJoinCallback();
-		}
-		else
-		{
-			Logger::logWarning(String("Discarding repeated invite!"));
 		}
 
 		multiplayerIncommingInvitationMutex.unlock();
@@ -777,9 +874,35 @@ bool XBLManager::isMultiplayerAsGuest () const
 	return (mode == MultiplayerMode::Invitee);
 }
 
-void XBLManager::closeMultiplayer ()
+void XBLManager::closeMultiplayer (bool deepReset, int session)
 {
-	multiplayerDone();
+	if (session == -1 || session == multiplayerCurrentSetup.sessionId) {
+		multiplayerDone();
+	}
+
+	if (session == multiplayerTargetSetup.sessionId)
+	{
+		multiplayerTargetSetup.mode = MultiplayerMode::None;
+		multiplayerTargetSetup.key = "";
+		multiplayerTargetSetup.invitationUri = L"";
+		multiplayerTargetSetup.sessionId = -1;
+	}
+
+	// Reset some stuff
+	if (deepReset)
+	{
+		multiplayerIncommingInvitationUri = L"";
+
+		multiplayerCurrentSetup.mode = MultiplayerMode::None;
+		multiplayerCurrentSetup.key = "";
+		multiplayerCurrentSetup.invitationUri = L"";
+		multiplayerCurrentSetup.sessionId = -1;
+
+		multiplayerTargetSetup.mode = MultiplayerMode::None;
+		multiplayerTargetSetup.key = "";
+		multiplayerTargetSetup.invitationUri = L"";
+		multiplayerTargetSetup.sessionId = -1;
+	}
 }
 
 void XBLManager::multiplayerUpdate()
@@ -819,11 +942,11 @@ void XBLManager::multiplayerUpdate_NotInitialized()
 		multiplayerTargetSetup.sessionId = -1;
 
 		// Reset operation states
-		xblOperation_add_local_user = XBLMPMOperationState::NotRequested;
-		xblOperation_set_property = XBLMPMOperationState::NotRequested;
-		xblOperation_set_joinability = XBLMPMOperationState::NotRequested;
-		xblOperation_join_lobby = XBLMPMOperationState::NotRequested;
-		xblOperation_remove_local_user = XBLMPMOperationState::NotRequested;
+		xblOperation_add_local_user.reset();
+		xblOperation_set_property.reset();
+		xblOperation_set_joinability.reset();
+		xblOperation_join_lobby.reset();
+		xblOperation_remove_local_user.reset();
 		
 		// MPM Initialization
 		Logger::logInfo("NFO: Initialize multiplayer Manager\n");
@@ -851,14 +974,14 @@ void XBLManager::multiplayerUpdate_Initializing()
 void XBLManager::multiplayerUpdate_Initializing_Iniviter()
 {
 	// Check 'add_local_user' Operation
-	if (xblOperation_add_local_user == XBLMPMOperationState::NotRequested) {
+	if (xblOperation_add_local_user.checkStateNotRequested()) {
 		// Add Local User
 		Logger::logDev("NFO: Add Local User\n");
 		auto result = xblMultiplayerManager->lobby_session()->add_local_user(xboxUser);
-		xblOperation_add_local_user = XBLMPMOperationState::Requested;
+		xblOperation_add_local_user.setStateRequested();
 		if (result.err()) {
 			Logger::logError("ERR: Unable to join local user: "+toString(result.err_message().c_str())+"\n" );
-			xblOperation_add_local_user = XBLMPMOperationState::Error;
+			xblOperation_add_local_user.setStateError();
 		}
 		else {
 			Logger::logDev("NFO: Set local user address\n");
@@ -868,34 +991,37 @@ void XBLManager::multiplayerUpdate_Initializing_Iniviter()
 	}
 
 	// Check 'set_property' Operation
-	if (xblOperation_set_property == XBLMPMOperationState::NotRequested && xblOperation_add_local_user == XBLMPMOperationState::DoneOk) {
+	if (xblOperation_set_property.checkStateNotRequested() && xblOperation_add_local_user.checkStateDoneOk()) {
 		Logger::logDev("NFO: Set server user GameKey property:\n"+toString(multiplayerCurrentSetup.key.c_str()));
 		std::string lobbyKey = multiplayerCurrentSetup.key.c_str();
 		std::wstring lobbyKeyW (lobbyKey.begin(), lobbyKey.end());
 		xblMultiplayerManager->lobby_session()->set_synchronized_properties(L"GameKey", web::json::value::string(lobbyKeyW), (void*)InterlockedIncrement(&xblMultiplayerContext));
-		xblOperation_set_property = XBLMPMOperationState::Requested;
+		xblOperation_set_property.setStateRequested();
 	}
 
 	// Check 'set_joinability' Operation
-	if (xblOperation_set_joinability == XBLMPMOperationState::NotRequested && xblOperation_add_local_user == XBLMPMOperationState::DoneOk) {
+	if (xblOperation_set_joinability.checkStateNotRequested() && xblOperation_add_local_user.checkStateDoneOk()) {
 		Logger::logDev("NFO: Set server joinability\n");
 		xblMultiplayerManager->set_joinability (joinability::joinable_by_friends, (void*)InterlockedIncrement(&xblMultiplayerContext));
-		xblOperation_set_joinability = XBLMPMOperationState::Requested;
+		xblOperation_set_joinability.setStateRequested();
 	}
 
 	// Check Initialization state based on Operations status
-	if (xblOperation_add_local_user == XBLMPMOperationState::DoneOk
-	 && xblOperation_set_property == XBLMPMOperationState::DoneOk
-	 && xblOperation_set_joinability == XBLMPMOperationState::DoneOk ) {
+	if (xblOperation_add_local_user.checkStateDoneOk()
+	 && xblOperation_set_property.checkStateDoneOk()
+	 && xblOperation_set_joinability.checkStateDoneOk() ) {
 		// Everthing ok : initaliziation successful
 		multiplayerState = MultiplayerState::Running;
 	}
 	else {
-		if (xblOperation_add_local_user == XBLMPMOperationState::Error
-		 || xblOperation_set_property == XBLMPMOperationState::Error
-		 || xblOperation_set_joinability == XBLMPMOperationState::Error
+		if (xblOperation_add_local_user.checkStateError()
+		 || xblOperation_set_property.checkStateError()
+		 || xblOperation_set_joinability.checkStateError()
 		) {
 			multiplayerState = MultiplayerState::Error;
+			if (joinErrorCallback) {
+				joinErrorCallback();
+			}
 		}
 	}
 }
@@ -903,7 +1029,7 @@ void XBLManager::multiplayerUpdate_Initializing_Iniviter()
 void XBLManager::multiplayerUpdate_Initializing_Inivitee()
 {
 	// Check 'join_lobby' Operation (aka protocol activation)
-	if (xblOperation_join_lobby == XBLMPMOperationState::NotRequested) {
+	if (xblOperation_join_lobby.checkStateNotRequested() ) {
 		// Extract handle id from URI
 		std::wstring handle = L"";
 		size_t pos = multiplayerCurrentSetup.invitationUri.find(L"handle=");
@@ -913,15 +1039,15 @@ void XBLManager::multiplayerUpdate_Initializing_Inivitee()
 		}
 		else {
 			Logger::logError("ERR: Unable to extract handle ID from URI: "+toString(multiplayerCurrentSetup.invitationUri.c_str())+"\n");
-			xblOperation_join_lobby = XBLMPMOperationState::Error;
+			xblOperation_join_lobby.setStateError();
 			return;
 		}
 
 		auto result = xblMultiplayerManager->join_lobby(handle, xboxUser);
-		xblOperation_join_lobby = XBLMPMOperationState::Requested;
+		xblOperation_join_lobby.setStateRequested();
 		if (result.err()) {
 			Logger::logError("ERR: Unable to join to lobby: "+toString(result.err_message())+"\n");
-			xblOperation_join_lobby = XBLMPMOperationState::Error;
+			xblOperation_join_lobby.setStateError();
 		}
 		else {
 			Logger::logDev("NFO: Set local user address\n");
@@ -929,13 +1055,13 @@ void XBLManager::multiplayerUpdate_Initializing_Inivitee()
 			result = xblMultiplayerManager->lobby_session()->set_local_member_connection_address(xboxUser, connectionAddress, (void*)InterlockedIncrement(&xblMultiplayerContext));
 			if (result.err()) {
 				Logger::logError("ERR: Unable to set local member connection address: "+toString(result.err_message().c_str())+"\n" );
-				xblOperation_join_lobby = XBLMPMOperationState::Error;
+				xblOperation_join_lobby.setStateError();
 			}
 		}
 	}
 
 	// Check Initialization state based on Operations status
-	if (xblOperation_join_lobby == XBLMPMOperationState::DoneOk) {
+	if (xblOperation_join_lobby.checkStateDoneOk()) {
 
 		// Everthing ok : initaliziation successful
 		try {
@@ -961,11 +1087,17 @@ void XBLManager::multiplayerUpdate_Initializing_Inivitee()
 
 		} catch (...) {
 			multiplayerState = MultiplayerState::Error;
+			if (joinErrorCallback) {
+				joinErrorCallback();
+			}
 		}
 	}
 	else {
-		if (xblOperation_join_lobby == XBLMPMOperationState::Error) {
+		if (xblOperation_join_lobby.checkStateError()) {
 			multiplayerState = MultiplayerState::Error;
+			if (joinErrorCallback) {
+				joinErrorCallback();
+			}
 		}
 	}
 }
@@ -987,35 +1119,33 @@ void XBLManager::multiplayerUpdate_Running()
 void XBLManager::multiplayerUpdate_Ending()
 {
 	// Check remove user state
-	bool opsInProgress = (xblOperation_add_local_user == XBLMPMOperationState::Requested
-						 || xblOperation_join_lobby == XBLMPMOperationState::Requested
-						 || xblOperation_add_local_user == XBLMPMOperationState::Requested
-						 || xblOperation_set_property == XBLMPMOperationState::Requested
-						 || xblOperation_set_joinability == XBLMPMOperationState::Requested
-						 || xblOperation_join_lobby == XBLMPMOperationState::Requested
+	bool opsInProgress = (  xblOperation_add_local_user.checkStateRequested()
+						 || xblOperation_join_lobby.checkStateRequested()
+						 || xblOperation_set_property.checkStateRequested()
+						 || xblOperation_set_joinability.checkStateRequested()
 						);
 
 	if (!opsInProgress) {
-		bool removeUserNeeded = (xblOperation_add_local_user == XBLMPMOperationState::DoneOk
-								|| xblOperation_join_lobby == XBLMPMOperationState::DoneOk
+		bool removeUserNeeded = (xblOperation_add_local_user.checkStateDoneOk()
+								|| xblOperation_join_lobby.checkStateDoneOk()
 								);
 
 		if (removeUserNeeded) {
 
 			// Check 'remove_local_user' Operation
-			if ( xblOperation_remove_local_user==XBLMPMOperationState::NotRequested )
+			if ( xblOperation_remove_local_user.checkStateNotRequested() )
 			{				
 				auto result = xblMultiplayerManager->lobby_session()->remove_local_user(xboxUser);
-				xblOperation_remove_local_user=XBLMPMOperationState::Requested;
+				xblOperation_remove_local_user.setStateRequested();
 				if (result.err()) {
 					Logger::logError("ERR: Unable to remove local user: "+toString(result.err_message().c_str())+"\n" );
-					xblOperation_remove_local_user = XBLMPMOperationState::Error;
+					xblOperation_remove_local_user.setStateError();
 				}
 			}
 
 			// Check NotInitialized state based on Operations status
-			if (  xblOperation_remove_local_user==XBLMPMOperationState::DoneOk
-			   || xblOperation_remove_local_user==XBLMPMOperationState::Error
+			if (  xblOperation_remove_local_user.checkStateDoneOk()
+			   || xblOperation_remove_local_user.checkStateError()
 			   )
 			{
 				// Ending done
@@ -1052,11 +1182,11 @@ void XBLManager::xblMultiplayerPoolProcess()
 						auto userAddedArgs = std::dynamic_pointer_cast<user_added_event_args>(e.event_args());
 						if (e.err()) {
 							Logger::logError("ERR: event user_added: "+toString(e.err_message().c_str())+"\n");
-							xblOperation_add_local_user = XBLMPMOperationState::Error;
+							xblOperation_add_local_user.setStateError();
 						}
 						else {
 							Logger::logDev("NFO: event user_added ok!...\n");
-							xblOperation_add_local_user = XBLMPMOperationState::DoneOk;
+							xblOperation_add_local_user.setStateDoneOk();
 						}
 					}
 					break;
@@ -1066,11 +1196,11 @@ void XBLManager::xblMultiplayerPoolProcess()
 						auto userAddedArgs = std::dynamic_pointer_cast<user_added_event_args>(e.event_args());
 						if (e.err()) {
 							Logger::logError("ERR: JoinLobby failed: "+toString(e.err_message().c_str())+"\n" );
-							xblOperation_join_lobby = XBLMPMOperationState::Error;
+							xblOperation_join_lobby.setStateError();
 						}
 						else {
 							Logger::logDev("NFO: JoinLobby ok!...\n");
-							xblOperation_join_lobby = XBLMPMOperationState::DoneOk;
+							xblOperation_join_lobby.setStateDoneOk();
 						}
 					}
 					break;
@@ -1080,7 +1210,7 @@ void XBLManager::xblMultiplayerPoolProcess()
 						auto gamePropChangedArgs = std::dynamic_pointer_cast<session_property_changed_event_args>(e.event_args());
 						if (e.session_type() == multiplayer_session_type::lobby_session) {
 							Logger::logDev("NFO: Lobby property changed...\n");
-							xblOperation_set_property = XBLMPMOperationState::DoneOk;
+							xblOperation_set_property.setStateDoneOk();
 						}
 						else {
 							Logger::logDev("NFO: Game property changed...\n");
@@ -1092,11 +1222,11 @@ void XBLManager::xblMultiplayerPoolProcess()
 					{
 						if (e.err()) {
 							Logger::logError("ERR: Joinabilty change failed: "+toString(e.err_message().c_str())+"\n");
-							xblOperation_set_joinability = XBLMPMOperationState::Error;
+							xblOperation_set_joinability.setStateError();
 						}
 						else {
 							Logger::logDev("NFO: Joinabilty change ok!...\n");
-							xblOperation_set_joinability = XBLMPMOperationState::DoneOk;
+							xblOperation_set_joinability.setStateDoneOk();
 						}
 					}
 					break;
@@ -1105,11 +1235,11 @@ void XBLManager::xblMultiplayerPoolProcess()
 					{
 						if (e.err()) {
 							Logger::logError("ERR: multiplayer_event_type::user_removed failed: "+toString(e.err_message().c_str())+"\n");
-							xblOperation_remove_local_user=XBLMPMOperationState::Error;
+							xblOperation_remove_local_user.setStateError();
 						}
 						else {
 							Logger::logDev("NFO: multiplayer_event_type::user_removed ok!...\n");
-							xblOperation_remove_local_user=XBLMPMOperationState::DoneOk; 
+							xblOperation_remove_local_user.setStateDoneOk();
 						}
 					}
 					break;
@@ -1204,6 +1334,14 @@ void XBLManager::setPreparingToJoinCallback(PlatformPreparingToJoinCallback call
 	preparingToJoinCallback = callback;
 }
 
+void XBLManager::setJoinErrorCallback(PlatformJoinErrorCallback callback)
+{
+	joinErrorCallback = callback;
+	if (callback && multiplayerState == MultiplayerState::Error) {
+		callback();
+	}
+}
+
  XBLMultiplayerSession::XBLMultiplayerSession(XBLManager& manager,const String& key) 
 	: manager(manager)
 	, key(key)
@@ -1214,7 +1352,7 @@ void XBLManager::setPreparingToJoinCallback(PlatformPreparingToJoinCallback call
 
 XBLMultiplayerSession::~XBLMultiplayerSession()
 {
-	manager.closeMultiplayer ();
+	manager.closeMultiplayer(false, sessionId);
 }
 
 MultiplayerStatus XBLMultiplayerSession::getStatus() const
@@ -1226,4 +1364,3 @@ void XBLMultiplayerSession::showInviteUI()
 {
 	manager.showInviteUI ();
 }
-
