@@ -192,6 +192,8 @@ namespace Halley
 		virtual void showPlayerInfo(String playerId) {}
 
 		virtual I18NLanguage getSystemLanguage() const { return I18NLanguage("en-GB"); }
+		virtual bool useSystemOverscan() const { return false; }
+		virtual float getSystemOverscan() const { return 1.0f; }
 
 		virtual bool canShowReportedUserContent() const { return true; }
 
