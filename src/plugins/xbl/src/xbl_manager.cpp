@@ -100,7 +100,7 @@ XBLMPMOperationStateCtrl::OpState XBLMPMOperationStateCtrl::getState() const
 {
 	if ( state==OpState::Requested )
 	{
-		const ULONGLONG requestTimeout = 4000;
+		const ULONGLONG requestTimeout = 20000;
 
 		ULONGLONG sinceRequestedElapsedTime = GetTickCount64()-requestStartTime;
 		if ( sinceRequestedElapsedTime>requestTimeout )
@@ -1179,67 +1179,103 @@ void XBLManager::xblMultiplayerPoolProcess()
 
 				case multiplayer_event_type::user_added:
 					{
-						auto userAddedArgs = std::dynamic_pointer_cast<user_added_event_args>(e.event_args());
-						if (e.err()) {
-							Logger::logError("ERR: event user_added: "+toString(e.err_message().c_str())+"\n");
-							xblOperation_add_local_user.setStateError();
+						if ( xblOperation_add_local_user.checkStateRequested() )
+						{
+							auto userAddedArgs = std::dynamic_pointer_cast<user_added_event_args>(e.event_args());
+							if (e.err()) {
+								Logger::logError("ERR: event user_added: "+toString(e.err_message().c_str())+"\n");
+								xblOperation_add_local_user.setStateError();
+							}
+							else {
+								Logger::logDev("NFO: event user_added ok!...\n");
+								xblOperation_add_local_user.setStateDoneOk();
+							}
 						}
-						else {
-							Logger::logDev("NFO: event user_added ok!...\n");
-							xblOperation_add_local_user.setStateDoneOk();
+						else
+						{
+							Logger::logDev("NFO: not expected response to multiplayer_event_type::user_added\n");
 						}
 					}
 					break;
 
 				case multiplayer_event_type::join_lobby_completed:
 					{
-						auto userAddedArgs = std::dynamic_pointer_cast<user_added_event_args>(e.event_args());
-						if (e.err()) {
-							Logger::logError("ERR: JoinLobby failed: "+toString(e.err_message().c_str())+"\n" );
-							xblOperation_join_lobby.setStateError();
+						if ( xblOperation_join_lobby.checkStateRequested() )
+						{
+							auto joinLobbyArgs = std::dynamic_pointer_cast<join_lobby_completed_event_args>(e.event_args());
+						
+							if (e.err()) {
+								Logger::logError("ERR: JoinLobby failed: "+toString(e.err_message().c_str())+"\n" );
+								xblOperation_join_lobby.setStateError();
+							}
+							else {
+								Logger::logDev("NFO: JoinLobby ok!...\n");
+								xblOperation_join_lobby.setStateDoneOk();
+							}
 						}
-						else {
-							Logger::logDev("NFO: JoinLobby ok!...\n");
-							xblOperation_join_lobby.setStateDoneOk();
+						else
+						{
+							Logger::logDev("NFO: not expected response to multiplayer_event_type::join_lobby_completed\n");
 						}
 					}
 					break;
 
 				case multiplayer_event_type::session_property_changed:
 					{
-						auto gamePropChangedArgs = std::dynamic_pointer_cast<session_property_changed_event_args>(e.event_args());
-						if (e.session_type() == multiplayer_session_type::lobby_session) {
-							Logger::logDev("NFO: Lobby property changed...\n");
-							xblOperation_set_property.setStateDoneOk();
+						if ( xblOperation_set_property.checkStateRequested() )
+						{
+							auto gamePropChangedArgs = std::dynamic_pointer_cast<session_property_changed_event_args>(e.event_args());
+							if (e.session_type() == multiplayer_session_type::lobby_session) {
+								Logger::logDev("NFO: Lobby property changed...\n");
+								xblOperation_set_property.setStateDoneOk();
+							}
+							else {
+								Logger::logDev("NFO: Game property changed...\n");
+							}
 						}
-						else {
-							Logger::logDev("NFO: Game property changed...\n");
+						else
+						{
+							Logger::logDev("NFO: not expected response to multiplayer_event_type::session_property_changed\n");
 						}
 					}
 					break;
 
 				case multiplayer_event_type::joinability_state_changed:
 					{
-						if (e.err()) {
-							Logger::logError("ERR: Joinabilty change failed: "+toString(e.err_message().c_str())+"\n");
-							xblOperation_set_joinability.setStateError();
+						if ( xblOperation_set_joinability.checkStateRequested() )
+						{
+							if (e.err()) {
+								Logger::logError("ERR: Joinabilty change failed: "+toString(e.err_message().c_str())+"\n");
+								xblOperation_set_joinability.setStateError();
+							}
+							else {
+								Logger::logDev("NFO: Joinabilty change ok!...\n");
+								xblOperation_set_joinability.setStateDoneOk();
+							}
 						}
-						else {
-							Logger::logDev("NFO: Joinabilty change ok!...\n");
-							xblOperation_set_joinability.setStateDoneOk();
+						else
+						{
+							Logger::logDev("NFO: not expected response to multiplayer_event_type::joinability_state_changed\n");
 						}
 					}
 					break;
 
 				case multiplayer_event_type::user_removed:
 					{
-						if (e.err()) {
-							Logger::logError("ERR: multiplayer_event_type::user_removed failed: "+toString(e.err_message().c_str())+"\n");
-							xblOperation_remove_local_user.setStateError();
+						if ( xblOperation_remove_local_user.checkStateRequested() )
+						{
+							if (e.err()) {
+								Logger::logError("ERR: multiplayer_event_type::user_removed failed: "+toString(e.err_message().c_str())+"\n");
+								xblOperation_remove_local_user.setStateError();
+							}
+							else {
+								Logger::logDev("NFO: multiplayer_event_type::user_removed ok!...\n");
+								xblOperation_remove_local_user.setStateDoneOk();
+							}
 						}
-						else {
-							Logger::logDev("NFO: multiplayer_event_type::user_removed ok!...\n");
-							xblOperation_remove_local_user.setStateDoneOk();
+						else
+						{
+							Logger::logDev("NFO: not expected response to multiplayer_event_type::user_removed\n");
 						}
 					}
 					break;
