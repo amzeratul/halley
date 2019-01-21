@@ -170,7 +170,8 @@ namespace Halley
 		virtual String getId() { return ""; }
 		virtual void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue) {}
 		virtual bool isAchievementUnlocked(const String& achievementId, bool defaultValue) { return defaultValue; }
-		virtual bool isAchievementSystemReady() { return true; }
+		virtual bool isAchievementSystemReady() const { return true; }
+		virtual bool mustUnlockAchievementsOnUserAction() const { return false; }
 
 		// Some platforms require custom handling when missing UGC capabilities
 		virtual bool hasOfflineUGCCapabilities() { return true; };
@@ -191,6 +192,8 @@ namespace Halley
 		virtual void showPlayerInfo(String playerId) {}
 
 		virtual I18NLanguage getSystemLanguage() const { return I18NLanguage("en-GB"); }
+		virtual bool useSystemOverscan() const { return false; }
+		virtual float getSystemOverscan() const { return 1.0f; }
 
 		virtual bool canShowReportedUserContent() const { return true; }
 
