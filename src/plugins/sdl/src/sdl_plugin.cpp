@@ -6,9 +6,17 @@
 namespace Halley {
 	
 	class SDLSystemPlugin : public Plugin {
-		HalleyAPIInternal* createAPI(SystemAPI*) override { return new SystemSDL(); }
+	public:
+		SDLSystemPlugin(Maybe<String> saveCryptKey)
+			: saveCryptKey(std::move(saveCryptKey))
+		{}
+
+		HalleyAPIInternal* createAPI(SystemAPI*) override { return new SystemSDL(saveCryptKey); }
 		PluginType getType() override { return PluginType::SystemAPI; }
 		String getName() override { return "System/SDL"; }
+
+	private:
+		Maybe<String> saveCryptKey;
 	};
 
 	class SDLInputPlugin : public Plugin {
@@ -25,9 +33,9 @@ namespace Halley {
 	
 }
 
-void initSDLSystemPlugin(Halley::IPluginRegistry &registry)
+void initSDLSystemPlugin(Halley::IPluginRegistry &registry, Halley::Maybe<Halley::String> saveCryptKey)
 {
-	registry.registerPlugin(std::make_unique<Halley::SDLSystemPlugin>());
+	registry.registerPlugin(std::make_unique<Halley::SDLSystemPlugin>(std::move(saveCryptKey)));
 }
 
 void initSDLInputPlugin(Halley::IPluginRegistry &registry)

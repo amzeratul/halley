@@ -9,7 +9,7 @@
 using namespace Halley;
 
 void initOpenGLPlugin(IPluginRegistry &registry);
-void initSDLSystemPlugin(IPluginRegistry &registry);
+void initSDLSystemPlugin(IPluginRegistry &registry, Maybe<String> cryptKey);
 void initSDLAudioPlugin(IPluginRegistry &registry);
 void initSDLInputPlugin(IPluginRegistry &registry);
 void initAsioPlugin(IPluginRegistry &registry);
@@ -25,7 +25,7 @@ HalleyEditor::~HalleyEditor()
 
 int HalleyEditor::initPlugins(IPluginRegistry &registry)
 {
-	initSDLSystemPlugin(registry);
+	initSDLSystemPlugin(registry, {});
 	initAsioPlugin(registry);
 	initSDLAudioPlugin(registry);
 	initSDLInputPlugin(registry);

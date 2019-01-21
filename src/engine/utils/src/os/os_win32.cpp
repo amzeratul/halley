@@ -322,9 +322,11 @@ void OSWin32::atomicWriteFile(const Path& path, const Bytes& data)
 		auto temp = path.replaceExtension(path.getExtension() + ".tmp");
 		auto tempPath = temp.getString().replaceAll("/", "\\").getUTF16();
 
-		std::ofstream fp(tempPath.c_str(), std::ios::binary | std::ios::out);
-		fp.write(reinterpret_cast<const char*>(data.data()), data.size());
-		fp.close();
+		{
+			std::ofstream fp(tempPath.c_str(), std::ios::binary | std::ios::out);
+			fp.write(reinterpret_cast<const char*>(data.data()), data.size());
+			fp.close();
+		}
 
 		const int result = ReplaceFileW(dstPath.c_str(), tempPath.c_str(), nullptr, REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr);
 		if (result == 0) {

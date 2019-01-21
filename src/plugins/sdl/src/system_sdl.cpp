@@ -11,8 +11,14 @@
 #include "sdl_gl_context.h"
 #include "input_sdl.h"
 #include "halley/support/logger.h"
+#include "sdl_save.h"
 
 using namespace Halley;
+
+SystemSDL::SystemSDL(Maybe<String> saveCryptKey)
+	: saveCryptKey(std::move(saveCryptKey))
+{
+}
 
 void SystemSDL::init()
 {
@@ -254,8 +260,7 @@ std::shared_ptr<ISaveData> SystemSDL::getStorageContainer(SaveDataType type, con
 		dir = dir / containerName / ".";
 	}
 
-	OS::get().createDirectories(dir);
-	return std::make_shared<SDLSaveData>(dir);
+	return std::make_shared<SDLSaveData>(type, dir, saveCryptKey);
 }
 
 void SystemSDL::setEnvironment(Environment* env)
@@ -350,53 +355,4 @@ void SystemSDL::deInitVideo()
 		SDL_QuitSubSystem(SDL_INIT_VIDEO);
 		videoInit = false;
 	}
-}
-
-SDLSaveData::SDLSaveData(Path dir)
-	: dir(dir)
-{
-}
-
-bool SDLSaveData::isReady() const
-{
-	return true;
-}
-
-Bytes SDLSaveData::getData(const String& path)
-{
-	Expects (!path.isEmpty());
-	return Path::readFile(dir / path);
-}
-
-void SDLSaveData::removeData(const String& path)
-{
-	Expects (!path.isEmpty());
-	return Path::removeFile(dir / path);
-}
-
-std::vector<String> SDLSaveData::enumerate(const String& root)
-{
-	auto paths = OS::get().enumerateDirectory(dir);
-	std::vector<String> result;
-	for (auto& p: paths) {
-		auto path = p.toString();
-		if (path.startsWith(root)) {
-			result.push_back(path);
-		}
-	}
-	return result;
-}
-
-void SDLSaveData::setData(const String& path, const Bytes& data, bool commit)
-{
-	Expects (!path.isEmpty());
-
-	OS::get().createDirectories(dir);
-	Path::writeFile(dir / path, data);
-
-	Logger::logDev("Saving \"" + path + "\", " + String::prettySize(data.size()));
-}
-
-void SDLSaveData::commit()
-{
 }

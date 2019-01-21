@@ -9,6 +9,9 @@ namespace Halley
 
 	class SystemSDL final : public SystemAPIInternal
 	{
+	public:
+		explicit SystemSDL(Maybe<String> saveCryptKey);
+
 	protected:
 		void init() override;
 		void deInit() override;
@@ -53,19 +56,6 @@ namespace Halley
 		mutable bool videoInit = false;
 		std::map<SaveDataType, Path> saveDir;
 		std::shared_ptr<IClipboard> clipboard;
-	};
-
-	class SDLSaveData : public ISaveData {
-	public:
-		explicit SDLSaveData(Path dir);
-		bool isReady() const override;
-		Bytes getData(const String& path) override;
-		void removeData(const String& path) override;
-		std::vector<String> enumerate(const String& root) override;
-		void setData(const String& path, const Bytes& data, bool commit) override;
-		void commit() override;
-
-	private:
-		Path dir;
+		Maybe<String> saveCryptKey;
 	};
 }
