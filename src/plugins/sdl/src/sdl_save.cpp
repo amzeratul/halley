@@ -74,17 +74,17 @@ Bytes SDLSaveData::getData(const String& path)
 		return rawData;
 	}
 
+	// Read header
 	SDLSaveHeader header;
 	memcpy(&header, rawData.data(), sizeof(header));
 	if (!header.isValid()) {
 		return rawData;
 	}
-	rawData.erase(rawData.begin(), rawData.begin() + sizeof(header));
-
-	auto k = getKey();
+	const auto k = getKey();
 	if (header.fileNameHash != SDLSaveHeader::computeHash(path, k)) {
 		return {};
 	}
+	rawData.erase(rawData.begin(), rawData.begin() + sizeof(header));
 
 	// Decrypt data
 	return Encrypt::decrypt(header.getIV(), k, rawData);

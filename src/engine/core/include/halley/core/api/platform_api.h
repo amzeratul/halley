@@ -158,6 +158,7 @@ namespace Halley
 		virtual bool showSubscriptionNeeded() const { return true; }
 
 		virtual String getPlayerName() { return "Player"; }
+		virtual String getUniquePlayerIdString() { return ""; } // This has to be a valid filename
 		virtual bool playerHasLoggedOut() { return false; }
 
 		// Complete when currentProgress == maximumValue
@@ -184,7 +185,8 @@ namespace Halley
 		virtual bool canShowReportedUserContent() const { return true; }
 
 		virtual bool needsStringFiltering() const { return false; }
-		virtual void setProfanityCheckLanguage(const String& language) {};
+		virtual void setProfanityCheckLanguage(const String& language) {}
+		
 		virtual void setProfanityCheckForbiddenWordsList(std::vector<String> words) {}
 
 		// Some platforms have different methods to check for profanity on names. If not, default to standard.
