@@ -317,13 +317,27 @@ void OSWin32::createDirectories(const Path& path)
 
 void OSWin32::atomicWriteFile(const Path& path, const Bytes& data)
 {
-	auto temp = path.replaceExtension(path.getExtension() + ".tmp");
+	auto dstPath = path.getString().replaceAll("/", "\\").getUTF16();
+	if (PathFileExistsW(dstPath.c_str())) {
+		auto temp = path.replaceExtension(path.getExtension() + ".tmp");
+		auto tempPath = temp.getString().replaceAll("/", "\\").getUTF16();
 
-	std::ofstream fp(temp.string(), std::ios::binary | std::ios::out);
-	fp.write(reinterpret_cast<const char*>(data.data()), data.size());
-	fp.close();
+		std::ofstream fp(tempPath.c_str(), std::ios::binary | std::ios::out);
+		fp.write(reinterpret_cast<const char*>(data.data()), data.size());
+		fp.close();
 
-	ReplaceFileW(path.getString().getUTF16().c_str(), temp.getString().getUTF16().c_str(), nullptr, REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr);
+		const int result = ReplaceFileW(dstPath.c_str(), tempPath.c_str(), nullptr, REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr);
+		if (result == 0) {
+			Logger::logWarning("Unable to safely overwrite file " + path.getString());
+			std::ofstream fp(dstPath.c_str(), std::ios::binary | std::ios::out);
+			fp.write(reinterpret_cast<const char*>(data.data()), data.size());
+			fp.close();
+		}
+	} else {
+		std::ofstream fp(dstPath.c_str(), std::ios::binary | std::ios::out);
+		fp.write(reinterpret_cast<const char*>(data.data()), data.size());
+		fp.close();
+	}
 }
 
 std::vector<Path> OSWin32::enumerateDirectory(const Path& rootPath)
