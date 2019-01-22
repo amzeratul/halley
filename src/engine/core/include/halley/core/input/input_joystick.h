@@ -64,7 +64,7 @@ namespace Halley {
 
 		static float defaultAxisAdjust(float value);
 
-		virtual int getButtonAtPosition(JoystickButtonPosition position) const;
+		virtual int getButtonAtPosition(JoystickButtonPosition position) const = 0;
 
 		virtual void update(Time t);
 

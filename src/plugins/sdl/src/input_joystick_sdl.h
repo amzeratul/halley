@@ -36,8 +36,12 @@ namespace Halley {
 			return JoystickType::Generic;
 		}
 
+		virtual int getButtonAtPosition(JoystickButtonPosition position) const override;
+
 	private:
 		InputJoystickSDL(int number);
+		int getSDLAxisIndex(int axis);
+		void processAxisEvent(int axis, float value);
 		void processEvent(const SDL_Event& event);
 
 		void* joystick;

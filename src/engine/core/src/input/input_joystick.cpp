@@ -65,26 +65,6 @@ std::shared_ptr<InputDevice> InputJoystick::getHat(int n)
 	return hats.at(n);
 }
 
-int InputJoystick::getButtonAtPosition(JoystickButtonPosition position) const
-{
-	bool isXbox = getJoystickType() == JoystickType::Xbox;
-	switch (position) {
-		case JoystickButtonPosition::FaceTop: return isXbox ? 3 : 0;
-		case JoystickButtonPosition::FaceRight: return isXbox ? 1 : 1;
-		case JoystickButtonPosition::FaceBottom: return isXbox ? 0 : 2;
-		case JoystickButtonPosition::FaceLeft: return isXbox ? 2 : 3;
-		case JoystickButtonPosition::Select: return 4;
-		case JoystickButtonPosition::Start: return 5;
-		case JoystickButtonPosition::BumperLeft: return 6;
-		case JoystickButtonPosition::BumperRight: return 7;
-		case JoystickButtonPosition::LeftStick: return 8;
-		case JoystickButtonPosition::RightStick: return 9;
-		case JoystickButtonPosition::PlatformAcceptButton: return 0;
-		case JoystickButtonPosition::PlatformCancelButton: return 1;
-		default: throw Exception("Invalid parameter", HalleyExceptions::Input);
-	}
-}
-
 void InputJoystick::update(Time t)
 {
 	updateVibration(t);
