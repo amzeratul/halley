@@ -48,8 +48,6 @@ Bytes Encrypt::decrypt(const Bytes& iv, const String& key, const Bytes& data)
 	AES_init_ctx_iv(&ctx, reinterpret_cast<const uint8_t*>(key.c_str()), iv.data());
 	AES_CBC_decrypt_buffer(&ctx, result.data(), uint32_t(result.size()));
 
-	Logger::logInfo(Encode::encodeBase16(result));
-
 	// Remove padding
 	unsigned char padSize = result.back();
 	if (padSize >= result.size()) {
