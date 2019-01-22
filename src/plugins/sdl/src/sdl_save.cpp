@@ -44,7 +44,7 @@ Bytes SDLSaveHeader::getIV() const
 
 uint64_t SDLSaveHeader::computeHash(const String& path, const String& key)
 {
-	String filename = Path(path).getFilename().getString() + ":" + key;
+	String filename = path + ":" + key;
 	return Hash::hash(gsl::as_bytes(gsl::span<const char>(filename.c_str(), filename.length())));
 }
 

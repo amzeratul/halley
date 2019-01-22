@@ -7,7 +7,7 @@ namespace Halley {
 		std::array<char, 8> formatId;
 		uint32_t version = 0;
 		uint32_t reserved = 0;
-		std::array<char, 8> iv;
+		std::array<char, 16> iv;
 		uint64_t fileNameHash = 0;
 
 		bool isValid() const;
