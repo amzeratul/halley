@@ -63,18 +63,22 @@ void AudioFacade::startPlayback(int deviceNumber)
 		format.format = AudioSampleFormat::Float;
 		format.numChannels = 2;
 		format.sampleRate = 48000;
-		
-		audioSpec = output.openAudioDevice(format, devices.at(deviceNumber).get(), [this]() { onNeedBuffer(); });
-		started = true;
 
-		std::cout << "Audio Playback started.\n";
-		std::cout << "\tDevice: " << devices.at(deviceNumber)->getName() << " [" << deviceNumber << "]\n";
-		std::cout << "\tSample rate: " << audioSpec.sampleRate << "\n";
-		std::cout << "\tChannels: " << audioSpec.numChannels << "\n";
-		std::cout << "\tFormat: " << toString(audioSpec.format) << "\n";
-		std::cout << "\tBuffer size: " << audioSpec.bufferSize << std::endl;
+		try {
+			audioSpec = output.openAudioDevice(format, devices.at(deviceNumber).get(), [this]() { onNeedBuffer(); });
+			started = true;
 
-		resumePlayback();
+			std::cout << "Audio Playback started.\n";
+			std::cout << "\tDevice: " << devices.at(deviceNumber)->getName() << " [" << deviceNumber << "]\n";
+			std::cout << "\tSample rate: " << audioSpec.sampleRate << "\n";
+			std::cout << "\tChannels: " << audioSpec.numChannels << "\n";
+			std::cout << "\tFormat: " << toString(audioSpec.format) << "\n";
+			std::cout << "\tBuffer size: " << audioSpec.bufferSize << std::endl;
+
+			resumePlayback();
+		} catch (...) {
+			// Unable to open audio device
+		}
 	}
 }
 
