@@ -149,4 +149,14 @@ I18NLanguage WinRTPlatform::getSystemLanguage() const
 	return I18NLanguage("en-GB");
 }
 
+void WinRTPlatform::suspend()
+{
+	xbl->suspend();
+}
+
+void WinRTPlatform::resume()
+{
+	xbl->resume();
+}
+
 #endif

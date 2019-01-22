@@ -112,17 +112,20 @@ public:
 		{
 			if (args.WindowActivationState() == CoreWindowActivationState::Deactivated) {
 				Logger::logError("CoreWindowActivationState::Deactivated\n");
+				system->getPlatform()->suspend();
 				system->callOnSuspendCallback();
 			}
 
 			if (args.WindowActivationState() == CoreWindowActivationState::CodeActivated) {
-				Logger::logError("CoreWindowActivationState::CodeActivated\n");
+				Logger::logError("CoreWindowActivationState::CodeActivated\n");				
+				system->getPlatform()->resume();
 				system->getPlatform()->recreateCloudSaveContainer();
 				system->callOnResumeCallback();
 			}
 
 			if (args.WindowActivationState() == CoreWindowActivationState::PointerActivated) {
 				Logger::logError("CoreWindowActivationState::PointerActivated\n");
+				system->getPlatform()->resume();
 				system->callOnResumeCallback();
 			}
 		});

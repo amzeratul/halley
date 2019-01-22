@@ -54,6 +54,9 @@ namespace Halley
 
 		I18NLanguage getSystemLanguage() const override;
 
+		void suspend();
+		void resume();
+
 	private:
 		std::shared_ptr<XBLManager> xbl;
 		WinRTSystem* system;

@@ -51,7 +51,7 @@ void XBLMPMOperationStateCtrl::reset()
 {
 	state = OpState::NotRequested;
 	requestStartTime = 0L;
-	timeOut = false;
+	timeOutActive = false;
 }
 
 void XBLMPMOperationStateCtrl::setStateRequested()
@@ -59,7 +59,7 @@ void XBLMPMOperationStateCtrl::setStateRequested()
 	assert ( state==OpState::NotRequested );
 
 	state = OpState::Requested;
-	requestStartTime = GetTickCount64();
+	renewTimeoutTime();
 }
 
 void XBLMPMOperationStateCtrl::setStateError()
@@ -96,18 +96,28 @@ bool XBLMPMOperationStateCtrl::checkStateDoneOk()
 	return getState()==OpState::DoneOk; 
 }
 
+void XBLMPMOperationStateCtrl::enableTimeout( bool active )
+{
+	timeOutActive = active;
+
+	if ( active ) {
+		renewTimeoutTime();
+	}
+}
+
+void XBLMPMOperationStateCtrl::renewTimeoutTime()
+{
+	requestStartTime = GetTickCount64();
+}
+
 XBLMPMOperationStateCtrl::OpState XBLMPMOperationStateCtrl::getState() const
 {
-	if ( state==OpState::Requested )
-	{
-		const ULONGLONG requestTimeout = 20000;
-
+	if ( timeOutActive && state==OpState::Requested ) {
+		const ULONGLONG requestTimeout = 5000;
 		ULONGLONG sinceRequestedElapsedTime = GetTickCount64()-requestStartTime;
-		if ( sinceRequestedElapsedTime>requestTimeout )
-		{
+		if ( sinceRequestedElapsedTime>requestTimeout ) {
 			Logger::logWarning(String("Operation time out!"));
 			state=OpState::Error;
-			timeOut=true;
 		}
 	}
 	
@@ -562,6 +572,25 @@ String XBLManager::performProfanityCheck(String text)
 	}
 
 	return String(finalText.c_str());
+}
+
+void XBLManager::suspend()
+{
+	Logger::logError("XBLManager::suspend\n");
+	suspended=true;
+	multiplayeEnableTimeout(false);
+}
+
+void XBLManager::resume()
+{
+	Logger::logError("XBLManager::resume\n");
+	suspended=false;
+	multiplayeEnableTimeout(true);
+}
+
+bool XBLManager::isSuspended() const
+{
+	return suspended;
 }
 
 bool XBLSaveData::isReady() const
@@ -1064,6 +1093,8 @@ void XBLManager::multiplayerUpdate_Initializing_Inivitee()
 	if (xblOperation_join_lobby.checkStateDoneOk()) {
 
 		// Everthing ok : initaliziation successful
+		multiplayerCurrentSetup.invitationUri=L"";
+
 		try {
 			// Get game key
 			Logger::logDev("NFO: Get server user GameKey property\n");
@@ -1094,6 +1125,8 @@ void XBLManager::multiplayerUpdate_Initializing_Inivitee()
 	}
 	else {
 		if (xblOperation_join_lobby.checkStateError()) {
+			multiplayerCurrentSetup.invitationUri=L"";
+
 			multiplayerState = MultiplayerState::Error;
 			if (joinErrorCallback) {
 				joinErrorCallback();
@@ -1159,6 +1192,15 @@ void XBLManager::multiplayerUpdate_Ending()
 			multiplayerState = MultiplayerState::NotInitialized;
 		}
 	}
+}
+
+void XBLManager::multiplayeEnableTimeout( bool active )
+{
+	xblOperation_add_local_user.enableTimeout(active);
+	xblOperation_set_property.enableTimeout(active);
+	xblOperation_set_joinability.enableTimeout(active);
+	xblOperation_join_lobby.enableTimeout(active);
+	xblOperation_remove_local_user.enableTimeout(active);
 }
 
 void XBLManager::multiplayerDone()
