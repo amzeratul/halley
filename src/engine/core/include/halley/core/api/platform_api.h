@@ -93,6 +93,12 @@ namespace Halley
 		AuthTokenResult(AuthTokenRetrievalResult result)
 			: result(result)
 		{}
+
+		AuthTokenResult(AuthTokenRetrievalResult result, OnlineCapabilities capabilities)
+			: result(result)
+			, capabilitiesSupported(capabilities)
+		{}
+
 		AuthTokenResult(std::unique_ptr<AuthorisationToken> token, OnlineCapabilities capabilities)
 			: result(AuthTokenRetrievalResult::OK)
 			, token(std::move(token))
@@ -165,6 +171,12 @@ namespace Halley
 		virtual String getId() { return ""; }
 		virtual void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue) {}
 		virtual bool isAchievementUnlocked(const String& achievementId, bool defaultValue) { return defaultValue; }
+		virtual bool isAchievementSystemReady() const { return true; }
+		virtual bool mustUnlockAchievementsOnUserAction() const { return false; }
+
+		// Some platforms require custom handling when missing UGC capabilities
+		virtual bool hasOfflineUGCCapabilities() { return true; };
+		virtual bool handleMissingUGCCapabilities() { return false; }; //returns true if has handled ugc access errors
 
 		// Return empty unique_ptr if not supported
 		virtual std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key) { return {}; }
@@ -181,6 +193,8 @@ namespace Halley
 		virtual void showPlayerInfo(String playerId) {}
 
 		virtual I18NLanguage getSystemLanguage() const { return I18NLanguage("en-GB"); }
+		virtual bool useSystemOverscan() const { return false; }
+		virtual float getSystemOverscan() const { return 1.0f; }
 
 		virtual bool canShowReportedUserContent() const { return true; }
 

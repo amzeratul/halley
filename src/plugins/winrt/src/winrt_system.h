@@ -34,10 +34,19 @@ namespace Halley {
 
 		void setPlatform(WinRTPlatform* winrtPlatform);
 		WinRTPlatform* getPlatform();
+
+		void setOnSuspendCallback(SystemOnSuspendCallback callback) override { onSuspendCallback = callback; }
+		void callOnSuspendCallback();
+
+		void setOnResumeCallback(SystemOnResumeCallback callback) override { onResumeCallback = callback; }
+		void callOnResumeCallback();
 	private:
 		WinRTPlatform* platform;
 		int checkIfConnectedToTheInternetDelay;
 		bool isConnectedToTheInternet;
+
+		SystemOnSuspendCallback onSuspendCallback;
+		SystemOnResumeCallback onResumeCallback;
 	};
 
 	class WinRTLocalSave : public ISaveData {
