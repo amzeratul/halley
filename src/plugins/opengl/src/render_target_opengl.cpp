@@ -86,7 +86,7 @@ bool ScreenRenderTargetOpenGL::getProjectionFlipVertical() const
 
 bool ScreenRenderTargetOpenGL::getViewportFlipVertical() const
 {
-	return true;
+	return false;
 }
 
 void ScreenRenderTargetOpenGL::onBind(Painter&)

@@ -1,7 +1,7 @@
 #pragma once
 #include <halley/maths/vector2.h>
 #include <halley/maths/rect.h>
-#include <boost/optional.hpp>
+#include <halley/data_structures/maybe.h>
 #include <halley/text/halleystring.h>
 
 namespace Halley
@@ -57,6 +57,7 @@ namespace Halley
 		boost::optional<Vector2i> getPosition() const { return position; }
 		Vector2i getSize() const { return size; }
 		String getTitle() const { return title; }
+		Rect4i getVirtualRect() const { return virtualRect ? virtualRect.get() : Rect4i({}, size); }
 
 		WindowDefinition withPosition(boost::optional<Vector2i> newPos) const
 		{
@@ -79,12 +80,20 @@ namespace Halley
 			return w;
 		}
 
+		WindowDefinition withVirtualRect(Rect4i virtualRect) const
+		{
+			auto w = *this;
+			w.virtualRect = virtualRect;
+			return w;
+		}
+
 	private:
 		WindowType windowType = WindowType::Fullscreen;
 		WindowState windowState = WindowState::Normal;
-		boost::optional<Vector2i> position;
+		Maybe<Vector2i> position;
 		Vector2i size;
 		String title;
+		Maybe<Rect4i> virtualRect;
 	};
 
 	class Window
