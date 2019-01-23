@@ -149,4 +149,14 @@ I18NLanguage WinRTPlatform::getSystemLanguage() const
 	return I18NLanguage("en-GB");
 }
 
+Future<PlatformSignInResult> WinRTPlatform::signIn()
+{
+	return xbl->signIn();
+}
+
+bool WinRTPlatform::isSignedIn() const
+{
+	return xbl->isSignedIn();
+}
+
 #endif

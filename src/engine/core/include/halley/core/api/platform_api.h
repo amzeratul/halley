@@ -145,12 +145,35 @@ namespace Halley
 	using PlatformPreparingToJoinCallback = std::function<void(void)>;
 	using PlatformJoinErrorCallback = std::function<void(void)>;
 
+	struct PlatformSignInResult {
+		bool success = false;
+		bool canRetry = false;
+		float retryDelaySeconds = 0;
+
+		PlatformSignInResult() = default;
+
+		PlatformSignInResult(bool success, bool canRetry, float retryDelaySeconds)
+			: success(success)
+			, canRetry(canRetry)
+			, retryDelaySeconds(retryDelaySeconds)
+		{}
+	};
+
 	class PlatformAPI
 	{
 	public:
 		virtual ~PlatformAPI() {}
 
 		virtual void update() = 0;
+
+		virtual bool needsSignIn() const { return false; }
+		virtual Future<PlatformSignInResult> signIn()
+		{
+			Promise<PlatformSignInResult> p;
+			p.setValue(PlatformSignInResult(true, false, 0));
+			return p.getFuture();
+		}
+		virtual bool isSignedIn() const { return true; }
 
 		virtual std::unique_ptr<HTTPRequest> makeHTTPRequest(const String& method, const String& url) = 0;
 

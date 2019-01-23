@@ -79,6 +79,9 @@ namespace Halley {
 		void init();
 		void deInit();
 
+		Future<PlatformSignInResult> signIn();
+		bool isSignedIn() const;
+
 		std::shared_ptr<ISaveData> getSaveContainer(const String& name);
 		void recreateCloudSaveContainer();
 
@@ -126,13 +129,10 @@ namespace Halley {
 		PlatformJoinErrorCallback joinErrorCallback;
 		int32_t signOutHandler;
 		bool playerLoggedOut;
-		int loginDelay;
 		
 		std::vector<String> forbiddenWords;
 		XBLAchievementsStatus achievementsStatus;
 		XBLStatus status = XBLStatus::Disconnected;
-
-		void signIn();
 
 		winrt::Windows::Foundation::IAsyncAction getConnectedStorage();
 		winrt::Windows::Foundation::IAsyncAction onLoggedIn();

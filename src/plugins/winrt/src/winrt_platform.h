@@ -16,6 +16,10 @@ namespace Halley
 
 		void update() override;
 
+		bool needsSignIn() const override { return true; }
+		Future<PlatformSignInResult> signIn() override;
+		bool isSignedIn() const override;
+
 		std::unique_ptr<HTTPRequest> makeHTTPRequest(const String& method, const String& url) override;
 
 		bool canProvideAuthToken() const override;

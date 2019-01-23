@@ -135,7 +135,6 @@ XBLManager::XBLManager()
 	xblMultiplayerContext = 0;
 
 	playerLoggedOut = false;
-	loginDelay = 0;
 }
 
 XBLManager::~XBLManager()
@@ -156,8 +155,6 @@ void XBLManager::init()
 		achievementStatus.clear();
 		playerLoggedOut = true;
 	});
-
-	signIn();
 }
 
 void XBLManager::deInit()
@@ -368,8 +365,11 @@ winrt::Windows::Foundation::IAsyncAction XBLManager::onLoggedIn()
 	co_await getConnectedStorage();
 }
 
-void XBLManager::signIn()
+Future<PlatformSignInResult> XBLManager::signIn()
 {
+	Promise<PlatformSignInResult> origPromise;
+	//auto future = promise.getFuture();
+
 	xbox::services::system::xbox_live_services_settings::get_singleton_instance()->set_diagnostics_trace_level(xbox::services::xbox_services_diagnostics_trace_level::verbose);
 	status = XBLStatus::Connecting;
 	
@@ -377,46 +377,64 @@ void XBLManager::signIn()
 	xboxUser = std::make_shared<xbox_live_user>(nullptr);
 	auto dispatcher = to_cx<Platform::Object>(winrt::Windows::UI::Core::CoreWindow::GetForCurrentThread().Dispatcher());
 	
-	xboxUser->signin_silently(dispatcher).then([=] (xbox::services::xbox_live_result<sign_in_result> result) -> winrt::Windows::Foundation::IAsyncAction
+	xboxUser->signin_silently(dispatcher).then([=] (xbox::services::xbox_live_result<sign_in_result> result) mutable -> winrt::Windows::Foundation::IAsyncAction
 	{
+		// For some reason the coroutine fucks this up if it's a capture, so make a local copy
+		auto promise = origPromise;
+
 		if (result.err()) {
 			Logger::logError(String("Error signing in to Xbox Live: ") + result.err_message());
-			loginDelay = LOGIN_DELAY;
 			status = XBLStatus::Disconnected;
+			promise.setValue(PlatformSignInResult(false, true, 10.0));
 		} else {
 			auto resultStatus = result.payload().status();
 			switch (resultStatus) {
 			case success:
 				co_await onLoggedIn();
+				promise.setValue(PlatformSignInResult(true, false, 0.0));
 				break;
 
 			case user_interaction_required:
-				xboxUser->signin(dispatcher).then([&](xbox::services::xbox_live_result<sign_in_result> loudResult) -> winrt::Windows::Foundation::IAsyncAction
 				{
-					if (loudResult.err()) {
-						Logger::logError("Error signing in to Xbox live: " + String(loudResult.err_message().c_str()));
-						loginDelay = LOGIN_DELAY;
-						status = XBLStatus::Disconnected;
-					} else {
-						auto resPayload = loudResult.payload();
-						switch (resPayload.status()) {
-						case success:
-							co_await onLoggedIn();
-							break;
-						default:
-							loginDelay = LOGIN_DELAY;
+					xboxUser->signin(dispatcher).then([=](xbox::services::xbox_live_result<sign_in_result> loudResult) mutable -> winrt::Windows::Foundation::IAsyncAction
+					{
+						// For some reason the coroutine fucks this up if it's a capture, so make a local copy
+						auto localPromise = promise;
+
+						if (loudResult.err()) {
+							Logger::logError("Error signing in to Xbox live: " + String(loudResult.err_message().c_str()));
 							status = XBLStatus::Disconnected;
-							break;
+							localPromise.setValue(PlatformSignInResult(false, true, 10.0));
+						} else {
+							auto resPayload = loudResult.payload();
+							switch (resPayload.status()) {
+							case success:
+								co_await onLoggedIn();
+								localPromise.setValue(PlatformSignInResult(true, false, 0.0));
+								break;
+							default:
+								status = XBLStatus::Disconnected;
+								localPromise.setValue(PlatformSignInResult(false, true, 10.0));
+								break;
+							}
 						}
-					}
-				}, concurrency::task_continuation_context::use_current());
-				break;
+					}, concurrency::task_continuation_context::use_current());
+					break;
+				}
 
 			default:
 				status = XBLStatus::Disconnected;
+				promise.setValue(PlatformSignInResult(false, true, 10.0));
 			}
 		}
 	});
+
+	return origPromise.getFuture();
+}
+
+bool XBLManager::isSignedIn() const
+{
+	return status != XBLStatus::Disconnected || (xboxUser && xboxUser->is_signed_in());
 }
 
 winrt::Windows::Foundation::IAsyncAction XBLManager::getConnectedStorage()
@@ -446,7 +464,6 @@ winrt::Windows::Foundation::IAsyncAction XBLManager::getConnectedStorage()
 	{
 		Logger::logError(String("Error getting the connected storage for user '") + xboxUser->gamertag().c_str() + String("'"));
 
-		loginDelay = LOGIN_DELAY;
 		xboxUser.reset();
 		xboxLiveContext.reset();
 		gameSaveProvider.reset();
@@ -713,16 +730,6 @@ void XBLSaveData::updateContainer() const
 
 void XBLManager::update()
 {
-	if (loginDelay > 0) {
-		if (status != XBLStatus::Connecting) {
-			--loginDelay;
-		}
-	} else {
-		if ((!xboxUser || !xboxUser->is_signed_in()) && status == XBLStatus::Disconnected) {
-			signIn();
-		}
-	}
-
 	multiplayerUpdate();
 }
 
