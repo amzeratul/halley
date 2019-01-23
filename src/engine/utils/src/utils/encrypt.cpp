@@ -1,3 +1,4 @@
+#include <cstring>
 #include "halley/utils/encrypt.h"
 #include "../contrib/tiny-aes/aes.hpp"
 #include "halley/text/halleystring.h"
@@ -44,7 +45,7 @@ Bytes Encrypt::decrypt(const Bytes& iv, const String& key, const Bytes& data)
 
 	// Decrypt
 	AES_ctx ctx;
-	memset(&ctx, 0, sizeof(ctx));
+	std::memset(&ctx, 0, sizeof(ctx));
 	AES_init_ctx_iv(&ctx, reinterpret_cast<const uint8_t*>(key.c_str()), iv.data());
 	AES_CBC_decrypt_buffer(&ctx, result.data(), uint32_t(result.size()));
 
