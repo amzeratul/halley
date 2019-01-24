@@ -177,6 +177,9 @@ namespace Halley
 		virtual bool hasOfflineUGCCapabilities() { return true; };
 		virtual bool handleMissingUGCCapabilities() { return false; }; //returns true if has handled ugc access errors
 
+		virtual bool customHandlesOnlineErrors() const { return false; }
+		virtual void handleOnlineError() {};
+
 		// Return empty unique_ptr if not supported
 		virtual std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key) { return {}; }
 
