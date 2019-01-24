@@ -31,7 +31,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	, i18n(i18n)
 	, styleSheet(styleSheet)
 {
-	if (api.platform->hasKeyboard()) {
+	if (api.platform && api.platform->hasKeyboard()) {
 		keyboard = api.platform->getKeyboard();
 	} else {
 		keyboard = api.input->getKeyboard();

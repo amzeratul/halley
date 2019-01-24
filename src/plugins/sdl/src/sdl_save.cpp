@@ -114,7 +114,7 @@ void SDLSaveData::setData(const String& path, const Bytes& rawData, bool commit)
 	Expects (!path.isEmpty());
 
 	Bytes finalData;
-	constexpr bool encrypted = true;
+	const bool encrypted = static_cast<bool>(key);
 
 	if (encrypted) {
 		// Encrypt
