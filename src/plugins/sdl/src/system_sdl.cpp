@@ -184,6 +184,10 @@ std::shared_ptr<Window> SystemSDL::createWindow(const WindowDefinition& windowDe
 #endif
 	}
 
+	// Disable High-DPI rendering (e.g. for Retina screens on Mac OS). Halley
+	// currently has a number of bugs when attempting to render at High-DPI.
+	SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+
 	// Window position
 	Vector2i windowSize = windowDef.getSize();
 	Vector2i winPos = windowDef.getPosition().get_value_or(getCenteredWindow(windowSize, 0));
