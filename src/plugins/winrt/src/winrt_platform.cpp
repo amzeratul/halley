@@ -159,4 +159,14 @@ bool WinRTPlatform::isSignedIn() const
 	return xbl->isSignedIn();
 }
 
+void WinRTPlatform::suspend()
+{
+	xbl->suspend();
+}
+
+void WinRTPlatform::resume()
+{
+	xbl->resume();
+}
+
 #endif

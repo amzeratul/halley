@@ -27,6 +27,9 @@ namespace xbox {
 using namespace xbox::services::multiplayer::manager;
 
 namespace Halley {
+
+	class XBLManager;
+
 	enum class XBLStatus {
 		Disconnected,
 		Connecting,
@@ -55,6 +58,9 @@ namespace Halley {
 		bool checkStateError();
 		bool checkStateDoneOk();
 
+		void enableTimeout( bool active );
+		void renewTimeoutTime();
+
 	private:
 
 		enum class OpState { 
@@ -67,8 +73,8 @@ namespace Halley {
 		OpState getState() const;
 
 		mutable OpState state;
-		mutable bool timeOut;
-		ULONGLONG requestStartTime;
+		mutable bool timeOutActive;
+		mutable ULONGLONG requestStartTime;
 	};
 
 	class XBLManager {
@@ -118,7 +124,14 @@ namespace Halley {
 		void setProfanityCheckForbiddenWordsList(std::vector<String> words);
 		String performProfanityCheck(String text);
 
+		void suspend();
+		void resume();
+		bool isSuspended() const;
+
 	private:
+		
+		bool suspended;
+
 		std::shared_ptr<xbox::services::system::xbox_live_user> xboxUser;
 		std::shared_ptr<xbox::services::xbox_live_context> xboxLiveContext;
 		Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> gameSaveProvider;
@@ -185,6 +198,7 @@ namespace Halley {
 		void multiplayerUpdate_Running();
 		void multiplayerUpdate_Ending();
 
+		void multiplayeEnableTimeout( bool active );
 		void multiplayerDone();
 		void xblMultiplayerPoolProcess();
 	};
