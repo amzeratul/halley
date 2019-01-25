@@ -185,6 +185,7 @@ namespace Halley
 
 		virtual bool canShowSubscriptionNeeded() const { return false; }
 		virtual bool showSubscriptionNeeded() const { return true; }
+		virtual bool canShowEULA() const { return true; }
 
 		virtual String getPlayerName() { return "Player"; }
 		virtual String getUniquePlayerIdString() { return ""; } // This has to be a valid filename
@@ -198,8 +199,8 @@ namespace Halley
 		virtual bool mustUnlockAchievementsOnUserAction() const { return false; }
 
 		// Some platforms require custom handling when missing UGC capabilities
-		virtual bool hasOfflineUGCCapabilities() { return true; };
-		virtual bool handleMissingUGCCapabilities() { return false; }; //returns true if has handled ugc access errors
+		virtual bool hasOfflineUGCCapabilities() { return true; }
+		virtual bool handleMissingUGCCapabilities() { return false; } //returns true if has handled ugc access errors
 
 		virtual bool customHandlesOnlineErrors() const { return false; }
 		virtual void handleOnlineError() {};
