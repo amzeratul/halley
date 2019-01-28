@@ -198,6 +198,10 @@ if (APPLE)
 	mark_as_advanced(CARBON_LIBRARY COCOA_LIBRARY COREAUDIO_LIBRARY AUDIOTOOLBOX_LIBRARY AUDIOUNIT_LIBRARY FORCEFEEDBACK_LIBRARY IOKIT_LIBRARY COREVIDEO_LIBRARY)
 
 	set(EXTRA_LIBS ${EXTRA_LIBS} ${CARBON_LIBRARY} ${COCOA_LIBRARY} ${COREAUDIO_LIBRARY} ${AUDIOTOOLBOX_LIBRARY} ${AUDIOUNIT_LIBRARY} ${FORCEFEEDBACK_LIBRARY} ${IOKIT_LIBRARY} ${COREVIDEO_LIBRARY} iconv)
+
+	if (BUILD_MACOSX_BUNDLE)
+		add_definitions(-DHALLEY_MACOSX_BUNDLE)
+	endif()
 endif(APPLE)
 
 # From http://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake
@@ -347,6 +351,9 @@ function(halleyProject name sources headers genDefinitions targetDir)
 	if (HOTRELOAD)
 		add_library(${name} SHARED ${proj_sources} ${proj_headers})
 		add_definitions(-DHALLEY_SHARED_LIBRARY)
+	elseif (BUILD_MACOSX_BUNDLE)
+		add_executable(${name} MACOSX_BUNDLE ${proj_sources} ${proj_headers})
+		add_definitions(-DHALLEY_EXECUTABLE)
 	else()
 		add_executable(${name} WIN32 ${proj_sources} ${proj_headers})
 		add_definitions(-DHALLEY_EXECUTABLE)
@@ -386,9 +393,15 @@ function(halleyProject name sources headers genDefinitions targetDir)
 	else ()
 		target_link_libraries(${name} ${HALLEY_PROJECT_LIBS})
 	endif ()
-	
+
 	if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
 		set_target_properties(${name} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+	endif ()
+
+	if (BUILD_MACOSX_BUNDLE)
+		add_custom_command(TARGET ${name} POST_BUILD
+			COMMAND "cp" "-R" "${CMAKE_CURRENT_SOURCE_DIR}/assets/" "$<TARGET_FILE_DIR:${name}>/../Resources"
+		)
 	endif ()
 endfunction(halleyProject)
 
@@ -401,3 +414,20 @@ function(halleyProjectCodegen name sources headers genDefinitions targetDir)
 		add_dependencies(${PROJECT_NAME}-codegen halley-cmd)
 	endif ()
 endfunction(halleyProjectCodegen)
+
+function(halleyProjectBundleProperties name icon app_title copyright)
+	if (BUILD_MACOSX_BUNDLE)
+		get_filename_component(icon_name ${icon} NAME)
+
+		set_target_properties(${name} PROPERTIES
+			MACOSX_BUNDLE_BUNDLE_NAME "${app_title}"
+			MACOSX_BUNDLE_COPYRIGHT "${copyright}"
+			MACOSX_BUNDLE_GUI_IDENTIFIER "${app_title}"
+			MACOSX_BUNDLE_ICON_FILE "${icon_name}"
+		)
+
+		add_custom_command(TARGET ${name} POST_BUILD
+			COMMAND "cp" "${CMAKE_CURRENT_SOURCE_DIR}/${icon}" "$<TARGET_FILE_DIR:${name}>/../Resources/"
+		)
+	endif ()
+endfunction(halleyProjectBundleProperties)

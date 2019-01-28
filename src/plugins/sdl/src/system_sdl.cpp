@@ -58,7 +58,11 @@ void SystemSDL::deInit()
 
 Path SystemSDL::getAssetsPath(const Path& gamePath) const
 {
+#if defined(HALLEY_MACOSX_BUNDLE)
+	return gamePath / ".." / "Resources";
+#else
 	return gamePath / ".." / "assets";
+#endif
 }
 
 Path SystemSDL::getUnpackedAssetsPath(const Path& gamePath) const
