@@ -55,10 +55,10 @@ namespace Halley {
     #elif defined(__EMSCRIPTEN__)
         return GamePlatform::Emscripten;
     #elif defined(__APPLE__)
-        #if defined(TARGET_OS_IPHONE)
+        #if TARGET_OS_IPHONE
             return GamePlatform::iOS;
         #else
-            return GamePlatform::Mac;
+            return GamePlatform::MacOS;
         #endif
     #elif defined(__linux)
         return GamePlatform::Linux;
