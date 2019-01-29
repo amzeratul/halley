@@ -48,6 +48,7 @@ void SDLWindow::update(const WindowDefinition& definition)
 	const WindowState windowState = definition.getWindowState();
 	const Vector2i windowSize = definition.getSize();
 	const Vector2i windowPos = definition.getPosition().get_value_or(getCenteredWindow(windowSize, 0));
+	const boost::optional<Path> icon = definition.getIcon();
 
 	if (windowType != WindowType::Fullscreen) {
 		SDL_SetWindowFullscreen(window, SDL_FALSE);
@@ -76,6 +77,12 @@ void SDLWindow::update(const WindowDefinition& definition)
 	case WindowState::Maximized:
 		SDL_MaximizeWindow(window);
 		break;
+	}
+
+	if (icon) {
+		auto surface = SDL_LoadBMP(icon->string().c_str());
+		SDL_SetWindowIcon(window, surface);
+		SDL_FreeSurface(surface);
 	}
 
 	updateDefinition(definition);
