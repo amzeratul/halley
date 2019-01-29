@@ -221,7 +221,7 @@ class XboxLiveAuthorisationToken : public AuthorisationToken {
 public:
 	XboxLiveAuthorisationToken(String userId, String token)
 	{
-		data["userId"] = std::move(userId);
+		//data["userId"] = std::move(userId);
 		data["token"] = std::move(token);
 	}
 
