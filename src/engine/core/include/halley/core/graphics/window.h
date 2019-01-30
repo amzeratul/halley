@@ -3,6 +3,7 @@
 #include <halley/maths/rect.h>
 #include <boost/optional.hpp>
 #include <halley/text/halleystring.h>
+#include <halley/file/path.h>
 
 namespace Halley
 {
@@ -57,6 +58,7 @@ namespace Halley
 		boost::optional<Vector2i> getPosition() const { return position; }
 		Vector2i getSize() const { return size; }
 		String getTitle() const { return title; }
+		boost::optional<Path> getIcon() const { return icon; }
 
 		WindowDefinition withPosition(boost::optional<Vector2i> newPos) const
 		{
@@ -79,12 +81,20 @@ namespace Halley
 			return w;
 		}
 
+		WindowDefinition withIcon(const Path& iconPath) const
+		{
+			auto w = *this;
+			w.icon = iconPath;
+			return w;
+		}
+
 	private:
 		WindowType windowType = WindowType::Fullscreen;
 		WindowState windowState = WindowState::Normal;
 		boost::optional<Vector2i> position;
 		Vector2i size;
 		String title;
+		boost::optional<Path> icon;
 	};
 
 	class Window

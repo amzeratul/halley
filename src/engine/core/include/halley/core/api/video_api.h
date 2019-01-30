@@ -2,6 +2,7 @@
 #include <halley/maths/vector2.h>
 #include <halley/maths/rect.h>
 #include <halley/text/halleystring.h>
+#include <halley/file/path.h>
 
 namespace Halley
 {
