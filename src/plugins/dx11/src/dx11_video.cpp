@@ -40,15 +40,19 @@ void DX11Video::initD3D(Window& window)
 		return;
 	}
 
-	IDXGIFactory* factory;
-	CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&factory));
-	IDXGIAdapter* adapter;
-	factory->EnumAdapters(0, &adapter);
-	if (adapter) {
-		DXGI_ADAPTER_DESC desc;
-		adapter->GetDesc(&desc);
-		Logger::logInfo("Using display adapter for DX11: " + String(desc.Description));
+#ifndef WINDOWS_STORE
+	{
+		IDXGIFactory* factory;
+		CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&factory));
+		IDXGIAdapter* adapter;
+		factory->EnumAdapters(0, &adapter);
+		if (adapter) {
+			DXGI_ADAPTER_DESC desc;
+			adapter->GetDesc(&desc);
+			Logger::logInfo("Using display adapter for DX11: " + String(desc.Description));
+		}
 	}
+#endif
 
 	ID3D11DeviceContext* dc;
 	D3D_FEATURE_LEVEL featureLevels[] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0 };
