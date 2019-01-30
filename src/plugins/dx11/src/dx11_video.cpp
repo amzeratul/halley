@@ -59,8 +59,6 @@ void DX11Video::initD3D(Window& window)
 	uint32_t flags = 0;
 	if (Debug::isDebug()) {
 		flags |= D3D11_CREATE_DEVICE_DEBUG;
-	} else {
-		flags |= D3D11_CREATE_DEVICE_VIDEO_SUPPORT;
 	}
 	auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels, 3, D3D11_SDK_VERSION, &device, nullptr, &dc);
 	if (result != S_OK) {
