@@ -32,7 +32,7 @@ void Sprite::drawNormal(Painter& painter) const
 	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	
 	if (clip) {
-		painter.setRelativeClip(clip.get() + vertexAttrib.pos);
+		painter.setRelativeClip(clip.get() + (absoluteClip ? Vector2f() : vertexAttrib.pos));
 	}
 	painter.drawSprites(material, 1, &vertexAttrib);
 	if (clip) {
@@ -375,12 +375,21 @@ bool Sprite::isVisible() const
 Sprite& Sprite::setClip(Rect4f c)
 {
 	clip = c;
+	absoluteClip = false;
+	return *this;
+}
+
+Sprite& Sprite::setAbsoluteClip(Rect4f c)
+{
+	clip = c;
+	absoluteClip = true;
 	return *this;
 }
 
 Sprite& Sprite::setClip()
 {
 	clip.reset();
+	absoluteClip = false;
 	return *this;
 }
 
