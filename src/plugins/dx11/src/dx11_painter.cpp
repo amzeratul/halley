@@ -10,6 +10,7 @@
 #include "dx11_rasterizer.h"
 #include "halley/core/graphics/render_target/render_target.h"
 #include "dx11_render_target.h"
+#include "halley/core/game/game_platform.h"
 using namespace Halley;
 
 DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
@@ -80,12 +81,15 @@ void DX11Painter::setMaterialData(const Material& material)
 		if (block.getType() != MaterialDataBlockType::SharedExternal) {
 			auto& buffer = static_cast<DX11MaterialConstantBuffer&>(block.getConstantBuffer()).getBuffer();
 			auto dxBuffer = buffer.getBuffer();
-			UINT firstConstant[] = { buffer.getOffset() / 16 };
-			UINT numConstants[] = { buffer.getLastSize() / 16 };
-			devCon.VSSetConstantBuffers1(block.getBindPoint(), 1, &dxBuffer, firstConstant, numConstants);
-			devCon.PSSetConstantBuffers1(block.getBindPoint(), 1, &dxBuffer, firstConstant, numConstants);
-			//devCon.VSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
-			//devCon.PSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
+			if (Halley::getPlatform() == GamePlatform::UWP || Halley::getPlatform() == GamePlatform::XboxOne) {
+				UINT firstConstant[] = { buffer.getOffset() / 16 };
+				UINT numConstants[] = { buffer.getLastSize() / 16 };
+				devCon.VSSetConstantBuffers1(block.getBindPoint(), 1, &dxBuffer, firstConstant, numConstants);
+				devCon.PSSetConstantBuffers1(block.getBindPoint(), 1, &dxBuffer, firstConstant, numConstants);
+			} else {
+				devCon.VSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
+				devCon.PSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
+			}
 		}
 	}
 }

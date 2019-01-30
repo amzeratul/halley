@@ -1,6 +1,7 @@
 #include "dx11_shader.h"
 #include "dx11_video.h"
 #include "halley/core/graphics/material/material_definition.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 DX11Shader::DX11Shader(DX11Video& video, const ShaderDefinition& definition)
@@ -8,7 +9,7 @@ DX11Shader::DX11Shader(DX11Video& video, const ShaderDefinition& definition)
 {
 	for (auto& shader: definition.shaders) {
 		loadShader(video, shader.first, shader.second);
-	};
+	}
 }
 
 DX11Shader::~DX11Shader()

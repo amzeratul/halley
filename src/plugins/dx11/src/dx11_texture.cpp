@@ -90,7 +90,7 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 
 	if (descriptor.pixelData.empty()) {
 		desc.Usage = D3D11_USAGE_DEFAULT;
-		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		desc.CPUAccessFlags = 0;
 	} else {
 		if (descriptor.canBeUpdated) {
 			desc.Usage = D3D11_USAGE_DEFAULT;

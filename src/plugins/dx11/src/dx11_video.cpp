@@ -11,6 +11,8 @@
 #include <DXGI1_2.h>
 #include <DXGI.h>
 #include "dx11_loader.h"
+#include "halley/support/logger.h"
+#include "halley/support/debug.h"
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "Dxgi.lib")
@@ -38,8 +40,25 @@ void DX11Video::initD3D(Window& window)
 		return;
 	}
 
+	IDXGIFactory* factory;
+	CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&factory));
+	IDXGIAdapter* adapter;
+	factory->EnumAdapters(0, &adapter);
+	if (adapter) {
+		DXGI_ADAPTER_DESC desc;
+		adapter->GetDesc(&desc);
+		Logger::logInfo("Using display adapter for DX11: " + String(desc.Description));
+	}
+
 	ID3D11DeviceContext* dc;
-	auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_VIDEO_SUPPORT, nullptr, 0, D3D11_SDK_VERSION, &device, nullptr, &dc);
+	D3D_FEATURE_LEVEL featureLevels[] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0 };
+	uint32_t flags = 0;
+	if (Debug::isDebug()) {
+		flags |= D3D11_CREATE_DEVICE_DEBUG;
+	} else {
+		flags |= D3D11_CREATE_DEVICE_VIDEO_SUPPORT;
+	}
+	auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels, 3, D3D11_SDK_VERSION, &device, nullptr, &dc);
 	if (result != S_OK) {
 		throw Exception("Unable to initialise DX11", HalleyExceptions::VideoPlugin);
 	}
