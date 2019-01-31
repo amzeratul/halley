@@ -96,6 +96,7 @@ namespace Halley
 		bool isVisible() const;
 
 		Sprite& setClip(Rect4f clip);
+		Sprite& setAbsoluteClip(Rect4f clip);
 		Sprite& setClip();
 		Maybe<Rect4f> getClip() const;
 
@@ -115,6 +116,7 @@ namespace Halley
 		Vector4s slices;
 		Vector4s outerBorder;
 		Maybe<Rect4f> clip;
+		bool absoluteClip = false;
 		bool visible = true;
 		bool flip = false;
 		bool sliced = false;
