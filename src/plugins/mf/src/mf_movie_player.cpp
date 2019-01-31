@@ -7,6 +7,8 @@
 #include "halley/concurrency/concurrent.h"
 #include "halley/core/resources/resources.h"
 #include "halley/support/logger.h"
+#include "halley/core/game/game_platform.h"
+#include "halley/maths/random.h"
 
 using namespace Halley;
 
@@ -41,7 +43,34 @@ static String guidToString(GUID guid)
 
 void MFMoviePlayer::init()
 {
+#ifdef WINDOWS_STORE
 	inputByteStream = new ResourceDataByteStream(data);
+#else
+	std::array<wchar_t, 256> tmpPath;
+	GetTempPathW(DWORD(tmpPath.size()), tmpPath.data());
+	tempFileName = String(tmpPath.data()) + "\\hlyvid" + toString(int(Random::getGlobal().getRawInt())) + ".mp4";
+	auto tmpFile = CreateFileW(tempFileName.getUTF16().c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, nullptr);
+	auto fullData = data->getReader()->readAll();
+	DWORD remaining = DWORD(fullData.size());
+	DWORD pos = 0;
+	while (remaining > 0) {
+		DWORD written;
+		if (!WriteFile(tmpFile, fullData.data() + pos, remaining, &written, nullptr)) {
+			throw Exception("Unable to initialise video player", HalleyExceptions::MoviePlugin);
+		}
+		pos += written;
+		remaining -= written;
+	}
+	FlushFileBuffers(tmpFile);
+	CloseHandle(tmpFile);
+
+	{
+		auto hr = MFCreateFile(MF_ACCESSMODE_READ, MF_OPENMODE_FAIL_IF_NOT_EXIST, MF_FILEFLAGS_NONE, tempFileName.getUTF16().c_str(), &inputByteStream);
+		if (!SUCCEEDED(hr)) {
+			throw Exception("Unable to open media file", HalleyExceptions::MoviePlugin);
+		}
+	}
+#endif
 	inputByteStream->AddRef();
 
 	IMFAttributes* attributes = nullptr;
@@ -225,6 +254,11 @@ void MFMoviePlayer::deInit()
 		inputByteStream->Release();
 		inputByteStream = nullptr;
 	}
+#ifndef WINDOWS_STORE
+	if (!tempFileName.isEmpty()) {
+		DeleteFileW(tempFileName.getUTF16().c_str());
+	}
+#endif
 }
 
 void MFMoviePlayer::requestVideoFrame()

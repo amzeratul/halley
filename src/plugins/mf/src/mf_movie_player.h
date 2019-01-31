@@ -32,11 +32,13 @@ namespace Halley
 
 	private:
 		std::shared_ptr<ResourceDataStream> data;
-
+		
+		String tempFileName;
 		IMFByteStream* inputByteStream = nullptr;
 		IMFSourceReader *reader = nullptr;
 		IMFSourceReaderCallback* sampleReceiver = nullptr;
 		int minStride;
+		bool supportIMF2DBuffer = true;
 
 		void init();
 		void deInit();
