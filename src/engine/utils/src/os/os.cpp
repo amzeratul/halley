@@ -133,4 +133,8 @@ std::shared_ptr<IClipboard> OS::getClipboard()
 	return {};
 }
 
+void OS::openURL(const String& url)
+{
+}
+
 OS* OS::osInstance = nullptr;

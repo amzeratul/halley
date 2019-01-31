@@ -110,4 +110,11 @@ String OSLinux::getUserDataDir()
 	return result + "/.local/share";
 }
 
+void OSLinux::openURL(const String& url)
+{
+	if (url.startsWith("http://") || url.startsWith("https://")) {
+		system("xdg-open " + url);
+	}
+}
+
 #endif

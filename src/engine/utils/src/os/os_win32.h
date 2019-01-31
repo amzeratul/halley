@@ -54,6 +54,8 @@ namespace Halley {
 
 		std::shared_ptr<IClipboard> getClipboard() override;
 
+		void openURL(const String& url) override;
+
 	private:
 		String runWMIQuery(String query, String parameter) const;
 		void loadWindowIcon(HWND hwnd);

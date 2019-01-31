@@ -32,6 +32,8 @@ namespace Halley {
 		String getUserDataDir() override;
 		ComputerData getComputerData() override;
 		Path parseProgramPath(const String&) override;
+
+		void openURL(const String& url) override;
 	};
 }
 

@@ -39,6 +39,8 @@
 #include <objbase.h>
 #include <atlbase.h>
 #include <fstream>
+#include <Windows.h>
+#include <shellapi.h>
 
 #pragma comment(lib, "wbemuuid.lib")
 //#pragma comment(lib, "comsupp.lib")
@@ -558,6 +560,13 @@ std::shared_ptr<IClipboard> OSWin32::getClipboard()
 		return std::make_shared<Win32Clipboard>();
 	} catch (...) {
 		return {};
+	}
+}
+
+void OSWin32::openURL(const String& url)
+{
+	if (url.startsWith("http://") || url.startsWith("https://")) {
+		ShellExecute(nullptr, "open", url.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
 	}
 }
 

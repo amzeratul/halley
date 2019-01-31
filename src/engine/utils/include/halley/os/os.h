@@ -64,6 +64,8 @@ namespace Halley {
 
 		virtual std::shared_ptr<IClipboard> getClipboard();
 
+		virtual void openURL(const String& url);
+
 	private:
 		static OS* osInstance;
 	};
