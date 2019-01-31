@@ -167,7 +167,14 @@ HRESULT __stdcall ResourceDataByteStream::BeginRead(BYTE* pb, ULONG cb, IMFAsync
 	if (!SUCCEEDED(hr)) {
 		throw Exception("Error in ResourceDataByteStream", HalleyExceptions::MoviePlugin);
 	}
-	hr = MFPutWorkItem(MFASYNC_CALLBACK_QUEUE_STANDARD, this, result);
+
+	IMFAsyncResult* invokeResult;
+	hr = MFCreateAsyncResult(nullptr, this, result, &invokeResult);
+	if (!SUCCEEDED(hr)) {
+		throw Exception("Error in ResourceDataByteStream", HalleyExceptions::MoviePlugin);
+	}
+	hr = MFInvokeCallback(invokeResult);
+	//hr = MFPutWorkItem(MFASYNC_CALLBACK_QUEUE_STANDARD, this, result);
 	//result->Release();
 
 	return hr;
