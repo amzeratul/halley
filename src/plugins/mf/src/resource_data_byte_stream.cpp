@@ -15,14 +15,20 @@ public:
 		, dst(dst)
 	{}
 
-    HRESULT __stdcall QueryInterface(REFIID riid, void **ppv)
+    HRESULT __stdcall QueryInterface(REFIID riid, void **ppvObject)
     {
-        static const QITAB qit[] = 
-        {
-            QITABENT(AsyncReadOp, IUnknown),
-            { 0 }
-        };
-        return QISearch(this, qit, riid, ppv);
+		if (!ppvObject) {
+			return E_INVALIDARG;
+		}
+		*ppvObject = nullptr;
+
+		if (riid == __uuidof(IUnknown)) {
+			AddRef();
+			*ppvObject = static_cast<AsyncReadOp*>(this);
+			return NOERROR;
+		} else {
+			return E_NOINTERFACE;
+		}
     }
 
     ULONG __stdcall AddRef()
@@ -49,15 +55,24 @@ Halley::ResourceDataByteStream::ResourceDataByteStream(std::shared_ptr<ResourceD
 	len = reader->size();
 }
 
-HRESULT __stdcall ResourceDataByteStream::QueryInterface(const IID& riid, void** ppv)
+HRESULT __stdcall ResourceDataByteStream::QueryInterface(const IID& riid, void** ppvObject)
 {
-    static const QITAB qit[] = 
-    {
-        QITABENT(ResourceDataByteStream, IMFAsyncCallback),
-		QITABENT(ResourceDataByteStream, IMFByteStream),
-        { 0 }
-    };
-    return QISearch(this, qit, riid, ppv);
+	if (!ppvObject) {
+		return E_INVALIDARG;
+	}
+	*ppvObject = nullptr;
+
+	if (riid == __uuidof(IMFByteStream)) {
+		AddRef();
+		*ppvObject = static_cast<IMFByteStream*>(this);
+		return NOERROR;
+	} else if (riid == __uuidof(IMFAsyncCallback)) {
+		AddRef();
+		*ppvObject = static_cast<IMFAsyncCallback*>(this);
+		return NOERROR;
+	} else {
+		return E_NOINTERFACE;
+	}
 }
 
 ULONG __stdcall ResourceDataByteStream::AddRef()
