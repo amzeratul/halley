@@ -10,7 +10,7 @@
 #undef max
 
 namespace Halley {
-	class ResourceDataByteStream final : public IMFByteStream
+	class ResourceDataByteStream final : public IMFByteStream, public IMFAsyncCallback 
 	{
 	public:
 		ResourceDataByteStream(std::shared_ptr<ResourceDataStream> data);
@@ -33,12 +33,14 @@ namespace Halley {
 		HRESULT __stdcall Seek(MFBYTESTREAM_SEEK_ORIGIN SeekOrigin, LONGLONG llSeekOffset, DWORD dwSeekFlags, QWORD* pqwCurrentPosition) override;
 		HRESULT __stdcall Flush() override;
 		HRESULT __stdcall Close() override;
+		HRESULT __stdcall GetParameters(DWORD* pdwFlags, DWORD* pdwQueue) override;
+		HRESULT __stdcall Invoke(IMFAsyncResult* pAsyncResult) override;
 
 	private:
 		std::unique_ptr<ResourceDataReader> reader;
+		std::mutex mutex;
 		size_t len;
+		size_t pos = 0;
 		long refCount = 0;
-
-		std::map<IMFAsyncResult*, ULONG> asyncNumRead;
 	};
 }

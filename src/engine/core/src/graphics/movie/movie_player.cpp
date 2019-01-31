@@ -365,7 +365,12 @@ void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descripto
 					tex = recycleTexture.front();
 					recycleTexture.pop_front();
 				}
-				pendingFrames.push_back({ tex, time });
+
+				const auto iter = std::find_if(pendingFrames.begin(), pendingFrames.end(), [=] (const PendingFrame& f)
+				{
+					return f.time > time;
+				});
+				pendingFrames.insert(iter, { tex, time });
 			}
 		}
 

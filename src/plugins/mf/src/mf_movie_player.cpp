@@ -43,9 +43,9 @@ static String guidToString(GUID guid)
 
 void MFMoviePlayer::init()
 {
-#ifdef WINDOWS_STORE
-	inputByteStream = new ResourceDataByteStream(data);
-#else
+	/*
+	// This block of code is a workaround in case ResourceDataByteStream is misbehaving
+
 	std::array<wchar_t, 256> tmpPath;
 	GetTempPathW(DWORD(tmpPath.size()), tmpPath.data());
 	tempFileName = String(tmpPath.data()) + "\\hlyvid" + toString(int(Random::getGlobal().getRawInt())) + ".mp4";
@@ -70,7 +70,9 @@ void MFMoviePlayer::init()
 			throw Exception("Unable to open media file", HalleyExceptions::MoviePlugin);
 		}
 	}
-#endif
+	*/
+
+	inputByteStream = new ResourceDataByteStream(data);
 	inputByteStream->AddRef();
 
 	IMFAttributes* attributes = nullptr;
@@ -254,11 +256,12 @@ void MFMoviePlayer::deInit()
 		inputByteStream->Release();
 		inputByteStream = nullptr;
 	}
-#ifndef WINDOWS_STORE
+
+	/*
 	if (!tempFileName.isEmpty()) {
 		DeleteFileW(tempFileName.getUTF16().c_str());
 	}
-#endif
+	*/
 }
 
 void MFMoviePlayer::requestVideoFrame()
