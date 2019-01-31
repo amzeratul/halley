@@ -104,6 +104,7 @@ set(USE_SDL2 1)
 set(USE_ASIO 1)
 set(USE_WINRT 0)
 set(USE_MEDIA_FOUNDATION 0)
+set(USE_AVFOUNDATION 0)
 
 if (EMSCRIPTEN)
 	set(USE_SDL2 0)
@@ -124,6 +125,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
 	set(USE_WINRT 1)
 endif ()
 
+if (APPLE)
+  set(USE_AVFOUNDATION 1)
+endif ()
 
 # Libs
 if (CMAKE_LIBRARY_PATH)
@@ -183,6 +187,10 @@ if (USE_MEDIA_FOUNDATION)
 	add_definitions(-DWITH_MEDIA_FOUNDATION)
 endif()
 
+# Apple AVFoundation
+if (USE_AVFOUNDATION)
+  add_definitions(-DWITH_AVFOUNDATION)
+endif()
 
 # Apple frameworks
 if (APPLE)
@@ -259,6 +267,14 @@ if (USE_MEDIA_FOUNDATION)
 	set(HALLEY_PROJECT_LIBS
 		optimized halley-mf
 		debug halley-mf_d
+		${HALLEY_PROJECT_LIBS}
+		)
+endif ()
+
+if (USE_AVFOUNDATION)
+	set(HALLEY_PROJECT_LIBS
+		optimized halley-avf
+		debug halley-avf_d
 		${HALLEY_PROJECT_LIBS}
 		)
 endif ()
@@ -389,6 +405,9 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		endif ()
 		if (USE_MEDIA_FOUNDATION)
 			target_link_libraries(${name} halley-mf)
+		endif ()
+		if (USE_AVFOUNDATION)
+			target_link_libraries(${name} halley-avf)
 		endif ()
 	else ()
 		target_link_libraries(${name} ${HALLEY_PROJECT_LIBS})
