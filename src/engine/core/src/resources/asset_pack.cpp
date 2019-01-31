@@ -60,11 +60,15 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& 
 		Deserializer::fromBytes<AssetDatabase>(*assetDb, Compression::decompress(assetDbBytes));
 	}
 
-	if (preLoad || !encryptionKey.isEmpty()) {
+	std::array<char, 16> ivEmpty;
+	memset(ivEmpty.data(), 0, ivEmpty.size());
+	const bool hasCrypt = memcmp(iv.data(), ivEmpty.data(), iv.size()) != 0 && !encryptionKey.isEmpty();
+
+	if (preLoad || hasCrypt) {
 		readToMemory();
 	}
 
-	if (!encryptionKey.isEmpty()) {
+	if (hasCrypt) {
 		decrypt(encryptionKey);
 	}
 }
