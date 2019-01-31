@@ -113,7 +113,8 @@ String OSLinux::getUserDataDir()
 void OSLinux::openURL(const String& url)
 {
 	if (url.startsWith("http://") || url.startsWith("https://")) {
-		system("xdg-open " + url);
+		auto str = "xdg-open " + url;
+		system(str.c_str());
 	}
 }
 

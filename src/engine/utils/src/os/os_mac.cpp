@@ -61,7 +61,8 @@ Path OSMac::parseProgramPath(const String&)
 void OSMac::openURL(const String& url)
 {
 	if (url.startsWith("http://") || url.startsWith("https://")) {
-		system("open " + url);
+		auto str = "open " + url;
+		system(str.c_str());
 	}
 }
 
