@@ -236,9 +236,9 @@ HRESULT __stdcall ResourceDataByteStream::Seek(MFBYTESTREAM_SEEK_ORIGIN SeekOrig
 {
 	std::unique_lock<std::mutex> lock(mutex);
 	if (SeekOrigin == msoCurrent) {
-		pos += llSeekOffset;
+		pos += size_t(llSeekOffset);
 	} else {
-		pos = llSeekOffset;
+		pos = size_t(llSeekOffset);
 	}
 	*pqwCurrentPosition = QWORD(pos);
 
