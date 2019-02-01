@@ -5,10 +5,12 @@ include_directories(${BOOST_INCLUDE_DIR} "../../engine/utils/include" "../../eng
 set(SOURCES
 	"src/avf_plugin.cpp"
 	"src/avf_movie_api.cpp"
+	"src/avf_movie_player.cpp"
 	)
 
 set(HEADERS
 	"src/avf_movie_api.h"
+	"src/avf_movie_player.h"
 	)
 
 assign_source_group(${SOURCES})
