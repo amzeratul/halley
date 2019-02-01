@@ -257,13 +257,15 @@ Halley::ComputerData Halley::OSWin32::getComputerData()
 Halley::String Halley::OSWin32::getUserDataDir()
 {
 	PWSTR path;
-	SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr, &path);
-	CoTaskMemFree(path);
-	return String(path) + "\\";
+	auto hr = SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr, &path);
+	if (SUCCEEDED(hr)) {
+		CoTaskMemFree(path);
+		return String(path) + "\\";
+	}
 
-	//TCHAR path[MAX_PATH];
-	//SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, path);
-	//return String(path) + "\\";
+	TCHAR path2[MAX_PATH];
+	SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, path2);
+	return String(path2) + "\\";
 }
 
 String OSWin32::getCurrentWorkingDir()
