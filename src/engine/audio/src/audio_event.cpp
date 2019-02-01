@@ -163,7 +163,9 @@ void AudioEventActionPlay::loadDependencies(const Resources& resources)
 		clipData.reserve(clips.size());
 			
 		for (auto& c: clips) {
-			clipData.push_back(resources.get<AudioClip>(c));
+			if (resources.exists<AudioClip>(c)) {
+				clipData.push_back(resources.get<AudioClip>(c));
+			}
 		}
 	}
 }

@@ -129,6 +129,12 @@ void AudioFacade::pausePlayback()
 
 AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
 {
+	if (!resources->exists<AudioEvent>(name))
+	{
+		size_t id = uniqueId++;
+		return std::make_shared<AudioHandleImpl>(*this, id);
+	}
+
 	auto event = resources->get<AudioEvent>(name);
 	event->loadDependencies(*resources);
 
