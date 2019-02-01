@@ -237,7 +237,11 @@ Bytes Path::readFile(const Path& path)
 {
 	Bytes result;
 
+#ifdef _WIN32
+	std::ifstream fp(path.getString().getUTF16().c_str(), std::ios::binary | std::ios::in);
+#else
 	std::ifstream fp(path.string(), std::ios::binary | std::ios::in);
+#endif
 	if (!fp.is_open()) {
 		return result;
 	}
