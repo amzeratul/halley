@@ -259,8 +259,9 @@ Halley::String Halley::OSWin32::getUserDataDir()
 	PWSTR path;
 	auto hr = SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr, &path);
 	if (SUCCEEDED(hr)) {
+		auto result = String(path) + "\\";
 		CoTaskMemFree(path);
-		return String(path) + "\\";
+		return result;
 	}
 
 	TCHAR path2[MAX_PATH];
