@@ -6,6 +6,7 @@
 #include "halley/core/graphics/sprite/sprite.h"
 #include <halley/audio/audio_clip.h>
 #include "halley/core/graphics/movie/movie_player.h"
+#import <Foundation/Foundation.h>
 
 namespace Halley
 {
@@ -23,6 +24,9 @@ namespace Halley
 		void onReset() override;
 
 	private:
+		void init();
+
 		std::shared_ptr<ResourceDataStream> data;
+		String filePath;
 	};
 }
