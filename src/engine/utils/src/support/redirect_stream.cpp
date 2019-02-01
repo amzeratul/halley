@@ -90,11 +90,15 @@ RedirectStreamToStream::~RedirectStreamToStream()
 
 void RedirectStreamToStream::onText(const char *msg, std::streamsize count)
 {
-	dst->write(msg, count);
+	if (dst) {
+		dst->write(msg, count);
+	}
 }
 
 void RedirectStreamToStream::onFlush()
 {
-	dst->flush();
+	if (dst) {
+		dst->flush();
+	}
 }
 

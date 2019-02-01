@@ -246,6 +246,9 @@ void Core::setOutRedirect(bool appendToExisting)
 #else
 	auto outStream = std::make_shared<std::ofstream>(path.c_str(), appendToExisting ? std::ofstream::app : std::ofstream::trunc);
 #endif
+	if (!outStream->is_open()) {
+		outStream.reset();
+	}
 	out = std::make_unique<RedirectStreamToStream>(std::cout, outStream, false);
 #endif
 }
