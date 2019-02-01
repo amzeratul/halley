@@ -117,6 +117,10 @@ void AudioEventActionPlay::run(AudioEngine& engine, size_t id, const AudioPositi
 	int clipN = rng.getInt(0, int(clips.size()) - 1);
 	auto clip = clipData[clipN];
 
+	if (!clip) {
+		return;
+	}
+
 	const float curVolume = rng.getFloat(volume.start, volume.end);
 	const float curPitch = clamp(rng.getFloat(pitch.start, pitch.end), 0.1f, 2.0f);
 
@@ -165,6 +169,9 @@ void AudioEventActionPlay::loadDependencies(const Resources& resources)
 		for (auto& c: clips) {
 			if (resources.exists<AudioClip>(c)) {
 				clipData.push_back(resources.get<AudioClip>(c));
+			}
+			else {
+				clipData.push_back(std::shared_ptr<AudioClip>());
 			}
 		}
 	}
