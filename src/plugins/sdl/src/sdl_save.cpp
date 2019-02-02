@@ -11,7 +11,7 @@ SDLSaveHeaderV0::SDLSaveHeaderV0()
 	memcpy(formatId.data(), "HLLYSAVE", 8);
 }
 
-size_t SDLSaveHeader::read(gsl::span<const std::byte> data)
+size_t SDLSaveHeader::read(gsl::span<const gsl::byte> data)
 {
 	size_t pos = 0;
 	auto readData = [&] (void* dst, size_t dstSize)
