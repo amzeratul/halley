@@ -26,6 +26,7 @@ namespace Halley {
 
 		size_t read(gsl::span<const gsl::byte> data);
 
+		bool isValidHeader() const;
 		bool isValid(const String& path, const String& key) const;
 		void generateIV();
 

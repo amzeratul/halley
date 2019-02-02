@@ -30,6 +30,9 @@ size_t SDLSaveHeader::read(gsl::span<const gsl::byte> data)
 	
 	// V0
 	readData(&v0, sizeof(SDLSaveHeaderV0));
+	if (!isValidHeader()) {
+		return 0;
+	}
 
 	// V1
 	if (v0.version >= 1) {
@@ -39,7 +42,7 @@ size_t SDLSaveHeader::read(gsl::span<const gsl::byte> data)
 	return pos;
 }
 
-bool SDLSaveHeader::isValid(const String& path, const String& key) const
+bool SDLSaveHeader::isValidHeader() const
 {
 	if (v0.version < 0) {
 		// Invalid version
@@ -55,6 +58,14 @@ bool SDLSaveHeader::isValid(const String& path, const String& key) const
 	}
 	if (v0.reserved != 0) {
 		// Future version?
+		return false;
+	}
+	return true;
+}
+
+bool SDLSaveHeader::isValid(const String& path, const String& key) const
+{
+	if (!isValidHeader()) {
 		return false;
 	}
 	if (v0.fileNameHash != computeHash(path, key)) {
