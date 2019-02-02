@@ -39,9 +39,16 @@ Bytes Encrypt::encrypt(const Bytes& iv, const String& key, const Bytes& data)
 Bytes Encrypt::decrypt(const Bytes& iv, const String& key, const Bytes& data)
 {
 	Expects(iv.size() == 16);
+	Expects(key.size() >= 16);
 
 	// Prepare buffer
 	Bytes result = data;
+
+	// If result is not mod AES_BLOCKLEN, things have already gone fucked, but we'll do our best...
+	if (result.size() % AES_BLOCKLEN != 0) {
+		Logger::logError("Encrypted block does not have the correct length.");
+		result.resize(alignUp(result.size(), size_t(AES_BLOCKLEN)));
+	}
 
 	// Decrypt
 	AES_ctx ctx;
