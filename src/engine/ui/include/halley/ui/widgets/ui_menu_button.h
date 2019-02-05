@@ -75,7 +75,7 @@ namespace Halley {
 	public:
 		using FocusChangedCallback = std::function<void(const String&, bool)>; // Id of focus, is this the initial change?
 
-		explicit UIMenuButtonGroupHighlight(std::shared_ptr<UIMenuButtonGroup> group);
+		UIMenuButtonGroupHighlight(std::shared_ptr<UIMenuButtonGroup> group, Time transitionAnimLen = 0.1);
 
 		void setFocusChangedCallback(FocusChangedCallback callback);
 
@@ -86,6 +86,7 @@ namespace Halley {
 	private:
 		std::shared_ptr<UIMenuButtonGroup> group;
 
+		Time transitionAnimLen = 0.1;
 		Time transitionTime = -1;
 		Time elapsedTime = 0;
 	

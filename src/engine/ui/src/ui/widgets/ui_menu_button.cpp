@@ -192,8 +192,9 @@ void UIMenuButtonControlWidget::onInput(const UIInputResults& input, Time time)
 	group->onInput(input, time);
 }
 
-UIMenuButtonGroupHighlight::UIMenuButtonGroupHighlight(std::shared_ptr<UIMenuButtonGroup> group)
+UIMenuButtonGroupHighlight::UIMenuButtonGroupHighlight(std::shared_ptr<UIMenuButtonGroup> group, Time transitionAnimLen)
 	: group(group)
+	, transitionAnimLen(transitionAnimLen)
 {
 }
 
@@ -204,8 +205,6 @@ void UIMenuButtonGroupHighlight::setFocusChangedCallback(FocusChangedCallback ca
 
 void UIMenuButtonGroupHighlight::update(Time time)
 {
-	constexpr Time transitionAnimLen = 0.1;
-
 	elapsedTime += time;
 
 	const auto focused = group->getCurrentFocus();
