@@ -1,17 +1,33 @@
 #pragma once
 
 #include "halley/core/api/halley_api_internal.h"
+#include <set>
 
 namespace Halley {
-	struct SDLSaveHeader {
+	struct SDLSaveHeaderV0
+	{
 		std::array<char, 8> formatId;
-		uint32_t version = 0;
+		uint32_t version = 1;
 		uint32_t reserved = 0;
 		std::array<char, 16> iv;
 		uint64_t fileNameHash = 0;
 
-		bool isValid() const;
-		void init();
+		SDLSaveHeaderV0();
+	};
+
+	struct SDLSaveHeaderV1
+	{
+		uint64_t dataHash = 0;
+	};
+
+	struct SDLSaveHeader {
+		SDLSaveHeaderV0 v0;
+		SDLSaveHeaderV1 v1;
+
+		size_t read(gsl::span<const gsl::byte> data);
+
+		bool isValidHeader() const;
+		bool isValid(const String& path, const String& key) const;
 		void generateIV();
 
 		Bytes getIV() const;
@@ -32,7 +48,9 @@ namespace Halley {
 		SaveDataType type;
 		Path dir;
 		Maybe<String> key;
+		std::set<String> corruptedFiles;
 
 		String getKey() const;
+		Maybe<Bytes> doGetData(const Path& path, const String& filename);
 	};
 }

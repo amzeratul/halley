@@ -6,39 +6,86 @@
 #include "halley/utils/hash.h"
 using namespace Halley;
 
-bool SDLSaveHeader::isValid() const
+SDLSaveHeaderV0::SDLSaveHeaderV0()
 {
-	if (memcmp(formatId.data(), "HLLYSAVE", 8) != 0) {
+	memcpy(formatId.data(), "HLLYSAVE", 8);
+}
+
+size_t SDLSaveHeader::read(gsl::span<const gsl::byte> data)
+{
+	size_t pos = 0;
+	auto readData = [&] (void* dst, size_t dstSize)
+	{
+		if (size_t(data.size()) >= pos + dstSize) {
+			memcpy(dst, data.data() + pos, dstSize);
+			pos += dstSize;
+		}
+	};
+
+	v0.version = -1;
+
+	if (size_t(data.size()) < sizeof(SDLSaveHeaderV0)) {
+		return 0;
+	}
+	
+	// V0
+	readData(&v0, sizeof(SDLSaveHeaderV0));
+	if (!isValidHeader()) {
+		return 0;
+	}
+
+	// V1
+	if (v0.version >= 1) {
+		readData(&v1, sizeof(SDLSaveHeaderV1));
+	}
+
+	return pos;
+}
+
+bool SDLSaveHeader::isValidHeader() const
+{
+	if (v0.version < 0) {
+		// Invalid version
 		return false;
 	}
-	if (version > 0) {
+	if (v0.version > 1) {
+		// Future version
 		return false;
 	}
-	if (reserved != 0) {
+	if (memcmp(v0.formatId.data(), "HLLYSAVE", 8) != 0) {
+		// Not even a Halley save
+		return false;
+	}
+	if (v0.reserved != 0) {
+		// Future version?
+		return false;
+	}
+	return true;
+}
+
+bool SDLSaveHeader::isValid(const String& path, const String& key) const
+{
+	if (!isValidHeader()) {
+		return false;
+	}
+	if (v0.fileNameHash != computeHash(path, key)) {
+		// Corrupt
 		return false;
 	}
 
 	return true;
 }
 
-void SDLSaveHeader::init()
-{
-	memcpy(formatId.data(), "HLLYSAVE", 8);
-	version = 0;
-	reserved = 0;
-	fileNameHash = 0;
-}
-
 void SDLSaveHeader::generateIV()
 {
-	Random::getGlobal().getBytes(gsl::as_writeable_bytes(gsl::span<char>(iv.data(), iv.size())));
+	Random::getGlobal().getBytes(gsl::as_writeable_bytes(gsl::span<char>(v0.iv.data(), v0.iv.size())));
 }
 
 Bytes SDLSaveHeader::getIV() const
 {
 	Bytes result;
-	result.resize(iv.size());
-	memcpy(result.data(), iv.data(), iv.size());
+	result.resize(v0.iv.size());
+	memcpy(result.data(), v0.iv.data(), v0.iv.size());
 	return result;
 }
 
@@ -61,33 +108,23 @@ bool SDLSaveData::isReady() const
 	return true;
 }
 
-Bytes SDLSaveData::getData(const String& path)
+Bytes SDLSaveData::getData(const String& filename)
 {
-	Expects (!path.isEmpty());
-	
-	auto rawData = Path::readFile(dir / path);
-	if (!key) {
-		return rawData;
-	}
+	Expects (!filename.isEmpty());
 
-	if (rawData.size() < sizeof(SDLSaveHeader)) {
-		return rawData;
+	auto path = dir / filename;
+	Maybe<Bytes> data = doGetData(path, filename);
+	if (data) {
+		return *data;
+	} else {
+		// Fallback to backup
+		data = doGetData(path.replaceExtension(path.getExtension() + ".bak"), filename);
+		if (data) {
+			return *data;
+		} else {
+			return {};
+		}
 	}
-
-	// Read header
-	SDLSaveHeader header;
-	memcpy(&header, rawData.data(), sizeof(header));
-	if (!header.isValid()) {
-		return rawData;
-	}
-	const auto k = getKey();
-	if (header.fileNameHash != SDLSaveHeader::computeHash(path, k)) {
-		return {};
-	}
-	rawData.erase(rawData.begin(), rawData.begin() + sizeof(header));
-
-	// Decrypt data
-	return Encrypt::decrypt(header.getIV(), k, rawData);
 }
 
 void SDLSaveData::removeData(const String& path)
@@ -102,7 +139,7 @@ std::vector<String> SDLSaveData::enumerate(const String& root)
 	std::vector<String> result;
 	for (auto& p: paths) {
 		auto path = p.toString();
-		if (path.startsWith(root)) {
+		if (path.startsWith(root) && !path.endsWith(".bak")) {
 			result.push_back(path);
 		}
 	}
@@ -120,9 +157,9 @@ void SDLSaveData::setData(const String& path, const Bytes& rawData, bool commit)
 		// Encrypt
 		auto k = getKey();
 		SDLSaveHeader header;
-		header.init();
 		header.generateIV();
-		header.fileNameHash = SDLSaveHeader::computeHash(path, k);
+		header.v0.fileNameHash = SDLSaveHeader::computeHash(path, k);
+		header.v1.dataHash = Hash::hash(rawData);
 		auto encryptedData = Encrypt::encrypt(header.getIV(), k, rawData);
 		
 		// Pack
@@ -133,9 +170,24 @@ void SDLSaveData::setData(const String& path, const Bytes& rawData, bool commit)
 		finalData = rawData;
 	}
 
+	// Paths
+	auto dstPath = dir / path;
+	auto dstPathStr = dstPath.getString();
+	Maybe<Path> backupPath;
+	if (corruptedFiles.find(dstPathStr) != corruptedFiles.end()) {
+		// File we're writing to was corrupted; don't back up, but do remove it from the list
+		corruptedFiles.erase(dstPathStr);
+	} else {
+		// We've read from this file safely before, so back it up!
+		// But don't do it for downloads, those don't count as highly sensitive data
+		if (type != SaveDataType::Downloads) {
+			backupPath = dstPath.replaceExtension(dstPath.getExtension() + ".bak");
+		}
+	}
+
 	// Write
 	OS::get().createDirectories(dir);
-	OS::get().atomicWriteFile(dir / path, finalData);
+	OS::get().atomicWriteFile(dstPath, finalData, backupPath);
 	Logger::logDev("Saving \"" + path + "\", " + String::prettySize(finalData.size()));
 }
 
@@ -150,4 +202,44 @@ String SDLSaveData::getKey() const
 	} else {
 		return "";
 	}
+}
+
+Maybe<Bytes> SDLSaveData::doGetData(const Path& path, const String& filename)
+{
+	auto rawData = Path::readFile(path);
+	if (rawData.empty()) {
+		return {};
+	}
+
+	if (!key) {
+		return rawData;
+	}
+
+	// Read header
+	SDLSaveHeader header;
+	const size_t headerSize = header.read(gsl::as_bytes(gsl::span<Byte>(rawData.data(), rawData.size())));
+	if (headerSize == 0) {
+		return rawData;
+	}
+
+	// Basic header validation
+	const auto k = getKey();
+	if (!header.isValid(filename, k)) {
+		Logger::logError("Invalid save file: " + filename);
+		return {};
+	}
+
+	// Decrypt data
+	rawData.erase(rawData.begin(), rawData.begin() + headerSize);
+	auto finalData = Encrypt::decrypt(header.getIV(), k, rawData);
+
+	// Final validation
+	if (header.v0.version >= 1 && header.v1.dataHash != Hash::hash(finalData)) {
+		Logger::logError("Corrupted save file: " + filename);
+		if (!path.getExtension().endsWith(".bak")) {
+			corruptedFiles.insert(path.getString());
+		}
+;		return {};
+	}
+	return finalData;
 }
