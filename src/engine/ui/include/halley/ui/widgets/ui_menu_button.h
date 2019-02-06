@@ -35,7 +35,9 @@ namespace Halley {
 		void onInput(const UIInputResults& input, Time time);
 		bool setFocus(UIMenuButton& uiMenuButton);
 		void setFocusLost(UIMenuButton& uiMenuButton);
+		void setFocusLost();
 		bool setFocus(const String& id);
+		void setFocusOnAnythingValid();
 		std::shared_ptr<UIMenuButton> getCurrentFocus() const;
 		const String& getCurrentFocusId() const;
 		size_t size() const;
@@ -55,6 +57,7 @@ namespace Halley {
 
 		std::vector<ButtonEntry> buttons;
 		String curFocus;
+		String lastFocus;
 		String cancelId;
 		bool enabled = true;
 		bool mandatoryFocus = true;

@@ -18,6 +18,12 @@ namespace Halley {
 	class UIAnchor;
 	class UIBehaviour;
 
+	enum UIWidgetUpdateType {
+		First,
+		Full,
+		Partial
+	};
+
 	class UIWidget : public IUIElement, public UIParent, public IUISizer, public std::enable_shared_from_this<UIWidget> {
 		friend class UIParent;
 		friend class UIRoot;
@@ -27,7 +33,7 @@ namespace Halley {
 		virtual ~UIWidget();
 
 		void doDraw(UIPainter& painter) const;
-		void doUpdate(bool full, Time t, UIInputType inputType, JoystickType joystickType);
+		void doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType);
 
 		Vector2f getLayoutMinimumSize(bool force) const override;
 		void setRect(Rect4f rect) override;

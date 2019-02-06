@@ -47,6 +47,7 @@ Rect4f UIRoot::getRect() const
 void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual)
 {
 	auto joystickType = manual->getJoystickType();
+	bool first = true;
 
 	do {
 		// Spawn & Update input
@@ -58,8 +59,9 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 
 		// Update children
 		for (auto& c: getChildren()) {
-			c->doUpdate(true, t, activeInputType, joystickType);
+			c->doUpdate(first ? UIWidgetUpdateType::First : UIWidgetUpdateType::Full, t, activeInputType, joystickType);
 		}
+		first = false;
 		removeDeadChildren();
 
 		// Layout all widgets
@@ -67,7 +69,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 
 		// Update again, to reflect what happened >_>
 		for (auto& c: getChildren()) {
-			c->doUpdate(false, 0, activeInputType, joystickType);
+			c->doUpdate(UIWidgetUpdateType::Partial, 0, activeInputType, joystickType);
 		}
 
 		// For subsequent iterations, make sure t = 0

@@ -43,9 +43,9 @@ void UIWidget::doDraw(UIPainter& painter) const
 	}
 }
 
-void UIWidget::doUpdate(bool full, Time t, UIInputType inputType, JoystickType joystickType)
+void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType)
 {
-	if (full) {
+	if (updateType == Full || updateType == First) {
 		setInputType(inputType);
 		setJoystickType(joystickType);
 	
@@ -61,14 +61,14 @@ void UIWidget::doUpdate(bool full, Time t, UIInputType inputType, JoystickType j
 		update(t, positionUpdated);
 		positionUpdated = false;
 
-		if (inputButtons && full) {
+		if (inputButtons && updateType == First) {
 			onInput(inputResults, t);
 		}
 
 		addNewChildren(inputType);
 
 		for (auto& c: getChildren()) {
-			c->doUpdate(full, t, inputType, joystickType);
+			c->doUpdate(updateType, t, inputType, joystickType);
 		}
 
 		removeDeadChildren();

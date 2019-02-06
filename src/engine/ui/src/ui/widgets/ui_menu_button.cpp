@@ -1,4 +1,5 @@
 #include "widgets/ui_menu_button.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -137,6 +138,9 @@ bool UIMenuButtonGroup::setFocus(UIMenuButton& uiMenuButton)
 		}
 
 		curFocus = uiMenuButton.getId();
+		if (!curFocus.isEmpty()) {
+			lastFocus = curFocus;
+		}
 
 		uiMenuButton.setGroupFocused(true);
 	}
@@ -145,7 +149,14 @@ bool UIMenuButtonGroup::setFocus(UIMenuButton& uiMenuButton)
 
 void UIMenuButtonGroup::setFocusLost(UIMenuButton& uiMenuButton)
 {
-	if (!mandatoryFocus && curFocus == uiMenuButton.getId()) {
+	if (curFocus == uiMenuButton.getId()) {
+		setFocusLost();
+	}
+}
+
+void UIMenuButtonGroup::setFocusLost()
+{
+	if (!mandatoryFocus) {
 		curFocus = "";
 	}
 }
@@ -160,6 +171,17 @@ bool UIMenuButtonGroup::setFocus(const String& id)
 		}
 	}
 	return false;
+}
+
+void UIMenuButtonGroup::setFocusOnAnythingValid()
+{
+	if (curFocus.isEmpty()) {
+		if (!lastFocus.isEmpty()) {
+			setFocus(buttons.at(0).id);
+		} else {
+			setFocus(lastFocus);
+		}
+	}
 }
 
 std::shared_ptr<UIMenuButton> UIMenuButtonGroup::getCurrentFocus() const
