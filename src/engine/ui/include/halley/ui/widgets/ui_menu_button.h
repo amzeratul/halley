@@ -14,7 +14,6 @@ namespace Halley {
 		void onOptionChosen();
 		void setGroupFocused(bool focused);
 		bool isGroupFocused() const;
-
 		void setOnGroupStateCallback(OnGroupStateCallback callback);
 
 	protected:
@@ -35,11 +34,14 @@ namespace Halley {
 
 		void onInput(const UIInputResults& input, Time time);
 		bool setFocus(UIMenuButton& uiMenuButton);
+		void setFocusLost(UIMenuButton& uiMenuButton);
 		bool setFocus(const String& id);
 		std::shared_ptr<UIMenuButton> getCurrentFocus() const;
+		const String& getCurrentFocusId() const;
 		size_t size() const;
 		
 		void setEnabled(bool enabled);
+		void setMandatoryFocus(bool mandatory);
 
 	private:
 		struct ButtonEntry {
@@ -55,6 +57,7 @@ namespace Halley {
 		String curFocus;
 		String cancelId;
 		bool enabled = true;
+		bool mandatoryFocus = true;
 
 		const ButtonEntry& getCurFocusEntry() const;
 		ButtonEntry& getCurFocusEntry();
@@ -82,6 +85,7 @@ namespace Halley {
 		void update(Time t);
 		Rect4f getCurRect() const;
 		Time getElapsedTime() const;
+		UIMenuButtonGroup& getGroup();
 
 	private:
 		std::shared_ptr<UIMenuButtonGroup> group;

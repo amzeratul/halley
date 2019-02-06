@@ -51,6 +51,7 @@ void UIMenuButton::doSetState(State state)
 		break;
 
 	default:
+		group->setFocusLost(*this);
 		break;
 	}
 }
@@ -65,7 +66,7 @@ void UIMenuButton::onGroupState(State state)
 void UIMenuButtonGroup::addButton(std::shared_ptr<UIMenuButton> button, const String& up, const String& down, const String& left, const String& right)
 {
 	buttons.push_back({ button, button->getId(), up, down, left, right });
-	if (buttons.size() == 1) {
+	if (buttons.size() == 1 && mandatoryFocus) {
 		setFocus(*button);
 	}
 }
@@ -104,11 +105,16 @@ void UIMenuButtonGroup::onInput(const UIInputResults& input, Time time)
 		}
 	}
 
+	auto curFocus = getCurrentFocus();
 	if (input.isButtonPressed(UIInput::Button::Accept)) {
-		getCurrentFocus()->onOptionChosen();
+		if (curFocus) {
+			curFocus->onOptionChosen();
+		}
 	} else if (input.isButtonPressed(UIInput::Button::Cancel)) {
 		if (setFocus(cancelId)) {
-			getCurrentFocus()->onOptionChosen();
+			if (curFocus) {
+				curFocus->onOptionChosen();
+			}
 		}
 	}
 }
@@ -125,13 +131,23 @@ bool UIMenuButtonGroup::setFocus(UIMenuButton& uiMenuButton)
 	}
 
 	if (curFocus != uiMenuButton.getId()) {
-		getCurrentFocus()->setGroupFocused(false);
+		auto cur = getCurrentFocus();
+		if (cur) {
+			cur->setGroupFocused(false);
+		}
 
 		curFocus = uiMenuButton.getId();
 
 		uiMenuButton.setGroupFocused(true);
 	}
 	return true;
+}
+
+void UIMenuButtonGroup::setFocusLost(UIMenuButton& uiMenuButton)
+{
+	if (!mandatoryFocus && curFocus == uiMenuButton.getId()) {
+		curFocus = "";
+	}
 }
 
 bool UIMenuButtonGroup::setFocus(const String& id)
@@ -148,7 +164,15 @@ bool UIMenuButtonGroup::setFocus(const String& id)
 
 std::shared_ptr<UIMenuButton> UIMenuButtonGroup::getCurrentFocus() const
 {
+	if (!mandatoryFocus && curFocus.isEmpty()) {
+		return {};
+	}
 	return getCurFocusEntry().button.lock();
+}
+
+const String& UIMenuButtonGroup::getCurrentFocusId() const
+{
+	return curFocus;
 }
 
 size_t UIMenuButtonGroup::size() const
@@ -159,6 +183,11 @@ size_t UIMenuButtonGroup::size() const
 void UIMenuButtonGroup::setEnabled(bool e)
 {
 	enabled = e;
+}
+
+void UIMenuButtonGroup::setMandatoryFocus(bool mandatory)
+{
+	mandatoryFocus = mandatory;
 }
 
 const UIMenuButtonGroup::ButtonEntry& UIMenuButtonGroup::getCurFocusEntry() const
@@ -207,8 +236,7 @@ void UIMenuButtonGroupHighlight::update(Time time)
 {
 	elapsedTime += time;
 
-	const auto focused = group->getCurrentFocus();
-	const String curFocus = focused->getId();
+	const String curFocus = group->getCurrentFocusId();
 
 	if (lastFocus != curFocus) {
 		transitionTime = lastFocus.isEmpty() ? transitionAnimLen : 0;
@@ -219,7 +247,10 @@ void UIMenuButtonGroupHighlight::update(Time time)
 	}
 
 	transitionTime += time;
-	targetRect = focused->getMouseRect();
+	const auto focused = group->getCurrentFocus();
+	if (focused) {
+		targetRect = focused->getMouseRect();
+	}
 
 	const float t = smoothCos(clamp(float(transitionTime / transitionAnimLen), 0.0f, 1.0f));
 	curRect = lerp(prevRect, targetRect, t);
@@ -233,6 +264,11 @@ Rect4f UIMenuButtonGroupHighlight::getCurRect() const
 Time UIMenuButtonGroupHighlight::getElapsedTime() const
 {
 	return elapsedTime;
+}
+
+UIMenuButtonGroup& UIMenuButtonGroupHighlight::getGroup()
+{
+	return *group;
 }
 
 void UIMenuButtonGroupHighlight::onFocusChanged(const String& id, const String& previous)
