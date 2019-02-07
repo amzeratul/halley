@@ -109,6 +109,7 @@ namespace Halley {
 		void setOnlyEnabledWithInputs(const std::vector<UIInputType>& inputs);
 		const std::vector<UIInputType>& getOnlyEnabledWithInput() const;
 		virtual void setInputButtons(const UIInputButtons& buttons);
+		UIInputType getLastInputType() const;
 
 		void setValidator(std::shared_ptr<UIValidator> validator);
 		std::shared_ptr<UIValidator> getValidator() const;
@@ -168,7 +169,6 @@ namespace Halley {
 
 		void shrink();
 		void forceLayout();
-		UIInputType getLastInputType() const;
 
 		virtual void onInput(const UIInputResults& input, Time time);
 		virtual void updateInputDevice(const InputDevice& inputDevice);
