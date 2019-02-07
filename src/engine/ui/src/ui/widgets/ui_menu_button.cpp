@@ -177,9 +177,9 @@ void UIMenuButtonGroup::setFocusOnAnythingValid()
 {
 	if (curFocus.isEmpty()) {
 		if (!lastFocus.isEmpty()) {
-			setFocus(buttons.at(0).id);
-		} else {
 			setFocus(lastFocus);
+		} else {
+			setFocus(buttons.at(0).id);
 		}
 	}
 }
