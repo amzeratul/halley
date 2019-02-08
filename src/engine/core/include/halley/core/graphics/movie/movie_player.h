@@ -101,6 +101,7 @@ namespace Halley
 
 		std::vector<MoviePlayerStream> streams;
 		std::list<std::shared_ptr<Texture>> recycleTexture;
+		std::list<PendingFrame> pendingFrames;
 		int maxVideoFrames;
 		int maxAudioSamples;
 
@@ -112,7 +113,6 @@ namespace Halley
 
 		Vector2i videoSize;
 		std::shared_ptr<Texture> currentTexture;
-		std::list<PendingFrame> pendingFrames;
 		std::shared_ptr<TextureRenderTarget> renderTarget;
 		std::shared_ptr<Texture> renderTexture;
 
