@@ -453,6 +453,13 @@ void WinRTSystem::runGame(std::function<void()> runnable)
 	CoreApplication::Run(winrt::make<Source>(*this, std::move(runnable)));
 }
 
+Maybe<String> WinRTSystem::getGameVersion() const
+{
+	Package package = Package::Current();
+	PackageVersion version = package.Id().Version();
+	return toString(version.Major) + "." + toString(version.Minor) + "." + toString(version.Build);
+}
+
 WinRTLocalSave::WinRTLocalSave(String prefix)
 	: folder(makeFolder(prefix))
 {
