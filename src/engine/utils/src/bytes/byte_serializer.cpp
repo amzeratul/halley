@@ -95,6 +95,9 @@ Deserializer& Deserializer::operator>>(Path& p)
 
 Deserializer& Deserializer::operator>>(gsl::span<gsl::byte>& span)
 {
+	if (span.empty()) {
+		return *this;
+	}
 	Expects(span.size_bytes() > 0);
 
 	ensureSufficientBytesRemaining(size_t(span.size_bytes()));
