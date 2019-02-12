@@ -330,12 +330,50 @@ static void writeFile(const wchar_t* str, const Bytes& data)
 	//std::ofstream fp(str, std::ios::binary | std::ios::out);
 	//fp.write(reinterpret_cast<const char*>(data.data()), data.size());
 	//fp.close();
-	auto file = CreateFileW(str, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
-	if (file != INVALID_HANDLE_VALUE) {
-		DWORD written = 0;
-		WriteFile(file, data.data(), DWORD(data.size()), &written, nullptr);
-		FlushFileBuffers(file);
-		CloseHandle(file);
+
+	for (int i = 3; --i >= 0;) {
+		{
+			auto file = CreateFileW(str, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+			if (file == INVALID_HANDLE_VALUE) {
+				if (i > 0) {
+					continue;
+				}
+				throw Exception("Unable to write file " + String(str), HalleyExceptions::File);
+			}
+			DWORD written = 0;
+			WriteFile(file, data.data(), DWORD(data.size()), &written, nullptr);
+			FlushFileBuffers(file);
+			CloseHandle(file);
+		}
+
+		{
+			// Read back to ensure it's OK
+			auto file = CreateFileW(str, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+			if (file == INVALID_HANDLE_VALUE) {
+				if (i > 0) {
+					continue;
+				}
+				throw Exception("Unable to read file " + String(str), HalleyExceptions::File);
+			}
+			DWORD read = 0;
+			DWORD highSize;
+			DWORD size = GetFileSize(file, &highSize);
+			Bytes readBack;
+			readBack.resize(size_t(size));
+
+			ReadFile(file, readBack.data(), size, &read, nullptr);
+			CloseHandle(file);
+
+			if (readBack != data) {
+				if (i > 0) {
+					continue;
+				}
+				throw Exception("Unable to correctly write file " + String(str), HalleyExceptions::File);
+			}
+
+			// All good
+			return;
+		}
 	}
 }
 
