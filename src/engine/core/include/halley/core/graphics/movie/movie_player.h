@@ -130,6 +130,9 @@ namespace Halley
 		void stopThread();
 		void threadEntry();
 
+		virtual bool useCustomThreads() const;
+		virtual void stopCustomThreads();
+
 		bool needsMoreVideoFrames() const;
 		bool needsMoreAudioFrames() const;
 	};

@@ -38,7 +38,9 @@ MoviePlayer::~MoviePlayer()
 void MoviePlayer::play()
 {
 	if (state == MoviePlayerState::Paused) {
-		startThread();
+		if (!useCustomThreads()) {
+			startThread();
+		}
 
 		if (!streamingClip) {
 			streamingClip = std::make_shared<StreamingAudioClip>(2);
@@ -226,6 +228,10 @@ void MoviePlayer::stopThread()
 		threadRunning = false;
 		workerThread.join();
 	}
+
+	if (useCustomThreads()) {
+		stopCustomThreads();
+	}
 }
 
 void MoviePlayer::threadEntry()
@@ -245,6 +251,15 @@ void MoviePlayer::threadEntry()
 			std::this_thread::sleep_for(2ms);
 		}
 	}
+}
+
+bool MoviePlayer::useCustomThreads() const
+{
+	return false;
+}
+
+void MoviePlayer::stopCustomThreads()
+{
 }
 
 bool MoviePlayer::needsMoreVideoFrames() const
