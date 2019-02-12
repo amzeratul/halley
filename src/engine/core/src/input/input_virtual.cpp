@@ -343,7 +343,7 @@ void InputVirtual::update(Time t)
 		axis.curRepeatValue = 0;
 
 		float curVal = getAxis(int(i));
-		int intVal = curVal > 0.30f ? 1 : (curVal < -0.30f ? -1 : 0);
+		int intVal = curVal > 0.50f ? 1 : (curVal < -0.50f ? -1 : 0);
 
 		auto& timeSinceRepeat = axis.timeSinceRepeat;
 		auto& lastVal = axis.lastRepeatedValue;
