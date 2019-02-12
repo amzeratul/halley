@@ -7,6 +7,7 @@
 #include <halley/audio/audio_clip.h>
 #include "halley/core/graphics/movie/movie_player.h"
 #import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
 
 namespace Halley
 {
@@ -25,8 +26,14 @@ namespace Halley
 
 	private:
 		void init();
+		void translateError(NSError* error);
 
 		std::shared_ptr<ResourceDataStream> data;
 		String filePath;
+
+		AVAsset* asset = nil;
+		AVAssetReader* assetReader = nil;
+		AVAssetReaderVideoCompositionOutput* videoOut = nil;
+		AVAssetReaderAudioMixOutput* audioOut = nil;
 	};
 }

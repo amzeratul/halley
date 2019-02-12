@@ -4,7 +4,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <fstream>
-#import <AVFoundation/AVFoundation.h>
 
 using namespace Halley;
 
@@ -17,7 +16,24 @@ AVFMoviePlayer::AVFMoviePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr
 
 AVFMoviePlayer::~AVFMoviePlayer() noexcept
 {
-	reset();
+	if (videoOut) {
+		[videoOut release];
+		videoOut = nil;
+	}
+	if (audioOut) {
+		[audioOut release];
+		audioOut = nil;
+	}
+	if (assetReader) {
+		[assetReader cancelReading];
+		[assetReader release];
+		assetReader = nil;
+	}
+	if (asset) {
+		[asset release];
+		asset = nil;
+	}
+
 	if (!filePath.isEmpty()) {
 		unlink(filePath.c_str());
 	}
@@ -25,6 +41,8 @@ AVFMoviePlayer::~AVFMoviePlayer() noexcept
 
 void AVFMoviePlayer::requestVideoFrame()
 {
+	CMSampleBufferRef sample = [videoOut copyNextSampleBuffer];
+	CVImageBufferRef image = CMSampleBufferGetImageBuffer(sample);
 }
 
 void AVFMoviePlayer::requestAudioFrame()
@@ -56,5 +74,40 @@ void AVFMoviePlayer::init()
 	} while (bytesRead == buffer.size());
 	fs.close();
 
-	AVAsset* asset = [AVAsset assetWithURL:fileUrl];
+	asset = [AVAsset assetWithURL:fileUrl];
+	[asset retain];
+
+	NSError* error = nil;
+	assetReader = [[AVAssetReader alloc] initWithAsset:asset error:&error];
+	translateError(error);
+	[assetReader retain];
+
+	NSArray<AVAssetTrack*>* videoTracks = [asset tracksWithMediaType:AVMediaTypeVideo];
+	videoOut = [[AVAssetReaderVideoCompositionOutput alloc] initWithVideoTracks:videoTracks videoSettings:nil];
+	[videoOut setVideoComposition:[AVVideoComposition videoCompositionWithPropertiesOfAsset:asset]];
+	[videoOut retain];
+
+	NSArray<AVAssetTrack*>* audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
+	audioOut = [[AVAssetReaderAudioMixOutput alloc] initWithAudioTracks:audioTracks audioSettings:nil];
+	[audioOut retain];
+
+	[assetReader addOutput:videoOut];
+	[assetReader addOutput:audioOut];
+
+	if ([assetReader startReading] == NO) {
+		translateError([assetReader error]);
+	}
+
+	reset();
+}
+
+void AVFMoviePlayer::translateError(NSError* error)
+{
+	if (error == nil) {
+		return;
+	}
+
+	String description([[error localizedDescription] UTF8String]);
+	int code = (int)[error code];
+	throw Exception("Error while processing movie file (" + toString(code) + "): " + description, HalleyExceptions::MoviePlugin);
 }
