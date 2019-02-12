@@ -325,6 +325,20 @@ void OSWin32::createDirectories(const Path& path)
 	}
 }
 
+static void writeFile(const wchar_t* str, const Bytes& data)
+{
+	//std::ofstream fp(str, std::ios::binary | std::ios::out);
+	//fp.write(reinterpret_cast<const char*>(data.data()), data.size());
+	//fp.close();
+	auto file = CreateFileW(str, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+	if (file != INVALID_HANDLE_VALUE) {
+		DWORD written = 0;
+		WriteFile(file, data.data(), DWORD(data.size()), &written, nullptr);
+		FlushFileBuffers(file);
+		CloseHandle(file);
+	}
+}
+
 void OSWin32::atomicWriteFile(const Path& path, const Bytes& data, Maybe<Path> backupOldVersionPath)
 {
 	auto dstPath = path.getString().replaceAll("/", "\\").getUTF16();
@@ -332,24 +346,15 @@ void OSWin32::atomicWriteFile(const Path& path, const Bytes& data, Maybe<Path> b
 		auto temp = path.replaceExtension(path.getExtension() + ".tmp");
 		auto tempPath = temp.getString().replaceAll("/", "\\").getUTF16();
 		auto backupPath = backupOldVersionPath ? backupOldVersionPath.get().getString().replaceAll("/", "\\").getUTF16() : StringUTF16();
-
-		{
-			std::ofstream fp(tempPath.c_str(), std::ios::binary | std::ios::out);
-			fp.write(reinterpret_cast<const char*>(data.data()), data.size());
-			fp.close();
-		}
+		writeFile(tempPath.c_str(), data);
 
 		const int result = ReplaceFileW(dstPath.c_str(), tempPath.c_str(), backupOldVersionPath ? backupPath.c_str() : nullptr, REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr);
 		if (result == 0) {
 			Logger::logWarning("Unable to safely overwrite file " + path.getString());
-			std::ofstream fp(dstPath.c_str(), std::ios::binary | std::ios::out);
-			fp.write(reinterpret_cast<const char*>(data.data()), data.size());
-			fp.close();
+			writeFile(dstPath.c_str(), data);
 		}
 	} else {
-		std::ofstream fp(dstPath.c_str(), std::ios::binary | std::ios::out);
-		fp.write(reinterpret_cast<const char*>(data.data()), data.size());
-		fp.close();
+		writeFile(dstPath.c_str(), data);
 	}
 }
 
