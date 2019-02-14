@@ -216,6 +216,10 @@ namespace Halley
 		virtual void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback) {}
 		virtual void setJoinErrorCallback(PlatformJoinErrorCallback callback) {}
 
+		virtual bool needsInviteExtraData() const { return false; }
+		virtual String inviteExtraDataFile() const { return ""; }
+		virtual void setInviteExtraData(const Bytes& data) {};
+
 		virtual bool canShowPlayerInfo() const { return false; }
 		virtual void showPlayerInfo(String playerId) {}
 
