@@ -76,6 +76,6 @@ namespace Halley {
 		RenderTarget* renderTarget = nullptr;
 		Maybe<Rect4i> viewPort;
 
-		RenderTarget* defaultRenderTarget;
+		RenderTarget* defaultRenderTarget = nullptr;
 	};
 }

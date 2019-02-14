@@ -25,11 +25,22 @@ namespace Halley
 		void onReset() override;
 
 	private:
+		struct PlaneData {
+			gsl::byte* data;
+			int stride;
+			int height;
+		};
+
 		void init();
+		void startReading();
 		void translateError(NSError* error);
+
+		void readVideoSample(Time time, PlaneData yPlane, PlaneData uvPlane);
+		void readAudioSample(Time time, gsl::span<const gsl::byte> data);
 
 		std::shared_ptr<ResourceDataStream> data;
 		String filePath;
+		bool startedReading = false;
 
 		AVAsset* asset = nil;
 		AVAssetReader* assetReader = nil;
