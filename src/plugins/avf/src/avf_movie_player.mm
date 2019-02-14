@@ -162,7 +162,14 @@ void AVFMoviePlayer::init()
 	[videoOut retain];
 
 	NSArray<AVAssetTrack*>* audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
-	audioOut = [[AVAssetReaderAudioMixOutput alloc] initWithAudioTracks:audioTracks audioSettings:nil];
+	NSDictionary* audioSettings = @{
+		AVFormatIDKey: @(kAudioFormatLinearPCM),
+		AVSampleRateKey: @(44100),
+		AVLinearPCMBitDepthKey: @(16),
+		AVLinearPCMIsFloatKey: @(NO),
+		AVLinearPCMIsBigEndianKey: @(NO)
+	};
+	audioOut = [[AVAssetReaderAudioMixOutput alloc] initWithAudioTracks:audioTracks audioSettings:audioSettings];
 	[audioOut retain];
 
 	[assetReader addOutput:videoOut];
