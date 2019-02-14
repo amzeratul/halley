@@ -29,7 +29,6 @@ AVFMoviePlayer::~AVFMoviePlayer() noexcept
 		audioOut = nil;
 	}
 	if (assetReader) {
-		[assetReader cancelReading];
 		[assetReader release];
 		assetReader = nil;
 	}
@@ -119,8 +118,12 @@ void AVFMoviePlayer::requestAudioFrame()
 	if (error != kCMBlockBufferNoErr) {
 		throw Exception("Reading audio data failed; error: " + toString(int(error)), HalleyExceptions::MoviePlugin);
 	}
+	Expects(totalLength == lengthAtOffset);
 
 	readAudioSample(sampleTime, gsl::as_bytes(gsl::span<char>(data, lengthAtOffset)));
+
+	CMSampleBufferInvalidate(sample);
+	CFRelease(sample);
 }
 
 void AVFMoviePlayer::onReset()
@@ -164,7 +167,7 @@ void AVFMoviePlayer::init()
 	NSArray<AVAssetTrack*>* audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
 	NSDictionary* audioSettings = @{
 		AVFormatIDKey: @(kAudioFormatLinearPCM),
-		AVSampleRateKey: @(44100),
+		AVSampleRateKey: @(48000),
 		AVLinearPCMBitDepthKey: @(16),
 		AVLinearPCMIsFloatKey: @(NO),
 		AVLinearPCMIsBigEndianKey: @(NO)
