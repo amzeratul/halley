@@ -5,9 +5,11 @@
 [![Standard](https://img.shields.io/badge/c%2B%2B-14-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B14)
 
 # Halley Game Engine
-A lightweight game engine written in C++14. It's considered to be highly experimental, and alpha quality at best.
+A lightweight game engine written in C++14. It has been used to ship Wargroove, a turn-based strategy game, on Windows, Mac (experimental), Nintendo Switch and Xbox One (soon PS4!).
 
 The Halley Game Engine is licensed under the Apache 2.0 license.
+
+Make sure to check out the [Halley-template](https://github.com/amzeratul/halley-template) repository for a blank sample.
 
 ## Design guidelines & objectives
 * Modern graphics pipelines, with first-class shader support
