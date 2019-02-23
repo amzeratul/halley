@@ -49,7 +49,7 @@ Halley is divided in a several sub-projects:
   * **entity**: Stress test of entity system
   * **network**: Stress test of network system
 * **samples**
-  * see [this project](https://github.com/amzeratul/halley-samples)
+  * (The samples project was taken down due to being too outdated, sorry about that!)
 
 ## Platforms
 The following platforms are supported:
