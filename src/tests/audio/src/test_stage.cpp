@@ -5,7 +5,7 @@ using namespace Halley;
 
 void TestStage::init()
 {
-	getAudioAPI().playMusic(getResource<AudioClip>("Loveshadow_-_Marcos_Theme.ogg"));
+	getAudioAPI().play(getResource<AudioClip>("Loveshadow_-_Marcos_Theme.ogg"), AudioPosition());
 }
 
 void TestStage::onVariableUpdate(Time time)
@@ -32,7 +32,7 @@ void TestStage::onVariableUpdate(Time time)
 	auto noteSamples = std::array<String, 12>{{ "c1", "c1s", "d1", "d1s", "e1", "f1", "f1s", "g1", "g1s", "a1", "a1s", "b1" }};
 	for (int i = 0; i < 12; ++i) {
 		if (key->isButtonPressed(noteKeys[i])) {
-			getAudioAPI().playUI(getResources().get<AudioClip>(noteSamples[i] + ".ogg"), 1.0f, pan);
+			getAudioAPI().play(getResources().get<AudioClip>(noteSamples[i] + ".ogg"), AudioPosition::makeUI(pan));
 		}
 	}
 }

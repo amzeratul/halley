@@ -12,13 +12,13 @@ public:
 		for (auto& e : mainFamily) {
 			auto& sprite = e.sprite.sprite;
 			sprite.setPos(e.position.position);
-			spritePainter.add(sprite, 0, e.sprite.layer, sprite.getPosition().y);
+			spritePainter.add(sprite, 1, e.sprite.layer, sprite.getPosition().y);
 		}
 
 		rc.bind([&] (Painter& painter)
 		{
 			painter.clear(Colour());
-			spritePainter.draw(0, painter);
+			spritePainter.draw(1, painter);
 			painter.flush();
 		});
 	}
