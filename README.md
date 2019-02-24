@@ -28,7 +28,7 @@ Make sure to check out the [Halley-template](https://github.com/amzeratul/halley
 ## Modules
 Halley is divided in a several sub-projects:
 * **engine**
-  * **core**: Core features of the engine, including looper, API management, resouces, and graphics engine
+  * **core**: Core features of the engine, including looper, API management, resources, and graphics engine
   * **audio**: Audio engine
   * **entity**: Framework for dealing with entities, components, and systems
   * **utils**: Utilities library
