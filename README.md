@@ -61,21 +61,34 @@ The following platforms are supported:
 
 ### Containers
 
-If you want to quickly jump in, you can build the provided [Dockerfile](Dockerfile)
-to install the dependencies below, or pull a pre-built container from Docker Hub.
-Either of the following will work:
+If you want to quickly jump in, you can pull the provided [Dockerfile](Dockerfile)
+(that builds a Docker container) that comes with the dependencies installed below.
 
-```bash
-$ git clone https://www.github.com/amzeratul/halley
-$ cd halley
-$ docker build -t vanessa/halley .
-```
-
-or
+If you are good with Docker you can try the container (you will need to expose the video
+device from your host)
 
 ```bash
 $ docker pull vanessa/halley
 ```
+
+But easier is to pull the Docker container into a [Singularity](https://www.sylabs.io/guides/3.0/user-guide/installation.html) container. 
+This will avoid dealing with trying to get our video devices to work in the Docker container!
+
+```bash
+$ sudo singularity build --sandbox halley-box docker://vanessa/halley
+$ singularity shell halley-box
+```
+
+Once in the container, try the test:
+
+```bash
+$ cd /code/src/tests/
+$ halley-editor entity/
+```
+
+And the display should work:
+
+![assets_src/image/entity.png](assets_src/image/entity.png)
 
 
 ### Local

@@ -4,6 +4,9 @@ Thumbs.db
 # CLion/IntelliJ
 .idea
 
+# Containers
+halley-box
+
 # Visual Studio
 *.user
 *.aps
