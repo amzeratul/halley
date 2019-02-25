@@ -58,4 +58,4 @@ ENV PATH /code/bin:$PATH
 # The full documentation is available on the [Wiki](https://github.com/amzeratul/halley/wiki).
 
 WORKDIR /code/src/tests
-#ENTRYPOINT ["halley-editor"]
+ENTRYPOINT ["halley-editor"]
