@@ -80,9 +80,17 @@ The following platforms are supported:
 ### Set up
 * Ensure that all dependencies above are set up correctly
 * Build with CMake
-  * Typical: "cmake -DCMAKE_INCLUDE_PATH=path/to/headers -DCMAKE_LIBRARY_PATH=path/to/libs -DBOOST_ROOT=path/to/boost .."
-  * Engine only: "cmake -DBUILD_HALLEY_TOOLS=0 -DBUILD_HALLEY_TESTS=0 [...]"
-* Run "halley-editor tests/entity" (or whichever other project you want to test)
+  * Typical:  
+     ```
+     cmake -DCMAKE_INCLUDE_PATH=path/to/headers \
+           -DCMAKE_LIBRARY_PATH=path/to/libs \
+           -DBOOST_ROOT=path/to/boost ..
+     ```
+  * Engine only:
+    ```
+    cmake -DBUILD_HALLEY_TOOLS=0 -DBUILD_HALLEY_TESTS=0 [...]
+    ```
+* Run `halley-editor tests/entity` (or whichever other project you want to test)
 * Launch that project
 
 ## Documentation
