@@ -16,12 +16,13 @@ namespace Halley {
 		UWP,
 		Android,
 		iOS,
-        Emscripten
+        Emscripten,
+		FreeBSD
 	};
 
 	template <>
 	struct EnumNames<GamePlatform> {
-		constexpr std::array<const char*, 11> operator()() const {
+		constexpr std::array<const char*, 12> operator()() const {
 			return {{
 				"unknown",
 				"windows",
@@ -33,7 +34,8 @@ namespace Halley {
 				"uwp",
 				"android",
 				"ios",
-                "emscripten"
+                "emscripten",
+				"freebsd"
 			}};
 		}
 	};
@@ -62,6 +64,8 @@ namespace Halley {
         #endif
     #elif defined(__linux)
         return GamePlatform::Linux;
+    #elif defined(__FreeBSD__)
+        return GamePlatform::FreeBSD;
     #else
         return GamePlatform::Unknown;
     #endif
