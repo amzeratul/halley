@@ -13,14 +13,17 @@ RUN apt-get update && apt-get install -y g++ gcc \
                                          libsdl2-dev \
                                          software-properties-common \
                                          freetype2-demos \
-                                         libfreetype6-dev
+                                         libfreetype6-dev \
+                                         python-dev \
+                                         libxml2-dev \
+                                         libxslt-dev
 
 # above installs cmake 3.10.2, gcc 7.3.0
 
 # Boost
 RUN wget https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz && \
     tar -xzvf boost_1_66_0.tar.gz && \
-    cd cd boost_1_66_0 && \
+    cd boost_1_66_0 && \
     ./bootstrap.sh && \
     ./b2 install
 
@@ -43,6 +46,7 @@ ADD . /code
 WORKDIR /code
 
 RUN cd /code/src && \
+    ldconfig && \
     cmake -DCMAKE_INCLUDE_PATH=/usr/local/lib -DHALLEY_PATH=../halley -DBUILD_HALLEY_TOOLS=1 -DBUILD_HALLEY_TESTS=0 -DCMAKE_LIBRARY_PATH=/usr/local/lib -DBOOST_ROOT=/usr/local/include/boost .. && \
     make
 
@@ -54,4 +58,4 @@ ENV PATH /code/bin:$PATH
 # The full documentation is available on the [Wiki](https://github.com/amzeratul/halley/wiki).
 
 WORKDIR /code/src/tests
-ENTRYPOINT ["halley-editor"]
+#ENTRYPOINT ["halley-editor"]

@@ -59,14 +59,35 @@ The following platforms are supported:
 
 ## Installation
 
-### Tools required
+### Containers
+
+If you want to quickly jump in, you can build the provided [Dockerfile](Dockerfile)
+to install the dependencies below, or pull a pre-built container from Docker Hub.
+Either of the following will work:
+
+```bash
+$ git clone https://www.github.com/amzeratul/halley
+$ cd halley
+$ docker build -t vanessa/halley .
+```
+
+or
+
+```bash
+$ docker pull vanessa/halley
+```
+
+
+### Local
+
+#### Tools required
 * CMake 3.10+
 * C++14 capable compiler:
   * Visual C++ 15.3 (Visual Studio 2017)
   * Clang 3.5
   * GCC 5.0
 
-### Library dependencies
+#### Library dependencies
 * Engine:
   * Boost 1.66.0 (header only)
   * OpenGL [optional]
@@ -77,7 +98,7 @@ The following platforms are supported:
   * Freetype 2.6.3
   * yaml-cpp 0.5.3
 
-### Set up
+#### Set up
 * Ensure that all dependencies above are set up correctly
 * Build with CMake
   * Typical: "cmake -DCMAKE_INCLUDE_PATH=path/to/headers -DCMAKE_LIBRARY_PATH=path/to/libs -DBOOST_ROOT=path/to/boost .."
