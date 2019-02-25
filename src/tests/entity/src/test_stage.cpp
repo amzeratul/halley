@@ -7,9 +7,7 @@ void TestStage::init()
 {
 	world = createWorld("sample_test_world", createSystem);
 	statsView = std::make_unique<WorldStatsView>(*getAPI().core);
-	auto stolen = world.release();
-	world.reset(stolen);
-	statsView->setWorld(stolen);
+	statsView->setWorld(world.get());
 }
 
 void TestStage::onFixedUpdate(Time time)
