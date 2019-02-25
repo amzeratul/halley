@@ -16,7 +16,8 @@ RUN apt-get update && apt-get install -y g++ gcc \
                                          libfreetype6-dev \
                                          python-dev \
                                          libxml2-dev \
-                                         libxslt-dev
+                                         libxslt-dev \
+                                         pciutils
 
 # above installs cmake 3.10.2, gcc 7.3.0
 
