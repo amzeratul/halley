@@ -59,9 +59,37 @@ The following platforms are supported:
 
 ## Installation
 
+### Local
+
+#### Tools required
+* CMake 3.10+
+* C++14 capable compiler:
+  * Visual C++ 15.3 (Visual Studio 2017)
+  * Clang 3.5
+  * GCC 5.0
+
+#### Library dependencies
+* Engine:
+  * Boost 1.66.0 (header only)
+  * OpenGL [optional]
+  * SDL 2.0.2 (2.0.7 recommended) [optional]
+  * Windows 10 SDK [optional]
+* Also required if building Tools:
+  * Boost 1.66.0 libraries: filesystem, system
+  * Freetype 2.6.3
+  * yaml-cpp 0.5.3
+
+#### Set up
+* Ensure that all dependencies above are set up correctly
+* Build with CMake
+  * Typical: "cmake -DCMAKE_INCLUDE_PATH=path/to/headers -DCMAKE_LIBRARY_PATH=path/to/libs -DBOOST_ROOT=path/to/boost .."
+  * Engine only: "cmake -DBUILD_HALLEY_TOOLS=0 -DBUILD_HALLEY_TESTS=0 [...]"
+* Run "halley-editor tests/entity" (or whichever other project you want to test)
+* Launch that project
+
 ### Containers
 
-If you want to quickly jump in, you can pull the provided [Dockerfile](Dockerfile)
+If you want to quickly jump in, we have an experimental setup with containers. you can pull the provided [Dockerfile](Dockerfile)
 (that builds a Docker container) that comes with the dependencies installed below.
 
 If you are good with Docker you can try the container (you will need to expose the video
@@ -90,34 +118,6 @@ And the display should work:
 
 ![assets_src/image/entity.png](assets_src/image/entity.png)
 
-
-### Local
-
-#### Tools required
-* CMake 3.10+
-* C++14 capable compiler:
-  * Visual C++ 15.3 (Visual Studio 2017)
-  * Clang 3.5
-  * GCC 5.0
-
-#### Library dependencies
-* Engine:
-  * Boost 1.66.0 (header only)
-  * OpenGL [optional]
-  * SDL 2.0.2 (2.0.7 recommended) [optional]
-  * Windows 10 SDK [optional]
-* Also required if building Tools:
-  * Boost 1.66.0 libraries: filesystem, system
-  * Freetype 2.6.3
-  * yaml-cpp 0.5.3
-
-#### Set up
-* Ensure that all dependencies above are set up correctly
-* Build with CMake
-  * Typical: "cmake -DCMAKE_INCLUDE_PATH=path/to/headers -DCMAKE_LIBRARY_PATH=path/to/libs -DBOOST_ROOT=path/to/boost .."
-  * Engine only: "cmake -DBUILD_HALLEY_TOOLS=0 -DBUILD_HALLEY_TESTS=0 [...]"
-* Run "halley-editor tests/entity" (or whichever other project you want to test)
-* Launch that project
 
 ## Documentation
 The full documentation is available on the [Wiki](https://github.com/amzeratul/halley/wiki).
