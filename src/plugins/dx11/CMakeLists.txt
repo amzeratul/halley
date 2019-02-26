@@ -35,3 +35,7 @@ assign_source_group(${HEADERS})
 
 add_library (halley-dx11 ${SOURCES} ${HEADERS})
 target_link_libraries(halley-dx11 halley-core halley-utils)
+
+if (MINGW)
+    target_link_libraries(halley-dx11 d3d11 dxgi)
+endif ()

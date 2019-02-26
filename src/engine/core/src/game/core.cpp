@@ -241,7 +241,7 @@ void Core::setOutRedirect(bool appendToExisting)
 {
 #if defined(_WIN32) || defined(__APPLE__) || defined(linux)
 	String path = (Path(environment->getDataPath()) / "log.txt").getString();
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 	auto outStream = std::make_shared<std::ofstream>(path.getUTF16().c_str(), appendToExisting ? std::ofstream::app : std::ofstream::trunc);
 #else
 	auto outStream = std::make_shared<std::ofstream>(path.c_str(), appendToExisting ? std::ofstream::app : std::ofstream::trunc);

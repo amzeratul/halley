@@ -1,6 +1,6 @@
 #include "resource_data_byte_stream.h"
 #include "halley/concurrency/concurrent.h"
-#include <atlbase.h>
+//#include <atlbase.h>
 using namespace Halley;
 
 class AsyncReadOp : public IUnknown

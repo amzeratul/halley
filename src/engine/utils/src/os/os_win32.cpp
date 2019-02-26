@@ -37,10 +37,14 @@
 #include <io.h>
 #include <comutil.h>
 #include <objbase.h>
-#include <atlbase.h>
 #include <fstream>
 #include <Windows.h>
 #include <shellapi.h>
+#include <shlwapi.h>
+
+#if defined(_WIN32) && !defined(__MINGW32__)
+#include <atlbase.h>
+#endif
 
 #pragma comment(lib, "wbemuuid.lib")
 //#pragma comment(lib, "comsupp.lib")
@@ -57,6 +61,11 @@ Halley::OSWin32::OSWin32()
 	// "Creating a WMI Application Using C++"
 
 	try {
+#ifdef __MINGW32__
+		// Fix symbol undefined bug of MINGW
+		static const IID CLSID_WbemAdministrativeLocator = {0xcb8555cc, 0x9128, 0x11d1, {0xad,0x9b,0x00,0xc0,0x4f,0xd8,0xfd,0xff}};
+#endif
+
 		// Initialize COM
 		HRESULT hr;
 		hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
@@ -105,8 +114,13 @@ static String getCOMError(int hr)
 	if (FAILED(hr2)) return "Failed getting COM error.";
 	BSTR str;
 	info->GetDescription(&str);
+#ifdef __MINGW32__
+	String tmp(str);
+    return "\"" + tmp + "\", code 0x"+ toString(hr, 16);
+#else
 	_bstr_t tmp(str);
 	return "\"" + String(LPCSTR(tmp)) + "\", code 0x"+ toString(hr, 16);
+#endif
 }
 
 Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter) const
@@ -117,6 +131,46 @@ Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter) cons
 
 	if (pSvc) {
 		try {
+#ifdef __MINGW32__
+			HRESULT hr;
+			IEnumWbemClassObject* enumerator;
+			BSTR lang = const_cast<BSTR>(L"WQL");
+			auto query_wchar = query.getUTF16();
+			BSTR q = const_cast<BSTR>(query_wchar.c_str());
+			hr = pSvc->ExecQuery(lang, q, WBEM_FLAG_FORWARD_ONLY, nullptr, &enumerator);
+			if (FAILED(hr)) {
+				if (enumerator) enumerator->Release(); enumerator = nullptr;
+				throw Exception("Error running WMI query: "+getCOMError(hr), HalleyExceptions::OS);
+			}
+
+			ULONG retcnt;
+			IWbemClassObject* result;
+			hr = enumerator->Next(WBEM_INFINITE, 1L, &result, &retcnt);
+			if (retcnt == 0) {
+				if (result) result->Release(); result = nullptr;
+				if (enumerator) enumerator->Release(); enumerator = nullptr;
+				return "Unknown";
+			}
+			if (FAILED(hr)) {
+				if (result) result->Release(); result = nullptr;
+				if (enumerator) enumerator->Release(); enumerator = nullptr;
+				throw Exception("Error obtaining WMI enumeration", HalleyExceptions::OS);
+			}
+
+			_variant_t var_val;
+			hr = result->Get(parameter.getUTF16().c_str(), 0, &var_val, nullptr, nullptr);
+
+			if (result) result->Release(); result = nullptr;
+			if (enumerator) enumerator->Release(); enumerator = nullptr;
+
+			if (FAILED(hr)) throw Exception("Error retrieving name from WMI query result", HalleyExceptions::OS);
+
+			if (var_val.vt == VT_NULL) {
+				return "";
+			} else {
+				return String(var_val.bstrVal);
+			}
+#else
 			HRESULT hr;
 			CComPtr<IEnumWbemClassObject> enumerator;
 			BSTR lang = CComBSTR(L"WQL");
@@ -139,6 +193,7 @@ Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter) cons
 			} else {
 				return String(static_cast<const char*>(_bstr_t(var_val)));
 			}
+#endif
 		} catch (std::exception& e) {
 			std::cout << "Exception running WMI query: " << e.what() << std::endl;
 		} catch (...) {

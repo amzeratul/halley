@@ -74,7 +74,7 @@
  *
  **********************************************************************/
 
-#if defined(_WIN32) && !defined(WINDOWS_STORE)
+#if defined(_WIN32) && !defined(WINDOWS_STORE) && !defined(__MINGW32__)
 
 #include <windows.h>
 #include <tchar.h>

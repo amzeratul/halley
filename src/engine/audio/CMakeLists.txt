@@ -59,4 +59,10 @@ else ()
         set_source_files_properties(src/audio_mixer_avx.cpp PROPERTIES COMPILE_FLAGS -mavx)
 endif ()
 
+if (MSVC)
+        set_source_files_properties(src/audio_mixer_sse.cpp PROPERTIES COMPILE_FLAGS /arch:SSE)
+else ()
+        set_source_files_properties(src/audio_mixer_sse.cpp PROPERTIES COMPILE_FLAGS -msse)
+endif ()
+
 add_library (halley-audio ${SOURCES} ${HEADERS})

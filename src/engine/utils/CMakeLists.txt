@@ -217,3 +217,7 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-utils ${SOURCES} ${HEADERS})
+
+if (MINGW)
+    target_link_libraries(halley-utils shlwapi wbemuuid)
+endif ()
