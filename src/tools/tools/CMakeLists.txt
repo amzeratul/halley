@@ -1,6 +1,6 @@
 project (halley-tools)
 
-include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} "include" "../../engine/core/include" "../../engine/utils/include" "../../engine/audio/include" "../../engine/net/include" "../../contrib/libogg/include" "../../contrib/libvorbis/include")
+include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIR} "include" "../../engine/core/include" "../../engine/utils/include" "../../engine/audio/include" "../../engine/net/include" "../../contrib/libogg/include" "../../contrib/libvorbis/include")
 
 set(SOURCES
 
@@ -141,7 +141,7 @@ set(HEADERS
 assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
-add_library (halley-tools ${SOURCES} ${HEADERS} ${YAMLCPP_INCLUDE_DIR})
+add_library (halley-tools ${SOURCES} ${HEADERS})
 
 target_link_libraries (halley-tools
     halley-core
