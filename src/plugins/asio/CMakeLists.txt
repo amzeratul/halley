@@ -24,3 +24,7 @@ assign_source_group(${HEADERS})
 
 add_library (halley-asio ${SOURCES} ${HEADERS})
 target_link_libraries(halley-asio halley-core halley-net)
+
+if (MINGW)
+    target_link_libraries(halley-asio ws2_32 wsock32)
+endif ()

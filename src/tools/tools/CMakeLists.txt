@@ -153,3 +153,7 @@ target_link_libraries (halley-tools
     ${YAMLCPP_LIBRARY}
     ${CMAKE_DL_LIBS}
     )
+
+if (MINGW)
+    target_link_libraries(halley-tools d3dcompiler)
+endif ()
