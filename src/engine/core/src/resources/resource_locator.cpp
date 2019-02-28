@@ -14,7 +14,7 @@ ResourceLocator::ResourceLocator(SystemAPI& system)
 {
 }
 
-void ResourceLocator::add(std::unique_ptr<IResourceLocatorProvider> locator)
+void ResourceLocator::add(std::unique_ptr<IResourceLocatorProvider> locator, const Path& path)
 {
 	auto& db = locator->getAssetDatabase();
 	for (auto& asset: db.getAssets()) {
@@ -23,6 +23,7 @@ void ResourceLocator::add(std::unique_ptr<IResourceLocatorProvider> locator)
 			locators[asset] = locator.get();
 		}
 	}
+	locatorPaths[path.getString()] = locator.get();
 	locatorList.emplace_back(std::move(locator));
 }
 
@@ -90,19 +91,45 @@ std::vector<String> ResourceLocator::enumerate(const AssetType type)
 
 void ResourceLocator::addFileSystem(const Path& path)
 {
-	add(std::make_unique<FileSystemResourceLocator>(system, path));
+	add(std::make_unique<FileSystemResourceLocator>(system, path), path);
 }
 
 void ResourceLocator::addPack(const Path& path, const String& encryptionKey, bool preLoad, bool allowFailure)
 {
 	auto dataReader = system.getDataReader(path.string());
 	if (dataReader) {
-		add(std::make_unique<PackResourceLocator>(std::move(dataReader), path, encryptionKey, preLoad));
+		add(std::make_unique<PackResourceLocator>(std::move(dataReader), path, encryptionKey, preLoad), path);
+
 	} else {
 		if (allowFailure) {
 			Logger::logWarning("Resource pack not found: \"" + path.string() + "\"");
 		} else {
 			throw Exception("Unable to load resource pack \"" + path.string() + "\"", HalleyExceptions::Resources);
+		}
+	}
+}
+
+void ResourceLocator::removePack(const String& path)
+{
+	auto* locatorToRemove = locatorPaths.find(path)->second;
+	auto& dbToRemove = locatorToRemove->getAssetDatabase();
+	for (auto& asset : dbToRemove.getAssets()) {
+		auto result = locators.find(asset);
+		if (result != locators.end()) {
+			locators.erase(asset);
+		}
+	}
+	auto locaterIter = std::find_if(locatorList.begin(), locatorList.end(), [&](std::unique_ptr<IResourceLocatorProvider>& locator) { return locator.get() == locatorToRemove; });
+	locatorList.erase(locaterIter);
+	
+	for (const auto& locator : locatorList)
+	{
+		auto& db = locator->getAssetDatabase();
+		for (auto& asset : db.getAssets()) {
+			auto result = locators.find(asset);
+			if (result == locators.end() || result->second->getPriority() < locator->getPriority()) {
+				locators[asset] = locator.get();
+			}
 		}
 	}
 }
