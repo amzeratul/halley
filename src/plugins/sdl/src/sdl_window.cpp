@@ -1,6 +1,7 @@
 #include "sdl_window.h"
 #include "halley/os/os.h"
 #include <SDL_syswm.h>
+#include "halley/core/game/game_platform.h"
 
 // win32 crap
 #ifdef max
@@ -51,11 +52,15 @@ void SDLWindow::update(const WindowDefinition& definition)
 	const boost::optional<Path> icon = definition.getIcon();
 
 	if (windowType != WindowType::Fullscreen) {
-		SDL_SetWindowFullscreen(window, SDL_FALSE);
+		SDL_SetWindowFullscreen(window, 0);
 	}
 	SDL_SetWindowSize(window, windowSize.x, windowSize.y);
 	if (windowType == WindowType::Fullscreen) {
-		SDL_SetWindowFullscreen(window, SDL_TRUE);
+		if (getPlatform() == GamePlatform::MacOS) {
+			SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		} else {
+			SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+		}
 	}
 	SDL_SetWindowBordered(window, windowType == WindowType::ResizableWindow || windowType == WindowType::Window ? SDL_TRUE : SDL_FALSE);
 
