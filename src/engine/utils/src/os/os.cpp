@@ -53,7 +53,7 @@ OS* OS::createOS()
 	return new OSiOS();
 #elif defined(linux)
 	return new OSLinux();
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) && !defined(__ORBIS__)
 	return new OSFreeBSD();
 #else
 	return new OS();
