@@ -22,7 +22,7 @@
 #pragma once
 
 
-#if defined(__APPLE__) || defined(__ANDROID__) || defined(linux) || defined(__FreeBSD__)
+#if defined(__APPLE__) || defined(__ANDROID__) || defined(linux) || (defined(__FreeBSD__) && !defined(__ORBIS__))
 #define IS_UNIX
 
 #include <halley/os/os.h>
