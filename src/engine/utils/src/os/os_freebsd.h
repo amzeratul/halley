@@ -22,7 +22,7 @@
 #pragma once
 
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) && !defined(__ORBIS__)
 
 #include "os_unix.h"
 
