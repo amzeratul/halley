@@ -62,7 +62,7 @@ void MainLoop::runLoop()
 			if (curTime >= targetTime) {
 				// Figure out how many steps we need...
 				const Time fixedDelta = 1.0 / fps;
-				int stepsNeeded = int(std::chrono::duration<float>(targetTime - curTime).count() * fps);
+				int stepsNeeded = int(std::chrono::duration<float>(curTime - targetTime).count() * fps);
 
 				// Run up to 5 (if we're more than 5 frames late, ignore them. C'est la vie)
 				for (int i = 0; i < std::min(stepsNeeded, 5); i++) {
