@@ -25,6 +25,7 @@
 #include "os_android.h"
 #include "os_ios.h"
 #include "os_linux.h"
+#include "os_freebsd.h"
 #include "halley/support/exception.h"
 #include <fstream>
 
@@ -52,6 +53,8 @@ OS* OS::createOS()
 	return new OSiOS();
 #elif defined(linux)
 	return new OSLinux();
+#elif defined(__FreeBSD__) && !defined(__ORBIS__)
+	return new OSFreeBSD();
 #else
 	return new OS();
 #endif

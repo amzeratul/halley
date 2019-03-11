@@ -5,9 +5,11 @@
 [![Standard](https://img.shields.io/badge/c%2B%2B-14-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B14)
 
 # Halley Game Engine
-A lightweight game engine written in C++14. It's considered to be highly experimental, and alpha quality at best.
+A lightweight game engine written in C++14. It has been used to ship Wargroove, a turn-based strategy game, on Windows, Mac (experimental), Nintendo Switch and Xbox One (soon PS4!).
 
 The Halley Game Engine is licensed under the Apache 2.0 license.
+
+Make sure to check out the [Halley-template](https://github.com/amzeratul/halley-template) repository for a blank sample.
 
 ## Design guidelines & objectives
 * Modern graphics pipelines, with first-class shader support
@@ -26,7 +28,7 @@ The Halley Game Engine is licensed under the Apache 2.0 license.
 ## Modules
 Halley is divided in a several sub-projects:
 * **engine**
-  * **core**: Core features of the engine, including looper, API management, resouces, and graphics engine
+  * **core**: Core features of the engine, including looper, API management, resources, and graphics engine
   * **audio**: Audio engine
   * **entity**: Framework for dealing with entities, components, and systems
   * **utils**: Utilities library
@@ -47,7 +49,7 @@ Halley is divided in a several sub-projects:
   * **entity**: Stress test of entity system
   * **network**: Stress test of network system
 * **samples**
-  * see [this project](https://github.com/amzeratul/halley-samples)
+  * (The samples project was taken down due to being too outdated, sorry about that!)
 
 ## Platforms
 The following platforms are supported:
@@ -78,9 +80,17 @@ The following platforms are supported:
 ### Set up
 * Ensure that all dependencies above are set up correctly
 * Build with CMake
-  * Typical: "cmake -DCMAKE_INCLUDE_PATH=path/to/headers -DCMAKE_LIBRARY_PATH=path/to/libs -DBOOST_ROOT=path/to/boost .."
-  * Engine only: "cmake -DBUILD_HALLEY_TOOLS=0 -DBUILD_HALLEY_TESTS=0 [...]"
-* Run "halley-editor tests/entity" (or whichever other project you want to test)
+  * Typical:  
+     ```
+     cmake -DCMAKE_INCLUDE_PATH=path/to/headers \
+           -DCMAKE_LIBRARY_PATH=path/to/libs \
+           -DBOOST_ROOT=path/to/boost ..
+     ```
+  * Engine only:
+    ```
+    cmake -DBUILD_HALLEY_TOOLS=0 -DBUILD_HALLEY_TESTS=0 [...]
+    ```
+* Run `halley-editor tests/entity` (or whichever other project you want to test)
 * Launch that project
 
 ## Documentation

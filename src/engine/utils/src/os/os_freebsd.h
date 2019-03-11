@@ -14,7 +14,7 @@
 
   ---------------------------------------------------------------
 
-  Copyright (c) 2007-2011 - Rodrigo Braz Monteiro.
+  Copyright (c) 2007-2016 - Rodrigo Braz Monteiro.
   This file is subject to the terms of halley_license.txt.
 
 \*****************************************************************/
@@ -22,23 +22,18 @@
 #pragma once
 
 
-#if defined(__APPLE__) || defined(__ANDROID__) || defined(linux) || (defined(__FreeBSD__) && !defined(__ORBIS__))
-#define IS_UNIX
+#if defined(__FreeBSD__) && !defined(__ORBIS__)
 
-#include <halley/os/os.h>
+#include "os_unix.h"
 
 namespace Halley {
-	class OSUnix : public OS {
+	class OSFreeBSD : public OSUnix {
 	public:
-		OSUnix();
-		~OSUnix();
+		String getUserDataDir() override;
+		ComputerData getComputerData() override;
+		Path parseProgramPath(const String&) override;
 
-		virtual ComputerData getComputerData() override;
-		virtual String getUserDataDir() override;
-		void createDirectories(const Path& path) override;
-		std::vector<Path> enumerateDirectory(const Path& path) override;
-
-		int runCommand(String command) override;
+		void openURL(const String& url) override;
 	};
 }
 

@@ -12,6 +12,7 @@
 #include "input_sdl.h"
 #include "halley/support/logger.h"
 #include "sdl_save.h"
+#include "halley/core/game/game_platform.h"
 
 using namespace Halley;
 
@@ -158,7 +159,11 @@ std::shared_ptr<Window> SystemSDL::createWindow(const WindowDefinition& windowDe
 		flags |= SDL_WINDOW_RESIZABLE;
 	}
 	else if (windowType == WindowType::Fullscreen) {
-		flags |= SDL_WINDOW_FULLSCREEN;
+		if (getPlatform() == GamePlatform::MacOS) {
+			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+		} else {
+			flags |= SDL_WINDOW_FULLSCREEN;
+		}
 	}
 
 	// Context options
