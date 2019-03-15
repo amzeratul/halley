@@ -109,9 +109,9 @@ void ResourceLocator::addPack(const Path& path, const String& encryptionKey, boo
 	}
 }
 
-void ResourceLocator::removePack(const String& path)
+void ResourceLocator::removePack(const Path& path)
 {
-	auto* locatorToRemove = locatorPaths.find(path)->second;
+	auto* locatorToRemove = locatorPaths.find(path.getString())->second;
 	auto& dbToRemove = locatorToRemove->getAssetDatabase();
 	for (auto& asset : dbToRemove.getAssets()) {
 		auto result = locators.find(asset);
