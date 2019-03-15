@@ -46,10 +46,10 @@ namespace Halley {
 	{
 	public:
 		explicit ResourceLocator(SystemAPI& system);
-		void add(std::unique_ptr<IResourceLocatorProvider> locator);
 		void addFileSystem(const Path& path);
 		void addPack(const Path& path, const String& encryptionKey = "", bool preLoad = false, bool allowFailure = false);
-		
+		void removePack(const Path& path);
+
 		const Metadata& getMetaData(const String& resource, AssetType type) const override;
 
 		std::unique_ptr<ResourceDataStatic> getStatic(const String& asset, AssetType type) override;
@@ -61,8 +61,11 @@ namespace Halley {
 
 	private:
 		SystemAPI& system;
+		HashMap<String, IResourceLocatorProvider*> locatorPaths;
 		HashMap<String, IResourceLocatorProvider*> locators;
 		Vector<std::unique_ptr<IResourceLocatorProvider>> locatorList;
+
+		void add(std::unique_ptr<IResourceLocatorProvider> locator, const Path& path);
 
 		std::unique_ptr<ResourceData> getResource(const String& asset, AssetType type, bool stream);
 	};
