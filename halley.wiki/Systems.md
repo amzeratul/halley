@@ -1,0 +1,230 @@
+# Overview
+Systems represent the code that modifies the [[Entities]] in the ECS [[World]]. Upon stepping the world, all systems on the [[timeline|Main Loop]] being stepped are executed, in order. For each of those systems, its relevant method (**update** or **render**) is called, in accordance to how the system was configured.
+
+Systems are half code generated, half user written.
+
+# Families
+Each system can have one or more families. A family works somewhat like a query - _every_ [[entity|Entities]] in the [[World]] that matches the [[component|Components]] requirements for the family will be included in the family. Systems can then iterate through any of its families, accessing the components requested.
+
+For example, a **VelocitySystem** might have a single family, called **main**, which depends on two components: **Position** (with write access) and **Velocity** (with read access). Every entity that has a **Position** component and a **Velocity** component will be a member of this family. When iterating through this family, the **VelocitySystem** will be able to read the **Velocity** component and modify the **Position** component.
+
+Families are dynamic, and entities can be added or removed to them as they are created, destroyed, or modified.
+
+Some operations (receiving messages and operating on the default "individual" strategy) require a **main** family. That's simply a family which is called "main".
+
+# Declaring Systems
+## Basic declaration
+Systems are declared in YAML files (see [[ECS Overview]]). A simple example, declaring the **Velocity** system we discussed above:
+
+```yaml
+system:
+  name: Velocity
+  families:
+    - main:
+      - Position: write
+      - Velocity: read
+```
+
+## Families
+Each family (above, only a **main** family is declared) lists all components it requires, with its name as the key, and its required access as the value. Valid access values are:
+
+* `read`: The component reference is `const T&`
+* `write`: The component reference is `T&`
+* `optional read`: The component reference is `Halley::MaybeRef<const T>`
+* `optional write`: The component reference is `Halley::MaybeRef<T>`
+
+The optional access specifier means that an entity WILL be included in the family even if it doesn't match that requirement. However, MaybeRef<T> might not be set, and the system will be forced to check if the entity contains that specific component.
+
+## Additional declarations
+Here's some more examples, from Wargroove:
+
+```yaml
+system:
+  name: TurnControl
+  families:
+    - units:
+      - Unit: write
+      - ArmyId: read
+      - GridPosition: read
+    - game:
+      - GameState: write
+      - GameTurn: write
+    - players:
+      - Player: write
+      - ArmyId: read
+  strategy: global
+  services:
+    - PathfindingService
+    - GameService
+    - SelectionService
+    - InputService
+    - ConfigService
+    - LuaService
+    - FogOfWarService
+  access:
+    - api
+  messages:
+    - PlayCutscene: send
+    - GrooveCharge: send
+```
+
+```yaml
+system:
+  name: SpriteRender
+  families:
+    - sprite:
+      - Position: read
+      - Sprite: write
+    - text:
+      - Position: read
+      - TextLabel: write
+  method: render
+  strategy: global
+  services:
+    - PainterService
+```
+
+The additional fields are:
+
+### Strategy
+This field defines how the system runs. There are three valid options:
+
+* `individual` (default): update or render gets called individually for each entity in the **main** family.
+* `global`: update or render only gets called once (with one fewer parameter), and the system should manually iterate through the family
+* `parallel`: same as individual, but the workload is spread across multiple threads
+
+### Services
+A list of all [[services|Services]] this system will have access to. The system will fail to initialise if the service requested is not added to the [[World]].
+
+### Method
+Whether this is an `update` (default) or `render` system. The appropriate method needs to be implemented in the system implementation, and the system needs to be added to the right timeline.
+
+### Access
+Access is used to request access to additional features. Valid options are:
+
+* `world`: The system will have access to the [[World]] instance, so it can create, destroy and query entities.
+* `resources`: The system will have access to the [[Resources]] instance.
+* `api`: The system will have access to **Halley::HalleyAPI** (see [[API Overview]]).
+
+### Messages
+A list of all [[messages|Messages]] that this system can send or receive. Note that messages can only be received on the **main** family. They should be listed as a key:value pair, with the key being the message name, and the value one of `send` or `receive`.
+
+# Implementing Systems
+
+## Overview
+To implement a system, first create a **.cpp** file under `/repo_root/src/systems`. That directory is special, since the build system will automatically add anything there to the build. Ideally, the name of the .cpp should match the name of the header generated by the [[Importing Assets]] step (under `/repo_root/gen/cpp/systems`).
+
+Inside the file, you must define the system. The system must obey the following rules:
+
+1. It must include the generated header
+1. It must publicly extend the generated `SystemNameBase` template, passing itself as a parameter (e.g. `FooSystem` should extend `FooSystemBase<FooSystem>`)
+1. It must implement the appropriate entry method (see below)
+1. It must implement any message received methods (see below)
+1. It must use the REGISTER_SYSTEM macro, passing its own class name as an argument (e.g. `REGISTER_SYSTEM(FooSystem)`) at global scope, at the bottom of the file
+
+## Example
+```c++
+#include "systems/velocity_system.h"
+
+class VelocitySystem final : public VelocitySystemBase<VelocitySystem> {
+public:
+	void update(Halley::Time time, MainFamily& e)
+	{
+		auto& pos = e.position.position;
+		const auto& vel = e.velocity.velocity;
+		pos += vel * time;
+	}
+};
+
+REGISTER_SYSTEM(VelocitySystem)
+```
+
+## Main method signatures
+There are four possible main method signatures, depending on whether the method is `update` or `render`, and whether the strategy is `global` or not (`individual` or `parallel`). They are as follows:
+
+### Individual/Parallel Update
+```c++
+void update(Halley::Time time, MainFamily& e)
+```
+
+### Global Update
+```c++
+void update(Halley::Time time)
+```
+
+### Individual/Parallel Render
+```c++
+void render(Halley::RenderContext& rc, MainFamily& e)
+```
+
+### Global Render
+```c++
+void render(Halley::RenderContext& rc)
+```
+
+## Working with families
+You can iterate through a family by simply using the C++11 for-each construct on the family name. For example:
+
+```c++
+for (auto& e: mainFamily) {
+	auto& cam = e.camera.camera;
+	cam.setPosition((e.position.position + e.camera.offset).round());
+}
+```
+
+You can also find a family element that matches a predicate by using `.match` or `.tryMatch`:
+
+```c++
+const PlayersFamily& curPlayer = playersFamily.match([&] (const PlayersFamily& p) { return p.armyId.id == curArmy; });
+const PlayersFamily* curPlayer2 = playersFamily.tryMatch([&] (const PlayersFamily& p) { return p.armyId.id == curArmy; });
+```
+
+## init
+You may optionally declare a magical init method, that will be invoked via static reflection when the system is initialised (which happens before the first time it steps):
+
+```c++
+void init() {
+	// do some init
+}
+```
+
+## onEntitiesAdded and onEntitiesRemoved
+You can also declare magical `onEntitiesAdded` or `onEntitiesRemoved` methods for any of your system's families. If you do, this method will get invoked every time entities are (respectively) added or removed to that family. This gets called before your main method (but after `init`). They should be in the form:
+
+```c++
+void onEntitiesAdded(Halley::Span<MyFamily> es)
+void onEntitiesRemoved(Halley::Span<MyFamily> es)
+```
+
+Halley::Span can be iterated with a C++11 for-each loop.
+
+## Sending and Receiving Messages
+If you declare that your system **sends** a specific type of [[message|Messages]], the code generator will generate a method that you can invoke, in the form:
+
+```c++
+void sendMessage(Halley::EntityId entityId, const MyMessage& msg)
+```
+
+If you declare that your system **receives** a message, then you MUST declare a public method with the following signature to receive the message:
+
+```c++
+void onMessageReceived(const MyMessage& msg, MainFamily& e)
+```
+
+Note that receiving messages only works on the **main** family. Messages that aren't received by any systems are simply silently dropped.
+
+## Accessing services
+If you request access to a specific [[service|Services]], you can access it with a generated method in the form _getServiceName_. For example, if you request access to **CombatService**, you'll have the following method available:
+
+```c++
+CombatService& getCombatService() const;
+```
+
+## Accessing World, Resources and API
+If you request access to the appropriate resource (see **Additional Declarations**, above), you can also invoke one of these methods from your system:
+
+```c++
+const Halley::HalleyAPI& getAPI() const;
+Halley::World& getWorld() const;
+Halley::Resources& getResources() const;
+```
