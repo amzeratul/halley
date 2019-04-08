@@ -21,3 +21,7 @@ endif ()
 if (USE_MEDIA_FOUNDATION)
     add_subdirectory(mf)
 endif ()
+
+if (USE_AVFOUNDATION)
+    add_subdirectory(avf)
+endif ()
