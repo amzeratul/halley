@@ -14,6 +14,7 @@ void initSDLAudioPlugin(IPluginRegistry &registry);
 void initSDLInputPlugin(IPluginRegistry &registry);
 void initAsioPlugin(IPluginRegistry &registry);
 void initDX11Plugin(IPluginRegistry &registry);
+void initMetalPlugin(IPluginRegistry &registry);
 
 HalleyEditor::HalleyEditor()
 {
@@ -32,6 +33,8 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 
 #ifdef _WIN32
 	initDX11Plugin(registry);
+#elif __APPLE__
+	initMetalPlugin(registry);
 #else
 	initOpenGLPlugin(registry);
 #endif
