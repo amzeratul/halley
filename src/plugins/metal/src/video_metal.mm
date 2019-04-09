@@ -1,6 +1,7 @@
 ﻿#include "video_metal.h"
 #include <halley/core/graphics/texture.h>
 #include <halley/core/graphics/shader.h>
+#include <SDL2/SDL.h>
 
 using namespace Halley;
 
@@ -13,10 +14,6 @@ VideoMetal::VideoMetal(SystemAPI& system)
 
 void VideoMetal::init()
 {
-  std::cout << "Initializing Metal..." << std::endl;
-  device = MTLCreateSystemDefaultDevice();
-  std::cout << "Metal initialized with:" << std::endl;
-  std::cout << "\tDevice: " << [device.name UTF8String] << std::endl;
 }
 
 void VideoMetal::deInit()
@@ -26,27 +23,45 @@ void VideoMetal::deInit()
 
 void VideoMetal::startRender()
 {
+  surface = [swap_chain nextDrawable];
 }
 
 void VideoMetal::finishRender()
 {
+  window->swap();
+  [surface release];
 }
 
 
 void VideoMetal::setWindow(WindowDefinition&& windowDescriptor)
 {
   window = system.createWindow(windowDescriptor);
+  initSwapChain(*window);
+}
+
+void VideoMetal::initSwapChain(Window& window) {
+  if (window.getNativeHandleType() != "SDL") {
+    throw Exception("Only SDL2 windows are supported by Metal", HalleyExceptions::VideoPlugin);
+  }
+  SDL_Window* sdl_window = static_cast<SDL_Window*>(window.getNativeHandle());
+  SDL_SetHint(SDL_HINT_RENDER_DRIVER, "metal");
+  SDL_Renderer *renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_PRESENTVSYNC);
+  swap_chain = static_cast<CAMetalLayer*>(SDL_RenderGetMetalLayer(renderer));
+  SDL_DestroyRenderer(renderer);
+  swap_chain.pixelFormat = MTLPixelFormatBGRA8Unorm;
+  device = swap_chain.device;
+  command_queue = [device newCommandQueue];
+  std::cout << "\tGot Metal device: " << [device.name UTF8String] << std::endl;
 }
 
 const Window& VideoMetal::getWindow() const
 {
-  Expects(window);
   return *window;
 }
 
 bool VideoMetal::hasWindow() const
 {
-  return static_cast<bool>(window);
+  return window != nullptr;
 }
 
 
@@ -82,9 +97,16 @@ String VideoMetal::getShaderLanguage()
 
 std::unique_ptr<Painter> VideoMetal::makePainter(Resources& resources)
 {
-  return std::make_unique<MetalPainter>(resources);
+  return std::make_unique<MetalPainter>(*this, resources);
 }
 
+id<CAMetalDrawable> VideoMetal::getSurface() {
+  return surface;
+}
+
+id<MTLCommandQueue> VideoMetal::getCommandQueue() {
+  return command_queue;
+}
 
 MetalTexture::MetalTexture(Vector2i size)
   : Texture(size)
@@ -109,17 +131,30 @@ int MetalShader::getBlockLocation(const String&, ShaderType)
 void MetalMaterialConstantBuffer::update(const MaterialDataBlock&) {}
 
 
-MetalPainter::MetalPainter(Resources& resources)
+MetalPainter::MetalPainter(VideoMetal& video, Resources& resources)
   : Painter(resources)
+  , video(video)
 {}
 
 void MetalPainter::clear(Colour colour) {}
 
 void MetalPainter::setMaterialPass(const Material&, int) {}
 
-void MetalPainter::doStartRender() {}
+void MetalPainter::doStartRender() {
+  buffer = [video.getCommandQueue() commandBuffer];
+  Colour col = Colour4f(0);
+  descriptor = renderPassDescriptorForTextureAndColour(video.getSurface().texture, col);
+  encoder = [buffer renderCommandEncoderWithDescriptor:descriptor];
+}
 
-void MetalPainter::doEndRender() {}
+void MetalPainter::doEndRender() {
+  [encoder endEncoding];
+  [buffer presentDrawable:video.getSurface()];
+  [buffer commit];
+  [encoder release];
+  [buffer release];
+  [descriptor release];
+}
 
 void MetalPainter::setVertices(const MaterialDefinition&, size_t, void*, size_t, unsigned short*, bool) {}
 

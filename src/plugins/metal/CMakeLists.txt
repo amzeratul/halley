@@ -18,4 +18,5 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -x objective-c++")
 
 add_library (halley-metal ${SOURCES} ${HEADERS})
 find_library(METAL_LIBRARY Metal)
-target_link_libraries(halley-metal halley-core halley-utils "${METAL_LIBRARY}")
+find_library(QUARTZ_LIBRARY QuartzCore)
+target_link_libraries(halley-metal halley-core halley-utils "${METAL_LIBRARY}" "${QUARTZ_LIBRARY}")
