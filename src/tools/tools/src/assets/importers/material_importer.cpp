@@ -45,7 +45,7 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const ConfigNode& 
 {
 	String passName = material.getName() + "_pass_" + toString(passN);
 
-	auto shaderTypes = { "vertex", "geometry", "pixel" };
+	auto shaderTypes = { "vertex", "geometry", "pixel", "combined" };
 
 	for (auto& shaderEntry: node["shader"]) {
 		String language = shaderEntry["language"].asString();

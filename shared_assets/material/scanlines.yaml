@@ -16,6 +16,5 @@ passes:
         vertex: sprite.vertex.hlsl
         pixel: scanline.pixel.hlsl
       - language: metal
-        vertex: sprite.vertex.metal
-        pixel: scanline.pixel.metal
+        combined: scanline.combined.metal
 ...
