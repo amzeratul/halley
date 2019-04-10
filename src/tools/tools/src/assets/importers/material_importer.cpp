@@ -99,7 +99,7 @@ Bytes MaterialImporter::doLoadShader(const String& name, IAssetCollector& collec
 					auto includeData = doLoadShader(includeFile, collector, loaded);
 					appendLine(includeData.data(), includeData.size());
 				}
-			} else {
+			} else if (!(quoted.startsWith("<") && quoted.endsWith(">"))) {
 				throw Exception("Invalid syntax in #include in shader", HalleyExceptions::Tools);
 			}
 		} else {

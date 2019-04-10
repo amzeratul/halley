@@ -12,4 +12,7 @@ passes:
       - language: hlsl
         vertex: sprite.vertex.hlsl
         pixel: sprite.pixel.hlsl
+      - language: metal
+        vertex: sprite.vertex.metal
+        pixel: sprite.pixel.metal
 ...
