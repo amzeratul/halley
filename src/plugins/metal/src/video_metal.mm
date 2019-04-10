@@ -78,18 +78,20 @@ std::unique_ptr<Shader> VideoMetal::createShader(const ShaderDefinition& definit
   for (auto const& attr : definition.vertexAttributes) {
     std::cout << "\tGot vertex attribute: " << attr.name << std::endl;
   }
-  for (auto const& shader : definition.shaders) {
-    std::cout << "\tGot shader: " << int(shader.first) << std::endl << std::string(shader.second.begin(), shader.second.end()) << std::endl;
-    auto shaderSrc = std::string(shader.second.begin(), shader.second.end());
-    auto compileOptions = [MTLCompileOptions new];
-    NSError* compileError;
-    id<MTLLibrary> lib = [device newLibraryWithSource:[NSString stringWithUTF8String:shaderSrc.c_str()] options:compileOptions error:&compileError];
-    if (compileError) {
-      throw Exception([[compileError localizedDescription] UTF8String], HalleyExceptions::VideoPlugin);
-    }
-    [compileOptions release];
-    [compileError release];
+  if (definition.shaders.find(ShaderType::Combined) == definition.shaders.end()) {
+    throw Exception("Metal requires combined shaders", HalleyExceptions::VideoPlugin);
   }
+  auto shader = definition.shaders.at(ShaderType::Combined);
+  auto shaderSrc = std::string(shader.begin(), shader.end());
+  auto compileOptions = [MTLCompileOptions new];
+  NSError* compileError;
+  id<MTLLibrary> lib = [device newLibraryWithSource:[NSString stringWithUTF8String:shaderSrc.c_str()] options:compileOptions error:&compileError];
+  if (compileError) {
+    std::cout << "Metal shader compilation failed for material " << definition.name << std::endl;
+    throw Exception([[compileError localizedDescription] UTF8String], HalleyExceptions::VideoPlugin);
+  }
+  [compileOptions release];
+  [compileError release];
   return std::make_unique<MetalShader>();
 }
 
