@@ -106,13 +106,14 @@ void UIMenuButtonGroup::onInput(const UIInputResults& input, Time time)
 		}
 	}
 
-	auto curFocus = getCurrentFocus();
 	if (input.isButtonPressed(UIInput::Button::Accept)) {
+		auto curFocus = getCurrentFocus();
 		if (curFocus) {
 			curFocus->onOptionChosen();
 		}
 	} else if (input.isButtonPressed(UIInput::Button::Cancel)) {
 		if (setFocus(cancelId)) {
+			auto curFocus = getCurrentFocus();
 			if (curFocus) {
 				curFocus->onOptionChosen();
 			}
