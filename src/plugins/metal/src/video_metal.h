@@ -91,7 +91,6 @@ namespace Halley {
 
   private:
     VideoMetal& video;
-    MTLRenderPassDescriptor* descriptor;
     id<MTLCommandBuffer> buffer;
     id<MTLRenderCommandEncoder> encoder;
   };

@@ -1,6 +1,7 @@
 ﻿#include "video_metal.h"
 #include <halley/core/graphics/texture.h>
 #include <halley/core/graphics/shader.h>
+#include <halley/core/graphics/material/material_definition.h>
 #include <SDL2/SDL.h>
 
 using namespace Halley;
@@ -70,8 +71,25 @@ std::unique_ptr<Texture> VideoMetal::createTexture(Vector2i size)
   return std::make_unique<MetalTexture>(size);
 }
 
-std::unique_ptr<Shader> VideoMetal::createShader(const ShaderDefinition&)
+std::unique_ptr<Shader> VideoMetal::createShader(const ShaderDefinition& definition)
 {
+  std::cout << "Creating shader for definition: " << definition.name << std::endl;
+  std::cout << "Got " << definition.vertexAttributes.size() << " vertex attributes." << std::endl;
+  for (auto const& attr : definition.vertexAttributes) {
+    std::cout << "\tGot vertex attribute: " << attr.name << std::endl;
+  }
+  for (auto const& shader : definition.shaders) {
+    std::cout << "\tGot shader: " << int(shader.first) << std::endl << std::string(shader.second.begin(), shader.second.end()) << std::endl;
+    auto shaderSrc = std::string(shader.second.begin(), shader.second.end());
+    auto compileOptions = [MTLCompileOptions new];
+    NSError* compileError;
+    id<MTLLibrary> lib = [device newLibraryWithSource:[NSString stringWithUTF8String:shaderSrc.c_str()] options:compileOptions error:&compileError];
+    if (compileError) {
+      throw Exception([[compileError localizedDescription] UTF8String], HalleyExceptions::VideoPlugin);
+    }
+    [compileOptions release];
+    [compileError release];
+  }
   return std::make_unique<MetalShader>();
 }
 
@@ -92,7 +110,7 @@ std::unique_ptr<MaterialConstantBuffer> VideoMetal::createConstantBuffer()
 
 String VideoMetal::getShaderLanguage()
 {
-  return "glsl";
+  return "metal";
 }
 
 std::unique_ptr<Painter> VideoMetal::makePainter(Resources& resources)
@@ -142,9 +160,10 @@ void MetalPainter::setMaterialPass(const Material&, int) {}
 
 void MetalPainter::doStartRender() {
   buffer = [video.getCommandQueue() commandBuffer];
-  Colour col = Colour4f(0);
-  descriptor = renderPassDescriptorForTextureAndColour(video.getSurface().texture, col);
+  auto col = Colour4f(0);
+  auto descriptor = renderPassDescriptorForTextureAndColour(video.getSurface().texture, col);
   encoder = [buffer renderCommandEncoderWithDescriptor:descriptor];
+  [descriptor release];
 }
 
 void MetalPainter::doEndRender() {
@@ -153,10 +172,23 @@ void MetalPainter::doEndRender() {
   [buffer commit];
   [encoder release];
   [buffer release];
-  [descriptor release];
 }
 
-void MetalPainter::setVertices(const MaterialDefinition&, size_t, void*, size_t, unsigned short*, bool) {}
+void MetalPainter::setVertices(
+  const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices,
+  unsigned short* indices, bool standardQuadsOnly
+) {
+  Expects(numVertices > 0);
+  Expects(numIndices >= numVertices);
+  Expects(vertexData);
+  Expects(indices);
+
+  size_t bytesSize = numVertices * material.getVertexStride();
+
+  //std::cout << "Got some vertices. There were " << numVertices << " of them." << std::endl;
+  //std::cout << "The vertices take up " << bytesSize << " bytes." << std::endl;
+  //std::cout << "There were " << numIndices << " indicies." << std::endl;
+}
 
 void MetalPainter::drawTriangles(size_t) {}
 
