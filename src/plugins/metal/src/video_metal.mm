@@ -90,6 +90,14 @@ std::unique_ptr<Shader> VideoMetal::createShader(const ShaderDefinition& definit
     std::cout << "Metal shader compilation failed for material " << definition.name << std::endl;
     throw Exception([[compileError localizedDescription] UTF8String], HalleyExceptions::VideoPlugin);
   }
+  auto fragmentProgram = [lib newFunctionWithName:@"pixel_func"];
+  if (fragmentProgram == nil) {
+    throw Exception("Shader for " + definition.name + " is missing a fragment function.", HalleyExceptions::VideoPlugin);
+  }
+  auto vertexProgram = [lib newFunctionWithName:@"vertex_func"];
+  if (vertexProgram == nil) {
+    throw Exception("Shader for " + definition.name + " is missing a vertex function.", HalleyExceptions::VideoPlugin);
+  }
   [compileOptions release];
   [compileError release];
   return std::make_unique<MetalShader>();

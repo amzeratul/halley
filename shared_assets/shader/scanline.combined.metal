@@ -1,18 +1,27 @@
 #include <metal_stdlib>
 using namespace metal;
 
-struct PixelIn {
-  float2 v_texCoord0;
-  float4 v_colour;
-  float4 v_colourAdd;
+struct VertexIn {
+    packed_float3 position;
+    packed_float4 color;
 };
 
-struct Uniforms {
-  float4 u_col0;
-  float4 u_col1;
-  float u_distance;
+struct VertexOut {
+  float4 computedPosition [[position]];
+  float4 color;
 };
 
-fragment float4 fragment_pixel(VertexOut vert [[stage_in]]) {
-  return float4(0, 0, 0, 0);
+vertex VertexOut vertex_func( // 1
+  const device VertexIn* vertex_array [[ buffer(0) ]],
+  unsigned int vid [[ vertex_id ]]) {
+    VertexIn v = vertex_array[vid];
+
+    VertexOut outVertex = VertexOut();
+    outVertex.computedPosition = float4(v.position, 1.0);
+    outVertex.color = v.color;
+    return outVertex;
+}
+
+fragment float4 pixel_func(VertexOut interpolated [[stage_in]]) {
+  return float4(interpolated.color);
 }
