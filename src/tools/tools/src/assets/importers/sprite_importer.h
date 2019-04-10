@@ -13,6 +13,7 @@ namespace Halley
 		int frameNumber;
 		int duration;
 		String sequenceName;
+		String direction;
 		Rect4i clip;
 		Vector2i pivot;
 		Vector4s slices;

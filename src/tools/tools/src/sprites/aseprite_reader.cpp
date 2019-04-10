@@ -44,15 +44,25 @@ std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::sp
 
 	// Create frames
 	std::vector<ImageData> frameData;
+	bool firstImage = true;
 	for (auto& t: tags) {
 		int i = 0;
-		for (auto& frameN: t.second) {
-			frameData.push_back(ImageData());
+		String sequence = t.first;
+		String direction = "";
+		if (sequence.find(':') != std::string::npos) {
+			auto split = sequence.split(':');
+			sequence = split.at(0);
+			direction = split.at(1);
+		}
+	
+		for (const int frameN: t.second) {
+			frameData.emplace_back();
 			auto& imgData = frameData.back();
 
 			imgData.img = aseFile.makeFrameImage(frameN);
 			imgData.frameNumber = i;
-			imgData.sequenceName = t.first;
+			imgData.sequenceName = sequence;
+			imgData.direction = direction;
 			imgData.duration = aseFile.getFrame(frameN).duration;
 			imgData.clip = trim ? imgData.img->getTrimRect() : imgData.img->getRect();
 
@@ -61,13 +71,17 @@ std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::sp
 			if (imgData.sequenceName != "") {
 				ss << "_" << imgData.sequenceName.cppStr();
 			}
+			if (imgData.direction != "") {
+				ss << "_" << imgData.direction.cppStr();
+			}
 			const bool hasFrameNumber = t.second.size() > 1;
 			if (hasFrameNumber) {
 				ss << "_" << std::setw(3) << std::setfill('0') << imgData.frameNumber;
 			}
 
 			imgData.filenames.emplace_back(ss.str());
-			if (frameN == 0) {
+			if (firstImage) {
+				firstImage = false;
 				imgData.filenames.emplace_back(":img:" + spriteName);
 			}
 
