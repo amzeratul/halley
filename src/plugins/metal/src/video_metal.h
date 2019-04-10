@@ -64,8 +64,14 @@ namespace Halley {
   class MetalShader : public Shader
   {
   public:
+    explicit MetalShader(id<MTLFunction> vertex, id<MTLFunction> fragment);
+    ~MetalShader();
     int getUniformLocation(const String& name, ShaderType stage) override;
     int getBlockLocation(const String& name, ShaderType stage) override;
+
+  private:
+    id<MTLFunction> vertex_func;
+    id<MTLFunction> fragment_func;
   };
 
   class MetalMaterialConstantBuffer : public MaterialConstantBuffer

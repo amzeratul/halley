@@ -85,22 +85,26 @@ std::unique_ptr<Shader> VideoMetal::createShader(const ShaderDefinition& definit
   auto shaderSrc = std::string(shader.begin(), shader.end());
   auto compileOptions = [MTLCompileOptions new];
   NSError* compileError;
-  id<MTLLibrary> lib = [device newLibraryWithSource:[NSString stringWithUTF8String:shaderSrc.c_str()] options:compileOptions error:&compileError];
+  id<MTLLibrary> lib = [
+    device newLibraryWithSource:[NSString stringWithUTF8String:shaderSrc.c_str()]
+      options:compileOptions error:&compileError
+  ];
   if (compileError) {
     std::cout << "Metal shader compilation failed for material " << definition.name << std::endl;
     throw Exception([[compileError localizedDescription] UTF8String], HalleyExceptions::VideoPlugin);
   }
-  auto fragmentProgram = [lib newFunctionWithName:@"pixel_func"];
-  if (fragmentProgram == nil) {
+  auto fragment_func = [lib newFunctionWithName:@"pixel_func"];
+  if (fragment_func == nil) {
     throw Exception("Shader for " + definition.name + " is missing a fragment function.", HalleyExceptions::VideoPlugin);
   }
-  auto vertexProgram = [lib newFunctionWithName:@"vertex_func"];
-  if (vertexProgram == nil) {
+  auto vertex_func = [lib newFunctionWithName:@"vertex_func"];
+  if (vertex_func == nil) {
     throw Exception("Shader for " + definition.name + " is missing a vertex function.", HalleyExceptions::VideoPlugin);
   }
+  [lib release];
   [compileOptions release];
   [compileError release];
-  return std::make_unique<MetalShader>();
+  return std::make_unique<MetalShader>(vertex_func, fragment_func);
 }
 
 std::unique_ptr<TextureRenderTarget> VideoMetal::createTextureRenderTarget()
@@ -144,6 +148,16 @@ MetalTexture::MetalTexture(Vector2i size)
 void MetalTexture::load(TextureDescriptor&&)
 {
   doneLoading();
+}
+
+MetalShader::MetalShader(id<MTLFunction> vertex, id<MTLFunction> fragment)
+  : vertex_func(vertex)
+  , fragment_func(fragment)
+{}
+
+MetalShader::~MetalShader() {
+  [vertex_func release];
+  [fragment_func release];
 }
 
 int MetalShader::getUniformLocation(const String&, ShaderType)
