@@ -42,7 +42,7 @@ set (editor_gen_definitions
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(EXTRA_LIBS bz2 z halley-metal)
-    set(EXTRA_DEPENDENCIES halley-metal)
+    add_dependencies(halley-editor halley-metal)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(EXTRA_LIBS pthread)
 endif()
@@ -50,7 +50,7 @@ endif()
 include_directories(${FREETYPE_INCLUDE_DIR} "../tools/include")
 
 halleyProjectCodegen(halley-editor "${editor_sources}" "${editor_headers}" "${editor_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/../../../bin)
-add_dependencies(halley-editor halley-cmd halley-core halley-net halley-sdl halley-opengl "${EXTRA_DEPENDENCIES}")
+add_dependencies(halley-editor halley-cmd halley-core halley-net halley-sdl halley-opengl)
 
 target_link_libraries (halley-editor
         halley-tools
