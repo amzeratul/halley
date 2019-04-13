@@ -41,6 +41,7 @@ namespace Halley {
 
     id<CAMetalDrawable> getSurface();
     id<MTLCommandQueue> getCommandQueue();
+    id<MTLDevice> getDevice();
 
   private:
     std::shared_ptr<Window> window;
@@ -68,6 +69,8 @@ namespace Halley {
     ~MetalShader();
     int getUniformLocation(const String& name, ShaderType stage) override;
     int getBlockLocation(const String& name, ShaderType stage) override;
+    id<MTLFunction> getVertexFunc();
+    id<MTLFunction> getFragmentFunc();
 
   private:
     id<MTLFunction> vertex_func;

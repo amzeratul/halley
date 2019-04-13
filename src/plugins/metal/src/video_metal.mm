@@ -140,6 +140,10 @@ id<MTLCommandQueue> VideoMetal::getCommandQueue() {
   return command_queue;
 }
 
+id<MTLDevice> VideoMetal::getDevice() {
+  return device;
+}
+
 MetalTexture::MetalTexture(Vector2i size)
   : Texture(size)
 {
@@ -170,6 +174,14 @@ int MetalShader::getBlockLocation(const String&, ShaderType)
   return 0;
 }
 
+id<MTLFunction> MetalShader::getVertexFunc() {
+  return vertex_func;
+}
+
+id<MTLFunction> MetalShader::getFragmentFunc() {
+  return fragment_func;
+}
+
 void MetalMaterialConstantBuffer::update(const MaterialDataBlock&) {}
 
 
@@ -180,7 +192,29 @@ MetalPainter::MetalPainter(VideoMetal& video, Resources& resources)
 
 void MetalPainter::clear(Colour colour) {}
 
-void MetalPainter::setMaterialPass(const Material&, int) {}
+void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
+  auto& pass = material.getDefinition().getPass(passNumber);
+  // TODO blending
+  MetalShader& shader = static_cast<MetalShader&>(pass.getShader());
+  
+  MTLRenderPipelineDescriptor *pipelineStateDescriptor = [[MTLRenderPipelineDescriptor alloc] init];
+  pipelineStateDescriptor.vertexFunction = shader.getVertexFunc();
+  pipelineStateDescriptor.fragmentFunction = shader.getFragmentFunc();
+  pipelineStateDescriptor.label = [NSString stringWithUTF8String:material.getDefinition().getName().c_str()];
+  pipelineStateDescriptor.colorAttachments[0].pixelFormat = video.getSurface().texture.pixelFormat;
+
+  NSError* error = NULL;
+  id<MTLRenderPipelineState> pipelineState = [
+    video.getDevice() newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
+      error:&error
+  ];
+  if (!pipelineState) {
+    std::cout << "Failed to create pipeline descriptor for material " << material.getDefinition().getName() <<
+      ", pass " << passNumber << "." << std::endl;
+    throw Exception([[error localizedDescription] UTF8String], HalleyExceptions::VideoPlugin);
+  }
+  [encoder setRenderPipelineState:pipelineState];
+}
 
 void MetalPainter::doStartRender() {
   buffer = [video.getCommandQueue() commandBuffer];
