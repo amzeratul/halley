@@ -196,7 +196,7 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
   auto& pass = material.getDefinition().getPass(passNumber);
   // TODO blending
   MetalShader& shader = static_cast<MetalShader&>(pass.getShader());
-  
+
   MTLRenderPipelineDescriptor *pipelineStateDescriptor = [[MTLRenderPipelineDescriptor alloc] init];
   pipelineStateDescriptor.vertexFunction = shader.getVertexFunc();
   pipelineStateDescriptor.fragmentFunction = shader.getFragmentFunc();
