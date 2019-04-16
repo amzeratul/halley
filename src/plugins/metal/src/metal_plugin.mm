@@ -1,10 +1,10 @@
-#include "video_metal.h"
+#include "metal_video.h"
 #include <halley/plugin/plugin.h>
 
 namespace Halley {
 
   class MetalPlugin : public Plugin {
-    HalleyAPIInternal* createAPI(SystemAPI* system) override { return new VideoMetal(*system); }
+    HalleyAPIInternal* createAPI(SystemAPI* system) override { return new MetalVideo(*system); }
     PluginType getType() override { return PluginType::GraphicsAPI; }
     String getName() override { return "Video/Metal"; }
   };

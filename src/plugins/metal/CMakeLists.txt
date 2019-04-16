@@ -4,13 +4,15 @@ include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} "../../engine/uti
 
 set(SOURCES
         "src/metal_plugin.mm"
-        "src/video_metal.mm"
-        "src/shader_metal.mm"
+        "src/metal_video.mm"
+        "src/metal_shader.mm"
+        "src/metal_buffer.mm"
         )
 
 set(HEADERS
-        "src/video_metal.h"
-        "src/shader_metal.h"
+        "src/metal_video.h"
+        "src/metal_shader.h"
+        "src/metal_buffer.h"
         )
 
 assign_source_group(${SOURCES})

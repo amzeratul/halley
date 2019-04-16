@@ -1,4 +1,4 @@
-﻿#include "video_metal.h"
+﻿#include "metal_video.h"
 #include <halley/core/graphics/texture.h>
 #include <halley/core/graphics/shader.h>
 #include <halley/core/graphics/material/material_definition.h>
@@ -8,39 +8,39 @@ using namespace Halley;
 
 ///////////////
 // Constructor
-VideoMetal::VideoMetal(SystemAPI& system)
+MetalVideo::MetalVideo(SystemAPI& system)
   : system(system)
 {
 }
 
-void VideoMetal::init()
+void MetalVideo::init()
 {
 }
 
-void VideoMetal::deInit()
+void MetalVideo::deInit()
 {
   std::cout << "Shutting down Metal..." << std::endl;
 }
 
-void VideoMetal::startRender()
+void MetalVideo::startRender()
 {
   surface = [swap_chain nextDrawable];
 }
 
-void VideoMetal::finishRender()
+void MetalVideo::finishRender()
 {
   window->swap();
   [surface release];
 }
 
 
-void VideoMetal::setWindow(WindowDefinition&& windowDescriptor)
+void MetalVideo::setWindow(WindowDefinition&& windowDescriptor)
 {
   window = system.createWindow(windowDescriptor);
   initSwapChain(*window);
 }
 
-void VideoMetal::initSwapChain(Window& window) {
+void MetalVideo::initSwapChain(Window& window) {
   if (window.getNativeHandleType() != "SDL") {
     throw Exception("Only SDL2 windows are supported by Metal", HalleyExceptions::VideoPlugin);
   }
@@ -55,61 +55,61 @@ void VideoMetal::initSwapChain(Window& window) {
   std::cout << "\tGot Metal device: " << [device.name UTF8String] << std::endl;
 }
 
-const Window& VideoMetal::getWindow() const
+const Window& MetalVideo::getWindow() const
 {
   return *window;
 }
 
-bool VideoMetal::hasWindow() const
+bool MetalVideo::hasWindow() const
 {
   return window != nullptr;
 }
 
 
-std::unique_ptr<Texture> VideoMetal::createTexture(Vector2i size)
+std::unique_ptr<Texture> MetalVideo::createTexture(Vector2i size)
 {
   return std::make_unique<MetalTexture>(size);
 }
 
-std::unique_ptr<Shader> VideoMetal::createShader(const ShaderDefinition& definition)
+std::unique_ptr<Shader> MetalVideo::createShader(const ShaderDefinition& definition)
 {
   return std::make_unique<MetalShader>(*this, definition);
 }
 
-std::unique_ptr<TextureRenderTarget> VideoMetal::createTextureRenderTarget()
+std::unique_ptr<TextureRenderTarget> MetalVideo::createTextureRenderTarget()
 {
   return std::make_unique<TextureRenderTarget>();
 }
 
-std::unique_ptr<ScreenRenderTarget> VideoMetal::createScreenRenderTarget()
+std::unique_ptr<ScreenRenderTarget> MetalVideo::createScreenRenderTarget()
 {
   return std::make_unique<ScreenRenderTarget>(Rect4i({}, getWindow().getWindowRect().getSize()));
 }
 
-std::unique_ptr<MaterialConstantBuffer> VideoMetal::createConstantBuffer()
+std::unique_ptr<MaterialConstantBuffer> MetalVideo::createConstantBuffer()
 {
   return std::make_unique<MetalMaterialConstantBuffer>();
 }
 
-String VideoMetal::getShaderLanguage()
+String MetalVideo::getShaderLanguage()
 {
   return "metal";
 }
 
-std::unique_ptr<Painter> VideoMetal::makePainter(Resources& resources)
+std::unique_ptr<Painter> MetalVideo::makePainter(Resources& resources)
 {
   return std::make_unique<MetalPainter>(*this, resources);
 }
 
-id<CAMetalDrawable> VideoMetal::getSurface() {
+id<CAMetalDrawable> MetalVideo::getSurface() {
   return surface;
 }
 
-id<MTLCommandQueue> VideoMetal::getCommandQueue() {
+id<MTLCommandQueue> MetalVideo::getCommandQueue() {
   return command_queue;
 }
 
-id<MTLDevice> VideoMetal::getDevice() {
+id<MTLDevice> MetalVideo::getDevice() {
   return device;
 }
 
@@ -126,7 +126,7 @@ void MetalTexture::load(TextureDescriptor&&)
 void MetalMaterialConstantBuffer::update(const MaterialDataBlock&) {}
 
 
-MetalPainter::MetalPainter(VideoMetal& video, Resources& resources)
+MetalPainter::MetalPainter(MetalVideo& video, Resources& resources)
   : Painter(resources)
   , video(video)
 {}

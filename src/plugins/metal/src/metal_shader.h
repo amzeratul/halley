@@ -4,12 +4,12 @@
 
 namespace Halley {
 
-  class VideoMetal;
+  class MetalVideo;
 
   class MetalShader final : public Shader
   {
   public:
-    explicit MetalShader(VideoMetal& video, const ShaderDefinition& definition);
+    explicit MetalShader(MetalVideo& video, const ShaderDefinition& definition);
     ~MetalShader();
     int getUniformLocation(const String& name, ShaderType stage) override;
     int getBlockLocation(const String& name, ShaderType stage) override;
@@ -17,7 +17,7 @@ namespace Halley {
     id<MTLFunction> getFragmentFunc();
 
   private:
-    VideoMetal& video;
+    MetalVideo& video;
     id<MTLFunction> vertex_func;
     id<MTLFunction> fragment_func;
   };

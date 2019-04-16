@@ -1,9 +1,9 @@
-#include "shader_metal.h"
-#include "video_metal.h"
+#include "metal_shader.h"
+#include "metal_video.h"
 
 using namespace Halley;
 
-MetalShader::MetalShader(VideoMetal& video, const ShaderDefinition& definition)
+MetalShader::MetalShader(MetalVideo& video, const ShaderDefinition& definition)
   : video(video)
 {
   auto compileOptions = [MTLCompileOptions new];

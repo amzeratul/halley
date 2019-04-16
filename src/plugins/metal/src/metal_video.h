@@ -1,5 +1,5 @@
 #pragma once
-#include "shader_metal.h"
+#include "metal_shader.h"
 #include "halley/core/api/halley_api_internal.h"
 #include "halley/core/graphics/texture.h"
 #include "halley/core/graphics/render_target/render_target_texture.h"
@@ -19,10 +19,10 @@ namespace Halley {
     return pass;
   }
 
-  class VideoMetal final : public VideoAPIInternal
+  class MetalVideo final : public VideoAPIInternal
   {
   public:
-    explicit VideoMetal(SystemAPI& system);
+    explicit MetalVideo(SystemAPI& system);
 
     void startRender() override;
     void finishRender() override;
@@ -71,7 +71,7 @@ namespace Halley {
   class MetalPainter : public Painter
   {
   public:
-    explicit MetalPainter(VideoMetal& video, Resources& resources);
+    explicit MetalPainter(MetalVideo& video, Resources& resources);
     void clear(Colour colour) override;
     void setMaterialPass(const Material& material, int pass) override;
     void doStartRender() override;
@@ -84,7 +84,7 @@ namespace Halley {
     void onUpdateProjection(Material& material) override;
 
   private:
-    VideoMetal& video;
+    MetalVideo& video;
     id<MTLCommandBuffer> buffer;
     id<MTLRenderCommandEncoder> encoder;
     id<MTLBuffer> indexBuffer;
