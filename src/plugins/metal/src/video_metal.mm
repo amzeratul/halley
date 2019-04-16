@@ -73,37 +73,7 @@ std::unique_ptr<Texture> VideoMetal::createTexture(Vector2i size)
 
 std::unique_ptr<Shader> VideoMetal::createShader(const ShaderDefinition& definition)
 {
-  std::cout << "Creating shader for definition: " << definition.name << std::endl;
-  std::cout << "Got " << definition.vertexAttributes.size() << " vertex attributes." << std::endl;
-  for (auto const& attr : definition.vertexAttributes) {
-    std::cout << "\tGot vertex attribute: " << attr.name << std::endl;
-  }
-  if (definition.shaders.find(ShaderType::Combined) == definition.shaders.end()) {
-    throw Exception("Metal requires combined shaders", HalleyExceptions::VideoPlugin);
-  }
-  auto shader = definition.shaders.at(ShaderType::Combined);
-  auto shaderSrc = std::string(shader.begin(), shader.end());
-  auto compileOptions = [MTLCompileOptions new];
-  NSError* compileError;
-  id<MTLLibrary> lib = [device newLibraryWithSource:[NSString stringWithUTF8String:shaderSrc.c_str()]
-      options:compileOptions error:&compileError
-  ];
-  if (compileError) {
-    std::cout << "Metal shader compilation failed for material " << definition.name << std::endl;
-    throw Exception([[compileError localizedDescription] UTF8String], HalleyExceptions::VideoPlugin);
-  }
-  auto fragment_func = [lib newFunctionWithName:@"pixel_func"];
-  if (fragment_func == nil) {
-    throw Exception("Shader for " + definition.name + " is missing a fragment function.", HalleyExceptions::VideoPlugin);
-  }
-  auto vertex_func = [lib newFunctionWithName:@"vertex_func"];
-  if (vertex_func == nil) {
-    throw Exception("Shader for " + definition.name + " is missing a vertex function.", HalleyExceptions::VideoPlugin);
-  }
-  [lib release];
-  [compileOptions release];
-  [compileError release];
-  return std::make_unique<MetalShader>(vertex_func, fragment_func);
+  return std::make_unique<MetalShader>(*this, definition);
 }
 
 std::unique_ptr<TextureRenderTarget> VideoMetal::createTextureRenderTarget()
@@ -151,34 +121,6 @@ MetalTexture::MetalTexture(Vector2i size)
 void MetalTexture::load(TextureDescriptor&&)
 {
   doneLoading();
-}
-
-MetalShader::MetalShader(id<MTLFunction> vertex, id<MTLFunction> fragment)
-  : vertex_func(vertex)
-  , fragment_func(fragment)
-{}
-
-MetalShader::~MetalShader() {
-  [vertex_func release];
-  [fragment_func release];
-}
-
-int MetalShader::getUniformLocation(const String&, ShaderType)
-{
-  return 0;
-}
-
-int MetalShader::getBlockLocation(const String&, ShaderType)
-{
-  return 0;
-}
-
-id<MTLFunction> MetalShader::getVertexFunc() {
-  return vertex_func;
-}
-
-id<MTLFunction> MetalShader::getFragmentFunc() {
-  return fragment_func;
 }
 
 void MetalMaterialConstantBuffer::update(const MaterialDataBlock&) {}

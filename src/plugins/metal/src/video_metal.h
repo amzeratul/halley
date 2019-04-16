@@ -1,9 +1,9 @@
 #pragma once
+#include "shader_metal.h"
 #include "halley/core/api/halley_api_internal.h"
 #include "halley/core/graphics/texture.h"
 #include "halley/core/graphics/render_target/render_target_texture.h"
 #include "halley/core/graphics/render_target/render_target_screen.h"
-#include "halley/core/graphics/shader.h"
 #include "halley/core/graphics/painter.h"
 #include <Metal/Metal.h>
 #include <QuartzCore/CAMetalLayer.h>
@@ -60,21 +60,6 @@ namespace Halley {
   public:
     explicit MetalTexture(Vector2i size);
     void load(TextureDescriptor&& descriptor) override;
-  };
-
-  class MetalShader : public Shader
-  {
-  public:
-    explicit MetalShader(id<MTLFunction> vertex, id<MTLFunction> fragment);
-    ~MetalShader();
-    int getUniformLocation(const String& name, ShaderType stage) override;
-    int getBlockLocation(const String& name, ShaderType stage) override;
-    id<MTLFunction> getVertexFunc();
-    id<MTLFunction> getFragmentFunc();
-
-  private:
-    id<MTLFunction> vertex_func;
-    id<MTLFunction> fragment_func;
   };
 
   class MetalMaterialConstantBuffer : public MaterialConstantBuffer
