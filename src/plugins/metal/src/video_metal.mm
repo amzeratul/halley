@@ -85,8 +85,7 @@ std::unique_ptr<Shader> VideoMetal::createShader(const ShaderDefinition& definit
   auto shaderSrc = std::string(shader.begin(), shader.end());
   auto compileOptions = [MTLCompileOptions new];
   NSError* compileError;
-  id<MTLLibrary> lib = [
-    device newLibraryWithSource:[NSString stringWithUTF8String:shaderSrc.c_str()]
+  id<MTLLibrary> lib = [device newLibraryWithSource:[NSString stringWithUTF8String:shaderSrc.c_str()]
       options:compileOptions error:&compileError
   ];
   if (compileError) {
@@ -204,8 +203,7 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
   pipelineStateDescriptor.colorAttachments[0].pixelFormat = video.getSurface().texture.pixelFormat;
 
   NSError* error = NULL;
-  id<MTLRenderPipelineState> pipelineState = [
-    video.getDevice() newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
+  id<MTLRenderPipelineState> pipelineState = [video.getDevice() newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
       error:&error
   ];
   if (!pipelineState) {
@@ -230,6 +228,7 @@ void MetalPainter::doEndRender() {
   [buffer commit];
   [encoder release];
   [buffer release];
+  [indexBuffer release];
 }
 
 void MetalPainter::setVertices(
@@ -242,18 +241,40 @@ void MetalPainter::setVertices(
   Expects(indices);
 
   size_t bytesSize = numVertices * material.getVertexStride();
+  [encoder setVertexBytes:vertexData length:bytesSize atIndex:0];
 
-  //std::cout << "Got some vertices. There were " << numVertices << " of them." << std::endl;
-  //std::cout << "The vertices take up " << bytesSize << " bytes." << std::endl;
-  //std::cout << "There were " << numIndices << " indicies." << std::endl;
+  indexBuffer = [video.getDevice() newBufferWithBytes:indices
+      length:numIndices*sizeof(short) options:MTLResourceStorageModeShared
+  ];
 }
 
-void MetalPainter::drawTriangles(size_t) {}
+void MetalPainter::drawTriangles(size_t numIndices) {
+  Expects(numIndices > 0);
+  Expects(numIndices % 3 == 0);
 
-void MetalPainter::setViewPort(Rect4i) {}
+  [encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+    indexCount:numIndices
+    indexType:MTLIndexTypeUInt16
+    indexBuffer:indexBuffer
+    indexBufferOffset:0
+  ];
+}
+
+void MetalPainter::setViewPort(Rect4i rect) {
+  [encoder setViewport:(MTLViewport){
+    static_cast<double>(rect.getTopLeft().x),
+    static_cast<double>(rect.getTopLeft().y),
+    static_cast<double>(rect.getWidth()),
+    static_cast<double>(rect.getHeight()),
+    0.0, 1.0
+  }];
+}
 
 void MetalPainter::setClip(Rect4i, bool) {}
 
 void MetalPainter::setMaterialData(const Material&) {}
 
-void MetalPainter::onUpdateProjection(Material&) {}
+void MetalPainter::onUpdateProjection(Material& material) {
+  material.uploadData(*this);
+  setMaterialData(material);
+}

@@ -102,5 +102,6 @@ namespace Halley {
     VideoMetal& video;
     id<MTLCommandBuffer> buffer;
     id<MTLRenderCommandEncoder> encoder;
+    id<MTLBuffer> indexBuffer;
   };
 }
