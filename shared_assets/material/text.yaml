@@ -18,7 +18,8 @@ passes:
         vertex: sprite.vertex.hlsl
         pixel: distance_field_sprite_outline.pixel.hlsl
       - language: metal
-        combined: distance_field_sprite_outline.combined.metal
+        vertex: sprite.vertex.metal
+        pixel: distance_field_sprite_outline.pixel.metal
   - blend: Alpha
     shader:
       - language: glsl
@@ -28,5 +29,6 @@ passes:
         vertex: sprite.vertex.hlsl
         pixel: distance_field_sprite_fill.pixel.hlsl
       - language: metal
-        combined: distance_field_sprite_fill.combined.metal
+        vertex: sprite.vertex.metal
+        pixel: distance_field_sprite_fill.pixel.metal
 ...

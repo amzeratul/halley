@@ -18,5 +18,6 @@ passes:
         vertex: sprite.vertex.hlsl
         pixel: distance_field_sprite.pixel.hlsl
       - language: metal
-        combined: distance_field_sprite.combined.metal
+        vertex: sprite.vertex.metal
+        pixel: distance_field_sprite.pixel.metal
 ...

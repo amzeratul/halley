@@ -19,9 +19,9 @@ MetalShader::MetalShader(VideoMetal& video, const ShaderDefinition& definition)
     }
     switch (shaderDef.first) {
       case ShaderType::Pixel:
-        fragment_func = [lib newFunctionWithName:@"fragment_func"];
+        fragment_func = [lib newFunctionWithName:@"pixel_func"];
         if (fragment_func == nil) {
-          throw Exception("Shader for " + definition.name + " is missing a fragment function.", HalleyExceptions::VideoPlugin);
+          throw Exception("Shader for " + definition.name + " is missing a pixel function.", HalleyExceptions::VideoPlugin);
         }
         break;
       case ShaderType::Vertex:
@@ -29,8 +29,9 @@ MetalShader::MetalShader(VideoMetal& video, const ShaderDefinition& definition)
         if (vertex_func == nil) {
           throw Exception("Shader for " + definition.name + " is missing a vertex function.", HalleyExceptions::VideoPlugin);
         }
+        break;
       default:
-        throw Exception("Unsupported shader type: " + toString(shaderDef.first), HalleyExceptions::VideoPlugin);
+        throw Exception("Unsupported shader type in " + definition.name + ": " + toString(shaderDef.first), HalleyExceptions::VideoPlugin);
     }
     [lib release];
     [compileError release];

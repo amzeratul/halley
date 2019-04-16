@@ -11,5 +11,6 @@ passes:
         vertex: sprite.vertex.hlsl
         pixel: solid_colour.pixel.hlsl
       - language: metal
-        combined: solid_colour.combined.metal
+        vertex: sprite.vertex.metal
+        pixel: solid_colour.pixel.metal
 ...
