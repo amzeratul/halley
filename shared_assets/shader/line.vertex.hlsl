@@ -14,6 +14,7 @@ struct VOut {
     float4 colour : COLOR0;
     float  vertPos : POSITION1;
     float  width : POSITION2;
+    float2 worldPos : POSITION3;
 };
 
 VOut main(VIn input) {
@@ -27,6 +28,7 @@ VOut main(VIn input) {
     result.colour = input.colour;
     result.vertPos = vertPos;
     result.width = width;
+    result.worldPos = pos;
 
     return result;
 }
