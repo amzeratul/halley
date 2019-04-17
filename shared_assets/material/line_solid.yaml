@@ -4,6 +4,9 @@ base: line_base.yaml
 passes:
   - blend: AlphaPremultiplied
     shader:
+      - language: glsl
+        vertex: line.vertex.glsl
+        pixel: line_solid.pixel.glsl
       - language: hlsl
         vertex: line.vertex.hlsl
         pixel: line_solid.pixel.hlsl
