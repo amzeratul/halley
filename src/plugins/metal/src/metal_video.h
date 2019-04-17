@@ -1,5 +1,6 @@
 #pragma once
 #include "metal_shader.h"
+#include "metal_loader.h"
 #include "halley/core/api/halley_api_internal.h"
 #include "halley/core/graphics/texture.h"
 #include "halley/core/graphics/render_target/render_target_texture.h"
@@ -45,6 +46,7 @@ namespace Halley {
 
   private:
     std::shared_ptr<Window> window;
+    std::unique_ptr<MetalLoader> loader;
     SystemAPI& system;
     CAMetalLayer* swap_chain;
     id<CAMetalDrawable> surface;
@@ -58,8 +60,13 @@ namespace Halley {
   class MetalTexture : public Texture
   {
   public:
-    explicit MetalTexture(Vector2i size);
+    explicit MetalTexture(MetalVideo& video, Vector2i size);
     void load(TextureDescriptor&& descriptor) override;
+    id<MTLTexture> getMetalTexture() const;
+
+  private:
+    MetalVideo& video;
+    id<MTLTexture> metalTexture;
   };
 
   class MetalPainter : public Painter

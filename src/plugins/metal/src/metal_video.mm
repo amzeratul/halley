@@ -2,6 +2,7 @@
 #include "metal_material_constant_buffer.h"
 
 #include <halley/core/graphics/texture.h>
+#include <halley/core/graphics/texture_descriptor.h>
 #include <halley/core/graphics/shader.h>
 #include <halley/core/graphics/material/material_definition.h>
 #include <SDL2/SDL.h>
@@ -17,11 +18,13 @@ MetalVideo::MetalVideo(SystemAPI& system)
 
 void MetalVideo::init()
 {
+  loader = std::make_unique<MetalLoader>(system);
 }
 
 void MetalVideo::deInit()
 {
   std::cout << "Shutting down Metal..." << std::endl;
+  loader.reset();
 }
 
 void MetalVideo::startRender()
@@ -70,7 +73,7 @@ bool MetalVideo::hasWindow() const
 
 std::unique_ptr<Texture> MetalVideo::createTexture(Vector2i size)
 {
-  return std::make_unique<MetalTexture>(size);
+  return std::make_unique<MetalTexture>(*this, size);
 }
 
 std::unique_ptr<Shader> MetalVideo::createShader(const ShaderDefinition& definition)
@@ -115,14 +118,39 @@ id<MTLDevice> MetalVideo::getDevice() {
   return device;
 }
 
-MetalTexture::MetalTexture(Vector2i size)
+MetalTexture::MetalTexture(MetalVideo& video, Vector2i size)
   : Texture(size)
+  , video(video)
 {
+  startLoading();
 }
 
-void MetalTexture::load(TextureDescriptor&&)
+void MetalTexture::load(TextureDescriptor&& descriptor)
 {
+  MTLTextureDescriptor *textureDescriptor = [[MTLTextureDescriptor alloc] init];
+  textureDescriptor.pixelFormat = MTLPixelFormatRGBA8Unorm;
+  textureDescriptor.width = descriptor.size.x;
+  textureDescriptor.height = descriptor.size.y;
+  metalTexture = [video.getDevice() newTextureWithDescriptor:textureDescriptor];
+  [textureDescriptor release];
+
+  NSUInteger bytesPerRow = 4 * descriptor.size.x;
+  MTLRegion region = {
+    { 0, 0, 0 },
+    {static_cast<NSUInteger>(descriptor.size.x), static_cast<NSUInteger>(descriptor.size.y), 1}
+  };
+
+  [metalTexture replaceRegion:region
+    mipmapLevel:0
+    withBytes:descriptor.pixelData.getBytes()
+    bytesPerRow:bytesPerRow
+  ];
   doneLoading();
+}
+
+id<MTLTexture> MetalTexture::getMetalTexture() const {
+  waitForLoad();
+  return metalTexture;
 }
 
 MetalPainter::MetalPainter(MetalVideo& video, Resources& resources)
@@ -157,6 +185,13 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
 
   // Metal requires the global material to be bound for each material pass, as it has no 'global' state.
   static_cast<MetalMaterialConstantBuffer&>(halleyGlobalMaterial->getDataBlocks().front().getConstantBuffer()).bind(encoder, 0);
+
+  // Bind textures
+  int texIndex = 0;
+  for (auto& tex : material.getTextures()) {
+    auto texture = std::static_pointer_cast<const MetalTexture>(tex);
+    [encoder setFragmentTexture:texture->getMetalTexture() atIndex:texIndex++];
+  }
 }
 
 void MetalPainter::doStartRender() {
