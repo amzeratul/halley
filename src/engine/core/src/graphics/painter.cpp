@@ -200,16 +200,51 @@ void Painter::drawLine(std::shared_ptr<Material> material, gsl::span<const Vecto
 	constexpr size_t pointIdxOffset[] = { 0, 0, 1, 1 };
 
 	std::vector<LineVertex> vertices(n * 4);
+
+	auto segmentNormal = [&] (size_t i) -> Maybe<Vector2f>
+	{
+		if (i < n) {
+			return (points[i + 1] - points[i]).normalized().orthoLeft();
+		} else {
+			return {};
+		}
+	};
+
+	auto makeNormal = [] (Vector2f a, Maybe<Vector2f> maybeB) -> Vector2f
+	{
+		if (maybeB) {
+			const auto b = maybeB.get();
+			const auto c = (a + b).normalized();
+			const auto cosHalfAlpha = c.dot(a);
+			return c * (1.0f / cosHalfAlpha);
+		} else {
+			return a;
+		}
+	};
+
+	Maybe<Vector2f> prevNormal;
+	Vector2f normal = segmentNormal(0).get();
+	Maybe<Vector2f> nextNormal;
+
 	for (size_t i = 0; i < n; ++i) {
-		const auto normal = (points[i + 1] - points[i]).normalized().orthoLeft();
+		nextNormal = segmentNormal(i + 1);
+
+		Vector2f v0n = makeNormal(normal, prevNormal);
+		Vector2f v1n = makeNormal(normal, nextNormal);
+
 		for (size_t j = 0; j < 4; ++j) {
 			const size_t idx = i * 4 + j;
 			auto& v = vertices[idx];
 			v.colour = col;
 			v.position = points[i + pointIdxOffset[j]];
-			v.normal = normal;
+			v.normal = j <= 1 ? v0n : v1n;
 			v.width.x = width;
 			v.width.y = normalPos[j];
+		}
+
+		prevNormal = normal;
+		if (nextNormal) {
+			normal = nextNormal.get();
 		}
 	}
 

@@ -20,7 +20,8 @@ VOut main(VIn input) {
     VOut result;
 
     float width = input.width.x;
-    float vertPos = 0.5 * (width + 1) * input.width.y;
+    float myPos = input.width.y;
+    float vertPos = 0.5 * (width + 1) * myPos;
     float2 pos = input.position + vertPos * input.normal;
     result.position = mul(u_mvp, float4(pos, 0, 1));
     result.colour = input.colour;

@@ -10,6 +10,9 @@ float4 main(VOut input) : SV_TARGET {
     float invFeather = 2.0;
     float v = clamp((edge - abs(input.vertPos)) * invFeather, -1, 1) * 0.5 + 0.5;
 
-    float a = input.colour.a * v;
+    // Generate gamma-correct alpha
+    // Should be pow(v, 1.0 / 2.2), but sqrt() is faster and the difference is very small
+    float a = input.colour.a * sqrt(v);
+
 	return float4(input.colour.rgb * a, a);
 }
