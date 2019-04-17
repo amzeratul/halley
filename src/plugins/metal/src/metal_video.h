@@ -62,12 +62,6 @@ namespace Halley {
     void load(TextureDescriptor&& descriptor) override;
   };
 
-  class MetalMaterialConstantBuffer : public MaterialConstantBuffer
-  {
-  public:
-    void update(const MaterialDataBlock& dataBlock) override;
-  };
-
   class MetalPainter : public Painter
   {
   public:

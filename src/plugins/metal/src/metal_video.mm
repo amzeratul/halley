@@ -1,4 +1,6 @@
 ﻿#include "metal_video.h"
+#include "metal_material_constant_buffer.h"
+
 #include <halley/core/graphics/texture.h>
 #include <halley/core/graphics/shader.h>
 #include <halley/core/graphics/material/material_definition.h>
@@ -88,7 +90,7 @@ std::unique_ptr<ScreenRenderTarget> MetalVideo::createScreenRenderTarget()
 
 std::unique_ptr<MaterialConstantBuffer> MetalVideo::createConstantBuffer()
 {
-  return std::make_unique<MetalMaterialConstantBuffer>();
+  return std::make_unique<MetalMaterialConstantBuffer>(*this);
 }
 
 String MetalVideo::getShaderLanguage()
@@ -123,9 +125,6 @@ void MetalTexture::load(TextureDescriptor&&)
   doneLoading();
 }
 
-void MetalMaterialConstantBuffer::update(const MaterialDataBlock&) {}
-
-
 MetalPainter::MetalPainter(MetalVideo& video, Resources& resources)
   : Painter(resources)
   , video(video)
@@ -153,7 +152,11 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
       ", pass " << passNumber << "." << std::endl;
     throw Exception([[error localizedDescription] UTF8String], HalleyExceptions::VideoPlugin);
   }
+
   [encoder setRenderPipelineState:pipelineState];
+
+  // Metal requires the global material to be bound for each material pass, as it has no 'global' state.
+  static_cast<MetalMaterialConstantBuffer&>(halleyGlobalMaterial->getDataBlocks().front().getConstantBuffer()).bind(encoder, 0);
 }
 
 void MetalPainter::doStartRender() {
@@ -214,7 +217,13 @@ void MetalPainter::setViewPort(Rect4i rect) {
 
 void MetalPainter::setClip(Rect4i, bool) {}
 
-void MetalPainter::setMaterialData(const Material&) {}
+void MetalPainter::setMaterialData(const Material& material) {
+  for (auto& dataBlock : material.getDataBlocks()) {
+    if (dataBlock.getType() != MaterialDataBlockType::SharedExternal) {
+      static_cast<MetalMaterialConstantBuffer&>(dataBlock.getConstantBuffer()).bind(encoder, dataBlock.getBindPoint());
+    }
+  }
+}
 
 void MetalPainter::onUpdateProjection(Material& material) {
   material.uploadData(*this);

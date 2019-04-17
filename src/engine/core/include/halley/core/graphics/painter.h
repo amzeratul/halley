@@ -85,6 +85,8 @@ namespace Halley
 		void generateQuadIndices(unsigned short firstVertex, size_t numQuads, unsigned short* target);
 		RenderTarget& getActiveRenderTarget();
 
+		std::unique_ptr<Material> halleyGlobalMaterial;
+
 	private:
 		Resources& resources;
 		RenderContext* activeContext = nullptr;
@@ -101,7 +103,6 @@ namespace Halley
 		Vector<unsigned short> indexBuffer;
 		std::shared_ptr<Material> materialPending;
 		std::shared_ptr<Material> solidLineMaterial;
-		std::unique_ptr<Material> halleyGlobalMaterial;
 
 		size_t nDrawCalls = 0;
 		size_t nVertices = 0;

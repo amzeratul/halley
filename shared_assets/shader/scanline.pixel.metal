@@ -1,20 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
 
-struct Uniforms {
-
-  struct HalleyBlock {
-    float4x4 mvp;
-  };
-
-  struct MaterialBlock {
-    float smoothness;
-    float outline;
-    float4 outlineColour;
-  };
-
-  HalleyBlock HalleyBlock;
-  MaterialBlock MaterialBlock;
+struct MaterialBlock {
+  float4 col0;
+  float4 col1;
+  float distance;
 };
 
 // Must match output of vertex shader
@@ -31,7 +21,7 @@ struct VertexOut {
 fragment float4 pixel_func (
   VertexOut v [[ stage_in ]],
   texture2d<float> tex0 [[ texture(0) ]],
-  constant Uniforms& uniforms [[ buffer(0) ]]
+  constant MaterialBlock& material [[ buffer(0) ]]
 ) {
-  return v.colour;
+  return v.colour * mix(material.col0, material.col1, fract(v.texCoord0.y / material.distance));
 }

@@ -44,14 +44,14 @@ MetalShader::~MetalShader() {
   [fragment_func release];
 }
 
-int MetalShader::getUniformLocation(const String&, ShaderType)
+int MetalShader::getUniformLocation(const String& name, ShaderType type)
 {
-  return 0;
+  return -1;
 }
 
-int MetalShader::getBlockLocation(const String&, ShaderType)
+int MetalShader::getBlockLocation(const String& name, ShaderType type)
 {
-  return 0;
+  return -1;
 }
 
 id<MTLFunction> MetalShader::getVertexFunc() {

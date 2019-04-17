@@ -1,14 +1,8 @@
 #include <metal_stdlib>
 using namespace metal;
 
-struct Uniforms {
-
-  struct HalleyBlock {
-    float4x4 mvp;
-  };
-
-  HalleyBlock HalleyBlock;
-
+struct HalleyBlock {
+  float4x4 mvp;
 };
 
 struct VertexIn {
@@ -58,12 +52,12 @@ float4 getVertexPosition(float4x4 mvp, float2 position, float2 pivot, float2 siz
   float2x2 m = float2x2(c, s, -s, c);
 
   float2 pos = position + m * ((vertPos - pivot) * size);
-  return /*mvp * */ float4(pos, 0, 1);
+  return mvp * float4(pos, 0, 1);
 }
 
 vertex VertexOut vertex_func (
   const device VertexIn* vertex_array [[ buffer(0) ]],
-  constant Uniforms& uniforms [[ buffer(1) ]],
+  constant HalleyBlock& halley_block [[ buffer(1) ]],
   unsigned int vid [[ vertex_id ]]
 ) {
   VertexIn v = vertex_array[vid];
@@ -78,7 +72,7 @@ vertex VertexOut vertex_func (
   outVertex.colourAdd = colours.addColour;
 
   outVertex.position = getVertexPosition(
-    uniforms.HalleyBlock.mvp, v.position, v.pivot,
+    halley_block.mvp, v.position, v.pivot,
     v.size * v.scale, v.vertPos.xy, v.rotation
   );
 
