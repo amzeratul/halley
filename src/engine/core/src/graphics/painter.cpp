@@ -178,6 +178,44 @@ void Painter::drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scal
 	}
 }
 
+void Painter::drawLine(std::shared_ptr<Material> material, gsl::span<const Vector2f> points, float width, Colour4f colour)
+{
+	// Need at least two points to draw a line
+	if (points.size() < 2) {
+		return;
+	}
+
+	struct LineVertex {
+		Vector4f colour;
+		Vector2f position;
+		Vector2f normal;
+		Vector2f width;
+		char _padding[8];
+	};
+
+	const size_t n = points.size() - 1;
+	const Vector4f col(colour.r, colour.g, colour.b, colour.a);
+
+	constexpr float normalPos[] = { -1, 1, 1, -1 };
+	constexpr size_t pointIdxOffset[] = { 0, 0, 1, 1 };
+
+	std::vector<LineVertex> vertices(n * 4);
+	for (size_t i = 0; i < n; ++i) {
+		const auto normal = (points[i + 1] - points[i]).normalized().orthoLeft();
+		for (size_t j = 0; j < 4; ++j) {
+			const size_t idx = i * 4 + j;
+			auto& v = vertices[idx];
+			v.colour = col;
+			v.position = points[i + pointIdxOffset[j]];
+			v.normal = normal;
+			v.width.x = width;
+			v.width.y = normalPos[j];
+		}
+	}
+
+	drawQuads(material, vertices.size(), vertices.data());
+}
+
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
 {
 	size_t requiredSize = bytesPending + numBytes;

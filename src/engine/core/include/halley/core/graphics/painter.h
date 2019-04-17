@@ -58,6 +58,9 @@ namespace Halley
 		// Draw one sliced sprite. Slices -> x = left, y = top, z = right, w = bottom, in [0..1] space relative to the texture
 		void drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scale, Vector4f slices, const void* vertexData);
 
+		// Draws a line across all points
+		void drawLine(std::shared_ptr<Material> material, gsl::span<const Vector2f> points, float width, Colour4f colour);
+
 		size_t getNumDrawCalls() const { return nDrawCalls; }
 		size_t getNumVertices() const { return nVertices; }
 		size_t getNumTriangles() const { return nTriangles; }
