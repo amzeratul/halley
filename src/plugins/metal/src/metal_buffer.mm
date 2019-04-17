@@ -19,10 +19,6 @@ void MetalBuffer::setData(gsl::span<const gsl::byte> data) {
 }
 
 void MetalBuffer::bind(id<MTLRenderCommandEncoder> encoder, int bindPoint) {
-  // TODO unyolo
-  if (bindPoint == 0) {
-    [encoder setVertexBuffer:buffer offset:0 atIndex:1];
-  } else {
-    [encoder setFragmentBuffer:buffer offset:0 atIndex:0];
-  }
+  [encoder setVertexBuffer:buffer offset:0 atIndex:bindPoint+1];
+  [encoder setFragmentBuffer:buffer offset:0 atIndex:bindPoint+1];
 }

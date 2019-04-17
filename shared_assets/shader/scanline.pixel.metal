@@ -21,7 +21,7 @@ struct VertexOut {
 fragment float4 pixel_func (
   VertexOut v [[ stage_in ]],
   texture2d<float> tex0 [[ texture(0) ]],
-  constant MaterialBlock& material [[ buffer(0) ]]
+  constant MaterialBlock& material [[ buffer(2) ]]
 ) {
   return v.colour * mix(material.col0, material.col1, fract(v.texCoord0.y / material.distance));
 }
