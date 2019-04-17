@@ -186,7 +186,11 @@ void MetalPainter::setVertices(
   Expects(indices);
 
   size_t bytesSize = numVertices * material.getVertexStride();
-  [encoder setVertexBytes:vertexData length:bytesSize atIndex:0];
+  id<MTLBuffer> buffer = [video.getDevice() newBufferWithBytes:vertexData
+    length:bytesSize
+    options:MTLResourceStorageModeShared
+  ];
+  [encoder setVertexBuffer:buffer offset:0 atIndex:0];
 
   indexBuffer = [video.getDevice() newBufferWithBytes:indices
       length:numIndices*sizeof(short) options:MTLResourceStorageModeShared
