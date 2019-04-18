@@ -9,6 +9,7 @@ set(SOURCES
         "src/metal_buffer.mm"
         "src/metal_material_constant_buffer.mm"
         "src/metal_loader.mm"
+        "src/metal_render_target.mm"
         )
 
 set(HEADERS
@@ -17,6 +18,7 @@ set(HEADERS
         "src/metal_buffer.h"
         "src/metal_material_constant_buffer.h"
         "src/metal_loader.h"
+        "src/metal_render_target.h"
         )
 
 assign_source_group(${SOURCES})

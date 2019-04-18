@@ -1,5 +1,6 @@
 ﻿#include "metal_video.h"
 #include "metal_material_constant_buffer.h"
+#include "metal_render_target.h"
 
 #include <halley/core/graphics/texture.h>
 #include <halley/core/graphics/texture_descriptor.h>
@@ -88,7 +89,7 @@ std::unique_ptr<TextureRenderTarget> MetalVideo::createTextureRenderTarget()
 
 std::unique_ptr<ScreenRenderTarget> MetalVideo::createScreenRenderTarget()
 {
-  return std::make_unique<ScreenRenderTarget>(Rect4i({}, getWindow().getWindowRect().getSize()));
+  return std::make_unique<MetalScreenRenderTarget>(Rect4i({}, getWindow().getWindowRect().getSize()));
 }
 
 std::unique_ptr<MaterialConstantBuffer> MetalVideo::createConstantBuffer()

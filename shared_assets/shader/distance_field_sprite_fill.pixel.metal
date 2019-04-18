@@ -22,7 +22,7 @@ fragment float4 pixel_func (
   VertexOut v [[ stage_in ]],
   texture2d<float> tex0 [[ texture(0) ]],
   sampler sampler0 [[ sampler(0) ]],
-  constant MaterialBlock& material [[ buffer(1) ]]
+  constant MaterialBlock& material [[ buffer(2) ]]
 ) {
   float dx = abs(dfdx(v.pixelTexCoord0.x) / dfdx(v.position.x));
   float dy = abs(dfdy(v.pixelTexCoord0.y) / dfdy(v.position.y));
