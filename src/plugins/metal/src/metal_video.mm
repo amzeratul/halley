@@ -170,6 +170,7 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
   pipelineStateDescriptor.fragmentFunction = shader.getFragmentFunc();
   pipelineStateDescriptor.label = [NSString stringWithUTF8String:material.getDefinition().getName().c_str()];
   pipelineStateDescriptor.colorAttachments[0].pixelFormat = video.getSurface().texture.pixelFormat;
+  setBlending(pass.getBlend(), pipelineStateDescriptor.colorAttachments[0]);
 
   NSError* error = NULL;
   id<MTLRenderPipelineState> pipelineState = [video.getDevice() newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
@@ -267,4 +268,40 @@ void MetalPainter::setMaterialData(const Material& material) {
 void MetalPainter::onUpdateProjection(Material& material) {
   material.uploadData(*this);
   setMaterialData(material);
+}
+
+void MetalPainter::setBlending(BlendType blendType, MTLRenderPipelineColorAttachmentDescriptor* colorAttachment) {
+  Expects(
+    blendType == BlendType::Alpha || blendType == BlendType::AlphaPremultiplied || blendType == BlendType::Add ||
+    blendType == BlendType::Opaque || blendType == BlendType::Multiply || blendType == BlendType::Darken
+  );
+  bool useBlending = blendType != BlendType::Opaque;
+  colorAttachment.blendingEnabled = useBlending;
+  if (!useBlending) {
+    return;
+  }
+
+  colorAttachment.rgbBlendOperation = MTLBlendOperationAdd;
+  colorAttachment.alphaBlendOperation = MTLBlendOperationAdd;
+
+  switch (blendType) {
+    case BlendType::Alpha:
+      setBlendFactor(colorAttachment, MTLBlendFactorSourceAlpha, MTLBlendFactorOneMinusSourceAlpha);
+      break;
+    case BlendType::AlphaPremultiplied:
+      setBlendFactor(colorAttachment, MTLBlendFactorOne, MTLBlendFactorOneMinusSourceAlpha);
+      break;
+    case BlendType::Multiply:
+      setBlendFactor(colorAttachment, MTLBlendFactorDestinationColor, MTLBlendFactorOneMinusSourceAlpha);
+      break;
+    default:
+      setBlendFactor(colorAttachment, MTLBlendFactorSourceAlpha, MTLBlendFactorOne);
+  }
+}
+
+void MetalPainter::setBlendFactor(MTLRenderPipelineColorAttachmentDescriptor* colorAttachment, MTLBlendFactor src, MTLBlendFactor dst) {
+  colorAttachment.sourceRGBBlendFactor = src;
+  colorAttachment.sourceAlphaBlendFactor = src;
+  colorAttachment.destinationRGBBlendFactor = dst;
+  colorAttachment.destinationAlphaBlendFactor = dst;
 }

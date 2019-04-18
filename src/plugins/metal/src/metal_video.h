@@ -85,6 +85,9 @@ namespace Halley {
     void onUpdateProjection(Material& material) override;
 
   private:
+    void setBlending(BlendType blendType, MTLRenderPipelineColorAttachmentDescriptor* colorAttachment);
+    void setBlendFactor(MTLRenderPipelineColorAttachmentDescriptor* colorAttachment, MTLBlendFactor src, MTLBlendFactor dst);
+
     MetalVideo& video;
     id<MTLCommandBuffer> buffer;
     id<MTLRenderCommandEncoder> encoder;
