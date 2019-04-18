@@ -11,7 +11,8 @@
 using namespace Halley;
 
 Painter::Painter(Resources& resources)
-	: halleyGlobalMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/MaterialBase"), true))
+	: resources(resources)
+	, halleyGlobalMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/MaterialBase"), true))
 {
 }
 
@@ -178,6 +179,11 @@ void Painter::drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scal
 	}
 }
 
+void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour)
+{
+	drawLine(getSolidLineMaterial(), points, width, colour);
+}
+
 void Painter::drawLine(std::shared_ptr<Material> material, gsl::span<const Vector2f> points, float width, Colour4f colour)
 {
 	// Need at least two points to draw a line
@@ -335,6 +341,14 @@ Rect4i Painter::getRectangleForActiveRenderTarget(Rect4i r)
 	} else {
 		return r;
 	}
+}
+
+std::shared_ptr<Material> Painter::getSolidLineMaterial()
+{
+	if (!solidLineMaterial) {
+		solidLineMaterial = std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidLine"));
+	}
+	return solidLineMaterial;
 }
 
 void Painter::startDrawCall(std::shared_ptr<Material>& material)

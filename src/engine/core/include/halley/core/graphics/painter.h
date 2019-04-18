@@ -58,7 +58,8 @@ namespace Halley
 		// Draw one sliced sprite. Slices -> x = left, y = top, z = right, w = bottom, in [0..1] space relative to the texture
 		void drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scale, Vector4f slices, const void* vertexData);
 
-		// Draws a line across all points
+		// Draws a line across all points (if no material is specified, use standard one)
+		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour);
 		void drawLine(std::shared_ptr<Material> material, gsl::span<const Vector2f> points, float width, Colour4f colour);
 
 		size_t getNumDrawCalls() const { return nDrawCalls; }
@@ -85,6 +86,7 @@ namespace Halley
 		RenderTarget& getActiveRenderTarget();
 
 	private:
+		Resources& resources;
 		RenderContext* activeContext = nullptr;
 		RenderTarget* activeRenderTarget = nullptr;
 		Matrix4f projection;
@@ -98,6 +100,7 @@ namespace Halley
 		Vector<char> vertexBuffer;
 		Vector<unsigned short> indexBuffer;
 		std::shared_ptr<Material> materialPending;
+		std::shared_ptr<Material> solidLineMaterial;
 		std::unique_ptr<Material> halleyGlobalMaterial;
 
 		size_t nDrawCalls = 0;
@@ -130,5 +133,7 @@ namespace Halley
 		void updateProjection();
 
 		Rect4i getRectangleForActiveRenderTarget(Rect4i rectangle);
+
+		std::shared_ptr<Material> getSolidLineMaterial();
 	};
 }
