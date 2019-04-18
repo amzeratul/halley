@@ -62,11 +62,12 @@ namespace Halley {
   public:
     explicit MetalTexture(MetalVideo& video, Vector2i size);
     void load(TextureDescriptor&& descriptor) override;
-    id<MTLTexture> getMetalTexture() const;
+    void bind(id<MTLRenderCommandEncoder> encoder, int bindIndex) const;
 
   private:
     MetalVideo& video;
     id<MTLTexture> metalTexture;
+    id<MTLSamplerState> sampler;
   };
 
   class MetalPainter : public Painter

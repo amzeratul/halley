@@ -127,12 +127,12 @@ MetalTexture::MetalTexture(MetalVideo& video, Vector2i size)
 
 void MetalTexture::load(TextureDescriptor&& descriptor)
 {
-  MTLTextureDescriptor *textureDescriptor = [[MTLTextureDescriptor alloc] init];
-  textureDescriptor.pixelFormat = MTLPixelFormatRGBA8Unorm;
-  textureDescriptor.width = descriptor.size.x;
-  textureDescriptor.height = descriptor.size.y;
+  auto textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
+    width:descriptor.size.x
+    height:descriptor.size.y
+    mipmapped:descriptor.useMipMap
+  ];
   metalTexture = [video.getDevice() newTextureWithDescriptor:textureDescriptor];
-  [textureDescriptor release];
 
   NSUInteger bytesPerRow = 4 * descriptor.size.x;
   MTLRegion region = {
@@ -145,12 +145,30 @@ void MetalTexture::load(TextureDescriptor&& descriptor)
     withBytes:descriptor.pixelData.getBytes()
     bytesPerRow:bytesPerRow
   ];
+
+  MTLSamplerDescriptor* samplerDescriptor = [[MTLSamplerDescriptor alloc] init];
+  samplerDescriptor.maxAnisotropy = 1;
+  auto filter = descriptor.useFiltering ? MTLSamplerMinMagFilterLinear : MTLSamplerMinMagFilterNearest;
+  samplerDescriptor.minFilter = filter;
+  samplerDescriptor.magFilter = filter;
+  samplerDescriptor.mipFilter = descriptor.useFiltering ? MTLSamplerMipFilterLinear : MTLSamplerMipFilterNearest;
+  auto clamp = descriptor.clamp ? MTLSamplerAddressModeClampToEdge : MTLSamplerAddressModeRepeat;
+  samplerDescriptor.sAddressMode = clamp;
+  samplerDescriptor.rAddressMode = clamp;
+  samplerDescriptor.tAddressMode = clamp;
+  samplerDescriptor.lodMinClamp = 0;
+  samplerDescriptor.lodMaxClamp = FLT_MAX;
+  sampler = [video.getDevice() newSamplerStateWithDescriptor:samplerDescriptor];
+  [samplerDescriptor release];
+
   doneLoading();
 }
 
-id<MTLTexture> MetalTexture::getMetalTexture() const {
+void MetalTexture::bind(id<MTLRenderCommandEncoder> encoder, int bindIndex) const {
   waitForLoad();
-  return metalTexture;
+
+  [encoder setFragmentTexture:metalTexture atIndex:bindIndex];
+  [encoder setFragmentSamplerState:sampler atIndex:bindIndex];
 }
 
 MetalPainter::MetalPainter(MetalVideo& video, Resources& resources)
@@ -191,7 +209,7 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
   int texIndex = 0;
   for (auto& tex : material.getTextures()) {
     auto texture = std::static_pointer_cast<const MetalTexture>(tex);
-    [encoder setFragmentTexture:texture->getMetalTexture() atIndex:texIndex++];
+    texture->bind(encoder, texIndex++);
   }
 }
 
