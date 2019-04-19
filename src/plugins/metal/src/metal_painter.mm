@@ -170,3 +170,12 @@ void MetalPainter::setBlendFactor(MTLRenderPipelineColorAttachmentDescriptor* co
 	colorAttachment.destinationRGBBlendFactor = dst;
 	colorAttachment.destinationAlphaBlendFactor = dst;
 }
+
+MTLRenderPassDescriptor* MetalPainter::renderPassDescriptorForTextureAndColour(id<MTLTexture> texture, Colour& colour) {
+	MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
+	pass.colorAttachments[0].clearColor = MTLClearColorMake(colour.r, colour.g, colour.b, colour.a);
+	pass.colorAttachments[0].loadAction = MTLLoadActionClear;
+	pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+	pass.colorAttachments[0].texture = texture;
+	return pass;
+}

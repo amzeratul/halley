@@ -5,15 +5,6 @@
 namespace Halley {
 	class MetalVideo;
 
-	static inline MTLRenderPassDescriptor* renderPassDescriptorForTextureAndColour(id<MTLTexture> texture, Colour& colour) {
-		MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
-		pass.colorAttachments[0].clearColor = MTLClearColorMake(colour.r, colour.g, colour.b, colour.a);
-		pass.colorAttachments[0].loadAction = MTLLoadActionClear;
-		pass.colorAttachments[0].storeAction = MTLStoreActionStore;
-		pass.colorAttachments[0].texture = texture;
-		return pass;
-	}
-
 	class MetalPainter : public Painter
 	{
 	public:
@@ -32,6 +23,7 @@ namespace Halley {
 	private:
 		void setBlending(BlendType blendType, MTLRenderPipelineColorAttachmentDescriptor* colorAttachment);
 		void setBlendFactor(MTLRenderPipelineColorAttachmentDescriptor* colorAttachment, MTLBlendFactor src, MTLBlendFactor dst);
+		MTLRenderPassDescriptor* renderPassDescriptorForTextureAndColour(id<MTLTexture> texture, Colour& colour);
 
 		MetalVideo& video;
 		id<MTLCommandBuffer> buffer;
