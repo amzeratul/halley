@@ -12,11 +12,15 @@ MetalPainter::MetalPainter(MetalVideo& video, Resources& resources)
 	, video(video)
 {}
 
-void MetalPainter::clear(Colour colour) {}
+void MetalPainter::clear(Colour colour) {
+	[encoder endEncoding];
+	auto descriptor = renderPassDescriptorForTextureAndColour(video.getSurface().texture, colour);
+	encoder = [buffer renderCommandEncoderWithDescriptor:descriptor];
+	[descriptor release];
+}
 
 void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
 	auto& pass = material.getDefinition().getPass(passNumber);
-	// TODO blending
 	MetalShader& shader = static_cast<MetalShader&>(pass.getShader());
 
 	MTLRenderPipelineDescriptor *pipelineStateDescriptor = [[MTLRenderPipelineDescriptor alloc] init];
