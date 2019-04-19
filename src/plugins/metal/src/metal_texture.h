@@ -6,18 +6,18 @@
 #include <Metal/Metal.h>
 
 namespace Halley {
-  class MetalVideo;
+	class MetalVideo;
 
-  class MetalTexture : public Texture
-  {
-  public:
-    explicit MetalTexture(MetalVideo& video, Vector2i size);
-    void load(TextureDescriptor&& descriptor) override;
-    void bind(id<MTLRenderCommandEncoder> encoder, int bindIndex) const;
+	class MetalTexture : public Texture
+	{
+	public:
+		explicit MetalTexture(MetalVideo& video, Vector2i size);
+		void load(TextureDescriptor&& descriptor) override;
+		void bind(id<MTLRenderCommandEncoder> encoder, int bindIndex) const;
 
-  private:
-    MetalVideo& video;
-    id<MTLTexture> metalTexture;
-    id<MTLSamplerState> sampler;
-  };
+	private:
+		MetalVideo& video;
+		id<MTLTexture> metalTexture;
+		id<MTLSamplerState> sampler;
+	};
 }

@@ -3,14 +3,14 @@
 using namespace Halley;
 
 MetalLoader::MetalLoader(SystemAPI& system)
-  : executor(Executors::getVideoAux())
+	: executor(Executors::getVideoAux())
 {
-  thread = system.createThread("Metal Loader", ThreadPriority::Normal, [this]() {
-    executor.runForever();
-  });
+	thread = system.createThread("Metal Loader", ThreadPriority::Normal, [this]() {
+		executor.runForever();
+	});
 }
 
 MetalLoader::~MetalLoader() {
-  executor.stop();
-  thread.join();
+	executor.stop();
+	thread.join();
 }

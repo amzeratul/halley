@@ -3,12 +3,12 @@
 
 namespace Halley {
 
-  class MetalScreenRenderTarget : public ScreenRenderTarget
-  {
-  public:
-    explicit MetalScreenRenderTarget(const Rect4i& viewPort);
-    bool getViewportFlipVertical() const override;
-    bool getProjectionFlipVertical() const override;
-  };
+	class MetalScreenRenderTarget : public ScreenRenderTarget
+	{
+	public:
+		explicit MetalScreenRenderTarget(const Rect4i& viewPort);
+		bool getViewportFlipVertical() const override;
+		bool getProjectionFlipVertical() const override;
+	};
 
 }

@@ -3,14 +3,14 @@
 #include <halley/core/api/system_api.h>
 
 namespace Halley {
-  class MetalLoader
-  {
-  public:
-    MetalLoader(SystemAPI& system);
-    ~MetalLoader();
+	class MetalLoader
+	{
+	public:
+		MetalLoader(SystemAPI& system);
+		~MetalLoader();
 
-  private:
-    Executor executor;
-    std::thread thread;
-  };
+	private:
+		Executor executor;
+		std::thread thread;
+	};
 }

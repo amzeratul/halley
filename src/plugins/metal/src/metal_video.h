@@ -9,40 +9,40 @@
 
 namespace Halley {
 
-  class MetalVideo final : public VideoAPIInternal
-  {
-  public:
-    explicit MetalVideo(SystemAPI& system);
+	class MetalVideo final : public VideoAPIInternal
+	{
+	public:
+		explicit MetalVideo(SystemAPI& system);
 
-    void startRender() override;
-    void finishRender() override;
-    void setWindow(WindowDefinition&& windowDescriptor) override;
-    const Window& getWindow() const override;
-    bool hasWindow() const override;
-    std::unique_ptr<Texture> createTexture(Vector2i size) override;
-    std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) override;
-    std::unique_ptr<TextureRenderTarget> createTextureRenderTarget() override;
-    std::unique_ptr<ScreenRenderTarget> createScreenRenderTarget() override;
-    std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() override;
-    void init() override;
-    void deInit() override;
-    std::unique_ptr<Painter> makePainter(Resources& resources) override;
-    String getShaderLanguage() override;
+		void startRender() override;
+		void finishRender() override;
+		void setWindow(WindowDefinition&& windowDescriptor) override;
+		const Window& getWindow() const override;
+		bool hasWindow() const override;
+		std::unique_ptr<Texture> createTexture(Vector2i size) override;
+		std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) override;
+		std::unique_ptr<TextureRenderTarget> createTextureRenderTarget() override;
+		std::unique_ptr<ScreenRenderTarget> createScreenRenderTarget() override;
+		std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() override;
+		void init() override;
+		void deInit() override;
+		std::unique_ptr<Painter> makePainter(Resources& resources) override;
+		String getShaderLanguage() override;
 
-    id<CAMetalDrawable> getSurface();
-    id<MTLCommandQueue> getCommandQueue();
-    id<MTLDevice> getDevice();
+		id<CAMetalDrawable> getSurface();
+		id<MTLCommandQueue> getCommandQueue();
+		id<MTLDevice> getDevice();
 
-  private:
-    std::shared_ptr<Window> window;
-    std::unique_ptr<MetalLoader> loader;
-    SystemAPI& system;
-    CAMetalLayer* swap_chain;
-    id<CAMetalDrawable> surface;
-    id<MTLDevice> device;
-    id<MTLCommandQueue> command_queue;
+	private:
+		std::shared_ptr<Window> window;
+		std::unique_ptr<MetalLoader> loader;
+		SystemAPI& system;
+		CAMetalLayer* swap_chain;
+		id<CAMetalDrawable> surface;
+		id<MTLDevice> device;
+		id<MTLCommandQueue> command_queue;
 
-    void initSwapChain(Window& window);
-  };
+		void initSwapChain(Window& window);
+	};
 
 }

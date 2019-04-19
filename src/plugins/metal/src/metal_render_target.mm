@@ -3,13 +3,13 @@
 using namespace Halley;
 
 MetalScreenRenderTarget::MetalScreenRenderTarget(const Rect4i& viewPort)
-  : ScreenRenderTarget(viewPort)
+	: ScreenRenderTarget(viewPort)
 {}
 
 bool MetalScreenRenderTarget::getViewportFlipVertical() const {
-  return false;
+	return false;
 }
 
 bool MetalScreenRenderTarget::getProjectionFlipVertical() const {
-  return true;
+	return true;
 }
