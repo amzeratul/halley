@@ -113,7 +113,14 @@ void MetalPainter::setViewPort(Rect4i rect) {
 	}];
 }
 
-void MetalPainter::setClip(Rect4i, bool) {}
+void MetalPainter::setClip(Rect4i rect, bool) {
+	[encoder setScissorRect:(MTLScissorRect){
+		static_cast<NSUInteger>(rect.getTopLeft().x),
+		static_cast<NSUInteger>(rect.getTopLeft().y),
+		static_cast<NSUInteger>(rect.getWidth()),
+		static_cast<NSUInteger>(rect.getHeight())
+	}];
+}
 
 void MetalPainter::setMaterialData(const Material& material) {
 	for (auto& dataBlock : material.getDataBlocks()) {
