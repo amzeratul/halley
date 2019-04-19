@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/core/graphics/shader.h"
+#include <halley/core/graphics/shader.h>
 #include <Metal/Metal.h>
 
 namespace Halley {
