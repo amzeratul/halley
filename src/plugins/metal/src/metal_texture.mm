@@ -12,14 +12,36 @@ MetalTexture::MetalTexture(MetalVideo& video, Vector2i size)
 
 void MetalTexture::load(TextureDescriptor&& descriptor)
 {
-	auto textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
+	MTLPixelFormat pixelFormat;
+	int bytesPerPixel = 0;
+	switch (descriptor.format) {
+		case TextureFormat::Indexed:
+			pixelFormat = MTLPixelFormatR8Unorm;
+			bytesPerPixel = 1;
+			break;
+		case TextureFormat::RGB:
+			throw Exception("RGB textures are not supported", HalleyExceptions::VideoPlugin);
+			break;
+		case TextureFormat::RGBA:
+			pixelFormat = MTLPixelFormatRGBA8Unorm;
+			bytesPerPixel = 4;
+			break;
+		case TextureFormat::DEPTH:
+			pixelFormat = MTLPixelFormatDepth32Float;
+			bytesPerPixel = 4;
+			break;
+		default:
+			throw Exception("Unknown texture format", HalleyExceptions::VideoPlugin);
+	}
+
+	auto textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat
 		width:descriptor.size.x
 		height:descriptor.size.y
 		mipmapped:descriptor.useMipMap
 	];
 	metalTexture = [video.getDevice() newTextureWithDescriptor:textureDescriptor];
 
-	NSUInteger bytesPerRow = 4 * descriptor.size.x;
+	NSUInteger bytesPerRow = bytesPerPixel * descriptor.size.x;
 	MTLRegion region = {
 		{ 0, 0, 0 },
 		{static_cast<NSUInteger>(descriptor.size.x), static_cast<NSUInteger>(descriptor.size.y), 1}
