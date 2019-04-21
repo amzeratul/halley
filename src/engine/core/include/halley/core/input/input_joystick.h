@@ -80,6 +80,8 @@ namespace Halley {
 		bool isAnyButtonReleased() override;
 		bool isAnyButtonDown() override;
 
+		void setAxisAdjust(std::function<float (float)> f);
+
 	protected:
 		Vector<float> axes;
 		Vector<spInputButtonBase> hats;
