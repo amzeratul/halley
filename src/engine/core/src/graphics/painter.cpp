@@ -267,6 +267,17 @@ void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f co
 	drawLine(points, width, colour, true, material);
 }
 
+void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<Material> material)
+{
+	const float arcLen = (to - from).getRadians() + (from.turnSide(to) > 0 ? 0.0f : 0 * float(pi()));
+	const size_t n = clamp(size_t(radius * arcLen / 2), size_t(16), size_t(256));
+	std::vector<Vector2f> points;
+	for (size_t i = 0; i < n; ++i) {
+		points.push_back(centre + Vector2f(radius, 0).rotate(from + Angle1f::fromRadians(i * arcLen / (n - 1))));
+	}
+	drawLine(points, width, colour, false, material);
+}
+
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
 {
 	size_t requiredSize = bytesPending + numBytes;
