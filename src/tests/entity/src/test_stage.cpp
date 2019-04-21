@@ -6,7 +6,8 @@ using namespace Halley;
 void TestStage::init()
 {
 	world = createWorld("sample_test_world", createSystem);
-	statsView = std::make_unique<WorldStatsView>(*getAPI().core, *world);
+	statsView = std::make_unique<WorldStatsView>(*getAPI().core);
+	statsView->setWorld(world.get());
 }
 
 void TestStage::onFixedUpdate(Time time)

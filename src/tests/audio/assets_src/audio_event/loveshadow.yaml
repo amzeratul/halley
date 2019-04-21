@@ -1,0 +1,5 @@
+actions:
+  - type: play
+    clips: [ Loveshadow_-_Marcos_Theme.ogg ]
+    group: music
+    loop: true
