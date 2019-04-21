@@ -1,0 +1,4 @@
+actions:
+  - type: play
+    clips: [ b1.ogg ]
+    group: key
