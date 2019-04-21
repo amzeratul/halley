@@ -59,8 +59,10 @@ namespace Halley
 		void drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scale, Vector4f slices, const void* vertexData);
 
 		// Draws a line across all points (if no material is specified, use standard one)
-		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour);
-		void drawLine(std::shared_ptr<Material> material, gsl::span<const Vector2f> points, float width, Colour4f colour);
+		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop = false, std::shared_ptr<Material> material = {});
+
+		// Circle drawing
+		void drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<Material> material = {});
 
 		size_t getNumDrawCalls() const { return nDrawCalls; }
 		size_t getNumVertices() const { return nVertices; }

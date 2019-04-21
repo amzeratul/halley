@@ -179,13 +179,12 @@ void Painter::drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scal
 	}
 }
 
-void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour)
+void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop, std::shared_ptr<Material> material)
 {
-	drawLine(getSolidLineMaterial(), points, width, colour);
-}
+	if (!material) {
+		material = getSolidLineMaterial();
+	}
 
-void Painter::drawLine(std::shared_ptr<Material> material, gsl::span<const Vector2f> points, float width, Colour4f colour)
-{
 	// Need at least two points to draw a line
 	if (points.size() < 2) {
 		return;
@@ -199,20 +198,21 @@ void Painter::drawLine(std::shared_ptr<Material> material, gsl::span<const Vecto
 		char _padding[8];
 	};
 
-	const size_t n = points.size() - 1;
 	const Vector4f col(colour.r, colour.g, colour.b, colour.a);
 
 	constexpr float normalPos[] = { -1, 1, 1, -1 };
 	constexpr size_t pointIdxOffset[] = { 0, 0, 1, 1 };
 
-	std::vector<LineVertex> vertices(n * 4);
+	const size_t nPoints = points.size();
+	const size_t nSegments = (loop ? nPoints : (nPoints - 1));
+	std::vector<LineVertex> vertices(nSegments * 4);
 
 	auto segmentNormal = [&] (size_t i) -> Maybe<Vector2f>
 	{
-		if (i < n) {
-			return (points[i + 1] - points[i]).normalized().orthoLeft();
-		} else {
+		if (!loop && i >= nSegments) {
 			return {};
+		} else {
+			return (points[(i + 1) % nPoints] - points[i % nPoints]).normalized().orthoLeft();
 		}
 	};
 
@@ -228,11 +228,11 @@ void Painter::drawLine(std::shared_ptr<Material> material, gsl::span<const Vecto
 		}
 	};
 
-	Maybe<Vector2f> prevNormal;
+	Maybe<Vector2f> prevNormal = loop ? segmentNormal(nSegments - 1) : Maybe<Vector2f>();
 	Vector2f normal = segmentNormal(0).get();
 	Maybe<Vector2f> nextNormal;
 
-	for (size_t i = 0; i < n; ++i) {
+	for (size_t i = 0; i < nSegments; ++i) {
 		nextNormal = segmentNormal(i + 1);
 
 		Vector2f v0n = makeNormal(normal, prevNormal);
@@ -242,7 +242,7 @@ void Painter::drawLine(std::shared_ptr<Material> material, gsl::span<const Vecto
 			const size_t idx = i * 4 + j;
 			auto& v = vertices[idx];
 			v.colour = col;
-			v.position = points[i + pointIdxOffset[j]];
+			v.position = points[(i + pointIdxOffset[j]) % nPoints];
 			v.normal = j <= 1 ? v0n : v1n;
 			v.width.x = width;
 			v.width.y = normalPos[j];
@@ -255,6 +255,16 @@ void Painter::drawLine(std::shared_ptr<Material> material, gsl::span<const Vecto
 	}
 
 	drawQuads(material, vertices.size(), vertices.data());
+}
+
+void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<Material> material)
+{
+	const size_t n = clamp(size_t(radius / 2), size_t(16), size_t(256));
+	std::vector<Vector2f> points;
+	for (size_t i = 0; i < n; ++i) {
+		points.push_back(centre + Vector2f(radius, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)));
+	}
+	drawLine(points, width, colour, true, material);
 }
 
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
