@@ -257,9 +257,14 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 	drawQuads(material, vertices.size(), vertices.data());
 }
 
+constexpr static size_t getSegmentsForArc(float radius, float arcLen)
+{
+	return clamp(size_t(std::sqrt(radius * arcLen) * 5), size_t(4), size_t(256));
+}
+
 void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<Material> material)
 {
-	const size_t n = clamp(size_t(radius / 2), size_t(16), size_t(256));
+	const size_t n = getSegmentsForArc(radius, 2 * float(pi()));
 	std::vector<Vector2f> points;
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(radius, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)));
@@ -270,7 +275,7 @@ void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f co
 void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<Material> material)
 {
 	const float arcLen = (to - from).getRadians() + (from.turnSide(to) > 0 ? 0.0f : 0 * float(pi()));
-	const size_t n = clamp(size_t(radius * arcLen / 2), size_t(16), size_t(256));
+	const size_t n = getSegmentsForArc(radius, arcLen);
 	std::vector<Vector2f> points;
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(radius, 0).rotate(from + Angle1f::fromRadians(i * arcLen / (n - 1))));
