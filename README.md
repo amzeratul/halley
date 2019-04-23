@@ -38,6 +38,7 @@ Halley is divided in a several sub-projects:
   * **asio**: Network/Asio implementation
   * **dx11**: Video/DX11 implementation
   * **opengl**: Video/OpenGL implementation
+  * **metal**: Video/Metal implementation (experimental)
   * **sdl**: System/SDL, Input/SDL and AudioOut/SDL implementations
   * **winrt**: System/WinRT, Input/WinRT, Platform/WinRT and AudioOut/XAudio2 implementations
 * **tools**
