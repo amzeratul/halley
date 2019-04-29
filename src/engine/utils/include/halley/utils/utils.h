@@ -161,6 +161,11 @@ namespace Halley {
 		return static_cast<T>(a * (1 - factor) + b * factor);
 	}
 
+	template <typename T>
+	constexpr inline T damp(T a, T b, float lambda, float dt) {
+		return lerp<T>(a, b, 1.0f - std::exp(-lambda * dt));
+	}
+
 	// Smoothing
 	template <typename T>
 	constexpr inline T smoothCos(T a)
