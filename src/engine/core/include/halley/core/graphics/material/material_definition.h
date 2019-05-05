@@ -72,13 +72,6 @@ namespace Halley
 		DecrementWrap
 	};
 
-	enum class CullingMode
-	{
-		None,
-		Front,
-		Back
-	};
-
 	template <>
 	struct EnumNames<StencilWriteOperation> {
 		constexpr std::array<const char*, 8> operator()() const {
@@ -91,6 +84,24 @@ namespace Halley
 				"Invert",
 				"IncrementWrap",
 				"DecrementWrap"
+			}};
+		}
+	};
+
+	enum class CullingMode
+	{
+		None,
+		Front,
+		Back
+	};
+
+	template <>
+	struct EnumNames<CullingMode> {
+		constexpr std::array<const char*, 3> operator()() const {
+			return{{
+				"None",
+				"Front",
+				"Back"
 			}};
 		}
 	};

@@ -48,5 +48,6 @@ namespace Halley
 		void rotateBuffers();
 		DX11Rasterizer& getRasterizer(const DX11RasterizerOptions& options);
 		void setRasterizer(const MaterialPass& pass);
+		void setRasterizer(const DX11RasterizerOptions& options);
 	};
 }

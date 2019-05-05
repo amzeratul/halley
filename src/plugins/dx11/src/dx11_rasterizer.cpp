@@ -24,7 +24,7 @@ bool DX11RasterizerOptions::operator<(const DX11RasterizerOptions& other) const
 }
 
 DX11Rasterizer::DX11Rasterizer(DX11Video& video, DX11RasterizerOptions opt)
-	: options(std::move(opt))
+	: options(opt)
 {
 	D3D11_RASTERIZER_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));

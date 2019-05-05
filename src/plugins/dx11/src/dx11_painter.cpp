@@ -183,7 +183,11 @@ void DX11Painter::setRasterizer(const MaterialPass& pass)
 	DX11RasterizerOptions options;
 	options.scissor = static_cast<bool>(clipping);
 	options.culling = pass.getCulling();
+	setRasterizer(options);
+}
 
+void DX11Painter::setRasterizer(const DX11RasterizerOptions& options)
+{
 	if (!curRaster || curRaster->getOptions() != options) {
 		auto& raster = getRasterizer(options);
 		curRaster = &raster;

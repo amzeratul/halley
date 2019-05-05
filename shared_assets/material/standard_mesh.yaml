@@ -11,6 +11,11 @@ attributes:
   - a_texCoord0: vec4
 passes:
   - blend: Opaque
+    cull: Back
+    depth:
+      test: true
+      write: true
+      comparison: Less
     shader:
       - language: hlsl
         vertex: standard_mesh.vertex.hlsl
