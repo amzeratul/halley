@@ -412,7 +412,7 @@ void Painter::startDrawCall(std::shared_ptr<Material>& material)
 void Painter::flushPending()
 {
 	if (verticesPending > 0) {
-		executeDrawPrimitives(*materialPending, verticesPending, vertexBuffer.data(), indexBuffer);
+		executeDrawPrimitives(*materialPending, verticesPending, vertexBuffer.data(), gsl::span<const IndexType>(indexBuffer.data(), indicesPending));
 	}
 
 	resetPending();
