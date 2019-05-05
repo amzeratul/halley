@@ -25,6 +25,7 @@
 #include "halley/maths/angle.h"
 #include "halley/maths/rect.h"
 #include "halley/maths/matrix4.h"
+#include "halley/maths/quaternion.h"
 #include "halley/data_structures/maybe.h"
 
 namespace Halley {
@@ -42,10 +43,12 @@ namespace Halley {
 	public:
 		Camera();
 		Camera(Vector2f pos, Angle1f angle = Angle1f::fromDegrees(0));
+		Camera(Vector3f pos, Quaternion quat = Quaternion());
 
 		Camera& setPosition(Vector2f pos);
 		Camera& setPosition(Vector3f pos);
 		Camera& setRotation(Angle1f angle);
+		Camera& setRotation(Quaternion quat);
 		Camera& setZoom(float zoom);
 
 		Camera& resetRenderTarget();
@@ -55,7 +58,8 @@ namespace Halley {
 		Camera& setViewPort(Rect4i viewPort);
 
 		Vector3f getPosition() const { return pos; }
-		Angle1f getRotation() const { return angle; }
+		Quaternion getRotation() const { return rotation; }
+		Angle1f getZAngle() const;
 		float getZoom() const { return zoom; }
 		Maybe<Rect4i> getViewPort() const { return viewPort; }
 
@@ -78,7 +82,7 @@ namespace Halley {
 		Matrix4f projection;
 		Vector3f pos;
 		float zoom = 1.0f;
-		Angle1f angle;
+		Quaternion rotation;
 		Maybe<Rect4i> viewPort;
 		CameraType type = CameraType::Orthographic2D;
 

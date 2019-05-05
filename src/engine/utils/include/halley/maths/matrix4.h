@@ -42,6 +42,8 @@ namespace Halley {
 		Vector2f operator*(const Vector2f& param) const;
 
 		static Matrix4f makeIdentity();
+		static Matrix4f makeBase(Vector3f x, Vector3f y, Vector3f z);
+
 		static Matrix4f makeRotationX(Angle1f angle);
 		static Matrix4f makeRotationY(Angle1f angle);
 		static Matrix4f makeRotationZ(Angle1f angle);
@@ -50,15 +52,19 @@ namespace Halley {
 		static Matrix4f makeScaling(Vector3f scale);
 		static Matrix4f makeTranslation(Vector2f translation);
 		static Matrix4f makeTranslation(Vector3f translation);
+
 		static Matrix4f makeOrtho2D(float left, float right, float bottom, float top, float near, float far);
 
 		void loadIdentity();
 		void rotateZ(Angle1f angle);
+		void rotate(const Quaternion& quaternion);
 		void scale(Vector2f scale);
 		void scale(Vector3f scale);
 		void translate(Vector2f translation);
 		void translate(Vector3f translation);
 		void transpose();
+
+		Quaternion toRotationQuaternion() const;
 
 		float* getElements();
 		const float* getElements() const;

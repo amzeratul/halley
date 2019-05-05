@@ -30,9 +30,15 @@ Camera::Camera()
 }
 
 
-Camera::Camera(Vector2f _pos, Angle1f _angle)
-	: pos(_pos)
-	, angle(_angle)
+Camera::Camera(Vector2f pos, Angle1f angle)
+	: pos(pos)
+{
+	setRotation(angle);
+}
+
+Camera::Camera(Vector3f pos, Quaternion quat)
+	: pos(pos)
+	, rotation(quat)
 {
 }
 
@@ -52,7 +58,13 @@ Camera& Camera::setPosition(Vector3f pos)
 
 Camera& Camera::setRotation(Angle1f angle)
 {
-	this->angle = angle;
+	rotation = Quaternion(Vector3f(0, 0, 1), angle);
+	return *this;
+}
+
+Camera& Camera::setRotation(Quaternion quat)
+{
+	rotation = quat;
 	return *this;
 }
 
@@ -87,6 +99,13 @@ Camera& Camera::setViewPort(Rect4i v)
 	return *this;
 }
 
+Angle1f Camera::getZAngle() const
+{
+	const auto v = rotation * Vector3f(1, 0, 0);
+	const auto v2d = Vector2f(v.x, v.y);
+	return v2d.angle();
+}
+
 void Camera::updateProjection(bool flipVertical)
 {
 	Vector2i area = getActiveViewPort().getSize();
@@ -100,8 +119,8 @@ void Camera::updateProjection(bool flipVertical)
 	if (zoom != 1.0f) {
 		projection.scale(Vector3f(zoom, zoom, zoom));
 	}
-	if (angle.getRadians() != 0) {
-		projection.rotateZ(-angle);
+	if (true || rotation != Quaternion()) {
+		projection.rotate(rotation.conjugated());
 	}
 	if (pos != Vector3f()) {
 		projection.translate(-pos);
@@ -131,6 +150,7 @@ Rect4i Camera::getActiveViewPort() const
 
 Rect4f Camera::getClippingRectangle() const
 {
+	const auto angle = getZAngle();
 	auto vp = getActiveViewPort();
 	auto halfSize = Vector2f(vp.getSize()) / (zoom * 2);
 	auto a = halfSize.rotate(angle);
@@ -142,12 +162,14 @@ Rect4f Camera::getClippingRectangle() const
 
 Vector2f Camera::screenToWorld(Vector2f p, Rect4f viewport) const
 {
+	const auto angle = getZAngle();
 	Vector2f pos2d(pos.x, pos.y);
 	return ((p - viewport.getCenter()) / zoom).rotate(angle) + pos2d;
 }
 
 Vector2f Camera::worldToScreen(Vector2f p, Rect4f viewport) const
 {
+	const auto angle = getZAngle();
 	Vector2f pos2d(pos.x, pos.y);
 	return (p - pos2d).rotate(-angle) * zoom + viewport.getCenter();
 }

@@ -48,7 +48,7 @@ void Painter::flush()
 Rect4f Painter::getWorldViewAABB() const
 {
 	Vector2f size = Vector2f(viewPort.getSize()) / camera->getZoom();
-	assert(camera->getRotation().getRadians() == 0); // Camera rotation not accounted by following line
+	assert(camera->getZAngle().getRadians() == 0); // Camera rotation not accounted by following line
 	auto camPos = camera->getPosition();
 	return Rect4f(Vector2f(camPos.x, camPos.y) - size * 0.5f, size);
 }

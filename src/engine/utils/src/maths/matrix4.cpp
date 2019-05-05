@@ -98,6 +98,11 @@ void Matrix4f::rotateZ(Angle1f angle)
 	(*this) *= makeRotationZ(angle);
 }
 
+void Matrix4f::rotate(const Quaternion& quaternion)
+{
+	*this *= makeRotation(quaternion);
+}
+
 void Matrix4f::scale(Vector2f scale)
 {
 	(*this) *= makeScaling(scale);
@@ -132,6 +137,53 @@ void Matrix4f::transpose()
 	std::swap(e[11], e[14]);
 }
 
+Quaternion Matrix4f::toRotationQuaternion() const
+{
+	// From https://stackoverflow.com/questions/52413464/look-at-quaternion-using-up-vector/52551983#52551983
+
+	const auto& e = [&] (int x, int y) { return getElement(x, y); };
+	
+	const float t0 = e(0, 0);
+	const float t1 = e(1, 1);
+	const float t2 = e(2, 2);
+	const float trace = t0 + t1 + t2;
+	
+	if (trace > 0) {
+		const float s = 0.5f / std::sqrt(trace + 1.0f);
+		return Quaternion(
+			0.25f / s,
+			(e(2, 1) - e(1, 2)) * s,
+			(e(0, 2) - e(2, 0)) * s,
+			(e(1, 0) - e(0, 1)) * s);
+	} else {
+		if (t0 > t1 && t0 > t2) {
+			const float s = 2.0f * std::sqrt(1.0f + t0 - t1 - t2);
+			return Quaternion(
+				(e(2, 1) - e(1, 2)) / s,
+				0.25f * s,
+				(e(0, 1) - e(1, 0)) / s,
+				(e(0, 2) - e(2, 0)) / s
+			);
+		} else if (t1 > t2) {
+			const float s = 2.0f * std::sqrt(1.0f + t1 - t0 - t2);
+			return Quaternion(
+				(e(0, 2) - e(2, 0)) / s,
+				(e(0, 1) - e(1, 0)) / s,
+				0.25f * s,
+				(e(1, 2) - e(2, 1)) / s
+			);
+		} else {
+			const float s = 2.0f * std::sqrt(1.0f + t2 - t0 - t1);
+			return Quaternion(
+				(e(1, 0) - e(0, 1)) / s,
+				(e(0, 2) - e(2, 0)) / s,
+				(e(1, 2) - e(2, 1)) / s,
+				0.25f * s
+			);
+		}
+	}
+}
+
 float* Matrix4f::getElements()
 {
 	return elements.data();
@@ -147,6 +199,17 @@ Matrix4f Matrix4f::makeIdentity()
 	Matrix4f result;
 	result.loadIdentity();
 	return result;
+}
+
+Matrix4f Matrix4f::makeBase(Vector3f x, Vector3f y, Vector3f z)
+{
+	const float mat[16] = {
+		x.x, x.y, x.z, 0,
+		y.x, y.y, y.z, 0,
+		z.x, z.y, z.z, 0,
+		0,   0,   0,   1
+	};
+	return Matrix4f(mat);
 }
 
 Matrix4f Matrix4f::makeRotationX(Angle1f angle)
@@ -193,10 +256,10 @@ Matrix4f Matrix4f::makeRotationZ(Angle1f angle)
 
 Matrix4f Matrix4f::makeRotation(const Quaternion& q)
 {
-	const float a = q.a;
-	const float b = q.b;
-	const float c = q.c;
-	const float d = q.d;
+	const float a = q.w;
+	const float b = q.x;
+	const float c = q.y;
+	const float d = q.z;
 	const float mat[16] = {
 		a, b, c, d,
 		-b, a, d, -c,
