@@ -22,6 +22,7 @@
 #include <cstring>
 #include "halley/maths/matrix4.h"
 #include "halley/maths/quaternion.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 Matrix4f::Matrix4f()
@@ -140,6 +141,7 @@ void Matrix4f::transpose()
 Quaternion Matrix4f::toRotationQuaternion() const
 {
 	// From https://stackoverflow.com/questions/52413464/look-at-quaternion-using-up-vector/52551983#52551983
+	// Untested
 
 	const auto& e = [&] (int x, int y) { return getElement(x, y); };
 	
@@ -161,23 +163,23 @@ Quaternion Matrix4f::toRotationQuaternion() const
 			return Quaternion(
 				(e(2, 1) - e(1, 2)) / s,
 				0.25f * s,
-				(e(0, 1) - e(1, 0)) / s,
-				(e(0, 2) - e(2, 0)) / s
+				(e(0, 1) + e(1, 0)) / s,
+				(e(0, 2) + e(2, 0)) / s
 			);
 		} else if (t1 > t2) {
 			const float s = 2.0f * std::sqrt(1.0f + t1 - t0 - t2);
 			return Quaternion(
 				(e(0, 2) - e(2, 0)) / s,
-				(e(0, 1) - e(1, 0)) / s,
+				(e(0, 1) + e(1, 0)) / s,
 				0.25f * s,
-				(e(1, 2) - e(2, 1)) / s
+				(e(1, 2) + e(2, 1)) / s
 			);
 		} else {
 			const float s = 2.0f * std::sqrt(1.0f + t2 - t0 - t1);
 			return Quaternion(
 				(e(1, 0) - e(0, 1)) / s,
-				(e(0, 2) - e(2, 0)) / s,
-				(e(1, 2) - e(2, 1)) / s,
+				(e(0, 2) + e(2, 0)) / s,
+				(e(1, 2) + e(2, 1)) / s,
 				0.25f * s
 			);
 		}
@@ -203,10 +205,20 @@ Matrix4f Matrix4f::makeIdentity()
 
 Matrix4f Matrix4f::makeBase(Vector3f x, Vector3f y, Vector3f z)
 {
+	// Untested
+
+	/*
 	const float mat[16] = {
 		x.x, x.y, x.z, 0,
 		y.x, y.y, y.z, 0,
 		z.x, z.y, z.z, 0,
+		0,   0,   0,   1
+	};
+	*/
+	const float mat[16] = {
+		x.x, y.x, z.x, 0,
+		x.y, y.y, z.y, 0,
+		x.z, y.z, z.z, 0,
 		0,   0,   0,   1
 	};
 	return Matrix4f(mat);

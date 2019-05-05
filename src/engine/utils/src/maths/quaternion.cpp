@@ -84,12 +84,49 @@ Vector3f Quaternion::toVector3f() const
 	return Vector3f(x, y, z);
 }
 
-Quaternion Quaternion::lookAt(const Vector3f& dir, const Vector3f& up)
+Quaternion Quaternion::lookAt(const Vector3f& dir, const Vector3f& worldUp)
 {
 	// See https://stackoverflow.com/questions/52413464/look-at-quaternion-using-up-vector/52551983#52551983
-	const Vector3f y = dir.normalized(); // Forward
-	const Vector3f x = y.cross(up.normalized()); // Sideways
-	const Vector3f z = x.cross(y); // Up
+	const Vector3f f = dir.normalized(); // Front
+	const Vector3f r = worldUp.cross(f).normalized(); // Right
+	const Vector3f u = f.cross(r); // Up
 
-	return Matrix4f::makeBase(x, y, z).toRotationQuaternion();
+	//return Matrix4f::makeBase(r, f, u).toRotationQuaternion();
+
+	const float trace = r.x + u.y + f.z;
+	if (trace > 0.0f) {
+		const float s = 0.5f / std::sqrt(trace + 1.0f);
+		return Quaternion(
+			0.25f / s,
+			(u.z - f.y) * s,
+			(f.x - r.z) * s,
+			(r.y - u.x) * s
+		);
+	} else {
+		if (r.x > u.y && r.x > f.z) {
+			const float s = 2.0f * std::sqrt(1.0f + r.x - u.y - f.z);
+			return Quaternion(
+				(u.z - f.y) / s,
+				0.25f * s,
+				(u.x + r.y) / s,
+				(f.x + r.z) / s
+			);
+		} else if (u.y > f.z) {
+			const float s = 2.0f * std::sqrt(1.0f + u.y - r.x - f.z);
+			return Quaternion(
+				(f.x - r.z) / s,
+				(u.x + r.y) / s,
+				0.25f * s,
+				(f.y + u.z) / s
+			);
+		} else {
+			const float s = 2.0f * std::sqrt(1.0f + f.z - r.x - u.y);
+			return Quaternion(
+				(r.y - u.x) / s,
+				(f.x + r.z) / s,
+				(f.y + u.z) / s,
+				0.25f * s
+			);
+		}
+	}
 }

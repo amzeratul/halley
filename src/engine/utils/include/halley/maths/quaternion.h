@@ -47,6 +47,6 @@ namespace Halley {
 		Quaternion conjugated() const;
 		Vector3f toVector3f() const;
 
-		static Quaternion lookAt(const Vector3f& dir, const Vector3f& up);
+		static Quaternion lookAt(const Vector3f& dir, const Vector3f& worldUp);
 	};
 }
