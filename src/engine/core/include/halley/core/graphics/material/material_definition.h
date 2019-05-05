@@ -72,6 +72,13 @@ namespace Halley
 		DecrementWrap
 	};
 
+	enum class CullingMode
+	{
+		None,
+		Front,
+		Back
+	};
+
 	template <>
 	struct EnumNames<StencilWriteOperation> {
 		constexpr std::array<const char*, 8> operator()() const {
@@ -236,6 +243,7 @@ namespace Halley
 		BlendType getBlend() const { return blend; }
 		Shader& getShader() const { return *shader; }
 		const MaterialDepthStencil& getDepthStencil() const { return depthStencil; }
+		CullingMode getCulling() const { return cull; }
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -246,6 +254,7 @@ namespace Halley
 		std::shared_ptr<Shader> shader;
 		BlendType blend;
 		MaterialDepthStencil depthStencil;
+		CullingMode cull = CullingMode::None;
 		
 		String shaderAssetId;
 	};
