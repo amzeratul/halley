@@ -88,19 +88,19 @@ void Camera::updateProjection(bool flipVertical)
 	Vector2i area = getActiveViewPort().getSize();
 
 	// Setup projection
-	float w = float(area.x);
-	float h = float(area.y);
+	const float w = float(area.x);
+	const float h = float(area.y);
 	projection = Matrix4f::makeOrtho2D(-w/2, w/2, flipVertical ? h/2 : -h/2, flipVertical ? -h/2 : h/2, -1000, 1000);
 
 	// Camera properties
 	if (zoom != 1.0f) {
-		projection.scale2D(zoom, zoom);
+		projection.scale(Vector2f(zoom, zoom));
 	}
 	if (angle.getRadians() != 0) {
 		projection.rotateZ(-angle);
 	}
 	if (pos != Vector2f()) {
-		projection.translate2D(-pos.x, -pos.y);
+		projection.translate(-pos);
 	}
 }
 

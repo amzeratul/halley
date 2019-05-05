@@ -97,14 +97,14 @@ void Matrix4f::rotateZ(Angle1f angle)
 	(*this) *= makeRotationZ(angle);
 }
 
-void Matrix4f::scale2D(float x, float y)
+void Matrix4f::scale(Vector2f scale)
 {
-	(*this) *= makeScaling2D(x, y);
+	(*this) *= makeScaling(scale);
 }
 
-void Matrix4f::translate2D(float x, float y)
+void Matrix4f::translate(Vector2f translation)
 {
-	(*this) *= makeTranslation2D(x, y);
+	(*this) *= makeTranslation(translation);
 }
 
 void Matrix4f::transpose()
@@ -180,32 +180,36 @@ Matrix4f Matrix4f::makeRotationZ(Angle1f angle)
 	return result;
 }
 
-Matrix4f Matrix4f::makeScaling2D(float scaleX, float scaleY)
+Matrix4f Matrix4f::makeScaling(Vector2f scale)
 {
 	Matrix4f result;
 	result.loadIdentity();
-	result.elements[0] = scaleX;
-	result.elements[5] = scaleY;
+	result.elements[getIndex(0, 0)] = scale.x;
+	result.elements[getIndex(1, 1)] = scale.y;
 	return result;
 }
 
-Matrix4f Matrix4f::makeTranslation2D(float x, float y)
+Matrix4f Matrix4f::makeTranslation(Vector2f translation)
 {
 	Matrix4f result;
 	result.loadIdentity();
-	result.elements[12] = x;
-	result.elements[13] = y;
+	result.elements[getIndex(3, 0)] = translation.x;
+	result.elements[getIndex(3, 1)] = translation.y;
 	return result;
 }
 
-Matrix4f Matrix4f::makeOrtho2D(float left, float right, float bottom, float top, float _near, float _far)
+Matrix4f Matrix4f::makeOrtho2D(float left, float right, float bottom, float top, float near, float far)
 {
-	// Replacement for glOrtho(), as that doesn't exist in OpenGL ES
-	// See http://www.khronos.org/opengles/documentation/opengles1_0/html/glOrtho.html
-	// Remember, this matrix looks transposed
-	const float mat[16] = { 2.0f/(right-left), 0.0f, 0.0f, 0.0f,
-							0.0f, 2.0f/(top-bottom), 0.0f, 0.0f,
-							0.0f, 0.0f, -2.0f / (_far-_near), 0.0f,
-							-(right+left)/(right-left), -(top+bottom)/(top-bottom), -(_far+_near)/(_far-_near), 1.0f };
+	const float width = right - left;
+	const float height = top - bottom;
+	const float depth = far - near;
+	const float xc = (right + left) / width;
+	const float yc = (top + bottom) / height;
+	const float zc = (far + near) / depth;
+
+	const float mat[16] = { 2.0f / width, 0.0f, 0.0f, 0.0f,
+							0.0f, 2.0f / height, 0.0f, 0.0f,
+							0.0f, 0.0f, -2.0f / depth, 0.0f,
+							-xc, -yc, -zc, 1.0f };
 	return Matrix4f(mat);
 }
