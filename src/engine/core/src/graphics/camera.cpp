@@ -119,7 +119,7 @@ void Camera::updateProjection(bool flipVertical)
 	if (zoom != 1.0f) {
 		projection.scale(Vector3f(zoom, zoom, zoom));
 	}
-	if (true || rotation != Quaternion()) {
+	if (rotation != Quaternion()) {
 		projection.rotate(rotation.conjugated());
 	}
 	if (pos != Vector3f()) {

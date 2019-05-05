@@ -256,16 +256,18 @@ Matrix4f Matrix4f::makeRotationZ(Angle1f angle)
 
 Matrix4f Matrix4f::makeRotation(const Quaternion& q)
 {
-	const float a = q.w;
-	const float b = q.x;
-	const float c = q.y;
-	const float d = q.z;
+	// From https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+	const float r = q.w;
+	const float i = q.x;
+	const float j = q.y;
+	const float k = q.z;
 	const float mat[16] = {
-		a, b, c, d,
-		-b, a, d, -c,
-		-c, -d, a, b,
-		-d, c, -b, a
+		1 - 2*(j*j + k*k), 2*(i*j + k*r), 2*(i*k - j*r), 0,
+		2*(i*j - k*r), 1 - 2*(i*i + k*k), 2*(j*k + i*r), 0,
+		2*(i*k + j*r), 2*(j*k - i*r), 1 - 2*(i*i + j*j), 0,
+		0, 0, 0, 1
 	};
+
 	return Matrix4f(mat);
 }
 
