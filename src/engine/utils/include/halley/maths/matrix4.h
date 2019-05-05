@@ -24,6 +24,7 @@
 #include <array>
 #include "angle.h"
 #include "vector2.h"
+#include "vector3.h"
 
 namespace Halley {
 	class Matrix4f {
@@ -43,13 +44,17 @@ namespace Halley {
 		static Matrix4f makeRotationY(Angle1f angle);
 		static Matrix4f makeRotationZ(Angle1f angle);
 		static Matrix4f makeScaling(Vector2f scale);
+		static Matrix4f makeScaling(Vector3f scale);
 		static Matrix4f makeTranslation(Vector2f translation);
+		static Matrix4f makeTranslation(Vector3f translation);
 		static Matrix4f makeOrtho2D(float left, float right, float bottom, float top, float near, float far);
 
 		void loadIdentity();
 		void rotateZ(Angle1f angle);
 		void scale(Vector2f scale);
+		void scale(Vector3f scale);
 		void translate(Vector2f translation);
+		void translate(Vector3f translation);
 		void transpose();
 
 		float* getElements();

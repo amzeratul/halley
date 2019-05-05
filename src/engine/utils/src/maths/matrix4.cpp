@@ -102,7 +102,17 @@ void Matrix4f::scale(Vector2f scale)
 	(*this) *= makeScaling(scale);
 }
 
+void Matrix4f::scale(Vector3f scale)
+{
+	(*this) *= makeScaling(scale);
+}
+
 void Matrix4f::translate(Vector2f translation)
+{
+	(*this) *= makeTranslation(translation);
+}
+
+void Matrix4f::translate(Vector3f translation)
 {
 	(*this) *= makeTranslation(translation);
 }
@@ -189,12 +199,32 @@ Matrix4f Matrix4f::makeScaling(Vector2f scale)
 	return result;
 }
 
+Matrix4f Matrix4f::makeScaling(Vector3f scale)
+{
+	Matrix4f result;
+	result.loadIdentity();
+	result.elements[getIndex(0, 0)] = scale.x;
+	result.elements[getIndex(1, 1)] = scale.y;
+	result.elements[getIndex(2, 2)] = scale.z;
+	return result;
+}
+
 Matrix4f Matrix4f::makeTranslation(Vector2f translation)
 {
 	Matrix4f result;
 	result.loadIdentity();
 	result.elements[getIndex(3, 0)] = translation.x;
 	result.elements[getIndex(3, 1)] = translation.y;
+	return result;
+}
+
+Matrix4f Matrix4f::makeTranslation(Vector3f translation)
+{
+	Matrix4f result;
+	result.loadIdentity();
+	result.elements[getIndex(3, 0)] = translation.x;
+	result.elements[getIndex(3, 1)] = translation.y;
+	result.elements[getIndex(3, 2)] = translation.z;
 	return result;
 }
 
