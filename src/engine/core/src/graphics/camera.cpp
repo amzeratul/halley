@@ -26,7 +26,6 @@ using namespace Halley;
 
 
 Camera::Camera()
-	: zoom(1.0f)
 {
 }
 
@@ -34,28 +33,33 @@ Camera::Camera()
 Camera::Camera(Vector2f _pos, Angle1f _angle)
 	: pos(_pos)
 	, angle(_angle)
-	, zoom(1.0f)
 {
 }
 
 
-Camera& Camera::setPosition(Vector2f _pos)
+Camera& Camera::setPosition(Vector2f pos)
 {
-	pos = _pos;
+	this->pos = Vector3f(pos);
+	return *this;
+}
+
+Camera& Camera::setPosition(Vector3f pos)
+{
+	this->pos = pos;
 	return *this;
 }
 
 
-Camera& Camera::setAngle(Angle1f _angle)
+Camera& Camera::setAngle(Angle1f angle)
 {
-	angle = _angle;
+	this->angle = angle;
 	return *this;
 }
 
 
-Camera& Camera::setZoom(float _zoom)
+Camera& Camera::setZoom(float zoom)
 {
-	zoom = _zoom;
+	this->zoom = zoom;
 	return *this;
 }
 
@@ -94,12 +98,12 @@ void Camera::updateProjection(bool flipVertical)
 
 	// Camera properties
 	if (zoom != 1.0f) {
-		projection.scale(Vector2f(zoom, zoom));
+		projection.scale(Vector3f(zoom, zoom, zoom));
 	}
 	if (angle.getRadians() != 0) {
 		projection.rotateZ(-angle);
 	}
-	if (pos != Vector2f()) {
+	if (pos != Vector3f()) {
 		projection.translate(-pos);
 	}
 }
@@ -132,15 +136,18 @@ Rect4f Camera::getClippingRectangle() const
 	auto a = halfSize.rotate(angle);
 	auto b = Vector2f(-halfSize.x, halfSize.y).rotate(angle);
 	auto rotatedHalfSize = Vector2f(std::max(std::abs(a.x), std::abs(b.x)), std::max(std::abs(a.y), std::abs(b.y)));
-	return Rect4f(pos - rotatedHalfSize, pos + rotatedHalfSize);
+	Vector2f pos2d(pos.x, pos.y);
+	return Rect4f(pos2d - rotatedHalfSize, pos2d + rotatedHalfSize);
 }
 
 Vector2f Camera::screenToWorld(Vector2f p, Rect4f viewport) const
 {
-	return ((p - viewport.getCenter()) / zoom).rotate(angle) + pos;
+	Vector2f pos2d(pos.x, pos.y);
+	return ((p - viewport.getCenter()) / zoom).rotate(angle) + pos2d;
 }
 
 Vector2f Camera::worldToScreen(Vector2f p, Rect4f viewport) const
 {
-	return (p - pos).rotate(-angle) * zoom + viewport.getCenter();
+	Vector2f pos2d(pos.x, pos.y);
+	return (p - pos2d).rotate(-angle) * zoom + viewport.getCenter();
 }

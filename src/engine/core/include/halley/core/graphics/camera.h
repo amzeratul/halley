@@ -37,6 +37,7 @@ namespace Halley {
 		Camera(Vector2f pos, Angle1f angle=Angle1f::fromDegrees(0));
 
 		Camera& setPosition(Vector2f pos);
+		Camera& setPosition(Vector3f pos);
 		Camera& setAngle(Angle1f angle);
 		Camera& setZoom(float zoom);
 
@@ -46,7 +47,7 @@ namespace Halley {
 		Camera& resetViewPort();
 		Camera& setViewPort(Rect4i viewPort);
 
-		Vector2f getPosition() const { return pos; }
+		Vector3f getPosition() const { return pos; }
 		Angle1f getAngle() const { return angle; }
 		float getZoom() const { return zoom; }
 		Maybe<Rect4i> getViewPort() const { return viewPort; }
@@ -67,10 +68,10 @@ namespace Halley {
 	private:
 		friend class Painter;
 
-		Vector2f pos;
+		Vector3f pos;
 		Matrix4f projection;
 		Angle1f angle;
-		float zoom;
+		float zoom = 1.0f;
 		bool rendering = false;
 
 		RenderTarget* renderTarget = nullptr;
