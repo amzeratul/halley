@@ -336,3 +336,13 @@ Matrix4f Matrix4f::makeOrtho2D(float left, float right, float bottom, float top,
 							-xc, -yc, -zc, 1.0f };
 	return Matrix4f(mat);
 }
+
+Matrix4f Matrix4f::makePerspective(float near, float far, float aspectRatio, const Angle1f& fov)
+{
+	const float tan = (fov * 0.5f).tan();
+	const float mat[16] = { 1.0f / (aspectRatio * tan), 0, 0, 0,
+							0, 1.0f / tan, 0, 0,
+							0, 0, (-near - far)/(near - far), 1,
+							0, 0, (2 * far * near)/(near - far), 0 };
+	return Matrix4f(mat);
+}

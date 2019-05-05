@@ -54,6 +54,7 @@ namespace Halley {
 		static Matrix4f makeTranslation(Vector3f translation);
 
 		static Matrix4f makeOrtho2D(float left, float right, float bottom, float top, float near, float far);
+		static Matrix4f makePerspective(float near, float far, float aspectRatio, const Angle1f& fov);
 
 		void loadIdentity();
 		void rotateZ(Angle1f angle);

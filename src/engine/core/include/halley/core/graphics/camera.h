@@ -34,7 +34,6 @@ namespace Halley {
 
 	enum class CameraType
 	{
-		Orthographic2D,
 		Orthographic,
 		Perspective
 	};
@@ -43,13 +42,16 @@ namespace Halley {
 	public:
 		Camera();
 		Camera(Vector2f pos, Angle1f angle = Angle1f::fromDegrees(0));
-		Camera(Vector3f pos, Quaternion quat = Quaternion());
+		Camera(Vector3f pos, Quaternion quat, Angle1f fov, CameraType type = CameraType::Perspective);
 
 		Camera& setPosition(Vector2f pos);
 		Camera& setPosition(Vector3f pos);
 		Camera& setRotation(Angle1f angle);
 		Camera& setRotation(Quaternion quat);
 		Camera& setZoom(float zoom);
+		Camera& setCameraType(CameraType type);
+		Camera& setFieldOfView(Angle1f fov);
+		Camera& setClippingPlanes(float near, float far);
 
 		Camera& resetRenderTarget();
 		Camera& setRenderTarget(RenderTarget& target);
@@ -84,7 +86,10 @@ namespace Halley {
 		float zoom = 1.0f;
 		Quaternion rotation;
 		Maybe<Rect4i> viewPort;
-		CameraType type = CameraType::Orthographic2D;
+		CameraType type = CameraType::Orthographic;
+		Angle1f fov;
+		float nearPlane = 0.1f;
+		float farPlane = 1000.0f;
 
 		RenderTarget* renderTarget = nullptr;
 		RenderTarget* defaultRenderTarget = nullptr;

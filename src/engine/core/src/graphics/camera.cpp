@@ -36,9 +36,11 @@ Camera::Camera(Vector2f pos, Angle1f angle)
 	setRotation(angle);
 }
 
-Camera::Camera(Vector3f pos, Quaternion quat)
+Camera::Camera(Vector3f pos, Quaternion quat, Angle1f fov, CameraType type)
 	: pos(pos)
 	, rotation(quat)
+	, type(type)
+	, fov(fov)
 {
 }
 
@@ -75,6 +77,25 @@ Camera& Camera::setZoom(float zoom)
 	return *this;
 }
 
+Camera& Camera::setCameraType(CameraType type)
+{
+	this->type = type;
+	return *this;
+}
+
+Camera& Camera::setFieldOfView(Angle1f fov)
+{
+	this->fov = fov;
+	return *this;
+}
+
+Camera& Camera::setClippingPlanes(float near, float far)
+{
+	this->nearPlane = near;
+	this->farPlane = far;
+	return *this;
+}
+
 Camera& Camera::resetRenderTarget()
 {
 	renderTarget = nullptr;
@@ -108,12 +129,15 @@ Angle1f Camera::getZAngle() const
 
 void Camera::updateProjection(bool flipVertical)
 {
-	Vector2i area = getActiveViewPort().getSize();
-
 	// Setup projection
-	const float w = float(area.x);
-	const float h = float(area.y);
-	projection = Matrix4f::makeOrtho2D(-w/2, w/2, flipVertical ? h/2 : -h/2, flipVertical ? -h/2 : h/2, -1000, 1000);
+	const Vector2i area = getActiveViewPort().getSize();
+	const auto w = float(area.x);
+	const auto h = float(area.y);
+	if (type == CameraType::Orthographic) {
+		projection = Matrix4f::makeOrtho2D(-w/2, w/2, flipVertical ? h/2 : -h/2, flipVertical ? -h/2 : h/2, -1000, 1000);
+	} else if (type == CameraType::Perspective) {
+		projection = Matrix4f::makePerspective(nearPlane, farPlane, w / h, fov);
+	}
 
 	// Camera properties
 	if (zoom != 1.0f) {
