@@ -27,6 +27,8 @@
 #include "vector3.h"
 
 namespace Halley {
+	class Quaternion;
+
 	class Matrix4f {
 	public:
 		Matrix4f();
@@ -43,6 +45,7 @@ namespace Halley {
 		static Matrix4f makeRotationX(Angle1f angle);
 		static Matrix4f makeRotationY(Angle1f angle);
 		static Matrix4f makeRotationZ(Angle1f angle);
+		static Matrix4f makeRotation(const Quaternion& rotation);
 		static Matrix4f makeScaling(Vector2f scale);
 		static Matrix4f makeScaling(Vector3f scale);
 		static Matrix4f makeTranslation(Vector2f translation);

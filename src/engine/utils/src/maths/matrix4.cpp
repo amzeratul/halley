@@ -21,6 +21,7 @@
 
 #include <cstring>
 #include "halley/maths/matrix4.h"
+#include "halley/maths/quaternion.h"
 using namespace Halley;
 
 Matrix4f::Matrix4f()
@@ -188,6 +189,21 @@ Matrix4f Matrix4f::makeRotationZ(Angle1f angle)
 	result.elements[getIndex(1, 0)] = -s;
 	result.elements[getIndex(1, 1)] = c;
 	return result;
+}
+
+Matrix4f Matrix4f::makeRotation(const Quaternion& q)
+{
+	const float a = q.a;
+	const float b = q.b;
+	const float c = q.c;
+	const float d = q.d;
+	const float mat[16] = {
+		a, b, c, d,
+		-b, a, d, -c,
+		-c, -d, a, b,
+		-d, c, -b, a
+	};
+	return Matrix4f(mat);
 }
 
 Matrix4f Matrix4f::makeScaling(Vector2f scale)

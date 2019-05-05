@@ -50,7 +50,7 @@ Camera& Camera::setPosition(Vector3f pos)
 }
 
 
-Camera& Camera::setAngle(Angle1f angle)
+Camera& Camera::setRotation(Angle1f angle)
 {
 	this->angle = angle;
 	return *this;

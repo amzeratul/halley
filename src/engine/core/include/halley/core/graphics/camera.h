@@ -31,14 +31,21 @@ namespace Halley {
 
 	class RenderTarget;
 
+	enum class CameraType
+	{
+		Orthographic2D,
+		Orthographic,
+		Perspective
+	};
+
 	class Camera {
 	public:
 		Camera();
-		Camera(Vector2f pos, Angle1f angle=Angle1f::fromDegrees(0));
+		Camera(Vector2f pos, Angle1f angle = Angle1f::fromDegrees(0));
 
 		Camera& setPosition(Vector2f pos);
 		Camera& setPosition(Vector3f pos);
-		Camera& setAngle(Angle1f angle);
+		Camera& setRotation(Angle1f angle);
 		Camera& setZoom(float zoom);
 
 		Camera& resetRenderTarget();
@@ -48,7 +55,7 @@ namespace Halley {
 		Camera& setViewPort(Rect4i viewPort);
 
 		Vector3f getPosition() const { return pos; }
-		Angle1f getAngle() const { return angle; }
+		Angle1f getRotation() const { return angle; }
 		float getZoom() const { return zoom; }
 		Maybe<Rect4i> getViewPort() const { return viewPort; }
 
@@ -68,15 +75,15 @@ namespace Halley {
 	private:
 		friend class Painter;
 
-		Vector3f pos;
 		Matrix4f projection;
-		Angle1f angle;
+		Vector3f pos;
 		float zoom = 1.0f;
-		bool rendering = false;
+		Angle1f angle;
+		Maybe<Rect4i> viewPort;
+		CameraType type = CameraType::Orthographic2D;
 
 		RenderTarget* renderTarget = nullptr;
-		Maybe<Rect4i> viewPort;
-
 		RenderTarget* defaultRenderTarget = nullptr;
+		bool rendering = false;
 	};
 }
