@@ -59,6 +59,14 @@ static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
 
 Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly)
 {
+	constexpr auto maxVertices = size_t(std::numeric_limits<IndexType>::max());
+	if (numVertices > maxVertices) {
+		throw Exception("Too many vertices in draw call: " + toString(numVertices) + ", maximum is " + toString(maxVertices), HalleyExceptions::Graphics);
+	}
+	if (verticesPending + numVertices > maxVertices) {
+		flushPending();
+	}
+
 	Expects(material);
 	Expects(numVertices > 0);
 	Expects(numIndices >= numVertices);
@@ -75,7 +83,7 @@ Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& mater
 
 	result.dstVertex = vertexBuffer.data() + bytesPending;
 	result.dstIndex = indexBuffer.data() + indicesPending;
-	result.firstIndex = static_cast<unsigned short>(verticesPending);
+	result.firstIndex = static_cast<IndexType>(verticesPending);
 
 	indicesPending += numIndices;
 	verticesPending += numVertices;
@@ -85,12 +93,26 @@ Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& mater
 	return result;
 }
 
+void Painter::draw(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData, gsl::span<IndexType> indices, PrimitiveType primitiveType)
+{
+	Expects(primitiveType == PrimitiveType::Triangle);
+	Expects(numVertices % 3 == 0);
+
+	const auto result = addDrawData(material, numVertices, indices.size(), false);
+
+	memcpy(result.dstVertex, vertexData, result.dataSize);
+
+	for (size_t i = 0; i < size_t(indices.size()); ++i) {
+		result.dstIndex[i] = indices[i] + result.firstIndex;
+	}
+}
+
 void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData)
 {
 	Expects(numVertices % 4 == 0);
 	Expects(vertexData != nullptr);
 
-	auto result = addDrawData(material, numVertices, numVertices * 3 / 2, true);
+	const auto result = addDrawData(material, numVertices, numVertices * 3 / 2, true);
 
 	memmove(result.dstVertex, vertexData, result.dataSize);
 	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
@@ -170,10 +192,10 @@ void Painter::drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scal
 	}
 
 	// Indices
-	unsigned short* dstIndex = result.dstIndex;
+	IndexType* dstIndex = result.dstIndex;
 	for (size_t y = 0; y < 3; y++) {
 		for (size_t x = 0; x < 3; x++) {
-			generateQuadIndicesOffset(static_cast<unsigned short>(result.firstIndex + x + (y * 4)), 4, dstIndex);
+			generateQuadIndicesOffset(static_cast<IndexType>(result.firstIndex + x + (y * 4)), 4, dstIndex);
 			dstIndex += 6;
 		}
 	}
@@ -390,7 +412,7 @@ void Painter::startDrawCall(std::shared_ptr<Material>& material)
 void Painter::flushPending()
 {
 	if (verticesPending > 0) {
-		executeDrawTriangles(*materialPending, verticesPending, vertexBuffer.data(), indicesPending, indexBuffer.data());
+		executeDrawPrimitives(*materialPending, verticesPending, vertexBuffer.data(), indexBuffer);
 	}
 
 	resetPending();
@@ -408,12 +430,14 @@ void Painter::resetPending()
 	}
 }
 
-void Painter::executeDrawTriangles(Material& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
+void Painter::executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<IndexType> indices, PrimitiveType primitiveType)
 {
+	Expects(primitiveType == PrimitiveType::Triangle);
+
 	startDrawCall();
 
 	// Load vertices
-	setVertices(material.getDefinition(), numVertices, vertexData, numIndices, indices, allIndicesAreQuads);
+	setVertices(material.getDefinition(), numVertices, vertexData, indices.size(), indices.data(), allIndicesAreQuads);
 
 	// Load material uniforms
 	material.uploadData(*this);
@@ -426,11 +450,11 @@ void Painter::executeDrawTriangles(Material& material, size_t numVertices, void*
 			material.bind(i, *this);
 
 			// Draw
-			drawTriangles(numIndices);
+			drawTriangles(indices.size());
 
 			// Log stats
 			nDrawCalls++;
-			nTriangles += numIndices / 3;
+			nTriangles += indices.size() / 3;
 			nVertices += numVertices;
 		}
 	}
@@ -438,14 +462,14 @@ void Painter::executeDrawTriangles(Material& material, size_t numVertices, void*
 	endDrawCall();
 }
 
-unsigned short* Painter::getStandardQuadIndices(size_t numQuads)
+IndexType* Painter::getStandardQuadIndices(size_t numQuads)
 {
 	size_t sz = numQuads * 6;
 	size_t oldSize = stdQuadIndexCache.size();
 
 	if (oldSize < sz) {
 		stdQuadIndexCache.resize(sz);
-		unsigned short pos = static_cast<unsigned short>(oldSize * 2 / 3);
+		IndexType pos = static_cast<IndexType>(oldSize * 2 / 3);
 		for (size_t i = oldSize; i < sz; i += 6) {
 			// A-----B
 			// |     |
@@ -465,7 +489,7 @@ unsigned short* Painter::getStandardQuadIndices(size_t numQuads)
 	return stdQuadIndexCache.data();
 }
 
-void Painter::generateQuadIndices(unsigned short pos, size_t numQuads, unsigned short* target)
+void Painter::generateQuadIndices(IndexType pos, size_t numQuads, IndexType* target)
 {
 	size_t numIndices = numQuads * 6;
 	for (size_t i = 0; i < numIndices; i += 6) {
@@ -490,7 +514,7 @@ RenderTarget& Painter::getActiveRenderTarget()
 	return *activeRenderTarget;
 }
 
-void Painter::generateQuadIndicesOffset(unsigned short pos, unsigned short lineStride, unsigned short* target)
+void Painter::generateQuadIndicesOffset(IndexType pos, IndexType lineStride, IndexType* target)
 {
 	// A-----B
 	// |     |

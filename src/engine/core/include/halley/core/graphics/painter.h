@@ -15,6 +15,13 @@ namespace Halley
 	class RenderContext;
 	class Core;
 
+	enum class PrimitiveType
+	{
+		Triangle
+	};
+
+	using IndexType = unsigned short;
+
 	class Painter
 	{
 		friend class RenderContext;
@@ -23,11 +30,11 @@ namespace Halley
 		struct PainterVertexData
 		{
 			char* dstVertex;
-			unsigned short* dstIndex;
+			IndexType* dstIndex;
 			size_t vertexSize;
 			size_t vertexStride;
 			size_t dataSize;
-			unsigned short firstIndex;
+			IndexType firstIndex;
 		};
 
 	public:
@@ -48,7 +55,10 @@ namespace Halley
 		void setClip(Rect4i rect);
 		void setClip();
 
-		// Draws quads to the screen
+		// Draws primitives
+		void draw(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData, gsl::span<IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
+
+		// Draws quads
 		void drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData);
 
 		// Draw sprites takes a single vertex per sprite, duplicates the data across multiple vertices, and draws
@@ -78,14 +88,14 @@ namespace Halley
 		virtual void endDrawCall() {}
 		virtual void doStartRender() = 0;
 		virtual void doEndRender() = 0;
-		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly) = 0;
+		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, IndexType* indices, bool standardQuadsOnly) = 0;
 		virtual void drawTriangles(size_t numIndices) = 0;
 
 		virtual void setViewPort(Rect4i rect) = 0;
 		virtual void setClip(Rect4i clip, bool enable) = 0;
 
 		virtual void onUpdateProjection(Material& material) = 0;
-		void generateQuadIndices(unsigned short firstVertex, size_t numQuads, unsigned short* target);
+		void generateQuadIndices(IndexType firstVertex, size_t numQuads, IndexType* target);
 		RenderTarget& getActiveRenderTarget();
 
 	private:
@@ -101,7 +111,7 @@ namespace Halley
 		size_t indicesPending = 0;
 		bool allIndicesAreQuads = true;
 		Vector<char> vertexBuffer;
-		Vector<unsigned short> indexBuffer;
+		Vector<IndexType> indexBuffer;
 		std::shared_ptr<Material> materialPending;
 		std::shared_ptr<Material> solidLineMaterial;
 		std::unique_ptr<Material> halleyGlobalMaterial;
@@ -113,7 +123,7 @@ namespace Halley
 		size_t prevVertices = 0;
 		size_t prevTriangles = 0;
 
-		Vector<unsigned short> stdQuadIndexCache;
+		Vector<IndexType> stdQuadIndexCache;
 
 		void bind(RenderContext& context);
 		void unbind(RenderContext& context);
@@ -124,14 +134,14 @@ namespace Halley
 		void resetPending();
 		void startDrawCall(std::shared_ptr<Material>& material);
 		void flushPending();
-		void executeDrawTriangles(Material& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices);
+		void executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
 
 		void makeSpaceForPendingVertices(size_t numBytes);
 		void makeSpaceForPendingIndices(size_t numIndices);
 		PainterVertexData addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly);
 
-		unsigned short* getStandardQuadIndices(size_t numQuads);
-		void generateQuadIndicesOffset(unsigned short firstVertex, unsigned short lineStride, unsigned short* target);
+		IndexType* getStandardQuadIndices(size_t numQuads);
+		void generateQuadIndicesOffset(IndexType firstVertex, IndexType lineStride, IndexType* target);
 
 		void updateProjection();
 
