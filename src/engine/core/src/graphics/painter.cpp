@@ -279,7 +279,7 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 	drawQuads(material, vertices.size(), vertices.data());
 }
 
-constexpr static size_t getSegmentsForArc(float radius, float arcLen)
+static size_t getSegmentsForArc(float radius, float arcLen)
 {
 	return clamp(size_t(std::sqrt(radius * arcLen) * 5), size_t(4), size_t(256));
 }
