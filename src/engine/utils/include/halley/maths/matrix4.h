@@ -39,6 +39,8 @@ namespace Halley {
 		Vector2f operator*(const Vector2f& param) const;
 
 		static Matrix4f makeIdentity();
+		static Matrix4f makeRotationX(Angle1f angle);
+		static Matrix4f makeRotationY(Angle1f angle);
 		static Matrix4f makeRotationZ(Angle1f angle);
 		static Matrix4f makeScaling2D(float scaleX, float scaleY);
 		static Matrix4f makeTranslation2D(float x, float y);
@@ -53,14 +55,19 @@ namespace Halley {
 		float* getElements();
 		const float* getElements() const;
 
-		inline float getElement(size_t column, size_t row) const
+		constexpr static size_t getIndex(size_t column, size_t row)
 		{
-			return elements[4 * column + row];
+			return 4 * column + row;
+		}
+
+		float getElement(size_t column, size_t row) const
+		{
+			return elements[getIndex(column, row)];
 		}
 
 		inline float& getElement(size_t column, size_t row)
 		{
-			return elements[4 * column + row];
+			return elements[getIndex(column, row)];
 		}
 
 	private:

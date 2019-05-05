@@ -56,7 +56,7 @@ namespace Halley
 		void setClip();
 
 		// Draws primitives
-		void draw(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData, gsl::span<IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
+		void draw(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
 
 		// Draws quads
 		void drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData);
@@ -134,7 +134,7 @@ namespace Halley
 		void resetPending();
 		void startDrawCall(std::shared_ptr<Material>& material);
 		void flushPending();
-		void executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
+		void executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
 
 		void makeSpaceForPendingVertices(size_t numBytes);
 		void makeSpaceForPendingIndices(size_t numIndices);

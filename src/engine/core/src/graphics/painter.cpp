@@ -93,10 +93,10 @@ Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& mater
 	return result;
 }
 
-void Painter::draw(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData, gsl::span<IndexType> indices, PrimitiveType primitiveType)
+void Painter::draw(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType)
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
-	Expects(numVertices % 3 == 0);
+	Expects(indices.size() % 3 == 0);
 
 	const auto result = addDrawData(material, numVertices, indices.size(), false);
 
@@ -430,14 +430,15 @@ void Painter::resetPending()
 	}
 }
 
-void Painter::executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<IndexType> indices, PrimitiveType primitiveType)
+void Painter::executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType)
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
 
 	startDrawCall();
 
 	// Load vertices
-	setVertices(material.getDefinition(), numVertices, vertexData, indices.size(), indices.data(), allIndicesAreQuads);
+	// BAD: This method should take const IndexType*!
+	setVertices(material.getDefinition(), numVertices, vertexData, indices.size(), const_cast<IndexType*>(indices.data()), allIndicesAreQuads);
 
 	// Load material uniforms
 	material.uploadData(*this);

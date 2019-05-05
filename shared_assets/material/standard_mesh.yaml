@@ -1,0 +1,18 @@
+---
+name: Halley/StandardMesh
+base: material_base.yaml
+uniforms:
+  - ModelBlock:
+    - u_modelMatrix: mat4
+attributes:
+  - a_position: vec4
+  - a_normal: vec4
+  - a_colour: vec4
+  - a_texCoord0: vec4
+passes:
+  - blend: Opaque
+    shader:
+      - language: hlsl
+        vertex: standard_mesh.vertex.hlsl
+        pixel: standard_mesh.pixel.hlsl
+...

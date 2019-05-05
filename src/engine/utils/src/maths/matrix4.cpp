@@ -138,6 +138,34 @@ Matrix4f Matrix4f::makeIdentity()
 	return result;
 }
 
+Matrix4f Matrix4f::makeRotationX(Angle1f angle)
+{
+	float s, c;
+	angle.sincos(s, c);
+	
+	Matrix4f result;
+	result.loadIdentity();
+	result.elements[getIndex(1, 1)] = c;
+	result.elements[getIndex(2, 1)] = -s;
+	result.elements[getIndex(1, 2)] = s;
+	result.elements[getIndex(2, 2)] = c;
+	return result;
+}
+
+Matrix4f Matrix4f::makeRotationY(Angle1f angle)
+{
+	float s, c;
+	angle.sincos(s, c);
+	
+	Matrix4f result;
+	result.loadIdentity();
+	result.elements[getIndex(0, 0)] = c;
+	result.elements[getIndex(2, 0)] = s;
+	result.elements[getIndex(0, 2)] = -s;
+	result.elements[getIndex(2, 2)] = c;
+	return result;
+}
+
 Matrix4f Matrix4f::makeRotationZ(Angle1f angle)
 {
 	float s, c;
@@ -145,10 +173,10 @@ Matrix4f Matrix4f::makeRotationZ(Angle1f angle)
 
 	Matrix4f result;
 	result.loadIdentity();
-	result.elements[0] = c;
-	result.elements[1] = s;
-	result.elements[4] = -s;
-	result.elements[5] = c;
+	result.elements[getIndex(0, 0)] = c;
+	result.elements[getIndex(0, 1)] = s;
+	result.elements[getIndex(1, 0)] = -s;
+	result.elements[getIndex(1, 1)] = c;
 	return result;
 }
 
