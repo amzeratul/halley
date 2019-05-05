@@ -91,8 +91,6 @@ Quaternion Quaternion::lookAt(const Vector3f& dir, const Vector3f& worldUp)
 	const Vector3f r = worldUp.cross(f).normalized(); // Right
 	const Vector3f u = f.cross(r); // Up
 
-	//return Matrix4f::makeBase(r, f, u).toRotationQuaternion();
-
 	const float trace = r.x + u.y + f.z;
 	if (trace > 0.0f) {
 		const float s = 0.5f / std::sqrt(trace + 1.0f);

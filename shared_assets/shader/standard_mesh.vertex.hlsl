@@ -23,9 +23,7 @@ struct VOut {
 VOut main(VIn input) {
     VOut result;
 
-    float4 pos = float4((input.position.xyz) * 50, input.position.w);
-
-    result.position = mul(u_mvp, mul(u_modelMatrix, pos));
+    result.position = mul(u_mvp, mul(u_modelMatrix, input.position));
     result.normal = input.normal;
     result.colour = input.colour;
     result.texCoord0 = input.texCoord0;

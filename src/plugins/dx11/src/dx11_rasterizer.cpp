@@ -14,13 +14,10 @@ bool DX11RasterizerOptions::operator!=(const DX11RasterizerOptions& other) const
 
 bool DX11RasterizerOptions::operator<(const DX11RasterizerOptions& other) const
 {
-	if (scissor < other.scissor) {
-		return true;
+	if (scissor != other.scissor) {
+		return scissor < other.scissor;
 	}
-	if (culling < other.culling) {
-		return true;
-	}
-	return false;
+	return culling < other.culling;
 }
 
 DX11Rasterizer::DX11Rasterizer(DX11Video& video, DX11RasterizerOptions opt)
