@@ -53,7 +53,6 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 	desc.Width = size.x;
 	desc.Height = size.y;
 	desc.MipLevels = desc.ArraySize = 1;
-	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
 	switch (descriptor.format) {
 	case TextureFormat::Indexed:
@@ -68,18 +67,23 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 		bpp = 4;
 		break;
 	case TextureFormat::DEPTH:
-		desc.Format = DXGI_FORMAT_D32_FLOAT;
+		desc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 		bpp = 4;
 		break;
 	default:
 		throw Exception("Unknown texture format", HalleyExceptions::VideoPlugin);
 	}
-	if (descriptor.isRenderTarget) {
-		desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
-	}
+
+	desc.BindFlags = 0;
 	if (descriptor.isDepthStencil) {
 		desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
+	} else {
+		desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+		if (descriptor.isRenderTarget) {
+			desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
+		}
 	}
+
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
 	desc.MiscFlags = 0;
@@ -109,23 +113,25 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 		throw Exception("Error loading texture.", HalleyExceptions::VideoPlugin);
 	}
 
-	CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	srvDesc.Format = desc.Format;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = 1;
-	srvDesc.Texture2D.MostDetailedMip = 0;
+	if (desc.BindFlags & D3D11_BIND_SHADER_RESOURCE) {
+		CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+		srvDesc.Format = desc.Format;
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MipLevels = 1;
+		srvDesc.Texture2D.MostDetailedMip = 0;
 
-	result = video.getDevice().CreateShaderResourceView(texture, &srvDesc, &srv);
-	if (result != S_OK) {
-		throw Exception("Error creating shader resource view", HalleyExceptions::VideoPlugin);
-	}
+		result = video.getDevice().CreateShaderResourceView(texture, &srvDesc, &srv);
+		if (result != S_OK) {
+			throw Exception("Error creating shader resource view", HalleyExceptions::VideoPlugin);
+		}
 
-	auto samplerDesc = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
-	samplerDesc.Filter = descriptor.useFiltering ? D3D11_FILTER_MIN_MAG_MIP_LINEAR : D3D11_FILTER_MIN_MAG_MIP_POINT;
-	samplerDesc.AddressU = samplerDesc.AddressV = samplerDesc.AddressW = descriptor.clamp ? D3D11_TEXTURE_ADDRESS_CLAMP : D3D11_TEXTURE_ADDRESS_WRAP;
-	result = video.getDevice().CreateSamplerState(&samplerDesc, &samplerState);
-	if (result != S_OK) {
-		throw Exception("Error creating sampler", HalleyExceptions::VideoPlugin);
+		auto samplerDesc = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
+		samplerDesc.Filter = descriptor.useFiltering ? D3D11_FILTER_MIN_MAG_MIP_LINEAR : D3D11_FILTER_MIN_MAG_MIP_POINT;
+		samplerDesc.AddressU = samplerDesc.AddressV = samplerDesc.AddressW = descriptor.clamp ? D3D11_TEXTURE_ADDRESS_CLAMP : D3D11_TEXTURE_ADDRESS_WRAP;
+		result = video.getDevice().CreateSamplerState(&samplerDesc, &samplerState);
+		if (result != S_OK) {
+			throw Exception("Error creating sampler", HalleyExceptions::VideoPlugin);
+		}
 	}
 
 	doneLoading();

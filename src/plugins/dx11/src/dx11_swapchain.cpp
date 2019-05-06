@@ -1,7 +1,12 @@
 #include "dx11_swapchain.h"
 #include "halley/core/graphics/window.h"
 #include "dx11_video.h"
+#include "halley/core/graphics/texture.h"
+#include "dx11_texture.h"
+#include "halley/core/graphics/texture_descriptor.h"
 using namespace Halley;
+
+constexpr static int numBuffers = 2;
 
 DX11SwapChain::DX11SwapChain(DX11Video& video, Window& window)
 	: video(video)
@@ -11,10 +16,8 @@ DX11SwapChain::DX11SwapChain(DX11Video& video, Window& window)
 
 DX11SwapChain::~DX11SwapChain()
 {
-	if (renderTarget) {
-		renderTarget->Release();
-		renderTarget = nullptr;
-	}
+	clearRenderTarget();
+	clearDepthStencilViews();
 
 	if (swapChain) {
 		swapChain->Release();
@@ -25,14 +28,12 @@ DX11SwapChain::~DX11SwapChain()
 void DX11SwapChain::present(bool useVsync)
 {
 	swapChain->Present(useVsync ? 1 : 0, 0);
+	curBuffer = (curBuffer + 1) % numBuffers;
 }
 
 void DX11SwapChain::resize(Vector2i newSize)
 {
-	if (renderTarget) {
-		renderTarget->Release();
-		renderTarget = nullptr;
-	}
+	clearRenderTarget();
 	
 	HRESULT result = swapChain->ResizeBuffers(0, newSize.x, newSize.y, DXGI_FORMAT_UNKNOWN, 0);
 	if (result != S_OK) {
@@ -56,8 +57,10 @@ ID3D11RenderTargetView* DX11SwapChain::getRenderTargetView() const
 
 ID3D11DepthStencilView* DX11SwapChain::getDepthStencilView() const
 {
-	// TODO
-	return nullptr;
+	if (depthStencilViews.empty()) {
+		return nullptr;
+	}
+	return depthStencilViews.at(curBuffer);
 }
 
 void DX11SwapChain::init(Window& window)
@@ -114,13 +117,61 @@ void DX11SwapChain::init(Window& window)
 
 void DX11SwapChain::initRenderTarget()
 {
-	if (renderTarget) {
-		renderTarget->Release();
-		renderTarget = nullptr;
-	}
+	clearRenderTarget();
 
 	ID3D11Texture2D *pBackBuffer;
     swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&pBackBuffer));
     video.getDevice().CreateRenderTargetView(pBackBuffer, nullptr, &renderTarget);
     pBackBuffer->Release();
+
+	initDepthStencilViews();
+}
+
+void DX11SwapChain::initDepthStencilViews()
+{
+	return;
+
+	clearDepthStencilViews();
+
+	for (int i = 0; i < numBuffers; ++i) {
+		auto t = video.createTexture(size);
+		auto& tex = dynamic_cast<DX11Texture&>(*t);
+		TextureDescriptor descriptor;
+		descriptor.size = size;
+		descriptor.isDepthStencil = true;
+		descriptor.format = TextureFormat::DEPTH;
+		tex.startLoading();
+		tex.load(std::move(descriptor));
+
+		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
+		desc.Flags = 0;
+		desc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+		desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		desc.Texture2D.MipSlice = 0;
+		ID3D11DepthStencilView *view;
+		auto result = video.getDevice().CreateDepthStencilView(tex.getTexture(), &desc, &view);
+		if (result != S_OK) {
+			throw Exception("Unable to create DepthStencilView", HalleyExceptions::VideoPlugin);
+		}
+
+		depthStencilTextures.push_back(std::move(t));
+		depthStencilViews.push_back(view);
+	}
+}
+
+void DX11SwapChain::clearRenderTarget()
+{
+	if (renderTarget) {
+		renderTarget->Release();
+		renderTarget = nullptr;
+	}
+}
+
+void DX11SwapChain::clearDepthStencilViews()
+{
+	for (auto& view: depthStencilViews) {
+		view->Release();
+	}
+	depthStencilViews.clear();
+	depthStencilTextures.clear();
 }
