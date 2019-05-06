@@ -2,7 +2,8 @@
 #include "dx11_painter.h"
 #include "dx11_shader.h"
 #include "dx11_texture.h"
-#include "dx11_render_target.h"
+#include "dx11_render_target_screen.h"
+#include "dx11_render_target_texture.h"
 #include "dx11_material_constant_buffer.h"
 
 #include <windows.h>
@@ -150,8 +151,7 @@ std::unique_ptr<ScreenRenderTarget> DX11Video::createScreenRenderTarget()
 		swapChain->resize(view.getSize());
 	}
 
-	// TODO: get depthStencil
-	return std::make_unique<DX11ScreenRenderTarget>(*this, view, swapChain->getRenderTarget(), nullptr);
+	return std::make_unique<DX11ScreenRenderTarget>(*this, view);
 }
 
 std::unique_ptr<MaterialConstantBuffer> DX11Video::createConstantBuffer()
@@ -171,12 +171,20 @@ String DX11Video::getShaderLanguage()
 
 ID3D11Device& DX11Video::getDevice()
 {
+	Expects(device);
 	return *device;
 }
 
 ID3D11DeviceContext1& DX11Video::getDeviceContext()
 {
+	Expects(deviceContext);
 	return *deviceContext;
+}
+
+DX11SwapChain& DX11Video::getSwapChain()
+{
+	Expects(swapChain);
+	return *swapChain;
 }
 
 SystemAPI& DX11Video::getSystem()

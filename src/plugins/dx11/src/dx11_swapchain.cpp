@@ -49,9 +49,15 @@ Vector2i DX11SwapChain::getSize() const
 	return size;
 }
 
-ID3D11RenderTargetView* DX11SwapChain::getRenderTarget() const
+ID3D11RenderTargetView* DX11SwapChain::getRenderTargetView() const
 {
 	return renderTarget;
+}
+
+ID3D11DepthStencilView* DX11SwapChain::getDepthStencilView() const
+{
+	// TODO
+	return nullptr;
 }
 
 void DX11SwapChain::init(Window& window)

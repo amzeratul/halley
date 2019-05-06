@@ -20,7 +20,8 @@ namespace Halley
 		~DX11SwapChain();
 		
 		Vector2i getSize() const;
-		ID3D11RenderTargetView* getRenderTarget() const;
+		ID3D11RenderTargetView* getRenderTargetView() const;
+		ID3D11DepthStencilView* getDepthStencilView() const;
 
 		void present(bool useVsync);
 		void resize(Vector2i size);

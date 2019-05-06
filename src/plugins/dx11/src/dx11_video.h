@@ -41,6 +41,7 @@ namespace Halley {
 
 		ID3D11Device& getDevice();
 		ID3D11DeviceContext1& getDeviceContext();
+		DX11SwapChain& getSwapChain();
 		
 		SystemAPI& getSystem();
 
