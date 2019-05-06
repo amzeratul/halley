@@ -46,8 +46,11 @@ namespace Halley
 
 		DX11Blend& getBlendMode(BlendType type);
 		void rotateBuffers();
+
 		DX11Rasterizer& getRasterizer(const DX11RasterizerOptions& options);
 		void setRasterizer(const MaterialPass& pass);
 		void setRasterizer(const DX11RasterizerOptions& options);
+
+		void setDepthStencil(const MaterialPass& pass);
 	};
 }

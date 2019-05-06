@@ -11,6 +11,7 @@
 namespace Halley {
 	class SystemAPI;
 	class DX11Loader;
+	class DX11SwapChain;
 
 	class DX11Video final : public VideoAPIInternal
 	{
@@ -51,19 +52,14 @@ namespace Halley {
 
 		ID3D11Device* device = nullptr;
 		ID3D11DeviceContext1* deviceContext = nullptr;
-		IDXGISwapChain1* swapChain = nullptr;
-		ID3D11RenderTargetView* backbuffer = nullptr;
 
-		Vector2i swapChainSize;
 		bool initialised = false;
 		bool useVsync = false;
 
 		std::unique_ptr<DX11Loader> loader;
+		std::unique_ptr<DX11SwapChain> swapChain;
 
 		void initD3D(Window& window);
-		void initSwapChain(Window& window);
-		void initBackBuffer();
-		void resizeSwapChain(Vector2i size);
 		void releaseD3D();
 	};
 }

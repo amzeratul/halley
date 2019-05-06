@@ -12,6 +12,7 @@ set(SOURCES
         "src/dx11_rasterizer.cpp"
         "src/dx11_render_target.cpp"
         "src/dx11_shader.cpp"
+        "src/dx11_swapchain.cpp"
         "src/dx11_texture.cpp"
         "src/dx11_video.cpp"
         )
@@ -25,6 +26,7 @@ set(HEADERS
         "src/dx11_rasterizer.h"
         "src/dx11_render_target.h"
         "src/dx11_shader.h"
+        "src/dx11_swapchain.h"
         "src/dx11_texture.h"
         "src/dx11_video.h"
         "src/halley_dx11.h"

@@ -12,15 +12,16 @@ namespace Halley
 	class IDX11RenderTarget
 	{
 	public:
-		~IDX11RenderTarget() {}
+		virtual ~IDX11RenderTarget() {}
 
 		virtual ID3D11RenderTargetView* getRenderTargetView() = 0;
+		virtual ID3D11DepthStencilView* getDepthStencilView() = 0;
 	};
 
 	class DX11ScreenRenderTarget : public ScreenRenderTarget, public IDX11RenderTarget
 	{
 	public:
-		explicit DX11ScreenRenderTarget(DX11Video& video, const Rect4i& viewPort, ID3D11RenderTargetView* view);
+		explicit DX11ScreenRenderTarget(DX11Video& video, const Rect4i& viewPort, ID3D11RenderTargetView* renderTargetView, ID3D11DepthStencilView* depthStencilView);
 
 		bool getProjectionFlipVertical() const override;
 		bool getViewportFlipVertical() const override;
@@ -28,10 +29,12 @@ namespace Halley
 		void onBind(Painter& painter) override;
 
 		ID3D11RenderTargetView* getRenderTargetView() override;
+		ID3D11DepthStencilView* getDepthStencilView() override;
 
 	private:
 		DX11Video& video;
-		ID3D11RenderTargetView* view;
+		ID3D11RenderTargetView* renderTargetView;
+		ID3D11DepthStencilView* depthStencilView;
 	};
 
 	class DX11TextureRenderTarget : public TextureRenderTarget, public IDX11RenderTarget
@@ -46,6 +49,7 @@ namespace Halley
 		void onBind(Painter& painter) override;
 
 		ID3D11RenderTargetView* getRenderTargetView() override;
+		ID3D11DepthStencilView* getDepthStencilView() override;
 
 	private:
 		DX11Video& video;

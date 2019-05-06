@@ -40,15 +40,22 @@ void DX11Painter::doEndRender()
 void DX11Painter::clear(Colour colour)
 {
 	const float col[] = { colour.r, colour.g, colour.b, colour.a };
-	auto view = dynamic_cast<IDX11RenderTarget&>(getActiveRenderTarget()).getRenderTargetView();
-	video.getDeviceContext().ClearRenderTargetView(view, col);
+	auto& renderTarget = dynamic_cast<IDX11RenderTarget&>(getActiveRenderTarget());
+	video.getDeviceContext().ClearRenderTargetView(renderTarget.getRenderTargetView(), col);
+
+	auto depthStencilView = renderTarget.getDepthStencilView();
+	if (depthStencilView) {
+		video.getDeviceContext().ClearDepthStencilView(depthStencilView, 0, -1, 0);
+	}
 }
 
 void DX11Painter::setMaterialPass(const Material& material, int passN)
 {
 	auto& pass = material.getDefinition().getPass(passN);
 
+	// Raster and depthStencil
 	setRasterizer(pass);
+	setDepthStencil(pass);
 
 	// Shader
 	auto& shader = static_cast<DX11Shader&>(pass.getShader());
@@ -203,4 +210,9 @@ void DX11Painter::setRasterizer(const DX11RasterizerOptions& options)
 		rect.right = clip.getRight();
 		video.getDeviceContext().RSSetScissorRects(1, &rect);
 	}
+}
+
+void DX11Painter::setDepthStencil(const MaterialPass& pass)
+{
+	// TODO
 }

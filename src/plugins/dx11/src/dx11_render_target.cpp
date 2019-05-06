@@ -3,10 +3,11 @@
 #include "dx11_texture.h"
 using namespace Halley;
 
-DX11ScreenRenderTarget::DX11ScreenRenderTarget(DX11Video& video, const Rect4i& viewPort, ID3D11RenderTargetView* view)
+DX11ScreenRenderTarget::DX11ScreenRenderTarget(DX11Video& video, const Rect4i& viewPort, ID3D11RenderTargetView* renderTargetView, ID3D11DepthStencilView* depthStencilView)
 	: ScreenRenderTarget(viewPort)
 	, video(video)
-	, view(view)
+	, renderTargetView(renderTargetView)
+	, depthStencilView(depthStencilView)
 {
 }
 
@@ -22,13 +23,17 @@ bool DX11ScreenRenderTarget::getViewportFlipVertical() const
 
 void DX11ScreenRenderTarget::onBind(Painter& painter)
 {
-	ID3D11RenderTargetView* views[] = { view };
-	video.getDeviceContext().OMSetRenderTargets(1, views, nullptr);
+	video.getDeviceContext().OMSetRenderTargets(1, &renderTargetView, depthStencilView);
 }
 
 ID3D11RenderTargetView* DX11ScreenRenderTarget::getRenderTargetView()
 {
-	return view;
+	return renderTargetView;
+}
+
+ID3D11DepthStencilView* DX11ScreenRenderTarget::getDepthStencilView()
+{
+	return depthStencilView;
 }
 
 DX11TextureRenderTarget::DX11TextureRenderTarget(DX11Video& video)
@@ -61,6 +66,11 @@ ID3D11RenderTargetView* DX11TextureRenderTarget::getRenderTargetView()
 {
 	update();
 	return views.at(0);
+}
+
+ID3D11DepthStencilView* DX11TextureRenderTarget::getDepthStencilView()
+{
+	return depthStencilView;
 }
 
 void DX11TextureRenderTarget::update()
