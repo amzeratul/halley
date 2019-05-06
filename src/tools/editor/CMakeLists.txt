@@ -44,6 +44,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(EXTRA_LIBS bz2 z)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(EXTRA_LIBS pthread)
+elseif(MINGW)
+    set(EXTRA_LIBS ws2_32 wsock32 d3d11 dxgi)
 endif()
 
 include_directories(${FREETYPE_INCLUDE_DIR} "../tools/include")

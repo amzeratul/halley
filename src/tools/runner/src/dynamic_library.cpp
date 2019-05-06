@@ -93,7 +93,7 @@ void DynamicLibrary::unload()
 void* DynamicLibrary::getFunction(std::string name) const
 {
 	#ifdef _WIN32
-	return GetProcAddress(handle, name.c_str());
+	return reinterpret_cast<void*>(GetProcAddress(handle, name.c_str()));
 	#else
 	return nullptr;
 	#endif

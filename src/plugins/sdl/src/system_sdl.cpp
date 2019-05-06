@@ -296,7 +296,7 @@ std::shared_ptr<IClipboard> SystemSDL::getClipboard() const
 }
 
 
-#if defined(_WIN32) && !defined(WINDOWS_STORE)
+#if defined(_WIN32) && !defined(WINDOWS_STORE) && !defined(__MINGW32__)
 #pragma warning(default: 6320 6322)
 #include <Windows.h>
 const DWORD MS_VC_EXCEPTION=0x406D1388;
@@ -332,7 +332,7 @@ void SetThreadName( DWORD dwThreadID, const char* name)
 
 void SystemSDL::setThreadName(const String& name)
 {
-#if defined(_WIN32) && !defined(WINDOWS_STORE) && defined(_DEBUG)
+#if defined(_WIN32) && !defined(WINDOWS_STORE) && !defined(__MINGW32__) && defined(_DEBUG)
 	if (name != "main") {
 		SetThreadName(static_cast<DWORD>(-1), name.c_str());
 	}

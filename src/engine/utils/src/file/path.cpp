@@ -237,7 +237,7 @@ Bytes Path::readFile(const Path& path)
 {
 	Bytes result;
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 	std::ifstream fp(path.getString().getUTF16().c_str(), std::ios::binary | std::ios::in);
 #else
 	std::ifstream fp(path.string(), std::ios::binary | std::ios::in);

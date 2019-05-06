@@ -4,6 +4,8 @@
 #include "dx11_texture.h"
 #include "dx11_render_target.h"
 #include "dx11_material_constant_buffer.h"
+#include "dx11_blend.h"
+#include "dx11_rasterizer.h"
 
 #include <windows.h>
 #include <windowsx.h>
@@ -113,7 +115,11 @@ void DX11Video::initSwapChain(Window& window)
 #else
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 #endif
+#ifdef __MINGW32__
+		swapChainDesc.Scaling = static_cast<DXGI_SCALING>(2);  // DXGI_SCALING_ASPECT_RATIO_STRETCH
+#else
 		swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
+#endif
 		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
 		IUnknown* coreWindow = reinterpret_cast<IUnknown*>(window.getNativeHandle());

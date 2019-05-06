@@ -6,7 +6,7 @@
 #include "halley/core/graphics/shader.h"
 #include "halley/support/logger.h"
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <D3Dcompiler.h>
 #pragma comment(lib, "D3DCompiler.lib")
 #endif
@@ -36,7 +36,7 @@ void ShaderImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 Bytes ShaderImporter::compileHLSL(const String& name, ShaderType type, const Bytes& bytes) const
 {
-#ifdef _MSC_VER
+#ifdef _WIN32
 
 	String target;
 
@@ -59,7 +59,11 @@ Bytes ShaderImporter::compileHLSL(const String& name, ShaderType type, const Byt
 
 	ID3D10Blob *codeBlob = nullptr;
 	ID3D10Blob *errorBlob = nullptr;
+#ifdef __MINGW32__
+	const HRESULT hResult = D3DCompile(bytes.data(), bytes.size(), name.c_str(), nullptr, nullptr, "main", target.c_str(), 0, 0, &codeBlob, &errorBlob);
+#else
 	const HRESULT hResult = D3DCompile2(bytes.data(), bytes.size(), name.c_str(), nullptr, nullptr, "main", target.c_str(), 0, 0, 0, nullptr, 0, &codeBlob, &errorBlob);
+#endif
 	if (hResult != S_OK) {
 		const auto errorMessage = String(reinterpret_cast<const char*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
 		errorBlob->Release();
