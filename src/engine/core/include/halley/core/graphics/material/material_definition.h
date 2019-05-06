@@ -227,20 +227,20 @@ namespace Halley
 		StencilWriteOperation getStencilOpStencilFail() const;
 
 	private:
-		bool enableDepthTest = false;
-		bool enableDepthWrite = false;
-		bool enableStencilTest = false;
-
-		int stencilReference = 0;
-		int stencilWriteMask = 0xFF;
-		int stencilReadMask = 0xFF;
-
 		DepthStencilComparisonFunction depthComparison = DepthStencilComparisonFunction::Always;
 		DepthStencilComparisonFunction stencilComparison = DepthStencilComparisonFunction::Always;
 
 		StencilWriteOperation stencilOpPass = StencilWriteOperation::Keep;
 		StencilWriteOperation stencilOpDepthFail = StencilWriteOperation::Keep;
 		StencilWriteOperation stencilOpStencilFail = StencilWriteOperation::Keep;
+
+		int stencilReference = 0;
+		int stencilWriteMask = 0xFF;
+		int stencilReadMask = 0xFF;
+
+		bool enableDepthTest = false;
+		bool enableDepthWrite = false;
+		bool enableStencilTest = false;
 	};
 
 	class MaterialPass

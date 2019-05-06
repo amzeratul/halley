@@ -129,8 +129,6 @@ void DX11SwapChain::initRenderTarget()
 
 void DX11SwapChain::initDepthStencilViews()
 {
-	return;
-
 	clearDepthStencilViews();
 
 	for (int i = 0; i < numBuffers; ++i) {
