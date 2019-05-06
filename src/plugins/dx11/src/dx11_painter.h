@@ -10,6 +10,7 @@ namespace Halley
 	class DX11Blend;
 	class DX11Rasterizer;
 	class DX11RasterizerOptions;
+	class DX11DepthStencil;
 
 	class DX11Painter : public Painter
 	{
@@ -40,6 +41,8 @@ namespace Halley
 
 		std::map<DX11RasterizerOptions, std::unique_ptr<DX11Rasterizer>> rasterizers;
 		DX11Rasterizer* curRaster = nullptr;
+
+		std::unique_ptr<DX11DepthStencil> depthStencil;
 
 		size_t curBuffer = 0;
 		Maybe<Rect4i> clipping;

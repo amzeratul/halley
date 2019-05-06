@@ -1,5 +1,4 @@
 #include "dx11_depth_stencil.h"
-#include "halley/core/graphics/material/material_definition.h"
 #include "dx11_video.h"
 using namespace Halley;
 
@@ -52,6 +51,7 @@ static D3D11_STENCIL_OP getOperation(StencilWriteOperation op)
 
 DX11DepthStencil::DX11DepthStencil(DX11Video& video, const MaterialDepthStencil& definition)
 	: video(video)
+	, definition(definition)
 {
 	D3D11_DEPTH_STENCIL_DESC desc;
 
@@ -73,7 +73,10 @@ DX11DepthStencil::DX11DepthStencil(DX11Video& video, const MaterialDepthStencil&
 	desc.BackFace.StencilPassOp = desc.FrontFace.StencilPassOp;
 	desc.BackFace.StencilFunc = desc.FrontFace.StencilFunc;
 
-	video.getDevice().CreateDepthStencilState(&desc, &state);
+	auto result = video.getDevice().CreateDepthStencilState(&desc, &state);
+	if (result != S_OK) {
+		throw Exception("Unable to create DepthStencil state", HalleyExceptions::VideoPlugin);
+	}
 }
 
 DX11DepthStencil::~DX11DepthStencil()
@@ -82,4 +85,14 @@ DX11DepthStencil::~DX11DepthStencil()
 		state->Release();
 		state = nullptr;
 	}
+}
+
+const MaterialDepthStencil& DX11DepthStencil::getDefinition() const
+{
+	return definition;
+}
+
+void DX11DepthStencil::bind()
+{
+	video.getDeviceContext().OMSetDepthStencilState(state, 1);
 }

@@ -226,6 +226,9 @@ namespace Halley
 		StencilWriteOperation getStencilOpDepthFail() const;
 		StencilWriteOperation getStencilOpStencilFail() const;
 
+		bool operator==(const MaterialDepthStencil& other) const;
+		bool operator!=(const MaterialDepthStencil& other) const;
+
 	private:
 		DepthStencilComparisonFunction depthComparison = DepthStencilComparisonFunction::Always;
 		DepthStencilComparisonFunction stencilComparison = DepthStencilComparisonFunction::Always;

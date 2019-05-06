@@ -11,6 +11,7 @@
 #include "halley/core/graphics/render_target/render_target.h"
 #include "dx11_render_target.h"
 #include "halley/core/game/game_platform.h"
+#include "dx11_depth_stencil.h"
 using namespace Halley;
 
 DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
@@ -45,7 +46,7 @@ void DX11Painter::clear(Colour colour)
 
 	auto depthStencilView = renderTarget.getDepthStencilView();
 	if (depthStencilView) {
-		video.getDeviceContext().ClearDepthStencilView(depthStencilView, 0, -1, 0);
+		video.getDeviceContext().ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 	}
 }
 
@@ -214,5 +215,8 @@ void DX11Painter::setRasterizer(const DX11RasterizerOptions& options)
 
 void DX11Painter::setDepthStencil(const MaterialPass& pass)
 {
-	// TODO
+	if (!depthStencil || depthStencil->getDefinition() != pass.getDepthStencil()) {
+		depthStencil = std::make_unique<DX11DepthStencil>(video, pass.getDepthStencil());
+		depthStencil->bind();
+	}
 }

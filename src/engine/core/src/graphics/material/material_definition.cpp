@@ -409,6 +409,36 @@ StencilWriteOperation MaterialDepthStencil::getStencilOpStencilFail() const
 	return stencilOpStencilFail;
 }
 
+bool MaterialDepthStencil::operator==(const MaterialDepthStencil& other) const
+{
+	return depthComparison == other.depthComparison
+		&& stencilComparison == other.stencilComparison
+		&& stencilOpPass == other.stencilOpPass
+		&& stencilOpDepthFail == other.stencilOpDepthFail
+		&& stencilOpStencilFail == other.stencilOpStencilFail
+		&& stencilReference == other.stencilReference
+		&& stencilWriteMask == other.stencilWriteMask
+		&& stencilReadMask == other.stencilReadMask
+		&& enableDepthTest == other.enableDepthTest
+		&& enableDepthWrite == other.enableDepthWrite
+		&& enableStencilTest == other.enableStencilTest;
+}
+
+bool MaterialDepthStencil::operator!=(const MaterialDepthStencil& other) const
+{
+	return depthComparison != other.depthComparison
+		|| stencilComparison != other.stencilComparison
+		|| stencilOpPass != other.stencilOpPass
+		|| stencilOpDepthFail != other.stencilOpDepthFail
+		|| stencilOpStencilFail != other.stencilOpStencilFail
+		|| stencilReference != other.stencilReference
+		|| stencilWriteMask != other.stencilWriteMask
+		|| stencilReadMask != other.stencilReadMask
+		|| enableDepthTest != other.enableDepthTest
+		|| enableDepthWrite != other.enableDepthWrite
+		|| enableStencilTest != other.enableStencilTest;
+}
+
 
 MaterialPass::MaterialPass()
 	: blend(BlendType::Undefined)
