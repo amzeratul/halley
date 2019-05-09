@@ -25,14 +25,16 @@
 #include <cmath>
 #include <iostream>
 #include "angle.h"
+#include "vector2.h"
+#include "vector3.h"
 #include <halley/utils/utils.h>
 #include <gsl/gsl_assert>
 
 namespace Halley {
 	//////////////////////////////
 	// Vector4D class declaration
-	template <typename T=float>
-	class Vector4D {
+	template <typename T=float, int Alignment=4>
+	class alignas(Alignment * sizeof(T)) Vector4D {
 	private:
 		T mod(T a, T b) const { return a % b; }
 
@@ -54,25 +56,39 @@ namespace Halley {
 			, w(w)
 		{}
 		
-		template <typename V>
-		explicit Vector4D (Vector4D<V> vec)
+		template <typename V, int A>
+		explicit Vector4D (Vector4D<V, A> vec)
 			: x(T(vec.x))
 			, y(T(vec.y))
 			, z(T(vec.z))
 			, w(T(vec.w))
+		{}
+
+		explicit Vector4D(const Vector2D<T>& v, T z = 0, T w = 0)
+			: x(v.x)
+			, y(v.y)
+			, z(z)
+			, w(w)
+		{}
+
+		explicit Vector4D(const Vector3D<T>& v, T w = 0)
+			: x(v.x)
+			, y(v.y)
+			, z(v.z)
+			, w(w)
 		{}
 		
 		// Getter
 		inline T& operator[](size_t n)
 		{
 			Expects(n <= 3);
-			return reinterpret_cast<T*>(this)[n];
+			return (&x)[n];
 		}
 
-		inline T operator[](size_t n) const
+		inline const T& operator[](size_t n) const
 		{
 			Expects(n <= 3);
-			return reinterpret_cast<const T*>(this)[n];
+			return (&x)[n];
 		}
 
 		// Assignment and comparison
@@ -127,7 +143,7 @@ namespace Halley {
 		}
 
 		// Dot product
-		inline T dot (Vector4D param) const { return (x * param.x) + (y * param.y) + (z * param.z) + (w * param.w); }
+		constexpr inline T dot (Vector4D param) const { return (x * param.x) + (y * param.y) + (z * param.z) + (w * param.w); }
 
 		// Length
 		inline T length () const { return sqrt(squaredLength()); }
@@ -139,6 +155,16 @@ namespace Halley {
 		// Floor
 		inline Vector4D floor() const { return Vector4D(floor(x), floor(y), floor(z), floor(w)); }
 		inline Vector4D ceil() const { return Vector4D(ceil(x), ceil(y), ceil(z), ceil(w)); }
+
+		Vector2D<T> toVector2() const
+		{
+			return Vector2D<T>(x / w, y / w);
+		}
+
+		Vector3D<T> toVector3() const
+		{
+			return Vector3D<T>(x / w, y / w, z / w);
+		}
 	};
 
 
@@ -158,9 +184,9 @@ namespace Halley {
 
 	////////////
 	// Typedefs
-	using Vector4d = Vector4D<double>;
-	using Vector4f = Vector4D<float>;
-	using Vector4i = Vector4D<int>;
-	using Vector4s = Vector4D<short>;
-	using Vector4c = Vector4D<char>;
+	using Vector4d = Vector4D<double, 4>;
+	using Vector4f = Vector4D<float, 4>;
+	using Vector4i = Vector4D<int, 4>;
+	using Vector4s = Vector4D<short, 4>;
+	using Vector4c = Vector4D<char, 4>;
 }

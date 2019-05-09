@@ -109,8 +109,8 @@ namespace Halley
 		Sprite clone() const;
 
 	private:
-		std::shared_ptr<Material> material;
 		SpriteVertexAttrib vertexAttrib;
+		std::shared_ptr<Material> material;
 
 		Vector2f size;
 		Vector4s slices;

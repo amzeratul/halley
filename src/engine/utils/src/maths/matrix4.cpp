@@ -30,29 +30,25 @@ Matrix4f::Matrix4f()
 }
 
 Matrix4f::Matrix4f(const Matrix4f& m)
-	: elements(m.elements)
+	: columns(m.columns)
 {
 }
 
 Matrix4f::Matrix4f(Matrix4f&& m) noexcept
-	: elements(m.elements)
+	: columns(std::move(m.columns))
 {
 }
 
 Matrix4f::Matrix4f(const float elems[])
 {
-	memcpy(elements.data(), elems, sizeof(float) * 16);
+	memcpy(getElements(), elems, sizeof(float) * 16);
 }
 
-Matrix4f& Matrix4f::operator=(const Matrix4f& param)
-{
-	elements = param.elements;
-	return *this;
-}
+Matrix4f& Matrix4f::operator=(const Matrix4f& param) = default;
 
 Matrix4f& Matrix4f::operator*=(const Matrix4f& param)
 {
-	elements = ((*this) * param).elements;
+	*this = (*this) * param;
 	return *this;
 }
 
@@ -60,12 +56,9 @@ Matrix4f Matrix4f::operator*(const Matrix4f& param) const
 {
 	Matrix4f result;
 	for (size_t y = 0; y < 4; y++) {
+		const auto row = getRow(y);
 		for (size_t x = 0; x < 4; x++) {
-			float accum = 0.0f;
-			for (size_t i = 0; i < 4; i++) {
-				accum += getElement(i, y) * param.getElement(x, i);
-			}
-			result.getElement(x, y) = accum;
+			result.getElement(x, y) = row.dot(param.getColumn(x));
 		}
 	}
 	return result;
@@ -73,16 +66,24 @@ Matrix4f Matrix4f::operator*(const Matrix4f& param) const
 
 Vector2f Matrix4f::operator*(const Vector2f& param) const
 {
-	float src[4] = { param.x, param.y, 0.0f, 1.0f };
-	float result[4];
+	return ((*this) * Vector4f(param, 0.0f, 1.0f)).toVector2();
+}
+
+Vector3f Matrix4f::operator*(const Vector3f& param) const
+{
+	return ((*this) * Vector4f(param, 1.0f)).toVector3();
+}
+
+Vector4f Matrix4f::operator*(const Vector4f& v) const
+{
+	Vector4f result;
+
 	for (size_t i = 0; i < 4; i++) {
-		float accum = 0.0f;
-		for (size_t j = 0; j < 4; j++) {
-			accum += getElement(j, i) * src[j];
-		}
-		result[i] = accum;
+		const auto row = getRow(i);
+		result[i] = row.dot(v);
 	}
-	return Vector2f(result[0] / result[3], result[1] / result[3]);
+
+	return result;
 }
 
 void Matrix4f::loadIdentity()
@@ -91,7 +92,7 @@ void Matrix4f::loadIdentity()
 											0.0f, 1.0f, 0.0f, 0.0f,
 											0.0f, 0.0f, 1.0f, 0.0f,
 											0.0f, 0.0f, 0.0f, 1.0f};
-	memcpy(elements.data(), identityMatrix, sizeof(float) * 16);
+	memcpy(getElements(), identityMatrix, sizeof(float) * 16);
 }
 
 void Matrix4f::rotateZ(Angle1f angle)
@@ -126,7 +127,7 @@ void Matrix4f::translate(Vector3f translation)
 
 void Matrix4f::transpose()
 {
-	auto& e = elements;
+	auto e = getElements();
 	
 	std::swap(e[1], e[4]);
 	std::swap(e[2], e[8]);
@@ -188,12 +189,22 @@ Quaternion Matrix4f::toRotationQuaternion() const
 
 float* Matrix4f::getElements()
 {
-	return elements.data();
+	return &(columns[0][0]);
 }
 
 const float* Matrix4f::getElements() const
 {
-	return elements.data();
+	return &(columns[0][0]);
+}
+
+Vector4f Matrix4f::getRow(size_t row) const
+{
+	return Vector4f(getElement(0, row), getElement(1, row), getElement(2, row), getElement(3, row));
+}
+
+Vector4f Matrix4f::getColumn(size_t column) const
+{
+	return columns[column];
 }
 
 Matrix4f Matrix4f::makeIdentity()
@@ -231,10 +242,10 @@ Matrix4f Matrix4f::makeRotationX(Angle1f angle)
 	
 	Matrix4f result;
 	result.loadIdentity();
-	result.elements[getIndex(1, 1)] = c;
-	result.elements[getIndex(2, 1)] = -s;
-	result.elements[getIndex(1, 2)] = s;
-	result.elements[getIndex(2, 2)] = c;
+	result.columns[1][1] = c;
+	result.columns[2][1] = -s;
+	result.columns[1][2] = s;
+	result.columns[2][2] = c;
 	return result;
 }
 
@@ -245,10 +256,10 @@ Matrix4f Matrix4f::makeRotationY(Angle1f angle)
 	
 	Matrix4f result;
 	result.loadIdentity();
-	result.elements[getIndex(0, 0)] = c;
-	result.elements[getIndex(2, 0)] = s;
-	result.elements[getIndex(0, 2)] = -s;
-	result.elements[getIndex(2, 2)] = c;
+	result.columns[0][0] = c;
+	result.columns[2][0] = s;
+	result.columns[0][2] = -s;
+	result.columns[2][2] = c;
 	return result;
 }
 
@@ -259,10 +270,10 @@ Matrix4f Matrix4f::makeRotationZ(Angle1f angle)
 
 	Matrix4f result;
 	result.loadIdentity();
-	result.elements[getIndex(0, 0)] = c;
-	result.elements[getIndex(0, 1)] = s;
-	result.elements[getIndex(1, 0)] = -s;
-	result.elements[getIndex(1, 1)] = c;
+	result.columns[0][0] = c;
+	result.columns[0][1] = s;
+	result.columns[1][0] = -s;
+	result.columns[1][1] = c;
 	return result;
 }
 
@@ -287,8 +298,8 @@ Matrix4f Matrix4f::makeScaling(Vector2f scale)
 {
 	Matrix4f result;
 	result.loadIdentity();
-	result.elements[getIndex(0, 0)] = scale.x;
-	result.elements[getIndex(1, 1)] = scale.y;
+	result.columns[0][0] = scale.x;
+	result.columns[1][1] = scale.y;
 	return result;
 }
 
@@ -296,9 +307,9 @@ Matrix4f Matrix4f::makeScaling(Vector3f scale)
 {
 	Matrix4f result;
 	result.loadIdentity();
-	result.elements[getIndex(0, 0)] = scale.x;
-	result.elements[getIndex(1, 1)] = scale.y;
-	result.elements[getIndex(2, 2)] = scale.z;
+	result.columns[0][0] = scale.x;
+	result.columns[1][1] = scale.y;
+	result.columns[2][2] = scale.z;
 	return result;
 }
 
@@ -306,8 +317,8 @@ Matrix4f Matrix4f::makeTranslation(Vector2f translation)
 {
 	Matrix4f result;
 	result.loadIdentity();
-	result.elements[getIndex(3, 0)] = translation.x;
-	result.elements[getIndex(3, 1)] = translation.y;
+	result.columns[3][0] = translation.x;
+	result.columns[3][1] = translation.y;
 	return result;
 }
 
@@ -315,9 +326,9 @@ Matrix4f Matrix4f::makeTranslation(Vector3f translation)
 {
 	Matrix4f result;
 	result.loadIdentity();
-	result.elements[getIndex(3, 0)] = translation.x;
-	result.elements[getIndex(3, 1)] = translation.y;
-	result.elements[getIndex(3, 2)] = translation.z;
+	result.columns[3][0] = translation.x;
+	result.columns[3][1] = translation.y;
+	result.columns[3][2] = translation.z;
 	return result;
 }
 

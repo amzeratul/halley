@@ -25,6 +25,7 @@
 #include "angle.h"
 #include "vector2.h"
 #include "vector3.h"
+#include "vector4.h"
 
 namespace Halley {
 	class Quaternion;
@@ -40,6 +41,8 @@ namespace Halley {
 		Matrix4f& operator*=(const Matrix4f& param);
 		Matrix4f operator*(const Matrix4f& param) const;
 		Vector2f operator*(const Vector2f& param) const;
+		Vector3f operator*(const Vector3f& param) const;
+		Vector4f operator*(const Vector4f& param) const;
 
 		static Matrix4f makeIdentity();
 		static Matrix4f makeBase(Vector3f x, Vector3f y, Vector3f z);
@@ -69,23 +72,21 @@ namespace Halley {
 
 		float* getElements();
 		const float* getElements() const;
-
-		constexpr static size_t getIndex(size_t column, size_t row)
-		{
-			return 4 * column + row;
-		}
-
+		
 		float getElement(size_t column, size_t row) const
 		{
-			return elements[getIndex(column, row)];
+			return columns[column][row];
 		}
 
 		inline float& getElement(size_t column, size_t row)
 		{
-			return elements[getIndex(column, row)];
+			return columns[column][row];
 		}
 
+		Vector4f getRow(size_t row) const;
+		Vector4f getColumn(size_t column) const;
+
 	private:
-		std::array<float, 16> elements;
+		std::array<Vector4f, 4> columns;
 	};
 }
