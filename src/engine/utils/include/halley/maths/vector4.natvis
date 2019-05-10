@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Halley::Vector4D&lt;*&gt;">
+    <DisplayString>({x}, {y}, {z}, {w})</DisplayString>
+  </Type>
+</AutoVisualizer>

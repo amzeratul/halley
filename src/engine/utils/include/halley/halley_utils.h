@@ -45,6 +45,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "maths/random.h"
 #include "maths/range.h"
 #include "maths/rect.h"
+#include "maths/simd.h"
 #include "maths/tween.h"
 #include "maths/vector2.h"
 #include "maths/vector3.h"

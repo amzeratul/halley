@@ -31,8 +31,6 @@
 #include <gsl/gsl_assert>
 
 namespace Halley {
-	//////////////////////////////
-	// Vector4D class declaration
 	template <typename T=float, int Alignment=4>
 	class alignas(Alignment * sizeof(T)) Vector4D {
 	private:
@@ -41,6 +39,8 @@ namespace Halley {
 	public:
 		T x, y, z, w;
 
+		struct Uninitialized {};
+
 		// Constructors
 		constexpr inline Vector4D ()
 			: x(0)
@@ -48,6 +48,8 @@ namespace Halley {
 			, z(0)
 			, w(0)
 		{}
+
+		constexpr inline Vector4D(Uninitialized u) {}
 		
 		constexpr inline Vector4D (T x, T y, T z, T w)
 			: x(x)
@@ -89,6 +91,16 @@ namespace Halley {
 		{
 			Expects(n <= 3);
 			return (&x)[n];
+		}
+
+		T* data()
+		{
+			return &x;
+		}
+
+		const T* data() const
+		{
+			return &x;
 		}
 
 		// Assignment and comparison

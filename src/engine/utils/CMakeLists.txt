@@ -142,6 +142,7 @@ set(HEADERS
         "src/maths/mt199937ar.h"
         "include/halley/maths/range.h"
         "include/halley/maths/rect.h"
+        "include/halley/maths/simd.h"
         "include/halley/maths/tween.h"
         "include/halley/maths/vector2.h"
         "include/halley/maths/vector2.natvis"

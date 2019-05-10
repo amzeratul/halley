@@ -26,7 +26,7 @@ float4 main(VOut input) : SV_TARGET {
     float3 r = normalize(-2 * dot(i, n) * n + i);
     float cosA = max(0, -dot(r, v));
 
-    float ambient = 0.05;
+    float ambient = 0.5;
     float diffuse = max(dot(n, i), 0) * intensity;
     float specular = pow(cosA, 100) * intensity * 0.117;
     float light = min(ambient + diffuse + specular, 1.0);

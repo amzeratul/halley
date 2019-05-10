@@ -21,11 +21,13 @@
 
 #include <cstring>
 #include "halley/maths/matrix4.h"
+#include "halley/maths/simd.h"
 #include "halley/maths/quaternion.h"
 #include "halley/support/logger.h"
 using namespace Halley;
 
 Matrix4f::Matrix4f()
+	: columns({ Vector4f(Vector4f::Uninitialized()), Vector4f(Vector4f::Uninitialized()), Vector4f(Vector4f::Uninitialized()), Vector4f(Vector4f::Uninitialized()) })
 {
 }
 
@@ -55,11 +57,26 @@ Matrix4f& Matrix4f::operator*=(const Matrix4f& param)
 Matrix4f Matrix4f::operator*(const Matrix4f& param) const
 {
 	Matrix4f result;
-	for (size_t y = 0; y < 4; y++) {
-		const auto row = getRow(y);
-		for (size_t x = 0; x < 4; x++) {
-			result.getElement(x, y) = row.dot(param.getColumn(x));
-		}
+
+	auto r0 = SIMDVec4::loadAligned(getColumn(0).data());
+	auto r1 = SIMDVec4::loadAligned(getColumn(1).data());
+	auto r2 = SIMDVec4::loadAligned(getColumn(2).data());
+	auto r3 = SIMDVec4::loadAligned(getColumn(3).data());
+	SIMDVec4::transpose(r0, r1, r2, r3);
+
+	for (size_t x = 0; x < 4; x++) {
+		auto c = SIMDVec4::loadAligned(param.getColumn(x).data());
+
+		// Computing output column "x"
+		auto d0 = r0 * c;
+		auto d1 = r1 * c;
+		d0 = SIMDVec4::horizontalAdd(d0, d1);
+		auto d2 = r2 * c;
+		auto d3 = r3 * c;
+		d2 = SIMDVec4::horizontalAdd(d2, d3);
+		d0 = SIMDVec4::horizontalAdd(d0, d2);
+
+		d0.storeAligned(result.columns[x].data());
 	}
 	return result;
 }
@@ -78,10 +95,22 @@ Vector4f Matrix4f::operator*(const Vector4f& v) const
 {
 	Vector4f result;
 
-	for (size_t i = 0; i < 4; i++) {
-		const auto row = getRow(i);
-		result[i] = row.dot(v);
-	}
+	auto r0 = SIMDVec4::loadAligned(getRow(0).data());
+	auto r1 = SIMDVec4::loadAligned(getRow(1).data());
+	auto r2 = SIMDVec4::loadAligned(getRow(2).data());
+	auto r3 = SIMDVec4::loadAligned(getRow(3).data());
+
+	auto c = SIMDVec4::loadAligned(v.data());
+	
+	auto d0 = r0 * c;
+	auto d1 = r1 * c;
+	d0 = SIMDVec4::horizontalAdd(d0, d1);
+	auto d2 = r2 * c;
+	auto d3 = r3 * c;
+	d2 = SIMDVec4::horizontalAdd(d2, d3);
+	d0 = SIMDVec4::horizontalAdd(d0, d2);
+
+	d0.storeAligned(result.data());
 
 	return result;
 }
