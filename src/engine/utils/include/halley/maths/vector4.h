@@ -36,20 +36,20 @@ namespace Halley {
 	template <typename T=float, int Alignment=4>
 	class alignas(Alignment * sizeof(T)) Vector4D {
 	private:
-		T mod(T a, T b) const { return a % b; }
+		constexpr inline T mod(T a, T b) const { return a % b; }
 
 	public:
 		T x, y, z, w;
 
 		// Constructors
-		Vector4D ()
+		constexpr inline Vector4D ()
 			: x(0)
 			, y(0)
 			, z(0)
 			, w(0)
 		{}
 		
-		Vector4D (T x, T y, T z, T w)
+		constexpr inline Vector4D (T x, T y, T z, T w)
 			: x(x)
 			, y(y)
 			, z(z)
@@ -57,21 +57,21 @@ namespace Halley {
 		{}
 		
 		template <typename V, int A>
-		explicit Vector4D (Vector4D<V, A> vec)
+		constexpr inline explicit Vector4D (Vector4D<V, A> vec)
 			: x(T(vec.x))
 			, y(T(vec.y))
 			, z(T(vec.z))
 			, w(T(vec.w))
 		{}
 
-		explicit Vector4D(const Vector2D<T>& v, T z = 0, T w = 0)
+		constexpr inline explicit Vector4D(const Vector2D<T>& v, T z = 0, T w = 0)
 			: x(v.x)
 			, y(v.y)
 			, z(z)
 			, w(w)
 		{}
 
-		explicit Vector4D(const Vector3D<T>& v, T w = 0)
+		constexpr inline explicit Vector4D(const Vector3D<T>& v, T w = 0)
 			: x(v.x)
 			, y(v.y)
 			, z(v.z)
@@ -79,47 +79,47 @@ namespace Halley {
 		{}
 		
 		// Getter
-		inline T& operator[](size_t n)
+		constexpr inline T& operator[](size_t n)
 		{
 			Expects(n <= 3);
 			return (&x)[n];
 		}
 
-		inline const T& operator[](size_t n) const
+		constexpr inline const T& operator[](size_t n) const
 		{
 			Expects(n <= 3);
 			return (&x)[n];
 		}
 
 		// Assignment and comparison
-		inline Vector4D& operator = (Vector4D param) { x = param.x; y = param.y; z = param.z; w = param.w; return *this; }
-		inline Vector4D& operator = (T param) { x = param; y = param; z = param; w = param; return *this; }
-		inline bool operator == (Vector4D param) const { return x == param.x && y == param.y && z == param.z && w == param.w; }
-		inline bool operator != (Vector4D param) const { return x != param.x || y != param.y || z != param.z || w != param.w; }
+		constexpr inline Vector4D& operator = (Vector4D param) { x = param.x; y = param.y; z = param.z; w = param.w; return *this; }
+		constexpr inline Vector4D& operator = (T param) { x = param; y = param; z = param; w = param; return *this; }
+		constexpr inline bool operator == (Vector4D param) const { return x == param.x && y == param.y && z == param.z && w == param.w; }
+		constexpr inline bool operator != (Vector4D param) const { return x != param.x || y != param.y || z != param.z || w != param.w; }
 
 		// Basic algebra
-		inline Vector4D operator + (Vector4D param) const { return Vector4D(x + param.x, y + param.y, z + param.z, w + param.w); }
-		inline Vector4D operator - (Vector4D param) const { return Vector4D(x - param.x, y - param.y, z - param.z, w - param.w); }
-		inline Vector4D operator * (Vector4D param) const { return Vector4D(x * param.x, y * param.y, z * param.z, w * param.w); }
-		inline Vector4D operator / (Vector4D param) const { return Vector4D(x / param.x, y / param.y, z / param.z, w / param.w); }
-		inline Vector4D operator % (Vector4D param) const { return Vector4D(mod(x, param.x), mod(y, param.y), mod(z, param.z), mod(w, param.w)); }
+		constexpr inline Vector4D operator + (Vector4D param) const { return Vector4D(x + param.x, y + param.y, z + param.z, w + param.w); }
+		constexpr inline Vector4D operator - (Vector4D param) const { return Vector4D(x - param.x, y - param.y, z - param.z, w - param.w); }
+		constexpr inline Vector4D operator * (Vector4D param) const { return Vector4D(x * param.x, y * param.y, z * param.z, w * param.w); }
+		constexpr inline Vector4D operator / (Vector4D param) const { return Vector4D(x / param.x, y / param.y, z / param.z, w / param.w); }
+		constexpr inline Vector4D operator % (Vector4D param) const { return Vector4D(mod(x, param.x), mod(y, param.y), mod(z, param.z), mod(w, param.w)); }
 
-		inline Vector4D modulo(Vector4D param) const { return Vector4D(Halley::modulo<T>(x, param.x), Halley::modulo<T>(y, param.y), Halley::modulo<T>(z, param.z), Halley::modulo<T>(w, param.w)); }
-		inline Vector4D floorDiv(Vector4D param) const { return Vector4D(Halley::floorDiv(x, param.x), Halley::floorDiv(y, param.y), Halley::floorDiv(z, param.z), Halley::floorDiv(w, param.w)); }
+		constexpr inline Vector4D modulo(Vector4D param) const { return Vector4D(Halley::modulo<T>(x, param.x), Halley::modulo<T>(y, param.y), Halley::modulo<T>(z, param.z), Halley::modulo<T>(w, param.w)); }
+		constexpr inline Vector4D floorDiv(Vector4D param) const { return Vector4D(Halley::floorDiv(x, param.x), Halley::floorDiv(y, param.y), Halley::floorDiv(z, param.z), Halley::floorDiv(w, param.w)); }
 
-		inline Vector4D operator - () const { return Vector4D(-x, -y, -z, -w); }
-
-		template <typename V>
-		inline Vector4D operator * (V param) const { return Vector4D(T(x * param), T(y * param), T(z * param), T(w * param)); }
+		constexpr inline Vector4D operator - () const { return Vector4D(-x, -y, -z, -w); }
 
 		template <typename V>
-		inline Vector4D operator / (V param) const { return Vector4D(T(x / param), T(y / param), T(z * param), T(w * param)); }
+		constexpr inline Vector4D operator * (V param) const { return Vector4D(T(x * param), T(y * param), T(z * param), T(w * param)); }
+
+		template <typename V>
+		constexpr inline Vector4D operator / (V param) const { return Vector4D(T(x / param), T(y / param), T(z * param), T(w * param)); }
 
 		// In-place operations
-		inline Vector4D& operator += (Vector4D param) { x += param.x; y += param.y; z += param.z; w += param.w; return *this; }
-		inline Vector4D& operator -= (Vector4D param) { x -= param.x; y -= param.y; z -= param.z; w -= param.w; return *this; }
-		inline Vector4D& operator *= (const T param) { x *= param; y *= param; z *= param; w *= param; return *this; }
-		inline Vector4D& operator /= (const T param) { x /= param; y /= param; z /= param; w /= param; return *this; }
+		constexpr inline Vector4D& operator += (Vector4D param) { x += param.x; y += param.y; z += param.z; w += param.w; return *this; }
+		constexpr inline Vector4D& operator -= (Vector4D param) { x -= param.x; y -= param.y; z -= param.z; w -= param.w; return *this; }
+		constexpr inline Vector4D& operator *= (const T param) { x *= param; y *= param; z *= param; w *= param; return *this; }
+		constexpr inline Vector4D& operator /= (const T param) { x /= param; y /= param; z /= param; w /= param; return *this; }
 
 		// Get the normalized vector (unit vector)
 		inline Vector4D unit () const
@@ -143,25 +143,29 @@ namespace Halley {
 		}
 
 		// Dot product
-		constexpr inline T dot (Vector4D param) const { return (x * param.x) + (y * param.y) + (z * param.z) + (w * param.w); }
+		constexpr inline T dot (Vector4D param) const
+		{
+
+			return (x * param.x) + (y * param.y) + (z * param.z) + (w * param.w);
+		}
 
 		// Length
-		inline T length () const { return sqrt(squaredLength()); }
-		inline T len () const { return length(); }
+		constexpr inline T length () const { static_cast<T>(std::sqrt(squaredLength())); }
+		constexpr inline T len () const { return length(); }
 
 		// Squared length, often useful and much faster
-		inline T squaredLength () const { return x*x + y*y + z*z + w*w; }
+		constexpr inline T squaredLength () const { return x*x + y*y + z*z + w*w; }
 
 		// Floor
 		inline Vector4D floor() const { return Vector4D(floor(x), floor(y), floor(z), floor(w)); }
 		inline Vector4D ceil() const { return Vector4D(ceil(x), ceil(y), ceil(z), ceil(w)); }
 
-		Vector2D<T> toVector2() const
+		constexpr Vector2D<T> toVector2() const
 		{
 			return Vector2D<T>(x / w, y / w);
 		}
 
-		Vector3D<T> toVector3() const
+		constexpr Vector3D<T> toVector3() const
 		{
 			return Vector3D<T>(x / w, y / w, z / w);
 		}
@@ -171,7 +175,7 @@ namespace Halley {
 	////////////////////
 	// Global operators
 	template <typename T, typename V>
-	inline Vector4D<T> operator * (V f, const Vector4D<T> &v)
+	constexpr inline Vector4D<T> operator * (V f, const Vector4D<T> &v)
 	{
 		return Vector4D<T>(T(v.x * f), T(v.y * f), T(v.z * f), T(v.w * f));
 	}
