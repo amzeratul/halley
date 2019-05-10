@@ -93,8 +93,6 @@ Vector3f Matrix4f::operator*(const Vector3f& param) const
 
 Vector4f Matrix4f::operator*(const Vector4f& v) const
 {
-	Vector4f result;
-
 	auto r0 = SIMDVec4::loadAligned(getRow(0).data());
 	auto r1 = SIMDVec4::loadAligned(getRow(1).data());
 	auto r2 = SIMDVec4::loadAligned(getRow(2).data());
@@ -110,8 +108,8 @@ Vector4f Matrix4f::operator*(const Vector4f& v) const
 	d2 = SIMDVec4::horizontalAdd(d2, d3);
 	d0 = SIMDVec4::horizontalAdd(d0, d2);
 
+	auto result = Vector4f(Vector4f::Uninitialized());
 	d0.storeAligned(result.data());
-
 	return result;
 }
 
