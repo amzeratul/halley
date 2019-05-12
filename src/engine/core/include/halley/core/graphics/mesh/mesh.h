@@ -17,11 +17,11 @@ namespace Halley {
 		constexpr static AssetType getAssetType() { return AssetType::Font; }
 
         size_t getNumVertices() const;
-		gsl::span<const char> getVertexData() const;
+		gsl::span<const Byte> getVertexData() const;
 		gsl::span<const IndexType> getIndices() const;
         std::shared_ptr<const Material> getMaterial() const;
 
-		void setVertices(size_t num, std::vector<char> vertexData);
+		void setVertices(size_t num, Bytes vertexData);
 		void setIndices(std::vector<IndexType> indices);
 		void setMaterialName(String name);
 		void setTextureNames(std::vector<String> textureNames);
@@ -31,7 +31,7 @@ namespace Halley {
 
     private:
 		size_t numVertices = 0;
-        std::vector<char> vertexData;
+        Bytes vertexData;
         std::vector<IndexType> indices;
 
 		String materialName;

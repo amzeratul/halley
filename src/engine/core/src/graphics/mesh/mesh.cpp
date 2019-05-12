@@ -40,9 +40,9 @@ size_t Mesh::getNumVertices() const
 	return numVertices;
 }
 
-gsl::span<const char> Mesh::getVertexData() const
+gsl::span<const Byte> Mesh::getVertexData() const
 {
-	return gsl::span<const char>(vertexData.data(), vertexData.size());
+	return gsl::span<const Byte>(vertexData.data(), vertexData.size());
 }
 
 gsl::span<const IndexType> Mesh::getIndices() const
@@ -55,7 +55,7 @@ std::shared_ptr<const Material> Mesh::getMaterial() const
 	return material;
 }
 
-void Mesh::setVertices(size_t num, std::vector<char> vertexData)
+void Mesh::setVertices(size_t num, Bytes vertexData)
 {
 	numVertices = num;
 	this->vertexData = std::move(vertexData);
