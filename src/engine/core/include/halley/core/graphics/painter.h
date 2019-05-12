@@ -2,6 +2,7 @@
 #include "camera.h"
 #include "blend.h"
 #include "halley/maths/colour.h"
+#include "graphics_enums.h"
 #include <condition_variable>
 #include <halley/maths/vector4.h>
 
@@ -14,13 +15,6 @@ namespace Halley
 	class Camera;
 	class RenderContext;
 	class Core;
-
-	enum class PrimitiveType
-	{
-		Triangle
-	};
-
-	using IndexType = unsigned short;
 
 	class Painter
 	{
