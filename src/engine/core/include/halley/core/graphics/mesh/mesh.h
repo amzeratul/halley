@@ -8,13 +8,21 @@ namespace Halley {
 	class ResourceLoader;
 	class Material;
 
+	struct VertexData
+	{
+		Vector4f pos;
+		Vector4f normal;
+		Vector4f colour;
+		Vector4f texCoord0;
+	};
+
     class Mesh final : public Resource {
     public:
 		Mesh();
 		explicit Mesh(ResourceLoader& loader);
 
 		static std::unique_ptr<Mesh> loadResource(ResourceLoader& loader);
-		constexpr static AssetType getAssetType() { return AssetType::Font; }
+		constexpr static AssetType getAssetType() { return AssetType::Mesh; }
 
         size_t getNumVertices() const;
 		gsl::span<const Byte> getVertexData() const;

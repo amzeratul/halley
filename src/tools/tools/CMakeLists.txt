@@ -22,6 +22,7 @@ set(SOURCES
     "src/assets/importers/font_importer.cpp"
     "src/assets/importers/image_importer.cpp"
     "src/assets/importers/material_importer.cpp"
+    "src/assets/importers/mesh_importer.cpp"
     "src/assets/importers/sprite_importer.cpp"
     "src/assets/importers/spritesheet_importer.cpp"
     "src/assets/importers/shader_importer.cpp"
@@ -53,7 +54,9 @@ set(SOURCES
 
     "src/tool/cli_tool.cpp"
 
-	"src/sprites/aseprite_file.cpp"
+    "src/mesh/wavefront_reader.cpp"
+
+    "src/sprites/aseprite_file.cpp"
     "src/sprites/aseprite_reader.cpp"
 
     "src/tasks/editor_task.cpp"
@@ -124,6 +127,7 @@ set(HEADERS
     "src/assets/importers/font_importer.h"
     "src/assets/importers/image_importer.h"
     "src/assets/importers/material_importer.h"
+    "src/assets/importers/mesh_importer.h"
     "src/assets/importers/sprite_importer.h"
     "src/assets/importers/spritesheet_importer.h"
     "src/assets/importers/shader_importer.h"
@@ -131,6 +135,8 @@ set(HEADERS
 
     "src/codegen/cpp/codegen_cpp.h"
     "src/codegen/cpp/cpp_class_gen.h"
+
+    "src/mesh/wavefront_reader.h"
 
 	"src/sprites/aseprite_file.h"
     "src/sprites/aseprite_reader.h"

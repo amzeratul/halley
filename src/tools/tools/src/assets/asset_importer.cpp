@@ -17,6 +17,7 @@
 #include "halley/tools/project/project.h"
 #include <boost/variant/detail/substitute.hpp>
 #include "importers/texture_importer.h"
+#include "importers/mesh_importer.h"
 
 using namespace Halley;
 
@@ -38,6 +39,7 @@ AssetImporter::AssetImporter(Project& project, const std::vector<Path>& assetsSr
 		std::make_unique<SpriteSheetImporter>(),
 		std::make_unique<ShaderImporter>(),
 		std::make_unique<TextureImporter>(),
+		std::make_unique<MeshImporter>(),
 		std::make_unique<IAssetImporter>()
 	};
 
@@ -78,6 +80,8 @@ IAssetImporter& AssetImporter::getRootImporter(Path path) const
 		type = ImportAssetType::Skip;
 	} else if (root == "texture") {
 		type = ImportAssetType::Texture;
+	} else if (root == "mesh") {
+		type = ImportAssetType::Mesh;
 	}
 
 	return getImporters(type).at(0);
