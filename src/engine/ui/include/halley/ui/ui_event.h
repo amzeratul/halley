@@ -32,7 +32,8 @@ namespace Halley {
 		TabChanged,
 		TabbedIn,
 		TabbedOut,
-		WidgetHighlighted
+		WidgetHighlighted,
+		GroupFocusChangeRequested
 	};
 
     class UIEvent {
