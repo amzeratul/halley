@@ -26,36 +26,73 @@ using namespace Halley;
 
 
 Camera::Camera()
-	: zoom(1.0f)
 {
 }
 
 
-Camera::Camera(Vector2f _pos, Angle1f _angle)
-	: pos(_pos)
-	, angle(_angle)
-	, zoom(1.0f)
+Camera::Camera(Vector2f pos, Angle1f angle)
+	: pos(pos)
+{
+	setRotation(angle);
+}
+
+Camera::Camera(Vector3f pos, Quaternion quat, Angle1f fov, CameraType type)
+	: pos(pos)
+	, rotation(quat)
+	, type(type)
+	, fov(fov)
 {
 }
 
 
-Camera& Camera::setPosition(Vector2f _pos)
+Camera& Camera::setPosition(Vector2f pos)
 {
-	pos = _pos;
+	this->pos = Vector3f(pos);
+	return *this;
+}
+
+Camera& Camera::setPosition(Vector3f pos)
+{
+	this->pos = pos;
 	return *this;
 }
 
 
-Camera& Camera::setAngle(Angle1f _angle)
+Camera& Camera::setRotation(Angle1f angle)
 {
-	angle = _angle;
+	rotation = Quaternion(Vector3f(0, 0, 1), angle);
+	return *this;
+}
+
+Camera& Camera::setRotation(Quaternion quat)
+{
+	rotation = quat;
 	return *this;
 }
 
 
-Camera& Camera::setZoom(float _zoom)
+Camera& Camera::setZoom(float zoom)
 {
-	zoom = _zoom;
+	this->zoom = zoom;
+	return *this;
+}
+
+Camera& Camera::setCameraType(CameraType type)
+{
+	this->type = type;
+	return *this;
+}
+
+Camera& Camera::setFieldOfView(Angle1f fov)
+{
+	this->fov = fov;
+	return *this;
+}
+
+Camera& Camera::setClippingPlanes(float near, float far)
+{
+	this->nearPlane = near;
+	this->farPlane = far;
 	return *this;
 }
 
@@ -83,24 +120,34 @@ Camera& Camera::setViewPort(Rect4i v)
 	return *this;
 }
 
+Angle1f Camera::getZAngle() const
+{
+	const auto v = rotation * Vector3f(1, 0, 0);
+	const auto v2d = Vector2f(v.x, v.y);
+	return v2d.angle();
+}
+
 void Camera::updateProjection(bool flipVertical)
 {
-	Vector2i area = getActiveViewPort().getSize();
-
 	// Setup projection
-	float w = float(area.x);
-	float h = float(area.y);
-	projection = Matrix4f::makeOrtho2D(-w/2, w/2, flipVertical ? h/2 : -h/2, flipVertical ? -h/2 : h/2, -1000, 1000);
+	const Vector2i area = getActiveViewPort().getSize();
+	const auto w = float(area.x);
+	const auto h = float(area.y);
+	if (type == CameraType::Orthographic) {
+		projection = Matrix4f::makeOrtho2D(-w/2, w/2, flipVertical ? h/2 : -h/2, flipVertical ? -h/2 : h/2, -1000, 1000);
+	} else if (type == CameraType::Perspective) {
+		projection = Matrix4f::makePerspective(nearPlane, farPlane, w / h, fov);
+	}
 
 	// Camera properties
 	if (zoom != 1.0f) {
-		projection.scale2D(zoom, zoom);
+		projection.scale(Vector3f(zoom, zoom, zoom));
 	}
-	if (angle.getRadians() != 0) {
-		projection.rotateZ(-angle);
+	if (rotation != Quaternion()) {
+		projection.rotate(rotation.conjugated());
 	}
-	if (pos != Vector2f()) {
-		projection.translate2D(-pos.x, -pos.y);
+	if (pos != Vector3f()) {
+		projection.translate(-pos);
 	}
 }
 
@@ -127,20 +174,26 @@ Rect4i Camera::getActiveViewPort() const
 
 Rect4f Camera::getClippingRectangle() const
 {
+	const auto angle = getZAngle();
 	auto vp = getActiveViewPort();
 	auto halfSize = Vector2f(vp.getSize()) / (zoom * 2);
 	auto a = halfSize.rotate(angle);
 	auto b = Vector2f(-halfSize.x, halfSize.y).rotate(angle);
 	auto rotatedHalfSize = Vector2f(std::max(std::abs(a.x), std::abs(b.x)), std::max(std::abs(a.y), std::abs(b.y)));
-	return Rect4f(pos - rotatedHalfSize, pos + rotatedHalfSize);
+	Vector2f pos2d(pos.x, pos.y);
+	return Rect4f(pos2d - rotatedHalfSize, pos2d + rotatedHalfSize);
 }
 
 Vector2f Camera::screenToWorld(Vector2f p, Rect4f viewport) const
 {
-	return ((p - viewport.getCenter()) / zoom).rotate(angle) + pos;
+	const auto angle = getZAngle();
+	Vector2f pos2d(pos.x, pos.y);
+	return ((p - viewport.getCenter()) / zoom).rotate(angle) + pos2d;
 }
 
 Vector2f Camera::worldToScreen(Vector2f p, Rect4f viewport) const
 {
-	return (p - pos).rotate(-angle) * zoom + viewport.getCenter();
+	const auto angle = getZAngle();
+	Vector2f pos2d(pos.x, pos.y);
+	return (p - pos2d).rotate(-angle) * zoom + viewport.getCenter();
 }

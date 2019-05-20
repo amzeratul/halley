@@ -11,7 +11,7 @@ namespace Halley
 		friend class Core;
 
 	public:
-		void bind(std::function<void(Painter&)> f)
+		void bind(const std::function<void(Painter&)>& f)
 		{
 			pushContext();
 			setActive();

@@ -57,7 +57,7 @@ namespace Halley
 		int bindPoint = 0;
 		bool dirty = true;
 
-		bool setUniform(size_t offset, ShaderParameterType type, void* data);
+		bool setUniform(size_t offset, ShaderParameterType type, const void* data);
 		void upload(VideoAPI* api);
 	};
 	
@@ -121,7 +121,7 @@ namespace Halley
 		void initUniforms(bool forceLocalBlocks);
 		MaterialParameter& getParameter(const String& name);
 
-		void setUniform(int blockNumber, size_t offset, ShaderParameterType type, void* data);
+		void setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data);
 		uint64_t computeHash() const;
 	};
 }

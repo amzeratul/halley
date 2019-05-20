@@ -11,6 +11,7 @@
 #include "halley/core/graphics/render_target/render_target.h"
 #include "dx11_render_target.h"
 #include "halley/core/game/game_platform.h"
+#include "dx11_depth_stencil.h"
 using namespace Halley;
 
 DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
@@ -31,11 +32,6 @@ DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
 
 void DX11Painter::doStartRender()
 {
-	if (!normalRaster) {
-		normalRaster = std::make_unique<DX11Rasterizer>(video, false);
-		scissorRaster = std::make_unique<DX11Rasterizer>(video, true);
-	}
-	normalRaster->bind(video);
 }
 
 void DX11Painter::doEndRender()
@@ -45,13 +41,22 @@ void DX11Painter::doEndRender()
 void DX11Painter::clear(Colour colour)
 {
 	const float col[] = { colour.r, colour.g, colour.b, colour.a };
-	auto view = dynamic_cast<IDX11RenderTarget&>(getActiveRenderTarget()).getRenderTargetView();
-	video.getDeviceContext().ClearRenderTargetView(view, col);
+	auto& renderTarget = dynamic_cast<IDX11RenderTarget&>(getActiveRenderTarget());
+	video.getDeviceContext().ClearRenderTargetView(renderTarget.getRenderTargetView(), col);
+
+	auto depthStencilView = renderTarget.getDepthStencilView();
+	if (depthStencilView) {
+		video.getDeviceContext().ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+	}
 }
 
 void DX11Painter::setMaterialPass(const Material& material, int passN)
 {
 	auto& pass = material.getDefinition().getPass(passN);
+
+	// Raster and depthStencil
+	setRasterizer(pass);
+	setDepthStencil(pass);
 
 	// Shader
 	auto& shader = static_cast<DX11Shader&>(pass.getShader());
@@ -143,17 +148,7 @@ void DX11Painter::setViewPort(Rect4i rect)
 
 void DX11Painter::setClip(Rect4i clip, bool enable)
 {
-	if (enable) {
-		scissorRaster->bind(video);
-		D3D11_RECT rect;
-		rect.top = clip.getTop();
-		rect.bottom = clip.getBottom();
-		rect.left = clip.getLeft();
-		rect.right = clip.getRight();
-		video.getDeviceContext().RSSetScissorRects(1, &rect);
-	} else {
-		normalRaster->bind(video);
-	}
+	clipping = enable ? clip : Maybe<Rect4i>();
 }
 
 void DX11Painter::onUpdateProjection(Material& material)
@@ -179,4 +174,49 @@ void DX11Painter::rotateBuffers()
 	curBuffer = (curBuffer + 1) % vertexBuffers.size();
 	indexBuffers[curBuffer].reset();
 	vertexBuffers[curBuffer].reset();
+}
+
+DX11Rasterizer& DX11Painter::getRasterizer(const DX11RasterizerOptions& options)
+{
+	auto iter = rasterizers.find(options);
+	if (iter != rasterizers.end()) {
+		return *iter->second;
+	}
+	rasterizers[options] = std::make_unique<DX11Rasterizer>(video, options);
+	return *rasterizers[options];
+}
+
+void DX11Painter::setRasterizer(const MaterialPass& pass)
+{
+	DX11RasterizerOptions options;
+	options.scissor = static_cast<bool>(clipping);
+	options.culling = pass.getCulling();
+	setRasterizer(options);
+}
+
+void DX11Painter::setRasterizer(const DX11RasterizerOptions& options)
+{
+	if (!curRaster || curRaster->getOptions() != options) {
+		auto& raster = getRasterizer(options);
+		curRaster = &raster;
+		raster.bind(video);	
+	}
+
+	if (options.scissor) {
+		auto clip = clipping.get();
+		D3D11_RECT rect;
+		rect.top = clip.getTop();
+		rect.bottom = clip.getBottom();
+		rect.left = clip.getLeft();
+		rect.right = clip.getRight();
+		video.getDeviceContext().RSSetScissorRects(1, &rect);
+	}
+}
+
+void DX11Painter::setDepthStencil(const MaterialPass& pass)
+{
+	if (!depthStencil || depthStencil->getDefinition() != pass.getDepthStencil()) {
+		depthStencil = std::make_unique<DX11DepthStencil>(video, pass.getDepthStencil());
+		depthStencil->bind();
+	}
 }

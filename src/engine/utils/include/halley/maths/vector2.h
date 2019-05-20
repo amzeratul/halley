@@ -50,7 +50,7 @@ namespace Halley {
 		// Constructors
 		constexpr Vector2D () : x(0), y(0) {}
 		
-		constexpr Vector2D (T _x, T _y) : x(_x), y(_y) {}
+		constexpr Vector2D (T x, T y) : x(x), y(y) {}
 		
 		template <typename V>
 		constexpr explicit Vector2D (Vector2D<V> vec) : x(T(vec.x)), y(T(vec.y)) {}

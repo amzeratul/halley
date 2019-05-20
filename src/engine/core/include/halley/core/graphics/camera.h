@@ -25,20 +25,33 @@
 #include "halley/maths/angle.h"
 #include "halley/maths/rect.h"
 #include "halley/maths/matrix4.h"
+#include "halley/maths/quaternion.h"
 #include "halley/data_structures/maybe.h"
 
 namespace Halley {
 
 	class RenderTarget;
 
+	enum class CameraType
+	{
+		Orthographic,
+		Perspective
+	};
+
 	class Camera {
 	public:
 		Camera();
-		Camera(Vector2f pos, Angle1f angle=Angle1f::fromDegrees(0));
+		Camera(Vector2f pos, Angle1f angle = Angle1f::fromDegrees(0));
+		Camera(Vector3f pos, Quaternion quat, Angle1f fov, CameraType type = CameraType::Perspective);
 
 		Camera& setPosition(Vector2f pos);
-		Camera& setAngle(Angle1f angle);
+		Camera& setPosition(Vector3f pos);
+		Camera& setRotation(Angle1f angle);
+		Camera& setRotation(Quaternion quat);
 		Camera& setZoom(float zoom);
+		Camera& setCameraType(CameraType type);
+		Camera& setFieldOfView(Angle1f fov);
+		Camera& setClippingPlanes(float near, float far);
 
 		Camera& resetRenderTarget();
 		Camera& setRenderTarget(RenderTarget& target);
@@ -46,8 +59,9 @@ namespace Halley {
 		Camera& resetViewPort();
 		Camera& setViewPort(Rect4i viewPort);
 
-		Vector2f getPosition() const { return pos; }
-		Angle1f getAngle() const { return angle; }
+		Vector3f getPosition() const { return pos; }
+		Quaternion getRotation() const { return rotation; }
+		Angle1f getZAngle() const;
 		float getZoom() const { return zoom; }
 		Maybe<Rect4i> getViewPort() const { return viewPort; }
 
@@ -67,15 +81,18 @@ namespace Halley {
 	private:
 		friend class Painter;
 
-		Vector2f pos;
 		Matrix4f projection;
-		Angle1f angle;
-		float zoom;
-		bool rendering = false;
+		Vector3f pos;
+		float zoom = 1.0f;
+		Quaternion rotation;
+		Maybe<Rect4i> viewPort;
+		CameraType type = CameraType::Orthographic;
+		Angle1f fov;
+		float nearPlane = 0.1f;
+		float farPlane = 1000.0f;
 
 		RenderTarget* renderTarget = nullptr;
-		Maybe<Rect4i> viewPort;
-
-		RenderTarget* defaultRenderTarget;
+		RenderTarget* defaultRenderTarget = nullptr;
+		bool rendering = false;
 	};
 }

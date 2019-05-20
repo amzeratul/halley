@@ -59,6 +59,7 @@ namespace Halley
 		AnimationSequence(String name, bool loop, bool noFlip);
 
 		size_t numFrames() const { return frames.size(); }
+		size_t numFrameDefinitions() const { return frameDefinitions.size(); }
 		const AnimationFrame& getFrame(size_t n) const
 		{
 			Expects(n < frames.size());

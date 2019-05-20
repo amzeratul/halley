@@ -26,7 +26,8 @@ namespace Halley
 		AudioEvent,
 		Sprite,
 		SpriteSheet,
-		Shader
+		Shader,
+		Mesh
 	};
 
 	// This order matters.
@@ -46,12 +47,14 @@ namespace Halley
 		Animation,
 		Font,
 		AudioClip,
-		AudioEvent
+		AudioEvent,
+		Mesh,
+		MeshAnimation
 	};
 
 	template <>
 	struct EnumNames<AssetType> {
-		constexpr std::array<const char*, 13> operator()() const {
+		constexpr std::array<const char*, 15> operator()() const {
 			return{{
 				"binaryFile",
 				"textFile",
@@ -65,7 +68,9 @@ namespace Halley
 				"animation",
 				"font",
 				"audioClip",
-				"audioEvent"
+				"audioEvent",
+				"mesh",
+				"meshAnimation"
 			}};
 		}
 	};

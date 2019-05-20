@@ -83,7 +83,7 @@ void MaterialParameter::operator=(Vector2i p)
 	material->setUniform(blockNumber, offset, ShaderParameterType::Int2, &p);
 }
 
-void MaterialParameter::operator=(Matrix4f m)
+void MaterialParameter::operator=(const Matrix4f& m)
 {
 	Expects(type == ShaderParameterType::Matrix4);
 	material->setUniform(blockNumber, offset, ShaderParameterType::Matrix4, &m);

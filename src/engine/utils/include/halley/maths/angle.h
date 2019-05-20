@@ -36,34 +36,34 @@ namespace Halley {
 	class Angle {
 	public:
 		// Constructors
-		Angle () : value(0) {}
-		Angle (T _value) : value(_value) {}
-		Angle (const Angle &angle) : value(angle.value) {}
+		constexpr Angle () : value(0) {}
+		constexpr Angle (T _value) : value(_value) {}
+		constexpr Angle (const Angle &angle) : value(angle.value) {}
 
 		// Comparison
-		inline bool operator== (const Angle &param) const { return value == param.value; }
-		inline bool operator!= (const Angle &param) const { return value != param.value; }
-		inline bool operator< (const Angle &param) const { return value < param.value; }
-		inline bool operator<= (const Angle &param) const { return value <= param.value; }
-		inline bool operator> (const Angle &param) const { return value > param.value; }
-		inline bool operator>= (const Angle &param) const { return value >= param.value; }
+		constexpr inline bool operator== (const Angle &param) const { return value == param.value; }
+		constexpr inline bool operator!= (const Angle &param) const { return value != param.value; }
+		constexpr inline bool operator< (const Angle &param) const { return value < param.value; }
+		constexpr inline bool operator<= (const Angle &param) const { return value <= param.value; }
+		constexpr inline bool operator> (const Angle &param) const { return value > param.value; }
+		constexpr inline bool operator>= (const Angle &param) const { return value >= param.value; }
 
 		// Basic arithmetics
-		inline Angle operator+ (const Angle &param) const
+		constexpr inline Angle operator+ (const Angle &param) const
 		{
 			Angle final;
 			final.value = value + param.value;
 			final.limit();
 			return final;
 		}
-		inline Angle operator- (const Angle &param) const
+		constexpr inline Angle operator- (const Angle &param) const
 		{
 			Angle final;
 			final.value = value - param.value;
 			final.limit();
 			return final;
 		}
-		inline Angle operator- () const
+		constexpr inline Angle operator- () const
 		{
 			Angle final;
 			final.value = -value;
@@ -72,17 +72,17 @@ namespace Halley {
 		}
 
 		// In-place operations
-		inline Angle& operator= (const Angle &angle) { value = angle.value; return *this; }
-		inline void operator+= (const Angle &angle) { value += angle.value; limit(); }
-		inline void operator-= (const Angle &angle) { value -= angle.value; limit(); }
+		constexpr inline Angle& operator= (const Angle &angle) { value = angle.value; return *this; }
+		constexpr inline void operator+= (const Angle &angle) { value += angle.value; limit(); }
+		constexpr inline void operator-= (const Angle &angle) { value -= angle.value; limit(); }
 
 		// Accessors
-		inline void setDegrees(const T degrees) { value = degToRad(degrees); limit(); }
-		inline void setRadians(const T radian) { value = radian; limit();}
-		inline T getDegrees() const { return radToDeg(value); }
-		inline T getRadians() const { return value; }
-		inline T toDegrees() const { return radToDeg(value); }
-		inline T toRadians() const { return value; }
+		constexpr inline void setDegrees(const T degrees) { value = degToRad(degrees); limit(); }
+		constexpr inline void setRadians(const T radian) { value = radian; limit();}
+		constexpr inline T getDegrees() const { return radToDeg(value); }
+		constexpr inline T getRadians() const { return value; }
+		constexpr inline T toDegrees() const { return radToDeg(value); }
+		constexpr inline T toRadians() const { return value; }
 
 		// Which side should it turn to to reach the parameter angle?
 		inline T turnSide(const Angle &param) const
@@ -114,8 +114,8 @@ namespace Halley {
 		}
 
 		// Conversion
-		static inline T degToRad(const T degrees) { return degrees * 0.01745329252f; }
-		static inline T radToDeg(const T radians) { return radians * 57.295779513f; }
+		constexpr static inline T degToRad(const T degrees) { return degrees * 0.01745329252f; }
+		constexpr static inline T radToDeg(const T radians) { return radians * 57.295779513f; }
 
 		// Trigonometric functions
 		inline T sin() const { return ::sin(value); }
@@ -141,14 +141,14 @@ namespace Halley {
 		}
 
 		// Builder methods
-		inline static Angle fromRadians (const T radians) { Angle ang; ang.setRadians(radians); return ang; }
-		inline static Angle fromDegrees (const T radians) { Angle ang; ang.setDegrees(radians); return ang; }
+		constexpr inline static Angle fromRadians (const T radians) { Angle ang; ang.setRadians(radians); return ang; }
+		constexpr inline static Angle fromDegrees (const T degrees) { Angle ang; ang.setDegrees(degrees); return ang; }
 
 	private:
 		// Angle value in radians
 		T value;
 
-		inline void limit()
+		constexpr inline void limit()
 		{
 			value = modulo(value, 2*PI_CONSTANT_F);
 		}

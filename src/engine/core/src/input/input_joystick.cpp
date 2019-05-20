@@ -132,6 +132,11 @@ bool InputJoystick::isAnyButtonDown()
 	return InputButtonBase::isAnyButtonDown();
 }
 
+void InputJoystick::setAxisAdjust(std::function<float(float)> f)
+{
+	axisAdjust = f;
+}
+
 void InputJoystick::setVibration(float, float)
 {
 }

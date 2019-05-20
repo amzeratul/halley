@@ -1,35 +1,7 @@
-#include "dx11_render_target.h"
+#include "dx11_render_target_texture.h"
 #include "dx11_video.h"
 #include "dx11_texture.h"
 using namespace Halley;
-
-DX11ScreenRenderTarget::DX11ScreenRenderTarget(DX11Video& video, const Rect4i& viewPort, ID3D11RenderTargetView* view)
-	: ScreenRenderTarget(viewPort)
-	, video(video)
-	, view(view)
-{
-}
-
-bool DX11ScreenRenderTarget::getProjectionFlipVertical() const
-{
-	return true;
-}
-
-bool DX11ScreenRenderTarget::getViewportFlipVertical() const
-{
-	return false;
-}
-
-void DX11ScreenRenderTarget::onBind(Painter& painter)
-{
-	ID3D11RenderTargetView* views[] = { view };
-	video.getDeviceContext().OMSetRenderTargets(1, views, nullptr);
-}
-
-ID3D11RenderTargetView* DX11ScreenRenderTarget::getRenderTargetView()
-{
-	return view;
-}
 
 DX11TextureRenderTarget::DX11TextureRenderTarget(DX11Video& video)
 	: video(video)
@@ -61,6 +33,11 @@ ID3D11RenderTargetView* DX11TextureRenderTarget::getRenderTargetView()
 {
 	update();
 	return views.at(0);
+}
+
+ID3D11DepthStencilView* DX11TextureRenderTarget::getDepthStencilView()
+{
+	return depthStencilView;
 }
 
 void DX11TextureRenderTarget::update()

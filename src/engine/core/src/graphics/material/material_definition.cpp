@@ -409,6 +409,36 @@ StencilWriteOperation MaterialDepthStencil::getStencilOpStencilFail() const
 	return stencilOpStencilFail;
 }
 
+bool MaterialDepthStencil::operator==(const MaterialDepthStencil& other) const
+{
+	return depthComparison == other.depthComparison
+		&& stencilComparison == other.stencilComparison
+		&& stencilOpPass == other.stencilOpPass
+		&& stencilOpDepthFail == other.stencilOpDepthFail
+		&& stencilOpStencilFail == other.stencilOpStencilFail
+		&& stencilReference == other.stencilReference
+		&& stencilWriteMask == other.stencilWriteMask
+		&& stencilReadMask == other.stencilReadMask
+		&& enableDepthTest == other.enableDepthTest
+		&& enableDepthWrite == other.enableDepthWrite
+		&& enableStencilTest == other.enableStencilTest;
+}
+
+bool MaterialDepthStencil::operator!=(const MaterialDepthStencil& other) const
+{
+	return depthComparison != other.depthComparison
+		|| stencilComparison != other.stencilComparison
+		|| stencilOpPass != other.stencilOpPass
+		|| stencilOpDepthFail != other.stencilOpDepthFail
+		|| stencilOpStencilFail != other.stencilOpStencilFail
+		|| stencilReference != other.stencilReference
+		|| stencilWriteMask != other.stencilWriteMask
+		|| stencilReadMask != other.stencilReadMask
+		|| enableDepthTest != other.enableDepthTest
+		|| enableDepthWrite != other.enableDepthWrite
+		|| enableStencilTest != other.enableStencilTest;
+}
+
 
 MaterialPass::MaterialPass()
 	: blend(BlendType::Undefined)
@@ -432,6 +462,8 @@ MaterialPass::MaterialPass(const String& shaderAssetId, const ConfigNode& node)
 		throw Exception("Unknown blend type: " + blendName, HalleyExceptions::Resources);
 	}
 
+	cull = fromString<CullingMode>(node["cull"].asString("None"));
+
 	if (node.hasKey("depth")) {
 		depthStencil.loadDepth(node["depth"]);
 	}
@@ -445,6 +477,7 @@ void MaterialPass::serialize(Serializer& s) const
 	s << blend;
 	s << shaderAssetId;
 	s << depthStencil;
+	s << cull;
 }
 
 void MaterialPass::deserialize(Deserializer& s)
@@ -452,6 +485,7 @@ void MaterialPass::deserialize(Deserializer& s)
 	s >> blend;
 	s >> shaderAssetId;
 	s >> depthStencil;
+	s >> cull;
 }
 
 void MaterialPass::createShader(ResourceLoader& loader, String name, const Vector<MaterialAttribute>& attributes)

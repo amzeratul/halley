@@ -5,9 +5,12 @@
 
 namespace Halley
 {
+	class MaterialPass;
 	class DX11Video;
 	class DX11Blend;
 	class DX11Rasterizer;
+	class DX11RasterizerOptions;
+	class DX11DepthStencil;
 
 	class DX11Painter : public Painter
 	{
@@ -35,12 +38,22 @@ namespace Halley
 		std::vector<DX11Buffer> indexBuffers;
 		ID3D11InputLayout* layout;
 		std::map<BlendType, DX11Blend> blendModes;
-		std::unique_ptr<DX11Rasterizer> normalRaster;
-		std::unique_ptr<DX11Rasterizer> scissorRaster;
+
+		std::map<DX11RasterizerOptions, std::unique_ptr<DX11Rasterizer>> rasterizers;
+		DX11Rasterizer* curRaster = nullptr;
+
+		std::unique_ptr<DX11DepthStencil> depthStencil;
 
 		size_t curBuffer = 0;
+		Maybe<Rect4i> clipping;
 
 		DX11Blend& getBlendMode(BlendType type);
 		void rotateBuffers();
+
+		DX11Rasterizer& getRasterizer(const DX11RasterizerOptions& options);
+		void setRasterizer(const MaterialPass& pass);
+		void setRasterizer(const DX11RasterizerOptions& options);
+
+		void setDepthStencil(const MaterialPass& pass);
 	};
 }

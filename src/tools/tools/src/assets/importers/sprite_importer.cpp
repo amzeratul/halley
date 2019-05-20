@@ -156,19 +156,54 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 	animation.setMaterialName(materialName);
 	animation.setSpriteSheetName(spriteSheetName);
 
+	// Generate directions
+	int numExplicitDirs = 0;
+	{
+		std::set<String> directionNames;
+		for (const auto& frame: frameData) {
+			if (!frame.direction.isEmpty()) {
+				if (directionNames.find(frame.direction) == directionNames.end()) {
+					directionNames.insert(frame.direction);
+					numExplicitDirs++;
+				}
+			}
+		}
+
+		if (numExplicitDirs == 0) {
+			directionNames.insert("right");
+		}
+
+		int rightId = -1;
+		int i = 0;
+		for (const auto& dir: directionNames) {
+			if (dir == "right") {
+				rightId = i;
+			}
+			animation.addDirection(AnimationDirection(dir, dir, false, i));
+			++i;
+		}
+		if (directionNames.find("left") == directionNames.end()) {
+			animation.addDirection(AnimationDirection("left", "right", true, rightId));
+		}
+	}
+		
 	std::map<String, AnimationSequence> sequences;
 
-	animation.addDirection(AnimationDirection("right", "forward", false, 0));
-	animation.addDirection(AnimationDirection("left", "forward", true, 0));
-	
-	for (auto& frame: frameData) {
-		auto i = sequences.find(frame.sequenceName);
-		if (i == sequences.end()) {
-			sequences[frame.sequenceName] = AnimationSequence(frame.sequenceName, true, false);
-		}
-		auto& seq = sequences[frame.sequenceName];
+	for (const auto& frame: frameData) {
+		String sequence = frame.sequenceName;
 
-		seq.addFrame(AnimationFrameDefinition(frame.frameNumber, frame.duration, frame.filenames.at(0)));
+		auto i = sequences.find(sequence);
+		if (i == sequences.end()) {
+			sequences[sequence] = AnimationSequence(sequence, true, false);
+		}
+		auto& seq = sequences[sequence];
+		if (int(seq.numFrameDefinitions()) == frame.frameNumber) {
+			auto filename = frame.filenames.at(0);
+			if (numExplicitDirs > 0) {
+				filename = filename.replaceAll("_" + frame.direction, "_%dir%");
+			}
+			seq.addFrame(AnimationFrameDefinition(frame.frameNumber, frame.duration, filename));
+		}
 	}
 
 	for (auto& seq: sequences) {

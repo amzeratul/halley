@@ -11,7 +11,8 @@
 using namespace Halley;
 
 Painter::Painter(Resources& resources)
-	: halleyGlobalMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/MaterialBase"), true))
+	: resources(resources)
+	, halleyGlobalMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/MaterialBase"), true))
 {
 }
 
@@ -47,8 +48,9 @@ void Painter::flush()
 Rect4f Painter::getWorldViewAABB() const
 {
 	Vector2f size = Vector2f(viewPort.getSize()) / camera->getZoom();
-	assert(camera->getAngle().getRadians() == 0); // Camera rotation not accounted by following line
-	return Rect4f(camera->getPosition() - size * 0.5f, size);
+	assert(camera->getZAngle().getRadians() == 0); // Camera rotation not accounted by following line
+	auto camPos = camera->getPosition();
+	return Rect4f(Vector2f(camPos.x, camPos.y) - size * 0.5f, size);
 }
 
 static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
@@ -58,6 +60,14 @@ static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
 
 Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly)
 {
+	constexpr auto maxVertices = size_t(std::numeric_limits<IndexType>::max());
+	if (numVertices > maxVertices) {
+		throw Exception("Too many vertices in draw call: " + toString(numVertices) + ", maximum is " + toString(maxVertices), HalleyExceptions::Graphics);
+	}
+	if (verticesPending + numVertices > maxVertices) {
+		flushPending();
+	}
+
 	Expects(material);
 	Expects(numVertices > 0);
 	Expects(numIndices >= numVertices);
@@ -74,7 +84,7 @@ Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& mater
 
 	result.dstVertex = vertexBuffer.data() + bytesPending;
 	result.dstIndex = indexBuffer.data() + indicesPending;
-	result.firstIndex = static_cast<unsigned short>(verticesPending);
+	result.firstIndex = static_cast<IndexType>(verticesPending);
 
 	indicesPending += numIndices;
 	verticesPending += numVertices;
@@ -84,12 +94,26 @@ Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& mater
 	return result;
 }
 
+void Painter::draw(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType)
+{
+	Expects(primitiveType == PrimitiveType::Triangle);
+	Expects(indices.size() % 3 == 0);
+
+	const auto result = addDrawData(material, numVertices, indices.size(), false);
+
+	memcpy(result.dstVertex, vertexData, result.dataSize);
+
+	for (size_t i = 0; i < size_t(indices.size()); ++i) {
+		result.dstIndex[i] = indices[i] + result.firstIndex;
+	}
+}
+
 void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData)
 {
 	Expects(numVertices % 4 == 0);
 	Expects(vertexData != nullptr);
 
-	auto result = addDrawData(material, numVertices, numVertices * 3 / 2, true);
+	const auto result = addDrawData(material, numVertices, numVertices * 3 / 2, true);
 
 	memmove(result.dstVertex, vertexData, result.dataSize);
 	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
@@ -169,13 +193,117 @@ void Painter::drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scal
 	}
 
 	// Indices
-	unsigned short* dstIndex = result.dstIndex;
+	IndexType* dstIndex = result.dstIndex;
 	for (size_t y = 0; y < 3; y++) {
 		for (size_t x = 0; x < 3; x++) {
-			generateQuadIndicesOffset(static_cast<unsigned short>(result.firstIndex + x + (y * 4)), 4, dstIndex);
+			generateQuadIndicesOffset(static_cast<IndexType>(result.firstIndex + x + (y * 4)), 4, dstIndex);
 			dstIndex += 6;
 		}
 	}
+}
+
+void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop, std::shared_ptr<Material> material)
+{
+	if (!material) {
+		material = getSolidLineMaterial();
+	}
+
+	// Need at least two points to draw a line
+	if (points.size() < 2) {
+		return;
+	}
+
+	struct LineVertex {
+		Vector4f colour;
+		Vector2f position;
+		Vector2f normal;
+		Vector2f width;
+		char _padding[8];
+	};
+
+	const Vector4f col(colour.r, colour.g, colour.b, colour.a);
+
+	constexpr float normalPos[] = { -1, 1, 1, -1 };
+	constexpr size_t pointIdxOffset[] = { 0, 0, 1, 1 };
+
+	const size_t nPoints = points.size();
+	const size_t nSegments = (loop ? nPoints : (nPoints - 1));
+	std::vector<LineVertex> vertices(nSegments * 4);
+
+	auto segmentNormal = [&] (size_t i) -> Maybe<Vector2f>
+	{
+		if (!loop && i >= nSegments) {
+			return {};
+		} else {
+			return (points[(i + 1) % nPoints] - points[i % nPoints]).normalized().orthoLeft();
+		}
+	};
+
+	auto makeNormal = [] (Vector2f a, Maybe<Vector2f> maybeB) -> Vector2f
+	{
+		if (maybeB) {
+			const auto b = maybeB.get();
+			const auto c = (a + b).normalized();
+			const auto cosHalfAlpha = c.dot(a);
+			return c * (1.0f / cosHalfAlpha);
+		} else {
+			return a;
+		}
+	};
+
+	Maybe<Vector2f> prevNormal = loop ? segmentNormal(nSegments - 1) : Maybe<Vector2f>();
+	Vector2f normal = segmentNormal(0).get();
+	Maybe<Vector2f> nextNormal;
+
+	for (size_t i = 0; i < nSegments; ++i) {
+		nextNormal = segmentNormal(i + 1);
+
+		Vector2f v0n = makeNormal(normal, prevNormal);
+		Vector2f v1n = makeNormal(normal, nextNormal);
+
+		for (size_t j = 0; j < 4; ++j) {
+			const size_t idx = i * 4 + j;
+			auto& v = vertices[idx];
+			v.colour = col;
+			v.position = points[(i + pointIdxOffset[j]) % nPoints];
+			v.normal = j <= 1 ? v0n : v1n;
+			v.width.x = width;
+			v.width.y = normalPos[j];
+		}
+
+		prevNormal = normal;
+		if (nextNormal) {
+			normal = nextNormal.get();
+		}
+	}
+
+	drawQuads(material, vertices.size(), vertices.data());
+}
+
+static size_t getSegmentsForArc(float radius, float arcLen)
+{
+	return clamp(size_t(std::sqrt(radius * arcLen) * 5), size_t(4), size_t(256));
+}
+
+void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<Material> material)
+{
+	const size_t n = getSegmentsForArc(radius, 2 * float(pi()));
+	std::vector<Vector2f> points;
+	for (size_t i = 0; i < n; ++i) {
+		points.push_back(centre + Vector2f(radius, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)));
+	}
+	drawLine(points, width, colour, true, material);
+}
+
+void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<Material> material)
+{
+	const float arcLen = (to - from).getRadians() + (from.turnSide(to) > 0 ? 0.0f : 0 * float(pi()));
+	const size_t n = getSegmentsForArc(radius, arcLen);
+	std::vector<Vector2f> points;
+	for (size_t i = 0; i < n; ++i) {
+		points.push_back(centre + Vector2f(radius, 0).rotate(from + Angle1f::fromRadians(i * arcLen / (n - 1))));
+	}
+	drawLine(points, width, colour, false, material);
 }
 
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
@@ -264,6 +392,14 @@ Rect4i Painter::getRectangleForActiveRenderTarget(Rect4i r)
 	}
 }
 
+std::shared_ptr<Material> Painter::getSolidLineMaterial()
+{
+	if (!solidLineMaterial) {
+		solidLineMaterial = std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidLine"));
+	}
+	return solidLineMaterial;
+}
+
 void Painter::startDrawCall(std::shared_ptr<Material>& material)
 {
 	if (material != materialPending) {
@@ -277,7 +413,7 @@ void Painter::startDrawCall(std::shared_ptr<Material>& material)
 void Painter::flushPending()
 {
 	if (verticesPending > 0) {
-		executeDrawTriangles(*materialPending, verticesPending, vertexBuffer.data(), indicesPending, indexBuffer.data());
+		executeDrawPrimitives(*materialPending, verticesPending, vertexBuffer.data(), gsl::span<const IndexType>(indexBuffer.data(), indicesPending));
 	}
 
 	resetPending();
@@ -295,12 +431,15 @@ void Painter::resetPending()
 	}
 }
 
-void Painter::executeDrawTriangles(Material& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices)
+void Painter::executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType)
 {
+	Expects(primitiveType == PrimitiveType::Triangle);
+
 	startDrawCall();
 
 	// Load vertices
-	setVertices(material.getDefinition(), numVertices, vertexData, numIndices, indices, allIndicesAreQuads);
+	// BAD: This method should take const IndexType*!
+	setVertices(material.getDefinition(), numVertices, vertexData, indices.size(), const_cast<IndexType*>(indices.data()), allIndicesAreQuads);
 
 	// Load material uniforms
 	material.uploadData(*this);
@@ -313,11 +452,11 @@ void Painter::executeDrawTriangles(Material& material, size_t numVertices, void*
 			material.bind(i, *this);
 
 			// Draw
-			drawTriangles(numIndices);
+			drawTriangles(indices.size());
 
 			// Log stats
 			nDrawCalls++;
-			nTriangles += numIndices / 3;
+			nTriangles += indices.size() / 3;
 			nVertices += numVertices;
 		}
 	}
@@ -325,14 +464,14 @@ void Painter::executeDrawTriangles(Material& material, size_t numVertices, void*
 	endDrawCall();
 }
 
-unsigned short* Painter::getStandardQuadIndices(size_t numQuads)
+IndexType* Painter::getStandardQuadIndices(size_t numQuads)
 {
 	size_t sz = numQuads * 6;
 	size_t oldSize = stdQuadIndexCache.size();
 
 	if (oldSize < sz) {
 		stdQuadIndexCache.resize(sz);
-		unsigned short pos = static_cast<unsigned short>(oldSize * 2 / 3);
+		IndexType pos = static_cast<IndexType>(oldSize * 2 / 3);
 		for (size_t i = oldSize; i < sz; i += 6) {
 			// A-----B
 			// |     |
@@ -352,7 +491,7 @@ unsigned short* Painter::getStandardQuadIndices(size_t numQuads)
 	return stdQuadIndexCache.data();
 }
 
-void Painter::generateQuadIndices(unsigned short pos, size_t numQuads, unsigned short* target)
+void Painter::generateQuadIndices(IndexType pos, size_t numQuads, IndexType* target)
 {
 	size_t numIndices = numQuads * 6;
 	for (size_t i = 0; i < numIndices; i += 6) {
@@ -377,7 +516,7 @@ RenderTarget& Painter::getActiveRenderTarget()
 	return *activeRenderTarget;
 }
 
-void Painter::generateQuadIndicesOffset(unsigned short pos, unsigned short lineStride, unsigned short* target)
+void Painter::generateQuadIndicesOffset(IndexType pos, IndexType lineStride, IndexType* target)
 {
 	// A-----B
 	// |     |

@@ -40,7 +40,7 @@ namespace Halley
 		void operator=(Vector4f p);
 		void operator=(int p);
 		void operator=(Vector2i p);
-		void operator=(Matrix4f m);
+		void operator=(const Matrix4f& m);
 
 		ShaderParameterType getType() const;
 

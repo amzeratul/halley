@@ -75,7 +75,7 @@ MaterialDataBlockType MaterialDataBlock::getType() const
 	return dataBlockType;
 }
 
-bool MaterialDataBlock::setUniform(size_t offset, ShaderParameterType type, void* srcData)
+bool MaterialDataBlock::setUniform(size_t offset, ShaderParameterType type, const void* srcData)
 {
 	Expects(dataBlockType != MaterialDataBlockType::SharedExternal);
 
@@ -237,7 +237,7 @@ const std::vector<std::shared_ptr<const Texture>>& Material::getTextures() const
 	return textures;
 }
 
-void Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, void* data)
+void Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data)
 {
 	if (dataBlocks[blockNumber].setUniform(offset, type, data)) {
 		needToUploadData = true;

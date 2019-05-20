@@ -2,7 +2,8 @@
 #include "dx11_painter.h"
 #include "dx11_shader.h"
 #include "dx11_texture.h"
-#include "dx11_render_target.h"
+#include "dx11_render_target_screen.h"
+#include "dx11_render_target_texture.h"
 #include "dx11_material_constant_buffer.h"
 
 #include <windows.h>
@@ -13,6 +14,7 @@
 #include "dx11_loader.h"
 #include "halley/support/logger.h"
 #include "halley/support/debug.h"
+#include "dx11_swapchain.h"
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "Dxgi.lib")
@@ -75,93 +77,9 @@ void DX11Video::initD3D(Window& window)
 		mt->SetMultithreadProtected(true);
 	}
 
-	initSwapChain(window);
+	swapChain = std::make_unique<DX11SwapChain>(*this, window);
 
 	initialised = true;
-}
-
-void DX11Video::initSwapChain(Window& window)
-{
-	if (swapChain) {
-		swapChain->Release();
-		swapChain = nullptr;
-	}
-
-	auto size = window.getWindowRect().getSize();
-	const bool usingCoreWindow = window.getNativeHandleType() == "CoreWindow";
-
-	IDXGIDevice2* pDXGIDevice;
-	device->QueryInterface(__uuidof(IDXGIDevice2), reinterpret_cast<void **>(&pDXGIDevice));
-	IDXGIAdapter * pDXGIAdapter;
-	pDXGIDevice->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void **>(&pDXGIAdapter));
-	IDXGIFactory2 * pIDXGIFactory;
-	pDXGIAdapter->GetParent(__uuidof(IDXGIFactory2), reinterpret_cast<void **>(&pIDXGIFactory));
-
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
-	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC1));
-	swapChainDesc.Width = size.x;
-	swapChainDesc.Height = size.y;
-	swapChainDesc.BufferCount = 1;
-	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.BufferCount = 2;
-	swapChainDesc.SampleDesc.Count = 1;
-
-	if (usingCoreWindow) {
-#if WINVER >= 0x0A00
-		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-#else
-		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-#endif
-		swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
-		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
-
-		IUnknown* coreWindow = reinterpret_cast<IUnknown*>(window.getNativeHandle());
-		auto result = pIDXGIFactory->CreateSwapChainForCoreWindow(device, coreWindow, &swapChainDesc, nullptr, &swapChain);
-		if (result != S_OK) {
-			throw Exception("Unable to create swap chain for CoreWindow", HalleyExceptions::VideoPlugin);
-		}
-	} else {
-		auto hWnd = reinterpret_cast<HWND>(window.getNativeHandle());
-		auto result = pIDXGIFactory->CreateSwapChainForHwnd(device, hWnd, &swapChainDesc, nullptr, nullptr, &swapChain);
-		if (result != S_OK) {
-			throw Exception("Unable to create swap chain for HWND", HalleyExceptions::VideoPlugin);
-		}
-	}
-
-	swapChainSize = size;
-
-	initBackBuffer();
-}
-
-void DX11Video::initBackBuffer()
-{
-	if (backbuffer) {
-		backbuffer->Release();
-		backbuffer = nullptr;
-	}
-
-	ID3D11Texture2D *pBackBuffer;
-    swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&pBackBuffer));
-    device->CreateRenderTargetView(pBackBuffer, nullptr, &backbuffer);
-    pBackBuffer->Release();
-}
-
-void DX11Video::resizeSwapChain(Vector2i size)
-{
-	if (backbuffer) {
-		backbuffer->Release();
-		backbuffer = nullptr;
-	}
-	
-	HRESULT result = swapChain->ResizeBuffers(0, size.x, size.y, DXGI_FORMAT_UNKNOWN, 0);
-	if (result != S_OK) {
-		throw Exception("Unable to resize swap chain", HalleyExceptions::VideoPlugin);
-	}
-
-	swapChainSize = size;
-
-	initBackBuffer();
 }
 
 void DX11Video::releaseD3D()
@@ -170,15 +88,7 @@ void DX11Video::releaseD3D()
 		return;
 	}
 
-	if (backbuffer) {
-		backbuffer->Release();
-		backbuffer = nullptr;
-	}
-
-	if (swapChain) {
-		swapChain->Release();
-		swapChain = nullptr;
-	}
+	swapChain.reset();
 
 	device->Release();
 	deviceContext->Release();
@@ -191,7 +101,7 @@ void DX11Video::startRender()
 
 void DX11Video::finishRender()
 {
-    swapChain->Present(useVsync ? 1 : 0, 0);
+	swapChain->present(useVsync);
 }
 
 void DX11Video::setWindow(WindowDefinition&& windowDescriptor)
@@ -237,11 +147,11 @@ std::unique_ptr<TextureRenderTarget> DX11Video::createTextureRenderTarget()
 std::unique_ptr<ScreenRenderTarget> DX11Video::createScreenRenderTarget()
 {
 	auto view = Rect4i(Vector2i(), window->getWindowRect().getSize());
-	if (swapChainSize != view.getSize()) {
-		resizeSwapChain(view.getSize());
+	if (swapChain->getSize() != view.getSize()) {
+		swapChain->resize(view.getSize());
 	}
 
-	return std::make_unique<DX11ScreenRenderTarget>(*this, view, backbuffer);
+	return std::make_unique<DX11ScreenRenderTarget>(*this, view);
 }
 
 std::unique_ptr<MaterialConstantBuffer> DX11Video::createConstantBuffer()
@@ -261,12 +171,20 @@ String DX11Video::getShaderLanguage()
 
 ID3D11Device& DX11Video::getDevice()
 {
+	Expects(device);
 	return *device;
 }
 
 ID3D11DeviceContext1& DX11Video::getDeviceContext()
 {
+	Expects(deviceContext);
 	return *deviceContext;
+}
+
+DX11SwapChain& DX11Video::getSwapChain()
+{
+	Expects(swapChain);
+	return *swapChain;
 }
 
 SystemAPI& DX11Video::getSystem()

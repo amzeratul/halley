@@ -1,0 +1,4 @@
+actions:
+  - type: play
+    clips: [ g1s.ogg ]
+    group: key

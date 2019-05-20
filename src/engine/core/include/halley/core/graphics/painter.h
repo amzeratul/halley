@@ -2,6 +2,7 @@
 #include "camera.h"
 #include "blend.h"
 #include "halley/maths/colour.h"
+#include "graphics_enums.h"
 #include <condition_variable>
 #include <halley/maths/vector4.h>
 
@@ -23,11 +24,11 @@ namespace Halley
 		struct PainterVertexData
 		{
 			char* dstVertex;
-			unsigned short* dstIndex;
+			IndexType* dstIndex;
 			size_t vertexSize;
 			size_t vertexStride;
 			size_t dataSize;
-			unsigned short firstIndex;
+			IndexType firstIndex;
 		};
 
 	public:
@@ -48,7 +49,10 @@ namespace Halley
 		void setClip(Rect4i rect);
 		void setClip();
 
-		// Draws quads to the screen
+		// Draws primitives
+		void draw(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
+
+		// Draws quads
 		void drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData);
 
 		// Draw sprites takes a single vertex per sprite, duplicates the data across multiple vertices, and draws
@@ -57,6 +61,13 @@ namespace Halley
 
 		// Draw one sliced sprite. Slices -> x = left, y = top, z = right, w = bottom, in [0..1] space relative to the texture
 		void drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scale, Vector4f slices, const void* vertexData);
+
+		// Draws a line across all points (if no material is specified, use standard one)
+		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop = false, std::shared_ptr<Material> material = {});
+
+		// Circle drawing
+		void drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<Material> material = {});
+		void drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<Material> material = {});
 
 		size_t getNumDrawCalls() const { return nDrawCalls; }
 		size_t getNumVertices() const { return nVertices; }
@@ -71,17 +82,18 @@ namespace Halley
 		virtual void endDrawCall() {}
 		virtual void doStartRender() = 0;
 		virtual void doEndRender() = 0;
-		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly) = 0;
+		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, IndexType* indices, bool standardQuadsOnly) = 0;
 		virtual void drawTriangles(size_t numIndices) = 0;
 
 		virtual void setViewPort(Rect4i rect) = 0;
 		virtual void setClip(Rect4i clip, bool enable) = 0;
 
 		virtual void onUpdateProjection(Material& material) = 0;
-		void generateQuadIndices(unsigned short firstVertex, size_t numQuads, unsigned short* target);
+		void generateQuadIndices(IndexType firstVertex, size_t numQuads, IndexType* target);
 		RenderTarget& getActiveRenderTarget();
 
 	private:
+		Resources& resources;
 		RenderContext* activeContext = nullptr;
 		RenderTarget* activeRenderTarget = nullptr;
 		Matrix4f projection;
@@ -93,8 +105,9 @@ namespace Halley
 		size_t indicesPending = 0;
 		bool allIndicesAreQuads = true;
 		Vector<char> vertexBuffer;
-		Vector<unsigned short> indexBuffer;
+		Vector<IndexType> indexBuffer;
 		std::shared_ptr<Material> materialPending;
+		std::shared_ptr<Material> solidLineMaterial;
 		std::unique_ptr<Material> halleyGlobalMaterial;
 
 		size_t nDrawCalls = 0;
@@ -104,7 +117,7 @@ namespace Halley
 		size_t prevVertices = 0;
 		size_t prevTriangles = 0;
 
-		Vector<unsigned short> stdQuadIndexCache;
+		Vector<IndexType> stdQuadIndexCache;
 
 		void bind(RenderContext& context);
 		void unbind(RenderContext& context);
@@ -115,17 +128,19 @@ namespace Halley
 		void resetPending();
 		void startDrawCall(std::shared_ptr<Material>& material);
 		void flushPending();
-		void executeDrawTriangles(Material& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices);
+		void executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
 
 		void makeSpaceForPendingVertices(size_t numBytes);
 		void makeSpaceForPendingIndices(size_t numIndices);
 		PainterVertexData addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly);
 
-		unsigned short* getStandardQuadIndices(size_t numQuads);
-		void generateQuadIndicesOffset(unsigned short firstVertex, unsigned short lineStride, unsigned short* target);
+		IndexType* getStandardQuadIndices(size_t numQuads);
+		void generateQuadIndicesOffset(IndexType firstVertex, IndexType lineStride, IndexType* target);
 
 		void updateProjection();
 
 		Rect4i getRectangleForActiveRenderTarget(Rect4i rectangle);
+
+		std::shared_ptr<Material> getSolidLineMaterial();
 	};
 }

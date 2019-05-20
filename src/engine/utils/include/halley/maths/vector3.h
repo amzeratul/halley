@@ -29,85 +29,101 @@ namespace Halley {
 	//////////////////////////////
 	// Vector3D class declaration
 	template <typename T=float>
-	class Vector3D {
+	class alignas(16) Vector3D {
 	private:
-		T Mod(T a, T b) const { return a % b; }
+		constexpr T Mod(T a, T b) const { return a % b; }
 
 	public:
-		T x,y,z;
+		T x, y, z;
 
 	private:
 		T pad = 0;
 
 	public:
 		// Constructors
-		Vector3D () { x = y = z = 0; }
-		Vector3D (const T _x, const T _y, const T _z) { x = _x; y = _y; z = _z; }
-		explicit Vector3D (const Vector2D<T> &vec, const T _z=0) { x = vec.x; y = vec.y; z = _z; }
-		Vector3D (const Vector3D<T> &vec) { x = vec.x; y = vec.y; z = vec.z; }
+		constexpr Vector3D () { x = y = z = 0; }
+		constexpr Vector3D (T x, T y, T z) { this->x = x; this->y = y; this->z = z; }
+		constexpr explicit Vector3D (Vector2D<T> vec, T z = 0) { x = vec.x; y = vec.y; this->z = z; }
+		constexpr Vector3D (const Vector3D<T> &vec) { x = vec.x; y = vec.y; z = vec.z; }
 		template <typename V>
-		explicit Vector3D (const Vector3D<V> &vec) { x = T(vec.x); y = T(vec.y); z = T(vec.z); }
+		constexpr explicit Vector3D (const Vector3D<V> &vec) { x = T(vec.x); y = T(vec.y); z = T(vec.z); }
 
 		// Getter
-		inline T& operator[](int n) { return *((&x)+n); }
-		inline const T& operator[](int n) const { return *((&x) + n); }
+		constexpr inline T& operator[](size_t n)
+		{
+			Expects(n <= 2);
+			return (&x)[n];
+		}
+		constexpr inline T operator[](size_t n) const
+		{
+			Expects(n <= 2);
+			return (&x)[n];
+		}
 
 		// Assignment and comparison
-		inline void operator = (const Vector3D &p) { x = p.x; y = p.y; z = p.z; }
-		inline void operator = (const T p) { x = p; y = p; z = p; }
-		inline bool operator == (const Vector3D &p) const { return x == p.x && y == p.y && z == p.z; }
-		inline bool operator != (const Vector3D &p) const { return x != p.x || y != p.y || z != p.z; }
+		constexpr inline void operator = (const Vector3D &p) { x = p.x; y = p.y; z = p.z; }
+		constexpr inline void operator = (const T p) { x = p; y = p; z = p; }
+		constexpr inline bool operator == (const Vector3D &p) const { return x == p.x && y == p.y && z == p.z; }
+		constexpr inline bool operator != (const Vector3D &p) const { return x != p.x || y != p.y || z != p.z; }
 
 		// Basic algebra
-		inline Vector3D operator + (const Vector3D &p) const { return Vector3D(x + p.x,y + p.y,z + p.z); }
-		inline Vector3D operator - (const Vector3D &p) const { return Vector3D(x - p.x,y - p.y,z - p.z); }
-		inline Vector3D operator * (const Vector3D &p) const { return Vector3D(x * p.x,y * p.y,z * p.z); }
-		inline Vector3D operator / (const Vector3D &p) const { return Vector3D(x / p.x,y / p.y,z / p.z); }
-		inline Vector3D operator % (const Vector3D &p) const { return Vector3D(Mod(x, p.x), Mod(y, p.y), Mod(z, p.z)); }
+		constexpr inline Vector3D operator + (const Vector3D &p) const { return Vector3D(x + p.x,y + p.y,z + p.z); }
+		constexpr inline Vector3D operator - (const Vector3D &p) const { return Vector3D(x - p.x,y - p.y,z - p.z); }
+		constexpr inline Vector3D operator * (const Vector3D &p) const { return Vector3D(x * p.x,y * p.y,z * p.z); }
+		constexpr inline Vector3D operator / (const Vector3D &p) const { return Vector3D(x / p.x,y / p.y,z / p.z); }
+		constexpr inline Vector3D operator % (const Vector3D &p) const { return Vector3D(Mod(x, p.x), Mod(y, p.y), Mod(z, p.z)); }
 
 		inline Vector3D modulo(const Vector3D &p) const { return Vector3D(Halley::modulo<T>(x, p.x), Halley::modulo<T>(y, p.y), Halley::modulo<T>(z, p.z)); }
 		inline Vector3D floorDiv(const Vector3D &p) const { return Vector3D(Halley::floorDiv(x, p.x), Halley::floorDiv(y, p.y), Halley::floorDiv(z, p.z)); }
 
-		inline Vector3D operator - () const { return Vector3D(-x,-y,-z); }
+		constexpr inline Vector3D operator - () const { return Vector3D(-x, -y, -z); }
 
-		inline Vector3D operator * (const float p) const { return Vector3D(T(x * p), T(y * p), T(z * p)); }
-		inline Vector3D operator / (const T p) const { return Vector3D(x / p,y / p, z / p); }
+		constexpr inline Vector3D operator * (const float p) const { return Vector3D(T(x * p), T(y * p), T(z * p)); }
+		constexpr inline Vector3D operator / (const T p) const { return Vector3D(x / p,y / p, z / p); }
 
 		// In-place operations
-		inline Vector3D operator += (const Vector3D &p) { x += p.x; y += p.y; z += p.z; return *this; }
-		inline Vector3D operator -= (const Vector3D &p) { x -= p.x; y -= p.y; z -= p.z; return *this; }
-		inline Vector3D operator *= (const T p) { x *= p; y *= p; z *= p; return *this; }
-		inline Vector3D operator /= (const T p) { x /= p; y /= p; z /= p; return *this; }
+		constexpr inline Vector3D operator += (const Vector3D &p) { x += p.x; y += p.y; z += p.z; return *this; }
+		constexpr inline Vector3D operator -= (const Vector3D &p) { x -= p.x; y -= p.y; z -= p.z; return *this; }
+		constexpr inline Vector3D operator *= (const T p) { x *= p; y *= p; z *= p; return *this; }
+		constexpr inline Vector3D operator /= (const T p) { x /= p; y /= p; z /= p; return *this; }
 
 		// Get the normalized vector (unit vector)
-		inline Vector3D getUnit () const
+		inline Vector3D unit() const
 		{
 			float len = length();
 			if (len != 0) {
-				return (*this) / len;
+				return (*this) * (1.0f / len);
 			}
-			else return Vector3D(T(0), T(0), T(0));
+			return Vector3D(T(0), T(0), T(0));
 		}
 
-		// Cross product (the Z component of it)
-		// TODO: lazy atm
-		//inline Vector3D Cross (const Vector3D &p) const { return x * p.y - y * p.x; }
+		// Cross product
+		constexpr inline Vector3D cross(const Vector3D& p) const { return Vector3D(y * p.z - z * p.y, z * p.x - x * p.z, x * p.y - y * p.x); }
 
 		// Dot product
-		inline T dot (const Vector3D &p) const { return (x * p.x) + (y * p.y) + (z * p.z); }
+		constexpr inline T dot(const Vector3D& p) const { return (x * p.x) + (y * p.y) + (z * p.z); }
 
 		// Length
-		inline T length () const { return sqrt(squaredLength()); }
+		constexpr inline T length() const { return static_cast<T>(std::sqrt(squaredLength())); }
 
 		// Squared length, often useful and much faster
-		inline T squaredLength () const { return x*x+y*y+z*z; }
+		constexpr inline T squaredLength() const { return x * x + y * y + z * z; }
 
 		// Floor
-		inline Vector3D floor () const { return Vector3D(::floor(x), ::floor(y), ::floor(z)); }
+		inline Vector3D floor() const { return Vector3D(::floor(x), ::floor(y), ::floor(z)); }
 
 		// Projection on another vector
-		inline Vector3D projection (const Vector3D &p) const { Vector3D unit = p.getUnit(); return dot(unit) * unit; }
-		inline T projectionLength (const Vector3D &p) const { Vector3D unit = p.getUnit(); return dot(unit); }
+		inline Vector3D projection(const Vector3D &p) const { Vector3D unit = p.unit(); return dot(unit) * unit; }
+		inline T projectionLength(const Vector3D &p) const { Vector3D unit = p.unit(); return dot(unit); }
+
+		inline Vector3D normalized() const
+		{
+			return unit();
+		}
+		inline void normalize()
+		{
+			*this = unit();
+		}
 
 		String toString() const
 		{

@@ -88,6 +88,24 @@ namespace Halley
 		}
 	};
 
+	enum class CullingMode
+	{
+		None,
+		Front,
+		Back
+	};
+
+	template <>
+	struct EnumNames<CullingMode> {
+		constexpr std::array<const char*, 3> operator()() const {
+			return{{
+				"None",
+				"Front",
+				"Back"
+			}};
+		}
+	};
+
 	
 	class MaterialUniform
 	{
@@ -208,21 +226,24 @@ namespace Halley
 		StencilWriteOperation getStencilOpDepthFail() const;
 		StencilWriteOperation getStencilOpStencilFail() const;
 
+		bool operator==(const MaterialDepthStencil& other) const;
+		bool operator!=(const MaterialDepthStencil& other) const;
+
 	private:
-		bool enableDepthTest = false;
-		bool enableDepthWrite = false;
-		bool enableStencilTest = false;
-
-		int stencilReference = 0;
-		int stencilWriteMask = 0xFF;
-		int stencilReadMask = 0xFF;
-
 		DepthStencilComparisonFunction depthComparison = DepthStencilComparisonFunction::Always;
 		DepthStencilComparisonFunction stencilComparison = DepthStencilComparisonFunction::Always;
 
 		StencilWriteOperation stencilOpPass = StencilWriteOperation::Keep;
 		StencilWriteOperation stencilOpDepthFail = StencilWriteOperation::Keep;
 		StencilWriteOperation stencilOpStencilFail = StencilWriteOperation::Keep;
+
+		int stencilReference = 0;
+		int stencilWriteMask = 0xFF;
+		int stencilReadMask = 0xFF;
+
+		bool enableDepthTest = false;
+		bool enableDepthWrite = false;
+		bool enableStencilTest = false;
 	};
 
 	class MaterialPass
@@ -236,6 +257,7 @@ namespace Halley
 		BlendType getBlend() const { return blend; }
 		Shader& getShader() const { return *shader; }
 		const MaterialDepthStencil& getDepthStencil() const { return depthStencil; }
+		CullingMode getCulling() const { return cull; }
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -246,6 +268,7 @@ namespace Halley
 		std::shared_ptr<Shader> shader;
 		BlendType blend;
 		MaterialDepthStencil depthStencil;
+		CullingMode cull = CullingMode::None;
 		
 		String shaderAssetId;
 	};
