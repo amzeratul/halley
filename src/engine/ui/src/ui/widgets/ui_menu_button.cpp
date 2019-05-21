@@ -172,7 +172,10 @@ bool UIMenuButtonGroup::setFocus(const String& id)
 	if (enabled) {
 		for (auto& b: buttons) {
 			if (b.id == id) {
-				return setFocus(*b.button.lock());
+				const auto& currentFocusId = getCurrentFocusId();
+				bool focusSet = setFocus(*b.button.lock());
+				getCurrentFocus()->sendEvent(UIEvent(UIEventType::GroupFocusChangeRequested, currentFocusId, id));
+				return focusSet;
 			}
 		}
 
