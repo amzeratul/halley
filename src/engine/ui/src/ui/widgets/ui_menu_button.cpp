@@ -77,6 +77,11 @@ void UIMenuButtonGroup::setCancelId(const String& id)
 	cancelId = id;
 }
 
+void UIMenuButtonGroup::clear()
+{
+	buttons.clear();
+}
+
 void UIMenuButtonGroup::onInput(const UIInputResults& input, Time time)
 {
 	if (size() == 0 || !enabled) {
@@ -167,9 +172,14 @@ bool UIMenuButtonGroup::setFocus(const String& id)
 	if (enabled) {
 		for (auto& b: buttons) {
 			if (b.id == id) {
-				return setFocus(*b.button.lock());
+				const auto& currentFocusId = getCurrentFocusId();
+				bool focusSet = setFocus(*b.button.lock());
+				getCurrentFocus()->sendEvent(UIEvent(UIEventType::GroupFocusChangeRequested, currentFocusId, id));
+				return focusSet;
 			}
 		}
+
+		getCurrentFocus()->sendEvent(UIEvent(UIEventType::GroupFocusChangeRequested, getCurrentFocusId(), id));
 	}
 	return false;
 }
@@ -196,6 +206,17 @@ std::shared_ptr<UIMenuButton> UIMenuButtonGroup::getCurrentFocus() const
 const String& UIMenuButtonGroup::getCurrentFocusId() const
 {
 	return curFocus;
+}
+
+int UIMenuButtonGroup::getCurrentFocusIndex() const
+{
+	for (auto i = 0; i < int(buttons.size()); i++)
+	{
+		if (buttons.at(i).id == curFocus) {
+			return i;
+		}
+	}
+	return -1;
 }
 
 size_t UIMenuButtonGroup::size() const
@@ -237,6 +258,11 @@ UIMenuButtonControlWidget::UIMenuButtonControlWidget(std::shared_ptr<UIMenuButto
 	: UIWidget("groupControl", Vector2f())
 	, group(std::move(group))
 {
+}
+
+void UIMenuButtonControlWidget::setGroup(std::shared_ptr<UIMenuButtonGroup> group)
+{
+	this->group = group;
 }
 
 void UIMenuButtonControlWidget::onInput(const UIInputResults& input, Time time)
