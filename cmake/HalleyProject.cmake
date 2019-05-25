@@ -105,6 +105,7 @@ set(USE_ASIO 1)
 set(USE_WINRT 0)
 set(USE_MEDIA_FOUNDATION 0)
 set(USE_AVFOUNDATION 0)
+set(USE_ANDROID 0)
 
 if (EMSCRIPTEN)
 	set(USE_SDL2 0)
@@ -115,6 +116,7 @@ if (ANDROID_NDK)
 	set(USE_SDL2 0)
 	set(USE_ASIO 0)
 	set(USE_OPENGL 0)
+	set(USE_ANDROID 1)
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 endif()
 
@@ -188,6 +190,11 @@ if (USE_WINRT)
 	if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
 		add_definitions(-DWITH_WINRT)
 	endif()
+endif()
+
+# Android
+if (USE_ANDROID)
+	add_definitions(-DWITH_ANDROID)
 endif()
 
 # Microsoft Media Foundation
@@ -319,6 +326,14 @@ set(HALLEY_PROJECT_LIBS
 	)
 endif ()
 
+if (USE_ANDROID)
+set(HALLEY_PROJECT_LIBS
+	optimized halley-android
+	debug halley-android_d
+	${HALLEY_PROJECT_LIBS}
+	)
+endif()
+
 
 
 set(HALLEY_PROJECT_INCLUDE_DIRS
@@ -419,6 +434,9 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		endif ()
 		if (USE_AVFOUNDATION)
 			target_link_libraries(${name} halley-avf)
+		endif ()
+		if (USE_ANDROID)
+			target_link_libraries(${name} halley-android)
 		endif ()
 	else ()
 		target_link_libraries(${name} ${HALLEY_PROJECT_LIBS})

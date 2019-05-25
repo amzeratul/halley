@@ -45,15 +45,4 @@ Halley::String Halley::OSAndroid::makeDataPath(String, String)
 	return "";
 }
 
-JavaVM* Halley::OSAndroid::vm;
-extern "C" jint JNI_OnLoad2(JavaVM* vm, void* reserved);
-
-extern "C" JNIEXPORT void JNICALL Java_com_studiominiboss_halley_HalleyActivity_startHalleyJNI(JNIEnv *env, jobject)
-{
-	__android_log_write(ANDROID_LOG_VERBOSE, "Halley", "Initializing Halley JNI (native side)...");
-	env->GetJavaVM(&OSAndroid::vm);
-	JNI_OnLoad2(OSAndroid::vm, nullptr);
-}
-
-
 #endif

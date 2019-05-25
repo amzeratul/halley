@@ -25,3 +25,7 @@ endif ()
 if (USE_AVFOUNDATION)
     add_subdirectory(avf)
 endif ()
+
+if (USE_ANDROID)
+    add_subdirectory(android)
+endif ()
