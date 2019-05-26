@@ -36,6 +36,7 @@ std::unique_ptr<ResourceDataReader> AndroidSystemAPI::getDataReader(String path,
 std::unique_ptr<GLContext> AndroidSystemAPI::createGLContext()
 {
     // TODO
+    return {};
 }
 
 std::shared_ptr<Window> AndroidSystemAPI::createWindow(const WindowDefinition& window)

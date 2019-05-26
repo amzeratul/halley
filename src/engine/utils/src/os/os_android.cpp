@@ -26,13 +26,11 @@
 #include <stdio.h>    
 #include <pwd.h>
 #include <unistd.h>
-#include <android/log.h>
 
 using namespace Halley;
 
 Halley::OSAndroid::OSAndroid()
 {
-	__android_log_write(ANDROID_LOG_VERBOSE, "Halley", "Trace: OSAndroid::OSAndroid");
 }
 
 Halley::String Halley::OSAndroid::getUserDataDir()

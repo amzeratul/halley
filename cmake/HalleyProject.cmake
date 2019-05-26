@@ -252,6 +252,19 @@ set(HALLEY_PROJECT_EXTERNAL_LIBS
 	${EXTRA_LIBS}
 	)
 
+set(HALLEY_PROJECT_INCLUDE_DIRS
+	${HALLEY_PATH}/include
+	${HALLEY_PATH}/src/contrib
+	${HALLEY_PATH}/src/engine/core/include
+	${HALLEY_PATH}/src/engine/net/include
+	${HALLEY_PATH}/src/engine/utils/include
+	${HALLEY_PATH}/src/engine/entity/include
+	${HALLEY_PATH}/src/engine/audio/include
+	${HALLEY_PATH}/src/engine/lua/include
+	${HALLEY_PATH}/src/engine/ui/include
+	${Boost_INCLUDE_DIR} 
+	)
+
 set(HALLEY_PROJECT_LIBS
 	optimized halley-ui
 	optimized halley-core
@@ -332,23 +345,8 @@ set(HALLEY_PROJECT_LIBS
 	debug halley-android_d
 	${HALLEY_PROJECT_LIBS}
 	)
-endif()
+endif ()
 
-
-
-set(HALLEY_PROJECT_INCLUDE_DIRS
-	${HALLEY_PATH}/include
-	${HALLEY_PATH}/src/contrib
-	${HALLEY_PATH}/src/engine/core/include
-	${HALLEY_PATH}/src/engine/net/include
-	${HALLEY_PATH}/src/engine/utils/include
-	${HALLEY_PATH}/src/engine/entity/include
-	${HALLEY_PATH}/src/engine/audio/include
-	${HALLEY_PATH}/src/engine/lua/include
-	${HALLEY_PATH}/src/engine/ui/include
-	${Boost_INCLUDE_DIR} 
-	)
-	
 set(HALLEY_PROJECT_LIB_DIRS
 	${HALLEY_PATH}/lib
 	)
@@ -450,13 +448,6 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		add_custom_command(TARGET ${name} POST_BUILD
 			COMMAND "cp" "-R" "${CMAKE_CURRENT_SOURCE_DIR}/assets/" "$<TARGET_FILE_DIR:${name}>/../Resources"
 		)
-	endif ()
-
-	if (ANDROID_NDK)
-		#add_library(native-activity SHARED main.cpp)
-		add_library(native_app_glue STATIC ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
-		target_include_directories(${name} PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue)
-		target_link_libraries(${name} android native_app_glue EGL GLESv1_CM log)
 	endif ()
 endfunction(halleyProject)
 
