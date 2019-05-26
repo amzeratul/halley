@@ -66,7 +66,7 @@ unsigned TextureOpenGL::getNativeId() const
 void TextureOpenGL::finishLoading()
 {
 	if (parent.isLoaderThread()) {
-#ifdef WITH_OPENGL
+#if defined(WITH_OPENGL) || defined(WITH_OPENGL_ES3)
 		fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 #endif
 		glFlush();
@@ -79,7 +79,7 @@ void TextureOpenGL::waitForOpenGLLoad() const
 {
 	waitForLoad();
 
-#ifdef WITH_OPENGL
+#if defined (WITH_OPENGL) || defined(WITH_OPENGL_ES3)
 	if (fence) {
 		GLenum result = glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, GLuint64(10000000000));
 		if (result == GL_TIMEOUT_EXPIRED) {
@@ -114,25 +114,26 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 	Expects(size.y <= 4096);
 	glCheckError();
 
-#ifdef WITH_OPENGL
-	GLuint pixFormat = GL_UNSIGNED_BYTE;
+    GLuint pixFormat = GL_UNSIGNED_BYTE;
 
+#if defined (WITH_OPENGL)
 	if (useMipMap) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1);
 	}
+#endif
 
+#if defined (WITH_OPENGL) || defined(WITH_OPENGL_ES3)
 	GLuint wrap = clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
-#else
-	GLuint pixFormat = GL_UNSIGNED_BYTE;
 #endif
+
 	int filtering = useFiltering ? GL_LINEAR : GL_NEAREST;
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, useMipMap ? GL_LINEAR_MIPMAP_LINEAR : filtering);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
 
-#ifdef WITH_OPENGL
+#if defined (WITH_OPENGL) || defined(WITH_OPENGL_ES3)
 	if (format == TextureFormat::DEPTH) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
@@ -148,7 +149,11 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
 	glPixelStorei(GL_PACK_ROW_LENGTH, stride);
 #else
+	if (format2 == GL_RGBA16F) format2 = GL_RGBA;
+	if (format2 == GL_DEPTH_COMPONENT24) format2 = GL_DEPTH_COMPONENT;
 	if (format2 == GL_DEPTH_COMPONENT16) format2 = GL_DEPTH_COMPONENT;
+    glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
+    glPixelStorei(GL_PACK_ROW_LENGTH, stride);
 #endif
 
 	if (pixelData.empty()) {
@@ -167,14 +172,14 @@ void TextureOpenGL::updateImage(TextureDescriptorImageData& pixelData, TextureFo
 {
 	int stride = pixelData.getStrideOr(size.x);
 
-#ifdef WITH_OPENGL
+#if defined (WITH_OPENGL) || defined(WITH_OPENGL_ES3)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
 	glPixelStorei(GL_PACK_ROW_LENGTH, stride);
 #endif
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y, getGLFormat(format), GL_UNSIGNED_BYTE, pixelData.getBytes());
 	glCheckError();
 
-#ifndef WITH_OPENGL_ES
+#if defined (WITH_OPENGL) || defined(WITH_OPENGL_ES3)
 	// Generate mipmap
 	if (useMipMap) {
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -193,7 +198,7 @@ unsigned TextureOpenGL::getGLFormat(TextureFormat format)
 	case TextureFormat::RGBA:
 		return GL_RGBA;
 	case TextureFormat::DEPTH:
-#ifdef WITH_OPENGL
+#if defined (WITH_OPENGL) || defined(WITH_OPENGL_ES3)
 		return GL_DEPTH_COMPONENT24;
 #else
 		return GL_DEPTH_COMPONENT16;
