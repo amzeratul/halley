@@ -2,26 +2,54 @@
 #include "android_save_data.h"
 #include "android_asset_reader.h"
 #include "android_window.h"
-#include <android/log.h>
+#include "android_gl_context.h"
+#include "android_system.h"
 #include <android_native_app_glue.h>
+#include <android/log.h>
 #include <jni.h>
-#include <halley/runner/game_loader.h>
-#include <halley/core/game/core.h>
-#include <halley/runner/main_loop.h>
-#include <halley/runner/entry_point.h>
 #include <string>
-
-struct android_app* androidAppState = nullptr;
+#include <EGL/egl.h>
 
 using namespace Halley;
 
 void AndroidSystemAPI::init()
 {
+    display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    eglInitialize(display, 0, 0);
 
+    const EGLint attribs[] = {
+            EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+            EGL_BLUE_SIZE, 8,
+            EGL_GREEN_SIZE, 8,
+            EGL_RED_SIZE, 8,
+            EGL_NONE
+    };
+    EGLint numConfigs;
+    eglChooseConfig(display, attribs, nullptr,0, &numConfigs);
+    auto validConfigs = std::vector<EGLConfig>(numConfigs);
+    eglChooseConfig(display, attribs, validConfigs.data(), numConfigs, &numConfigs);
+    config = validConfigs[0];
+    for (int i = 0; i < numConfigs; ++i) {
+        auto& cfg = validConfigs[i];
+        EGLint r, g, b, d;
+        if (eglGetConfigAttrib(display, cfg, EGL_RED_SIZE, &r)   &&
+            eglGetConfigAttrib(display, cfg, EGL_GREEN_SIZE, &g) &&
+            eglGetConfigAttrib(display, cfg, EGL_BLUE_SIZE, &b)  &&
+            eglGetConfigAttrib(display, cfg, EGL_DEPTH_SIZE, &d) &&
+            r == 8 && g == 8 && b == 8 && d == 0 ) {
+
+            config = validConfigs[i];
+            break;
+        }
+    }
+
+    surface = eglCreateWindowSurface(display, config, AndroidSystem::get().getAndroidApp()->window, nullptr);
 }
 
 void AndroidSystemAPI::deInit()
 {
+    eglDestroySurface(display, surface);
+    eglTerminate(display);
 }
 
 Path AndroidSystemAPI::getAssetsPath(const Path& gamePath) const
@@ -36,19 +64,17 @@ Path AndroidSystemAPI::getUnpackedAssetsPath(const Path& gamePath) const
 
 std::unique_ptr<ResourceDataReader> AndroidSystemAPI::getDataReader(String path, int64_t start, int64_t end)
 {
-    __android_log_print(ANDROID_LOG_INFO, "halley-android", "Loading %s with %lld %lld", path.c_str(), start, end);
-    return std::make_unique<AndroidAssetReader>(androidAppState->activity->assetManager, path);
+    return std::make_unique<AndroidAssetReader>(AndroidSystem::get().getAndroidApp()->activity->assetManager, path);
 }
 
 std::unique_ptr<GLContext> AndroidSystemAPI::createGLContext()
 {
-    // TODO
-    return {};
+    return std::make_unique<AndroidGLContext>(config, display, surface);
 }
 
 std::shared_ptr<Window> AndroidSystemAPI::createWindow(const WindowDefinition& window)
 {
-    return std::make_shared<AndroidWindow>(window);
+    return std::make_shared<AndroidWindow>(window, display, surface);
 }
 
 void AndroidSystemAPI::destroyWindow(std::shared_ptr<Window> window)
@@ -64,13 +90,11 @@ Vector2i AndroidSystemAPI::getScreenSize(int n) const
 
 Rect4i AndroidSystemAPI::getDisplayRect(int screen) const
 {
-    // TODO
-    return Rect4i(0, 0, 1920, 1080);
+    return Rect4i(Vector2i(), getScreenSize(screen));
 }
 
 void AndroidSystemAPI::showCursor(bool show)
 {
-    // TODO
 }
 
 std::shared_ptr<ISaveData> AndroidSystemAPI::getStorageContainer(SaveDataType type, const String& containerName)
@@ -82,38 +106,4 @@ bool AndroidSystemAPI::generateEvents(VideoAPI* video, InputAPI* input)
 {
     // TODO
     return true;
-}
-
-IHalleyEntryPoint* getHalleyEntry();
-
-void android_main(struct android_app* state)
-{
-    androidAppState = state;
-
-    std::vector<std::string> args = { "halleygame" };
-
-    auto entry = getHalleyEntry();
-    std::unique_ptr<IMainLoopable> core = entry->createCore(args);
-
-    try {
-        DummyGameLoader loader;
-        loader.setCore(*core);
-        core->getAPI().system->runGame([&]() {
-            core->init();
-            MainLoop loop(*core, loader);
-            loop.run();
-        });
-    } catch (std::exception& e) {
-        if (core) {
-            core->onTerminatedInError(e.what());
-        } else {
-            std::cout << "Exception initialising core: " + String(e.what()) << std::endl;
-        }
-    } catch (...) {
-        if (core) {
-            core->onTerminatedInError("");
-        } else {
-            std::cout << "Unknown exception initialising core." << std::endl;
-        }
-    }
 }

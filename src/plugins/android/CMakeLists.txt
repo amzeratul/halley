@@ -4,7 +4,9 @@ include_directories(${Boost_INCLUDE_DIR} "../../engine/utils/include" "../../eng
 
 set(SOURCES
     "src/android_asset_reader.cpp"
+    "src/android_gl_context.cpp"
     "src/android_plugin.cpp"
+    "src/android_system.cpp"
     "src/android_system_api.cpp"
     "src/android_save_data.cpp"
     "src/android_window.cpp"
@@ -14,6 +16,8 @@ set(SOURCES
 
 set(HEADERS
     "src/android_asset_reader.h"
+    "src/android_gl_context.h"
+    "src/android_system.h"
     "src/android_system_api.h"
     "src/android_save_data.h"
     "src/android_window.h"
@@ -23,4 +27,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-android ${SOURCES} ${HEADERS})
-target_link_libraries(halley-android halley-core halley-audio android log)
+target_link_libraries(halley-android halley-core halley-audio android log EGL)

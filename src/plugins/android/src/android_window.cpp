@@ -1,8 +1,10 @@
 #include "android_window.h"
 using namespace Halley;
 
-AndroidWindow::AndroidWindow(const WindowDefinition& definition)
+AndroidWindow::AndroidWindow(const WindowDefinition& definition, EGLDisplay display, EGLSurface surface)
     : definition(definition)
+    , display(display)
+    , surface(surface)
 {
 
 }
@@ -29,7 +31,7 @@ void AndroidWindow::setVsync(bool vsync)
 
 void AndroidWindow::swap()
 {
-
+    eglSwapBuffers(display, surface);
 }
 
 Rect4i AndroidWindow::getWindowRect() const
