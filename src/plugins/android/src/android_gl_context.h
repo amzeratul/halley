@@ -19,5 +19,6 @@ namespace Halley {
         EGLSurface surface;
         EGLContext context;
         bool shared = false;
+        bool ownsSurface = false;
     };
 }

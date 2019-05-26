@@ -183,10 +183,12 @@ endif ()
 # OpenGL ES
 if (USE_OPENGL_ES2)
 	add_definitions(-DWITH_OPENGL_ES2)
+	set(OPENGL_LIBRARIES "GLESv2")
 endif ()
 
 if (USE_OPENGL_ES3)
 	add_definitions(-DWITH_OPENGL_ES3)
+	set(OPENGL_LIBRARIES "GLESv3")
 endif ()
 
 # Asio
