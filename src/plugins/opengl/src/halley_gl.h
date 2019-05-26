@@ -30,6 +30,9 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 	#else
 		#include <GL/gl.h>
 	#endif
+#elif defined(WITH_OPENGL_ES3)
+	#define GL_GLEXT_PROTOTYPES
+	#include <GLES3/gl3.h>
 #elif defined(WITH_OPENGL_ES2)
 	#define GL_GLEXT_PROTOTYPES
 	#include <GLES2/gl2.h>

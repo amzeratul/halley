@@ -99,6 +99,8 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -DGSL_UNENFORCED_O
 
 # Pick dependencies
 set(USE_OPENGL 1)
+set(USE_OPENGL_ES2 0)
+set(USE_OPENGL_ES3 0)
 set(USE_DX11 0)
 set(USE_SDL2 1)
 set(USE_ASIO 1)
@@ -110,12 +112,15 @@ set(USE_ANDROID 0)
 if (EMSCRIPTEN)
 	set(USE_SDL2 0)
 	set(USE_ASIO 0)
+	set(USE_OPENGL 0)
+	set(USE_OPENGL_ES2 1)
 endif()
 
 if (ANDROID_NDK)
 	set(USE_SDL2 0)
 	set(USE_ASIO 0)
 	set(USE_OPENGL 0)
+	set(USE_OPENGL_ES3 1)
 	set(USE_ANDROID 1)
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 endif()
@@ -173,6 +178,15 @@ if (USE_OPENGL)
 	else()
 		set(X11_LIBRARIES "")
 	endif ()
+endif ()
+
+# OpenGL ES
+if (USE_OPENGL_ES2)
+	add_definitions(-DWITH_OPENGL_ES2)
+endif ()
+
+if (USE_OPENGL_ES3)
+	add_definitions(-DWITH_OPENGL_ES3)
 endif ()
 
 # Asio
@@ -412,7 +426,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 
 	if (EMBED)
 		target_link_libraries(${name} halley-ui halley-core halley-entity halley-audio halley-net halley-lua halley-utils ${HALLEY_PROJECT_EXTERNAL_LIBS})
-		if (USE_OPENGL)
+		if (USE_OPENGL OR USE_OPENGL_ES2 OR USE_OPENGL_ES3)
 			target_link_libraries(${name} halley-opengl)
 		endif ()
 		if (USE_SDL2)
