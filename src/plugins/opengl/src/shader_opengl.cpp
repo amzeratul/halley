@@ -61,10 +61,10 @@ static GLuint loadShader(const Bytes& src, GLenum type, String name)
     if (src.size() >= 13 && memcmp(src.data(), "#version 330", 12) == 0) {
         startPos = 12;
     }
-    size_t len = src.size() + 15 - startPos + 1;
-    GLchar* buffer = new GLchar[len];
+    size_t len = src.size() + 15 - startPos;
+    GLchar* buffer = new GLchar[len + 1];
     memcpy(buffer, "#version 300 es", 15);
-    memcpy(buffer + 15, src.data() + startPos, src.size() - startPos);
+    memcpy(buffer + 15, src.data() + startPos, len - 15);
     buffer[len] = 0;
 #else
 	GLchar* buffer = new GLchar[len + 1];
