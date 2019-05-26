@@ -24,7 +24,7 @@ namespace Halley {
 		static std::unique_ptr<Mesh> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Mesh; }
 
-        size_t getNumVertices() const;
+        uint32_t getNumVertices() const;
 		gsl::span<const Byte> getVertexData() const;
 		gsl::span<const IndexType> getIndices() const;
         std::shared_ptr<const Material> getMaterial() const;
@@ -38,7 +38,7 @@ namespace Halley {
 		void deserialize(Deserializer& deserializer);
 
     private:
-		size_t numVertices = 0;
+		uint32_t numVertices = 0;
         Bytes vertexData;
         std::vector<IndexType> indices;
 

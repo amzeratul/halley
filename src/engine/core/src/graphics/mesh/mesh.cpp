@@ -35,7 +35,7 @@ std::unique_ptr<Mesh> Mesh::loadResource(ResourceLoader& loader)
 	return std::make_unique<Mesh>(loader);
 }
 
-size_t Mesh::getNumVertices() const
+uint32_t Mesh::getNumVertices() const
 {
 	return numVertices;
 }
@@ -57,7 +57,7 @@ std::shared_ptr<const Material> Mesh::getMaterial() const
 
 void Mesh::setVertices(size_t num, Bytes vertexData)
 {
-	numVertices = num;
+	numVertices = uint32_t(num);
 	this->vertexData = std::move(vertexData);
 }
 
