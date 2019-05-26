@@ -26,4 +26,13 @@ namespace Halley {
 			return std::make_unique<T>();
 		}
 	};
+
+	class DummyGameLoader : public GameLoader
+	{
+	public:
+		std::unique_ptr<Game> createGame() override
+		{
+			return {};
+		}
+	};
 }

@@ -21,7 +21,7 @@
 
 #include "halley/support/redirect_stream.h"
 #ifdef __ANDROID__
-//#include <android/log.h>
+#include <android/log.h>
 #endif
 
 using namespace Halley;
@@ -45,8 +45,7 @@ RedirectStream::~RedirectStream(){
 std::streamsize RedirectStream::xsputn(const char *msg, std::streamsize count){
 	onText(msg, count);
 
-//#ifdef __ANDROID__
-	/*
+#ifdef __ANDROID__
 	// On android, also redirect to log
 	static std::string logBuf;
 	logBuf += std::string(msg, count);
@@ -58,11 +57,10 @@ std::streamsize RedirectStream::xsputn(const char *msg, std::streamsize count){
 			__android_log_write(ANDROID_LOG_INFO, "Halley", msg2.c_str());
 		}
 	}
-	*/
-//#else
+#else
 	// Output to original stream
 	if (!exclusive) newstream->write(msg, count);
-//#endif
+#endif
 
 	return count;
 }

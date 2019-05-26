@@ -2,12 +2,17 @@
 #include <android/log.h>
 #include <android_native_app_glue.h>
 #include <jni.h>
+#include <halley/runner/game_loader.h>
+#include <halley/core/game/core.h>
+#include <halley/runner/main_loop.h>
+#include <halley/runner/entry_point.h>
+#include <string>
 
 using namespace Halley;
 
 void AndroidSystemAPI::init()
 {
-    // TODO
+    __android_log_print(ANDROID_LOG_INFO, "halley-android", "AndroidSystemAPI::init()");
 }
 
 void AndroidSystemAPI::deInit()
@@ -79,7 +84,38 @@ bool AndroidSystemAPI::generateEvents(VideoAPI* video, InputAPI* input)
     return true;
 }
 
+IHalleyEntryPoint* getHalleyEntry();
+
 void android_main(struct android_app* state)
 {
-    // TODO
+    __android_log_print(ANDROID_LOG_INFO, "halley-android", "Hello world!");
+
+    std::vector<std::string> args = { "halleygame" };
+
+    auto entry = getHalleyEntry();
+    std::unique_ptr<IMainLoopable> core = entry->createCore(args);
+
+    try {
+        DummyGameLoader loader;
+        loader.setCore(*core);
+        core->getAPI().system->runGame([&]() {
+            core->init();
+            MainLoop loop(*core, loader);
+            loop.run();
+        });
+    } catch (std::exception& e) {
+        if (core) {
+            core->onTerminatedInError(e.what());
+        } else {
+            std::cout << "Exception initialising core: " + String(e.what()) << std::endl;
+        }
+    } catch (...) {
+        if (core) {
+            core->onTerminatedInError("");
+        } else {
+            std::cout << "Unknown exception initialising core." << std::endl;
+        }
+    }
+
+    __android_log_print(ANDROID_LOG_INFO, "halley-android", "Goodbye world!");
 }

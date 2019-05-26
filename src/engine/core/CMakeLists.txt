@@ -171,3 +171,8 @@ assign_source_group(${HEADERS})
 
 add_library (halley-core ${SOURCES} ${HEADERS})
 target_link_libraries(halley-core halley-entity halley-utils halley-audio halley-net)
+
+# Hack, there should be no platform specific stuff in core...
+if (USE_ANDROID)
+    target_link_libraries(halley-core log android)
+endif ()
