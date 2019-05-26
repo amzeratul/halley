@@ -27,7 +27,8 @@ namespace Halley
 		void updateImage(TextureDescriptorImageData& pixelData, TextureFormat format, bool useMipMap);
 		void create(Vector2i size, TextureFormat format, bool useMipMap, bool useFiltering, bool clamp, TextureDescriptorImageData& imgData);
 
-		static unsigned int getGLFormat(TextureFormat format);
+		static unsigned int getGLInternalFormat(TextureFormat format);
+		static unsigned int getGLPixelFormat(TextureFormat format);
 
 		void waitForOpenGLLoad() const;
 		void finishLoading();

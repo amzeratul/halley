@@ -114,8 +114,6 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 	Expects(size.y <= 4096);
 	glCheckError();
 
-    GLuint pixFormat = GL_UNSIGNED_BYTE;
-
 #if defined (WITH_OPENGL)
 	if (useMipMap) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1);
@@ -140,28 +138,18 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 	}
 #endif
 
-	GLuint glFormat = getGLFormat(format);
-	GLuint format2 = glFormat;
+	GLuint internalFormat = getGLInternalFormat(format);
+	GLuint pixelFormat = getGLPixelFormat(format);
 	int stride = pixelData.empty() ? size.x : pixelData.getStrideOr(size.x);
-#ifdef WITH_OPENGL
-	if (format2 == GL_RGBA16F || format2 == GL_RGBA16) format2 = GL_RGBA;
-	if (format2 == GL_DEPTH_COMPONENT24) format2 = GL_DEPTH_COMPONENT;
 	glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
 	glPixelStorei(GL_PACK_ROW_LENGTH, stride);
-#else
-	if (format2 == GL_RGBA16F) format2 = GL_RGBA;
-	if (format2 == GL_DEPTH_COMPONENT24) format2 = GL_DEPTH_COMPONENT;
-	if (format2 == GL_DEPTH_COMPONENT16) format2 = GL_DEPTH_COMPONENT;
-    glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
-    glPixelStorei(GL_PACK_ROW_LENGTH, stride);
-#endif
 
 	if (pixelData.empty()) {
 		Vector<char> blank;
 		blank.resize(size.x * size.y * TextureDescriptor::getBitsPerPixel(format));
-		glTexImage2D(GL_TEXTURE_2D, 0, glFormat, size.x, size.y, 0, format2, pixFormat, blank.data());
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, size.x, size.y, 0, pixelFormat, GL_UNSIGNED_BYTE, blank.data());
 	} else {
-		glTexImage2D(GL_TEXTURE_2D, 0, glFormat, size.x, size.y, 0, format2, pixFormat, pixelData.getBytes());
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, size.x, size.y, 0, pixelFormat, GL_UNSIGNED_BYTE, pixelData.getBytes());
 	}
 	glCheckError();
 
@@ -176,7 +164,7 @@ void TextureOpenGL::updateImage(TextureDescriptorImageData& pixelData, TextureFo
 	glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
 	glPixelStorei(GL_PACK_ROW_LENGTH, stride);
 #endif
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y, getGLFormat(format), GL_UNSIGNED_BYTE, pixelData.getBytes());
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y, getGLPixelFormat(format), GL_UNSIGNED_BYTE, pixelData.getBytes());
 	glCheckError();
 
 #if defined (WITH_OPENGL) || defined(WITH_OPENGL_ES3)
@@ -188,7 +176,23 @@ void TextureOpenGL::updateImage(TextureDescriptorImageData& pixelData, TextureFo
 #endif
 }
 
-unsigned TextureOpenGL::getGLFormat(TextureFormat format)
+unsigned TextureOpenGL::getGLInternalFormat(TextureFormat format)
+{
+	switch (format) {
+	case TextureFormat::Indexed:
+		return GL_R8;
+	case TextureFormat::RGB:
+		return GL_RGB;
+	case TextureFormat::RGBA:
+		return GL_RGBA;
+	case TextureFormat::DEPTH:
+		return GL_DEPTH_COMPONENT24;
+	default:
+		throw Exception("Unknown texture format: " + toString(static_cast<int>(format)), HalleyExceptions::VideoPlugin);
+	}
+}
+
+unsigned TextureOpenGL::getGLPixelFormat(TextureFormat format)
 {
 	switch (format) {
 	case TextureFormat::Indexed:
@@ -198,11 +202,7 @@ unsigned TextureOpenGL::getGLFormat(TextureFormat format)
 	case TextureFormat::RGBA:
 		return GL_RGBA;
 	case TextureFormat::DEPTH:
-#if defined (WITH_OPENGL) || defined(WITH_OPENGL_ES3)
-		return GL_DEPTH_COMPONENT24;
-#else
-		return GL_DEPTH_COMPONENT16;
-#endif
+		return GL_DEPTH_COMPONENT;
 	default:
 		throw Exception("Unknown texture format: " + toString(static_cast<int>(format)), HalleyExceptions::VideoPlugin);
 	}
