@@ -45,7 +45,8 @@ void AndroidSystemAPI::init()
         }
     }
 
-    surface = eglCreateWindowSurface(display, config, AndroidSystem::get().getAndroidApp()->window, nullptr);
+    auto window = AndroidSystem::get().getAndroidApp()->window;
+    surface = eglCreateWindowSurface(display, config, window, nullptr);
 }
 
 void AndroidSystemAPI::deInit()
@@ -81,13 +82,14 @@ std::shared_ptr<Window> AndroidSystemAPI::createWindow(const WindowDefinition& w
 
 void AndroidSystemAPI::destroyWindow(std::shared_ptr<Window> window)
 {
-    // TODO
 }
 
 Vector2i AndroidSystemAPI::getScreenSize(int n) const
 {
-    // TODO
-    return Vector2i(1920, 1080);
+    EGLint w, h;
+    eglQuerySurface(display, surface, EGL_WIDTH, &w);
+    eglQuerySurface(display, surface, EGL_HEIGHT, &h);
+    return Vector2i(w, h);
 }
 
 Rect4i AndroidSystemAPI::getDisplayRect(int screen) const
@@ -106,6 +108,14 @@ std::shared_ptr<ISaveData> AndroidSystemAPI::getStorageContainer(SaveDataType ty
 
 bool AndroidSystemAPI::generateEvents(VideoAPI* video, InputAPI* input)
 {
-    // TODO
+    auto androidAppState = AndroidSystem::get().getAndroidApp();
+    int ident;
+    int events;
+    struct android_poll_source* source;
+    while ((ident = ALooper_pollAll(0, nullptr, &events, reinterpret_cast<void**>(&source))) >= 0) {
+        if (source != nullptr) {
+            source->process(androidAppState, source);
+        }
+    }
     return true;
 }

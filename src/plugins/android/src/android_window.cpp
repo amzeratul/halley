@@ -36,8 +36,7 @@ void AndroidWindow::swap()
 
 Rect4i AndroidWindow::getWindowRect() const
 {
-    // TODO
-    return Rect4i(0, 0, 1920, 1080);
+    return Rect4i(Vector2i(), definition.getSize());
 }
 
 const WindowDefinition& AndroidWindow::getDefinition() const
