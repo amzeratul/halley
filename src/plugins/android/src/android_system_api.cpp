@@ -1,4 +1,6 @@
 #include "android_system_api.h"
+#include "android_save_data.h"
+#include "android_asset_reader.h"
 #include <android/log.h>
 #include <android_native_app_glue.h>
 #include <jni.h>
@@ -8,16 +10,17 @@
 #include <halley/runner/entry_point.h>
 #include <string>
 
+struct android_app* androidAppState = nullptr;
+
 using namespace Halley;
 
 void AndroidSystemAPI::init()
 {
-    __android_log_print(ANDROID_LOG_INFO, "halley-android", "AndroidSystemAPI::init()");
+
 }
 
 void AndroidSystemAPI::deInit()
 {
-    // TODO
 }
 
 Path AndroidSystemAPI::getAssetsPath(const Path& gamePath) const
@@ -34,8 +37,7 @@ Path AndroidSystemAPI::getUnpackedAssetsPath(const Path& gamePath) const
 
 std::unique_ptr<ResourceDataReader> AndroidSystemAPI::getDataReader(String path, int64_t start, int64_t end)
 {
-    // TODO
-    return {};
+    return std::make_unique<AndroidAssetReader>(androidAppState->activity->assetManager, path);
 }
 
 std::unique_ptr<GLContext> AndroidSystemAPI::createGLContext()
@@ -74,8 +76,7 @@ void AndroidSystemAPI::showCursor(bool show)
 
 std::shared_ptr<ISaveData> AndroidSystemAPI::getStorageContainer(SaveDataType type, const String& containerName)
 {
-    // TODO
-    return {};
+    return std::make_shared<AndroidSaveData>(type, containerName);
 }
 
 bool AndroidSystemAPI::generateEvents(VideoAPI* video, InputAPI* input)
@@ -88,6 +89,7 @@ IHalleyEntryPoint* getHalleyEntry();
 
 void android_main(struct android_app* state)
 {
+    androidAppState = state;
     __android_log_print(ANDROID_LOG_INFO, "halley-android", "Hello world!");
 
     std::vector<std::string> args = { "halleygame" };
