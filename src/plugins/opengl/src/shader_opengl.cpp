@@ -67,6 +67,7 @@ static GLuint loadShader(const Bytes& src, GLenum type, String name)
     memcpy(buffer + 15, src.data() + startPos, len - 15);
     buffer[len] = 0;
 #else
+	size_t len = src.size();
 	GLchar* buffer = new GLchar[len + 1];
 	memcpy(buffer, src.data(), src.size());
 	buffer[len] = 0;
