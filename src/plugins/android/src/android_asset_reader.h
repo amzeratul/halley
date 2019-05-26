@@ -18,5 +18,6 @@ namespace Halley {
     private:
         AAssetManager* mgr = nullptr;
         AAsset* asset = nullptr;
+        off64_t curPos = 0;
     };
 }

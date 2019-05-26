@@ -1,6 +1,7 @@
 #include "android_system_api.h"
 #include "android_save_data.h"
 #include "android_asset_reader.h"
+#include "android_window.h"
 #include <android/log.h>
 #include <android_native_app_glue.h>
 #include <jni.h>
@@ -25,18 +26,17 @@ void AndroidSystemAPI::deInit()
 
 Path AndroidSystemAPI::getAssetsPath(const Path& gamePath) const
 {
-    // TODO
-    return "";
+    return ".";
 }
 
 Path AndroidSystemAPI::getUnpackedAssetsPath(const Path& gamePath) const
 {
-    // TODO
-    return "";
+    return ".";
 }
 
 std::unique_ptr<ResourceDataReader> AndroidSystemAPI::getDataReader(String path, int64_t start, int64_t end)
 {
+    __android_log_print(ANDROID_LOG_INFO, "halley-android", "Loading %s with %lld %lld", path.c_str(), start, end);
     return std::make_unique<AndroidAssetReader>(androidAppState->activity->assetManager, path);
 }
 
@@ -48,8 +48,7 @@ std::unique_ptr<GLContext> AndroidSystemAPI::createGLContext()
 
 std::shared_ptr<Window> AndroidSystemAPI::createWindow(const WindowDefinition& window)
 {
-    // TODO
-    return {};
+    return std::make_shared<AndroidWindow>(window);
 }
 
 void AndroidSystemAPI::destroyWindow(std::shared_ptr<Window> window)
@@ -60,13 +59,13 @@ void AndroidSystemAPI::destroyWindow(std::shared_ptr<Window> window)
 Vector2i AndroidSystemAPI::getScreenSize(int n) const
 {
     // TODO
-    return Vector2i();
+    return Vector2i(1920, 1080);
 }
 
 Rect4i AndroidSystemAPI::getDisplayRect(int screen) const
 {
     // TODO
-    return Rect4i();
+    return Rect4i(0, 0, 1920, 1080);
 }
 
 void AndroidSystemAPI::showCursor(bool show)
@@ -90,7 +89,6 @@ IHalleyEntryPoint* getHalleyEntry();
 void android_main(struct android_app* state)
 {
     androidAppState = state;
-    __android_log_print(ANDROID_LOG_INFO, "halley-android", "Hello world!");
 
     std::vector<std::string> args = { "halleygame" };
 
@@ -118,6 +116,4 @@ void android_main(struct android_app* state)
             std::cout << "Unknown exception initialising core." << std::endl;
         }
     }
-
-    __android_log_print(ANDROID_LOG_INFO, "halley-android", "Goodbye world!");
 }

@@ -7,6 +7,7 @@ set(SOURCES
     "src/android_plugin.cpp"
     "src/android_system_api.cpp"
     "src/android_save_data.cpp"
+    "src/android_window.cpp"
 
     "${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c"
     )
@@ -15,6 +16,7 @@ set(HEADERS
     "src/android_asset_reader.h"
     "src/android_system_api.h"
     "src/android_save_data.h"
+    "src/android_window.h"
     )
 
 assign_source_group(${SOURCES})

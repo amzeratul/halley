@@ -3,7 +3,7 @@ using namespace Halley;
 
 AndroidAssetReader::AndroidAssetReader(AAssetManager *mgr, String path)
 {
-    asset = AAssetManager_open(mgr, path.c_str(), AASSET_MODE_RANDOM);
+    asset = AAssetManager_open(mgr, path.mid(2).c_str(), AASSET_MODE_RANDOM);
 }
 
 AndroidAssetReader::~AndroidAssetReader()
@@ -13,22 +13,26 @@ AndroidAssetReader::~AndroidAssetReader()
 
 size_t AndroidAssetReader::size() const
 {
-    return size_t(AAsset_getLength(asset));
+    return size_t(AAsset_getLength64(asset));
 }
 
 int AndroidAssetReader::read(gsl::span<gsl::byte> dst)
 {
-    return AAsset_read(asset, dst.data(), size_t(dst.size()));
+    int nRead = AAsset_read(asset, dst.data(), size_t(dst.size()));
+    if (nRead > 0) {
+        curPos += nRead;
+    }
+    return nRead;
 }
 
 void AndroidAssetReader::seek(int64_t pos, int whence)
 {
-    AAsset_seek(asset, off_t(pos), whence);
+    curPos = AAsset_seek64(asset, off_t(pos), whence);
 }
 
 size_t AndroidAssetReader::tell() const
 {
-    return size_t(AAsset_getLength(asset) - AAsset_getRemainingLength(asset));
+    return curPos;
 }
 
 void AndroidAssetReader::close()
