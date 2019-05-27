@@ -99,15 +99,13 @@ void AndroidInputAPI::onMotionEvent(AInputEvent *event)
     if (action == AMOTION_EVENT_ACTION_DOWN) {
         touches[pointerId] = std::make_shared<InputTouch>(pos);
         firstTouch = touches.size() == 1;
+        holdingRight = false;
     } else {
         auto touch = touches[pointerId];
         touch->setPos(pos);
 
-        const bool validTap = firstTouch && (pos - touch->getInitialPos()).length() < 10.0f;
-
-        if (validTap && heldTime >= 0.3) {
-            holdingRight = true;
-        }
+        const bool validTap = firstTouch && (pos - touch->getInitialPos()).length() < 20.0f;
+        holdingRight = validTap && heldTime >= 0.3;
 
         if (action == AMOTION_EVENT_ACTION_UP) {
             mouse->setPosition(pos);
