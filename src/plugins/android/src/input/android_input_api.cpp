@@ -23,6 +23,7 @@ void AndroidInputAPI::beginEvents(Time t)
 {
     mouse->onButtonStatus(0, false);
     mouse->onButtonStatus(1, false);
+    mouse->onButtonStatus(2, holdingRight);
 }
 
 size_t AndroidInputAPI::getNumberOfKeyboards() const
@@ -101,15 +102,19 @@ void AndroidInputAPI::onMotionEvent(AInputEvent *event)
     } else {
         auto touch = touches[pointerId];
         touch->setPos(pos);
+
+        const bool validTap = firstTouch && (pos - touch->getInitialPos()).length() < 10.0f;
+
+        if (validTap && heldTime >= 0.3) {
+            holdingRight = true;
+        }
+
         if (action == AMOTION_EVENT_ACTION_UP) {
             mouse->setPosition(pos);
+            holdingRight = false;
 
-            if (firstTouch && (pos - touch->getInitialPos()).length() < 10.0f) {
-                if (heldTime < 0.3) {
-                    mouse->onButtonStatus(0, true);
-                } else {
-                    mouse->onButtonStatus(1, true);
-                }
+            if (validTap && heldTime < 0.3) {
+                mouse->onButtonStatus(0, true);
             }
 
             touches.erase(pointerId);

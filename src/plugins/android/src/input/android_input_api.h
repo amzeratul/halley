@@ -40,6 +40,7 @@ namespace Halley {
         std::shared_ptr<AndroidMouse> mouse;
         std::function<Vector2f(Vector2i)> mouseRemap;
         bool firstTouch = false;
+        bool holdingRight = false;
 
         std::map<int32_t, std::shared_ptr<InputTouch>> touches;
 
