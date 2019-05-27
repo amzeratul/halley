@@ -8,6 +8,7 @@
 #include <halley/core/game/core.h>
 #include <halley/runner/main_loop.h>
 #include <halley/runner/entry_point.h>
+#include "input/android_input_api.h"
 
 using namespace Halley;
 
@@ -23,8 +24,8 @@ static AndroidSystem* sys = nullptr;
 
 static int32_t onInputEvent(struct android_app* app, AInputEvent* event)
 {
-    // TODO
-    return 0;
+    AndroidSystem::get().onInputEvent(event);
+    return 1;
 }
 
 static void onAppCmd(struct android_app* app, int32_t cmd)
@@ -105,4 +106,16 @@ void AndroidSystem::onAppCmd(int32_t cmd)
     if (cmd == APP_CMD_INIT_WINDOW) {
         initWindow = true;
     }
+}
+
+void AndroidSystem::onInputEvent(AInputEvent *event)
+{
+    if (inputAPI) {
+        inputAPI->onInputEvent(event);
+    }
+}
+
+void AndroidSystem::setInputAPI(AndroidInputAPI *inputAPI)
+{
+    this->inputAPI = inputAPI;
 }
