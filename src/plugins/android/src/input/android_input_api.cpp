@@ -89,8 +89,11 @@ void AndroidInputAPI::onMotionEvent(AInputEvent *event)
     const int32_t index = (actionIndex >> 8) & 0xFF;
     const auto rawPos = Vector2f(AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0));
     const auto pos = mouseRemap(Vector2i(rawPos.round()));
-    const Time time = Time(AMotionEvent_getDownTime(event)) / 1'000'000'000.0;
     const int32_t pointerId = AMotionEvent_getPointerId(event, index);
+
+    const auto eventTime = AMotionEvent_getEventTime(event);
+    const auto startTime = AMotionEvent_getDownTime(event);
+    const Time heldTime = Time(eventTime - startTime) / 1'000'000'000.0;
 
     if (action == AMOTION_EVENT_ACTION_DOWN) {
         touches[pointerId] = std::make_shared<InputTouch>(pos);
@@ -101,8 +104,8 @@ void AndroidInputAPI::onMotionEvent(AInputEvent *event)
         if (action == AMOTION_EVENT_ACTION_UP) {
             mouse->setPosition(pos);
 
-            if (firstTouch && (pos - touch->getInitialPos()).length() < 5.0f) {
-                if (time < 0.2) {
+            if (firstTouch && (pos - touch->getInitialPos()).length() < 10.0f) {
+                if (heldTime < 0.3) {
                     mouse->onButtonStatus(0, true);
                 } else {
                     mouse->onButtonStatus(1, true);
