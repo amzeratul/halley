@@ -3,7 +3,7 @@
 #include "android_asset_reader.h"
 #include "android_window.h"
 #include "android_gl_context.h"
-#include "android_system.h"
+#include "../android_system.h"
 #include <android_native_app_glue.h>
 #include <android/log.h>
 #include <jni.h>
