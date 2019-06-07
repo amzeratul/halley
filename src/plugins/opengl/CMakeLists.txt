@@ -29,18 +29,9 @@ set(HEADERS
         "src/video_opengl.h"
         )
 
-if (WITH_OPENGL)
-	add_definitions(-DWITH_OPENGL)
+if (USE_OPENGL)
 	set(SOURCES ${SOURCES} "src/gl_core_3_3.c")
 	set(HEADERS ${HEADERS} "src/gl_core_3_3.h")
-endif()
-
-if(WITH_OPENGL_ES2)
-        add_definitions(-DWITH_OPENGL_ES2)
-endif()
-
-if(WITH_OPENGL_ES3)
-        add_definitions(-DWITH_OPENGL_ES3)
 endif()
 
 assign_source_group(${SOURCES})
