@@ -220,4 +220,8 @@ set(HEADERS
 assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        set_source_files_properties("src/maths/matrix4.cpp" PROPERTIES COMPILE_FLAGS "-msse3")
+endif ()
+
 add_library (halley-utils ${SOURCES} ${HEADERS})
