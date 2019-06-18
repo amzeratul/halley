@@ -127,12 +127,22 @@ namespace Halley
 		Public
 	};
 
+	template <>
+	struct EnumNames<MultiplayerPrivacy> {
+		constexpr std::array<const char*, 3> operator()() const {
+			return { {
+					"private",
+					"friends_only",
+					"public"
+				} };
+		}
+	};
+
 	class MultiplayerSession {
 	public:
 		virtual ~MultiplayerSession() = default;
 		virtual MultiplayerStatus getStatus() const = 0;
 		virtual void showInviteUI() = 0;
-		virtual bool canSetPrivacy() const { return false; }
 		virtual void setPrivacy(MultiplayerPrivacy privacy) { }
 	};
 
@@ -207,6 +217,7 @@ namespace Halley
 
 		// Return empty unique_ptr if not supported
 		virtual std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key) { return {}; }
+		virtual bool canSetLobbyPrivacy() { return false; }
 
 		virtual void multiplayerInvitationCancel() { }
 
