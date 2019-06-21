@@ -5,6 +5,7 @@
 #include <halley/concurrency/future.h>
 #include <halley/utils/utils.h>
 #include "halley/text/i18n.h"
+#include "halley/text/string_converter.h"
 
 namespace Halley
 {
