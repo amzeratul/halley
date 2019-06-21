@@ -164,6 +164,7 @@ namespace Halley
 	public:
 		virtual ~PlatformAPI() {}
 
+		virtual String getId() { return ""; }
 		virtual void update() = 0;
 
 		virtual bool needsSignIn() const { return false; }
@@ -191,12 +192,18 @@ namespace Halley
 		virtual String getUniquePlayerIdString() { return ""; } // This has to be a valid filename
 		virtual bool playerHasLoggedOut() { return false; }
 
+		// Achievements
 		// Complete when currentProgress == maximumValue
-		virtual String getId() { return ""; }
 		virtual void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue) {}
 		virtual bool isAchievementUnlocked(const String& achievementId, bool defaultValue) { return defaultValue; }
 		virtual bool isAchievementSystemReady() const { return true; }
 		virtual bool mustUnlockAchievementsOnUserAction() const { return false; }
+
+		// Stats
+		virtual void setStat(const String& statId, int value) {}
+		virtual int getStatInt(const String& statId) { return 0; }
+		virtual void incrementStat(const String& statId) { setStat(statId, getStatInt(statId) + 1); }
+		virtual bool isStatsSystemReady() const { return true; }
 
 		// Some platforms require custom handling when missing UGC capabilities
 		virtual bool hasOfflineUGCCapabilities() { return true; }
