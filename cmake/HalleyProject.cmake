@@ -103,6 +103,7 @@ set(USE_OPENGL 1)
 set(USE_OPENGL_ES2 0)
 set(USE_OPENGL_ES3 0)
 set(USE_DX11 0)
+set(USE_METAL 0)
 set(USE_SDL2 1)
 set(USE_ASIO 1)
 set(USE_WINRT 0)
@@ -142,6 +143,7 @@ endif ()
 
 if (APPLE)
   set(USE_AVFOUNDATION 1)
+  set(USE_METAL 1)
 endif ()
 
 # Libs

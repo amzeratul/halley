@@ -6,6 +6,10 @@ if (USE_OPENGL OR USE_OPENGL_ES2 OR USE_OPENGL_ES3)
     add_subdirectory(opengl)
 endif ()
 
+if (USE_METAL)
+    add_subdirectory(metal)
+endif ()
+
 if (USE_SDL2)
     add_subdirectory(sdl)
 endif ()

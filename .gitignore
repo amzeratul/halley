@@ -29,6 +29,10 @@ Thumbs.db
 # VSCode
 .vscode
 
+# Vim
+compile_commands.json
+*.swp
+
 # Binaries
 /assets/
 /assets_unpacked/

@@ -143,6 +143,8 @@ void* SDLWindow::getNativeHandle()
 	if (SDL_GetWindowWMInfo(window, &wminfo) == 1) {
 		return wminfo.info.win.window;
 	}
+#elif __APPLE__
+  return window;
 #endif
 	return nullptr;
 }
@@ -151,6 +153,8 @@ String SDLWindow::getNativeHandleType()
 {
 #ifdef _WIN32
 	return "HWND";
+#elif __APPLE__
+  return "SDL";
 #else
 	return "";
 #endif

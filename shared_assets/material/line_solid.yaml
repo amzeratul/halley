@@ -10,4 +10,7 @@ passes:
       - language: hlsl
         vertex: line.vertex.hlsl
         pixel: line_solid.pixel.hlsl
+      - language: metal
+        vertex: line.vertex.metal
+        pixel: line_solid.pixel.metal
 ...

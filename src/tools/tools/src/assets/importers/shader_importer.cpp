@@ -20,9 +20,12 @@ void ShaderImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		const auto shaderType = fromString<ShaderType>(input.name.getExtension().mid(1));
 		const String language = input.metadata.getString("language", "");
 
-		if (language == "glsl") {
+		if (language == "glsl" || language == "metal") {
+			// Runtime-compiled shader languages
 			String strData = String(reinterpret_cast<const char*>(input.data.data()), input.data.size());
-			strData = "#version 330\n" + strData;
+			if (language == "glsl") {
+				strData = "#version 330\n" + strData;
+			}
 			Bytes data(strData.size());
 			memcpy(data.data(), strData.c_str(), data.size());
 			shader.shaders[shaderType] = data;

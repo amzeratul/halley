@@ -45,7 +45,7 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const ConfigNode& 
 {
 	String passName = material.getName() + "_pass_" + toString(passN);
 
-	auto shaderTypes = { "vertex", "geometry", "pixel" };
+	auto shaderTypes = { "vertex", "geometry", "pixel", "combined" };
 
 	for (auto& shaderEntry: node["shader"]) {
 		String language = shaderEntry["language"].asString();
@@ -99,8 +99,10 @@ Bytes MaterialImporter::doLoadShader(const String& name, IAssetCollector& collec
 					auto includeData = doLoadShader(includeFile, collector, loaded);
 					appendLine(includeData.data(), includeData.size());
 				}
-			} else {
+			} else if (!(quoted.startsWith("<") && quoted.endsWith(">"))) {
 				throw Exception("Invalid syntax in #include in shader", HalleyExceptions::Tools);
+			} else {
+				appendLine(curLine.c_str(), curLine.size());
 			}
 		} else {
 			appendLine(curLine.c_str(), curLine.size());
