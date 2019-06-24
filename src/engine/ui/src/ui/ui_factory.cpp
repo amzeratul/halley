@@ -729,7 +729,7 @@ std::shared_ptr<UIWidget> UIFactory::makeHybridList(const ConfigNode& node)
 			}
 
 			if (optionsNode["divider"].asBool(false)) {
-				list->addDivider();
+				list->addDivider(optionsNode["id"].asString(""));
 			} else {
 				const auto id = optionsNode["id"].asString();
 				const auto label = parseLabel(optionsNode);

@@ -7,10 +7,13 @@ namespace Halley {
 		explicit UIHybridList(const String& id, UIStyle style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 
 		void addTextItem(const String& id, const LocalisedString& label);
-	    void addDivider();
+	    void addDivider(const String& id = "");
+		void setDividerActive(const String& id);
 
 		void setInputButtons(const UIInputButtons& button);
 		void setItemEnabled(const String& id, bool enabled);
+		void setItemActive(const String& id, bool active);
+		void setDividerActive(const String& id, bool active);
 
     private:
 		UIStyle style;

@@ -49,11 +49,11 @@ void UIHybridList::addTextItem(const String& id, const LocalisedString& label)
 	buttons->add(button);
 }
 
-void UIHybridList::addDivider()
+void UIHybridList::addDivider(const String& id)
 {
 	auto dividerStyle = style.getSubStyle("divider");
-	buttons->add(std::make_shared<UIImage>(dividerStyle.getSprite("image")), 0, dividerStyle.getBorder("border"));
-	list->add(std::make_shared<UIImage>(dividerStyle.getSprite("image")), 0, dividerStyle.getBorder("border"));
+	buttons->add(std::make_shared<UIImage>(id, dividerStyle.getSprite("image")), 0, dividerStyle.getBorder("border"));
+	list->add(std::make_shared<UIImage>(id, dividerStyle.getSprite("image")), 0, dividerStyle.getBorder("border"));
 }
 
 void UIHybridList::setInputButtons(const UIInputButtons& inputButtons)
@@ -71,4 +71,16 @@ void UIHybridList::setItemEnabled(const String& id, bool enabled)
 {
 	buttons->getWidget(id)->setEnabled(enabled);
 	list->getItem(id)->setEnabled(enabled);
+}
+
+void UIHybridList::setItemActive(const String& id, bool active)
+{
+	buttons->getWidget(id)->setActive(active);
+	list->getItem(id)->setActive(active);
+}
+
+void UIHybridList::setDividerActive(const String& id, bool active)
+{
+	buttons->getWidget(id)->setActive(active);
+	list->getWidget(id)->setActive(active);
 }
