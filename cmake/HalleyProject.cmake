@@ -143,7 +143,7 @@ endif ()
 
 if (APPLE)
   set(USE_AVFOUNDATION 1)
-  set(USE_METAL 1)
+#  set(USE_METAL 1)
 endif ()
 
 # Libs
