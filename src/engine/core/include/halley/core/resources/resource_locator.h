@@ -26,7 +26,6 @@
 #include <halley/resources/resource_data.h>
 #include <halley/data_structures/hash_map.h>
 #include <halley/data_structures/vector.h>
-#include <set>
 
 namespace Halley {
 	enum class AssetType;
