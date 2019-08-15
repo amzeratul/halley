@@ -93,11 +93,12 @@ void ResourceLocator::addFileSystem(const Path& path)
 	add(std::make_unique<FileSystemResourceLocator>(system, path), path);
 }
 
-void ResourceLocator::addPack(const Path& path, const String& encryptionKey, bool preLoad, bool allowFailure)
+void ResourceLocator::addPack(const Path& path, const String& encryptionKey, bool preLoad, bool allowFailure, Maybe<int> priority)
 {
 	auto dataReader = system.getDataReader(path.string());
 	if (dataReader) {
-		add(std::make_unique<PackResourceLocator>(std::move(dataReader), path, encryptionKey, preLoad), path);
+		auto resourceLocator = std::make_unique<PackResourceLocator>(std::move(dataReader), path, encryptionKey, preLoad, priority);
+		add(std::move(resourceLocator), path);
 
 	} else {
 		if (allowFailure) {
@@ -144,6 +145,19 @@ void ResourceLocator::overwriteAsset(const Path& path, const String& asset, cons
 		else {
 			throw Exception("Unable to load resource pack \"" + path.string() + "\"", HalleyExceptions::Resources);
 		}
+	}
+}
+
+std::vector<String> ResourceLocator::getAssetsFromPack(const Path& path, const String& encryptionKey) const
+{
+	auto dataReader = system.getDataReader(path.string());
+	if (dataReader) {
+		std::unique_ptr<IResourceLocatorProvider> resourceLocator = std::make_unique<PackResourceLocator>(std::move(dataReader), path, "", true);
+		auto& db = resourceLocator->getAssetDatabase();
+		return db.getAssets();
+	}
+	else {
+		throw Exception("Unable to load resource pack \"" + path.string() + "\"", HalleyExceptions::Resources);
 	}
 }
 
