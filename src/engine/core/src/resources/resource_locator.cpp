@@ -109,45 +109,6 @@ void ResourceLocator::addPack(const Path& path, const String& encryptionKey, boo
 	}
 }
 
-void ResourceLocator::overwriteAsset(const Path& path, const String& asset, const String& encryptionKey, bool preLoad,
-	bool allowFailure)
-{
-	auto dataReader = system.getDataReader(path.string());
-	if (dataReader) {
-		std::unique_ptr<IResourceLocatorProvider> locator = std::make_unique<PackResourceLocator>(std::move(dataReader), path, encryptionKey, preLoad);
-
-		bool found = false;
-		auto& db = locator->getAssetDatabase();
-		for (auto& dbAsset : db.getAssets()) {
-			if (asset == dbAsset) {
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
-			if (allowFailure) {
-				Logger::logWarning("Resource pack not found: \"" + path.string() + "\"");
-				return;
-			}
-			else {
-				throw Exception("Unable to load resource pack \"" + path.string() + "\"", HalleyExceptions::Resources);
-			}
-		}
-		
-		locators[asset] = locator.get();
-		locatorPaths[path.getString()] = locator.get();
-		locatorList.emplace_back(std::move(locator));
-	}
-	else {
-		if (allowFailure) {
-			Logger::logWarning("Resource pack not found: \"" + path.string() + "\"");
-		}
-		else {
-			throw Exception("Unable to load resource pack \"" + path.string() + "\"", HalleyExceptions::Resources);
-		}
-	}
-}
-
 std::vector<String> ResourceLocator::getAssetsFromPack(const Path& path, const String& encryptionKey) const
 {
 	auto dataReader = system.getDataReader(path.string());

@@ -50,7 +50,6 @@ namespace Halley {
 		explicit ResourceLocator(SystemAPI& system);
 		void addFileSystem(const Path& path);
 		void addPack(const Path& path, const String& encryptionKey = "", bool preLoad = false, bool allowFailure = false, Maybe<int> priority = {});
-		void overwriteAsset(const Path& path, const String& asset, const String& encryptionKey = "", bool preLoad = false, bool allowFailure = false);
 		std::vector<String> getAssetsFromPack(const Path& path, const String& encryptionKey = "") const;
 		void removePack(const Path& path);
 
