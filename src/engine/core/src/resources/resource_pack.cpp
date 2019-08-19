@@ -4,10 +4,11 @@
 #include "api/system_api.h"
 using namespace Halley;
 
-PackResourceLocator::PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, String key, bool preLoad)
+PackResourceLocator::PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, String key, bool preLoad, Maybe<int> priority)
 	: path(std::move(path))
 	, encryptionKey(std::move(key))
 	, preLoad(preLoad)
+	, priority(priority)
 {
 	assetPack = std::make_unique<AssetPack>(std::move(reader), encryptionKey, preLoad);
 }
@@ -41,4 +42,9 @@ void PackResourceLocator::purge(SystemAPI& sys)
 void PackResourceLocator::loadAfterPurge()
 {
 	assetPack = std::make_unique<AssetPack>(system->getDataReader(path.string()), encryptionKey, preLoad);
+}
+
+int PackResourceLocator::getPriority() const
+{
+	return priority ? priority.get() : IResourceLocatorProvider::getPriority();
 }
