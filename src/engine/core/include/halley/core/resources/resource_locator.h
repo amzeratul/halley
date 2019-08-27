@@ -26,6 +26,8 @@
 #include <halley/resources/resource_data.h>
 #include <halley/data_structures/hash_map.h>
 #include <halley/data_structures/vector.h>
+#include <set>
+#include "halley/data_structures/maybe.h"
 
 namespace Halley {
 	enum class AssetType;
@@ -47,7 +49,8 @@ namespace Halley {
 	public:
 		explicit ResourceLocator(SystemAPI& system);
 		void addFileSystem(const Path& path);
-		void addPack(const Path& path, const String& encryptionKey = "", bool preLoad = false, bool allowFailure = false);
+		void addPack(const Path& path, const String& encryptionKey = "", bool preLoad = false, bool allowFailure = false, Maybe<int> priority = {});
+		std::vector<String> getAssetsFromPack(const Path& path, const String& encryptionKey = "") const;
 		void removePack(const Path& path);
 
 		const Metadata& getMetaData(const String& resource, AssetType type) const override;
