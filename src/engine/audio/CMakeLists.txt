@@ -10,6 +10,7 @@ set(SOURCES
         "src/audio_engine.cpp"
         "src/audio_event.cpp"
         "src/audio_facade.cpp"
+        "src/audio_filter_biquad.cpp"
         "src/audio_filter_resample.cpp"
         "src/audio_handle_impl.cpp"
         "src/audio_mixer.cpp"
@@ -25,7 +26,9 @@ set(HEADERS
         "include/halley/audio/audio_emitter_behaviour.h"
         "include/halley/audio/audio_event.h"
         "include/halley/audio/audio_facade.h"
+        "include/halley/audio/audio_filter_biquad.h"
         "include/halley/audio/audio_position.h"
+        "include/halley/audio/audio_source.h"
         "include/halley/audio/halley_audio.h"
         "include/halley/audio/vorbis_dec.h"
         "src/audio_buffer.h"
@@ -36,7 +39,6 @@ set(HEADERS
         "src/audio_mixer.h"
         "src/audio_mixer_avx.h"
         "src/audio_mixer_sse.h"
-        "src/audio_source.h"
         "src/audio_source_clip.h"
         )
 

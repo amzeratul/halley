@@ -5,7 +5,7 @@ using namespace Halley;
 
 AudioFilterResample::AudioFilterResample(std::shared_ptr<AudioSource> source, int fromHz, int toHz, AudioBufferPool& pool)
 	: pool(pool)
-	, source(source)
+	, source(std::move(source))
 	, fromHz(fromHz)
 	, toHz(toHz)
 {
