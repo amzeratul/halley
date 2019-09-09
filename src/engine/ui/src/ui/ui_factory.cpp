@@ -804,7 +804,7 @@ bool UIFactory::resolveConditions(const ConfigNode& node) const
 	if (node.getType() == ConfigNodeType::Sequence) {
 		bool ok = true;
 		for (auto& c: node.asSequence()) {
-			ok &= hasCondition(c.asString());
+			ok &= resolveCondition(c.asString());
 		}
 		return ok;
 	} else {
