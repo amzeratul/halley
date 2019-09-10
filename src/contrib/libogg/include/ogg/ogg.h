@@ -17,12 +17,12 @@
 #ifndef _OGG_H
 #define _OGG_H
 
+#include <stddef.h>
+#include <ogg/os_types.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stddef.h>
-#include <ogg/os_types.h>
 
 typedef struct {
   void *iov_base;

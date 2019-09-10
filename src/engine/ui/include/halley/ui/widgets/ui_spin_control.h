@@ -9,9 +9,9 @@ namespace Halley {
 	public:
 		explicit UISpinControl(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, float value);
 
-		UISpinControl(UISpinControl&& other) = default;
+		UISpinControl(UISpinControl&& other) = delete;
 		UISpinControl(const UISpinControl& other) = delete;
-		UISpinControl& operator=(UISpinControl&& other) = default;
+		UISpinControl& operator=(UISpinControl&& other) = delete;
 		UISpinControl& operator=(const UISpinControl& other) = delete;
 
 		void setValue(float value);

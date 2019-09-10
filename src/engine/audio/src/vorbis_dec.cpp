@@ -25,6 +25,7 @@
 #include "ogg/ogg.h"
 #include "halley/support/exception.h"
 #include "halley/resources/resource_data.h"
+#include <gsl/gsl_assert>
 
 #ifdef WITH_IVORBIS
 	#include "ivorbiscodec.h"

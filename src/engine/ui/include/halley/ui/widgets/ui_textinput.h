@@ -15,9 +15,9 @@ namespace Halley {
 	public:
 		explicit UITextInput(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, String text = "", LocalisedString ghostText = LocalisedString());
 
-		UITextInput(UITextInput&& other) = default;
+		UITextInput(UITextInput&& other) = delete;
 		UITextInput(const UITextInput& other) = delete;
-		UITextInput& operator=(UITextInput&& other) = default;
+		UITextInput& operator=(UITextInput&& other) = delete;
 		UITextInput& operator=(const UITextInput& other) = delete;
 
 		bool canInteractWithMouse() const override;
