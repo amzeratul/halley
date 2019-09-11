@@ -11,8 +11,8 @@
 using namespace Halley;
 
 Painter::Painter(Resources& resources)
-	: resources(resources)
-	, halleyGlobalMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/MaterialBase"), true))
+	: halleyGlobalMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/MaterialBase"), true))
+	, resources(resources)
 {
 }
 
