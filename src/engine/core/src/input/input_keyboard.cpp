@@ -125,6 +125,9 @@ void TextInputData::onControlCharacter(TextControlCharacter c, std::shared_ptr<I
 	case TextControlCharacter::Right:
 		setSelection(getSelection().start + 1);
 		break;
+	default:
+		// Ignore other cases
+		break;
 	}
 
 	if (clipboard) {
@@ -143,6 +146,8 @@ void TextInputData::onControlCharacter(TextControlCharacter c, std::shared_ptr<I
 		case TextControlCharacter::Cut:
 			clipboard->setData(String(text));
 			setText(StringUTF32());
+			break;
+		default:
 			break;
 		}
 	}

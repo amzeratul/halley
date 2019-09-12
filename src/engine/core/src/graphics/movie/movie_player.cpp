@@ -16,11 +16,11 @@ using namespace Halley;
 using namespace std::chrono_literals;
 
 MoviePlayer::MoviePlayer(VideoAPI& video, AudioAPI& audio)
-	: video(video)
+	: maxVideoFrames(7)
+	, maxAudioSamples(20000)
+	, video(video)
 	, audio(audio)
 	, threadRunning(false)
-	, maxVideoFrames(7)
-	, maxAudioSamples(20000)
 	, aliveFlag(std::make_shared<MoviePlayerAliveFlag>())
 {
 }
