@@ -188,6 +188,20 @@ I18NLanguageMatch I18NLanguage::getMatch(const I18NLanguage& other) const
 	return I18NLanguageMatch::Exact;
 }
 
+Maybe<I18NLanguage> I18NLanguage::getBestMatch(const std::vector<I18NLanguage>& languages, const I18NLanguage& target, Maybe<I18NLanguage> fallback)
+{
+	I18NLanguageMatch bestMatch = I18NLanguageMatch::None;
+	Maybe<I18NLanguage> result = fallback;
+	for (const auto& l: languages) {
+		auto m = l.getMatch(target);
+		if (int(m) > int(bestMatch)) {
+			bestMatch = m;
+			result = l;
+		}
+	}
+	return result;
+}
+
 bool I18NLanguage::operator==(const I18NLanguage& other) const
 {
 	return languageCode == other.languageCode && countryCode == other.countryCode;

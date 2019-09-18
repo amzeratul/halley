@@ -143,7 +143,7 @@ namespace Halley
 	public:
 		virtual ~MultiplayerSession() = default;
 		virtual MultiplayerStatus getStatus() const = 0;
-		virtual void showInviteUI() = 0;
+		virtual void showInviteUI(int maxPlayers, const std::map<I18NLanguage, String>& messagePerLanguage) = 0;
 		virtual void setPrivacy(MultiplayerPrivacy privacy) { }
 	};
 

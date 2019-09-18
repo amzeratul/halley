@@ -230,7 +230,7 @@ namespace Halley {
 		virtual ~XBLMultiplayerSession();
 
 		MultiplayerStatus getStatus() const override;
-		void showInviteUI() override;
+		void showInviteUI(int maxPlayers, const std::map<I18NLanguage, String>& messagePerLanguage) override;
 	private:
 		XBLManager& manager;
 		String key;

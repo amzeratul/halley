@@ -1445,7 +1445,7 @@ MultiplayerStatus XBLMultiplayerSession::getStatus() const
 	return manager.getMultiplayerStatus ( sessionId );
 }
 
-void XBLMultiplayerSession::showInviteUI()
+void XBLMultiplayerSession::showInviteUI(int maxPlayers, const std::map<I18NLanguage, String>& messagePerLanguage)
 {
 	manager.showInviteUI ();
 }
