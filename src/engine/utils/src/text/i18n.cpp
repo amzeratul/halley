@@ -79,6 +79,19 @@ LocalisedString I18N::get(const String& key) const
 	return LocalisedString(*this, key, "#MISSING#");
 }
 
+Maybe<LocalisedString> I18N::get(const String& key, const I18NLanguage& language) const
+{
+	auto curLang = strings.find(language);
+	if (curLang != strings.end()) {
+		auto i = curLang->second.find(key);
+		if (i != curLang->second.end()) {
+			return LocalisedString(*this, key, i->second);
+		}
+	}
+
+	return {};
+}
+
 LocalisedString I18N::getPreProcessedUserString(const String& string) const
 {
 	if (string.startsWith("$")) {
