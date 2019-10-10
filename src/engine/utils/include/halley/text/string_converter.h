@@ -171,12 +171,18 @@ namespace Halley
 	}
 
 	template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-	String toString(T value, int base = 10)
+	String toString(T value, int base = 10, int width = 1)
 	{
 		Expects(base == 10 || base == 16 || base == 8);
 		std::stringstream ss;
-		if (base == 16) ss.setf(std::ios::hex, std::ios::basefield);
-		else if (base == 8) ss.setf(std::ios::oct, std::ios::basefield);
+		if (base == 16) {
+			ss.setf(std::ios::hex, std::ios::basefield);
+		} else if (base == 8) {
+			ss.setf(std::ios::oct, std::ios::basefield);
+		}
+		if (width > 1) {
+			ss << std::setfill('0') << std::setw(width);
+		}
 		ss << value;
 		return ss.str();
 	}
