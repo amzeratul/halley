@@ -7,8 +7,14 @@ UILabel::UILabel(const String& id, TextRenderer style, const LocalisedString& te
 	: UIWidget(id, {})
 	, renderer(style)
 	, text(text)
+	, aliveFlag(std::make_shared<bool>(true))
 {
 	updateText();
+}
+
+UILabel::~UILabel()
+{
+	*aliveFlag = false;
 }
 
 void UILabel::draw(UIPainter& painter) const
@@ -100,6 +106,17 @@ void UILabel::setText(const LocalisedString& t)
 		text = t;
 		updateText();
 	}
+}
+
+void UILabel::setFutureText(Future<String> futureText)
+{
+	const auto flag = aliveFlag;
+	futureText.then(Executors::getMainThread(), [=] (const String& filtered)
+	{
+		if (*flag) {
+			setText(LocalisedString::fromUserString(filtered));
+		}
+	});
 }
 
 void UILabel::setColourOverride(const std::vector<ColourOverride>& overrides)
