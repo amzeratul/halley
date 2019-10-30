@@ -35,7 +35,7 @@ namespace Halley
 		using DataType = T;
 
 		template <typename P, typename F>
-		static void setPromise(P promise, F&& callable)
+		static void setPromise(P& promise, F&& callable)
 		{
 			if (!promise.isCancelled()) {
 				promise.setValue(std::move(callable()));
@@ -61,7 +61,7 @@ namespace Halley
 		using DataType = VoidWrapper;
 
 		template <typename P, typename F>
-		static void setPromise(P promise, F&& callable)
+		static void setPromise(P& promise, F&& callable)
 		{
 			if (!promise.isCancelled()) {
 				callable();
@@ -273,8 +273,9 @@ namespace Halley
 		{
 		}
 
-		void setValue(T&& value)
+		void setValue(T value)
 		{
+			Expects(futureData);
 			futureData->set(std::move(value));
 		}
 
@@ -285,6 +286,7 @@ namespace Halley
 
 		bool isCancelled() const
 		{
+			Expects(futureData);
 			return futureData->isCancelled();
 		}
 
@@ -463,7 +465,7 @@ namespace Halley
 			: payload(f)
 		{}
 
-		void setPayload(MovableFunction<T>&& f)
+		void setPayload(MovableFunction<T> f)
 		{
 			payload = std::move(f);
 		}
