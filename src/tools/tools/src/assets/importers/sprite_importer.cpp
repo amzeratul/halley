@@ -173,18 +173,25 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 			directionNames.insert("right");
 		}
 
-		int rightId = -1;
 		int i = 0;
 		for (const auto& dir: directionNames) {
-			if (dir == "right") {
-				rightId = i;
+			animation.addDirection(AnimationDirection(dir, dir, false, i++));
+		}
+
+		auto hasAnim = [&](const String& name)
+		{
+			return directionNames.find(name) != directionNames.end();
+		};
+		auto replaceAnim = [&](const String& toAdd, const String& base)
+		{
+			if (!hasAnim(toAdd) && hasAnim(base)) {
+				animation.addDirection(AnimationDirection(toAdd, base, true, animation.getDirection(base).getId()));
 			}
-			animation.addDirection(AnimationDirection(dir, dir, false, i));
-			++i;
-		}
-		if (directionNames.find("left") == directionNames.end()) {
-			animation.addDirection(AnimationDirection("left", "right", true, rightId));
-		}
+		};
+
+		replaceAnim("left", "right");
+		replaceAnim("up_left", "up_right");
+		replaceAnim("down_left", "down_right");
 	}
 		
 	std::map<String, AnimationSequence> sequences;
