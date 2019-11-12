@@ -3,17 +3,18 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-  - widget: { id: topLabel, class: label, text: "Enter the path of the project to load:" }
-    fill: centre
-  - widget: { class: scrollBarPane, size: [200, 250] }
+- widget: { id: topLabel, class: label, text: "Enter the path of the project to load:" }
+  fill: centre
+- widget: { class: scrollBarPane, size: [200, 250] }
+  proportion: 1
+  border: [0, 10, 0, 10]
+  sizer: { type: vertical }
+  children:
+  - widget: { id: recent, class: list }
+- sizer: { type: horizontal }
+  children:
+  - widget: { id: input, class: textInput, size: [400, 20] }
     proportion: 1
-    border: [0, 10, 0, 10]
-    sizer: { type: vertical }
-    children:
-      - widget: { id: recent, class: list }
-  - children:
-      - widget: { id: input, class: textInput, size: [400, 20] }
-        proportion: 1
-      - widget: { id: ok, class: button, text: "OK" }
+  - widget: { id: ok, class: button, text: "OK" }
 
 ...

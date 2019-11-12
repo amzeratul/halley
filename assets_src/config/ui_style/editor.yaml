@@ -10,6 +10,7 @@ uiStyle:
     downSound: ""
     hoverSound: ""
     label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    labelBorder: [0, 0, 0, 0]
 
   input:
     box: { img: ui/ui_input.png, colour: "#9861B6" }
