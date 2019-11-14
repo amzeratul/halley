@@ -24,6 +24,8 @@ namespace Halley {
 	class UIDebugConsoleController {
 	public:
 		Future<String> runCommand(String command, std::vector<String> args);
+		String runHelp();
+		
 		void addCommands(UIDebugConsoleCommands& commands);
 		void removeCommands(UIDebugConsoleCommands& commands);
 

@@ -32,6 +32,12 @@ const std::map<String, UIDebugConsoleCallbackPair>& UIDebugConsoleCommands::getC
 
 Future<String> UIDebugConsoleController::runCommand(String command, std::vector<String> args)
 {
+	if (command == "help") {
+		Promise<String> value;
+		value.setValue(runHelp());
+		return value.getFuture();
+	}
+	
 	for (auto& commandSet: commands) {
 		const auto& cs = commandSet->getCommands();
 		const auto iter = cs.find(command);
@@ -51,6 +57,17 @@ Future<String> UIDebugConsoleController::runCommand(String command, std::vector<
 	Promise<String> value;
 	value.setValue("Command not found: \"" + command + "\".");
 	return value.getFuture();
+}
+
+String UIDebugConsoleController::runHelp()
+{
+	String result = "Commands available:";
+	for (auto& commandSet: commands) {
+		for (auto& command: commandSet->getCommands()) {
+			result += "\n  " + command.first;
+		}
+	}
+	return result;
 }
 
 void UIDebugConsoleController::addCommands(UIDebugConsoleCommands& commandSet)
