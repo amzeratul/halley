@@ -32,17 +32,20 @@ const std::map<String, UIDebugConsoleCallbackPair>& UIDebugConsoleCommands::getC
 
 Future<String> UIDebugConsoleController::runCommand(String command, std::vector<String> args)
 {
-	const auto iter = commands.find(command);
-	if (iter != commands.end()) {
-		const UIDebugConsoleCallbackPair& pair = iter->second;
-		if (pair.first) {
-			return Concurrent::execute(*pair.first, [args=std::move(args), f=pair.second] () -> String {
-				return f(args);
-			});
-		} else {
-			Promise<String> value;
-			value.setValue(pair.second(args));
-			return value.getFuture();
+	for (auto& commandSet: commands) {
+		const auto& cs = commandSet->getCommands();
+		const auto iter = cs.find(command);
+		if (iter != cs.end()) {
+			const UIDebugConsoleCallbackPair& pair = iter->second;
+			if (pair.first) {
+				return Concurrent::execute(*pair.first, [args=std::move(args), f=pair.second] () -> String {
+					return f(args);
+				});
+			} else {
+				Promise<String> value;
+				value.setValue(pair.second(args));
+				return value.getFuture();
+			}
 		}
 	}
 	Promise<String> value;
@@ -50,22 +53,14 @@ Future<String> UIDebugConsoleController::runCommand(String command, std::vector<
 	return value.getFuture();
 }
 
-void UIDebugConsoleController::addCommands(UIDebugConsoleCommands& commands)
+void UIDebugConsoleController::addCommands(UIDebugConsoleCommands& commandSet)
 {
-	for (auto& c: commands.getCommands()) {
-		if (this->commands.find(c.first) == this->commands.end()) {
-			this->commands[c.first] = c.second;
-		} else {
-			throw Exception("Duplicated debug console command: " + c.first, HalleyExceptions::UI);
-		}
-	}
+	commands.push_back(&commandSet);
 }
 
-void UIDebugConsoleController::removeCommands(UIDebugConsoleCommands& commands)
+void UIDebugConsoleController::removeCommands(UIDebugConsoleCommands& commandSet)
 {
-	for (auto& c: commands.getCommands()) {
-		this->commands.erase(c.first);
-	}
+	commands.erase(std::remove(commands.begin(), commands.end(), &commandSet), commands.end());
 }
 
 void UIDebugConsole::show()

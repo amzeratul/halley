@@ -28,7 +28,7 @@ namespace Halley {
 		void removeCommands(UIDebugConsoleCommands& commands);
 
 	private:
-		std::map<String, UIDebugConsoleCallbackPair> commands;
+		std::vector<UIDebugConsoleCommands*> commands;
 	};
 
     class UIDebugConsole : public UIWidget {
