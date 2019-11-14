@@ -1,3 +1,4 @@
+#include <utility>
 #include "halley/file_formats/config_file.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/ui/ui_factory.h"
@@ -29,7 +30,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	: api(api)
 	, resources(resources)
 	, i18n(i18n)
-	, styleSheet(styleSheet)
+	, styleSheet(std::move(styleSheet))
 {
 	if (api.platform && api.platform->hasKeyboard()) {
 		keyboard = api.platform->getKeyboard();

@@ -123,7 +123,7 @@ void EditorRootStage::createUI()
 
 void EditorRootStage::createLoadProjectUI()
 {
-	auto loadProjectUI = uiFactory->makeUI("ui/load_project");
+	auto loadProjectUI = uiFactory->makeUI("ui/halley/load_project");
 
 	loadProjectUI->setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
 	{
