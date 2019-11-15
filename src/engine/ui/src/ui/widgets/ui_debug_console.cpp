@@ -83,12 +83,18 @@ void UIDebugConsoleController::removeCommands(UIDebugConsoleCommands& commandSet
 std::vector<StringUTF32> UIDebugConsoleController::getAutoComplete(const StringUTF32& line) const
 {
 	std::vector<StringUTF32> results;
+
+	auto tryCommand = [&] (const StringUTF32& c)
+	{
+		if (c.substr(0, line.size()) == line) {
+			results.push_back(c);
+		}
+	};
+
+	tryCommand(String("help").getUTF32());
 	for (auto& commandSet: commands) {
 		for (auto& command: commandSet->getCommands()) {
-			auto c32 = command.first.getUTF32();
-			if (c32.substr(0, line.size()) == line) {
-				results.push_back(c32);
-			}
+			tryCommand(command.first.getUTF32());
 		}
 	}
 	return results;
