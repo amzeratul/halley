@@ -17,6 +17,7 @@ UITextInput::UITextInput(std::shared_ptr<InputKeyboard> keyboard, String id, UIS
 	, sprite(style.getSprite("box"))
 	, caret(style.getSprite("caret"))
 	, label(style.getTextRenderer("label"))
+	, ghostLabel(style.getTextRenderer("labelGhost"))
 	, text(text.getUTF32())
 	, ghostText(std::move(ghostText))
 {
@@ -48,9 +49,9 @@ String UITextInput::getText() const
 	return String(text.getText());
 }
 
-UITextInput& UITextInput::setGhostText(const LocalisedString& t)
+UITextInput& UITextInput::setGhostText(LocalisedString t)
 {
-	ghostText = t;
+	ghostText = std::move(t);
 	return *this;
 }
 
@@ -69,14 +70,36 @@ void UITextInput::setMaxLength(Maybe<int> length)
 	text.setLengthLimits(0, length);
 }
 
+Range<int> UITextInput::getSelection() const
+{
+	return text.getSelection();
+}
+
+void UITextInput::setSelection(int selection)
+{
+	text.setSelection(selection);
+}
+
+void UITextInput::setSelection(Range<int> selection)
+{
+	text.setSelection(selection);
+}
+
 void UITextInput::onManualControlActivate()
 {
 	getRoot()->setFocus(shared_from_this());
 }
 
+void UITextInput::setAutoCompleteHandle(AutoCompleteHandle handle)
+{
+	autoCompleteHandle = std::move(handle);
+	updateAutoComplete();
+}
+
 void UITextInput::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);
+	painter.draw(ghostLabel);
 	painter.draw(label);
 
 	if (caretShowing && caret.hasMaterial()) {
@@ -95,6 +118,19 @@ void UITextInput::updateTextInput()
 		if (!ok) {
 			getRoot()->setFocus({});
 		}
+	}
+
+	if (keyboard->isButtonPressed(Keys::Tab)) {
+		if (!autoCompleteText.empty()) {
+			setText(autoCompleteText);
+			setSelection(int(text.getText().size()));
+		}
+	}
+	if (keyboard->isButtonPressed(Keys::Up)) {
+		autoCompleteCurOption = autoCompleteOptions > 0 ? modulo(autoCompleteCurOption - 1, autoCompleteOptions) : 0;
+	}
+	if (keyboard->isButtonPressed(Keys::Down)) {
+		autoCompleteCurOption = autoCompleteOptions > 0 ? modulo(autoCompleteCurOption + 1, autoCompleteOptions) : 0;
 	}
 
 	updateCaret();
@@ -129,6 +165,8 @@ void UITextInput::onTextModified()
 	const auto str = String(text.getText());
 	sendEvent(UIEvent(UIEventType::TextChanged, getId(), str));
 	notifyDataBind(str);
+
+	updateAutoComplete();
 }
 
 void UITextInput::validateText()
@@ -178,15 +216,12 @@ void UITextInput::update(Time t, bool moved)
 		caretShowing = false;
 	}
 
-	// Update text label
-	if (text.getText().empty() && !isFocused()) {
-		ghostText.checkForUpdates();
-		label = style.getTextRenderer("labelGhost");
-		label.setText(ghostText);
-	} else {
-		label = style.getTextRenderer("label");
-		label.setText(text.getText());
-	}
+	// Update text labels
+	const bool showGhost = text.getText().empty() && !isFocused();
+	const bool showAutoComplete = !autoCompleteText.empty();
+	ghostText.checkForUpdates();
+	ghostLabel.setText(showAutoComplete ? autoCompleteText : (showGhost ? ghostText.getString().getUTF32() : StringUTF32()));
+	label.setText(text.getText());
 
 	// Position the text
 	const float length = label.getExtents().x;
@@ -195,12 +230,16 @@ void UITextInput::update(Time t, bool moved)
 	const Vector2f startPos = getPosition() + Vector2f(getInnerBorder().x, getInnerBorder().y);
 	if (length > capacityX) {
 		textScrollPos.x = clamp(textScrollPos.x, std::max(0.0f, caretPhysicalPos - capacityX), std::min(length - capacityX, caretPhysicalPos));
-		label.setClip(Rect4f(textScrollPos, textScrollPos + Vector2f(capacityX, capacityY)));
+		const auto clip = Rect4f(textScrollPos, textScrollPos + Vector2f(capacityX, capacityY));
+		label.setClip(clip);
+		ghostLabel.setClip(clip);
 	} else {
 		textScrollPos.x = 0;
 		label.setClip();
+		ghostLabel.setClip();
 	}
 	label.setPosition(startPos - textScrollPos);
+	ghostLabel.setPosition(startPos - textScrollPos);
 
 	// Position the caret
 	caret.setPos(startPos - textScrollPos + Vector2f(caretPhysicalPos, 0));
@@ -235,4 +274,24 @@ void UITextInput::pressMouse(Vector2f mousePos, int button)
 void UITextInput::readFromDataBind()
 {
 	setText(getDataBind()->getStringData());
+}
+
+void UITextInput::updateAutoComplete()
+{
+	if (!autoCompleteHandle || text.getText().empty()) {
+		autoCompleteOptions = 0;
+		autoCompleteCurOption = 0;
+		autoCompleteText.clear();
+	} else {
+		const auto result = autoCompleteHandle(text.getText());
+		if (result.empty()) {
+			autoCompleteOptions = 0;
+			autoCompleteCurOption = 0;
+			autoCompleteText.clear();
+		} else {
+			autoCompleteOptions = int(result.size());
+			autoCompleteCurOption = modulo(autoCompleteCurOption, autoCompleteOptions);
+			autoCompleteText = result[autoCompleteCurOption];
+		}
+	}
 }

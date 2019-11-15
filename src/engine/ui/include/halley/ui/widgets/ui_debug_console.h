@@ -28,6 +28,7 @@ namespace Halley {
 		
 		void addCommands(UIDebugConsoleCommands& commands);
 		void removeCommands(UIDebugConsoleCommands& commands);
+		std::vector<StringUTF32> getAutoComplete(const StringUTF32& line) const;
 
 	private:
 		std::vector<UIDebugConsoleCommands*> commands;

@@ -80,6 +80,20 @@ void UIDebugConsoleController::removeCommands(UIDebugConsoleCommands& commandSet
 	commands.erase(std::remove(commands.begin(), commands.end(), &commandSet), commands.end());
 }
 
+std::vector<StringUTF32> UIDebugConsoleController::getAutoComplete(const StringUTF32& line) const
+{
+	std::vector<StringUTF32> results;
+	for (auto& commandSet: commands) {
+		for (auto& command: commandSet->getCommands()) {
+			auto c32 = command.first.getUTF32();
+			if (c32.substr(0, line.size()) == line) {
+				results.push_back(c32);
+			}
+		}
+	}
+	return results;
+}
+
 void UIDebugConsole::show()
 {
 	setActive(true);
@@ -99,13 +113,17 @@ void UIDebugConsole::setup()
 	add(factory.makeUI("ui/halley/debug_console"));
 
 	inputField = getWidgetAs<UITextInput>("input");
+	inputField->setAutoCompleteHandle([=] (const StringUTF32& str) -> std::vector<StringUTF32>
+	{
+		return controller.getAutoComplete(str);
+	});
 
-	setHandle(UIEventType::ButtonClicked, [=] (const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
 	{
 		onSubmit();
 	});
 	
-	setHandle(UIEventType::TextSubmit, [=] (const UIEvent& event)
+	setHandle(UIEventType::TextSubmit, "input", [=] (const UIEvent& event)
 	{
 		onSubmit();
 	});
