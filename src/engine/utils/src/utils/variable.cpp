@@ -56,6 +56,7 @@ void Internal::VariableStorage::setValue(const ConfigNode& node)
 			type = ConfigNodeType::Int;
 			intValue = strValue == "true";
 		}
+		break;
 	}
 	default:
 		throw Exception("Cannot load variable from ConfigNode type " + node.getType(), HalleyExceptions::Utils);
