@@ -66,11 +66,13 @@ namespace Halley {
 			VariableBase();
 			VariableBase(const VariableBase& other) = default;
 			VariableBase(VariableBase&& other) = default;
+			VariableBase& operator=(const VariableBase& other) = default;
+			VariableBase& operator=(VariableBase&& other) = default;
 
 		protected:
-			VariableBase(VariableTable& parent, String key);
+			VariableBase(const VariableTable& parent, String key);
 
-			VariableTable* parent = nullptr;
+			const VariableTable* parent = nullptr;
 			String key;
 			int parentVersion = -1;
 			VariableStorage storage;
@@ -82,7 +84,9 @@ namespace Halley {
 	template <typename T>
 	class Variable : public Internal::VariableBase {
 	public:
-		Variable(VariableTable& parent, String key)
+		Variable() = default;
+		
+		Variable(const VariableTable& parent, String key)
 			: VariableBase(parent, std::move(key))
 		{}
 		
@@ -109,17 +113,17 @@ namespace Halley {
 		VariableTable(const ConfigNode& node);
 
 		template <typename T>
-		Variable<T> get(const String& name)
+		Variable<T> get(const String& name) const
 		{
 			return Variable<T>(*this, name);
 		}
 
-		const Internal::VariableStorage& getRawStorage(const String& key);
+		const Internal::VariableStorage& getRawStorage(const String& key) const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
-		constexpr static AssetType getAssetType() { return AssetType::Sprite; }
+		constexpr static AssetType getAssetType() { return AssetType::VariableTable; }
 		static std::unique_ptr<VariableTable> loadResource(ResourceLoader& loader);
 		void reload(Resource&& resource) override;
 

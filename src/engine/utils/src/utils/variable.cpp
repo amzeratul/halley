@@ -104,7 +104,7 @@ Internal::VariableBase::VariableBase()
 {
 }
 
-Internal::VariableBase::VariableBase(VariableTable& parent, String key)
+Internal::VariableBase::VariableBase(const VariableTable& parent, String key)
 	: parent(&parent)
 	, key(std::move(key))
 {
@@ -157,7 +157,7 @@ void VariableTable::reload(Resource&& resource)
 	*this = std::move(dynamic_cast<VariableTable&>(resource));
 }
 
-const Internal::VariableStorage& VariableTable::getRawStorage(const String& key)
+const Internal::VariableStorage& VariableTable::getRawStorage(const String& key) const
 {
 	auto iter = variables.find(key);
 	if (iter == variables.end()) {
