@@ -80,3 +80,4 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "utils/hash.h"
 #include "utils/type_traits.h"
 #include "utils/utils.h"
+#include "utils/variable.h"

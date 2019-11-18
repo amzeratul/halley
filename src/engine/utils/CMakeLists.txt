@@ -58,6 +58,7 @@ set(SOURCES
         "src/utils/boost_system.cpp"
         "src/utils/encrypt.cpp"
         "src/utils/hash.cpp"
+        "src/utils/variable.cpp"
         
         "contrib/json/jsoncpp.cpp"
 
@@ -175,6 +176,7 @@ set(HEADERS
         "include/halley/utils/hash.h"
         "include/halley/utils/type_traits.h"
         "include/halley/utils/utils.h"
+        "include/halley/utils/variable.h"
         "src/os/os_android.h"
         "src/os/os_ios.h"
         "src/os/os_linux.h"
