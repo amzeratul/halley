@@ -1,0 +1,70 @@
+---
+
+uiStyle:
+  button:
+    normal: { img: halley_ui/ui_button.png, colour: "#9C5BB5" }
+    down: { img: halley_ui/ui_button.png, colour: "#913DA3" }
+    hover: { img: halley_ui/ui_button.png, colour: "#B68FCB" }
+    innerBorder: [ 5, 5, 5, 5 ]
+    upSound: ""
+    downSound: ""
+    hoverSound: ""
+    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    labelBorder: [0, 0, 0, 0]
+
+  input:
+    box: { img: halley_ui/ui_input.png, colour: "#9861B6" }
+    caret: halley_ui/ui_caret.png
+    innerBorder: [ 6, 5, 6, 2 ]
+    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    labelGhost: { font: Ubuntu Bold, size: 18, colour: "#7F7F7F" }
+
+  list:
+    background: ""
+    item:
+      normal: { img: halley_ui/ui_list_item.png, colour: "#9C5BB5" }
+      hover: { img: halley_ui/ui_list_item.png, colour: "#B68FCB" }
+      selected: { img: halley_ui/ui_list_item.png, colour: "#913DA3" }
+      innerBorder: [ 6, 5, 6, 2 ]
+    innerBorder: [ 0, 0, 0, 0 ]
+    extraMouseBorder: [ 1, 1, 1, 1 ]
+    selectionChangedSound: ""
+    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFFCF" }
+    selectedLabel: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    gap: 1
+
+  scrollbar:
+    bar:
+      horizontal: { img: halley_ui/ui_scrollbar.png, colour: "#5E3962" }
+      vertical: { img: halley_ui/ui_scrollbar.png, colour: "#5E3962" }
+    up:
+      normal: { img: halley_ui/ui_scrollbar.png, colour: "#9C5BB5" }
+      disabled: { img: halley_ui/ui_scrollbar.png, colour: "#8D7B95" }
+      down: { img: halley_ui/ui_scrollbar.png, colour: "#913DA3" }
+      hover: { img: halley_ui/ui_scrollbar.png, colour: "#B68FCB" }
+      innerBorder: [ 3, 3, 3, 3 ]
+      upSound: ""
+      downSound: ""
+      hoverSound: ""
+    down:
+      normal: { img: halley_ui/ui_scrollbar.png, colour: "#9C5BB5" }
+      disabled: { img: halley_ui/ui_scrollbar.png, colour: "#8D7B95" }
+      down: { img: halley_ui/ui_scrollbar.png, colour: "#913DA3" }
+      hover: { img: halley_ui/ui_scrollbar.png, colour: "#B68FCB" }
+      innerBorder: [ 3, 3, 3, 3 ]
+      upSound: ""
+      downSound: ""
+      hoverSound: ""
+    thumb:
+      normal: { img: halley_ui/ui_scrollbar.png, colour: "#9C5BB5" }
+      down: { img: halley_ui/ui_scrollbar.png, colour: "#913DA3" }
+      hover: { img: halley_ui/ui_scrollbar.png, colour: "#B68FCB" }
+      innerBorder: [ 3, 3, 3, 3 ]
+      upSound: ""
+      downSound: ""
+      hoverSound: ""
+
+  label:
+    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+
+...

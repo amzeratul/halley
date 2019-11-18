@@ -61,6 +61,10 @@ void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 
 	// Purge assets first, to force re-loading of any affected packs
 	for (auto& curType: byType) {
+		if (curType.first == AssetType::AudioClip) {
+			api.audio->pausePlayback();
+		}
+
 		auto& resources = api.core->getResources().ofType(curType.first);
 		for (auto& asset: curType.second) {
 			resources.purge(asset);
@@ -69,10 +73,6 @@ void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 
 	// Reload assets
 	for (auto& curType: byType) {
-		if (curType.first == AssetType::AudioClip) {
-			api.audio->pausePlayback();
-		}
-
 		auto& resources = api.core->getResources().ofType(curType.first);
 		for (auto& asset: curType.second) {
 			Logger::logInfo("Reloading " + curType.first + ": " + asset);

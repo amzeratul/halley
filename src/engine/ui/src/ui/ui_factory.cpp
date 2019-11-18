@@ -1,3 +1,4 @@
+#include <utility>
 #include "halley/file_formats/config_file.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/ui/ui_factory.h"
@@ -29,7 +30,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	: api(api)
 	, resources(resources)
 	, i18n(i18n)
-	, styleSheet(styleSheet)
+	, styleSheet(std::move(styleSheet))
 {
 	if (api.platform && api.platform->hasKeyboard()) {
 		keyboard = api.platform->getKeyboard();
@@ -595,13 +596,14 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollBar(const ConfigNode& entryNode)
 std::shared_ptr<UIWidget> UIFactory::makeScrollBarPane(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
+	auto id = node["id"].asString("");
 	auto clipSize = asVector2f(node["clipSize"], Vector2f());
 	auto style = UIStyle(node["style"].asString("scrollbar"), styleSheet);
 	auto scrollHorizontal = node["scrollHorizontal"].asBool(false);
 	auto scrollVertical = node["scrollVertical"].asBool(true);
 	auto alwaysShow = !node["autoHide"].asBool(false);
 
-	return std::make_shared<UIScrollBarPane>(clipSize, style, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow);
+	return std::make_shared<UIScrollBarPane>(id, clipSize, style, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow);
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeSlider(const ConfigNode& entryNode)

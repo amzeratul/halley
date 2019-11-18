@@ -22,6 +22,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "widgets/ui_animation.h"
 #include "widgets/ui_button.h"
 #include "widgets/ui_checkbox.h"
+#include "widgets/ui_debug_console.h"
 #include "widgets/ui_dropdown.h"
 #include "widgets/ui_framed_image.h"
 #include "widgets/ui_gamepad_image.h"

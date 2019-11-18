@@ -1,0 +1,17 @@
+---
+
+widget: { class: image, image: halley_ui/ui_window.png, innerBorder: [5, 5, 5, 5], colour: "#201427C0" }
+sizer: { type: vertical }
+children:
+- widget: { class: scrollBarPane, size: [640, 360], id: log }
+  proportion: 1
+  sizer: { type: vertical }
+  children: []
+- sizer: { type: horizontal }
+  border: [0, 5, 0, 0]
+  children:
+  - widget: { id: input, class: textInput, size: [400, 20] }
+    proportion: 1
+  - widget: { id: ok, class: button, text: "OK" }
+
+...

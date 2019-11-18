@@ -67,8 +67,8 @@ void EditorRootStage::onRender(RenderContext& context) const
 		// UI
 		SpritePainter spritePainter;
 		spritePainter.start(100);
-		ui->draw(spritePainter, 0, 0);
-		spritePainter.draw(0, painter);
+		ui->draw(spritePainter, 1, 0);
+		spritePainter.draw(1, painter);
 
 		// Taskbar
 		taskBar->draw(painter);
@@ -123,7 +123,7 @@ void EditorRootStage::createUI()
 
 void EditorRootStage::createLoadProjectUI()
 {
-	auto loadProjectUI = uiFactory->makeUI("ui/load_project");
+	auto loadProjectUI = uiFactory->makeUI("ui/halley/load_project");
 
 	loadProjectUI->setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
 	{

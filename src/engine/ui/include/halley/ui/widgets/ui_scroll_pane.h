@@ -37,6 +37,8 @@ namespace Halley {
 		bool canScroll(UIScrollDirection direction) const;
 		float getCoverageSize(UIScrollDirection direction) const;
 
+		void refresh();
+
     protected:
 	    void drawChildren(UIPainter& painter) const override;
 	    Vector2f getLayoutMinimumSize(bool force) const override;
