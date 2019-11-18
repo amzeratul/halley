@@ -1,3 +1,4 @@
+#include <boost/variant/detail/substitute.hpp>
 #include "halley/tools/assets/asset_importer.h"
 #include "halley/support/exception.h"
 #include "importers/copy_file_importer.h"
@@ -15,8 +16,8 @@
 #include "importers/shader_importer.h"
 #include "halley/text/string_converter.h"
 #include "halley/tools/project/project.h"
-#include <boost/variant/detail/substitute.hpp>
 #include "importers/texture_importer.h"
+#include "importers/variable_importer.h"
 #include "importers/mesh_importer.h"
 
 using namespace Halley;
@@ -40,7 +41,8 @@ AssetImporter::AssetImporter(Project& project, const std::vector<Path>& assetsSr
 		std::make_unique<ShaderImporter>(),
 		std::make_unique<TextureImporter>(),
 		std::make_unique<MeshImporter>(),
-		std::make_unique<IAssetImporter>()
+		std::make_unique<IAssetImporter>(),
+		std::make_unique<VariableImporter>()
 	};
 
 	for (auto& importer: defaultImporters) {
@@ -82,6 +84,8 @@ IAssetImporter& AssetImporter::getRootImporter(Path path) const
 		type = ImportAssetType::Texture;
 	} else if (root == "mesh") {
 		type = ImportAssetType::Mesh;
+	} else if (root == "variable") {
+		type = ImportAssetType::VariableTable;
 	}
 
 	return getImporters(type).at(0);

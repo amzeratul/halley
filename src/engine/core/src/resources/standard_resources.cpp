@@ -13,6 +13,7 @@
 #include "halley/file_formats/binary_file.h"
 #include "halley/file_formats/image.h"
 #include "halley/core/graphics/mesh/mesh.h"
+#include "halley/utils/variable.h"
 
 using namespace Halley;
 
@@ -32,6 +33,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<AudioClip>();
 	resources.init<AudioEvent>();
 	resources.init<Mesh>();
+	resources.init<VariableTable>();
 
 	resources.of<SpriteResource>().setResourceLoader([&] (const String& name, ResourceLoadPriority) -> std::shared_ptr<Resource>
 	{

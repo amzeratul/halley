@@ -43,19 +43,19 @@ namespace Halley {
 		template <typename T>
 		void init()
 		{
-			AssetType assetType = T::getAssetType();
-			int id = int(assetType);
+			constexpr AssetType assetType = T::getAssetType();
+			constexpr int id = int(assetType);
 			resources.resize(std::max(resources.size(), size_t(id + 1)));
 			resources[id] = std::make_unique<ResourceCollection<T>>(*this, assetType);
 		}
 
 		template <typename T>
-		ResourceCollection<T>& of() const
+		[[nodiscard]] ResourceCollection<T>& of() const
 		{
 			return static_cast<ResourceCollection<T>&>(ofType(T::getAssetType()));
 		}
 
-		ResourceCollectionBase& ofType(AssetType assetType) const
+		[[nodiscard]] ResourceCollectionBase& ofType(AssetType assetType) const
 		{
 			return *resources[int(assetType)];
 		}
@@ -79,13 +79,13 @@ namespace Halley {
 		}
 
 		template <typename T>
-		bool exists(const String& name) const
+		[[nodiscard]] bool exists(const String& name) const
 		{
 			return of<T>().exists(name);
 		}
 
 		template <typename T>
-		std::vector<String> enumerate() const
+		[[nodiscard]] std::vector<String> enumerate() const
 		{
 			return of<T>().enumerate();
 		}
