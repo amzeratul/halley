@@ -327,7 +327,7 @@ Maybe<float> Polygon::getCollisionWithSweepingCircle(Vector2f p0, float radius, 
 		// Check segments
 		// One of the two line segments (facing away) is not needed, so we only test two circles and one segment
 		Vector2f offset = (a - b).normalized().orthoLeft() * radius;
-		if (offset.dot(moveDir) < 0) {
+		if (offset.dot(moveDir) > 0) {
 			offset = -offset;
 		}
 		submit(ray.castLineSegment(a + offset, b + offset));

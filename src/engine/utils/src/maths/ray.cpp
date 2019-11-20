@@ -40,6 +40,30 @@ Maybe<float> Ray::castCircle(Vector2f centre, float radius) const
 
 Maybe<float> Ray::castLineSegment(Vector2f a, Vector2f b) const
 {
-	// TODO
-	return {};
+	// From http://geomalgorithms.com/a05-_intersect-1.html
+
+	const Vector2f u = dir;
+	const Vector2f ut = u.orthoLeft();
+	const Vector2f v = b - a;
+	const Vector2f vt = v.orthoLeft();
+	const float denom = vt.dot(dir);
+	if (denom == 0) {
+		// Parallel
+		return {};
+	}
+
+	const Vector2f w = p - a;
+	const float s = -vt.dot(w) / denom;
+	if (s < 0) {
+		// Behind ray
+		return {};
+	}
+
+	const float t = -ut.dot(w) / denom;
+	if (t < 0 || t > 1) {
+		// Outside segment
+		return {};
+	}
+
+	return s;
 }
