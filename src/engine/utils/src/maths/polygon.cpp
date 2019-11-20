@@ -22,6 +22,7 @@
 
 #include "halley/maths/polygon.h"
 #include <limits>
+#include "halley/maths/ray.h"
 using namespace Halley;
 
 
@@ -282,4 +283,55 @@ void Polygon::setVertices(const VertexList& _vertices)
 float Polygon::getRadius() const
 {
 	return outerRadius;
+}
+
+Rect4f Polygon::getAABB() const
+{
+	return aabb;
+}
+
+Maybe<float> Polygon::getCollisionWithSweepingCircle(Vector2f p0, float radius, Vector2f moveDir, float moveLen) const
+{
+	// This is used to grow AABBs to check if p0 is inside
+	// If this coarse test fails, the sweep shouldn't overlap the polygon
+	const float border = radius + (moveLen * std::max(std::abs(moveDir.x), std::abs(moveDir.y)));
+	if (!getAABB().grow(border).contains(p0)) {
+		return {};
+	}
+
+	Maybe<float> result;
+	const auto submit = [&] (Maybe<float> c)
+	{
+		if (c && c.get() < moveLen) {
+			if (!result || c.get() < result.get()) {
+				result = c;
+			}
+		}
+	};
+	
+	const auto ray = Ray(p0, moveDir);
+
+	for (size_t i = 0; i < vertices.size(); ++i) {
+		// For each line segment in the polygon...
+		const Vector2f a = vertices[i];
+		const Vector2f b = vertices[(i + 1) % vertices.size()];
+
+		// We expand the line segment into a rounded capsule.
+		// It's now two circles (one centred at each vertex) and two line segments (connecting the circles)
+		// Checking collision of this capsule against the centre of the circle is isomorphic to the original problem, but easier
+
+		// Check circles
+		submit(ray.castCircle(a, radius));
+		submit(ray.castCircle(b, radius));
+
+		// Check segments
+		// One of the two line segments (facing away) is not needed, so we only test two circles and one segment
+		Vector2f offset = (a - b).normalized().orthoLeft() * radius;
+		if (offset.dot(moveDir) < 0) {
+			offset = -offset;
+		}
+		submit(ray.castLineSegment(a + offset, b + offset));
+	}
+	
+	return result;
 }

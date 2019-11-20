@@ -40,32 +40,33 @@ namespace Halley {
 		Rect2D<T>& operator=(const Rect2D<T>& o) = default;
 		Rect2D<T>& operator=(Rect2D<T>&& o) = default;
 
-		template<typename U> explicit Rect2D(Rect2D<U> r)
+		template<typename U>
+		constexpr explicit Rect2D(Rect2D<U> r)
 		{
 			set(T(r.getX()), T(r.getY()), T(r.getWidth()), T(r.getHeight()));
 		}
 
-		Rect2D(Vector2D<T> point1, Vector2D<T> point2)
+		constexpr Rect2D(Vector2D<T> point1, Vector2D<T> point2)
 		{
 			set(point1, point2);
 		}
 
-		Rect2D(Vector2D<T> origin, T width, T height)
+		constexpr Rect2D(Vector2D<T> origin, T width, T height)
 		{
 			set(origin, Vector2D<T>(origin.x+width, origin.y+height));
 		}
 
-		Rect2D(T x, T y, T width, T height)
+		constexpr Rect2D(T x, T y, T width, T height)
 		{
 			set(x, y, width, height);
 		}
 
-		void set(T x, T y, T width, T height)
+		constexpr void set(T x, T y, T width, T height)
 		{
 			set(Vector2D<T>(x, y), Vector2D<T>(x+width, y+height));
 		}
 
-		void set(Vector2D<T> point1, Vector2D<T> point2)
+		constexpr void set(Vector2D<T> point1, Vector2D<T> point2)
 		{
 			p1.x = std::min(point1.x, point2.x);
 			p1.y = std::min(point1.y, point2.y);
@@ -73,103 +74,103 @@ namespace Halley {
 			p2.y = std::max(point1.y, point2.y);
 		}
 
-		void setPos(Vector2D<T> pos)
+		constexpr void setPos(Vector2D<T> pos)
 		{
 			auto sz = p2 - p1;
 			p1 = pos;
 			p2 = pos + sz;
 		}
 
-		void setX(T x)
+		constexpr void setX(T x)
 		{
 			float dx = x - p1.x;
 			p1.x += dx;
 			p2.x += dx;
 		}
 
-		void setY(T y)
+		constexpr void setY(T y)
 		{
 			float dy = y - p1.y;
 			p1.y += dy;
 			p2.y += dy;
 		}
 
-		void setWidth(T w)
+		constexpr void setWidth(T w)
 		{
 			p2.x = p1.x + w;
 		}
 
-		void setHeight(T h)
+		constexpr void setHeight(T h)
 		{
 			p2.y = p1.y + h;
 		}
 
-		void setSize(Vector2D<T> size)
+		constexpr void setSize(Vector2D<T> size)
 		{
 			p2 = p1 + size;
 		}
 
-		void setLeft(T value)
+		constexpr void setLeft(T value)
 		{
 			p1.x = value;
 		}
 
-		void setRight(T value)
+		constexpr void setRight(T value)
 		{
 			p2.x = value;
 		}
 
-		void setTop(T value)
+		constexpr void setTop(T value)
 		{
 			p1.y = value;
 		}
 
-		void setBottom(T value)
+		constexpr void setBottom(T value)
 		{
 			p2.y = value;
 		}
 
-		Rect2D<T> shrink(T amount) const
+		constexpr Rect2D<T> shrink(T amount) const
 		{
 			auto offset = Vector2D<T>(amount, amount);
 			return Rect2D(p1 + offset, p2 - offset);
 		}
 
-		Rect2D<T> grow(T amount) const
+		constexpr Rect2D<T> grow(T amount) const
 		{
 			auto offset = Vector2D<T>(amount, amount);
 			return Rect2D(p1 - offset, p2 + offset);
 		}
 
-		Vector2D<T> getTopLeft() const { return p1; }
-		Vector2D<T> getBottomRight() const { return p2; }
-		Vector2D<T> getBottomLeft() const { return Vector2D<T>(p1.x, p2.y); }
-		Vector2D<T> getTopRight() const { return Vector2D<T>(p2.x, p1.y); }
-		Vector2D<T> getSize() const { return p2 - p1; }
+		constexpr Vector2D<T> getTopLeft() const { return p1; }
+		constexpr Vector2D<T> getBottomRight() const { return p2; }
+		constexpr Vector2D<T> getBottomLeft() const { return Vector2D<T>(p1.x, p2.y); }
+		constexpr Vector2D<T> getTopRight() const { return Vector2D<T>(p2.x, p1.y); }
+		constexpr Vector2D<T> getSize() const { return p2 - p1; }
 
-		T getWidth() const { return p2.x - p1.x; }
-		T getHeight() const { return p2.y - p1.y; }
-		T getX() const { return p1.x; }
-		T getY() const { return p1.y; }
+		constexpr T getWidth() const { return p2.x - p1.x; }
+		constexpr T getHeight() const { return p2.y - p1.y; }
+		constexpr T getX() const { return p1.x; }
+		constexpr T getY() const { return p1.y; }
 
-		T getLeft() const { return p1.x; }
-		T getRight() const { return p2.x; }
-		T getTop() const { return p1.y; }
-		T getBottom() const { return p2.y; }
+		constexpr T getLeft() const { return p1.x; }
+		constexpr T getRight() const { return p2.x; }
+		constexpr T getTop() const { return p1.y; }
+		constexpr T getBottom() const { return p2.y; }
 
-		bool contains(Vector2D<T> p) const
+		constexpr bool contains(Vector2D<T> p) const
 		{
 			return (p.x >= p1.x && p.x < p2.x && p.y >= p1.y && p.y < p2.y);
 		}
 
-		Vector2D<T> getClosestPoint(Vector2D<T> p) const
+		constexpr Vector2D<T> getClosestPoint(Vector2D<T> p) const
 		{
 			p.x = clamp(p.x, p1.x, p2.x - 1);
 			p.y = clamp(p.y, p1.y, p2.y - 1);
 			return p;
 		}
 
-		Vector2D<T> wrapInside(Vector2D<T> p) const
+		constexpr Vector2D<T> wrapInside(Vector2D<T> p) const
 		{
 			Vector2D<T> size = getSize();
 			return ((((p-p1) % size) + size) % size) + p1;
@@ -201,78 +202,78 @@ namespace Halley {
 			return Range<T>(p1[i], p2[i]);
 		}
 
-		Rect2D<T> operator+(Vector2D<T> v) const
+		constexpr Rect2D<T> operator+(Vector2D<T> v) const
 		{
 			return Rect2D<T>(p1 + v, p2 + v);
 		}
 
-		Rect2D<T> operator+(Rect2D<T> v) const
+		constexpr Rect2D<T> operator+(Rect2D<T> v) const
 		{
 			return Rect2D<T>(p1 + v.p1, p2 + v.p2);
 		}
 
-		Rect2D<T> operator-(Vector2D<T> v) const
+		constexpr Rect2D<T> operator-(Vector2D<T> v) const
 		{
 			return Rect2D<T>(p1 - v, p2 - v);
 		}
 
-		Rect2D<T> operator-(Rect2D<T> v) const
+		constexpr Rect2D<T> operator-(Rect2D<T> v) const
 		{
 			return Rect2D<T>(p1 - v.p1, p2 - v.p2);
 		}
 
-		Rect2D<T>& operator+=(Vector2D<T> v)
+		constexpr Rect2D<T>& operator+=(Vector2D<T> v)
 		{
 			p1 += v;
 			p2 += v;
 			return *this;
 		}
 
-		Rect2D<T>& operator-=(Vector2D<T> v)
+		constexpr Rect2D<T>& operator-=(Vector2D<T> v)
 		{
 			p1 -= v;
 			p2 -= v;
 			return *this;
 		}
 
-		bool overlaps(Rect2D<T> other) const
+		constexpr bool overlaps(Rect2D<T> other) const
 		{
 			return !(p2.x <= other.p1.x || other.p2.x <= p1.x || p2.y <= other.p1.y || other.p2.y <= p1.y);
 		}
 
-		Vector2D<T> getCenter() const
+		constexpr Vector2D<T> getCenter() const
 		{
 			return (p1+p2)/2;
 		}
 
-		bool isEmpty() const
+		constexpr bool isEmpty() const
 		{
 			return getWidth() <= 0 || getHeight() <= 0;
 		}
 
-		bool operator==(const Rect2D<T>& p) const
+		constexpr bool operator==(const Rect2D<T>& p) const
 		{
 			return p1 == p.p1 && p2 == p.p2;
 		}
 
-		bool operator!=(const Rect2D<T>& p) const
+		constexpr bool operator!=(const Rect2D<T>& p) const
 		{
 			return p1 != p.p1 || p2 != p.p2;
 		}
 
 		template <typename V>
-		Rect2D operator * (const V param) const
+		constexpr Rect2D operator * (const V param) const
 		{
 			return Rect2D(p1 * param, p2 * param);
 		}
 
 		template <typename V>
-		Rect2D operator / (const V param) const
+		constexpr Rect2D operator / (const V param) const
 		{
 			return Rect2D(p1 / param, p2 / param);
 		}
 
-		Rect2D fitWithin(const Rect2D& container) const
+		constexpr Rect2D fitWithin(const Rect2D& container) const
 		{
 			Rect2D r = *this;
 			if (r.p2.x > container.p2.x) {
