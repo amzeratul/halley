@@ -290,7 +290,7 @@ Rect4f Polygon::getAABB() const
 	return aabb;
 }
 
-Maybe<float> Polygon::getCollisionWithSweepingCircle(Vector2f p0, float radius, Vector2f moveDir, float moveLen) const
+Maybe<std::pair<float, Vector2f>> Polygon::getCollisionWithSweepingCircle(Vector2f p0, float radius, Vector2f moveDir, float moveLen) const
 {
 	// This is used to grow AABBs to check if p0 is inside
 	// If this coarse test fails, the sweep shouldn't overlap the polygon
@@ -299,11 +299,11 @@ Maybe<float> Polygon::getCollisionWithSweepingCircle(Vector2f p0, float radius, 
 		return {};
 	}
 
-	Maybe<float> result;
-	const auto submit = [&] (Maybe<float> c)
+	Maybe<std::pair<float, Vector2f>> result;
+	const auto submit = [&] (Maybe<std::pair<float, Vector2f>> c)
 	{
-		if (c && c.get() < moveLen) {
-			if (!result || c.get() < result.get()) {
+		if (c && c.get().first < moveLen) {
+			if (!result || c.get().first < result.get().first) {
 				result = c;
 			}
 		}
