@@ -1,4 +1,5 @@
 #include "halley/maths/ray.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 Ray::Ray()
@@ -22,7 +23,7 @@ Maybe<std::pair<float, Vector2f>> Ray::castCircle(Vector2f centre, float radius)
 
 	// Distance between center of circle and ray
 	const Vector2f n = dir.orthoLeft();
-	const float distToCentre = n.dot(localCentre);
+	const float distToCentre = std::abs(n.dot(localCentre));
 	if (distToCentre > radius) {
 		// Ray doesn't overlap circle
 		return {};
@@ -37,6 +38,12 @@ Maybe<std::pair<float, Vector2f>> Ray::castCircle(Vector2f centre, float radius)
 	const float dist = distToClosest - intersectionDepth;
 	const Vector2f intersectionPoint = p + dir * dist;
 	const Vector2f normal = (intersectionPoint - centre).normalized();
+
+	//Logger::logInfo(" circ [" + toString(dist) + ", " + dir + "] - " + normal);
+
+	Ensures(!std::isnan(dist));
+	Ensures(!std::isnan(normal.x));
+	Ensures(!std::isnan(normal.y));
 	
 	return std::pair<float, Vector2f>(dist, normal);
 }
@@ -68,5 +75,13 @@ Maybe<std::pair<float, Vector2f>> Ray::castLineSegment(Vector2f a, Vector2f b) c
 		return {};
 	}
 
-	return std::pair<float, Vector2f>(s, vt.normalized());
+	const Vector2f normal = vt.normalized();
+
+	Ensures(!std::isnan(s));
+	Ensures(!std::isnan(normal.x));
+	Ensures(!std::isnan(normal.y));
+
+	//Logger::logInfo(" line [" + toString(s) + ", " + dir + "] - " + normal);
+	
+	return std::pair<float, Vector2f>(s, dir.dot(normal) > 0 ? -normal : normal);
 }

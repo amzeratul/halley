@@ -306,6 +306,16 @@ void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f 
 	drawLine(points, width, colour, false, material);
 }
 
+void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<Material> material)
+{
+	const size_t n = getSegmentsForArc(std::max(radius.x, radius.y), 2 * float(pi()));
+	std::vector<Vector2f> points;
+	for (size_t i = 0; i < n; ++i) {
+		points.push_back(centre + Vector2f(1.0f, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)) * radius);
+	}
+	drawLine(points, width, colour, true, material);
+}
+
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
 {
 	size_t requiredSize = bytesPending + numBytes;

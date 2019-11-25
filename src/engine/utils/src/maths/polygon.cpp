@@ -321,8 +321,8 @@ Maybe<std::pair<float, Vector2f>> Polygon::getCollisionWithSweepingCircle(Vector
 		// Checking collision of this capsule against the centre of the circle is isomorphic to the original problem, but easier
 
 		// Check circles
+		// Only check one vertex, "b" will be checked by another iteration
 		submit(ray.castCircle(a, radius));
-		submit(ray.castCircle(b, radius));
 
 		// Check segments
 		// One of the two line segments (facing away) is not needed, so we only test two circles and one segment
@@ -333,5 +333,73 @@ Maybe<std::pair<float, Vector2f>> Polygon::getCollisionWithSweepingCircle(Vector
 		submit(ray.castLineSegment(a + offset, b + offset));
 	}
 	
+	return result;
+}
+
+Maybe<std::pair<float, Vector2f>> Polygon::getCollisionWithSweepingEllipse(Vector2f p0, Vector2f radius, Vector2f moveDir, float moveLen) const
+{
+	// This is the same algorithm as above, but we scale everything so the ellipse becomes a circle
+	
+	// This is used to grow AABBs to check if p0 is inside
+	// If this coarse test fails, the sweep shouldn't overlap the polygon
+	const float border = std::max(radius.x, radius.y) + (moveLen * std::max(std::abs(moveDir.x), std::abs(moveDir.y)));
+	if (!getAABB().grow(border).contains(p0)) {
+		return {};
+	}
+
+	const auto localRadius = radius.x;
+	const auto scale = radius.x / radius.y;
+	const auto transformation = Vector2f(1.0f, scale);
+
+	const auto localMove = moveDir * transformation * moveLen;
+	const auto localMoveLen = localMove.length();
+	const auto localMoveDir = localMove.normalized();
+	const auto localP0 = p0 * transformation;
+	const auto ray = Ray(localP0, localMoveDir);
+
+	float bestLen = localMoveLen;
+	Maybe<std::pair<float, Vector2f>> result;
+	const auto submit = [&] (Maybe<std::pair<float, Vector2f>> c)
+	{
+		if (c) {
+			const float lenToCol = c.get().first;
+			if (lenToCol < bestLen) {
+				result = c;
+				bestLen = lenToCol;
+			}
+		}
+	};
+
+	for (size_t i = 0; i < vertices.size(); ++i) {
+		// For each line segment in the polygon...
+		const Vector2f a = vertices[i] * transformation;
+		const Vector2f b = vertices[(i + 1) % vertices.size()] * transformation;
+
+		// We expand the line segment into a rounded capsule.
+		// It's now two circles (one centred at each vertex) and two line segments (connecting the circles)
+		// Checking collision of this capsule against the centre of the circle is isomorphic to the original problem, but easier
+
+		// Check circle
+		// Only check one vertex, "b" will be checked by another iteration
+		submit(ray.castCircle(a, localRadius));
+
+		// Check segments
+		// One of the two line segments (facing away) is not needed, so we only test two circles and one segment
+		Vector2f offset = (a - b).normalized().orthoLeft() * localRadius;
+		if (offset.dot(localMoveDir) > 0) {
+			offset = -offset;
+		}
+		submit(ray.castLineSegment(a + offset, b + offset));
+	}
+
+	if (result) {
+		// Transform the results back to global space
+		result->first *= moveLen / localMoveLen;
+
+		// This is a multiply instead of the divide you might expect
+		// The correct operation here is (norm.orthoLeft() / transform).orthoRight().normalized()
+		// But this is equivalent and faster
+		result->second = (result->second * transformation).normalized();
+	}
 	return result;
 }

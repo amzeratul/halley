@@ -103,6 +103,9 @@ namespace Halley {
 		// In-place operations
 		constexpr inline Vector2D& operator += (Vector2D param) { x += param.x; y += param.y; return *this; }
 		constexpr inline Vector2D& operator -= (Vector2D param) { x -= param.x; y -= param.y; return *this; }
+		constexpr inline Vector2D& operator *= (Vector2D param) { x *= param.x; y *= param.y; return *this; }
+		constexpr inline Vector2D& operator /= (Vector2D param) { x /= param.x; y /= param.y; return *this; }
+		constexpr inline Vector2D& operator %= (Vector2D param) { x %= param.x; y %= param.y; return *this; }
 		constexpr inline Vector2D& operator *= (const T param) { x *= param; y *= param; return *this; }
 		constexpr inline Vector2D& operator /= (const T param) { x /= param; y /= param; return *this; }
 

@@ -56,6 +56,7 @@ namespace Halley {
 		// Returns the distance from circlePos, along moveDir, until the collision point, and the collision normal.
 		// Only returns a value if a collision is found between start pos and up to move len away
 		Maybe<std::pair<float, Vector2f>> getCollisionWithSweepingCircle(Vector2f circlePos, float radius, Vector2f moveDir, float moveLen) const;
+		Maybe<std::pair<float, Vector2f>> getCollisionWithSweepingEllipse(Vector2f circlePos, Vector2f radius, Vector2f moveDir, float moveLen) const;
 
 	private:
 		float outerRadius;
