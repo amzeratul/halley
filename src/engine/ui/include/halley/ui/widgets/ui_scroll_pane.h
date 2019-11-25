@@ -20,10 +20,12 @@ namespace Halley {
 
     class UIScrollPane : public UIWidget {
     public:
+		UIScrollPane(String id, Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal = false, bool scrollVertical = true);
 		UIScrollPane(Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal = false, bool scrollVertical = true);
 
 		Vector2f getScrollPosition() const;
 		Vector2f getRelativeScrollPosition() const;
+		Vector2f getRelativeScrollEndPosition() const;
 
 		void scrollTo(Vector2f position);
 		void scrollBy(Vector2f delta);

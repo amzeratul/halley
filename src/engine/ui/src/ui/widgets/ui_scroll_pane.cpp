@@ -3,8 +3,8 @@
 
 using namespace Halley;
 
-UIScrollPane::UIScrollPane(Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal, bool scrollVertical)
-	: UIWidget("", Vector2f(), std::move(sizer))
+UIScrollPane::UIScrollPane(String id, Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal, bool scrollVertical)
+	: UIWidget(std::move(id), Vector2f(), std::move(sizer))
 	, clipSize(clipSize)
 	, scrollSpeed(10.0f)
 	, scrollHorizontal(scrollHorizontal)
@@ -26,6 +26,11 @@ UIScrollPane::UIScrollPane(Vector2f clipSize, UISizer&& sizer, bool scrollHorizo
 	});
 }
 
+UIScrollPane::UIScrollPane(Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal, bool scrollVertical)
+: UIScrollPane("", clipSize, std::move(sizer), scrollHorizontal, scrollVertical) {
+
+}
+
 Vector2f UIScrollPane::getScrollPosition() const
 {
 	return scrollPos;
@@ -34,6 +39,11 @@ Vector2f UIScrollPane::getScrollPosition() const
 Vector2f UIScrollPane::getRelativeScrollPosition() const
 {
 	return scrollPos / contentsSize;
+}
+
+Vector2f UIScrollPane::getRelativeScrollEndPosition() const
+{
+	return (scrollPos + clipSize) / contentsSize;
 }
 
 void UIScrollPane::scrollTo(Vector2f position)
