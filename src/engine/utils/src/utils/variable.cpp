@@ -79,6 +79,8 @@ void Internal::VariableStorage::serialize(Serializer& s) const
 	case ConfigNodeType::Float2:
 		s << vector2fValue;
 		break;
+	default:
+		throw Exception("Unknown variable type " + type, HalleyExceptions::Utils);
 	}
 }
 
@@ -98,6 +100,8 @@ void Internal::VariableStorage::deserialize(Deserializer& s)
 	case ConfigNodeType::Float2:
 		s >> vector2fValue;
 		break;
+	default:
+		throw Exception("Unknown variable type " + type, HalleyExceptions::Utils);
 	}
 }
 
