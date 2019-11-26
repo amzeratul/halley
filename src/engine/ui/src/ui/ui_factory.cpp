@@ -576,11 +576,12 @@ std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
 std::shared_ptr<UIWidget> UIFactory::makeScrollPane(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
+	auto id = node["id"].asString("");
 	auto clipSize = asVector2f(node["clipSize"], Vector2f());
 	auto scrollHorizontal = node["scrollHorizontal"].asBool(false);
 	auto scrollVertical = node["scrollVertical"].asBool(true);
 
-	return std::make_shared<UIScrollPane>(clipSize, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical);
+	return std::make_shared<UIScrollPane>(id, clipSize, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical);
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeScrollBar(const ConfigNode& entryNode)

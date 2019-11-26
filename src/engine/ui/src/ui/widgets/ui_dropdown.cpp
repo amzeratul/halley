@@ -212,7 +212,7 @@ void UIDropdown::open()
 		auto distanceFromBottom = getRoot()->getRect().getBottom() - getRect().getBottom() - 5.0f;
 		auto height = distanceFromBottom < 0 ? standardHeight : std::min(standardHeight, distanceFromBottom);
 
-		scrollPane = std::make_shared<UIScrollPane>(Vector2f(0, height), UISizer(UISizerType::Vertical, 0));
+		scrollPane = std::make_shared<UIScrollPane>("", Vector2f(0, height), UISizer(UISizerType::Vertical, 0));
 		scrollPane->add(dropdownList);
 
 		auto scrollBar = std::make_shared<UIScrollBar>(UIScrollDirection::Vertical, scrollbarStyle);
