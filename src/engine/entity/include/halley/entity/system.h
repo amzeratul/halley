@@ -38,7 +38,7 @@ namespace Halley {
 		String getName() const { return name; }
 		void setName(String n) { name = n; }
 		size_t getEntityCount() const;
-		void tryInit();
+		bool tryInit();
 
 		long long getNanoSecondsTaken() const { return timer.lastElapsedNanoSeconds(); }
 		long long getNanoSecondsTakenAvg() const { return timer.averageElapsedNanoSeconds(); }

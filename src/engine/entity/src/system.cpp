@@ -19,12 +19,14 @@ size_t System::getEntityCount() const
 	return n;
 }
 
-void System::tryInit()
+bool System::tryInit()
 {
 	if (!initialised) {
 		initBase();
 		initialised = true;
+		return true;
 	}
+	return false;
 }
 
 void System::setCollectSamples(bool collect)
@@ -130,6 +132,10 @@ void System::doUpdate(Time time) {
 }
 
 void System::doRender(RenderContext& rc) {
+	if (!initialised) {
+		throw Exception("System " + name + " is being rendered before being initialised. Make sure a World::step() happens before World::render().", HalleyExceptions::Entity);
+	}
+	
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 	if (collectSamples) {
 		timer.beginSample();

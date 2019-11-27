@@ -227,7 +227,6 @@ void World::render(RenderContext& rc) const
 		t.beginSample();
 	}
 
-	initSystems();
 	renderSystems(rc);
 
 	if (collectMetrics) {
@@ -344,11 +343,14 @@ void World::updateEntities()
 	HALLEY_DEBUG_TRACE();
 }
 
-void World::initSystems() const
+void World::initSystems()
 {
 	for (auto& tl: systems) {
 		for (auto& system : tl) {
-			system->tryInit();
+			// If the system is initialised, also check for any entities that need spawning
+			if (system->tryInit()) {
+				spawnPending();
+			}
 		}
 	}
 }
