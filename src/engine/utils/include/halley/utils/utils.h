@@ -77,36 +77,6 @@ namespace Halley {
 		return 3.1415926535897932384626433832795;
 	}
 
-
-	// Endianness conversion
-	//const bool IS_BIG_ENDIAN = *((short*)"AB") == 0x4243;
-	constexpr bool IS_BIG_ENDIAN = false;
-
-	template <typename T>
-	constexpr inline T FixEndian(T t)
-	{
-		if (IS_BIG_ENDIAN) {
-			T temp = t;
-			unsigned char *v = reinterpret_cast<unsigned char*>(&temp);
-			for (size_t i=0; i<sizeof(T)/2; i++) {
-				std::swap(v[i], v[sizeof(T)-1-i]);
-			}
-			return temp;
-		} else {
-			return t;
-		}
-	}
-
-	template<>
-	constexpr inline char FixEndian<char>(char t) {
-		return t;
-	}
-
-	template<>
-	constexpr inline unsigned char FixEndian<unsigned char>(unsigned char t) {
-		return t;
-	}
-
 	// True modulo definition
 	template <typename T> constexpr inline T modulo (T a, T b)
 	{
@@ -260,6 +230,18 @@ namespace Halley {
 	constexpr T alignDown(T val, T align)
 	{
 		return (val / align) * align;
+	}
+
+	template <typename T>
+	constexpr T signOf(T val)
+	{
+		if (val == 0) {
+			return 0;
+		} else if (val > 0) {
+			return 1;
+		} else {
+			return -1;
+		}
 	}
 
 	// Prefetch data from memory
