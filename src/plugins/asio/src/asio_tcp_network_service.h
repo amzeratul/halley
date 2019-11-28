@@ -17,6 +17,7 @@ namespace Halley
 
 	private:
 		asio::io_service service;
+		asio::io_service::work work;
 		TCPEndpoint localEndpoint;
 		asio::ip::tcp::acceptor acceptor;
 

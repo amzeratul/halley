@@ -4,7 +4,8 @@
 using namespace Halley;
 
 AsioTCPNetworkService::AsioTCPNetworkService(int port, IPVersion version)
-	: localEndpoint(version == IPVersion::IPv4 ? asio::ip::tcp::v4() : asio::ip::tcp::v6(), static_cast<unsigned short>(port))
+	: work(service)
+	, localEndpoint(version == IPVersion::IPv4 ? asio::ip::tcp::v4() : asio::ip::tcp::v6(), static_cast<unsigned short>(port))
 	, acceptor(service, localEndpoint)
 {
 	Expects(port == 0 || port > 1024);
