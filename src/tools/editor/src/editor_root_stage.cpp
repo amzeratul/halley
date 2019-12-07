@@ -7,6 +7,7 @@
 #include "preferences.h"
 #include "ui/editor_ui_factory.h"
 #include "halley/tools/project/project.h"
+#include "ui/load_project_window.h"
 
 using namespace Halley;
 
@@ -123,29 +124,15 @@ void EditorRootStage::createUI()
 
 void EditorRootStage::createLoadProjectUI()
 {
-	auto loadProjectUI = uiFactory->makeUI("ui/halley/load_project");
-
-	loadProjectUI->setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
+	uiMainPanel->add(std::make_shared<LoadProjectWindow>(*uiFactory, editor, [this] (const String& str)
 	{
-		event.getCurWidget().getWidgetAs<UITextInput>("input")->setText(event.getData());
-	});
-
-	loadProjectUI->setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
-	{
-		project = editor.loadProject(event.getCurWidget().getWidgetAs<UITextInput>("input")->getText());
+		project = editor.loadProject(str);
 		if (project) {
-			event.getCurWidget().destroy();
 			loadProject();
+		} else {
+			createLoadProjectUI();
 		}
-	});
-
-	auto recent = loadProjectUI->getWidgetAs<UIList>("recent");
-	for (auto& r: editor.getPreferences().getRecents()) {
-		recent->addTextItem(r, LocalisedString::fromUserString(r));
-	}
-	recent->addTextItem("", LocalisedString::fromHardcodedString("New location..."));
-
-	uiMainPanel->add(loadProjectUI, 1, Vector4f(), UISizerAlignFlags::Centre);
+	}), 1, Vector4f(), UISizerAlignFlags::Centre);
 }
 
 void EditorRootStage::updateUI(Time time)
