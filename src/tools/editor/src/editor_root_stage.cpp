@@ -7,7 +7,7 @@
 #include "ui/editor_ui_factory.h"
 #include "ui/console_window.h"
 #include "ui/load_project_window.h"
-#include "ui/taskbar/taskbar.h"
+#include "ui/taskbar.h"
 
 using namespace Halley;
 

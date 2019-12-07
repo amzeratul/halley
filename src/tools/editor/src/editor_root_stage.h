@@ -5,8 +5,6 @@
 
 namespace Halley {
 	class HalleyEditor;
-	class ConsoleWindow;
-	class TaskBar;
 	class EditorUIFactory;
 	class Project;
 
