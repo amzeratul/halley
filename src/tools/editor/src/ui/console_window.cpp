@@ -8,7 +8,7 @@ ConsoleWindow::ConsoleWindow(UIFactory& ui)
 	console = std::make_shared<UIDebugConsole>("debugConsole", ui, controller);
 
 	Logger::addSink(*this);
-	ConsoleWindow::add(console, 1, Vector4f(8, 8, 8, 8));
+	ConsoleWindow::add(console, 1);
 	ConsoleWindow::log(LoggerLevel::Info, "Welcome to the Halley Game Engine Editor.");
 	ConsoleWindow::log(LoggerLevel::Info, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam eros metus, mollis sit amet justo a, viverra posuere ex. Etiam sed arcu nec libero ultricies tincidunt id maximus lectus. Curabitur id hendrerit leo. Morbi eu sollicitudin dolor. Donec ornare mauris ut justo varius hendrerit. Phasellus commodo ultrices tellus. Sed eu velit laoreet nunc tincidunt fermentum ac sed purus. Morbi vel luctus lectus, nec porttitor nisi. Curabitur aliquam tempus urna consequat rhoncus. Etiam laoreet sed dolor eleifend eleifend. Aliquam eu nisl justo. Pellentesque commodo libero diam, ac gravida nunc finibus dapibus. Vestibulum eu odio porttitor, gravida mauris eu, tincidunt nisi.");
 }

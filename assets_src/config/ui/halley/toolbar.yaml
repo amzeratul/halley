@@ -1,0 +1,19 @@
+---
+
+widget: 
+  id: toolbar
+  class: list
+  type: horizontal
+  options:
+  - id: properties
+    text: Properties
+  - id: assets
+    text: Assets
+  - id: ecs
+    text: ECS
+  - id: remote
+    text: Remote
+  - id: settings
+    text: Settings
+
+...
