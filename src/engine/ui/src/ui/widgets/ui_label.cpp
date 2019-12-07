@@ -28,6 +28,9 @@ void UILabel::draw(UIPainter& painter) const
 
 void UILabel::update(Time t, bool moved)
 {
+	if (flowLayout && lastCellWidth != getCellWidth()) {
+		updateText();
+	}
 	if (marquee) {
 		updateMarquee(t);
 	}
@@ -51,17 +54,20 @@ void UILabel::setMarquee(bool enabled)
 
 void UILabel::updateMinSize()
 {
+	lastCellWidth = getCellWidth();
+	const float effectiveMaxWidth = std::min(lastCellWidth, maxWidth);
+
 	needsClip = false;
 	textExtents = renderer.getExtents();
 	unclippedWidth = textExtents.x;
-	if (textExtents.x > maxWidth) {
-		if (wordWrapped) {
-			renderer.setText(renderer.split(maxWidth));
+	if (textExtents.x > effectiveMaxWidth) {
+		if (wordWrapped || flowLayout) {
+			renderer.setText(renderer.split(effectiveMaxWidth));
 			textExtents = renderer.getExtents();
 			unclippedWidth = textExtents.x;
 		} else {
 			unclippedWidth = textExtents.x;
-			textExtents.x = maxWidth;
+			textExtents.x = effectiveMaxWidth;
 			needsClip = true;
 		}
 	}
@@ -70,7 +76,12 @@ void UILabel::updateMinSize()
 		textExtents.y = maxLines * renderer.getLineHeight();
 		needsClip = true;
 	}
-	setMinSize(textExtents);
+
+	if (flowLayout) {
+		setMinSize(Vector2f(0.0f, textExtents.y));
+	} else {
+		setMinSize(textExtents);
+	}
 }
 
 void UILabel::updateText() {
@@ -87,7 +98,7 @@ void UILabel::updateMarquee(Time t)
 		}
 		constexpr float speed = 10.0f;
 		const float maxMarquee = unclippedWidth - maxWidth;
-		marqueePos += marqueeDirection * float(t) * speed;
+		marqueePos += float(marqueeDirection) * float(t) * speed;
 		if (marqueePos < 0 || marqueePos > maxMarquee) {
 			marqueePos = clamp(marqueePos, 0.0f, maxMarquee);
 			marqueeDirection = -marqueeDirection;
@@ -98,6 +109,21 @@ void UILabel::updateMarquee(Time t)
 		marqueeIdle = 0;
 		marqueeDirection = -1;
 	}
+}
+
+float UILabel::getCellWidth()
+{
+	if (flowLayout) {
+		auto parent = getParent();
+		if (parent) {
+			auto max = parent->getMaxChildWidth();
+			if (max) {
+				return max.get();
+			}
+		}
+	}
+	
+	return std::numeric_limits<float>::infinity();
 }
 
 void UILabel::setText(const LocalisedString& t)
@@ -159,6 +185,12 @@ bool UILabel::isWordWrapped() const
 bool UILabel::isClipped() const
 {
 	return needsClip;
+}
+
+void UILabel::setFlowLayout(bool flow)
+{
+	flowLayout = flow;
+	updateText();
 }
 
 void UILabel::setAlignment(float alignment)
@@ -241,4 +273,11 @@ void UILabel::setHoverable(TextRenderer normalRenderer, TextRenderer hoveredRend
 			renderer.setOutlineColour(normalRenderer.getOutlineColour());
 		}
 	});
+}
+
+void UILabel::onParentChanged()
+{
+	if (flowLayout) {
+		updateText();
+	}
 }

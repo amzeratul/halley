@@ -10,6 +10,11 @@ UIParent::~UIParent()
 	}
 }
 
+Maybe<float> UIParent::getMaxChildWidth() const
+{
+	return Maybe<float>();
+}
+
 void UIParent::addChild(std::shared_ptr<UIWidget> widget)
 {
 	Expects(widget->getParent() == nullptr || widget->getParent() == this);

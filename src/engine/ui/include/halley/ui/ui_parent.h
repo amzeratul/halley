@@ -3,6 +3,7 @@
 #include <vector>
 #include "halley/text/halleystring.h"
 #include "halley/maths/rect.h"
+#include "halley/data_structures/maybe.h"
 
 namespace Halley {
 	enum class UIInputType;
@@ -20,6 +21,7 @@ namespace Halley {
 		virtual void sendEvent(UIEvent&& event) const = 0;
 
 		virtual Rect4f getRect() const = 0;
+		virtual Maybe<float> getMaxChildWidth() const;
 
 		void addChild(std::shared_ptr<UIWidget> widget);
 		void removeChild(UIWidget& widget);

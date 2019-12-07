@@ -133,6 +133,8 @@ void UIDebugConsole::setup()
 	{
 		onSubmit();
 	});
+
+	layout();
 }
 
 void UIDebugConsole::onSubmit()
@@ -163,6 +165,7 @@ void UIDebugConsole::addLine(const String& line, Colour colour)
 	auto style = factory.getStyle("label").getTextRenderer("label");
 	style.setSize(16).setColour(colour);
 	auto newLabel = std::make_shared<UILabel>("", style, LocalisedString::fromUserString(line));
+	newLabel->setFlowLayout(true);
 	auto scrollPane = getWidgetAs<UIScrollBarPane>("log");
 	scrollPane->add(newLabel);
 	scrollPane->getPane()->refresh();

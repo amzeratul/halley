@@ -13,6 +13,7 @@ using namespace Halley;
 
 EditorRootStage::EditorRootStage(HalleyEditor& editor, std::unique_ptr<Project> project)
 	: editor(editor)
+	, mainThreadExecutor(Executors::getMainThread())
 	, project(std::move(project))
 	, tasks(std::make_unique<EditorTaskSet>())
 {
@@ -39,6 +40,7 @@ void EditorRootStage::init()
 
 void EditorRootStage::onVariableUpdate(Time time)
 {
+	mainThreadExecutor.runPending();
 	tasks->update(time);
 
 	updateUI(time);
@@ -137,14 +139,16 @@ void EditorRootStage::createLoadProjectUI()
 {
 	clearUI();
 
-	uiMid->add(std::make_shared<LoadProjectWindow>(*uiFactory, editor, [this] (const String& str)
+	uiMid->add(std::make_shared<LoadProjectWindow>(*uiFactory, editor, [this] (String str)
 	{
-		project = editor.loadProject(str);
-		if (project) {
-			loadProject();
-		} else {
-			createLoadProjectUI();
-		}
+		Concurrent::execute(Executors::getMainThread(), [=] () {
+			project = editor.loadProject(str);
+			if (project) {
+				loadProject();
+			} else {
+				createLoadProjectUI();
+			}
+		});
 	}), 1, Vector4f(), UISizerAlignFlags::Centre);
 }
 

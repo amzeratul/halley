@@ -41,6 +41,8 @@ namespace Halley {
 
 		void refresh();
 
+		Maybe<float> getMaxChildWidth() const override;
+
     protected:
 	    void drawChildren(UIPainter& painter) const override;
 	    Vector2f getLayoutMinimumSize(bool force) const override;

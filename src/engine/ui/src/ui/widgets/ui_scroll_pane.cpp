@@ -173,3 +173,12 @@ void UIScrollPane::setRelativeScroll(float position, UIScrollDirection direction
 	target[axis] = position * contentsSize[axis];
 	scrollTo(target);
 }
+
+Maybe<float> UIScrollPane::getMaxChildWidth() const
+{
+	if (scrollHorizontal) {
+		return Maybe<float>();
+	} else {
+		return getSize().x;
+	}
+}

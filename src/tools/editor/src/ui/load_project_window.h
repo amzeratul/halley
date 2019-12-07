@@ -8,6 +8,6 @@ namespace Halley {
 	class LoadProjectWindow : public UIWidget
 	{
 	public:
-		LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, std::function<void(const String&)> callback);
+		LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, std::function<void(String)> callback);
 	};
 }

@@ -163,6 +163,7 @@ namespace Halley {
 		virtual void onFocusLost();
 		virtual void onLayout();
 		virtual void onDestroyRequested();
+		virtual void onParentChanged();
 
 		void notifyDataBind(bool data) const;
 		void notifyDataBind(int data) const;

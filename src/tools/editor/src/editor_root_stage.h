@@ -21,6 +21,7 @@ namespace Halley {
 	private:
 		HalleyEditor& editor;
 		I18N i18n;
+		Executor mainThreadExecutor;
 
 		std::unique_ptr<Project> project;
 

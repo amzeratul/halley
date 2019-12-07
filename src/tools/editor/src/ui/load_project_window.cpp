@@ -3,7 +3,7 @@
 #include "src/preferences.h"
 using namespace Halley;
 
-LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, std::function<void(const String&)> callback)
+LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, std::function<void(String)> callback)
 	: UIWidget("load_project", {}, UISizer())
 {
 	UIWidget::add(factory.makeUI("ui/halley/load_project"));
@@ -16,7 +16,6 @@ LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, s
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
 	{
 		auto result = event.getCurWidget().getWidgetAs<UITextInput>("input")->getText();
-		event.getCurWidget().destroy();
 		callback(result);
 	});
 

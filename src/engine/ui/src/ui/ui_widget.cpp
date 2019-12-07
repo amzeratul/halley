@@ -475,6 +475,10 @@ void UIWidget::onEnabledChanged()
 {
 }
 
+void UIWidget::onParentChanged()
+{
+}
+
 void UIWidget::setParent(UIParent* p)
 {
 	Expects((parent == nullptr) ^ (p == nullptr));
@@ -487,6 +491,8 @@ void UIWidget::setParent(UIParent* p)
 	if (anchor) {
 		layout();
 	}
+
+	onParentChanged();
 }
 
 UIParent* UIWidget::getParent() const

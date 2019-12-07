@@ -22,6 +22,8 @@ namespace Halley {
 		void setWordWrapped(bool wrapped);
 		bool isWordWrapped() const;
 		bool isClipped() const;
+		void setMarquee(bool enabled);
+		void setFlowLayout(bool flow);
 
 		void setAlignment(float alignment);
 
@@ -39,7 +41,8 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
-		void setMarquee(bool enabled);
+	protected:
+		void onParentChanged() override;
 
 	private:
 		TextRenderer renderer;
@@ -52,14 +55,17 @@ namespace Halley {
 		bool wordWrapped = true;
 		bool needsClip = false;
 		bool marquee = false;
+		bool flowLayout = false;
 
 		Time marqueeIdle;
 		int marqueeDirection = -1;
 		float marqueePos = 0;
 		float unclippedWidth;
+		float lastCellWidth;
 
 		void updateMinSize();
 		void updateText();
 		void updateMarquee(Time t);
+		float getCellWidth();
 	};
 }

@@ -442,7 +442,8 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::fun
 			const float w = accepted ? glyph.advance.x * scale : 0.0f;
 			curWidth += w;
 
-			if (c == '\n' || curWidth > maxWidth || isLastChar) {
+			const bool firstCharInRun = i == 0; // It MUST fit at least the first character, or we'll infinite loop
+			if (c == '\n' || (!firstCharInRun && curWidth > maxWidth) || isLastChar) {
 				int advanceAdjust = isLastChar ? 0 : -1;
 				if (!lastValid) {
 					// lastValid won't be set if there were no suitable breaking spaces
