@@ -112,7 +112,7 @@ void UIList::clear()
 	items.clear();
 	curOption = -1;
 	curOptionHighlight = -1;
-	getSizer().clear();
+	UIWidget::clear();
 }
 
 void UIList::setItemEnabled(const String& id, bool enabled)

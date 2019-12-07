@@ -56,6 +56,8 @@ namespace Halley {
 		void addSpacer(float size) override;
 		void addStretchSpacer(float proportion = 0) override;
 
+		void clear() override;
+
 		virtual bool canInteractWithMouse() const;
 		virtual bool isFocusLocked() const;
 		bool isMouseOver() const;

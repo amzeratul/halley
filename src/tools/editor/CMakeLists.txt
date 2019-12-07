@@ -9,8 +9,7 @@ set (editor_sources
 	"src/halley_editor.cpp"
 	"src/preferences.cpp"
 
-	"src/console/console_window.cpp"
-
+	"src/ui/console_window.cpp"
 	"src/ui/editor_ui_factory.cpp"
 	"src/ui/load_project_window.cpp"
 	"src/ui/toolbar.cpp"
@@ -23,8 +22,7 @@ set (editor_headers
 	"src/halley_editor.h"
 	"src/preferences.h"
 
-	"src/console/console_window.h"
-
+	"src/ui/console_window.h"
 	"src/ui/editor_ui_factory.h"
 	"src/ui/load_project_window.h"
 	"src/ui/toolbar.h"

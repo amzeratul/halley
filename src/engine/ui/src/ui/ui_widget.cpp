@@ -197,6 +197,14 @@ void UIWidget::addStretchSpacer(float proportion)
 	}
 }
 
+void UIWidget::clear()
+{
+	if (sizer) {
+		sizer.get().clear();
+	}
+	UIParent::clear();
+}
+
 bool UIWidget::canInteractWithMouse() const
 {
 	return false;

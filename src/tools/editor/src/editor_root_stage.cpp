@@ -1,13 +1,13 @@
 #include "editor_root_stage.h"
-#include "console/console_window.h"
 #include "halley_editor.h"
-#include "ui/taskbar/taskbar.h"
 #include "halley/tools/assets/check_assets_task.h"
 #include "halley/audio/resampler.h"
 #include "preferences.h"
-#include "ui/editor_ui_factory.h"
 #include "halley/tools/project/project.h"
+#include "ui/editor_ui_factory.h"
+#include "ui/console_window.h"
 #include "ui/load_project_window.h"
+#include "ui/taskbar/taskbar.h"
 
 using namespace Halley;
 
@@ -71,8 +71,9 @@ void EditorRootStage::onRender(RenderContext& context) const
 		ui->draw(spritePainter, 1, 0);
 		spritePainter.draw(1, painter);
 
-		// Taskbar
-		taskBar->draw(painter);
+		if (taskBar) {
+			taskBar->draw(painter);
+		}
 
 		if (console) {
 			console->draw(painter, Rect4f(view.getTopLeft() + Vector2f(16, 16), view.getBottomRight() - Vector2f(16, 80)));
@@ -111,20 +112,40 @@ void EditorRootStage::initSprites()
 	}
 }
 
+void EditorRootStage::clearUI()
+{
+	if (uiTop) {
+		uiTop->clear();
+	}
+	if (uiMid) {
+		uiMid->clear();
+	}
+	if (uiBottom) {
+		uiBottom->clear();
+	}
+}
+
 void EditorRootStage::createUI()
 {
 	uiFactory = std::make_unique<EditorUIFactory>(getAPI(), getResources(), i18n);
 	ui = std::make_unique<UIRoot>(&getAudioAPI());
 
-	uiMainPanel = std::make_shared<UIWidget>("mainPanel", Vector2f(), UISizer(UISizerType::Vertical));
+	uiMainPanel = std::make_shared<UIWidget>("uiMainPanel", Vector2f(), UISizer(UISizerType::Vertical));
 	ui->addChild(uiMainPanel);
 
-	taskBar = std::make_unique<TaskBar>(getResources());
+	uiTop = std::make_shared<UIWidget>("uiTop", Vector2f(), UISizer(UISizerType::Horizontal));
+	uiMid = std::make_shared<UIWidget>("uiMid", Vector2f(), UISizer(UISizerType::Horizontal));
+	uiBottom = std::make_shared<UIWidget>("uiBottom", Vector2f(), UISizer(UISizerType::Horizontal));
+	uiMainPanel->add(uiTop);
+	uiMainPanel->add(uiMid, 1);
+	uiMainPanel->add(uiBottom);
 }
 
 void EditorRootStage::createLoadProjectUI()
 {
-	uiMainPanel->add(std::make_shared<LoadProjectWindow>(*uiFactory, editor, [this] (const String& str)
+	clearUI();
+
+	uiMid->add(std::make_shared<LoadProjectWindow>(*uiFactory, editor, [this] (const String& str)
 	{
 		project = editor.loadProject(str);
 		if (project) {
@@ -135,15 +156,22 @@ void EditorRootStage::createLoadProjectUI()
 	}), 1, Vector4f(), UISizerAlignFlags::Centre);
 }
 
+void EditorRootStage::createProjectUI()
+{
+	clearUI();
+	console = std::make_unique<ConsoleWindow>(getResources());
+	taskBar = std::make_unique<TaskBar>(getResources());
+}
+
 void EditorRootStage::updateUI(Time time)
 {
 	if (taskBar) {
 		taskBar->update(tasks->getTasks(), time);
 	}
 
-	auto kb = getInputAPI().getKeyboard();
+	const auto kb = getInputAPI().getKeyboard();
+	const auto size = getVideoAPI().getWindow().getDefinition().getSize();
 
-	auto size = getVideoAPI().getWindow().getDefinition().getSize();
 	uiMainPanel->setMinSize(Vector2f(size));
 	ui->setRect(Rect4f(Vector2f(), Vector2f(size)));
 	ui->update(time, UIInputType::Mouse, getInputAPI().getMouse(), kb);
@@ -158,5 +186,5 @@ void EditorRootStage::loadProject()
 	project->setDevConServer(devConServer.get());
 	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(*project, false)));
 
-	console = std::make_unique<ConsoleWindow>(getResources());
+	createProjectUI();
 }

@@ -23,6 +23,7 @@ namespace Halley {
 
 		void addChild(std::shared_ptr<UIWidget> widget);
 		void removeChild(UIWidget& widget);
+		virtual void clear();
 
 		bool addNewChildren(UIInputType inputType);
 		bool removeDeadChildren();

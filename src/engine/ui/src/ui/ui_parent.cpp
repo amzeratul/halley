@@ -35,6 +35,19 @@ void UIParent::removeChild(UIWidget& widget)
 	markAsNeedingLayout();
 }
 
+void UIParent::clear()
+{
+	if (children.empty()) {
+		return;
+	}
+
+	for (auto& c: children) {
+		c->setParent(nullptr);
+	}
+	children.clear();
+	markAsNeedingLayout();
+}
+
 bool UIParent::addNewChildren(UIInputType inputType)
 {
 	const bool addedAny = !childrenWaiting.empty();
