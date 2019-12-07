@@ -223,7 +223,7 @@ namespace Halley {
 		bool positionUpdated = false;
 		bool modal = true;
 		bool mouseBlocker = true;
-		bool shrinkOnLayout = false;
+		bool shrinkOnLayout = true;
 		bool destroying = false;
 		bool canSendEvents = true;
 	};

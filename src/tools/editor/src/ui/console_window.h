@@ -14,19 +14,16 @@ namespace Halley
 		explicit ConsoleWindow(UIFactory& ui);
 		~ConsoleWindow();
 
-		void draw(UIPainter& painter) const override;
-
-		void printLn(const String& line);
 		void log(LoggerLevel level, const String& msg) override;
 
-	private:
-		void submit();
+	protected:
+		void update(Time t, bool moved) override;
 
-		String input;
-		Sprite background;
-		std::vector<String> buffer;
-		std::vector<String> history;
-		std::shared_ptr<const Font> font;
+	private:
+		std::vector<std::pair<LoggerLevel, String>> buffer;
+		std::shared_ptr<UIDebugConsole> console;
+
+		UIDebugConsoleController controller;
 
 		mutable std::mutex mutex;
 	};

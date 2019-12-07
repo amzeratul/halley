@@ -39,12 +39,12 @@ namespace Halley {
 		UIDebugConsole(const String& id, UIFactory& factory, UIDebugConsoleController& controller);
 		void show();
 		void hide();
+		void addLine(const String& line, Colour colour);
     	
     private:
 		void setup();
 		void onSubmit();
 		void runCommand(const String& command);
-		void addLine(const String& line, Colour colour);
 
 		UIFactory& factory;
 		UIDebugConsoleController& controller;

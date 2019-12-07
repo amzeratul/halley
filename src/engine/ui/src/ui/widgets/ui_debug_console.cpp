@@ -116,7 +116,7 @@ void UIDebugConsole::hide()
 
 void UIDebugConsole::setup()
 {
-	add(factory.makeUI("ui/halley/debug_console"));
+	add(factory.makeUI("ui/halley/debug_console"), 1);
 
 	inputField = getWidgetAs<UITextInput>("input");
 	inputField->setAutoCompleteHandle([=] (const StringUTF32& str) -> std::vector<StringUTF32>
