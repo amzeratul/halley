@@ -74,10 +74,6 @@ void EditorRootStage::onRender(RenderContext& context) const
 		if (taskBar) {
 			taskBar->draw(painter);
 		}
-
-		if (console) {
-			console->draw(painter, Rect4f(view.getTopLeft() + Vector2f(16, 16), view.getBottomRight() - Vector2f(16, 80)));
-		}
 	});
 }
 
@@ -159,7 +155,7 @@ void EditorRootStage::createLoadProjectUI()
 void EditorRootStage::createProjectUI()
 {
 	clearUI();
-	console = std::make_unique<ConsoleWindow>(getResources());
+	uiMid->add(std::make_unique<ConsoleWindow>(*uiFactory), 1);
 	taskBar = std::make_unique<TaskBar>(getResources());
 }
 
@@ -175,10 +171,6 @@ void EditorRootStage::updateUI(Time time)
 	uiMainPanel->setMinSize(Vector2f(size));
 	ui->setRect(Rect4f(Vector2f(), Vector2f(size)));
 	ui->update(time, UIInputType::Mouse, getInputAPI().getMouse(), kb);
-
-	if (console) {
-		console->update(*kb);
-	}
 }
 
 void EditorRootStage::loadProject()

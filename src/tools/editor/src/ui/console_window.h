@@ -1,7 +1,6 @@
 #pragma once
 #include <halley/maths/rect.h>
 #include <halley/core/input/input_device.h>
-#include <halley/core/resources/resources.h>
 #include <halley/core/graphics/text/font.h>
 #include <halley/support/logger.h>
 
@@ -9,17 +8,15 @@ namespace Halley
 {
 	class Painter;
 
-	class ConsoleWindow : public ILoggerSink
+	class ConsoleWindow : public UIWidget, public ILoggerSink
 	{
 	public:
-		explicit ConsoleWindow(Resources& resources);
+		explicit ConsoleWindow(UIFactory& ui);
 		~ConsoleWindow();
 
-		void update(InputDevice& keyboard);
-		void draw(Painter& painter, Rect4f bounds) const;
+		void draw(UIPainter& painter) const override;
 
 		void printLn(const String& line);
-
 		void log(LoggerLevel level, const String& msg) override;
 
 	private:

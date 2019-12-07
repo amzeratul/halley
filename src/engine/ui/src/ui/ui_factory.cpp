@@ -124,6 +124,11 @@ std::shared_ptr<UIStyleSheet> UIFactory::getStyleSheet() const
 	return styleSheet;
 }
 
+Resources& UIFactory::getResources() const
+{
+	return resources;
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 {
 	auto& widgetNode = entryNode["widget"];

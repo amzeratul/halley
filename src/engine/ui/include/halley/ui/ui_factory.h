@@ -41,6 +41,8 @@ namespace Halley
 		UIStyle getStyle(const String& name) const;
 		std::shared_ptr<UIStyleSheet> getStyleSheet() const;
 
+		Resources& getResources() const;
+
 	protected:
 		struct ParsedOption {
 			String id;

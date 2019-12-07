@@ -6,8 +6,10 @@
 
 using namespace Halley;
 
-ConsoleWindow::ConsoleWindow(Resources& resources)
+ConsoleWindow::ConsoleWindow(UIFactory& ui)
 {
+	auto& resources = ui.getResources();
+
 	background = Sprite()
 		.setImage(resources, "round_rect.png", "Halley/DistanceFieldSprite")
 		.setColour(Colour4f(0.0f, 0.0f, 0.0f, 0.4f))
@@ -36,23 +38,18 @@ void ConsoleWindow::log(LoggerLevel, const String& msg)
 	printLn(msg);
 }
 
-void ConsoleWindow::update(InputDevice& keyboard)
-{
-	// TODO
-}
-
-void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
+void ConsoleWindow::draw(UIPainter& painter) const
 {
 	std::unique_lock<std::mutex> lock(mutex);
 
-	Rect4f innerBounds = bounds.shrink(12);
-	Rect4f outerBounds = bounds.grow(8);
+	const Rect4f bounds = Rect4f(getPosition(), getPosition() + getSize());
+	const Rect4f innerBounds = bounds.shrink(20);
+	const Rect4f outerBounds = bounds;
 
 	// Background
-	background.clone()
+	painter.draw(background.clone()
 		.setPos(outerBounds.getTopLeft())
-		.scaleTo(outerBounds.getSize())
-		.draw(painter);
+		.scaleTo(outerBounds.getSize()), true);
 
 	const float size = 18;
 	float lineH = font->getLineHeightAtSize(size);
@@ -63,7 +60,7 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 	text.setFont(font).setSize(size).setOffset(Vector2f(0, 1)).setColour(Colour(1, 1, 1));
 
 	// Draw command
-	text.setText("> " + input).setPosition(cursor).draw(painter);
+	painter.draw(text.setText("> " + input).setPosition(cursor), true);
 	cursor += Vector2f(0, -lineH);
 
 	// Draw buffer
@@ -78,7 +75,7 @@ void ConsoleWindow::draw(Painter& painter, Rect4f bounds) const
 		}
 		text.setText(buffer[i]);
 		//auto extents = text.getExtents();
-		text.setPosition(cursor).draw(painter);
+		painter.draw(text.setPosition(cursor), true);
 		cursor += Vector2f(0, -lineH * nLinesHere);
 		nDrawn += nLinesHere;
 	}
