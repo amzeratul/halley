@@ -5,7 +5,9 @@
 
 namespace Halley
 {
-	class TaskBar
+	class EditorTaskSet;
+
+	class TaskBar : public UIWidget
 	{
 		class TaskDisplay
 		{
@@ -18,20 +20,20 @@ namespace Halley
 		};
 
 	public:
-		TaskBar(Resources& resources);
-		void update(const std::list<std::shared_ptr<EditorTaskAnchor>>& tasks, Time time);
-		void draw(Painter& painter);
+		TaskBar(UIFactory& factory, EditorTaskSet& taskSet);
+		void update(Time time, bool moved) override;
+		void draw(UIPainter& painter) const override;
 
 	private:
 		Resources& resources;
+		EditorTaskSet& taskSet;
+		std::vector<TaskDisplay> tasks;
 
-		Sprite barSolid;
-		Sprite barFade;
-		Sprite halleyLogo;
+		mutable Sprite barSolid;
+		mutable	Sprite barFade;
+		mutable Sprite halleyLogo;
 
 		std::shared_ptr<const Font> font;
-
-		std::vector<TaskDisplay> tasks;
 
 		float displaySize = 0;
 

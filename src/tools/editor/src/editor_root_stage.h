@@ -37,8 +37,6 @@ namespace Halley {
 		std::shared_ptr<UIWidget> uiMid;
 		std::shared_ptr<UIWidget> uiBottom;
 
-		std::unique_ptr<TaskBar> taskBar;
-		
 		std::unique_ptr<EditorTaskSet> tasks;
 		std::unique_ptr<DevConServer> devConServer;
 

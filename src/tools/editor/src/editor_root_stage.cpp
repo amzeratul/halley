@@ -70,10 +70,6 @@ void EditorRootStage::onRender(RenderContext& context) const
 		spritePainter.start(100);
 		ui->draw(spritePainter, 1, 0);
 		spritePainter.draw(1, painter);
-
-		if (taskBar) {
-			taskBar->draw(painter);
-		}
 	});
 }
 
@@ -155,16 +151,12 @@ void EditorRootStage::createLoadProjectUI()
 void EditorRootStage::createProjectUI()
 {
 	clearUI();
-	uiMid->add(std::make_unique<ConsoleWindow>(*uiFactory), 1);
-	taskBar = std::make_unique<TaskBar>(getResources());
+	uiMid->add(std::make_shared<ConsoleWindow>(*uiFactory), 1);
+	uiBottom->add(std::make_shared<TaskBar>(*uiFactory, *tasks), 1);
 }
 
 void EditorRootStage::updateUI(Time time)
 {
-	if (taskBar) {
-		taskBar->update(tasks->getTasks(), time);
-	}
-
 	const auto kb = getInputAPI().getKeyboard();
 	const auto size = getVideoAPI().getWindow().getDefinition().getSize();
 

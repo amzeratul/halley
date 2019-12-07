@@ -1,9 +1,12 @@
 #include "taskbar.h"
+#include "halley/tools/tasks/editor_task_set.h"
 
 using namespace Halley;
 
-TaskBar::TaskBar(Resources& resources)
-	: resources(resources)
+TaskBar::TaskBar(UIFactory& ui, EditorTaskSet& taskSet)
+	: UIWidget("taskBar", Vector2f(150.0f, 80.0), UISizer())
+	, resources(ui.getResources())
+	, taskSet(taskSet)
 {
 	{
 		auto col = Colour4f(0.9882f, 0.15686f, 0.27843f, 1);
@@ -27,8 +30,10 @@ TaskBar::TaskBar(Resources& resources)
 	font = resources.get<Font>("Ubuntu Bold");
 }
 
-void TaskBar::update(const std::list<std::shared_ptr<EditorTaskAnchor>>& taskData, Time time)
+void TaskBar::update(Time time, bool moved)
 {
+	auto taskData = taskSet.getTasks();
+
 	// Ensure it has a display associated
 	for (auto& t : taskData) {
 		if (t->isVisible() && t->getStatus() == EditorTaskStatus::Started) {
@@ -64,19 +69,18 @@ void TaskBar::update(const std::list<std::shared_ptr<EditorTaskAnchor>>& taskDat
 	displaySize = lerp(displaySize, float(tasks.size()), static_cast<float>(6 * time));
 }
 
-void TaskBar::draw(Painter& painter)
+void TaskBar::draw(UIPainter& painter) const
 {
 	// Setup for tasks
-	auto view = painter.getViewPort();
-	Vector2f anchor = Vector2f(view.getBottomLeft());
-	Vector2f baseDrawPos = anchor + Vector2f(150, -72);
-	Vector2f size = Vector2f(std::min(400.0f, (view.getWidth() - baseDrawPos.x - 150) / std::max(1.0f, displaySize)), 40);
+	const Vector2f anchor = getPosition() + Vector2f(0, 80.0f);
+	const Vector2f baseDrawPos = getPosition() + Vector2f(150.0f, 8.0f);
+	const Vector2f size = Vector2f(std::min(400.0f, getSize().x / std::max(1.0f, displaySize)), 40);
 	float totalLen = baseDrawPos.x + (displaySize * size.x) + 10.0f;
 
 	// Draw logo
-	barSolid.setScale(Vector2f(totalLen, 32)).setPos(anchor + Vector2f(0, -56)).draw(painter);
-	barFade.setPos(anchor + Vector2f(totalLen, -56)).draw(painter);
-	halleyLogo.setPos(anchor + Vector2f(80, -41)).draw(painter);
+	painter.draw(barSolid.setScale(Vector2f(totalLen, 32)).setPos(anchor + Vector2f(0, -56)), true);
+	painter.draw(barFade.setPos(anchor + Vector2f(totalLen, -56)), true);
+	painter.draw(halleyLogo.setPos(anchor + Vector2f(80, -41)), true);
 
 	if (tasks.empty()) {
 		// Nothing to do here!
@@ -105,20 +109,17 @@ void TaskBar::draw(Painter& painter)
 			.set("u_outlineColour", col);
 
 		// Background
-		sprite
-			.setColour(Colour4f(0.15f, 0.15f, 0.19f))
-			.draw(painter);
+		painter.draw(sprite.setColour(Colour4f(0.15f, 0.15f, 0.19f)), true);
 
 		// Progress
-		sprite
+		painter.draw(sprite
 			.setClip(Rect4f(Vector2f(), (size.x + 10) * t.progressDisplay, size.y + 10))
 			.scaleTo(size + Vector2f(10, 10))
-			.setColour(col)
-			.draw(painter);
+			.setColour(col), true);
 
 		// Text
-		text.setSize(14).setText(t.task->getName()).setPosition(drawPos + Vector2f(24, 12)).draw(painter);
-		text.setSize(17).setText(t.task->getProgressLabel()).setPosition(drawPos + Vector2f(24, 30)).draw(painter);
+		painter.draw(text.setSize(14).setText(t.task->getName()).setPosition(drawPos + Vector2f(24, 12)), true);
+		painter.draw(text.setSize(17).setText(t.task->getProgressLabel()).setPosition(drawPos + Vector2f(24, 30)), true);
 	}
 }
 
