@@ -9,6 +9,7 @@
 namespace Halley {
 	class UIStyle;
 	class UIListItem;
+	class UIImage;
 
 	class UIList : public UIWidget {
 		friend class UIListItem;
@@ -25,6 +26,7 @@ namespace Halley {
 		UIStyle getStyle() const;
 
 		void addTextItem(const String& id, const LocalisedString& label, float maxWidth = -1, bool centre = false);
+		void addImage(const String& id, std::shared_ptr<UIImage> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, Maybe<UIStyle> styleOverride = {});
 		void addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, Maybe<UIStyle> styleOverride = {});
 		void clear();
 

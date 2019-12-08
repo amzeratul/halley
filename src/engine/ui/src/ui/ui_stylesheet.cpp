@@ -60,6 +60,12 @@ void loadStyleData(Resources& resources, const String& name, const ConfigNode& n
 }
 
 template <>
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, Colour4f& data)
+{
+	data = Colour4f::fromString(node.asString());
+}
+
+template <>
 void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, std::shared_ptr<const UIStyleDefinition>& data)
 {
 	if (node.getType() != ConfigNodeType::Map) {
@@ -120,6 +126,7 @@ UIStyleDefinition::UIStyleDefinition(String styleName, const ConfigNode& node, R
 	borders[":default"] = Vector4f();
 	strings[":default"] = "";
 	subStyles[":default"] = {};
+	colours[":default"] = Colour4f(1, 1, 1, 1);
 }
 
 std::shared_ptr<const UIStyleDefinition> UIStyleDefinition::getSubStyle(const String& name) const
@@ -142,6 +149,11 @@ bool UIStyleDefinition::hasTextRenderer(const String& name) const
 	return hasValue(node, resources, styleName, name, textRenderers);
 }
 
+bool UIStyleDefinition::hasColour(const String& name) const
+{
+	return hasValue(node, resources, styleName, name, colours);
+}
+
 Vector4f UIStyleDefinition::getBorder(const String& name) const
 {
 	return getValue(node, resources, styleName, name, borders);
@@ -155,6 +167,11 @@ const String& UIStyleDefinition::getString(const String& name) const
 float UIStyleDefinition::getFloat(const String& name) const
 {
 	return getValue(node, resources, styleName, name, floats);
+}
+
+Colour4f UIStyleDefinition::getColour(const String& name) const
+{
+	return getValue(node, resources, styleName, name, colours);
 }
 
 UIStyleSheet::UIStyleSheet(Resources& resources)

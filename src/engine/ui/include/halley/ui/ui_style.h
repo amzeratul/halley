@@ -17,6 +17,8 @@ namespace Halley {
 		Vector4f getBorder(const String& name) const;
 		const String& getString(const String& name) const;
 		float getFloat(const String& name) const;
+		Colour4f getColour(const String& name) const;
+		bool hasColour(const String& name) const;
 
 	private:
 		std::shared_ptr<const UIStyleDefinition> style;

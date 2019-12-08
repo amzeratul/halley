@@ -1,0 +1,19 @@
+---
+
+uiStyle:
+  toolbar:
+    background: ""
+    item:
+      selected: { img: ui/slant_capsule.png, colour: "#FFFFFF", imageColour: "#000000" }
+      hover: { img: ui/slant_capsule.png, colour: "#F98A9A" }
+      normal: { img: ui/slant_capsule.png, colour: "#FC2847" }
+      innerBorder: [ 8, 5, 8, 2 ]
+    innerBorder: [ 0, 0, 0, 0 ]
+    extraMouseBorder: [ 1, 1, 1, 1 ]
+    selectionChangedSound: ""
+    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFFCF" }
+    selectedLabel: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    selectedImageColour: '#000000'
+    gap: -5
+
+...

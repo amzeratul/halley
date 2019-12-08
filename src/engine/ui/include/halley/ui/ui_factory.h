@@ -48,9 +48,9 @@ namespace Halley
 			String id;
 			LocalisedString text;
 			String image;
+			String inactiveImage;
 			String spriteSheet;
 			String sprite;
-			String inactiveImage;
 			Vector4f border;
 			bool active;
 		};

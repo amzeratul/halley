@@ -19,11 +19,14 @@ namespace Halley {
 
 		const Sprite& getSprite(const String& name) const;
 		const TextRenderer& getTextRenderer(const String& name) const;
-		bool hasTextRenderer(const String& name) const;
 		Vector4f getBorder(const String& name) const;
 		const String& getString(const String& name) const;
 		float getFloat(const String& name) const;
+		Colour4f getColour(const String& name) const;
 		std::shared_ptr<const UIStyleDefinition> getSubStyle(const String& name) const;
+
+		bool hasTextRenderer(const String& name) const;
+		bool hasColour(const String& name) const;
 
 	private:
 		const String styleName;
@@ -35,6 +38,7 @@ namespace Halley {
 		mutable FlatMap<String, Vector4f> borders;
 		mutable FlatMap<String, String> strings;
 		mutable FlatMap<String, float> floats;
+		mutable FlatMap<String, Colour4f> colours;
 		mutable FlatMap<String, std::shared_ptr<const UIStyleDefinition>> subStyles;
 	};
 

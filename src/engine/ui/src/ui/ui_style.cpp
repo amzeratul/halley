@@ -50,3 +50,13 @@ float UIStyle::getFloat(const String& name) const
 {
 	return style->getFloat(name);
 }
+
+Colour4f UIStyle::getColour(const String& name) const
+{
+	return style->getColour(name);
+}
+
+bool UIStyle::hasColour(const String& name) const
+{
+	return style->hasColour(name);
+}

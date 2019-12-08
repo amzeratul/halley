@@ -1,6 +1,7 @@
 #include "widgets/ui_list.h"
 #include "ui_style.h"
 #include "widgets/ui_label.h"
+#include "widgets/ui_image.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
@@ -97,6 +98,15 @@ void UIList::addTextItem(const String& id, const LocalisedString& label, float m
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 	item->add(widget, 0, Vector4f(), centre ? UISizerAlignFlags::CentreHorizontal : UISizerFillFlags::Fill);
 	addItem(item);
+}
+
+void UIList::addImage(const String& id, std::shared_ptr<UIImage> image, float proportion, Vector4f border, int fillFlags, Maybe<UIStyle> styleOverride)
+{
+	if (style.hasColour("selectedImageColour")) {
+		image->setSelectable(image->getSprite().getColour(), style.getColour("selectedImageColour"));
+	}
+
+	addItem(id, image, proportion, border, fillFlags, styleOverride);
 }
 
 void UIList::addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, Maybe<UIStyle> styleOverride)

@@ -313,9 +313,9 @@ std::vector<UIFactory::ParsedOption> UIFactory::parseOptions(const ConfigNode& n
 			option.id = id;
 			option.text = label;
 			option.image = n["image"].asString("");
+			option.inactiveImage = n["inactiveImage"].asString("");
 			option.spriteSheet = n["spriteSheet"].asString("");
 			option.sprite = n["sprite"].asString("");
-			option.inactiveImage = n["inactiveImage"].asString("");
 			option.border = asVector4f(n["border"], Vector4f());
 			option.active = n["active"].asBool(true);
 			result.push_back(option);
@@ -482,7 +482,7 @@ std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
 				image->setSprite(inactiveSprite);
 			}
 
-			widget->addItem(o.id, image, 1, o.border, UISizerAlignFlags::Centre);
+			widget->addImage(o.id, image, 1, o.border, UISizerAlignFlags::Centre);
 		} else {
 			widget->addTextItem(o.id, o.text);
 		}

@@ -156,7 +156,7 @@ void EditorRootStage::createProjectUI()
 {
 	clearUI();
 
-	uiTop->add(uiFactory->makeUI("ui/halley/toolbar"), 1, Vector4f(8, 8, 8, 8));
+	uiTop->add(uiFactory->makeUI("ui/halley/toolbar"), 1, Vector4f(0, 16, 0, 8));
 	uiMid->add(std::make_shared<ConsoleWindow>(*uiFactory), 1, Vector4f(8, 8, 8, 8));
 	uiBottom->add(std::make_shared<TaskBar>(*uiFactory, *tasks), 1);
 }

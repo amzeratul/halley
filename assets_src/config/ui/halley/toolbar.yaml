@@ -1,19 +1,43 @@
 ---
 
-widget: 
-  id: toolbar
-  class: list
-  type: horizontal
-  options:
-  - id: properties
-    text: Properties
-  - id: assets
-    text: Assets
-  - id: ecs
-    text: ECS
-  - id: remote
-    text: Remote
-  - id: settings
-    text: Settings
+widget: { class: widget }
+sizer: { type: horizontal, gap: 0 }
+children:
+- widget: { class: image, image: ui/slant_capsule_right.png, size: [40, 38], colour: "#FC2847" }
+  border: [0, 0, -5, 0]
+- widget: 
+    id: toolbar
+    class: list
+    type: horizontal
+    style: toolbar
+    options:
+    - id: properties
+      image: ui/toolbar_properties.png
+    - id: assets
+      image: ui/toolbar_assets.png
+    - id: ecs
+      image: ui/toolbar_ecs.png
+    - id: remote
+      image: ui/toolbar_remote.png
+    - id: settings
+      image: ui/toolbar_settings.png
+- widget: { class: image, image: ui/slant_capsule_left.png, size: [20, 38], colour: "#FC2847" }
+  border: [-5, 0, 0, 0]
+- widget: { class: image, image: whitebox.png, size: [80, 38], colour: "#FC2847" }
+  children:
+  - widget: { class: label, id: toolName, text: Properties }
+    fill: centre
+    proportion: 1
+- widget: { class: image, image: ui/slant_capsule_right.png, size: [20, 38], colour: "#FC2847" }
+  border: [0, 0, 0, 0]
+- stretchSpacer: {}
+  proportion: 1
+- widget: { class: image, image: ui/slant_capsule_left.png, size: [20, 38], colour: "#FC2847" }
+- widget: { class: image, image: whitebox.png, size: [80, 38], colour: "#FC2847" }
+  children:
+  - widget: { class: label, id: gameName, text: Halley Game }
+    fill: centre
+    proportion: 1
+    border: [0, 0, 20, 0]
 
 ...
