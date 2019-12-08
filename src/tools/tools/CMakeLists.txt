@@ -65,6 +65,7 @@ set(SOURCES
 
     "src/project/project.cpp"
     "src/project/project_loader.cpp"
+    "src/project/project_properties.cpp"
 
     "src/vs_project/vs_project_manipulator.cpp"
     "src/vs_project/vs_project_tool.cpp"
@@ -114,6 +115,7 @@ set(HEADERS
 
     "include/halley/tools/project/project.h"
     "include/halley/tools/project/project_loader.h"
+    "include/halley/tools/project/project_properties.h"
     
     "include/halley/tools/vs_project/vs_project_manipulator.h"
     "include/halley/tools/vs_project/vs_project_tool.h"

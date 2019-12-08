@@ -12,6 +12,7 @@ namespace Halley
 	class HalleyStatics;
 	class IHalleyPlugin;
 	class DevConServer;
+	class ProjectProperties;
 	using HalleyPluginPtr = std::shared_ptr<IHalleyPlugin>;
 
 	class Project
@@ -42,6 +43,8 @@ namespace Halley
 
 		void setDevConServer(DevConServer* server);
 		DevConServer* getDevConServer() const;
+		
+		ProjectProperties& getProperties() const;
 
 	private:
 		std::vector<String> platforms;
@@ -53,6 +56,7 @@ namespace Halley
 		std::unique_ptr<ImportAssetsDatabase> importAssetsDatabase;
 		std::unique_ptr<ImportAssetsDatabase> codegenDatabase;
 		std::unique_ptr<AssetImporter> assetImporter;
+		std::unique_ptr<ProjectProperties> properties;
 
 		std::vector<HalleyPluginPtr> plugins;
 	};
