@@ -11,14 +11,14 @@ children:
     type: horizontal
     style: toolbar
     options:
-    - id: properties
-      image: ui/toolbar_properties.png
     - id: assets
       image: ui/toolbar_assets.png
     - id: ecs
       image: ui/toolbar_ecs.png
     - id: remote
       image: ui/toolbar_remote.png
+    - id: properties
+      image: ui/toolbar_properties.png
     - id: settings
       image: ui/toolbar_settings.png
 - widget: { class: image, image: ui/slant_capsule_left_short.png, size: [20, 32], colour: "#FC2847" }

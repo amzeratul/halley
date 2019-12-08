@@ -9,6 +9,7 @@
 #include "ui/load_project_window.h"
 #include "ui/taskbar.h"
 #include "ui/toolbar.h"
+#include "assets/assets_editor_window.h"
 
 using namespace Halley;
 
@@ -118,6 +119,7 @@ void EditorRootStage::clearUI()
 	if (uiBottom) {
 		uiBottom->clear();
 	}
+	pagedPane = {};
 }
 
 void EditorRootStage::createUI()
@@ -157,9 +159,21 @@ void EditorRootStage::createProjectUI()
 {
 	clearUI();
 
-	uiTop->add(std::make_shared<Toolbar>(*uiFactory, project->getProperties()), 1, Vector4f(0, 16, 0, 8));
-	uiMid->add(std::make_shared<ConsoleWindow>(*uiFactory), 1, Vector4f(8, 8, 8, 8));
-	uiBottom->add(std::make_shared<TaskBar>(*uiFactory, *tasks), 1);
+	pagedPane = std::make_shared<UIPagedPane>("pages", 5);
+	const auto toolbar = std::make_shared<Toolbar>(*uiFactory, project->getProperties());
+	const auto taskbar = std::make_shared<TaskBar>(*uiFactory, *tasks);
+
+	uiTop->add(toolbar, 1, Vector4f(0, 16, 0, 8));
+	uiMid->add(pagedPane, 1);
+	uiBottom->add(taskbar, 1);
+
+	pagedPane->getPage(0)->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project), 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(4)->add(std::make_shared<ConsoleWindow>(*uiFactory), 1, Vector4f(8, 8, 8, 8));
+
+	toolbar->setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
+	{
+		pagedPane->setPage(event.getIntData());
+	});
 }
 
 void EditorRootStage::updateUI(Time time)
