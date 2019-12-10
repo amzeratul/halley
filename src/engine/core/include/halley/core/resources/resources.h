@@ -37,7 +37,7 @@ namespace Halley {
 		friend class ResourceCollectionBase;
 
 	public:
-		Resources(std::unique_ptr<ResourceLocator> locator, const HalleyAPI* api);
+		Resources(std::unique_ptr<ResourceLocator> locator, const HalleyAPI& api);
 		~Resources();
 
 		template <typename T>

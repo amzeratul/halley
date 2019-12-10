@@ -167,7 +167,7 @@ void EditorRootStage::createProjectUI()
 	uiMid->add(pagedPane, 1);
 	uiBottom->add(taskbar, 1);
 
-	pagedPane->getPage(0)->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project), 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(0)->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project, getAPI()), 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(4)->add(std::make_shared<ConsoleWindow>(*uiFactory), 1, Vector4f(8, 8, 8, 8));
 
 	toolbar->setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
