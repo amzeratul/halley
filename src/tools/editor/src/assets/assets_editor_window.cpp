@@ -16,6 +16,11 @@ AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, con
 void AssetsEditorWindow::makeUI()
 {
 	UIWidget::add(factory.makeUI("ui/halley/assets_editor_window"), 1);
+
+	setHandle(UIEventType::ListSelectionChanged, "assetType", [=] (const UIEvent& event)
+	{
+		listAssets(fromString<AssetType>(event.getData()));
+	});
 }
 
 void AssetsEditorWindow::loadResources(const HalleyAPI& api)
