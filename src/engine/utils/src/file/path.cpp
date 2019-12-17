@@ -51,6 +51,11 @@ void Path::normalise()
 		lastIsBack = false;
 	};
 
+	auto canInsertDot = [&] () -> bool
+	{
+		return writePos == 0 || (pathParts[writePos - 1] != "." && pathParts[writePos - 1] != "..");
+	};
+
 	int n = int(pathParts.size());
 	for (int i = 0; i < n; ++i) {
 		bool first = i == 0;
@@ -64,11 +69,11 @@ void Path::normalise()
 				write(".");
 			}
 		} else if (current == ".") {
-			if (first || last) {
+			if ((first || last) && canInsertDot()) {
 				write(current);
 			}
 		} else if (current == "..") {
-			if (writePos > 0 && pathParts[writePos - 1] != "..") {
+			if (writePos > 0 && pathParts[writePos - 1] != ".." && pathParts[writePos - 1] != ".") {
 				--writePos;
 				lastIsBack = true;
 			} else {
@@ -78,7 +83,7 @@ void Path::normalise()
 			write(current);
 		}
 	}
-	if (lastIsBack) {
+	if (lastIsBack && canInsertDot()) {
 		write(".");
 	}
 

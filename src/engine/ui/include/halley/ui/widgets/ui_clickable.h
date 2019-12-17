@@ -23,6 +23,7 @@ namespace Halley {
 
 		void onClick(UIEventCallback callback);
 		virtual void onClicked(Vector2f mousePos) = 0;
+		virtual void onDoubleClicked(Vector2f mousePos);
 
 		void onInput(const UIInputResults& input, Time time) override;
 
@@ -31,6 +32,7 @@ namespace Halley {
 
 	protected:
 
+		void update(Time t, bool moved) override;
 		virtual void onStateChanged(State prev, State next);
 		bool setState(State state);
 		virtual void doSetState(State state) = 0;
@@ -45,5 +47,8 @@ namespace Halley {
 		Maybe<Vector4f> mouseExtraBorder;
 		bool held = false;
 		bool forceUpdate = false;
+
+		Vector2f clickPos;
+		Time clickTime = 100.0;
 	};
 }

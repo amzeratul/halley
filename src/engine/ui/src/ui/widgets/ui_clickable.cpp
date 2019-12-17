@@ -2,7 +2,7 @@
 using namespace Halley;
 
 UIClickable::UIClickable(String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)
-	: UIWidget(id, minSize, std::move(sizer), innerBorder)
+	: UIWidget(std::move(id), minSize, std::move(sizer), innerBorder)
 {
 }
 
@@ -28,6 +28,13 @@ void UIClickable::releaseMouse(Vector2f mousePos, int button)
 	if (button == 0 && isEnabled()) {
 		if (held && isMouseOver()) {
 			onClicked(mousePos);
+
+			if (clickTime < 0.5 && (mousePos - clickPos).length() < 3.0f) {
+				onDoubleClicked(mousePos);
+			}
+
+			clickTime = 0;
+			clickPos = mousePos;
 		}
 		held = false;
 	}
@@ -66,6 +73,10 @@ bool UIClickable::updateButton()
 void UIClickable::doForceUpdate()
 {
 	forceUpdate = true;
+}
+
+void UIClickable::onDoubleClicked(Vector2f mousePos)
+{
 }
 
 void UIClickable::onInput(const UIInputResults& input, Time time)
@@ -120,4 +131,9 @@ void UIClickable::onShortcutPressed()
 void UIClickable::setMouseExtraBorder(Maybe<Vector4f> override)
 {
 	mouseExtraBorder = override;
+}
+
+void UIClickable::update(Time t, bool)
+{
+	clickTime += t;
 }

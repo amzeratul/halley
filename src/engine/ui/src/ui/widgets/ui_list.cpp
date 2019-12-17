@@ -388,7 +388,12 @@ void UIList::update(Time t, bool moved)
 void UIList::onItemClicked(UIListItem& item)
 {
 	setSelectedOption(item.getIndex());
-	sendEvent(UIEvent(UIEventType::ListAccept, getId(), curOption));
+}
+
+void UIList::onItemDoubleClicked(UIListItem& item)
+{
+	setSelectedOption(item.getIndex());
+	onAccept();
 }
 
 void UIList::onItemDragged(UIListItem& item, int index, Vector2f pos)
@@ -418,6 +423,11 @@ UIListItem::UIListItem(const String& id, UIList& parent, UIStyle style, int inde
 	, extraMouseArea(extraMouseArea)
 {
 	sprite = style.getSprite("normal");
+}
+
+void UIListItem::onDoubleClicked(Vector2f mousePos)
+{
+	parent.onItemDoubleClicked(*this);
 }
 
 void UIListItem::onClicked(Vector2f mousePos)

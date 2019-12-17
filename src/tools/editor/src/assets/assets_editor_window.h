@@ -12,9 +12,12 @@ namespace Halley {
 		Project& project;
 
 		std::unique_ptr<Resources> gameResources;
+		std::map<AssetType, Path> curPaths;
+		AssetType curType = AssetType::Sprite;
 
 		void makeUI();
 		void loadResources(const HalleyAPI& api);
 		void listAssets(AssetType type);
+		void loadAsset(const String& name);
     };
 }

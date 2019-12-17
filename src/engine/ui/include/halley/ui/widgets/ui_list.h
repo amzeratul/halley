@@ -71,6 +71,7 @@ namespace Halley {
 		bool uniformSizedItems = false;
 
 		void onItemClicked(UIListItem& item);
+		void onItemDoubleClicked(UIListItem& item);
 		void onItemDragged(UIListItem& item, int index, Vector2f pos);
 		void addItem(std::shared_ptr<UIListItem> item);
 		void onAccept();
@@ -87,6 +88,7 @@ namespace Halley {
 		explicit UIListItem(const String& id, UIList& parent, UIStyle style, int index, Vector4f extraMouseArea);
 
 		void onClicked(Vector2f mousePos) override;
+		void onDoubleClicked(Vector2f mousePos) override;
 		void setSelected(bool selected);
 
 		void setStyle(UIStyle style);

@@ -21,6 +21,11 @@ void AssetsEditorWindow::makeUI()
 	{
 		listAssets(fromString<AssetType>(event.getData()));
 	});
+
+	setHandle(UIEventType::ListAccept, "assetList", [=] (const UIEvent& event)
+	{
+		loadAsset(event.getData());
+	});
 }
 
 void AssetsEditorWindow::loadResources(const HalleyAPI& api)
@@ -33,13 +38,46 @@ void AssetsEditorWindow::loadResources(const HalleyAPI& api)
 
 void AssetsEditorWindow::listAssets(AssetType type)
 {
+	curType = type;
+	if (curPaths.find(type) == curPaths.end()) {
+		curPaths[type] = Path(".");
+	}
+	const auto curPath = curPaths[type];
+	
+	auto assets = gameResources->ofType(type).enumerate();
+	std::sort(assets.begin(), assets.end());
+
+	std::set<String> dirs;
+	std::vector<String> files;
+
+	for (auto& a: assets) {
+		auto path = Path("./" + a);
+		auto relPath = path.makeRelativeTo(curPath);
+		if (relPath.getNumberPaths() == 1) {
+			files.push_back(relPath.toString());
+		} else {
+			auto start = relPath.getFront(1);
+			dirs.insert(start.toString());
+		}
+	}
+
 	auto list = getWidgetAs<UIList>("assetList");
 	list->clear();
-	auto& res = *gameResources;
+	for (auto& dir: dirs) {
+		list->addTextItem(dir + "/.", LocalisedString::fromUserString("[" + dir + "]"));
+	}
+	for (auto& file: files) {
+		list->addTextItem(file, LocalisedString::fromUserString(file));
+	}
+}
 
-	auto assets = res.ofType(type).enumerate();
-	std::sort(assets.begin(), assets.end());
-	for (auto& a: assets) {
-		list->addTextItem(a, LocalisedString::fromUserString(a));
+void AssetsEditorWindow::loadAsset(const String& name)
+{
+	if (name.endsWith("/.")) {
+		auto& curPath = curPaths[curType];
+		curPath = curPath / name;
+		listAssets(curType);
+	} else {
+		// TODO
 	}
 }
