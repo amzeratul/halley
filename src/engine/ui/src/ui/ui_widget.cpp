@@ -29,18 +29,27 @@ UIWidget::~UIWidget()
 
 void UIWidget::doDraw(UIPainter& painter) const
 {
-	if (isActive()) {
-		draw(painter);
-
-		if (childLayerAdjustment == 0) {
-			drawChildren(painter);
-		} else {
-			UIPainter p2 = painter.withAdjustedLayer(childLayerAdjustment);
-			drawChildren(p2);
-		}
-
-		drawAfterChildren(painter);
+	if (!isActive()) {
+		return;
 	}
+
+	auto clip = painter.getClip();
+	if (clip && !ignoreClip()) {
+		if (!clip.get().overlaps(getRect())) {
+			return;
+		}
+	}
+
+	draw(painter);
+
+	if (childLayerAdjustment == 0) {
+		drawChildren(painter);
+	} else {
+		UIPainter p2 = painter.withAdjustedLayer(childLayerAdjustment);
+		drawChildren(p2);
+	}
+
+	drawAfterChildren(painter);
 }
 
 void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType)
@@ -258,6 +267,11 @@ Vector4f UIWidget::getInnerBorder() const
 Rect4f UIWidget::getRect() const
 {
 	return Rect4f(getPosition(), getPosition() + getSize());
+}
+
+bool UIWidget::ignoreClip() const
+{
+	return false;
 }
 
 void UIWidget::setPosition(Vector2f pos)

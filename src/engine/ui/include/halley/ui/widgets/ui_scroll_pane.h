@@ -42,6 +42,7 @@ namespace Halley {
 		void refresh();
 
 		Maybe<float> getMaxChildWidth() const override;
+		bool ignoreClip() const override;
 
     protected:
 	    void drawChildren(UIPainter& painter) const override;

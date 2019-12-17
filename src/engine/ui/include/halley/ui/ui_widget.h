@@ -72,6 +72,7 @@ namespace Halley {
 		Vector2f getMinimumSize() const;
 		Vector4f getInnerBorder() const;
 		Rect4f getRect() const override;
+		virtual bool ignoreClip() const;
 
 		void setPosition(Vector2f pos);
 		void setMinSize(Vector2f size);

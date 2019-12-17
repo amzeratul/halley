@@ -48,6 +48,9 @@ namespace Halley {
 
 		void setUniformSizedItems(bool enabled);
 
+		bool ignoreClip() const override;
+
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;

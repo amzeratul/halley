@@ -47,6 +47,11 @@ UIPainter UIPainter::withMask(int mask)
 	return result;
 }
 
+Maybe<Rect4f> UIPainter::getClip() const
+{
+	return clip;
+}
+
 float UIPainter::getCurrentPriority()
 {
 	if (parent) {

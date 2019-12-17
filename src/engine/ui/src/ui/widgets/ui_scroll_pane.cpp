@@ -108,7 +108,7 @@ void UIScrollPane::refresh()
 
 void UIScrollPane::drawChildren(UIPainter& painter) const
 {
-	auto p = painter.withClip(Rect4f(getPosition(), getPosition() + getSize()));
+	auto p = painter.withClip(getRect());
 	UIWidget::drawChildren(p);
 }
 
@@ -181,4 +181,9 @@ Maybe<float> UIScrollPane::getMaxChildWidth() const
 	} else {
 		return getSize().x;
 	}
+}
+
+bool UIScrollPane::ignoreClip() const
+{
+	return true;
 }

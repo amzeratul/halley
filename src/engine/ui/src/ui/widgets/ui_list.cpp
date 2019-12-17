@@ -243,6 +243,11 @@ void UIList::setUniformSizedItems(bool enabled)
 	uniformSizedItems = enabled;
 }
 
+bool UIList::ignoreClip() const
+{
+	return true;
+}
+
 size_t UIList::getNumberOfItems() const
 {
 	size_t n = 0;

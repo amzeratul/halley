@@ -19,6 +19,8 @@ namespace Halley {
 		UIPainter withClip(Maybe<Rect4f> clip);
 		UIPainter withMask(int mask);
 
+		Maybe<Rect4f> getClip() const;
+
 	private:
 		SpritePainter& painter;
 		Maybe<Rect4f> clip;
