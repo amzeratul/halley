@@ -55,6 +55,24 @@ uiStyle:
       upSound: ""
       downSound: ""
       hoverSound: ""
+    left:
+      normal: { img: halley_ui/ui_scrollbar.png, colour: "#9C5BB5" }
+      disabled: { img: halley_ui/ui_scrollbar.png, colour: "#8D7B95" }
+      down: { img: halley_ui/ui_scrollbar.png, colour: "#913DA3" }
+      hover: { img: halley_ui/ui_scrollbar.png, colour: "#B68FCB" }
+      innerBorder: [ 3, 3, 3, 3 ]
+      upSound: ""
+      downSound: ""
+      hoverSound: ""
+    right:
+      normal: { img: halley_ui/ui_scrollbar.png, colour: "#9C5BB5" }
+      disabled: { img: halley_ui/ui_scrollbar.png, colour: "#8D7B95" }
+      down: { img: halley_ui/ui_scrollbar.png, colour: "#913DA3" }
+      hover: { img: halley_ui/ui_scrollbar.png, colour: "#B68FCB" }
+      innerBorder: [ 3, 3, 3, 3 ]
+      upSound: ""
+      downSound: ""
+      hoverSound: ""
     thumb:
       normal: { img: halley_ui/ui_scrollbar.png, colour: "#9C5BB5" }
       down: { img: halley_ui/ui_scrollbar.png, colour: "#913DA3" }

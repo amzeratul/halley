@@ -4,6 +4,7 @@
 #include "halley/support/exception.h"
 #include <halley/concurrency/concurrent.h>
 #include "halley/bytes/compression.h"
+#include "halley/core/api/halley_api.h"
 
 using namespace Halley;
 
@@ -116,6 +117,7 @@ ResourceDataStream::ResourceDataStream(String path, ResourceDataMakeReader makeR
 
 ResourceLoader::ResourceLoader(ResourceLoader&& loader) noexcept
 	: locator(loader.locator)
+	, resources(resources)
 	, name(std::move(loader.name))
 	, priority(loader.priority)
 	, api(loader.api)
@@ -126,8 +128,9 @@ ResourceLoader::~ResourceLoader()
 {
 }
 
-ResourceLoader::ResourceLoader(IResourceLocator& locator, const String& name, AssetType type, ResourceLoadPriority priority, const HalleyAPI* api)
+ResourceLoader::ResourceLoader(IResourceLocator& locator, const String& name, AssetType type, ResourceLoadPriority priority, const HalleyAPI* api, Resources& resources)
 	: locator(locator)
+	, resources(resources)
 	, name(name)
 	, type(type)
 	, priority(priority)
@@ -175,4 +178,9 @@ Future<std::unique_ptr<ResourceDataStatic>> ResourceLoader::getAsync() const
 		}
 		return result;
 	});
+}
+
+Resources& ResourceLoader::getResources() const
+{
+	return resources;
 }

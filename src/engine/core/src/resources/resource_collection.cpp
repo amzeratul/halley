@@ -76,7 +76,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::loadAsset(const String& assetI
 		newRes = resourceLoader(assetId, priority);
 	} else {
 		// Normal loading
-		auto resLoader = ResourceLoader(*(parent.locator), assetId, type, priority, parent.api);
+		auto resLoader = ResourceLoader(*(parent.locator), assetId, type, priority, parent.api, parent);
 		newRes = loadResource(resLoader);
 		if (!newRes && resLoader.loaded) {
 			throw Exception("Unable to construct resource from data: " + assetId, HalleyExceptions::Resources);

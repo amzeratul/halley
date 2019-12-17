@@ -184,9 +184,9 @@ void Animation::reload(Resource&& resource)
 
 void Animation::loadDependencies(ResourceLoader& loader)
 {
-	spriteSheet = loader.getAPI().getResource<SpriteSheet>(spriteSheetName);
+	spriteSheet = loader.getResources().get<SpriteSheet>(spriteSheetName);
 
-	auto matDef = loader.getAPI().getResource<MaterialDefinition>(materialName);
+	auto matDef = loader.getResources().get<MaterialDefinition>(materialName);
 	material = std::make_shared<Material>(matDef);
 	material->set("tex0", spriteSheet->getTexture());
 
@@ -259,6 +259,14 @@ const AnimationDirection& Animation::getDirection(int id) const
 Vector2i Animation::getPivot() const
 {
 	return sequences.at(0).getFrame(0).getSprite(0).origPivot;
+}
+
+Rect4i Animation::getBounds() const
+{
+	auto& sprite = sequences.at(0).getFrame(0).getSprite(0);
+	const auto size = Vector2i(sprite.size) + Vector2i(sprite.trimBorder.x + sprite.trimBorder.z, sprite.trimBorder.y + sprite.trimBorder.w);
+	const auto pivot = sprite.origPivot;
+	return Rect4i(-pivot, -pivot + size);
 }
 
 bool Animation::hasSequence(const String& seqName) const

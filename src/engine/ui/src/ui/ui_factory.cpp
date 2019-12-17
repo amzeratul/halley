@@ -579,11 +579,11 @@ std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
 	auto id = node["id"].asString();
 	auto size = asVector2f(node["size"], Vector2f());
 	auto animationOffset = asVector2f(node["offset"], Vector2f());
-	auto animationName = node["animation"].asString();
+	auto animationName = node["animation"].asString("");
 	auto sequence = node["sequence"].asString("default");
 	auto direction = node["direction"].asString("default");
 
-	auto animation = AnimationPlayer(resources.get<Animation>(animationName), sequence, direction);
+	auto animation = AnimationPlayer(animationName.isEmpty() ? std::shared_ptr<const Animation>() : resources.get<Animation>(animationName), sequence, direction);
 
 	return std::make_shared<UIAnimation>(id, size, animationOffset, animation);
 }

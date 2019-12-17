@@ -134,7 +134,7 @@ bool SpriteSheet::hasSprite(const String& name) const
 std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 {
 	auto result = std::make_unique<SpriteSheet>();
-	result->resources = &loader.getAPI().core->getResources();
+	result->resources = &loader.getResources();
 	auto data = loader.getStatic();
 	Deserializer s(data->getSpan());
 	result->deserialize(s);

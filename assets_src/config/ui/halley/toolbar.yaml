@@ -23,9 +23,9 @@ children:
       image: ui/toolbar_settings.png
 - widget: { class: image, image: ui/slant_capsule_left_short.png, size: [20, 32], colour: "#FC2847" }
   border: [-5, 3, 0, 3]
-- widget: { class: image, image: whitebox.png, size: [80, 32], colour: "#FC2847" }
+- widget: { class: image, image: whitebox.png, size: [100, 32], colour: "#FC2847" }
   children:
-  - widget: { class: label, id: toolName, text: Properties }
+  - widget: { class: label, id: toolName, text: Assets }
     fill: centre
     proportion: 1
   border: [0, 3, 0, 3]

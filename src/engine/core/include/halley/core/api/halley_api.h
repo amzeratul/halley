@@ -39,12 +39,6 @@ namespace Halley
 		PlatformAPI* platform;
 		NetworkAPI* network;
 		MovieAPI* movie;
-		
-		template <typename T>
-		std::shared_ptr<const T> getResource(String name) const
-		{
-			return core->getResources().of<T>().get(name);
-		}
 
 	private:
 		friend class Core;

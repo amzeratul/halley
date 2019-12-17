@@ -19,12 +19,12 @@ Mesh::Mesh(ResourceLoader& loader)
 	Deserializer s(data->getSpan());
 	deserialize(s);
 
-	auto matDef = loader.getAPI().getResource<MaterialDefinition>(materialName);
+	auto matDef = loader.getResources().get<MaterialDefinition>(materialName);
 	material = std::make_unique<Material>(matDef);
 
 	int i = 0;
 	for (auto& t: textureNames) {
-		auto texture = loader.getAPI().getResource<Texture>(t);
+		auto texture = loader.getResources().get<Texture>(t);
 		material->set("tex" + toString(i), texture);
 		++i;
 	}

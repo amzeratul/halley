@@ -1,6 +1,7 @@
 #include "assets_editor_window.h"
 #include "halley/tools/project/project.h"
 #include "halley/core/resources/standard_resources.h"
+#include "animation_editor.h"
 using namespace Halley;
 
 AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api)
@@ -73,11 +74,25 @@ void AssetsEditorWindow::listAssets(AssetType type)
 
 void AssetsEditorWindow::loadAsset(const String& name)
 {
+	auto& curPath = curPaths[curType];
 	if (name.endsWith("/.")) {
-		auto& curPath = curPaths[curType];
 		curPath = curPath / name;
 		listAssets(curType);
 	} else {
-		// TODO
+		getWidget("contents")->clear();
+
+		auto editor = createEditor(curType, (curPath / name).toString().mid(2));
+		if (editor) {
+			getWidget("contents")->add(editor, 1);
+		}
 	}
+}
+
+std::shared_ptr<UIWidget> AssetsEditorWindow::createEditor(AssetType type, const String& name)
+{
+	switch (type) {
+	case AssetType::Animation:
+		return std::make_shared<AnimationEditor>(factory, *gameResources, name);
+	}
+	return {};
 }

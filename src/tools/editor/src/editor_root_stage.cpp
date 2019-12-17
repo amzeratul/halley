@@ -174,6 +174,25 @@ void EditorRootStage::createProjectUI()
 
 	toolbar->setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
 	{
+		String toolName;
+		switch (event.getIntData()) {
+		case 0:
+			toolName = "Assets";
+			break;
+		case 1:
+			toolName = "ECS";
+			break;
+		case 2:
+			toolName = "Remotes";
+			break;
+		case 3:
+			toolName = "Properties";
+			break;
+		case 4:
+			toolName = "Settings";
+			break;
+		}
+		toolbar->getWidgetAs<UILabel>("toolName")->setText(LocalisedString::fromHardcodedString(toolName));
 		pagedPane->setPage(event.getIntData());
 	});
 	toolbar->setHandle(UIEventType::ButtonClicked, "exitProject", [=] (const UIEvent& event)

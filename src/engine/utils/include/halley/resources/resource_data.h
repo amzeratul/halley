@@ -106,6 +106,7 @@ namespace Halley {
 
 	class HalleyAPI;
 	class Metadata;
+	class Resources;
 
 	class ResourceLoader
 	{
@@ -120,13 +121,15 @@ namespace Halley {
 		std::unique_ptr<ResourceDataStatic> getStatic();
 		std::unique_ptr<ResourceDataStream> getStream();
 		Future<std::unique_ptr<ResourceDataStatic>> getAsync() const;
+		Resources& getResources() const;
 
 	private:
 		ResourceLoader(ResourceLoader&& loader) noexcept;
-		ResourceLoader(IResourceLocator& locator, const String& name, AssetType type, ResourceLoadPriority priority, const HalleyAPI* api);
+		ResourceLoader(IResourceLocator& locator, const String& name, AssetType type, ResourceLoadPriority priority, const HalleyAPI* api, Resources& resources);
 		~ResourceLoader();
 
 		IResourceLocator& locator;
+		Resources& resources;
 		String name;
 		AssetType type;
 		ResourceLoadPriority priority;

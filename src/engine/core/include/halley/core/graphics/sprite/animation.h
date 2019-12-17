@@ -127,7 +127,9 @@ namespace Halley
 		const AnimationSequence& getSequence(const String& name) const;
 		const AnimationDirection& getDirection(const String& name) const;
 		const AnimationDirection& getDirection(int id) const;
+		
 		Vector2i getPivot() const;
+		Rect4i getBounds() const;
 
 		bool hasSequence(const String& name) const;
 

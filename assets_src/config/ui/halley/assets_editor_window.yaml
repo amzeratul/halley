@@ -30,7 +30,8 @@ children:
           text: test
         - id: test2
           text: test
-  - widget: { class: label, text: "TODO :)" }
-    fill: centre
+  - widget: { class: widget, id: contents }
+    fill: fill
+    sizer: { type: horizontal }
     proportion: 1
 ...

@@ -1,0 +1,7 @@
+---
+widget: { class: scrollBarPane, scrollHorizontal: true, scrollVertical: true }
+children:
+- widget: { class: animation, id: display }
+  proportion: 1
+  fill: centre
+...
