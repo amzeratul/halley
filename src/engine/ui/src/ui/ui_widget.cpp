@@ -424,15 +424,17 @@ void UIWidget::shrink()
 void UIWidget::forceLayout()
 {
 	Expects (lastInputType != UIInputType::Undefined);
-	forceAddChildren(lastInputType);
+	forceAddChildren(lastInputType, true);
 	layout();
 }
 
-void UIWidget::forceAddChildren(UIInputType inputType)
+void UIWidget::forceAddChildren(UIInputType inputType, bool forceRecursive)
 {
-	addNewChildren(inputType);
-	for (auto& c: getChildren()) {
-		c->forceAddChildren(inputType);
+	bool added = addNewChildren(inputType);
+	if (added || forceRecursive) {
+		for (auto& c: getChildren()) {
+			c->forceAddChildren(inputType, forceRecursive);
+		}
 	}
 	checkActive();
 }
@@ -467,9 +469,11 @@ void UIWidget::onInput(const UIInputResults& input, Time time)
 
 void UIWidget::setMouseClip(Maybe<Rect4f> clip)
 {
-	mouseClip = clip;
-	for (auto& c: getChildren()) {
-		c->setMouseClip(clip);
+	if (clip != mouseClip) {
+		mouseClip = clip;
+		for (auto& c: getChildren()) {
+			c->setMouseClip(clip);
+		}
 	}
 }
 

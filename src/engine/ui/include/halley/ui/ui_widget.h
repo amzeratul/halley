@@ -141,7 +141,7 @@ namespace Halley {
 
 		void sendEvent(UIEvent&& event) const override;
 		void sendEventDown(const UIEvent& event) const;
-		void forceAddChildren(UIInputType inputType);
+		void forceAddChildren(UIInputType inputType, bool forceRecursive);
 
 		void addBehaviour(std::shared_ptr<UIBehaviour> behaviour);
 		void clearBehaviours();

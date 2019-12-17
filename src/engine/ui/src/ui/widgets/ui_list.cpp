@@ -21,7 +21,7 @@ UIList::UIList(const String& id, UIStyle style, UISizerType orientation, int nCo
 
 bool UIList::setSelectedOption(int option)
 {
-	forceAddChildren(UIInputType::Undefined);
+	forceAddChildren(UIInputType::Undefined, false);
 
 	const auto numberOfItems = int(getNumberOfItems());
 	if (numberOfItems == 0) {

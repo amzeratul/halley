@@ -60,6 +60,8 @@ static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
 
 Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly)
 {
+	updateClip();
+
 	constexpr auto maxVertices = size_t(std::numeric_limits<IndexType>::max());
 	if (numVertices > maxVertices) {
 		throw Exception("Too many vertices in draw call: " + toString(numVertices) + ", maximum is " + toString(maxVertices), HalleyExceptions::Graphics);
@@ -379,15 +381,12 @@ void Painter::setRelativeClip(Rect4f rect)
 
 void Painter::setClip(Rect4i rect)
 {
-	flushPending();
-	Rect4i finalRect = (rect + viewPort.getTopLeft()).intersection(viewPort);
-	setClip(getRectangleForActiveRenderTarget(finalRect), finalRect != activeRenderTarget->getViewPort());
+	pendingClip = rect;
 }
 
 void Painter::setClip()
 {
-	flushPending();
-	setClip(getRectangleForActiveRenderTarget(viewPort), viewPort != activeRenderTarget->getViewPort());
+	pendingClip = Maybe<Rect4i>();
 }
 
 Rect4i Painter::getRectangleForActiveRenderTarget(Rect4i r)
@@ -550,5 +549,20 @@ void Painter::updateProjection()
 	halleyGlobalMaterial->set("u_mvp", projection);
 	if (*old != *halleyGlobalMaterial) {
 		onUpdateProjection(*halleyGlobalMaterial);
+	}
+}
+
+void Painter::updateClip()
+{
+	if (curClip != pendingClip) {
+		flushPending();
+
+		curClip = pendingClip;
+		if (curClip) {
+			Rect4i finalRect = (curClip.get() + viewPort.getTopLeft()).intersection(viewPort);
+			setClip(getRectangleForActiveRenderTarget(finalRect), finalRect != activeRenderTarget->getViewPort());
+		} else {
+			setClip(getRectangleForActiveRenderTarget(viewPort), viewPort != activeRenderTarget->getViewPort());
+		}
 	}
 }

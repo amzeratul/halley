@@ -102,7 +102,7 @@ void UIScrollPane::refresh()
 		scrollPos.y = 0;
 	}
 	contentsSize = UIWidget::getLayoutMinimumSize(false);
-	setMouseClip(Rect4f(getPosition(), getPosition() + getSize()));
+	setMouseClip(getRect());
 }
 
 

@@ -55,7 +55,9 @@ void UIParent::clear()
 
 bool UIParent::addNewChildren(UIInputType inputType)
 {
-	const bool addedAny = !childrenWaiting.empty();
+	if (childrenWaiting.empty()) {
+		return false;
+	}
 
 	for (auto& c: childrenWaiting) {
 		c->setInputType(inputType);
@@ -63,11 +65,8 @@ bool UIParent::addNewChildren(UIInputType inputType)
 	}
 	childrenWaiting.clear();
 
-	if (addedAny) {
-		markAsNeedingLayout();
-	}
-
-	return addedAny;
+	markAsNeedingLayout();
+	return true;
 }
 
 bool UIParent::removeDeadChildren()

@@ -120,6 +120,8 @@ namespace Halley
 		size_t prevTriangles = 0;
 
 		Vector<IndexType> stdQuadIndexCache;
+		Maybe<Rect4i> curClip;
+		Maybe<Rect4i> pendingClip;
 
 		void bind(RenderContext& context);
 		void unbind(RenderContext& context);
@@ -140,6 +142,7 @@ namespace Halley
 		void generateQuadIndicesOffset(IndexType firstVertex, IndexType lineStride, IndexType* target);
 
 		void updateProjection();
+		void updateClip();
 
 		Rect4i getRectangleForActiveRenderTarget(Rect4i rectangle);
 
