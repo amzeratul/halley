@@ -14,7 +14,9 @@ UIButton::UIButton(String id, UIStyle s, Maybe<UISizer> sizer)
 
 void UIButton::draw(UIPainter& painter) const
 {
-	painter.draw(sprite);
+	if (sprite.hasMaterial()) {
+		painter.draw(sprite);
+	}
 }
 
 void UIButton::update(Time t, bool moved)

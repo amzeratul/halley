@@ -17,7 +17,6 @@ EditorRootStage::EditorRootStage(HalleyEditor& editor, std::unique_ptr<Project> 
 	: editor(editor)
 	, mainThreadExecutor(Executors::getMainThread())
 	, project(std::move(project))
-	, tasks(std::make_unique<EditorTaskSet>())
 {
 }
 
@@ -43,7 +42,9 @@ void EditorRootStage::init()
 void EditorRootStage::onVariableUpdate(Time time)
 {
 	mainThreadExecutor.runPending();
-	tasks->update(time);
+	if (tasks) {
+		tasks->update(time);
+	}
 
 	updateUI(time);
 
@@ -141,6 +142,7 @@ void EditorRootStage::createUI()
 void EditorRootStage::createLoadProjectUI()
 {
 	clearUI();
+	unloadProject();
 
 	uiMid->add(std::make_shared<LoadProjectWindow>(*uiFactory, editor, [this] (String str)
 	{
@@ -174,6 +176,10 @@ void EditorRootStage::createProjectUI()
 	{
 		pagedPane->setPage(event.getIntData());
 	});
+	toolbar->setHandle(UIEventType::ButtonClicked, "exitProject", [=] (const UIEvent& event)
+	{
+		createLoadProjectUI();
+	});
 }
 
 void EditorRootStage::updateUI(Time time)
@@ -189,7 +195,14 @@ void EditorRootStage::updateUI(Time time)
 void EditorRootStage::loadProject()
 {
 	project->setDevConServer(devConServer.get());
+	tasks = std::make_unique<EditorTaskSet>();
 	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(*project, false)));
 
 	createProjectUI();
+}
+
+void EditorRootStage::unloadProject()
+{
+	tasks.reset();
+	project.reset();
 }

@@ -107,3 +107,28 @@ void UIImage::setSelectable(Sprite normalSprite, Sprite selectedSprite)
 		dirty = true;
 	});
 }
+
+void UIImage::setHoverable(Colour4f normalColour, Colour4f selColour)
+{
+	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event)
+	{
+		if (event.getBoolData()) {
+			sprite.setColour(selColour);
+		} else {
+			sprite.setColour(normalColour);
+		}
+	});
+}
+
+void UIImage::setHoverable(Sprite normalSprite, Sprite selectedSprite)
+{
+	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event)
+	{
+		if (event.getBoolData()) {
+			sprite = selectedSprite;
+		} else {
+			sprite = normalSprite;
+		}
+		dirty = true;
+	});
+}

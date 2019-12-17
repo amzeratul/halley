@@ -376,6 +376,7 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 	auto style = UIStyle(node["style"].asString("button"), styleSheet);
 	auto label = parseLabel(node);
 
+	bool hasString = false;
 	auto sizer = makeSizerOrDefault(entryNode, UISizer());
 	if (!label.getString().isEmpty()) {
 		const auto& renderer = style.getTextRenderer("label");
@@ -383,14 +384,23 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 		if (style.hasTextRenderer("hoveredLabel")) {
 			uiLabel->setHoverable(style.getTextRenderer("label"), style.getTextRenderer("hoveredLabel"));
 		}
-		if (style.hasTextRenderer("selectedLabel"))
-		{
+		if (style.hasTextRenderer("selectedLabel"))	{
 			uiLabel->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
 		}
 		sizer.add(uiLabel, 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
+		hasString = true;
 	}
 
 	auto result = std::make_shared<UIButton>(id, style, std::move(sizer));
+
+	if (node.hasKey("icon")) {
+		auto icon = Sprite().setImage(getResources(), node["icon"].asString());
+		auto image = std::make_shared<UIImage>(icon);
+		if (style.hasColour("hoveredIconColour")) {
+			image->setHoverable(icon.getColour(), style.getColour("hoveredIconColour"));
+		}
+		result->add(image, hasString ? 0.0f : 1.0f, style.getBorder("iconBorder"), UISizerAlignFlags::Centre);
+	}
 
 	if (node.hasKey("mouseBorder")) {
 		result->setMouseExtraBorder(asVector4f(node["mouseBorder"], Vector4f()));

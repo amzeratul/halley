@@ -41,6 +41,16 @@ children:
   - widget: { class: label, id: gameName, text: Halley Game }
     fill: centre
     proportion: 1
-    border: [0, 0, 20, 0]
+    border: [0, 0, 0, 0]
+- widget: { class: image, image: ui/slant_capsule_right_short.png, size: [20, 32], colour: "#FC2847" }
+  border: [0, 3, 0, 3]
+- widget: { class: image, image: ui/slant_capsule_left_short.png, size: [20, 32], colour: "#FC2847" }
+  border: [-4, 3, 0, 3]
+- widget: { class: image, image: whitebox.png, size: [20, 32], colour: "#FC2847" }
+  border: [0, 3, 0, 3]
+  children:
+  - widget: { id: exitProject, class: button, icon: ui/exit.png, style: flatButton, mouseBorder: [10, 10, 10, 10] }
+    fill: centre
+    border: [-7, 0, 10, 0]
 
 ...

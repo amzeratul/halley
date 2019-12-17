@@ -17,6 +17,8 @@ namespace Halley {
 
 		void setLayerAdjustment(int adjustment);
 		void setWorldClip(Maybe<Rect4f> worldClip);
+		void setHoverable(Colour4f normalColour, Colour4f selColour);
+		void setHoverable(Sprite normalSprite, Sprite selectedSprite);
 		void setSelectable(Colour4f normalColour, Colour4f selColour);
 		void setSelectable(Sprite normalSprite, Sprite selectedSprite);
 

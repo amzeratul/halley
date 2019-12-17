@@ -49,5 +49,6 @@ namespace Halley {
 		void updateUI(Time time);
 
 		void loadProject();
+		void unloadProject();
 	};
 }

@@ -196,6 +196,9 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 			if (filePath.getExtension() == ".meta") {
 				continue;
 			}
+			if (isCancelled()) {
+				return;
+			}
 
 			dbChanged = dbChanged | importFile(db, assets, isCodegen, directoryMetas, srcPath, filePath);
 		}

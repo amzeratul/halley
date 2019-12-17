@@ -16,4 +16,16 @@ uiStyle:
     selectedImageColour: '#000000'
     gap: -5
 
+  flatButton:
+    normal: { img: whitebox.png, colour: "#00000000" }
+    down: { img: whitebox.png, colour: "#00000000" }
+    hover: { img: whitebox.png, colour: "#00000000" }
+    innerBorder: [ 0, 0, 0, 0 ]
+    upSound: ""
+    downSound: ""
+    hoverSound: ""
+    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    labelBorder: [0, 0, 0, 0]
+    iconBorder: [0, 0, 0, 0]
+    hoveredIconColour: "#FFCDCD"
 ...
