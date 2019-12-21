@@ -1,6 +1,7 @@
 #include "halley/tools/packer/asset_packer_task.h"
 #include "halley/tools/project/project.h"
 #include "halley/support/logger.h"
+#include "halley/concurrency/concurrent.h"
 
 using namespace Halley;
 
@@ -22,7 +23,9 @@ void AssetPackerTask::run()
 		setProgress(1.0f, "");
 
 		if (assetsToPack) {
-			project.reloadAssets(assetsToPack.get());
+			Concurrent::execute(Executors::getMainThread(), [project = &project, assets = std::move(assetsToPack)] () {
+				project->reloadAssets(assets.get());
+			});
 		}
 	}
 }
