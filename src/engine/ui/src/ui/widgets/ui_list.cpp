@@ -388,6 +388,9 @@ void UIList::update(Time t, bool moved)
 void UIList::onItemClicked(UIListItem& item)
 {
 	setSelectedOption(item.getIndex());
+	if (singleClickAccept) {
+		onAccept();
+	}
 }
 
 void UIList::onItemDoubleClicked(UIListItem& item)
@@ -684,4 +687,14 @@ void UIList::readFromDataBind()
 	} else {
 		setSelectedOption(data->getIntData());
 	}
+}
+
+bool UIList::isSingleClickAccept() const
+{
+	return singleClickAccept;
+}
+
+void UIList::setSingleClickAccept(bool enabled)
+{
+	singleClickAccept = enabled;
 }

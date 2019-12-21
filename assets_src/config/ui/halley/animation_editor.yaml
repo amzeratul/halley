@@ -1,7 +1,18 @@
 ---
-widget: { class: scrollBarPane, scrollHorizontal: true, scrollVertical: true }
+widget: { class: widget }
+sizer: { type: vertical }
 children:
-- widget: { class: animation, id: display }
+- widget: { class: scrollBarPane, scrollHorizontal: true, scrollVertical: true }
   proportion: 1
-  fill: centre
+  fill: fill
+  children:
+  - widget: { class: animation, id: display }
+    proportion: 1
+    fill: centre
+- sizer: { type: horizontal }
+  children:
+  - widget: { id: sequence, class: dropdown, size: [200, 30] }
+    proportion: 0
+  - widget: { id: direction, class: dropdown, size: [200, 30] }
+    proportion: 0
 ...

@@ -46,6 +46,9 @@ namespace Halley {
 		bool canDrag() const;
 		void setDrag(bool drag);
 
+		bool isSingleClickAccept() const;
+		void setSingleClickAccept(bool enabled);
+
 		void setUniformSizedItems(bool enabled);
 
 		bool ignoreClip() const override;
@@ -69,6 +72,7 @@ namespace Halley {
 		bool dragEnabled = false;
 		bool manualDragging = false;
 		bool uniformSizedItems = false;
+		bool singleClickAccept = true;
 
 		void onItemClicked(UIListItem& item);
 		void onItemDoubleClicked(UIListItem& item);

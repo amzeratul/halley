@@ -256,6 +256,24 @@ const AnimationDirection& Animation::getDirection(int id) const
 	}
 }
 
+std::vector<String> Animation::getSequenceNames() const
+{
+	std::vector<String> result;
+	for (auto& s: sequences) {
+		result.emplace_back(s.getName());
+	}
+	return result;
+}
+
+std::vector<String> Animation::getDirectionNames() const
+{
+	std::vector<String> result;
+	for (auto& d: directions) {
+		result.emplace_back(d.getName());
+	}
+	return result;
+}
+
 Vector2i Animation::getPivot() const
 {
 	return sequences.at(0).getFrame(0).getSprite(0).origPivot;

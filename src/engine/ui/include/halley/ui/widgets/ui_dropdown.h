@@ -24,6 +24,7 @@ namespace Halley {
 
 		void setInputButtons(const UIInputButtons& buttons) override;
 		void setOptions(std::vector<LocalisedString> options, int defaultOption = -1);
+		void setOptions(std::vector<String> optionsIds, int defaultOption = -1);
 		void setOptions(std::vector<String> optionIds, std::vector<LocalisedString> options, int defaultOption = -1);
 		void setOptions(const I18N& i18n, const String& i18nPrefix, std::vector<String> optionIds, int defaultOption = -1);
 

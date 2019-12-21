@@ -73,6 +73,11 @@ void UIDropdown::setOptions(std::vector<LocalisedString> os, int defaultOption)
 	setOptions({}, std::move(os), defaultOption);
 }
 
+void UIDropdown::setOptions(std::vector<String> optionIds, int defaultOption)
+{
+	setOptions(std::move(optionIds), {}, defaultOption);
+}
+
 void UIDropdown::updateOptionLabels() {
 	label = style.getTextRenderer("label").clone().setText(options[curOption]);
 
@@ -87,10 +92,17 @@ void UIDropdown::updateOptionLabels() {
 
 void UIDropdown::setOptions(std::vector<String> oIds, std::vector<LocalisedString> os, int defaultOption)
 {
-	if (oIds.empty()) {
+	if (oIds.empty() && !os.empty()) {
 		oIds.resize(os.size());
 		for (size_t i = 0; i < oIds.size(); ++i) {
 			oIds[i] = toString(i);
+		}
+	}
+
+	if (os.empty() && !oIds.empty()) {
+		os.resize(oIds.size());
+		for (size_t i = 0; i < os.size(); ++i) {
+			os[i] = LocalisedString::fromUserString(oIds[i]);
 		}
 	}
 
@@ -158,7 +170,7 @@ void UIDropdown::update(Time t, bool moved)
 
 	if (needUpdate) {
 		sprite.setPos(getPosition()).scaleTo(getSize());
-		label.setAlignment(0.0f).setPosition(getPosition() + Vector2f(3, 0));
+		label.setAlignment(0.0f).setPosition(getPosition() + style.getBorder("labelBorder").xy());
 
 		if (dropdownWindow) {
 			dropdownWindow->setPosition(getPosition() + Vector2f(0.0f, getSize().y));

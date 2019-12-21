@@ -124,9 +124,12 @@ namespace Halley
 		const String& getName() const { return name; }
 		const SpriteSheet& getSpriteSheet() const { return *spriteSheet; }
 		std::shared_ptr<Material> getMaterial() const { return material; }
+
 		const AnimationSequence& getSequence(const String& name) const;
 		const AnimationDirection& getDirection(const String& name) const;
 		const AnimationDirection& getDirection(int id) const;
+		std::vector<String> getSequenceNames() const;
+		std::vector<String> getDirectionNames() const;
 		
 		Vector2i getPivot() const;
 		Rect4i getBounds() const;

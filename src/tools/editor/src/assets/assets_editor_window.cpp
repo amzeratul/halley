@@ -17,6 +17,7 @@ AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, con
 void AssetsEditorWindow::makeUI()
 {
 	UIWidget::add(factory.makeUI("ui/halley/assets_editor_window"), 1);
+	getWidgetAs<UIList>("assetList")->setSingleClickAccept(false);
 
 	setHandle(UIEventType::ListSelectionChanged, "assetType", [=] (const UIEvent& event)
 	{

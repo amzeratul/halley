@@ -33,6 +33,19 @@ uiStyle:
     selectedLabel: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
     gap: 1
 
+  dropdown:
+    normal: { img: halley_ui/ui_dropdown_closed.png, colour: "#9C5BB5" }
+    hover: { img: halley_ui/ui_dropdown_closed.png, colour: "#B68FCB" }
+    open: { img: halley_ui/ui_dropdown_open.png, colour: "#B68FCB" }
+    disabled: { img: halley_ui/ui_dropdown_closed.png, colour: "#CDCDCD" }
+    background: { img: halley_ui/ui_dropdown_window.png, colour: "#B68FCB" }
+    innerBorder: [ 2, 2, 2, 2 ]
+    labelBorder: [ 6, 5, 0, 0 ]
+    label: { font: Ubuntu Bold, size: 15, colour: "#FFFFFFCF" }
+    selectedLabel: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
+    openSound: ""
+    closeSound: ""
+
   scrollbar:
     bar:
       horizontal: { img: halley_ui/ui_scrollbar.png, colour: "#5E3962" }
