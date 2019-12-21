@@ -32,9 +32,31 @@ void AssetsEditorWindow::makeUI()
 void AssetsEditorWindow::loadResources(const HalleyAPI& api)
 {
 	auto locator = std::make_unique<ResourceLocator>(*api.system);
-	locator->addFileSystem(project.getUnpackedAssetsPath());
+	try {
+		locator->addFileSystem(project.getUnpackedAssetsPath());
+	} catch (...)
+	{}
+
 	gameResources = std::make_unique<Resources>(std::move(locator), api);
 	StandardResources::initialize(*gameResources);
+
+	project.addAssetReloadCallback([=] (const std::vector<String>& assets)
+	{
+		refreshAssets(assets);
+	});
+}
+
+void AssetsEditorWindow::refreshAssets(const std::vector<String>& assets)
+{
+	if (gameResources->getLocator().getLocatorCount() == 0) {
+		try {
+			gameResources->getLocator().addFileSystem(project.getUnpackedAssetsPath());
+		} catch (...)
+		{}
+	}
+
+	gameResources->reloadAssets(assets);
+	listAssets(curType);
 }
 
 void AssetsEditorWindow::listAssets(AssetType type)

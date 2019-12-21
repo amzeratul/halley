@@ -62,6 +62,8 @@ namespace Halley {
 		std::vector<String> enumerate(const AssetType type);
 		bool exists(const String& asset);
 
+		size_t getLocatorCount() const;
+
 	private:
 		SystemAPI& system;
 		HashMap<String, IResourceLocatorProvider*> locatorPaths;

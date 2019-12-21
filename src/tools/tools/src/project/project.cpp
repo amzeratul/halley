@@ -3,6 +3,8 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/core/game/halley_statics.h"
 #include "halley/tools/project/project_properties.h"
+#include "halley/support/logger.h"
+#include "halley/core/devcon/devcon_server.h"
 
 using namespace Halley;
 
@@ -104,15 +106,35 @@ void Project::setAssetPackManifest(const Path& path)
 
 void Project::setDevConServer(DevConServer* server)
 {
-	devConServer = server;
+	addAssetReloadCallback([=] (const std::vector<String>& assetIds) {
+		server->reloadAssets(assetIds);
+	});
 }
 
-DevConServer* Project::getDevConServer() const
+void Project::addAssetReloadCallback(AssetReloadCallback callback)
 {
-	return devConServer;
+	assetReloadCallbacks.push_back(std::move(callback));
 }
 
 ProjectProperties& Project::getProperties() const
 {
 	return *properties;
+}
+
+void Project::reloadAssets(const std::set<String>& assets)
+{
+	if (assetReloadCallbacks.empty()) {
+		return;
+	}
+
+	std::vector<String> assetIds;
+	assetIds.reserve(assets.size());
+	for (auto& a: assets) {
+		assetIds.push_back(a);
+	}
+	Logger::logInfo("Requesting reloading of " + toString(assetIds.size()) + " assets");
+
+	for (auto& callback: assetReloadCallbacks) {
+		callback(assetIds);
+	}
 }

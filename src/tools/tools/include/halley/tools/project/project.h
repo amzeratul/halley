@@ -18,6 +18,8 @@ namespace Halley
 	class Project
 	{
 	public:
+		using AssetReloadCallback = std::function<void(const std::vector<String>&)>;
+
 		Project(std::vector<String> platforms, Path projectRootPath, Path halleyRootPath, std::vector<HalleyPluginPtr> plugins);
 		~Project();
 		
@@ -42,16 +44,19 @@ namespace Halley
 		std::vector<std::unique_ptr<IAssetImporter>> getAssetImportersFromPlugins(ImportAssetType type) const;
 
 		void setDevConServer(DevConServer* server);
-		DevConServer* getDevConServer() const;
+		void addAssetReloadCallback(AssetReloadCallback callback);
 		
 		ProjectProperties& getProperties() const;
+		
+		void reloadAssets(const std::set<String>& assets);
 
 	private:
 		std::vector<String> platforms;
 		Path rootPath;
 		Path halleyRootPath;
 		Path assetPackManifest;
-		DevConServer* devConServer = nullptr;
+
+		std::vector<AssetReloadCallback> assetReloadCallbacks;
 
 		std::unique_ptr<ImportAssetsDatabase> importAssetsDatabase;
 		std::unique_ptr<ImportAssetsDatabase> codegenDatabase;

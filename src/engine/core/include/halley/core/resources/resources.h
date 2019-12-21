@@ -89,7 +89,15 @@ namespace Halley {
 		{
 			return of<T>().enumerate();
 		}
-		
+
+		ResourceLocator& getLocator()
+		{
+			return *locator;
+		}
+
+		void reloadAssets(const std::vector<String>& ids); // ids are in "type:name" format
+		void reloadAssets(const std::map<AssetType, std::vector<String>>& byType);
+
 	private:
 		const std::unique_ptr<ResourceLocator> locator;
 		Vector<std::unique_ptr<ResourceCollectionBase>> resources;

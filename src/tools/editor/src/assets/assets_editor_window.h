@@ -19,6 +19,7 @@ namespace Halley {
 		void loadResources(const HalleyAPI& api);
 		void listAssets(AssetType type);
 		void loadAsset(const String& name);
+		void refreshAssets(const std::vector<String>& assets);
 		std::shared_ptr<UIWidget> createEditor(AssetType type, const String& name);
     };
 }

@@ -9,15 +9,15 @@ uiStyle:
     upSound: ""
     downSound: ""
     hoverSound: ""
-    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    label: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
     labelBorder: [0, 0, 0, 0]
 
   input:
     box: { img: halley_ui/ui_input.png, colour: "#9861B6" }
     caret: halley_ui/ui_caret.png
     innerBorder: [ 6, 5, 6, 2 ]
-    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
-    labelGhost: { font: Ubuntu Bold, size: 18, colour: "#7F7F7F" }
+    label: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
+    labelGhost: { font: Ubuntu Bold, size: 15, colour: "#7F7F7F" }
 
   list:
     background: ""
@@ -29,8 +29,8 @@ uiStyle:
     innerBorder: [ 0, 0, 0, 0 ]
     extraMouseBorder: [ 1, 1, 1, 1 ]
     selectionChangedSound: ""
-    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFFCF" }
-    selectedLabel: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    label: { font: Ubuntu Bold, size: 15, colour: "#FFFFFFCF" }
+    selectedLabel: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
     gap: 1
 
   scrollbar:
@@ -83,6 +83,6 @@ uiStyle:
       hoverSound: ""
 
   label:
-    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    label: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
 
 ...

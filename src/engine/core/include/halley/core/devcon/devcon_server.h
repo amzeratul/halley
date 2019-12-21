@@ -40,8 +40,7 @@ namespace Halley
 
 		void update();
 
-		void reloadAssets(std::vector<String> assetIds);
-		void reloadAssets(std::set<String> assetIds);
+		void reloadAssets(const std::vector<String>& assetIds);
 
 	private:
 		std::unique_ptr<NetworkService> service;

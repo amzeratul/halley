@@ -66,19 +66,9 @@ void DevConServer::update()
 	}
 }
 
-void DevConServer::reloadAssets(std::vector<String> ids)
+void DevConServer::reloadAssets(const std::vector<String>& ids)
 {
 	for (auto& c: connections) {
 		c->reloadAssets(ids);
 	}
-}
-
-void DevConServer::reloadAssets(std::set<String> assetIdsSet)
-{
-	std::vector<String> assetIds;
-	assetIds.reserve(assetIdsSet.size());
-	for (auto& a: assetIdsSet) {
-		assetIds.push_back(a);
-	}
-	reloadAssets(std::move(assetIds));
 }

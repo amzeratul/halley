@@ -1,6 +1,5 @@
 #include "halley/tools/packer/asset_packer_task.h"
 #include "halley/tools/project/project.h"
-#include "halley/core/devcon/devcon_server.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
@@ -22,9 +21,8 @@ void AssetPackerTask::run()
 	if (!isCancelled()) {
 		setProgress(1.0f, "");
 
-		if (project.getDevConServer() && assetsToPack) {
-			Logger::logInfo("Requesting reloading of assets");
-			project.getDevConServer()->reloadAssets(assetsToPack.get());
+		if (assetsToPack) {
+			project.reloadAssets(assetsToPack.get());
 		}
 	}
 }

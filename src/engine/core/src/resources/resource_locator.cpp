@@ -161,3 +161,8 @@ bool ResourceLocator::exists(const String& asset)
 {
 	return locators.find(asset) != locators.end();
 }
+
+size_t ResourceLocator::getLocatorCount() const
+{
+	return locators.size();
+}
