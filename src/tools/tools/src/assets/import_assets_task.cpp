@@ -69,8 +69,14 @@ void ImportAssetsTask::run()
 	if (!isCancelled()) {
 		setProgress(1.0f, "");
 
-		if (packAfter && !hasError()) {
-			addContinuation(EditorTaskAnchor(std::make_unique<AssetPackerTask>(project, std::move(outputAssets), std::move(deletedAssets))));
+		if (!hasError()) {
+			Concurrent::execute(Executors::getMainThread(), [project = &project, assets = outputAssets] () {
+				project->reloadAssets(assets, false);
+			});
+
+			if (packAfter) {
+				addContinuation(EditorTaskAnchor(std::make_unique<AssetPackerTask>(project, std::move(outputAssets), std::move(deletedAssets))));
+			}
 		}
 	}
 

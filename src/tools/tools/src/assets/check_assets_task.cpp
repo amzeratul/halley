@@ -23,32 +23,57 @@ CheckAssetsTask::CheckAssetsTask(Project& project, bool oneShot)
 	, monitorGen(project.getGenPath())
 	, monitorGenSrc(project.getGenSrcPath())
 	, oneShot(oneShot)
-{}
+{
+	project.setCheckAssetTask(this);
+}
+
+CheckAssetsTask::~CheckAssetsTask()
+{
+	project.setCheckAssetTask(nullptr);
+}
 
 void CheckAssetsTask::run()
 {
 	bool first = true;
 	while (!isCancelled()) {
+		if (!pending.empty()) {
+			const auto assets = checkSpecificAssets(project.getImportAssetsDatabase(), pending);
+			pending.clear();
+			if (!isCancelled()) {
+				requestImport(project.getImportAssetsDatabase(), assets, project.getUnpackedAssetsPath(), "Importing assets", true);
+				sleep(10);
+			}
+		}
+
 		if (first | monitorAssets.poll() | monitorAssetsSrc.poll() | monitorSharedAssetsSrc.poll()) { // Don't short-circuit
 			Logger::logInfo("Scanning for asset changes...");
-			checkAllAssets(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, project.getUnpackedAssetsPath(), "Importing assets", true);
+			const auto assets = checkAllAssets(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true);
+			if (!isCancelled()) {
+				requestImport(project.getImportAssetsDatabase(), assets, project.getUnpackedAssetsPath(), "Importing assets", true);
+			}
 		}
 
 		if (first | monitorGen.poll() | monitorGenSrc.poll()) {
 			Logger::logInfo("Scanning for codegen changes...");
-			checkAllAssets(project.getCodegenDatabase(), { project.getGenSrcPath() }, project.getGenPath(), "Generating code", false);
+			const auto assets = checkAllAssets(project.getCodegenDatabase(), { project.getGenSrcPath() }, false);
+			if (!isCancelled()) {
+				requestImport(project.getCodegenDatabase(), assets, project.getGenPath(), "Generating code", false);
+			}
 		}
 
 		first = false;
 
 		while (hasPendingTasks()) {
-			std::this_thread::sleep_for(5ms);
+			sleep(5);
 		}
 
 		if (oneShot) {
 			return;
 		}
-		std::this_thread::sleep_for(monitorAssets.hasRealImplementation() ? 100ms : 1000ms);
+
+		if (pending.empty()) {
+			sleep(monitorAssets.hasRealImplementation() ? 100 : 1000);
+		}
 	}
 }
 
@@ -118,23 +143,51 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 	return dbChanged;
 }
 
-void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, Path dstPath, String taskName, bool packAfter)
+void CheckAssetsTask::sleep(int timeMs)
+{
+	std::unique_lock<std::mutex> lock(mutex);
+	condition.wait_for(lock, timeMs * 1ms);
+	for (auto& a: inbox) {
+		//pending.push_back(std::move(a)); // This is buggy, just wake up
+	}
+	inbox.clear();
+}
+
+std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkSpecificAssets(ImportAssetsDatabase& db, const std::vector<Path>& paths)
+{
+	std::map<String, ImportAssetsDatabaseEntry> assets;
+	bool dbChanged = false;
+	for (auto& path: paths) {
+		dbChanged = dbChanged | importFile(db, assets, false, directoryMetas, project.getAssetsSrcPath(), path);
+	}
+	if (dbChanged) {
+		db.save();
+	}
+	return assets;
+}
+
+std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, bool collectDirMeta)
 {
 	std::map<String, ImportAssetsDatabaseEntry> assets;
 
 	bool isCodegen = srcPaths.size() == 1 && srcPaths[0] == project.getGenSrcPath();
 	bool dbChanged = false;
 
-	std::vector<Path> directoryMetas;
+	if (collectDirMeta) {
+		directoryMetas.clear();
+	}
+	std::vector<Path> dummyDirMetas;
 
 	// Enumerate all potential assets
 	for (auto srcPath : srcPaths) {
 		auto allFiles = FileSystem::enumerateDirectory(srcPath);
 
 		// First, collect all directory metas
-		for (auto& filePath : allFiles) {
-			if (filePath.getFilename() == "_dir.meta") {
-				directoryMetas.push_back(filePath);
+		if (collectDirMeta) {
+			for (auto& filePath : allFiles) {
+				if (filePath.getFilename() == "_dir.meta") {
+					directoryMetas.push_back(filePath);
+				}
 			}
 		}
 
@@ -144,19 +197,24 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 				continue;
 			}
 			if (isCancelled()) {
-				return;
+				return {};
 			}
 
-			dbChanged = dbChanged | importFile(db, assets, isCodegen, directoryMetas, srcPath, filePath);
+			dbChanged = dbChanged | importFile(db, assets, isCodegen, collectDirMeta ? directoryMetas : dummyDirMetas, srcPath, filePath);
 		}
 	}
 
 	if (dbChanged) {
 		db.save();
 	}
-
-	// Check for missing input files
 	db.markAssetsAsStillPresent(assets);
+
+	return assets;
+}
+
+void CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry> assets, Path dstPath, String taskName, bool packAfter)
+{
+	// Check for missing input files
 	auto toDelete = db.getAllMissing();
 	std::vector<String> deletedAssets;
 	if (!toDelete.empty()) {
@@ -176,6 +234,15 @@ void CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path>
 		Logger::logInfo("Assets to be imported: " + toString(toImport.size()));
 		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(taskName, db, project.getAssetImporter(), dstPath, std::move(toImport), std::move(deletedAssets), project, packAfter)));
 	}
+}
+
+void CheckAssetsTask::requestRefreshAsset(Path path)
+{
+	{
+		std::unique_lock<std::mutex> lock(mutex);
+		inbox.push_back(std::move(path));
+	}
+	condition.notify_one();
 }
 
 std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::filterNeedsImporting(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets)

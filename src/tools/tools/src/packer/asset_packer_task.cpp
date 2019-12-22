@@ -24,7 +24,7 @@ void AssetPackerTask::run()
 
 		if (assetsToPack) {
 			Concurrent::execute(Executors::getMainThread(), [project = &project, assets = std::move(assetsToPack)] () {
-				project->reloadAssets(assets.get());
+				project->reloadAssets(assets.get(), true);
 			});
 		}
 	}

@@ -107,7 +107,7 @@ void Project::setAssetPackManifest(const Path& path)
 
 void Project::setDevConServer(DevConServer* server)
 {
-	addAssetReloadCallback([=] (const std::vector<String>& assetIds) {
+	addAssetPackReloadCallback([=] (const std::vector<String>& assetIds) {
 		server->reloadAssets(assetIds);
 	});
 }
@@ -115,6 +115,11 @@ void Project::setDevConServer(DevConServer* server)
 void Project::addAssetReloadCallback(AssetReloadCallback callback)
 {
 	assetReloadCallbacks.push_back(std::move(callback));
+}
+
+void Project::addAssetPackReloadCallback(AssetReloadCallback callback)
+{
+	assetPackedReloadCallbacks.push_back(std::move(callback));
 }
 
 ProjectProperties& Project::getProperties() const
@@ -135,16 +140,22 @@ Maybe<Metadata> Project::getMetadata(AssetType type, const String& assetId)
 
 void Project::setMetaData(AssetType type, const String& assetId, const Metadata& metadata)
 {
-	auto path = importAssetsDatabase->getMetadataPath(type, assetId);
-	if (path) {
+	auto maybePath = importAssetsDatabase->getMetadataPath(type, assetId);
+	if (maybePath) {
 		const auto str = metadata.toYAMLString();
 		auto data = Bytes(str.size());
 		memcpy(data.data(), str.c_str(), str.size());
-		FileSystem::writeFile(getAssetsSrcPath() / path.get(), data);
+
+		const auto& path = maybePath.get();
+		const auto metaPath = getAssetsSrcPath() / path;
+		const auto filePath = path.replaceExtension(path.getExtension().left(path.getExtension().size() - 5));
+
+		FileSystem::writeFile(metaPath, data);
+		notifyAssetFileModified(filePath);
 	}
 }
 
-void Project::reloadAssets(const std::set<String>& assets)
+void Project::reloadAssets(const std::set<String>& assets, bool packed)
 {
 	if (assetReloadCallbacks.empty()) {
 		return;
@@ -155,9 +166,21 @@ void Project::reloadAssets(const std::set<String>& assets)
 	for (auto& a: assets) {
 		assetIds.push_back(a);
 	}
-	Logger::logInfo("Requesting reloading of " + toString(assetIds.size()) + " assets");
 
-	for (auto& callback: assetReloadCallbacks) {
+	for (auto& callback: (packed ? assetPackedReloadCallbacks : assetReloadCallbacks)) {
 		callback(assetIds);
+	}
+}
+
+void Project::setCheckAssetTask(CheckAssetsTask* task)
+{
+	Expects(!checkAssetsTask ^ !task);
+	checkAssetsTask = task;
+}
+
+void Project::notifyAssetFileModified(Path path)
+{
+	if (checkAssetsTask) {
+		checkAssetsTask->requestRefreshAsset(std::move(path));
 	}
 }
