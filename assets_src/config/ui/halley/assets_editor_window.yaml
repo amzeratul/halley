@@ -30,8 +30,13 @@ children:
           text: test
         - id: test2
           text: test
-  - widget: { class: widget, id: contents }
-    fill: fill
-    sizer: { type: horizontal }
+  - sizer: { type: vertical }
     proportion: 1
+    children:
+    - widget: { class: widget, id: contents }
+      fill: fill
+      sizer: { type: horizontal }
+      proportion: 1
+    - widget: { class: label, id: assetName, text: "" }
+      fill: centre
 ...

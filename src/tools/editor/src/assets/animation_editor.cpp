@@ -9,13 +9,6 @@ AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, Proje
 {
 	animation = resources.get<Animation>(animationId);
 	setupWindow();
-
-	/*
-	Metadata meta = project.getMetadata(AssetType::Animation, animationId).get();
-	Logger::logInfo("Reading pivot " + toString(Vector2i(meta.getInt("pivotX", 0), meta.getInt("pivotY", 0))));
-	meta.set("pivotX", 42);
-	project.setMetaData(AssetType::Animation, animationId, meta);
-	*/
 }
 
 void AnimationEditor::setupWindow()

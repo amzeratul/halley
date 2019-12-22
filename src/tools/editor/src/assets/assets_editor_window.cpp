@@ -104,9 +104,11 @@ void AssetsEditorWindow::loadAsset(const String& name)
 	} else {
 		getWidget("contents")->clear();
 
-		auto editor = createEditor(curType, (curPath / name).toString().mid(2));
+		const auto assetName = (curPath / name).toString().mid(2);
+		const auto editor = createEditor(curType, assetName);
 		if (editor) {
 			getWidget("contents")->add(editor, 1);
+			getWidgetAs<UILabel>("assetName")->setText(LocalisedString::fromUserString("[" + toString(curType) + "] " + assetName));
 		}
 	}
 }
