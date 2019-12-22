@@ -86,8 +86,9 @@ void UIDropdown::updateOptionLabels() {
 		maxExtents = std::max(maxExtents, label.clone().setText(o).getExtents().x);
 	}
 
-	auto minSize = Vector2f(maxExtents + 19, 14); // HACK
-	setMinSize(std::max(getMinimumSize(), minSize));
+	auto minSizeMargins = style.getBorder("minSizeMargins");
+	auto minSize = Vector2f(maxExtents, 0) + minSizeMargins.xy();
+	setMinSize(Vector2f::max(getMinimumSize(), minSize));
 }
 
 void UIDropdown::setOptions(std::vector<String> oIds, std::vector<LocalisedString> os, int defaultOption)

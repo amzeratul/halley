@@ -22,9 +22,9 @@ uiStyle:
   list:
     background: ""
     item:
-      normal: { img: halley_ui/ui_list_item.png, colour: "#9C5BB5" }
-      hover: { img: halley_ui/ui_list_item.png, colour: "#B68FCB" }
-      selected: { img: halley_ui/ui_list_item.png, colour: "#913DA3" }
+      normal: { img: halley_ui/ui_list_item.png, colour: "#913DA3" }
+      hover: { img: halley_ui/ui_list_item.png, colour: "#9C5BB5" }
+      selected: { img: halley_ui/ui_list_item.png, colour: "#B68FCB" }
       innerBorder: [ 6, 5, 6, 2 ]
     innerBorder: [ 0, 0, 0, 0 ]
     extraMouseBorder: [ 1, 1, 1, 1 ]
@@ -46,6 +46,7 @@ uiStyle:
     openSound: ""
     closeSound: ""
     height: 200
+    minSizeMargins: [ 40, 20, 0, 0 ]
 
   scrollbar:
     bar:
