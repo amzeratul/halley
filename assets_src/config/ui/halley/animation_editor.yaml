@@ -2,6 +2,16 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
+- sizer: { type: horizontal }
+  children:
+  - widget: { class: label, text: "Sequence:" }
+    border: [5, 0, 5, 0]
+    fill: centre
+  - widget: { id: sequence, class: dropdown, size: [200, 30] }
+  - widget: { class: label, text: "Direction:" }
+    border: [10, 0, 5, 0]
+    fill: centre
+  - widget: { id: direction, class: dropdown, size: [200, 30] }
 - widget: { class: scrollBarPane, scrollHorizontal: true, scrollVertical: true }
   proportion: 1
   fill: fill
@@ -9,10 +19,4 @@ children:
   - widget: { class: animation, id: display }
     proportion: 1
     fill: centre
-- sizer: { type: horizontal }
-  children:
-  - widget: { id: sequence, class: dropdown, size: [200, 30] }
-    proportion: 0
-  - widget: { id: direction, class: dropdown, size: [200, 30] }
-    proportion: 0
 ...

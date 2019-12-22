@@ -40,11 +40,12 @@ uiStyle:
     disabled: { img: halley_ui/ui_dropdown_closed.png, colour: "#CDCDCD" }
     background: { img: halley_ui/ui_dropdown_window.png, colour: "#B68FCB" }
     innerBorder: [ 2, 2, 2, 2 ]
-    labelBorder: [ 6, 5, 0, 0 ]
-    label: { font: Ubuntu Bold, size: 15, colour: "#FFFFFFCF" }
+    labelBorder: [ 6, 8, 0, 0 ]
+    label: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
     selectedLabel: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
     openSound: ""
     closeSound: ""
+    height: 200
 
   scrollbar:
     bar:

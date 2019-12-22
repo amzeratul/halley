@@ -13,6 +13,12 @@ LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, s
 		event.getCurWidget().getWidgetAs<UITextInput>("input")->setText(event.getData());
 	});
 
+	setHandle(UIEventType::ListAccept, [=] (const UIEvent& event)
+	{
+		auto result = event.getCurWidget().getWidgetAs<UITextInput>("input")->getText();
+		callback(result);
+	});
+
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
 	{
 		auto result = event.getCurWidget().getWidgetAs<UITextInput>("input")->getText();
@@ -20,6 +26,7 @@ LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, s
 	});
 
 	auto recent = getWidgetAs<UIList>("recent");
+	recent->setSingleClickAccept(false);
 	for (auto& r: editor.getPreferences().getRecents()) {
 		recent->addTextItem(r, LocalisedString::fromUserString(r));
 	}

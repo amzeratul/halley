@@ -220,7 +220,7 @@ void UIDropdown::open()
 		dropdownList->setInputButtons(inputButtons);
 		dropdownList->setFocused(true);
 
-		auto standardHeight = 80.0f;
+		auto standardHeight = style.getFloat("height");
 		auto distanceFromBottom = getRoot()->getRect().getBottom() - getRect().getBottom() - 5.0f;
 		auto height = distanceFromBottom < 0 ? standardHeight : std::min(standardHeight, distanceFromBottom);
 
