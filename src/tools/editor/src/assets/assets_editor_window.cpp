@@ -115,7 +115,7 @@ std::shared_ptr<UIWidget> AssetsEditorWindow::createEditor(AssetType type, const
 {
 	switch (type) {
 	case AssetType::Animation:
-		return std::make_shared<AnimationEditor>(factory, *gameResources, name);
+		return std::make_shared<AnimationEditor>(factory, *gameResources, project, name);
 	}
 	return {};
 }

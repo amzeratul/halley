@@ -28,6 +28,7 @@ namespace Halley
 		int getInt(String key, int defaultValue) const;
 		float getFloat(String key, float defaultValue) const;
 		String getString(String key, String defaultValue) const;
+		const std::map<String, String>& getEntries() const;
 
 		void set(String key, bool value);
 		void set(String key, int value);
@@ -45,6 +46,7 @@ namespace Halley
 		bool operator!=(const Metadata& rhs) const;
 
 		String toString() const;
+		String toYAMLString() const;
 
 	private:
 		std::map<String, String> entries;

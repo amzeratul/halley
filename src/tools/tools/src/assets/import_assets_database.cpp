@@ -139,6 +139,24 @@ Maybe<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) const
 	}
 }
 
+Maybe<Path> ImportAssetsDatabase::getMetadataPath(AssetType type, const String& assetId) const
+{
+	// This method is not very efficient
+	std::lock_guard<std::mutex> lock(mutex);
+
+	for (auto& a: assetsImported) {
+		const auto& asset = a.second.asset;
+		for (auto& o: asset.outputFiles) {
+			if (o.type == type && o.name == assetId) {
+				const auto filePath = asset.inputFiles.at(0).first;
+				return filePath.replaceExtension(filePath.getExtension() + ".meta");
+			}
+		}
+	}
+
+	return {};
+}
+
 bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset) const
 {
 	std::lock_guard<std::mutex> lock(mutex);

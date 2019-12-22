@@ -47,6 +47,9 @@ namespace Halley
 		void addAssetReloadCallback(AssetReloadCallback callback);
 		
 		ProjectProperties& getProperties() const;
+
+		Maybe<Metadata> getMetadata(AssetType type, const String& assetId);
+		void setMetaData(AssetType type, const String& assetId, const Metadata& metadata);
 		
 		void reloadAssets(const std::set<String>& assets);
 

@@ -75,6 +75,11 @@ String Metadata::getString(String key, String v) const
 	}
 }
 
+const std::map<String, String>& Metadata::getEntries() const
+{
+	return entries;
+}
+
 void Metadata::set(String key, bool value)
 {
 	entries[key] = value ? "true" : "false";
@@ -141,5 +146,22 @@ String Metadata::toString() const
 		ss << "\"" << e.first << "\": \"" << e.second << "\" ";
 	}
 	ss << "}";
+	return ss.str();
+}
+
+String Metadata::toYAMLString() const
+{
+	std::stringstream ss;
+	ss << "---\n";
+	for (auto& e: entries) {
+		ss << e.first << ": ";
+		if (e.second.isNumber()) {
+			ss << e.second;
+		} else {
+			ss << "\"" << e.second << "\"";
+		}
+		ss << "\n";
+	}
+	ss << "...\n";
 	return ss.str();
 }

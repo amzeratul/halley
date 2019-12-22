@@ -77,6 +77,7 @@ namespace Halley
 		bool needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const;
 		void setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data);
 		Maybe<Metadata> getMetadata(const Path& path) const;
+		Maybe<Path> getMetadataPath(AssetType type, const String& assetId) const;
 
 		bool needsImporting(const ImportAssetsDatabaseEntry& asset) const;
 		void markAsImported(const ImportAssetsDatabaseEntry& asset);
@@ -99,7 +100,7 @@ namespace Halley
 		std::map<String, AssetEntry> assetsImported;
 		std::map<String, AssetEntry> assetsFailed; // Ephemeral
 		std::map<String, InputFileEntry> inputFiles;
-		
+	
 		mutable std::mutex mutex;
 	};
 }

@@ -5,10 +5,11 @@ namespace Halley {
 
 	class AnimationEditor : public UIWidget {
     public:
-        AnimationEditor(UIFactory& factory, Resources& resources, const String& animationId);
+        AnimationEditor(UIFactory& factory, Resources& resources, Project& project, const String& animationId);
 
 	private:
 		UIFactory& factory;
+		Project& project;
 		std::shared_ptr<const Animation> animation;
 
 		void setupWindow();

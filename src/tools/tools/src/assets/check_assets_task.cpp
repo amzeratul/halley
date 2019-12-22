@@ -8,8 +8,8 @@
 #include <boost/filesystem/operations.hpp>
 #include "halley/tools/file/filesystem.h"
 #include "halley/support/logger.h"
-#include "../yaml/halley-yamlcpp.h"
 #include "halley/resources/resource_data.h"
+#include "halley/tools/assets/metadata_importer.h"
 
 using namespace Halley;
 using namespace std::chrono_literals;
@@ -52,59 +52,6 @@ void CheckAssetsTask::run()
 	}
 }
 
-static void loadMetaTable(Metadata& meta, const YAML::Node& root)
-{
-	for (YAML::const_iterator it = root.begin(); it != root.end(); ++it) {
-		String key = it->first.as<std::string>();
-		String value = it->second.as<std::string>();
-		meta.set(key, value);
-	}
-}
-
-static void loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta, String assetId)
-{
-	auto data = ResourceDataStatic::loadFromFileSystem(path);
-	auto root = YAML::Load(data->getString());
-
-	if (isDirectoryMeta) {
-		for (const auto& rootList: root) {
-			bool matches = true;
-			if (rootList["match"]) {
-				matches = false;
-				for (auto& pattern: rootList["match"]) {
-					auto p = pattern.as<std::string>();
-					if (assetId.contains(p)) {
-						matches = true;
-						break;
-					}
-				}
-			}
-			if (matches && rootList["data"]) {
-				loadMetaTable(meta, rootList["data"]);
-				return;
-			}
-		}
-	} else {
-		loadMetaTable(meta, root);
-	}
-}
-
-static Metadata getMetaData(Path inputFilePath, Maybe<Path> dirMetaPath, Maybe<Path> privateMetaPath)
-{
-	Metadata meta;
-	try {
-		if (dirMetaPath) {
-			loadMetaData(meta, dirMetaPath.get(), true, inputFilePath.toString());
-		}
-		if (privateMetaPath) {
-			loadMetaData(meta, privateMetaPath.get(), false, inputFilePath.toString());
-		}
-	} catch (std::exception& e) {
-		throw Exception("Error parsing metafile for " + inputFilePath + ": " + e.what(), HalleyExceptions::Tools);
-	}
-	return meta;
-}
-
 bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry>& assets, const bool isCodegen, const std::vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath) {
 	std::array<int64_t, 3> timestamps = {{ 0, 0, 0 }};
 	bool dbChanged = false;
@@ -131,7 +78,7 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 
 	// Load metadata if needed
 	if (db.needToLoadInputMetadata(filePath, timestamps)) {
-		Metadata meta = getMetaData(filePath, dirMetaPath, privateMetaPath);
+		Metadata meta = MetadataImporter::getMetaData(filePath, dirMetaPath, privateMetaPath);
 		db.setInputFileMetadata(filePath, timestamps, meta);
 		dbChanged = true;
 	}

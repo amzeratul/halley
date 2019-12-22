@@ -81,6 +81,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::loadAsset(const String& assetI
 		if (!newRes && resLoader.loaded) {
 			throw Exception("Unable to construct resource from data: " + assetId, HalleyExceptions::Resources);
 		}
+		newRes->setMeta(resLoader.getMeta());
 	}
 
 	if (!newRes) {

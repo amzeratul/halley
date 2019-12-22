@@ -5,6 +5,7 @@
 #include "halley/tools/project/project_properties.h"
 #include "halley/support/logger.h"
 #include "halley/core/devcon/devcon_server.h"
+#include "halley/tools/assets/metadata_importer.h"
 
 using namespace Halley;
 
@@ -119,6 +120,28 @@ void Project::addAssetReloadCallback(AssetReloadCallback callback)
 ProjectProperties& Project::getProperties() const
 {
 	return *properties;
+}
+
+Maybe<Metadata> Project::getMetadata(AssetType type, const String& assetId)
+{
+	auto path = importAssetsDatabase->getMetadataPath(type, assetId);
+	if (path) {
+		Metadata data;
+		MetadataImporter::loadMetaData(data, getAssetsSrcPath() / path.get(), false, assetId);
+		return data;
+	}
+	return {};
+}
+
+void Project::setMetaData(AssetType type, const String& assetId, const Metadata& metadata)
+{
+	auto path = importAssetsDatabase->getMetadataPath(type, assetId);
+	if (path) {
+		const auto str = metadata.toYAMLString();
+		auto data = Bytes(str.size());
+		memcpy(data.data(), str.c_str(), str.size());
+		FileSystem::writeFile(getAssetsSrcPath() / path.get(), data);
+	}
 }
 
 void Project::reloadAssets(const std::set<String>& assets)

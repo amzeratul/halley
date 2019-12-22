@@ -11,6 +11,7 @@ set(SOURCES
     "src/assets/import_assets_task.cpp"
     "src/assets/import_assets_database.cpp"
     "src/assets/import_tool.cpp"
+    "src/assets/metadata_importer.cpp"
 
     "src/assets/importers/animation_importer.cpp"
     "src/assets/importers/audio_event_importer.cpp"
@@ -103,6 +104,7 @@ set(HEADERS
     "include/halley/tools/assets/import_assets_task.h"
     "include/halley/tools/assets/import_assets_database.h"
     "include/halley/tools/assets/import_tool.h"
+    "include/halley/tools/assets/metadata_importer.h"
 
     "include/halley/tools/tasks/editor_task.h"
     "include/halley/tools/tasks/editor_task_set.h"

@@ -1,12 +1,21 @@
 #include "animation_editor.h"
+#include "halley/tools/project/project.h"
 using namespace Halley;
 
-AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, const String& animationId)
+AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, Project& project, const String& animationId)
 	: UIWidget("animationEditor", {}, UISizer())
 	, factory(factory)
+	, project(project)
 {
 	animation = resources.get<Animation>(animationId);
 	setupWindow();
+
+	/*
+	Metadata meta = project.getMetadata(AssetType::Animation, animationId).get();
+	Logger::logInfo("Reading pivot " + toString(Vector2i(meta.getInt("pivotX", 0), meta.getInt("pivotY", 0))));
+	meta.set("pivotX", 42);
+	project.setMetaData(AssetType::Animation, animationId, meta);
+	*/
 }
 
 void AnimationEditor::setupWindow()
