@@ -1,5 +1,7 @@
 #include "toolbar.h"
 #include "halley/tools/project/project_properties.h"
+#include "halley/ui/ui_sizer.h"
+#include "halley/ui/widgets/ui_label.h"
 
 using namespace Halley;
 
