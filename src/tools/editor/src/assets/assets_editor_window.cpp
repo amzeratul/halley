@@ -1,7 +1,11 @@
 #include "assets_editor_window.h"
 #include "halley/tools/project/project.h"
+#include "halley/core/resources/resource_locator.h"
 #include "halley/core/resources/standard_resources.h"
+#include "halley/ui/widgets/ui_label.h"
+#include "halley/ui/widgets/ui_list.h"
 #include "animation_editor.h"
+
 using namespace Halley;
 
 AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api)
@@ -67,7 +71,7 @@ void AssetsEditorWindow::listAssets(AssetType type)
 		curPaths[type] = Path(".");
 	}
 	const auto curPath = curPaths[type];
-	
+
 	auto assets = gameResources->ofType(type).enumerate();
 	std::sort(assets.begin(), assets.end());
 
