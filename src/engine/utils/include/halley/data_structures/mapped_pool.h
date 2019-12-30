@@ -55,26 +55,26 @@ namespace Halley {
 	public:
 		std::pair<T*, int64_t> alloc() {
 			// Next entry will be at position "entryIdx", which is just what was stored on next
-			uint32_t entryIdx = next;
+			const uint32_t entryIdx = next;
 
 			// Figure which block it goes into, and make sure that exists
-			size_t blockIdx = entryIdx / blockLen;
+			const size_t blockIdx = entryIdx / blockLen;
 			if (blockIdx >= blocks.size()) {
 				blocks.push_back(Block(blocks.size()));
 			}
 			auto& block = blocks[blockIdx];
 
 			// Find the local entry inside that block and initialize it
-			size_t localIdx = entryIdx % blockLen;
+			const size_t localIdx = entryIdx % blockLen;
 			auto& data = block.data[localIdx];
-			int rev = data.revision;
+			const int rev = data.revision;
 			T* result = reinterpret_cast<T*>(&(data.data));
 
 			// Next block is what was stored on the nextFreeEntryIndex
 			std::swap(next, block.data[localIdx].nextFreeEntryIndex);
 
 			// External index composes the revision with the index, so it's unique, but easily mappable
-			int64_t externalIdx = static_cast<int64_t>(entryIdx) | (static_cast<int64_t>(rev & 0x7FFFFFFF) << 32); // TODO: compute properly
+			const int64_t externalIdx = static_cast<int64_t>(entryIdx) | (static_cast<int64_t>(rev & 0x7FFFFFFF) << 32); // TODO: compute properly
 			return std::pair<T*, int64_t>(result, externalIdx);
 		}
 

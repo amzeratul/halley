@@ -51,10 +51,10 @@ void UISizerEntry::placeInside(Rect4f rect, Vector2f minSize)
 		anchoring.x = 1.0f;
 	}
 	if (fillFlags & UISizerFillFlags::FillHorizontal) {
-		size.x = cellSize.x;
+		size.x = std::max(minSize.x, cellSize.x);
 	}
 	if (fillFlags & UISizerFillFlags::FillVertical) {
-		size.y = cellSize.y;
+		size.y = std::max(minSize.y, cellSize.y);
 	}
 
 	Vector2f spareSize = cellSize - size;

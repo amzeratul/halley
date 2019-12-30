@@ -15,6 +15,7 @@ set (editor_sources
 	"src/ui/console_window.cpp"
 	"src/ui/editor_ui_factory.cpp"
 	"src/ui/load_project_window.cpp"
+	"src/ui/scroll_background.cpp"
 	"src/ui/taskbar.cpp"
 	"src/ui/toolbar.cpp"
 	)
@@ -31,6 +32,7 @@ set (editor_headers
 	"src/ui/console_window.h"
 	"src/ui/editor_ui_factory.h"
 	"src/ui/load_project_window.h"
+	"src/ui/scroll_background.h"
 	"src/ui/taskbar.h"
 	"src/ui/toolbar.h"
 	)

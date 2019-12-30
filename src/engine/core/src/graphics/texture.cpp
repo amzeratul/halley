@@ -49,7 +49,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 		TextureDescriptor descriptor(size);
 		descriptor.useFiltering = meta.getBool("filtering", false);
 		descriptor.useMipMap = meta.getBool("mipmap", false);
-		descriptor.clamp = meta.getBool("clamp", true);
+		descriptor.addressMode = fromString<TextureAddressMode>(meta.getString("addressMode", "clamp"));
 		descriptor.format = fromString<TextureFormat>(formatStr);
 		descriptor.pixelData = std::move(img);
 		descriptor.pixelFormat = meta.getString("compression") == "png" ? PixelDataFormat::Image : PixelDataFormat::Precompiled;

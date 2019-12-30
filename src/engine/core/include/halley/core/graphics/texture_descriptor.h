@@ -32,6 +32,24 @@ namespace Halley
 		Precompiled
 	};
 
+	enum class TextureAddressMode
+	{
+		Repeat,
+		Clamp,
+		Mirror
+	};
+
+	template <>
+	struct EnumNames<TextureAddressMode> {
+		constexpr std::array<const char*, 3> operator()() const {
+			return{{
+				"repeat",
+				"clamp",
+				"mirror"
+			}};
+		}
+	};
+
 	
 	class TextureDescriptorImageData
 	{
@@ -67,11 +85,11 @@ namespace Halley
 		size_t padding = 0;
 		TextureFormat format = TextureFormat::RGBA;
 		PixelDataFormat pixelFormat = PixelDataFormat::Image;
+		TextureAddressMode addressMode = TextureAddressMode::Clamp;
 		TextureDescriptorImageData pixelData;
 
 		bool useMipMap = false;
 		bool useFiltering = false;
-		bool clamp = true;
 		bool canBeUpdated = false;
 		bool isRenderTarget = false;
 		bool isDepthStencil = false;

@@ -5,5 +5,8 @@ namespace Halley {
     class EditorUIFactory : public UIFactory {
     public:
 		EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n);
+
+    private:
+		std::shared_ptr<UIWidget> makeScrollBackground(const ConfigNode& node);
     };
 }

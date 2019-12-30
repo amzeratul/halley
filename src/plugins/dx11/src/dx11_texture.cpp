@@ -45,6 +45,19 @@ DX11Texture& DX11Texture::operator=(DX11Texture&& other) noexcept
 	return *this;
 }
 
+static D3D11_TEXTURE_ADDRESS_MODE getAddressMode(TextureAddressMode mode)
+{
+	switch (mode) {
+	case TextureAddressMode::Clamp:
+		return D3D11_TEXTURE_ADDRESS_CLAMP;
+	case TextureAddressMode::Mirror:
+		return D3D11_TEXTURE_ADDRESS_MIRROR;
+	case TextureAddressMode::Repeat:
+		return D3D11_TEXTURE_ADDRESS_WRAP;
+	}
+	throw Exception("Unknown TextureAddressMode: " + toString(mode), HalleyExceptions::VideoPlugin);
+}
+
 void DX11Texture::load(TextureDescriptor&& descriptor)
 {
 	int bpp = 0;
@@ -127,7 +140,7 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 
 		auto samplerDesc = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
 		samplerDesc.Filter = descriptor.useFiltering ? D3D11_FILTER_MIN_MAG_MIP_LINEAR : D3D11_FILTER_MIN_MAG_MIP_POINT;
-		samplerDesc.AddressU = samplerDesc.AddressV = samplerDesc.AddressW = descriptor.clamp ? D3D11_TEXTURE_ADDRESS_CLAMP : D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressU = samplerDesc.AddressV = samplerDesc.AddressW = getAddressMode(descriptor.addressMode);
 		result = video.getDevice().CreateSamplerState(&samplerDesc, &samplerState);
 		if (result != S_OK) {
 			throw Exception("Error creating sampler", HalleyExceptions::VideoPlugin);

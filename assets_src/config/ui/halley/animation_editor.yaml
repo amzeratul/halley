@@ -16,7 +16,10 @@ children:
   proportion: 1
   fill: fill
   children:
-  - widget: { class: animation, id: display }
+  - widget: { class: scrollBackground }
     proportion: 1
-    fill: centre
+    children:
+    - widget: { class: animation, id: display }
+      proportion: 1
+      fill: centre
 ...

@@ -46,7 +46,7 @@ void TextureOpenGL::load(TextureDescriptor&& d)
 	glUtils.bindTexture(textureId);
 	
 	if (texSize != d.size) {
-		create(d.size, d.format, d.useMipMap, d.useFiltering, d.clamp, d.pixelData);
+		create(d.size, d.format, d.useMipMap, d.useFiltering, d.addressMode, d.pixelData);
 	} else if (!d.pixelData.empty()) {
 		updateImage(d.pixelData, d.format, d.useMipMap);
 	}
@@ -106,7 +106,7 @@ void TextureOpenGL::bind(int textureUnit) const
 	glUtils.bindTexture(textureId);
 }
 
-void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, bool useFiltering, bool clamp, TextureDescriptorImageData& pixelData)
+void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, bool useFiltering, TextureAddressMode addressMode, TextureDescriptorImageData& pixelData)
 {
 	Expects(size.x > 0);
 	Expects(size.y > 0);
@@ -121,8 +121,7 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 #endif
 
 #if defined (WITH_OPENGL) || defined(WITH_OPENGL_ES3)
-	GLuint wrap = clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-
+	GLuint wrap = getGLAddressMode(addressMode);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 #endif
@@ -205,5 +204,19 @@ unsigned TextureOpenGL::getGLPixelFormat(TextureFormat format)
 		return GL_DEPTH_COMPONENT;
 	default:
 		throw Exception("Unknown texture format: " + toString(static_cast<int>(format)), HalleyExceptions::VideoPlugin);
+	}
+}
+
+unsigned TextureOpenGL::getGLAddressMode(TextureAddressMode addressMode)
+{
+	switch (addressMode) {
+	case TextureAddressMode::Clamp:
+		return GL_CLAMP_TO_EDGE;
+	case TextureAddressMode::Mirror:
+		return GL_MIRRORED_REPEAT;
+	case TextureAddressMode::Repeat:
+		return GL_REPEAT;
+	default:
+		throw Exception("Unknown texture address mode: " + toString(addressMode), HalleyExceptions::VideoPlugin);
 	}
 }
