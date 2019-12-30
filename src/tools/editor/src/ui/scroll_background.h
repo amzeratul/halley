@@ -4,6 +4,7 @@ namespace Halley {
     class ScrollBackground : public UIWidget {
     public:
         ScrollBackground(String id, Resources& res, UISizer sizer);
+		float getZoomLevel() const;
 
     protected:
         void update(Time t, bool moved) override;
@@ -18,11 +19,14 @@ namespace Halley {
 
     private:
 		Sprite bg;
-		bool dragging = false;
 		Vector2f mouseStartPos;
 		Vector2f startScrollPos;
 		UIScrollPane* pane = nullptr;
+		int zoomExp = 0;
+		bool dirty = false;
+		bool dragging = false;
 
         void setDragPos(Vector2f pos);
+		void onMouseWheel(const UIEvent& event);
     };
 }

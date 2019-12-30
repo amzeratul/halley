@@ -91,6 +91,16 @@ float UIScrollPane::getCoverageSize(UIScrollDirection direction) const
 	}
 }
 
+void UIScrollPane::setScrollWheelEnabled(bool enabled)
+{
+	scrollWheelEnabled = enabled;
+}
+
+bool UIScrollPane::isScrollWhellEnabled() const
+{
+	return scrollWheelEnabled;
+}
+
 void UIScrollPane::refresh()
 {
 	if (!scrollHorizontal) {
@@ -131,7 +141,9 @@ bool UIScrollPane::canInteractWithMouse() const
 
 void UIScrollPane::onMouseWheel(const UIEvent& event)
 {
-	scrollBy(Vector2f(0.0f, -scrollSpeed * event.getIntData()));
+	if (scrollWheelEnabled) {
+		scrollBy(Vector2f(0.0f, -scrollSpeed * float(event.getIntData())));
+	}
 }
 
 Vector2f UIScrollPane::getBasePosition(const String& widgetId)

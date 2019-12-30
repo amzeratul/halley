@@ -595,8 +595,11 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollPane(const ConfigNode& entryNode)
 	auto clipSize = asVector2f(node["clipSize"], Vector2f());
 	auto scrollHorizontal = node["scrollHorizontal"].asBool(false);
 	auto scrollVertical = node["scrollVertical"].asBool(true);
+	auto mouseWheelEnabled = node["mouseWheelEnabled"].asBool(true);
 
-	return std::make_shared<UIScrollPane>(id, clipSize, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical);
+	auto result = std::make_shared<UIScrollPane>(id, clipSize, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical);
+	result->setScrollWheelEnabled(mouseWheelEnabled);
+	return result;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeScrollBar(const ConfigNode& entryNode)
@@ -618,8 +621,11 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollBarPane(const ConfigNode& entryNo
 	auto scrollHorizontal = node["scrollHorizontal"].asBool(false);
 	auto scrollVertical = node["scrollVertical"].asBool(true);
 	auto alwaysShow = !node["autoHide"].asBool(false);
+	auto mouseWheelEnabled = node["mouseWheelEnabled"].asBool(true);
 
-	return std::make_shared<UIScrollBarPane>(id, clipSize, style, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow);
+	auto result = std::make_shared<UIScrollBarPane>(id, clipSize, style, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow);
+	result->getPane()->setScrollWheelEnabled(mouseWheelEnabled);
+	return result;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeSlider(const ConfigNode& entryNode)

@@ -39,6 +39,9 @@ namespace Halley {
 		bool canScroll(UIScrollDirection direction) const;
 		float getCoverageSize(UIScrollDirection direction) const;
 
+		void setScrollWheelEnabled(bool enabled);
+		bool isScrollWhellEnabled() const;
+
 		void refresh();
 
 		Maybe<float> getMaxChildWidth() const override;
@@ -54,9 +57,10 @@ namespace Halley {
 		Vector2f clipSize;
 		Vector2f contentsSize;
 		Vector2f scrollPos;
-		float scrollSpeed;
-		bool scrollHorizontal;
-		bool scrollVertical;
+		float scrollSpeed = 0;
+		bool scrollHorizontal = false;
+		bool scrollVertical = false;
+		bool scrollWheelEnabled = true;
 
 		void onMouseWheel(const UIEvent& event);
 		Vector2f getBasePosition(const String& widgetId);
