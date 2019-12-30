@@ -23,3 +23,48 @@ void ScrollBackground::draw(UIPainter& painter) const
 {
 	painter.draw(bg);
 }
+
+bool ScrollBackground::canInteractWithMouse() const
+{
+	return true;
+}
+
+bool ScrollBackground::isFocusLocked() const
+{
+	return dragging;
+}
+
+void ScrollBackground::pressMouse(Vector2f mousePos, int button)
+{
+	if (button == 0) {
+		pane = dynamic_cast<UIScrollPane*>(getParent());
+		if (pane) {
+			dragging = true;
+			mouseStartPos = mousePos;
+			startScrollPos = pane->getScrollPosition();
+		}
+	}
+}
+
+void ScrollBackground::releaseMouse(Vector2f mousePos, int button)
+{
+	if (button == 0) {
+		if (dragging) {
+			onMouseOver(mousePos);
+			dragging = false;
+		}
+	}
+}
+
+void ScrollBackground::onMouseOver(Vector2f mousePos)
+{
+	if (dragging) {
+		setDragPos(mouseStartPos - mousePos + startScrollPos);
+	}
+}
+
+void ScrollBackground::setDragPos(Vector2f pos)
+{
+	pane->scrollTo(pos);
+}
+
