@@ -1,5 +1,8 @@
 #include "animation_editor.h"
 #include "halley/tools/project/project.h"
+#include "halley/ui/widgets/ui_animation.h"
+#include "halley/ui/widgets/ui_dropdown.h"
+
 using namespace Halley;
 
 AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, Project& project, const String& animationId)

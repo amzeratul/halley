@@ -28,7 +28,8 @@ namespace Halley {
 		void addTextItem(const String& id, const LocalisedString& label, float maxWidth = -1, bool centre = false);
 		void addImage(const String& id, std::shared_ptr<UIImage> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, Maybe<UIStyle> styleOverride = {});
 		void addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, Maybe<UIStyle> styleOverride = {});
-		void clear();
+
+		void clear() override;
 
 		void setItemEnabled(const String& id, bool enabled);
 		void setItemActive(const String& id, bool active);
@@ -42,7 +43,7 @@ namespace Halley {
 
 		std::shared_ptr<UIListItem> getItem(int n) const;
 		std::shared_ptr<UIListItem> getItem(const String& id) const;
-		
+
 		bool canDrag() const;
 		void setDrag(bool drag);
 
@@ -122,7 +123,7 @@ namespace Halley {
 		Sprite sprite;
 		Vector4f extraMouseArea;
 		bool selected = false;
-		
+
 		bool held = false;
 		bool dragged = false;
 		Vector2f mouseStartPos;
