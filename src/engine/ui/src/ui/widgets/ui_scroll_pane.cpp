@@ -1,5 +1,6 @@
 #include "widgets/ui_scroll_pane.h"
 #include "ui_style.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -84,6 +85,7 @@ bool UIScrollPane::canScroll(UIScrollDirection direction) const
 
 float UIScrollPane::getCoverageSize(UIScrollDirection direction) const
 {
+	auto contentsSize = UIWidget::getLayoutMinimumSize(false);
 	if (direction == UIScrollDirection::Horizontal) {
 		return getSize().x / contentsSize.x;
 	} else {
@@ -96,7 +98,7 @@ void UIScrollPane::setScrollWheelEnabled(bool enabled)
 	scrollWheelEnabled = enabled;
 }
 
-bool UIScrollPane::isScrollWhellEnabled() const
+bool UIScrollPane::isScrollWheelEnabled() const
 {
 	return scrollWheelEnabled;
 }
@@ -112,7 +114,9 @@ void UIScrollPane::refresh()
 		scrollPos.y = 0;
 	}
 	contentsSize = UIWidget::getLayoutMinimumSize(false);
+
 	setMouseClip(getRect());
+	scrollTo(getScrollPosition());
 }
 
 
@@ -137,6 +141,11 @@ Vector2f UIScrollPane::getLayoutMinimumSize(bool force) const
 bool UIScrollPane::canInteractWithMouse() const
 {
 	return true;
+}
+
+void UIScrollPane::onLayout()
+{
+	refresh();
 }
 
 void UIScrollPane::onMouseWheel(const UIEvent& event)

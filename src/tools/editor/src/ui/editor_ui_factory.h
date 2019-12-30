@@ -8,5 +8,6 @@ namespace Halley {
 
     private:
 		std::shared_ptr<UIWidget> makeScrollBackground(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeAnimationEditorDisplay(const ConfigNode& entryNode);
     };
 }

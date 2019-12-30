@@ -40,7 +40,7 @@ namespace Halley {
 		float getCoverageSize(UIScrollDirection direction) const;
 
 		void setScrollWheelEnabled(bool enabled);
-		bool isScrollWhellEnabled() const;
+		bool isScrollWheelEnabled() const;
 
 		void refresh();
 
@@ -52,6 +52,7 @@ namespace Halley {
 	    Vector2f getLayoutMinimumSize(bool force) const override;
 	    Vector2f getLayoutOriginPosition() const override;
 	    bool canInteractWithMouse() const override;
+		void onLayout() override;
 
    	private:
 		Vector2f clipSize;

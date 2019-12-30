@@ -12,14 +12,14 @@ children:
     border: [10, 0, 5, 0]
     fill: centre
   - widget: { id: direction, class: dropdown, size: [200, 30] }
-- widget: { class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, mouseWheelEnabled: false }
+- widget: { id: contents, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, mouseWheelEnabled: false }
   proportion: 1
   fill: fill
   children:
-  - widget: { class: scrollBackground }
+  - widget: { class: scrollBackground, id: scrollBackground }
     proportion: 1
     children:
-    - widget: { class: animation, id: display }
+    - widget: { class: animationEditorDisplay, id: display }
       proportion: 1
       fill: centre
 ...

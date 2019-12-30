@@ -605,11 +605,12 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollPane(const ConfigNode& entryNode)
 std::shared_ptr<UIWidget> UIFactory::makeScrollBar(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("scrollbar"), styleSheet);
 	auto scrollDirection = fromString<UIScrollDirection>(node["scrollDirection"].asString("vertical"));
 	auto alwaysShow = !node["autoHide"].asBool(false);
 
-	return std::make_shared<UIScrollBar>(scrollDirection, style, alwaysShow);
+	return std::make_shared<UIScrollBar>(id, scrollDirection, style, alwaysShow);
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeScrollBarPane(const ConfigNode& entryNode)

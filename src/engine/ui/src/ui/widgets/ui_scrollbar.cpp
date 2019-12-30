@@ -6,8 +6,8 @@
 
 using namespace Halley;
 
-UIScrollBar::UIScrollBar(UIScrollDirection direction, UIStyle style, bool alwaysShow)
-	: UIWidget("", Vector2f(), UISizer(direction == UIScrollDirection::Horizontal ? UISizerType::Horizontal : UISizerType::Vertical))
+UIScrollBar::UIScrollBar(String id, UIScrollDirection direction, UIStyle style, bool alwaysShow)
+	: UIWidget(std::move(id), Vector2f(), UISizer(direction == UIScrollDirection::Horizontal ? UISizerType::Horizontal : UISizerType::Vertical))
 	, direction(direction)
 	, alwaysShow(alwaysShow)
 {

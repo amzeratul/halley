@@ -2,6 +2,7 @@
 #include "halley/core/resources/resources.h"
 #include <halley/file_formats/config_file.h>
 #include "scroll_background.h"
+#include "src/assets/animation_editor.h"
 using namespace Halley;
 
 std::shared_ptr<UIStyleSheet> makeStyleSheet(Resources& resources)
@@ -23,9 +24,17 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	setInputButtons("list", listButtons);
 
 	addFactory("scrollBackground", [=] (const ConfigNode& node) { return makeScrollBackground(node); });
+	addFactory("animationEditorDisplay", [=] (const ConfigNode& node) { return makeAnimationEditorDisplay(node); });
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeScrollBackground(const ConfigNode& entryNode)
 {
 	return std::make_shared<ScrollBackground>("scrollBackground", resources, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)));
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeAnimationEditorDisplay(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	return std::make_shared<AnimationEditorDisplay>(id);
 }

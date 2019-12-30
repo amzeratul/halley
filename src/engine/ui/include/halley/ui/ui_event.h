@@ -9,6 +9,8 @@
 namespace Halley {
 	enum class UIEventType {
 		Undefined,
+
+		// Please keep these in alphabetical order
 		ButtonClicked,
 		CheckboxUpdated,
 		Dragged,
@@ -17,6 +19,7 @@ namespace Halley {
 		DropdownClosed,
 		FocusGained,
 		FocusLost,
+		GroupFocusChangeRequested,
 		ListSelectionChanged,
 		ListAccept,
 		ListCancel,
@@ -32,8 +35,7 @@ namespace Halley {
 		TabChanged,
 		TabbedIn,
 		TabbedOut,
-		WidgetHighlighted,
-		GroupFocusChangeRequested
+		WidgetHighlighted
 	};
 
     class UIEvent {

@@ -19,5 +19,29 @@ namespace Halley {
 
 		void setupWindow();
 	};
+
+	class AnimationEditorDisplay : public UIWidget {
+	public:
+		AnimationEditorDisplay(String id);
+
+		void setZoom(float zoom);
+		void setAnimation(std::shared_ptr<const Animation> animation);
+		void setSequence(const String& sequence);
+		void setDirection(const String& direction);
+
+	protected:
+		void update(Time t, bool moved) override;
+		void draw(UIPainter& painter) const override;
+
+	private:
+		std::shared_ptr<const Animation> animation;
+		AnimationPlayer animationPlayer;
+
+		Sprite sprite;
+		Rect4f bounds;
+		float zoom = 1.0f;
+
+		void updateAnimation();
+	};
 }
 

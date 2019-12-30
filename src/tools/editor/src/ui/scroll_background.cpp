@@ -19,6 +19,11 @@ float ScrollBackground::getZoomLevel() const
 	return std::powf(2.0f, float(zoomExp));
 }
 
+void ScrollBackground::setZoomListener(ZoomListener listener)
+{
+	zoomListener = listener;
+}
+
 void ScrollBackground::update(Time t, bool moved)
 {
 	if (moved || dirty) {
@@ -45,10 +50,15 @@ bool ScrollBackground::isFocusLocked() const
 	return dragging;
 }
 
+UIScrollPane* ScrollBackground::getScrollPane() const
+{
+	return dynamic_cast<UIScrollPane*>(getParent());
+}
+
 void ScrollBackground::pressMouse(Vector2f mousePos, int button)
 {
 	if (button == 0) {
-		pane = dynamic_cast<UIScrollPane*>(getParent());
+		pane = getScrollPane();
 		if (pane) {
 			dragging = true;
 			mouseStartPos = mousePos;
@@ -69,6 +79,7 @@ void ScrollBackground::releaseMouse(Vector2f mousePos, int button)
 
 void ScrollBackground::onMouseOver(Vector2f mousePos)
 {
+	lastMousePos = mousePos;
 	if (dragging) {
 		setDragPos(mouseStartPos - mousePos + startScrollPos);
 	}
@@ -83,5 +94,8 @@ void ScrollBackground::onMouseWheel(const UIEvent& event)
 {
 	zoomExp = clamp(zoomExp + signOf(event.getIntData()), -5, 5);
 	dirty = true;
+	if (zoomListener) {
+		zoomListener(getZoomLevel());
+	}
 }
 

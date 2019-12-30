@@ -8,7 +8,7 @@ namespace Halley {
 
     class UIScrollBar : public UIWidget {
     public:
-		UIScrollBar(UIScrollDirection direction, UIStyle style, bool alwaysShow = true);
+		UIScrollBar(String id, UIScrollDirection direction, UIStyle style, bool alwaysShow = true);
 		void setScrollPane(UIScrollPane& pane);
 
 	    bool canInteractWithMouse() const override;
