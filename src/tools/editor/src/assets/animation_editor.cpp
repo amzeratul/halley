@@ -43,9 +43,12 @@ void AnimationEditor::setupWindow()
 	});
 }
 
-AnimationEditorDisplay::AnimationEditorDisplay(String id)
+AnimationEditorDisplay::AnimationEditorDisplay(String id, Resources& resources)
 	: UIWidget(std::move(id))
+	, resources(resources)
 {
+	boundsSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
+	pivotSprite.setImage(resources, "ui/pivot.png").setColour(Colour4f(1, 0, 1));
 }
 
 void AnimationEditorDisplay::setZoom(float z)
@@ -73,14 +76,23 @@ void AnimationEditorDisplay::setDirection(const String& direction)
 
 void AnimationEditorDisplay::update(Time t, bool moved)
 {
+	updateAnimation();
+
 	animationPlayer.update(t);
 	animationPlayer.updateSprite(sprite);
-	sprite.setPos(getPosition() - (bounds.getTopLeft() * zoom)).setScale(zoom);
+
+	const Vector2f pivotPos = getPosition() - bounds.getTopLeft() * zoom;
+
+	sprite.setPos(pivotPos).setScale(zoom);
+	pivotSprite.setPos(pivotPos);
+	boundsSprite.setPos(getPosition()).scaleTo(bounds.getSize() * zoom);
 }
 
 void AnimationEditorDisplay::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);
+	painter.draw(boundsSprite);
+	painter.draw(pivotSprite);
 }
 
 void AnimationEditorDisplay::updateAnimation()

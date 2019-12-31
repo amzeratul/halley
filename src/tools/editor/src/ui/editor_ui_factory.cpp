@@ -36,5 +36,5 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeAnimationEditorDisplay(const Conf
 {
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
-	return std::make_shared<AnimationEditorDisplay>(id);
+	return std::make_shared<AnimationEditorDisplay>(id, resources);
 }

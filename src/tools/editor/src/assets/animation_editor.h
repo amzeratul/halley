@@ -22,7 +22,7 @@ namespace Halley {
 
 	class AnimationEditorDisplay : public UIWidget {
 	public:
-		AnimationEditorDisplay(String id);
+		AnimationEditorDisplay(String id, Resources& resources);
 
 		void setZoom(float zoom);
 		void setAnimation(std::shared_ptr<const Animation> animation);
@@ -34,10 +34,13 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 
 	private:
+		Resources& resources;
 		std::shared_ptr<const Animation> animation;
 		AnimationPlayer animationPlayer;
 
 		Sprite sprite;
+		Sprite boundsSprite;
+		Sprite pivotSprite;
 		Rect4f bounds;
 		float zoom = 1.0f;
 
