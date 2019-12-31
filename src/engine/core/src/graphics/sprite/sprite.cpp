@@ -301,9 +301,16 @@ Sprite& Sprite::setImage(Resources& resources, String imageName, String material
 		materialName = "Halley/Sprite";
 	}
 	const auto sprite = resources.get<SpriteResource>(imageName);
-	const auto spriteSheet = sprite->getSpriteSheet();
-	setImage(spriteSheet->getTexture(), resources.get<MaterialDefinition>(materialName));
-	setSprite(sprite->getSprite());
+	const auto material = resources.get<MaterialDefinition>(materialName);
+	setImage(*sprite, material);
+	return *this;
+}
+
+Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> materialDefinition)
+{
+	const auto spriteSheet = sprite.getSpriteSheet();
+	setImage(spriteSheet->getTexture(), materialDefinition);
+	setSprite(sprite.getSprite());
 	return *this;
 }
 

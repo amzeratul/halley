@@ -35,6 +35,21 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<Mesh>();
 	resources.init<VariableTable>();
 
+	resources.of<SpriteResource>().setResourceEnumerator([&] () -> std::vector<String>
+	{
+		std::vector<String> result;
+		auto& ss = resources.of<SpriteSheet>();
+		for (auto& sheetName: ss.enumerate()) {
+			auto sheet = ss.get(sheetName);
+			for (auto& spriteName: sheet->getSpriteNames()) {
+				if (spriteName.startsWith(":img:")) {
+					result.push_back(spriteName.mid(5));
+				}
+			}
+		}
+		return result;
+	});
+
 	resources.of<SpriteResource>().setResourceLoader([&] (const String& name, ResourceLoadPriority) -> std::shared_ptr<Resource>
 	{
 		auto& sprites = resources.of<SpriteResource>();

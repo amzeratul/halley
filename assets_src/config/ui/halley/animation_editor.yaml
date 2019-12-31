@@ -2,7 +2,8 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-- sizer: { type: horizontal }
+- widget: { id: animControls, class: widget }
+  sizer: { type: horizontal }
   children:
   - widget: { class: label, text: "Sequence:" }
     border: [5, 0, 5, 0]

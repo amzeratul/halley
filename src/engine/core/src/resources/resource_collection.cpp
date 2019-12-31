@@ -2,6 +2,7 @@
 #include "resources/resource_locator.h"
 #include "resources/resources.h"
 #include <halley/resources/resource.h>
+#include <utility>
 #include "halley/support/logger.h"
 
 using namespace Halley;
@@ -65,7 +66,11 @@ void ResourceCollectionBase::purge(const String& assetId)
 
 std::vector<String> ResourceCollectionBase::enumerate() const
 {
-	return parent.locator->enumerate(type);
+	if (resourceEnumerator) {
+		return resourceEnumerator();
+	} else {
+		return parent.locator->enumerate(type);
+	}
 }
 
 std::shared_ptr<Resource> ResourceCollectionBase::loadAsset(const String& assetId, ResourceLoadPriority priority) {
@@ -121,10 +126,15 @@ bool ResourceCollectionBase::exists(const String& assetId)
 }
 
 void ResourceCollectionBase::setResource(int curDepth, const String& name, std::shared_ptr<Resource> resource) {
-	resources.emplace(name, Wrapper(resource, curDepth));
+	resources.emplace(name, Wrapper(std::move(resource), curDepth));
 }
 
 void ResourceCollectionBase::setResourceLoader(ResourceLoaderFunc loader)
 {
-	resourceLoader = loader;
+	resourceLoader = std::move(loader);
+}
+
+void ResourceCollectionBase::setResourceEnumerator(ResourceEnumeratorFunc enumerator)
+{
+	resourceEnumerator = std::move(enumerator);
 }

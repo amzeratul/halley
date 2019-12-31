@@ -52,6 +52,7 @@ namespace Halley
 
 		Sprite& setImage(Resources& resources, String imageName, String materialName = "");
 		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material);
+		Sprite& setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> material);
 		Sprite& setImageData(const Texture& image);
 
 		Sprite& setSprite(Resources& resources, String spriteSheetName, String imageName, String materialName = "");

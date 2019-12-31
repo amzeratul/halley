@@ -15,7 +15,7 @@ AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, con
 {
 	loadResources(api);
 	makeUI();
-	listAssets(AssetType::Animation);
+	listAssets(AssetType::Sprite);
 }
 
 void AssetsEditorWindow::makeUI()
@@ -120,8 +120,9 @@ void AssetsEditorWindow::loadAsset(const String& name)
 std::shared_ptr<UIWidget> AssetsEditorWindow::createEditor(AssetType type, const String& name)
 {
 	switch (type) {
+	case AssetType::Sprite:
 	case AssetType::Animation:
-		return std::make_shared<AnimationEditor>(factory, *gameResources, project, name);
+		return std::make_shared<AnimationEditor>(factory, *gameResources, project, name, type);
 	}
 	return {};
 }

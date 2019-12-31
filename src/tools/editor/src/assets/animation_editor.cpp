@@ -6,12 +6,16 @@
 
 using namespace Halley;
 
-AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, Project& project, const String& animationId)
+AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, Project& project, const String& assetId, AssetType type)
 	: UIWidget("animationEditor", {}, UISizer())
 	, factory(factory)
 	, project(project)
 {
-	animation = resources.get<Animation>(animationId);
+	if (type == AssetType::Animation) {
+		animation = resources.get<Animation>(assetId);
+	} else if (type == AssetType::Sprite) {
+		sprite = resources.get<SpriteResource>(assetId);
+	}
 	setupWindow();
 }
 
@@ -20,17 +24,25 @@ void AnimationEditor::setupWindow()
 	add(factory.makeUI("ui/halley/animation_editor"), 1);
 
 	auto animationDisplay = getWidgetAs<AnimationEditorDisplay>("display");
-	animationDisplay->setAnimation(animation);
+	if (animation) {
+		animationDisplay->setAnimation(animation);
+	} else {
+		animationDisplay->setSprite(sprite);
+	}
 	getWidgetAs<ScrollBackground>("scrollBackground")->setZoomListener([=] (float zoom)
 	{
 		animationDisplay->setZoom(zoom);
 	});
 
-	auto sequenceList = getWidgetAs<UIDropdown>("sequence");
-	sequenceList->setOptions(animation->getSequenceNames());
+	if (animation) {
+		auto sequenceList = getWidgetAs<UIDropdown>("sequence");
+		sequenceList->setOptions(animation->getSequenceNames());
 
-	auto directionList = getWidgetAs<UIDropdown>("direction");
-	directionList->setOptions(animation->getDirectionNames());
+		auto directionList = getWidgetAs<UIDropdown>("direction");
+		directionList->setOptions(animation->getDirectionNames());
+	} else {
+		getWidget("animControls")->setActive(false);
+	}
 
 	setHandle(UIEventType::DropboxSelectionChanged, "sequence", [=] (const UIEvent& event)
 	{
@@ -66,6 +78,11 @@ void AnimationEditorDisplay::setAnimation(std::shared_ptr<const Animation> a)
 	updateAnimation();
 }
 
+void AnimationEditorDisplay::setSprite(std::shared_ptr<const SpriteResource> s)
+{
+	sprite = std::move(s);
+}
+
 void AnimationEditorDisplay::setSequence(const String& sequence)
 {
 	animationPlayer.setSequence(sequence);
@@ -80,8 +97,10 @@ void AnimationEditorDisplay::update(Time t, bool moved)
 {
 	updateAnimation();
 
-	animationPlayer.update(t);
-	animationPlayer.updateSprite(origSprite);
+	if (animation) {
+		animationPlayer.update(t);
+		animationPlayer.updateSprite(origSprite);
+	}
 
 	const Vector2f pivotPos = getPosition() - bounds.getTopLeft() * zoom;
 
@@ -114,6 +133,14 @@ void AnimationEditorDisplay::draw(UIPainter& painter) const
 
 void AnimationEditorDisplay::updateAnimation()
 {
-	bounds = Rect4f(animation->getBounds());
+	if (animation) {
+		bounds = Rect4f(animation->getBounds());
+	} else {
+		origSprite.setImage(*sprite, resources.get<MaterialDefinition>("Halley/Sprite"));
+		const auto origin = -origSprite.getAbsolutePivot() - Vector2f(origSprite.getOuterBorder().xy());
+		const auto sz = origSprite.getOriginalSize();
+		bounds = Rect4f(origin, origin + sz);
+	}
+
 	setMinSize(bounds.getSize() * zoom);
 }

@@ -10,12 +10,13 @@ namespace Halley {
 
 	class AnimationEditor : public UIWidget {
     public:
-        AnimationEditor(UIFactory& factory, Resources& resources, Project& project, const String& animationId);
+        AnimationEditor(UIFactory& factory, Resources& resources, Project& project, const String& assetId, AssetType type);
 
 	private:
 		UIFactory& factory;
 		Project& project;
 		std::shared_ptr<const Animation> animation;
+		std::shared_ptr<const SpriteResource> sprite;
 
 		void setupWindow();
 	};
@@ -26,6 +27,7 @@ namespace Halley {
 
 		void setZoom(float zoom);
 		void setAnimation(std::shared_ptr<const Animation> animation);
+		void setSprite(std::shared_ptr<const SpriteResource> sprite);
 		void setSequence(const String& sequence);
 		void setDirection(const String& direction);
 
@@ -36,6 +38,7 @@ namespace Halley {
 	private:
 		Resources& resources;
 		std::shared_ptr<const Animation> animation;
+		std::shared_ptr<const SpriteResource> sprite;
 		AnimationPlayer animationPlayer;
 
 		Sprite origSprite;

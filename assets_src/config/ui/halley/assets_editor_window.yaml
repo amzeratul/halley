@@ -7,10 +7,12 @@ children:
     id: assetType
     type: horizontal
     options:
-    - id: animation
+    - id: sprite
       text: Sprites
+    - id: animation
+      text: Animations
     - id: audioClip
-      text: AudioClips
+      text: Audio Clips
     - id: shader
       text: Shaders
 - widget: { class: widget }
