@@ -15,8 +15,7 @@ namespace Halley {
 	private:
 		UIFactory& factory;
 		Project& project;
-		std::shared_ptr<const Animation> animation;
-		std::shared_ptr<const SpriteResource> sprite;
+		std::shared_ptr<const Resource> resource;
 
 		void setupWindow();
 	};
@@ -28,6 +27,7 @@ namespace Halley {
 		void setZoom(float zoom);
 		void setAnimation(std::shared_ptr<const Animation> animation);
 		void setSprite(std::shared_ptr<const SpriteResource> sprite);
+		void setTexture(std::shared_ptr<const Texture> texture);
 		void setSequence(const String& sequence);
 		void setDirection(const String& direction);
 
@@ -38,7 +38,6 @@ namespace Halley {
 	private:
 		Resources& resources;
 		std::shared_ptr<const Animation> animation;
-		std::shared_ptr<const SpriteResource> sprite;
 		AnimationPlayer animationPlayer;
 
 		Sprite origSprite;
@@ -50,7 +49,7 @@ namespace Halley {
 		Rect4f bounds;
 		float zoom = 1.0f;
 
-		void updateAnimation();
+		void updateBounds();
 	};
 }
 

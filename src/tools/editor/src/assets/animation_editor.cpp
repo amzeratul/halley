@@ -12,9 +12,11 @@ AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, Proje
 	, project(project)
 {
 	if (type == AssetType::Animation) {
-		animation = resources.get<Animation>(assetId);
+		resource = resources.get<Animation>(assetId);
 	} else if (type == AssetType::Sprite) {
-		sprite = resources.get<SpriteResource>(assetId);
+		resource = resources.get<SpriteResource>(assetId);
+	} else if (type == AssetType::Texture) {
+		resource = resources.get<Texture>(assetId);
 	}
 	setupWindow();
 }
@@ -23,12 +25,19 @@ void AnimationEditor::setupWindow()
 {
 	add(factory.makeUI("ui/halley/animation_editor"), 1);
 
+	const auto animation = std::dynamic_pointer_cast<const Animation>(resource);
+	const auto sprite = std::dynamic_pointer_cast<const SpriteResource>(resource);
+	const auto texture = std::dynamic_pointer_cast<const Texture>(resource);
+
 	auto animationDisplay = getWidgetAs<AnimationEditorDisplay>("display");
 	if (animation) {
 		animationDisplay->setAnimation(animation);
-	} else {
+	} else if (sprite) {
 		animationDisplay->setSprite(sprite);
+	} else if (texture) {
+		animationDisplay->setTexture(texture);
 	}
+
 	getWidgetAs<ScrollBackground>("scrollBackground")->setZoomListener([=] (float zoom)
 	{
 		animationDisplay->setZoom(zoom);
@@ -68,19 +77,31 @@ AnimationEditorDisplay::AnimationEditorDisplay(String id, Resources& resources)
 void AnimationEditorDisplay::setZoom(float z)
 {
 	zoom = z;
-	updateAnimation();
+	updateBounds();
 }
 
 void AnimationEditorDisplay::setAnimation(std::shared_ptr<const Animation> a)
 {
 	animation = std::move(a);
 	animationPlayer.setAnimation(animation);
-	updateAnimation();
+	bounds = Rect4f(animation->getBounds());
+	updateBounds();
 }
 
-void AnimationEditorDisplay::setSprite(std::shared_ptr<const SpriteResource> s)
+void AnimationEditorDisplay::setSprite(std::shared_ptr<const SpriteResource> sprite)
 {
-	sprite = std::move(s);
+	origSprite.setImage(*sprite, resources.get<MaterialDefinition>("Halley/Sprite"));
+	const auto origin = -origSprite.getAbsolutePivot() - Vector2f(origSprite.getOuterBorder().xy());
+	const auto sz = origSprite.getOriginalSize();
+	bounds = Rect4f(origin, origin + sz);
+}
+
+void AnimationEditorDisplay::setTexture(std::shared_ptr<const Texture> texture)
+{
+	origSprite.setImage(texture, resources.get<MaterialDefinition>("Halley/Sprite"))
+		.setTexRect(Rect4f(0, 0, 1, 1))
+		.setSize(Vector2f(texture->getSize()));
+	bounds = Rect4f(Vector2f(), origSprite.getSize());
 }
 
 void AnimationEditorDisplay::setSequence(const String& sequence)
@@ -95,7 +116,7 @@ void AnimationEditorDisplay::setDirection(const String& direction)
 
 void AnimationEditorDisplay::update(Time t, bool moved)
 {
-	updateAnimation();
+	updateBounds();
 
 	if (animation) {
 		animationPlayer.update(t);
@@ -131,16 +152,7 @@ void AnimationEditorDisplay::draw(UIPainter& painter) const
 	}
 }
 
-void AnimationEditorDisplay::updateAnimation()
+void AnimationEditorDisplay::updateBounds()
 {
-	if (animation) {
-		bounds = Rect4f(animation->getBounds());
-	} else {
-		origSprite.setImage(*sprite, resources.get<MaterialDefinition>("Halley/Sprite"));
-		const auto origin = -origSprite.getAbsolutePivot() - Vector2f(origSprite.getOuterBorder().xy());
-		const auto sz = origSprite.getOriginalSize();
-		bounds = Rect4f(origin, origin + sz);
-	}
-
 	setMinSize(bounds.getSize() * zoom);
 }

@@ -11,8 +11,16 @@ children:
       text: Sprites
     - id: animation
       text: Animations
+    - id: texture
+      text: Textures
     - id: audioClip
       text: Audio Clips
+    - id: audioEvent
+      text: Audio Events
+    - id: font
+      text: Fonts
+    - id: materialDefinition
+      text: Materials
     - id: shader
       text: Shaders
 - widget: { class: widget }

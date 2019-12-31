@@ -1,0 +1,40 @@
+Meta:
+
+AudioClip:
+- bool streaming
+- int loopPoint
+
+Sprite:
+- int pivotX
+- int pivotY
+- int slice_left
+- int slice_right
+- int slice_top
+- int slice_bottom
+- int tileWidth
+- int tileHeight
+- String palette
+- String material
+- String atlas
+
+Texture:
+- bool filtering
+- bool minimap
+- bool trim
+- String format
+- String addressMode
+
+Font:
+- int supersample
+- int width
+- int height
+- int rangeStart
+- int rangeEnd
+- int ascenderAdjustment
+- int lineSpacing
+- float radius
+- float fontSize
+- font replacementScale
+- String extraCharacters
+- String fontName
+- String fallback
