@@ -38,8 +38,11 @@ namespace Halley {
 		std::shared_ptr<const Animation> animation;
 		AnimationPlayer animationPlayer;
 
-		Sprite sprite;
+		Sprite origSprite;
+		Sprite drawSprite;
 		Sprite boundsSprite;
+		Sprite nineSliceVSprite;
+		Sprite nineSliceHSprite;
 		Sprite pivotSprite;
 		Rect4f bounds;
 		float zoom = 1.0f;

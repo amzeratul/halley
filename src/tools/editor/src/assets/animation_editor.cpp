@@ -48,6 +48,8 @@ AnimationEditorDisplay::AnimationEditorDisplay(String id, Resources& resources)
 	, resources(resources)
 {
 	boundsSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
+	nineSliceVSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
+	nineSliceHSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
 	pivotSprite.setImage(resources, "ui/pivot.png").setColour(Colour4f(1, 0, 1));
 }
 
@@ -79,20 +81,35 @@ void AnimationEditorDisplay::update(Time t, bool moved)
 	updateAnimation();
 
 	animationPlayer.update(t);
-	animationPlayer.updateSprite(sprite);
+	animationPlayer.updateSprite(origSprite);
 
 	const Vector2f pivotPos = getPosition() - bounds.getTopLeft() * zoom;
 
-	sprite.setPos(pivotPos).setScale(zoom);
+	drawSprite = origSprite.clone().setPos(pivotPos).setScale(zoom).setNotSliced();
 	pivotSprite.setPos(pivotPos);
 	boundsSprite.setPos(getPosition()).scaleTo(bounds.getSize() * zoom);
+
+	if (origSprite.isSliced()) {
+		auto slices = Vector4f(origSprite.getSlices());
+		nineSliceVSprite.setVisible(true).setPos(getPosition() + Vector2f(0, slices.y) * zoom).scaleTo(Vector2f::max(Vector2f(1, 1), (bounds.getSize() - Vector2f(0, slices.w + slices.y)) * zoom));
+		nineSliceHSprite.setVisible(true).setPos(getPosition() + Vector2f(slices.x, 0) * zoom).scaleTo(Vector2f::max(Vector2f(1, 1), (bounds.getSize() - Vector2f(slices.x + slices.z, 0)) * zoom));
+	} else {
+		nineSliceVSprite.setVisible(false);
+		nineSliceHSprite.setVisible(false);
+	}
 }
 
 void AnimationEditorDisplay::draw(UIPainter& painter) const
 {
-	painter.draw(sprite);
+	painter.draw(drawSprite);
 	painter.draw(boundsSprite);
 	painter.draw(pivotSprite);
+	if (nineSliceHSprite.isVisible()) {
+		painter.draw(nineSliceHSprite);
+	}
+	if (nineSliceVSprite.isVisible()) {
+		painter.draw(nineSliceVSprite);
+	}
 }
 
 void AnimationEditorDisplay::updateAnimation()

@@ -91,6 +91,8 @@ namespace Halley
 
 		Sprite& setSliced(Vector4s slices);
 		Sprite& setNotSliced();
+		bool isSliced() const;
+		Vector4s getSlices() const;
 
 		Sprite& setVisible(bool visible);
 		bool isVisible() const;

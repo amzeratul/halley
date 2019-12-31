@@ -361,6 +361,16 @@ Sprite& Sprite::setNotSliced()
 	return *this;
 }
 
+bool Sprite::isSliced() const
+{
+	return sliced;
+}
+
+Vector4s Sprite::getSlices() const
+{
+	return slices;
+}
+
 Sprite& Sprite::setVisible(bool v)
 {
 	visible = v;
