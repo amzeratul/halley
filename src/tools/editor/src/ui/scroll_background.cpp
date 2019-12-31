@@ -92,10 +92,32 @@ void ScrollBackground::setDragPos(Vector2f pos)
 
 void ScrollBackground::onMouseWheel(const UIEvent& event)
 {
+	const float oldZoom = getZoomLevel();
 	zoomExp = clamp(zoomExp + signOf(event.getIntData()), -5, 5);
+	const float zoom = getZoomLevel();
 	dirty = true;
-	if (zoomListener) {
-		zoomListener(getZoomLevel());
+
+	if (zoom != oldZoom) {
+		pane = getScrollPane();
+		if (!pane) {
+			return;
+		}
+
+		const Vector2f childPos = getChildren().at(0)->getPosition() - getPosition();
+
+		const Vector2f panelScrollPos = pane->getScrollPosition();
+
+		if (zoomListener) {
+			zoomListener(zoom);
+		}
+
+		pane->refresh();
+
+		const Vector2f relMousePos = lastMousePos - pane->getPosition();
+		const Vector2f oldMousePos = (relMousePos - childPos + panelScrollPos) / oldZoom;
+		const Vector2f newScrollPos = oldMousePos * zoom - relMousePos;
+
+		pane->scrollTo(newScrollPos);
 	}
 }
 
