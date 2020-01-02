@@ -3,7 +3,7 @@
 using namespace Halley;
 
 UIPagedPane::UIPagedPane(String id, int nPages, Vector2f minSize)
-	: UIWidget(id, minSize, UISizer())
+	: UIWidget(std::move(id), minSize, UISizer())
 {
 	pages.reserve(nPages);
 	for (int i = 0; i < nPages; ++i) {

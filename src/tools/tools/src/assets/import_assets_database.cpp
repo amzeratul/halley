@@ -1,3 +1,4 @@
+#include <utility>
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/resources/resource_data.h"
@@ -69,9 +70,9 @@ void ImportAssetsDatabase::InputFileEntry::deserialize(Deserializer& s)
 
 ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, std::vector<String> platforms)
 	: platforms(std::move(platforms))
-	, directory(directory)
-	, dbFile(dbFile)
-	, assetsDbFile(assetsDbFile)
+	, directory(std::move(directory))
+	, dbFile(std::move(dbFile))
+	, assetsDbFile(std::move(assetsDbFile))
 {
 	load();
 }
