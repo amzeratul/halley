@@ -4,7 +4,7 @@
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
 
-constexpr static int currentAssetVersion = 56;
+constexpr static int currentAssetVersion = 57;
 
 using namespace Halley;
 
@@ -306,11 +306,12 @@ std::vector<std::pair<AssetType, String>> ImportAssetsDatabase::getAssetsFromFil
 	for (auto& a: assetsImported) {
 		const auto& asset = a.second.asset;
 		for (auto& in: asset.inputFiles) {
-			if (in.first == inputFile) {				
+			if (in.first == inputFile) {
 				for (auto& out: asset.outputFiles) {
-					result.emplace_back(out.type, out.name);
+					if (out.primaryInputFile.isEmpty() || out.primaryInputFile == inputFile) {
+						result.emplace_back(out.type, out.name);
+					}
 				}
-				break;
 			}
 		}
 	}

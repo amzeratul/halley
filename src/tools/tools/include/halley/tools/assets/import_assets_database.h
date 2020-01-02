@@ -4,6 +4,7 @@
 #include <mutex>
 #include "halley/text/halleystring.h"
 #include <cstdint>
+#include <utility>
 #include "asset_importer.h"
 #include "halley/core/resources/asset_database.h"
 
@@ -25,20 +26,20 @@ namespace Halley
 
 		ImportAssetsDatabaseEntry() {}
 
-		ImportAssetsDatabaseEntry(String assetId, Path srcDir, Path inputFile, int64_t time)
-			: assetId(assetId)
-			, srcDir(srcDir)
+		ImportAssetsDatabaseEntry(String assetId, Path srcDir, const Path& inputFile, int64_t time)
+			: assetId(std::move(assetId))
+			, srcDir(std::move(srcDir))
 			, inputFiles({ TimestampedPath(inputFile, time) })
 		{}
 
 		ImportAssetsDatabaseEntry(String assetId, Path srcDir)
-			: assetId(assetId)
-			, srcDir(srcDir)
+			: assetId(std::move(assetId))
+			, srcDir(std::move(srcDir))
 		{}
 
 		ImportAssetsDatabaseEntry(String assetId, Path srcDir, std::vector<TimestampedPath>&& inputFiles)
-			: assetId(assetId)
-			, srcDir(srcDir)
+			: assetId(std::move(assetId))
+			, srcDir(std::move(srcDir))
 			, inputFiles(std::move(inputFiles))
 		{}
 

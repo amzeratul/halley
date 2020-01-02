@@ -58,12 +58,14 @@ namespace Halley
 		String name;
 		AssetType type;
 		std::map<String, PlatformVersion> platformVersions;
+		Path primaryInputFile;
 
 		void serialize(Serializer& s) const
 		{
 			s << name;
 			s << type;
 			s << platformVersions;
+			s << primaryInputFile;
 		}
 		
 		void deserialize(Deserializer& s)
@@ -71,6 +73,7 @@ namespace Halley
 			s >> name;
 			s >> type;
 			s >> platformVersions;
+			s >> primaryInputFile;
 		}
 	};
 
@@ -78,7 +81,7 @@ namespace Halley
 	{
 	public:
 		virtual ~IAssetCollector() {}
-		virtual void output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata = {}, const String& platform = "pc") = 0;
+		virtual void output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata = {}, const String& platform = "pc", const Path& primaryInputFile = {}) = 0;
 		virtual void addAdditionalAsset(ImportingAsset&& asset) = 0;
 		virtual bool reportProgress(float progress, const String& label = "") = 0;
 		virtual Bytes readAdditionalFile(const Path& filePath) = 0;

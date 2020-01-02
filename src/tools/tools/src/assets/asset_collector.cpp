@@ -15,7 +15,7 @@ AssetCollector::AssetCollector(const ImportingAsset& asset, const Path& dstDir, 
 	, reporter(reporter)
 {}
 
-void AssetCollector::output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata, const String& platform)
+void AssetCollector::output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata, const String& platform, const Path& primaryInputFile)
 {
 	const String id = name.replaceAll("_", "__").replaceAll("/", "_-_").replaceAll(":", "_c_");
 	Path filePath = Path(toString(type)) / id;
@@ -40,6 +40,7 @@ void AssetCollector::output(const String& name, AssetType type, const Bytes& dat
 		result = &assets.back();
 		result->name = name;
 		result->type = type;
+		result->primaryInputFile = primaryInputFile;
 	}
 
 	// Store information about this asset version

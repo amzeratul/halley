@@ -103,7 +103,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 		// Write animation
 		Animation animation = generateAnimation(spriteName, spriteSheetName, meta.getString("material", "Halley/Sprite"), frames);
-		collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation));
+		collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation), {}, "pc", inputFile.name);
 
 		std::move(frames.begin(), frames.end(), std::back_inserter(totalFrames));
 	}
