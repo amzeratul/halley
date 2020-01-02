@@ -12,7 +12,7 @@ namespace Halley
 	public:
 		MetadataEditor(UIFactory& factory);
 
-		void setResource(Project& project, AssetType type, const String& name);
+		void setResource(Project& project, AssetType type, const Path& filePath);
 		void saveMetadata();
 
 	private:
@@ -20,7 +20,7 @@ namespace Halley
 		Metadata metadata;
 		Project* project = nullptr;
 		AssetType assetType;
-		String assetId;
+		Path filePath;
 
 		void makeUI();
 

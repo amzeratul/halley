@@ -62,6 +62,7 @@ namespace Halley
 		public:
 			std::array<int64_t, 3> timestamp;
 			Metadata metadata;
+			Path basePath;
 
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
@@ -75,7 +76,7 @@ namespace Halley
 		std::unique_ptr<AssetDatabase> makeAssetDatabase(const String& platform) const;
 
 		bool needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const;
-		void setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data);
+		void setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data, Path basePath);
 		Maybe<Metadata> getMetadata(const Path& path) const;
 		Maybe<Path> getMetadataPath(AssetType type, const String& assetId) const;
 
@@ -87,6 +88,8 @@ namespace Halley
 		std::vector<ImportAssetsDatabaseEntry> getAllMissing() const;
 
 		std::vector<AssetResource> getOutFiles(String assetId) const;
+		std::vector<String> getInputFiles() const;
+		std::vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& inputFile);
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

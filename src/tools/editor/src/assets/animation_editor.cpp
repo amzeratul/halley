@@ -6,8 +6,8 @@
 
 using namespace Halley;
 
-AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, const String& assetId, AssetType type, Project& project)
-	: AssetEditor(factory, resources, assetId, type, project)
+AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, AssetType type, Project& project)
+	: AssetEditor(factory, resources, project, type)
 {
 	setupWindow();
 }
@@ -21,8 +21,6 @@ void AnimationEditor::setupWindow()
 {
 	add(factory.makeUI("ui/halley/animation_editor"), 1);
 	animationDisplay = getWidgetAs<AnimationEditorDisplay>("display");
-
-	loadAssetData();
 
 	getWidgetAs<ScrollBackground>("scrollBackground")->setZoomListener([=] (float zoom)
 	{

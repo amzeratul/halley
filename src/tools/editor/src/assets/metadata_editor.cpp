@@ -8,19 +8,25 @@ MetadataEditor::MetadataEditor(UIFactory& factory)
 {
 }
 
-void MetadataEditor::setResource(Project& p, AssetType type, const String& name)
+void MetadataEditor::setResource(Project& p, AssetType type, const Path& path)
 {
 	assetType = type;
-	assetId = name;
+	filePath = path;
 	project = &p;
-	metadata = project->getMetadata(assetType, assetId).get_value_or(Metadata());
+	metadata = project->getMetadata(filePath);
 
 	makeUI();
+}
+
+void MetadataEditor::saveMetadata()
+{
+	project->setMetaData(filePath, metadata);
 }
 
 void MetadataEditor::makeUI()
 {
 	clear();
+
 	switch (assetType) {
 	case AssetType::Sprite:
 	case AssetType::Animation:
@@ -165,9 +171,4 @@ void MetadataEditor::makeStringField(UISizer& sizer, const String& key, const St
 	{
 		updateMetadata(metadata, key, *this, value, defaultValue);
 	});
-}
-
-void MetadataEditor::saveMetadata()
-{
-	project->setMetaData(assetType, assetId, metadata);
 }

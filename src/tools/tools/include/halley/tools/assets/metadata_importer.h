@@ -6,7 +6,7 @@
 namespace Halley {
     class MetadataImporter {
     public:
-	    static void loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta, String assetId);
+	    static void loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta, const Path& inputFilePath);
 	    static Metadata getMetaData(Path inputFilePath, Maybe<Path> dirMetaPath, Maybe<Path> privateMetaPath);
     };
 }

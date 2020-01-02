@@ -50,8 +50,11 @@ namespace Halley
 		
 		ProjectProperties& getProperties() const;
 
-		Maybe<Metadata> getMetadata(AssetType type, const String& assetId);
-		void setMetaData(AssetType type, const String& assetId, const Metadata& metadata);
+		Metadata getMetadata(const Path& filePath);
+		void setMetaData(const Path& filePath, const Metadata& metadata);
+
+		std::vector<String> getAssetSrcList() const;
+		std::vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;
 
 		void reloadAssets(const std::set<String>& assets, bool packed);
 		void setCheckAssetTask(CheckAssetsTask* checkAssetsTask);

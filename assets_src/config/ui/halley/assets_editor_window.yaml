@@ -43,7 +43,8 @@ children:
   - sizer: { type: vertical }
     proportion: 1
     children:
-    - widget: { class: widget, id: contents }
+    - widget: { id: contentList, class: list, type: horizontal }
+    - widget: { id: content, class: pagedPane }
       fill: fill
       sizer: { type: horizontal }
       proportion: 1

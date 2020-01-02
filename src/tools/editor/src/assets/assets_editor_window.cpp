@@ -13,26 +13,11 @@ AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, con
 	: UIWidget("assets_editor", {}, UISizer())
 	, factory(factory)
 	, project(project)
+	, curSrcPath(".")
 {
 	loadResources(api);
 	makeUI();
-	listAssets(AssetType::Sprite);
-}
-
-void AssetsEditorWindow::makeUI()
-{
-	UIWidget::add(factory.makeUI("ui/halley/assets_editor_window"), 1);
-	getWidgetAs<UIList>("assetList")->setSingleClickAccept(false);
-
-	setHandle(UIEventType::ListSelectionChanged, "assetType", [=] (const UIEvent& event)
-	{
-		listAssets(fromString<AssetType>(event.getData()));
-	});
-
-	setHandle(UIEventType::ListAccept, "assetList", [=] (const UIEvent& event)
-	{
-		loadAsset(event.getData());
-	});
+	setAssetSrcMode(true);
 }
 
 void AssetsEditorWindow::loadResources(const HalleyAPI& api)
@@ -52,21 +37,46 @@ void AssetsEditorWindow::loadResources(const HalleyAPI& api)
 	});
 }
 
-void AssetsEditorWindow::refreshAssets(const std::vector<String>& assets)
+void AssetsEditorWindow::makeUI()
 {
-	if (gameResources->getLocator().getLocatorCount() == 0) {
-		try {
-			gameResources->getLocator().addFileSystem(project.getUnpackedAssetsPath());
-		} catch (...)
-		{}
-	}
+	UIWidget::add(factory.makeUI("ui/halley/assets_editor_window"), 1);
 
-	gameResources->reloadAssets(assets);
-	listAssets(curType);
+	assetList = getWidgetAs<UIList>("assetList");
+	assetList->setSingleClickAccept(false);
+	metadataEditor = getWidgetAs<MetadataEditor>("metadataEditor");
+	content = getWidgetAs<UIPagedPane>("content");
+	contentList = getWidgetAs<UIList>("contentList");
 
-	if (curEditor) {
-		curEditor->reload();
+	setHandle(UIEventType::ListSelectionChanged, "contentList", [=] (const UIEvent& event)
+	{
+		content->setPage(event.getData().toInteger());
+	});
+
+	setHandle(UIEventType::ListSelectionChanged, "assetType", [=] (const UIEvent& event)
+	{
+		listAssets(fromString<AssetType>(event.getData()));
+	});
+
+	setHandle(UIEventType::ListAccept, "assetList", [=] (const UIEvent& event)
+	{
+		loadAsset(event.getData());
+	});
+}
+
+void AssetsEditorWindow::setAssetSrcMode(bool enabled)
+{
+	assetSrcMode = enabled;
+	getWidget("assetType")->setActive(!assetSrcMode);
+	if (assetSrcMode) {
+		listAssetSources();
+	} else {
+		listAssets(AssetType::Sprite);
 	}
+}
+
+void AssetsEditorWindow::listAssetSources()
+{
+	setListContents(project.getAssetSrcList(), curSrcPath);
 }
 
 void AssetsEditorWindow::listAssets(AssetType type)
@@ -77,7 +87,11 @@ void AssetsEditorWindow::listAssets(AssetType type)
 	}
 	const auto curPath = curPaths[type];
 
-	auto assets = gameResources->ofType(type).enumerate();
+	setListContents(gameResources->ofType(type).enumerate(), curPath);	
+}
+
+void AssetsEditorWindow::setListContents(std::vector<String> assets, const Path& curPath)
+{
 	std::sort(assets.begin(), assets.end());
 
 	std::set<String> dirs;
@@ -94,60 +108,125 @@ void AssetsEditorWindow::listAssets(AssetType type)
 		}
 	}
 
-	auto list = getWidgetAs<UIList>("assetList");
-	list->clear();
+	assetList->clear();
 	for (auto& dir: dirs) {
-		list->addTextItem(dir + "/.", LocalisedString::fromUserString("[" + dir + "]"));
+		assetList->addTextItem(dir + "/.", LocalisedString::fromUserString("[" + dir + "]"));
 	}
 	for (auto& file: files) {
-		list->addTextItem(file, LocalisedString::fromUserString(file));
+		assetList->addTextItem(file, LocalisedString::fromUserString(file));
+	}
+}
+
+void AssetsEditorWindow::refreshList()
+{
+	if (assetSrcMode) {
+		listAssetSources();
+	} else {
+		listAssets(curType);
 	}
 }
 
 void AssetsEditorWindow::loadAsset(const String& name)
 {
-	auto& curPath = curPaths[curType];
+	auto& curPath = assetSrcMode ? curSrcPath : curPaths[curType];
 	if (name.endsWith("/.")) {
 		curPath = curPath / name;
-		listAssets(curType);
+		refreshList();
 	} else {
-		getWidget("contents")->clear();
+		content->clear();
+		contentList->clear();
+		curEditors.clear();
 
-		const auto assetName = (curPath / name).toString().mid(2);
-		curEditor = createEditor(curType, assetName);
-		if (curEditor) {
-			getWidget("contents")->add(curEditor, 1);
-			getWidgetAs<UILabel>("assetName")->setText(LocalisedString::fromUserString("[" + toString(curType) + "] " + assetName));
+		if (assetSrcMode) {
+			auto assets = project.getAssetsFromFile((curPath / name).dropFront(1));
+			std::sort(assets.begin(), assets.end(), [] (decltype(assets)::const_reference a, decltype(assets)::const_reference b) -> bool
+			{
+				return b.first < a.first;
+			});
+			for (auto& asset: assets) {
+				createEditorTab(asset.first, asset.second);
+			}
+
+			if (assets.empty()) {
+				metadataEditor->clear();
+			} else {
+				metadataEditor->setResource(project, assets.at(0).first, curPath / name);
+			}
+		} else {
+			metadataEditor->clear();
+			const auto assetName = (curPath / name).toString().mid(2);
+			createEditorTab(curType, assetName);
 		}
-		getWidgetAs<MetadataEditor>("metadataEditor")->setResource(project, curType, assetName);
 	}
 }
 
-std::shared_ptr<AssetEditor> AssetsEditorWindow::createEditor(AssetType type, const String& name)
+void AssetsEditorWindow::refreshAssets(const std::vector<String>& assets)
+{
+	if (gameResources->getLocator().getLocatorCount() == 0) {
+		try {
+			gameResources->getLocator().addFileSystem(project.getUnpackedAssetsPath());
+		} catch (...)
+		{}
+	}
+
+	gameResources->reloadAssets(assets);
+	refreshList();
+
+	for (auto& editor: curEditors) {
+		editor->reload();
+	}
+}
+
+std::shared_ptr<AssetEditor> AssetsEditorWindow::makeEditor(AssetType type, const String& name)
 {
 	switch (type) {
 	case AssetType::Sprite:
 	case AssetType::Animation:
 	case AssetType::Texture:
-		return std::make_shared<AnimationEditor>(factory, *gameResources, name, type, project);
+		return std::make_shared<AnimationEditor>(factory, *gameResources, type, project);
 	}
 	return {};
 }
 
-AssetEditor::AssetEditor(UIFactory& factory, Resources& resources, const String& assetId, AssetType type, Project& project)
+void AssetsEditorWindow::createEditorTab(AssetType type, const String& name)
+{
+	auto editor = makeEditor(type, name);
+	if (editor) {
+		editor->setResource(name);
+		int n = content->getNumberOfPages();
+		content->addPage();
+		content->getPage(n)->add(editor, 1);
+		contentList->addTextItem(toString(n), LocalisedString::fromUserString(toString(type)));
+	}
+}
+
+AssetEditor::AssetEditor(UIFactory& factory, Resources& resources, Project& project, AssetType type)
 	: UIWidget("assetEditor", {}, UISizer())
 	, factory(factory)
 	, project(project)
-	, assetId(assetId)
+	, resources(resources)
 	, assetType(type)
 {
-	if (type == AssetType::Animation) {
+}
+
+void AssetEditor::setResource(const String& id)
+{
+	assetId = id;
+	if (assetType == AssetType::Animation) {
 		resource = resources.get<Animation>(assetId);
-	} else if (type == AssetType::Sprite) {
+	} else if (assetType == AssetType::Sprite) {
 		resource = resources.get<SpriteResource>(assetId);
-	} else if (type == AssetType::Texture) {
+	} else if (assetType == AssetType::Texture) {
 		resource = resources.get<Texture>(assetId);
 	}
+	reload();
+}
+
+void AssetEditor::clearResource()
+{
+	assetId = "";
+	resource.reset();
+	reload();
 }
 
 void AssetEditor::reload()

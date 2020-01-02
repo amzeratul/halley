@@ -15,6 +15,7 @@ namespace Halley {
 	    Vector2f getLayoutMinimumSize(bool force) const override;
 		std::shared_ptr<UIWidget> getPage(int n) const;
 
+        void clear() override;
     private:
         int currentPage = 0;
 

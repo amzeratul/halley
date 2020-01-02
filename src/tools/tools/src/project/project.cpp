@@ -127,6 +127,26 @@ ProjectProperties& Project::getProperties() const
 	return *properties;
 }
 
+Metadata Project::getMetadata(const Path& filePath)
+{
+	Metadata metadata;
+	const Path metaPath = getAssetsSrcPath() / filePath.replaceExtension(filePath.getExtension() + ".meta");
+	MetadataImporter::loadMetaData(metadata, metaPath, false, filePath);
+	return metadata;
+}
+
+void Project::setMetaData(const Path& filePath, const Metadata& metadata)
+{
+	const auto str = metadata.toYAMLString();
+	auto data = Bytes(str.size());
+	memcpy(data.data(), str.c_str(), str.size());
+
+	const Path metaPath = getAssetsSrcPath() / filePath.replaceExtension(filePath.getExtension() + ".meta");
+	FileSystem::writeFile(metaPath, data);
+	notifyAssetFileModified(filePath);
+}
+
+/*
 Maybe<Metadata> Project::getMetadata(AssetType type, const String& assetId)
 {
 	auto path = importAssetsDatabase->getMetadataPath(type, assetId);
@@ -153,6 +173,17 @@ void Project::setMetaData(AssetType type, const String& assetId, const Metadata&
 		FileSystem::writeFile(metaPath, data);
 		notifyAssetFileModified(filePath);
 	}
+}
+*/
+
+std::vector<String> Project::getAssetSrcList() const
+{
+	return importAssetsDatabase->getInputFiles();
+}
+
+std::vector<std::pair<AssetType, String>> Project::getAssetsFromFile(const Path& path) const
+{
+	return importAssetsDatabase->getAssetsFromFile(path);
 }
 
 void Project::reloadAssets(const std::set<String>& assets, bool packed)

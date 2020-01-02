@@ -104,7 +104,7 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 	// Load metadata if needed
 	if (db.needToLoadInputMetadata(filePath, timestamps)) {
 		Metadata meta = MetadataImporter::getMetaData(filePath, dirMetaPath, privateMetaPath);
-		db.setInputFileMetadata(filePath, timestamps, meta);
+		db.setInputFileMetadata(filePath, timestamps, meta, srcPath);
 		dbChanged = true;
 	}
 

@@ -14,10 +14,12 @@ static void loadMetaTable(Metadata& meta, const YAML::Node& root)
 	}
 }
 
-void MetadataImporter::loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta, String assetId)
+void MetadataImporter::loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta, const Path& inputFilePath)
 {
 	const auto data = ResourceDataStatic::loadFromFileSystem(path);
 	auto root = YAML::Load(data ? data->getString() : "");
+
+	const String inputFilePathStr = inputFilePath.toString();
 
 	if (isDirectoryMeta) {
 		for (const auto& rootList: root) {
@@ -26,7 +28,7 @@ void MetadataImporter::loadMetaData(Metadata& meta, const Path& path, bool isDir
 				matches = false;
 				for (auto& pattern: rootList["match"]) {
 					auto p = pattern.as<std::string>();
-					if (assetId.contains(p)) {
+					if (inputFilePathStr.contains(p)) {
 						matches = true;
 						break;
 					}
@@ -47,10 +49,10 @@ Metadata MetadataImporter::getMetaData(Path inputFilePath, Maybe<Path> dirMetaPa
 	Metadata meta;
 	try {
 		if (dirMetaPath) {
-			loadMetaData(meta, dirMetaPath.get(), true, inputFilePath.toString());
+			loadMetaData(meta, dirMetaPath.get(), true, inputFilePath);
 		}
 		if (privateMetaPath) {
-			loadMetaData(meta, privateMetaPath.get(), false, inputFilePath.toString());
+			loadMetaData(meta, privateMetaPath.get(), false, inputFilePath);
 		}
 	} catch (std::exception& e) {
 		throw Exception("Error parsing metafile for " + inputFilePath + ": " + e.what(), HalleyExceptions::Tools);

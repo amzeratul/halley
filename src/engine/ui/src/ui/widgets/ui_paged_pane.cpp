@@ -54,3 +54,9 @@ std::shared_ptr<UIWidget> UIPagedPane::getPage(int n) const
 {
 	return pages.at(n);
 }
+
+void UIPagedPane::clear()
+{
+	UIWidget::clear();
+	pages.clear();
+}

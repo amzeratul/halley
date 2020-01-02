@@ -12,7 +12,7 @@ namespace Halley {
 
 	class AnimationEditor : public AssetEditor {
     public:
-        AnimationEditor(UIFactory& factory, Resources& resources, const String& assetId, AssetType type, Project& project);
+        AnimationEditor(UIFactory& factory, Resources& resources, AssetType type, Project& project);
 
         void reload() override;
 

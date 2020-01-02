@@ -3,7 +3,7 @@
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
 
-constexpr static int currentAssetVersion = 55;
+constexpr static int currentAssetVersion = 56;
 
 using namespace Halley;
 
@@ -48,6 +48,7 @@ void ImportAssetsDatabase::InputFileEntry::serialize(Serializer& s) const
 		s << timestamp[i];
 	}
 	s << metadata;
+	s << basePath;
 }
 
 void ImportAssetsDatabase::InputFileEntry::deserialize(Deserializer& s)
@@ -63,6 +64,7 @@ void ImportAssetsDatabase::InputFileEntry::deserialize(Deserializer& s)
 		timestamp[i] = 0;
 	}
 	s >> metadata;
+	s >> basePath;
 }
 
 ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, std::vector<String> platforms)
@@ -100,14 +102,13 @@ bool ImportAssetsDatabase::needToLoadInputMetadata(const Path& path, std::array<
 	std::lock_guard<std::mutex> lock(mutex);
 
 	// Is it an unknown file?
-	auto pathStr = path.toString();
-	auto iter = inputFiles.find(pathStr);
+	const auto iter = inputFiles.find(path.toString());
 	if (iter == inputFiles.end()) {
 		return true;
 	}
 
 	// Any of the timestamps changed?
-	for (int i = 0; i < timestamps.size(); ++i) {
+	for (size_t i = 0; i < timestamps.size(); ++i) {
 		if (iter->second.timestamp[i] != timestamps[i]) {
 			return true;
 		}
@@ -116,22 +117,22 @@ bool ImportAssetsDatabase::needToLoadInputMetadata(const Path& path, std::array<
 	return false;
 }
 
-void ImportAssetsDatabase::setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data)
+void ImportAssetsDatabase::setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data, Path basePath)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 
-	auto pathStr = path.toString();
-	auto& input = inputFiles[pathStr];
+	auto& input = inputFiles[path.toString()];
 	input.timestamp = timestamps;
 	input.metadata = data;
+	input.basePath = std::move(basePath);
 }
 
 Maybe<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
 
-	auto pathStr = path.toString();
-	auto iter = inputFiles.find(pathStr);
+	const auto pathStr = path.toString();
+	const auto iter = inputFiles.find(pathStr);
 	if (iter == inputFiles.end()) {
 		return {};
 	} else {
@@ -277,12 +278,43 @@ std::vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() con
 
 std::vector<AssetResource> ImportAssetsDatabase::getOutFiles(String assetId) const
 {
+	std::lock_guard<std::mutex> lock(mutex);
 	auto iter = assetsImported.find(assetId);
 	if (iter != assetsImported.end()) {
 		return iter->second.asset.outputFiles;
 	} else {
 		return {};
 	}
+}
+
+std::vector<String> ImportAssetsDatabase::getInputFiles() const
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	std::vector<String> result;
+	for (auto& i: inputFiles) {
+		result.push_back(i.first);
+	}
+	return result;
+}
+
+std::vector<std::pair<AssetType, String>> ImportAssetsDatabase::getAssetsFromFile(const Path& inputFile)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	std::vector<std::pair<AssetType, String>> result;
+
+	for (auto& a: assetsImported) {
+		const auto& asset = a.second.asset;
+		for (auto& in: asset.inputFiles) {
+			if (in.first == inputFile) {				
+				for (auto& out: asset.outputFiles) {
+					result.emplace_back(out.type, out.name);
+				}
+				break;
+			}
+		}
+	}
+
+	return result;
 }
 
 void ImportAssetsDatabase::serialize(Serializer& s) const
