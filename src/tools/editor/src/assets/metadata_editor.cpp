@@ -27,13 +27,38 @@ void MetadataEditor::makeUI()
 		addInt2Field("Pivot", "pivotX", "pivotY", Vector2i());
 		addInt4Field("Slices", "slice_left", "slice_right", "slice_bottom", "slice_top", Vector4i());
 		addInt2Field("Tile", "tileWidth", "tileHeight", Vector2i());
+		addBoolField("Trim", "trim", true);
+		addStringField("Atlas", "atlas", "");
 		addStringField("Palette", "palette", "");
 		addStringField("Material", "material", "Halley/Sprite");
-		addStringField("Atlas", "atlas", "");
+		addBoolField("Filtering", "filtering", false);
+		addBoolField("Minimap", "minimap", false);
+		addStringField("Format", "format", "rgba");
+		addStringField("Address Mode", "addressMode", "clamp");
+		break;
+
+	case AssetType::AudioClip:
+		addBoolField("Streaming", "streaming", false);
+		addIntField("Loop Point", "loopPoint", 0);
+		break;
+
+	case AssetType::Font:
+		addFloatField("Font Size", "fontSize", 0);
+		addStringField("Font Name", "fontName", "");
+		addInt2Field("Image Size", "width", "height", Vector2i(512, 512));
+		addIntField("Supersample", "supersample", 4);
+		addInt2Field("Range", "rangeStart", "rangeEnd", Vector2i(0, 255));
+		addIntField("Ascender Adj.", "ascenderAdjustment", 0);
+		addIntField("Line Spacing", "lineSpacing", 0);
+		addFloatField("Radius", "radius", 8.0f);
+		addStringField("Fallback", "fallback", "");
+		addFloatField("Fallback Scale", "replacementScale", 1.0f);
+		addStringField("Extra characters", "extraCharacters", "");
+		break;
 	}
 }
 
-void MetadataEditor::addInt(const String& name, const String& key, int defaultValue)
+void MetadataEditor::addIntField(const String& name, const String& key, int defaultValue)
 {
 	makeLabel(name);
 	makeIntField(getSizer(), key, defaultValue);
@@ -59,13 +84,13 @@ void MetadataEditor::addInt4Field(const String& name, const String& x, const Str
 	makeIntField(*sizer, w, defaultValue.w);
 }
 
-void MetadataEditor::addFloat(const String& name, const String& key, float defaultValue)
+void MetadataEditor::addFloatField(const String& name, const String& key, float defaultValue)
 {
 	makeLabel(name);
 	makeFloatField(getSizer(), key, defaultValue);
 }
 
-void MetadataEditor::addBool(const String& name, const String& key, bool defaultValue)
+void MetadataEditor::addBoolField(const String& name, const String& key, bool defaultValue)
 {
 	makeLabel(name);
 	makeBoolField(getSizer(), key, defaultValue);	
@@ -124,7 +149,7 @@ void MetadataEditor::makeBoolField(UISizer& sizer, const String& key, bool defau
 {
 	const auto result = std::make_shared<UICheckbox>(key, factory.getStyle("checkbox"));
 	result->setMinSize(Vector2f(30, 30));
-	sizer.add(result, 1);
+	sizer.add(result, 1, {}, UISizerAlignFlags::Left | UISizerAlignFlags::CentreVertical);
 	bindData(key, metadata.getBool(key, defaultValue), [=] (bool value)
 	{
 		updateMetadata(metadata, key, *this, value, defaultValue);

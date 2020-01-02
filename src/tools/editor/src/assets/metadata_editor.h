@@ -24,11 +24,11 @@ namespace Halley
 
 		void makeUI();
 
-		void addInt(const String& name, const String& key, int defaultValue);
+		void addIntField(const String& name, const String& key, int defaultValue);
 		void addInt2Field(const String& name, const String& x, const String& y, Vector2i defaultValue);
 		void addInt4Field(const String& name, const String& x, const String& y, const String& z, const String& w, Vector4i defaultValue);
-		void addFloat(const String& name, const String& key, float defaultValue);
-		void addBool(const String& name, const String& key, bool defaultValue);
+		void addFloatField(const String& name, const String& key, float defaultValue);
+		void addBoolField(const String& name, const String& key, bool defaultValue);
 		void addStringField(const String& name, const String& key, const String& defaultValue);
 
 		void makeLabel(const String& name);

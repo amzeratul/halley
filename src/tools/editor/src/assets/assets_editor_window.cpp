@@ -118,9 +118,8 @@ void AssetsEditorWindow::loadAsset(const String& name)
 		if (curEditor) {
 			getWidget("contents")->add(curEditor, 1);
 			getWidgetAs<UILabel>("assetName")->setText(LocalisedString::fromUserString("[" + toString(curType) + "] " + assetName));
-
-			getWidgetAs<MetadataEditor>("metadataEditor")->setResource(project, curType, assetName);
 		}
+		getWidgetAs<MetadataEditor>("metadataEditor")->setResource(project, curType, assetName);
 	}
 }
 

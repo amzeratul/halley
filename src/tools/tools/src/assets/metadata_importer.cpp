@@ -16,8 +16,8 @@ static void loadMetaTable(Metadata& meta, const YAML::Node& root)
 
 void MetadataImporter::loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta, String assetId)
 {
-	auto data = ResourceDataStatic::loadFromFileSystem(path);
-	auto root = YAML::Load(data->getString());
+	const auto data = ResourceDataStatic::loadFromFileSystem(path);
+	auto root = YAML::Load(data ? data->getString() : "");
 
 	if (isDirectoryMeta) {
 		for (const auto& rootList: root) {

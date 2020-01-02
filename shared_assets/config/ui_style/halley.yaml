@@ -12,6 +12,14 @@ uiStyle:
     label: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
     labelBorder: [0, 0, 0, 0]
 
+  checkbox:
+    normal: { img: halley_ui/ui_checkbox.png, colour: "#9C5BB5" }
+    checked: { img: halley_ui/ui_checkbox_checked.png, colour: "#9C5BB5" }
+    hover: { img: halley_ui/ui_checkbox.png, colour: "#B68FCB" }
+    checkedHover: { img: halley_ui/ui_checkbox_checked.png, colour: "#B68FCB" }
+    disabled: { img: halley_ui/ui_checkbox.png, colour: "#CDCDCD" }
+    checkedDisabled: { img: halley_ui/ui_checkbox_checked.png, colour: "#CDCDCD" }
+
   input:
     box: { img: halley_ui/ui_input.png, colour: "#9861B6" }
     caret: halley_ui/ui_caret.png
