@@ -119,12 +119,14 @@ bool Metadata::set(String key, String value)
 	return true;
 }
 
-void Metadata::erase(const String& key)
+bool Metadata::erase(const String& key)
 {
 	const auto iter = entries.find(key);
 	if (iter != entries.end()) {
 		entries.erase(iter);
+		return true;
 	}
+	return false;
 }
 
 std::unique_ptr<Metadata> Metadata::fromBinary(ResourceDataStatic& data)

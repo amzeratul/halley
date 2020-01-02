@@ -36,7 +36,7 @@ namespace Halley
 		bool set(String key, const char* value);
 		bool set(String key, const std::string& value);
 		bool set(String key, String value);
-		void erase(const String& key);
+		bool erase(const String& key);
 
 		static std::unique_ptr<Metadata> fromBinary(ResourceDataStatic& data);
 		
