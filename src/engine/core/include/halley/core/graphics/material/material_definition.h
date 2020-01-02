@@ -14,6 +14,7 @@ namespace Halley
 	class Painter;
 	class MaterialImporter;
 	class MaterialTextureParameter;
+	class Texture;
 
 	enum class ShaderParameterType
 	{
@@ -174,6 +175,7 @@ namespace Halley
 		const Vector<MaterialAttribute>& getAttributes() const { return attributes; }
 		const Vector<MaterialUniformBlock>& getUniformBlocks() const { return uniformBlocks; }
 		const Vector<String>& getTextures() const { return textures; }
+		const std::shared_ptr<const Texture>& getFallbackTexture() const;
 		
 		void addPass(const MaterialPass& materialPass);
 
@@ -193,6 +195,8 @@ namespace Halley
 		Vector<MaterialAttribute> attributes;
 		int vertexSize = 0;
 		int vertexPosOffset = 0;
+
+		std::shared_ptr<const Texture> fallbackTexture;
 
 		void loadUniforms(const ConfigNode& node);
 		void loadTextures(const ConfigNode& node);

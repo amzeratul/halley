@@ -113,6 +113,8 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	for (auto& p: passes) {
 		p.createShader(loader, name + "/pass" + toString(i++), attributes);
 	}
+
+	fallbackTexture = loader.getResources().get<Texture>("whitebox.png");
 }
 
 void MaterialDefinition::reload(Resource&& resource)
@@ -175,6 +177,11 @@ size_t MaterialDefinition::getVertexStride() const
 size_t MaterialDefinition::getVertexPosOffset() const
 {
 	return size_t(vertexPosOffset);
+}
+
+const std::shared_ptr<const Texture>& MaterialDefinition::getFallbackTexture() const
+{
+	return fallbackTexture;
 }
 
 void MaterialDefinition::addPass(const MaterialPass& materialPass)

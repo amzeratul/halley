@@ -114,7 +114,7 @@ namespace Halley
 
 		std::vector<char> passEnabled;
 
-		mutable uint64_t hashValue;
+		mutable uint64_t hashValue = 0;
 		mutable bool needToUpdateHash = true;
 		bool needToUploadData = true;
 
@@ -123,5 +123,7 @@ namespace Halley
 
 		void setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data);
 		uint64_t computeHash() const;
+
+		const std::shared_ptr<const Texture>& getFallbackTexture() const;
 	};
 }

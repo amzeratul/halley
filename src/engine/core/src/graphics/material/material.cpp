@@ -119,8 +119,8 @@ Material::Material(const Material& other)
 	}
 }
 
-Material::Material(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks)
-	: materialDefinition(materialDefinition)
+Material::Material(std::shared_ptr<const MaterialDefinition> definition, bool forceLocalBlocks)
+	: materialDefinition(std::move(definition))
 {
 	passEnabled.resize(materialDefinition->getNumPasses(), 1);
 	initUniforms(forceLocalBlocks);
@@ -262,9 +262,18 @@ uint64_t Material::computeHash() const
 	return hasher.digest();
 }
 
+const std::shared_ptr<const Texture>& Material::getFallbackTexture() const
+{
+	return materialDefinition->getFallbackTexture();
+}
+
 const std::shared_ptr<const Texture>& Material::getTexture(int textureUnit) const
 {
-	return textures[textureUnit];
+	auto& tex = textureUnit >= 0 && textureUnit < int(textures.size()) ? textures[textureUnit] : getFallbackTexture();
+	if (!tex) {
+		return getFallbackTexture();
+	}
+	return tex;
 }
 
 const Vector<MaterialParameter>& Material::getUniforms() const
