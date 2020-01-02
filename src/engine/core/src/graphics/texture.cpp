@@ -17,7 +17,8 @@ void Texture::load(TextureDescriptor&& descriptor)
 
 std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 {
-	auto& meta = loader.getMeta();
+	const auto& meta = loader.getMeta();
+
 	Vector2i size(meta.getInt("width", -1), meta.getInt("height", -1));
 	if (size.x == -1 && size.y == -1) {
 		throw Exception("Unable to load texture \"" + loader.getName() + "\" due to missing asset data.", HalleyExceptions::Graphics);

@@ -42,6 +42,7 @@ namespace Halley
 		std::shared_ptr<UIStyleSheet> getStyleSheet() const;
 
 		Resources& getResources() const;
+		std::shared_ptr<InputKeyboard> getKeyboard() const;
 
 	protected:
 		struct ParsedOption {

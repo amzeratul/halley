@@ -3,6 +3,7 @@
 #include <halley/file_formats/config_file.h>
 #include "scroll_background.h"
 #include "src/assets/animation_editor.h"
+#include "src/assets/metadata_editor.h"
 using namespace Halley;
 
 std::shared_ptr<UIStyleSheet> makeStyleSheet(Resources& resources)
@@ -25,6 +26,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 
 	addFactory("scrollBackground", [=] (const ConfigNode& node) { return makeScrollBackground(node); });
 	addFactory("animationEditorDisplay", [=] (const ConfigNode& node) { return makeAnimationEditorDisplay(node); });
+	addFactory("metadataEditor", [=] (const ConfigNode& node) { return makeMetadataEditor(node); });
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeScrollBackground(const ConfigNode& entryNode)
@@ -37,4 +39,9 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeAnimationEditorDisplay(const Conf
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	return std::make_shared<AnimationEditorDisplay>(id, resources);
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeMetadataEditor(const ConfigNode& entryNode)
+{
+	return std::make_shared<MetadataEditor>(*this);
 }

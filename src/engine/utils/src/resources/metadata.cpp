@@ -80,34 +80,51 @@ const std::map<String, String>& Metadata::getEntries() const
 	return entries;
 }
 
-void Metadata::set(String key, bool value)
+bool Metadata::set(String key, bool value)
 {
-	entries[key] = value ? "true" : "false";
+	return set(std::move(key), value ? "true" : "false");
 }
 
-void Metadata::set(String key, int value)
+bool Metadata::set(String key, int value)
 {
-	entries[key] = Halley::toString(value);
+	return set(std::move(key), Halley::toString(value));
 }
 
-void Metadata::set(String key, float value)
+bool Metadata::set(String key, float value)
 {
-	entries[key] = Halley::toString(value);
+	return set(std::move(key), Halley::toString(value));
 }
 
-void Metadata::set(String key, const char* value)
+bool Metadata::set(String key, const char* value)
 {
-	entries[key] = value;
+	return set(std::move(key), String(value));
 }
 
-void Metadata::set(String key, const std::string& value)
+bool Metadata::set(String key, const std::string& value)
 {
-	entries[key] = value;
+	return set(std::move(key), String(value));
 }
 
-void Metadata::set(String key, const String& value)
+bool Metadata::set(String key, String value)
 {
-	entries[key] = value;
+	const auto iter = entries.find(key);
+	if (iter != entries.end()) {
+		if (iter->second == value) {
+			return false;
+		}
+		iter->second = std::move(value);
+	} else {
+		entries[std::move(key)] = std::move(value);
+	}
+	return true;
+}
+
+void Metadata::erase(const String& key)
+{
+	const auto iter = entries.find(key);
+	if (iter != entries.end()) {
+		entries.erase(iter);
+	}
 }
 
 std::unique_ptr<Metadata> Metadata::fromBinary(ResourceDataStatic& data)

@@ -4,20 +4,23 @@
 #include "halley/core/resources/resources.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/ui_widget.h"
+#include "assets_editor_window.h"
 
 namespace Halley {
 	class Project;
+	class AnimationEditorDisplay;
 
-	class AnimationEditor : public UIWidget {
+	class AnimationEditor : public AssetEditor {
     public:
-        AnimationEditor(UIFactory& factory, Resources& resources, Project& project, const String& assetId, AssetType type);
+        AnimationEditor(UIFactory& factory, Resources& resources, const String& assetId, AssetType type, Project& project);
+
+        void reload() override;
 
 	private:
-		UIFactory& factory;
-		Project& project;
-		std::shared_ptr<const Resource> resource;
-
 		void setupWindow();
+		void loadAssetData();
+
+        std::shared_ptr<AnimationEditorDisplay> animationDisplay;
 	};
 
 	class AnimationEditorDisplay : public UIWidget {

@@ -5,9 +5,9 @@ using namespace Halley;
 
 Resource::~Resource() = default;
 
-void Resource::setMeta(const Metadata& m)
+void Resource::setMeta(Metadata m)
 {
-	meta = m;
+	meta = std::move(m);
 }
 
 const Metadata& Resource::getMeta() const
@@ -15,9 +15,9 @@ const Metadata& Resource::getMeta() const
 	return meta;
 }
 
-void Resource::setAssetId(const String& n)
+void Resource::setAssetId(String id)
 {
-	assetId = n;
+	assetId = std::move(id);
 }
 
 const String& Resource::getAssetId() const

@@ -5,6 +5,7 @@
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_list.h"
 #include "animation_editor.h"
+#include "metadata_editor.h"
 
 using namespace Halley;
 
@@ -62,6 +63,10 @@ void AssetsEditorWindow::refreshAssets(const std::vector<String>& assets)
 
 	gameResources->reloadAssets(assets);
 	listAssets(curType);
+
+	if (curEditor) {
+		curEditor->reload();
+	}
 }
 
 void AssetsEditorWindow::listAssets(AssetType type)
@@ -109,21 +114,43 @@ void AssetsEditorWindow::loadAsset(const String& name)
 		getWidget("contents")->clear();
 
 		const auto assetName = (curPath / name).toString().mid(2);
-		const auto editor = createEditor(curType, assetName);
-		if (editor) {
-			getWidget("contents")->add(editor, 1);
+		curEditor = createEditor(curType, assetName);
+		if (curEditor) {
+			getWidget("contents")->add(curEditor, 1);
 			getWidgetAs<UILabel>("assetName")->setText(LocalisedString::fromUserString("[" + toString(curType) + "] " + assetName));
+
+			getWidgetAs<MetadataEditor>("metadataEditor")->setResource(project, curType, assetName);
 		}
 	}
 }
 
-std::shared_ptr<UIWidget> AssetsEditorWindow::createEditor(AssetType type, const String& name)
+std::shared_ptr<AssetEditor> AssetsEditorWindow::createEditor(AssetType type, const String& name)
 {
 	switch (type) {
 	case AssetType::Sprite:
 	case AssetType::Animation:
 	case AssetType::Texture:
-		return std::make_shared<AnimationEditor>(factory, *gameResources, project, name, type);
+		return std::make_shared<AnimationEditor>(factory, *gameResources, name, type, project);
 	}
 	return {};
+}
+
+AssetEditor::AssetEditor(UIFactory& factory, Resources& resources, const String& assetId, AssetType type, Project& project)
+	: UIWidget("assetEditor", {}, UISizer())
+	, factory(factory)
+	, project(project)
+	, assetId(assetId)
+	, assetType(type)
+{
+	if (type == AssetType::Animation) {
+		resource = resources.get<Animation>(assetId);
+	} else if (type == AssetType::Sprite) {
+		resource = resources.get<SpriteResource>(assetId);
+	} else if (type == AssetType::Texture) {
+		resource = resources.get<Texture>(assetId);
+	}
+}
+
+void AssetEditor::reload()
+{
 }

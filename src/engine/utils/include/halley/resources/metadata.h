@@ -30,13 +30,14 @@ namespace Halley
 		String getString(String key, String defaultValue) const;
 		const std::map<String, String>& getEntries() const;
 
-		void set(String key, bool value);
-		void set(String key, int value);
-		void set(String key, float value);
-		void set(String key, const char* value);
-		void set(String key, const std::string& value);
-		void set(String key, const String& value);
-		
+		bool set(String key, bool value);
+		bool set(String key, int value);
+		bool set(String key, float value);
+		bool set(String key, const char* value);
+		bool set(String key, const std::string& value);
+		bool set(String key, String value);
+		void erase(const String& key);
+
 		static std::unique_ptr<Metadata> fromBinary(ResourceDataStatic& data);
 		
 		void serialize(Serializer& s) const;

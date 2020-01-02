@@ -6,52 +6,28 @@
 
 using namespace Halley;
 
-AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, Project& project, const String& assetId, AssetType type)
-	: UIWidget("animationEditor", {}, UISizer())
-	, factory(factory)
-	, project(project)
+AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, const String& assetId, AssetType type, Project& project)
+	: AssetEditor(factory, resources, assetId, type, project)
 {
-	if (type == AssetType::Animation) {
-		resource = resources.get<Animation>(assetId);
-	} else if (type == AssetType::Sprite) {
-		resource = resources.get<SpriteResource>(assetId);
-	} else if (type == AssetType::Texture) {
-		resource = resources.get<Texture>(assetId);
-	}
 	setupWindow();
+}
+
+void AnimationEditor::reload()
+{
+	loadAssetData();
 }
 
 void AnimationEditor::setupWindow()
 {
 	add(factory.makeUI("ui/halley/animation_editor"), 1);
+	animationDisplay = getWidgetAs<AnimationEditorDisplay>("display");
 
-	const auto animation = std::dynamic_pointer_cast<const Animation>(resource);
-	const auto sprite = std::dynamic_pointer_cast<const SpriteResource>(resource);
-	const auto texture = std::dynamic_pointer_cast<const Texture>(resource);
-
-	auto animationDisplay = getWidgetAs<AnimationEditorDisplay>("display");
-	if (animation) {
-		animationDisplay->setAnimation(animation);
-	} else if (sprite) {
-		animationDisplay->setSprite(sprite);
-	} else if (texture) {
-		animationDisplay->setTexture(texture);
-	}
+	loadAssetData();
 
 	getWidgetAs<ScrollBackground>("scrollBackground")->setZoomListener([=] (float zoom)
 	{
 		animationDisplay->setZoom(zoom);
 	});
-
-	if (animation) {
-		auto sequenceList = getWidgetAs<UIDropdown>("sequence");
-		sequenceList->setOptions(animation->getSequenceNames());
-
-		auto directionList = getWidgetAs<UIDropdown>("direction");
-		directionList->setOptions(animation->getDirectionNames());
-	} else {
-		getWidget("animControls")->setActive(false);
-	}
 
 	setHandle(UIEventType::DropboxSelectionChanged, "sequence", [=] (const UIEvent& event)
 	{
@@ -62,6 +38,31 @@ void AnimationEditor::setupWindow()
 	{
 		animationDisplay->setDirection(event.getData());
 	});
+}
+
+void AnimationEditor::loadAssetData()
+{
+	const auto animation = std::dynamic_pointer_cast<const Animation>(resource);
+	const auto sprite = std::dynamic_pointer_cast<const SpriteResource>(resource);
+	const auto texture = std::dynamic_pointer_cast<const Texture>(resource);
+
+	if (animation) {
+		animationDisplay->setAnimation(animation);
+	} else if (sprite) {
+		animationDisplay->setSprite(sprite);
+	} else if (texture) {
+		animationDisplay->setTexture(texture);
+	}
+
+	if (animation) {
+		auto sequenceList = getWidgetAs<UIDropdown>("sequence");
+		sequenceList->setOptions(animation->getSequenceNames());
+
+		auto directionList = getWidgetAs<UIDropdown>("direction");
+		directionList->setOptions(animation->getDirectionNames());
+	} else {
+		getWidget("animControls")->setActive(false);
+	}
 }
 
 AnimationEditorDisplay::AnimationEditorDisplay(String id, Resources& resources)

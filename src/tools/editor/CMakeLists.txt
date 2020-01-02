@@ -11,6 +11,7 @@ set (editor_sources
 
 	"src/assets/animation_editor.cpp"
 	"src/assets/assets_editor_window.cpp"
+	"src/assets/metadata_editor.cpp"
 
 	"src/ui/console_window.cpp"
 	"src/ui/editor_ui_factory.cpp"
@@ -28,6 +29,7 @@ set (editor_headers
 
 	"src/assets/animation_editor.h"
 	"src/assets/assets_editor_window.h"
+	"src/assets/metadata_editor.h"
 
 	"src/ui/console_window.h"
 	"src/ui/editor_ui_factory.h"

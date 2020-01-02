@@ -34,7 +34,7 @@ Font:
 - int lineSpacing
 - float radius
 - float fontSize
-- font replacementScale
+- float replacementScale
 - String extraCharacters
 - String fontName
 - String fallback

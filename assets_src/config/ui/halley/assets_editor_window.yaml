@@ -49,4 +49,6 @@ children:
       proportion: 1
     - widget: { class: label, id: assetName, text: "" }
       fill: centre
+  - widget: { class: metadataEditor }
+    border: [10, 0, 0, 0]
 ...

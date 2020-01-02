@@ -86,9 +86,9 @@ namespace Halley
 	public:
 		virtual ~Resource();
 
-		void setMeta(const Metadata& meta);
+		void setMeta(Metadata meta);
 		const Metadata& getMeta() const;
-		void setAssetId(const String& name);
+		void setAssetId(String name);
 		const String& getAssetId() const;
 		virtual void onLoaded(Resources& resources);
 		
