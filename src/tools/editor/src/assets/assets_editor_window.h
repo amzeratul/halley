@@ -59,7 +59,7 @@ namespace Halley {
 		void refreshList();
 		void setFilter(const String& filter);
 
-		void loadAsset(const String& name);
+		void loadAsset(const String& name, bool doubleClick);
 		void refreshAssets(const std::vector<String>& assets);
 
 		std::shared_ptr<AssetEditor> makeEditor(AssetType type, const String& name);

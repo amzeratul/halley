@@ -57,9 +57,14 @@ void AssetsEditorWindow::makeUI()
 		listAssets(fromString<AssetType>(event.getData()));
 	});
 
+	setHandle(UIEventType::ListSelectionChanged, "assetList", [=] (const UIEvent& event)
+	{
+		loadAsset(event.getData(), false);
+	});
+
 	setHandle(UIEventType::ListAccept, "assetList", [=] (const UIEvent& event)
 	{
-		loadAsset(event.getData());
+		loadAsset(event.getData(), true);
 	});
 
 	setHandle(UIEventType::TextChanged, "assetSearch", [=] (const UIEvent& event)
@@ -160,12 +165,14 @@ void AssetsEditorWindow::setFilter(const String& f)
 	}
 }
 
-void AssetsEditorWindow::loadAsset(const String& name)
+void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick)
 {
 	auto& curPath = assetSrcMode ? curSrcPath : curPaths[curType];
 	if (name.endsWith("/.")) {
-		curPath = curPath / name;
-		refreshList();
+		if (doubleClick) {
+			curPath = curPath / name;
+			refreshList();
+		}
 	} else {
 		content->clear();
 		contentList->clear();
