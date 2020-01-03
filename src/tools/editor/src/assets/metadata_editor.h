@@ -12,12 +12,13 @@ namespace Halley
 	public:
 		MetadataEditor(UIFactory& factory);
 
-		void setResource(Project& project, AssetType type, const Path& filePath);
+		void setResource(Project& project, AssetType type, const Path& filePath, Metadata effectiveMetadata);
 		void saveMetadata();
 
 	private:
 		UIFactory& factory;
 		Metadata metadata;
+		Metadata effectiveMetadata;
 		Project* project = nullptr;
 		AssetType assetType;
 		Path filePath;

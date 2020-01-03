@@ -50,8 +50,9 @@ namespace Halley
 		
 		ProjectProperties& getProperties() const;
 
-		Metadata getMetadata(const Path& filePath);
-		void setMetaData(const Path& filePath, const Metadata& metadata);
+		Metadata getImportMetadata(AssetType type, const String& assetId) const;
+		Metadata readMetadataFromDisk(const Path& filePath) const;
+		void writeMetadataToDisk(const Path& filePath, const Metadata& metadata);
 
 		std::vector<String> getAssetSrcList() const;
 		std::vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;

@@ -8,19 +8,20 @@ MetadataEditor::MetadataEditor(UIFactory& factory)
 {
 }
 
-void MetadataEditor::setResource(Project& p, AssetType type, const Path& path)
+void MetadataEditor::setResource(Project& p, AssetType type, const Path& path, Metadata effectiveMeta)
 {
 	assetType = type;
 	filePath = path;
 	project = &p;
-	metadata = project->getMetadata(filePath);
+	metadata = project->readMetadataFromDisk(filePath);
+	effectiveMetadata = std::move(effectiveMeta);
 
 	makeUI();
 }
 
 void MetadataEditor::saveMetadata()
 {
-	project->setMetaData(filePath, metadata);
+	project->writeMetadataToDisk(filePath, metadata);
 }
 
 void MetadataEditor::makeUI()
@@ -167,7 +168,11 @@ void MetadataEditor::makeStringField(UISizer& sizer, const String& key, const St
 	const auto result = std::make_shared<UITextInput>(factory.getKeyboard(), key, factory.getStyle("input"));
 	result->setMinSize(Vector2f(40, 30));
 	sizer.add(result, 1);
-	bindData(key, metadata.getString(key, defaultValue), [=] (const String& value)
+
+	auto effectiveDefault = effectiveMetadata.getString(":" + key, defaultValue);
+	auto value = metadata.getString(key, effectiveDefault);
+
+	bindData(key, value, [=] (const String& value)
 	{
 		updateMetadata(metadata, key, *this, value, defaultValue);
 	});

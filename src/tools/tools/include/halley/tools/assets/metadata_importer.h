@@ -7,6 +7,6 @@ namespace Halley {
     class MetadataImporter {
     public:
 	    static void loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta, const Path& inputFilePath);
-	    static Metadata getMetaData(Path inputFilePath, Maybe<Path> dirMetaPath, Maybe<Path> privateMetaPath);
+	    static Metadata getMetaData(const Path& inputFilePath, Maybe<Path> dirMetaPath, Maybe<Path> privateMetaPath);
     };
 }

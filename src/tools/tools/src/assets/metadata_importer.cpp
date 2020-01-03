@@ -5,12 +5,15 @@
 #include "halley/text/string_converter.h"
 using namespace Halley;
 
-static void loadMetaTable(Metadata& meta, const YAML::Node& root)
+static void loadMetaTable(Metadata& meta, const YAML::Node& root, bool dirMeta)
 {
 	for (YAML::const_iterator it = root.begin(); it != root.end(); ++it) {
 		String key = it->first.as<std::string>();
 		String value = it->second.as<std::string>();
 		meta.set(key, value);
+		if (dirMeta) {
+			meta.set(":" + key, value);
+		}
 	}
 }
 
@@ -35,16 +38,16 @@ void MetadataImporter::loadMetaData(Metadata& meta, const Path& path, bool isDir
 				}
 			}
 			if (matches && rootList["data"]) {
-				loadMetaTable(meta, rootList["data"]);
+				loadMetaTable(meta, rootList["data"], true);
 				return;
 			}
 		}
 	} else {
-		loadMetaTable(meta, root);
+		loadMetaTable(meta, root, false);
 	}
 }
 
-Metadata MetadataImporter::getMetaData(Path inputFilePath, Maybe<Path> dirMetaPath, Maybe<Path> privateMetaPath)
+Metadata MetadataImporter::getMetaData(const Path& inputFilePath, Maybe<Path> dirMetaPath, Maybe<Path> privateMetaPath)
 {
 	Metadata meta;
 	try {

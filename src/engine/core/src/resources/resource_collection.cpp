@@ -64,6 +64,11 @@ void ResourceCollectionBase::purge(const String& assetId)
 	}
 }
 
+std::shared_ptr<Resource> ResourceCollectionBase::getUntyped(const String& name, ResourceLoadPriority priority)
+{
+	return doGet(name, priority);
+}
+
 std::vector<String> ResourceCollectionBase::enumerate() const
 {
 	if (resourceEnumerator) {

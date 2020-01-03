@@ -127,7 +127,12 @@ ProjectProperties& Project::getProperties() const
 	return *properties;
 }
 
-Metadata Project::getMetadata(const Path& filePath)
+Metadata Project::getImportMetadata(AssetType type, const String& assetId) const
+{
+	return importAssetsDatabase->getMetadata(type, assetId).get_value_or(Metadata());
+}
+
+Metadata Project::readMetadataFromDisk(const Path& filePath) const
 {
 	Metadata metadata;
 	const Path metaPath = getAssetsSrcPath() / filePath.replaceExtension(filePath.getExtension() + ".meta");
@@ -135,7 +140,7 @@ Metadata Project::getMetadata(const Path& filePath)
 	return metadata;
 }
 
-void Project::setMetaData(const Path& filePath, const Metadata& metadata)
+void Project::writeMetadataToDisk(const Path& filePath, const Metadata& metadata)
 {
 	const auto str = metadata.toYAMLString();
 	auto data = Bytes(str.size());
@@ -145,36 +150,6 @@ void Project::setMetaData(const Path& filePath, const Metadata& metadata)
 	FileSystem::writeFile(metaPath, data);
 	notifyAssetFileModified(filePath);
 }
-
-/*
-Maybe<Metadata> Project::getMetadata(AssetType type, const String& assetId)
-{
-	auto path = importAssetsDatabase->getMetadataPath(type, assetId);
-	if (path) {
-		Metadata data;
-		MetadataImporter::loadMetaData(data, getAssetsSrcPath() / path.get(), false, assetId);
-		return data;
-	}
-	return {};
-}
-
-void Project::setMetaData(AssetType type, const String& assetId, const Metadata& metadata)
-{
-	auto maybePath = importAssetsDatabase->getMetadataPath(type, assetId);
-	if (maybePath) {
-		const auto str = metadata.toYAMLString();
-		auto data = Bytes(str.size());
-		memcpy(data.data(), str.c_str(), str.size());
-
-		const auto& path = maybePath.get();
-		const auto metaPath = getAssetsSrcPath() / path;
-		const auto filePath = path.replaceExtension(path.getExtension().left(path.getExtension().size() - 5));
-
-		FileSystem::writeFile(metaPath, data);
-		notifyAssetFileModified(filePath);
-	}
-}
-*/
 
 std::vector<String> Project::getAssetSrcList() const
 {

@@ -52,6 +52,8 @@ namespace Halley
 		void reload(const String& assetId);
 		void purge(const String& assetId);
 
+		std::shared_ptr<Resource> getUntyped(const String& name, ResourceLoadPriority priority = ResourceLoadPriority::Normal);
+
 		std::vector<String> enumerate() const;
 
 	protected:

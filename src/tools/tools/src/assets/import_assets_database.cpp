@@ -4,7 +4,7 @@
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
 
-constexpr static int currentAssetVersion = 57;
+constexpr static int currentAssetVersion = 58;
 
 using namespace Halley;
 
@@ -141,7 +141,7 @@ Maybe<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) const
 	}
 }
 
-Maybe<Path> ImportAssetsDatabase::getMetadataPath(AssetType type, const String& assetId) const
+Maybe<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const String& assetId) const
 {
 	// This method is not very efficient
 	std::lock_guard<std::mutex> lock(mutex);
@@ -150,8 +150,13 @@ Maybe<Path> ImportAssetsDatabase::getMetadataPath(AssetType type, const String& 
 		const auto& asset = a.second.asset;
 		for (auto& o: asset.outputFiles) {
 			if (o.type == type && o.name == assetId) {
-				const auto filePath = asset.inputFiles.at(0).first;
-				return filePath.replaceExtension(filePath.getExtension() + ".meta");
+				const auto inputFile = o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).first : o.primaryInputFile;
+
+				const auto iter = inputFiles.find(inputFile.toString());
+				if (iter == inputFiles.end()) {
+					return {};
+				}
+				return iter->second.metadata;
 			}
 		}
 	}

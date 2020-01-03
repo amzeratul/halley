@@ -191,12 +191,13 @@ void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick)
 			if (assets.empty()) {
 				metadataEditor->clear();
 			} else {
-				metadataEditor->setResource(project, assets.at(0).first, Path(name));
+				const auto type = assets.at(0).first;
+				auto effectiveMeta = project.getImportMetadata(type, assets.at(0).second);
+				metadataEditor->setResource(project, type, Path(name), std::move(effectiveMeta));
 			}
 		} else {
 			metadataEditor->clear();
-			const auto assetName = name;
-			createEditorTab(curType, assetName);
+			createEditorTab(curType, name);
 		}
 	}
 }
