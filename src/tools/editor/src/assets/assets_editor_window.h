@@ -42,6 +42,7 @@ namespace Halley {
 		bool assetSrcMode = true;
 		std::vector<std::shared_ptr<AssetEditor>> curEditors;
 		Maybe<std::vector<String>> assetNames;
+		String filter;
         
 		std::shared_ptr<UIList> assetList;
 		std::shared_ptr<UIList> contentList;
@@ -54,8 +55,9 @@ namespace Halley {
 
 		void listAssetSources();
 		void listAssets(AssetType type);
-		void setListContents(std::vector<String> files, const Path& curPath);
+		void setListContents(std::vector<String> files, const Path& curPath, bool flat);
 		void refreshList();
+		void setFilter(const String& filter);
 
 		void loadAsset(const String& name);
 		void refreshAssets(const std::vector<String>& assets);

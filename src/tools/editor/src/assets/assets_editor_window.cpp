@@ -61,6 +61,11 @@ void AssetsEditorWindow::makeUI()
 	{
 		loadAsset(event.getData());
 	});
+
+	setHandle(UIEventType::TextChanged, "assetSearch", [=] (const UIEvent& event)
+	{
+		setFilter(event.getData());
+	});
 }
 
 void AssetsEditorWindow::setAssetSrcMode(bool enabled)
@@ -80,7 +85,18 @@ void AssetsEditorWindow::listAssetSources()
 		assetNames = project.getAssetSrcList();
 		std::sort(assetNames.get().begin(), assetNames.get().end()); // Is this even needed?
 	}
-	setListContents(assetNames.get(), curSrcPath);
+
+	if (filter.isEmpty()) {
+		setListContents(assetNames.get(), curSrcPath, false);
+	} else {
+		std::vector<String> filteredList;
+		for (auto& a: assetNames.get()) {
+			if (a.asciiLower().contains(filter)) {
+				filteredList.push_back(a);
+			}
+		}
+		setListContents(filteredList, curSrcPath, true);
+	}	
 }
 
 void AssetsEditorWindow::listAssets(AssetType type)
@@ -94,30 +110,36 @@ void AssetsEditorWindow::listAssets(AssetType type)
 	auto assets = gameResources->ofType(type).enumerate();
 	std::sort(assets.begin(), assets.end());
 
-	setListContents(assets, curPath);	
+	setListContents(assets, curPath, false);
 }
 
-void AssetsEditorWindow::setListContents(std::vector<String> assets, const Path& curPath)
+void AssetsEditorWindow::setListContents(std::vector<String> assets, const Path& curPath, bool flat)
 {
-	std::set<String> dirs;
-	std::vector<std::pair<String, String>> files;
-
-	for (auto& a: assets) {
-		auto relPath = Path("./" + a).makeRelativeTo(curPath);
-		if (relPath.getNumberPaths() == 1) {
-			files.emplace_back(a, relPath.toString());
-		} else {
-			auto start = relPath.getFront(1);
-			dirs.insert(start.toString());
-		}
-	}
-
 	assetList->clear();
-	for (auto& dir: dirs) {
-		assetList->addTextItem(dir + "/.", LocalisedString::fromUserString("[" + dir + "]"));
-	}
-	for (auto& file: files) {
-		assetList->addTextItem(file.first, LocalisedString::fromUserString(file.second));
+	if (flat) {
+		for (auto& a: assets) {
+			assetList->addTextItem(a, LocalisedString::fromUserString(Path(a).getFilename().toString()));
+		}
+	} else {
+		std::set<String> dirs;
+		std::vector<std::pair<String, String>> files;
+
+		for (auto& a: assets) {
+			auto relPath = Path("./" + a).makeRelativeTo(curPath);
+			if (relPath.getNumberPaths() == 1) {
+				files.emplace_back(a, relPath.toString());
+			} else {
+				auto start = relPath.getFront(1);
+				dirs.insert(start.toString());
+			}
+		}
+
+		for (auto& dir: dirs) {
+			assetList->addTextItem(dir + "/.", LocalisedString::fromUserString("[" + dir + "]"));
+		}
+		for (auto& file: files) {
+			assetList->addTextItem(file.first, LocalisedString::fromUserString(file.second));
+		}
 	}
 }
 
@@ -127,6 +149,14 @@ void AssetsEditorWindow::refreshList()
 		listAssetSources();
 	} else {
 		listAssets(curType);
+	}
+}
+
+void AssetsEditorWindow::setFilter(const String& f)
+{
+	if (filter != f) {
+		filter = f.asciiLower();
+		refreshList();
 	}
 }
 
