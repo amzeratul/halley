@@ -76,7 +76,11 @@ void AssetsEditorWindow::setAssetSrcMode(bool enabled)
 
 void AssetsEditorWindow::listAssetSources()
 {
-	setListContents(project.getAssetSrcList(), curSrcPath);
+	if (!assetNames) {
+		assetNames = project.getAssetSrcList();
+		std::sort(assetNames.get().begin(), assetNames.get().end()); // Is this even needed?
+	}
+	setListContents(assetNames.get(), curSrcPath);
 }
 
 void AssetsEditorWindow::listAssets(AssetType type)
@@ -87,21 +91,21 @@ void AssetsEditorWindow::listAssets(AssetType type)
 	}
 	const auto curPath = curPaths[type];
 
-	setListContents(gameResources->ofType(type).enumerate(), curPath);	
+	auto assets = gameResources->ofType(type).enumerate();
+	std::sort(assets.begin(), assets.end());
+
+	setListContents(assets, curPath);	
 }
 
 void AssetsEditorWindow::setListContents(std::vector<String> assets, const Path& curPath)
 {
-	std::sort(assets.begin(), assets.end());
-
 	std::set<String> dirs;
-	std::vector<String> files;
+	std::vector<std::pair<String, String>> files;
 
 	for (auto& a: assets) {
-		auto path = Path("./" + a);
-		auto relPath = path.makeRelativeTo(curPath);
+		auto relPath = Path("./" + a).makeRelativeTo(curPath);
 		if (relPath.getNumberPaths() == 1) {
-			files.push_back(relPath.toString());
+			files.emplace_back(a, relPath.toString());
 		} else {
 			auto start = relPath.getFront(1);
 			dirs.insert(start.toString());
@@ -113,7 +117,7 @@ void AssetsEditorWindow::setListContents(std::vector<String> assets, const Path&
 		assetList->addTextItem(dir + "/.", LocalisedString::fromUserString("[" + dir + "]"));
 	}
 	for (auto& file: files) {
-		assetList->addTextItem(file, LocalisedString::fromUserString(file));
+		assetList->addTextItem(file.first, LocalisedString::fromUserString(file.second));
 	}
 }
 
@@ -138,7 +142,7 @@ void AssetsEditorWindow::loadAsset(const String& name)
 		curEditors.clear();
 
 		if (assetSrcMode) {
-			auto assets = project.getAssetsFromFile((curPath / name).dropFront(1));
+			auto assets = project.getAssetsFromFile(Path(name));
 			std::sort(assets.begin(), assets.end(), [] (decltype(assets)::const_reference a, decltype(assets)::const_reference b) -> bool
 			{
 				return b.first < a.first;
@@ -150,11 +154,11 @@ void AssetsEditorWindow::loadAsset(const String& name)
 			if (assets.empty()) {
 				metadataEditor->clear();
 			} else {
-				metadataEditor->setResource(project, assets.at(0).first, curPath / name);
+				metadataEditor->setResource(project, assets.at(0).first, Path(name));
 			}
 		} else {
 			metadataEditor->clear();
-			const auto assetName = (curPath / name).toString().mid(2);
+			const auto assetName = name;
 			createEditorTab(curType, assetName);
 		}
 	}
@@ -169,6 +173,7 @@ void AssetsEditorWindow::refreshAssets(const std::vector<String>& assets)
 		{}
 	}
 
+	assetNames.reset();
 	gameResources->reloadAssets(assets);
 	refreshList();
 

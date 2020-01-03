@@ -41,6 +41,7 @@ namespace Halley {
 
 		bool assetSrcMode = true;
 		std::vector<std::shared_ptr<AssetEditor>> curEditors;
+		Maybe<std::vector<String>> assetNames;
         
 		std::shared_ptr<UIList> assetList;
 		std::shared_ptr<UIList> contentList;
