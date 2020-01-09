@@ -75,14 +75,14 @@ namespace Halley
 		
 		bool includes(const OnlineCapabilities& other)
 		{
-			auto check = [](bool has, bool otherHas)
+			auto checkInclusion = [](bool has, bool otherHas)
 			{
 				return otherHas ? has : true;
 			};
-			return check(onlinePlay, other.onlinePlay)
-				&& check(ugc, other.ugc)
-				&& check(communication, other.communication)
-				&& check(viewProfiles, other.viewProfiles);
+			return checkInclusion(onlinePlay, other.onlinePlay)
+				&& checkInclusion(ugc, other.ugc)
+				&& checkInclusion(communication, other.communication)
+				&& checkInclusion(viewProfiles, other.viewProfiles);
 		}
 	};
 
