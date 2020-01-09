@@ -224,7 +224,12 @@ namespace Halley
 		virtual void handleOnlineError() {}
 
 		virtual bool hasDLC(const String& key) const { return false; }
-		virtual void requestGetDLC(const String& key) {}
+		virtual Future<bool> requestGetDLC(const String& key)
+		{
+			Promise<bool> result;
+			result.setValue(false);
+			return result.getFuture();
+		}
 
 		// Return empty unique_ptr if not supported
 		virtual std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key) { return {}; }
