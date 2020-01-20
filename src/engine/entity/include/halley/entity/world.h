@@ -25,7 +25,9 @@ namespace Halley {
 	class World
 	{
 	public:
-		World(const HalleyAPI* api, bool collectMetrics);
+		using CreateComponentFunction = std::function<void(const String& componentName, EntityRef& entity, const ConfigNode& componentData)>;
+
+		World(const HalleyAPI* api, bool collectMetrics, CreateComponentFunction createComponent);
 		~World();
 
 		void step(TimeLine timeline, Time elapsed);
@@ -80,10 +82,13 @@ namespace Halley {
 			families.emplace_back(std::move(newFam));
 			return *newFamPtr;
 		}
+
+		const CreateComponentFunction& getCreateComponentFunction() const;
 		
 	private:
 		const HalleyAPI* api;
 		std::array<Vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
+		CreateComponentFunction createComponent;
 		bool collectMetrics = false;
 		bool entityDirty = false;
 		

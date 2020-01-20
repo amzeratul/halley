@@ -35,6 +35,11 @@ namespace Halley
 		CPPClassGenerator& addDefaultConstructor();
 		CPPClassGenerator& addConstructor(const Vector<VariableSchema>& variables);
 		CPPClassGenerator& addCustomConstructor(const Vector<VariableSchema>& parameters, const Vector<VariableSchema>& initialization);
+		
+		static String getAccessString(CPPAccess access);
+		static String getTypeString(TypeSchema type);
+		static String getVariableString(VariableSchema var);
+		static String getMethodSignatureString(MethodSchema var);
 
 		void writeTo(Vector<String>& out, int nTabs = 0);
 	private:
@@ -45,9 +50,5 @@ namespace Halley
 		Vector<String> results;
 
 		void ensureOK() const;
-		static String getAccessString(CPPAccess access);
-		static String getTypeString(TypeSchema type);
-		static String getVariableString(VariableSchema var);
-		static String getMethodSignatureString(MethodSchema var);
 	};
 }

@@ -12,8 +12,9 @@
 
 using namespace Halley;
 
-World::World(const HalleyAPI* api, bool collectMetrics)
+World::World(const HalleyAPI* api, bool collectMetrics, CreateComponentFunction createComponent)
 	: api(api)
+	, createComponent(std::move(createComponent))
 	, collectMetrics(collectMetrics)
 {	
 }
@@ -184,6 +185,11 @@ size_t World::numEntities() const
 void World::onEntityDirty()
 {
 	entityDirty = true;
+}
+
+const World::CreateComponentFunction& World::getCreateComponentFunction() const
+{
+	return createComponent;
 }
 
 void World::deleteEntity(Entity* entity)

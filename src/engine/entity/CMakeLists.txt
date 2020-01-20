@@ -5,6 +5,7 @@ include_directories(${Boost_INCLUDE_DIR} "include/halley/entity" "../utils/inclu
 set(SOURCES
         "src/component.cpp"
         "src/entity.cpp"
+        "src/entity_factory.cpp"
         "src/family"
         "src/family_binding.cpp"
         "src/family_mask.cpp"
@@ -16,9 +17,10 @@ set(SOURCES
 set(HEADERS
         "include/halley/entity/component.h"
         "include/halley/entity/entity.h"
-        "include/halley/entity/entity_id.h"
         "include/halley/entity/family_binding.h"
         "include/halley/entity/family_extractor.h"
+        "include/halley/entity/entity_factory.h"
+        "include/halley/entity/entity_id.h"
         "include/halley/entity/family.h"
         "include/halley/entity/family_mask.h"
         "include/halley/entity/family_type.h"

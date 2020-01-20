@@ -6,6 +6,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "bytes/byte_serializer.h"
 #include "bytes/compression.h"
+#include "bytes/config_node_serializer.h"
 #include "bytes/fuzzer.h"
 
 #include "data_structures/bin_pack.h"
