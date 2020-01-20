@@ -22,11 +22,42 @@ namespace Halley {
     };
 
 	template <>
+    class ConfigNodeDeserializer<float> {
+    public:
+        float operator()(const ConfigNode& node)
+        {
+			return node.asFloat();
+        }
+    };
+
+	template <>
     class ConfigNodeDeserializer<Vector2f> {
     public:
         Vector2f operator()(const ConfigNode& node)
         {
 			return node.asVector2f();
+        }
+    };
+
+	template <>
+    class ConfigNodeDeserializer<Colour4f> {
+    public:
+        Colour4f operator()(const ConfigNode& node)
+        {
+			return Colour4f::fromString(node.asString());
+        }
+    };
+
+	template <typename T>
+    class ConfigNodeDeserializer<Maybe<T>> {
+    public:
+        Maybe<T> operator()(const ConfigNode& node)
+        {
+        	if (node.getType() == ConfigNodeType::Undefined) {
+				return Maybe<T>();
+        	} else {
+				return Maybe<T>(ConfigNodeDeserializer<T>()(node));
+			}
         }
     };
 }
