@@ -46,5 +46,5 @@ void PackResourceLocator::loadAfterPurge()
 
 int PackResourceLocator::getPriority() const
 {
-	return priority ? priority.get() : IResourceLocatorProvider::getPriority();
+	return priority ? priority.value() : IResourceLocatorProvider::getPriority();
 }

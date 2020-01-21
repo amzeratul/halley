@@ -48,7 +48,7 @@ void SDLWindow::update(const WindowDefinition& definition)
 	const WindowType windowType = definition.getWindowType();
 	const WindowState windowState = definition.getWindowState();
 	const Vector2i windowSize = definition.getSize();
-	const Vector2i windowPos = definition.getPosition().get_value_or(getCenteredWindow(windowSize, 0));
+	const Vector2i windowPos = definition.getPosition().value_or(getCenteredWindow(windowSize, 0));
 	const Maybe<Path> icon = definition.getIcon();
 
 	if (windowType != WindowType::Fullscreen) {

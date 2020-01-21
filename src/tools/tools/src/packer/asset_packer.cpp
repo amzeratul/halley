@@ -93,8 +93,8 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 			String packName;
 			String encryptionKey;
 			if (packEntry) {
-				packName = packEntry.get().get().getName();
-				encryptionKey = packEntry.get().get().getEncryptionKey();
+				packName = packEntry->get().getName();
+				encryptionKey = packEntry->get().getEncryptionKey();
 			}
 
 			// Retrieve pack
@@ -112,7 +112,7 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 
 			// Activate the pack if this asset was actually supposed to be packed
 			if (assetsToPack) {
-				if (assetsToPack.get().find(assetName) != assetsToPack.get().end()) {
+				if (assetsToPack->find(assetName) != assetsToPack->end()) {
 					iter->second.setActive(true);
 				}
 			}
@@ -132,7 +132,7 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 		String packName;
 		auto packEntry = manifest.getPack("~:" + assetName);
 		if (packEntry) {
-			packName = packEntry.get().get().getName();
+			packName = packEntry->get().getName();
 		}
 
 		auto iter = packs.find(packName);

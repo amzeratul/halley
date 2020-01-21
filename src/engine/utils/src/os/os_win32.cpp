@@ -383,7 +383,7 @@ void OSWin32::atomicWriteFile(const Path& path, const Bytes& data, Maybe<Path> b
 	if (PathFileExistsW(dstPath.c_str())) {
 		auto temp = path.replaceExtension(path.getExtension() + ".tmp");
 		auto tempPath = temp.getString().replaceAll("/", "\\").getUTF16();
-		auto backupPath = backupOldVersionPath ? backupOldVersionPath.get().getString().replaceAll("/", "\\").getUTF16() : StringUTF16();
+		auto backupPath = backupOldVersionPath ? backupOldVersionPath->getString().replaceAll("/", "\\").getUTF16() : StringUTF16();
 		writeFile(tempPath.c_str(), data);
 
 		const int result = ReplaceFileW(dstPath.c_str(), tempPath.c_str(), backupOldVersionPath ? backupPath.c_str() : nullptr, REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr);

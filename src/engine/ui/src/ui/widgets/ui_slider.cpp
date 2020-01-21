@@ -41,7 +41,7 @@ float UISlider::getValue() const
 {
 	float val;
 	if (granularity) {
-		val = clamp(lround((value - minValue) / granularity.get()) * granularity.get() + minValue, minValue, maxValue);
+		val = clamp(lround((value - minValue) / granularity.value()) * granularity.value() + minValue, minValue, maxValue);
 	} else {
 		val = value;
 	}

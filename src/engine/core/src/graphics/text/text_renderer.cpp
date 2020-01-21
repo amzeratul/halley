@@ -238,7 +238,7 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 
 			// Check for colour override
 			while (curOverride < colourOverrides.size() && colourOverrides[curOverride].first == i) {
-				curCol = colourOverrides[curOverride].second ? colourOverrides[curOverride].second.get() : colour;
+				curCol = colourOverrides[curOverride].second ? colourOverrides[curOverride].second.value() : colour;
 				++curOverride;
 			}
 			
@@ -286,7 +286,7 @@ void TextRenderer::draw(Painter& painter) const
 	}
 
 	if (clip) {
-		painter.setRelativeClip(clip.get() + position);
+		painter.setRelativeClip(clip.value() + position);
 	}
 	Sprite::drawMixedMaterials(spritesCache.data(), spritesCache.size(), painter);
 	if (clip) {
@@ -454,13 +454,13 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::fun
 					}
 					advanceAdjust = 0;
 				}
-				const int advance = int(lastValid.get().size());
+				const int advance = int(lastValid->size());
 				Expects(advance > 0);
 
 				if (!result.empty()) {
 					result.push_back('\n');
 				}
-				result += StringUTF32(lastValid.get().data(), advance + advanceAdjust);
+				result += StringUTF32(lastValid->data(), advance + advanceAdjust);
 				src = src.subspan(advance);
 				break;
 			}

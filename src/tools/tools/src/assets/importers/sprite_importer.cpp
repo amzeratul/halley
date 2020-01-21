@@ -62,8 +62,8 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		// Palette
 		auto thisPalette = meta.getString("palette", "");
 		if (palette) {
-			if (thisPalette != palette.get()) {
-				throw Exception("Incompatible palettes in atlas \"" + atlasName + "\". Previously using \"" + palette.get() + "\", now trying to use \"" + thisPalette + "\"", HalleyExceptions::Tools);
+			if (thisPalette != palette.value()) {
+				throw Exception("Incompatible palettes in atlas \"" + atlasName + "\". Previously using \"" + palette.value() + "\", now trying to use \"" + thisPalette + "\"", HalleyExceptions::Tools);
 			}
 		} else {
 			palette = thisPalette;
@@ -117,10 +117,10 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	auto size = atlasImage->getSize();
 	Metadata meta;
 	if (startMeta) {
-		meta = startMeta.get();
+		meta = startMeta.value();
 	}
 	if (palette) {
-		meta.set("palette", palette.get());
+		meta.set("palette", palette.value());
 	}
 	meta.set("width", size.x);
 	meta.set("height", size.y);
@@ -140,7 +140,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 String SpriteImporter::getAssetId(const Path& file, const Maybe<Metadata>& metadata) const
 {
 	if (metadata) {
-		String atlas = metadata.get().getString("atlas", "");
+		String atlas = metadata->getString("atlas", "");
 		if (atlas != "") {
 			return atlas;
 		}
@@ -253,14 +253,14 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 
 		Logger::logInfo("Trying " + toString(size.x) + "x" + toString(size.y) + " px...");
 		auto res = BinPack::pack(entries, size);
-		if (res.is_initialized()) {
+		if (res) {
 			// Found a pack
 			if (images.size() > 1) {
 				Logger::logInfo("Atlas \"" + atlasName + "\" generated at " + toString(size.x) + "x" + toString(size.y) + " px with " + toString(images.size()) + " sprites. Total image area is " + toString(totalImageArea) + " px^2, sqrt = " + toString(lround(sqrt(totalImageArea))) + " px.");
 			}
 
 			
-			return makeAtlas(res.get(), size, spriteSheet);
+			return makeAtlas(res.value(), size, spriteSheet);
 		} else {
 			// Try 64x64, then 128x64, 128x128, 256x128, etc
 			if (wide) {

@@ -118,7 +118,7 @@ float UILabel::getCellWidth()
 		if (parent) {
 			auto max = parent->getMaxChildWidth();
 			if (max) {
-				return max.get();
+				return max.value();
 			}
 		}
 	}

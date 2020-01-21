@@ -32,7 +32,7 @@ void UIImage::update(Time t, bool moved)
 		Vector2f basePos = getPosition();
 		Vector2f imgBaseSize = sprite.getRawSize().abs() + topLeftBorder + bottomRightBorder;
 		if (sprite.getClip()) {
-			auto c = sprite.getClip().get();
+			auto c = sprite.getClip().value();
 			basePos -= c.getTopLeft();
 			imgBaseSize = std::min(c.getSize(), imgBaseSize);
 		}
@@ -56,7 +56,7 @@ void UIImage::setSprite(Sprite s)
 	//sprite.setAbsolutePivot(-topLeftBorder + sprite.getAbsolutePivot());
 	
 	if (c) {
-		setMinSize(Vector2f::min(spriteSize, c.get().getSize()));
+		setMinSize(Vector2f::min(spriteSize, c->getSize()));
 	} else {
 		setMinSize(spriteSize);
 	}

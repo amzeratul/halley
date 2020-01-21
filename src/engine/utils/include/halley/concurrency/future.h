@@ -144,19 +144,19 @@ namespace Halley
 		template<typename T0>
 		T0 doGet(typename std::enable_if<std::is_copy_constructible<T0>::value, int>::type)
 		{
-			if (!data.is_initialized()) {
+			if (!data) {
 				throw Exception("Data is not initialized.", HalleyExceptions::Utils);
 			}
-			return data.get();
+			return *data;
 		}
 
 		template<typename T0>
 		T0 doGet(typename std::enable_if<!std::is_copy_constructible<T0>::value, int>::type)
 		{
-			if (!data.is_initialized()) {
+			if (!data) {
 				throw Exception("Data is not initialized.", HalleyExceptions::Utils);
 			}
-			auto result = std::move(data.get());
+			auto result = std::move(*data);
 			data.reset();
 			return result;
 		}

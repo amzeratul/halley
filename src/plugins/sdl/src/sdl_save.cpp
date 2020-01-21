@@ -198,7 +198,7 @@ void SDLSaveData::commit()
 String SDLSaveData::getKey() const
 {
 	if (key) {
-		return key.get() + ":" + toString(type);
+		return key.value() + ":" + toString(type);
 	} else {
 		return "";
 	}

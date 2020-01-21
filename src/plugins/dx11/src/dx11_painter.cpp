@@ -203,7 +203,7 @@ void DX11Painter::setRasterizer(const DX11RasterizerOptions& options)
 	}
 
 	if (options.scissor) {
-		auto clip = clipping.get();
+		auto clip = clipping.value();
 		D3D11_RECT rect;
 		rect.top = clip.getTop();
 		rect.bottom = clip.getBottom();

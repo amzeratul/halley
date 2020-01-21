@@ -187,7 +187,7 @@ UISizer UIFactory::makeSizerOrDefault(const ConfigNode& entryNode, UISizer&& def
 {
 	auto sizer = makeSizer(entryNode);
 	if (sizer) {
-		return std::move(sizer.get());
+		return std::move(sizer.value());
 	} else {
 		return std::move(defaultSizer);
 	}
@@ -197,7 +197,7 @@ std::shared_ptr<UISizer> UIFactory::makeSizerPtr(const ConfigNode& entryNode)
 {
 	auto sizer = makeSizer(entryNode);
 	if (sizer) {
-		return std::make_shared<UISizer>(std::move(sizer.get()));
+		return std::make_shared<UISizer>(std::move(sizer.value()));
 	} else {
 		return {};
 	}
@@ -287,7 +287,7 @@ Vector2f UIFactory::asVector2f(const ConfigNode& node, Maybe<Vector2f> defaultVa
 		auto seq = node.asSequence();
 		return Vector2f(seq.at(0).asFloat(), seq.at(1).asFloat());
 	} else if (defaultValue) {
-		return defaultValue.get();
+		return defaultValue.value();
 	} else {
 		throw Exception("Unable to parse node as Vector2f.", HalleyExceptions::UI);
 	}
@@ -335,7 +335,7 @@ Vector4f UIFactory::asVector4f(const ConfigNode& node, Maybe<Vector4f> defaultVa
 		auto seq = node.asSequence();
 		return Vector4f(seq.at(0).asFloat(), seq.at(1).asFloat(), seq.at(2).asFloat(), seq.at(3).asFloat());
 	} else if (defaultValue) {
-		return defaultValue.get();
+		return defaultValue.value();
 	} else {
 		throw Exception("Unable to parse node as Vector2f.", HalleyExceptions::UI);
 	}
@@ -567,7 +567,7 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 	sprite.setColour(Colour4f::fromString(col)).setFlip(flip).setRotation(rotation);
 	
 	if (pivot) {
-		sprite.setPivot(pivot.get());
+		sprite.setPivot(pivot.value());
 	}
 	Vector4f innerBorder = asVector4f(node["innerBorder"], Vector4f());
 

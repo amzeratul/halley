@@ -62,7 +62,7 @@ UIAnchor UIAnchor::operator*(float f) const
 {
 	Maybe<Rect4f> b;
 	if (bounds) {
-		b = bounds.get() * f;
+		b = bounds.value() * f;
 	}
 	auto result = UIAnchor(relativePos * f, relativeAlignment * f, absoluteOffset * f, b);
 	result.setAutoBounds(autoBounds);
@@ -73,7 +73,7 @@ UIAnchor UIAnchor::operator+(const UIAnchor& other) const
 {
 	Maybe<Rect4f> b;
 	if (bounds) {
-		b = bounds.get();
+		b = bounds.value();
 	}
 	auto result = UIAnchor(relativePos + other.relativePos, relativeAlignment + other.relativeAlignment, absoluteOffset + other.absoluteOffset, b);
 	result.setAutoBounds(autoBounds);

@@ -66,8 +66,8 @@ LocalisedString I18N::get(const String& key) const
 		}
 	}
 
-	if (fallbackLanguage && fallbackLanguage.get() != currentLanguage) {
-		auto defLang = strings.find(fallbackLanguage.get());
+	if (fallbackLanguage && fallbackLanguage.value() != currentLanguage) {
+		auto defLang = strings.find(fallbackLanguage.value());
 		if (defLang != strings.end()) {
 			auto i = defLang->second.find(key);
 			if (i != defLang->second.end()) {
@@ -184,7 +184,7 @@ const Maybe<String>& I18NLanguage::getCountryCode() const
 String I18NLanguage::getISOCode() const
 {
 	if (countryCode) {
-		return languageCode + "-" + countryCode.get();
+		return languageCode + "-" + countryCode.value();
 	} else {
 		return languageCode;
 	}
@@ -239,7 +239,7 @@ bool I18NLanguage::operator<(const I18NLanguage& other) const
 	if (!other.countryCode) {
 		return false;
 	}
-	return countryCode.get() < other.countryCode.get();
+	return countryCode.value() < other.countryCode.value();
 }
 
 LocalisedString LocalisedString::fromHardcodedString(const char* str)

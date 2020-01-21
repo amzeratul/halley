@@ -86,17 +86,17 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 
 	// Collect data on directory meta file
 	auto dirMetaPath = findDirectoryMeta(directoryMetas, filePath);
-	if (dirMetaPath && FileSystem::exists(srcPath / dirMetaPath.get())) {
-		dirMetaPath = srcPath / dirMetaPath.get();
-		timestamps[1] = FileSystem::getLastWriteTime(dirMetaPath.get());
+	if (dirMetaPath && FileSystem::exists(srcPath / dirMetaPath.value())) {
+		dirMetaPath = srcPath / dirMetaPath.value();
+		timestamps[1] = FileSystem::getLastWriteTime(dirMetaPath.value());
 	} else {
 		dirMetaPath = {};
 	}
 
 	// Collect data on private meta file
 	Maybe<Path> privateMetaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
-	if (FileSystem::exists(privateMetaPath.get())) {
-		timestamps[2] = FileSystem::getLastWriteTime(privateMetaPath.get());
+	if (FileSystem::exists(privateMetaPath.value())) {
+		timestamps[2] = FileSystem::getLastWriteTime(privateMetaPath.value());
 	} else {
 		privateMetaPath = {};
 	}

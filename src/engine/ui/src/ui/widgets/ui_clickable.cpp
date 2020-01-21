@@ -92,7 +92,7 @@ Rect4f UIClickable::getMouseRect() const
 	auto rect = UIWidget::getMouseRect();
 
 	if (mouseExtraBorder) {
-		auto& b = mouseExtraBorder.get();
+		auto& b = mouseExtraBorder.value();
 		return Rect4f(rect.getTopLeft() - Vector2f(b.x, b.y), rect.getBottomRight() + Vector2f(b.z, b.w));
 	}
 

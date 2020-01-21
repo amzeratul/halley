@@ -47,7 +47,7 @@ void AssetCollector::output(const String& name, AssetType type, const Bytes& dat
 	AssetResource::PlatformVersion version;
 	version.filepath = fullPath.string();
 	if (metadata) {
-		version.metadata = metadata.get();
+		version.metadata = metadata.value();
 	}
 	result->platformVersions[platform] = std::move(version);
 }

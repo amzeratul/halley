@@ -91,8 +91,8 @@ void TextInputData::insertText(const StringUTF32& t)
 		if (maxLength) {
 			const int curSelLen = selection.end - selection.start;
 			const size_t finalLen = text.size() - size_t(curSelLen) + insertSize;
-			if (int(finalLen) > maxLength.get()) {
-				insertSize = size_t(std::max(int64_t(0), int64_t(insertSize) + int64_t(maxLength.get()) - int64_t(finalLen)));
+			if (int(finalLen) > maxLength.value()) {
+				insertSize = size_t(std::max(int64_t(0), int64_t(insertSize) + int64_t(maxLength.value()) - int64_t(finalLen)));
 			}
 		}
 
@@ -139,7 +139,7 @@ void TextInputData::onControlCharacter(TextControlCharacter c, std::shared_ptr<I
 		{
 			auto str = clipboard->getStringData();
 			if (str) {
-				insertText(str.get());
+				insertText(str.value());
 			}
 			break;
 		}
@@ -313,7 +313,7 @@ void InputKeyboard::onButtonPressed(int scanCode)
 	}
 
 	if (code) {
-		onTextControlCharacterGenerated(code.get());
+		onTextControlCharacterGenerated(code.value());
 	}
 	InputButtonBase::onButtonPressed(scanCode);
 }

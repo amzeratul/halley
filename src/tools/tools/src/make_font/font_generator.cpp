@@ -51,7 +51,7 @@ static Maybe<Vector<BinPackResult>> binarySearch(std::function<Maybe<Vector<BinP
 		int v = (v0 + v1) / 2;
 		Maybe<Vector<BinPackResult>> result = f(v);
 
-		if (result.is_initialized()) {
+		if (result) {
 			// Midpoint is good, try increasing
 			lastGood = v;
 			bestResult = result;
@@ -91,7 +91,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 	Maybe<Vector<BinPackResult>> result;
 
 	if (sizeInfo.fontSize) {
-		fontSize = int(sizeInfo.fontSize.get());
+		fontSize = int(sizeInfo.fontSize.value());
 
 		constexpr int minSize = 16;
 		constexpr int maxSize = 4096;
@@ -104,7 +104,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 			}
 		}
 	} else if (sizeInfo.imageSize) {
-		imageSize = sizeInfo.imageSize.get();
+		imageSize = sizeInfo.imageSize.value();
 
 		if (verbose) {
 			std::cout << "Finding best pack size...\n";
@@ -137,7 +137,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 	std::atomic<int> nDone(0);
 	std::atomic<bool> keepGoing(true);
 
-	auto& pack = result.get();
+	auto& pack = result.value();
 	if (verbose) {
 		std::cout << "Rendering " << pack.size() << " glyphs";
 	}

@@ -15,7 +15,7 @@ UIWidget::UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f i
 	, sizer(std::move(sizer))
 {
 	if (this->sizer) {
-		this->sizer.get().reparent(*this);
+		this->sizer->reparent(*this);
 	}
 }
 
@@ -35,7 +35,7 @@ void UIWidget::doDraw(UIPainter& painter) const
 
 	auto clip = painter.getClip();
 	if (clip && !ignoreClip()) {
-		if (!clip.get().overlaps(getRect())) {
+		if (!clip->overlaps(getRect())) {
 			return;
 		}
 	}
@@ -99,7 +99,7 @@ Vector2f UIWidget::getLayoutMinimumSize(bool force) const
 		if (layoutNeeded > 0) {
 			--layoutNeeded;
 			auto border = getInnerBorder();
-			layoutSize = sizer.get().getLayoutMinimumSize(false);
+			layoutSize = sizer->getLayoutMinimumSize(false);
 			if (layoutSize.x > 0.1f || layoutSize.y > 0.1f) {
 				layoutSize += Vector2f(border.x + border.z, border.y + border.w);
 			}
@@ -115,7 +115,7 @@ void UIWidget::setRect(Rect4f rect)
 	if (sizer) {
 		auto border = getInnerBorder();
 		auto p0 = getLayoutOriginPosition();
-		sizer.get().setRect(Rect4f(p0 + Vector2f(border.x, border.y), p0 + rect.getSize() - Vector2f(border.z, border.w)));
+		sizer->setRect(Rect4f(p0 + Vector2f(border.x, border.y), p0 + rect.getSize() - Vector2f(border.z, border.w)));
 	} else {
 		for (auto& c: getChildren()) {
 			c->layout();
@@ -173,7 +173,7 @@ UISizer& UIWidget::getSizer()
 	if (!sizer) {
 		throw Exception("UIWidget does not have a sizer.", HalleyExceptions::UI);
 	}
-	return sizer.get();
+	return sizer.value();
 }
 
 void UIWidget::add(std::shared_ptr<IUIElement> element, float porportion, Vector4f border, int fillFlags)
@@ -188,28 +188,28 @@ void UIWidget::add(std::shared_ptr<IUIElement> element, float porportion, Vector
 		}
 	}
 	if (sizer) {
-		sizer.get().add(element, porportion, border, fillFlags);
+		sizer->add(element, porportion, border, fillFlags);
 	}
 }
 
 void UIWidget::addSpacer(float size)
 {
 	if (sizer) {
-		sizer.get().addSpacer(size);
+		sizer->addSpacer(size);
 	}
 }
 
 void UIWidget::addStretchSpacer(float proportion)
 {
 	if (sizer) {
-		sizer.get().addStretchSpacer(proportion);
+		sizer->addStretchSpacer(proportion);
 	}
 }
 
 void UIWidget::clear()
 {
 	if (sizer) {
-		sizer.get().clear();
+		sizer->clear();
 	}
 	UIParent::clear();
 }
@@ -615,7 +615,7 @@ Rect4f UIWidget::getMouseRect() const
 {
 	auto rect = Rect4f(getPosition(), getPosition() + getSize());
 	if (mouseClip) {
-		return rect.intersection(mouseClip.get());
+		return rect.intersection(mouseClip.value());
 	} else {
 		return rect;
 	}

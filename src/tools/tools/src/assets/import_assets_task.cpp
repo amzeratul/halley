@@ -104,7 +104,7 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 		importingAsset.assetType = asset.assetType;
 		for (auto& f: asset.inputFiles) {
 			auto meta = db.getMetadata(f.first);
-			importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.first, FileSystem::readFile(asset.srcDir / f.first), meta ? meta.get() : Metadata()));
+			importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.first, FileSystem::readFile(asset.srcDir / f.first), meta ? meta.value() : Metadata()));
 		}
 		toLoad.emplace_back(std::move(importingAsset));
 

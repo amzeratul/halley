@@ -28,6 +28,18 @@ namespace Halley {
             return *pointer;
         }
 
+    	T* operator->()
+        {
+        	Expects(pointer != nullptr);
+			return pointer;
+        }
+
+    	const T* operator->() const
+        {
+        	Expects(pointer != nullptr);
+			return pointer;
+        }
+
     private:
         T* pointer;
     };

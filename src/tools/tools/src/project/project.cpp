@@ -129,7 +129,7 @@ ProjectProperties& Project::getProperties() const
 
 Metadata Project::getImportMetadata(AssetType type, const String& assetId) const
 {
-	return importAssetsDatabase->getMetadata(type, assetId).get_value_or(Metadata());
+	return importAssetsDatabase->getMetadata(type, assetId).value_or(Metadata());
 }
 
 Metadata Project::readMetadataFromDisk(const Path& filePath) const

@@ -166,7 +166,7 @@ Rect4i Camera::getActiveViewPort() const
 {
 	auto targetViewPort = getActiveRenderTarget().getViewPort();
 	if (viewPort) {
-		return viewPort.get().intersection(targetViewPort);
+		return viewPort->intersection(targetViewPort);
 	} else {
 		return targetViewPort;
 	}

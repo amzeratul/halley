@@ -83,7 +83,7 @@ Maybe<int> TextureDescriptorImageData::getStride() const
 int TextureDescriptorImageData::getStrideOr(int assumedStride) const
 {
 	if (stride) {
-		return stride.get();
+		return stride.value();
 	} else {
 		return assumedStride;
 	}

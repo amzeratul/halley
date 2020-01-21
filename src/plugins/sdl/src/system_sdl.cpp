@@ -199,7 +199,7 @@ std::shared_ptr<Window> SystemSDL::createWindow(const WindowDefinition& windowDe
 
 	// Window position
 	Vector2i windowSize = windowDef.getSize();
-	Vector2i winPos = windowDef.getPosition().get_value_or(getCenteredWindow(windowSize, 0));
+	Vector2i winPos = windowDef.getPosition().value_or(getCenteredWindow(windowSize, 0));
 
 	// Create window
 	auto sdlWindow = SDL_CreateWindow(windowDef.getTitle().c_str(), winPos.x, winPos.y, windowSize.x, windowSize.y, flags);

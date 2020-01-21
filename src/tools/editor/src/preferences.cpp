@@ -23,7 +23,7 @@ ConfigNode Preferences::save() const
 	{
 		ConfigNode::MapType windowNode;
 		if (windowPosition) {
-			windowNode["position"] = windowPosition.get();
+			windowNode["position"] = windowPosition.value();
 		}
 		windowNode["size"] = windowSize;
 		windowNode["state"] = int(windowState);

@@ -32,7 +32,7 @@ UIPainter UIPainter::withClip(Maybe<Rect4f> newClip)
 	auto result = clone();
 	if (newClip) {
 		if (clip) {
-			result.clip = clip.get().intersection(newClip.get());
+			result.clip = clip->intersection(newClip.value());
 		} else {
 			result.clip = newClip;
 		}
@@ -64,9 +64,9 @@ float UIPainter::getCurrentPriority()
 void UIPainter::draw(const Sprite& sprite, bool forceCopy)
 {
 	if (clip) {
-		auto targetClip = clip.get() - sprite.getPosition();
+		auto targetClip = clip.value() - sprite.getPosition();
 		if (sprite.getClip()) {
-			targetClip = sprite.getClip().get().intersection(targetClip);
+			targetClip = sprite.getClip()->intersection(targetClip);
 		}
 
 		auto onScreen = sprite.getAABB().intersection(targetClip + sprite.getPosition());
@@ -85,14 +85,14 @@ void UIPainter::draw(const Sprite& sprite, bool forceCopy)
 void UIPainter::draw(const TextRenderer& text, bool forceCopy)
 {
 	if (clip) {
-		auto targetClip = clip.get() - text.getPosition();
+		auto targetClip = clip.value() - text.getPosition();
 		if (text.getClip()) {
-			targetClip = text.getClip().get().intersection(targetClip);
+			targetClip = text.getClip()->intersection(targetClip);
 		}
 		
 		auto onScreen = Rect4f(Vector2f(), text.getExtents()).intersection(targetClip);
 		if (onScreen.getWidth() > 0.1f && onScreen.getHeight() > 0.1f) {
-			painter.addCopy(text.clone().setClip(clip.get() - text.getPosition()), mask, layer, getCurrentPriority());
+			painter.addCopy(text.clone().setClip(clip.value() - text.getPosition()), mask, layer, getCurrentPriority());
 		}
 	} else {
 		if (forceCopy) {

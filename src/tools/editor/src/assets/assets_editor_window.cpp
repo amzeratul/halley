@@ -88,14 +88,14 @@ void AssetsEditorWindow::listAssetSources()
 {
 	if (!assetNames) {
 		assetNames = project.getAssetSrcList();
-		std::sort(assetNames.get().begin(), assetNames.get().end()); // Is this even needed?
+		std::sort(assetNames->begin(), assetNames->end()); // Is this even needed?
 	}
 
 	if (filter.isEmpty()) {
-		setListContents(assetNames.get(), curSrcPath, false);
+		setListContents(assetNames.value(), curSrcPath, false);
 	} else {
 		std::vector<String> filteredList;
-		for (auto& a: assetNames.get()) {
+		for (auto& a: assetNames.value()) {
 			if (a.asciiLower().contains(filter)) {
 				filteredList.push_back(a);
 			}

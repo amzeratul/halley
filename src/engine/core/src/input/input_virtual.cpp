@@ -379,7 +379,7 @@ void InputVirtual::update(Time t)
 		}
 	}
 	if (positionLimits) {
-		position = positionLimits.get().getClosestPoint(position);
+		position = positionLimits->getClosestPoint(position);
 	}
 }
 

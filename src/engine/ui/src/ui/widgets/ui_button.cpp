@@ -31,7 +31,7 @@ void UIButton::update(Time t, bool moved)
 		Vector2f basePos = getPosition();
 		Vector2f imgBaseSize = sprite.getRawSize().abs() + topLeftBorder + bottomRightBorder;
 		if (sprite.getClip()) {
-			auto c = sprite.getClip().get();
+			auto c = sprite.getClip().value();
 			basePos -= c.getTopLeft();
 			imgBaseSize = std::min(c.getSize(), imgBaseSize);
 		}

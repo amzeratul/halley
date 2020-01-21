@@ -26,7 +26,7 @@ namespace Halley
 			if (!serialized) {
 				serialized = Serializer::toBytes(*this);
 			}
-			return serialized.get().size();
+			return serialized->size();
 		}
 
 		void serializeTo(gsl::span<gsl::byte> dst) const
@@ -34,7 +34,7 @@ namespace Halley
 			if (!serialized) {
 				serialized = Serializer::toBytes(*this);
 			}
-			memcpy(dst.data(), serialized.get().data(), serialized.get().size());
+			memcpy(dst.data(), serialized->data(), serialized->size());
 		}
 
 		virtual void serialize(Serializer& s) const = 0;

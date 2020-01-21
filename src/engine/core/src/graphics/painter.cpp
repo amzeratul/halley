@@ -244,7 +244,7 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 	auto makeNormal = [] (Vector2f a, Maybe<Vector2f> maybeB) -> Vector2f
 	{
 		if (maybeB) {
-			const auto b = maybeB.get();
+			const auto b = maybeB.value();
 			const auto c = (a + b).normalized();
 			const auto cosHalfAlpha = c.dot(a);
 			return c * (1.0f / cosHalfAlpha);
@@ -254,7 +254,7 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 	};
 
 	Maybe<Vector2f> prevNormal = loop ? segmentNormal(nSegments - 1) : Maybe<Vector2f>();
-	Vector2f normal = segmentNormal(0).get();
+	Vector2f normal = segmentNormal(0).value();
 	Maybe<Vector2f> nextNormal;
 
 	for (size_t i = 0; i < nSegments; ++i) {
@@ -275,7 +275,7 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 
 		prevNormal = normal;
 		if (nextNormal) {
-			normal = nextNormal.get();
+			normal = nextNormal.value();
 		}
 	}
 
@@ -559,7 +559,7 @@ void Painter::updateClip()
 
 		curClip = pendingClip;
 		if (curClip) {
-			Rect4i finalRect = (curClip.get() + viewPort.getTopLeft()).intersection(viewPort);
+			Rect4i finalRect = (curClip.value() + viewPort.getTopLeft()).intersection(viewPort);
 			setClip(getRectangleForActiveRenderTarget(finalRect), finalRect != activeRenderTarget->getViewPort());
 		} else {
 			setClip(getRectangleForActiveRenderTarget(viewPort), viewPort != activeRenderTarget->getViewPort());

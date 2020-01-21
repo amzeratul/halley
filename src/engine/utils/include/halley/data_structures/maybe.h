@@ -4,10 +4,10 @@
 #include <functional>
 #include <cassert>
 #include "halley/support/exception.h"
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace Halley
 {
 	template <typename T>
-	using Maybe = boost::optional<T>;
+	using Maybe = std::optional<T>;
 }

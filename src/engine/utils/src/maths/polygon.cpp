@@ -302,8 +302,8 @@ Maybe<std::pair<float, Vector2f>> Polygon::getCollisionWithSweepingCircle(Vector
 	Maybe<std::pair<float, Vector2f>> result;
 	const auto submit = [&] (Maybe<std::pair<float, Vector2f>> c)
 	{
-		if (c && c.get().first < moveLen) {
-			if (!result || c.get().first < result.get().first) {
+		if (c && c->first < moveLen) {
+			if (!result || c->first < result->first) {
 				result = c;
 			}
 		}
@@ -362,7 +362,7 @@ Maybe<std::pair<float, Vector2f>> Polygon::getCollisionWithSweepingEllipse(Vecto
 	const auto submit = [&] (Maybe<std::pair<float, Vector2f>> c)
 	{
 		if (c) {
-			const float lenToCol = c.get().first;
+			const float lenToCol = c->first;
 			if (lenToCol < bestLen) {
 				result = c;
 				bestLen = lenToCol;

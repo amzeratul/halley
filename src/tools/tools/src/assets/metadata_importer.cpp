@@ -52,10 +52,10 @@ Metadata MetadataImporter::getMetaData(const Path& inputFilePath, Maybe<Path> di
 	Metadata meta;
 	try {
 		if (dirMetaPath) {
-			loadMetaData(meta, dirMetaPath.get(), true, inputFilePath);
+			loadMetaData(meta, dirMetaPath.value(), true, inputFilePath);
 		}
 		if (privateMetaPath) {
-			loadMetaData(meta, privateMetaPath.get(), false, inputFilePath);
+			loadMetaData(meta, privateMetaPath.value(), false, inputFilePath);
 		}
 	} catch (std::exception& e) {
 		throw Exception("Error parsing metafile for " + inputFilePath + ": " + e.what(), HalleyExceptions::Tools);

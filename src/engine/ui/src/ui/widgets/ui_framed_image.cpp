@@ -70,7 +70,7 @@ const Sprite& UIFramedImage::getFramedSprite() const
 void UIFramedImage::setScrolling(Vector2f ss, Maybe<Vector2f> startPos)
 {
 	if (startPos) {
-		scrollPos = startPos.get();
+		scrollPos = startPos.value();
 	}
 	scrollSpeed = ss;
 }
