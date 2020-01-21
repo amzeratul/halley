@@ -17,12 +17,8 @@ set(HEADERS
         "include/halley/lua/lua_state.h"
         )
 
-file (GLOB_RECURSE LUA_FILES "../../contrib/lua/src/*.*")
-file (GLOB_RECURSE SELENE_FILES "../../contrib/selene/include/*.*")
-
-set(SOURCES ${SOURCES} ${LUA_FILES} ${SELENE_FILES})
-
 assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-lua ${SOURCES} ${HEADERS})
+target_link_libraries (halley-lua halley-contrib)

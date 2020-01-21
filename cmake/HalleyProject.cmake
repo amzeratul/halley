@@ -285,6 +285,7 @@ set(HALLEY_PROJECT_INCLUDE_DIRS
 	)
 
 set(HALLEY_PROJECT_LIBS
+	optimized halley-contrib
 	optimized halley-ui
 	optimized halley-core
 	optimized halley-entity
@@ -292,6 +293,7 @@ set(HALLEY_PROJECT_LIBS
 	optimized halley-net
 	optimized halley-lua
 	optimized halley-utils
+	debug halley-contrib_d
 	debug halley-ui_d
 	debug halley-core_d
 	debug halley-entity_d

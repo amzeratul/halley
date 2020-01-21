@@ -75,7 +75,7 @@ license you like.
 #pragma warning(disable: 4463)
 #endif
 
-#include "halley/file_formats/json/json.h"
+#include "json.h"
 
 
 // //////////////////////////////////////////////////////////////////////

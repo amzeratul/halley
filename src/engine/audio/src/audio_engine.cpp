@@ -219,7 +219,7 @@ int AudioEngine::getGroupId(const String& group)
 {
 	auto iter = std::find(groupNames.begin(), groupNames.end(), group);
 	if (iter != groupNames.end()) {
-		return iter - groupNames.begin();
+		return int(iter - groupNames.begin());
 	} else {
 		groupNames.push_back(group);
 		groupGains.push_back(1.0f);

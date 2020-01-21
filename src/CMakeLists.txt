@@ -1,3 +1,4 @@
+add_subdirectory(contrib)
 add_subdirectory(engine)
 add_subdirectory(plugins)
 

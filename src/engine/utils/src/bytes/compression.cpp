@@ -2,7 +2,7 @@
 #include <memory>
 #include "halley/bytes/compression.h"
 //#include "../../contrib/lodepng/lodepng.h"
-#include "../../contrib/zlib/zlib.h"
+#include "../../../../contrib/zlib/zlib.h"
 #include "halley/support/exception.h"
 #include "halley/text/string_converter.h"
 

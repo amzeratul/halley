@@ -1,5 +1,5 @@
 #include "halley/tools/vs_project/vs_project_manipulator.h"
-#include "../../../engine/utils/contrib/tinyxml/ticpp.h"
+#include "../../../contrib/tinyxml/ticpp.h"
 #include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
 #include "halley/tools/file/filesystem.h"

@@ -1,5 +1,5 @@
 #include "halley/audio/resampler.h"
-#include "../../contrib/speex/speex_resampler.h"
+#include "../../../../contrib/speex/speex_resampler.h"
 
 using namespace Halley;
 
