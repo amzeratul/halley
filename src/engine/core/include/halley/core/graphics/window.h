@@ -1,9 +1,9 @@
 #pragma once
 #include <halley/maths/vector2.h>
 #include <halley/maths/rect.h>
-#include <boost/optional.hpp>
 #include <halley/text/halleystring.h>
 #include <halley/file/path.h>
+#include <halley/data_structures/maybe.h>
 
 namespace Halley
 {
@@ -46,7 +46,7 @@ namespace Halley
 			, title(title)
 		{}
 
-		WindowDefinition(WindowType windowType, boost::optional<Vector2i> position, Vector2i size, String title)
+		WindowDefinition(WindowType windowType, Maybe<Vector2i> position, Vector2i size, String title)
 			: windowType(windowType)
 			, position(position)
 			, size(size)
@@ -55,12 +55,12 @@ namespace Halley
 
 		WindowType getWindowType() const { return windowType; }
 		WindowState getWindowState() const { return windowState; }
-		boost::optional<Vector2i> getPosition() const { return position; }
+		Maybe<Vector2i> getPosition() const { return position; }
 		Vector2i getSize() const { return size; }
 		String getTitle() const { return title; }
-		boost::optional<Path> getIcon() const { return icon; }
+		Maybe<Path> getIcon() const { return icon; }
 
-		WindowDefinition withPosition(boost::optional<Vector2i> newPos) const
+		WindowDefinition withPosition(Maybe<Vector2i> newPos) const
 		{
 			auto w = *this;
 			w.position = newPos;
@@ -91,10 +91,10 @@ namespace Halley
 	private:
 		WindowType windowType = WindowType::Fullscreen;
 		WindowState windowState = WindowState::Normal;
-		boost::optional<Vector2i> position;
+		Maybe<Vector2i> position;
 		Vector2i size;
 		String title;
-		boost::optional<Path> icon;
+		Maybe<Path> icon;
 	};
 
 	class Window

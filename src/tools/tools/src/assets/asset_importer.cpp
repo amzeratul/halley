@@ -1,4 +1,3 @@
-#include <boost/variant/detail/substitute.hpp>
 #include "halley/tools/assets/asset_importer.h"
 #include "halley/support/exception.h"
 #include "importers/copy_file_importer.h"

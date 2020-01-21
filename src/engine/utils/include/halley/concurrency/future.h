@@ -3,7 +3,7 @@
 #include "executor.h"
 #include <memory>
 #include <atomic>
-#include <boost/optional.hpp>
+#include <halley/data_structures/maybe.h>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -180,7 +180,7 @@ namespace Halley
 
 		std::atomic<bool> available;
 		std::atomic<bool> cancelled;
-		boost::optional<T> data;
+		Maybe<T> data;
 
 		std::vector<std::function<void(T)>> continuations;
 		std::mutex mutex;

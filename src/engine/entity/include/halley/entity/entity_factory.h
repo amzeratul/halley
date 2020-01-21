@@ -8,6 +8,8 @@ namespace Halley {
 	
 	class EntityFactory {
 	public:
+		explicit EntityFactory(World& world);
+
 		template <typename T>
 		static void createComponent(EntityRef& e, const ConfigNode& componentData)
 		{
@@ -16,7 +18,6 @@ namespace Halley {
 			e.addComponent<T>(std::move(component));
 		}
 
-		explicit EntityFactory(World& world);
 		EntityRef createEntity(const ConfigNode& node);
 
 	private:

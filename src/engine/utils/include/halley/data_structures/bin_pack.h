@@ -1,7 +1,7 @@
 #pragma once
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
-#include <boost/optional.hpp>
+#include <halley/data_structures/maybe.h>
 
 namespace Halley
 {
@@ -55,7 +55,7 @@ namespace Halley
 	class BinPack
 	{
 	public:
-		static boost::optional<Vector<BinPackResult>> pack(const std::vector<BinPackEntry>& entries, Vector2i binSize);
-		static boost::optional<Vector<BinPackResult>> fastPack(const std::vector<BinPackEntry>& entries, Vector2i binSize);
+		static Maybe<Vector<BinPackResult>> pack(const std::vector<BinPackEntry>& entries, Vector2i binSize);
+		static Maybe<Vector<BinPackResult>> fastPack(const std::vector<BinPackEntry>& entries, Vector2i binSize);
 	};
 }

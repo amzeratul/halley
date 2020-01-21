@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <utility>
 #include <set>
-#include <boost/optional.hpp>
+#include "halley/data_structures/maybe.h"
 #include "halley/maths/vector4.h"
 
 namespace Halley {
@@ -137,7 +137,7 @@ namespace Halley {
 		}
 		
 		template <typename T>
-		Serializer& operator<<(const boost::optional<T>& p)
+		Serializer& operator<<(const Maybe<T>& p)
 		{
 			if (p) {
 				return *this << true << p.get();
@@ -357,7 +357,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		Deserializer& operator>>(boost::optional<T>& p)
+		Deserializer& operator>>(Maybe<T>& p)
 		{
 			bool present;
 			*this >> present;
@@ -366,7 +366,7 @@ namespace Halley {
 				*this >> tmp;
 				p = tmp;
 			} else {
-				p = boost::optional<T>();
+				p = Maybe<T>();
 			}
 			return *this;
 		}

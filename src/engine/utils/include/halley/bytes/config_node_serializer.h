@@ -8,7 +8,7 @@ namespace Halley {
     public:
         T operator()(const ConfigNode& node)
         {
-			return T();
+			throw Exception("ConfigNodeDeserializer unimplemented type: " + String(typeid(T).name()), HalleyExceptions::Utils);
         }
     };
 
