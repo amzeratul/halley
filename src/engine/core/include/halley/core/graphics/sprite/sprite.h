@@ -5,6 +5,7 @@
 #include <halley/maths/colour.h>
 #include <halley/maths/vector4.h>
 #include "halley/data_structures/maybe.h"
+#include <halley/bytes/config_node_serializer.h>
 
 namespace Halley
 {
@@ -125,5 +126,15 @@ namespace Halley
 		bool sliced = false;
 
 		void computeSize();
+	};
+
+	class Resources;
+	template<>
+	class ConfigNodeDeserializer<Sprite> {
+	public:
+		Sprite operator()(Resources& resources, const ConfigNode& node)
+		{
+			return Sprite().setImage(resources, node["image"].asString());
+		}
 	};
 }

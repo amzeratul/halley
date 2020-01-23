@@ -290,6 +290,15 @@ Rect4f Polygon::getAABB() const
 	return aabb;
 }
 
+void Polygon::translate(Vector2f offset)
+{
+	for (auto& v: vertices) {
+		v += offset;
+	}
+	realize();
+}
+
+
 Maybe<std::pair<float, Vector2f>> Polygon::getCollisionWithSweepingCircle(Vector2f p0, float radius, Vector2f moveDir, float moveLen) const
 {
 	// This is used to grow AABBs to check if p0 is inside

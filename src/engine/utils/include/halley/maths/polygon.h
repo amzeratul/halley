@@ -53,6 +53,8 @@ namespace Halley {
 
 		Rect4f getAABB() const;
 
+		void translate(Vector2f offset);
+
 		// Returns the distance from circlePos, along moveDir, until the collision point, and the collision normal.
 		// Only returns a value if a collision is found between start pos and up to move len away
 		Maybe<std::pair<float, Vector2f>> getCollisionWithSweepingCircle(Vector2f circlePos, float radius, Vector2f moveDir, float moveLen) const;

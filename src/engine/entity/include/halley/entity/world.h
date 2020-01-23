@@ -21,11 +21,12 @@ namespace Halley {
 	class System;
 	class Painter;
 	class HalleyAPI;
+	class EntityFactory;
 
 	class World
 	{
 	public:
-		using CreateComponentFunction = std::function<void(const String& componentName, EntityRef& entity, const ConfigNode& componentData)>;
+		using CreateComponentFunction = std::function<void(EntityFactory& factory, const String& componentName, EntityRef& entity, const ConfigNode& componentData)>;
 
 		World(const HalleyAPI* api, bool collectMetrics, CreateComponentFunction createComponent);
 		~World();

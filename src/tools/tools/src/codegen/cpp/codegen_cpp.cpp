@@ -135,7 +135,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 	registryCpp.insert(registryCpp.end(), {
 		"",
 		"",
-		"using ComponentFactoryPtr = std::function<void(EntityRef&, const ConfigNode&)>;",
+		"using ComponentFactoryPtr = std::function<void(EntityFactory&, EntityRef&, const ConfigNode&)>;",
 		"using ComponentFactoryMap = HashMap<String, ComponentFactoryPtr>;",
 		"",
 		"static ComponentFactoryMap makeComponentFactories() {",
@@ -143,7 +143,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 	});
 
 	for (auto& comp : components) {
-		registryCpp.push_back("	result[\"" + comp.name + "\"] = [] (EntityRef& e, const ConfigNode& node) { EntityFactory::createComponent<" + comp.name + "Component>(e, node); };");
+		registryCpp.push_back("	result[\"" + comp.name + "\"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) { factory.createComponent<" + comp.name + "Component>(e, node); };");
 	}
 
 	registryCpp.insert(registryCpp.end(), {
@@ -164,13 +164,13 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"		return std::unique_ptr<System>(result->second());",
 		"	}",
 		"",
-		"   void createComponent(const String& name, EntityRef& entity, const ConfigNode& componentData) {",
+		"   void createComponent(EntityFactory& factory, const String& name, EntityRef& entity, const ConfigNode& componentData) {",
 		"		static ComponentFactoryMap factories = makeComponentFactories();",
 		"		auto result = factories.find(name);",
 		"		if (result == factories.end()) {",
 		"			throw Exception(\"Component not found: \" + name, HalleyExceptions::Entity);",
 		"		}",
-		"		return result->second(entity, componentData);",
+		"		return result->second(factory, entity, componentData);",
 		"   }",
 		"}"
 	});
@@ -180,7 +180,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"",
 		"namespace Halley {",
 		"	std::unique_ptr<System> createSystem(String name);",
-		"	void createComponent(const String& name, EntityRef& entity, const ConfigNode& componentData);",
+		"	void createComponent(EntityFactory& factory, const String& name, EntityRef& entity, const ConfigNode& componentData);",
 		"}"
 	};
 
@@ -212,7 +212,7 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		} else {
 			deserializeBody += "\n\t\t";
 		}
-		deserializeBody += member.name + " = Halley::ConfigNodeDeserializer<" + CPPClassGenerator::getTypeString(member.type) + ">()(node[\"" + member.name + "\"]);";
+		deserializeBody += member.name + " = Halley::ConfigNodeDeserializer<" + CPPClassGenerator::getTypeString(member.type) + ">()(resources, node[\"" + member.name + "\"]);";
 	}
 
 	auto gen = CPPClassGenerator(component.name + "Component", "Halley::Component", CPPAccess::Public, true)
@@ -223,7 +223,7 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		.addBlankLine()
 		.addDefaultConstructor()
 		.addBlankLine()
-		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node") }, "deserialize"), deserializeBody);
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::Resources&"), "resources"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node") }, "deserialize"), deserializeBody);
 
 	if (!component.members.empty()) {
 		gen.addBlankLine()
