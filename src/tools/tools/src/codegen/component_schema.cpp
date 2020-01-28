@@ -5,7 +5,8 @@ using namespace Halley;
 
 ComponentSchema::ComponentSchema() {}
 
-ComponentSchema::ComponentSchema(YAML::Node node)
+ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
+	: generate(generate)
 {
 	name = node["name"].as<std::string>();
 

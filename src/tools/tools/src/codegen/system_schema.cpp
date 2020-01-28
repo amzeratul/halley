@@ -6,7 +6,8 @@ using namespace Halley;
 
 SystemSchema::SystemSchema() {}
 
-SystemSchema::SystemSchema(YAML::Node node)
+SystemSchema::SystemSchema(YAML::Node node, bool generate)
+	: generate(generate)
 {
 	name = node["name"].as<std::string>();
 

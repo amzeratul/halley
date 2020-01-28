@@ -34,12 +34,15 @@ namespace Halley
 
 		Path getGenPath() const;
 		Path getGenSrcPath() const;
+		Path getSharedGenPath() const;
+		Path getSharedGenSrcPath() const;
 
 		void setAssetPackManifest(const Path& path);
 		Path getAssetPackManifestPath() const;
 
 		ImportAssetsDatabase& getImportAssetsDatabase() const;
 		ImportAssetsDatabase& getCodegenDatabase() const;
+		ImportAssetsDatabase& getSharedCodegenDatabase() const;
 
 		const AssetImporter& getAssetImporter() const;
 		std::vector<std::unique_ptr<IAssetImporter>> getAssetImportersFromPlugins(ImportAssetType type) const;
@@ -73,6 +76,7 @@ namespace Halley
 
 		std::unique_ptr<ImportAssetsDatabase> importAssetsDatabase;
 		std::unique_ptr<ImportAssetsDatabase> codegenDatabase;
+		std::unique_ptr<ImportAssetsDatabase> sharedCodegenDatabase;
 		std::unique_ptr<AssetImporter> assetImporter;
 		std::unique_ptr<ProjectProperties> properties;
 

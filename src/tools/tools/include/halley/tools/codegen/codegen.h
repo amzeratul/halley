@@ -17,8 +17,14 @@ namespace Halley
 	class MessageSchema;
 	class CustomTypeSchema;
 
+	struct CodegenSourceInfo {
+		String filename;
+		gsl::span<const gsl::byte> data;
+		bool generate = false;
+	};
+	
 	class Codegen
-	{
+	{	
 		struct Stats
 		{
 			int written = 0;
@@ -35,7 +41,7 @@ namespace Halley
 
 		explicit Codegen(bool verbose = false);
 
-		void loadSources(std::vector<std::pair<String, gsl::span<const gsl::byte>>> files, ProgressReporter progress = &doNothing);
+		void loadSources(std::vector<CodegenSourceInfo> files, ProgressReporter progress = &doNothing);
 		void validate(ProgressReporter progress = &doNothing);
 		void process();
 		bool writeFile(Path path, const char* data, size_t dataSize, bool stub) const;
@@ -43,10 +49,10 @@ namespace Halley
 		std::vector<Path> generateCode(Path directory, ProgressReporter progress = &doNothing);
 
 	private:
-		void addSource(String name, gsl::span<const gsl::byte> data);
-		void addComponent(YAML::Node rootNode);
-		void addSystem(YAML::Node rootNode);
-		void addMessage(YAML::Node rootNode);
+		void addSource(CodegenSourceInfo sourceInfo);
+		void addComponent(YAML::Node rootNode, bool generate);
+		void addSystem(YAML::Node rootNode, bool generate);
+		void addMessage(YAML::Node rootNode, bool generate);
 		void addType(YAML::Node rootNode);
 		String getInclude(String typeName) const;
 

@@ -71,7 +71,7 @@ namespace Halley
 	{
 	public:
 		SystemSchema();
-		explicit SystemSchema(YAML::Node node);
+		explicit SystemSchema(YAML::Node node, bool generate);
 
 		String name;
 		SystemStrategy strategy = SystemStrategy::Individual;
@@ -79,6 +79,7 @@ namespace Halley
 		SystemMethod method = SystemMethod::Update;
 		CodegenLanguage language = CodegenLanguage::CPlusPlus;
 		int smearing = 0;
+		bool generate = false;
 
 		std::unordered_set<String> includeFiles;
 

@@ -14,11 +14,12 @@ namespace Halley
 	{
 	public:
 		ComponentSchema();
-		explicit ComponentSchema(YAML::Node node);
+		explicit ComponentSchema(YAML::Node node, bool generate);
 
 		int id = -1;
 		String name;
 		Vector<VariableSchema> members;
 		std::unordered_set<String> includeFiles;
+		bool generate = false;
 	};
 }

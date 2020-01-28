@@ -35,12 +35,12 @@ Codegen::Codegen(bool verbose)
 {
 }
 
-void Codegen::loadSources(std::vector<std::pair<String, gsl::span<const gsl::byte>>> files, ProgressReporter progress)
+void Codegen::loadSources(std::vector<CodegenSourceInfo> files, ProgressReporter progress)
 {
 	int i = 0;
 	for (auto& f : files) {
-		addSource(f.first, f.second);
-		if (!progress(float(i) / float(files.size()), f.first)) {
+		addSource(f);
+		if (!progress(float(i) / float(files.size()), f.filename)) {
 			return;
 		}
 	}
@@ -222,17 +222,21 @@ std::vector<Path> Codegen::generateCode(Path directory, ProgressReporter progres
 		Vector<SystemSchema> syss;
 
 		for (auto& comp : components) {
-			writeFiles(genDir, gen->generateComponent(comp.second), stats);
+			if (comp.second.generate) {
+				writeFiles(genDir, gen->generateComponent(comp.second), stats);
+			}
 			comps.push_back(comp.second);
 		}
 		for (auto& sys : systems) {
-			if (sys.second.language == gen->getLanguage()) {
+			if (sys.second.generate && sys.second.language == gen->getLanguage()) {
 				writeFiles(genDir, gen->generateSystem(sys.second), stats);
 			}
 			syss.push_back(sys.second);
 		}
 		for (auto& msg : messages) {
-			writeFiles(genDir, gen->generateMessage(msg.second), stats);
+			if (msg.second.generate) {
+				writeFiles(genDir, gen->generateMessage(msg.second), stats);
+			}
 		}
 
 		// Registry
@@ -259,13 +263,13 @@ std::vector<Path> Codegen::generateCode(Path directory, ProgressReporter progres
 	return out;
 }
 
-void Codegen::addSource(String path, gsl::span<const gsl::byte> data)
+void Codegen::addSource(CodegenSourceInfo info)
 {
-	String strData(reinterpret_cast<const char*>(data.data()), data.size());
+	String strData(reinterpret_cast<const char*>(info.data.data()), info.data.size());
 	auto documents = YAML::LoadAll(strData.cppStr());
 
 	for (auto document: documents) {
-		String curPos = path + ":" + toString(document.Mark().line) + ":" + toString(document.Mark().column);
+		String curPos = info.filename + ":" + toString(document.Mark().line) + ":" + toString(document.Mark().column);
 
 		if (!document.IsDefined() || document.IsNull()) {
 			throw Exception("Invalid document in stream.", HalleyExceptions::Tools);
@@ -274,11 +278,11 @@ void Codegen::addSource(String path, gsl::span<const gsl::byte> data)
 		if (document.IsScalar()) {
 			throw Exception("YAML parse error in codegen definitions:\n\"" + document.as<std::string>() + "\"\nat " + curPos, HalleyExceptions::Tools);
 		} else if (document["component"].IsDefined()) {
-			addComponent(document);
+			addComponent(document, info.generate);
 		} else if (document["system"].IsDefined()) {
-			addSystem(document);
+			addSystem(document, info.generate);
 		} else if (document["message"].IsDefined()) {
-			addMessage(document);
+			addMessage(document, info.generate);
 		} else if (document["type"].IsDefined()) {
 			addType(document);
 		} else {
@@ -287,9 +291,9 @@ void Codegen::addSource(String path, gsl::span<const gsl::byte> data)
 	}
 }
 
-void Codegen::addComponent(YAML::Node rootNode)
+void Codegen::addComponent(YAML::Node rootNode, bool generate)
 {
-	auto comp = ComponentSchema(rootNode["component"]);
+	auto comp = ComponentSchema(rootNode["component"], generate);
 
 	if (components.find(comp.name) == components.end()) {
 		components[comp.name] = comp;
@@ -298,9 +302,9 @@ void Codegen::addComponent(YAML::Node rootNode)
 	}
 }
 
-void Codegen::addSystem(YAML::Node rootNode)
+void Codegen::addSystem(YAML::Node rootNode, bool generate)
 {
-	auto sys = SystemSchema(rootNode["system"]);
+	auto sys = SystemSchema(rootNode["system"], generate);
 
 	if (systems.find(sys.name) == systems.end()) {
 		systems[sys.name] = sys;
@@ -309,9 +313,9 @@ void Codegen::addSystem(YAML::Node rootNode)
 	}
 }
 
-void Codegen::addMessage(YAML::Node rootNode)
+void Codegen::addMessage(YAML::Node rootNode, bool generate)
 {
-	auto msg = MessageSchema(rootNode["message"]);
+	auto msg = MessageSchema(rootNode["message"], generate);
 
 	if (messages.find(msg.name) == messages.end()) {
 		messages[msg.name] = msg;

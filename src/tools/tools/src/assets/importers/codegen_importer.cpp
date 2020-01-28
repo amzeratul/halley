@@ -13,13 +13,13 @@ void CodegenImporter::import(const ImportingAsset& asset, IAssetCollector& colle
 {
 	Codegen codegen;
 
-	std::vector<std::pair<String, gsl::span<const gsl::byte>>> srcs;
+	std::vector<CodegenSourceInfo> srcs;
 	int n = 0;
 	for (auto& f : asset.inputFiles) {
 		if (!collector.reportProgress(lerp(0.0f, 0.25f, float(n) / asset.inputFiles.size()), "Loading sources")) {
 			return;
 		}
-		srcs.push_back(std::make_pair(f.name.string(), gsl::as_bytes(gsl::span<const Byte>(f.data))));
+		srcs.push_back(CodegenSourceInfo{ f.name.string(), gsl::as_bytes(gsl::span<const Byte>(f.data)), !f.metadata.getBool("skipGen", false) });
 		++n;
 	}
 	codegen.loadSources(srcs, [&](float progress, String label) -> bool {

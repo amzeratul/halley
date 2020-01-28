@@ -5,7 +5,8 @@ using namespace Halley;
 
 MessageSchema::MessageSchema() {}
 
-MessageSchema::MessageSchema(YAML::Node node)
+MessageSchema::MessageSchema(YAML::Node node, bool generate)
+	: generate(generate)
 {
 	name = node["name"].as<std::string>();
 

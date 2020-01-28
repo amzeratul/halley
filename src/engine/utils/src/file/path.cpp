@@ -88,6 +88,14 @@ void Path::normalise()
 	}
 
 	pathParts.resize(writePos);
+
+#ifdef _WIN32
+	if (!pathParts.empty()) {
+		if (pathParts[0].size() == 2 && pathParts[0][1] == ':') {
+			pathParts[0] = pathParts[0].asciiUpper();
+		}
+	}
+#endif
 }
 
 Path& Path::operator=(const std::string& other)
@@ -282,7 +290,7 @@ Path Path::makeRelativeTo(const Path& path) const
 		}
 	}
 
-	for (int i = 0; i < int(path.getNumberPaths()) - int(sharedRoot) - 1; ++i) {
+	for (int i = 0; i < int(path.getNumberPaths()) - int(sharedRoot) - (isAbsolute() ? 0 : 1); ++i) {
 		result.emplace_back("..");
 	}
 
