@@ -62,7 +62,7 @@ namespace Halley {
 		bool hasComponent()
 		{
 			if (dirty) {
-				return getComponent<T>() != nullptr;
+				return tryGetComponent<T>() != nullptr;
 			} else {
 				return FamilyMask::hasBit(mask, FamilyMask::RetrieveComponentIndex<T>::componentIndex);
 			}
@@ -73,7 +73,8 @@ namespace Halley {
 			return dirty;
 		}
 
-		bool isAlive() const {
+		bool isAlive() const
+		{
 			return alive;
 		}
 
@@ -167,7 +168,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		bool hasComponent()
+		bool hasComponent() const
 		{
 			return entity.hasComponent<T>();
 		}

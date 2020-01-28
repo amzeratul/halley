@@ -8,12 +8,12 @@ EntityFactory::EntityFactory(World& world, Resources& resources)
 {
 }
 
-Maybe<EntityRef> EntityFactory::createEntity(const ConfigNode& node)
+EntityFactory::~EntityFactory()
 {
-	if (!node["enabled"].asBool(true)) {
-		return {};
-	}
-	
+}
+
+EntityEntry EntityFactory::createEntity(const ConfigNode& node)
+{
 	auto entity = world.createEntity();
 	const auto func = world.getCreateComponentFunction();
 	
@@ -24,12 +24,18 @@ Maybe<EntityRef> EntityFactory::createEntity(const ConfigNode& node)
 		}
 	}
 
-	return entity;
+	return EntityEntry{ node["name"].asString(""), entity };
 }
 
-void EntityFactory::createScene(const ConfigNode& node)
+std::vector<EntityEntry> EntityFactory::createScene(const ConfigNode& node)
 {
-	for (auto& e: node["entities"].asSequence()) {
-		createEntity(e);
+	const auto& seq = node["entities"].asSequence();
+	std::vector<EntityEntry> result;
+	result.reserve(seq.size());
+	
+	for (auto& e: seq) {
+		result.push_back(createEntity(e));
 	}
+
+	return result;
 }
