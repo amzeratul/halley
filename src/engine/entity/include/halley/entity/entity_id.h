@@ -3,6 +3,7 @@
 #include <cstdint>
 #include "halley/text/halleystring.h"
 #include "halley/text/string_converter.h"
+#include "halley/bytes/config_node_serializer.h"
 
 namespace Halley {
 	struct alignas(8) EntityId {
@@ -28,6 +29,15 @@ namespace Halley {
 			return Halley::toString(value);
 		}
 	};
+	
+	template <>
+    class ConfigNodeDeserializer<EntityId> {
+    public:
+        EntityId operator()(Resources&, const ConfigNode& node)
+        {
+			return EntityId(node.asString(""));
+        }
+    };
 }
 
 

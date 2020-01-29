@@ -157,7 +157,9 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	Vector<String> contents = {
 		"#pragma once",
 		"",
+		"#ifndef DONT_INCLUDE_HALLEY_HPP",
 		"#include <halley.hpp>",
+		"#endif"
 		""
 	};
 
@@ -179,20 +181,25 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 
 	String className = component.name + "Component" + (component.customImplementation ? "Base" : "");
 	
-	auto gen = CPPClassGenerator(className, "Halley::Component", CPPAccess::Public, !component.customImplementation)
-		.addAccessLevelSection(CPPAccess::Public)
-		.addMember(VariableSchema(TypeSchema("int", false, true, true), "componentIndex", toString(component.id)))
+	auto gen = CPPClassGenerator(className, "Halley::Component", MemberAccess::Public, !component.customImplementation)
+		.addAccessLevelSection(MemberAccess::Public)
+		.addMember(MemberSchema(TypeSchema("int", false, true, true), "componentIndex", toString(component.id)))
 		.addBlankLine()
 		.addMembers(component.members)
 		.addBlankLine()
-		.addDefaultConstructor()
-		.addBlankLine()
-		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::Resources&"), "resources"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node") }, "deserialize"), deserializeBody);
+		.addAccessLevelSection(MemberAccess::Public)
+		.addDefaultConstructor();
 
+	// Additional constructors
 	if (!component.members.empty()) {
+		
 		gen.addBlankLine()
-			.addConstructor(component.members);
+			.addConstructor(MemberSchema::toVariableSchema(component.members));
 	}
+	
+	// Deserialize method
+	gen.addBlankLine()
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::Resources&"), "resources"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node") }, "deserialize"), deserializeBody);
 
 	gen.finish()
 		.writeTo(contents);
@@ -295,21 +302,21 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		"template <typename T>"
 	});
 
-	auto sysClassGen = CPPClassGenerator(system.name + "SystemBase", "Halley::System", CPPAccess::Private)
+	auto sysClassGen = CPPClassGenerator(system.name + "SystemBase", "Halley::System", MemberAccess::Private)
 		.addMethodDeclaration(MethodSchema(TypeSchema("Halley::System*"), {}, "halleyCreate" + system.name + "System", false, false, false, false, true))
 		.addBlankLine()
-		.addAccessLevelSection(CPPAccess::Public);
+		.addAccessLevelSection(MemberAccess::Public);
 
 	for (auto& fam : system.families) {
-		auto members = convert<ComponentReferenceSchema, VariableSchema>(fam.components, [](auto& comp)
+		auto members = convert<ComponentReferenceSchema, MemberSchema>(fam.components, [](auto& comp)
 		{
 			String type = comp.optional ? "Halley::MaybeRef<" + comp.name + "Component>" : comp.name + "Component&";
-			return VariableSchema(TypeSchema(type, !comp.write), lowerFirst(comp.name));
+			return MemberSchema(TypeSchema(type, !comp.write), lowerFirst(comp.name));
 		});
 
 		sysClassGen
 			.addClass(CPPClassGenerator(upperFirst(fam.name) + "Family", "Halley::FamilyBaseOf<" + upperFirst(fam.name) + "Family>")
-				.addAccessLevelSection(CPPAccess::Public)
+				.addAccessLevelSection(MemberAccess::Public)
 				.addMembers(members)
 				.addBlankLine()
 				.addTypeDefinition("Type", "Halley::FamilyType<" + String::concatList(convert<ComponentReferenceSchema, String>(fam.components, [](auto& comp)
@@ -317,13 +324,13 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 					return comp.optional ? "Halley::MaybeRef<" + comp.name + "Component>" : comp.name + "Component";
 				}), ", ") + ">")
 				.addBlankLine()
-				.addAccessLevelSection(CPPAccess::Protected)
-				.addConstructor(members)
+				.addAccessLevelSection(MemberAccess::Protected)
+				.addConstructor(MemberSchema::toVariableSchema(members))
 				.finish())
 			.addBlankLine();
 	}
 
-	sysClassGen.addAccessLevelSection(CPPAccess::Protected);
+	sysClassGen.addAccessLevelSection(MemberAccess::Protected);
 
 	if ((int(system.access) & int(SystemAccess::API)) != 0) {
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("const Halley::HalleyAPI&"), {}, "getAPI", true), "return doGetAPI();");
@@ -351,7 +358,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	// Service declarations
 	for (auto& service: system.services) {
 		sysClassGen.addBlankLine();
-		sysClassGen.addMember(VariableSchema(service.name + "*", lowerFirst(service.name), "nullptr"));
+		sysClassGen.addMember(MemberSchema(service.name + "*", lowerFirst(service.name), "nullptr"));
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema(service.name + "&"), {}, "get" + service.name, true), "return *" + lowerFirst(service.name) + ";");
 	}
 
@@ -366,18 +373,18 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	}
 	sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "initBase", false, false, true), initBaseMethodBody);
 
-	auto fams = convert<FamilySchema, VariableSchema>(system.families, [](auto& fam) { return VariableSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); });
+	auto fams = convert<FamilySchema, MemberSchema>(system.families, [](auto& fam) { return MemberSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); });
 	auto mid = fams.begin() + std::min(fams.size(), size_t(1));
-	std::vector<VariableSchema> mainFams(fams.begin(), mid);
-	std::vector<VariableSchema> otherFams(mid, fams.end());
+	std::vector<MemberSchema> mainFams(fams.begin(), mid);
+	std::vector<MemberSchema> otherFams(mid, fams.end());
 	sysClassGen
 		.addBlankLine()
-		.addAccessLevelSection(system.strategy == SystemStrategy::Global ? CPPAccess::Protected : CPPAccess::Private)
+		.addAccessLevelSection(system.strategy == SystemStrategy::Global ? MemberAccess::Protected : MemberAccess::Private)
 		.addMembers(mainFams)
-		.addAccessLevelSection(CPPAccess::Protected)
+		.addAccessLevelSection(MemberAccess::Protected)
 		.addMembers(otherFams)
 		.addBlankLine()
-		.addAccessLevelSection(CPPAccess::Private)
+		.addAccessLevelSection(MemberAccess::Private)
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(info.methodArgType), info.methodArgName) }, info.methodName + "Base", false, false, true, true), info.stratImpl)
 		.addBlankLine();
 
@@ -398,7 +405,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	}
 
 	sysClassGen
-		.addAccessLevelSection(CPPAccess::Public)
+		.addAccessLevelSection(MemberAccess::Public)
 		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}, {" + String::concatList(msgsReceived, ", ") + "}") })
 		.finish()
 		.writeTo(contents);
@@ -418,8 +425,8 @@ Vector<String> CodegenCPP::generateSystemStub(SystemSchema& system) const
 		""
 	};
 
-	auto actualSys = CPPClassGenerator(systemName, systemName + "Base<" + systemName + ">", CPPAccess::Public, true)
-		.addAccessLevelSection(CPPAccess::Public)
+	auto actualSys = CPPClassGenerator(systemName, systemName + "Base<" + systemName + ">", MemberAccess::Public, true)
+		.addAccessLevelSection(MemberAccess::Public)
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), info.familyArgs, info.methodName, info.methodConst), "// TODO");
 
 	for (auto& msg : system.messages) {
@@ -457,9 +464,9 @@ Vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
 	}
 	contents.push_back("");
 
-	auto gen = CPPClassGenerator(message.name + "Message", "Halley::Message", CPPAccess::Public, true)
-		.addAccessLevelSection(CPPAccess::Public)
-		.addMember(VariableSchema(TypeSchema("int", false, true, true), "messageIndex", toString(message.id)))
+	auto gen = CPPClassGenerator(message.name + "Message", "Halley::Message", MemberAccess::Public, true)
+		.addAccessLevelSection(MemberAccess::Public)
+		.addMember(MemberSchema(TypeSchema("int", false, true, true), "messageIndex", toString(message.id)))
 		.addBlankLine()
 		.addMembers(message.members)
 		.addBlankLine()
@@ -467,7 +474,7 @@ Vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
 		.addBlankLine();
 
 	if (!message.members.empty()) {
-		gen.addConstructor(message.members)
+		gen.addConstructor(MemberSchema::toVariableSchema(message.members))
 			.addBlankLine();
 	}
 

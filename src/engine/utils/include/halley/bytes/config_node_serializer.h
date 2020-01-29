@@ -2,6 +2,7 @@
 
 #include "halley/file_formats/config_file.h"
 #include "halley/maths/polygon.h"
+#include "halley/maths/colour.h"
 
 namespace Halley {
     template <typename T>
@@ -46,6 +47,15 @@ namespace Halley {
         Vector2f operator()(Resources&, const ConfigNode& node)
         {
 			return node.asVector2f(Vector2f());
+        }
+    };
+
+	template <>
+    class ConfigNodeDeserializer<Angle1f> {
+    public:
+        Angle1f operator()(Resources&, const ConfigNode& node)
+        {
+			return Angle1f::fromRadians(node.asFloat(0.0f));
         }
     };
 

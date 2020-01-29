@@ -12,7 +12,7 @@ MessageSchema::MessageSchema(YAML::Node node, bool generate)
 
 	for (auto memberEntry : node["members"]) {
 		for (auto m = memberEntry.begin(); m != memberEntry.end(); ++m) {
-			members.emplace_back(VariableSchema(TypeSchema(m->second.as<std::string>()), m->first.as<std::string>()));
+			members.emplace_back(MemberSchema(TypeSchema(m->second.as<std::string>()), m->first.as<std::string>()));
 		}
 	}
 }

@@ -10,5 +10,3 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "entity/family_binding.h"
 #include "entity/family.h"
 #include "entity/entity_factory.h"
-
-#include "entity/components/transform_2d_component.h"

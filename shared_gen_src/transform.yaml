@@ -2,8 +2,23 @@
 
 component:
   name: Transform2D
-  customImplementation: "halley/entity/components/transform_2d_component.h"
+  customImplementation: "halley/core/components/transform_2d_component.h"
   members:
-  - position: 'Halley::Vector2f'
+  - position:
+      type: 'Halley::Vector2f'
+      access: protected
+  - rotation:
+      type: 'Halley::Angle1f'
+      access: protected
+  - scale:
+      type: 'Halley::Vector2f'
+      access: protected
+      defaultValue: 'Halley::Vector2f(1.0f, 1.0f)'
+  - parent:
+      type: 'Halley::Maybe<Halley::EntityId>'
+      access: protected
+  - children:
+      type: 'std::vector<Halley::EntityId>'
+      access: protected
 
 ...

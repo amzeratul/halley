@@ -1,7 +1,7 @@
 #include "halley/file/path.h"
 #include <sstream>
 #include <fstream>
-#include "halley/core/halley_core.h"
+#include "halley/os/os.h"
 
 using namespace Halley;
 

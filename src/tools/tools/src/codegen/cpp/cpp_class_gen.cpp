@@ -9,10 +9,10 @@ CPPClassGenerator::CPPClassGenerator(String name)
 	results.push_back("class " + name + " {");
 }
 
-CPPClassGenerator::CPPClassGenerator(String name, String baseClass, CPPAccess inheritanceType, bool isFinal)
+CPPClassGenerator::CPPClassGenerator(String name, String baseClass, MemberAccess inheritanceType, bool isFinal)
 	: className(name)
 {
-	results.push_back("class " + name + (isFinal ? " final" : "") + " : " + getAccessString(inheritanceType) + " " + baseClass + " {");
+	results.push_back("class " + name + (isFinal ? " final" : "") + " : " + toString(inheritanceType) + " " + baseClass + " {");
 }
 
 CPPClassGenerator& CPPClassGenerator::addClass(CPPClassGenerator& otherClass)
@@ -41,26 +41,25 @@ CPPClassGenerator& CPPClassGenerator::addComment(String comment)
 	return *this;
 }
 
-CPPClassGenerator& CPPClassGenerator::addAccessLevelSection(CPPAccess access)
+CPPClassGenerator& CPPClassGenerator::addAccessLevelSection(MemberAccess access)
 {
 	ensureOK();
 	if (currentAccess != access) {
 		currentAccess = access;
-		results.push_back(getAccessString(access) + ":");
+		results.push_back(toString(access) + ":");
 	}
 	return *this;
 }
 
-CPPClassGenerator& CPPClassGenerator::addMember(VariableSchema member)
+CPPClassGenerator& CPPClassGenerator::addMember(MemberSchema member)
 {
-	ensureOK();
-	results.push_back("\t" + getVariableString(member) + ";");
+	addAccessLevelSection(member.access);
+	results.push_back("\t" + getMemberString(member) + ";");
 	return *this;
 }
 
-CPPClassGenerator& CPPClassGenerator::addMembers(const Vector<VariableSchema>& members)
+CPPClassGenerator& CPPClassGenerator::addMembers(const Vector<MemberSchema>& members)
 {
-	ensureOK();
 	for (auto& m : members) {
 		addMember(m);
 	}
@@ -172,19 +171,6 @@ void CPPClassGenerator::ensureOK() const
 	}
 }
 
-String CPPClassGenerator::getAccessString(CPPAccess access)
-{
-	switch (access) {
-	case CPPAccess::Public:
-		return "public";
-	case CPPAccess::Protected:
-		return "protected";
-	case CPPAccess::Private:
-		return "private";
-	}
-	throw Exception("Unknown access type.", HalleyExceptions::Tools);
-}
-
 String CPPClassGenerator::getTypeString(TypeSchema type)
 {
 	String value;
@@ -206,6 +192,15 @@ String CPPClassGenerator::getVariableString(VariableSchema var)
 	String init = "";
 	if (var.initialValue != "") {
 		init = " = " + var.initialValue;
+	}
+	return getTypeString(var.type) + " " + var.name + init;
+}
+
+String CPPClassGenerator::getMemberString(MemberSchema var)
+{
+	String init = "";
+	if (var.defaultValue != "") {
+		init = " = " + var.defaultValue;
 	}
 	return getTypeString(var.type) + " " + var.name + init;
 }

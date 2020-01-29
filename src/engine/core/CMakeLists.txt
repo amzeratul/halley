@@ -1,9 +1,11 @@
 project (halley-core)
 
-include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../entity/include" "../audio/include" "../net/include")
+include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../entity/include" "../audio/include" "../net/include" "../../../shared_gen/cpp")
 
 set(SOURCES
         "src/api/halley_api.cpp"
+
+        "src/components/transform_2d_component.cpp"
         
         "src/dummy/dummy_audio.cpp"
         "src/dummy/dummy_input.cpp"
@@ -72,6 +74,7 @@ set(SOURCES
         )
 
 set(HEADERS
+
         "src/dummy/dummy_audio.h"
         "src/dummy/dummy_input.h"
         "src/dummy/dummy_plugins.h"
@@ -94,6 +97,8 @@ set(HEADERS
         "include/halley/core/api/system_api.h"
         "include/halley/core/api/video_api.h"
         
+        "include/halley/core/components/transform_2d_component.h"
+
         "include/halley/core/game/core.h"
         "include/halley/core/game/environment.h"
         "include/halley/core/game/game.h"

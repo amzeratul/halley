@@ -18,7 +18,7 @@ namespace Halley
 
 		int id = -1;
 		String name;
-		Vector<VariableSchema> members;
+		Vector<MemberSchema> members;
 		std::unordered_set<String> includeFiles;
 		bool generate = false;
 	};

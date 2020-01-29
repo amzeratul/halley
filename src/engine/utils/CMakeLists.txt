@@ -65,6 +65,7 @@ set(SOURCES
 set(HEADERS
         "include/halley/audio/resampler.h"
         "include/halley/bytes/byte_serializer.h"
+        "include/halley/bytes/config_node_serializer.h"
         "include/halley/bytes/compression.h"
         "include/halley/bytes/fuzzer.h"
         "include/halley/concurrency/concurrent.h"

@@ -19,7 +19,7 @@ namespace Halley
 
 		int id = -1;
 		String name;
-		Vector<VariableSchema> members;
+		Vector<MemberSchema> members;
 		std::unordered_set<String> includeFiles;
 		Maybe<String> customImplementation;
 		bool generate = false;
