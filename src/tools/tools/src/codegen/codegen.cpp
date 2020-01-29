@@ -226,7 +226,7 @@ std::vector<Path> Codegen::generateCode(Path directory, ProgressReporter progres
 		}
 		for (auto& sys : systems) {
 			if (sys.second.generate && sys.second.language == gen->getLanguage()) {
-				writeFiles(genDir, gen->generateSystem(sys.second), stats);
+				writeFiles(genDir, gen->generateSystem(sys.second, components), stats);
 			}
 			syss.push_back(sys.second);
 		}

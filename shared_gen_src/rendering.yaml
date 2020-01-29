@@ -1,0 +1,36 @@
+---
+
+component:
+  name: Sprite
+  members:
+  - sprite: 'Halley::Sprite'
+  - layer: int
+  - mask: int
+
+---
+
+component:
+  name: TextLabel
+  members:
+  - text: 'Halley::TextRenderer'
+  - layer: int
+  - mask: int
+
+---
+
+component:
+  name: SpriteAnimation
+  members:
+  - player: 'Halley::AnimationPlayer'
+
+---
+
+component:
+  name: Camera
+  members:
+  - zoom: float
+  - clear: 'Halley::Maybe<Halley::Colour4f>'
+  - mask: int
+  - layer: int
+
+...

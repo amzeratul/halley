@@ -8,39 +8,6 @@
 
 using namespace Halley;
 
-static String toFileName(String className)
-{
-	std::stringstream ss;
-
-	auto isUpper = [](char c) {
-		return c >= 'A' && c <= 'Z';
-	};
-
-	auto lower = [](char c) {
-		return static_cast<char>(c + 32);
-	};
-
-	auto tryGet = [](const String& s, size_t i) {
-		if (s.size() > i) {
-			return s[i];
-		} else {
-			return char(0);
-		}
-	};
-
-	for (size_t i = 0; i < className.size(); i++) {
-		if (isUpper(className[i])) {
-			if (i > 0 && !isUpper(tryGet(className, i+1))) {
-				ss << '_';
-			}
-			ss << lower(className[i]);
-		} else {
-			ss << className[i];
-		}
-	}
-	return ss.str();
-}
-
 static String upperFirst(String name)
 {
 	if (name[0] >= 'a' && name[0] <= 'z') {
@@ -57,11 +24,6 @@ static String lowerFirst(String name)
 	return name;
 }
 
-static Path makePath(Path dir, String className, String extension)
-{
-	return dir / (toFileName(className) + "." + extension).cppStr();
-}
-
 CodeGenResult CodegenCPP::generateComponent(ComponentSchema component)
 {
 	String className = component.name + "Component";
@@ -71,12 +33,12 @@ CodeGenResult CodegenCPP::generateComponent(ComponentSchema component)
 	return result;
 }
 
-CodeGenResult CodegenCPP::generateSystem(SystemSchema system)
+CodeGenResult CodegenCPP::generateSystem(SystemSchema system, const HashMap<String, ComponentSchema>& components)
 {
 	String className = system.name + "System";
 
 	CodeGenResult result;
-	result.emplace_back(CodeGenFile(makePath("systems", className, "h"), generateSystemHeader(system)));
+	result.emplace_back(CodeGenFile(makePath("systems", className, "h"), generateSystemHeader(system, components)));
 	//result.emplace_back(CodeGenFile(makePath("../../src/systems", className, "cpp"), generateSystemStub(system), true));
 	return result;
 }
@@ -99,7 +61,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 	};
 
 	for (auto& comp: components) {
-		registryCpp.emplace_back("#include \"components/" + toFileName(comp.name + "Component") + ".h\"");
+		registryCpp.emplace_back("#include \"" + getComponentFileName(comp) + "\"");
 	}
 	
 	registryCpp.insert(registryCpp.end(), {
@@ -291,7 +253,7 @@ public:
 	bool methodConst;
 };
 
-Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
+Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const HashMap<String, ComponentSchema>& components) const
 {
 	auto info = SystemInfo(system);
 
@@ -313,8 +275,11 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system) const
 	for (auto& fam : system.families) {
 		for (auto& comp : fam.components) {
 			if (included.find(comp.name) == included.end()) {
-				contents.emplace_back("#include \"../components/" + toFileName(comp.name + "Component") + ".h\"");
-				included.emplace(comp.name);
+				auto iter = components.find(comp.name);
+				if (iter != components.end()) {
+					contents.emplace_back("#include \"" + getComponentFileName(iter->second) + "\"");
+					included.emplace(comp.name);
+				}
 			}
 		}
 	}
@@ -509,4 +474,47 @@ Vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
 		.writeTo(contents);
 
 	return contents;
+}
+
+Path CodegenCPP::makePath(Path dir, String className, String extension) const
+{
+	return dir / (toFileName(className) + "." + extension).cppStr();
+}
+
+String CodegenCPP::toFileName(String className) const
+{
+	std::stringstream ss;
+
+	auto isUpper = [](char c) {
+		return c >= 'A' && c <= 'Z';
+	};
+
+	auto lower = [](char c) {
+		return static_cast<char>(c + 32);
+	};
+
+	auto tryGet = [](const String& s, size_t i) {
+		if (s.size() > i) {
+			return s[i];
+		} else {
+			return char(0);
+		}
+	};
+
+	for (size_t i = 0; i < className.size(); i++) {
+		if (isUpper(className[i])) {
+			if (i > 0 && !isUpper(tryGet(className, i+1))) {
+				ss << '_';
+			}
+			ss << lower(className[i]);
+		} else {
+			ss << className[i];
+		}
+	}
+	return ss.str();
+}
+
+String CodegenCPP::getComponentFileName(const ComponentSchema& component) const
+{
+	return "components/" + toFileName(component.name + "Component") + ".h";
 }

@@ -5,6 +5,7 @@
 #include "message_schema.h"
 #include "custom_type_schema.h"
 #include "halley/file/path.h"
+#include "halley/data_structures/hash_map.h"
 
 namespace Halley
 {
@@ -34,7 +35,7 @@ namespace Halley
 		virtual Path getDirectory() const = 0;
 
 		virtual CodeGenResult generateComponent(ComponentSchema component) = 0;
-		virtual CodeGenResult generateSystem(SystemSchema system) = 0;
+		virtual CodeGenResult generateSystem(SystemSchema system, const HashMap<String, ComponentSchema>& components) = 0;
 		virtual CodeGenResult generateMessage(MessageSchema message) = 0;
 
 		virtual CodeGenResult generateRegistry(const Vector<ComponentSchema>& components, const Vector<SystemSchema>& systems) = 0;
