@@ -141,4 +141,15 @@ namespace Halley {
 			return Polygon(std::move(list));
 		}
 	};
+
+	class ConfigNodeHelper {
+	public:
+		template <typename T>
+		static void deserializeIfDefined(T& dst, Resources& resources, const ConfigNode& node)
+		{
+			if (node.getType() != ConfigNodeType::Undefined) {
+				dst = ConfigNodeDeserializer<T>()(resources, node);
+			}
+		}
+	};
 }

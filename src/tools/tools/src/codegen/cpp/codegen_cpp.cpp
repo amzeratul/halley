@@ -176,7 +176,7 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		} else {
 			deserializeBody += "\n\t\t";
 		}
-		deserializeBody += member.name + " = Halley::ConfigNodeDeserializer<" + CPPClassGenerator::getTypeString(member.type) + ">()(resources, node[\"" + member.name + "\"]);";
+		deserializeBody += "Halley::ConfigNodeHelper::deserializeIfDefined(" + member.name + ", resources, node[\"" + member.name + "\"]);";
 	}
 
 	String className = component.name + "Component" + (component.customImplementation ? "Base" : "");
