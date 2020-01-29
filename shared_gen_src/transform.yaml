@@ -14,11 +14,5 @@ component:
       type: 'Halley::Vector2f'
       access: protected
       defaultValue: 'Halley::Vector2f(1.0f, 1.0f)'
-  - parent:
-      type: 'Halley::Maybe<Halley::EntityId>'
-      access: protected
-  - children:
-      type: 'std::vector<Halley::EntityId>'
-      access: protected
 
 ...
