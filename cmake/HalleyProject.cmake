@@ -273,6 +273,7 @@ set(HALLEY_PROJECT_EXTERNAL_LIBS
 
 set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/include
+	${HALLEY_PATH}/shared_gen/cpp
 	${HALLEY_PATH}/src/contrib
 	${HALLEY_PATH}/src/engine/core/include
 	${HALLEY_PATH}/src/engine/net/include

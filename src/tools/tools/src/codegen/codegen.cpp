@@ -101,10 +101,7 @@ void Codegen::validate(ProgressReporter progress)
 void Codegen::process()
 {
 	{
-		int id = 0;
 		for (auto& comp : components) {
-			comp.second.id = id++;
-
 			for (auto& m: comp.second.members) {
 				String i = getInclude(m.type.name);
 				if (i != "") {
@@ -296,6 +293,7 @@ void Codegen::addComponent(YAML::Node rootNode, bool generate)
 	auto comp = ComponentSchema(rootNode["component"], generate);
 
 	if (components.find(comp.name) == components.end()) {
+		comp.id = int(components.size());
 		components[comp.name] = comp;
 	} else {
 		throw Exception("Component already declared: " + comp.name, HalleyExceptions::Tools);

@@ -1,0 +1,8 @@
+---
+
+component:
+  name: Transform2D
+  members:
+  - position: 'Halley::Vector2f'
+
+...

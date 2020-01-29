@@ -54,11 +54,11 @@ void CheckAssetsTask::run()
 				requestImport(project.getImportAssetsDatabase(), assets, project.getUnpackedAssetsPath(), "Importing assets", true);
 			}
 		}
-
+		
 		const bool sharedGenSrcResult = first | monitorSharedGenSrc.poll();
 		if (sharedGenSrcResult | monitorGen.poll() | monitorGenSrc.poll()) {
 			Logger::logInfo("Scanning for codegen changes...");
-			const auto assets = checkAllAssets(project.getCodegenDatabase(), { project.getGenSrcPath(), project.getSharedGenSrcPath() }, false);
+			const auto assets = checkAllAssets(project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false);
 			if (!isCancelled()) {
 				requestImport(project.getCodegenDatabase(), assets, project.getGenPath(), "Generating code", false);
 			}
@@ -206,7 +206,7 @@ std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(Impo
 
 		// Next, go through normal files
 		const bool isCodegen = srcPath == project.getGenSrcPath() || srcPath == project.getSharedGenSrcPath();
-		const bool skipGen = srcPath == project.getSharedGenSrcPath() && srcPaths.size() > 1;	// Editor will only have one here, so gen anyway
+		const bool skipGen = srcPath == project.getSharedGenSrcPath() && srcPaths.size() > 1;
 		for (const auto& filePath : allFiles) {
 			if (filePath.getExtension() == ".meta") {
 				continue;
