@@ -15,4 +15,8 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 			members.emplace_back(VariableSchema(TypeSchema(m->second.as<std::string>()), m->first.as<std::string>()));
 		}
 	}
+
+	if (node["customImplementation"].IsDefined()) {
+		customImplementation = node["customImplementation"].as<std::string>();
+	}
 }

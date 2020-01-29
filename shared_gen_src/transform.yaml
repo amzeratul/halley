@@ -2,6 +2,7 @@
 
 component:
   name: Transform2D
+  customImplementation: "halley/entity/components/transform_2d_component.h"
   members:
   - position: 'Halley::Vector2f'
 

@@ -2,6 +2,7 @@
 
 #include "fields_schema.h"
 #include <unordered_set>
+#include "halley/data_structures/maybe.h"
 
 namespace YAML
 {
@@ -20,6 +21,7 @@ namespace Halley
 		String name;
 		Vector<VariableSchema> members;
 		std::unordered_set<String> includeFiles;
+		Maybe<String> customImplementation;
 		bool generate = false;
 	};
 }

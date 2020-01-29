@@ -1,6 +1,6 @@
 project (halley-entity)
 
-include_directories(${Boost_INCLUDE_DIR} "include/halley/entity" "../utils/include")
+include_directories(${Boost_INCLUDE_DIR} "include/halley/entity" "../utils/include" "../../../shared_gen/cpp")
 
 set(SOURCES
         "src/component.cpp"
@@ -15,6 +15,8 @@ set(SOURCES
         )
 
 set(HEADERS
+        "include/halley/halley_entity.h"
+
         "include/halley/entity/component.h"
         "include/halley/entity/entity.h"
         "include/halley/entity/family_binding.h"
@@ -29,7 +31,8 @@ set(HEADERS
         "include/halley/entity/system.h"
         "include/halley/entity/type_deleter.h"
         "include/halley/entity/world.h"
-        "include/halley/halley_entity.h"
+
+        "include/halley/entity/components/transform_2d_component.h"
         )
 
 assign_source_group(${SOURCES})

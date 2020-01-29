@@ -26,7 +26,7 @@ static String lowerFirst(String name)
 
 CodeGenResult CodegenCPP::generateComponent(ComponentSchema component)
 {
-	String className = component.name + "Component";
+	const String className = component.name + "Component" + (component.customImplementation ? "Base" : "");
 
 	CodeGenResult result;
 	result.emplace_back(CodeGenFile(makePath("components", className, "h"), generateComponentHeader(component)));
@@ -35,7 +35,7 @@ CodeGenResult CodegenCPP::generateComponent(ComponentSchema component)
 
 CodeGenResult CodegenCPP::generateSystem(SystemSchema system, const HashMap<String, ComponentSchema>& components)
 {
-	String className = system.name + "System";
+	const String className = system.name + "System";
 
 	CodeGenResult result;
 	result.emplace_back(CodeGenFile(makePath("systems", className, "h"), generateSystemHeader(system, components)));
@@ -45,7 +45,7 @@ CodeGenResult CodegenCPP::generateSystem(SystemSchema system, const HashMap<Stri
 
 CodeGenResult CodegenCPP::generateMessage(MessageSchema message)
 {
-	String className = message.name + "Message";
+	const String className = message.name + "Message";
 
 	CodeGenResult result;
 	result.emplace_back(CodeGenFile(makePath("messages", className, "h"), generateMessageHeader(message)));
@@ -177,7 +177,9 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		deserializeBody += member.name + " = Halley::ConfigNodeDeserializer<" + CPPClassGenerator::getTypeString(member.type) + ">()(resources, node[\"" + member.name + "\"]);";
 	}
 
-	auto gen = CPPClassGenerator(component.name + "Component", "Halley::Component", CPPAccess::Public, true)
+	String className = component.name + "Component" + (component.customImplementation ? "Base" : "");
+	
+	auto gen = CPPClassGenerator(className, "Halley::Component", CPPAccess::Public, !component.customImplementation)
 		.addAccessLevelSection(CPPAccess::Public)
 		.addMember(VariableSchema(TypeSchema("int", false, true, true), "componentIndex", toString(component.id)))
 		.addBlankLine()
@@ -516,5 +518,9 @@ String CodegenCPP::toFileName(String className) const
 
 String CodegenCPP::getComponentFileName(const ComponentSchema& component) const
 {
-	return "components/" + toFileName(component.name + "Component") + ".h";
+	if (component.customImplementation) {
+		return component.customImplementation.value();
+	} else {
+		return "components/" + toFileName(component.name + "Component") + ".h";
+	}
 }
