@@ -36,8 +36,10 @@ public:
 	
 	std::vector<Halley::EntityId> getChildren() const { return childIds; }
 	void addChild(Halley::EntityId parentId, Halley::World& world);
-	void addChild(Transform2DComponent& parentTransform);
-	void detachChildren();
+	void addChild(Transform2DComponent& childTransform);
+	void detachChildren(Halley::World& world);
+
+	void destroyTree(Halley::World& world);
 
 private:
 	friend class Entity;

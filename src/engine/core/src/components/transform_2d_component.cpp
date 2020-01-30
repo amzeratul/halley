@@ -17,14 +17,21 @@ Transform2DComponent::Transform2DComponent()
 
 Vector2f Transform2DComponent::getGlobalPosition() const
 {
-	// TODO
-	return position;
+	if (parentTransform) {
+		// TODO, do this properly
+		return position + parentTransform->getGlobalPosition();
+	} else {
+		return position;
+	}
 }
 
 void Transform2DComponent::setGlobalPosition(Vector2f v)
 {
-	// TODO
-	position = v;
+	if (parentTransform) {
+		position = v - parentTransform->getGlobalPosition();
+	} else {
+		position = v;
+	}
 }
 
 Vector2f Transform2DComponent::getGlobalScale() const
@@ -59,18 +66,7 @@ void Transform2DComponent::init(EntityId id)
 void Transform2DComponent::setParent(EntityId newParentId, World& world)
 {
 	if (parentId != newParentId) {
-	
-		// Unparent from old
-		setParent();
-
-		// Set id
-		parentId = newParentId;
-
-		// Reparent
-		if (parentId.isValid()) {
-			parentTransform = &world.getEntity(parentId.value()).getComponent<Transform2DComponent>();
-			parentTransform->childIds.push_back(myId);
-		}
+		setParent(world.getEntity(parentId).getComponent<Transform2DComponent>());
 	}
 }
 
@@ -101,15 +97,28 @@ void Transform2DComponent::setParent()
 
 void Transform2DComponent::addChild(EntityId parentId, World& world)
 {
-	// TODO
+	world.getEntity(parentId).getComponent<Transform2DComponent>().setParent(*this);
 }
 
-void Transform2DComponent::addChild(Transform2DComponent& parentTransform)
+void Transform2DComponent::addChild(Transform2DComponent& childTransform)
 {
-	// TODO
+	childTransform.setParent(*this);
 }
 
-void Transform2DComponent::detachChildren()
+void Transform2DComponent::detachChildren(World& world)
 {
-	// TODO
+	auto childIdsCopy = childIds;
+	for (auto& childId: childIdsCopy) {
+		world.getEntity(childId).getComponent<Transform2DComponent>().setParent();
+	}
+}
+
+void Transform2DComponent::destroyTree(World& world)
+{
+	auto childIdsCopy = childIds;
+	for (auto& childId: childIdsCopy) {
+		world.getEntity(childId).getComponent<Transform2DComponent>().destroyTree(world);
+	}
+	setParent();
+	world.destroyEntity(myId);
 }
