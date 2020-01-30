@@ -31,6 +31,11 @@ EntityEntry EntityFactory::createEntity(const ConfigNode& node)
 	}
 
 	auto e = EntityEntry{ node["name"].asString(""), entity };
+	auto myTransform = e.entity.tryGetComponent<Transform2DComponent>();
+	if (myTransform) {
+		myTransform->init(e.entity.getEntityId());
+	}
+	
 	if (node["children"].getType() == ConfigNodeType::Sequence) {
 		for (auto& childNode: node["children"].asSequence()) {
 			createChildEntity(childNode, e.entity);
@@ -43,6 +48,7 @@ EntityEntry EntityFactory::createEntity(const ConfigNode& node)
 void EntityFactory::createChildEntity(const ConfigNode& node, EntityRef& parent)
 {
 	auto e = createEntity(node);
+
 	auto parentTransform = parent.tryGetComponent<Transform2DComponent>();
 	if (parentTransform) {
 		parentTransform->addChild(e.entity.getComponent<Transform2DComponent>());
