@@ -1,13 +1,5 @@
-#include "halley/maths/vector2.h"
-#include "halley/entity/component.h"
-#include "halley/entity/entity.h"
-#include "halley/entity/world.h"
-#include "halley/core/resources/resources.h"
-#include "halley/file_formats/config_file.h"
-#include "halley/bytes/config_node_serializer.h"
-
 #define DONT_INCLUDE_HALLEY_HPP
-#include "components/transform_2d_component.h"
+#include "entity/components/transform_2d_component.h"
 
 using namespace Halley;
 

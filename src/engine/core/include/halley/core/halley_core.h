@@ -4,6 +4,8 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "api/halley_api.h"
 
+#include "entity/entity_factory.h"
+
 #include "game/core.h"
 #include "game/environment.h"
 #include "game/game.h"

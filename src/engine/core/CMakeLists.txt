@@ -5,8 +5,6 @@ include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../uti
 set(SOURCES
         "src/api/halley_api.cpp"
 
-        "src/components/transform_2d_component.cpp"
-        
         "src/dummy/dummy_audio.cpp"
         "src/dummy/dummy_input.cpp"
         "src/dummy/dummy_network.cpp"
@@ -15,6 +13,9 @@ set(SOURCES
         "src/dummy/dummy_plugins.cpp"
         "src/dummy/dummy_system.cpp"
         "src/dummy/dummy_video.cpp"
+
+        "src/entity/entity_factory.cpp"
+        "src/entity/components/transform_2d_component.cpp"
 
         "src/game/core.cpp"
         "src/game/environment.cpp"
@@ -97,7 +98,8 @@ set(HEADERS
         "include/halley/core/api/system_api.h"
         "include/halley/core/api/video_api.h"
         
-        "include/halley/core/components/transform_2d_component.h"
+        "include/halley/core/entity/entity_factory.h"
+        "include/halley/core/entity/components/transform_2d_component.h"
 
         "include/halley/core/game/core.h"
         "include/halley/core/game/environment.h"

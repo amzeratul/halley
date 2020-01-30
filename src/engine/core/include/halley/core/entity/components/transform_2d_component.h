@@ -1,5 +1,12 @@
 #pragma once
 
+#include "halley/maths/vector2.h"
+#include "halley/entity/component.h"
+#include "halley/entity/entity.h"
+#include "halley/entity/world.h"
+#include "halley/core/resources/resources.h"
+#include "halley/file_formats/config_file.h"
+#include "halley/bytes/config_node_serializer.h"
 #include "components/transform2d_component_base.h"
 
 class Transform2DComponent : public Transform2DComponentBase {
