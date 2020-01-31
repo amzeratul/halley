@@ -195,18 +195,25 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 	}
 		
 	std::map<String, AnimationSequence> sequences;
+	std::map<String, std::set<String>> directionsPerSequence;
 
-	for (const auto& frame: frameData) {
+	for (const auto& frame : frameData) {
 		String sequence = frame.sequenceName;
 
 		auto i = sequences.find(sequence);
 		if (i == sequences.end()) {
 			sequences[sequence] = AnimationSequence(sequence, true, false);
 		}
+
+		directionsPerSequence[sequence].insert(frame.direction);
+	}
+
+	for (const auto& frame : frameData) {
+		String sequence = frame.sequenceName;
 		auto& seq = sequences[sequence];
 		if (int(seq.numFrameDefinitions()) == frame.frameNumber) {
 			auto filename = frame.filenames.at(0);
-			if (numExplicitDirs > 0) {
+			if (!directionsPerSequence.at(sequence).empty() && !frame.direction.isEmpty()) {
 				filename = filename.replaceAll("_" + frame.direction, "_%dir%");
 			}
 			seq.addFrame(AnimationFrameDefinition(frame.frameNumber, frame.duration, filename));
