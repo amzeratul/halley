@@ -1,5 +1,8 @@
 #pragma once
 
+#include "halley/ui/ui_widget.h"
+#include "halley/ui/widgets/ui_scroll_pane.h"
+
 namespace Halley {
     class ScrollBackground : public UIWidget {
     public:
