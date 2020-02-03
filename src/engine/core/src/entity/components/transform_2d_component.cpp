@@ -7,6 +7,11 @@ Transform2DComponent::Transform2DComponent()
 {
 }
 
+Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f localRotation, Vector2f localScale)
+	: Transform2DComponentBase(localPosition, localRotation, localScale)
+{
+}
+
 Vector2f Transform2DComponent::getGlobalPosition() const
 {
 	if (parentTransform) {
@@ -110,7 +115,7 @@ void Transform2DComponent::destroyTree(World& world)
 	world.destroyEntity(myId);
 }
 
-void Transform2DComponent::onAddedToEntity(Halley::EntityRef& entity)
+void Transform2DComponent::onAddedToEntity(EntityRef& entity)
 {
 	myId = entity.getEntityId();
 }
