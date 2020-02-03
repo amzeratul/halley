@@ -34,8 +34,6 @@ public:
 	Halley::Angle1f getGlobalRotation() const;
 	void setGlobalRotation(Halley::Angle1f v);
 
-	void init(Halley::EntityId myId);
-
 	Halley::Maybe<Halley::EntityId> getParent() const { return parentId; }
 	void setParent(Halley::EntityId parentId, Halley::World& world);
 	void setParent(Transform2DComponent& parentTransform);
@@ -49,10 +47,12 @@ public:
 	void destroyTree(Halley::World& world);
 
 private:
-	friend class Entity;
+	friend class Halley::EntityRef;
 
 	Transform2DComponent* parentTransform = nullptr;
 	Halley::EntityId myId;
 	Halley::EntityId parentId;
 	std::vector<Halley::EntityId> childIds;
+
+	void onAddedToEntity(Halley::EntityRef& entity);
 };

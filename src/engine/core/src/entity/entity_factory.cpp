@@ -31,10 +31,6 @@ EntityEntry EntityFactory::createEntity(const ConfigNode& node)
 	}
 
 	auto e = EntityEntry{ node["name"].asString(""), entity };
-	auto myTransform = e.entity.tryGetComponent<Transform2DComponent>();
-	if (myTransform) {
-		myTransform->init(e.entity.getEntityId());
-	}
 	
 	if (node["children"].getType() == ConfigNodeType::Sequence) {
 		for (auto& childNode: node["children"].asSequence()) {

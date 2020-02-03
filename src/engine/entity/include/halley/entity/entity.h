@@ -8,11 +8,17 @@
 #include "entity_id.h"
 #include "type_deleter.h"
 #include <halley/data_structures/vector.h>
+#include "halley/utils/type_traits.h"
 
 namespace Halley {
 	class World;
 	class System;
+	class EntityRef;
 
+	// True if T::init() exists
+	template <class, class = void_t<>> struct HasOnAddedToEntityMember : std::false_type {};
+	template <class T> struct HasOnAddedToEntityMember<T, decltype(std::declval<T&>().onAddedToEntity(std::declval<EntityRef&>()))> : std::true_type { };
+	
 	class MessageEntry
 	{
 	public:
@@ -139,7 +145,9 @@ namespace Halley {
 			static_assert(std::is_base_of<Component, T>::value, "Components must extend the Component class");
 			static_assert(!std::is_polymorphic<T>::value, "Components cannot be polymorphic (i.e. they can't have virtual methods)");
 			static_assert(std::is_default_constructible<T>::value, "Components must have a default constructor");
-			entity.addComponent(world, new T(std::move(component)));
+			auto c = new T(std::move(component));
+			entity.addComponent(world, c);
+			invokeComponentInit(*c, *this);
 			return *this;
 		}
 
@@ -178,6 +186,16 @@ namespace Halley {
 		EntityRef(Entity& e, World& w)
 			: entity(e)
 			, world(w)
+		{}
+
+		template <typename T, typename std::enable_if<HasOnAddedToEntityMember<T>::value, int>::type = 0>
+		void invokeComponentInit(T& comp, EntityRef& ref)
+		{
+			comp.onAddedToEntity(ref);
+		}
+
+		template <typename T, typename std::enable_if<!HasOnAddedToEntityMember<T>::value, int>::type = 0>
+		void invokeComponentInit(T&, EntityRef&)
 		{}
 
 		Entity& entity;

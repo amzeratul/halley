@@ -50,11 +50,6 @@ void Transform2DComponent::setGlobalRotation(Angle1f v)
 	rotation = v;
 }
 
-void Transform2DComponent::init(EntityId id)
-{
-	myId = id;
-}
-
 void Transform2DComponent::setParent(EntityId newParentId, World& world)
 {
 	if (parentId != newParentId) {
@@ -113,4 +108,9 @@ void Transform2DComponent::destroyTree(World& world)
 	}
 	setParent();
 	world.destroyEntity(myId);
+}
+
+void Transform2DComponent::onAddedToEntity(Halley::EntityRef& entity)
+{
+	myId = entity.getEntityId();
 }
