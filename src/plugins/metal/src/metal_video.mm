@@ -30,13 +30,14 @@ void MetalVideo::deInit()
 
 void MetalVideo::startRender()
 {
+	pool = [[NSAutoreleasePool alloc] init];
 	surface = [swap_chain nextDrawable];
 }
 
 void MetalVideo::finishRender()
 {
 	window->swap();
-	[surface release];
+	[pool release];
 }
 
 

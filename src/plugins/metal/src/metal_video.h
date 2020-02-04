@@ -41,6 +41,7 @@ namespace Halley {
 		id<CAMetalDrawable> surface;
 		id<MTLDevice> device;
 		id<MTLCommandQueue> command_queue;
+		NSAutoreleasePool *pool;
 
 		void initSwapChain(Window& window);
 	};

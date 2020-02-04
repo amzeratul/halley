@@ -16,7 +16,6 @@ void MetalPainter::clear(Colour colour) {
 	[encoder endEncoding];
 	auto descriptor = renderPassDescriptorForTextureAndColour(video.getSurface().texture, colour);
 	encoder = [buffer renderCommandEncoderWithDescriptor:descriptor];
-	[descriptor release];
 }
 
 void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
@@ -51,6 +50,9 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
 		auto texture = std::static_pointer_cast<const MetalTexture>(tex);
 		texture->bind(encoder, texIndex++);
 	}
+
+	[pipelineState release];
+	[pipelineStateDescriptor release];
 }
 
 void MetalPainter::doStartRender() {
@@ -58,16 +60,12 @@ void MetalPainter::doStartRender() {
 	auto col = Colour4f(0);
 	auto descriptor = renderPassDescriptorForTextureAndColour(video.getSurface().texture, col);
 	encoder = [buffer renderCommandEncoderWithDescriptor:descriptor];
-	[descriptor release];
 }
 
 void MetalPainter::doEndRender() {
 	[encoder endEncoding];
 	[buffer presentDrawable:video.getSurface()];
 	[buffer commit];
-	[encoder release];
-	[buffer release];
-	[indexBuffer release];
 }
 
 void MetalPainter::setVertices(
@@ -85,6 +83,8 @@ void MetalPainter::setVertices(
 		options:MTLResourceStorageModeShared
 	];
 	[encoder setVertexBuffer:buffer offset:0 atIndex:0];
+	[buffer setPurgeableState:MTLPurgeableStateEmpty];
+	[buffer autorelease];
 
 	indexBuffer = [video.getDevice() newBufferWithBytes:indices
 			length:numIndices*sizeof(short) options:MTLResourceStorageModeShared
@@ -101,6 +101,8 @@ void MetalPainter::drawTriangles(size_t numIndices) {
 		indexBuffer:indexBuffer
 		indexBufferOffset:0
 	];
+	[indexBuffer setPurgeableState:MTLPurgeableStateEmpty];
+	[indexBuffer release];
 }
 
 void MetalPainter::setViewPort(Rect4i rect) {
