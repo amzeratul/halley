@@ -1,4 +1,4 @@
-﻿#include "metal_material_constant_buffer.h"
+#include "metal_material_constant_buffer.h"
 #include "metal_painter.h"
 #include "metal_render_target.h"
 #include "metal_texture.h"
