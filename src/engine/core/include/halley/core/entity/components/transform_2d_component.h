@@ -13,6 +13,8 @@ class Transform2DComponent : public Transform2DComponentBase {
 public:
 	Transform2DComponent();
 	explicit Transform2DComponent(Halley::Vector2f localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1));
+	Transform2DComponent(Transform2DComponent& parentTransform, Halley::Vector2f localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1));
+	Transform2DComponent(Halley::EntityId parentId, Halley::World& world, Halley::Vector2f localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1));
 
 	const Halley::Vector2f& getLocalPosition() const { return position; }
 	Halley::Vector2f& getLocalPosition() { return position; }
@@ -36,9 +38,9 @@ public:
 	void setGlobalRotation(Halley::Angle1f v);
 
 	Halley::Maybe<Halley::EntityId> getParent() const { return parentId; }
-	void setParent(Halley::EntityId parentId, Halley::World& world);
-	void setParent(Transform2DComponent& parentTransform);
-	void setParent();
+	void setParent(Halley::EntityId parentId, Halley::World& world, bool keepLocalPosition = false);
+	void setParent(Transform2DComponent& parentTransform, bool keepLocalPosition = false);
+	void setParent(bool keepLocalPosition = false);
 	
 	std::vector<Halley::EntityId> getChildren() const { return childIds; }
 	void addChild(Halley::EntityId parentId, Halley::World& world);

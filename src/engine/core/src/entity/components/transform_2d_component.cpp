@@ -12,6 +12,18 @@ Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f local
 {
 }
 
+Transform2DComponent::Transform2DComponent(Transform2DComponent& parentTransform, Vector2f localPosition, Angle1f localRotation, Vector2f localScale)
+	: Transform2DComponentBase(localPosition, localRotation, localScale)
+{
+	setParent(parentTransform, true);
+}
+
+Transform2DComponent::Transform2DComponent(EntityId parentId, World& world, Vector2f localPosition, Angle1f localRotation, Vector2f localScale)
+	: Transform2DComponentBase(localPosition, localRotation, localScale)
+{
+	setParent(parentId, world, true);
+}
+
 Vector2f Transform2DComponent::getGlobalPosition() const
 {
 	if (parentTransform) {
@@ -55,18 +67,18 @@ void Transform2DComponent::setGlobalRotation(Angle1f v)
 	rotation = v;
 }
 
-void Transform2DComponent::setParent(EntityId newParentId, World& world)
+void Transform2DComponent::setParent(EntityId newParentId, World& world, bool keepLocalPosition)
 {
 	if (parentId != newParentId) {
-		setParent(world.getEntity(parentId).getComponent<Transform2DComponent>());
+		setParent(world.getEntity(parentId).getComponent<Transform2DComponent>(), keepLocalPosition);
 	}
 }
 
-void Transform2DComponent::setParent(Transform2DComponent& newParentTransform)
+void Transform2DComponent::setParent(Transform2DComponent& newParentTransform, bool keepLocalPosition)
 {
 	if (parentTransform != &newParentTransform) {
 		// Unparent from old
-		setParent();
+		setParent(keepLocalPosition);
 
 		// Set id
 		parentId = newParentTransform.myId;
@@ -77,7 +89,7 @@ void Transform2DComponent::setParent(Transform2DComponent& newParentTransform)
 	}
 }
 
-void Transform2DComponent::setParent()
+void Transform2DComponent::setParent(bool keepLocalPosition)
 {
 	if (parentTransform) {
 		auto& siblings = parentTransform->childIds;
