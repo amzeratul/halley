@@ -3,9 +3,7 @@
 
 using namespace Halley;
 
-Transform2DComponent::Transform2DComponent()
-{
-}
+Transform2DComponent::Transform2DComponent() = default;
 
 Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f localRotation, Vector2f localScale)
 	: Transform2DComponentBase(localPosition, localRotation, localScale)
@@ -86,12 +84,24 @@ void Transform2DComponent::setParent(Transform2DComponent& newParentTransform, b
 		// Reparent
 		parentTransform = &newParentTransform;
 		parentTransform->childIds.push_back(myId);
+
+		if (!keepLocalPosition) {
+			setGlobalPosition(getLocalPosition());
+			setGlobalRotation(getLocalRotation());
+			setGlobalScale(getLocalScale());
+		}
 	}
 }
 
 void Transform2DComponent::setParent(bool keepLocalPosition)
 {
 	if (parentTransform) {
+		if (!keepLocalPosition) {
+			setLocalPosition(getGlobalPosition());
+			setLocalRotation(getGlobalRotation());
+			setLocalScale(getGlobalScale());
+		}
+		
 		auto& siblings = parentTransform->childIds;
 		siblings.erase(std::remove(siblings.begin(), siblings.end(), myId), siblings.end());
 		parentTransform = nullptr;
@@ -117,14 +127,16 @@ void Transform2DComponent::detachChildren(World& world)
 	}
 }
 
-void Transform2DComponent::destroyTree(World& world)
+void Transform2DComponent::destroyTree(World& world, bool includingMe)
 {
 	auto childIdsCopy = childIds;
 	for (auto& childId: childIdsCopy) {
 		world.getEntity(childId).getComponent<Transform2DComponent>().destroyTree(world);
 	}
-	setParent();
-	world.destroyEntity(myId);
+	setParent(true);
+	if (includingMe) {
+		world.destroyEntity(myId);
+	}
 }
 
 void Transform2DComponent::onAddedToEntity(EntityRef& entity)

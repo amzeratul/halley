@@ -47,7 +47,7 @@ public:
 	void addChild(Transform2DComponent& childTransform);
 	void detachChildren(Halley::World& world);
 
-	void destroyTree(Halley::World& world);
+	void destroyTree(Halley::World& world, bool includingMe = true);
 
 private:
 	friend class Halley::EntityRef;
