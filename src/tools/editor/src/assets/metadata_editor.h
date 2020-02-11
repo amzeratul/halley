@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/ui/ui_widget.h"
+#include "halley/file/path.h"
 
 namespace Halley
 {
