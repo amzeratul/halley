@@ -7,21 +7,21 @@
 
 using namespace Halley;
 
-AudioVoice::AudioVoice(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, int group) 
-	: source(std::move(source))
-	, sourcePos(std::move(sourcePos))
-	, group(group)
+AudioVoice::AudioVoice(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, uint8_t group) 
+	: group(group)
 	, gain(gain)
+	, source(std::move(source))
+	, sourcePos(std::move(sourcePos))
 {}
 
 AudioVoice::~AudioVoice() = default;
 
-void AudioVoice::setId(size_t i)
+void AudioVoice::setId(uint32_t i)
 {
 	id = i;
 }
 
-size_t AudioVoice::getId() const
+uint32_t AudioVoice::getId() const
 {
 	return id;
 }
@@ -67,7 +67,7 @@ void AudioVoice::setBehaviour(std::shared_ptr<AudioVoiceBehaviour> value)
 	behaviour->onAttach(*this);
 }
 
-int AudioVoice::getGroup() const
+uint8_t AudioVoice::getGroup() const
 {
 	return group;
 }

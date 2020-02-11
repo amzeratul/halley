@@ -12,7 +12,7 @@ namespace Halley {
 
 	class AudioVoice {
     public:
-		AudioVoice(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, int group);
+		AudioVoice(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, uint8_t group);
 		~AudioVoice();
 
 		void start();
@@ -32,20 +32,20 @@ namespace Halley {
 		void update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener, float groupGain);
 		void mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixer& mixer, AudioBufferPool& pool);
 		
-		void setId(size_t id);
-		size_t getId() const;
+		void setId(uint32_t id);
+		uint32_t getId() const;
 
 		void setBehaviour(std::shared_ptr<AudioVoiceBehaviour> behaviour);
 		
-		int getGroup() const;
+		uint8_t getGroup() const;
 
 	private:
+		uint32_t id = std::numeric_limits<uint32_t>::max();
+		uint8_t group = 0;
+		uint8_t nChannels = 0;
 		bool playing = false;
 		bool done = false;
 		bool isFirstUpdate = true;
-		uint8_t nChannels = 0;
-		int group;
-		size_t id = std::numeric_limits<size_t>::max();
     	float gain;
 		float elapsedTime = 0.0f;
 

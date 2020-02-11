@@ -20,7 +20,7 @@ namespace Halley
 		AudioEvent();
 		explicit AudioEvent(const ConfigNode& config);
 
-		void run(AudioEngine& engine, size_t id, const AudioPosition& position) const;
+		void run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -53,7 +53,7 @@ namespace Halley
 	{
 	public:
 		virtual ~IAudioEventAction() {}
-		virtual void run(AudioEngine& engine, size_t id, const AudioPosition& position) const = 0;
+		virtual void run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const = 0;
 		virtual AudioEventActionType getType() const = 0;
 
 		virtual void serialize(Serializer& s) const = 0;
@@ -67,7 +67,7 @@ namespace Halley
 		AudioEventActionPlay();
 		explicit AudioEventActionPlay(const ConfigNode& config);
 
-		void run(AudioEngine& engine, size_t id, const AudioPosition& position) const override;
+		void run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
 		AudioEventActionType getType() const override;
 
 		void serialize(Serializer& s) const override;

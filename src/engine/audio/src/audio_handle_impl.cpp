@@ -5,7 +5,7 @@
 
 using namespace Halley;
 
-AudioHandleImpl::AudioHandleImpl(AudioFacade& facade, size_t id)
+AudioHandleImpl::AudioHandleImpl(AudioFacade& facade, uint32_t id)
 	: facade(facade)
 	, handleId(id)
 {
@@ -70,7 +70,7 @@ bool AudioHandleImpl::isPlaying() const
 
 void AudioHandleImpl::enqueue(std::function<void(AudioVoice& src)> f)
 {
-	size_t id = handleId;
+	uint32_t id = handleId;
 	AudioEngine* engine = facade.engine.get();
 	facade.enqueue([id, engine, f] () {
 		for (auto& src: engine->getSources(id)) {

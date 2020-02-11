@@ -25,7 +25,7 @@ AudioEvent::AudioEvent(const ConfigNode& config)
 	}
 }
 
-void AudioEvent::run(AudioEngine& engine, size_t id, const AudioPosition& position) const
+void AudioEvent::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
 {
 	for (auto& a: actions) {
 		a->run(engine, id, position);
@@ -103,7 +103,7 @@ AudioEventActionPlay::AudioEventActionPlay(const ConfigNode& node)
 	loop = node["loop"].asBool(false);
 }
 
-void AudioEventActionPlay::run(AudioEngine& engine, size_t id, const AudioPosition& position) const
+void AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
 {
 	if (clips.empty()) {
 		return;

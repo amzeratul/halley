@@ -23,14 +23,14 @@ AudioEngine::~AudioEngine()
 {
 }
 
-void AudioEngine::postEvent(size_t id, std::shared_ptr<const AudioEvent> event, const AudioPosition& position)
+void AudioEngine::postEvent(uint32_t id, const AudioEvent& event, const AudioPosition& position)
 {
-	event->run(*this, id, position);
+	event.run(*this, id, position);
 }
 
-void AudioEngine::play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)
+void AudioEngine::play(uint32_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)
 {
-	addEmitter(id, std::make_unique<AudioVoice>(std::make_shared<AudioSourceClip>(clip, loop, 0), position, volume, getGroupId("")));
+	addEmitter(id, std::make_unique<AudioVoice>(std::make_shared<AudioSourceClip>(std::move(clip), loop, 0), std::move(position), volume, getGroupId("")));
 }
 
 void AudioEngine::setListener(AudioListenerData l)
@@ -64,14 +64,14 @@ void AudioEngine::run()
 	// but first return so we the AudioFacade can update the incoming sound data
 }
 
-void AudioEngine::addEmitter(size_t id, std::unique_ptr<AudioVoice>&& src)
+void AudioEngine::addEmitter(uint32_t id, std::unique_ptr<AudioVoice>&& src)
 {
 	emitters.emplace_back(std::move(src));
 	emitters.back()->setId(id);
 	idToSource[id].push_back(emitters.back().get());
 }
 
-const std::vector<AudioVoice*>& AudioEngine::getSources(size_t id)
+const std::vector<AudioVoice*>& AudioEngine::getSources(uint32_t id)
 {
 	auto src = idToSource.find(id);
 	if (src != idToSource.end()) {
@@ -81,9 +81,9 @@ const std::vector<AudioVoice*>& AudioEngine::getSources(size_t id)
 	}
 }
 
-std::vector<size_t> AudioEngine::getPlayingSounds()
+std::vector<uint32_t> AudioEngine::getPlayingSounds()
 {
-	std::vector<size_t> result(idToSource.size());
+	std::vector<uint32_t> result(idToSource.size());
 	size_t i = 0;
 	for (const auto& kv: idToSource) {
 		result[i++] = kv.first;
@@ -217,7 +217,7 @@ void AudioEngine::clearBuffer(gsl::span<AudioSamplePack> dst)
 
 int AudioEngine::getGroupId(const String& group)
 {
-	auto iter = std::find(groupNames.begin(), groupNames.end(), group);
+	const auto iter = std::find(groupNames.begin(), groupNames.end(), group);
 	if (iter != groupNames.end()) {
 		return int(iter - groupNames.begin());
 	} else {
@@ -227,7 +227,7 @@ int AudioEngine::getGroupId(const String& group)
 	}
 }
 
-float AudioEngine::getGroupGain(int id) const
+float AudioEngine::getGroupGain(uint8_t id) const
 {
 	return groupGains[id];
 }

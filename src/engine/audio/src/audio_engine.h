@@ -21,15 +21,15 @@ namespace Halley {
 	    AudioEngine();
 		~AudioEngine();
 
-	    void postEvent(size_t id, std::shared_ptr<const AudioEvent> event, const AudioPosition& position);
-	    void play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop);
+	    void postEvent(uint32_t id, const AudioEvent& event, const AudioPosition& position);
+	    void play(uint32_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop);
 	    void setListener(AudioListenerData position);
 		void setOutputChannels(std::vector<AudioChannelData> channelData);
 
-		void addEmitter(size_t id, std::unique_ptr<AudioVoice>&& src);
+		void addEmitter(uint32_t id, std::unique_ptr<AudioVoice>&& src);
 
-		const std::vector<AudioVoice*>& getSources(size_t id);
-		std::vector<size_t> getPlayingSounds();
+		const std::vector<AudioVoice*>& getSources(uint32_t id);
+		std::vector<uint32_t> getPlayingSounds();
 
 		void run();
 		void start(AudioSpec spec, AudioOutputAPI& out);
@@ -58,7 +58,7 @@ namespace Halley {
 		std::vector<std::unique_ptr<AudioVoice>> emitters;
 		std::vector<AudioChannelData> channels;
 		
-		std::map<size_t, std::vector<AudioVoice*>> idToSource;
+		std::map<uint32_t, std::vector<AudioVoice*>> idToSource;
 		std::vector<AudioVoice*> dummyIdSource;
 
 		float masterGain = 1.0f;
@@ -73,6 +73,6 @@ namespace Halley {
 	    void removeFinishedEmitters();
 		void clearBuffer(gsl::span<AudioSamplePack> dst);
 
-    	float getGroupGain(int group) const;
+    	float getGroupGain(uint8_t group) const;
     };
 }
