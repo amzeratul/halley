@@ -5,7 +5,7 @@
 #include <condition_variable>
 #include <map>
 #include <vector>
-#include "audio_emitter.h"
+#include "audio_voice.h"
 #include "halley/audio/resampler.h"
 #include "halley/maths/random.h"
 #include "halley/data_structures/flat_map.h"
@@ -26,9 +26,9 @@ namespace Halley {
 	    void setListener(AudioListenerData position);
 		void setOutputChannels(std::vector<AudioChannelData> channelData);
 
-		void addEmitter(size_t id, std::unique_ptr<AudioEmitter>&& src);
+		void addEmitter(size_t id, std::unique_ptr<AudioVoice>&& src);
 
-		const std::vector<AudioEmitter*>& getSources(size_t id);
+		const std::vector<AudioVoice*>& getSources(size_t id);
 		std::vector<size_t> getPlayingSounds();
 
 		void run();
@@ -54,14 +54,12 @@ namespace Halley {
 
 		std::atomic<bool> running;
 		std::atomic<bool> needsBuffer;
-		std::mutex mutex;
-		std::condition_variable backBufferCondition;
 
-		std::vector<std::unique_ptr<AudioEmitter>> emitters;
+		std::vector<std::unique_ptr<AudioVoice>> emitters;
 		std::vector<AudioChannelData> channels;
 		
-		std::map<size_t, std::vector<AudioEmitter*>> idToSource;
-		std::vector<AudioEmitter*> dummyIdSource;
+		std::map<size_t, std::vector<AudioVoice*>> idToSource;
+		std::vector<AudioVoice*> dummyIdSource;
 
 		float masterGain = 1.0f;
 		std::vector<String> groupNames;

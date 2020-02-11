@@ -30,7 +30,7 @@ void AudioEngine::postEvent(size_t id, std::shared_ptr<const AudioEvent> event, 
 
 void AudioEngine::play(size_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)
 {
-	addEmitter(id, std::make_unique<AudioEmitter>(std::make_shared<AudioSourceClip>(clip, loop, 0), position, volume, getGroupId("")));
+	addEmitter(id, std::make_unique<AudioVoice>(std::make_shared<AudioSourceClip>(clip, loop, 0), position, volume, getGroupId("")));
 }
 
 void AudioEngine::setListener(AudioListenerData l)
@@ -64,14 +64,14 @@ void AudioEngine::run()
 	// but first return so we the AudioFacade can update the incoming sound data
 }
 
-void AudioEngine::addEmitter(size_t id, std::unique_ptr<AudioEmitter>&& src)
+void AudioEngine::addEmitter(size_t id, std::unique_ptr<AudioVoice>&& src)
 {
 	emitters.emplace_back(std::move(src));
 	emitters.back()->setId(id);
 	idToSource[id].push_back(emitters.back().get());
 }
 
-const std::vector<AudioEmitter*>& AudioEngine::getSources(size_t id)
+const std::vector<AudioVoice*>& AudioEngine::getSources(size_t id)
 {
 	auto src = idToSource.find(id);
 	if (src != idToSource.end()) {
@@ -196,14 +196,14 @@ void AudioEngine::removeFinishedEmitters()
 			if (iter != idToSource.end()) {
 				auto& ems = iter->second;
 				if (ems.size() > 1) {
-					ems.erase(std::remove_if(ems.begin(), ems.end(), [] (const AudioEmitter* e) { return e->isDone(); }), ems.end());
+					ems.erase(std::remove_if(ems.begin(), ems.end(), [] (const AudioVoice* e) { return e->isDone(); }), ems.end());
 				} else {
 					idToSource.erase(iter);
 				}
 			}
 		}
 	}
-	emitters.erase(std::remove_if(emitters.begin(), emitters.end(), [&] (const std::unique_ptr<AudioEmitter>& src) { return src->isDone(); }), emitters.end());
+	emitters.erase(std::remove_if(emitters.begin(), emitters.end(), [&] (const std::unique_ptr<AudioVoice>& src) { return src->isDone(); }), emitters.end());
 }
 
 void AudioEngine::clearBuffer(gsl::span<AudioSamplePack> dst)

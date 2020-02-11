@@ -1,7 +1,7 @@
 #include "audio_facade.h"
 #include "audio_engine.h"
 #include "audio_handle_impl.h"
-#include "audio_emitter_behaviour.h"
+#include "audio_voice_behaviour.h"
 #include "halley/support/console.h"
 #include "halley/support/logger.h"
 #include "halley/core/resources/resources.h"
@@ -155,7 +155,7 @@ AudioHandle AudioFacade::playMusic(const String& eventName, int track, float fad
 
 	if (hasFade) {
 		handle->setGain(0.0f);
-		handle->setBehaviour(std::make_unique<AudioEmitterFadeBehaviour>(fadeInTime, 1.0f, false));
+		handle->setBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeInTime, 1.0f, false));
 	}
 
 	return handle;
@@ -222,7 +222,7 @@ void AudioFacade::setOutputChannels(std::vector<AudioChannelData> audioChannelDa
 void AudioFacade::stopMusic(AudioHandle& handle, float fadeOutTime)
 {
 	if (fadeOutTime > 0.001f) {
-		handle->setBehaviour(std::make_unique<AudioEmitterFadeBehaviour>(fadeOutTime, 0.0f, true));
+		handle->setBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeOutTime, 0.0f, true));
 	} else {
 		handle->stop();
 	}

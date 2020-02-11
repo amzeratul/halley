@@ -1,32 +1,32 @@
-#include "audio_emitter.h"
+#include "audio_voice.h"
 #include <utility>
 #include "audio_mixer.h"
-#include "audio_emitter_behaviour.h"
+#include "audio_voice_behaviour.h"
 #include "audio_source.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
 
-AudioEmitter::AudioEmitter(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, int group) 
+AudioVoice::AudioVoice(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, int group) 
 	: source(std::move(source))
 	, sourcePos(std::move(sourcePos))
 	, group(group)
 	, gain(gain)
 {}
 
-AudioEmitter::~AudioEmitter() = default;
+AudioVoice::~AudioVoice() = default;
 
-void AudioEmitter::setId(size_t i)
+void AudioVoice::setId(size_t i)
 {
 	id = i;
 }
 
-size_t AudioEmitter::getId() const
+size_t AudioVoice::getId() const
 {
 	return id;
 }
 
-void AudioEmitter::start()
+void AudioVoice::start()
 {
 	Expects(isReady());
 	Expects(!playing);
@@ -39,69 +39,69 @@ void AudioEmitter::start()
 	}
 }
 
-void AudioEmitter::stop()
+void AudioVoice::stop()
 {
 	playing = false;
 	done = true;
 }
 
-bool AudioEmitter::isPlaying() const
+bool AudioVoice::isPlaying() const
 {
 	return playing;
 }
 
-bool AudioEmitter::isReady() const
+bool AudioVoice::isReady() const
 {
 	return source->isReady();
 }
 
-bool AudioEmitter::isDone() const
+bool AudioVoice::isDone() const
 {
 	return done;
 }
 
-void AudioEmitter::setBehaviour(std::shared_ptr<AudioEmitterBehaviour> value)
+void AudioVoice::setBehaviour(std::shared_ptr<AudioVoiceBehaviour> value)
 {
 	behaviour = std::move(value);
 	elapsedTime = 0;
 	behaviour->onAttach(*this);
 }
 
-int AudioEmitter::getGroup() const
+int AudioVoice::getGroup() const
 {
 	return group;
 }
 
-void AudioEmitter::setGain(float g)
+void AudioVoice::setGain(float g)
 {
 	gain = g;
 }
 
-void AudioEmitter::setAudioSourcePosition(Vector3f position)
+void AudioVoice::setAudioSourcePosition(Vector3f position)
 {
 	if (nChannels == 1) {
 		sourcePos.setPosition(position);
 	}
 }
 
-void AudioEmitter::setAudioSourcePosition(AudioPosition s)
+void AudioVoice::setAudioSourcePosition(AudioPosition s)
 {
 	if (nChannels == 1) {
 		sourcePos = std::move(s);
 	}
 }
 
-float AudioEmitter::getGain() const
+float AudioVoice::getGain() const
 {
 	return gain;
 }
 
-size_t AudioEmitter::getNumberOfChannels() const
+size_t AudioVoice::getNumberOfChannels() const
 {
 	return nChannels;
 }
 
-void AudioEmitter::update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener, float groupGain)
+void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener, float groupGain)
 {
 	Expects(playing);
 
@@ -122,7 +122,7 @@ void AudioEmitter::update(gsl::span<const AudioChannelData> channels, const Audi
 	}
 }
 
-void AudioEmitter::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixer& mixer, AudioBufferPool& pool)
+void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixer& mixer, AudioBufferPool& pool)
 {
 	Expects(dst.size() > 0);
 	Expects(numSamples % 16 == 0);
@@ -176,7 +176,7 @@ void AudioEmitter::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMi
 	}
 }
 
-void AudioEmitter::advancePlayback(size_t samples)
+void AudioVoice::advancePlayback(size_t samples)
 {
 	elapsedTime += float(samples) / AudioConfig::sampleRate;
 }

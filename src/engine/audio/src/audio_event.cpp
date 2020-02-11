@@ -130,7 +130,7 @@ void AudioEventActionPlay::run(AudioEngine& engine, size_t id, const AudioPositi
 	if (std::abs(curPitch - 1.0f) > 0.01f) {
 		source = std::make_shared<AudioFilterResample>(source, int(lround(sampleRate * curPitch)), sampleRate, engine.getPool());
 	}
-	engine.addEmitter(id, std::make_unique<AudioEmitter>(source, position, curVolume, engine.getGroupId(group)));
+	engine.addEmitter(id, std::make_unique<AudioVoice>(source, position, curVolume, engine.getGroupId(group)));
 }
 
 AudioEventActionType AudioEventActionPlay::getType() const

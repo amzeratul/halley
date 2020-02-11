@@ -1,19 +1,19 @@
 #pragma once
 #include "audio_position.h"
-#include "audio_emitter_behaviour.h"
+#include "audio_voice_behaviour.h"
 #include "audio_buffer.h"
 #include <limits>
 
 namespace Halley {
 	class AudioBufferPool;
 	class AudioMixer;
-	class AudioEmitterBehaviour;
+	class AudioVoiceBehaviour;
 	class AudioSource;
 
-	class AudioEmitter {
+	class AudioVoice {
     public:
-		AudioEmitter(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, int group);
-		~AudioEmitter();
+		AudioVoice(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, int group);
+		~AudioVoice();
 
 		void start();
 		void stop();
@@ -35,27 +35,26 @@ namespace Halley {
 		void setId(size_t id);
 		size_t getId() const;
 
-		void setBehaviour(std::shared_ptr<AudioEmitterBehaviour> behaviour);
+		void setBehaviour(std::shared_ptr<AudioVoiceBehaviour> behaviour);
 		
 		int getGroup() const;
 
 	private:
-		std::shared_ptr<AudioSource> source;
-		std::shared_ptr<AudioEmitterBehaviour> behaviour;
-    	AudioPosition sourcePos;
-		int group;
-
 		bool playing = false;
 		bool done = false;
 		bool isFirstUpdate = true;
+		uint8_t nChannels = 0;
+		int group;
+		size_t id = std::numeric_limits<size_t>::max();
     	float gain;
 		float elapsedTime = 0.0f;
 
-		size_t nChannels = 0;
+		std::shared_ptr<AudioSource> source;
+		std::shared_ptr<AudioVoiceBehaviour> behaviour;
+    	AudioPosition sourcePos;
+
 		std::array<float, 16> channelMix;
 		std::array<float, 16> prevChannelMix;
-
-		size_t id = std::numeric_limits<size_t>::max();
 
 		void advancePlayback(size_t samples);
     };
