@@ -204,6 +204,11 @@ if (USE_DX11)
 	add_definitions(-DWITH_DX11)
 endif()
 
+# Metal
+if (USE_METAL)
+	add_definitions(-DWITH_METAL)
+endif()
+
 # WinRT
 if (USE_WINRT)
 	if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
