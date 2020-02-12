@@ -62,14 +62,16 @@ The following platforms are supported:
 
 ## Installation
 
-### Tools required
+### Local
+
+#### Tools required
 * CMake 3.10+
 * C++14 capable compiler:
   * Visual C++ 15.3 (Visual Studio 2017)
   * Clang 3.5
   * GCC 5.0
 
-### Library dependencies
+#### Library dependencies
 * Engine:
   * Boost 1.66.0 (header only)
   * OpenGL [optional]
@@ -80,7 +82,7 @@ The following platforms are supported:
   * Freetype 2.6.3
   * yaml-cpp 0.5.3
 
-### Set up
+#### Set up
 * Ensure that all dependencies above are set up correctly
 * Build with CMake
   * Typical:  
@@ -95,6 +97,38 @@ The following platforms are supported:
     ```
 * Run `halley-editor tests/entity` (or whichever other project you want to test)
 * Launch that project
+
+### Containers
+
+If you want to quickly jump in, we have an experimental setup with containers. you can pull the provided [Dockerfile](Dockerfile)
+(that builds a Docker container) that comes with the dependencies installed below.
+
+If you are good with Docker you can try the container (you will need to expose the video
+device from your host)
+
+```bash
+$ docker pull vanessa/halley
+```
+
+But easier is to pull the Docker container into a [Singularity](https://www.sylabs.io/guides/3.0/user-guide/installation.html) container. 
+This will avoid dealing with trying to get our video devices to work in the Docker container!
+
+```bash
+$ sudo singularity build --sandbox halley-box docker://vanessa/halley
+$ singularity shell halley-box
+```
+
+Once in the container, try the test:
+
+```bash
+$ cd /code/src/tests/
+$ halley-editor entity/
+```
+
+And the display should work:
+
+![assets_src/image/entity.png](assets_src/image/entity.png)
+
 
 ## Documentation
 The full documentation is available on the [Wiki](https://github.com/amzeratul/halley/wiki).
