@@ -93,6 +93,7 @@ namespace Halley {
 	private:
 		Vector<std::pair<int, Component*>> components;
 		Vector<MessageEntry> inbox;
+		String name;
 		FamilyMaskType mask;
 		EntityId uid;
 		int liveComponents = 0;
@@ -179,6 +180,16 @@ namespace Halley {
 		bool hasComponent() const
 		{
 			return entity.hasComponent<T>();
+		}
+
+		const String& getName() const
+		{
+			return entity.name;
+		}
+
+		void setName(String name)
+		{
+			entity.name = std::move(name);
 		}
 
 	private:

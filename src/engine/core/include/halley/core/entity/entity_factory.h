@@ -7,19 +7,13 @@
 namespace Halley {
 	class World;
 	class Resources;
-
-	class EntityEntry {
-	public:
-		String name;
-		EntityRef entity;
-	};
 	
 	class EntityFactory {
 	public:
 		explicit EntityFactory(World& world, Resources& resources);
 		virtual ~EntityFactory();
 		
-		EntityEntry createEntity(const ConfigNode& node);
+		EntityRef createEntity(const ConfigNode& node);
 		
 		template <typename T>
 		void createComponent(EntityRef& e, const ConfigNode& componentData)

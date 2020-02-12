@@ -16,7 +16,7 @@ EntityFactory::~EntityFactory()
 {
 }
 
-EntityEntry EntityFactory::createEntity(const ConfigNode& node)
+EntityRef EntityFactory::createEntity(const ConfigNode& node)
 {
 	auto entity = world.createEntity();
 	const auto func = world.getCreateComponentFunction();
@@ -30,15 +30,15 @@ EntityEntry EntityFactory::createEntity(const ConfigNode& node)
 		}
 	}
 
-	auto e = EntityEntry{ node["name"].asString(""), entity };
+	entity.setName(node["name"].asString(""));
 	
 	if (node["children"].getType() == ConfigNodeType::Sequence) {
 		for (auto& childNode: node["children"].asSequence()) {
-			createChildEntity(childNode, e.entity);
+			createChildEntity(childNode, entity);
 		}
 	}
 
-	return e;
+	return entity;
 }
 
 void EntityFactory::createChildEntity(const ConfigNode& node, EntityRef& parent)
@@ -47,7 +47,7 @@ void EntityFactory::createChildEntity(const ConfigNode& node, EntityRef& parent)
 
 	auto parentTransform = parent.tryGetComponent<Transform2DComponent>();
 	if (parentTransform) {
-		parentTransform->addChild(e.entity.getComponent<Transform2DComponent>(), true);
+		parentTransform->addChild(e.getComponent<Transform2DComponent>(), true);
 	}
 }
 
