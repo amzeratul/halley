@@ -47,7 +47,7 @@ void EntityFactory::createChildEntity(const ConfigNode& node, EntityRef& parent)
 
 	auto parentTransform = parent.tryGetComponent<Transform2DComponent>();
 	if (parentTransform) {
-		parentTransform->addChild(e.entity.getComponent<Transform2DComponent>());
+		parentTransform->addChild(e.entity.getComponent<Transform2DComponent>(), true);
 	}
 }
 

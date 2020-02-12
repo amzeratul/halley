@@ -4,7 +4,6 @@
 #include "halley/entity/component.h"
 #include "halley/entity/entity.h"
 #include "halley/entity/world.h"
-#include "halley/core/resources/resources.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/bytes/config_node_serializer.h"
 #include "components/transform2d_component_base.h"
@@ -43,8 +42,8 @@ public:
 	void setParent(bool keepLocalPosition = false);
 	
 	std::vector<Halley::EntityId> getChildren() const { return childIds; }
-	void addChild(Halley::EntityId parentId, Halley::World& world);
-	void addChild(Transform2DComponent& childTransform);
+	void addChild(Halley::EntityId parentId, Halley::World& world, bool keepLocalPosition = false);
+	void addChild(Transform2DComponent& childTransform, bool keepLocalPosition = false);
 	void detachChildren(Halley::World& world);
 
 	void destroyTree(Halley::World& world, bool includingMe = true);

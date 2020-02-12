@@ -109,14 +109,14 @@ void Transform2DComponent::setParent(bool keepLocalPosition)
 	parentId = EntityId();
 }
 
-void Transform2DComponent::addChild(EntityId parentId, World& world)
+void Transform2DComponent::addChild(EntityId parentId, World& world, bool keepLocalPosition)
 {
-	world.getEntity(parentId).getComponent<Transform2DComponent>().setParent(*this);
+	world.getEntity(parentId).getComponent<Transform2DComponent>().setParent(*this, keepLocalPosition);
 }
 
-void Transform2DComponent::addChild(Transform2DComponent& childTransform)
+void Transform2DComponent::addChild(Transform2DComponent& childTransform, bool keepLocalPosition)
 {
-	childTransform.setParent(*this);
+	childTransform.setParent(*this, keepLocalPosition);
 }
 
 void Transform2DComponent::detachChildren(World& world)
