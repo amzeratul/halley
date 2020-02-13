@@ -6,7 +6,7 @@
 
 class TextLabelComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex = 1;
+	static constexpr int componentIndex = 2;
 	
 	Halley::TextRenderer text;
 	int layer;

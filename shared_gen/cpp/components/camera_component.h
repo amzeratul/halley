@@ -6,7 +6,7 @@
 
 class CameraComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex = 3;
+	static constexpr int componentIndex = 4;
 	
 	float zoom;
 	Halley::Maybe<Halley::Colour4f> clear;

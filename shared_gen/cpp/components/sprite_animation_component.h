@@ -6,7 +6,7 @@
 
 class SpriteAnimationComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex = 2;
+	static constexpr int componentIndex = 3;
 	
 	Halley::AnimationPlayer player;
 	

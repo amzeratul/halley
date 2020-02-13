@@ -4,8 +4,12 @@ component:
   name: Sprite
   members:
   - sprite: 'Halley::Sprite'
-  - layer: int
-  - mask: int
+  - layer:
+      type: int
+      defaultValue: 0
+  - mask:
+      type: int
+      defaultValue: 1
 
 ---
 

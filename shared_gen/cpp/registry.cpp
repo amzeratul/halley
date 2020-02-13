@@ -1,11 +1,11 @@
 #include <halley.hpp>
 using namespace Halley;
 
+#include "halley/core/entity/components/transform_2d_component.h"
 #include "components/text_label_component.h"
 #include "components/sprite_component.h"
 #include "components/sprite_animation_component.h"
 #include "components/camera_component.h"
-#include "halley/core/entity/components/transform_2d_component.h"
 
 // System factory functions
 
@@ -24,11 +24,11 @@ using ComponentFactoryMap = HashMap<String, ComponentFactoryPtr>;
 
 static ComponentFactoryMap makeComponentFactories() {
 	ComponentFactoryMap result;
+	result["Transform2D"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) { factory.createComponent<Transform2DComponent>(e, node); };
 	result["TextLabel"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) { factory.createComponent<TextLabelComponent>(e, node); };
 	result["Sprite"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) { factory.createComponent<SpriteComponent>(e, node); };
 	result["SpriteAnimation"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) { factory.createComponent<SpriteAnimationComponent>(e, node); };
 	result["Camera"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) { factory.createComponent<CameraComponent>(e, node); };
-	result["Transform2D"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) { factory.createComponent<Transform2DComponent>(e, node); };
 	return result;
 }
 

@@ -6,7 +6,7 @@
 
 class Transform2DComponentBase : public Halley::Component {
 public:
-	static constexpr int componentIndex = 4;
+	static constexpr int componentIndex = 0;
 	
 protected:
 	Halley::Vector2f position;

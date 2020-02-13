@@ -6,11 +6,11 @@
 
 class SpriteComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex = 0;
+	static constexpr int componentIndex = 1;
 	
 	Halley::Sprite sprite;
-	int layer;
-	int mask;
+	int layer = 0;
+	int mask = 1;
 	
 	SpriteComponent() {}
 	
