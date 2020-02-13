@@ -9,27 +9,27 @@ Metadata::Metadata() {}
 
 Metadata::~Metadata() {}
 
-bool Metadata::hasKey(String key) const
+bool Metadata::hasKey(const String& key) const
 {
 	return entries.find(key) != entries.end();
 }
 
-bool Metadata::getBool(String key) const
+bool Metadata::getBool(const String& key) const
 {
 	return getString(key) == "true";
 }
 
-int Metadata::getInt(String key) const
+int Metadata::getInt(const String& key) const
 {
 	return getString(key).toInteger();
 }
 
-float Metadata::getFloat(String key) const
+float Metadata::getFloat(const String& key) const
 {
 	return getString(key).toFloat();
 }
 
-String Metadata::getString(String key) const
+String Metadata::getString(const String& key) const
 {
 	auto result = entries.find(key);
 	if (result != entries.end()) {
@@ -39,7 +39,7 @@ String Metadata::getString(String key) const
 	}
 }
 
-bool Metadata::getBool(String key, bool v) const
+bool Metadata::getBool(const String& key, bool v) const
 {
 	if (hasKey(key)) {
 		return getBool(key);
@@ -48,7 +48,7 @@ bool Metadata::getBool(String key, bool v) const
 	}
 }
 
-int Metadata::getInt(String key, int v) const
+int Metadata::getInt(const String& key, int v) const
 {
 	if (hasKey(key)) {
 		return getInt(key);
@@ -57,7 +57,7 @@ int Metadata::getInt(String key, int v) const
 	}
 }
 
-float Metadata::getFloat(String key, float v) const
+float Metadata::getFloat(const String& key, float v) const
 {
 	if (hasKey(key)) {
 		return getFloat(key);
@@ -66,7 +66,7 @@ float Metadata::getFloat(String key, float v) const
 	}
 }
 
-String Metadata::getString(String key, String v) const
+String Metadata::getString(const String& key, String v) const
 {
 	if (hasKey(key)) {
 		return getString(key);

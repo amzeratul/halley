@@ -4,6 +4,7 @@
 #include <halley/file_formats/image.h>
 #include <halley/resources/metadata.h>
 #include "halley/concurrency/concurrent.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 

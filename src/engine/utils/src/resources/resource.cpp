@@ -7,12 +7,22 @@ Resource::~Resource() = default;
 
 void Resource::setMeta(Metadata m)
 {
-	meta = std::move(m);
+	// Only allow setting meta once to avoid a race condition
+	// For example, resource_collection.cpp would try to set a meta on a Texture while texture.cpp is trying to load it and referencing its data
+	if (!metaSet) {
+		meta = std::move(m);
+		metaSet = true;
+	}
 }
 
 const Metadata& Resource::getMeta() const
 {
 	return meta;
+}
+
+bool Resource::isMetaSet() const
+{
+	return metaSet;
 }
 
 void Resource::setAssetId(String id)

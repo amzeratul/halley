@@ -88,6 +88,8 @@ namespace Halley
 
 		void setMeta(Metadata meta);
 		const Metadata& getMeta() const;
+		bool isMetaSet() const;
+		
 		void setAssetId(String name);
 		const String& getAssetId() const;
 		virtual void onLoaded(Resources& resources);
@@ -102,6 +104,7 @@ namespace Halley
 		Metadata meta;
 		String assetId;
 		int assetVersion = 0;
+		bool metaSet = false;
 	};
 
 	class ResourceObserver

@@ -15,19 +15,23 @@ namespace Halley
 	public:
 		Metadata();
 		Metadata(const Metadata& other) = default;
+		Metadata(Metadata&& other) = default;
 		~Metadata();
 
-		bool hasKey(String key) const;
+		Metadata& operator=(const Metadata& other) = default;
+		Metadata& operator=(Metadata&& other) = default;
 
-		bool getBool(String key) const;
-		int getInt(String key) const;
-		float getFloat(String key) const;
-		String getString(String key) const;
+		bool hasKey(const String& key) const;
 
-		bool getBool(String key, bool defaultValue) const;
-		int getInt(String key, int defaultValue) const;
-		float getFloat(String key, float defaultValue) const;
-		String getString(String key, String defaultValue) const;
+		bool getBool(const String& key) const;
+		int getInt(const String& key) const;
+		float getFloat(const String& key) const;
+		String getString(const String& key) const;
+
+		bool getBool(const String& key, bool defaultValue) const;
+		int getInt(const String& key, int defaultValue) const;
+		float getFloat(const String& key, float defaultValue) const;
+		String getString(const String& key, String defaultValue) const;
 		const std::map<String, String>& getEntries() const;
 
 		bool set(String key, bool value);
