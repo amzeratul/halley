@@ -25,8 +25,7 @@ Transform2DComponent::Transform2DComponent(EntityId parentId, World& world, Vect
 Vector2f Transform2DComponent::getGlobalPosition() const
 {
 	if (parentTransform) {
-		// TODO, do this properly
-		return position + parentTransform->getGlobalPosition();
+		return transformPoint(position);
 	} else {
 		return position;
 	}
@@ -35,7 +34,7 @@ Vector2f Transform2DComponent::getGlobalPosition() const
 void Transform2DComponent::setGlobalPosition(Vector2f v)
 {
 	if (parentTransform) {
-		position = v - parentTransform->getGlobalPosition();
+		position = inverseTransformPoint(v);
 	} else {
 		position = v;
 	}
@@ -63,6 +62,18 @@ void Transform2DComponent::setGlobalRotation(Angle1f v)
 {
 	// TODO
 	rotation = v;
+}
+
+Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
+{
+	// TODO, do this properly
+	return parentTransform->getGlobalPosition() + p;
+}
+
+Vector2f Transform2DComponent::inverseTransformPoint(const Vector2f& p) const
+{
+	// TODO, do this properly
+	return p - parentTransform->getGlobalPosition();
 }
 
 void Transform2DComponent::setParent(EntityId newParentId, World& world, bool keepLocalPosition)

@@ -36,6 +36,9 @@ public:
 	Halley::Angle1f getGlobalRotation() const;
 	void setGlobalRotation(Halley::Angle1f v);
 
+	Halley::Vector2f transformPoint(const Halley::Vector2f& p) const;
+	Halley::Vector2f inverseTransformPoint(const Halley::Vector2f& p) const;
+
 	Halley::Maybe<Halley::EntityId> getParent() const { return parentId; }
 	void setParent(Halley::EntityId parentId, Halley::World& world, bool keepLocalPosition = false);
 	void setParent(Transform2DComponent& parentTransform, bool keepLocalPosition = false);
