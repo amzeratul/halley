@@ -141,6 +141,15 @@ namespace Halley {
 			return Polygon(std::move(list));
 		}
 	};
+	
+	template<>
+	class ConfigNodeDeserializer<String> {
+	public:
+		String operator()(Resources& resources, const ConfigNode& node)
+		{
+			return node.asString("");
+		}
+	};
 
 	class ConfigNodeHelper {
 	public:
