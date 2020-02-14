@@ -8,6 +8,7 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
+#include "halley/core/game/game_platform.h"
 
 #ifdef _MSC_VER
 	#ifdef _DEBUG
@@ -188,7 +189,11 @@ void Codegen::writeFiles(Path dir, const CodeGenResult& files, Stats& stats) con
 		std::stringstream ss;
 		for (auto& line: f.fileContents) {
 			ss << line;
-			ss << "\n";
+			if constexpr (getPlatform() == GamePlatform::Windows) {
+				ss << "\r\n";
+			} else {
+				ss << "\n";
+			}
 		}
 		auto finalData = ss.str();
 
