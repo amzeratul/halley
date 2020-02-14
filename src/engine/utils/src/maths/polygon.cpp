@@ -68,30 +68,66 @@ void Polygon::realize()
 
 ///////////////////////////////////////////////////////
 // Checks if a particular point is inside the polygon
-bool Polygon::isPointInside(const Vector2f &point) const
+// Only works for convex polygons
+bool Polygon::isPointInsideConvex(Vector2f point) const
 {
-	Vector2f p = point - origin;
+	const Vector2f p = point - origin;
 
 	// Fast fail
-	if (p.squaredLength() > outerRadius*outerRadius) return false;
-
-	// Do cross product with all the segments, except for last
-	Vector2f a,b;
-	size_t len = vertices.size();
-	for (size_t i=0; i<len-1; i++) {
-		a = p - vertices[i];
-		b = vertices[i+1] - vertices[i];
-		if (a.cross(b) > 0) return false;
+	if (p.squaredLength() > outerRadius * outerRadius) {
+		return false;
 	}
 
-	// Try last segment (duplicated code just to avoid a %, fuck yeah)
-	len--;
-	a = p - vertices[len];
-	b = vertices[0] - vertices[len];
-	if (a.cross(b) > 0) return false;
+	// Do cross product with all the segments
+	const size_t len = vertices.size();
+	for (size_t i = 0; i < len; i++) {
+		const auto a = p - vertices[i];
+		const auto b = vertices[(i+1) % len] - vertices[i];
+		if (a.cross(b) > 0) {
+			return false;
+		}
+	}
 
 	// Nothing failed, so it's inside
 	return true;
+}
+
+bool Polygon::isPointInside(Vector2f point) const
+{
+	const Vector2f p = point - origin;
+
+	// Fast fail
+	if (p.squaredLength() > outerRadius * outerRadius) {
+		return false;
+	}
+
+	size_t nLeft = 0;
+	size_t nRight = 0;
+	const size_t len = vertices.size();
+
+	// For each segment that overlaps this point vertically, classify it as "left" or "right"
+	for (size_t i = 0; i < len; i++) {
+		const auto a = vertices[i];
+		const auto b = vertices[(i+1) % len];
+		auto r = Range(a.y, b.y);
+		if (r.contains(p.y)) {
+			if (a.x < p.x && b.x < p.x) {
+				nLeft++;
+			} else if (a.x > p.x && b.x > p.x) {
+				nRight++;
+			} else {
+				const float t = (p.y - a.y) / (b.y - a.y);
+				const float refX = lerp(a.x, b.x, t);
+				if (refX < p.x) {
+					nLeft++;
+				} else {
+					nRight++;
+				}
+			}
+		}
+	}
+
+	return (nLeft % 2) == 1 && (nRight % 2) == 1;
 }
 
 
