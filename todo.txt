@@ -1,18 +1,28 @@
-core/game
-- child stages?
+editor
+- project properties
+- editor options
+- ECS editor
+- ECS inspector
+- create project from template
+- game stats display
+- prefab editor
+- scene editor
+- render graph editor
+- state machine editor
+- compile game
+- launch game
 
-core/resources
+core
+- check if hot reload still works
 - hot reload AudioClips
 
-core/graphics
-* depth buffer
-* stencil buffer
+graphics
 - render graph [from old Halley?]
 - convert uniforms into attributes for distance_field_sprite?
 - optimise SpritePainter
-- run rendering on another thread? [RESEARCH]
 - multi-pass: disable batching
 - fallback shaders
+- run rendering on another thread? [RESEARCH]
 - Codegen vertex attribute data? [RESEARCH]
 
 input
@@ -20,69 +30,45 @@ input
 - use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
-* rate limiting
-* multiple "layers" (with individual listeners for them)
+- reduce mutexes and allocations
+- refactor voice system
+- rate limiting
+- multiple "layers" (with individual listeners for them)
 - range compression/ducking
 - audio environments
 - source filters
 - listener filters
 - effects/DSP
-  - low-pass [RESEARCH]
+  - low-pass/high-pass/band-pass (standard biquad filters)
   - reverb [RESEARCH]
   - doppler shift [RESEARCH]
 
 entity
-- load prefabs
-- generalised rendering
-- universal hierarchical transforms [RESEARCH]
-- query other entities? [RESEARCH]
-- smearing systems
-- systems as parallel tasks [RESEARCH]
-- better timelines?
-- foreign language systems [RESEARCH]
-- defragment/optimize memory? [RESEARCH]
+- general serialize/deserialize
 - snapshot world
+- smearing systems
+- better timelines?
+- defragment/optimize memory? [RESEARCH]
 
 ui
-* tab order
-* research CJK
-- reduce draw calls
+- tab order
+- reduce draw calls, especially between text and images
 
 lua
 - lua bindings for C++ objects
-- codegen Lua
-- Lua systems
-- codegen component
-- codegen system
-
-editor
-* project properties
-- asset view/edit meta
-- create project from template
-- game stats display
-- console commands back-end
-- prefab editor?
-- scene editor? [RESEARCH]
-- animation editor
-- system/component/message editor
-- render graph editor
-- state machine editor? [RESEARCH]
-- compile game
-- launch game
+- lua ECS? [RESEARCH]
 
 asset importing
-* load ase without external process
 - generate fonts with OpenCL
 
 utils
-- collision detection & triggers
+- remove Boost dependencies
 - consider replacing STL with EASTL or similar?
 - improve Halley::String?
 - write my own memory pool/replace boost::pool?
 - DirectoryMonitor support on Linux and Mac
 
 samples
-- make a minimal "template" sample
 - ports from my old game jam games:
   - ggj16 ("Anu & Ki") - from Unity
   - ggj15 ("A Horrible Night") - from Unity
@@ -99,9 +85,8 @@ misc/refactor
 - Use C++ modules?
 
 platforms
-- Android?
-- iOS?
 - Emscripten?
 
-vulkan?
-- future support?
+plugins
+- Vulkan
+- Win32 System
