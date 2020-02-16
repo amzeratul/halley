@@ -109,7 +109,7 @@ bool Polygon::isPointInside(Vector2f point) const
 	for (size_t i = 0; i < len; i++) {
 		const auto a = vertices[i];
 		const auto b = vertices[(i+1) % len];
-		auto r = Range(a.y, b.y);
+		auto r = Range<float>(a.y, b.y);
 		if (r.contains(p.y)) {
 			if (a.x < p.x && b.x < p.x) {
 				nLeft++;
