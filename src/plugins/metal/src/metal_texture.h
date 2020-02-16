@@ -19,5 +19,7 @@ namespace Halley {
 		MetalVideo& video;
 		id<MTLTexture> metalTexture;
 		id<MTLSamplerState> sampler;
+
+		static MTLSamplerAddressMode getMetalAddressMode(TextureDescriptor& descriptor);
 	};
 }

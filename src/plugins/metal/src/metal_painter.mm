@@ -10,20 +10,20 @@ using namespace Halley;
 MetalPainter::MetalPainter(MetalVideo& video, Resources& resources)
 	: Painter(resources)
 	, video(video)
+	, indexBuffer(nil)
 {}
 
 void MetalPainter::clear(Colour colour) {
 	[encoder endEncoding];
 	auto descriptor = renderPassDescriptorForTextureAndColour(video.getSurface().texture, colour);
 	encoder = [buffer renderCommandEncoderWithDescriptor:descriptor];
-	[descriptor release];
 }
 
 void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
 	auto& pass = material.getDefinition().getPass(passNumber);
 	MetalShader& shader = static_cast<MetalShader&>(pass.getShader());
 
-	MTLRenderPipelineDescriptor *pipelineStateDescriptor = [[MTLRenderPipelineDescriptor alloc] init];
+	MTLRenderPipelineDescriptor *pipelineStateDescriptor = [[[MTLRenderPipelineDescriptor alloc] init] autorelease];
 	pipelineStateDescriptor.vertexFunction = shader.getVertexFunc();
 	pipelineStateDescriptor.fragmentFunction = shader.getFragmentFunc();
 	pipelineStateDescriptor.label = [NSString stringWithUTF8String:material.getDefinition().getName().c_str()];
@@ -31,9 +31,9 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
 	setBlending(pass.getBlend(), pipelineStateDescriptor.colorAttachments[0]);
 
 	NSError* error = NULL;
-	id<MTLRenderPipelineState> pipelineState = [video.getDevice() newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
+	id<MTLRenderPipelineState> pipelineState = [[video.getDevice() newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
 			error:&error
-	];
+	] autorelease];
 	if (!pipelineState) {
 		std::cout << "Failed to create pipeline descriptor for material " << material.getDefinition().getName() <<
 			", pass " << passNumber << "." << std::endl;
@@ -58,16 +58,12 @@ void MetalPainter::doStartRender() {
 	auto col = Colour4f(0);
 	auto descriptor = renderPassDescriptorForTextureAndColour(video.getSurface().texture, col);
 	encoder = [buffer renderCommandEncoderWithDescriptor:descriptor];
-	[descriptor release];
 }
 
 void MetalPainter::doEndRender() {
 	[encoder endEncoding];
 	[buffer presentDrawable:video.getSurface()];
 	[buffer commit];
-	[encoder release];
-	[buffer release];
-	[indexBuffer release];
 }
 
 void MetalPainter::setVertices(
@@ -80,12 +76,15 @@ void MetalPainter::setVertices(
 	Expects(indices);
 
 	size_t bytesSize = numVertices * material.getVertexStride();
-	id<MTLBuffer> buffer = [video.getDevice() newBufferWithBytes:vertexData
+	id<MTLBuffer> buffer = [[video.getDevice() newBufferWithBytes:vertexData
 		length:bytesSize
 		options:MTLResourceStorageModeShared
-	];
+	] autorelease];
 	[encoder setVertexBuffer:buffer offset:0 atIndex:0];
 
+	if (indexBuffer != nil) {
+		[indexBuffer autorelease];
+	}
 	indexBuffer = [video.getDevice() newBufferWithBytes:indices
 			length:numIndices*sizeof(short) options:MTLResourceStorageModeShared
 	];

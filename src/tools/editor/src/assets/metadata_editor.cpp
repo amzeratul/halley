@@ -1,5 +1,10 @@
 #include "metadata_editor.h"
 #include "halley/tools/project/project.h"
+#include "halley/ui/ui_factory.h"
+#include "halley/ui/ui_validator.h"
+#include "halley/ui/widgets/ui_checkbox.h"
+#include "halley/ui/widgets/ui_label.h"
+#include "halley/ui/widgets/ui_textinput.h"
 using namespace Halley;
 
 MetadataEditor::MetadataEditor(UIFactory& factory)

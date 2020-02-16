@@ -3,6 +3,8 @@
 #include "halley/core/api/halley_api.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/ui_widget.h"
+#include "halley/ui/widgets/ui_list.h"
+#include "halley/ui/widgets/ui_paged_pane.h"
 
 namespace Halley {
 	class Project;

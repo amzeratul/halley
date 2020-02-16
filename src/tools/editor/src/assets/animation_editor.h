@@ -1,9 +1,11 @@
 #pragma once
 
+#include "halley/core/graphics/texture.h"
 #include "halley/core/graphics/sprite/animation.h"
 #include "halley/core/resources/resources.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/ui_widget.h"
+#include "halley/ui/widgets/ui_animation.h"
 #include "assets_editor_window.h"
 
 namespace Halley {

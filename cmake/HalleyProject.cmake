@@ -204,6 +204,11 @@ if (USE_DX11)
 	add_definitions(-DWITH_DX11)
 endif()
 
+# Metal
+if (USE_METAL)
+	add_definitions(-DWITH_METAL)
+endif()
+
 # WinRT
 if (USE_WINRT)
 	if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
@@ -353,6 +358,14 @@ set(HALLEY_PROJECT_LIBS
 	)
 endif ()
 
+if (USE_METAL)
+set(HALLEY_PROJECT_LIBS
+	optimized halley-metal
+	debug halley-metal_d
+	${HALLEY_PROJECT_LIBS}
+	)
+endif ()
+
 if (USE_WINRT)
 set(HALLEY_PROJECT_LIBS
 	optimized halley-winrt
@@ -458,6 +471,9 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		if (USE_ANDROID)
 			target_link_libraries(${name} halley-android)
 		endif ()
+		if (USE_METAL)
+			target_link_libraries(${name} halley-metal)
+		endif()
 	else ()
 		target_link_libraries(${name} ${HALLEY_PROJECT_LIBS})
 	endif ()
