@@ -10,14 +10,16 @@ namespace Halley
 		ProjectLoader(const HalleyStatics& statics, const Path& halleyPath);
 
 		std::unique_ptr<Project> loadProject(const Path& path) const;
-		void setPlatforms(std::vector<String> platforms);
+		std::vector<HalleyPluginPtr> getPlugins(std::vector<String> platforms) const;
 
 	private:
 		const HalleyStatics& statics;
 		Path halleyPath;
-		std::vector<String> curPlatforms;
+
+		std::vector<String> knownPlatforms;
 		std::vector<HalleyPluginPtr> plugins;
 
-		HalleyPluginPtr loadPlugin(const Path& path);
+		void loadPlugins();
+		HalleyPluginPtr loadPlugin(const Path& path) const;
 	};
 }

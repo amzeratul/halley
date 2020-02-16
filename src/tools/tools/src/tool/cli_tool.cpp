@@ -48,16 +48,10 @@ CommandLineTool::~CommandLineTool()
 
 int CommandLineTool::runRaw(int argc, char** argv)
 {
-	platforms = std::vector<String>{"pc"};
-
 	Vector<std::string> args;
 	for (int i = 2; i < argc; i++) {
 		String arg = argv[i];
-		if (arg.startsWith("--")) {
-			if (arg.startsWith("--platforms=")) {
-				platforms = arg.mid(12).split(',');
-			}
-		} else {
+		if (!arg.startsWith("--")) {
 			args.push_back(arg.cppStr());
 		}
 	}

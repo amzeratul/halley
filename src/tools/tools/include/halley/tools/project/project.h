@@ -8,6 +8,7 @@
 
 namespace Halley
 {
+	class ProjectLoader;
 	class ImportAssetsDatabase;
 
 	class HalleyStatics;
@@ -21,7 +22,7 @@ namespace Halley
 	public:
 		using AssetReloadCallback = std::function<void(const std::vector<String>&)>;
 
-		Project(std::vector<String> platforms, Path projectRootPath, Path halleyRootPath, std::vector<HalleyPluginPtr> plugins);
+		Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader& loader);
 		~Project();
 		
 		std::vector<String> getPlatforms() const;

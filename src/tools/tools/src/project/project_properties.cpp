@@ -21,6 +21,26 @@ void ProjectProperties::setName(String n)
 	name = std::move(n);
 }
 
+const String& ProjectProperties::getAssetPackManifest() const
+{
+	return assetPackManifest;
+}
+
+void ProjectProperties::setAssetPackManifest(String manifest)
+{
+	assetPackManifest = std::move(manifest);
+}
+
+const std::vector<String>& ProjectProperties::getPlatforms() const
+{
+	return platforms;
+}
+
+void ProjectProperties::setPlatforms(std::vector<String> platforms)
+{
+	this->platforms = std::move(platforms);
+}
+
 void ProjectProperties::load()
 {
 	auto data = FileSystem::readFile(propertiesFile);
@@ -33,6 +53,15 @@ void ProjectProperties::load()
 	auto node = ConfigImporter::parseYAMLNode(root);
 
 	name = node["name"].asString("Halley Project");
+	assetPackManifest = node["assetPackManifest"].asString("halley_project/asset_manifest.yaml");
+
+	if (node.hasKey("platforms")) {
+		for (auto& plat: node["platforms"].asSequence()) {
+			platforms.push_back(plat.asString());
+		}
+	} else {
+		platforms = { "pc" };
+	}
 }
 
 void ProjectProperties::save()

@@ -21,7 +21,6 @@ int ImportTool::run(Vector<std::string> args)
 		const Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));
 		
 		ProjectLoader loader(*statics, halleyRootPath);
-		loader.setPlatforms(platforms);
 		auto proj = loader.loadProject(projectPath);
 
 		if (args.size() >= 3) {

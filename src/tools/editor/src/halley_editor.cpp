@@ -85,16 +85,11 @@ void HalleyEditor::init(const Environment& environment, const Vector<String>& ar
 
 void HalleyEditor::parseArguments(const std::vector<String>& args)
 {
-	platforms = std::vector<String>{"pc"};
 	gotProjectPath = false;
 
 	for (auto& arg : args) {
 		if (arg.startsWith("--")) {
-			if (arg.startsWith("--platforms=")) {
-				platforms = arg.mid(String("--platforms=").length()).split(',');
-			} else {
-				std::cout << "Unknown argument \"" << arg << "\".\n";
-			}
+			std::cout << "Unknown argument \"" << arg << "\".\n";
 		} else {
 			if (!gotProjectPath) {
 				projectPath = arg.cppStr();
@@ -111,7 +106,6 @@ std::unique_ptr<Stage> HalleyEditor::startGame(const HalleyAPI* api)
 	preferences = std::make_unique<Preferences>(*api->system);
 
 	projectLoader = std::make_unique<ProjectLoader>(api->core->getStatics(), rootPath);
-	projectLoader->setPlatforms(platforms);
 	std::unique_ptr<Project> project;
 
 	if (gotProjectPath) {

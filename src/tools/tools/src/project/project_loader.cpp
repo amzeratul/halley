@@ -2,19 +2,20 @@
 #include "halley/core/game/halley_statics.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/support/debug.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 
 ProjectLoader::ProjectLoader(const HalleyStatics& statics, const Path& halleyPath)
 	: statics(statics)
 	, halleyPath(halleyPath)
-{}
+{
+	loadPlugins();
+}
 
 std::unique_ptr<Project> ProjectLoader::loadProject(const Path& path) const
 {
-	auto project = std::make_unique<Project>(curPlatforms, path, halleyPath, plugins);
-	project->setAssetPackManifest(path / "halley_project" / "asset_manifest.yaml"); // HACK
-	return std::move(project);
+	return std::make_unique<Project>(path, halleyPath, *this);
 }
 
 static String getDLLExtension()
@@ -28,15 +29,9 @@ static String getDLLExtension()
 #endif	
 }
 
-void ProjectLoader::setPlatforms(std::vector<String> platforms)
+void ProjectLoader::loadPlugins()
 {
-	plugins.clear();
-
-	// Initialize known platforms
-	std::vector<bool> knownPlatforms(platforms.size());
-	for (size_t i = 0; i < platforms.size(); ++i) {
-		knownPlatforms[i] = platforms[i] == "pc";
-	}
+	knownPlatforms.clear();
 
 	// Look for plugins
 	auto pluginPath = halleyPath / "plugins";
@@ -44,30 +39,50 @@ void ProjectLoader::setPlatforms(std::vector<String> platforms)
 	for (auto& file: files) {
 		if (file.getExtension() == getDLLExtension()) {
 			auto plugin = loadPlugin(pluginPath / file);
+
+			// Don't mix debug and release plugin/editor
 			if (plugin && plugin->isDebug() == Debug::isDebug()) {
-				// Valid plugin, check platform compatibility
-				auto pluginPlatforms = plugin->getSupportedPlatforms();
-				bool accepted = false;
-				for (size_t i = 0; i < platforms.size(); ++i) {
-					for (auto& pluginPlatform: pluginPlatforms) {
-						accepted |= pluginPlatform == "*" || pluginPlatform == platforms[i];
-						knownPlatforms[i] = knownPlatforms[i] || pluginPlatform == platforms[i];
+				for (auto& plat: plugin->getSupportedPlatforms()) {
+					if (plat != "*" && std::find(knownPlatforms.begin(), knownPlatforms.end(), plat) == knownPlatforms.end()) {
+						knownPlatforms.push_back(plat);
 					}
 				}
-				if (accepted) {
-					plugins.emplace_back(std::move(plugin));
-				}
+				plugins.push_back(std::move(plugin));
 			}
+		}
+	}
+}
+
+std::vector<HalleyPluginPtr> ProjectLoader::getPlugins(std::vector<String> platforms) const
+{
+	std::vector<HalleyPluginPtr> result;
+
+	// Initialize known platforms
+	std::vector<bool> foundPlatforms(platforms.size());
+	for (size_t i = 0; i < platforms.size(); ++i) {
+		foundPlatforms[i] = platforms[i] == "pc";
+	}
+
+	for (auto& plugin: plugins) {
+		bool accepted = false;
+		for (size_t i = 0; i < platforms.size(); ++i) {
+			for (auto& pluginPlatform: plugin->getSupportedPlatforms()) {
+				accepted |= pluginPlatform == "*" || pluginPlatform == platforms[i];
+				foundPlatforms[i] = foundPlatforms[i] || pluginPlatform == platforms[i];
+			}
+		}
+		if (accepted) {
+			result.emplace_back(plugin);
 		}
 	}
 	
 	for (size_t i = 0; i < platforms.size(); ++i) {
-		if (!knownPlatforms[i]) {
-			throw Exception("Unknown platform: " + platforms[i], HalleyExceptions::Tools);
+		if (!foundPlatforms[i]) {
+			Logger::logError("Unknown platform: \"" + platforms[i] + "\".");
 		}
 	}
 
-	curPlatforms = std::move(platforms);
+	return result;
 }
 
 #ifdef _WIN32
@@ -79,7 +94,7 @@ void ProjectLoader::setPlatforms(std::vector<String> platforms)
     #include <dlfcn.h>
 #endif
 
-HalleyPluginPtr ProjectLoader::loadPlugin(const Path& path)
+HalleyPluginPtr ProjectLoader::loadPlugin(const Path& path) const
 {
 	using CreateHalleyPluginFn = IHalleyPlugin*(HalleyStatics*);
 	using DestroyHalleyPluginFn = void(IHalleyPlugin*);

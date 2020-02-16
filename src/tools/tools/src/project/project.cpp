@@ -7,20 +7,24 @@
 #include "halley/support/logger.h"
 #include "halley/core/devcon/devcon_server.h"
 #include "halley/tools/assets/metadata_importer.h"
+#include "halley/tools/project/project_loader.h"
 
 using namespace Halley;
 
-Project::Project(std::vector<String> _platforms, Path projectRootPath, Path halleyRootPath, std::vector<HalleyPluginPtr> plugins)
-	: platforms(std::move(_platforms))
-	, rootPath(std::move(projectRootPath))
+Project::Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader& loader)
+	: rootPath(std::move(projectRootPath))
 	, halleyRootPath(std::move(halleyRootPath))
-	, plugins(std::move(plugins))
 {	
+	properties = std::make_unique<ProjectProperties>(rootPath / "halley_project" / "properties.yaml");
+	assetPackManifest = rootPath / properties->getAssetPackManifest();
+
+	platforms = properties->getPlatforms();
+	plugins = loader.getPlugins(platforms);
+
 	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platforms);
 	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", std::vector<String>{ "" });
 	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", std::vector<String>{ "" });
 	assetImporter = std::make_unique<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
-	properties = std::make_unique<ProjectProperties>(rootPath / "halley_project" / "properties.yaml");
 }
 
 Project::~Project()
