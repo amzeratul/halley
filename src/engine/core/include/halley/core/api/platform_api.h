@@ -277,5 +277,8 @@ namespace Halley
 
 		virtual bool hasKeyboard() const { return false; }
 		virtual std::shared_ptr<InputKeyboard> getKeyboard() const { return {}; }
+
+		// Returns arbitrary platform-specific data
+		virtual String getStringData(const String& key) { return ""; }
 	};
 }
