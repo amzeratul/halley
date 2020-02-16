@@ -7,6 +7,7 @@
 #include "halley/support/debug.h"
 #include "halley/core/resources/resources.h"
 #include "audio_event.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -128,17 +129,27 @@ void AudioEngine::generateBuffer()
 	mixEmitters(samplesToRead, numChannels, channelBuffers);
 	removeFinishedEmitters();
 
+	// Interleave
 	auto bufferRef = pool->getBuffer(samplesToRead * numChannels);
 	auto buffer = bufferRef.getSpan().subspan(0, packsToRead * numChannels);
-	mixer->interleaveChannels(buffer, channelBuffers);
+	const bool interleave = out->needsInterleavedSamples();
+	if (interleave) {
+		mixer->interleaveChannels(buffer, channelBuffers);
+	} else {
+		mixer->concatenateChannels(buffer, channelBuffers);
+	}
+
+	// Compress
 	mixer->compressRange(buffer);
 
 	// Resample to output sample rate, if necessary
 	if (outResampler) {
-		auto resampledBuffer = pool->getBuffer(samplesToRead * numChannels * spec.sampleRate / 48000 + 16);
-		auto result = outResampler->resampleInterleaved(bufferRef.getSampleSpan().subspan(0, samplesToRead * numChannels), resampledBuffer.getSampleSpan());
+		const auto resampledBuffer = pool->getBuffer(samplesToRead * numChannels * spec.sampleRate / 48000 + 16);
+		const auto srcSpan = bufferRef.getSampleSpan().subspan(0, samplesToRead * numChannels);
+		const auto dstSpan = resampledBuffer.getSampleSpan();
+		auto result = interleave ? outResampler->resampleInterleaved(srcSpan, dstSpan) : outResampler->resampleNoninterleaved(srcSpan, dstSpan, numChannels);
 		if (result.nRead != samplesToRead) {
-			throw Exception("Failed to read all input sample data", HalleyExceptions::AudioEngine);
+			Logger::logError("Audio resampler failed to read all input sample data.");
 		}
 		out->queueAudio(resampledBuffer.getSampleSpan().subspan(0, result.nWritten * numChannels));
 	} else {

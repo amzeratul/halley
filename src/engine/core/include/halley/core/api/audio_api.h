@@ -112,6 +112,7 @@ namespace Halley
 		virtual bool needsMoreAudio() = 0;
 
 		virtual bool needsAudioThread() const = 0;
+		virtual bool needsInterleavedSamples() const { return true; }
 	};
 
 	class IAudioHandle
