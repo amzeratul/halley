@@ -56,7 +56,7 @@ namespace Halley {
 		std::unique_ptr<AudioEngine> engine;
 
 		std::thread audioThread;
-		std::mutex audioMutex;
+		std::mutex audioMutex;  // TODO: this mutex has to go
 		std::mutex exceptionMutex;
 		std::atomic<bool> running;
 		std::atomic<bool> started;
