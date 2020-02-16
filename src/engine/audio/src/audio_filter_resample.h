@@ -10,7 +10,7 @@ namespace Halley
 	public:
 		AudioFilterResample(std::shared_ptr<AudioSource> source, int fromHz, int toHz, AudioBufferPool& pool);
 
-		size_t getNumberOfChannels() const override;
+		uint8_t getNumberOfChannels() const override;
 		bool isReady() const override;
 		bool getAudioData(size_t numSamples, AudioSourceData& dst) override;
 

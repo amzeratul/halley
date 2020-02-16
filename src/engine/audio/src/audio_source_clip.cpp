@@ -13,7 +13,7 @@ AudioSourceClip::AudioSourceClip(std::shared_ptr<const IAudioClip> c, bool loopi
 	Expects(clip);
 }
 
-size_t AudioSourceClip::getNumberOfChannels() const
+uint8_t AudioSourceClip::getNumberOfChannels() const
 {
 	return clip->getNumberOfChannels();
 }
@@ -32,7 +32,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData& dst
 	const auto playbackLength = int64_t(clip->getLength());
 
 	bool isPlaying = true;
-	const size_t nChannels = getNumberOfChannels();
+	const uint8_t nChannels = getNumberOfChannels();
 	size_t samplesWritten = 0;
 
 	// On delay, pad with zeroes

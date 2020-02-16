@@ -1,7 +1,7 @@
 #include "audio_facade.h"
 #include "audio_engine.h"
 #include "audio_handle_impl.h"
-#include "audio_emitter_behaviour.h"
+#include "audio_voice_behaviour.h"
 #include "halley/support/console.h"
 #include "halley/support/logger.h"
 #include "halley/core/resources/resources.h"
@@ -129,18 +129,18 @@ void AudioFacade::pausePlayback()
 
 AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
 {
-	if (!resources->exists<AudioEvent>(name))
-	{
-		size_t id = uniqueId++;
+	if (!resources->exists<AudioEvent>(name)) {
+		Logger::logWarning("Unknown audio event: \"" + name + "\"");
+		uint32_t id = uniqueId++;
 		return std::make_shared<AudioHandleImpl>(*this, id);
 	}
 
 	auto event = resources->get<AudioEvent>(name);
 	event->loadDependencies(*resources);
 
-	size_t id = uniqueId++;
+	uint32_t id = uniqueId++;
 	enqueue([=] () {
-		engine->postEvent(id, event, position);
+		engine->postEvent(id, *event, position);
 	});
 	return std::make_shared<AudioHandleImpl>(*this, id);
 }
@@ -155,7 +155,7 @@ AudioHandle AudioFacade::playMusic(const String& eventName, int track, float fad
 
 	if (hasFade) {
 		handle->setGain(0.0f);
-		handle->setBehaviour(std::make_unique<AudioEmitterFadeBehaviour>(fadeInTime, 1.0f, false));
+		handle->setBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeInTime, 1.0f, false));
 	}
 
 	return handle;
@@ -163,7 +163,7 @@ AudioHandle AudioFacade::playMusic(const String& eventName, int track, float fad
 
 AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)
 {
-	size_t id = uniqueId++;
+	uint32_t id = uniqueId++;
 	enqueue([=] () {
 		engine->play(id, clip, position, volume, loop);
 	});
@@ -222,7 +222,7 @@ void AudioFacade::setOutputChannels(std::vector<AudioChannelData> audioChannelDa
 void AudioFacade::stopMusic(AudioHandle& handle, float fadeOutTime)
 {
 	if (fadeOutTime > 0.001f) {
-		handle->setBehaviour(std::make_unique<AudioEmitterFadeBehaviour>(fadeOutTime, 0.0f, true));
+		handle->setBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeOutTime, 0.0f, true));
 	} else {
 		handle->stop();
 	}

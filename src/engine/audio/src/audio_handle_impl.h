@@ -5,12 +5,12 @@
 namespace Halley
 {
 	class AudioFacade;
-	class AudioEmitter;
+	class AudioVoice;
 
 	class AudioHandleImpl : public IAudioHandle
 	{
 	public:
-		AudioHandleImpl(AudioFacade& facade, size_t id);
+		AudioHandleImpl(AudioFacade& facade, uint32_t id);
 		
 		void setGain(float gain) override;
 		void setVolume(float volume) override;
@@ -18,12 +18,12 @@ namespace Halley
 		void setPan(float pan) override;
 		void stop(float fadeTime) override;
 		bool isPlaying() const override;
-		void setBehaviour(std::unique_ptr<AudioEmitterBehaviour> behaviour) override;
+		void setBehaviour(std::unique_ptr<AudioVoiceBehaviour> behaviour) override;
 
 	private:
 		AudioFacade& facade;
-		size_t handleId;
+		uint32_t handleId;
 
-		void enqueue(std::function<void(AudioEmitter& src)> f);
+		void enqueue(std::function<void(AudioVoice& src)> f);
 	};
 }

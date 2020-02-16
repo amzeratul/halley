@@ -5,8 +5,6 @@ include_directories(${Boost_INCLUDE_DIR} "include/halley/audio" "../utils/includ
 set(SOURCES
         "src/audio_buffer.cpp"
         "src/audio_clip.cpp"
-        "src/audio_emitter.cpp"
-        "src/audio_emitter_behaviour.cpp"
         "src/audio_engine.cpp"
         "src/audio_event.cpp"
         "src/audio_facade.cpp"
@@ -18,21 +16,22 @@ set(SOURCES
         "src/audio_mixer_sse.cpp"
         "src/audio_position.cpp"
         "src/audio_source_clip.cpp"
+        "src/audio_voice.cpp"
+        "src/audio_voice_behaviour.cpp"
         "src/vorbis_dec.cpp"
         )
 
 set(HEADERS
         "include/halley/audio/audio_clip.h"
-        "include/halley/audio/audio_emitter_behaviour.h"
         "include/halley/audio/audio_event.h"
         "include/halley/audio/audio_facade.h"
         "include/halley/audio/audio_filter_biquad.h"
         "include/halley/audio/audio_position.h"
         "include/halley/audio/audio_source.h"
+        "include/halley/audio/audio_voice_behaviour.h"
         "include/halley/audio/halley_audio.h"
         "include/halley/audio/vorbis_dec.h"
         "src/audio_buffer.h"
-        "src/audio_emitter.h"
         "src/audio_engine.h"
         "src/audio_filter_resample.h"
         "src/audio_handle_impl.h"
@@ -40,6 +39,7 @@ set(HEADERS
         "src/audio_mixer_avx.h"
         "src/audio_mixer_sse.h"
         "src/audio_source_clip.h"
+        "src/audio_voice.h"
         )
 
 set(SOURCES ${SOURCES} ${OGG_FILES} ${VORBIS_FILES})

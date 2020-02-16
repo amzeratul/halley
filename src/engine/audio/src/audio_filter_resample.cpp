@@ -11,7 +11,7 @@ AudioFilterResample::AudioFilterResample(std::shared_ptr<AudioSource> source, in
 {
 }
 
-size_t AudioFilterResample::getNumberOfChannels() const
+uint8_t AudioFilterResample::getNumberOfChannels() const
 {
 	return source->getNumberOfChannels();
 }

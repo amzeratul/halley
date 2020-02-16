@@ -5,7 +5,7 @@
 
 using namespace Halley;
 
-AudioHandleImpl::AudioHandleImpl(AudioFacade& facade, size_t id)
+AudioHandleImpl::AudioHandleImpl(AudioFacade& facade, uint32_t id)
 	: facade(facade)
 	, handleId(id)
 {
@@ -13,7 +13,7 @@ AudioHandleImpl::AudioHandleImpl(AudioFacade& facade, size_t id)
 
 void AudioHandleImpl::setGain(float gain)
 {
-	enqueue([gain] (AudioEmitter& src)
+	enqueue([gain] (AudioVoice& src)
 	{
 		src.setGain(gain);
 	});
@@ -26,7 +26,7 @@ void AudioHandleImpl::setVolume(float volume)
 
 void AudioHandleImpl::setPosition(Vector2f pos)
 {
-	enqueue([pos] (AudioEmitter& src)
+	enqueue([pos] (AudioVoice& src)
 	{
 		src.setAudioSourcePosition(Vector3f(pos));
 	});
@@ -34,7 +34,7 @@ void AudioHandleImpl::setPosition(Vector2f pos)
 
 void AudioHandleImpl::setPan(float pan)
 {
-	enqueue([pan] (AudioEmitter& src)
+	enqueue([pan] (AudioVoice& src)
 	{
 		src.setAudioSourcePosition(AudioPosition::makeUI(pan));
 	});
@@ -42,20 +42,20 @@ void AudioHandleImpl::setPan(float pan)
 
 void AudioHandleImpl::stop(float fadeTime)
 {
-	enqueue([fadeTime] (AudioEmitter& src)
+	enqueue([fadeTime] (AudioVoice& src)
 	{
 		if (fadeTime >= 0.001f) {
-			src.setBehaviour(std::make_unique<AudioEmitterFadeBehaviour>(fadeTime, 0.0f, true));
+			src.setBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeTime, 0.0f, true));
 		} else {
 			src.stop();
 		}
 	});
 }
 
-void AudioHandleImpl::setBehaviour(std::unique_ptr<AudioEmitterBehaviour> b)
+void AudioHandleImpl::setBehaviour(std::unique_ptr<AudioVoiceBehaviour> b)
 {
-	std::shared_ptr<AudioEmitterBehaviour> behaviour = std::move(b);
-	enqueue([behaviour] (AudioEmitter& src) mutable
+	std::shared_ptr<AudioVoiceBehaviour> behaviour = std::move(b);
+	enqueue([behaviour] (AudioVoice& src) mutable
 	{
 		src.setBehaviour(behaviour);
 	});
@@ -68,9 +68,9 @@ bool AudioHandleImpl::isPlaying() const
 }
 
 
-void AudioHandleImpl::enqueue(std::function<void(AudioEmitter& src)> f)
+void AudioHandleImpl::enqueue(std::function<void(AudioVoice& src)> f)
 {
-	size_t id = handleId;
+	uint32_t id = handleId;
 	AudioEngine* engine = facade.engine.get();
 	facade.enqueue([id, engine, f] () {
 		for (auto& src: engine->getSources(id)) {

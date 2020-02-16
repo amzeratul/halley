@@ -7,7 +7,7 @@ AudioFilterBiquad::AudioFilterBiquad(std::shared_ptr<AudioSource> src)
 {
 }
 
-size_t AudioFilterBiquad::getNumberOfChannels() const
+uint8_t AudioFilterBiquad::getNumberOfChannels() const
 {
 	return src->getNumberOfChannels();
 }

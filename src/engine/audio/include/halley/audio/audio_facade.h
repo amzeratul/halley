@@ -66,12 +66,12 @@ namespace Halley {
 		std::vector<std::function<void()>> inbox;
 		std::vector<std::function<void()>> inboxProcessing;
 		std::vector<String> exceptions;
-		std::vector<size_t> playingSounds;
-		std::vector<size_t> playingSoundsNext;
+		std::vector<uint32_t> playingSounds;
+		std::vector<uint32_t> playingSoundsNext;
 
 		std::map<int, AudioHandle> musicTracks;
 
-		size_t uniqueId = 0;
+		uint32_t uniqueId = 0;
 		bool ownAudioThread;
 
 	    void run();

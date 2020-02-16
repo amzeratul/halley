@@ -7,7 +7,7 @@
 
 using namespace Halley;
 
-AudioClip::AudioClip(size_t numChannels)
+AudioClip::AudioClip(uint8_t numChannels)
 	: numChannels(numChannels)
 {
 	startLoading();
@@ -61,7 +61,7 @@ void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadat
 void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadata metadata)
 {
 	vorbisData = std::make_unique<VorbisData>(data);
-	size_t nChannels = vorbisData->getNumChannels();
+	uint8_t nChannels = vorbisData->getNumChannels();
 	if (vorbisData->getSampleRate() != AudioConfig::sampleRate) {
 		throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.", HalleyExceptions::AudioEngine);
 	}
@@ -120,7 +120,7 @@ size_t AudioClip::getLength() const
 	return sampleLength;
 }
 
-size_t AudioClip::getNumberOfChannels() const
+uint8_t AudioClip::getNumberOfChannels() const
 {
 	return numChannels;
 }
@@ -141,7 +141,7 @@ std::shared_ptr<AudioClip> AudioClip::loadResource(ResourceLoader& loader)
 	auto meta = loader.getMeta();
 	bool streaming = meta.getBool("streaming", false);
 	int channels = meta.getInt("channels", 1);
-	auto result = std::make_shared<AudioClip>(size_t(channels));
+	auto result = std::make_shared<AudioClip>(uint8_t(channels));
 
 	if (streaming) {
 		std::shared_ptr<ResourceDataStream> stream = loader.getStream();
@@ -164,7 +164,7 @@ void AudioClip::reload(Resource&& resource)
 	*this = std::move(dynamic_cast<AudioClip&>(resource));
 }
 
-StreamingAudioClip::StreamingAudioClip(size_t numChannels)
+StreamingAudioClip::StreamingAudioClip(uint8_t numChannels)
 	: numChannels(numChannels)
 {
 	buffers.resize(numChannels);
@@ -204,7 +204,7 @@ size_t StreamingAudioClip::copyChannelData(size_t channelN, size_t pos, size_t l
 	return len;
 }
 
-size_t StreamingAudioClip::getNumberOfChannels() const
+uint8_t StreamingAudioClip::getNumberOfChannels() const
 {
 	return numChannels;
 }
