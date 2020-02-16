@@ -1,6 +1,5 @@
 #include "resource_filesystem.h"
 #include "resources/resource_locator.h"
-#include <set>
 #include <halley/support/exception.h>
 #include "resource_pack.h"
 #include "halley/support/logger.h"
