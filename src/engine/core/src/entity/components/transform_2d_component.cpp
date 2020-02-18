@@ -5,19 +5,19 @@ using namespace Halley;
 
 Transform2DComponent::Transform2DComponent() = default;
 
-Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f localRotation, Vector2f localScale)
-	: Transform2DComponentBase(localPosition, localRotation, localScale)
+Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f localRotation, Vector2f localScale, int subWorld)
+	: Transform2DComponentBase(localPosition, localRotation, localScale, subWorld)
 {
 }
 
 Transform2DComponent::Transform2DComponent(Transform2DComponent& parentTransform, Vector2f localPosition, Angle1f localRotation, Vector2f localScale)
-	: Transform2DComponentBase(localPosition, localRotation, localScale)
+	: Transform2DComponentBase(localPosition, localRotation, localScale, 0)
 {
 	setParent(parentTransform, true);
 }
 
 Transform2DComponent::Transform2DComponent(EntityId parentId, World& world, Vector2f localPosition, Angle1f localRotation, Vector2f localScale)
-	: Transform2DComponentBase(localPosition, localRotation, localScale)
+	: Transform2DComponentBase(localPosition, localRotation, localScale, 0)
 {
 	setParent(parentId, world, true);
 }
@@ -62,6 +62,19 @@ void Transform2DComponent::setGlobalRotation(Angle1f v)
 {
 	// TODO
 	rotation = v;
+}
+
+int Transform2DComponent::getSubWorld() const
+{
+	if (parentTransform) {
+		return parentTransform->getSubWorld();
+	}
+	return subWorld;
+}
+
+void Transform2DComponent::setSubWorld(int world)
+{
+	subWorld = world;
 }
 
 Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const

@@ -14,5 +14,9 @@ component:
       type: 'Halley::Vector2f'
       access: protected
       defaultValue: 'Halley::Vector2f(1.0f, 1.0f)'
+  - subWorld:
+      type: int
+      access: protected
+      defaultValue: 0
 
 ...
