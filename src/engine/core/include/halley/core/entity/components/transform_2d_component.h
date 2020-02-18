@@ -12,8 +12,8 @@ class Transform2DComponent : public Transform2DComponentBase {
 public:
 	Transform2DComponent();
 	explicit Transform2DComponent(Halley::Vector2f localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1), int subWorld = 0);
-	Transform2DComponent(Transform2DComponent& parentTransform, Halley::Vector2f localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1));
-	Transform2DComponent(Halley::EntityId parentId, Halley::World& world, Halley::Vector2f localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1));
+	Transform2DComponent(Transform2DComponent& parentTransform, Halley::Vector2f localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1), int subWorld = 0);
+	Transform2DComponent(Halley::EntityId parentId, Halley::World& world, Halley::Vector2f localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1), int subWorld = 0);
 
 	const Halley::Vector2f& getLocalPosition() const { return position; }
 	Halley::Vector2f& getLocalPosition() { return position; }

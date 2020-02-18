@@ -10,14 +10,14 @@ Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f local
 {
 }
 
-Transform2DComponent::Transform2DComponent(Transform2DComponent& parentTransform, Vector2f localPosition, Angle1f localRotation, Vector2f localScale)
-	: Transform2DComponentBase(localPosition, localRotation, localScale, 0)
+Transform2DComponent::Transform2DComponent(Transform2DComponent& parentTransform, Vector2f localPosition, Angle1f localRotation, Vector2f localScale, int subWorld)
+	: Transform2DComponentBase(localPosition, localRotation, localScale, subWorld)
 {
 	setParent(parentTransform, true);
 }
 
-Transform2DComponent::Transform2DComponent(EntityId parentId, World& world, Vector2f localPosition, Angle1f localRotation, Vector2f localScale)
-	: Transform2DComponentBase(localPosition, localRotation, localScale, 0)
+Transform2DComponent::Transform2DComponent(EntityId parentId, World& world, Vector2f localPosition, Angle1f localRotation, Vector2f localScale, int subWorld)
+	: Transform2DComponentBase(localPosition, localRotation, localScale, subWorld)
 {
 	setParent(parentId, world, true);
 }
@@ -66,9 +66,6 @@ void Transform2DComponent::setGlobalRotation(Angle1f v)
 
 int Transform2DComponent::getSubWorld() const
 {
-	if (parentTransform) {
-		return parentTransform->getSubWorld();
-	}
 	return subWorld;
 }
 
