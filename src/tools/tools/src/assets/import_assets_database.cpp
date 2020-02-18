@@ -91,11 +91,9 @@ void ImportAssetsDatabase::save() const
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	FileSystem::writeFile(dbFile, Serializer::toBytes(*this));
-	for (auto& platform: platforms) {
-		// TODO: fix this
-		auto assetDb = makeAssetDatabase(platform);
-		FileSystem::writeFile(assetsDbFile, Serializer::toBytes(*assetDb));
-	}
+
+	const auto pcAssetDatabase = makeAssetDatabase("pc");
+	FileSystem::writeFile(assetsDbFile, Serializer::toBytes(*pcAssetDatabase));
 }
 
 bool ImportAssetsDatabase::needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const
