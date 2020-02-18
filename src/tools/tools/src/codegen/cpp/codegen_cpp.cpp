@@ -5,6 +5,7 @@
 #include <halley/support/exception.h>
 #include <algorithm>
 #include "halley/text/string_converter.h"
+#include "halley/core/game/game_platform.h"
 
 using namespace Halley;
 
@@ -174,7 +175,11 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		if (first) {
 			first = false;
 		} else {
-			deserializeBody += "\n\t\t";
+			if constexpr (getPlatform() == GamePlatform::Windows) {
+				deserializeBody += "\r\n\t\t";
+			} else {
+				deserializeBody += "\n\t\t";
+			}
 		}
 		deserializeBody += "Halley::ConfigNodeHelper::deserializeIfDefined(" + member.name + ", resources, node[\"" + member.name + "\"]);";
 	}
