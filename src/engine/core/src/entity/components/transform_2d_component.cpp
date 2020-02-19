@@ -69,7 +69,8 @@ int Transform2DComponent::getSubWorld() const
 	if (subWorld != INT_MIN) {
 		return subWorld;
 	} else {
-		return parentTransform ? parentTransform->getSubWorld() : subWorld;
+		// Default value, default to parent, or to zero if no parent
+		return parentTransform ? parentTransform->getSubWorld() : 0;
 	}
 }
 
