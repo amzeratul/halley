@@ -13,20 +13,27 @@ namespace Halley {
 		explicit EntityFactory(World& world, Resources& resources);
 		virtual ~EntityFactory();
 		
-		EntityRef createEntity(const ConfigNode& node);
+		EntityRef createEntity(const ConfigNode& node, bool populate = true);
+		void updateEntity(EntityRef& entity, const ConfigNode& node);
+		void updateEntityTree(EntityRef& entity, const ConfigNode& node);
 		
 		template <typename T>
 		void createComponent(EntityRef& e, const ConfigNode& componentData)
 		{
-			T component;
-			component.deserialize(resources, componentData);
-			e.addComponent<T>(std::move(component));
+			auto comp = e.tryGetComponent<T>();
+			if (comp) {
+				comp->deserialize(resources, componentData);
+			} else {
+				T component;
+				component.deserialize(resources, componentData);
+				e.addComponent<T>(std::move(component));
+			}
 		}
 
 	private:
 		World& world;
 		Resources& resources;
 
-		void createChildEntity(const ConfigNode& node, EntityRef& parent);
+		void createChildEntity(EntityRef& parent, const ConfigNode& node, bool populate);
 	};
 }
