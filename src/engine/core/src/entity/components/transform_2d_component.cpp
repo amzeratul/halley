@@ -1,5 +1,6 @@
 #define DONT_INCLUDE_HALLEY_HPP
 #include "entity/components/transform_2d_component.h"
+#include "halley/core/graphics/sprite/sprite.h"
 
 using namespace Halley;
 
@@ -89,6 +90,11 @@ Vector2f Transform2DComponent::inverseTransformPoint(const Vector2f& p) const
 {
 	// TODO, do this properly
 	return p - parentTransform->getGlobalPosition();
+}
+
+Rect4f Transform2DComponent::getSpriteAABB(const Sprite& sprite) const
+{
+	return sprite.getAABB() - sprite.getPosition() + getGlobalPosition();
 }
 
 void Transform2DComponent::setParent(EntityId newParentId, World& world, bool keepLocalPosition)

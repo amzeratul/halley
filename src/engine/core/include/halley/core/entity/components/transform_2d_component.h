@@ -8,6 +8,11 @@
 #include "halley/bytes/config_node_serializer.h"
 #include "components/transform2d_component_base.h"
 
+namespace Halley
+{
+	class Sprite;
+}
+
 class Transform2DComponent : public Transform2DComponentBase {
 public:
 	Transform2DComponent();
@@ -41,6 +46,8 @@ public:
 
 	Halley::Vector2f transformPoint(const Halley::Vector2f& p) const;
 	Halley::Vector2f inverseTransformPoint(const Halley::Vector2f& p) const;
+
+	Halley::Rect4f getSpriteAABB(const Halley::Sprite& sprite) const;
 
 	Halley::Maybe<Halley::EntityId> getParent() const { return parentId; }
 	void setParent(Halley::EntityId parentId, Halley::World& world, bool keepLocalPosition = false);
