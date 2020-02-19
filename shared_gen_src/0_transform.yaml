@@ -17,6 +17,6 @@ component:
   - subWorld:
       type: int
       access: protected
-      defaultValue: 0
+      defaultValue: 'INT_MIN'
 
 ...
