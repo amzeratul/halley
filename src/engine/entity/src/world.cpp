@@ -286,8 +286,8 @@ void World::updateEntities()
 	std::vector<size_t> entitiesRemoved;
 
 	struct FamilyTodo {
-		std::vector<Entity*> toAdd;
-		std::vector<Entity*> toRemove;
+		std::vector<std::pair<FamilyMaskType, Entity*>> toAdd;
+		std::vector<std::pair<FamilyMaskType, Entity*>> toRemove;
 	};
 	std::map<FamilyMaskType, FamilyTodo> pending;
 
@@ -304,7 +304,7 @@ void World::updateEntities()
 			// First of all, let's check if it's dead
 			if (!entity.isAlive()) {
 				// Remove from systems
-				pending[entity.getMask()].toRemove.push_back(&entity);
+				pending[entity.getMask()].toRemove.emplace_back(FamilyMaskType(), &entity);
 				entitiesRemoved.push_back(i);
 			} else {
 				// It's alive, so check old and new system inclusions
@@ -314,21 +314,32 @@ void World::updateEntities()
 
 				// Did it change?
 				if (oldMask != newMask) {
-					pending[oldMask].toRemove.push_back(&entity);
-					pending[newMask].toAdd.push_back(&entity);
+					pending[oldMask].toRemove.emplace_back(newMask, &entity);
+					pending[newMask].toAdd.emplace_back(oldMask, &entity);
 				}
 			}
 		}
 	}
 
 	HALLEY_DEBUG_TRACE();
+	// Go through every family adding/removing entities as needed
 	for (auto& todo: pending) {
 		for (auto& fam: getFamiliesFor(todo.first)) {
+			const auto& famMask = fam->inclusionMask;
+			
 			for (auto& e: todo.second.toRemove) {
-				fam->removeEntity(*e);
+				// Only remove if the entity is not about to be re-added
+				const auto& newMask = e.first;
+				if (!newMask.contains(famMask)) {
+					fam->removeEntity(*e.second);
+				}
 			}
 			for (auto& e: todo.second.toAdd) {
-				fam->addEntity(*e);
+				// Only add if the entity was not already in this
+				const auto& oldMask = e.first;
+				if (!oldMask.contains(famMask)) {
+					fam->addEntity(*e.second);
+				}
 			}
 		}
 	}
