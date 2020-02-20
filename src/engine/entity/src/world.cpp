@@ -139,7 +139,7 @@ Service& World::getService(const String& name) const
 	return *iter->second;
 }
 
-EntityRef World::createEntity()
+EntityRef World::createEntity(String name)
 {
 	Entity* entity = new(PoolAllocator<Entity>::alloc()) Entity();
 	if (entity == nullptr) {
@@ -147,7 +147,9 @@ EntityRef World::createEntity()
 	}
 	entitiesPendingCreation.push_back(entity);
 	allocateEntity(entity);
-	return EntityRef(*entity, *this);
+	auto e = EntityRef(*entity, *this);
+	e.setName(std::move(name));
+	return e;
 }
 
 void World::destroyEntity(EntityId id)
@@ -180,6 +182,16 @@ Entity* World::tryGetEntity(EntityId id)
 size_t World::numEntities() const
 {
 	return entities.size();
+}
+
+std::vector<EntityRef> World::getEntities()
+{
+	std::vector<EntityRef> result;
+	result.reserve(entities.size());
+	for (auto& e: entities) {
+		result.push_back(EntityRef(*e, *this));
+	}
+	return result;
 }
 
 void World::onEntityDirty()

@@ -54,11 +54,12 @@ namespace Halley {
 			return *dynamic_cast<T*>(&getService(typeid(T).name()));
 		}
 
-		EntityRef createEntity();
+		EntityRef createEntity(String name = "");
 		void destroyEntity(EntityId id);
 		EntityRef getEntity(EntityId id);
 		Entity* tryGetEntity(EntityId id);
 		size_t numEntities() const;
+		std::vector<EntityRef> getEntities();
 
 		void spawnPending(); // Warning: use with care, will invalidate entities
 
@@ -85,7 +86,7 @@ namespace Halley {
 		}
 
 		const CreateComponentFunction& getCreateComponentFunction() const;
-		
+
 	private:
 		const HalleyAPI* api;
 		std::array<Vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;

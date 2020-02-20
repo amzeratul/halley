@@ -54,6 +54,18 @@ namespace Halley {
 		}
 
 		template <typename T>
+		const T* tryGetComponent() const
+		{
+			constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
+			for (size_t i = 0; i < components.size(); i++) {
+				if (components[i].first == id) {
+					return static_cast<const T*>(components[i].second);
+				}
+			}
+			return nullptr;
+		}
+
+		template <typename T>
 		T& getComponent()
 		{
 			auto value = tryGetComponent<T>();
@@ -65,7 +77,18 @@ namespace Halley {
 		}
 
 		template <typename T>
-		bool hasComponent()
+		const T& getComponent() const
+		{
+			auto value = tryGetComponent<T>();
+			if (value) {
+				return *value;
+			} else {
+				throw Exception("Component " + String(typeid(T).name()) + " does not exist in entity.", HalleyExceptions::Entity);
+			}
+		}
+
+		template <typename T>
+		bool hasComponent() const
 		{
 			if (dirty) {
 				return tryGetComponent<T>() != nullptr;
