@@ -15,6 +15,26 @@ UIDebugConsole::UIDebugConsole(const String& id, UIFactory& factory, UIDebugCons
 	setup();
 }
 
+UIDebugConsoleResponse::UIDebugConsoleResponse()
+{
+}
+
+UIDebugConsoleResponse::UIDebugConsoleResponse(String response, bool closeConsole)
+	: response(response)
+	, closeConsole(closeConsole)
+{
+}
+
+const String& UIDebugConsoleResponse::getResponse() const
+{
+	return response;
+}
+
+bool UIDebugConsoleResponse::isCloseConsole() const
+{
+	return closeConsole;
+}
+
 void UIDebugConsoleCommands::addCommand(String command, UIDebugConsoleCallback callback)
 {
 	commands[command] = UIDebugConsoleCallbackPair(nullptr, std::move(callback));
@@ -30,10 +50,10 @@ const std::map<String, UIDebugConsoleCallbackPair>& UIDebugConsoleCommands::getC
 	return commands;
 }
 
-Future<String> UIDebugConsoleController::runCommand(String command, std::vector<String> args)
+Future<UIDebugConsoleResponse> UIDebugConsoleController::runCommand(String command, std::vector<String> args)
 {
 	if (command == "help") {
-		Promise<String> value;
+		Promise<UIDebugConsoleResponse> value;
 		value.setValue(runHelp());
 		return value.getFuture();
 	}
@@ -44,17 +64,17 @@ Future<String> UIDebugConsoleController::runCommand(String command, std::vector<
 		if (iter != cs.end()) {
 			const UIDebugConsoleCallbackPair& pair = iter->second;
 			if (pair.first) {
-				return Concurrent::execute(*pair.first, [args=std::move(args), f=pair.second] () -> String {
+				return Concurrent::execute(*pair.first, [args=std::move(args), f=pair.second] () -> UIDebugConsoleResponse {
 					return f(args);
 				});
 			} else {
-				Promise<String> value;
+				Promise<UIDebugConsoleResponse> value;
 				value.setValue(pair.second(args));
 				return value.getFuture();
 			}
 		}
 	}
-	Promise<String> value;
+	Promise<UIDebugConsoleResponse> value;
 	value.setValue("Command not found: \"" + command + "\".");
 	return value.getFuture();
 }
@@ -153,10 +173,15 @@ void UIDebugConsole::runCommand(const String& rawCommand)
 	String command = std::move(args[0]);
 	args.erase(args.begin());
 	
-	controller.runCommand(std::move(command), std::move(args)).then(Executors::getMainThread(), [=] (String result) {
-		addLine(result, Colour::fromString("#E2D5EA"));
+	controller.runCommand(std::move(command), std::move(args)).then(Executors::getMainThread(), [=] (UIDebugConsoleResponse result) {
+		if (!result.getResponse().isEmpty()) {
+			addLine(result.getResponse(), Colour::fromString("#E2D5EA"));
+		}
 		inputField->setEnabled(true);
 		inputField->setFocused(true);
+		if (result.isCloseConsole()) {
+			hide();
+		}
 	});
 }
 

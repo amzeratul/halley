@@ -7,7 +7,20 @@ namespace Halley {
 	class UIFactory;
 	class UIStyle;
 
-	using UIDebugConsoleCallback = std::function<String(std::vector<String>)>;
+	class UIDebugConsoleResponse {
+	public:
+		UIDebugConsoleResponse();
+		UIDebugConsoleResponse(String response, bool closeConsole = false);
+
+		const String& getResponse() const;
+		bool isCloseConsole() const;
+		
+	private:
+		String response;
+		bool closeConsole = false;
+	};
+
+	using UIDebugConsoleCallback = std::function<UIDebugConsoleResponse(std::vector<String>)>;
 	using UIDebugConsoleCallbackPair = std::pair<ExecutionQueue*, UIDebugConsoleCallback>;
 
 	class UIDebugConsoleCommands {
@@ -23,7 +36,7 @@ namespace Halley {
 
 	class UIDebugConsoleController {
 	public:
-		Future<String> runCommand(String command, std::vector<String> args);
+		Future<UIDebugConsoleResponse> runCommand(String command, std::vector<String> args);
 		String runHelp();
 		
 		void addCommands(UIDebugConsoleCommands& commands);
