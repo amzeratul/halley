@@ -64,7 +64,7 @@ void Encode::decodeBase16(const String& in, gsl::span<Byte> bytes)
 {
 	auto charToVal = [&] (char character) -> uint32_t
 	{
-		if (character >= 0 && character <= 9) {
+		if (character >= '0' && character <= '9') {
 			return character - '0';
 		} else if (character >= 'A' && character <= 'F') {
 			return character - 'A' + 10;
@@ -78,7 +78,7 @@ void Encode::decodeBase16(const String& in, gsl::span<Byte> bytes)
 	const size_t inSize = in.size();
 	const size_t outSize = inSize / 2;
 	Expects(inSize % 2 == 0);
-	Expects(size_t(bytes.size()) > outSize);
+	Expects(size_t(bytes.size()) >= outSize);
 
 	for (size_t i = 0; i < outSize; ++i) {
 		const auto high = charToVal(in[i * 2]);
