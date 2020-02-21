@@ -22,6 +22,7 @@
 #include <halley/utils/utils.h>
 #include "halley/text/encode.h"
 #include "halley/support/assert.h"
+#include "halley/support/exception.h"
 
 using namespace Halley;
 
@@ -43,19 +44,52 @@ static void initBase64()
 
 typedef unsigned char uchar;
 
-String Encode::encodeBase16(const Bytes& in)
+String Encode::encodeBase16(gsl::span<const Byte> in)
 {
 	const char characters[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
 	String result;
-	result.cppStr().resize(in.size() * 2, '0');
-	for (size_t i = 0; i < in.size(); ++i) {
+	size_t size = size_t(in.size());
+	result.cppStr().resize(size * 2, '0');
+	for (size_t i = 0; i < size; ++i) {
 		unsigned char c = in[i];
 		result[i * 2] = characters[(c & 0xF0) >> 4];
 		result[i * 2 + 1] = characters[c & 0x0F];
 	}
 
 	return result;
+}
+
+void Encode::decodeBase16(const String& in, gsl::span<Byte> bytes)
+{
+	auto charToVal = [&] (char character) -> uint32_t
+	{
+		if (character >= 0 && character <= 9) {
+			return character - '0';
+		} else if (character >= 'A' && character <= 'F') {
+			return character - 'A' + 10;
+		} else if (character >= 'a' && character <= 'f') {
+			return character - 'a' + 10;
+		} else {
+			throw Exception("Invalid hex string \"" + in + "\".", HalleyExceptions::Utils);
+		}
+	};
+	
+	const size_t inSize = in.size();
+	const size_t outSize = inSize / 2;
+	Expects(inSize % 2 == 0);
+	Expects(size_t(bytes.size()) > outSize);
+
+	for (size_t i = 0; i < outSize; ++i) {
+		const auto high = charToVal(in[i * 2]);
+		const auto low = charToVal(in[i * 2 + 1]);
+		bytes[i] = (high << 4) | low;
+	}
+}
+
+String Encode::encodeBase16(const Bytes& in)
+{
+	return encodeBase16(gsl::span<const Byte>(in.data(), in.size()));
 }
 
 String Encode::encodeBase64(const Bytes& in)

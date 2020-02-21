@@ -52,6 +52,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "maths/vector2.h"
 #include "maths/vector3.h"
 #include "maths/vector4.h"
+#include "maths/uuid.h"
 
 #include "os/os.h"
 

@@ -510,65 +510,9 @@ String String::operator += (const Character &p)
 	return *this;
 }
 
-void operator <<(double &p1,String &p2)
+void operator <<(double &p1, String &p2)
 {
-	p1 = atof(p2.c_str());
-}
-
-
-
-//////////////////////////////////
-// Convert a string to an integer
-int String::toInteger() const
-{
-	size_t len = length();
-	int value = 0;
-	int mult = 1;
-	int chr;
-	bool firstChar = true;
-	const char *data = c_str();
-	for (size_t i=0;i<len;i++) {
-		if (data[i] == ' ') continue;
-		chr = int(data[i])-int('0');
-		if (chr >= 0 && chr <= 9) value = 10*value+chr;
-		else if (firstChar && data[i] == '-') mult = -1;
-		else if (firstChar && data[i] == '+') {
-			firstChar = false;
-			continue;
-		}
-		else throw Exception("Out of Range", HalleyExceptions::Utils);
-		firstChar = false;
-	}
-	return value * mult;
-}
-
-long long String::toInteger64() const
-{
-	size_t len = length();
-	long long value = 0;
-	long long mult = 1;
-	int chr;
-	bool firstChar = true;
-	const char *data = c_str();
-	for (size_t i=0;i<len;i++) {
-		if (data[i] == ' ') continue;
-		chr = int(data[i])-int('0');
-		if (chr >= 0 && chr <= 9) value = 10*value+chr;
-		else if (firstChar && data[i] == '-') mult = -1;
-		else if (firstChar && data[i] == '+') {
-			firstChar = false;
-			continue;
-		}
-		else throw Exception("Out of Range", HalleyExceptions::Utils);
-		firstChar = false;
-	}
-	return value * mult;
-}
-
-
-float String::toFloat() const
-{
-	return float(atof(c_str()));
+	p1 = std::stof(p2.c_str());
 }
 
 

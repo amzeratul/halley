@@ -68,8 +68,10 @@ namespace Halley {
 		}
 
 		void getBytes(gsl::span<gsl::byte> dst);
+		void getBytes(gsl::span<Byte> dst);
 		void setSeed(uint32_t seed);
 		void setSeed(gsl::span<const gsl::byte> data);
+		void setSeed(gsl::span<Byte> data);
 
 		uint32_t getRawInt();
 		float getRawFloat();

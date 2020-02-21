@@ -9,6 +9,7 @@
 #include "type_deleter.h"
 #include <halley/data_structures/vector.h>
 #include "halley/utils/type_traits.h"
+#include "halley/maths/uuid.h"
 
 namespace Halley {
 	class World;
@@ -116,9 +117,10 @@ namespace Halley {
 	private:
 		Vector<std::pair<int, Component*>> components;
 		Vector<MessageEntry> inbox;
-		String name;
 		FamilyMaskType mask;
 		EntityId uid;
+		String name;
+		UUID uuid;
 		int liveComponents = 0;
 		bool dirty = false;
 		bool alive = true;
@@ -213,6 +215,11 @@ namespace Halley {
 		void setName(String name)
 		{
 			entity.name = std::move(name);
+		}
+
+		const UUID& getUUID() const
+		{
+			return entity.uuid;
 		}
 
 	private:

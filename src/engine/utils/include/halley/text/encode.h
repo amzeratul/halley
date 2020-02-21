@@ -22,9 +22,12 @@
 #pragma once
 
 #include "halleystring.h"
+#include <gsl/span>
 
 namespace Halley {
 	namespace Encode {
+		String encodeBase16(gsl::span<const Byte> in);
+		void decodeBase16(const String& in, gsl::span<Byte> bytes);
 		String encodeBase16(const Bytes& in);
 
 		String encodeBase64(const Bytes& in);

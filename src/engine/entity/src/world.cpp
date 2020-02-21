@@ -9,6 +9,7 @@
 #include "halley/text/string_converter.h"
 #include "halley/support/debug.h"
 #include "halley/file_formats/config_file.h"
+#include "halley/maths/uuid.h"
 
 using namespace Halley;
 
@@ -139,17 +140,23 @@ Service& World::getService(const String& name) const
 	return *iter->second;
 }
 
-EntityRef World::createEntity(String name)
+EntityRef World::createEntity(UUID uuid, String name)
 {
 	Entity* entity = new(PoolAllocator<Entity>::alloc()) Entity();
 	if (entity == nullptr) {
 		throw Exception("Error creating entity - out of memory?", HalleyExceptions::Entity);
 	}
+	entity->uuid = uuid;
 	entitiesPendingCreation.push_back(entity);
 	allocateEntity(entity);
 	auto e = EntityRef(*entity, *this);
 	e.setName(std::move(name));
 	return e;
+}
+
+EntityRef World::createEntity(String name)
+{
+	return createEntity(UUID::generate(), name);
 }
 
 void World::destroyEntity(EntityId id)

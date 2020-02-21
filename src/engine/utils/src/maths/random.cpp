@@ -146,6 +146,11 @@ void Random::getBytes(gsl::span<gsl::byte> dst)
 	}
 }
 
+void Random::getBytes(gsl::span<Byte> dst)
+{
+	getBytes(gsl::span<gsl::byte>(reinterpret_cast<gsl::byte*>(dst.data()), dst.size()));
+}
+
 void Random::setSeed(uint32_t seed)
 {
 	 generator->init_genrand(seed);
@@ -156,6 +161,11 @@ void Random::setSeed(gsl::span<const gsl::byte> data)
 	std::vector<uint32_t> initData(alignUp(size_t(data.size_bytes()), sizeof(uint32_t)) / sizeof(uint32_t), 0);
 	memcpy(initData.data(), data.data(), data.size_bytes());
 	generator->init_by_array(initData.data(), initData.size());
+}
+
+void Random::setSeed(gsl::span<Byte> data)
+{
+	setSeed(gsl::span<gsl::byte>(reinterpret_cast<gsl::byte*>(data.data()), data.size()));
 }
 
 uint32_t Random::getRawInt()

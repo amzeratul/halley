@@ -15,6 +15,7 @@
 #include "service.h"
 
 namespace Halley {
+	class UUID;
 	class ConfigNode;
 	class RenderContext;
 	class Entity;
@@ -54,6 +55,7 @@ namespace Halley {
 			return *dynamic_cast<T*>(&getService(typeid(T).name()));
 		}
 
+		EntityRef createEntity(UUID uuid, String name = "");
 		EntityRef createEntity(String name = "");
 		void destroyEntity(EntityId id);
 		EntityRef getEntity(EntityId id);
