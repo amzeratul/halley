@@ -2,6 +2,7 @@
 #include "graphics/sprite/animation_player.h"
 #include "graphics/sprite/sprite.h"
 #include <gsl/gsl_assert>
+#include "resources/resources.h"
 
 using namespace Halley;
 
@@ -274,4 +275,9 @@ void AnimationPlayer::updateIfNeeded()
 		setSequence(curSeqName);
 		setDirection(curDirName);
 	}
+}
+
+AnimationPlayer ConfigNodeSerializer<AnimationPlayer>::deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+{
+	return AnimationPlayer(context.resources->get<Animation>(node["animation"].asString()), node["sequence"].asString("default"), node["direction"].asString("default"));
 }

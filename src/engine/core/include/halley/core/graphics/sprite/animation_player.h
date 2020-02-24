@@ -3,6 +3,8 @@
 #include "sprite_sheet.h"
 #include <halley/time/halleytime.h>
 #include "halley/data_structures/maybe.h"
+#include "halley/file_formats/config_file.h"
+#include "halley/bytes/config_node_serializer.h"
 
 namespace Halley
 {
@@ -86,5 +88,12 @@ namespace Halley
 		bool applyPivot = true;
 
 		mutable bool hasUpdate = true;
+	};
+
+	class Resources;
+	template<>
+	class ConfigNodeSerializer<AnimationPlayer> {
+	public:
+		AnimationPlayer deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node);
 	};
 }
