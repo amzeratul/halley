@@ -1,16 +1,18 @@
-#include "entity/entity_factory.h"
-#include "halley/halley_entity.h"
+#include "entity_factory.h"
+#include "halley/support/logger.h"
+#include "world.h"
 
 #define DONT_INCLUDE_HALLEY_HPP
-#include "entity/components/transform_2d_component.h"
-#include "halley/support/logger.h"
+#include "components/transform_2d_component.h"
 
 using namespace Halley;
 
 EntityFactory::EntityFactory(World& world, Resources& resources)
 	: world(world)
-	, resources(resources)
 {
+	entityContext = std::make_unique<EntitySerializationContext>(world);
+	context.resources = &resources;
+	context.entityContext = entityContext.get();
 }
 
 EntityFactory::~EntityFactory()
@@ -19,8 +21,20 @@ EntityFactory::~EntityFactory()
 
 EntityRef EntityFactory::createEntity(const ConfigNode& node, bool populate)
 {
-	auto entity = world.createEntity(UUID(node["uuid"].asString()), node["name"].asString(""));
-	const auto func = world.getCreateComponentFunction();
+	// Note: this is not thread-safe
+	context.entityContext->uuids.clear();
+
+	auto entity = createEntity(nullptr, node, false);
+	updateEntityTree(entity, node);
+	return entity;
+}
+
+EntityRef EntityFactory::createEntity(EntityRef* parent, const ConfigNode& node, bool populate)
+{
+	const auto uuid = UUID(node["uuid"].asString());
+	auto entity = world.createEntity(uuid, node["name"].asString(""));
+
+	context.entityContext->uuids[uuid] = entity.getEntityId();
 
 	if (populate) {
 		updateEntity(entity, node);
@@ -28,21 +42,18 @@ EntityRef EntityFactory::createEntity(const ConfigNode& node, bool populate)
 	
 	if (node["children"].getType() == ConfigNodeType::Sequence) {
 		for (auto& childNode: node["children"].asSequence()) {
-			createChildEntity(entity, childNode, populate);
+			createEntity(&entity, childNode, populate);
+		}
+	}
+
+	if (parent) {
+		auto parentTransform = parent->tryGetComponent<Transform2DComponent>();
+		if (parentTransform) {
+			parentTransform->addChild(entity.getComponent<Transform2DComponent>(), true);
 		}
 	}
 
 	return entity;
-}
-
-void EntityFactory::createChildEntity(EntityRef& parent, const ConfigNode& node, bool populate)
-{
-	auto e = createEntity(node, populate);
-
-	auto parentTransform = parent.tryGetComponent<Transform2DComponent>();
-	if (parentTransform) {
-		parentTransform->addChild(e.getComponent<Transform2DComponent>(), true);
-	}
 }
 
 void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& node)
@@ -104,7 +115,12 @@ void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node)
 	// Insert new nodes
 	for (size_t i = 0; i < nNodes; ++i) {
 		if (!nodeConsumed[i]) {
-			createChildEntity(entity, childNodes[i], true);
+			createEntity(&entity, childNodes[i], true);
 		}
 	}
+}
+
+EntitySerializationContext::EntitySerializationContext(World& world)
+	: world(world)
+{
 }

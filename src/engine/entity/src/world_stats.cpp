@@ -1,10 +1,10 @@
-#include "utils/world_stats.h"
+#include "world_stats.h"
 #include "halley/core/graphics/render_context.h"
-#include "graphics/text/font.h"
-#include "resources/resources.h"
+#include "halley/core/graphics/text/font.h"
+#include "halley/core/resources/resources.h"
 #include "halley/core/api/core_api.h"
-#include <halley/entity/world.h>
-#include <halley/entity/system.h>
+#include "world.h"
+#include "system.h"
 #include "halley/text/string_converter.h"
 
 using namespace Halley;

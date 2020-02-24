@@ -1,8 +1,7 @@
-#include "stage/entity_stage.h"
-#include <halley/entity/world.h>
-#include <halley/entity/system.h>
 #include "halley/file_formats/config_file.h"
-#include "game/game.h"
+#include "halley/core/game/game.h"
+#include "world.h"
+#include "entity_stage.h"
 using namespace Halley;
 
 std::unique_ptr<World> EntityStage::createWorld(const String& configName, std::function<std::unique_ptr<System>(String)> createFunction, CreateComponentFunction createComponent)

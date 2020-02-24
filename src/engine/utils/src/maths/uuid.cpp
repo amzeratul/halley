@@ -38,6 +38,11 @@ bool UUID::operator!=(const UUID& other) const
 	return memcmp(bytes.data(), other.bytes.data(), size_t(bytes.size())) != 0;
 }
 
+bool UUID::operator<(const UUID& other) const
+{
+	return memcmp(bytes.data(), other.bytes.data(), size_t(bytes.size())) == -1;
+}
+
 String UUID::toString() const
 {
 	using namespace Encode;

@@ -28,7 +28,7 @@ namespace Halley
 		virtual void initStage(Stage& stage) = 0;
 		virtual Stage& getCurrentStage() = 0;
 
-		virtual const HalleyStatics& getStatics() = 0;
+		virtual HalleyStatics& getStatics() = 0;
 		
 		virtual Resources& getResources() = 0;
 		virtual const Environment& getEnvironment() = 0;

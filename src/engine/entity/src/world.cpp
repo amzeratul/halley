@@ -10,6 +10,7 @@
 #include "halley/support/debug.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/maths/uuid.h"
+#include "halley/core/api/halley_api.h"
 
 using namespace Halley;
 
@@ -17,7 +18,8 @@ World::World(const HalleyAPI* api, bool collectMetrics, CreateComponentFunction 
 	: api(api)
 	, createComponent(std::move(createComponent))
 	, collectMetrics(collectMetrics)
-{	
+{
+	MaskStorageInterface::createMaskStorageIfNeeded(api->core->getStatics());
 }
 
 World::~World()

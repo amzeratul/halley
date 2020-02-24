@@ -22,10 +22,10 @@ public:
 		, layer(layer)
 	{}
 	
-	void deserialize(Halley::Resources& resources, const Halley::ConfigNode& node) {
-		Halley::ConfigNodeHelper::deserializeIfDefined(zoom, resources, node["zoom"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(clear, resources, node["clear"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(mask, resources, node["mask"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(layer, resources, node["layer"]);
+	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
+		Halley::ConfigNodeHelper::deserializeIfDefined(zoom, context, node["zoom"]);
+		Halley::ConfigNodeHelper::deserializeIfDefined(clear, context, node["clear"]);
+		Halley::ConfigNodeHelper::deserializeIfDefined(mask, context, node["mask"]);
+		Halley::ConfigNodeHelper::deserializeIfDefined(layer, context, node["layer"]);
 	}
 };

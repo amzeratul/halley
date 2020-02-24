@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include <halley/data_structures/vector.h>
 #include <functional>
+#include "halley/core/game/halley_statics.h"
 
 using namespace Halley;
 using namespace FamilyMask;
@@ -152,14 +153,16 @@ HandleType FamilyMask::getHandle(RealType mask)
 	return Handle(mask);
 }
 
-void* MaskStorageInterface::createMaskStorage()
+void MaskStorageInterface::createMaskStorageIfNeeded(HalleyStatics& statics)
 {
-	auto result = new MaskStorage();
-	MaskStorage::getInstance() = result;
-	return result;
-}
-
-void MaskStorageInterface::setMaskStorage(void* storage)
-{
-	MaskStorage::getInstance() = reinterpret_cast<MaskStorage*>(storage);
+	if (!MaskStorage::getInstance()) {
+		const auto curStorage = statics.getMaskStorage();
+		if (curStorage) {
+			MaskStorage::getInstance() = reinterpret_cast<MaskStorage*>(curStorage);
+		} else {
+			const auto storage = new MaskStorage();
+			MaskStorage::getInstance() = storage;
+			statics.setMaskStorage(storage);
+		}
+	}
 }
