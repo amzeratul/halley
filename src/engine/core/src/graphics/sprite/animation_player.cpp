@@ -10,13 +10,16 @@ AnimationPlayer::AnimationPlayer(std::shared_ptr<const Animation> animation, con
 	setAnimation(animation, sequence, direction);
 }
 
-AnimationPlayer& AnimationPlayer::playOnce(const String& sequence)
+AnimationPlayer& AnimationPlayer::playOnce(const String& sequence, const Maybe<String>& nextLoopingSequence)
 {
 	updateIfNeeded();
 
 	curSeq = nullptr;
 	setSequence(sequence);
 	seqLooping = false;
+
+	nextSequence = nextLoopingSequence;
+
 	return *this;
 }
 
@@ -46,6 +49,7 @@ AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> 
 AnimationPlayer& AnimationPlayer::setSequence(const String& sequence)
 {
 	curSeqName = sequence;
+	nextSequence = {};
 	updateIfNeeded();
 
 	if (animation && (!curSeq || curSeq->getName() != sequence)) {
@@ -261,7 +265,12 @@ void AnimationPlayer::onSequenceStarted()
 
 void AnimationPlayer::onSequenceDone()
 {
-	playing = false;
+	if (nextSequence) {
+		setSequence(nextSequence.value());
+	}
+	else {
+		playing = false;
+	}
 }
 
 void AnimationPlayer::updateIfNeeded()
