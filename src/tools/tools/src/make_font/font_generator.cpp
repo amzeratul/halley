@@ -12,6 +12,7 @@
 #include "halley/concurrency/concurrent.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/core/graphics/text/font.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -95,8 +96,11 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 
 		constexpr int minSize = 16;
 		constexpr int maxSize = 4096;
-		for (int i = 0; i < (2 * fastLog2Floor(uint32_t(maxSize / minSize))); ++i) {
+		for (int i = 0; ; ++i) {
 			auto curSize = Vector2i(minSize << ((i + 1) / 2), minSize << (i / 2));
+			if (curSize.x > maxSize || curSize.y > maxSize) {
+				break;
+			}
 			result = tryPacking(font, float(fontSize), curSize, scale, borderSuperSample, characters);
 			if (result) {
 				imageSize = curSize;
