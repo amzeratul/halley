@@ -181,7 +181,7 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 				deserializeBody += "\n\t\t";
 			}
 		}
-		deserializeBody += "Halley::ConfigNodeHelper::deserializeIfDefined(" + member.name + ", resources, node[\"" + member.name + "\"]);";
+		deserializeBody += "Halley::ConfigNodeHelper::deserializeIfDefined(" + member.name + ", context, node[\"" + member.name + "\"]);";
 	}
 
 	String className = component.name + "Component" + (component.customImplementation ? "Base" : "");
@@ -204,7 +204,7 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	
 	// Deserialize method
 	gen.addBlankLine()
-		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::Resources&"), "resources"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node") }, "deserialize"), deserializeBody);
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::ConfigNodeSerializationContext&"), "context"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node") }, "deserialize"), deserializeBody);
 
 	gen.finish()
 		.writeTo(contents);

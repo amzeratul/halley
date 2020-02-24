@@ -4,6 +4,8 @@
 #include "halley/data_structures/maybe_ref.h"
 
 namespace Halley {
+	class HalleyStatics;
+
 	namespace FamilyMask {
 		using RealType = std::bitset<256>;
 
@@ -151,8 +153,7 @@ namespace Halley {
 	class MaskStorageInterface
 	{
 	public:
-		static void* createMaskStorage();
-		static void setMaskStorage(void*);
+		static void createMaskStorageIfNeeded(HalleyStatics& statics);
 	};
 
 	using FamilyMaskType = FamilyMask::HandleType;

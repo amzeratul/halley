@@ -1,5 +1,5 @@
 #define DONT_INCLUDE_HALLEY_HPP
-#include "entity/components/transform_2d_component.h"
+#include "components/transform_2d_component.h"
 #include "halley/core/graphics/sprite/sprite.h"
 
 using namespace Halley;

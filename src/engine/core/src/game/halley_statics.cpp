@@ -18,7 +18,6 @@ namespace Halley {
 		HalleyStaticsPimpl()
 		{
 			logger = new Logger();
-			maskStorage = MaskStorageInterface::createMaskStorage();
 			os = OS::createOS();
 
 			executors = std::make_unique<Executors>();
@@ -34,8 +33,8 @@ namespace Halley {
 		}
 
 		Vector<TypeDeleterBase*> typeDeleters;
-		void* maskStorage;
-		OS* os;
+		void* maskStorage = nullptr;
+		OS* os = nullptr;
 		Logger* logger;
 		
 		std::unique_ptr<Executors> executors;
@@ -82,7 +81,6 @@ void HalleyStatics::setupGlobals() const
 	Logger::setInstance(*pimpl->logger);
 
 	ComponentDeleterTable::getDeleters() = &pimpl->typeDeleters;
-	MaskStorageInterface::setMaskStorage(pimpl->maskStorage);
 	OS::setInstance(pimpl->os);
 
 	Executors::set(*pimpl->executors);
@@ -93,4 +91,14 @@ void HalleyStatics::suspend()
 	pimpl->diskIOThreadPool.reset();
 	pimpl->cpuThreadPool.reset();
 	pimpl->cpuAuxThreadPool.reset();
+}
+
+void HalleyStatics::setMaskStorage(void* storage)
+{
+	pimpl->maskStorage = storage;
+}
+
+void* HalleyStatics::getMaskStorage() const
+{
+	return pimpl->maskStorage;
 }

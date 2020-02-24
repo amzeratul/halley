@@ -130,11 +130,11 @@ namespace Halley
 
 	class Resources;
 	template<>
-	class ConfigNodeDeserializer<Sprite> {
+	class ConfigNodeSerializer<Sprite> {
 	public:
-		Sprite operator()(Resources& resources, const ConfigNode& node)
+		Sprite deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
-			return Sprite().setImage(resources, node["image"].asString());
+			return Sprite().setImage(*context.resources, node["image"].asString());
 		}
 	};
 }

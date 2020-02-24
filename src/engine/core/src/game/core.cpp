@@ -89,7 +89,7 @@ Core::~Core()
 	deInit();
 }
 
-const HalleyStatics& Core::getStatics()
+HalleyStatics& Core::getStatics()
 {
 	return statics;
 }

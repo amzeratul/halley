@@ -1,6 +1,6 @@
 project (halley-core)
 
-include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../entity/include" "../audio/include" "../net/include" "../../../shared_gen/cpp")
+include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../audio/include" "../net/include" "../entity/include")
 
 set(SOURCES
         "src/api/halley_api.cpp"
@@ -13,9 +13,6 @@ set(SOURCES
         "src/dummy/dummy_plugins.cpp"
         "src/dummy/dummy_system.cpp"
         "src/dummy/dummy_video.cpp"
-
-        "src/entity/entity_factory.cpp"
-        "src/entity/components/transform_2d_component.cpp"
 
         "src/game/core.cpp"
         "src/game/environment.cpp"
@@ -64,14 +61,11 @@ set(SOURCES
         "src/resources/resources.cpp"
         "src/resources/standard_resources.cpp"
 
-        "src/stage/entity_stage.cpp"
         "src/stage/stage.cpp"
 
         "src/devcon/devcon_client.cpp"
         "src/devcon/devcon_messages.cpp"
         "src/devcon/devcon_server.cpp"
-        
-        "src/utils/world_stats.cpp"
         )
 
 set(HEADERS
@@ -98,9 +92,6 @@ set(HEADERS
         "include/halley/core/api/system_api.h"
         "include/halley/core/api/video_api.h"
         
-        "include/halley/core/entity/entity_factory.h"
-        "include/halley/core/entity/components/transform_2d_component.h"
-
         "include/halley/core/game/core.h"
         "include/halley/core/game/environment.h"
         "include/halley/core/game/game.h"
@@ -161,7 +152,6 @@ set(HEADERS
         "src/resources/resource_filesystem.h"
         "src/resources/resource_pack.h"
 
-        "include/halley/core/stage/entity_stage.h"
         "include/halley/core/stage/stage.h"
         "include/halley/core/stage/stage_id.h"
 
@@ -169,7 +159,6 @@ set(HEADERS
         "include/halley/core/devcon/devcon_messages.h"
         "include/halley/core/devcon/devcon_server.h"
         
-        "include/halley/core/utils/world_stats.h"
         "src/prec.h"
         )
 
@@ -177,7 +166,7 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-core ${SOURCES} ${HEADERS})
-target_link_libraries(halley-core halley-entity halley-utils halley-audio halley-net)
+target_link_libraries(halley-core halley-utils halley-audio halley-net)
 
 # Hack, there should be no platform specific stuff in core...
 if (USE_ANDROID)
