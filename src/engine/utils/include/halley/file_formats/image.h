@@ -40,7 +40,8 @@ namespace Halley {
 			Indexed,
 			RGB,
 			RGBA,
-			RGBAPremultiplied
+			RGBAPremultiplied,
+			SingleChannel
 		};
 
 		Image(Format format = Format::RGBA, Vector2i size = {});
@@ -78,7 +79,7 @@ namespace Halley {
 		Rect4i getRect() const;
 
 		void clear(int colour);
-		void blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp);
+		void blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t srcBpp);
 		void blitFromRotated(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp);
 		void blitFrom(Vector2i pos, Image& img, bool rotated = false);
 		void blitFrom(Vector2i pos, Image& img, Rect4i srcArea, bool rotated = false);
@@ -108,13 +109,14 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<Image::Format> {
-		constexpr std::array<const char*, 5> operator()() const {
+		constexpr std::array<const char*, 6> operator()() const {
 			return{{
 				"undefined",
 				"indexed",
 				"rgb",
 				"rgba",
-				"rgba_premultiplied"
+				"rgba_premultiplied",
+				"single_channel"
 			}};
 		}
 	};

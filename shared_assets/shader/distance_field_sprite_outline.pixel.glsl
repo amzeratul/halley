@@ -19,7 +19,7 @@ void main() {
 	highp float dy = abs(dFdy(v_pixelTexCoord0.y) / dFdy(gl_FragCoord.y));
 	highp float texGrad = max(dx, dy);
 
-	highp float a = texture(tex0, v_texCoord0).a;
+	highp float a = texture(tex0, v_texCoord0).r;
 	highp float s = max(u_smoothness * texGrad, 0.001);
 	highp float inEdge = 0.5;
 	highp float outEdge = inEdge - clamp(u_outline, 0.0, 0.995) * 0.5;

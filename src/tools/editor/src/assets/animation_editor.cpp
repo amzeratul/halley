@@ -100,6 +100,7 @@ void AnimationEditorDisplay::setTexture(std::shared_ptr<const Texture> texture)
 {
 	origSprite.setImage(texture, resources.get<MaterialDefinition>("Halley/Sprite"))
 		.setTexRect(Rect4f(0, 0, 1, 1))
+		.setColour(Colour4f(1, 1, 1, 1))
 		.setSize(Vector2f(texture->getSize()));
 	bounds = Rect4f(Vector2f(), origSprite.getSize());
 }

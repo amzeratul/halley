@@ -28,7 +28,7 @@ fragment float4 pixel_func (
 	float dy = abs(dfdy(v.pixelTexCoord0.y) / dfdy(v.position.y));
 	float texGrad = max(dx, dy);
 
-	float a = tex0.sample(sampler0, v.texCoord0).a;
+	float a = tex0.sample(sampler0, v.texCoord0).r;
 	float s = material.smoothness * texGrad;
 	float inEdge = 0.5;
 	float outEdge = inEdge - clamp(material.outline, 0.0, 0.995) * 0.5;

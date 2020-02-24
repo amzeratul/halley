@@ -179,6 +179,7 @@ unsigned TextureOpenGL::getGLInternalFormat(TextureFormat format)
 {
 	switch (format) {
 	case TextureFormat::Indexed:
+	case TextureFormat::Red:
 		return GL_R8;
 	case TextureFormat::RGB:
 		return GL_RGB;
@@ -195,6 +196,7 @@ unsigned TextureOpenGL::getGLPixelFormat(TextureFormat format)
 {
 	switch (format) {
 	case TextureFormat::Indexed:
+	case TextureFormat::Red:
 		return GL_RED;
 	case TextureFormat::RGB:
 		return GL_RGB;

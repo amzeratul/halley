@@ -284,12 +284,20 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult
 {
 	Vector2i size = shrinkAtlas(result);
 
-	auto image = std::make_unique<Image>(Image::Format::RGBA, size);
-	image->clear(0);
+	std::unique_ptr<Image> atlasImage;
 
 	for (auto& packedImg: result) {
 		ImageData* img = reinterpret_cast<ImageData*>(packedImg.data);
-		image->blitFrom(packedImg.rect.getTopLeft(), *img->img, img->clip, packedImg.rotated);
+
+		if (!atlasImage) {
+			atlasImage = std::make_unique<Image>(img->img->getFormat(), size);
+			atlasImage->clear(0);
+		}
+		if (atlasImage->getFormat() != img->img->getFormat()) {
+			throw Exception("Mixed image formats in atlas.", HalleyExceptions::Tools);
+		}
+		
+		atlasImage->blitFrom(packedImg.rect.getTopLeft(), *img->img, img->clip, packedImg.rotated);
 
 		const auto borderTL = img->clip.getTopLeft();
 		const auto borderBR = img->img->getSize() - img->clip.getSize() - borderTL;
@@ -310,7 +318,7 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult
 		}
 	}
 
-	return image;
+	return atlasImage;
 }
 
 Vector2i SpriteImporter::shrinkAtlas(const std::vector<BinPackResult>& results) const

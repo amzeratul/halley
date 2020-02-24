@@ -343,23 +343,21 @@ bool String::isNumber() const
 	bool foundSeparator = false;
 	bool foundDigit = false;
 	size_t i = 0;
-	for (const char *chr = c_str();*chr;chr++) {
+	for (const char *chr = c_str(); *chr; chr++) {
 		char cur = *chr;
 
 		if (cur >= '0' && cur <= '9') {
 			foundDigit = true;
-		}
-
-		else if (cur == '.' || cur == ',') {
-			if (foundSeparator) return false;
+		} else if (cur == '.' || cur == ',') {
+			if (foundSeparator) {
+				return false;
+			}
 			foundSeparator = true;
-		}
-				
-		else if (cur == '-') {
-			if (i != 0) return false;
-		}
-
-		else {
+		} else if (cur == '-') {
+			if (i != 0) {
+				return false;
+			}
+		} else {
 			return false;
 		}
 
@@ -371,17 +369,22 @@ bool String::isNumber() const
 
 bool String::isInteger() const
 {
-	int i=0;
-	for (const char *chr = c_str();*chr;chr++) {
+	bool hasDigit = false;
+	int i = 0;
+	for (const char *chr = c_str(); *chr; chr++) {
 		char cur = *chr;
 		if (cur == '-') {
-			if (i != 0) return false;
+			if (i != 0) {
+				return false;
+			}
 		} else if (cur < '0' || cur > '9') {
 			return false;
+		} else {
+			hasDigit = true;
 		}
 		i++;
 	}
-	return true;
+	return hasDigit;
 }
 
 

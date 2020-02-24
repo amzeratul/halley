@@ -2,5 +2,5 @@
 filtering: true
 mipmap: false
 premultiply: false
-format: rgba
+format: single_channel
 ...

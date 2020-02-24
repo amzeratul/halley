@@ -25,7 +25,7 @@ float4 main(VOut input) : SV_TARGET {
 	float dy = abs(ddy(input.pixelTexCoord0.y) / ddy(input.position.y));
 	float texGrad = max(dx, dy);
 
-	float a = tex0.Sample(sampler0, input.texCoord0).a;
+	float a = tex0.Sample(sampler0, input.texCoord0).r;
 	float s = max(u_smoothness * texGrad, 0.001);
 	float inEdge = 0.51;
 

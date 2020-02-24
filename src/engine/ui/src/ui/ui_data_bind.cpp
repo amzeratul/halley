@@ -183,7 +183,7 @@ void UIDataBindInt::onDataFromWidget(float data)
 
 void UIDataBindInt::onDataFromWidget(const String& data)
 {
-	if (canWriteData() && writeCallback) {
+	if (canWriteData() && writeCallback && data.isInteger()) {
 		writeCallback(data.toInteger());
 	}
 }
@@ -230,7 +230,7 @@ void UIDataBindFloat::onDataFromWidget(float data)
 
 void UIDataBindFloat::onDataFromWidget(const String& data)
 {
-	if (canWriteData() && writeCallback) {
+	if (canWriteData() && writeCallback && data.isNumber()) {
 		writeCallback(data.toFloat());
 	}
 }

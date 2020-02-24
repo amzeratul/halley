@@ -69,6 +69,7 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 
 	switch (descriptor.format) {
 	case TextureFormat::Indexed:
+	case TextureFormat::Red:
 		desc.Format = DXGI_FORMAT_R8_UNORM;
 		bpp = 1;
 		break;

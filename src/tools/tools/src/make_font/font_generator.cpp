@@ -128,7 +128,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 		return FontGeneratorResult();
 	}
 
-	auto dstImg = std::make_unique<Image>(Image::Format::RGBA, imageSize);
+	auto dstImg = std::make_unique<Image>(Image::Format::SingleChannel, imageSize);
 	dstImg->clear(0);
 
 	Vector<CharcodeEntry> codes;
@@ -233,12 +233,12 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 	for (auto& c: entries) {
 		auto metrics = font.getMetrics(c.charcode, scale);
 
-		int32_t charcode = c.charcode;
-		Rect4f area = Rect4f(c.rect) / Vector2f(imageSize);
-		Vector2f size = Vector2f(c.rect.getSize());
-		Vector2f horizontalBearing = metrics.bearingHorizontal + Vector2f(float(-padding), float(padding));
-		Vector2f verticalBearing = metrics.bearingVertical + Vector2f(float(-padding), float(padding));
-		Vector2f advance = metrics.advance;
+		const int32_t charcode = c.charcode;
+		const Rect4f area = Rect4f(c.rect) / Vector2f(imageSize);
+		const Vector2f size = Vector2f(c.rect.getSize());
+		const Vector2f horizontalBearing = metrics.bearingHorizontal + Vector2f(float(-padding), float(padding));
+		const Vector2f verticalBearing = metrics.bearingVertical + Vector2f(float(-padding), float(padding));
+		const Vector2f advance = metrics.advance;
 
 		result->addGlyph(Font::Glyph(charcode, area, size, horizontalBearing, verticalBearing, advance));
 	}
@@ -251,7 +251,7 @@ std::unique_ptr<Metadata> FontGenerator::generateTextureMeta()
 	auto meta = std::make_unique<Metadata>();
 	meta->set("filtering", true);
 	meta->set("mipmap", false);
-	meta->set("format", "rgba");
+	meta->set("format", "red");
 	meta->set("compression", "raw_image");
 	return meta;
 }

@@ -381,7 +381,7 @@ void MFMoviePlayer::readVideoSample(Time time, const gsl::byte* data, int stride
 	memcpy(myData.data(), data, myData.size());
 
 	TextureDescriptor descriptor;
-	descriptor.format = TextureFormat::Indexed;
+	descriptor.format = TextureFormat::Red;
 	descriptor.pixelFormat = PixelDataFormat::Image;
 	descriptor.size = Vector2i(width, height);
 	descriptor.pixelData = TextureDescriptorImageData(std::move(myData), stride);

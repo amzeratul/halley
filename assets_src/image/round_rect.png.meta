@@ -2,7 +2,7 @@
 filtering: true
 mipmap: false
 premultiply: false
-format: rgba
+format: single_channel
 slice_top: 28
 slice_bottom: 28
 slice_left: 28

@@ -118,6 +118,7 @@ int Image::getBytesPerPixel() const
 	case Format::RGB:
 		return 3;
 	case Format::Indexed:
+	case Format::SingleChannel:
 		return 1;
 	default:
 		throw Exception("Image format is undefined.", HalleyExceptions::Utils);
@@ -131,6 +132,10 @@ Image::Format Image::getFormat() const
 
 Rect4i Image::getTrimRect() const
 {
+	if (getBytesPerPixel() != 4) {
+		return Rect4i(0, 0, w, h);
+	}
+
 	int x0 = w;
 	int x1 = 0;
 	int y0 = h;
@@ -165,48 +170,85 @@ Rect4i Image::getRect() const
 
 void Image::clear(int colour)
 {
-	int* dst = reinterpret_cast<int*>(px.get());
-	for (unsigned int y = 0; y < h; y++) {
-		for (unsigned int x = 0; x < w; x++) {
-			*dst++ = colour;
+	const int bpp = getBytesPerPixel();
+	if (bpp == 4) {
+		int* dst = reinterpret_cast<int*>(px.get());
+		for (unsigned int y = 0; y < h; y++) {
+			for (unsigned int x = 0; x < w; x++) {
+				*dst++ = colour;
+			}
+		}
+	} else if (bpp == 1) {
+		const char col = char(colour);
+		char* dst = px.get();
+		for (unsigned int y = 0; y < h; y++) {
+			for (unsigned int x = 0; x < w; x++) {
+				*dst++ = col;
+			}
 		}
 	}
 }
 
-void Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp)
+void Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t srcBpp)
 {
-	size_t xMin = std::max(0, -pos.x);
-	size_t yMin = std::max(0, -pos.y);
-	size_t xMax = std::min(size_t(w) - pos.x, width);
-	size_t yMax = std::min(size_t(h) - pos.y, height);
-	int* dst = reinterpret_cast<int*>(px.get()) + pos.x + pos.y * w;
+	const size_t xMin = std::max(0, -pos.x);
+	const size_t yMin = std::max(0, -pos.y);
+	const size_t xMax = std::min(size_t(w) - pos.x, width);
+	const size_t yMax = std::min(size_t(h) - pos.y, height);
 
-	if (bpp == 1) {
-		const char* src = reinterpret_cast<const char*>(buffer);
-		for (size_t y = yMin; y < yMax; y++) {
-			for (size_t x = xMin; x < xMax; x++) {
-				size_t pxPos = (x >> 3) + y * pitch;
-				int bit = 1 << (int(7 - x) & 7);
-				bool active = (src[pxPos] & bit) != 0;
-				dst[x + y * w] = convertRGBAToInt(255, 255, 255, active ? 255 : 0);
+	if (getBytesPerPixel() == 1) {
+		char* dst = px.get() + pos.x + pos.y * w;
+		if (srcBpp == 1) {
+			const char* src = reinterpret_cast<const char*>(buffer);
+			for (size_t y = yMin; y < yMax; y++) {
+				for (size_t x = xMin; x < xMax; x++) {
+					size_t pxPos = (x >> 3) + y * pitch;
+					int bit = 1 << (int(7 - x) & 7);
+					bool active = (src[pxPos] & bit) != 0;
+					dst[x + y * w] = active ? 255 : 0;
+				}
 			}
-		}
-	} else if (bpp == 8) {
-		const char* src = reinterpret_cast<const char*>(buffer);
-		for (size_t y = yMin; y < yMax; y++) {
-			for (size_t x = xMin; x < xMax; x++) {
-				dst[x + y * w] = convertRGBAToInt(255, 255, 255, src[x + y * pitch]);
+		} else if (srcBpp == 8) {
+			const char* src = reinterpret_cast<const char*>(buffer);
+			for (size_t y = yMin; y < yMax; y++) {
+				for (size_t x = xMin; x < xMax; x++) {
+					dst[x + y * w] = src[x + y * pitch];
+				}
 			}
+		} else if (srcBpp == 32) {
+			throw Exception("Cannot blit from 32-bit to 8-bit.", HalleyExceptions::Utils);
+		} else {
+			throw Exception("Unknown amount of bits per pixel: " + toString(srcBpp), HalleyExceptions::Utils);
 		}
-	} else if (bpp == 32) {
-		const int* src = reinterpret_cast<const int*>(buffer);
-		for (size_t y = yMin; y < yMax; y++) {
-			for (size_t x = xMin; x < xMax; x++) {
-				dst[x + y * w] = src[x + y * pitch];
+	} else if (getBytesPerPixel() == 4) {
+		int* dst = reinterpret_cast<int*>(px.get()) + pos.x + pos.y * w;
+		if (srcBpp == 1) {
+			const char* src = reinterpret_cast<const char*>(buffer);
+			for (size_t y = yMin; y < yMax; y++) {
+				for (size_t x = xMin; x < xMax; x++) {
+					size_t pxPos = (x >> 3) + y * pitch;
+					int bit = 1 << (int(7 - x) & 7);
+					bool active = (src[pxPos] & bit) != 0;
+					dst[x + y * w] = convertRGBAToInt(255, 255, 255, active ? 255 : 0);
+				}
 			}
+		} else if (srcBpp == 8) {
+			const char* src = reinterpret_cast<const char*>(buffer);
+			for (size_t y = yMin; y < yMax; y++) {
+				for (size_t x = xMin; x < xMax; x++) {
+					dst[x + y * w] = convertRGBAToInt(255, 255, 255, src[x + y * pitch]);
+				}
+			}
+		} else if (srcBpp == 32) {
+			const int* src = reinterpret_cast<const int*>(buffer);
+			for (size_t y = yMin; y < yMax; y++) {
+				for (size_t x = xMin; x < xMax; x++) {
+					dst[x + y * w] = src[x + y * pitch];
+				}
+			}
+		} else {
+			throw Exception("Unknown amount of bits per pixel: " + toString(srcBpp), HalleyExceptions::Utils);
 		}
-	} else {
-		throw Exception("Unknown amount of bits per pixel: " + toString(bpp), HalleyExceptions::Utils);
 	}
 }
 
@@ -390,6 +432,7 @@ void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 		LodePNGColorType colorFormat;
 		switch (targetFormat) {
 		case Format::Indexed:
+		case Format::SingleChannel:
 			colorFormat = LCT_GREY;
 			break;
 		case Format::RGB:
@@ -468,6 +511,7 @@ Bytes Image::savePNGToBytes(bool allowDepthReduce) const
 		colFormat = LCT_RGB;
 		break;
 	case Format::Indexed:
+	case Format::SingleChannel:
 		colFormat = LCT_GREY;
 		break;
 	default:
@@ -519,6 +563,7 @@ Image::Format Image::getImageFormat(gsl::span<const gsl::byte> bytes)
 	LodePNGColorType colorFormat = state.info_png.color.colortype;
 	switch (colorFormat) {
 	case LCT_GREY:
+		return Format::SingleChannel;
 	case LCT_PALETTE:
 		return Format::Indexed;
 	case LCT_RGB:
