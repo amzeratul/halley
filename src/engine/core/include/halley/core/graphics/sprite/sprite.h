@@ -134,7 +134,11 @@ namespace Halley
 	public:
 		Sprite deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
-			return Sprite().setImage(*context.resources, node["image"].asString());
+			if (node.hasKey("image")) {
+				return Sprite().setImage(*context.resources, node["image"].asString());
+			}
+			
+			return Sprite();
 		}
 	};
 }
