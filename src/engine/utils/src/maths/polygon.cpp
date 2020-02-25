@@ -220,6 +220,35 @@ bool Polygon::overlaps(const Polygon &param,Vector2f *translation,Vector2f *coll
 	return true;
 }
 
+Vector2f Polygon::getClosestPoint(Vector2f rawPoint, float anisotropy) const
+{
+	Expects(!vertices.empty());
+
+	const auto scale = Vector2f(1.0f, 1.0f / anisotropy);
+	const auto point = rawPoint * scale;
+	
+	Vector2f bestPoint = vertices[0];
+	float closestDistance2 = std::numeric_limits<float>::infinity();
+	
+	const size_t n = vertices.size();
+	for (size_t i = 0; i < n; ++i) {
+		const Vector2f a = vertices[i] * scale;
+		const Vector2f b = vertices[(i + 1) % n] * scale;
+		const float len = (b - a).length();
+		const Vector2f dir = (b - a) * (1.0f / len);
+		const float x = (point - a).dot(dir); // position along the A-B segment
+		const Vector2f p = a + dir * clamp(x, 0.0f, len);
+
+		const float dist2 = (point - p).squaredLength();
+		if (dist2 < closestDistance2) {
+			closestDistance2 = dist2;
+			bestPoint = p;
+		}
+	}
+
+	return bestPoint * Vector2f(1.0f, anisotropy);
+}
+
 
 ////////////////////////////////
 // Project polygon into an axis
@@ -301,11 +330,6 @@ void Polygon::setVertices(const VertexList& _vertices)
 {
 	vertices = _vertices;
 	realize();
-}
-
-Rect4f Polygon::getAABB() const
-{
-	return aabb;
 }
 
 void Polygon::translate(Vector2f offset)

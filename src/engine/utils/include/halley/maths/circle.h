@@ -16,6 +16,7 @@ namespace Halley {
         Vector2f getCentre() const { return centre; }
 
     	bool contains(Vector2f point) const;
+        bool overlaps(const Circle& circle) const;
 
         static Circle getSpanningCircle(const std::vector<Vector2f>& points);
 

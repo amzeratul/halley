@@ -50,6 +50,7 @@ namespace Halley {
 		bool isPointInsideConvex(Vector2f point) const;
 		bool isPointInside(Vector2f point) const;
 		bool overlaps(const Polygon &param, Vector2f *translation= nullptr, Vector2f *collisionPoint= nullptr) const;
+		Vector2f getClosestPoint(Vector2f p, float anisotropy = 1.0f) const; // All Y coordinates are multiplied by anisotropy
 
 		void setVertices(const VertexList& vertices);
 		const VertexList& getVertices() const { return vertices; }
@@ -58,7 +59,8 @@ namespace Halley {
 		void rotateAndScale(Angle<float> angle, Vector2f scale);
 		bool isClockwise() const;
 
-		Rect4f getAABB() const;
+		const Rect4f& getAABB() const { return aabb; }
+		const Circle& getBoundingCircle() const { return circle; }
 
 		void translate(Vector2f offset);
 
