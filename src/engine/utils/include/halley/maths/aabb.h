@@ -24,6 +24,7 @@
 
 #include <halley/data_structures/vector.h>
 #include "vector2.h"
+#include "rect.h"
 
 namespace Halley {
 
@@ -35,6 +36,9 @@ namespace Halley {
 		bool overlaps(const AABB& p, Vector2f delta=Vector2f()) const;
 		bool isPointInside(Vector2f p) const;
 		void set(Vector2f p1, Vector2f p2);
+		Rect4f toRect4f() const;
+
+		static AABB getSpanningBox(const std::vector<Vector2f>& points);
 
 	private:
 		Vector2f p1, p2;

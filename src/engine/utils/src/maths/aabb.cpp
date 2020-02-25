@@ -38,6 +38,38 @@ void AABB::set(Vector2f _p1, Vector2f _p2)
 	p2 = _p2;
 }
 
+Rect4f AABB::toRect4f() const
+{
+	return Rect4f(p1, p2);
+}
+
+AABB AABB::getSpanningBox(const std::vector<Vector2f>& points)
+{
+	float x1 = std::numeric_limits<float>::max();
+	float y1 = std::numeric_limits<float>::max();
+	float x2 = std::numeric_limits<float>::lowest();
+	float y2 = std::numeric_limits<float>::lowest();
+
+	const size_t len = points.size();
+	for (size_t i = 0; i < len; i++) {
+		Vector2f v = points[i];
+		if (v.x < x1) {
+			x1 = v.x;
+		}
+		if (v.x > x2) {
+			x2 = v.x;
+		}
+		if (v.y < y1) {
+			y1 = v.y;
+		}
+		if (v.y > y2) {
+			y2 = v.y;
+		}
+	}
+	
+	return AABB(Vector2f(x1, y1), Vector2f(x2, y2));
+}
+
 bool AABB::overlaps(const AABB& p, Vector2f delta) const
 {
 	if (p.p1.x > p2.x + delta.x) return false;

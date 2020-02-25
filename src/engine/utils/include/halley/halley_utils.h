@@ -38,6 +38,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "maths/angle.h"
 #include "maths/base_transform.h"
 #include "maths/box.h"
+#include "maths/circle.h"
 #include "maths/colour.h"
 #include "maths/line.h"
 #include "maths/matrix4.h"
