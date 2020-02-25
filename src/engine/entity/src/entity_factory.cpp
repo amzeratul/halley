@@ -19,7 +19,7 @@ EntityFactory::~EntityFactory()
 {
 }
 
-EntityRef EntityFactory::createEntity(const ConfigNode& node, bool populate)
+EntityRef EntityFactory::createEntity(const ConfigNode& node)
 {
 	// Note: this is not thread-safe
 	context.entityContext->uuids.clear();
@@ -36,8 +36,13 @@ EntityRef EntityFactory::createEntity(EntityRef* parent, const ConfigNode& node,
 
 	context.entityContext->uuids[uuid] = entity.getEntityId();
 
-	if (populate) {
-		updateEntity(entity, node);
+	updateEntity(entity, node, !populate);
+
+	if (parent) {
+		auto parentTransform = parent->tryGetComponent<Transform2DComponent>();
+		if (parentTransform) {
+			parentTransform->addChild(entity.getComponent<Transform2DComponent>(), true);
+		}
 	}
 	
 	if (node["children"].getType() == ConfigNodeType::Sequence) {
@@ -46,24 +51,19 @@ EntityRef EntityFactory::createEntity(EntityRef* parent, const ConfigNode& node,
 		}
 	}
 
-	if (parent) {
-		auto parentTransform = parent->tryGetComponent<Transform2DComponent>();
-		if (parentTransform) {
-			parentTransform->addChild(entity.getComponent<Transform2DComponent>(), true);
-		}
-	}
-
 	return entity;
 }
 
-void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& node)
+void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& node, bool transformOnly)
 {
 	const auto func = world.getCreateComponentFunction();
 	if (node["components"].getType() == ConfigNodeType::Sequence) {
 		for (auto& componentNode: node["components"].asSequence()) {
 			for (auto& c: componentNode.asMap()) {
 				auto name = c.first;
-				func(*this, name, entity, c.second);
+				if (!transformOnly || name == "Transform2D" || name == "Transform3D") {
+					func(*this, name, entity, c.second);
+				}
 			}
 		}
 	}

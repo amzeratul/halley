@@ -13,8 +13,8 @@ namespace Halley {
 		explicit EntityFactory(World& world, Resources& resources);
 		virtual ~EntityFactory();
 		
-		EntityRef createEntity(const ConfigNode& node, bool populate = true);
-		void updateEntity(EntityRef& entity, const ConfigNode& node);
+		EntityRef createEntity(const ConfigNode& node);
+		void updateEntity(EntityRef& entity, const ConfigNode& node, bool transformOnly = false);
 		void updateEntityTree(EntityRef& entity, const ConfigNode& node);
 		
 		template <typename T>
