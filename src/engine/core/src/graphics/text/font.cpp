@@ -39,26 +39,28 @@ void Font::Glyph::deserialize(Deserializer& s)
 	s >> advance;
 }
 
-Font::Font(String name, String imageName, float ascender, float height, float sizePt, float renderScale)
-	: name(name)
-	, imageName(imageName)
+Font::Font(String name, String imageName, float ascender, float height, float sizePt, float renderScale, Vector2i imageSize)
+	: name(std::move(name))
+	, imageName(std::move(imageName))
 	, ascender(ascender)
 	, height(height)
 	, sizePt(sizePt)
 	, smoothRadius(0)
 	, replacementScale(renderScale)
+	, imageSize(imageSize)
 	, distanceField(false)
 {
 }
 
-Font::Font(String name, String imageName, float ascender, float height, float sizePt, float renderScale, float distanceFieldSmoothRadius, std::vector<String> fallback)
-	: name(name)
-	, imageName(imageName)
+Font::Font(String name, String imageName, float ascender, float height, float sizePt, float renderScale, Vector2i imageSize, float distanceFieldSmoothRadius, std::vector<String> fallback)
+	: name(std::move(name))
+	, imageName(std::move(imageName))
 	, ascender(ascender)
 	, height(height)
 	, sizePt(sizePt)
 	, smoothRadius(distanceFieldSmoothRadius)
 	, replacementScale(renderScale)
+	, imageSize(imageSize)
 	, distanceField(true)
 	, fallback(std::move(fallback))
 {
@@ -145,6 +147,11 @@ float Font::getSmoothRadius() const
 	return smoothRadius;
 }
 
+Vector2i Font::getImageSize() const
+{
+	return imageSize;
+}
+
 float Font::getReplacementScale() const
 {
 	return replacementScale;
@@ -179,6 +186,7 @@ void Font::serialize(Serializer& s) const
 	s << sizePt;
 	s << distanceField;
 	s << smoothRadius;
+	s << imageSize;
 	s << replacementScale;
 	s << glyphs;
 	s << fallback;
@@ -193,6 +201,7 @@ void Font::deserialize(Deserializer& s)
 	s >> sizePt;
 	s >> distanceField;
 	s >> smoothRadius;
+	s >> imageSize;
 	s >> replacementScale;
 	s >> glyphs;
 	s >> fallback;

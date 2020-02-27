@@ -184,6 +184,16 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 {
 	Expects(font);
 
+	bool floorEnabled = false;
+	auto floorAlign = [floorEnabled] (Vector2f a) -> Vector2f
+	{
+		if (floorEnabled) {
+			return a.floor();
+		} else {
+			return a;
+		}
+	};
+
 	const bool hasMaterialOverride = font->isDistanceField();
 	if (hasMaterialOverride && materialDirty) {
 		updateMaterials();
@@ -192,9 +202,9 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 
 	if (glyphsDirty || positionDirty) {
 		float mainScale = getScale(*font);
-		Vector2f p = (position + Vector2f(0, font->getAscenderDistance() * mainScale)).floor();
+		Vector2f p = floorAlign(position + Vector2f(0, font->getAscenderDistance() * mainScale));
 		if (offset != Vector2f(0, 0)) {
-			p -= (getExtents() * offset).floor();
+			p -= floorAlign(getExtents() * offset);
 		}
 
 		size_t startPos = 0;
@@ -205,7 +215,7 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 		{
 			// Line break, update previous characters!
 			if (align != 0) {
-				Vector2f off = (-lineOffset * align).floor();
+				Vector2f off = floorAlign(-lineOffset * align);
 				for (size_t j = startPos; j < spritesInserted; j++) {
 					auto& sprite = sprites[j];
 					sprite.setPos(sprite.getPosition() + off);
@@ -248,7 +258,7 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 				auto& fontForGlyph = font->getFontForGlyph(c);
 				auto& glyph = fontForGlyph.getGlyph(c);
 				const float scale = getScale(fontForGlyph);
-				const auto fontAdjustment = (Vector2f(0, fontForGlyph.getAscenderDistance() - font->getAscenderDistance()) * scale).floor();
+				const auto fontAdjustment = floorAlign(Vector2f(0, fontForGlyph.getAscenderDistance() - font->getAscenderDistance()) * scale);
 
 				std::shared_ptr<Material> materialToUse = hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial();
 
@@ -540,8 +550,14 @@ std::shared_ptr<Material> TextRenderer::getMaterial(const Font& font) const
 
 void TextRenderer::updateMaterial(Material& material, const Font& font) const
 {
-	float smooth = clamp(smoothness / font.getSmoothRadius(), 0.001f, 0.999f);
-	float outlineSize = clamp(outline / font.getSmoothRadius(), 0.0f, 0.995f);
+	const float smoothRadius = font.getSmoothRadius();
+	const Vector2f smoothPerTexUnit = Vector2f(font.getImageSize()) / (2.0f * smoothRadius);
+	const float lowSmooth = std::min(smoothPerTexUnit.x, smoothPerTexUnit.y);
+
+	const float scale = getScale(font);
+	
+	const float smooth = smoothness * lowSmooth;
+	const float outlineSize = outline / smoothRadius / scale;
 	material
 		.set("u_smoothness", smooth)
 		.set("u_outline", outlineSize)
