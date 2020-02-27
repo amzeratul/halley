@@ -12,6 +12,9 @@
 #include "halley/maths/uuid.h"
 #include "halley/core/api/halley_api.h"
 
+#define DONT_INCLUDE_HALLEY_HPP
+#include "components/transform_2d_component.h"
+
 using namespace Halley;
 
 World::World(const HalleyAPI* api, bool collectMetrics, CreateComponentFunction createComponent)
@@ -163,10 +166,22 @@ EntityRef World::createEntity(String name)
 
 void World::destroyEntity(EntityId id)
 {
+	doDestroyEntity(id);
+	entityDirty = true;
+}
+
+void World::doDestroyEntity(EntityId id)
+{
 	auto e = tryGetEntity(id);
 	if (e) {
 		e->destroy();
-		entityDirty = true;
+
+		const auto transform = e->tryGetComponent<Transform2DComponent>();
+		if (transform) {
+			for (auto& c: transform->getChildren()) {
+				doDestroyEntity(c);
+			}
+		}
 	}
 }
 

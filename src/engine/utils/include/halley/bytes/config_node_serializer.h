@@ -3,6 +3,7 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/maths/polygon.h"
 #include "halley/maths/colour.h"
+#include <set>
 
 namespace Halley {
 	class EntitySerializationContext;
@@ -133,7 +134,23 @@ namespace Halley {
 			}
 			return result;
         }
-    };
+	};
+
+	template <typename T>
+	class ConfigNodeSerializer<std::set<T>> {
+	public:
+		std::set<T> deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+		{
+			std::set<T> result;
+			if (node.getType() == ConfigNodeType::Sequence) {
+				auto seq = node.asSequence();
+				for (auto& s : seq) {
+					result.insert(ConfigNodeSerializer<T>().deserialize(context, s));
+				}
+			}
+			return result;
+		}
+	};
 	
 	template<>
 	class ConfigNodeSerializer<Polygon> {
@@ -157,6 +174,23 @@ namespace Halley {
 		String deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
 		{
 			return node.asString("");
+		}
+	};
+
+	template <typename T>
+	class ConfigNodeSerializer<std::map<String, T>>
+	{
+	public:
+		std::map<String, T> deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+		{
+			std::map<String, T> result;
+			if (node.getType() == ConfigNodeType::Map) {
+				auto map = node.asMap();
+				for (auto& s : map) {
+					result[s.first] = ConfigNodeSerializer<T>().deserialize(context, s.second);
+				}
+			}
+			return result;
 		}
 	};
 

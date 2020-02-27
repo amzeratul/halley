@@ -157,18 +157,7 @@ void Transform2DComponent::detachChildren(World& world)
 	for (auto& childId: childIdsCopy) {
 		world.getEntity(childId).getComponent<Transform2DComponent>().setParent();
 	}
-}
-
-void Transform2DComponent::destroyTree(World& world, bool includingMe)
-{
-	auto childIdsCopy = childIds;
-	for (auto& childId: childIdsCopy) {
-		world.getEntity(childId).getComponent<Transform2DComponent>().destroyTree(world);
-	}
-	setParent(true);
-	if (includingMe) {
-		world.destroyEntity(myId);
-	}
+	childIds.clear();
 }
 
 void Transform2DComponent::onAddedToEntity(EntityRef& entity)

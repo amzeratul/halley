@@ -111,6 +111,8 @@ namespace Halley {
 		void allocateEntity(Entity* entity);
 		void updateEntities();
 		void initSystems();
+
+		void doDestroyEntity(EntityId id);
 		void deleteEntity(Entity* entity);
 
 		void updateSystems(TimeLine timeline, Time elapsed);
