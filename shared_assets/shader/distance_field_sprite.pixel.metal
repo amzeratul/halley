@@ -18,6 +18,12 @@ struct VertexOut {
 	float4 position [[ position ]];
 };
 
+// TODO: Move this out as a common util
+// There's no lerp function defined in Metal's standard library
+float4 lerp(float4 a, float4 b, float factor) {
+    return a * (1 - factor) + b * factor;
+}
+
 fragment float4 pixel_func (
 	VertexOut v [[ stage_in ]],
 	texture2d<float> tex0 [[ texture(0) ]],
@@ -37,8 +43,7 @@ fragment float4 pixel_func (
 	float outline = 1.0 - smoothstep(inEdge - s, inEdge + s, a);
 	float4 colFill = v.colour;
 	float4 colOutline = material.outlineColour;
-	float4 col = mix(colFill, colOutline, outline);
-
 	float4 col = lerp(colFill, colOutline, outline);
+
 	return float4(col.rgb, col.a * edge);
 }
