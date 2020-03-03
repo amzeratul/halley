@@ -36,6 +36,7 @@ fragment float4 pixel_func (
 	float edge1 = clamp(inEdge + s, edge0 + 0.01, 0.99);
 	float edge = smoothstep(edge0, edge1, a) * v.colour.a;
 
+	float4 colFill = v.colour;
 	float alpha = colFill.a * edge;
 	return float4(colFill.rgb * alpha, alpha);
 }

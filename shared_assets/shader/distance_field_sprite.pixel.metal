@@ -39,6 +39,5 @@ fragment float4 pixel_func (
 	float4 colOutline = material.outlineColour;
 	float4 col = mix(colFill, colOutline, outline);
 
-	float4 col = lerp(colFill, colOutline, outline);
 	return float4(col.rgb, col.a * edge);
 }
