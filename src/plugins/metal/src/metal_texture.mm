@@ -16,6 +16,7 @@ void MetalTexture::load(TextureDescriptor&& descriptor)
 	int bytesPerPixel = 0;
 	switch (descriptor.format) {
 		case TextureFormat::Indexed:
+		case TextureFormat::Red:
 			pixelFormat = MTLPixelFormatR8Unorm;
 			bytesPerPixel = 1;
 			break;
