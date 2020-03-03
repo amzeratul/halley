@@ -60,6 +60,8 @@ public:
 	void addChild(Transform2DComponent& childTransform, bool keepLocalPosition = false);
 	void detachChildren(Halley::World& world);
 
+	void onAddedToEntity(Halley::EntityRef& entity);
+
 private:
 	friend class Halley::EntityRef;
 
@@ -67,6 +69,4 @@ private:
 	Halley::EntityId myId;
 	Halley::EntityId parentId;
 	std::vector<Halley::EntityId> childIds;
-
-	void onAddedToEntity(Halley::EntityRef& entity);
 };
