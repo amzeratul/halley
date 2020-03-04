@@ -5,15 +5,100 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/core/graphics/shader.h"
 #include "halley/support/logger.h"
+#include <ShaderConductor/ShaderConductor.hpp>
 
 #ifdef _MSC_VER
 #include <D3Dcompiler.h>
 #pragma comment(lib, "D3DCompiler.lib")
+#pragma comment(lib, "ShaderConductor.lib")
 #endif
 
 using namespace Halley;
 
 void ShaderImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
+{
+	std::map<String, ShaderFile> shaders;
+	const Metadata meta = asset.inputFiles.at(0).metadata;
+	if (meta.getString("language", "") != "hlsl") {
+		return;
+	}
+
+	std::array<String, 3> languages = {{ "hlsl", "glsl", "metal" }};
+
+	for (auto& language: languages) {
+		ShaderFile shader;
+		for (auto& input: asset.inputFiles) {
+			const auto shaderType = fromString<ShaderType>(input.name.getExtension().mid(1));
+			shader.shaders[shaderType] = fromHLSL(input.name.toString(), shaderType, input.data, language);
+		}
+
+		Metadata curMeta = meta;
+		curMeta.set("language", language);
+		collector.output(asset.assetId, AssetType::Shader, Serializer::toBytes(shader), curMeta);
+	}
+}
+
+Bytes ShaderImporter::fromHLSL(const String& name, ShaderType type, const Bytes& data, const String& dstLanguage) const
+{
+	if (dstLanguage == "hlsl") {
+		return compileHLSL(name, type, data);
+	} else {
+		using namespace ShaderConductor;
+
+		ShaderStage stage;
+		switch (type) {
+		case ShaderType::Pixel:
+			stage = ShaderStage::PixelShader;
+			break;
+		case ShaderType::Vertex:
+			stage = ShaderStage::VertexShader;
+			break;
+		case ShaderType::Geometry:
+			stage = ShaderStage::GeometryShader;
+			break;
+		default:
+			throw Exception("Invalid stage: " + toString(type), HalleyExceptions::Tools);
+		}
+
+		String srcStr(reinterpret_cast<const char*>(data.data()), data.size());
+		
+		Compiler::SourceDesc source;
+		source.fileName = name.c_str();
+		source.entryPoint = "main";
+		source.stage = stage;
+		source.source = srcStr.c_str();
+		source.numDefines = 0;
+		source.defines = nullptr;
+		
+		Compiler::TargetDesc target;
+		if (dstLanguage == "glsl") {
+			target.language = ShadingLanguage::Glsl;
+			target.version = "330";
+		} else if (dstLanguage == "metal") {
+			target.language = ShadingLanguage::Msl_iOS;
+			target.version = "221";
+		}
+		
+		Compiler::Options options;
+		options.shiftAllCBuffersBindings = 0;
+		options.shiftAllSamplersBindings = 0;
+		options.shiftAllTexturesBindings = 0;
+		options.shiftAllUABuffersBindings = 0;
+		
+		Compiler compiler;
+		auto result = compiler.Compile(source, options, target);
+
+		if (result.hasError) {
+			throw Exception("Error converting shader to " + dstLanguage + ": " + String(reinterpret_cast<const char*>(result.errorWarningMsg->Data()), result.errorWarningMsg->Size()), HalleyExceptions::Tools);
+		}
+
+		Bytes bytes(result.target->Size());
+		memcpy(bytes.data(), result.target->Data(), bytes.size());
+		return bytes;
+	}
+}
+
+void ShaderImporter::importOld(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	ShaderFile shader;
 	for (auto& input: asset.inputFiles) {
