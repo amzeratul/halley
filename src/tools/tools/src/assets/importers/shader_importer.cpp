@@ -32,9 +32,10 @@ void ShaderImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			shader.shaders[shaderType] = fromHLSL(input.name.toString(), shaderType, input.data, language);
 		}
 
+		String id = asset.assetId.split(':').at(0) + ":" + language;
 		Metadata curMeta = meta;
 		curMeta.set("language", language);
-		collector.output(asset.assetId, AssetType::Shader, Serializer::toBytes(shader), curMeta);
+		collector.output(id, AssetType::Shader, Serializer::toBytes(shader), curMeta);
 	}
 }
 
@@ -85,8 +86,7 @@ Bytes ShaderImporter::fromHLSL(const String& name, ShaderType type, const Bytes&
 		options.shiftAllTexturesBindings = 0;
 		options.shiftAllUABuffersBindings = 0;
 		
-		Compiler compiler;
-		auto result = compiler.Compile(source, options, target);
+		auto result = Compiler::Compile(source, options, target);
 
 		if (result.hasError) {
 			throw Exception("Error converting shader to " + dstLanguage + ": " + String(reinterpret_cast<const char*>(result.errorWarningMsg->Data()), result.errorWarningMsg->Size()), HalleyExceptions::Tools);
