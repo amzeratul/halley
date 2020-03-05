@@ -11,24 +11,12 @@ uniforms:
 passes:
   - blend: AlphaPremultiplied
     shader:
-      - language: glsl
-        vertex: sprite.vertex.glsl
-        pixel: distance_field_sprite_outline.pixel.glsl
-      - language: hlsl
-        vertex: sprite.vertex.hlsl
-        pixel: distance_field_sprite_outline.pixel.hlsl
-      - language: metal
-        vertex: sprite.vertex.metal
-        pixel: distance_field_sprite_outline.pixel.metal
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: distance_field_sprite_outline.pixel.hlsl
   - blend: AlphaPremultiplied
     shader:
-      - language: glsl
-        vertex: sprite.vertex.glsl
-        pixel: distance_field_sprite_fill.pixel.glsl
-      - language: hlsl
-        vertex: sprite.vertex.hlsl
-        pixel: distance_field_sprite_fill.pixel.hlsl
-      - language: metal
-        vertex: sprite.vertex.metal
-        pixel: distance_field_sprite_fill.pixel.metal
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: distance_field_sprite_fill.pixel.hlsl
 ...

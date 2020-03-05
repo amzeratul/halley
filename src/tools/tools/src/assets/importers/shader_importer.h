@@ -11,9 +11,7 @@ namespace Halley
 		ImportAssetType getType() const override { return ImportAssetType::Shader; }
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 
-	private:
-		Bytes fromHLSL(const String& name, ShaderType type, const Bytes& data, const String& dstLanguage) const;
-		Bytes compileHLSL(const String& name, ShaderType type, const Bytes& data) const;
-		void importOld(const ImportingAsset& asset, IAssetCollector& collector);
+		static Bytes convertHLSL(const String& name, ShaderType type, const Bytes& data, const String& dstLanguage);
+		static Bytes compileHLSL(const String& name, ShaderType type, const Bytes& data);
 	};
 }

@@ -11,13 +11,7 @@ uniforms:
 passes:
   - blend: Alpha
     shader:
-      - language: glsl
-        vertex: sprite.vertex.glsl
-        pixel: distance_field_sprite.pixel.glsl
-      - language: hlsl
-        vertex: sprite.vertex.hlsl
-        pixel: distance_field_sprite.pixel.hlsl
-      - language: metal
-        vertex: sprite.vertex.metal
-        pixel: distance_field_sprite.pixel.metal
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: distance_field_sprite.pixel.hlsl
 ...

@@ -5,6 +5,8 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/text/string_converter.h"
 #include "config_importer.h"
+#include "shader_importer.h"
+#include "halley/core/graphics/shader.h"
 
 using namespace Halley;
 
@@ -43,22 +45,47 @@ MaterialDefinition MaterialImporter::parseMaterial(Path basePath, gsl::span<cons
 
 void MaterialImporter::loadPass(MaterialDefinition& material, const ConfigNode& node, IAssetCollector& collector, int passN)
 {
-	String passName = material.getName() + "_pass_" + toString(passN);
+	const String passName = material.getName() + "_pass_" + toString(passN);
+	const String shaderName = passName;
 
-	auto shaderTypes = { "vertex", "geometry", "pixel", "combined" };
+	const auto shaderTypes = { ShaderType::Vertex, ShaderType::Geometry, ShaderType::Pixel, ShaderType::Combined };
+	const String languages[] = { "hlsl", "glsl", "metal" };
 
+	// Map languages to nodes
+	std::map<String, const ConfigNode*> langToNode;
+	const ConfigNode* defaultNode = nullptr;
 	for (auto& shaderEntry: node["shader"]) {
-		String language = shaderEntry["language"].asString();
-		String shaderName = passName;
+		const auto language = shaderEntry["language"].asString();
+		langToNode[language] = &shaderEntry;
+		if (language == "hlsl") {
+			defaultNode = &shaderEntry;
+		}
+	}
+
+	// Generate each language
+	for (auto& language: languages) {
+		const auto iter = langToNode.find(language);
+		const bool hasEntry = iter != langToNode.end();
+		const ConfigNode* shaderEntryPtr = hasEntry ? iter->second : defaultNode;
+		if (!shaderEntryPtr) {
+			throw Exception("No shader for " + language + " in " + passName, HalleyExceptions::Tools);
+		}
+		const ConfigNode& shaderEntry = *shaderEntryPtr;
+		
 		ImportingAsset shaderAsset;
 		shaderAsset.assetId = shaderName + ":" + language;
 		shaderAsset.assetType = ImportAssetType::Shader;
 		for (auto& curType: shaderTypes) {
-			if (shaderEntry.hasKey(curType)) {
-				auto data = loadShader(shaderEntry[curType].asString(), collector);
+			String curTypeName = toString(curType);
+			if (shaderEntry.hasKey(curTypeName)) {
+				auto data = loadShader(shaderEntry[curTypeName].asString(), collector);
+				if (!hasEntry) {
+					data = ShaderImporter::convertHLSL(shaderName, curType, data, language);
+				}
+				
 				Metadata meta;
 				meta.set("language", language);
-				shaderAsset.inputFiles.emplace_back(ImportingAssetFile(shaderName + "." + curType, std::move(data), meta));
+				shaderAsset.inputFiles.emplace_back(ImportingAssetFile(shaderName + "." + curTypeName, std::move(data), meta));
 			}
 		}
 		collector.addAdditionalAsset(std::move(shaderAsset));

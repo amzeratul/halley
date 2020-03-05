@@ -9,13 +9,7 @@ uniforms:
 passes:
   - blend: Opaque
     shader:
-      - language: glsl
-        vertex: sprite.vertex.glsl
-        pixel: scanline.pixel.glsl
-      - language: hlsl
-        vertex: sprite.vertex.hlsl
-        pixel: scanline.pixel.hlsl
-      - language: metal
-        vertex: sprite.vertex.metal
-        pixel: scanline.pixel.metal
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: scanline.pixel.hlsl
 ...

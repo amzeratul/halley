@@ -19,7 +19,7 @@ passes:
       write: true
       comparison: Less
     shader:
-      - language: hlsl
-        vertex: standard_mesh.vertex.hlsl
-        pixel: standard_mesh.pixel.hlsl
+    - language: hlsl
+      vertex: standard_mesh.vertex.hlsl
+      pixel: standard_mesh.pixel.hlsl
 ...

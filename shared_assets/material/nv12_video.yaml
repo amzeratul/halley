@@ -6,13 +6,7 @@ textures:
 passes:
   - blend: Alpha
     shader:
-      - language: glsl
-        vertex: sprite.vertex.glsl
-        pixel: nv12_video.pixel.glsl
-      - language: hlsl
-        vertex: sprite.vertex.hlsl
-        pixel: nv12_video.pixel.hlsl
-      - language: metal
-        vertex: sprite.vertex.metal
-        pixel: nv12_video.pixel.metal
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: nv12_video.pixel.hlsl
 ...

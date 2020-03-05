@@ -19,116 +19,89 @@ void ShaderImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 {
 	std::map<String, ShaderFile> shaders;
 	const Metadata meta = asset.inputFiles.at(0).metadata;
-	if (meta.getString("language", "") != "hlsl") {
-		return;
-	}
+	const auto language = meta.getString("language", "");
 
-	std::array<String, 3> languages = {{ "hlsl", "glsl", "metal" }};
-
-	for (auto& language: languages) {
-		ShaderFile shader;
-		for (auto& input: asset.inputFiles) {
-			const auto shaderType = fromString<ShaderType>(input.name.getExtension().mid(1));
-			shader.shaders[shaderType] = fromHLSL(input.name.toString(), shaderType, input.data, language);
-		}
-
-		String id = asset.assetId.split(':').at(0) + ":" + language;
-		Metadata curMeta = meta;
-		curMeta.set("language", language);
-		collector.output(id, AssetType::Shader, Serializer::toBytes(shader), curMeta);
-	}
-}
-
-Bytes ShaderImporter::fromHLSL(const String& name, ShaderType type, const Bytes& data, const String& dstLanguage) const
-{
-	if (dstLanguage == "hlsl") {
-		return compileHLSL(name, type, data);
-	} else {
-		using namespace ShaderConductor;
-
-		ShaderStage stage;
-		switch (type) {
-		case ShaderType::Pixel:
-			stage = ShaderStage::PixelShader;
-			break;
-		case ShaderType::Vertex:
-			stage = ShaderStage::VertexShader;
-			break;
-		case ShaderType::Geometry:
-			stage = ShaderStage::GeometryShader;
-			break;
-		default:
-			throw Exception("Invalid stage: " + toString(type), HalleyExceptions::Tools);
-		}
-
-		String srcStr(reinterpret_cast<const char*>(data.data()), data.size());
-		
-		Compiler::Options options;
-		options.shiftAllCBuffersBindings = 0;
-		options.shiftAllSamplersBindings = 0;
-		options.shiftAllTexturesBindings = 0;
-		options.shiftAllUABuffersBindings = 0;
-
-		Compiler::SourceDesc source;
-		source.fileName = name.c_str();
-		source.entryPoint = "main";
-		source.stage = stage;
-		source.source = srcStr.c_str();
-		source.numDefines = 0;
-		source.defines = nullptr;
-		
-		Compiler::TargetDesc target;
-		if (dstLanguage == "glsl") {
-			target.language = ShadingLanguage::Glsl;
-			target.version = "330";
-		} else if (dstLanguage == "metal") {
-			target.language = ShadingLanguage::Msl_iOS;
-			target.version = "221";
-		}
-		
-		auto result = Compiler::Compile(source, options, target);
-
-		if (result.hasError) {
-			const auto msg = String(reinterpret_cast<const char*>(result.errorWarningMsg->Data()), result.errorWarningMsg->Size());
-			DestroyBlob(result.target);
-			DestroyBlob(result.errorWarningMsg);
-			throw Exception("Error converting shader to " + dstLanguage + ": " + msg, HalleyExceptions::Tools);
-		}
-
-		Bytes bytes(result.target->Size());
-		memcpy(bytes.data(), result.target->Data(), bytes.size());
-		DestroyBlob(result.target);
-		DestroyBlob(result.errorWarningMsg);
-		
-		return bytes;
-	}
-}
-
-void ShaderImporter::importOld(const ImportingAsset& asset, IAssetCollector& collector)
-{
 	ShaderFile shader;
 	for (auto& input: asset.inputFiles) {
 		const auto shaderType = fromString<ShaderType>(input.name.getExtension().mid(1));
-		const String language = input.metadata.getString("language", "");
 
-		if (language == "glsl" || language == "metal") {
-			// Runtime-compiled shader languages
-			String strData = String(reinterpret_cast<const char*>(input.data.data()), input.data.size());
-			if (language == "glsl") {
-				strData = "#version 330\n" + strData;
-			}
-			Bytes data(strData.size());
-			memcpy(data.data(), strData.c_str(), data.size());
-			shader.shaders[shaderType] = data;
-		} else if (language == "hlsl") {
-			shader.shaders[shaderType] = compileHLSL(input.name.toString(), shaderType, input.data);
+		Bytes data = input.data;
+		if (language == "hlsl") {
+			data = compileHLSL(input.name.toString(), shaderType, data);
 		}
+		
+		shader.shaders[shaderType] = data;
 	}
 
-	collector.output(asset.assetId, AssetType::Shader, Serializer::toBytes(shader), asset.inputFiles.at(0).metadata);
+	collector.output(asset.assetId, AssetType::Shader, Serializer::toBytes(shader), meta);
 }
 
-Bytes ShaderImporter::compileHLSL(const String& name, ShaderType type, const Bytes& bytes) const
+Bytes ShaderImporter::convertHLSL(const String& name, ShaderType type, const Bytes& data, const String& dstLanguage)
+{
+	if (dstLanguage == "hlsl") {
+		return data;
+	}
+	
+	using namespace ShaderConductor;
+
+	ShaderStage stage;
+	switch (type) {
+	case ShaderType::Pixel:
+		stage = ShaderStage::PixelShader;
+		break;
+	case ShaderType::Vertex:
+		stage = ShaderStage::VertexShader;
+		break;
+	case ShaderType::Geometry:
+		stage = ShaderStage::GeometryShader;
+		break;
+	default:
+		throw Exception("Invalid stage: " + toString(type), HalleyExceptions::Tools);
+	}
+
+	String srcStr(reinterpret_cast<const char*>(data.data()), data.size());
+	
+	Compiler::Options options = {};
+	options.shiftAllCBuffersBindings = 0;
+	options.shiftAllSamplersBindings = 0;
+	options.shiftAllTexturesBindings = 0;
+	options.shiftAllUABuffersBindings = 0;
+
+	Compiler::SourceDesc source = {};
+	source.fileName = name.c_str();
+	source.entryPoint = "main";
+	source.stage = stage;
+	source.source = srcStr.c_str();
+	source.numDefines = 0;
+	source.defines = nullptr;
+	
+	Compiler::TargetDesc target = {};
+	if (dstLanguage == "glsl") {
+		target.language = ShadingLanguage::Glsl;
+		target.version = "330";
+	} else if (dstLanguage == "metal") {
+		target.language = ShadingLanguage::Msl_iOS;
+		target.version = "221";
+	}
+	
+	auto result = Compiler::Compile(source, options, target);
+
+	if (result.hasError) {
+		const auto msg = String(reinterpret_cast<const char*>(result.errorWarningMsg->Data()), result.errorWarningMsg->Size());
+		DestroyBlob(result.target);
+		DestroyBlob(result.errorWarningMsg);
+		throw Exception("Error converting shader to " + dstLanguage + ": " + msg, HalleyExceptions::Tools);
+	}
+
+	Bytes bytes(result.target->Size());
+	memcpy(bytes.data(), result.target->Data(), bytes.size());
+	DestroyBlob(result.target);
+	DestroyBlob(result.errorWarningMsg);
+	
+	return bytes;
+}
+
+Bytes ShaderImporter::compileHLSL(const String& name, ShaderType type, const Bytes& bytes)
 {
 #ifdef _MSC_VER
 

@@ -4,13 +4,7 @@ base: sprite_base.yaml
 passes:
   - blend: Opaque
     shader:
-      - language: glsl
-        vertex: untransformed.vertex.glsl
-        pixel: solid_colour.pixel.glsl
-      - language: hlsl
-        vertex: untransformed.vertex.hlsl
-        pixel: solid_colour.pixel.hlsl
-      - language: metal
-        vertex: untransformed.vertex.metal
-        pixel: solid_colour.pixel.metal
+    - language: hlsl
+      vertex: untransformed.vertex.hlsl
+      pixel: solid_colour.pixel.hlsl
 ...
