@@ -31,6 +31,7 @@ namespace Halley {
 		std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() override;
 
 		String getShaderLanguage() override;
+		bool isColumnMajor() const override;
 
 		bool isLoaderThread() const;
 

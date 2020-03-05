@@ -86,7 +86,13 @@ void MaterialParameter::operator=(Vector2i p)
 void MaterialParameter::operator=(const Matrix4f& m)
 {
 	Expects(type == ShaderParameterType::Matrix4);
-	material->setUniform(blockNumber, offset, ShaderParameterType::Matrix4, &m);
+	if (material->getDefinition().isColumnMajor()) {
+		auto transposed = m;
+		transposed.transpose();
+		material->setUniform(blockNumber, offset, ShaderParameterType::Matrix4, &transposed);
+	} else {
+		material->setUniform(blockNumber, offset, ShaderParameterType::Matrix4, &m);
+	}
 }
 
 ShaderParameterType MaterialParameter::getType() const

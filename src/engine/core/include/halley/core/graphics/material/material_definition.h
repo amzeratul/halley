@@ -185,6 +185,8 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		bool isColumnMajor() const;
+
 	private:
 		VideoAPI* api = nullptr;
 
@@ -195,6 +197,7 @@ namespace Halley
 		Vector<MaterialAttribute> attributes;
 		int vertexSize = 0;
 		int vertexPosOffset = 0;
+		bool columnMajor = false;
 
 		std::shared_ptr<const Texture> fallbackTexture;
 

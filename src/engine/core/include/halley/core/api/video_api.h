@@ -38,6 +38,7 @@ namespace Halley
 		virtual std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() = 0;
 
 		virtual String getShaderLanguage() = 0;
+		virtual bool isColumnMajor() const { return false; }
 
 		virtual void* getImplementationPointer(const String& id) { return nullptr; }
 	};

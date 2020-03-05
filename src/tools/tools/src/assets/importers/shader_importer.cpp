@@ -63,6 +63,12 @@ Bytes ShaderImporter::fromHLSL(const String& name, ShaderType type, const Bytes&
 
 		String srcStr(reinterpret_cast<const char*>(data.data()), data.size());
 		
+		Compiler::Options options;
+		options.shiftAllCBuffersBindings = 0;
+		options.shiftAllSamplersBindings = 0;
+		options.shiftAllTexturesBindings = 0;
+		options.shiftAllUABuffersBindings = 0;
+
 		Compiler::SourceDesc source;
 		source.fileName = name.c_str();
 		source.entryPoint = "main";
@@ -79,12 +85,6 @@ Bytes ShaderImporter::fromHLSL(const String& name, ShaderType type, const Bytes&
 			target.language = ShadingLanguage::Msl_iOS;
 			target.version = "221";
 		}
-		
-		Compiler::Options options;
-		options.shiftAllCBuffersBindings = 0;
-		options.shiftAllSamplersBindings = 0;
-		options.shiftAllTexturesBindings = 0;
-		options.shiftAllUABuffersBindings = 0;
 		
 		auto result = Compiler::Compile(source, options, target);
 

@@ -113,6 +113,7 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	for (auto& p: passes) {
 		p.createShader(loader, name + "/pass" + toString(i++), attributes);
 	}
+	columnMajor = api->isColumnMajor();
 
 	fallbackTexture = loader.getResources().get<Texture>("whitebox.png");
 }
@@ -214,6 +215,11 @@ void MaterialDefinition::deserialize(Deserializer& s)
 	s >> attributes;
 	s >> vertexSize;
 	s >> vertexPosOffset;
+}
+
+bool MaterialDefinition::isColumnMajor() const
+{
+	return columnMajor;
 }
 
 void MaterialDefinition::loadUniforms(const ConfigNode& node)

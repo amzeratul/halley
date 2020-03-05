@@ -364,6 +364,11 @@ String VideoOpenGL::getShaderLanguage()
 	return "glsl";
 }
 
+bool VideoOpenGL::isColumnMajor() const
+{
+	return true;
+}
+
 std::unique_ptr<Painter> VideoOpenGL::makePainter(Resources& resources)
 {
 	return std::make_unique<PainterOpenGL>(resources);
