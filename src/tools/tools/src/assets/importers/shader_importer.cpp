@@ -89,11 +89,17 @@ Bytes ShaderImporter::fromHLSL(const String& name, ShaderType type, const Bytes&
 		auto result = Compiler::Compile(source, options, target);
 
 		if (result.hasError) {
-			throw Exception("Error converting shader to " + dstLanguage + ": " + String(reinterpret_cast<const char*>(result.errorWarningMsg->Data()), result.errorWarningMsg->Size()), HalleyExceptions::Tools);
+			const auto msg = String(reinterpret_cast<const char*>(result.errorWarningMsg->Data()), result.errorWarningMsg->Size());
+			DestroyBlob(result.target);
+			DestroyBlob(result.errorWarningMsg);
+			throw Exception("Error converting shader to " + dstLanguage + ": " + msg, HalleyExceptions::Tools);
 		}
 
 		Bytes bytes(result.target->Size());
 		memcpy(bytes.data(), result.target->Data(), bytes.size());
+		DestroyBlob(result.target);
+		DestroyBlob(result.errorWarningMsg);
+		
 		return bytes;
 	}
 }
