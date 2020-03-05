@@ -84,9 +84,10 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 	// TODO: move this logic to Painter?
 	for (auto& dataBlock: material.getDataBlocks()) {
 		int address = dataBlock.getAddress(passNumber, ShaderType::Combined);
-		if (address != -1) {
-			shader.setUniformBlockBinding(address, dataBlock.getBindPoint());
+		if (address == -1) {
+			address = dataBlock.getBindPoint();
 		}
+		shader.setUniformBlockBinding(address, dataBlock.getBindPoint());
 	}
 
 	// Bind textures
@@ -94,14 +95,15 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 	int textureUnit = 0;
 	for (auto& tex: material.getTextureUniforms()) {
 		int location = tex.getAddress(passNumber, ShaderType::Combined);
-		if (location != -1) {
-			auto texture = std::static_pointer_cast<const TextureOpenGL>(material.getTexture(textureUnit));
-			if (!texture) {
-				throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.", HalleyExceptions::VideoPlugin);					
-			} else {
-				glUniform1i(location, textureUnit);
-				texture->bind(textureUnit);
-			}
+		if (location == -1) {
+			location = textureUnit;
+		}
+		auto texture = std::static_pointer_cast<const TextureOpenGL>(material.getTexture(textureUnit));
+		if (!texture) {
+			throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.", HalleyExceptions::VideoPlugin);					
+		} else {
+			glUniform1i(location, textureUnit);
+			texture->bind(textureUnit);
 		}
 		++textureUnit;
 	}
