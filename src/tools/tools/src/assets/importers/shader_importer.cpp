@@ -78,10 +78,13 @@ Bytes ShaderImporter::convertHLSL(const String& name, ShaderType type, const Byt
 	Compiler::TargetDesc target = {};
 	if (dstLanguage == "glsl") {
 		target.language = ShadingLanguage::Glsl;
-		target.version = "330";
+		target.version = "430";
 	} else if (dstLanguage == "metal") {
 		target.language = ShadingLanguage::Msl_iOS;
 		target.version = "221";
+	} else if (dstLanguage == "spirv") {
+		target.language = ShadingLanguage::SpirV;
+		target.version = "460";
 	}
 	
 	auto result = Compiler::Compile(source, options, target);

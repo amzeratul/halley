@@ -49,7 +49,7 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const ConfigNode& 
 	const String shaderName = passName;
 
 	const auto shaderTypes = { ShaderType::Vertex, ShaderType::Geometry, ShaderType::Pixel, ShaderType::Combined };
-	const String languages[] = { "hlsl", "glsl", "metal" };
+	const String languages[] = { "hlsl", "glsl", "metal", "spirv" };
 
 	// Map languages to nodes
 	std::map<String, const ConfigNode*> langToNode;
