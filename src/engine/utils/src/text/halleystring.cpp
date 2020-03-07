@@ -466,7 +466,7 @@ void String::asciiMakeLower()
 
 ///////////////
 
-String String::operator += (const String &p)
+String& String::operator += (const String &p)
 {
 	str.append(p);
 	return *this;
@@ -480,31 +480,31 @@ String String::operator += (const wxString &p)
 }
 #endif
 
-String String::operator += (const char* p)
+String& String::operator += (const char* p)
 {
 	str.append(p);
 	return *this;
 }
 
-String String::operator += (const wchar_t* p)
+String& String::operator += (const wchar_t* p)
 {
 	str.append(String(p));
 	return *this;
 }
 
-String String::operator += (const double &p)
+String& String::operator += (const double &p)
 {
 	str.append(toString(p));
 	return *this;
 }
 
-String String::operator += (const int &p)
+String& String::operator += (const int &p)
 {
 	str.append(toString(p));
 	return *this;
 }
 
-String String::operator += (const Character &p)
+String& String::operator += (const Character &p)
 {
 	str.append(1,p);
 	return *this;
