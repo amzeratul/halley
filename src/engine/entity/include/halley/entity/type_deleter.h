@@ -18,7 +18,7 @@ namespace Halley {
 		{
 			auto& m = *getDeleters();
 			if (int(m.size()) <= idx) {
-				m.resize(static_cast<size_t>(idx * 1.5f + 1));
+				m.resize(static_cast<size_t>(idx) * 3 / 2 + 1);
 			}
 			m[idx] = deleter;
 		}
