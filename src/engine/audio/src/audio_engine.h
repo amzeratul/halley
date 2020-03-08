@@ -1,6 +1,5 @@
 #pragma once
 #include "audio_buffer.h"
-#include <mutex>
 #include <atomic>
 #include <condition_variable>
 #include <map>
@@ -8,7 +7,6 @@
 #include "audio_voice.h"
 #include "halley/audio/resampler.h"
 #include "halley/maths/random.h"
-#include "halley/data_structures/flat_map.h"
 
 namespace Halley {
 	class AudioMixer;
@@ -47,7 +45,7 @@ namespace Halley {
 
     private:
 		AudioSpec spec;
-		AudioOutputAPI* out;
+		AudioOutputAPI* out = nullptr;
 		std::unique_ptr<AudioMixer> mixer;
 		std::unique_ptr<AudioBufferPool> pool;
 		std::unique_ptr<AudioResampler> outResampler;

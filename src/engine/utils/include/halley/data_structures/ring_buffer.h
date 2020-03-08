@@ -35,6 +35,11 @@ namespace Halley {
     	{
             return numEntries.load() >= n;
     	}
+
+    	bool empty() const
+    	{
+            return numEntries.load() == 0;
+    	}
     	
         void writeOne(T e)
         {
