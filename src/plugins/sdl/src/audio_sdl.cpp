@@ -150,18 +150,15 @@ void AudioSDL::queueAudio(gsl::span<const float> data)
 
 bool AudioSDL::needsMoreAudio()
 {
-	/*
-	size_t sizePerSample = outputFormat.format == AudioSampleFormat::Int16 ? 2 : 4;
-	size_t queuedAudioSize = queuedSize / (outputFormat.numChannels * sizePerSample);
-	 */
-
-	// Doesn't use threaded audio
-	return false;
+	const size_t sizePerSample = outputFormat.format == AudioSampleFormat::Int16 ? 2 : 4;
+	const size_t queuedAudioSamples = audioBuffer.availableToRead() / (outputFormat.numChannels * sizePerSample);
+	const size_t neededAudioSamples = 2 * size_t(outputFormat.bufferSize);
+	return queuedAudioSamples < neededAudioSamples;
 }
 
 bool AudioSDL::needsAudioThread() const
 {
-	return false;
+	return true;
 }
 
 void AudioSDL::doQueueAudio(gsl::span<const gsl::byte> data) 
@@ -173,29 +170,18 @@ void AudioSDL::doQueueAudio(gsl::span<const gsl::byte> data)
 	}
 }
 
-void AudioSDL::onCallback(unsigned char* stream, int len) 
+void AudioSDL::onCallback(unsigned char* stream, int len)
 {
 	auto dst = gsl::span<std::byte>(reinterpret_cast<std::byte*>(stream), len);
 
-	while (!dst.empty()) {
-		if (audioBuffer.empty()) {
-			if (prepareAudioCallback) {
-				prepareAudioCallback();
-			}
-			
-			// Either no callback, or callback didn't add anything
-			if (audioBuffer.empty()) {
-				break;
-			}
-		} else {
-			const size_t toCopy = std::min(size_t(dst.size()), audioBuffer.availableToRead());
+	if (!audioBuffer.empty()) {
+		const size_t toCopy = std::min(size_t(dst.size()), audioBuffer.availableToRead());
 
-			audioBuffer.read(dst.subspan(0, toCopy));
-			dst = dst.subspan(toCopy);
-		}
+		audioBuffer.read(dst.subspan(0, toCopy));
+		dst = dst.subspan(toCopy);
 	}
 
-	if (dst.empty()) {
+	if (!dst.empty()) {
 		// :(
 		Logger::logWarning("Insufficient audio data, padding with zeroes.");
 		memset(dst.data(), 0, size_t(dst.size()));

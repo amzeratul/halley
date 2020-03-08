@@ -49,6 +49,26 @@ namespace Halley {
             ++numEntries;
         }
 
+        void write(gsl::span<T> es)
+        {
+            const size_t numToWrite = size_t(es.size());
+            Expects(canWrite(numToWrite));
+            const size_t spaceToEnd = entries.size() - writePos;
+            const size_t nToWrite1 = std::min(spaceToEnd, numToWrite);
+
+            for (size_t i = 0; i < nToWrite1; ++i) {
+                entries[writePos + i] = std::move(es[i]);
+            }
+
+            const size_t nToWrite2 = numToWrite - nToWrite1;
+            for (size_t i = 0; i < nToWrite2; ++i) {
+                entries[i] = std::move(es[i + nToWrite1]);
+            }
+
+            writePos = (writePos + numToWrite) % entries.size();
+            numEntries.fetch_add(numToWrite);
+        }
+
     	void write(gsl::span<const T> es)
     	{
             const size_t numToWrite = size_t(es.size());
