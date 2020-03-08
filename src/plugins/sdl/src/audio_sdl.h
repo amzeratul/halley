@@ -46,7 +46,7 @@ namespace Halley
 		std::vector<short> tmpShort;
 		std::vector<int> tmpInt;
 
-		RingBuffer<gsl::byte> ringBuffer;
+		RingBuffer<gsl::byte> audioBuffer;
 		
 		AudioCallback prepareAudioCallback;
 
