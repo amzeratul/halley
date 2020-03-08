@@ -28,11 +28,6 @@ void AudioSDL::init()
 	}
 }
 
-bool AudioSDL::needsAudioThread() const
-{
-	return false;
-}
-
 void AudioSDL::deInit()
 {
 	closeAudioDevice();
@@ -161,6 +156,11 @@ bool AudioSDL::needsMoreAudio()
 	 */
 
 	// Doesn't use threaded audio
+	return false;
+}
+
+bool AudioSDL::needsAudioThread() const
+{
 	return false;
 }
 
