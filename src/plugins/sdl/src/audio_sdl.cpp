@@ -16,6 +16,11 @@ String AudioDeviceSDL::getName() const
 	return name != "" ? name : "Default";
 }
 
+AudioSDL::AudioSDL()
+	: ringBuffer(4096 * 8)
+{
+}
+
 void AudioSDL::init()
 {
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) == -1) {
@@ -161,53 +166,39 @@ bool AudioSDL::needsMoreAudio()
 
 void AudioSDL::doQueueAudio(gsl::span<const gsl::byte> data) 
 {
-	std::vector<unsigned char> tmp(data.size_bytes());
-	memcpy(tmp.data(), data.data(), data.size_bytes());
-
-	std::unique_lock<std::mutex> lock(mutex);
-	queuedSize += data.size_bytes();
-	audioQueue.push_back(std::move(tmp));
+	if (ringBuffer.canWrite(size_t(data.size()))) {
+		ringBuffer.write(data);
+	} else {
+		Logger::logError("Buffer overflow on audio output buffer.");
+	}
 }
 
 void AudioSDL::onCallback(unsigned char* stream, int len) 
 {
-	size_t remaining = size_t(len);
-	size_t pos = 0;
+	auto dst = gsl::span<std::byte>(reinterpret_cast<std::byte*>(stream), len);
 
-	while (remaining > 0) {
-		std::unique_lock<std::mutex> lock(mutex);
-		if (audioQueue.empty()) {
-			lock.unlock();
+	while (!dst.empty()) {
+		if (!ringBuffer.canRead(1)) {
 			if (prepareAudioCallback) {
 				prepareAudioCallback();
 			}
 			
 			// Either no callback, or callback didn't add anything
-			if (audioQueue.empty()) {
+			if (!ringBuffer.canRead(1)) {
 				break;
 			}
 		} else {
-			auto& front = audioQueue.front();
-			size_t toCopy = std::min(remaining, front.size() - readPos);
+			const size_t toCopy = std::min(size_t(dst.size()), ringBuffer.availableToRead());
 
-			memcpy(stream + pos, front.data() + readPos, toCopy);
-
-			remaining -= toCopy;
-			queuedSize -= toCopy;
-			pos += toCopy;
-			readPos += toCopy;
-
-			if (readPos == front.size()) {
-				readPos = 0;
-				audioQueue.pop_front();
-			}
+			ringBuffer.read(dst.subspan(0, toCopy));
+			dst = dst.subspan(toCopy);
 		}
 	}
 
-	if (remaining > 0) {
+	if (dst.empty()) {
 		// :(
 		Logger::logWarning("Insufficient audio data, padding with zeroes.");
-		memset(stream + pos, 0, remaining);
+		memset(dst.data(), 0, size_t(dst.size()));
 	}
 }
 

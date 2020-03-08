@@ -16,6 +16,16 @@ namespace Halley {
             entries.resize(capacity);
     	}
 
+    	size_t availableToRead() const
+    	{
+            return numEntries.load();
+    	}
+
+        size_t availableToWrite() const
+        {
+            return entries.size() - numEntries.load();
+        }
+
     	bool canWrite(size_t n) const
     	{
             return numEntries.load() + n <= entries.size();
@@ -23,7 +33,6 @@ namespace Halley {
 
     	bool canRead(size_t n) const
     	{
-            Expects(canRead(1));
             return numEntries.load() >= n;
     	}
     	
@@ -57,6 +66,7 @@ namespace Halley {
 
     	T readOne()
     	{
+            Expects(canRead(1));
             T v = entries[readPos];
             readPos = (readPos + 1) % entries.size();
             --numEntries;
