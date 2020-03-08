@@ -60,10 +60,10 @@ namespace Halley
 	class AudioSpec
 	{
 	public:
-		int sampleRate;
-		int numChannels;
-		int bufferSize;
-		AudioSampleFormat format;
+		int sampleRate = 0;
+		int numChannels = 0;
+		int bufferSize = 0;
+		AudioSampleFormat format = AudioSampleFormat::Undefined;
 
 		AudioSpec() {}
 		AudioSpec(int sampleRate, int numChannels, int bufferSize, AudioSampleFormat format)
