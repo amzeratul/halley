@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gsl/span>
+#include <atomic>
 
 namespace Halley {
 	// This is a lock-free, wait-free ring buffer

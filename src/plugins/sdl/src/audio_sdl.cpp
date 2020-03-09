@@ -1,13 +1,14 @@
 #include "audio_sdl.h"
 #include <SDL.h>
 #include <cstdint>
+#include <utility>
 #include "halley/text/string_converter.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
 
 AudioDeviceSDL::AudioDeviceSDL(String name)
-	: name(name)
+	: name(std::move(name))
 {
 }
 
@@ -17,7 +18,6 @@ String AudioDeviceSDL::getName() const
 }
 
 AudioSDL::AudioSDL()
-	: audioBuffer(4096 * 8)
 {
 }
 
@@ -112,79 +112,18 @@ void AudioSDL::stopPlayback()
 	}
 }
 
-void AudioSDL::queueAudio(gsl::span<const float> data)
-{
-	Expects(device);
-
-	const size_t numSamples = data.size();
-
-	// Float
-	if (outputFormat.format == AudioSampleFormat::Float) {
-		doQueueAudio(gsl::as_bytes(data));
-	}
-	
-	// Int16
-	else if (outputFormat.format == AudioSampleFormat::Int16) {
-		if (tmpShort.size() < numSamples) {
-			tmpShort.resize(numSamples);
-		}
-		for (ptrdiff_t i = 0; i < data.size(); ++i) {
-			tmpShort[i] = static_cast<short>(data[i] * 32768.0f);
-		}
-
-		doQueueAudio(gsl::as_bytes(gsl::span<short>(tmpShort)));
-	}
-	
-	// Int32
-	else if (outputFormat.format == AudioSampleFormat::Int32) {
-		if (tmpInt.size() < numSamples) {
-			tmpInt.resize(numSamples);
-		}
-		for (ptrdiff_t i = 0; i < data.size(); ++i) {
-			tmpInt[i] = static_cast<int>(data[i] * 2147483648.0f);
-		}
-
-		doQueueAudio(gsl::as_bytes(gsl::span<int>(tmpInt)));
-	}
-}
-
-bool AudioSDL::needsMoreAudio()
-{
-	const size_t sizePerSample = outputFormat.format == AudioSampleFormat::Int16 ? 2 : 4;
-	const size_t queuedAudioSamples = audioBuffer.availableToRead() / (outputFormat.numChannels * sizePerSample);
-	const size_t neededAudioSamples = 2 * size_t(outputFormat.bufferSize);
-	return queuedAudioSamples < neededAudioSamples;
-}
-
 bool AudioSDL::needsAudioThread() const
 {
 	return true;
 }
 
-void AudioSDL::doQueueAudio(gsl::span<const gsl::byte> data) 
+void AudioSDL::onAudioAvailable()
 {
-	if (audioBuffer.canWrite(size_t(data.size()))) {
-		audioBuffer.write(data);
-	} else {
-		Logger::logError("Buffer overflow on audio output buffer.");
-	}
 }
 
 void AudioSDL::onCallback(unsigned char* stream, int len)
 {
-	auto dst = gsl::span<std::byte>(reinterpret_cast<std::byte*>(stream), len);
-
-	if (!audioBuffer.empty()) {
-		const size_t toCopy = std::min(size_t(dst.size()), audioBuffer.availableToRead());
-
-		audioBuffer.read(dst.subspan(0, toCopy));
-		dst = dst.subspan(toCopy);
-	}
-
-	if (!dst.empty()) {
-		// :(
-		Logger::logWarning("Insufficient audio data, padding with zeroes.");
-		memset(dst.data(), 0, size_t(dst.size()));
-	}
+	const auto dst = gsl::span<std::byte>(reinterpret_cast<std::byte*>(stream), len);
+	getAudioOutputFunction()(dst, true);
 }
 

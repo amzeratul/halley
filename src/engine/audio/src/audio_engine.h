@@ -6,6 +6,7 @@
 #include <vector>
 #include "audio_voice.h"
 #include "halley/audio/resampler.h"
+#include "halley/data_structures/ring_buffer.h"
 #include "halley/maths/random.h"
 
 namespace Halley {
@@ -49,6 +50,9 @@ namespace Halley {
 		std::unique_ptr<AudioMixer> mixer;
 		std::unique_ptr<AudioBufferPool> pool;
 		std::unique_ptr<AudioResampler> outResampler;
+		std::vector<short> tmpShort;
+		std::vector<int> tmpInt;
+		RingBuffer<gsl::byte> audioOutputBuffer;
 
 		std::atomic<bool> running;
 		std::atomic<bool> needsBuffer;
@@ -70,6 +74,10 @@ namespace Halley {
 		void mixEmitters(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
 	    void removeFinishedEmitters();
 		void clearBuffer(gsl::span<AudioSamplePack> dst);
+		void queueAudioFloat(gsl::span<const float> data);
+		void queueAudioBytes(gsl::span<const gsl::byte> data);
+		bool needsMoreAudio();
+		size_t fillOutputBuffer(gsl::span<std::byte> dst, bool fill);
 
     	float getGroupGain(uint8_t group) const;
     };
