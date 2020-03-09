@@ -148,12 +148,12 @@ namespace Halley {
 
 		//////////
 
-		String operator += (const String &p);
-		String operator += (const char* p);
-		String operator += (const wchar_t* p);
-		String operator += (const double &p);
-		String operator += (const int &p);
-		String operator += (const Character &p);
+		String& operator += (const String &p);
+		String& operator += (const char* p);
+		String& operator += (const wchar_t* p);
+		String& operator += (const double &p);
+		String& operator += (const int &p);
+		String& operator += (const Character &p);
 
 		bool operator== (const String& rhp) const;
 		bool operator!= (const String& rhp) const;

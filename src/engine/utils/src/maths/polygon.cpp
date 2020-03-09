@@ -80,6 +80,9 @@ bool Polygon::isPointInside(Vector2f point) const
 	if (!circle.contains(point)) {
 		return false;
 	}
+	if (!aabb.contains(point)) {
+		return false;
+	}
 
 	size_t nLeft = 0;
 	size_t nRight = 0;

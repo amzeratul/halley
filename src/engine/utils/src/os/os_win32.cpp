@@ -280,6 +280,9 @@ String OSWin32::getCurrentWorkingDir()
 String OSWin32::getEnvironmentVariable(const String& name)
 {
 	auto bufferSize = GetEnvironmentVariable(name.c_str(), nullptr, 0);
+	if (bufferSize == 0) {
+		return String();
+	}
 	std::string buffer(bufferSize - 1, 0);
 	GetEnvironmentVariable(name.c_str(), &buffer[0], bufferSize);
 	return buffer;
