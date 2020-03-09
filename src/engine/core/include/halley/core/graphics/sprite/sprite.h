@@ -92,6 +92,9 @@ namespace Halley
 		Sprite& setTexRect(Rect4f texRect);
 		Rect4f getTexRect() const;
 
+		Sprite& setCustom0(Vector4f custom0);
+		Vector4f getCustom0() const;
+
 		Sprite& setSliced(Vector4s slices);
 		Sprite& setNotSliced();
 		bool isSliced() const;

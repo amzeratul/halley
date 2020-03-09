@@ -244,6 +244,17 @@ Rect4f Sprite::getTexRect() const
 	return vertexAttrib.texRect;
 }
 
+Sprite& Sprite::setCustom0(Vector4f custom0)
+{
+	vertexAttrib.custom0 = custom0;
+	return *this;
+}
+
+Vector4f Sprite::getCustom0() const
+{
+	return vertexAttrib.custom0;
+}
+
 Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 {
 	if (materialName == "") {
