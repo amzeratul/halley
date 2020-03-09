@@ -29,6 +29,7 @@ namespace Halley
 		Vector2f scale;
 		Colour4f colour;
 		Rect4f texRect;
+		Vector4f custom0;
 		float rotation = 0;
 		float textureRotation = 0;
 		char _padding[8];

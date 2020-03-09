@@ -139,6 +139,8 @@ namespace Halley
 	public:
 		String name;
 		ShaderParameterType type;
+		String semantic;
+		int semanticIndex;
 		int location;
 		int offset;
 

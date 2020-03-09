@@ -7,10 +7,18 @@ uniforms:
 textures:
   - tex0: sampler2D
 attributes:
-  - a_position: vec4
-  - a_normal: vec4
-  - a_colour: vec4
-  - a_texCoord0: vec4
+  - name: position
+    type: vec4
+    semantic: POSITION
+  - name: normal
+    type: vec4
+    semantic: NORMAL
+  - name: colour
+    type: vec4
+    semantic: COLOUR
+  - name: texCoord0
+    type: vec4
+    semantic: TEXCOORD0
 passes:
   - blend: Opaque
     cull: Back

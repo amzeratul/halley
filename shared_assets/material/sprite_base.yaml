@@ -2,13 +2,54 @@
 name: Halley/SpriteBase
 base: material_base.yaml
 attributes:
-  - a_vertPos: vec4          # xy = relative position of vertex [0..1], zw = relative position of texture [0..1]
-  - a_position: vec2         # position (world space)
-  - a_pivot: vec2            # relative pivot [0..1]
-  - a_size: vec2             # size (px), should be the size of the texture
-  - a_scale: vec2            # scale (relative)
-  - a_colour: vec4           # rgba
-  - a_texCoord0: vec4        # xy = top-left, zw = bottom-right
-  - a_rotation: float        # rotation (radians)
-  - a_textureRotation: float # is the sprite rotated? (1 if 90 degrees rotated)
+  # xy = relative position of vertex [0..1], zw = relative position of texture [0..1]
+  - name: vertPos
+    type: vec4
+    semantic: VERTPOS
+    special: vertPos
+
+  # position (world space)
+  - name: position
+    type: vec2
+    semantic: POSITION
+
+  # relative pivot [0..1]
+  - name: pivot
+    type: vec2
+    semantic: PIVOT
+
+  # size (px), should be the size of the texture
+  - name: size
+    type: vec2
+    semantic: SIZE
+
+  # scale (relative)
+  - name: scale
+    type: vec2
+    semantic: SCALE
+
+  # rgba
+  - name: colour
+    type: vec4
+    semantic: COLOUR
+
+  # xy = top-left, zw = bottom-right
+  - name: texCoord0
+    type: vec4
+    semantic: TEXCOORD0
+
+  # custom
+  - name: custom0
+    type: vec4
+    semantic: CUSTOM0
+
+  # rotation (radians)
+  - name: rotation
+    type: float
+    semantic: ROTATION
+
+  # is the sprite rotated? (1 if 90 degrees rotated)
+  - name: textureRotation
+    type: float
+    semantic: TEXTUREROTATION
 ...

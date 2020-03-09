@@ -69,6 +69,8 @@ void MaterialAttribute::serialize(Serializer& s) const
 {
 	s << name;
 	s << type;
+	s << semantic;
+	s << semanticIndex;
 	s << location;
 	s << offset;
 }
@@ -77,6 +79,8 @@ void MaterialAttribute::deserialize(Deserializer& s)
 {
 	s >> name;
 	s >> type;
+	s >> semantic;
+	s >> semanticIndex;
 	s >> location;
 	s >> offset;
 }
@@ -263,24 +267,29 @@ void MaterialDefinition::loadAttributes(const ConfigNode& node)
 	int location = int(attributes.size());
 	int offset = vertexSize;
 
-	for (auto& attribEntry: node.asSequence()) {
-		for (auto& it: attribEntry.asMap()) {
-			String name = it.first;
-			ShaderParameterType type = parseParameterType(it.second.asString());
+	for (const auto& attribEntry: node.asSequence()) {
+		const ShaderParameterType type = parseParameterType(attribEntry["type"].asString());
+		String semantic = attribEntry["semantic"].asString();
+		int semanticIndex = 0;
+		if (semantic.right(1).isInteger()) {
+			semanticIndex = semantic.right(1).toInteger();
+			semantic = semantic.left(semantic.size() - 1);
+		}
 
-			attributes.push_back(MaterialAttribute());
-			auto& a = attributes.back();
-			a.name = name;
-			a.type = type;
-			a.location = location++;
-			a.offset = offset;
+		attributes.push_back(MaterialAttribute());
+		auto& a = attributes.back();
+		a.name = attribEntry["name"].asString("");
+		a.type = type;
+		a.semantic = semantic;
+		a.semanticIndex = semanticIndex;
+		a.location = location++;
+		a.offset = offset;
 
-			int size = int(MaterialAttribute::getAttributeSize(type));
-			offset += size;
+		const int size = int(MaterialAttribute::getAttributeSize(type));
+		offset += size;
 
-			if (a.name == "a_vertPos") {
-				vertexPosOffset = a.offset;
-			}
+		if (attribEntry["special"].asString("") == "vertPos") {
+			vertexPosOffset = a.offset;
 		}
 	}
 
@@ -291,13 +300,13 @@ ShaderParameterType MaterialDefinition::parseParameterType(String rawType) const
 {
 	if (rawType == "float") {
 		return ShaderParameterType::Float;
-	} else if (rawType == "vec2") {
+	} else if (rawType == "float2" || rawType == "vec2") {
 		return ShaderParameterType::Float2;
-	} else if (rawType == "vec3") {
+	} else if (rawType == "float3" || rawType == "vec3") {
 		return ShaderParameterType::Float3;
-	} else if (rawType == "vec4") {
+	} else if (rawType == "float4" || rawType == "vec4") {
 		return ShaderParameterType::Float4;
-	} else if (rawType == "mat4") {
+	} else if (rawType == "float4x4" || rawType == "mat4") {
 		return ShaderParameterType::Matrix4;
 	} else if (rawType == "sampler2D") {
 		return ShaderParameterType::Texture2D;
