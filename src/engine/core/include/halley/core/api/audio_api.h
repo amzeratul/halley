@@ -121,6 +121,11 @@ namespace Halley
 		{
 			return audioOutputFunc;
 		}
+
+		size_t getAudioOutput(gsl::span<gsl::byte> dst, bool padWithZeroes) const
+		{
+			return audioOutputFunc(dst, padWithZeroes);
+		}
 		
 	private:
 		friend class AudioEngine;
