@@ -17,7 +17,7 @@ String AudioDeviceSDL::getName() const
 }
 
 AudioSDL::AudioSDL()
-	: ringBuffer(4096 * 8)
+	: audioBuffer(4096 * 8)
 {
 }
 
@@ -166,8 +166,8 @@ bool AudioSDL::needsAudioThread() const
 
 void AudioSDL::doQueueAudio(gsl::span<const gsl::byte> data) 
 {
-	if (ringBuffer.canWrite(size_t(data.size()))) {
-		ringBuffer.write(data);
+	if (audioBuffer.canWrite(size_t(data.size()))) {
+		audioBuffer.write(data);
 	} else {
 		Logger::logError("Buffer overflow on audio output buffer.");
 	}
@@ -178,19 +178,19 @@ void AudioSDL::onCallback(unsigned char* stream, int len)
 	auto dst = gsl::span<std::byte>(reinterpret_cast<std::byte*>(stream), len);
 
 	while (!dst.empty()) {
-		if (!ringBuffer.canRead(1)) {
+		if (!audioBuffer.canRead(1)) {
 			if (prepareAudioCallback) {
 				prepareAudioCallback();
 			}
 			
 			// Either no callback, or callback didn't add anything
-			if (!ringBuffer.canRead(1)) {
+			if (!audioBuffer.canRead(1)) {
 				break;
 			}
 		} else {
-			const size_t toCopy = std::min(size_t(dst.size()), ringBuffer.availableToRead());
+			const size_t toCopy = std::min(size_t(dst.size()), audioBuffer.availableToRead());
 
-			ringBuffer.read(dst.subspan(0, toCopy));
+			audioBuffer.read(dst.subspan(0, toCopy));
 			dst = dst.subspan(toCopy);
 		}
 	}
