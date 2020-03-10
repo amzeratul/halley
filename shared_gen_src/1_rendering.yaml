@@ -36,5 +36,6 @@ component:
   - clear: 'Halley::Maybe<Halley::Colour4f>'
   - mask: int
   - layer: int
+  - offset: 'Halley::Vector2f'
 
 ...
