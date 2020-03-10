@@ -1,5 +1,5 @@
 #define DONT_INCLUDE_HALLEY_HPP
-#include "entity/components/transform_2d_component.h"
+#include "components/transform_2d_component.h"
 #include "halley/core/graphics/sprite/sprite.h"
 
 using namespace Halley;
@@ -157,18 +157,7 @@ void Transform2DComponent::detachChildren(World& world)
 	for (auto& childId: childIdsCopy) {
 		world.getEntity(childId).getComponent<Transform2DComponent>().setParent();
 	}
-}
-
-void Transform2DComponent::destroyTree(World& world, bool includingMe)
-{
-	auto childIdsCopy = childIds;
-	for (auto& childId: childIdsCopy) {
-		world.getEntity(childId).getComponent<Transform2DComponent>().destroyTree(world);
-	}
-	setParent(true);
-	if (includingMe) {
-		world.destroyEntity(myId);
-	}
+	childIds.clear();
 }
 
 void Transform2DComponent::onAddedToEntity(EntityRef& entity)

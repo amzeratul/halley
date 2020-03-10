@@ -1,5 +1,5 @@
 #pragma once
-#include "stage.h"
+#include "halley/core/stage/stage.h"
 
 namespace Halley
 {

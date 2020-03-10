@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <vector>
 
+#include "halley/data_structures/ring_buffer.h"
+
 namespace Halley
 {
 	class AudioDeviceSDL final : public AudioDevice
@@ -19,6 +21,7 @@ namespace Halley
 	class AudioSDL final : public AudioOutputAPIInternal
 	{
 	public:
+		AudioSDL();
 		void init() override;
 		void deInit() override;
 
@@ -43,11 +46,8 @@ namespace Halley
 		std::vector<short> tmpShort;
 		std::vector<int> tmpInt;
 
-		std::mutex mutex;
-		std::list<std::vector<unsigned char>> audioQueue;
-		size_t readPos = 0;
-		size_t queuedSize = 0;
-
+		RingBuffer<gsl::byte> audioBuffer;
+		
 		AudioCallback prepareAudioCallback;
 
 		void doQueueAudio(gsl::span<const gsl::byte> data);

@@ -26,6 +26,7 @@
 #include "vector2.h"
 #include "rect.h"
 #include "halley/data_structures/maybe.h"
+#include "circle.h"
 
 namespace Halley {
 
@@ -34,37 +35,43 @@ namespace Halley {
 
 	class Polygon {
 	public:
+		struct CollisionResult {
+			Vector2f normal;
+			float distance = 0;
+			bool collided = false;
+			bool fastFail = false;
+		};
+		
 		Polygon();
-		Polygon(const VertexList& vertices, Vertex origin=Vertex());
+		Polygon(VertexList vertices);
 
 		static Polygon makePolygon(Vector2f origin, float w, float h);
 
 		bool isPointInsideConvex(Vector2f point) const;
 		bool isPointInside(Vector2f point) const;
 		bool overlaps(const Polygon &param, Vector2f *translation= nullptr, Vector2f *collisionPoint= nullptr) const;
+		Vector2f getClosestPoint(Vector2f p, float anisotropy = 1.0f) const; // All Y coordinates are multiplied by anisotropy
 
 		void setVertices(const VertexList& vertices);
-		void setOrigin(const Vertex& _origin) { origin = _origin; }
 		const VertexList& getVertices() const { return vertices; }
-		const Vertex& getOrigin() const { return origin; }
+		
 		void rotate(Angle<float> angle);
 		void rotateAndScale(Angle<float> angle, Vector2f scale);
 		bool isClockwise() const;
-		float getRadius() const;
 
-		Rect4f getAABB() const;
+		const Rect4f& getAABB() const { return aabb; }
+		const Circle& getBoundingCircle() const { return circle; }
 
 		void translate(Vector2f offset);
 
 		// Returns the distance from circlePos, along moveDir, until the collision point, and the collision normal.
 		// Only returns a value if a collision is found between start pos and up to move len away
-		Maybe<std::pair<float, Vector2f>> getCollisionWithSweepingCircle(Vector2f circlePos, float radius, Vector2f moveDir, float moveLen) const;
-		Maybe<std::pair<float, Vector2f>> getCollisionWithSweepingEllipse(Vector2f circlePos, Vector2f radius, Vector2f moveDir, float moveLen) const;
+		CollisionResult getCollisionWithSweepingCircle(Vector2f circlePos, float radius, Vector2f moveDir, float moveLen) const;
+		CollisionResult getCollisionWithSweepingEllipse(Vector2f circlePos, Vector2f radius, Vector2f moveDir, float moveLen) const;
 
 	private:
-		float outerRadius;
+		Circle circle;
 		VertexList vertices;
-		Vertex origin;
 		Rect4f aabb;
 
 		void project(const Vector2f &axis,float &min,float &max) const;

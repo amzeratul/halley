@@ -21,8 +21,8 @@ struct VOut {
 
 
 float4 main(VOut input) : SV_TARGET {
-	float dx = abs(ddx(input.pixelTexCoord0.x) / ddx(input.position.x));
-	float dy = abs(ddy(input.pixelTexCoord0.y) / ddy(input.position.y));
+	float dx = abs(ddx(input.texCoord0.x));
+	float dy = abs(ddy(input.texCoord0.y));
 	float texGrad = max(dx, dy);
 
 	float a = tex0.Sample(sampler0, input.texCoord0).r;
@@ -33,5 +33,6 @@ float4 main(VOut input) : SV_TARGET {
 	float edge1 = clamp(inEdge + s, edge0 + 0.01, 0.99);
 	float edge = smoothstep(edge0, edge1, a) * input.colour.a;
 	float4 colFill = input.colour;
-	return float4(colFill.rgb, colFill.a * edge);
+	float alpha = colFill.a * edge;
+	return float4(colFill.rgb * alpha, alpha);
 }

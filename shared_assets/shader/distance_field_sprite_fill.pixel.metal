@@ -24,8 +24,8 @@ fragment float4 pixel_func (
 	sampler sampler0 [[ sampler(0) ]],
 	constant MaterialBlock& material [[ buffer(2) ]]
 ) {
-	float dx = abs(dfdx(v.pixelTexCoord0.x) / dfdx(v.position.x));
-	float dy = abs(dfdy(v.pixelTexCoord0.y) / dfdy(v.position.y));
+	float dx = abs(dfdx(v.texCoord0.x));
+	float dy = abs(dfdy(v.texCoord0.y));
 	float texGrad = max(dx, dy);
 
 	float a = tex0.sample(sampler0, v.texCoord0).r;
@@ -36,5 +36,7 @@ fragment float4 pixel_func (
 	float edge1 = clamp(inEdge + s, edge0 + 0.01, 0.99);
 	float edge = smoothstep(edge0, edge1, a) * v.colour.a;
 
-	return float4(v.colour.rgb, v.colour.a * edge);
+	float4 colFill = v.colour;
+	float alpha = colFill.a * edge;
+	return float4(colFill.rgb * alpha, alpha);
 }

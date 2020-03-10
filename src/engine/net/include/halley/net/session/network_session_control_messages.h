@@ -16,7 +16,7 @@ namespace Halley {
 
 	struct ControlMsgSetPeerId
 	{
-		int8_t peerId;
+		int8_t peerId = 0;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -30,7 +30,7 @@ namespace Halley {
 	};
 
 	struct ControlMsgSetPeerState {
-		int8_t peerId;
+		int8_t peerId = 0;
 		Bytes state;
 
 		void serialize(Serializer& s) const;

@@ -24,10 +24,10 @@ public:
 		, subWorld(subWorld)
 	{}
 	
-	void deserialize(Halley::Resources& resources, const Halley::ConfigNode& node) {
-		Halley::ConfigNodeHelper::deserializeIfDefined(position, resources, node["position"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(rotation, resources, node["rotation"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(scale, resources, node["scale"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(subWorld, resources, node["subWorld"]);
+	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
+		Halley::ConfigNodeHelper::deserializeIfDefined(position, context, node["position"]);
+		Halley::ConfigNodeHelper::deserializeIfDefined(rotation, context, node["rotation"]);
+		Halley::ConfigNodeHelper::deserializeIfDefined(scale, context, node["scale"]);
+		Halley::ConfigNodeHelper::deserializeIfDefined(subWorld, context, node["subWorld"]);
 	}
 };

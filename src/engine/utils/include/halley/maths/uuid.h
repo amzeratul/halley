@@ -12,6 +12,7 @@ namespace Halley {
 
         bool operator==(const UUID& other) const;
         bool operator!=(const UUID& other) const;
+		bool operator<(const UUID& other) const;
 
 		String toString() const;
 

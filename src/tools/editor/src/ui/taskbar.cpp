@@ -16,7 +16,7 @@ TaskBar::TaskBar(UIFactory& ui, EditorTaskSet& taskSet)
 			.setScale(Vector2f(0.5f, 0.5f))
 			.setColour(col);
 		halleyLogo.getMaterial()
-			.set("u_smoothness", 1.0f / 8.0f)
+			.set("u_smoothness", 16.0f)
 			.set("u_outline", 0.0f)
 			.set("u_outlineColour", col);
 	}
@@ -89,7 +89,7 @@ void TaskBar::draw(UIPainter& painter) const
 
 	// Setup text renderer
 	TextRenderer text;
-	text.setFont(font).setOffset(Vector2f(0, 0)).setColour(Colour(1, 1, 1)).setOutline(1.0f).setOutlineColour(Colour(0, 0, 0, 0.35f));
+	text.setFont(font).setOffset(Vector2f(0, 0)).setColour(Colour(1, 1, 1)).setOutline(2.0f).setOutlineColour(Colour(0, 0, 0, 0.35f));
 
 	// Draw tasks
 	for (auto& t : tasks) {
@@ -104,7 +104,7 @@ void TaskBar::draw(UIPainter& painter) const
 			.setPivot(Vector2f(0, 0));
 
 		sprite.getMaterial()
-			.set("u_smoothness", 1.0f / 16.0f)
+			.set("u_smoothness", 6.0f)
 			.set("u_outline", 0.4f)
 			.set("u_outlineColour", col);
 

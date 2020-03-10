@@ -20,9 +20,9 @@ public:
 		, mask(mask)
 	{}
 	
-	void deserialize(Halley::Resources& resources, const Halley::ConfigNode& node) {
-		Halley::ConfigNodeHelper::deserializeIfDefined(text, resources, node["text"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(layer, resources, node["layer"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(mask, resources, node["mask"]);
+	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
+		Halley::ConfigNodeHelper::deserializeIfDefined(text, context, node["text"]);
+		Halley::ConfigNodeHelper::deserializeIfDefined(layer, context, node["layer"]);
+		Halley::ConfigNodeHelper::deserializeIfDefined(mask, context, node["mask"]);
 	}
 };

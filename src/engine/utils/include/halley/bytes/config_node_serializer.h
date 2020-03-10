@@ -3,75 +3,85 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/maths/polygon.h"
 #include "halley/maths/colour.h"
+#include <set>
 
 namespace Halley {
+	class EntitySerializationContext;
+	
+	class ConfigNodeSerializationContext {
+	public:
+		Resources* resources = nullptr;
+		EntitySerializationContext* entityContext = nullptr;
+	};
+
+	
     template <typename T>
-    class ConfigNodeDeserializer {
+    class ConfigNodeSerializer {
     public:
-        T operator()(Resources&, const ConfigNode& node)
+        T deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
         {
-			throw Exception("ConfigNodeDeserializer unimplemented type: " + String(typeid(T).name()), HalleyExceptions::Utils);
+			throw Exception("ConfigNodeSerializer unimplemented type: " + String(typeid(T).name()), HalleyExceptions::Utils);
         }
     };
 
 	template <>
-    class ConfigNodeDeserializer<int> {
+    class ConfigNodeSerializer<int> {
     public:
-        int operator()(Resources&, const ConfigNode& node)
+        int deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
         {
 			return node.asInt(0);
         }
     };
 
 	template <>
-    class ConfigNodeDeserializer<float> {
+    class ConfigNodeSerializer<float> {
     public:
-        float operator()(Resources&, const ConfigNode& node)
+        float deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
         {
 			return node.asFloat(0);
         }
     };
 
 	template <>
-    class ConfigNodeDeserializer<Vector2i> {
+    class ConfigNodeSerializer<Vector2i> {
     public:
-        Vector2i operator()(Resources&, const ConfigNode& node)
+        Vector2i deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
         {
 			return node.asVector2i(Vector2i());
         }
     };
 
 	template <>
-    class ConfigNodeDeserializer<Vector2f> {
+    class ConfigNodeSerializer<Vector2f> {
     public:
-        Vector2f operator()(Resources&, const ConfigNode& node)
+        Vector2f deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
         {
 			return node.asVector2f(Vector2f());
         }
     };
 
 	template <>
-    class ConfigNodeDeserializer<Angle1f> {
+    class ConfigNodeSerializer<Angle1f> {
     public:
-        Angle1f operator()(Resources&, const ConfigNode& node)
+        Angle1f deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
         {
 			return Angle1f::fromRadians(node.asFloat(0.0f));
         }
     };
 
 	template <>
-    class ConfigNodeDeserializer<Colour4f> {
+    class ConfigNodeSerializer<Colour4f> {
     public:
-        Colour4f operator()(Resources&, const ConfigNode& node)
+        Colour4f deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
         {
 			return Colour4f::fromString(node.asString("#000000"));
         }
     };
 
 	template <>
-    class ConfigNodeDeserializer<Rect4i> {
+    class ConfigNodeSerializer<Rect4i> {
     public:
-        Rect4i operator()(Resources&, const ConfigNode& node)
+        Rect4i deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
         {
         	if (node.getType() == ConfigNodeType::Sequence) {
 				auto seq = node.asSequence();
@@ -83,9 +93,9 @@ namespace Halley {
     };
 
 	template <>
-    class ConfigNodeDeserializer<Rect4f> {
+    class ConfigNodeSerializer<Rect4f> {
     public:
-        Rect4f operator()(Resources&, const ConfigNode& node)
+        Rect4f deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
         {
 			if (node.getType() == ConfigNodeType::Sequence) {
 				auto seq = node.asSequence();
@@ -97,39 +107,55 @@ namespace Halley {
     };
 
 	template <typename T>
-    class ConfigNodeDeserializer<Maybe<T>> {
+    class ConfigNodeSerializer<Maybe<T>> {
     public:
-        Maybe<T> operator()(Resources& resources, const ConfigNode& node)
+        Maybe<T> deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
         {
         	if (node.getType() == ConfigNodeType::Undefined) {
 				return Maybe<T>();
         	} else {
-				return Maybe<T>(ConfigNodeDeserializer<T>()(resources, node));
+				return Maybe<T>(ConfigNodeSerializer<T>().deserialize(context, node));
 			}
         }
     };
 
 	template <typename T>
-    class ConfigNodeDeserializer<std::vector<T>> {
+    class ConfigNodeSerializer<std::vector<T>> {
     public:
-        std::vector<T> operator()(Resources& resources, const ConfigNode& node)
+        std::vector<T> deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
         {
 			std::vector<T> result;
         	if (node.getType() == ConfigNodeType::Sequence) {
 				auto seq = node.asSequence();
 				result.reserve(seq.size());
         		for (auto& s: seq) {
-					result.push_back(ConfigNodeDeserializer<T>()(resources, s));
+					result.push_back(ConfigNodeSerializer<T>().deserialize(context, s));
 				}
 			}
 			return result;
         }
-    };
+	};
+
+	template <typename T>
+	class ConfigNodeSerializer<std::set<T>> {
+	public:
+		std::set<T> deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+		{
+			std::set<T> result;
+			if (node.getType() == ConfigNodeType::Sequence) {
+				auto seq = node.asSequence();
+				for (auto& s : seq) {
+					result.insert(ConfigNodeSerializer<T>().deserialize(context, s));
+				}
+			}
+			return result;
+		}
+	};
 	
 	template<>
-	class ConfigNodeDeserializer<Polygon> {
+	class ConfigNodeSerializer<Polygon> {
 	public:
-		Polygon operator()(Resources& resources, const ConfigNode& node)
+		Polygon deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
 		{
 			VertexList list;
 			if (node.getType() == ConfigNodeType::Sequence) {
@@ -143,21 +169,38 @@ namespace Halley {
 	};
 	
 	template<>
-	class ConfigNodeDeserializer<String> {
+	class ConfigNodeSerializer<String> {
 	public:
-		String operator()(Resources& resources, const ConfigNode& node)
+		String deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
 		{
 			return node.asString("");
+		}
+	};
+
+	template <typename T>
+	class ConfigNodeSerializer<std::map<String, T>>
+	{
+	public:
+		std::map<String, T> deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+		{
+			std::map<String, T> result;
+			if (node.getType() == ConfigNodeType::Map) {
+				auto map = node.asMap();
+				for (auto& s : map) {
+					result[s.first] = ConfigNodeSerializer<T>().deserialize(context, s.second);
+				}
+			}
+			return result;
 		}
 	};
 
 	class ConfigNodeHelper {
 	public:
 		template <typename T>
-		static void deserializeIfDefined(T& dst, Resources& resources, const ConfigNode& node)
+		static void deserializeIfDefined(T& dst, ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
 			if (node.getType() != ConfigNodeType::Undefined) {
-				dst = ConfigNodeDeserializer<T>()(resources, node);
+				dst = ConfigNodeSerializer<T>().deserialize(context, node);
 			}
 		}
 	};

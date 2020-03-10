@@ -237,6 +237,11 @@ const std::vector<std::shared_ptr<const Texture>>& Material::getTextures() const
 	return textures;
 }
 
+size_t Material::getNumTextureUnits() const
+{
+	return textures.size();
+}
+
 void Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data)
 {
 	if (dataBlocks[blockNumber].setUniform(offset, type, data)) {

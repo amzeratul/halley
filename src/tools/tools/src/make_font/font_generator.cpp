@@ -12,6 +12,7 @@
 #include "halley/concurrency/concurrent.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/core/graphics/text/font.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -95,8 +96,11 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 
 		constexpr int minSize = 16;
 		constexpr int maxSize = 4096;
-		for (int i = 0; i < (2 * fastLog2Floor(uint32_t(maxSize / minSize))); ++i) {
+		for (int i = 0; ; ++i) {
 			auto curSize = Vector2i(minSize << ((i + 1) / 2), minSize << (i / 2));
+			if (curSize.x > maxSize || curSize.y > maxSize) {
+				break;
+			}
 			result = tryPacking(font, float(fontSize), curSize, scale, borderSuperSample, characters);
 			if (result) {
 				imageSize = curSize;
@@ -217,7 +221,7 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 	const float ascender = float(lround(font.getAscender() * scale) + meta.getInt("ascenderAdjustment", 0));
 	const float height = float(lround(font.getHeight() * scale) + meta.getInt("lineSpacing", 0));
 	const float sizePt = float(lround(font.getSize() * scale));
-	const float smoothRadius = radius * scale;
+	const float smoothRadius = radius;
 	const int padding = lround(radius);
 
 	std::vector<String> fallback;
@@ -228,7 +232,7 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 		}
 	}
 
-	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, ascender, height, sizePt, replacementScale, smoothRadius, fallback);
+	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, ascender, height, sizePt, replacementScale, imageSize, smoothRadius, fallback);
 
 	for (auto& c: entries) {
 		auto metrics = font.getMetrics(c.charcode, scale);

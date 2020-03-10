@@ -9,7 +9,7 @@ uniforms:
     - u_outline: float
     - u_outlineColour: vec4
 passes:
-  - blend: Alpha
+  - blend: AlphaPremultiplied
     shader:
       - language: glsl
         vertex: sprite.vertex.glsl
@@ -20,7 +20,7 @@ passes:
       - language: metal
         vertex: sprite.vertex.metal
         pixel: distance_field_sprite_outline.pixel.metal
-  - blend: Alpha
+  - blend: AlphaPremultiplied
     shader:
       - language: glsl
         vertex: sprite.vertex.glsl

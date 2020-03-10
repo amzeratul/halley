@@ -10,7 +10,6 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "bytes/fuzzer.h"
 
 #include "data_structures/bin_pack.h"
-#include "data_structures/circular_buffer.h"
 #include "data_structures/dynamic_grid.h"
 #include "data_structures/hash_map.h"
 #include "data_structures/mapped_pool.h"
@@ -19,6 +18,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "data_structures/memory_pool.h"
 #include "data_structures/nullable_reference.h"
 #include "data_structures/rect_spatial_checker.h"
+#include "data_structures/ring_buffer.h"
 #include "data_structures/tree_map.h"
 #include "data_structures/vector.h"
 
@@ -38,6 +38,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "maths/angle.h"
 #include "maths/base_transform.h"
 #include "maths/box.h"
+#include "maths/circle.h"
 #include "maths/colour.h"
 #include "maths/line.h"
 #include "maths/matrix4.h"

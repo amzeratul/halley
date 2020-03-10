@@ -13,8 +13,8 @@ namespace Halley {
 		explicit EntityFactory(World& world, Resources& resources);
 		virtual ~EntityFactory();
 		
-		EntityRef createEntity(const ConfigNode& node, bool populate = true);
-		void updateEntity(EntityRef& entity, const ConfigNode& node);
+		EntityRef createEntity(const ConfigNode& node);
+		void updateEntity(EntityRef& entity, const ConfigNode& node, bool transformOnly = false);
 		void updateEntityTree(EntityRef& entity, const ConfigNode& node);
 		
 		template <typename T>
@@ -22,18 +22,27 @@ namespace Halley {
 		{
 			auto comp = e.tryGetComponent<T>();
 			if (comp) {
-				comp->deserialize(resources, componentData);
+				comp->deserialize(context, componentData);
 			} else {
 				T component;
-				component.deserialize(resources, componentData);
+				component.deserialize(context, componentData);
 				e.addComponent<T>(std::move(component));
 			}
 		}
 
 	private:
 		World& world;
-		Resources& resources;
+		ConfigNodeSerializationContext context;
+		std::unique_ptr<EntitySerializationContext> entityContext;
 
-		void createChildEntity(EntityRef& parent, const ConfigNode& node, bool populate);
+		EntityRef createEntity(EntityRef* parent, const ConfigNode& node, bool populate);
+	};
+
+	class EntitySerializationContext {
+	public:
+		World& world;
+		std::map<UUID, EntityId> uuids;
+
+		EntitySerializationContext(World& world);
 	};
 }
