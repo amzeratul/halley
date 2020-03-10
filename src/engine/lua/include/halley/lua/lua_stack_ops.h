@@ -146,7 +146,7 @@ namespace Halley {
 	struct ToLua<Maybe<T>> {
 		inline void operator()(LuaState& state, Maybe<T>& value) const {
 			if (value) {
-				ToLua<T>()(state, value.get());
+				ToLua<T>()(state, value.value());
 			} else {
 				LuaStackOps(state).push(nullptr);
 			}
