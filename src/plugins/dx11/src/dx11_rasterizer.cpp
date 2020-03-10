@@ -44,7 +44,7 @@ DX11Rasterizer::DX11Rasterizer(DX11Video& video, DX11RasterizerOptions opt)
 	desc.DepthBias = 0;
 	desc.SlopeScaledDepthBias = 0.0f;
 	desc.DepthBiasClamp = 0.0f;
-	desc.DepthClipEnable = FALSE;
+	desc.DepthClipEnable = TRUE;
 	desc.ScissorEnable = options.scissor;
 	desc.MultisampleEnable = FALSE;
 	desc.AntialiasedLineEnable = FALSE;
