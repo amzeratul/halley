@@ -16,6 +16,7 @@ AudioFacade::AudioFacade(AudioOutputAPI& o, SystemAPI& system)
 	, started(false)
 	, commandQueue(256)
 	, exceptions(16)
+	, playingSoundsQueue(4)
 	, ownAudioThread(o.needsAudioThread())
 {
 }
@@ -264,7 +265,9 @@ void AudioFacade::stepAudio()
 			if (!running) {
 				return;
 			}
-			playingSoundsNext = engine->getPlayingSounds();
+			if (playingSoundsQueue.canWrite(1)) {
+				playingSoundsQueue.writeOne(engine->getPlayingSounds());
+			}
 		}
 
 		const size_t nToRead = commandQueue.availableToRead();
@@ -308,6 +311,8 @@ void AudioFacade::pump()
 	}
 
 	if (running) {
-		playingSounds = playingSoundsNext;
+		while (playingSoundsQueue.canRead(1)) {
+			playingSounds = playingSoundsQueue.readOne();
+		}
 	}
 }
