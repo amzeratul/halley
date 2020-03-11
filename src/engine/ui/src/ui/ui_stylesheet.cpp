@@ -33,7 +33,8 @@ void loadStyleData(Resources& resources, const String& name, const ConfigNode& n
 		.setColour(Colour4f::fromString(node["colour"].asString()))
 		.setOutline(node["outline"].asFloat(0.0f))
 		.setOutlineColour(Colour4f::fromString(node["outlineColour"].asString("#000000")))		
-		.setAlignment(node["alignment"].asFloat(0.0f));
+		.setAlignment(node["alignment"].asFloat(0.0f))
+		.setSmoothness(node["smoothness"].asFloat(1.0));
 }
 
 template <>
