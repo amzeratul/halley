@@ -103,7 +103,7 @@ bool UIScrollPane::isScrollWheelEnabled() const
 	return scrollWheelEnabled;
 }
 
-void UIScrollPane::refresh()
+void UIScrollPane::refresh(bool force)
 {
 	if (!scrollHorizontal) {
 		clipSize.x = getSize().x;
@@ -115,7 +115,7 @@ void UIScrollPane::refresh()
 	}
 	contentsSize = UIWidget::getLayoutMinimumSize(false);
 
-	setMouseClip(getRect());
+	setMouseClip(getRect(), force);
 	scrollTo(getScrollPosition());
 }
 
@@ -207,4 +207,14 @@ Maybe<float> UIScrollPane::getMaxChildWidth() const
 bool UIScrollPane::ignoreClip() const
 {
 	return true;
+}
+
+void UIScrollPane::onChildrenAdded()
+{
+	refresh(true);
+}
+
+void UIScrollPane::onChildrenRemoved()
+{
+	refresh(true);
 }

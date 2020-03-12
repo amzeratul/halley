@@ -8,12 +8,14 @@
 #include "halley/core/resources/resources.h"
 #include "audio_event.h"
 #include "halley/support/logger.h"
+#include "halley/core/api/audio_api.h"
 
 using namespace Halley;
 
 AudioEngine::AudioEngine()
 	: mixer(AudioMixer::makeMixer())
 	, pool(std::make_unique<AudioBufferPool>())
+	, audioOutputBuffer(4096 * 8)
 	, running(true)
 	, needsBuffer(true)
 {
@@ -51,12 +53,12 @@ void AudioEngine::run()
 	//const size_t bufSize = spec.numChannels * sizeof(AudioConfig::SampleFormat) * spec.bufferSize;
 
 	// Generate one buffer
-	if (running && out->needsMoreAudio()) {
+	if (running && needsMoreAudio()) {
 		generateBuffer();
 	}
 
 	// OK, we've supplied it with enough buffers; if that was enough, then, sleep as long as no more buffers are needed
-	while (running && !out->needsMoreAudio()) {
+	while (running && !needsMoreAudio()) {
 		using namespace std::chrono_literals;
 		std::this_thread::sleep_for(100us);
 	}
@@ -96,6 +98,11 @@ void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 {
 	spec = s;
 	out = &o;
+
+	out->setAudioOutputFunction([=](gsl::span<gsl::byte> dst, bool fill) -> size_t
+	{
+		return fillOutputBuffer(dst, fill);
+	});
 
 	channels.resize(spec.numChannels);
 	channels[0].pan = -1.0f;
@@ -151,10 +158,82 @@ void AudioEngine::generateBuffer()
 		if (result.nRead != samplesToRead) {
 			Logger::logError("Audio resampler failed to read all input sample data.");
 		}
-		out->queueAudio(resampledBuffer.getSampleSpan().subspan(0, result.nWritten * numChannels));
+		queueAudioFloat(resampledBuffer.getSampleSpan().subspan(0, result.nWritten * numChannels));
 	} else {
-		out->queueAudio(bufferRef.getSampleSpan());
+		queueAudioFloat(bufferRef.getSampleSpan());
 	}
+}
+
+void AudioEngine::queueAudioFloat(gsl::span<const float> data)
+{
+	const size_t numSamples = data.size();
+
+	// Float
+	if (spec.format == AudioSampleFormat::Float) {
+		queueAudioBytes(gsl::as_bytes(data));
+	}
+
+	// Int16
+	else if (spec.format == AudioSampleFormat::Int16) {
+		if (tmpShort.size() < numSamples) {
+			tmpShort.resize(numSamples);
+		}
+		for (ptrdiff_t i = 0; i < data.size(); ++i) {
+			tmpShort[i] = static_cast<short>(data[i] * 32768.0f);
+		}
+
+		queueAudioBytes(gsl::as_bytes(gsl::span<short>(tmpShort)));
+	}
+
+	// Int32
+	else if (spec.format == AudioSampleFormat::Int32) {
+		if (tmpInt.size() < numSamples) {
+			tmpInt.resize(numSamples);
+		}
+		for (ptrdiff_t i = 0; i < data.size(); ++i) {
+			tmpInt[i] = static_cast<int>(data[i] * 2147483648.0f);
+		}
+
+		queueAudioBytes(gsl::as_bytes(gsl::span<int>(tmpInt)));
+	}
+}
+
+void AudioEngine::queueAudioBytes(gsl::span<const gsl::byte> data)
+{
+	if (audioOutputBuffer.canWrite(size_t(data.size()))) {
+		audioOutputBuffer.write(data);
+	} else {
+		Logger::logError("Buffer overflow on audio output buffer.");
+	}
+	
+	out->onAudioAvailable();
+}
+
+size_t AudioEngine::fillOutputBuffer(gsl::span<std::byte> dst, bool fill)
+{
+	size_t written = 0;
+	if (!audioOutputBuffer.empty()) {
+		written = std::min(size_t(dst.size()), audioOutputBuffer.availableToRead());
+		audioOutputBuffer.read(dst.subspan(0, written));
+	}
+
+	const auto remaining = dst.subspan(written);
+	if (!remaining.empty() && fill) {
+		// :(
+		Logger::logWarning("Insufficient audio data, padding with zeroes.");
+		memset(remaining.data(), 0, size_t(remaining.size_bytes()));
+		written = size_t(dst.size());
+	}
+
+	return written;
+}
+
+bool AudioEngine::needsMoreAudio()
+{
+	const size_t sizePerSample = spec.format == AudioSampleFormat::Int16 ? 2 : 4;
+	const size_t queuedAudioSamples = audioOutputBuffer.availableToRead() / (spec.numChannels * sizePerSample);
+	const size_t neededAudioSamples = 2 * size_t(spec.bufferSize);
+	return queuedAudioSamples < neededAudioSamples;
 }
 
 Random& AudioEngine::getRNG()

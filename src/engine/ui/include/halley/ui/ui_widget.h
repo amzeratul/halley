@@ -128,7 +128,7 @@ namespace Halley {
 		void bindData(const String& childId, const String& initialValue, UIDataBindString::WriteCallback callback = {});
 		
 		bool isDescendentOf(const UIWidget& ancestor) const override;
-		void setMouseClip(Maybe<Rect4f> mouseClip);
+		void setMouseClip(Maybe<Rect4f> mouseClip, bool force);
 
 		virtual void onManualControlCycleValue(int delta);
 		virtual void onManualControlAnalogueAdjustValue(float delta, Time t);

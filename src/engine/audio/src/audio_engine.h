@@ -1,14 +1,13 @@
 #pragma once
 #include "audio_buffer.h"
-#include <mutex>
 #include <atomic>
 #include <condition_variable>
 #include <map>
 #include <vector>
 #include "audio_voice.h"
 #include "halley/audio/resampler.h"
+#include "halley/data_structures/ring_buffer.h"
 #include "halley/maths/random.h"
-#include "halley/data_structures/flat_map.h"
 
 namespace Halley {
 	class AudioMixer;
@@ -47,10 +46,13 @@ namespace Halley {
 
     private:
 		AudioSpec spec;
-		AudioOutputAPI* out;
+		AudioOutputAPI* out = nullptr;
 		std::unique_ptr<AudioMixer> mixer;
 		std::unique_ptr<AudioBufferPool> pool;
 		std::unique_ptr<AudioResampler> outResampler;
+		std::vector<short> tmpShort;
+		std::vector<int> tmpInt;
+		RingBuffer<gsl::byte> audioOutputBuffer;
 
 		std::atomic<bool> running;
 		std::atomic<bool> needsBuffer;
@@ -72,6 +74,10 @@ namespace Halley {
 		void mixEmitters(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
 	    void removeFinishedEmitters();
 		void clearBuffer(gsl::span<AudioSamplePack> dst);
+		void queueAudioFloat(gsl::span<const float> data);
+		void queueAudioBytes(gsl::span<const gsl::byte> data);
+		bool needsMoreAudio();
+		size_t fillOutputBuffer(gsl::span<std::byte> dst, bool fill);
 
     	float getGroupGain(uint8_t group) const;
     };

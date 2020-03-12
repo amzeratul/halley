@@ -14,6 +14,9 @@ AudioFacade::AudioFacade(AudioOutputAPI& o, SystemAPI& system)
 	, system(system)
 	, running(false)
 	, started(false)
+	, commandQueue(256)
+	, exceptions(16)
+	, playingSoundsQueue(4)
 	, ownAudioThread(o.needsAudioThread())
 {
 }
@@ -115,7 +118,6 @@ void AudioFacade::pausePlayback()
 {
 	if (running) {
 		{
-			std::unique_lock<std::mutex> lock(audioMutex);
 			running = false;
 			engine->pause();
 		}
@@ -244,8 +246,9 @@ void AudioFacade::setListener(AudioListenerData listener)
 
 void AudioFacade::onAudioException(std::exception& e)
 {
-	std::unique_lock<std::mutex> lock(exceptionMutex);
-	exceptions.emplace_back(e.what());
+	if (exceptions.canWrite(1)) {
+		exceptions.writeOne(e.what());
+	}
 }
 
 void AudioFacade::run()
@@ -259,16 +262,18 @@ void AudioFacade::stepAudio()
 {
 	try {
 		{
-			std::unique_lock<std::mutex> lock(audioMutex);
 			if (!running) {
 				return;
 			}
-			std::swap(inbox, inboxProcessing);
-			inbox.clear();
-			playingSoundsNext = engine->getPlayingSounds();
+			if (playingSoundsQueue.canWrite(1)) {
+				playingSoundsQueue.writeOne(engine->getPlayingSounds());
+			}
 		}
 
-		for (auto& action : inboxProcessing) {
+		const size_t nToRead = commandQueue.availableToRead();
+		inbox.resize(nToRead);
+		commandQueue.read(gsl::span<std::function<void()>>(inbox.data(), nToRead));
+		for (auto& action : inbox) {
 			action();
 		}
 
@@ -285,39 +290,29 @@ void AudioFacade::stepAudio()
 void AudioFacade::enqueue(std::function<void()> action)
 {
 	if (running) {
-		outbox.emplace_back(std::move(action));
+		if (commandQueue.canWrite(1)) {
+			commandQueue.writeOne(std::move(action));
+		} else {
+			Logger::logError("Out of space on audio command queue.");
+		}
 	}
 }
 
 void AudioFacade::pump()
 {
-	{
-		std::unique_lock<std::mutex> lock(exceptionMutex);
-		if (!exceptions.empty()) {
-			for (size_t i = 0; i + 1 < exceptions.size(); ++i) {
-				Logger::logError(exceptions[i]);
-			}
-			const auto e = exceptions.back();
-			exceptions.clear();
-			stopPlayback();
-			throw Exception(e, HalleyExceptions::AudioEngine);
+	if (!exceptions.empty()) {
+		String e;
+		while (!exceptions.empty()) {
+			e = exceptions.readOne();
+			Logger::logError(e);
 		}
+		stopPlayback();
+		throw Exception(e, HalleyExceptions::AudioEngine);
 	}
 
 	if (running) {
-		std::unique_lock<std::mutex> lock(audioMutex);
-		if (!outbox.empty()) {
-			size_t i = inbox.size();
-			inbox.resize(i + outbox.size());
-			for (auto& o: outbox) {
-				inbox[i++] = std::move(o);
-			}
-			outbox.clear();
+		while (playingSoundsQueue.canRead(1)) {
+			playingSounds = playingSoundsQueue.readOne();
 		}
-
-		playingSounds = playingSoundsNext;
-	} else {
-		inbox.clear();
-		outbox.clear();
 	}
 }

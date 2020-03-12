@@ -1,10 +1,11 @@
 #pragma once
 #include <thread>
-#include <mutex>
 #include <atomic>
 #include <vector>
 #include "halley/core/api/halley_api_internal.h"
 #include <map>
+
+#include "halley/data_structures/ring_buffer.h"
 
 namespace Halley {
 	class AudioPosition;
@@ -50,24 +51,22 @@ namespace Halley {
 		void onAudioException(std::exception& e);
 
     private:
-		Resources* resources;
+		Resources* resources = nullptr;
 		AudioOutputAPI& output;
 		SystemAPI& system;
 		std::unique_ptr<AudioEngine> engine;
 
 		std::thread audioThread;
-		std::mutex audioMutex;  // TODO: this mutex has to go
-		std::mutex exceptionMutex;
 		std::atomic<bool> running;
 		std::atomic<bool> started;
 	    AudioSpec audioSpec;
 
-		std::vector<std::function<void()>> outbox;
+		RingBuffer<std::function<void()>> commandQueue;
 		std::vector<std::function<void()>> inbox;
-		std::vector<std::function<void()>> inboxProcessing;
-		std::vector<String> exceptions;
+    	
+		RingBuffer<String> exceptions;
 		std::vector<uint32_t> playingSounds;
-		std::vector<uint32_t> playingSoundsNext;
+		RingBuffer<std::vector<uint32_t>> playingSoundsQueue;
 
 		std::map<int, AudioHandle> musicTracks;
 

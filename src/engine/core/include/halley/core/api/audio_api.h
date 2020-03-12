@@ -9,6 +9,8 @@
 #include "halley/maths/vector3.h"
 #include <memory>
 
+#include "halley/data_structures/ring_buffer.h"
+
 namespace Halley
 {
 	class AudioPosition;
@@ -95,10 +97,11 @@ namespace Halley
 	};
 
 	using AudioCallback = std::function<void()>;
+	using AudioOutputFillFunction = std::function<size_t(gsl::span<gsl::byte> dst, bool padWithZeroes)>;
 
 	class AudioOutputAPI
 	{
-	public:
+	public:		
 		virtual ~AudioOutputAPI() {}
 
 		virtual Vector<std::unique_ptr<const AudioDevice>> getAudioDevices() = 0;
@@ -108,11 +111,31 @@ namespace Halley
 		virtual void startPlayback() = 0;
 		virtual void stopPlayback() = 0;
 
-		virtual void queueAudio(gsl::span<const float> data) = 0;
-		virtual bool needsMoreAudio() = 0;
+		virtual void onAudioAvailable() = 0;
 
 		virtual bool needsAudioThread() const = 0;
 		virtual bool needsInterleavedSamples() const { return true; }
+
+	protected:
+		const AudioOutputFillFunction& getAudioOutputFunction() const
+		{
+			return audioOutputFunc;
+		}
+
+		size_t getAudioOutput(gsl::span<gsl::byte> dst, bool padWithZeroes) const
+		{
+			return audioOutputFunc(dst, padWithZeroes);
+		}
+		
+	private:
+		friend class AudioEngine;
+		
+		void setAudioOutputFunction(AudioOutputFillFunction buffer)
+		{
+			audioOutputFunc = std::move(buffer);
+		}
+
+		AudioOutputFillFunction audioOutputFunc;
 	};
 
 	class IAudioHandle

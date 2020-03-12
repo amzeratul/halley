@@ -66,6 +66,7 @@ bool UIParent::addNewChildren(UIInputType inputType)
 	childrenWaiting.clear();
 
 	markAsNeedingLayout();
+	onChildrenAdded();
 	return true;
 }
 
@@ -81,6 +82,7 @@ bool UIParent::removeDeadChildren()
 	const bool removedAny = before != children.size();
 	if (removedAny) {
 		markAsNeedingLayout();
+		onChildrenRemoved();
 	}
 	return removedAny;
 }

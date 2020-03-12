@@ -467,12 +467,12 @@ void UIWidget::onInput(const UIInputResults& input, Time time)
 {
 }
 
-void UIWidget::setMouseClip(Maybe<Rect4f> clip)
+void UIWidget::setMouseClip(Maybe<Rect4f> clip, bool force)
 {
-	if (clip != mouseClip) {
+	if (force || clip != mouseClip) {
 		mouseClip = clip;
 		for (auto& c: getChildren()) {
-			c->setMouseClip(clip);
+			c->setMouseClip(clip, force);
 		}
 	}
 }

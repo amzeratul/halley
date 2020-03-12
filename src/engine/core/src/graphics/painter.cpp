@@ -554,15 +554,18 @@ void Painter::updateProjection()
 
 void Painter::updateClip()
 {
-	if (curClip != pendingClip) {
-		flushPending();
+	Rect4i finalRect = viewPort;
+	if (pendingClip) {
+		finalRect = (pendingClip.value() + viewPort.getTopLeft()).intersection(viewPort);
+	}
+	const Rect4i targetClip = getRectangleForActiveRenderTarget(finalRect);
+	const bool enableClip = finalRect != activeRenderTarget->getViewPort();
+	const Maybe<Rect4i> dstClip = enableClip ? targetClip : Maybe<Rect4i>();
 
-		curClip = pendingClip;
-		if (curClip) {
-			Rect4i finalRect = (curClip.value() + viewPort.getTopLeft()).intersection(viewPort);
-			setClip(getRectangleForActiveRenderTarget(finalRect), finalRect != activeRenderTarget->getViewPort());
-		} else {
-			setClip(getRectangleForActiveRenderTarget(viewPort), viewPort != activeRenderTarget->getViewPort());
-		}
+	if (curClip != dstClip) {
+		curClip = dstClip;
+
+		flushPending();
+		setClip(targetClip, enableClip);
 	}
 }

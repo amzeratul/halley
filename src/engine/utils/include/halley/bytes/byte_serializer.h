@@ -140,7 +140,7 @@ namespace Halley {
 		Serializer& operator<<(const Maybe<T>& p)
 		{
 			if (p) {
-				return *this << true << p.get();
+				return *this << true << p.value();
 			} else {
 				return *this << false;
 			}
