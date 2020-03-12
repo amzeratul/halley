@@ -122,7 +122,7 @@ namespace Halley
 
 		virtual void onAudioAvailable() = 0;
 
-		virtual bool needsMoreAudio() const = 0;
+		virtual bool needsMoreAudio() = 0;
 		virtual bool needsAudioThread() const = 0;
 		virtual bool needsInterleavedSamples() const { return true; }
 

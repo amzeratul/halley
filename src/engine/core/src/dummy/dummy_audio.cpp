@@ -32,7 +32,7 @@ void DummyAudioAPI::deInit()
 {
 }
 
-bool DummyAudioAPI::needsMoreAudio() const
+bool DummyAudioAPI::needsMoreAudio()
 {
 	return false;
 }
