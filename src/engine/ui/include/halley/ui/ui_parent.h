@@ -32,6 +32,8 @@ namespace Halley {
 		bool isWaitingToSpawnChildren() const;
 
 		virtual void markAsNeedingLayout();
+		virtual void onChildrenAdded() {}
+		virtual void onChildrenRemoved() {}
 
 		std::vector<std::shared_ptr<UIWidget>>& getChildren();
 		const std::vector<std::shared_ptr<UIWidget>>& getChildren() const;

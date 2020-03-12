@@ -42,11 +42,14 @@ namespace Halley {
 		void setScrollWheelEnabled(bool enabled);
 		bool isScrollWheelEnabled() const;
 
-		void refresh();
+		void refresh(bool force = false);
 
 		Maybe<float> getMaxChildWidth() const override;
 		bool ignoreClip() const override;
 
+		void onChildrenAdded() override;
+		void onChildrenRemoved() override;
+    	
     protected:
 	    void drawChildren(UIPainter& painter) const override;
 	    Vector2f getLayoutMinimumSize(bool force) const override;
