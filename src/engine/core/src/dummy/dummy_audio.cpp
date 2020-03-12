@@ -32,6 +32,11 @@ void DummyAudioAPI::deInit()
 {
 }
 
+bool DummyAudioAPI::needsMoreAudio() const
+{
+	return false;
+}
+
 bool DummyAudioAPI::needsAudioThread() const
 {
 	return false;

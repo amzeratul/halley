@@ -14,7 +14,7 @@ namespace Halley {
 	class IAudioClip;
 	class Resources;
 
-    class AudioEngine
+    class AudioEngine: private IAudioOutput
     {
     public:
 	    AudioEngine();
@@ -77,7 +77,9 @@ namespace Halley {
 		void queueAudioFloat(gsl::span<const float> data);
 		void queueAudioBytes(gsl::span<const gsl::byte> data);
 		bool needsMoreAudio();
-		size_t fillOutputBuffer(gsl::span<std::byte> dst, bool fill);
+
+		size_t getAvailable() override;
+		size_t output(gsl::span<std::byte> dst, bool fill) override;
 
     	float getGroupGain(uint8_t group) const;
     };

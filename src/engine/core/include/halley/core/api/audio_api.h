@@ -18,6 +18,7 @@ namespace Halley
 	class AudioEvent;
 	class IAudioClip;
 	class AudioVoiceBehaviour;
+	class AudioEngine;
 
     namespace AudioConfig {
         constexpr int sampleRate = 48000;
@@ -97,12 +98,20 @@ namespace Halley
 	};
 
 	using AudioCallback = std::function<void()>;
-	using AudioOutputFillFunction = std::function<size_t(gsl::span<gsl::byte> dst, bool padWithZeroes)>;
+
+	class IAudioOutput
+	{
+	public:
+		virtual ~IAudioOutput() = default;
+		
+		virtual size_t getAvailable() = 0;
+		virtual size_t output(gsl::span<gsl::byte> dst, bool padWithZeroes) = 0;
+	};
 
 	class AudioOutputAPI
 	{
 	public:		
-		virtual ~AudioOutputAPI() {}
+		virtual ~AudioOutputAPI() = default;
 
 		virtual Vector<std::unique_ptr<const AudioDevice>> getAudioDevices() = 0;
 		virtual AudioSpec openAudioDevice(const AudioSpec& requestedFormat, const AudioDevice* device = nullptr, AudioCallback prepareAudioCallback = AudioCallback()) = 0;
@@ -113,29 +122,25 @@ namespace Halley
 
 		virtual void onAudioAvailable() = 0;
 
+		virtual bool needsMoreAudio() const = 0;
 		virtual bool needsAudioThread() const = 0;
 		virtual bool needsInterleavedSamples() const { return true; }
 
 	protected:
-		const AudioOutputFillFunction& getAudioOutputFunction() const
+		static size_t getAudioBytesNeeded(const AudioSpec& outputSpec, size_t nBuffers)
 		{
-			return audioOutputFunc;
+			const size_t sizePerSample = outputSpec.format == AudioSampleFormat::Int16 ? 2 : 4;
+			return nBuffers * outputSpec.bufferSize * outputSpec.numChannels * sizePerSample;
 		}
-
-		size_t getAudioOutput(gsl::span<gsl::byte> dst, bool padWithZeroes) const
-		{
-			return audioOutputFunc(dst, padWithZeroes);
-		}
+		
+		IAudioOutput& getAudioOutputInterface() const { return *audioOutputInterface; }
 		
 	private:
 		friend class AudioEngine;
 		
-		void setAudioOutputFunction(AudioOutputFillFunction buffer)
-		{
-			audioOutputFunc = std::move(buffer);
-		}
-
-		AudioOutputFillFunction audioOutputFunc;
+		IAudioOutput* audioOutputInterface = nullptr;
+		
+		void setAudioOutputInterface(IAudioOutput& aoInterface) { audioOutputInterface = &aoInterface; }
 	};
 
 	class IAudioHandle
