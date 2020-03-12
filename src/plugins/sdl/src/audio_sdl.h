@@ -34,7 +34,7 @@ namespace Halley
 
 		void onCallback(unsigned char* stream, int len);
 
-		bool needsMoreAudio() const override;
+		bool needsMoreAudio() override;
 		bool needsAudioThread() const override;
 		void onAudioAvailable() override;
 		

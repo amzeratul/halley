@@ -127,7 +127,7 @@ void AudioSDL::onCallback(unsigned char* stream, int len)
 	getAudioOutputInterface().output(dst, true);
 }
 
-bool AudioSDL::needsMoreAudio() const
+bool AudioSDL::needsMoreAudio()
 {
 	return getAudioOutputInterface().getAvailable() < getAudioBytesNeeded(outputFormat, 2);
 }

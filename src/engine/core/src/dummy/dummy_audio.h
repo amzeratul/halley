@@ -11,7 +11,7 @@ namespace Halley {
 		void stopPlayback() override;
 		void init() override;
 		void deInit() override;
-		bool needsMoreAudio() const override;
+		bool needsMoreAudio() override;
 		bool needsAudioThread() const override;
 		void onAudioAvailable() override;
 	};
