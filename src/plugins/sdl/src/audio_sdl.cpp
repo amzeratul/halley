@@ -124,6 +124,11 @@ void AudioSDL::onAudioAvailable()
 void AudioSDL::onCallback(unsigned char* stream, int len)
 {
 	const auto dst = gsl::span<std::byte>(reinterpret_cast<std::byte*>(stream), len);
-	(void) getAudioOutput(dst, true);
+	getAudioOutputInterface().output(dst, true);
+}
+
+bool AudioSDL::needsMoreAudio() const
+{
+	return getAudioOutputInterface().getAvailable() < getAudioBytesNeeded(outputFormat, 2);
 }
 

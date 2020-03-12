@@ -99,10 +99,7 @@ void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 	spec = s;
 	out = &o;
 
-	out->setAudioOutputFunction([=](gsl::span<gsl::byte> dst, bool fill) -> size_t
-	{
-		return fillOutputBuffer(dst, fill);
-	});
+	out->setAudioOutputInterface(*this);
 
 	channels.resize(spec.numChannels);
 	channels[0].pan = -1.0f;
@@ -209,7 +206,12 @@ void AudioEngine::queueAudioBytes(gsl::span<const gsl::byte> data)
 	out->onAudioAvailable();
 }
 
-size_t AudioEngine::fillOutputBuffer(gsl::span<std::byte> dst, bool fill)
+size_t AudioEngine::getAvailable()
+{
+	return audioOutputBuffer.availableToRead();
+}
+
+size_t AudioEngine::output(gsl::span<std::byte> dst, bool fill)
 {
 	size_t written = 0;
 	if (!audioOutputBuffer.empty()) {
@@ -230,10 +232,7 @@ size_t AudioEngine::fillOutputBuffer(gsl::span<std::byte> dst, bool fill)
 
 bool AudioEngine::needsMoreAudio()
 {
-	const size_t sizePerSample = spec.format == AudioSampleFormat::Int16 ? 2 : 4;
-	const size_t queuedAudioSamples = audioOutputBuffer.availableToRead() / (spec.numChannels * sizePerSample);
-	const size_t neededAudioSamples = 2 * size_t(spec.bufferSize);
-	return queuedAudioSamples < neededAudioSamples;
+	return out->needsMoreAudio();
 }
 
 Random& AudioEngine::getRNG()
