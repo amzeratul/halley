@@ -8,6 +8,7 @@
 #include "halley/core/resources/resources.h"
 #include "audio_source_clip.h"
 #include "audio_filter_resample.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -19,7 +20,7 @@ AudioEvent::AudioEvent(const ConfigNode& config)
 		for (auto& actionNode: config["actions"]) {
 			const auto type = fromString<AudioEventActionType>(actionNode["type"].asString());
 			if (type == AudioEventActionType::Play) {
-				actions.push_back(std::make_unique<AudioEventActionPlay>(actionNode));
+				actions.push_back(std::make_unique<AudioEventActionPlay>(*this, actionNode));
 			}
 		}
 	}
@@ -50,7 +51,7 @@ void AudioEvent::deserialize(Deserializer& s)
 		s >> name;
 		auto type = fromString<AudioEventActionType>(name);
 		if (type == AudioEventActionType::Play) {
-			auto newAction = std::make_unique<AudioEventActionPlay>();
+			auto newAction = std::make_unique<AudioEventActionPlay>(*this);
 			s >> *newAction;
 			actions.push_back(std::move(newAction));
 		}
@@ -71,9 +72,13 @@ std::shared_ptr<AudioEvent> AudioEvent::loadResource(ResourceLoader& loader)
 	return event;
 }
 
-AudioEventActionPlay::AudioEventActionPlay() = default;
+AudioEventActionPlay::AudioEventActionPlay(AudioEvent& event)
+	: event(event)
+{
+}
 
-AudioEventActionPlay::AudioEventActionPlay(const ConfigNode& node)
+AudioEventActionPlay::AudioEventActionPlay(AudioEvent& event, const ConfigNode& node)
+	: event(event)
 {
 	group = node["group"].asString("");
 	if (node.hasKey("clips")) {
@@ -169,8 +174,9 @@ void AudioEventActionPlay::loadDependencies(const Resources& resources)
 		for (auto& c: clips) {
 			if (resources.exists<AudioClip>(c)) {
 				clipData.push_back(resources.get<AudioClip>(c));
-			}
-			else {
+			} else {
+				
+				Logger::logError("AudioClip not found: \"" + c + "\", needed by \"" + event.getAssetId() + "\".");
 				clipData.push_back(std::shared_ptr<AudioClip>());
 			}
 		}
