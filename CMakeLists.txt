@@ -43,8 +43,6 @@ SET(HALLEY_VERSION_MINOR "0")
 SET(HALLEY_VERSION_PATCH "0")
 SET(HALLEY_VERSION "${HALLEY_VERSION_MAJOR}.${HALLEY_VERSION_MINOR}.${HALLEY_VERSION_PATCH}")
 
-add_subdirectory(src)
-
 if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../halley-external")
     set(BIN_DIR_LEN 0)
     string(LENGTH "${CMAKE_BINARY_DIR}" BIN_DIR_LEN)
@@ -53,3 +51,5 @@ if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../halley-external")
     message("External dir will be ${EXTERNAL_BIN_DIR}-external")
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../halley-external" "${EXTERNAL_BIN_DIR}-external")
 endif()
+
+add_subdirectory(src)

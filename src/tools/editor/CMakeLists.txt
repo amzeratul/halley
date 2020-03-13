@@ -66,6 +66,12 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	add_dependencies(halley-editor halley-metal)
 endif()
 
+get_property(deps GLOBAL PROPERTY halley_external_plugin_dependencies)
+if (NOT ("${deps}" STREQUAL ""))
+    separate_arguments(deps)
+    add_dependencies(halley-editor ${deps})
+endif()
+
 target_link_libraries (halley-editor
         halley-tools
         ${FREETYPE_LIBRARIES}
