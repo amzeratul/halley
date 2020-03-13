@@ -72,14 +72,16 @@ int SpritePainterEntry::getMask() const
 	return mask;
 }
 
-void SpritePainter::start(size_t nSprites)
+void SpritePainter::start()
 {
-	if (sprites.capacity() < nSprites) {
-		sprites.reserve(nSprites);
-	}
 	sprites.clear();
 	cachedSprites.clear();
 	cachedText.clear();
+}
+
+void SpritePainter::start(size_t)
+{
+	start();
 }
 
 void SpritePainter::add(const Sprite& sprite, int mask, int layer, float tieBreaker)

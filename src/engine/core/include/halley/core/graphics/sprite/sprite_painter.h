@@ -46,7 +46,8 @@ namespace Halley
 	class SpritePainter
 	{
 	public:
-		void start(size_t nSprites);
+		void start();
+		[[deprecated]] void start(size_t nSprites);
 		void add(const Sprite& sprite, int mask, int layer, float tieBreaker);
 		void addCopy(const Sprite& sprite, int mask, int layer, float tieBreaker);
 		void add(const TextRenderer& sprite, int mask, int layer, float tieBreaker);

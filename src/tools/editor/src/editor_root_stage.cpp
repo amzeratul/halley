@@ -72,7 +72,7 @@ void EditorRootStage::onRender(RenderContext& context) const
 
 		// UI
 		SpritePainter spritePainter;
-		spritePainter.start(100);
+		spritePainter.start();
 		ui->draw(spritePainter, 1, 0);
 		spritePainter.draw(1, painter);
 	});
