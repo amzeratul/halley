@@ -153,6 +153,21 @@ namespace Halley
 		static size_t getAttributeSize(ShaderParameterType type);
 	};
 
+	class MaterialTexture
+	{
+	public:
+		String name;
+		String defaultTextureName;
+		ShaderParameterType samplerType = ShaderParameterType::Texture2D;
+		std::shared_ptr<const Texture> defaultTexture;
+
+		MaterialTexture();
+		MaterialTexture(String name, String defaultTexture, ShaderParameterType samplerType);
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
+
 	class MaterialDefinition final : public Resource
 	{
 		friend class Material;
@@ -177,7 +192,7 @@ namespace Halley
 		size_t getVertexPosOffset() const;
 		const Vector<MaterialAttribute>& getAttributes() const { return attributes; }
 		const Vector<MaterialUniformBlock>& getUniformBlocks() const { return uniformBlocks; }
-		const Vector<String>& getTextures() const { return textures; }
+		const Vector<MaterialTexture>& getTextures() const { return textures; }
 		const std::shared_ptr<const Texture>& getFallbackTexture() const;
 		int getDefaultMask() const;
 
@@ -194,7 +209,7 @@ namespace Halley
 
 		String name;
 		Vector<MaterialPass> passes;
-		Vector<String> textures;
+		Vector<MaterialTexture> textures;
 		Vector<MaterialUniformBlock> uniformBlocks;
 		Vector<MaterialAttribute> attributes;
 		int vertexSize = 0;

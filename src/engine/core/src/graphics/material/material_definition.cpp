@@ -104,6 +104,29 @@ size_t MaterialAttribute::getAttributeSize(ShaderParameterType type)
 	}
 }
 
+MaterialTexture::MaterialTexture()
+{}
+
+MaterialTexture::MaterialTexture(String name, String defaultTexture, ShaderParameterType samplerType)
+	: name(std::move(name))
+	, defaultTextureName(std::move(defaultTexture))
+	, samplerType(samplerType)
+{}
+
+void MaterialTexture::serialize(Serializer& s) const
+{
+	s << name;
+	s << defaultTextureName;
+	s << samplerType;
+}
+
+void MaterialTexture::deserialize(Deserializer& s)
+{
+	s >> name;
+	s >> defaultTextureName;
+	s >> samplerType;
+}
+
 MaterialDefinition::MaterialDefinition() {}
 
 MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
@@ -119,7 +142,13 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	}
 	columnMajor = api->isColumnMajor();
 
+	// Load textures
 	fallbackTexture = loader.getResources().get<Texture>("whitebox.png");
+	for (auto& tex: textures) {
+		if (!tex.defaultTextureName.isEmpty()) {
+			tex.defaultTexture = loader.getResources().get<Texture>(tex.defaultTextureName);
+		}
+	}
 }
 
 void MaterialDefinition::reload(Resource&& resource)
@@ -258,15 +287,26 @@ void MaterialDefinition::loadUniforms(const ConfigNode& node)
 void MaterialDefinition::loadTextures(const ConfigNode& node)
 {
 	for (auto& attribEntry: node.asSequence()) {
-		for (auto& it: attribEntry.asMap()) {
-			String name = it.first;
-			ShaderParameterType type = parseParameterType(it.second.asString());
-			if (type != ShaderParameterType::Texture2D) {
-				throw Exception("Texture \"" + name + "\" must be sampler2D", HalleyExceptions::Resources);
+		MaterialTexture tex;
+		
+		if (attribEntry.hasKey("name")) {
+			// New format
+			tex.name = attribEntry["name"].asString();
+			tex.samplerType = parseParameterType(attribEntry["sampler"].asString("sampler2D"));
+			tex.defaultTextureName = attribEntry["defaultTexture"].asString("");
+		} else {
+			// Old format
+			for (auto& it : attribEntry.asMap()) {
+				tex.name = it.first;
+				tex.samplerType = parseParameterType(it.second.asString());
 			}
-
-			textures.push_back(name);
 		}
+
+		if (tex.samplerType != ShaderParameterType::Texture2D) {
+			throw Exception("Texture \"" + tex.name + "\" must be sampler2D", HalleyExceptions::Resources);
+		}
+
+		textures.push_back(tex);
 	}
 }
 

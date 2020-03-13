@@ -146,9 +146,15 @@ void Material::initUniforms(bool forceLocalBlocks)
 		++blockNumber;
 	}
 
-	textures.resize(materialDefinition->getTextures().size());
-	for (auto& tex: materialDefinition->getTextures()) {
-		textureUniforms.push_back(MaterialTextureParameter(*this, tex));
+	// Load textures
+	const auto& textureDefs = materialDefinition->getTextures();
+	const size_t nTextures = textureDefs.size();
+	textures.reserve(nTextures);
+	textureUniforms.reserve(nTextures);
+	for (size_t i = 0; i < nTextures; ++i) {
+		const auto& tex = textureDefs[i];
+		textureUniforms.push_back(MaterialTextureParameter(*this, tex.name));
+		textures.push_back(tex.defaultTexture);
 	}
 }
 
@@ -315,7 +321,7 @@ Material& Material::set(const String& name, const std::shared_ptr<const Texture>
 {
 	auto& texs = materialDefinition->getTextures();
 	for (size_t i = 0; i < texs.size(); ++i) {
-		if (texs[i] == name) {
+		if (texs[i].name == name) {
 			const auto textureUnit = i;
 			if (textures[textureUnit] != texture) {
 				textures[textureUnit] = texture;
