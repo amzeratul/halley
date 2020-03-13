@@ -25,3 +25,9 @@ target_link_libraries (halley-cmd
         ${Boost_SYSTEM_LIBRARY}
         ${EXTRA_LIBS}
         )
+
+get_property(deps GLOBAL PROPERTY halley_external_plugin_dependencies)
+if (NOT ("${deps}" STREQUAL ""))
+    separate_arguments(deps)
+    add_dependencies(halley-cmd ${deps})
+endif()
