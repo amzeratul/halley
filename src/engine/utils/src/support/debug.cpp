@@ -135,7 +135,7 @@ String Debug::getCallStack(int skip)
 void Debug::trace(const char* filename, int line, const char* arg)
 {
 	auto& trace = lastTraces[tracePos];
-	tracePos = (tracePos + 1) % lastTraces.size();
+	tracePos = (tracePos + 1) % int(lastTraces.size());
 	trace.filename = filename;
 	trace.line = line;
 

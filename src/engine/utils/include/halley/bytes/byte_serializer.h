@@ -273,7 +273,7 @@ namespace Halley {
 		{
 			unsigned int sz;
 			*this >> sz;
-			ensureSufficientBytesRemaining(sz * 2); // Expect at least two bytes per map entry
+			ensureSufficientBytesRemaining(size_t(sz) * 2); // Expect at least two bytes per map entry
 
 			for (unsigned int i = 0; i < sz; i++) {
 				T key;
