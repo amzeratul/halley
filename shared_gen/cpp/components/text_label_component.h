@@ -9,8 +9,8 @@ public:
 	static constexpr int componentIndex = 2;
 	
 	Halley::TextRenderer text;
-	int layer;
-	int mask;
+	int layer = 0;
+	int mask = 1;
 	
 	TextLabelComponent() {}
 	

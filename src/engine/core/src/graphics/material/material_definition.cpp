@@ -132,6 +132,7 @@ void MaterialDefinition::load(const ConfigNode& root)
 {
 	// Load name
 	name = root["name"].asString("Unknown");
+	defaultMask = root["defaultMask"].asInt(1);
 
 	// Load attributes & uniforms
 	if (root.hasKey("attributes")) {
@@ -189,6 +190,11 @@ const std::shared_ptr<const Texture>& MaterialDefinition::getFallbackTexture() c
 	return fallbackTexture;
 }
 
+int MaterialDefinition::getDefaultMask() const
+{
+	return defaultMask;
+}
+
 void MaterialDefinition::addPass(const MaterialPass& materialPass)
 {
 	passes.push_back(materialPass);
@@ -208,6 +214,7 @@ void MaterialDefinition::serialize(Serializer& s) const
 	s << attributes;
 	s << vertexSize;
 	s << vertexPosOffset;
+	s << defaultMask;
 }
 
 void MaterialDefinition::deserialize(Deserializer& s)
@@ -219,6 +226,7 @@ void MaterialDefinition::deserialize(Deserializer& s)
 	s >> attributes;
 	s >> vertexSize;
 	s >> vertexPosOffset;
+	s >> defaultMask;
 }
 
 bool MaterialDefinition::isColumnMajor() const

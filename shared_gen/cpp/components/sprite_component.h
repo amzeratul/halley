@@ -10,7 +10,7 @@ public:
 	
 	Halley::Sprite sprite;
 	int layer = 0;
-	int mask = 1;
+	int mask = -1;
 	
 	SpriteComponent() {}
 	

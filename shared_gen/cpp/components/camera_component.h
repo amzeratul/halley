@@ -8,10 +8,10 @@ class CameraComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex = 4;
 	
-	float zoom;
+	float zoom = 1;
 	Halley::Maybe<Halley::Colour4f> clear;
-	int mask;
-	int layer;
+	int mask = 1;
+	int layer = 0;
 	
 	CameraComponent() {}
 	

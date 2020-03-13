@@ -9,7 +9,7 @@ component:
       defaultValue: 0
   - mask:
       type: int
-      defaultValue: 1
+      defaultValue: -1
 
 ---
 
@@ -17,8 +17,12 @@ component:
   name: TextLabel
   members:
   - text: 'Halley::TextRenderer'
-  - layer: int
-  - mask: int
+  - layer:
+      type: int
+      defaultValue: 0
+  - mask:
+      type: int
+      defaultValue: 1
 
 ---
 
@@ -32,9 +36,15 @@ component:
 component:
   name: Camera
   members:
-  - zoom: float
+  - zoom:
+      type: float
+      defaultValue: 1
   - clear: 'Halley::Maybe<Halley::Colour4f>'
-  - mask: int
-  - layer: int
+  - mask:
+      type: int
+      defaultValue: 1
+  - layer:
+      type: int
+      defaultValue: 0
 
 ...

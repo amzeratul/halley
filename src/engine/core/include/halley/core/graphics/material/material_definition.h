@@ -140,9 +140,9 @@ namespace Halley
 		String name;
 		ShaderParameterType type;
 		String semantic;
-		int semanticIndex;
-		int location;
-		int offset;
+		int semanticIndex = 0;
+		int location = 0;
+		int offset = 0;
 
 		MaterialAttribute();
 		MaterialAttribute(String name, ShaderParameterType type, int location, int offset = 0);
@@ -166,6 +166,7 @@ namespace Halley
 		void reload(Resource&& resource) override;
 		void load(const ConfigNode& node);
 
+		void addPass(const MaterialPass& materialPass);
 		int getNumPasses() const;
 		const MaterialPass& getPass(int n) const;
 		MaterialPass& getPass(int n);
@@ -178,8 +179,7 @@ namespace Halley
 		const Vector<MaterialUniformBlock>& getUniformBlocks() const { return uniformBlocks; }
 		const Vector<String>& getTextures() const { return textures; }
 		const std::shared_ptr<const Texture>& getFallbackTexture() const;
-		
-		void addPass(const MaterialPass& materialPass);
+		int getDefaultMask() const;
 
 		static std::unique_ptr<MaterialDefinition> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::MaterialDefinition; }
@@ -199,6 +199,7 @@ namespace Halley
 		Vector<MaterialAttribute> attributes;
 		int vertexSize = 0;
 		int vertexPosOffset = 0;
+		int defaultMask = 1;
 		bool columnMajor = false;
 
 		std::shared_ptr<const Texture> fallbackTexture;
