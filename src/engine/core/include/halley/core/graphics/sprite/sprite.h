@@ -62,9 +62,10 @@ namespace Halley
 		Sprite& setSprite(const SpriteSheet& sheet, String name, bool applyPivot = true);
 		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true);
 
-		Sprite& setPos(Vector2f pos);
-		Sprite& setPosition(Vector2f pos);
-		Vector2f getPosition() const;
+		Sprite& setPos(Vector2f pos) { vertexAttrib.pos = pos; return *this; }
+		Sprite& setPosition(Vector2f pos) { vertexAttrib.pos = pos; return *this; }
+		Vector2f getPosition() const { return vertexAttrib.pos; }
+		Vector2f& getPosition() { return vertexAttrib.pos; }
 
 		Sprite& setPivot(Vector2f pivot);
 		Sprite& setAbsolutePivot(Vector2f pivot);
@@ -86,22 +87,24 @@ namespace Halley
 		Sprite& setFlip(bool flip);
 		bool isFlipped() const;
 
-		Sprite& setColour(Colour4f colour);
-		Colour4f getColour() const;
+		Sprite& setColour(Colour4f colour) { vertexAttrib.colour = colour; return *this; }
+		Colour4f getColour() const { return vertexAttrib.colour; }
+		Colour4f& getColour() { return vertexAttrib.colour; }
 
 		Sprite& setTexRect(Rect4f texRect);
 		Rect4f getTexRect() const;
 
-		Sprite& setCustom0(Vector4f custom0);
-		Vector4f getCustom0() const;
+		Sprite& setCustom0(Vector4f custom0) { vertexAttrib.custom0 = custom0; return *this; }
+		Vector4f getCustom0() const { return vertexAttrib.custom0; }
+		Vector4f& getCustom0() { return vertexAttrib.custom0; }
 
 		Sprite& setSliced(Vector4s slices);
 		Sprite& setNotSliced();
 		bool isSliced() const;
 		Vector4s getSlices() const;
 
-		Sprite& setVisible(bool visible);
-		bool isVisible() const;
+		Sprite& setVisible(bool visible) { this->visible = visible; return *this; }
+		bool isVisible() const { return visible; }
 
 		Sprite& setClip(Rect4f clip);
 		Sprite& setAbsoluteClip(Rect4f clip);

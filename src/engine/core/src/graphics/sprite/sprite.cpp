@@ -138,37 +138,9 @@ Vector2f Sprite::getScaledSize() const
 	return vertexAttrib.scale * vertexAttrib.size;
 }
 
-Vector2f Sprite::getPosition() const
-{
-	return vertexAttrib.pos;
-}
-
-Colour4f Sprite::getColour() const
-{
-	return vertexAttrib.colour;
-}
-
-Sprite& Sprite::setPos(Vector2f v)
-{
-	vertexAttrib.pos = v;
-	return *this;
-}
-
-Sprite& Sprite::setPosition(Vector2f v)
-{
-	vertexAttrib.pos = v;
-	return *this;
-}
-
 Sprite& Sprite::setRotation(Angle1f v)
 {
 	vertexAttrib.rotation = v.getRadians();
-	return *this;
-}
-
-Sprite& Sprite::setColour(Colour4f v)
-{
-	vertexAttrib.colour = v;
 	return *this;
 }
 
@@ -242,17 +214,6 @@ Sprite& Sprite::setTexRect(Rect4f v)
 Rect4f Sprite::getTexRect() const
 {
 	return vertexAttrib.texRect;
-}
-
-Sprite& Sprite::setCustom0(Vector4f custom0)
-{
-	vertexAttrib.custom0 = custom0;
-	return *this;
-}
-
-Vector4f Sprite::getCustom0() const
-{
-	return vertexAttrib.custom0;
 }
 
 Sprite& Sprite::setMaterial(Resources& resources, String materialName)
@@ -387,17 +348,6 @@ bool Sprite::isSliced() const
 Vector4s Sprite::getSlices() const
 {
 	return slices;
-}
-
-Sprite& Sprite::setVisible(bool v)
-{
-	visible = v;
-	return *this;
-}
-
-bool Sprite::isVisible() const
-{
-	return visible;
 }
 
 Sprite& Sprite::setClip(Rect4f c)
