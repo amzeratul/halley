@@ -1,4 +1,0 @@
-actions:
-  - type: play
-    clips: [ d1s.ogg ]
-    group: key
