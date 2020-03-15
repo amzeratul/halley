@@ -57,6 +57,8 @@ namespace Halley
 		Path makeRelativeTo(const Path& path) const;
 		Path changeRelativeRoot(const Path& currentParent, const Path& newParent) const;
 
+		bool isDirectory() const;
+		bool isFile() const;
 		bool isAbsolute() const;
 		bool isEmpty() const;
 

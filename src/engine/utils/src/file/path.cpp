@@ -290,7 +290,10 @@ Path Path::makeRelativeTo(const Path& path) const
 		}
 	}
 
-	for (int i = 0; i < int(path.getNumberPaths()) - int(sharedRoot) - (isAbsolute() ? 0 : 1) - (path.getFilename() == "." ? 1 : 0); ++i) {
+	const bool relToDir = path.isDirectory();
+	//const int foldersAbove = int(path.getNumberPaths()) - int(sharedRoot) - (isAbsolute() ? 0 : 1) - (relToDir ? 1 : 0);
+	const int foldersAbove = int(path.getNumberPaths()) - int(sharedRoot) - (relToDir ? 1 : 0);
+	for (int i = 0; i < foldersAbove; ++i) {
 		result.emplace_back("..");
 	}
 
@@ -305,6 +308,16 @@ Path Path::changeRelativeRoot(const Path& currentParent, const Path& newParent) 
 {
 	const auto absolute = isAbsolute() ? *this : (currentParent / (*this));
 	return absolute.makeRelativeTo(newParent);
+}
+
+bool Path::isDirectory() const
+{
+	return !pathParts.empty() && pathParts.back() == ".";
+}
+
+bool Path::isFile() const
+{
+	return !pathParts.empty() && pathParts.back() != ".";
 }
 
 bool Path::isAbsolute() const
