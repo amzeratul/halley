@@ -130,7 +130,10 @@ Bytes SDLSaveData::getData(const String& filename)
 void SDLSaveData::removeData(const String& path)
 {
 	Expects (!path.isEmpty());
-	return Path::removeFile(dir / path);
+	Path::removeFile(dir / path);
+	auto backupFile = dir / path;
+	backupFile = backupFile.replaceExtension(backupFile.getExtension() + ".bak");
+	Path::removeFile(backupFile);
 }
 
 std::vector<String> SDLSaveData::enumerate(const String& root)
