@@ -24,6 +24,7 @@ target_link_libraries (halley-cmd
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         ${EXTRA_LIBS}
+        ${ShaderConductor_LIBRARY}
         )
 
 get_property(deps GLOBAL PROPERTY halley_external_plugin_dependencies)

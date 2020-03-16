@@ -78,6 +78,7 @@ target_link_libraries (halley-editor
         ${YAMLCPP_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
-        ${EXTRA_LIBS}
+		${EXTRA_LIBS}
+		${ShaderConductor_LIBRARY}
         )
 

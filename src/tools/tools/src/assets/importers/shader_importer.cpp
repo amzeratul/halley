@@ -5,12 +5,12 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/core/graphics/shader.h"
 #include "halley/support/logger.h"
+
 #include <ShaderConductor/ShaderConductor.hpp>
 
 #ifdef _MSC_VER
 #include <D3Dcompiler.h>
 #pragma comment(lib, "D3DCompiler.lib")
-#pragma comment(lib, "ShaderConductor.lib")
 #endif
 
 using namespace Halley;
