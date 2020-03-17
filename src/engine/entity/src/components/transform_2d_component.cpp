@@ -1,6 +1,7 @@
 #define DONT_INCLUDE_HALLEY_HPP
 #include "components/transform_2d_component.h"
 #include "halley/core/graphics/sprite/sprite.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -23,6 +24,30 @@ Transform2DComponent::Transform2DComponent(EntityId parentId, World& world, Vect
 	setParent(parentId, world, true);
 }
 
+Transform2DComponent::~Transform2DComponent()
+{
+	setParent();
+	detachChildren();
+}
+
+void Transform2DComponent::setLocalPosition(Halley::Vector2f v)
+{
+	position = v;
+	markDirty();
+}
+
+void Transform2DComponent::setLocalScale(Halley::Vector2f v)
+{
+	scale = v;
+	markDirty();
+}
+
+void Transform2DComponent::setLocalRotation(Halley::Angle1f v)
+{
+	rotation = v;
+	markDirty();
+}
+
 Vector2f Transform2DComponent::getGlobalPosition() const
 {
 	if (parentTransform) {
@@ -39,6 +64,7 @@ void Transform2DComponent::setGlobalPosition(Vector2f v)
 	} else {
 		position = v;
 	}
+	markDirty();
 }
 
 Vector2f Transform2DComponent::getGlobalScale() const
@@ -51,6 +77,7 @@ void Transform2DComponent::setGlobalScale(Vector2f v)
 {
 	// TODO
 	scale = v;
+	markDirty();
 }
 
 Angle1f Transform2DComponent::getGlobalRotation() const
@@ -63,6 +90,7 @@ void Transform2DComponent::setGlobalRotation(Angle1f v)
 {
 	// TODO
 	rotation = v;
+	markDirty();
 }
 
 int Transform2DComponent::getSubWorld() const
@@ -115,7 +143,7 @@ void Transform2DComponent::setParent(Transform2DComponent& newParentTransform, b
 
 		// Reparent
 		parentTransform = &newParentTransform;
-		parentTransform->childIds.push_back(myId);
+		parentTransform->children.push_back(this);
 
 		if (!keepLocalPosition) {
 			setGlobalPosition(getLocalPosition());
@@ -134,16 +162,17 @@ void Transform2DComponent::setParent(bool keepLocalPosition)
 			setLocalScale(getGlobalScale());
 		}
 		
-		auto& siblings = parentTransform->childIds;
-		siblings.erase(std::remove(siblings.begin(), siblings.end(), myId), siblings.end());
+		auto& siblings = parentTransform->children;
+		siblings.erase(std::remove(siblings.begin(), siblings.end(), this), siblings.end());
 		parentTransform = nullptr;
 	}
 	parentId = EntityId();
+	markDirty();
 }
 
 void Transform2DComponent::addChild(EntityId parentId, World& world, bool keepLocalPosition)
 {
-	world.getEntity(parentId).getComponent<Transform2DComponent>().setParent(*this, keepLocalPosition);
+	addChild(world.getEntity(parentId).getComponent<Transform2DComponent>(), keepLocalPosition);
 }
 
 void Transform2DComponent::addChild(Transform2DComponent& childTransform, bool keepLocalPosition)
@@ -151,16 +180,24 @@ void Transform2DComponent::addChild(Transform2DComponent& childTransform, bool k
 	childTransform.setParent(*this, keepLocalPosition);
 }
 
-void Transform2DComponent::detachChildren(World& world)
+void Transform2DComponent::detachChildren()
 {
-	auto childIdsCopy = childIds;
-	for (auto& childId: childIdsCopy) {
-		world.getEntity(childId).getComponent<Transform2DComponent>().setParent();
+	auto childrenCopy = children;
+	for (auto& child: childrenCopy) {
+		child->setParent();
 	}
-	childIds.clear();
+	children.clear();
 }
 
 void Transform2DComponent::onAddedToEntity(EntityRef& entity)
 {
 	myId = entity.getEntityId();
+}
+
+void Transform2DComponent::markDirty()
+{
+	revision++;
+	for (auto& child: children) {
+		child->markDirty();
+	}
 }

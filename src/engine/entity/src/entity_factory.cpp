@@ -94,7 +94,7 @@ void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node)
 	// Update the existing children
 	size_t childIndex = 0;
 	for (auto& child: transform2D->getChildren()) {
-		auto childEntity = world.getEntity(child);
+		auto childEntity = world.getEntity(child->getEntityId());
 		const auto& entityUUID = childEntity.getUUID();
 
 		// Find which node to use based on UUID

@@ -179,7 +179,7 @@ void World::doDestroyEntity(EntityId id)
 		const auto transform = e->tryGetComponent<Transform2DComponent>();
 		if (transform) {
 			for (auto& c: transform->getChildren()) {
-				doDestroyEntity(c);
+				doDestroyEntity(c->getEntityId());
 			}
 		}
 	}
