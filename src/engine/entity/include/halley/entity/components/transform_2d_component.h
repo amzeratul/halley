@@ -76,5 +76,20 @@ private:
 	Halley::EntityId parentId;
 	uint32_t revision = 0;
 
+	mutable uint32_t cachedValues = 0;
+	mutable Halley::Vector2f cachedGlobalPos;
+	mutable Halley::Vector2f cachedGlobalScale;
+	mutable Halley::Angle1f cachedGlobalRotation;
+	mutable int cachedSubWorld = 0;
+
+	enum class CachedIndices {
+		Position,
+		Scale,
+		Rotation,
+		SubWorld
+	};
+
 	void markDirty();
+	bool isCached(CachedIndices index) const;
+	void setCached(CachedIndices index) const;
 };

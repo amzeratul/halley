@@ -40,6 +40,11 @@ namespace Halley {
 			return pointer;
         }
 
+    	operator bool() const
+        {
+            return pointer != nullptr;
+        }
+
     private:
         T* pointer;
     };

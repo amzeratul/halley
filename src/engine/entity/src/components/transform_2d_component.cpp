@@ -51,7 +51,11 @@ void Transform2DComponent::setLocalRotation(Halley::Angle1f v)
 Vector2f Transform2DComponent::getGlobalPosition() const
 {
 	if (parentTransform) {
-		return parentTransform->transformPoint(position);
+		if (!isCached(CachedIndices::Position)) {
+			setCached(CachedIndices::Position);
+			cachedGlobalPos = parentTransform->transformPoint(position);
+		}
+		return cachedGlobalPos;
 	} else {
 		return position;
 	}
@@ -99,13 +103,22 @@ int Transform2DComponent::getSubWorld() const
 		return subWorld;
 	} else {
 		// Default value, default to parent, or to zero if no parent
-		return parentTransform ? parentTransform->getSubWorld() : 0;
+		if (parentTransform) {
+			if (!isCached(CachedIndices::SubWorld)) {
+				setCached(CachedIndices::SubWorld);
+				cachedSubWorld = parentTransform->getSubWorld();
+			}
+			return cachedSubWorld;
+		} else {
+			return 0;
+		}
 	}
 }
 
 void Transform2DComponent::setSubWorld(int world)
 {
 	subWorld = world;
+	markDirty();
 }
 
 Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
@@ -197,7 +210,18 @@ void Transform2DComponent::onAddedToEntity(EntityRef& entity)
 void Transform2DComponent::markDirty()
 {
 	revision++;
+	cachedValues = 0;
 	for (auto& child: children) {
 		child->markDirty();
 	}
+}
+
+bool Transform2DComponent::isCached(CachedIndices index) const
+{
+	return cachedValues & (1 << int(index));
+}
+
+void Transform2DComponent::setCached(CachedIndices index) const
+{
+	cachedValues |= (1 << int(index));
 }
