@@ -70,6 +70,9 @@ namespace Halley
 		void drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<Material> material = {});
 		void drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<Material> material = {});
 
+		// Rect drawing
+		void drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<Material> material = {});
+
 		size_t getNumDrawCalls() const { return nDrawCalls; }
 		size_t getNumVertices() const { return nVertices; }
 		size_t getNumTriangles() const { return nTriangles; }

@@ -294,7 +294,7 @@ void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f co
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(radius, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)));
 	}
-	drawLine(points, width, colour, true, material);
+	drawLine(points, width, colour, true, std::move(material));
 }
 
 void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<Material> material)
@@ -305,7 +305,7 @@ void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f 
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(radius, 0).rotate(from + Angle1f::fromRadians(i * arcLen / (n - 1))));
 	}
-	drawLine(points, width, colour, false, material);
+	drawLine(points, width, colour, false, std::move(material));
 }
 
 void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<Material> material)
@@ -315,7 +315,18 @@ void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(1.0f, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)) * radius);
 	}
-	drawLine(points, width, colour, true, material);
+	drawLine(points, width, colour, true, std::move(material));
+}
+
+void Painter::drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<Material> material)
+{
+	std::vector<Vector2f> points;
+	points.push_back(rect.getTopLeft());
+	points.push_back(rect.getTopRight());
+	points.push_back(rect.getBottomRight());
+	points.push_back(rect.getBottomLeft());
+	points.push_back(rect.getTopLeft());
+	drawLine(points, width, colour, false, std::move(material));
 }
 
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
