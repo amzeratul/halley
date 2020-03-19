@@ -25,6 +25,7 @@ std::unique_ptr<IMainLoopable> DynamicGameLoader::createCore(std::vector<std::st
 	Expects(args.size() >= 2);
 
 	args.erase(args.begin());
+
 	return entry->createCore(args);
 }
 

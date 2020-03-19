@@ -48,7 +48,6 @@ if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../halley-external")
     string(LENGTH "${CMAKE_BINARY_DIR}" BIN_DIR_LEN)
     #math(EXPR BIN_DIR_LEN "${BIN_DIR_LEN} - 1")
     string(SUBSTRING "${CMAKE_BINARY_DIR}" 0 "${BIN_DIR_LEN}" EXTERNAL_BIN_DIR)
-    message("External dir will be ${EXTERNAL_BIN_DIR}-external")
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../halley-external" "${EXTERNAL_BIN_DIR}-external")
 endif()
 

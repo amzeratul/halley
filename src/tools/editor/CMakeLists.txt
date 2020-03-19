@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 3.0)
 
 project (halley-editor)
 
+SET(HALLEY_MONOLITHIC 1)
+
 set (editor_sources
 	"prec.cpp"
 

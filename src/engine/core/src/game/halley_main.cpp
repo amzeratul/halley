@@ -53,3 +53,13 @@ Vector<std::string> HalleyMain::getWin32Args()
 #endif
 	return args;
 }
+
+Vector<std::string> HalleyMain::getArgs(int argc, char* argv[])
+{
+	Vector<std::string> args;
+	args.reserve(argc);
+	for (int i = 0; i < argc; i++) {
+		args.push_back(argv[i]);
+	}
+	return args;
+}

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <halley/core/game/game.h>
+#include "entry_point.h"
 
 namespace Halley {
 	class IMainLoopable;
@@ -25,6 +26,23 @@ namespace Halley {
 		{
 			return std::make_unique<T>();
 		}
+	};
+
+	class EntryPointGameLoader : public GameLoader
+	{
+	public:
+		EntryPointGameLoader(IHalleyEntryPoint& entryPoint)
+			: entryPoint(entryPoint)
+		{			
+		}
+		
+		std::unique_ptr<Game> createGame() override
+		{
+			return entryPoint.createGame();
+		}
+
+	private:
+		IHalleyEntryPoint& entryPoint;
 	};
 
 	class DummyGameLoader : public GameLoader
