@@ -1,9 +1,7 @@
-#include "dynamic_loader.h"
+#include "halley/tools/runner/runner_tool.h"
+#include "halley/tools/runner/dynamic_loader.h"
 #include <boost/filesystem.hpp>
 #include <halley/runner/main_loop.h>
-
-#define SDL_MAIN_HANDLED
-#include <SDL.h>
 
 using namespace Halley;
 
@@ -38,19 +36,22 @@ static int runMain(DynamicGameLoader& loader, Vector<std::string> args)
 	}
 }
 
-int main(int argc, char** argv) {
-	SDL_SetMainReady();
-	SDL_Init(SDL_INIT_NOPARACHUTE);
-
-	Vector<std::string> args;
-	for (int i = 0; i < argc; i++) {
-		args.push_back(argv[i]);
+int RunnerTool::runRaw(int argc, char* argv[])
+{
+	if (argc < 3) {
+		std::cout << "Usage: halley-cmd run <dllname> ..." << std::endl;
+		return 1;
 	}
+	
+	// Skip the first two arguments (halley-cmd path and "run")
+	std::vector<std::string> args;
+	args.reserve(argc - 2);
+	for (int i = 2; i < argc; ++i) {
+		args.emplace_back(argv[i]);
+	}
+	
+	std::cout << "Running " << args.at(0) << "..." << std::endl;
 
-	using namespace boost::filesystem;
-	path p(args[1]);
-
-	DynamicGameLoader loader(p.string());
-
+	DynamicGameLoader loader(args.at(0));
 	return runMain(loader, args);
 }

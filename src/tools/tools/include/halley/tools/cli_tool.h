@@ -16,8 +16,8 @@ namespace Halley
 	public:
 		virtual ~CommandLineTool();
 
-		int runRaw(int argc, char** argv);
-		virtual int run(Vector<std::string> args) = 0;
+		virtual int runRaw(int argc, char** argv);
+		virtual int run(Vector<std::string> args);
 
 	protected:
 		std::unique_ptr<HalleyStatics> statics;

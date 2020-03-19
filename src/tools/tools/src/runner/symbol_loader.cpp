@@ -1,6 +1,6 @@
-#include "symbol_loader.h"
+#include "halley/tools/runner/symbol_loader.h"
 #include <halley/support/exception.h>
-#include "dynamic_library.h"
+#include "halley/tools/dll/dynamic_library.h"
 #include <sstream>
 
 using namespace Halley;

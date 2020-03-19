@@ -288,13 +288,17 @@ String OSWin32::getEnvironmentVariable(const String& name)
 	return buffer;
 }
 
-Path OSWin32::parseProgramPath(const String&)
+Path OSWin32::parseProgramPath(const String& path)
 {
-	HMODULE hModule = GetModuleHandleW(nullptr);
-	WCHAR path[MAX_PATH];
-	GetModuleFileNameW(hModule, path, MAX_PATH);
-	String programPath(path);
-	return Path(programPath).parentPath() / ".";
+	if (path.endsWith(".dll")) {
+		return Path(path).parentPath();
+	} else {
+		HMODULE hModule = GetModuleHandleW(nullptr);
+		WCHAR path[MAX_PATH];
+		GetModuleFileNameW(hModule, path, MAX_PATH);
+		String programPath(path);
+		return Path(programPath).parentPath() / ".";
+	}
 }
 
 void Halley::OSWin32::setConsoleColor(int foreground, int background)

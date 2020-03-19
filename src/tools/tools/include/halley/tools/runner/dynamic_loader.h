@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include <halley/runner/game_loader.h>
-#include "dynamic_library.h"
+#include "halley/tools/dll/dynamic_library.h"
 #include "symbol_loader.h"
 #include <halley/runner/main_loop.h>
 

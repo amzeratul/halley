@@ -39,6 +39,8 @@ set(SOURCES
     "src/codegen/message_schema.cpp"
     "src/codegen/system_schema.cpp"
     
+    "src/dll/dynamic_library.cpp"
+
     "src/distance_field/distance_field_generator.cpp"
     "src/distance_field/distance_field_tool.cpp"
     
@@ -53,6 +55,11 @@ set(SOURCES
     "src/packer/asset_packer.cpp"
     "src/packer/asset_packer_task.cpp"
     "src/packer/asset_packer_tool.cpp"
+
+    "src/runner/dynamic_loader.cpp"
+    "src/runner/memory_patcher.cpp"
+    "src/runner/runner_tool.cpp"
+    "src/runner/symbol_loader.cpp"
 
     "src/tool/cli_tool.cpp"
 
@@ -97,6 +104,8 @@ set(HEADERS
     "include/halley/tools/codegen/message_schema.h"
     "include/halley/tools/codegen/system_schema.h"
     
+    "include/halley/tools/dll/dynamic_library.h"
+
     "include/halley/tools/assets/asset_collector.h"
     "include/halley/tools/assets/asset_importer.h"
     "include/halley/tools/assets/check_assets_task.h"
@@ -118,6 +127,12 @@ set(HEADERS
     "include/halley/tools/project/project.h"
     "include/halley/tools/project/project_loader.h"
     "include/halley/tools/project/project_properties.h"
+
+    "include/halley/tools/runner/dynamic_loader.h"
+    "include/halley/tools/runner/memory_patcher.h"
+    "include/halley/tools/runner/runner_tool.h"
+    "include/halley/tools/runner/symbol_loader.h"
+    "include/halley/tools/runner/win.h"
     
     "include/halley/tools/vs_project/vs_project_manipulator.h"
     "include/halley/tools/vs_project/vs_project_tool.h"

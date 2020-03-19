@@ -1,9 +1,9 @@
-#include "dynamic_loader.h"
+#include "halley/tools/runner/dynamic_loader.h"
 #include <halley/core/game/halley_main.h>
-#include "memory_patcher.h"
 #include <halley/runner/entry_point.h>
 #include <gsl/gsl_assert>
 #include "halley/support/console.h"
+#include "halley/tools/runner/memory_patcher.h"
 
 using namespace Halley;
 
@@ -22,10 +22,6 @@ DynamicGameLoader::~DynamicGameLoader()
 std::unique_ptr<IMainLoopable> DynamicGameLoader::createCore(std::vector<std::string> args)
 {
 	Expects(entry != nullptr);
-	Expects(args.size() >= 2);
-
-	args.erase(args.begin());
-
 	return entry->createCore(args);
 }
 
