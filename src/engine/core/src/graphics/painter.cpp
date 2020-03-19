@@ -243,7 +243,8 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 
 	auto makeNormal = [] (Vector2f a, Maybe<Vector2f> maybeB) -> Vector2f
 	{
-		if (maybeB) {
+		// Disabled. Enabling this makes it looks nicer, but also introduces a lot of edge cases with acute angles that are very hard to deal with
+		if (false && maybeB) {
 			const auto b = maybeB.value();
 			const auto c = (a + b).normalized();
 			const auto cosHalfAlpha = c.dot(a);
