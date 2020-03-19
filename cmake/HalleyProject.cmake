@@ -414,15 +414,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 	include_directories("." "gen/cpp" ${HALLEY_PROJECT_INCLUDE_DIRS})
 	link_directories(${HALLEY_PROJECT_LIB_DIRS})
 
-	if (HALLEY_HOTRELOAD)
-		# TODO: roll this into default target
-		set(HALLEY_RUNNER_PATH ${HALLEY_PATH}\\bin\\halley-runner.exe)
-		set(HALLEY_RUNNER_DEBUG_PATH ${HALLEY_PATH}\\bin\\halley-runner_d.exe)
-		configure_file(${HALLEY_PATH}/cmake/halley_game.vcxproj.user.in ${CMAKE_CURRENT_BINARY_DIR}/${name}.vcxproj.user @ONLY) 
-
-		add_library(${name} SHARED ${proj_sources} ${proj_headers})
-		add_definitions(-DHALLEY_SHARED_LIBRARY)
-	elseif (BUILD_MACOSX_BUNDLE)
+	if (BUILD_MACOSX_BUNDLE)
 		add_executable(${name} MACOSX_BUNDLE ${proj_sources} ${proj_headers})
 		add_definitions(-DHALLEY_EXECUTABLE)
 	elseif (ANDROID_NDK)
@@ -439,6 +431,12 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		target_compile_definitions(${name} PUBLIC HALLEY_STATIC_LIBRARY)
 		target_compile_definitions(${name}-dll PUBLIC HALLEY_SHARED_LIBRARY)
 		target_compile_definitions(${name}-exe PUBLIC HALLEY_EXECUTABLE)
+
+		# Setup default run paths for DLL
+		# Note that I'm using release halley-cmd for debug, as currently they have the same name
+		set(HALLEY_RUNNER_PATH ${HALLEY_PATH}\\bin\\halley-cmd.exe)
+		set(HALLEY_RUNNER_DEBUG_PATH ${HALLEY_PATH}\\bin\\halley-cmd.exe)
+		configure_file(${HALLEY_PATH}/cmake/halley_game_dll.vcxproj.user.in ${CMAKE_CURRENT_BINARY_DIR}/${name}-dll.vcxproj.user @ONLY) 
 
 		#set_target_properties(${name}-dll PROPERTIES OUTPUT_NAME ${name})
 		#set_target_properties(${name}-exe PROPERTIES OUTPUT_NAME ${name})
