@@ -36,6 +36,16 @@ void DX11Video::deInit()
 	releaseD3D();
 }
 
+void DX11Video::onResume()
+{
+	loader = std::make_unique<DX11Loader>(*this);
+}
+
+void DX11Video::onSuspend()
+{
+	loader.reset();
+}
+
 void DX11Video::initD3D(Window& window)
 {
 	if (initialised) {

@@ -34,7 +34,9 @@ namespace Halley {
 		
 		void init() override;
 		void deInit() override;
-		
+		void onResume() override;
+		void onSuspend() override;
+
 		std::unique_ptr<Painter> makePainter(Resources& resources) override;
 
 		String getShaderLanguage() override;
