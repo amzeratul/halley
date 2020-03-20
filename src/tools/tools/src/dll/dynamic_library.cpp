@@ -7,6 +7,15 @@
 #include "halley/text/encode.h"
 #include "halley/text/string_converter.h"
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#ifdef min
+#undef min
+#undef max
+#endif
+#endif
+
 using namespace Halley;
 using namespace std::filesystem;
 
@@ -80,7 +89,7 @@ void DynamicLibrary::unload()
 {
 	if (loaded) {
 		#ifdef _WIN32
-		if (!FreeLibrary(handle)) {
+		if (!FreeLibrary(static_cast<HMODULE>(handle))) {
 			throw Exception("Unable to release library " + libPath.string() + " due to error " + toString(GetLastError()), HalleyExceptions::Core);
 		}
 		#endif
@@ -105,7 +114,7 @@ void* DynamicLibrary::getFunction(std::string name) const
 	Expects(loaded);
 	
 	#ifdef _WIN32
-	return GetProcAddress(handle, name.c_str());
+	return GetProcAddress(static_cast<HMODULE>(handle), name.c_str());
 	#else
 	// TODO
 	return nullptr;
@@ -145,8 +154,6 @@ void DynamicLibrary::flushLoaded() const
 		if (!std::filesystem::remove(f, ec)) {
 			Logger::logWarning("Can't remove " + f.string());
 			remaining.push_back(std::move(f));
-		} else {
-			Logger::logInfo("Removed " + f.string());
 		}
 	}
 	

@@ -18,10 +18,14 @@ namespace Halley {
     	const std::vector<String>& getPlatforms() const;
     	void setPlatforms(std::vector<String> platforms);
 
+        const String& getDLL() const;
+        void setDLL(String dll);
+
 	private:
 		const Path& propertiesFile;
 		String name;
     	String assetPackManifest;
+        String dll;
     	std::vector<String> platforms;
 
 		void load();

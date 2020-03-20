@@ -1,17 +1,7 @@
 #pragma once
 
 #include <filesystem>
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#ifdef min
-#undef min
-#undef max
-#endif
-using LibHandleType = HMODULE;
-#else
 using LibHandleType = void*;
-#endif
 
 namespace Halley
 {

@@ -41,6 +41,16 @@ void ProjectProperties::setPlatforms(std::vector<String> platforms)
 	this->platforms = std::move(platforms);
 }
 
+const String& ProjectProperties::getDLL() const
+{
+	return dll;
+}
+
+void ProjectProperties::setDLL(String dll)
+{
+	this->dll = std::move(dll);
+}
+
 void ProjectProperties::load()
 {
 	auto data = FileSystem::readFile(propertiesFile);
@@ -54,6 +64,7 @@ void ProjectProperties::load()
 
 	name = node["name"].asString("Halley Project");
 	assetPackManifest = node["assetPackManifest"].asString("halley_project/asset_manifest.yaml");
+	dll = node["dll"].asString("");
 
 	if (node.hasKey("platforms")) {
 		for (auto& plat: node["platforms"].asSequence()) {

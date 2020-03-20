@@ -25,10 +25,18 @@ Project::Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader&
 	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", std::vector<String>{ "" });
 	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", std::vector<String>{ "" });
 	assetImporter = std::make_unique<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
+
+	auto dllPath = loader.getDLLPath(rootPath, properties->getDLL());
+	if (!dllPath.isEmpty()) {
+		gameDll = std::make_shared<DynamicLibrary>(dllPath.string());
+		gameDll->load(false);
+		Logger::logInfo("Loaded " + dllPath.string());
+	}
 }
 
 Project::~Project()
 {
+	gameDll.reset();
 	assetImporter.reset();
 	plugins.clear();
 }

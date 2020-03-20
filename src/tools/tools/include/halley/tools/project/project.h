@@ -5,6 +5,7 @@
 #include "halley/plugin/halley_plugin.h"
 #include <memory>
 #include "halley/tools/assets/check_assets_task.h"
+#include "halley/tools/dll/dynamic_library.h"
 
 namespace Halley
 {
@@ -82,5 +83,6 @@ namespace Halley
 		std::unique_ptr<ProjectProperties> properties;
 
 		std::vector<HalleyPluginPtr> plugins;
+		std::shared_ptr<DynamicLibrary> gameDll;
 	};
 }
