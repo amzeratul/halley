@@ -56,6 +56,7 @@ Resources& Stage::getResources() const
 
 Game& Stage::getGame() const
 {
+	Expects(game != nullptr);
 	return *game;
 }
 

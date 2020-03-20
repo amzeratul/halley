@@ -7,12 +7,13 @@
 namespace Halley
 {
 	class Game;
+	class Core;
 	
 	class IHalleyEntryPoint
 	{
 	public:
 		virtual ~IHalleyEntryPoint() {}
-		virtual std::unique_ptr<IMainLoopable> createCore(const std::vector<std::string>& args) = 0;
+		virtual std::unique_ptr<Core> createCore(const std::vector<std::string>& args) = 0;
 		virtual std::unique_ptr<Game> createGame() = 0;
 	};
 
@@ -25,7 +26,7 @@ namespace Halley
 			return std::make_unique<T>();
 		}
 
-		std::unique_ptr<IMainLoopable> createCore(const std::vector<std::string>& args) override
+		std::unique_ptr<Core> createCore(const std::vector<std::string>& args) override
 		{
 			Expects(args.size() >= 1);
 			Expects(args.size() < 1000);

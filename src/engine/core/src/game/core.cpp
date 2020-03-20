@@ -100,6 +100,9 @@ void Core::onSuspended()
 	if (api->videoInternal) {
 		api->videoInternal->onSuspend();
 	}
+	if (api->audioInternal) {
+		api->audioInternal->onSuspend();
+	}
 	if (api->inputInternal) {
 		api->inputInternal->onSuspend();
 	}
@@ -124,6 +127,9 @@ void Core::onReloaded()
 	
 	if (api->inputInternal) {
 		api->inputInternal->onResume();
+	}
+	if (api->audioInternal) {
+		api->audioInternal->onResume();
 	}
 	if (api->videoInternal) {
 		api->videoInternal->onResume();
@@ -154,6 +160,8 @@ int Core::getTargetFPS()
 
 void Core::init()
 {
+	Expects(!initialized);
+	
 	// Initialize API
 	api->init();
 	api->systemInternal->setEnvironment(environment.get());
@@ -178,11 +186,14 @@ void Core::init()
 	if (api->video) {
 		painter = api->videoInternal->makePainter(api->core->getResources());
 	}
+
+	initialized = true;
 }
 
 void Core::deInit()
 {
 	std::cout << "Game shutting down." << std::endl;
+	Expects(initialized);
 
 	// Ensure stage is cleaned up
 	running = false;
@@ -213,6 +224,8 @@ void Core::deInit()
 	
 	// Stop thread pool and other statics
 	statics.suspend();
+	
+	initialized = false;
 
 	// Deinit console redirector
 	std::cout << "Goodbye!" << std::endl;

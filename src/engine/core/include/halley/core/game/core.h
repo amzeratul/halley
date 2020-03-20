@@ -95,6 +95,7 @@ namespace Halley
 		std::unique_ptr<Stage> nextStage;
 		bool pendingStageTransition = false;
 
+		bool initialized = false;
 		bool running = true;
 		bool hasError = false;
 		bool hasConsole = false;

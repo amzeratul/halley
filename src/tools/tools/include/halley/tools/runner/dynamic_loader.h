@@ -16,7 +16,7 @@ namespace Halley
 		DynamicGameLoader(std::string dllName);
 		~DynamicGameLoader();
 
-		std::unique_ptr<IMainLoopable> createCore(Vector<std::string> args);
+		std::unique_ptr<Core> createCore(Vector<std::string> args) override;
 		std::unique_ptr<Game> createGame() override;
 		bool needsToReload() const override;
 		void reload() override;

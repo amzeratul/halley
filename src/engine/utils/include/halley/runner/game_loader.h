@@ -3,6 +3,7 @@
 #include <memory>
 #include <halley/core/game/game.h>
 #include "entry_point.h"
+#include "halley/core/game/core.h"
 
 namespace Halley {
 	class IMainLoopable;
@@ -16,6 +17,11 @@ namespace Halley {
 		virtual bool needsToReload() const { return false; }
 		virtual void reload() {}
 		virtual void setCore(IMainLoopable&) {}
+
+		virtual std::unique_ptr<Core> createCore(Vector<std::string> args)
+		{
+			return std::make_unique<Core>(createGame(), args);
+		}
 	};
 
 	template <typename T>

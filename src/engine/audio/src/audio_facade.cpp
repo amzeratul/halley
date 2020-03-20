@@ -251,6 +251,18 @@ void AudioFacade::onAudioException(std::exception& e)
 	}
 }
 
+void AudioFacade::onSuspend()
+{
+	pausePlayback();
+}
+
+void AudioFacade::onResume()
+{
+	Logger::logInfo("Resuming audio");
+	startPlayback(0);
+	Logger::logInfo("Resumed audio");
+}
+
 void AudioFacade::run()
 {
 	while (running) {

@@ -1,4 +1,5 @@
 #include "halley/core/game/halley_main.h"
+#include "halley/core/game/core.h"
 #include "halley/support/console.h"
 #include "game/halley_main.h"
 
@@ -14,7 +15,7 @@ int HalleyMain::runMain(GameLoader& loader, const Vector<std::string>& args)
 {
 	std::unique_ptr<Core> core;
 	try {
-		core = std::make_unique<Core>(loader.createGame(), args);
+		core = loader.createCore(args);
 		loader.setCore(*core);
 		core->getAPI().system->runGame([&]() {
 			core->init();

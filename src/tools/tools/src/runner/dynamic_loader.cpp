@@ -19,7 +19,7 @@ DynamicGameLoader::~DynamicGameLoader()
 	unload();
 }
 
-std::unique_ptr<IMainLoopable> DynamicGameLoader::createCore(std::vector<std::string> args)
+std::unique_ptr<Core> DynamicGameLoader::createCore(std::vector<std::string> args)
 {
 	Expects(entry != nullptr);
 	return entry->createCore(args);
@@ -27,7 +27,7 @@ std::unique_ptr<IMainLoopable> DynamicGameLoader::createCore(std::vector<std::st
 
 std::unique_ptr<Game> DynamicGameLoader::createGame()
 {
-	throw Exception("Cannot create game from DynamicGameLoader", HalleyExceptions::Core);
+	return entry->createGame();
 }
 
 bool DynamicGameLoader::needsToReload() const
@@ -54,7 +54,6 @@ void DynamicGameLoader::reload()
 void DynamicGameLoader::setCore(IMainLoopable& c)
 {
 	core = &c;
-	core->init();
 }
 
 #ifdef _WIN32

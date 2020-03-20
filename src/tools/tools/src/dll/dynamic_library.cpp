@@ -87,6 +87,9 @@ void DynamicLibrary::load(bool withAnotherName)
 
 void DynamicLibrary::unload()
 {
+	// WARNING: Don't call any Halley globals here (especially Logger)
+	// This is because this can be called while hot-reloading DLLs, where Halley globals are undefined
+	
 	if (loaded) {
 		#ifdef _WIN32
 		if (!FreeLibrary(static_cast<HMODULE>(handle))) {
@@ -147,12 +150,12 @@ bool DynamicLibrary::hasChanged() const
 
 void DynamicLibrary::flushLoaded() const
 {
+	// WARNING: Don't call any Halley globals here (especially Logger)
 	decltype(toDelete) remaining;
 	
 	for (auto& f: toDelete) {
 		std::error_code ec;
 		if (!std::filesystem::remove(f, ec)) {
-			Logger::logWarning("Can't remove " + f.string());
 			remaining.push_back(std::move(f));
 		}
 	}

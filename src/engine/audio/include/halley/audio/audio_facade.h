@@ -50,6 +50,9 @@ namespace Halley {
 
 		void onAudioException(std::exception& e);
 
+		void onSuspend() override;
+		void onResume() override;
+    	
     private:
 		Resources* resources = nullptr;
 		AudioOutputAPI& output;
