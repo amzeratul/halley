@@ -57,6 +57,24 @@ void SystemSDL::deInit()
 	SDL_Quit();
 }
 
+void SystemSDL::onResume()
+{
+	if (SDL_InitSubSystem(SDL_INIT_EVENTS) == -1) {
+		throw Exception(String("Exception initializing events: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
+	}
+	if (SDL_InitSubSystem(SDL_INIT_TIMER) == -1) {
+		throw Exception(String("Exception initializing timer: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
+	}
+	if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) == -1) {
+		throw Exception(String("Exception initializing joystick: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
+	}
+}
+
+void SystemSDL::onSuspend()
+{
+	SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_TIMER | SDL_INIT_EVENTS);
+}
+
 Path SystemSDL::getAssetsPath(const Path& gamePath) const
 {
 #if defined(HALLEY_MACOSX_BUNDLE)

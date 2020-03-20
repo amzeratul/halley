@@ -16,6 +16,9 @@ namespace Halley
 		void init() override;
 		void deInit() override;
 
+		void onResume() override;
+		void onSuspend() override;
+
 		Path getAssetsPath(const Path& gamePath) const override;
 		Path getUnpackedAssetsPath(const Path& gamePath) const override;
 

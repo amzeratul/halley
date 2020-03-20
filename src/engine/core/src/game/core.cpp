@@ -109,6 +109,9 @@ void Core::onSuspended()
 	if (api->inputInternal) {
 		api->inputInternal->onSuspend();
 	}
+	if (api->systemInternal) {
+		api->systemInternal->onSuspend();
+	}
 
 	statics.suspend();
 
@@ -127,7 +130,10 @@ void Core::onReloaded()
 	if (api->system) {
 		api->system->setThreadName("main");
 	}
-	
+
+	if (api->systemInternal) {
+		api->systemInternal->onResume();
+	}
 	if (api->inputInternal) {
 		api->inputInternal->onResume();
 	}
