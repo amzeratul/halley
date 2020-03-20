@@ -1,10 +1,14 @@
 #include "halley/tools/dll/dynamic_library.h"
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <halley/support/exception.h>
+
+#include "halley/maths/random.h"
+#include "halley/support/logger.h"
+#include "halley/text/encode.h"
 #include "halley/text/string_converter.h"
 
 using namespace Halley;
-using namespace boost::filesystem;
+using namespace std::filesystem;
 
 DynamicLibrary::DynamicLibrary(std::string originalPath)
 	: libOrigPath(originalPath)
@@ -24,7 +28,12 @@ void DynamicLibrary::load(bool withAnotherName)
 	// Determine which path to load
 	hasTempPath = withAnotherName;
 	if (withAnotherName) {
-		libPath = libOrigPath.parent_path() / unique_path("halley-%%%%-%%%%-%%%%-%%%%.dll");
+		auto tmpPath = libOrigPath.parent_path() / "halley_tmp";
+		create_directories(tmpPath);
+
+		Bytes randomBytes(8);
+		Random::getGlobal().getBytes(randomBytes);
+		libPath = tmpPath / String("halley-" + Encode::encodeBase16(randomBytes) + ".dll").cppStr();
 		copy_file(libOrigPath, libPath);
 	} else {
 		libPath = libOrigPath;
@@ -52,7 +61,7 @@ void DynamicLibrary::load(bool withAnotherName)
 
 	// Load
 	#ifdef _WIN32
-	handle = LoadLibrary(libPath.string().c_str());
+	handle = LoadLibraryW(libPath.wstring().c_str());
 	#endif
 	if (!handle) {
 		throw Exception("Unable to load library: " + libPath.string(), HalleyExceptions::Core);
@@ -78,12 +87,13 @@ void DynamicLibrary::unload()
 		handle = nullptr;
 
 		if (hasTempPath) {
-			remove(libPath);
+			toDelete.push_back(libPath);
 			/*
 			if (libPath != debugSymbolsPath) {
-				remove(debugSymbolsPath);
+				toDelete.push_back(debugSymbolsPath);
 			}
 			*/
+			flushLoaded();
 		}
 
 		loaded = false;
@@ -92,6 +102,8 @@ void DynamicLibrary::unload()
 
 void* DynamicLibrary::getFunction(std::string name) const
 {
+	Expects(loaded);
+	
 	#ifdef _WIN32
 	return GetProcAddress(handle, name.c_str());
 	#else
@@ -102,11 +114,16 @@ void* DynamicLibrary::getFunction(std::string name) const
 
 void* DynamicLibrary::getBaseAddress() const
 {
+	Expects(loaded);
 	return handle;
 }
 
 bool DynamicLibrary::hasChanged() const
 {
+	Expects(loaded);
+
+	flushLoaded();
+	
 	// Never got debug symbols, so disable hot-reload
 	if (!hasDebugSymbols) {
 		return false;
@@ -117,4 +134,21 @@ bool DynamicLibrary::hasChanged() const
 	}
 	// If BOTH the dll and debug symbols files have changed, we're ready to reload
 	return last_write_time(libOrigPath) > libLastWrite && last_write_time(debugSymbolsOrigPath) > debugLastWrite;
+}
+
+void DynamicLibrary::flushLoaded() const
+{
+	decltype(toDelete) remaining;
+	
+	for (auto& f: toDelete) {
+		std::error_code ec;
+		if (!std::filesystem::remove(f, ec)) {
+			Logger::logWarning("Can't remove " + f.string());
+			remaining.push_back(std::move(f));
+		} else {
+			Logger::logInfo("Removed " + f.string());
+		}
+	}
+	
+	toDelete = std::move(remaining);
 }

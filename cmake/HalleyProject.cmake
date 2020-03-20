@@ -434,9 +434,12 @@ function(halleyProject name sources headers genDefinitions targetDir)
 
 		# Setup default run paths for DLL
 		# Note that I'm using release halley-cmd for debug, as currently they have the same name
-		set(HALLEY_RUNNER_PATH ${HALLEY_PATH}\\bin\\halley-cmd.exe)
-		set(HALLEY_RUNNER_DEBUG_PATH ${HALLEY_PATH}\\bin\\halley-cmd.exe)
-		configure_file(${HALLEY_PATH}/cmake/halley_game_dll.vcxproj.user.in ${CMAKE_CURRENT_BINARY_DIR}/${name}-dll.vcxproj.user @ONLY) 
+		if (TARGET halley-cmd)
+			set(HALLEY_RUNNER_PATH ${HALLEY_PATH}\\bin\\halley-cmd.exe)
+			set(HALLEY_RUNNER_DEBUG_PATH ${HALLEY_PATH}\\bin\\halley-cmd.exe)
+			configure_file(${HALLEY_PATH}/cmake/halley_game_dll.vcxproj.user.in ${CMAKE_CURRENT_BINARY_DIR}/${name}-dll.vcxproj.user @ONLY) 
+			add_dependencies(${name}-dll halley-cmd)
+		endif()
 
 		#set_target_properties(${name}-dll PROPERTIES OUTPUT_NAME ${name})
 		#set_target_properties(${name}-exe PROPERTIES OUTPUT_NAME ${name})

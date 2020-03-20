@@ -1,9 +1,13 @@
 #pragma once
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#ifdef min
+#undef min
+#undef max
+#endif
 using LibHandleType = HMODULE;
 #else
 using LibHandleType = void*;
@@ -27,19 +31,21 @@ namespace Halley
 
 	private:
 		std::string libName;
-		boost::filesystem::path libOrigPath;
-		boost::filesystem::path libPath;
-		boost::filesystem::path debugSymbolsOrigPath;
-		boost::filesystem::path debugSymbolsPath;
+		std::filesystem::path libOrigPath;
+		std::filesystem::path libPath;
+		std::filesystem::path debugSymbolsOrigPath;
+		std::filesystem::path debugSymbolsPath;
 
 		LibHandleType handle = nullptr;
 
-		time_t libLastWrite = 0;
-		time_t debugLastWrite = 0;
+		std::filesystem::file_time_type libLastWrite;
+		std::filesystem::file_time_type debugLastWrite;
 
 		bool hasTempPath = false;
 		bool hasDebugSymbols = false;
 		bool loaded = false;
 
+		mutable std::vector<std::filesystem::path> toDelete;
+		void flushLoaded() const;
 	};
 }
