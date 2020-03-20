@@ -31,6 +31,7 @@ void AudioSDL::init()
 void AudioSDL::deInit()
 {
 	closeAudioDevice();
+	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
 Vector<std::unique_ptr<const AudioDevice>> AudioSDL::getAudioDevices()
@@ -110,6 +111,16 @@ void AudioSDL::stopPlayback()
 		SDL_PauseAudioDevice(device, 1);
 		playing = false;
 	}
+}
+
+void AudioSDL::onSuspend()
+{
+	deInit();
+}
+
+void AudioSDL::onResume()
+{
+	init();
 }
 
 bool AudioSDL::needsAudioThread() const

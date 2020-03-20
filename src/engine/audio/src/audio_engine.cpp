@@ -98,6 +98,7 @@ void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 {
 	spec = s;
 	out = &o;
+	running = true;
 
 	out->setAudioOutputInterface(*this);
 

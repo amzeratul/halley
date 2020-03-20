@@ -53,13 +53,20 @@ Vector<std::unique_ptr<const AudioDevice>> AudioFacade::getAudioDevices()
 
 void AudioFacade::startPlayback(int deviceNumber)
 {
-	if (started) {
+	doStartPlayback(deviceNumber, true);
+}
+
+void AudioFacade::doStartPlayback(int deviceNumber, bool createEngine)
+{
+	if (createEngine && started) {
 		stopPlayback();
 	}
 
 	auto devices = getAudioDevices();
 	if (int(devices.size()) > deviceNumber) {
-		engine = std::make_unique<AudioEngine>();
+		if (createEngine) {
+			engine = std::make_unique<AudioEngine>();
+		}
 
 		AudioSpec format;
 		format.bufferSize = 512;
@@ -70,6 +77,7 @@ void AudioFacade::startPlayback(int deviceNumber)
 		try {
 			audioSpec = output.openAudioDevice(format, devices.at(deviceNumber).get(), [this]() { onNeedBuffer(); });
 			started = true;
+			lastDeviceNumber = deviceNumber;
 
 			std::cout << "Audio Playback started.\n";
 			std::cout << "\tDevice: " << devices.at(deviceNumber)->getName() << " [" << deviceNumber << "]\n";
@@ -127,6 +135,16 @@ void AudioFacade::pausePlayback()
 		}
 		output.stopPlayback();
 	}
+}
+
+void AudioFacade::onSuspend()
+{
+	pausePlayback();
+}
+
+void AudioFacade::onResume()
+{
+	doStartPlayback(lastDeviceNumber, false);
 }
 
 AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
@@ -249,18 +267,6 @@ void AudioFacade::onAudioException(std::exception& e)
 	if (exceptions.canWrite(1)) {
 		exceptions.writeOne(e.what());
 	}
-}
-
-void AudioFacade::onSuspend()
-{
-	pausePlayback();
-}
-
-void AudioFacade::onResume()
-{
-	Logger::logInfo("Resuming audio");
-	startPlayback(0);
-	Logger::logInfo("Resumed audio");
 }
 
 void AudioFacade::run()

@@ -63,6 +63,7 @@ namespace Halley {
 		std::atomic<bool> running;
 		std::atomic<bool> started;
 	    AudioSpec audioSpec;
+		int lastDeviceNumber = 0;
 
 		RingBuffer<std::function<void()>> commandQueue;
 		std::vector<std::function<void()>> inbox;
@@ -76,6 +77,7 @@ namespace Halley {
 		uint32_t uniqueId = 0;
 		bool ownAudioThread;
 
+		void doStartPlayback(int deviceNumber, bool createEngine);
 	    void run();
 	    void stepAudio();
 	    void enqueue(std::function<void()> action);

@@ -31,7 +31,9 @@ namespace Halley
 
 		void startPlayback() override;
 		void stopPlayback() override;
-
+		void onSuspend() override;
+		void onResume() override;
+		
 		void onCallback(unsigned char* stream, int len);
 
 		bool needsMoreAudio() override;

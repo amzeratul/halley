@@ -103,6 +103,9 @@ void Core::onSuspended()
 	if (api->audioInternal) {
 		api->audioInternal->onSuspend();
 	}
+	if (api->audioOutputInternal) {
+		api->audioOutputInternal->onSuspend();
+	}
 	if (api->inputInternal) {
 		api->inputInternal->onSuspend();
 	}
@@ -127,6 +130,9 @@ void Core::onReloaded()
 	
 	if (api->inputInternal) {
 		api->inputInternal->onResume();
+	}
+	if (api->audioOutputInternal) {
+		api->audioOutputInternal->onResume();
 	}
 	if (api->audioInternal) {
 		api->audioInternal->onResume();
