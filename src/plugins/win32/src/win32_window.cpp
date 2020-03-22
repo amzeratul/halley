@@ -1,13 +1,30 @@
 #include "win32_window.h"
+#include <winuser.h>
 
 using namespace Halley;
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK HalleyWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	//switch (uMsg) {
-	//default:
+	switch (uMsg) {
+	case WM_GETMINMAXINFO:
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
-	//}
+	case WM_NCCREATE:
+		return true;
+	case WM_NCCALCSIZE:
+		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	case WM_CREATE:
+		{
+			CREATESTRUCT* createStruct = reinterpret_cast<CREATESTRUCT*>(lParam);
+			void* window = createStruct->lpCreateParams;
+			SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
+			return DefWindowProc(hwnd, uMsg, wParam, lParam);
+		}
+	default:
+		{
+			auto window = reinterpret_cast<Win32Window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+			return window->onMessage(uMsg, wParam, lParam);
+		}
+	}
 }
 
 Win32Window::Win32Window(const WindowDefinition& def)
@@ -17,7 +34,7 @@ Win32Window::Win32Window(const WindowDefinition& def)
 
 	const static char* windowClassName = "HalleyWindow";
 	WNDCLASS wc = {};
-	wc.lpfnWndProc = WindowProc;
+	wc.lpfnWndProc = HalleyWindowProc;
 	wc.hInstance = hInstance;
 	wc.lpszClassName = windowClassName;
 	RegisterClass(&wc);
@@ -31,6 +48,11 @@ Win32Window::Win32Window(const WindowDefinition& def)
 		const auto error = GetLastError();
 		throw Exception("Unable to create window, error: " + toString(error, 16), HalleyExceptions::SystemPlugin);
 	}
+}
+
+Win32Window::~Win32Window()
+{
+	destroy();
 }
 
 void Win32Window::update(const WindowDefinition& def)
@@ -71,7 +93,10 @@ const WindowDefinition& Win32Window::getDefinition() const
 
 void Win32Window::destroy()
 {
-	DestroyWindow(hwnd);
+	if (hwnd) {
+		DestroyWindow(hwnd);
+	}
+	hwnd = nullptr;
 }
 
 void* Win32Window::getNativeHandle()
@@ -82,4 +107,12 @@ void* Win32Window::getNativeHandle()
 String Win32Window::getNativeHandleType()
 {
 	return "Win32";
+}
+
+LRESULT Win32Window::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	//switch (uMsg) {
+	//default:
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	//}
 }

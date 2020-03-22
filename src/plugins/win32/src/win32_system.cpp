@@ -39,7 +39,9 @@ std::unique_ptr<GLContext> Win32System::createGLContext()
 
 std::shared_ptr<Window> Win32System::createWindow(const WindowDefinition& definition)
 {
-	return std::make_shared<Win32Window>(definition);
+	auto window = std::make_shared<Win32Window>(definition);
+	window->show();
+	return window;
 }
 
 void Win32System::destroyWindow(std::shared_ptr<Window> window)
