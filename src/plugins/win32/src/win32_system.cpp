@@ -1,6 +1,7 @@
 #include "win32_system.h"
 
 #include "win32_data_reader.h"
+#include "win32_window.h"
 using namespace Halley;
 
 void Win32System::init()
@@ -36,15 +37,14 @@ std::unique_ptr<GLContext> Win32System::createGLContext()
 	return {};
 }
 
-std::shared_ptr<Window> Win32System::createWindow(const WindowDefinition& window)
+std::shared_ptr<Window> Win32System::createWindow(const WindowDefinition& definition)
 {
-	// TODO
-	return {};
+	return std::make_shared<Win32Window>(definition);
 }
 
 void Win32System::destroyWindow(std::shared_ptr<Window> window)
 {
-	// TODO
+	std::static_pointer_cast<Win32Window>(window)->destroy();
 }
 
 Vector2i Win32System::getScreenSize(int n) const

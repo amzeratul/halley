@@ -6,11 +6,14 @@ set(SOURCES
     "src/win32_data_reader.cpp"
     "src/win32_plugin.cpp"
     "src/win32_system.cpp"
+    "src/win32_window.cpp"
 )
 
 set(HEADERS
+    "src/halley_windows.h"
     "src/win32_data_reader.h"
     "src/win32_system.h"
+    "src/win32_window.h"
 )
 
 assign_source_group(${SOURCES})
