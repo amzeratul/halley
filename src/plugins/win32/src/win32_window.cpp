@@ -9,17 +9,24 @@ LRESULT CALLBACK HalleyWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 {
 	switch (uMsg) {
 	case WM_GETMINMAXINFO:
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+		{
+			MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lParam);
+			return 0;
+		}
 	case WM_NCCREATE:
 		return true;
 	case WM_NCCALCSIZE:
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+		{
+			return DefWindowProc(hwnd, uMsg, wParam, lParam);
+			//RECT* rect = reinterpret_cast<RECT*>(lParam);
+			//return 0;
+		}
 	case WM_CREATE:
 		{
 			CREATESTRUCT* createStruct = reinterpret_cast<CREATESTRUCT*>(lParam);
 			void* window = createStruct->lpCreateParams;
 			SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
-			return DefWindowProc(hwnd, uMsg, wParam, lParam);
+			return 0;
 		}
 	default:
 		{
@@ -42,11 +49,20 @@ Win32Window::Win32Window(const WindowDefinition& def, Win32System& system)
 	wc.lpszClassName = windowClassName;
 	RegisterClass(&wc);
 
-	const Vector2i pos = def.getPosition().value_or(Vector2i(0, 0));
+	const Vector2i pos = def.getPosition().value_or(Vector2i(CW_USEDEFAULT, CW_USEDEFAULT));
 	const Vector2i size = def.getSize();
-	
+
 	DWORD style = WS_OVERLAPPEDWINDOW;
-	hwnd = CreateWindowEx(0, windowClassName, definition.getTitle().c_str(), style, pos.x, pos.y, size.x, size.y, nullptr, nullptr, hInstance, this);
+	DWORD exStyle = 0;
+
+	RECT rect = {};
+	rect.left = 0;
+	rect.top = 0;
+	rect.right = size.x;
+	rect.bottom = size.y;
+	AdjustWindowRectEx(&rect, style, false, exStyle);
+	
+	hwnd = CreateWindowEx(exStyle, windowClassName, definition.getTitle().c_str(), style, pos.x, pos.y, rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, hInstance, this);
 	if (!hwnd) {
 		const auto error = GetLastError();
 		throw Exception("Unable to create window, error: " + toString(error, 16), HalleyExceptions::SystemPlugin);
@@ -66,6 +82,7 @@ void Win32Window::update(const WindowDefinition& def)
 void Win32Window::show()
 {
 	ShowWindow(hwnd, 1);
+	UpdateWindow(hwnd);
 }
 
 void Win32Window::hide()
@@ -85,8 +102,9 @@ void Win32Window::swap()
 
 Rect4i Win32Window::getWindowRect() const
 {
-	// TODO
-	return Rect4i(0, 0, 1920, 1080);
+	RECT rect;
+	GetClientRect(hwnd, &rect);
+	return Rect4i(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
 }
 
 const WindowDefinition& Win32Window::getDefinition() const
@@ -119,6 +137,8 @@ LRESULT Win32Window::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		destroy();
 		return 0;
+	case WM_GETICON:
+		return onGetIcon(wParam);
 	default:
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
@@ -127,4 +147,9 @@ LRESULT Win32Window::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 bool Win32Window::isAlive() const
 {
 	return hwnd != nullptr;
+}
+
+LRESULT Win32Window::onGetIcon(WPARAM iconType)
+{
+	return 0;
 }

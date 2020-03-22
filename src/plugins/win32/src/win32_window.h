@@ -31,5 +31,7 @@ namespace Halley {
 		WindowDefinition definition;
 		Win32System& system;
 		HWND hwnd;
-    };
+
+		LRESULT onGetIcon(WPARAM iconType);
+	};
 }
