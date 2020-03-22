@@ -413,6 +413,9 @@ function(halleyProject name sources headers genDefinitions targetDir)
 	
 	set(proj_sources ${sources} ${${name}_sources_gen} ${${name}_sources_systems})
 	set(proj_headers ${headers} ${${name}_headers_gen} ${genDefinitions})
+	set(proj_resources ${sources} ${headers})
+	list(FILTER proj_resources INCLUDE REGEX "[^.]*\\.rc")
+	message(${proj_resources})
 
 	assign_source_group(${proj_sources})
 	assign_source_group(${proj_headers})
@@ -432,7 +435,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 	else()
 		add_library(${name} STATIC ${proj_sources} ${proj_headers})
 		add_library(${name}-dll SHARED ${HALLEY_PATH}/src/entry/halley_dll_entry.cpp)
-		add_executable(${name}-exe WIN32 ${HALLEY_PATH}/src/entry/halley_exe_entry.cpp)
+		add_executable(${name}-exe WIN32 ${HALLEY_PATH}/src/entry/halley_exe_entry.cpp ${proj_resources})
 		
 		target_compile_definitions(${name} PUBLIC HALLEY_STATIC_LIBRARY)
 		target_compile_definitions(${name}-dll PUBLIC HALLEY_SHARED_LIBRARY)

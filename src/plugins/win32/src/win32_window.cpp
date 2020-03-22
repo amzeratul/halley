@@ -61,12 +61,18 @@ Win32Window::Win32Window(const WindowDefinition& def, Win32System& system)
 	rect.right = size.x;
 	rect.bottom = size.y;
 	AdjustWindowRectEx(&rect, style, false, exStyle);
+
+	icon = LoadIcon(hInstance, "IDI_MAIN_ICON");
 	
-	hwnd = CreateWindowEx(exStyle, windowClassName, definition.getTitle().c_str(), style, pos.x, pos.y, rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, hInstance, this);
+	hwnd = CreateWindowEx(exStyle, windowClassName, "HalleyWindow", style, pos.x, pos.y, rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, hInstance, this);
 	if (!hwnd) {
 		const auto error = GetLastError();
 		throw Exception("Unable to create window, error: " + toString(error, 16), HalleyExceptions::SystemPlugin);
 	}
+
+	SetWindowText(hwnd, definition.getTitle().c_str());
+	SetClassLongPtr(hwnd, GCLP_HICON, reinterpret_cast<LONG_PTR>(icon));
+	SendMessage(hwnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(icon));
 }
 
 Win32Window::~Win32Window()
@@ -137,8 +143,6 @@ LRESULT Win32Window::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		destroy();
 		return 0;
-	case WM_GETICON:
-		return onGetIcon(wParam);
 	default:
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
@@ -147,9 +151,4 @@ LRESULT Win32Window::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 bool Win32Window::isAlive() const
 {
 	return hwnd != nullptr;
-}
-
-LRESULT Win32Window::onGetIcon(WPARAM iconType)
-{
-	return 0;
 }
