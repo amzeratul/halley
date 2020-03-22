@@ -39,7 +39,7 @@ std::unique_ptr<GLContext> Win32System::createGLContext()
 
 std::shared_ptr<Window> Win32System::createWindow(const WindowDefinition& definition)
 {
-	auto window = std::make_shared<Win32Window>(definition);
+	auto window = std::make_shared<Win32Window>(definition, *this);
 	window->show();
 	return window;
 }
@@ -68,6 +68,20 @@ void Win32System::showCursor(bool show)
 
 bool Win32System::generateEvents(VideoAPI* video, InputAPI* input)
 {
-	// TODO
-	return true;
+	MSG msg = {};
+	while (PeekMessage(&msg, nullptr, 0, 0, true)) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	if (!run) {
+		PostQuitMessage(0);
+	}
+	
+	return run;
+}
+
+void Win32System::onWindowDestroyed(Win32Window& window)
+{
+	run = false;
 }

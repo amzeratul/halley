@@ -4,9 +4,11 @@
 #include "halley_windows.h"
 
 namespace Halley {
-    class Win32Window final : public Window {
+	class Win32System;
+
+	class Win32Window final : public Window {
     public:
-		Win32Window(const WindowDefinition& definition);
+		Win32Window(const WindowDefinition& definition, Win32System& system);
 		~Win32Window();
     	
 	    void update(const WindowDefinition& definition) override;
@@ -23,8 +25,11 @@ namespace Halley {
 
     	LRESULT onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+		bool isAlive() const;
+
 	private:
 		WindowDefinition definition;
+		Win32System& system;
 		HWND hwnd;
     };
 }

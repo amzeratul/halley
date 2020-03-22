@@ -1,6 +1,8 @@
 #include "win32_window.h"
 #include <winuser.h>
 
+#include "win32_system.h"
+
 using namespace Halley;
 
 LRESULT CALLBACK HalleyWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -27,8 +29,9 @@ LRESULT CALLBACK HalleyWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	}
 }
 
-Win32Window::Win32Window(const WindowDefinition& def)
+Win32Window::Win32Window(const WindowDefinition& def, Win32System& system)
 	: definition(def)
+	, system(system)
 {
 	auto hInstance = GetModuleHandle(nullptr);
 
@@ -97,6 +100,7 @@ void Win32Window::destroy()
 		DestroyWindow(hwnd);
 	}
 	hwnd = nullptr;
+	system.onWindowDestroyed(*this);
 }
 
 void* Win32Window::getNativeHandle()
@@ -111,8 +115,16 @@ String Win32Window::getNativeHandleType()
 
 LRESULT Win32Window::onMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	//switch (uMsg) {
-	//default:
-	return DefWindowProc(hwnd, uMsg, wParam, lParam);
-	//}
+	switch (uMsg) {
+	case WM_DESTROY:
+		destroy();
+		return 0;
+	default:
+		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	}
+}
+
+bool Win32Window::isAlive() const
+{
+	return hwnd != nullptr;
 }

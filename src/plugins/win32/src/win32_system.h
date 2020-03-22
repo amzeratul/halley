@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/core/api/halley_api_internal.h"
+#include "win32_window.h"
 
 namespace Halley {
     class Win32System : public SystemAPIInternal {
@@ -21,5 +22,10 @@ namespace Halley {
 	    void showCursor(bool show) override;
 
 	    bool generateEvents(VideoAPI* video, InputAPI* input) override;
+
+    	void onWindowDestroyed(Win32Window& window);
+
+    private:
+		bool run = true;
     };
 }
