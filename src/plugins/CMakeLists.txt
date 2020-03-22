@@ -2,6 +2,10 @@ if (USE_DX11)
     add_subdirectory(dx11)
 endif ()
 
+if (USE_WIN32)
+    add_subdirectory(win32)
+endif()
+
 if (USE_OPENGL OR USE_OPENGL_ES2 OR USE_OPENGL_ES3)
     add_subdirectory(opengl)
 endif ()
