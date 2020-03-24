@@ -18,7 +18,8 @@ set(SOURCES
         "src/game/environment.cpp"
         "src/game/game_console.cpp"
         "src/game/halley_main.cpp"
-		"src/game/halley_statics.cpp"
+        "src/game/halley_statics.cpp"
+        "src/game/main_loop.cpp"
 
         "src/graphics/camera.cpp"
         "src/graphics/material/material.cpp"
@@ -91,7 +92,10 @@ set(HEADERS
         "include/halley/core/api/save_data.h"
         "include/halley/core/api/system_api.h"
         "include/halley/core/api/video_api.h"
-        
+
+        "include/halley/core/entry/entry_point.h"
+        "include/halley/core/entry/game_loader.h"
+
         "include/halley/core/game/core.h"
         "include/halley/core/game/environment.h"
         "include/halley/core/game/game.h"
@@ -99,6 +103,7 @@ set(HEADERS
         "include/halley/core/game/halley_main.h"
         "include/halley/core/game/halley_statics.h"
         "include/halley/core/game/game_platform.h"
+        "include/halley/core/game/main_loop.h"
         
         "include/halley/core/graphics/blend.h"
         "include/halley/core/graphics/camera.h"

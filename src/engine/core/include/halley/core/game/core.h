@@ -6,7 +6,7 @@
 #include <halley/time/stopwatch.h>
 #include <halley/support/redirect_stream.h>
 #include <halley/core/stage/stage.h>
-#include <halley/runner/main_loop.h>
+#include <halley/core/game/main_loop.h>
 #include <halley/plugin/plugin.h>
 #include <halley/core/api/halley_api_internal.h>
 #include "halley_statics.h"

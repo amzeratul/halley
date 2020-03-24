@@ -1,9 +1,9 @@
 #pragma once
 #include <memory>
-#include <halley/runner/game_loader.h>
 #include "halley/tools/dll/dynamic_library.h"
 #include "symbol_loader.h"
-#include <halley/runner/main_loop.h>
+#include <halley/core/game/main_loop.h>
+#include "halley/core/entry/game_loader.h"
 
 namespace Halley
 {

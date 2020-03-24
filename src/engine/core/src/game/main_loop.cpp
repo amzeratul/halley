@@ -1,9 +1,10 @@
+#include "game/main_loop.h"
+#include "entry/game_loader.h"
+
 #include <iostream>
 
 #include <halley/support/console.h>
 #include <halley/support/debug.h>
-#include <halley/runner/main_loop.h>
-#include <halley/runner/game_loader.h>
 
 #include "halley/core/api/halley_api.h"
 

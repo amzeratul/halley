@@ -1,8 +1,5 @@
 #include "halley/tools/runner/runner_tool.h"
 #include "halley/tools/runner/dynamic_loader.h"
-#include <boost/filesystem.hpp>
-#include <halley/runner/main_loop.h>
-
 #include "halley/core/game/halley_main.h"
 
 using namespace Halley;

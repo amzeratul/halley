@@ -1,6 +1,6 @@
 #include "halley/tools/runner/dynamic_loader.h"
 #include <halley/core/game/halley_main.h>
-#include <halley/runner/entry_point.h>
+#include <halley/core/entry/entry_point.h>
 #include <gsl/gsl_assert>
 #include "halley/support/console.h"
 #include "halley/tools/runner/memory_patcher.h"

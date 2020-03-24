@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <vector>
-#include "main_loop.h"
+#include "halley/core/game/main_loop.h"
 
 namespace Halley
 {
