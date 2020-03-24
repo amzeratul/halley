@@ -219,3 +219,8 @@ void Project::notifyAssetFileModified(Path path)
 		checkAssetsTask->requestRefreshAsset(std::move(path));
 	}
 }
+
+const std::shared_ptr<DynamicLibrary>& Project::getGameDLL() const
+{
+	return gameDll;
+}

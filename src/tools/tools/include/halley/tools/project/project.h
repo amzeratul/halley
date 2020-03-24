@@ -66,6 +66,8 @@ namespace Halley
 		void setCheckAssetTask(CheckAssetsTask* checkAssetsTask);
 		void notifyAssetFileModified(Path path);
 
+		const std::shared_ptr<DynamicLibrary>& getGameDLL() const;
+
 	private:
 		std::vector<String> platforms;
 		Path rootPath;

@@ -13,6 +13,8 @@ children:
     options:
     - id: assets
       image: ui/toolbar_assets.png
+    - id: scene
+      image: ui/toolbar_scene.png
     - id: ecs
       image: ui/toolbar_ecs.png
     - id: remote

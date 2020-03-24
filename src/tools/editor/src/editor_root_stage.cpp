@@ -10,6 +10,7 @@
 #include "ui/taskbar.h"
 #include "ui/toolbar.h"
 #include "assets/assets_editor_window.h"
+#include "scene/scene_editor_window.h"
 
 using namespace Halley;
 
@@ -161,7 +162,7 @@ void EditorRootStage::createProjectUI()
 {
 	clearUI();
 
-	pagedPane = std::make_shared<UIPagedPane>("pages", 5);
+	pagedPane = std::make_shared<UIPagedPane>("pages", 6);
 	const auto toolbar = std::make_shared<Toolbar>(*uiFactory, project->getProperties());
 	const auto taskbar = std::make_shared<TaskBar>(*uiFactory, *tasks);
 
@@ -169,26 +170,30 @@ void EditorRootStage::createProjectUI()
 	uiMid->add(pagedPane, 1);
 	uiBottom->add(taskbar, 1);
 
-	pagedPane->getPage(0)->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project, getAPI()), 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(4)->add(std::make_shared<ConsoleWindow>(*uiFactory), 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(int(EditorTabs::Assets))->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project, getAPI()), 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(int(EditorTabs::Scene))->add(std::make_shared<SceneEditorWindow>(*uiFactory, *project, getAPI()), 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(int(EditorTabs::Settings))->add(std::make_shared<ConsoleWindow>(*uiFactory), 1, Vector4f(8, 8, 8, 8));
 
 	toolbar->setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
 	{
 		String toolName;
-		switch (event.getIntData()) {
-		case 0:
+		switch (EditorTabs(event.getIntData())) {
+		case EditorTabs::Assets:
 			toolName = "Assets";
 			break;
-		case 1:
+		case EditorTabs::Scene:
+			toolName = "Scene";
+			break;
+		case EditorTabs::ECS:
 			toolName = "ECS";
 			break;
-		case 2:
+		case EditorTabs::Remotes:
 			toolName = "Remotes";
 			break;
-		case 3:
+		case EditorTabs::Properties:
 			toolName = "Properties";
 			break;
-		case 4:
+		case EditorTabs::Settings:
 			toolName = "Settings";
 			break;
 		}

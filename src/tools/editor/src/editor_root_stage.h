@@ -8,6 +8,15 @@ namespace Halley {
 	class EditorUIFactory;
 	class Project;
 
+	enum class EditorTabs {
+		Assets,
+		Scene,
+		ECS,
+		Remotes,
+		Properties,
+		Settings
+	};
+
 	class EditorRootStage final : public Stage
 	{
 	public:

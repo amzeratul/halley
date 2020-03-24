@@ -1,0 +1,8 @@
+---
+widget: { class: widget }
+sizer: { type: vertical }
+children:
+- widget: { class: label, text: TODO! :) }
+- widget: { id: canvas, class: sceneEditorCanvas }
+  proportion: 1
+...

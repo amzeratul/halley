@@ -15,6 +15,11 @@ set (editor_sources
 	"src/assets/assets_editor_window.cpp"
 	"src/assets/metadata_editor.cpp"
 
+	"src/scene/entity_editor.cpp"
+	"src/scene/entity_list.cpp"
+	"src/scene/scene_editor_canvas.cpp"
+	"src/scene/scene_editor_window.cpp"
+
 	"src/ui/console_window.cpp"
 	"src/ui/editor_ui_factory.cpp"
 	"src/ui/load_project_window.cpp"
@@ -32,6 +37,11 @@ set (editor_headers
 	"src/assets/animation_editor.h"
 	"src/assets/assets_editor_window.h"
 	"src/assets/metadata_editor.h"
+
+	"src/scene/entity_editor.h"
+	"src/scene/entity_list.h"
+	"src/scene/scene_editor_canvas.h"
+	"src/scene/scene_editor_window.h"
 
 	"src/ui/console_window.h"
 	"src/ui/editor_ui_factory.h"

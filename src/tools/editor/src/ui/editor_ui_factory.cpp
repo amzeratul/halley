@@ -4,6 +4,7 @@
 #include "scroll_background.h"
 #include "src/assets/animation_editor.h"
 #include "src/assets/metadata_editor.h"
+#include "src/scene/scene_editor_canvas.h"
 using namespace Halley;
 
 std::shared_ptr<UIStyleSheet> makeStyleSheet(Resources& resources)
@@ -27,6 +28,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("scrollBackground", [=] (const ConfigNode& node) { return makeScrollBackground(node); });
 	addFactory("animationEditorDisplay", [=] (const ConfigNode& node) { return makeAnimationEditorDisplay(node); });
 	addFactory("metadataEditor", [=] (const ConfigNode& node) { return makeMetadataEditor(node); });
+	addFactory("sceneEditorCanvas", [=](const ConfigNode& node) { return makeSceneEditorCanvas(node); });
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeScrollBackground(const ConfigNode& entryNode)
@@ -44,4 +46,11 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeAnimationEditorDisplay(const Conf
 std::shared_ptr<UIWidget> EditorUIFactory::makeMetadataEditor(const ConfigNode& entryNode)
 {
 	return std::make_shared<MetadataEditor>(*this);
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeSceneEditorCanvas(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	return std::make_shared<SceneEditorCanvas>(id, resources);
 }
