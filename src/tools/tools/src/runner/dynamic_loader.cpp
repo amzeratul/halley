@@ -56,16 +56,10 @@ void DynamicGameLoader::setCore(IMainLoopable& c)
 	core = &c;
 }
 
-#ifdef _WIN32
-#define STDCALL __stdcall
-#else
-#define STDCALL
-#endif
-
 void DynamicGameLoader::load()
 {
 	lib.load(true);
-	auto getHalleyEntry = reinterpret_cast<IHalleyEntryPoint*(STDCALL*)()>(lib.getFunction("getHalleyEntry"));
+	auto getHalleyEntry = reinterpret_cast<IHalleyEntryPoint*(HALLEY_STDCALL*)()>(lib.getFunction("getHalleyEntry"));
 	if (!getHalleyEntry) {
 		lib.unload();
 		throw Exception("getHalleyEntry not found.", HalleyExceptions::Core);

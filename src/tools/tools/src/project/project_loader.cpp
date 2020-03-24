@@ -90,7 +90,8 @@ Path ProjectLoader::getDLLPath(const Path& projectPath, const String& dllName) c
 	if (dllName.isEmpty()) {
 		return "";
 	}
-	return projectPath / (dllName + getDLLExtension());
+	const String suffix = Debug::isDebug() ? "_d" : "";
+	return projectPath / (dllName + suffix + getDLLExtension());
 }
 
 #ifdef _WIN32
