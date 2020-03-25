@@ -15,14 +15,14 @@ namespace Halley {
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
-
+		void render(RenderContext& rc) const override;
+		
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
 		Resources* gameResources = nullptr;
 
 		Sprite border;
-		Sprite canvas;
 
 		std::shared_ptr<DynamicLibrary> gameDLL;
 		std::unique_ptr<SceneEditorInterface> interface;
@@ -30,8 +30,13 @@ namespace Halley {
 		std::unique_ptr<CoreAPIInternal> gameCoreAPI;
 		mutable bool errorState = false;
 
+		std::shared_ptr<TextureRenderTarget> renderTarget;
+		Vector2i curTextureSize;
+		Vector2i curRenderSize;
+
 		void updateInterface(Time t);
-		void renderInterface() const;
+		void renderInterface(RenderContext& rc) const;
+		void updateCanvas(Vector2i size);
 
 		void loadDLL();
 		void unloadDLL();

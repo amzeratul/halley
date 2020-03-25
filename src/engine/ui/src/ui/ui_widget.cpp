@@ -88,6 +88,19 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 	}
 }
 
+void UIWidget::doRender(RenderContext& rc)
+{
+	if (!isActive()) {
+		return;
+	}
+	
+	render(rc);
+
+	for (auto& c: getChildren()) {
+		c->doRender(rc);
+	}
+}
+
 Vector2f UIWidget::getLayoutMinimumSize(bool force) const
 {
 	if (!isActive() && !force) {
@@ -634,6 +647,10 @@ void UIWidget::drawChildren(UIPainter& painter) const
 	for (auto& c: getChildren()) {
 		c->doDraw(painter);
 	}
+}
+
+void UIWidget::render(RenderContext& render) const
+{
 }
 
 void UIWidget::update(Time t, bool moved)

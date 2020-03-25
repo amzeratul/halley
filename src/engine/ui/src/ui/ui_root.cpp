@@ -338,6 +338,13 @@ void UIRoot::draw(SpritePainter& painter, int mask, int layer)
 	}
 }
 
+void UIRoot::render(RenderContext& rc)
+{
+	for (auto& c: getChildren()) {
+		c->doRender(rc);
+	}
+}
+
 Maybe<AudioHandle> UIRoot::playSound(const String& eventName)
 {
 	if (audio && !eventName.isEmpty()) {

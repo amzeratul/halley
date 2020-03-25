@@ -10,7 +10,6 @@ SceneEditorCanvas::SceneEditorCanvas(String id, Resources& resources, const Hall
 	, resources(resources)
 {
 	border.setImage(resources, "whitebox.png").setColour(Colour4f());
-	canvas.setImage(resources, "whitebox.png").setColour(Colour4f(0.2f, 0.2f, 0.2f));
 }
 
 SceneEditorCanvas::~SceneEditorCanvas()
@@ -20,8 +19,8 @@ SceneEditorCanvas::~SceneEditorCanvas()
 
 void SceneEditorCanvas::update(Time t, bool moved)
 {
-	canvas.setPos(getPosition() + Vector2f(1, 1)).setSize(getSize() - Vector2f(2, 2));
 	updateInterface(t);
+	updateCanvas(Vector2i(getSize()) - Vector2i(2, 2));
 }
 
 void SceneEditorCanvas::draw(UIPainter& painter) const
@@ -33,9 +32,25 @@ void SceneEditorCanvas::draw(UIPainter& painter) const
 	painter.draw(border.clone().setPos(pos).setSize(Vector2f(1, size.y)), true);
 	painter.draw(border.clone().setPos(pos + Vector2f(size.x - 1, 0)).setSize(Vector2f(1, size.y)), true);
 
-	renderInterface();
+	auto canvas = Sprite()
+		.setPos(getPosition() + Vector2f(1, 1)).setSize(getSize() - Vector2f(2, 2));
+
+	if (interface && renderTarget) {
+		const auto& tex = renderTarget->getTexture(0);
+		canvas
+			.setImage(tex, resources.get<MaterialDefinition>("Halley/SpriteOpaque"))
+			.setSize(Vector2f(curRenderSize))
+			.setTexRect(Rect4f(Vector2f(), Vector2f(curRenderSize) / Vector2f(tex->getSize())));
+	} else {
+		canvas.setImage(resources, "whitebox.png").setColour(Colour4f(0.2f, 0.2f, 0.2f));
+	}
 	
-	painter.draw(canvas);
+	painter.draw(canvas, true);
+}
+
+void SceneEditorCanvas::render(RenderContext& rc) const
+{
+	renderInterface(rc);
 }
 
 void SceneEditorCanvas::setGameDLL(std::shared_ptr<DynamicLibrary> dll, Resources& gameResources)
@@ -73,7 +88,7 @@ void SceneEditorCanvas::updateInterface(Time t)
 	}
 }
 
-void SceneEditorCanvas::renderInterface() const
+void SceneEditorCanvas::renderInterface(RenderContext& rc) const
 {
 	if (errorState) {
 		return;
@@ -81,8 +96,30 @@ void SceneEditorCanvas::renderInterface() const
 	
 	if (interface) {
 		guardedRun([&]() {
-			// TODO
+			auto context = rc.with(*renderTarget);
+			interface->render(context);
 		});
+	}
+}
+
+void SceneEditorCanvas::updateCanvas(Vector2i size)
+{
+	if (size != curRenderSize && size.x > 0 && size.y > 0) {
+		curRenderSize = size;
+
+		const auto textureSize = Vector2i(nextPowerOf2(size.x), nextPowerOf2(size.y));
+		if (textureSize != curTextureSize) {
+			curTextureSize = textureSize;
+			std::shared_ptr<Texture> tex = api.video->createTexture(textureSize);
+			auto desc = TextureDescriptor(textureSize, TextureFormat::RGBA);
+			desc.isRenderTarget = true;
+			tex->load(std::move(desc));
+
+			renderTarget = api.video->createTextureRenderTarget();
+			renderTarget->setTarget(0, tex);
+		}
+
+		renderTarget->setViewPort(Rect4i(Vector2i(), size));
 	}
 }
 

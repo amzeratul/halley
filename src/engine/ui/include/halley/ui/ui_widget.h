@@ -34,6 +34,7 @@ namespace Halley {
 
 		void doDraw(UIPainter& painter) const;
 		void doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType);
+		void doRender(RenderContext& rc);
 
 		Vector2f getLayoutMinimumSize(bool force) const override;
 		void setRect(Rect4f rect) override;
@@ -156,6 +157,7 @@ namespace Halley {
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;
 		virtual void drawChildren(UIPainter& painter) const;
+		virtual void render(RenderContext& rc) const;
 		virtual void update(Time t, bool moved);
 
 		void updateBehaviours(Time t);

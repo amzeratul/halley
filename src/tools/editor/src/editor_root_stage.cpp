@@ -62,6 +62,8 @@ void EditorRootStage::onVariableUpdate(Time time)
 
 void EditorRootStage::onRender(RenderContext& context) const
 {
+	ui->render(context);
+	
 	context.bind([&](Painter& painter)
 	{
 		auto view = Rect4f(painter.getViewPort());

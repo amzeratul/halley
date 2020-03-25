@@ -6,6 +6,7 @@
 #include "ui_parent.h"
 #include "ui_input.h"
 #include "halley/core/api/audio_api.h"
+#include "halley/core/game/core.h"
 
 namespace Halley {
 	class SpritePainter;
@@ -32,6 +33,8 @@ namespace Halley {
 
 		void update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual);
 		void draw(SpritePainter& painter, int mask, int layer);
+		void render(RenderContext& rc);
+
 		void mouseOverNext(bool forward = true);
 		void runLayout();
 		
