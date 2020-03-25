@@ -8,10 +8,11 @@
 
 using namespace Halley;
 
-DevConClient::DevConClient(const HalleyAPI& api, std::unique_ptr<NetworkService> service, const String& address, int port)
+DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::unique_ptr<NetworkService> service, String address, int port)
 	: api(api)
+	, resources(resources)
 	, service(std::move(service))
-	, address(address)
+	, address(std::move(address))
 	, port(port)
 {
 	connect();
@@ -48,7 +49,7 @@ void DevConClient::update()
 
 void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 {
-	api.core->getResources().reloadAssets(msg.getIds());
+	resources.reloadAssets(msg.getIds());
 }
 
 void DevConClient::connect()

@@ -192,7 +192,7 @@ void Core::init()
 	// Create devcon connection
 	String devConAddress = game->getDevConAddress();
 	if (!devConAddress.isEmpty()) {
-		devConClient = std::make_unique<DevConClient>(*api, api->network->createService(NetworkProtocol::TCP), devConAddress, game->getDevConPort());
+		devConClient = std::make_unique<DevConClient>(*api, *resources, api->network->createService(NetworkProtocol::TCP), std::move(devConAddress), game->getDevConPort());
 	}
 
 	// Start game
@@ -200,7 +200,7 @@ void Core::init()
 	
 	// Get video resources
 	if (api->video) {
-		painter = api->videoInternal->makePainter(api->core->getResources());
+		painter = api->videoInternal->makePainter(*resources);
 	}
 
 	initialized = true;

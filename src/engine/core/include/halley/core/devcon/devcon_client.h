@@ -10,11 +10,12 @@ namespace Halley
 	class HalleyAPI;
 	class IConnection;
 	class MessageQueue;
+	class Resources;
 
 	class DevConClient : private ILoggerSink
 	{
 	public:
-		DevConClient(const HalleyAPI& api, std::unique_ptr<NetworkService> service, const String& address, int port = DevCon::devConPort);
+		DevConClient(const HalleyAPI& api, Resources& resources, std::unique_ptr<NetworkService> service, String address, int port = DevCon::devConPort);
 		~DevConClient();
 
 		void update();
@@ -23,6 +24,7 @@ namespace Halley
 
 	private:
 		const HalleyAPI& api;
+		Resources& resources;
 		std::unique_ptr<NetworkService> service;
 		String address;
 		int port;

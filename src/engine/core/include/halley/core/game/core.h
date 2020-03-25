@@ -36,7 +36,6 @@ namespace Halley
 		void initStage(Stage& stage) override;
 		Stage& getCurrentStage() override;
 		void quit(int exitCode = 0) override;
-		Resources& getResources() override;
 		const Environment& getEnvironment() override;
 		int64_t getTime(CoreAPITimer timer, TimeLine tl, StopwatchAveraging::Mode mode) const override;
 
@@ -46,6 +45,8 @@ namespace Halley
 		bool transitionStage() override;
 		const HalleyAPI& getAPI() const override { return *api; }
 		HalleyStatics& getStatics() override;
+
+		Resources& getResources();
 
 		void onSuspended() override;
 		void onReloaded() override;
