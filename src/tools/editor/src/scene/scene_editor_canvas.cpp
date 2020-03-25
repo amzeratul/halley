@@ -13,7 +13,10 @@ SceneEditorCanvas::SceneEditorCanvas(String id, Resources& resources, const Hall
 	canvas.setImage(resources, "whitebox.png").setColour(Colour4f(0.2f, 0.2f, 0.2f));
 }
 
-SceneEditorCanvas::~SceneEditorCanvas() = default;
+SceneEditorCanvas::~SceneEditorCanvas()
+{
+	unloadDLL();
+}
 
 void SceneEditorCanvas::update(Time t, bool moved)
 {
