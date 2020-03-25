@@ -12,8 +12,11 @@ namespace Halley {
 	public:
 		explicit EntityFactory(World& world, Resources& resources);
 		virtual ~EntityFactory();
-		
+
+		EntityRef createEntity(const char* prefabName);
+		EntityRef createEntity(const String& prefabName);
 		EntityRef createEntity(const ConfigNode& node);
+		
 		void updateEntity(EntityRef& entity, const ConfigNode& node, bool transformOnly = false);
 		void updateEntityTree(EntityRef& entity, const ConfigNode& node);
 		

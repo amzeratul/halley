@@ -11,6 +11,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "game/game.h"
 #include "game/game_console.h"
 #include "game/game_platform.h"
+#include "game/scene_editor_interface.h"
 
 #include "graphics/blend.h"
 #include "graphics/painter.h"

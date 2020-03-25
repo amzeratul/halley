@@ -4,6 +4,7 @@
 
 #define DONT_INCLUDE_HALLEY_HPP
 #include "components/transform_2d_component.h"
+#include "halley/core/resources/resources.h"
 
 using namespace Halley;
 
@@ -17,6 +18,16 @@ EntityFactory::EntityFactory(World& world, Resources& resources)
 
 EntityFactory::~EntityFactory()
 {
+}
+
+EntityRef EntityFactory::createEntity(const char* prefabName)
+{
+	return createEntity(context.resources->get<ConfigFile>(prefabName)->getRoot());
+}
+
+EntityRef EntityFactory::createEntity(const String& prefabName)
+{
+	return createEntity(context.resources->get<ConfigFile>(prefabName)->getRoot());
 }
 
 EntityRef EntityFactory::createEntity(const ConfigNode& node)

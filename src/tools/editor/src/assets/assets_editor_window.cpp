@@ -9,28 +9,19 @@
 
 using namespace Halley;
 
-AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api)
+AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project)
 	: UIWidget("assets_editor", {}, UISizer())
 	, factory(factory)
 	, project(project)
 	, curSrcPath(".")
 {
-	loadResources(api);
+	loadResources();
 	makeUI();
 	setAssetSrcMode(true);
 }
 
-void AssetsEditorWindow::loadResources(const HalleyAPI& api)
+void AssetsEditorWindow::loadResources()
 {
-	auto locator = std::make_unique<ResourceLocator>(*api.system);
-	try {
-		locator->addFileSystem(project.getUnpackedAssetsPath());
-	} catch (...)
-	{}
-
-	gameResources = std::make_unique<Resources>(std::move(locator), api);
-	StandardResources::initialize(*gameResources);
-
 	project.addAssetReloadCallback([=] (const std::vector<String>& assets)
 	{
 		refreshAssets(assets);
@@ -112,7 +103,7 @@ void AssetsEditorWindow::listAssets(AssetType type)
 	}
 	const auto curPath = curPaths[type];
 
-	auto assets = gameResources->ofType(type).enumerate();
+	auto assets = project.getGameResources().ofType(type).enumerate();
 	std::sort(assets.begin(), assets.end());
 
 	setListContents(assets, curPath, false);
@@ -204,15 +195,7 @@ void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick)
 
 void AssetsEditorWindow::refreshAssets(const std::vector<String>& assets)
 {
-	if (gameResources->getLocator().getLocatorCount() == 0) {
-		try {
-			gameResources->getLocator().addFileSystem(project.getUnpackedAssetsPath());
-		} catch (...)
-		{}
-	}
-
 	assetNames.reset();
-	gameResources->reloadAssets(assets);
 	refreshList();
 
 	for (auto& editor: curEditors) {
@@ -226,7 +209,7 @@ std::shared_ptr<AssetEditor> AssetsEditorWindow::makeEditor(AssetType type, cons
 	case AssetType::Sprite:
 	case AssetType::Animation:
 	case AssetType::Texture:
-		return std::make_shared<AnimationEditor>(factory, *gameResources, type, project);
+		return std::make_shared<AnimationEditor>(factory, project.getGameResources(), type, project);
 	}
 	return {};
 }

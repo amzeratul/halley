@@ -17,12 +17,13 @@
 
 using namespace Halley;
 
-World::World(const HalleyAPI* api, bool collectMetrics, CreateComponentFunction createComponent)
+World::World(const HalleyAPI& api, Resources& resources, bool collectMetrics, CreateComponentFunction createComponent)
 	: api(api)
+	, resources(resources)
 	, createComponent(std::move(createComponent))
 	, collectMetrics(collectMetrics)
 {
-	MaskStorageInterface::createMaskStorageIfNeeded(api->core->getStatics());
+	MaskStorageInterface::createMaskStorageIfNeeded(api.core->getStatics());
 }
 
 World::~World()
@@ -46,7 +47,8 @@ World::~World()
 
 System& World::addSystem(std::unique_ptr<System> system, TimeLine timelineType)
 {
-	system->api = api;
+	system->api = &api;
+	system->resources = &resources;
 	system->setCollectSamples(collectMetrics);
 	auto& ref = *system.get();
 	auto& timeline = getSystems(timelineType);

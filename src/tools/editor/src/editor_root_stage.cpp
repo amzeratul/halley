@@ -170,7 +170,7 @@ void EditorRootStage::createProjectUI()
 	uiMid->add(pagedPane, 1);
 	uiBottom->add(taskbar, 1);
 
-	pagedPane->getPage(int(EditorTabs::Assets))->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project, getAPI()), 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(int(EditorTabs::Assets))->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project), 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(int(EditorTabs::Scene))->add(std::make_shared<SceneEditorWindow>(*uiFactory, *project, getAPI()), 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(int(EditorTabs::Settings))->add(std::make_shared<ConsoleWindow>(*uiFactory), 1, Vector4f(8, 8, 8, 8));
 

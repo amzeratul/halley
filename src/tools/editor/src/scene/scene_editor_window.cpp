@@ -19,6 +19,6 @@ void SceneEditorWindow::makeUI()
 
 	const auto& dll = project.getGameDLL();
 	if (dll) {
-		getWidgetAs<SceneEditorCanvas>("canvas")->setGameDLL(dll);
+		getWidgetAs<SceneEditorCanvas>("canvas")->setGameDLL(dll, project.getGameResources());
 	}
 }

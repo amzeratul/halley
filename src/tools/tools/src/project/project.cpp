@@ -1,11 +1,15 @@
 #include <utility>
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/tools/project/project.h"
+
+#include "halley/core/api/halley_api.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/core/game/halley_statics.h"
 #include "halley/tools/project/project_properties.h"
 #include "halley/support/logger.h"
 #include "halley/core/devcon/devcon_server.h"
+#include "halley/core/resources/resource_locator.h"
+#include "halley/core/resources/standard_resources.h"
 #include "halley/tools/assets/metadata_importer.h"
 #include "halley/tools/project/project_loader.h"
 
@@ -196,12 +200,25 @@ void Project::reloadAssets(const std::set<String>& assets, bool packed)
 		return;
 	}
 
+	// Build name list
 	std::vector<String> assetIds;
 	assetIds.reserve(assets.size());
 	for (auto& a: assets) {
 		assetIds.push_back(a);
 	}
 
+	// Reload game assets
+	if (!packed && gameResources) {
+		if (gameResources->getLocator().getLocatorCount() == 0) {
+			try {
+				gameResources->getLocator().addFileSystem(getUnpackedAssetsPath());
+			} catch (...) {}
+		}
+
+		gameResources->reloadAssets(assetIds);
+	}
+
+	// Notify callbacks
 	for (auto& callback: (packed ? assetPackedReloadCallbacks : assetReloadCallbacks)) {
 		callback(assetIds);
 	}
@@ -223,4 +240,20 @@ void Project::notifyAssetFileModified(Path path)
 const std::shared_ptr<DynamicLibrary>& Project::getGameDLL() const
 {
 	return gameDll;
+}
+
+void Project::loadGameResources(const HalleyAPI& api)
+{
+	auto locator = std::make_unique<ResourceLocator>(*api.system);
+	try {
+		locator->addFileSystem(getUnpackedAssetsPath());
+	} catch (...) {}
+
+	gameResources = std::make_unique<Resources>(std::move(locator), api);
+	StandardResources::initialize(*gameResources);
+}
+
+Resources& Project::getGameResources()
+{
+	return *gameResources;
 }

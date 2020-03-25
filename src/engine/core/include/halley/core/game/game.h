@@ -4,6 +4,7 @@
 
 namespace Halley
 {
+	class SceneEditorContext;
 	class IPluginRegistry;
 	class ResourceLocator;
 	class Stage;

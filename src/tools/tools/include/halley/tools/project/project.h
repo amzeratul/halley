@@ -16,6 +16,7 @@ namespace Halley
 	class IHalleyPlugin;
 	class DevConServer;
 	class ProjectProperties;
+	class HalleyAPI;
 	using HalleyPluginPtr = std::shared_ptr<IHalleyPlugin>;
 
 	class Project
@@ -68,6 +69,9 @@ namespace Halley
 
 		const std::shared_ptr<DynamicLibrary>& getGameDLL() const;
 
+		void loadGameResources(const HalleyAPI& api);
+		Resources& getGameResources();
+
 	private:
 		std::vector<String> platforms;
 		Path rootPath;
@@ -86,5 +90,6 @@ namespace Halley
 
 		std::vector<HalleyPluginPtr> plugins;
 		std::shared_ptr<DynamicLibrary> gameDll;
+		std::unique_ptr<Resources> gameResources;
 	};
 }

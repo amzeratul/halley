@@ -30,13 +30,12 @@ namespace Halley {
 
 	class AssetsEditorWindow : public UIWidget {
     public:
-        AssetsEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api);
+        AssetsEditorWindow(UIFactory& factory, Project& project);
 
 	private:
 		UIFactory& factory;
 		Project& project;
 
-		std::unique_ptr<Resources> gameResources;
 		std::map<AssetType, Path> curPaths;
 		Path curSrcPath;
 		AssetType curType = AssetType::Sprite;
@@ -51,7 +50,7 @@ namespace Halley {
 		std::shared_ptr<UIPagedPane> content;
         std::shared_ptr<MetadataEditor> metadataEditor;
 
-        void loadResources(const HalleyAPI& api);
+        void loadResources();
         void makeUI();
 		void setAssetSrcMode(bool enabled);
 

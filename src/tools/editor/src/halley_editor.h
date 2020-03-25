@@ -32,6 +32,7 @@ namespace Halley
 		bool shouldCreateSeparateConsole() const override;
 
 	private:
+		const HalleyAPI* api = nullptr;
 		std::unique_ptr<ProjectLoader> projectLoader;
 		std::unique_ptr<Preferences> preferences;
 		Path rootPath;

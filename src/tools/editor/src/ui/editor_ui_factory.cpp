@@ -52,5 +52,5 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeSceneEditorCanvas(const ConfigNod
 {
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
-	return std::make_shared<SceneEditorCanvas>(id, resources);
+	return std::make_shared<SceneEditorCanvas>(id, resources, api);
 }

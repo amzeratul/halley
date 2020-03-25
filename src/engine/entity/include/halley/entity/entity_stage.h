@@ -10,7 +10,8 @@ namespace Halley
 	class EntityStage : public Stage
 	{
 	public:
+		using CreateSystemFunction = std::function<std::unique_ptr<System>(String)>;
 		using CreateComponentFunction = std::function<void(EntityFactory& factory, const String& componentName, EntityRef& entity, const ConfigNode& componentData)>;
-		std::unique_ptr<World> createWorld(const String& configName, std::function<std::unique_ptr<System>(String)> createFunction, CreateComponentFunction createComponent);
+		std::unique_ptr<World> createWorld(const String& configName, CreateSystemFunction createFunction, CreateComponentFunction createComponent);
 	};
 }

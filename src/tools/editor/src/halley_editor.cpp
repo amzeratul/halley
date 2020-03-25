@@ -101,8 +101,9 @@ void HalleyEditor::parseArguments(const std::vector<String>& args)
 	}
 }
 
-std::unique_ptr<Stage> HalleyEditor::startGame(const HalleyAPI* api)
+std::unique_ptr<Stage> HalleyEditor::startGame(const HalleyAPI* _api)
 {
+	api = _api;
 	preferences = std::make_unique<Preferences>(*api->system);
 
 	projectLoader = std::make_unique<ProjectLoader>(api->core->getStatics(), rootPath);
@@ -124,6 +125,8 @@ std::unique_ptr<Project> HalleyEditor::loadProject(Path path)
 	if (!project) {
 		throw Exception("Unable to load project at " + path.string(), HalleyExceptions::Tools);
 	}
+
+	project->loadGameResources(*api);
 
 	preferences->addRecent(path.string());
 	preferences->saveToFile();

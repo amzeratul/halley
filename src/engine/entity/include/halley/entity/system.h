@@ -47,6 +47,7 @@ namespace Halley {
 	protected:
 		const HalleyAPI& doGetAPI() const { return *api; }
 		World& doGetWorld() const { return *world; }
+		Resources& doGetResources() const { return *resources; }
 
 		virtual void initBase() {}
 		virtual void updateBase(Time) {}
@@ -130,6 +131,7 @@ namespace Halley {
 
 		World* world = nullptr;
 		const HalleyAPI* api = nullptr;
+		Resources* resources = nullptr;
 		String name;
 		int systemId = -1;
 		bool initialised = false;
