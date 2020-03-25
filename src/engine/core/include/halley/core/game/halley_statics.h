@@ -3,7 +3,8 @@
 
 namespace Halley
 {
-	class HalleyStaticsPimpl;
+	class HalleyStaticsShared;
+	class HalleyStaticsPrivate;
 	class SystemAPI;
 
 	class HalleyStatics
@@ -11,6 +12,8 @@ namespace Halley
 	public:
 		HalleyStatics();
 		~HalleyStatics();
+		HalleyStatics(HalleyStatics& parent);
+		
 		void setupGlobals() const;
 		void resume(SystemAPI* system);
 		void suspend();
@@ -19,6 +22,7 @@ namespace Halley
 		void* getMaskStorage() const;
 
 	private:
-		std::unique_ptr<HalleyStaticsPimpl> pimpl;
+		std::shared_ptr<HalleyStaticsShared> sharedData;
+		std::unique_ptr<HalleyStaticsPrivate> privateData;
 	};
 }

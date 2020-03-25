@@ -15,6 +15,8 @@ set (editor_sources
 	"src/assets/assets_editor_window.cpp"
 	"src/assets/metadata_editor.cpp"
 
+	"src/project/core_api_wrapper.cpp"
+
 	"src/scene/entity_editor.cpp"
 	"src/scene/entity_list.cpp"
 	"src/scene/scene_editor_canvas.cpp"
@@ -37,6 +39,8 @@ set (editor_headers
 	"src/assets/animation_editor.h"
 	"src/assets/assets_editor_window.h"
 	"src/assets/metadata_editor.h"
+
+	"src/project/core_api_wrapper.h"
 
 	"src/scene/entity_editor.h"
 	"src/scene/entity_list.h"

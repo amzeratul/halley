@@ -49,10 +49,10 @@ namespace Halley {
 		void loadSystems(const ConfigNode& config, std::function<std::unique_ptr<System>(String)> createFunction);
 
 		template <typename T>
-		T& getService() const
+		T& getService(const String& systemName) const
 		{
 			static_assert(std::is_base_of<Service, T>::value, "Must extend Service");
-			return *dynamic_cast<T*>(&getService(typeid(T).name()));
+			return *dynamic_cast<T*>(&getService(typeid(T).name(), systemName));
 		}
 
 		EntityRef createEntity(UUID uuid, String name = "");
@@ -121,7 +121,7 @@ namespace Halley {
 		
 		void onAddFamily(Family& family);
 
-		Service& getService(const String& name) const;
+		Service& getService(const String& name, const String& systemName) const;
 
 		const std::vector<Family*>& getFamiliesFor(const FamilyMaskType& mask);
 	};

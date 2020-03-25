@@ -1,5 +1,6 @@
 #include "scene_editor_canvas.h"
 #include "halley/core/game/scene_editor_interface.h"
+#include "src/project/core_api_wrapper.h"
 
 using namespace Halley;
 
@@ -80,9 +81,13 @@ void SceneEditorCanvas::loadDLL()
 	interface = game->createSceneEditorInterface();
 
 	if (interface) {
+		gameCoreAPI = std::make_unique<CoreAPIWrapper>(*api.core);
+		gameAPI = api.clone();
+		gameAPI->replaceCoreAPI(gameCoreAPI.get());
+		
 		SceneEditorContext context;
 		context.resources = gameResources;
-		context.api = &api;
+		context.api = gameAPI.get();
 		interface->init(context);
 	}
 }
@@ -92,6 +97,9 @@ void SceneEditorCanvas::unloadDLL()
 	Expects(gameDLL);
 	interface.reset();
 	gameDLL->unload();
+
+	gameAPI.reset();
+	gameCoreAPI.reset();
 }
 
 void SceneEditorCanvas::reloadDLL()

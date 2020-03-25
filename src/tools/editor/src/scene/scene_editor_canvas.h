@@ -26,6 +26,8 @@ namespace Halley {
 
 		std::shared_ptr<DynamicLibrary> gameDLL;
 		std::unique_ptr<SceneEditorInterface> interface;
+		std::unique_ptr<HalleyAPI> gameAPI;
+		std::unique_ptr<CoreAPIInternal> gameCoreAPI;
 
 		void updateInterface(Time t);
 		void renderInterface() const;

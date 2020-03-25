@@ -370,7 +370,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	// Construct initBase();
 	std::vector<String> initBaseMethodBody;
 	for (auto& service: system.services) {
-		initBaseMethodBody.push_back(lowerFirst(service.name) + " = &doGetWorld().template getService<" + service.name + ">();");
+		initBaseMethodBody.push_back(lowerFirst(service.name) + " = &doGetWorld().template getService<" + service.name + ">(getName());");
 	}
 	initBaseMethodBody.push_back("invokeInit<T>(static_cast<T*>(this));");
 	for (auto& family: system.families) {

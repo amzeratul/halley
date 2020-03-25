@@ -20,14 +20,14 @@ namespace Halley
 	{
 		// Beware of member order
 		CoreAPIInternal* coreInternal;
-		std::unique_ptr<SystemAPIInternal> systemInternal;
-		std::unique_ptr<VideoAPIInternal> videoInternal;
-		std::unique_ptr<InputAPIInternal> inputInternal;
-		std::unique_ptr<AudioAPIInternal> audioInternal;
-		std::unique_ptr<AudioOutputAPIInternal> audioOutputInternal;
-		std::unique_ptr<PlatformAPIInternal> platformInternal;
-		std::unique_ptr<NetworkAPIInternal> networkInternal;
-		std::unique_ptr<MovieAPIInternal> movieInternal;
+		std::shared_ptr<SystemAPIInternal> systemInternal;
+		std::shared_ptr<VideoAPIInternal> videoInternal;
+		std::shared_ptr<InputAPIInternal> inputInternal;
+		std::shared_ptr<AudioAPIInternal> audioInternal;
+		std::shared_ptr<AudioOutputAPIInternal> audioOutputInternal;
+		std::shared_ptr<PlatformAPIInternal> platformInternal;
+		std::shared_ptr<NetworkAPIInternal> networkInternal;
+		std::shared_ptr<MovieAPIInternal> movieInternal;
 
 	public:
 		~HalleyAPI();
@@ -40,6 +40,9 @@ namespace Halley
 		NetworkAPI* network;
 		MovieAPI* movie;
 
+		std::unique_ptr<HalleyAPI> clone() const;
+		void replaceCoreAPI(CoreAPIInternal* core);
+
 	private:
 		friend class Core;
 
@@ -47,5 +50,7 @@ namespace Halley
 		void deInit();
 		void assign();
 		static std::unique_ptr<HalleyAPI> create(CoreAPIInternal* core, int flags);
+
+		HalleyAPI& operator=(const HalleyAPI& other);
 	};
 }

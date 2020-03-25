@@ -138,11 +138,11 @@ void World::loadSystems(const ConfigNode& root, std::function<std::unique_ptr<Sy
 	}
 }
 
-Service& World::getService(const String& name) const
+Service& World::getService(const String& name, const String& systemName) const
 {
 	auto iter = services.find(name);
 	if (iter == services.end()) {
-		throw Exception("Service not found: " + name, HalleyExceptions::Entity);
+		throw Exception("Service \"" + name + "\" required by \"" + (systemName.isEmpty() ? "" : (systemName + "System")) + "\" not found.", HalleyExceptions::Entity);
 	}
 	return *iter->second;
 }

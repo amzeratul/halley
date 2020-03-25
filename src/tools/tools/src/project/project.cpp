@@ -32,9 +32,13 @@ Project::Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader&
 
 	auto dllPath = loader.getDLLPath(rootPath, properties->getDLL());
 	if (!dllPath.isEmpty()) {
-		gameDll = std::make_shared<DynamicLibrary>(dllPath.string());
-		gameDll->load(false);
-		Logger::logInfo("Loaded " + dllPath.string());
+		try {
+			gameDll = std::make_shared<DynamicLibrary>(dllPath.string());
+			gameDll->load(false);
+			Logger::logInfo("Loaded " + dllPath.string());
+		} catch (...) {
+			gameDll.reset();
+		}
 	}
 }
 

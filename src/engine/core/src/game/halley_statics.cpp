@@ -12,10 +12,10 @@
 using namespace Halley;
 
 namespace Halley {
-	class HalleyStaticsPimpl
+	class HalleyStaticsShared
 	{
 	public:
-		HalleyStaticsPimpl()
+		HalleyStaticsShared()
 		{
 			logger = new Logger();
 			os = OS::createOS();
@@ -24,7 +24,7 @@ namespace Halley {
 			executors->set(*executors);
 		}
 
-		~HalleyStaticsPimpl()
+		~HalleyStaticsShared()
 		{
 			diskIOThreadPool.reset();
 			cpuThreadPool.reset();
@@ -32,8 +32,6 @@ namespace Halley {
 			executors.reset();
 		}
 
-		Vector<TypeDeleterBase*> typeDeleters;
-		void* maskStorage = nullptr;
 		OS* os = nullptr;
 		Logger* logger;
 		
@@ -42,16 +40,30 @@ namespace Halley {
 		std::unique_ptr<ThreadPool> cpuAuxThreadPool;
 		std::unique_ptr<ThreadPool> diskIOThreadPool;
 	};
+
+	class HalleyStaticsPrivate {
+	public:
+		Vector<TypeDeleterBase*> typeDeleters;
+		void* maskStorage = nullptr;
+	};
 }
 
 HalleyStatics::HalleyStatics()
-	: pimpl(std::make_unique<HalleyStaticsPimpl>())
+	: sharedData(std::make_shared<HalleyStaticsShared>())
+	, privateData(std::make_unique<HalleyStaticsPrivate>())
 {
 }
 
 HalleyStatics::~HalleyStatics()
 {
-	pimpl.reset();
+	sharedData.reset();
+	privateData.reset();
+}
+
+HalleyStatics::HalleyStatics(HalleyStatics& parent)
+	: sharedData(parent.sharedData)
+	, privateData(std::make_unique<HalleyStaticsPrivate>())
+{
 }
 
 void HalleyStatics::resume(SystemAPI* system)
@@ -70,35 +82,38 @@ void HalleyStatics::resume(SystemAPI* system)
 		}
 	};
 
-	pimpl->cpuThreadPool = std::make_unique<ThreadPool>("CPU", pimpl->executors->getCPU(), std::thread::hardware_concurrency(), makeThread);
-	pimpl->cpuAuxThreadPool = std::make_unique<ThreadPool>("CPUAux", pimpl->executors->getCPUAux(), std::thread::hardware_concurrency(), makeThread);
-	pimpl->diskIOThreadPool = std::make_unique<ThreadPool>("IO", pimpl->executors->getDiskIO(), 1, makeThread);
+	sharedData->cpuThreadPool = std::make_unique<ThreadPool>("CPU", sharedData->executors->getCPU(), std::thread::hardware_concurrency(), makeThread);
+	sharedData->cpuAuxThreadPool = std::make_unique<ThreadPool>("CPUAux", sharedData->executors->getCPUAux(), std::thread::hardware_concurrency(), makeThread);
+	sharedData->diskIOThreadPool = std::make_unique<ThreadPool>("IO", sharedData->executors->getDiskIO(), 1, makeThread);
 #endif
 }
 
 void HalleyStatics::setupGlobals() const
 {
-	Logger::setInstance(*pimpl->logger);
+	Expects(sharedData);
+	Expects(privateData);
+	
+	Logger::setInstance(*sharedData->logger);
 
-	ComponentDeleterTable::getDeleters() = &pimpl->typeDeleters;
-	OS::setInstance(pimpl->os);
+	ComponentDeleterTable::getDeleters() = &privateData->typeDeleters;
+	OS::setInstance(sharedData->os);
 
-	Executors::set(*pimpl->executors);
+	Executors::set(*sharedData->executors);
 }
 
 void HalleyStatics::suspend()
 {
-	pimpl->diskIOThreadPool.reset();
-	pimpl->cpuThreadPool.reset();
-	pimpl->cpuAuxThreadPool.reset();
+	sharedData->diskIOThreadPool.reset();
+	sharedData->cpuThreadPool.reset();
+	sharedData->cpuAuxThreadPool.reset();
 }
 
 void HalleyStatics::setMaskStorage(void* storage)
 {
-	pimpl->maskStorage = storage;
+	privateData->maskStorage = storage;
 }
 
 void* HalleyStatics::getMaskStorage() const
 {
-	return pimpl->maskStorage;
+	return privateData->maskStorage;
 }

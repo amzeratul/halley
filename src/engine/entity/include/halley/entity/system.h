@@ -35,8 +35,8 @@ namespace Halley {
 		System(std::initializer_list<FamilyBindingBase*> families, std::initializer_list<int> messageTypesReceived);
 		virtual ~System() {}
 
-		String getName() const { return name; }
-		void setName(String n) { name = n; }
+		const String& getName() const { return name; }
+		void setName(String n) { name = std::move(n); }
 		size_t getEntityCount() const;
 		bool tryInit();
 
