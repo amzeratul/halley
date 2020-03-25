@@ -110,13 +110,20 @@ void SceneEditorCanvas::updateCanvas(Vector2i size)
 		const auto textureSize = Vector2i(nextPowerOf2(size.x), nextPowerOf2(size.y));
 		if (textureSize != curTextureSize) {
 			curTextureSize = textureSize;
-			std::shared_ptr<Texture> tex = api.video->createTexture(textureSize);
-			auto desc = TextureDescriptor(textureSize, TextureFormat::RGBA);
-			desc.isRenderTarget = true;
-			tex->load(std::move(desc));
+			
+			std::shared_ptr<Texture> colourTarget = api.video->createTexture(textureSize);
+			auto colourDesc = TextureDescriptor(textureSize, TextureFormat::RGBA);
+			colourDesc.isRenderTarget = true;
+			colourTarget->load(std::move(colourDesc));
+
+			std::shared_ptr<Texture> depthTarget = api.video->createTexture(textureSize);
+			auto depthDesc = TextureDescriptor(textureSize, TextureFormat::DEPTH);
+			depthDesc.isDepthStencil = true;
+			depthTarget->load(std::move(depthDesc));
 
 			renderTarget = api.video->createTextureRenderTarget();
-			renderTarget->setTarget(0, tex);
+			renderTarget->setTarget(0, colourTarget);
+			renderTarget->setDepthTexture(depthTarget);
 		}
 
 		renderTarget->setViewPort(Rect4i(Vector2i(), size));
