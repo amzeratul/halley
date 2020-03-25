@@ -185,6 +185,10 @@ void Core::init()
 	// Resources
 	initResources();
 
+	// Give game api and resources
+	game->api = api.get();
+	game->resources = resources.get();
+
 	// Create devcon connection
 	String devConAddress = game->getDevConAddress();
 	if (!devConAddress.isEmpty()) {
@@ -192,7 +196,7 @@ void Core::init()
 	}
 
 	// Start game
-	setStage(game->startGame(&*api));
+	setStage(game->startGame());
 	
 	// Get video resources
 	if (api->video) {
@@ -487,9 +491,8 @@ int64_t Core::getTime(CoreAPITimer timerType, TimeLine tl, StopwatchAveraging::M
 
 void Core::initStage(Stage& stage)
 {
-	stage.api = &*api;
 	stage.setGame(*game);
-	stage.init();
+	stage.doInit(api.get(), *resources);
 }
 
 Stage& Core::getCurrentStage()

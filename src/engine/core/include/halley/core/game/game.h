@@ -26,7 +26,7 @@ namespace Halley
 		virtual bool isDevMode() const = 0;
 		virtual bool shouldCreateSeparateConsole() const;
 
-		virtual std::unique_ptr<Stage> startGame(const HalleyAPI*) = 0;
+		virtual std::unique_ptr<Stage> startGame() = 0;
 		virtual void endGame();
 
 		virtual std::unique_ptr<Stage> makeStage(StageID id);
@@ -41,5 +41,14 @@ namespace Halley
 		virtual void onUncaughtException(const Exception& exception, TimeLine timeLine);
 
 		virtual std::unique_ptr<SceneEditorInterface> createSceneEditorInterface();
+
+		const HalleyAPI& getAPI() const;
+		Resources& getResources() const;
+
+	private:
+		friend class Core;
+		
+		const HalleyAPI* api = nullptr;
+		Resources* resources = nullptr;
 	};
 }

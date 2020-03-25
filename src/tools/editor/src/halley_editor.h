@@ -24,7 +24,7 @@ namespace Halley
 		void init(const Environment& environment, const Vector<String>& args) override;
 		int initPlugins(IPluginRegistry &registry) override;
 		void initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator) override;
-		std::unique_ptr<Stage> startGame(const HalleyAPI* api) override;
+		std::unique_ptr<Stage> startGame() override;
 
 		String getName() const override;
 		String getDataPath() const override;
@@ -32,7 +32,6 @@ namespace Halley
 		bool shouldCreateSeparateConsole() const override;
 
 	private:
-		const HalleyAPI* api = nullptr;
 		std::unique_ptr<ProjectLoader> projectLoader;
 		std::unique_ptr<Preferences> preferences;
 		Path rootPath;

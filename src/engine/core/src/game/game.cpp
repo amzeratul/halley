@@ -52,3 +52,19 @@ std::unique_ptr<SceneEditorInterface> Game::createSceneEditorInterface()
 {
 	return {};
 }
+
+const HalleyAPI& Game::getAPI() const
+{
+	if (!api) {
+		throw Exception("HalleyAPI is only initialized on Game right before call to startGame()", HalleyExceptions::Core);
+	}
+	return *api;
+}
+
+Resources& Game::getResources() const
+{
+	if (!resources) {
+		throw Exception("Resources are only initialized on Game right before call to startGame()", HalleyExceptions::Core);
+	}
+	return *resources;
+}

@@ -12,7 +12,7 @@ namespace Halley
 	class WorldStatsView
 	{
 	public:
-		WorldStatsView(CoreAPI& coreApi);
+		WorldStatsView(Resources& resources, CoreAPI& coreApi);
 
 		void draw(RenderContext& context);
 		void setWorld(const World* world);
@@ -20,6 +20,7 @@ namespace Halley
 	private:
 		String formatTime(int64_t ns) const;
 
+		Resources& resources;
 		const CoreAPI& coreAPI;
 		const World* world = nullptr;
 		TextRenderer text;

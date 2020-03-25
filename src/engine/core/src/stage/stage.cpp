@@ -65,8 +65,9 @@ void Stage::setGame(Game& g)
 	game = &g;
 }
 
-void Stage::doInit(const HalleyAPI* _api)
+void Stage::doInit(const HalleyAPI* _api, Resources& _resources)
 {
+	resources = &_resources;
 	api = _api;
 	init();
 }

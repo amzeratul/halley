@@ -50,12 +50,14 @@ namespace Halley
 		friend class Core;
 
 		void setGame(Game& game);
-		void doInit(const HalleyAPI* api);
+		void doInit(const HalleyAPI* api, Resources& resources);
 		void doDeInit();
 
 		Game* game = nullptr;
-		String name;
 		const HalleyAPI* api = nullptr;
+		Resources* resources = nullptr;
+
+		String name;
 	};
 
 }

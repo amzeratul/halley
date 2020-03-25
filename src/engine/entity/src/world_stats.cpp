@@ -9,9 +9,10 @@
 
 using namespace Halley;
 
-WorldStatsView::WorldStatsView(CoreAPI& coreAPI)
-	: coreAPI(coreAPI)
-	, text(coreAPI.getResources().get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f))
+WorldStatsView::WorldStatsView(Resources& resources, CoreAPI& coreAPI)
+	: resources(resources)
+	, coreAPI(coreAPI)
+	, text(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f))
 {
 }
 
