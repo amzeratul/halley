@@ -62,15 +62,27 @@ void SceneEditorCanvas::reload()
 
 void SceneEditorCanvas::updateInterface(Time t)
 {
+	if (errorState) {
+		unloadDLL();
+	}
+	
 	if (interface) {
-		interface->update(t);
+		guardedRun([&] () {
+			interface->update(t);
+		});
 	}
 }
 
 void SceneEditorCanvas::renderInterface() const
 {
+	if (errorState) {
+		return;
+	}
+	
 	if (interface) {
-		// TODO
+		guardedRun([&]() {
+			// TODO
+		});
 	}
 }
 
@@ -91,7 +103,13 @@ void SceneEditorCanvas::loadDLL()
 		SceneEditorContext context;
 		context.resources = gameResources;
 		context.api = gameAPI.get();
-		interface->init(context);
+
+		guardedRun([&]() {
+			interface->init(context);
+		});
+		if (errorState) {
+			unloadDLL();
+		}
 	}
 }
 
@@ -103,10 +121,25 @@ void SceneEditorCanvas::unloadDLL()
 
 	gameAPI.reset();
 	gameCoreAPI.reset();
+
+	errorState = false;
 }
 
 void SceneEditorCanvas::reloadDLL()
 {
 	// TODO
 	Logger::logWarning("SceneEditorCanvas::reloadDLL() not implemented yet");
+}
+
+void SceneEditorCanvas::guardedRun(const std::function<void()>& f) const
+{
+	try {
+		f();
+	} catch (const std::exception& e) {
+		Logger::logException(e);
+		errorState = true;
+	} catch (...) {
+		Logger::logError("Unknown error in SceneEditorCanvas, probably from game dll");
+		errorState = true;
+	}
 }

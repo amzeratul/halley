@@ -5,11 +5,6 @@
 
 using namespace Halley;
 
-HalleyAPI::~HalleyAPI()
-{
-	deInit();
-}
-
 void HalleyAPI::assign()
 {
 	Expects(coreInternal);

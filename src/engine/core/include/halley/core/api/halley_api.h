@@ -30,7 +30,6 @@ namespace Halley
 		std::shared_ptr<MovieAPIInternal> movieInternal;
 
 	public:
-		~HalleyAPI();
 		CoreAPI* core;
 		SystemAPI* system;
 		VideoAPI* video;

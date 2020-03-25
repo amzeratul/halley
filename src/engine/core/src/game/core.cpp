@@ -236,6 +236,7 @@ void Core::deInit()
 	resources.reset();
 
 	// Deinit API (note that this has to happen after resources, otherwise resources which rely on an API to de-init, such as textures, will crash)
+	api->deInit();
 	api.reset();
 	
 	// Stop thread pool and other statics

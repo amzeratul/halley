@@ -28,6 +28,7 @@ namespace Halley {
 		std::unique_ptr<SceneEditorInterface> interface;
 		std::unique_ptr<HalleyAPI> gameAPI;
 		std::unique_ptr<CoreAPIInternal> gameCoreAPI;
+		mutable bool errorState = false;
 
 		void updateInterface(Time t);
 		void renderInterface() const;
@@ -35,5 +36,7 @@ namespace Halley {
 		void loadDLL();
 		void unloadDLL();
 		void reloadDLL();
+
+		void guardedRun(const std::function<void()>& f) const;
 	};
 }
