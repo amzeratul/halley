@@ -24,6 +24,7 @@ namespace Halley {
         virtual void render(RenderContext& rc) = 0;
     	
         virtual World& getWorld() = 0;
+        virtual void spawnPending() = 0;
         virtual EntityId getCameraId() = 0;
     };
 }

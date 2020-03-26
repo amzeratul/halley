@@ -35,7 +35,7 @@ void SceneEditorWindow::loadScene(const String& name)
 		
 		sceneName = name;
 		sceneId = factory.createEntity(name).getEntityId();
-		world.spawnPending();
+		interface.spawnPending();
 
 		entityList->clearExceptions();
 		entityList->addException(interface.getCameraId());
