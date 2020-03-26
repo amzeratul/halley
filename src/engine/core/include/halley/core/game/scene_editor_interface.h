@@ -5,6 +5,8 @@
 namespace Halley {
     class RenderContext;
     class World;
+    class HalleyAPI;
+    class Resources;
 
     class SceneEditorContext {
     public:

@@ -8,28 +8,28 @@ void TextureRenderTarget::setTarget(int attachmentNumber, std::shared_ptr<Textur
 {
 	Expects(attachmentNumber >= 0);
 	Expects(attachmentNumber < 8);
-	Expects(tex != std::shared_ptr<Texture>());
+	Expects(tex);
 
 	if (int(attachments.size()) <= attachmentNumber) {
-		attachments.resize(attachmentNumber + 1);
+		attachments.resize(size_t(attachmentNumber) + 1);
 	}
-	attachments[attachmentNumber] = tex;
+	attachments[attachmentNumber] = std::move(tex);
 
 	dirty = true;
 }
 
-std::shared_ptr<Texture> TextureRenderTarget::getTexture(int attachmentNumber) const
+const std::shared_ptr<Texture>& TextureRenderTarget::getTexture(int attachmentNumber) const
 {
 	return attachments.at(attachmentNumber);
 }
 
 void TextureRenderTarget::setDepthTexture(std::shared_ptr<Texture> tex)
 {
-	depth = tex;
+	depth = std::move(tex);
 	dirty = true;
 }
 
-std::shared_ptr<Texture> TextureRenderTarget::getDepthTexture() const
+const std::shared_ptr<Texture>& TextureRenderTarget::getDepthTexture() const
 {
 	return depth;
 }

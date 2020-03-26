@@ -30,13 +30,10 @@ namespace Halley {
 		std::unique_ptr<CoreAPIInternal> gameCoreAPI;
 		mutable bool errorState = false;
 
-		std::shared_ptr<TextureRenderTarget> renderTarget;
-		Vector2i curTextureSize;
-		Vector2i curRenderSize;
+		std::shared_ptr<RenderSurface> surface;
 
 		void updateInterface(Time t);
 		void renderInterface(RenderContext& rc) const;
-		void updateCanvas(Vector2i size);
 
 		void loadDLL();
 		void unloadDLL();

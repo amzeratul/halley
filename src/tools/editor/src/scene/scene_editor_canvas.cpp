@@ -10,6 +10,7 @@ SceneEditorCanvas::SceneEditorCanvas(String id, Resources& resources, const Hall
 	, resources(resources)
 {
 	border.setImage(resources, "whitebox.png").setColour(Colour4f());
+	surface = std::make_shared<RenderSurface>(*api.video, resources);
 }
 
 SceneEditorCanvas::~SceneEditorCanvas()
@@ -20,7 +21,7 @@ SceneEditorCanvas::~SceneEditorCanvas()
 void SceneEditorCanvas::update(Time t, bool moved)
 {
 	updateInterface(t);
-	updateCanvas(Vector2i(getSize()) - Vector2i(2, 2));
+	surface->setSize(Vector2i(getSize()) - Vector2i(2, 2));
 }
 
 void SceneEditorCanvas::draw(UIPainter& painter) const
@@ -32,18 +33,15 @@ void SceneEditorCanvas::draw(UIPainter& painter) const
 	painter.draw(border.clone().setPos(pos).setSize(Vector2f(1, size.y)), true);
 	painter.draw(border.clone().setPos(pos + Vector2f(size.x - 1, 0)).setSize(Vector2f(1, size.y)), true);
 
-	auto canvas = Sprite()
-		.setPos(getPosition() + Vector2f(1, 1)).setSize(getSize() - Vector2f(2, 2));
+	Sprite canvas;
 
-	if (interface && renderTarget) {
-		const auto& tex = renderTarget->getTexture(0);
-		canvas
-			.setImage(tex, resources.get<MaterialDefinition>("Halley/SpriteOpaque"))
-			.setSize(Vector2f(curRenderSize))
-			.setTexRect(Rect4f(Vector2f(), Vector2f(curRenderSize) / Vector2f(tex->getSize())));
+	if (interface && surface->isReady()) {
+		canvas = surface->getSurfaceSprite();
 	} else {
 		canvas.setImage(resources, "whitebox.png").setColour(Colour4f(0.2f, 0.2f, 0.2f));
 	}
+
+	canvas.setPos(getPosition() + Vector2f(1, 1)).setSize(getSize() - Vector2f(2, 2));
 	
 	painter.draw(canvas, true);
 }
@@ -96,37 +94,9 @@ void SceneEditorCanvas::renderInterface(RenderContext& rc) const
 	
 	if (interface) {
 		guardedRun([&]() {
-			auto context = rc.with(*renderTarget);
+			auto context = rc.with(surface->getRenderTarget());
 			interface->render(context);
 		});
-	}
-}
-
-void SceneEditorCanvas::updateCanvas(Vector2i size)
-{
-	if (size != curRenderSize && size.x > 0 && size.y > 0) {
-		curRenderSize = size;
-
-		const auto textureSize = Vector2i(nextPowerOf2(size.x), nextPowerOf2(size.y));
-		if (textureSize != curTextureSize) {
-			curTextureSize = textureSize;
-			
-			std::shared_ptr<Texture> colourTarget = api.video->createTexture(textureSize);
-			auto colourDesc = TextureDescriptor(textureSize, TextureFormat::RGBA);
-			colourDesc.isRenderTarget = true;
-			colourTarget->load(std::move(colourDesc));
-
-			std::shared_ptr<Texture> depthTarget = api.video->createTexture(textureSize);
-			auto depthDesc = TextureDescriptor(textureSize, TextureFormat::DEPTH);
-			depthDesc.isDepthStencil = true;
-			depthTarget->load(std::move(depthDesc));
-
-			renderTarget = api.video->createTextureRenderTarget();
-			renderTarget->setTarget(0, colourTarget);
-			renderTarget->setDepthTexture(depthTarget);
-		}
-
-		renderTarget->setViewPort(Rect4i(Vector2i(), size));
 	}
 }
 
