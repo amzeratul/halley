@@ -1,5 +1,6 @@
 #pragma once
 
+#include "halley/entity/entity_id.h"
 #include "halley/time/halleytime.h"
 
 namespace Halley {
@@ -21,6 +22,8 @@ namespace Halley {
         virtual void init(SceneEditorContext& context) = 0;
         virtual void update(Time t) = 0;
         virtual void render(RenderContext& rc) = 0;
+    	
         virtual World& getWorld() = 0;
+        virtual EntityId getCameraId() = 0;
     };
 }

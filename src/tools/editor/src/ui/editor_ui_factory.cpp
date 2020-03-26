@@ -4,6 +4,8 @@
 #include "scroll_background.h"
 #include "src/assets/animation_editor.h"
 #include "src/assets/metadata_editor.h"
+#include "src/scene/entity_editor.h"
+#include "src/scene/entity_list.h"
 #include "src/scene/scene_editor_canvas.h"
 using namespace Halley;
 
@@ -29,6 +31,8 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("animationEditorDisplay", [=] (const ConfigNode& node) { return makeAnimationEditorDisplay(node); });
 	addFactory("metadataEditor", [=] (const ConfigNode& node) { return makeMetadataEditor(node); });
 	addFactory("sceneEditorCanvas", [=](const ConfigNode& node) { return makeSceneEditorCanvas(node); });
+	addFactory("entityList", [=](const ConfigNode& node) { return makeEntityList(node); });
+	addFactory("entityEditor", [=](const ConfigNode& node) { return makeEntityEditor(node); });
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeScrollBackground(const ConfigNode& entryNode)
@@ -53,4 +57,18 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeSceneEditorCanvas(const ConfigNod
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	return std::make_shared<SceneEditorCanvas>(id, resources, api);
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeEntityList(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	return std::make_shared<EntityList>(id, *this);
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeEntityEditor(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	return std::make_shared<EntityEditor>(id, *this);
 }
