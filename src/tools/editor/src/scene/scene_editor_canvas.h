@@ -8,9 +8,12 @@ namespace Halley {
 		SceneEditorCanvas(String id, Resources& resources, const HalleyAPI& api);
 		~SceneEditorCanvas();
 
-		void setGameDLL(std::shared_ptr<DynamicLibrary> dll, Resources& gameResources);
+		void loadGame(std::shared_ptr<DynamicLibrary> dll, Resources& gameResources);
 		bool needsReload() const;
 		void reload();
+
+		bool isLoaded() const;
+		SceneEditorInterface& getInterface() const;
 
 	protected:
 		void update(Time t, bool moved) override;

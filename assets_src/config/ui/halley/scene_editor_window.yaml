@@ -2,7 +2,11 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-- widget: { class: label, text: TODO! :) }
+- sizer: { type: horizontal }
+  children:
+  - widget: { id: fileName, class: textInput }
+    proportion: 1
+  - widget: { id: load, class: button, text: "Load", size: [60, 30] }
 - widget: { id: canvas, class: sceneEditorCanvas }
   proportion: 1
 ...

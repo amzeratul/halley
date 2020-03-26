@@ -51,7 +51,7 @@ void SceneEditorCanvas::render(RenderContext& rc) const
 	renderInterface(rc);
 }
 
-void SceneEditorCanvas::setGameDLL(std::shared_ptr<DynamicLibrary> dll, Resources& gameResources)
+void SceneEditorCanvas::loadGame(std::shared_ptr<DynamicLibrary> dll, Resources& gameResources)
 {
 	this->gameResources = &gameResources;
 	gameDLL = std::move(dll);
@@ -71,6 +71,17 @@ bool SceneEditorCanvas::needsReload() const
 void SceneEditorCanvas::reload()
 {
 	reloadDLL();
+}
+
+bool SceneEditorCanvas::isLoaded() const
+{
+	return static_cast<bool>(interface);
+}
+
+SceneEditorInterface& SceneEditorCanvas::getInterface() const
+{
+	Expects(interface);
+	return *interface;
 }
 
 void SceneEditorCanvas::updateInterface(Time t)
