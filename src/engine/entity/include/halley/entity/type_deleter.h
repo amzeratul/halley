@@ -14,37 +14,36 @@ namespace Halley {
 	class ComponentDeleterTable
 	{
 	public:
-		static void set(int idx, TypeDeleterBase* deleter)
+		void set(int idx, TypeDeleterBase* deleter)
 		{
-			auto& m = *getDeleters();
-			if (int(m.size()) <= idx) {
-				m.resize(static_cast<size_t>(idx) * 3 / 2 + 1);
+			if (int(map.size()) <= idx) {
+				map.resize(static_cast<size_t>(idx) * 3 / 2 + 1, nullptr);
 			}
-			m[idx] = deleter;
+			map[idx] = deleter;
 		}
 
-		static TypeDeleterBase* get(int uid)
+		TypeDeleterBase* get(int uid) const
 		{
-			return (*getDeleters())[uid];
+			return map[uid];
 		}
 
-		static Vector<TypeDeleterBase*>*& getDeleters()
+		bool hasComponent(int uid) const
 		{
-			static Vector<TypeDeleterBase*>* map;
-			return map;
+			return map.size() > size_t(uid) && map[uid] != nullptr;
 		}
+
+	private:
+		Vector<TypeDeleterBase*> map;
 	};
 
 	template <typename T>
 	class TypeDeleter final : public TypeDeleterBase
 	{
 	public:
-		static void initialize()
+		static void initialize(ComponentDeleterTable& table)
 		{
-			static bool initialized = false;
-			if (!initialized) {
-				initialized = true;
-				ComponentDeleterTable::set(T::componentIndex, new TypeDeleter<T>());
+			if (!table.hasComponent(T::componentIndex)) {
+				table.set(T::componentIndex, new TypeDeleter<T>());
 			}
 		}
 

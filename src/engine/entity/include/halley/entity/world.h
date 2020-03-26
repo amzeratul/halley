@@ -89,7 +89,9 @@ namespace Halley {
 		}
 
 		const CreateComponentFunction& getCreateComponentFunction() const;
-		MaskStorage& getStorage() const;
+
+		MaskStorage& getMaskStorage() const;
+		ComponentDeleterTable& getComponentDeleterTable();
 
 	private:
 		const HalleyAPI& api;
@@ -110,6 +112,7 @@ namespace Halley {
 		TreeMap<FamilyMaskType, std::vector<Family*>> familyCache;
 
 		std::shared_ptr<MaskStorage> maskStorage;
+		std::shared_ptr<ComponentDeleterTable> componentDeleterTable;
 
 		mutable std::array<StopwatchAveraging, 3> timer;
 

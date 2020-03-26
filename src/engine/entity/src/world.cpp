@@ -23,6 +23,7 @@ World::World(const HalleyAPI& api, Resources& resources, bool collectMetrics, Cr
 	, createComponent(std::move(createComponent))
 	, collectMetrics(collectMetrics)
 	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
+	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
 {
 }
 
@@ -240,14 +241,20 @@ const World::CreateComponentFunction& World::getCreateComponentFunction() const
 	return createComponent;
 }
 
-MaskStorage& World::getStorage() const
+MaskStorage& World::getMaskStorage() const
 {
 	return *maskStorage;
+}
+
+ComponentDeleterTable& World::getComponentDeleterTable()
+{
+	return *componentDeleterTable;
 }
 
 void World::deleteEntity(Entity* entity)
 {
 	Expects (entity);
+	entity->destroyComponents(*componentDeleterTable);
 	entity->~Entity();
 	PoolAllocator<Entity>::free(entity);
 }
@@ -350,7 +357,7 @@ void World::updateEntities()
 			} else {
 				// It's alive, so check old and new system inclusions
 				FamilyMaskType oldMask = entity.getMask();
-				entity.refresh(*maskStorage);
+				entity.refresh(*maskStorage, *componentDeleterTable);
 				FamilyMaskType newMask = entity.getMask();
 
 				// Did it change?

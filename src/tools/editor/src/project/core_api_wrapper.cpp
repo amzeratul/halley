@@ -4,7 +4,6 @@ using namespace Halley;
 CoreAPIWrapper::CoreAPIWrapper(CoreAPI& parent)
 	: parent(parent)
 {
-	statics = std::make_unique<HalleyStatics>(parent.getStatics());
 }
 
 void CoreAPIWrapper::registerPlugin(std::unique_ptr<Plugin> plugin)
@@ -44,7 +43,7 @@ Stage& CoreAPIWrapper::getCurrentStage()
 
 HalleyStatics& CoreAPIWrapper::getStatics()
 {
-	return *statics;
+	return parent.getStatics();
 }
 
 const Environment& CoreAPIWrapper::getEnvironment()

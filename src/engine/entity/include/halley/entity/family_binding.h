@@ -135,7 +135,7 @@ namespace Halley {
 
 	protected:
 		void bindFamily(World& world) override {
-			init(world.getStorage());
+			init(world.getMaskStorage());
 			setFamily(&world.getFamily<T>());
 		}
 		

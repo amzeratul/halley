@@ -19,6 +19,5 @@ namespace Halley {
 
 	private:
 		CoreAPI& parent;
-		std::unique_ptr<HalleyStatics> statics;
 	};
 }

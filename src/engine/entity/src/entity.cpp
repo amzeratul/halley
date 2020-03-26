@@ -4,16 +4,15 @@
 
 using namespace Halley;
 
-Entity::Entity()
-{
-	liveComponents = 0;
-}
+Entity::Entity() = default;
+Entity::~Entity() = default;
 
-Entity::~Entity()
+void Entity::destroyComponents(ComponentDeleterTable& table)
 {
-	for (auto i = components.begin(); i != components.end(); ++i) {
-		deleteComponent(i->second, i->first);
+	for (auto& component : components) {
+		deleteComponent(component.second, component.first, table);
 	}
+	components.clear();
 	liveComponents = 0;
 }
 
@@ -34,9 +33,9 @@ void Entity::removeComponentAt(int i)
 	--liveComponents;
 }
 
-void Entity::deleteComponent(Component* component, int id)
+void Entity::deleteComponent(Component* component, int id, ComponentDeleterTable& table)
 {
-	TypeDeleterBase* deleter = ComponentDeleterTable::get(id);
+	TypeDeleterBase* deleter = table.get(id);
 	deleter->callDestructor(component);
 	PoolPool::getPool(deleter->getSize())->free(component);
 }
@@ -53,19 +52,24 @@ void Entity::markDirty(World& world)
 	}
 }
 
+ComponentDeleterTable& Entity::getComponentDeleterTable(World& world)
+{
+	return world.getComponentDeleterTable();
+}
+
 FamilyMaskType Entity::getMask() const
 {
 	return mask;
 }
 
-void Entity::refresh(MaskStorage& storage)
+void Entity::refresh(MaskStorage& storage, ComponentDeleterTable& table)
 {
 	if (dirty) {
 		dirty = false;
 
 		// Delete stale components
 		for (int i = liveComponents; i < int(components.size()); ++i) {
-			deleteComponent(components[i].second, components[i].first);
+			deleteComponent(components[i].second, components[i].first, table);
 		}
 		components.resize(liveComponents);
 

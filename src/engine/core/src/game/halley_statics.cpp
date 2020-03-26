@@ -40,29 +40,16 @@ namespace Halley {
 		std::unique_ptr<ThreadPool> cpuAuxThreadPool;
 		std::unique_ptr<ThreadPool> diskIOThreadPool;
 	};
-
-	class HalleyStaticsPrivate {
-	public:
-		Vector<TypeDeleterBase*> typeDeleters;
-	};
 }
 
 HalleyStatics::HalleyStatics()
 	: sharedData(std::make_shared<HalleyStaticsShared>())
-	, privateData(std::make_unique<HalleyStaticsPrivate>())
 {
 }
 
 HalleyStatics::~HalleyStatics()
 {
 	sharedData.reset();
-	privateData.reset();
-}
-
-HalleyStatics::HalleyStatics(HalleyStatics& parent)
-	: sharedData(parent.sharedData)
-	, privateData(std::make_unique<HalleyStaticsPrivate>())
-{
 }
 
 void HalleyStatics::resume(SystemAPI* system)
@@ -90,13 +77,9 @@ void HalleyStatics::resume(SystemAPI* system)
 void HalleyStatics::setupGlobals() const
 {
 	Expects(sharedData);
-	Expects(privateData);
 	
 	Logger::setInstance(*sharedData->logger);
-
-	ComponentDeleterTable::getDeleters() = &privateData->typeDeleters;
 	OS::setInstance(sharedData->os);
-
 	Executors::set(*sharedData->executors);
 }
 

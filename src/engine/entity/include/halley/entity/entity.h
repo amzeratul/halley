@@ -113,7 +113,7 @@ namespace Halley {
 		FamilyMaskType getMask() const;
 		EntityId getEntityId() const;
 
-		void refresh(MaskStorage& storage);
+		void refresh(MaskStorage& storage, ComponentDeleterTable& table);
 		void destroy();
 
 	private:
@@ -128,12 +128,13 @@ namespace Halley {
 		bool alive = true;
 
 		Entity();
+		void destroyComponents(ComponentDeleterTable& storage);
 
 		template <typename T>
 		Entity& addComponent(World& world, T* component)
 		{
 			addComponent(component, T::componentIndex);
-			TypeDeleter<T>::initialize();
+			TypeDeleter<T>::initialize(getComponentDeleterTable(world));
 
 			markDirty(world);
 			return *this;
@@ -156,10 +157,11 @@ namespace Halley {
 
 		void addComponent(Component* component, int id);
 		void removeComponentAt(int index);
-		void deleteComponent(Component* component, int id);
+		void deleteComponent(Component* component, int id, ComponentDeleterTable& table);
 		void onReady();
 
 		void markDirty(World& world);
+		ComponentDeleterTable& getComponentDeleterTable(World& world);
 	};
 
 	class EntityRef
