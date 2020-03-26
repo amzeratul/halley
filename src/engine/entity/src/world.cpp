@@ -220,6 +220,16 @@ std::vector<EntityRef> World::getEntities()
 	return result;
 }
 
+std::vector<ConstEntityRef> World::getEntities() const
+{
+	std::vector<ConstEntityRef> result;
+	result.reserve(entities.size());
+	for (auto& e : entities) {
+		result.push_back(ConstEntityRef(*e, *this));
+	}
+	return result;
+}
+
 void World::onEntityDirty()
 {
 	entityDirty = true;

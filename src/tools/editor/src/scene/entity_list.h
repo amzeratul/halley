@@ -8,8 +8,15 @@ namespace Halley {
 	public:
 		EntityList(String id, UIFactory& factory);
 
+		void clearExceptions();
+		void addException(EntityId entityId);
+		
+		void refreshList(const World& world);
+
 	private:
 		UIFactory& factory;
+		std::shared_ptr<UIList> list;
+		std::set<EntityId> exceptions;
 
 		void makeUI();
 	};

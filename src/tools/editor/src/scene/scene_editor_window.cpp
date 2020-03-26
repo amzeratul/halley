@@ -1,6 +1,8 @@
 #include "scene_editor_window.h"
 
 
+
+#include "entity_list.h"
 #include "halley/tools/project/project.h"
 #include "scene_editor_canvas.h"
 using namespace Halley;
@@ -26,12 +28,18 @@ void SceneEditorWindow::loadScene(const String& name)
 	unloadScene();
 	
 	if (!name.isEmpty() && canvas->isLoaded()) {
-		auto& world = canvas->getInterface().getWorld();
+		auto& interface = canvas->getInterface();
+		auto& world = interface.getWorld();
 
 		EntityFactory factory(world, project.getGameResources());
 		
 		sceneName = name;
 		sceneId = factory.createEntity(name).getEntityId();
+		world.spawnPending();
+
+		entityList->clearExceptions();
+		entityList->addException(interface.getCameraId());
+		entityList->refreshList(world);
 	}
 }
 
@@ -42,6 +50,7 @@ void SceneEditorWindow::unloadScene()
 	if (canvas->isLoaded() && sceneId.isValid()) {
 		auto& world = canvas->getInterface().getWorld();
 		world.destroyEntity(sceneId);
+		world.spawnPending();
 	}
 	sceneName = "";
 	sceneId = EntityId();
@@ -61,6 +70,7 @@ void SceneEditorWindow::makeUI()
 {
 	add(uiFactory.makeUI("ui/halley/scene_editor_window"), 1);
 	canvas = getWidgetAs<SceneEditorCanvas>("canvas");
+	entityList = getWidgetAs<EntityList>("entityList");
 
 	setHandle(UIEventType::ButtonClicked, "load", [=](const UIEvent& event)
 	{
@@ -75,3 +85,4 @@ void SceneEditorWindow::load()
 		canvas->loadGame(dll, project.getGameResources());
 	}
 }
+

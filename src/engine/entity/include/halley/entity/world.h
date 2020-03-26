@@ -62,6 +62,7 @@ namespace Halley {
 		Entity* tryGetEntity(EntityId id);
 		size_t numEntities() const;
 		std::vector<EntityRef> getEntities();
+		std::vector<ConstEntityRef> getEntities() const;
 
 		void spawnPending(); // Warning: use with care, will invalidate entities
 

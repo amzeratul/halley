@@ -32,12 +32,14 @@ namespace Halley {
 	};
 
 	class EntityRef;
+	class ConstEntityRef;
 
 	class Entity
 	{
 		friend class World;
 		friend class System;
 		friend class EntityRef;
+		friend class ConstEntityRef;
 
 	public:
 		~Entity();
@@ -241,5 +243,52 @@ namespace Halley {
 
 		Entity& entity;
 		World& world;
+	};
+	
+	class ConstEntityRef
+	{
+	public:
+		template <typename T>
+		const T& getComponent() const
+		{
+			return entity.getComponent<T>();
+		}
+
+		template <typename T>
+		const T* tryGetComponent() const
+		{
+			return entity.tryGetComponent<T>();
+		}
+
+		EntityId getEntityId() const
+		{
+			return entity.getEntityId();
+		}
+
+		template <typename T>
+		bool hasComponent() const
+		{
+			return entity.hasComponent<T>();
+		}
+
+		const String& getName() const
+		{
+			return entity.name;
+		}
+
+		const UUID& getUUID() const
+		{
+			return entity.uuid;
+		}
+
+	private:
+		friend class World;
+		ConstEntityRef(Entity& e, const World& w)
+			: entity(e)
+			, world(w)
+		{}
+
+		Entity& entity;
+		const World& world;
 	};
 }

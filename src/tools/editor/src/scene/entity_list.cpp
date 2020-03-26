@@ -8,7 +8,28 @@ EntityList::EntityList(String id, UIFactory& factory)
 	makeUI();
 }
 
+void EntityList::clearExceptions()
+{
+	exceptions.clear();
+}
+
+void EntityList::addException(EntityId entityId)
+{
+	exceptions.insert(entityId);
+}
+
 void EntityList::makeUI()
 {
-	add(std::make_shared<UIList>(getId() + "_list", factory.getStyle("list")));
+	list = std::make_shared<UIList>(getId() + "_list", factory.getStyle("list"));
+	add(list, 1);
+}
+
+void EntityList::refreshList(const World& world)
+{
+	list->clear();
+	for (auto& e: world.getEntities()) {
+		if (exceptions.find(e.getEntityId()) == exceptions.end()) {
+			list->addTextItem(e.getEntityId().toString(), LocalisedString::fromUserString(e.getName()));
+		}
+	}
 }
