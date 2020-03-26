@@ -18,7 +18,6 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 
 SceneEditorWindow::~SceneEditorWindow()
 {
-	unloadScene();
 }
 
 void SceneEditorWindow::loadScene(const String& name)
