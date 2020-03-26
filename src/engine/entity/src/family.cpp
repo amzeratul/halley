@@ -3,9 +3,10 @@
 
 using namespace Halley;
 
-Family::Family(FamilyMaskType mask) 
+Family::Family(FamilyMaskType mask)
 	: inclusionMask(mask)
-{}
+{
+}
 
 void Family::addOnEntitiesAdded(FamilyBindingBase* bind)
 {

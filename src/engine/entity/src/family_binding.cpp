@@ -12,11 +12,10 @@ FamilyBindingBase::~FamilyBindingBase()
 	}
 }
 
-FamilyBindingBase::FamilyBindingBase(FamilyMaskType readMask, FamilyMaskType writeMask)
-	: family(nullptr)
-	, readMask(readMask)
-	, writeMask(writeMask)
+void FamilyBindingBase::doInit(FamilyMaskType read, FamilyMaskType write)
 {
+	readMask = read;
+	writeMask = write;
 }
 
 void FamilyBindingBase::onEntitiesAdded(void* entity, size_t count)

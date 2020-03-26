@@ -22,8 +22,8 @@ World::World(const HalleyAPI& api, Resources& resources, bool collectMetrics, Cr
 	, resources(resources)
 	, createComponent(std::move(createComponent))
 	, collectMetrics(collectMetrics)
+	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 {
-	MaskStorageInterface::createMaskStorageIfNeeded(api.core->getStatics());
 }
 
 World::~World()
@@ -240,6 +240,11 @@ const World::CreateComponentFunction& World::getCreateComponentFunction() const
 	return createComponent;
 }
 
+MaskStorage& World::getStorage() const
+{
+	return *maskStorage;
+}
+
 void World::deleteEntity(Entity* entity)
 {
 	Expects (entity);
@@ -345,7 +350,7 @@ void World::updateEntities()
 			} else {
 				// It's alive, so check old and new system inclusions
 				FamilyMaskType oldMask = entity.getMask();
-				entity.refresh();
+				entity.refresh(*maskStorage);
 				FamilyMaskType newMask = entity.getMask();
 
 				// Did it change?
@@ -366,14 +371,14 @@ void World::updateEntities()
 			for (auto& e: todo.second.toRemove) {
 				// Only remove if the entity is not about to be re-added
 				const auto& newMask = e.first;
-				if (!newMask.contains(famMask)) {
+				if (!newMask.contains(famMask, *maskStorage)) {
 					fam->removeEntity(*e.second);
 				}
 			}
 			for (auto& e: todo.second.toAdd) {
 				// Only add if the entity was not already in this
 				const auto& oldMask = e.first;
-				if (!oldMask.contains(famMask)) {
+				if (!oldMask.contains(famMask, *maskStorage)) {
 					fam->addEntity(*e.second);
 				}
 			}
@@ -443,7 +448,7 @@ void World::onAddFamily(Family& family)
 		auto& entity = *entities[i];
 		auto eMask = entity.getMask();
 		auto fMask = family.inclusionMask;
-		if ((eMask & fMask) == fMask) {
+		if ((eMask.intersection(fMask, *maskStorage)) == fMask) {
 			family.addEntity(entity);
 		}
 	}
@@ -460,7 +465,7 @@ const std::vector<Family*>& World::getFamiliesFor(const FamilyMaskType& mask)
 		for (auto& iter : families) {
 			auto& family = *iter;
 			FamilyMaskType famMask = family.inclusionMask;
-			if (mask.contains(famMask)) {
+			if (mask.contains(famMask, *maskStorage)) {
 				result.push_back(&family);
 			}
 		}

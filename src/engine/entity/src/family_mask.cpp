@@ -46,26 +46,19 @@ namespace std {
 class MaskStorage
 {
 public:
-	static MaskStorage*& getInstance()
-	{
-		static MaskStorage* i = nullptr;
-		return i;
-	}
-
 	Vector<MaskEntry*> values;
 	std::unordered_set<MaskEntry> entries;
 
-	static int getHandle(const RealType& value)
+	int getHandle(const RealType& value)
 	{
-		auto& instance = *getInstance();
 		auto entry = MaskEntry(value, 0);
-		auto i = instance.entries.find(entry);
-		if (i == instance.entries.end()) {
+		auto i = entries.find(entry);
+		if (i == entries.end()) {
 			// Not found
-			int idx = static_cast<int>(instance.values.size());
+			int idx = static_cast<int>(values.size());
 			entry.idx = idx;
-			auto result = instance.entries.insert(std::move(entry));
-			instance.values.push_back(const_cast<MaskEntry*>(&*result.first));
+			auto result = entries.insert(std::move(entry));
+			values.push_back(const_cast<MaskEntry*>(&*result.first));
 			return idx;
 		} else {
 			// Found
@@ -73,15 +66,17 @@ public:
 		}
 	}
 
-	static RealType& retrieve(int handle)
+	RealType& retrieve(int handle)
 	{
-		static RealType dummy;
 		if (handle == -1) {
 			return dummy;
 		} else {
-			return (*getInstance()).values[handle]->mask;
+			return values[handle]->mask;
 		}
 	}
+
+private:
+	RealType dummy;
 };
 
 
@@ -100,19 +95,15 @@ Handle::Handle(Handle&& h) noexcept
 {
 }
 
-Handle::Handle(const RealType& mask)
-	: value(MaskStorage::getHandle(mask))
+Handle::Handle(const RealType& mask, MaskStorage& storage)
+	: value(storage.getHandle(mask))
 {
 }
 
-Handle::Handle(RealType&& mask)
-	: value(MaskStorage::getHandle(mask))
-{
-}
-
-void Handle::operator=(const Handle& h)
+Handle& Handle::operator=(const Handle& h)
 {
 	value = h.value;
+	return *this;
 }
 
 bool Handle::operator==(const Handle& h) const
@@ -130,39 +121,30 @@ bool Handle::operator<(const Handle& h) const
 	return value < h.value;
 }
 
-Handle Handle::operator&(const Handle& h) const
+Handle Handle::intersection(const Handle& h, MaskStorage& storage) const
 {
-	return Handle(getRealValue() & h.getRealValue());
+	return Handle(getRealValue(storage) & h.getRealValue(storage), storage);
 }
 
-const RealType& Handle::getRealValue() const
+const RealType& Handle::getRealValue(MaskStorage& storage) const
 {
-	return MaskStorage::retrieve(value);
+	return storage.retrieve(value);
 }
 
-bool Handle::contains(const Handle& handle) const
+bool Handle::contains(const Handle& handle, MaskStorage& storage) const
 {
-	auto& mine = getRealValue();
-	auto& theirs = handle.getRealValue();
+	auto& mine = getRealValue(storage);
+	auto& theirs = handle.getRealValue(storage);
 
 	return (mine & theirs) == theirs;
 }
 
-HandleType FamilyMask::getHandle(RealType mask)
+HandleType FamilyMask::getHandle(RealType mask, MaskStorage& storage)
 {
-	return Handle(mask);
+	return Handle(mask, storage);
 }
 
-void MaskStorageInterface::createMaskStorageIfNeeded(HalleyStatics& statics)
+std::shared_ptr<MaskStorage> MaskStorageInterface::createStorage()
 {
-	if (!MaskStorage::getInstance()) {
-		const auto curStorage = statics.getMaskStorage();
-		if (curStorage) {
-			MaskStorage::getInstance() = reinterpret_cast<MaskStorage*>(curStorage);
-		} else {
-			const auto storage = new MaskStorage();
-			MaskStorage::getInstance() = storage;
-			statics.setMaskStorage(storage);
-		}
-	}
+	return std::make_shared<MaskStorage>();
 }

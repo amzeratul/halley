@@ -44,7 +44,6 @@ namespace Halley {
 	class HalleyStaticsPrivate {
 	public:
 		Vector<TypeDeleterBase*> typeDeleters;
-		void* maskStorage = nullptr;
 	};
 }
 
@@ -108,12 +107,3 @@ void HalleyStatics::suspend()
 	sharedData->cpuAuxThreadPool.reset();
 }
 
-void HalleyStatics::setMaskStorage(void* storage)
-{
-	privateData->maskStorage = storage;
-}
-
-void* HalleyStatics::getMaskStorage() const
-{
-	return privateData->maskStorage;
-}

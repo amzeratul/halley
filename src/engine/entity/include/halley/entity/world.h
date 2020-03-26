@@ -80,7 +80,7 @@ namespace Halley {
 			}
 			*/
 
-			auto newFam = std::make_unique<FamilyImpl<T>>();
+			auto newFam = std::make_unique<FamilyImpl<T>>(getStorage());
 			Family* newFamPtr = newFam.get();
 			onAddFamily(*newFamPtr);
 			//families[mask] = std::move(newFam);
@@ -89,6 +89,7 @@ namespace Halley {
 		}
 
 		const CreateComponentFunction& getCreateComponentFunction() const;
+		MaskStorage& getStorage() const;
 
 	private:
 		const HalleyAPI& api;
@@ -107,6 +108,8 @@ namespace Halley {
 		TreeMap<String, std::shared_ptr<Service>> services;
 
 		TreeMap<FamilyMaskType, std::vector<Family*>> familyCache;
+
+		std::shared_ptr<MaskStorage> maskStorage;
 
 		mutable std::array<StopwatchAveraging, 3> timer;
 

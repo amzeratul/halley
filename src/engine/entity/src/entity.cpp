@@ -58,7 +58,7 @@ FamilyMaskType Entity::getMask() const
 	return mask;
 }
 
-void Entity::refresh()
+void Entity::refresh(MaskStorage& storage)
 {
 	if (dirty) {
 		dirty = false;
@@ -74,7 +74,7 @@ void Entity::refresh()
 		for (auto i : components) {
 			FamilyMask::setBit(m, i.first);
 		}
-		mask = FamilyMask::getHandle(m);
+		mask = FamilyMask::getHandle(m, storage);
 	}
 }
 

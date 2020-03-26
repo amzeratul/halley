@@ -17,9 +17,6 @@ namespace Halley
 		void setupGlobals() const;
 		void resume(SystemAPI* system);
 		void suspend();
-		
-		void setMaskStorage(void* storage);
-		void* getMaskStorage() const;
 
 	private:
 		std::shared_ptr<HalleyStaticsShared> sharedData;

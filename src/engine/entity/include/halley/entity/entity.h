@@ -113,7 +113,7 @@ namespace Halley {
 		FamilyMaskType getMask() const;
 		EntityId getEntityId() const;
 
-		void refresh();
+		void refresh(MaskStorage& storage);
 		void destroy();
 
 	private:
