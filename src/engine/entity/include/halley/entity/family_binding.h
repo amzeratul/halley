@@ -43,11 +43,6 @@ namespace Halley {
 	class FamilyBinding : public FamilyBindingBase
 	{
 	public:
-		void init(MaskStorage& storage)
-		{
-			doInit(T::Type::readMask(storage), T::Type::writeMask(storage));
-		}
-
 		T& operator[](size_t index) {
 			Expects(index < count());
 			return *reinterpret_cast<T*>(getElement(index));
@@ -142,6 +137,12 @@ namespace Halley {
 		void bindFamily(World& world) override {
 			init(world.getStorage());
 			setFamily(&world.getFamily<T>());
+		}
+		
+	private:
+		void init(MaskStorage& storage)
+		{
+			doInit(T::Type::readMask(storage), T::Type::writeMask(storage));
 		}
 	};
 }

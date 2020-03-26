@@ -80,7 +80,7 @@ namespace Halley {
 			}
 			*/
 
-			auto newFam = std::make_unique<FamilyImpl<T>>(getStorage());
+			auto newFam = std::make_unique<FamilyImpl<T>>(*maskStorage);
 			Family* newFamPtr = newFam.get();
 			onAddFamily(*newFamPtr);
 			//families[mask] = std::move(newFam);
