@@ -66,6 +66,7 @@ void EditorRootStage::onRender(RenderContext& context) const
 	
 	context.bind([&](Painter& painter)
 	{
+		painter.clear(Colour4f()); // Needed for depth/stencil
 		auto view = Rect4f(painter.getViewPort());
 
 		// Background
