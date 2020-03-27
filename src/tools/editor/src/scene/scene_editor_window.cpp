@@ -8,7 +8,7 @@
 using namespace Halley;
 
 SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api)
-	: UIWidget("assets_editor", {}, UISizer())
+	: UIWidget("scene_editor", {}, UISizer())
 	, uiFactory(factory)
 	, project(project)
 {
@@ -70,11 +70,6 @@ void SceneEditorWindow::makeUI()
 	add(uiFactory.makeUI("ui/halley/scene_editor_window"), 1);
 	canvas = getWidgetAs<SceneEditorCanvas>("canvas");
 	entityList = getWidgetAs<EntityList>("entityList");
-
-	setHandle(UIEventType::ButtonClicked, "load", [=](const UIEvent& event)
-	{
-		loadScene(getWidgetAs<UITextInput>("fileName")->getText());
-	});
 }
 
 void SceneEditorWindow::load()

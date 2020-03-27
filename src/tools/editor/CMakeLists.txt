@@ -14,6 +14,7 @@ set (editor_sources
 	"src/assets/animation_editor.cpp"
 	"src/assets/assets_editor_window.cpp"
 	"src/assets/metadata_editor.cpp"
+	"src/assets/prefab_editor.cpp"
 
 	"src/project/core_api_wrapper.cpp"
 
@@ -39,6 +40,7 @@ set (editor_headers
 	"src/assets/animation_editor.h"
 	"src/assets/assets_editor_window.h"
 	"src/assets/metadata_editor.h"
+	"src/assets/prefab_editor.h"
 
 	"src/project/core_api_wrapper.h"
 

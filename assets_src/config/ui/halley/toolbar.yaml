@@ -6,7 +6,7 @@ children:
 - widget: { class: image, image: ui/slant_capsule_right_short.png, size: [40, 32], colour: "#FC2847" }
   border: [0, 3, -5, 3]
 - widget: 
-    id: toolbar
+    id: toolbarList
     class: list
     type: horizontal
     style: toolbar

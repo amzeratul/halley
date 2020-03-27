@@ -6,13 +6,15 @@
 #include "halley/ui/widgets/ui_list.h"
 #include "animation_editor.h"
 #include "metadata_editor.h"
+#include "prefab_editor.h"
 
 using namespace Halley;
 
-AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project)
+AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, EditorRootStage& stage)
 	: UIWidget("assets_editor", {}, UISizer())
 	, factory(factory)
 	, project(project)
+	, stage(stage)
 	, curSrcPath(".")
 {
 	loadResources();
@@ -210,6 +212,8 @@ std::shared_ptr<AssetEditor> AssetsEditorWindow::makeEditor(AssetType type, cons
 	case AssetType::Animation:
 	case AssetType::Texture:
 		return std::make_shared<AnimationEditor>(factory, project.getGameResources(), type, project);
+	case AssetType::Prefab:
+		return std::make_shared<PrefabEditor>(factory, project.getGameResources(), type, project, stage);
 	}
 	return {};
 }

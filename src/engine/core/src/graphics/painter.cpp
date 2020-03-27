@@ -355,6 +355,9 @@ void Painter::bind(RenderContext& context)
 
 	// Set render target
 	activeRenderTarget = &camera->getActiveRenderTarget();
+	if (!activeRenderTarget) {
+		throw Exception("No active render target", HalleyExceptions::Core);
+	}
 	activeRenderTarget->onBind(*this);
 
 	// Set viewport

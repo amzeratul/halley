@@ -103,7 +103,7 @@ void SceneEditorCanvas::renderInterface(RenderContext& rc) const
 		return;
 	}
 	
-	if (interface) {
+	if (interface && surface->isReady()) {
 		guardedRun([&]() {
 			auto context = rc.with(surface->getRenderTarget());
 			interface->render(context);

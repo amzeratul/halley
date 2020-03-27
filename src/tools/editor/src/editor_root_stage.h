@@ -2,6 +2,7 @@
 
 #include "prec.h"
 #include "halley/tools/tasks/editor_task_set.h"
+#include "ui/toolbar.h"
 
 namespace Halley {
 	class HalleyEditor;
@@ -26,6 +27,8 @@ namespace Halley {
 		void init() override;
 		void onVariableUpdate(Time time) override;
 		void onRender(RenderContext& context) const override;
+
+		void openPrefab(const String& name);
 
 	private:
 		HalleyEditor& editor;

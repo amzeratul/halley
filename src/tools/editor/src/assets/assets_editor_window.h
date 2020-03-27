@@ -7,6 +7,7 @@
 #include "halley/ui/widgets/ui_paged_pane.h"
 
 namespace Halley {
+	class EditorRootStage;
 	class Project;
 	class MetadataEditor;
 	
@@ -30,11 +31,12 @@ namespace Halley {
 
 	class AssetsEditorWindow : public UIWidget {
     public:
-        AssetsEditorWindow(UIFactory& factory, Project& project);
+        AssetsEditorWindow(UIFactory& factory, Project& project, EditorRootStage& stage);
 
 	private:
 		UIFactory& factory;
 		Project& project;
+		EditorRootStage& stage;
 
 		std::map<AssetType, Path> curPaths;
 		Path curSrcPath;

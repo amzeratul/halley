@@ -1,19 +1,31 @@
 editor
+- compile game
+- launch game
 - project properties
 - editor options
 - ECS editor
 - ECS inspector
 - create project from template
 - game stats display
-- prefab editor
-- scene editor
 - render graph editor
 - state machine editor
-- compile game
-- launch game
+
+scene editor
+- open from asset editor
+- reload on asset reload
+- entity list
+- entity editor
+- scroll view
+
+entity
+- nested prefabs
+- general serialize/deserialize
+- snapshot world
+- smearing systems
+- better timelines?
+- defragment/optimize memory? [RESEARCH]
 
 core
-- check if hot reload still works
 - hot reload AudioClips
 
 graphics
@@ -30,7 +42,6 @@ input
 - use GameController API, ditch XInput+Joystick (should be superceded)
 
 audio
-- reduce mutexes and allocations
 - refactor voice system
 - rate limiting
 - multiple "layers" (with individual listeners for them)
@@ -42,13 +53,6 @@ audio
   - low-pass/high-pass/band-pass (standard biquad filters)
   - reverb [RESEARCH]
   - doppler shift [RESEARCH]
-
-entity
-- general serialize/deserialize
-- snapshot world
-- smearing systems
-- better timelines?
-- defragment/optimize memory? [RESEARCH]
 
 ui
 - tab order
@@ -67,6 +71,11 @@ utils
 - improve Halley::String?
 - write my own memory pool/replace boost::pool?
 - DirectoryMonitor support on Linux and Mac
+
+system/win32:
+- window properties
+- input
+- audio
 
 samples
 - ports from my old game jam games:
@@ -89,4 +98,3 @@ platforms
 
 plugins
 - Vulkan
-- Win32 System

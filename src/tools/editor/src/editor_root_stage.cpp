@@ -172,11 +172,11 @@ void EditorRootStage::createProjectUI()
 	uiMid->add(pagedPane, 1);
 	uiBottom->add(taskbar, 1);
 
-	pagedPane->getPage(int(EditorTabs::Assets))->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project), 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(int(EditorTabs::Assets))->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project, *this), 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(int(EditorTabs::Scene))->add(std::make_shared<SceneEditorWindow>(*uiFactory, *project, getAPI()), 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(int(EditorTabs::Settings))->add(std::make_shared<ConsoleWindow>(*uiFactory), 1, Vector4f(8, 8, 8, 8));
 
-	toolbar->setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
+	toolbar->setHandle(UIEventType::ListSelectionChanged, "toolbarList", [=] (const UIEvent& event)
 	{
 		String toolName;
 		switch (EditorTabs(event.getIntData())) {
@@ -231,4 +231,13 @@ void EditorRootStage::unloadProject()
 {
 	tasks.reset();
 	project.reset();
+}
+
+void EditorRootStage::openPrefab(const String& name)
+{
+	auto sceneEditor = ui->getWidgetAs<SceneEditorWindow>("scene_editor");
+	sceneEditor->loadScene(name);
+	auto toolbar = ui->getWidgetAs<UIList>("toolbarList");
+	toolbar->setSelectedOption(int(EditorTabs::Scene));
+	//pagedPane->setPage(int(EditorTabs::Scene));
 }
