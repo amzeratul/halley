@@ -26,6 +26,7 @@ namespace Halley {
 		void pressMouse(Vector2f mousePos, int button) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
 		void onMouseOver(Vector2f mousePos) override;
+		void onMouseWheel(const UIEvent& event);
 		
 	private:
 		const HalleyAPI& api;

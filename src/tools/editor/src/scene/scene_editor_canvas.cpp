@@ -11,6 +11,11 @@ SceneEditorCanvas::SceneEditorCanvas(String id, Resources& resources, const Hall
 {
 	border.setImage(resources, "whitebox.png").setColour(Colour4f());
 	surface = std::make_shared<RenderSurface>(*api.video, resources);
+
+	setHandle(UIEventType::MouseWheel, [this](const UIEvent& event)
+	{
+		onMouseWheel(event);
+	});
 }
 
 SceneEditorCanvas::~SceneEditorCanvas()
@@ -81,9 +86,16 @@ void SceneEditorCanvas::releaseMouse(Vector2f mousePos, int button)
 
 void SceneEditorCanvas::onMouseOver(Vector2f mousePos)
 {
-	if (dragging) {
+	if (dragging && interface) {
 		interface->dragCamera(lastMousePos - mousePos);
-		lastMousePos = mousePos;
+	}
+	lastMousePos = mousePos;
+}
+
+void SceneEditorCanvas::onMouseWheel(const UIEvent& event)
+{
+	if (interface) {
+		interface->changeZoom(event.getIntData(), lastMousePos - getPosition() - getSize() / 2);
 	}
 }
 
