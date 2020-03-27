@@ -51,6 +51,42 @@ void SceneEditorCanvas::render(RenderContext& rc) const
 	renderInterface(rc);
 }
 
+bool SceneEditorCanvas::canInteractWithMouse() const
+{
+	return true;
+}
+
+bool SceneEditorCanvas::isFocusLocked() const
+{
+	return dragging;
+}
+
+void SceneEditorCanvas::pressMouse(Vector2f mousePos, int button)
+{
+	if (button == 0) {
+		dragging = true;
+		lastMousePos = mousePos;
+	}
+}
+
+void SceneEditorCanvas::releaseMouse(Vector2f mousePos, int button)
+{
+	if (button == 0) {
+		if (dragging) {
+			onMouseOver(mousePos);
+			dragging = false;
+		}
+	}
+}
+
+void SceneEditorCanvas::onMouseOver(Vector2f mousePos)
+{
+	if (dragging) {
+		interface->dragCamera(lastMousePos - mousePos);
+		lastMousePos = mousePos;
+	}
+}
+
 void SceneEditorCanvas::loadGame(std::shared_ptr<DynamicLibrary> dll, Resources& gameResources)
 {
 	this->gameResources = &gameResources;

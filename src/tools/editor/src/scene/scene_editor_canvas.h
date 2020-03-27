@@ -3,7 +3,7 @@
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
-	class SceneEditorCanvas : public UIWidget {
+	class SceneEditorCanvas final : public UIWidget {
 	public:
 		SceneEditorCanvas(String id, Resources& resources, const HalleyAPI& api);
 		~SceneEditorCanvas();
@@ -19,6 +19,13 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
 		void render(RenderContext& rc) const override;
+
+		bool canInteractWithMouse() const override;
+		bool isFocusLocked() const override;
+
+		void pressMouse(Vector2f mousePos, int button) override;
+		void releaseMouse(Vector2f mousePos, int button) override;
+		void onMouseOver(Vector2f mousePos) override;
 		
 	private:
 		const HalleyAPI& api;
@@ -34,6 +41,9 @@ namespace Halley {
 		mutable bool errorState = false;
 
 		std::shared_ptr<RenderSurface> surface;
+
+		bool dragging = false;
+		Vector2f lastMousePos;
 
 		void updateInterface(Time t);
 		void renderInterface(RenderContext& rc) const;

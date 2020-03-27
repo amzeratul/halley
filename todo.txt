@@ -11,11 +11,10 @@ editor
 - state machine editor
 
 scene editor
-- open from asset editor
+- scroll view
 - reload on asset reload
 - entity list
 - entity editor
-- scroll view
 
 entity
 - nested prefabs
