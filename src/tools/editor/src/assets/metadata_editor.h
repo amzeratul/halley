@@ -14,6 +14,7 @@ namespace Halley
 		MetadataEditor(UIFactory& factory);
 
 		void setResource(Project& project, AssetType type, const Path& filePath, Metadata effectiveMetadata);
+		void onMetadataChanged();
 		void saveMetadata();
 
 	private:
@@ -23,6 +24,9 @@ namespace Halley
 		Project* project = nullptr;
 		AssetType assetType;
 		Path filePath;
+		bool changed = false;
+
+		std::shared_ptr<UIWidget> fields;
 
 		void makeUI();
 

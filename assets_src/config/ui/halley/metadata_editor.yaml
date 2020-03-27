@@ -1,0 +1,8 @@
+---
+widget: { class: widget }
+sizer: { type: vertical }
+children:
+- widget: { id: fields, class: widget }
+  sizer: { type: vertical }
+- widget: { id: applyChanges, class: button, text: "Apply", size: [30, 30] }
+...

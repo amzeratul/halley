@@ -24,14 +24,32 @@ void MetadataEditor::setResource(Project& p, AssetType type, const Path& path, M
 	makeUI();
 }
 
+void MetadataEditor::onMetadataChanged()
+{
+	changed = true;
+	getWidget("applyChanges")->setEnabled(true);
+}
+
 void MetadataEditor::saveMetadata()
 {
-	project->writeMetadataToDisk(filePath, metadata);
+	if (changed) {
+		project->writeMetadataToDisk(filePath, metadata);
+		changed = false;
+		getWidget("applyChanges")->setEnabled(false);
+	}
 }
 
 void MetadataEditor::makeUI()
 {
 	clear();
+	add(factory.makeUI("ui/halley/metadata_editor"));
+	fields = getWidget("fields");
+	getWidget("applyChanges")->setEnabled(false);
+
+	setHandle(UIEventType::ButtonClicked, "applyChanges", [=](const UIEvent& event)
+	{
+		saveMetadata();
+	});
 
 	switch (assetType) {
 	case AssetType::Sprite:
@@ -73,14 +91,14 @@ void MetadataEditor::makeUI()
 void MetadataEditor::addIntField(const String& name, const String& key, int defaultValue)
 {
 	makeLabel(name);
-	makeIntField(getSizer(), key, defaultValue);
+	makeIntField(fields->getSizer(), key, defaultValue);
 }
 
 void MetadataEditor::addInt2Field(const String& name, const String& x, const String& y, Vector2i defaultValue)
 {
 	makeLabel(name);
 	auto sizer = std::make_shared<UISizer>();
-	add(sizer, 1);
+	fields->add(sizer, 1);
 	makeIntField(*sizer, x, defaultValue.x);
 	makeIntField(*sizer, y, defaultValue.y);
 }
@@ -89,7 +107,7 @@ void MetadataEditor::addInt4Field(const String& name, const String& x, const Str
 {
 	makeLabel(name);
 	auto sizer = std::make_shared<UISizer>();
-	add(sizer, 1);
+	fields->add(sizer, 1);
 	makeIntField(*sizer, x, defaultValue.x);
 	makeIntField(*sizer, y, defaultValue.y);
 	makeIntField(*sizer, z, defaultValue.z);
@@ -99,24 +117,24 @@ void MetadataEditor::addInt4Field(const String& name, const String& x, const Str
 void MetadataEditor::addFloatField(const String& name, const String& key, float defaultValue)
 {
 	makeLabel(name);
-	makeFloatField(getSizer(), key, defaultValue);
+	makeFloatField(fields->getSizer(), key, defaultValue);
 }
 
 void MetadataEditor::addBoolField(const String& name, const String& key, bool defaultValue)
 {
 	makeLabel(name);
-	makeBoolField(getSizer(), key, defaultValue);	
+	makeBoolField(fields->getSizer(), key, defaultValue);
 }
 
 void MetadataEditor::addStringField(const String& name, const String& key, const String& defaultValue)
 {
 	makeLabel(name);
-	makeStringField(getSizer(), key, defaultValue);
+	makeStringField(fields->getSizer(), key, defaultValue);
 }
 
 void MetadataEditor::makeLabel(const String& name)
 {
-	add(std::make_shared<UILabel>("", factory.getStyle("label").getTextRenderer("label"), LocalisedString::fromUserString(name)), 0, Vector4f(0, 0, 10, 0), UISizerAlignFlags::CentreVertical);
+	fields->add(std::make_shared<UILabel>("", factory.getStyle("label").getTextRenderer("label"), LocalisedString::fromUserString(name)), 0, Vector4f(0, 0, 10, 0), UISizerAlignFlags::CentreVertical);
 }
 
 template <typename T>
@@ -124,11 +142,11 @@ void updateMetadata(Metadata& metadata, const String& key, MetadataEditor& edito
 {
 	if (value == defaultValue) {
 		if (metadata.erase(key)) {
-			editor.saveMetadata();
+			editor.onMetadataChanged();
 		}
 	} else {
 		if (metadata.set(key, value)) {
-			editor.saveMetadata();
+			editor.onMetadataChanged();
 		}
 	}
 }
