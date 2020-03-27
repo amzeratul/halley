@@ -18,4 +18,12 @@ namespace Halley
 		static ConfigNode parseYAMLNode(const YAML::Node& node);
 		static void parseConfig(ConfigFile& config, gsl::span<const gsl::byte> data);
 	};
+
+	class PrefabImporter : public IAssetImporter
+	{
+	public:
+		ImportAssetType getType() const override { return ImportAssetType::Prefab; }
+
+		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
+	};
 }

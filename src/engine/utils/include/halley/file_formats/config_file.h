@@ -181,7 +181,7 @@ namespace Halley
 
 		void reload(Resource&& resource) override;
 
-	private:
+	protected:
 		ConfigNode root;
 
 		void updateRoot();
@@ -204,5 +204,13 @@ namespace Halley
 		int assetVersion = 0;
 		const ConfigFile* file = nullptr;
 		const ConfigNode* node = nullptr;
+	};
+	
+	class Prefab final : public ConfigFile {
+	public:
+		static std::unique_ptr<Prefab> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::Prefab; }
+
+		void reload(Resource&& resource) override;
 	};
 }

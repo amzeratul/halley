@@ -22,12 +22,12 @@ EntityFactory::~EntityFactory()
 
 EntityRef EntityFactory::createEntity(const char* prefabName)
 {
-	return createEntity(context.resources->get<ConfigFile>(prefabName)->getRoot());
+	return createEntity(context.resources->get<Prefab>(prefabName)->getRoot());
 }
 
 EntityRef EntityFactory::createEntity(const String& prefabName)
 {
-	return createEntity(context.resources->get<ConfigFile>(prefabName)->getRoot());
+	return createEntity(context.resources->get<Prefab>(prefabName)->getRoot());
 }
 
 EntityRef EntityFactory::createEntity(const ConfigNode& node)

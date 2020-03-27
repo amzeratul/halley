@@ -1,6 +1,7 @@
 #include "halley/core/resources/asset_database.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/support/exception.h"
+#include "halley/resources/resource.h"
 #include <set>
 
 using namespace Halley;
@@ -24,6 +25,15 @@ void AssetDatabase::Entry::deserialize(Deserializer& s)
 	s >> meta;
 }
 
+AssetDatabase::TypedDB::TypedDB()
+{
+}
+
+AssetDatabase::TypedDB::TypedDB(AssetType type)
+	: type(type)
+{
+}
+
 void AssetDatabase::TypedDB::add(const String& name, Entry&& asset)
 {
 	assets[name] = std::move(asset);
@@ -33,18 +43,20 @@ const AssetDatabase::Entry& AssetDatabase::TypedDB::get(const String& name) cons
 {
 	auto i = assets.find(name);
 	if (i == assets.end()) {
-		throw Exception("Asset not found: " + name, HalleyExceptions::Resources);
+		throw Exception("Asset not found: " + toString(type) + ":" + name, HalleyExceptions::Resources);
 	}
 	return i->second;
 }
 
 void AssetDatabase::TypedDB::serialize(Serializer& s) const
 {
+	s << type;
 	s << assets;
 }
 
 void AssetDatabase::TypedDB::deserialize(Deserializer& s)
 {
+	s >> type;
 	s >> assets;
 }
 
@@ -60,7 +72,13 @@ void AssetDatabase::addAsset(const String& name, AssetType type, Entry&& entry)
 
 const AssetDatabase::TypedDB& AssetDatabase::getDatabase(AssetType type) const
 {
-	return dbs[int(type)];
+	const int key = int(type);
+	const auto iter = dbs.find(key);
+	if (iter == dbs.end()) {
+		const auto res = dbs.insert(std::make_pair(key, TypedDB(type)));
+		return res.first->second;
+	}
+	return iter->second;
 }
 
 std::vector<String> AssetDatabase::getAssets() const

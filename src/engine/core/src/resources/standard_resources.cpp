@@ -34,6 +34,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<AudioEvent>();
 	resources.init<Mesh>();
 	resources.init<VariableTable>();
+	resources.init<Prefab>();
 
 	resources.of<SpriteResource>().setResourceEnumerator([&] () -> std::vector<String>
 	{

@@ -118,7 +118,10 @@ void SceneEditorCanvas::loadDLL()
 	gameDLL->load(true);
 	auto getHalleyEntry = reinterpret_cast<IHalleyEntryPoint * (HALLEY_STDCALL*)()>(gameDLL->getFunction("getHalleyEntry"));
 	auto game = getHalleyEntry()->createGame();
-	interface = game->createSceneEditorInterface();
+	guardedRun([&]() {
+		interface = game->createSceneEditorInterface();
+	});
+	game.reset();
 
 	if (interface) {
 		gameCoreAPI = std::make_unique<CoreAPIWrapper>(*api.core);
@@ -140,9 +143,11 @@ void SceneEditorCanvas::loadDLL()
 
 void SceneEditorCanvas::unloadDLL()
 {
-	Expects(gameDLL);
 	interface.reset();
-	gameDLL->unload();
+
+	if (gameDLL) {
+		gameDLL->unload();
+	}
 
 	gameAPI.reset();
 	gameCoreAPI.reset();

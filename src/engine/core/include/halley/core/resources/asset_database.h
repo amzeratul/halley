@@ -28,6 +28,9 @@ namespace Halley
 		class TypedDB
 		{
 		public:
+			TypedDB();
+			explicit TypedDB(AssetType type);
+			
 			void add(const String& name, Entry&& asset);
 			const Entry& get(const String& name) const;
 
@@ -37,6 +40,7 @@ namespace Halley
 			const HashMap<String, Entry>& getAssets() const;
 
 		private:
+			AssetType type;
 			HashMap<String, Entry> assets;
 		};
 

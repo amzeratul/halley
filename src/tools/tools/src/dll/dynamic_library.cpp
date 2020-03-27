@@ -130,9 +130,16 @@ void* DynamicLibrary::getBaseAddress() const
 	return handle;
 }
 
+bool DynamicLibrary::isLoaded() const
+{
+	return loaded;
+}
+
 bool DynamicLibrary::hasChanged() const
 {
-	Expects(loaded);
+	if (!loaded) {
+		return false;
+	}
 
 	flushLoaded();
 	
