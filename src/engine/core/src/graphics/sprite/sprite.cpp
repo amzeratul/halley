@@ -28,7 +28,7 @@ void Sprite::draw(Painter& painter) const
 
 void Sprite::drawNormal(Painter& painter) const
 {
-	Expects(material);
+	Expects(material != nullptr);
 	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	
 	if (clip) {
@@ -47,7 +47,7 @@ void Sprite::drawSliced(Painter& painter) const
 
 void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel) const
 {
-	Expects(material);
+	Expects(material != nullptr);
 	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	
 	Vector4f slices(slicesPixel);
@@ -229,7 +229,7 @@ Sprite& Sprite::setMaterial(std::shared_ptr<Material> m)
 {
 	bool hadMaterial = static_cast<bool>(material);
 
-	Expects(m);
+	Expects(m != nullptr);
 	material = m;
 
 	if (!hadMaterial && !material->getTextures().empty()) {
@@ -248,8 +248,8 @@ Sprite& Sprite::setImageData(const Texture& image)
 
 Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> materialDefinition)
 {
-	Expects(image);
-	Expects(materialDefinition);
+	Expects(image != nullptr);
+	Expects(materialDefinition != nullptr);
 
 	auto mat = std::make_shared<Material>(materialDefinition);
 	mat->set("tex0", image);

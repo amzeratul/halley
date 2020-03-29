@@ -10,7 +10,7 @@ AudioSourceClip::AudioSourceClip(std::shared_ptr<const IAudioClip> c, bool loopi
 	, playbackPos(-delaySamples)
 	, looping(looping)
 {
-	Expects(clip);
+	Expects(clip != nullptr);
 }
 
 uint8_t AudioSourceClip::getNumberOfChannels() const

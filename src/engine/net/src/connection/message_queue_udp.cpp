@@ -63,7 +63,7 @@ MessageQueueUDP::MessageQueueUDP(std::shared_ptr<ReliableConnection> conn)
 	: connection(conn)
 	, channels(32)
 {
-	Expects(connection);
+	Expects(connection != nullptr);
 	connection->addAckListener(*this);
 }
 

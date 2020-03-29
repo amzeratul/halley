@@ -182,7 +182,7 @@ TextRenderer TextRenderer::clone() const
 
 void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 {
-	Expects(font);
+	Expects(font != nullptr);
 
 	bool floorEnabled = false;
 	auto floorAlign = [floorEnabled] (Vector2f a) -> Vector2f
