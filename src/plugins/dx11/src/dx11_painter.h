@@ -3,6 +3,10 @@
 #include "dx11_buffer.h"
 #include <map>
 
+#include "dx11_rasterizer.h"
+#include "dx11_blend.h"
+#include "dx11_depth_stencil.h"
+
 namespace Halley
 {
 	class MaterialPass;

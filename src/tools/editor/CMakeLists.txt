@@ -39,7 +39,7 @@ set (editor_headers
 	"src/ui/toolbar.h"
 	)
 
-if (MSVC)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	set (editor_headers
 		${editor_headers}
 		"res/halley-editor.rc"
@@ -81,4 +81,3 @@ target_link_libraries (halley-editor
 		${EXTRA_LIBS}
 		${ShaderConductor_LIBRARY}
         )
-

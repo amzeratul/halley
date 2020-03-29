@@ -51,7 +51,7 @@ MaterialDataBlock::MaterialDataBlock(MaterialDataBlock&& other) noexcept
 
 MaterialConstantBuffer& MaterialDataBlock::getConstantBuffer() const
 {
-	Expects(constantBuffer);
+	Expects(constantBuffer != nullptr);
 	return *constantBuffer;
 }
 

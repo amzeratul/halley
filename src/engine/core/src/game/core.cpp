@@ -436,13 +436,13 @@ void Core::quit(int code)
 
 Resources& Core::getResources()
 {
-	Expects(resources);
+	Expects(resources != nullptr);
 	return *resources;
 }
 
 const Environment& Core::getEnvironment()
 {
-	Expects(environment);
+	Expects(environment != nullptr);
 	return *environment;
 }
 

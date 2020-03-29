@@ -300,7 +300,7 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWi
 }
 
 void UIRoot::setUIMouseRemapping(std::function<Vector2f(Vector2f)> remapFunction) {
-	Expects(remapFunction);
+	Expects(remapFunction != nullptr);
 	mouseRemap = remapFunction;
 }
 

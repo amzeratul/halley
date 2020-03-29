@@ -12,7 +12,7 @@ UIStyle::UIStyle(std::shared_ptr<const UIStyleDefinition> style)
 
 UIStyle::UIStyle(const String& styleName, std::shared_ptr<UIStyleSheet> styleSheet)
 {
-	Expects(styleSheet);
+	Expects(styleSheet != nullptr);
 	style = styleSheet->getStyle(styleName);
 }
 

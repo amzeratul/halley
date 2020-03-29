@@ -40,7 +40,7 @@ static void loadSymbolsImpl(DynamicLibrary& dll, Vector<DebugSymbol>& vector)
 		throw Exception("Unable to initialize Symbol loading", HalleyExceptions::Core);
 	}
 
-	long long baseAddr = long long(dll.getBaseAddress());
+	long long baseAddr = reinterpret_cast<long long>(dll.getBaseAddress());
 
 	SymEnumSymbols(hProcess, baseAddr, "*", loadSymbolsCallback, &vector);
 
