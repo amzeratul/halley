@@ -13,7 +13,7 @@ namespace Halley {
 		void reload();
 
 		bool isLoaded() const;
-		SceneEditorInterface& getInterface() const;
+		ISceneEditor& getInterface() const;
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -36,7 +36,7 @@ namespace Halley {
 		Sprite border;
 
 		std::shared_ptr<DynamicLibrary> gameDLL;
-		std::unique_ptr<SceneEditorInterface> interface;
+		std::unique_ptr<ISceneEditor> interface;
 		std::unique_ptr<HalleyAPI> gameAPI;
 		std::unique_ptr<CoreAPIInternal> gameCoreAPI;
 		mutable bool errorState = false;

@@ -48,7 +48,7 @@ void Game::onUncaughtException(const Exception& exception, TimeLine timeLine)
 	throw exception;
 }
 
-std::unique_ptr<SceneEditorInterface> Game::createSceneEditorInterface()
+std::unique_ptr<ISceneEditor> Game::createSceneEditorInterface()
 {
 	return {};
 }

@@ -10,7 +10,7 @@ namespace Halley
 	class Stage;
 	class Environment;
 	class GameConsole;
-	class SceneEditorInterface;
+	class ISceneEditor;
 	
 	class Game
 	{
@@ -40,7 +40,7 @@ namespace Halley
 
 		virtual void onUncaughtException(const Exception& exception, TimeLine timeLine);
 
-		virtual std::unique_ptr<SceneEditorInterface> createSceneEditorInterface();
+		virtual std::unique_ptr<ISceneEditor> createSceneEditorInterface();
 
 		const HalleyAPI& getAPI() const;
 		Resources& getResources() const;

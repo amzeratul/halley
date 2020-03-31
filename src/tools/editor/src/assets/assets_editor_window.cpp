@@ -42,27 +42,27 @@ void AssetsEditorWindow::makeUI()
 
 	setHandle(UIEventType::ListSelectionChanged, "contentList", [=] (const UIEvent& event)
 	{
-		content->setPage(event.getData().toInteger());
+		content->setPage(event.getStringData().toInteger());
 	});
 
 	setHandle(UIEventType::ListSelectionChanged, "assetType", [=] (const UIEvent& event)
 	{
-		listAssets(fromString<AssetType>(event.getData()));
+		listAssets(fromString<AssetType>(event.getStringData()));
 	});
 
 	setHandle(UIEventType::ListSelectionChanged, "assetList", [=] (const UIEvent& event)
 	{
-		loadAsset(event.getData(), false);
+		loadAsset(event.getStringData(), false);
 	});
 
 	setHandle(UIEventType::ListAccept, "assetList", [=] (const UIEvent& event)
 	{
-		loadAsset(event.getData(), true);
+		loadAsset(event.getStringData(), true);
 	});
 
 	setHandle(UIEventType::TextChanged, "assetSearch", [=] (const UIEvent& event)
 	{
-		setFilter(event.getData());
+		setFilter(event.getStringData());
 	});
 }
 

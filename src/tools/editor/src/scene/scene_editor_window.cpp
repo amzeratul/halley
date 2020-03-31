@@ -2,6 +2,7 @@
 
 
 
+#include "entity_editor.h"
 #include "entity_list.h"
 #include "halley/tools/project/project.h"
 #include "scene_editor_canvas.h"
@@ -35,6 +36,9 @@ void SceneEditorWindow::loadScene(const String& name)
 		sceneName = name;
 		sceneId = factory.createEntity(name).getEntityId();
 		interface.spawnPending();
+
+		sceneData = std::make_unique<WorldSceneData>(world);
+		entityEditor->setSceneData(*sceneData);
 
 		entityList->clearExceptions();
 		entityList->addException(interface.getCameraId());
@@ -70,6 +74,12 @@ void SceneEditorWindow::makeUI()
 	add(uiFactory.makeUI("ui/halley/scene_editor_window"), 1);
 	canvas = getWidgetAs<SceneEditorCanvas>("canvas");
 	entityList = getWidgetAs<EntityList>("entityList");
+	entityEditor = getWidgetAs<EntityEditor>("entityEditor");
+
+	setHandle(UIEventType::ListSelectionChanged, "entityList", [=](const UIEvent& event)
+	{
+		entityEditor->showEntity(event.getStringData());
+	});
 }
 
 void SceneEditorWindow::load()

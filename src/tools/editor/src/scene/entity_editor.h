@@ -8,8 +8,12 @@ namespace Halley {
 	public:
 		EntityEditor(String id, UIFactory& factory);
 
+		void setSceneData(ISceneData& sceneData);
+		void showEntity(const String& id);
+
 	private:
 		UIFactory& factory;
+		ISceneData* sceneData = nullptr;
 
 		void makeUI();
 	};

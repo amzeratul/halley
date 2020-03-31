@@ -111,12 +111,17 @@ UIEventType UIEvent::getType() const
 	return type;
 }
 
-String UIEvent::getSourceId() const
+const String& UIEvent::getSourceId() const
 {
 	return sourceId;
 }
 
 String UIEvent::getData() const
+{
+	return data;
+}
+
+const String& UIEvent::getStringData() const
 {
 	return data;
 }

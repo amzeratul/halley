@@ -1,4 +1,5 @@
 #pragma once
+#include "entity_editor.h"
 #include "entity_list.h"
 #include "halley/ui/ui_widget.h"
 #include "scene_editor_canvas.h"
@@ -28,6 +29,8 @@ namespace Halley {
 		String sceneName;
 		EntityId sceneId;
 		std::shared_ptr<EntityList> entityList;
+		std::shared_ptr<EntityEditor> entityEditor;
+		std::unique_ptr<ISceneData> sceneData;
 
 		void makeUI();
 		void load();

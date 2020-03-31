@@ -15,9 +15,9 @@ namespace Halley {
         Resources* resources;
     };
 	
-    class SceneEditorInterface {
+    class ISceneEditor {
     public:
-        virtual ~SceneEditorInterface() = default;
+        virtual ~ISceneEditor() = default;
 
         virtual void init(SceneEditorContext& context) = 0;
         virtual void update(Time t) = 0;
@@ -30,4 +30,11 @@ namespace Halley {
         virtual void dragCamera(Vector2f amount) = 0;
         virtual void changeZoom(int amount, Vector2f cursorPosRelToCamera) = 0;
     };
+
+	class ISceneData {
+	public:
+		virtual ~ISceneData() = default;
+
+		virtual ConfigNode getEntityData(const String& id) = 0;
+	};
 }

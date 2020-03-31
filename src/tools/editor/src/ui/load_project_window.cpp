@@ -10,7 +10,7 @@ LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, s
 
 	setHandle(UIEventType::ListSelectionChanged, [=] (const UIEvent& event)
 	{
-		event.getCurWidget().getWidgetAs<UITextInput>("input")->setText(event.getData());
+		event.getCurWidget().getWidgetAs<UITextInput>("input")->setText(event.getStringData());
 	});
 
 	setHandle(UIEventType::ListAccept, [=] (const UIEvent& event)

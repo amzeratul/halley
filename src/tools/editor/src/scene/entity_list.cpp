@@ -29,7 +29,7 @@ void EntityList::refreshList(const World& world)
 	list->clear();
 	for (auto& e: world.getEntities()) {
 		if (exceptions.find(e.getEntityId()) == exceptions.end()) {
-			list->addTextItem(e.getEntityId().toString(), LocalisedString::fromUserString(e.getName()));
+			list->addTextItem(e.getUUID().toString(), LocalisedString::fromUserString(e.getName()));
 		}
 	}
 }

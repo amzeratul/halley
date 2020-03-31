@@ -126,7 +126,7 @@ bool SceneEditorCanvas::isLoaded() const
 	return static_cast<bool>(interface);
 }
 
-SceneEditorInterface& SceneEditorCanvas::getInterface() const
+ISceneEditor& SceneEditorCanvas::getInterface() const
 {
 	Expects(interface);
 	return *interface;

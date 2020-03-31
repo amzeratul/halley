@@ -51,8 +51,9 @@ namespace Halley {
 		UIEvent(UIEventType type, String sourceId, Rect4f data);
 		
     	UIEventType getType() const;
-		String getSourceId() const;
-		String getData() const;
+		const String& getSourceId() const;
+		[[deprecated]] String getData() const;
+    	const String& getStringData() const;
 		bool getBoolData() const;
 		int getIntData() const;
 		int getIntData2() const;

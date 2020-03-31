@@ -30,12 +30,12 @@ void AnimationEditor::setupWindow()
 
 	setHandle(UIEventType::DropboxSelectionChanged, "sequence", [=] (const UIEvent& event)
 	{
-		animationDisplay->setSequence(event.getData());
+		animationDisplay->setSequence(event.getStringData());
 	});
 
 	setHandle(UIEventType::DropboxSelectionChanged, "direction", [=] (const UIEvent& event)
 	{
-		animationDisplay->setDirection(event.getData());
+		animationDisplay->setDirection(event.getStringData());
 	});
 }
 
