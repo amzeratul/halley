@@ -25,12 +25,13 @@ namespace Halley {
 		Project& project;
 
 		std::shared_ptr<SceneEditorCanvas> canvas;
+		std::shared_ptr<EntityList> entityList;
+		std::shared_ptr<EntityEditor> entityEditor;
 
 		String sceneName;
 		EntityId sceneId;
-		std::shared_ptr<EntityList> entityList;
-		std::shared_ptr<EntityEditor> entityEditor;
 		std::unique_ptr<ISceneData> sceneData;
+		std::unique_ptr<Prefab> prefab;
 
 		void makeUI();
 		void load();

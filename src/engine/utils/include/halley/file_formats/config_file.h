@@ -164,10 +164,10 @@ namespace Halley
 	{
 	public:
 		ConfigFile();
-		ConfigFile(const ConfigFile& other) = delete;
+		explicit ConfigFile(const ConfigFile& other);
 		ConfigFile(ConfigFile&& other);
 
-		ConfigFile& operator=(const ConfigFile& other) = delete;
+		ConfigFile& operator=(const ConfigFile& other);
 		ConfigFile& operator=(ConfigFile&& other);
 
 		ConfigNode& getRoot();

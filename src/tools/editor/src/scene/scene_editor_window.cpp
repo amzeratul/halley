@@ -37,7 +37,8 @@ void SceneEditorWindow::loadScene(const String& name)
 		sceneId = factory.createEntity(name).getEntityId();
 		interface.spawnPending();
 
-		sceneData = std::make_unique<WorldSceneData>(world);
+		prefab = std::make_unique<Prefab>(*project.getGameResources().get<Prefab>(name));
+		sceneData = std::make_unique<PrefabSceneData>(*prefab);
 		entityEditor->setSceneData(*sceneData);
 
 		entityList->clearExceptions();
@@ -76,7 +77,7 @@ void SceneEditorWindow::makeUI()
 	entityList = getWidgetAs<EntityList>("entityList");
 	entityEditor = getWidgetAs<EntityEditor>("entityEditor");
 
-	setHandle(UIEventType::ListSelectionChanged, "entityList", [=](const UIEvent& event)
+	setHandle(UIEventType::ListSelectionChanged, "entityList_list", [=](const UIEvent& event)
 	{
 		entityEditor->showEntity(event.getStringData());
 	});
