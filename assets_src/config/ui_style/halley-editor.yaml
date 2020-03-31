@@ -28,4 +28,7 @@ uiStyle:
     labelBorder: [0, 0, 0, 0]
     iconBorder: [0, 0, 0, 0]
     hoveredIconColour: "#FFCDCD"
+
+  labelLight:
+    label: { font: Ubuntu Light, size: 14, colour: "#FFFFFF" }
 ...

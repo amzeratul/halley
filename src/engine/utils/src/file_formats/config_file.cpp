@@ -455,8 +455,28 @@ String ConfigNode::asString() const
 		return toString(asInt());
 	} else if (type == ConfigNodeType::Float) {
 		return toString(asFloat());
+	} else if (type == ConfigNodeType::Sequence) {
+		String result = "[";
+		bool first = true;
+		for (auto& e: asSequence()) {
+			if (!first) {
+				result += ", ";
+			}
+			first = false;
+			result += e.asString();
+		}
+		result += "]";
+		return result;
+	} else if (type == ConfigNodeType::Float2) {
+		auto v = asVector2f();
+		return "(" + toString(v.x) + ", " + toString(v.y) + ")";
+	} else if (type == ConfigNodeType::Int2) {
+		auto v = asVector2i();
+		return "(" + toString(v.x) + ", " + toString(v.y) + ")";
+	} else if (type == ConfigNodeType::Map) {
+		return "{...}";
 	} else {
-		throw Exception(getNodeDebugId() + " is not a string type", HalleyExceptions::Resources);
+		throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to String.", HalleyExceptions::Resources);
 	}
 }
 

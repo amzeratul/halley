@@ -24,21 +24,21 @@ uiStyle:
     box: { img: halley_ui/ui_input.png, colour: "#9861B6" }
     caret: halley_ui/ui_caret.png
     innerBorder: [ 6, 5, 6, 2 ]
-    label: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
-    labelGhost: { font: Ubuntu Bold, size: 15, colour: "#7F7F7F" }
+    label: { font: Ubuntu Regular, size: 15, colour: "#FFFFFF" }
+    labelGhost: { font: Ubuntu Regular, size: 15, colour: "#7F7F7F" }
 
   list:
-    background: ""
+    background: { img: "halley_ui/ui_list_item.png", colour: "#201427" }
     item:
-      normal: { img: halley_ui/ui_list_item.png, colour: "#913DA3" }
-      hover: { img: halley_ui/ui_list_item.png, colour: "#9C5BB5" }
-      selected: { img: halley_ui/ui_list_item.png, colour: "#B68FCB" }
+      normal: ""
+      hover: { img: halley_ui/ui_list_item.png, colour: "#5E3962" }
+      selected: { img: halley_ui/ui_list_item.png, colour: "#9C5BB5" }
       innerBorder: [ 6, 5, 6, 2 ]
     innerBorder: [ 0, 0, 0, 0 ]
     extraMouseBorder: [ 1, 1, 1, 1 ]
     selectionChangedSound: ""
-    label: { font: Ubuntu Bold, size: 15, colour: "#FFFFFFCF" }
-    selectedLabel: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
+    label: { font: Ubuntu Regular, size: 15, colour: "#FFFFFFCF" }
+    selectedLabel: { font: Ubuntu Regular, size: 15, colour: "#FFFFFF" }
     gap: 1
 
   dropdown:
@@ -49,8 +49,8 @@ uiStyle:
     background: { img: halley_ui/ui_dropdown_window.png, colour: "#B68FCB" }
     innerBorder: [ 2, 2, 2, 2 ]
     labelBorder: [ 6, 8, 0, 0 ]
-    label: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
-    selectedLabel: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
+    label: { font: Ubuntu Regular, size: 15, colour: "#FFFFFF" }
+    selectedLabel: { font: Ubuntu Regular, size: 15, colour: "#FFFFFF" }
     openSound: ""
     closeSound: ""
     height: 200
