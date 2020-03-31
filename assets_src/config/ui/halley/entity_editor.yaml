@@ -1,0 +1,7 @@
+---
+widget: { class: image, image: "halley_ui/ui_window.png", innerBorder: [ 4, 4, 4, 4 ], colour: "#201427" }
+sizer: { type: vertical }
+children:
+- widget: { id: fields, class: widget }
+  sizer: { type: vertical, gap: 4 }
+...

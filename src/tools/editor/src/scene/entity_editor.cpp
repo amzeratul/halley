@@ -17,7 +17,8 @@ void EntityEditor::showEntity(const String& id)
 {
 	Expects(sceneData);
 
-	background->clear();
+	auto fields = getWidget("fields");
+	fields->clear();
 	
 	auto data = sceneData->getEntityData(id);
 	if (data["components"].getType() == ConfigNodeType::Sequence) {
@@ -26,7 +27,9 @@ void EntityEditor::showEntity(const String& id)
 				const auto& componentType = c.first;
 				const auto& componentData = c.second;
 
-				background->add(std::make_shared<UIImage>(Sprite().setImage(factory.getResources(), "ui/title_capsule.png").setColour(Colour4f::fromString("#9C5BB5"))), 0);
+				auto componentUI = factory.makeUI("ui/halley/entity_editor_component");
+				componentUI->getWidgetAs<UILabel>("componentType")->setText(LocalisedString::fromUserString(componentType));
+				fields->add(componentUI);
 			}
 		}
 	}
@@ -34,8 +37,6 @@ void EntityEditor::showEntity(const String& id)
 
 void EntityEditor::makeUI()
 {
-	auto sprite = Sprite().setImage(factory.getResources(), "halley_ui/ui_window.png").setColour(Colour4f::fromString("#201427"));
-	background = std::make_shared<UIImage>(sprite, UISizer(UISizerType::Vertical), Vector4f(4, 4, 4, 4));
-	add(background, 1);
+	add(factory.makeUI("ui/halley/entity_editor"), 1);
 }
 

@@ -15,8 +15,6 @@ namespace Halley {
 		UIFactory& factory;
 		ISceneData* sceneData = nullptr;
 
-		std::shared_ptr<UIImage> background;
-		
 		void makeUI();
 	};
 }
