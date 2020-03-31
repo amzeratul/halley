@@ -1,9 +1,9 @@
 #pragma once
 
-#include "component_schema.h"
-#include "system_schema.h"
-#include "message_schema.h"
-#include "custom_type_schema.h"
+#include "halley/tools/ecs/component_schema.h"
+#include "halley/tools/ecs/system_schema.h"
+#include "halley/tools/ecs/message_schema.h"
+#include "halley/tools/ecs/custom_type_schema.h"
 #include "halley/file/path.h"
 #include "halley/data_structures/hash_map.h"
 

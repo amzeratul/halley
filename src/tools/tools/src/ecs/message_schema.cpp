@@ -1,5 +1,5 @@
 #include "../yaml/halley-yamlcpp.h"
-#include <halley/tools/codegen/message_schema.h>
+#include <halley/tools/ecs/message_schema.h>
 
 using namespace Halley;
 

@@ -12,16 +12,11 @@ namespace YAML
 
 namespace Halley
 {
+	class ECSData;
 	class ComponentSchema;
 	class SystemSchema;
 	class MessageSchema;
 	class CustomTypeSchema;
-
-	struct CodegenSourceInfo {
-		String filename;
-		gsl::span<const gsl::byte> data;
-		bool generate = false;
-	};
 	
 	class Codegen
 	{	
@@ -32,34 +27,14 @@ namespace Halley
 			std::vector<Path> files;
 		};
 
-		static bool doNothing(float, String) { return true; }
-
 	public:
 		using ProgressReporter = std::function<bool(float, String)>;
 
 		static void run(Path inDir, Path outDir);
-
-		explicit Codegen(bool verbose = false);
-
-		void loadSources(std::vector<CodegenSourceInfo> files, ProgressReporter progress = &doNothing);
-		void validate(ProgressReporter progress = &doNothing);
-		void process();
-		bool writeFile(Path path, const char* data, size_t dataSize, bool stub) const;
-		void writeFiles(Path directory, const CodeGenResult& files, Stats& stats) const;
-		std::vector<Path> generateCode(Path directory, ProgressReporter progress = &doNothing);
+		static std::vector<Path> generateCode(const ECSData& data, Path directory);
 
 	private:
-		void addSource(CodegenSourceInfo sourceInfo);
-		void addComponent(YAML::Node rootNode, bool generate);
-		void addSystem(YAML::Node rootNode, bool generate);
-		void addMessage(YAML::Node rootNode, bool generate);
-		void addType(YAML::Node rootNode);
-		String getInclude(String typeName) const;
-
-		bool verbose;
-		HashMap<String, ComponentSchema> components;
-		HashMap<String, SystemSchema> systems;
-		HashMap<String, MessageSchema> messages;
-		HashMap<String, CustomTypeSchema> types;
+		static bool writeFile(Path path, const char* data, size_t dataSize, bool stub);
+		static void writeFiles(Path directory, const CodeGenResult& files, Stats& stats);
 	};
 }

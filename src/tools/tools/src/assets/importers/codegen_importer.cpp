@@ -1,6 +1,7 @@
 #include "codegen_importer.h"
 #include "halley/tools/codegen/codegen.h"
 #include "halley/tools/assets/import_assets_database.h"
+#include "halley/tools/ecs/ecs_data.h"
 
 using namespace Halley;
 
@@ -11,8 +12,6 @@ String CodegenImporter::getAssetId(const Path& file, const Maybe<Metadata>& meta
 
 void CodegenImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	Codegen codegen;
-
 	std::vector<CodegenSourceInfo> srcs;
 	int n = 0;
 	for (auto& f : asset.inputFiles) {
@@ -22,28 +21,13 @@ void CodegenImporter::import(const ImportingAsset& asset, IAssetCollector& colle
 		srcs.push_back(CodegenSourceInfo{ f.name.string(), gsl::as_bytes(gsl::span<const Byte>(f.data)), !f.metadata.getBool("skipGen", false) });
 		++n;
 	}
-	codegen.loadSources(srcs, [&](float progress, String label) -> bool {
-		return collector.reportProgress(lerp(0.0f, 0.25f, progress), "Loading " + label);
-	});
+	ECSData data;
+	data.loadSources(srcs);
 
-	if (!collector.reportProgress(0.25f, "Validating")) {
+	if (!collector.reportProgress(0.5f, "Generating code")) {
 		return;
 	}
-	codegen.validate([&](float progress, String label) -> bool {
-		return collector.reportProgress(lerp(0.25f, 0.5f, progress), "Validating " + label);
-	});
-
-	if (!collector.reportProgress(0.50f, "Processing")) {
-		return;
-	}
-	codegen.process();
-
-	if (!collector.reportProgress(0.75f, "Generating code")) {
-		return;
-	}
-	codegen.generateCode(collector.getDestinationDirectory(), [&](float progress, String label) -> bool {
-		return collector.reportProgress(lerp(0.75f, 1.0f, progress), "Generating " + label);
-	});
+	Codegen::generateCode(data, collector.getDestinationDirectory());
 
 	if (!collector.reportProgress(0.999f, "")) {
 		return;

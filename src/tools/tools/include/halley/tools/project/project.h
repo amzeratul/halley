@@ -16,6 +16,7 @@ namespace Halley
 	class IHalleyPlugin;
 	class DevConServer;
 	class ProjectProperties;
+	class ECSData;
 	class HalleyAPI;
 	using HalleyPluginPtr = std::shared_ptr<IHalleyPlugin>;
 
@@ -46,6 +47,7 @@ namespace Halley
 		ImportAssetsDatabase& getImportAssetsDatabase() const;
 		ImportAssetsDatabase& getCodegenDatabase() const;
 		ImportAssetsDatabase& getSharedCodegenDatabase() const;
+		ECSData& getECSData() const;
 
 		const AssetImporter& getAssetImporter() const;
 		std::vector<std::unique_ptr<IAssetImporter>> getAssetImportersFromPlugins(ImportAssetType type) const;
@@ -64,6 +66,7 @@ namespace Halley
 		std::vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;
 
 		void reloadAssets(const std::set<String>& assets, bool packed);
+		void reloadCodegen();
 		void setCheckAssetTask(CheckAssetsTask* checkAssetsTask);
 		void notifyAssetFileModified(Path path);
 
@@ -87,9 +90,12 @@ namespace Halley
 		std::unique_ptr<ImportAssetsDatabase> sharedCodegenDatabase;
 		std::unique_ptr<AssetImporter> assetImporter;
 		std::unique_ptr<ProjectProperties> properties;
+		std::unique_ptr<ECSData> ecsData;
 
 		std::vector<HalleyPluginPtr> plugins;
 		std::shared_ptr<DynamicLibrary> gameDll;
 		std::unique_ptr<Resources> gameResources;
+
+		void loadECSData();
 	};
 }

@@ -34,10 +34,12 @@ set(SOURCES
     "src/codegen/cpp/cpp_class_gen.cpp"
     "src/codegen/codegen.cpp"
     "src/codegen/codegen_tool.cpp"
-    "src/codegen/component_schema.cpp"
-    "src/codegen/custom_type_schema.cpp"
-    "src/codegen/message_schema.cpp"
-    "src/codegen/system_schema.cpp"
+
+    "src/ecs/component_schema.cpp"
+    "src/ecs/custom_type_schema.cpp"
+    "src/ecs/ecs_data.cpp"
+    "src/ecs/message_schema.cpp"
+    "src/ecs/system_schema.cpp"
     
     "src/dll/dynamic_library.cpp"
 
@@ -98,11 +100,12 @@ set(HEADERS
     "include/halley/tools/make_font/font_generator.h"
     "include/halley/tools/make_font/make_font_tool.h"
 
-    "include/halley/tools/codegen/component_schema.h"
-    "include/halley/tools/codegen/custom_type_schema.h"
-    "include/halley/tools/codegen/fields_schema.h"
-    "include/halley/tools/codegen/message_schema.h"
-    "include/halley/tools/codegen/system_schema.h"
+    "include/halley/tools/ecs/component_schema.h"
+    "include/halley/tools/ecs/custom_type_schema.h"
+    "include/halley/tools/ecs/ecs_data.h"
+    "include/halley/tools/ecs/fields_schema.h"
+    "include/halley/tools/ecs/message_schema.h"
+    "include/halley/tools/ecs/system_schema.h"
     
     "include/halley/tools/dll/dynamic_library.h"
 

@@ -11,6 +11,7 @@
 #include "halley/core/resources/resource_locator.h"
 #include "halley/core/resources/standard_resources.h"
 #include "halley/tools/assets/metadata_importer.h"
+#include "halley/tools/ecs/ecs_data.h"
 #include "halley/tools/project/project_loader.h"
 
 using namespace Halley;
@@ -29,6 +30,8 @@ Project::Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader&
 	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", std::vector<String>{ "" });
 	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", std::vector<String>{ "" });
 	assetImporter = std::make_unique<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
+
+	loadECSData();
 
 	auto dllPath = loader.getDLLPath(rootPath, properties->getDLL());
 	if (!dllPath.isEmpty()) {
@@ -120,6 +123,11 @@ ImportAssetsDatabase& Project::getSharedCodegenDatabase() const
 	return *sharedCodegenDatabase;
 }
 
+ECSData& Project::getECSData() const
+{
+	return *ecsData;
+}
+
 const AssetImporter& Project::getAssetImporter() const
 {
 	return *assetImporter;
@@ -200,10 +208,6 @@ std::vector<std::pair<AssetType, String>> Project::getAssetsFromFile(const Path&
 
 void Project::reloadAssets(const std::set<String>& assets, bool packed)
 {
-	if (assetReloadCallbacks.empty()) {
-		return;
-	}
-
 	// Build name list
 	std::vector<String> assetIds;
 	assetIds.reserve(assets.size());
@@ -226,6 +230,11 @@ void Project::reloadAssets(const std::set<String>& assets, bool packed)
 	for (auto& callback: (packed ? assetPackedReloadCallbacks : assetReloadCallbacks)) {
 		callback(assetIds);
 	}
+}
+
+void Project::reloadCodegen()
+{
+	loadECSData();
 }
 
 void Project::setCheckAssetTask(CheckAssetsTask* task)
@@ -260,4 +269,22 @@ void Project::loadGameResources(const HalleyAPI& api)
 Resources& Project::getGameResources()
 {
 	return *gameResources;
+}
+
+void Project::loadECSData()
+{
+	ecsData = std::make_unique<ECSData>();
+
+	const auto& inputFiles = codegenDatabase->getInputFiles();
+	const auto n = inputFiles.size();
+	std::vector<CodegenSourceInfo> sources(n);
+	std::vector<Bytes> inputData(n);
+	
+	for (size_t i = 0; i < n; ++i) {
+		inputData[i] = FileSystem::readFile(getGenSrcPath() / inputFiles[i]);
+		auto data = gsl::as_bytes(gsl::span<Byte>(inputData[i].data(), inputData[i].size()));
+		sources[i] = CodegenSourceInfo{inputFiles[i], data, true};
+	}
+	
+	ecsData->loadSources(sources);
 }

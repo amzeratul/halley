@@ -1,5 +1,5 @@
 #include "../yaml/halley-yamlcpp.h"
-#include <halley/tools/codegen/component_schema.h>
+#include <halley/tools/ecs/component_schema.h>
 #include "halley/text/string_converter.h"
 
 using namespace Halley;

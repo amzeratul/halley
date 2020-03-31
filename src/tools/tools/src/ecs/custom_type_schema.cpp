@@ -1,5 +1,5 @@
 #include "../yaml/halley-yamlcpp.h"
-#include "halley/tools/codegen/custom_type_schema.h"
+#include "halley/tools/ecs/custom_type_schema.h"
 
 using namespace Halley;
 
