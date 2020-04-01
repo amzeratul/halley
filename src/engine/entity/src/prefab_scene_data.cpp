@@ -1,20 +1,40 @@
 #include "prefab_scene_data.h"
+
+#include "../../../tools/tools/include/halley/tools/file/filesystem.h"
+#include "halley/bytes/byte_serializer.h"
+
 using namespace Halley;
 
-PrefabSceneData::PrefabSceneData(Prefab& prefab)
+PrefabSceneData::PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> factory, EntityRef entity)
 	: prefab(prefab)
+	, factory(std::move(factory))
+	, entity(entity)
 {
 }
 
 ConfigNode PrefabSceneData::getEntityData(const String& id)
 {
-	return findEntity(prefab.getRoot(), id).value_or(ConfigNode());
+	auto result = findEntity(prefab.getRoot(), id);
+	if (result) {
+		return ConfigNode(*result);
+	}
+	return ConfigNode();
 }
 
-Maybe<ConfigNode> PrefabSceneData::findEntity(ConfigNode& node, const String& id)
+void PrefabSceneData::reloadEntity(const String& id, const ConfigNode& data)
+{
+	auto result = findEntity(prefab.getRoot(), id);
+	if (result) {
+		*result = ConfigNode(data);
+	}
+	
+	factory->updateEntityTree(entity, prefab.getRoot());
+}
+
+ConfigNode* PrefabSceneData::findEntity(ConfigNode& node, const String& id)
 {
 	if (node["uuid"].asString("") == id) {
-		return ConfigNode(node);
+		return &node;
 	}
 	
 	if (node["children"].getType() == ConfigNodeType::Sequence) {
@@ -26,5 +46,5 @@ Maybe<ConfigNode> PrefabSceneData::findEntity(ConfigNode& node, const String& id
 		}
 	}
 
-	return {};
+	return nullptr;
 }

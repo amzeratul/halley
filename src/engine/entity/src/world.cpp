@@ -11,6 +11,7 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/maths/uuid.h"
 #include "halley/core/api/halley_api.h"
+#include "halley/support/logger.h"
 
 #define DONT_INCLUDE_HALLEY_HPP
 #include "components/transform_2d_component.h"

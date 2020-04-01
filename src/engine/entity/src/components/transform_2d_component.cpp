@@ -1,7 +1,7 @@
 #define DONT_INCLUDE_HALLEY_HPP
+#include "halley/support/logger.h"
 #include "components/transform_2d_component.h"
 #include "halley/core/graphics/sprite/sprite.h"
-#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -205,6 +205,12 @@ void Transform2DComponent::detachChildren()
 void Transform2DComponent::onAddedToEntity(EntityRef& entity)
 {
 	myId = entity.getEntityId();
+}
+
+void Transform2DComponent::deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node)
+{
+	Transform2DComponentBase::deserialize(context, node);
+	markDirty();
 }
 
 void Transform2DComponent::markDirty()

@@ -39,7 +39,7 @@ UITextInput& UITextInput::setText(StringUTF32 t)
 {
 	if (t != text.getText()) {
 		text.setText(std::move(t));
-		onTextModified();
+		onMaybeTextModified();
 	}
 	return *this;
 }
@@ -135,7 +135,7 @@ void UITextInput::updateTextInput()
 
 	updateCaret();
 
-	onTextModified();
+	onMaybeTextModified();
 	
 	if (keyboard->isButtonPressed(Keys::Enter) || keyboard->isButtonPressed(Keys::KP_Enter)) {
 		if (!isMultiLine) {
@@ -152,6 +152,14 @@ void UITextInput::updateCaret()
 		caretShowing = true;
 		caretPos = pos;
 		caretPhysicalPos = label.getCharacterPosition(caretPos, text.getText()).x;
+	}
+}
+
+void UITextInput::onMaybeTextModified()
+{
+	if (lastText != text.getText()) {
+		lastText = text.getText();
+		onTextModified();
 	}
 }
 

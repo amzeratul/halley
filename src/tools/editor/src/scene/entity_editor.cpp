@@ -6,7 +6,7 @@ using namespace Halley;
 EntityEditor::EntityEditor(String id, UIFactory& factory)
 	: UIWidget(std::move(id), Vector2f(200, 30), UISizer(UISizerType::Vertical))
 	, factory(factory)
-	, context(factory)
+	, context(factory, [=] () { onEntityUpdated(); })
 {
 	addFieldFactories(EntityEditorFactories::getDefaultFactories());
 	makeUI();
@@ -25,9 +25,10 @@ void EntityEditor::showEntity(const String& id)
 
 	fields->clear();
 	
-	auto data = sceneData->getEntityData(id);
-	if (data["components"].getType() == ConfigNodeType::Sequence) {
-		for (auto& componentNode: data["components"].asSequence()) {
+	currentEntityData = sceneData->getEntityData(id);
+	currentId = id;
+	if (currentEntityData["components"].getType() == ConfigNodeType::Sequence) {
+		for (auto& componentNode: currentEntityData["components"].asSequence()) {
 			for (auto& c: componentNode.asMap()) {
 				loadComponentData(c.first, c.second);
 			}
@@ -81,12 +82,14 @@ std::shared_ptr<IUIElement> EntityEditor::createEditField(const String& fieldTyp
 	}
 }
 
+void EntityEditor::onEntityUpdated()
+{
+	sceneData->reloadEntity(currentId, currentEntityData);
+}
+
 void EntityEditor::addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories)
 {
 	for (auto& factory: factories) {
 		fieldFactories[factory->getFieldType()] = std::move(factory);
 	}
 }
-
-
-

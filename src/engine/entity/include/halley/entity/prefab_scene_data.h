@@ -1,16 +1,20 @@
 #pragma once
+#include "entity_factory.h"
 #include "halley/core/game/scene_editor_interface.h"
 
 namespace Halley {
     class PrefabSceneData : public ISceneData {
     public:
-    	PrefabSceneData(Prefab& prefab);
+    	PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> factory, EntityRef entity);
 
         ConfigNode getEntityData(const String& id) override;
+        void reloadEntity(const String& id, const ConfigNode& data) override;
     	
     private:
     	Prefab& prefab;
+        std::shared_ptr<EntityFactory> factory;
+        EntityRef entity;
 
-    	Maybe<ConfigNode> findEntity(ConfigNode& node, const String& id);
+    	ConfigNode* findEntity(ConfigNode& node, const String& id);
     };
 }

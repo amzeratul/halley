@@ -9,6 +9,7 @@ namespace Halley {
     	explicit WorldSceneData(World& world);
 
         ConfigNode getEntityData(const String& id) override;
+        void reloadEntity(const String& id, const ConfigNode& data) override;
     	
     private:
     	World& world;

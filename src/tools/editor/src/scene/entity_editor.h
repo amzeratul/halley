@@ -23,8 +23,12 @@ namespace Halley {
 		std::shared_ptr<UIWidget> fields;
 		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 
+		String currentId;
+		ConfigNode currentEntityData;
+
 		void makeUI();
 		void loadComponentData(const String& componentType, ConfigNode& data);
 		std::shared_ptr<IUIElement> createEditField(const String& fieldType, const String& fieldName, ConfigNode& componentData, const String& defaultValue);
+		void onEntityUpdated();
 	};
 }

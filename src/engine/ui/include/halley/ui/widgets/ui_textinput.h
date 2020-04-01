@@ -56,6 +56,7 @@ namespace Halley {
 		void updateTextInput();
 		void updateCaret();
 
+		void onMaybeTextModified();
 		void onTextModified();
 		void validateText();
 		void onValidatorSet() override;
@@ -73,6 +74,7 @@ namespace Halley {
 
 		TextInputData text;
 		LocalisedString ghostText;
+		StringUTF32 lastText;
 		
 		StringUTF32 autoCompleteText;
 		AutoCompleteHandle autoCompleteHandle;

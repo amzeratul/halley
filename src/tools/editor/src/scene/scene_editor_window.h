@@ -32,6 +32,7 @@ namespace Halley {
 		EntityId sceneId;
 		std::unique_ptr<ISceneData> sceneData;
 		std::unique_ptr<Prefab> prefab;
+		std::shared_ptr<EntityFactory> entityFactory;
 
 		void makeUI();
 		void load();

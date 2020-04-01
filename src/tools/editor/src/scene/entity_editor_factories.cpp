@@ -89,14 +89,27 @@ public:
 		if (componentData[fieldName].getType() != ConfigNodeType::Undefined) {
 			value = componentData[fieldName].asVector2f();
 		}
+		Vector2f defVecValue;
 
 		auto x = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "xValue", context.getFactory().getStyle("input"), value ? toString(value->x) : "");
-		x->setValidator(std::make_shared<UINumericValidator>(true, true));
+		//x->setValidator(std::make_shared<UINumericValidator>(true, true));
 		x->setMinSize(Vector2f(60, 25));
+		x->bindData("xValue", value.value_or(defVecValue).x, [&, fieldName] (float newVal)
+		{
+			auto& node = componentData[fieldName];
+			node = ConfigNode(Vector2f(newVal, node.asVector2f(Vector2f()).y));
+			context.onEntityUpdated();
+		});
 
 		auto y = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "yValue", context.getFactory().getStyle("input"), value ? toString(value->y) : "");
-		y->setValidator(std::make_shared<UINumericValidator>(true, true));
+		//y->setValidator(std::make_shared<UINumericValidator>(true, true));
 		y->setMinSize(Vector2f(60, 25));
+		y->bindData("yValue", value.value_or(defVecValue).y, [&, fieldName](float newVal)
+		{
+			auto& node = componentData[fieldName];
+			node = ConfigNode(Vector2f(node.asVector2f(Vector2f()).x, newVal));
+			context.onEntityUpdated();
+		});
 
 		auto sizer = std::make_shared<UISizer>(UISizerType::Horizontal, 4.0f);
 		sizer->add(x, 1);

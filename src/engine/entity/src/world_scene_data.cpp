@@ -11,3 +11,8 @@ ConfigNode WorldSceneData::getEntityData(const String& id)
 	// TODO
 	return ConfigNode();
 }
+
+void WorldSceneData::reloadEntity(const String& id, const ConfigNode& data)
+{
+	// TODO
+}

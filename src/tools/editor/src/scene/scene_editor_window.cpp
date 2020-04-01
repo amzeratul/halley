@@ -30,15 +30,16 @@ void SceneEditorWindow::loadScene(const String& name)
 	if (!name.isEmpty() && canvas->isLoaded()) {
 		auto& interface = canvas->getInterface();
 		auto& world = interface.getWorld();
-
-		EntityFactory factory(world, project.getGameResources());
-		
 		sceneName = name;
-		sceneId = factory.createEntity(name).getEntityId();
-		interface.spawnPending();
 
 		prefab = std::make_unique<Prefab>(*project.getGameResources().get<Prefab>(name));
-		sceneData = std::make_unique<PrefabSceneData>(*prefab);
+		entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
+
+		auto entity = entityFactory->createEntity(prefab->getRoot());
+		sceneId = entity.getEntityId();
+		interface.spawnPending();
+
+		sceneData = std::make_unique<PrefabSceneData>(*prefab, entityFactory, entity);
 		entityEditor->setSceneData(*sceneData, project.getECSData());
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 
@@ -59,12 +60,14 @@ void SceneEditorWindow::unloadScene()
 	}
 	sceneName = "";
 	sceneId = EntityId();
+	entityFactory.reset();
+	sceneData.reset();
 }
 
 void SceneEditorWindow::update(Time t, bool moved)
 {
 	if (canvas->needsReload()) {
-		String name = sceneName;
+		const String name = sceneName;
 		unloadScene();
 		canvas->reload();
 		loadScene(name);

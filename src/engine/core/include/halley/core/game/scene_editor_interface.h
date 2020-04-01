@@ -19,14 +19,18 @@ namespace Halley {
 
     class ComponentEditorContext {
     public:
-        ComponentEditorContext(UIFactory& factory)
+        ComponentEditorContext(UIFactory& factory, std::function<void()> updateCallback)
             : factory(factory)
+    		, updateCallback(updateCallback)
         {}
 
         UIFactory& getFactory() { return factory; }
 
+    	void onEntityUpdated() { updateCallback(); }
+
     private:
         UIFactory& factory;
+        std::function<void()> updateCallback;
     };
 
     class IComponentEditorFieldFactory {
@@ -59,5 +63,6 @@ namespace Halley {
 		virtual ~ISceneData() = default;
 
 		virtual ConfigNode getEntityData(const String& id) = 0;
+		virtual void reloadEntity(const String& id, const ConfigNode& data) = 0;
 	};
 }

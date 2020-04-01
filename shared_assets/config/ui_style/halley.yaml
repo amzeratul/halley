@@ -5,6 +5,7 @@ uiStyle:
     normal: { img: halley_ui/ui_button.png, colour: "#9C5BB5" }
     down: { img: halley_ui/ui_button.png, colour: "#913DA3" }
     hover: { img: halley_ui/ui_button.png, colour: "#B68FCB" }
+    disabled: { img: halley_ui/ui_button.png, colour: "#927B95" }
     innerBorder: [ 5, 5, 5, 5 ]
     upSound: ""
     downSound: ""
