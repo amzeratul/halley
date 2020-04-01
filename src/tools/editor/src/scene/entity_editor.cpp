@@ -1,12 +1,14 @@
 #include "entity_editor.h"
-
+#include "entity_editor_factories.h"
 #include "halley/tools/ecs/ecs_data.h"
 using namespace Halley;
 
 EntityEditor::EntityEditor(String id, UIFactory& factory)
 	: UIWidget(std::move(id), Vector2f(200, 30), UISizer(UISizerType::Vertical))
 	, factory(factory)
+	, context(factory)
 {
+	addFieldFactories(EntityEditorFactories::getDefaultFactories());
 	makeUI();
 }
 
@@ -26,7 +28,7 @@ void EntityEditor::showEntity(const String& id)
 	auto data = sceneData->getEntityData(id);
 	if (data["components"].getType() == ConfigNodeType::Sequence) {
 		for (auto& componentNode: data["components"].asSequence()) {
-			for (auto& c : componentNode.asMap()) {
+			for (auto& c: componentNode.asMap()) {
 				loadComponentData(c.first, c.second);
 			}
 		}
@@ -40,7 +42,7 @@ void EntityEditor::makeUI()
 	fields->setMinSize(Vector2f(300, 20));
 }
 
-void EntityEditor::loadComponentData(const String& componentType, const ConfigNode& data)
+void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data)
 {
 	auto componentUI = factory.makeUI("ui/halley/entity_editor_component");
 	componentUI->getWidgetAs<UILabel>("componentType")->setText(LocalisedString::fromUserString(componentType));
@@ -52,33 +54,39 @@ void EntityEditor::loadComponentData(const String& componentType, const ConfigNo
 	if (iter != ecsData->getComponents().end()) {
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
-			String value;
-			if (data[member.name].getType() != ConfigNodeType::Undefined) {
-				value = data[member.name].asString();
-			} else {
-				const auto iter = std::find_if(componentData.members.begin(), componentData.members.end(), [&] (const MemberSchema& m) { return m.name == member.name; });
-				if (iter != componentData.members.end()) {
-					value = iter->defaultValue;
-				} else {
-					value = "?";
-				}
-			}
+			const String fieldName = member.name;
 			
-			auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromUserString(member.name));
+			auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromUserString(fieldName));
 			label->setMaxWidth(100);
 			label->setMarquee(true);
 
 			auto labelBox = std::make_shared<UIWidget>("", Vector2f(100, 20), UISizer());
 			labelBox->add(label);
 			
-			auto input = std::make_shared<UITextInput>(factory.getKeyboard(), "", factory.getStyle("input"), value);
-			input->setMinSize(Vector2f(60, 25));
-
 			componentFields->add(labelBox, 0, {}, UISizerAlignFlags::CentreVertical);
-			componentFields->add(input, 1);
+			componentFields->add(createEditField(member.type.name, fieldName, data, member.defaultValue), 1);
 		}
 	}
 	
 	fields->add(componentUI);
 }
+
+std::shared_ptr<IUIElement> EntityEditor::createEditField(const String& fieldType, const String& fieldName, ConfigNode& componentData, const String& defaultValue)
+{
+	auto iter = fieldFactories.find(fieldType);
+	if (iter != fieldFactories.end()) {
+		return iter->second->createField(context, fieldName, componentData, defaultValue);
+	} else {
+		return std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromHardcodedString("N/A"));
+	}
+}
+
+void EntityEditor::addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories)
+{
+	for (auto& factory: factories) {
+		fieldFactories[factory->getFieldType()] = std::move(factory);
+	}
+}
+
+
 

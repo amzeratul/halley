@@ -19,6 +19,7 @@ set (editor_sources
 	"src/project/core_api_wrapper.cpp"
 
 	"src/scene/entity_editor.cpp"
+	"src/scene/entity_editor_factories.cpp"
 	"src/scene/entity_list.cpp"
 	"src/scene/scene_editor_canvas.cpp"
 	"src/scene/scene_editor_window.cpp"
@@ -45,6 +46,7 @@ set (editor_headers
 	"src/project/core_api_wrapper.h"
 
 	"src/scene/entity_editor.h"
+	"src/scene/entity_editor_factories.h"
 	"src/scene/entity_list.h"
 	"src/scene/scene_editor_canvas.h"
 	"src/scene/scene_editor_window.h"

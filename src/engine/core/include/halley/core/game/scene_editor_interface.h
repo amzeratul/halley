@@ -8,11 +8,32 @@ namespace Halley {
     class World;
     class HalleyAPI;
     class Resources;
+    class UIFactory;
+    class IUIElement;
 
     class SceneEditorContext {
     public:
         const HalleyAPI* api;
         Resources* resources;
+    };
+
+    class ComponentEditorContext {
+    public:
+        ComponentEditorContext(UIFactory& factory)
+            : factory(factory)
+        {}
+
+        UIFactory& getFactory() { return factory; }
+
+    private:
+        UIFactory& factory;
+    };
+
+    class IComponentEditorFieldFactory {
+    public:
+        virtual ~IComponentEditorFieldFactory() = default;
+    	virtual String getFieldType() = 0;
+        virtual std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const String& fieldName, ConfigNode& componentData, const String& defaultValue) = 0;
     };
 	
     class ISceneEditor {
@@ -29,6 +50,8 @@ namespace Halley {
         virtual EntityId getCameraId() = 0;
         virtual void dragCamera(Vector2f amount) = 0;
         virtual void changeZoom(int amount, Vector2f cursorPosRelToCamera) = 0;
+
+    	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     };
 
 	class ISceneData {

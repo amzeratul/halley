@@ -1,4 +1,5 @@
 #pragma once
+#include "halley/tools/ecs/fields_schema.h"
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
@@ -11,14 +12,19 @@ namespace Halley {
 
 		void setSceneData(ISceneData& sceneData, ECSData& data);
 		void showEntity(const String& id);
+		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
 
 	private:
 		UIFactory& factory;
 		ISceneData* sceneData = nullptr;
 		ECSData* ecsData = nullptr;
+		ComponentEditorContext context;
+		
 		std::shared_ptr<UIWidget> fields;
+		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 
 		void makeUI();
-		void loadComponentData(const String& componentType, const ConfigNode& data);
+		void loadComponentData(const String& componentType, ConfigNode& data);
+		std::shared_ptr<IUIElement> createEditField(const String& fieldType, const String& fieldName, ConfigNode& componentData, const String& defaultValue);
 	};
 }

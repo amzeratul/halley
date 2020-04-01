@@ -40,6 +40,7 @@ void SceneEditorWindow::loadScene(const String& name)
 		prefab = std::make_unique<Prefab>(*project.getGameResources().get<Prefab>(name));
 		sceneData = std::make_unique<PrefabSceneData>(*prefab);
 		entityEditor->setSceneData(*sceneData, project.getECSData());
+		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 
 		entityList->clearExceptions();
 		entityList->addException(interface.getCameraId());
