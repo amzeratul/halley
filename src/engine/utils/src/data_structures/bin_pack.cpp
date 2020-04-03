@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-Maybe<Vector<BinPackResult>> BinPack::pack(const std::vector<BinPackEntry>& entries, Vector2i binSize)
+std::optional<Vector<BinPackResult>> BinPack::pack(const std::vector<BinPackEntry>& entries, Vector2i binSize)
 {
 	using T = void*;
 
@@ -29,13 +29,13 @@ Maybe<Vector<BinPackResult>> BinPack::pack(const std::vector<BinPackEntry>& entr
 		for (auto& content: outputContent.Get()) {
 			results.push_back(BinPackResult(Rect4i(content.coord.x, content.coord.y, content.size.w, content.size.h), content.rotated, content.content));
 		}
-		return Maybe<Vector<BinPackResult>>(std::move(results));
+		return std::optional<Vector<BinPackResult>>(std::move(results));
 	} else {
-		return Maybe<Vector<BinPackResult>>();
+		return std::optional<Vector<BinPackResult>>();
 	}
 }
 
-Maybe<Vector<BinPackResult>> BinPack::fastPack(const std::vector<BinPackEntry>& entries, Vector2i binSize)
+std::optional<Vector<BinPackResult>> BinPack::fastPack(const std::vector<BinPackEntry>& entries, Vector2i binSize)
 {
 	Vector<BinPackResult> result;
 	std::priority_queue<BinPackEntry> queue;

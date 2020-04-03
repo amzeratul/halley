@@ -63,7 +63,7 @@ void TextInputData::setSelection(Range<int> sel)
 	selection = sel;
 }
 
-void TextInputData::setLengthLimits(int min, Maybe<int> max)
+void TextInputData::setLengthLimits(int min, std::optional<int> max)
 {
 	minLength = min;
 	maxLength = max;
@@ -74,7 +74,7 @@ int TextInputData::getMinLength() const
 	return minLength;
 }
 
-Maybe<int> TextInputData::getMaxLength() const
+std::optional<int> TextInputData::getMaxLength() const
 {
 	return maxLength;
 }
@@ -228,7 +228,7 @@ void InputKeyboard::onButtonPressed(int scanCode)
 	const bool shiftDown = isButtonDown(Keys::LShift) || isButtonDown(Keys::RShift);
 	const bool ctrlDown = isButtonDown(Keys::LCtrl) || isButtonDown(Keys::RCtrl);
 
-	Maybe<TextControlCharacter> code;
+	std::optional<TextControlCharacter> code;
 
 	if (!shiftDown && !ctrlDown) {
 		switch (scanCode) {

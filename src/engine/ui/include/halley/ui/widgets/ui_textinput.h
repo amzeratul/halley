@@ -31,8 +31,8 @@ namespace Halley {
 		UITextInput& setGhostText(LocalisedString text);
 		LocalisedString getGhostText() const;
 
-		Maybe<int> getMaxLength() const;
-		void setMaxLength(Maybe<int> length);
+		std::optional<int> getMaxLength() const;
+		void setMaxLength(std::optional<int> length);
 
 		Range<int> getSelection() const;
 		void setSelection(int selection);

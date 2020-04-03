@@ -109,7 +109,7 @@ namespace Halley
 		Sprite& setClip(Rect4f clip);
 		Sprite& setAbsoluteClip(Rect4f clip);
 		Sprite& setClip();
-		Maybe<Rect4f> getClip() const;
+		std::optional<Rect4f> getClip() const;
 
 		Rect4f getAABB() const;
 		bool isInView(Rect4f rect) const;
@@ -126,7 +126,7 @@ namespace Halley
 		Vector2f size;
 		Vector4s slices;
 		Vector4s outerBorder;
-		Maybe<Rect4f> clip;
+		std::optional<Rect4f> clip;
 		bool absoluteClip = false;
 		bool visible = true;
 		bool flip = false;

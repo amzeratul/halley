@@ -64,7 +64,7 @@ namespace Halley
 		virtual void setOnSuspendCallback(SystemOnSuspendCallback callback) {}
 		virtual void setOnResumeCallback(SystemOnResumeCallback callback) {}
 
-		virtual Maybe<String> getGameVersion() const { return {}; }
+		virtual std::optional<String> getGameVersion() const { return {}; }
 
 	private:
 		friend class HalleyAPI;

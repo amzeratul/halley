@@ -63,7 +63,7 @@ namespace Halley {
 		Quaternion getRotation() const { return rotation; }
 		Angle1f getZAngle() const;
 		float getZoom() const { return zoom; }
-		Maybe<Rect4i> getViewPort() const { return viewPort; }
+		std::optional<Rect4i> getViewPort() const { return viewPort; }
 
 		Vector2f screenToWorld(Vector2f p, Rect4f viewport) const;
 		Vector2f worldToScreen(Vector2f p, Rect4f viewport) const;
@@ -85,7 +85,7 @@ namespace Halley {
 		Vector3f pos;
 		float zoom = 1.0f;
 		Quaternion rotation;
-		Maybe<Rect4i> viewPort;
+		std::optional<Rect4i> viewPort;
 		CameraType type = CameraType::Orthographic;
 		Angle1f fov;
 		float nearPlane = 0.1f;

@@ -4,7 +4,7 @@
 #include "api/system_api.h"
 using namespace Halley;
 
-PackResourceLocator::PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, String key, bool preLoad, Maybe<int> priority)
+PackResourceLocator::PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, String key, bool preLoad, std::optional<int> priority)
 	: path(std::move(path))
 	, encryptionKey(std::move(key))
 	, preLoad(preLoad)

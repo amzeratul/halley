@@ -75,12 +75,12 @@ void UISlider::readFromDataBind()
 	}
 }
 
-void UISlider::setGranularity(Maybe<float> g)
+void UISlider::setGranularity(std::optional<float> g)
 {
 	granularity = g;
 }
 
-Maybe<float> UISlider::getGranularity() const
+std::optional<float> UISlider::getGranularity() const
 {
 	return granularity;
 }

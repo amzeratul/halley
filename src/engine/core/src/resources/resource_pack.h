@@ -9,7 +9,7 @@ namespace Halley {
 
 	class PackResourceLocator : public IResourceLocatorProvider {
 	public:
-		explicit PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, String encryptionKey = "", bool preLoad = false, Maybe<int> priority = {});
+		explicit PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, String encryptionKey = "", bool preLoad = false, std::optional<int> priority = {});
 		~PackResourceLocator();
 
 	protected:
@@ -26,7 +26,7 @@ namespace Halley {
 		Path path;
 		String encryptionKey; // :(
 		bool preLoad;
-		Maybe<int> priority;
+		std::optional<int> priority;
 		SystemAPI* system = nullptr;
 	};
 }

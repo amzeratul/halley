@@ -2,13 +2,13 @@
 
 using namespace Halley;
 
-UIImage::UIImage(Sprite s, Maybe<UISizer> sizer, Vector4f innerBorder)
+UIImage::UIImage(Sprite s, std::optional<UISizer> sizer, Vector4f innerBorder)
 	: UIWidget("", {}, std::move(sizer), innerBorder)
 {
 	setSprite(s);
 }
 
-UIImage::UIImage(const String& id, Sprite s, Maybe<UISizer> sizer, Vector4f innerBorder)
+UIImage::UIImage(const String& id, Sprite s, std::optional<UISizer> sizer, Vector4f innerBorder)
 	: UIWidget(id, {}, std::move(sizer), innerBorder)
 {
 	setSprite(s);
@@ -78,7 +78,7 @@ void UIImage::setLayerAdjustment(int adjustment)
 	layerAdjustment = adjustment;
 }
 
-void UIImage::setWorldClip(Maybe<Rect4f> wc)
+void UIImage::setWorldClip(std::optional<Rect4f> wc)
 {
 	worldClip = wc;
 }

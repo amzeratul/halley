@@ -137,7 +137,7 @@ namespace Halley {
 		}
 		
 		template <typename T>
-		Serializer& operator<<(const Maybe<T>& p)
+		Serializer& operator<<(const std::optional<T>& p)
 		{
 			if (p) {
 				return *this << true << p.value();
@@ -357,7 +357,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		Deserializer& operator>>(Maybe<T>& p)
+		Deserializer& operator>>(std::optional<T>& p)
 		{
 			bool present;
 			*this >> present;
@@ -366,7 +366,7 @@ namespace Halley {
 				*this >> tmp;
 				p = tmp;
 			} else {
-				p = Maybe<T>();
+				p = std::optional<T>();
 			}
 			return *this;
 		}

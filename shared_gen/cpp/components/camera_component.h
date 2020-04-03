@@ -9,13 +9,13 @@ public:
 	static constexpr int componentIndex = 4;
 	
 	float zoom = 1;
-	Halley::Maybe<Halley::Colour4f> clear;
+	std::optional<Halley::Colour4f> clear;
 	int mask = 1;
 	int layer = 0;
 	
 	CameraComponent() {}
 	
-	CameraComponent(float zoom, Halley::Maybe<Halley::Colour4f> clear, int mask, int layer)
+	CameraComponent(float zoom, std::optional<Halley::Colour4f> clear, int mask, int layer)
 		: zoom(zoom)
 		, clear(clear)
 		, mask(mask)

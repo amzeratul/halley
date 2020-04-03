@@ -16,7 +16,7 @@ namespace Halley {
 		int getWheelMove() const override;
 
 	private:
-		Maybe<winrt::Windows::UI::Core::CoreWindow> window;
+		std::optional<winrt::Windows::UI::Core::CoreWindow> window;
 		std::function<Vector2f(Vector2i)> remap;
 		Vector2i nativePos;
 		

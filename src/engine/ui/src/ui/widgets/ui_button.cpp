@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-UIButton::UIButton(String id, UIStyle s, Maybe<UISizer> sizer)
+UIButton::UIButton(String id, UIStyle s, std::optional<UISizer> sizer)
 	: UIClickable(id, s.getSprite("normal").getScaledSize(), std::move(sizer), s.getBorder("innerBorder"))
 	, style(s)
 {

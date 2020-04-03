@@ -11,7 +11,7 @@ TextureDescriptorImageData::TextureDescriptorImageData(std::unique_ptr<Image> im
 {
 }
 
-TextureDescriptorImageData::TextureDescriptorImageData(Bytes&& bytes, Maybe<int> stride)
+TextureDescriptorImageData::TextureDescriptorImageData(Bytes&& bytes, std::optional<int> stride)
 	: rawBytes(move(bytes))
 	, stride(stride)
 	, isRaw(true)
@@ -24,7 +24,7 @@ TextureDescriptorImageData::TextureDescriptorImageData(TextureDescriptorImageDat
 	, isRaw(other.isRaw)
 {}
 
-TextureDescriptorImageData::TextureDescriptorImageData(gsl::span<const gsl::byte> bytes, Maybe<int> stride)
+TextureDescriptorImageData::TextureDescriptorImageData(gsl::span<const gsl::byte> bytes, std::optional<int> stride)
 	: rawBytes(bytes.size_bytes())
 	, stride(stride)
     , isRaw(true)
@@ -75,7 +75,7 @@ Bytes TextureDescriptorImageData::moveBytes()
 	}
 }
 
-Maybe<int> TextureDescriptorImageData::getStride() const
+std::optional<int> TextureDescriptorImageData::getStride() const
 {
 	return stride;
 }

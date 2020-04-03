@@ -78,12 +78,12 @@ void UISpinControl::setIncrement(float inc)
 	textInput->setValidator(std::make_shared<UINumericValidator>(true, isFloat));
 }
 
-void UISpinControl::setMinimumValue(Maybe<float> value)
+void UISpinControl::setMinimumValue(std::optional<float> value)
 {
 	minValue = value;
 }
 
-void UISpinControl::setMaximumValue(Maybe<float> value)
+void UISpinControl::setMaximumValue(std::optional<float> value)
 {
 	maxValue = value;
 }

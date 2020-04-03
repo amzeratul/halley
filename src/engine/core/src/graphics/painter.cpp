@@ -232,7 +232,7 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 	const size_t nSegments = (loop ? nPoints : (nPoints - 1));
 	std::vector<LineVertex> vertices(nSegments * 4);
 
-	auto segmentNormal = [&] (size_t i) -> Maybe<Vector2f>
+	auto segmentNormal = [&] (size_t i) -> std::optional<Vector2f>
 	{
 		if (!loop && i >= nSegments) {
 			return {};
@@ -241,7 +241,7 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 		}
 	};
 
-	auto makeNormal = [] (Vector2f a, Maybe<Vector2f> maybeB) -> Vector2f
+	auto makeNormal = [] (Vector2f a, std::optional<Vector2f> maybeB) -> Vector2f
 	{
 		// Disabled. Enabling this makes it looks nicer, but also introduces a lot of edge cases with acute angles that are very hard to deal with
 		if (false && maybeB) {
@@ -254,9 +254,9 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 		}
 	};
 
-	Maybe<Vector2f> prevNormal = loop ? segmentNormal(nSegments - 1) : Maybe<Vector2f>();
+	std::optional<Vector2f> prevNormal = loop ? segmentNormal(nSegments - 1) : std::optional<Vector2f>();
 	Vector2f normal = segmentNormal(0).value();
-	Maybe<Vector2f> nextNormal;
+	std::optional<Vector2f> nextNormal;
 
 	for (size_t i = 0; i < nSegments; ++i) {
 		nextNormal = segmentNormal(i + 1);
@@ -401,7 +401,7 @@ void Painter::setClip(Rect4i rect)
 
 void Painter::setClip()
 {
-	pendingClip = Maybe<Rect4i>();
+	pendingClip = std::optional<Rect4i>();
 }
 
 Rect4i Painter::getRectangleForActiveRenderTarget(Rect4i r)
@@ -575,7 +575,7 @@ void Painter::updateClip()
 	}
 	const Rect4i targetClip = getRectangleForActiveRenderTarget(finalRect);
 	const bool enableClip = finalRect != activeRenderTarget->getViewPort();
-	const Maybe<Rect4i> dstClip = enableClip ? targetClip : Maybe<Rect4i>();
+	const std::optional<Rect4i> dstClip = enableClip ? targetClip : std::optional<Rect4i>();
 
 	if (curClip != dstClip) {
 		curClip = dstClip;

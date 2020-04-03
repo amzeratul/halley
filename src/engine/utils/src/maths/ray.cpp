@@ -12,7 +12,7 @@ Ray::Ray(Vector2f start, Vector2f dir)
 {
 }
 
-Maybe<std::pair<float, Vector2f>> Ray::castCircle(Vector2f centre, float radius) const
+std::optional<std::pair<float, Vector2f>> Ray::castCircle(Vector2f centre, float radius) const
 {
 	// Is ahead of ray?
 	const Vector2f localCentre = centre - p;
@@ -48,7 +48,7 @@ Maybe<std::pair<float, Vector2f>> Ray::castCircle(Vector2f centre, float radius)
 	return std::pair<float, Vector2f>(dist, normal);
 }
 
-Maybe<std::pair<float, Vector2f>> Ray::castLineSegment(Vector2f a, Vector2f b) const
+std::optional<std::pair<float, Vector2f>> Ray::castLineSegment(Vector2f a, Vector2f b) const
 {
 	// From http://geomalgorithms.com/a05-_intersect-1.html
 

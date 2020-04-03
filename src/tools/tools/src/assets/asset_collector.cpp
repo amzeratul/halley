@@ -15,7 +15,7 @@ AssetCollector::AssetCollector(const ImportingAsset& asset, const Path& dstDir, 
 	, reporter(reporter)
 {}
 
-void AssetCollector::output(const String& name, AssetType type, const Bytes& data, Maybe<Metadata> metadata, const String& platform, const Path& primaryInputFile)
+void AssetCollector::output(const String& name, AssetType type, const Bytes& data, std::optional<Metadata> metadata, const String& platform, const Path& primaryInputFile)
 {
 	const String id = name.replaceAll("_", "__").replaceAll("/", "_-_").replaceAll(":", "_c_");
 	Path filePath = Path(toString(type)) / id;

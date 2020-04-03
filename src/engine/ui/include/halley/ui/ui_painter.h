@@ -16,14 +16,14 @@ namespace Halley {
 
 		UIPainter clone();
 		UIPainter withAdjustedLayer(int delta);
-		UIPainter withClip(Maybe<Rect4f> clip);
+		UIPainter withClip(std::optional<Rect4f> clip);
 		UIPainter withMask(int mask);
 
-		Maybe<Rect4f> getClip() const;
+		std::optional<Rect4f> getClip() const;
 
 	private:
 		SpritePainter& painter;
-		Maybe<Rect4f> clip;
+		std::optional<Rect4f> clip;
 		int mask;
 		int layer;
 		int n;

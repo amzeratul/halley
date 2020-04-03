@@ -384,7 +384,7 @@ static void writeFile(const wchar_t* str, const Bytes& data)
 	}
 }
 
-void OSWin32::atomicWriteFile(const Path& path, const Bytes& data, Maybe<Path> backupOldVersionPath)
+void OSWin32::atomicWriteFile(const Path& path, const Bytes& data, std::optional<Path> backupOldVersionPath)
 {
 	auto dstPath = path.getString().replaceAll("/", "\\").getUTF16();
 	if (PathFileExistsW(dstPath.c_str())) {
@@ -586,7 +586,7 @@ public:
 		CloseClipboard();
 	}
 
-	Maybe<String> getStringData() override
+	std::optional<String> getStringData() override
 	{
 		if (!OpenClipboard(nullptr)) {
 			throw Exception("Unable to open clipboard.", HalleyExceptions::OS);

@@ -435,7 +435,7 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::fun
 	// Keep doing this while src is not exhausted
 	while (!src.empty()) {
 		float curWidth = 0.0f;
-		Maybe<gsl::span<const char32_t>> lastValid;
+		std::optional<gsl::span<const char32_t>> lastValid;
 
 		for (std::ptrdiff_t i = 0; i < src.length(); ++i) {
 			const int32_t c = src[i];
@@ -514,7 +514,7 @@ float TextRenderer::getSmoothness() const
 	return smoothness;
 }
 
-Maybe<Rect4f> TextRenderer::getClip() const
+std::optional<Rect4f> TextRenderer::getClip() const
 {
 	return clip;
 }

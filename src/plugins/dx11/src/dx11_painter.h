@@ -45,7 +45,7 @@ namespace Halley
 		std::unique_ptr<DX11DepthStencil> depthStencil;
 
 		size_t curBuffer = 0;
-		Maybe<Rect4i> clipping;
+		std::optional<Rect4i> clipping;
 
 		DX11Blend& getBlendMode(BlendType type);
 		void rotateBuffers();

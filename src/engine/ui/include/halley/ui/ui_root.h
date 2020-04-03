@@ -38,7 +38,7 @@ namespace Halley {
 		void mouseOverNext(bool forward = true);
 		void runLayout();
 		
-		Maybe<AudioHandle> playSound(const String& eventName);
+		std::optional<AudioHandle> playSound(const String& eventName);
 		void sendEvent(UIEvent&& event) const override;
 
 		bool hasModalUI() const;

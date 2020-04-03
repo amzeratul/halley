@@ -41,7 +41,7 @@ namespace Halley {
 		void setOnResumeCallback(SystemOnResumeCallback callback) override { onResumeCallback = callback; }
 		void callOnResumeCallback();
 
-		Maybe<String> getGameVersion() const override;
+		std::optional<String> getGameVersion() const override;
 
 	private:
 		WinRTPlatform* platform;

@@ -92,7 +92,7 @@ void ResourceLocator::addFileSystem(const Path& path)
 	add(std::make_unique<FileSystemResourceLocator>(system, path), path);
 }
 
-void ResourceLocator::addPack(const Path& path, const String& encryptionKey, bool preLoad, bool allowFailure, Maybe<int> priority)
+void ResourceLocator::addPack(const Path& path, const String& encryptionKey, bool preLoad, bool allowFailure, std::optional<int> priority)
 {
 	auto dataReader = system.getDataReader(path.string());
 	if (dataReader) {

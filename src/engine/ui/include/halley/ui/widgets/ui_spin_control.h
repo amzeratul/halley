@@ -19,8 +19,8 @@ namespace Halley {
 
 		void setIncrement(float inc);
 
-		void setMinimumValue(Maybe<float> value);
-		void setMaximumValue(Maybe<float> value);
+		void setMinimumValue(std::optional<float> value);
+		void setMaximumValue(std::optional<float> value);
 
 		void onManualControlActivate() override;
 		void onManualControlCycleValue(int delta) override;
@@ -31,7 +31,7 @@ namespace Halley {
 		std::shared_ptr<UITextInput> textInput;
 		float value = 0;
 		float increment = 1;
-		Maybe<float> minValue;
-		Maybe<float> maxValue;
+		std::optional<float> minValue;
+		std::optional<float> maxValue;
     };
 }

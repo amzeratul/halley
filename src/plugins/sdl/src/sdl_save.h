@@ -36,7 +36,7 @@ namespace Halley {
 
 	class SDLSaveData : public ISaveData {
 	public:
-		explicit SDLSaveData(SaveDataType type, Path dir, Maybe<String> key);
+		explicit SDLSaveData(SaveDataType type, Path dir, std::optional<String> key);
 		bool isReady() const override;
 		Bytes getData(const String& path) override;
 		void removeData(const String& path) override;
@@ -47,10 +47,10 @@ namespace Halley {
 	private:
 		SaveDataType type;
 		Path dir;
-		Maybe<String> key;
+		std::optional<String> key;
 		std::set<String> corruptedFiles;
 
 		String getKey() const;
-		Maybe<Bytes> doGetData(const Path& path, const String& filename);
+		std::optional<Bytes> doGetData(const Path& path, const String& filename);
 	};
 }

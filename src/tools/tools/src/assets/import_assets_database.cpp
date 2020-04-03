@@ -126,7 +126,7 @@ void ImportAssetsDatabase::setInputFileMetadata(const Path& path, std::array<int
 	input.basePath = std::move(basePath);
 }
 
-Maybe<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) const
+std::optional<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
 
@@ -139,7 +139,7 @@ Maybe<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) const
 	}
 }
 
-Maybe<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const String& assetId) const
+std::optional<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const String& assetId) const
 {
 	// This method is not very efficient
 	std::lock_guard<std::mutex> lock(mutex);

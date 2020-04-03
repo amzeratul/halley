@@ -207,7 +207,7 @@ void XBLManager::recreateCloudSaveContainer()
 	}
 }
 
-Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> XBLManager::getProvider() const
+std::optional<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> XBLManager::getProvider() const
 {
 	return gameSaveProvider;
 }

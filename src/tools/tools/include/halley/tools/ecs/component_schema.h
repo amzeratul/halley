@@ -21,7 +21,7 @@ namespace Halley
 		String name;
 		Vector<MemberSchema> members;
 		std::unordered_set<String> includeFiles;
-		Maybe<String> customImplementation;
+		std::optional<String> customImplementation;
 		bool generate = false;
 	};
 }

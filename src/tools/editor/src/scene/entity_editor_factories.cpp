@@ -115,7 +115,7 @@ public:
 
 	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const String& fieldName, ConfigNode& componentData, const String& defaultValue) override
 	{
-		Maybe<Vector2f> value;
+		std::optional<Vector2f> value;
 		if (componentData[fieldName].getType() != ConfigNodeType::Undefined) {
 			value = componentData[fieldName].asVector2f();
 		}

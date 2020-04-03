@@ -31,7 +31,7 @@ namespace Halley
 
 		std::vector<String> recents;
 
-		Maybe<Vector2i> windowPosition;
+		std::optional<Vector2i> windowPosition;
 		Vector2i windowSize;
 		WindowState windowState = WindowState::Normal;
 	};

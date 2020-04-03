@@ -16,7 +16,7 @@ namespace Halley
 	class Material;
 	class Sprite;
 
-	using ColourOverride = std::pair<size_t, Maybe<Colour4f>>;
+	using ColourOverride = std::pair<size_t, std::optional<Colour4f>>;
 
 	class TextRenderer
 	{
@@ -69,7 +69,7 @@ namespace Halley
 		float getOutline() const;
 		Colour getOutlineColour() const;
 		float getSmoothness() const;
-		Maybe<Rect4f> getClip() const;
+		std::optional<Rect4f> getClip() const;
 		float getLineHeight() const;
 		float getAlignment() const;
 
@@ -90,7 +90,7 @@ namespace Halley
 		Vector2f pixelOffset;
 		Colour colour;
 		Colour outlineColour;
-		Maybe<Rect4f> clip;
+		std::optional<Rect4f> clip;
 
 		std::vector<ColourOverride> colourOverrides;
 

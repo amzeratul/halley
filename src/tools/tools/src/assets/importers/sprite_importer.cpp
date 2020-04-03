@@ -36,9 +36,9 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	String spriteSheetName = Path(asset.assetId).replaceExtension("").string();
 	std::vector<ImageData> totalFrames;
 
-	Maybe<Metadata> startMeta;
+	std::optional<Metadata> startMeta;
 
-	Maybe<String> palette;
+	std::optional<String> palette;
 
 	for (auto& inputFile: asset.inputFiles) {
 		auto fileInputId = Path(inputFile.name).dropFront(1);
@@ -137,7 +137,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	collector.output(spriteSheetName, AssetType::SpriteSheet, Serializer::toBytes(spriteSheet));
 }
 
-String SpriteImporter::getAssetId(const Path& file, const Maybe<Metadata>& metadata) const
+String SpriteImporter::getAssetId(const Path& file, const std::optional<Metadata>& metadata) const
 {
 	if (metadata) {
 		String atlas = metadata->getString("atlas", "");

@@ -10,6 +10,6 @@ namespace Halley {
 		virtual ~IClipboard() = default;
 		
 		virtual void setData(const String& stringData) = 0;
-		virtual Maybe<String> getStringData() = 0;
+		virtual std::optional<String> getStringData() = 0;
 	};
 }

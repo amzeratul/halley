@@ -11,7 +11,7 @@ AnimationPlayer::AnimationPlayer(std::shared_ptr<const Animation> animation, con
 	setAnimation(animation, sequence, direction);
 }
 
-AnimationPlayer& AnimationPlayer::playOnce(const String& sequence, const Maybe<String>& nextLoopingSequence)
+AnimationPlayer& AnimationPlayer::playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence)
 {
 	updateIfNeeded();
 

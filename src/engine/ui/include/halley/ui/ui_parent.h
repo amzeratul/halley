@@ -21,7 +21,7 @@ namespace Halley {
 		virtual void sendEvent(UIEvent&& event) const = 0;
 
 		virtual Rect4f getRect() const = 0;
-		virtual Maybe<float> getMaxChildWidth() const;
+		virtual std::optional<float> getMaxChildWidth() const;
 
 		void addChild(std::shared_ptr<UIWidget> widget);
 		void removeChild(UIWidget& widget);

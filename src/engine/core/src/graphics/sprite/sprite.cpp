@@ -371,7 +371,7 @@ Sprite& Sprite::setClip()
 	return *this;
 }
 
-Maybe<Rect4f> Sprite::getClip() const
+std::optional<Rect4f> Sprite::getClip() const
 {
 	return clip;
 }

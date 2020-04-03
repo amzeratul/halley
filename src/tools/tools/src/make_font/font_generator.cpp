@@ -16,7 +16,7 @@
 
 using namespace Halley;
 
-static Maybe<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float borderSuperSampled, const std::vector<int>& characters)
+static std::optional<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float borderSuperSampled, const std::vector<int>& characters)
 {
 	font.setSize(fontSize);
 
@@ -41,16 +41,16 @@ static Maybe<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, V
 	}
 }
 
-static Maybe<Vector<BinPackResult>> binarySearch(std::function<Maybe<Vector<BinPackResult>>(int)> f, int minBound, int maxBound, int &best)
+static std::optional<Vector<BinPackResult>> binarySearch(std::function<std::optional<Vector<BinPackResult>>(int)> f, int minBound, int maxBound, int &best)
 {
 	int v0 = minBound;
 	int v1 = maxBound;
 	int lastGood = v0;
-	Maybe<Vector<BinPackResult>> bestResult;
+	std::optional<Vector<BinPackResult>> bestResult;
 
 	while (v0 <= v1) {
 		int v = (v0 + v1) / 2;
-		Maybe<Vector<BinPackResult>> result = f(v);
+		std::optional<Vector<BinPackResult>> result = f(v);
 
 		if (result) {
 			// Midpoint is good, try increasing
@@ -89,7 +89,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 
 	int fontSize = 0;
 	Vector2i imageSize;
-	Maybe<Vector<BinPackResult>> result;
+	std::optional<Vector<BinPackResult>> result;
 
 	if (sizeInfo.fontSize) {
 		fontSize = int(sizeInfo.fontSize.value());
@@ -115,7 +115,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 		}
 		constexpr int minFont = 0;
 		constexpr int maxFont = 1000;
-		result = binarySearch([&](int curFontSize) -> Maybe<Vector<BinPackResult>>
+		result = binarySearch([&](int curFontSize) -> std::optional<Vector<BinPackResult>>
 		{
 			return tryPacking(font, float(curFontSize), imageSize, scale, borderSuperSample, characters);
 		}, minFont, maxFont, fontSize);

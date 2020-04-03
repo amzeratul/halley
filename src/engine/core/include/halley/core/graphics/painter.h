@@ -123,8 +123,8 @@ namespace Halley
 		size_t prevTriangles = 0;
 
 		Vector<IndexType> stdQuadIndexCache;
-		Maybe<Rect4i> curClip;
-		Maybe<Rect4i> pendingClip;
+		std::optional<Rect4i> curClip;
+		std::optional<Rect4i> pendingClip;
 
 		void bind(RenderContext& context);
 		void unbind(RenderContext& context);

@@ -46,7 +46,7 @@ namespace Halley
 			, title(title)
 		{}
 
-		WindowDefinition(WindowType windowType, Maybe<Vector2i> position, Vector2i size, String title)
+		WindowDefinition(WindowType windowType, std::optional<Vector2i> position, Vector2i size, String title)
 			: windowType(windowType)
 			, position(position)
 			, size(size)
@@ -55,12 +55,12 @@ namespace Halley
 
 		WindowType getWindowType() const { return windowType; }
 		WindowState getWindowState() const { return windowState; }
-		Maybe<Vector2i> getPosition() const { return position; }
+		std::optional<Vector2i> getPosition() const { return position; }
 		Vector2i getSize() const { return size; }
 		String getTitle() const { return title; }
-		Maybe<Path> getIcon() const { return icon; }
+		std::optional<Path> getIcon() const { return icon; }
 
-		WindowDefinition withPosition(Maybe<Vector2i> newPos) const
+		WindowDefinition withPosition(std::optional<Vector2i> newPos) const
 		{
 			auto w = *this;
 			w.position = newPos;
@@ -91,10 +91,10 @@ namespace Halley
 	private:
 		WindowType windowType = WindowType::Fullscreen;
 		WindowState windowState = WindowState::Normal;
-		Maybe<Vector2i> position;
+		std::optional<Vector2i> position;
 		Vector2i size;
 		String title;
-		Maybe<Path> icon;
+		std::optional<Path> icon;
 	};
 
 	class Window

@@ -60,12 +60,12 @@ LocalisedString UITextInput::getGhostText() const
 	return ghostText;
 }
 
-Maybe<int> UITextInput::getMaxLength() const
+std::optional<int> UITextInput::getMaxLength() const
 {
 	return text.getMaxLength();
 }
 
-void UITextInput::setMaxLength(Maybe<int> length)
+void UITextInput::setMaxLength(std::optional<int> length)
 {
 	text.setLengthLimits(0, length);
 }

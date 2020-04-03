@@ -17,6 +17,6 @@ namespace Halley {
 		JoystickButtonPosition button;
 		std::function<Sprite(JoystickButtonPosition, JoystickType)> iconRetriever;
 		Colour4f colour;
-		Maybe<JoystickType> curType;
+		std::optional<JoystickType> curType;
 	};
 }

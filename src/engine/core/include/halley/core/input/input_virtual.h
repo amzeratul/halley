@@ -134,7 +134,7 @@ namespace Halley {
 		Vector<AxisData> axes;
 
 		Vector<PositionBindData> positions;
-		Maybe<Rect4f> positionLimits;
+		std::optional<Rect4f> positionLimits;
 		Vector2f position;
 
 		Vector<spInputDevice> wheels;

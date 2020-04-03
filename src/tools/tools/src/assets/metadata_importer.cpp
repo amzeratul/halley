@@ -47,7 +47,7 @@ void MetadataImporter::loadMetaData(Metadata& meta, const Path& path, bool isDir
 	}
 }
 
-Metadata MetadataImporter::getMetaData(const Path& inputFilePath, Maybe<Path> dirMetaPath, Maybe<Path> privateMetaPath)
+Metadata MetadataImporter::getMetaData(const Path& inputFilePath, std::optional<Path> dirMetaPath, std::optional<Path> privateMetaPath)
 {
 	Metadata meta;
 	try {

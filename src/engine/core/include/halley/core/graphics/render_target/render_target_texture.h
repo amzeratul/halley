@@ -24,6 +24,6 @@ namespace Halley
 		Vector<std::shared_ptr<Texture>> attachments;
 		std::shared_ptr<Texture> depth;
 		bool dirty = false;
-		Maybe<Rect4i> viewPort;
+		std::optional<Rect4i> viewPort;
 	};
 }

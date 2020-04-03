@@ -29,7 +29,7 @@ namespace Halley {
 		friend class UIRoot;
 
 	public:
-		UIWidget(String id = "", Vector2f minSize = {}, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
+		UIWidget(String id = "", Vector2f minSize = {}, std::optional<UISizer> sizer = {}, Vector4f innerBorder = {});
 		virtual ~UIWidget();
 
 		void doDraw(UIPainter& painter) const;
@@ -50,7 +50,7 @@ namespace Halley {
 		void setAnchor(UIAnchor anchor);
 		void setAnchor();
 
-		virtual Maybe<UISizer>& tryGetSizer();
+		virtual std::optional<UISizer>& tryGetSizer();
 		virtual UISizer& getSizer();
 
 		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
@@ -129,7 +129,7 @@ namespace Halley {
 		void bindData(const String& childId, const String& initialValue, UIDataBindString::WriteCallback callback = {});
 		
 		bool isDescendentOf(const UIWidget& ancestor) const override;
-		void setMouseClip(Maybe<Rect4f> mouseClip, bool force);
+		void setMouseClip(std::optional<Rect4f> mouseClip, bool force);
 
 		virtual void onManualControlCycleValue(int delta);
 		virtual void onManualControlAnalogueAdjustValue(float delta, Time t);
@@ -148,7 +148,7 @@ namespace Halley {
 		void clearBehaviours();
 		const std::vector<std::shared_ptr<UIBehaviour>>& getBehaviours() const;
 
-		Maybe<AudioHandle> playSound(const String& eventName);
+		std::optional<AudioHandle> playSound(const String& eventName);
 
 		bool needsLayout() const;
 		void markAsNeedingLayout() override;
@@ -202,10 +202,10 @@ namespace Halley {
 		Vector2f position;
 		Vector2f size;
 		Vector2f minSize;
-		Maybe<Rect4f> mouseClip;
+		std::optional<Rect4f> mouseClip;
 
 		Vector4f innerBorder;
-		Maybe<UISizer> sizer;
+		std::optional<UISizer> sizer;
 
 		mutable Vector2f layoutSize;
 		mutable int layoutNeeded = 1;

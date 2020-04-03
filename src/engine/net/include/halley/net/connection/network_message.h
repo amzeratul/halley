@@ -43,7 +43,7 @@ namespace Halley
 		unsigned short seq = 0;
 		char channel = -1;
 
-		mutable Maybe<Bytes> serialized;
+		mutable std::optional<Bytes> serialized;
 	};
 
 	class NetworkMessageFactoryBase

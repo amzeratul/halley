@@ -10,7 +10,7 @@ namespace Halley
 	public:
 		ImportAssetType getType() const override { return ImportAssetType::BitmapFont; }
 
-		String getAssetId(const Path& file, const Maybe<Metadata>& metadata) const override;
+		String getAssetId(const Path& file, const std::optional<Metadata>& metadata) const override;
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 

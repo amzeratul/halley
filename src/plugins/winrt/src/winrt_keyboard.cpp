@@ -6,7 +6,7 @@ using namespace Halley;
 using namespace winrt::Windows::UI::Core;
 using namespace winrt::Windows::System;
 
-Maybe<int> WinRTKeyboard::getHalleyKey(VirtualKey virtualKey)
+std::optional<int> WinRTKeyboard::getHalleyKey(VirtualKey virtualKey)
 {
 	int code = int(virtualKey);
 	if (code < 0 || code >= int(keyMapping.size())) {

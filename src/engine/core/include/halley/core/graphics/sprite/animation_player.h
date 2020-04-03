@@ -15,7 +15,7 @@ namespace Halley
 	public:
 		explicit AnimationPlayer(std::shared_ptr<const Animation> animation = std::shared_ptr<const Animation>(), const String& sequence = "default", const String& direction = "default");
 
-		AnimationPlayer& playOnce(const String& sequence, const Maybe<String>& nextLoopingSequence = {});
+		AnimationPlayer& playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence = {});
 
 		AnimationPlayer& setAnimation(std::shared_ptr<const Animation> animation, const String& sequence = "default", const String& direction = "default");
 		AnimationPlayer& setSequence(const String& sequence);
@@ -63,7 +63,7 @@ namespace Halley
 		const AnimationSequence* curSeq = nullptr;
 		const AnimationDirection* curDir = nullptr;
 
-		Maybe<String> nextSequence = {};
+		std::optional<String> nextSequence = {};
 		
 		String curSeqName;
 		String curDirName;

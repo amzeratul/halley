@@ -39,7 +39,7 @@ component:
   - zoom:
       type: float
       defaultValue: 1
-  - clear: 'Halley::Maybe<Halley::Colour4f>'
+  - clear: 'std::optional<Halley::Colour4f>'
   - mask:
       type: int
       defaultValue: 1

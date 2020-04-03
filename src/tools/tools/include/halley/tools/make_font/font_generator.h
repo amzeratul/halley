@@ -43,8 +43,8 @@ namespace Halley
 	public:
 		struct FontSizeInfo
 		{
-			Maybe<Vector2i> imageSize;
-			Maybe<float> fontSize;
+			std::optional<Vector2i> imageSize;
+			std::optional<float> fontSize;
 			float replacementScale = 1.0f;
 		};
 

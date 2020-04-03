@@ -105,7 +105,7 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 	}
 
 	// Collect data on private meta file
-	Maybe<Path> privateMetaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
+	std::optional<Path> privateMetaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
 	if (FileSystem::exists(privateMetaPath.value())) {
 		timestamps[2] = FileSystem::getLastWriteTime(privateMetaPath.value());
 	} else {
@@ -279,10 +279,10 @@ std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::filterNeedsImporting(Imp
 	return toImport;
 }
 
-Maybe<Path> CheckAssetsTask::findDirectoryMeta(const std::vector<Path>& metas, const Path& path) const
+std::optional<Path> CheckAssetsTask::findDirectoryMeta(const std::vector<Path>& metas, const Path& path) const
 {
 	auto parent = path.parentPath();
-	Maybe<Path> longestPath;
+	std::optional<Path> longestPath;
 	for (auto& m: metas) {
 		if (!longestPath || longestPath->getNumberPaths() < m.getNumberPaths()) {
 			auto n = m.getNumberPaths() - 1;

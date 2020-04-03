@@ -95,7 +95,7 @@ uint64_t SDLSaveHeader::computeHash(const String& path, const String& key)
 	return Hash::hash(gsl::as_bytes(gsl::span<const char>(filename.c_str(), filename.length())));
 }
 
-SDLSaveData::SDLSaveData(SaveDataType type, Path dir, Maybe<String> key)
+SDLSaveData::SDLSaveData(SaveDataType type, Path dir, std::optional<String> key)
 	: type(type)
 	, dir(std::move(dir))
 	, key(std::move(key))
@@ -113,7 +113,7 @@ Bytes SDLSaveData::getData(const String& filename)
 	Expects (!filename.isEmpty());
 
 	auto path = dir / filename;
-	Maybe<Bytes> data = doGetData(path, filename);
+	std::optional<Bytes> data = doGetData(path, filename);
 	if (data) {
 		return *data;
 	} else {
@@ -176,7 +176,7 @@ void SDLSaveData::setData(const String& path, const Bytes& rawData, bool commit)
 	// Paths
 	auto dstPath = dir / path;
 	auto dstPathStr = dstPath.getString();
-	Maybe<Path> backupPath;
+	std::optional<Path> backupPath;
 	if (corruptedFiles.find(dstPathStr) != corruptedFiles.end()) {
 		// File we're writing to was corrupted; don't back up, but do remove it from the list
 		corruptedFiles.erase(dstPathStr);
@@ -207,7 +207,7 @@ String SDLSaveData::getKey() const
 	}
 }
 
-Maybe<Bytes> SDLSaveData::doGetData(const Path& path, const String& filename)
+std::optional<Bytes> SDLSaveData::doGetData(const Path& path, const String& filename)
 {
 	auto rawData = Path::readFile(path);
 	if (rawData.empty()) {

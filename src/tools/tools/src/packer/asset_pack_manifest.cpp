@@ -76,7 +76,7 @@ void AssetPackManifest::load(const ConfigFile& file)
 	}
 }
 
-Maybe<std::reference_wrapper<const AssetPackManifestEntry>> AssetPackManifest::getPack(const String& asset) const
+std::optional<std::reference_wrapper<const AssetPackManifestEntry>> AssetPackManifest::getPack(const String& asset) const
 {
 	for (auto& e: exclude) {
 		if (asset.contains(e)) {

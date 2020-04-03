@@ -19,7 +19,7 @@ namespace Halley {
 		void removeCapture(WinRTTextInputCapture* capture);
 
 	protected:
-		Maybe<winrt::Windows::UI::Core::CoreWindow> window;
+		std::optional<winrt::Windows::UI::Core::CoreWindow> window;
 		winrt::event_token acceleratorKeyEvent;
 
 		std::vector<int> keyMapping;
@@ -27,7 +27,7 @@ namespace Halley {
 
 		void initMapping();
 		std::unique_ptr<ITextInputCapture> makeTextInputCapture() override;
-		Maybe<int> getHalleyKey(winrt::Windows::System::VirtualKey virtualKey);
+		std::optional<int> getHalleyKey(winrt::Windows::System::VirtualKey virtualKey);
 		void onTextControlCharacterGenerated(TextControlCharacter chr);
 	};
 
@@ -45,8 +45,8 @@ namespace Halley {
 	private:
 		WinRTKeyboard & parent;
 		TextInputData* input = nullptr;
-		Maybe<winrt::Windows::UI::Text::Core::CoreTextServicesManager> servicesManager;
-		Maybe<winrt::Windows::UI::Text::Core::CoreTextEditContext> editContext;
+		std::optional<winrt::Windows::UI::Text::Core::CoreTextServicesManager> servicesManager;
+		std::optional<winrt::Windows::UI::Text::Core::CoreTextEditContext> editContext;
 		
 		Range<int> lastSel;
 		int lastRevision = 0;

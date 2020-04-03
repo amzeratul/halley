@@ -1,12 +1,12 @@
 #include "widgets/ui_framed_image.h"
 using namespace Halley;
 
-UIFramedImage::UIFramedImage(const String& id, UIStyle style, Maybe<UISizer> sizer)
+UIFramedImage::UIFramedImage(const String& id, UIStyle style, std::optional<UISizer> sizer)
 	: UIFramedImage(id, style.getSprite("frame"), style.getSprite("framedImage"), style.getBorder("frameBorder"), std::move(sizer), style.getBorder("innerBorder"))
 {
 }
 
-UIFramedImage::UIFramedImage(const String& id, Sprite frame, Sprite framedImage, Vector4f frameBorder, Maybe<UISizer> sizer, Vector4f innerBorder)
+UIFramedImage::UIFramedImage(const String& id, Sprite frame, Sprite framedImage, Vector4f frameBorder, std::optional<UISizer> sizer, Vector4f innerBorder)
 	: UIImage(id, frame, std::move(sizer), innerBorder)
 	, framedSprite(framedImage)
 	, frameBorder(frameBorder)
@@ -67,7 +67,7 @@ const Sprite& UIFramedImage::getFramedSprite() const
 	return framedSprite;
 }
 
-void UIFramedImage::setScrolling(Vector2f ss, Maybe<Vector2f> startPos)
+void UIFramedImage::setScrolling(Vector2f ss, std::optional<Vector2f> startPos)
 {
 	if (startPos) {
 		scrollPos = startPos.value();

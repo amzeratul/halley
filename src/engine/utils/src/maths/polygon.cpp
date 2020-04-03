@@ -356,7 +356,7 @@ Polygon::CollisionResult Polygon::getCollisionWithSweepingCircle(Vector2f p0, fl
 		return result;
 	}
 
-	const auto submit = [&] (Maybe<std::pair<float, Vector2f>> c)
+	const auto submit = [&] (std::optional<std::pair<float, Vector2f>> c)
 	{
 		if (c && c->first < moveLen) {
 			if (!result.collided || c->first < result.distance) {
@@ -418,7 +418,7 @@ Polygon::CollisionResult Polygon::getCollisionWithSweepingEllipse(Vector2f p0, V
 	const auto ray = Ray(localP0, localMoveDir);
 
 	float bestLen = localMoveLen;
-	const auto submit = [&] (Maybe<std::pair<float, Vector2f>> c)
+	const auto submit = [&] (std::optional<std::pair<float, Vector2f>> c)
 	{
 		if (c) {
 			const float lenToCol = c->first;

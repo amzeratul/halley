@@ -46,5 +46,5 @@ void TextureRenderTarget::setViewPort(Rect4i vp)
 
 void TextureRenderTarget::resetViewPort()
 {
-	viewPort = Maybe<Rect4i>();
+	viewPort = std::optional<Rect4i>();
 }

@@ -51,7 +51,7 @@ public:
 	Halley::Rect4f getSpriteAABB(const Halley::Sprite& sprite) const;
 
 	bool hasParent() const { return parentId.isValid(); }
-	Halley::Maybe<Halley::EntityId> getParentId() const { return parentId; }
+	std::optional<Halley::EntityId> getParentId() const { return parentId; }
 	void setParent(Halley::EntityId parentId, Halley::World& world, bool keepLocalPosition = false);
 	void setParent(Transform2DComponent& parentTransform, bool keepLocalPosition = false);
 	void setParent(bool keepLocalPosition = false);

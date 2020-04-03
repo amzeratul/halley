@@ -11,12 +11,12 @@ namespace Halley {
 	class UIAnchor
 	{
 	public:
-		UIAnchor(Vector2f relativePos = Vector2f(0.5f, 0.5f), Vector2f relativeAlignment = Vector2f(0.5f, 0.5f), Vector2f absoluteOffset = Vector2f(), Maybe<Rect4f> bounds = {});
+		UIAnchor(Vector2f relativePos = Vector2f(0.5f, 0.5f), Vector2f relativeAlignment = Vector2f(0.5f, 0.5f), Vector2f absoluteOffset = Vector2f(), std::optional<Rect4f> bounds = {});
 
 		Vector2f getRelativePos() const;
 		Vector2f getRelativeAlignment() const;
 		Vector2f getAbsoluteOffset() const;
-		Maybe<Rect4f> getBounds() const;
+		std::optional<Rect4f> getBounds() const;
 
 		UIAnchor& setBounds(UIParent& parent);
 		UIAnchor& setAutoBounds(bool enabled);
@@ -33,7 +33,7 @@ namespace Halley {
 		Vector2f relativePos;
 		Vector2f relativeAlignment;
 		Vector2f absoluteOffset;
-		Maybe<Rect4f> bounds;
+		std::optional<Rect4f> bounds;
 		bool autoBounds = false;
 	};
 }

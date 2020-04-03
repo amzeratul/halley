@@ -31,7 +31,7 @@ namespace Halley
 		ImportAssetType getType() const override { return ImportAssetType::Sprite; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
-		String getAssetId(const Path& file, const Maybe<Metadata>& metadata) const override;
+		String getAssetId(const Path& file, const std::optional<Metadata>& metadata) const override;
 
 	private:
 		Animation generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const std::vector<ImageData>& frameData);

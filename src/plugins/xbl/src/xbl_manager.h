@@ -91,7 +91,7 @@ namespace Halley {
 		std::shared_ptr<ISaveData> getSaveContainer(const String& name);
 		void recreateCloudSaveContainer();
 
-		Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> getProvider() const;
+		std::optional<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> getProvider() const;
 		XBLStatus getStatus() const;
 		Future<AuthTokenResult> getAuthToken(const AuthTokenParameters& parameters);
 		void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue);
@@ -134,7 +134,7 @@ namespace Halley {
 
 		std::shared_ptr<xbox::services::system::xbox_live_user> xboxUser;
 		std::shared_ptr<xbox::services::xbox_live_context> xboxLiveContext;
-		Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> gameSaveProvider;
+		std::optional<winrt::Windows::Gaming::XboxLive::Storage::GameSaveProvider> gameSaveProvider;
 		std::map<String, std::shared_ptr<ISaveData>> saveStorage;
 		std::map<std::wstring, bool> achievementStatus;
 		PlatformJoinCallback joinCallback;
@@ -219,7 +219,7 @@ namespace Halley {
 		bool isSaving;
 		XBLManager& manager;
 		String containerName;
-		mutable Maybe<winrt::Windows::Gaming::XboxLive::Storage::GameSaveContainer> gameSaveContainer;
+		mutable std::optional<winrt::Windows::Gaming::XboxLive::Storage::GameSaveContainer> gameSaveContainer;
 
 		void updateContainer() const;
 	};

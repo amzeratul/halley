@@ -27,7 +27,7 @@ UIPainter UIPainter::withAdjustedLayer(int delta)
 	return result;
 }
 
-UIPainter UIPainter::withClip(Maybe<Rect4f> newClip)
+UIPainter UIPainter::withClip(std::optional<Rect4f> newClip)
 {
 	auto result = clone();
 	if (newClip) {
@@ -47,7 +47,7 @@ UIPainter UIPainter::withMask(int mask)
 	return result;
 }
 
-Maybe<Rect4f> UIPainter::getClip() const
+std::optional<Rect4f> UIPainter::getClip() const
 {
 	return clip;
 }

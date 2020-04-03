@@ -79,7 +79,7 @@ LocalisedString I18N::get(const String& key) const
 	return LocalisedString(*this, key, "#MISSING#");
 }
 
-Maybe<LocalisedString> I18N::get(const String& key, const I18NLanguage& language) const
+std::optional<LocalisedString> I18N::get(const String& key, const I18NLanguage& language) const
 {
 	auto curLang = strings.find(language);
 	if (curLang != strings.end()) {
@@ -160,12 +160,12 @@ I18NLanguage::I18NLanguage(const String& code)
 	}
 }
 
-I18NLanguage::I18NLanguage(String languageCode, Maybe<String> countryCode)
+I18NLanguage::I18NLanguage(String languageCode, std::optional<String> countryCode)
 {
 	set(std::move(languageCode), std::move(countryCode));
 }
 
-void I18NLanguage::set(String languageCode, Maybe<String> countryCode)
+void I18NLanguage::set(String languageCode, std::optional<String> countryCode)
 {
 	this->languageCode = std::move(languageCode);
 	this->countryCode = std::move(countryCode);
@@ -176,7 +176,7 @@ const String& I18NLanguage::getLanguageCode() const
 	return languageCode;
 }
 
-const Maybe<String>& I18NLanguage::getCountryCode() const
+const std::optional<String>& I18NLanguage::getCountryCode() const
 {
 	return countryCode;
 }
@@ -201,10 +201,10 @@ I18NLanguageMatch I18NLanguage::getMatch(const I18NLanguage& other) const
 	return I18NLanguageMatch::Exact;
 }
 
-Maybe<I18NLanguage> I18NLanguage::getBestMatch(const std::vector<I18NLanguage>& languages, const I18NLanguage& target, Maybe<I18NLanguage> fallback)
+std::optional<I18NLanguage> I18NLanguage::getBestMatch(const std::vector<I18NLanguage>& languages, const I18NLanguage& target, std::optional<I18NLanguage> fallback)
 {
 	I18NLanguageMatch bestMatch = I18NLanguageMatch::None;
-	Maybe<I18NLanguage> result = fallback;
+	std::optional<I18NLanguage> result = fallback;
 	for (const auto& l: languages) {
 		auto m = l.getMatch(target);
 		if (int(m) > int(bestMatch)) {

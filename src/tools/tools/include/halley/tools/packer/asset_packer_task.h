@@ -10,14 +10,14 @@ namespace Halley
 	class AssetPackerTask : public EditorTask
 	{
 	public:
-		explicit AssetPackerTask(Project& project, Maybe<std::set<String>> assetsToPack, std::vector<String> deletedAssets);
+		explicit AssetPackerTask(Project& project, std::optional<std::set<String>> assetsToPack, std::vector<String> deletedAssets);
 
 	protected:
 		void run() override;
 
 	private:
 		Project& project;
-		Maybe<std::set<String>> assetsToPack;
+		std::optional<std::set<String>> assetsToPack;
 		std::vector<String> deletedAssets;
 	};
 }

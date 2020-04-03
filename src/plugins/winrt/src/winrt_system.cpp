@@ -453,7 +453,7 @@ void WinRTSystem::runGame(std::function<void()> runnable)
 	CoreApplication::Run(winrt::make<Source>(*this, std::move(runnable)));
 }
 
-Maybe<String> WinRTSystem::getGameVersion() const
+std::optional<String> WinRTSystem::getGameVersion() const
 {
 	Package package = Package::Current();
 	PackageVersion version = package.Id().Version();

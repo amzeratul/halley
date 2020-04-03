@@ -44,7 +44,7 @@ namespace Halley {
 
 		void refresh(bool force = false);
 
-		Maybe<float> getMaxChildWidth() const override;
+		std::optional<float> getMaxChildWidth() const override;
 		bool ignoreClip() const override;
 
 		void onChildrenAdded() override;

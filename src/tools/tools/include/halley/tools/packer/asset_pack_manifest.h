@@ -30,7 +30,7 @@ namespace Halley {
 
 		void load(const ConfigFile& file);
 
-		Maybe<std::reference_wrapper<const AssetPackManifestEntry>> getPack(const String& asset) const;
+		std::optional<std::reference_wrapper<const AssetPackManifestEntry>> getPack(const String& asset) const;
 
 	private:
 		std::vector<String> exclude;

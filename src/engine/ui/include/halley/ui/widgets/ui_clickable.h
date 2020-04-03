@@ -13,7 +13,7 @@ namespace Halley {
 			Hover
 		};
 
-		UIClickable(String id, Vector2f minSize, Maybe<UISizer> sizer = {}, Vector4f innerBorder = {});
+		UIClickable(String id, Vector2f minSize, std::optional<UISizer> sizer = {}, Vector4f innerBorder = {});
 
 		bool canInteractWithMouse() const override;
 		bool isFocusLocked() const override;
@@ -28,7 +28,7 @@ namespace Halley {
 		void onInput(const UIInputResults& input, Time time) override;
 
 		Rect4f getMouseRect() const override;
-		void setMouseExtraBorder(Maybe<Vector4f> override);
+		void setMouseExtraBorder(std::optional<Vector4f> override);
 
 	protected:
 
@@ -44,7 +44,7 @@ namespace Halley {
 
 	private:
 		State curState = State::Up;
-		Maybe<Vector4f> mouseExtraBorder;
+		std::optional<Vector4f> mouseExtraBorder;
 		bool held = false;
 		bool forceUpdate = false;
 

@@ -78,8 +78,8 @@ namespace Halley
 
 		bool needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const;
 		void setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data, Path basePath);
-		Maybe<Metadata> getMetadata(const Path& path) const;
-		Maybe<Metadata> getMetadata(AssetType type, const String& assetId) const;
+		std::optional<Metadata> getMetadata(const Path& path) const;
+		std::optional<Metadata> getMetadata(AssetType type, const String& assetId) const;
 
 		bool needsImporting(const ImportAssetsDatabaseEntry& asset) const;
 		void markAsImported(const ImportAssetsDatabaseEntry& asset);

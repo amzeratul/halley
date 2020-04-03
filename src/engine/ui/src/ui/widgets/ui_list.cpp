@@ -100,7 +100,7 @@ void UIList::addTextItem(const String& id, const LocalisedString& label, float m
 	addItem(item);
 }
 
-void UIList::addImage(const String& id, std::shared_ptr<UIImage> image, float proportion, Vector4f border, int fillFlags, Maybe<UIStyle> styleOverride)
+void UIList::addImage(const String& id, std::shared_ptr<UIImage> image, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
 {
 	if (style.hasColour("selectedImageColour")) {
 		image->setSelectable(image->getSprite().getColour(), style.getColour("selectedImageColour"));
@@ -109,7 +109,7 @@ void UIList::addImage(const String& id, std::shared_ptr<UIImage> image, float pr
 	addItem(id, image, proportion, border, fillFlags, styleOverride);
 }
 
-void UIList::addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, Maybe<UIStyle> styleOverride)
+void UIList::addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
 {
 	const auto& itemStyle = styleOverride ? *styleOverride : style;
 	auto item = std::make_shared<UIListItem>(id, *this, itemStyle.getSubStyle("item"), int(getNumberOfItems()), itemStyle.getBorder("extraMouseBorder"));

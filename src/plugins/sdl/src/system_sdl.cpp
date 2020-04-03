@@ -16,7 +16,7 @@
 
 using namespace Halley;
 
-SystemSDL::SystemSDL(Maybe<String> saveCryptKey)
+SystemSDL::SystemSDL(std::optional<String> saveCryptKey)
 	: saveCryptKey(std::move(saveCryptKey))
 {
 }

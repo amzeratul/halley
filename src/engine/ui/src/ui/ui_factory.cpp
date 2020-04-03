@@ -159,7 +159,7 @@ std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 	return widget;
 }
 
-Maybe<UISizer> UIFactory::makeSizer(const ConfigNode& entryNode)
+std::optional<UISizer> UIFactory::makeSizer(const ConfigNode& entryNode)
 {
 	const bool hasSizer = entryNode.hasKey("sizer");
 	const bool hasChildren = entryNode.hasKey("children");
@@ -271,7 +271,7 @@ void UIFactory::applyInputButtons(UIWidget& widget, const String& key)
 	}
 }
 
-Maybe<Vector2f> UIFactory::asMaybeVector2f(const ConfigNode& node)
+std::optional<Vector2f> UIFactory::asMaybeVector2f(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Sequence) {
 		auto seq = node.asSequence();
@@ -281,7 +281,7 @@ Maybe<Vector2f> UIFactory::asMaybeVector2f(const ConfigNode& node)
 	}
 }
 
-Vector2f UIFactory::asVector2f(const ConfigNode& node, Maybe<Vector2f> defaultValue)
+Vector2f UIFactory::asVector2f(const ConfigNode& node, std::optional<Vector2f> defaultValue)
 {
 	if (node.getType() == ConfigNodeType::Sequence) {
 		auto seq = node.asSequence();
@@ -329,7 +329,7 @@ std::vector<UIFactory::ParsedOption> UIFactory::parseOptions(const ConfigNode& n
 	return result;
 }
 
-Vector4f UIFactory::asVector4f(const ConfigNode& node, Maybe<Vector4f> defaultValue)
+Vector4f UIFactory::asVector4f(const ConfigNode& node, std::optional<Vector4f> defaultValue)
 {
 	if (node.getType() == ConfigNodeType::Sequence) {
 		auto seq = node.asSequence();

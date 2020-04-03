@@ -132,10 +132,10 @@ namespace Halley {
 
 
 	template <typename T>
-	struct FromLua<Maybe<T>> {
-		inline Maybe<T> operator()(LuaState& state) const {
+	struct FromLua<std::optional<T>> {
+		inline std::optional<T> operator()(LuaState& state) const {
 			if (LuaStackOps(state).isTopNil()) {
-				return Maybe<T>();
+				return std::optional<T>();
 			} else {
 				return FromLua<T>()(state);
 			}
@@ -143,8 +143,8 @@ namespace Halley {
 	};
 
 	template <typename T>
-	struct ToLua<Maybe<T>> {
-		inline void operator()(LuaState& state, Maybe<T>& value) const {
+	struct ToLua<std::optional<T>> {
+		inline void operator()(LuaState& state, std::optional<T>& value) const {
 			if (value) {
 				ToLua<T>()(state, value.value());
 			} else {

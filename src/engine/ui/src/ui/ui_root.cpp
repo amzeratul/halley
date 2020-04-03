@@ -345,7 +345,7 @@ void UIRoot::render(RenderContext& rc)
 	}
 }
 
-Maybe<AudioHandle> UIRoot::playSound(const String& eventName)
+std::optional<AudioHandle> UIRoot::playSound(const String& eventName)
 {
 	if (audio && !eventName.isEmpty()) {
 		return audio->postEvent(eventName, AudioPosition::makeUI(0.0f));

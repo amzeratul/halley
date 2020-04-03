@@ -180,7 +180,7 @@ namespace Halley
 
 		std::atomic<bool> available;
 		std::atomic<bool> cancelled;
-		Maybe<T> data;
+		std::optional<T> data;
 
 		std::vector<std::function<void(T)>> continuations;
 		std::mutex mutex;

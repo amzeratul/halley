@@ -56,17 +56,17 @@ namespace Halley {
 	public:
 		I18NLanguage();
 		explicit I18NLanguage(const String& code);
-		I18NLanguage(String languageCode, Maybe<String> countryCode);
+		I18NLanguage(String languageCode, std::optional<String> countryCode);
 
-		void set(String languageCode, Maybe<String> countryCode);
+		void set(String languageCode, std::optional<String> countryCode);
 
 		const String& getLanguageCode() const;
-		const Maybe<String>& getCountryCode() const;
+		const std::optional<String>& getCountryCode() const;
 		String getISOCode() const;
 
 		I18NLanguageMatch getMatch(const I18NLanguage& other) const;
 
-		static Maybe<I18NLanguage> getBestMatch(const std::vector<I18NLanguage>& languages, const I18NLanguage& target, Maybe<I18NLanguage> fallback = {});
+		static std::optional<I18NLanguage> getBestMatch(const std::vector<I18NLanguage>& languages, const I18NLanguage& target, std::optional<I18NLanguage> fallback = {});
 
 		bool operator==(const I18NLanguage& other) const;
 		bool operator!=(const I18NLanguage& other) const;
@@ -74,7 +74,7 @@ namespace Halley {
 
 	private:
 		String languageCode;
-		Maybe<String> countryCode;
+		std::optional<String> countryCode;
 	};
 
 	class I18N {
@@ -89,7 +89,7 @@ namespace Halley {
 		std::vector<I18NLanguage> getLanguagesAvailable() const;
 
 		LocalisedString get(const String& key) const;
-		Maybe<LocalisedString> get(const String& key, const I18NLanguage& language) const;
+		std::optional<LocalisedString> get(const String& key, const I18NLanguage& language) const;
 		LocalisedString getPreProcessedUserString(const String& string) const;
 
 		template <typename T>
@@ -109,7 +109,7 @@ namespace Halley {
 
 	private:
 		I18NLanguage currentLanguage;
-		Maybe<I18NLanguage> fallbackLanguage;
+		std::optional<I18NLanguage> fallbackLanguage;
 		std::map<I18NLanguage, std::map<String, String>> strings;
 		std::map<String, ConfigObserver> observers;
 		int version = 0;

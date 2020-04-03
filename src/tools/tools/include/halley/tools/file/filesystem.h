@@ -54,7 +54,7 @@ namespace Halley {
 		const Path& getPath() const;
 
 	private:
-		Maybe<Path> path;
+		std::optional<Path> path;
 	};
 }
 

@@ -110,7 +110,7 @@ void OS::createDirectories(const Path& path)
 {
 }
 
-void OS::atomicWriteFile(const Path& path, const Bytes& data, Maybe<Path> backupOldVersionPath)
+void OS::atomicWriteFile(const Path& path, const Bytes& data, std::optional<Path> backupOldVersionPath)
 {
 	std::ofstream fp(path.string(), std::ios::binary | std::ios::out);
 	fp.write(reinterpret_cast<const char*>(data.data()), data.size());

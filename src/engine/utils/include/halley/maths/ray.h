@@ -12,7 +12,7 @@ namespace Halley {
 		Ray();
 		Ray(Vector2f start, Vector2f dir);
 
-		Maybe<std::pair<float, Vector2f>> castCircle(Vector2f centre, float radius) const;
-		Maybe<std::pair<float, Vector2f>> castLineSegment(Vector2f a, Vector2f b) const;
+		std::optional<std::pair<float, Vector2f>> castCircle(Vector2f centre, float radius) const;
+		std::optional<std::pair<float, Vector2f>> castLineSegment(Vector2f a, Vector2f b) const;
 	};
 }

@@ -148,7 +148,7 @@ void DX11Painter::setViewPort(Rect4i rect)
 
 void DX11Painter::setClip(Rect4i clip, bool enable)
 {
-	clipping = enable ? clip : Maybe<Rect4i>();
+	clipping = enable ? clip : std::optional<Rect4i>();
 }
 
 void DX11Painter::onUpdateProjection(Material& material)

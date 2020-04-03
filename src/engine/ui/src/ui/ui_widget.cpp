@@ -7,7 +7,7 @@
 
 using namespace Halley;
 
-UIWidget::UIWidget(String id, Vector2f minSize, Maybe<UISizer> sizer, Vector4f innerBorder)
+UIWidget::UIWidget(String id, Vector2f minSize, std::optional<UISizer> sizer, Vector4f innerBorder)
 	: id(id)
 	, size(minSize)
 	, minSize(minSize)
@@ -176,7 +176,7 @@ void UIWidget::setAnchor()
 	anchor.reset();
 }
 
-Maybe<UISizer>& UIWidget::tryGetSizer()
+std::optional<UISizer>& UIWidget::tryGetSizer()
 {
 	return sizer;
 }
@@ -480,7 +480,7 @@ void UIWidget::onInput(const UIInputResults& input, Time time)
 {
 }
 
-void UIWidget::setMouseClip(Maybe<Rect4f> clip, bool force)
+void UIWidget::setMouseClip(std::optional<Rect4f> clip, bool force)
 {
 	if (force || clip != mouseClip) {
 		mouseClip = clip;
@@ -710,7 +710,7 @@ void UIWidget::sendEventDown(const UIEvent& event) const
 	}
 }
 
-Maybe<AudioHandle> UIWidget::playSound(const String& eventName)
+std::optional<AudioHandle> UIWidget::playSound(const String& eventName)
 {
 	if (!eventName.isEmpty()) {
 		auto root = getRoot();

@@ -17,8 +17,8 @@ namespace Halley {
 		float getMaxValue() const;
 		float getRelativeValue() const; // 0..1 range
 		void readFromDataBind() override;
-		void setGranularity(Maybe<float> granularity);
-		Maybe<float> getGranularity() const;
+		void setGranularity(std::optional<float> granularity);
+		std::optional<float> getGranularity() const;
 
 		void setLabelConversion(std::function<LocalisedString(float)> f);
 		void setTransformation(std::function<float(float)> f);
@@ -37,7 +37,7 @@ namespace Halley {
 
 		const float minValue;
 		const float maxValue;
-		Maybe<float> granularity;
+		std::optional<float> granularity;
 		float value;
 		float maxSpeed = 0;
 		Time timeSinceMove = 0;

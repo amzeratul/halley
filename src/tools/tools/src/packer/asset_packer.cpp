@@ -56,14 +56,14 @@ void AssetPackListing::sort()
 	std::sort(entries.begin(), entries.end());
 }
 
-void AssetPacker::pack(Project& project, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets)
+void AssetPacker::pack(Project& project, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets)
 {
 	for (auto& platform: project.getPlatforms()) {
 		packPlatform(project, assetsToPack, deletedAssets, platform);
 	}
 }
 
-void AssetPacker::packPlatform(Project& project, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets, const String& platform)
+void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets, const String& platform)
 {
 	const auto src = project.getUnpackedAssetsPath();
 	const auto dst = project.getPackedAssetsPath(platform);
@@ -79,7 +79,7 @@ void AssetPacker::packPlatform(Project& project, Maybe<std::set<String>> assetsT
 	generatePacks(packs, src, dst);
 }
 
-std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, Maybe<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets)
+std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets)
 {
 	std::map<String, AssetPackListing> packs;
 	for (auto typeName: EnumNames<AssetType>()()) {

@@ -215,7 +215,7 @@ void Font::deserialize(Deserializer& s)
 
 void Font::printGlyphs() const
 {
-	Maybe<Range<int>> curRange;
+	std::optional<Range<int>> curRange;
 	std::vector<Range<int>> ranges;
 	for (auto& g: glyphs) {
 		int c = g.first;

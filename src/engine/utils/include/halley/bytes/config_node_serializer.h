@@ -116,14 +116,14 @@ namespace Halley {
     };
 
 	template <typename T>
-    class ConfigNodeSerializer<Maybe<T>> {
+    class ConfigNodeSerializer<std::optional<T>> {
     public:
-        Maybe<T> deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+        std::optional<T> deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
         {
         	if (node.getType() == ConfigNodeType::Undefined) {
-				return Maybe<T>();
+				return std::optional<T>();
         	} else {
-				return Maybe<T>(ConfigNodeSerializer<T>().deserialize(context, node));
+				return std::optional<T>(ConfigNodeSerializer<T>().deserialize(context, node));
 			}
         }
     };

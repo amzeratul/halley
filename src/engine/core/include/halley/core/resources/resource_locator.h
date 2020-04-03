@@ -48,7 +48,7 @@ namespace Halley {
 	public:
 		explicit ResourceLocator(SystemAPI& system);
 		void addFileSystem(const Path& path);
-		void addPack(const Path& path, const String& encryptionKey = "", bool preLoad = false, bool allowFailure = false, Maybe<int> priority = {});
+		void addPack(const Path& path, const String& encryptionKey = "", bool preLoad = false, bool allowFailure = false, std::optional<int> priority = {});
 		std::vector<String> getAssetsFromPack(const Path& path, const String& encryptionKey = "") const;
 		void removePack(const Path& path);
 
