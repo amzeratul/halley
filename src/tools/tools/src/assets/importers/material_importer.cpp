@@ -1,7 +1,6 @@
 #include "material_importer.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/core/graphics/material/material_definition.h"
-#include "../../yaml/halley-yamlcpp.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/text/string_converter.h"
 #include "shader_importer.h"
@@ -19,9 +18,8 @@ void MaterialImporter::import(const ImportingAsset& asset, IAssetCollector& coll
 
 MaterialDefinition MaterialImporter::parseMaterial(Path basePath, gsl::span<const gsl::byte> data, IAssetCollector& collector) const
 {
-	String strData(reinterpret_cast<const char*>(data.data()), data.size());
-	YAML::Node yamlRoot = YAML::Load(strData.cppStr());
-	auto root = YAMLConvert::parseYAMLNode(yamlRoot);
+	auto config = YAMLConvert::parseConfig(data);
+	const auto& root = config.getRoot();
 
 	// Load base material
 	MaterialDefinition material;

@@ -4,7 +4,9 @@
 
 #include "entity_editor.h"
 #include "entity_list.h"
+#include "halley/tools/file/filesystem.h"
 #include "halley/tools/project/project.h"
+#include "halley/tools/yaml/yaml_convert.h"
 #include "scene_editor_canvas.h"
 using namespace Halley;
 
@@ -113,8 +115,13 @@ void SceneEditorWindow::saveEntity()
 {
 	getWidget("saveButton")->setEnabled(false);
 
-	sceneName;
-	auto& data = prefab->getRoot();
+	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = {{ "name", "uuid", "components", "children" }};
+
+	auto path = project.getAssetsSrcPath() / "prefab" / (sceneName + ".yaml");
+	auto strData = YAMLConvert::generateYAML(*prefab, options);
+	auto data = gsl::as_bytes(gsl::span<const char>(strData.c_str(), strData.length()));
+	FileSystem::writeFile(path, data);
 }
 
 void SceneEditorWindow::markModified()

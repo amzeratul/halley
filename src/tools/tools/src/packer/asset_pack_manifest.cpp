@@ -47,11 +47,7 @@ const String& AssetPackManifestEntry::getEncryptionKey() const
 
 AssetPackManifest::AssetPackManifest(const Bytes& data)
 {
-	ConfigFile config;
-	String strData(reinterpret_cast<const char*>(data.data()), data.size());
-	YAML::Node root = YAML::Load(strData.cppStr());
-	config.getRoot() = YAMLConvert::parseYAMLNode(root);
-	load(config);
+	load(YAMLConvert::parseConfig(data));
 }
 
 AssetPackManifest::AssetPackManifest(const ConfigFile& file)
