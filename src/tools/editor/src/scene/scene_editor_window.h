@@ -16,6 +16,7 @@ namespace Halley {
 
 		void loadScene(const String& sceneName);
 		void unloadScene();
+		void markModified();
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -36,5 +37,7 @@ namespace Halley {
 
 		void makeUI();
 		void load();
+		void showEntity(const String& id);
+		void saveEntity();
 	};
 }

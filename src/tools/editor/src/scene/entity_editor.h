@@ -3,6 +3,7 @@
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
+	class SceneEditorWindow;
 	class ECSData;
 	class UIFactory;
 
@@ -10,6 +11,7 @@ namespace Halley {
 	public:
 		EntityEditor(String id, UIFactory& factory);
 
+		void setSceneEditor(SceneEditorWindow& sceneEditor);
 		void setSceneData(ISceneData& sceneData, ECSData& data);
 		void showEntity(const String& id);
 		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
@@ -18,6 +20,7 @@ namespace Halley {
 		UIFactory& factory;
 		ISceneData* sceneData = nullptr;
 		ECSData* ecsData = nullptr;
+		SceneEditorWindow* sceneEditor = nullptr;
 		ComponentEditorContext context;
 		
 		std::shared_ptr<UIWidget> fields;

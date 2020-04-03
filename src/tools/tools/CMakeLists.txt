@@ -79,6 +79,8 @@ set(SOURCES
 
     "src/vs_project/vs_project_manipulator.cpp"
     "src/vs_project/vs_project_tool.cpp"
+
+    "src/yaml/yaml_convert.cpp"
     )
 
 set(HEADERS
@@ -139,6 +141,8 @@ set(HEADERS
     
     "include/halley/tools/vs_project/vs_project_manipulator.h"
     "include/halley/tools/vs_project/vs_project_tool.h"
+
+    "include/halley/tools/yaml/yaml_convert.h"
 
     "src/assets/importers/animation_importer.h"
     "src/assets/importers/audio_event_importer.h"

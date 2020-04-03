@@ -3,6 +3,9 @@ widget: { class: widget }
 sizer: { type: vertical }
 children:
 - sizer: { type: horizontal }
+  children:
+  - widget: { id: saveButton, class: button, text: "Save", size: [100, 30] }
+- sizer: { type: horizontal }
   proportion: 1
   children:
   - widget: { id: entityList, class: entityList }

@@ -2,7 +2,7 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/tools/packer/asset_packer.h"
 #include <yaml-cpp/yaml.h>
-#include "../assets/importers/config_importer.h"
+#include "halley/tools/yaml/yaml_convert.h"
 using namespace Halley;
 
 AssetPackManifestEntry::AssetPackManifestEntry()
@@ -50,7 +50,7 @@ AssetPackManifest::AssetPackManifest(const Bytes& data)
 	ConfigFile config;
 	String strData(reinterpret_cast<const char*>(data.data()), data.size());
 	YAML::Node root = YAML::Load(strData.cppStr());
-	config.getRoot() = ConfigImporter::parseYAMLNode(root);
+	config.getRoot() = YAMLConvert::parseYAMLNode(root);
 	load(config);
 }
 

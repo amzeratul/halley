@@ -1,6 +1,7 @@
 #include "entity_editor.h"
 #include "entity_editor_factories.h"
 #include "halley/tools/ecs/ecs_data.h"
+#include "scene_editor_window.h"
 using namespace Halley;
 
 EntityEditor::EntityEditor(String id, UIFactory& factory)
@@ -10,6 +11,11 @@ EntityEditor::EntityEditor(String id, UIFactory& factory)
 {
 	addFieldFactories(EntityEditorFactories::getDefaultFactories());
 	makeUI();
+}
+
+void EntityEditor::setSceneEditor(SceneEditorWindow& editor)
+{
+	sceneEditor = &editor;
 }
 
 void EntityEditor::setSceneData(ISceneData& scene, ECSData& ecs)
@@ -85,6 +91,7 @@ std::shared_ptr<IUIElement> EntityEditor::createEditField(const String& fieldTyp
 void EntityEditor::onEntityUpdated()
 {
 	sceneData->reloadEntity(currentId, currentEntityData);
+	sceneEditor->markModified();
 }
 
 void EntityEditor::addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories)

@@ -2,7 +2,7 @@
 #include "halley/tools/project/project_properties.h"
 #include "halley/tools/file/filesystem.h"
 #include "../yaml/halley-yamlcpp.h"
-#include "../assets/importers/config_importer.h"
+#include "halley/tools/yaml/yaml_convert.h"
 using namespace Halley;
 
 ProjectProperties::ProjectProperties(const Path& propertiesFile)
@@ -60,7 +60,7 @@ void ProjectProperties::load()
 
 	String strData = String(reinterpret_cast<const char*>(data.data()), data.size());
 	YAML::Node root = YAML::Load(strData);
-	auto node = ConfigImporter::parseYAMLNode(root);
+	auto node = YAMLConvert::parseYAMLNode(root);
 
 	name = node["name"].asString("Halley Project");
 	assetPackManifest = node["assetPackManifest"].asString("halley_project/asset_manifest.yaml");

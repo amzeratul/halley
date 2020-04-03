@@ -4,9 +4,9 @@
 #include "../../yaml/halley-yamlcpp.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/text/string_converter.h"
-#include "config_importer.h"
 #include "shader_importer.h"
 #include "halley/core/graphics/shader.h"
+#include "halley/tools/yaml/yaml_convert.h"
 
 using namespace Halley;
 
@@ -21,7 +21,7 @@ MaterialDefinition MaterialImporter::parseMaterial(Path basePath, gsl::span<cons
 {
 	String strData(reinterpret_cast<const char*>(data.data()), data.size());
 	YAML::Node yamlRoot = YAML::Load(strData.cppStr());
-	auto root = ConfigImporter::parseYAMLNode(yamlRoot);
+	auto root = YAMLConvert::parseYAMLNode(yamlRoot);
 
 	// Load base material
 	MaterialDefinition material;
