@@ -70,6 +70,10 @@ String YAMLConvert::generateYAML(const ConfigNode& node, const EmitOptions& opti
 {
 	YAML::Emitter emitter;
 	emitNode(node, emitter, options);
+
+	if (!emitter.good()) {
+		throw Exception("Error generating YAML: " + emitter.GetLastError(), HalleyExceptions::Tools);
+	}
 	return emitter.c_str();
 }
 
@@ -83,10 +87,7 @@ void YAMLConvert::emitNode(const ConfigNode& node, YAML::Emitter& emitter, const
 	case ConfigNodeType::Int2:
 		{
 			const auto vec = node.asVector2i();
-			emitter << YAML::BeginSeq;
-			emitter << vec.x;
-			emitter << vec.y;
-			emitter << YAML::EndSeq;
+			emitter << YAML::Flow << YAML::BeginSeq << vec.x << vec.y << YAML::EndSeq;
 		}
 		return;
 
@@ -97,10 +98,7 @@ void YAMLConvert::emitNode(const ConfigNode& node, YAML::Emitter& emitter, const
 	case ConfigNodeType::Float2:
 		{
 			const auto vec = node.asVector2f();
-			emitter << YAML::BeginSeq;
-			emitter << vec.x;
-			emitter << vec.y;
-			emitter << YAML::EndSeq;
+			emitter << YAML::Flow << YAML::BeginSeq << vec.x << vec.y << YAML::EndSeq;
 		}
 		return;
 
@@ -127,8 +125,7 @@ void YAMLConvert::emitNode(const ConfigNode& node, YAML::Emitter& emitter, const
 
 void YAMLConvert::emitSequence(const ConfigNode& node, YAML::Emitter& emitter, const EmitOptions& options)
 {
-	const bool flow = isCompactSequence(node, 0);
-	if (flow) {
+	if (isCompactSequence(node, 0)) {
 		emitter << YAML::Flow;
 	}
 
@@ -137,17 +134,16 @@ void YAMLConvert::emitSequence(const ConfigNode& node, YAML::Emitter& emitter, c
 		emitNode(n, emitter, options);
 	}
 	emitter << YAML::EndSeq;
-
-	if (flow) {
-		emitter << YAML::Block;
-	}
 }
 
 void YAMLConvert::emitMap(const ConfigNode& node, YAML::Emitter& emitter, const EmitOptions& options)
 {
-	emitter << YAML::BeginMap;
-
 	const auto& map = node.asMap();
+
+	if (map.empty()) {
+		emitter << YAML::Flow;
+	}
+	emitter << YAML::BeginMap;
 
 	// Sort entries by key, using options
 	std::vector<String> keys;
@@ -170,7 +166,6 @@ void YAMLConvert::emitMap(const ConfigNode& node, YAML::Emitter& emitter, const 
 	// Emit them in order
 	for (const auto& k: keys) {
 		const auto iter = map.find(k);
-		
 		emitter << YAML::Key << k;
 		emitter << YAML::Value;
 		emitNode(iter->second, emitter, options);
