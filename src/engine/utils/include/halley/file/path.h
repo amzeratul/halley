@@ -28,6 +28,7 @@ namespace Halley
 		Path getStem() const;
 		String getExtension() const;
 		String getString() const;
+		String getNativeString() const;
 		String toString() const;
 
 		size_t getNumberPaths() const;

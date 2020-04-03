@@ -28,7 +28,8 @@ LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, s
 	auto recent = getWidgetAs<UIList>("recent");
 	recent->setSingleClickAccept(false);
 	for (auto& r: editor.getPreferences().getRecents()) {
-		recent->addTextItem(r, LocalisedString::fromUserString(r));
+		auto p = Path(r).getNativeString();
+		recent->addTextItem(p, LocalisedString::fromUserString(p));
 	}
 	recent->addTextItem("", LocalisedString::fromHardcodedString("New location..."));
 }

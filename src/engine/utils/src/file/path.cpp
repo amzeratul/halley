@@ -150,6 +150,19 @@ String Path::getString() const
 	return s.str();
 }
 
+String Path::getNativeString() const
+{
+	auto str = getString();
+#ifdef _WIN32
+	for (auto& c: str.cppStr()) {
+		if (c == '/') {
+			c = '\\';
+		}
+	}
+#endif
+	return str;
+}
+
 String Path::toString() const
 {
 	return getString();
