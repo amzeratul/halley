@@ -2,6 +2,11 @@
 widget: { class: image, image: "halley_ui/ui_window.png", innerBorder: [ 4, 4, 4, 4 ], colour: "#201427" }
 sizer: { type: vertical }
 children:
-- widget: { id: fields, class: widget }
-  sizer: { type: vertical, gap: 8 }
+- widget: { id: scrollBarPane, class: scrollBarPane }
+  sizer: { type: vertical }
+  proportion: 1
+  children:
+  - widget: { id: fields, class: widget }
+    sizer: { type: vertical, gap: 8 }
+    border: [0, 0, 4, 0]
 ...

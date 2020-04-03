@@ -25,6 +25,15 @@ namespace Halley {
     };
 
 	template <>
+	class ConfigNodeSerializer<bool> {
+	public:
+		int deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
+		{
+			return node.asBool(false);
+		}
+	};
+
+	template <>
     class ConfigNodeSerializer<int> {
     public:
         int deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
