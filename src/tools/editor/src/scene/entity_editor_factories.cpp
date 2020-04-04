@@ -12,14 +12,14 @@ public:
 	{
 		String value = componentData[fieldName].asString("");
 
-		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "textValue", context.getFactory().getStyle("input"), value, LocalisedString::fromUserString(defaultValue));
+		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "textValue", context.getFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
 		field->bindData("textValue", value, [&, fieldName](String newVal)
 		{
 			componentData[fieldName] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 		
-		field->setMinSize(Vector2f(60, 25));
+		field->setMinSize(Vector2f(60, 22));
 
 		return field;
 	}
@@ -36,9 +36,9 @@ public:
 	{
 		int value = componentData[fieldName].asInt(defaultValue.isInteger() ? defaultValue.toInteger() : 0);
 
-		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "intValue", context.getFactory().getStyle("input"));
+		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "intValue", context.getFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, false));
-		field->setMinSize(Vector2f(60, 25));
+		field->setMinSize(Vector2f(60, 22));
 		field->bindData("intValue", value, [&, fieldName](int newVal)
 		{
 			componentData[fieldName] = ConfigNode(newVal);
@@ -60,9 +60,9 @@ public:
 	{
 		const float value = componentData[fieldName].asFloat(defaultValue.isNumber() ? defaultValue.toFloat() : 0.0f);
 
-		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "floatValue", context.getFactory().getStyle("input"));
+		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "floatValue", context.getFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, true));
-		field->setMinSize(Vector2f(60, 25));
+		field->setMinSize(Vector2f(60, 22));
 		field->bindData("floatValue", value, [&, fieldName](float newVal)
 		{
 			componentData[fieldName] = ConfigNode(newVal);
@@ -121,9 +121,9 @@ public:
 		}
 		Vector2f defVecValue;
 
-		auto x = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "xValue", context.getFactory().getStyle("input"));
+		auto x = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "xValue", context.getFactory().getStyle("inputThin"));
 		x->setValidator(std::make_shared<UINumericValidator>(true, true));
-		x->setMinSize(Vector2f(60, 25));
+		x->setMinSize(Vector2f(60, 22));
 		x->bindData("xValue", value.value_or(defVecValue).x, [&, fieldName] (float newVal)
 		{
 			auto& node = componentData[fieldName];
@@ -131,9 +131,9 @@ public:
 			context.onEntityUpdated();
 		});
 
-		auto y = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "yValue", context.getFactory().getStyle("input"));
+		auto y = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "yValue", context.getFactory().getStyle("inputThin"));
 		y->setValidator(std::make_shared<UINumericValidator>(true, true));
-		y->setMinSize(Vector2f(60, 25));
+		y->setMinSize(Vector2f(60, 22));
 		y->bindData("yValue", value.value_or(defVecValue).y, [&, fieldName](float newVal)
 		{
 			auto& node = componentData[fieldName];

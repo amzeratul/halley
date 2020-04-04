@@ -36,9 +36,10 @@ namespace Halley {
 	class Angle {
 	public:
 		// Constructors
-		constexpr Angle () : value(0) {}
-		constexpr Angle (T _value) : value(_value) {}
-		constexpr Angle (const Angle &angle) : value(angle.value) {}
+		constexpr Angle() : value(0) {}
+		constexpr Angle(T _value) : value(_value) {}
+		constexpr Angle(const Angle &angle) : value(angle.value) {}
+		constexpr Angle(Angle&& angle) : value(std::move(angle.value)) {}
 
 		// Comparison
 		constexpr inline bool operator== (const Angle &param) const { return value == param.value; }

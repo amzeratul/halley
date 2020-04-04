@@ -2,9 +2,14 @@
 widget: { class: image, image: "ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#9C5BB5" }
 sizer: { type: vertical }
 children:
-- widget: { id: componentType, class: label, text: "Name" }
-  fill: centre
+- sizer: { type: horizontal }
+  children:
+  - widget: { id: componentType, class: label, text: "Name" }
+    fill: centre
+    proportion: 1
+  - widget: { id: deleteComponentButton, class: button, text: "x", size: [30, 18], style: buttonThin }
+    border: [0, 0, -1, 0]
 - widget: { id: componentFields, class: widget }
-  border: [0, 3, 0, 1]
+  border: [1, 4, 1, 1]
   sizer: { type: grid, gap: 2, columns: 2 }
 ...
