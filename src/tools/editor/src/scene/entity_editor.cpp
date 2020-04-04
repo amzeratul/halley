@@ -13,6 +13,14 @@ EntityEditor::EntityEditor(String id, UIFactory& factory)
 	makeUI();
 }
 
+void EntityEditor::update(Time t, bool moved)
+{
+	if (needToReloadUI) {
+		showEntity(currentId);
+		needToReloadUI = false;
+	}
+}
+
 void EntityEditor::setSceneEditor(SceneEditorWindow& editor)
 {
 	sceneEditor = &editor;
@@ -22,6 +30,18 @@ void EntityEditor::setSceneData(ISceneData& scene, ECSData& ecs)
 {
 	sceneData = &scene;
 	ecsData = &ecs;
+}
+
+void EntityEditor::makeUI()
+{
+	add(factory.makeUI("ui/halley/entity_editor"), 1);
+	fields = getWidget("fields");
+	fields->setMinSize(Vector2f(300, 20));
+
+	setHandle(UIEventType::ButtonClicked, "addComponentButton", [=](const UIEvent& event)
+		{
+			addComponent();
+		});
 }
 
 void EntityEditor::showEntity(const String& id)
@@ -42,17 +62,14 @@ void EntityEditor::showEntity(const String& id)
 	}
 }
 
-void EntityEditor::makeUI()
-{
-	add(factory.makeUI("ui/halley/entity_editor"), 1);
-	fields = getWidget("fields");
-	fields->setMinSize(Vector2f(300, 20));
-}
-
 void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data)
 {
 	auto componentUI = factory.makeUI("ui/halley/entity_editor_component");
 	componentUI->getWidgetAs<UILabel>("componentType")->setText(LocalisedString::fromUserString(componentType));
+	componentUI->setHandle(UIEventType::ButtonClicked, "deleteComponentButton", [=] (const UIEvent& event)
+	{
+		deleteComponent(componentType);
+	});
 
 	auto componentFields = componentUI->getWidget("componentFields");
 	componentFields->getSizer().setColumnProportions({{0, 1}});
@@ -86,6 +103,54 @@ std::shared_ptr<IUIElement> EntityEditor::createEditField(const String& fieldTyp
 	} else {
 		return std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromHardcodedString("N/A"));
 	}
+}
+
+void EntityEditor::addComponent()
+{
+	// TODO: pop UI and ask type
+	addComponent("Polygon");
+}
+
+void EntityEditor::addComponent(const String& name)
+{
+	auto& components = currentEntityData["components"];
+	if (components.getType() != ConfigNodeType::Sequence) {
+		components = ConfigNode::SequenceType();
+	}
+
+	ConfigNode compNode = ConfigNode::MapType();
+	compNode[name] = ConfigNode::MapType();
+	
+	components.asSequence().emplace_back(std::move(compNode));
+
+	needToReloadUI = true;	
+	onEntityUpdated();
+}
+
+void EntityEditor::deleteComponent(const String& name)
+{
+	auto& components = currentEntityData["components"];
+	if (components.getType() == ConfigNodeType::Sequence) {
+		auto& componentSequence = components.asSequence();
+		bool found = false;
+		
+		for (size_t i = 0; i < componentSequence.size(); ++i) {
+			for (auto& c: componentSequence[i].asMap()) {
+				if (c.first == name) {
+					found = true;
+					break;
+				}
+			}
+
+			if (found) {
+				componentSequence.erase(componentSequence.begin() + i);
+				break;
+			}
+		}
+	}
+
+	needToReloadUI = true;
+	onEntityUpdated();
 }
 
 void EntityEditor::onEntityUpdated()

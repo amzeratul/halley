@@ -11,6 +11,8 @@ namespace Halley {
 	public:
 		EntityEditor(String id, UIFactory& factory);
 
+		void update(Time t, bool moved) override;
+
 		void setSceneEditor(SceneEditorWindow& sceneEditor);
 		void setSceneData(ISceneData& sceneData, ECSData& data);
 		void showEntity(const String& id);
@@ -28,10 +30,15 @@ namespace Halley {
 
 		String currentId;
 		ConfigNode currentEntityData;
+		bool needToReloadUI = false;
 
 		void makeUI();
 		void loadComponentData(const String& componentType, ConfigNode& data);
 		std::shared_ptr<IUIElement> createEditField(const String& fieldType, const String& fieldName, ConfigNode& componentData, const String& defaultValue);
+
+		void addComponent();
+		void addComponent(const String& name);
+		void deleteComponent(const String& name);
 		void onEntityUpdated();
 	};
 }
