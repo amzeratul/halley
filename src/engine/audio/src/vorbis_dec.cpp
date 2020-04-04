@@ -174,7 +174,7 @@ size_t VorbisData::vorbisRead(void* ptr, size_t size, size_t nmemb, void* dataso
 	if (data->streaming) {
 		auto res = data->stream;
 		size_t requested = size*nmemb;
-		size_t r = res->read(gsl::as_writeable_bytes(gsl::span<char>(reinterpret_cast<char*>(ptr), requested)));
+		size_t r = res->read(gsl::as_writable_bytes(gsl::span<char>(reinterpret_cast<char*>(ptr), requested)));
 		return r;
 	} else {
 		auto res = std::dynamic_pointer_cast<ResourceDataStatic>(data->resource);

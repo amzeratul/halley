@@ -11,7 +11,7 @@ using namespace Halley;
 Bytes ResourceDataReader::readAll()
 {
 	Bytes result(size() - tell());
-	read(gsl::as_writeable_bytes(gsl::span<Byte>(result)));
+	read(gsl::as_writable_bytes(gsl::span<Byte>(result)));
 	return result;
 }
 

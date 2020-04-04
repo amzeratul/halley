@@ -168,7 +168,7 @@ void AsioUDPNetworkService::receivePacket(gsl::span<gsl::byte> received, std::st
 	// Read connection id
 	short id = -1;
 	std::array<unsigned char, 2> bytes;
-	auto dst = gsl::as_writeable_bytes(gsl::span<unsigned char, 2>(bytes));
+	auto dst = gsl::as_writable_bytes(gsl::span<unsigned char, 2>(bytes));
 	dst[0] = received[0];
 	if (bytes[0] & 0x80) {
 		if (received.size_bytes() < 2) {

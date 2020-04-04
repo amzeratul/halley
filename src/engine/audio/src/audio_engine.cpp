@@ -176,7 +176,7 @@ void AudioEngine::queueAudioFloat(gsl::span<const float> data)
 		if (tmpShort.size() < numSamples) {
 			tmpShort.resize(numSamples);
 		}
-		for (ptrdiff_t i = 0; i < data.size(); ++i) {
+		for (size_t i = 0; i < data.size(); ++i) {
 			tmpShort[i] = static_cast<short>(data[i] * 32768.0f);
 		}
 
@@ -188,7 +188,7 @@ void AudioEngine::queueAudioFloat(gsl::span<const float> data)
 		if (tmpInt.size() < numSamples) {
 			tmpInt.resize(numSamples);
 		}
-		for (ptrdiff_t i = 0; i < data.size(); ++i) {
+		for (size_t i = 0; i < data.size(); ++i) {
 			tmpInt[i] = static_cast<int>(data[i] * 2147483648.0f);
 		}
 

@@ -53,7 +53,7 @@ namespace Halley
 		template <typename T>
 		void extractHeader(T& h)
 		{
-			extractHeader(gsl::as_writeable_bytes(gsl::span<T>(&h, 1)));
+			extractHeader(gsl::as_writable_bytes(gsl::span<T>(&h, 1)));
 		}
 
 		InboundNetworkPacket& operator=(InboundNetworkPacket&& other);

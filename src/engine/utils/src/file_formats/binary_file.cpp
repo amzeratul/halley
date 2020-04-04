@@ -64,7 +64,7 @@ gsl::span<const gsl::byte> BinaryFile::getSpan() const
 gsl::span<gsl::byte> BinaryFile::getSpan()
 {
 	Expects(!streaming);
-	return gsl::as_writeable_bytes(gsl::span<Byte>(data));
+	return gsl::as_writable_bytes(gsl::span<Byte>(data));
 }
 
 std::shared_ptr<ResourceDataStream> BinaryFile::getStream() const

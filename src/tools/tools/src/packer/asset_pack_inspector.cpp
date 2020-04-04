@@ -20,12 +20,12 @@ void AssetPackInspector::parse(const Bytes& bytes)
 {
 	auto s = Deserializer(bytes);
 	AssetPackHeader header;
-	auto headerSpan = gsl::as_writeable_bytes(gsl::span<AssetPackHeader>(&header, 1));
+	auto headerSpan = gsl::as_writable_bytes(gsl::span<AssetPackHeader>(&header, 1));
 	s >> headerSpan;
 	dataStartPos = header.dataStartPos;
 
 	Bytes tableData(header.dataStartPos - header.assetDbStartPos);
-	auto tableSpan = gsl::as_writeable_bytes(gsl::span<Byte>(tableData.data(), tableData.size()));
+	auto tableSpan = gsl::as_writable_bytes(gsl::span<Byte>(tableData.data(), tableData.size()));
 	s >> tableSpan;
 
 	rawTableSize = tableData.size();

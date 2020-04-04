@@ -58,7 +58,7 @@ void AudioMixer::concatenateChannels(gsl::span<AudioSamplePack> dst, gsl::span<A
 
 void AudioMixer::compressRange(gsl::span<AudioSamplePack> buffer)
 {
-	for (ptrdiff_t i = 0; i < buffer.size(); ++i) {
+	for (size_t i = 0; i < buffer.size(); ++i) {
 		for (size_t j = 0; j < AudioSamplePack::NumSamples; ++j) {
 			float& sample = buffer[i].samples[j];
 			sample = std::max(-0.99995f, std::min(sample, 0.99995f));

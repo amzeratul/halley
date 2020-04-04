@@ -131,7 +131,7 @@ HRESULT __stdcall ResourceDataByteStream::Read(BYTE* pb, ULONG cb, ULONG* pcbRea
 {
 	std::unique_lock<std::mutex> lock(mutex);
 	reader->seek(pos, SEEK_SET);
-	const auto nRead = reader->read(gsl::as_writeable_bytes(gsl::span<BYTE>(pb, cb)));
+	const auto nRead = reader->read(gsl::as_writable_bytes(gsl::span<BYTE>(pb, cb)));
 	pos += nRead;
 	*pcbRead = nRead;
 	return S_OK;
@@ -147,7 +147,7 @@ HRESULT __stdcall ResourceDataByteStream::BeginRead(BYTE* pb, ULONG cb, IMFAsync
 		MFCreateAsyncResult(nullptr, pCallback, punkState, &result);
 		{
 			std::unique_lock<std::mutex> lock(mutex);
-			ULONG nRead = reader->read(gsl::as_writeable_bytes(gsl::span<BYTE>(pb, cb)));
+			ULONG nRead = reader->read(gsl::as_writable_bytes(gsl::span<BYTE>(pb, cb)));
 			asyncNumRead[result] = nRead;
 		}
 		pCallback->Invoke(result);
@@ -156,7 +156,7 @@ HRESULT __stdcall ResourceDataByteStream::BeginRead(BYTE* pb, ULONG cb, IMFAsync
 	});
 	*/
 
-	auto op = new AsyncReadOp(pos, gsl::as_writeable_bytes(gsl::span<BYTE>(pb, cb)));
+	auto op = new AsyncReadOp(pos, gsl::as_writable_bytes(gsl::span<BYTE>(pb, cb)));
 	pos += cb;
 	if (pos > len) {
 		pos = len;

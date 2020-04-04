@@ -78,7 +78,7 @@ bool SDLSaveHeader::isValid(const String& path, const String& key) const
 
 void SDLSaveHeader::generateIV()
 {
-	Random::getGlobal().getBytes(gsl::as_writeable_bytes(gsl::span<char>(v0.iv.data(), v0.iv.size())));
+	Random::getGlobal().getBytes(gsl::as_writable_bytes(gsl::span<char>(v0.iv.data(), v0.iv.size())));
 }
 
 Bytes SDLSaveHeader::getIV() const

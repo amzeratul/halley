@@ -82,7 +82,7 @@ std::unique_ptr<ResourceData> FileSystemResourceLocator::getData(const String& a
 
 		size_t size = fp->size();
 		char* buf = new char[size];
-		fp->read(gsl::as_writeable_bytes(gsl::span<char>(buf, size)));
+		fp->read(gsl::as_writable_bytes(gsl::span<char>(buf, size)));
 		return std::make_unique<ResourceDataStatic>(buf, size, path);
 	}
 }

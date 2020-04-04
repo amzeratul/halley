@@ -437,11 +437,11 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::fun
 		float curWidth = 0.0f;
 		std::optional<gsl::span<const char32_t>> lastValid;
 
-		for (std::ptrdiff_t i = 0; i < src.length(); ++i) {
+		for (size_t i = 0; i < src.size(); ++i) {
 			const int32_t c = src[i];
 			const bool accepted = filter ? filter(c) : true;
 
-			const bool isLastChar = i == src.length() - 1;
+			const bool isLastChar = i == src.size() - 1;
 			if (isLastChar || (accepted && (c == '\n' || c == ' ' || c == '\t'))) {
 				lastValid = src.subspan(0, i + 1);
 			}

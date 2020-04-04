@@ -114,7 +114,7 @@ Deserializer& Deserializer::operator>>(Bytes& bytes)
 	ensureSufficientBytesRemaining(sz);
 	bytes.resize(sz);
 
-	auto dst = gsl::as_writeable_bytes(gsl::span<Byte>(bytes));
+	auto dst = gsl::as_writable_bytes(gsl::span<Byte>(bytes));
 	*this >> dst;
 	return *this;
 }

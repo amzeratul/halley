@@ -38,7 +38,7 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& 
 		throw Exception("Asset pack is invalid (too small)", HalleyExceptions::Resources);
 	}
 	AssetPackHeader header;
-	int nRead = reader->read(gsl::as_writeable_bytes(gsl::span<AssetPackHeader>(&header, 1)));
+	int nRead = reader->read(gsl::as_writable_bytes(gsl::span<AssetPackHeader>(&header, 1)));
 	if (nRead != int(sizeof(header))) {
 		throw Exception("Unable to read header", HalleyExceptions::Resources);
 	}
@@ -52,7 +52,7 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& 
 	{
 		const size_t assetDbSize = size_t(header.dataStartPos - header.assetDbStartPos);
 		auto assetDbBytes = Bytes(assetDbSize);
-		nRead = reader->read(gsl::as_writeable_bytes(gsl::span<Byte>(assetDbBytes)));
+		nRead = reader->read(gsl::as_writable_bytes(gsl::span<Byte>(assetDbBytes)));
 		if (nRead != int(assetDbBytes.size())) {
 			throw Exception("Unable to read header", HalleyExceptions::Resources);
 		}
@@ -142,7 +142,7 @@ std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType 
 		if (hasReader) {
 			auto result = new char[size];
 			try {
-				readData(pos, gsl::as_writeable_bytes(gsl::span<char>(result, size)));
+				readData(pos, gsl::as_writable_bytes(gsl::span<char>(result, size)));
 				return std::make_unique<ResourceDataStatic>(result, size, path, true);
 			} catch (...) {
 				delete[] result;
@@ -171,7 +171,7 @@ void AssetPack::readToMemory()
 void AssetPack::encrypt(const String& key)
 {
 	// Generate IV
-	Random::getGlobal().getBytes(gsl::as_writeable_bytes(gsl::span<char>(iv)));
+	Random::getGlobal().getBytes(gsl::as_writable_bytes(gsl::span<char>(iv)));
 	Bytes ivBytes(iv.size());
 	memcpy(ivBytes.data(), iv.data(), iv.size());
 

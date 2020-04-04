@@ -158,7 +158,7 @@ void ReliableConnection::removeAckListener(IReliableConnectionAckListener& liste
 void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 {
 	ReliableHeader header;
-	packet.extractHeader(gsl::as_writeable_bytes(gsl::span<ReliableHeader>(&header, 1)));
+	packet.extractHeader(gsl::as_writable_bytes(gsl::span<ReliableHeader>(&header, 1)));
 	processReceivedAcks(header.ack, header.ackBits);
 	unsigned short seq = header.sequence;
 
@@ -169,7 +169,7 @@ void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 
 		// Sub-packets header
 		std::array<unsigned char, 2> sizeBytes;
-		auto data = gsl::as_writeable_bytes(gsl::span<unsigned char>(sizeBytes));
+		auto data = gsl::as_writable_bytes(gsl::span<unsigned char>(sizeBytes));
 		packet.extractHeader(data.subspan(0, 1));
 		size_t size = 0;
 		bool resend = (sizeBytes[0] & 0x80) != 0;
@@ -187,7 +187,7 @@ void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 			if (packet.getSize() < 2) {
 				throw Exception("Sub-packet header missing resend data", HalleyExceptions::Network);
 			}
-			packet.extractHeader(gsl::as_writeable_bytes(gsl::span<unsigned short>(&resendOf, 1)));
+			packet.extractHeader(gsl::as_writable_bytes(gsl::span<unsigned short>(&resendOf, 1)));
 		}
 
 		// Extract data
@@ -196,7 +196,7 @@ void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 			throw Exception("Unexpected sub-packet size: " + toString(size) + " bytes, packet is " + toString(packet.getSize()) + " bytes.", HalleyExceptions::Network);
 		}
 		auto subPacketData = gsl::span<char, 2048>(buffer).subspan(0, size);
-		packet.extractHeader(gsl::as_writeable_bytes(subPacketData));
+		packet.extractHeader(gsl::as_writable_bytes(subPacketData));
 
 		// Process sub-packet
 		if (onSeqReceived(seq, resend, resendOf)) {

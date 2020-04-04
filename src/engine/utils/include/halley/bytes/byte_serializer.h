@@ -29,7 +29,7 @@ namespace Halley {
 			Serializer dry;
 			f(dry);
 			Bytes result(dry.getSize());
-			Serializer s(gsl::as_writeable_bytes(gsl::span<Halley::Byte>(result)));
+			Serializer s(gsl::as_writable_bytes(gsl::span<Halley::Byte>(result)));
 			f(s);
 			return result;
 		}

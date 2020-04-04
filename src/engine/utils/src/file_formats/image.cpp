@@ -419,7 +419,7 @@ void Image::deserialize(Deserializer& s)
 	s >> len;
 	dataLen = size_t(len);
 	px = std::unique_ptr<char, void(*)(char*)>(static_cast<char*>(malloc(dataLen)), [](char* data) { free(data); });
-	auto span = gsl::as_writeable_bytes(gsl::span<char>(px.get(), dataLen));
+	auto span = gsl::as_writable_bytes(gsl::span<char>(px.get(), dataLen));
 	s >> span;
 }
 
