@@ -11,6 +11,7 @@ children:
   sizer: { type: vertical }
   children:
   - widget: { id: recent, class: list }
+    proportion: 1
 - sizer: { type: horizontal }
   children:
   - widget: { id: input, class: textInput, size: [400, 20] }

@@ -1,4 +1,6 @@
 #include "entity_editor.h"
+
+#include "add_component_window.h"
 #include "entity_editor_factories.h"
 #include "halley/tools/ecs/ecs_data.h"
 #include "scene_editor_window.h"
@@ -39,9 +41,9 @@ void EntityEditor::makeUI()
 	fields->setMinSize(Vector2f(300, 20));
 
 	setHandle(UIEventType::ButtonClicked, "addComponentButton", [=](const UIEvent& event)
-		{
-			addComponent();
-		});
+	{
+		addComponent();
+	});
 }
 
 void EntityEditor::showEntity(const String& id)
@@ -107,8 +109,30 @@ std::shared_ptr<IUIElement> EntityEditor::createEditField(const String& fieldTyp
 
 void EntityEditor::addComponent()
 {
-	// TODO: pop UI and ask type
-	addComponent("Polygon");
+	std::set<String> existingComponents;
+	auto& components = currentEntityData["components"];
+	if (components.getType() == ConfigNodeType::Sequence) {
+		for (auto& c: components.asSequence()) {
+			for (auto& kv: c.asMap()) {
+				existingComponents.insert(kv.first);
+			}
+		}
+	}
+	
+	std::vector<String> componentNames;
+	for (auto& c: ecsData->getComponents()) {
+		if (existingComponents.find(c.first) == existingComponents.end()) {
+			componentNames.push_back(c.first);
+		}
+	}
+	std::sort(componentNames.begin(), componentNames.end());
+	
+	getRoot()->addChild(std::make_shared<AddComponentWindow>(factory, componentNames, [=] (std::optional<String> result)
+	{
+		if (result) {
+			addComponent(result.value());
+		}
+	}));
 }
 
 void EntityEditor::addComponent(const String& name)

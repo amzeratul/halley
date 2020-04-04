@@ -18,6 +18,7 @@ set (editor_sources
 
 	"src/project/core_api_wrapper.cpp"
 
+	"src/scene/add_component_window.cpp"
 	"src/scene/entity_editor.cpp"
 	"src/scene/entity_editor_factories.cpp"
 	"src/scene/entity_list.cpp"
@@ -45,6 +46,7 @@ set (editor_headers
 
 	"src/project/core_api_wrapper.h"
 
+	"src/scene/add_component_window.h"
 	"src/scene/entity_editor.h"
 	"src/scene/entity_editor_factories.h"
 	"src/scene/entity_list.h"

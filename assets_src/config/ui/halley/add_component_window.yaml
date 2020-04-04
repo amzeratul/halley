@@ -1,0 +1,21 @@
+---
+widget: { class: image, image: ui/float_window.png, innerBorder: [ 14, 11, 14, 14 ], colour: "#9C5BB5" }
+sizer: { type: vertical }
+children:
+- sizer: { type: horizontal }
+  children:
+  - widget: { id: title, class: label, text: "Add Component" }
+    fill: centre
+    proportion: 1
+- widget: { class: scrollBarPane, size: [200, 250] }
+  border: [1, 4, 1, 1]
+  children:
+  - widget: { id: options, class: list, size: [400, 400] }
+- sizer: { type: horizontal }
+  children:
+  - widget: { id: ok, class: button, text: "Add" }
+    proportion: 1
+  - widget: { id: cancel, class: button, text: "Cancel" }
+    proportion: 1
+
+...
