@@ -36,7 +36,7 @@ EntityRef EntityFactory::createEntity(const ConfigNode& node)
 	context.entityContext->uuids.clear();
 
 	auto entity = createEntity(nullptr, node, false);
-	updateEntityTree(entity, node);
+	doUpdateEntityTree(entity, node, false);
 	return entity;
 }
 
@@ -47,7 +47,7 @@ EntityRef EntityFactory::createEntity(EntityRef* parent, const ConfigNode& node,
 
 	context.entityContext->uuids[uuid] = entity.getEntityId();
 
-	updateEntity(entity, node, !populate);
+	updateEntity(entity, node, populate ? UpdateMode::UpdateAll : UpdateMode::TransformOnly);
 
 	if (parent) {
 		auto parentTransform = parent->tryGetComponent<Transform2DComponent>();
@@ -65,18 +65,34 @@ EntityRef EntityFactory::createEntity(EntityRef* parent, const ConfigNode& node,
 	return entity;
 }
 
-void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& node, bool transformOnly)
+void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& node, UpdateMode mode)
 {
+	std::vector<int> idsUpdated;
+	
 	const auto func = world.getCreateComponentFunction();
 	if (node["components"].getType() == ConfigNodeType::Sequence) {
-		for (auto& componentNode: node["components"].asSequence()) {
+		auto& sequence = node["components"].asSequence();
+
+		if (mode == UpdateMode::UpdateAllDeleteOld) {
+			idsUpdated.reserve(sequence.size());
+		}
+		
+		for (auto& componentNode: sequence) {
 			for (auto& c: componentNode.asMap()) {
 				auto name = c.first;
-				if (!transformOnly || name == "Transform2D" || name == "Transform3D") {
-					func(*this, name, entity, c.second);
+				if (mode != UpdateMode::TransformOnly || name == "Transform2D" || name == "Transform3D") {
+					auto result = func(*this, name, entity, c.second);
+					
+					if (mode == UpdateMode::UpdateAllDeleteOld) {
+						idsUpdated.push_back(result.componentId);
+					}
 				}
 			}
 		}
+	}
+
+	if (mode == UpdateMode::UpdateAllDeleteOld) {
+		entity.keepOnlyComponentsWithIds(idsUpdated);
 	}
 
 	entity.setName(node["name"].asString(""));
@@ -84,7 +100,12 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& node, bool
 
 void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node)
 {
-	updateEntity(entity, node);
+	doUpdateEntityTree(entity, node, true);
+}
+
+void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& node, bool refreshing)
+{
+	updateEntity(entity, node, refreshing ? UpdateMode::UpdateAllDeleteOld : UpdateMode::UpdateAll);
 
 	const auto transform2D = entity.tryGetComponent<Transform2DComponent>();
 	if (node["children"].getType() != ConfigNodeType::Sequence || !transform2D) {

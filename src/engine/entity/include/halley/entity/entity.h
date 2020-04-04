@@ -143,7 +143,7 @@ namespace Halley {
 		template <typename T>
 		Entity& removeComponent(World& world)
 		{
-			int id = T::componentIndex;
+			constexpr int id = T::componentIndex;
 			for (int i = 0; i < liveComponents; ++i) {
 				if (components[i].first == id) {
 					removeComponentAt(i);
@@ -157,7 +157,10 @@ namespace Halley {
 
 		void addComponent(Component* component, int id);
 		void removeComponentAt(int index);
+		void removeAllComponents(World& world);
 		void deleteComponent(Component* component, int id, ComponentDeleterTable& table);
+		void keepOnlyComponentsWithIds(const std::vector<int>& ids, World& world);
+
 		void onReady();
 
 		void markDirty(World& world);
@@ -185,6 +188,12 @@ namespace Halley {
 		EntityRef& removeComponent()
 		{
 			entity.removeComponent<T>(world);
+			return *this;
+		}
+
+		EntityRef& removeAllComponents()
+		{
+			entity.removeAllComponents(world);
 			return *this;
 		}
 
@@ -224,6 +233,11 @@ namespace Halley {
 		const UUID& getUUID() const
 		{
 			return entity.uuid;
+		}
+
+		void keepOnlyComponentsWithIds(const std::vector<int>& ids)
+		{
+			entity.keepOnlyComponentsWithIds(ids, world);
 		}
 
 	private:

@@ -18,19 +18,31 @@ void Entity::destroyComponents(ComponentDeleterTable& table)
 
 void Entity::addComponent(Component* component, int id)
 {
+	// Put it at the back of the list...
 	components.push_back(std::pair<int, Component*>(id, component));
+
+	// ...if there's dead components, swap with the first dead component...
 	if (liveComponents < int(components.size())) {
-		// Swap with first non-live component
 		std::swap(components[liveComponents], components.back());
 	}
+
+	// ...and increase the list, therefore putting it in living component territory
 	++liveComponents;
 }
 
 void Entity::removeComponentAt(int i)
 {
-	// Put it at the end and decrease live count
-	std::swap(components[i], components.back());
+	// Put it at the end of the list of living components... (guaranteed to swap with living component)
+	std::swap(components[i], components[size_t(liveComponents) - 1]);
+
+	// ...then shrink that list, therefore moving it into dead component territory
 	--liveComponents;
+}
+
+void Entity::removeAllComponents(World& world)
+{
+	liveComponents = 0;
+	markDirty(world);
 }
 
 void Entity::deleteComponent(Component* component, int id, ComponentDeleterTable& table)
@@ -38,6 +50,16 @@ void Entity::deleteComponent(Component* component, int id, ComponentDeleterTable
 	TypeDeleterBase* deleter = table.get(id);
 	deleter->callDestructor(component);
 	PoolPool::getPool(deleter->getSize())->free(component);
+}
+
+void Entity::keepOnlyComponentsWithIds(const std::vector<int>& ids, World& world)
+{
+	auto newEnd = std::remove_if(components.begin(), components.begin() + liveComponents, [&] (const std::pair<int, Component*>& c)
+	{
+		return std::find(ids.begin(), ids.end(), c.first) == ids.end();
+	});
+	liveComponents = int(newEnd - components.begin());
+	markDirty(world);
 }
 
 void Entity::onReady()

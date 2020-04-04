@@ -237,7 +237,7 @@ void World::onEntityDirty()
 	entityDirty = true;
 }
 
-const World::CreateComponentFunction& World::getCreateComponentFunction() const
+const CreateComponentFunction& World::getCreateComponentFunction() const
 {
 	return createComponent;
 }

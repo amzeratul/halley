@@ -98,7 +98,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 	registryCpp.insert(registryCpp.end(), {
 		"",
 		"",
-		"using ComponentFactoryPtr = std::function<void(EntityFactory&, EntityRef&, const ConfigNode&)>;",
+		"using ComponentFactoryPtr = std::function<CreateComponentFunctionResult(EntityFactory&, EntityRef&, const ConfigNode&)>;",
 		"using ComponentFactoryMap = HashMap<String, ComponentFactoryPtr>;",
 		"",
 		"static ComponentFactoryMap makeComponentFactories() {",
@@ -106,7 +106,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 	});
 
 	for (auto& comp : components) {
-		registryCpp.push_back("	result[\"" + comp.name + "\"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) { factory.createComponent<" + comp.name + "Component>(e, node); };");
+		registryCpp.push_back("	result[\"" + comp.name + "\"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<" + comp.name + "Component>(e, node); };");
 	}
 
 	registryCpp.insert(registryCpp.end(), {
@@ -127,7 +127,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"		return std::unique_ptr<System>(result->second());",
 		"	}",
 		"",
-		"   void createComponent(EntityFactory& factory, const String& name, EntityRef& entity, const ConfigNode& componentData) {",
+		"   CreateComponentFunctionResult createComponent(EntityFactory& factory, const String& name, EntityRef& entity, const ConfigNode& componentData) {",
 		"		static ComponentFactoryMap factories = makeComponentFactories();",
 		"		auto result = factories.find(name);",
 		"		if (result == factories.end()) {",
@@ -143,7 +143,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"",
 		"namespace Halley {",
 		"	std::unique_ptr<System> createSystem(String name);",
-		"	void createComponent(EntityFactory& factory, const String& name, EntityRef& entity, const ConfigNode& componentData);",
+		"	CreateComponentFunctionResult createComponent(EntityFactory& factory, const String& name, EntityRef& entity, const ConfigNode& componentData);",
 		"}"
 	};
 

@@ -13,6 +13,7 @@
 #include <halley/data_structures/vector.h>
 #include <halley/data_structures/tree_map.h>
 #include "service.h"
+#include "create_functions.h"
 
 namespace Halley {
 	class UUID;
@@ -22,13 +23,10 @@ namespace Halley {
 	class System;
 	class Painter;
 	class HalleyAPI;
-	class EntityFactory;
 
 	class World
 	{
 	public:
-		using CreateComponentFunction = std::function<void(EntityFactory& factory, const String& componentName, EntityRef& entity, const ConfigNode& componentData)>;
-
 		World(const HalleyAPI& api, Resources& resources, bool collectMetrics, CreateComponentFunction createComponent);
 		~World();
 
