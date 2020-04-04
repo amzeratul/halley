@@ -18,12 +18,6 @@ Transform2DComponent::Transform2DComponent(Transform2DComponent& parentTransform
 	setParent(parentTransform, true);
 }
 
-Transform2DComponent::Transform2DComponent(EntityId parentId, World& world, Vector2f localPosition, Angle1f localRotation, Vector2f localScale, int subWorld)
-	: Transform2DComponentBase(localPosition, localRotation, localScale, subWorld)
-{
-	setParent(parentId, world, true);
-}
-
 Transform2DComponent::~Transform2DComponent()
 {
 	setParent();
@@ -138,11 +132,15 @@ Rect4f Transform2DComponent::getSpriteAABB(const Sprite& sprite) const
 	return sprite.getAABB() - sprite.getPosition() + getGlobalPosition();
 }
 
-void Transform2DComponent::setParent(EntityId newParentId, World& world, bool keepLocalPosition)
+Transform2DComponent& Transform2DComponent::getParent() const
 {
-	if (parentId != newParentId) {
-		setParent(world.getEntity(parentId).getComponent<Transform2DComponent>(), keepLocalPosition);
-	}
+	Expects(parentTransform);
+	return *parentTransform;
+}
+
+Transform2DComponent* Transform2DComponent::tryGetParent() const
+{
+	return parentTransform;
 }
 
 void Transform2DComponent::setParent(Transform2DComponent& newParentTransform, bool keepLocalPosition)
@@ -150,9 +148,6 @@ void Transform2DComponent::setParent(Transform2DComponent& newParentTransform, b
 	if (parentTransform != &newParentTransform) {
 		// Unparent from old
 		setParent(keepLocalPosition);
-
-		// Set id
-		parentId = newParentTransform.myId;
 
 		// Reparent
 		parentTransform = &newParentTransform;
@@ -179,13 +174,7 @@ void Transform2DComponent::setParent(bool keepLocalPosition)
 		siblings.erase(std::remove(siblings.begin(), siblings.end(), this), siblings.end());
 		parentTransform = nullptr;
 	}
-	parentId = EntityId();
 	markDirty();
-}
-
-void Transform2DComponent::addChild(EntityId parentId, World& world, bool keepLocalPosition)
-{
-	addChild(world.getEntity(parentId).getComponent<Transform2DComponent>(), keepLocalPosition);
 }
 
 void Transform2DComponent::addChild(Transform2DComponent& childTransform, bool keepLocalPosition)
