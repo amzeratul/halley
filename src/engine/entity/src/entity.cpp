@@ -54,11 +54,14 @@ void Entity::deleteComponent(Component* component, int id, ComponentDeleterTable
 
 void Entity::keepOnlyComponentsWithIds(const std::vector<int>& ids, World& world)
 {
-	auto newEnd = std::remove_if(components.begin(), components.begin() + liveComponents, [&] (const std::pair<int, Component*>& c)
-	{
-		return std::find(ids.begin(), ids.end(), c.first) == ids.end();
-	});
-	liveComponents = int(newEnd - components.begin());
+	for (int i = 0; i < liveComponents; ++i) {
+		if (std::find(ids.begin(), ids.end(), components[i].first) == ids.end()) {
+			std::swap(components[i], components[liveComponents - 1]);
+			--liveComponents;
+			--i;
+		}
+	}
+	
 	markDirty(world);
 }
 

@@ -120,7 +120,7 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& node
 	nodeUUIDs.reserve(nNodes);
 	std::vector<char> nodeConsumed(nNodes, 0);
 	for (size_t i = 0; i < nNodes; ++i) {
-		nodeUUIDs.push_back(UUID(childNodes[i]["uuid"].asString()));
+		nodeUUIDs.emplace_back(childNodes[i]["uuid"].asString());
 	}
 
 	// Update the existing children
@@ -136,7 +136,7 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& node
 			const auto nodeIdx = (i + childIndex) % nNodes;
 			if (entityUUID == nodeUUIDs[nodeIdx]) {
 				nodeConsumed[nodeIdx] = 1;
-				updateEntityTree(childEntity, childNodes[nodeIdx]);
+				doUpdateEntityTree(childEntity, childNodes[nodeIdx], refreshing);
 				break;
 			}
 		}
