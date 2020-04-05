@@ -8,16 +8,6 @@ EntityList::EntityList(String id, UIFactory& factory)
 	makeUI();
 }
 
-void EntityList::clearExceptions()
-{
-	exceptions.clear();
-}
-
-void EntityList::addException(EntityId entityId)
-{
-	exceptions.insert(entityId);
-}
-
 void EntityList::makeUI()
 {
 	list = std::make_shared<UIList>(getId() + "_list", factory.getStyle("list"));
@@ -25,12 +15,24 @@ void EntityList::makeUI()
 	add(list, 1);
 }
 
-void EntityList::refreshList(const World& world)
+void EntityList::addEntities(const EntityTree& entity, int depth, const String& parentId)
+{
+	// Root is empty, don't add it
+	if (!entity.entityId.isEmpty()) {
+		// HACK
+		auto prefix = std::string(depth * 4, ' ');
+		
+		list->addTextItem(entity.entityId, LocalisedString::fromUserString(prefix + entity.name));
+	}
+	
+	for (auto& e: entity.children) {
+		addEntities(e, depth + 1, entity.entityId);
+	}
+}
+
+void EntityList::refreshList(const ISceneData& sceneData)
 {
 	list->clear();
-	for (auto& e: world.getEntities()) {
-		if (exceptions.find(e.getEntityId()) == exceptions.end()) {
-			list->addTextItem(e.getUUID().toString(), LocalisedString::fromUserString(e.getName()));
-		}
-	}
+
+	addEntities(sceneData.getEntityTree(), 0, "");
 }

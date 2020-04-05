@@ -9,12 +9,14 @@ namespace Halley {
 
         ConfigNode getEntityData(const String& id) override;
         void reloadEntity(const String& id, const ConfigNode& data) override;
+        EntityTree getEntityTree() const override;
     	
     private:
     	Prefab& prefab;
         std::shared_ptr<EntityFactory> factory;
         EntityRef entity;
 
-    	ConfigNode* findEntity(ConfigNode& node, const String& id);
+    	ConfigNode* findEntity(ConfigNode& node, const String& id) const;
+    	void fillEntityTree(const ConfigNode& node, EntityTree& tree) const;
     };
 }

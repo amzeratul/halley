@@ -45,9 +45,7 @@ void SceneEditorWindow::loadScene(const String& name)
 		entityEditor->setSceneData(*sceneData, project.getECSData());
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 
-		entityList->clearExceptions();
-		entityList->addException(interface.getCameraId());
-		entityList->refreshList(world);
+		entityList->refreshList(*sceneData);
 	}
 }
 

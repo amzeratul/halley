@@ -31,7 +31,7 @@ void PrefabSceneData::reloadEntity(const String& id, const ConfigNode& data)
 	factory->updateEntityTree(entity, prefab.getRoot());
 }
 
-ConfigNode* PrefabSceneData::findEntity(ConfigNode& node, const String& id)
+ConfigNode* PrefabSceneData::findEntity(ConfigNode& node, const String& id) const
 {
 	if (node["uuid"].asString("") == id) {
 		return &node;
@@ -47,4 +47,26 @@ ConfigNode* PrefabSceneData::findEntity(ConfigNode& node, const String& id)
 	}
 
 	return nullptr;
+}
+
+EntityTree PrefabSceneData::getEntityTree() const
+{
+	EntityTree root;
+	fillEntityTree(prefab.getRoot(), root);
+	return root;
+}
+
+void PrefabSceneData::fillEntityTree(const ConfigNode& node, EntityTree& tree) const
+{
+	tree.entityId = node["uuid"].asString("");
+	tree.name = node["name"].asString("");
+	if (node["children"].getType() == ConfigNodeType::Sequence) {
+		const auto& seq = node["children"].asSequence();
+		tree.children.reserve(seq.size());
+		
+		for (auto& childNode : seq) {
+			tree.children.emplace_back();
+			fillEntityTree(childNode, tree.children.back());
+		}
+	}
 }

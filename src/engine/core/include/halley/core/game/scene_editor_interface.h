@@ -62,11 +62,19 @@ namespace Halley {
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     };
 
+	class EntityTree {
+	public:
+		String entityId;
+		String name;
+		std::vector<EntityTree> children;
+	};
+
 	class ISceneData {
 	public:
 		virtual ~ISceneData() = default;
 
 		virtual ConfigNode getEntityData(const String& id) = 0;
 		virtual void reloadEntity(const String& id, const ConfigNode& data) = 0;
+		virtual EntityTree getEntityTree() const = 0;
 	};
 }

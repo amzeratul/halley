@@ -16,3 +16,9 @@ void WorldSceneData::reloadEntity(const String& id, const ConfigNode& data)
 {
 	// TODO
 }
+
+EntityTree WorldSceneData::getEntityTree() const
+{
+	// TODO
+	return EntityTree();
+}

@@ -7,17 +7,14 @@ namespace Halley {
 	class EntityList final : public UIWidget {
 	public:
 		EntityList(String id, UIFactory& factory);
-
-		void clearExceptions();
-		void addException(EntityId entityId);
-		
-		void refreshList(const World& world);
+				
+		void refreshList(const ISceneData& sceneData);
 
 	private:
 		UIFactory& factory;
 		std::shared_ptr<UIList> list;
-		std::set<EntityId> exceptions;
-
+		
 		void makeUI();
+		void addEntities(const EntityTree& entity, int depth, const String& parentId);
 	};
 }
