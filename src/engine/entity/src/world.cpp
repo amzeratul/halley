@@ -13,9 +13,6 @@
 #include "halley/core/api/halley_api.h"
 #include "halley/support/logger.h"
 
-#define DONT_INCLUDE_HALLEY_HPP
-#include "components/transform_2d_component.h"
-
 using namespace Halley;
 
 World::World(const HalleyAPI& api, Resources& resources, bool collectMetrics, CreateComponentFunction createComponent)
@@ -149,23 +146,39 @@ Service& World::getService(const String& name, const String& systemName) const
 	return *iter->second;
 }
 
-EntityRef World::createEntity(UUID uuid, String name)
+EntityRef World::createEntity(String name, std::optional<EntityRef> parent)
 {
+	return createEntity(UUID(), name, parent);
+}
+
+EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> parent)
+{
+	if (!uuid.isValid()) {
+		uuid = UUID::generate();
+	}
+	
 	Entity* entity = new(PoolAllocator<Entity>::alloc()) Entity();
 	if (entity == nullptr) {
 		throw Exception("Error creating entity - out of memory?", HalleyExceptions::Entity);
 	}
 	entity->uuid = uuid;
+	
 	entitiesPendingCreation.push_back(entity);
 	allocateEntity(entity);
+
 	auto e = EntityRef(*entity, *this);
 	e.setName(std::move(name));
+
+	if (parent) {
+		e.setParent(parent.value());
+	}
+	
 	return e;
 }
 
-EntityRef World::createEntity(String name)
+EntityRef World::createEntity(UUID uuid, String name, EntityId parentId)
 {
-	return createEntity(UUID::generate(), name);
+	return createEntity(uuid, name, getEntity(parentId));
 }
 
 void World::destroyEntity(EntityId id)
@@ -176,16 +189,17 @@ void World::destroyEntity(EntityId id)
 
 void World::doDestroyEntity(EntityId id)
 {
-	auto e = tryGetEntity(id);
+	const auto e = tryGetEntity(id);
 	if (e) {
-		e->destroy();
+		doDestroyEntity(e);
+	}
+}
 
-		const auto transform = e->tryGetComponent<Transform2DComponent>();
-		if (transform) {
-			for (auto& c: transform->getChildren()) {
-				doDestroyEntity(c->getEntityId());
-			}
-		}
+void World::doDestroyEntity(Entity* e)
+{
+	e->destroy();
+	for (auto& c : e->getChildren()) {
+		doDestroyEntity(c);
 	}
 }
 
@@ -217,7 +231,7 @@ std::vector<EntityRef> World::getEntities()
 	std::vector<EntityRef> result;
 	result.reserve(entities.size());
 	for (auto& e: entities) {
-		result.push_back(EntityRef(*e, *this));
+		result.emplace_back(*e, *this);
 	}
 	return result;
 }
@@ -227,7 +241,31 @@ std::vector<ConstEntityRef> World::getEntities() const
 	std::vector<ConstEntityRef> result;
 	result.reserve(entities.size());
 	for (auto& e : entities) {
-		result.push_back(ConstEntityRef(*e, *this));
+		result.emplace_back(*e, *this);
+	}
+	return result;
+}
+
+std::vector<EntityRef> World::getTopLevelEntities()
+{
+	std::vector<EntityRef> result;
+	result.reserve(entities.size());
+	for (auto& e : entities) {
+		if (e->getParent() == nullptr) {
+			result.emplace_back(*e, *this);
+		}
+	}
+	return result;
+}
+
+std::vector<ConstEntityRef> World::getTopLevelEntities() const
+{
+	std::vector<ConstEntityRef> result;
+	result.reserve(entities.size());
+	for (auto& e : entities) {
+		if (e->getParent() == nullptr) {
+			result.emplace_back(*e, *this);
+		}
 	}
 	return result;
 }

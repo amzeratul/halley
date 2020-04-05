@@ -13,7 +13,7 @@ namespace Halley {
 	class EntityFactory {
 	public:
 		enum class UpdateMode {
-			TransformOnly,
+			//TransformOnly,
 			UpdateAll,
 			UpdateAllDeleteOld
 		};
@@ -52,7 +52,7 @@ namespace Halley {
 		ConfigNodeSerializationContext context;
 		std::unique_ptr<EntitySerializationContext> entityContext;
 
-		EntityRef createEntity(EntityRef* parent, const ConfigNode& node, bool populate);
+		EntityRef createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate);
 		void doUpdateEntityTree(EntityRef& entity, const ConfigNode& node, bool refreshing);
 	};
 

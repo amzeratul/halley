@@ -17,6 +17,7 @@ namespace Halley {
 		String toString() const;
 
 		static UUID generate();
+    	bool isValid() const;
 
     private:
 		std::array<Byte, 16> bytes;

@@ -1,9 +1,6 @@
 #include "entity_factory.h"
 #include "halley/support/logger.h"
 #include "world.h"
-
-#define DONT_INCLUDE_HALLEY_HPP
-#include "components/transform_2d_component.h"
 #include "halley/core/resources/resources.h"
 
 using namespace Halley;
@@ -35,30 +32,25 @@ EntityRef EntityFactory::createEntity(const ConfigNode& node)
 	// Note: this is not thread-safe
 	context.entityContext->uuids.clear();
 
-	auto entity = createEntity(nullptr, node, false);
+	auto entity = createEntity(std::optional<EntityRef>(), node, false);
 	doUpdateEntityTree(entity, node, false);
 	return entity;
 }
 
-EntityRef EntityFactory::createEntity(EntityRef* parent, const ConfigNode& node, bool populate)
+EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate)
 {
 	const auto uuid = UUID(node["uuid"].asString());
-	auto entity = world.createEntity(uuid, node["name"].asString(""));
+	auto entity = world.createEntity(uuid, node["name"].asString(""), parent);
 
 	context.entityContext->uuids[uuid] = entity.getEntityId();
 
-	updateEntity(entity, node, populate ? UpdateMode::UpdateAll : UpdateMode::TransformOnly);
-
-	if (parent) {
-		auto parentTransform = parent->tryGetComponent<Transform2DComponent>();
-		if (parentTransform) {
-			parentTransform->addChild(entity.getComponent<Transform2DComponent>(), true);
-		}
+	if (populate) {
+		updateEntity(entity, node, UpdateMode::UpdateAll);
 	}
-	
+
 	if (node["children"].getType() == ConfigNodeType::Sequence) {
 		for (auto& childNode: node["children"].asSequence()) {
-			createEntity(&entity, childNode, populate);
+			createEntity(entity, childNode, populate);
 		}
 	}
 
@@ -80,12 +72,10 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& node, Upda
 		for (auto& componentNode: sequence) {
 			for (auto& c: componentNode.asMap()) {
 				auto name = c.first;
-				if (mode != UpdateMode::TransformOnly || name == "Transform2D" || name == "Transform3D") {
-					auto result = func(*this, name, entity, c.second);
-					
-					if (mode == UpdateMode::UpdateAllDeleteOld) {
-						idsUpdated.push_back(result.componentId);
-					}
+				auto result = func(*this, name, entity, c.second);
+				
+				if (mode == UpdateMode::UpdateAllDeleteOld) {
+					idsUpdated.push_back(result.componentId);
 				}
 			}
 		}
@@ -107,8 +97,7 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& node
 {
 	updateEntity(entity, node, refreshing ? UpdateMode::UpdateAllDeleteOld : UpdateMode::UpdateAll);
 
-	const auto transform2D = entity.tryGetComponent<Transform2DComponent>();
-	if (node["children"].getType() != ConfigNodeType::Sequence || !transform2D) {
+	if (node["children"].getType() != ConfigNodeType::Sequence) {
 		return;
 	}
 
@@ -125,8 +114,8 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& node
 
 	// Update the existing children
 	size_t childIndex = 0;
-	for (auto& child: transform2D->getChildren()) {
-		auto childEntity = world.getEntity(child->getEntityId());
+	for (auto& child: entity.getRawChildren()) {
+		auto childEntity = EntityRef(*child, world);
 		const auto& entityUUID = childEntity.getUUID();
 
 		// Find which node to use based on UUID
@@ -147,7 +136,7 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& node
 	// Insert new nodes
 	for (size_t i = 0; i < nNodes; ++i) {
 		if (!nodeConsumed[i]) {
-			createEntity(&entity, childNodes[i], true);
+			createEntity(entity, childNodes[i], true);
 		}
 	}
 }

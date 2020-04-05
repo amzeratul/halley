@@ -53,14 +53,17 @@ namespace Halley {
 			return *dynamic_cast<T*>(&getService(typeid(T).name(), systemName));
 		}
 
-		EntityRef createEntity(UUID uuid, String name = "");
-		EntityRef createEntity(String name = "");
+		EntityRef createEntity(String name = "", std::optional<EntityRef> parent = {});
+		EntityRef createEntity(UUID uuid, String name = "", std::optional<EntityRef> parent = {});
+		EntityRef createEntity(UUID uuid, String name, EntityId parentId);
 		void destroyEntity(EntityId id);
 		EntityRef getEntity(EntityId id);
 		Entity* tryGetEntity(EntityId id);
 		size_t numEntities() const;
 		std::vector<EntityRef> getEntities();
 		std::vector<ConstEntityRef> getEntities() const;
+		std::vector<EntityRef> getTopLevelEntities();
+		std::vector<ConstEntityRef> getTopLevelEntities() const;
 
 		void spawnPending(); // Warning: use with care, will invalidate entities
 
@@ -119,6 +122,7 @@ namespace Halley {
 		void initSystems();
 
 		void doDestroyEntity(EntityId id);
+		void doDestroyEntity(Entity* entity);
 		void deleteEntity(Entity* entity);
 
 		void updateSystems(TimeLine timeline, Time elapsed);

@@ -275,20 +275,20 @@ namespace Halley {
 			return EntityRef(*entity->getParent(), *world);
 		}
 
-		Maybe<EntityRef> tryGetParent() const
+		std::optional<EntityRef> tryGetParent() const
 		{
 			const auto parent = entity->getParent();
-			return parent != nullptr ? EntityRef(*parent, *world) : Maybe<EntityRef>();
+			return parent != nullptr ? EntityRef(*parent, *world) : std::optional<EntityRef>();
 		}
 
 		void setParent(EntityRef& parent)
 		{
-			entity->setParent(parent);
+			entity->setParent(parent.entity);
 		}
 
 		void setParent()
 		{
-			entity->setParent();
+			entity->setParent(nullptr);
 		}
 
 		const std::vector<Entity*>& getRawChildren() const
@@ -298,7 +298,7 @@ namespace Halley {
 
 		void addChild(EntityRef& child)
 		{
-			entity->addChild(child);
+			entity->addChild(*child.entity);
 		}
 
 		void detachChildren()
@@ -329,47 +329,81 @@ namespace Halley {
 	class ConstEntityRef
 	{
 	public:
+		ConstEntityRef() = default;
+		ConstEntityRef(const ConstEntityRef& other) = default;
+		ConstEntityRef(ConstEntityRef&& other) = default;
+
+		ConstEntityRef& operator=(const ConstEntityRef& other) = default;
+		ConstEntityRef& operator=(ConstEntityRef&& other) = default;
+
+		ConstEntityRef(Entity& e, const World& w)
+			: entity(&e)
+			, world(&w)
+		{}
+		
 		template <typename T>
 		const T& getComponent() const
 		{
-			return entity.getComponent<T>();
+			return entity->getComponent<T>();
 		}
 
 		template <typename T>
 		const T* tryGetComponent() const
 		{
-			return entity.tryGetComponent<T>();
+			return entity->tryGetComponent<T>();
 		}
 
 		EntityId getEntityId() const
 		{
-			return entity.getEntityId();
+			return entity->getEntityId();
 		}
 
 		template <typename T>
 		bool hasComponent() const
 		{
-			return entity.hasComponent<T>();
+			return entity->hasComponent<T>();
 		}
 
 		const String& getName() const
 		{
-			return entity.name;
+			return entity->name;
 		}
 
 		const UUID& getUUID() const
 		{
-			return entity.uuid;
+			return entity->uuid;
+		}
+
+		bool hasParent() const
+		{
+			return entity->getParent() != nullptr;
+		}
+
+		ConstEntityRef getParent() const
+		{
+			return ConstEntityRef(*entity->getParent(), *world);
+		}
+
+		std::optional<ConstEntityRef> tryGetParent() const
+		{
+			const auto parent = entity->getParent();
+			return parent != nullptr ? ConstEntityRef(*parent, *world) : std::optional<ConstEntityRef>();
+		}
+
+		[[deprecated]] const std::vector<Entity*>& getRawChildren() const
+		{
+			return entity->getChildren();
+		}
+
+		int8_t getHierarchyRevision() const
+		{
+			return entity->hierarchyRevision;
 		}
 
 	private:
 		friend class World;
-		ConstEntityRef(Entity& e, const World& w)
-			: entity(e)
-			, world(w)
-		{}
 
-		Entity& entity;
-		const World& world;
+		Entity* entity;
+		const World* world;
 	};
 }

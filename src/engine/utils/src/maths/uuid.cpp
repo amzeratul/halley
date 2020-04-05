@@ -63,3 +63,13 @@ UUID UUID::generate()
 	bs[8] = (bs[8] & 0b00111111) | (0b10 << 6); // Variant 1
 	return result;
 }
+
+bool UUID::isValid() const
+{
+	for (size_t i = 0; i < 16; ++i) {
+		if (bytes[i] != 0) {
+			return true;
+		}
+	}
+	return false;
+}
