@@ -12,16 +12,8 @@ Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f local
 {
 }
 
-Transform2DComponent::Transform2DComponent(Transform2DComponent& parentTransform, Vector2f localPosition, Angle1f localRotation, Vector2f localScale, int subWorld)
-	: Transform2DComponentBase(localPosition, localRotation, localScale, subWorld)
-{
-	setParent(parentTransform, true);
-}
-
 Transform2DComponent::~Transform2DComponent()
 {
-	setParent();
-	detachChildren();
 }
 
 void Transform2DComponent::setLocalPosition(Halley::Vector2f v)
@@ -44,6 +36,7 @@ void Transform2DComponent::setLocalRotation(Halley::Angle1f v)
 
 Vector2f Transform2DComponent::getGlobalPosition() const
 {
+	checkDirty();
 	if (parentTransform) {
 		if (!isCached(CachedIndices::Position)) {
 			setCached(CachedIndices::Position);
@@ -57,6 +50,7 @@ Vector2f Transform2DComponent::getGlobalPosition() const
 
 void Transform2DComponent::setGlobalPosition(Vector2f v)
 {
+	checkDirty();
 	if (parentTransform) {
 		position = parentTransform->inverseTransformPoint(v);
 	} else {
@@ -97,6 +91,7 @@ int Transform2DComponent::getSubWorld() const
 		return subWorld;
 	} else {
 		// Default value, default to parent, or to zero if no parent
+		checkDirty();
 		if (parentTransform) {
 			if (!isCached(CachedIndices::SubWorld)) {
 				setCached(CachedIndices::SubWorld);
@@ -132,68 +127,9 @@ Rect4f Transform2DComponent::getSpriteAABB(const Sprite& sprite) const
 	return sprite.getAABB() - sprite.getPosition() + getGlobalPosition();
 }
 
-Transform2DComponent& Transform2DComponent::getParent() const
-{
-	Expects(parentTransform);
-	return *parentTransform;
-}
-
-Transform2DComponent* Transform2DComponent::tryGetParent() const
-{
-	return parentTransform;
-}
-
-void Transform2DComponent::setParent(Transform2DComponent& newParentTransform, bool keepLocalPosition)
-{
-	if (parentTransform != &newParentTransform) {
-		// Unparent from old
-		setParent(keepLocalPosition);
-
-		// Reparent
-		parentTransform = &newParentTransform;
-		parentTransform->children.push_back(this);
-
-		if (!keepLocalPosition) {
-			setGlobalPosition(getLocalPosition());
-			setGlobalRotation(getLocalRotation());
-			setGlobalScale(getLocalScale());
-		}
-	}
-}
-
-void Transform2DComponent::setParent(bool keepLocalPosition)
-{
-	if (parentTransform) {
-		if (!keepLocalPosition) {
-			setLocalPosition(getGlobalPosition());
-			setLocalRotation(getGlobalRotation());
-			setLocalScale(getGlobalScale());
-		}
-		
-		auto& siblings = parentTransform->children;
-		siblings.erase(std::remove(siblings.begin(), siblings.end(), this), siblings.end());
-		parentTransform = nullptr;
-	}
-	markDirty();
-}
-
-void Transform2DComponent::addChild(Transform2DComponent& childTransform, bool keepLocalPosition)
-{
-	childTransform.setParent(*this, keepLocalPosition);
-}
-
-void Transform2DComponent::detachChildren()
-{
-	auto childrenCopy = children;
-	for (auto& child: childrenCopy) {
-		child->setParent();
-	}
-	children.clear();
-}
-
 void Transform2DComponent::onAddedToEntity(EntityRef& entity)
 {
-	myId = entity.getEntityId();
+	this->entity = entity;
 }
 
 void Transform2DComponent::deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
@@ -202,13 +138,20 @@ void Transform2DComponent::deserialize(ConfigNodeSerializationContext& context, 
 	markDirty();
 }
 
-void Transform2DComponent::markDirty()
+void Transform2DComponent::checkDirty() const
 {
-	revision++;
-	cachedValues = 0;
-	for (auto& child: children) {
-		child->markDirty();
+	const auto curRev = entity.getHierarchyRevision();
+	if (hierarchyRevision != curRev) {
+		hierarchyRevision = curRev;
+		parentTransform = entity.hasParent() ? entity.getParent().tryGetComponent<Transform2DComponent>() : nullptr;
+		markDirty();
 	}
+}
+
+void Transform2DComponent::markDirty() const
+{
+	++revision;
+	cachedValues = 0;
 }
 
 bool Transform2DComponent::isCached(CachedIndices index) const

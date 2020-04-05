@@ -82,6 +82,48 @@ ComponentDeleterTable& Entity::getComponentDeleterTable(World& world)
 	return world.getComponentDeleterTable();
 }
 
+void Entity::setParent(Entity* newParent)
+{
+	if (parent != newParent) {
+		// Unparent from old
+		if (parent) {
+			auto& siblings = parent->children;
+			siblings.erase(std::remove(siblings.begin(), siblings.end(), this), siblings.end());
+			parent = nullptr;
+		}
+
+		// Reparent
+		if (newParent) {
+			parent = newParent;
+			parent->children.push_back(this);
+		}
+
+		markHierarchyDirty();
+	}
+}
+
+void Entity::addChild(Entity& child)
+{
+	child.setParent(this);
+}
+
+void Entity::detachChildren()
+{
+	auto childrenCopy = std::move(children);
+	for (auto& child : childrenCopy) {
+		child->setParent(nullptr);
+	}
+	children.clear();
+}
+
+void Entity::markHierarchyDirty()
+{
+	hierarchyRevision++;
+	for (auto& child: children) {
+		child->markHierarchyDirty();
+	}
+}
+
 FamilyMaskType Entity::getMask() const
 {
 	return mask;

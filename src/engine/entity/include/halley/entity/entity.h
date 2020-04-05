@@ -117,15 +117,21 @@ namespace Halley {
 		void destroy();
 
 	private:
+		// Start with these for better cache coherence
 		Vector<std::pair<int, Component*>> components;
+		int liveComponents = 0;
+		bool dirty = false;
+		bool alive = true;
+
+		int8_t hierarchyRevision = 0;
+		Entity* parent = nullptr;
+		Vector<Entity*> children;
+		
 		Vector<MessageEntry> inbox;
 		FamilyMaskType mask;
 		EntityId uid;
 		String name;
 		UUID uuid;
-		int liveComponents = 0;
-		bool dirty = false;
-		bool alive = true;
 
 		Entity();
 		void destroyComponents(ComponentDeleterTable& storage);
@@ -165,11 +171,30 @@ namespace Halley {
 
 		void markDirty(World& world);
 		ComponentDeleterTable& getComponentDeleterTable(World& world);
+
+		Entity* getParent() const { return parent; }
+		void setParent(Entity* parent);
+		const std::vector<Entity*>& getChildren() const { return children; }
+		void addChild(Entity& child);
+		void detachChildren();
+		void markHierarchyDirty();
 	};
 
 	class EntityRef
 	{
 	public:
+		EntityRef() = default;
+		EntityRef(const EntityRef& other) = default;
+		EntityRef(EntityRef&& other) = default;
+
+		EntityRef& operator=(const EntityRef& other) = default;
+		EntityRef& operator=(EntityRef&& other) = default;
+		
+		EntityRef(Entity& e, World& w)
+			: entity(&e)
+			, world(&w)
+		{}
+
 		template <typename T>
 		EntityRef& addComponent(T&& component)
 		{
@@ -179,7 +204,7 @@ namespace Halley {
 			static_assert(!std::is_polymorphic<T>::value, "Components cannot be polymorphic (i.e. they can't have virtual methods)");
 			static_assert(std::is_default_constructible<T>::value, "Components must have a default constructor");
 			auto c = new T(std::move(component));
-			entity.addComponent(world, c);
+			entity->addComponent(*world, c);
 			invokeComponentInit(*c, *this);
 			return *this;
 		}
@@ -187,78 +212,118 @@ namespace Halley {
 		template <typename T>
 		EntityRef& removeComponent()
 		{
-			entity.removeComponent<T>(world);
+			entity->removeComponent<T>(*world);
 			return *this;
 		}
 
 		EntityRef& removeAllComponents()
 		{
-			entity.removeAllComponents(world);
+			entity->removeAllComponents(*world);
 			return *this;
 		}
 
 		template <typename T>
 		T& getComponent()
 		{
-			return entity.getComponent<T>();
+			return entity->getComponent<T>();
 		}
 
 		template <typename T>
 		T* tryGetComponent()
 		{
-			return entity.tryGetComponent<T>();
+			return entity->tryGetComponent<T>();
 		}
 
 		EntityId getEntityId() const
 		{
-			return entity.getEntityId();
+			return entity->getEntityId();
 		}
 
 		template <typename T>
 		bool hasComponent() const
 		{
-			return entity.hasComponent<T>();
+			return entity->hasComponent<T>();
 		}
 
 		const String& getName() const
 		{
-			return entity.name;
+			return entity->name;
 		}
 
 		void setName(String name)
 		{
-			entity.name = std::move(name);
+			entity->name = std::move(name);
 		}
 
 		const UUID& getUUID() const
 		{
-			return entity.uuid;
+			return entity->uuid;
 		}
 
 		void keepOnlyComponentsWithIds(const std::vector<int>& ids)
 		{
-			entity.keepOnlyComponentsWithIds(ids, world);
+			entity->keepOnlyComponentsWithIds(ids, *world);
+		}
+
+		bool hasParent() const
+		{
+			return entity->getParent() != nullptr;
+		}
+		
+		EntityRef getParent() const
+		{
+			return EntityRef(*entity->getParent(), *world);
+		}
+
+		Maybe<EntityRef> tryGetParent() const
+		{
+			const auto parent = entity->getParent();
+			return parent != nullptr ? EntityRef(*parent, *world) : Maybe<EntityRef>();
+		}
+
+		void setParent(EntityRef& parent)
+		{
+			entity->setParent(parent);
+		}
+
+		void setParent()
+		{
+			entity->setParent();
+		}
+
+		const std::vector<Entity*>& getRawChildren() const
+		{
+			return entity->getChildren();
+		}
+
+		void addChild(EntityRef& child)
+		{
+			entity->addChild(child);
+		}
+
+		void detachChildren()
+		{
+			entity->detachChildren();
+		}
+
+		int8_t getHierarchyRevision() const
+		{
+			return entity->hierarchyRevision;
 		}
 
 	private:
-		friend class World;
-		EntityRef(Entity& e, World& w)
-			: entity(e)
-			, world(w)
-		{}
-
 		template <typename T, typename std::enable_if<HasOnAddedToEntityMember<T>::value, int>::type = 0>
-		void invokeComponentInit(T& comp, EntityRef& ref)
+		static void invokeComponentInit(T& comp, EntityRef& ref)
 		{
 			comp.onAddedToEntity(ref);
 		}
 
 		template <typename T, typename std::enable_if<!HasOnAddedToEntityMember<T>::value, int>::type = 0>
-		void invokeComponentInit(T&, EntityRef&)
+		static void invokeComponentInit(T&, EntityRef&)
 		{}
 
-		Entity& entity;
-		World& world;
+		Entity* entity = nullptr;
+		World* world = nullptr;
 	};
 	
 	class ConstEntityRef

@@ -17,7 +17,6 @@ class Transform2DComponent : public Transform2DComponentBase {
 public:
 	Transform2DComponent();
 	explicit Transform2DComponent(Halley::Vector2f localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1), int subWorld = 0);
-	Transform2DComponent(Transform2DComponent& parentTransform, Halley::Vector2f localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1), int subWorld = 0);
 	~Transform2DComponent();
 
 	const Halley::Vector2f& getLocalPosition() const { return position; }
@@ -49,18 +48,6 @@ public:
 
 	Halley::Rect4f getSpriteAABB(const Halley::Sprite& sprite) const;
 
-	bool hasParent() const { return parentTransform != nullptr; }
-	Transform2DComponent& getParent() const;
-	Transform2DComponent* tryGetParent() const;
-	void setParent(Transform2DComponent& parentTransform, bool keepLocalPosition = false);
-	void setParent(bool keepLocalPosition = false);
-	
-	std::vector<Transform2DComponent*> getChildren() const { return children; }
-	void addChild(Transform2DComponent& childTransform, bool keepLocalPosition = false);
-	void detachChildren();
-
-	Halley::EntityId getEntityId() const { return myId; }
-
 	void onAddedToEntity(Halley::EntityRef& entity);
 
 	uint32_t getRevision() const { return revision; }
@@ -70,10 +57,10 @@ public:
 private:
 	friend class Halley::EntityRef;
 
-	Transform2DComponent* parentTransform = nullptr;
-	std::vector<Transform2DComponent*> children;
-	Halley::EntityId myId;
-	uint32_t revision = 0;
+	mutable Halley::EntityRef entity;
+	mutable Transform2DComponent* parentTransform = nullptr;
+	mutable uint32_t revision = 0;
+	mutable uint8_t hierarchyRevision = 0xFF;
 
 	mutable uint32_t cachedValues = 0;
 	mutable Halley::Vector2f cachedGlobalPos;
@@ -88,7 +75,8 @@ private:
 		SubWorld
 	};
 
-	void markDirty();
+	void checkDirty() const;
+	void markDirty() const;
 	bool isCached(CachedIndices index) const;
 	void setCached(CachedIndices index) const;
 };
