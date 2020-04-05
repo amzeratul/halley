@@ -196,7 +196,7 @@ void Transform2DComponent::onAddedToEntity(EntityRef& entity)
 	myId = entity.getEntityId();
 }
 
-void Transform2DComponent::deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node)
+void Transform2DComponent::deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
 {
 	Transform2DComponentBase::deserialize(context, node);
 	markDirty();
