@@ -58,7 +58,8 @@ namespace Halley {
 		EntityRef createEntity(UUID uuid, String name, EntityId parentId);
 		void destroyEntity(EntityId id);
 		EntityRef getEntity(EntityId id);
-		Entity* tryGetEntity(EntityId id);
+		Entity* tryGetRawEntity(EntityId id);
+		std::optional<EntityRef> findEntity(const UUID& id);
 		size_t numEntities() const;
 		std::vector<EntityRef> getEntities();
 		std::vector<ConstEntityRef> getEntities() const;

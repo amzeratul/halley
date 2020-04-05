@@ -47,7 +47,7 @@ void System::purgeMessages()
 	if (messagesSentTo.size() > 0) {
 		for (auto& target: messagesSentTo) {
 			// Purge all messages of this age
-			Entity* entity = world->tryGetEntity(target);
+			Entity* entity = world->tryGetRawEntity(target);
 
 			if (entity) {
 				auto& inbox = entity->inbox;
@@ -73,7 +73,7 @@ void System::processMessages()
 		size_t sz = fam.count();
 		for (size_t i = 0; i < sz; i++) {
 			FamilyBase* elem = reinterpret_cast<FamilyBase*>(fam.getElement(i));
-			Entity* entity = world->tryGetEntity(elem->entityId);
+			Entity* entity = world->tryGetRawEntity(elem->entityId);
 			if (entity) {
 				for (const auto& msg: entity->inbox) {
 					if (std::find(messageTypesReceived.begin(), messageTypesReceived.end(), msg.type) != messageTypesReceived.end()) {
@@ -101,7 +101,7 @@ void System::dispatchMessages()
 {
 	if (!outbox.empty()) {
 		for (auto& o: outbox) {
-			Entity* entity = world->tryGetEntity(o.first);
+			Entity* entity = world->tryGetRawEntity(o.first);
 			if (entity) {
 				entity->inbox.emplace_back(std::move(o.second));
 				messagesSentTo.push_back(o.first);

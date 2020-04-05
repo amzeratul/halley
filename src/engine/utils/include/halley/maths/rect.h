@@ -158,25 +158,25 @@ namespace Halley {
 		constexpr T getTop() const { return p1.y; }
 		constexpr T getBottom() const { return p2.y; }
 
-		constexpr bool contains(Vector2D<T> p) const
+		[[nodiscard]] constexpr bool contains(Vector2D<T> p) const
 		{
 			return (p.x >= p1.x && p.x < p2.x && p.y >= p1.y && p.y < p2.y);
 		}
 
-		constexpr Vector2D<T> getClosestPoint(Vector2D<T> p) const
+		[[nodiscard]] constexpr Vector2D<T> getClosestPoint(Vector2D<T> p) const
 		{
 			p.x = clamp(p.x, p1.x, p2.x - 1);
 			p.y = clamp(p.y, p1.y, p2.y - 1);
 			return p;
 		}
 
-		constexpr Vector2D<T> wrapInside(Vector2D<T> p) const
+		[[nodiscard]] constexpr Vector2D<T> wrapInside(Vector2D<T> p) const
 		{
 			Vector2D<T> size = getSize();
 			return ((((p-p1) % size) + size) % size) + p1;
 		}
 
-		Rect2D<T> intersection(Rect2D<T> p) const
+		[[nodiscard]] Rect2D<T> intersection(const Rect2D<T>& p) const
 		{
 			Range<T> x0(p1.x, p2.x);
 			Range<T> x1(p.p1.x, p.p2.x);
@@ -185,6 +185,11 @@ namespace Halley {
 			Range<T> y1(p.p1.y, p.p2.y);
 			Range<T> y = y0.getOverlap(y1);
 			return Rect2D<T>(Vector2D<T>(x.start, y.start), Vector2D<T>(x.end, y.end));
+		}
+
+		[[nodiscard]] constexpr Rect2D<T> merge(const Rect2D<T>& other) const
+		{
+			return Rect2D<T>(Vector2D<T>::min(p1, other.p1), Vector2D<T>::max(p2, other.p2));
 		}
 
 		Range<T> getHorizontal() const

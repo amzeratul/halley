@@ -1,10 +1,11 @@
 #include "scene_editor.h"
-
+#include "world.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/core/game/halley_statics.h"
-#include "world.h"
+#include "halley/core/graphics/sprite/sprite.h"
 
 #define DONT_INCLUDE_HALLEY_HPP
+#include "components/sprite_component.h"
 #include "components/camera_component.h"
 #include "components/transform_2d_component.h"
 
@@ -86,6 +87,13 @@ void SceneEditor::dragCamera(Vector2f amount)
 	transform.setGlobalPosition(transform.getGlobalPosition() + amount / zoom);
 }
 
+void SceneEditor::moveCameraTo2D(Vector2f pos)
+{
+	auto camera = getWorld().getEntity(cameraEntityId);
+	auto& transform = camera.getComponent<Transform2DComponent>();
+	transform.setGlobalPosition(pos);
+}
+
 void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 {
 	if (amount == 0) {
@@ -106,8 +114,56 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 	transform.setGlobalPosition(transform.getGlobalPosition() + translate);
 }
 
-void SceneEditor::setSelectedEntity(EntityId id)
+void SceneEditor::setSelectedEntity(const UUID& id)
 {}
 
-void SceneEditor::showEntity(EntityId id)
-{}
+void SceneEditor::showEntity(const UUID& id)
+{
+	auto e = getWorld().findEntity(id);
+	
+	if (e) {
+		const auto aabb = getSpriteTreeBounds(e.value());
+		moveCameraTo2D(aabb.getCenter());
+	}
+}
+
+Rect4f SceneEditor::getSpriteTreeBounds(EntityRef& e)
+{
+	std::optional<Rect4f> rect;
+	doGetSpriteTreeBounds(e, rect);
+	return rect.value_or(Rect4f());
+}
+
+void SceneEditor::doGetSpriteTreeBounds(EntityRef& e, std::optional<Rect4f>& rect)
+{
+	auto cur = getSpriteBounds(e);
+	if (!rect) {
+		rect = cur;
+	}
+	if (cur) {
+		rect = rect->merge(*cur);
+	}
+
+	auto& world = getWorld();
+	for (auto& c: e.getRawChildren()) {
+		auto child = EntityRef(*c, world);
+		doGetSpriteTreeBounds(child, rect);
+	}
+}
+
+std::optional<Rect4f> SceneEditor::getSpriteBounds(EntityRef& e)
+{
+	const auto transform2d = e.tryGetComponent<Transform2DComponent>();
+
+	if (transform2d) {
+		const auto sprite = e.tryGetComponent<SpriteComponent>();
+
+		if (sprite) {
+			return transform2d->getSpriteAABB(sprite->sprite);
+		} else {
+			auto pos = transform2d->getGlobalPosition();
+			return Rect4f(pos, pos);
+		}
+	}
+	return {};
+}

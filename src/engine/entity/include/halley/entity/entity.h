@@ -109,6 +109,11 @@ namespace Halley {
 		{
 			return alive;
 		}
+		
+		const UUID& getUUID() const
+		{
+			return uuid;
+		}
 
 		FamilyMaskType getMask() const;
 		EntityId getEntityId() const;

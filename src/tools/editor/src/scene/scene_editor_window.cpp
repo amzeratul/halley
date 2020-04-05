@@ -88,6 +88,11 @@ void SceneEditorWindow::makeUI()
 
 	setHandle(UIEventType::ListSelectionChanged, "entityList_list", [=] (const UIEvent& event)
 	{
+		selectEntity(event.getStringData());
+	});
+
+	setHandle(UIEventType::ListAccept, "entityList_list", [=](const UIEvent& event)
+	{
 		showEntity(event.getStringData());
 	});
 
@@ -105,10 +110,16 @@ void SceneEditorWindow::load()
 	}
 }
 
-void SceneEditorWindow::showEntity(const String& id)
+void SceneEditorWindow::selectEntity(const String& id)
 {
 	getWidget("saveButton")->setEnabled(false);
 	entityEditor->showEntity(id);
+}
+
+void SceneEditorWindow::showEntity(const String& id)
+{
+	auto& interface = canvas->getInterface();
+	interface.showEntity(UUID(id));
 }
 
 void SceneEditorWindow::saveEntity()

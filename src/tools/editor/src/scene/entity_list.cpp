@@ -21,6 +21,7 @@ void EntityList::addException(EntityId entityId)
 void EntityList::makeUI()
 {
 	list = std::make_shared<UIList>(getId() + "_list", factory.getStyle("list"));
+	list->setSingleClickAccept(false);
 	add(list, 1);
 }
 

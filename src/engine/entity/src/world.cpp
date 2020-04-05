@@ -189,7 +189,7 @@ void World::destroyEntity(EntityId id)
 
 void World::doDestroyEntity(EntityId id)
 {
-	const auto e = tryGetEntity(id);
+	const auto e = tryGetRawEntity(id);
 	if (e) {
 		doDestroyEntity(e);
 	}
@@ -205,20 +205,30 @@ void World::doDestroyEntity(Entity* e)
 
 EntityRef World::getEntity(EntityId id)
 {
-	Entity* entity = tryGetEntity(id);
+	Entity* entity = tryGetRawEntity(id);
 	if (entity == nullptr) {
 		throw Exception("Entity does not exist: " + toString(id), HalleyExceptions::Entity);
 	}
 	return EntityRef(*entity, *this);
 }
 
-Entity* World::tryGetEntity(EntityId id)
+Entity* World::tryGetRawEntity(EntityId id)
 {
 	auto v = entityMap.get(id.value);
 	if (v == nullptr) {
 		return nullptr;
 	}
 	return *v;
+}
+
+std::optional<EntityRef> World::findEntity(const UUID& id)
+{
+	for (auto& e: entities) {
+		if (e->getUUID() == id) {
+			return EntityRef(*e, *this);
+		}
+	}
+	return std::optional<EntityRef>();
 }
 
 size_t World::numEntities() const

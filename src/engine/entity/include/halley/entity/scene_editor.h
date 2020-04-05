@@ -16,8 +16,8 @@ namespace Halley {
 		void dragCamera(Vector2f amount) override;
 		void changeZoom(int amount, Vector2f cursorPosRelToCamera) override;
 
-		void setSelectedEntity(EntityId id) override;
-		void showEntity(EntityId id) override;
+		void setSelectedEntity(const UUID& id) override;
+		void showEntity(const UUID& id) override;
 
 		std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() override;
 
@@ -36,5 +36,10 @@ namespace Halley {
 		EntityId cameraEntityId;
 
 		std::unique_ptr<World> createWorld(SceneEditorContext& context);
+
+    	void moveCameraTo2D(Vector2f pos);
+    	Rect4f getSpriteTreeBounds(EntityRef& e);
+		void doGetSpriteTreeBounds(EntityRef& e, std::optional<Rect4f>& rect);
+    	std::optional<Rect4f> getSpriteBounds(EntityRef& e);
 	};
 }
