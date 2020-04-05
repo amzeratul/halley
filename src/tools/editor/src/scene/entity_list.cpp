@@ -2,7 +2,7 @@
 using namespace Halley;
 
 EntityList::EntityList(String id, UIFactory& factory)
-	: UIWidget(std::move(id), Vector2f(160, 30), UISizer())
+	: UIWidget(std::move(id), Vector2f(200, 30), UISizer())
 	, factory(factory)
 {
 	makeUI();
