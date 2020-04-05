@@ -311,6 +311,11 @@ namespace Halley {
 			return entity->hierarchyRevision;
 		}
 
+		bool isValid() const
+		{
+			return entity != nullptr;
+		}
+
 	private:
 		template <typename T, typename std::enable_if<HasOnAddedToEntityMember<T>::value, int>::type = 0>
 		static void invokeComponentInit(T& comp, EntityRef& ref)

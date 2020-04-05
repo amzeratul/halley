@@ -7,6 +7,7 @@ using namespace Halley;
 
 Transform2DComponent::Transform2DComponent() = default;
 
+
 Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f localRotation, Vector2f localScale, int subWorld)
 	: Transform2DComponentBase(localPosition, localRotation, localScale, subWorld)
 {
@@ -14,6 +15,15 @@ Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f local
 
 Transform2DComponent::~Transform2DComponent()
 {
+	if (entity.isValid()) {
+		markDirty(DirtyPropagationMode::Removed);
+	}
+}
+
+void Transform2DComponent::onAddedToEntity(EntityRef& entity)
+{
+	this->entity = entity;
+	markDirty(DirtyPropagationMode::Added);
 }
 
 void Transform2DComponent::setLocalPosition(Halley::Vector2f v)
@@ -127,11 +137,6 @@ Rect4f Transform2DComponent::getSpriteAABB(const Sprite& sprite) const
 	return sprite.getAABB() - sprite.getPosition() + getGlobalPosition();
 }
 
-void Transform2DComponent::onAddedToEntity(EntityRef& entity)
-{
-	this->entity = entity;
-}
-
 void Transform2DComponent::deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
 {
 	Transform2DComponentBase::deserialize(context, node);
@@ -148,10 +153,33 @@ void Transform2DComponent::checkDirty() const
 	}
 }
 
-void Transform2DComponent::markDirty() const
+void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth) const
 {
-	++revision;
-	cachedValues = 0;
+	// For "Changed" mode only:
+	// If cachedValues is zero, it means that nobody has read this (any read MUST set cachedValues to non-zero)
+	// Since nobody read it, then there's no need to do anything, or indeed to even propagate changes down
+	
+	if (cachedValues != 0 || mode != DirtyPropagationMode::Changed) {
+		++revision;
+		cachedValues = 0;
+
+		// Propagate to all children
+		for (auto& c: entity.getRawChildren()) {
+			const auto childTransform = c->tryGetComponent<Transform2DComponent>();
+			if (childTransform) {
+				childTransform->markDirty(mode, depth + 1);
+			}
+		}
+
+		// For the level immediately below the forced updated, the entity should also re-get parent transform as it might be new or gone
+		if (depth == 1) {
+			if (mode == DirtyPropagationMode::Added) {
+				parentTransform = entity.getParent().tryGetComponent<Transform2DComponent>();
+			} else if (mode == DirtyPropagationMode::Removed) {
+				parentTransform = nullptr;
+			}
+		}
+	}
 }
 
 bool Transform2DComponent::isCached(CachedIndices index) const

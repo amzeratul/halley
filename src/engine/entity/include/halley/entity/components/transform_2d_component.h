@@ -60,6 +60,7 @@ private:
 	mutable Halley::EntityRef entity;
 	mutable Transform2DComponent* parentTransform = nullptr;
 	mutable uint32_t revision = 0;
+	mutable uint32_t parentRevision = 0;
 	mutable uint8_t hierarchyRevision = 0xFF;
 
 	mutable uint32_t cachedValues = 0;
@@ -75,8 +76,14 @@ private:
 		SubWorld
 	};
 
+	enum class DirtyPropagationMode {
+		Changed,
+		Added,
+		Removed
+	};
+
 	void checkDirty() const;
-	void markDirty() const;
+	void markDirty(DirtyPropagationMode mode = DirtyPropagationMode::Changed, int depth = 0) const;
 	bool isCached(CachedIndices index) const;
 	void setCached(CachedIndices index) const;
 };
