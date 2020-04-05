@@ -43,6 +43,7 @@ set(SOURCES
         "src/ui/widgets/ui_spin_control.cpp"
 		"src/ui/widgets/ui_spin_list.cpp"
         "src/ui/widgets/ui_textinput.cpp"
+        "src/ui/widgets/ui_tree_list.cpp"
         )
 
 set(HEADERS
@@ -89,6 +90,7 @@ set(HEADERS
         "include/halley/ui/widgets/ui_spin_control.h"
 		"include/halley/ui/widgets/ui_spin_list.h"
         "include/halley/ui/widgets/ui_textinput.h"
+        "include/halley/ui/widgets/ui_tree_list.h"
         )
 
 assign_source_group(${SOURCES})

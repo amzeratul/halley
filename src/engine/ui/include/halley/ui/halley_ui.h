@@ -38,3 +38,4 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "widgets/ui_slider.h"
 #include "widgets/ui_spin_control.h"
 #include "widgets/ui_textinput.h"
+#include "widgets/ui_tree_list.h"
