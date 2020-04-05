@@ -55,6 +55,9 @@ namespace Halley {
         virtual void dragCamera(Vector2f amount) = 0;
         virtual void changeZoom(int amount, Vector2f cursorPosRelToCamera) = 0;
 
+    	virtual void setSelectedEntity(EntityId id) = 0;
+    	virtual void showEntity(EntityId id) = 0;
+
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     };
 
