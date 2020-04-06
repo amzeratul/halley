@@ -48,7 +48,7 @@ namespace Halley {
 		T* tryGetComponent()
 		{
 			constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
-			for (size_t i = 0; i < components.size(); i++) {
+			for (int i = 0; i < liveComponents; i++) {
 				if (components[i].first == id) {
 					return static_cast<T*>(components[i].second);
 				}
@@ -60,7 +60,7 @@ namespace Halley {
 		const T* tryGetComponent() const
 		{
 			constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
-			for (size_t i = 0; i < components.size(); i++) {
+			for (int i = 0; i < liveComponents; i++) {
 				if (components[i].first == id) {
 					return static_cast<const T*>(components[i].second);
 				}

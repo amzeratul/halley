@@ -125,10 +125,9 @@ void Entity::markHierarchyDirty()
 	hierarchyRevision++;
 
 	// Notify transform
-	for (int i = 0; i < liveComponents; ++i) {
-		if (components[i].first == Transform2DComponent::componentIndex) {
-			reinterpret_cast<Transform2DComponent*>(components[i].second)->onHierarchyChanged();
-		}
+	auto transform = tryGetComponent<Transform2DComponent>();
+	if (transform) {
+		transform->onHierarchyChanged();
 	}
 	
 	for (auto& child: children) {
