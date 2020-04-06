@@ -23,22 +23,34 @@ Transform2DComponent::~Transform2DComponent()
 void Transform2DComponent::onAddedToEntity(EntityRef& entity)
 {
 	this->entity = entity;
+	updateParentTransform();
 	markDirty(DirtyPropagationMode::Added);
 }
 
-void Transform2DComponent::setLocalPosition(Halley::Vector2f v)
+void Transform2DComponent::onHierarchyChanged()
+{
+	updateParentTransform();	
+	markDirtyShallow();
+}
+
+void Transform2DComponent::updateParentTransform()
+{
+	parentTransform = entity.hasParent() ? entity.getParent().tryGetComponent<Transform2DComponent>() : nullptr;
+}
+
+void Transform2DComponent::setLocalPosition(Vector2f v)
 {
 	position = v;
 	markDirty();
 }
 
-void Transform2DComponent::setLocalScale(Halley::Vector2f v)
+void Transform2DComponent::setLocalScale(Vector2f v)
 {
 	scale = v;
 	markDirty();
 }
 
-void Transform2DComponent::setLocalRotation(Halley::Angle1f v)
+void Transform2DComponent::setLocalRotation(Angle1f v)
 {
 	rotation = v;
 	markDirty();
@@ -46,7 +58,6 @@ void Transform2DComponent::setLocalRotation(Halley::Angle1f v)
 
 Vector2f Transform2DComponent::getGlobalPosition() const
 {
-	checkDirty();
 	if (parentTransform) {
 		if (!isCached(CachedIndices::Position)) {
 			setCached(CachedIndices::Position);
@@ -60,7 +71,6 @@ Vector2f Transform2DComponent::getGlobalPosition() const
 
 void Transform2DComponent::setGlobalPosition(Vector2f v)
 {
-	checkDirty();
 	if (parentTransform) {
 		position = parentTransform->inverseTransformPoint(v);
 	} else {
@@ -101,7 +111,6 @@ int Transform2DComponent::getSubWorld() const
 		return subWorld;
 	} else {
 		// Default value, default to parent, or to zero if no parent
-		checkDirty();
 		if (parentTransform) {
 			if (!isCached(CachedIndices::SubWorld)) {
 				setCached(CachedIndices::SubWorld);
@@ -143,16 +152,6 @@ void Transform2DComponent::deserialize(ConfigNodeSerializationContext& context, 
 	markDirty();
 }
 
-void Transform2DComponent::checkDirty() const
-{
-	const auto curRev = entity.getHierarchyRevision();
-	if (hierarchyRevision != curRev) {
-		hierarchyRevision = curRev;
-		parentTransform = entity.hasParent() ? entity.getParent().tryGetComponent<Transform2DComponent>() : nullptr;
-		markDirty();
-	}
-}
-
 void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth) const
 {
 	// For "Changed" mode only:
@@ -160,8 +159,7 @@ void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth) const
 	// Since nobody read it, then there's no need to do anything, or indeed to even propagate changes down
 	
 	if (cachedValues != 0 || mode != DirtyPropagationMode::Changed) {
-		++revision;
-		cachedValues = 0;
+		markDirtyShallow();
 
 		// Propagate to all children
 		for (auto& c: entity.getRawChildren()) {
@@ -180,6 +178,12 @@ void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth) const
 			}
 		}
 	}
+}
+
+void Transform2DComponent::markDirtyShallow() const
+{
+	++revision;
+	cachedValues = 0;
 }
 
 bool Transform2DComponent::isCached(CachedIndices index) const

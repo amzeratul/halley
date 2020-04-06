@@ -2,6 +2,10 @@
 #include "entity.h"
 #include "world.h"
 
+#define DONT_INCLUDE_HALLEY_HPP
+#include "components/transform_2d_component.h"
+
+
 using namespace Halley;
 
 Entity::Entity() = default;
@@ -119,6 +123,14 @@ void Entity::detachChildren()
 void Entity::markHierarchyDirty()
 {
 	hierarchyRevision++;
+
+	// Notify transform
+	for (int i = 0; i < liveComponents; ++i) {
+		if (components[i].first == Transform2DComponent::componentIndex) {
+			reinterpret_cast<Transform2DComponent*>(components[i].second)->onHierarchyChanged();
+		}
+	}
+	
 	for (auto& child: children) {
 		child->markHierarchyDirty();
 	}
