@@ -15,7 +15,6 @@
 #include "importers/shader_importer.h"
 #include "halley/text/string_converter.h"
 #include "halley/tools/project/project.h"
-#include <boost/variant/detail/substitute.hpp>
 #include "importers/texture_importer.h"
 #include "importers/mesh_importer.h"
 
