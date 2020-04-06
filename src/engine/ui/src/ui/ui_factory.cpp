@@ -23,6 +23,7 @@
 #include "halley/ui/widgets/ui_hybrid_list.h"
 #include "widgets/ui_spin_list.h"
 #include "widgets/ui_option_list_morpher.h"
+#include "widgets/ui_tree_list.h"
 
 using namespace Halley;
 
@@ -60,6 +61,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("hybridList", [=] (const ConfigNode& node) { return makeHybridList(node); });
 	addFactory("spinList", [=](const ConfigNode& node) { return makeSpinList(node); });
 	addFactory("optionListMorpher", [=](const ConfigNode& node) { return makeOptionListMorpher(node); });
+	addFactory("treeList", [=](const ConfigNode& node) { return makeTreeList(node); });
 }
 
 void UIFactory::addFactory(const String& key, WidgetFactory factory)
@@ -812,6 +814,21 @@ std::shared_ptr<UIWidget> UIFactory::makeOptionListMorpher(const ConfigNode& ent
 	auto widget = std::make_shared<UIOptionListMorpher>(id, dropdownStyle, spinlistStyle, scrollStyle, listStyle);
 	applyInputButtons(*widget, node["inputButtons"].asString("list"));
 	widget->setOptions(optionIds, optionLabels);
+	return widget;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeTreeList(const ConfigNode& entryNode)
+{
+	const auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto style = UIStyle(node["style"].asString("list"), styleSheet);
+	auto label = parseLabel(node);
+
+	auto widget = std::make_shared<UITreeList>(id, style);
+	applyInputButtons(*widget, node["inputButtons"].asString("list"));
+
+	widget->setDrag(node["canDrag"].asBool(false));
+
 	return widget;
 }
 

@@ -43,6 +43,7 @@ namespace Halley {
 
 		std::shared_ptr<UIListItem> getItem(int n) const;
 		std::shared_ptr<UIListItem> getItem(const String& id) const;
+		std::shared_ptr<UIListItem> tryGetItem(const String& id) const;
 
 		bool canDrag() const;
 		void setDrag(bool drag);
@@ -60,8 +61,12 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 		void onInput(const UIInputResults& input, Time time) override;
 
-	private:
+		void addItem(std::shared_ptr<UIListItem> item, Vector4f border = Vector4f());
+		size_t getNumberOfItems() const;
+
 		UIStyle style;
+
+	private:
 		UISizerType orientation;
 		Sprite sprite;
 		std::vector<std::shared_ptr<UIListItem>> items;
@@ -78,11 +83,9 @@ namespace Halley {
 		void onItemClicked(UIListItem& item);
 		void onItemDoubleClicked(UIListItem& item);
 		void onItemDragged(UIListItem& item, int index, Vector2f pos);
-		void addItem(std::shared_ptr<UIListItem> item);
 		void onAccept();
 		void onCancel();
 		void reassignIds();
-		size_t getNumberOfItems() const;
 
 		void swapItems(int idxA, int idxB);
 		bool isManualDragging() const;
@@ -105,6 +108,11 @@ namespace Halley {
 		void notifySwap(Vector2f to);
 		bool canSwap() const;
 		Vector2f getOrigPosition() const;
+
+		void setParentItem(const String& parentItemId);
+		const String& getParentItemId() const;
+		void setDepth(int depth);
+		int getDepth() const;
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -136,6 +144,9 @@ namespace Halley {
 		Vector2f swapTo;
 		Time swapTime = 0;
 		int manualDragTime = 0;
+
+		int depth = 0;
+		String parentItemId;
 
 		void doSetState(State state) override;
 		void updateSpritePosition();

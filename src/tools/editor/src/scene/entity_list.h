@@ -12,7 +12,7 @@ namespace Halley {
 
 	private:
 		UIFactory& factory;
-		std::shared_ptr<UIList> list;
+		std::shared_ptr<UITreeList> list;
 		
 		void makeUI();
 		void addEntities(const EntityTree& entity, int depth, const String& parentId);

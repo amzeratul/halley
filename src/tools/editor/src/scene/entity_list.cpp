@@ -10,7 +10,7 @@ EntityList::EntityList(String id, UIFactory& factory)
 
 void EntityList::makeUI()
 {
-	list = std::make_shared<UIList>(getId() + "_list", factory.getStyle("list"));
+	list = std::make_shared<UITreeList>(getId() + "_list", factory.getStyle("list"));
 	list->setSingleClickAccept(false);
 	add(list, 1);
 }
@@ -19,10 +19,7 @@ void EntityList::addEntities(const EntityTree& entity, int depth, const String& 
 {
 	// Root is empty, don't add it
 	if (!entity.entityId.isEmpty()) {
-		// HACK
-		auto prefix = std::string(depth * 4, ' ');
-		
-		list->addTextItem(entity.entityId, LocalisedString::fromUserString(prefix + entity.name));
+		list->addTreeItem(entity.entityId, parentId, LocalisedString::fromUserString(entity.name));
 	}
 	
 	for (auto& e: entity.children) {

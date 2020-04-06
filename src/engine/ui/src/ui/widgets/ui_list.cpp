@@ -161,10 +161,10 @@ void UIList::setItemActive(const String& id, bool active)
 	}
 }
 
-void UIList::addItem(std::shared_ptr<UIListItem> item)
+void UIList::addItem(std::shared_ptr<UIListItem> item, Vector4f border)
 {
-	add(item, uniformSizedItems ? 1.0f : 0.0f);
-	bool wasEmpty = getNumberOfItems() == 0;
+	add(item, uniformSizedItems ? 1.0f : 0.0f, border);
+	const bool wasEmpty = getNumberOfItems() == 0;
 	items.push_back(item);
 	if (wasEmpty) {
 		curOption = -1;
@@ -226,6 +226,16 @@ std::shared_ptr<UIListItem> UIList::getItem(const String& id) const
 		}
 	}
 	throw Exception("Invalid item", HalleyExceptions::UI);
+}
+
+std::shared_ptr<UIListItem> UIList::tryGetItem(const String& id) const
+{
+	for (auto& item : items) {
+		if (item->getId() == id) {
+			return item;
+		}
+	}
+	return {};
 }
 
 bool UIList::canDrag() const
@@ -637,6 +647,26 @@ bool UIListItem::canSwap() const
 Vector2f UIListItem::getOrigPosition() const
 {
 	return origPos;
+}
+
+void UIListItem::setParentItem(const String& parentId)
+{
+	parentItemId = parentId;
+}
+
+const String& UIListItem::getParentItemId() const
+{
+	return parentItemId;
+}
+
+void UIListItem::setDepth(int d)
+{
+	depth = d;
+}
+
+int UIListItem::getDepth() const
+{
+	return depth;
 }
 
 bool UIList::setSelectedOptionId(const String& id)
