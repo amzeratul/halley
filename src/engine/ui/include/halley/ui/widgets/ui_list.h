@@ -139,6 +139,7 @@ namespace Halley {
 		Vector2f myStartPos;
 		Vector2f origPos;
 		Vector2f curDragPos;
+		Vector2f dragWidgetOffset;
 		UIWidget* dragWidget = nullptr;
 
 		bool swapping = false;

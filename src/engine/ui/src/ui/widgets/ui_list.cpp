@@ -549,6 +549,7 @@ void UIListItem::pressMouse(Vector2f mousePos, int button)
 			dragWidget = this;
 		}
 		myStartPos = dragWidget->getPosition();
+		dragWidgetOffset = myStartPos - getPosition();
 
 		parent.onItemClicked(*this);
 	}
@@ -602,6 +603,10 @@ void UIListItem::updateSpritePosition()
 {
 	if (sprite.hasMaterial()) {
 		Vector2f pos = getPosition();
+
+		if (dragged) {
+			pos = dragWidget->getPosition() - dragWidgetOffset;
+		}
 		sprite.scaleTo(getSize() - innerBorder.xy() - innerBorder.zw()).setPos(pos + innerBorder.xy());
 	}
 }
