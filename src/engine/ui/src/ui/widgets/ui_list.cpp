@@ -429,7 +429,7 @@ void UIList::onItemDragged(UIListItem& item, int index, Vector2f pos)
 }
 
 UIListItem::UIListItem(const String& id, UIList& parent, UIStyle style, int index, Vector4f extraMouseArea)
-	: UIClickable(id, {}, UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
+	: UIClickable(id, {}, UISizer(UISizerType::Horizontal), style.getBorder("innerBorder"))
 	, parent(parent)
 	, style(style)
 	, index(index)
@@ -596,7 +596,7 @@ void UIListItem::updateSpritePosition()
 {
 	if (sprite.hasMaterial()) {
 		Vector2f pos = getPosition();
-		sprite.scaleTo(getSize()).setPos(pos);
+		sprite.scaleTo(getSize() - innerBorder.xy() - innerBorder.zw()).setPos(pos + innerBorder.xy());
 	}
 }
 
@@ -621,12 +621,17 @@ Rect4f UIListItem::getMouseRect() const
 	if (rect.getWidth() <= 0.01f || rect.getHeight() <= 0.01f) {
 		return rect;
 	}
-	return Rect4f(rect.getTopLeft() - Vector2f(extraMouseArea.x, extraMouseArea.y), rect.getBottomRight() + Vector2f(extraMouseArea.z, extraMouseArea.w));
+	return Rect4f(rect.getTopLeft() - extraMouseArea.xy() + innerBorder.xy(), rect.getBottomRight() + extraMouseArea.zw() - innerBorder.zw());
 }
 
 Rect4f UIListItem::getRawRect() const
 {
 	return Rect4f(getPosition(), getPosition() + getSize());
+}
+
+void UIListItem::setClickableInnerBorder(Vector4f ib)
+{
+	innerBorder = ib;
 }
 
 void UIListItem::notifySwap(Vector2f to)
@@ -647,26 +652,6 @@ bool UIListItem::canSwap() const
 Vector2f UIListItem::getOrigPosition() const
 {
 	return origPos;
-}
-
-void UIListItem::setParentItem(const String& parentId)
-{
-	parentItemId = parentId;
-}
-
-const String& UIListItem::getParentItemId() const
-{
-	return parentItemId;
-}
-
-void UIListItem::setDepth(int d)
-{
-	depth = d;
-}
-
-int UIListItem::getDepth() const
-{
-	return depth;
 }
 
 bool UIList::setSelectedOptionId(const String& id)

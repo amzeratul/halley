@@ -103,16 +103,14 @@ namespace Halley {
 
 		int getIndex() const;
 		void setIndex(int index);
+		
 		Rect4f getMouseRect() const override;
 		Rect4f getRawRect() const;
+		void setClickableInnerBorder(Vector4f innerBorder);
+		
 		void notifySwap(Vector2f to);
 		bool canSwap() const;
 		Vector2f getOrigPosition() const;
-
-		void setParentItem(const String& parentItemId);
-		const String& getParentItemId() const;
-		void setDepth(int depth);
-		int getDepth() const;
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -130,6 +128,7 @@ namespace Halley {
 		int index;
 		Sprite sprite;
 		Vector4f extraMouseArea;
+		Vector4f innerBorder;
 		bool selected = false;
 
 		bool held = false;
@@ -144,9 +143,6 @@ namespace Halley {
 		Vector2f swapTo;
 		Time swapTime = 0;
 		int manualDragTime = 0;
-
-		int depth = 0;
-		String parentItemId;
 
 		void doSetState(State state) override;
 		void updateSpritePosition();

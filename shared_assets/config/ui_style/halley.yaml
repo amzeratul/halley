@@ -48,7 +48,7 @@ uiStyle:
       normal: ""
       hover: { img: halley_ui/ui_list_item.png, colour: "#5E3962" }
       selected: { img: halley_ui/ui_list_item.png, colour: "#9C5BB5" }
-      innerBorder: [ 6, 5, 6, 2 ]
+      innerBorder: [ 0, 0, 0, 0 ]
     innerBorder: [ 0, 0, 0, 0 ]
     extraMouseBorder: [ 1, 1, 1, 1 ]
     selectionChangedSound: ""
@@ -56,6 +56,7 @@ uiStyle:
     selectedLabel: { font: Ubuntu Regular, size: 13, colour: "#FFFFFF" }
     gap: 1
     indentation: 20
+    element: { img: "halley_ui/ui_treeview_element.png", colour: "#9C5BB5" }
 
   dropdown:
     normal: { img: halley_ui/ui_dropdown_closed.png, colour: "#9C5BB5" }
