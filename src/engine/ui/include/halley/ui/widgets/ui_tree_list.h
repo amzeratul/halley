@@ -16,7 +16,8 @@ namespace Halley {
         std::shared_ptr<UIButton> collapseButton;
     	bool waitingConstruction = true;
         float totalIndent = 0;
-
+        size_t lastDepth = 0;
+    	
     	void setupUI();
     };
 	

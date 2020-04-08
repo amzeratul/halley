@@ -66,30 +66,35 @@ UITreeListControls::UITreeListControls(String id, UIStyle style)
 
 float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth, bool hasChildren)
 {
-	auto getSprite = [&] (size_t depth) -> Sprite
-	{
-		const auto left = itemsLeftPerDepth[depth];
-		const bool deepest = depth == itemsLeftPerDepth.size() - 1;
-		if (deepest) {
-			if (left == 1) {
-				return style.getSprite("guide_l");
-			} else {
-				return style.getSprite("guide_t");
-			}
-		} else {
-			if (left == 1) {
-				return Sprite().setSize(Vector2f(22, 22));
-			} else {
-				return style.getSprite("guide_i");
-			}
-		}
-	};
-	
-	if (waitingConstruction || itemsLeftPerDepth.size() != guides.size() + 1) {
+	if (waitingConstruction || itemsLeftPerDepth.size() != lastDepth) {
 		clear();
 		guides.clear();
+		lastDepth = itemsLeftPerDepth.size();
 
-		for (size_t i = 1; i < itemsLeftPerDepth.size(); ++i) {
+		auto getSprite = [&](size_t depth) -> Sprite
+		{
+			const auto left = itemsLeftPerDepth[depth];
+			const bool deepest = depth == itemsLeftPerDepth.size() - 1;
+			if (deepest) {
+				if (left == 1) {
+					return style.getSprite("guide_l");
+				}
+				else {
+					return style.getSprite("guide_t");
+				}
+			}
+			else {
+				if (left == 1) {
+					return Sprite().setSize(Vector2f(22, 22));
+				}
+				else {
+					return style.getSprite("guide_i");
+				}
+			}
+		};
+		
+		const size_t lastDepth = itemsLeftPerDepth.size() - (hasChildren ? 1 : 0);
+		for (size_t i = 0; i < lastDepth; ++i) {
 			guides.push_back(std::make_shared<UIImage>(getSprite(i)));
 			add(guides.back(), 0, Vector4f(0, -1, 0, 0));
 		}
