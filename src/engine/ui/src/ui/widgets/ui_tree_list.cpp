@@ -17,12 +17,15 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 {
 	auto listItem = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 
+	// Controls
 	const auto treeControls = std::make_shared<UITreeListControls>(id, style.getSubStyle("controls"));
 	listItem->add(treeControls, 0, {}, UISizerFillFlags::Fill);
 
+	// Icon
 	auto icon = std::make_shared<UIImage>(style.getSubStyle("controls").getSprite("element"));
 	listItem->add(icon, 0, {}, UISizerAlignFlags::Centre);
 
+	// Label
 	auto labelWidget = std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label);
 	if (style.hasTextRenderer("selectedLabel")) {
 		labelWidget->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
@@ -32,8 +35,8 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 	}
 	listItem->add(labelWidget, 0, style.getBorder("labelBorder"), UISizerFillFlags::Fill);
 
+	// Logical item
 	auto treeItem = UITreeListItem(id, listItem, treeControls);
-	
 	auto& parentItem = getItemOrRoot(parentId);
 	parentItem.addChild(std::move(treeItem));
 
@@ -58,6 +61,7 @@ UITreeListControls::UITreeListControls(String id, UIStyle style)
 	: UIWidget(std::move(id), Vector2f(), UISizer(UISizerType::Horizontal, 0))
 	, style(std::move(style))
 {
+	setupUI();
 }
 
 float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth, bool hasChildren)
@@ -91,8 +95,11 @@ float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth
 		}
 
 		if (hasChildren) {
-			expandArrow = std::make_shared<UIImage>(style.getSprite("expanded"));
-			add(expandArrow, 0, Vector4f(), UISizerAlignFlags::Centre);
+			expandButton = std::make_shared<UIButton>("expand", style.getSubStyle("expandButton"));
+			collapseButton = std::make_shared<UIButton>("collapse", style.getSubStyle("collapseButton"));
+			expandButton->setActive(false);
+			add(expandButton, 0, Vector4f(), UISizerAlignFlags::Centre);
+			add(collapseButton, 0, Vector4f(), UISizerAlignFlags::Centre);
 		}
 
 		totalIndent = getLayoutMinimumSize(false).x;
@@ -100,6 +107,20 @@ float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth
 	}
 
 	return totalIndent;
+}
+
+void UITreeListControls::setupUI()
+{
+	setHandle(UIEventType::ButtonClicked, "expand", [=] (const UIEvent& event)
+	{
+		expandButton->setActive(false);
+		collapseButton->setActive(true);
+	});
+	setHandle(UIEventType::ButtonClicked, "collapse", [=](const UIEvent& event)
+	{
+		expandButton->setActive(true);
+		collapseButton->setActive(false);
+	});
 }
 
 UITreeListItem::UITreeListItem() = default;

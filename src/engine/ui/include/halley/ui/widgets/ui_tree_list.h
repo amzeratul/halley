@@ -12,9 +12,12 @@ namespace Halley {
     private:
     	UIStyle style;
     	std::vector<std::shared_ptr<UIImage>> guides;
-        std::shared_ptr<UIImage> expandArrow;
+        std::shared_ptr<UIButton> expandButton;
+        std::shared_ptr<UIButton> collapseButton;
     	bool waitingConstruction = true;
         float totalIndent = 0;
+
+    	void setupUI();
     };
 	
     class UITreeListItem {

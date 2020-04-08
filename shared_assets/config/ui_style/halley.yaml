@@ -62,8 +62,28 @@ uiStyle:
       guide_t: { img: "halley_ui/ui_treeview_line_t.png", colour: "#9C5BB5" }
       guide_l: { img: "halley_ui/ui_treeview_line_l.png", colour: "#9C5BB5" }
       guide_empty: { img: "halley_ui/ui_treeview_line_i.png", colour: "#00000000" }
-      expanded: { img: "halley_ui/ui_treeview_expanded.png", colour: "#FFFFFF" }
-      collapsed: { img: "halley_ui/ui_treeview_collapsed.png", colour: "#FFFFFF" }
+      collapseButton:
+        normal: { img: halley_ui/ui_treeview_expanded.png, colour: "#9C5BB5" }
+        down: { img: halley_ui/ui_treeview_expanded.png, colour: "#913DA3" }
+        hover: { img: halley_ui/ui_treeview_expanded.png, colour: "#B68FCB" }
+        disabled: { img: halley_ui/ui_treeview_expanded.png, colour: "#927B95" }
+        innerBorder: [ 0, 0, 0, 0 ]
+        upSound: ""
+        downSound: ""
+        hoverSound: ""
+        label: { font: Ubuntu Regular, size: 13, colour: "#FFFFFF" }
+        labelBorder: [0, 0, 0, 0]
+      expandButton:
+        normal: { img: halley_ui/ui_treeview_collapsed.png, colour: "#9C5BB5" }
+        down: { img: halley_ui/ui_treeview_collapsed.png, colour: "#913DA3" }
+        hover: { img: halley_ui/ui_treeview_collapsed.png, colour: "#B68FCB" }
+        disabled: { img: halley_ui/ui_treeview_collapsed.png, colour: "#927B95" }
+        innerBorder: [ 0, 0, 0, 0 ]
+        upSound: ""
+        downSound: ""
+        hoverSound: ""
+        label: { font: Ubuntu Regular, size: 13, colour: "#FFFFFF" }
+        labelBorder: [0, 0, 0, 0]
 
   dropdown:
     normal: { img: halley_ui/ui_dropdown_closed.png, colour: "#9C5BB5" }
