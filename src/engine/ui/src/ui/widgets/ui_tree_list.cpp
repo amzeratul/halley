@@ -11,6 +11,7 @@ using namespace Halley;
 UITreeList::UITreeList(String id, UIStyle style)
 	: UIList(std::move(id), std::move(style))
 {
+	setupEvents();
 }
 
 void UITreeList::addTreeItem(const String& id, const String& parentId, const LocalisedString& label)
@@ -46,7 +47,7 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 void UITreeList::update(Time t, bool moved)
 {
 	UIList::update(t, moved);
-	root.updateTree();
+	root.updateTree(*this);
 }
 
 UITreeListItem& UITreeList::getItemOrRoot(const String& id)
@@ -56,6 +57,25 @@ UITreeListItem& UITreeList::getItemOrRoot(const String& id)
 		return *res;
 	}
 	return root;
+}
+
+void UITreeList::setupEvents()
+{
+	setHandle(UIEventType::TreeCollapse, [=] (const UIEvent& event)
+	{
+		auto elem = root.tryFindId(event.getStringData());
+		if (elem) {
+			elem->setExpanded(false);
+		}
+	});
+
+	setHandle(UIEventType::TreeExpand, [=](const UIEvent& event)
+	{
+		auto elem = root.tryFindId(event.getStringData());
+		if (elem) {
+			elem->setExpanded(true);
+		}
+	});
 }
 
 UITreeListControls::UITreeListControls(String id, UIStyle style)
@@ -122,11 +142,15 @@ void UITreeListControls::setupUI()
 	{
 		expandButton->setActive(false);
 		collapseButton->setActive(true);
+
+		sendEvent(UIEvent(UIEventType::TreeExpand, getId(), getId()));
 	});
 	setHandle(UIEventType::ButtonClicked, "collapse", [=](const UIEvent& event)
 	{
-		expandButton->setActive(true);
 		collapseButton->setActive(false);
+		expandButton->setActive(true);
+
+		sendEvent(UIEvent(UIEventType::TreeCollapse, getId(), getId()));
 	});
 }
 
@@ -159,25 +183,30 @@ void UITreeListItem::addChild(UITreeListItem item)
 	children.emplace_back(std::move(item));
 }
 
-void UITreeListItem::updateTree()
+void UITreeListItem::setExpanded(bool e)
 {
-	std::vector<int> itemsLeftPerDepth;
-	doUpdateTree(itemsLeftPerDepth);
+	expanded = e;
 }
 
-void UITreeListItem::doUpdateTree(std::vector<int>& itemsLeftPerDepth)
+void UITreeListItem::updateTree(UITreeList& treeList)
 {
-	if (listItem && treeControls) {
+	std::vector<int> itemsLeftPerDepth;
+	doUpdateTree(treeList, itemsLeftPerDepth, expanded);
+}
+
+void UITreeListItem::doUpdateTree(UITreeList& treeList, std::vector<int>& itemsLeftPerDepth, bool treeExpanded)
+{
+	treeList.setItemActive(id, treeExpanded);
+
+	if (listItem && treeControls && treeExpanded) {
 		const float totalIndent = treeControls->updateGuides(itemsLeftPerDepth, !children.empty());
 		listItem->setClickableInnerBorder(Vector4f(totalIndent, 0, 0, 0));
 	}
-
+	
 	itemsLeftPerDepth.push_back(int(children.size()));
-
 	for (auto& c: children) {
-		c.doUpdateTree(itemsLeftPerDepth);
+		c.doUpdateTree(treeList, itemsLeftPerDepth, expanded && treeExpanded);
 		itemsLeftPerDepth.back()--;
 	}
-
 	itemsLeftPerDepth.pop_back();
 }

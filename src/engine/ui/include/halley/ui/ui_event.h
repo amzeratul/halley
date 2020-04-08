@@ -35,6 +35,8 @@ namespace Halley {
 		TabChanged,
 		TabbedIn,
 		TabbedOut,
+		TreeCollapse,
+		TreeExpand,
 		WidgetHighlighted
 	};
 

@@ -20,6 +20,8 @@ namespace Halley {
     	
     	void setupUI();
     };
+
+	class UITreeList;
 	
     class UITreeListItem {
     public:
@@ -29,15 +31,17 @@ namespace Halley {
     	UITreeListItem* tryFindId(const String& id);
     	void addChild(UITreeListItem item);
 
-    	void updateTree();
+    	void updateTree(UITreeList& treeList);
+        void setExpanded(bool expanded);
 
     private:
     	String id;
         std::shared_ptr<UIListItem> listItem;
         std::shared_ptr<UITreeListControls> treeControls;
     	std::vector<UITreeListItem> children;
+    	bool expanded = true;
 
-    	void doUpdateTree(std::vector<int>& itemsLeftPerDepth);
+    	void doUpdateTree(UITreeList& treeList, std::vector<int>& itemsLeftPerDepth, bool treeExpanded);
     };
 	
     class UITreeList : public UIList {
@@ -53,5 +57,6 @@ namespace Halley {
     	UITreeListItem root;
 
     	UITreeListItem& getItemOrRoot(const String& id);
+        void setupEvents();
     };
 }
