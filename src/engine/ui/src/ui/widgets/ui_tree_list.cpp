@@ -68,13 +68,13 @@ void UITreeList::onItemDragging(UIListItem& item, int index, Vector2f pos)
 
 	const auto res = root.findPosition(pos + item.getRect().getSize() / 2);
 	if (res) {
-		const auto pos = res.value();
-		auto rect = pos.rect;
+		const auto& resData = res.value();
+		auto rect = resData.rect;
 		if (rect.getHeight() < 1) {
 			rect = Rect4f(rect.getTopLeft() - Vector2f(0, 1), rect.getTopRight() + Vector2f(0, 1));
 		}
 		
-		insertCursor = style.getSubStyle("cursor").getSprite(pos.type == UITreeListItem::PositionType::OnTop ? "over" : "beforeAfter");
+		insertCursor = style.getSubStyle("cursor").getSprite(resData.type == UITreeListItem::PositionType::OnTop ? "over" : "beforeAfter");
 		insertCursor.setPos(rect.getTopLeft()).scaleTo(rect.getSize());
 	}	
 }
@@ -83,7 +83,35 @@ void UITreeList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
 {
 	auto res = root.findPosition(pos + item.getRect().getSize() / 2);
 	if (res) {
-		// TODO
+		const auto& resData = res.value();
+
+		const String& itemId = item.getId();
+		String newParentId;
+		size_t newChildIndex;
+		
+		if (resData.type == UITreeListItem::PositionType::OnTop) {
+			newParentId = resData.item->getId();
+			newChildIndex = resData.item->getNumberOfChildren();
+		} else {
+			newParentId = resData.item->getParentId();
+			const auto parent = root.tryFindId(newParentId);
+			const auto siblingIndex = parent->getChildIndex(resData.item->getId());
+			newChildIndex = siblingIndex + (resData.type == UITreeListItem::PositionType::Before ? 0 : 1);
+		}
+
+		const auto& curItem = *root.tryFindId(itemId);
+		const String& oldParentId = curItem.getParentId();
+		auto& oldParent = *root.tryFindId(oldParentId);
+		const size_t oldChildIndex = oldParent.getChildIndex(itemId);
+
+		if (oldParentId != newParentId || oldChildIndex != newChildIndex) {
+			auto& newParent = *root.tryFindId(newParentId);
+			newParent.addChild(oldParent.removeChild(itemId), newChildIndex);
+
+			sendEvent(UIEvent(UIEventType::TreeItemReparented, getId(), itemId, newParentId, int(newChildIndex)));
+
+			
+		}
 	}
 	insertCursor = Sprite();
 }
@@ -225,7 +253,31 @@ void UITreeListItem::addChild(UITreeListItem item)
 	if (children.empty()) {
 		expanded = true;
 	}
+	item.parentId = id;
 	children.emplace_back(std::move(item));
+}
+
+void UITreeListItem::addChild(UITreeListItem item, size_t pos)
+{
+	if (children.empty()) {
+		expanded = true;
+	}
+	item.parentId = id;
+	children.insert(children.begin() + pos, std::move(item));
+}
+
+UITreeListItem UITreeListItem::removeChild(const String& id)
+{
+	const size_t n = children.size();
+	for (size_t i = 0; i < n; ++i) {
+		if (children[i].id == id) {
+			UITreeListItem item = std::move(children[i]);
+			children.erase(children.begin() + i);
+			item.parentId = "";
+			return item;
+		}
+	}
+	throw Exception("No child with id \"" + id + "\"", HalleyExceptions::UI);
 }
 
 void UITreeListItem::setExpanded(bool e)
@@ -272,6 +324,26 @@ std::optional<UITreeListItem::FindPositionResult> UITreeListItem::findPosition(V
 const String& UITreeListItem::getId() const
 {
 	return id;
+}
+
+const String& UITreeListItem::getParentId() const
+{
+	return parentId;
+}
+
+size_t UITreeListItem::getNumberOfChildren() const
+{
+	return children.size();
+}
+
+size_t UITreeListItem::getChildIndex(const String& id) const
+{
+	for (size_t i = 0; i < children.size(); ++i) {
+		if (children[i].id == id) {
+			return i;
+		}
+	}
+	return 0;
 }
 
 void UITreeListItem::updateTree(UITreeList& treeList)

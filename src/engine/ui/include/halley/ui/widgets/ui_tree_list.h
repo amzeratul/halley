@@ -50,15 +50,22 @@ namespace Halley {
 
     	UITreeListItem* tryFindId(const String& id);
     	void addChild(UITreeListItem item);
+        void addChild(UITreeListItem item, size_t pos);
+    	UITreeListItem removeChild(const String& id);
 
     	void updateTree(UITreeList& treeList);
         void setExpanded(bool expanded);
 
     	std::optional<FindPositionResult> findPosition(Vector2f pos) const;
+    	
         const String& getId() const;
+    	const String& getParentId() const;
+    	size_t getNumberOfChildren() const;
+        size_t getChildIndex(const String& id) const;
 
     private:
     	String id;
+    	String parentId;
         std::shared_ptr<UIListItem> listItem;
         std::shared_ptr<UITreeListControls> treeControls;
     	std::vector<UITreeListItem> children;

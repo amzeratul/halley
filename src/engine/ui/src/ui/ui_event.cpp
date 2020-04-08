@@ -1,4 +1,6 @@
 #include "ui_event.h"
+
+#include <utility>
 #include "halley/support/exception.h"
 
 using namespace Halley;
@@ -10,28 +12,28 @@ UIEvent::UIEvent()
 
 UIEvent::UIEvent(UIEventType type, String sourceId, String data)
 	: type(type)
-	, sourceId(sourceId)
-	, data(data)
+	, sourceId(std::move(sourceId))
+	, strData(std::move(data))
 {
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, bool data)
 	: type(type)
-	, sourceId(sourceId)
+	, sourceId(std::move(sourceId))
 	, boolData(data)
 {
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, int data)
 	: type(type)
-	, sourceId(sourceId)
+	, sourceId(std::move(sourceId))
 	, intData(data)
 {
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, int data1, int data2)
 	: type(type)
-	, sourceId(sourceId)
+	, sourceId(std::move(sourceId))
 	, intData(data1)
 	, intData2(data2)
 {
@@ -39,29 +41,38 @@ UIEvent::UIEvent(UIEventType type, String sourceId, int data1, int data2)
 
 UIEvent::UIEvent(UIEventType type, String sourceId, float data)
 	: type(type)
-	, sourceId(sourceId)
+	, sourceId(std::move(sourceId))
 	, floatData(data)
 {
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, String data, int intData)
 	: type(type)
-	, sourceId(sourceId)
-	, data(data)
+	, sourceId(std::move(sourceId))
+	, strData(std::move(data))
+	, intData(intData)
+{
+}
+
+UIEvent::UIEvent(UIEventType type, String sourceId, String data, String data2, int intData)
+	: type(type)
+	, sourceId(std::move(sourceId))
+	, strData(std::move(data))
+	, strData2(std::move(data2))
 	, intData(intData)
 {
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, Vector2f data)
 	: type(type)
-	, sourceId(sourceId)
+	, sourceId(std::move(sourceId))
 	, vectorData(data)
 {
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, Rect4f data)
 	: type(type)
-	, sourceId(sourceId)
+	, sourceId(std::move(sourceId))
 	, rectData(data)
 {
 }
@@ -118,22 +129,27 @@ const String& UIEvent::getSourceId() const
 
 String UIEvent::getData() const
 {
-	return data;
+	return strData;
 }
 
 const String& UIEvent::getStringData() const
 {
-	return data;
+	return strData;
+}
+
+const String& UIEvent::getStringData2() const
+{
+	return strData2;
 }
 
 void UIEventHandler::setHandle(UIEventType type, UIEventCallback handler)
 {
-	handles[type] = handler;
+	handles[type] = std::move(handler);
 }
 
-void UIEventHandler::setHandle(UIEventType type, String id, UIEventCallback handler)
+void UIEventHandler::setHandle(UIEventType type, const String& id, UIEventCallback handler)
 {
-	specificHandles[std::make_pair(type, id)] = handler;
+	specificHandles[std::make_pair(type, id)] = std::move(handler);
 }
 
 bool UIEventHandler::canHandle(const UIEvent& event) const

@@ -116,7 +116,7 @@ namespace Halley {
 		Vector2f getOrigPosition() const;
 
 		void setDraggableSubWidget(UIWidget* widget);
-
+		
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
