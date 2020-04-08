@@ -29,10 +29,9 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 	item->setDepth(depth);
 	item->setParentItem(parentId);
-
-	const float ident = 20.0f;
-	
 	item->add(widget, 0, {}, UISizerFillFlags::Fill);
-	addItem(item, Vector4f(ident * depth, 0, 0, 0));
+
+	const float indent = getStyle().getFloat("indentation");
+	addItem(item, Vector4f(indent * float(depth), 0, 0, 0), UISizerAlignFlags::Left | UISizerFillFlags::FillVertical);
 }
 

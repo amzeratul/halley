@@ -6,8 +6,8 @@
 
 using namespace Halley;
 
-UIList::UIList(const String& id, UIStyle style, UISizerType orientation, int nColumns)
-	: UIWidget(id, {}, UISizer(orientation, style.getFloat("gap"), nColumns), style.getBorder("innerBorder"))
+UIList::UIList(String id, UIStyle style, UISizerType orientation, int nColumns)
+	: UIWidget(std::move(id), {}, UISizer(orientation, style.getFloat("gap"), nColumns), style.getBorder("innerBorder"))
 	, style(style)
 	, orientation(orientation)
 	, nColumns(nColumns)
@@ -161,12 +161,12 @@ void UIList::setItemActive(const String& id, bool active)
 	}
 }
 
-void UIList::addItem(std::shared_ptr<UIListItem> item, Vector4f border)
+void UIList::addItem(std::shared_ptr<UIListItem> item, Vector4f border, int fillFlags)
 {
-	add(item, uniformSizedItems ? 1.0f : 0.0f, border);
-	const bool wasEmpty = getNumberOfItems() == 0;
+	add(item, uniformSizedItems ? 1.0f : 0.0f, border, fillFlags);
 	items.push_back(item);
-	if (wasEmpty) {
+
+	if (getNumberOfItems() == 1) {
 		curOption = -1;
 		setSelectedOption(0);
 	}

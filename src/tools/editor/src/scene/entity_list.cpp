@@ -10,7 +10,7 @@ EntityList::EntityList(String id, UIFactory& factory)
 
 void EntityList::makeUI()
 {
-	list = std::make_shared<UITreeList>(getId() + "_list", factory.getStyle("list"));
+	list = std::make_shared<UITreeList>(getId() + "_list", factory.getStyle("treeList"));
 	list->setSingleClickAccept(false);
 	add(list, 1);
 }

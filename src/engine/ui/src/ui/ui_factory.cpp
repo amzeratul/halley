@@ -825,7 +825,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTreeList(const ConfigNode& entryNode)
 	auto label = parseLabel(node);
 
 	auto widget = std::make_shared<UITreeList>(id, style);
-	applyInputButtons(*widget, node["inputButtons"].asString("list"));
+	applyInputButtons(*widget, node["inputButtons"].asString("treeList"));
 
 	widget->setDrag(node["canDrag"].asBool(false));
 

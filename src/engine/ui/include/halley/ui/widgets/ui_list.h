@@ -15,7 +15,7 @@ namespace Halley {
 		friend class UIListItem;
 
 	public:
-		explicit UIList(const String& id, UIStyle style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
+		explicit UIList(String id, UIStyle style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 
 		bool setSelectedOption(int option);
 		bool setSelectedOptionId(const String& id);
@@ -61,7 +61,7 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 		void onInput(const UIInputResults& input, Time time) override;
 
-		void addItem(std::shared_ptr<UIListItem> item, Vector4f border = Vector4f());
+		void addItem(std::shared_ptr<UIListItem> item, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill);
 		size_t getNumberOfItems() const;
 
 		UIStyle style;

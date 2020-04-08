@@ -46,6 +46,8 @@ void SceneEditorWindow::loadScene(const String& name)
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 
 		entityList->refreshList(*sceneData);
+
+		showEntity(entity.getUUID().toString());
 	}
 }
 
