@@ -8,7 +8,7 @@ children:
 - sizer: { type: horizontal }
   proportion: 1
   children:
-  - widget: { id: scrollBarPane, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, size: [250, 30] }
+  - widget: { id: scrollBarPane, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, size: [350, 30] }
     sizer: { type: vertical }
     children:
     - widget: { id: entityList, class: entityList }

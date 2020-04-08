@@ -17,8 +17,11 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 {
 	auto listItem = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 
-	const auto treeControls = std::make_shared<UITreeListControls>(id, style.getSubStyle("controls").getSprite("element"), style.getSubStyle("controls"));
+	const auto treeControls = std::make_shared<UITreeListControls>(id, style.getSubStyle("controls"));
 	listItem->add(treeControls, 0, {}, UISizerFillFlags::Fill);
+
+	auto icon = std::make_shared<UIImage>(style.getSubStyle("controls").getSprite("element"));
+	listItem->add(icon, 0, {}, UISizerAlignFlags::Centre);
 
 	auto labelWidget = std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label);
 	if (style.hasTextRenderer("selectedLabel")) {
@@ -51,14 +54,13 @@ UITreeListItem& UITreeList::getItemOrRoot(const String& id)
 	return root;
 }
 
-UITreeListControls::UITreeListControls(String id, Sprite elementSprite, UIStyle style)
+UITreeListControls::UITreeListControls(String id, UIStyle style)
 	: UIWidget(std::move(id), Vector2f(), UISizer(UISizerType::Horizontal, 0))
 	, style(std::move(style))
-	, elementSprite(std::move(elementSprite))
 {
 }
 
-float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth)
+float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth, bool hasChildren)
 {
 	auto getSprite = [&] (size_t depth) -> Sprite
 	{
@@ -79,17 +81,19 @@ float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth
 		}
 	};
 	
-	if (waitingConstruction || itemsLeftPerDepth.size() != guides.size()) {
+	if (waitingConstruction || itemsLeftPerDepth.size() != guides.size() + 1) {
 		clear();
 		guides.clear();
 
-		for (size_t i = 0; i < itemsLeftPerDepth.size(); ++i) {
+		for (size_t i = 1; i < itemsLeftPerDepth.size(); ++i) {
 			guides.push_back(std::make_shared<UIImage>(getSprite(i)));
 			add(guides.back(), 0, Vector4f(0, -1, 0, 0));
 		}
 
-		elementImage = std::make_shared<UIImage>(elementSprite);
-		add(elementImage, 0, Vector4f(), UISizerAlignFlags::Centre);
+		if (hasChildren) {
+			expandArrow = std::make_shared<UIImage>(style.getSprite("expanded"));
+			add(expandArrow, 0, Vector4f(), UISizerAlignFlags::Centre);
+		}
 
 		totalIndent = getLayoutMinimumSize(false).x;
 		waitingConstruction = false;
@@ -136,7 +140,7 @@ void UITreeListItem::updateTree()
 void UITreeListItem::doUpdateTree(std::vector<int>& itemsLeftPerDepth)
 {
 	if (listItem && treeControls) {
-		const float totalIndent = treeControls->updateGuides(itemsLeftPerDepth);
+		const float totalIndent = treeControls->updateGuides(itemsLeftPerDepth, !children.empty());
 		listItem->setClickableInnerBorder(Vector4f(totalIndent, 0, 0, 0));
 	}
 
