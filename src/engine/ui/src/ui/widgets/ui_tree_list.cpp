@@ -22,8 +22,8 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 	listItem->add(treeControls, 0, {}, UISizerFillFlags::Fill);
 
 	// Icon
-	auto icon = std::make_shared<UIImage>(style.getSubStyle("controls").getSprite("element"));
-	listItem->add(icon, 0, {}, UISizerAlignFlags::Centre);
+	//auto icon = std::make_shared<UIImage>(style.getSubStyle("controls").getSprite("element"));
+	//listItem->add(icon, 0, {}, UISizerAlignFlags::Centre);
 
 	// Label
 	auto labelWidget = std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label);
@@ -45,6 +45,7 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 
 void UITreeList::update(Time t, bool moved)
 {
+	UIList::update(t, moved);
 	root.updateTree();
 }
 
@@ -73,28 +74,29 @@ float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth
 
 		auto getSprite = [&](size_t depth) -> Sprite
 		{
-			const auto left = itemsLeftPerDepth[depth];
-			const bool deepest = depth == itemsLeftPerDepth.size() - 1;
-			if (deepest) {
-				if (left == 1) {
-					return style.getSprite("guide_l");
-				}
-				else {
-					return style.getSprite("guide_t");
-				}
-			}
-			else {
-				if (left == 1) {
-					return Sprite().setSize(Vector2f(22, 22));
-				}
-				else {
-					return style.getSprite("guide_i");
+			const bool leaf = depth == itemsLeftPerDepth.size();
+			if (leaf) {
+				return style.getSprite("leaf");
+			} else {
+				const bool deepest = depth == itemsLeftPerDepth.size() - 1;
+				const auto left = itemsLeftPerDepth[depth];
+				if (deepest) {
+					if (left == 1) {
+						return style.getSprite("guide_l");
+					} else {
+						return style.getSprite("guide_t");
+					}
+				} else {
+					if (left == 1) {
+						return Sprite().setSize(Vector2f(22, 22));
+					} else {
+						return style.getSprite("guide_i");
+					}
 				}
 			}
 		};
 		
-		const size_t lastDepth = itemsLeftPerDepth.size() - (hasChildren ? 1 : 0);
-		for (size_t i = 0; i < lastDepth; ++i) {
+		for (size_t i = 1; i < itemsLeftPerDepth.size() + (hasChildren ? 0 : 1); ++i) {
 			guides.push_back(std::make_shared<UIImage>(getSprite(i)));
 			add(guides.back(), 0, Vector4f(0, -1, 0, 0));
 		}

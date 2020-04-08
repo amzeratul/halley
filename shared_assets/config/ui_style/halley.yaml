@@ -62,6 +62,7 @@ uiStyle:
       guide_t: { img: "halley_ui/ui_treeview_line_t.png", colour: "#9C5BB5" }
       guide_l: { img: "halley_ui/ui_treeview_line_l.png", colour: "#9C5BB5" }
       guide_empty: { img: "halley_ui/ui_treeview_line_i.png", colour: "#00000000" }
+      leaf: { img: "halley_ui/ui_treeview_leaf.png", colour: "#9C5BB5" }
       element: { img: "halley_ui/ui_treeview_element.png", colour: "#FFFFFF" }
       collapseButton:
         normal: { img: halley_ui/ui_treeview_expanded.png, colour: "#9C5BB5" }
