@@ -18,7 +18,7 @@ EntityEditor::EntityEditor(String id, UIFactory& factory)
 void EntityEditor::update(Time t, bool moved)
 {
 	if (needToReloadUI) {
-		showEntity(currentId);
+		showEntity(currentId, true);
 		needToReloadUI = false;
 	}
 }
@@ -46,8 +46,12 @@ void EntityEditor::makeUI()
 	});
 }
 
-void EntityEditor::showEntity(const String& id)
+void EntityEditor::showEntity(const String& id, bool force)
 {
+	if (id == currentId && !force) {
+		return;
+	}
+	
 	Expects(sceneData);
 	Expects(ecsData);
 

@@ -15,7 +15,7 @@ namespace Halley {
 
 		void setSceneEditor(SceneEditorWindow& sceneEditor);
 		void setSceneData(ISceneData& sceneData, ECSData& data);
-		void showEntity(const String& id);
+		void showEntity(const String& id, bool force = false);
 		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
 
 	private:
