@@ -63,7 +63,8 @@ namespace Halley {
 		void addItem(std::shared_ptr<UIListItem> item, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill);
 		size_t getNumberOfItems() const;
 
-		virtual void onItemDragged(UIListItem& item, int index, Vector2f pos);
+		virtual void onItemDragging(UIListItem& item, int index, Vector2f pos);
+		virtual void onItemDoneDragging(UIListItem& item, int index, Vector2f pos);
 
 		UIStyle style;
 
@@ -106,7 +107,9 @@ namespace Halley {
 		
 		Rect4f getMouseRect() const override;
 		Rect4f getRawRect() const;
+		
 		void setClickableInnerBorder(Vector4f innerBorder);
+		Vector4f getClickableInnerBorder() const;
 		
 		void notifySwap(Vector2f to);
 		bool canSwap() const;

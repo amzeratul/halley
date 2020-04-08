@@ -409,7 +409,7 @@ void UIList::onItemDoubleClicked(UIListItem& item)
 	onAccept();
 }
 
-void UIList::onItemDragged(UIListItem& item, int index, Vector2f pos)
+void UIList::onItemDragging(UIListItem& item, int index, Vector2f pos)
 {
 	const int axis = orientation == UISizerType::Horizontal ? 0 : 1;
 
@@ -426,6 +426,10 @@ void UIList::onItemDragged(UIListItem& item, int index, Vector2f pos)
 			swapItems(index, index + 1);
 		}
 	}
+}
+
+void UIList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
+{
 }
 
 UIListItem::UIListItem(const String& id, UIList& parent, UIStyle style, int index, Vector4f extraMouseArea)
@@ -553,6 +557,11 @@ void UIListItem::pressMouse(Vector2f mousePos, int button)
 
 		parent.onItemClicked(*this);
 	}
+
+	if (button == 2) {
+		held = false;
+		dragged = false;
+	}
 }
 
 void UIListItem::releaseMouse(Vector2f mousePos, int button)
@@ -562,7 +571,11 @@ void UIListItem::releaseMouse(Vector2f mousePos, int button)
 		if (held) {
 			onMouseOver(mousePos);
 			held = false;
-			dragged = false;
+
+			if (dragged) {
+				dragged = false;
+				parent.onItemDoneDragging(*this, index, curDragPos);
+			}
 		}
 	}
 }
@@ -570,7 +583,7 @@ void UIListItem::releaseMouse(Vector2f mousePos, int button)
 void UIListItem::setDragPos(Vector2f pos)
 {
 	curDragPos = pos.round();
-	parent.onItemDragged(*this, index, curDragPos);
+	parent.onItemDragging(*this, index, curDragPos);
 }
 
 void UIListItem::doSetState(State state)
@@ -643,6 +656,11 @@ Rect4f UIListItem::getRawRect() const
 void UIListItem::setClickableInnerBorder(Vector4f ib)
 {
 	innerBorder = ib;
+}
+
+Vector4f UIListItem::getClickableInnerBorder() const
+{
+	return innerBorder;
 }
 
 void UIListItem::notifySwap(Vector2f to)

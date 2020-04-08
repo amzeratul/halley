@@ -59,6 +59,9 @@ uiStyle:
     selectedLabel: { font: Ubuntu Regular, size: 13, colour: "#FFFFFF" }
     gap: 1
     indentation: 20
+    cursor:
+      beforeAfter: { img: "whitebox.png" }
+      over: { img: "whitebox.png", colour: "#FFFFFF80" }
     controls:
       guide_i: { img: "halley_ui/ui_treeview_line_i.png", colour: "#9C5BB5" }
       guide_t: { img: "halley_ui/ui_treeview_line_t.png", colour: "#9C5BB5" }

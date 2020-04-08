@@ -51,14 +51,41 @@ void UITreeList::update(Time t, bool moved)
 	root.updateTree(*this);
 }
 
-void UITreeList::onItemDragged(UIListItem& item, int index, Vector2f pos)
+void UITreeList::draw(UIPainter& painter) const
+{
+	UIList::draw(painter);
+	if (insertCursor.hasMaterial()) {
+		painter.draw(insertCursor);
+	}
+}
+
+void UITreeList::onItemDragging(UIListItem& item, int index, Vector2f pos)
 {
 	auto elem = root.tryFindId(item.getId());
 	if (elem) {
 		elem->setExpanded(false);
 	}
 
-	// TODO
+	const auto res = root.findPosition(pos + item.getRect().getSize() / 2);
+	if (res) {
+		const auto pos = res.value();
+		auto rect = pos.rect;
+		if (rect.getHeight() < 1) {
+			rect = Rect4f(rect.getTopLeft() - Vector2f(0, 1), rect.getTopRight() + Vector2f(0, 1));
+		}
+		
+		insertCursor = style.getSubStyle("cursor").getSprite(pos.type == UITreeListItem::PositionType::OnTop ? "over" : "beforeAfter");
+		insertCursor.setPos(rect.getTopLeft()).scaleTo(rect.getSize());
+	}	
+}
+
+void UITreeList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
+{
+	auto res = root.findPosition(pos + item.getRect().getSize() / 2);
+	if (res) {
+		// TODO
+	}
+	insertCursor = Sprite();
 }
 
 UITreeListItem& UITreeList::getItemOrRoot(const String& id)
@@ -207,6 +234,44 @@ void UITreeListItem::setExpanded(bool e)
 		expanded = e;
 		treeControls->setExpanded(e);
 	}
+}
+
+std::optional<UITreeListItem::FindPositionResult> UITreeListItem::findPosition(Vector2f pos) const
+{
+	if (listItem) {
+		const auto r = listItem->getRect();
+		const auto b = listItem->getClickableInnerBorder();
+		const float x0 = r.getLeft() + b.x;
+		const float x1 = r.getRight() - b.z;
+		const float y0 = r.getTop() + b.y;
+		const float y1 = r.getBottom() - b.w + 1;
+		const float h = y1 - y0;
+		const float y = pos.y;
+		
+		if (y >= y0 && y < y1) {
+			if (y < y0 + h / 4) {
+				return FindPositionResult(PositionType::Before, this, Rect4f(x0, y0, x1 - x0, 0));
+			} else if (y > y0 + 3 * h / 4) {
+				return FindPositionResult(PositionType::After, this, Rect4f(x0, y1, x1 - x0, 0));
+			} else {
+				return FindPositionResult(PositionType::OnTop, this, Rect4f(x0, y0, x1 - x0, y1 - y0));
+			}
+		}
+	}
+
+	for (auto& c: children) {
+		auto res = c.findPosition(pos);
+		if (res) {
+			return *res;
+		}
+	}
+	
+	return {};
+}
+
+const String& UITreeListItem::getId() const
+{
+	return id;
 }
 
 void UITreeListItem::updateTree(UITreeList& treeList)

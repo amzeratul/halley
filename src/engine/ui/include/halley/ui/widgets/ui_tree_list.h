@@ -26,6 +26,25 @@ namespace Halley {
 	
     class UITreeListItem {
     public:
+        enum class PositionType {
+        	OnTop,
+	        Before,
+        	After
+        };
+
+    	struct FindPositionResult {
+    		PositionType type;
+    		const UITreeListItem* item;
+    		Rect4f rect;
+
+    		FindPositionResult() = default;
+    		FindPositionResult(PositionType type, const UITreeListItem* item, Rect4f rect)
+                : type(type)
+    			, item(item)
+    			, rect(rect)
+            {}
+    	};
+    	
     	UITreeListItem();
     	UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeControls);
 
@@ -34,6 +53,9 @@ namespace Halley {
 
     	void updateTree(UITreeList& treeList);
         void setExpanded(bool expanded);
+
+    	std::optional<FindPositionResult> findPosition(Vector2f pos) const;
+        const String& getId() const;
 
     private:
     	String id;
@@ -53,10 +75,13 @@ namespace Halley {
 
     protected:
         void update(Time t, bool moved) override;
-        void onItemDragged(UIListItem& item, int index, Vector2f pos) override;
+        void draw(UIPainter& painter) const override;
+        void onItemDragging(UIListItem& item, int index, Vector2f pos) override;
+        void onItemDoneDragging(UIListItem& item, int index, Vector2f pos) override;
     	
     private:
     	UITreeListItem root;
+    	Sprite insertCursor;
 
     	UITreeListItem& getItemOrRoot(const String& id);
         void setupEvents();
