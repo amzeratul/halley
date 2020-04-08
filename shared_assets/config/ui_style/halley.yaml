@@ -50,6 +50,7 @@ uiStyle:
       selected: { img: halley_ui/ui_list_item.png, colour: "#9C5BB5" }
       innerBorder: [ 0, 0, 0, 0 ]
     innerBorder: [ 0, 0, 0, 0 ]
+    labelBorder: [ 6, 5, 6, 2 ]
     extraMouseBorder: [ 1, 1, 1, 1 ]
     selectionChangedSound: ""
     label: { font: Ubuntu Regular, size: 13, colour: "#FFFFFFCF" }
@@ -60,6 +61,7 @@ uiStyle:
       guide_i: { img: "halley_ui/ui_treeview_line_i.png", colour: "#9C5BB5" }
       guide_t: { img: "halley_ui/ui_treeview_line_t.png", colour: "#9C5BB5" }
       guide_l: { img: "halley_ui/ui_treeview_line_l.png", colour: "#9C5BB5" }
+      guide_empty: { img: "halley_ui/ui_treeview_line_i.png", colour: "#00000000" }
       element: { img: "halley_ui/ui_treeview_element.png" }
 
   dropdown:

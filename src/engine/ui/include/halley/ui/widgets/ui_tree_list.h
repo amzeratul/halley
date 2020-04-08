@@ -7,7 +7,7 @@ namespace Halley {
     public:
         UITreeListControls(String id, Sprite elementSprite, UIStyle style);
 
-        float setDepth(size_t depth);
+        float updateGuides(const std::vector<int>& itemsLeftPerDepth);
 
     private:
     	UIStyle style;
@@ -15,6 +15,7 @@ namespace Halley {
     	std::vector<std::shared_ptr<UIImage>> guides;
         std::shared_ptr<UIImage> elementImage;
     	bool waitingConstruction = true;
+        float totalIndent = 0;
     };
 	
     class UITreeListItem {
@@ -33,7 +34,7 @@ namespace Halley {
         std::shared_ptr<UITreeListControls> treeControls;
     	std::vector<UITreeListItem> children;
 
-    	void doUpdateTree(int depth);
+    	void doUpdateTree(std::vector<int>& itemsLeftPerDepth);
     };
 	
     class UITreeList : public UIList {

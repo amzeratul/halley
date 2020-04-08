@@ -1,3 +1,6 @@
+#include <utility>
+
+
 #include "widgets/ui_tree_list.h"
 
 #include "widgets/ui_image.h"
@@ -14,17 +17,17 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 {
 	auto listItem = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 
-	auto treeControls = std::make_shared<UITreeListControls>(id, style.getSubStyle("controls").getSprite("element"), style.getSubStyle("controls"));
+	const auto treeControls = std::make_shared<UITreeListControls>(id, style.getSubStyle("controls").getSprite("element"), style.getSubStyle("controls"));
 	listItem->add(treeControls, 0, {}, UISizerFillFlags::Fill);
 
-	auto widget = std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label);
+	auto labelWidget = std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label);
 	if (style.hasTextRenderer("selectedLabel")) {
-		widget->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
+		labelWidget->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
 	}
 	if (style.hasTextRenderer("disabledStyle")) {
-		widget->setDisablable(style.getTextRenderer("label"), style.getTextRenderer("disabledStyle"));
+		labelWidget->setDisablable(style.getTextRenderer("label"), style.getTextRenderer("disabledStyle"));
 	}
-	listItem->add(widget, 0, {}, UISizerFillFlags::Fill);
+	listItem->add(labelWidget, 0, style.getBorder("labelBorder"), UISizerFillFlags::Fill);
 
 	auto treeItem = UITreeListItem(id, listItem, treeControls);
 	
@@ -41,7 +44,7 @@ void UITreeList::update(Time t, bool moved)
 
 UITreeListItem& UITreeList::getItemOrRoot(const String& id)
 {
-	auto res = root.tryFindId(id);
+	const auto res = root.tryFindId(id);
 	if (res) {
 		return *res;
 	}
@@ -51,28 +54,48 @@ UITreeListItem& UITreeList::getItemOrRoot(const String& id)
 UITreeListControls::UITreeListControls(String id, Sprite elementSprite, UIStyle style)
 	: UIWidget(std::move(id), Vector2f(), UISizer(UISizerType::Horizontal, 0))
 	, style(std::move(style))
-	, elementSprite(elementSprite)
+	, elementSprite(std::move(elementSprite))
 {
 }
 
-float UITreeListControls::setDepth(size_t depth)
+float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth)
 {
-	if (waitingConstruction || depth != guides.size()) {
+	auto getSprite = [&] (size_t depth) -> Sprite
+	{
+		const auto left = itemsLeftPerDepth[depth];
+		const bool deepest = depth == itemsLeftPerDepth.size() - 1;
+		if (deepest) {
+			if (left == 1) {
+				return style.getSprite("guide_l");
+			} else {
+				return style.getSprite("guide_t");
+			}
+		} else {
+			if (left == 1) {
+				return Sprite().setSize(Vector2f(22, 22));
+			} else {
+				return style.getSprite("guide_i");
+			}
+		}
+	};
+	
+	if (waitingConstruction || itemsLeftPerDepth.size() != guides.size()) {
 		clear();
 		guides.clear();
 
-		for (size_t i = 0; i < depth; ++i) {
-			guides.push_back(std::make_shared<UIImage>(style.getSprite("guide_t")));
+		for (size_t i = 0; i < itemsLeftPerDepth.size(); ++i) {
+			guides.push_back(std::make_shared<UIImage>(getSprite(i)));
 			add(guides.back(), 0, Vector4f(0, -1, 0, 0));
 		}
 
 		elementImage = std::make_shared<UIImage>(elementSprite);
 		add(elementImage, 0, Vector4f(), UISizerAlignFlags::Centre);
 
+		totalIndent = getLayoutMinimumSize(false).x;
 		waitingConstruction = false;
 	}
 
-	return getMinimumSize().x;
+	return totalIndent;
 }
 
 UITreeListItem::UITreeListItem() = default;
@@ -106,17 +129,23 @@ void UITreeListItem::addChild(UITreeListItem item)
 
 void UITreeListItem::updateTree()
 {
-	doUpdateTree(0);
+	std::vector<int> itemsLeftPerDepth;
+	doUpdateTree(itemsLeftPerDepth);
 }
 
-void UITreeListItem::doUpdateTree(int depth)
+void UITreeListItem::doUpdateTree(std::vector<int>& itemsLeftPerDepth)
 {
 	if (listItem && treeControls) {
-		const float totalIndent = treeControls->setDepth(depth);
+		const float totalIndent = treeControls->updateGuides(itemsLeftPerDepth);
 		listItem->setClickableInnerBorder(Vector4f(totalIndent, 0, 0, 0));
 	}
-	
+
+	itemsLeftPerDepth.push_back(int(children.size()));
+
 	for (auto& c: children) {
-		c.doUpdateTree(depth + 1);
+		c.doUpdateTree(itemsLeftPerDepth);
+		itemsLeftPerDepth.back()--;
 	}
+
+	itemsLeftPerDepth.pop_back();
 }
