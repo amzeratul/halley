@@ -45,6 +45,12 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 	addItem(listItem, Vector4f(), UISizerAlignFlags::Left | UISizerFillFlags::FillVertical);
 }
 
+void UITreeList::clear()
+{
+	UIList::clear();
+	root = UITreeListItem();
+}
+
 void UITreeList::update(Time t, bool moved)
 {
 	UIList::update(t, moved);
@@ -105,12 +111,18 @@ void UITreeList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
 		const size_t oldChildIndex = oldParent.getChildIndex(itemId);
 
 		if (oldParentId != newParentId || oldChildIndex != newChildIndex) {
-			auto& newParent = *root.tryFindId(newParentId);
-			newParent.addChild(oldParent.removeChild(itemId), newChildIndex);
+			// TODO: swap this without rebuilding whole thing?
+			/*
+			if (oldParentId == newParentId) {
+				oldParent.moveChild(oldChildIndex, newChildIndex);
+			} else {
+				auto& newParent = *root.tryFindId(newParentId);
+				newParent.addChild(oldParent.removeChild(itemId), newChildIndex);
+			}
+			reassignIds();
+			*/			
 
 			sendEvent(UIEvent(UIEventType::TreeItemReparented, getId(), itemId, newParentId, int(newChildIndex)));
-
-			
 		}
 	}
 	insertCursor = Sprite();
@@ -278,6 +290,15 @@ UITreeListItem UITreeListItem::removeChild(const String& id)
 		}
 	}
 	throw Exception("No child with id \"" + id + "\"", HalleyExceptions::UI);
+}
+
+void UITreeListItem::moveChild(size_t oldChildIndex, size_t newChildIndex)
+{
+	if (newChildIndex < oldChildIndex) {
+		std::rotate(children.begin() + newChildIndex, children.begin() + oldChildIndex, children.begin() + oldChildIndex);
+	} else {
+		std::rotate(children.begin() + oldChildIndex, children.begin() + newChildIndex, children.begin() + newChildIndex);
+	}
 }
 
 void UITreeListItem::setExpanded(bool e)

@@ -41,11 +41,11 @@ void SceneEditorWindow::loadScene(const String& name)
 		sceneId = entity.getEntityId();
 		interface.spawnPending();
 
-		sceneData = std::make_unique<PrefabSceneData>(*prefab, entityFactory, entity);
+		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, entity);
 		entityEditor->setSceneData(*sceneData, project.getECSData());
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 
-		entityList->refreshList(*sceneData);
+		entityList->setSceneData(sceneData);
 
 		showEntity(entity.getUUID().toString());
 	}

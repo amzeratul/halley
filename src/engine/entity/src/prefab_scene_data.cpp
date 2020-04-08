@@ -56,6 +56,11 @@ EntityTree PrefabSceneData::getEntityTree() const
 	return root;
 }
 
+void PrefabSceneData::reparentEntity(const String& entityId, const String& newParentId, int childIndex)
+{
+	// TODO
+}
+
 void PrefabSceneData::fillEntityTree(const ConfigNode& node, EntityTree& tree) const
 {
 	tree.entityId = node["uuid"].asString("");

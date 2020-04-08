@@ -31,7 +31,7 @@ namespace Halley {
 
 		String sceneName;
 		EntityId sceneId;
-		std::unique_ptr<ISceneData> sceneData;
+		std::shared_ptr<ISceneData> sceneData;
 		std::unique_ptr<Prefab> prefab;
 		std::shared_ptr<EntityFactory> entityFactory;
 

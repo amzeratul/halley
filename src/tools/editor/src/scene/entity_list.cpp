@@ -8,12 +8,29 @@ EntityList::EntityList(String id, UIFactory& factory)
 	makeUI();
 }
 
+void EntityList::setSceneData(std::shared_ptr<ISceneData> data)
+{
+	sceneData = std::move(data);
+	refreshList();
+}
+
 void EntityList::makeUI()
 {
 	list = std::make_shared<UITreeList>(getId() + "_list", factory.getStyle("treeList"));
 	list->setSingleClickAccept(false);
 	list->setDrag(true);
 	add(list, 1);
+
+	setHandle(UIEventType::TreeItemReparented, [=] (const UIEvent& event)
+	{
+		const auto entityId = event.getStringData();
+		const auto newParentId = event.getStringData2();
+		const auto childIndex = event.getIntData();
+
+		sceneData->reparentEntity(entityId, newParentId, childIndex);
+
+		refreshList();
+	});
 }
 
 void EntityList::addEntities(const EntityTree& entity, int depth, const String& parentId)
@@ -28,9 +45,9 @@ void EntityList::addEntities(const EntityTree& entity, int depth, const String& 
 	}
 }
 
-void EntityList::refreshList(const ISceneData& sceneData)
+void EntityList::refreshList()
 {
 	list->clear();
 
-	addEntities(sceneData.getEntityTree(), 0, "");
+	addEntities(sceneData->getEntityTree(), 0, "");
 }

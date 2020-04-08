@@ -65,6 +65,7 @@ namespace Halley {
 
 		virtual void onItemDragging(UIListItem& item, int index, Vector2f pos);
 		virtual void onItemDoneDragging(UIListItem& item, int index, Vector2f pos);
+		void reassignIds();
 
 		UIStyle style;
 
@@ -86,7 +87,6 @@ namespace Halley {
 		void onItemDoubleClicked(UIListItem& item);
 		void onAccept();
 		void onCancel();
-		void reassignIds();
 
 		void swapItems(int idxA, int idxB);
 		bool isManualDragging() const;

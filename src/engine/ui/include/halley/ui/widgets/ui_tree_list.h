@@ -52,6 +52,7 @@ namespace Halley {
     	void addChild(UITreeListItem item);
         void addChild(UITreeListItem item, size_t pos);
     	UITreeListItem removeChild(const String& id);
+        void moveChild(size_t oldChildIndex, size_t newChildIndex);
 
     	void updateTree(UITreeList& treeList);
         void setExpanded(bool expanded);
@@ -80,6 +81,8 @@ namespace Halley {
 
         void addTreeItem(const String& id, const String& parentId, const LocalisedString& label);
 
+        void clear() override;
+    	
     protected:
         void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;

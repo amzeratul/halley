@@ -22,3 +22,8 @@ EntityTree WorldSceneData::getEntityTree() const
 	// TODO
 	return EntityTree();
 }
+
+void WorldSceneData::reparentEntity(const String& entityId, const String& newParentId, int childIndex)
+{
+	// TODO
+}

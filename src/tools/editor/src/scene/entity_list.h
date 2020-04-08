@@ -7,12 +7,14 @@ namespace Halley {
 	class EntityList final : public UIWidget {
 	public:
 		EntityList(String id, UIFactory& factory);
-				
-		void refreshList(const ISceneData& sceneData);
+
+		void setSceneData(std::shared_ptr<ISceneData> sceneData);
+		void refreshList();
 
 	private:
 		UIFactory& factory;
 		std::shared_ptr<UITreeList> list;
+		std::shared_ptr<ISceneData> sceneData;
 		
 		void makeUI();
 		void addEntities(const EntityTree& entity, int depth, const String& parentId);

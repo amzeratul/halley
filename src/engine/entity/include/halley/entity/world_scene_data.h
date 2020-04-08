@@ -11,6 +11,7 @@ namespace Halley {
         ConfigNode getEntityData(const String& id) override;
         void reloadEntity(const String& id, const ConfigNode& data) override;
         EntityTree getEntityTree() const override;
+        void reparentEntity(const String& entityId, const String& newParentId, int childIndex) override;
     	
     private:
     	World& world;
