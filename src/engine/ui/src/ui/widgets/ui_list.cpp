@@ -434,6 +434,7 @@ UIListItem::UIListItem(const String& id, UIList& parent, UIStyle style, int inde
 	, style(style)
 	, index(index)
 	, extraMouseArea(extraMouseArea)
+	, dragWidget(this)
 {
 	sprite = style.getSprite("normal");
 }
@@ -492,9 +493,9 @@ void UIListItem::update(Time t, bool moved)
 		setChildLayerAdjustment(1);
 		
 		const auto parentRect = parent.getRect();
-		const auto myTargetRect = Rect4f(curDragPos, curDragPos + getSize());
-		setPosition(myTargetRect.fitWithin(parentRect).getTopLeft());
-		layout();
+		const auto myTargetRect = Rect4f(curDragPos, curDragPos + dragWidget->getSize());
+		dragWidget->setPosition(myTargetRect.fitWithin(parentRect).getTopLeft());
+		dragWidget->layout();
 		dirty = true;
 	} else  {
 		setChildLayerAdjustment(0);
@@ -528,7 +529,7 @@ void UIListItem::update(Time t, bool moved)
 
 void UIListItem::onMouseOver(Vector2f mousePos)
 {
-	if (parent.canDrag() && held /* && (mousePos - mouseStartPos).length() > 2.0f */) {
+	if (parent.canDrag() && held && (mousePos - mouseStartPos).length() > 3.0f) {
 		dragged = true;
 	}
 	if (dragged) {
@@ -543,7 +544,12 @@ void UIListItem::pressMouse(Vector2f mousePos, int button)
 		held = true;
 		dragged = false;
 		mouseStartPos = mousePos;
-		myStartPos = getPosition();
+
+		if (!dragWidget) {
+			dragWidget = this;
+		}
+		myStartPos = dragWidget->getPosition();
+
 		parent.onItemClicked(*this);
 	}
 }
@@ -652,6 +658,11 @@ bool UIListItem::canSwap() const
 Vector2f UIListItem::getOrigPosition() const
 {
 	return origPos;
+}
+
+void UIListItem::setDraggableSubWidget(UIWidget* widget)
+{
+	dragWidget = widget;
 }
 
 bool UIList::setSelectedOptionId(const String& id)

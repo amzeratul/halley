@@ -55,7 +55,6 @@ namespace Halley {
 
 		bool ignoreClip() const override;
 
-
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -63,6 +62,8 @@ namespace Halley {
 
 		void addItem(std::shared_ptr<UIListItem> item, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill);
 		size_t getNumberOfItems() const;
+
+		virtual void onItemDragged(UIListItem& item, int index, Vector2f pos);
 
 		UIStyle style;
 
@@ -82,7 +83,6 @@ namespace Halley {
 
 		void onItemClicked(UIListItem& item);
 		void onItemDoubleClicked(UIListItem& item);
-		void onItemDragged(UIListItem& item, int index, Vector2f pos);
 		void onAccept();
 		void onCancel();
 		void reassignIds();
@@ -112,6 +112,8 @@ namespace Halley {
 		bool canSwap() const;
 		Vector2f getOrigPosition() const;
 
+		void setDraggableSubWidget(UIWidget* widget);
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -137,6 +139,7 @@ namespace Halley {
 		Vector2f myStartPos;
 		Vector2f origPos;
 		Vector2f curDragPos;
+		UIWidget* dragWidget = nullptr;
 
 		bool swapping = false;
 		Vector2f swapFrom;

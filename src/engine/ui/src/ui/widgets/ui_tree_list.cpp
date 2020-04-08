@@ -35,6 +35,7 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 		labelWidget->setDisablable(style.getTextRenderer("label"), style.getTextRenderer("disabledStyle"));
 	}
 	listItem->add(labelWidget, 0, style.getBorder("labelBorder"), UISizerFillFlags::Fill);
+	listItem->setDraggableSubWidget(labelWidget.get());
 
 	// Logical item
 	auto treeItem = UITreeListItem(id, listItem, treeControls);
@@ -48,6 +49,16 @@ void UITreeList::update(Time t, bool moved)
 {
 	UIList::update(t, moved);
 	root.updateTree(*this);
+}
+
+void UITreeList::onItemDragged(UIListItem& item, int index, Vector2f pos)
+{
+	auto elem = root.tryFindId(item.getId());
+	if (elem) {
+		elem->setExpanded(false);
+	}
+
+	// TODO
 }
 
 UITreeListItem& UITreeList::getItemOrRoot(const String& id)
@@ -136,20 +147,24 @@ float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth
 	return totalIndent;
 }
 
+void UITreeListControls::setExpanded(bool expanded)
+{
+	if (expandButton) {
+		expandButton->setActive(!expanded);
+	}
+	if (collapseButton) {
+		collapseButton->setActive(expanded);
+	}
+}
+
 void UITreeListControls::setupUI()
 {
 	setHandle(UIEventType::ButtonClicked, "expand", [=] (const UIEvent& event)
 	{
-		expandButton->setActive(false);
-		collapseButton->setActive(true);
-
 		sendEvent(UIEvent(UIEventType::TreeExpand, getId(), getId()));
 	});
 	setHandle(UIEventType::ButtonClicked, "collapse", [=](const UIEvent& event)
 	{
-		collapseButton->setActive(false);
-		expandButton->setActive(true);
-
 		sendEvent(UIEvent(UIEventType::TreeCollapse, getId(), getId()));
 	});
 }
@@ -180,12 +195,18 @@ UITreeListItem* UITreeListItem::tryFindId(const String& id)
 
 void UITreeListItem::addChild(UITreeListItem item)
 {
+	if (children.empty()) {
+		expanded = true;
+	}
 	children.emplace_back(std::move(item));
 }
 
 void UITreeListItem::setExpanded(bool e)
 {
-	expanded = e;
+	if (!children.empty()) {
+		expanded = e;
+		treeControls->setExpanded(e);
+	}
 }
 
 void UITreeListItem::updateTree(UITreeList& treeList)

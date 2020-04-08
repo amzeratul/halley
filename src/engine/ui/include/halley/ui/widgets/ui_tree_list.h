@@ -8,6 +8,7 @@ namespace Halley {
         UITreeListControls(String id, UIStyle style);
 
         float updateGuides(const std::vector<int>& itemsLeftPerDepth, bool hasChildren);
+        void setExpanded(bool expanded);
 
     private:
     	UIStyle style;
@@ -52,6 +53,7 @@ namespace Halley {
 
     protected:
         void update(Time t, bool moved) override;
+        void onItemDragged(UIListItem& item, int index, Vector2f pos) override;
     	
     private:
     	UITreeListItem root;
