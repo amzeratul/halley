@@ -14,7 +14,7 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 {
 	auto listItem = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 
-	auto treeControls = std::make_shared<UITreeListControls>(id, style.getSprite("element"));
+	auto treeControls = std::make_shared<UITreeListControls>(id, style.getSubStyle("controls").getSprite("element"), style.getSubStyle("controls"));
 	listItem->add(treeControls, 0, {}, UISizerFillFlags::Fill);
 
 	auto widget = std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label);
@@ -48,18 +48,31 @@ UITreeListItem& UITreeList::getItemOrRoot(const String& id)
 	return root;
 }
 
-UITreeListControls::UITreeListControls(String id, Sprite element)
+UITreeListControls::UITreeListControls(String id, Sprite elementSprite, UIStyle style)
 	: UIWidget(std::move(id), Vector2f(), UISizer(UISizerType::Horizontal, 0))
+	, style(std::move(style))
+	, elementSprite(elementSprite)
 {
-	spacer = std::make_shared<UIWidget>();
-	elementImage = std::make_shared<UIImage>(element);
-	add(spacer);
-	add(elementImage);
 }
 
-void UITreeListControls::setDepth(int depth)
+float UITreeListControls::setDepth(size_t depth)
 {
-	spacer->setMinSize(Vector2f(15.0f * depth, 0));
+	if (waitingConstruction || depth != guides.size()) {
+		clear();
+		guides.clear();
+
+		for (size_t i = 0; i < depth; ++i) {
+			guides.push_back(std::make_shared<UIImage>(style.getSprite("guide_t")));
+			add(guides.back(), 0, Vector4f(0, -1, 0, 0));
+		}
+
+		elementImage = std::make_shared<UIImage>(elementSprite);
+		add(elementImage, 0, Vector4f(), UISizerAlignFlags::Centre);
+
+		waitingConstruction = false;
+	}
+
+	return getMinimumSize().x;
 }
 
 UITreeListItem::UITreeListItem() = default;
@@ -77,7 +90,7 @@ UITreeListItem* UITreeListItem::tryFindId(const String& id)
 	}
 
 	for (auto& c: children) {
-		auto res = c.tryFindId(id);
+		const auto res = c.tryFindId(id);
 		if (res) {
 			return res;
 		}
@@ -99,9 +112,8 @@ void UITreeListItem::updateTree()
 void UITreeListItem::doUpdateTree(int depth)
 {
 	if (listItem && treeControls) {
-		const float totalIndent = 15.0f * depth;
+		const float totalIndent = treeControls->setDepth(depth);
 		listItem->setClickableInnerBorder(Vector4f(totalIndent, 0, 0, 0));
-		treeControls->setDepth(depth);
 	}
 	
 	for (auto& c: children) {

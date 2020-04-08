@@ -5,13 +5,16 @@
 namespace Halley {
     class UITreeListControls : public UIWidget {
     public:
-        UITreeListControls(String id, Sprite elementImage);
+        UITreeListControls(String id, Sprite elementSprite, UIStyle style);
 
-        void setDepth(int depth);
+        float setDepth(size_t depth);
 
     private:
-        std::shared_ptr<UIWidget> spacer;
+    	UIStyle style;
+    	Sprite elementSprite;
+    	std::vector<std::shared_ptr<UIImage>> guides;
         std::shared_ptr<UIImage> elementImage;
+    	bool waitingConstruction = true;
     };
 	
     class UITreeListItem {
