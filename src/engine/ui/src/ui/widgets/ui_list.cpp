@@ -121,7 +121,6 @@ void UIList::clear()
 {
 	items.clear();
 	curOption = -1;
-	curOptionHighlight = -1;
 	UIWidget::clear();
 }
 
@@ -275,11 +274,6 @@ void UIList::swapItems(int idxA, int idxB)
 		curOption = idxB;
 	} else if (curOption == idxB) {
 		curOption = idxA;
-	}
-	if (curOptionHighlight == idxA) {
-		curOptionHighlight = idxB;
-	} else if (curOptionHighlight == idxB) {
-		curOptionHighlight = idxA;
 	}
 
 	std::swap(items[idxA], items[idxB]);

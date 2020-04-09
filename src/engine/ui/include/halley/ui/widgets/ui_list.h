@@ -69,7 +69,6 @@ namespace Halley {
 
 		UIStyle style;
 		std::vector<std::shared_ptr<UIListItem>> items;
-		int curOptionHighlight = -1;
 		int curOption = -1;
 
 	private:
