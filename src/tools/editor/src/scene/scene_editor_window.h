@@ -41,7 +41,7 @@ namespace Halley {
 		void makeUI();
 		void load();
 		void selectEntity(const String& id);
-		void showEntity(const String& id);
+		void panCameraToEntity(const String& id);
 		void saveEntity();
 	};
 }

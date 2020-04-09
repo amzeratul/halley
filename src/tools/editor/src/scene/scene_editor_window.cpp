@@ -32,22 +32,27 @@ void SceneEditorWindow::loadScene(const String& name)
 	if (!name.isEmpty() && canvas->isLoaded()) {
 		auto& interface = canvas->getInterface();
 		auto& world = interface.getWorld();
-		sceneName = name;
 
+		// Load prefab
 		prefab = std::make_unique<Prefab>(*project.getGameResources().get<Prefab>(name));
-		entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
 
+		// Spawn scene
+		entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
 		auto entity = entityFactory->createEntity(prefab->getRoot());
-		sceneId = entity.getEntityId();
 		interface.spawnPending();
 
+		// Get scene data
+		sceneId = entity.getEntityId();
+		sceneName = name;
+
+		// Setup editors
 		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, entity);
 		entityEditor->setECSData(project.getECSData());
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
-
 		entityList->setSceneData(sceneData);
 
-		showEntity(entity.getUUID().toString());
+		// Show root
+		panCameraToEntity(entity.getUUID().toString());
 	}
 }
 
@@ -93,7 +98,7 @@ void SceneEditorWindow::makeUI()
 
 	setHandle(UIEventType::ListAccept, "entityList_list", [=](const UIEvent& event)
 	{
-		showEntity(event.getStringData());
+		panCameraToEntity(event.getStringData());
 	});
 
 	setHandle(UIEventType::ButtonClicked, "saveButton", [=] (const UIEvent& event)
@@ -119,10 +124,9 @@ void SceneEditorWindow::selectEntity(const String& id)
 	}
 }
 
-void SceneEditorWindow::showEntity(const String& id)
+void SceneEditorWindow::panCameraToEntity(const String& id)
 {
-	auto& interface = canvas->getInterface();
-	interface.showEntity(UUID(id));
+	canvas->getInterface().showEntity(UUID(id));
 }
 
 void SceneEditorWindow::saveEntity()
