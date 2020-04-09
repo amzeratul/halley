@@ -2,6 +2,7 @@
 
 #include "../../../tools/tools/include/halley/tools/file/filesystem.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -56,6 +57,8 @@ void PrefabSceneData::reparentEntity(const String& entityId, const String& newPa
 		throw Exception("Entity not found: " + newParentId, HalleyExceptions::Tools);
 	}
 
+	//Logger::logInfo("Reparenting \"" + (*entityMoving)["name"].asString() + "\" from \"" + (*oldParent)["name"].asString() + "\" to \"" + (*newParent)["name"].asString() + "\":" + toString(childIndex));
+	
 	if (newParent == oldParent) {
 		moveChild(*newParent, entityId, size_t(childIndex));
 	} else {
@@ -143,8 +146,12 @@ void PrefabSceneData::moveChild(ConfigNode& parent, const String& childId, int t
 	auto& seq = parent["children"].asSequence();
 	const int startIndex = int(std::find_if(seq.begin(), seq.end(), [&] (const ConfigNode& n) { return n["uuid"].asString("") == childId; }) - seq.begin());
 
-	const int dir = signOf(targetIndex - startIndex);
-	for (int i = startIndex; i != targetIndex; i += dir) {
+	// If moving forwards, subtract one to account for the fact that the currently occupied slot will be removed
+	const int finalIndex = targetIndex > startIndex ? targetIndex - 1 : targetIndex;
+
+	// Swap from start to end
+	const int dir = signOf(finalIndex - startIndex);
+	for (int i = startIndex; i != finalIndex; i += dir) {
 		std::swap(seq[i], seq[i + dir]);
 	}
 }

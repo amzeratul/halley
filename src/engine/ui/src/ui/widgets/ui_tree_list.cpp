@@ -105,25 +105,7 @@ void UITreeList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
 			newChildIndex = siblingIndex + (resData.type == UITreeListItem::PositionType::Before ? 0 : 1);
 		}
 
-		const auto& curItem = *root.tryFindId(itemId);
-		const String& oldParentId = curItem.getParentId();
-		auto& oldParent = *root.tryFindId(oldParentId);
-		const size_t oldChildIndex = oldParent.getChildIndex(itemId);
-
-		if (oldParentId != newParentId || oldChildIndex != newChildIndex) {
-			// TODO: swap this without rebuilding whole thing?
-			/*
-			if (oldParentId == newParentId) {
-				oldParent.moveChild(oldChildIndex, newChildIndex);
-			} else {
-				auto& newParent = *root.tryFindId(newParentId);
-				newParent.addChild(oldParent.removeChild(itemId), newChildIndex);
-			}
-			reassignIds();
-			*/			
-
-			sendEvent(UIEvent(UIEventType::TreeItemReparented, getId(), itemId, newParentId, int(newChildIndex)));
-		}
+		reparentItem(itemId, newParentId, int(newChildIndex));
 	}
 	insertCursor = Sprite();
 }
@@ -154,6 +136,33 @@ void UITreeList::setupEvents()
 			elem->setExpanded(true);
 		}
 	});
+}
+
+void UITreeList::reparentItem(const String& itemId, const String& newParentId, int newChildIndex)
+{
+	if (itemId == newParentId) {
+		return;
+	}
+	
+	const auto& curItem = *root.tryFindId(itemId);
+	const String& oldParentId = curItem.getParentId();
+	auto& oldParent = *root.tryFindId(oldParentId);
+	const size_t oldChildIndex = int(oldParent.getChildIndex(itemId));
+
+	if (oldParentId != newParentId || oldChildIndex != newChildIndex) {
+		// TODO: swap this without rebuilding whole thing?
+		/*
+		if (oldParentId == newParentId) {
+			oldParent.moveChild(oldChildIndex, newChildIndex);
+		} else {
+			auto& newParent = *root.tryFindId(newParentId);
+			newParent.addChild(oldParent.removeChild(itemId), newChildIndex);
+		}
+		reassignIds();
+		*/
+
+		sendEvent(UIEvent(UIEventType::TreeItemReparented, getId(), itemId, newParentId, newChildIndex));
+	}
 }
 
 UITreeListControls::UITreeListControls(String id, UIStyle style)
@@ -332,10 +341,12 @@ std::optional<UITreeListItem::FindPositionResult> UITreeListItem::findPosition(V
 		}
 	}
 
-	for (auto& c: children) {
-		auto res = c.findPosition(pos);
-		if (res) {
-			return *res;
+	if (expanded) {
+		for (auto& c: children) {
+			auto res = c.findPosition(pos);
+			if (res) {
+				return *res;
+			}
 		}
 	}
 	

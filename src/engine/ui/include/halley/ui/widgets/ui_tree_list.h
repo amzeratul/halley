@@ -95,5 +95,6 @@ namespace Halley {
 
     	UITreeListItem& getItemOrRoot(const String& id);
         void setupEvents();
+    	void reparentItem(const String& id, const String& newParentId, int childIndex);
     };
 }
