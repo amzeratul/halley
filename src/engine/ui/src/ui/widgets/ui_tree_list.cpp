@@ -46,6 +46,20 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 	needsRefresh = true;
 }
 
+void UITreeList::removeItem(const String& id)
+{
+	auto item = root.removeFromTree(id);
+	if (item) {
+		getSizer().remove(*item->getListItem());
+		removeChild(*item->getListItem());
+
+		items.erase(std::remove_if(items.begin(), items.end(), [&] (const std::shared_ptr<UIListItem>& i)
+		{
+			return i->getId() == id;
+		}), items.end());
+	}
+}
+
 void UITreeList::setLabel(const String& id, const LocalisedString& label)
 {
 	auto item = root.tryFindId(id);
@@ -378,6 +392,26 @@ void UITreeListItem::setExpanded(bool e)
 	}
 }
 
+std::unique_ptr<UITreeListItem> UITreeListItem::removeFromTree(const String& id)
+{
+	for (size_t i = 0; i < children.size(); ++i) {
+		if (children[i]->id == id) {
+			auto res = std::move(children[i]);
+			children.erase(children.begin() + i);
+			return res;
+		}
+	}
+
+	for (auto& child: children) {
+		auto result = child->removeFromTree(id);
+		if (result) {
+			return result;
+		}
+	}
+
+	return {};
+}
+
 std::optional<UITreeListItem::FindPositionResult> UITreeListItem::findPosition(Vector2f pos) const
 {
 	if (listItem) {
@@ -436,6 +470,11 @@ size_t UITreeListItem::getChildIndex(const String& id) const
 		}
 	}
 	return 0;
+}
+
+std::shared_ptr<UIListItem> UITreeListItem::getListItem() const
+{
+	return listItem;
 }
 
 void UITreeListItem::updateTree(UITreeList& treeList)

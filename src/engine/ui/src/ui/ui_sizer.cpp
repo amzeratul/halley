@@ -162,6 +162,11 @@ void UISizer::addStretchSpacer(float proportion)
 	entries.emplace_back(UISizerEntry({}, proportion, {}, {}));
 }
 
+void UISizer::remove(IUIElement& element)
+{
+	entries.erase(std::remove_if(entries.begin(), entries.end(), [&] (const UISizerEntry& e) { return e.getPointer().get() == &element; }), entries.end());
+}
+
 void UISizer::reparent(UIParent& parent)
 {
 	if (curParent != &parent) {

@@ -12,7 +12,10 @@ namespace Halley {
 		void setSceneEditorWindow(SceneEditorWindow& sceneEditor);
 		void setSceneData(std::shared_ptr<ISceneData> sceneData);
 		void refreshList();
+
 		void onEntityModified(const String& id, const ConfigNode& node);
+		void onEntityAdded(const String& id, const String& parentId, const ConfigNode& data);
+		void onEntityRemoved(const String& id, const String& parentId);
 
 	private:
 		UIFactory& factory;
@@ -22,6 +25,6 @@ namespace Halley {
 		std::shared_ptr<ISceneData> sceneData;
 		
 		void makeUI();
-		void addEntities(const EntityTree& entity, int depth, const String& parentId);
+		void addEntities(const EntityTree& entity, const String& parentId);
 	};
 }

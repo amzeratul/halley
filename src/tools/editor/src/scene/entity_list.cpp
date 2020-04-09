@@ -39,7 +39,7 @@ void EntityList::makeUI()
 	});
 }
 
-void EntityList::addEntities(const EntityTree& entity, int depth, const String& parentId)
+void EntityList::addEntities(const EntityTree& entity, const String& parentId)
 {
 	// Root is empty, don't add it
 	if (!entity.entityId.isEmpty()) {
@@ -47,7 +47,7 @@ void EntityList::addEntities(const EntityTree& entity, int depth, const String& 
 	}
 	
 	for (auto& e: entity.children) {
-		addEntities(e, depth + 1, entity.entityId);
+		addEntities(e, entity.entityId);
 	}
 }
 
@@ -55,10 +55,24 @@ void EntityList::refreshList()
 {
 	list->clear();
 
-	addEntities(sceneData->getEntityTree(), 0, "");
+	addEntities(sceneData->getEntityTree(), "");
 }
 
 void EntityList::onEntityModified(const String& id, const ConfigNode& node)
 {
 	list->setLabel(id, LocalisedString::fromUserString(node["name"].asString("")));
+}
+
+void EntityList::onEntityAdded(const String& id, const String& parentId, const ConfigNode& data)
+{
+	list->addTreeItem(id, parentId, LocalisedString::fromUserString(data["name"].asString()));
+	list->sortItems();
+	list->setSelectedOptionId(id);
+}
+
+void EntityList::onEntityRemoved(const String& id, const String& parentId)
+{
+	list->removeItem(id);
+	list->sortItems();
+	list->setSelectedOptionId(parentId);
 }

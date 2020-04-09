@@ -8,11 +8,20 @@ children:
 - sizer: { type: horizontal }
   proportion: 1
   children:
-  - widget: { id: scrollBarPane, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, size: [350, 30] }
-    sizer: { type: vertical }
+  - sizer: { type: vertical }
     children:
-    - widget: { id: entityList, class: entityList }
+    - widget: { id: scrollBarPane, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, size: [350, 30] }
+      sizer: { type: vertical }
       proportion: 1
+      children:
+      - widget: { id: entityList, class: entityList }
+        proportion: 1
+    - sizer: { type: horizontal }
+      children:
+      - widget: { id: addEntity, class: button, text: Add }
+        proportion: 1
+      - widget: { id: removeEntity, class: button, text: Remove }
+        proportion: 1
   - widget: { id: canvas, class: sceneEditorCanvas }
     proportion: 1
   - widget: { id: entityEditor, class: entityEditor }

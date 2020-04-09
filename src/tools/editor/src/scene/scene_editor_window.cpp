@@ -109,6 +109,16 @@ void SceneEditorWindow::makeUI()
 	{
 		saveEntity();
 	});
+
+	setHandle(UIEventType::ButtonClicked, "addEntity", [=] (const UIEvent& event)
+	{
+		addEntity();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "removeEntity", [=] (const UIEvent& event)
+	{
+		removeEntity();
+	});
 }
 
 void SceneEditorWindow::load()
@@ -123,7 +133,6 @@ void SceneEditorWindow::selectEntity(const String& id)
 {
 	const bool changed = entityEditor->loadEntity(id, sceneData->getEntityData(id), false);
 	if (changed) {
-		getWidget("saveButton")->setEnabled(false);
 		currentEntityId = id;
 	}
 }
@@ -151,12 +160,6 @@ void SceneEditorWindow::markModified()
 	getWidget("saveButton")->setEnabled(true);
 }
 
-void SceneEditorWindow::onTreeChanged()
-{
-	entityEditor->loadEntity(currentEntityId, sceneData->getEntityData(currentEntityId), true);
-	markModified();
-}
-
 void SceneEditorWindow::onEntityModified(const String& id)
 {
 	entityList->onEntityModified(id, sceneData->getEntityData(id));
@@ -164,3 +167,72 @@ void SceneEditorWindow::onEntityModified(const String& id)
 	markModified();
 }
 
+void SceneEditorWindow::addEntity()
+{
+	if (!currentEntityId.isEmpty()) {
+		const String& parentId = currentEntityId;
+
+		const auto newId = UUID::generate().toString();
+		
+		auto& data = sceneData->getEntityData(parentId);
+		auto newEntityData = ConfigNode(ConfigNode::MapType());
+		newEntityData["name"] = "New Entity";
+		newEntityData["uuid"] = newId;
+
+		auto& children = data["children"];
+		if (children.getType() != ConfigNodeType::Sequence) {
+			children = ConfigNode::SequenceType();
+		}
+		// Store a copy (keep original for updates below)
+		children.asSequence().emplace_back(ConfigNode(newEntityData));
+
+		entityList->onEntityAdded(newId, parentId, newEntityData);
+		onEntityModified(parentId);
+		selectEntity(newId);
+	}
+}
+
+void SceneEditorWindow::removeEntity()
+{
+	if (!currentEntityId.isEmpty()) {
+		const String& targetId = currentEntityId;
+		const String& parentId = findParent(currentEntityId);
+
+		if (!parentId.isEmpty()) {
+			auto& data = sceneData->getEntityData(parentId);
+			auto& children = data["children"].asSequence();
+
+			children.erase(std::remove_if(children.begin(), children.end(), [&] (const ConfigNode& child)
+			{
+				return child["uuid"].asString("") == targetId;
+			}), children.end());
+
+			entityList->onEntityRemoved(targetId, parentId);
+			onEntityModified(parentId);
+			selectEntity(parentId);
+		}
+	}
+}
+
+String SceneEditorWindow::findParent(const String& entityId) const
+{
+	const auto tree = sceneData->getEntityTree();
+	const auto res = findParent(entityId, tree, "");
+	return res ? *res : "";
+}
+
+const String* SceneEditorWindow::findParent(const String& entityId, const EntityTree& tree, const String& prev) const
+{
+	if (tree.entityId == entityId) {
+		return &prev;
+	}
+
+	for (auto& c: tree.children) {
+		const auto res = findParent(entityId, c, tree.entityId);
+		if (res) {
+			return res;
+		}
+	}
+
+	return nullptr;
+}

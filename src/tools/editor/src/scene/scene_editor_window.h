@@ -18,7 +18,6 @@ namespace Halley {
 		void unloadScene();
 		void markModified();
 
-		void onTreeChanged();
 		void onEntityModified(const String& id);
 
 	protected:
@@ -45,5 +44,10 @@ namespace Halley {
 		void selectEntity(const String& id);
 		void panCameraToEntity(const String& id);
 		void saveEntity();
+		
+		void addEntity();
+		void removeEntity();
+		String findParent(const String& entityId) const;
+		const String* findParent(const String& entityId, const EntityTree& tree, const String& prev) const;
 	};
 }

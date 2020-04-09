@@ -58,7 +58,8 @@ namespace Halley {
         void setLabel(const LocalisedString& label);
         void setExpanded(bool expanded);
 
-    	void updateTree(UITreeList& treeList);
+        std::unique_ptr<UITreeListItem> removeFromTree(const String& id);
+        void updateTree(UITreeList& treeList);
     	void collectItems(std::vector<std::shared_ptr<UIListItem>>& items);
     	std::optional<FindPositionResult> findPosition(Vector2f pos) const;
     	
@@ -66,6 +67,8 @@ namespace Halley {
     	const String& getParentId() const;
     	size_t getNumberOfChildren() const;
         size_t getChildIndex(const String& id) const;
+
+        std::shared_ptr<UIListItem> getListItem() const;
 
     private:
     	String id;
@@ -84,9 +87,11 @@ namespace Halley {
     	UITreeList(String id, UIStyle style);
 
         void addTreeItem(const String& id, const String& parentId, const LocalisedString& label);
+        void removeItem(const String& id);
         void setLabel(const String& id, const LocalisedString& label);
 
         void clear() override;
+        void sortItems();
 
     protected:
         void update(Time t, bool moved) override;
@@ -102,6 +107,5 @@ namespace Halley {
     	UITreeListItem& getItemOrRoot(const String& id);
         void setupEvents();
     	void reparentItem(const String& id, const String& newParentId, int childIndex);
-        void sortItems();
     };
 }
