@@ -189,7 +189,7 @@ void UITreeList::sortItems()
 		const auto& itemA = std::dynamic_pointer_cast<UIListItem>(a.getPointer());
 		const auto& itemB = std::dynamic_pointer_cast<UIListItem>(b.getPointer());
 
-		return itemA->getIndex() < itemB->getIndex();
+		return itemA->getAbsoluteIndex() < itemB->getAbsoluteIndex();
 	});
 }
 

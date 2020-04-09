@@ -192,12 +192,14 @@ void UIList::onCancel()
 void UIList::reassignIds()
 {
 	int i = 0;
+	int j = 0;
 	for (auto& item: items) {
 		if (item->isActive() && item->isEnabled()) {
 			item->setIndex(i++);
 		} else {
 			item->setIndex(-1);
 		}
+		item->setAbsoluteIndex(j++);
 	}
 }
 
@@ -431,6 +433,7 @@ UIListItem::UIListItem(const String& id, UIList& parent, UIStyle style, int inde
 	, parent(parent)
 	, style(style)
 	, index(index)
+	, absoluteIndex(index)
 	, extraMouseArea(extraMouseArea)
 	, dragWidget(this)
 {
@@ -631,6 +634,16 @@ int UIListItem::getIndex() const
 void UIListItem::setIndex(int i)
 {
 	index = i;
+}
+
+int UIListItem::getAbsoluteIndex() const
+{
+	return absoluteIndex;
+}
+
+void UIListItem::setAbsoluteIndex(int index)
+{
+	absoluteIndex = index;
 }
 
 Rect4f UIListItem::getMouseRect() const

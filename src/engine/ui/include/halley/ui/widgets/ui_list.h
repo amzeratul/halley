@@ -103,6 +103,9 @@ namespace Halley {
 
 		int getIndex() const;
 		void setIndex(int index);
+
+		int getAbsoluteIndex() const;
+		void setAbsoluteIndex(int index);
 		
 		Rect4f getMouseRect() const override;
 		Rect4f getRawRect() const;
@@ -130,6 +133,7 @@ namespace Halley {
 		UIList& parent;
 		UIStyle style;
 		int index;
+		int absoluteIndex;
 		Sprite sprite;
 		Vector4f extraMouseArea;
 		Vector4f innerBorder;
