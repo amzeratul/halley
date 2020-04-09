@@ -172,10 +172,24 @@ void UITreeList::reparentItem(const String& itemId, const String& newParentId, i
 
 void UITreeList::sortItems()
 {
+	// Store previous curOption/curOptionHighlight
+	const auto oldOption = curOption >= 0 ? items[curOption]->getId() : "";
+	const auto oldHighlight = curOptionHighlight >= 0 ? items[curOptionHighlight]->getId() : "";
+	
 	// Update list representation
 	items.clear();
 	root.collectItems(items);
 	reassignIds();
+
+	// Restore curOption/curOptionHighlight
+	for (auto& i: items) {
+		if (i->getId() == oldOption) {
+			curOption = i->getIndex();
+		}
+		if (i->getId() == oldHighlight) {
+			curOptionHighlight = i->getIndex();
+		}
+	}
 
 	// Update sizer
 	getSizer().sortItems([&] (const UISizerEntry& a, const UISizerEntry& b)
