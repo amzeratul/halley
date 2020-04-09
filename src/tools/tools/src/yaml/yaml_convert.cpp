@@ -140,16 +140,13 @@ void YAMLConvert::emitMap(const ConfigNode& node, YAML::Emitter& emitter, const 
 {
 	const auto& map = node.asMap();
 
-	if (map.empty()) {
-		emitter << YAML::Flow;
-	}
-	emitter << YAML::BeginMap;
-
 	// Sort entries by key, using options
 	std::vector<String> keys;
 	keys.reserve(map.size());
 	for (auto& kv: map) {
-		keys.push_back(kv.first);
+		if (kv.second.getType() != ConfigNodeType::Undefined) {
+			keys.push_back(kv.first);
+		}
 	}
 
 	std::sort(keys.begin(), keys.end(), [&] (const String& a, const String& b)
@@ -163,7 +160,12 @@ void YAMLConvert::emitMap(const ConfigNode& node, YAML::Emitter& emitter, const 
 		return a < b;
 	});
 
-	// Emit them in order
+	if (keys.empty()) {
+		emitter << YAML::Flow;
+	}
+	emitter << YAML::BeginMap;
+
+	// Emit keys in order
 	for (const auto& k: keys) {
 		const auto iter = map.find(k);
 		emitter << YAML::Key << k;
