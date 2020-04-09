@@ -178,11 +178,13 @@ namespace Halley {
 		ComponentDeleterTable& getComponentDeleterTable(World& world);
 
 		Entity* getParent() const { return parent; }
-		void setParent(Entity* parent);
+		void setParent(Entity* parent, bool propagate = true);
 		const std::vector<Entity*>& getChildren() const { return children; }
 		void addChild(Entity& child);
 		void detachChildren();
 		void markHierarchyDirty();
+
+		void doDestroy(bool updateParenting);
 	};
 
 	class EntityRef
@@ -322,6 +324,8 @@ namespace Halley {
 		}
 
 	private:
+		friend class World;
+		
 		template <typename T, typename std::enable_if<HasOnAddedToEntityMember<T>::value, int>::type = 0>
 		static void invokeComponentInit(T& comp, EntityRef& ref)
 		{

@@ -184,7 +184,12 @@ EntityRef World::createEntity(UUID uuid, String name, EntityId parentId)
 void World::destroyEntity(EntityId id)
 {
 	doDestroyEntity(id);
-	entityDirty = true;
+}
+
+void World::destroyEntity(EntityRef entity)
+{
+	Expects(entity.world == this);
+	doDestroyEntity(entity.entity);
 }
 
 void World::doDestroyEntity(EntityId id)
@@ -198,9 +203,7 @@ void World::doDestroyEntity(EntityId id)
 void World::doDestroyEntity(Entity* e)
 {
 	e->destroy();
-	for (auto& c : e->getChildren()) {
-		doDestroyEntity(c);
-	}
+	entityDirty = true;
 }
 
 EntityRef World::getEntity(EntityId id)

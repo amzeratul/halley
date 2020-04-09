@@ -86,7 +86,7 @@ ComponentDeleterTable& Entity::getComponentDeleterTable(World& world)
 	return world.getComponentDeleterTable();
 }
 
-void Entity::setParent(Entity* newParent)
+void Entity::setParent(Entity* newParent, bool propagate)
 {
 	if (parent != newParent) {
 		// Unparent from old
@@ -102,7 +102,9 @@ void Entity::setParent(Entity* newParent)
 			parent->children.push_back(this);
 		}
 
-		markHierarchyDirty();
+		if (propagate) {
+			markHierarchyDirty();
+		}
 	}
 }
 
@@ -170,6 +172,20 @@ EntityId Entity::getEntityId() const
 
 void Entity::destroy()
 {
+	doDestroy(true);
+}
+
+void Entity::doDestroy(bool updateParenting)
+{
+	if (updateParenting) {
+		setParent(nullptr, false);
+	}
+
+	for (auto& c: children) {
+		c->doDestroy(false);
+	}
+	children.clear();
+	
 	alive = false;
 	dirty = true;
 }

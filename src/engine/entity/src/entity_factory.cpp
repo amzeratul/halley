@@ -97,11 +97,7 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& node
 {
 	updateEntity(entity, node, refreshing ? UpdateMode::UpdateAllDeleteOld : UpdateMode::UpdateAll);
 
-	if (node["children"].getType() != ConfigNodeType::Sequence) {
-		return;
-	}
-
-	const auto& childNodes = node["children"].asSequence();
+	const auto& childNodes = node["children"].getType() == ConfigNodeType::Sequence ? node["children"].asSequence() : ConfigNode::SequenceType();
 	const size_t nNodes = childNodes.size();
 
 	// Compile the set of all UUIDs that are in the node
@@ -113,24 +109,29 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& node
 	}
 
 	// Update the existing children
-	size_t childIndex = 0;
-	for (auto& child: entity.getRawChildren()) {
-		auto childEntity = EntityRef(*child, world);
+	auto& entityChildren = entity.getRawChildren();
+	for (size_t childIndex = 0; childIndex < entityChildren.size(); ++childIndex) {
+		auto childEntity = EntityRef(*entityChildren[childIndex], world);
 		const auto& entityUUID = childEntity.getUUID();
 
 		// Find which node to use based on UUID
+		bool found = false;
 		for (size_t i = 0; i < nNodes; ++i) {
 			// Start at child index and loop around.
 			// If the structure matches (no insertions/removed since creation), this will find it on the first attempt.
 			const auto nodeIdx = (i + childIndex) % nNodes;
 			if (entityUUID == nodeUUIDs[nodeIdx]) {
 				nodeConsumed[nodeIdx] = 1;
+				found = true;
 				doUpdateEntityTree(childEntity, childNodes[nodeIdx], refreshing);
 				break;
 			}
 		}
 
-		childIndex++;
+		// Not found, so it should be removed
+		if (!found) {
+			world.destroyEntity(childEntity.getEntityId());
+		}
 	}
 
 	// Insert new nodes
