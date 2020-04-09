@@ -27,6 +27,7 @@ namespace Halley {
 		ComponentEditorContext context;
 		
 		std::shared_ptr<UIWidget> fields;
+		std::shared_ptr<UITextInput> entityName;
 		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 
 		String currentId;
@@ -40,6 +41,7 @@ namespace Halley {
 		void addComponent();
 		void addComponent(const String& name);
 		void deleteComponent(const String& name);
+		void setName(const String& name);
 		void onEntityUpdated();
 		ConfigNode& getEntityData();
 	};

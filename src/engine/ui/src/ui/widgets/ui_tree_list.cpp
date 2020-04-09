@@ -38,12 +38,20 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 	listItem->setDraggableSubWidget(labelWidget.get());
 
 	// Logical item
-	auto treeItem = std::make_unique<UITreeListItem>(id, listItem, treeControls);
+	auto treeItem = std::make_unique<UITreeListItem>(id, listItem, treeControls, labelWidget);
 	auto& parentItem = getItemOrRoot(parentId);
 	parentItem.addChild(std::move(treeItem));
 
 	addItem(listItem, Vector4f(), UISizerAlignFlags::Left | UISizerFillFlags::FillVertical);
 	needsRefresh = true;
+}
+
+void UITreeList::setLabel(const String& id, const LocalisedString& label)
+{
+	auto item = root.tryFindId(id);
+	if (item) {
+		item->setLabel(label);
+	}
 }
 
 void UITreeList::clear()
@@ -290,9 +298,10 @@ void UITreeListControls::setupUI()
 
 UITreeListItem::UITreeListItem() = default;
 
-UITreeListItem::UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeControls)
+UITreeListItem::UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeControls, std::shared_ptr<UILabel> label)
 	: id(std::move(id))
 	, listItem(std::move(listItem))
+	, label(std::move(label))
 	, treeControls(std::move(treeControls))
 {}
 
@@ -354,6 +363,11 @@ void UITreeListItem::moveChild(size_t startIndex, size_t targetIndex)
 	for (size_t i = startIndex; i != finalIndex; i += dir) {
 		std::swap(children[i], children[i + dir]);
 	}
+}
+
+void UITreeListItem::setLabel(const LocalisedString& text)
+{
+	label->setText(text);
 }
 
 void UITreeListItem::setExpanded(bool e)

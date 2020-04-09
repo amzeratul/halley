@@ -7,6 +7,22 @@ children:
   proportion: 1
   border: [0, 0, 4, 0]
   children:
+  - widget: { class: image, image: "ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#754589" }
+    sizer: { type: vertical }
+    border: [0, 0, 0, 4]
+    children:
+    - widget: { id: "", class: label, text: "Entity" }
+      fill: centre
+    - widget: { id: entityFields, class: widget }
+      border: [1, 4, 1, 1]
+      sizer: { type: grid, gap: 2, columns: 2, columnProportion: [0, 1] }
+      fill: fill
+      children:
+      - widget: { class: widget, size: [100, 20] }
+        children:
+        - widget: { id: "", class: label, text: "Name", style: "labelLight" }
+      - widget: { id: entityName, class: textInput, size: [200, 22], style: inputThin }
+        proportion: 1
   - widget: { id: fields, class: widget }
     sizer: { type: vertical, gap: 8 }
   - widget: { id: addComponentButton, class: button, text: "Add Component", size: [ 30, 25 ] }

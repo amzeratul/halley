@@ -12,6 +12,7 @@ namespace Halley {
 		void setSceneEditorWindow(SceneEditorWindow& sceneEditor);
 		void setSceneData(std::shared_ptr<ISceneData> sceneData);
 		void refreshList();
+		void onEntityModified(const String& id, const ConfigNode& node);
 
 	private:
 		UIFactory& factory;

@@ -178,6 +178,16 @@ std::optional<UISizer> UIFactory::makeSizer(const ConfigNode& entryNode)
 		int nColumns = sizerNode["columns"].asInt(1);
 		
 		sizer = UISizer(sizerType, gap, nColumns);
+
+		if (sizerNode["columnProportions"].getType() == ConfigNodeType::Sequence) {
+			auto& seq = sizerNode["columnProportions"].asSequence();
+			std::vector<float> proportions;
+			proportions.reserve(seq.size());
+			for (auto& e: seq) {
+				proportions.push_back(e.asFloat());
+			}
+			sizer.setColumnProportions(proportions);
+		}
 	}
 
 	loadSizerChildren(sizer, entryNode["children"]);

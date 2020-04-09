@@ -57,3 +57,8 @@ void EntityList::refreshList()
 
 	addEntities(sceneData->getEntityTree(), 0, "");
 }
+
+void EntityList::onEntityModified(const String& id, const ConfigNode& node)
+{
+	list->setLabel(id, LocalisedString::fromUserString(node["name"].asString("")));
+}

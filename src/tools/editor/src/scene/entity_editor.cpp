@@ -39,9 +39,16 @@ void EntityEditor::makeUI()
 	fields = getWidget("fields");
 	fields->setMinSize(Vector2f(300, 20));
 
+	entityName = getWidgetAs<UITextInput>("entityName");
+
 	setHandle(UIEventType::ButtonClicked, "addComponentButton", [=](const UIEvent& event)
 	{
 		addComponent();
+	});
+
+	setHandle(UIEventType::TextSubmit, "entityName", [=] (const UIEvent& event)
+	{
+		setName(event.getStringData());
 	});
 }
 
@@ -70,6 +77,8 @@ void EntityEditor::reloadEntity()
 			}
 		}
 	}
+
+	entityName->setText(getEntityData()["name"].asString(""));
 }
 
 void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data)
@@ -82,7 +91,6 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 	});
 
 	auto componentFields = componentUI->getWidget("componentFields");
-	componentFields->getSizer().setColumnProportions({{0, 1}});
 	
 	const auto iter = ecsData->getComponents().find(componentType);
 	if (iter != ecsData->getComponents().end()) {
@@ -182,6 +190,12 @@ void EntityEditor::deleteComponent(const String& name)
 	}
 
 	needToReloadUI = true;
+	onEntityUpdated();
+}
+
+void EntityEditor::setName(const String& name)
+{
+	getEntityData()["name"] = name;
 	onEntityUpdated();
 }
 

@@ -159,6 +159,7 @@ void SceneEditorWindow::onTreeChanged()
 
 void SceneEditorWindow::onEntityModified(const String& id)
 {
+	entityList->onEntityModified(id, sceneData->getEntityData(id));
 	sceneData->reloadEntity(id);
 	markModified();
 }

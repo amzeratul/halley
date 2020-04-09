@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ui_list.h"
+#include "ui_label.h"
 
 namespace Halley {
     class UITreeListControls : public UIWidget {
@@ -46,7 +47,7 @@ namespace Halley {
     	};
     	
     	UITreeListItem();
-    	UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeControls);
+    	UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeControls, std::shared_ptr<UILabel> label);
 
     	UITreeListItem* tryFindId(const String& id);
     	void addChild(std::unique_ptr<UITreeListItem> item);
@@ -54,6 +55,7 @@ namespace Halley {
     	std::unique_ptr<UITreeListItem> removeChild(const String& id);
         void moveChild(size_t oldChildIndex, size_t newChildIndex);
 
+        void setLabel(const LocalisedString& label);
         void setExpanded(bool expanded);
 
     	void updateTree(UITreeList& treeList);
@@ -69,6 +71,7 @@ namespace Halley {
     	String id;
     	String parentId;
         std::shared_ptr<UIListItem> listItem;
+        std::shared_ptr<UILabel> label;
         std::shared_ptr<UITreeListControls> treeControls;
     	std::vector<std::unique_ptr<UITreeListItem>> children;
     	bool expanded = true;
@@ -81,9 +84,10 @@ namespace Halley {
     	UITreeList(String id, UIStyle style);
 
         void addTreeItem(const String& id, const String& parentId, const LocalisedString& label);
+        void setLabel(const String& id, const LocalisedString& label);
 
         void clear() override;
-    	
+
     protected:
         void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
