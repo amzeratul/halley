@@ -69,6 +69,7 @@ namespace Halley {
         size_t getChildIndex(const String& id) const;
 
         std::shared_ptr<UIListItem> getListItem() const;
+        const std::vector<std::unique_ptr<UITreeListItem>>& getChildren() const;
 
     private:
     	String id;
@@ -107,5 +108,6 @@ namespace Halley {
     	UITreeListItem& getItemOrRoot(const String& id);
         void setupEvents();
     	void reparentItem(const String& id, const String& newParentId, int childIndex);
+    	void removeTree(const UITreeListItem& tree);
     };
 }

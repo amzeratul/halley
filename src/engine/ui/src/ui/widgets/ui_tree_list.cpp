@@ -50,13 +50,22 @@ void UITreeList::removeItem(const String& id)
 {
 	auto item = root.removeFromTree(id);
 	if (item) {
-		getSizer().remove(*item->getListItem());
-		removeChild(*item->getListItem());
+		removeTree(*item);
+	}
+}
 
-		items.erase(std::remove_if(items.begin(), items.end(), [&] (const std::shared_ptr<UIListItem>& i)
-		{
-			return i->getId() == id;
-		}), items.end());
+void UITreeList::removeTree(const UITreeListItem& tree)
+{
+	getSizer().remove(*tree.getListItem());
+	removeChild(*tree.getListItem());
+
+	items.erase(std::remove_if(items.begin(), items.end(), [&] (const std::shared_ptr<UIListItem>& i)
+	{
+		return i->getId() == tree.getId();
+	}), items.end());
+
+	for (auto& subTree: tree.getChildren()) {
+		removeTree(*subTree);
 	}
 }
 
@@ -475,6 +484,11 @@ size_t UITreeListItem::getChildIndex(const String& id) const
 std::shared_ptr<UIListItem> UITreeListItem::getListItem() const
 {
 	return listItem;
+}
+
+const std::vector<std::unique_ptr<UITreeListItem>>& UITreeListItem::getChildren() const
+{
+	return children;
 }
 
 void UITreeListItem::updateTree(UITreeList& treeList)
