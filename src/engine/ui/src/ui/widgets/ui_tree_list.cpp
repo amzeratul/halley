@@ -38,23 +38,28 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 	listItem->setDraggableSubWidget(labelWidget.get());
 
 	// Logical item
-	auto treeItem = UITreeListItem(id, listItem, treeControls);
+	auto treeItem = std::make_unique<UITreeListItem>(id, listItem, treeControls);
 	auto& parentItem = getItemOrRoot(parentId);
 	parentItem.addChild(std::move(treeItem));
 
 	addItem(listItem, Vector4f(), UISizerAlignFlags::Left | UISizerFillFlags::FillVertical);
+	needsRefresh = true;
 }
 
 void UITreeList::clear()
 {
 	UIList::clear();
 	root = UITreeListItem();
+	needsRefresh = true;
 }
 
 void UITreeList::update(Time t, bool moved)
 {
 	UIList::update(t, moved);
-	root.updateTree(*this);
+	if (needsRefresh) {
+		root.updateTree(*this);
+		needsRefresh = false;
+	}
 }
 
 void UITreeList::draw(UIPainter& painter) const
@@ -127,6 +132,7 @@ void UITreeList::setupEvents()
 		if (elem) {
 			elem->setExpanded(false);
 		}
+		needsRefresh = true;
 	});
 
 	setHandle(UIEventType::TreeExpand, [=](const UIEvent& event)
@@ -135,6 +141,7 @@ void UITreeList::setupEvents()
 		if (elem) {
 			elem->setExpanded(true);
 		}
+		needsRefresh = true;
 	});
 }
 
@@ -150,19 +157,34 @@ void UITreeList::reparentItem(const String& itemId, const String& newParentId, i
 	const size_t oldChildIndex = int(oldParent.getChildIndex(itemId));
 
 	if (oldParentId != newParentId || oldChildIndex != newChildIndex) {
-		// TODO: swap this without rebuilding whole thing?
-		/*
 		if (oldParentId == newParentId) {
 			oldParent.moveChild(oldChildIndex, newChildIndex);
 		} else {
 			auto& newParent = *root.tryFindId(newParentId);
 			newParent.addChild(oldParent.removeChild(itemId), newChildIndex);
 		}
-		reassignIds();
-		*/
+		sortItems();
+		needsRefresh = true;
 
 		sendEvent(UIEvent(UIEventType::TreeItemReparented, getId(), itemId, newParentId, newChildIndex));
 	}
+}
+
+void UITreeList::sortItems()
+{
+	// Update list representation
+	items.clear();
+	root.collectItems(items);
+	reassignIds();
+
+	// Update sizer
+	getSizer().sortItems([&] (const UISizerEntry& a, const UISizerEntry& b)
+	{
+		const auto& itemA = std::dynamic_pointer_cast<UIListItem>(a.getPointer());
+		const auto& itemB = std::dynamic_pointer_cast<UIListItem>(b.getPointer());
+
+		return itemA->getIndex() < itemB->getIndex();
+	});
 }
 
 UITreeListControls::UITreeListControls(String id, UIStyle style)
@@ -172,37 +194,39 @@ UITreeListControls::UITreeListControls(String id, UIStyle style)
 	setupUI();
 }
 
-float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth, bool hasChildren)
+float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth, bool hasChildren, bool expanded)
 {
-	if (waitingConstruction || itemsLeftPerDepth.size() != lastDepth) {
+	auto getSprite = [&](size_t depth) -> Sprite
+	{
+		const bool leaf = depth == itemsLeftPerDepth.size();
+		if (leaf) {
+			return style.getSprite("leaf");
+		} else {
+			const bool deepest = depth == itemsLeftPerDepth.size() - 1;
+			const auto left = itemsLeftPerDepth[depth];
+			if (deepest) {
+				if (left == 1) {
+					return style.getSprite("guide_l");
+				} else {
+					return style.getSprite("guide_t");
+				}
+			} else {
+				if (left == 1) {
+					return Sprite().setSize(Vector2f(22, 22));
+				} else {
+					return style.getSprite("guide_i");
+				}
+			}
+		}
+	};
+
+	const bool hadChildren = !!expandButton;
+
+	if (waitingConstruction || itemsLeftPerDepth.size() != lastDepth || hasChildren != hadChildren) {
 		clear();
 		guides.clear();
 		lastDepth = itemsLeftPerDepth.size();
 
-		auto getSprite = [&](size_t depth) -> Sprite
-		{
-			const bool leaf = depth == itemsLeftPerDepth.size();
-			if (leaf) {
-				return style.getSprite("leaf");
-			} else {
-				const bool deepest = depth == itemsLeftPerDepth.size() - 1;
-				const auto left = itemsLeftPerDepth[depth];
-				if (deepest) {
-					if (left == 1) {
-						return style.getSprite("guide_l");
-					} else {
-						return style.getSprite("guide_t");
-					}
-				} else {
-					if (left == 1) {
-						return Sprite().setSize(Vector2f(22, 22));
-					} else {
-						return style.getSprite("guide_i");
-					}
-				}
-			}
-		};
-		
 		for (size_t i = 1; i < itemsLeftPerDepth.size() + (hasChildren ? 0 : 1); ++i) {
 			guides.push_back(std::make_shared<UIImage>(getSprite(i)));
 			add(guides.back(), 0, Vector4f(0, -1, 0, 0));
@@ -211,13 +235,26 @@ float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth
 		if (hasChildren) {
 			expandButton = std::make_shared<UIButton>("expand", style.getSubStyle("expandButton"));
 			collapseButton = std::make_shared<UIButton>("collapse", style.getSubStyle("collapseButton"));
-			expandButton->setActive(false);
+
+			expandButton->setActive(!expanded);
+			collapseButton->setActive(expanded);
+
 			add(expandButton, 0, Vector4f(), UISizerAlignFlags::Centre);
 			add(collapseButton, 0, Vector4f(), UISizerAlignFlags::Centre);
+		} else if (hadChildren) {
+			expandButton->destroy();
+			expandButton.reset();
+			collapseButton->destroy();
+			collapseButton.reset();
 		}
 
-		totalIndent = getLayoutMinimumSize(false).x;
 		waitingConstruction = false;
+		totalIndent = getLayoutMinimumSize(false).x;
+	} else {
+		// Update guides
+		for (size_t i = 1; i < itemsLeftPerDepth.size() + (hasChildren ? 0 : 1); ++i) {
+			guides[i - 1]->setSprite(getSprite(i));
+		}
 	}
 
 	return totalIndent;
@@ -260,7 +297,7 @@ UITreeListItem* UITreeListItem::tryFindId(const String& id)
 	}
 
 	for (auto& c: children) {
-		const auto res = c.tryFindId(id);
+		const auto res = c->tryFindId(id);
 		if (res) {
 			return res;
 		}
@@ -269,44 +306,47 @@ UITreeListItem* UITreeListItem::tryFindId(const String& id)
 	return nullptr;
 }
 
-void UITreeListItem::addChild(UITreeListItem item)
+void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item)
 {
 	if (children.empty()) {
 		expanded = true;
 	}
-	item.parentId = id;
+	item->parentId = id;
 	children.emplace_back(std::move(item));
 }
 
-void UITreeListItem::addChild(UITreeListItem item, size_t pos)
+void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item, size_t pos)
 {
 	if (children.empty()) {
 		expanded = true;
 	}
-	item.parentId = id;
+	item->parentId = id;
 	children.insert(children.begin() + pos, std::move(item));
 }
 
-UITreeListItem UITreeListItem::removeChild(const String& id)
+std::unique_ptr<UITreeListItem> UITreeListItem::removeChild(const String& id)
 {
 	const size_t n = children.size();
 	for (size_t i = 0; i < n; ++i) {
-		if (children[i].id == id) {
-			UITreeListItem item = std::move(children[i]);
+		if (children[i]->id == id) {
+			auto item = std::move(children[i]);
 			children.erase(children.begin() + i);
-			item.parentId = "";
+			item->parentId = "";
 			return item;
 		}
 	}
 	throw Exception("No child with id \"" + id + "\"", HalleyExceptions::UI);
 }
 
-void UITreeListItem::moveChild(size_t oldChildIndex, size_t newChildIndex)
+void UITreeListItem::moveChild(size_t startIndex, size_t targetIndex)
 {
-	if (newChildIndex < oldChildIndex) {
-		std::rotate(children.begin() + newChildIndex, children.begin() + oldChildIndex, children.begin() + oldChildIndex);
-	} else {
-		std::rotate(children.begin() + oldChildIndex, children.begin() + newChildIndex, children.begin() + newChildIndex);
+	// If moving forwards, subtract one to account for the fact that the currently occupied slot will be removed
+	const size_t finalIndex = targetIndex > startIndex ? targetIndex - 1 : targetIndex;
+
+	// Swap from start to end
+	const int dir = finalIndex > startIndex ? 1 : -1;
+	for (size_t i = startIndex; i != finalIndex; i += dir) {
+		std::swap(children[i], children[i + dir]);
 	}
 }
 
@@ -343,7 +383,7 @@ std::optional<UITreeListItem::FindPositionResult> UITreeListItem::findPosition(V
 
 	if (expanded) {
 		for (auto& c: children) {
-			auto res = c.findPosition(pos);
+			auto res = c->findPosition(pos);
 			if (res) {
 				return *res;
 			}
@@ -371,7 +411,7 @@ size_t UITreeListItem::getNumberOfChildren() const
 size_t UITreeListItem::getChildIndex(const String& id) const
 {
 	for (size_t i = 0; i < children.size(); ++i) {
-		if (children[i].id == id) {
+		if (children[i]->id == id) {
 			return i;
 		}
 	}
@@ -384,18 +424,29 @@ void UITreeListItem::updateTree(UITreeList& treeList)
 	doUpdateTree(treeList, itemsLeftPerDepth, expanded);
 }
 
+void UITreeListItem::collectItems(std::vector<std::shared_ptr<UIListItem>>& items)
+{
+	if (listItem) {
+		items.push_back(listItem);
+	}
+
+	for (auto& c: children) {
+		c->collectItems(items);
+	}
+}
+
 void UITreeListItem::doUpdateTree(UITreeList& treeList, std::vector<int>& itemsLeftPerDepth, bool treeExpanded)
 {
 	treeList.setItemActive(id, treeExpanded);
 
 	if (listItem && treeControls && treeExpanded) {
-		const float totalIndent = treeControls->updateGuides(itemsLeftPerDepth, !children.empty());
+		const float totalIndent = treeControls->updateGuides(itemsLeftPerDepth, !children.empty(), expanded);
 		listItem->setClickableInnerBorder(Vector4f(totalIndent, 0, 0, 0));
 	}
 	
 	itemsLeftPerDepth.push_back(int(children.size()));
 	for (auto& c: children) {
-		c.doUpdateTree(treeList, itemsLeftPerDepth, expanded && treeExpanded);
+		c->doUpdateTree(treeList, itemsLeftPerDepth, expanded && treeExpanded);
 		itemsLeftPerDepth.back()--;
 	}
 	itemsLeftPerDepth.pop_back();

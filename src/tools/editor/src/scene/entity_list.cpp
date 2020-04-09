@@ -29,7 +29,7 @@ void EntityList::makeUI()
 
 		sceneData->reparentEntity(entityId, newParentId, childIndex);
 
-		refreshList();
+		//refreshList();
 	});
 }
 

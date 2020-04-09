@@ -68,11 +68,11 @@ namespace Halley {
 		void reassignIds();
 
 		UIStyle style;
+		std::vector<std::shared_ptr<UIListItem>> items;
 
 	private:
 		UISizerType orientation;
 		Sprite sprite;
-		std::vector<std::shared_ptr<UIListItem>> items;
 
 		int curOptionHighlight = -1;
 		int curOption = -1;

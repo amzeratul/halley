@@ -7,7 +7,7 @@ namespace Halley {
     public:
         UITreeListControls(String id, UIStyle style);
 
-        float updateGuides(const std::vector<int>& itemsLeftPerDepth, bool hasChildren);
+        float updateGuides(const std::vector<int>& itemsLeftPerDepth, bool hasChildren, bool expanded);
         void setExpanded(bool expanded);
 
     private:
@@ -49,14 +49,15 @@ namespace Halley {
     	UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeControls);
 
     	UITreeListItem* tryFindId(const String& id);
-    	void addChild(UITreeListItem item);
-        void addChild(UITreeListItem item, size_t pos);
-    	UITreeListItem removeChild(const String& id);
+    	void addChild(std::unique_ptr<UITreeListItem> item);
+        void addChild(std::unique_ptr<UITreeListItem> item, size_t pos);
+    	std::unique_ptr<UITreeListItem> removeChild(const String& id);
         void moveChild(size_t oldChildIndex, size_t newChildIndex);
 
-    	void updateTree(UITreeList& treeList);
         void setExpanded(bool expanded);
 
+    	void updateTree(UITreeList& treeList);
+    	void collectItems(std::vector<std::shared_ptr<UIListItem>>& items);
     	std::optional<FindPositionResult> findPosition(Vector2f pos) const;
     	
         const String& getId() const;
@@ -69,7 +70,7 @@ namespace Halley {
     	String parentId;
         std::shared_ptr<UIListItem> listItem;
         std::shared_ptr<UITreeListControls> treeControls;
-    	std::vector<UITreeListItem> children;
+    	std::vector<std::unique_ptr<UITreeListItem>> children;
     	bool expanded = true;
 
     	void doUpdateTree(UITreeList& treeList, std::vector<int>& itemsLeftPerDepth, bool treeExpanded);
@@ -92,9 +93,11 @@ namespace Halley {
     private:
     	UITreeListItem root;
     	Sprite insertCursor;
+    	bool needsRefresh = true;
 
     	UITreeListItem& getItemOrRoot(const String& id);
         void setupEvents();
     	void reparentItem(const String& id, const String& newParentId, int childIndex);
+        void sortItems();
     };
 }

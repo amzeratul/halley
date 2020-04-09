@@ -117,7 +117,14 @@ namespace Halley {
 		UISizerEntry& operator[](size_t n);
 
 		void updateEnabled() const;
+		
 		void swapItems(int idxA, int idxB);
+
+		template <typename F>
+		void sortItems(F f)
+		{
+			std::sort(entries.begin(), entries.end(), f);
+		}
 
 	private:
 		std::vector<UISizerEntry> entries;
