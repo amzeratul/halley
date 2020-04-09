@@ -46,7 +46,7 @@ void SceneEditorWindow::loadScene(const String& name)
 		sceneName = name;
 
 		// Setup editors
-		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, entity);
+		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, world);
 		entityEditor->setECSData(project.getECSData());
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 		entityList->setSceneData(sceneData);
@@ -86,9 +86,13 @@ void SceneEditorWindow::makeUI()
 	add(uiFactory.makeUI("ui/halley/scene_editor_window"), 1);
 	
 	canvas = getWidgetAs<SceneEditorCanvas>("canvas");
+	
 	entityList = getWidgetAs<EntityList>("entityList");
+	entityList->setSceneEditorWindow(*this);
+
 	entityEditor = getWidgetAs<EntityEditor>("entityEditor");
-	entityEditor->setSceneEditor(*this);
+	entityEditor->setSceneEditorWindow(*this);
+
 	getWidget("saveButton")->setEnabled(false);
 
 	setHandle(UIEventType::ListSelectionChanged, "entityList_list", [=] (const UIEvent& event)
@@ -117,7 +121,7 @@ void SceneEditorWindow::load()
 
 void SceneEditorWindow::selectEntity(const String& id)
 {
-	const bool changed = entityEditor->loadEntity(id, sceneData->getEntityData(id));
+	const bool changed = entityEditor->loadEntity(id, sceneData->getEntityData(id), false);
 	if (changed) {
 		getWidget("saveButton")->setEnabled(false);
 		currentEntityId = id;
@@ -147,9 +151,15 @@ void SceneEditorWindow::markModified()
 	getWidget("saveButton")->setEnabled(true);
 }
 
-void SceneEditorWindow::modifyEntity(const String& id, const ConfigNode& data)
+void SceneEditorWindow::onTreeChanged()
 {
-	sceneData->reloadEntity(id, data);
+	entityEditor->loadEntity(currentEntityId, sceneData->getEntityData(currentEntityId), true);
+	markModified();
+}
+
+void SceneEditorWindow::onEntityModified(const String& id)
+{
+	sceneData->reloadEntity(id);
 	markModified();
 }
 

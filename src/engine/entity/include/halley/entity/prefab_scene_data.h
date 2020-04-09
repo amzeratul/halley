@@ -5,17 +5,19 @@
 namespace Halley {
     class PrefabSceneData : public ISceneData {
     public:
-    	PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> factory, EntityRef entity);
+    	PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> factory, World& world);
 
-        ConfigNode getEntityData(const String& id) override;
-        void reloadEntity(const String& id, const ConfigNode& data) override;
+        ConfigNode& getEntityData(const String& id) override;
+        void reloadEntity(const String& id) override;
         EntityTree getEntityTree() const override;
         void reparentEntity(const String& entityId, const String& newParentId, int childIndex) override;
     	
     private:
     	Prefab& prefab;
         std::shared_ptr<EntityFactory> factory;
-        EntityRef entity;
+        World& world;
+
+    	void reloadEntity(const String& id, ConfigNode& data);
 
         static ConfigNode* findEntity(ConfigNode& node, const String& id);
         static std::pair<ConfigNode*, ConfigNode*> findEntityAndParent(ConfigNode& node, ConfigNode* previous, const String& id);

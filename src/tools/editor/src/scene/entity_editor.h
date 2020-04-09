@@ -13,11 +13,11 @@ namespace Halley {
 
 		void update(Time t, bool moved) override;
 
-		void setSceneEditor(SceneEditorWindow& sceneEditor);
+		void setSceneEditorWindow(SceneEditorWindow& sceneEditor);
 		void setECSData(ECSData& data);
 		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
 
-		bool loadEntity(const String& id, ConfigNode data);
+		bool loadEntity(const String& id, ConfigNode& data, bool force);
 		void reloadEntity();
 
 	private:
@@ -30,7 +30,7 @@ namespace Halley {
 		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 
 		String currentId;
-		ConfigNode currentEntityData;
+		ConfigNode* currentEntityData = nullptr;
 		bool needToReloadUI = false;
 
 		void makeUI();
@@ -41,5 +41,6 @@ namespace Halley {
 		void addComponent(const String& name);
 		void deleteComponent(const String& name);
 		void onEntityUpdated();
+		ConfigNode& getEntityData();
 	};
 }

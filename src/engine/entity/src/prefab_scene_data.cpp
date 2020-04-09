@@ -1,35 +1,38 @@
 #include "prefab_scene_data.h"
 
-#include "../../../tools/tools/include/halley/tools/file/filesystem.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/support/logger.h"
+#include "world.h"
 
 using namespace Halley;
 
-PrefabSceneData::PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> factory, EntityRef entity)
+PrefabSceneData::PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> factory, World& world)
 	: prefab(prefab)
 	, factory(std::move(factory))
-	, entity(entity)
+	, world(world)
 {
 }
 
-ConfigNode PrefabSceneData::getEntityData(const String& id)
+ConfigNode& PrefabSceneData::getEntityData(const String& id)
 {
-	const auto result = findEntity(prefab.getRoot(), id);
-	if (result) {
-		return ConfigNode(*result);
+	const auto data = findEntity(prefab.getRoot(), id);
+	if (!data) {
+		throw Exception("Entity data not found for \"" + id + "\"", HalleyExceptions::Entity);
 	}
-	return ConfigNode();
+	return *data;
 }
 
-void PrefabSceneData::reloadEntity(const String& id, const ConfigNode& data)
+void PrefabSceneData::reloadEntity(const String& id)
 {
-	const auto result = findEntity(prefab.getRoot(), id);
-	if (result) {
-		*result = ConfigNode(data);
+	reloadEntity(id, getEntityData(id));
+}
+
+void PrefabSceneData::reloadEntity(const String& id, ConfigNode& data)
+{
+	auto entity = world.findEntity(UUID(id));
+	if (entity) {
+		factory->updateEntityTree(*entity, data);
 	}
-	
-	factory->updateEntityTree(entity, prefab.getRoot());
 }
 
 EntityTree PrefabSceneData::getEntityTree() const
@@ -64,6 +67,9 @@ void PrefabSceneData::reparentEntity(const String& entityId, const String& newPa
 	} else {
 		addChild(*newParent, childIndex, removeChild(*oldParent, entityId));
 	}
+
+	reloadEntity((*oldParent)["uuid"].asString(""), *oldParent);
+	reloadEntity((*newParent)["uuid"].asString(""), *newParent);
 }
 
 ConfigNode* PrefabSceneData::findEntity(ConfigNode& node, const String& id)

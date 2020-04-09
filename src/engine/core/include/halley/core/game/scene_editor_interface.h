@@ -73,8 +73,8 @@ namespace Halley {
 	public:
 		virtual ~ISceneData() = default;
 
-		virtual ConfigNode getEntityData(const String& id) = 0;
-		virtual void reloadEntity(const String& id, const ConfigNode& data) = 0;
+		virtual ConfigNode& getEntityData(const String& id) = 0;
+		virtual void reloadEntity(const String& id) = 0;
 		virtual EntityTree getEntityTree() const = 0;
 		virtual void reparentEntity(const String& entityId, const String& newParentId, int childIndex) = 0;
 	};

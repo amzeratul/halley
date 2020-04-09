@@ -17,7 +17,9 @@ namespace Halley {
 		void loadScene(const String& sceneName);
 		void unloadScene();
 		void markModified();
-		void modifyEntity(const String& id, const ConfigNode& data);
+
+		void onTreeChanged();
+		void onEntityModified(const String& id);
 
 	protected:
 		void update(Time t, bool moved) override;

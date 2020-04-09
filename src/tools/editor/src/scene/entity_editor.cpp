@@ -23,7 +23,7 @@ void EntityEditor::update(Time t, bool moved)
 	}
 }
 
-void EntityEditor::setSceneEditor(SceneEditorWindow& editor)
+void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor)
 {
 	sceneEditor = &editor;
 }
@@ -45,15 +45,15 @@ void EntityEditor::makeUI()
 	});
 }
 
-bool EntityEditor::loadEntity(const String& id, ConfigNode data)
+bool EntityEditor::loadEntity(const String& id, ConfigNode& data, bool force)
 {
 	Expects(ecsData);
 
-	if (id == currentId) {
+	if (currentId == id && currentEntityData == &data && !force) {
 		return false;
 	}
 	
-	currentEntityData = std::move(data);
+	currentEntityData = &data;
 	currentId = id;
 	
 	reloadEntity();
@@ -63,8 +63,8 @@ bool EntityEditor::loadEntity(const String& id, ConfigNode data)
 void EntityEditor::reloadEntity()
 {
 	fields->clear();
-	if (currentEntityData["components"].getType() == ConfigNodeType::Sequence) {
-		for (auto& componentNode: currentEntityData["components"].asSequence()) {
+	if (getEntityData()["components"].getType() == ConfigNodeType::Sequence) {
+		for (auto& componentNode: getEntityData()["components"].asSequence()) {
 			for (auto& c: componentNode.asMap()) {
 				loadComponentData(c.first, c.second);
 			}
@@ -118,7 +118,7 @@ std::shared_ptr<IUIElement> EntityEditor::createEditField(const String& fieldTyp
 void EntityEditor::addComponent()
 {
 	std::set<String> existingComponents;
-	auto& components = currentEntityData["components"];
+	auto& components = getEntityData()["components"];
 	if (components.getType() == ConfigNodeType::Sequence) {
 		for (auto& c: components.asSequence()) {
 			for (auto& kv: c.asMap()) {
@@ -145,7 +145,7 @@ void EntityEditor::addComponent()
 
 void EntityEditor::addComponent(const String& name)
 {
-	auto& components = currentEntityData["components"];
+	auto& components = getEntityData()["components"];
 	if (components.getType() != ConfigNodeType::Sequence) {
 		components = ConfigNode::SequenceType();
 	}
@@ -161,7 +161,7 @@ void EntityEditor::addComponent(const String& name)
 
 void EntityEditor::deleteComponent(const String& name)
 {
-	auto& components = currentEntityData["components"];
+	auto& components = getEntityData()["components"];
 	if (components.getType() == ConfigNodeType::Sequence) {
 		auto& componentSequence = components.asSequence();
 		bool found = false;
@@ -187,7 +187,12 @@ void EntityEditor::deleteComponent(const String& name)
 
 void EntityEditor::onEntityUpdated()
 {
-	sceneEditor->modifyEntity(currentId, currentEntityData);
+	sceneEditor->onEntityModified(currentId);
+}
+
+ConfigNode& EntityEditor::getEntityData()
+{
+	return *currentEntityData;
 }
 
 void EntityEditor::addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories)

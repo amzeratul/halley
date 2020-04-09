@@ -6,13 +6,12 @@ WorldSceneData::WorldSceneData(World& world)
 {
 }
 
-ConfigNode WorldSceneData::getEntityData(const String& id)
+ConfigNode& WorldSceneData::getEntityData(const String& id)
 {
-	// TODO
-	return ConfigNode();
+	throw Exception("Not implemented", HalleyExceptions::Entity);
 }
 
-void WorldSceneData::reloadEntity(const String& id, const ConfigNode& data)
+void WorldSceneData::reloadEntity(const String& id)
 {
 	// TODO
 }
