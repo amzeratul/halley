@@ -1,4 +1,6 @@
 #include "entity_list.h"
+
+#include "scene_editor_window.h"
 using namespace Halley;
 
 EntityList::EntityList(String id, UIFactory& factory)
@@ -6,6 +8,11 @@ EntityList::EntityList(String id, UIFactory& factory)
 	, factory(factory)
 {
 	makeUI();
+}
+
+void EntityList::setSceneEditorWindow(SceneEditorWindow& editor)
+{
+	sceneEditor = &editor;
 }
 
 void EntityList::setSceneData(std::shared_ptr<ISceneData> data)
@@ -29,7 +36,7 @@ void EntityList::makeUI()
 
 		sceneData->reparentEntity(entityId, newParentId, childIndex);
 
-		//refreshList();
+		//sceneEditor->onEntityModified();
 	});
 }
 

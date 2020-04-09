@@ -2,17 +2,21 @@
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
+	class SceneEditorWindow;
 	class UIFactory;
 
 	class EntityList final : public UIWidget {
 	public:
 		EntityList(String id, UIFactory& factory);
 
+		void setSceneEditorWindow(SceneEditorWindow& sceneEditor);
 		void setSceneData(std::shared_ptr<ISceneData> sceneData);
 		void refreshList();
 
 	private:
 		UIFactory& factory;
+		SceneEditorWindow* sceneEditor;
+		
 		std::shared_ptr<UITreeList> list;
 		std::shared_ptr<ISceneData> sceneData;
 		

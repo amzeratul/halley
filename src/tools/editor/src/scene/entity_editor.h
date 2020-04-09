@@ -14,13 +14,14 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 		void setSceneEditor(SceneEditorWindow& sceneEditor);
-		void setSceneData(ISceneData& sceneData, ECSData& data);
-		void showEntity(const String& id, bool force = false);
+		void setECSData(ECSData& data);
 		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
+
+		bool loadEntity(const String& id, ConfigNode data);
+		void reloadEntity();
 
 	private:
 		UIFactory& factory;
-		ISceneData* sceneData = nullptr;
 		ECSData* ecsData = nullptr;
 		SceneEditorWindow* sceneEditor = nullptr;
 		ComponentEditorContext context;

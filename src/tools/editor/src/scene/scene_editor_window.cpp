@@ -42,7 +42,7 @@ void SceneEditorWindow::loadScene(const String& name)
 		interface.spawnPending();
 
 		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, entity);
-		entityEditor->setSceneData(*sceneData, project.getECSData());
+		entityEditor->setECSData(project.getECSData());
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 
 		entityList->setSceneData(sceneData);
@@ -112,8 +112,11 @@ void SceneEditorWindow::load()
 
 void SceneEditorWindow::selectEntity(const String& id)
 {
-	getWidget("saveButton")->setEnabled(false);
-	entityEditor->showEntity(id);
+	const bool changed = entityEditor->loadEntity(id, sceneData->getEntityData(id));
+	if (changed) {
+		getWidget("saveButton")->setEnabled(false);
+		currentEntityId = id;
+	}
 }
 
 void SceneEditorWindow::showEntity(const String& id)
@@ -138,5 +141,11 @@ void SceneEditorWindow::saveEntity()
 void SceneEditorWindow::markModified()
 {
 	getWidget("saveButton")->setEnabled(true);
+}
+
+void SceneEditorWindow::modifyEntity(const String& id, const ConfigNode& data)
+{
+	sceneData->reloadEntity(id, data);
+	markModified();
 }
 

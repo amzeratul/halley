@@ -17,6 +17,7 @@ namespace Halley {
 		void loadScene(const String& sceneName);
 		void unloadScene();
 		void markModified();
+		void modifyEntity(const String& id, const ConfigNode& data);
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -34,6 +35,8 @@ namespace Halley {
 		std::shared_ptr<ISceneData> sceneData;
 		std::unique_ptr<Prefab> prefab;
 		std::shared_ptr<EntityFactory> entityFactory;
+
+		String currentEntityId;
 
 		void makeUI();
 		void load();

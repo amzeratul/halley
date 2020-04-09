@@ -18,7 +18,7 @@ EntityEditor::EntityEditor(String id, UIFactory& factory)
 void EntityEditor::update(Time t, bool moved)
 {
 	if (needToReloadUI) {
-		showEntity(currentId, true);
+		reloadEntity();
 		needToReloadUI = false;
 	}
 }
@@ -28,9 +28,8 @@ void EntityEditor::setSceneEditor(SceneEditorWindow& editor)
 	sceneEditor = &editor;
 }
 
-void EntityEditor::setSceneData(ISceneData& scene, ECSData& ecs)
+void EntityEditor::setECSData(ECSData& ecs)
 {
-	sceneData = &scene;
 	ecsData = &ecs;
 }
 
@@ -46,19 +45,24 @@ void EntityEditor::makeUI()
 	});
 }
 
-void EntityEditor::showEntity(const String& id, bool force)
+bool EntityEditor::loadEntity(const String& id, ConfigNode data)
 {
-	if (id == currentId && !force) {
-		return;
-	}
-	
-	Expects(sceneData);
 	Expects(ecsData);
 
-	fields->clear();
+	if (id == currentId) {
+		return false;
+	}
 	
-	currentEntityData = sceneData->getEntityData(id);
+	currentEntityData = std::move(data);
 	currentId = id;
+	
+	reloadEntity();
+	return true;
+}
+
+void EntityEditor::reloadEntity()
+{
+	fields->clear();
 	if (currentEntityData["components"].getType() == ConfigNodeType::Sequence) {
 		for (auto& componentNode: currentEntityData["components"].asSequence()) {
 			for (auto& c: componentNode.asMap()) {
@@ -183,8 +187,7 @@ void EntityEditor::deleteComponent(const String& name)
 
 void EntityEditor::onEntityUpdated()
 {
-	sceneData->reloadEntity(currentId, currentEntityData);
-	sceneEditor->markModified();
+	sceneEditor->modifyEntity(currentId, currentEntityData);
 }
 
 void EntityEditor::addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories)
