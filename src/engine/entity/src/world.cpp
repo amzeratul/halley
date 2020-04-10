@@ -487,10 +487,10 @@ void World::initSystems()
 	}
 }
 
-void World::updateSystems(TimeLine timeline, Time time)
+void World::updateSystems(TimeLine timeline, Time elapsed)
 {
 	for (auto& system : getSystems(timeline)) {
-		system->doUpdate(time);
+		system->doUpdate(elapsed);
 		spawnPending();
 	}
 }
