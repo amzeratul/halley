@@ -16,7 +16,7 @@ namespace Halley {
 	class System;
 	class EntityRef;
 
-	// True if T::init() exists
+	// True if T::onAddedToEntity(EntityRef&) exists
 	template <class, class = void_t<>> struct HasOnAddedToEntityMember : std::false_type {};
 	template <class T> struct HasOnAddedToEntityMember<T, decltype(std::declval<T&>().onAddedToEntity(std::declval<EntityRef&>()))> : std::true_type { };
 	
