@@ -7,6 +7,6 @@ namespace Halley
 	class EntityStage : public Stage
 	{
 	public:
-		std::unique_ptr<World> createWorld(const String& configName, CreateSystemFunction createFunction, CreateComponentFunction createComponent);
+		std::unique_ptr<World> createWorld(const String& configName);
 	};
 }

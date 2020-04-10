@@ -141,10 +141,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 	Vector<String> registryH{
 		"#pragma once",
 		"",
-		"namespace Halley {",
-		"	std::unique_ptr<System> createSystem(String name);",
-		"	CreateComponentFunctionResult createComponent(EntityFactory& factory, const String& name, EntityRef& entity, const ConfigNode& componentData);",
-		"}"
+		"#include <halley/entity/registry.h>"
 	};
 
 	CodeGenResult result;

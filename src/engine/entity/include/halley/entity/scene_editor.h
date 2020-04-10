@@ -25,8 +25,6 @@ namespace Halley {
 		virtual void createServices(World& world, SceneEditorContext& context);
 		virtual void createEntities(World& world, SceneEditorContext& context);
 
-		virtual CreateComponentFunction getCreateComponentFunction() const = 0;
-		virtual CreateSystemFunction getCreateSystemFunction() const = 0;
 		virtual String getSceneEditorStageName() = 0;
 
     	virtual EntityId createCamera();

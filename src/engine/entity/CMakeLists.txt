@@ -38,6 +38,7 @@ set(HEADERS
         "include/halley/entity/family_type.h"
         "include/halley/entity/message.h"
         "include/halley/entity/prefab_scene_data.h"
+        "include/halley/entity/registry.h"
         "include/halley/entity/scene_editor.h"
         "include/halley/entity/service.h"
         "include/halley/entity/system.h"

@@ -3,6 +3,8 @@
 #include "halley/core/api/halley_api.h"
 #include "halley/core/game/halley_statics.h"
 #include "halley/core/graphics/sprite/sprite.h"
+#include "system.h"
+#include "registry.h"
 
 #define DONT_INCLUDE_HALLEY_HPP
 #include "components/sprite_component.h"
@@ -51,9 +53,9 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> SceneEditor::getCompo
 
 std::unique_ptr<World> SceneEditor::createWorld(SceneEditorContext& context)
 {
-	auto world = std::make_unique<World>(*context.api, *context.resources, true, getCreateComponentFunction());
+	auto world = std::make_unique<World>(*context.api, *context.resources, true, createComponent);
 	const auto& sceneConfig = context.resources->get<ConfigFile>(getSceneEditorStageName())->getRoot();
-	world->loadSystems(sceneConfig, getCreateSystemFunction());
+	world->loadSystems(sceneConfig, createSystem);
 
 	return world;
 }
