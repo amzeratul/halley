@@ -210,9 +210,14 @@ namespace Halley {
 			static_assert(std::is_base_of<Component, T>::value, "Components must extend the Component class");
 			static_assert(!std::is_polymorphic<T>::value, "Components cannot be polymorphic (i.e. they can't have virtual methods)");
 			static_assert(std::is_default_constructible<T>::value, "Components must have a default constructor");
+
 			auto c = new T(std::move(component));
 			entity->addComponent(*world, c);
-			invokeComponentInit(*c, *this);
+
+			if constexpr (HasOnAddedToEntityMember<T>::value) {
+				c->onAddedToEntity(*this);
+			}
+
 			return *this;
 		}
 
@@ -325,16 +330,6 @@ namespace Halley {
 
 	private:
 		friend class World;
-		
-		template <typename T, typename std::enable_if<HasOnAddedToEntityMember<T>::value, int>::type = 0>
-		static void invokeComponentInit(T& comp, EntityRef& ref)
-		{
-			comp.onAddedToEntity(ref);
-		}
-
-		template <typename T, typename std::enable_if<!HasOnAddedToEntityMember<T>::value, int>::type = 0>
-		static void invokeComponentInit(T&, EntityRef&)
-		{}
 
 		Entity* entity = nullptr;
 		World* world = nullptr;

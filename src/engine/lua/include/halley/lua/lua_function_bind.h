@@ -46,17 +46,14 @@ namespace Halley {
 	};
 
 	namespace LuaCallbackBindDetails {
-		template <signed int pos, typename Tuple, std::enable_if_t<pos == 0, int> = 0>
+		template <signed int pos, typename Tuple>
 		inline void doFillTuple(LuaState& state, Tuple& tuple)
 		{
-		}
-
-		template <signed int pos, typename Tuple, std::enable_if_t<pos != 0, int> = 0>
-		inline void doFillTuple(LuaState& state, Tuple& tuple)
-		{
-			using T = typename std::tuple_element<pos - 1, Tuple>::type;
-			std::get<pos - 1>(tuple) = FromLua<T>()(state);
-			doFillTuple<pos - 1, Tuple>(state, tuple);
+			if constexpr (pos != 0) {
+				using T = typename std::tuple_element<pos - 1, Tuple>::type;
+				std::get<pos - 1>(tuple) = FromLua<T>()(state);
+				doFillTuple<pos - 1, Tuple>(state, tuple);
+			}
 		}
 		
 		template <typename... Ps>

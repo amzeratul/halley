@@ -47,6 +47,12 @@ namespace Halley {
 		void loadSystems(const ConfigNode& config, std::function<std::unique_ptr<System>(String)> createFunction);
 
 		template <typename T>
+		T& getService()
+		{
+			return getService<T>("");
+		}
+		
+		template <typename T>
 		T& getService(const String& systemName)
 		{
 			static_assert(std::is_base_of<Service, T>::value, "Must extend Service");

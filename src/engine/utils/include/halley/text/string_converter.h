@@ -16,34 +16,30 @@ namespace Halley
 	
 	struct UserConverter
 	{
-		template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+		template<typename T>
 		static String toString(const T& v)
 		{
-			return EnumNames<T>()()[int(v)];
-		}
-
-		template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
-		static String toString(const T& v)
-		{
-			return v.toString();
-		}
-
-		template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-		static T fromString(const String& str)
-		{
-			EnumNames<T> n;
-			auto names = n();
-			auto res = std::find_if(std::begin(names), std::end(names), [&](const char* v) { return str == v; });
-			if (res == std::end(names)) {
-				throw Exception("String \"" + str + "\" does not exist in enum \"" + typeid(T).name() + "\".", HalleyExceptions::Utils);
+			if constexpr (std::is_enum<T>::value) {
+				return EnumNames<T>()()[int(v)];
+			} else {
+				return v.toString();
 			}
-			return T(res - std::begin(names));
 		}
 
-		template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
+		template<typename T>
 		static T fromString(const String& str)
 		{
-			return T(str);
+			if constexpr (std::is_enum<T>::value) {
+				EnumNames<T> n;
+				auto names = n();
+				auto res = std::find_if(std::begin(names), std::end(names), [&](const char* v) { return str == v; });
+				if (res == std::end(names)) {
+					throw Exception("String \"" + str + "\" does not exist in enum \"" + typeid(T).name() + "\".", HalleyExceptions::Utils);
+				}
+				return T(res - std::begin(names));
+			} else {
+				return T(str);
+			}
 		}
 	};
 

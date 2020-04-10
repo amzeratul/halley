@@ -78,41 +78,35 @@ namespace Halley {
 			doSendMessage(entityId, std::move(toSend), sizeof(T), T::messageIndex);
 		}
 
-		template <typename T, typename std::enable_if<HasInitMember<T>::value, int>::type = 0>
+		template <typename T>
 		void invokeInit(T* system)
 		{
-			system->init();
+			if constexpr (HasInitMember<T>::value) {
+				system->init();
+			}
 		}
 
-		template <typename T, typename std::enable_if<!HasInitMember<T>::value, int>::type = 0>
-		void invokeInit(T*)
-		{}
-
-		template <typename T, typename F, typename std::enable_if<HasOnEntitiesAdded<T, F>::value, int>::type = 0>
+		template <typename T, typename F>
 		void initialiseOnEntityAdded(FamilyBinding<F>& binding, T* system)
 		{
-			binding.setOnEntitiesAdded([system] (void* es, size_t count)
-			{
-				system->onEntitiesAdded(Span<F>(static_cast<F*>(es), count));
-			});
+			if constexpr (HasOnEntitiesAdded<T, F>::value) {
+				binding.setOnEntitiesAdded([system] (void* es, size_t count)
+				{
+					system->onEntitiesAdded(Span<F>(static_cast<F*>(es), count));
+				});
+			}
 		}
 
-		template <typename T, typename F, typename std::enable_if<!HasOnEntitiesAdded<T, F>::value, int>::type = 0>
-		void initialiseOnEntityAdded(FamilyBinding<F>&, T*)
-		{}
-
-		template <typename T, typename F, typename std::enable_if<HasOnEntitiesRemoved<T, F>::value, int>::type = 0>
+		template <typename T, typename F>
 		void initialiseOnEntityRemoved(FamilyBinding<F>& binding, T* system)
 		{
-			binding.setOnEntitiesRemoved([system] (void* es, size_t count)
-			{
-				system->onEntitiesRemoved(Span<F>(static_cast<F*>(es), count));
-			});
+			if constexpr (HasOnEntitiesRemoved<T, F>::value) {
+				binding.setOnEntitiesRemoved([system] (void* es, size_t count)
+				{
+					system->onEntitiesRemoved(Span<F>(static_cast<F*>(es), count));
+				});
+			}
 		}
-
-		template <typename T, typename F, typename std::enable_if<!HasOnEntitiesRemoved<T, F>::value, int>::type = 0>
-		void initialiseOnEntityRemoved(FamilyBinding<F>&, T*)
-		{}
 
 		template <typename T, typename F>
 		void initialiseFamilyBinding(FamilyBinding<F>& binding, T* system)

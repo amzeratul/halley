@@ -93,7 +93,7 @@ namespace Halley
 		T get()
 		{
 			wait();
-			return doGet<T>(0);
+			return doGet<T>();
 		}
 
 		void wait()
@@ -138,27 +138,23 @@ namespace Halley
 
 	private:
 		void apply(std::function<void(T)> f) {
-			f(doGet<T>(0));
+			f(doGet<T>());
 		}
 
 		template<typename T0>
-		T0 doGet(typename std::enable_if<std::is_copy_constructible<T0>::value, int>::type)
+		T0 doGet()
 		{
 			if (!data) {
 				throw Exception("Data is not initialized.", HalleyExceptions::Utils);
 			}
-			return *data;
-		}
 
-		template<typename T0>
-		T0 doGet(typename std::enable_if<!std::is_copy_constructible<T0>::value, int>::type)
-		{
-			if (!data) {
-				throw Exception("Data is not initialized.", HalleyExceptions::Utils);
+			if constexpr (std::is_copy_constructible<T0>::value) {
+				return *data;
+			} else {
+				auto result = std::move(*data);
+				data.reset();
+				return result;
 			}
-			auto result = std::move(*data);
-			data.reset();
-			return result;
 		}
 
 		void makeAvailable()
@@ -173,7 +169,7 @@ namespace Halley
 				condition.notify_all();
 			}
 
-			for (auto f : toRun) {
+			for (auto& f : toRun) {
 				apply(f);
 			}
 		}
@@ -197,7 +193,7 @@ namespace Halley
 		{}
 
 		Future(std::shared_ptr<FutureData<DataType>> data)
-			: data(data)
+			: data(std::move(data))
 		{}
 
 		Future(const Future& o) = default;
