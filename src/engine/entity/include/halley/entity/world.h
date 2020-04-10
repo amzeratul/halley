@@ -47,10 +47,20 @@ namespace Halley {
 		void loadSystems(const ConfigNode& config, std::function<std::unique_ptr<System>(String)> createFunction);
 
 		template <typename T>
-		T& getService(const String& systemName) const
+		T& getService(const String& systemName)
 		{
 			static_assert(std::is_base_of<Service, T>::value, "Must extend Service");
-			return *dynamic_cast<T*>(&getService(typeid(T).name(), systemName));
+
+			const auto serviceName = typeid(T).name();
+			const auto rawService = tryGetService(serviceName);
+			if (!rawService) {
+				if constexpr (std::is_default_constructible_v<T>) {
+					return dynamic_cast<T&>(addService(std::make_shared<T>()));
+				} else {
+					throw Exception(String("Service \"") + serviceName + "\" required by \"" + (systemName.isEmpty() ? "" : (systemName + "System")) + "\" not found, and it cannot be default constructed.", HalleyExceptions::Entity);
+				}
+			}
+			return *dynamic_cast<T*>(rawService);
 		}
 
 		EntityRef createEntity(String name = "", std::optional<EntityRef> parent = {});
@@ -135,7 +145,7 @@ namespace Halley {
 		
 		void onAddFamily(Family& family);
 
-		Service& getService(const String& name, const String& systemName) const;
+		Service* tryGetService(const String& name) const;
 
 		const std::vector<Family*>& getFamiliesFor(const FamilyMaskType& mask);
 	};

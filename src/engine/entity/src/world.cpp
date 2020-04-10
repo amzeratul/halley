@@ -110,6 +110,9 @@ System& World::getSystem(const String& name)
 Service& World::addService(std::shared_ptr<Service> service)
 {
 	auto& ref = *service;
+	if (services.find(service->getName()) != services.end()) {
+		throw Exception("Service already registered: " + service->getName(), HalleyExceptions::Entity);
+	}
 	services[service->getName()] = std::move(service);
 	return ref;
 }
@@ -137,13 +140,13 @@ void World::loadSystems(const ConfigNode& root, std::function<std::unique_ptr<Sy
 	}
 }
 
-Service& World::getService(const String& name, const String& systemName) const
+Service* World::tryGetService(const String& name) const
 {
-	auto iter = services.find(name);
+	const auto iter = services.find(name);
 	if (iter == services.end()) {
-		throw Exception("Service \"" + name + "\" required by \"" + (systemName.isEmpty() ? "" : (systemName + "System")) + "\" not found.", HalleyExceptions::Entity);
+		return nullptr;
 	}
-	return *iter->second;
+	return iter->second.get();
 }
 
 EntityRef World::createEntity(String name, std::optional<EntityRef> parent)
