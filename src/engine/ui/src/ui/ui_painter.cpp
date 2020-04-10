@@ -5,29 +5,28 @@
 using namespace Halley;
 
 UIPainter::UIPainter(SpritePainter& painter, int mask, int layer)
-	: painter(painter)
+	: painter(&painter)
 	, mask(mask)
 	, layer(layer)
-	, n(0)
 {
 }
 
-UIPainter UIPainter::clone()
+UIPainter UIPainter::clone() const
 {
-	auto result = UIPainter(painter, mask, layer);
-	result.parent = this;
+	auto result = UIPainter(*painter, mask, layer);
+	result.rootPainter = rootPainter ? rootPainter : this;
 	result.clip = clip;
 	return result;
 }
 
-UIPainter UIPainter::withAdjustedLayer(int delta)
+UIPainter UIPainter::withAdjustedLayer(int delta) const
 {
 	auto result = clone();
 	result.layer += delta;
 	return result;
 }
 
-UIPainter UIPainter::withClip(std::optional<Rect4f> newClip)
+UIPainter UIPainter::withClip(std::optional<Rect4f> newClip) const
 {
 	auto result = clone();
 	if (newClip) {
@@ -40,7 +39,14 @@ UIPainter UIPainter::withClip(std::optional<Rect4f> newClip)
 	return result;
 }
 
-UIPainter UIPainter::withMask(int mask)
+UIPainter UIPainter::withNoClip() const
+{
+	auto result = clone();
+	result.clip = {};
+	return result;
+}
+
+UIPainter UIPainter::withMask(int mask) const
 {
 	auto result = clone();
 	result.mask = mask;
@@ -52,12 +58,12 @@ std::optional<Rect4f> UIPainter::getClip() const
 	return clip;
 }
 
-float UIPainter::getCurrentPriority()
+float UIPainter::getCurrentPriorityAndIncrement() const
 {
-	if (parent) {
-		return parent->getCurrentPriority();
+	if (rootPainter) {
+		return rootPainter->getCurrentPriorityAndIncrement();
 	} else {
-		return float(n++);
+		return float(currentPriority++);
 	}
 }
 
@@ -71,13 +77,13 @@ void UIPainter::draw(const Sprite& sprite, bool forceCopy)
 
 		auto onScreen = sprite.getAABB().intersection(targetClip + sprite.getPosition());
 		if (onScreen.getWidth() > 0.1f && onScreen.getHeight() > 0.1f) {
-			painter.addCopy(sprite.clone().setClip(targetClip), mask, layer, getCurrentPriority());
+			painter->addCopy(sprite.clone().setClip(targetClip), mask, layer, getCurrentPriorityAndIncrement());
 		}
 	} else {
 		if (forceCopy) {
-			painter.addCopy(sprite, mask, layer, getCurrentPriority());
+			painter->addCopy(sprite, mask, layer, getCurrentPriorityAndIncrement());
 		} else {
-			painter.add(sprite, mask, layer, getCurrentPriority());
+			painter->add(sprite, mask, layer, getCurrentPriorityAndIncrement());
 		}
 	}
 }
@@ -92,13 +98,13 @@ void UIPainter::draw(const TextRenderer& text, bool forceCopy)
 		
 		auto onScreen = Rect4f(Vector2f(), text.getExtents()).intersection(targetClip);
 		if (onScreen.getWidth() > 0.1f && onScreen.getHeight() > 0.1f) {
-			painter.addCopy(text.clone().setClip(clip.value() - text.getPosition()), mask, layer, getCurrentPriority());
+			painter->addCopy(text.clone().setClip(clip.value() - text.getPosition()), mask, layer, getCurrentPriorityAndIncrement());
 		}
 	} else {
 		if (forceCopy) {
-			painter.addCopy(text, mask, layer, getCurrentPriority());
+			painter->addCopy(text, mask, layer, getCurrentPriorityAndIncrement());
 		} else {
-			painter.add(text, mask, layer, getCurrentPriority());
+			painter->add(text, mask, layer, getCurrentPriorityAndIncrement());
 		}
 	}
 }

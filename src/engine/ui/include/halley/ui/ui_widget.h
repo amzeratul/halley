@@ -139,6 +139,8 @@ namespace Halley {
 
 		void setChildLayerAdjustment(int delta);
 		int getChildLayerAdjustment() const;
+		void setNoClipChildren(bool noClip);
+		bool getNoClipChildren() const;
 
 		void sendEvent(UIEvent&& event) const override;
 		void sendEventDown(const UIEvent& event) const;
@@ -230,5 +232,6 @@ namespace Halley {
 		bool shrinkOnLayout = true;
 		bool destroying = false;
 		bool canSendEvents = true;
+		bool dontClipChildren = false;
 	};
 }

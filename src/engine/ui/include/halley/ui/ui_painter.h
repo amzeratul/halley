@@ -10,25 +10,29 @@ namespace Halley {
 	class UIPainter {
 	public:
 		UIPainter(SpritePainter& painter, int mask, int layer);
+		UIPainter(UIPainter&& other) = default;
+
+		UIPainter& operator=(UIPainter&& other) = default;
 
 		void draw(const Sprite& sprite, bool forceCopy = false);
 		void draw(const TextRenderer& text, bool forceCopy = false);
 
-		UIPainter clone();
-		UIPainter withAdjustedLayer(int delta);
-		UIPainter withClip(std::optional<Rect4f> clip);
-		UIPainter withMask(int mask);
+		UIPainter clone() const;
+		UIPainter withAdjustedLayer(int delta) const;
+		UIPainter withClip(std::optional<Rect4f> clip) const;
+		UIPainter withMask(int mask) const;
+		UIPainter withNoClip() const;
 
 		std::optional<Rect4f> getClip() const;
 
 	private:
-		SpritePainter& painter;
+		SpritePainter* painter = nullptr;
 		std::optional<Rect4f> clip;
 		int mask;
 		int layer;
-		int n;
-		UIPainter* parent = nullptr;
+		mutable int currentPriority = 0;
+		const UIPainter* rootPainter = nullptr;
 
-		float getCurrentPriority();
+		float getCurrentPriorityAndIncrement() const;
 	};
 }

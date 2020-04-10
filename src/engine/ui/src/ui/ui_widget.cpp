@@ -46,6 +46,9 @@ void UIWidget::doDraw(UIPainter& painter) const
 		drawChildren(painter);
 	} else {
 		UIPainter p2 = painter.withAdjustedLayer(childLayerAdjustment);
+		if (dontClipChildren) {
+			p2 = p2.withNoClip();
+		}
 		drawChildren(p2);
 	}
 
@@ -893,4 +896,14 @@ void UIWidget::setChildLayerAdjustment(int delta)
 int UIWidget::getChildLayerAdjustment() const
 {
 	return childLayerAdjustment;
+}
+
+void UIWidget::setNoClipChildren(bool noClip)
+{
+	dontClipChildren = noClip;
+}
+
+bool UIWidget::getNoClipChildren() const
+{
+	return dontClipChildren;
 }

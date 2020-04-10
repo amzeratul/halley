@@ -45,8 +45,10 @@ namespace Halley {
 		std::shared_ptr<UIListItem> getItem(const String& id) const;
 		std::shared_ptr<UIListItem> tryGetItem(const String& id) const;
 
-		bool canDrag() const;
-		void setDrag(bool drag);
+		bool isDragEnabled() const;
+		void setDragEnabled(bool drag);
+		bool isDragOutsideEnabled() const;
+		void setDragOutsideEnabled(bool dragOutside);
 
 		bool isSingleClickAccept() const;
 		void setSingleClickAccept(bool enabled);
@@ -78,6 +80,7 @@ namespace Halley {
 		int nColumns = 1;
 		bool firstUpdate = true;
 		bool dragEnabled = false;
+		bool dragOutsideEnabled = false;
 		bool manualDragging = false;
 		bool uniformSizedItems = false;
 		bool singleClickAccept = true;

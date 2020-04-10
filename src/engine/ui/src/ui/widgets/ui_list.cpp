@@ -239,14 +239,24 @@ std::shared_ptr<UIListItem> UIList::tryGetItem(const String& id) const
 	return {};
 }
 
-bool UIList::canDrag() const
+bool UIList::isDragEnabled() const
 {
 	return dragEnabled;
 }
 
-void UIList::setDrag(bool drag)
+void UIList::setDragEnabled(bool drag)
 {
 	dragEnabled = drag;
+}
+
+bool UIList::isDragOutsideEnabled() const
+{
+	return dragOutsideEnabled;
+}
+
+void UIList::setDragOutsideEnabled(bool dragOutside)
+{
+	dragOutsideEnabled = dragOutside;
 }
 
 void UIList::setUniformSizedItems(bool enabled)
@@ -492,10 +502,14 @@ void UIListItem::update(Time t, bool moved)
 
 	if (dragged) {
 		setChildLayerAdjustment(1);
-		
-		const auto parentRect = parent.getRect();
-		const auto myTargetRect = Rect4f(curDragPos, curDragPos + dragWidget->getSize());
-		dragWidget->setPosition(myTargetRect.fitWithin(parentRect).getTopLeft());
+
+		auto pos = curDragPos;
+		if (!parent.dragOutsideEnabled) {
+			const auto parentRect = parent.getRect();
+			const auto myTargetRect = Rect4f(curDragPos, curDragPos + dragWidget->getSize());
+			pos = myTargetRect.fitWithin(parentRect).getTopLeft();
+		}
+		dragWidget->setPosition(pos);
 		dragWidget->layout();
 		dirty = true;
 	} else  {
@@ -530,8 +544,9 @@ void UIListItem::update(Time t, bool moved)
 
 void UIListItem::onMouseOver(Vector2f mousePos)
 {
-	if (parent.canDrag() && held && (mousePos - mouseStartPos).length() > 3.0f) {
+	if (parent.isDragEnabled() && held && (mousePos - mouseStartPos).length() > 3.0f) {
 		dragged = true;
+		setNoClipChildren(parent.isDragOutsideEnabled());
 	}
 	if (dragged) {
 		setDragPos(mousePos - mouseStartPos + myStartPos);
@@ -571,6 +586,7 @@ void UIListItem::releaseMouse(Vector2f mousePos, int button)
 
 			if (dragged) {
 				dragged = false;
+				setNoClipChildren(false);
 				parent.onItemDoneDragging(*this, index, curDragPos);
 			}
 		}

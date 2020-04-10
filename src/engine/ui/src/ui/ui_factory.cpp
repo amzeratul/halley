@@ -516,7 +516,7 @@ std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
 		widget->setItemActive(o.id, o.active);
 	}
 
-	widget->setDrag(node["canDrag"].asBool(false));
+	widget->setDragEnabled(node["canDrag"].asBool(false));
 	widget->setUniformSizedItems(node["uniformSizedItems"].asBool(false));
 
 	return widget;
@@ -837,7 +837,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTreeList(const ConfigNode& entryNode)
 	auto widget = std::make_shared<UITreeList>(id, style);
 	applyInputButtons(*widget, node["inputButtons"].asString("treeList"));
 
-	widget->setDrag(node["canDrag"].asBool(false));
+	widget->setDragEnabled(node["canDrag"].asBool(false));
 
 	return widget;
 }

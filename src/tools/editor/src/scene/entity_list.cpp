@@ -25,7 +25,8 @@ void EntityList::makeUI()
 {
 	list = std::make_shared<UITreeList>(getId() + "_list", factory.getStyle("treeList"));
 	list->setSingleClickAccept(false);
-	list->setDrag(true);
+	list->setDragEnabled(true);
+	//list->setDragOutsideEnabled(true);
 	add(list, 1);
 
 	setHandle(UIEventType::TreeItemReparented, [=] (const UIEvent& event)

@@ -118,7 +118,7 @@ void UITreeList::onItemDragging(UIListItem& item, int index, Vector2f pos)
 		
 		insertCursor = style.getSubStyle("cursor").getSprite(resData.type == UITreeListItem::PositionType::OnTop ? "over" : "beforeAfter");
 		insertCursor.setPos(rect.getTopLeft()).scaleTo(rect.getSize());
-	}	
+	}
 }
 
 void UITreeList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
