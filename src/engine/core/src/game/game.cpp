@@ -1,5 +1,6 @@
 #include "halley/core/game/game.h"
 #include "halley/core/game/scene_editor_interface.h"
+#include "halley/entity/scene_editor.h"
 using namespace Halley;
 
 Game::~Game() = default;
@@ -50,7 +51,7 @@ void Game::onUncaughtException(const Exception& exception, TimeLine timeLine)
 
 std::unique_ptr<ISceneEditor> Game::createSceneEditorInterface()
 {
-	return {};
+	return std::make_unique<SceneEditor>();
 }
 
 const HalleyAPI& Game::getAPI() const

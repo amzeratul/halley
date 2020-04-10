@@ -3,8 +3,13 @@
 #include "halley/core/game/scene_editor_interface.h"
 
 namespace Halley {
+	class World;
+	
     class SceneEditor : public ISceneEditor {
     public:
+		SceneEditor();
+    	virtual ~SceneEditor();
+    	
 		void init(SceneEditorContext& context) override;
 		void update(Time t) override;
 		void render(RenderContext& rc) override;
@@ -25,7 +30,7 @@ namespace Halley {
 		virtual void createServices(World& world, SceneEditorContext& context);
 		virtual void createEntities(World& world, SceneEditorContext& context);
 
-		virtual String getSceneEditorStageName() = 0;
+		virtual String getSceneEditorStageName();
 
     	virtual EntityId createCamera();
 

@@ -13,6 +13,10 @@
 
 using namespace Halley;
 
+SceneEditor::SceneEditor() = default;
+
+SceneEditor::~SceneEditor() = default;
+
 void SceneEditor::init(SceneEditorContext& context)
 {
 	context.api->core->getStatics().setupGlobals();
@@ -66,6 +70,11 @@ void SceneEditor::createServices(World& world, SceneEditorContext& context)
 
 void SceneEditor::createEntities(World& world, SceneEditorContext& context)
 {
+}
+
+String SceneEditor::getSceneEditorStageName()
+{
+	return "stages/scene_editor";
 }
 
 EntityId SceneEditor::createCamera()

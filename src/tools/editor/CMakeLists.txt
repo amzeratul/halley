@@ -31,6 +31,8 @@ set (editor_sources
 	"src/ui/scroll_background.cpp"
 	"src/ui/taskbar.cpp"
 	"src/ui/toolbar.cpp"
+
+	"../../../gen/cpp/registry.cpp"
 	)
 
 set (editor_headers
