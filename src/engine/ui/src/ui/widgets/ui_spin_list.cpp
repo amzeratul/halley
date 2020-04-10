@@ -160,6 +160,11 @@ void UISpinList::onManualControlActivate()
 	getRoot()->setFocus(shared_from_this());
 }
 
+bool UISpinList::canReceiveFocus() const
+{
+	return true;
+}
+
 void UISpinList::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);

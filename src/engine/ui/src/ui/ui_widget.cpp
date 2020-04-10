@@ -741,6 +741,11 @@ void UIWidget::markAsNeedingLayout()
 	}
 }
 
+bool UIWidget::canReceiveFocus() const
+{
+	return false;
+}
+
 void UIWidget::checkActive()
 {
 }

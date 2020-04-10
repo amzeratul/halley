@@ -96,6 +96,11 @@ void UITextInput::setAutoCompleteHandle(AutoCompleteHandle handle)
 	updateAutoComplete();
 }
 
+bool UITextInput::canReceiveFocus() const
+{
+	return true;
+}
+
 void UITextInput::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);

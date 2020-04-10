@@ -111,6 +111,11 @@ void UIOptionListMorpher::onManualControlActivate()
 	getRoot()->setFocus(shared_from_this());
 }
 
+bool UIOptionListMorpher::canReceiveFocus() const
+{
+	return true;
+}
+
 void UIOptionListMorpher::draw(UIPainter& painter) const
 {
 

@@ -141,6 +141,11 @@ void UIDropdown::onManualControlActivate()
 	open();
 }
 
+bool UIDropdown::canReceiveFocus() const
+{
+	return true;
+}
+
 void UIDropdown::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);

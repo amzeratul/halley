@@ -57,6 +57,8 @@ namespace Halley {
 
 		bool ignoreClip() const override;
 
+		bool canReceiveFocus() const override;
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;

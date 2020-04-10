@@ -42,6 +42,8 @@ namespace Halley {
 
 		void setAutoCompleteHandle(AutoCompleteHandle handle);
 
+		bool canReceiveFocus() const override;
+		
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;

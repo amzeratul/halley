@@ -63,6 +63,15 @@ namespace Halley {
 		}
 
 		virtual bool isDescendentOf(const UIWidget& ancestor) const;
+
+		template <typename F>
+		void descend(F f)
+		{
+			for (auto& c: children) {
+				f(c);
+				c->descend(f);
+			}
+		}
 		
 	private:
 		std::vector<std::shared_ptr<UIWidget>> children;

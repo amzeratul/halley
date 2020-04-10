@@ -155,6 +155,8 @@ namespace Halley {
 		bool needsLayout() const;
 		void markAsNeedingLayout() override;
 
+		virtual bool canReceiveFocus() const;
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;

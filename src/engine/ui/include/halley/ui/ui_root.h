@@ -45,7 +45,8 @@ namespace Halley {
 		bool isMouseOverUI() const;
 		std::shared_ptr<UIWidget> getWidgetUnderMouse() const;
 		std::shared_ptr<UIWidget> getWidgetUnderMouseIncludingDisabled() const;
-		void setFocus(std::shared_ptr<UIWidget> focus);
+		void setFocus(const std::shared_ptr<UIWidget>& focus);
+		void focusNext(bool reverse);
 
 		UIWidget* getCurrentFocus() const;
 

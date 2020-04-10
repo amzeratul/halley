@@ -230,7 +230,7 @@ void UIRoot::runLayout()
 	}
 }
 
-void UIRoot::setFocus(std::shared_ptr<UIWidget> focus)
+void UIRoot::setFocus(const std::shared_ptr<UIWidget>& focus)
 {
 	auto curFocus = currentFocus.lock();
 	if (curFocus != focus) {
@@ -243,6 +243,25 @@ void UIRoot::setFocus(std::shared_ptr<UIWidget> focus)
 			focus->setFocused(true);
 		}
 	}
+}
+
+void UIRoot::focusNext(bool reverse)
+{
+	std::vector<std::shared_ptr<UIWidget>> focusables;
+	descend([&] (const std::shared_ptr<UIWidget>& e)
+	{
+		if (e->canReceiveFocus()) {
+			focusables.push_back(e);
+		}
+	});
+
+	if (focusables.empty()) {
+		return;
+	}
+
+	const int index = gsl::narrow<int>(std::find(focusables.begin(), focusables.end(), currentFocus.lock()) - focusables.begin());
+	const int newIndex = modulo(index + (reverse ? -1 : 1), gsl::narrow<int>(focusables.size()));
+	setFocus(focusables[newIndex]);
 }
 
 void UIRoot::updateMouseOver(const std::shared_ptr<UIWidget>& underMouse)

@@ -30,6 +30,8 @@ namespace Halley {
 		void onManualControlCycleValue(int delta) override;
 		void onManualControlActivate() override;
 
+		bool canReceiveFocus() const override;
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void drawChildren(UIPainter& painter) const override;
