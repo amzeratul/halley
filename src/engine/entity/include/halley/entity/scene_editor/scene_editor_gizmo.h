@@ -10,6 +10,28 @@ namespace Halley {
 	class Camera;
 	class Painter;
 
+	class SceneEditorGizmoHandle {
+	public:
+		void update(const SceneEditorInputState& inputState);
+
+		void setBoundsCheck(std::function<bool(Vector2f, Vector2f)> boundsCheck);
+		
+		void setPosition(Vector2f pos);
+		Vector2f getPosition() const;
+		
+		bool isOver() const;
+		bool isHeld() const;
+
+	private:
+		bool over = false;
+		bool holding = false;
+
+		Vector2f pos;
+		Vector2f startOffset;
+
+		std::function<bool(Vector2f, Vector2f)> boundsCheck;
+	};
+
 	class SceneEditorGizmo {
 	public:
 		virtual ~SceneEditorGizmo() = default;

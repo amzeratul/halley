@@ -1,7 +1,51 @@
 #include "scene_editor/scene_editor_gizmo.h"
 #include "components/transform_2d_component.h"
+#include "halley/core/game/scene_editor_interface.h"
 #include "halley/core/graphics/camera.h"
 using namespace Halley;
+
+void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState)
+{
+	if (!holding) {
+		over = boundsCheck(pos, inputState.mousePos);
+		if (over && inputState.leftClickPressed) {
+			holding = true;
+			startOffset = pos - inputState.mousePos;
+		}
+	}
+
+	if (holding) {
+		pos = inputState.mousePos + startOffset;
+		if (!inputState.leftClickHeld) {
+			holding = false;
+		}
+	}
+}
+
+void SceneEditorGizmoHandle::setBoundsCheck(std::function<bool(Vector2f, Vector2f)> bc)
+{
+	boundsCheck = std::move(bc);
+}
+
+void SceneEditorGizmoHandle::setPosition(Vector2f p)
+{
+	pos = p;
+}
+
+Vector2f SceneEditorGizmoHandle::getPosition() const
+{
+	return pos;
+}
+
+bool SceneEditorGizmoHandle::isOver() const
+{
+	return over;
+}
+
+bool SceneEditorGizmoHandle::isHeld() const
+{
+	return holding;
+}
 
 void SceneEditorGizmo::update(Time time, const SceneEditorInputState& inputState)
 {}

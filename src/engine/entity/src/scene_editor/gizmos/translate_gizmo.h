@@ -4,6 +4,7 @@
 namespace Halley {
 	class TranslateGizmo final : public SceneEditorGizmo {
 	public:
+		TranslateGizmo();
 		void update(Time time, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
 
@@ -12,10 +13,6 @@ namespace Halley {
 
 	private:
 		bool visible = false;
-		bool hover = false;
-		bool holding = false;
-
-		Vector2f pos;
-		Vector2f startOffset;
+		SceneEditorGizmoHandle handle;
 	};
 }

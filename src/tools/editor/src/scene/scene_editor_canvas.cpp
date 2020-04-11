@@ -114,6 +114,8 @@ void SceneEditorCanvas::releaseMouse(Vector2f mousePos, int button)
 
 void SceneEditorCanvas::onMouseOver(Vector2f mousePos)
 {
+	inputState.rawMousePos = mousePos;
+
 	if (dragging && interface) {
 		interface->dragCamera(lastMousePos - mousePos);
 	}
@@ -258,7 +260,6 @@ void SceneEditorCanvas::updateInputState()
 	inputState.ctrlHeld = keyboard->isButtonDown(Keys::LCtrl) || keyboard->isButtonDown(Keys::RCtrl);
 	inputState.shiftHeld = keyboard->isButtonDown(Keys::LShift) || keyboard->isButtonDown(Keys::RShift);
 
-	inputState.rawMousePos = mouse->getPosition();
 	inputState.viewRect = getRect();
 }
 

@@ -4,28 +4,26 @@
 #include "halley/core/graphics/painter.h"
 using namespace Halley;
 
+TranslateGizmo::TranslateGizmo()
+{
+	handle.setBoundsCheck([=] (Vector2f myPos, Vector2f mousePos) -> bool
+	{
+		return (myPos - mousePos).length() < 10.0f / getZoom();
+	});
+}
+
 void TranslateGizmo::update(Time time, const SceneEditorInputState& inputState)
 {
-	hover = (inputState.mousePos - pos).length() < 5.0f / getZoom();
-
-	if (hover && inputState.leftClickPressed) {
-		holding = true;
-		startOffset = pos - inputState.mousePos;
-	}
-
-	if (holding) {
-		pos = inputState.mousePos + startOffset;
-		if (!inputState.leftClickHeld) {
-			holding = false;
-		}
-	}
+	handle.update(inputState);
 }
 
 void TranslateGizmo::draw(Painter& painter) const
 {
 	if (visible) {
 		const float zoom = getZoom();
-		painter.drawCircle(pos, 5.0f / zoom, 1.0f / zoom, hover ? Colour4f(1, 1, 1) : Colour4f(0.5f, 0.5f, 0.5f));
+		auto overCol = Colour4f(0.5f, 0.5f, 1);
+		auto outCol = Colour4f(0.2f, 0.2f, 1.0f);
+		painter.drawCircle(handle.getPosition(), 10.0f / zoom, 1.0f / zoom, handle.isOver() ? overCol : outCol);
 	}
 }
 
@@ -33,7 +31,7 @@ void TranslateGizmo::onEntityChanged()
 {
 	auto transform = getTransform();
 	if (transform) {
-		pos = transform->getGlobalPosition();
+		handle.setPosition(transform->getGlobalPosition());
 		visible = true;
 	} else {
 		visible = false;
