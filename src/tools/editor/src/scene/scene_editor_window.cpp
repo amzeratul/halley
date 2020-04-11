@@ -52,6 +52,9 @@ void SceneEditorWindow::loadScene(const String& name)
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 		entityList->setSceneData(sceneData);
 
+		// HACK: set to drag tool
+		interface.setTool(SceneEditorTool::Translate);
+
 		// Show root
 		panCameraToEntity(entity.getUUID().toString());
 	}

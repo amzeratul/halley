@@ -40,6 +40,15 @@ namespace Halley {
     	virtual String getFieldType() = 0;
         virtual std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const String& fieldName, ConfigNode& componentData, const String& defaultValue) = 0;
     };
+
+    enum class SceneEditorTool {
+    	None,
+        Drag,
+        Translate,
+        Rotate,
+        Scale,
+        Polygon
+    };
 	
     class ISceneEditor {
     public:
@@ -58,6 +67,7 @@ namespace Halley {
 
     	virtual void setSelectedEntity(const UUID& id) = 0;
     	virtual void showEntity(const UUID& id) = 0;
+    	virtual void setTool(SceneEditorTool tool) = 0;
 
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     };

@@ -6,6 +6,7 @@
 #include "halley/core/graphics/render_context.h"
 #include "system.h"
 #include "registry.h"
+#include "scene_editor/scene_editor_gizmo_collection.h"
 
 #define DONT_INCLUDE_HALLEY_HPP
 #include "components/sprite_component.h"
@@ -26,6 +27,8 @@ void SceneEditor::init(SceneEditorContext& context)
 	createServices(*world, context);
 	createEntities(*world, context);
 	cameraEntityId = createCamera();
+
+	gizmoCollection = std::make_unique<SceneEditorGizmoCollection>();
 }
 
 void SceneEditor::update(Time t)
@@ -153,6 +156,8 @@ void SceneEditor::setSelectedEntity(const UUID& id)
 		if (selectedEntity) {
 			selectedBounds = getSpriteTreeBounds(selectedEntity.value());
 		}
+
+		gizmoCollection->setSelectedEntity(selectedEntity);
 	}
 }
 
@@ -164,6 +169,11 @@ void SceneEditor::showEntity(const UUID& id)
 		const auto aabb = getSpriteTreeBounds(e.value());
 		moveCameraTo2D(aabb.getCenter());
 	}
+}
+
+void SceneEditor::setTool(SceneEditorTool tool)
+{
+	gizmoCollection->setTool(tool);
 }
 
 Rect4f SceneEditor::getSpriteTreeBounds(const EntityRef& e) const
@@ -208,7 +218,7 @@ std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)
 
 void SceneEditor::updateGizmos(Time t)
 {
-	
+	gizmoCollection->update(t);
 }
 
 void SceneEditor::drawGizmos(Painter& painter) const
@@ -216,4 +226,6 @@ void SceneEditor::drawGizmos(Painter& painter) const
 	if (selectedBounds) {
 		painter.drawRect(selectedBounds.value(), 1.0f, Colour4f(0.6, 0.6f, 0.6f));
 	}
+
+	gizmoCollection->draw(painter);
 }

@@ -7,6 +7,7 @@ namespace Halley {
 	class EntityRef;
 	class World;
 	class Painter;
+	class SceneEditorGizmoCollection;
 	
     class SceneEditor : public ISceneEditor {
     public:
@@ -26,7 +27,8 @@ namespace Halley {
 
 		void setSelectedEntity(const UUID& id) override;
 		void showEntity(const UUID& id) override;
-
+		void setTool(SceneEditorTool tool) override;
+    	
 		std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() override;
 
     protected:
@@ -45,6 +47,8 @@ namespace Halley {
     	
 		std::optional<EntityRef> selectedEntity;
     	std::optional<Rect4f> selectedBounds;
+
+    	std::unique_ptr<SceneEditorGizmoCollection> gizmoCollection;
 
 		std::unique_ptr<World> createWorld(SceneEditorContext& context);
 
