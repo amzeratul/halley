@@ -53,10 +53,11 @@ void SceneEditorGizmo::update(Time time, const SceneEditorInputState& inputState
 void SceneEditorGizmo::draw(Painter& painter) const
 {}
 
-void SceneEditorGizmo::setSelectedEntity(const std::optional<EntityRef>& entity)
+void SceneEditorGizmo::setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& data)
 {
 	if (curEntity != entity) {
 		curEntity = entity;
+		entityData = &data;
 		onEntityChanged();
 	}
 }
@@ -85,6 +86,26 @@ Transform2DComponent* SceneEditorGizmo::getTransform()
 	} else {
 		return nullptr;
 	}
+}
+
+ConfigNode& SceneEditorGizmo::getEntityData()
+{
+	return *entityData;
+}
+
+ConfigNode* SceneEditorGizmo::getComponentData(const String& name)
+{
+	auto& components = (*entityData)["components"];
+	if (components.getType() == ConfigNodeType::Sequence) {
+		for (auto& compNode: components.asSequence()) {
+			for (auto& [curName, value]: compNode.asMap()) {
+				if (curName == name) {
+					return &value;
+				}
+			}
+		}
+	}
+	return nullptr;
 }
 
 const std::optional<EntityRef>& SceneEditorGizmo::getEntity() const

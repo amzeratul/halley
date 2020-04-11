@@ -38,7 +38,8 @@ namespace Halley {
 
 		virtual void update(Time time, const SceneEditorInputState& inputState);
 		virtual void draw(Painter& painter) const;
-		void setSelectedEntity(const std::optional<EntityRef>& entity);
+
+		void setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& entityData);
 
 		void setCamera(const Camera& camera);
 
@@ -50,11 +51,15 @@ namespace Halley {
 
 		const Transform2DComponent* getTransform() const;
 		Transform2DComponent* getTransform();
+
+		ConfigNode& getEntityData();
+		ConfigNode* getComponentData(const String& name);
 		
 		float getZoom() const;
 
 	private:
 		std::optional<EntityRef> curEntity;
+		ConfigNode* entityData = nullptr;
 		float zoom = 1.0f;
 	};
 }

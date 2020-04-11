@@ -11,6 +11,7 @@ namespace Halley {
     class Resources;
     class UIFactory;
     class IUIElement;
+	class ConfigNode;
 
     class SceneEditorContext {
     public:
@@ -83,7 +84,7 @@ namespace Halley {
         virtual void dragCamera(Vector2f amount) = 0;
         virtual void changeZoom(int amount, Vector2f cursorPosRelToCamera) = 0;
 
-    	virtual void setSelectedEntity(const UUID& id) = 0;
+    	virtual void setSelectedEntity(const UUID& id, ConfigNode& entityData) = 0;
     	virtual void showEntity(const UUID& id) = 0;
     	virtual void setTool(SceneEditorTool tool) = 0;
 

@@ -16,14 +16,19 @@ void TranslateGizmo::update(Time time, const SceneEditorInputState& inputState)
 {
 	handle.update(inputState);
 
-	if (!handle.isHeld()) {
-		const auto transform = getTransform();
-		if (transform) {
-			handle.setPosition(transform->getGlobalPosition());
-			visible = true;
+	const auto transform = getTransform();
+	if (transform) {
+		if (handle.isHeld()) {
+			// Write to object
+			transform->setGlobalPosition(handle.getPosition());
+			updateEntityData(transform->getLocalPosition());
 		} else {
-			visible = false;
+			// Read from object
+			handle.setPosition(transform->getGlobalPosition());
 		}
+		visible = true;
+	} else {
+		visible = false;
 	}
 }
 
@@ -47,13 +52,17 @@ void TranslateGizmo::draw(Painter& painter) const
 	}
 }
 
-void TranslateGizmo::onEntityChanged()
-{
-}
-
 Circle TranslateGizmo::getMainHandle() const
 {
 	const auto pos = handle.getPosition();
 	return Circle(pos, 10.0f / getZoom());
+}
+
+void TranslateGizmo::updateEntityData(Vector2f pos)
+{
+	auto* data = getComponentData("Transform2D");
+	if (data) {
+		(*data)["position"] = pos;
+	}
 }
 

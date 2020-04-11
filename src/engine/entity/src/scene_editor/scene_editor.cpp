@@ -147,13 +147,13 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 	transform.setGlobalPosition(roundPosition(transform.getGlobalPosition() + translate, camera.zoom));
 }
 
-void SceneEditor::setSelectedEntity(const UUID& id)
+void SceneEditor::setSelectedEntity(const UUID& id, ConfigNode& entityData)
 {
 	selectedEntity.reset();
 
 	if (id.isValid()) {
 		selectedEntity = getWorld().findEntity(id);
-		gizmoCollection->setSelectedEntity(selectedEntity);
+		gizmoCollection->setSelectedEntity(selectedEntity, entityData);
 	}
 }
 

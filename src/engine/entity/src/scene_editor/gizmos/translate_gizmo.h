@@ -8,13 +8,11 @@ namespace Halley {
 		void update(Time time, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
 
-	protected:
-		void onEntityChanged() override;
-
 	private:
 		bool visible = false;
 		SceneEditorGizmoHandle handle;
 
 		Circle getMainHandle() const;
+		void updateEntityData(Vector2f pos);
 	};
 }

@@ -135,9 +135,10 @@ void SceneEditorWindow::load()
 
 void SceneEditorWindow::selectEntity(const String& id)
 {
-	const bool changed = entityEditor->loadEntity(id, sceneData->getEntityData(id), false);
+	auto& entityData = sceneData->getEntityData(id);
+	const bool changed = entityEditor->loadEntity(id, entityData, false);
 	if (changed) {
-		canvas->getInterface().setSelectedEntity(UUID(id));
+		canvas->getInterface().setSelectedEntity(UUID(id), entityData);
 		currentEntityId = id;
 	}
 }

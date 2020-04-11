@@ -31,14 +31,15 @@ void SceneEditorGizmoCollection::draw(Painter& painter)
 	}
 }
 
-void SceneEditorGizmoCollection::setSelectedEntity(const std::optional<EntityRef>& entity)
+void SceneEditorGizmoCollection::setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& data)
 {
 	selectedEntity = entity;
+	entityData = &data;
 	
-	selectedBoundsGizmo->setSelectedEntity(entity);
+	selectedBoundsGizmo->setSelectedEntity(entity, *entityData);
 	
 	if (activeGizmo) {
-		activeGizmo->setSelectedEntity(entity);
+		activeGizmo->setSelectedEntity(entity, *entityData);
 	}
 }
 
@@ -54,7 +55,7 @@ void SceneEditorGizmoCollection::setTool(SceneEditorTool tool)
 		}
 
 		if (activeGizmo) {
-			activeGizmo->setSelectedEntity(selectedEntity);
+			activeGizmo->setSelectedEntity(selectedEntity, *entityData);
 		}
 	}
 }
