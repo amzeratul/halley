@@ -11,19 +11,19 @@ SelectedBoundsGizmo::SelectedBoundsGizmo(Resources& resources)
 	material = std::make_shared<Material>(resources.get<MaterialDefinition>("Halley/InvertLine"));
 }
 
-void SelectedBoundsGizmo::draw(Painter& painter) const
-{
-	if (bounds) {
-		painter.drawRect(bounds.value(), 1.0f / getZoom(), Colour4f(1, 1, 1), material);
-	}
-}
-
-void SelectedBoundsGizmo::onEntityChanged()
+void SelectedBoundsGizmo::update(Time time, const SceneEditorInputState& inputState)
 {
 	const auto& e = getEntity();
 	if (e) {
 		bounds = SceneEditor::getSpriteTreeBounds(e.value());
 	} else {
 		bounds.reset();
+	}
+}
+
+void SelectedBoundsGizmo::draw(Painter& painter) const
+{
+	if (bounds) {
+		painter.drawRect(bounds.value(), 1.0f / getZoom(), Colour4f(1, 1, 1), material);
 	}
 }

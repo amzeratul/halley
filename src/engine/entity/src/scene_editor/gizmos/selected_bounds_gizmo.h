@@ -8,11 +8,9 @@ namespace Halley {
 	class SelectedBoundsGizmo final : public SceneEditorGizmo {
 	public:
 		explicit SelectedBoundsGizmo(Resources& resources);
-		
-		void draw(Painter& painter) const override;
 
-	protected:
-		void onEntityChanged() override;
+		void update(Time time, const SceneEditorInputState& inputState) override;
+		void draw(Painter& painter) const override;
 
 	private:
 		std::optional<Rect4f> bounds;
