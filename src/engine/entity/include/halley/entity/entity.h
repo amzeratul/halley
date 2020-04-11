@@ -196,7 +196,7 @@ namespace Halley {
 
 		EntityRef& operator=(const EntityRef& other) = default;
 		EntityRef& operator=(EntityRef&& other) = default;
-		
+
 		EntityRef(Entity& e, World& w)
 			: entity(&e)
 			, world(&w)
@@ -350,6 +350,11 @@ namespace Halley {
 		bool operator!=(const EntityRef& other) const
 		{
 			return !(*this == other);
+		}
+
+		World& getWorld() const
+		{
+			return *world;
 		}
 
 	private:

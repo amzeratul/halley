@@ -42,7 +42,7 @@ void SceneEditor::update(Time t)
 	camera.setPosition(transformComponent.getGlobalPosition()).setZoom(cameraComponent.zoom);
 
 	// Update gizmos
-	updateGizmos(t);
+	gizmoCollection->update(t, camera);
 }
 
 void SceneEditor::render(RenderContext& rc)
@@ -53,7 +53,7 @@ void SceneEditor::render(RenderContext& rc)
 	// Render gizmos
 	rc.with(camera).bind([&] (Painter& painter)
 	{
-		drawGizmos(painter);
+		gizmoCollection->draw(painter);
 	});
 }
 
@@ -146,15 +146,10 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 
 void SceneEditor::setSelectedEntity(const UUID& id)
 {
-	selectedBounds.reset();
 	selectedEntity.reset();
 
 	if (id.isValid()) {
 		selectedEntity = getWorld().findEntity(id);
-		if (selectedEntity) {
-			selectedBounds = getSpriteTreeBounds(selectedEntity.value());
-		}
-
 		gizmoCollection->setSelectedEntity(selectedEntity);
 	}
 }
@@ -174,14 +169,14 @@ void SceneEditor::setTool(SceneEditorTool tool)
 	gizmoCollection->setTool(tool);
 }
 
-Rect4f SceneEditor::getSpriteTreeBounds(const EntityRef& e) const
+Rect4f SceneEditor::getSpriteTreeBounds(const EntityRef& e)
 {
 	std::optional<Rect4f> rect;
 	doGetSpriteTreeBounds(e, rect);
 	return rect.value_or(Rect4f());
 }
 
-void SceneEditor::doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect) const
+void SceneEditor::doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect)
 {
 	auto cur = getSpriteBounds(e);
 	if (!rect) {
@@ -192,7 +187,7 @@ void SceneEditor::doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f
 	}
 
 	for (auto& c: e.getRawChildren()) {
-		auto child = EntityRef(*c, *world);
+		auto child = EntityRef(*c, e.getWorld());
 		doGetSpriteTreeBounds(child, rect);
 	}
 }
@@ -212,18 +207,4 @@ std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)
 		}
 	}
 	return {};
-}
-
-void SceneEditor::updateGizmos(Time t)
-{
-	gizmoCollection->update(t, camera);
-}
-
-void SceneEditor::drawGizmos(Painter& painter) const
-{
-	if (selectedBounds) {
-		painter.drawRect(selectedBounds.value(), 1.0f, Colour4f(0.6, 0.6f, 0.6f));
-	}
-
-	gizmoCollection->draw(painter);
 }

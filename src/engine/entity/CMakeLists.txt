@@ -23,7 +23,9 @@ set(SOURCES
         "src/scene_editor/scene_editor.cpp"
         "src/scene_editor/scene_editor_gizmo.cpp"
         "src/scene_editor/scene_editor_gizmo_collection.cpp"
-        "src/scene_editor/translate_gizmo.cpp"
+        
+        "src/scene_editor/gizmos/selected_bounds_gizmo.cpp"
+        "src/scene_editor/gizmos/translate_gizmo.cpp"
         )
 
 set(HEADERS
@@ -55,7 +57,9 @@ set(HEADERS
         "include/halley/entity/scene_editor/scene_editor.h"
         "include/halley/entity/scene_editor/scene_editor_gizmo.h"
         "include/halley/entity/scene_editor/scene_editor_gizmo_collection.h"
-        "include/halley/entity/scene_editor/translate_gizmo.h"
+
+        "src/scene_editor/gizmos/selected_bounds_gizmo.h"
+        "src/scene_editor/gizmos/translate_gizmo.h"
         )
 
 assign_source_group(${SOURCES})

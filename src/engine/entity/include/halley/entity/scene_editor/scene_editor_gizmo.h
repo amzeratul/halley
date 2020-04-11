@@ -21,9 +21,13 @@ namespace Halley {
 
 	protected:
 		virtual void onEntityChanged();
+
+		const std::optional<EntityRef>& getEntity() const;
+		std::optional<EntityRef>& getEntity();
+
 		const Transform2DComponent* getTransform() const;
 		Transform2DComponent* getTransform();
-
+		
 		float getZoom() const;
 
 	private:

@@ -1,4 +1,4 @@
-#include "scene_editor/translate_gizmo.h"
+#include "translate_gizmo.h"
 #include "components/transform_2d_component.h"
 #include "halley/core/graphics/painter.h"
 using namespace Halley;

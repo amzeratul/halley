@@ -43,6 +43,16 @@ Transform2DComponent* SceneEditorGizmo::getTransform()
 	}
 }
 
+const std::optional<EntityRef>& SceneEditorGizmo::getEntity() const
+{
+	return curEntity;
+}
+
+std::optional<EntityRef>& SceneEditorGizmo::getEntity()
+{
+	return curEntity;
+}
+
 float SceneEditorGizmo::getZoom() const
 {
 	return zoom;

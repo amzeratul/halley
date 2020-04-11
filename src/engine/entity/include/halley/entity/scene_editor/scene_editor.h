@@ -31,6 +31,9 @@ namespace Halley {
     	
 		std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() override;
 
+		static Rect4f getSpriteTreeBounds(const EntityRef& e);
+		static std::optional<Rect4f> getSpriteBounds(const EntityRef& e);
+
     protected:
 		virtual void createServices(World& world, SceneEditorContext& context);
 		virtual void createEntities(World& world, SceneEditorContext& context);
@@ -46,18 +49,11 @@ namespace Halley {
     	Camera camera;
     	
 		std::optional<EntityRef> selectedEntity;
-    	std::optional<Rect4f> selectedBounds;
-
     	std::unique_ptr<SceneEditorGizmoCollection> gizmoCollection;
 
 		std::unique_ptr<World> createWorld(SceneEditorContext& context);
 
     	void moveCameraTo2D(Vector2f pos);
-    	Rect4f getSpriteTreeBounds(const EntityRef& e) const;
-		void doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect) const;
-    	static std::optional<Rect4f> getSpriteBounds(const EntityRef& e);
-
-    	void updateGizmos(Time t);
-    	void drawGizmos(Painter& painter) const;
+		static void doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect);
 	};
 }

@@ -1,9 +1,7 @@
 #pragma once
-#include "scene_editor_gizmo.h"
+#include "scene_editor/scene_editor_gizmo.h"
 
 namespace Halley {
-	class Transform2DComponent;
-	
 	class TranslateGizmo final : public SceneEditorGizmo {
 	public:
 		void update(Time time) override;
