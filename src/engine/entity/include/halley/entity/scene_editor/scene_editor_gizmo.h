@@ -1,6 +1,7 @@
 #pragma once
 #include <optional>
 #include "entity.h"
+#include "halley/core/game/scene_editor_interface.h"
 #include "halley/time/halleytime.h"
 
 class Transform2DComponent;
@@ -42,6 +43,7 @@ namespace Halley {
 		void setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& entityData);
 
 		void setCamera(const Camera& camera);
+		void setOutputState(SceneEditorOutputState& outputState);
 
 	protected:
 		virtual void onEntityChanged();
@@ -54,12 +56,15 @@ namespace Halley {
 
 		ConfigNode& getEntityData();
 		ConfigNode* getComponentData(const String& name);
+
+		void markModified(const String& component, const String& field);
 		
 		float getZoom() const;
 
 	private:
 		std::optional<EntityRef> curEntity;
 		ConfigNode* entityData = nullptr;
+		SceneEditorOutputState* outputState = nullptr;
 		float zoom = 1.0f;
 	};
 }

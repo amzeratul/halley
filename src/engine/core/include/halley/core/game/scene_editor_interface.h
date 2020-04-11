@@ -68,13 +68,17 @@ namespace Halley {
 		// Filled on SceneEditor side
         Vector2f mousePos;
     };
+
+	struct SceneEditorOutputState {
+		std::vector<std::pair<String, String>> fieldsChanged;
+	};
 	
     class ISceneEditor {
     public:
         virtual ~ISceneEditor() = default;
 
         virtual void init(SceneEditorContext& context) = 0;
-        virtual void update(Time t, SceneEditorInputState inputState) = 0;
+        virtual void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState) = 0;
         virtual void render(RenderContext& rc) = 0;
     	
         virtual World& getWorld() = 0;

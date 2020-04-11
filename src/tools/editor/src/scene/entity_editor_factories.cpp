@@ -115,37 +115,57 @@ public:
 
 	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const String& fieldName, ConfigNode& componentData, const String& defaultValue) override
 	{
-		std::optional<Vector2f> value;
+		Vector2f value;
 		if (componentData[fieldName].getType() != ConfigNodeType::Undefined) {
 			value = componentData[fieldName].asVector2f();
 		}
-		Vector2f defVecValue;
 
-		auto x = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "xValue", context.getFactory().getStyle("inputThin"));
+		const auto& keyboard = context.getFactory().getKeyboard();
+		const auto& style = context.getFactory().getStyle("inputThin");
+
+		auto dataOutput = std::make_shared<bool>(true);
+		
+		auto x = std::make_shared<UITextInput>(keyboard, "xValue", style);
 		x->setValidator(std::make_shared<UINumericValidator>(true, true));
 		x->setMinSize(Vector2f(60, 22));
-		x->bindData("xValue", value.value_or(defVecValue).x, [&, fieldName] (float newVal)
+		x->bindData("xValue", value.x, [&, fieldName, dataOutput] (float newVal)
 		{
-			auto& node = componentData[fieldName];
-			node = ConfigNode(Vector2f(newVal, node.asVector2f(Vector2f()).y));
-			context.onEntityUpdated();
+			if (*dataOutput) {
+				auto& node = componentData[fieldName];
+				node = ConfigNode(Vector2f(newVal, node.asVector2f(Vector2f()).y));
+				context.onEntityUpdated();
+			}
 		});
 
-		auto y = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "yValue", context.getFactory().getStyle("inputThin"));
+		auto y = std::make_shared<UITextInput>(keyboard, "yValue", style);
 		y->setValidator(std::make_shared<UINumericValidator>(true, true));
 		y->setMinSize(Vector2f(60, 22));
-		y->bindData("yValue", value.value_or(defVecValue).y, [&, fieldName](float newVal)
+		y->bindData("yValue", value.y, [&, fieldName, dataOutput](float newVal)
 		{
-			auto& node = componentData[fieldName];
-			node = ConfigNode(Vector2f(node.asVector2f(Vector2f()).x, newVal));
-			context.onEntityUpdated();
+			if (*dataOutput) {
+				auto& node = componentData[fieldName];
+				node = ConfigNode(Vector2f(node.asVector2f(Vector2f()).x, newVal));
+				context.onEntityUpdated();
+			}
 		});
 
-		auto sizer = std::make_shared<UISizer>(UISizerType::Horizontal, 4.0f);
-		sizer->add(x, 1);
-		sizer->add(y, 1);
+		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
+		container->add(x, 1);
+		container->add(y, 1);
 
-		return sizer;
+		container->setHandle(UIEventType::ReloadData, fieldName, [=, &componentData] (const UIEvent& event)
+		{
+			Vector2f newVal;
+			if (componentData[fieldName].getType() != ConfigNodeType::Undefined) {
+				newVal = componentData[fieldName].asVector2f();
+			}
+			*dataOutput = false;
+			x->setText(toString(newVal.x));
+			y->setText(toString(newVal.y));
+			*dataOutput = true;
+		});
+
+		return container;
 	}
 };
 

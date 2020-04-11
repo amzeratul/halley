@@ -3,6 +3,8 @@
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
+	class SceneEditorWindow;
+
 	class SceneEditorCanvas final : public UIWidget {
 	public:
 		SceneEditorCanvas(String id, Resources& resources, const HalleyAPI& api);
@@ -14,6 +16,7 @@ namespace Halley {
 
 		bool isLoaded() const;
 		ISceneEditor& getInterface() const;
+		void setSceneEditorWindow(SceneEditorWindow& editorWindow);
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -32,6 +35,7 @@ namespace Halley {
 		const HalleyAPI& api;
 		Resources& resources;
 		Resources* gameResources = nullptr;
+		SceneEditorWindow* editorWindow;
 
 		Sprite border;
 
@@ -46,6 +50,7 @@ namespace Halley {
 		std::shared_ptr<InputKeyboard> keyboard;
 		std::shared_ptr<InputDevice> mouse;
 		SceneEditorInputState inputState;
+		SceneEditorOutputState outputState;
 
 		bool dragging = false;
 		int dragButton = 0;
@@ -60,6 +65,7 @@ namespace Halley {
 
 		void guardedRun(const std::function<void()>& f) const;
 		void updateInputState();
+		void notifyOutputState();
 		void clearInputState();
 	};
 }

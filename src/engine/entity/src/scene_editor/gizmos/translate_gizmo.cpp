@@ -64,5 +64,6 @@ void TranslateGizmo::updateEntityData(Vector2f pos)
 	if (data) {
 		(*data)["position"] = pos;
 	}
+	markModified("Transform2D", "position");
 }
 

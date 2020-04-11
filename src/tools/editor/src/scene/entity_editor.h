@@ -19,6 +19,7 @@ namespace Halley {
 
 		bool loadEntity(const String& id, ConfigNode& data, bool force);
 		void reloadEntity();
+		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
 	private:
 		UIFactory& factory;

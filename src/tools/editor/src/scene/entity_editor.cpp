@@ -81,6 +81,11 @@ void EntityEditor::reloadEntity()
 	entityName->setText(getEntityData()["name"].asString(""));
 }
 
+void EntityEditor::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
+{
+	sendEventDown(UIEvent(UIEventType::ReloadData, fieldName));
+}
+
 void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data)
 {
 	auto componentUI = factory.makeUI("ui/halley/entity_editor_component");

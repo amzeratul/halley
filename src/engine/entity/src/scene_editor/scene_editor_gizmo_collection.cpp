@@ -11,13 +11,14 @@ SceneEditorGizmoCollection::SceneEditorGizmoCollection(Resources& resources)
 	selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(resources);
 }
 
-void SceneEditorGizmoCollection::update(Time time, const Camera& camera, const SceneEditorInputState& inputState)
+void SceneEditorGizmoCollection::update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
 {
 	selectedBoundsGizmo->setCamera(camera);
 	selectedBoundsGizmo->update(time, inputState);
 	
 	if (activeGizmo) {
 		activeGizmo->setCamera(camera);
+		activeGizmo->setOutputState(outputState);
 		activeGizmo->update(time, inputState);
 	}
 }

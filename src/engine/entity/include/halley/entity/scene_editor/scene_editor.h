@@ -15,7 +15,7 @@ namespace Halley {
     	virtual ~SceneEditor();
     	
 		void init(SceneEditorContext& context) override;
-		void update(Time t, SceneEditorInputState inputState) override;
+		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState) override;
 		void render(RenderContext& rc) override;
 
 		World& getWorld() override;

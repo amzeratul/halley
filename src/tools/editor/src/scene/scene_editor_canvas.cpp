@@ -1,5 +1,6 @@
 #include "scene_editor_canvas.h"
 #include "halley/core/game/scene_editor_interface.h"
+#include "scene_editor_window.h"
 #include "src/project/core_api_wrapper.h"
 
 using namespace Halley;
@@ -162,6 +163,11 @@ ISceneEditor& SceneEditorCanvas::getInterface() const
 	return *interface;
 }
 
+void SceneEditorCanvas::setSceneEditorWindow(SceneEditorWindow& window)
+{
+	editorWindow = &window;
+}
+
 void SceneEditorCanvas::updateInterface(Time t)
 {
 	if (errorState) {
@@ -171,8 +177,9 @@ void SceneEditorCanvas::updateInterface(Time t)
 	if (interface) {
 		updateInputState();
 		guardedRun([&] () {
-			interface->update(t, inputState);
+			interface->update(t, inputState, outputState);
 		});
+		notifyOutputState();
 		clearInputState();
 	}
 }
@@ -261,6 +268,14 @@ void SceneEditorCanvas::updateInputState()
 	inputState.shiftHeld = keyboard->isButtonDown(Keys::LShift) || keyboard->isButtonDown(Keys::RShift);
 
 	inputState.viewRect = getRect();
+}
+
+void SceneEditorCanvas::notifyOutputState()
+{
+	for (auto& m: outputState.fieldsChanged) {
+		editorWindow->onFieldChangedByGizmo(m.first, m.second);
+	}
+	outputState.fieldsChanged.clear();
 }
 
 void SceneEditorCanvas::clearInputState()

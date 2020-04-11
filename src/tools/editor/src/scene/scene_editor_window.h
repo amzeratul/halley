@@ -19,6 +19,7 @@ namespace Halley {
 		void markModified();
 
 		void onEntityModified(const String& id);
+		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
 	protected:
 		void update(Time t, bool moved) override;

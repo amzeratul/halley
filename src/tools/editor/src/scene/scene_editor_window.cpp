@@ -90,6 +90,7 @@ void SceneEditorWindow::makeUI()
 	add(uiFactory.makeUI("ui/halley/scene_editor_window"), 1);
 	
 	canvas = getWidgetAs<SceneEditorCanvas>("canvas");
+	canvas->setSceneEditorWindow(*this);
 	
 	entityList = getWidgetAs<EntityList>("entityList");
 	entityList->setSceneEditorWindow(*this);
@@ -171,6 +172,11 @@ void SceneEditorWindow::onEntityModified(const String& id)
 	entityList->onEntityModified(id, sceneData->getEntityData(id));
 	sceneData->reloadEntity(id);
 	markModified();
+}
+
+void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
+{
+	entityEditor->onFieldChangedByGizmo(componentName, fieldName);
 }
 
 void SceneEditorWindow::addEntity()

@@ -27,6 +27,7 @@ namespace Halley {
 		MouseWheel,
 		MakeAreaVisible,
 		MakeAreaVisibleCentered,
+		ReloadData,
 		SetSelected,
 		SetEnabled,
 		SetHovered,

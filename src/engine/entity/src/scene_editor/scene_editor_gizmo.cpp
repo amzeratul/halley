@@ -67,6 +67,11 @@ void SceneEditorGizmo::setCamera(const Camera& camera)
 	zoom = camera.getZoom();
 }
 
+void SceneEditorGizmo::setOutputState(SceneEditorOutputState& state)
+{
+	outputState = &state;
+}
+
 void SceneEditorGizmo::onEntityChanged()
 {}
 
@@ -106,6 +111,13 @@ ConfigNode* SceneEditorGizmo::getComponentData(const String& name)
 		}
 	}
 	return nullptr;
+}
+
+void SceneEditorGizmo::markModified(const String& component, const String& field)
+{
+	if (outputState) {
+		outputState->fieldsChanged.push_back(std::make_pair(component, field));
+	}
 }
 
 const std::optional<EntityRef>& SceneEditorGizmo::getEntity() const
