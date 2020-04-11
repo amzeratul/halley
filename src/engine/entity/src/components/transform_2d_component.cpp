@@ -131,13 +131,19 @@ void Transform2DComponent::setSubWorld(int world)
 Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
 {
 	// TODO, do this properly
-	return getGlobalPosition() + p;
+	
+	auto pos = getGlobalPosition() + p;
+	setCached(CachedIndices::Position); // Important: getGlobalPosition() won't cache if it's the root, but this is important for markDirty
+	return pos;
 }
 
 Vector2f Transform2DComponent::inverseTransformPoint(const Vector2f& p) const
 {
 	// TODO, do this properly
-	return p - getGlobalPosition();
+
+	auto pos = p - getGlobalPosition();
+	setCached(CachedIndices::Position); // Important: getGlobalPosition() won't cache if it's the root, but this is important for markDirty
+	return pos;
 }
 
 Rect4f Transform2DComponent::getSpriteAABB(const Sprite& sprite) const
