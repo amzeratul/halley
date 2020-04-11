@@ -1,8 +1,9 @@
-#include "scene_editor.h"
+#include "scene_editor/scene_editor.h"
 #include "world.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/core/game/halley_statics.h"
 #include "halley/core/graphics/sprite/sprite.h"
+#include "halley/core/graphics/render_context.h"
 #include "system.h"
 #include "registry.h"
 
@@ -29,13 +30,30 @@ void SceneEditor::init(SceneEditorContext& context)
 
 void SceneEditor::update(Time t)
 {
+	// Update world
 	world->step(TimeLine::FixedUpdate, t);
 	world->step(TimeLine::VariableUpdate, t);
+
+	// Update camera
+	auto cameraEntity = world->getEntity(cameraEntityId);
+	auto& cameraComponent = cameraEntity.getComponent<CameraComponent>();
+	auto& transformComponent = cameraEntity.getComponent<Transform2DComponent>();
+	camera.setPosition(transformComponent.getGlobalPosition()).setZoom(cameraComponent.zoom);
+
+	// Update gizmos
+	updateGizmos(t);
 }
 
 void SceneEditor::render(RenderContext& rc)
 {
+	// Render world
 	world->render(rc);
+
+	// Render gizmos
+	rc.with(camera).bind([&] (Painter& painter)
+	{
+		drawGizmos(painter);
+	});
 }
 
 World& SceneEditor::getWorld()
@@ -126,7 +144,17 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 }
 
 void SceneEditor::setSelectedEntity(const UUID& id)
-{}
+{
+	selectedBounds.reset();
+	selectedEntity.reset();
+
+	if (id.isValid()) {
+		selectedEntity = getWorld().findEntity(id);
+		if (selectedEntity) {
+			selectedBounds = getSpriteTreeBounds(selectedEntity.value());
+		}
+	}
+}
 
 void SceneEditor::showEntity(const UUID& id)
 {
@@ -138,14 +166,14 @@ void SceneEditor::showEntity(const UUID& id)
 	}
 }
 
-Rect4f SceneEditor::getSpriteTreeBounds(EntityRef& e)
+Rect4f SceneEditor::getSpriteTreeBounds(const EntityRef& e) const
 {
 	std::optional<Rect4f> rect;
 	doGetSpriteTreeBounds(e, rect);
 	return rect.value_or(Rect4f());
 }
 
-void SceneEditor::doGetSpriteTreeBounds(EntityRef& e, std::optional<Rect4f>& rect)
+void SceneEditor::doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect) const
 {
 	auto cur = getSpriteBounds(e);
 	if (!rect) {
@@ -155,14 +183,13 @@ void SceneEditor::doGetSpriteTreeBounds(EntityRef& e, std::optional<Rect4f>& rec
 		rect = rect->merge(*cur);
 	}
 
-	auto& world = getWorld();
 	for (auto& c: e.getRawChildren()) {
-		auto child = EntityRef(*c, world);
+		auto child = EntityRef(*c, *world);
 		doGetSpriteTreeBounds(child, rect);
 	}
 }
 
-std::optional<Rect4f> SceneEditor::getSpriteBounds(EntityRef& e)
+std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)
 {
 	const auto transform2d = e.tryGetComponent<Transform2DComponent>();
 
@@ -177,4 +204,16 @@ std::optional<Rect4f> SceneEditor::getSpriteBounds(EntityRef& e)
 		}
 	}
 	return {};
+}
+
+void SceneEditor::updateGizmos(Time t)
+{
+	
+}
+
+void SceneEditor::drawGizmos(Painter& painter) const
+{
+	if (selectedBounds) {
+		painter.drawRect(selectedBounds.value(), 1.0f, Colour4f(0.6, 0.6f, 0.6f));
+	}
 }

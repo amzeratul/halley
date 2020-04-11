@@ -16,6 +16,7 @@ using namespace Halley;
 Painter::Painter(Resources& resources)
 	: halleyGlobalMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/MaterialBase"), true))
 	, resources(resources)
+	, solidLineMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidLine")))
 {
 }
 
@@ -421,9 +422,6 @@ Rect4i Painter::getRectangleForActiveRenderTarget(Rect4i r)
 
 std::shared_ptr<Material> Painter::getSolidLineMaterial()
 {
-	if (!solidLineMaterial) {
-		solidLineMaterial = std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidLine"));
-	}
 	return solidLineMaterial;
 }
 

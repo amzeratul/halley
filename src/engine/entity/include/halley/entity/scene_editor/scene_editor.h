@@ -1,9 +1,12 @@
 #pragma once
-#include "create_functions.h"
 #include "halley/core/game/scene_editor_interface.h"
+#include "halley/core/graphics/camera.h"
+#include "../entity.h"
 
 namespace Halley {
+	class EntityRef;
 	class World;
+	class Painter;
 	
     class SceneEditor : public ISceneEditor {
     public:
@@ -36,13 +39,21 @@ namespace Halley {
 
     private:
 		std::unique_ptr<World> world;
-		EntityId cameraEntityId;
+
+    	EntityId cameraEntityId;
+    	Camera camera;
+    	
+		std::optional<EntityRef> selectedEntity;
+    	std::optional<Rect4f> selectedBounds;
 
 		std::unique_ptr<World> createWorld(SceneEditorContext& context);
 
     	void moveCameraTo2D(Vector2f pos);
-    	Rect4f getSpriteTreeBounds(EntityRef& e);
-		void doGetSpriteTreeBounds(EntityRef& e, std::optional<Rect4f>& rect);
-    	std::optional<Rect4f> getSpriteBounds(EntityRef& e);
+    	Rect4f getSpriteTreeBounds(const EntityRef& e) const;
+		void doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect) const;
+    	static std::optional<Rect4f> getSpriteBounds(const EntityRef& e);
+
+    	void updateGizmos(Time t);
+    	void drawGizmos(Painter& painter) const;
 	};
 }

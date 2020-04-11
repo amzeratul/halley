@@ -21,6 +21,7 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 
 SceneEditorWindow::~SceneEditorWindow()
 {
+	unloadScene();
 }
 
 void SceneEditorWindow::loadScene(const String& name)
@@ -133,6 +134,7 @@ void SceneEditorWindow::selectEntity(const String& id)
 {
 	const bool changed = entityEditor->loadEntity(id, sceneData->getEntityData(id), false);
 	if (changed) {
+		canvas->getInterface().setSelectedEntity(UUID(id));
 		currentEntityId = id;
 	}
 }

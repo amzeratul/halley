@@ -13,13 +13,14 @@ set(SOURCES
         "src/family_mask.cpp"
         "src/message.cpp"
         "src/prefab_scene_data.cpp"
-        "src/scene_editor.cpp"
         "src/system.cpp"
         "src/world.cpp"
         "src/world_scene_data.cpp"
         "src/world_stats.cpp"
 
         "src/components/transform_2d_component.cpp"
+
+        "src/scene_editor/scene_editor.cpp"
         )
 
 set(HEADERS
@@ -39,7 +40,6 @@ set(HEADERS
         "include/halley/entity/message.h"
         "include/halley/entity/prefab_scene_data.h"
         "include/halley/entity/registry.h"
-        "include/halley/entity/scene_editor.h"
         "include/halley/entity/service.h"
         "include/halley/entity/system.h"
         "include/halley/entity/type_deleter.h"
@@ -48,6 +48,8 @@ set(HEADERS
         "include/halley/entity/world_stats.h"
 
         "include/halley/entity/components/transform_2d_component.h"
+
+        "include/halley/entity/scene_editor/scene_editor.h"
         )
 
 assign_source_group(${SOURCES})

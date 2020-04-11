@@ -202,6 +202,8 @@ namespace Halley {
 			, world(&w)
 		{}
 
+		~EntityRef() = default;
+
 		template <typename T>
 		EntityRef& addComponent(T&& component)
 		{
@@ -241,7 +243,19 @@ namespace Halley {
 		}
 
 		template <typename T>
+		const T& getComponent() const
+		{
+			return entity->getComponent<T>();
+		}
+
+		template <typename T>
 		T* tryGetComponent()
+		{
+			return entity->tryGetComponent<T>();
+		}
+
+		template <typename T>
+		const T* tryGetComponent() const
 		{
 			return entity->tryGetComponent<T>();
 		}
