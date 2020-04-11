@@ -26,7 +26,7 @@ void SceneEditor::init(SceneEditorContext& context)
 	createEntities(*world, context);
 	cameraEntityId = createCamera();
 
-	gizmoCollection = std::make_unique<SceneEditorGizmoCollection>();
+	gizmoCollection = std::make_unique<SceneEditorGizmoCollection>(*context.editorResources);
 }
 
 void SceneEditor::update(Time t)
@@ -100,7 +100,7 @@ EntityId SceneEditor::createCamera()
 {
 	return getWorld().createEntity("editorCamera")
 		.addComponent(Transform2DComponent(Vector2f(0, 0)))
-		.addComponent(CameraComponent(1.0f, Colour4f(0.5f, 0.5f, 0.5f), 0x7FFFFFFF, 0))
+		.addComponent(CameraComponent(1.0f, Colour4f(0.2f, 0.2f, 0.2f), 0x7FFFFFFF, 0))
 		.getEntityId();
 }
 
@@ -114,14 +114,14 @@ void SceneEditor::dragCamera(Vector2f amount)
 	auto camera = getWorld().getEntity(cameraEntityId);
 	const float zoom = camera.getComponent<CameraComponent>().zoom;
 	auto& transform = camera.getComponent<Transform2DComponent>();
-	transform.setGlobalPosition(transform.getGlobalPosition() + amount / zoom);
+	transform.setGlobalPosition(roundPosition(transform.getGlobalPosition() + amount / zoom));
 }
 
 void SceneEditor::moveCameraTo2D(Vector2f pos)
 {
 	auto camera = getWorld().getEntity(cameraEntityId);
 	auto& transform = camera.getComponent<Transform2DComponent>();
-	transform.setGlobalPosition(pos);
+	transform.setGlobalPosition(roundPosition(pos));
 }
 
 void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
@@ -141,7 +141,7 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 
 	// Translate to keep fixed point
 	const Vector2f translate = cursorPosRelToCamera * (1.0f / prevZoom - 1.0f / camera.zoom);
-	transform.setGlobalPosition(transform.getGlobalPosition() + translate);
+	transform.setGlobalPosition(roundPosition(transform.getGlobalPosition() + translate, camera.zoom));
 }
 
 void SceneEditor::setSelectedEntity(const UUID& id)
@@ -190,6 +190,16 @@ void SceneEditor::doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f
 		auto child = EntityRef(*c, e.getWorld());
 		doGetSpriteTreeBounds(child, rect);
 	}
+}
+
+Vector2f SceneEditor::roundPosition(Vector2f pos) const
+{
+	return roundPosition(pos, camera.getZoom());
+}
+
+Vector2f SceneEditor::roundPosition(Vector2f pos, float zoom) const
+{
+	return (pos * zoom).round() / zoom;
 }
 
 std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)

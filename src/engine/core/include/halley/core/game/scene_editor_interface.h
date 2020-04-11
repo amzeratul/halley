@@ -16,6 +16,7 @@ namespace Halley {
     public:
         const HalleyAPI* api;
         Resources* resources;
+        Resources* editorResources;
     };
 
     class ComponentEditorContext {

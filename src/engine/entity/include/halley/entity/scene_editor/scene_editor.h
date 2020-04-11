@@ -55,5 +55,7 @@ namespace Halley {
 
     	void moveCameraTo2D(Vector2f pos);
 		static void doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect);
+    	Vector2f roundPosition(Vector2f pos) const;
+		Vector2f roundPosition(Vector2f pos, float zoom) const;
 	};
 }

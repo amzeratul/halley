@@ -168,13 +168,13 @@ GLUtils::GLUtils(GLUtils& other)
 
 void GLUtils::setBlendType(BlendType type)
 {
-	Expects(type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Opaque || type == BlendType::Multiply || type == BlendType::Darken);
+	Expects(type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Opaque || type == BlendType::Multiply || type == BlendType::Invert || type == BlendType::Darken);
 	glCheckError();
 
 	const BlendType curType = state.curBlend;
 	if (!checked || curType != type) {
-		bool hasBlend = curType == BlendType::Alpha || curType == BlendType::AlphaPremultiplied || curType == BlendType::Add || curType == BlendType::Multiply || curType == BlendType::Darken;
-		bool needsBlend = type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Multiply || type == BlendType::Darken;
+		bool hasBlend = curType == BlendType::Alpha || curType == BlendType::AlphaPremultiplied || curType == BlendType::Add || curType == BlendType::Multiply || curType == BlendType::Invert || curType == BlendType::Darken;
+		bool needsBlend = type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Multiply || type == BlendType::Invert || type == BlendType::Darken;
 
 		// Disable current
 		if (hasBlend && !needsBlend) {
@@ -197,6 +197,10 @@ void GLUtils::setBlendType(BlendType type)
 			}
 			else if (type == BlendType::Multiply) {
 				glBlendFunc(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
+				glCheckError();
+			}
+			else if (type == BlendType::Invert) {
+				glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
 				glCheckError();
 			}
 			else {

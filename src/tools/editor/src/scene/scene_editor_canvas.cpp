@@ -178,6 +178,7 @@ void SceneEditorCanvas::loadDLL()
 		
 		SceneEditorContext context;
 		context.resources = gameResources;
+		context.editorResources = &resources;
 		context.api = gameAPI.get();
 
 		guardedRun([&]() {

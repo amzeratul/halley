@@ -5,9 +5,10 @@
 #include "halley/core/graphics/camera.h"
 using namespace Halley;
 
-SceneEditorGizmoCollection::SceneEditorGizmoCollection()
+SceneEditorGizmoCollection::SceneEditorGizmoCollection(Resources& resources)
+	: resources(resources)
 {
-	selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>();
+	selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(resources);
 }
 
 void SceneEditorGizmoCollection::update(Time time, const Camera& camera)

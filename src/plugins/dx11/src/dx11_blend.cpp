@@ -52,6 +52,15 @@ DX11Blend::DX11Blend(DX11Video& video, BlendType blend)
 		target.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
 		break;
 
+	case BlendType::Invert:
+		target.BlendOp = D3D11_BLEND_OP_ADD;
+		target.SrcBlend = D3D11_BLEND_INV_DEST_COLOR;
+		target.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		target.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		target.SrcBlendAlpha = D3D11_BLEND_ONE;
+		target.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+		break;
+
 	case BlendType::Opaque:
 	default:
 		target.BlendEnable = false;

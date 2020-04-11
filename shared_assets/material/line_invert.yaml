@@ -1,0 +1,10 @@
+---
+name: Halley/InvertLine
+base: line_base.yaml
+passes:
+  - blend: Invert
+    shader:
+    - language: hlsl
+      vertex: line.vertex.hlsl
+      pixel: line_solid.pixel.hlsl
+...

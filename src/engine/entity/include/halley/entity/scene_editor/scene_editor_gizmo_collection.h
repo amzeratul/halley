@@ -10,7 +10,7 @@ namespace Halley {
 
 	class SceneEditorGizmoCollection {
 	public:
-		SceneEditorGizmoCollection();
+		SceneEditorGizmoCollection(Resources& resources);
 		
 		void update(Time time, const Camera& camera);
 		void draw(Painter& painter);
@@ -18,6 +18,7 @@ namespace Halley {
 		void setTool(SceneEditorTool tool);
 
 	private:
+		Resources& resources;
 		std::unique_ptr<SceneEditorGizmo> selectedBoundsGizmo;
 		std::unique_ptr<SceneEditorGizmo> activeGizmo;
 		
