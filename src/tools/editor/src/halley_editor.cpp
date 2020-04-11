@@ -131,7 +131,7 @@ std::unique_ptr<Project> HalleyEditor::loadProject(Path path)
 	preferences->addRecent(path.string());
 	preferences->saveToFile();
 	
-	return std::move(project);
+	return project;
 }
 
 std::unique_ptr<Project> HalleyEditor::createProject(Path path)
@@ -147,7 +147,7 @@ std::unique_ptr<Project> HalleyEditor::createProject(Path path)
 	preferences->addRecent(path.string());
 	preferences->saveToFile();
 	
-	return std::move(project);
+	return project;
 }
 
 HalleyGame(HalleyEditor);

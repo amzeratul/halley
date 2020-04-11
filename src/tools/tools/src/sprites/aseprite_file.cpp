@@ -474,7 +474,7 @@ std::unique_ptr<Image> AsepriteFile::makeFrameImage(int frameNumber)
 	}
 
 	frameImage->preMultiply();
-	return std::move(frameImage);
+	return frameImage;
 }
 
 const AsepriteFrame& AsepriteFile::getFrame(int frameNumber) const

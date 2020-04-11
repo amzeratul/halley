@@ -115,7 +115,7 @@ std::unique_ptr<ITextInputCapture> InputKeyboardSDL::makeTextInputCapture()
 {
 	auto ptr = std::make_unique<SDLTextInputCapture>(*this);
 	captures.insert(ptr.get());
-	return std::move(ptr);
+	return ptr;
 }
 
 String InputKeyboardSDL::getButtonName(int code)

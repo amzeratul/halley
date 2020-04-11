@@ -192,7 +192,7 @@ std::optional<UISizer> UIFactory::makeSizer(const ConfigNode& entryNode)
 
 	loadSizerChildren(sizer, entryNode["children"]);
 
-	return std::move(sizer);
+	return sizer;
 }
 
 UISizer UIFactory::makeSizerOrDefault(const ConfigNode& entryNode, UISizer&& defaultSizer)

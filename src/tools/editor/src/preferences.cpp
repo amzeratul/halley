@@ -30,7 +30,7 @@ ConfigNode Preferences::save() const
 		root["window"] = std::move(windowNode);
 	}
 
-	return std::move(root);
+	return root;
 }
 
 void Preferences::load(const ConfigNode& root)
