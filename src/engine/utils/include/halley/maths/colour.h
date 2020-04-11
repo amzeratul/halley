@@ -27,58 +27,60 @@
 #include <cmath>
 #include "halley/text/halleystring.h"
 #include <gsl/gsl_assert>
+#include <cstdint>
 
 namespace Halley {
+	// This whole class is TERRIBLE
+	// There should be a type distinction between linear and gamma space, with conversions,
+	// and the default Colour type should be Colour4c
+	
 	template <typename T>
-	inline T colMinValue()
+	constexpr T colMinValue()
 	{
 		return 0;
 	}
 
 	template <typename T>
-	inline T colMaxValue()
+	constexpr T colMaxValue()
 	{
 		return 255;
 	}
 
 	template <>
-	inline float colMaxValue<float>()
+	constexpr float colMaxValue<float>()
 	{
 		return 1.0f;
 	}
 
 	template <typename T, typename U>
-	inline U convertColour(T x)
+	constexpr U convertColour(T x)
 	{
 		return U(float(x) * colMaxValue<U>() / colMaxValue<T>());
 	}
 
 	template <>
-	inline unsigned char convertColour(int x)
+	constexpr uint8_t convertColour(int x)
 	{
-		return static_cast<unsigned char>(x);
+		return static_cast<uint8_t>(x);
 	}
 
 	template <typename T>
 	class Colour4 {
 	public:
-		T r, g, b, a;
+		T r = colMinValue<T>();
+		T g = colMinValue<T>();
+		T b = colMinValue<T>();
+		T a = colMaxValue<T>();
 
-		Colour4()
-			: r(colMinValue<T>())
-			, g(colMinValue<T>())
-			, b(colMinValue<T>())
-			, a(colMaxValue<T>())
-		{}
+		constexpr Colour4() = default;
 
-		Colour4(T luma)
+		constexpr Colour4(T luma)
 			: r(luma)
 			, g(luma)
 			, b(luma)
-			, a(1)
 		{}
 		
-		Colour4(T r, T g, T b, T a=colMaxValue<T>())
+		constexpr Colour4(T r, T g, T b, T a=colMaxValue<T>())
 			: r(r)
 			, g(g)
 			, b(b)
@@ -154,40 +156,40 @@ namespace Halley {
 			return Colour4<T>(Colour4<float>(r, g, b));
 		}
 
-		Colour4 multiplyLuma(float t) const
+		constexpr Colour4 multiplyLuma(float t) const
 		{
 			return Colour4(r*t, g*t, b*t, a);
 		}
 
-		Colour4 inverseMultiplyLuma(float t) const
+		constexpr Colour4 inverseMultiplyLuma(float t) const
 		{
 			return Colour4(1.0f - ((1.0f - r) * t), 1.0f - ((1.0f - g) * t), 1.0f - ((1.0f - b) * t), a);
 		}
 
-		Colour4 operator+(const Colour4& c) const
+		constexpr Colour4 operator+(const Colour4& c) const
 		{
 			return Colour4(r+c.r, g+c.g, b+c.b, a+c.a);
 		}
 
-		Colour4 operator*(float t) const
+		constexpr Colour4 operator*(float t) const
 		{
 			return Colour4(r*t, g*t, b*t, a*t);
 		}
 
-		bool operator==(const Colour4& c) const
+		constexpr bool operator==(const Colour4& c) const
 		{
 			return r == c.r && g == c.g && b == c.b && a == c.a;
 		}
 
-		bool operator!=(const Colour4& c) const
+		constexpr bool operator!=(const Colour4& c) const
 		{
 			return r != c.r || g != c.g || b != c.b || a != c.a;
 		}
 
 	private:
-		unsigned char byteRep(T v) const
+		uint8_t byteRep(T v) const
 		{
-			return convertColour<T, unsigned char>(v);
+			return convertColour<T, uint8_t>(v);
 		}
 
 		static T parseHex(String str)
@@ -196,7 +198,7 @@ namespace Halley {
 			int value;
 			ss << std::hex;
 			ss >> value;
-			return convertColour<unsigned char, T>(static_cast<unsigned char>(value));
+			return convertColour<uint8_t, T>(static_cast<uint8_t>(value));
 		}
 
 		template <typename U>
@@ -208,7 +210,7 @@ namespace Halley {
 		}
 	};
 
-	typedef Colour4<unsigned char> Colour4c;
+	typedef Colour4<uint8_t> Colour4c;
 	typedef Colour4<float> Colour4f;
 	typedef Colour4f Colour;
 }

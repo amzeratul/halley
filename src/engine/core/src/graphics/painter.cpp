@@ -289,7 +289,7 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 
 static size_t getSegmentsForArc(float radius, float arcLen)
 {
-	return clamp(size_t(std::sqrt(radius * arcLen) * 5), size_t(4), size_t(256));
+	return clamp(size_t(std::sqrtf(radius * arcLen) * 5.0f), size_t(4), size_t(256));
 }
 
 void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<Material> material)
