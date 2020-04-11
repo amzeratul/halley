@@ -517,21 +517,7 @@ MaterialPass::MaterialPass()
 MaterialPass::MaterialPass(const String& shaderAssetId, const ConfigNode& node)
 	: shaderAssetId(shaderAssetId)
 {
-	String blendName = node["blend"].asString("Opaque");
-	if (blendName == "Opaque") {
-		blend = BlendType::Opaque;
-	} else if (blendName == "Alpha") {
-		blend = BlendType::Alpha;
-	} else if (blendName == "AlphaPremultiplied") {
-		blend = BlendType::AlphaPremultiplied;
-	} else if (blendName == "Add") {
-		blend = BlendType::Add;
-	} else if (blendName == "Multiply") {
-		blend = BlendType::Multiply;
-	} else {
-		throw Exception("Unknown blend type: " + blendName, HalleyExceptions::Resources);
-	}
-
+	blend = fromString<BlendType>(node["blend"].asString("Opaque"));
 	cull = fromString<CullingMode>(node["cull"].asString("None"));
 
 	if (node.hasKey("depth")) {
