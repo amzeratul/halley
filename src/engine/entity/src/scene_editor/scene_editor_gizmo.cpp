@@ -1,5 +1,6 @@
 #include "scene_editor/scene_editor_gizmo.h"
 #include "components/transform_2d_component.h"
+#include "halley/core/graphics/camera.h"
 using namespace Halley;
 
 void SceneEditorGizmo::update(Time time)
@@ -14,6 +15,11 @@ void SceneEditorGizmo::setSelectedEntity(const std::optional<EntityRef>& entity)
 		curEntity = entity;
 		onEntityChanged();
 	}
+}
+
+void SceneEditorGizmo::setCamera(const Camera& camera)
+{
+	zoom = camera.getZoom();
 }
 
 void SceneEditorGizmo::onEntityChanged()
@@ -35,4 +41,9 @@ Transform2DComponent* SceneEditorGizmo::getTransform()
 	} else {
 		return nullptr;
 	}
+}
+
+float SceneEditorGizmo::getZoom() const
+{
+	return zoom;
 }

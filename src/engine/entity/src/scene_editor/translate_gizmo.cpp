@@ -11,7 +11,8 @@ void TranslateGizmo::update(Time time)
 void TranslateGizmo::draw(Painter& painter) const
 {
 	if (visible) {
-		painter.drawCircle(pos, 5.0f, 1.0f, Colour4f(1, 1, 1));
+		const float zoom = getZoom();
+		painter.drawCircle(pos, 5.0f / zoom, 1.0f / zoom, Colour4f(1, 1, 1));
 	}
 }
 

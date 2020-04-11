@@ -260,13 +260,12 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 
 	std::optional<Vector2f> prevNormal = loop ? segmentNormal(nSegments - 1) : std::optional<Vector2f>();
 	Vector2f normal = segmentNormal(0).value();
-	std::optional<Vector2f> nextNormal;
 
 	for (size_t i = 0; i < nSegments; ++i) {
-		nextNormal = segmentNormal(i + 1);
+		std::optional<Vector2f> nextNormal = segmentNormal(i + 1);
 
-		Vector2f v0n = makeNormal(normal, prevNormal);
-		Vector2f v1n = makeNormal(normal, nextNormal);
+		const Vector2f v0n = makeNormal(normal, prevNormal);
+		const Vector2f v1n = makeNormal(normal, nextNormal);
 
 		for (size_t j = 0; j < 4; ++j) {
 			const size_t idx = i * 4 + j;
@@ -289,7 +288,7 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 
 static size_t getSegmentsForArc(float radius, float arcLen)
 {
-	return clamp(size_t(std::sqrtf(radius * arcLen) * 5.0f), size_t(4), size_t(256));
+	return clamp(size_t(arcLen / float(pi() * 2) * 50.0f), size_t(4), size_t(256));
 }
 
 void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<Material> material)

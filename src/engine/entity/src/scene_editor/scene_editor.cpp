@@ -136,8 +136,8 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 	const float prevZoom = camera.zoom;
 
 	// Zoom
-	const int curLevel = lroundf(std::log2f(clamp(camera.zoom, 1.0f / 1024.0f, 1024.0f)));
-	camera.zoom = std::powf(2.0f, float(clamp(curLevel + amount, -10, 10)));
+	const int curLevel = lroundf(std::log2f(clamp(camera.zoom, 1.0f / 32.0f, 32.0f)));
+	camera.zoom = std::powf(2.0f, float(clamp(curLevel + amount, -5, 5)));
 
 	// Translate to keep fixed point
 	const Vector2f translate = cursorPosRelToCamera * (1.0f / prevZoom - 1.0f / camera.zoom);
@@ -216,7 +216,7 @@ std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)
 
 void SceneEditor::updateGizmos(Time t)
 {
-	gizmoCollection->update(t);
+	gizmoCollection->update(t, camera);
 }
 
 void SceneEditor::drawGizmos(Painter& painter) const
