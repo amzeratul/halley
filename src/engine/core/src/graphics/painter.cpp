@@ -247,8 +247,8 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 
 	auto makeNormal = [] (Vector2f a, std::optional<Vector2f> maybeB) -> Vector2f
 	{
-		// Disabled. Enabling this makes it looks nicer, but also introduces a lot of edge cases with acute angles that are very hard to deal with
-		if (false && maybeB) {
+		// Enabling this makes it looks nicer, but also introduces a lot of edge cases with acute angles that are very hard to deal with, so only enable for angles <= 90 degrees
+		if (maybeB && maybeB.value().dot(a) >= -0.001f) {
 			const auto b = maybeB.value();
 			const auto c = (a + b).normalized();
 			const auto cosHalfAlpha = c.dot(a);
@@ -330,8 +330,7 @@ void Painter::drawRect(Rect4f rect, float width, Colour4f colour, std::shared_pt
 	points.push_back(rect.getTopRight());
 	points.push_back(rect.getBottomRight());
 	points.push_back(rect.getBottomLeft());
-	points.push_back(rect.getTopLeft());
-	drawLine(points, width, colour, false, std::move(material));
+	drawLine(points, width, colour, true, std::move(material));
 }
 
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
