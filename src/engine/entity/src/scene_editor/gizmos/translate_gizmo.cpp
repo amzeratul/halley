@@ -8,33 +8,52 @@ TranslateGizmo::TranslateGizmo()
 {
 	handle.setBoundsCheck([=] (Vector2f myPos, Vector2f mousePos) -> bool
 	{
-		return (myPos - mousePos).length() < 10.0f / getZoom();
+		return getMainHandle().contains(mousePos);
 	});
 }
 
 void TranslateGizmo::update(Time time, const SceneEditorInputState& inputState)
 {
 	handle.update(inputState);
+
+	if (!handle.isHeld()) {
+		const auto transform = getTransform();
+		if (transform) {
+			handle.setPosition(transform->getGlobalPosition());
+			visible = true;
+		} else {
+			visible = false;
+		}
+	}
 }
 
 void TranslateGizmo::draw(Painter& painter) const
 {
 	if (visible) {
 		const float zoom = getZoom();
-		auto overCol = Colour4f(0.5f, 0.5f, 1);
-		auto outCol = Colour4f(0.2f, 0.2f, 1.0f);
-		painter.drawCircle(handle.getPosition(), 10.0f / zoom, 1.0f / zoom, handle.isOver() ? overCol : outCol);
+		const auto overCol = Colour4f(0.5f, 0.5f, 1);
+		const auto outCol = Colour4f(0.2f, 0.2f, 1.0f);
+		const auto col = handle.isOver() ? overCol : outCol;
+		const auto circle = getMainHandle();
+
+		const auto centre = circle.getCentre();
+		const auto radius = circle.getRadius();
+		const float lineWidth = 2.0f / zoom;
+		const float fineLineWidth = 1.0f / zoom;
+		
+		painter.drawCircle(centre, radius, lineWidth, col);
+		painter.drawLine({{ centre - Vector2f(radius * 0.6f, 0), centre + Vector2f(radius * 0.6f, 0) }}, fineLineWidth, col);
+		painter.drawLine({{ centre - Vector2f(0, radius * 0.6f), centre + Vector2f(0, radius * 0.6f) }}, fineLineWidth, col);
 	}
 }
 
 void TranslateGizmo::onEntityChanged()
 {
-	auto transform = getTransform();
-	if (transform) {
-		handle.setPosition(transform->getGlobalPosition());
-		visible = true;
-	} else {
-		visible = false;
-	}
+}
+
+Circle TranslateGizmo::getMainHandle() const
+{
+	const auto pos = handle.getPosition();
+	return Circle(pos, 10.0f / getZoom());
 }
 

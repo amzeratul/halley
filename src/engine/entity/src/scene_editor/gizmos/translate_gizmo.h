@@ -14,5 +14,7 @@ namespace Halley {
 	private:
 		bool visible = false;
 		SceneEditorGizmoHandle handle;
+
+		Circle getMainHandle() const;
 	};
 }
