@@ -11,7 +11,7 @@ namespace Halley {
 	class SceneEditorGizmoCollection {
 	public:
 		void update(Time time);
-		void draw(const Painter& painter);
+		void draw(Painter& painter);
 		void setSelectedEntity(const std::optional<EntityRef>& entity);
 		void setTool(SceneEditorTool tool);
 

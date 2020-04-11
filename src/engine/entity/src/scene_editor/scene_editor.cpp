@@ -7,8 +7,6 @@
 #include "system.h"
 #include "registry.h"
 #include "scene_editor/scene_editor_gizmo_collection.h"
-
-#define DONT_INCLUDE_HALLEY_HPP
 #include "components/sprite_component.h"
 #include "components/camera_component.h"
 #include "components/transform_2d_component.h"

@@ -61,5 +61,6 @@ set(HEADERS
 assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
+add_definitions(-DDONT_INCLUDE_HALLEY_HPP)
 add_library (halley-entity ${SOURCES} ${HEADERS})
 target_link_libraries(halley-entity halley-utils halley-core)

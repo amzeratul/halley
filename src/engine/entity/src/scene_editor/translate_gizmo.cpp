@@ -1,4 +1,6 @@
 #include "scene_editor/translate_gizmo.h"
+#include "components/transform_2d_component.h"
+#include "halley/core/graphics/painter.h"
 using namespace Halley;
 
 void TranslateGizmo::update(Time time)
@@ -6,12 +8,21 @@ void TranslateGizmo::update(Time time)
 	// TODO
 }
 
-void TranslateGizmo::draw(const Painter& painter)
+void TranslateGizmo::draw(Painter& painter) const
 {
-	// TODO
+	if (visible) {
+		painter.drawCircle(pos, 5.0f, 1.0f, Colour4f(1, 1, 1));
+	}
 }
 
-void TranslateGizmo::setSelectedEntity(const std::optional<EntityRef>& entity)
+void TranslateGizmo::onEntityChanged()
 {
-	// TODO
+	auto transform = getTransform();
+	if (transform) {
+		pos = transform->getGlobalPosition();
+		visible = true;
+	} else {
+		visible = false;
+	}
 }
+

@@ -1,8 +1,6 @@
 #include <halley/data_structures/memory_pool.h>
 #include "entity.h"
 #include "world.h"
-
-#define DONT_INCLUDE_HALLEY_HPP
 #include "components/transform_2d_component.h"
 
 

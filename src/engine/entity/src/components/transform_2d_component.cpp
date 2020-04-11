@@ -1,4 +1,3 @@
-#define DONT_INCLUDE_HALLEY_HPP
 #include "halley/support/logger.h"
 #include "components/transform_2d_component.h"
 #include "halley/core/graphics/sprite/sprite.h"

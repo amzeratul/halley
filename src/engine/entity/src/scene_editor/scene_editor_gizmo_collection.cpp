@@ -10,7 +10,7 @@ void SceneEditorGizmoCollection::update(Time time)
 	}
 }
 
-void SceneEditorGizmoCollection::draw(const Painter& painter)
+void SceneEditorGizmoCollection::draw(Painter& painter)
 {
 	if (activeGizmo) {
 		activeGizmo->draw(painter);

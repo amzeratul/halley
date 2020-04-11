@@ -342,6 +342,16 @@ namespace Halley {
 			return entity != nullptr;
 		}
 
+		bool operator==(const EntityRef& other) const
+		{
+			return entity == other.entity && world == other.world;
+		}
+
+		bool operator!=(const EntityRef& other) const
+		{
+			return !(*this == other);
+		}
+
 	private:
 		friend class World;
 
