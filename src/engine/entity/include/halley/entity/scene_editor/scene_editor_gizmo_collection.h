@@ -12,7 +12,7 @@ namespace Halley {
 	public:
 		SceneEditorGizmoCollection(Resources& resources);
 		
-		void update(Time time, const Camera& camera);
+		void update(Time time, const Camera& camera, const SceneEditorInputState& inputState);
 		void draw(Painter& painter);
 		void setSelectedEntity(const std::optional<EntityRef>& entity);
 		void setTool(SceneEditorTool tool);

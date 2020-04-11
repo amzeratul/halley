@@ -12,6 +12,9 @@ SceneEditorCanvas::SceneEditorCanvas(String id, Resources& resources, const Hall
 	border.setImage(resources, "whitebox.png").setColour(Colour4f());
 	surface = std::make_shared<RenderSurface>(*api.video, resources);
 
+	keyboard = api.input->getKeyboard();
+	mouse = api.input->getMouse();
+	
 	setHandle(UIEventType::MouseWheel, [this](const UIEvent& event)
 	{
 		onMouseWheel(event);
@@ -68,19 +71,44 @@ bool SceneEditorCanvas::isFocusLocked() const
 
 void SceneEditorCanvas::pressMouse(Vector2f mousePos, int button)
 {
-	if (button == 0) {
-		dragging = true;
-		lastMousePos = mousePos;
+	switch (button) {
+	case 0:
+		inputState.leftClickPressed = inputState.leftClickHeld = true;
+		break;
+	case 1:
+		inputState.middleClickPressed = inputState.middleClickHeld = true;
+		break;
+	case 2:
+		inputState.rightClickPressed = inputState.rightClickHeld = true;
+		break;
+	}
+	
+	if (!dragging) {
+		if (button == 1) {
+			dragButton = button;
+			dragging = true;
+			lastMousePos = mousePos;
+		}
 	}
 }
 
 void SceneEditorCanvas::releaseMouse(Vector2f mousePos, int button)
 {
-	if (button == 0) {
-		if (dragging) {
-			onMouseOver(mousePos);
-			dragging = false;
-		}
+	switch (button) {
+	case 0:
+		inputState.leftClickHeld = false;
+		break;
+	case 1:
+		inputState.middleClickHeld = false;
+		break;
+	case 2:
+		inputState.rightClickHeld = false;
+		break;
+	}
+
+	if (button == dragButton && dragging) {
+		onMouseOver(mousePos);
+		dragging = false;
 	}
 }
 
@@ -137,11 +165,13 @@ void SceneEditorCanvas::updateInterface(Time t)
 	if (errorState) {
 		unloadDLL();
 	}
-	
+
 	if (interface) {
+		updateInputState();
 		guardedRun([&] () {
-			interface->update(t);
+			interface->update(t, inputState);
 		});
+		clearInputState();
 	}
 }
 
@@ -221,4 +251,20 @@ void SceneEditorCanvas::guardedRun(const std::function<void()>& f) const
 		Logger::logError("Unknown error in SceneEditorCanvas, probably from game dll");
 		errorState = true;
 	}
+}
+
+void SceneEditorCanvas::updateInputState()
+{
+	inputState.ctrlHeld = keyboard->isButtonDown(Keys::LCtrl) || keyboard->isButtonDown(Keys::RCtrl);
+	inputState.shiftHeld = keyboard->isButtonDown(Keys::LShift) || keyboard->isButtonDown(Keys::RShift);
+
+	inputState.rawMousePos = mouse->getPosition();
+	inputState.viewRect = getRect();
+}
+
+void SceneEditorCanvas::clearInputState()
+{
+	inputState.leftClickPressed = false;
+	inputState.middleClickPressed = false;
+	inputState.rightClickPressed = false;
 }

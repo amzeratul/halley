@@ -91,23 +91,25 @@ void UIRoot::updateMouse(spInputDevice mouse)
 		underMouse = currentMouseOver.lock();
 	}
 
-	// Click
-	if (mouse->isButtonPressed(0)) {
-		mouseHeld = true;
-		setFocus(underMouse);
-		if (underMouse) {
-			mouse->clearButtonPress(0);
-			underMouse->pressMouse(mousePos, 0);
+	for (int i = 0; i < 3; ++i) {
+		// Click
+		if (!anyMouseButtonHeld && mouse->isButtonPressed(i)) {
+			anyMouseButtonHeld = true;
+			setFocus(underMouse);
+			if (underMouse) {
+				mouse->clearButtonPress(i);
+				underMouse->pressMouse(mousePos, i);
+			}
 		}
-	}
 
-	// Release click
-	auto focus = currentFocus.lock();
-	if (mouse->isButtonReleased(0)) {
-		mouseHeld = false;
-		if (focus) {
-			focus->releaseMouse(mousePos, 0);
-			mouse->clearButtonRelease(0);
+		// Release click
+		if (anyMouseButtonHeld && mouse->isButtonReleased(i)) {
+			anyMouseButtonHeld = false;
+			auto focus = currentFocus.lock();
+			if (focus) {
+				focus->releaseMouse(mousePos, i);
+				mouse->clearButtonRelease(i);
+			}
 		}
 	}
 
@@ -119,7 +121,7 @@ void UIRoot::updateMouse(spInputDevice mouse)
 
 	// If the mouse is held, but it's over a different component from the focused one, don't mouse over anything
 	auto activeMouseOver = underMouse;
-	if (mouseHeld && focus) {
+	if (auto focus = currentFocus.lock(); anyMouseButtonHeld && focus) {
 		if (focus != underMouse) {
 			activeMouseOver.reset();
 		}

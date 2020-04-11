@@ -9,7 +9,6 @@ namespace Halley {
 	public:
 		explicit SelectedBoundsGizmo(Resources& resources);
 		
-		void update(Time time) override;
 		void draw(Painter& painter) const override;
 
 	protected:

@@ -6,6 +6,7 @@
 class Transform2DComponent;
 
 namespace Halley {
+	struct SceneEditorInputState;
 	class Camera;
 	class Painter;
 
@@ -13,7 +14,7 @@ namespace Halley {
 	public:
 		virtual ~SceneEditorGizmo() = default;
 
-		virtual void update(Time time);
+		virtual void update(Time time, const SceneEditorInputState& inputState);
 		virtual void draw(Painter& painter) const;
 		void setSelectedEntity(const std::optional<EntityRef>& entity);
 

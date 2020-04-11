@@ -29,7 +29,7 @@ void SceneEditor::init(SceneEditorContext& context)
 	gizmoCollection = std::make_unique<SceneEditorGizmoCollection>(*context.editorResources);
 }
 
-void SceneEditor::update(Time t)
+void SceneEditor::update(Time t, SceneEditorInputState inputState)
 {
 	// Update world
 	world->step(TimeLine::FixedUpdate, t);
@@ -41,8 +41,11 @@ void SceneEditor::update(Time t)
 	auto& transformComponent = cameraEntity.getComponent<Transform2DComponent>();
 	camera.setPosition(transformComponent.getGlobalPosition()).setZoom(cameraComponent.zoom);
 
+	// Update input state
+	inputState.mousePos = camera.screenToWorld(inputState.rawMousePos, inputState.viewRect);
+
 	// Update gizmos
-	gizmoCollection->update(t, camera);
+	gizmoCollection->update(t, camera, inputState);
 }
 
 void SceneEditor::render(RenderContext& rc)

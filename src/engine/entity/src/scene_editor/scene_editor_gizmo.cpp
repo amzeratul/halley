@@ -3,7 +3,7 @@
 #include "halley/core/graphics/camera.h"
 using namespace Halley;
 
-void SceneEditorGizmo::update(Time time)
+void SceneEditorGizmo::update(Time time, const SceneEditorInputState& inputState)
 {}
 
 void SceneEditorGizmo::draw(Painter& painter) const

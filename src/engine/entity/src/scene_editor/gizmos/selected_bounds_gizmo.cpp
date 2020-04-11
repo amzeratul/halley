@@ -11,9 +11,6 @@ SelectedBoundsGizmo::SelectedBoundsGizmo(Resources& resources)
 	material = std::make_shared<Material>(resources.get<MaterialDefinition>("Halley/InvertLine"));
 }
 
-void SelectedBoundsGizmo::update(Time time)
-{}
-
 void SelectedBoundsGizmo::draw(Painter& painter) const
 {
 	if (bounds) {

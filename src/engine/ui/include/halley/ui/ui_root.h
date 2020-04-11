@@ -65,7 +65,7 @@ namespace Halley {
 		Vector2f overscan;
 
 		AudioAPI* audio;
-		bool mouseHeld = false;
+		bool anyMouseButtonHeld = false;
 
 		std::function<Vector2f(Vector2f)> mouseRemap;
 

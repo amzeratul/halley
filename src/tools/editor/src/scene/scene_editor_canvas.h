@@ -43,7 +43,12 @@ namespace Halley {
 
 		std::shared_ptr<RenderSurface> surface;
 
+		std::shared_ptr<InputKeyboard> keyboard;
+		std::shared_ptr<InputDevice> mouse;
+		SceneEditorInputState inputState;
+
 		bool dragging = false;
+		int dragButton = 0;
 		Vector2f lastMousePos;
 
 		void updateInterface(Time t);
@@ -54,5 +59,7 @@ namespace Halley {
 		void reloadDLL();
 
 		void guardedRun(const std::function<void()>& f) const;
+		void updateInputState();
+		void clearInputState();
 	};
 }

@@ -50,13 +50,30 @@ namespace Halley {
         Scale,
         Polygon
     };
+
+	struct SceneEditorInputState {
+		// Filled on editor side
+		bool leftClickPressed = false;
+		bool leftClickHeld = false;
+		bool middleClickPressed = false;
+		bool middleClickHeld = false;
+		bool rightClickPressed = false;
+		bool rightClickHeld = false;
+		bool shiftHeld = false;
+		bool ctrlHeld = false;
+		Vector2f rawMousePos;
+		Rect4f viewRect;
+
+		// Filled on SceneEditor side
+        Vector2f mousePos;
+    };
 	
     class ISceneEditor {
     public:
         virtual ~ISceneEditor() = default;
 
         virtual void init(SceneEditorContext& context) = 0;
-        virtual void update(Time t) = 0;
+        virtual void update(Time t, SceneEditorInputState inputState) = 0;
         virtual void render(RenderContext& rc) = 0;
     	
         virtual World& getWorld() = 0;
