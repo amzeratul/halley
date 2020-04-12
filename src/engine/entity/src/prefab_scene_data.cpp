@@ -37,6 +37,7 @@ void PrefabSceneData::reloadEntity(const String& id)
 {
 	if (!id.isEmpty()) {
 		reloadEntity(id, findEntity(prefab.getRoot(), id));
+		world.spawnPending();
 	}
 }
 
@@ -110,15 +111,22 @@ void PrefabSceneData::reparentEntity(const String& entityId, const String& newPa
 
 	// WARNING: ALL OF THESE OPERATIONS CAN INVALIDATE OLD POINTERS, DON'T KEEP REFERENCES
 	if (newParentId == oldParentId) {
-		moveChild(findChildListFor(newParentId), entityId, size_t(childIndex));
+		moveChild(findChildListFor(newParentId), entityId, size_t(childIndex)); // INVALIDATES REFERENCES
+		reloadEntity(newParentId.isEmpty() ? entityId : newParentId);
 	} else {
+		// The order is very important here
 		// Don't collapse into one sequence point! findChildListFor(newParentId) MUST execute after removeChild()!
-		auto child = removeChild(findChildListFor(oldParentId), entityId);
-		addChild(findChildListFor(newParentId), childIndex, std::move(child));
-	}
+		auto child = removeChild(findChildListFor(oldParentId), entityId); // INVALIDATES REFERENCES
 
-	reloadEntity(oldParentId);
-	reloadEntity(newParentId);
+		// Reload before proceeding, so it can delete from root if needed
+		reloadEntity(oldParentId.isEmpty() ? entityId : oldParentId);
+
+		// Add to new parent
+		addChild(findChildListFor(newParentId), childIndex, std::move(child)); // INVALIDATES REFERENCES
+
+		// Reload destination
+		reloadEntity(newParentId.isEmpty() ? entityId : newParentId);
+	}
 }
 
 bool PrefabSceneData::isSingleRoot()
