@@ -137,7 +137,7 @@ void SceneEditorWindow::load()
 
 void SceneEditorWindow::selectEntity(const String& id)
 {
-	auto& entityData = sceneData->getEntityData(id);
+	auto& entityData = sceneData->getEntityData(id).data;
 	const bool changed = entityEditor->loadEntity(id, entityData, false);
 	if (changed) {
 		canvas->getInterface().setSelectedEntity(UUID(id), entityData);
@@ -170,7 +170,7 @@ void SceneEditorWindow::markModified()
 
 void SceneEditorWindow::onEntityModified(const String& id)
 {
-	entityList->onEntityModified(id, sceneData->getEntityData(id));
+	entityList->onEntityModified(id, sceneData->getEntityData(id).data);
 	sceneData->reloadEntity(id);
 	markModified();
 }
@@ -183,16 +183,21 @@ void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const
 void SceneEditorWindow::addEntity()
 {
 	if (!currentEntityId.isEmpty()) {
-		const String& parentId = currentEntityId;
+		const String& tryParentId = currentEntityId;
+		const auto res = sceneData->getEntityData(tryParentId);
+		const bool isParentPrefab = res.data.hasKey("prefab");
+		const String& parentId = isParentPrefab ? res.parentId : tryParentId;
+		ConfigNode& parentData = isParentPrefab ? sceneData->getEntityData(parentId).data : res.data;
 
 		const auto newId = UUID::generate().toString();
 		
-		auto& data = sceneData->getEntityData(parentId);
 		auto newEntityData = ConfigNode(ConfigNode::MapType());
 		newEntityData["name"] = "New Entity";
 		newEntityData["uuid"] = newId;
+		newEntityData["children"] = ConfigNode::SequenceType();
+		newEntityData["components"] = ConfigNode::SequenceType();
 
-		auto& children = data["children"];
+		auto& children = parentData["children"];
 		if (children.getType() != ConfigNodeType::Sequence) {
 			children = ConfigNode::SequenceType();
 		}
@@ -212,7 +217,7 @@ void SceneEditorWindow::removeEntity()
 		const String& parentId = findParent(currentEntityId);
 
 		if (!parentId.isEmpty()) {
-			auto& data = sceneData->getEntityData(parentId);
+			auto& data = sceneData->getEntityData(parentId).data;
 			auto& children = data["children"].asSequence();
 
 			children.erase(std::remove_if(children.begin(), children.end(), [&] (const ConfigNode& child)

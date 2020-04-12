@@ -15,18 +15,23 @@ PrefabSceneData::PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> 
 {
 }
 
-ConfigNode& PrefabSceneData::getEntityData(const String& id)
+ISceneData::EntityData PrefabSceneData::getEntityData(const String& id)
 {
-	const auto data = findEntity(prefab.getRoot(), id);
+	const auto& [data, parentData] = findEntityAndParent(prefab.getRoot(), nullptr, id);
 	if (!data) {
 		throw Exception("Entity data not found for \"" + id + "\"", HalleyExceptions::Entity);
 	}
-	return *data;
+
+	String parentId;
+	if (parentData) {
+		parentId = (*parentData)["uuid"].asString();
+	}
+	return EntityData(*data, parentId);
 }
 
 void PrefabSceneData::reloadEntity(const String& id)
 {
-	reloadEntity(id, getEntityData(id));
+	reloadEntity(id, getEntityData(id).data);
 }
 
 void PrefabSceneData::reloadEntity(const String& id, ConfigNode& data)

@@ -14,7 +14,7 @@ UITreeList::UITreeList(String id, UIStyle style)
 	setupEvents();
 }
 
-void UITreeList::addTreeItem(const String& id, const String& parentId, const LocalisedString& label, const String& labelStyleName)
+void UITreeList::addTreeItem(const String& id, const String& parentId, const LocalisedString& label, const String& labelStyleName, bool forceLeaf)
 {
 	auto listItem = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 
@@ -39,7 +39,7 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 	listItem->setDraggableSubWidget(labelWidget.get());
 
 	// Logical item
-	auto treeItem = std::make_unique<UITreeListItem>(id, listItem, treeControls, labelWidget);
+	auto treeItem = std::make_unique<UITreeListItem>(id, listItem, treeControls, labelWidget, forceLeaf);
 	auto& parentItem = getItemOrRoot(parentId);
 	parentItem.addChild(std::move(treeItem));
 
@@ -322,11 +322,12 @@ void UITreeListControls::setupUI()
 
 UITreeListItem::UITreeListItem() = default;
 
-UITreeListItem::UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeControls, std::shared_ptr<UILabel> label)
+UITreeListItem::UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeControls, std::shared_ptr<UILabel> label, bool forceLeaf)
 	: id(std::move(id))
 	, listItem(std::move(listItem))
 	, label(std::move(label))
 	, treeControls(std::move(treeControls))
+	, forceLeaf(forceLeaf)
 {}
 
 UITreeListItem* UITreeListItem::tryFindId(const String& id)
@@ -347,6 +348,8 @@ UITreeListItem* UITreeListItem::tryFindId(const String& id)
 
 void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item)
 {
+	Expects(!forceLeaf);
+	
 	if (children.empty()) {
 		expanded = true;
 	}
@@ -356,6 +359,8 @@ void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item)
 
 void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item, size_t pos)
 {
+	Expects(!forceLeaf);
+	
 	if (children.empty()) {
 		expanded = true;
 	}
@@ -365,6 +370,8 @@ void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item, size_t pos)
 
 std::unique_ptr<UITreeListItem> UITreeListItem::removeChild(const String& id)
 {
+	Expects(!forceLeaf);
+	
 	const size_t n = children.size();
 	for (size_t i = 0; i < n; ++i) {
 		if (children[i]->id == id) {
@@ -379,6 +386,8 @@ std::unique_ptr<UITreeListItem> UITreeListItem::removeChild(const String& id)
 
 void UITreeListItem::moveChild(size_t startIndex, size_t targetIndex)
 {
+	Expects(!forceLeaf);
+	
 	// If moving forwards, subtract one to account for the fact that the currently occupied slot will be removed
 	const size_t finalIndex = targetIndex > startIndex ? targetIndex - 1 : targetIndex;
 
@@ -435,11 +444,15 @@ std::optional<UITreeListItem::FindPositionResult> UITreeListItem::findPosition(V
 		const float y = pos.y;
 		
 		if (y >= y0 && y < y1) {
-			if (y < y0 + h / 4) {
+			const float threshold0 = forceLeaf ? y0 + h / 2 : y0 + h / 4;
+			const float threshold1 = forceLeaf ? y0 + h / 2 : y0 + 3 * h / 4;
+			
+			if (y < threshold0) {
 				return FindPositionResult(PositionType::Before, this, Rect4f(x0, y0, x1 - x0, 0));
-			} else if (y > y0 + 3 * h / 4) {
+			} else if (y > threshold1 || forceLeaf) {
 				return FindPositionResult(PositionType::After, this, Rect4f(x0, y1, x1 - x0, 0));
 			} else {
+				assert(!forceLeaf);
 				return FindPositionResult(PositionType::OnTop, this, Rect4f(x0, y0, x1 - x0, y1 - y0));
 			}
 		}
@@ -490,6 +503,11 @@ std::shared_ptr<UIListItem> UITreeListItem::getListItem() const
 const std::vector<std::unique_ptr<UITreeListItem>>& UITreeListItem::getChildren() const
 {
 	return children;
+}
+
+bool UITreeListItem::canHaveChildren() const
+{
+	return !forceLeaf;
 }
 
 void UITreeListItem::updateTree(UITreeList& treeList)

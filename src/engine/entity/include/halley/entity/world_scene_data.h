@@ -8,7 +8,7 @@ namespace Halley {
     public:
     	explicit WorldSceneData(World& world);
 
-        ConfigNode& getEntityData(const String& id) override;
+        EntityData getEntityData(const String& id) override;
         void reloadEntity(const String& id) override;
         EntityTree getEntityTree() const override;
         void reparentEntity(const String& entityId, const String& newParentId, int childIndex) override;
