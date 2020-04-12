@@ -61,7 +61,7 @@ namespace Halley {
         std::unique_ptr<UITreeListItem> removeFromTree(const String& id);
         void updateTree(UITreeList& treeList);
     	void collectItems(std::vector<std::shared_ptr<UIListItem>>& items);
-    	std::optional<FindPositionResult> findPosition(Vector2f pos) const;
+    	std::optional<FindPositionResult> findPosition(UITreeList& tree, Vector2f pos) const;
     	
         const String& getId() const;
     	const String& getParentId() const;
@@ -84,6 +84,7 @@ namespace Halley {
     	bool forceLeaf = false;
 
     	void doUpdateTree(UITreeList& treeList, std::vector<int>& itemsLeftPerDepth, bool treeExpanded);
+        std::optional<FindPositionResult> doFindPosition(UITreeList& tree, Vector2f pos, int depth) const;
     };
 	
     class UITreeList : public UIList {
@@ -97,6 +98,11 @@ namespace Halley {
         void clear() override;
         void sortItems();
 
+    	void setSingleRoot(bool enabled);
+    	bool isSingleRoot() const;
+
+        bool canDragListItem(const UIListItem& listItem) override;
+    	
     protected:
         void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
@@ -107,6 +113,7 @@ namespace Halley {
     	UITreeListItem root;
     	Sprite insertCursor;
     	bool needsRefresh = true;
+    	bool singleRoot = false;
 
     	UITreeListItem& getItemOrRoot(const String& id);
         void setupEvents();

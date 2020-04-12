@@ -18,6 +18,7 @@ void EntityList::setSceneEditorWindow(SceneEditorWindow& editor)
 void EntityList::setSceneData(std::shared_ptr<ISceneData> data)
 {
 	sceneData = std::move(data);
+	list->setSingleRoot(sceneData->isSingleRoot());
 	refreshList();
 }
 

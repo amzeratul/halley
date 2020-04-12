@@ -121,6 +121,11 @@ void PrefabSceneData::reparentEntity(const String& entityId, const String& newPa
 	reloadEntity(newParentId);
 }
 
+bool PrefabSceneData::isSingleRoot()
+{
+	return prefab.getRoot().getType() != ConfigNodeType::Sequence;
+}
+
 ConfigNode::SequenceType& PrefabSceneData::findChildListFor(const String& id)
 {
 	auto& root = prefab.getRoot();

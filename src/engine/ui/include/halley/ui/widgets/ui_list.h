@@ -49,6 +49,7 @@ namespace Halley {
 		void setDragEnabled(bool drag);
 		bool isDragOutsideEnabled() const;
 		void setDragOutsideEnabled(bool dragOutside);
+		virtual bool canDragListItem(const UIListItem& listItem);
 
 		bool isSingleClickAccept() const;
 		void setSingleClickAccept(bool enabled);

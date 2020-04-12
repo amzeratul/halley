@@ -259,6 +259,11 @@ void UIList::setDragOutsideEnabled(bool dragOutside)
 	dragOutsideEnabled = dragOutside;
 }
 
+bool UIList::canDragListItem(const UIListItem& listItem)
+{
+	return isDragEnabled();
+}
+
 void UIList::setUniformSizedItems(bool enabled)
 {
 	uniformSizedItems = enabled;
@@ -549,7 +554,7 @@ void UIListItem::update(Time t, bool moved)
 
 void UIListItem::onMouseOver(Vector2f mousePos)
 {
-	if (parent.isDragEnabled() && held && (mousePos - mouseStartPos).length() > 3.0f) {
+	if (held && parent.canDragListItem(*this) && (mousePos - mouseStartPos).length() > 3.0f) {
 		dragged = true;
 		setNoClipChildren(parent.isDragOutsideEnabled());
 	}

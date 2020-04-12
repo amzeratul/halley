@@ -136,5 +136,6 @@ namespace Halley {
 		virtual void reloadEntity(const String& id) = 0;
 		virtual EntityTree getEntityTree() const = 0;
 		virtual void reparentEntity(const String& entityId, const String& newParentId, int childIndex) = 0;
+        virtual bool isSingleRoot() = 0;
 	};
 }

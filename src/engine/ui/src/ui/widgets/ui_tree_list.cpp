@@ -110,7 +110,7 @@ void UITreeList::onItemDragging(UIListItem& item, int index, Vector2f pos)
 		elem->setExpanded(false);
 	}
 
-	const auto res = root.findPosition(pos + item.getRect().getSize() / 2);
+	const auto res = root.findPosition(*this, pos + item.getRect().getSize() / 2);
 	if (res) {
 		const auto& resData = res.value();
 		auto rect = resData.rect;
@@ -125,7 +125,7 @@ void UITreeList::onItemDragging(UIListItem& item, int index, Vector2f pos)
 
 void UITreeList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
 {
-	auto res = root.findPosition(pos + item.getRect().getSize() / 2);
+	auto res = root.findPosition(*this, pos + item.getRect().getSize() / 2);
 	if (res) {
 		const auto& resData = res.value();
 
@@ -224,6 +224,21 @@ void UITreeList::sortItems()
 
 		return itemA->getAbsoluteIndex() < itemB->getAbsoluteIndex();
 	});
+}
+
+void UITreeList::setSingleRoot(bool enabled)
+{
+	singleRoot = enabled;
+}
+
+bool UITreeList::isSingleRoot() const
+{
+	return singleRoot;
+}
+
+bool UITreeList::canDragListItem(const UIListItem& listItem)
+{
+	return isDragEnabled() && (!singleRoot || listItem.getAbsoluteIndex() != 0);
 }
 
 UITreeListControls::UITreeListControls(String id, UIStyle style)
@@ -432,9 +447,16 @@ std::unique_ptr<UITreeListItem> UITreeListItem::removeFromTree(const String& id)
 	return {};
 }
 
-std::optional<UITreeListItem::FindPositionResult> UITreeListItem::findPosition(Vector2f pos) const
+std::optional<UITreeListItem::FindPositionResult> UITreeListItem::findPosition(UITreeList& tree, Vector2f pos) const
+{
+	return doFindPosition(tree, pos, 0);
+}
+
+std::optional<UITreeListItem::FindPositionResult> UITreeListItem::doFindPosition(UITreeList& tree, Vector2f pos, int depth) const
 {
 	if (listItem) {
+		const bool isSingleRoot = depth <= 1 && tree.isSingleRoot();
+	
 		const auto r = listItem->getRect();
 		const auto b = listItem->getClickableInnerBorder();
 		const float x0 = r.getLeft() + b.x;
@@ -445,12 +467,21 @@ std::optional<UITreeListItem::FindPositionResult> UITreeListItem::findPosition(V
 		const float y = pos.y;
 		
 		if (y >= y0 && y < y1) {
-			const float threshold0 = forceLeaf ? y0 + h / 2 : y0 + h / 4;
-			const float threshold1 = forceLeaf ? y0 + h / 2 : y0 + 3 * h / 4;
+			float threshold0, threshold1;
+			if (forceLeaf) {
+				threshold0 = y0 + h / 2;
+				threshold1 = y0 + h / 2;
+			} else if (isSingleRoot) {
+				threshold0 = y1;
+				threshold1 = y0;
+			} else {
+				threshold0 = y0 + h / 4;
+				threshold1 = y0 + 3 * h / 4;
+			}			
 			
-			if (y < threshold0) {
+			if (y < threshold0 && !isSingleRoot) {
 				return FindPositionResult(PositionType::Before, this, Rect4f(x0, y0, x1 - x0, 0));
-			} else if (y > threshold1 || forceLeaf) {
+			} else if ((y > threshold1 && !isSingleRoot) || forceLeaf) {
 				return FindPositionResult(PositionType::After, this, Rect4f(x0, y1, x1 - x0, 0));
 			} else {
 				assert(!forceLeaf);
@@ -461,7 +492,7 @@ std::optional<UITreeListItem::FindPositionResult> UITreeListItem::findPosition(V
 
 	if (expanded) {
 		for (auto& c: children) {
-			auto res = c->findPosition(pos);
+			auto res = c->doFindPosition(tree, pos, depth + 1);
 			if (res) {
 				return *res;
 			}

@@ -3,7 +3,7 @@
 #include "halley/core/game/scene_editor_interface.h"
 
 namespace Halley {
-    class PrefabSceneData : public ISceneData {
+    class PrefabSceneData final : public ISceneData {
     public:
     	PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> factory, World& world, Resources& gameResources);
 
@@ -11,6 +11,7 @@ namespace Halley {
         void reloadEntity(const String& id) override;
         EntityTree getEntityTree() const override;
         void reparentEntity(const String& entityId, const String& newParentId, int childIndex) override;
+        bool isSingleRoot() override;
     	
     private:
     	Prefab& prefab;

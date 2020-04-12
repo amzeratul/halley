@@ -26,3 +26,8 @@ void WorldSceneData::reparentEntity(const String& entityId, const String& newPar
 {
 	// TODO
 }
+
+bool WorldSceneData::isSingleRoot()
+{
+	return false;
+}
