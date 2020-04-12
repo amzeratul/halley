@@ -147,7 +147,7 @@ void SceneEditorWindow::selectEntity(const String& id)
 		if (tree.entityId.isEmpty()) {
 			if (tree.children.empty()) {
 				ConfigNode empty;
-				entityEditor->loadEntity("", empty, false);
+				entityEditor->loadEntity("", empty, nullptr, false);
 				return;
 			} else {
 				actualId = tree.children[0].entityId;
@@ -158,7 +158,13 @@ void SceneEditorWindow::selectEntity(const String& id)
 	}
 
 	auto& entityData = sceneData->getEntityData(actualId).data;
-	const bool changed = entityEditor->loadEntity(actualId, entityData, false);
+	const ConfigNode* prefabData = nullptr;
+	String prefabName = entityData["prefab"].asString("");
+	if (!prefabName.isEmpty()) {
+		prefabData = &project.getGameResources().get<Prefab>(prefabName)->getRoot();
+	}
+	
+	const bool changed = entityEditor->loadEntity(actualId, entityData, prefabData, false);
 	if (changed) {
 		canvas->getInterface().setSelectedEntity(UUID(actualId), entityData);
 		currentEntityId = actualId;

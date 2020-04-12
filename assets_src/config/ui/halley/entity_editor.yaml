@@ -7,7 +7,7 @@ children:
   proportion: 1
   border: [0, 0, 4, 0]
   children:
-  - widget: { class: image, image: "ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#754589" }
+  - widget: { id: entityHeader, class: image, image: "ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#754589" }
     sizer: { type: vertical }
     border: [0, 0, 0, 4]
     children:
@@ -22,6 +22,22 @@ children:
         children:
         - widget: { id: "", class: label, text: "Name", style: "labelLight" }
       - widget: { id: entityName, class: textInput, size: [200, 22], style: inputThin }
+        proportion: 1
+  - widget: { id: prefabHeader, class: image, image: "ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#754589" }
+    sizer: { type: vertical }
+    border: [0, 0, 0, 4]
+    children:
+    - widget: { id: "", class: label, text: "Prefab" }
+      fill: centre
+    - widget: { id: prefabFields, class: widget }
+      border: [1, 4, 1, 1]
+      sizer: { type: grid, gap: 2, columns: 2, columnProportion: [0, 1] }
+      fill: fill
+      children:
+      - widget: { class: widget, size: [100, 20] }
+        children:
+        - widget: { id: "", class: label, text: "Prefab", style: "labelLight" }
+      - widget: { id: prefabName, class: textInput, size: [200, 22], style: inputThin }
         proportion: 1
   - widget: { id: fields, class: widget }
     sizer: { type: vertical, gap: 8 }

@@ -556,7 +556,8 @@ bool ConfigNode::hasKey(const String& key) const
 {
 	if (type == ConfigNodeType::Map) {
 		auto& map = asMap();
-		return map.find(key) != map.end();
+		auto iter = map.find(key);
+		return iter != map.end() && iter->second.getType() != ConfigNodeType::Undefined;
 	} else {
 		return false;
 	}

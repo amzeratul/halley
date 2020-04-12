@@ -69,7 +69,9 @@ void EntityList::refreshList()
 
 void EntityList::onEntityModified(const String& id, const ConfigNode& node)
 {
-	list->setLabel(id, LocalisedString::fromUserString(node["name"].asString("")));
+	if (!node.hasKey("prefab")) {
+		list->setLabel(id, LocalisedString::fromUserString(node["name"].asString("")));
+	}
 }
 
 void EntityList::onEntityAdded(const String& id, const String& parentId, const ConfigNode& data)
