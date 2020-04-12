@@ -31,6 +31,7 @@ void SceneEditorWindow::loadScene(const String& name)
 	unloadScene();
 	
 	if (!name.isEmpty() && canvas->isLoaded()) {
+		sceneName = name;
 		auto& interface = canvas->getInterface();
 		auto& world = interface.getWorld();
 
@@ -40,12 +41,8 @@ void SceneEditorWindow::loadScene(const String& name)
 
 		// Spawn scene
 		entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
-		auto entity = entityFactory->createEntity(prefab->getRoot());
+		auto entities = entityFactory->createScene(prefab->getRoot());
 		interface.spawnPending();
-
-		// Get scene data
-		sceneId = entity.getEntityId();
-		sceneName = name;
 
 		// Setup editors
 		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, world, project.getGameResources());
@@ -57,7 +54,9 @@ void SceneEditorWindow::loadScene(const String& name)
 		interface.setTool(SceneEditorTool::Translate);
 
 		// Show root
-		panCameraToEntity(entity.getUUID().toString());
+		if (!entities.empty()) {
+			panCameraToEntity(entities.at(0).getUUID().toString());
+		}		
 	}
 }
 
@@ -65,13 +64,18 @@ void SceneEditorWindow::unloadScene()
 {
 	Expects(canvas);
 	
-	if (canvas->isLoaded() && sceneId.isValid()) {
-		auto& world = canvas->getInterface().getWorld();
-		world.destroyEntity(sceneId);
+	if (canvas->isLoaded()) {
+		auto& interface = canvas->getInterface();
+		auto& world = interface.getWorld();
+		const auto cameraId = interface.getCameraId();
+		for (auto& e: world.getTopLevelEntities()) {
+			if (e.getEntityId() != cameraId) {
+				world.destroyEntity(e);
+			}
+		}		
 		world.spawnPending();
 	}
 	sceneName = "";
-	sceneId = EntityId();
 	entityFactory.reset();
 	sceneData.reset();
 }
@@ -137,11 +141,27 @@ void SceneEditorWindow::load()
 
 void SceneEditorWindow::selectEntity(const String& id)
 {
-	auto& entityData = sceneData->getEntityData(id).data;
-	const bool changed = entityEditor->loadEntity(id, entityData, false);
+	String actualId = id;
+	if (actualId.isEmpty()) {
+		const auto& tree = sceneData->getEntityTree();
+		if (tree.entityId.isEmpty()) {
+			if (tree.children.empty()) {
+				ConfigNode empty;
+				entityEditor->loadEntity("", empty, false);
+				return;
+			} else {
+				actualId = tree.children[0].entityId;
+			}
+		} else {
+			actualId = tree.entityId;
+		}
+	}
+
+	auto& entityData = sceneData->getEntityData(actualId).data;
+	const bool changed = entityEditor->loadEntity(actualId, entityData, false);
 	if (changed) {
-		canvas->getInterface().setSelectedEntity(UUID(id), entityData);
-		currentEntityId = id;
+		canvas->getInterface().setSelectedEntity(UUID(actualId), entityData);
+		currentEntityId = actualId;
 	}
 }
 
@@ -168,9 +188,28 @@ void SceneEditorWindow::markModified()
 	getWidget("saveButton")->setEnabled(true);
 }
 
+void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId)
+{
+	auto& data = sceneData->getEntityData(id).data;
+	entityList->onEntityAdded(id, parentId, data);
+	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
+	selectEntity(id);
+	markModified();
+}
+
+void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId)
+{
+	entityList->onEntityRemoved(id, parentId);
+	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
+	selectEntity(parentId);
+	markModified();
+}
+
 void SceneEditorWindow::onEntityModified(const String& id)
 {
-	entityList->onEntityModified(id, sceneData->getEntityData(id).data);
+	if (!id.isEmpty()) {
+		entityList->onEntityModified(id, sceneData->getEntityData(id).data);
+	}
 	sceneData->reloadEntity(id);
 	markModified();
 }
@@ -178,6 +217,7 @@ void SceneEditorWindow::onEntityModified(const String& id)
 void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
 {
 	entityEditor->onFieldChangedByGizmo(componentName, fieldName);
+	markModified();
 }
 
 void SceneEditorWindow::addEntity()
@@ -187,49 +227,61 @@ void SceneEditorWindow::addEntity()
 		const auto res = sceneData->getEntityData(tryParentId);
 		const bool isParentPrefab = res.data.hasKey("prefab");
 		const String& parentId = isParentPrefab ? res.parentId : tryParentId;
-		ConfigNode& parentData = isParentPrefab ? sceneData->getEntityData(parentId).data : res.data;
+		addEntity(parentId);
+	}
+}
 
-		const auto newId = UUID::generate().toString();
-		
-		auto newEntityData = ConfigNode(ConfigNode::MapType());
-		newEntityData["name"] = "New Entity";
-		newEntityData["uuid"] = newId;
-		newEntityData["children"] = ConfigNode::SequenceType();
-		newEntityData["components"] = ConfigNode::SequenceType();
+void SceneEditorWindow::addEntity(const String& parentId)
+{
+	const auto newId = UUID::generate().toString();
 
+	auto newEntityData = ConfigNode(ConfigNode::MapType());
+	newEntityData["name"] = "New Entity";
+	newEntityData["uuid"] = newId;
+	newEntityData["children"] = ConfigNode::SequenceType();
+	newEntityData["components"] = ConfigNode::SequenceType();
+
+	if (parentId.isEmpty()) {
+		// Should only be able to place items on the root if it's a scene
+		auto& root = sceneData->getEntityData("").data;
+		root.asSequence().emplace_back(ConfigNode(newEntityData));
+	} else {
+		ConfigNode& parentData = sceneData->getEntityData(parentId).data;
 		auto& children = parentData["children"];
 		if (children.getType() != ConfigNodeType::Sequence) {
 			children = ConfigNode::SequenceType();
 		}
-		// Store a copy (keep original for updates below)
 		children.asSequence().emplace_back(ConfigNode(newEntityData));
-
-		entityList->onEntityAdded(newId, parentId, newEntityData);
-		onEntityModified(parentId);
-		selectEntity(newId);
 	}
+
+	onEntityAdded(newId, parentId);
 }
 
 void SceneEditorWindow::removeEntity()
 {
 	if (!currentEntityId.isEmpty()) {
-		const String& targetId = currentEntityId;
-		const String& parentId = findParent(currentEntityId);
-
-		if (!parentId.isEmpty()) {
-			auto& data = sceneData->getEntityData(parentId).data;
-			auto& children = data["children"].asSequence();
-
-			children.erase(std::remove_if(children.begin(), children.end(), [&] (const ConfigNode& child)
-			{
-				return child["uuid"].asString("") == targetId;
-			}), children.end());
-
-			entityList->onEntityRemoved(targetId, parentId);
-			onEntityModified(parentId);
-			selectEntity(parentId);
-		}
+		removeEntity(currentEntityId);
 	}
+}
+
+void SceneEditorWindow::removeEntity(const String& targetId)
+{
+	const String& parentId = findParent(currentEntityId);
+
+	auto& data = sceneData->getEntityData(parentId).data;
+	const bool isSceneRoot = parentId.isEmpty() && data.getType() == ConfigNodeType::Sequence;
+	if (parentId.isEmpty() && !isSceneRoot) {
+		// Don't delete root of prefab
+		return;
+	}
+
+	auto& children = isSceneRoot ? data.asSequence() : data["children"].asSequence();
+	children.erase(std::remove_if(children.begin(), children.end(), [&] (const ConfigNode& child)
+	{
+		return child["uuid"].asString("") == targetId;
+	}), children.end());
+
+	onEntityRemoved(targetId, parentId);
 }
 
 String SceneEditorWindow::findParent(const String& entityId) const
@@ -257,7 +309,14 @@ const String* SceneEditorWindow::findParent(const String& entityId, const Entity
 
 void SceneEditorWindow::preparePrefab(Prefab& prefab)
 {
-	preparePrefabEntity(prefab.getRoot());
+	auto& root = prefab.getRoot();
+	if (root.getType() == ConfigNodeType::Sequence) {
+		for (auto& rootElement: root.asSequence()) {
+			preparePrefabEntity(rootElement);
+		}
+	} else {
+		preparePrefabEntity(prefab.getRoot());
+	}
 }
 
 void SceneEditorWindow::preparePrefabEntity(ConfigNode& node)

@@ -24,9 +24,11 @@ namespace Halley {
 		EntityRef createEntity(const char* prefabName);
 		EntityRef createEntity(const String& prefabName);
 		EntityRef createEntity(const ConfigNode& node);
+		std::vector<EntityRef> createScene(const ConfigNode& node);
 		
 		void updateEntityTree(EntityRef& entity, const ConfigNode& node);
-		
+		void updateScene(std::vector<EntityRef>& entities, const ConfigNode& node);
+
 		template <typename T>
 		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData)
 		{
@@ -46,11 +48,13 @@ namespace Halley {
 			return result;
 		}
 
+
 	private:
 		World& world;
 		ConfigNodeSerializationContext context;
 		std::unique_ptr<EntitySerializationContext> entityContext;
 
+		EntityRef createEntityTree(const ConfigNode& node);
 		EntityRef createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate);
 		
 		void updateEntity(EntityRef& entity, const ConfigNode& node, UpdateMode mode = UpdateMode::UpdateAll);

@@ -29,9 +29,33 @@ EntityRef EntityFactory::createEntity(const String& prefabName)
 
 EntityRef EntityFactory::createEntity(const ConfigNode& node)
 {
+	if (node.getType() == ConfigNodeType::Sequence) {
+		throw Exception("Prefab seems to have more than one root; use EntityFactory::createScene() instead", HalleyExceptions::Entity);
+	}
+	
 	// Note: this is not thread-safe
 	context.entityContext->uuids.clear();
 
+	return createEntityTree(node);
+}
+
+std::vector<EntityRef> EntityFactory::createScene(const ConfigNode& node)
+{
+	context.entityContext->uuids.clear();
+
+	std::vector<EntityRef> result;
+	if (node.getType() == ConfigNodeType::Sequence) {
+		for (auto& e: node.asSequence()) {
+			result.push_back(createEntityTree(e));
+		}
+	} else {
+		result.push_back(createEntityTree(node));
+	}
+	return result;
+}
+
+EntityRef EntityFactory::createEntityTree(const ConfigNode& node)
+{
 	auto entity = createEntity(std::optional<EntityRef>(), node, false);
 	doUpdateEntityTree(entity, node, false);
 	return entity;
@@ -128,6 +152,29 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node)
 {
 	doUpdateEntityTree(entity, node, true);
+}
+
+void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNode& node)
+{
+	if (node.getType() == ConfigNodeType::Sequence) {
+		std::map<String, const ConfigNode*> nodes;
+
+		for (auto& n: node.asSequence()) {
+			nodes[n["uuid"].asString()] = &n;
+		}
+		
+		for (auto& e: entities) {
+			const auto iter = nodes.find(e.getUUID().toString());
+			if (iter != nodes.end()) {
+				updateEntityTree(e, *iter->second);
+			}			
+		}
+	} else {
+		if (entities.size() != 1) {
+			throw Exception("Expecting only one entity for non-sequence scene", HalleyExceptions::Entity);
+		}
+		updateEntityTree(entities.at(0), node);
+	}
 }
 
 void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& treeNode, bool refreshing)

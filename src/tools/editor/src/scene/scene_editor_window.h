@@ -18,6 +18,8 @@ namespace Halley {
 		void unloadScene();
 		void markModified();
 
+		void onEntityAdded(const String& id, const String& parentId);
+		void onEntityRemoved(const String& id, const String& parentId);
 		void onEntityModified(const String& id);
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
@@ -33,7 +35,6 @@ namespace Halley {
 		std::shared_ptr<EntityEditor> entityEditor;
 
 		String sceneName;
-		EntityId sceneId;
 		std::shared_ptr<ISceneData> sceneData;
 		std::unique_ptr<Prefab> prefab;
 		std::shared_ptr<EntityFactory> entityFactory;
@@ -47,7 +48,10 @@ namespace Halley {
 		void saveEntity();
 		
 		void addEntity();
+		void addEntity(const String& parentId);
 		void removeEntity();
+		void removeEntity(const String& entityId);
+		
 		String findParent(const String& entityId) const;
 		const String* findParent(const String& entityId, const EntityTree& tree, const String& prev) const;
 

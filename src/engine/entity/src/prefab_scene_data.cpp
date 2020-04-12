@@ -17,6 +17,10 @@ PrefabSceneData::PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> 
 
 ISceneData::EntityData PrefabSceneData::getEntityData(const String& id)
 {
+	if (id.isEmpty()) {
+		return EntityData(prefab.getRoot(), "");
+	}
+	
 	const auto& [data, parentData] = findEntityAndParent(prefab.getRoot(), nullptr, id);
 	if (!data) {
 		throw Exception("Entity data not found for \"" + id + "\"", HalleyExceptions::Entity);
@@ -31,22 +35,65 @@ ISceneData::EntityData PrefabSceneData::getEntityData(const String& id)
 
 void PrefabSceneData::reloadEntity(const String& id)
 {
-	reloadEntity(id, getEntityData(id).data);
+	if (!id.isEmpty()) {
+		reloadEntity(id, findEntity(prefab.getRoot(), id));
+	}
 }
 
-void PrefabSceneData::reloadEntity(const String& id, ConfigNode& data)
+void PrefabSceneData::reloadEntity(const String& id, ConfigNode* data)
 {
 	auto entity = world.findEntity(UUID(id));
 	if (entity) {
-		factory->updateEntityTree(*entity, data);
+		if (data) {
+			// Update
+			factory->updateEntityTree(*entity, *data);
+		} else {
+			// Destroy
+			world.destroyEntity(entity.value());
+		}
+	} else {
+		if (data) {
+			// Create
+			factory->createEntity(*data);
+		}
 	}
 }
 
 EntityTree PrefabSceneData::getEntityTree() const
 {
 	EntityTree root;
-	fillEntityTree(prefab.getRoot(), root);
+	const auto& rootNode = prefab.getRoot();
+	if (rootNode.getType() == ConfigNodeType::Sequence) {
+		for (auto& n: rootNode.asSequence()) {
+			fillEntityTree(n, root.children.emplace_back());
+		}
+	} else {
+		fillEntityTree(rootNode, root);
+	}
 	return root;
+}
+
+void PrefabSceneData::fillEntityTree(const ConfigNode& node, EntityTree& tree) const
+{
+	tree.entityId = node["uuid"].asString("");
+	if (node.hasKey("prefab")) {
+		const auto& prefabName = node["prefab"].asString();
+		const auto& prefabNode = gameResources.get<Prefab>(prefabName)->getRoot();
+		//tree.entityId = prefabNode["uuid"].asString("");
+		tree.name = prefabNode["name"].asString("");
+		tree.prefab = prefabName;
+	} else {
+		tree.name = node["name"].asString("Entity");
+		if (node["children"].getType() == ConfigNodeType::Sequence) {
+			const auto& seq = node["children"].asSequence();
+			tree.children.reserve(seq.size());
+
+			for (auto& childNode : seq) {
+				tree.children.emplace_back();
+				fillEntityTree(childNode, tree.children.back());
+			}
+		}
+	}
 }
 
 void PrefabSceneData::reparentEntity(const String& entityId, const String& newParentId, int childIndex)
@@ -81,67 +128,62 @@ void PrefabSceneData::reparentEntity(const String& entityId, const String& newPa
 	}
 
 	
-	reloadEntity(oldParentId, *(findEntity(prefab.getRoot(), oldParentId)));
-	reloadEntity(newParentId, *(findEntity(prefab.getRoot(), newParentId)));
+	reloadEntity(oldParentId, findEntity(prefab.getRoot(), oldParentId));
+	reloadEntity(newParentId, findEntity(prefab.getRoot(), newParentId));
 }
 
 ConfigNode* PrefabSceneData::findEntity(ConfigNode& node, const String& id)
 {
-	if (node["uuid"].asString("") == id) {
-		return &node;
-	}
-
-	if (node["children"].getType() == ConfigNodeType::Sequence) {
-		for (auto& childNode : node["children"].asSequence()) {
-			auto r = findEntity(childNode, id);
+	if (node.getType() == ConfigNodeType::Sequence) {
+		for (auto& childNode: node.asSequence()) {
+			const auto r = findEntity(childNode, id);
 			if (r) {
 				return r;
 			}
 		}
-	}
+	} else {
+		if (node["uuid"].asString("") == id) {
+			return &node;
+		}
 
+		if (node["children"].getType() == ConfigNodeType::Sequence) {
+			for (auto& childNode : node["children"].asSequence()) {
+				auto r = findEntity(childNode, id);
+				if (r) {
+					return r;
+				}
+			}
+		}
+	}
+	
 	return nullptr;
 }
 
 std::pair<ConfigNode*, ConfigNode*> PrefabSceneData::findEntityAndParent(ConfigNode& node, ConfigNode* previous, const String& id)
 {
-	if (node["uuid"].asString("") == id) {
-		return std::make_pair(&node, previous);
-	}
-
-	if (node["children"].getType() == ConfigNodeType::Sequence) {
-		for (auto& childNode : node["children"].asSequence()) {
-			auto r = findEntityAndParent(childNode, &node, id);
+	if (node.getType() == ConfigNodeType::Sequence) {
+		for (auto& childNode: node.asSequence()) {
+			auto r = findEntityAndParent(childNode, nullptr, id);
 			if (r.first) {
 				return r;
+			}
+		}
+	} else {
+		if (node["uuid"].asString("") == id) {
+			return std::make_pair(&node, previous);
+		}
+
+		if (node["children"].getType() == ConfigNodeType::Sequence) {
+			for (auto& childNode : node["children"].asSequence()) {
+				auto r = findEntityAndParent(childNode, &node, id);
+				if (r.first) {
+					return r;
+				}
 			}
 		}
 	}
 
 	return std::make_pair(nullptr, nullptr);
-}
-
-void PrefabSceneData::fillEntityTree(const ConfigNode& node, EntityTree& tree) const
-{
-	tree.entityId = node["uuid"].asString("");
-	if (node.hasKey("prefab")) {
-		const auto& prefabName = node["prefab"].asString();
-		const auto& prefabNode = gameResources.get<Prefab>(prefabName)->getRoot();
-		//tree.entityId = prefabNode["uuid"].asString("");
-		tree.name = prefabNode["name"].asString("");
-		tree.prefab = prefabName;
-	} else {
-		tree.name = node["name"].asString("Entity");
-		if (node["children"].getType() == ConfigNodeType::Sequence) {
-			const auto& seq = node["children"].asSequence();
-			tree.children.reserve(seq.size());
-			
-			for (auto& childNode : seq) {
-				tree.children.emplace_back();
-				fillEntityTree(childNode, tree.children.back());
-			}
-		}
-	}
 }
 
 void PrefabSceneData::addChild(ConfigNode& parent, int index, ConfigNode child)

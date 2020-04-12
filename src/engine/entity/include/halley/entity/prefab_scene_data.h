@@ -18,7 +18,7 @@ namespace Halley {
         World& world;
     	Resources& gameResources;
 
-    	void reloadEntity(const String& id, ConfigNode& data);
+    	void reloadEntity(const String& id, ConfigNode* data);
         void fillEntityTree(const ConfigNode& node, EntityTree& tree) const;
 
         static ConfigNode* findEntity(ConfigNode& node, const String& id);

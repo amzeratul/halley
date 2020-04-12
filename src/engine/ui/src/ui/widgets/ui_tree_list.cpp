@@ -205,7 +205,7 @@ void UITreeList::reparentItem(const String& itemId, const String& newParentId, i
 void UITreeList::sortItems()
 {
 	// Store previous curOption
-	const auto oldOption = curOption >= 0 ? items[curOption]->getId() : "";
+	const auto oldOption = curOption >= 0 && curOption < gsl::narrow_cast<int>(items.size()) ? items[curOption]->getId() : "";
 	
 	// Update list representation
 	items.clear();
