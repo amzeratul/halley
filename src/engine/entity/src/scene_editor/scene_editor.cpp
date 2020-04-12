@@ -149,12 +149,15 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 
 void SceneEditor::setSelectedEntity(const UUID& id, ConfigNode& entityData)
 {
-	selectedEntity.reset();
+	const auto curId = selectedEntity ? selectedEntity.value().getUUID() : UUID();
+	if (id != curId) {
+		selectedEntity.reset();
+		if (id.isValid()) {
+			selectedEntity = getWorld().findEntity(id);
+		}
+	}	
 
-	if (id.isValid()) {
-		selectedEntity = getWorld().findEntity(id);
-		gizmoCollection->setSelectedEntity(selectedEntity, entityData);
-	}
+	gizmoCollection->setSelectedEntity(selectedEntity, entityData);
 }
 
 void SceneEditor::showEntity(const UUID& id)

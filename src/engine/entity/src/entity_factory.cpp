@@ -92,7 +92,7 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 	
 	std::vector<int> idsUpdated;
 
-	// PRepare component overrides
+	// Prepare component overrides
 	std::map<String, const ConfigNode*> overrides;
 	if (overrideNodes) {
 		if ((*overrideNodes)["components"].getType() == ConfigNodeType::Sequence) {
@@ -197,7 +197,7 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 
 	// Update the existing children
 	auto& entityChildren = entity.getRawChildren();
-	for (size_t childIndex = 0; childIndex < entityChildren.size(); ++childIndex) {
+	for (size_t childIndex = 0; childIndex < entityChildren.size();) {
 		auto childEntity = EntityRef(*entityChildren[childIndex], world);
 		const auto& entityUUID = childEntity.getUUID();
 
@@ -215,8 +215,10 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 			}
 		}
 
-		// Not found, so it should be removed
-		if (!found) {
+		// If not found, it will be deleted. Note that deleting an entity immediately removes it from the tree, so we only increase childIndex if it's not removed
+		if (found) {
+			++childIndex;
+		} else {
 			world.destroyEntity(childEntity.getEntityId());
 		}
 	}

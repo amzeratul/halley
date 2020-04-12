@@ -164,11 +164,9 @@ void SceneEditorWindow::selectEntity(const String& id)
 		prefabData = &project.getGameResources().get<Prefab>(prefabName)->getRoot();
 	}
 	
-	const bool changed = entityEditor->loadEntity(actualId, entityData, prefabData, false);
-	if (changed) {
-		canvas->getInterface().setSelectedEntity(UUID(actualId), entityData);
-		currentEntityId = actualId;
-	}
+	entityEditor->loadEntity(actualId, entityData, prefabData, false);
+	canvas->getInterface().setSelectedEntity(UUID(actualId), entityData);
+	currentEntityId = actualId;
 }
 
 void SceneEditorWindow::panCameraToEntity(const String& id)
