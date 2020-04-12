@@ -106,30 +106,70 @@ void PrefabSceneData::reparentEntity(const String& entityId, const String& newPa
 	if (!entityMoving) {
 		throw Exception("Entity not found: " + entityId, HalleyExceptions::Tools);
 	}
-	if (!oldParent) {
-		throw Exception("Entity has no parent: " + entityId, HalleyExceptions::Tools);
-	}
-	const String oldParentId = (*oldParent)["uuid"].asString();
+	const String oldParentId = oldParent ? (*oldParent)["uuid"].asString() : "";
 
-	// WARNING: THESE OPERATIONS CAN INVALIDATE OLD POINTERS, DON'T KEEP REFERENCES
+	// WARNING: ALL OF THESE OPERATIONS CAN INVALIDATE OLD POINTERS, DON'T KEEP REFERENCES
 	if (newParentId == oldParentId) {
-		const auto newParent = findEntity(prefab.getRoot(), newParentId);
-		if (!newParent) {
-			throw Exception("Entity not found: " + newParentId, HalleyExceptions::Tools);
-		}
-		moveChild(*newParent, entityId, size_t(childIndex)); // INVALIDATES REFERENCES
+		moveChild(findChildListFor(newParentId), entityId, size_t(childIndex));
 	} else {
-		auto child = removeChild(*oldParent, entityId); // INVALIDATES REFERENCES
-		const auto newParent = findEntity(prefab.getRoot(), newParentId);
-		if (!newParent) {
-			throw Exception("Entity not found: " + newParentId, HalleyExceptions::Tools);
-		}
-		addChild(*newParent, childIndex, std::move(child)); // INVALIDATES REFERENCES
+		// Don't collapse into one sequence point! findChildListFor(newParentId) MUST execute after removeChild()!
+		auto child = removeChild(findChildListFor(oldParentId), entityId);
+		addChild(findChildListFor(newParentId), childIndex, std::move(child));
 	}
 
-	
-	reloadEntity(oldParentId, findEntity(prefab.getRoot(), oldParentId));
-	reloadEntity(newParentId, findEntity(prefab.getRoot(), newParentId));
+	reloadEntity(oldParentId);
+	reloadEntity(newParentId);
+}
+
+ConfigNode::SequenceType& PrefabSceneData::findChildListFor(const String& id)
+{
+	auto& root = prefab.getRoot();
+	if (id.isEmpty()) {
+		if (root.getType() == ConfigNodeType::Sequence) {
+			return root.asSequence();
+		} else {
+			throw Exception("Root has no child list", HalleyExceptions::Entity);
+		}		
+	} else {
+		ConfigNode* res = nullptr;
+
+		if (root.getType() == ConfigNodeType::Sequence) {
+			for (auto& r: root.asSequence()) {
+				res = doFindChildListFor(r, id);
+				if (res) {
+					break;
+				}
+			}
+		} else {
+			res = doFindChildListFor(root, id);
+		}
+
+		if (!res) {
+			throw Exception("Couldn't find entity with id " + id, HalleyExceptions::Entity);
+		}
+		if (res->getType() == ConfigNodeType::Undefined) {
+			*res = ConfigNode::SequenceType();
+		}
+		return res->asSequence();
+	}
+}
+
+ConfigNode* PrefabSceneData::doFindChildListFor(ConfigNode& node, const String& id)
+{
+	if (node["uuid"].asString("") == id) {
+		return &node["children"];
+	}
+
+	if (node["children"].getType() == ConfigNodeType::Sequence) {
+		for (auto& childNode : node["children"].asSequence()) {
+			const auto r = findEntity(childNode, id);
+			if (r) {
+				return r;
+			}
+		}
+	}
+
+	return nullptr;
 }
 
 ConfigNode* PrefabSceneData::findEntity(ConfigNode& node, const String& id)
@@ -186,19 +226,13 @@ std::pair<ConfigNode*, ConfigNode*> PrefabSceneData::findEntityAndParent(ConfigN
 	return std::make_pair(nullptr, nullptr);
 }
 
-void PrefabSceneData::addChild(ConfigNode& parent, int index, ConfigNode child)
+void PrefabSceneData::addChild(ConfigNode::SequenceType& seq, int index, ConfigNode child)
 {
-	if (parent["children"].getType() != ConfigNodeType::Sequence) {
-		parent["children"] = ConfigNode::SequenceType();
-	}
-
-	auto& seq = parent["children"].asSequence();
 	seq.insert(seq.begin() + clamp(index, 0, int(seq.size())), std::move(child));
 }
 
-ConfigNode PrefabSceneData::removeChild(ConfigNode& parent, const String& childId)
+ConfigNode PrefabSceneData::removeChild(ConfigNode::SequenceType& seq, const String& childId)
 {
-	auto& seq = parent["children"].asSequence();
 	for (size_t i = 0; i < seq.size(); ++i) {
 		auto& node = seq[i].asMap();
 		if (node["uuid"].asString("") == childId) {
@@ -210,9 +244,8 @@ ConfigNode PrefabSceneData::removeChild(ConfigNode& parent, const String& childI
 	throw Exception("Child not found: " + childId, HalleyExceptions::Tools);
 }
 
-void PrefabSceneData::moveChild(ConfigNode& parent, const String& childId, int targetIndex)
+void PrefabSceneData::moveChild(ConfigNode::SequenceType& seq, const String& childId, int targetIndex)
 {
-	auto& seq = parent["children"].asSequence();
 	const int startIndex = int(std::find_if(seq.begin(), seq.end(), [&] (const ConfigNode& n) { return n["uuid"].asString("") == childId; }) - seq.begin());
 
 	// If moving forwards, subtract one to account for the fact that the currently occupied slot will be removed

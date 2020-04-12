@@ -53,6 +53,7 @@ void UITreeList::removeItem(const String& id)
 	if (item) {
 		removeTree(*item);
 	}
+	needsRefresh = true;
 }
 
 void UITreeList::removeTree(const UITreeListItem& tree)
