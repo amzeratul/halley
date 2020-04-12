@@ -42,7 +42,7 @@ EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, const Con
 	const bool isPrefab = treeNode.hasKey("prefab");
 	const auto& node = isPrefab ? getPrefabNode(treeNode["prefab"].asString()) : treeNode;
 	
-	const auto uuid = UUID(node["uuid"].asString());
+	const auto uuid = UUID(treeNode["uuid"].asString()); // Use UUID in parent, not in prefab
 	auto entity = world.createEntity(uuid, node["name"].asString(""), parent);
 
 	context.entityContext->uuids[uuid] = entity.getEntityId();
@@ -145,14 +145,7 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 	nodeUUIDs.reserve(nNodes);
 	std::vector<char> nodeConsumed(nNodes, 0);
 	for (size_t i = 0; i < nNodes; ++i) {
-		const auto& cn = childNodes[i];
-		String uuid;
-		if (cn.hasKey("prefab")) {
-			uuid = getPrefabNode(cn["prefab"].asString())["uuid"].asString();
-		} else {
-			uuid = cn["uuid"].asString();
-		}
-		nodeUUIDs.emplace_back(std::move(uuid));
+		nodeUUIDs.emplace_back(childNodes[i]["uuid"].asString());
 	}
 
 	// Update the existing children

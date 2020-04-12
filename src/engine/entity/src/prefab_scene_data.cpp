@@ -1,15 +1,17 @@
 #include "prefab_scene_data.h"
 
 #include "halley/bytes/byte_serializer.h"
+#include "halley/core/resources/resources.h"
 #include "halley/support/logger.h"
 #include "world.h"
 
 using namespace Halley;
 
-PrefabSceneData::PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> factory, World& world)
+PrefabSceneData::PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> factory, World& world, Resources& gameResources)
 	: prefab(prefab)
 	, factory(std::move(factory))
 	, world(world)
+	, gameResources(gameResources)
 {
 }
 
@@ -108,17 +110,25 @@ std::pair<ConfigNode*, ConfigNode*> PrefabSceneData::findEntityAndParent(ConfigN
 	return std::make_pair(nullptr, nullptr);
 }
 
-void PrefabSceneData::fillEntityTree(const ConfigNode& node, EntityTree& tree)
+void PrefabSceneData::fillEntityTree(const ConfigNode& node, EntityTree& tree) const
 {
 	tree.entityId = node["uuid"].asString("");
-	tree.name = node["name"].asString("");
-	if (node["children"].getType() == ConfigNodeType::Sequence) {
-		const auto& seq = node["children"].asSequence();
-		tree.children.reserve(seq.size());
-		
-		for (auto& childNode : seq) {
-			tree.children.emplace_back();
-			fillEntityTree(childNode, tree.children.back());
+	if (node.hasKey("prefab")) {
+		const auto& prefabName = node["prefab"].asString();
+		const auto& prefabNode = gameResources.get<Prefab>(prefabName)->getRoot();
+		//tree.entityId = prefabNode["uuid"].asString("");
+		tree.name = prefabNode["name"].asString("");
+		tree.prefab = prefabName;
+	} else {
+		tree.name = node["name"].asString("Entity");
+		if (node["children"].getType() == ConfigNodeType::Sequence) {
+			const auto& seq = node["children"].asSequence();
+			tree.children.reserve(seq.size());
+			
+			for (auto& childNode : seq) {
+				tree.children.emplace_back();
+				fillEntityTree(childNode, tree.children.back());
+			}
 		}
 	}
 }

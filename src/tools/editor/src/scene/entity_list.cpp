@@ -44,7 +44,8 @@ void EntityList::addEntities(const EntityTree& entity, const String& parentId)
 {
 	// Root is empty, don't add it
 	if (!entity.entityId.isEmpty()) {
-		list->addTreeItem(entity.entityId, parentId, LocalisedString::fromUserString(entity.name));
+		const String name = entity.name + (entity.prefab.isEmpty() ? "" : (" [" + entity.prefab + "]"));
+		list->addTreeItem(entity.entityId, parentId, LocalisedString::fromUserString(name));
 	}
 	
 	for (auto& e: entity.children) {

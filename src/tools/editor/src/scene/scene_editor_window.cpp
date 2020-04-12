@@ -48,7 +48,7 @@ void SceneEditorWindow::loadScene(const String& name)
 		sceneName = name;
 
 		// Setup editors
-		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, world);
+		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, world, project.getGameResources());
 		entityEditor->setECSData(project.getECSData());
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 		entityList->setSceneData(sceneData);
@@ -257,9 +257,7 @@ void SceneEditorWindow::preparePrefab(Prefab& prefab)
 
 void SceneEditorWindow::preparePrefabEntity(ConfigNode& node)
 {
-	if (!node.hasKey("name")) {
-		node["name"] = "Entity";
-	}
+	const bool isPrefab = node.hasKey("prefab");
 	
 	if (!node.hasKey("uuid")) {
 		node["uuid"] = UUID::generate().toString();
@@ -269,11 +267,17 @@ void SceneEditorWindow::preparePrefabEntity(ConfigNode& node)
 		node["components"] = ConfigNode::SequenceType();
 	}
 
-	if (!node.hasKey("children")) {
-		node["children"] = ConfigNode::SequenceType();
-	} else {
-		for (auto& c: node["children"].asSequence()) {
-			preparePrefabEntity(c);
+	if (!isPrefab) {
+		if (!node.hasKey("name")) {
+			node["name"] = "Entity";
+		}
+
+		if (!node.hasKey("children")) {
+			node["children"] = ConfigNode::SequenceType();
+		} else {
+			for (auto& c: node["children"].asSequence()) {
+				preparePrefabEntity(c);
+			}
 		}
 	}
 }

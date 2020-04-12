@@ -113,6 +113,7 @@ namespace Halley {
 	public:
 		String entityId;
 		String name;
+		String prefab;
 		std::vector<EntityTree> children;
 	};
 
