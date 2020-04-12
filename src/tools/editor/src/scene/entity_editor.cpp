@@ -83,7 +83,7 @@ void EntityEditor::reloadEntity()
 
 void EntityEditor::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
 {
-	sendEventDown(UIEvent(UIEventType::ReloadData, fieldName));
+	sendEventDown(UIEvent(UIEventType::ReloadData, componentName + ":" + fieldName));
 }
 
 void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data)
@@ -109,20 +109,21 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 
 			auto labelBox = std::make_shared<UIWidget>("", Vector2f(100, 20), UISizer());
 			labelBox->add(label);
-			
+
+			ComponentFieldParameters parameters(componentType, fieldName, member.defaultValue, data);
 			componentFields->add(labelBox, 0, {}, UISizerAlignFlags::CentreVertical);
-			componentFields->add(createEditField(member.type.name, fieldName, data, member.defaultValue), 1);
+			componentFields->add(createEditField(member.type.name, parameters), 1);
 		}
 	}
 	
 	fields->add(componentUI);
 }
 
-std::shared_ptr<IUIElement> EntityEditor::createEditField(const String& fieldType, const String& fieldName, ConfigNode& componentData, const String& defaultValue)
+std::shared_ptr<IUIElement> EntityEditor::createEditField(const String& fieldType, const ComponentFieldParameters& parameters)
 {
 	auto iter = fieldFactories.find(fieldType);
 	if (iter != fieldFactories.end()) {
-		return iter->second->createField(context, fieldName, componentData, defaultValue);
+		return iter->second->createField(context, parameters);
 	} else {
 		return std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromHardcodedString("N/A"));
 	}

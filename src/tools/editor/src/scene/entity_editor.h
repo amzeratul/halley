@@ -37,7 +37,7 @@ namespace Halley {
 
 		void makeUI();
 		void loadComponentData(const String& componentType, ConfigNode& data);
-		std::shared_ptr<IUIElement> createEditField(const String& fieldType, const String& fieldName, ConfigNode& componentData, const String& defaultValue);
+		std::shared_ptr<IUIElement> createEditField(const String& fieldType, const ComponentFieldParameters& parameters);
 
 		void addComponent();
 		void addComponent(const String& name);

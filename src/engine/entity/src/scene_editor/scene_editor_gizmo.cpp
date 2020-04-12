@@ -116,7 +116,7 @@ ConfigNode* SceneEditorGizmo::getComponentData(const String& name)
 void SceneEditorGizmo::markModified(const String& component, const String& field)
 {
 	if (outputState) {
-		outputState->fieldsChanged.push_back(std::make_pair(component, field));
+		outputState->fieldsChanged.emplace_back(component, field);
 	}
 }
 

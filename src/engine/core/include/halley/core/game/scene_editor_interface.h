@@ -36,11 +36,25 @@ namespace Halley {
         std::function<void()> updateCallback;
     };
 
+	struct ComponentFieldParameters {
+        ComponentFieldParameters(const String& componentName, const String& fieldName, const String& defaultValue, ConfigNode& componentData)
+            : componentName(componentName)
+			, fieldName(fieldName)
+			, defaultValue(defaultValue)
+			, componentData(componentData)
+        {}
+		
+		const String& componentName;
+		const String& fieldName;
+		const String& defaultValue;
+        ConfigNode& componentData;
+    };
+
     class IComponentEditorFieldFactory {
     public:
         virtual ~IComponentEditorFieldFactory() = default;
     	virtual String getFieldType() = 0;
-        virtual std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const String& fieldName, ConfigNode& componentData, const String& defaultValue) = 0;
+        virtual std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& parameters) = 0;
     };
 
     enum class SceneEditorTool {

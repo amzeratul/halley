@@ -8,17 +8,22 @@ public:
 		return "Halley::String";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const String& fieldName, ConfigNode& componentData, const String& defaultValue) override
+	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
+		auto& componentData = pars.componentData;
+		const auto& componentName = pars.componentName;
+		const auto& fieldName = pars.fieldName;
+		const auto& defaultValue = pars.defaultValue;
+
 		String value = componentData[fieldName].asString("");
 
 		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "textValue", context.getFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
 		field->bindData("textValue", value, [&, fieldName](String newVal)
-		{
-			componentData[fieldName] = ConfigNode(std::move(newVal));
-			context.onEntityUpdated();
-		});
-		
+			{
+				componentData[fieldName] = ConfigNode(std::move(newVal));
+				context.onEntityUpdated();
+			});
+
 		field->setMinSize(Vector2f(60, 22));
 
 		return field;
@@ -32,18 +37,23 @@ public:
 		return "int";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const String& fieldName, ConfigNode& componentData, const String& defaultValue) override
+	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
+		auto& componentData = pars.componentData;
+		const auto& componentName = pars.componentName;
+		const auto& fieldName = pars.fieldName;
+		const auto& defaultValue = pars.defaultValue;
+
 		int value = componentData[fieldName].asInt(defaultValue.isInteger() ? defaultValue.toInteger() : 0);
 
 		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "intValue", context.getFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, false));
 		field->setMinSize(Vector2f(60, 22));
 		field->bindData("intValue", value, [&, fieldName](int newVal)
-		{
-			componentData[fieldName] = ConfigNode(newVal);
-			context.onEntityUpdated();
-		});
+			{
+				componentData[fieldName] = ConfigNode(newVal);
+				context.onEntityUpdated();
+			});
 
 		return field;
 	}
@@ -56,18 +66,23 @@ public:
 		return "float";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const String& fieldName, ConfigNode& componentData, const String& defaultValue) override
+	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
+		auto& componentData = pars.componentData;
+		const auto& componentName = pars.componentName;
+		const auto& fieldName = pars.fieldName;
+		const auto& defaultValue = pars.defaultValue;
+
 		const float value = componentData[fieldName].asFloat(defaultValue.isNumber() ? defaultValue.toFloat() : 0.0f);
 
 		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "floatValue", context.getFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, true));
 		field->setMinSize(Vector2f(60, 22));
 		field->bindData("floatValue", value, [&, fieldName](float newVal)
-		{
-			componentData[fieldName] = ConfigNode(newVal);
-			context.onEntityUpdated();
-		});
+			{
+				componentData[fieldName] = ConfigNode(newVal);
+				context.onEntityUpdated();
+			});
 
 		return field;
 	}
@@ -88,20 +103,25 @@ public:
 		return "bool";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const String& fieldName, ConfigNode& componentData, const String& defaultValue) override
+	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
+		auto& componentData = pars.componentData;
+		const auto& componentName = pars.componentName;
+		const auto& fieldName = pars.fieldName;
+		const auto& defaultValue = pars.defaultValue;
+
 		bool value = componentData[fieldName].asBool(defaultValue == "true");
 
 		auto field = std::make_shared<UICheckbox>("boolValue", context.getFactory().getStyle("checkbox"), value);
 		field->bindData("boolValue", value, [&, fieldName](bool newVal)
-		{
-			componentData[fieldName] = ConfigNode(newVal);
-			context.onEntityUpdated();
-		});
-		
+			{
+				componentData[fieldName] = ConfigNode(newVal);
+				context.onEntityUpdated();
+			});
+
 		auto sizer = std::make_shared<UISizer>(UISizerType::Horizontal, 4.0f);
 		sizer->add(field);
-		
+
 		return sizer;
 	}
 };
@@ -113,8 +133,13 @@ public:
 		return "Halley::Vector2f";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const String& fieldName, ConfigNode& componentData, const String& defaultValue) override
+	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
+		auto& componentData = pars.componentData;
+		const auto& componentName = pars.componentName;
+		const auto& fieldName = pars.fieldName;
+		const auto& defaultValue = pars.defaultValue;
+
 		Vector2f value;
 		if (componentData[fieldName].getType() != ConfigNodeType::Undefined) {
 			value = componentData[fieldName].asVector2f();
@@ -153,7 +178,7 @@ public:
 		container->add(x, 1);
 		container->add(y, 1);
 
-		container->setHandle(UIEventType::ReloadData, fieldName, [=, &componentData] (const UIEvent& event)
+		container->setHandle(UIEventType::ReloadData, componentName + ":" + fieldName, [=, &componentData] (const UIEvent& event)
 		{
 			Vector2f newVal;
 			if (componentData[fieldName].getType() != ConfigNodeType::Undefined) {
