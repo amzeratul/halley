@@ -147,10 +147,11 @@ ConfigNode::SequenceType& PrefabSceneData::findChildListFor(const String& id)
 		if (!res) {
 			throw Exception("Couldn't find entity with id " + id, HalleyExceptions::Entity);
 		}
-		if (res->getType() == ConfigNodeType::Undefined) {
-			*res = ConfigNode::SequenceType();
+		ConfigNode& children = *res;
+		if (children.getType() == ConfigNodeType::Undefined) {
+			children = ConfigNode::SequenceType();
 		}
-		return res->asSequence();
+		return children.asSequence();
 	}
 }
 
@@ -162,7 +163,7 @@ ConfigNode* PrefabSceneData::doFindChildListFor(ConfigNode& node, const String& 
 
 	if (node["children"].getType() == ConfigNodeType::Sequence) {
 		for (auto& childNode : node["children"].asSequence()) {
-			const auto r = findEntity(childNode, id);
+			const auto r = doFindChildListFor(childNode, id);
 			if (r) {
 				return r;
 			}
