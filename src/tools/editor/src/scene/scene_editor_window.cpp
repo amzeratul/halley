@@ -36,6 +36,7 @@ void SceneEditorWindow::loadScene(const String& name)
 
 		// Load prefab
 		prefab = std::make_unique<Prefab>(*project.getGameResources().get<Prefab>(name));
+		preparePrefab(*prefab);
 
 		// Spawn scene
 		entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
@@ -247,4 +248,32 @@ const String* SceneEditorWindow::findParent(const String& entityId, const Entity
 	}
 
 	return nullptr;
+}
+
+void SceneEditorWindow::preparePrefab(Prefab& prefab)
+{
+	preparePrefabEntity(prefab.getRoot());
+}
+
+void SceneEditorWindow::preparePrefabEntity(ConfigNode& node)
+{
+	if (!node.hasKey("name")) {
+		node["name"] = "Entity";
+	}
+	
+	if (!node.hasKey("uuid")) {
+		node["uuid"] = UUID::generate().toString();
+	}
+
+	if (!node.hasKey("components")) {
+		node["components"] = ConfigNode::SequenceType();
+	}
+
+	if (!node.hasKey("children")) {
+		node["children"] = ConfigNode::SequenceType();
+	} else {
+		for (auto& c: node["children"].asSequence()) {
+			preparePrefabEntity(c);
+		}
+	}
 }

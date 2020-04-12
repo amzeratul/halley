@@ -19,12 +19,12 @@ EntityFactory::~EntityFactory()
 
 EntityRef EntityFactory::createEntity(const char* prefabName)
 {
-	return createEntity(context.resources->get<Prefab>(prefabName)->getRoot());
+	return createEntity(getPrefabNode(prefabName));
 }
 
 EntityRef EntityFactory::createEntity(const String& prefabName)
 {
-	return createEntity(context.resources->get<Prefab>(prefabName)->getRoot());
+	return createEntity(getPrefabNode(prefabName));
 }
 
 EntityRef EntityFactory::createEntity(const ConfigNode& node)
@@ -37,15 +37,18 @@ EntityRef EntityFactory::createEntity(const ConfigNode& node)
 	return entity;
 }
 
-EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate)
+EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, const ConfigNode& treeNode, bool populate)
 {
+	const bool isPrefab = treeNode.hasKey("prefab");
+	const auto& node = isPrefab ? getPrefabNode(treeNode["prefab"].asString()) : treeNode;
+	
 	const auto uuid = UUID(node["uuid"].asString());
 	auto entity = world.createEntity(uuid, node["name"].asString(""), parent);
 
 	context.entityContext->uuids[uuid] = entity.getEntityId();
 
 	if (populate) {
-		updateEntity(entity, node, UpdateMode::UpdateAll);
+		updateEntity(entity, treeNode, UpdateMode::UpdateAll);
 	}
 
 	if (node["children"].getType() == ConfigNodeType::Sequence) {
@@ -57,10 +60,45 @@ EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, const Con
 	return entity;
 }
 
-void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& node, UpdateMode mode)
+void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, UpdateMode mode)
 {
-	std::vector<int> idsUpdated;
+	const bool isPrefab = treeNode.hasKey("prefab");
+	const auto& node = isPrefab ? getPrefabNode(treeNode["prefab"].asString()) : treeNode;
+	auto* overrideNodes = isPrefab ? &treeNode : nullptr;
 	
+	std::vector<int> idsUpdated;
+
+	// PRepare component overrides
+	std::map<String, const ConfigNode*> overrides;
+	if (overrideNodes) {
+		if ((*overrideNodes)["components"].getType() == ConfigNodeType::Sequence) {
+			auto& sequence = (*overrideNodes)["components"].asSequence();
+			for (auto& componentNode: sequence) {
+				for (auto& [componentName, componentData]: componentNode.asMap()) {
+					overrides[componentName] = &componentData;
+				}
+			}
+		}
+	}
+	ConfigNode tempNode;
+	auto getComponentData = [&] (const String& name, const ConfigNode& originalData) -> const ConfigNode&
+	{
+		if (isPrefab) {
+			const auto iter = overrides.find(name);
+			if (iter == overrides.end()) {
+				return originalData;
+			}
+			tempNode = ConfigNode(originalData);
+			for (auto& [field, data]: iter->second->asMap()) {
+				tempNode[field] = ConfigNode(data);
+			}
+			return tempNode;
+		} else {
+			return originalData;
+		}
+	};
+
+	// Load components
 	const auto func = world.getCreateComponentFunction();
 	if (node["components"].getType() == ConfigNodeType::Sequence) {
 		auto& sequence = node["components"].asSequence();
@@ -70,9 +108,8 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& node, Upda
 		}
 		
 		for (auto& componentNode: sequence) {
-			for (auto& c: componentNode.asMap()) {
-				auto name = c.first;
-				auto result = func(*this, name, entity, c.second);
+			for (auto& [componentName, componentData]: componentNode.asMap()) {
+				auto result = func(*this, componentName, entity, getComponentData(componentName, componentData));
 				
 				if (mode == UpdateMode::UpdateAllDeleteOld) {
 					idsUpdated.push_back(result.componentId);
@@ -93,9 +130,12 @@ void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node)
 	doUpdateEntityTree(entity, node, true);
 }
 
-void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& node, bool refreshing)
+void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& treeNode, bool refreshing)
 {
-	updateEntity(entity, node, refreshing ? UpdateMode::UpdateAllDeleteOld : UpdateMode::UpdateAll);
+	updateEntity(entity, treeNode, refreshing ? UpdateMode::UpdateAllDeleteOld : UpdateMode::UpdateAll);
+
+	const bool isPrefab = treeNode.hasKey("prefab");
+	const auto& node = isPrefab ? getPrefabNode(treeNode["prefab"].asString()) : treeNode;
 
 	const auto& childNodes = node["children"].getType() == ConfigNodeType::Sequence ? node["children"].asSequence() : ConfigNode::SequenceType();
 	const size_t nNodes = childNodes.size();
@@ -105,7 +145,14 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& node
 	nodeUUIDs.reserve(nNodes);
 	std::vector<char> nodeConsumed(nNodes, 0);
 	for (size_t i = 0; i < nNodes; ++i) {
-		nodeUUIDs.emplace_back(childNodes[i]["uuid"].asString());
+		const auto& cn = childNodes[i];
+		String uuid;
+		if (cn.hasKey("prefab")) {
+			uuid = getPrefabNode(cn["prefab"].asString())["uuid"].asString();
+		} else {
+			uuid = cn["uuid"].asString();
+		}
+		nodeUUIDs.emplace_back(std::move(uuid));
 	}
 
 	// Update the existing children
@@ -140,6 +187,11 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& node
 			createEntity(entity, childNodes[i], true);
 		}
 	}
+}
+
+const ConfigNode& EntityFactory::getPrefabNode(const String& id)
+{
+	return context.resources->get<Prefab>(id)->getRoot();
 }
 
 EntitySerializationContext::EntitySerializationContext(World& world)

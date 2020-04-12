@@ -25,7 +25,6 @@ namespace Halley {
 		EntityRef createEntity(const String& prefabName);
 		EntityRef createEntity(const ConfigNode& node);
 		
-		void updateEntity(EntityRef& entity, const ConfigNode& node, UpdateMode mode = UpdateMode::UpdateAll);
 		void updateEntityTree(EntityRef& entity, const ConfigNode& node);
 		
 		template <typename T>
@@ -53,7 +52,11 @@ namespace Halley {
 		std::unique_ptr<EntitySerializationContext> entityContext;
 
 		EntityRef createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate);
+		
+		void updateEntity(EntityRef& entity, const ConfigNode& node, UpdateMode mode = UpdateMode::UpdateAll);
 		void doUpdateEntityTree(EntityRef& entity, const ConfigNode& node, bool refreshing);
+		
+		const ConfigNode& getPrefabNode(const String& id);
 	};
 
 	class EntitySerializationContext {

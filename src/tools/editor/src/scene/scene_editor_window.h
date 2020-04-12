@@ -50,5 +50,8 @@ namespace Halley {
 		void removeEntity();
 		String findParent(const String& entityId) const;
 		const String* findParent(const String& entityId, const EntityTree& tree, const String& prev) const;
+
+		void preparePrefab(Prefab& prefab);
+		void preparePrefabEntity(ConfigNode& node);
 	};
 }
