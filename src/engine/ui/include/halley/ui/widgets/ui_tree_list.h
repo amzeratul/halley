@@ -87,7 +87,7 @@ namespace Halley {
     public:
     	UITreeList(String id, UIStyle style);
 
-        void addTreeItem(const String& id, const String& parentId, const LocalisedString& label);
+        void addTreeItem(const String& id, const String& parentId, const LocalisedString& label, const String& labelStyle = "label");
         void removeItem(const String& id);
         void setLabel(const String& id, const LocalisedString& label);
 

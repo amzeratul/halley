@@ -55,8 +55,14 @@ uiStyle:
     labelBorder: [ 6, 5, 6, 2 ]
     extraMouseBorder: [ 1, 1, 1, 1 ]
     selectionChangedSound: ""
-    label: { font: Ubuntu Regular, size: 13, colour: "#FFFFFFCF" }
-    selectedLabel: { font: Ubuntu Regular, size: 13, colour: "#FFFFFF" }
+    label:
+      normal: { font: Ubuntu Regular, size: 13, colour: "#EEEEEE" }
+      selected: { font: Ubuntu Regular, size: 13, colour: "#FFFFFF" }
+      disabled: { font: Ubuntu Regular, size: 13, colour: "#808080" }
+    labelSpecial:
+      normal: { font: Ubuntu Regular, size: 13, colour: "#E8B900" }
+      selected: { font: Ubuntu Regular, size: 13, colour: "#FFCD06" }
+      disabled: { font: Ubuntu Regular, size: 13, colour: "#B7A351" }
     gap: 1
     indentation: 20
     cursor:

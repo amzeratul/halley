@@ -14,7 +14,7 @@ UITreeList::UITreeList(String id, UIStyle style)
 	setupEvents();
 }
 
-void UITreeList::addTreeItem(const String& id, const String& parentId, const LocalisedString& label)
+void UITreeList::addTreeItem(const String& id, const String& parentId, const LocalisedString& label, const String& labelStyleName)
 {
 	auto listItem = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 
@@ -27,12 +27,13 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 	//listItem->add(icon, 0, {}, UISizerAlignFlags::Centre);
 
 	// Label
-	auto labelWidget = std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label);
-	if (style.hasTextRenderer("selectedLabel")) {
-		labelWidget->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
+	const auto& labelStyle = style.getSubStyle(labelStyleName);
+	auto labelWidget = std::make_shared<UILabel>(id + "_label", labelStyle.getTextRenderer("normal"), label);
+	if (labelStyle.hasTextRenderer("selected")) {
+		labelWidget->setSelectable(labelStyle.getTextRenderer("normal"), labelStyle.getTextRenderer("selected"));
 	}
-	if (style.hasTextRenderer("disabledStyle")) {
-		labelWidget->setDisablable(style.getTextRenderer("label"), style.getTextRenderer("disabledStyle"));
+	if (labelStyle.hasTextRenderer("disabled")) {
+		labelWidget->setDisablable(labelStyle.getTextRenderer("normal"), labelStyle.getTextRenderer("disabled"));
 	}
 	listItem->add(labelWidget, 0, style.getBorder("labelBorder"), UISizerFillFlags::Fill);
 	listItem->setDraggableSubWidget(labelWidget.get());
