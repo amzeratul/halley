@@ -50,7 +50,6 @@ void PrefabSceneData::reparentEntity(const String& entityId, const String& newPa
 	Expects(!entityId.isEmpty());
 	
 	auto [entityMoving, oldParent] = findEntityAndParent(prefab.getRoot(), nullptr, entityId);
-	const auto newParent = findEntity(prefab.getRoot(), newParentId);
 
 	if (!entityMoving) {
 		throw Exception("Entity not found: " + entityId, HalleyExceptions::Tools);
@@ -58,20 +57,27 @@ void PrefabSceneData::reparentEntity(const String& entityId, const String& newPa
 	if (!oldParent) {
 		throw Exception("Entity has no parent: " + entityId, HalleyExceptions::Tools);
 	}
-	if (!newParent) {
-		throw Exception("Entity not found: " + newParentId, HalleyExceptions::Tools);
-	}
+	const String oldParentId = (*oldParent)["uuid"].asString();
 
-	//Logger::logInfo("Reparenting \"" + (*entityMoving)["name"].asString() + "\" from \"" + (*oldParent)["name"].asString() + "\" to \"" + (*newParent)["name"].asString() + "\":" + toString(childIndex));
-	
-	if (newParent == oldParent) {
-		moveChild(*newParent, entityId, size_t(childIndex));
+	// WARNING: THESE OPERATIONS CAN INVALIDATE OLD POINTERS, DON'T KEEP REFERENCES
+	if (newParentId == oldParentId) {
+		const auto newParent = findEntity(prefab.getRoot(), newParentId);
+		if (!newParent) {
+			throw Exception("Entity not found: " + newParentId, HalleyExceptions::Tools);
+		}
+		moveChild(*newParent, entityId, size_t(childIndex)); // INVALIDATES REFERENCES
 	} else {
-		addChild(*newParent, childIndex, removeChild(*oldParent, entityId));
+		auto child = removeChild(*oldParent, entityId); // INVALIDATES REFERENCES
+		const auto newParent = findEntity(prefab.getRoot(), newParentId);
+		if (!newParent) {
+			throw Exception("Entity not found: " + newParentId, HalleyExceptions::Tools);
+		}
+		addChild(*newParent, childIndex, std::move(child)); // INVALIDATES REFERENCES
 	}
 
-	reloadEntity((*oldParent)["uuid"].asString(""), *oldParent);
-	reloadEntity((*newParent)["uuid"].asString(""), *newParent);
+	
+	reloadEntity(oldParentId, *(findEntity(prefab.getRoot(), oldParentId)));
+	reloadEntity(newParentId, *(findEntity(prefab.getRoot(), newParentId)));
 }
 
 ConfigNode* PrefabSceneData::findEntity(ConfigNode& node, const String& id)
