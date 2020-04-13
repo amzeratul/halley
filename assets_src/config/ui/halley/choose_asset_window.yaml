@@ -4,7 +4,7 @@ sizer: { type: vertical }
 children:
 - sizer: { type: horizontal }
   children:
-  - widget: { id: title, class: label, text: "Add Component" }
+  - widget: { id: title, class: label, text: "Choose Asset" }
     fill: centre
     proportion: 1
 - widget: { id: search, class: textInput, size: [50, 30], ghostText: Search }
