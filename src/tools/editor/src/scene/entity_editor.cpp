@@ -62,7 +62,7 @@ bool EntityEditor::loadEntity(const String& id, ConfigNode& data, const ConfigNo
 	Expects(ecsData);
 
 	gameResources = &resources;
-	context = std::make_unique<ComponentEditorContext>(factory, resources, [=] () { onEntityUpdated(); });
+	context = std::make_unique<ComponentEditorContext>(*static_cast<IEntityEditor*>(this), factory, resources);
 
 	if (currentId == id && currentEntityData == &data && !force) {
 		return false;
@@ -104,6 +104,16 @@ void EntityEditor::onFieldChangedByGizmo(const String& componentName, const Stri
 	sendEventDown(UIEvent(UIEventType::ReloadData, componentName + ":" + fieldName));
 }
 
+std::shared_ptr<IUIElement> EntityEditor::makeLabel(const String& text)
+{
+	auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromUserString(text));
+	label->setMaxWidth(100);
+	label->setMarquee(true);
+	auto labelBox = std::make_shared<UIWidget>("", Vector2f(100, 20), UISizer());
+	labelBox->add(label);
+	return labelBox;
+}
+
 void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data)
 {
 	auto componentUI = factory.makeUI("ui/halley/entity_editor_component");
@@ -134,14 +144,14 @@ void EntityEditor::createField(UIWidget& parent, const String& fieldType, const 
 		
 	if (compFieldFactory && compFieldFactory->canCreateLabel()) {
 		compFieldFactory->createLabelAndField(parent, *context, parameters);
+	} else if (compFieldFactory && compFieldFactory->isCompound()) {
+		auto field = factory.makeUI("ui/halley/entity_editor_compound_field");
+		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.fieldName));
+		field->getWidget("fields")->add(compFieldFactory->createField(*context, parameters));
+		parent.add(field);
 	} else {
 		auto container = std::make_shared<UISizer>();
-		auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromUserString(parameters.fieldName));
-		label->setMaxWidth(100);
-		label->setMarquee(true);
-		auto labelBox = std::make_shared<UIWidget>("", Vector2f(100, 20), UISizer());
-		labelBox->add(label);
-		container->add(labelBox, 0, {}, UISizerAlignFlags::CentreVertical);
+		container->add(makeLabel(parameters.fieldName), 0, {}, UISizerAlignFlags::CentreVertical);
 
 		if (compFieldFactory) {
 			container->add(compFieldFactory->createField(*context, parameters), 1);

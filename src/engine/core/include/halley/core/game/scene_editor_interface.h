@@ -20,22 +20,31 @@ namespace Halley {
         Resources* editorResources;
     };
 
+	class IEntityEditor {
+	public:
+		virtual ~IEntityEditor() = default;
+
+		virtual void onEntityUpdated() = 0;
+		virtual std::shared_ptr<IUIElement> makeLabel(const String& label) = 0;
+	};
+
     class ComponentEditorContext {
     public:
-        ComponentEditorContext(UIFactory& factory, Resources& gameResources, std::function<void()> updateCallback)
-            : factory(factory)
+        ComponentEditorContext(IEntityEditor& parent, UIFactory& factory, Resources& gameResources)
+            : parent(parent)
+    		, factory(factory)
             , gameResources(gameResources)
-            , updateCallback(std::move(updateCallback))
         {}
 
         UIFactory& getFactory() { return factory; }
         Resources& getGameResources() { return gameResources; }
-    	void onEntityUpdated() { updateCallback(); }
+    	void onEntityUpdated() { parent.onEntityUpdated(); }
+    	std::shared_ptr<IUIElement> makeLabel(const String& label) { return parent.makeLabel(label); }
 
     private:
+        IEntityEditor& parent;
         UIFactory& factory;
         Resources& gameResources;
-        std::function<void()> updateCallback;
     };
 
 	struct ComponentFieldParameters {
@@ -59,6 +68,7 @@ namespace Halley {
         virtual ~IComponentEditorFieldFactory() = default;
     	virtual String getFieldType() = 0;
     	virtual bool canCreateLabel() const { return false; }
+    	virtual bool isCompound() const { return false; }
         virtual void createLabelAndField(UIWidget& parent, ComponentEditorContext& context, const ComponentFieldParameters& parameters) {}
         virtual std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& parameters) = 0;
     };

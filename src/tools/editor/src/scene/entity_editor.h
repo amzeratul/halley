@@ -7,7 +7,7 @@ namespace Halley {
 	class ECSData;
 	class UIFactory;
 
-	class EntityEditor final : public UIWidget {
+	class EntityEditor final : public UIWidget, IEntityEditor {
 	public:
 		EntityEditor(String id, UIFactory& factory);
 
@@ -21,6 +21,8 @@ namespace Halley {
 		void reloadEntity();
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
+		std::shared_ptr<IUIElement> makeLabel(const String& label) override;
+		
 	private:
 		UIFactory& factory;
 		ECSData* ecsData = nullptr;
@@ -50,7 +52,7 @@ namespace Halley {
 		void setName(const String& name);
 		void setPrefabName(const String& name);
 
-		void onEntityUpdated();
+		void onEntityUpdated() override;
 		ConfigNode& getEntityData();
 
 		void updatePrefabNames();

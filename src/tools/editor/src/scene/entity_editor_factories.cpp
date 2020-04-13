@@ -192,6 +192,11 @@ public:
 		return "Halley::Sprite";
 	}
 
+	bool isCompound() const override
+	{
+		return true;
+	}
+
 	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto& componentData = pars.componentData;
@@ -209,12 +214,19 @@ public:
 		pivotContainer->add(std::make_shared<UITextInput>(keyboard, "pivotX", inputStyle, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
 		pivotContainer->add(std::make_shared<UITextInput>(keyboard, "pivotY", inputStyle, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
 
-		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Vertical, 4.0f));
+		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
+		container->getSizer().setColumnProportions({{0, 1}});
+		container->add(context.makeLabel("image"));
 		container->add(std::make_shared<SelectAssetWidget>("image", context.getFactory(), AssetType::Sprite, context.getGameResources()));
+		container->add(context.makeLabel("material"));
 		container->add(std::make_shared<SelectAssetWidget>("material", context.getFactory(), AssetType::MaterialDefinition, context.getGameResources()));
+		container->add(context.makeLabel("colour"));
 		container->add(std::make_shared<UITextInput>(keyboard, "colour", inputStyle));
+		container->add(context.makeLabel("pivot"));
 		container->add(pivotContainer);
+		container->add(context.makeLabel("flip"));
 		container->add(std::make_shared<UICheckbox>("flip", checkStyle), 0, {}, UISizerAlignFlags::Left);
+		container->add(context.makeLabel("visible"));
 		container->add(std::make_shared<UICheckbox>("visible", checkStyle), 0, {}, UISizerAlignFlags::Left);
 
 		container->bindData("image", fieldData["image"].asString(""), [&, fieldName](String newVal)
@@ -272,6 +284,11 @@ public:
 		return "Halley::AnimationPlayer";
 	}
 
+	bool isCompound() const override
+	{
+		return true;
+	}
+
 	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto& componentData = pars.componentData;
@@ -289,11 +306,17 @@ public:
 		const auto& scrollStyle = context.getFactory().getStyle("scrollbar");
 		const auto& listStyle = context.getFactory().getStyle("list");
 
-		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Vertical, 4.0f));
+		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
+		container->getSizer().setColumnProportions({{0, 1}});
+		container->add(context.makeLabel("animation"));
 		container->add(std::make_shared<SelectAssetWidget>("animation", context.getFactory(), AssetType::Animation, context.getGameResources()));
+		container->add(context.makeLabel("sequence"));
 		container->add(std::make_shared<UIDropdown>("sequence", dropStyle, scrollStyle, listStyle));
+		container->add(context.makeLabel("direction"));
 		container->add(std::make_shared<UIDropdown>("direction", dropStyle, scrollStyle, listStyle));
+		container->add(context.makeLabel("playbackSpeed"));
 		container->add(std::make_shared<UITextInput>(keyboard, "playbackSpeed", inputStyle, "", LocalisedString(), std::make_shared<UINumericValidator>(false, true)));
+		container->add(context.makeLabel("applyPivot"));
 		container->add(std::make_shared<UICheckbox>("applyPivot", checkStyle), 0, {}, UISizerAlignFlags::Left);
 
 		auto updateAnimation = [container, fieldName, &resources, &componentData] (const String& animName)

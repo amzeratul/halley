@@ -1,0 +1,10 @@
+---
+widget: { class: image, image: "ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#5E3962" }
+sizer: { type: vertical }
+children:
+- widget: { id: fieldName, class: label, text: "Name" }
+  fill: centre
+- widget: { id: fields, class: widget }
+  border: [1, 4, 1, 1]
+  sizer: { type: vertical, gap: 2 }
+...
