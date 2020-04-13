@@ -136,6 +136,9 @@ void UITreeList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
 		if (resData.type == UITreeListItem::PositionType::OnTop) {
 			newParentId = resData.item->getId();
 			newChildIndex = resData.item->getNumberOfChildren();
+		} else if (resData.type == UITreeListItem::PositionType::End) {
+			newParentId = "";
+			newChildIndex = root.getNumberOfChildren();
 		} else {
 			newParentId = resData.item->getParentId();
 			const auto parent = root.tryFindId(newParentId);
@@ -449,12 +452,13 @@ std::unique_ptr<UITreeListItem> UITreeListItem::removeFromTree(const String& id)
 
 std::optional<UITreeListItem::FindPositionResult> UITreeListItem::findPosition(UITreeList& tree, Vector2f pos) const
 {
-	return doFindPosition(tree, pos, 0);
+	return doFindPosition(tree, pos, 0, true);
 }
 
-std::optional<UITreeListItem::FindPositionResult> UITreeListItem::doFindPosition(UITreeList& tree, Vector2f pos, int depth) const
+std::optional<UITreeListItem::FindPositionResult> UITreeListItem::doFindPosition(UITreeList& tree, Vector2f pos, int depth, bool lastBranch) const
 {
 	if (listItem) {
+		const bool isLastItem = lastBranch && (!expanded || children.empty());
 		const bool isSingleRoot = depth <= 1 && tree.isSingleRoot();
 	
 		const auto r = listItem->getRect();
@@ -487,12 +491,14 @@ std::optional<UITreeListItem::FindPositionResult> UITreeListItem::doFindPosition
 				assert(!forceLeaf);
 				return FindPositionResult(PositionType::OnTop, this, Rect4f(x0, y0, x1 - x0, y1 - y0));
 			}
+		} else if (y >= y1 && isLastItem && !isSingleRoot) {
+			return FindPositionResult(PositionType::End, nullptr, Rect4f(0, y1, 20, 0));
 		}
 	}
 
 	if (expanded) {
-		for (auto& c: children) {
-			auto res = c->doFindPosition(tree, pos, depth + 1);
+		for (size_t i = 0; i < children.size(); ++i) {
+			auto res = children[i]->doFindPosition(tree, pos, depth + 1, lastBranch && i + 1 == children.size());
 			if (res) {
 				return *res;
 			}

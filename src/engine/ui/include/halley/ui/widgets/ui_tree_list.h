@@ -30,7 +30,8 @@ namespace Halley {
         enum class PositionType {
         	OnTop,
 	        Before,
-        	After
+        	After,
+        	End
         };
 
     	struct FindPositionResult {
@@ -84,7 +85,7 @@ namespace Halley {
     	bool forceLeaf = false;
 
     	void doUpdateTree(UITreeList& treeList, std::vector<int>& itemsLeftPerDepth, bool treeExpanded);
-        std::optional<FindPositionResult> doFindPosition(UITreeList& tree, Vector2f pos, int depth) const;
+        std::optional<FindPositionResult> doFindPosition(UITreeList& tree, Vector2f pos, int depth, bool lasBranch) const;
     };
 	
     class UITreeList : public UIList {
