@@ -203,6 +203,7 @@ public:
 
 		const auto& keyboard = context.getFactory().getKeyboard();
 		const auto& inputStyle = context.getFactory().getStyle("inputThin");
+		const auto& checkStyle = context.getFactory().getStyle("checkbox");
 
 		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Vertical, 4.0f));
 
@@ -242,6 +243,20 @@ public:
 		{
 			auto& node = componentData[fieldName]["pivot"];
 			node = ConfigNode(Vector2f(node.asVector2f(Vector2f()).x, newVal));
+			context.onEntityUpdated();
+		});
+
+		container->add(std::make_shared<UICheckbox>("flip", checkStyle), 0, {}, UISizerAlignFlags::Left);
+		container->bindData("flip", fieldData["flip"].asBool(false), [&, fieldName](bool newVal)
+		{
+			componentData[fieldName]["flip"] = ConfigNode(newVal);
+			context.onEntityUpdated();
+		});
+
+		container->add(std::make_shared<UICheckbox>("visible", checkStyle), 0, {}, UISizerAlignFlags::Left);
+		container->bindData("visible", fieldData["visible"].asBool(true), [&, fieldName](bool newVal)
+		{
+			componentData[fieldName]["visible"] = ConfigNode(newVal);
 			context.onEntityUpdated();
 		});
 
