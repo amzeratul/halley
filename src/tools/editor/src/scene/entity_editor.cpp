@@ -12,6 +12,7 @@ EntityEditor::EntityEditor(String id, UIFactory& factory)
 {
 	addFieldFactories(EntityEditorFactories::getDefaultFactories());
 	makeUI();
+	reloadEntity();
 }
 
 void EntityEditor::update(Time t, bool moved)
@@ -77,25 +78,37 @@ bool EntityEditor::loadEntity(const String& id, ConfigNode& data, const ConfigNo
 	return true;
 }
 
+void EntityEditor::unloadEntity()
+{
+	currentEntityData = nullptr;
+	prefabData = nullptr;
+	currentId = "";
+	isPrefab = false;
+	reloadEntity();
+}
+
 void EntityEditor::reloadEntity()
 {
+	getWidget("entityHeader")->setActive(currentEntityData && !isPrefab);
+	getWidget("prefabHeader")->setActive(currentEntityData && isPrefab);
+	getWidget("addComponentButton")->setActive(currentEntityData);
 	fields->clear();
-	if (getEntityData()["components"].getType() == ConfigNodeType::Sequence) {
-		for (auto& componentNode: getEntityData()["components"].asSequence()) {
-			for (auto& c: componentNode.asMap()) {
-				loadComponentData(c.first, c.second);
+
+	if (currentEntityData) {
+		if (getEntityData()["components"].getType() == ConfigNodeType::Sequence) {
+			for (auto& componentNode: getEntityData()["components"].asSequence()) {
+				for (auto& c: componentNode.asMap()) {
+					loadComponentData(c.first, c.second);
+				}
 			}
 		}
-	}
 
-	getWidget("entityHeader")->setActive(!isPrefab);
-	getWidget("prefabHeader")->setActive(isPrefab);
-
-	if (isPrefab) {
-		updatePrefabNames();
-		prefabName->setSelectedOption(getEntityData()["prefab"].asString(""));
-	} else {
-		entityName->setText(getEntityData()["name"].asString(""));
+		if (isPrefab) {
+			updatePrefabNames();
+			prefabName->setSelectedOption(getEntityData()["prefab"].asString(""));
+		} else {
+			entityName->setText(getEntityData()["name"].asString(""));
+		}
 	}
 }
 

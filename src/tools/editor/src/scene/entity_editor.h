@@ -18,11 +18,12 @@ namespace Halley {
 		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
 
 		bool loadEntity(const String& id, ConfigNode& data, const ConfigNode* prefabData, bool force, Resources& gameResources);
+		void unloadEntity();
 		void reloadEntity();
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
 		std::shared_ptr<IUIElement> makeLabel(const String& label) override;
-		
+
 	private:
 		UIFactory& factory;
 		ECSData* ecsData = nullptr;

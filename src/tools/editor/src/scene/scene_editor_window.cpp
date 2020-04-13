@@ -81,7 +81,8 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 void SceneEditorWindow::unloadScene()
 {
 	Expects(canvas);
-	
+
+	currentEntityId = "";
 	if (canvas->isLoaded()) {
 		auto& interface = canvas->getInterface();
 		auto& world = interface.getWorld();
@@ -95,6 +96,7 @@ void SceneEditorWindow::unloadScene()
 	}
 	entityFactory.reset();
 	sceneData.reset();
+	entityEditor->unloadEntity();
 }
 
 void SceneEditorWindow::update(Time t, bool moved)
