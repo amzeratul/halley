@@ -11,5 +11,5 @@ children:
     border: [0, 0, -1, 0]
 - widget: { id: componentFields, class: widget }
   border: [1, 4, 1, 1]
-  sizer: { type: grid, gap: 2, columns: 2, columnProportions: [0, 1] }
+  sizer: { type: vertical, gap: 2 }
 ...

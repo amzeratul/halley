@@ -52,10 +52,14 @@ namespace Halley {
         ConfigNode& componentData;
     };
 
+	class UIWidget;
+
     class IComponentEditorFieldFactory {
     public:
         virtual ~IComponentEditorFieldFactory() = default;
     	virtual String getFieldType() = 0;
+    	virtual bool canCreateLabel() const { return false; }
+        virtual void createLabelAndField(UIWidget& parent, ComponentEditorContext& context, const ComponentFieldParameters& parameters) {}
         virtual std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& parameters) = 0;
     };
 

@@ -119,31 +119,37 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 	if (iter != ecsData->getComponents().end()) {
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
-			const String fieldName = member.name;
-			
-			auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromUserString(fieldName));
-			label->setMaxWidth(100);
-			label->setMarquee(true);
-
-			auto labelBox = std::make_shared<UIWidget>("", Vector2f(100, 20), UISizer());
-			labelBox->add(label);
-
-			ComponentFieldParameters parameters(componentType, fieldName, member.defaultValue, data);
-			componentFields->add(labelBox, 0, {}, UISizerAlignFlags::CentreVertical);
-			componentFields->add(createEditField(member.type.name, parameters), 1);
+			ComponentFieldParameters parameters(componentType, member.name, member.defaultValue, data);
+			createField(*componentFields, member.type.name, parameters);
 		}
 	}
 	
 	fields->add(componentUI);
 }
 
-std::shared_ptr<IUIElement> EntityEditor::createEditField(const String& fieldType, const ComponentFieldParameters& parameters)
+void EntityEditor::createField(UIWidget& parent, const String& fieldType, const ComponentFieldParameters& parameters)
 {
-	auto iter = fieldFactories.find(fieldType);
-	if (iter != fieldFactories.end()) {
-		return iter->second->createField(*context, parameters);
+	const auto iter = fieldFactories.find(fieldType);
+	auto* compFieldFactory = iter != fieldFactories.end() ? iter->second.get() : nullptr;
+		
+	if (compFieldFactory && compFieldFactory->canCreateLabel()) {
+		compFieldFactory->createLabelAndField(parent, *context, parameters);
 	} else {
-		return std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromHardcodedString("N/A"));
+		auto container = std::make_shared<UISizer>();
+		auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromUserString(parameters.fieldName));
+		label->setMaxWidth(100);
+		label->setMarquee(true);
+		auto labelBox = std::make_shared<UIWidget>("", Vector2f(100, 20), UISizer());
+		labelBox->add(label);
+		container->add(labelBox, 0, {}, UISizerAlignFlags::CentreVertical);
+
+		if (compFieldFactory) {
+			container->add(compFieldFactory->createField(*context, parameters), 1);
+		} else {
+			container->add(std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromHardcodedString("N/A")));
+		}
+
+		parent.add(container);
 	}
 }
 
