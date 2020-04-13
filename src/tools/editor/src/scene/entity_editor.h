@@ -25,7 +25,7 @@ namespace Halley {
 		UIFactory& factory;
 		ECSData* ecsData = nullptr;
 		SceneEditorWindow* sceneEditor = nullptr;
-		ComponentEditorContext context;
+		std::unique_ptr<ComponentEditorContext> context;
 		
 		std::shared_ptr<UIWidget> fields;
 		std::shared_ptr<UITextInput> entityName;

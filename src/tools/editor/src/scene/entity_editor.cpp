@@ -9,7 +9,6 @@ using namespace Halley;
 EntityEditor::EntityEditor(String id, UIFactory& factory)
 	: UIWidget(std::move(id), Vector2f(200, 30), UISizer(UISizerType::Vertical))
 	, factory(factory)
-	, context(factory, [=] () { onEntityUpdated(); })
 {
 	addFieldFactories(EntityEditorFactories::getDefaultFactories());
 	makeUI();
@@ -63,6 +62,7 @@ bool EntityEditor::loadEntity(const String& id, ConfigNode& data, const ConfigNo
 	Expects(ecsData);
 
 	gameResources = &resources;
+	context = std::make_unique<ComponentEditorContext>(factory, resources, [=] () { onEntityUpdated(); });
 
 	if (currentId == id && currentEntityData == &data && !force) {
 		return false;
@@ -141,7 +141,7 @@ std::shared_ptr<IUIElement> EntityEditor::createEditField(const String& fieldTyp
 {
 	auto iter = fieldFactories.find(fieldType);
 	if (iter != fieldFactories.end()) {
-		return iter->second->createField(context, parameters);
+		return iter->second->createField(*context, parameters);
 	} else {
 		return std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromHardcodedString("N/A"));
 	}

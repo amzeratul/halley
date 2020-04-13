@@ -38,6 +38,7 @@ uiStyle:
     innerBorder: [ 6, 3, 6, 2 ]
     label: { font: Ubuntu Light, size: 14, colour: "#FFFFFF" }
     labelGhost: { font: Ubuntu Light, size: 14, colour: "#7F7F7F" }
+    minSize: 22
 
   buttonThin:
     normal: { img: halley_ui/ui_button.png, colour: "#9C5BB5" }

@@ -11,7 +11,7 @@
 using namespace Halley;
 
 UITextInput::UITextInput(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, String text, LocalisedString ghostText)
-	: UIWidget(id, {}, UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
+	: UIWidget(id, Vector2f(style.getFloat("minSize"), style.getFloat("minSize")), UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
 	, keyboard(std::move(keyboard))
 	, style(style)
 	, sprite(style.getSprite("box"))

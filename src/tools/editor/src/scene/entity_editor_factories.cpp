@@ -19,12 +19,10 @@ public:
 
 		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "textValue", context.getFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
 		field->bindData("textValue", value, [&, fieldName](String newVal)
-			{
-				componentData[fieldName] = ConfigNode(std::move(newVal));
-				context.onEntityUpdated();
-			});
-
-		field->setMinSize(Vector2f(60, 22));
+		{
+			componentData[fieldName] = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
 
 		return field;
 	}
@@ -48,7 +46,6 @@ public:
 
 		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "intValue", context.getFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, false));
-		field->setMinSize(Vector2f(60, 22));
 		field->bindData("intValue", value, [&, fieldName](int newVal)
 			{
 				componentData[fieldName] = ConfigNode(newVal);
@@ -77,7 +74,6 @@ public:
 
 		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "floatValue", context.getFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, true));
-		field->setMinSize(Vector2f(60, 22));
 		field->bindData("floatValue", value, [&, fieldName](float newVal)
 			{
 				componentData[fieldName] = ConfigNode(newVal);
@@ -152,7 +148,6 @@ public:
 		
 		auto x = std::make_shared<UITextInput>(keyboard, "xValue", style);
 		x->setValidator(std::make_shared<UINumericValidator>(true, true));
-		x->setMinSize(Vector2f(60, 22));
 		x->bindData("xValue", value.x, [&, fieldName, dataOutput] (float newVal)
 		{
 			if (*dataOutput) {
@@ -164,7 +159,6 @@ public:
 
 		auto y = std::make_shared<UITextInput>(keyboard, "yValue", style);
 		y->setValidator(std::make_shared<UINumericValidator>(true, true));
-		y->setMinSize(Vector2f(60, 22));
 		y->bindData("yValue", value.y, [&, fieldName, dataOutput](float newVal)
 		{
 			if (*dataOutput) {
@@ -194,6 +188,31 @@ public:
 	}
 };
 
+class ComponentEditorSpriteFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::Sprite";
+	}
+
+	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto& componentData = pars.componentData;
+		const auto& componentName = pars.componentName;
+		const auto& fieldName = pars.fieldName;
+		const auto& defaultValue = pars.defaultValue;
+
+		auto& fieldData = componentData[fieldName];
+
+		auto imageField = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "textValue", context.getFactory().getStyle("inputThin"), fieldData["image"].asString(""), LocalisedString::fromUserString(defaultValue));
+
+		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Vertical, 4.0f));
+		container->add(imageField);
+
+		return container;
+	}
+};
+
 std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -204,6 +223,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorAngle1fFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorBoolFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorVector2fFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorSpriteFieldFactory>());
 	
 	return factories;
 }

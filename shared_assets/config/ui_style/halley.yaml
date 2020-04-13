@@ -27,6 +27,7 @@ uiStyle:
     innerBorder: [ 6, 5, 6, 2 ]
     label: { font: Ubuntu Regular, size: 15, colour: "#FFFFFF" }
     labelGhost: { font: Ubuntu Regular, size: 15, colour: "#7F7F7F" }
+    minSize: 30
 
   list:
     background: { img: "halley_ui/ui_list_item.png", colour: "#201427" }

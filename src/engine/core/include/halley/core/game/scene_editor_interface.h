@@ -22,17 +22,19 @@ namespace Halley {
 
     class ComponentEditorContext {
     public:
-        ComponentEditorContext(UIFactory& factory, std::function<void()> updateCallback)
+        ComponentEditorContext(UIFactory& factory, Resources& gameResources, std::function<void()> updateCallback)
             : factory(factory)
-    		, updateCallback(updateCallback)
+            , gameResources(gameResources)
+            , updateCallback(std::move(updateCallback))
         {}
 
         UIFactory& getFactory() { return factory; }
-
+        Resources& getGameResources() { return gameResources; }
     	void onEntityUpdated() { updateCallback(); }
 
     private:
         UIFactory& factory;
+        Resources& gameResources;
         std::function<void()> updateCallback;
     };
 
