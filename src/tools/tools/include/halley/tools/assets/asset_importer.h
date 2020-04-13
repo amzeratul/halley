@@ -11,13 +11,16 @@ namespace Halley
 	class AssetImporter
 	{
 	public:
-		AssetImporter(Project& project, const std::vector<Path>& assetsSrc);
-		IAssetImporter& getRootImporter(Path path) const;
+		AssetImporter(Project& project, std::vector<Path> assetsSrc);
+		IAssetImporter& getRootImporter(const Path& path) const;
 		std::vector<std::reference_wrapper<IAssetImporter>> getImporters(ImportAssetType type) const;
 		const std::vector<Path>& getAssetsSrc() const;
 
 	private:
 		std::map<ImportAssetType, std::vector<std::unique_ptr<IAssetImporter>>> importers;
 		std::vector<Path> assetsSrc;
+		bool importByExtension = false;
+
+		void addImporter(std::vector<std::unique_ptr<IAssetImporter>>& dst, std::unique_ptr<IAssetImporter> importer);
 	};
 }

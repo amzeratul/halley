@@ -4,8 +4,8 @@
 #include "halley/tools/yaml/yaml_convert.h"
 using namespace Halley;
 
-ProjectProperties::ProjectProperties(const Path& propertiesFile)
-	: propertiesFile(propertiesFile)
+ProjectProperties::ProjectProperties(Path propertiesFile)
+	: propertiesFile(std::move(propertiesFile))
 {
 	load();
 }
@@ -50,9 +50,19 @@ void ProjectProperties::setDLL(String dll)
 	this->dll = std::move(dll);
 }
 
+bool ProjectProperties::getImportByExtension() const
+{
+	return importByExtension;
+}
+
+void ProjectProperties::setImportByExtension(bool enabled)
+{
+	importByExtension = enabled;
+}
+
 void ProjectProperties::load()
 {
-	auto data = FileSystem::readFile(propertiesFile);
+	const auto data = FileSystem::readFile(propertiesFile);
 	if (data.empty()) {
 		return;
 	}
@@ -63,6 +73,7 @@ void ProjectProperties::load()
 	name = node["name"].asString("Halley Project");
 	assetPackManifest = node["assetPackManifest"].asString("halley_project/asset_manifest.yaml");
 	dll = node["dll"].asString("");
+	importByExtension = node["importByExtension"].asBool(false);
 
 	if (node.hasKey("platforms")) {
 		for (auto& plat: node["platforms"].asSequence()) {

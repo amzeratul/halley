@@ -7,7 +7,7 @@ namespace Halley {
 
     class ProjectProperties {
     public:
-		ProjectProperties(const Path& propertiesFile);
+		ProjectProperties(Path propertiesFile);
 
 		const String& getName() const;
 		void setName(String name);
@@ -20,12 +20,16 @@ namespace Halley {
 
         const String& getDLL() const;
         void setDLL(String dll);
+    	
+		bool getImportByExtension() const;
+    	void setImportByExtension(bool enabled);
 
 	private:
 		const Path& propertiesFile;
 		String name;
     	String assetPackManifest;
         String dll;
+    	bool importByExtension = false;
     	std::vector<String> platforms;
 
 		void load();

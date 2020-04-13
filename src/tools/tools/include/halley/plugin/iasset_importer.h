@@ -95,11 +95,19 @@ namespace Halley
 
 		virtual ImportAssetType getType() const { return ImportAssetType::Skip; }
 		virtual void import(const ImportingAsset&, IAssetCollector&) {}
-		virtual int dropFrontCount() const { return 1; }
+		virtual int dropFrontCount() const { return importByExtension ? 0 : 1; }
 
 		virtual String getAssetId(const Path& file, const std::optional<Metadata>& metadata) const
 		{
 			return file.dropFront(dropFrontCount()).string();
 		}
+
+		void setImportByExtension(bool enabled)
+		{
+			importByExtension = enabled;
+		}
+
+	private:
+		bool importByExtension = false;
 	};
 }
