@@ -37,7 +37,7 @@ void EntityList::makeUI()
 		const auto childIndex = event.getIntData();
 
 		sceneData->reparentEntity(entityId, newParentId, childIndex);
-		sceneEditor->markModified();
+		sceneEditor->onEntityMoved(entityId);
 	});
 }
 

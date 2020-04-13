@@ -55,9 +55,9 @@ void SceneEditorGizmo::draw(Painter& painter) const
 
 void SceneEditorGizmo::setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& data)
 {
+	entityData = &data;
 	if (curEntity != entity) {
 		curEntity = entity;
-		entityData = &data;
 		onEntityChanged();
 	}
 }

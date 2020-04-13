@@ -238,6 +238,14 @@ void SceneEditorWindow::onEntityModified(const String& id)
 	markModified();
 }
 
+void SceneEditorWindow::onEntityMoved(const String& id)
+{
+	if (currentEntityId == id) {
+		selectEntity(id);
+	}
+	markModified();
+}
+
 void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
 {
 	entityEditor->onFieldChangedByGizmo(componentName, fieldName);

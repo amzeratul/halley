@@ -23,6 +23,7 @@ namespace Halley {
 		void onEntityAdded(const String& id, const String& parentId);
 		void onEntityRemoved(const String& id, const String& parentId);
 		void onEntityModified(const String& id);
+		void onEntityMoved(const String& id);
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
 		std::shared_ptr<const Prefab> getGamePrefab(const String& id) const;
