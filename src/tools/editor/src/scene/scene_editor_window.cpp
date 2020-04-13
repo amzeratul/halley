@@ -252,11 +252,28 @@ void SceneEditorWindow::addNewPrefab()
 
 void SceneEditorWindow::addNewPrefab(const String& prefabName)
 {
-	auto data = ConfigNode(ConfigNode::MapType());
-	data["uuid"] = UUID::generate().toString();
-	data["components"] = ConfigNode::SequenceType();
-	data["prefab"] = prefabName;
-	addEntity(std::move(data));
+	if (project.getGameResources().exists<Prefab>(prefabName)) {
+		const auto prefab = project.getGameResources().get<Prefab>(prefabName);
+		const auto& prefabRoot = prefab->getRoot();
+		if (prefabRoot.getType() == ConfigNodeType::Map) {
+			auto components = ConfigNode::SequenceType();
+
+			// Clone transform components
+			for (auto& c: prefabRoot["components"].asSequence()) {
+				for (auto& kv: c.asMap()) {
+					if (kv.first == "Transform2D" || kv.first == "Transform3D") {
+						components.emplace_back(c);
+					}
+				}
+			}
+
+			auto data = ConfigNode(ConfigNode::MapType());
+			data["uuid"] = UUID::generate().toString();
+			data["components"] = std::move(components);
+			data["prefab"] = prefabName;
+			addEntity(std::move(data));
+		}
+	}
 }
 
 void SceneEditorWindow::addEntity(ConfigNode data)
