@@ -157,6 +157,8 @@ namespace Halley {
 
 		virtual bool canReceiveFocus() const;
 
+		virtual void onAddedToRoot();
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;
@@ -191,6 +193,7 @@ namespace Halley {
 
 	private:
 		void setParent(UIParent* parent);
+		void notifyTreeAddedToRoot();
 
 		void setWidgetRect(Rect4f rect);
 		void resetInputResults();

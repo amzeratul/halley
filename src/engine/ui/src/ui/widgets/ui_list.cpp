@@ -144,7 +144,7 @@ void UIList::setItemEnabled(const String& id, bool enabled)
 
 void UIList::setItemActive(const String& id, bool active)
 {
-	auto curId = getSelectedOptionId();
+	const auto curId = getSelectedOptionId();
 	for (auto& item: items) {
 		if (item->getId() == id) {
 			if (!active) {
@@ -152,6 +152,25 @@ void UIList::setItemActive(const String& id, bool active)
 			}
 			item->setActive(active);
 		}
+	}
+	reassignIds();
+	if (!setSelectedOptionId(curId)) {
+		curOption = -1;
+		setSelectedOption(0);
+	}
+}
+
+void UIList::filterOptions(const String& filter)
+{
+	auto filterLower = filter.asciiLower();
+	
+	const auto curId = getSelectedOptionId();
+	for (auto& item: items) {
+		const bool active = item->getId().asciiLower().contains(filterLower);
+		if (!active) {
+			item->setSelected(false);
+		}
+		item->setActive(active);
 	}
 	reassignIds();
 	if (!setSelectedOptionId(curId)) {

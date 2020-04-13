@@ -180,7 +180,7 @@ void EntityEditor::addComponent()
 		}
 	}
 	std::sort(componentNames.begin(), componentNames.end());
-	
+
 	getRoot()->addChild(std::make_shared<AddComponentWindow>(factory, componentNames, [=] (std::optional<String> result)
 	{
 		if (result) {

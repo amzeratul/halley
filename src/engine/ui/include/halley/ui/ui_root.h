@@ -55,6 +55,8 @@ namespace Halley {
 
 		std::vector<std::shared_ptr<UIWidget>> collectWidgets();
 
+		void onChildAdded(UIWidget& child) override;
+		
 	private:
 		String id;
 		std::weak_ptr<UIWidget> currentMouseOver;

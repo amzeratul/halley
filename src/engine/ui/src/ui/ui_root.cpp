@@ -339,6 +339,11 @@ std::vector<std::shared_ptr<UIWidget>> UIRoot::collectWidgets()
 	return output;
 }
 
+void UIRoot::onChildAdded(UIWidget& child)
+{
+	child.onAddedToRoot();
+}
+
 void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output)
 {
 	for (auto& c: start->getChildren()) {

@@ -7,6 +7,8 @@ children:
   - widget: { id: title, class: label, text: "Add Component" }
     fill: centre
     proportion: 1
+- widget: { id: search, class: textInput, size: [50, 30], ghostText: Search }
+  border: [1, 4, 1, 1]
 - widget: { class: scrollBarPane, size: [200, 250] }
   border: [1, 4, 1, 1]
   children:

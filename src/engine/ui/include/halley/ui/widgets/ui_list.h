@@ -33,6 +33,7 @@ namespace Halley {
 
 		void setItemEnabled(const String& id, bool enabled);
 		void setItemActive(const String& id, bool active);
+		void filterOptions(const String& filter);
 
 		Rect4f getOptionRect(int curOption) const;
 

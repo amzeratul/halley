@@ -529,6 +529,14 @@ void UIWidget::setParent(UIParent* p)
 	onParentChanged();
 }
 
+void UIWidget::notifyTreeAddedToRoot()
+{
+	onAddedToRoot();
+	for (auto& c: getChildren()) {
+		c->notifyTreeAddedToRoot();
+	}
+}
+
 UIParent* UIWidget::getParent() const
 {
 	return parent;
@@ -744,6 +752,10 @@ void UIWidget::markAsNeedingLayout()
 bool UIWidget::canReceiveFocus() const
 {
 	return false;
+}
+
+void UIWidget::onAddedToRoot()
+{
 }
 
 void UIWidget::checkActive()

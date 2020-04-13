@@ -34,6 +34,7 @@ namespace Halley {
 		virtual void markAsNeedingLayout();
 		virtual void onChildrenAdded() {}
 		virtual void onChildrenRemoved() {}
+		virtual void onChildAdded(UIWidget& child) {}
 
 		std::vector<std::shared_ptr<UIWidget>>& getChildren();
 		const std::vector<std::shared_ptr<UIWidget>>& getChildren() const;
