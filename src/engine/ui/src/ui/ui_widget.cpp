@@ -8,7 +8,7 @@
 using namespace Halley;
 
 UIWidget::UIWidget(String id, Vector2f minSize, std::optional<UISizer> sizer, Vector4f innerBorder)
-	: id(id)
+	: id(std::move(id))
 	, size(minSize)
 	, minSize(minSize)
 	, innerBorder(innerBorder)
