@@ -288,5 +288,11 @@ void AnimationPlayer::updateIfNeeded()
 
 AnimationPlayer ConfigNodeSerializer<AnimationPlayer>::deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
 {
-	return AnimationPlayer(context.resources->get<Animation>(node["animation"].asString()), node["sequence"].asString("default"), node["direction"].asString("default"));
+	auto animName = node["animation"].asString("");
+	auto anim = animName.isEmpty() ? std::shared_ptr<Animation>() : context.resources->get<Animation>(animName);
+
+	auto player = AnimationPlayer(anim, node["sequence"].asString("default"), node["direction"].asString("default"));
+	player.setApplyPivot(node["applyPivot"].asBool(true));
+	player.setPlaybackSpeed(node["playbackSpeed"].asFloat(1.0f));	
+	return player;
 }

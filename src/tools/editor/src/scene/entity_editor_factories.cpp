@@ -147,10 +147,10 @@ public:
 		const auto& style = context.getFactory().getStyle("inputThin");
 
 		auto dataOutput = std::make_shared<bool>(true);
-		
-		auto x = std::make_shared<UITextInput>(keyboard, "xValue", style);
-		x->setValidator(std::make_shared<UINumericValidator>(true, true));
-		x->bindData("xValue", value.x, [&, fieldName, dataOutput] (float newVal)
+		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
+
+		container->add(std::make_shared<UITextInput>(keyboard, "xValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
+		container->bindData("xValue", value.x, [&, fieldName, dataOutput] (float newVal)
 		{
 			if (*dataOutput) {
 				auto& node = componentData[fieldName];
@@ -159,9 +159,8 @@ public:
 			}
 		});
 
-		auto y = std::make_shared<UITextInput>(keyboard, "yValue", style);
-		y->setValidator(std::make_shared<UINumericValidator>(true, true));
-		y->bindData("yValue", value.y, [&, fieldName, dataOutput](float newVal)
+		container->add(std::make_shared<UITextInput>(keyboard, "yValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
+		container->bindData("yValue", value.y, [&, fieldName, dataOutput](float newVal)
 		{
 			if (*dataOutput) {
 				auto& node = componentData[fieldName];
@@ -170,10 +169,6 @@ public:
 			}
 		});
 
-		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
-		container->add(x, 1);
-		container->add(y, 1);
-
 		container->setHandle(UIEventType::ReloadData, componentName + ":" + fieldName, [=, &componentData] (const UIEvent& event)
 		{
 			Vector2f newVal;
@@ -181,8 +176,8 @@ public:
 				newVal = componentData[fieldName].asVector2f();
 			}
 			*dataOutput = false;
-			x->setText(toString(newVal.x));
-			y->setText(toString(newVal.y));
+			event.getCurWidget().getWidgetAs<UITextInput>("xValue")->setText(toString(newVal.x));
+			event.getCurWidget().getWidgetAs<UITextInput>("yValue")->setText(toString(newVal.y));
 			*dataOutput = true;
 		});
 
@@ -206,29 +201,47 @@ public:
 
 		auto& fieldData = componentData[fieldName];
 
+		const auto& keyboard = context.getFactory().getKeyboard();
+		const auto& inputStyle = context.getFactory().getStyle("inputThin");
+
 		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Vertical, 4.0f));
 
-		auto imageField = std::make_shared<SelectAssetWidget>("image", context.getFactory(), AssetType::Sprite, context.getGameResources());
-		container->add(imageField);
+		container->add(std::make_shared<SelectAssetWidget>("image", context.getFactory(), AssetType::Sprite, context.getGameResources()));
 		container->bindData("image", fieldData["image"].asString(""), [&, fieldName](String newVal)
 		{
 			componentData[fieldName]["image"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 		
-		auto materialField = std::make_shared<SelectAssetWidget>("material", context.getFactory(), AssetType::MaterialDefinition, context.getGameResources());
-		container->add(materialField);
+		container->add(std::make_shared<SelectAssetWidget>("material", context.getFactory(), AssetType::MaterialDefinition, context.getGameResources()));
 		container->bindData("material", fieldData["material"].asString(""), [&, fieldName](String newVal)
 		{
 			componentData[fieldName]["material"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
-		auto colourField = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "colour", context.getFactory().getStyle("inputThin"), "", LocalisedString::fromUserString(defaultValue));
-		container->add(colourField);
+		container->add(std::make_shared<UITextInput>(keyboard, "colour", inputStyle, "", LocalisedString::fromUserString(defaultValue)));
 		container->bindData("colour", fieldData["colour"].asString("#FFFFFF"), [&, fieldName](String newVal)
 		{
 			componentData[fieldName]["colour"] = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
+
+		auto pivot = componentData[fieldName]["pivot"].asVector2f(Vector2f());
+		auto pivotContainer = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
+		container->add(pivotContainer);
+		pivotContainer->add(std::make_shared<UITextInput>(keyboard, "pivotX", inputStyle, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
+		pivotContainer->add(std::make_shared<UITextInput>(keyboard, "pivotY", inputStyle, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
+		pivotContainer->bindData("pivotX", pivot.x, [&, fieldName] (float newVal)
+		{
+			auto& node = componentData[fieldName]["pivot"];
+			node = ConfigNode(Vector2f(newVal, node.asVector2f(Vector2f()).y));
+			context.onEntityUpdated();
+		});
+		pivotContainer->bindData("pivotY", pivot.y, [&, fieldName] (float newVal)
+		{
+			auto& node = componentData[fieldName]["pivot"];
+			node = ConfigNode(Vector2f(node.asVector2f(Vector2f()).x, newVal));
 			context.onEntityUpdated();
 		});
 

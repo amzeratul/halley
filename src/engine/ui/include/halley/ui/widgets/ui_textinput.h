@@ -15,7 +15,7 @@ namespace Halley {
 	public:
 		using AutoCompleteHandle = std::function<std::vector<StringUTF32>(StringUTF32)>;
 		
-		explicit UITextInput(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, String text = "", LocalisedString ghostText = LocalisedString());
+		UITextInput(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, String text = "", LocalisedString ghostText = {}, std::shared_ptr<UIValidator> validator = {});
 
 		UITextInput(UITextInput&& other) = delete;
 		UITextInput(const UITextInput& other) = delete;

@@ -10,7 +10,7 @@
 
 using namespace Halley;
 
-UITextInput::UITextInput(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, String text, LocalisedString ghostText)
+UITextInput::UITextInput(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, String text, LocalisedString ghostText, std::shared_ptr<UIValidator> validator)
 	: UIWidget(id, Vector2f(style.getFloat("minSize"), style.getFloat("minSize")), UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
 	, keyboard(std::move(keyboard))
 	, style(style)
@@ -22,6 +22,7 @@ UITextInput::UITextInput(std::shared_ptr<InputKeyboard> keyboard, String id, UIS
 	, ghostText(std::move(ghostText))
 {
 	label.setText(text);
+	setValidator(std::move(validator));
 }
 
 bool UITextInput::canInteractWithMouse() const
