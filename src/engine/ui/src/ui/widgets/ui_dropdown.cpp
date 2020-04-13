@@ -10,7 +10,7 @@
 using namespace Halley;
 
 UIDropdown::UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, std::vector<LocalisedString> os, int defaultOption)
-	: UIClickable(id, {})
+	: UIClickable(id, Vector2f(style.getFloat("minSize"), style.getFloat("minSize")))
 	, style(style)
 	, scrollbarStyle(scrollbarStyle)
 	, listStyle(listStyle)

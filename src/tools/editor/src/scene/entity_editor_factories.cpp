@@ -281,18 +281,57 @@ public:
 
 		auto& fieldData = componentData[fieldName];
 
+		auto& resources = context.getGameResources();
 		const auto& keyboard = context.getFactory().getKeyboard();
 		const auto& inputStyle = context.getFactory().getStyle("inputThin");
 		const auto& checkStyle = context.getFactory().getStyle("checkbox");
+		const auto& dropStyle = context.getFactory().getStyle("dropdown");
+		const auto& scrollStyle = context.getFactory().getStyle("scrollbar");
+		const auto& listStyle = context.getFactory().getStyle("list");
 
 		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Vertical, 4.0f));
 		container->add(std::make_shared<SelectAssetWidget>("animation", context.getFactory(), AssetType::Animation, context.getGameResources()));
+		container->add(std::make_shared<UIDropdown>("sequence", dropStyle, scrollStyle, listStyle));
+		container->add(std::make_shared<UIDropdown>("direction", dropStyle, scrollStyle, listStyle));
 		container->add(std::make_shared<UITextInput>(keyboard, "playbackSpeed", inputStyle, "", LocalisedString(), std::make_shared<UINumericValidator>(false, true)));
 		container->add(std::make_shared<UICheckbox>("applyPivot", checkStyle), 0, {}, UISizerAlignFlags::Left);
 
-		container->bindData("animation", fieldData["animation"].asString(""), [&, fieldName](String newVal)
+		auto updateAnimation = [container, fieldName, &resources, &componentData] (const String& animName)
 		{
+			std::vector<String> sequences;
+			std::vector<String> directions;
+
+			if (!animName.isEmpty()) {
+				const auto anim = resources.get<Animation>(animName);
+				directions = anim->getDirectionNames();
+				sequences = anim->getSequenceNames();
+			}
+
+			auto sequence = container->getWidgetAs<UIDropdown>("sequence");
+			auto direction = container->getWidgetAs<UIDropdown>("direction");
+			sequence->setOptions(sequences);
+			direction->setOptions(directions);
+			sequence->setSelectedOption(componentData[fieldName]["sequence"].asString(""));
+			direction->setSelectedOption(componentData[fieldName]["direction"].asString(""));
+		};
+		updateAnimation(fieldData["animation"].asString(""));
+
+		container->bindData("animation", fieldData["animation"].asString(""), [&, fieldName, updateAnimation](String newVal)
+		{
+			updateAnimation(newVal);
 			componentData[fieldName]["animation"] = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
+
+		container->bindData("sequence", fieldData["sequence"].asString(""), [&, fieldName](String newVal)
+		{
+			componentData[fieldName]["sequence"] = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
+
+		container->bindData("direction", fieldData["direction"].asString(""), [&, fieldName](String newVal)
+		{
+			componentData[fieldName]["direction"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 

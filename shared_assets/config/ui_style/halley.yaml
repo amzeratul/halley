@@ -112,6 +112,7 @@ uiStyle:
     openSound: ""
     closeSound: ""
     height: 200
+    minSize: 30
     minSizeMargins: [ 40, 20, 0, 0 ]
 
   scrollbar:
