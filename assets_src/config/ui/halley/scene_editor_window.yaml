@@ -18,7 +18,9 @@ children:
         proportion: 1
     - sizer: { type: horizontal }
       children:
-      - widget: { id: addEntity, class: button, text: Add }
+      - widget: { id: addEntity, class: button, text: Add Entity }
+        proportion: 1
+      - widget: { id: addPrefab, class: button, text: Add Prefab }
         proportion: 1
       - widget: { id: removeEntity, class: button, text: Remove }
         proportion: 1

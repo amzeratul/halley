@@ -122,7 +122,12 @@ void SceneEditorWindow::makeUI()
 
 	setHandle(UIEventType::ButtonClicked, "addEntity", [=] (const UIEvent& event)
 	{
-		addEntity();
+		addNewEntity();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "addPrefab", [=] (const UIEvent& event)
+	{
+		addNewPrefab("");
 	});
 
 	setHandle(UIEventType::ButtonClicked, "removeEntity", [=] (const UIEvent& event)
@@ -224,41 +229,58 @@ void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const
 	markModified();
 }
 
-void SceneEditorWindow::addEntity()
+void SceneEditorWindow::addNewEntity()
 {
+	auto data = ConfigNode(ConfigNode::MapType());
+	data["name"] = "New Entity";
+	data["uuid"] = UUID::generate().toString();
+	data["children"] = ConfigNode::SequenceType();
+	data["components"] = ConfigNode::SequenceType();
+	addEntity(std::move(data));
+}
+
+void SceneEditorWindow::addNewPrefab(const String& prefabName)
+{
+	auto data = ConfigNode(ConfigNode::MapType());
+	data["uuid"] = UUID::generate().toString();
+	data["components"] = ConfigNode::SequenceType();
+	data["prefab"] = prefabName;
+	addEntity(std::move(data));
+}
+
+void SceneEditorWindow::addEntity(ConfigNode data)
+{
+	String parentId;
 	if (!currentEntityId.isEmpty()) {
 		const String& tryParentId = currentEntityId;
 		const auto res = sceneData->getEntityData(tryParentId);
 		const bool isParentPrefab = res.data.hasKey("prefab");
-		const String& parentId = isParentPrefab ? res.parentId : tryParentId;
-		addEntity(parentId);
+		parentId = isParentPrefab ? res.parentId : tryParentId;
+	}
+
+	if (!parentId.isEmpty() || prefab->getRoot().getType() == ConfigNodeType::Sequence) {
+		addEntity(parentId, std::move(data));
 	}
 }
 
-void SceneEditorWindow::addEntity(const String& parentId)
+void SceneEditorWindow::addEntity(const String& parentId, ConfigNode data)
 {
-	const auto newId = UUID::generate().toString();
-
-	auto newEntityData = ConfigNode(ConfigNode::MapType());
-	newEntityData["name"] = "New Entity";
-	newEntityData["uuid"] = newId;
-	newEntityData["children"] = ConfigNode::SequenceType();
-	newEntityData["components"] = ConfigNode::SequenceType();
-
+	const auto uuid = data["uuid"].asString();
+	
 	if (parentId.isEmpty()) {
 		// Should only be able to place items on the root if it's a scene
 		auto& root = sceneData->getEntityData("").data;
-		root.asSequence().emplace_back(ConfigNode(newEntityData));
+		root.asSequence().emplace_back(std::move(data));
 	} else {
 		ConfigNode& parentData = sceneData->getEntityData(parentId).data;
 		auto& children = parentData["children"];
 		if (children.getType() != ConfigNodeType::Sequence) {
 			children = ConfigNode::SequenceType();
 		}
-		children.asSequence().emplace_back(ConfigNode(newEntityData));
+		children.asSequence().emplace_back(std::move(data));
 	}
 
-	onEntityAdded(newId, parentId);
+	onEntityAdded(uuid, parentId);
 }
 
 void SceneEditorWindow::removeEntity()

@@ -47,8 +47,10 @@ namespace Halley {
 		void panCameraToEntity(const String& id);
 		void saveEntity();
 		
-		void addEntity();
-		void addEntity(const String& parentId);
+		void addNewEntity();
+		void addNewPrefab(const String& prefabName);
+		void addEntity(ConfigNode data);
+		void addEntity(const String& parentId, ConfigNode data);
 		void removeEntity();
 		void removeEntity(const String& entityId);
 		
