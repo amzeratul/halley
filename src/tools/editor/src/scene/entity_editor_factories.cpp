@@ -205,6 +205,9 @@ public:
 		const auto& defaultValue = pars.defaultValue;
 
 		auto& fieldData = componentData[fieldName];
+		if (fieldData.getType() == ConfigNodeType::Undefined) {
+			fieldData = ConfigNode::MapType();
+		}
 
 		const auto& keyboard = context.getFactory().getKeyboard();
 		const auto& inputStyle = context.getFactory().getStyle("inputThin");
@@ -297,7 +300,10 @@ public:
 		const auto& defaultValue = pars.defaultValue;
 
 		auto& fieldData = componentData[fieldName];
-
+		if (fieldData.getType() == ConfigNodeType::Undefined) {
+			fieldData = ConfigNode::MapType();
+		}
+		
 		auto& resources = context.getGameResources();
 		const auto& keyboard = context.getFactory().getKeyboard();
 		const auto& inputStyle = context.getFactory().getStyle("inputThin");
