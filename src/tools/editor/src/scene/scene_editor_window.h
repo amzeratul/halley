@@ -23,6 +23,8 @@ namespace Halley {
 		void onEntityModified(const String& id);
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
+		std::shared_ptr<const Prefab> getGamePrefab(const String& id) const;
+
 	protected:
 		void update(Time t, bool moved) override;
 		

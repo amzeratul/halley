@@ -37,7 +37,7 @@ children:
       - widget: { class: widget, size: [100, 20] }
         children:
         - widget: { id: "", class: label, text: "Prefab", style: "labelLight" }
-      - widget: { id: prefabName, class: textInput, size: [200, 22], style: inputThin }
+      - widget: { id: prefabName, class: dropdown, size: [200, 30] }
         proportion: 1
   - widget: { id: fields, class: widget }
     sizer: { type: vertical, gap: 8 }

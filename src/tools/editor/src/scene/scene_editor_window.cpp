@@ -153,7 +153,7 @@ void SceneEditorWindow::selectEntity(const String& id)
 		if (tree.entityId.isEmpty()) {
 			if (tree.children.empty()) {
 				ConfigNode empty;
-				entityEditor->loadEntity("", empty, nullptr, false);
+				entityEditor->loadEntity("", empty, nullptr, false, project.getGameResources());
 				return;
 			} else {
 				actualId = tree.children[0].entityId;
@@ -167,10 +167,10 @@ void SceneEditorWindow::selectEntity(const String& id)
 	const ConfigNode* prefabData = nullptr;
 	const String prefabName = entityData["prefab"].asString("");
 	if (!prefabName.isEmpty()) {
-		prefabData = &project.getGameResources().get<Prefab>(prefabName)->getRoot();
+		prefabData = &getGamePrefab(prefabName)->getRoot();
 	}
 	
-	entityEditor->loadEntity(actualId, entityData, prefabData, false);
+	entityEditor->loadEntity(actualId, entityData, prefabData, false, project.getGameResources());
 	canvas->getInterface().setSelectedEntity(UUID(actualId), entityData);
 	currentEntityId = actualId;
 }
@@ -230,6 +230,14 @@ void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const
 	markModified();
 }
 
+std::shared_ptr<const Prefab> SceneEditorWindow::getGamePrefab(const String& id) const
+{
+	if (project.getGameResources().exists<Prefab>(id)) {
+		return project.getGameResources().get<Prefab>(id);
+	}
+	return {};
+}
+
 void SceneEditorWindow::addNewEntity()
 {
 	auto data = ConfigNode(ConfigNode::MapType());
@@ -252,8 +260,8 @@ void SceneEditorWindow::addNewPrefab()
 
 void SceneEditorWindow::addNewPrefab(const String& prefabName)
 {
-	if (project.getGameResources().exists<Prefab>(prefabName)) {
-		const auto prefab = project.getGameResources().get<Prefab>(prefabName);
+	const auto prefab = getGamePrefab(prefabName);
+	if (prefab) {
 		const auto& prefabRoot = prefab->getRoot();
 		if (prefabRoot.getType() == ConfigNodeType::Map) {
 			auto components = ConfigNode::SequenceType();

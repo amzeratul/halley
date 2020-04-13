@@ -64,10 +64,15 @@ String EntityList::getEntityName(const ConfigNode& data) const
 	return getEntityName(data["name"].asString("?"), data["prefab"].asString());
 }
 
-String EntityList::getEntityName(const String& name, const String& prefab) const
+String EntityList::getEntityName(const String& name, const String& prefabName) const
 {
-	if (!prefab.isEmpty()) {
-		return "[" + prefab + "]";
+	if (!prefabName.isEmpty()) {
+		const auto prefab = sceneEditor->getGamePrefab(prefabName);
+		if (prefab) {
+			return prefab->getRoot()["name"].asString() + " [" + prefabName + "]";
+		} else {
+			return "Missing prefab! [" + prefabName + "]";
+		}
 	} else {
 		return name;
 	}

@@ -40,7 +40,7 @@ void EntityEditor::makeUI()
 	fields->setMinSize(Vector2f(300, 20));
 
 	entityName = getWidgetAs<UITextInput>("entityName");
-	prefabName = getWidgetAs<UITextInput>("prefabName");
+	prefabName = getWidgetAs<UIDropdown>("prefabName");
 
 	setHandle(UIEventType::ButtonClicked, "addComponentButton", [=](const UIEvent& event)
 	{
@@ -52,25 +52,27 @@ void EntityEditor::makeUI()
 		setName(event.getStringData());
 	});
 
-	setHandle(UIEventType::TextSubmit, "prefabName", [=] (const UIEvent& event)
+	setHandle(UIEventType::DropboxSelectionChanged, "prefabName", [=] (const UIEvent& event)
 	{
 		setPrefabName(event.getStringData());
 	});
 }
 
-bool EntityEditor::loadEntity(const String& id, ConfigNode& data, const ConfigNode* prefab, bool force)
+bool EntityEditor::loadEntity(const String& id, ConfigNode& data, const ConfigNode* prefab, bool force, Resources& resources)
 {
 	Expects(ecsData);
+
+	gameResources = &resources;
 
 	if (currentId == id && currentEntityData == &data && !force) {
 		return false;
 	}
-	
+
 	currentEntityData = &data;
 	prefabData = prefab;
 	currentId = id;
 	isPrefab = !!prefabData;
-	
+
 	reloadEntity();
 	return true;
 }
@@ -90,7 +92,8 @@ void EntityEditor::reloadEntity()
 	getWidget("prefabHeader")->setActive(isPrefab);
 
 	if (isPrefab) {
-		prefabName->setText(getEntityData()["prefab"].asString(""));
+		updatePrefabNames();
+		prefabName->setSelectedOption(getEntityData()["prefab"].asString(""));
 	} else {
 		entityName->setText(getEntityData()["name"].asString(""));
 	}
@@ -255,6 +258,13 @@ void EntityEditor::onEntityUpdated()
 ConfigNode& EntityEditor::getEntityData()
 {
 	return *currentEntityData;
+}
+
+void EntityEditor::updatePrefabNames()
+{
+	Expects(prefabName);
+
+	prefabName->setOptions(gameResources->enumerate<Prefab>());
 }
 
 void EntityEditor::addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories)

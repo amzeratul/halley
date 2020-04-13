@@ -17,7 +17,7 @@ namespace Halley {
 		void setECSData(ECSData& data);
 		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
 
-		bool loadEntity(const String& id, ConfigNode& data, const ConfigNode* prefabData, bool force);
+		bool loadEntity(const String& id, ConfigNode& data, const ConfigNode* prefabData, bool force, Resources& gameResources);
 		void reloadEntity();
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
@@ -29,7 +29,7 @@ namespace Halley {
 		
 		std::shared_ptr<UIWidget> fields;
 		std::shared_ptr<UITextInput> entityName;
-		std::shared_ptr<UITextInput> prefabName;
+		std::shared_ptr<UIDropdown> prefabName;
 		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 
 		String currentId;
@@ -37,6 +37,7 @@ namespace Halley {
 		const ConfigNode* prefabData = nullptr;
 		bool needToReloadUI = false;
 		bool isPrefab = false;
+		Resources* gameResources = nullptr;
 
 		void makeUI();
 		void loadComponentData(const String& componentType, ConfigNode& data);
@@ -51,5 +52,7 @@ namespace Halley {
 
 		void onEntityUpdated();
 		ConfigNode& getEntityData();
+
+		void updatePrefabNames();
 	};
 }
