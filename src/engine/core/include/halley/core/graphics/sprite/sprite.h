@@ -139,13 +139,6 @@ namespace Halley
 	template<>
 	class ConfigNodeSerializer<Sprite> {
 	public:
-		Sprite deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
-		{
-			if (node.hasKey("image")) {
-				return Sprite().setImage(*context.resources, node["image"].asString(), node["material"].asString(""));
-			}
-			
-			return Sprite();
-		}
+		Sprite deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node);
 	};
 }

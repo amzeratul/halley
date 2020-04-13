@@ -224,6 +224,14 @@ public:
 			context.onEntityUpdated();
 		});
 
+		auto colourField = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "colour", context.getFactory().getStyle("inputThin"), "", LocalisedString::fromUserString(defaultValue));
+		container->add(colourField);
+		container->bindData("colour", fieldData["colour"].asString("#FFFFFF"), [&, fieldName](String newVal)
+		{
+			componentData[fieldName]["colour"] = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
+
 		return container;
 	}
 };

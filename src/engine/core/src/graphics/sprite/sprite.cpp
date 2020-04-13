@@ -419,3 +419,20 @@ Vector2f Sprite::getScale() const
 {
 	return vertexAttrib.scale;
 }
+
+Sprite ConfigNodeSerializer<Sprite>::deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+{
+	Sprite sprite;
+
+	if (node.hasKey("image")) {
+		sprite.setImage(*context.resources, node["image"].asString(), node["material"].asString(""));
+	}
+	if (node.hasKey("pivot")) {
+		sprite.setAbsolutePivot(node["pivot"].asVector2f());
+	}
+	sprite.setFlip(node["flip"].asBool(false));
+	sprite.setVisible(node["visible"].asBool(true));
+	sprite.setColour(Colour4f::fromString(node["colour"].asString("#FFFFFF")));
+
+	return sprite;
+}
