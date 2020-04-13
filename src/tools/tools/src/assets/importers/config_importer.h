@@ -21,4 +21,12 @@ namespace Halley
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 	};
+
+	class SceneImporter : public IAssetImporter
+	{
+	public:
+		ImportAssetType getType() const override { return ImportAssetType::Scene; }
+
+		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
+	};
 }

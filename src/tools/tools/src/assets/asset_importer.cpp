@@ -34,6 +34,7 @@ AssetImporter::AssetImporter(Project& project, std::vector<Path> assetsSrc)
 		std::make_unique<MaterialImporter>(),
 		std::make_unique<ConfigImporter>(),
 		std::make_unique<PrefabImporter>(),
+		std::make_unique<SceneImporter>(),
 		std::make_unique<CodegenImporter>(),
 		std::make_unique<AudioImporter>(),
 		std::make_unique<AudioEventImporter>(),
@@ -84,6 +85,8 @@ IAssetImporter& AssetImporter::getRootImporter(const Path& path) const
 		type = ImportAssetType::Config;
 	} else if (root == "prefab") {
 		type = ImportAssetType::Prefab;
+	} else if (root == "scene") {
+		type = ImportAssetType::Scene;
 	} else if (root == "audio") {
 		type = ImportAssetType::Audio;
 	} else if (root == "audio_event") {

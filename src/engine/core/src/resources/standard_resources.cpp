@@ -35,6 +35,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<Mesh>();
 	resources.init<VariableTable>();
 	resources.init<Prefab>();
+	resources.init<Scene>();
 
 	resources.of<SpriteResource>().setResourceEnumerator([&] () -> std::vector<String>
 	{

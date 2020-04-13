@@ -162,6 +162,23 @@ std::optional<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const 
 	return {};
 }
 
+Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& assetId) const
+{
+	// This method is not very efficient
+	std::lock_guard<std::mutex> lock(mutex);
+
+	for (auto& a: assetsImported) {
+		const auto& asset = a.second.asset;
+		for (auto& o: asset.outputFiles) {
+			if (o.type == type && o.name == assetId) {
+				return o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).first : o.primaryInputFile;
+			}
+		}
+	}
+
+	return {};
+}
+
 bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset) const
 {
 	std::lock_guard<std::mutex> lock(mutex);

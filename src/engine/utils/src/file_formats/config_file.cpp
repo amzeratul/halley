@@ -857,8 +857,7 @@ std::unique_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
 	auto prefab = std::make_unique<Prefab>();
 
 	auto data = loader.getStatic();
-	Deserializer s(data->getSpan());
-	s >> *prefab;
+	Deserializer::fromBytes(*prefab, data->getSpan());
 
 	return prefab;
 }
@@ -866,6 +865,21 @@ std::unique_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
 void Prefab::reload(Resource&& resource)
 {
 	*this = std::move(dynamic_cast<Prefab&>(resource));
+	updateRoot();
+}
+
+std::unique_ptr<Scene> Scene::loadResource(ResourceLoader& loader)
+{
+	auto scene = std::make_unique<Scene>();
+	auto data = loader.getStatic();
+	Deserializer::fromBytes(*scene, data->getSpan());
+
+	return scene;
+}
+
+void Scene::reload(Resource&& resource)
+{
+	*this = std::move(dynamic_cast<Scene&>(resource));
 	updateRoot();
 }
 

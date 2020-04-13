@@ -28,7 +28,7 @@ namespace Halley {
 		void onVariableUpdate(Time time) override;
 		void onRender(RenderContext& context) const override;
 
-		void openPrefab(const String& name);
+		void openPrefab(const String& name, AssetType assetType);
 
 	private:
 		HalleyEditor& editor;

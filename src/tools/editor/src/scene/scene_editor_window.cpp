@@ -27,17 +27,34 @@ SceneEditorWindow::~SceneEditorWindow()
 
 void SceneEditorWindow::loadScene(const String& name)
 {
-	Expects(canvas);
-	
 	unloadScene();
-	
-	if (!name.isEmpty() && canvas->isLoaded()) {
-		sceneName = name;
+	assetPath = project.getAssetsSrcPath() / project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::Scene, name);
+
+	if (!name.isEmpty()) {
+		loadScene(*project.getGameResources().get<Scene>(name));
+	}
+}
+
+void SceneEditorWindow::loadPrefab(const String& name)
+{
+	unloadScene();
+	assetPath = project.getAssetsSrcPath() / project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::Prefab, name);
+
+	if (!name.isEmpty()) {
+		loadScene(*project.getGameResources().get<Prefab>(name));
+	}
+}
+
+void SceneEditorWindow::loadScene(const Prefab& origPrefab)
+{
+	Expects(canvas);
+
+	if (canvas->isLoaded()) {
 		auto& interface = canvas->getInterface();
 		auto& world = interface.getWorld();
 
 		// Load prefab
-		prefab = std::make_unique<Prefab>(*project.getGameResources().get<Prefab>(name));
+		prefab = std::make_unique<Prefab>(origPrefab);
 		preparePrefab(*prefab);
 
 		// Spawn scene
@@ -76,7 +93,6 @@ void SceneEditorWindow::unloadScene()
 		}		
 		world.spawnPending();
 	}
-	sceneName = "";
 	entityFactory.reset();
 	sceneData.reset();
 }
@@ -84,10 +100,9 @@ void SceneEditorWindow::unloadScene()
 void SceneEditorWindow::update(Time t, bool moved)
 {
 	if (canvas->needsReload()) {
-		const String name = sceneName;
 		unloadScene();
 		canvas->reload();
-		loadScene(name);
+		loadScene(*prefab);
 	}
 }
 
@@ -187,10 +202,9 @@ void SceneEditorWindow::saveEntity()
 	YAMLConvert::EmitOptions options;
 	options.mapKeyOrder = {{ "name", "uuid", "components", "children" }};
 
-	auto path = project.getAssetsSrcPath() / "prefab" / (sceneName + ".yaml");
 	auto strData = YAMLConvert::generateYAML(*prefab, options);
 	auto data = gsl::as_bytes(gsl::span<const char>(strData.c_str(), strData.length()));
-	FileSystem::writeFile(path, data);
+	FileSystem::writeFile(assetPath, data);
 }
 
 void SceneEditorWindow::markModified()

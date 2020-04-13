@@ -213,6 +213,7 @@ std::shared_ptr<AssetEditor> AssetsEditorWindow::makeEditor(AssetType type, cons
 	case AssetType::Texture:
 		return std::make_shared<AnimationEditor>(factory, project.getGameResources(), type, project);
 	case AssetType::Prefab:
+	case AssetType::Scene:
 		return std::make_shared<PrefabEditor>(factory, project.getGameResources(), type, project, stage);
 	}
 	return {};

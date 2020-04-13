@@ -238,10 +238,14 @@ void EditorRootStage::unloadProject()
 	project.reset();
 }
 
-void EditorRootStage::openPrefab(const String& name)
+void EditorRootStage::openPrefab(const String& name, AssetType assetType)
 {
 	auto sceneEditor = ui->getWidgetAs<SceneEditorWindow>("scene_editor");
-	sceneEditor->loadScene(name);
+	if (assetType == AssetType::Scene) {
+		sceneEditor->loadScene(name);
+	} else if (assetType == AssetType::Prefab) {
+		sceneEditor->loadPrefab(name);
+	}
 	auto toolbar = ui->getWidgetAs<UIList>("toolbarList");
 	toolbar->setSelectedOption(int(EditorTabs::Scene));
 	//pagedPane->setPage(int(EditorTabs::Scene));

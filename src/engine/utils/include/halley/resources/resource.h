@@ -29,7 +29,8 @@ namespace Halley
 		Shader,
 		Mesh,
 		VariableTable,
-		Prefab
+		Prefab,
+		Scene
 	};
 
 	// This order matters.
@@ -53,12 +54,13 @@ namespace Halley
 		Mesh,
 		MeshAnimation,
 		VariableTable,
-		Prefab
+		Prefab,
+		Scene
 	};
 
 	template <>
 	struct EnumNames<AssetType> {
-		constexpr std::array<const char*, 17> operator()() const {
+		constexpr std::array<const char*, 18> operator()() const {
 			return{{
 				"binaryFile",
 				"textFile",
@@ -76,7 +78,8 @@ namespace Halley
 				"mesh",
 				"meshAnimation",
 				"variableTable",
-				"prefab"
+				"prefab",
+				"scene"
 			}};
 		}
 	};

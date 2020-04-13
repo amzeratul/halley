@@ -21,6 +21,6 @@ void PrefabEditor::setupWindow()
 
 	setHandle(UIEventType::ButtonClicked, "open", [=](const UIEvent& event)
 	{
-		stage.openPrefab(assetId);
+		stage.openPrefab(assetId, assetType);
 	});
 }

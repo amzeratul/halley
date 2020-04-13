@@ -206,10 +206,18 @@ namespace Halley
 		const ConfigNode* node = nullptr;
 	};
 	
-	class Prefab final : public ConfigFile {
+	class Prefab : public ConfigFile {
 	public:
 		static std::unique_ptr<Prefab> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Prefab; }
+
+		void reload(Resource&& resource) override;
+	};
+
+	class Scene final : public Prefab {
+	public:
+		static std::unique_ptr<Scene> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::Scene; }
 
 		void reload(Resource&& resource) override;
 	};

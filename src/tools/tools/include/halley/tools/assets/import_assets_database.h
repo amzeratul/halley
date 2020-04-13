@@ -81,6 +81,8 @@ namespace Halley
 		std::optional<Metadata> getMetadata(const Path& path) const;
 		std::optional<Metadata> getMetadata(AssetType type, const String& assetId) const;
 
+		Path getPrimaryInputFile(AssetType type, const String& assetId) const;
+
 		bool needsImporting(const ImportAssetsDatabaseEntry& asset) const;
 		void markAsImported(const ImportAssetsDatabaseEntry& asset);
 		void markDeleted(const ImportAssetsDatabaseEntry& asset);

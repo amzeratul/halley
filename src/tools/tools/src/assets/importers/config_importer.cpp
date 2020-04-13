@@ -25,3 +25,14 @@ void PrefabImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::Prefab, Serializer::toBytes(prefab), meta);
 }
 
+void SceneImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
+{
+	Scene scene;
+	YAMLConvert::parseConfig(scene, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
+
+	Metadata meta = asset.inputFiles.at(0).metadata;
+	meta.set("asset_compression", "deflate");
+
+	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::Scene, Serializer::toBytes(scene), meta);
+}
+

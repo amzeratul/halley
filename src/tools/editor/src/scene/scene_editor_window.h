@@ -15,6 +15,8 @@ namespace Halley {
 		~SceneEditorWindow();
 
 		void loadScene(const String& sceneName);
+		void loadPrefab(const String& name);
+		void loadScene(const Prefab& prefab);
 		void unloadScene();
 		void markModified();
 
@@ -36,7 +38,7 @@ namespace Halley {
 		std::shared_ptr<EntityList> entityList;
 		std::shared_ptr<EntityEditor> entityEditor;
 
-		String sceneName;
+		Path assetPath;
 		std::shared_ptr<ISceneData> sceneData;
 		std::unique_ptr<Prefab> prefab;
 		std::shared_ptr<EntityFactory> entityFactory;
