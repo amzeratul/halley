@@ -48,6 +48,7 @@ namespace Halley {
 		void saveEntity();
 		
 		void addNewEntity();
+		void addNewPrefab();
 		void addNewPrefab(const String& prefabName);
 		void addEntity(ConfigNode data);
 		void addEntity(const String& parentId, ConfigNode data);

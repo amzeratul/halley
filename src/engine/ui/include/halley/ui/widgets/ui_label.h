@@ -12,6 +12,7 @@ namespace Halley {
 		~UILabel();
 
 		void setText(const LocalisedString& text);
+		void setText(LocalisedString&& text);
 		void setFutureText(Future<String> text);
 		void setColourOverride(const std::vector<ColourOverride>& overrides);
 

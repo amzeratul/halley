@@ -134,6 +134,14 @@ void UILabel::setText(const LocalisedString& t)
 	}
 }
 
+void UILabel::setText(LocalisedString&& t)
+{
+	if (text != t) {
+		text = std::move(t);
+		updateText();
+	}
+}
+
 void UILabel::setFutureText(Future<String> futureText)
 {
 	const auto flag = aliveFlag;

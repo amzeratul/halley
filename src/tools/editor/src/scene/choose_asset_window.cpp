@@ -1,7 +1,7 @@
 #include "choose_asset_window.h"
 using namespace Halley;
 
-ChooseAssetWindow::ChooseAssetWindow(UIFactory& factory, std::function<void(std::optional<String>)> callback)
+ChooseAssetWindow::ChooseAssetWindow(UIFactory& factory, Callback callback)
 	: UIWidget("choose_asset_window", {}, UISizer())
 	, factory(factory)
 	, callback(std::move(callback))
@@ -15,7 +15,6 @@ ChooseAssetWindow::~ChooseAssetWindow() = default;
 
 void ChooseAssetWindow::onAddedToRoot()
 {
-	getWidgetAs<UILabel>("title")->setText(getTitle());
 	getRoot()->setFocus(getWidget("search"));
 }
 
@@ -26,9 +25,9 @@ void ChooseAssetWindow::setAssetIds(const std::vector<String>& ids)
 	}
 }
 
-LocalisedString ChooseAssetWindow::getTitle() const
+void ChooseAssetWindow::setTitle(LocalisedString title)
 {
-	return LocalisedString::fromHardcodedString("Choose Asset");
+	getWidgetAs<UILabel>("title")->setText(std::move(title));
 }
 
 void ChooseAssetWindow::makeUI()
@@ -75,4 +74,18 @@ void ChooseAssetWindow::cancel()
 void ChooseAssetWindow::setFilter(const String& str)
 {
 	options->filterOptions(str);
+}
+
+AddComponentWindow::AddComponentWindow(UIFactory& factory, const std::vector<String>& componentList, Callback callback)
+	: ChooseAssetWindow(factory, std::move(callback))
+{
+	setAssetIds(componentList);
+	setTitle(LocalisedString::fromHardcodedString("Add Component"));
+}
+
+ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, Resources& gameResources, Callback callback)
+	: ChooseAssetWindow(factory, std::move(callback))
+{
+	setAssetIds(gameResources.enumerate<Prefab>());
+	setTitle(LocalisedString::fromHardcodedString("Choose prefab"));
 }

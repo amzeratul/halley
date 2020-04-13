@@ -16,6 +16,12 @@ namespace Halley {
 
 	public:
 		LocalisedString();
+
+		LocalisedString(const LocalisedString& other) = default;
+		LocalisedString(LocalisedString&& other) = default;
+
+		LocalisedString& operator=(const LocalisedString& other) = default;
+		LocalisedString& operator=(LocalisedString&& other) = default;
 		
 		LocalisedString& operator+=(const LocalisedString& str);
 

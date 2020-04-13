@@ -1,6 +1,6 @@
 #include "entity_editor.h"
 
-#include "add_component_window.h"
+#include "choose_asset_window.h"
 #include "entity_editor_factories.h"
 #include "halley/tools/ecs/ecs_data.h"
 #include "scene_editor_window.h"

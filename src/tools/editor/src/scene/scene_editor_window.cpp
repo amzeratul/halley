@@ -2,6 +2,7 @@
 
 
 
+#include "choose_asset_window.h"
 #include "entity_editor.h"
 #include "entity_list.h"
 #include "halley/tools/file/filesystem.h"
@@ -127,7 +128,7 @@ void SceneEditorWindow::makeUI()
 
 	setHandle(UIEventType::ButtonClicked, "addPrefab", [=] (const UIEvent& event)
 	{
-		addNewPrefab("");
+		addNewPrefab();
 	});
 
 	setHandle(UIEventType::ButtonClicked, "removeEntity", [=] (const UIEvent& event)
@@ -164,7 +165,7 @@ void SceneEditorWindow::selectEntity(const String& id)
 
 	auto& entityData = sceneData->getEntityData(actualId).data;
 	const ConfigNode* prefabData = nullptr;
-	String prefabName = entityData["prefab"].asString("");
+	const String prefabName = entityData["prefab"].asString("");
 	if (!prefabName.isEmpty()) {
 		prefabData = &project.getGameResources().get<Prefab>(prefabName)->getRoot();
 	}
@@ -237,6 +238,16 @@ void SceneEditorWindow::addNewEntity()
 	data["children"] = ConfigNode::SequenceType();
 	data["components"] = ConfigNode::SequenceType();
 	addEntity(std::move(data));
+}
+
+void SceneEditorWindow::addNewPrefab()
+{
+	getRoot()->addChild(std::make_shared<ChoosePrefabWindow>(uiFactory, project.getGameResources(), [=] (std::optional<String> result)
+	{
+		if (result) {
+			addNewPrefab(result.value());
+		}
+	}));
 }
 
 void SceneEditorWindow::addNewPrefab(const String& prefabName)
