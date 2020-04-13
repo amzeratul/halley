@@ -15,7 +15,7 @@ children:
   - widget: { id: options, class: list, size: [400, 400] }
 - sizer: { type: horizontal }
   children:
-  - widget: { id: ok, class: button, text: "Add" }
+  - widget: { id: ok, class: button, text: "OK" }
     proportion: 1
   - widget: { id: cancel, class: button, text: "Cancel" }
     proportion: 1

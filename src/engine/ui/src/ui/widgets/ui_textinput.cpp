@@ -101,6 +101,16 @@ bool UITextInput::canReceiveFocus() const
 	return true;
 }
 
+void UITextInput::setReadOnly(bool enabled)
+{
+	text.setReadOnly(enabled);
+}
+
+bool UITextInput::isReadOnly() const
+{
+	return text.isReadOnly();
+}
+
 void UITextInput::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);

@@ -18,11 +18,12 @@ void ChooseAssetWindow::onAddedToRoot()
 	getRoot()->setFocus(getWidget("search"));
 }
 
-void ChooseAssetWindow::setAssetIds(const std::vector<String>& ids)
+void ChooseAssetWindow::setAssetIds(const std::vector<String>& ids, const String& defaultOption)
 {
 	for (const auto& c: ids) {
 		options->addTextItem(c, LocalisedString::fromUserString(c));
 	}
+	options->setSelectedOptionId(defaultOption);
 }
 
 void ChooseAssetWindow::setTitle(LocalisedString title)
@@ -79,13 +80,13 @@ void ChooseAssetWindow::setFilter(const String& str)
 AddComponentWindow::AddComponentWindow(UIFactory& factory, const std::vector<String>& componentList, Callback callback)
 	: ChooseAssetWindow(factory, std::move(callback))
 {
-	setAssetIds(componentList);
+	setAssetIds(componentList, "");
 	setTitle(LocalisedString::fromHardcodedString("Add Component"));
 }
 
-ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, Resources& gameResources, Callback callback)
+ChooseAssetTypeWindow::ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, Callback callback)
 	: ChooseAssetWindow(factory, std::move(callback))
 {
-	setAssetIds(gameResources.enumerate<Prefab>());
-	setTitle(LocalisedString::fromHardcodedString("Choose prefab"));
+	setAssetIds(gameResources.ofType(type).enumerate(), defaultOption);
+	setTitle(LocalisedString::fromHardcodedString("Choose " + toString(type)));
 }

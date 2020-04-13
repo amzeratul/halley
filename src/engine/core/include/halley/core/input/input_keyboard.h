@@ -58,6 +58,9 @@ namespace Halley {
 		int getTextRevision() const;
 		Range<int> getTotalRange() const;
 
+		void setReadOnly(bool enable);
+		bool isReadOnly() const;
+
 	private:
 		StringUTF32 text;
 		Range<int> selection;
@@ -65,6 +68,7 @@ namespace Halley {
 		int minLength = 0;
 		std::optional<int> maxLength = {};
 		int textRevision = 0;
+		bool readOnly = false;
 
 		void onTextModified();
 		void onDelete();

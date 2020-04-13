@@ -15,7 +15,7 @@ namespace Halley {
 		virtual ~ChooseAssetWindow();
 
         void onAddedToRoot() override;
-		void setAssetIds(const std::vector<String>& ids);
+		void setAssetIds(const std::vector<String>& ids, const String& defaultOption);
 
 		void setTitle(LocalisedString title);
 
@@ -36,8 +36,8 @@ namespace Halley {
         AddComponentWindow(UIFactory& factory, const std::vector<String>& componentList, Callback callback);
     };
 
-	class ChoosePrefabWindow : public ChooseAssetWindow {
+	class ChooseAssetTypeWindow : public ChooseAssetWindow {
 	public:
-        ChoosePrefabWindow(UIFactory& factory, Resources& gameResources, Callback callback);
+        ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, Callback callback);
 	};
 }

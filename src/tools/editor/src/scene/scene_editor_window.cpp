@@ -264,7 +264,7 @@ void SceneEditorWindow::addNewEntity()
 
 void SceneEditorWindow::addNewPrefab()
 {
-	getRoot()->addChild(std::make_shared<ChoosePrefabWindow>(uiFactory, project.getGameResources(), [=] (std::optional<String> result)
+	getRoot()->addChild(std::make_shared<ChooseAssetTypeWindow>(uiFactory, AssetType::Prefab, "", project.getGameResources(), [=] (std::optional<String> result)
 	{
 		if (result) {
 			addNewPrefab(result.value());

@@ -86,7 +86,7 @@ void TextInputData::insertText(const String& text)
 
 void TextInputData::insertText(const StringUTF32& t)
 {
-	if (!t.empty()) {
+	if (!t.empty() && !readOnly) {
 		size_t insertSize = t.length();
 		if (maxLength) {
 			const int curSelLen = selection.end - selection.start;
@@ -137,15 +137,19 @@ void TextInputData::onControlCharacter(TextControlCharacter c, std::shared_ptr<I
 			break;
 		case TextControlCharacter::Paste:
 		{
-			auto str = clipboard->getStringData();
-			if (str) {
-				insertText(str.value());
+			if (!readOnly) {
+				auto str = clipboard->getStringData();
+				if (str) {
+					insertText(str.value());
+				}
 			}
 			break;
 		}
 		case TextControlCharacter::Cut:
-			clipboard->setData(String(text));
-			setText(StringUTF32());
+			if (!readOnly) {
+				clipboard->setData(String(text));
+				setText(StringUTF32());
+			}
 			break;
 		default:
 			break;
@@ -163,8 +167,22 @@ Range<int> TextInputData::getTotalRange() const
 	return Range<int>(0, int(text.size()));
 }
 
+void TextInputData::setReadOnly(bool enable)
+{
+	readOnly = enable;
+}
+
+bool TextInputData::isReadOnly() const
+{
+	return readOnly;
+}
+
 void TextInputData::onDelete()
 {
+	if (readOnly) {
+		return;
+	}
+	
 	if (selection.start == selection.end) {
 		if (selection.start < int(text.size())) {
 			setText(text.substr(0, selection.start) + text.substr(selection.start + 1));
@@ -176,6 +194,10 @@ void TextInputData::onDelete()
 
 void TextInputData::onBackspace()
 {
+	if (readOnly) {
+		return;
+	}
+	
 	if (selection.start == selection.end) {
 		if (selection.start > 0) { // If selection.s == 0, -1 causes it to overflow (unsigned). Shouldn't do anything in that case.
 			const auto start = selection.start;

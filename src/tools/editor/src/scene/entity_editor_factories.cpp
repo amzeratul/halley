@@ -1,4 +1,6 @@
 #include "entity_editor_factories.h"
+
+#include "src/ui/select_asset_widget.h"
 using namespace Halley;
 
 class ComponentEditorTextFieldFactory : public IComponentEditorFieldFactory {
@@ -204,10 +206,23 @@ public:
 
 		auto& fieldData = componentData[fieldName];
 
-		auto imageField = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "textValue", context.getFactory().getStyle("inputThin"), fieldData["image"].asString(""), LocalisedString::fromUserString(defaultValue));
-
 		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Vertical, 4.0f));
+
+		auto imageField = std::make_shared<SelectAssetWidget>("image", context.getFactory(), AssetType::Sprite, context.getGameResources());
 		container->add(imageField);
+		container->bindData("image", fieldData["image"].asString(""), [&, fieldName](String newVal)
+		{
+			componentData[fieldName]["image"] = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
+		
+		auto materialField = std::make_shared<SelectAssetWidget>("material", context.getFactory(), AssetType::MaterialDefinition, context.getGameResources());
+		container->add(materialField);
+		container->bindData("material", fieldData["material"].asString(""), [&, fieldName](String newVal)
+		{
+			componentData[fieldName]["material"] = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
 
 		return container;
 	}
