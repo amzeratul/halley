@@ -56,8 +56,21 @@ void EntityList::addEntities(const EntityTree& entity, const String& parentId)
 void EntityList::addEntity(const String& name, const String& id, const String& parentId, const String& prefab)
 {
 	const bool isPrefab = !prefab.isEmpty();
-	const String finalName = name + (prefab.isEmpty() ? "" : (" [" + prefab + "]"));
-	list->addTreeItem(id, parentId, LocalisedString::fromUserString(finalName), isPrefab ? "labelSpecial" : "label", isPrefab);
+	list->addTreeItem(id, parentId, LocalisedString::fromUserString(getEntityName(name, prefab)), isPrefab ? "labelSpecial" : "label", isPrefab);
+}
+
+String EntityList::getEntityName(const ConfigNode& data) const
+{
+	return getEntityName(data["name"].asString("?"), data["prefab"].asString());
+}
+
+String EntityList::getEntityName(const String& name, const String& prefab) const
+{
+	if (!prefab.isEmpty()) {
+		return "[" + prefab + "]";
+	} else {
+		return name;
+	}
 }
 
 void EntityList::refreshList()
@@ -69,14 +82,12 @@ void EntityList::refreshList()
 
 void EntityList::onEntityModified(const String& id, const ConfigNode& node)
 {
-	if (!node.hasKey("prefab")) {
-		list->setLabel(id, LocalisedString::fromUserString(node["name"].asString("")));
-	}
+	list->setLabel(id, LocalisedString::fromUserString(getEntityName(node)));
 }
 
 void EntityList::onEntityAdded(const String& id, const String& parentId, const ConfigNode& data)
 {
-	addEntity(data["name"].asString(), id, parentId, data["prefab"].asString(""));
+	addEntity(data["name"].asString(""), id, parentId, data["prefab"].asString(""));
 	list->sortItems();
 	list->setSelectedOptionId(id);
 }

@@ -27,5 +27,7 @@ namespace Halley {
 		void makeUI();
 		void addEntities(const EntityTree& entity, const String& parentId);
 		void addEntity(const String& name, const String& id, const String& parentId, const String& prefab);
+		String getEntityName(const ConfigNode& data) const;
+		String getEntityName(const String& name, const String& prefab) const;
 	};
 }
