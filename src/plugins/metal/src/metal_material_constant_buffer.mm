@@ -22,6 +22,8 @@ void MetalMaterialConstantBuffer::update(const MaterialDataBlock& dataBlock) {
 
   buffer.setData(gsl::span{reinterpret_cast<gsl::byte *>(padded),
                            static_cast<long>(data.length_bytes() + padding)});
+
+  free(padded);
 }
 
 
