@@ -3,11 +3,14 @@
 #include "metal_shader.h"
 #include <halley/core/api/halley_api_internal.h>
 #include <halley/core/graphics/painter.h>
+#include <halley/core/graphics/material/material_definition.h>
 #include <halley/core/graphics/render_target/render_target_texture.h>
 #include <halley/core/graphics/render_target/render_target_screen.h>
 #include <QuartzCore/CAMetalLayer.h>
 
 namespace Halley {
+	// Place vertex buffer at end of table to avoid collisions.
+	static const size_t MaxMetalBufferIndex = 30;
 
 	class MetalVideo final : public VideoAPIInternal
 	{
@@ -28,6 +31,7 @@ namespace Halley {
 		void deInit() override;
 		std::unique_ptr<Painter> makePainter(Resources& resources) override;
 		String getShaderLanguage() override;
+		bool isColumnMajor() const override;
 
 		id<CAMetalDrawable> getSurface();
 		id<MTLCommandQueue> getCommandQueue();
