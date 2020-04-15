@@ -77,7 +77,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> SceneEditor::getCompo
 	return {};
 }
 
-std::shared_ptr<UIWidget> SceneEditor::makeCustomUI()
+std::shared_ptr<UIWidget> SceneEditor::makeCustomUI(const MakeCustomUIParameters& parameters)
 {
 	return {};
 }

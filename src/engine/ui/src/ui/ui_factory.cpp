@@ -136,6 +136,11 @@ std::shared_ptr<InputKeyboard> UIFactory::getKeyboard() const
 	return keyboard;
 }
 
+UIFactory UIFactory::withResources(Resources& newResources) const
+{
+	return UIFactory(api, newResources, i18n, styleSheet);
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 {
 	auto& widgetNode = entryNode["widget"];

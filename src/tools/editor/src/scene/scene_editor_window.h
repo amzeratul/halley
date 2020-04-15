@@ -46,6 +46,8 @@ namespace Halley {
 
 		String currentEntityId;
 
+		std::shared_ptr<UIWidget> curCustomUI;
+
 		void makeUI();
 		void load();
 		void selectEntity(const String& id);
@@ -65,5 +67,7 @@ namespace Halley {
 
 		void preparePrefab(Prefab& prefab);
 		void preparePrefabEntity(ConfigNode& node);
+
+		void setCustomUI(std::shared_ptr<UIWidget> ui);
 	};
 }

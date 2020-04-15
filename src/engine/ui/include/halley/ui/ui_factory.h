@@ -44,6 +44,8 @@ namespace Halley
 		Resources& getResources() const;
 		std::shared_ptr<InputKeyboard> getKeyboard() const;
 
+		UIFactory withResources(Resources& newResources) const;
+
 	protected:
 		struct ParsedOption {
 			String id;

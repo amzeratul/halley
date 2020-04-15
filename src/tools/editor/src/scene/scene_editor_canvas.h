@@ -18,6 +18,8 @@ namespace Halley {
 		ISceneEditor& getInterface() const;
 		void setSceneEditorWindow(SceneEditorWindow& editorWindow);
 
+		void guardedRun(const std::function<void()>& f) const;
+
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
@@ -63,7 +65,6 @@ namespace Halley {
 		void unloadDLL();
 		void reloadDLL();
 
-		void guardedRun(const std::function<void()>& f) const;
 		void updateInputState();
 		void notifyOutputState();
 		void clearInputState();

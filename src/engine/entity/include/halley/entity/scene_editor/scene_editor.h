@@ -30,7 +30,7 @@ namespace Halley {
 		void setTool(SceneEditorTool tool) override;
     	
 		std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() override;
-		std::shared_ptr<UIWidget> makeCustomUI() override;
+		std::shared_ptr<UIWidget> makeCustomUI(const MakeCustomUIParameters& parameters) override;
 
 		static Rect4f getSpriteTreeBounds(const EntityRef& e);
 		static std::optional<Rect4f> getSpriteBounds(const EntityRef& e);

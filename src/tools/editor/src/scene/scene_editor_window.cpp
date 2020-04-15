@@ -74,13 +74,22 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		// Show root
 		if (!entities.empty()) {
 			panCameraToEntity(entities.at(0).getUUID().toString());
-		}		
+		}
+
+		// Custom UI
+		canvas->guardedRun([&] ()
+		{
+			const auto parameters = ISceneEditor::MakeCustomUIParameters(uiFactory, project.getGameResources());
+			setCustomUI(canvas->getInterface().makeCustomUI(parameters));
+		});
 	}
 }
 
 void SceneEditorWindow::unloadScene()
 {
 	Expects(canvas);
+
+	setCustomUI({});
 
 	currentEntityId = "";
 	if (canvas->isLoaded()) {
@@ -429,5 +438,20 @@ void SceneEditorWindow::preparePrefabEntity(ConfigNode& node)
 				preparePrefabEntity(c);
 			}
 		}
+	}
+}
+
+void SceneEditorWindow::setCustomUI(std::shared_ptr<UIWidget> ui)
+{
+	if (curCustomUI) {
+		curCustomUI->destroy();
+	}
+	curCustomUI = ui;
+	
+	auto customUIField = getWidget("customUI");
+	customUIField->setShrinkOnLayout(true);
+	customUIField->clear();
+	if (ui) {
+		customUIField->add(ui, 1);
 	}
 }
