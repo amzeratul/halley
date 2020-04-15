@@ -20,7 +20,10 @@ void MetalBuffer::setData(gsl::span<const gsl::byte> data) {
 	[oldBuffer release];
 }
 
-void MetalBuffer::bind(id<MTLRenderCommandEncoder> encoder, int bindPoint) {
-	[encoder setVertexBuffer:buffer offset:0 atIndex:bindPoint+1];
-	[encoder setFragmentBuffer:buffer offset:0 atIndex:bindPoint+1];
+void MetalBuffer::bindVertex(id<MTLRenderCommandEncoder> encoder, int bindPoint) {
+	[encoder setVertexBuffer:buffer offset:0 atIndex:bindPoint];
+}
+
+void MetalBuffer::bindFragment(id<MTLRenderCommandEncoder> encoder, int bindPoint) {
+	[encoder setFragmentBuffer:buffer offset:0 atIndex:bindPoint];
 }

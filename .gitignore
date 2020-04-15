@@ -61,6 +61,7 @@ obj/
 *.log
 _ReSharper*/
 *.sbr
+.clangd/
 
 # Build system
 /build/
