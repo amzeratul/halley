@@ -123,6 +123,7 @@ namespace Halley {
     	virtual void setTool(SceneEditorTool tool) = 0;
 
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
+    	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;
     };
 
 	class EntityTree {

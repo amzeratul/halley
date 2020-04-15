@@ -77,6 +77,11 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> SceneEditor::getCompo
 	return {};
 }
 
+std::shared_ptr<UIWidget> SceneEditor::makeCustomUI()
+{
+	return {};
+}
+
 std::unique_ptr<World> SceneEditor::createWorld(SceneEditorContext& context)
 {
 	auto world = std::make_unique<World>(*context.api, *context.resources, true, createComponent);
