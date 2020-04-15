@@ -30,29 +30,38 @@ namespace Halley {
 		void setTool(SceneEditorTool tool) override;
     	
 		std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() override;
-		std::shared_ptr<UIWidget> makeCustomUI(const MakeCustomUIParameters& parameters) override;
+		std::shared_ptr<UIWidget> makeCustomUI() override;
 
 		static Rect4f getSpriteTreeBounds(const EntityRef& e);
 		static std::optional<Rect4f> getSpriteBounds(const EntityRef& e);
 
     protected:
-		virtual void createServices(World& world, SceneEditorContext& context);
-		virtual void createEntities(World& world, SceneEditorContext& context);
+		virtual void onInit();
+    	
+		virtual void createServices(World& world);
+		virtual void createEntities(World& world);
 
 		virtual String getSceneEditorStageName();
+    	const HalleyAPI& getAPI() const;
+    	Resources& getGameResources() const;
+    	Resources& getEditorResources() const;
 
     	virtual EntityId createCamera();
 
     private:
-		std::unique_ptr<World> world;
+		const HalleyAPI* api = nullptr;
+		Resources* resources = nullptr;
+		Resources* editorResources = nullptr;
+
+    	std::unique_ptr<World> world;
 
     	EntityId cameraEntityId;
     	Camera camera;
     	
 		std::optional<EntityRef> selectedEntity;
     	std::unique_ptr<SceneEditorGizmoCollection> gizmoCollection;
-
-		std::unique_ptr<World> createWorld(SceneEditorContext& context);
+    	
+		std::unique_ptr<World> createWorld();
 
     	void moveCameraTo2D(Vector2f pos);
 		static void doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect);

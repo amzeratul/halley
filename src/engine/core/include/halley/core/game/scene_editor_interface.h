@@ -104,17 +104,7 @@ namespace Halley {
 	};
 
     class ISceneEditor {
-    public:
-        struct MakeCustomUIParameters {
-            MakeCustomUIParameters(UIFactory& factory, Resources& gameResources)
-                : factory(factory)
-        		, gameResources(gameResources)
-            {}
-        	
-            UIFactory& factory;
-        	Resources& gameResources;
-        };
-    	
+    public:    	
         virtual ~ISceneEditor() = default;
 
         virtual void init(SceneEditorContext& context) = 0;
@@ -133,7 +123,7 @@ namespace Halley {
     	virtual void setTool(SceneEditorTool tool) = 0;
 
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
-    	virtual std::shared_ptr<UIWidget> makeCustomUI(const MakeCustomUIParameters& parameters) = 0;
+    	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;
     };
 
 	class EntityTree {

@@ -79,8 +79,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		// Custom UI
 		canvas->guardedRun([&] ()
 		{
-			const auto parameters = ISceneEditor::MakeCustomUIParameters(uiFactory, project.getGameResources());
-			setCustomUI(canvas->getInterface().makeCustomUI(parameters));
+			setCustomUI(canvas->getInterface().makeCustomUI());
 		});
 	}
 }

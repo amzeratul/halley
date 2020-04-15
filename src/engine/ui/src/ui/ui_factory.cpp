@@ -64,6 +64,10 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("treeList", [=](const ConfigNode& node) { return makeTreeList(node); });
 }
 
+UIFactory::~UIFactory()
+{
+}
+
 void UIFactory::addFactory(const String& key, WidgetFactory factory)
 {
 	factories[key] = factory;

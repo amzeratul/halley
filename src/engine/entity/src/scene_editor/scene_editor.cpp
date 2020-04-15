@@ -19,14 +19,20 @@ SceneEditor::~SceneEditor() = default;
 
 void SceneEditor::init(SceneEditorContext& context)
 {
-	context.api->core->getStatics().setupGlobals();
+	api = context.api;
+	resources = context.resources;
+	editorResources = context.editorResources;
 
-	world = createWorld(context);
-	createServices(*world, context);
-	createEntities(*world, context);
+	api->core->getStatics().setupGlobals();
+	
+	world = createWorld();
+	createServices(*world);
+	createEntities(*world);
 	cameraEntityId = createCamera();
 
 	gizmoCollection = std::make_unique<SceneEditorGizmoCollection>(*context.editorResources);
+
+	onInit();
 }
 
 void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState)
@@ -77,31 +83,46 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> SceneEditor::getCompo
 	return {};
 }
 
-std::shared_ptr<UIWidget> SceneEditor::makeCustomUI(const MakeCustomUIParameters& parameters)
+std::shared_ptr<UIWidget> SceneEditor::makeCustomUI()
 {
 	return {};
 }
 
-std::unique_ptr<World> SceneEditor::createWorld(SceneEditorContext& context)
+std::unique_ptr<World> SceneEditor::createWorld()
 {
-	auto world = std::make_unique<World>(*context.api, *context.resources, true, createComponent);
-	const auto& sceneConfig = context.resources->get<ConfigFile>(getSceneEditorStageName())->getRoot();
+	auto world = std::make_unique<World>(getAPI(), getGameResources(), true, createComponent);
+	const auto& sceneConfig = getGameResources().get<ConfigFile>(getSceneEditorStageName())->getRoot();
 	world->loadSystems(sceneConfig, createSystem);
 
 	return world;
 }
 
-void SceneEditor::createServices(World& world, SceneEditorContext& context)
+void SceneEditor::createServices(World& world)
 {
 }
 
-void SceneEditor::createEntities(World& world, SceneEditorContext& context)
+void SceneEditor::createEntities(World& world)
 {
 }
 
 String SceneEditor::getSceneEditorStageName()
 {
 	return "stages/scene_editor";
+}
+
+const HalleyAPI& SceneEditor::getAPI() const
+{
+	return *api;
+}
+
+Resources& SceneEditor::getGameResources() const
+{
+	return *resources;
+}
+
+Resources& SceneEditor::getEditorResources() const
+{
+	return *editorResources;
 }
 
 EntityId SceneEditor::createCamera()
@@ -228,4 +249,8 @@ std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)
 		}
 	}
 	return {};
+}
+
+void SceneEditor::onInit()
+{
 }

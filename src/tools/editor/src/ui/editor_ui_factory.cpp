@@ -9,7 +9,7 @@
 #include "src/scene/scene_editor_canvas.h"
 using namespace Halley;
 
-std::shared_ptr<UIStyleSheet> makeStyleSheet(Resources& resources)
+static std::shared_ptr<UIStyleSheet> makeStyleSheet(Resources& resources)
 {
 	auto result = std::make_shared<UIStyleSheet>(resources);
 	for (auto& style: resources.enumerate<ConfigFile>()) {
@@ -19,7 +19,6 @@ std::shared_ptr<UIStyleSheet> makeStyleSheet(Resources& resources)
 	}
 	return result;
 }
-
 
 EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n)
 	: UIFactory(api, resources, i18n, makeStyleSheet(resources))
