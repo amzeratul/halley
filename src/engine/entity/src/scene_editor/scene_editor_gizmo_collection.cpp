@@ -47,7 +47,7 @@ void SceneEditorGizmoCollection::setSelectedEntity(const std::optional<EntityRef
 
 void SceneEditorGizmoCollection::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
 {
-	if (tool != currentTool) {
+	if (tool != currentTool || currentTool == SceneEditorTool::Polygon) { 	// Hack
 		currentTool = tool;
 		activeGizmo.reset();
 		

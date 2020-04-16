@@ -402,6 +402,8 @@ public:
 		auto style = context.getFactory().getStyle("buttonThin");
 		
 		auto field = std::make_shared<UIButton>("editPolygon", style, LocalisedString::fromHardcodedString("Edit..."));
+		field->setMinSize(Vector2f(30, 22));
+		
 		field->setHandle(UIEventType::ButtonClicked, "editPolygon", [=, &context] (const UIEvent& event)
 		{
 			ConfigNode options = ConfigNode(ConfigNode::MapType());

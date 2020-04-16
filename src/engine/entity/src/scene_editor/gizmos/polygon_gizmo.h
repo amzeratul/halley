@@ -8,9 +8,23 @@ namespace Halley {
 		void update(Time time, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
 
+	protected:
+		void onEntityChanged() override;
+		
 	private:
 		String componentName;
 		String fieldName;
 		bool isOpenPolygon;
+
+		VertexList lastStored;
+		VertexList vertices;
+		std::vector<SceneEditorGizmoHandle> handles;
+
+		VertexList readPoints();
+		void writePoints(const VertexList& ps);
+		void updateHandles();
+		Rect4f getHandleRect(Vector2f pos, float size) const;
+
+		void writePointsIfNeeded();
 	};
 }
