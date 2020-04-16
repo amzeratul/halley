@@ -23,6 +23,7 @@ namespace Halley {
 		bool isHeld() const;
 
 		void setCanDrag(bool enabled);
+		void setNotOver();
 
 	private:
 		bool over = false;

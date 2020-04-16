@@ -22,10 +22,41 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 		handle.update(inputState);
 	}
 
+	// Choose cur focus
+	int curFocus = -1;
+	const int nHandles = gsl::narrow_cast<int>(handles.size());
+	for (int i = 0; i < nHandles; ++i) {
+		if (handles[i].isHeld()) {
+			curFocus = i;
+		}
+	}
+	for (int i = 0; i < nHandles; ++i) {
+		auto& handle = handles[i];
+		if (handle.isOver()) {
+			if (curFocus >= 0 && curFocus != i) {
+				// Someone else already focused!
+				handle.setNotOver();
+			} else {
+				curFocus = i;
+			}
+		}
+	}
+
+	// Update mode
+	if (mode == PolygonGizmoMode::Append) {
+		preview = inputState.mousePos;
+	}
+
 	// Insert/delete
 	if (inputState.leftClickPressed) {
 		if (mode == PolygonGizmoMode::Append) {
 			handles.emplace_back(makeHandle(inputState.mousePos));
+		} else if (mode == PolygonGizmoMode::Delete) {
+			if (curFocus >= 0) {
+				handles.erase(handles.begin() + curFocus);
+			}
+		} else if (mode == PolygonGizmoMode::Insert) {
+			
 		}
 	}
 
@@ -33,11 +64,6 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 	vertices.resize(handles.size());
 	for (size_t i = 0; i < handles.size(); ++i) {
 		vertices[i] = handles[i].getPosition();
-	}
-
-	// Update preview vertex
-	if (mode == PolygonGizmoMode::Append) {
-		preview = inputState.mousePos;
 	}
 	
 	writePointsIfNeeded();

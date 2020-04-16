@@ -55,6 +55,12 @@ void SceneEditorGizmoHandle::setCanDrag(bool enabled)
 	}
 }
 
+void SceneEditorGizmoHandle::setNotOver()
+{
+	over = false;
+	holding = false;
+}
+
 void SceneEditorGizmo::update(Time time, const SceneEditorInputState& inputState)
 {}
 
