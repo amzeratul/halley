@@ -39,7 +39,7 @@ namespace Halley {
 
 		VertexList lastStored;
 		VertexList vertices;
-		Vertex preview;
+		std::optional<Vertex> preview;
 		size_t previewIndex = 0;
 		std::vector<SceneEditorGizmoHandle> handles;
 

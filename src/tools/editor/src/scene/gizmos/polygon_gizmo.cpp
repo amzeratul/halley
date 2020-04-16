@@ -18,23 +18,24 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 	
 	const int curFocus = updateHandles(inputState);
 
-	// Update mode
-	if (mode == PolygonGizmoMode::Append) {
-		preview = inputState.mousePos;
-	} else if (mode == PolygonGizmoMode::Insert) {
-		std::tie(preview, previewIndex) = findInsertPoint(inputState.mousePos);
+	// Update preview
+	preview.reset();
+	if (curFocus == -1) {
+		if (mode == PolygonGizmoMode::Append) {
+			preview = inputState.mousePos;
+		} else if (mode == PolygonGizmoMode::Insert) {
+			std::tie(preview, previewIndex) = findInsertPoint(inputState.mousePos);
+		}
 	}
 
 	// Insert/delete
 	if (inputState.leftClickPressed) {
-		if (mode == PolygonGizmoMode::Append) {
+		if (mode == PolygonGizmoMode::Append && curFocus == -1) {
 			handles.emplace_back(makeHandle(inputState.mousePos));
-		} else if (mode == PolygonGizmoMode::Delete) {
-			if (curFocus >= 0) {
-				handles.erase(handles.begin() + curFocus);
-			}
-		} else if (mode == PolygonGizmoMode::Insert) {
-			
+		} else if (mode == PolygonGizmoMode::Delete && curFocus != -1) {
+			handles.erase(handles.begin() + curFocus);
+		} else if (mode == PolygonGizmoMode::Insert && preview) {
+			handles.insert(handles.begin() + previewIndex, makeHandle(preview.value()));
 		}
 	}
 
@@ -51,7 +52,7 @@ int PolygonGizmo::updateHandles(const SceneEditorInputState& inputState)
 {
 	// Update existing handles
 	for (auto& handle: handles) {
-		handle.setCanDrag(mode == PolygonGizmoMode::Move);
+		handle.setCanDrag(mode != PolygonGizmoMode::Delete);
 		handle.update(inputState);
 	}
 
@@ -84,7 +85,7 @@ void PolygonGizmo::draw(Painter& painter) const
 	const auto col = Colour4f(0, 1, 0.5f);
 	const auto highCol = Colour4f(1, 1, 1);
 
-	if (mode == PolygonGizmoMode::Append) {
+	if (mode == PolygonGizmoMode::Append && preview.has_value()) {
 		painter.drawLine(vertices, 2.0f / zoom, col, false);
 
 		const size_t nVertices = vertices.size();
@@ -92,13 +93,17 @@ void PolygonGizmo::draw(Painter& painter) const
 		if (nVertices >= 1) {
 			newBit.push_back(vertices.back());
 		}
-		newBit.push_back(preview);
+		newBit.push_back(preview.value());
 		if (nVertices >= 2 && !isOpenPolygon) {
 			newBit.push_back(vertices.front());
 		}
 		painter.drawLine(newBit, 1.0f / zoom, col, false);
 	} else {
 		painter.drawLine(vertices, 2.0f / zoom, col, !isOpenPolygon);
+	}
+
+	if (mode == PolygonGizmoMode::Insert && preview.has_value()) {
+		painter.drawCircle(preview.value(), 3.0f / zoom, 2.0f, col);
 	}
 	
 	for (const auto& h: handles) {
@@ -190,7 +195,28 @@ void PolygonGizmo::setMode(PolygonGizmoMode m)
 
 std::pair<Vector2f, size_t> PolygonGizmo::findInsertPoint(Vector2f pos) const
 {
-	
+	if (vertices.empty()) {
+		return std::make_pair(pos, 0);
+	}
+
+	const size_t nVertices = vertices.size();
+	const size_t n = isOpenPolygon ? nVertices - 1 : nVertices;
+
+	size_t bestIndex = 0;
+	Vector2f bestPoint;
+	float bestDist = std::numeric_limits<float>::infinity();
+	for (size_t i = 0; i < n; ++i) {
+		const auto seg = LineSegment(vertices[i], vertices[(i + 1) % nVertices]);
+		const auto p = seg.getClosestPoint(pos);
+		const float dist = (p - pos).squaredLength();
+		if (dist < bestDist) {
+			bestDist = dist;
+			bestIndex = i + 1;
+			bestPoint = p;
+		}
+	}
+
+	return std::make_pair(bestPoint, bestIndex);
 }
 
 SceneEditorGizmoHandle PolygonGizmo::makeHandle(Vector2f pos) const
