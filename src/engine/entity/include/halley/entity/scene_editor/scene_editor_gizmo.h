@@ -39,6 +39,7 @@ namespace Halley {
 
 		virtual void update(Time time, const SceneEditorInputState& inputState);
 		virtual void draw(Painter& painter) const;
+		virtual std::shared_ptr<UIWidget> makeUI();
 
 		void setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& entityData);
 

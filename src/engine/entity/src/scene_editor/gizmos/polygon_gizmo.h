@@ -7,7 +7,8 @@ namespace Halley {
 		PolygonGizmo(const String& componentName, const String& fieldName, const ConfigNode& options);
 		void update(Time time, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
-
+		std::shared_ptr<UIWidget> makeUI() override;
+		
 	protected:
 		void onEntityChanged() override;
 		

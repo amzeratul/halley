@@ -1,7 +1,4 @@
 #include "scene_editor_window.h"
-
-
-
 #include "choose_asset_window.h"
 #include "entity_editor.h"
 #include "entity_list.h"
@@ -265,7 +262,7 @@ void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const
 void SceneEditorWindow::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
 {
 	if (canvas->isLoaded()) {
-		canvas->getInterface().setTool(tool, componentName, fieldName, options);
+		setToolUI(canvas->getInterface().setTool(tool, componentName, fieldName, options));
 	}
 }
 
@@ -460,4 +457,20 @@ void SceneEditorWindow::setCustomUI(std::shared_ptr<UIWidget> ui)
 	if (ui) {
 		customUIField->add(ui, 1);
 	}
+}
+
+void SceneEditorWindow::setToolUI(std::shared_ptr<UIWidget> ui)
+{
+	if (curToolUI) {
+		curToolUI->destroy();
+	}
+	curToolUI = ui;
+
+	auto customUIField = canvas->getWidget("currentToolUI");
+	customUIField->setShrinkOnLayout(true);
+	customUIField->clear();
+	if (ui) {
+		customUIField->add(ui, 1);
+	}
+	customUIField->setActive(!!ui);
 }

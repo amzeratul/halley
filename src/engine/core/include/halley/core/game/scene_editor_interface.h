@@ -123,7 +123,7 @@ namespace Halley {
 
     	virtual void setSelectedEntity(const UUID& id, ConfigNode& entityData) = 0;
     	virtual void showEntity(const UUID& id) = 0;
-    	virtual void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
+    	virtual std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
 
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;

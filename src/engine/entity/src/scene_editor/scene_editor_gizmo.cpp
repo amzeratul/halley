@@ -53,6 +53,11 @@ void SceneEditorGizmo::update(Time time, const SceneEditorInputState& inputState
 void SceneEditorGizmo::draw(Painter& painter) const
 {}
 
+std::shared_ptr<UIWidget> SceneEditorGizmo::makeUI()
+{
+	return {};
+}
+
 void SceneEditorGizmo::setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& data)
 {
 	entityData = &data;

@@ -1,36 +1,42 @@
 ---
 widget: { class: widget }
-sizer: { type: vertical }
+sizer: { type: horizontal }
+proportion: 1
 children:
-- sizer: { type: horizontal }
+- sizer: { type: vertical }
   children:
-  - widget: { id: saveButton, class: button, text: "Save", size: [100, 30] }
-- sizer: { type: horizontal }
-  proportion: 1
-  children:
-  - sizer: { type: vertical }
-    children:
     - widget: { id: scrollBarPane, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, size: [350, 30] }
       sizer: { type: vertical }
       proportion: 1
       children:
-      - widget: { id: entityList, class: entityList }
-        proportion: 1
+        - widget: { id: entityList, class: entityList }
+          proportion: 1
     - sizer: { type: horizontal }
       children:
-      - widget: { id: addEntity, class: button, text: Add Entity }
-        proportion: 1
-      - widget: { id: addPrefab, class: button, text: Add Prefab }
-        proportion: 1
-      - widget: { id: removeEntity, class: button, text: Remove }
-        proportion: 1
-  - sizer: { type: vertical} 
-    proportion: 1
-    children:
+        - widget: { id: addEntity, class: button, text: Add Entity }
+          proportion: 1
+        - widget: { id: addPrefab, class: button, text: Add Prefab }
+          proportion: 1
+        - widget: { id: removeEntity, class: button, text: Remove }
+          proportion: 1
+- sizer: { type: vertical} 
+  proportion: 1
+  children:
+    - widget: { id: sceneEditorToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: "#201427", innerBorder: [5, 5, 5, 5] }
+      sizer: { type: horizontal }
+      children:
+        - widget: { id: saveButton, class: button, style: buttonThin, text: "Save", size: [100, 22] }
     - widget: { id: canvas, class: sceneEditorCanvas }
       proportion: 1
+      sizer: { type: vertical }
+      children:
+        - widget: { id: currentToolUI, class: image, image: "halley_ui/ui_list_item.png", colour: "#201427", innerBorder: [5, 5, 5, 5], size: [100, 32] }
+          sizer: { type: horizontal }
+          border: [10, 10, 10, 10]
+          fill: right
+          children: []
     - widget: { id: customUI, class: widget }
       sizer: { type: vertical }
       children: []
-  - widget: { id: entityEditor, class: entityEditor }
+- widget: { id: entityEditor, class: entityEditor }
 ...

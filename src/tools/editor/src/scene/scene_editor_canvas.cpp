@@ -5,8 +5,8 @@
 
 using namespace Halley;
 
-SceneEditorCanvas::SceneEditorCanvas(String id, Resources& resources, const HalleyAPI& api)
-	: UIWidget(std::move(id))
+SceneEditorCanvas::SceneEditorCanvas(String id, Resources& resources, const HalleyAPI& api, std::optional<UISizer> sizer)
+	: UIWidget(std::move(id), Vector2f(32, 32), std::move(sizer))
 	, api(api)
 	, resources(resources)
 {

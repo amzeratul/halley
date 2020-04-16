@@ -1,5 +1,4 @@
 #include "polygon_gizmo.h"
-
 #include "halley/core/graphics/painter.h"
 using namespace Halley;
 
@@ -29,6 +28,11 @@ void PolygonGizmo::draw(Painter& painter) const
 	for (const auto& h: handles) {
 		painter.drawRect(getHandleRect(h.getPosition(), 12.0f), 1.0f / zoom, h.isOver() ? highCol : col);
 	}
+}
+
+std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
+{
+	return {};
 }
 
 void PolygonGizmo::onEntityChanged()

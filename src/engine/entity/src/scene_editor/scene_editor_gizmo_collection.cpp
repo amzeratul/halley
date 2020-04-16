@@ -45,7 +45,7 @@ void SceneEditorGizmoCollection::setSelectedEntity(const std::optional<EntityRef
 	}
 }
 
-void SceneEditorGizmoCollection::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
+std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
 {
 	if (tool != currentTool || currentTool == SceneEditorTool::Polygon) { 	// Hack
 		currentTool = tool;
@@ -63,6 +63,8 @@ void SceneEditorGizmoCollection::setTool(SceneEditorTool tool, const String& com
 
 		if (activeGizmo) {
 			activeGizmo->setSelectedEntity(selectedEntity, *entityData);
+			return activeGizmo->makeUI();
 		}
 	}
+	return {};
 }

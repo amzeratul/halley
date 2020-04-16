@@ -196,9 +196,9 @@ void SceneEditor::showEntity(const UUID& id)
 	}
 }
 
-void SceneEditor::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
+std::shared_ptr<UIWidget> SceneEditor::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
 {
-	gizmoCollection->setTool(tool, componentName, fieldName, options);
+	return gizmoCollection->setTool(tool, componentName, fieldName, options);
 }
 
 Rect4f SceneEditor::getSpriteTreeBounds(const EntityRef& e)
