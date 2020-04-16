@@ -49,6 +49,7 @@ namespace Halley {
 
 		std::shared_ptr<RenderSurface> surface;
 
+		std::unique_ptr<SceneEditorGizmoCollection> gizmos;
 		std::shared_ptr<InputKeyboard> keyboard;
 		std::shared_ptr<InputDevice> mouse;
 		SceneEditorInputState inputState;

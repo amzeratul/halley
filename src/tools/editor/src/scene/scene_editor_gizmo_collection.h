@@ -3,19 +3,18 @@
 #include "halley/core/game/scene_editor_interface.h"
 #include "halley/time/halleytime.h"
 #include "scene_editor_gizmo.h"
-#include "entity.h"
 
 namespace Halley {
 	class Painter;
 
-	class SceneEditorGizmoCollection {
+	class SceneEditorGizmoCollection : public ISceneEditorGizmoCollection {
 	public:
 		SceneEditorGizmoCollection(Resources& resources);
 		
-		void update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState);
-		void draw(Painter& painter);
-		void setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& entityData);
-		std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options);
+		void update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) override;
+		void draw(Painter& painter) override;
+		void setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& entityData) override;
+		std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
 
 	private:
 		Resources& resources;

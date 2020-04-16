@@ -1,5 +1,5 @@
 #include "translate_gizmo.h"
-#include "components/transform_2d_component.h"
+#include "halley/entity/components/transform_2d_component.h"
 #include "halley/core/game/scene_editor_interface.h"
 #include "halley/core/graphics/painter.h"
 using namespace Halley;

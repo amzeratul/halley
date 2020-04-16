@@ -1,6 +1,5 @@
 #pragma once
 #include <optional>
-#include "entity.h"
 #include "halley/core/game/scene_editor_interface.h"
 #include "halley/time/halleytime.h"
 

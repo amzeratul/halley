@@ -12,6 +12,10 @@ namespace Halley {
     class UIFactory;
     class IUIElement;
 	class ConfigNode;
+	class EntityRef;
+	class Camera;
+	class Painter;
+	class ISceneEditorGizmoCollection;
     enum class SceneEditorTool;
 
     class SceneEditorContext {
@@ -19,6 +23,7 @@ namespace Halley {
         const HalleyAPI* api;
         Resources* resources;
         Resources* editorResources;
+        ISceneEditorGizmoCollection* gizmos;
     };
 
 	class IEntityEditor {
@@ -157,5 +162,15 @@ namespace Halley {
 		virtual EntityTree getEntityTree() const = 0;
 		virtual void reparentEntity(const String& entityId, const String& newParentId, int childIndex) = 0;
         virtual bool isSingleRoot() = 0;
+	};
+
+	class ISceneEditorGizmoCollection {
+	public:
+		virtual ~ISceneEditorGizmoCollection() = default;
+
+        virtual void update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) = 0;
+        virtual void draw(Painter& painter) = 0;
+        virtual void setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& entityData) = 0;
+        virtual std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
 	};
 }

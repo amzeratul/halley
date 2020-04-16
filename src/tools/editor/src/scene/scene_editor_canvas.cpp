@@ -1,4 +1,6 @@
 #include "scene_editor_canvas.h"
+
+#include "scene_editor_gizmo_collection.h"
 #include "halley/core/game/scene_editor_interface.h"
 #include "scene_editor_window.h"
 #include "src/project/core_api_wrapper.h"
@@ -15,6 +17,8 @@ SceneEditorCanvas::SceneEditorCanvas(String id, Resources& resources, const Hall
 
 	keyboard = api.input->getKeyboard();
 	mouse = api.input->getMouse();
+
+	gizmos = std::make_unique<SceneEditorGizmoCollection>(resources);
 	
 	setHandle(UIEventType::MouseWheel, [this](const UIEvent& event)
 	{
@@ -219,6 +223,7 @@ void SceneEditorCanvas::loadDLL()
 		context.resources = gameResources;
 		context.editorResources = &resources;
 		context.api = gameAPI.get();
+		context.gizmos = gizmos.get();
 
 		guardedRun([&]() {
 			interface->init(context);

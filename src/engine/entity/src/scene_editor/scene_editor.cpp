@@ -6,7 +6,6 @@
 #include "halley/core/graphics/render_context.h"
 #include "system.h"
 #include "registry.h"
-#include "scene_editor/scene_editor_gizmo_collection.h"
 #include "components/sprite_component.h"
 #include "components/camera_component.h"
 #include "components/transform_2d_component.h"
@@ -22,6 +21,7 @@ void SceneEditor::init(SceneEditorContext& context)
 	api = context.api;
 	resources = context.resources;
 	editorResources = context.editorResources;
+	gizmoCollection = context.gizmos;
 
 	api->core->getStatics().setupGlobals();
 	
@@ -29,8 +29,6 @@ void SceneEditor::init(SceneEditorContext& context)
 	createServices(*world);
 	createEntities(*world);
 	cameraEntityId = createCamera();
-
-	gizmoCollection = std::make_unique<SceneEditorGizmoCollection>(*context.editorResources);
 
 	onInit();
 }

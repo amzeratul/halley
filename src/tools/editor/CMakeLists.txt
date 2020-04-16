@@ -23,7 +23,13 @@ set (editor_sources
 	"src/scene/entity_editor_factories.cpp"
 	"src/scene/entity_list.cpp"
 	"src/scene/scene_editor_canvas.cpp"
+	"src/scene/scene_editor_gizmo.cpp"
+	"src/scene/scene_editor_gizmo_collection.cpp"
 	"src/scene/scene_editor_window.cpp"
+
+	"src/scene/gizmos/polygon_gizmo.cpp"
+	"src/scene/gizmos/selected_bounds_gizmo.cpp"
+	"src/scene/gizmos/translate_gizmo.cpp"
 
 	"src/ui/console_window.cpp"
 	"src/ui/editor_ui_factory.cpp"
@@ -54,8 +60,13 @@ set (editor_headers
 	"src/scene/entity_editor_factories.h"
 	"src/scene/entity_list.h"
 	"src/scene/scene_editor_canvas.h"
+	"src/scene/scene_editor_gizmo.h"
+	"src/scene/scene_editor_gizmo_collection.h"
 	"src/scene/scene_editor_window.h"
-
+	"src/scene/gizmos/polygon_gizmo.h"
+	"src/scene/gizmos/selected_bounds_gizmo.h"
+	"src/scene/gizmos/translate_gizmo.h"
+	
 	"src/ui/console_window.h"
 	"src/ui/editor_ui_factory.h"
 	"src/ui/load_project_window.h"

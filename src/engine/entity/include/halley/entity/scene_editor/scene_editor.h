@@ -59,7 +59,7 @@ namespace Halley {
     	Camera camera;
     	
 		std::optional<EntityRef> selectedEntity;
-    	std::unique_ptr<SceneEditorGizmoCollection> gizmoCollection;
+    	ISceneEditorGizmoCollection* gizmoCollection = nullptr;
     	
 		std::unique_ptr<World> createWorld();
 

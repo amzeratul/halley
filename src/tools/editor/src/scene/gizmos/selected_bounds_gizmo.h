@@ -1,6 +1,6 @@
 #pragma once
 #include "halley/core/graphics/sprite/animation.h"
-#include "scene_editor/scene_editor_gizmo.h"
+#include "../scene_editor_gizmo.h"
 
 namespace Halley {
 	class Material;
