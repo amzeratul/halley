@@ -142,8 +142,10 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 	if (iter != ecsData->getComponents().end()) {
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
-			ComponentFieldParameters parameters(componentType, member.name, member.defaultValue, data);
-			createField(*componentFields, member.type.name, parameters);
+			if (member.serializable) {
+				ComponentFieldParameters parameters(componentType, member.name, member.defaultValue, data);
+				createField(*componentFields, member.type.name, parameters);
+			}
 		}
 	}
 	

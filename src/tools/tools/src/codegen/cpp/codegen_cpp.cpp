@@ -169,6 +169,10 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	String deserializeBody;
 	bool first = true;
 	for (auto& member: component.members) {
+		if (!member.serializable) {
+			continue;
+		}
+		
 		if (first) {
 			first = false;
 		} else {
