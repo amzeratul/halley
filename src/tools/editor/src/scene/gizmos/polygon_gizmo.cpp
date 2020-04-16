@@ -2,8 +2,9 @@
 #include "halley/core/graphics/painter.h"
 using namespace Halley;
 
-PolygonGizmo::PolygonGizmo(const String& componentName, const String& fieldName, const ConfigNode& options)
-	: componentName(componentName)
+PolygonGizmo::PolygonGizmo(const String& componentName, const String& fieldName, const ConfigNode& options, UIFactory& factory)
+	: factory(factory)
+	, componentName(componentName)
 	, fieldName(fieldName)
 	, isOpenPolygon(options["isOpenPolygon"].asBool(false))
 {
@@ -33,7 +34,8 @@ void PolygonGizmo::draw(Painter& painter) const
 
 std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
 {
-	return {};
+	auto ui = factory.makeUI("ui/halley/polygon_gizmo_toolbar");
+	return ui;
 }
 
 void PolygonGizmo::onEntityChanged()

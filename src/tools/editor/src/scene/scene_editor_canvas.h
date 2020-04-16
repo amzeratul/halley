@@ -7,7 +7,7 @@ namespace Halley {
 
 	class SceneEditorCanvas final : public UIWidget {
 	public:
-		SceneEditorCanvas(String id, Resources& resources, const HalleyAPI& api, std::optional<UISizer> sizer = {});
+		SceneEditorCanvas(String id, UIFactory& factory, Resources& resources, const HalleyAPI& api, std::optional<UISizer> sizer = {});
 		~SceneEditorCanvas();
 
 		void loadGame(std::shared_ptr<DynamicLibrary> dll, Resources& gameResources);

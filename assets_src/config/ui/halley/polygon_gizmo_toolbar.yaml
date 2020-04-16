@@ -1,0 +1,13 @@
+widget: 
+  id: mode
+  class: list
+  type: horizontal
+  options:
+    - id: move
+      text: Move
+    - id: append
+      text: Append
+    - id: insert
+      text: Insert
+    - id: delete
+      text: Delete

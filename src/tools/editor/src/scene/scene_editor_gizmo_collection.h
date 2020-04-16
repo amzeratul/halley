@@ -9,7 +9,7 @@ namespace Halley {
 
 	class SceneEditorGizmoCollection : public ISceneEditorGizmoCollection {
 	public:
-		SceneEditorGizmoCollection(Resources& resources);
+		SceneEditorGizmoCollection(UIFactory& factory, Resources& resources);
 		
 		void update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) override;
 		void draw(Painter& painter) override;
@@ -17,6 +17,7 @@ namespace Halley {
 		std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
 
 	private:
+		UIFactory& factory;
 		Resources& resources;
 		std::unique_ptr<SceneEditorGizmo> selectedBoundsGizmo;
 		std::unique_ptr<SceneEditorGizmo> activeGizmo;

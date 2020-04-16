@@ -5,8 +5,9 @@
 #include "halley/core/graphics/camera.h"
 using namespace Halley;
 
-SceneEditorGizmoCollection::SceneEditorGizmoCollection(Resources& resources)
-	: resources(resources)
+SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resources& resources)
+	: factory(factory)
+	, resources(resources)
 {
 	selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(resources);
 }
@@ -56,7 +57,7 @@ std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(SceneEditorTool to
 			break;
 
 		case SceneEditorTool::Polygon:
-			activeGizmo = std::make_unique<PolygonGizmo>(componentName, fieldName, options);
+			activeGizmo = std::make_unique<PolygonGizmo>(componentName, fieldName, options, factory);
 			break;
 		}
 

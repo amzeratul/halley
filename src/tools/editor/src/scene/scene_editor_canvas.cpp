@@ -7,7 +7,7 @@
 
 using namespace Halley;
 
-SceneEditorCanvas::SceneEditorCanvas(String id, Resources& resources, const HalleyAPI& api, std::optional<UISizer> sizer)
+SceneEditorCanvas::SceneEditorCanvas(String id, UIFactory& factory, Resources& resources, const HalleyAPI& api, std::optional<UISizer> sizer)
 	: UIWidget(std::move(id), Vector2f(32, 32), std::move(sizer))
 	, api(api)
 	, resources(resources)
@@ -18,7 +18,7 @@ SceneEditorCanvas::SceneEditorCanvas(String id, Resources& resources, const Hall
 	keyboard = api.input->getKeyboard();
 	mouse = api.input->getMouse();
 
-	gizmos = std::make_unique<SceneEditorGizmoCollection>(resources);
+	gizmos = std::make_unique<SceneEditorGizmoCollection>(factory, resources);
 	
 	setHandle(UIEventType::MouseWheel, [this](const UIEvent& event)
 	{
