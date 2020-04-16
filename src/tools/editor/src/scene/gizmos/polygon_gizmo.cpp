@@ -16,6 +16,39 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 		setMode(PolygonGizmoMode::Move);
 	}
 	
+	const int curFocus = updateHandles(inputState);
+
+	// Update mode
+	if (mode == PolygonGizmoMode::Append) {
+		preview = inputState.mousePos;
+	} else if (mode == PolygonGizmoMode::Insert) {
+		std::tie(preview, previewIndex) = findInsertPoint(inputState.mousePos);
+	}
+
+	// Insert/delete
+	if (inputState.leftClickPressed) {
+		if (mode == PolygonGizmoMode::Append) {
+			handles.emplace_back(makeHandle(inputState.mousePos));
+		} else if (mode == PolygonGizmoMode::Delete) {
+			if (curFocus >= 0) {
+				handles.erase(handles.begin() + curFocus);
+			}
+		} else if (mode == PolygonGizmoMode::Insert) {
+			
+		}
+	}
+
+	// Update vertices
+	vertices.resize(handles.size());
+	for (size_t i = 0; i < handles.size(); ++i) {
+		vertices[i] = handles[i].getPosition();
+	}
+	
+	writePointsIfNeeded();
+}
+
+int PolygonGizmo::updateHandles(const SceneEditorInputState& inputState)
+{
 	// Update existing handles
 	for (auto& handle: handles) {
 		handle.setCanDrag(mode == PolygonGizmoMode::Move);
@@ -42,31 +75,7 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 		}
 	}
 
-	// Update mode
-	if (mode == PolygonGizmoMode::Append) {
-		preview = inputState.mousePos;
-	}
-
-	// Insert/delete
-	if (inputState.leftClickPressed) {
-		if (mode == PolygonGizmoMode::Append) {
-			handles.emplace_back(makeHandle(inputState.mousePos));
-		} else if (mode == PolygonGizmoMode::Delete) {
-			if (curFocus >= 0) {
-				handles.erase(handles.begin() + curFocus);
-			}
-		} else if (mode == PolygonGizmoMode::Insert) {
-			
-		}
-	}
-
-	// Update vertices
-	vertices.resize(handles.size());
-	for (size_t i = 0; i < handles.size(); ++i) {
-		vertices[i] = handles[i].getPosition();
-	}
-	
-	writePointsIfNeeded();
+	return curFocus;
 }
 
 void PolygonGizmo::draw(Painter& painter) const
@@ -115,7 +124,7 @@ void PolygonGizmo::onEntityChanged()
 
 	mode = vertices.empty() ? PolygonGizmoMode::Append : PolygonGizmoMode::Move;
 	
-	updateHandles();
+	loadHandlesFromVertices();
 }
 
 VertexList PolygonGizmo::readPoints()
@@ -150,7 +159,7 @@ void PolygonGizmo::writePoints(const VertexList& ps)
 	lastStored = ps;
 }
 
-void PolygonGizmo::updateHandles()
+void PolygonGizmo::loadHandlesFromVertices()
 {
 	handles.resize(vertices.size(), makeHandle({}));
 	for (size_t i = 0; i < vertices.size(); ++i) {
@@ -179,7 +188,12 @@ void PolygonGizmo::setMode(PolygonGizmoMode m)
 	}
 }
 
-SceneEditorGizmoHandle PolygonGizmo::makeHandle(Vector2f pos)
+std::pair<Vector2f, size_t> PolygonGizmo::findInsertPoint(Vector2f pos) const
+{
+	
+}
+
+SceneEditorGizmoHandle PolygonGizmo::makeHandle(Vector2f pos) const
 {
 	SceneEditorGizmoHandle handle;
 	handle.setBoundsCheck([this] (Vector2f pos, Vector2f mousePos) -> bool

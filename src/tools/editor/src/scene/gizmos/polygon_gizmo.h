@@ -40,6 +40,7 @@ namespace Halley {
 		VertexList lastStored;
 		VertexList vertices;
 		Vertex preview;
+		size_t previewIndex = 0;
 		std::vector<SceneEditorGizmoHandle> handles;
 
 		PolygonGizmoMode mode = PolygonGizmoMode::Move;
@@ -47,12 +48,15 @@ namespace Halley {
 
 		VertexList readPoints();
 		void writePoints(const VertexList& ps);
-		void updateHandles();
-		Rect4f getHandleRect(Vector2f pos, float size) const;
-
 		void writePointsIfNeeded();
+
+		void loadHandlesFromVertices();
+		Rect4f getHandleRect(Vector2f pos, float size) const;
+		SceneEditorGizmoHandle makeHandle(Vector2f pos) const;
+		int updateHandles(const SceneEditorInputState& inputState);
+
 		void setMode(PolygonGizmoMode mode);
 
-		SceneEditorGizmoHandle makeHandle(Vector2f pos);
+		std::pair<Vertex, size_t> findInsertPoint(Vector2f pos) const;
 	};
 }
