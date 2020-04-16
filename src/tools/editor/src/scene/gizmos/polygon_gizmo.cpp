@@ -15,6 +15,7 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 		handles[i].update(inputState);
 		vertices[i] = handles[i].getPosition();
 	}
+	writePointsIfNeeded();
 }
 
 void PolygonGizmo::draw(Painter& painter) const
@@ -66,7 +67,7 @@ void PolygonGizmo::writePoints(const VertexList& ps)
 		for (const auto& p: ps) {
 			result.push_back(ConfigNode(p));
 		}
-		(*data)["fieldName"] = ConfigNode(std::move(result));
+		(*data)[fieldName] = ConfigNode(std::move(result));
 		
 		markModified(componentName, fieldName);
 	}
