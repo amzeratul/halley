@@ -7,8 +7,8 @@ using namespace Halley;
 void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState)
 {
 	if (!holding) {
-		over = boundsCheck(pos, inputState.mousePos);
-		if (over && inputState.leftClickPressed) {
+		over = boundsCheck ? boundsCheck(pos, inputState.mousePos) : false;
+		if (canDrag && over && inputState.leftClickPressed) {
 			holding = true;
 			startOffset = pos - inputState.mousePos;
 		}
@@ -45,6 +45,14 @@ bool SceneEditorGizmoHandle::isOver() const
 bool SceneEditorGizmoHandle::isHeld() const
 {
 	return holding;
+}
+
+void SceneEditorGizmoHandle::setCanDrag(bool enabled)
+{
+	canDrag = enabled;
+	if (!canDrag) {
+		holding = false;
+	}
 }
 
 void SceneEditorGizmo::update(Time time, const SceneEditorInputState& inputState)

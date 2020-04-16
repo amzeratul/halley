@@ -22,9 +22,12 @@ namespace Halley {
 		bool isOver() const;
 		bool isHeld() const;
 
+		void setCanDrag(bool enabled);
+
 	private:
 		bool over = false;
 		bool holding = false;
+		bool canDrag = true;
 
 		Vector2f pos;
 		Vector2f startOffset;
