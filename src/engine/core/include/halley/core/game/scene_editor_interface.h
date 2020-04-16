@@ -12,6 +12,7 @@ namespace Halley {
     class UIFactory;
     class IUIElement;
 	class ConfigNode;
+    enum class SceneEditorTool;
 
     class SceneEditorContext {
     public:
@@ -26,6 +27,7 @@ namespace Halley {
 
 		virtual void onEntityUpdated() = 0;
 		virtual std::shared_ptr<IUIElement> makeLabel(const String& label) = 0;
+		virtual void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
 	};
 
     class ComponentEditorContext {
@@ -36,10 +38,11 @@ namespace Halley {
             , gameResources(gameResources)
         {}
 
-        UIFactory& getFactory() { return factory; }
-        Resources& getGameResources() { return gameResources; }
-    	void onEntityUpdated() { parent.onEntityUpdated(); }
-    	std::shared_ptr<IUIElement> makeLabel(const String& label) { return parent.makeLabel(label); }
+        UIFactory& getFactory() const { return factory; }
+        Resources& getGameResources() const { return gameResources; }
+    	void onEntityUpdated() const { parent.onEntityUpdated(); }
+    	std::shared_ptr<IUIElement> makeLabel(const String& label) const { return parent.makeLabel(label); }
+        void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) const { parent.setTool(tool, componentName, fieldName, options); }
 
     private:
         IEntityEditor& parent;
@@ -69,8 +72,8 @@ namespace Halley {
     	virtual String getFieldType() = 0;
     	virtual bool canCreateLabel() const { return false; }
     	virtual bool isCompound() const { return false; }
-        virtual void createLabelAndField(UIWidget& parent, ComponentEditorContext& context, const ComponentFieldParameters& parameters) {}
-        virtual std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& parameters) = 0;
+        virtual void createLabelAndField(UIWidget& parent, const ComponentEditorContext& context, const ComponentFieldParameters& parameters) {}
+        virtual std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& parameters) = 0;
     };
 
     enum class SceneEditorTool {
@@ -120,7 +123,7 @@ namespace Halley {
 
     	virtual void setSelectedEntity(const UUID& id, ConfigNode& entityData) = 0;
     	virtual void showEntity(const UUID& id) = 0;
-    	virtual void setTool(SceneEditorTool tool) = 0;
+    	virtual void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
 
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;

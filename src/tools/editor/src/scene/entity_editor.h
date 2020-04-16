@@ -54,6 +54,7 @@ namespace Halley {
 		void setPrefabName(const String& name);
 
 		void onEntityUpdated() override;
+		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
 		ConfigNode& getEntityData();
 
 		void updatePrefabNames();

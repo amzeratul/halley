@@ -286,6 +286,11 @@ void EntityEditor::onEntityUpdated()
 	sceneEditor->onEntityModified(currentId);
 }
 
+void EntityEditor::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
+{
+	sceneEditor->setTool(tool, componentName, fieldName, options);
+}
+
 ConfigNode& EntityEditor::getEntityData()
 {
 	return *currentEntityData;

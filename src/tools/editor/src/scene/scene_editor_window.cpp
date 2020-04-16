@@ -69,7 +69,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		entityList->setSceneData(sceneData);
 
 		// HACK: set to drag tool
-		interface.setTool(SceneEditorTool::Translate);
+		setTool(SceneEditorTool::Translate, "Tranform2D", "position", ConfigNode());
 
 		// Show root
 		if (!entities.empty()) {
@@ -260,6 +260,13 @@ void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const
 {
 	entityEditor->onFieldChangedByGizmo(componentName, fieldName);
 	markModified();
+}
+
+void SceneEditorWindow::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
+{
+	if (canvas->isLoaded()) {
+		canvas->getInterface().setTool(tool, componentName, fieldName, options);
+	}
 }
 
 std::shared_ptr<const Prefab> SceneEditorWindow::getGamePrefab(const String& id) const

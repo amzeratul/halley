@@ -10,7 +10,7 @@ public:
 		return "Halley::String";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto& componentData = pars.componentData;
 		const auto& componentName = pars.componentName;
@@ -37,7 +37,7 @@ public:
 		return "int";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto& componentData = pars.componentData;
 		const auto& componentName = pars.componentName;
@@ -49,10 +49,10 @@ public:
 		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "intValue", context.getFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, false));
 		field->bindData("intValue", value, [&, fieldName](int newVal)
-			{
-				componentData[fieldName] = ConfigNode(newVal);
-				context.onEntityUpdated();
-			});
+		{
+			componentData[fieldName] = ConfigNode(newVal);
+			context.onEntityUpdated();
+		});
 
 		return field;
 	}
@@ -65,7 +65,7 @@ public:
 		return "float";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto& componentData = pars.componentData;
 		const auto& componentName = pars.componentName;
@@ -77,10 +77,10 @@ public:
 		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "floatValue", context.getFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, true));
 		field->bindData("floatValue", value, [&, fieldName](float newVal)
-			{
-				componentData[fieldName] = ConfigNode(newVal);
-				context.onEntityUpdated();
-			});
+		{
+			componentData[fieldName] = ConfigNode(newVal);
+			context.onEntityUpdated();
+		});
 
 		return field;
 	}
@@ -101,7 +101,7 @@ public:
 		return "bool";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto& componentData = pars.componentData;
 		const auto& componentName = pars.componentName;
@@ -112,10 +112,10 @@ public:
 
 		auto field = std::make_shared<UICheckbox>("boolValue", context.getFactory().getStyle("checkbox"), value);
 		field->bindData("boolValue", value, [&, fieldName](bool newVal)
-			{
-				componentData[fieldName] = ConfigNode(newVal);
-				context.onEntityUpdated();
-			});
+		{
+			componentData[fieldName] = ConfigNode(newVal);
+			context.onEntityUpdated();
+		});
 
 		auto sizer = std::make_shared<UISizer>(UISizerType::Horizontal, 4.0f);
 		sizer->add(field);
@@ -131,7 +131,7 @@ public:
 		return "Halley::Vector2f";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto& componentData = pars.componentData;
 		const auto& componentName = pars.componentName;
@@ -197,7 +197,7 @@ public:
 		return true;
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto& componentData = pars.componentData;
 		const auto& componentName = pars.componentName;
@@ -292,7 +292,7 @@ public:
 		return true;
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto& componentData = pars.componentData;
 		const auto& componentName = pars.componentName;
@@ -380,6 +380,52 @@ public:
 	}
 };
 
+class ComponentEditorPolygonFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::Polygon";
+	}
+
+	virtual bool isOpenPolygon()
+	{
+		return false;
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto& componentData = pars.componentData;
+		const auto& componentName = pars.componentName;
+		const auto& fieldName = pars.fieldName;
+		const auto& defaultValue = pars.defaultValue;
+
+		auto style = context.getFactory().getStyle("buttonThin");
+		
+		auto field = std::make_shared<UIButton>("editPolygon", style, LocalisedString::fromHardcodedString("Edit..."));
+		field->setHandle(UIEventType::ButtonClicked, "editPolygon", [=, &context] (const UIEvent& event)
+		{
+			ConfigNode options = ConfigNode(ConfigNode::MapType());
+			options["isOpenPolygon"] = isOpenPolygon();
+			context.setTool(SceneEditorTool::Polygon, componentName, fieldName, options);
+		});
+		
+		return field;
+	}
+};
+
+class ComponentEditorVertexListFieldFactory : public ComponentEditorPolygonFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::VertexList";
+	}
+
+	bool isOpenPolygon() override
+	{
+		return true;
+	}
+};
+
 std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -392,6 +438,8 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorVector2fFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorSpriteFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorAnimationPlayerFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorPolygonFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorVertexListFieldFactory>());
 	
 	return factories;
 }

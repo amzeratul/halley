@@ -15,7 +15,7 @@ namespace Halley {
 		void update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState);
 		void draw(Painter& painter);
 		void setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& entityData);
-		void setTool(SceneEditorTool tool);
+		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options);
 
 	private:
 		Resources& resources;

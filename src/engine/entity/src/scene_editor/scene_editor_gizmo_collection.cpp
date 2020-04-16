@@ -2,6 +2,7 @@
 #include "gizmos/translate_gizmo.h"
 #include "gizmos/selected_bounds_gizmo.h"
 #include "entity.h"
+#include "gizmos/polygon_gizmo.h"
 #include "halley/core/graphics/camera.h"
 using namespace Halley;
 
@@ -44,7 +45,7 @@ void SceneEditorGizmoCollection::setSelectedEntity(const std::optional<EntityRef
 	}
 }
 
-void SceneEditorGizmoCollection::setTool(SceneEditorTool tool)
+void SceneEditorGizmoCollection::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
 {
 	if (tool != currentTool) {
 		currentTool = tool;
@@ -53,6 +54,11 @@ void SceneEditorGizmoCollection::setTool(SceneEditorTool tool)
 		switch (tool) {
 		case SceneEditorTool::Translate:
 			activeGizmo = std::make_unique<TranslateGizmo>();
+			break;
+
+		case SceneEditorTool::Polygon:
+			activeGizmo = std::make_unique<PolygonGizmo>(componentName, fieldName, options);
+			break;
 		}
 
 		if (activeGizmo) {

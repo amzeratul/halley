@@ -3,10 +3,10 @@
 
 using namespace Halley;
 
-UILabel::UILabel(const String& id, TextRenderer style, const LocalisedString& text)
-	: UIWidget(id, {})
-	, renderer(style)
-	, text(text)
+UILabel::UILabel(String id, TextRenderer style, LocalisedString text)
+	: UIWidget(std::move(id), {})
+	, renderer(std::move(style))
+	, text(std::move(text))
 	, aliveFlag(std::make_shared<bool>(true))
 {
 	updateText();

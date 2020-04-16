@@ -5,7 +5,8 @@
 namespace Halley {
 	class UIButton : public UIClickable {
 	public:
-		explicit UIButton(String id, UIStyle style, std::optional<UISizer> sizer = {});
+		UIButton(String id, UIStyle style, std::optional<UISizer> sizer = {});
+		UIButton(String id, UIStyle style, LocalisedString label);
 
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -18,6 +19,8 @@ namespace Halley {
 		void onManualControlActivate() override;
 
 		void setCanDoBorderOnly(bool canDo);
+
+		void setLabel(LocalisedString string);
 
 	protected:
 		void doSetState(State state) override;

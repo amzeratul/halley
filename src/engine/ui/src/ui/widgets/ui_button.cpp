@@ -1,6 +1,7 @@
 #include "widgets/ui_button.h"
 #include "ui_style.h"
 #include "ui_painter.h"
+#include "widgets/ui_label.h"
 
 using namespace Halley;
 
@@ -10,6 +11,12 @@ UIButton::UIButton(String id, UIStyle s, std::optional<UISizer> sizer)
 {
 	sprite = style.getSprite("normal");
 	setMinSize(sprite.getOriginalSize());
+}
+
+UIButton::UIButton(String id, UIStyle style, LocalisedString label)
+	: UIButton(std::move(id), std::move(style), UISizer())
+{
+	setLabel(std::move(label));
 }
 
 void UIButton::draw(UIPainter& painter) const
@@ -81,6 +88,19 @@ void UIButton::onManualControlActivate()
 void UIButton::setCanDoBorderOnly(bool canDo)
 {
 	canDoBorderOnly = canDo;
+}
+
+void UIButton::setLabel(LocalisedString label)
+{
+	const auto& renderer = style.getTextRenderer("label");
+	auto uiLabel = std::make_shared<UILabel>(getId() + "_label", renderer, std::move(label));
+	if (style.hasTextRenderer("hoveredLabel")) {
+		uiLabel->setHoverable(style.getTextRenderer("label"), style.getTextRenderer("hoveredLabel"));
+	}
+	if (style.hasTextRenderer("selectedLabel"))	{
+		uiLabel->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
+	}
+	add(uiLabel, 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
 }
 
 void UIButton::doSetState(State state)
