@@ -131,6 +131,10 @@ EntityId SceneEditor::createCamera()
 		.getEntityId();
 }
 
+void SceneEditor::onEntitySelected(std::optional<EntityRef> entity)
+{
+}
+
 EntityId SceneEditor::getCameraId()
 {
 	return cameraEntityId;
@@ -182,6 +186,8 @@ void SceneEditor::setSelectedEntity(const UUID& id, ConfigNode& entityData)
 	}	
 
 	gizmoCollection->setSelectedEntity(selectedEntity, entityData);
+
+	onEntitySelected(selectedEntity);
 }
 
 void SceneEditor::showEntity(const UUID& id)

@@ -48,6 +48,8 @@ namespace Halley {
 
     	virtual EntityId createCamera();
 
+    	virtual void onEntitySelected(std::optional<EntityRef> entity);
+
     private:
 		const HalleyAPI* api = nullptr;
 		Resources* resources = nullptr;
