@@ -224,10 +224,18 @@ void AssetsEditorWindow::createEditorTab(AssetType type, const String& name)
 	auto editor = makeEditor(type, name);
 	if (editor) {
 		editor->setResource(name);
-		int n = content->getNumberOfPages();
+		auto n = content->getNumberOfPages();
 		content->addPage();
 		content->getPage(n)->add(editor, 1);
-		contentList->addTextItem(toString(n), LocalisedString::fromUserString(toString(type)));
+		auto typeSprite = Sprite().setImage(factory.getResources(), Path("ui") / "assetTypes" / toString(type) + ".png");
+		const auto image = std::make_shared<UIImage>(typeSprite);
+		const auto text = std::make_shared<UILabel>(name + "_" + toString(type) + ":label", contentList->getStyle().getTextRenderer("label"), LocalisedString::fromUserString(name));
+		
+		auto item = std::make_shared<UISizer>();
+		item->add(image);
+		item->add(text, 1.0f, {}, UISizerAlignFlags::CentreVertical);
+		
+		contentList->addItem(toString(n), item);
 	}
 }
 
