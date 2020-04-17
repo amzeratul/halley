@@ -58,7 +58,7 @@ ConfigNode::ConfigNode(SequenceType&& entryList)
 	operator=(std::move(entryList));
 }
 
-ConfigNode::ConfigNode(String&& value)
+ConfigNode::ConfigNode(String value)
 {
 	operator=(std::move(value));
 }

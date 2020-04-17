@@ -32,7 +32,7 @@ namespace Halley {
 
 		virtual void onEntityUpdated() = 0;
 		virtual std::shared_ptr<IUIElement> makeLabel(const String& label) = 0;
-		virtual void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
+		virtual void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) = 0;
 	};
 
     class ComponentEditorContext {
@@ -47,7 +47,7 @@ namespace Halley {
         Resources& getGameResources() const { return gameResources; }
     	void onEntityUpdated() const { parent.onEntityUpdated(); }
     	std::shared_ptr<IUIElement> makeLabel(const String& label) const { return parent.makeLabel(label); }
-        void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) const { parent.setTool(tool, componentName, fieldName, options); }
+        void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) const { parent.setTool(tool, componentName, fieldName, std::move(options)); }
 
     private:
         IEntityEditor& parent;
@@ -56,17 +56,19 @@ namespace Halley {
     };
 
 	struct ComponentFieldParameters {
-        ComponentFieldParameters(const String& componentName, const String& fieldName, const String& defaultValue, ConfigNode& componentData)
+        ComponentFieldParameters(const String& componentName, const String& fieldName, const String& defaultValue, ConfigNode& componentData, const std::vector<String>& componentNames)
             : componentName(componentName)
 			, fieldName(fieldName)
 			, defaultValue(defaultValue)
 			, componentData(componentData)
+			, componentNames(componentNames)
         {}
 		
 		const String& componentName;
 		const String& fieldName;
 		const String& defaultValue;
         ConfigNode& componentData;
+        const std::vector<String>& componentNames;
     };
 
 	class UIWidget;
@@ -143,6 +145,7 @@ namespace Halley {
 
     	virtual void setSelectedEntity(const UUID& id, ConfigNode& entityData) = 0;
     	virtual void showEntity(const UUID& id) = 0;
+        virtual ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) = 0;
 
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;

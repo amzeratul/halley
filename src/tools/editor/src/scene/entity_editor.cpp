@@ -96,9 +96,19 @@ void EntityEditor::reloadEntity()
 
 	if (currentEntityData) {
 		if (getEntityData()["components"].getType() == ConfigNodeType::Sequence) {
-			for (auto& componentNode: getEntityData()["components"].asSequence()) {
+			auto& seq = getEntityData()["components"].asSequence();
+			std::vector<String> componentNames;
+			componentNames.reserve(seq.size());
+
+			for (auto& componentNode: seq) {
 				for (auto& c: componentNode.asMap()) {
-					loadComponentData(c.first, c.second);
+					componentNames.push_back(c.first);
+				}
+			}
+			
+			for (auto& componentNode: seq) {
+				for (auto& c: componentNode.asMap()) {
+					loadComponentData(c.first, c.second, componentNames);
 				}
 			}
 		}
@@ -127,7 +137,7 @@ std::shared_ptr<IUIElement> EntityEditor::makeLabel(const String& text)
 	return labelBox;
 }
 
-void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data)
+void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data, const std::vector<String>& componentNames)
 {
 	auto componentUI = factory.makeUI("ui/halley/entity_editor_component");
 	componentUI->getWidgetAs<UILabel>("componentType")->setText(LocalisedString::fromUserString(componentType));
@@ -143,7 +153,7 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
 			if (member.serializable) {
-				ComponentFieldParameters parameters(componentType, member.name, member.defaultValue, data);
+				ComponentFieldParameters parameters(componentType, member.name, member.defaultValue, data, componentNames);
 				createField(*componentFields, member.type.name, parameters);
 			}
 		}
@@ -287,9 +297,9 @@ void EntityEditor::onEntityUpdated()
 	sceneEditor->onEntityModified(currentId);
 }
 
-void EntityEditor::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
+void EntityEditor::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options)
 {
-	sceneEditor->setTool(tool, componentName, fieldName, options);
+	sceneEditor->setTool(tool, componentName, fieldName, std::move(options));
 }
 
 ConfigNode& EntityEditor::getEntityData()

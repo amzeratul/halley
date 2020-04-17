@@ -398,6 +398,7 @@ public:
 		const auto& componentName = pars.componentName;
 		const auto& fieldName = pars.fieldName;
 		const auto& defaultValue = pars.defaultValue;
+		auto componentNames = pars.componentNames;
 
 		auto style = context.getFactory().getStyle("buttonThin");
 		
@@ -408,7 +409,14 @@ public:
 		{
 			ConfigNode options = ConfigNode(ConfigNode::MapType());
 			options["isOpenPolygon"] = isOpenPolygon();
-			context.setTool(SceneEditorTool::Polygon, componentName, fieldName, options);
+
+			ConfigNode::SequenceType compNames;
+			for (const auto& name : componentNames) {
+				compNames.emplace_back(ConfigNode(name));
+			}
+			options["componentNames"] = std::move(compNames);
+			
+			context.setTool(SceneEditorTool::Polygon, componentName, fieldName, std::move(options));
 		});
 		
 		return field;

@@ -23,7 +23,7 @@ namespace Halley {
 	
 	class PolygonGizmo final : public SceneEditorGizmo {
 	public:
-		PolygonGizmo(const String& componentName, const String& fieldName, const ConfigNode& options, UIFactory& factory);
+		PolygonGizmo(String componentName, String fieldName, const ConfigNode& options, UIFactory& factory);
 		void update(Time time, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
 		std::shared_ptr<UIWidget> makeUI() override;
@@ -36,6 +36,7 @@ namespace Halley {
 		String componentName;
 		String fieldName;
 		bool isOpenPolygon;
+		Colour4f colour;
 
 		VertexList lastStored;
 		VertexList vertices;

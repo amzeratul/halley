@@ -281,8 +281,12 @@ void SceneEditorWindow::setTool(SceneEditorTool tool)
 	}
 }
 
-void SceneEditorWindow::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
+void SceneEditorWindow::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options)
 {
+	if (canvas->isLoaded()) {
+		options = canvas->getInterface().onToolSet(tool, componentName, fieldName, std::move(options));
+	}
+
 	curTool = tool;
 	curComponentName = componentName;
 	setToolUI(canvas->setTool(tool, componentName, fieldName, options));

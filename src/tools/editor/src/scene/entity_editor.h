@@ -43,7 +43,7 @@ namespace Halley {
 		Resources* gameResources = nullptr;
 
 		void makeUI();
-		void loadComponentData(const String& componentType, ConfigNode& data);
+		void loadComponentData(const String& componentType, ConfigNode& data, const std::vector<String>& componentNames);
 		void createField(UIWidget& parent, const String& fieldType, const ComponentFieldParameters& parameters);
 
 		void addComponent();
@@ -54,7 +54,7 @@ namespace Halley {
 		void setPrefabName(const String& name);
 
 		void onEntityUpdated() override;
-		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
+		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;
 		ConfigNode& getEntityData();
 
 		void updatePrefabNames();

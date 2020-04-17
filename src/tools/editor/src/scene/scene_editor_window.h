@@ -28,7 +28,7 @@ namespace Halley {
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
 		void setTool(SceneEditorTool tool);
-		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options);
+		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options);
 
 		std::shared_ptr<const Prefab> getGamePrefab(const String& id) const;
 

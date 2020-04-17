@@ -2,11 +2,12 @@
 #include "halley/core/graphics/painter.h"
 using namespace Halley;
 
-PolygonGizmo::PolygonGizmo(const String& componentName, const String& fieldName, const ConfigNode& options, UIFactory& factory)
+PolygonGizmo::PolygonGizmo(String componentName, String fieldName, const ConfigNode& options, UIFactory& factory)
 	: factory(factory)
-	, componentName(componentName)
-	, fieldName(fieldName)
+	, componentName(std::move(componentName))
+	, fieldName(std::move(fieldName))
 	, isOpenPolygon(options["isOpenPolygon"].asBool(false))
+	, colour(Colour4f::fromString(options["colour"].asString("#0080FF")))
 {
 }
 
@@ -82,11 +83,10 @@ int PolygonGizmo::updateHandles(const SceneEditorInputState& inputState)
 void PolygonGizmo::draw(Painter& painter) const
 {
 	const auto zoom = getZoom();
-	const auto col = Colour4f(0, 1, 0.5f);
 	const auto highCol = Colour4f(1, 1, 1);
 
 	if (mode == PolygonGizmoMode::Append && preview.has_value()) {
-		painter.drawLine(vertices, 2.0f / zoom, col, false);
+		painter.drawLine(vertices, 2.0f / zoom, colour, false);
 
 		const size_t nVertices = vertices.size();
 		VertexList newBit;
@@ -97,17 +97,17 @@ void PolygonGizmo::draw(Painter& painter) const
 		if (nVertices >= 2 && !isOpenPolygon) {
 			newBit.push_back(vertices.front());
 		}
-		painter.drawLine(newBit, 1.0f / zoom, col, false);
+		painter.drawLine(newBit, 1.0f / zoom, colour, false);
 	} else {
-		painter.drawLine(vertices, 2.0f / zoom, col, !isOpenPolygon);
+		painter.drawLine(vertices, 2.0f / zoom, colour, !isOpenPolygon);
 	}
 
 	if (mode == PolygonGizmoMode::Insert && preview.has_value()) {
-		painter.drawCircle(preview.value(), 3.0f / zoom, 2.0f, col);
+		painter.drawCircle(preview.value(), 3.0f / zoom, 2.0f, colour);
 	}
 	
 	for (const auto& h: handles) {
-		painter.drawRect(getHandleRect(h.getPosition(), 12.0f), 1.0f / zoom, h.isOver() ? highCol : col);
+		painter.drawRect(getHandleRect(h.getPosition(), 12.0f), 1.0f / zoom, h.isOver() ? highCol : colour);
 	}
 }
 
