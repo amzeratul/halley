@@ -71,12 +71,6 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		// Import image data
 		std::map<String, std::vector<ImageData>> groupedFrames;
 		
-		auto groupSeparated = meta.getBool("group_separated", false);
-		if (groupSeparated)
-		{
-			Logger::logInfo("group separated!");
-		}
-		
 		if (inputFile.name.getExtension() == ".ase" || inputFile.name.getExtension() == ".aseprite") {
 			// Import Aseprite file
 			auto groupSeparated = meta.getBool("group_separated", false);

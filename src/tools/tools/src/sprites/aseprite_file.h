@@ -111,8 +111,7 @@ namespace Halley {
 		void load(gsl::span<const gsl::byte> data);
 
 		const std::vector<AsepriteTag>& getTags() const;
-		std::map<String, std::unique_ptr<Image>> makeGroupFrameImages(int frameNumber);
-		std::unique_ptr<Image> makeFrameImage(int frameNumber, bool includeGroups);
+		std::map<String, std::unique_ptr<Image>> makeGroupFrameImages(int frameNumber, bool groupSeparated);
 	    const AsepriteFrame& getFrame(int n) const;
 	    size_t getNumberOfFrames() const;
 

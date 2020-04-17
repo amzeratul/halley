@@ -57,31 +57,17 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String s
 
 		for (const int frameN: t.second) {
 
-			std::unique_ptr<Image> frameImage = aseFile.makeFrameImage(frameN, !groupSeparated);
-			std::map<String, std::unique_ptr<Image>> groupFrameImages;
-			
-			if (groupSeparated)
-			{
-				groupFrameImages = aseFile.makeGroupFrameImages(frameN);;
-			}
+			std::map<String, std::unique_ptr<Image>> groupFrameImages = aseFile.makeGroupFrameImages(frameN, groupSeparated);
 
 			const auto duration = aseFile.getFrame(frameN).duration;
 			const auto hasFrameNumber = t.second.size() > 1;
 
-			std::vector<ImageData> defaultFrameData;
-			addImageData(i, defaultFrameData, std::move(frameImage), aseFile, baseName, sequence, direction, duration, trim, hasFrameNumber, {}, firstImage, spriteName);
-			firstImage = false;
-			if (frameData.find("") == frameData.end())
-			{
-				frameData[""] = std::vector<ImageData>();
-			}
-			std::move(defaultFrameData.begin(), defaultFrameData.end(), std::back_inserter(frameData[""]));
-			
 			for (auto& groupFrameImage : groupFrameImages)
 			{
 				std::vector<ImageData> groupFrameData;
 				addImageData(i, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, hasFrameNumber, groupFrameImage.first, firstImage, spriteName);
-			
+				firstImage = false;
+				
 				if(frameData.find(groupFrameImage.first) == frameData.end())
 				{
 					frameData[groupFrameImage.first] = std::vector<ImageData>();
