@@ -256,13 +256,14 @@ void EntityEditor::deleteComponent(const String& name)
 
 			if (found) {
 				componentSequence.erase(componentSequence.begin() + i);
-				break;
+
+				needToReloadUI = true;
+				sceneEditor->onComponentRemoved(name);
+				onEntityUpdated();
+				return;
 			}
 		}
 	}
-
-	needToReloadUI = true;
-	onEntityUpdated();
 }
 
 void EntityEditor::setName(const String& name)

@@ -27,7 +27,6 @@ namespace Halley {
 
 		void setSelectedEntity(const UUID& id, ConfigNode& entityData) override;
 		void showEntity(const UUID& id) override;
-		std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
     	
 		std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() override;
 		std::shared_ptr<UIWidget> makeCustomUI() override;

@@ -26,6 +26,18 @@ children:
       sizer: { type: horizontal }
       children:
         - widget: { id: saveButton, class: button, style: buttonThin, text: "Save", size: [100, 22] }
+        - border: [10, 0, 0, 0]
+          widget:
+            id: toolMode
+            class: list
+            type: horizontal
+            options:
+              - id: drag
+                text: Hand
+              - id: translate
+                text: Move
+              - id: polygon
+                text: Polygon
     - widget: { id: canvas, class: sceneEditorCanvas }
       proportion: 1
       sizer: { type: vertical }

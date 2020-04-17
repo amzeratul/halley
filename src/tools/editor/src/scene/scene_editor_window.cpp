@@ -65,8 +65,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 		entityList->setSceneData(sceneData);
 
-		// HACK: set to drag tool
-		setTool(SceneEditorTool::Translate, "Tranform2D", "position", ConfigNode());
+		setTool(SceneEditorTool::Drag);
 
 		// Show root
 		if (!entities.empty()) {
@@ -126,11 +125,18 @@ void SceneEditorWindow::makeUI()
 	entityEditor = getWidgetAs<EntityEditor>("entityEditor");
 	entityEditor->setSceneEditorWindow(*this);
 
+	toolMode = getWidgetAs<UIList>("toolMode");
+	
 	getWidget("saveButton")->setEnabled(false);
 
 	setHandle(UIEventType::ListSelectionChanged, "entityList_list", [=] (const UIEvent& event)
 	{
 		selectEntity(event.getStringData());
+	});
+
+	setHandle(UIEventType::ListSelectionChanged, "toolMode", [=] (const UIEvent& event)
+	{
+		setTool(fromString<SceneEditorTool>(event.getStringData()));
 	});
 
 	setHandle(UIEventType::ListAccept, "entityList_list", [=](const UIEvent& event)
@@ -169,6 +175,8 @@ void SceneEditorWindow::load()
 
 void SceneEditorWindow::selectEntity(const String& id)
 {
+	decayTool();
+	
 	String actualId = id;
 	if (actualId.isEmpty()) {
 		const auto& tree = sceneData->getEntityTree();
@@ -253,17 +261,33 @@ void SceneEditorWindow::onEntityMoved(const String& id)
 	markModified();
 }
 
+void SceneEditorWindow::onComponentRemoved(const String& name)
+{
+	if (name == curComponentName) {
+		decayTool();
+	}
+}
+
 void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
 {
 	entityEditor->onFieldChangedByGizmo(componentName, fieldName);
 	markModified();
 }
 
+void SceneEditorWindow::setTool(SceneEditorTool tool)
+{
+	if (curTool != tool) {
+		setTool(tool, "", "", ConfigNode());
+	}
+}
+
 void SceneEditorWindow::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
 {
-	if (canvas->isLoaded()) {
-		setToolUI(canvas->getInterface().setTool(tool, componentName, fieldName, options));
-	}
+	curTool = tool;
+	curComponentName = componentName;
+	setToolUI(canvas->setTool(tool, componentName, fieldName, options));
+	toolMode->setItemActive("polygon", tool == SceneEditorTool::Polygon);
+	toolMode->setSelectedOptionId(toString(tool));
 }
 
 std::shared_ptr<const Prefab> SceneEditorWindow::getGamePrefab(const String& id) const
@@ -473,4 +497,11 @@ void SceneEditorWindow::setToolUI(std::shared_ptr<UIWidget> ui)
 		customUIField->add(ui, 1);
 	}
 	customUIField->setActive(!!ui);
+}
+
+void SceneEditorWindow::decayTool()
+{
+	if (curTool == SceneEditorTool::Polygon) {
+		setTool(SceneEditorTool::Drag);
+	}
 }

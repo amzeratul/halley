@@ -135,9 +135,14 @@ void PolygonGizmo::onEntityChanged()
 VertexList PolygonGizmo::readPoints()
 {
 	VertexList result;
-	const auto* data = getComponentData(componentName);
+	auto* data = getComponentData(componentName);
 	if (data) {
-		const auto& seq = (*data)[fieldName].asSequence();
+		auto& field = (*data)[fieldName];
+		if (field.getType() != ConfigNodeType::Sequence) {
+			field = ConfigNode::SequenceType();
+		}
+		
+		const auto& seq = field.asSequence();
 		result.reserve(seq.size());
 		for (const auto& p: seq) {
 			result.push_back(p.asVector2f());

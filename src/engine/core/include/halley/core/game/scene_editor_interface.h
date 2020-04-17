@@ -90,6 +90,21 @@ namespace Halley {
         Polygon
     };
 
+    template <>
+    struct EnumNames<SceneEditorTool> {
+        constexpr std::array<const char*, 6> operator()() const {
+            return
+        	{{
+				"none",
+            	"drag",
+            	"translate",
+        		"rotate",
+        		"scale",
+        		"polygon"
+            }};
+        }
+    };
+
 	struct SceneEditorInputState {
 		// Filled on editor side
 		bool leftClickPressed = false;
@@ -128,7 +143,6 @@ namespace Halley {
 
     	virtual void setSelectedEntity(const UUID& id, ConfigNode& entityData) = 0;
     	virtual void showEntity(const UUID& id) = 0;
-    	virtual std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
 
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;

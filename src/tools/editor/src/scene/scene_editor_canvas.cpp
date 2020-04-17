@@ -89,7 +89,7 @@ void SceneEditorCanvas::pressMouse(Vector2f mousePos, int button)
 	}
 	
 	if (!dragging) {
-		if (button == 1) {
+		if (button == 1 || (tool == SceneEditorTool::Drag && button == 0)) {
 			dragButton = button;
 			dragging = true;
 			lastMousePos = mousePos;
@@ -265,6 +265,12 @@ void SceneEditorCanvas::guardedRun(const std::function<void()>& f) const
 		Logger::logError("Unknown error in SceneEditorCanvas, probably from game dll");
 		errorState = true;
 	}
+}
+
+std::shared_ptr<UIWidget> SceneEditorCanvas::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
+{
+	this->tool = tool;
+	return gizmos->setTool(tool, componentName, fieldName, options);
 }
 
 void SceneEditorCanvas::updateInputState()

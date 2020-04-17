@@ -24,8 +24,10 @@ namespace Halley {
 		void onEntityRemoved(const String& id, const String& parentId);
 		void onEntityModified(const String& id);
 		void onEntityMoved(const String& id);
+		void onComponentRemoved(const String& name);
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
+		void setTool(SceneEditorTool tool);
 		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options);
 
 		std::shared_ptr<const Prefab> getGamePrefab(const String& id) const;
@@ -40,6 +42,7 @@ namespace Halley {
 		std::shared_ptr<SceneEditorCanvas> canvas;
 		std::shared_ptr<EntityList> entityList;
 		std::shared_ptr<EntityEditor> entityEditor;
+		std::shared_ptr<UIList> toolMode;
 
 		Path assetPath;
 		std::shared_ptr<ISceneData> sceneData;
@@ -50,6 +53,8 @@ namespace Halley {
 
 		std::shared_ptr<UIWidget> curCustomUI;
 		std::shared_ptr<UIWidget> curToolUI;
+		SceneEditorTool curTool = SceneEditorTool::None;
+		String curComponentName;
 
 		void makeUI();
 		void load();
@@ -73,5 +78,7 @@ namespace Halley {
 
 		void setCustomUI(std::shared_ptr<UIWidget> ui);
 		void setToolUI(std::shared_ptr<UIWidget> ui);
+
+		void decayTool();
 	};
 }
