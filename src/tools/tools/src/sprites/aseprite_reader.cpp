@@ -8,7 +8,7 @@
 using namespace Halley;
 
 
-std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData, bool trim)
+std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData, bool trim, bool groupSeparated)
 {
 	const String baseName = Path(spriteName).getFilename().string();
 
@@ -43,7 +43,7 @@ std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::sp
 	}
 
 	// Create frames
-	std::vector<ImageData> frameData;
+	std::map<String, std::vector<ImageData>> frameData;
 	bool firstImage = true;
 	for (auto& t: tags) {
 		int i = 0;
@@ -54,40 +54,80 @@ std::vector<ImageData> AsepriteReader::importAseprite(String spriteName, gsl::sp
 			sequence = split.at(0);
 			direction = split.at(1);
 		}
-	
+
 		for (const int frameN: t.second) {
-			frameData.emplace_back();
-			auto& imgData = frameData.back();
 
-			imgData.img = aseFile.makeFrameImage(frameN);
-			imgData.frameNumber = i;
-			imgData.sequenceName = sequence;
-			imgData.direction = direction;
-			imgData.duration = aseFile.getFrame(frameN).duration;
-			imgData.clip = trim ? imgData.img->getTrimRect() : imgData.img->getRect();
-
-			std::stringstream ss;
-			ss << baseName.cppStr();
-			if (imgData.sequenceName != "") {
-				ss << "_" << imgData.sequenceName.cppStr();
-			}
-			if (imgData.direction != "") {
-				ss << "_" << imgData.direction.cppStr();
-			}
-			const bool hasFrameNumber = t.second.size() > 1;
-			if (hasFrameNumber) {
-				ss << "_" << std::setw(3) << std::setfill('0') << imgData.frameNumber;
+			std::unique_ptr<Image> frameImage = aseFile.makeFrameImage(frameN, !groupSeparated);
+			std::map<String, std::unique_ptr<Image>> groupFrameImages;
+			
+			if (groupSeparated)
+			{
+				groupFrameImages = aseFile.makeGroupFrameImages(frameN);;
 			}
 
-			imgData.filenames.emplace_back(ss.str());
-			if (firstImage) {
-				firstImage = false;
-				imgData.filenames.emplace_back(":img:" + spriteName);
-			}
+			const auto duration = aseFile.getFrame(frameN).duration;
+			const auto hasFrameNumber = t.second.size() > 1;
 
-			i++;
+			std::vector<ImageData> defaultFrameData;
+			addImageData(i, defaultFrameData, std::move(frameImage), aseFile, baseName, sequence, direction, duration, trim, hasFrameNumber, {}, firstImage, spriteName);
+			firstImage = false;
+			if (frameData.find("") == frameData.end())
+			{
+				frameData[""] = std::vector<ImageData>();
+			}
+			std::move(defaultFrameData.begin(), defaultFrameData.end(), std::back_inserter(frameData[""]));
+			
+			for (auto& groupFrameImage : groupFrameImages)
+			{
+				std::vector<ImageData> groupFrameData;
+				addImageData(i, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, hasFrameNumber, groupFrameImage.first, firstImage, spriteName);
+			
+				if(frameData.find(groupFrameImage.first) == frameData.end())
+				{
+					frameData[groupFrameImage.first] = std::vector<ImageData>();
+				}
+				std::move(groupFrameData.begin(), groupFrameData.end(), std::back_inserter(frameData[groupFrameImage.first]));
+			}
 		}
 	}
 
 	return frameData;
+}
+
+void AsepriteReader::addImageData(int frameNumber, std::vector<ImageData>& frameData, std::unique_ptr<Image> frameImage, const AsepriteFile& aseFile,
+	const String& baseName, const String& sequence, const String& direction, int duration, bool trim, bool hasFrameNumber, std::optional<String> group,
+	bool firstImage, const String& spriteName)
+{
+	frameData.emplace_back();
+	auto& imgData = frameData.back();
+	
+	imgData.img = std::move(frameImage);
+	imgData.frameNumber = frameNumber;
+	imgData.sequenceName = /*group ? group.value() + (sequence.isEmpty() ? "" : "_" + sequence) : */sequence;
+	imgData.direction = direction;
+	imgData.duration = duration;
+	imgData.clip = trim ? imgData.img->getTrimRect() : imgData.img->getRect();
+	
+	std::stringstream ss;
+	ss << baseName.cppStr();
+	if (imgData.sequenceName != "") {
+		ss << "_" << imgData.sequenceName.cppStr();
+	}
+	if (imgData.direction != "") {
+		ss << "_" << imgData.direction.cppStr();
+	}
+	
+	if (group)
+	{
+		ss << "_" << group.value();
+	}
+	if (hasFrameNumber) {
+		ss << "_" << std::setw(3) << std::setfill('0') << imgData.frameNumber;
+	}
+	
+	imgData.filenames.emplace_back(ss.str());
+	if (firstImage) {
+		firstImage = false;
+		imgData.filenames.emplace_back(":img:" + spriteName + (group ? ":" + group.value() : ""));
+	}
 }

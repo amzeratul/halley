@@ -320,7 +320,7 @@ void AsepriteFile::addLayerChunk(gsl::span<const gsl::byte> span)
 	layer.layerGroupDisplaysCollapsed = (data.flags & 32) != 0;
 	layer.referenceLayer = (data.flags & 64) != 0;
 	layer.opacity = (flags & 1) != 0 ? data.opacity : 255;
-
+	
 	layer.layerName = readString(span);
 }
 
@@ -454,14 +454,72 @@ const std::vector<AsepriteTag>& AsepriteFile::getTags() const
 	return tags;
 }
 
-std::unique_ptr<Image> AsepriteFile::makeFrameImage(int frameNumber)
+std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int frameNumber)
+{
+	std::map<String, std::unique_ptr<Image>> frameImages;
+
+	String currentGroup;
+	std::unique_ptr<Image> groupFrameImage;
+	
+	auto inGroup = false;
+	for (int layerNumber = 0; layerNumber < layers.size(); ++layerNumber) {
+		auto& layer = layers[layerNumber];
+
+		const auto newGroup = layer.type == AsepriteLayerType::Group && layer.childLevel == 0;
+		const auto outOfGroup = inGroup && layer.type != AsepriteLayerType::Group && layer.childLevel == 0;
+		if (newGroup)
+		{
+			currentGroup = layer.layerName;
+			inGroup = true;
+
+			if (groupFrameImage)
+			{
+				groupFrameImage->preMultiply();
+				frameImages[currentGroup] = std::move(groupFrameImage);
+				groupFrameImage.reset();
+			}
+			
+			groupFrameImage = std::make_unique<Image>(Image::Format::RGBA, size);
+			groupFrameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));
+		}
+		
+		if (outOfGroup)
+		{
+			inGroup = false;
+			
+			groupFrameImage->preMultiply();
+			frameImages[currentGroup] = std::move(groupFrameImage);
+			groupFrameImage.reset();
+		}
+
+		if (layer.visible && inGroup) {
+			auto* cel = getCelAt(frameNumber, layerNumber);
+			if (cel) {
+				const uint8_t opacity = uint8_t(clamp((uint32_t(cel->opacity) * uint32_t(layer.opacity)) / 255, uint32_t(0), uint32_t(255)));
+				if (!cel->imgData) {
+					cel->loadImage(colourDepth, layer.background ? paletteBg : paletteTransparent);
+				}
+				cel->drawAt(*groupFrameImage, opacity, layer.blendMode);
+			}
+		}
+	}
+
+	if (groupFrameImage) {
+		groupFrameImage->preMultiply();
+		frameImages[currentGroup] = std::move(groupFrameImage);
+	}
+
+	return frameImages;
+}
+
+std::unique_ptr<Image> AsepriteFile::makeFrameImage(int frameNumber, bool includeGroups)
 {
 	auto frameImage = std::make_unique<Image>(Image::Format::RGBA, size);
 	frameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));
 
 	for (int layerNumber = 0; layerNumber < layers.size(); ++layerNumber) {
 		auto& layer = layers[layerNumber];
-		if (layer.visible) {
+		if (layer.visible && (includeGroups || layer.childLevel == 0)) {
 			auto* cel = getCelAt(frameNumber, layerNumber);
 			if (cel) {
 				const uint8_t opacity = uint8_t(clamp((uint32_t(cel->opacity) * uint32_t(layer.opacity)) / 255, uint32_t(0), uint32_t(255)));
