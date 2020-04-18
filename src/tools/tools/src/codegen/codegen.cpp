@@ -12,11 +12,14 @@
 #include "halley/tools/ecs/ecs_data.h"
 
 #ifdef _MSC_VER
-	#ifdef _DEBUG
-		#pragma comment(lib, "libyaml-cppmdd.lib")
-	#else
-		#pragma comment(lib, "libyaml-cppmd.lib")
-	#endif
+	#ifndef USE_VCPKG_YAML
+		#ifdef _DEBUG
+			#pragma comment(lib, "libyaml-cppmdd.lib")
+		#else
+			#pragma comment(lib, "libyaml-cppmd.lib")
+		#endif
+	#endif // !USE_VCPKG_YAML
+
 
 	#include <sys/utime.h>
 #else

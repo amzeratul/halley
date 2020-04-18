@@ -74,7 +74,7 @@ Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& mater
 		flushPending();
 	}
 
-	Expects(material);
+	Expects(material != nullptr);
 	Expects(numVertices > 0);
 	Expects(numIndices >= numVertices);
 

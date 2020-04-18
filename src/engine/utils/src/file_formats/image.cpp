@@ -205,7 +205,7 @@ void Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t heig
 					size_t pxPos = (x >> 3) + y * pitch;
 					int bit = 1 << (int(7 - x) & 7);
 					bool active = (src[pxPos] & bit) != 0;
-					dst[x + y * w] = active ? 255 : 0;
+					dst[x + y * w] = active ? 0xFF : 0;
 				}
 			}
 		} else if (srcBpp == 8) {

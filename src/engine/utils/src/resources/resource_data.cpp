@@ -117,7 +117,7 @@ ResourceDataStream::ResourceDataStream(String path, ResourceDataMakeReader makeR
 
 ResourceLoader::ResourceLoader(ResourceLoader&& loader) noexcept
 	: locator(loader.locator)
-	, resources(resources)
+	, resources(loader.resources)
 	, name(std::move(loader.name))
 	, priority(loader.priority)
 	, api(loader.api)
