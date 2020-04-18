@@ -1,5 +1,6 @@
 #include "entity_list.h"
 
+#include "halley/ui/ui_factory.h"
 #include "scene_editor_window.h"
 using namespace Halley;
 
@@ -47,7 +48,7 @@ void EntityList::addEntities(const EntityTree& entity, const String& parentId)
 	if (!entity.entityId.isEmpty()) {
 		addEntity(entity.name, entity.entityId, parentId, entity.prefab);
 	}
-	
+
 	for (auto& e: entity.children) {
 		addEntities(e, entity.entityId);
 	}

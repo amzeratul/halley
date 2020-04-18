@@ -1,5 +1,4 @@
 #include "halley/tools/dll/dynamic_library.h"
-#include <filesystem>
 #include <halley/support/exception.h>
 
 #include "halley/maths/random.h"
@@ -17,7 +16,7 @@
 #endif
 
 using namespace Halley;
-using namespace std::filesystem;
+using namespace boost::filesystem;
 
 DynamicLibrary::DynamicLibrary(std::string originalPath)
 	: libOrigPath(originalPath)
@@ -161,11 +160,11 @@ void DynamicLibrary::flushLoaded() const
 	decltype(toDelete) remaining;
 	
 	for (auto& f: toDelete) {
-		std::error_code ec;
-		if (!std::filesystem::remove(f, ec)) {
+		boost::system::error_code ec;
+		if (!boost::filesystem::remove(f, ec)) {
 			remaining.push_back(std::move(f));
 		}
 	}
-	
+
 	toDelete = std::move(remaining);
 }

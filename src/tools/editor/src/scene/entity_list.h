@@ -1,9 +1,12 @@
 #pragma once
 #include "halley/ui/ui_widget.h"
+#include "halley/ui/widgets/ui_tree_list.h"
 
 namespace Halley {
 	class SceneEditorWindow;
 	class UIFactory;
+	class EntityTree;
+	class ISceneData;
 
 	class EntityList final : public UIWidget {
 	public:
@@ -20,10 +23,10 @@ namespace Halley {
 	private:
 		UIFactory& factory;
 		SceneEditorWindow* sceneEditor;
-		
+
 		std::shared_ptr<UITreeList> list;
 		std::shared_ptr<ISceneData> sceneData;
-		
+
 		void makeUI();
 		void addEntities(const EntityTree& entity, const String& parentId);
 		void addEntity(const String& name, const String& id, const String& parentId, const String& prefab);

@@ -1,5 +1,12 @@
 #include "scene_editor_canvas.h"
 
+#include "halley/core/entry/entry_point.h"
+#include "halley/core/game/game.h"
+#include "halley/core/graphics/render_context.h"
+#include "halley/core/graphics/render_target/render_surface.h"
+#include "halley/core/graphics/render_target/render_target_texture.h"
+#include "halley/core/input/input_keyboard.h"
+#include "halley/core/input/input_keys.h"
 #include "scene_editor_gizmo_collection.h"
 #include "halley/core/game/scene_editor_interface.h"
 #include "scene_editor_window.h"
@@ -19,7 +26,7 @@ SceneEditorCanvas::SceneEditorCanvas(String id, UIFactory& factory, Resources& r
 	mouse = api.input->getMouse();
 
 	gizmos = std::make_unique<SceneEditorGizmoCollection>(factory, resources);
-	
+
 	setHandle(UIEventType::MouseWheel, [this](const UIEvent& event)
 	{
 		onMouseWheel(event);
@@ -55,7 +62,7 @@ void SceneEditorCanvas::draw(UIPainter& painter) const
 	}
 
 	canvas.setPos(getPosition() + Vector2f(1, 1)).setSize(getSize() - Vector2f(2, 2));
-	
+
 	painter.draw(canvas, true);
 }
 
@@ -87,7 +94,7 @@ void SceneEditorCanvas::pressMouse(Vector2f mousePos, int button)
 		inputState.rightClickPressed = inputState.rightClickHeld = true;
 		break;
 	}
-	
+
 	if (!dragging) {
 		if (button == 1 || (tool == SceneEditorTool::Drag && button == 0)) {
 			dragButton = button;
@@ -193,7 +200,7 @@ void SceneEditorCanvas::renderInterface(RenderContext& rc) const
 	if (errorState) {
 		return;
 	}
-	
+
 	if (interface && surface->isReady()) {
 		guardedRun([&]() {
 			auto context = rc.with(surface->getRenderTarget());
@@ -218,7 +225,7 @@ void SceneEditorCanvas::loadDLL()
 		gameCoreAPI = std::make_unique<CoreAPIWrapper>(*api.core);
 		gameAPI = api.clone();
 		gameAPI->replaceCoreAPI(gameCoreAPI.get());
-		
+
 		SceneEditorContext context;
 		context.resources = gameResources;
 		context.editorResources = &resources;

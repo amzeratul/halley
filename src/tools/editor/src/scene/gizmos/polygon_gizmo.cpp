@@ -1,5 +1,8 @@
 #include "polygon_gizmo.h"
 #include "halley/core/graphics/painter.h"
+#include "halley/maths/line.h"
+#include "halley/ui/ui_factory.h"
+#include "halley/ui/widgets/ui_list.h"
 using namespace Halley;
 
 PolygonGizmo::PolygonGizmo(String componentName, String fieldName, const ConfigNode& options, UIFactory& factory)

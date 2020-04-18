@@ -2,6 +2,8 @@
 #include "../scene_editor_gizmo.h"
 
 namespace Halley {
+	class UIList;
+
 	enum class PolygonGizmoMode {
 		Move,
 		Append,
@@ -20,17 +22,17 @@ namespace Halley {
 				}};
 		}
 	};
-	
+
 	class PolygonGizmo final : public SceneEditorGizmo {
 	public:
 		PolygonGizmo(String componentName, String fieldName, const ConfigNode& options, UIFactory& factory);
 		void update(Time time, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
 		std::shared_ptr<UIWidget> makeUI() override;
-		
+
 	protected:
 		void onEntityChanged() override;
-		
+
 	private:
 		UIFactory& factory;
 		String componentName;

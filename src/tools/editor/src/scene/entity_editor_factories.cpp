@@ -1,6 +1,12 @@
 #include "entity_editor_factories.h"
-
+#include "halley/core/graphics/sprite/animation.h"
+#include "halley/ui/ui_factory.h"
+#include "halley/ui/ui_validator.h"
+#include "halley/ui/widgets/ui_checkbox.h"
+#include "halley/ui/widgets/ui_dropdown.h"
+#include "halley/ui/widgets/ui_textinput.h"
 #include "src/ui/select_asset_widget.h"
+
 using namespace Halley;
 
 class ComponentEditorTextFieldFactory : public IComponentEditorFieldFactory {
@@ -237,7 +243,7 @@ public:
 			componentData[fieldName]["image"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
-		
+
 		container->bindData("material", fieldData["material"].asString(""), [&, fieldName](String newVal)
 		{
 			componentData[fieldName]["material"] = ConfigNode(std::move(newVal));
@@ -256,7 +262,7 @@ public:
 			node = ConfigNode(Vector2f(newVal, node.asVector2f(Vector2f()).y));
 			context.onEntityUpdated();
 		});
-		
+
 		container->bindData("pivotY", fieldData["pivot"].asVector2f(Vector2f()).y, [&, fieldName] (float newVal)
 		{
 			auto& node = componentData[fieldName]["pivot"];
@@ -303,7 +309,7 @@ public:
 		if (fieldData.getType() == ConfigNodeType::Undefined) {
 			fieldData = ConfigNode::MapType();
 		}
-		
+
 		auto& resources = context.getGameResources();
 		const auto& keyboard = context.getFactory().getKeyboard();
 		const auto& inputStyle = context.getFactory().getStyle("inputThin");
@@ -401,10 +407,10 @@ public:
 		auto componentNames = pars.componentNames;
 
 		auto style = context.getFactory().getStyle("buttonThin");
-		
+
 		auto field = std::make_shared<UIButton>("editPolygon", style, LocalisedString::fromHardcodedString("Edit..."));
 		field->setMinSize(Vector2f(30, 22));
-		
+
 		field->setHandle(UIEventType::ButtonClicked, "editPolygon", [=, &context] (const UIEvent& event)
 		{
 			ConfigNode options = ConfigNode(ConfigNode::MapType());
@@ -415,10 +421,10 @@ public:
 				compNames.emplace_back(ConfigNode(name));
 			}
 			options["componentNames"] = std::move(compNames);
-			
+
 			context.setTool(SceneEditorTool::Polygon, componentName, fieldName, std::move(options));
 		});
-		
+
 		return field;
 	}
 };
@@ -450,6 +456,6 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorAnimationPlayerFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorPolygonFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorVertexListFieldFactory>());
-	
+
 	return factories;
 }
