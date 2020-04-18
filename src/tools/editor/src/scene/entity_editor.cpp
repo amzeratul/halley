@@ -3,6 +3,9 @@
 #include "choose_asset_window.h"
 #include "entity_editor_factories.h"
 #include "halley/tools/ecs/ecs_data.h"
+#include "halley/ui/ui_factory.h"
+#include "halley/ui/widgets/ui_dropdown.h"
+#include "halley/ui/widgets/ui_textinput.h"
 #include "scene_editor_window.h"
 using namespace Halley;
 

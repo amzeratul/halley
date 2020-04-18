@@ -8,6 +8,7 @@ namespace Halley {
 	class HalleyAPI;
 	class Project;
 	class UIFactory;
+	class EntityFactory;
 
 	class SceneEditorWindow final : public UIWidget {
 	public:
@@ -34,7 +35,7 @@ namespace Halley {
 
 	protected:
 		void update(Time t, bool moved) override;
-		
+
 	private:
 		UIFactory& uiFactory;
 		Project& project;
@@ -61,7 +62,7 @@ namespace Halley {
 		void selectEntity(const String& id);
 		void panCameraToEntity(const String& id);
 		void saveEntity();
-		
+
 		void addNewEntity();
 		void addNewPrefab();
 		void addNewPrefab(const String& prefabName);
@@ -69,7 +70,7 @@ namespace Halley {
 		void addEntity(const String& parentId, ConfigNode data);
 		void removeEntity();
 		void removeEntity(const String& entityId);
-		
+
 		String findParent(const String& entityId) const;
 		const String* findParent(const String& entityId, const EntityTree& tree, const String& prev) const;
 

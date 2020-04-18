@@ -1,4 +1,5 @@
 #pragma once
+#include "halley/core/game/scene_editor_interface.h"
 #include "halley/tools/ecs/fields_schema.h"
 #include "halley/ui/ui_widget.h"
 
@@ -6,6 +7,8 @@ namespace Halley {
 	class SceneEditorWindow;
 	class ECSData;
 	class UIFactory;
+	class UIDropdown;
+	class UITextInput;
 
 	class EntityEditor final : public UIWidget, IEntityEditor {
 	public:

@@ -1,6 +1,7 @@
 #pragma once
 #include <optional>
 #include "halley/core/game/scene_editor_interface.h"
+#include "halley/entity/entity.h"
 #include "halley/time/halleytime.h"
 
 class Transform2DComponent;

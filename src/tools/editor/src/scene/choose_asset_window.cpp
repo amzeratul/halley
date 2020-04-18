@@ -1,4 +1,9 @@
 #include "choose_asset_window.h"
+#include "halley/ui/ui_anchor.h"
+#include "halley/ui/ui_factory.h"
+#include "halley/ui/widgets/ui_label.h"
+#include "halley/ui/widgets/ui_list.h"
+
 using namespace Halley;
 
 ChooseAssetWindow::ChooseAssetWindow(UIFactory& factory, Callback callback)

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <filesystem>
+#include <boost/filesystem.hpp>
+
 using LibHandleType = void*;
 
 namespace Halley
@@ -22,21 +23,21 @@ namespace Halley
 
 	private:
 		std::string libName;
-		std::filesystem::path libOrigPath;
-		std::filesystem::path libPath;
-		std::filesystem::path debugSymbolsOrigPath;
-		std::filesystem::path debugSymbolsPath;
+		boost::filesystem::path libOrigPath;
+		boost::filesystem::path libPath;
+		boost::filesystem::path debugSymbolsOrigPath;
+		boost::filesystem::path debugSymbolsPath;
 
 		LibHandleType handle = nullptr;
 
-		std::filesystem::file_time_type libLastWrite;
-		std::filesystem::file_time_type debugLastWrite;
+		time_t libLastWrite = 0;
+		time_t debugLastWrite = 0;
 
 		bool hasTempPath = false;
 		bool hasDebugSymbols = false;
 		bool loaded = false;
 
-		mutable std::vector<std::filesystem::path> toDelete;
+		mutable std::vector<boost::filesystem::path> toDelete;
 		void flushLoaded() const;
 	};
 }

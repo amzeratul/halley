@@ -1,9 +1,13 @@
 #pragma once
+#include "halley/core/game/scene_editor_interface.h"
 #include "halley/tools/dll/dynamic_library.h"
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
 	class SceneEditorWindow;
+	class UIFactory;
+	class RenderSurface;
+	class SceneEditorGizmoCollection;
 
 	class SceneEditorCanvas final : public UIWidget {
 	public:
@@ -33,7 +37,7 @@ namespace Halley {
 		void releaseMouse(Vector2f mousePos, int button) override;
 		void onMouseOver(Vector2f mousePos) override;
 		void onMouseWheel(const UIEvent& event);
-		
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;

@@ -17,11 +17,11 @@ void MetalMaterialConstantBuffer::update(const MaterialDataBlock& dataBlock) {
   auto data = dataBlock.getData();
   const size_t padding = alignUp<char>(data.size_bytes(), 16);
 
-  auto padded = malloc(data.length_bytes() + padding);
+  auto padded = malloc(data.size_bytes() + padding);
   memcpy(padded, data.data(), data.size_bytes());
 
   buffer.setData(gsl::span{reinterpret_cast<gsl::byte *>(padded),
-                           static_cast<long>(data.length_bytes() + padding)});
+                           static_cast<std::size_t>(static_cast<long>(data.size_bytes() + padding))});
 
   free(padded);
 }

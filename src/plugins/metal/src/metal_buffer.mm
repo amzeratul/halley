@@ -15,7 +15,7 @@ MetalBuffer::~MetalBuffer() {
 
 void MetalBuffer::setData(gsl::span<const gsl::byte> data) {
 	auto oldBuffer = std::move(buffer);
-	buffer = [video.getDevice() newBufferWithBytes:data.data() length:data.length_bytes() options:MTLResourceStorageModeShared];
+	buffer = [video.getDevice() newBufferWithBytes:data.data() length:data.size_bytes() options:MTLResourceStorageModeShared];
 	[oldBuffer setPurgeableState:MTLPurgeableStateEmpty];
 	[oldBuffer release];
 }
