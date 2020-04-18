@@ -103,6 +103,11 @@ String MetalVideo::getShaderLanguage()
 	return "metal";
 }
 
+bool MetalVideo::isColumnMajor() const
+{
+	return true;
+}
+
 std::unique_ptr<Painter> MetalVideo::makePainter(Resources& resources)
 {
 	return std::make_unique<MetalPainter>(*this, resources);

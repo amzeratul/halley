@@ -10,7 +10,8 @@ namespace Halley
 		explicit MetalMaterialConstantBuffer(MetalVideo& video);
 		~MetalMaterialConstantBuffer();
 		void update(const MaterialDataBlock& dataBlock) override;
-		void bind(id<MTLRenderCommandEncoder> encoder, int bindPoint);
+		void bindVertex(id<MTLRenderCommandEncoder> encoder, int bindPoint);
+		void bindFragment(id<MTLRenderCommandEncoder> encoder, int bindPoint);
 	private:
 		MetalBuffer buffer;
 	};

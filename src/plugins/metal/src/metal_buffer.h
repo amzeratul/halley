@@ -25,7 +25,8 @@ namespace Halley {
 		MetalBuffer& operator=(MetalBuffer&& other) = delete;
 
 		void setData(gsl::span<const gsl::byte> data);
-		void bind(id<MTLRenderCommandEncoder> encoder, int bindPoint);
+		void bindVertex(id<MTLRenderCommandEncoder> encoder, int bindPoint);
+		void bindFragment(id<MTLRenderCommandEncoder> encoder, int bindPoint);
 		id<MTLBuffer> getBuffer();
 
 	private:
