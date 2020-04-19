@@ -1,5 +1,6 @@
 #include "metal_material_constant_buffer.h"
 #include "metal_painter.h"
+#include "metal_render_target.h"
 #include "metal_texture.h"
 #include "metal_video.h"
 
@@ -13,8 +14,9 @@ MetalPainter::MetalPainter(MetalVideo& video, Resources& resources)
 
 void MetalPainter::clear(Colour colour) {
 	[encoder endEncoding];
-	auto descriptor = renderPassDescriptorForTextureAndColour(video.getSurface().texture, colour);
-	encoder = [buffer renderCommandEncoderWithDescriptor:descriptor];
+	auto& renderTarget = dynamic_cast<IMetalRenderTarget&>(getActiveRenderTarget());
+	auto descriptor = renderPassDescriptorForTextureAndColour(renderTarget.getMetalTexture(), colour);
+	encoder = [video.getCommandBuffer() renderCommandEncoderWithDescriptor:descriptor];
 }
 
 void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
@@ -48,16 +50,19 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
 }
 
 void MetalPainter::doStartRender() {
-	buffer = [video.getCommandQueue() commandBuffer];
-	auto col = Colour4f(0);
-	auto descriptor = renderPassDescriptorForTextureAndColour(video.getSurface().texture, col);
-	encoder = [buffer renderCommandEncoderWithDescriptor:descriptor];
 }
 
 void MetalPainter::doEndRender() {
+}
+
+void MetalPainter::startEncoding(id<MTLTexture> texture) {
+	auto col = Colour4f(0);
+	auto descriptor = renderPassDescriptorForTextureAndColour(texture, col);
+	encoder = [video.getCommandBuffer() renderCommandEncoderWithDescriptor:descriptor];
+}
+
+void MetalPainter::endEncoding() {
 	[encoder endEncoding];
-	[buffer presentDrawable:video.getSurface()];
-	[buffer commit];
 }
 
 void MetalPainter::setVertices(
