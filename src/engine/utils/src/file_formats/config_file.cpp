@@ -552,6 +552,42 @@ ConfigNode::MapType& ConfigNode::asMap()
 	}
 }
 
+void ConfigNode::ensureType(ConfigNodeType t)
+{
+	if (type != t) {
+		switch (t) {
+		case ConfigNodeType::Int:
+			*this = 0;
+			break;
+		case ConfigNodeType::Int2:
+			*this = Vector2i();
+			break;
+		case ConfigNodeType::Float:
+			*this = 0.0f;
+			break;
+		case ConfigNodeType::Float2:
+			*this = Vector2f();
+			break;
+		case ConfigNodeType::Sequence:
+			*this = SequenceType();
+			break;
+		case ConfigNodeType::Map:
+			*this = MapType();
+			break;
+		case ConfigNodeType::Bytes:
+			*this = Bytes();
+			break;
+		case ConfigNodeType::String:
+			*this = String();
+			break;
+		case ConfigNodeType::Undefined:
+			reset();
+			type = ConfigNodeType::Undefined;
+			break;
+		}
+	}
+}
+
 bool ConfigNode::hasKey(const String& key) const
 {
 	if (type == ConfigNodeType::Map) {

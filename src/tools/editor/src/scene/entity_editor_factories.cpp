@@ -201,9 +201,7 @@ public:
 		const auto& defaultValue = pars.defaultValue;
 
 		auto& fieldData = data.getFieldData();
-		if (fieldData.getType() == ConfigNodeType::Undefined) {
-			fieldData = ConfigNode::MapType();
-		}
+		fieldData.ensureType(ConfigNodeType::Map);
 
 		const auto& keyboard = context.getFactory().getKeyboard();
 		const auto& inputStyle = context.getFactory().getStyle("inputThin");
@@ -294,9 +292,7 @@ public:
 		const auto& defaultValue = pars.defaultValue;
 
 		auto& fieldData = data.getFieldData();
-		if (fieldData.getType() == ConfigNodeType::Undefined) {
-			fieldData = ConfigNode::MapType();
-		}
+		fieldData.ensureType(ConfigNodeType::Map);
 
 		auto& resources = context.getGameResources();
 		const auto& keyboard = context.getFactory().getKeyboard();
@@ -439,15 +435,14 @@ public:
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		const auto fieldType = pars.typeParameters.at(0);
+		auto data = pars.data;
 
+		data.getFieldData().ensureType(ConfigNodeType::Sequence);
+		
 		auto container = std::make_shared<UIWidget>(pars.data.getName(), Vector2f(), UISizer(UISizerType::Vertical));
 
-		auto& data = pars.data.getFieldData();
-		if (data.getType() != ConfigNodeType::Sequence) {
-			data = ConfigNode::SequenceType();
-		}
-
-		for (size_t i = 0; i < data.asSequence().size(); ++i) {
+		const size_t nElements = data.getFieldData().asSequence().size();
+		for (size_t i = 0; i < nElements; ++i) {
 			ComponentFieldParameters params(pars.componentName, ComponentDataRetriever(pars.data.getSubIndex(i)), "", pars.componentNames, {});
 			context.createField(*container, fieldType, params, false);
 		}

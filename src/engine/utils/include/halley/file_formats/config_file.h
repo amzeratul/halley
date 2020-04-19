@@ -111,6 +111,8 @@ namespace Halley
 		SequenceType& asSequence();
 		MapType& asMap();
 
+		void ensureType(ConfigNodeType type);
+
 		bool hasKey(const String& key) const;
 		void removeKey(const String& key);
 
