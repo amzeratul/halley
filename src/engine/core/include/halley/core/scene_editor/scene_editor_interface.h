@@ -79,7 +79,7 @@ namespace Halley {
         virtual ~IComponentEditorFieldFactory() = default;
         virtual String getFieldType() = 0;
         virtual bool canCreateLabel() const { return false; }
-        virtual bool isCompound() const { return false; }
+        virtual bool isNested() const { return false; }
         virtual void createLabelAndField(UIWidget& parent, const ComponentEditorContext& context, const ComponentFieldParameters& parameters) {}
         virtual std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& parameters) = 0;
     };

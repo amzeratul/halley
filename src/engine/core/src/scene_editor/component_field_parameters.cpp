@@ -46,9 +46,10 @@ const String& ComponentDataRetriever::getName() const
 	return name;
 }
 
-ComponentFieldParameters::ComponentFieldParameters(const String& componentName, ComponentDataRetriever data, const String& defaultValue, const std::vector<String>& componentNames)
+ComponentFieldParameters::ComponentFieldParameters(const String& componentName, ComponentDataRetriever data, const String& defaultValue, const std::vector<String>& componentNames, const std::vector<String>& typeParameters)
 	: componentName(componentName)
 	, data(std::move(data))
 	, defaultValue(defaultValue)
 	, componentNames(componentNames)
+	, typeParameters(typeParameters)
 {}

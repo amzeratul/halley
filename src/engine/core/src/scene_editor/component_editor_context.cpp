@@ -24,6 +24,11 @@ void ComponentEditorContext::setTool(SceneEditorTool tool, const String& compone
 	parent.setTool(tool, componentName, fieldName, std::move(options));
 }
 
+void ComponentEditorContext::createField(UIWidget& dst, const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel) const
+{
+	parent.createField(dst, fieldType, parameters, createLabel);
+}
+
 UIFactory& ComponentEditorContext::getFactory() const
 {
 	return factory;

@@ -26,6 +26,7 @@ namespace Halley {
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
 		std::shared_ptr<IUIElement> makeLabel(const String& label) override;
+		void createField(UIWidget& parent, const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel) override;
 
 	private:
 		UIFactory& factory;
@@ -47,7 +48,7 @@ namespace Halley {
 
 		void makeUI();
 		void loadComponentData(const String& componentType, ConfigNode& data, const std::vector<String>& componentNames);
-		void createField(UIWidget& parent, const String& fieldType, const ComponentFieldParameters& parameters);
+		std::pair<String, std::vector<String>> parseType(const String& type);
 
 		void addComponent();
 		void addComponent(const String& name);

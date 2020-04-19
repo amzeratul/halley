@@ -190,7 +190,7 @@ public:
 		return "Halley::Sprite";
 	}
 
-	bool isCompound() const override
+	bool isNested() const override
 	{
 		return true;
 	}
@@ -283,7 +283,7 @@ public:
 		return "Halley::AnimationPlayer";
 	}
 
-	bool isCompound() const override
+	bool isNested() const override
 	{
 		return true;
 	}
@@ -429,6 +429,33 @@ public:
 	}
 };
 
+class ComponentEditorStdVectorFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "std::vector<>";
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto fieldType = pars.typeParameters.at(0);
+
+		auto container = std::make_shared<UIWidget>(pars.data.getName(), Vector2f(), UISizer(UISizerType::Vertical));
+
+		auto& data = pars.data.getFieldData();
+		if (data.getType() != ConfigNodeType::Sequence) {
+			data = ConfigNode::SequenceType();
+		}
+
+		for (size_t i = 0; i < data.asSequence().size(); ++i) {
+			ComponentFieldParameters params(pars.componentName, ComponentDataRetriever(pars.data.getSubIndex(i)), "", pars.componentNames, {});
+			context.createField(*container, fieldType, params, false);
+		}
+		
+		return container;
+	}
+};
+
 std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -443,6 +470,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorAnimationPlayerFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorPolygonFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorVertexListFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorStdVectorFieldFactory>());
 
 	return factories;
 }
