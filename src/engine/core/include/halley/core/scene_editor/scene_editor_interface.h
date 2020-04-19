@@ -13,6 +13,7 @@ namespace Halley {
     class UIFactory;
     class IUIElement;
 	class UIWidget;
+	class IUISizer;
 	class ConfigNode;
 	class EntityRef;
 	class Camera;
@@ -80,7 +81,7 @@ namespace Halley {
         virtual String getFieldType() = 0;
         virtual bool canCreateLabel() const { return false; }
         virtual bool isNested() const { return false; }
-        virtual void createLabelAndField(UIWidget& parent, const ComponentEditorContext& context, const ComponentFieldParameters& parameters) {}
+        virtual void createLabelAndField(IUISizer& parent, const ComponentEditorContext& context, const ComponentFieldParameters& parameters) {}
         virtual std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& parameters) = 0;
     };
 

@@ -435,17 +435,49 @@ public:
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		const auto fieldType = pars.typeParameters.at(0);
-		auto data = pars.data;
+		const auto data = pars.data;
+		const auto componentName = pars.componentName;
+		const auto componentNames = pars.componentNames;
 
 		data.getFieldData().ensureType(ConfigNodeType::Sequence);
 		
-		auto container = std::make_shared<UIWidget>(pars.data.getName(), Vector2f(), UISizer(UISizerType::Vertical));
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Vertical));
 
-		const size_t nElements = data.getFieldData().asSequence().size();
-		for (size_t i = 0; i < nElements; ++i) {
-			ComponentFieldParameters params(pars.componentName, ComponentDataRetriever(pars.data.getSubIndex(i)), "", pars.componentNames, {});
-			context.createField(*container, fieldType, params, false);
-		}
+		auto buildList = [=, &context] () {
+			container->clear();
+			
+			const size_t nElements = data.getFieldData().asSequence().size();
+			for (size_t i = 0; i < nElements; ++i) {
+				auto rowSizer = std::make_shared<UISizer>();
+
+				ComponentFieldParameters params(componentName, ComponentDataRetriever(data.getSubIndex(i)), "", componentNames, {});
+				context.createField(*rowSizer, fieldType, params, false);
+				(*rowSizer)[0].setProportion(1.0f);
+
+				auto deleteButton = std::make_shared<UIButton>("delete" + toString(i), context.getFactory().getStyle("buttonThin"), LocalisedString::fromHardcodedString("-"));
+				deleteButton->setMinSize(Vector2f(22, 22));
+				rowSizer->add(deleteButton);
+
+				container->add(rowSizer);
+			}
+			
+			auto addButton = std::make_shared<UIButton>("add", context.getFactory().getStyle("buttonThin"), LocalisedString::fromHardcodedString("+"));
+			addButton->setMinSize(Vector2f(22, 22));
+			container->add(addButton);
+		};
+		buildList();
+
+		container->setHandle(UIEventType::ButtonClicked, [=, buildList = std::move(buildList)] (const UIEvent& event)
+		{
+			auto& seq = data.getFieldData().asSequence();
+			if (event.getSourceId() == "add") {
+				seq.emplace_back(ConfigNode());
+			} else if (event.getSourceId().startsWith("delete")) {
+				const size_t index = event.getSourceId().mid(6).toInteger();
+				seq.erase(seq.begin() + index);
+			}
+			buildList();
+		});
 		
 		return container;
 	}

@@ -183,7 +183,7 @@ std::pair<String, std::vector<String>> EntityEditor::parseType(const String& typ
 	return {type, {}};
 }
 
-void EntityEditor::createField(UIWidget& parent, const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel)
+void EntityEditor::createField(IUISizer& parent, const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel)
 {
 	const auto iter = fieldFactories.find(fieldType);
 	auto* compFieldFactory = iter != fieldFactories.end() ? iter->second.get() : nullptr;

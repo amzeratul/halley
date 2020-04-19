@@ -26,7 +26,7 @@ namespace Halley {
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
 		std::shared_ptr<IUIElement> makeLabel(const String& label) override;
-		void createField(UIWidget& parent, const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel) override;
+		void createField(IUISizer& parent, const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel) override;
 
 	private:
 		UIFactory& factory;
