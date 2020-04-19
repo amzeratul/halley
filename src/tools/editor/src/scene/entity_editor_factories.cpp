@@ -483,6 +483,14 @@ public:
 	}
 };
 
+class ComponentEditorStdSetFieldFactory : public ComponentEditorStdVectorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "std::set<>";
+	}
+};
+
 std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -498,6 +506,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorPolygonFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorVertexListFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorStdVectorFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorStdSetFieldFactory>());
 
 	return factories;
 }
