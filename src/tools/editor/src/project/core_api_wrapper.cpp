@@ -1,4 +1,7 @@
 #include "core_api_wrapper.h"
+
+#include "halley/core/stage/stage.h"
+
 using namespace Halley;
 
 CoreAPIWrapper::CoreAPIWrapper(CoreAPI& parent)
