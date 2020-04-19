@@ -4,6 +4,7 @@
 #include "halley/time/halleytime.h"
 
 namespace Halley {
+	enum class SceneEditorTool;
 	class UUID;
 	class RenderContext;
     class World;
@@ -11,77 +12,14 @@ namespace Halley {
     class Resources;
     class UIFactory;
     class IUIElement;
+	class UIWidget;
 	class ConfigNode;
 	class EntityRef;
 	class Camera;
 	class Painter;
 	class ISceneEditorGizmoCollection;
-    enum class SceneEditorTool;
-
-    class SceneEditorContext {
-    public:
-        const HalleyAPI* api;
-        Resources* resources;
-        Resources* editorResources;
-        ISceneEditorGizmoCollection* gizmos;
-    };
-
-	class IEntityEditor {
-	public:
-		virtual ~IEntityEditor() = default;
-
-		virtual void onEntityUpdated() = 0;
-		virtual std::shared_ptr<IUIElement> makeLabel(const String& label) = 0;
-		virtual void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) = 0;
-	};
-
-    class ComponentEditorContext {
-    public:
-        ComponentEditorContext(IEntityEditor& parent, UIFactory& factory, Resources& gameResources)
-            : parent(parent)
-    		, factory(factory)
-            , gameResources(gameResources)
-        {}
-
-        UIFactory& getFactory() const { return factory; }
-        Resources& getGameResources() const { return gameResources; }
-    	void onEntityUpdated() const { parent.onEntityUpdated(); }
-    	std::shared_ptr<IUIElement> makeLabel(const String& label) const { return parent.makeLabel(label); }
-        void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) const { parent.setTool(tool, componentName, fieldName, std::move(options)); }
-
-    private:
-        IEntityEditor& parent;
-        UIFactory& factory;
-        Resources& gameResources;
-    };
-
-	struct ComponentFieldParameters {
-        ComponentFieldParameters(const String& componentName, const String& fieldName, const String& defaultValue, ConfigNode& componentData, const std::vector<String>& componentNames)
-            : componentName(componentName)
-			, fieldName(fieldName)
-			, defaultValue(defaultValue)
-			, componentData(componentData)
-			, componentNames(componentNames)
-        {}
-		
-		const String& componentName;
-		const String& fieldName;
-		const String& defaultValue;
-        ConfigNode& componentData;
-        const std::vector<String>& componentNames;
-    };
-
-	class UIWidget;
-
-    class IComponentEditorFieldFactory {
-    public:
-        virtual ~IComponentEditorFieldFactory() = default;
-    	virtual String getFieldType() = 0;
-    	virtual bool canCreateLabel() const { return false; }
-    	virtual bool isCompound() const { return false; }
-        virtual void createLabelAndField(UIWidget& parent, const ComponentEditorContext& context, const ComponentFieldParameters& parameters) {}
-        virtual std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& parameters) = 0;
-    };
+	struct ComponentFieldParameters;
+	class ComponentEditorContext;
 
     enum class SceneEditorTool {
     	None,
@@ -127,6 +65,24 @@ namespace Halley {
 	struct SceneEditorOutputState {
 		std::vector<std::pair<String, String>> fieldsChanged;
 	};
+
+    class SceneEditorContext {
+    public:
+        const HalleyAPI* api;
+        Resources* resources;
+        Resources* editorResources;
+        ISceneEditorGizmoCollection* gizmos;
+    };
+
+    class IComponentEditorFieldFactory {
+    public:
+        virtual ~IComponentEditorFieldFactory() = default;
+        virtual String getFieldType() = 0;
+        virtual bool canCreateLabel() const { return false; }
+        virtual bool isCompound() const { return false; }
+        virtual void createLabelAndField(UIWidget& parent, const ComponentEditorContext& context, const ComponentFieldParameters& parameters) {}
+        virtual std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& parameters) = 0;
+    };
 
     class ISceneEditor {
     public:    	
