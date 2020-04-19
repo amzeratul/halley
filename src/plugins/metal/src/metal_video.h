@@ -36,6 +36,7 @@ namespace Halley {
 		id<CAMetalDrawable> getSurface();
 		id<MTLCommandQueue> getCommandQueue();
 		id<MTLDevice> getDevice();
+		id<MTLCommandBuffer> getCommandBuffer();
 
 	private:
 		std::shared_ptr<Window> window;
@@ -46,6 +47,7 @@ namespace Halley {
 		id<MTLDevice> device;
 		id<MTLCommandQueue> command_queue;
 		NSAutoreleasePool *pool;
+		id<MTLCommandBuffer> command_buffer;
 
 		void initSwapChain(Window& window);
 	};

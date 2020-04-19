@@ -19,6 +19,8 @@ namespace Halley {
 		void setClip(Rect4i clip, bool enable) override;
 		void setMaterialData(const Material& material) override;
 		void onUpdateProjection(Material& material) override;
+		void startEncoding(id<MTLTexture> texture);
+		void endEncoding();
 
 	private:
 		void setBlending(BlendType blendType, MTLRenderPipelineColorAttachmentDescriptor* colorAttachment);
@@ -26,7 +28,6 @@ namespace Halley {
 		MTLRenderPassDescriptor* renderPassDescriptorForTextureAndColour(id<MTLTexture> texture, Colour& colour);
 
 		MetalVideo& video;
-		id<MTLCommandBuffer> buffer;
 		id<MTLRenderCommandEncoder> encoder;
 		id<MTLBuffer> indexBuffer;
 	};
