@@ -76,7 +76,7 @@ set (editor_headers
 	"src/ui/toolbar.h"
 	)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+if (MSVC)
 	set (editor_headers
 		${editor_headers}
 		"res/halley-editor.rc"
