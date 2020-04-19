@@ -156,7 +156,7 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
 			if (member.serializable) {
-				ComponentFieldParameters parameters(componentType, member.name, member.defaultValue, data, componentNames);
+				ComponentFieldParameters parameters(componentType, ComponentDataRetriever(data, member.name), member.defaultValue, componentNames);
 				createField(*componentFields, member.type.name, parameters);
 			}
 		}
@@ -174,12 +174,12 @@ void EntityEditor::createField(UIWidget& parent, const String& fieldType, const 
 		compFieldFactory->createLabelAndField(parent, *context, parameters);
 	} else if (compFieldFactory && compFieldFactory->isCompound()) {
 		auto field = factory.makeUI("ui/halley/entity_editor_compound_field");
-		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.fieldName));
+		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.data.getName()));
 		field->getWidget("fields")->add(compFieldFactory->createField(*context, parameters));
 		parent.add(field);
 	} else {
 		auto container = std::make_shared<UISizer>();
-		container->add(makeLabel(parameters.fieldName), 0, {}, UISizerAlignFlags::CentreVertical);
+		container->add(makeLabel(parameters.data.getName()), 0, {}, UISizerAlignFlags::CentreVertical);
 
 		if (compFieldFactory) {
 			container->add(compFieldFactory->createField(*context, parameters), 1);

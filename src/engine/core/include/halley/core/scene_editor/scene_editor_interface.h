@@ -18,7 +18,7 @@ namespace Halley {
 	class Camera;
 	class Painter;
 	class ISceneEditorGizmoCollection;
-	struct ComponentFieldParameters;
+	class ComponentFieldParameters;
 	class ComponentEditorContext;
 
     enum class SceneEditorTool {
