@@ -101,6 +101,8 @@ namespace Halley {
         virtual void changeZoom(int amount, Vector2f cursorPosRelToCamera) = 0;
 
     	virtual void setSelectedEntity(const UUID& id, ConfigNode& entityData) = 0;
+        virtual void onEntityModified(const UUID& id, const ConfigNode& entityData) = 0;
+
     	virtual void showEntity(const UUID& id) = 0;
         virtual ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) = 0;
 

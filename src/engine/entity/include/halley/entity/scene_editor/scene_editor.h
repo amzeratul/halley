@@ -26,6 +26,9 @@ namespace Halley {
 		void changeZoom(int amount, Vector2f cursorPosRelToCamera) override;
 
 		void setSelectedEntity(const UUID& id, ConfigNode& entityData) override;
+		void onEntityModified(const UUID& id, const ConfigNode& entityData) final override;
+    	virtual void onEntityModified(EntityRef& entity, const ConfigNode& entityData);
+    	
 		void showEntity(const UUID& id) override;
 		ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;
     	

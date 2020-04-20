@@ -251,7 +251,11 @@ void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId
 void SceneEditorWindow::onEntityModified(const String& id)
 {
 	if (!id.isEmpty()) {
-		entityList->onEntityModified(id, sceneData->getEntityData(id).data);
+		const auto& data = sceneData->getEntityData(id).data;
+		entityList->onEntityModified(id, data);
+		if (canvas->isLoaded()) {
+			canvas->getInterface().onEntityModified(UUID(id), data);
+		}
 	}
 	sceneData->reloadEntity(id);
 	markModified();

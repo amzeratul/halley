@@ -190,6 +190,27 @@ void SceneEditor::setSelectedEntity(const UUID& id, ConfigNode& entityData)
 	onEntitySelected(selectedEntity);
 }
 
+void SceneEditor::onEntityModified(const UUID& id, const ConfigNode& entityData)
+{
+	if (!id.isValid()) {
+		return;
+	}
+	
+	const auto curId = selectedEntity ? selectedEntity.value().getUUID() : UUID();
+	if (curId == id) {
+		onEntityModified(selectedEntity.value(), entityData);
+	} else {
+		auto entity = getWorld().findEntity(id);
+		if (entity) {
+			onEntityModified(entity.value(), entityData);
+		}
+	}
+}
+
+void SceneEditor::onEntityModified(EntityRef& entity, const ConfigNode& entityData)
+{
+}
+
 void SceneEditor::showEntity(const UUID& id)
 {
 	auto e = getWorld().findEntity(id);
