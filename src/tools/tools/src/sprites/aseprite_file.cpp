@@ -463,6 +463,7 @@ std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int 
 	auto defaultFrameImage = std::make_unique<Image>(Image::Format::RGBA, size);
 	defaultFrameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));;
 	groupImages[currentGroup] = std::move(defaultFrameImage);
+	auto defaultFrameUsed = false;
 	
 	auto inGroup = false;
 	for (int layerNumber = 0; layerNumber < layers.size(); ++layerNumber) {
@@ -491,9 +492,13 @@ std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int 
 			}
 		}
 
-		if (layer.visible) {
+		if (layer.visible) {			
 			auto* cel = getCelAt(frameNumber, layerNumber);
 			if (cel) {
+				if (currentGroup == "")
+				{
+					defaultFrameUsed = true;
+				}
 				const uint8_t opacity = uint8_t(clamp((uint32_t(cel->opacity) * uint32_t(layer.opacity)) / 255, uint32_t(0), uint32_t(255)));
 				if (!cel->imgData) {
 					cel->loadImage(colourDepth, layer.background ? paletteBg : paletteTransparent);
@@ -505,7 +510,12 @@ std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int 
 	
 	std::map<String, std::unique_ptr<Image>> frameImages;
 	for (auto& group : groupImages)
-	{
+	{		
+		if (group.first == "" && !defaultFrameUsed)
+		{
+			continue;
+		}
+		
 		group.second->preMultiply();
 		frameImages[group.first] = std::move(group.second);
 	}
