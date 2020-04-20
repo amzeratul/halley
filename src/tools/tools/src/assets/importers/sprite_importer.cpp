@@ -93,6 +93,8 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			imgData.sequenceName = "";
 		}
 
+		auto oneAtlas = meta.getString("atlas", "");
+		
 		for (auto& frames : groupedFrames) {
 			// Update frames with pivot and slices
 			for (auto& f : frames.second) {
@@ -105,50 +107,53 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			if (grid.x > 0 && grid.y > 0) {
 				frames.second = splitImagesInGrid(frames.second, grid);
 			}
-
-			// Write animation
-			auto spriteSheetName = baseSpriteSheetName + (frames.first.isEmpty() ? "" : ":" + frames.first);
+			
+			auto spriteSheetName = baseSpriteSheetName;// +(frames.first.isEmpty() ? "" : ":" + frames.first);
 			auto spriteName = baseSpriteName + (frames.first.isEmpty() ? "" : ":" + frames.first);
 			Animation animation = generateAnimation(spriteName, spriteSheetName, meta.getString("material", "Halley/Sprite"), frames.second);
 			collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation), {}, "pc", inputFile.name);
 
 			std::vector<ImageData> totalFrames;
 			std::move(frames.second.begin(), frames.second.end(), std::back_inserter(totalFrames));
-			totalGroupedFrames[spriteSheetName] = std::move(totalFrames);
+			totalGroupedFrames[spriteSheetName + " " + spriteName] = std::move(totalFrames);
 		}
 		
 	}
 
 	// Generate atlas + spritesheet
-	for (auto& totalFrames : totalGroupedFrames) {
-		auto groupAtlasName = totalFrames.first + Path(asset.assetId).getExtension();
-		SpriteSheet spriteSheet;
-		auto atlasImage = generateAtlas(groupAtlasName, totalFrames.second, spriteSheet);
-		spriteSheet.setTextureName(groupAtlasName);
-
-		// Image metafile
-		auto size = atlasImage->getSize();
-		Metadata meta;
-		if (startMeta) {
-			meta = startMeta.value();
-		}
-		if (palette) {
-			meta.set("palette", palette.value());
-		}
-		meta.set("width", size.x);
-		meta.set("height", size.y);
-		meta.set("compression", "raw_image");
-
-		// Write atlas image
-		ImportingAsset image;
-		image.assetId = groupAtlasName;
-		image.assetType = ImportAssetType::Image;
-		image.inputFiles.emplace_back(ImportingAssetFile(groupAtlasName, Serializer::toBytes(*atlasImage), meta));
-		collector.addAdditionalAsset(std::move(image));
-
-		// Write spritesheet
-		collector.output(totalFrames.first, AssetType::SpriteSheet, Serializer::toBytes(spriteSheet));
+	std::vector<ImageData> totalFrames;
+	for (auto& frames : totalGroupedFrames)
+	{
+		std::move(frames.second.begin(), frames.second.end(), std::back_inserter(totalFrames));
 	}
+
+	auto groupAtlasName = asset.assetId;// totalFrames.first + Path(asset.assetId).getExtension();
+	SpriteSheet spriteSheet;
+	auto atlasImage = generateAtlas(groupAtlasName, totalFrames, spriteSheet);
+	spriteSheet.setTextureName(groupAtlasName);
+
+	// Image metafile
+	auto size = atlasImage->getSize();
+	Metadata meta;
+	if (startMeta) {
+		meta = startMeta.value();
+	}
+	if (palette) {
+		meta.set("palette", palette.value());
+	}
+	meta.set("width", size.x);
+	meta.set("height", size.y);
+	meta.set("compression", "raw_image");
+
+	// Write atlas image
+	ImportingAsset image;
+	image.assetId = groupAtlasName;
+	image.assetType = ImportAssetType::Image;
+	image.inputFiles.emplace_back(ImportingAssetFile(groupAtlasName, Serializer::toBytes(*atlasImage), meta));
+	collector.addAdditionalAsset(std::move(image));
+
+	// Write spritesheet
+	collector.output(baseSpriteSheetName, AssetType::SpriteSheet, Serializer::toBytes(spriteSheet));
 }
 
 String SpriteImporter::getAssetId(const Path& file, const std::optional<Metadata>& metadata) const
