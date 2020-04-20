@@ -17,7 +17,7 @@ namespace Halley {
 		const AssetDatabase& getAssetDatabase() override;
 		void purge(SystemAPI& system) override;
 		int getPriority() const override;
-
+		
 	private:
 		void loadAfterPurge();
 

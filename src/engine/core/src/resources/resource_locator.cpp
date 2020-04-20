@@ -14,21 +14,47 @@ ResourceLocator::ResourceLocator(SystemAPI& system)
 
 void ResourceLocator::add(std::unique_ptr<IResourceLocatorProvider> locator, const Path& path)
 {
-	auto& db = locator->getAssetDatabase();
+	loadLocatorData(*locator);
+	locatorPaths[path.getString()] = locator.get();
+	locators.emplace_back(std::move(locator));
+}
+
+void ResourceLocator::loadLocatorData(IResourceLocatorProvider& locator)
+{
+	auto& db = locator.getAssetDatabase();
 	for (auto& asset: db.getAssets()) {
-		auto result = locators.find(asset);
-		if (result == locators.end() || result->second->getPriority() < locator->getPriority()) {
-			locators[asset] = locator.get();
+		auto result = assetToLocator.find(asset);
+		if (result == assetToLocator.end() || result->second->getPriority() < locator.getPriority()) {
+			assetToLocator[asset] = &locator;
 		}
 	}
-	locatorPaths[path.getString()] = locator.get();
-	locatorList.emplace_back(std::move(locator));
+}
+
+void ResourceLocator::purge(const String& asset, AssetType type)
+{
+	auto result = assetToLocator.find(asset);
+	if (result != assetToLocator.end()) {
+		// Found the locator for this file, purge it
+		result->second->purge(system);
+	} else {
+		// Couldn't find a locator (new file?), purge everything
+		purgeAll();
+	}
+}
+
+void ResourceLocator::purgeAll()
+{
+	assetToLocator.clear();
+	for (auto& locator: locators) {
+		locator->purge(system);
+		loadLocatorData(*locator);
+	}
 }
 
 std::unique_ptr<ResourceData> ResourceLocator::getResource(const String& asset, AssetType type, bool stream)
 {
-	auto result = locators.find(asset);
-	if (result != locators.end()) {
+	auto result = assetToLocator.find(asset);
+	if (result != assetToLocator.end()) {
 		auto data = result->second->getData(asset, type, stream);
 		if (data) {
 			return data;
@@ -62,24 +88,10 @@ std::unique_ptr<ResourceDataStream> ResourceLocator::getStream(const String& ass
 	return std::unique_ptr<ResourceDataStream>(ptr);
 }
 
-void ResourceLocator::purge(const String& asset, AssetType type)
-{
-	auto result = locators.find(asset);
-	if (result != locators.end()) {
-		// Found the locator for this file, purge it
-		result->second->purge(system);
-	} else {
-		// Couldn't find a locator (new file?), purge everything
-		for (auto& l: locatorList) {
-			l->purge(system);
-		}
-	}
-}
-
 std::vector<String> ResourceLocator::enumerate(const AssetType type)
 {
 	std::vector<String> result;
-	for (auto& l: locatorList) {
+	for (auto& l: locators) {
 		for (auto& r: l->getAssetDatabase().enumerate(type)) {
 			result.push_back(std::move(r));
 		}
@@ -108,6 +120,31 @@ void ResourceLocator::addPack(const Path& path, const String& encryptionKey, boo
 	}
 }
 
+void ResourceLocator::removePack(const Path& path)
+{
+	auto* locatorToRemove = locatorPaths.find(path.getString())->second;
+	auto& dbToRemove = locatorToRemove->getAssetDatabase();
+	for (auto& asset : dbToRemove.getAssets()) {
+		auto result = assetToLocator.find(asset);
+		if (result != assetToLocator.end()) {
+			assetToLocator.erase(asset);
+		}
+	}
+	auto locaterIter = std::find_if(locators.begin(), locators.end(), [&](std::unique_ptr<IResourceLocatorProvider>& locator) { return locator.get() == locatorToRemove; });
+	locators.erase(locaterIter);
+	
+	for (const auto& locator : locators)
+	{
+		auto& db = locator->getAssetDatabase();
+		for (auto& asset : db.getAssets()) {
+			auto result = assetToLocator.find(asset);
+			if (result == assetToLocator.end() || result->second->getPriority() < locator->getPriority()) {
+				assetToLocator[asset] = locator.get();
+			}
+		}
+	}
+}
+
 std::vector<String> ResourceLocator::getAssetsFromPack(const Path& path, const String& encryptionKey) const
 {
 	auto dataReader = system.getDataReader(path.string());
@@ -121,35 +158,10 @@ std::vector<String> ResourceLocator::getAssetsFromPack(const Path& path, const S
 	}
 }
 
-void ResourceLocator::removePack(const Path& path)
-{
-	auto* locatorToRemove = locatorPaths.find(path.getString())->second;
-	auto& dbToRemove = locatorToRemove->getAssetDatabase();
-	for (auto& asset : dbToRemove.getAssets()) {
-		auto result = locators.find(asset);
-		if (result != locators.end()) {
-			locators.erase(asset);
-		}
-	}
-	auto locaterIter = std::find_if(locatorList.begin(), locatorList.end(), [&](std::unique_ptr<IResourceLocatorProvider>& locator) { return locator.get() == locatorToRemove; });
-	locatorList.erase(locaterIter);
-	
-	for (const auto& locator : locatorList)
-	{
-		auto& db = locator->getAssetDatabase();
-		for (auto& asset : db.getAssets()) {
-			auto result = locators.find(asset);
-			if (result == locators.end() || result->second->getPriority() < locator->getPriority()) {
-				locators[asset] = locator.get();
-			}
-		}
-	}
-}
-
 const Metadata& ResourceLocator::getMetaData(const String& asset, AssetType type) const
 {
-	auto result = locators.find(asset);
-	if (result != locators.end()) {
+	auto result = assetToLocator.find(asset);
+	if (result != assetToLocator.end()) {
 		return result->second->getAssetDatabase().getDatabase(type).get(asset).meta;
 	} else {
 		throw Exception("Unable to locate resource: " + asset, HalleyExceptions::Resources);
@@ -158,10 +170,10 @@ const Metadata& ResourceLocator::getMetaData(const String& asset, AssetType type
 
 bool ResourceLocator::exists(const String& asset)
 {
-	return locators.find(asset) != locators.end();
+	return assetToLocator.find(asset) != assetToLocator.end();
 }
 
 size_t ResourceLocator::getLocatorCount() const
 {
-	return locators.size();
+	return assetToLocator.size();
 }
