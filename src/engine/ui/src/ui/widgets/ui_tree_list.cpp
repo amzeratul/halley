@@ -459,7 +459,8 @@ std::optional<UITreeListItem::FindPositionResult> UITreeListItem::doFindPosition
 {
 	if (listItem) {
 		const bool isLastItem = lastBranch && (!expanded || children.empty());
-		const bool isSingleRoot = depth <= 1 && tree.isSingleRoot();
+		const bool isSingleRootTree = tree.isSingleRoot();
+		const bool isRootOfSingleRootTree = depth <= 1 && isSingleRootTree;
 	
 		const auto r = listItem->getRect();
 		const auto b = listItem->getClickableInnerBorder();
@@ -475,23 +476,23 @@ std::optional<UITreeListItem::FindPositionResult> UITreeListItem::doFindPosition
 			if (forceLeaf) {
 				threshold0 = y0 + h / 2;
 				threshold1 = y0 + h / 2;
-			} else if (isSingleRoot) {
+			} else if (isRootOfSingleRootTree) {
 				threshold0 = y1;
 				threshold1 = y0;
 			} else {
 				threshold0 = y0 + h / 4;
 				threshold1 = y0 + 3 * h / 4;
-			}			
+			}
 			
-			if (y < threshold0 && !isSingleRoot) {
+			if (y < threshold0 && !isRootOfSingleRootTree) {
 				return FindPositionResult(PositionType::Before, this, Rect4f(x0, y0, x1 - x0, 0));
-			} else if ((y > threshold1 && !isSingleRoot) || forceLeaf) {
+			} else if ((y > threshold1 && !isRootOfSingleRootTree) || forceLeaf) {
 				return FindPositionResult(PositionType::After, this, Rect4f(x0, y1, x1 - x0, 0));
 			} else {
 				assert(!forceLeaf);
 				return FindPositionResult(PositionType::OnTop, this, Rect4f(x0, y0, x1 - x0, y1 - y0));
 			}
-		} else if (y >= y1 && isLastItem && !isSingleRoot) {
+		} else if (y >= y1 && isLastItem && !isSingleRootTree) {
 			return FindPositionResult(PositionType::End, nullptr, Rect4f(0, y1, 20, 0));
 		}
 	}
