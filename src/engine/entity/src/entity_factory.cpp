@@ -190,7 +190,7 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNo
 			const auto iter = nodes.find(e.getUUID().toString());
 			if (iter != nodes.end()) {
 				doUpdateEntityTree(e, *iter->second, true);
-			}			
+			}
 		}
 	} else {
 		if (entities.size() != 1) {

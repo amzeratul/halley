@@ -25,8 +25,14 @@ bool EntityScene::needsUpdate() const
 
 void EntityScene::update(EntityFactory& factory)
 {
+	// When an update is requested, only actually update the scene, regardless of whichever triggered it
+	// However, mark all of them as updated.
+	// 
 	for (auto& entry: prefabObservers) {
-		entry.update(factory);
+		if (entry.isScene()) {
+			entry.update(factory);
+		}
+		entry.markUpdated();
 	}
 }
 
@@ -51,12 +57,15 @@ bool EntityScene::PrefabObserver::needsUpdate() const
 	return assetVersion != config->getAssetVersion();
 }
 
+bool EntityScene::PrefabObserver::isScene() const
+{
+	return scene;
+}
+
 void EntityScene::PrefabObserver::update(EntityFactory& factory)
 {
-	assetVersion = config->getAssetVersion();
-
 	if (!entities.empty()) {
-		if (isScene) {
+		if (scene) {
 			factory.updateScene(entities, config->getRoot());
 		} else {
 			for (auto& entity: entities) {
@@ -66,11 +75,16 @@ void EntityScene::PrefabObserver::update(EntityFactory& factory)
 	}
 }
 
+void EntityScene::PrefabObserver::markUpdated()
+{
+	assetVersion = config->getAssetVersion();
+}
+
 void EntityScene::PrefabObserver::addEntity(EntityRef entity, std::optional<int> index)
 {
 	entities.push_back(entity);
 	if (index) {
-		isScene = true;
+		scene = true;
 	}
 }
 

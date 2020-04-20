@@ -26,7 +26,10 @@ namespace Halley {
 			PrefabObserver(std::shared_ptr<const ConfigFile> config);
 			
 			bool needsUpdate() const;
+			bool isScene() const;
+			
 			void update(EntityFactory& factory);
+			void markUpdated();
 
 			void addEntity(EntityRef entity, std::optional<int> index);
 
@@ -36,7 +39,7 @@ namespace Halley {
 			std::shared_ptr<const ConfigFile> config;
 			std::vector<EntityRef> entities;
 			int assetVersion = 0;
-			bool isScene = false;
+			bool scene = false;
 		};
 
 		std::vector<EntityRef> entities;
