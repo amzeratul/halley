@@ -9,6 +9,7 @@
 namespace Halley {
 	class World;
 	class Resources;
+	class EntityScene;
 	
 	class EntityFactory {
 	public:
@@ -24,7 +25,8 @@ namespace Halley {
 		EntityRef createEntity(const char* prefabName);
 		EntityRef createEntity(const String& prefabName);
 		EntityRef createEntity(const ConfigNode& node);
-		std::vector<EntityRef> createScene(const ConfigNode& node);
+		EntityRef createPrefab(std::shared_ptr<const Prefab> prefab);
+		EntityScene createScene(std::shared_ptr<const Prefab> scene);
 		
 		void updateEntityTree(EntityRef& entity, const ConfigNode& node);
 		void updateScene(std::vector<EntityRef>& entities, const ConfigNode& node);
@@ -54,13 +56,14 @@ namespace Halley {
 		Resources& resources;
 		ConfigNodeSerializationContext context;
 
-		EntityRef createEntityTree(const ConfigNode& node);
-		EntityRef createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate);
+		void createEntityTreeForScene(const ConfigNode& node, EntityScene& curScene, std::shared_ptr<const Prefab> prefab, std::optional<int> index = {});
+		EntityRef createEntityTree(const ConfigNode& node, EntityScene* curScene);
+		EntityRef createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate, EntityScene* curScene);
 		
 		void updateEntity(EntityRef& entity, const ConfigNode& node, UpdateMode mode = UpdateMode::UpdateAll);
 		void doUpdateEntityTree(EntityRef& entity, const ConfigNode& node, bool refreshing);
 		
-		const ConfigNode& getPrefabNode(const String& id);
+		std::shared_ptr<const Prefab> getPrefab(const String& id) const;
 
 		void startContext();
 		ConfigNodeSerializationContext makeContext() const;

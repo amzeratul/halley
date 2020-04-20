@@ -55,12 +55,12 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		auto& world = interface.getWorld();
 
 		// Load prefab
-		prefab = std::make_unique<Prefab>(origPrefab);
+		prefab = std::make_shared<Prefab>(origPrefab);
 		preparePrefab(*prefab);
 
 		// Spawn scene
 		entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
-		auto entities = entityFactory->createScene(prefab->getRoot());
+		auto sceneCreated = entityFactory->createScene(prefab);
 		interface.spawnPending();
 
 		// Setup editors
@@ -72,8 +72,8 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		setTool(SceneEditorTool::Drag);
 
 		// Show root
-		if (!entities.empty()) {
-			panCameraToEntity(entities.at(0).getUUID().toString());
+		if (!sceneCreated.getEntities().empty()) {
+			panCameraToEntity(sceneCreated.getEntities().at(0).getUUID().toString());
 		}
 
 		// Custom UI

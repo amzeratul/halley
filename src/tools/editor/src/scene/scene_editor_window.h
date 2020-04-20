@@ -47,7 +47,7 @@ namespace Halley {
 
 		Path assetPath;
 		std::shared_ptr<ISceneData> sceneData;
-		std::unique_ptr<Prefab> prefab;
+		std::shared_ptr<Prefab> prefab;
 		std::shared_ptr<EntityFactory> entityFactory;
 
 		String currentEntityId;
