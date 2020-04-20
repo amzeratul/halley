@@ -50,6 +50,7 @@ children:
     proportion: 1
     border: [10, 0, 10, 0]
     children:
+    - widget: { id: contentListDropdown, class: dropdown, size: [200, 30] }
     - widget: { id: contentList, class: list, type: horizontal }
     - widget: { id: content, class: pagedPane }
       fill: fill
