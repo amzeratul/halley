@@ -7,10 +7,9 @@ using namespace Halley;
 
 EntityFactory::EntityFactory(World& world, Resources& resources)
 	: world(world)
+	, resources(resources)
+	, context(makeContext())
 {
-	entityContext = std::make_unique<EntitySerializationContext>(world);
-	context.resources = &resources;
-	context.entityContext = entityContext.get();
 }
 
 EntityFactory::~EntityFactory()
@@ -33,16 +32,14 @@ EntityRef EntityFactory::createEntity(const ConfigNode& node)
 		throw Exception("Prefab seems to have more than one root; use EntityFactory::createScene() instead", HalleyExceptions::Entity);
 	}
 	
-	// Note: this is not thread-safe
-	context.entityContext->uuids.clear();
-
+	startContext();
 	return createEntityTree(node);
 }
 
 std::vector<EntityRef> EntityFactory::createScene(const ConfigNode& node)
 {
-	context.entityContext->uuids.clear();
-
+	startContext();
+	
 	std::vector<EntityRef> result;
 	if (node.getType() == ConfigNodeType::Sequence) {
 		for (auto& e: node.asSequence()) {
@@ -151,11 +148,13 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 
 void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node)
 {
+	startContext();
 	doUpdateEntityTree(entity, node, true);
 }
 
 void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNode& node)
 {
+	startContext();
 	if (node.getType() == ConfigNodeType::Sequence) {
 		std::map<String, const ConfigNode*> nodes;
 
@@ -166,14 +165,14 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNo
 		for (auto& e: entities) {
 			const auto iter = nodes.find(e.getUUID().toString());
 			if (iter != nodes.end()) {
-				updateEntityTree(e, *iter->second);
+				doUpdateEntityTree(e, *iter->second, true);
 			}			
 		}
 	} else {
 		if (entities.size() != 1) {
 			throw Exception("Expecting only one entity for non-sequence scene", HalleyExceptions::Entity);
 		}
-		updateEntityTree(entities.at(0), node);
+		doUpdateEntityTree(entities.at(0), node, true);
 	}
 }
 
@@ -236,7 +235,26 @@ const ConfigNode& EntityFactory::getPrefabNode(const String& id)
 	return context.resources->get<Prefab>(id)->getRoot();
 }
 
+void EntityFactory::startContext()
+{
+	// Warning: this makes this whole class not thread safe
+	context.entityContext->clear();
+}
+
+ConfigNodeSerializationContext EntityFactory::makeContext() const
+{
+	ConfigNodeSerializationContext context;
+	context.resources = &resources;
+	context.entityContext = std::make_shared<EntitySerializationContext>(world);
+	return context;
+}
+
 EntitySerializationContext::EntitySerializationContext(World& world)
 	: world(world)
 {
+}
+
+void EntitySerializationContext::clear()
+{
+	uuids.clear();
 }

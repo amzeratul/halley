@@ -51,8 +51,8 @@ namespace Halley {
 
 	private:
 		World& world;
+		Resources& resources;
 		ConfigNodeSerializationContext context;
-		std::unique_ptr<EntitySerializationContext> entityContext;
 
 		EntityRef createEntityTree(const ConfigNode& node);
 		EntityRef createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate);
@@ -61,6 +61,9 @@ namespace Halley {
 		void doUpdateEntityTree(EntityRef& entity, const ConfigNode& node, bool refreshing);
 		
 		const ConfigNode& getPrefabNode(const String& id);
+
+		void startContext();
+		ConfigNodeSerializationContext makeContext() const;
 	};
 
 	class EntitySerializationContext {
@@ -69,5 +72,7 @@ namespace Halley {
 		std::map<UUID, EntityId> uuids;
 
 		EntitySerializationContext(World& world);
+
+		void clear();
 	};
 }
