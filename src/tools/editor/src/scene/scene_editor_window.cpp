@@ -282,7 +282,7 @@ void SceneEditorWindow::onEntityMoved(const String& id)
 	}
 
 	if (canvas->isLoaded()) {
-		canvas->getInterface().onEntityModified(UUID(id), sceneData->getEntityData(id).data);
+		canvas->getInterface().onEntityMoved(UUID(id), sceneData->getEntityData(id).data);
 	}
 	
 	markModified();

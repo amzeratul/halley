@@ -29,11 +29,13 @@ namespace Halley {
 
 		void onEntityAdded(const UUID& id, const ConfigNode& entityData) final override;
 		void onEntityRemoved(const UUID& id) final override;
+		void onEntityMoved(const UUID& id, const ConfigNode& entityData) final override;
 		void onEntityModified(const UUID& id, const ConfigNode& entityData) final override;
-    	virtual void onEntityModified(EntityRef entity, const ConfigNode& entityData);
 		virtual void onEntityAdded(EntityRef entity, const ConfigNode& entityData);
 		virtual void onEntityRemoved(EntityRef entity);
-    	
+		virtual void onEntityMoved(EntityRef entity, const ConfigNode& entityData);
+		virtual void onEntityModified(EntityRef entity, const ConfigNode& entityData);
+
 		void showEntity(const UUID& id) override;
 		ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;
     	

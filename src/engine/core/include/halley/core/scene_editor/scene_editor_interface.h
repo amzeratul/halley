@@ -104,6 +104,7 @@ namespace Halley {
         virtual void onEntityAdded(const UUID& id, const ConfigNode& entityData) = 0;
         virtual void onEntityRemoved(const UUID& id) = 0;
         virtual void onEntityModified(const UUID& id, const ConfigNode& entityData) = 0;
+        virtual void onEntityMoved(const UUID& id, const ConfigNode& entityData) = 0;
 
     	virtual void showEntity(const UUID& id) = 0;
         virtual ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) = 0;

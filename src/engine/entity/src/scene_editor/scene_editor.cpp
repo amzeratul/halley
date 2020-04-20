@@ -204,6 +204,13 @@ void SceneEditor::onEntityRemoved(const UUID& id)
 	}
 }
 
+void SceneEditor::onEntityMoved(const UUID& id, const ConfigNode& entityData)
+{
+	if (id.isValid()) {
+		onEntityMoved(getEntity(id), entityData);
+	}
+}
+
 void SceneEditor::onEntityModified(const UUID& id, const ConfigNode& entityData)
 {
 	if (id.isValid()) {
@@ -218,6 +225,9 @@ void SceneEditor::onEntityAdded(EntityRef entity, const ConfigNode& entityData)
 {}
 
 void SceneEditor::onEntityRemoved(EntityRef entity)
+{}
+
+void SceneEditor::onEntityMoved(EntityRef entity, const ConfigNode& entityData)
 {}
 
 void SceneEditor::showEntity(const UUID& id)
