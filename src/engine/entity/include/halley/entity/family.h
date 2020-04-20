@@ -172,6 +172,8 @@ namespace Halley {
 				// Move all entities to be removed to the back of the vector
 				{
 					int n = int(entities.size());
+					std::vector<std::pair<int, int>> moves;
+					moves.reserve( removeCount );
 					// Note: it's important to scan it forward. Scanning backwards would improve performance for short-lived entities,
 					// but it causes an issue where an entity is removed and added to the same family in one frame.
 					for (int i = 0; i < n; i++) {
@@ -180,7 +182,7 @@ namespace Halley {
 						if (iter != toRemove.end() && id == *iter) {
 							toRemove.erase(iter);
 							if (i != n - 1) {
-								std::swap(entities[i], entities[n - 1]);
+								moves.emplace_back( std::make_pair( i, n - 1 ) );
 								i--;
 							}
 							n--;
@@ -188,6 +190,9 @@ namespace Halley {
 								break;
 							}
 						}
+					}
+					for (const std::pair<int, int>& move : moves) {
+						std::swap(entities[move.first], entities[move.second]);
 					}
 					Ensures(size_t(n) + removeCount == entities.size());
 				}
