@@ -18,7 +18,7 @@ namespace Halley {
 		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState) override;
 		void render(RenderContext& rc) override;
 
-		World& getWorld() override;
+		World& getWorld() const override;
 		void spawnPending() override;
 
 		EntityId getCameraId() override;
@@ -26,8 +26,13 @@ namespace Halley {
 		void changeZoom(int amount, Vector2f cursorPosRelToCamera) override;
 
 		void setSelectedEntity(const UUID& id, ConfigNode& entityData) override;
+
+		void onEntityAdded(const UUID& id, const ConfigNode& entityData) final override;
+		void onEntityRemoved(const UUID& id) final override;
 		void onEntityModified(const UUID& id, const ConfigNode& entityData) final override;
-    	virtual void onEntityModified(EntityRef& entity, const ConfigNode& entityData);
+    	virtual void onEntityModified(EntityRef entity, const ConfigNode& entityData);
+		virtual void onEntityAdded(EntityRef entity, const ConfigNode& entityData);
+		virtual void onEntityRemoved(EntityRef entity);
     	
 		void showEntity(const UUID& id) override;
 		ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;
@@ -72,5 +77,6 @@ namespace Halley {
 		static void doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect);
     	Vector2f roundPosition(Vector2f pos) const;
 		Vector2f roundPosition(Vector2f pos, float zoom) const;
+    	EntityRef getEntity(const UUID& uuid) const;
 	};
 }

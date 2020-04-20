@@ -273,6 +273,20 @@ namespace Halley {
 			return entity->hasComponent<T>(*world);
 		}
 
+		template <typename T>
+		bool hasComponentInTree() const
+		{
+			if (hasComponent<T>()) {
+				return true;
+			}
+			for (auto& c: getRawChildren()) {
+				if (EntityRef(*c, getWorld()).hasComponentInTree<T>()) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		const String& getName() const
 		{
 			return entity->name;

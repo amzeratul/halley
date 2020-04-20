@@ -64,7 +64,7 @@ void SceneEditor::render(RenderContext& rc)
 	});
 }
 
-World& SceneEditor::getWorld()
+World& SceneEditor::getWorld() const
 {
 	Expects(world);
 	return *world;
@@ -190,26 +190,35 @@ void SceneEditor::setSelectedEntity(const UUID& id, ConfigNode& entityData)
 	onEntitySelected(selectedEntity);
 }
 
-void SceneEditor::onEntityModified(const UUID& id, const ConfigNode& entityData)
+void SceneEditor::onEntityAdded(const UUID& id, const ConfigNode& entityData)
 {
-	if (!id.isValid()) {
-		return;
-	}
-	
-	const auto curId = selectedEntity ? selectedEntity.value().getUUID() : UUID();
-	if (curId == id) {
-		onEntityModified(selectedEntity.value(), entityData);
-	} else {
-		auto entity = getWorld().findEntity(id);
-		if (entity) {
-			onEntityModified(entity.value(), entityData);
-		}
+	if (id.isValid()) {
+		onEntityAdded(getEntity(id), entityData);
 	}
 }
 
-void SceneEditor::onEntityModified(EntityRef& entity, const ConfigNode& entityData)
+void SceneEditor::onEntityRemoved(const UUID& id)
 {
+	if (id.isValid()) {
+		onEntityRemoved(getEntity(id));
+	}
 }
+
+void SceneEditor::onEntityModified(const UUID& id, const ConfigNode& entityData)
+{
+	if (id.isValid()) {
+		onEntityModified(getEntity(id), entityData);
+	}
+}
+
+void SceneEditor::onEntityModified(EntityRef entity, const ConfigNode& entityData)
+{}
+
+void SceneEditor::onEntityAdded(EntityRef entity, const ConfigNode& entityData)
+{}
+
+void SceneEditor::onEntityRemoved(EntityRef entity)
+{}
 
 void SceneEditor::showEntity(const UUID& id)
 {
@@ -278,4 +287,14 @@ std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)
 
 void SceneEditor::onInit()
 {
+}
+
+EntityRef SceneEditor::getEntity(const UUID& id) const
+{
+	const auto curId = selectedEntity ? selectedEntity.value().getUUID() : UUID();
+	if (curId == id) {
+		return selectedEntity.value();
+	} else {
+		return getWorld().findEntity(id).value();
+	}
 }

@@ -93,7 +93,7 @@ namespace Halley {
         virtual void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState) = 0;
         virtual void render(RenderContext& rc) = 0;
     	
-        virtual World& getWorld() = 0;
+        virtual World& getWorld() const = 0;
         virtual void spawnPending() = 0;
 
         virtual EntityId getCameraId() = 0;
@@ -101,6 +101,8 @@ namespace Halley {
         virtual void changeZoom(int amount, Vector2f cursorPosRelToCamera) = 0;
 
     	virtual void setSelectedEntity(const UUID& id, ConfigNode& entityData) = 0;
+        virtual void onEntityAdded(const UUID& id, const ConfigNode& entityData) = 0;
+        virtual void onEntityRemoved(const UUID& id) = 0;
         virtual void onEntityModified(const UUID& id, const ConfigNode& entityData) = 0;
 
     	virtual void showEntity(const UUID& id) = 0;

@@ -237,6 +237,11 @@ void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId)
 	entityList->onEntityAdded(id, parentId, data);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	selectEntity(id);
+
+	if (canvas->isLoaded()) {
+		canvas->getInterface().onEntityAdded(UUID(id), data);
+	}
+	
 	markModified();
 }
 
@@ -245,6 +250,11 @@ void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId
 	entityList->onEntityRemoved(id, parentId);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	selectEntity(parentId);
+
+	if (canvas->isLoaded()) {
+		canvas->getInterface().onEntityRemoved(UUID(id));
+	}
+	
 	markModified();
 }
 
@@ -252,12 +262,16 @@ void SceneEditorWindow::onEntityModified(const String& id)
 {
 	if (!id.isEmpty()) {
 		const auto& data = sceneData->getEntityData(id).data;
+
 		entityList->onEntityModified(id, data);
+
+		sceneData->reloadEntity(id);
+		
 		if (canvas->isLoaded()) {
 			canvas->getInterface().onEntityModified(UUID(id), data);
 		}
 	}
-	sceneData->reloadEntity(id);
+
 	markModified();
 }
 
@@ -266,6 +280,11 @@ void SceneEditorWindow::onEntityMoved(const String& id)
 	if (currentEntityId == id) {
 		selectEntity(id);
 	}
+
+	if (canvas->isLoaded()) {
+		canvas->getInterface().onEntityModified(UUID(id), sceneData->getEntityData(id).data);
+	}
+	
 	markModified();
 }
 
