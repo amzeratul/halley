@@ -1,4 +1,6 @@
 #include "entity_scene.h"
+
+#include "entity_factory.h"
 using namespace Halley;
 
 std::vector<EntityRef>& EntityScene::getEntities()
@@ -30,18 +32,12 @@ void EntityScene::update(EntityFactory& factory)
 
 void EntityScene::addPrefabReference(const std::shared_ptr<const Prefab>& prefab, const EntityRef& entity, std::optional<int> index)
 {
-	getOrMakeObserver(prefab).entities.emplace_back(entity, index);
+	getOrMakeObserver(prefab).addEntity(entity, index);
 }
 
 void EntityScene::addRootEntity(EntityRef entity)
 {
 	entities.emplace_back(entity);
-}
-
-EntityScene::ObservedEntity::ObservedEntity(EntityRef entity, std::optional<int> index)
-	: entity(entity)
-	, index(index)
-{
 }
 
 EntityScene::PrefabObserver::PrefabObserver(std::shared_ptr<const ConfigFile> config)
@@ -58,15 +54,35 @@ bool EntityScene::PrefabObserver::needsUpdate() const
 void EntityScene::PrefabObserver::update(EntityFactory& factory)
 {
 	assetVersion = config->getAssetVersion();
-	for (auto& entity: entities) {
-		// TODO
+
+	if (!entities.empty()) {
+		if (isScene) {
+			factory.updateScene(entities, config->getRoot());
+		} else {
+			for (auto& entity: entities) {
+				factory.updateEntityTree(entity, config->getRoot());
+			}
+		}
 	}
+}
+
+void EntityScene::PrefabObserver::addEntity(EntityRef entity, std::optional<int> index)
+{
+	entities.push_back(entity);
+	if (index) {
+		isScene = true;
+	}
+}
+
+const std::shared_ptr<const ConfigFile>& EntityScene::PrefabObserver::getConfig() const
+{
+	return config;
 }
 
 EntityScene::PrefabObserver& EntityScene::getOrMakeObserver(const std::shared_ptr<const ConfigFile>& config)
 {
 	for (auto& o: prefabObservers) {
-		if (o.config == config) {
+		if (o.getConfig() == config) {
 			return o;
 		}
 	}

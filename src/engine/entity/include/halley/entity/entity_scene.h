@@ -21,23 +21,22 @@ namespace Halley {
 		void addRootEntity(EntityRef entity);
 
 	private:
-		class ObservedEntity {
-		public:
-			EntityRef entity;
-			std::optional<int> index;
-
-			ObservedEntity(EntityRef entity, std::optional<int> index);
-		};
-		
 		class PrefabObserver {
 		public:
-			std::shared_ptr<const ConfigFile> config;
-			int assetVersion = 0;
-			std::vector<ObservedEntity> entities;
-
 			PrefabObserver(std::shared_ptr<const ConfigFile> config);
+			
 			bool needsUpdate() const;
 			void update(EntityFactory& factory);
+
+			void addEntity(EntityRef entity, std::optional<int> index);
+
+			const std::shared_ptr<const ConfigFile>& getConfig() const;
+
+		private:
+			std::shared_ptr<const ConfigFile> config;
+			std::vector<EntityRef> entities;
+			int assetVersion = 0;
+			bool isScene = false;
 		};
 
 		std::vector<EntityRef> entities;
