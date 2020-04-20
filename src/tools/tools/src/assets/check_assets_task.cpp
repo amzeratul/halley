@@ -120,6 +120,8 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 		}
 		db.setInputFileMetadata(filePath, timestamps, meta, srcPath);
 		dbChanged = true;
+	} else {
+		db.markInputPresent(filePath);
 	}
 
 	// Figure out the right importer and assetId for this file
@@ -191,6 +193,8 @@ std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(Impo
 	}
 	std::vector<Path> dummyDirMetas;
 
+	db.markAllInputFilesAsMissing();
+
 	// Enumerate all potential assets
 	for (const auto& srcPath: srcPaths) {
 		auto allFiles = FileSystem::enumerateDirectory(srcPath);
@@ -225,6 +229,8 @@ std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(Impo
 		}
 	}
 
+	dbChanged = dbChanged | db.purgeMissingInputs();
+	
 	if (dbChanged) {
 		db.save();
 	}
