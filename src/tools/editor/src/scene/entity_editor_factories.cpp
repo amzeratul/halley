@@ -31,7 +31,7 @@ public:
 		String value = data.getFieldData().asString("");
 
 		auto field = std::make_shared<UITextInput>(context.getUIFactory().getKeyboard(), "textValue", context.getUIFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
-		field->bindData("textValue", value, [&, data](String newVal)
+		field->bindData("textValue", value, [&context, data](String newVal)
 		{
 			data.getFieldData() = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
@@ -62,7 +62,7 @@ public:
 
 		auto field = std::make_shared<UITextInput>(context.getUIFactory().getKeyboard(), "intValue", context.getUIFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, false));
-		field->bindData("intValue", value, [&, data](int newVal)
+		field->bindData("intValue", value, [&context, data](int newVal)
 		{
 			data.getFieldData() = ConfigNode(newVal);
 			context.onEntityUpdated();
@@ -93,7 +93,7 @@ public:
 
 		auto field = std::make_shared<UITextInput>(context.getUIFactory().getKeyboard(), "floatValue", context.getUIFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, true));
-		field->bindData("floatValue", value, [&, data](float newVal)
+		field->bindData("floatValue", value, [&context, data](float newVal)
 		{
 			data.getFieldData() = ConfigNode(newVal);
 			context.onEntityUpdated();
@@ -131,7 +131,7 @@ public:
 		bool value = data.getFieldData().asBool(defaultValue == "true");
 
 		auto field = std::make_shared<UICheckbox>("boolValue", context.getUIFactory().getStyle("checkbox"), value);
-		field->bindData("boolValue", value, [&, data](bool newVal)
+		field->bindData("boolValue", value, [&context, data](bool newVal)
 		{
 			data.getFieldData() = ConfigNode(newVal);
 			context.onEntityUpdated();
@@ -173,7 +173,7 @@ public:
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
 
 		container->add(std::make_shared<UITextInput>(keyboard, "xValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
-		container->bindData("xValue", value.x, [&, data, dataOutput] (float newVal)
+		container->bindData("xValue", value.x, [&context, data, dataOutput] (float newVal)
 		{
 			if (*dataOutput) {
 				auto& node = data.getFieldData();
@@ -183,7 +183,7 @@ public:
 		});
 
 		container->add(std::make_shared<UITextInput>(keyboard, "yValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
-		container->bindData("yValue", value.y, [&, data, dataOutput](float newVal)
+		container->bindData("yValue", value.y, [&context, data, dataOutput](float newVal)
 		{
 			if (*dataOutput) {
 				auto& node = data.getFieldData();
@@ -228,14 +228,9 @@ public:
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto data = pars.data;
-		const auto& defaultValue = pars.defaultValue;
 
 		auto& fieldData = data.getFieldData();
 		fieldData.ensureType(ConfigNodeType::Map);
-
-		const auto& keyboard = context.getUIFactory().getKeyboard();
-		const auto& inputStyle = context.getUIFactory().getStyle("inputThin");
-		const auto& checkStyle = context.getUIFactory().getStyle("checkbox");
 
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});
@@ -244,55 +239,23 @@ public:
 		container->add(context.makeLabel("material"));
 		container->add(std::make_shared<SelectAssetWidget>("material", context.getUIFactory(), AssetType::MaterialDefinition, context.getGameResources()));
 		container->add(context.makeLabel("colour"));
-		container->add(std::make_shared<UITextInput>(keyboard, "colour", inputStyle));
+		container->add(context.makeField("Halley::Colour4f", pars.withSubKey("colour"), false));
 		container->add(context.makeLabel("pivot"));
 		container->add(context.makeField("std::optional<Halley::Vector2f>", pars.withSubKey("pivot"), false));
 		container->add(context.makeLabel("flip"));
-		container->add(std::make_shared<UICheckbox>("flip", checkStyle), 0, {}, UISizerAlignFlags::Left);
+		container->add(context.makeField("bool", pars.withSubKey("flip"), false));
 		container->add(context.makeLabel("visible"));
-		container->add(std::make_shared<UICheckbox>("visible", checkStyle), 0, {}, UISizerAlignFlags::Left);
+		container->add(context.makeField("bool", pars.withSubKey("visible", "true"), false));
 
-		container->bindData("image", fieldData["image"].asString(""), [&, data](String newVal)
+		container->bindData("image", fieldData["image"].asString(""), [&context, data](String newVal)
 		{
 			data.getFieldData()["image"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
-		container->bindData("material", fieldData["material"].asString(""), [&, data](String newVal)
+		container->bindData("material", fieldData["material"].asString(""), [&context, data](String newVal)
 		{
 			data.getFieldData()["material"] = ConfigNode(std::move(newVal));
-			context.onEntityUpdated();
-		});
-
-		container->bindData("colour", fieldData["colour"].asString("#FFFFFF"), [&, data](String newVal)
-		{
-			data.getFieldData()["colour"] = ConfigNode(std::move(newVal));
-			context.onEntityUpdated();
-		});
-
-		container->bindData("pivotX", fieldData["pivot"].asVector2f(Vector2f()).x, [&, data] (float newVal)
-		{
-			auto& node = data.getFieldData()["pivot"];
-			node = ConfigNode(Vector2f(newVal, node.asVector2f(Vector2f()).y));
-			context.onEntityUpdated();
-		});
-
-		container->bindData("pivotY", fieldData["pivot"].asVector2f(Vector2f()).y, [&, data] (float newVal)
-		{
-			auto& node = data.getFieldData()["pivot"];
-			node = ConfigNode(Vector2f(node.asVector2f(Vector2f()).x, newVal));
-			context.onEntityUpdated();
-		});
-
-		container->bindData("flip", fieldData["flip"].asBool(false), [&, data](bool newVal)
-		{
-			data.getFieldData()["flip"] = ConfigNode(newVal);
-			context.onEntityUpdated();
-		});
-
-		container->bindData("visible", fieldData["visible"].asBool(true), [&, data](bool newVal)
-		{
-			data.getFieldData()["visible"] = ConfigNode(newVal);
 			context.onEntityUpdated();
 		});
 
@@ -320,15 +283,11 @@ public:
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto data = pars.data;
-		const auto& defaultValue = pars.defaultValue;
 
 		auto& fieldData = data.getFieldData();
 		fieldData.ensureType(ConfigNodeType::Map);
 
 		auto& resources = context.getGameResources();
-		const auto& keyboard = context.getUIFactory().getKeyboard();
-		const auto& inputStyle = context.getUIFactory().getStyle("inputThin");
-		const auto& checkStyle = context.getUIFactory().getStyle("checkbox");
 		const auto& dropStyle = context.getUIFactory().getStyle("dropdown");
 		const auto& scrollStyle = context.getUIFactory().getStyle("scrollbar");
 		const auto& listStyle = context.getUIFactory().getStyle("list");
@@ -342,9 +301,9 @@ public:
 		container->add(context.makeLabel("direction"));
 		container->add(std::make_shared<UIDropdown>("direction", dropStyle, scrollStyle, listStyle));
 		container->add(context.makeLabel("playbackSpeed"));
-		container->add(std::make_shared<UITextInput>(keyboard, "playbackSpeed", inputStyle, "", LocalisedString(), std::make_shared<UINumericValidator>(false, true)));
+		container->add(context.makeField("float", pars.withSubKey("playbackSpeed", "1"), false));
 		container->add(context.makeLabel("applyPivot"));
-		container->add(std::make_shared<UICheckbox>("applyPivot", checkStyle), 0, {}, UISizerAlignFlags::Left);
+		container->add(context.makeField("bool", pars.withSubKey("applyPivot", "true"), false));
 
 		auto updateAnimation = [container, data, &resources] (const String& animName)
 		{
@@ -366,34 +325,22 @@ public:
 		};
 		updateAnimation(fieldData["animation"].asString(""));
 
-		container->bindData("animation", fieldData["animation"].asString(""), [&, data, updateAnimation](String newVal)
+		container->bindData("animation", fieldData["animation"].asString(""), [&context, data, updateAnimation](String newVal)
 		{
 			updateAnimation(newVal);
 			data.getFieldData()["animation"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
-		container->bindData("sequence", fieldData["sequence"].asString(""), [&, data](String newVal)
+		container->bindData("sequence", fieldData["sequence"].asString(""), [&context, data](String newVal)
 		{
 			data.getFieldData()["sequence"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
-		container->bindData("direction", fieldData["direction"].asString(""), [&, data](String newVal)
+		container->bindData("direction", fieldData["direction"].asString(""), [&context, data](String newVal)
 		{
 			data.getFieldData()["direction"] = ConfigNode(std::move(newVal));
-			context.onEntityUpdated();
-		});
-
-		container->bindData("playbackSpeed", fieldData["playbackSpeed"].asFloat(1.0f), [&, data](float newVal)
-		{
-			data.getFieldData()["playbackSpeed"] = ConfigNode(newVal);
-			context.onEntityUpdated();
-		});
-
-		container->bindData("applyPivot", fieldData["applyPivot"].asBool(true), [&, data](bool newVal)
-		{
-			data.getFieldData()["applyPivot"] = ConfigNode(newVal);
 			context.onEntityUpdated();
 		});
 
@@ -593,6 +540,46 @@ public:
 	}
 };
 
+class ComponentEditorColourFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::Colour4f";
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode("#FFFFFF");
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		// TODO: make this a proper colour picker
+		auto data = pars.data;
+		const auto defaultValue = pars.defaultValue.isEmpty() ? "#FFFFFF" : pars.defaultValue;
+
+		String value = data.getFieldData().asString(defaultValue);
+
+		auto container = std::make_shared<UISizer>();
+		
+		auto field = std::make_shared<UITextInput>(context.getUIFactory().getKeyboard(), "colourHex", context.getUIFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
+		container->add(field, 1);
+
+		auto colourPreview = std::make_shared<UIImage>(Sprite().setImage(context.getUIFactory().getResources(), "halley_ui/ui_list_item.png").setColour(Colour4f::fromString(value)));
+		colourPreview->setMinSize(Vector2f(40, 22));
+		container->add(colourPreview);
+		
+		field->bindData("colourHex", value, [&context, data, colourPreview](String newVal)
+		{
+			colourPreview->getSprite().setColour(Colour4f::fromString(newVal));
+			data.getFieldData() = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
+
+		return container;
+	}
+};
+
 std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -611,6 +598,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorStdSetFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorStdOptionalFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorOptionalLiteFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorColourFieldFactory>());
 
 	return factories;
 }
