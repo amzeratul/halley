@@ -27,7 +27,8 @@ namespace Halley {
 
 		std::shared_ptr<IUIElement> makeLabel(const String& label) override;
 		void createField(IUISizer& parent, const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel) override;
-
+		ConfigNode getDefaultNode(const String& fieldType) override;
+		
 	private:
 		UIFactory& factory;
 		ECSData* ecsData = nullptr;

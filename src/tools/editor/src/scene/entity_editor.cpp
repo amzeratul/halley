@@ -211,6 +211,16 @@ void EntityEditor::createField(IUISizer& parent, const String& fieldType, const 
 	}
 }
 
+ConfigNode EntityEditor::getDefaultNode(const String& fieldType)
+{
+	const auto iter = fieldFactories.find(fieldType);
+	if (iter == fieldFactories.end()) {
+		return ConfigNode();
+	} else {
+		return iter->second->getDefaultNode();
+	}
+}
+
 void EntityEditor::addComponent()
 {
 	// Components already on this entity

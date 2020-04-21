@@ -58,6 +58,7 @@ namespace Halley
 		ConfigNode(MapType&& entryMap);
 		ConfigNode(SequenceType&& entryList);
 		ConfigNode(String value);
+		ConfigNode(const char* value);
 		ConfigNode(bool value);
 		ConfigNode(int value);
 		ConfigNode(float value);

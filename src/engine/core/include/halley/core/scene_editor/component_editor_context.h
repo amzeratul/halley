@@ -22,18 +22,20 @@ namespace Halley {
 		virtual std::shared_ptr<IUIElement> makeLabel(const String& label) = 0;
 		virtual void createField(IUISizer& parent, const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel) = 0;
 		virtual void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) = 0;
+		virtual ConfigNode getDefaultNode(const String& fieldType) = 0;
 	};
 	
     class ComponentEditorContext {
     public:
 	    ComponentEditorContext(IEntityEditor& parent, UIFactory& factory, Resources& gameResources);
 
-        UIFactory& getFactory() const;
+        UIFactory& getUIFactory() const;
 	    Resources& getGameResources() const;
         void onEntityUpdated() const;
 	    std::shared_ptr<IUIElement> makeLabel(const String& label) const;
 	    void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) const;
 		void createField(IUISizer& parent, const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel) const;
+    	ConfigNode getDefaultNode(const String& fieldType) const;
 
     private:
         IEntityEditor& parent;

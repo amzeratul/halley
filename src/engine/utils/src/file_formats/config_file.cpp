@@ -63,6 +63,11 @@ ConfigNode::ConfigNode(String value)
 	operator=(std::move(value));
 }
 
+ConfigNode::ConfigNode(const char* value)
+{
+	operator=(value);
+}
+
 ConfigNode::ConfigNode(bool value)
 {
 	operator=(value);

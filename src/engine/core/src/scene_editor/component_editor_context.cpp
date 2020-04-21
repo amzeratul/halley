@@ -29,7 +29,12 @@ void ComponentEditorContext::createField(IUISizer& dst, const String& fieldType,
 	parent.createField(dst, fieldType, parameters, createLabel);
 }
 
-UIFactory& ComponentEditorContext::getFactory() const
+ConfigNode ComponentEditorContext::getDefaultNode(const String& fieldType) const
+{
+	return parent.getDefaultNode(fieldType);
+}
+
+UIFactory& ComponentEditorContext::getUIFactory() const
 {
 	return factory;
 }

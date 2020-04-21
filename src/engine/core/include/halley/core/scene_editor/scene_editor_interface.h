@@ -83,6 +83,7 @@ namespace Halley {
         virtual bool isNested() const { return false; }
         virtual void createLabelAndField(IUISizer& parent, const ComponentEditorContext& context, const ComponentFieldParameters& parameters) {}
         virtual std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& parameters) = 0;
+        virtual ConfigNode getDefaultNode() const { return ConfigNode(); }
     };
 
     class ISceneEditor {
