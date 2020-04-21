@@ -23,5 +23,7 @@ namespace Halley
 		std::unordered_set<String> includeFiles;
 		std::optional<String> customImplementation;
 		bool generate = false;
+
+		bool operator<(const ComponentSchema& other) const;
 	};
 }

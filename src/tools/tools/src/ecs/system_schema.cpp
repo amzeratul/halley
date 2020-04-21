@@ -131,3 +131,8 @@ SystemSchema::SystemSchema(YAML::Node node, bool generate)
 		}
 	}
 }
+
+bool SystemSchema::operator<(const SystemSchema& other) const
+{
+	return name < other.name;
+}

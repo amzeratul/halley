@@ -17,6 +17,6 @@ public:
 	{}
 	
 	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
-		Halley::ConfigNodeHelper::deserializeIfDefined(player, context, node["player"]);
+		Halley::ConfigNodeHelper<decltype(player)>::deserialize(player, context, node["player"]);
 	}
 };

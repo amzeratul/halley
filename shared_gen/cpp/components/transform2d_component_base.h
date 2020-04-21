@@ -25,9 +25,9 @@ public:
 	{}
 	
 	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
-		Halley::ConfigNodeHelper::deserializeIfDefined(position, context, node["position"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(rotation, context, node["rotation"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(scale, context, node["scale"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(subWorld, context, node["subWorld"]);
+		Halley::ConfigNodeHelper<decltype(position)>::deserialize(position, context, node["position"]);
+		Halley::ConfigNodeHelper<decltype(rotation)>::deserialize(rotation, context, node["rotation"]);
+		Halley::ConfigNodeHelper<decltype(scale)>::deserialize(scale, context, node["scale"]);
+		Halley::ConfigNodeHelper<decltype(subWorld)>::deserialize(subWorld, context, node["subWorld"]);
 	}
 };

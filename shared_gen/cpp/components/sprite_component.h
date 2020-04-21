@@ -10,19 +10,19 @@ public:
 	
 	Halley::Sprite sprite;
 	int layer = 0;
-	int mask = -1;
+	Halley::OptionalLite<int> mask;
 	
 	SpriteComponent() {}
 	
-	SpriteComponent(Halley::Sprite sprite, int layer, int mask)
+	SpriteComponent(Halley::Sprite sprite, int layer, Halley::OptionalLite<int> mask)
 		: sprite(sprite)
 		, layer(layer)
 		, mask(mask)
 	{}
 	
 	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
-		Halley::ConfigNodeHelper::deserializeIfDefined(sprite, context, node["sprite"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(layer, context, node["layer"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(mask, context, node["mask"]);
+		Halley::ConfigNodeHelper<decltype(sprite)>::deserialize(sprite, context, node["sprite"]);
+		Halley::ConfigNodeHelper<decltype(layer)>::deserialize(layer, context, node["layer"]);
+		Halley::ConfigNodeHelper<decltype(mask)>::deserialize(mask, context, node["mask"]);
 	}
 };

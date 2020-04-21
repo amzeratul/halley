@@ -217,14 +217,32 @@ namespace Halley {
 		}
 	};
 
+	template <typename T>
 	class ConfigNodeHelper {
 	public:
-		template <typename T>
-		static void deserializeIfDefined(T& dst, ConfigNodeSerializationContext& context, const ConfigNode& node)
+		static void deserialize(T& dst, ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
 			if (node.getType() != ConfigNodeType::Undefined) {
 				dst = ConfigNodeSerializer<T>().deserialize(context, node);
 			}
+		}
+	};
+
+	template <typename T>
+	class ConfigNodeHelper<std::optional<T>> {
+	public:
+		static void deserialize(std::optional<T>& dst, ConfigNodeSerializationContext& context, const ConfigNode& node)
+		{
+			dst = ConfigNodeSerializer<std::optional<T>>().deserialize(context, node);
+		}
+	};
+
+	template <typename T>
+	class ConfigNodeHelper<OptionalLite<T>> {
+	public:
+		static void deserialize(OptionalLite<T>& dst, ConfigNodeSerializationContext& context, const ConfigNode& node)
+		{
+			dst = ConfigNodeSerializer<OptionalLite<T>>().deserialize(context, node);
 		}
 	};
 }

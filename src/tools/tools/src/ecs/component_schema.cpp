@@ -37,3 +37,8 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 		customImplementation = node["customImplementation"].as<std::string>();
 	}
 }
+
+bool ComponentSchema::operator<(const ComponentSchema& other) const
+{
+	return id < other.id;
+}

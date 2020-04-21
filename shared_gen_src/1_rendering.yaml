@@ -8,8 +8,7 @@ component:
       type: int
       defaultValue: 0
   - mask:
-      type: int
-      defaultValue: -1
+      type: 'Halley::OptionalLite<int>'
 
 ---
 
@@ -21,8 +20,7 @@ component:
       type: int
       defaultValue: 0
   - mask:
-      type: int
-      defaultValue: 1
+      type: 'Halley::OptionalLite<int>'
 
 ---
 

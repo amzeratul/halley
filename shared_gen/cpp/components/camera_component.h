@@ -23,9 +23,9 @@ public:
 	{}
 	
 	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
-		Halley::ConfigNodeHelper::deserializeIfDefined(zoom, context, node["zoom"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(clear, context, node["clear"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(mask, context, node["mask"]);
-		Halley::ConfigNodeHelper::deserializeIfDefined(layer, context, node["layer"]);
+		Halley::ConfigNodeHelper<decltype(zoom)>::deserialize(zoom, context, node["zoom"]);
+		Halley::ConfigNodeHelper<decltype(clear)>::deserialize(clear, context, node["clear"]);
+		Halley::ConfigNodeHelper<decltype(mask)>::deserialize(mask, context, node["mask"]);
+		Halley::ConfigNodeHelper<decltype(layer)>::deserialize(layer, context, node["layer"]);
 	}
 };

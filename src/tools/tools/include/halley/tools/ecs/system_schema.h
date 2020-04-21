@@ -86,5 +86,7 @@ namespace Halley
 		Vector<FamilySchema> families;
 		Vector<MessageReferenceSchema> messages;
 		Vector<ServiceSchema> services;
+
+		bool operator< (const SystemSchema& other) const;
 	};
 }

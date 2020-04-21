@@ -53,8 +53,13 @@ CodeGenResult CodegenCPP::generateMessage(MessageSchema message)
 	return result;
 }
 
-CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& components, const Vector<SystemSchema>& systems)
+CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& componentsRaw, const Vector<SystemSchema>& systemsRaw)
 {
+	auto components = componentsRaw;
+	std::sort(components.begin(), components.end());
+	auto systems = systemsRaw;
+	std::sort(systems.begin(), systems.end());
+
 	Vector<String> registryCpp {
 		"#include <halley.hpp>",
 		"using namespace Halley;",
@@ -182,7 +187,7 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 				deserializeBody += "\n\t\t";
 			}
 		}
-		deserializeBody += "Halley::ConfigNodeHelper::deserializeIfDefined(" + member.name + ", context, node[\"" + member.name + "\"]);";
+		deserializeBody += "Halley::ConfigNodeHelper<decltype(" + member.name + ")>::deserialize(" + member.name + ", context, node[\"" + member.name + "\"]);";
 	}
 
 	String className = component.name + "Component" + (component.customImplementation ? "Base" : "");
