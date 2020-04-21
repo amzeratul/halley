@@ -1,7 +1,10 @@
 #pragma once
 
-#include "halley/entity/entity_id.h"
 #include "halley/time/halleytime.h"
+#include "halley/file_formats/config_file.h"
+#include "halley/maths/rect.h"
+#include "halley/text/halleystring.h"
+#include <optional>
 
 namespace Halley {
 	enum class SceneEditorTool;
@@ -21,6 +24,7 @@ namespace Halley {
 	class ISceneEditorGizmoCollection;
 	class ComponentFieldParameters;
 	class ComponentEditorContext;
+    struct EntityId;
 
     enum class SceneEditorTool {
     	None,
