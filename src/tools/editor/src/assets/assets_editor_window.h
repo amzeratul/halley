@@ -50,6 +50,7 @@ namespace Halley {
 		std::shared_ptr<UIList> assetList;
 		std::shared_ptr<UIList> contentList;
 		std::shared_ptr<UIDropdown> contentListDropdown;
+		std::shared_ptr<UILabel> contentListDropdownLabel;
 		std::shared_ptr<UIPagedPane> content;
         std::shared_ptr<MetadataEditor> metadataEditor;
 
