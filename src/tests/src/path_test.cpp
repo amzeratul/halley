@@ -2,7 +2,7 @@
 #include <halley.hpp>
 using namespace Halley;
 
-TEST(HalleyPath, Identity)
+TEST(HalleyPath, Normalization)
 {
 	EXPECT_NE(Path(""), Path("."));
 	EXPECT_EQ(Path("./"), Path("."));
@@ -19,7 +19,7 @@ TEST(HalleyPath, Identity)
 TEST(HalleyPath, Append)
 {
 	EXPECT_EQ(Path("foo") / Path("bar"), Path("foo/bar"));
-	EXPECT_EQ(Path("foo/bar/baz") / Path("../.."), Path("foo"));
+	EXPECT_EQ(Path("foo/bar/baz") / Path("../.."), Path("foo/."));
 	EXPECT_EQ(Path("foo") / Path("../.."), Path(".."));
 }
 

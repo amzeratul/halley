@@ -38,11 +38,12 @@ bool FileSystem::createParentDir(const Path& p)
 
 int64_t FileSystem::getLastWriteTime(const Path& p)
 {
-	try {
-		return last_write_time(getNative(p));
-	} catch (...) {
+	boost::system::error_code ec;
+	const auto result = last_write_time(getNative(p), ec);
+	if (ec.failed()) {
 		return 0;
 	}
+	return result;
 }
 
 bool FileSystem::isFile(const Path& p)

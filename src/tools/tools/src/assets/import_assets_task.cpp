@@ -112,7 +112,11 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 		importingAsset.assetType = asset.assetType;
 		for (auto& f: asset.inputFiles) {
 			auto meta = db.getMetadata(f.first);
-			importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.first, FileSystem::readFile(asset.srcDir / f.first), meta ? meta.value() : Metadata()));
+			auto data = FileSystem::readFile(asset.srcDir / f.first);
+			if (data.empty()) {
+				Logger::logError("Data for \"" + toString(asset.srcDir / f.first) + "\" is empty.");
+			}
+			importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.first, std::move(data), meta ? meta.value() : Metadata()));
 		}
 		toLoad.emplace_back(std::move(importingAsset));
 

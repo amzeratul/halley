@@ -31,8 +31,6 @@ Project::Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader&
 	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", std::vector<String>{ "" });
 	assetImporter = std::make_unique<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
 
-	loadECSData();
-
 	auto dllPath = loader.getDLLPath(rootPath, properties->getDLL());
 	if (!dllPath.isEmpty()) {
 		try {
@@ -123,8 +121,11 @@ ImportAssetsDatabase& Project::getSharedCodegenDatabase() const
 	return *sharedCodegenDatabase;
 }
 
-ECSData& Project::getECSData() const
+ECSData& Project::getECSData()
 {
+	if (!ecsData) {
+		loadECSData();
+	}
 	return *ecsData;
 }
 

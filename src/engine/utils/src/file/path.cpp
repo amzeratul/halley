@@ -69,7 +69,7 @@ void Path::normalise()
 				write(".");
 			}
 		} else if (current == ".") {
-			if ((first || last) && canInsertDot()) {
+			if (last && canInsertDot()) {
 				write(current);
 			}
 		} else if (current == "..") {
