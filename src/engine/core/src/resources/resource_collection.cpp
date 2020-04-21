@@ -3,6 +3,8 @@
 #include "resources/resources.h"
 #include <halley/resources/resource.h>
 #include <utility>
+
+#include "graphics/sprite/sprite.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
@@ -86,7 +88,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::loadAsset(const String& assetI
 		newRes = resourceLoader(assetId, priority);
 	} else {
 		// Normal loading
-		auto resLoader = ResourceLoader(*(parent.locator), assetId, type, priority, parent.api, parent);
+		auto resLoader = ResourceLoader(*(parent.locator), assetId, type, priority, parent.api, parent);		
 		newRes = loadResource(resLoader);
 		if (!newRes && resLoader.loaded) {
 			throw Exception("Unable to construct resource from data: " + assetId, HalleyExceptions::Resources);

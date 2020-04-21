@@ -89,7 +89,7 @@ void AsepriteReader::addImageData(int frameNumber, std::vector<ImageData>& frame
 	
 	imgData.img = std::move(frameImage);
 	imgData.frameNumber = frameNumber;
-	imgData.sequenceName = /*group ? group.value() + (sequence.isEmpty() ? "" : "_" + sequence) : */sequence;
+	imgData.sequenceName = sequence;
 	imgData.direction = direction;
 	imgData.duration = duration;
 	imgData.clip = trim ? imgData.img->getTrimRect() : imgData.img->getRect();
@@ -103,7 +103,7 @@ void AsepriteReader::addImageData(int frameNumber, std::vector<ImageData>& frame
 		ss << "_" << imgData.direction.cppStr();
 	}
 	
-	if (group)
+	if (!group->isEmpty())
 	{
 		ss << "_" << group.value();
 	}
@@ -114,6 +114,6 @@ void AsepriteReader::addImageData(int frameNumber, std::vector<ImageData>& frame
 	imgData.filenames.emplace_back(ss.str());
 	if (firstImage) {
 		firstImage = false;
-		imgData.filenames.emplace_back(":img:" + spriteName + (group ? ":" + group.value() : ""));
+		imgData.filenames.emplace_back(":img:" + spriteName + (!group->isEmpty() ? ":" + group.value() : ""));
 	}
 }

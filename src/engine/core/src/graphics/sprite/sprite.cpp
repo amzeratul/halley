@@ -9,6 +9,10 @@
 #include "resources/resources.h"
 #include <gsl/gsl_assert>
 
+
+#include "graphics/sprite/animation.h"
+#include "halley/support/logger.h"
+
 using namespace Halley;
 
 Sprite::Sprite()
@@ -272,6 +276,12 @@ Sprite& Sprite::setImage(Resources& resources, String imageName, String material
 	if (materialName == "") {
 		materialName = "Halley/Sprite";
 	}
+
+	if (imageName.contains("background"))
+	{
+		Logger::logInfo("got " + imageName);
+	}
+	
 	const auto sprite = resources.get<SpriteResource>(imageName);
 	const auto material = resources.get<MaterialDefinition>(materialName);
 	setImage(*sprite, material);
