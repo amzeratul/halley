@@ -73,6 +73,7 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String s
 				}
 				std::move(groupFrameData.begin(), groupFrameData.end(), std::back_inserter(frameData[groupFrameImage.first]));
 			}
+			++i;
 		}
 	}
 
