@@ -24,7 +24,7 @@ namespace Halley
 			: val(value)
 		{}
 
-		constexpr OptionalLite(nullptr_t)
+		constexpr OptionalLite(std::nullptr_t)
 			: val(getDefaultValue())
 		{}
 
@@ -34,7 +34,7 @@ namespace Halley
 			return *this;
 		}
 
-		[[maybe_unused]] constexpr OptionalLite& operator=(nullptr_t)
+		[[maybe_unused]] constexpr OptionalLite& operator=(std::nullptr_t)
 		{
 			val = getDefaultValue();
 			return *this;
@@ -148,6 +148,8 @@ namespace Halley
 
 		constexpr static T getDefaultValue()
 		{
+			static_assert(std::is_integral_v<T> || std::is_floating_point_v<T>);
+			
 			if constexpr (std::is_integral_v<T>) {
 				if constexpr (std::numeric_limits<T>::is_signed) {
 					return std::numeric_limits<T>::min();
@@ -157,7 +159,7 @@ namespace Halley
 			} else if constexpr (std::is_floating_point_v<T>) {
 				return std::numeric_limits<T>::quiet_NaN();
 			} else {
-				static_assert(false, "Type must be integral or floating point");
+				return T();
 			}
 		}
 
