@@ -276,11 +276,6 @@ Sprite& Sprite::setImage(Resources& resources, String imageName, String material
 	if (materialName == "") {
 		materialName = "Halley/Sprite";
 	}
-
-	if (imageName.contains("background"))
-	{
-		Logger::logInfo("got " + imageName);
-	}
 	
 	const auto sprite = resources.get<SpriteResource>(imageName);
 	const auto material = resources.get<MaterialDefinition>(materialName);
