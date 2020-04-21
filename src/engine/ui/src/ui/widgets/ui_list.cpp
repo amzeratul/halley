@@ -172,6 +172,8 @@ void UIList::filterOptions(const String& filter)
 		}
 		item->setActive(active);
 	}
+
+	layout();
 	reassignIds();
 	if (!setSelectedOptionId(curId)) {
 		curOption = -1;
