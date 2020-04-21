@@ -432,6 +432,11 @@ public:
 		return "std::vector<>";
 	}
 
+	bool isNested() const override
+	{
+		return false;
+	}
+
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		const auto fieldType = pars.typeParameters.at(0);
@@ -491,6 +496,49 @@ public:
 	}
 };
 
+class ComponentEditorStdOptionalFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "std::optional<>";
+	}
+
+	bool isNested() const override
+	{
+		return false;
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto fieldType = pars.typeParameters.at(0);
+		const auto data = pars.data;
+
+		const bool initialValue = pars.data.getFieldData().getType() != ConfigNodeType::Undefined;
+
+		auto rowSizer = std::make_shared<UISizer>();
+		auto checkbox = std::make_shared<UICheckbox>("present", context.getFactory().getStyle("checkbox"), initialValue);
+		rowSizer->add(checkbox);
+
+		auto container = std::make_shared<UIWidget>("container", Vector2f(), UISizer(UISizerType::Vertical));
+		context.createField(*container, fieldType, pars, false);
+		rowSizer->add(container, 1);
+		container->setActive(initialValue);
+
+		checkbox->bindData("present", initialValue, [&context, container, data](bool newVal)
+		{
+			container->setActive(newVal);
+			if (newVal) {
+				// TODO: force propagation
+			} else {
+				data.getFieldData() = ConfigNode();
+			}
+			context.onEntityUpdated();
+		});
+		
+		return rowSizer;
+	}
+};
+
 std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -507,6 +555,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorVertexListFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorStdVectorFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorStdSetFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorStdOptionalFieldFactory>());
 
 	return factories;
 }
