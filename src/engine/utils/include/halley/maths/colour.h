@@ -112,15 +112,20 @@ namespace Halley {
 		{
 			Colour4 col;
 			size_t len = str.length();
-			Expects(str[0] == '#');
-			if (len >= 3) col.r = parseHex(str.substr(1, 2));
-			else col.r = 0;
-			if (len >= 5) col.g = parseHex(str.substr(3, 2));
-			else col.g = 0;
-			if (len >= 7) col.b = parseHex(str.substr(5, 2));
-			else col.b = 0;
-			if (len >= 9) col.a = parseHex(str.substr(7, 2));
-			else col.a = colMaxValue<T>();
+			if (len >= 1 && str[0] == '#') {
+				if (len >= 3) {
+					col.r = parseHex(str.substr(1, 2));
+				}
+				if (len >= 5) {
+					col.g = parseHex(str.substr(3, 2));
+				}
+				if (len >= 7) {
+					col.b = parseHex(str.substr(5, 2));
+				}
+				if (len >= 9) {
+					col.a = parseHex(str.substr(7, 2));
+				}
+			}
 			return col;
 		}
 
