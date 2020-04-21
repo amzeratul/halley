@@ -451,7 +451,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		#set_target_properties(${name}-exe PROPERTIES OUTPUT_NAME ${name})
 	endif()
 
-	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+	if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 		if (USE_PCH)
 			add_precompiled_header(${name} prec.h FORCEINCLUDE SOURCE_CXX prec.cpp)
 		endif ()
