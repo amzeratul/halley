@@ -156,9 +156,8 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
 			if (member.serializable) {
-				auto [type, typeParams] = parseType(member.type.name);
-				ComponentFieldParameters parameters(componentType, componentNames, ComponentDataRetriever(data, member.name), member.defaultValue, typeParams);
-				auto field = createField(type, parameters, true);
+				ComponentFieldParameters parameters(componentType, componentNames, ComponentDataRetriever(data, member.name), member.defaultValue);
+				auto field = makeField(member.type.name, parameters, true);
 				if (field) {
 					componentFields->add(field);
 				}
@@ -186,8 +185,11 @@ std::pair<String, std::vector<String>> EntityEditor::parseType(const String& typ
 	return {type, {}};
 }
 
-std::shared_ptr<IUIElement> EntityEditor::createField(const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel)
+std::shared_ptr<IUIElement> EntityEditor::makeField(const String& rawFieldType, ComponentFieldParameters parameters, bool createLabel)
 {
+	auto [fieldType, typeParams] = parseType(rawFieldType);
+	parameters.typeParameters = std::move(typeParams);
+		
 	const auto iter = fieldFactories.find(fieldType);
 	auto* compFieldFactory = iter != fieldFactories.end() ? iter->second.get() : nullptr;
 		

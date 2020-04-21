@@ -246,7 +246,7 @@ public:
 		container->add(context.makeLabel("colour"));
 		container->add(std::make_shared<UITextInput>(keyboard, "colour", inputStyle));
 		container->add(context.makeLabel("pivot"));
-		container->add(context.createField("std::optional<Halley::Vector2f>", pars.withSubKey("pivot"), false));
+		container->add(context.makeField("std::optional<Halley::Vector2f>", pars.withSubKey("pivot"), false));
 		container->add(context.makeLabel("flip"));
 		container->add(std::make_shared<UICheckbox>("flip", checkStyle), 0, {}, UISizerAlignFlags::Left);
 		container->add(context.makeLabel("visible"));
@@ -494,7 +494,7 @@ public:
 			for (size_t i = 0; i < nElements; ++i) {
 				auto rowSizer = std::make_shared<UISizer>();
 
-				rowSizer->add(context.createField(fieldType, pars.withSubIndex(i), false), 1);
+				rowSizer->add(context.makeField(fieldType, pars.withSubIndex(i), false), 1);
 
 				auto deleteButton = std::make_shared<UIButton>("delete" + toString(i), context.getUIFactory().getStyle("buttonThin"), LocalisedString::fromHardcodedString("-"));
 				deleteButton->setMinSize(Vector2f(22, 22));
@@ -568,7 +568,7 @@ public:
 		{
 			if (newVal) {
 				data.getFieldData() = context.getDefaultNode(fieldType);
-				container->add(context.createField(fieldType, pars, false));
+				container->add(context.makeField(fieldType, pars, false));
 			} else {
 				container->clear();
 				data.getFieldData() = ConfigNode();

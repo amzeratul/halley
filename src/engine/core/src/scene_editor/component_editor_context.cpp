@@ -1,5 +1,6 @@
 #include "scene_editor/component_editor_context.h"
 #include "halley/file_formats/config_file.h"
+#include "scene_editor/component_field_parameters.h"
 
 using namespace Halley;
 
@@ -24,9 +25,9 @@ void ComponentEditorContext::setTool(SceneEditorTool tool, const String& compone
 	parent.setTool(tool, componentName, fieldName, std::move(options));
 }
 
-std::shared_ptr<IUIElement> ComponentEditorContext::createField(const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel) const
+std::shared_ptr<IUIElement> ComponentEditorContext::makeField(const String& fieldType, ComponentFieldParameters parameters, bool createLabel) const
 {
-	return parent.createField(fieldType, parameters, createLabel);
+	return parent.makeField(fieldType, std::move(parameters), createLabel);
 }
 
 ConfigNode ComponentEditorContext::getDefaultNode(const String& fieldType) const

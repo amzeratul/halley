@@ -26,7 +26,7 @@ namespace Halley {
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
 		std::shared_ptr<IUIElement> makeLabel(const String& label) override;
-		std::shared_ptr<IUIElement> createField(const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel) override;
+		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, bool createLabel) override;
 		ConfigNode getDefaultNode(const String& fieldType) override;
 		
 	private:
