@@ -237,10 +237,6 @@ public:
 		const auto& inputStyle = context.getUIFactory().getStyle("inputThin");
 		const auto& checkStyle = context.getUIFactory().getStyle("checkbox");
 
-		auto pivotContainer = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
-		pivotContainer->add(std::make_shared<UITextInput>(keyboard, "pivotX", inputStyle, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
-		pivotContainer->add(std::make_shared<UITextInput>(keyboard, "pivotY", inputStyle, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
-
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});
 		container->add(context.makeLabel("image"));
@@ -250,7 +246,7 @@ public:
 		container->add(context.makeLabel("colour"));
 		container->add(std::make_shared<UITextInput>(keyboard, "colour", inputStyle));
 		container->add(context.makeLabel("pivot"));
-		container->add(pivotContainer);
+		container->add(context.createField("std::optional<Halley::Vector2f>", pars.withSubKey("pivot"), false));
 		container->add(context.makeLabel("flip"));
 		container->add(std::make_shared<UICheckbox>("flip", checkStyle), 0, {}, UISizerAlignFlags::Left);
 		container->add(context.makeLabel("visible"));
@@ -426,8 +422,8 @@ public:
 	{
 		auto data = pars.data;
 		const auto& defaultValue = pars.defaultValue;
-		auto componentNames = pars.componentNames;
-		auto componentName = pars.componentName;
+		const auto componentNames = pars.otherComponentNames;
+		const auto componentName = pars.componentName;
 
 		auto style = context.getUIFactory().getStyle("buttonThin");
 
@@ -486,8 +482,6 @@ public:
 	{
 		const auto fieldType = pars.typeParameters.at(0);
 		const auto data = pars.data;
-		const auto componentName = pars.componentName;
-		const auto componentNames = pars.componentNames;
 
 		data.getFieldData().ensureType(ConfigNodeType::Sequence);
 		
@@ -500,9 +494,7 @@ public:
 			for (size_t i = 0; i < nElements; ++i) {
 				auto rowSizer = std::make_shared<UISizer>();
 
-				ComponentFieldParameters params(componentName, ComponentDataRetriever(data.getSubIndex(i)), "", componentNames, {});
-				context.createField(*rowSizer, fieldType, params, false);
-				(*rowSizer)[0].setProportion(1.0f);
+				rowSizer->add(context.createField(fieldType, pars.withSubIndex(i), false), 1);
 
 				auto deleteButton = std::make_shared<UIButton>("delete" + toString(i), context.getUIFactory().getStyle("buttonThin"), LocalisedString::fromHardcodedString("-"));
 				deleteButton->setMinSize(Vector2f(22, 22));
@@ -576,7 +568,7 @@ public:
 		{
 			if (newVal) {
 				data.getFieldData() = context.getDefaultNode(fieldType);
-				context.createField(*container, fieldType, pars, false);
+				container->add(context.createField(fieldType, pars, false));
 			} else {
 				container->clear();
 				data.getFieldData() = ConfigNode();

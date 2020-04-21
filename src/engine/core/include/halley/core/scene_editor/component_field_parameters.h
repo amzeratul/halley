@@ -27,12 +27,15 @@ namespace Halley {
 	
 	class ComponentFieldParameters {
 	public:
-		ComponentFieldParameters(const String& componentName, ComponentDataRetriever data, const String& defaultValue, const std::vector<String>& componentNames, const std::vector<String>& typeParameters);
+		ComponentFieldParameters(String componentName, std::vector<String> otherComponentNames, ComponentDataRetriever data, String defaultValue = "", std::vector<String> typeParameters = {});
 
-		const String& componentName;
+		ComponentFieldParameters withSubIndex(size_t index) const;
+		ComponentFieldParameters withSubKey(const String& key) const;
+
+		String componentName;
+		std::vector<String> otherComponentNames;
 		ComponentDataRetriever data;
-		const String& defaultValue;
-		const std::vector<String>& componentNames;
-		const std::vector<String>& typeParameters;
+		String defaultValue;
+		std::vector<String> typeParameters;
 	};
 }

@@ -24,9 +24,9 @@ void ComponentEditorContext::setTool(SceneEditorTool tool, const String& compone
 	parent.setTool(tool, componentName, fieldName, std::move(options));
 }
 
-void ComponentEditorContext::createField(IUISizer& dst, const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel) const
+std::shared_ptr<IUIElement> ComponentEditorContext::createField(const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel) const
 {
-	parent.createField(dst, fieldType, parameters, createLabel);
+	return parent.createField(fieldType, parameters, createLabel);
 }
 
 ConfigNode ComponentEditorContext::getDefaultNode(const String& fieldType) const

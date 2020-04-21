@@ -1,3 +1,6 @@
+#include <utility>
+
+
 #include "scene_editor/component_field_parameters.h"
 #include "halley/file_formats/config_file.h"
 using namespace Halley;
@@ -46,10 +49,20 @@ const String& ComponentDataRetriever::getName() const
 	return name;
 }
 
-ComponentFieldParameters::ComponentFieldParameters(const String& componentName, ComponentDataRetriever data, const String& defaultValue, const std::vector<String>& componentNames, const std::vector<String>& typeParameters)
-	: componentName(componentName)
+ComponentFieldParameters::ComponentFieldParameters(String componentName, std::vector<String> otherComponentNames, ComponentDataRetriever data, String defaultValue, std::vector<String> typeParameters)
+	: componentName(std::move(componentName))
+	, otherComponentNames(std::move(otherComponentNames))
 	, data(std::move(data))
-	, defaultValue(defaultValue)
-	, componentNames(componentNames)
-	, typeParameters(typeParameters)
+	, defaultValue(std::move(defaultValue))
+	, typeParameters(std::move(typeParameters))
 {}
+
+ComponentFieldParameters ComponentFieldParameters::withSubIndex(size_t index) const
+{
+	return ComponentFieldParameters(componentName, otherComponentNames, data.getSubIndex(index));
+}
+
+ComponentFieldParameters ComponentFieldParameters::withSubKey(const String& key) const
+{
+	return ComponentFieldParameters(componentName, otherComponentNames, data.getSubKey(key));
+}

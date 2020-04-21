@@ -157,8 +157,11 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 		for (auto& member: componentData.members) {
 			if (member.serializable) {
 				auto [type, typeParams] = parseType(member.type.name);
-				ComponentFieldParameters parameters(componentType, ComponentDataRetriever(data, member.name), member.defaultValue, componentNames, typeParams);
-				createField(*componentFields, type, parameters, true);
+				ComponentFieldParameters parameters(componentType, componentNames, ComponentDataRetriever(data, member.name), member.defaultValue, typeParams);
+				auto field = createField(type, parameters, true);
+				if (field) {
+					componentFields->add(field);
+				}
 			}
 		}
 	}
@@ -183,18 +186,18 @@ std::pair<String, std::vector<String>> EntityEditor::parseType(const String& typ
 	return {type, {}};
 }
 
-void EntityEditor::createField(IUISizer& parent, const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel)
+std::shared_ptr<IUIElement> EntityEditor::createField(const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel)
 {
 	const auto iter = fieldFactories.find(fieldType);
 	auto* compFieldFactory = iter != fieldFactories.end() ? iter->second.get() : nullptr;
 		
 	if (createLabel && compFieldFactory && compFieldFactory->canCreateLabel()) {
-		compFieldFactory->createLabelAndField(parent, *context, parameters);
+		return compFieldFactory->createLabelAndField(*context, parameters);
 	} else if (compFieldFactory && compFieldFactory->isNested()) {
 		auto field = factory.makeUI("ui/halley/entity_editor_compound_field");
 		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.data.getName()));
 		field->getWidget("fields")->add(compFieldFactory->createField(*context, parameters));
-		parent.add(field);
+		return field;
 	} else {
 		auto container = std::make_shared<UISizer>();
 		if (createLabel) {
@@ -207,8 +210,10 @@ void EntityEditor::createField(IUISizer& parent, const String& fieldType, const 
 			container->add(std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromHardcodedString("N/A")));
 		}
 
-		parent.add(container);
+		return container;
 	}
+
+	return {};
 }
 
 ConfigNode EntityEditor::getDefaultNode(const String& fieldType)
