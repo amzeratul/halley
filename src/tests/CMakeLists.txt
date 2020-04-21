@@ -1,6 +1,17 @@
 project (halley-tests)
 
-include_directories(${Boost_INCLUDE_DIR} "include" "../core/include" "../utils/include" "../audio/include" "../net/include" "../entity/include")
+include_directories(
+        ${Boost_INCLUDE_DIR}
+        "include"
+        "../../include"
+        "../../src/engine/core/include"
+        "../../src/engine/utils/include"
+        "../../src/engine/audio/include"
+        "../../src/engine/net/include"
+        "../../src/engine/entity/include"
+        "../../src/engine/lua/include"
+        "../../src/engine/ui/include"
+)
 
 set(SOURCES
         "src/path_test.cpp"
