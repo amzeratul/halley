@@ -9,7 +9,7 @@
 #include "src/scene/scene_editor_canvas.h"
 using namespace Halley;
 
-std::shared_ptr<UIStyleSheet> makeStyleSheet(Resources& resources)
+static std::shared_ptr<UIStyleSheet> makeStyleSheet(Resources& resources)
 {
 	auto result = std::make_shared<UIStyleSheet>(resources);
 	for (auto& style: resources.enumerate<ConfigFile>()) {
@@ -19,7 +19,6 @@ std::shared_ptr<UIStyleSheet> makeStyleSheet(Resources& resources)
 	}
 	return result;
 }
-
 
 EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n)
 	: UIFactory(api, resources, i18n, makeStyleSheet(resources))
@@ -56,7 +55,7 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeSceneEditorCanvas(const ConfigNod
 {
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
-	return std::make_shared<SceneEditorCanvas>(id, resources, api);
+	return std::make_shared<SceneEditorCanvas>(id, *this, resources, api, makeSizer(entryNode));
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeEntityList(const ConfigNode& entryNode)

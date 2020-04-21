@@ -25,6 +25,7 @@
 #include "halley/maths/ray.h"
 #include "halley/maths/aabb.h"
 #include "halley/maths/circle.h"
+#include "halley/maths/line.h"
 using namespace Halley;
 
 
@@ -235,12 +236,7 @@ Vector2f Polygon::getClosestPoint(Vector2f rawPoint, float anisotropy) const
 	
 	const size_t n = vertices.size();
 	for (size_t i = 0; i < n; ++i) {
-		const Vector2f a = vertices[i] * scale;
-		const Vector2f b = vertices[(i + 1) % n] * scale;
-		const float len = (b - a).length();
-		const Vector2f dir = (b - a) * (1.0f / len);
-		const float x = (point - a).dot(dir); // position along the A-B segment
-		const Vector2f p = a + dir * clamp(x, 0.0f, len);
+		const Vector2f p = LineSegment(vertices[i] * scale, vertices[(i + 1) % n] * scale).getClosestPoint(point);
 
 		const float dist2 = (point - p).squaredLength();
 		if (dist2 < closestDistance2) {

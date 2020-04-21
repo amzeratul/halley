@@ -58,7 +58,7 @@ ConfigNode::ConfigNode(SequenceType&& entryList)
 	operator=(std::move(entryList));
 }
 
-ConfigNode::ConfigNode(String&& value)
+ConfigNode::ConfigNode(String value)
 {
 	operator=(std::move(value));
 }
@@ -549,6 +549,42 @@ ConfigNode::MapType& ConfigNode::asMap()
 		return *reinterpret_cast<MapType*>(ptrData);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a map type", HalleyExceptions::Resources);
+	}
+}
+
+void ConfigNode::ensureType(ConfigNodeType t)
+{
+	if (type != t) {
+		switch (t) {
+		case ConfigNodeType::Int:
+			*this = 0;
+			break;
+		case ConfigNodeType::Int2:
+			*this = Vector2i();
+			break;
+		case ConfigNodeType::Float:
+			*this = 0.0f;
+			break;
+		case ConfigNodeType::Float2:
+			*this = Vector2f();
+			break;
+		case ConfigNodeType::Sequence:
+			*this = SequenceType();
+			break;
+		case ConfigNodeType::Map:
+			*this = MapType();
+			break;
+		case ConfigNodeType::Bytes:
+			*this = Bytes();
+			break;
+		case ConfigNodeType::String:
+			*this = String();
+			break;
+		case ConfigNodeType::Undefined:
+			reset();
+			type = ConfigNodeType::Undefined;
+			break;
+		}
 	}
 }
 

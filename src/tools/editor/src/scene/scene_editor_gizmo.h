@@ -1,7 +1,7 @@
 #pragma once
 #include <optional>
-#include "entity.h"
-#include "halley/core/game/scene_editor_interface.h"
+#include "halley/core/scene_editor/scene_editor_interface.h"
+#include "halley/entity/entity.h"
 #include "halley/time/halleytime.h"
 
 class Transform2DComponent;
@@ -23,9 +23,13 @@ namespace Halley {
 		bool isOver() const;
 		bool isHeld() const;
 
+		void setCanDrag(bool enabled);
+		void setNotOver();
+
 	private:
 		bool over = false;
 		bool holding = false;
+		bool canDrag = true;
 
 		Vector2f pos;
 		Vector2f startOffset;
@@ -39,6 +43,7 @@ namespace Halley {
 
 		virtual void update(Time time, const SceneEditorInputState& inputState);
 		virtual void draw(Painter& painter) const;
+		virtual std::shared_ptr<UIWidget> makeUI();
 
 		void setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& entityData);
 

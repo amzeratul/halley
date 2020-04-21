@@ -28,6 +28,24 @@ namespace Halley {
 	public:
 		static std::vector<Vector2i> generateLine(Vector2i p0, Vector2i p1);
 		static void doLine(Vector2i p0, Vector2i p1, std::function<void(Vector2i)> callback);
-		static Vector2f closestPointInSegment(Vector2f start, Vector2f end, Vector2f p);
+	};
+
+	class LineSegment {
+	public:
+		constexpr LineSegment() = default;
+		constexpr LineSegment(Vector2f a, Vector2f b)
+			: a(a), b(b)
+		{}
+
+		Vector2f a;
+		Vector2f b;
+
+		constexpr Vector2f getClosestPoint(Vector2f point) const
+		{
+			const float len = (b - a).length();
+			const Vector2f dir = (b - a) * (1.0f / len);
+			const float x = (point - a).dot(dir); // position along the A-B segment
+			return a + dir * clamp(x, 0.0f, len);
+		}
 	};
 }

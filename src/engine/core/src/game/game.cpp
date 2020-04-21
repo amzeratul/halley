@@ -1,5 +1,5 @@
 #include "halley/core/game/game.h"
-#include "halley/core/game/scene_editor_interface.h"
+#include "halley/core/scene_editor/scene_editor_interface.h"
 #include "halley/entity/scene_editor/scene_editor.h"
 using namespace Halley;
 

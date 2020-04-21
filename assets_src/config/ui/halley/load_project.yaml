@@ -1,13 +1,16 @@
 ---
 
-widget: { class: widget }
+widget: { class: image, image: ui/float_window.png, innerBorder: [ 14, 11, 14, 14 ], colour: "#9C5BB5" }
 sizer: { type: vertical }
 children:
-- widget: { id: topLabel, class: label, text: "Enter the path of the project to load:" }
+- widget: { id: title, class: label, text: "Load Project" }
+  fill: centre
+- widget: { id: topLabel, class: label, style: labelLight, text: "Enter the path of the project to load:" }
+  border: [0, 5, 0, 0]
   fill: centre
 - widget: { class: scrollBarPane, size: [200, 250] }
   proportion: 1
-  border: [0, 10, 0, 10]
+  border: [0, 5, 0, 10]
   sizer: { type: vertical }
   children:
   - widget: { id: recent, class: list }

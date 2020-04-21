@@ -3,6 +3,9 @@
 #include "choose_asset_window.h"
 #include "entity_editor_factories.h"
 #include "halley/tools/ecs/ecs_data.h"
+#include "halley/ui/ui_factory.h"
+#include "halley/ui/widgets/ui_dropdown.h"
+#include "halley/ui/widgets/ui_textinput.h"
 #include "scene_editor_window.h"
 using namespace Halley;
 
@@ -96,9 +99,19 @@ void EntityEditor::reloadEntity()
 
 	if (currentEntityData) {
 		if (getEntityData()["components"].getType() == ConfigNodeType::Sequence) {
-			for (auto& componentNode: getEntityData()["components"].asSequence()) {
+			auto& seq = getEntityData()["components"].asSequence();
+			std::vector<String> componentNames;
+			componentNames.reserve(seq.size());
+
+			for (auto& componentNode: seq) {
 				for (auto& c: componentNode.asMap()) {
-					loadComponentData(c.first, c.second);
+					componentNames.push_back(c.first);
+				}
+			}
+			
+			for (auto& componentNode: seq) {
+				for (auto& c: componentNode.asMap()) {
+					loadComponentData(c.first, c.second, componentNames);
 				}
 			}
 		}
@@ -127,7 +140,7 @@ std::shared_ptr<IUIElement> EntityEditor::makeLabel(const String& text)
 	return labelBox;
 }
 
-void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data)
+void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data, const std::vector<String>& componentNames)
 {
 	auto componentUI = factory.makeUI("ui/halley/entity_editor_component");
 	componentUI->getWidgetAs<UILabel>("componentType")->setText(LocalisedString::fromUserString(componentType));
@@ -142,29 +155,51 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 	if (iter != ecsData->getComponents().end()) {
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
-			ComponentFieldParameters parameters(componentType, member.name, member.defaultValue, data);
-			createField(*componentFields, member.type.name, parameters);
+			if (member.serializable) {
+				auto [type, typeParams] = parseType(member.type.name);
+				ComponentFieldParameters parameters(componentType, ComponentDataRetriever(data, member.name), member.defaultValue, componentNames, typeParams);
+				createField(*componentFields, type, parameters, true);
+			}
 		}
 	}
 	
 	fields->add(componentUI);
 }
 
-void EntityEditor::createField(UIWidget& parent, const String& fieldType, const ComponentFieldParameters& parameters)
+std::pair<String, std::vector<String>> EntityEditor::parseType(const String& type)
+{
+	// This will split the C++ type for templates, e.g.:
+	// std::optional<Halley::String> -> "std::optional<>", {"Halley::String"}
+	// std::map<int, Halley::Colour4f> -> "std::map<>", {"int", "Halley::Colour4f"}
+	// Multiple levels of nesting are not supported atm
+
+	const auto openPos = type.find('<');
+	const auto closePos = type.find_last_of('>');
+	if (openPos != String::npos && closePos != String::npos) {
+		auto base = type.left(openPos) + "<>";
+		auto remain = type.substr(openPos + 1, closePos - openPos - 1).split(',');
+		return {base, remain};
+	}
+	return {type, {}};
+}
+
+void EntityEditor::createField(IUISizer& parent, const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel)
 {
 	const auto iter = fieldFactories.find(fieldType);
 	auto* compFieldFactory = iter != fieldFactories.end() ? iter->second.get() : nullptr;
 		
-	if (compFieldFactory && compFieldFactory->canCreateLabel()) {
+	if (createLabel && compFieldFactory && compFieldFactory->canCreateLabel()) {
 		compFieldFactory->createLabelAndField(parent, *context, parameters);
-	} else if (compFieldFactory && compFieldFactory->isCompound()) {
+	} else if (compFieldFactory && compFieldFactory->isNested()) {
 		auto field = factory.makeUI("ui/halley/entity_editor_compound_field");
-		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.fieldName));
+		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.data.getName()));
 		field->getWidget("fields")->add(compFieldFactory->createField(*context, parameters));
 		parent.add(field);
 	} else {
 		auto container = std::make_shared<UISizer>();
-		container->add(makeLabel(parameters.fieldName), 0, {}, UISizerAlignFlags::CentreVertical);
+		if (createLabel) {
+			container->add(makeLabel(parameters.data.getName()), 0, {}, UISizerAlignFlags::CentreVertical);
+		}
 
 		if (compFieldFactory) {
 			container->add(compFieldFactory->createField(*context, parameters), 1);
@@ -254,13 +289,14 @@ void EntityEditor::deleteComponent(const String& name)
 
 			if (found) {
 				componentSequence.erase(componentSequence.begin() + i);
-				break;
+
+				needToReloadUI = true;
+				sceneEditor->onComponentRemoved(name);
+				onEntityUpdated();
+				return;
 			}
 		}
 	}
-
-	needToReloadUI = true;
-	onEntityUpdated();
 }
 
 void EntityEditor::setName(const String& name)
@@ -282,6 +318,11 @@ void EntityEditor::setPrefabName(const String& name)
 void EntityEditor::onEntityUpdated()
 {
 	sceneEditor->onEntityModified(currentId);
+}
+
+void EntityEditor::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options)
+{
+	sceneEditor->setTool(tool, componentName, fieldName, std::move(options));
 }
 
 ConfigNode& EntityEditor::getEntityData()

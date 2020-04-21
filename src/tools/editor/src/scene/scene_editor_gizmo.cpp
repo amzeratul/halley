@@ -1,14 +1,14 @@
-#include "scene_editor/scene_editor_gizmo.h"
-#include "components/transform_2d_component.h"
-#include "halley/core/game/scene_editor_interface.h"
+#include "scene_editor_gizmo.h"
+#include "halley/entity/components/transform_2d_component.h"
+#include "halley/core/scene_editor/scene_editor_interface.h"
 #include "halley/core/graphics/camera.h"
 using namespace Halley;
 
 void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState)
 {
 	if (!holding) {
-		over = boundsCheck(pos, inputState.mousePos);
-		if (over && inputState.leftClickPressed) {
+		over = boundsCheck ? boundsCheck(pos, inputState.mousePos) : false;
+		if (canDrag && over && inputState.leftClickPressed) {
 			holding = true;
 			startOffset = pos - inputState.mousePos;
 		}
@@ -47,11 +47,30 @@ bool SceneEditorGizmoHandle::isHeld() const
 	return holding;
 }
 
+void SceneEditorGizmoHandle::setCanDrag(bool enabled)
+{
+	canDrag = enabled;
+	if (!canDrag) {
+		holding = false;
+	}
+}
+
+void SceneEditorGizmoHandle::setNotOver()
+{
+	over = false;
+	holding = false;
+}
+
 void SceneEditorGizmo::update(Time time, const SceneEditorInputState& inputState)
 {}
 
 void SceneEditorGizmo::draw(Painter& painter) const
 {}
+
+std::shared_ptr<UIWidget> SceneEditorGizmo::makeUI()
+{
+	return {};
+}
 
 void SceneEditorGizmo::setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& data)
 {

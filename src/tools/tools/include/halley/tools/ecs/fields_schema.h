@@ -3,6 +3,7 @@
 #include <halley/text/halleystring.h>
 #include <halley/text/string_converter.h>
 #include <array>
+#include <utility>
 
 namespace Halley
 {
@@ -15,7 +16,7 @@ namespace Halley
 		bool isConstExpr = false;
 
 		TypeSchema(String name, bool isConst = false, bool isStatic = false, bool isConstExpr = false)
-			: name(name)
+			: name(std::move(name))
 			, isConst(isConst)
 			, isStatic(isStatic)
 			, isConstExpr(isConstExpr)
@@ -30,9 +31,9 @@ namespace Halley
 		String initialValue;
 
 		VariableSchema(TypeSchema type, String name, String initialValue = "")
-			: type(type)
-			, name(name)
-			, initialValue(initialValue)
+			: type(std::move(type))
+			, name(std::move(name))
+			, initialValue(std::move(initialValue))
 		{}
 	};
 
@@ -60,12 +61,14 @@ namespace Halley
 		String name;
 		String defaultValue;
 		MemberAccess access;
+		bool serializable;
 
-		MemberSchema(TypeSchema type, String name, String defaultValue = "", MemberAccess access = MemberAccess::Public)
-			: type(type)
-			, name(name)
-			, defaultValue(defaultValue)
+		MemberSchema(TypeSchema type, String name, String defaultValue = "", MemberAccess access = MemberAccess::Public, bool serializable = true)
+			: type(std::move(type))
+			, name(std::move(name))
+			, defaultValue(std::move(defaultValue))
 			, access(access)
+			, serializable(serializable)
 		{}
 
 		static std::vector<VariableSchema> toVariableSchema(const std::vector<MemberSchema>& schema)
@@ -73,7 +76,7 @@ namespace Halley
 			std::vector<VariableSchema> result;
 			result.reserve(schema.size());
 			for (auto& s: schema) {
-				result.push_back(VariableSchema(s.type, s.name));
+				result.emplace_back(s.type, s.name);
 			}
 			return result;
 		}
@@ -92,9 +95,9 @@ namespace Halley
 		bool isFriend = false;
 
 		MethodSchema(TypeSchema returnType, Vector<VariableSchema> arguments, String name, bool isConst = false, bool isVirtual = false, bool isOverride = false, bool isFinal = false, bool isFriend = false)
-			: returnType(returnType)
-			, arguments(arguments)
-			, name(name)
+			: returnType(std::move(returnType))
+			, arguments(std::move(arguments))
+			, name(std::move(name))
 			, isConst(isConst)
 			, isVirtual(isVirtual)
 			, isOverride(isOverride)

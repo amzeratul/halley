@@ -91,12 +91,12 @@ namespace Halley {
 		}
 
 		template <typename T>
-		bool hasComponent() const
+		bool hasComponent(World& world) const
 		{
 			if (dirty) {
 				return tryGetComponent<T>() != nullptr;
 			} else {
-				return FamilyMask::hasBit(mask, FamilyMask::RetrieveComponentIndex<T>::componentIndex);
+				return hasBit(world, FamilyMask::RetrieveComponentIndex<T>::componentIndex);
 			}
 		}
 
@@ -185,6 +185,8 @@ namespace Halley {
 		void markHierarchyDirty();
 
 		void doDestroy(bool updateParenting);
+
+		bool hasBit(World& world, int index) const;
 	};
 
 	class EntityRef
@@ -268,7 +270,21 @@ namespace Halley {
 		template <typename T>
 		bool hasComponent() const
 		{
-			return entity->hasComponent<T>();
+			return entity->hasComponent<T>(*world);
+		}
+
+		template <typename T>
+		bool hasComponentInTree() const
+		{
+			if (hasComponent<T>()) {
+				return true;
+			}
+			for (auto& c: getRawChildren()) {
+				if (EntityRef(*c, getWorld()).hasComponentInTree<T>()) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		const String& getName() const
@@ -399,7 +415,7 @@ namespace Halley {
 		template <typename T>
 		bool hasComponent() const
 		{
-			return entity->hasComponent<T>();
+			return entity->hasComponent<T>(*world);
 		}
 
 		const String& getName() const

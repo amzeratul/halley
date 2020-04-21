@@ -1,5 +1,5 @@
 #pragma once
-#include "scene_editor/scene_editor_gizmo.h"
+#include "../scene_editor_gizmo.h"
 
 namespace Halley {
 	class TranslateGizmo final : public SceneEditorGizmo {

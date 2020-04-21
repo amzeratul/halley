@@ -13,12 +13,15 @@ namespace Halley {
 		~MetalShader();
 		int getUniformLocation(const String& name, ShaderType stage) override;
 		int getBlockLocation(const String& name, ShaderType stage) override;
-		id<MTLFunction> getVertexFunc();
-		id<MTLFunction> getFragmentFunc();
+		MTLRenderPipelineDescriptor* setupMaterial(const Material& material);
 
 	private:
 		MetalVideo& video;
+		MTLRenderPipelineDescriptor* descriptor = nullptr;
+		MTLVertexDescriptor* vertex_descriptor;
 		id<MTLFunction> vertex_func;
 		id<MTLFunction> fragment_func;
+
+		MTLVertexFormat getVertexFormatForShaderParameterType(ShaderParameterType type);
 	};
 }

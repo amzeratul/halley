@@ -64,6 +64,7 @@ namespace Halley
 			std::array<int64_t, 3> timestamp;
 			Metadata metadata;
 			Path basePath;
+			bool missing = false; // Not serialized
 
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
@@ -80,6 +81,10 @@ namespace Halley
 		void setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data, Path basePath);
 		std::optional<Metadata> getMetadata(const Path& path) const;
 		std::optional<Metadata> getMetadata(AssetType type, const String& assetId) const;
+
+		void markInputPresent(const Path& path);
+		void markAllInputFilesAsMissing();
+		bool purgeMissingInputs();
 
 		Path getPrimaryInputFile(AssetType type, const String& assetId) const;
 

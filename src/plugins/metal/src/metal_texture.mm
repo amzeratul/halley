@@ -48,9 +48,18 @@ void MetalTexture::load(TextureDescriptor&& descriptor)
 		{static_cast<NSUInteger>(descriptor.size.x), static_cast<NSUInteger>(descriptor.size.y), 1}
 	};
 
+	Byte* imageBytes;
+	if (descriptor.pixelData.empty()) {
+		Vector<Byte> blank;
+		blank.resize(size.x * size.y * TextureDescriptor::getBitsPerPixel(descriptor.format));
+		imageBytes = blank.data();
+	} else {
+		imageBytes = descriptor.pixelData.getBytes();
+	}
+
 	[metalTexture replaceRegion:region
 		mipmapLevel:0
-		withBytes:descriptor.pixelData.getBytes()
+		withBytes:imageBytes
 		bytesPerRow:bytesPerRow
 	];
 

@@ -6,7 +6,6 @@
 #include "halley/core/graphics/render_context.h"
 #include "system.h"
 #include "registry.h"
-#include "scene_editor/scene_editor_gizmo_collection.h"
 #include "components/sprite_component.h"
 #include "components/camera_component.h"
 #include "components/transform_2d_component.h"
@@ -19,14 +18,19 @@ SceneEditor::~SceneEditor() = default;
 
 void SceneEditor::init(SceneEditorContext& context)
 {
-	context.api->core->getStatics().setupGlobals();
+	api = context.api;
+	resources = context.resources;
+	editorResources = context.editorResources;
+	gizmoCollection = context.gizmos;
 
-	world = createWorld(context);
-	createServices(*world, context);
-	createEntities(*world, context);
+	api->core->getStatics().setupGlobals();
+	
+	world = createWorld();
+	createServices(*world);
+	createEntities(*world);
 	cameraEntityId = createCamera();
 
-	gizmoCollection = std::make_unique<SceneEditorGizmoCollection>(*context.editorResources);
+	onInit();
 }
 
 void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState)
@@ -60,7 +64,7 @@ void SceneEditor::render(RenderContext& rc)
 	});
 }
 
-World& SceneEditor::getWorld()
+World& SceneEditor::getWorld() const
 {
 	Expects(world);
 	return *world;
@@ -77,20 +81,25 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> SceneEditor::getCompo
 	return {};
 }
 
-std::unique_ptr<World> SceneEditor::createWorld(SceneEditorContext& context)
+std::shared_ptr<UIWidget> SceneEditor::makeCustomUI()
 {
-	auto world = std::make_unique<World>(*context.api, *context.resources, true, createComponent);
-	const auto& sceneConfig = context.resources->get<ConfigFile>(getSceneEditorStageName())->getRoot();
+	return {};
+}
+
+std::unique_ptr<World> SceneEditor::createWorld()
+{
+	auto world = std::make_unique<World>(getAPI(), getGameResources(), true, createComponent);
+	const auto& sceneConfig = getGameResources().get<ConfigFile>(getSceneEditorStageName())->getRoot();
 	world->loadSystems(sceneConfig, createSystem);
 
 	return world;
 }
 
-void SceneEditor::createServices(World& world, SceneEditorContext& context)
+void SceneEditor::createServices(World& world)
 {
 }
 
-void SceneEditor::createEntities(World& world, SceneEditorContext& context)
+void SceneEditor::createEntities(World& world)
 {
 }
 
@@ -99,12 +108,31 @@ String SceneEditor::getSceneEditorStageName()
 	return "stages/scene_editor";
 }
 
+const HalleyAPI& SceneEditor::getAPI() const
+{
+	return *api;
+}
+
+Resources& SceneEditor::getGameResources() const
+{
+	return *resources;
+}
+
+Resources& SceneEditor::getEditorResources() const
+{
+	return *editorResources;
+}
+
 EntityId SceneEditor::createCamera()
 {
 	return getWorld().createEntity("editorCamera")
 		.addComponent(Transform2DComponent(Vector2f(0, 0)))
 		.addComponent(CameraComponent(1.0f, Colour4f(0.2f, 0.2f, 0.2f), 0x7FFFFFFF, 0))
 		.getEntityId();
+}
+
+void SceneEditor::onEntitySelected(std::optional<EntityRef> entity)
+{
 }
 
 EntityId SceneEditor::getCameraId()
@@ -158,7 +186,49 @@ void SceneEditor::setSelectedEntity(const UUID& id, ConfigNode& entityData)
 	}	
 
 	gizmoCollection->setSelectedEntity(selectedEntity, entityData);
+
+	onEntitySelected(selectedEntity);
 }
+
+void SceneEditor::onEntityAdded(const UUID& id, const ConfigNode& entityData)
+{
+	if (id.isValid()) {
+		onEntityAdded(getEntity(id), entityData);
+	}
+}
+
+void SceneEditor::onEntityRemoved(const UUID& id)
+{
+	if (id.isValid()) {
+		onEntityRemoved(getEntity(id));
+	}
+}
+
+void SceneEditor::onEntityMoved(const UUID& id, const ConfigNode& entityData)
+{
+	if (id.isValid()) {
+		onEntityMoved(getEntity(id), entityData);
+	}
+}
+
+void SceneEditor::onEntityModified(const UUID& id, const ConfigNode& entityData)
+{
+	if (id.isValid()) {
+		onEntityModified(getEntity(id), entityData);
+	}
+}
+
+void SceneEditor::onEntityModified(EntityRef entity, const ConfigNode& entityData)
+{}
+
+void SceneEditor::onEntityAdded(EntityRef entity, const ConfigNode& entityData)
+{}
+
+void SceneEditor::onEntityRemoved(EntityRef entity)
+{}
+
+void SceneEditor::onEntityMoved(EntityRef entity, const ConfigNode& entityData)
+{}
 
 void SceneEditor::showEntity(const UUID& id)
 {
@@ -170,9 +240,9 @@ void SceneEditor::showEntity(const UUID& id)
 	}
 }
 
-void SceneEditor::setTool(SceneEditorTool tool)
+ConfigNode SceneEditor::onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options)
 {
-	gizmoCollection->setTool(tool);
+	return options;
 }
 
 Rect4f SceneEditor::getSpriteTreeBounds(const EntityRef& e)
@@ -223,4 +293,18 @@ std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)
 		}
 	}
 	return {};
+}
+
+void SceneEditor::onInit()
+{
+}
+
+EntityRef SceneEditor::getEntity(const UUID& id) const
+{
+	const auto curId = selectedEntity ? selectedEntity.value().getUUID() : UUID();
+	if (curId == id) {
+		return selectedEntity.value();
+	} else {
+		return getWorld().findEntity(id).value();
+	}
 }

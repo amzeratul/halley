@@ -3,6 +3,7 @@
 
 namespace Halley {
 	class UIFactory;
+	class UITextInput;
 
 	class SelectAssetWidget : public UIWidget {
 	public:

@@ -64,6 +64,10 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("treeList", [=](const ConfigNode& node) { return makeTreeList(node); });
 }
 
+UIFactory::~UIFactory()
+{
+}
+
 void UIFactory::addFactory(const String& key, WidgetFactory factory)
 {
 	factories[key] = factory;
@@ -134,6 +138,11 @@ Resources& UIFactory::getResources() const
 std::shared_ptr<InputKeyboard> UIFactory::getKeyboard() const
 {
 	return keyboard;
+}
+
+UIFactory UIFactory::withResources(Resources& newResources) const
+{
+	return UIFactory(api, newResources, i18n, styleSheet);
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
@@ -395,21 +404,13 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 
 	bool hasString = false;
 	auto sizer = makeSizerOrDefault(entryNode, UISizer());
-	if (!label.getString().isEmpty()) {
-		const auto& renderer = style.getTextRenderer("label");
-		auto uiLabel = std::make_shared<UILabel>(id + "_label", renderer, label);
-		if (style.hasTextRenderer("hoveredLabel")) {
-			uiLabel->setHoverable(style.getTextRenderer("label"), style.getTextRenderer("hoveredLabel"));
-		}
-		if (style.hasTextRenderer("selectedLabel"))	{
-			uiLabel->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
-		}
-		sizer.add(uiLabel, 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
-		hasString = true;
-	}
-
 	auto result = std::make_shared<UIButton>(id, style, std::move(sizer));
 
+	if (!label.getString().isEmpty()) {
+		result->setLabel(LocalisedString::fromUserString(label.getString()));
+		hasString = true;
+	}
+	
 	if (node.hasKey("icon")) {
 		auto icon = Sprite().setImage(getResources(), node["icon"].asString());
 		auto image = std::make_shared<UIImage>(icon);

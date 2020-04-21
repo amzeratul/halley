@@ -56,7 +56,9 @@ namespace Halley {
 
 		std::unique_ptr<ResourceDataStatic> getStatic(const String& asset, AssetType type) override;
 		std::unique_ptr<ResourceDataStream> getStream(const String& asset, AssetType type) override;
+
 		void purge(const String& asset, AssetType type);
+		void purgeAll();
 
 		std::vector<String> enumerate(const AssetType type);
 		bool exists(const String& asset);
@@ -66,11 +68,12 @@ namespace Halley {
 	private:
 		SystemAPI& system;
 		HashMap<String, IResourceLocatorProvider*> locatorPaths;
-		HashMap<String, IResourceLocatorProvider*> locators;
-		Vector<std::unique_ptr<IResourceLocatorProvider>> locatorList;
+		HashMap<String, IResourceLocatorProvider*> assetToLocator;
+		Vector<std::unique_ptr<IResourceLocatorProvider>> locators;
 
 		void add(std::unique_ptr<IResourceLocatorProvider> locator, const Path& path);
 
 		std::unique_ptr<ResourceData> getResource(const String& asset, AssetType type, bool stream);
+		void loadLocatorData(IResourceLocatorProvider& locator);
 	};
 }

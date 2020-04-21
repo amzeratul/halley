@@ -3,7 +3,7 @@
 #include <atlbase.h>
 using namespace Halley;
 
-class AsyncReadOp : public IUnknown
+class AsyncReadOp final : public IUnknown
 {
 public:
 	size_t from = 0;

@@ -1,13 +1,14 @@
 #include "scene_editor_window.h"
-
-
-
 #include "choose_asset_window.h"
 #include "entity_editor.h"
 #include "entity_list.h"
+#include "halley/entity/entity_factory.h"
+#include "halley/entity/prefab_scene_data.h"
+#include "halley/entity/world.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/yaml/yaml_convert.h"
+#include "halley/ui/ui_factory.h"
 #include "scene_editor_canvas.h"
 using namespace Halley;
 
@@ -54,12 +55,12 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		auto& world = interface.getWorld();
 
 		// Load prefab
-		prefab = std::make_unique<Prefab>(origPrefab);
+		prefab = std::make_shared<Prefab>(origPrefab);
 		preparePrefab(*prefab);
 
 		// Spawn scene
 		entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
-		auto entities = entityFactory->createScene(prefab->getRoot());
+		auto sceneCreated = entityFactory->createScene(prefab);
 		interface.spawnPending();
 
 		// Setup editors
@@ -68,19 +69,26 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 		entityList->setSceneData(sceneData);
 
-		// HACK: set to drag tool
-		interface.setTool(SceneEditorTool::Translate);
+		setTool(SceneEditorTool::Drag);
 
 		// Show root
-		if (!entities.empty()) {
-			panCameraToEntity(entities.at(0).getUUID().toString());
-		}		
+		if (!sceneCreated.getEntities().empty()) {
+			panCameraToEntity(sceneCreated.getEntities().at(0).getUUID().toString());
+		}
+
+		// Custom UI
+		canvas->guardedRun([&] ()
+		{
+			setCustomUI(canvas->getInterface().makeCustomUI());
+		});
 	}
 }
 
 void SceneEditorWindow::unloadScene()
 {
 	Expects(canvas);
+
+	setCustomUI({});
 
 	currentEntityId = "";
 	if (canvas->isLoaded()) {
@@ -121,11 +129,18 @@ void SceneEditorWindow::makeUI()
 	entityEditor = getWidgetAs<EntityEditor>("entityEditor");
 	entityEditor->setSceneEditorWindow(*this);
 
+	toolMode = getWidgetAs<UIList>("toolMode");
+	
 	getWidget("saveButton")->setEnabled(false);
 
 	setHandle(UIEventType::ListSelectionChanged, "entityList_list", [=] (const UIEvent& event)
 	{
 		selectEntity(event.getStringData());
+	});
+
+	setHandle(UIEventType::ListSelectionChanged, "toolMode", [=] (const UIEvent& event)
+	{
+		setTool(fromString<SceneEditorTool>(event.getStringData()));
 	});
 
 	setHandle(UIEventType::ListAccept, "entityList_list", [=](const UIEvent& event)
@@ -164,6 +179,8 @@ void SceneEditorWindow::load()
 
 void SceneEditorWindow::selectEntity(const String& id)
 {
+	decayTool();
+	
 	String actualId = id;
 	if (actualId.isEmpty()) {
 		const auto& tree = sceneData->getEntityTree();
@@ -220,6 +237,11 @@ void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId)
 	entityList->onEntityAdded(id, parentId, data);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	selectEntity(id);
+
+	if (canvas->isLoaded()) {
+		canvas->getInterface().onEntityAdded(UUID(id), data);
+	}
+	
 	markModified();
 }
 
@@ -228,15 +250,28 @@ void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId
 	entityList->onEntityRemoved(id, parentId);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	selectEntity(parentId);
+
+	if (canvas->isLoaded()) {
+		canvas->getInterface().onEntityRemoved(UUID(id));
+	}
+	
 	markModified();
 }
 
 void SceneEditorWindow::onEntityModified(const String& id)
 {
 	if (!id.isEmpty()) {
-		entityList->onEntityModified(id, sceneData->getEntityData(id).data);
+		const auto& data = sceneData->getEntityData(id).data;
+
+		entityList->onEntityModified(id, data);
+
+		sceneData->reloadEntity(id);
+		
+		if (canvas->isLoaded()) {
+			canvas->getInterface().onEntityModified(UUID(id), data);
+		}
 	}
-	sceneData->reloadEntity(id);
+
 	markModified();
 }
 
@@ -245,13 +280,45 @@ void SceneEditorWindow::onEntityMoved(const String& id)
 	if (currentEntityId == id) {
 		selectEntity(id);
 	}
+
+	if (canvas->isLoaded()) {
+		canvas->getInterface().onEntityMoved(UUID(id), sceneData->getEntityData(id).data);
+	}
+	
 	markModified();
+}
+
+void SceneEditorWindow::onComponentRemoved(const String& name)
+{
+	if (name == curComponentName) {
+		decayTool();
+	}
 }
 
 void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
 {
 	entityEditor->onFieldChangedByGizmo(componentName, fieldName);
-	markModified();
+	onEntityModified(currentEntityId);
+}
+
+void SceneEditorWindow::setTool(SceneEditorTool tool)
+{
+	if (curTool != tool) {
+		setTool(tool, "", "", ConfigNode());
+	}
+}
+
+void SceneEditorWindow::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options)
+{
+	if (canvas->isLoaded()) {
+		options = canvas->getInterface().onToolSet(tool, componentName, fieldName, std::move(options));
+	}
+
+	curTool = tool;
+	curComponentName = componentName;
+	setToolUI(canvas->setTool(tool, componentName, fieldName, options));
+	toolMode->setItemActive("polygon", tool == SceneEditorTool::Polygon);
+	toolMode->setSelectedOptionId(toString(tool));
 }
 
 std::shared_ptr<const Prefab> SceneEditorWindow::getGamePrefab(const String& id) const
@@ -429,5 +496,43 @@ void SceneEditorWindow::preparePrefabEntity(ConfigNode& node)
 				preparePrefabEntity(c);
 			}
 		}
+	}
+}
+
+void SceneEditorWindow::setCustomUI(std::shared_ptr<UIWidget> ui)
+{
+	if (curCustomUI) {
+		curCustomUI->destroy();
+	}
+	curCustomUI = ui;
+	
+	auto customUIField = getWidget("customUI");
+	customUIField->setShrinkOnLayout(true);
+	customUIField->clear();
+	if (ui) {
+		customUIField->add(ui, 1);
+	}
+}
+
+void SceneEditorWindow::setToolUI(std::shared_ptr<UIWidget> ui)
+{
+	if (curToolUI) {
+		curToolUI->destroy();
+	}
+	curToolUI = ui;
+
+	auto customUIField = canvas->getWidget("currentToolUI");
+	customUIField->setShrinkOnLayout(true);
+	customUIField->clear();
+	if (ui) {
+		customUIField->add(ui, 1);
+	}
+	customUIField->setActive(!!ui);
+}
+
+void SceneEditorWindow::decayTool()
+{
+	if (curTool == SceneEditorTool::Polygon) {
+		setTool(SceneEditorTool::Drag);
 	}
 }

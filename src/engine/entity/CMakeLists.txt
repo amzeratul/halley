@@ -7,6 +7,7 @@ set(SOURCES
         "src/entity.cpp"
         "src/entity_factory.cpp"
         "src/entity_id.cpp"
+        "src/entity_scene.cpp"
         "src/entity_stage.cpp"
         "src/family"
         "src/family_binding.cpp"
@@ -21,11 +22,6 @@ set(SOURCES
         "src/components/transform_2d_component.cpp"
 
         "src/scene_editor/scene_editor.cpp"
-        "src/scene_editor/scene_editor_gizmo.cpp"
-        "src/scene_editor/scene_editor_gizmo_collection.cpp"
-        
-        "src/scene_editor/gizmos/selected_bounds_gizmo.cpp"
-        "src/scene_editor/gizmos/translate_gizmo.cpp"
         )
 
 set(HEADERS
@@ -38,6 +34,7 @@ set(HEADERS
         "include/halley/entity/family_extractor.h"
         "include/halley/entity/entity_factory.h"
         "include/halley/entity/entity_id.h"
+        "include/halley/entity/entity_scene.h"
         "include/halley/entity/entity_stage.h"
         "include/halley/entity/family.h"
         "include/halley/entity/family_mask.h"
@@ -55,11 +52,6 @@ set(HEADERS
         "include/halley/entity/components/transform_2d_component.h"
 
         "include/halley/entity/scene_editor/scene_editor.h"
-        "include/halley/entity/scene_editor/scene_editor_gizmo.h"
-        "include/halley/entity/scene_editor/scene_editor_gizmo_collection.h"
-
-        "src/scene_editor/gizmos/selected_bounds_gizmo.h"
-        "src/scene_editor/gizmos/translate_gizmo.h"
         )
 
 assign_source_group(${SOURCES})

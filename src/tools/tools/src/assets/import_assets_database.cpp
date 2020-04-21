@@ -124,6 +124,40 @@ void ImportAssetsDatabase::setInputFileMetadata(const Path& path, std::array<int
 	input.timestamp = timestamps;
 	input.metadata = data;
 	input.basePath = std::move(basePath);
+	input.missing = false;
+}
+
+void ImportAssetsDatabase::markInputPresent(const Path& path)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	auto& input = inputFiles[path.toString()];
+	input.missing = false;
+}
+
+void ImportAssetsDatabase::markAllInputFilesAsMissing()
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	
+	for (auto& i: inputFiles) {
+		i.second.missing = true;
+	}
+}
+
+bool ImportAssetsDatabase::purgeMissingInputs()
+{
+	std::lock_guard<std::mutex> lock(mutex);
+
+	bool modified = false;
+	for (auto iter = inputFiles.begin(); iter != inputFiles.end();) {
+		if (iter->second.missing) {
+			modified = true;
+			iter = inputFiles.erase(iter);
+		} else {
+			++iter;
+		}
+	}
+	
+	return modified;
 }
 
 std::optional<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) const

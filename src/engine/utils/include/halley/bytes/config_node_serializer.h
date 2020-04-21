@@ -11,7 +11,7 @@ namespace Halley {
 	class ConfigNodeSerializationContext {
 	public:
 		Resources* resources = nullptr;
-		EntitySerializationContext* entityContext = nullptr;
+		std::shared_ptr<EntitySerializationContext> entityContext;
 	};
 
 	

@@ -271,7 +271,7 @@ namespace Halley
 
 		void setValue(T value)
 		{
-			Expects(futureData);
+			Expects(futureData != nullptr);
 			futureData->set(std::move(value));
 		}
 
@@ -282,7 +282,7 @@ namespace Halley
 
 		bool isCancelled() const
 		{
-			Expects(futureData);
+			Expects(futureData != nullptr);
 			return futureData->isCancelled();
 		}
 

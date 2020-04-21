@@ -1,6 +1,14 @@
 #include "entity_editor_factories.h"
-
+#include "halley/core/graphics/sprite/animation.h"
+#include "halley/ui/ui_factory.h"
+#include "halley/ui/ui_validator.h"
+#include "halley/ui/widgets/ui_checkbox.h"
+#include "halley/ui/widgets/ui_dropdown.h"
+#include "halley/ui/widgets/ui_textinput.h"
 #include "src/ui/select_asset_widget.h"
+#include "halley/core/scene_editor/component_field_parameters.h"
+#include "halley/core/scene_editor/component_editor_context.h"
+
 using namespace Halley;
 
 class ComponentEditorTextFieldFactory : public IComponentEditorFieldFactory {
@@ -10,19 +18,17 @@ public:
 		return "Halley::String";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
-		auto& componentData = pars.componentData;
-		const auto& componentName = pars.componentName;
-		const auto& fieldName = pars.fieldName;
+		auto data = pars.data;
 		const auto& defaultValue = pars.defaultValue;
 
-		String value = componentData[fieldName].asString("");
+		String value = data.getFieldData().asString("");
 
 		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "textValue", context.getFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
-		field->bindData("textValue", value, [&, fieldName](String newVal)
+		field->bindData("textValue", value, [&, data](String newVal)
 		{
-			componentData[fieldName] = ConfigNode(std::move(newVal));
+			data.getFieldData() = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
@@ -37,22 +43,20 @@ public:
 		return "int";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
-		auto& componentData = pars.componentData;
-		const auto& componentName = pars.componentName;
-		const auto& fieldName = pars.fieldName;
+		auto data = pars.data;
 		const auto& defaultValue = pars.defaultValue;
 
-		int value = componentData[fieldName].asInt(defaultValue.isInteger() ? defaultValue.toInteger() : 0);
+		int value = data.getFieldData().asInt(defaultValue.isInteger() ? defaultValue.toInteger() : 0);
 
 		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "intValue", context.getFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, false));
-		field->bindData("intValue", value, [&, fieldName](int newVal)
-			{
-				componentData[fieldName] = ConfigNode(newVal);
-				context.onEntityUpdated();
-			});
+		field->bindData("intValue", value, [&, data](int newVal)
+		{
+			data.getFieldData() = ConfigNode(newVal);
+			context.onEntityUpdated();
+		});
 
 		return field;
 	}
@@ -65,22 +69,20 @@ public:
 		return "float";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
-		auto& componentData = pars.componentData;
-		const auto& componentName = pars.componentName;
-		const auto& fieldName = pars.fieldName;
+		auto data = pars.data;
 		const auto& defaultValue = pars.defaultValue;
 
-		const float value = componentData[fieldName].asFloat(defaultValue.isNumber() ? defaultValue.toFloat() : 0.0f);
+		const float value = data.getFieldData().asFloat(defaultValue.isNumber() ? defaultValue.toFloat() : 0.0f);
 
 		auto field = std::make_shared<UITextInput>(context.getFactory().getKeyboard(), "floatValue", context.getFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, true));
-		field->bindData("floatValue", value, [&, fieldName](float newVal)
-			{
-				componentData[fieldName] = ConfigNode(newVal);
-				context.onEntityUpdated();
-			});
+		field->bindData("floatValue", value, [&, data](float newVal)
+		{
+			data.getFieldData() = ConfigNode(newVal);
+			context.onEntityUpdated();
+		});
 
 		return field;
 	}
@@ -101,21 +103,19 @@ public:
 		return "bool";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
-		auto& componentData = pars.componentData;
-		const auto& componentName = pars.componentName;
-		const auto& fieldName = pars.fieldName;
+		auto data = pars.data;
 		const auto& defaultValue = pars.defaultValue;
 
-		bool value = componentData[fieldName].asBool(defaultValue == "true");
+		bool value = data.getFieldData().asBool(defaultValue == "true");
 
 		auto field = std::make_shared<UICheckbox>("boolValue", context.getFactory().getStyle("checkbox"), value);
-		field->bindData("boolValue", value, [&, fieldName](bool newVal)
-			{
-				componentData[fieldName] = ConfigNode(newVal);
-				context.onEntityUpdated();
-			});
+		field->bindData("boolValue", value, [&, data](bool newVal)
+		{
+			data.getFieldData() = ConfigNode(newVal);
+			context.onEntityUpdated();
+		});
 
 		auto sizer = std::make_shared<UISizer>(UISizerType::Horizontal, 4.0f);
 		sizer->add(field);
@@ -131,49 +131,47 @@ public:
 		return "Halley::Vector2f";
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
-		auto& componentData = pars.componentData;
-		const auto& componentName = pars.componentName;
-		const auto& fieldName = pars.fieldName;
+		auto data = pars.data;
 		const auto& defaultValue = pars.defaultValue;
 
 		Vector2f value;
-		if (componentData[fieldName].getType() != ConfigNodeType::Undefined) {
-			value = componentData[fieldName].asVector2f();
+		if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
+			value = data.getFieldData().asVector2f();
 		}
 
 		const auto& keyboard = context.getFactory().getKeyboard();
 		const auto& style = context.getFactory().getStyle("inputThin");
 
 		auto dataOutput = std::make_shared<bool>(true);
-		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
 
 		container->add(std::make_shared<UITextInput>(keyboard, "xValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
-		container->bindData("xValue", value.x, [&, fieldName, dataOutput] (float newVal)
+		container->bindData("xValue", value.x, [&, data, dataOutput] (float newVal)
 		{
 			if (*dataOutput) {
-				auto& node = componentData[fieldName];
+				auto& node = data.getFieldData();
 				node = ConfigNode(Vector2f(newVal, node.asVector2f(Vector2f()).y));
 				context.onEntityUpdated();
 			}
 		});
 
 		container->add(std::make_shared<UITextInput>(keyboard, "yValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
-		container->bindData("yValue", value.y, [&, fieldName, dataOutput](float newVal)
+		container->bindData("yValue", value.y, [&, data, dataOutput](float newVal)
 		{
 			if (*dataOutput) {
-				auto& node = componentData[fieldName];
+				auto& node = data.getFieldData();
 				node = ConfigNode(Vector2f(node.asVector2f(Vector2f()).x, newVal));
 				context.onEntityUpdated();
 			}
 		});
 
-		container->setHandle(UIEventType::ReloadData, componentName + ":" + fieldName, [=, &componentData] (const UIEvent& event)
+		container->setHandle(UIEventType::ReloadData, pars.componentName + ":" + data.getName(), [=] (const UIEvent& event)
 		{
 			Vector2f newVal;
-			if (componentData[fieldName].getType() != ConfigNodeType::Undefined) {
-				newVal = componentData[fieldName].asVector2f();
+			if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
+				newVal = data.getFieldData().asVector2f();
 			}
 			*dataOutput = false;
 			event.getCurWidget().getWidgetAs<UITextInput>("xValue")->setText(toString(newVal.x));
@@ -192,32 +190,28 @@ public:
 		return "Halley::Sprite";
 	}
 
-	bool isCompound() const override
+	bool isNested() const override
 	{
 		return true;
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
-		auto& componentData = pars.componentData;
-		const auto& componentName = pars.componentName;
-		const auto& fieldName = pars.fieldName;
+		auto data = pars.data;
 		const auto& defaultValue = pars.defaultValue;
 
-		auto& fieldData = componentData[fieldName];
-		if (fieldData.getType() == ConfigNodeType::Undefined) {
-			fieldData = ConfigNode::MapType();
-		}
+		auto& fieldData = data.getFieldData();
+		fieldData.ensureType(ConfigNodeType::Map);
 
 		const auto& keyboard = context.getFactory().getKeyboard();
 		const auto& inputStyle = context.getFactory().getStyle("inputThin");
 		const auto& checkStyle = context.getFactory().getStyle("checkbox");
 
-		auto pivotContainer = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
+		auto pivotContainer = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
 		pivotContainer->add(std::make_shared<UITextInput>(keyboard, "pivotX", inputStyle, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
 		pivotContainer->add(std::make_shared<UITextInput>(keyboard, "pivotY", inputStyle, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
 
-		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});
 		container->add(context.makeLabel("image"));
 		container->add(std::make_shared<SelectAssetWidget>("image", context.getFactory(), AssetType::Sprite, context.getGameResources()));
@@ -232,47 +226,47 @@ public:
 		container->add(context.makeLabel("visible"));
 		container->add(std::make_shared<UICheckbox>("visible", checkStyle), 0, {}, UISizerAlignFlags::Left);
 
-		container->bindData("image", fieldData["image"].asString(""), [&, fieldName](String newVal)
+		container->bindData("image", fieldData["image"].asString(""), [&, data](String newVal)
 		{
-			componentData[fieldName]["image"] = ConfigNode(std::move(newVal));
-			context.onEntityUpdated();
-		});
-		
-		container->bindData("material", fieldData["material"].asString(""), [&, fieldName](String newVal)
-		{
-			componentData[fieldName]["material"] = ConfigNode(std::move(newVal));
+			data.getFieldData()["image"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
-		container->bindData("colour", fieldData["colour"].asString("#FFFFFF"), [&, fieldName](String newVal)
+		container->bindData("material", fieldData["material"].asString(""), [&, data](String newVal)
 		{
-			componentData[fieldName]["colour"] = ConfigNode(std::move(newVal));
+			data.getFieldData()["material"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
-		container->bindData("pivotX", fieldData["pivot"].asVector2f(Vector2f()).x, [&, fieldName] (float newVal)
+		container->bindData("colour", fieldData["colour"].asString("#FFFFFF"), [&, data](String newVal)
 		{
-			auto& node = componentData[fieldName]["pivot"];
+			data.getFieldData()["colour"] = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
+
+		container->bindData("pivotX", fieldData["pivot"].asVector2f(Vector2f()).x, [&, data] (float newVal)
+		{
+			auto& node = data.getFieldData()["pivot"];
 			node = ConfigNode(Vector2f(newVal, node.asVector2f(Vector2f()).y));
 			context.onEntityUpdated();
 		});
-		
-		container->bindData("pivotY", fieldData["pivot"].asVector2f(Vector2f()).y, [&, fieldName] (float newVal)
+
+		container->bindData("pivotY", fieldData["pivot"].asVector2f(Vector2f()).y, [&, data] (float newVal)
 		{
-			auto& node = componentData[fieldName]["pivot"];
+			auto& node = data.getFieldData()["pivot"];
 			node = ConfigNode(Vector2f(node.asVector2f(Vector2f()).x, newVal));
 			context.onEntityUpdated();
 		});
 
-		container->bindData("flip", fieldData["flip"].asBool(false), [&, fieldName](bool newVal)
+		container->bindData("flip", fieldData["flip"].asBool(false), [&, data](bool newVal)
 		{
-			componentData[fieldName]["flip"] = ConfigNode(newVal);
+			data.getFieldData()["flip"] = ConfigNode(newVal);
 			context.onEntityUpdated();
 		});
 
-		container->bindData("visible", fieldData["visible"].asBool(true), [&, fieldName](bool newVal)
+		container->bindData("visible", fieldData["visible"].asBool(true), [&, data](bool newVal)
 		{
-			componentData[fieldName]["visible"] = ConfigNode(newVal);
+			data.getFieldData()["visible"] = ConfigNode(newVal);
 			context.onEntityUpdated();
 		});
 
@@ -287,23 +281,19 @@ public:
 		return "Halley::AnimationPlayer";
 	}
 
-	bool isCompound() const override
+	bool isNested() const override
 	{
 		return true;
 	}
 
-	std::shared_ptr<IUIElement> createField(ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
-		auto& componentData = pars.componentData;
-		const auto& componentName = pars.componentName;
-		const auto& fieldName = pars.fieldName;
+		auto data = pars.data;
 		const auto& defaultValue = pars.defaultValue;
 
-		auto& fieldData = componentData[fieldName];
-		if (fieldData.getType() == ConfigNodeType::Undefined) {
-			fieldData = ConfigNode::MapType();
-		}
-		
+		auto& fieldData = data.getFieldData();
+		fieldData.ensureType(ConfigNodeType::Map);
+
 		auto& resources = context.getGameResources();
 		const auto& keyboard = context.getFactory().getKeyboard();
 		const auto& inputStyle = context.getFactory().getStyle("inputThin");
@@ -312,7 +302,7 @@ public:
 		const auto& scrollStyle = context.getFactory().getStyle("scrollbar");
 		const auto& listStyle = context.getFactory().getStyle("list");
 
-		auto container = std::make_shared<UIWidget>(fieldName, Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});
 		container->add(context.makeLabel("animation"));
 		container->add(std::make_shared<SelectAssetWidget>("animation", context.getFactory(), AssetType::Animation, context.getGameResources()));
@@ -325,7 +315,7 @@ public:
 		container->add(context.makeLabel("applyPivot"));
 		container->add(std::make_shared<UICheckbox>("applyPivot", checkStyle), 0, {}, UISizerAlignFlags::Left);
 
-		auto updateAnimation = [container, fieldName, &resources, &componentData] (const String& animName)
+		auto updateAnimation = [container, data, &resources] (const String& animName)
 		{
 			std::vector<String> sequences;
 			std::vector<String> directions;
@@ -340,43 +330,164 @@ public:
 			auto direction = container->getWidgetAs<UIDropdown>("direction");
 			sequence->setOptions(sequences);
 			direction->setOptions(directions);
-			sequence->setSelectedOption(componentData[fieldName]["sequence"].asString(""));
-			direction->setSelectedOption(componentData[fieldName]["direction"].asString(""));
+			sequence->setSelectedOption(data.getFieldData()["sequence"].asString(""));
+			direction->setSelectedOption(data.getFieldData()["direction"].asString(""));
 		};
 		updateAnimation(fieldData["animation"].asString(""));
 
-		container->bindData("animation", fieldData["animation"].asString(""), [&, fieldName, updateAnimation](String newVal)
+		container->bindData("animation", fieldData["animation"].asString(""), [&, data, updateAnimation](String newVal)
 		{
 			updateAnimation(newVal);
-			componentData[fieldName]["animation"] = ConfigNode(std::move(newVal));
+			data.getFieldData()["animation"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
-		container->bindData("sequence", fieldData["sequence"].asString(""), [&, fieldName](String newVal)
+		container->bindData("sequence", fieldData["sequence"].asString(""), [&, data](String newVal)
 		{
-			componentData[fieldName]["sequence"] = ConfigNode(std::move(newVal));
+			data.getFieldData()["sequence"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
-		container->bindData("direction", fieldData["direction"].asString(""), [&, fieldName](String newVal)
+		container->bindData("direction", fieldData["direction"].asString(""), [&, data](String newVal)
 		{
-			componentData[fieldName]["direction"] = ConfigNode(std::move(newVal));
+			data.getFieldData()["direction"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
-		container->bindData("playbackSpeed", fieldData["playbackSpeed"].asFloat(1.0f), [&, fieldName](float newVal)
+		container->bindData("playbackSpeed", fieldData["playbackSpeed"].asFloat(1.0f), [&, data](float newVal)
 		{
-			componentData[fieldName]["playbackSpeed"] = ConfigNode(newVal);
+			data.getFieldData()["playbackSpeed"] = ConfigNode(newVal);
 			context.onEntityUpdated();
 		});
 
-		container->bindData("applyPivot", fieldData["applyPivot"].asBool(true), [&, fieldName](bool newVal)
+		container->bindData("applyPivot", fieldData["applyPivot"].asBool(true), [&, data](bool newVal)
 		{
-			componentData[fieldName]["applyPivot"] = ConfigNode(newVal);
+			data.getFieldData()["applyPivot"] = ConfigNode(newVal);
 			context.onEntityUpdated();
 		});
 
 		return container;
+	}
+};
+
+class ComponentEditorPolygonFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::Polygon";
+	}
+
+	virtual bool isOpenPolygon()
+	{
+		return false;
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto data = pars.data;
+		const auto& defaultValue = pars.defaultValue;
+		auto componentNames = pars.componentNames;
+		auto componentName = pars.componentName;
+
+		auto style = context.getFactory().getStyle("buttonThin");
+
+		auto field = std::make_shared<UIButton>("editPolygon", style, LocalisedString::fromHardcodedString("Edit..."));
+		field->setMinSize(Vector2f(30, 22));
+
+		field->setHandle(UIEventType::ButtonClicked, "editPolygon", [=, &context] (const UIEvent& event)
+		{
+			ConfigNode options = ConfigNode(ConfigNode::MapType());
+			options["isOpenPolygon"] = isOpenPolygon();
+
+			ConfigNode::SequenceType compNames;
+			for (const auto& name : componentNames) {
+				compNames.emplace_back(ConfigNode(name));
+			}
+			options["componentNames"] = std::move(compNames);
+
+			context.setTool(SceneEditorTool::Polygon, componentName, data.getName(), std::move(options));
+		});
+
+		return field;
+	}
+};
+
+class ComponentEditorVertexListFieldFactory : public ComponentEditorPolygonFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::VertexList";
+	}
+
+	bool isOpenPolygon() override
+	{
+		return true;
+	}
+};
+
+class ComponentEditorStdVectorFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "std::vector<>";
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto fieldType = pars.typeParameters.at(0);
+		const auto data = pars.data;
+		const auto componentName = pars.componentName;
+		const auto componentNames = pars.componentNames;
+
+		data.getFieldData().ensureType(ConfigNodeType::Sequence);
+		
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Vertical));
+
+		auto buildList = [=, &context] () {
+			container->clear();
+			
+			const size_t nElements = data.getFieldData().asSequence().size();
+			for (size_t i = 0; i < nElements; ++i) {
+				auto rowSizer = std::make_shared<UISizer>();
+
+				ComponentFieldParameters params(componentName, ComponentDataRetriever(data.getSubIndex(i)), "", componentNames, {});
+				context.createField(*rowSizer, fieldType, params, false);
+				(*rowSizer)[0].setProportion(1.0f);
+
+				auto deleteButton = std::make_shared<UIButton>("delete" + toString(i), context.getFactory().getStyle("buttonThin"), LocalisedString::fromHardcodedString("-"));
+				deleteButton->setMinSize(Vector2f(22, 22));
+				rowSizer->add(deleteButton);
+
+				container->add(rowSizer);
+			}
+			
+			auto addButton = std::make_shared<UIButton>("add", context.getFactory().getStyle("buttonThin"), LocalisedString::fromHardcodedString("+"));
+			addButton->setMinSize(Vector2f(22, 22));
+			container->add(addButton);
+		};
+		buildList();
+
+		container->setHandle(UIEventType::ButtonClicked, [=, buildList = std::move(buildList)] (const UIEvent& event)
+		{
+			auto& seq = data.getFieldData().asSequence();
+			if (event.getSourceId() == "add") {
+				seq.emplace_back(ConfigNode());
+			} else if (event.getSourceId().startsWith("delete")) {
+				const size_t index = event.getSourceId().mid(6).toInteger();
+				seq.erase(seq.begin() + index);
+			}
+			buildList();
+		});
+		
+		return container;
+	}
+};
+
+class ComponentEditorStdSetFieldFactory : public ComponentEditorStdVectorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "std::set<>";
 	}
 };
 
@@ -392,6 +503,10 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorVector2fFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorSpriteFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorAnimationPlayerFieldFactory>());
-	
+	factories.emplace_back(std::make_unique<ComponentEditorPolygonFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorVertexListFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorStdVectorFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorStdSetFieldFactory>());
+
 	return factories;
 }

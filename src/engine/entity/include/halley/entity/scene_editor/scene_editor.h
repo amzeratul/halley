@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/core/game/scene_editor_interface.h"
+#include "halley/core/scene_editor/scene_editor_interface.h"
 #include "halley/core/graphics/camera.h"
 #include "../entity.h"
 
@@ -18,7 +18,7 @@ namespace Halley {
 		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState) override;
 		void render(RenderContext& rc) override;
 
-		World& getWorld() override;
+		World& getWorld() const override;
 		void spawnPending() override;
 
 		EntityId getCameraId() override;
@@ -26,36 +26,59 @@ namespace Halley {
 		void changeZoom(int amount, Vector2f cursorPosRelToCamera) override;
 
 		void setSelectedEntity(const UUID& id, ConfigNode& entityData) override;
+
+		void onEntityAdded(const UUID& id, const ConfigNode& entityData) final override;
+		void onEntityRemoved(const UUID& id) final override;
+		void onEntityMoved(const UUID& id, const ConfigNode& entityData) final override;
+		void onEntityModified(const UUID& id, const ConfigNode& entityData) final override;
+		virtual void onEntityAdded(EntityRef entity, const ConfigNode& entityData);
+		virtual void onEntityRemoved(EntityRef entity);
+		virtual void onEntityMoved(EntityRef entity, const ConfigNode& entityData);
+		virtual void onEntityModified(EntityRef entity, const ConfigNode& entityData);
+
 		void showEntity(const UUID& id) override;
-		void setTool(SceneEditorTool tool) override;
+		ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;
     	
 		std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() override;
+		std::shared_ptr<UIWidget> makeCustomUI() override;
 
 		static Rect4f getSpriteTreeBounds(const EntityRef& e);
 		static std::optional<Rect4f> getSpriteBounds(const EntityRef& e);
 
     protected:
-		virtual void createServices(World& world, SceneEditorContext& context);
-		virtual void createEntities(World& world, SceneEditorContext& context);
+		virtual void onInit();
+    	
+		virtual void createServices(World& world);
+		virtual void createEntities(World& world);
 
 		virtual String getSceneEditorStageName();
+    	const HalleyAPI& getAPI() const;
+    	Resources& getGameResources() const;
+    	Resources& getEditorResources() const;
 
     	virtual EntityId createCamera();
 
+    	virtual void onEntitySelected(std::optional<EntityRef> entity);
+
     private:
-		std::unique_ptr<World> world;
+		const HalleyAPI* api = nullptr;
+		Resources* resources = nullptr;
+		Resources* editorResources = nullptr;
+
+    	std::unique_ptr<World> world;
 
     	EntityId cameraEntityId;
     	Camera camera;
     	
 		std::optional<EntityRef> selectedEntity;
-    	std::unique_ptr<SceneEditorGizmoCollection> gizmoCollection;
-
-		std::unique_ptr<World> createWorld(SceneEditorContext& context);
+    	ISceneEditorGizmoCollection* gizmoCollection = nullptr;
+    	
+		std::unique_ptr<World> createWorld();
 
     	void moveCameraTo2D(Vector2f pos);
 		static void doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect);
     	Vector2f roundPosition(Vector2f pos) const;
 		Vector2f roundPosition(Vector2f pos, float zoom) const;
+    	EntityRef getEntity(const UUID& uuid) const;
 	};
 }

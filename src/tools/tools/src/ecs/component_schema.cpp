@@ -27,7 +27,8 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				const String type = memberProperties["type"].as<std::string>();
 				const String access = memberProperties["access"].as<std::string>("public");
 				const String defaultValue = memberProperties["defaultValue"].as<std::string>("");
-				members.emplace_back(TypeSchema(type), name, defaultValue, fromString<MemberAccess>(access));
+				const bool serializable = memberProperties["serializable"].as<bool>(true);
+				members.emplace_back(TypeSchema(type), name, defaultValue, fromString<MemberAccess>(access), serializable);
 			}
 		}
 	}

@@ -7,9 +7,9 @@ using namespace Halley;
 
 void HalleyAPI::assign()
 {
-	Expects(coreInternal);
-	Expects(systemInternal);
-	
+	Expects(coreInternal != nullptr);
+	Expects(systemInternal != nullptr);
+
 	core = coreInternal;
 	system = systemInternal.get();
 

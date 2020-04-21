@@ -30,6 +30,8 @@ void Resources::reloadAssets(const std::vector<String>& ids)
 	}
 
 	reloadAssets(byType);
+
+	locator->purgeAll();
 }
 
 void Resources::reloadAssets(const std::map<AssetType, std::vector<String>>& byType)

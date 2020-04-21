@@ -1,9 +1,8 @@
 #include "metal_material_constant_buffer.h"
 #include "metal_painter.h"
+#include "metal_render_target.h"
 #include "metal_texture.h"
 #include "metal_video.h"
-
-#include <halley/core/graphics/material/material_definition.h>
 
 using namespace Halley;
 
@@ -15,19 +14,16 @@ MetalPainter::MetalPainter(MetalVideo& video, Resources& resources)
 
 void MetalPainter::clear(Colour colour) {
 	[encoder endEncoding];
-	auto descriptor = renderPassDescriptorForTextureAndColour(video.getSurface().texture, colour);
-	encoder = [buffer renderCommandEncoderWithDescriptor:descriptor];
+	auto& renderTarget = dynamic_cast<IMetalRenderTarget&>(getActiveRenderTarget());
+	auto descriptor = renderPassDescriptorForTextureAndColour(renderTarget.getMetalTexture(), colour);
+	encoder = [video.getCommandBuffer() renderCommandEncoderWithDescriptor:descriptor];
 }
 
 void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
 	auto& pass = material.getDefinition().getPass(passNumber);
 	MetalShader& shader = static_cast<MetalShader&>(pass.getShader());
 
-	MTLRenderPipelineDescriptor *pipelineStateDescriptor = [[[MTLRenderPipelineDescriptor alloc] init] autorelease];
-	pipelineStateDescriptor.vertexFunction = shader.getVertexFunc();
-	pipelineStateDescriptor.fragmentFunction = shader.getFragmentFunc();
-	pipelineStateDescriptor.label = [NSString stringWithUTF8String:material.getDefinition().getName().c_str()];
-	pipelineStateDescriptor.colorAttachments[0].pixelFormat = video.getSurface().texture.pixelFormat;
+	auto pipelineStateDescriptor = shader.setupMaterial(material);
 	setBlending(pass.getBlend(), pipelineStateDescriptor.colorAttachments[0]);
 
 	NSError* error = NULL;
@@ -43,7 +39,7 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
 	[encoder setRenderPipelineState:pipelineState];
 
 	// Metal requires the global material to be bound for each material pass, as it has no 'global' state.
-	static_cast<MetalMaterialConstantBuffer&>(halleyGlobalMaterial->getDataBlocks().front().getConstantBuffer()).bind(encoder, 0);
+	static_cast<MetalMaterialConstantBuffer&>(halleyGlobalMaterial->getDataBlocks().front().getConstantBuffer()).bindVertex(encoder, 0);
 
 	// Bind textures
 	int texIndex = 0;
@@ -54,16 +50,19 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
 }
 
 void MetalPainter::doStartRender() {
-	buffer = [video.getCommandQueue() commandBuffer];
-	auto col = Colour4f(0);
-	auto descriptor = renderPassDescriptorForTextureAndColour(video.getSurface().texture, col);
-	encoder = [buffer renderCommandEncoderWithDescriptor:descriptor];
 }
 
 void MetalPainter::doEndRender() {
+}
+
+void MetalPainter::startEncoding(id<MTLTexture> texture) {
+	auto col = Colour4f(0);
+	auto descriptor = renderPassDescriptorForTextureAndColour(texture, col);
+	encoder = [video.getCommandBuffer() renderCommandEncoderWithDescriptor:descriptor];
+}
+
+void MetalPainter::endEncoding() {
 	[encoder endEncoding];
-	[buffer presentDrawable:video.getSurface()];
-	[buffer commit];
 }
 
 void MetalPainter::setVertices(
@@ -80,7 +79,7 @@ void MetalPainter::setVertices(
 		length:bytesSize
 		options:MTLResourceStorageModeShared
 	] autorelease];
-	[encoder setVertexBuffer:buffer offset:0 atIndex:0];
+	[encoder setVertexBuffer:buffer offset:0 atIndex:MaxMetalBufferIndex];
 
 	if (indexBuffer != nil) {
 		[indexBuffer autorelease];
@@ -124,7 +123,7 @@ void MetalPainter::setClip(Rect4i rect, bool) {
 void MetalPainter::setMaterialData(const Material& material) {
 	for (auto& dataBlock : material.getDataBlocks()) {
 		if (dataBlock.getType() != MaterialDataBlockType::SharedExternal) {
-			static_cast<MetalMaterialConstantBuffer&>(dataBlock.getConstantBuffer()).bind(encoder, dataBlock.getBindPoint());
+			static_cast<MetalMaterialConstantBuffer&>(dataBlock.getConstantBuffer()).bindFragment(encoder, 0);
 		}
 	}
 }

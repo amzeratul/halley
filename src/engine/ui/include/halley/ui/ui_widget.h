@@ -107,7 +107,7 @@ namespace Halley {
 		void setHandle(UIEventType type, String id, UIEventCallback handler);
 
 		void setCanSendEvents(bool canSend);
-		
+
 		virtual void setInputType(UIInputType uiInput);
 		virtual void setJoystickType(JoystickType joystickType);
 		void setOnlyEnabledWithInputs(const std::vector<UIInputType>& inputs);
@@ -127,14 +127,14 @@ namespace Halley {
 		void bindData(const String& childId, int initialValue, UIDataBindInt::WriteCallback callback = {});
 		void bindData(const String& childId, float initialValue, UIDataBindFloat::WriteCallback callback = {});
 		void bindData(const String& childId, const String& initialValue, UIDataBindString::WriteCallback callback = {});
-		
+
 		bool isDescendentOf(const UIWidget& ancestor) const override;
 		void setMouseClip(std::optional<Rect4f> mouseClip, bool force);
 
 		virtual void onManualControlCycleValue(int delta);
 		virtual void onManualControlAnalogueAdjustValue(float delta, Time t);
 		virtual void onManualControlActivate();
-		
+
 		UIInput::Priority getInputPriority() const;
 
 		void setChildLayerAdjustment(int delta);
@@ -239,4 +239,13 @@ namespace Halley {
 		bool canSendEvents = true;
 		bool dontClipChildren = false;
 	};
+
+	template <typename F>
+	void UIParent::descend(F f)
+	{
+		for (auto& c: children) {
+			f(c);
+			c->descend(f);
+		}
+	}
 }

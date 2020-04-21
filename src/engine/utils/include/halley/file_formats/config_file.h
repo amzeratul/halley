@@ -57,7 +57,7 @@ namespace Halley
 		ConfigNode(ConfigNode&& other);
 		ConfigNode(MapType&& entryMap);
 		ConfigNode(SequenceType&& entryList);
-		ConfigNode(String&& value);
+		ConfigNode(String value);
 		ConfigNode(bool value);
 		ConfigNode(int value);
 		ConfigNode(float value);
@@ -110,6 +110,8 @@ namespace Halley
 		const MapType& asMap() const;
 		SequenceType& asSequence();
 		MapType& asMap();
+
+		void ensureType(ConfigNodeType type);
 
 		bool hasKey(const String& key) const;
 		void removeKey(const String& key);

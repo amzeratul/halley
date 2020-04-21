@@ -1,7 +1,7 @@
 #pragma once
 
 #include "world.h"
-#include "halley/core/game/scene_editor_interface.h"
+#include "halley/core/scene_editor/scene_editor_interface.h"
 
 namespace Halley {
     class WorldSceneData : public ISceneData {

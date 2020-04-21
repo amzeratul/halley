@@ -85,6 +85,11 @@ void UISizerEntry::setBorder(const Vector4f& b)
 	border = b;
 }
 
+void UISizerEntry::setProportion(float prop)
+{
+	proportion = prop;
+}
+
 Vector4f UISizerEntry::getBorder() const
 {
 	return border;

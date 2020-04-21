@@ -1,4 +1,5 @@
 #pragma once
+#include "halley/core/scene_editor/scene_editor_interface.h"
 #include "halley/tools/ecs/fields_schema.h"
 #include "halley/ui/ui_widget.h"
 
@@ -6,6 +7,8 @@ namespace Halley {
 	class SceneEditorWindow;
 	class ECSData;
 	class UIFactory;
+	class UIDropdown;
+	class UITextInput;
 
 	class EntityEditor final : public UIWidget, IEntityEditor {
 	public:
@@ -23,6 +26,7 @@ namespace Halley {
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
 		std::shared_ptr<IUIElement> makeLabel(const String& label) override;
+		void createField(IUISizer& parent, const String& fieldType, const ComponentFieldParameters& parameters, bool createLabel) override;
 
 	private:
 		UIFactory& factory;
@@ -43,8 +47,8 @@ namespace Halley {
 		Resources* gameResources = nullptr;
 
 		void makeUI();
-		void loadComponentData(const String& componentType, ConfigNode& data);
-		void createField(UIWidget& parent, const String& fieldType, const ComponentFieldParameters& parameters);
+		void loadComponentData(const String& componentType, ConfigNode& data, const std::vector<String>& componentNames);
+		std::pair<String, std::vector<String>> parseType(const String& type);
 
 		void addComponent();
 		void addComponent(const String& name);
@@ -54,6 +58,7 @@ namespace Halley {
 		void setPrefabName(const String& name);
 
 		void onEntityUpdated() override;
+		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;
 		ConfigNode& getEntityData();
 
 		void updatePrefabNames();

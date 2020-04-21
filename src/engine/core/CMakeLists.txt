@@ -64,6 +64,10 @@ set(SOURCES
         "src/resources/resources.cpp"
         "src/resources/standard_resources.cpp"
 
+        "src/scene_editor/component_editor_context.cpp"
+        "src/scene_editor/component_field_parameters.cpp"
+        "src/scene_editor/scene_editor_interface.cpp"
+
         "src/stage/stage.cpp"
 
         "src/devcon/devcon_client.cpp"
@@ -106,7 +110,6 @@ set(HEADERS
         "include/halley/core/game/halley_statics.h"
         "include/halley/core/game/game_platform.h"
         "include/halley/core/game/main_loop.h"
-        "include/halley/core/game/scene_editor_interface.h"
         
         "include/halley/core/graphics/blend.h"
         "include/halley/core/graphics/camera.h"
@@ -160,6 +163,10 @@ set(HEADERS
 
         "src/resources/resource_filesystem.h"
         "src/resources/resource_pack.h"
+
+        "include/halley/core/scene_editor/component_editor_context.h"
+        "include/halley/core/scene_editor/component_field_parameters.h"
+        "include/halley/core/scene_editor/scene_editor_interface.h"
 
         "include/halley/core/stage/stage.h"
         "include/halley/core/stage/stage_id.h"

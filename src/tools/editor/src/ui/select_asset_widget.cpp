@@ -1,5 +1,7 @@
 #include "select_asset_widget.h"
 
+#include "halley/ui/ui_factory.h"
+#include "halley/ui/widgets/ui_textinput.h"
 #include "src/scene/choose_asset_window.h"
 using namespace Halley;
 

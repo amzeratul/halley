@@ -32,10 +32,13 @@ void MetalVideo::startRender()
 {
 	pool = [[NSAutoreleasePool alloc] init];
 	surface = [swap_chain nextDrawable];
+	command_buffer = [command_queue commandBuffer];
 }
 
 void MetalVideo::finishRender()
 {
+	[command_buffer presentDrawable:surface];
+	[command_buffer commit];
 	window->swap();
 	[pool release];
 }
@@ -85,12 +88,12 @@ std::unique_ptr<Shader> MetalVideo::createShader(const ShaderDefinition& definit
 
 std::unique_ptr<TextureRenderTarget> MetalVideo::createTextureRenderTarget()
 {
-	return std::make_unique<TextureRenderTarget>();
+	return std::make_unique<MetalTextureRenderTarget>();
 }
 
 std::unique_ptr<ScreenRenderTarget> MetalVideo::createScreenRenderTarget()
 {
-	return std::make_unique<MetalScreenRenderTarget>(Rect4i({}, getWindow().getWindowRect().getSize()));
+	return std::make_unique<MetalScreenRenderTarget>(*this, Rect4i({}, getWindow().getWindowRect().getSize()));
 }
 
 std::unique_ptr<MaterialConstantBuffer> MetalVideo::createConstantBuffer()
@@ -103,6 +106,11 @@ String MetalVideo::getShaderLanguage()
 	return "metal";
 }
 
+bool MetalVideo::isColumnMajor() const
+{
+	return true;
+}
+
 std::unique_ptr<Painter> MetalVideo::makePainter(Resources& resources)
 {
 	return std::make_unique<MetalPainter>(*this, resources);
@@ -112,10 +120,10 @@ id<CAMetalDrawable> MetalVideo::getSurface() {
 	return surface;
 }
 
-id<MTLCommandQueue> MetalVideo::getCommandQueue() {
-	return command_queue;
-}
-
 id<MTLDevice> MetalVideo::getDevice() {
 	return device;
+}
+
+id<MTLCommandBuffer> MetalVideo::getCommandBuffer() {
+	return command_buffer;
 }

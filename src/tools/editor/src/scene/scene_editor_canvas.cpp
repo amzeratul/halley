@@ -1,12 +1,21 @@
 #include "scene_editor_canvas.h"
-#include "halley/core/game/scene_editor_interface.h"
+
+#include "halley/core/entry/entry_point.h"
+#include "halley/core/game/game.h"
+#include "halley/core/graphics/render_context.h"
+#include "halley/core/graphics/render_target/render_surface.h"
+#include "halley/core/graphics/render_target/render_target_texture.h"
+#include "halley/core/input/input_keyboard.h"
+#include "halley/core/input/input_keys.h"
+#include "scene_editor_gizmo_collection.h"
+#include "halley/core/scene_editor/scene_editor_interface.h"
 #include "scene_editor_window.h"
 #include "src/project/core_api_wrapper.h"
 
 using namespace Halley;
 
-SceneEditorCanvas::SceneEditorCanvas(String id, Resources& resources, const HalleyAPI& api)
-	: UIWidget(std::move(id))
+SceneEditorCanvas::SceneEditorCanvas(String id, UIFactory& factory, Resources& resources, const HalleyAPI& api, std::optional<UISizer> sizer)
+	: UIWidget(std::move(id), Vector2f(32, 32), std::move(sizer))
 	, api(api)
 	, resources(resources)
 {
@@ -15,7 +24,9 @@ SceneEditorCanvas::SceneEditorCanvas(String id, Resources& resources, const Hall
 
 	keyboard = api.input->getKeyboard();
 	mouse = api.input->getMouse();
-	
+
+	gizmos = std::make_unique<SceneEditorGizmoCollection>(factory, resources);
+
 	setHandle(UIEventType::MouseWheel, [this](const UIEvent& event)
 	{
 		onMouseWheel(event);
@@ -51,7 +62,7 @@ void SceneEditorCanvas::draw(UIPainter& painter) const
 	}
 
 	canvas.setPos(getPosition() + Vector2f(1, 1)).setSize(getSize() - Vector2f(2, 2));
-	
+
 	painter.draw(canvas, true);
 }
 
@@ -83,9 +94,9 @@ void SceneEditorCanvas::pressMouse(Vector2f mousePos, int button)
 		inputState.rightClickPressed = inputState.rightClickHeld = true;
 		break;
 	}
-	
+
 	if (!dragging) {
-		if (button == 1) {
+		if (button == 1 || (tool == SceneEditorTool::Drag && button == 0)) {
 			dragButton = button;
 			dragging = true;
 			lastMousePos = mousePos;
@@ -189,7 +200,7 @@ void SceneEditorCanvas::renderInterface(RenderContext& rc) const
 	if (errorState) {
 		return;
 	}
-	
+
 	if (interface && surface->isReady()) {
 		guardedRun([&]() {
 			auto context = rc.with(surface->getRenderTarget());
@@ -214,11 +225,12 @@ void SceneEditorCanvas::loadDLL()
 		gameCoreAPI = std::make_unique<CoreAPIWrapper>(*api.core);
 		gameAPI = api.clone();
 		gameAPI->replaceCoreAPI(gameCoreAPI.get());
-		
+
 		SceneEditorContext context;
 		context.resources = gameResources;
 		context.editorResources = &resources;
 		context.api = gameAPI.get();
+		context.gizmos = gizmos.get();
 
 		guardedRun([&]() {
 			interface->init(context);
@@ -260,6 +272,12 @@ void SceneEditorCanvas::guardedRun(const std::function<void()>& f) const
 		Logger::logError("Unknown error in SceneEditorCanvas, probably from game dll");
 		errorState = true;
 	}
+}
+
+std::shared_ptr<UIWidget> SceneEditorCanvas::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
+{
+	this->tool = tool;
+	return gizmos->setTool(tool, componentName, fieldName, options);
 }
 
 void SceneEditorCanvas::updateInputState()

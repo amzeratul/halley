@@ -7,7 +7,7 @@ UIMenuButton::UIMenuButton(std::shared_ptr<UIMenuButtonGroup> group, String id, 
 	: UIClickable(id, minSize, std::move(sizer), innerBorder)
 	, group(group)
 {
-	Expects(group);
+	Expects(group != nullptr);
 }
 
 void UIMenuButton::onClicked(Vector2f mousePos)
