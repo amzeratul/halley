@@ -567,7 +567,9 @@ public:
 		auto setState = [&context, container, data, fieldType, pars] (bool newVal)
 		{
 			if (newVal) {
-				data.getFieldData() = context.getDefaultNode(fieldType);
+				if (data.getFieldData().getType() == ConfigNodeType::Undefined) {
+					data.getFieldData() = context.getDefaultNode(fieldType);
+				}
 				container->add(context.makeField(fieldType, pars, false));
 			} else {
 				container->clear();
@@ -580,6 +582,14 @@ public:
 		checkbox->bindData("present", initialValue, std::move(setState));
 		
 		return rowSizer;
+	}
+};
+
+class ComponentEditorOptionalLiteFieldFactory : public ComponentEditorStdOptionalFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::OptionalLite<>";
 	}
 };
 
@@ -600,6 +610,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorStdVectorFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorStdSetFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorStdOptionalFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorOptionalLiteFieldFactory>());
 
 	return factories;
 }

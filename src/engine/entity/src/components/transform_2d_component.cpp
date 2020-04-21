@@ -106,8 +106,8 @@ void Transform2DComponent::setGlobalRotation(Angle1f v)
 
 int Transform2DComponent::getSubWorld() const
 {
-	if (subWorld != INT_MIN) {
-		return subWorld;
+	if (subWorld) {
+		return subWorld.value();
 	} else {
 		// Default value, default to parent, or to zero if no parent
 		if (parentTransform) {

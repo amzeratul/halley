@@ -12,12 +12,12 @@ protected:
 	Halley::Vector2f position;
 	Halley::Angle1f rotation;
 	Halley::Vector2f scale = Halley::Vector2f(1.0f, 1.0f);
-	int subWorld = INT_MIN;
+	Halley::OptionalLite<int> subWorld;
 	
 public:
 	Transform2DComponentBase() {}
 	
-	Transform2DComponentBase(Halley::Vector2f position, Halley::Angle1f rotation, Halley::Vector2f scale, int subWorld)
+	Transform2DComponentBase(Halley::Vector2f position, Halley::Angle1f rotation, Halley::Vector2f scale, Halley::OptionalLite<int> subWorld)
 		: position(position)
 		, rotation(rotation)
 		, scale(scale)

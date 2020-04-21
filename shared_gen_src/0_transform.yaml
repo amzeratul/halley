@@ -15,8 +15,7 @@ component:
       access: protected
       defaultValue: 'Halley::Vector2f(1.0f, 1.0f)'
   - subWorld:
-      type: int
+      type: 'Halley::OptionalLite<int>'
       access: protected
-      defaultValue: 'INT_MIN'
 
 ...

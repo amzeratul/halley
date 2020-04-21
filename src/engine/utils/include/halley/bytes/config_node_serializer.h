@@ -3,6 +3,7 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/maths/polygon.h"
 #include "halley/maths/colour.h"
+#include "halley/data_structures/maybe.h"
 #include <set>
 
 namespace Halley {
@@ -200,6 +201,19 @@ namespace Halley {
 				}
 			}
 			return result;
+		}
+	};
+
+	template <typename T>
+	class ConfigNodeSerializer<OptionalLite<T>> {
+	public:
+		OptionalLite<T> deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+		{
+			if (node.getType() == ConfigNodeType::Undefined) {
+				return OptionalLite<T>();
+			} else {
+				return OptionalLite<T>(ConfigNodeSerializer<T>().deserialize(context, node));
+			}
 		}
 	};
 
