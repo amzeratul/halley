@@ -25,7 +25,6 @@ namespace Halley {
 
 	private:
 		VideoAPI& video;
-		Resources& resources;
 
 		std::shared_ptr<TextureRenderTarget> renderTarget;
 		Vector2i curTextureSize;

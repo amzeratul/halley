@@ -12,7 +12,6 @@ using namespace Halley;
 
 RenderSurface::RenderSurface(VideoAPI& video, Resources& resources, const String& materialName)
 	: video(video)
-	, resources(resources)
 {
 	material = std::make_shared<Material>(resources.get<MaterialDefinition>(materialName));
 }
