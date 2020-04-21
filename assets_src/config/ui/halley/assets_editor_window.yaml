@@ -50,6 +50,13 @@ children:
     proportion: 1
     border: [10, 0, 10, 0]
     children:
+    - widget: { class: widget }
+      sizer: { type: horizontal}
+      children:
+        - widget: { class: label, id: contentListDropdownLabel, text: "Assets:"}
+          border: [0, 0, 5, 0]
+          fill: [centreVertical]
+        - widget: { id: contentListDropdown, class: dropdown, size: [200, 30] }
     - widget: { id: contentList, class: list, type: horizontal }
     - widget: { id: content, class: pagedPane }
       fill: fill

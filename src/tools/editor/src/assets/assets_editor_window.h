@@ -49,9 +49,13 @@ namespace Halley {
         
 		std::shared_ptr<UIList> assetList;
 		std::shared_ptr<UIList> contentList;
+		std::shared_ptr<UIDropdown> contentListDropdown;
+		std::shared_ptr<UILabel> contentListDropdownLabel;
 		std::shared_ptr<UIPagedPane> content;
         std::shared_ptr<MetadataEditor> metadataEditor;
 
+		String loadedAsset;
+		
         void loadResources();
         void makeUI();
 		void setAssetSrcMode(bool enabled);
@@ -62,7 +66,7 @@ namespace Halley {
 		void refreshList();
 		void setFilter(const String& filter);
 
-		void loadAsset(const String& name, bool doubleClick);
+		void loadAsset(const String& name, bool doubleClick, bool clearDropdown);
 		void refreshAssets(const std::vector<String>& assets);
 
 		std::shared_ptr<AssetEditor> makeEditor(AssetType type, const String& name);

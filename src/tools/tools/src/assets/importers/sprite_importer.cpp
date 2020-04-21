@@ -32,9 +32,8 @@ bool ImageData::operator!=(const ImageData& other) const
 
 void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	String atlasName = asset.assetId;
-	String spriteSheetName = Path(asset.assetId).replaceExtension("").string();
-	std::vector<ImageData> totalFrames;
+	String baseSpriteSheetName = Path(asset.assetId).replaceExtension("").string();
+	std::map<String, std::vector<ImageData>> totalGroupedFrames;
 
 	std::optional<Metadata> startMeta;
 
@@ -42,7 +41,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 	for (auto& inputFile: asset.inputFiles) {
 		auto fileInputId = Path(inputFile.name).dropFront(1);
-		const String spriteName = fileInputId.replaceExtension("").string();
+		const String baseSpriteName = fileInputId.replaceExtension("").string();
 
 		// Meta
 		Metadata meta = inputFile.metadata;
@@ -63,22 +62,27 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		auto thisPalette = meta.getString("palette", "");
 		if (palette) {
 			if (thisPalette != palette.value()) {
-				throw Exception("Incompatible palettes in atlas \"" + atlasName + "\". Previously using \"" + palette.value() + "\", now trying to use \"" + thisPalette + "\"", HalleyExceptions::Tools);
+				throw Exception("Incompatible palettes in atlas \"" + asset.assetId + "\". Previously using \"" + palette.value() + "\", now trying to use \"" + thisPalette + "\"", HalleyExceptions::Tools);
 			}
 		} else {
 			palette = thisPalette;
 		}
 
 		// Import image data
-		std::vector<ImageData> frames;
+		std::map<String, std::vector<ImageData>> groupedFrames;
+		
 		if (inputFile.name.getExtension() == ".ase" || inputFile.name.getExtension() == ".aseprite") {
 			// Import Aseprite file
-			frames = AsepriteReader::importAseprite(spriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), trim);
-		} else {
+			auto groupSeparated = meta.getBool("group_separated", false);
+			groupedFrames = AsepriteReader::importAseprite(baseSpriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), trim, groupSeparated);
+		}
+		else {
 			// Bitmap
 			auto span = gsl::as_bytes(gsl::span<const Byte>(inputFile.data));
 			auto image = std::make_unique<Image>(span, fromString<Image::Format>(meta.getString("format", "undefined")));
-
+			
+			groupedFrames[""] = std::vector<ImageData>();
+			auto& frames = groupedFrames[""];
 			frames.emplace_back();
 			auto& imgData = frames.back();
 			imgData.clip = trim ? image->getTrimRect() : image->getRect(); // Be careful, make sure this is done before the std::move() below
@@ -89,29 +93,44 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			imgData.sequenceName = "";
 		}
 
-		// Update frames with pivot and slices
-		for (auto& f: frames) {
-			f.pivot = pivot;
-			f.slices = slices;
+		auto oneAtlas = meta.getString("atlas", "");
+		
+		for (auto& frames : groupedFrames) {
+			// Update frames with pivot and slices
+			for (auto& f : frames.second) {
+				f.pivot = pivot;
+				f.slices = slices;
+			}
+
+			// Split into a grid
+			const Vector2i grid(meta.getInt("tileWidth", 0), meta.getInt("tileHeight", 0));
+			if (grid.x > 0 && grid.y > 0) {
+				frames.second = splitImagesInGrid(frames.second, grid);
+			}
+			
+			auto spriteSheetName = baseSpriteSheetName;// +(frames.first.isEmpty() ? "" : ":" + frames.first);
+			auto spriteName = baseSpriteName + (frames.first.isEmpty() ? "" : ":" + frames.first);
+			Animation animation = generateAnimation(spriteName, spriteSheetName, meta.getString("material", "Halley/Sprite"), frames.second);
+			collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation), {}, "pc", inputFile.name);
+
+			std::vector<ImageData> totalFrames;
+			std::move(frames.second.begin(), frames.second.end(), std::back_inserter(totalFrames));
+			totalGroupedFrames[spriteSheetName + " " + spriteName] = std::move(totalFrames);
 		}
-
-		// Split into a grid
-		const Vector2i grid(meta.getInt("tileWidth", 0), meta.getInt("tileHeight", 0));
-		if (grid.x > 0 && grid.y > 0) {
-			frames = splitImagesInGrid(frames, grid);
-		}
-
-		// Write animation
-		Animation animation = generateAnimation(spriteName, spriteSheetName, meta.getString("material", "Halley/Sprite"), frames);
-		collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation), {}, "pc", inputFile.name);
-
-		std::move(frames.begin(), frames.end(), std::back_inserter(totalFrames));
+		
 	}
 
 	// Generate atlas + spritesheet
+	std::vector<ImageData> totalFrames;
+	for (auto& frames : totalGroupedFrames)
+	{
+		std::move(frames.second.begin(), frames.second.end(), std::back_inserter(totalFrames));
+	}
+
+	auto groupAtlasName = asset.assetId;// totalFrames.first + Path(asset.assetId).getExtension();
 	SpriteSheet spriteSheet;
-	auto atlasImage = generateAtlas(atlasName, totalFrames, spriteSheet);
-	spriteSheet.setTextureName(atlasName);
+	auto atlasImage = generateAtlas(groupAtlasName, totalFrames, spriteSheet);
+	spriteSheet.setTextureName(groupAtlasName);
 
 	// Image metafile
 	auto size = atlasImage->getSize();
@@ -128,13 +147,13 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 	// Write atlas image
 	ImportingAsset image;
-	image.assetId = atlasName;
+	image.assetId = groupAtlasName;
 	image.assetType = ImportAssetType::Image;
-	image.inputFiles.emplace_back(ImportingAssetFile(atlasName, Serializer::toBytes(*atlasImage), meta));
+	image.inputFiles.emplace_back(ImportingAssetFile(groupAtlasName, Serializer::toBytes(*atlasImage), meta));
 	collector.addAdditionalAsset(std::move(image));
 
 	// Write spritesheet
-	collector.output(spriteSheetName, AssetType::SpriteSheet, Serializer::toBytes(spriteSheet));
+	collector.output(baseSpriteSheetName, AssetType::SpriteSheet, Serializer::toBytes(spriteSheet));
 }
 
 String SpriteImporter::getAssetId(const Path& file, const std::optional<Metadata>& metadata) const
