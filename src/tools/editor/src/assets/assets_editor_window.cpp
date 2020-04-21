@@ -167,6 +167,12 @@ void AssetsEditorWindow::setFilter(const String& f)
 
 void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick, bool clearDropdown)
 {
+	if (clearDropdown) {
+		contentListDropdown->clear();
+		contentListDropdown->setActive(false);
+		contentListDropdownLabel->setActive(false);
+	}
+	
 	auto& curPath = assetSrcMode ? curSrcPath : curPaths[curType];
 	if (name.endsWith("/.")) {
 		if (doubleClick) {
@@ -179,12 +185,6 @@ void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick, bool cl
 		content->clear();
 		contentList->clear();
 		curEditors.clear();
-
-		if (clearDropdown) {
-			contentListDropdown->clear();
-			contentListDropdown->setActive(false);
-			contentListDropdownLabel->setActive(false);
-		}
 
 		if (assetSrcMode) {
 			auto assets = project.getAssetsFromFile(Path(name));
