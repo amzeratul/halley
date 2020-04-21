@@ -43,8 +43,7 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String s
 	}
 
 	// Create frames
-	std::map<String, std::vector<ImageData>> frameData;
-	bool firstImage = true;
+	std::map<String, std::vector<ImageData>> frameData;	
 	for (auto& t: tags) {
 		int i = 0;
 		String sequence = t.first;
@@ -65,8 +64,8 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String s
 			for (auto& groupFrameImage : groupFrameImages)
 			{
 				std::vector<ImageData> groupFrameData;
+				auto firstImage = frameData.find(groupFrameImage.first) == frameData.end();
 				addImageData(i, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, hasFrameNumber, groupFrameImage.first, firstImage, spriteName);
-				firstImage = false;
 				
 				if(frameData.find(groupFrameImage.first) == frameData.end())
 				{
