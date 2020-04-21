@@ -25,6 +25,7 @@ void ChooseAssetWindow::onAddedToRoot()
 
 void ChooseAssetWindow::setAssetIds(const std::vector<String>& ids, const String& defaultOption)
 {
+	options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
 	for (const auto& c: ids) {
 		options->addTextItem(c, LocalisedString::fromUserString(c));
 	}
@@ -66,10 +67,8 @@ void ChooseAssetWindow::makeUI()
 void ChooseAssetWindow::accept()
 {
 	const auto id = getWidgetAs<UIList>("options")->getSelectedOptionId();
-	if (!id.isEmpty()) {
-		callback(id);
-		destroy();
-	}
+	callback(id);
+	destroy();
 }
 
 void ChooseAssetWindow::cancel()
