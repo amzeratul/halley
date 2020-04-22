@@ -2,6 +2,7 @@
 #include "halley/core/resources/resources.h"
 #include <halley/file_formats/config_file.h>
 #include "scroll_background.h"
+#include "select_asset_widget.h"
 #include "src/assets/animation_editor.h"
 #include "src/assets/metadata_editor.h"
 #include "src/scene/entity_editor.h"
@@ -32,6 +33,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("sceneEditorCanvas", [=](const ConfigNode& node) { return makeSceneEditorCanvas(node); });
 	addFactory("entityList", [=](const ConfigNode& node) { return makeEntityList(node); });
 	addFactory("entityEditor", [=](const ConfigNode& node) { return makeEntityEditor(node); });
+	addFactory("selectAsset", [=](const ConfigNode& node) { return makeSelectAsset(node); });
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeScrollBackground(const ConfigNode& entryNode)
@@ -70,4 +72,11 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeEntityEditor(const ConfigNode& en
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	return std::make_shared<EntityEditor>(id, *this);
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeSelectAsset(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	return std::make_shared<SelectAssetWidget>(id, *this, fromString<AssetType>(node["assetType"].asString()));
 }

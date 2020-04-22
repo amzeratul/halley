@@ -5,13 +5,32 @@
 #include "src/scene/choose_asset_window.h"
 using namespace Halley;
 
-SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& resources)
+SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, AssetType type)
 	: UIWidget(id, Vector2f(), UISizer(UISizerType::Horizontal))
 	, factory(factory)
-	, resources(resources)
 	, type(type)
 {
 	makeUI();
+}
+
+SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources)
+	: SelectAssetWidget(id, factory, type)
+{
+	this->gameResources = &gameResources;
+}
+
+void SelectAssetWidget::setValue(const String& value)
+{
+	if (value != input->getText()) {
+		input->setText(value);
+		notifyDataBind(value);
+		sendEvent(UIEvent(UIEventType::TextChanged, getId(), value));
+	}
+}
+
+void SelectAssetWidget::setGameResources(Resources& resources)
+{
+	gameResources = &resources;
 }
 
 void SelectAssetWidget::makeUI()
@@ -29,13 +48,14 @@ void SelectAssetWidget::makeUI()
 
 void SelectAssetWidget::choose()
 {
-	getRoot()->addChild(std::make_shared<ChooseAssetTypeWindow>(factory, type, input->getText(), resources, [=] (std::optional<String> result)
-	{
-		if (result) {
-			input->setText(result.value());
-			notifyDataBind(result.value());
-		}
-	}));
+	if (gameResources) {
+		getRoot()->addChild(std::make_shared<ChooseAssetTypeWindow>(factory, type, input->getText(), *gameResources, [=] (std::optional<String> result)
+		{
+			if (result) {
+				setValue(result.value());
+			}
+		}));
+	}
 }
 
 void SelectAssetWidget::readFromDataBind()

@@ -7,6 +7,7 @@
 #include "halley/ui/widgets/ui_dropdown.h"
 #include "halley/ui/widgets/ui_textinput.h"
 #include "scene_editor_window.h"
+#include "src/ui/select_asset_widget.h"
 using namespace Halley;
 
 EntityEditor::EntityEditor(String id, UIFactory& factory)
@@ -43,7 +44,7 @@ void EntityEditor::makeUI()
 	fields->setMinSize(Vector2f(300, 20));
 
 	entityName = getWidgetAs<UITextInput>("entityName");
-	prefabName = getWidgetAs<UIDropdown>("prefabName");
+	prefabName = getWidgetAs<SelectAssetWidget>("prefabName");
 
 	setHandle(UIEventType::ButtonClicked, "addComponentButton", [=](const UIEvent& event)
 	{
@@ -55,7 +56,7 @@ void EntityEditor::makeUI()
 		setName(event.getStringData());
 	});
 
-	setHandle(UIEventType::DropboxSelectionChanged, "prefabName", [=] (const UIEvent& event)
+	setHandle(UIEventType::TextChanged, "prefabName", [=] (const UIEvent& event)
 	{
 		setPrefabName(event.getStringData());
 	});
@@ -66,6 +67,7 @@ bool EntityEditor::loadEntity(const String& id, ConfigNode& data, const ConfigNo
 	Expects(ecsData);
 
 	gameResources = &resources;
+	prefabName->setGameResources(*gameResources);
 	context = std::make_unique<ComponentEditorContext>(*static_cast<IEntityEditor*>(this), factory, resources);
 
 	if (currentId == id && currentEntityData == &data && !force) {
@@ -117,8 +119,7 @@ void EntityEditor::reloadEntity()
 		}
 
 		if (isPrefab) {
-			updatePrefabNames();
-			prefabName->setSelectedOption(getEntityData()["prefab"].asString(""));
+			prefabName->setValue(getEntityData()["prefab"].asString(""));
 		} else {
 			entityName->setText(getEntityData()["name"].asString(""));
 		}
@@ -319,16 +320,22 @@ void EntityEditor::deleteComponent(const String& name)
 void EntityEditor::setName(const String& name)
 {
 	if (!isPrefab) {
-		getEntityData()["name"] = name;
-		onEntityUpdated();
+		const String oldName = getEntityData()["name"].asString("");
+		if (oldName != name) {
+			getEntityData()["name"] = name;
+			onEntityUpdated();
+		}
 	}
 }
 
-void EntityEditor::setPrefabName(const String& name)
+void EntityEditor::setPrefabName(const String& prefab)
 {
 	if (isPrefab) {
-		getEntityData()["prefab"] = name;
-		onEntityUpdated();
+		const String oldPrefab = getEntityData()["prefab"].asString("");
+		if (oldPrefab != prefab) {
+			getEntityData()["prefab"] = prefab;
+			onEntityUpdated();
+		}
 	}
 }
 
@@ -345,13 +352,6 @@ void EntityEditor::setTool(SceneEditorTool tool, const String& componentName, co
 ConfigNode& EntityEditor::getEntityData()
 {
 	return *currentEntityData;
-}
-
-void EntityEditor::updatePrefabNames()
-{
-	Expects(prefabName);
-
-	prefabName->setOptions(gameResources->enumerate<Prefab>());
 }
 
 void EntityEditor::addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories)

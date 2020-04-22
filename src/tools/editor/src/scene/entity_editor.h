@@ -2,6 +2,7 @@
 #include "halley/core/scene_editor/scene_editor_interface.h"
 #include "halley/tools/ecs/fields_schema.h"
 #include "halley/ui/ui_widget.h"
+#include "src/ui/select_asset_widget.h"
 
 namespace Halley {
 	class SceneEditorWindow;
@@ -37,7 +38,7 @@ namespace Halley {
 		
 		std::shared_ptr<UIWidget> fields;
 		std::shared_ptr<UITextInput> entityName;
-		std::shared_ptr<UIDropdown> prefabName;
+		std::shared_ptr<SelectAssetWidget> prefabName;
 		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 
 		String currentId;
@@ -56,12 +57,10 @@ namespace Halley {
 		void deleteComponent(const String& name);
 
 		void setName(const String& name);
-		void setPrefabName(const String& name);
+		void setPrefabName(const String& prefab);
 
 		void onEntityUpdated() override;
 		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;
 		ConfigNode& getEntityData();
-
-		void updatePrefabNames();
 	};
 }
