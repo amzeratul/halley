@@ -56,7 +56,7 @@ Halley is divided in a several sub-projects:
 
 ## Platforms
 The following platforms are supported:
-* **Windows**: Tested on Windows 10 Professional 64-bit (Should work on as low as XP 32-bit)
+* **Windows**: Tested on Windows 10 Professional 64-bit (Might work on as low as XP 32-bit, but XP is no longer a tested target)
 * **Mac OS X**: Tested on Mac OS X 10.9.6
 * **Linux**: Tested on Ubuntu 16.04
 
@@ -64,19 +64,19 @@ The following platforms are supported:
 
 ### Tools required
 * CMake 3.10+
-* C++14 capable compiler:
-  * Visual C++ 15.3 (Visual Studio 2017)
-  * Clang 3.5
-  * GCC 5.0
+* C++17 capable compiler:
+  * Visual C++ 15.9 (Visual Studio 2017)
+  * Clang 5
+  * GCC 7
 
 ### Library dependencies
 * Engine:
-  * Boost 1.66.0 (header only)
+  * Boost 1.72.0 (header only)
   * OpenGL [optional]
   * SDL 2.0.2 (2.0.7 recommended) [optional]
   * Windows 10 SDK [optional]
 * Also required if building Tools:
-  * Boost 1.66.0 libraries: filesystem, system
+  * Boost 1.72.0 libraries: filesystem, system
   * Freetype 2.6.3
   * yaml-cpp 0.5.3
 
