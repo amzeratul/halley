@@ -1,28 +1,26 @@
 #include "scene_editor_game_bridge.h"
 #include "scene_editor_gizmo_collection.h"
+#include "halley/tools/project/project.h"
 #include "src/project/core_api_wrapper.h"
 using namespace Halley;
 
 
-SceneEditorGameBridge::SceneEditorGameBridge(const HalleyAPI& api, Resources& resources, UIFactory& factory)
+SceneEditorGameBridge::SceneEditorGameBridge(const HalleyAPI& api, Resources& resources, UIFactory& factory, Project& project)
 	: api(api)
 	, resources(resources)
 {
 	gizmos = std::make_unique<SceneEditorGizmoCollection>(factory, resources);
+
+	gameResources = &project.getGameResources();
+	gameDLL = project.getGameDLL();
+	if (gameDLL) {
+		loadDLL();
+	}
 }
 
 SceneEditorGameBridge::~SceneEditorGameBridge()
 {
 	unloadDLL();
-}
-
-void SceneEditorGameBridge::loadGame(std::shared_ptr<DynamicLibrary> dll, Resources& gameResources)
-{
-	this->gameResources = &gameResources;
-	gameDLL = std::move(dll);
-	if (gameDLL) {
-		loadDLL();
-	}
 }
 
 bool SceneEditorGameBridge::needsReload() const

@@ -2,15 +2,16 @@
 #include "halley/tools/dll/dynamic_library.h"
 
 namespace Halley {
+	class Project;
+
 	class SceneEditorGameBridge {
 	public:
-		SceneEditorGameBridge(const HalleyAPI& api, Resources& resources, UIFactory& factory);
+		SceneEditorGameBridge(const HalleyAPI& api, Resources& resources, UIFactory& factory, Project& project);
 		~SceneEditorGameBridge();
 
 		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState);
 		void render(RenderContext& rc) const;
 
-		void loadGame(std::shared_ptr<DynamicLibrary> dll, Resources& gameResources);
 		bool needsReload() const;
 		void reload();
 

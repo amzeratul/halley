@@ -18,18 +18,9 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 	, api(api)
 	, uiFactory(factory)
 	, project(project)
-	, gameBridge(std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory))
+	, gameBridge(std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory, project))
 {
 	makeUI();
-	load();
-}
-
-void SceneEditorWindow::load()
-{
-	const auto& dll = project.getGameDLL();
-	if (dll) {
-		gameBridge->loadGame(dll, project.getGameResources());
-	}
 }
 
 SceneEditorWindow::~SceneEditorWindow()

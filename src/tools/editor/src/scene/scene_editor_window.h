@@ -60,7 +60,6 @@ namespace Halley {
 		String curComponentName;
 
 		void makeUI();
-		void load();
 		void selectEntity(const String& id);
 		void panCameraToEntity(const String& id);
 		void saveEntity();
