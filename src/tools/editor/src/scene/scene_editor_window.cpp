@@ -10,15 +10,26 @@
 #include "halley/tools/yaml/yaml_convert.h"
 #include "halley/ui/ui_factory.h"
 #include "scene_editor_canvas.h"
+#include "scene_editor_game_bridge.h"
 using namespace Halley;
 
 SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api)
 	: UIWidget("scene_editor", {}, UISizer())
+	, api(api)
 	, uiFactory(factory)
 	, project(project)
+	, gameBridge(std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory))
 {
 	makeUI();
 	load();
+}
+
+void SceneEditorWindow::load()
+{
+	const auto& dll = project.getGameDLL();
+	if (dll) {
+		gameBridge->loadGame(dll, project.getGameResources());
+	}
 }
 
 SceneEditorWindow::~SceneEditorWindow()
@@ -48,11 +59,9 @@ void SceneEditorWindow::loadPrefab(const String& name)
 
 void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 {
-	Expects(canvas);
-
-	canvas->initializeInterfaceIfNeeded();
-	if (canvas->isLoaded()) {
-		auto& interface = canvas->getInterface();
+	gameBridge->initializeInterfaceIfNeeded();
+	if (gameBridge->isLoaded()) {
+		auto& interface = gameBridge->getInterface();
 		auto& world = interface.getWorld();
 
 		// Load prefab
@@ -78,22 +87,17 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		}
 
 		// Custom UI
-		canvas->guardedRun([&] ()
-		{
-			setCustomUI(canvas->getInterface().makeCustomUI());
-		});
+		setCustomUI(gameBridge->makeCustomUI());
 	}
 }
 
 void SceneEditorWindow::unloadScene()
 {
-	Expects(canvas);
-
 	setCustomUI({});
 
 	currentEntityId = "";
-	if (canvas->isLoaded()) {
-		auto& interface = canvas->getInterface();
+	if (gameBridge->isLoaded()) {
+		auto& interface = gameBridge->getInterface();
 		auto& world = interface.getWorld();
 		const auto cameraId = interface.getCameraId();
 		for (auto& e: world.getTopLevelEntities()) {
@@ -110,9 +114,9 @@ void SceneEditorWindow::unloadScene()
 
 void SceneEditorWindow::update(Time t, bool moved)
 {
-	if (canvas->needsReload()) {
+	if (gameBridge->needsReload()) {
 		unloadScene();
-		canvas->reload();
+		gameBridge->reload();
 		loadScene(*prefab);
 	}
 }
@@ -123,6 +127,7 @@ void SceneEditorWindow::makeUI()
 	
 	canvas = getWidgetAs<SceneEditorCanvas>("canvas");
 	canvas->setSceneEditorWindow(*this);
+	canvas->setGameBridge(*gameBridge);
 	
 	entityList = getWidgetAs<EntityList>("entityList");
 	entityList->setSceneEditorWindow(*this);
@@ -170,14 +175,6 @@ void SceneEditorWindow::makeUI()
 	});
 }
 
-void SceneEditorWindow::load()
-{
-	const auto& dll = project.getGameDLL();
-	if (dll) {
-		canvas->loadGame(dll, project.getGameResources());
-	}
-}
-
 void SceneEditorWindow::selectEntity(const String& id)
 {
 	decayTool();
@@ -206,17 +203,13 @@ void SceneEditorWindow::selectEntity(const String& id)
 	}
 	
 	entityEditor->loadEntity(actualId, entityData, prefabData, false, project.getGameResources());
-	if (canvas->isLoaded()) {
-		canvas->getInterface().setSelectedEntity(UUID(actualId), entityData);
-	}
+	gameBridge->setSelectedEntity(UUID(actualId), entityData);
 	currentEntityId = actualId;
 }
 
 void SceneEditorWindow::panCameraToEntity(const String& id)
 {
-	if (canvas->isLoaded()) {
-		canvas->getInterface().showEntity(UUID(id));
-	}
+	gameBridge->showEntity(UUID(id));
 }
 
 void SceneEditorWindow::saveEntity()
@@ -243,9 +236,7 @@ void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId)
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	selectEntity(id);
 
-	if (canvas->isLoaded()) {
-		canvas->getInterface().onEntityAdded(UUID(id), data);
-	}
+	gameBridge->onEntityAdded(UUID(id), data);
 	
 	markModified();
 }
@@ -256,9 +247,7 @@ void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	selectEntity(parentId);
 
-	if (canvas->isLoaded()) {
-		canvas->getInterface().onEntityRemoved(UUID(id));
-	}
+	gameBridge->onEntityRemoved(UUID(id));
 	
 	markModified();
 }
@@ -272,9 +261,7 @@ void SceneEditorWindow::onEntityModified(const String& id)
 
 		sceneData->reloadEntity(id);
 		
-		if (canvas->isLoaded()) {
-			canvas->getInterface().onEntityModified(UUID(id), data);
-		}
+		gameBridge->onEntityModified(UUID(id), data);
 	}
 
 	markModified();
@@ -286,9 +273,7 @@ void SceneEditorWindow::onEntityMoved(const String& id)
 		selectEntity(id);
 	}
 
-	if (canvas->isLoaded()) {
-		canvas->getInterface().onEntityMoved(UUID(id), sceneData->getEntityData(id).data);
-	}
+	gameBridge->onEntityMoved(UUID(id), sceneData->getEntityData(id).data);
 	
 	markModified();
 }
@@ -315,9 +300,7 @@ void SceneEditorWindow::setTool(SceneEditorTool tool)
 
 void SceneEditorWindow::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options)
 {
-	if (canvas->isLoaded()) {
-		options = canvas->getInterface().onToolSet(tool, componentName, fieldName, std::move(options));
-	}
+	gameBridge->onToolSet(tool, componentName, fieldName, std::move(options));
 
 	curTool = tool;
 	curComponentName = componentName;

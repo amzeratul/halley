@@ -37,9 +37,11 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 	private:
+		const HalleyAPI& api;
 		UIFactory& uiFactory;
 		Project& project;
 
+		std::shared_ptr<SceneEditorGameBridge> gameBridge;
 		std::shared_ptr<SceneEditorCanvas> canvas;
 		std::shared_ptr<EntityList> entityList;
 		std::shared_ptr<EntityEditor> entityEditor;

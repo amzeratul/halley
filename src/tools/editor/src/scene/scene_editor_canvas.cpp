@@ -1,5 +1,7 @@
 #include "scene_editor_canvas.h"
 
+
+#include "scene_editor_game_bridge.h"
 #include "halley/core/entry/entry_point.h"
 #include "halley/core/game/game.h"
 #include "halley/core/graphics/render_context.h"
@@ -16,7 +18,6 @@ using namespace Halley;
 
 SceneEditorCanvas::SceneEditorCanvas(String id, UIFactory& factory, Resources& resources, const HalleyAPI& api, std::optional<UISizer> sizer)
 	: UIWidget(std::move(id), Vector2f(32, 32), std::move(sizer))
-	, api(api)
 	, resources(resources)
 {
 	border.setImage(resources, "whitebox.png").setColour(Colour4f());
@@ -25,22 +26,21 @@ SceneEditorCanvas::SceneEditorCanvas(String id, UIFactory& factory, Resources& r
 	keyboard = api.input->getKeyboard();
 	mouse = api.input->getMouse();
 
-	gizmos = std::make_unique<SceneEditorGizmoCollection>(factory, resources);
-
 	setHandle(UIEventType::MouseWheel, [this](const UIEvent& event)
 	{
 		onMouseWheel(event);
 	});
 }
 
-SceneEditorCanvas::~SceneEditorCanvas()
-{
-	unloadDLL();
-}
-
 void SceneEditorCanvas::update(Time t, bool moved)
 {
-	updateInterface(t);
+	updateInputState();
+	if (gameBridge) {
+		gameBridge->update(t, inputState, outputState);
+	}
+	notifyOutputState();
+	clearInputState();
+
 	surface->setSize(Vector2i(getSize()) - Vector2i(2, 2));
 }
 
@@ -55,7 +55,7 @@ void SceneEditorCanvas::draw(UIPainter& painter) const
 
 	Sprite canvas;
 
-	if (interface && surface->isReady()) {
+	if (surface->isReady()) {
 		canvas = surface->getSurfaceSprite();
 	} else {
 		canvas.setImage(resources, "whitebox.png").setColour(Colour4f(0.2f, 0.2f, 0.2f));
@@ -68,7 +68,10 @@ void SceneEditorCanvas::draw(UIPainter& painter) const
 
 void SceneEditorCanvas::render(RenderContext& rc) const
 {
-	renderInterface(rc);
+	if (gameBridge && surface->isReady()) {
+		auto context = rc.with(surface->getRenderTarget());
+		gameBridge->render(context);
+	}
 }
 
 bool SceneEditorCanvas::canInteractWithMouse() const
@@ -128,50 +131,20 @@ void SceneEditorCanvas::onMouseOver(Vector2f mousePos)
 {
 	inputState.rawMousePos = mousePos;
 
-	if (dragging && interface) {
-		interface->dragCamera(lastMousePos - mousePos);
+	if (dragging && gameBridge) {
+		gameBridge->dragCamera(lastMousePos - mousePos);
 	}
 	lastMousePos = mousePos;
 }
 
 void SceneEditorCanvas::onMouseWheel(const UIEvent& event)
 {
-	if (interface) {
-		interface->changeZoom(event.getIntData(), lastMousePos - getPosition() - getSize() / 2);
-	}
+	gameBridge->changeZoom(event.getIntData(), lastMousePos - getPosition() - getSize() / 2);
 }
 
-void SceneEditorCanvas::loadGame(std::shared_ptr<DynamicLibrary> dll, Resources& gameResources)
+void SceneEditorCanvas::setGameBridge(SceneEditorGameBridge& bridge)
 {
-	this->gameResources = &gameResources;
-	gameDLL = std::move(dll);
-	if (gameDLL) {
-		loadDLL();
-	}
-}
-
-bool SceneEditorCanvas::needsReload() const
-{
-	if (gameDLL) {
-		return gameDLL->hasChanged();
-	}
-	return false;
-}
-
-void SceneEditorCanvas::reload()
-{
-	reloadDLL();
-}
-
-bool SceneEditorCanvas::isLoaded() const
-{
-	return interfaceReady;
-}
-
-ISceneEditor& SceneEditorCanvas::getInterface() const
-{
-	Expects(interface);
-	return *interface;
+	gameBridge = &bridge;
 }
 
 void SceneEditorCanvas::setSceneEditorWindow(SceneEditorWindow& window)
@@ -179,126 +152,10 @@ void SceneEditorCanvas::setSceneEditorWindow(SceneEditorWindow& window)
 	editorWindow = &window;
 }
 
-void SceneEditorCanvas::updateInterface(Time t)
-{
-	if (errorState) {
-		unloadDLL();
-	}
-
-	if (interface) {
-		initializeInterfaceIfNeeded();
-		updateInputState();
-		guardedRun([&] () {
-			interface->update(t, inputState, outputState);
-		});
-		notifyOutputState();
-		clearInputState();
-	}
-}
-
-void SceneEditorCanvas::renderInterface(RenderContext& rc) const
-{
-	if (errorState) {
-		return;
-	}
-
-	if (interface && surface->isReady()) {
-		guardedRun([&]() {
-			auto context = rc.with(surface->getRenderTarget());
-			interface->render(context);
-		});
-	}
-}
-
-void SceneEditorCanvas::initializeInterfaceIfNeeded()
-{
-	if (!interfaceReady) {
-		if (interface->isReadyToCreateWorld()) {
-			guardedRun([&]() {
-				interface->createWorld();
-				interfaceReady = true;
-			}, true);
-		}
-	}
-}
-
-void SceneEditorCanvas::loadDLL()
-{
-	Expects(gameDLL);
-
-	gameDLL->load(true);
-	auto getHalleyEntry = reinterpret_cast<IHalleyEntryPoint * (HALLEY_STDCALL*)()>(gameDLL->getFunction("getHalleyEntry"));
-	auto game = getHalleyEntry()->createGame();
-	guardedRun([&]() {
-		interface = game->createSceneEditorInterface();
-		interfaceReady = false;
-		errorState = false;
-	});
-	game.reset();
-
-	if (interface) {
-		gameCoreAPI = std::make_unique<CoreAPIWrapper>(*api.core);
-		gameAPI = api.clone();
-		gameAPI->replaceCoreAPI(gameCoreAPI.get());
-
-		SceneEditorContext context;
-		context.resources = gameResources;
-		context.editorResources = &resources;
-		context.api = gameAPI.get();
-		context.gizmos = gizmos.get();
-
-		guardedRun([&]() {
-			interface->init(context);
-		});
-		if (errorState) {
-			unloadDLL();
-		} else {
-			initializeInterfaceIfNeeded();
-		}
-	}
-}
-
-void SceneEditorCanvas::unloadDLL()
-{
-	interface.reset();
-	interfaceReady = false;
-
-	if (gameDLL) {
-		gameDLL->unload();
-	}
-
-	gameAPI.reset();
-	gameCoreAPI.reset();
-
-	errorState = false;
-}
-
-void SceneEditorCanvas::reloadDLL()
-{
-	Logger::logWarning("SceneEditorCanvas::reloadDLL() not implemented yet");
-}
-
-void SceneEditorCanvas::guardedRun(const std::function<void()>& f, bool allowFailure) const
-{
-	try {
-		f();
-	} catch (const std::exception& e) {
-		Logger::logException(e);
-		if (!allowFailure) {
-			errorState = true;
-		}
-	} catch (...) {
-		Logger::logError("Unknown error in SceneEditorCanvas, probably from game dll");
-		if (!allowFailure) {
-			errorState = true;
-		}
-	}
-}
-
 std::shared_ptr<UIWidget> SceneEditorCanvas::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
 {
 	this->tool = tool;
-	return gizmos->setTool(tool, componentName, fieldName, options);
+	return gameBridge->getGizmos().setTool(tool, componentName, fieldName, options);
 }
 
 void SceneEditorCanvas::updateInputState()
