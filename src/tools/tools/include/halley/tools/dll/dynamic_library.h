@@ -21,6 +21,8 @@ namespace Halley
 		bool isLoaded() const;
 		bool hasChanged() const;
 
+		void clearTempDirectory();
+
 	private:
 		std::string libName;
 		boost::filesystem::path libOrigPath;
@@ -38,6 +40,8 @@ namespace Halley
 		bool loaded = false;
 
 		mutable std::vector<boost::filesystem::path> toDelete;
+
 		void flushLoaded() const;
+		boost::filesystem::path getTempPath() const;
 	};
 }

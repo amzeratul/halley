@@ -36,7 +36,7 @@ void DynamicLibrary::load(bool withAnotherName)
 	// Determine which path to load
 	hasTempPath = withAnotherName;
 	if (withAnotherName) {
-		auto tmpPath = libOrigPath.parent_path() / "halley_tmp";
+		auto tmpPath = getTempPath();
 		create_directories(tmpPath);
 
 		Bytes randomBytes(8);
@@ -154,6 +154,12 @@ bool DynamicLibrary::hasChanged() const
 	return last_write_time(libOrigPath) > libLastWrite && last_write_time(debugSymbolsOrigPath) > debugLastWrite;
 }
 
+void DynamicLibrary::clearTempDirectory()
+{
+	boost::system::error_code ec;
+	boost::filesystem::remove_all(getTempPath(), ec);
+}
+
 void DynamicLibrary::flushLoaded() const
 {
 	// WARNING: Don't call any Halley globals here (especially Logger)
@@ -167,4 +173,9 @@ void DynamicLibrary::flushLoaded() const
 	}
 
 	toDelete = std::move(remaining);
+}
+
+path DynamicLibrary::getTempPath() const
+{
+	return libOrigPath.parent_path() / "halley_tmp";
 }

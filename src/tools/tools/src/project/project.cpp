@@ -35,6 +35,7 @@ Project::Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader&
 	if (!dllPath.isEmpty()) {
 		try {
 			gameDll = std::make_shared<DynamicLibrary>(dllPath.string());
+			gameDll->clearTempDirectory();
 			gameDll->load(false);
 			Logger::logInfo("Loaded " + dllPath.string());
 		} catch (...) {
