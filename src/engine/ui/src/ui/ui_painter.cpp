@@ -98,7 +98,7 @@ void UIPainter::draw(const TextRenderer& text, bool forceCopy)
 		
 		auto onScreen = Rect4f(Vector2f(), text.getExtents()).intersection(targetClip);
 		if (onScreen.getWidth() > 0.1f && onScreen.getHeight() > 0.1f) {
-			painter->addCopy(text.clone().setClip(clip.value() - text.getPosition()), mask, layer, getCurrentPriorityAndIncrement());
+			painter->addCopy(text.clone().setClip(targetClip), mask, layer, getCurrentPriorityAndIncrement());
 		}
 	} else {
 		if (forceCopy) {

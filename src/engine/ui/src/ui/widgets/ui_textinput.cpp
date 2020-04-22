@@ -114,9 +114,17 @@ bool UITextInput::isReadOnly() const
 
 void UITextInput::draw(UIPainter& painter) const
 {
-	painter.draw(sprite);
-	painter.draw(ghostLabel);
-	painter.draw(label);
+	if (sprite.hasMaterial()) {
+		painter.draw(sprite);
+	}
+	
+	if (!ghostLabel.empty()) {
+		painter.draw(ghostLabel);
+	}
+	
+	if (!label.empty()) {
+		painter.draw(label);
+	}
 
 	if (caretShowing && caret.hasMaterial()) {
 		painter.draw(caret);

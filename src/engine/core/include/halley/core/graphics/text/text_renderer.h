@@ -73,6 +73,8 @@ namespace Halley
 		float getLineHeight() const;
 		float getAlignment() const;
 
+		bool empty() const;
+
 	private:
 		std::shared_ptr<const Font> font;
 		mutable std::map<const Font*, std::shared_ptr<Material>> materials;

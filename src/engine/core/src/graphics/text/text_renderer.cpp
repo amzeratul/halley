@@ -529,6 +529,11 @@ float TextRenderer::getAlignment() const
 	return align;
 }
 
+bool TextRenderer::empty() const
+{
+	return text.empty();
+}
+
 float TextRenderer::getScale(const Font& f) const
 {
 	const bool usingReplacement = &f != font.get();

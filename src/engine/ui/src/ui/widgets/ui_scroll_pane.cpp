@@ -119,7 +119,6 @@ void UIScrollPane::refresh(bool force)
 	scrollTo(getScrollPosition());
 }
 
-
 void UIScrollPane::drawChildren(UIPainter& painter) const
 {
 	auto p = painter.withClip(getRect());
