@@ -56,6 +56,8 @@ namespace Halley {
 		Resources& resources;
 		ConfigNodeSerializationContext context;
 
+		ConfigNode dummyPrefab;
+
 		void createEntityTreeForScene(const ConfigNode& node, EntityScene& curScene, std::shared_ptr<const Prefab> prefab, std::optional<int> index = {});
 		EntityRef createEntityTree(const ConfigNode& node, EntityScene* curScene);
 		EntityRef createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate, EntityScene* curScene);
@@ -64,6 +66,7 @@ namespace Halley {
 		void doUpdateEntityTree(EntityRef& entity, const ConfigNode& node, bool refreshing);
 		
 		std::shared_ptr<const Prefab> getPrefab(const String& id) const;
+		const ConfigNode& getPrefabNode(const String& id) const;
 
 		void startContext();
 		ConfigNodeSerializationContext makeContext() const;

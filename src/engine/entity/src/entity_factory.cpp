@@ -12,6 +12,9 @@ EntityFactory::EntityFactory(World& world, Resources& resources)
 	, resources(resources)
 	, context(makeContext())
 {
+	dummyPrefab = ConfigNode(ConfigNode::MapType());
+	dummyPrefab["uuid"] = "00000000-0000-0000-0000-000000000000";
+	dummyPrefab["name"] = "Missing";
 }
 
 EntityFactory::~EntityFactory()
@@ -36,13 +39,18 @@ EntityRef EntityFactory::createEntity(const ConfigNode& node)
 
 EntityRef EntityFactory::createPrefab(std::shared_ptr<const Prefab> prefab)
 {
-	const auto& node = prefab->getRoot();
-	if (node.getType() == ConfigNodeType::Sequence) {
-		throw Exception("Prefab seems to have more than one root; use EntityFactory::createScene() instead", HalleyExceptions::Entity);
+	if (!prefab) {
+		Logger::logWarning("Missing prefab");
+		return EntityRef();
+	} else {
+		const auto& node = prefab->getRoot();
+		if (node.getType() == ConfigNodeType::Sequence) {
+			throw Exception("Prefab seems to have more than one root; use EntityFactory::createScene() instead", HalleyExceptions::Entity);
+		}
+		
+		startContext();
+		return createEntityTree(node, nullptr);
 	}
-	
-	startContext();
-	return createEntityTree(node, nullptr);
 }
 
 EntityScene EntityFactory::createScene(std::shared_ptr<const Prefab> prefab)
@@ -80,7 +88,7 @@ EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, const Con
 {
 	const bool isPrefab = treeNode.hasKey("prefab");
 	const auto prefab = isPrefab ? getPrefab(treeNode["prefab"].asString()) : std::shared_ptr<const Prefab>();
-	const auto& node = prefab ? prefab->getRoot() : treeNode;
+	const auto& node = isPrefab ? (prefab ? prefab->getRoot() : dummyPrefab) : treeNode;
 	
 	const auto uuid = UUID(treeNode["uuid"].asString()); // Use UUID in parent, not in prefab
 	auto entity = world.createEntity(uuid, node["name"].asString(""), parent);
@@ -107,8 +115,7 @@ EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, const Con
 void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, UpdateMode mode)
 {
 	const bool isPrefab = treeNode.hasKey("prefab");
-	const auto prefab = isPrefab ? getPrefab(treeNode["prefab"].asString()) : std::shared_ptr<const Prefab>();
-	const auto& node = prefab ? prefab->getRoot() : treeNode;
+	const auto& node = isPrefab ? getPrefabNode(treeNode["prefab"].asString()) : treeNode;
 	auto* overrideNodes = isPrefab ? &treeNode : nullptr;
 	
 	std::vector<int> idsUpdated;
@@ -205,8 +212,7 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 	updateEntity(entity, treeNode, refreshing ? UpdateMode::UpdateAllDeleteOld : UpdateMode::UpdateAll);
 
 	const bool isPrefab = treeNode.hasKey("prefab");
-	const auto prefab = isPrefab ? getPrefab(treeNode["prefab"].asString()) : std::shared_ptr<const Prefab>();
-	const auto& node = prefab ? prefab->getRoot() : treeNode;
+	const auto& node = isPrefab ? getPrefabNode(treeNode["prefab"].asString()) : treeNode;
 
 	const auto& childNodes = node["children"].getType() == ConfigNodeType::Sequence ? node["children"].asSequence() : ConfigNode::SequenceType();
 	const size_t nNodes = childNodes.size();
@@ -257,7 +263,17 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 
 std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const
 {
-	return resources.get<Prefab>(id);
+	return resources.exists<Prefab>(id) ? resources.get<Prefab>(id) : std::shared_ptr<const Prefab>();
+}
+
+const ConfigNode& EntityFactory::getPrefabNode(const String& id) const
+{
+	const auto p = getPrefab(id);
+	if (p) {
+		return p->getRoot();
+	} else {
+		return dummyPrefab;
+	}
 }
 
 void EntityFactory::startContext()

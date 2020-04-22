@@ -79,10 +79,13 @@ void PrefabSceneData::fillEntityTree(const ConfigNode& node, EntityTree& tree) c
 	tree.entityId = node["uuid"].asString("");
 	if (node.hasKey("prefab")) {
 		const auto& prefabName = node["prefab"].asString();
-		const auto& prefabNode = gameResources.get<Prefab>(prefabName)->getRoot();
-		//tree.entityId = prefabNode["uuid"].asString("");
-		tree.name = prefabNode["name"].asString("");
 		tree.prefab = prefabName;
+		if (gameResources.exists<Prefab>(prefabName)) {
+			const auto& prefabNode = gameResources.get<Prefab>(prefabName)->getRoot();
+			tree.name = prefabNode["name"].asString("");
+		} else {
+			tree.name = "Missing Prefab";
+		}
 	} else {
 		tree.name = node["name"].asString("Entity");
 		if (node["children"].getType() == ConfigNodeType::Sequence) {
