@@ -47,7 +47,7 @@ namespace Halley {
 		std::shared_ptr<std::ostream> newstream;
 	};
 
-	class RedirectStreamToStream : public RedirectStream {
+	class RedirectStreamToStream final : public RedirectStream {
 	public:
 		RedirectStreamToStream(std::ostream& source, std::shared_ptr<std::ostream> dst, bool exclusive);
 		~RedirectStreamToStream();

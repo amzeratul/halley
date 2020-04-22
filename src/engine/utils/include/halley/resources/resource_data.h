@@ -55,7 +55,7 @@ namespace Halley {
 		String path;
 	};
 
-	class ResourceDataStatic : public ResourceData {
+	class ResourceDataStatic final : public ResourceData {
 	public:
 		ResourceDataStatic(String path);
 		ResourceDataStatic(const void* data, size_t size, String path, bool owning = true);
@@ -79,7 +79,7 @@ namespace Halley {
 	};
 
 	typedef std::function<std::unique_ptr<ResourceDataReader>()> ResourceDataMakeReader;
-	class ResourceDataStream : public ResourceData {
+	class ResourceDataStream final : public ResourceData {
 	public:
 		ResourceDataStream(String path, ResourceDataMakeReader makeReader);
 		std::unique_ptr<ResourceDataReader> getReader() const { return make(); }

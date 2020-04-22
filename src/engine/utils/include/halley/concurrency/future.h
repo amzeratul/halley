@@ -389,7 +389,7 @@ namespace Halley
 	};
 
 	template <typename T>
-	class MovableStdFunction : public MovableFunctionBase<T>
+	class MovableStdFunction final : public MovableFunctionBase<T>
 	{
 	public:
 		MovableStdFunction(std::function<T()> f)
@@ -405,7 +405,7 @@ namespace Halley
 	};
 
 	template <typename T, typename U>
-	class MovableBoundFunction : public MovableFunctionBase<T>
+	class MovableBoundFunction final : public MovableFunctionBase<T>
 	{
 	public:
 		MovableBoundFunction(std::function<T(U&&)> f, U&& v)

@@ -7,7 +7,7 @@ namespace Halley {
 	class SystemAPI;
 	class AssetPack;
 
-	class PackResourceLocator : public IResourceLocatorProvider {
+	class PackResourceLocator final : public IResourceLocatorProvider {
 	public:
 		explicit PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, String encryptionKey = "", bool preLoad = false, std::optional<int> priority = {});
 		~PackResourceLocator();

@@ -71,7 +71,7 @@ namespace Halley
 	};
 
 	template <typename T>
-	class ResourceCollection : public ResourceCollectionBase
+	class ResourceCollection final : public ResourceCollectionBase
 	{
 		static_assert(std::is_base_of<Resource, T>::value, "Type must extend Resource");
 

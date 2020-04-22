@@ -11,7 +11,7 @@ namespace Halley {
 		virtual bool isEnabled();
 	};
 
-	class UINumericValidator : public UIValidator {
+	class UINumericValidator final : public UIValidator {
 	public:
 		UINumericValidator(bool allowNegative, bool allowFloatingPoint = false);
 		StringUTF32 onTextChanged(StringUTF32) override;
@@ -21,7 +21,7 @@ namespace Halley {
 		bool allowFloat;
 	};
 
-	class UIFunctionValidator : public UIValidator {
+	class UIFunctionValidator final : public UIValidator {
 	public:
 		explicit UIFunctionValidator(std::function<bool()> validate);
 		bool isEnabled() override;
@@ -30,7 +30,7 @@ namespace Halley {
 		std::function<bool()> f;
 	};
 
-	class UITextFunctionValidator : public UIValidator {
+	class UITextFunctionValidator final : public UIValidator {
 	public:
 		explicit UITextFunctionValidator(std::function<StringUTF32(StringUTF32)> validate);
 		StringUTF32 onTextChanged(StringUTF32 changedTo) override;

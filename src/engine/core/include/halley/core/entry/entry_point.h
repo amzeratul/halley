@@ -24,7 +24,7 @@ namespace Halley
 	};
 
 	template <typename GameType>
-	class HalleyEntryPoint : public IHalleyEntryPoint
+	class HalleyEntryPoint final : public IHalleyEntryPoint
 	{
 	public:
 		std::unique_ptr<Game> createGame() override

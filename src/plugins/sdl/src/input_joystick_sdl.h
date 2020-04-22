@@ -25,7 +25,7 @@
 
 namespace Halley {
 
-	class InputJoystickSDL : public InputJoystick {
+	class InputJoystickSDL final : public InputJoystick {
 	public:
 		~InputJoystickSDL();
 		std::string getName() const final override;

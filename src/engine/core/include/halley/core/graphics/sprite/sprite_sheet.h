@@ -46,7 +46,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 	};
 	
-	class SpriteSheet : public Resource
+	class SpriteSheet final : public Resource
 	{
 	public:
 		const std::shared_ptr<const Texture>& getTexture() const;
@@ -84,7 +84,7 @@ namespace Halley
 		void loadTexture(Resources& resources) const;
 	};
 
-	class SpriteResource : public Resource
+	class SpriteResource final : public Resource
 	{
 	public:
 		SpriteResource(std::shared_ptr<const SpriteSheet> spriteSheet, size_t idx);

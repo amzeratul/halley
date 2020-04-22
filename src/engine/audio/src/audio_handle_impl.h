@@ -7,7 +7,7 @@ namespace Halley
 	class AudioFacade;
 	class AudioVoice;
 
-	class AudioHandleImpl : public IAudioHandle
+	class AudioHandleImpl final : public IAudioHandle
 	{
 	public:
 		AudioHandleImpl(AudioFacade& facade, uint32_t id);

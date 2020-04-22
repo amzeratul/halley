@@ -3,7 +3,7 @@
 
 namespace Halley {
 	
-	class DX11Plugin : public Plugin {
+	class DX11Plugin final : public Plugin {
 		HalleyAPIInternal* createAPI(SystemAPI* system) override { return new DX11Video(*system); }
 		PluginType getType() override { return PluginType::GraphicsAPI; }
 		String getName() override { return "Video/DX11"; }

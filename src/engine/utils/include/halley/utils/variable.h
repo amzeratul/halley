@@ -82,7 +82,7 @@ namespace Halley {
 	}
 
 	template <typename T>
-	class Variable : public Internal::VariableBase {
+	class Variable final : public Internal::VariableBase {
 	public:
 		Variable() = default;
 		
@@ -107,7 +107,7 @@ namespace Halley {
 		}
 	};
 
-	class VariableTable : public Resource {
+	class VariableTable final : public Resource {
 	public:
 		VariableTable();
 		VariableTable(const ConfigNode& node);

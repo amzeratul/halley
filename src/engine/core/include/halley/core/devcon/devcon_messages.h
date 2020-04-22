@@ -28,7 +28,7 @@ namespace Halley
 			virtual MessageType getMessageType() const = 0;
 		};
 
-		class LogMsg : public DevConMessage
+		class LogMsg final : public DevConMessage
 		{
 		public:
 			LogMsg(gsl::span<const gsl::byte> data);
@@ -45,7 +45,7 @@ namespace Halley
 			String msg;
 		};
 
-		class ReloadAssetsMsg : public DevConMessage
+		class ReloadAssetsMsg final : public DevConMessage
 		{
 		public:
 			ReloadAssetsMsg(gsl::span<const gsl::byte> data);

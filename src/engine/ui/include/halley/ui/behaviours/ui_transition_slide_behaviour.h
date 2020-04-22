@@ -6,7 +6,7 @@
 namespace Halley {
 	class UIAnchor;
 
-	class UITransitionSlideBehaviour : public UIBehaviour {
+	class UITransitionSlideBehaviour final : public UIBehaviour {
 		enum class Mode {
 			FadeIn,
 			Normal,

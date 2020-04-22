@@ -6,7 +6,7 @@ namespace Halley
 {
 	class DX11SwapChain;
 
-	class DX11ScreenRenderTarget : public ScreenRenderTarget, public IDX11RenderTarget
+	class DX11ScreenRenderTarget final : public ScreenRenderTarget, public IDX11RenderTarget
 	{
 	public:
 		explicit DX11ScreenRenderTarget(DX11Video& video, const Rect4i& viewPort);

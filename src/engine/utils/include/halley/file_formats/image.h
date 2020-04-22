@@ -33,7 +33,7 @@ namespace Halley {
 	class ResourceDataStatic;
 	class ResourceLoader;
 
-	class Image : public Resource {
+	class Image final : public Resource {
 	public:
 		enum class Format {
 			Undefined,

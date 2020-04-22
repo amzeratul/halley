@@ -23,7 +23,7 @@ namespace Halley
 		virtual void log(LoggerLevel level, const String& msg) = 0;
 	};
 
-	class StdOutSink : public ILoggerSink {
+	class StdOutSink final : public ILoggerSink {
 	public:
 		explicit StdOutSink(bool devMode);
 		void log(LoggerLevel level, const String& msg) override;

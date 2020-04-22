@@ -8,7 +8,7 @@ namespace Halley
 {
 	class DX11Video;
 
-	class DX11Texture : public Texture
+	class DX11Texture final : public Texture
 	{
 	public:
 		DX11Texture(DX11Video& video, Vector2i size);

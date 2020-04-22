@@ -10,7 +10,7 @@ namespace Halley {
 	    virtual bool update(float elapsedTime, AudioVoice& audioSource) = 0;
     };
 
-	class AudioVoiceFadeBehaviour: public AudioVoiceBehaviour {
+	class AudioVoiceFadeBehaviour final : public AudioVoiceBehaviour {
 	public:
 		AudioVoiceFadeBehaviour(float fadeTime, float targetVolume, bool stopAtEnd);
 

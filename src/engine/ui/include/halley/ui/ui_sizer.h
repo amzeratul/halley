@@ -88,7 +88,7 @@ namespace Halley {
 		virtual void addStretchSpacer(float proportion = 0) = 0;
 	};
 
-	class UISizer : public IUIElement, public IUISizer {
+	class UISizer final : public IUIElement, public IUISizer {
 	public:
 		explicit UISizer(UISizerType type = UISizerType::Horizontal, float gap = 1.0f, int nColumns = 0);
 

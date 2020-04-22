@@ -28,7 +28,7 @@
 #include <jni.h>
 
 namespace Halley {
-	class OSAndroid : public OSUnix {
+	class OSAndroid final : public OSUnix {
 	public:
 		OSAndroid();
 		virtual String getUserDataDir();

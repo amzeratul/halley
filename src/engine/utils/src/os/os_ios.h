@@ -27,7 +27,7 @@
 #include "os_unix.h"
 
 namespace Halley {
-	class OSiOS : public OSUnix {
+	class OSiOS final : public OSUnix {
 	public:
 		OSiOS();
 		virtual String getUserDataDir();

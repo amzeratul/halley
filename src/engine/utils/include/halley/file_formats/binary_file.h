@@ -9,7 +9,7 @@ namespace Halley
 {
 	class ResourceLoader;
 
-	class BinaryFile : public Resource
+	class BinaryFile final : public Resource
 	{
 	public:
 		BinaryFile();

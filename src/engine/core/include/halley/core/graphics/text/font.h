@@ -11,7 +11,7 @@ namespace Halley
 	class Deserializer;
 	class Serializer;
 
-	class Font : public Resource
+	class Font final : public Resource
 	{
 	public:
 		class Glyph

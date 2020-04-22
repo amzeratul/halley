@@ -9,7 +9,7 @@ namespace Halley {
 
 	class InputKeyboardSDL;
 
-	class SDLTextInputCapture : public ITextInputCapture {
+	class SDLTextInputCapture final : public ITextInputCapture {
 	public:
 		SDLTextInputCapture(InputKeyboardSDL& parent);
 		~SDLTextInputCapture();
@@ -28,7 +28,7 @@ namespace Halley {
 		TextInputData* textInput;
 	};
 
-	class InputKeyboardSDL : public InputKeyboard {
+	class InputKeyboardSDL final : public InputKeyboard {
 	public:
 		std::unique_ptr<ITextInputCapture> makeTextInputCapture() override;
 		String getButtonName(int code) override;

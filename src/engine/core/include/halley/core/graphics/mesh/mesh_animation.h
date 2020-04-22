@@ -3,7 +3,7 @@
 #include "halley/resources/resource.h"
 
 namespace Halley {
-    class MeshAnimation : public Resource {
+    class MeshAnimation final : public Resource {
 
     };
 }

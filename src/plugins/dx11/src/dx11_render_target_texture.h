@@ -4,7 +4,7 @@
 
 namespace Halley
 {
-	class DX11TextureRenderTarget : public TextureRenderTarget, public IDX11RenderTarget
+	class DX11TextureRenderTarget final : public TextureRenderTarget, public IDX11RenderTarget
 	{
 	public:
 		DX11TextureRenderTarget(DX11Video& video);

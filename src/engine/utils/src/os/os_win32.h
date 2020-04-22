@@ -29,7 +29,7 @@
 #include <wbemidl.h>
 
 namespace Halley {
-	class OSWin32 : public OS {
+	class OSWin32 final : public OS {
 	public:
 		OSWin32();
 		~OSWin32();

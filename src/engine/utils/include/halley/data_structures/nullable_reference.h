@@ -32,7 +32,7 @@ namespace Halley {
 	};
 
 	template <typename T>
-	class NullableReferenceOf : public NullableReference {
+	class NullableReferenceOf final : public NullableReference {
 	public:
 		NullableReferenceOf()
 		{}

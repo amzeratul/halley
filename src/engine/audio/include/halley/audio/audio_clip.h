@@ -20,7 +20,7 @@ namespace Halley
 		virtual bool isLoaded() const { return true; }
 	};
 
-	class AudioClip : public AsyncResource, public IAudioClip
+	class AudioClip final : public AsyncResource, public IAudioClip
 	{
 	public:
 		AudioClip(uint8_t numChannels);
@@ -55,7 +55,7 @@ namespace Halley
 		mutable std::unique_ptr<VorbisData> vorbisData;
 	};
 
-	class StreamingAudioClip : public IAudioClip
+	class StreamingAudioClip final : public IAudioClip
 	{
 	public:
 		StreamingAudioClip(uint8_t numChannels);

@@ -61,7 +61,7 @@ namespace Halley {
     };
 
 
-	class PackDataReader : public ResourceDataReader {
+	class PackDataReader final : public ResourceDataReader {
 	public:
 		PackDataReader(AssetPack& pack, size_t startPos, size_t fileSize);
 

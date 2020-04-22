@@ -25,7 +25,7 @@ namespace Halley {
 	};
 
 	template <typename T>
-	class StaticGameLoader : public GameLoader
+	class StaticGameLoader final : public GameLoader
 	{
 	public:
 		std::unique_ptr<Game> createGame() override
@@ -34,7 +34,7 @@ namespace Halley {
 		}
 	};
 
-	class EntryPointGameLoader : public GameLoader
+	class EntryPointGameLoader final : public GameLoader
 	{
 	public:
 		EntryPointGameLoader(IHalleyEntryPoint& entryPoint)
@@ -51,7 +51,7 @@ namespace Halley {
 		IHalleyEntryPoint& entryPoint;
 	};
 
-	class DummyGameLoader : public GameLoader
+	class DummyGameLoader final : public GameLoader
 	{
 	public:
 		std::unique_ptr<Game> createGame() override

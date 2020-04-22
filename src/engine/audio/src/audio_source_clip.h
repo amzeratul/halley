@@ -3,7 +3,7 @@
 
 namespace Halley
 {
-	class AudioSourceClip : public AudioSource
+	class AudioSourceClip final : public AudioSource
 	{
 	public:
 		AudioSourceClip(std::shared_ptr<const IAudioClip> clip, bool looping, int64_t delaySamples);

@@ -9,7 +9,7 @@ namespace Halley
 {
 	class DX11Video;
 
-	class DX11Shader : public Shader
+	class DX11Shader final : public Shader
 	{
 	public:
 		DX11Shader(DX11Video& video, const ShaderDefinition& definition);

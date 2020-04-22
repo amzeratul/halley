@@ -14,7 +14,7 @@ namespace Halley
 	class IAudioEventAction;
 	class Resources;
 
-	class AudioEvent : public Resource
+	class AudioEvent final : public Resource
 	{
 	public:
 		AudioEvent();
@@ -61,7 +61,7 @@ namespace Halley
 		virtual void loadDependencies(const Resources& resources) {}
 	};
 
-	class AudioEventActionPlay : public IAudioEventAction
+	class AudioEventActionPlay final : public IAudioEventAction
 	{
 	public:
 		explicit AudioEventActionPlay(AudioEvent& event);

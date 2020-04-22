@@ -20,7 +20,7 @@ namespace Halley {
 		Gamepad
 	};
 	
-	class UIRoot : public UIParent {
+	class UIRoot final : public UIParent {
 	public:
 		explicit UIRoot(AudioAPI* audio, Rect4f rect = {});
 

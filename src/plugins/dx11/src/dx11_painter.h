@@ -16,7 +16,7 @@ namespace Halley
 	class DX11RasterizerOptions;
 	class DX11DepthStencil;
 
-	class DX11Painter : public Painter
+	class DX11Painter final : public Painter
 	{
 	public:
 		explicit DX11Painter(DX11Video& video, Resources& resources);

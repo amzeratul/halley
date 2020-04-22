@@ -5,7 +5,7 @@
 
 namespace Halley
 {
-	class AudioFilterResample : public AudioSource
+	class AudioFilterResample final : public AudioSource
 	{
 	public:
 		AudioFilterResample(std::shared_ptr<AudioSource> source, int fromHz, int toHz, AudioBufferPool& pool);

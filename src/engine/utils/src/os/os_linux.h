@@ -27,7 +27,7 @@
 #include "os_unix.h"
 
 namespace Halley {
-	class OSLinux : public OSUnix {
+	class OSLinux final : public OSUnix {
 	public:
 		String getUserDataDir() override;
 		ComputerData getComputerData() override;

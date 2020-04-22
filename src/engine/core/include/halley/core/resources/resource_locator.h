@@ -43,7 +43,7 @@ namespace Halley {
 		virtual void purge(SystemAPI& system) = 0;
 	};
 
-	class ResourceLocator : public IResourceLocator
+	class ResourceLocator final : public IResourceLocator
 	{
 	public:
 		explicit ResourceLocator(SystemAPI& system);

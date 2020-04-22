@@ -57,7 +57,7 @@ namespace Halley {
 		};
 	}
 
-	class Exception : public std::exception {
+	class Exception final : public std::exception {
 	public:
 		Exception() = default;
 		Exception(String msg, int errorCode) noexcept;

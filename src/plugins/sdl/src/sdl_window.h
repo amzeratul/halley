@@ -4,7 +4,7 @@
 
 namespace Halley
 {
-	class SDLWindow : public Window
+	class SDLWindow final : public Window
 	{
 	public:
 		SDLWindow(SDL_Window* window);

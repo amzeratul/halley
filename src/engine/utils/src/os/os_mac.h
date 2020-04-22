@@ -27,7 +27,7 @@
 #include "os_unix.h"
 
 namespace Halley {
-	class OSMac : public OSUnix {
+	class OSMac final : public OSUnix {
 	public:
 		String getUserDataDir() override;
 		Path parseProgramPath(const String&) override;

@@ -38,7 +38,7 @@ namespace Halley
 		Vector<MaterialAttribute> vertexAttributes;
 	};
 
-	class ShaderFile : public Resource
+	class ShaderFile final : public Resource
 	{
 	public:
 		std::map<ShaderType, Bytes> shaders;

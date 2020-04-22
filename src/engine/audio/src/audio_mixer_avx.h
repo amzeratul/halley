@@ -4,7 +4,7 @@
 #ifdef HAS_AVX
 namespace Halley
 {
-	class AudioMixerAVX : public AudioMixer
+	class AudioMixerAVX final : public AudioMixer
 	{
 	public:
 		void mixAudio(gsl::span<const AudioSamplePack> src, gsl::span<AudioSamplePack> dst, float gainStart, float gainEnd) override;

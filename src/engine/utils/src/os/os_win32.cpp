@@ -560,7 +560,7 @@ int OSWin32::runCommand(String rawCommand)
 	return int(exitCode);
 }
 
-class Win32Clipboard : public IClipboard {
+class Win32Clipboard final : public IClipboard {
 public:
 	void setData(const String& stringData) override
 	{

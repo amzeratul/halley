@@ -6,7 +6,7 @@
 namespace Halley {
 	class SystemAPI;
 
-	class FileSystemResourceLocator : public IResourceLocatorProvider {
+	class FileSystemResourceLocator final : public IResourceLocatorProvider {
 	public:
 		FileSystemResourceLocator(SystemAPI& system, const Path& basePath);
 

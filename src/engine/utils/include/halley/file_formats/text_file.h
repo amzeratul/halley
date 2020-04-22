@@ -7,7 +7,7 @@ namespace Halley
 {
 	class ResourceLoader;
 
-	class TextFile : public Resource
+	class TextFile final : public Resource
 	{
 	public:
 		TextFile();

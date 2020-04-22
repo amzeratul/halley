@@ -46,7 +46,7 @@ namespace Halley {
 		void setAcceptingDataFromWidget(bool accepting);
     };
 
-	class UIDataBindBool : public UIDataBind {
+	class UIDataBindBool final : public UIDataBind {
 	public:
 		using WriteCallback = std::function<void(bool)>;
 
@@ -70,7 +70,7 @@ namespace Halley {
 		WriteCallback writeCallback;
 	};
 
-	class UIDataBindInt : public UIDataBind {
+	class UIDataBindInt final : public UIDataBind {
 	public:
 		using WriteCallback = std::function<void(int)>;
 
@@ -93,7 +93,7 @@ namespace Halley {
 		WriteCallback writeCallback;
 	};
 
-	class UIDataBindFloat : public UIDataBind {
+	class UIDataBindFloat final : public UIDataBind {
 	public:
 		using WriteCallback = std::function<void(float)>;
 
@@ -116,7 +116,7 @@ namespace Halley {
 		WriteCallback writeCallback;
 	};
 
-	class UIDataBindString : public UIDataBind {
+	class UIDataBindString final : public UIDataBind {
 	public:
 		using WriteCallback = std::function<void(String)>;
 
