@@ -50,6 +50,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 {
 	Expects(canvas);
 
+	canvas->initializeInterfaceIfNeeded();
 	if (canvas->isLoaded()) {
 		auto& interface = canvas->getInterface();
 		auto& world = interface.getWorld();
@@ -205,13 +206,17 @@ void SceneEditorWindow::selectEntity(const String& id)
 	}
 	
 	entityEditor->loadEntity(actualId, entityData, prefabData, false, project.getGameResources());
-	canvas->getInterface().setSelectedEntity(UUID(actualId), entityData);
+	if (canvas->isLoaded()) {
+		canvas->getInterface().setSelectedEntity(UUID(actualId), entityData);
+	}
 	currentEntityId = actualId;
 }
 
 void SceneEditorWindow::panCameraToEntity(const String& id)
 {
-	canvas->getInterface().showEntity(UUID(id));
+	if (canvas->isLoaded()) {
+		canvas->getInterface().showEntity(UUID(id));
+	}
 }
 
 void SceneEditorWindow::saveEntity()

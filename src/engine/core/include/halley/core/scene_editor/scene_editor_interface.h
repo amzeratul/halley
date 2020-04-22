@@ -97,6 +97,9 @@ namespace Halley {
         virtual void init(SceneEditorContext& context) = 0;
         virtual void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState) = 0;
         virtual void render(RenderContext& rc) = 0;
+
+    	virtual bool isReadyToCreateWorld() const = 0;
+    	virtual void createWorld() = 0;
     	
         virtual World& getWorld() const = 0;
         virtual void spawnPending() = 0;

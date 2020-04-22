@@ -24,13 +24,6 @@ void SceneEditor::init(SceneEditorContext& context)
 	gizmoCollection = context.gizmos;
 
 	api->core->getStatics().setupGlobals();
-	
-	world = createWorld();
-	createServices(*world);
-	createEntities(*world);
-	cameraEntityId = createCamera();
-
-	onInit();
 }
 
 void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState)
@@ -64,6 +57,21 @@ void SceneEditor::render(RenderContext& rc)
 	});
 }
 
+bool SceneEditor::isReadyToCreateWorld() const
+{
+	return getGameResources().exists<ConfigFile>(getSceneEditorStageName());
+}
+
+void SceneEditor::createWorld()
+{
+	world = doCreateWorld();
+	createServices(*world);
+	createEntities(*world);
+	cameraEntityId = createCamera();
+
+	onInit();
+}
+
 World& SceneEditor::getWorld() const
 {
 	Expects(world);
@@ -86,7 +94,7 @@ std::shared_ptr<UIWidget> SceneEditor::makeCustomUI()
 	return {};
 }
 
-std::unique_ptr<World> SceneEditor::createWorld()
+std::unique_ptr<World> SceneEditor::doCreateWorld()
 {
 	auto world = std::make_unique<World>(getAPI(), getGameResources(), true, createComponent);
 	const auto& sceneConfig = getGameResources().get<ConfigFile>(getSceneEditorStageName())->getRoot();
@@ -103,7 +111,7 @@ void SceneEditor::createEntities(World& world)
 {
 }
 
-String SceneEditor::getSceneEditorStageName()
+String SceneEditor::getSceneEditorStageName() const
 {
 	return "stages/scene_editor";
 }

@@ -165,7 +165,7 @@ void SceneEditorCanvas::reload()
 
 bool SceneEditorCanvas::isLoaded() const
 {
-	return static_cast<bool>(interface);
+	return interfaceReady;
 }
 
 ISceneEditor& SceneEditorCanvas::getInterface() const
@@ -186,6 +186,7 @@ void SceneEditorCanvas::updateInterface(Time t)
 	}
 
 	if (interface) {
+		initializeInterfaceIfNeeded();
 		updateInputState();
 		guardedRun([&] () {
 			interface->update(t, inputState, outputState);
@@ -209,6 +210,18 @@ void SceneEditorCanvas::renderInterface(RenderContext& rc) const
 	}
 }
 
+void SceneEditorCanvas::initializeInterfaceIfNeeded()
+{
+	if (!interfaceReady) {
+		if (interface->isReadyToCreateWorld()) {
+			guardedRun([&]() {
+				interface->createWorld();
+				interfaceReady = true;
+			}, true);
+		}
+	}
+}
+
 void SceneEditorCanvas::loadDLL()
 {
 	Expects(gameDLL);
@@ -218,6 +231,8 @@ void SceneEditorCanvas::loadDLL()
 	auto game = getHalleyEntry()->createGame();
 	guardedRun([&]() {
 		interface = game->createSceneEditorInterface();
+		interfaceReady = false;
+		errorState = false;
 	});
 	game.reset();
 
@@ -237,6 +252,8 @@ void SceneEditorCanvas::loadDLL()
 		});
 		if (errorState) {
 			unloadDLL();
+		} else {
+			initializeInterfaceIfNeeded();
 		}
 	}
 }
@@ -244,6 +261,7 @@ void SceneEditorCanvas::loadDLL()
 void SceneEditorCanvas::unloadDLL()
 {
 	interface.reset();
+	interfaceReady = false;
 
 	if (gameDLL) {
 		gameDLL->unload();
@@ -257,20 +275,23 @@ void SceneEditorCanvas::unloadDLL()
 
 void SceneEditorCanvas::reloadDLL()
 {
-	// TODO
 	Logger::logWarning("SceneEditorCanvas::reloadDLL() not implemented yet");
 }
 
-void SceneEditorCanvas::guardedRun(const std::function<void()>& f) const
+void SceneEditorCanvas::guardedRun(const std::function<void()>& f, bool allowFailure) const
 {
 	try {
 		f();
 	} catch (const std::exception& e) {
 		Logger::logException(e);
-		errorState = true;
+		if (!allowFailure) {
+			errorState = true;
+		}
 	} catch (...) {
 		Logger::logError("Unknown error in SceneEditorCanvas, probably from game dll");
-		errorState = true;
+		if (!allowFailure) {
+			errorState = true;
+		}
 	}
 }
 

@@ -14,9 +14,12 @@ namespace Halley {
 		SceneEditor();
     	virtual ~SceneEditor();
     	
-		void init(SceneEditorContext& context) override;
-		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState) override;
-		void render(RenderContext& rc) override;
+		void init(SceneEditorContext& context) final override;
+		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState) final override;
+		void render(RenderContext& rc) final override;
+
+		bool isReadyToCreateWorld() const final override;
+		void createWorld() final override;
 
 		World& getWorld() const override;
 		void spawnPending() override;
@@ -51,7 +54,7 @@ namespace Halley {
 		virtual void createServices(World& world);
 		virtual void createEntities(World& world);
 
-		virtual String getSceneEditorStageName();
+		virtual String getSceneEditorStageName() const;
     	const HalleyAPI& getAPI() const;
     	Resources& getGameResources() const;
     	Resources& getEditorResources() const;
@@ -73,7 +76,7 @@ namespace Halley {
 		std::optional<EntityRef> selectedEntity;
     	ISceneEditorGizmoCollection* gizmoCollection = nullptr;
     	
-		std::unique_ptr<World> createWorld();
+		std::unique_ptr<World> doCreateWorld();
 
     	void moveCameraTo2D(Vector2f pos);
 		static void doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect);

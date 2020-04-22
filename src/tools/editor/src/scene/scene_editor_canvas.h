@@ -20,9 +20,11 @@ namespace Halley {
 
 		bool isLoaded() const;
 		ISceneEditor& getInterface() const;
+		void initializeInterfaceIfNeeded();
+
 		void setSceneEditorWindow(SceneEditorWindow& editorWindow);
 
-		void guardedRun(const std::function<void()>& f) const;
+		void guardedRun(const std::function<void()>& f, bool allowFailure = false) const;
 		std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options);
 
 	protected:
@@ -51,6 +53,7 @@ namespace Halley {
 		std::unique_ptr<HalleyAPI> gameAPI;
 		std::unique_ptr<CoreAPIInternal> gameCoreAPI;
 		mutable bool errorState = false;
+		bool interfaceReady = false;
 
 		std::shared_ptr<RenderSurface> surface;
 
