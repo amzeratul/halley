@@ -16,10 +16,10 @@ public:
 	CameraComponent() {}
 	
 	CameraComponent(float zoom, std::optional<Halley::Colour4f> clear, int mask, int layer)
-		: zoom(zoom)
-		, clear(clear)
-		, mask(mask)
-		, layer(layer)
+		: zoom(std::move(zoom))
+		, clear(std::move(clear))
+		, mask(std::move(mask))
+		, layer(std::move(layer))
 	{}
 	
 	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {

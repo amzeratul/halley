@@ -118,12 +118,12 @@ CPPClassGenerator& CPPClassGenerator::addDefaultConstructor()
 	return addCustomConstructor({}, {});
 }
 
-CPPClassGenerator& CPPClassGenerator::addConstructor(const Vector<VariableSchema>& variables)
+CPPClassGenerator& CPPClassGenerator::addConstructor(const Vector<VariableSchema>& variables, bool move)
 {
 	Vector<VariableSchema> init;
 	for (auto& v : variables) {
 		init.push_back(v);
-		init.back().initialValue = v.name;
+		init.back().initialValue = move ? ("std::move(" + v.name + ")") : v.name;
 	}
 	return addCustomConstructor(variables, init);
 }
@@ -133,10 +133,10 @@ CPPClassGenerator& CPPClassGenerator::addCustomConstructor(const Vector<Variable
 	String sig = "\t" + getMethodSignatureString(MethodSchema(TypeSchema(""), parameters, className));
 	String body = "{}";
 
-	if (initialization.size() > 0) {
+	if (!initialization.empty()) {
 		results.push_back(sig);
 		bool first = true;
-		for (auto& i: initialization) {
+		for (const auto& i: initialization) {
 			String prefix = first ? "\t\t: ": "\t\t, ";
 			first = false;
 			results.push_back(prefix + i.name + "(" + i.initialValue + ")");

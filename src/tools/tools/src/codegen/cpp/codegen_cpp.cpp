@@ -205,7 +205,7 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	if (!component.members.empty()) {
 		
 		gen.addBlankLine()
-			.addConstructor(MemberSchema::toVariableSchema(component.members));
+			.addConstructor(MemberSchema::toVariableSchema(component.members), true);
 	}
 	
 	// Deserialize method
@@ -336,7 +336,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 				}), ", ") + ">")
 				.addBlankLine()
 				.addAccessLevelSection(MemberAccess::Protected)
-				.addConstructor(MemberSchema::toVariableSchema(members))
+				.addConstructor(MemberSchema::toVariableSchema(members), false)
 				.finish())
 			.addBlankLine();
 	}
@@ -485,7 +485,7 @@ Vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
 		.addBlankLine();
 
 	if (!message.members.empty()) {
-		gen.addConstructor(MemberSchema::toVariableSchema(message.members))
+		gen.addConstructor(MemberSchema::toVariableSchema(message.members), true)
 			.addBlankLine();
 	}
 

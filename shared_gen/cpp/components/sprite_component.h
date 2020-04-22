@@ -15,9 +15,9 @@ public:
 	SpriteComponent() {}
 	
 	SpriteComponent(Halley::Sprite sprite, int layer, Halley::OptionalLite<int> mask)
-		: sprite(sprite)
-		, layer(layer)
-		, mask(mask)
+		: sprite(std::move(sprite))
+		, layer(std::move(layer))
+		, mask(std::move(mask))
 	{}
 	
 	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {

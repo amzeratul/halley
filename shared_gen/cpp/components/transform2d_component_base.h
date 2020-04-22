@@ -18,10 +18,10 @@ public:
 	Transform2DComponentBase() {}
 	
 	Transform2DComponentBase(Halley::Vector2f position, Halley::Angle1f rotation, Halley::Vector2f scale, Halley::OptionalLite<int> subWorld)
-		: position(position)
-		, rotation(rotation)
-		, scale(scale)
-		, subWorld(subWorld)
+		: position(std::move(position))
+		, rotation(std::move(rotation))
+		, scale(std::move(scale))
+		, subWorld(std::move(subWorld))
 	{}
 	
 	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {

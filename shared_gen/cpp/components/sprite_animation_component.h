@@ -13,7 +13,7 @@ public:
 	SpriteAnimationComponent() {}
 	
 	SpriteAnimationComponent(Halley::AnimationPlayer player)
-		: player(player)
+		: player(std::move(player))
 	{}
 	
 	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {

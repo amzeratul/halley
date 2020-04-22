@@ -15,9 +15,9 @@ public:
 	TextLabelComponent() {}
 	
 	TextLabelComponent(Halley::TextRenderer text, int layer, Halley::OptionalLite<int> mask)
-		: text(text)
-		, layer(layer)
-		, mask(mask)
+		: text(std::move(text))
+		, layer(std::move(layer))
+		, mask(std::move(mask))
 	{}
 	
 	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
