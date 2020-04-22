@@ -435,6 +435,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		else()
 			add_executable(${name}-exe WIN32 ${HALLEY_PATH}/src/entry/halley_exe_entry.cpp)
 		endif()
+		set_target_properties(${name}-exe PROPERTIES OUTPUT_NAME ${name})
 		
 		target_compile_definitions(${name} PUBLIC HALLEY_STATIC_LIBRARY)
 		target_compile_definitions(${name}-dll PUBLIC HALLEY_SHARED_LIBRARY)
@@ -448,9 +449,6 @@ function(halleyProject name sources headers genDefinitions targetDir)
 			configure_file(${HALLEY_PATH}/cmake/halley_game_dll.vcxproj.user.in ${CMAKE_CURRENT_BINARY_DIR}/${name}-dll.vcxproj.user @ONLY) 
 			add_dependencies(${name}-dll halley-cmd)
 		endif()
-
-		#set_target_properties(${name}-dll PROPERTIES OUTPUT_NAME ${name})
-		#set_target_properties(${name}-exe PROPERTIES OUTPUT_NAME ${name})
 	endif()
 
 	if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
