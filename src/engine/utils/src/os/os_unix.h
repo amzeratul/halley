@@ -28,7 +28,7 @@
 #include <halley/os/os.h>
 
 namespace Halley {
-	class OSUnix final : public OS {
+	class OSUnix : public OS {
 	public:
 		OSUnix();
 		~OSUnix();
