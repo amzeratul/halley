@@ -71,6 +71,8 @@ namespace Halley
 		void notifyAssetFileModified(Path path);
 
 		const std::shared_ptr<DynamicLibrary>& getGameDLL() const;
+		Path getDLLPath() const;
+		Path getExecutablePath() const;
 
 		void loadGameResources(const HalleyAPI& api);
 		Resources& getGameResources();

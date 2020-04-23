@@ -40,14 +40,14 @@ void ProjectProperties::setPlatforms(std::vector<String> platforms)
 	this->platforms = std::move(platforms);
 }
 
-const String& ProjectProperties::getDLL() const
+const String& ProjectProperties::getBinName() const
 {
-	return dll;
+	return binName;
 }
 
-void ProjectProperties::setDLL(String dll)
+void ProjectProperties::setBinName(String binName)
 {
-	this->dll = std::move(dll);
+	this->binName = std::move(binName);
 }
 
 bool ProjectProperties::getImportByExtension() const
@@ -72,7 +72,7 @@ void ProjectProperties::load()
 
 	name = node["name"].asString("Halley Project");
 	assetPackManifest = node["assetPackManifest"].asString("halley_project/asset_manifest.yaml");
-	dll = node["dll"].asString("");
+	binName = node["binName"].asString("");
 	importByExtension = node["importByExtension"].asBool(false);
 
 	if (node.hasKey("platforms")) {

@@ -10,6 +10,7 @@
 #include "halley/core/devcon/devcon_server.h"
 #include "halley/core/resources/resource_locator.h"
 #include "halley/core/resources/standard_resources.h"
+#include "halley/support/debug.h"
 #include "halley/tools/assets/metadata_importer.h"
 #include "halley/tools/ecs/ecs_data.h"
 #include "halley/tools/project/project_loader.h"
@@ -31,7 +32,7 @@ Project::Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader&
 	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", std::vector<String>{ "" });
 	assetImporter = std::make_unique<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
 
-	auto dllPath = loader.getDLLPath(rootPath, properties->getDLL());
+	auto dllPath = getDLLPath();
 	if (!dllPath.isEmpty()) {
 		try {
 			gameDll = std::make_shared<DynamicLibrary>(dllPath.string());
@@ -255,6 +256,46 @@ void Project::notifyAssetFileModified(Path path)
 const std::shared_ptr<DynamicLibrary>& Project::getGameDLL() const
 {
 	return gameDll;
+}
+
+constexpr static const char* getDLLExtension()
+{
+#if defined (_WIN32)
+	return ".dll";
+#elif defined(__APPLE__)
+	return ".dylib";
+#else
+	return ".so";
+#endif	
+}
+
+constexpr static const char* getExecutableExtension()
+{
+#if defined (_WIN32)
+	return ".exe";
+#else
+	return "";
+#endif	
+}
+
+Path Project::getDLLPath() const
+{
+	const auto& binName = getProperties().getBinName();
+	if (binName.isEmpty()) {
+		return "";
+	}
+	const String suffix = Debug::isDebug() ? "-dll_d" : "-dll";
+	return rootPath / "bin" / (binName + suffix + getDLLExtension());
+}
+
+Path Project::getExecutablePath() const
+{
+	const auto& binName = getProperties().getBinName();
+	if (binName.isEmpty()) {
+		return "";
+	}
+	const String suffix = Debug::isDebug() ? "_d" : "";
+	return rootPath / "bin" / (binName + suffix + getExecutableExtension());
 }
 
 void Project::loadGameResources(const HalleyAPI& api)

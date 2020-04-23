@@ -59,7 +59,7 @@ void Toolbar::makeUI()
 
 	setHandle(UIEventType::ButtonClicked, "runProject", [=] (const UIEvent& event)
 	{
-		// TODO
+		OS::get().runCommandAsync("\"" + project.getExecutablePath().getNativeString() + "\" --devcon=127.0.0.1");
 	});
 
 	setHandle(UIEventType::ButtonClicked, "buildProject", [=] (const UIEvent& event)

@@ -11,7 +11,6 @@ namespace Halley
 
 		std::unique_ptr<Project> loadProject(const Path& path) const;
 		std::vector<HalleyPluginPtr> getPlugins(std::vector<String> platforms) const;
-		Path getDLLPath(const Path& projectPath, const String& dllName) const;
 
 	private:
 		const HalleyStatics& statics;

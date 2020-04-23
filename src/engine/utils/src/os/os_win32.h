@@ -51,6 +51,7 @@ namespace Halley {
 		void onWindowCreated(void* window) override;
 
 		int runCommand(String command) override;
+		void runCommandAsync(const String& string) override;
 
 		std::shared_ptr<IClipboard> getClipboard() override;
 

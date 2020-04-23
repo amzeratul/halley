@@ -85,15 +85,6 @@ std::vector<HalleyPluginPtr> ProjectLoader::getPlugins(std::vector<String> platf
 	return result;
 }
 
-Path ProjectLoader::getDLLPath(const Path& projectPath, const String& dllName) const
-{
-	if (dllName.isEmpty()) {
-		return "";
-	}
-	const String suffix = Debug::isDebug() ? "_d" : "";
-	return projectPath / (dllName + suffix + getDLLExtension());
-}
-
 #ifdef _WIN32
 	#define WIN32_LEAN_AND_MEAN
 	#include <Windows.h>

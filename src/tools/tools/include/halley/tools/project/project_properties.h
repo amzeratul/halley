@@ -18,8 +18,8 @@ namespace Halley {
     	const std::vector<String>& getPlatforms() const;
     	void setPlatforms(std::vector<String> platforms);
 
-        const String& getDLL() const;
-        void setDLL(String dll);
+        const String& getBinName() const;
+        void setBinName(String binName);
     	
 		bool getImportByExtension() const;
     	void setImportByExtension(bool enabled);
@@ -28,7 +28,7 @@ namespace Halley {
 		const Path& propertiesFile;
 		String name;
     	String assetPackManifest;
-        String dll;
+        String binName;
     	bool importByExtension = false;
     	std::vector<String> platforms;
 

@@ -560,6 +560,35 @@ int OSWin32::runCommand(String rawCommand)
 	return int(exitCode);
 }
 
+void OSWin32::runCommandAsync(const String& rawCommand)
+{
+	// Create the commandline
+	auto command = rawCommand.getUTF16();
+	if (command.length() >= 1024) {
+		throw Exception("Command is too long!", HalleyExceptions::OS);
+	}
+	wchar_t buffer[1024];
+	memcpy(buffer, command.c_str(), command.size() * sizeof(wchar_t));
+	buffer[command.size()] = 0;
+
+	// Startup info
+	STARTUPINFOW si;
+	memset(&si, 0, sizeof(STARTUPINFO));
+	si.cb = sizeof(STARTUPINFO);
+
+	// Process info
+	PROCESS_INFORMATION pi;
+	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
+
+	// Run
+	if (!CreateProcessW(nullptr, buffer, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
+		return;
+	}
+
+	CloseHandle(pi.hThread);
+	CloseHandle(pi.hProcess);
+}
+
 class Win32Clipboard final : public IClipboard {
 public:
 	void setData(const String& stringData) override

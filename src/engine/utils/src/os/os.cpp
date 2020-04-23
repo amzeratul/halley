@@ -131,6 +131,11 @@ int OS::runCommand(String)
 	throw Exception("Running commands is not implemented in this platform.", HalleyExceptions::OS);
 }
 
+void OS::runCommandAsync(const String& string)
+{
+	throw Exception("Running commands is not implemented in this platform.", HalleyExceptions::OS);
+}
+
 std::shared_ptr<IClipboard> OS::getClipboard()
 {
 	return {};
