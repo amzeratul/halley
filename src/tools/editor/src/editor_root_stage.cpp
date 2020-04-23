@@ -166,7 +166,7 @@ void EditorRootStage::createProjectUI()
 	clearUI();
 
 	pagedPane = std::make_shared<UIPagedPane>("pages", 6);
-	const auto toolbar = std::make_shared<Toolbar>(*uiFactory, project->getProperties());
+	const auto toolbar = std::make_shared<Toolbar>(*uiFactory, *this, *project);
 	const auto taskbar = std::make_shared<TaskBar>(*uiFactory, *tasks);
 
 	uiTop->add(toolbar, 1, Vector4f(0, 16, 0, 8));
@@ -176,37 +176,6 @@ void EditorRootStage::createProjectUI()
 	pagedPane->getPage(int(EditorTabs::Assets))->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project, *this), 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(int(EditorTabs::Scene))->add(std::make_shared<SceneEditorWindow>(*uiFactory, *project, getAPI()), 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(int(EditorTabs::Settings))->add(std::make_shared<ConsoleWindow>(*uiFactory), 1, Vector4f(8, 8, 8, 8));
-
-	toolbar->setHandle(UIEventType::ListSelectionChanged, "toolbarList", [=] (const UIEvent& event)
-	{
-		String toolName;
-		switch (EditorTabs(event.getIntData())) {
-		case EditorTabs::Assets:
-			toolName = "Assets";
-			break;
-		case EditorTabs::Scene:
-			toolName = "Scene";
-			break;
-		case EditorTabs::ECS:
-			toolName = "ECS";
-			break;
-		case EditorTabs::Remotes:
-			toolName = "Remotes";
-			break;
-		case EditorTabs::Properties:
-			toolName = "Properties";
-			break;
-		case EditorTabs::Settings:
-			toolName = "Settings";
-			break;
-		}
-		toolbar->getWidgetAs<UILabel>("toolName")->setText(LocalisedString::fromHardcodedString(toolName));
-		pagedPane->setPage(event.getIntData());
-	});
-	toolbar->setHandle(UIEventType::ButtonClicked, "exitProject", [=] (const UIEvent& event)
-	{
-		createLoadProjectUI();
-	});
 }
 
 void EditorRootStage::updateUI(Time time)
@@ -249,4 +218,9 @@ void EditorRootStage::openPrefab(const String& name, AssetType assetType)
 	auto toolbar = ui->getWidgetAs<UIList>("toolbarList");
 	toolbar->setSelectedOption(int(EditorTabs::Scene));
 	//pagedPane->setPage(int(EditorTabs::Scene));
+}
+
+void EditorRootStage::setPage(EditorTabs tab)
+{
+	pagedPane->setPage(int(tab));
 }

@@ -29,6 +29,8 @@ namespace Halley {
 		void onRender(RenderContext& context) const override;
 
 		void openPrefab(const String& name, AssetType assetType);
+		void setPage(EditorTabs tab);
+		void createLoadProjectUI();
 
 	private:
 		HalleyEditor& editor;
@@ -55,7 +57,6 @@ namespace Halley {
 		void initSprites();
 		void clearUI();
 		void createUI();
-		void createLoadProjectUI();
 		void createProjectUI();
 
 		void updateUI(Time time);
