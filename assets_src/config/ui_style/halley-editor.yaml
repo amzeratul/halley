@@ -7,7 +7,7 @@ uiStyle:
       selected: { img: ui/slant_capsule.png, colour: "#FFFFFF", imageColour: "#000000" }
       hover: { img: ui/slant_capsule.png, colour: "#F98A9A" }
       normal: { img: ui/slant_capsule.png, colour: "#FC2847" }
-      innerBorder: [ 8, 5, 8, 2 ]
+      innerBorder: [ 8, 1, 8, 1 ]
     innerBorder: [ 0, 0, 0, 0 ]
     extraMouseBorder: [ 1, 1, 1, 1 ]
     selectionChangedSound: ""
@@ -21,6 +21,20 @@ uiStyle:
     down: { img: whitebox.png, colour: "#00000000" }
     hover: { img: whitebox.png, colour: "#00000000" }
     innerBorder: [ 0, 0, 0, 0 ]
+    upSound: ""
+    downSound: ""
+    hoverSound: ""
+    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    labelBorder: [0, 0, 0, 0]
+    iconBorder: [0, 0, 0, 0]
+    hoveredIconColour: "#FFCDCD"
+
+  slantButton:
+    selected: { img: ui/slant_capsule.png, colour: "#FFFFFF", imageColour: "#000000" }
+    hover: { img: ui/slant_capsule.png, colour: "#F98A9A" }
+    normal: { img: ui/slant_capsule.png, colour: "#FC2847" }
+    down: { img: ui/slant_capsule.png, colour: "#D30322" }
+    innerBorder: [ 15, 0, 15, 0 ]
     upSound: ""
     downSound: ""
     hoverSound: ""

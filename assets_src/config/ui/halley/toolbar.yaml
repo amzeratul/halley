@@ -3,8 +3,8 @@
 widget: { class: widget }
 sizer: { type: horizontal, gap: 0 }
 children:
-- widget: { class: image, image: ui/slant_capsule_right_short.png, size: [40, 32], colour: "#FC2847" }
-  border: [0, 3, -5, 3]
+- widget: { class: image, image: ui/slant_capsule_short.png, size: [50, 32], colour: "#FC2847" }
+  border: [-10, 3, -5, 3]
 - widget: 
     id: toolbarList
     class: list
@@ -23,36 +23,27 @@ children:
       image: ui/toolbar_properties.png
     - id: settings
       image: ui/toolbar_settings.png
-- widget: { class: image, image: ui/slant_capsule_left_short.png, size: [20, 32], colour: "#FC2847" }
-  border: [-5, 3, 0, 3]
-- widget: { class: image, image: whitebox.png, size: [100, 32], colour: "#FC2847" }
+- widget: { class: image, image: ui/slant_capsule_short.png, size: [140, 32], colour: "#FC2847" }
   children:
   - widget: { class: label, id: toolName, text: Assets }
     fill: centre
     proportion: 1
-  border: [0, 3, 0, 3]
-- widget: { class: image, image: ui/slant_capsule_right_short.png, size: [20, 32], colour: "#FC2847" }
-  border: [0, 3, 0, 3]
+  border: [-5, 3, 0, 3]
+
 - stretchSpacer: {}
   proportion: 1
-- widget: { class: image, image: ui/slant_capsule_left_short.png, size: [20, 32], colour: "#FC2847" }
-  border: [0, 3, 0, 3]
-- widget: { class: image, image: whitebox.png, size: [80, 32], colour: "#FC2847" }
+
+- widget: { class: image, image: ui/slant_capsule_short.png, size: [120, 32], colour: "#FC2847", innerBorder: [20, 0, 20, 0] }
   border: [0, 3, 0, 3]
   children:
   - widget: { class: label, id: gameName, text: Halley Game }
     fill: centre
     proportion: 1
     border: [0, 0, 0, 0]
-- widget: { class: image, image: ui/slant_capsule_right_short.png, size: [20, 32], colour: "#FC2847" }
-  border: [0, 3, 0, 3]
-- widget: { class: image, image: ui/slant_capsule_left_short.png, size: [20, 32], colour: "#FC2847" }
-  border: [-4, 3, 0, 3]
-- widget: { class: image, image: whitebox.png, size: [20, 32], colour: "#FC2847" }
-  border: [0, 3, 0, 3]
-  children:
-  - widget: { id: exitProject, class: button, icon: ui/exit.png, style: flatButton, mouseBorder: [10, 10, 10, 10] }
-    fill: centre
-    border: [-7, 0, 10, 0]
+- widget: { id: exitProject, class: button, icon: ui/exit.png, style: slantButton, mouseBorder: [10, 10, 10, 10], size: [42, 42] }
+  fill: centre
+  border: [-5, 0, 10, 0]
+- widget: { class: image, image: ui/slant_capsule_short.png, size: [30, 32], colour: "#FC2847", innerBorder: [20, 0, 20, 0] }
+  border: [-15, 3, -10, 3]
 
 ...
