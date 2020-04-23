@@ -40,10 +40,15 @@ children:
     fill: centre
     proportion: 1
     border: [0, 0, 0, 0]
-- widget: { id: exitProject, class: button, icon: ui/exit.png, style: slantButton, mouseBorder: [10, 10, 10, 10], size: [42, 42] }
-  fill: centre
-  border: [-5, 0, 10, 0]
+- widget: { id: runProject, class: button, icon: ui/play.png, style: slantButton, size: [42, 42] }
+  border: [-5, 0, 0, 0]
+- widget: { id: buildProject, class: button, icon: ui/build.png, style: slantButton, size: [42, 42] }
+  border: [-5, 0, 0, 0]
+- widget: { class: image, image: ui/slant_capsule_short.png, size: [20, 32], colour: "#FC2847", innerBorder: [20, 0, 20, 0] }
+  border: [-5, 3, 0, 3]
+- widget: { id: exitProject, class: button, icon: ui/exit.png, style: slantButton, size: [42, 42] }
+  border: [-5, 0, 0, 0]
 - widget: { class: image, image: ui/slant_capsule_short.png, size: [30, 32], colour: "#FC2847", innerBorder: [20, 0, 20, 0] }
-  border: [-15, 3, -10, 3]
+  border: [-5, 3, -10, 3]
 
 ...
