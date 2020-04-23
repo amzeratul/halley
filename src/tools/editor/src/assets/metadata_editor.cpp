@@ -65,6 +65,7 @@ void MetadataEditor::makeUI()
 		addBoolField("Minimap", "minimap", false);
 		addStringField("Format", "format", "rgba");
 		addStringField("Address Mode", "addressMode", "clamp");
+		addBoolField("Group Separated", "group_separated", false);
 		break;
 
 	case AssetType::AudioClip:

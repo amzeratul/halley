@@ -511,7 +511,7 @@ std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int 
 	std::map<String, std::unique_ptr<Image>> frameImages;
 	for (auto& group : groupImages)
 	{		
-		if (group.first == "" && !defaultFrameUsed)
+		if (group.first == "" && !defaultFrameUsed && (groupImages.size() > 1))
 		{
 			continue;
 		}
