@@ -30,7 +30,9 @@ namespace Halley
 		
 		std::vector<String> getPlatforms() const;
 
-		Path getRootPath() const;
+		const Path& getHalleyRootPath() const;
+		
+		const Path& getRootPath() const;		
 		Path getUnpackedAssetsPath() const;
 		Path getPackedAssetsPath(const String& platform) const;
 		Path getAssetsSrcPath() const;

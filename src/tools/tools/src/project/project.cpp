@@ -57,7 +57,12 @@ std::vector<String> Project::getPlatforms() const
 	return platforms;
 }
 
-Path Project::getRootPath() const
+const Path& Project::getHalleyRootPath() const
+{
+	return halleyRootPath;
+}
+
+const Path& Project::getRootPath() const
 {
 	return rootPath;
 }
