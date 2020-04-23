@@ -1,5 +1,7 @@
+@echo off
+
 cd /d %1
-mkdir build
+if not exist build mkdir build
 cd build
 
 set slnName="%~2.sln"

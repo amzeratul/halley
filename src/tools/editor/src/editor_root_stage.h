@@ -32,6 +32,8 @@ namespace Halley {
 		void setPage(EditorTabs tab);
 		void createLoadProjectUI();
 
+		EditorTaskSet& getTasks() const;
+
 	private:
 		HalleyEditor& editor;
 		I18N i18n;

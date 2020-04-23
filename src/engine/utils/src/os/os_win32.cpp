@@ -477,15 +477,36 @@ int OSWin32::runCommand(String rawCommand)
 	using namespace std::chrono_literals;
 	std::this_thread::sleep_for(100ms);
 
-	// Create the commandline
+	Promise<int> promise;
+	auto future = promise.getFuture();
+
+	runCommand(rawCommand.getUTF16(), promise);
+
+	return future.get();
+}
+
+Future<int> OSWin32::runCommandAsync(const String& rawCommand)
+{
+	Promise<int> promise;
+	auto future = promise.getFuture();
+
 	auto command = rawCommand.getUTF16();
+	std::thread([this, command = std::move(command), promise = std::move(promise)] () {
+		runCommand(command, promise);
+	}).detach();
+
+	return future;
+}
+
+void OSWin32::runCommand(StringUTF16 command, Promise<int> promise)
+{
+	// Create the commandline
 	if (command.length() >= 1024) {
 		throw Exception("Command is too long!", HalleyExceptions::OS);
 	}
 	wchar_t buffer[1024];
 	memcpy(buffer, command.c_str(), command.size() * sizeof(wchar_t));
 	buffer[command.size()] = 0;
-
 
 	// Create pipes for reading process output
 	SECURITY_ATTRIBUTES saAttr;
@@ -524,25 +545,45 @@ int OSWin32::runCommand(String rawCommand)
 	PROCESS_INFORMATION pi;
 	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
 	if (!CreateProcessW(nullptr, buffer, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
-		return -1;
+		promise.setValue(-1);
+		return;
 	}
 
 	// Wait for process to end
 	CloseHandle(inWrite);
 	HANDLE waitHandles[] = { pi.hProcess, outRead, errorRead };
-	WaitForMultipleObjects(3, waitHandles, TRUE, INFINITE);
 
-	// Read output
+	auto readOutput = [&] ()
 	{
-		String out = readPipeToString(outRead);
+		auto out = readPipeToString(outRead);
+		auto error = readPipeToString(errorRead);
 		if (!out.isEmpty()) {
-			Logger::logInfo(out);
+			if (out.endsWith("\n")) {
+				out = out.left(out.size() - 1);
+			}
+			Logger::logDev(out);
 		}
-		String error = readPipeToString(errorRead);
 		if (!error.isEmpty()) {
+			if (error.endsWith("\n")) {
+				error = error.left(error.size() - 1);
+			}
 			Logger::logError(error);
 		}
+	};
+
+	while (!promise.isCancelled()) {
+		const DWORD waitResult = WaitForMultipleObjects(3, waitHandles, TRUE, 10);
+		if (waitResult >= WAIT_OBJECT_0 && waitResult < WAIT_OBJECT_0 + 3) {
+			// Done!
+			break;
+		} else if (waitResult == WAIT_FAILED) {
+			promise.setValue(-3);
+			return;
+		}
+		readOutput();
 	}
+
+	readOutput();
 
 	// Get exit code
 	DWORD exitCode = -2;
@@ -557,36 +598,7 @@ int OSWin32::runCommand(String rawCommand)
 	CloseHandle(errorRead);
 	CloseHandle(errorWrite);
 
-	return int(exitCode);
-}
-
-void OSWin32::runCommandAsync(const String& rawCommand)
-{
-	// Create the commandline
-	auto command = rawCommand.getUTF16();
-	if (command.length() >= 1024) {
-		throw Exception("Command is too long!", HalleyExceptions::OS);
-	}
-	wchar_t buffer[1024];
-	memcpy(buffer, command.c_str(), command.size() * sizeof(wchar_t));
-	buffer[command.size()] = 0;
-
-	// Startup info
-	STARTUPINFOW si;
-	memset(&si, 0, sizeof(STARTUPINFO));
-	si.cb = sizeof(STARTUPINFO);
-
-	// Process info
-	PROCESS_INFORMATION pi;
-	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
-
-	// Run
-	if (!CreateProcessW(nullptr, buffer, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
-		return;
-	}
-
-	CloseHandle(pi.hThread);
-	CloseHandle(pi.hProcess);
+	promise.setValue(static_cast<int>(exitCode));
 }
 
 class Win32Clipboard final : public IClipboard {

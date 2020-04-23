@@ -1,5 +1,7 @@
 #include "toolbar.h"
 
+
+#include "halley/tools/project/build_project_task.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/project/project_properties.h"
 #include "halley/ui/ui_sizer.h"
@@ -64,19 +66,6 @@ void Toolbar::makeUI()
 
 	setHandle(UIEventType::ButtonClicked, "buildProject", [=] (const UIEvent& event)
 	{
-		const String scriptName = [] ()
-		{
-			if constexpr (getPlatform() == GamePlatform::Windows) {
-				return "build_project_win.bat";
-			} else if constexpr (getPlatform() == GamePlatform::MacOS) {
-				return "build_project_mac.sh";
-			} else if constexpr (getPlatform() == GamePlatform::Linux) {
-				return "build_project_linux.sh";
-			} else {
-				throw Exception("No project build script available for this platform.", HalleyExceptions::Tools);
-			}
-		}();
-		const auto buildScript = project.getHalleyRootPath() / "scripts" / scriptName;
-		OS::get().runCommandAsync("\"" + buildScript + "\" \"" + project.getRootPath() + "\" " + project.getProperties().getBinName());
+		editorStage.getTasks().addTask(EditorTaskAnchor(std::make_unique<BuildProjectTask>(project)));
 	});
 }

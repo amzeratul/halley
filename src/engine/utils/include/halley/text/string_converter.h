@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "halleystring.h"
 #include <halley/support/exception.h>
+#include <array>
 
 namespace Halley
 {

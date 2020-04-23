@@ -161,6 +161,11 @@ void EditorRootStage::createLoadProjectUI()
 	}), 1, Vector4f(), UISizerAlignFlags::Centre);
 }
 
+EditorTaskSet& EditorRootStage::getTasks() const
+{
+	return *tasks;
+}
+
 void EditorRootStage::createProjectUI()
 {
 	clearUI();
