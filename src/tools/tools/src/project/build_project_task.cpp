@@ -3,6 +3,7 @@
 #include "halley/os/os.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/project/project_properties.h"
+#include <chrono>
 
 using namespace Halley;
 
@@ -27,5 +28,19 @@ BuildProjectTask::BuildProjectTask(Project& project)
 
 void BuildProjectTask::run()
 {
-	OS::get().runCommand(command);
+	using namespace std::literals::chrono_literals;
+	auto future = OS::get().runCommandAsync(command);
+
+	while (!future.isReady()) {
+		if (isCancelled()) {
+			future.cancel();
+			return;
+		}
+		std::this_thread::sleep_for(10ms);
+	}
+
+	const int returnValue = future.get();
+	if (returnValue != 0) {
+		addError("Script returned error code " + toString(returnValue));
+	}
 }
