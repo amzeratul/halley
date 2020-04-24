@@ -5,6 +5,7 @@ if not exist build mkdir build
 cd build
 
 set slnName="%~2.sln"
+set binTargetName="%~2-gamebins"
 
 IF NOT EXIST %slnName% (
 cmake -G "Visual Studio 16 2019" ^
@@ -20,4 +21,4 @@ cmake -G "Visual Studio 16 2019" ^
     .. || exit /b 1
 )
 
-cmake.exe --build . --config RelWithDebInfo || exit /b 1
+cmake.exe --build . --target %binTargetName% --config RelWithDebInfo || exit /b 1

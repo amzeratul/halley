@@ -448,6 +448,9 @@ function(halleyProject name sources headers genDefinitions targetDir)
 			configure_file(${HALLEY_PATH}/cmake/halley_game_dll.vcxproj.user.in ${CMAKE_CURRENT_BINARY_DIR}/${name}-dll.vcxproj.user @ONLY) 
 			add_dependencies(${name}-dll halley-cmd)
 		endif()
+
+		# Setup a gamebins target for external building
+		add_custom_target(${name}-gamebins DEPENDS ${name}-exe ${name}-dll)
 	endif()
 
 	if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
