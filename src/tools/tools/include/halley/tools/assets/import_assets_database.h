@@ -13,13 +13,31 @@ namespace Halley
 	class Project;
 	class Deserializer;
 	class Serializer;
+
+	class AssetPath {
+	public:
+		AssetPath();
+		AssetPath(TimestampedPath path);
+		AssetPath(TimestampedPath path, Path dataPath);
+
+		const Path& getPath() const;
+		const Path& getDataPath() const;
+		int64_t getTimestamp() const;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+
+	private:
+		TimestampedPath path;
+		Path dataPath;
+	};
 	
 	class ImportAssetsDatabaseEntry
 	{
 	public:
 		String assetId;
 		Path srcDir;
-		std::vector<TimestampedPath> inputFiles;
+		std::vector<AssetPath> inputFiles;
 		std::vector<TimestampedPath> additionalInputFiles; // These were requested by the importer, rather than enumerated directly
 		std::vector<AssetResource> outputFiles;
 		ImportAssetType assetType = ImportAssetType::Undefined;
@@ -37,7 +55,7 @@ namespace Halley
 			, srcDir(std::move(srcDir))
 		{}
 
-		ImportAssetsDatabaseEntry(String assetId, Path srcDir, std::vector<TimestampedPath>&& inputFiles)
+		ImportAssetsDatabaseEntry(String assetId, Path srcDir, std::vector<AssetPath>&& inputFiles)
 			: assetId(std::move(assetId))
 			, srcDir(std::move(srcDir))
 			, inputFiles(std::move(inputFiles))

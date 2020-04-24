@@ -4,9 +4,48 @@
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
 
-constexpr static int currentAssetVersion = 66;
+constexpr static int currentAssetVersion = 67;
 
 using namespace Halley;
+
+AssetPath::AssetPath()
+{}
+
+AssetPath::AssetPath(TimestampedPath path)
+	: path(std::move(path))
+{}
+
+AssetPath::AssetPath(TimestampedPath path, Path dataPath)
+	: path(std::move(path))
+	, dataPath(std::move(dataPath))
+{}
+
+const Path& AssetPath::getPath() const
+{
+	return path.first;
+}
+
+const Path& AssetPath::getDataPath() const
+{
+	return dataPath.isEmpty() ? path.first : dataPath;
+}
+
+int64_t AssetPath::getTimestamp() const
+{
+	return path.second;
+}
+
+void AssetPath::serialize(Serializer& s) const
+{
+	s << path;
+	s << dataPath;
+}
+
+void AssetPath::deserialize(Deserializer& s)
+{
+	s >> path;
+	s >> dataPath;
+}
 
 void ImportAssetsDatabaseEntry::serialize(Serializer& s) const
 {
@@ -182,7 +221,7 @@ std::optional<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const 
 		const auto& asset = a.second.asset;
 		for (auto& o: asset.outputFiles) {
 			if (o.type == type && o.name == assetId) {
-				const auto inputFile = o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).first : o.primaryInputFile;
+				const auto inputFile = o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
 
 				const auto iter = inputFiles.find(inputFile.toString());
 				if (iter == inputFiles.end()) {
@@ -205,7 +244,7 @@ Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& ass
 		const auto& asset = a.second.asset;
 		for (auto& o: asset.outputFiles) {
 			if (o.type == type && o.name == assetId) {
-				return o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).first : o.primaryInputFile;
+				return o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
 			}
 		}
 	}
@@ -245,11 +284,11 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 	// Any of the input files changed?
 	// Note: We don't have to check old files on new input, because the size matches and all entries matched.
 	for (auto& i: asset.inputFiles) {
-		auto result = std::find_if(oldAsset.inputFiles.begin(), oldAsset.inputFiles.end(), [&](const TimestampedPath& entry) { return entry.first == i.first; });
+		auto result = std::find_if(oldAsset.inputFiles.begin(), oldAsset.inputFiles.end(), [&](const AssetPath& entry) { return entry.getDataPath() == i.getDataPath(); });
 		if (result == oldAsset.inputFiles.end()) {
 			// File wasn't there before
 			return true;
-		} else if (result->second != i.second) {
+		} else if (result->getTimestamp() != i.getTimestamp()) {
 			// Timestamp changed
 			return true;
 		}
@@ -360,7 +399,7 @@ std::vector<std::pair<AssetType, String>> ImportAssetsDatabase::getAssetsFromFil
 	for (auto& a: assetsImported) {
 		const auto& asset = a.second.asset;
 		for (auto& in: asset.inputFiles) {
-			if (in.first == inputFile) {
+			if (in.getPath() == inputFile) {
 				for (auto& out: asset.outputFiles) {
 					if (out.primaryInputFile.isEmpty() || out.primaryInputFile == inputFile) {
 						result.emplace_back(out.type, out.name);

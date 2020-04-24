@@ -149,10 +149,14 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 		if (asset.assetType != assetImporter.getType()) { // Ensure it has the correct type
 			throw Exception("AssetId conflict on " + assetId, HalleyExceptions::Tools);
 		}
-		if (asset.srcDir == srcPath) { // Don't mix files from two different source paths
+		if (asset.srcDir == srcPath) {
 			asset.inputFiles.push_back(input);
 		} else {
-			throw Exception("Mixed source dir input for " + assetId, HalleyExceptions::Tools);
+			auto relPath = (srcPath / input.first).makeRelativeTo(asset.srcDir);
+			asset.inputFiles.emplace_back(input, relPath);
+
+			// Don't mix files from two different source paths
+			//throw Exception("Mixed source dir input for " + assetId, HalleyExceptions::Tools);
 		}
 	}
 
