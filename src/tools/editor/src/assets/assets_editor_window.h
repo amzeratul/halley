@@ -73,5 +73,8 @@ namespace Halley {
 
 		std::shared_ptr<AssetEditor> makeEditor(AssetType type, const String& name);
 		void createEditorTab(AssetType type, const String& name);
+
+		void addAsset();
+		void removeAsset();
     };
 }

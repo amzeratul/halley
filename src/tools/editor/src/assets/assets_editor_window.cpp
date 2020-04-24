@@ -6,7 +6,10 @@
 #include "halley/ui/widgets/ui_list.h"
 #include "animation_editor.h"
 #include "metadata_editor.h"
+#include "new_asset_window.h"
 #include "prefab_editor.h"
+#include "halley/tools/file/filesystem.h"
+#include "halley/tools/yaml/yaml_convert.h"
 
 using namespace Halley;
 
@@ -72,6 +75,16 @@ void AssetsEditorWindow::makeUI()
 		setFilter(event.getStringData());
 	});
 
+	setHandle(UIEventType::ButtonClicked, "addAsset", [=] (const UIEvent& event)
+	{
+		addAsset();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "removeAsset", [=] (const UIEvent& event)
+	{
+		removeAsset();
+	});
+
 	updateAddRemoveButtons();
 }
 
@@ -84,16 +97,6 @@ void AssetsEditorWindow::setAssetSrcMode(bool enabled)
 	} else {
 		listAssets(AssetType::Sprite);
 	}
-}
-
-void AssetsEditorWindow::updateAddRemoveButtons()
-{
-	auto stem = curSrcPath.getFront(1).string();
-	bool canAdd = stem == "prefab" || stem == "scene";
-	bool canRemove = !lastClickedAsset.isEmpty() && !lastClickedAsset.endsWith("/.");
-	
-	getWidget("addAsset")->setEnabled(canAdd);
-	getWidget("removeAsset")->setEnabled(canRemove);
 }
 
 void AssetsEditorWindow::listAssetSources()
@@ -291,6 +294,48 @@ void AssetsEditorWindow::createEditorTab(AssetType type, const String& name)
 
 		contentList->addItem(toString(n), item);
 	}
+}
+
+void AssetsEditorWindow::updateAddRemoveButtons()
+{
+	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
+	
+	const auto stem = curSrcPath.getFront(1).string();
+	const bool canAdd = stem == "prefab" || stem == "scene";
+	const bool canRemove = !lastClickedAsset.isEmpty() && !lastClickedAsset.endsWith("/.");
+
+	getWidget("addAsset")->setEnabled(canAdd);
+	getWidget("removeAsset")->setEnabled(canRemove);
+}
+
+void AssetsEditorWindow::addAsset()
+{
+	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
+	
+	const auto assetType = curSrcPath.getFront(1).string();
+	const auto dstPath = project.getAssetsSrcPath() / curSrcPath;
+
+	getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, [=] (std::optional<String> newName)
+	{
+		if (newName) {
+			if (assetType == "prefab") {
+				Prefab prefab;
+				prefab.makeDefault();
+				FileSystem::writeFile(dstPath / (newName.value() + ".prefab"), YAMLConvert::generateYAML(prefab.getRoot(), YAMLConvert::EmitOptions()));
+			} else if (assetType == "scene") {
+				Scene scene;
+				scene.makeDefault();
+				FileSystem::writeFile(dstPath / (newName.value() + ".scene"), YAMLConvert::generateYAML(scene.getRoot(), YAMLConvert::EmitOptions()));
+			}
+		}
+	}));
+}
+
+void AssetsEditorWindow::removeAsset()
+{
+	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
+	assetList->setItemActive(lastClickedAsset, false);
+	FileSystem::remove(project.getAssetsSrcPath() / lastClickedAsset);
 }
 
 AssetEditor::AssetEditor(UIFactory& factory, Resources& resources, Project& project, AssetType type)

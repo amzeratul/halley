@@ -215,6 +215,7 @@ namespace Halley
 		constexpr static AssetType getAssetType() { return AssetType::Prefab; }
 
 		void reload(Resource&& resource) override;
+		void makeDefault();
 	};
 
 	class Scene final : public Prefab {
@@ -223,5 +224,6 @@ namespace Halley
 		constexpr static AssetType getAssetType() { return AssetType::Scene; }
 
 		void reload(Resource&& resource) override;
+		void makeDefault();
 	};
 }

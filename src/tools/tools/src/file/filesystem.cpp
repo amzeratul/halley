@@ -82,6 +82,11 @@ void FileSystem::writeFile(const Path& path, const Bytes& data)
 	writeFile(path, as_bytes(gsl::span<const Byte>(data)));
 }
 
+void FileSystem::writeFile(const Path& path, const String& data)
+{
+	writeFile(path, as_bytes(gsl::span<const char>(data.c_str(), data.length())));
+}
+
 Bytes FileSystem::readFile(const Path& path)
 {
 	Bytes result;

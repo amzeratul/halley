@@ -1,0 +1,19 @@
+---
+widget: { class: image, image: ui/float_window.png, innerBorder: [ 14, 11, 14, 14 ], colour: "#9C5BB5" }
+sizer: { type: vertical }
+children:
+- sizer: { type: horizontal }
+  children:
+  - widget: { id: title, class: label, text: "New Asset" }
+    fill: centre
+    proportion: 1
+- widget: { id: name, class: textInput, size: [300, 30], ghostText: Name }
+  border: [1, 4, 1, 1]
+- sizer: { type: horizontal }
+  children:
+  - widget: { id: ok, class: button, text: "OK" }
+    proportion: 1
+  - widget: { id: cancel, class: button, text: "Cancel" }
+    proportion: 1
+
+...

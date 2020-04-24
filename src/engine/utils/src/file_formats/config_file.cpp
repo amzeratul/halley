@@ -909,6 +909,11 @@ void Prefab::reload(Resource&& resource)
 	updateRoot();
 }
 
+void Prefab::makeDefault()
+{
+	getRoot() = ConfigNode(ConfigNode::MapType());
+}
+
 std::unique_ptr<Scene> Scene::loadResource(ResourceLoader& loader)
 {
 	auto scene = std::make_unique<Scene>();
@@ -922,6 +927,11 @@ void Scene::reload(Resource&& resource)
 {
 	*this = std::move(dynamic_cast<Scene&>(resource));
 	updateRoot();
+}
+
+void Scene::makeDefault()
+{
+	getRoot() = ConfigNode(ConfigNode::SequenceType());
 }
 
 ConfigNode ConfigNode::undefinedConfigNode;
