@@ -46,6 +46,12 @@ children:
             text: test
           - id: test2
             text: test
+    - sizer: { type: horizontal }
+      children:
+        - widget: { id: addAsset, class: button, text: Add }
+          proportion: 1
+        - widget: { id: removeAsset, class: button, text: Remove }
+          proportion: 1
   - sizer: { type: vertical }
     proportion: 1
     border: [10, 0, 10, 0]

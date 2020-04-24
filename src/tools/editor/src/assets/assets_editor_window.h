@@ -55,10 +55,12 @@ namespace Halley {
         std::shared_ptr<MetadataEditor> metadataEditor;
 
 		String loadedAsset;
-		
+        String lastClickedAsset;
+
         void loadResources();
         void makeUI();
 		void setAssetSrcMode(bool enabled);
+		void updateAddRemoveButtons();
 
 		void listAssetSources();
 		void listAssets(AssetType type);

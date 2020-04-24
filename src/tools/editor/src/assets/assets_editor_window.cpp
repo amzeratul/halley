@@ -71,6 +71,8 @@ void AssetsEditorWindow::makeUI()
 	{
 		setFilter(event.getStringData());
 	});
+
+	updateAddRemoveButtons();
 }
 
 void AssetsEditorWindow::setAssetSrcMode(bool enabled)
@@ -82,6 +84,16 @@ void AssetsEditorWindow::setAssetSrcMode(bool enabled)
 	} else {
 		listAssets(AssetType::Sprite);
 	}
+}
+
+void AssetsEditorWindow::updateAddRemoveButtons()
+{
+	auto stem = curSrcPath.getFront(1).string();
+	bool canAdd = stem == "prefab" || stem == "scene";
+	bool canRemove = !lastClickedAsset.isEmpty() && !lastClickedAsset.endsWith("/.");
+	
+	getWidget("addAsset")->setEnabled(canAdd);
+	getWidget("removeAsset")->setEnabled(canRemove);
 }
 
 void AssetsEditorWindow::listAssetSources()
@@ -172,6 +184,9 @@ void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick, bool cl
 		contentListDropdown->setActive(false);
 		contentListDropdownLabel->setActive(false);
 	}
+
+	lastClickedAsset = name;
+	updateAddRemoveButtons();
 	
 	auto& curPath = assetSrcMode ? curSrcPath : curPaths[curType];
 	if (name.endsWith("/.")) {
@@ -196,19 +211,14 @@ void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick, bool cl
 
 			auto useDropdown = false;
 			std::vector<String> assetNames;
-			if (int(assets.size()) > 3)
-			{
-				
-				
-				for (const auto& asset : assets)
-				{
+			if (int(assets.size()) > 3) {				
+				for (const auto& asset : assets) {
 					if (asset.first == AssetType::Animation) {
 						assetNames.push_back(asset.second);
 					}
 				}
 
-				if(assetNames.size() > 0)
-				{
+				if(!assetNames.empty())	{
 					useDropdown = true;
 					contentListDropdown->setActive(true);
 					contentListDropdownLabel->setActive(true);
