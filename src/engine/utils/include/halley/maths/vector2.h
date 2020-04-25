@@ -40,7 +40,7 @@ namespace Halley {
 	//////////////////////////////
 	// Vector2D class declaration
 	template <typename T=float, class U=Angle<float>>
-	class Vector2D {
+	class alignas(sizeof(T)*2) Vector2D {
 	private:
 		constexpr static T mod(T a, T b) noexcept { return a % b; }
 
