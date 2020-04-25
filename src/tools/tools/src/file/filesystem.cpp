@@ -179,13 +179,13 @@ ScopedTemporaryFile::~ScopedTemporaryFile()
 	}
 }
 
-ScopedTemporaryFile::ScopedTemporaryFile(ScopedTemporaryFile&& other)
+ScopedTemporaryFile::ScopedTemporaryFile(ScopedTemporaryFile&& other) noexcept
 {
 	path = std::move(other.path);
 	other.path.reset();
 }
 
-ScopedTemporaryFile& ScopedTemporaryFile::operator=(ScopedTemporaryFile&& other)
+ScopedTemporaryFile& ScopedTemporaryFile::operator=(ScopedTemporaryFile&& other) noexcept
 {
 	path = std::move(other.path);
 	other.path.reset();

@@ -37,7 +37,8 @@ namespace std {
 	//template <class T> struct hash;
 	template<> struct hash<MaskEntry>
 	{
-		std::size_t operator()(MaskEntry const& s) const {
+		std::size_t operator()(MaskEntry const& s) const noexcept
+		{
 			return std::hash<RealType>()(s.mask);
 		}
 	};

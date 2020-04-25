@@ -43,7 +43,7 @@ ConfigNode::ConfigNode(const ConfigNode& other)
 	}
 }
 
-ConfigNode::ConfigNode(ConfigNode&& other)
+ConfigNode::ConfigNode(ConfigNode&& other) noexcept
 {
 	*this = std::move(other);
 }
@@ -108,7 +108,7 @@ ConfigNode::~ConfigNode()
 	reset();
 }
 
-ConfigNode& ConfigNode::operator=(ConfigNode&& other)
+ConfigNode& ConfigNode::operator=(ConfigNode&& other) noexcept
 {
 	reset();
 
@@ -783,13 +783,13 @@ ConfigFile::ConfigFile(const ConfigFile& other)
 	updateRoot();
 }
 
-ConfigFile::ConfigFile(ConfigFile&& other)
+ConfigFile::ConfigFile(ConfigFile&& other) noexcept
 {
 	root = std::move(other.root);
 	updateRoot();
 }
 
-ConfigFile& ConfigFile::operator=(ConfigFile&& other)
+ConfigFile& ConfigFile::operator=(ConfigFile&& other) noexcept
 {
 	root = std::move(other.root);
 	updateRoot();

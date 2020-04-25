@@ -10,7 +10,7 @@ namespace Halley {
 	class UIPainter {
 	public:
 		UIPainter(SpritePainter& painter, int mask, int layer);
-		UIPainter(UIPainter&& other) = default;
+		UIPainter(UIPainter&& other) noexcept = default;
 
 		UIPainter& operator=(UIPainter&& other) = default;
 

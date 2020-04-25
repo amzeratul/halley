@@ -25,7 +25,7 @@ namespace Halley
 			{}
 
 			Wrapper(std::shared_ptr<Resource> resource, int loadDepth)
-				: res(resource)
+				: res(std::move(resource))
 				, depth(loadDepth)
 			{}
 

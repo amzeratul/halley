@@ -30,10 +30,10 @@ namespace Halley {
     public:
 		SIMDVec4() = default;
 		SIMDVec4(const SIMDVec4& other) = default;
-		SIMDVec4(SIMDVec4&& other) = default;
+		SIMDVec4(SIMDVec4&& other) noexcept = default;
 
 		SIMDVec4& operator=(const SIMDVec4& other) = default;
-		SIMDVec4& operator=(SIMDVec4&& other) = default;
+		SIMDVec4& operator=(SIMDVec4&& other) noexcept = default;
 
 		static inline SIMDVec4 loadZero()
 		{

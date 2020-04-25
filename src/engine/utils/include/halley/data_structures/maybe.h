@@ -40,7 +40,7 @@ namespace Halley
 			return *this;
 		}
 
-		[[maybe_unused]] constexpr OptionalLite& operator=(const OptionalLite& other)
+		[[maybe_unused]] constexpr OptionalLite& operator=(const OptionalLite& other) noexcept
 		{
 			val = other.val;
 			return *this;

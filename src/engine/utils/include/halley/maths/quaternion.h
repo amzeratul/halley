@@ -11,7 +11,7 @@ namespace Halley {
 
 		Quaternion() = default;
 		Quaternion(const Quaternion& other) = default;
-		Quaternion(Quaternion&& other) = default;
+		Quaternion(Quaternion&& other) noexcept = default;
 		Quaternion(float w, float x, float y, float z)
 			: w(w), x(x), y(y), z(z)
 		{}
@@ -19,7 +19,7 @@ namespace Halley {
 		Quaternion(Vector3f v);
 
 		Quaternion& operator=(const Quaternion& other) = default;
-		Quaternion& operator=(Quaternion&& other) = default;
+		Quaternion& operator=(Quaternion&& other) noexcept = default;
 
 		Quaternion operator+(const Quaternion& other) const
 		{

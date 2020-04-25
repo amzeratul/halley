@@ -47,7 +47,7 @@ namespace std {
 	template<>
 	struct hash<Halley::EntityId>
 	{
-		size_t operator()(const Halley::EntityId& v) const 
+		size_t operator()(const Halley::EntityId& v) const noexcept
 		{
 			return std::hash<int64_t>()(v.value);
 		}

@@ -48,8 +48,8 @@ namespace Halley {
 
 			Block(const Block& other) = delete;
 			Block& operator=(const Block& other) = delete;
-			Block(Block&& other) = default;
-			Block& operator=(Block&& other) = default;
+			Block(Block&& other) noexcept = default;
+			Block& operator=(Block&& other) noexcept = default;
 		};
 
 	public:

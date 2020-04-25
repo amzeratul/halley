@@ -59,7 +59,7 @@ namespace Halley {
 		{}
 
 		constexpr inline Vector4D(const Vector4D& other) = default;
-		constexpr inline Vector4D(Vector4D&& other) = default;
+		constexpr inline Vector4D(Vector4D&& other) noexcept = default;
 		
 		template <typename V, int A>
 		constexpr inline explicit Vector4D (const Vector4D<V, A>& vec)

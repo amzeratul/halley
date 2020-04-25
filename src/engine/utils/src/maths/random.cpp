@@ -45,9 +45,9 @@ Random::Random(gsl::span<const gsl::byte> data)
 
 Random::~Random() = default;
 
-Random::Random(Random&& other) = default;
+Random::Random(Random&& other) noexcept = default;
 
-Random& Random::operator=(Random&& other) = default;
+Random& Random::operator=(Random&& other) noexcept = default;
 
 int32_t Random::getInt(int32_t min, int32_t max)
 {

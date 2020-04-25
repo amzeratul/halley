@@ -15,9 +15,9 @@ namespace Halley
 		Path(const String& name);
 
 		Path(const Path& other) = default;
-		Path(Path&& other) = default;
+		Path(Path&& other) noexcept = default;
 		Path& operator=(const Path& other) = default;
-		Path& operator=(Path&& other) = default;
+		Path& operator=(Path&& other) noexcept = default;
 
 		Path& operator=(const std::string& other);
 		Path& operator=(const String& other);

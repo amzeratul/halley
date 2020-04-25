@@ -54,7 +54,7 @@ namespace Halley
 
 		ConfigNode();
 		explicit ConfigNode(const ConfigNode& other);
-		ConfigNode(ConfigNode&& other);
+		ConfigNode(ConfigNode&& other) noexcept;
 		ConfigNode(MapType&& entryMap);
 		ConfigNode(SequenceType&& entryList);
 		ConfigNode(String value);
@@ -69,7 +69,7 @@ namespace Halley
 		~ConfigNode();
 		
 		ConfigNode& operator=(const ConfigNode& other) = delete;
-		ConfigNode& operator=(ConfigNode&& other);
+		ConfigNode& operator=(ConfigNode&& other) noexcept;
 		ConfigNode& operator=(bool value);
 		ConfigNode& operator=(int value);
 		ConfigNode& operator=(float value);
@@ -168,10 +168,10 @@ namespace Halley
 	public:
 		ConfigFile();
 		explicit ConfigFile(const ConfigFile& other);
-		ConfigFile(ConfigFile&& other);
+		ConfigFile(ConfigFile&& other) noexcept;
 
 		ConfigFile& operator=(const ConfigFile& other);
-		ConfigFile& operator=(ConfigFile&& other);
+		ConfigFile& operator=(ConfigFile&& other) noexcept;
 
 		ConfigNode& getRoot();
 		const ConfigNode& getRoot() const;

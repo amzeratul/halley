@@ -23,7 +23,7 @@ AssetPack::AssetPack()
 	memset(iv.data(), 0, iv.size());
 }
 
-AssetPack::AssetPack(AssetPack&& other)
+AssetPack::AssetPack(AssetPack&& other) noexcept
 {
 	*this = std::move(other);
 }
@@ -77,7 +77,7 @@ AssetPack::~AssetPack()
 {
 }
 
-AssetPack& AssetPack::operator=(AssetPack&& other)
+AssetPack& AssetPack::operator=(AssetPack&& other) noexcept
 {
 	std::unique_lock<std::mutex> lock(other.readerMutex);
 

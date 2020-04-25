@@ -194,10 +194,10 @@ namespace Halley {
 	public:
 		EntityRef() = default;
 		EntityRef(const EntityRef& other) = default;
-		EntityRef(EntityRef&& other) = default;
+		EntityRef(EntityRef&& other) noexcept = default;
 
 		EntityRef& operator=(const EntityRef& other) = default;
-		EntityRef& operator=(EntityRef&& other) = default;
+		EntityRef& operator=(EntityRef&& other) noexcept = default;
 
 		EntityRef(Entity& e, World& w)
 			: entity(&e)

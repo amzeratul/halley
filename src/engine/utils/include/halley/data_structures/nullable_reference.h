@@ -41,7 +41,7 @@ namespace Halley {
 			: NullableReference(other)
 		{}
 		
-		NullableReferenceOf(NullableReference&& other)
+		NullableReferenceOf(NullableReference&& other) noexcept
 			: NullableReference(other)
 		{}
 		
@@ -59,7 +59,7 @@ namespace Halley {
 			return *this;
 		}
 		
-		NullableReferenceOf& operator=(NullableReference&& other)
+		NullableReferenceOf& operator=(NullableReference&& other) noexcept
 		{
 			NullableReference::operator=(other);
 			return *this;

@@ -48,9 +48,9 @@ namespace Halley {
 		~ScopedTemporaryFile();
 
 		ScopedTemporaryFile(const ScopedTemporaryFile& other) = delete;
-		ScopedTemporaryFile(ScopedTemporaryFile&& other);
+		ScopedTemporaryFile(ScopedTemporaryFile&& other) noexcept;
 		ScopedTemporaryFile& operator=(const ScopedTemporaryFile& other) = delete;
-		ScopedTemporaryFile& operator=(ScopedTemporaryFile&& other);
+		ScopedTemporaryFile& operator=(ScopedTemporaryFile&& other) noexcept;
 
 		const Path& getPath() const;
 

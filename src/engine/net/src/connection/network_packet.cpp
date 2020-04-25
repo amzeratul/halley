@@ -78,7 +78,7 @@ InboundNetworkPacket::InboundNetworkPacket()
 	: NetworkPacketBase()
 {}
 
-InboundNetworkPacket::InboundNetworkPacket(InboundNetworkPacket&& other)
+InboundNetworkPacket::InboundNetworkPacket(InboundNetworkPacket&& other) noexcept
 	: NetworkPacketBase()
 {
 	data = other.data;
@@ -98,7 +98,7 @@ void InboundNetworkPacket::extractHeader(gsl::span<gsl::byte> dst)
 	dataStart += dst.size_bytes();
 }
 
-InboundNetworkPacket& InboundNetworkPacket::operator=(InboundNetworkPacket&& other)
+InboundNetworkPacket& InboundNetworkPacket::operator=(InboundNetworkPacket&& other) noexcept
 {
 	data = other.data;
 	dataStart = other.dataStart;

@@ -26,12 +26,12 @@ namespace Halley {
     public:
 		AssetPack();
 		AssetPack(const AssetPack& other) = delete;
-		AssetPack(AssetPack&& other);
+		AssetPack(AssetPack&& other) noexcept;
 		AssetPack(std::unique_ptr<ResourceDataReader> reader, const String& encryptionKey = "", bool preLoad = false);
 		~AssetPack();
 
 		AssetPack& operator=(const AssetPack& other) = delete;
-		AssetPack& operator=(AssetPack&& other);
+		AssetPack& operator=(AssetPack&& other) noexcept;
 
 		AssetDatabase& getAssetDatabase();
 		const AssetDatabase& getAssetDatabase() const;

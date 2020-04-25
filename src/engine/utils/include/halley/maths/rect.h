@@ -35,10 +35,10 @@ namespace Halley {
 	public:
 		Rect2D() = default;
 		Rect2D(const Rect2D<T>& r) = default;
-		Rect2D(Rect2D<T>&& r) = default;
+		Rect2D(Rect2D<T>&& r) noexcept = default;
 
 		Rect2D<T>& operator=(const Rect2D<T>& o) = default;
-		Rect2D<T>& operator=(Rect2D<T>&& o) = default;
+		Rect2D<T>& operator=(Rect2D<T>&& o) noexcept = default;
 
 		template<typename U>
 		constexpr explicit Rect2D(Rect2D<U> r)

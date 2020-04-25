@@ -92,9 +92,9 @@ namespace Halley {
 	public:
 		explicit UISizer(UISizerType type = UISizerType::Horizontal, float gap = 1.0f, int nColumns = 0);
 
-		UISizer(UISizer&& other);
+		UISizer(UISizer&& other) noexcept;
 		UISizer(const UISizer& other) = delete;
-		UISizer& operator=(UISizer&& other);
+		UISizer& operator=(UISizer&& other) noexcept;
 		UISizer& operator=(const UISizer& other) = delete;
 
 		Vector2f getLayoutMinimumSize(bool force) const override;

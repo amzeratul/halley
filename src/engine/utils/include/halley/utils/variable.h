@@ -65,9 +65,9 @@ namespace Halley {
 		public:		
 			VariableBase();
 			VariableBase(const VariableBase& other) = default;
-			VariableBase(VariableBase&& other) = default;
+			VariableBase(VariableBase&& other) noexcept = default;
 			VariableBase& operator=(const VariableBase& other) = default;
-			VariableBase& operator=(VariableBase&& other) = default;
+			VariableBase& operator=(VariableBase&& other) noexcept = default;
 
 		protected:
 			VariableBase(const VariableTable& parent, String key);

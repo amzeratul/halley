@@ -107,12 +107,12 @@ UISizer::UISizer(UISizerType type, float gap, int nColumns)
 {
 }
 
-UISizer::UISizer(UISizer&& other)
+UISizer::UISizer(UISizer&& other) noexcept
 {
 	*this = std::move(other);
 }
 
-UISizer& UISizer::operator=(UISizer&& other)
+UISizer& UISizer::operator=(UISizer&& other) noexcept
 {
 	type = other.type;
 	gap = other.gap;

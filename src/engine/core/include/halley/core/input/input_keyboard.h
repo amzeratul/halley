@@ -97,9 +97,9 @@ namespace Halley {
 		TextInputCapture(TextInputData& inputData, SoftwareKeyboardData data, std::unique_ptr<ITextInputCapture> capture);
 		~TextInputCapture();
 
-		TextInputCapture(TextInputCapture&& other) = default;
+		TextInputCapture(TextInputCapture&& other) noexcept = default;
 		TextInputCapture(const TextInputCapture& other) = delete;
-		TextInputCapture& operator=(TextInputCapture&& other) = default;
+		TextInputCapture& operator=(TextInputCapture&& other) noexcept = default;
 		TextInputCapture& operator=(const TextInputCapture& other) = delete;
 
 		bool update() const; // Returns if the capture is still open

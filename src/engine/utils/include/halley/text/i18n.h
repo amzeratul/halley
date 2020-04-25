@@ -18,10 +18,10 @@ namespace Halley {
 		LocalisedString();
 
 		LocalisedString(const LocalisedString& other) = default;
-		LocalisedString(LocalisedString&& other) = default;
+		LocalisedString(LocalisedString&& other) noexcept = default;
 
 		LocalisedString& operator=(const LocalisedString& other) = default;
-		LocalisedString& operator=(LocalisedString&& other) = default;
+		LocalisedString& operator=(LocalisedString&& other) noexcept = default;
 		
 		LocalisedString& operator+=(const LocalisedString& str);
 

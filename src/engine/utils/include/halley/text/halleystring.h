@@ -184,7 +184,7 @@ namespace std {
 	template<>
 	struct hash<Halley::String>
 	{
-		size_t operator()(const Halley::String& s) const 
+		size_t operator()(const Halley::String& s) const noexcept
 		{
 			return std::hash<std::string>()(s.cppStr());
 		}

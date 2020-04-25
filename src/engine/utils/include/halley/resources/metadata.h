@@ -15,11 +15,11 @@ namespace Halley
 	public:
 		Metadata();
 		Metadata(const Metadata& other) = default;
-		Metadata(Metadata&& other) = default;
+		Metadata(Metadata&& other) noexcept = default;
 		~Metadata();
 
 		Metadata& operator=(const Metadata& other) = default;
-		Metadata& operator=(Metadata&& other) = default;
+		Metadata& operator=(Metadata&& other) noexcept = default;
 
 		bool hasKey(const String& key) const;
 
