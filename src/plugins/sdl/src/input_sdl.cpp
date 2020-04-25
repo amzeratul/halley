@@ -158,13 +158,10 @@ void InputSDL::processEvent(SDL_Event& event)
 		case SDL_KEYUP:
 		case SDL_TEXTINPUT:
 		case SDL_TEXTEDITING:
-			{
-				size_t n = getNumberOfKeyboards();
-				for (size_t i=0; i < n; i++) {
-					keyboards[i]->processEvent(event);
-				}
-				break;
+			for (auto& keyboard: keyboards) {
+				keyboard->processEvent(event);
 			}
+			break;
 
 		case SDL_JOYAXISMOTION:
 			processJoyEvent(event.jaxis.which, event);
@@ -184,13 +181,10 @@ void InputSDL::processEvent(SDL_Event& event)
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
 		case SDL_MOUSEWHEEL:
-			{
-				size_t n = getNumberOfMice();
-				for (size_t i=0; i < n; i++) {
-					mice[i]->processEvent(event, mouseRemap);
-				}
-				break;
+			for (auto& mouse: mice) {
+				mouse->processEvent(event, mouseRemap);
 			}
+			break;
 
 		case SDL_FINGERDOWN:
 		case SDL_FINGERUP:

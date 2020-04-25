@@ -91,10 +91,19 @@ Path SystemSDL::getUnpackedAssetsPath(const Path& gamePath) const
 
 bool SystemSDL::generateEvents(VideoAPI* video, InputAPI* input)
 {
-	SDL_Event event;
+	auto sdlInput = dynamic_cast<InputSDL*>(input);
+	std::array<SDL_Event, 32> events;
 	SDL_PumpEvents();
-	while (SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT) > 0) {
-		switch (event.type) {
+	while (true) {
+		const int nEvents = SDL_PeepEvents(events.data(), gsl::narrow_cast<int>(events.size()), SDL_GETEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT);
+		if (nEvents == 0) {
+			break;
+		}
+
+		for (int i = 0; i < nEvents; ++i) {
+			auto& event = events[i];
+
+			switch (event.type) {
 			case SDL_KEYDOWN:
 			case SDL_KEYUP:
 			case SDL_TEXTINPUT:
@@ -111,24 +120,24 @@ bool SystemSDL::generateEvents(VideoAPI* video, InputAPI* input)
 			case SDL_FINGERUP:
 			case SDL_FINGERDOWN:
 			case SDL_FINGERMOTION:
-			{
-				auto sdlInput = dynamic_cast<InputSDL*>(input);
-				if (sdlInput) {
-					sdlInput->processEvent(event);
+				{
+					if (sdlInput) {
+						sdlInput->processEvent(event);
+					}
+					break;
 				}
-				break;
-			}
 			case SDL_QUIT:
-			{
-				std::cout << "SDL_QUIT received." << std::endl;
-				return false;
-			}
-			case SDL_WINDOWEVENT:
-			{
-				if (video) {
-					processVideoEvent(video, event);
+				{
+					std::cout << "SDL_QUIT received." << std::endl;
+					return false;
 				}
-				break;
+			case SDL_WINDOWEVENT:
+				{
+					if (video) {
+						processVideoEvent(video, event);
+					}
+					break;
+				}
 			}
 		}
 	}

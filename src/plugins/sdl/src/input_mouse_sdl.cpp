@@ -30,7 +30,7 @@ InputMouseSDL::InputMouseSDL()
 	init(5);
 }
 
-void InputMouseSDL::processEvent(const SDL_Event& event, std::function<Vector2f(Vector2i)> remap)
+void InputMouseSDL::processEvent(const SDL_Event& event, const std::function<Vector2f(Vector2i)>& remap)
 {
 	switch (event.type) {
 	case SDL_MOUSEMOTION:
@@ -63,7 +63,7 @@ void InputMouseSDL::processEvent(const SDL_Event& event, std::function<Vector2f(
 	}
 }
 
-void InputMouseSDL::updateRemap(std::function<Vector2f(Vector2i)> remap) {
+void InputMouseSDL::updateRemap(const std::function<Vector2f(Vector2i)>& remap) {
 	int x, y;
 	SDL_GetMouseState(&x, &y);
 	pos = remap(Vector2i(x, y));
