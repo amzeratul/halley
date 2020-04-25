@@ -3,17 +3,42 @@
 #include "halley/bytes/byte_serializer.h"
 using namespace Halley;
 
-Internal::VariableStorage::VariableStorage()
+Internal::VariableStorage::VariableStorage() noexcept
 	: intValue(0)
 {
 }
 
-Internal::VariableStorage::VariableStorage(const VariableStorage& other)
+Internal::VariableStorage::VariableStorage(const VariableStorage& other) noexcept
 {
 	*this = other;
 }
 
-Internal::VariableStorage& Internal::VariableStorage::operator=(const VariableStorage& other)
+Internal::VariableStorage::VariableStorage(VariableStorage&& other) noexcept
+{
+	*this = std::move(other);
+}
+
+Internal::VariableStorage& Internal::VariableStorage::operator=(const VariableStorage& other) noexcept
+{
+	switch (other.type) {
+	case ConfigNodeType::Int:
+		intValue = other.intValue;
+		break;
+	case ConfigNodeType::Float:
+		floatValue = other.floatValue;
+		break;
+	case ConfigNodeType::Int2:
+		vector2iValue = other.vector2iValue;
+		break;
+	case ConfigNodeType::Float2:
+		vector2fValue = other.vector2fValue;
+		break;
+	}
+	type = other.type;
+	return *this;
+}
+
+Internal::VariableStorage& Internal::VariableStorage::operator=(VariableStorage&& other) noexcept
 {
 	switch (other.type) {
 	case ConfigNodeType::Int:

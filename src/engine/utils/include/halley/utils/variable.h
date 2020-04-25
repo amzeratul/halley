@@ -9,9 +9,11 @@ namespace Halley {
 
 	namespace Internal {
 		struct VariableStorage {
-			VariableStorage();
-			VariableStorage(const VariableStorage& other);
-			VariableStorage& operator=(const VariableStorage& other);
+			VariableStorage() noexcept;
+			VariableStorage(const VariableStorage& other) noexcept;
+			VariableStorage(VariableStorage&& other) noexcept;
+			VariableStorage& operator=(const VariableStorage& other) noexcept;
+			VariableStorage& operator=(VariableStorage&& other) noexcept;
 			
 			ConfigNodeType type = ConfigNodeType::Undefined;
 
