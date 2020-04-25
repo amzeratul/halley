@@ -451,6 +451,23 @@ void SceneEditorWindow::preparePrefab(Prefab& prefab)
 	}
 }
 
+static void hackFixPosition(Vector2f offset, ConfigNode& node)
+{
+	if (node.hasKey("components")) {
+		for (auto& c: node["components"]) {
+			for (auto& [name, value]: c.asMap()) {
+				for (auto& [fieldName, fieldValue]: value.asMap()) {
+					if (fieldName == "baseline" || fieldName == "polygon") {
+						for (auto& v: fieldValue.asSequence()) {
+							v = v.asVector2f() + offset;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 void SceneEditorWindow::preparePrefabEntity(ConfigNode& node)
 {
 	const bool isPrefab = node.hasKey("prefab");
@@ -476,6 +493,8 @@ void SceneEditorWindow::preparePrefabEntity(ConfigNode& node)
 			}
 		}
 	}
+
+	//hackFixPosition(Vector2f(-320, -240), node);
 }
 
 void SceneEditorWindow::setCustomUI(std::shared_ptr<UIWidget> ui)

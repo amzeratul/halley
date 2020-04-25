@@ -5,8 +5,10 @@ using namespace Halley;
 
 Quaternion::Quaternion(Vector3f axis, Angle1f angle)
 {
-	float sine, cosine;
-	(angle * 0.5f).sincos(sine, cosine);
+	const auto a = angle * 0.5f;
+	const float sine = a.sin();
+	const float cosine = a.cos();
+	
 	const auto u = axis.unit() * sine;
 	w = cosine;
 	x = u.x;

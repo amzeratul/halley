@@ -264,8 +264,8 @@ Matrix4f Matrix4f::makeBase(Vector3f x, Vector3f y, Vector3f z)
 
 Matrix4f Matrix4f::makeRotationX(Angle1f angle)
 {
-	float s, c;
-	angle.sincos(s, c);
+	const float s = angle.sin();
+	const float c = angle.cos();
 	
 	Matrix4f result;
 	result.loadIdentity();
@@ -278,8 +278,8 @@ Matrix4f Matrix4f::makeRotationX(Angle1f angle)
 
 Matrix4f Matrix4f::makeRotationY(Angle1f angle)
 {
-	float s, c;
-	angle.sincos(s, c);
+	const float s = angle.sin();
+	const float c = angle.cos();
 	
 	Matrix4f result;
 	result.loadIdentity();
@@ -292,8 +292,8 @@ Matrix4f Matrix4f::makeRotationY(Angle1f angle)
 
 Matrix4f Matrix4f::makeRotationZ(Angle1f angle)
 {
-	float s, c;
-	angle.sincos(s, c);
+	const float s = angle.sin();
+	const float c = angle.cos();
 
 	Matrix4f result;
 	result.loadIdentity();

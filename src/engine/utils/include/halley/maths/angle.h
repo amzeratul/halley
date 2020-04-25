@@ -39,32 +39,32 @@ namespace Halley {
 		constexpr Angle() : value(0) {}
 		constexpr Angle(T _value) : value(_value) {}
 		constexpr Angle(const Angle &angle) : value(angle.value) {}
-		constexpr Angle(Angle&& angle) : value(std::move(angle.value)) {}
+		constexpr Angle(Angle&& angle) noexcept : value(std::move(angle.value)) {}
 
 		// Comparison
-		constexpr inline bool operator== (const Angle &param) const { return value == param.value; }
-		constexpr inline bool operator!= (const Angle &param) const { return value != param.value; }
-		constexpr inline bool operator< (const Angle &param) const { return value < param.value; }
-		constexpr inline bool operator<= (const Angle &param) const { return value <= param.value; }
-		constexpr inline bool operator> (const Angle &param) const { return value > param.value; }
-		constexpr inline bool operator>= (const Angle &param) const { return value >= param.value; }
+		constexpr bool operator== (const Angle &param) const { return value == param.value; }
+		constexpr bool operator!= (const Angle &param) const { return value != param.value; }
+		constexpr bool operator< (const Angle &param) const { return value < param.value; }
+		constexpr bool operator<= (const Angle &param) const { return value <= param.value; }
+		constexpr bool operator> (const Angle &param) const { return value > param.value; }
+		constexpr bool operator>= (const Angle &param) const { return value >= param.value; }
 
 		// Basic arithmetics
-		constexpr inline Angle operator+ (const Angle &param) const
+		constexpr Angle operator+ (const Angle &param) const
 		{
 			Angle final;
 			final.value = value + param.value;
 			final.limit();
 			return final;
 		}
-		constexpr inline Angle operator- (const Angle &param) const
+		constexpr Angle operator- (const Angle &param) const
 		{
 			Angle final;
 			final.value = value - param.value;
 			final.limit();
 			return final;
 		}
-		constexpr inline Angle operator- () const
+		constexpr Angle operator- () const
 		{
 			Angle final;
 			final.value = -value;
@@ -73,28 +73,29 @@ namespace Halley {
 		}
 
 		// In-place operations
-		constexpr inline Angle& operator= (const Angle &angle) { value = angle.value; return *this; }
-		constexpr inline void operator+= (const Angle &angle) { value += angle.value; limit(); }
-		constexpr inline void operator-= (const Angle &angle) { value -= angle.value; limit(); }
+		constexpr Angle& operator= (const Angle &angle) noexcept { value = angle.value; return *this; }
+		constexpr Angle& operator= (Angle&& angle) noexcept { value = angle.value; return *this; }
+		constexpr void operator+= (const Angle &angle) { value += angle.value; limit(); }
+		constexpr void operator-= (const Angle &angle) { value -= angle.value; limit(); }
 
 		// Accessors
-		constexpr inline void setDegrees(const T degrees) { value = degToRad(degrees); limit(); }
-		constexpr inline void setRadians(const T radian) { value = radian; limit();}
-		constexpr inline T getDegrees() const { return radToDeg(value); }
-		constexpr inline T getRadians() const { return value; }
-		constexpr inline T toDegrees() const { return radToDeg(value); }
-		constexpr inline T toRadians() const { return value; }
+		constexpr void setDegrees(const T degrees) { value = degToRad(degrees); limit(); }
+		constexpr void setRadians(const T radian) { value = radian; limit();}
+		constexpr T getDegrees() const { return radToDeg(value); }
+		constexpr T getRadians() const { return value; }
+		constexpr T toDegrees() const { return radToDeg(value); }
+		constexpr T toRadians() const { return value; }
 
 		// Which side should it turn to to reach the parameter angle?
-		inline T turnSide(const Angle &param) const
+		constexpr T turnSide(const Angle &param) const
 		{
-			float res = ::sin(param.value - value);
+			float res = std::sin(param.value - value);
 			if (res > 0.0f) return 1.0f;
 			else return -1.0f;
 		}
 
 		// Turns a specific number of radians towards a target
-		inline void turnRadiansTowards(const Angle &angle,const T radians)
+		constexpr void turnRadiansTowards(const Angle &angle,const T radians)
 		{
 			float side = turnSide(angle);
 			value += radians * side;
@@ -104,52 +105,34 @@ namespace Halley {
 		}
 
 		// Turns a specific number of degrees towards a target
-		inline void turnDegreesTowards(const Angle &angle,const T degrees) { turnRadiansTowards(angle,degToRad(degrees)); }
+		constexpr void turnDegreesTowards(const Angle &angle,const T degrees) { turnRadiansTowards(angle,degToRad(degrees)); }
 
 		// Distance to another angle
-		inline Angle distance(const Angle &param) const
+		constexpr Angle distance(const Angle &param) const
 		{
-			float v = fabs(value - param.value);
+			float v = std::fabs(value - param.value);
 			if (v > PI_CONSTANT_F) v = 2.0f*PI_CONSTANT_F - v;
 			return fromRadians(v);
 		}
 
 		// Conversion
-		constexpr static inline T degToRad(const T degrees) { return degrees * 0.01745329252f; }
-		constexpr static inline T radToDeg(const T radians) { return radians * 57.295779513f; }
+		constexpr static T degToRad(const T degrees) noexcept { return degrees * 0.01745329252f; }
+		constexpr static T radToDeg(const T radians) noexcept { return radians * 57.295779513f; }
 
 		// Trigonometric functions
-		inline T sin() const { return ::sin(value); }
-		inline T cos() const { return ::cos(value); }
-		inline T tan() const { return ::tan(value); }
-		inline void sincos(T& s, T& c) const {
-#if defined(_MSC_VER) && defined(_M_IX86)
-			float _v = value;
-			float _s;
-			float _c;
-			__asm {
-				fld _v
-				fsincos
-				fstp _c
-				fstp _s
-			}
-			s = _s;
-			c = _c;
-#else
-			s = ::sin(value);
-			c = ::cos(value);
-#endif
-		}
+		constexpr T sin() const noexcept { return std::sin(value); }
+		constexpr T cos() const noexcept { return std::cos(value); }
+		constexpr T tan() const noexcept { return std::tan(value); }
 
 		// Builder methods
-		constexpr inline static Angle fromRadians (const T radians) { Angle ang; ang.setRadians(radians); return ang; }
-		constexpr inline static Angle fromDegrees (const T degrees) { Angle ang; ang.setDegrees(degrees); return ang; }
+		constexpr static Angle fromRadians (const T radians) noexcept { Angle ang; ang.setRadians(radians); return ang; }
+		constexpr static Angle fromDegrees (const T degrees) noexcept { Angle ang; ang.setDegrees(degrees); return ang; }
 
 	private:
 		// Angle value in radians
 		T value;
 
-		constexpr inline void limit()
+		constexpr void limit()
 		{
 			value = modulo(value, 2*PI_CONSTANT_F);
 		}
