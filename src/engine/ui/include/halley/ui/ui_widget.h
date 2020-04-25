@@ -37,10 +37,10 @@ namespace Halley {
 		void doRender(RenderContext& rc);
 
 		Vector2f getLayoutMinimumSize(bool force) const override;
-		void setRect(Rect4f rect) override;
+		void setRect(Rect4f rect) final override;
 
-		UIRoot* getRoot() override;
-		const UIRoot* getRoot() const override;
+		UIRoot* getRoot() final override;
+		const UIRoot* getRoot() const final override;
 		UIParent* getParent() const;
 
 		void layout();
@@ -65,14 +65,14 @@ namespace Halley {
 		bool isFocused() const;
 
 		void setId(const String& id);
-		const String& getId() const override;
+		const String& getId() const final override;
 
 		Vector2f getPosition() const;
 		virtual Vector2f getLayoutOriginPosition() const;
 		Vector2f getSize() const;
 		Vector2f getMinimumSize() const;
 		Vector4f getInnerBorder() const;
-		Rect4f getRect() const override;
+		Rect4f getRect() const final override;
 		virtual bool ignoreClip() const;
 
 		void setPosition(Vector2f pos);
@@ -86,7 +86,7 @@ namespace Halley {
 		virtual void onMouseOver(Vector2f mousePos);
 		virtual Rect4f getMouseRect() const;
 
-		bool isActive() const override;
+		bool isActive() const final override;
 		void setActive(bool active);
 		bool isEnabled() const;
 		void setEnabled(bool enabled);
@@ -128,7 +128,7 @@ namespace Halley {
 		void bindData(const String& childId, float initialValue, UIDataBindFloat::WriteCallback callback = {});
 		void bindData(const String& childId, const String& initialValue, UIDataBindString::WriteCallback callback = {});
 
-		bool isDescendentOf(const UIWidget& ancestor) const override;
+		bool isDescendentOf(const UIWidget& ancestor) const final override;
 		void setMouseClip(std::optional<Rect4f> mouseClip, bool force);
 
 		virtual void onManualControlCycleValue(int delta);
@@ -153,7 +153,7 @@ namespace Halley {
 		std::optional<AudioHandle> playSound(const String& eventName);
 
 		bool needsLayout() const;
-		void markAsNeedingLayout() override;
+		void markAsNeedingLayout() final override;
 
 		virtual bool canReceiveFocus() const;
 
