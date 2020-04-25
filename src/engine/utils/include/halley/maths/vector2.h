@@ -49,11 +49,10 @@ namespace Halley {
 
 		// Constructors
 		constexpr Vector2D () noexcept : x(0), y(0) {}
-		
 		constexpr Vector2D (T x, T y) noexcept : x(x), y(y) {}
-		
-		template <typename V>
-		constexpr explicit Vector2D (Vector2D<V> vec) noexcept : x(T(vec.x)), y(T(vec.y)) {}
+		constexpr Vector2D (const Vector2D& vec) noexcept : x(static_cast<T>(vec.x)), y(static_cast<T>(vec.y)) {}
+		constexpr Vector2D (Vector2D&& vec) noexcept : x(static_cast<T>(vec.x)), y(static_cast<T>(vec.y)) {}
+		template <typename V> constexpr explicit Vector2D (const Vector2D<V>& vec) noexcept : x(static_cast<T>(vec.x)), y(static_cast<T>(vec.y)) {}
 
 		constexpr Vector2D (T length, U angle) noexcept
 		{
@@ -76,7 +75,8 @@ namespace Halley {
 		}
 
 		// Assignment and comparison
-		constexpr Vector2D& operator = (Vector2D param) { x = param.x; y = param.y; return *this; }
+		constexpr Vector2D& operator = (const Vector2D& param) { x = param.x; y = param.y; return *this; }
+		constexpr Vector2D& operator = (Vector2D&& param) noexcept { x = param.x; y = param.y; return *this; }
 		constexpr Vector2D& operator = (T param) { x = param; y = param; return *this; }
 		constexpr bool operator == (Vector2D param) const { return x == param.x && y == param.y; }
 		constexpr bool operator != (Vector2D param) const { return x != param.x || y != param.y; }
