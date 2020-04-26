@@ -198,7 +198,7 @@ void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick, bool cl
 			refreshList();
 		}
 	} else {
-		if (loadedAsset != name) {
+		if (loadedAsset != name || !clearDropdown) {
 			loadedAsset = name;
 			
 			content->clear();
