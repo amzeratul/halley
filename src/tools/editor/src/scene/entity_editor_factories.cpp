@@ -432,9 +432,11 @@ public:
 
 		data.getFieldData().ensureType(ConfigNodeType::Sequence);
 		
-		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Vertical));
+		const auto containerPtr = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Vertical));
+		const auto containerWeak = std::weak_ptr<UIWidget>(containerPtr);
 
 		auto buildList = [=, &context] () {
+			const auto container = containerWeak.lock();
 			container->clear();
 			
 			const size_t nElements = data.getFieldData().asSequence().size();
@@ -456,7 +458,7 @@ public:
 		};
 		buildList();
 
-		container->setHandle(UIEventType::ButtonClicked, [=, buildList = std::move(buildList)] (const UIEvent& event)
+		containerPtr->setHandle(UIEventType::ButtonClicked, [=, buildList = std::move(buildList)] (const UIEvent& event)
 		{
 			auto& seq = data.getFieldData().asSequence();
 			if (event.getSourceId() == "add") {
@@ -468,7 +470,7 @@ public:
 			buildList();
 		});
 		
-		return container;
+		return containerPtr;
 	}
 };
 
