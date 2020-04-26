@@ -311,7 +311,7 @@ std::shared_ptr<const Prefab> SceneEditorWindow::getGamePrefab(const String& id)
 void SceneEditorWindow::addNewEntity()
 {
 	auto data = ConfigNode(ConfigNode::MapType());
-	data["name"] = "New Entity";
+	data["name"] = "";
 	data["uuid"] = UUID::generate().toString();
 	data["children"] = ConfigNode::SequenceType();
 	data["components"] = ConfigNode::SequenceType();

@@ -319,13 +319,24 @@ void EntityEditor::deleteComponent(const String& name)
 
 void EntityEditor::setName(const String& name)
 {
-	if (!isPrefab) {
-		const String oldName = getEntityData()["name"].asString("");
-		if (oldName != name) {
-			getEntityData()["name"] = name;
-			onEntityUpdated();
-		}
+	if (!isPrefab && getName() != name) {
+		getEntityData()["name"] = name;
+		onEntityUpdated();
 	}
+}
+
+void EntityEditor::setDefaultName(const String& name, const String& prevName)
+{
+	const auto oldName = getName();
+	if (oldName.isEmpty() || oldName == prevName) {
+		entityName->setText(name);
+		setName(name);
+	}
+}
+
+String EntityEditor::getName() const
+{
+	return isPrefab ? "" : getEntityData()["name"].asString("");
 }
 
 void EntityEditor::setPrefabName(const String& prefab)
@@ -350,6 +361,11 @@ void EntityEditor::setTool(SceneEditorTool tool, const String& componentName, co
 }
 
 ConfigNode& EntityEditor::getEntityData()
+{
+	return *currentEntityData;
+}
+
+const ConfigNode& EntityEditor::getEntityData() const
 {
 	return *currentEntityData;
 }

@@ -62,7 +62,7 @@ void EntityList::addEntity(const String& name, const String& id, const String& p
 
 String EntityList::getEntityName(const ConfigNode& data) const
 {
-	return getEntityName(data["name"].asString("?"), data["prefab"].asString(""));
+	return getEntityName(data["name"].asString(""), data["prefab"].asString(""));
 }
 
 String EntityList::getEntityName(const String& name, const String& prefabName) const
@@ -75,7 +75,11 @@ String EntityList::getEntityName(const String& name, const String& prefabName) c
 			return "Missing prefab! [" + prefabName + "]";
 		}
 	} else {
-		return name;
+		if (name.isEmpty()) {
+			return "Unnamed Entity";
+		} else {
+			return name;
+		}
 	}
 }
 

@@ -35,6 +35,11 @@ ConfigNode ComponentEditorContext::getDefaultNode(const String& fieldType) const
 	return parent.getDefaultNode(fieldType);
 }
 
+void ComponentEditorContext::setDefaultName(const String& name, const String& prevName) const
+{
+	parent.setDefaultName(name, prevName);
+}
+
 UIFactory& ComponentEditorContext::getUIFactory() const
 {
 	return factory;

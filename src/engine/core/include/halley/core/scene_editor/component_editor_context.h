@@ -23,6 +23,7 @@ namespace Halley {
 		virtual std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, bool createLabel) = 0;
 		virtual void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) = 0;
 		virtual ConfigNode getDefaultNode(const String& fieldType) = 0;
+		virtual void setDefaultName(const String& name, const String& prevName) = 0;
 	};
 	
     class ComponentEditorContext {
@@ -37,6 +38,7 @@ namespace Halley {
 		std::shared_ptr<IUIElement> makeLabel(const String& label) const;
 		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, bool createLabel) const;
     	ConfigNode getDefaultNode(const String& fieldType) const;
+	    void setDefaultName(const String& name, const String& prevName) const;
 
     private:
         IEntityEditor& parent;

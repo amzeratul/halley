@@ -255,6 +255,8 @@ public:
 				material->setValue(context.getGameResources().get<SpriteResource>(newVal)->getDefaultMaterialName());
 			}
 
+			context.setDefaultName(filterName(newVal), filterName(data.getFieldData()["image"].asString("")));
+
 			data.getFieldData()["image"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
@@ -266,6 +268,11 @@ public:
 		});
 
 		return container;
+	}
+
+	static String filterName(const String& name)
+	{
+		return Path(name).getFilename().toString();
 	}
 };
 

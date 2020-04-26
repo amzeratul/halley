@@ -29,6 +29,8 @@ namespace Halley {
 		std::shared_ptr<IUIElement> makeLabel(const String& label) override;
 		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, bool createLabel) override;
 		ConfigNode getDefaultNode(const String& fieldType) override;
+
+		void setDefaultName(const String& name, const String& prevName) override;
 		
 	private:
 		UIFactory& factory;
@@ -57,10 +59,12 @@ namespace Halley {
 		void deleteComponent(const String& name);
 
 		void setName(const String& name);
+		String getName() const;
 		void setPrefabName(const String& prefab);
 
 		void onEntityUpdated() override;
 		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;
 		ConfigNode& getEntityData();
+		const ConfigNode& getEntityData() const;
 	};
 }
