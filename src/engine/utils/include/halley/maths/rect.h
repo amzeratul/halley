@@ -24,6 +24,7 @@
 
 #include "vector2.h"
 #include "range.h"
+#include <optional>
 
 namespace Halley {
 	//////////////////////////////
@@ -176,7 +177,7 @@ namespace Halley {
 			return ((((p-p1) % size) + size) % size) + p1;
 		}
 
-		[[nodiscard]] Rect2D<T> intersection(const Rect2D<T>& p) const
+		[[nodiscard]] constexpr Rect2D<T> intersection(const Rect2D<T>& p) const
 		{
 			Range<T> x0(p1.x, p2.x);
 			Range<T> x1(p.p1.x, p.p2.x);
@@ -299,6 +300,19 @@ namespace Halley {
 		String toString() const
 		{
 			return String("[") + p1.toString() + " " + p2.toString() + "]";
+		}
+
+		constexpr static std::optional<Rect2D> optionalIntersect(const std::optional<Rect2D>& a, const std::optional<Rect2D>& b)
+		{
+			if (a && b) {
+				return a->intersection(b.value());
+			} else if (a) {
+				return a.value();
+			} else if (b) {
+				return b.value();
+			} else {
+				return {};
+			}
 		}
 	};
 

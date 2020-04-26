@@ -9,10 +9,6 @@
 #include "resources/resources.h"
 #include <gsl/gsl_assert>
 
-
-#include "graphics/sprite/animation.h"
-#include "halley/support/logger.h"
-
 using namespace Halley;
 
 Sprite::Sprite()
@@ -21,52 +17,69 @@ Sprite::Sprite()
 	setColour(Colour4f(1, 1, 1, 1));
 }
 
-void Sprite::draw(Painter& painter) const
+template <typename F>
+void Sprite::paintWithClip(Painter& painter, const std::optional<Rect4f>& extClip, F f) const
+{
+	const bool needsClip = hasClip || extClip;
+	if (needsClip) {
+		const Rect4f finalClip = Rect4f::optionalIntersect(getAbsoluteClip(), extClip).value();
+
+		const auto onScreen = getAABB().intersection(finalClip);
+		if (onScreen.getWidth() < 0.01f || onScreen.getHeight() < 0.01f) {
+			// Invisible, abort drawing
+			return;
+		}
+		
+		painter.setRelativeClip(finalClip);
+	}
+
+	f();
+
+	if (needsClip) {
+		painter.setClip();
+	}
+}
+
+void Sprite::draw(Painter& painter, const std::optional<Rect4f>& extClip) const
 {
 	if (sliced) {
-		drawSliced(painter, slices);
+		drawSliced(painter, slices, extClip);
 	} else {
-		drawNormal(painter);
+		drawNormal(painter, extClip);
 	}
 }
 
-void Sprite::drawNormal(Painter& painter) const
+void Sprite::drawSliced(Painter& painter, const std::optional<Rect4f>& extClip) const
+{
+	drawSliced(painter, slices, extClip);
+}
+
+void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) const
+{
+	Expects(material != nullptr);
+	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+
+	paintWithClip(painter, extClip, [&] ()
+	{
+		painter.drawSprites(material, 1, &vertexAttrib);
+	});
+}
+
+void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optional<Rect4f>& extClip) const
 {
 	Expects(material != nullptr);
 	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	
-	if (hasClip) {
-		painter.setRelativeClip(clip + (absoluteClip ? Vector2f() : vertexAttrib.pos));
-	}
-	painter.drawSprites(material, 1, &vertexAttrib);
-	if (hasClip) {
-		painter.setClip();
-	}
-}
+	paintWithClip(painter, extClip, [&] ()
+	{
+		Vector4f slices(slicesPixel);
+		slices.x /= size.x;
+		slices.y /= size.y;
+		slices.z /= size.x;
+		slices.w /= size.y;
 
-void Sprite::drawSliced(Painter& painter) const
-{
-	drawSliced(painter, slices);
-}
-
-void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel) const
-{
-	Expects(material != nullptr);
-	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
-	
-	Vector4f slices(slicesPixel);
-	slices.x /= size.x;
-	slices.y /= size.y;
-	slices.z /= size.x;
-	slices.w /= size.y;
-
-	if (hasClip) {
-		painter.setRelativeClip(clip + vertexAttrib.pos);
-	}
-	painter.drawSlicedSprite(material, vertexAttrib.scale, slices, &vertexAttrib);
-	if (hasClip) {
-		painter.setClip();
-	}
+		painter.drawSlicedSprite(material, vertexAttrib.scale, slices, &vertexAttrib);
+	});
 }
 
 void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
@@ -373,6 +386,11 @@ Sprite& Sprite::setClip()
 std::optional<Rect4f> Sprite::getClip() const
 {
 	return hasClip ? clip : std::optional<Rect4f>();
+}
+
+std::optional<Rect4f> Sprite::getAbsoluteClip() const
+{
+	return hasClip ? clip + (absoluteClip ? Vector2f() : vertexAttrib.pos) : std::optional<Rect4f>();
 }
 
 Sprite Sprite::clone() const

@@ -47,7 +47,7 @@ namespace Halley
 		TextRenderer clone() const;
 
 		void generateSprites(std::vector<Sprite>& sprites) const;
-		void draw(Painter& painter) const;
+		void draw(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
 
 		void setSpriteFilter(SpriteFilter f);
 

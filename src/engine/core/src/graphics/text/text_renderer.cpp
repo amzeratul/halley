@@ -284,7 +284,7 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 	}
 }
 
-void TextRenderer::draw(Painter& painter) const
+void TextRenderer::draw(Painter& painter, const std::optional<Rect4f>& extClip) const
 {
 	generateSprites(spritesCache);
 
@@ -295,11 +295,15 @@ void TextRenderer::draw(Painter& painter) const
 		positionDirty = true;
 	}
 
-	if (clip) {
-		painter.setRelativeClip(clip.value() + position);
+	const std::optional<Rect4f> myClip = clip ? clip.value() + position : std::optional<Rect4f>();
+	const auto finalClip = Rect4f::optionalIntersect(myClip, extClip);
+	if (finalClip) {
+		painter.setRelativeClip(finalClip.value());
 	}
+	
 	Sprite::drawMixedMaterials(spritesCache.data(), spritesCache.size(), painter);
-	if (clip) {
+
+	if (finalClip) {
 		painter.setClip();
 	}
 }

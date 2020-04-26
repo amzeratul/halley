@@ -30,12 +30,12 @@ namespace Halley {
 		T start;
 		T end;
 
-		Range()
+		constexpr Range()
 			: start(0)
 			, end(0)
 		{}
 
-		Range(T _start, T _end) {
+		constexpr Range(T _start, T _end) {
 			if (_start < _end) {
 				start = _start;
 				end = _end;
@@ -45,19 +45,19 @@ namespace Halley {
 			}
 		}
 
-		bool contains(T elem) const
+		constexpr bool contains(T elem) const
 		{
 			return elem >= start && elem < end;
 		}
 
-		inline T getLength() { return end - start; }
+		constexpr T getLength() { return end - start; }
 
-		inline bool overlaps(const Range &p) const
+		constexpr bool overlaps(const Range &p) const
 		{
 			return (start < p.end) && (p.start < end);
 		}
 
-		inline Range getOverlap(const Range &p) const
+		constexpr Range getOverlap(const Range &p) const
 		{
 			T s = std::max(start, p.start);
 			T e = std::min(end, p.end);
@@ -69,12 +69,12 @@ namespace Halley {
 			}
 		}
 		
-		inline Range getSweepOverlap(T len) const
+		constexpr Range getSweepOverlap(T len) const
 		{
 			return Range(start - len, end);
 		}
 
-		T getTimeToOverlap(const Range& p, T factor=1) const
+		constexpr T getTimeToOverlap(const Range& p, T factor=1) const
 		{
 			T sx = p.start;
 			T ex = p.end;
@@ -83,15 +83,15 @@ namespace Halley {
 
 			T t1 = (start-sx)*factor/divisor;
 			T t2 = (end-sx)*factor/divisor;
-			return min(abs(t1), abs(t2));
+			return std::min(std::abs(t1), std::abs(t2));
 		}
 
-		bool operator==(const Range& other) const
+		constexpr bool operator==(const Range& other) const
 		{
 			return start == other.start && end == other.end;
 		}
 
-		bool operator!=(const Range& other) const
+		constexpr bool operator!=(const Range& other) const
 		{
 			return start != other.start || end != other.end;
 		}

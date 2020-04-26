@@ -45,10 +45,10 @@ namespace Halley
 		Sprite& operator=(const Sprite& other) = default;
 		Sprite& operator=(Sprite&& other) noexcept = default;
 
-		void draw(Painter& painter) const;
-		void drawNormal(Painter& painter) const;
-		void drawSliced(Painter& painter) const;
-		void drawSliced(Painter& painter, Vector4s slices) const;
+		void draw(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
+		void drawNormal(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
+		void drawSliced(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
+		void drawSliced(Painter& painter, Vector4s slices, const std::optional<Rect4f>& extClip = {}) const;
 		static void draw(const Sprite* sprites, size_t n, Painter& painter);
 		static void drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painter);
 
@@ -115,6 +115,7 @@ namespace Halley
 		Sprite& setAbsoluteClip(Rect4f clip);
 		Sprite& setClip();
 		std::optional<Rect4f> getClip() const;
+		std::optional<Rect4f> getAbsoluteClip() const;
 
 		Rect4f getAABB() const;
 		bool isInView(Rect4f rect) const;
@@ -139,6 +140,8 @@ namespace Halley
 		bool sliced = false;
 
 		void computeSize();
+
+		template<typename F> void paintWithClip(Painter& painter, const std::optional<Rect4f>& clip, F f) const;
 	};
 
 	class Resources;

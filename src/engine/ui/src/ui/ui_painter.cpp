@@ -63,48 +63,24 @@ float UIPainter::getCurrentPriorityAndIncrement() const
 	if (rootPainter) {
 		return rootPainter->getCurrentPriorityAndIncrement();
 	} else {
-		return float(currentPriority++);
+		return static_cast<float>(currentPriority++);
 	}
 }
 
 void UIPainter::draw(const Sprite& sprite, bool forceCopy)
 {
-	if (clip) {
-		auto targetClip = clip.value() - sprite.getPosition();
-		if (sprite.getClip()) {
-			targetClip = sprite.getClip()->intersection(targetClip);
-		}
-
-		auto onScreen = sprite.getAABB().intersection(targetClip + sprite.getPosition());
-		if (onScreen.getWidth() > 0.1f && onScreen.getHeight() > 0.1f) {
-			painter->addCopy(sprite.clone().setClip(targetClip), mask, layer, getCurrentPriorityAndIncrement());
-		}
+	if (forceCopy) {
+		painter->addCopy(sprite, mask, layer, getCurrentPriorityAndIncrement(), clip);
 	} else {
-		if (forceCopy) {
-			painter->addCopy(sprite, mask, layer, getCurrentPriorityAndIncrement());
-		} else {
-			painter->add(sprite, mask, layer, getCurrentPriorityAndIncrement());
-		}
+		painter->add(sprite, mask, layer, getCurrentPriorityAndIncrement(), clip);
 	}
 }
 
 void UIPainter::draw(const TextRenderer& text, bool forceCopy)
 {
-	if (clip) {
-		auto targetClip = clip.value() - text.getPosition();
-		if (text.getClip()) {
-			targetClip = text.getClip()->intersection(targetClip);
-		}
-		
-		auto onScreen = Rect4f(Vector2f(), text.getExtents()).intersection(targetClip);
-		if (onScreen.getWidth() > 0.1f && onScreen.getHeight() > 0.1f) {
-			painter->addCopy(text.clone().setClip(targetClip), mask, layer, getCurrentPriorityAndIncrement());
-		}
+	if (forceCopy) {
+		painter->addCopy(text, mask, layer, getCurrentPriorityAndIncrement(), clip);
 	} else {
-		if (forceCopy) {
-			painter->addCopy(text, mask, layer, getCurrentPriorityAndIncrement());
-		} else {
-			painter->add(text, mask, layer, getCurrentPriorityAndIncrement());
-		}
+		painter->add(text, mask, layer, getCurrentPriorityAndIncrement(), clip);
 	}
 }
