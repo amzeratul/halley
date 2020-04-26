@@ -95,13 +95,18 @@ void Font::onLoaded(Resources& resources)
 	}
 }
 
-const Font::Glyph& Font::getGlyph(int code) const
+std::pair<const Font::Glyph&, const Font&> Font::getGlyph(int code) const
 {
-	auto& font = getFontForGlyph(code);
-	auto iter = font.glyphs.find(code);
-	if (iter == font.glyphs.end()) {
-		iter = font.glyphs.find(0);
-		if (iter == font.glyphs.end()) {
+	const auto& font = getFontForGlyph(code);
+	return { font.getGlyphHere(code), font };
+}
+
+const Font::Glyph& Font::getGlyphHere(int code) const
+{
+	auto iter = glyphs.find(code);
+	if (iter == glyphs.end()) {
+		iter = glyphs.find(0);
+		if (iter == glyphs.end()) {
 			throw Exception("Unable to load fallback character, needed for character " + toString(code), HalleyExceptions::Graphics);
 		}
 		return iter->second;
@@ -111,9 +116,9 @@ const Font::Glyph& Font::getGlyph(int code) const
 
 const Font& Font::getFontForGlyph(int code) const
 {
-	auto iter = glyphs.find(code);
+	const auto iter = glyphs.find(code);
 	if (iter == glyphs.end()) {
-		for (auto& font: fallbackFont) {
+		for (const auto& font: fallbackFont) {
 			if (font->glyphs.find(code) != font->glyphs.end()) {
 				return *font;
 			}

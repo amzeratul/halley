@@ -255,15 +255,14 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 			if (c == '\n') {
 				flush();
 			} else {
-				auto& fontForGlyph = font->getFontForGlyph(c);
-				auto& glyph = fontForGlyph.getGlyph(c);
+				const auto& [glyph, fontForGlyph] = font->getGlyph(c);
 				const float scale = getScale(fontForGlyph);
 				const auto fontAdjustment = floorAlign(Vector2f(0, fontForGlyph.getAscenderDistance() - font->getAscenderDistance()) * scale);
 
 				std::shared_ptr<Material> materialToUse = hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial();
 
 				sprites[spritesInserted++] = Sprite()
-					.setMaterial(materialToUse)
+					.setMaterial(std::move(materialToUse))
 					.setSize(glyph.size)
 					.setTexRect(glyph.area)
 					.setColour(curCol)
@@ -331,9 +330,8 @@ Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 			p.x = 0;
 			p.y += lineH;
 		} else {
-			const auto& f = font->getFontForGlyph(c);
+			const auto& [glyph, f] = font->getGlyph(c);
 			const float scale = getScale(f);
-			auto& glyph = f.getGlyph(c);
 			p += Vector2f(glyph.advance.x, 0) * scale;
 		}
 	}
@@ -359,9 +357,8 @@ Vector2f TextRenderer::getCharacterPosition(size_t character, const StringUTF32&
 			p.x = 0;
 			p.y += lineH;
 		} else {
-			const auto& f = font->getFontForGlyph(c);
+			const auto& [glyph, f] = font->getGlyph(c);
 			const float scale = getScale(f);
-			auto& glyph = f.getGlyph(c);
 			p += Vector2f(glyph.advance.x, 0) * scale;
 		}
 	}
@@ -410,9 +407,8 @@ size_t TextRenderer::getCharacterAt(const Vector2f& position, const StringUTF32&
 			p.x = 0;
 			p.y += lineH;
 		} else if (c != 0) {
-			const auto& f = font->getFontForGlyph(c);
+			const auto& [glyph, f] = font->getGlyph(c);
 			const float scale = getScale(f);
-			auto& glyph = f.getGlyph(c);
 			p += Vector2f(glyph.advance.x, 0) * scale;
 		}
 	}
@@ -450,8 +446,7 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::fun
 				lastValid = src.subspan(0, i + 1);
 			}
 
-			const auto& f = font->getFontForGlyph(c);
-			auto& glyph = f.getGlyph(c);
+			const auto& [glyph, f] = font->getGlyph(c);
 			const float scale = getScale(f);
 			const float w = accepted ? glyph.advance.x * scale : 0.0f;
 			curWidth += w;

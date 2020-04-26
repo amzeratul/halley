@@ -46,7 +46,8 @@ namespace Halley
 		void reload(Resource&& resource) override;
 		void onLoaded(Resources& resources) override;
 
-		const Glyph& getGlyph(int code) const;
+		std::pair<const Glyph&, const Font&> getGlyph(int code) const;
+		const Glyph& getGlyphHere(int code) const;
 		const Font& getFontForGlyph(int code) const;
 		float getLineHeightAtSize(float size) const;
 		float getAscenderDistance() const;
@@ -81,6 +82,6 @@ namespace Halley
 		std::vector<String> fallback;
 
 		std::shared_ptr<Material> material;
-		FlatMap<int, Glyph> glyphs;
+		std::unordered_map<int, Glyph> glyphs;
 	};
 }
