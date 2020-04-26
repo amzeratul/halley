@@ -465,7 +465,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		set_target_properties(${name} PROPERTIES SUFFIX ".bc")
 	endif()
 
-	SET(LINK_LIBRARIES ${HALLEY_PROJECT_LIBS})
+	SET(LINK_LIBRARIES "")
 	if (EMBED)
 		SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-ui halley-core halley-entity halley-audio halley-net halley-lua halley-utils ${HALLEY_PROJECT_EXTERNAL_LIBS})
 		if (USE_OPENGL OR USE_OPENGL_ES2 OR USE_OPENGL_ES3)
