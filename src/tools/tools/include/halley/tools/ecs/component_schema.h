@@ -22,6 +22,7 @@ namespace Halley
 		Vector<MemberSchema> members;
 		std::unordered_set<String> includeFiles;
 		std::optional<String> customImplementation;
+		std::vector<String> componentDependencies;
 		bool generate = false;
 
 		bool operator<(const ComponentSchema& other) const;

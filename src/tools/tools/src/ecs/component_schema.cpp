@@ -37,6 +37,15 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 	if (node["customImplementation"].IsDefined()) {
 		customImplementation = node["customImplementation"].as<std::string>();
 	}
+
+	const auto deps = node["componentDependencies"];
+	if (deps.IsSequence()) {
+		for (auto n = deps.begin(); n != deps.end(); ++n) {
+			if (n->IsScalar()) {
+				componentDependencies.push_back(n->as<std::string>());
+			}
+		}
+	}
 }
 
 bool ComponentSchema::operator<(const ComponentSchema& other) const

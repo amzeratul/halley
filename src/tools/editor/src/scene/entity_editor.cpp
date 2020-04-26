@@ -229,7 +229,7 @@ ConfigNode EntityEditor::getDefaultNode(const String& fieldType)
 	}
 }
 
-void EntityEditor::addComponent()
+std::set<String> EntityEditor::getComponentsOnEntity() const
 {
 	// Components already on this entity
 	std::set<String> existingComponents;
@@ -241,8 +241,11 @@ void EntityEditor::addComponent()
 			}
 		}
 	}
+	return existingComponents;
+}
 
-	// Components on prefab root
+std::set<String> EntityEditor::getComponentsOnPrefab() const
+{
 	std::set<String> prefabComponents;
 	if (isPrefab) {
 		auto& comps = (*prefabData)["components"];
@@ -254,10 +257,17 @@ void EntityEditor::addComponent()
 			}
 		}
 	}
+	return prefabComponents;
+}
+
+void EntityEditor::addComponent()
+{
+	auto existingComponents = getComponentsOnEntity();
+	auto prefabComponents = getComponentsOnPrefab();
 
 	// Generate all available names
 	std::vector<String> componentNames;
-	for (auto& c: ecsData->getComponents()) {
+	for (const auto& c: ecsData->getComponents()) {
 		if (existingComponents.find(c.first) == existingComponents.end()) {
 			if (!isPrefab || prefabComponents.find(c.first) != prefabComponents.end()) {
 				componentNames.push_back(c.first);
@@ -276,16 +286,34 @@ void EntityEditor::addComponent()
 
 void EntityEditor::addComponent(const String& name)
 {
-	auto& components = getEntityData()["components"];
-	if (components.getType() != ConfigNodeType::Sequence) {
-		components = ConfigNode::SequenceType();
+	// Dependencies
+	const auto iter = ecsData->getComponents().find(name);
+	if (iter == ecsData->getComponents().end()) {
+		throw Exception("Unknown component type: " + name, HalleyExceptions::Tools);
 	}
+	const auto& deps = iter->second.componentDependencies;
 
+	// Generate component
 	ConfigNode compNode = ConfigNode::MapType();
 	compNode[name] = ConfigNode::MapType();
+
+	// Get list
+	auto& components = getEntityData()["components"];
+	components.ensureType(ConfigNodeType::Sequence);
+
+	// Insert dependencies, if needed
+	auto existingComponents = getComponentsOnEntity();
+	auto prefabComponents = getComponentsOnPrefab();
+	for (const auto& dep: deps) {
+		if (existingComponents.find(dep) == existingComponents.end() && prefabComponents.find(dep) == prefabComponents.end()) {
+			addComponent(dep);
+		}
+	}
 	
+	// Insert
 	components.asSequence().emplace_back(std::move(compNode));
 
+	// Reload
 	needToReloadUI = true;	
 	onEntityUpdated();
 }

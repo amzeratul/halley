@@ -36,6 +36,16 @@ const HashMap<String, CustomTypeSchema>& ECSData::getCustomTypes() const
 
 void ECSData::validate()
 {
+	for (auto& comp: components) {
+		for (auto& dep: comp.second.componentDependencies) {
+			if (dep == comp.second.name) {
+				throw Exception("Component " + comp.second.name + " depends on itself.", HalleyExceptions::Tools);
+			} else if (components.find(dep) == components.end()) {
+				throw Exception("Component " + comp.second.name + " depends on missing component \"" + dep + "\"", HalleyExceptions::Tools);
+			}
+		}
+	}
+	
 	for (auto& sys : systems) {
 		bool hasMain = false;
 		std::set<String> famNames;

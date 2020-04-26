@@ -2,6 +2,7 @@
 
 component:
   name: Sprite
+  componentDependencies: [Transform2D]
   members:
   - sprite:
       type: 'Halley::Sprite'
@@ -16,6 +17,7 @@ component:
 
 component:
   name: TextLabel
+  componentDependencies: [Transform2D]
   members:
   - text: 'Halley::TextRenderer'
   - layer:

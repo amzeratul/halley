@@ -66,5 +66,8 @@ namespace Halley {
 		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;
 		ConfigNode& getEntityData();
 		const ConfigNode& getEntityData() const;
+
+		std::set<String> getComponentsOnEntity() const;
+		std::set<String> getComponentsOnPrefab() const;
 	};
 }
