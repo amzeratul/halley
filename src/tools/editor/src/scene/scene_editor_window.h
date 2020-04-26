@@ -82,5 +82,7 @@ namespace Halley {
 		void setToolUI(std::shared_ptr<UIWidget> ui);
 
 		void decayTool();
+
+		void setSaveEnabled(bool enabled);
 	};
 }

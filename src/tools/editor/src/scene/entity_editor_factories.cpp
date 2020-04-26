@@ -537,11 +537,14 @@ public:
 				container->clear();
 				data.getFieldData() = ConfigNode();
 			}
-			context.onEntityUpdated();
 		};
 		setState(initialValue);
 
-		checkbox->bindData("present", initialValue, std::move(setState));
+		checkbox->bindData("present", initialValue, [&context, setState = std::move(setState)] (bool newVal)
+		{
+			setState(newVal);
+			context.onEntityUpdated();
+		});
 		
 		return rowSizer;
 	}

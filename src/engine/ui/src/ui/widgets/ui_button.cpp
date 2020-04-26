@@ -90,17 +90,21 @@ void UIButton::setCanDoBorderOnly(bool canDo)
 	canDoBorderOnly = canDo;
 }
 
-void UIButton::setLabel(LocalisedString label)
+void UIButton::setLabel(LocalisedString text)
 {
-	const auto& renderer = style.getTextRenderer("label");
-	auto uiLabel = std::make_shared<UILabel>(getId() + "_label", renderer, std::move(label));
-	if (style.hasTextRenderer("hoveredLabel")) {
-		uiLabel->setHoverable(style.getTextRenderer("label"), style.getTextRenderer("hoveredLabel"));
+	if (!label) {
+		const auto& renderer = style.getTextRenderer("label");
+		label = std::make_shared<UILabel>(getId() + "_label", renderer, std::move(text));
+		if (style.hasTextRenderer("hoveredLabel")) {
+			label->setHoverable(style.getTextRenderer("label"), style.getTextRenderer("hoveredLabel"));
+		}
+		if (style.hasTextRenderer("selectedLabel"))	{
+			label->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
+		}
+		add(label, 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
+	} else {
+		label->setText(std::move(text));
 	}
-	if (style.hasTextRenderer("selectedLabel"))	{
-		uiLabel->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
-	}
-	add(uiLabel, 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
 }
 
 void UIButton::doSetState(State state)

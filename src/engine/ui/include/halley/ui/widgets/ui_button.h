@@ -1,5 +1,6 @@
 #pragma once
 #include "ui_clickable.h"
+#include "ui_label.h"
 #include "halley/core/graphics/sprite/sprite.h"
 
 namespace Halley {
@@ -31,6 +32,7 @@ namespace Halley {
 		Sprite sprite;
 		UIStyle style;
 		UIInputType curInputType = UIInputType::Undefined;
+		std::shared_ptr<UILabel> label;
 		bool borderOnly = false;
 		bool canDoBorderOnly = true;
 	};

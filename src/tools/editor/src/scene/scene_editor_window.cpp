@@ -128,7 +128,7 @@ void SceneEditorWindow::makeUI()
 
 	toolMode = getWidgetAs<UIList>("toolMode");
 	
-	getWidget("saveButton")->setEnabled(false);
+	setSaveEnabled(false);
 
 	setHandle(UIEventType::ListSelectionChanged, "entityList_list", [=] (const UIEvent& event)
 	{
@@ -205,7 +205,7 @@ void SceneEditorWindow::panCameraToEntity(const String& id)
 
 void SceneEditorWindow::saveEntity()
 {
-	getWidget("saveButton")->setEnabled(false);
+	setSaveEnabled(false);
 
 	YAMLConvert::EmitOptions options;
 	options.mapKeyOrder = {{ "name", "uuid", "components", "children" }};
@@ -217,7 +217,7 @@ void SceneEditorWindow::saveEntity()
 
 void SceneEditorWindow::markModified()
 {
-	getWidget("saveButton")->setEnabled(true);
+	setSaveEnabled(true);
 }
 
 void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId)
@@ -533,4 +533,11 @@ void SceneEditorWindow::decayTool()
 	if (curTool == SceneEditorTool::Polygon) {
 		setTool(SceneEditorTool::Drag);
 	}
+}
+
+void SceneEditorWindow::setSaveEnabled(bool enabled)
+{
+	auto button = getWidgetAs<UIButton>("saveButton");
+	button->setLabel(LocalisedString::fromHardcodedString(enabled ? "* Save" : "Save"));
+	button->setEnabled(enabled);
 }
