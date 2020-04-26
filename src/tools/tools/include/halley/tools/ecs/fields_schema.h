@@ -62,13 +62,15 @@ namespace Halley
 		String defaultValue;
 		MemberAccess access;
 		bool serializable;
+		bool collapse;
 
-		MemberSchema(TypeSchema type, String name, String defaultValue = "", MemberAccess access = MemberAccess::Public, bool serializable = true)
+		MemberSchema(TypeSchema type, String name, String defaultValue = "", MemberAccess access = MemberAccess::Public, bool serializable = true, bool collapse = false)
 			: type(std::move(type))
 			, name(std::move(name))
 			, defaultValue(std::move(defaultValue))
 			, access(access)
 			, serializable(serializable)
+			, collapse(collapse)
 		{}
 
 		static std::vector<VariableSchema> toVariableSchema(const std::vector<MemberSchema>& schema)

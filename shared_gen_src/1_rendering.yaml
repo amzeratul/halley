@@ -3,7 +3,9 @@
 component:
   name: Sprite
   members:
-  - sprite: 'Halley::Sprite'
+  - sprite:
+      type: 'Halley::Sprite'
+      collapse: true
   - layer:
       type: int
       defaultValue: 0

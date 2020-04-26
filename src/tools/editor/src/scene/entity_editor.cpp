@@ -158,7 +158,7 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 		for (auto& member: componentData.members) {
 			if (member.serializable) {
 				ComponentFieldParameters parameters(componentType, componentNames, ComponentDataRetriever(data, member.name), member.defaultValue);
-				auto field = makeField(member.type.name, parameters, true);
+				auto field = makeField(member.type.name, parameters, !member.collapse);
 				if (field) {
 					componentFields->add(field);
 				}
@@ -196,7 +196,7 @@ std::shared_ptr<IUIElement> EntityEditor::makeField(const String& rawFieldType, 
 		
 	if (createLabel && compFieldFactory && compFieldFactory->canCreateLabel()) {
 		return compFieldFactory->createLabelAndField(*context, parameters);
-	} else if (compFieldFactory && compFieldFactory->isNested()) {
+	} else if (createLabel && compFieldFactory && compFieldFactory->isNested()) {
 		auto field = factory.makeUI("ui/halley/entity_editor_compound_field");
 		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.data.getName()));
 		field->getWidget("fields")->add(compFieldFactory->createField(*context, parameters));
