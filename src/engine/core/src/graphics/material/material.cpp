@@ -266,12 +266,14 @@ size_t Material::getNumTextureUnits() const
 	return textures.size();
 }
 
-void Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data)
+bool Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data)
 {
 	if (dataBlocks[blockNumber].setUniform(offset, type, data)) {
 		needToUploadData = true;
 		needToUpdateHash = true;
+		return true;
 	}
+	return false;
 }
 
 uint64_t Material::computeHash() const

@@ -33,14 +33,14 @@ namespace Halley
 		friend class MaterialPass;
 
 	public:
-		MaterialParameter& operator=(Colour colour);
-		MaterialParameter& operator=(float p);
-		MaterialParameter& operator=(Vector2f p);
-		MaterialParameter& operator=(Vector3f p);
-		MaterialParameter& operator=(Vector4f p);
-		MaterialParameter& operator=(int p);
-		MaterialParameter& operator=(Vector2i p);
-		MaterialParameter& operator=(const Matrix4f& m);
+		bool set(Colour colour);
+		bool set(float p);
+		bool set(Vector2f p);
+		bool set(Vector3f p);
+		bool set(Vector4f p);
+		bool set(int p);
+		bool set(Vector2i p);
+		bool set(const Matrix4f& m);
 
 		ShaderParameterType getType() const;
 

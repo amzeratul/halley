@@ -558,10 +558,10 @@ void Painter::updateProjection()
 {
 	camera->updateProjection(activeRenderTarget->getProjectionFlipVertical());
 	projection = camera->getProjection();
-	
-	auto old = halleyGlobalMaterial->clone();
+
+	const auto oldHash = halleyGlobalMaterial->getHash();
 	halleyGlobalMaterial->set("u_mvp", projection);
-	if (*old != *halleyGlobalMaterial) {
+	if (oldHash != halleyGlobalMaterial->getHash()) {
 		onUpdateProjection(*halleyGlobalMaterial);
 	}
 }

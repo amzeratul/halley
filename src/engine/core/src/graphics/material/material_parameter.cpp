@@ -41,66 +41,58 @@ void MaterialParameter::rebind(Material& m) noexcept
 	material = &m;
 }
 
-MaterialParameter& MaterialParameter::operator=(Colour colour)
+bool MaterialParameter::set(Colour colour)
 {
 	Expects(type == ShaderParameterType::Float4);
-	material->setUniform(blockNumber, offset, ShaderParameterType::Float4, &colour);
-	return *this;
+	return material->setUniform(blockNumber, offset, ShaderParameterType::Float4, &colour);
 }
 
-MaterialParameter& MaterialParameter::operator=(float p)
+bool MaterialParameter::set(float p)
 {
 	Expects(type == ShaderParameterType::Float);
-	material->setUniform(blockNumber, offset, ShaderParameterType::Float, &p);
-	return *this;
+	return material->setUniform(blockNumber, offset, ShaderParameterType::Float, &p);
 }
 
-MaterialParameter& MaterialParameter::operator=(Vector2f p)
+bool MaterialParameter::set(Vector2f p)
 {
 	Expects(type == ShaderParameterType::Float2);
-	material->setUniform(blockNumber, offset, ShaderParameterType::Float2, &p);
-	return *this;
+	return material->setUniform(blockNumber, offset, ShaderParameterType::Float2, &p);
 }
 
-MaterialParameter& MaterialParameter::operator=(Vector3f p)
+bool MaterialParameter::set(Vector3f p)
 {
 	Expects(type == ShaderParameterType::Float3);
-	material->setUniform(blockNumber, offset, ShaderParameterType::Float3, &p);
-	return *this;
+	return material->setUniform(blockNumber, offset, ShaderParameterType::Float3, &p);
 }
 
-MaterialParameter& MaterialParameter::operator=(Vector4f p)
+bool MaterialParameter::set(Vector4f p)
 {
 	Expects(type == ShaderParameterType::Float4);
-	material->setUniform(blockNumber, offset, ShaderParameterType::Float4, &p);
-	return *this;
+	return material->setUniform(blockNumber, offset, ShaderParameterType::Float4, &p);
 }
 
-MaterialParameter& MaterialParameter::operator=(int p)
+bool MaterialParameter::set(int p)
 {
 	Expects(type == ShaderParameterType::Int);
-	material->setUniform(blockNumber, offset, ShaderParameterType::Int, &p);
-	return *this;
+	return material->setUniform(blockNumber, offset, ShaderParameterType::Int, &p);
 }
 
-MaterialParameter& MaterialParameter::operator=(Vector2i p)
+bool MaterialParameter::set(Vector2i p)
 {
 	Expects(type == ShaderParameterType::Int2);
-	material->setUniform(blockNumber, offset, ShaderParameterType::Int2, &p);
-	return *this;
+	return material->setUniform(blockNumber, offset, ShaderParameterType::Int2, &p);
 }
 
-MaterialParameter& MaterialParameter::operator=(const Matrix4f& m)
+bool MaterialParameter::set(const Matrix4f& m)
 {
 	Expects(type == ShaderParameterType::Matrix4);
 	if (material->getDefinition().isColumnMajor()) {
 		auto transposed = m;
 		transposed.transpose();
-		material->setUniform(blockNumber, offset, ShaderParameterType::Matrix4, &transposed);
+		return material->setUniform(blockNumber, offset, ShaderParameterType::Matrix4, &transposed);
 	} else {
-		material->setUniform(blockNumber, offset, ShaderParameterType::Matrix4, &m);
+		return material->setUniform(blockNumber, offset, ShaderParameterType::Matrix4, &m);
 	}
-	return *this;
 }
 
 ShaderParameterType MaterialParameter::getType() const

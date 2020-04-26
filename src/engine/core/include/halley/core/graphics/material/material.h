@@ -101,7 +101,7 @@ namespace Halley
 		template <typename T>
 		Material& set(const String& name, const T& value)
 		{
-			getParameter(name) = value;
+			getParameter(name).set(value);
 			return *this;
 		}
 
@@ -123,7 +123,7 @@ namespace Halley
 		void initUniforms(bool forceLocalBlocks);
 		MaterialParameter& getParameter(const String& name);
 
-		void setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data);
+		bool setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data);
 		uint64_t computeHash() const;
 
 		const std::shared_ptr<const Texture>& getFallbackTexture() const;
