@@ -2,6 +2,7 @@
 #include "halley/text/string_converter.h"
 #include "halley/text/encode.h"
 #include "halley/maths/random.h"
+#include <cstring> // needed for memset and memcmp
 
 using namespace Halley;
 
