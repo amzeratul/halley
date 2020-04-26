@@ -33,11 +33,11 @@ children:
             type: horizontal
             options:
               - id: drag
-                text: Hand
+                image: ui/scene_editor_drag.png
               - id: translate
-                text: Move
+                image: ui/scene_editor_move.png
               - id: polygon
-                text: Polygon
+                image: ui/scene_editor_polygon.png
     - widget: { id: canvas, class: sceneEditorCanvas }
       proportion: 1
       sizer: { type: vertical }
