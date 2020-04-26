@@ -238,22 +238,38 @@ Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 	if (materialName == "") {
 		materialName = "Halley/Sprite";
 	}
-	setMaterial(std::make_shared<Material>(resources.get<MaterialDefinition>(materialName)));
+	setMaterial(std::make_shared<Material>(resources.get<MaterialDefinition>(materialName)), false);
 	return *this;
 }
 
-Sprite& Sprite::setMaterial(std::shared_ptr<Material> m)
+Sprite& Sprite::setMaterial(std::shared_ptr<Material> m, bool shared)
 {
 	Expects(m != nullptr);
 
 	const bool hadMaterial = static_cast<bool>(material);
 	material = std::move(m);
+	sharedMaterial = shared;
 
 	if (!hadMaterial && !material->getTextures().empty()) {
 		setImageData(*material->getTextures()[0]);
 	}
 
 	return *this;
+}
+
+Sprite& Sprite::setMaterial(std::unique_ptr<Material> m)
+{
+	setMaterial(std::move(m), false);
+	return *this;
+}
+
+Material& Sprite::getMutableMaterial()
+{
+	if (sharedMaterial) {
+		material = material->clone();
+		sharedMaterial = false;
+	}
+	return *material;
 }
 
 Sprite& Sprite::setImageData(const Texture& image)
@@ -263,35 +279,36 @@ Sprite& Sprite::setImageData(const Texture& image)
 	return *this;
 }
 
-Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> materialDefinition)
+Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> materialDefinition, bool shared)
 {
 	Expects(image != nullptr);
 	Expects(materialDefinition != nullptr);
 
 	auto mat = std::make_shared<Material>(materialDefinition);
 	mat->set("tex0", image);
-	setMaterial(mat);
+	setMaterial(mat, shared);
 	return *this;
 }
 
 Sprite& Sprite::setImage(Resources& resources, const String& imageName, String materialName)
 {
 	Expects (!imageName.isEmpty());
+		
+	const auto sprite = resources.get<SpriteResource>(imageName);
 
 	if (materialName == "") {
-		materialName = "Halley/Sprite";
+		materialName = sprite->getDefaultMaterialName();
 	}
 	
-	const auto sprite = resources.get<SpriteResource>(imageName);
-	const auto material = resources.get<MaterialDefinition>(materialName);
-	setImage(*sprite, material);
+	setMaterial(sprite->getMaterial(materialName), true);
+	setSprite(sprite->getSprite());
 	return *this;
 }
 
-Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> materialDefinition)
+Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> materialDefinition, bool shared)
 {
 	const auto spriteSheet = sprite.getSpriteSheet();
-	setImage(spriteSheet->getTexture(), std::move(materialDefinition));
+	setImage(spriteSheet->getTexture(), std::move(materialDefinition), shared);
 	setSprite(sprite.getSprite());
 	return *this;
 }

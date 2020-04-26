@@ -17,6 +17,7 @@ namespace Halley
 	class ResourceDataStatic;
 	class Texture;
 	class ResourceLoader;
+	class Material;
 
 	class SpriteSheetEntry
 	{
@@ -49,6 +50,8 @@ namespace Halley
 	class SpriteSheet final : public Resource
 	{
 	public:
+		SpriteSheet();
+		
 		const std::shared_ptr<const Texture>& getTexture() const;
 		const SpriteSheetEntry& getSprite(const String& name) const;
 		const SpriteSheetEntry& getSprite(size_t idx) const;
@@ -65,6 +68,11 @@ namespace Halley
 		void addSprite(String name, const SpriteSheetEntry& sprite);
 		void setTextureName(String name);
 
+		std::shared_ptr<Material> getMaterial(const String& name) const;
+		void setDefaultMaterialName(String materialName);
+		const String& getDefaultMaterialName() const;
+		void clearMaterialCache() const;
+
 		static std::unique_ptr<SpriteSheet> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::SpriteSheet; }
 		void reload(Resource&& resource) override;
@@ -73,13 +81,19 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 	private:
+		constexpr static int version = 1;
+		
 		Resources* resources = nullptr;
 
-		mutable std::shared_ptr<const Texture> texture;
 		std::vector<SpriteSheetEntry> sprites;
 		HashMap<String, uint32_t> spriteIdx;
 		std::vector<SpriteSheetFrameTag> frameTags;
+
 		String textureName;
+		mutable std::shared_ptr<const Texture> texture;
+
+		String defaultMaterialName;
+		mutable HashMap<String, std::weak_ptr<Material>> materials;
 
 		void loadTexture(Resources& resources) const;
 	};
@@ -87,11 +101,14 @@ namespace Halley
 	class SpriteResource final : public Resource
 	{
 	public:
-		SpriteResource(std::shared_ptr<const SpriteSheet> spriteSheet, size_t idx);
+		SpriteResource(const std::shared_ptr<const SpriteSheet>& spriteSheet, size_t idx);
 
 		const SpriteSheetEntry& getSprite() const;
 		size_t getIdx() const;
 		std::shared_ptr<const SpriteSheet> getSpriteSheet() const;
+
+		std::shared_ptr<Material> getMaterial(const String& name) const;
+		const String& getDefaultMaterialName() const;
 
 		constexpr static AssetType getAssetType() { return AssetType::Sprite; }
 		static std::unique_ptr<SpriteResource> loadResource(ResourceLoader& loader);

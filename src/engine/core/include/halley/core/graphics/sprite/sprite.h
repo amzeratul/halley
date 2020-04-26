@@ -53,13 +53,15 @@ namespace Halley
 		static void drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painter);
 
 		Sprite& setMaterial(Resources& resources, String materialName = "");
-		Sprite& setMaterial(std::shared_ptr<Material> m);
-		Material& getMaterial() const { return *material; }
+		Sprite& setMaterial(std::shared_ptr<Material> m, bool shared = true);
+		Sprite& setMaterial(std::unique_ptr<Material> m);
+		Material& getMutableMaterial();
+		const Material& getMaterial() const { return *material; }
 		bool hasMaterial() const { return material != nullptr; }
 
 		Sprite& setImage(Resources& resources, const String& imageName, String materialName = "");
-		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material);
-		Sprite& setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> material);
+		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material, bool shared = true);
+		Sprite& setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> material, bool shared = true);
 		Sprite& setImageData(const Texture& image);
 
 		Sprite& setSprite(Resources& resources, const String& spriteSheetName, const String& imageName, String materialName = "");
@@ -138,6 +140,7 @@ namespace Halley
 		bool visible = true;
 		bool flip = false;
 		bool sliced = false;
+		bool sharedMaterial = false;
 
 		void computeSize();
 

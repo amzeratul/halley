@@ -166,9 +166,9 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 {
 	if (animation && hasUpdate) {
 		if (materialOverride) {
-			sprite.setMaterial(materialOverride);
+			sprite.setMaterial(materialOverride, true);
 		} else {
-			sprite.setMaterial(animation->getMaterial());
+			sprite.setMaterial(animation->getMaterial(), true);
 		}
 		sprite.setSprite(*spriteData, false);
 		if (applyPivot) {
@@ -181,7 +181,7 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 
 AnimationPlayer& AnimationPlayer::setMaterialOverride(std::shared_ptr<Material> material)
 {
-	materialOverride = material;
+	materialOverride = std::move(material);
 	return *this;
 }
 

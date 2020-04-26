@@ -387,6 +387,14 @@ namespace Halley {
 			return *this;
 		}
 
+		template <typename T>
+		void peek(T& val)
+		{
+			const auto oldPos = pos;
+			*this >> val;
+			pos = oldPos;
+		}
+
 		void setVersion(int version);
 		int getVersion() const;
 

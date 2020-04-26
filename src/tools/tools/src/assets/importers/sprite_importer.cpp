@@ -127,17 +127,21 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		std::move(frames.second.begin(), frames.second.end(), std::back_inserter(totalFrames));
 	}
 
-	auto groupAtlasName = asset.assetId;// totalFrames.first + Path(asset.assetId).getExtension();
-	SpriteSheet spriteSheet;
-	auto atlasImage = generateAtlas(groupAtlasName, totalFrames, spriteSheet);
-	spriteSheet.setTextureName(groupAtlasName);
-
-	// Image metafile
-	auto size = atlasImage->getSize();
+	// Metafile
 	Metadata meta;
 	if (startMeta) {
 		meta = startMeta.value();
 	}
+
+	// Create the atlas
+	auto groupAtlasName = asset.assetId;
+	SpriteSheet spriteSheet;
+	auto atlasImage = generateAtlas(groupAtlasName, totalFrames, spriteSheet);
+	spriteSheet.setTextureName(groupAtlasName);
+	spriteSheet.setDefaultMaterialName(meta.getString("defaultMaterial", "Halley/Sprite"));
+
+	// Metafile parameters
+	auto size = atlasImage->getSize();
 	if (palette) {
 		meta.set("palette", palette.value());
 	}

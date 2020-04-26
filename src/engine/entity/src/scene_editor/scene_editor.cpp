@@ -9,12 +9,20 @@
 #include "components/sprite_component.h"
 #include "components/camera_component.h"
 #include "components/transform_2d_component.h"
+#include "halley/core/graphics/sprite/sprite_sheet.h"
 
 using namespace Halley;
 
 SceneEditor::SceneEditor() = default;
 
-SceneEditor::~SceneEditor() = default;
+SceneEditor::~SceneEditor()
+{
+	if (resources) {
+		for (const auto& ss: resources->enumerate<SpriteSheet>()) {
+			resources->get<SpriteSheet>(ss)->clearMaterialCache();
+		}
+	}
+}
 
 void SceneEditor::init(SceneEditorContext& context)
 {

@@ -4,6 +4,8 @@
 #include "resources/resources.h"
 #include "halley/file_formats/json/json.h"
 #include <halley/file_formats/json_file.h>
+#include "graphics/material/material.h"
+#include "graphics/material/material_definition.h"
 #include "halley/bytes/byte_serializer.h"
 
 using namespace Halley;
@@ -62,6 +64,11 @@ void SpriteSheetFrameTag::deserialize(Deserializer& s)
 	s >> name;
 	s >> to;
 	s >> from;
+}
+
+SpriteSheet::SpriteSheet()
+	: defaultMaterialName("Halley/Sprite")
+{
 }
 
 const std::shared_ptr<const Texture>& SpriteSheet::getTexture() const
@@ -150,12 +157,44 @@ void SpriteSheet::loadTexture(Resources& resources) const
 void SpriteSheet::addSprite(String name, const SpriteSheetEntry& sprite)
 {
 	sprites.push_back(sprite);
-	spriteIdx[name] = uint32_t(sprites.size() - 1);
+	spriteIdx[std::move(name)] = uint32_t(sprites.size() - 1);
 }
 
 void SpriteSheet::setTextureName(String name)
 {
-	textureName = name;
+	textureName = std::move(name);
+}
+
+std::shared_ptr<Material> SpriteSheet::getMaterial(const String& name) const
+{
+	const auto iter = materials.find(name);
+	std::shared_ptr<Material> result;
+	if (iter != materials.end()) {
+		result = iter->second.lock();
+	}
+
+	if (!result) {
+		result = std::make_shared<Material>(resources->get<MaterialDefinition>(name));
+		result->set("tex0", getTexture());
+		materials[name] = result;
+	}
+
+	return result;
+}
+
+void SpriteSheet::setDefaultMaterialName(String materialName)
+{
+	defaultMaterialName = std::move(materialName);
+}
+
+const String& SpriteSheet::getDefaultMaterialName() const
+{
+	return defaultMaterialName;
+}
+
+void SpriteSheet::clearMaterialCache() const
+{
+	materials.clear();
 }
 
 void SpriteSheet::reload(Resource&& resource)
@@ -165,18 +204,33 @@ void SpriteSheet::reload(Resource&& resource)
 
 void SpriteSheet::serialize(Serializer& s) const
 {
+	s << version;
 	s << textureName;
 	s << sprites;
 	s << spriteIdx;
 	s << frameTags;
+	s << defaultMaterialName;
 }
 
 void SpriteSheet::deserialize(Deserializer& s)
 {
+	// Old versions didn't have a version header, so this is a workaround to detect them
+	int v;
+	s.peek(v);
+	if (v <= 255) {
+		s >> v;
+	} else {
+		v = 0;
+	}
+	
 	s >> textureName;
 	s >> sprites;
 	s >> spriteIdx;
 	s >> frameTags;
+
+	if (v >= 1) {
+		s >> defaultMaterialName;
+	}
 }
 
 void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)
@@ -242,7 +296,7 @@ void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)
 }
 
 
-SpriteResource::SpriteResource(std::shared_ptr<const SpriteSheet> spriteSheet, size_t idx)
+SpriteResource::SpriteResource(const std::shared_ptr<const SpriteSheet>& spriteSheet, size_t idx)
 	: spriteSheet(spriteSheet)
 	, idx(idx)
 {
@@ -261,6 +315,16 @@ size_t SpriteResource::getIdx() const
 std::shared_ptr<const SpriteSheet> SpriteResource::getSpriteSheet() const
 {
 	return spriteSheet.lock();
+}
+
+std::shared_ptr<Material> SpriteResource::getMaterial(const String& name) const
+{
+	return spriteSheet.lock()->getMaterial(name);
+}
+
+const String& SpriteResource::getDefaultMaterialName() const
+{
+	return spriteSheet.lock()->getDefaultMaterialName();
 }
 
 std::unique_ptr<SpriteResource> SpriteResource::loadResource(ResourceLoader& loader)
