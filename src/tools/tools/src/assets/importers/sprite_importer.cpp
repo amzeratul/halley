@@ -83,8 +83,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			
 			groupedFrames[""] = std::vector<ImageData>();
 			auto& frames = groupedFrames[""];
-			frames.emplace_back();
-			auto& imgData = frames.back();
+			auto& imgData = frames.emplace_back();
 			imgData.clip = trim ? image->getTrimRect() : image->getRect(); // Be careful, make sure this is done before the std::move() below
 			imgData.img = std::move(image);
 			imgData.duration = 100;

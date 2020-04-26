@@ -246,9 +246,15 @@ public:
 		container->add(context.makeField("bool", pars.withSubKey("flip"), false));
 		container->add(context.makeLabel("visible"));
 		container->add(context.makeField("bool", pars.withSubKey("visible", "true"), false));
+		auto containerWeak = std::weak_ptr<UIWidget>(container);
 
-		container->bindData("image", fieldData["image"].asString(""), [&context, data](String newVal)
+		container->bindData("image", fieldData["image"].asString(""), [&context, data, containerWeak](String newVal)
 		{
+			auto material = containerWeak.lock()->getWidgetAs<SelectAssetWidget>("material");
+			if (material->getValue().isEmpty()) {
+				material->setValue(context.getGameResources().get<SpriteResource>(newVal)->getDefaultMaterialName());
+			}
+
 			data.getFieldData()["image"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});

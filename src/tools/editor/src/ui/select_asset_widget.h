@@ -11,6 +11,8 @@ namespace Halley {
 		SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources);
 
 		void setValue(const String& value);
+		String getValue() const;
+
 		void setGameResources(Resources& gameResources);
 
 	private:

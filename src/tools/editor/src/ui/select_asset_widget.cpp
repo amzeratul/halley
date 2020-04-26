@@ -21,11 +21,16 @@ SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, Asset
 
 void SelectAssetWidget::setValue(const String& value)
 {
-	if (value != input->getText()) {
+	if (value != getValue()) {
 		input->setText(value);
 		notifyDataBind(value);
 		sendEvent(UIEvent(UIEventType::TextChanged, getId(), value));
 	}
+}
+
+String SelectAssetWidget::getValue() const
+{
+	return input->getText();
 }
 
 void SelectAssetWidget::setGameResources(Resources& resources)
