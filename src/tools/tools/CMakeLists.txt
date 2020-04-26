@@ -1,9 +1,21 @@
 project (halley-tools)
 
-include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIR} ${ShaderConductor_INCLUDE_DIR} "include" "../../engine/core/include" "../../engine/utils/include" "../../engine/audio/include" "../../engine/net/include" "../../contrib/libogg/include" "../../contrib/libvorbis/include")
+include_directories(
+    ${BOOST_INCLUDE_DIR}
+    ${FREETYPE_INCLUDE_DIRS}
+    ${YAMLCPP_INCLUDE_DIR}
+    ${ShaderConductor_INCLUDE_DIR}
+    "include"
+    "../../engine/core/include"
+    "../../engine/utils/include"
+    "../../engine/audio/include"
+    "../../engine/net/include"
+    "../../engine/entity/include"
+    "../../contrib/libogg/include"
+    "../../contrib/libvorbis/include"
+)
 
 set(SOURCES
-
     "src/assets/asset_collector.cpp"
     "src/assets/asset_importer.cpp"
     "src/assets/check_assets_task.cpp"
