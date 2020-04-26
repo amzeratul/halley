@@ -11,6 +11,11 @@ StdOutSink::StdOutSink(bool devMode)
 {
 }
 
+StdOutSink::~StdOutSink()
+{
+	std::cout.flush();
+}
+
 void StdOutSink::log(LoggerLevel level, const String& msg)
 {
 	if (level == LoggerLevel::Dev && !devMode) {
@@ -30,7 +35,7 @@ void StdOutSink::log(LoggerLevel level, const String& msg)
 	case LoggerLevel::Info:
 		break;
 	}
-	std::cout << msg << ConsoleColour() << std::endl;
+	std::cout << msg << ConsoleColour() << '\n';
 }
 
 void Logger::setInstance(Logger& logger)
@@ -53,11 +58,11 @@ void Logger::removeSink(ILoggerSink& sink)
 void Logger::log(LoggerLevel level, const String& msg)
 {
 	if (instance) {
-		for (auto& s: instance->sinks) {
+		for (const auto& s: instance->sinks) {
 			s->log(level, msg);
 		}
 	} else {
-		std::cout << msg << std::endl;
+		std::cout << msg << '\n';
 	}
 }
 

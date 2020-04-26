@@ -26,6 +26,7 @@ namespace Halley
 	class StdOutSink final : public ILoggerSink {
 	public:
 		explicit StdOutSink(bool devMode);
+		~StdOutSink();
 		void log(LoggerLevel level, const String& msg) override;
 
 	private:
