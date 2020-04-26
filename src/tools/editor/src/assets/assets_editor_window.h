@@ -19,8 +19,9 @@ namespace Halley {
 		void setResource(const String& assetId);
 		void clearResource();
 		virtual void reload();
+        virtual void onDoubleClick();
 
-	protected:
+    protected:
 		UIFactory& factory;
 		Project& project;
 		Resources& resources;
@@ -70,6 +71,7 @@ namespace Halley {
 
 		void loadAsset(const String& name, bool doubleClick, bool clearDropdown);
 		void refreshAssets(const std::vector<String>& assets);
+		void onDoubleClickAsset();
 
 		std::shared_ptr<AssetEditor> makeEditor(AssetType type, const String& name);
 		void createEditorTab(AssetType type, const String& name);

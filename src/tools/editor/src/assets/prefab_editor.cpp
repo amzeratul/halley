@@ -15,6 +15,11 @@ void PrefabEditor::reload()
 	
 }
 
+void PrefabEditor::onDoubleClick()
+{
+	stage.openPrefab(assetId, assetType);
+}
+
 void PrefabEditor::setupWindow()
 {
 	add(factory.makeUI("ui/halley/prefab_editor"), 1);

@@ -198,56 +198,62 @@ void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick, bool cl
 			refreshList();
 		}
 	} else {
-		loadedAsset = name;
-		
-		content->clear();
-		contentList->clear();
-		curEditors.clear();
+		if (loadedAsset != name) {
+			loadedAsset = name;
+			
+			content->clear();
+			contentList->clear();
+			curEditors.clear();
 
-		if (assetSrcMode) {
-			auto assets = project.getAssetsFromFile(Path(name));
+			if (assetSrcMode) {
+				auto assets = project.getAssetsFromFile(Path(name));
 
-			std::sort(assets.begin(), assets.end(), [] (decltype(assets)::const_reference a, decltype(assets)::const_reference b) -> bool
-			{
-				return b.first < a.first;
-			});
+				std::sort(assets.begin(), assets.end(), [] (decltype(assets)::const_reference a, decltype(assets)::const_reference b) -> bool
+				{
+					return b.first < a.first;
+				});
 
-			auto useDropdown = false;
-			std::vector<String> assetNames;
-			if (int(assets.size()) > 3) {				
-				for (const auto& asset : assets) {
-					if (asset.first == AssetType::Animation) {
-						assetNames.push_back(asset.second);
+				auto useDropdown = false;
+				std::vector<String> assetNames;
+				if (int(assets.size()) > 3) {				
+					for (const auto& asset : assets) {
+						if (asset.first == AssetType::Animation) {
+							assetNames.push_back(asset.second);
+						}
+					}
+
+					if(!assetNames.empty())	{
+						useDropdown = true;
+						contentListDropdown->setActive(true);
+						contentListDropdownLabel->setActive(true);
+					}
+
+					if (clearDropdown) {
+						contentListDropdown->setOptions(assetNames, 0);
+					}
+				}
+				
+				for (auto& asset: assets) {
+					if (!useDropdown || asset.second == contentListDropdown->getSelectedOptionId() || std::find(assetNames.begin(), assetNames.end(), asset.second) == assetNames.end()) {
+						createEditorTab(asset.first, asset.second);
 					}
 				}
 
-				if(!assetNames.empty())	{
-					useDropdown = true;
-					contentListDropdown->setActive(true);
-					contentListDropdownLabel->setActive(true);
+				if (assets.empty()) {
+					metadataEditor->clear();
+				} else {
+					const auto type = assets.at(0).first;
+					auto effectiveMeta = project.getImportMetadata(type, assets.at(0).second);
+					metadataEditor->setResource(project, type, Path(name), std::move(effectiveMeta));
 				}
-
-				if (clearDropdown) {
-					contentListDropdown->setOptions(assetNames, 0);
-				}
-			}
-			
-			for (auto& asset: assets) {
-				if (!useDropdown || asset.second == contentListDropdown->getSelectedOptionId() || std::find(assetNames.begin(), assetNames.end(), asset.second) == assetNames.end()) {
-					createEditorTab(asset.first, asset.second);
-				}
-			}
-
-			if (assets.empty()) {
-				metadataEditor->clear();
 			} else {
-				const auto type = assets.at(0).first;
-				auto effectiveMeta = project.getImportMetadata(type, assets.at(0).second);
-				metadataEditor->setResource(project, type, Path(name), std::move(effectiveMeta));
+				metadataEditor->clear();
+				createEditorTab(curType, name);
 			}
-		} else {
-			metadataEditor->clear();
-			createEditorTab(curType, name);
+		}
+
+		if (doubleClick) {
+			onDoubleClickAsset();
 		}
 	}
 }
@@ -259,6 +265,13 @@ void AssetsEditorWindow::refreshAssets(const std::vector<String>& assets)
 
 	for (auto& editor: curEditors) {
 		editor->reload();
+	}
+}
+
+void AssetsEditorWindow::onDoubleClickAsset()
+{
+	if (!curEditors.empty()) {
+		curEditors.front()->onDoubleClick();
 	}
 }
 
@@ -293,6 +306,7 @@ void AssetsEditorWindow::createEditorTab(AssetType type, const String& name)
 		item->add(text, 1.0f, {}, UISizerAlignFlags::CentreVertical);
 
 		contentList->addItem(toString(n), item);
+		curEditors.push_back(editor);
 	}
 }
 
@@ -368,5 +382,9 @@ void AssetEditor::clearResource()
 }
 
 void AssetEditor::reload()
+{
+}
+
+void AssetEditor::onDoubleClick()
 {
 }
