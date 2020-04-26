@@ -30,5 +30,5 @@ Circle Circle::getSpanningCircle(const std::vector<Vector2f>& points)
 		}
 	}
 
-	return Circle(centre, std::sqrtf(radius2));
+	return Circle(centre, std::sqrt(radius2));
 }
