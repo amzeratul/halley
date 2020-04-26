@@ -12,7 +12,7 @@ namespace Halley {
 		UIPainter(SpritePainter& painter, int mask, int layer);
 		UIPainter(UIPainter&& other) noexcept = default;
 
-		UIPainter& operator=(UIPainter&& other) = default;
+		UIPainter& operator=(UIPainter&& other) noexcept = default;
 
 		void draw(const Sprite& sprite, bool forceCopy = false);
 		void draw(const TextRenderer& text, bool forceCopy = false);
