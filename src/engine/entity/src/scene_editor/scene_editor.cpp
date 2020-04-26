@@ -184,7 +184,7 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 
 	// Zoom
 	const int curLevel = lroundf(std::log2f(clamp(camera.zoom, 1.0f / 32.0f, 32.0f)));
-	camera.zoom = std::powf(2.0f, float(clamp(curLevel + amount, -5, 5)));
+	camera.zoom = std::pow(2.0f, float(clamp(curLevel + amount, -5, 5)));
 
 	// Translate to keep fixed point
 	const Vector2f translate = cursorPosRelToCamera * (1.0f / prevZoom - 1.0f / camera.zoom);

@@ -16,7 +16,7 @@ ScrollBackground::ScrollBackground(String id, Resources& res, UISizer sizer)
 
 float ScrollBackground::getZoomLevel() const
 {
-	return std::powf(2.0f, float(zoomExp));
+	return std::pow(2.0f, float(zoomExp));
 }
 
 void ScrollBackground::setZoomListener(ZoomListener listener)
