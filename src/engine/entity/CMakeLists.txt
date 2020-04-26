@@ -4,6 +4,7 @@ include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/entity" "../c
 
 set(SOURCES
         "src/component.cpp"
+        "src/create_functions.cpp"
         "src/entity.cpp"
         "src/entity_factory.cpp"
         "src/entity_id.cpp"

@@ -5,7 +5,6 @@
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/render_context.h"
 #include "system.h"
-#include "registry.h"
 #include "components/sprite_component.h"
 #include "components/camera_component.h"
 #include "components/transform_2d_component.h"
@@ -104,9 +103,9 @@ std::shared_ptr<UIWidget> SceneEditor::makeCustomUI()
 
 std::unique_ptr<World> SceneEditor::doCreateWorld()
 {
-	auto world = std::make_unique<World>(getAPI(), getGameResources(), true, createComponent);
+	auto world = std::make_unique<World>(getAPI(), getGameResources(), true, CreateEntityFunctions::getCreateComponent());
 	const auto& sceneConfig = getGameResources().get<ConfigFile>(getSceneEditorStageName())->getRoot();
-	world->loadSystems(sceneConfig, createSystem);
+	world->loadSystems(sceneConfig, CreateEntityFunctions::getCreateSystem());
 
 	return world;
 }

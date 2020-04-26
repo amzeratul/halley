@@ -62,7 +62,7 @@ Executors& Executors::get()
 	return *instance;
 }
 
-void Executors::set(Executors& e)
+void Executors::setInstance(Executors& e)
 {
 	instance = &e;
 }

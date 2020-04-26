@@ -42,7 +42,7 @@ namespace Halley
 	{
 	public:
 		static Executors& get();
-		static void set(Executors& e);
+		static void setInstance(Executors& e);
 
 		static ExecutionQueue& getCPU() { return instance->cpu; }
 		static ExecutionQueue& getCPUAux() { return instance->cpuAux; }

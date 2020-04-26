@@ -4,6 +4,8 @@
 #include <halley/core/game/core.h>
 #include "halley/core/game/main_loop.h"
 #include "halley/core/entry/entry_point.h"
+#include "halley/entity/create_functions.h"
+#include "halley/entity/registry.h"
 
 namespace Halley
 {
@@ -30,6 +32,12 @@ namespace Halley
 		static Vector<std::string> getWin32Args();
 		static Vector<std::string> getArgs(int argc, char* argv[]);
 	};
+	
+	template <typename T> constexpr static void InitEntities()
+	{
+		CreateEntityFunctions::getCreateComponent() = createComponent;
+		CreateEntityFunctions::getCreateSystem() = createSystem;
+	}
 }
 
 #ifdef _MSC_VER
@@ -38,15 +46,14 @@ namespace Halley
 	#define HALLEY_EXPORT
 #endif
 
-// Macro to implement program
 #if defined(HALLEY_EXECUTABLE)
 	#if defined(_WIN32) || defined(WINDOWS_STORE)
-		#define HalleyGame(T) int __stdcall WinMain(void*, void*, char*, int) { return Halley::HalleyMain::winMain<T>(); }
+		#define HalleyGame(T) int __stdcall WinMain(void*, void*, char*, int) { Halley::InitEntities<T>(); return Halley::HalleyMain::winMain<T>(); }
 	#else
-		#define HalleyGame(T) int main(int argc, char* argv[]) { return Halley::HalleyMain::main<T>(argc, argv); }
+		#define HalleyGame(T) int main(int argc, char* argv[]) { Halley::InitEntities<T>(); return Halley::HalleyMain::main<T>(argc, argv); }
 	#endif
 #elif defined(HALLEY_SHARED_LIBRARY)
-	#define HalleyGame(T) HALLEY_EXPORT IHalleyEntryPoint* getHalleyEntry() { static HalleyEntryPoint<T> entry; return &entry; }
+	#define HalleyGame(T) HALLEY_EXPORT IHalleyEntryPoint* getHalleyEntry() { Halley::InitEntities<T>(); static HalleyEntryPoint<T> entry; return &entry; }
 #elif defined(HALLEY_STATIC_LIBRARY)
-	#define HalleyGame(T) IHalleyEntryPoint* getHalleyEntryStatic() { static HalleyEntryPoint<T> entry; return &entry; }
+	#define HalleyGame(T) IHalleyEntryPoint* getHalleyEntryStatic() { Halley::InitEntities<T>(); static HalleyEntryPoint<T> entry; return &entry; }
 #endif

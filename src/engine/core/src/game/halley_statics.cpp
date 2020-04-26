@@ -21,7 +21,7 @@ namespace Halley {
 			os = OS::createOS();
 
 			executors = std::make_unique<Executors>();
-			executors->set(*executors);
+			executors->setInstance(*executors);
 		}
 
 		~HalleyStaticsShared()
@@ -80,7 +80,7 @@ void HalleyStatics::setupGlobals() const
 	
 	Logger::setInstance(*sharedData->logger);
 	OS::setInstance(sharedData->os);
-	Executors::set(*sharedData->executors);
+	Executors::setInstance(*sharedData->executors);
 }
 
 void HalleyStatics::suspend()
