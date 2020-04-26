@@ -2,7 +2,13 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-- widget: { id: fields, class: widget }
+- widget: { class: image, image: "ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#9C5BB5", size: [250, 10] }
   sizer: { type: vertical }
-- widget: { id: applyChanges, class: button, text: "Apply", size: [30, 30] }
+  children:
+  - widget: { id: "", class: label, text: "Metadata" }
+    fill: centre
+  - widget: { id: fields, class: widget }
+    sizer: { type: vertical }
+  - widget: { id: applyChanges, class: button, text: "Apply", size: [30, 30] }
+    border: [0, 2, 0, 0]
 ...

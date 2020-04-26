@@ -154,8 +154,8 @@ void updateMetadata(Metadata& metadata, const String& key, MetadataEditor& edito
 
 void MetadataEditor::makeIntField(UISizer& sizer, const String& key, int defaultValue)
 {
-	const auto result = std::make_shared<UITextInput>(factory.getKeyboard(), key, factory.getStyle("input"));
-	result->setMinSize(Vector2f(40, 30));
+	const auto result = std::make_shared<UITextInput>(factory.getKeyboard(), key, factory.getStyle("inputThin"));
+	result->setMinSize(Vector2f(40, 22));
 	result->setValidator(std::make_shared<UINumericValidator>(true, false));
 	sizer.add(result, 1);
 	bindData(key, metadata.getInt(key, defaultValue), [=] (int value)
@@ -166,8 +166,8 @@ void MetadataEditor::makeIntField(UISizer& sizer, const String& key, int default
 
 void MetadataEditor::makeFloatField(UISizer& sizer, const String& key, float defaultValue)
 {
-	const auto result = std::make_shared<UITextInput>(factory.getKeyboard(), key, factory.getStyle("input"));
-	result->setMinSize(Vector2f(40, 30));
+	const auto result = std::make_shared<UITextInput>(factory.getKeyboard(), key, factory.getStyle("inputThin"));
+	result->setMinSize(Vector2f(40, 22));
 	result->setValidator(std::make_shared<UINumericValidator>(true, true));
 	sizer.add(result, 1);
 	bindData(key, metadata.getFloat(key, defaultValue), [=] (float value)
@@ -179,7 +179,7 @@ void MetadataEditor::makeFloatField(UISizer& sizer, const String& key, float def
 void MetadataEditor::makeBoolField(UISizer& sizer, const String& key, bool defaultValue)
 {
 	const auto result = std::make_shared<UICheckbox>(key, factory.getStyle("checkbox"));
-	result->setMinSize(Vector2f(30, 30));
+	result->setMinSize(Vector2f(22, 22));
 	sizer.add(result, 1, {}, UISizerAlignFlags::Left | UISizerAlignFlags::CentreVertical);
 	bindData(key, metadata.getBool(key, defaultValue), [=] (bool value)
 	{
@@ -189,8 +189,8 @@ void MetadataEditor::makeBoolField(UISizer& sizer, const String& key, bool defau
 
 void MetadataEditor::makeStringField(UISizer& sizer, const String& key, const String& defaultValue)
 {
-	const auto result = std::make_shared<UITextInput>(factory.getKeyboard(), key, factory.getStyle("input"));
-	result->setMinSize(Vector2f(40, 30));
+	const auto result = std::make_shared<UITextInput>(factory.getKeyboard(), key, factory.getStyle("inputThin"));
+	result->setMinSize(Vector2f(40, 22));
 	sizer.add(result, 1);
 
 	auto effectiveDefault = effectiveMetadata.getString(":" + key, defaultValue);
