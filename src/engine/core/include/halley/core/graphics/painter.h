@@ -50,17 +50,17 @@ namespace Halley
 		void setClip();
 
 		// Draws primitives
-		void draw(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
+		void draw(const std::shared_ptr<Material>& material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
 
 		// Draws quads
-		void drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData);
+		void drawQuads(const std::shared_ptr<Material>& material, size_t numVertices, const void* vertexData);
 
 		// Draw sprites takes a single vertex per sprite, duplicates the data across multiple vertices, and draws
 		// vertPosOffset is the offset, in bytes, from the start of each vertex's data, to a Vector2f which will be filled with the vertex's position in 0-1 space.
-		void drawSprites(std::shared_ptr<Material> material, size_t numSprites, const void* vertexData);
+		void drawSprites(const std::shared_ptr<Material>& material, size_t numSprites, const void* vertexData);
 
 		// Draw one sliced sprite. Slices -> x = left, y = top, z = right, w = bottom, in [0..1] space relative to the texture
-		void drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scale, Vector4f slices, const void* vertexData);
+		void drawSlicedSprite(const std::shared_ptr<Material>& material, Vector2f scale, Vector4f slices, const void* vertexData);
 
 		// Draws a line across all points (if no material is specified, use standard one)
 		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop = false, std::shared_ptr<Material> material = {});
@@ -133,13 +133,13 @@ namespace Halley
 		void endRender();
 		
 		void resetPending();
-		void startDrawCall(std::shared_ptr<Material>& material);
+		void startDrawCall(const std::shared_ptr<Material>& material);
 		void flushPending();
 		void executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
 
 		void makeSpaceForPendingVertices(size_t numBytes);
 		void makeSpaceForPendingIndices(size_t numIndices);
-		PainterVertexData addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly);
+		PainterVertexData addDrawData(const std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly);
 
 		IndexType* getStandardQuadIndices(size_t numQuads);
 		void generateQuadIndicesOffset(IndexType firstVertex, IndexType lineStride, IndexType* target);

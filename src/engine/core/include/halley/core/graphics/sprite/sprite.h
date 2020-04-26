@@ -40,6 +40,11 @@ namespace Halley
 	public:
 		Sprite();
 
+		Sprite(const Sprite& other) = default;
+		Sprite(Sprite&& other) noexcept = default;
+		Sprite& operator=(const Sprite& other) = default;
+		Sprite& operator=(Sprite&& other) noexcept = default;
+
 		void draw(Painter& painter) const;
 		void drawNormal(Painter& painter) const;
 		void drawSliced(Painter& painter) const;
@@ -52,14 +57,14 @@ namespace Halley
 		Material& getMaterial() const { return *material; }
 		bool hasMaterial() const { return material != nullptr; }
 
-		Sprite& setImage(Resources& resources, String imageName, String materialName = "");
+		Sprite& setImage(Resources& resources, const String& imageName, String materialName = "");
 		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material);
 		Sprite& setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> material);
 		Sprite& setImageData(const Texture& image);
 
-		Sprite& setSprite(Resources& resources, String spriteSheetName, String imageName, String materialName = "");
+		Sprite& setSprite(Resources& resources, const String& spriteSheetName, const String& imageName, String materialName = "");
 		Sprite& setSprite(const SpriteResource& sprite, bool applyPivot = true);
-		Sprite& setSprite(const SpriteSheet& sheet, String name, bool applyPivot = true);
+		Sprite& setSprite(const SpriteSheet& sheet, const String& name, bool applyPivot = true);
 		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true);
 
 		Sprite& setPos(Vector2f pos) { vertexAttrib.pos = pos; return *this; }
@@ -126,7 +131,8 @@ namespace Halley
 		Vector2f size;
 		Vector4s slices;
 		Vector4s outerBorder;
-		std::optional<Rect4f> clip;
+		Rect4f clip; // This is not a std::optional<Rect4f>, and instead has a companion bool, because it allows for better memory alignment
+		bool hasClip = false;
 		bool absoluteClip = false;
 		bool visible = true;
 		bool flip = false;

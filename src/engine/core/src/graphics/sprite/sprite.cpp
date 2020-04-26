@@ -35,11 +35,11 @@ void Sprite::drawNormal(Painter& painter) const
 	Expects(material != nullptr);
 	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 	
-	if (clip) {
-		painter.setRelativeClip(clip.value() + (absoluteClip ? Vector2f() : vertexAttrib.pos));
+	if (hasClip) {
+		painter.setRelativeClip(clip + (absoluteClip ? Vector2f() : vertexAttrib.pos));
 	}
 	painter.drawSprites(material, 1, &vertexAttrib);
-	if (clip) {
+	if (hasClip) {
 		painter.setClip();
 	}
 }
@@ -60,11 +60,11 @@ void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel) const
 	slices.z /= size.x;
 	slices.w /= size.y;
 
-	if (clip) {
-		painter.setRelativeClip(clip.value() + vertexAttrib.pos);
+	if (hasClip) {
+		painter.setRelativeClip(clip + vertexAttrib.pos);
 	}
 	painter.drawSlicedSprite(material, vertexAttrib.scale, slices, &vertexAttrib);
-	if (clip) {
+	if (hasClip) {
 		painter.setClip();
 	}
 }
@@ -231,10 +231,10 @@ Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 
 Sprite& Sprite::setMaterial(std::shared_ptr<Material> m)
 {
-	bool hadMaterial = static_cast<bool>(material);
-
 	Expects(m != nullptr);
-	material = m;
+
+	const bool hadMaterial = static_cast<bool>(material);
+	material = std::move(m);
 
 	if (!hadMaterial && !material->getTextures().empty()) {
 		setImageData(*material->getTextures()[0]);
@@ -261,18 +261,10 @@ Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<c
 	return *this;
 }
 
-Sprite& Sprite::setImage(Resources& resources, String imageName, String materialName)
+Sprite& Sprite::setImage(Resources& resources, const String& imageName, String materialName)
 {
-	/*
 	Expects (!imageName.isEmpty());
-	if (materialName == "") {
-		materialName = "Halley/Sprite";
-	}
-	setImage(resources.get<Texture>(imageName), resources.get<MaterialDefinition>(materialName));
-	return *this;
-	*/
 
-	Expects (!imageName.isEmpty());
 	if (materialName == "") {
 		materialName = "Halley/Sprite";
 	}
@@ -286,12 +278,12 @@ Sprite& Sprite::setImage(Resources& resources, String imageName, String material
 Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> materialDefinition)
 {
 	const auto spriteSheet = sprite.getSpriteSheet();
-	setImage(spriteSheet->getTexture(), materialDefinition);
+	setImage(spriteSheet->getTexture(), std::move(materialDefinition));
 	setSprite(sprite.getSprite());
 	return *this;
 }
 
-Sprite& Sprite::setSprite(Resources& resources, String spriteSheetName, String imageName, String materialName)
+Sprite& Sprite::setSprite(Resources& resources, const String& spriteSheetName, const String& imageName, String materialName)
 {
 	Expects (!spriteSheetName.isEmpty());
 	Expects (!imageName.isEmpty());
@@ -311,7 +303,7 @@ Sprite& Sprite::setSprite(const SpriteResource& sprite, bool applyPivot)
 	return *this;
 }
 
-Sprite& Sprite::setSprite(const SpriteSheet& sheet, String name, bool applyPivot)
+Sprite& Sprite::setSprite(const SpriteSheet& sheet, const String& name, bool applyPivot)
 {
 	Expects (!name.isEmpty());
 	setSprite(sheet.getSprite(name), applyPivot);
@@ -357,28 +349,30 @@ Vector4s Sprite::getSlices() const
 
 Sprite& Sprite::setClip(Rect4f c)
 {
-	clip = c;
+	clip = std::move(c);
+	hasClip = true;
 	absoluteClip = false;
 	return *this;
 }
 
 Sprite& Sprite::setAbsoluteClip(Rect4f c)
 {
-	clip = c;
+	clip = std::move(c);
+	hasClip = true;
 	absoluteClip = true;
 	return *this;
 }
 
 Sprite& Sprite::setClip()
 {
-	clip.reset();
+	hasClip = false;
 	absoluteClip = false;
 	return *this;
 }
 
 std::optional<Rect4f> Sprite::getClip() const
 {
-	return clip;
+	return hasClip ? clip : std::optional<Rect4f>();
 }
 
 Sprite Sprite::clone() const

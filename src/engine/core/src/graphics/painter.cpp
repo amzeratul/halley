@@ -62,7 +62,7 @@ static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
 	return *reinterpret_cast<Vector4f*>(vertexAttrib + vertPosOffset);
 }
 
-Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly)
+Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly)
 {
 	updateClip();
 
@@ -100,7 +100,7 @@ Painter::PainterVertexData Painter::addDrawData(std::shared_ptr<Material>& mater
 	return result;
 }
 
-void Painter::draw(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType)
+void Painter::draw(const std::shared_ptr<Material>& material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType)
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
 	Expects(indices.size() % 3 == 0);
@@ -114,7 +114,7 @@ void Painter::draw(std::shared_ptr<Material> material, size_t numVertices, const
 	}
 }
 
-void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, const void* vertexData)
+void Painter::drawQuads(const std::shared_ptr<Material>& material, size_t numVertices, const void* vertexData)
 {
 	Expects(numVertices % 4 == 0);
 	Expects(vertexData != nullptr);
@@ -125,7 +125,7 @@ void Painter::drawQuads(std::shared_ptr<Material> material, size_t numVertices, 
 	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
 }
 
-void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites, const void* vertexData)
+void Painter::drawSprites(const std::shared_ptr<Material>& material, size_t numSprites, const void* vertexData)
 {
 	Expects(vertexData != nullptr);
 
@@ -133,14 +133,14 @@ void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites,
 	const size_t numVertices = verticesPerSprite * numSprites;
 	const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
 
-	auto result = addDrawData(material, numVertices, numSprites * 6, true);
+	const auto result = addDrawData(material, numVertices, numSprites * 6, true);
 
 	const char* const src = reinterpret_cast<const char*>(vertexData);
 
 	for (size_t i = 0; i < numSprites; i++) {
 		for (size_t j = 0; j < verticesPerSprite; j++) {
-			size_t srcOffset = i * result.vertexStride;
-			size_t dstOffset = (i * verticesPerSprite + j) * result.vertexStride;
+			const size_t srcOffset = i * result.vertexStride;
+			const size_t dstOffset = (i * verticesPerSprite + j) * result.vertexStride;
 			memmove(result.dstVertex + dstOffset, src + srcOffset, result.vertexSize);
 
 			// j -> vertPos
@@ -157,7 +157,7 @@ void Painter::drawSprites(std::shared_ptr<Material> material, size_t numSprites,
 	generateQuadIndices(result.firstIndex, numSprites, result.dstIndex);
 }
 
-void Painter::drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scale, Vector4f slices, const void* vertexData)
+void Painter::drawSlicedSprite(const std::shared_ptr<Material>& material, Vector2f scale, Vector4f slices, const void* vertexData)
 {
 	Expects(vertexData != nullptr);
 	if (scale.x < 0.00001f || scale.y < 0.00001f) {
@@ -181,8 +181,8 @@ void Painter::drawSlicedSprite(std::shared_ptr<Material> material, Vector2f scal
 	const size_t numIndices = 9 * 6; // 9 quads, 6 indices per quad
 	const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
 
-	auto result = addDrawData(material, numVertices, numIndices, false);
-	const char* const src = reinterpret_cast<const char*>(vertexData);
+	const auto result = addDrawData(material, numVertices, numIndices, false);
+	const char* const src = static_cast<const char*>(vertexData);
 
 	// Vertices
 	std::array<Vector2f, 4> pos = {{ Vector2f(0, 0), Vector2f(slices.x / scale.x, slices.y / scale.y), Vector2f(1 - slices.z / scale.x, 1 - slices.w / scale.y), Vector2f(1, 1) }};
@@ -423,7 +423,7 @@ std::shared_ptr<Material> Painter::getSolidLineMaterial()
 	return solidLineMaterial;
 }
 
-void Painter::startDrawCall(std::shared_ptr<Material>& material)
+void Painter::startDrawCall(const std::shared_ptr<Material>& material)
 {
 	if (material != materialPending) {
 		if (materialPending != std::shared_ptr<Material>() && !(*material == *materialPending)) {

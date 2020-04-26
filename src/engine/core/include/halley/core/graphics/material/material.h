@@ -68,6 +68,7 @@ namespace Halley
 
 	public:
 		Material(const Material& other);
+		Material(Material&& other) noexcept;
 		explicit Material(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks = false); // forceLocalBlocks is for engine use only
 
 		void bind(int pass, Painter& painter);
@@ -113,8 +114,7 @@ namespace Halley
 		Vector<MaterialTextureParameter> textureUniforms;
 		Vector<MaterialDataBlock> dataBlocks;
 		std::vector<std::shared_ptr<const Texture>> textures;
-
-		std::vector<char> passEnabled;
+		std::array<bool, 8> passEnabled;
 
 		mutable uint64_t hashValue = 0;
 		mutable bool needToUpdateHash = true;

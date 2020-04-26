@@ -119,10 +119,28 @@ Material::Material(const Material& other)
 	}
 }
 
+Material::Material(Material&& other) noexcept
+	: materialDefinition(std::move(other.materialDefinition))
+	, uniforms(std::move(other.uniforms))
+	, textureUniforms(std::move(other.textureUniforms))
+	, dataBlocks(std::move(other.dataBlocks))
+	, textures(std::move(other.textures))
+	, passEnabled(other.passEnabled)
+{
+	for (auto& u: uniforms) {
+		u.rebind(*this);
+	}
+}
+
 Material::Material(std::shared_ptr<const MaterialDefinition> definition, bool forceLocalBlocks)
 	: materialDefinition(std::move(definition))
 {
-	passEnabled.resize(materialDefinition->getNumPasses(), 1);
+	if (materialDefinition->getNumPasses() > passEnabled.size()) {
+		throw Exception("Too many passes in material.", HalleyExceptions::Graphics);
+	}
+	for (auto& p: passEnabled) {
+		p = true;
+	}
 	initUniforms(forceLocalBlocks);
 }
 
@@ -268,7 +286,7 @@ uint64_t Material::computeHash() const
 		hasher.feedBytes(dataBlock.getData());
 	}
 
-	hasher.feedBytes(gsl::as_bytes(gsl::span<const char>(passEnabled.data(), passEnabled.size())));
+	hasher.feedBytes(gsl::as_bytes(gsl::span<const bool>(passEnabled.data(), passEnabled.size())));
 
 	return hasher.digest();
 }
@@ -299,11 +317,10 @@ const Vector<MaterialDataBlock>& Material::getDataBlocks() const
 
 void Material::setPassEnabled(int pass, bool enabled)
 {
-	const auto value = enabled ? 1 : 0;
 	auto& p = passEnabled.at(pass);
-	if (p != value) {
+	if (p != enabled) {
 		needToUpdateHash = true;
-		p = value;
+		p = enabled;
 	}
 }
 
