@@ -14,9 +14,9 @@
 #ifdef _MSC_VER
 	#ifndef USE_VCPKG_YAML
 		#ifdef _DEBUG
-			#pragma comment(lib, "libyaml-cppmdd.lib")
+			#pragma comment(lib, "yaml-cppd.lib")
 		#else
-			#pragma comment(lib, "libyaml-cppmd.lib")
+			#pragma comment(lib, "yaml-cpp.lib")
 		#endif
 	#endif // !USE_VCPKG_YAML
 
