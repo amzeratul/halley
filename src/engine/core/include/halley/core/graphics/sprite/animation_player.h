@@ -48,6 +48,8 @@ namespace Halley
 
 		AnimationPlayer& setOffsetPivot(Vector2f offset);
 
+		void syncWith(const AnimationPlayer& masterAnimator);
+
 	private:
 		void resolveSprite();
 

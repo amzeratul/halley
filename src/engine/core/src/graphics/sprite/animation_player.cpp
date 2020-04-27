@@ -170,11 +170,14 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 		} else {
 			sprite.setMaterial(animation->getMaterial(), true);
 		}
+		
 		sprite.setSprite(*spriteData, false);
+		
 		if (applyPivot) {
 			sprite.setPivot(spriteData->pivot + offsetPivot / sprite.getSize());
 		}
 		sprite.setFlip(dirFlip && !seqNoFlip);
+		
 		hasUpdate = false;
 	}
 }
@@ -246,6 +249,15 @@ AnimationPlayer& AnimationPlayer::setOffsetPivot(Vector2f offset)
 	offsetPivot = offset;
 	hasUpdate = true;
 	return *this;
+}
+
+void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator)
+{
+	setSequence(masterAnimator.getCurrentSequenceName());
+	setDirection(masterAnimator.getCurrentDirectionName());
+	curFrame = masterAnimator.curFrame;
+
+	resolveSprite();
 }
 
 void AnimationPlayer::resolveSprite()
