@@ -30,7 +30,7 @@ void UIImage::update(Time t, bool moved)
 {
 	if (moved || dirty) {
 		Vector2f basePos = getPosition();
-		Vector2f imgBaseSize = sprite.getRawSize().abs() + topLeftBorder + bottomRightBorder;
+		Vector2f imgBaseSize = sprite.getSize() + topLeftBorder + bottomRightBorder;
 		if (sprite.getClip()) {
 			auto c = sprite.getClip().value();
 			basePos -= c.getTopLeft();
@@ -52,7 +52,7 @@ void UIImage::setSprite(Sprite s)
 	bottomRightBorder = Vector2f(float(b.z), float(b.w));
 	auto c = s.getClip();
 	
-	auto spriteSize = (s.getRawSize().abs() + topLeftBorder + bottomRightBorder) * s.getScale();
+	auto spriteSize = (s.getSize() + topLeftBorder + bottomRightBorder) * s.getScale();
 	//sprite.setAbsolutePivot(-topLeftBorder + sprite.getAbsolutePivot());
 	
 	if (c) {

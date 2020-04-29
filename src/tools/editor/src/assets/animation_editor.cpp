@@ -92,7 +92,7 @@ void AnimationEditorDisplay::setSprite(std::shared_ptr<const SpriteResource> spr
 {
 	origSprite.setImage(*sprite, resources.get<MaterialDefinition>("Halley/Sprite"));
 	const auto origin = -origSprite.getAbsolutePivot() - Vector2f(origSprite.getOuterBorder().xy());
-	const auto sz = origSprite.getOriginalSize();
+	const auto sz = origSprite.getUncroppedSize();
 	bounds = Rect4f(origin, origin + sz);
 }
 

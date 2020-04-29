@@ -46,6 +46,7 @@ public:
 	Halley::Vector2f inverseTransformPoint(const Halley::Vector2f& p) const;
 
 	Halley::Rect4f getSpriteAABB(const Halley::Sprite& sprite) const;
+	Halley::Rect4f getSpriteUncroppedAABB(const Halley::Sprite& sprite) const;
 
 	void onAddedToEntity(Halley::EntityRef& entity);
 	void onHierarchyChanged();

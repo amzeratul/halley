@@ -150,7 +150,7 @@ UISliderBar::UISliderBar(UISlider& parent, UIStyle style)
 	left = style.getSprite("left");
 	right = style.getSprite("right");
 	extra = style.getBorder("extraMouseBorder");
-	setMinSize(bar.getRawSize());
+	setMinSize(bar.getSize());
 }
 
 bool UISliderBar::canInteractWithMouse() const
@@ -206,7 +206,7 @@ void UISliderBar::update(Time t, bool moved)
 	const auto size = getSize();
 	const float thumbX = size.x * parent.getRelativeValue();
 
-	left.setPos(getPosition() + Vector2f(-left.getOriginalSize().x, 0));
+	left.setPos(getPosition() + Vector2f(-left.getUncroppedSize().x, 0));
 	thumb.setPos(Vector2f(thumbX, 0) + getPosition());
 	right.setPos(getPosition() + Vector2f(getSize().x, 0));
 }
@@ -214,7 +214,7 @@ void UISliderBar::update(Time t, bool moved)
 void UISliderBar::fill(UIPainter& painter, Rect4f rect, Sprite sprite) const
 {
 	auto p2 = painter.withClip(rect);
-	const Vector2f spriteSize = sprite.getOriginalSize();
+	const Vector2f spriteSize = sprite.getUncroppedSize();
 	int n = int(ceil(getSize().x / spriteSize.x));
 	for (int i = 0; i < n; ++i) {
 		sprite.setPos(getPosition() + Vector2f(i * spriteSize.x, 0));

@@ -78,8 +78,10 @@ namespace Halley
 		Sprite& setAbsolutePivot(Vector2f pivot);
 		Vector2f getPivot() const;
 		Vector2f getAbsolutePivot() const;
+		Vector2f getUncroppedAbsolutePivot() const;
 
 		Sprite& setRotation(Angle1f angle);
+		Angle1f getRotation() const;
 
 		Sprite& setSize(Vector2f size);
 		Sprite& setScale(Vector2f scale);
@@ -88,8 +90,8 @@ namespace Halley
 		Vector2f getSize() const;
 		Vector2f getScale() const;
 		Vector2f getScaledSize() const;
-		Vector2f getRawSize() const;
-		Vector2f getOriginalSize() const;
+		Vector2f getUncroppedSize() const;
+		Vector2f getUncroppedScaledSize() const;
 
 		Sprite& setFlip(bool flip);
 		bool isFlipped() const;
@@ -120,6 +122,7 @@ namespace Halley
 		std::optional<Rect4f> getAbsoluteClip() const;
 
 		Rect4f getAABB() const;
+		Rect4f getUncroppedAABB() const;
 		bool isInView(Rect4f rect) const;
 
 		Vector4s getOuterBorder() const;

@@ -10,7 +10,7 @@ UIButton::UIButton(String id, UIStyle s, std::optional<UISizer> sizer)
 	, style(s)
 {
 	sprite = style.getSprite("normal");
-	setMinSize(sprite.getOriginalSize());
+	setMinSize(sprite.getUncroppedSize());
 }
 
 UIButton::UIButton(String id, UIStyle style, LocalisedString label)
@@ -36,7 +36,7 @@ void UIButton::update(Time t, bool moved)
 		const auto bottomRightBorder = Vector2f(float(b.z), float(b.w));
 
 		Vector2f basePos = getPosition();
-		Vector2f imgBaseSize = sprite.getRawSize().abs() + topLeftBorder + bottomRightBorder;
+		Vector2f imgBaseSize = sprite.getSize() + topLeftBorder + bottomRightBorder;
 		if (sprite.getClip()) {
 			auto c = sprite.getClip().value();
 			basePos -= c.getTopLeft();

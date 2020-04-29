@@ -133,15 +133,29 @@ void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painte
 
 Rect4f Sprite::getAABB() const
 {
-	Vector2f pos = vertexAttrib.pos;
-	if (std::abs(vertexAttrib.rotation) < 0.0001f) {
+	const Vector2f sz = getScaledSize();
+	if (std::abs(getRotation().toRadians()) < 0.0001f) {
 		// No rotation, give exact bounding box
-		Vector2f sz = getScaledSize();
-		return Rect4f(pos - sz * vertexAttrib.pivot, pos + sz * (Vector2f(1, 1) - vertexAttrib.pivot));
+		const Vector2f pivot = getPivot();
+		return getPosition() + Rect4f(-sz * pivot, sz * (Vector2f(1, 1) - pivot));
 	} else {
 		// This is a coarse test; will give a few false positives
-		Vector2f sz = getScaledSize() * 1.4142136f; // sqrt(2)
-		return Rect4f(pos - sz, pos + sz); // Could use offset here, but that would also need to take rotation into account
+		const Vector2f sz2 = sz * std::sqrt(2);
+		return getPosition() + Rect4f(-sz2, sz2); // Could use offset here, but that would also need to take rotation into account
+	}
+}
+
+Rect4f Sprite::getUncroppedAABB() const
+{
+	const Vector2f sz = getUncroppedScaledSize();
+	if (std::abs(getRotation().toRadians()) < 0.0001f) {
+		// No rotation, give exact bounding box
+		const Vector2f pivot = getUncroppedAbsolutePivot();
+		return getPosition() - pivot + Rect4f(Vector2f(), sz);
+	} else {
+		// This is a coarse test; will give a few false positives
+		const Vector2f sz2 = sz * std::sqrt(2);
+		return getPosition() + Rect4f(-sz2, sz2); // Could use offset here, but that would also need to take rotation into account
 	}
 }
 
@@ -152,13 +166,18 @@ bool Sprite::isInView(Rect4f v) const
 
 Vector2f Sprite::getScaledSize() const
 {
-	return vertexAttrib.scale * vertexAttrib.size;
+	return getScale() * getSize();
 }
 
 Sprite& Sprite::setRotation(Angle1f v)
 {
 	vertexAttrib.rotation = v.getRadians();
 	return *this;
+}
+
+Angle1f Sprite::getRotation() const
+{
+	return vertexAttrib.rotation;
 }
 
 Sprite& Sprite::setScale(Vector2f v)
@@ -210,7 +229,12 @@ Vector2f Sprite::getPivot() const
 
 Vector2f Sprite::getAbsolutePivot() const
 {
-	return vertexAttrib.pivot * size;
+	return getPivot() * size;
+}
+
+Vector2f Sprite::getUncroppedAbsolutePivot() const
+{
+	return getAbsolutePivot() + Vector2f(outerBorder.xy());
 }
 
 Sprite& Sprite::setSize(Vector2f v)
@@ -428,14 +452,14 @@ Vector2f Sprite::getSize() const
 	return size;
 }
 
-Vector2f Sprite::getRawSize() const
+Vector2f Sprite::getUncroppedSize() const
 {
-	return vertexAttrib.size;
+	return getSize() + Vector2f(outerBorder.xy() + outerBorder.zw());
 }
 
-Vector2f Sprite::getOriginalSize() const
+Vector2f Sprite::getUncroppedScaledSize() const
 {
-	return getRawSize() + Vector2f(Vector2i(outerBorder.x + outerBorder.z, outerBorder.y + outerBorder.z));
+	return getScale() * getUncroppedSize();
 }
 
 Vector4s Sprite::getOuterBorder() const
