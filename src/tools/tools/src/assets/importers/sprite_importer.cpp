@@ -410,6 +410,9 @@ void SpriteImporter::markDuplicates(std::vector<ImageData>& images) const
 	for (auto& image: images) {
 		Hash::Hasher hasher;
 		const auto clip = image.clip;
+		if (clip.isEmpty()) {
+			continue;
+		}
 		for (int y = clip.getTop(); y < clip.getBottom(); ++y) {
 			const auto row = image.img->getPixelBytesRow(clip.getLeft(), clip.getRight(), y);
 			hasher.feedBytes(as_bytes(row));

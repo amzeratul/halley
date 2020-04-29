@@ -501,7 +501,7 @@ gsl::span<const unsigned char> Image::getPixelBytes() const
 
 gsl::span<const unsigned char> Image::getPixelBytesRow(int x0, int x1, int y) const
 {
-	return getPixelBytes().subspan(x0 + y * w * size_t(getBytesPerPixel()), x1 - x0);
+	return getPixelBytes().subspan((x0 + y * w) * size_t(getBytesPerPixel()), (x1 - x0) * size_t(getBytesPerPixel()));
 }
 
 gsl::span<int> Image::getPixels4BPP()
