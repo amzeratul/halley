@@ -129,7 +129,7 @@ void FontFace::drawGlyph(Image& image, int charcode, Vector2i pos) const
 	}
 	
 	auto bmp = glyph->bitmap;
-	image.blitFrom(pos, reinterpret_cast<char*>(bmp.buffer), bmp.width, bmp.rows, bmp.pitch, 1);
+	image.blitFrom(pos, gsl::span<unsigned char>(bmp.buffer, bmp.rows * bmp.pitch), bmp.width, bmp.rows, bmp.pitch, 1);
 }
 
 FontMetrics FontFace::getMetrics(int charcode, float scale) const

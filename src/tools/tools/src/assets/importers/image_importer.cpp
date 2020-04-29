@@ -54,8 +54,8 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const Image& image, const
 	auto lookup = makePaletteConversion(palette);
 
 	auto result = std::make_unique<Image>(Image::Format::Indexed, image.getSize());
-	auto dst = reinterpret_cast<uint8_t*>(result->getPixels());
-	auto src = reinterpret_cast<const uint32_t*>(image.getPixels());
+	auto dst = result->getPixelBytes();
+	auto src = image.getPixels4BPP();
 	size_t n = image.getWidth() * image.getHeight();
 
 	std::vector<int> coloursMissing;
@@ -86,7 +86,7 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const Image& image, const
 
 std::unordered_map<uint32_t, uint32_t> ImageImporter::makePaletteConversion(const Image& palette)
 {
-	auto src = reinterpret_cast<const uint32_t*>(palette.getPixels());
+	auto src = palette.getPixels4BPP();
 	size_t w = palette.getWidth();
 	size_t h = palette.getHeight();
 

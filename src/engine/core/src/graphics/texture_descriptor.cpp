@@ -48,7 +48,7 @@ bool TextureDescriptorImageData::empty() const
 
 Byte* TextureDescriptorImageData::getBytes()
 {
-	return isRaw ? rawBytes.data() : reinterpret_cast<Byte*>(img->getPixels());
+	return isRaw ? rawBytes.data() : reinterpret_cast<Byte*>(img->getPixelBytes().data());
 }
 
 gsl::span<const gsl::byte> TextureDescriptorImageData::getSpan() const
@@ -56,7 +56,7 @@ gsl::span<const gsl::byte> TextureDescriptorImageData::getSpan() const
 	if (isRaw) {
 		return gsl::as_bytes(gsl::span<const Byte>(rawBytes.data(), rawBytes.size()));
 	} else {
-		return gsl::as_bytes(gsl::span<char>(img->getPixels(), img->getByteSize()));
+		return gsl::as_bytes(img->getPixelBytes());
 	}
 }
 
@@ -69,7 +69,7 @@ Bytes TextureDescriptorImageData::moveBytes()
 			return Bytes();
 		}
 		Bytes result(img->getByteSize());
-		memcpy(result.data(), img->getPixels(), img->getByteSize());
+		memcpy(result.data(), img->getPixelBytes().data(), img->getByteSize());
 		img.reset();
 		return result;
 	}

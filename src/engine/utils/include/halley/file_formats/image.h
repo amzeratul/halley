@@ -58,10 +58,14 @@ namespace Halley {
 		static Format getImageFormat(gsl::span<const gsl::byte> bytes);
 		static bool isPNG(gsl::span<const gsl::byte> bytes);
 
-		int getPixel(Vector2i pos) const;
+		gsl::span<unsigned char> getPixelBytes();
+		gsl::span<const unsigned char> getPixelBytes() const;
+
+		int getPixel4BPP(Vector2i pos) const;
 		int getPixelAlpha(Vector2i pos) const;
-		char* getPixels() { return px.get(); }
-		const char* getPixels() const { return px.get(); }
+		gsl::span<int> getPixels4BPP();
+		gsl::span<const int> getPixels4BPP() const;
+		gsl::span<const int> getPixelRow4BPP(int x0, int x1, int y) const;
 		size_t getByteSize() const;
 
 		static unsigned int convertRGBAToInt(unsigned int r, unsigned int g, unsigned int b, unsigned int a=255);
@@ -79,8 +83,8 @@ namespace Halley {
 		Rect4i getRect() const;
 
 		void clear(int colour);
-		void blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t srcBpp);
-		void blitFromRotated(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp);
+		void blitFrom(Vector2i pos, gsl::span<const unsigned char> buffer, size_t width, size_t height, size_t pitch, size_t srcBpp);
+		void blitFromRotated(Vector2i pos, gsl::span<const unsigned char> buffer, size_t width, size_t height, size_t pitch, size_t bpp);
 		void blitFrom(Vector2i pos, Image& img, bool rotated = false);
 		void blitFrom(Vector2i pos, Image& img, Rect4i srcArea, bool rotated = false);
 
@@ -100,7 +104,7 @@ namespace Halley {
 		void preMultiply();
 
 	private:
-		std::unique_ptr<char, void(*)(char*)> px;
+		std::unique_ptr<unsigned char, void(*)(unsigned char*)> px;
 		size_t dataLen = 0;
 		unsigned int w = 0;
 		unsigned int h = 0;

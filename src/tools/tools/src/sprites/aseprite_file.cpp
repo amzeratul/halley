@@ -136,7 +136,7 @@ void AsepriteCel::loadImage(AsepriteDepth depth, const std::vector<uint32_t>& pa
 	imgData = std::make_unique<Image>(Image::Format::RGBA, size);
 	imgData->clear(Image::convertRGBAToInt(0, 0, 0, 0));
 
-	auto dst = reinterpret_cast<uint32_t*>(imgData->getPixels());
+	auto dst = imgData->getPixels4BPP();
 	const size_t n = size_t(size.x * size.y);
 
 	if (depth == AsepriteDepth::Indexed8) {

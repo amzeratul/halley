@@ -40,34 +40,34 @@ static float getDistanceAt(const int* src, int srcW, int srcH, int xCentre, int 
 
 std::unique_ptr<Image> DistanceFieldGenerator::generate(Image& srcImg, Vector2i size, float radius)
 {
-	Expects(srcImg.getPixels() != nullptr);
+	Expects(!srcImg.getPixelBytes().empty());
 	Expects(srcImg.getFormat() == Image::Format::RGBA);
 	const int srcW = srcImg.getWidth();
 	const int srcH = srcImg.getHeight();
-	const int* src = reinterpret_cast<int*>(srcImg.getPixels());
+	const auto src = srcImg.getPixels4BPP();
 
 	auto dstImg = std::make_unique<Image>(Image::Format::SingleChannel, size);
 
 	const int w = size.x;
 	const int h = size.y;
-	char* dstStart = dstImg->getPixels();
+	const auto dstStart = dstImg->getPixelBytes();
 
 	int texelW = srcW / w;
 	int texelH = srcH / h;
 
 	for (int y = 0; y < h; y++) {
 		for (int x = 0; x < w; x++) {
-			char* dst = dstStart + x + y * w;
+			unsigned char* dst = &dstStart[x + y * w];
 			float distAcc = 0;
 			// For each sub-pixel, compute the distance to closest pixel of the opposite value
 			// Then average it all
 			for (int j = 0; j < texelH; j++) {
 				for (int i = 0; i < texelW; i++) {
-					distAcc += getDistanceAt(src, srcW, srcH, x * srcW / w + i, y * srcH / h + j, radius * srcW / w);
+					distAcc += getDistanceAt(src.data(), srcW, srcH, x * srcW / w + i, y * srcH / h + j, radius * srcW / w);
 				}
 			}
 			int distance = clamp(int(distAcc * 255 / (texelW * texelH)), 0, 255);
-			*dst = char(distance);
+			*dst = static_cast<unsigned char>(distance);
 		}
 	}
 

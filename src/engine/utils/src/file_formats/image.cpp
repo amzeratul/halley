@@ -32,7 +32,7 @@
 using namespace Halley;
 
 Image::Image(Format format, Vector2i size)
-	: px(nullptr, [](char*){})
+	: px(nullptr, [](unsigned char*){})
 	, dataLen(0)
 	, format(format)
 {
@@ -40,19 +40,19 @@ Image::Image(Format format, Vector2i size)
 }
 
 Image::Image(gsl::span<const gsl::byte> bytes, Format targetFormat)
-	: px(nullptr, [](char*) {})
+	: px(nullptr, [](unsigned char*) {})
 {
 	load(bytes, targetFormat);
 }
 
 Image::Image(const ResourceDataStatic& data)
-	: px(nullptr, [](char*) {})
+	: px(nullptr, [](unsigned char*) {})
 {
 	load(data.getSpan(), Format::Undefined);
 }
 
 Image::Image(const ResourceDataStatic& data, const Metadata& meta)
-	: px(nullptr, [](char*) {})
+	: px(nullptr, [](unsigned char*) {})
 {
 	auto format = fromString<Format>(meta.getString("format", "undefined"));
 	load(data.getSpan(), format);
@@ -70,14 +70,14 @@ void Image::setSize(Vector2i size)
 	dataLen = w * h * getBytesPerPixel();
 	dataLen += (16 - (dataLen % 16)) % 16;
 	if (w > 0 && h > 0)	{
-		px = std::unique_ptr<char, void(*)(char*)>(new char[dataLen], [](char* data) { delete[] data; });
+		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(new unsigned char[dataLen], [](unsigned char* data) { delete[] data; });
 		if (getBytesPerPixel() == 4) {
 			Ensures(size_t(px.get()) % 4 == 0);
 		}
 		Ensures(px.get() != nullptr);
 		memset(px.get(), 0, dataLen);
 	} else {
-		px = std::unique_ptr<char, void(*)(char*)>(nullptr, [](char*) {});
+		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(nullptr, [](unsigned char*) {});
 	}
 }
 
@@ -179,8 +179,8 @@ void Image::clear(int colour)
 			}
 		}
 	} else if (bpp == 1) {
-		const char col = char(colour);
-		char* dst = px.get();
+		const char col = unsigned char(colour);
+		unsigned char* dst = px.get();
 		for (unsigned int y = 0; y < h; y++) {
 			for (unsigned int x = 0; x < w; x++) {
 				*dst++ = col;
@@ -189,7 +189,7 @@ void Image::clear(int colour)
 	}
 }
 
-void Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t srcBpp)
+void Image::blitFrom(Vector2i pos, gsl::span<const unsigned char> buffer, size_t width, size_t height, size_t pitch, size_t srcBpp)
 {
 	const size_t xMin = std::max(0, -pos.x);
 	const size_t yMin = std::max(0, -pos.y);
@@ -197,9 +197,9 @@ void Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t heig
 	const size_t yMax = std::min(size_t(h) - pos.y, height);
 
 	if (getBytesPerPixel() == 1) {
-		char* dst = px.get() + pos.x + pos.y * w;
+		unsigned char* dst = px.get() + pos.x + pos.y * w;
 		if (srcBpp == 1) {
-			const char* src = reinterpret_cast<const char*>(buffer);
+			const unsigned char* src = reinterpret_cast<const unsigned char*>(buffer.data());
 			for (size_t y = yMin; y < yMax; y++) {
 				for (size_t x = xMin; x < xMax; x++) {
 					size_t pxPos = (x >> 3) + y * pitch;
@@ -209,7 +209,7 @@ void Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t heig
 				}
 			}
 		} else if (srcBpp == 8) {
-			const char* src = reinterpret_cast<const char*>(buffer);
+			const unsigned char* src = reinterpret_cast<const unsigned char*>(buffer.data());
 			for (size_t y = yMin; y < yMax; y++) {
 				for (size_t x = xMin; x < xMax; x++) {
 					dst[x + y * w] = src[x + y * pitch];
@@ -223,7 +223,7 @@ void Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t heig
 	} else if (getBytesPerPixel() == 4) {
 		int* dst = reinterpret_cast<int*>(px.get()) + pos.x + pos.y * w;
 		if (srcBpp == 1) {
-			const char* src = reinterpret_cast<const char*>(buffer);
+			const unsigned char* src = reinterpret_cast<const unsigned char*>(buffer.data());
 			for (size_t y = yMin; y < yMax; y++) {
 				for (size_t x = xMin; x < xMax; x++) {
 					size_t pxPos = (x >> 3) + y * pitch;
@@ -233,14 +233,14 @@ void Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t heig
 				}
 			}
 		} else if (srcBpp == 8) {
-			const char* src = reinterpret_cast<const char*>(buffer);
+			const unsigned char* src = reinterpret_cast<const unsigned char*>(buffer.data());
 			for (size_t y = yMin; y < yMax; y++) {
 				for (size_t x = xMin; x < xMax; x++) {
 					dst[x + y * w] = convertRGBAToInt(255, 255, 255, src[x + y * pitch]);
 				}
 			}
 		} else if (srcBpp == 32) {
-			const int* src = reinterpret_cast<const int*>(buffer);
+			const int* src = reinterpret_cast<const int*>(buffer.data());
 			for (size_t y = yMin; y < yMax; y++) {
 				for (size_t x = xMin; x < xMax; x++) {
 					dst[x + y * w] = src[x + y * pitch];
@@ -252,7 +252,7 @@ void Image::blitFrom(Vector2i pos, const char* buffer, size_t width, size_t heig
 	}
 }
 
-void Image::blitFromRotated(Vector2i pos, const char* buffer, size_t width, size_t height, size_t pitch, size_t bpp)
+void Image::blitFromRotated(Vector2i pos, gsl::span<const unsigned char> buffer, size_t width, size_t height, size_t pitch, size_t bpp)
 {
 	Expects(getBytesPerPixel() == 4);
 
@@ -267,7 +267,7 @@ void Image::blitFromRotated(Vector2i pos, const char* buffer, size_t width, size
 	int* dst = reinterpret_cast<int*>(px.get());
 
 	if (bpp == 32) {
-		const int* src = reinterpret_cast<const int*>(buffer);
+		const int* src = reinterpret_cast<const int*>(buffer.data());
 		for (auto y = yMin; y < yMax; y++) {
 			for (auto x = xMin; x < xMax; x++) {
 				auto srcX = y - yMin;
@@ -283,9 +283,9 @@ void Image::blitFromRotated(Vector2i pos, const char* buffer, size_t width, size
 void Image::blitFrom(Vector2i pos, Image& srcImg, bool rotated)
 {
 	if (rotated) {
-		blitFromRotated(pos, srcImg.getPixels(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), getBytesPerPixel() * 8);
+		blitFromRotated(pos, srcImg.getPixelBytes(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), getBytesPerPixel() * 8);
 	} else {
-		blitFrom(pos, srcImg.getPixels(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), getBytesPerPixel() * 8);
+		blitFrom(pos, srcImg.getPixelBytes(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), getBytesPerPixel() * 8);
 	}
 }
 
@@ -295,9 +295,9 @@ void Image::blitFrom(Vector2i pos, Image& srcImg, Rect4i srcArea, bool rotated)
 	size_t stride = srcImg.getWidth();
 	size_t offset = src.getTop() * stride + src.getLeft();
 	if (rotated) {
-		blitFromRotated(pos, srcImg.getPixels() + offset * getBytesPerPixel(), src.getWidth(), src.getHeight(), stride, getBytesPerPixel() * 8);
+		blitFromRotated(pos, srcImg.getPixelBytes().subspan(offset * getBytesPerPixel()), src.getWidth(), src.getHeight(), stride, getBytesPerPixel() * 8);
 	} else {
-		blitFrom(pos, srcImg.getPixels() + offset * getBytesPerPixel(), src.getWidth(), src.getHeight(), stride, getBytesPerPixel() * 8);
+		blitFrom(pos, srcImg.getPixelBytes().subspan(offset * getBytesPerPixel()), src.getWidth(), src.getHeight(), stride, getBytesPerPixel() * 8);
 	}
 }
 
@@ -371,11 +371,13 @@ void blendImages(F f, const Image& src, Image& dst, Vector2i pos, uint8_t opacit
 
 	const size_t rectW = srcRect.getWidth();
 	const size_t rectH = srcRect.getHeight();
-	for (size_t i = 0; i < rectH; ++i) {
-		const uint32_t* srcData = reinterpret_cast<const uint32_t*>(src.getPixels()) + ((i + srcRect.getTop()) * src.getWidth() + srcRect.getLeft());
-		uint32_t* dstData = reinterpret_cast<uint32_t*>(dst.getPixels()) + ((i + dstRect.getTop()) * dst.getWidth() + dstRect.getLeft());
-		for (size_t j = 0; j < rectW; ++j) {
-			dstData[j] = f(srcData[j], dstData[j], opacity32);
+	if (rectW > 0) {
+		for (size_t i = 0; i < rectH; ++i) {
+			const auto srcData = src.getPixels4BPP().subspan((i + srcRect.getTop()) * src.getWidth() + srcRect.getLeft());
+			const auto dstData = dst.getPixels4BPP().subspan((i + dstRect.getTop()) * dst.getWidth() + dstRect.getLeft());
+			for (size_t j = 0; j < rectW; ++j) {
+				dstData[j] = f(srcData[j], dstData[j], opacity32);
+			}
 		}
 	}
 }
@@ -406,7 +408,7 @@ void Image::serialize(Serializer& s) const
 	s << h;
 	s << format;
 	s << uint64_t(dataLen);
-	s << gsl::as_bytes(gsl::span<char>(px.get(), dataLen));
+	s << gsl::as_bytes(gsl::span<unsigned char>(px.get(), dataLen));
 }
 
 void Image::deserialize(Deserializer& s)
@@ -418,8 +420,8 @@ void Image::deserialize(Deserializer& s)
 	uint64_t len;
 	s >> len;
 	dataLen = size_t(len);
-	px = std::unique_ptr<char, void(*)(char*)>(static_cast<char*>(malloc(dataLen)), [](char* data) { free(data); });
-	auto span = gsl::as_writable_bytes(gsl::span<char>(px.get(), dataLen));
+	px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(static_cast<unsigned char*>(malloc(dataLen)), [](unsigned char* data) { free(data); });
+	auto span = gsl::as_writable_bytes(gsl::span<unsigned char>(px.get(), dataLen));
 	s >> span;
 }
 
@@ -443,7 +445,7 @@ void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 		}
 		lodepng_decode_memory(&pixels, &x, &y, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size(), colorFormat, 8);
 
-		px = std::unique_ptr<char, void(*)(char*)>(reinterpret_cast<char*>(pixels), [](char* data) { free(data); });
+		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(reinterpret_cast<unsigned char*>(pixels), [](unsigned char* data) { free(data); });
 		w = x;
 		h = y;
 		format = targetFormat != Format::Undefined ? targetFormat : Format::RGBA;
@@ -451,11 +453,11 @@ void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 	} else {
 		int x, y, nComp;
 		format = Format::RGBA;
-		char *pixels = reinterpret_cast<char*>(stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &x, &y, &nComp, 4));
+		unsigned char *pixels = reinterpret_cast<unsigned char*>(stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &x, &y, &nComp, 4));
 		if (!pixels) {
 			throw Exception("Unable to load image data.", HalleyExceptions::Utils);
 		}
-		px = std::unique_ptr<char, void(*)(char*)>(pixels, [](char* data) { stbi_image_free(data); });
+		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(pixels, [](unsigned char* data) { stbi_image_free(data); });
 		w = x;
 		h = y;
 		dataLen = w * h * getBytesPerPixel();
@@ -486,18 +488,49 @@ void Image::preMultiply()
 	format = Format::RGBAPremultiplied;
 }
 
-int Image::getPixel(Vector2i pos) const
+
+gsl::span<unsigned char> Image::getPixelBytes()
+{
+	return gsl::span<unsigned char>(px.get(), getByteSize());
+}
+
+gsl::span<const unsigned char> Image::getPixelBytes() const
+{
+	return gsl::span<const unsigned char>(px.get(), getByteSize());
+}
+
+gsl::span<int> Image::getPixels4BPP()
 {
 	Expects(getBytesPerPixel() == 4);
+	Expects(dataLen >= size_t(w) * size_t(h) * 4);
 
-	if (pos.x < 0 || pos.y < 0 || pos.x >= int(w) || pos.y >= int(h)) return 0;
-	return *reinterpret_cast<const int*>(getPixels() + 4*(pos.x + pos.y*w));
+	return gsl::span<int>(reinterpret_cast<int*>(px.get()), w * h);
+}
+
+gsl::span<const int> Image::getPixels4BPP() const
+{
+	Expects(getBytesPerPixel() == 4);
+	Expects(dataLen >= size_t(w) * size_t(h) * 4);
+
+	return gsl::span<const int>(reinterpret_cast<const int*>(px.get()), w * h);
+}
+
+int Image::getPixel4BPP(Vector2i pos) const
+{
+	if (pos.x < 0 || pos.y < 0 || pos.x >= int(w) || pos.y >= int(h)) {
+		return 0;
+	}
+	return getPixels4BPP()[pos.x + pos.y * w];
 }
 
 int Image::getPixelAlpha(Vector2i pos) const
 {
-	unsigned int pixel = static_cast<unsigned int>(getPixel(pos));
-	return pixel >> 24;
+	return getPixel4BPP(pos) >> 24;
+}
+
+gsl::span<const int> Image::getPixelRow4BPP(int x0, int x1, int y) const
+{
+	return getPixels4BPP().subspan(x0 + y * w, x1 - x0);
 }
 
 Bytes Image::savePNGToBytes(bool allowDepthReduce) const
