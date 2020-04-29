@@ -314,6 +314,23 @@ namespace Halley {
 				return {};
 			}
 		}
+
+		static Rect2D getSpanningRect(const std::vector<Vector2D<T>>& points)
+		{
+			T x1 = std::numeric_limits<T>::max();
+			T y1 = std::numeric_limits<T>::max();
+			T x2 = std::numeric_limits<T>::lowest();
+			T y2 = std::numeric_limits<T>::lowest();
+
+			for (const auto& v: points) {
+				x1 = std::min(x1, v.x);
+				x2 = std::max(x2, v.x);
+				y1 = std::min(y1, v.y);
+				y2 = std::max(y2, v.y);
+			}
+			
+			return Rect2D(Vector2f(x1, y1), Vector2f(x2, y2));
+		}
 	};
 
 	template <typename T>

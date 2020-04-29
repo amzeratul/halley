@@ -23,7 +23,6 @@
 #include "halley/maths/polygon.h"
 #include <limits>
 #include "halley/maths/ray.h"
-#include "halley/maths/aabb.h"
 #include "halley/maths/circle.h"
 #include "halley/maths/line.h"
 using namespace Halley;
@@ -46,7 +45,7 @@ Polygon::Polygon(VertexList vertices)
 // Realize that the polygon has changed shape
 void Polygon::realize()
 {
-	aabb = AABB::getSpanningBox(vertices).toRect4f();
+	aabb = Rect4f::getSpanningRect(vertices);
 	circle = Circle::getSpanningCircle(vertices);
 }
 
