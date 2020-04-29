@@ -286,7 +286,7 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 		}
 
 		Logger::logInfo("Trying " + toString(size.x) + "x" + toString(size.y) + " px...");
-		auto res = BinPack::pack(entries, size);
+		auto res = BinPack::fastPack(entries, size);
 		if (res) {
 			// Found a pack
 			if (images.size() > 1) {
@@ -328,9 +328,8 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult
 		const auto borderTL = img->clip.getTopLeft();
 		const auto borderBR = img->img->getSize() - img->clip.getSize() - borderTL;
 
-		const auto offset = Vector2f();
-		// Hmm, this was like this before... this could be related to random alignment issues
-		//const auto offset = Vector2f(0.0001f, 0.0001f);
+		// HACK: Hmmm, suspicious
+		const auto offset = Vector2f(0.0001f, 0.0001f);
 
 		auto addImageData = [&] (const ImageData& imgData) {
 			SpriteSheetEntry entry;
