@@ -36,7 +36,7 @@ namespace Halley {
 			
 			void feedBytes(gsl::span<const gsl::byte> bytes);
 
-			uint64_t digest();
+			[[nodiscard]] uint64_t digest();
 
 		private:
 			bool ready;

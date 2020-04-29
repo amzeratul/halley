@@ -10,6 +10,7 @@
 #include "halley/text/string_converter.h"
 #include "../../sprites/aseprite_reader.h"
 #include "halley/support/logger.h"
+#include "halley/utils/hash.h"
 
 using namespace Halley;
 
@@ -233,7 +234,7 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 	for (const auto& frame : frameData) {
 		String sequence = frame.sequenceName;
 		auto& seq = sequences[sequence];
-		if (int(seq.numFrameDefinitions()) == frame.frameNumber) {
+		if (static_cast<int>(seq.numFrameDefinitions()) == frame.frameNumber) {
 			auto filename = frame.filenames.at(0);
 			if (!directionsPerSequence.at(sequence).empty() && !frame.direction.isEmpty()) {
 				filename = filename.replaceAll("_" + frame.direction, "_%dir%");
@@ -255,21 +256,25 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 		Logger::logInfo("Generating atlas \"" + atlasName + "\" with " + toString(images.size()) + " sprites...");
 	}
 
+	markDuplicates(images);
+
 	// Generate entries
 	int64_t totalImageArea = 0;
 	std::vector<BinPackEntry> entries;
 	entries.reserve(images.size());
 	for (auto& img: images) {
-		auto size = img.clip.getSize();
-		totalImageArea += size.x * size.y;
-		entries.emplace_back(size, &img);
+		if (!img.isDuplicate) {
+			auto size = img.clip.getSize();
+			totalImageArea += size.x * size.y;
+			entries.emplace_back(size, &img);
+		}
 	}
 
 	// Figure out a reasonable pack size to start with
-	const int minSize = nextPowerOf2(int(sqrt(double(totalImageArea)))) / 2;
+	const int minSize = nextPowerOf2(static_cast<int>(sqrt(static_cast<double>(totalImageArea)))) / 2;
 	const int64_t guessArea = int64_t(minSize) * int64_t(minSize);
 	const int maxSize = 4096;
-	int curSize = std::min(maxSize, std::max(32, int(minSize)));
+	int curSize = std::min(maxSize, std::max(32, static_cast<int>(minSize)));
 
 	// Try packing
 	bool wide = guessArea > 2 * totalImageArea;
@@ -287,9 +292,8 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 			if (images.size() > 1) {
 				Logger::logInfo("Atlas \"" + atlasName + "\" generated at " + toString(size.x) + "x" + toString(size.y) + " px with " + toString(images.size()) + " sprites. Total image area is " + toString(totalImageArea) + " px^2, sqrt = " + toString(lround(sqrt(totalImageArea))) + " px.");
 			}
-
 			
-			return makeAtlas(res.value(), size, spriteSheet);
+			return makeAtlas(res.value(), spriteSheet);
 		} else {
 			// Try 64x64, then 128x64, 128x128, 256x128, etc
 			if (wide) {
@@ -302,14 +306,14 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 	}
 }
 
-std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult>& result, Vector2i origSize, SpriteSheet& spriteSheet)
+std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult>& result, SpriteSheet& spriteSheet)
 {
-	Vector2i size = shrinkAtlas(result);
+	Vector2i size = computeAtlasSize(result);
 
 	std::unique_ptr<Image> atlasImage;
 
-	for (auto& packedImg: result) {
-		ImageData* img = reinterpret_cast<ImageData*>(packedImg.data);
+	for (const auto& packedImg: result) {
+		const ImageData* img = reinterpret_cast<ImageData*>(packedImg.data);
 
 		if (!atlasImage) {
 			atlasImage = std::make_unique<Image>(img->img->getFormat(), size);
@@ -324,31 +328,40 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult
 		const auto borderTL = img->clip.getTopLeft();
 		const auto borderBR = img->img->getSize() - img->clip.getSize() - borderTL;
 
-		const auto offset = Vector2f(0.0001f, 0.0001f);
+		const auto offset = Vector2f();
+		// Hmm, this was like this before... this could be related to random alignment issues
+		//const auto offset = Vector2f(0.0001f, 0.0001f);
 
-		SpriteSheetEntry entry;
-		entry.size = Vector2f(img->clip.getSize());
-		entry.rotated = packedImg.rotated;
-		entry.pivot = Vector2f(img->pivot - img->clip.getTopLeft()) / entry.size;
-		entry.origPivot = img->pivot;
-		entry.coords = (Rect4f(Vector2f(packedImg.rect.getTopLeft()) + offset, Vector2f(packedImg.rect.getBottomRight()) + offset)) / Vector2f(size);
-		entry.trimBorder = Vector4s(short(borderTL.x), short(borderTL.y), short(borderBR.x), short(borderBR.y));
-		entry.slices = img->slices;
+		auto addImageData = [&] (const ImageData& imgData) {
+			SpriteSheetEntry entry;
+			entry.size = Vector2f(imgData.clip.getSize());
+			entry.rotated = packedImg.rotated;
+			entry.pivot = Vector2f(imgData.pivot - imgData.clip.getTopLeft()) / entry.size;
+			entry.origPivot = imgData.pivot;
+			entry.coords = (Rect4f(Vector2f(packedImg.rect.getTopLeft()) + offset, Vector2f(packedImg.rect.getBottomRight()) + offset)) / Vector2f(size);
+			entry.trimBorder = Vector4s(static_cast<short>(borderTL.x), static_cast<short>(borderTL.y), static_cast<short>(borderBR.x), static_cast<short>(borderBR.y));
+			entry.slices = imgData.slices;
 
-		for (auto& filename: img->filenames) {
-			spriteSheet.addSprite(filename, entry);
+			for (const auto& filename: imgData.filenames) {
+				spriteSheet.addSprite(filename, entry);
+			}
+		};
+		
+		addImageData(*img);
+		for (const auto& dupe: img->duplicatesOfThis) {
+			addImageData(*dupe);
 		}
 	}
 
 	return atlasImage;
 }
 
-Vector2i SpriteImporter::shrinkAtlas(const std::vector<BinPackResult>& results) const
+Vector2i SpriteImporter::computeAtlasSize(const std::vector<BinPackResult>& results) const
 {
 	int w = 0;
 	int h = 0;
 
-	for (auto& r: results) {
+	for (const auto& r: results) {
 		w = std::max(w, r.rect.getRight());
 		h = std::max(h, r.rect.getBottom());
 	}
@@ -360,7 +373,7 @@ std::vector<ImageData> SpriteImporter::splitImagesInGrid(const std::vector<Image
 {
 	std::vector<ImageData> result;
 
-	for (auto& src: images) {
+	for (const auto& src: images) {
 		auto imgSize = src.img->getSize();
 		int nX = imgSize.x / grid.x;
 		int nY = imgSize.y / grid.y;
@@ -388,4 +401,27 @@ std::vector<ImageData> SpriteImporter::splitImagesInGrid(const std::vector<Image
 	}
 
 	return result;
+}
+
+void SpriteImporter::markDuplicates(std::vector<ImageData>& images) const
+{
+	std::unordered_map<uint64_t, ImageData*> hashes;
+	
+	for (auto& image: images) {
+		Hash::Hasher hasher;
+		const auto clip = image.clip;
+		for (int y = clip.getTop(); y < clip.getBottom(); ++y) {
+			const auto row = image.img->getPixelBytesRow(clip.getLeft(), clip.getRight(), y);
+			hasher.feedBytes(as_bytes(row));
+		}
+		const auto hash = hasher.digest();
+
+		const auto iter = hashes.find(hash);
+		if (iter == hashes.end()) {
+			hashes[hash] = &image;
+		} else {
+			image.isDuplicate = true;
+			iter->second->duplicatesOfThis.push_back(&image);
+		}
+	}
 }
