@@ -179,7 +179,7 @@ void Image::clear(int colour)
 			}
 		}
 	} else if (bpp == 1) {
-		const char col = unsigned char(colour);
+		const char col = static_cast<unsigned char>(colour);
 		unsigned char* dst = px.get();
 		for (unsigned int y = 0; y < h; y++) {
 			for (unsigned int x = 0; x < w; x++) {
