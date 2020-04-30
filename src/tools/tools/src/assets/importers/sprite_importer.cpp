@@ -136,7 +136,8 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	// Create the atlas
 	auto groupAtlasName = asset.assetId;
 	SpriteSheet spriteSheet;
-	auto atlasImage = generateAtlas(groupAtlasName, totalFrames, spriteSheet);
+	ConfigNode spriteInfo;
+	auto atlasImage = generateAtlas(groupAtlasName, totalFrames, spriteSheet, spriteInfo);
 	spriteSheet.setTextureName(groupAtlasName);
 	spriteSheet.setDefaultMaterialName(meta.getString("defaultMaterial", "Halley/Sprite"));
 
@@ -154,6 +155,8 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	image.assetId = groupAtlasName;
 	image.assetType = ImportAssetType::Image;
 	image.inputFiles.emplace_back(ImportingAssetFile(groupAtlasName, Serializer::toBytes(*atlasImage), meta));
+	image.options.ensureType(ConfigNodeType::Map);
+	image.options["sprites"] = std::move(spriteInfo);
 	collector.addAdditionalAsset(std::move(image));
 
 	// Write spritesheet
@@ -250,7 +253,7 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 	return animation;
 }
 
-std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, std::vector<ImageData>& images, SpriteSheet& spriteSheet)
+std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, std::vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo)
 {
 	if (images.size() > 1) {
 		Logger::logInfo("Generating atlas \"" + atlasName + "\" with " + toString(images.size()) + " sprites...");
@@ -293,7 +296,7 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 				Logger::logInfo("Atlas \"" + atlasName + "\" generated at " + toString(size.x) + "x" + toString(size.y) + " px with " + toString(images.size()) + " sprites. Total image area is " + toString(totalImageArea) + " px^2, sqrt = " + toString(lround(sqrt(totalImageArea))) + " px.");
 			}
 			
-			return makeAtlas(res.value(), spriteSheet);
+			return makeAtlas(res.value(), spriteSheet, spriteInfo);
 		} else {
 			// Try 64x64, then 128x64, 128x128, 256x128, etc
 			if (wide) {
@@ -306,8 +309,11 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 	}
 }
 
-std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult>& result, SpriteSheet& spriteSheet)
+std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult>& result, SpriteSheet& spriteSheet, ConfigNode& spriteInfo)
 {
+	spriteInfo.ensureType(ConfigNodeType::Sequence);
+	auto& infoSeq = spriteInfo.asSequence();
+	
 	Vector2i size = computeAtlasSize(result);
 
 	std::unique_ptr<Image> atlasImage;
@@ -343,6 +349,17 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult
 
 			for (const auto& filename: imgData.filenames) {
 				spriteSheet.addSprite(filename, entry);
+
+				auto infoEntry = ConfigNode(ConfigNode::MapType());
+				infoEntry["name"] = filename;
+				infoEntry["x"] = packedImg.rect.getLeft();
+				infoEntry["y"] = packedImg.rect.getTop();
+				infoEntry["w"] = packedImg.rect.getWidth();
+				infoEntry["h"] = packedImg.rect.getHeight();
+				infoEntry["offX"] = borderTL.x;
+				infoEntry["offY"] = borderTL.y;
+				infoEntry["rotated"] = packedImg.rotated;
+				infoSeq.emplace_back(std::move(infoEntry));
 			}
 		};
 		

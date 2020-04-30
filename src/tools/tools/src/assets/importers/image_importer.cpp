@@ -32,7 +32,7 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	if (palette != "") {
 		auto paletteBytes = collector.readAdditionalFile(palette);
 		Image paletteImage(gsl::as_bytes(gsl::span<Byte>(paletteBytes)));
-		image = convertToIndexed(*image, paletteImage);
+		image = convertToIndexed(mainFile.string(), *image, paletteImage, asset.options);
 	}
 
 	// Fill meta
@@ -49,7 +49,7 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	collector.addAdditionalAsset(std::move(imageAsset));
 }
 
-std::unique_ptr<Image> ImageImporter::convertToIndexed(const Image& image, const Image& palette)
+std::unique_ptr<Image> ImageImporter::convertToIndexed(const String& fileName, const Image& image, const Image& palette, const ConfigNode& assetOptions)
 {
 	auto lookup = makePaletteConversion(palette);
 
@@ -59,12 +59,15 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const Image& image, const
 	size_t n = image.getWidth() * image.getHeight();
 
 	std::vector<int> coloursMissing;
+	std::vector<Vector2i> colourMissingPos;
 
 	for (size_t i = 0; i < n; ++i) {
 		auto res = lookup.find(src[i]);
 		if (res == lookup.end()) {
 			if (std::find(coloursMissing.begin(), coloursMissing.end(), src[i]) == coloursMissing.end()) {
+				const auto pos = Vector2i(static_cast<int>(i % image.getWidth()), static_cast<int>(i / image.getWidth()));
 				coloursMissing.push_back(src[i]);
+				colourMissingPos.push_back(pos);
 			}
 		} else {
 			dst[i] = uint8_t(res->second);
@@ -73,10 +76,13 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const Image& image, const
 
 	if (!coloursMissing.empty()) {
 		String message = "Colours missing from the palette:";
-		for (auto col: coloursMissing) {
+		const size_t nMissing = coloursMissing.size();
+		for (size_t i = 0; i < nMissing; ++i) {
 			unsigned int r, g, b, a;
-			Image::convertIntToRGBA(col, r, g, b, a);
-			message += "\n" + Colour4<int>(r, g, b, a).toString();
+			Image::convertIntToRGBA(coloursMissing[i], r, g, b, a);
+			auto pos = lookupSpritePosition(fileName, colourMissingPos[i], assetOptions);
+			
+			message += "\n\t" + Colour4<int>(r, g, b, a).toString() + " on " + pos.first + " at position " + pos.second;
 		}
 		throw Exception(message, HalleyExceptions::Tools);
 	}
@@ -108,4 +114,30 @@ std::unordered_map<uint32_t, uint32_t> ImageImporter::makePaletteConversion(cons
 		}
 	}
 	return lookup;
+}
+
+std::pair<String, Vector2i> ImageImporter::lookupSpritePosition(const String& fileName, Vector2i pos, const ConfigNode& options)
+{
+	if (!options.hasKey("sprites") || options["sprites"].getType() != ConfigNodeType::Sequence) {
+		return { fileName, pos };
+	}
+	const auto& sprites = options["sprites"].asSequence();
+	for (const auto& spriteEntry: sprites) {
+		const int x = spriteEntry["x"].asInt();
+		const int y = spriteEntry["y"].asInt();
+		const int w = spriteEntry["w"].asInt();
+		const int h = spriteEntry["h"].asInt();
+		if (Rect4i(x, y, w, h).contains(pos)) {
+			auto relPos = pos - Vector2i(x, y);
+			const bool rotated = spriteEntry["rotated"].asBool();
+			if (rotated) {
+				std::swap(relPos.x, relPos.y);
+			}
+			relPos += Vector2i(spriteEntry["offX"].asInt(), spriteEntry["offY"].asInt());
+
+			return { spriteEntry["name"].asString(), relPos };
+		}
+	}
+
+	return { fileName + " [unknown]", pos };
 }

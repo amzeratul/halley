@@ -43,8 +43,8 @@ namespace Halley
 	private:
 		Animation generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const std::vector<ImageData>& frameData);
 
-		std::unique_ptr<Image> generateAtlas(const String& atlasName, std::vector<ImageData>& images, SpriteSheet& spriteSheet);
-		std::unique_ptr<Image> makeAtlas(const std::vector<BinPackResult>& result, SpriteSheet& spriteSheet);
+		std::unique_ptr<Image> generateAtlas(const String& atlasName, std::vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo);
+		std::unique_ptr<Image> makeAtlas(const std::vector<BinPackResult>& result, SpriteSheet& spriteSheet, ConfigNode& spriteInfo);
 		Vector2i computeAtlasSize(const std::vector<BinPackResult>& results) const;
 		void markDuplicates(std::vector<ImageData>& images) const;
 

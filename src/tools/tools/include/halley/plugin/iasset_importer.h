@@ -8,6 +8,7 @@
 #include "halley/resources/resource.h"
 #include "halley/data_structures/maybe.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/file_formats/config_file.h"
 
 namespace Halley
 {
@@ -32,6 +33,7 @@ namespace Halley
 		String assetId;
 		std::vector<ImportingAssetFile> inputFiles;
 		ImportAssetType assetType = ImportAssetType::Undefined;
+		ConfigNode options;
 	};
 
 	class AssetResource
