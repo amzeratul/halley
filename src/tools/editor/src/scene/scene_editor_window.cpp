@@ -291,7 +291,7 @@ void SceneEditorWindow::setTool(SceneEditorTool tool)
 
 void SceneEditorWindow::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options)
 {
-	gameBridge->onToolSet(tool, componentName, fieldName, std::move(options));
+	options = gameBridge->onToolSet(tool, componentName, fieldName, std::move(options));
 
 	curTool = tool;
 	curComponentName = componentName;

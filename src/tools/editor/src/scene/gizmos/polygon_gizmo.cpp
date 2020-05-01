@@ -1,5 +1,6 @@
 #include "polygon_gizmo.h"
 #include "halley/core/graphics/painter.h"
+#include "halley/entity/components/transform_2d_component.h"
 #include "halley/maths/line.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_list.h"
@@ -46,7 +47,7 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 	// Update vertices
 	vertices.resize(handles.size());
 	for (size_t i = 0; i < handles.size(); ++i) {
-		vertices[i] = handles[i].getPosition();
+		vertices[i] = worldToLocal(handles[i].getPosition());
 	}
 	
 	writePointsIfNeeded();
@@ -88,21 +89,26 @@ void PolygonGizmo::draw(Painter& painter) const
 	const auto zoom = getZoom();
 	const auto highCol = Colour4f(1, 1, 1);
 
-	if (mode == PolygonGizmoMode::Append && preview.has_value()) {
-		painter.drawLine(vertices, 2.0f / zoom, colour, false);
+	worldSpaceVertices.resize(vertices.size());
+	for (size_t i = 0; i < vertices.size(); ++i) {
+		worldSpaceVertices[i] = localToWorld(vertices[i]);
+	}
 
-		const size_t nVertices = vertices.size();
+	if (mode == PolygonGizmoMode::Append && preview.has_value()) {
+		painter.drawLine(worldSpaceVertices, 2.0f / zoom, colour, false);
+
+		const size_t nVertices = worldSpaceVertices.size();
 		VertexList newBit;
 		if (nVertices >= 1) {
-			newBit.push_back(vertices.back());
+			newBit.push_back(worldSpaceVertices.back());
 		}
 		newBit.push_back(preview.value());
 		if (nVertices >= 2 && !isOpenPolygon) {
-			newBit.push_back(vertices.front());
+			newBit.push_back(worldSpaceVertices.front());
 		}
 		painter.drawLine(newBit, 1.0f / zoom, colour, false);
 	} else {
-		painter.drawLine(vertices, 2.0f / zoom, colour, !isOpenPolygon);
+		painter.drawLine(worldSpaceVertices, 2.0f / zoom, colour, !isOpenPolygon);
 	}
 
 	if (mode == PolygonGizmoMode::Insert && preview.has_value()) {
@@ -176,7 +182,7 @@ void PolygonGizmo::loadHandlesFromVertices()
 {
 	handles.resize(vertices.size(), makeHandle({}));
 	for (size_t i = 0; i < vertices.size(); ++i) {
-		handles[i].setPosition(vertices[i]);
+		handles[i].setPosition(localToWorld(vertices[i]));
 	}
 }
 
@@ -225,6 +231,26 @@ std::pair<Vector2f, size_t> PolygonGizmo::findInsertPoint(Vector2f pos) const
 	}
 
 	return std::make_pair(bestPoint, bestIndex);
+}
+
+Vector2f PolygonGizmo::localToWorld(Vector2f localPos) const
+{
+	auto t = getTransform();
+	if (t) {
+		return t->transformPoint(localPos);
+	} else {
+		return localPos;
+	}
+}
+
+Vector2f PolygonGizmo::worldToLocal(Vector2f worldPos) const
+{
+	auto t = getTransform();
+	if (t) {
+		return t->inverseTransformPoint(worldPos);
+	} else {
+		return worldPos;
+	}
 }
 
 SceneEditorGizmoHandle PolygonGizmo::makeHandle(Vector2f pos) const

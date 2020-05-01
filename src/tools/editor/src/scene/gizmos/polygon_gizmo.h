@@ -42,6 +42,7 @@ namespace Halley {
 
 		VertexList lastStored;
 		VertexList vertices;
+		mutable VertexList worldSpaceVertices;
 		std::optional<Vertex> preview;
 		size_t previewIndex = 0;
 		std::vector<SceneEditorGizmoHandle> handles;
@@ -61,5 +62,8 @@ namespace Halley {
 		void setMode(PolygonGizmoMode mode);
 
 		std::pair<Vertex, size_t> findInsertPoint(Vector2f pos) const;
+
+		Vector2f localToWorld(Vector2f localPos) const;
+		Vector2f worldToLocal(Vector2f worldPos) const;
 	};
 }
