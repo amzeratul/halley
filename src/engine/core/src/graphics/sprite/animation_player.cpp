@@ -59,7 +59,6 @@ AnimationPlayer& AnimationPlayer::setSequence(const String& sequence)
 		curFrame = 0;
 		curFrameLen = 0;
 		curSeq = &animation->getSequence(sequence);
-		Expects(curSeq);
 
 		seqLen = curSeq->numFrames();
 		seqLooping = curSeq->isLooping();
@@ -255,7 +254,7 @@ void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator)
 {
 	setSequence(masterAnimator.getCurrentSequenceName());
 	setDirection(masterAnimator.getCurrentDirectionName());
-	curFrame = masterAnimator.curFrame;
+	curFrame = clamp(masterAnimator.curFrame, 0, static_cast<int>(curSeq->numFrames()) - 1);
 
 	resolveSprite();
 }
@@ -264,7 +263,6 @@ void AnimationPlayer::resolveSprite()
 {
 	updateIfNeeded();
 
-	Expects(curSeq);
 	auto& frame = curSeq->getFrame(curFrame);
 	curFrameLen = std::max(1, frame.getDuration()) * 0.001; // 1ms minimum
 	spriteData = &frame.getSprite(dirId);
