@@ -6,6 +6,7 @@
 #include "halley/core/input/input_device.h"
 #include "halley/text/i18n.h"
 #include "halley/core/input/input_keyboard.h"
+#include "halley/core/input/text_input_data.h"
 
 namespace Halley {
 	class UIStyle;

@@ -22,6 +22,7 @@
 #include <SDL.h>
 #include "input_keyboard_sdl.h"
 #include "halley/core/input/input_keys.h"
+#include "halley/core/input/text_input_data.h"
 using namespace Halley;
 
 InputKeyboardSDL::InputKeyboardSDL(std::shared_ptr<IClipboard> clipboard)

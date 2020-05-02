@@ -54,6 +54,8 @@ set(SOURCES
         "src/input/input_touch.cpp"
         "src/input/input_vibration.cpp"
         "src/input/input_virtual.cpp"
+        "src/input/text_input_capture.cpp"
+        "src/input/text_input_data.cpp"
 
         "src/resources/asset_database.cpp"
         "src/resources/asset_pack.cpp"
@@ -153,6 +155,8 @@ set(HEADERS
         "include/halley/core/input/input_touch.h"
         "include/halley/core/input/input_vibration.h"
         "include/halley/core/input/input_virtual.h"
+        "include/halley/core/input/text_input_capture.h"
+        "include/halley/core/input/text_input_data.h"
         
         "include/halley/core/resources/asset_database.h"
         "include/halley/core/resources/asset_pack.h"

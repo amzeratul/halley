@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <algorithm>
+
 namespace Halley {
 
 	template <typename T>

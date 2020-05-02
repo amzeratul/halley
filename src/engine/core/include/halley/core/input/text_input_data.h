@@ -1,0 +1,78 @@
+#pragma once
+
+#include "halley/maths/range.h"
+#include "halley/text/halleystring.h"
+#include "halley/data_structures/maybe.h"
+
+namespace Halley {
+	enum class TextControlCharacter {
+		Enter,
+		Delete,
+		Backspace,
+		Left,
+		Right,
+		Up,
+		Down,
+		PageUp,
+		PageDown,
+		Home,
+		End,
+		Tab,
+		Copy,
+		Paste,
+		Cut,
+		Undo,
+		Redo,
+		SelectAll,
+		SelectLeft,
+		SelectRight,
+		SelectUp,
+		SelectDown
+	};
+
+	class IClipboard;
+
+	class TextInputData {
+	public:
+		explicit TextInputData();
+		explicit TextInputData(const String& str);
+		explicit TextInputData(StringUTF32 str);
+
+		const StringUTF32& getText() const;
+		void setText(const String& text);
+		void setText(StringUTF32 text);
+
+		Range<int> getSelection() const;
+		void setSelection(int selection);
+		void setSelection(Range<int> selection);
+
+		void setLengthLimits(int min, std::optional<int> max);
+		int getMinLength() const;
+		std::optional<int> getMaxLength() const;
+
+		void insertText(const String& text);
+		void insertText(const StringUTF32& text);
+
+		void onControlCharacter(TextControlCharacter c, std::shared_ptr<IClipboard> clipboard);
+
+		int getTextRevision() const;
+		Range<int> getTotalRange() const;
+
+		void setReadOnly(bool enable);
+		bool isReadOnly() const;
+
+	private:
+		StringUTF32 text;
+		Range<int> selection;
+
+		int minLength = 0;
+		std::optional<int> maxLength = {};
+		int textRevision = 0;
+		bool readOnly = false;
+
+		void onTextModified();
+		void onDelete();
+		void onBackspace();
+	};
+
+}

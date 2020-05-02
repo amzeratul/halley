@@ -51,6 +51,8 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "input/input_manual.h"
 #include "input/input_touch.h"
 #include "input/input_virtual.h"
+#include "input/text_input_capture.h"
+#include "input/text_input_data.h"
 
 #include "resources/asset_database.h"
 #include "resources/asset_pack.h"

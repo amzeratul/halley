@@ -7,6 +7,7 @@
 #include "ui_input.h"
 #include "halley/core/api/audio_api.h"
 #include "halley/core/game/core.h"
+#include "halley/core/input/input_keys.h"
 
 namespace Halley {
 	class SpritePainter;
@@ -22,13 +23,7 @@ namespace Halley {
 	};
 
 	struct UIKeyboardEvent {
-		enum class Modifiers {
-			Shift = 1,
-			Ctrl = 2,
-			Alt = 4
-		};
-
-		int keyCode = 0;
+		Keys keyCode;
 		int modifiers = 0;
 	};
 	
