@@ -30,7 +30,7 @@ public:
 
 		String value = data.getFieldData().asString("");
 
-		auto field = std::make_shared<UITextInput>(context.getUIFactory().getKeyboard(), "textValue", context.getUIFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
+		auto field = std::make_shared<UITextInput>("textValue", context.getUIFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
 		field->bindData("textValue", value, [&context, data](String newVal)
 		{
 			data.getFieldData() = ConfigNode(std::move(newVal));
@@ -60,7 +60,7 @@ public:
 
 		int value = data.getFieldData().asInt(defaultValue.isInteger() ? defaultValue.toInteger() : 0);
 
-		auto field = std::make_shared<UITextInput>(context.getUIFactory().getKeyboard(), "intValue", context.getUIFactory().getStyle("inputThin"));
+		auto field = std::make_shared<UITextInput>("intValue", context.getUIFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, false));
 		field->bindData("intValue", value, [&context, data](int newVal)
 		{
@@ -91,7 +91,7 @@ public:
 
 		const float value = data.getFieldData().asFloat(defaultValue.isNumber() ? defaultValue.toFloat() : 0.0f);
 
-		auto field = std::make_shared<UITextInput>(context.getUIFactory().getKeyboard(), "floatValue", context.getUIFactory().getStyle("inputThin"));
+		auto field = std::make_shared<UITextInput>("floatValue", context.getUIFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, true));
 		field->bindData("floatValue", value, [&context, data](float newVal)
 		{
@@ -166,13 +166,12 @@ public:
 			value = data.getFieldData().asVector2f();
 		}
 
-		const auto& keyboard = context.getUIFactory().getKeyboard();
 		const auto& style = context.getUIFactory().getStyle("inputThin");
 
 		auto dataOutput = std::make_shared<bool>(true);
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
 
-		container->add(std::make_shared<UITextInput>(keyboard, "xValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
+		container->add(std::make_shared<UITextInput>("xValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
 		container->bindData("xValue", value.x, [&context, data, dataOutput] (float newVal)
 		{
 			if (*dataOutput) {
@@ -182,7 +181,7 @@ public:
 			}
 		});
 
-		container->add(std::make_shared<UITextInput>(keyboard, "yValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
+		container->add(std::make_shared<UITextInput>("yValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
 		container->bindData("yValue", value.y, [&context, data, dataOutput](float newVal)
 		{
 			if (*dataOutput) {
@@ -580,7 +579,7 @@ public:
 
 		auto container = std::make_shared<UISizer>();
 		
-		auto field = std::make_shared<UITextInput>(context.getUIFactory().getKeyboard(), "colourHex", context.getUIFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
+		auto field = std::make_shared<UITextInput>("colourHex", context.getUIFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
 		container->add(field, 1);
 
 		auto colourPreview = std::make_shared<UIImage>(Sprite().setImage(context.getUIFactory().getResources(), "halley_ui/ui_list_item.png").setColour(Colour4f::fromString(value)));

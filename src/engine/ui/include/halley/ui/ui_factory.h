@@ -43,7 +43,6 @@ namespace Halley
 		std::shared_ptr<UIStyleSheet> getStyleSheet() const;
 
 		Resources& getResources() const;
-		std::shared_ptr<InputKeyboard> getKeyboard() const;
 
 		UIFactory withResources(Resources& newResources) const;
 
@@ -62,8 +61,6 @@ namespace Halley
 		const HalleyAPI& api;
 		Resources& resources;
 		const I18N& i18n;
-
-		std::shared_ptr<InputKeyboard> keyboard;
 
 		std::shared_ptr<UIWidget> makeWidget(const ConfigNode& node);
 		std::shared_ptr<UISizer> makeSizerPtr(const ConfigNode& node);

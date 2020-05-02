@@ -178,7 +178,7 @@ void UIDebugConsole::runCommand(const String& rawCommand)
 			addLine(result.getResponse(), Colour::fromString("#E2D5EA"));
 		}
 		inputField->setEnabled(true);
-		inputField->setFocused(true);
+		getRoot()->setFocus(inputField);
 		if (result.isCloseConsole()) {
 			hide();
 		}

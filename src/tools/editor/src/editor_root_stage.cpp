@@ -130,7 +130,7 @@ void EditorRootStage::clearUI()
 void EditorRootStage::createUI()
 {
 	uiFactory = std::make_unique<EditorUIFactory>(getAPI(), getResources(), i18n);
-	ui = std::make_unique<UIRoot>(&getAudioAPI());
+	ui = std::make_unique<UIRoot>(getAPI());
 
 	uiMainPanel = std::make_shared<UIWidget>("uiMainPanel", Vector2f(), UISizer(UISizerType::Vertical));
 	ui->addChild(uiMainPanel);

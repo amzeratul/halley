@@ -154,7 +154,7 @@ void updateMetadata(Metadata& metadata, const String& key, MetadataEditor& edito
 
 void MetadataEditor::makeIntField(UISizer& sizer, const String& key, int defaultValue)
 {
-	const auto result = std::make_shared<UITextInput>(factory.getKeyboard(), key, factory.getStyle("inputThin"));
+	const auto result = std::make_shared<UITextInput>(key, factory.getStyle("inputThin"));
 	result->setMinSize(Vector2f(40, 22));
 	result->setValidator(std::make_shared<UINumericValidator>(true, false));
 	sizer.add(result, 1);
@@ -166,7 +166,7 @@ void MetadataEditor::makeIntField(UISizer& sizer, const String& key, int default
 
 void MetadataEditor::makeFloatField(UISizer& sizer, const String& key, float defaultValue)
 {
-	const auto result = std::make_shared<UITextInput>(factory.getKeyboard(), key, factory.getStyle("inputThin"));
+	const auto result = std::make_shared<UITextInput>(key, factory.getStyle("inputThin"));
 	result->setMinSize(Vector2f(40, 22));
 	result->setValidator(std::make_shared<UINumericValidator>(true, true));
 	sizer.add(result, 1);
@@ -189,7 +189,7 @@ void MetadataEditor::makeBoolField(UISizer& sizer, const String& key, bool defau
 
 void MetadataEditor::makeStringField(UISizer& sizer, const String& key, const String& defaultValue)
 {
-	const auto result = std::make_shared<UITextInput>(factory.getKeyboard(), key, factory.getStyle("inputThin"));
+	const auto result = std::make_shared<UITextInput>(key, factory.getStyle("inputThin"));
 	result->setMinSize(Vector2f(40, 22));
 	sizer.add(result, 1);
 

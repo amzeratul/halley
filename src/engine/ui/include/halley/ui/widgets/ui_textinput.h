@@ -15,7 +15,7 @@ namespace Halley {
 	public:
 		using AutoCompleteHandle = std::function<std::vector<StringUTF32>(StringUTF32)>;
 		
-		UITextInput(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, String text = "", LocalisedString ghostText = {}, std::shared_ptr<UIValidator> validator = {});
+		UITextInput(String id, UIStyle style, String text = "", LocalisedString ghostText = {}, std::shared_ptr<UIValidator> validator = {});
 
 		UITextInput(UITextInput&& other) = delete;
 		UITextInput(const UITextInput& other) = delete;
@@ -52,13 +52,13 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 		void onFocus() override;
-		void onFocusLost() override;
+		TextInputData* getTextInputData() override;
+		
 		void pressMouse(Vector2f mousePos, int button) override;
 
 		void readFromDataBind() override;
 
 	private:
-		void updateTextInput();
 		void updateCaret();
 
 		void onMaybeTextModified();
@@ -67,8 +67,6 @@ namespace Halley {
 		void onValidatorSet() override;
 		void updateAutoComplete();
 
-		std::shared_ptr<InputKeyboard> keyboard;
-		std::unique_ptr<TextInputCapture> capture;
 		AutoCompleteHandle handle;
 
 		UIStyle style;

@@ -17,8 +17,9 @@ namespace Halley {
 	class UIDataBind;
 	class UIAnchor;
 	class UIBehaviour;
+	class TextInputData;
 
-	enum UIWidgetUpdateType {
+	enum class UIWidgetUpdateType {
 		First,
 		Full,
 		Partial
@@ -79,7 +80,6 @@ namespace Halley {
 		void setMinSize(Vector2f size);
 		void setInnerBorder(Vector4f border);
 
-		void setFocused(bool focused);
 		void setMouseOver(bool mouseOver);
 		virtual void pressMouse(Vector2f mousePos, int button);
 		virtual void releaseMouse(Vector2f mousePos, int button);
@@ -170,6 +170,8 @@ namespace Halley {
 
 		virtual void onFocus();
 		virtual void onFocusLost();
+		virtual TextInputData *getTextInputData();
+
 		virtual void onLayout();
 		virtual void onDestroyRequested();
 		virtual void onParentChanged();

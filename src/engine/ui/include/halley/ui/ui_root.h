@@ -12,6 +12,7 @@ namespace Halley {
 	class SpritePainter;
 	class AudioAPI;
 	class AudioClip;
+	class TextInputCapture;
 
 	enum class UIInputType {
 		Undefined,
@@ -22,7 +23,8 @@ namespace Halley {
 	
 	class UIRoot final : public UIParent {
 	public:
-		explicit UIRoot(AudioAPI* audio, Rect4f rect = {});
+		explicit UIRoot(const HalleyAPI& api, Rect4f rect = {});
+		~UIRoot();
 
 		UIRoot* getRoot() override;
 		const UIRoot* getRoot() const override;
@@ -45,7 +47,7 @@ namespace Halley {
 		bool isMouseOverUI() const;
 		std::shared_ptr<UIWidget> getWidgetUnderMouse() const;
 		std::shared_ptr<UIWidget> getWidgetUnderMouseIncludingDisabled() const;
-		void setFocus(const std::shared_ptr<UIWidget>& focus);
+		void setFocus(const std::shared_ptr<UIWidget>& newFocus);
 		void focusNext(bool reverse);
 
 		UIWidget* getCurrentFocus() const;
@@ -56,28 +58,35 @@ namespace Halley {
 		std::vector<std::shared_ptr<UIWidget>> collectWidgets();
 
 		void onChildAdded(UIWidget& child) override;
-		
+				
 	private:
 		String id;
+		std::shared_ptr<InputKeyboard> keyboard;
+		AudioAPI* audio = nullptr;
+		Rect4f uiRect;
+
 		std::weak_ptr<UIWidget> currentMouseOver;
 		std::weak_ptr<UIWidget> currentFocus;
 		Vector2f lastMousePos;
 		std::shared_ptr<InputDevice> dummyInput;
-		Rect4f uiRect;
 		Vector2f overscan;
 
-		AudioAPI* audio;
 		bool anyMouseButtonHeld = false;
 
 		std::function<Vector2f(Vector2f)> mouseRemap;
+		std::unique_ptr<TextInputCapture> textCapture;
 
 		void updateMouse(spInputDevice mouse);
-		void updateInputTree(const spInputDevice& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting);
-		void updateInput(spInputDevice input);
+		void updateGlobalInputTree(const spInputDevice& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting);
+		void updateGlobalInput(spInputDevice input);
+		void updateFocusInput();
 
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled = false) const;
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos, bool includeDisabled = false) const;
 		void updateMouseOver(const std::shared_ptr<UIWidget>& underMouse);
 		void collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output);
+
+		void focusWidget(UIWidget& widget);
+		void unfocusWidget(UIWidget& widget);
 	};
 }

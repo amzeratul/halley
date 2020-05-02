@@ -4,9 +4,26 @@
 #include "ui_painter.h"
 #include "halley/audio/audio_position.h"
 #include "halley/audio/audio_clip.h"
+#include "halley/core/input/input_keyboard.h"
 #include "halley/maths/random.h"
 
 using namespace Halley;
+
+UIRoot::UIRoot(const HalleyAPI& api, Rect4f rect)
+	: id("root")
+	, audio(api.audio)
+	, uiRect(rect)
+	, dummyInput(std::make_shared<InputButtonBase>(4))
+	, mouseRemap([](Vector2f p) { return p; })
+{
+	if (api.platform && api.platform->hasKeyboard()) {
+		keyboard = api.platform->getKeyboard();
+	} else {
+		keyboard = api.input->getKeyboard();
+	}
+}
+
+UIRoot::~UIRoot() = default;
 
 UIRoot* UIRoot::getRoot()
 {
@@ -21,16 +38,6 @@ const UIRoot* UIRoot::getRoot() const
 const String& UIRoot::getId() const
 {
 	return id;
-}
-
-UIRoot::UIRoot(AudioAPI* audio, Rect4f rect)
-	: id("root")
-	, dummyInput(std::make_shared<InputButtonBase>(4))
-	, uiRect(rect)
-	, audio(audio)
-	, mouseRemap([](Vector2f p) { return p; })
-{
-
 }
 
 void UIRoot::setRect(Rect4f rect, Vector2f overscan)
@@ -50,12 +57,15 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 	bool first = true;
 
 	do {
-		// Spawn & Update input
+		// Spawn new widgets
 		addNewChildren(activeInputType);
+
+		// Update input
 		if (activeInputType == UIInputType::Mouse) {
 			updateMouse(mouse);
 		}
-		updateInput(manual);
+		updateFocusInput();
+		updateGlobalInput(manual);
 
 		// Update children
 		for (auto& c: getChildren()) {
@@ -132,7 +142,7 @@ void UIRoot::updateMouse(spInputDevice mouse)
 	updateMouseOver(activeMouseOver);
 }
 
-void UIRoot::updateInputTree(const spInputDevice& input, UIWidget& widget, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting)
+void UIRoot::updateGlobalInputTree(const spInputDevice& input, UIWidget& widget, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting)
 {
 	if (!widget.isActive()) {
 		return;
@@ -144,7 +154,7 @@ void UIRoot::updateInputTree(const spInputDevice& input, UIWidget& widget, std::
 
 	for (auto& c: widget.getChildren()) {
 		// Depth-first
-		updateInputTree(input, *c, inputTargets, bestPriority, accepting);
+		updateGlobalInputTree(input, *c, inputTargets, bestPriority, accepting);
 	}
 
 	if (widget.inputButtons) {
@@ -152,7 +162,7 @@ void UIRoot::updateInputTree(const spInputDevice& input, UIWidget& widget, std::
 		if (accepting) {
 			auto priority = widget.getInputPriority();
 
-			if (int(priority) > int(bestPriority)) {
+			if (static_cast<int>(priority) > static_cast<int>(bestPriority)) {
 				bestPriority = priority;
 				inputTargets.clear();
 			}
@@ -163,7 +173,7 @@ void UIRoot::updateInputTree(const spInputDevice& input, UIWidget& widget, std::
 	}
 }
 
-void UIRoot::updateInput(spInputDevice input)
+void UIRoot::updateGlobalInput(spInputDevice input)
 {
 	auto& cs = getChildren();
 	std::vector<UIWidget*> inputTargets;
@@ -172,8 +182,8 @@ void UIRoot::updateInput(spInputDevice input)
 	bool accepting = true;
 	for (int i = int(cs.size()); --i >= 0; ) {
 		auto& c = *cs[i];
-		updateInputTree(input, c, inputTargets, bestPriority, accepting);
-				
+		updateGlobalInputTree(input, c, inputTargets, bestPriority, accepting);
+
 		if (c.isMouseBlocker()) {
 			accepting = false;
 		}
@@ -205,6 +215,23 @@ void UIRoot::updateInput(spInputDevice input)
 	}
 }
 
+void UIRoot::updateFocusInput()
+{
+	// Focus could have been destructed, clean up
+	if (currentFocus.expired()) {
+		setFocus({});
+	}
+	
+	if (textCapture) {
+		const bool stillCaptured = textCapture->update();
+		if (!stillCaptured) {
+			// This is used for soft keyboards, which will return false once they're done executing
+			// The widget then loses focus, so that being focused is equal to capturing soft keyboard
+			setFocus({});
+		}
+	}
+}
+
 void UIRoot::mouseOverNext(bool forward)
 {
 	auto widgets = collectWidgets();
@@ -232,18 +259,51 @@ void UIRoot::runLayout()
 	}
 }
 
-void UIRoot::setFocus(const std::shared_ptr<UIWidget>& focus)
+void UIRoot::setFocus(const std::shared_ptr<UIWidget>& newFocus)
 {
-	auto curFocus = currentFocus.lock();
-	if (curFocus != focus) {
-		if (curFocus) {
-			curFocus->setFocused(false);
+	if (currentFocus.expired()) {
+		currentFocus.reset();
+		textCapture.reset();
+	}
+	
+	const auto prevFocus = currentFocus.lock();
+
+	if (prevFocus != newFocus) {
+		if (prevFocus) {
+			unfocusWidget(*prevFocus);
 		}
 
-		currentFocus = focus;
-		if (focus) {
-			focus->setFocused(true);
+		currentFocus = newFocus;
+
+		if (newFocus) {
+			focusWidget(*newFocus);
 		}
+	}
+}
+
+void UIRoot::focusWidget(UIWidget& widget)
+{
+	if (!widget.focused) {
+		widget.focused = true;
+		widget.onFocus();
+
+		const auto text = widget.getTextInputData();
+		if (text && keyboard) {
+			textCapture = std::make_unique<TextInputCapture>(keyboard->captureText(*text, {}));
+		}
+		
+		widget.sendEvent(UIEvent(UIEventType::FocusGained, widget.getId()));
+	}
+}
+
+void UIRoot::unfocusWidget(UIWidget& widget)
+{
+	textCapture.reset();
+	
+	if (widget.focused) {
+		widget.focused = false;
+		widget.onFocusLost();
+		widget.sendEvent(UIEvent(UIEventType::FocusLost, widget.getId()));
 	}
 }
 

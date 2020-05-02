@@ -57,7 +57,7 @@ void UIWidget::doDraw(UIPainter& painter) const
 
 void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType)
 {
-	if (updateType == Full || updateType == First) {
+	if (updateType == UIWidgetUpdateType::Full || updateType == UIWidgetUpdateType::First) {
 		setInputType(inputType);
 		setJoystickType(joystickType);
 	
@@ -73,7 +73,7 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 		update(t, positionUpdated);
 		positionUpdated = false;
 
-		if (inputButtons && updateType == First) {
+		if (inputButtons && updateType == UIWidgetUpdateType::First) {
 			onInput(inputResults, t);
 		}
 
@@ -309,20 +309,6 @@ void UIWidget::setInnerBorder(Vector4f border)
 	if (innerBorder != border) {
 		innerBorder = border;
 		markAsNeedingLayout();
-	}
-}
-
-void UIWidget::setFocused(bool f)
-{
-	if (focused != f) {
-		focused = f;
-		if (focused) {
-			onFocus();
-			sendEvent(UIEvent(UIEventType::FocusGained, getId()));
-		} else {
-			onFocusLost();
-			sendEvent(UIEvent(UIEventType::FocusLost, getId()));
-		}
 	}
 }
 
@@ -687,6 +673,11 @@ void UIWidget::onFocus()
 
 void UIWidget::onFocusLost()
 {
+}
+
+TextInputData* UIWidget::getTextInputData()
+{
+	return nullptr;
 }
 
 void UIWidget::onLayout()

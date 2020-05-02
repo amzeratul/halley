@@ -7,7 +7,7 @@ namespace Halley {
 
 	class UISpinControl : public UIWidget {
 	public:
-		explicit UISpinControl(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, float value);
+		explicit UISpinControl(String id, UIStyle style, float value);
 
 		UISpinControl(UISpinControl&& other) = delete;
 		UISpinControl(const UISpinControl& other) = delete;

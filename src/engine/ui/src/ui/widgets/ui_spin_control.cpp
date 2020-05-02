@@ -4,11 +4,11 @@
 #include "halley/support/logger.h"
 using namespace Halley;
 
-UISpinControl::UISpinControl(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, float value)
+UISpinControl::UISpinControl(String id, UIStyle style, float value)
 	: UIWidget(id, {}, UISizer())
 	, value(99999)
 {
-	textInput = std::make_shared<UITextInput>(keyboard, id + "_textinput", style.getSubStyle("input"), "99999");
+	textInput = std::make_shared<UITextInput>(id + "_textinput", style.getSubStyle("input"), "99999");
 	textInput->setValidator(std::make_shared<UINumericValidator>(true, false));
 
 	const auto leftButton = std::make_shared<UIButton>(id + "_left", style.getSubStyle("leftButton"));

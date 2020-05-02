@@ -10,9 +10,8 @@
 
 using namespace Halley;
 
-UITextInput::UITextInput(std::shared_ptr<InputKeyboard> keyboard, String id, UIStyle style, String text, LocalisedString ghostText, std::shared_ptr<UIValidator> validator)
-	: UIWidget(id, Vector2f(style.getFloat("minSize"), style.getFloat("minSize")), UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
-	, keyboard(std::move(keyboard))
+UITextInput::UITextInput(String id, UIStyle style, String text, LocalisedString ghostText, std::shared_ptr<UIValidator> validator)
+	: UIWidget(std::move(id), Vector2f(style.getFloat("minSize"), style.getFloat("minSize")), UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
 	, style(style)
 	, sprite(style.getSprite("box"))
 	, caret(style.getSprite("caret"))
@@ -131,19 +130,9 @@ void UITextInput::draw(UIPainter& painter) const
 	}
 }
 
+/*
 void UITextInput::updateTextInput()
 {
-	if (!keyboard) {
-		return;
-	}
-
-	if (capture) {
-		bool ok = capture->update();
-		if (!ok) {
-			getRoot()->setFocus({});
-		}
-	}
-
 	if (keyboard->isButtonPressed(Keys::Tab)) {
 		if (!autoCompleteText.empty()) {
 			setText(autoCompleteText);
@@ -157,16 +146,13 @@ void UITextInput::updateTextInput()
 		autoCompleteCurOption = autoCompleteOptions > 0 ? modulo(autoCompleteCurOption + 1, autoCompleteOptions) : 0;
 	}
 
-	updateCaret();
-
-	onMaybeTextModified();
-	
 	if (keyboard->isButtonPressed(Keys::Enter) || keyboard->isButtonPressed(Keys::KP_Enter)) {
 		if (!isMultiLine) {
 			sendEvent(UIEvent(UIEventType::TextSubmit, getId(), getText()));
 		}
 	}
 }
+*/
 
 void UITextInput::updateCaret()
 {
@@ -241,7 +227,8 @@ void UITextInput::update(Time t, bool moved)
 
 		if (t > 0.000001f) {
 			// Update can be called more than once. Only one of them will have non-zero time.
-			updateTextInput();
+			updateCaret();
+			onMaybeTextModified();
 		}
 	} else {
 		caretTime = 0;
@@ -285,13 +272,11 @@ void UITextInput::onFocus()
 {
 	caretTime = 0;
 	caretShowing = true;
-
-	capture = std::make_unique<TextInputCapture>(keyboard->captureText(text, {}));
 }
 
-void UITextInput::onFocusLost()
+TextInputData* UITextInput::getTextInputData()
 {
-	capture.reset();
+	return &text;
 }
 
 void UITextInput::pressMouse(Vector2f mousePos, int button)

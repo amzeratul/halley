@@ -224,7 +224,7 @@ void UIDropdown::open()
 		}
 		dropdownList->setSelectedOption(curOption);
 		dropdownList->setInputButtons(inputButtons);
-		dropdownList->setFocused(true);
+		getRoot()->setFocus(dropdownList);
 
 		auto standardHeight = style.getFloat("height");
 		auto distanceFromBottom = getRoot()->getRect().getBottom() - getRect().getBottom() - 5.0f;
