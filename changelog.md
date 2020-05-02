@@ -1,6 +1,8 @@
-== Halley 3.x.x ==
+# Changelog
 
-=== Breaking Changes ===
+## Halley 3.x.x
+
+### Breaking Changes
 * `Game::startGame()` no longer takes API as a parameter. Use `Game::getAPI()` instead.
 * `Halley::Maybe<T>` is now deprecated. Use `std::optional<T>` instead.
 * `EntityStage::createWorld()` no longer takes `createComponent` and `createSystem` arguments.
