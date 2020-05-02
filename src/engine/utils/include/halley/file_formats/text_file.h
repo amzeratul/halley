@@ -18,7 +18,7 @@ namespace Halley
 
 		static std::unique_ptr<TextFile> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::TextFile; }
-		void reload(Resource&& resource) override;
+		void reload(Resource resource) override;
 
 	private:
 		String data;

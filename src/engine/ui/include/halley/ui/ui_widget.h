@@ -142,7 +142,7 @@ namespace Halley {
 		void setNoClipChildren(bool noClip);
 		bool getNoClipChildren() const;
 
-		void sendEvent(UIEvent&& event) const override;
+		void sendEvent(UIEvent event) const override;
 		void sendEventDown(const UIEvent& event) const;
 		void forceAddChildren(UIInputType inputType, bool forceRecursive);
 

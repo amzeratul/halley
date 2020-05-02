@@ -161,9 +161,9 @@ bool UIEventHandler::canHandle(const UIEvent& event) const
 	}
 }
 
-void UIEventHandler::queue(const UIEvent& event)
+void UIEventHandler::queue(UIEvent event)
 {
-	eventQueue.push_back(event);
+	eventQueue.emplace_back(std::move(event));
 }
 
 void UIEventHandler::pump()

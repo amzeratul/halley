@@ -182,7 +182,7 @@ namespace Halley
 		static std::unique_ptr<ConfigFile> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::ConfigFile; }
 
-		void reload(Resource&& resource) override;
+		void reload(Resource resource) override;
 
 	protected:
 		ConfigNode root;
@@ -214,7 +214,7 @@ namespace Halley
 		static std::unique_ptr<Prefab> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Prefab; }
 
-		void reload(Resource&& resource) override;
+		void reload(Resource resource) override;
 		void makeDefault();
 	};
 
@@ -223,7 +223,7 @@ namespace Halley
 		static std::unique_ptr<Scene> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Scene; }
 
-		void reload(Resource&& resource) override;
+		void reload(Resource resource) override;
 		void makeDefault();
 	};
 }

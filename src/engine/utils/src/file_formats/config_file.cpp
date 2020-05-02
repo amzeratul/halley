@@ -836,7 +836,7 @@ std::unique_ptr<ConfigFile> ConfigFile::loadResource(ResourceLoader& loader)
 	return config;
 }
 
-void ConfigFile::reload(Resource&& resource)
+void ConfigFile::reload(Resource resource)
 {
 	*this = std::move(dynamic_cast<ConfigFile&>(resource));
 	updateRoot();
@@ -903,7 +903,7 @@ std::unique_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
 	return prefab;
 }
 
-void Prefab::reload(Resource&& resource)
+void Prefab::reload(Resource resource)
 {
 	*this = std::move(dynamic_cast<Prefab&>(resource));
 	updateRoot();
@@ -923,7 +923,7 @@ std::unique_ptr<Scene> Scene::loadResource(ResourceLoader& loader)
 	return scene;
 }
 
-void Scene::reload(Resource&& resource)
+void Scene::reload(Resource resource)
 {
 	*this = std::move(dynamic_cast<Scene&>(resource));
 	updateRoot();

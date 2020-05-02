@@ -53,7 +53,7 @@ void TextureOpenGL::load(TextureDescriptor&& d)
 	finishLoading();
 }
 
-void TextureOpenGL::reload(Resource&& resource)
+void TextureOpenGL::reload(Resource resource)
 {
 	*this = std::move(dynamic_cast<TextureOpenGL&>(resource));
 }

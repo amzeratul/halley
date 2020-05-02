@@ -159,7 +159,7 @@ std::shared_ptr<AudioClip> AudioClip::loadResource(ResourceLoader& loader)
 	return result;
 }
 
-void AudioClip::reload(Resource&& resource)
+void AudioClip::reload(Resource resource)
 {
 	*this = std::move(dynamic_cast<AudioClip&>(resource));
 }

@@ -127,7 +127,7 @@ namespace Halley {
 
 		constexpr static AssetType getAssetType() { return AssetType::VariableTable; }
 		static std::unique_ptr<VariableTable> loadResource(ResourceLoader& loader);
-		void reload(Resource&& resource) override;
+		void reload(Resource resource) override;
 
 	private:
 		FlatMap<String, Internal::VariableStorage> variables;

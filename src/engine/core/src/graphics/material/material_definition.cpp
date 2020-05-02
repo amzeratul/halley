@@ -151,7 +151,7 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	}
 }
 
-void MaterialDefinition::reload(Resource&& resource)
+void MaterialDefinition::reload(Resource resource)
 {
 	auto& other = dynamic_cast<MaterialDefinition&>(resource);
 	*this = std::move(other);

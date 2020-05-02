@@ -380,7 +380,7 @@ std::optional<AudioHandle> UIRoot::playSound(const String& eventName)
 	return {};
 }
 
-void UIRoot::sendEvent(UIEvent&&) const
+void UIRoot::sendEvent(UIEvent) const
 {
 	// Unhandled event
 }

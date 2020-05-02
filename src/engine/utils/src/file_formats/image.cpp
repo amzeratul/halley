@@ -397,7 +397,7 @@ std::unique_ptr<Image> Image::loadResource(ResourceLoader& loader)
 	return std::make_unique<Image>(*loader.getStatic(), loader.getMeta());
 }
 
-void Image::reload(Resource&& resource)
+void Image::reload(Resource resource)
 {
 	*this = std::move(dynamic_cast<Image&>(resource));
 }

@@ -92,7 +92,7 @@ namespace Halley {
 		void setHandle(UIEventType type, const String& id, UIEventCallback handler);
 
 		bool canHandle(const UIEvent& event) const;
-		void queue(const UIEvent& event);
+		void queue(UIEvent event);
 		void pump();
 		void setWidget(UIWidget* uiWidget);
 

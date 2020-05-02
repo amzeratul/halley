@@ -182,7 +182,7 @@ std::unique_ptr<VariableTable> VariableTable::loadResource(ResourceLoader& loade
 	return result;
 }
 
-void VariableTable::reload(Resource&& resource)
+void VariableTable::reload(Resource resource)
 {
 	*this = std::move(dynamic_cast<VariableTable&>(resource));
 }

@@ -83,7 +83,7 @@ std::unique_ptr<Font> Font::loadResource(ResourceLoader& loader)
 	return std::make_unique<Font>(loader);
 }
 
-void Font::reload(Resource&& resource)
+void Font::reload(Resource resource)
 {
 	*this = std::move(dynamic_cast<Font&>(resource));
 }

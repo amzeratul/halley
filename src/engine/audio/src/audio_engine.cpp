@@ -67,7 +67,7 @@ void AudioEngine::run()
 	// but first return so we the AudioFacade can update the incoming sound data
 }
 
-void AudioEngine::addEmitter(uint32_t id, std::unique_ptr<AudioVoice>&& src)
+void AudioEngine::addEmitter(uint32_t id, std::unique_ptr<AudioVoice> src)
 {
 	emitters.emplace_back(std::move(src));
 	emitters.back()->setId(id);

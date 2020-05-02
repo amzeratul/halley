@@ -24,7 +24,7 @@ std::unique_ptr<TextFile> TextFile::loadResource(ResourceLoader& loader)
 	return std::make_unique<TextFile>(loader.getStatic()->getString());
 }
 
-void TextFile::reload(Resource&& resource)
+void TextFile::reload(Resource resource)
 {
 	*this = std::move(dynamic_cast<TextFile&>(resource));
 }

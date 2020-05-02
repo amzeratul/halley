@@ -697,15 +697,13 @@ void UIWidget::onDestroyRequested()
 {
 }
 
-void UIWidget::sendEvent(UIEvent&& event) const
+void UIWidget::sendEvent(UIEvent event) const
 {
 	if (canSendEvents) {
 		if (eventHandler && eventHandler->canHandle(event)) {
 			eventHandler->queue(event);
-		} else {
-			if (parent) {
-				parent->sendEvent(std::move(event));
-			}
+		} else if (parent) {
+			parent->sendEvent(std::move(event));
 		}
 	}
 }
@@ -715,7 +713,7 @@ void UIWidget::sendEventDown(const UIEvent& event) const
 	if (eventHandler && eventHandler->canHandle(event)) {
 		eventHandler->queue(event);
 	} else {
-		for (auto& c: getChildren()) {
+		for (const auto& c: getChildren()) {
 			c->sendEventDown(event);
 		}
 	}

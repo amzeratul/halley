@@ -25,7 +25,7 @@ namespace Halley {
 	    void setListener(AudioListenerData position);
 		void setOutputChannels(std::vector<AudioChannelData> channelData);
 
-		void addEmitter(uint32_t id, std::unique_ptr<AudioVoice>&& src);
+		void addEmitter(uint32_t id, std::unique_ptr<AudioVoice> src);
 
 		const std::vector<AudioVoice*>& getSources(uint32_t id);
 		std::vector<uint32_t> getPlayingSounds();

@@ -18,7 +18,7 @@ namespace Halley {
 		virtual const String& getId() const = 0;
 		virtual UIRoot* getRoot() = 0;
 		virtual const UIRoot* getRoot() const = 0;
-		virtual void sendEvent(UIEvent&& event) const = 0;
+		virtual void sendEvent(UIEvent event) const = 0;
 
 		virtual Rect4f getRect() const = 0;
 		virtual std::optional<float> getMaxChildWidth() const;
