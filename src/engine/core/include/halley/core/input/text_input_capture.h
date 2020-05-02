@@ -2,7 +2,10 @@
 #include "halley/text/halleystring.h"
 
 namespace Halley {
+	class InputKeyboard;
+	enum class TextControlCharacter;
 	class TextInputData;
+	class IClipboard;
 
 	struct SoftwareKeyboardData {
 		String title;
@@ -19,6 +22,28 @@ namespace Halley {
 
 		virtual bool isOpen() const = 0;
 		virtual void update() = 0;
+
+		virtual void onTextEntered(const StringUTF32& text) {}
+		virtual void onControlCharacter(TextControlCharacter c, std::shared_ptr<IClipboard> clipboard) {}
+	};
+
+	class StandardTextInputCapture final : public ITextInputCapture {
+	public:
+		StandardTextInputCapture(InputKeyboard& parent);
+		~StandardTextInputCapture();
+
+		void open(TextInputData& input, SoftwareKeyboardData softKeyboardData) override;
+		void close() override;
+		bool isOpen() const override;
+		void update() override;
+
+		void onTextEntered(const StringUTF32& text) override;
+		void onControlCharacter(TextControlCharacter c, std::shared_ptr<IClipboard> clipboard) override;
+
+	private:
+		bool currentlyOpen = false;
+		InputKeyboard& parent;
+		TextInputData* textInput;
 	};
 
 	class TextInputCapture {

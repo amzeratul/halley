@@ -4,8 +4,9 @@
 #include "input/text_input_data.h"
 using namespace Halley;
 
-InputKeyboard::InputKeyboard(int nButtons)
+InputKeyboard::InputKeyboard(int nButtons, std::shared_ptr<IClipboard> clipboard)
 	: InputButtonBase(nButtons)
+	, clipboard(std::move(clipboard))
 {
 }
 
@@ -120,6 +121,29 @@ void InputKeyboard::onButtonReleased(int scanCode)
 	InputButtonBase::onButtonReleased(scanCode);
 }
 
-void InputKeyboard::onTextControlCharacterGenerated(TextControlCharacter c)
+void InputKeyboard::onTextEntered(const char* text)
 {
+	const auto str = String(text).getUTF32();
+	for (const auto& c: captures) {
+		c->onTextEntered(str);
+	}
+}
+
+void InputKeyboard::onTextControlCharacterGenerated(TextControlCharacter chr)
+{
+	for (const auto& c: captures) {
+		c->onControlCharacter(chr, clipboard);
+	}
+}
+
+std::unique_ptr<ITextInputCapture> InputKeyboard::makeTextInputCapture()
+{
+	auto ptr = std::make_unique<StandardTextInputCapture>(*this);
+	captures.insert(ptr.get());
+	return ptr;
+}
+
+void InputKeyboard::removeCapture(ITextInputCapture* capture)
+{
+	captures.erase(capture);
 }
