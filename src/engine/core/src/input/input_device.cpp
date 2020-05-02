@@ -32,6 +32,11 @@ bool InputDevice::isAnyButtonPressed()
 	return false;
 }
 
+bool InputDevice::isAnyButtonPressedRepeat()
+{
+	return false;
+}
+
 bool InputDevice::isAnyButtonReleased()
 {
 	return false;

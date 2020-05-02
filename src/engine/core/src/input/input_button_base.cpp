@@ -91,32 +91,22 @@ void InputButtonBase::clearPresses()
 
 bool InputButtonBase::isAnyButtonPressed()
 {
-	for (size_t i=0; i<buttonPressed.size(); i++) {
-		if (buttonPressed[i] != 0) {
-			return true;
-		}
-	}
-	return false;
+	return std::any_of(buttonPressed.begin(), buttonPressed.end(), [] (const auto& v) { return v != 0; });
+}
+
+bool InputButtonBase::isAnyButtonPressedRepeat()
+{
+	return std::any_of(buttonPressedRepeat.begin(), buttonPressedRepeat.end(), [] (const auto& v) { return v != 0; });
 }
 
 bool InputButtonBase::isAnyButtonReleased()
 {
-	for (size_t i=0; i<buttonReleased.size(); i++) {
-		if (buttonReleased[i] != 0) {
-			return true;
-		}
-	}
-	return false;
+	return std::any_of(buttonReleased.begin(), buttonReleased.end(), [] (const auto& v) { return v != 0; });
 }
 
 bool InputButtonBase::isAnyButtonDown()
 {
-	for (size_t i=0; i<buttonDown.size(); i++) {
-		if (buttonDown[i] != 0) {
-			return true;
-		}
-	}
-	return false;
+	return std::any_of(buttonDown.begin(), buttonDown.end(), [] (const auto& v) { return v != 0; });
 }
 
 bool InputButtonBase::isButtonPressed(int code)
@@ -141,6 +131,26 @@ bool InputButtonBase::isButtonDown(int code)
 {
 	if (code < 0 || code >= int(buttonDown.size())) return false;
 	return buttonDown[code] != 0;
+}
+
+bool InputButtonBase::isButtonPressed(Keys code)
+{
+	return isButtonPressed(static_cast<int>(code));
+}
+
+bool InputButtonBase::isButtonPressedRepeat(Keys code)
+{
+	return isButtonPressedRepeat(static_cast<int>(code));
+}
+
+bool InputButtonBase::isButtonReleased(Keys code)
+{
+	return isButtonReleased(static_cast<int>(code));
+}
+
+bool InputButtonBase::isButtonDown(Keys code)
+{
+	return isButtonDown(static_cast<int>(code));
 }
 
 String InputButtonBase::getButtonName(int code)

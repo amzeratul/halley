@@ -20,6 +20,17 @@ namespace Halley {
 		Keyboard,
 		Gamepad
 	};
+
+	struct UIKeyboardEvent {
+		enum class Modifiers {
+			Shift = 1,
+			Ctrl = 2,
+			Alt = 4
+		};
+
+		int keyCode = 0;
+		int modifiers = 0;
+	};
 	
 	class UIRoot final : public UIParent {
 	public:
@@ -80,6 +91,7 @@ namespace Halley {
 		void updateGlobalInputTree(const spInputDevice& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting);
 		void updateGlobalInput(spInputDevice input);
 		void updateFocusInput();
+		std::vector<UIKeyboardEvent> getKeyboardInput(bool allowPrintable) const;
 
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled = false) const;
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos, bool includeDisabled = false) const;

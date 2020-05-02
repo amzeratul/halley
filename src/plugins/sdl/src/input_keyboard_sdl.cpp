@@ -121,13 +121,13 @@ std::unique_ptr<ITextInputCapture> InputKeyboardSDL::makeTextInputCapture()
 String InputKeyboardSDL::getButtonName(int code)
 {
 	switch (code) {
-	case Keys::Esc:
+	case static_cast<int>(Keys::Esc):
 		return "Esc";
-	case Keys::Delete:
+	case static_cast<int>(Keys::Delete):
 		return "Del";
 	default:
-		if (code >= Keys::A && code <= Keys::Z) {
-			return String(wchar_t(code - Keys::A + 'A'));
+		if (code >= static_cast<int>(Keys::A) && code <= static_cast<int>(Keys::Z)) {
+			return String(static_cast<wchar_t>(code - static_cast<int>(Keys::A) + 'A'));
 		} else {
 			return SDL_GetKeyName(SDL_Keycode(code));
 		}

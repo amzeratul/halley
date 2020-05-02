@@ -72,17 +72,17 @@ namespace Halley {
 
     private:
 		UIEventType type;
-		String sourceId;
-		String strData;
-    	String strData2;
-		bool boolData = false;
 		int intData = 0;
 		int intData2 = 0;
 		float floatData = 0.0f;
+		String sourceId;
+		String strData;
+    	String strData2;
 		Vector2f vectorData;
 		Rect4f rectData;
 		UIWidget* curWidget = nullptr;
-    };
+		bool boolData = false;
+	};
 
 	using UIEventCallback = std::function<void(const UIEvent&)>;
 

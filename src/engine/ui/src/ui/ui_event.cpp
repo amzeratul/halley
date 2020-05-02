@@ -26,40 +26,40 @@ UIEvent::UIEvent(UIEventType type, String sourceId, bool data)
 
 UIEvent::UIEvent(UIEventType type, String sourceId, int data)
 	: type(type)
-	, sourceId(std::move(sourceId))
 	, intData(data)
+	, sourceId(std::move(sourceId))
 {
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, int data1, int data2)
 	: type(type)
-	, sourceId(std::move(sourceId))
 	, intData(data1)
 	, intData2(data2)
+	, sourceId(std::move(sourceId))
 {
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, float data)
 	: type(type)
-	, sourceId(std::move(sourceId))
 	, floatData(data)
+	, sourceId(std::move(sourceId))
 {
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, String data, int intData)
 	: type(type)
+	, intData(intData)
 	, sourceId(std::move(sourceId))
 	, strData(std::move(data))
-	, intData(intData)
 {
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, String data, String data2, int intData)
 	: type(type)
+	, intData(intData)
 	, sourceId(std::move(sourceId))
 	, strData(std::move(data))
 	, strData2(std::move(data2))
-	, intData(intData)
 {
 }
 

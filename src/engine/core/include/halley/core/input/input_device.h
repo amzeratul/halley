@@ -26,6 +26,7 @@
 #include "halley/maths/vector2.h"
 
 namespace Halley {
+	enum class Keys;
 
 	enum class JoystickType {
 		None,
@@ -49,6 +50,7 @@ namespace Halley {
 		virtual String getButtonName(int code);
 
 		virtual bool isAnyButtonPressed();
+		virtual bool isAnyButtonPressedRepeat();
 		virtual bool isAnyButtonReleased();
 		virtual bool isAnyButtonDown();
 

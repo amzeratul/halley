@@ -56,6 +56,8 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 	auto joystickType = manual->getJoystickType();
 	bool first = true;
 
+	updateFocusInput();
+
 	do {
 		// Spawn new widgets
 		addNewChildren(activeInputType);
@@ -64,7 +66,6 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 		if (activeInputType == UIInputType::Mouse) {
 			updateMouse(mouse);
 		}
-		updateFocusInput();
 		updateGlobalInput(manual);
 
 		// Update children
@@ -221,6 +222,8 @@ void UIRoot::updateFocusInput()
 	if (currentFocus.expired()) {
 		setFocus({});
 	}
+
+	getKeyboardInput(!textCapture);
 	
 	if (textCapture) {
 		const bool stillCaptured = textCapture->update();
@@ -230,6 +233,15 @@ void UIRoot::updateFocusInput()
 			setFocus({});
 		}
 	}
+}
+
+std::vector<UIKeyboardEvent> UIRoot::getKeyboardInput(bool allowPrintable) const
+{
+	std::vector<UIKeyboardEvent> result;
+	if (keyboard && keyboard->isAnyButtonPressed()) {
+		const size_t nButtons = keyboard->getNumberButtons();
+	}
+	return result;
 }
 
 void UIRoot::mouseOverNext(bool forward)

@@ -253,7 +253,7 @@ void InputKeyboard::onButtonPressed(int scanCode)
 	std::optional<TextControlCharacter> code;
 
 	if (!shiftDown && !ctrlDown) {
-		switch (scanCode) {
+		switch (Keys(scanCode)) {
 		case Keys::Backspace:
 			code = TextControlCharacter::Backspace;
 			break;
@@ -291,11 +291,13 @@ void InputKeyboard::onButtonPressed(int scanCode)
 		case Keys::End:
 			code = TextControlCharacter::End;
 			break;
+		default:
+			break;
 		}
 	}
 
 	if (ctrlDown && !shiftDown) {
-		switch (scanCode) {
+		switch (Keys(scanCode)) {
 		case Keys::C:
 			code = TextControlCharacter::Copy;
 			break;
@@ -314,11 +316,13 @@ void InputKeyboard::onButtonPressed(int scanCode)
 		case Keys::A:
 			code = TextControlCharacter::SelectAll;
 			break;
+		default:
+			break;
 		}
 	}
 
 	if (shiftDown && !ctrlDown) {
-		switch (scanCode) {
+		switch (Keys(scanCode)) {
 		case Keys::Left:
 			code = TextControlCharacter::SelectLeft;
 			break;
@@ -330,6 +334,8 @@ void InputKeyboard::onButtonPressed(int scanCode)
 			break;
 		case Keys::Down:
 			code = TextControlCharacter::SelectDown;
+			break;
+		default:
 			break;
 		}
 	}

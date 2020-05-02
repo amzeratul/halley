@@ -23,6 +23,7 @@
 #include "input/input_manual.h"
 #include <set>
 #include <algorithm>
+#include <utility>
 
 using namespace Halley;
 
@@ -37,7 +38,7 @@ InputVirtual::InputVirtual(int nButtons, int nAxes)
 
 bool InputVirtual::isEnabled() const
 {
-	for (auto& d: getAllDevices()) {
+	for (const auto& d: getAllDevices()) {
 		if (d->isEnabled()) {
 			return true;
 		}
@@ -67,10 +68,8 @@ size_t InputVirtual::getNumberAxes()
 
 bool InputVirtual::isAnyButtonPressed()
 {
-	for (size_t j=0; j < buttons.size(); j++) {
-		auto& binds = buttons[j];
-		for (size_t i=0; i<binds.size(); i++) {
-			Bind& bind = binds[i];
+	for (auto& binds : buttons) {
+		for (auto& bind : binds) {
 			if (bind.device->isAnyButtonPressed()) {
 				return true;
 			}
@@ -81,10 +80,8 @@ bool InputVirtual::isAnyButtonPressed()
 
 bool InputVirtual::isAnyButtonReleased()
 {
-	for (size_t j=0; j < buttons.size(); j++) {
-		auto& binds = buttons[j];
-		for (size_t i=0; i<binds.size(); i++) {
-			Bind& bind = binds[i];
+	for (auto& binds : buttons) {
+		for (auto& bind : binds) {
 			if (bind.device->isAnyButtonReleased()) {
 				return true;
 			}
@@ -95,10 +92,8 @@ bool InputVirtual::isAnyButtonReleased()
 
 bool InputVirtual::isAnyButtonDown()
 {
-	for (size_t j=0; j < buttons.size(); j++) {
-		auto& binds = buttons[j];
-		for (size_t i=0; i<binds.size(); i++) {
-			Bind& bind = binds[i];
+	for (auto& binds : buttons) {
+		for (auto& bind : binds) {
 			if (bind.device->isAnyButtonDown()) {
 				return true;
 			}
@@ -110,8 +105,7 @@ bool InputVirtual::isAnyButtonDown()
 bool InputVirtual::isButtonPressed(int code)
 {
 	auto& binds = buttons.at(code);
-	for (size_t i=0; i<binds.size(); i++) {
-		Bind& bind = binds[i];
+	for (auto& bind : binds) {
 		if (bind.device->isButtonPressed(bind.a)) {
 			return true;
 		}
@@ -122,8 +116,7 @@ bool InputVirtual::isButtonPressed(int code)
 bool InputVirtual::isButtonPressedRepeat(int code)
 {
 	auto& binds = buttons.at(code);
-	for (size_t i=0; i<binds.size(); i++) {
-		Bind& bind = binds[i];
+	for (auto& bind : binds) {
 		if (bind.device->isButtonPressedRepeat(bind.a)) {
 			return true;
 		}
@@ -134,8 +127,7 @@ bool InputVirtual::isButtonPressedRepeat(int code)
 bool InputVirtual::isButtonReleased(int code)
 {
 	auto& binds = buttons.at(code);
-	for (size_t i=0; i<binds.size(); i++) {
-		Bind& bind = binds[i];
+	for (auto& bind : binds) {
 		if (bind.device->isButtonReleased(bind.a)) {
 			return true;
 		}
@@ -146,8 +138,7 @@ bool InputVirtual::isButtonReleased(int code)
 bool InputVirtual::isButtonDown(int code)
 {
 	auto& binds = buttons.at(code);
-	for (size_t i=0; i<binds.size(); i++) {
-		Bind& bind = binds[i];
+	for (auto& bind : binds) {
 		if (bind.device->isButtonDown(bind.a)) {
 			return true;
 		}
@@ -158,8 +149,7 @@ bool InputVirtual::isButtonDown(int code)
 void InputVirtual::clearButton(int code)
 {
 	auto& binds = buttons.at(code);
-	for (size_t i=0; i<binds.size(); i++) {
-		Bind& bind = binds[i];
+	for (auto& bind : binds) {
 		bind.device->clearButton(bind.a);
 	}
 }
@@ -167,8 +157,7 @@ void InputVirtual::clearButton(int code)
 void InputVirtual::clearButtonPress(int code)
 {
 	auto& binds = buttons.at(code);
-	for (size_t i=0; i<binds.size(); i++) {
-		Bind& bind = binds[i];
+	for (auto& bind : binds) {
 		bind.device->clearButtonPress(bind.a);
 	}
 }
@@ -176,8 +165,7 @@ void InputVirtual::clearButtonPress(int code)
 void InputVirtual::clearButtonRelease(int code)
 {
 	auto& binds = buttons.at(code);
-	for (size_t i=0; i<binds.size(); i++) {
-		Bind& bind = binds[i];
+	for (auto& bind : binds) {
 		bind.device->clearButtonRelease(bind.a);
 	}
 }
@@ -190,8 +178,8 @@ float InputVirtual::getAxis(int n)
 	for (size_t i=0; i<binds.size(); i++) {
 		Bind& b = binds[i];
 		if (b.isAxisEmulation) {
-			int left = b.device->isButtonDown(b.a) ? 1 : 0;
-			int right = b.device->isButtonDown(b.b) ? 1 : 0;
+			const int left = b.device->isButtonDown(b.a) ? 1 : 0;
+			const int right = b.device->isButtonDown(b.b) ? 1 : 0;
 			value += right - left;
 		} else {
 			value += b.device->getAxis(b.a);
@@ -211,7 +199,12 @@ void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
 	if (!lastDevice) {
 		setLastDevice(device.get());
 	}
-	buttons.at(n).push_back(Bind(device, deviceN, false));
+	buttons.at(n).push_back(Bind(std::move(device), deviceN, false));
+}
+
+void InputVirtual::bindButton(int n, spInputDevice device, Keys deviceButton)
+{
+	bindButton(n, std::move(device), static_cast<int>(deviceButton));
 }
 
 void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
@@ -219,7 +212,7 @@ void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
 	if (!lastDevice) {
 		setLastDevice(device.get());
 	}
-	axes.at(n).binds.push_back(Bind(device, deviceN, true));
+	axes.at(n).binds.push_back(Bind(std::move(device), deviceN, true));
 }
 
 void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton)
@@ -227,12 +220,17 @@ void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButto
 	if (!lastDevice) {
 		setLastDevice(device.get());
 	}
-	axes.at(n).binds.push_back(Bind(device, negativeButton, positiveButton, true));
+	axes.at(n).binds.push_back(Bind(std::move(device), negativeButton, positiveButton, true));
+}
+
+void InputVirtual::bindAxisButton(int n, spInputDevice device, Keys negativeButton, Keys positiveButton)
+{
+	bindAxisButton(n, std::move(device), static_cast<int>(negativeButton), static_cast<int>(positiveButton));
 }
 
 void InputVirtual::bindVibrationOverride(spInputDevice joy)
 {
-	vibrationOverride = joy;
+	vibrationOverride = std::move(joy);
 }
 
 void InputVirtual::unbindButton(int n)
@@ -247,18 +245,18 @@ void InputVirtual::unbindAxis(int n)
 
 void InputVirtual::clearBindings()
 {
-	for (size_t i=0; i<buttons.size(); i++) {
-		buttons[i].clear();
+	for (auto& button : buttons) {
+		button.clear();
 	}
-	for (size_t i=0; i<axes.size(); i++) {
-		axes[i].binds.clear();
+	for (auto& axe : axes) {
+		axe.binds.clear();
 	}
 	vibrationOverride = spInputDevice();
 }
 
 void InputVirtual::vibrate(spInputVibration vib)
 {
-	auto dev = vibrationOverride ? vibrationOverride.get() : lastDevice;
+	const auto& dev = vibrationOverride ? vibrationOverride.get() : lastDevice;
 	if (dev) {
 		dev->vibrate(vib);
 	}
@@ -266,7 +264,7 @@ void InputVirtual::vibrate(spInputVibration vib)
 
 void InputVirtual::stopVibrating()
 {
-	auto dev = vibrationOverride ? vibrationOverride.get() : lastDevice;
+	const auto& dev = vibrationOverride ? vibrationOverride.get() : lastDevice;
 	if (dev) {
 		dev->stopVibrating();
 	}
@@ -295,7 +293,7 @@ void InputVirtual::setPositionLimits()
 int InputVirtual::getWheelMove() const
 {
 	int val = 0;
-	for (auto& w: wheels) {
+	for (const auto& w: wheels) {
 		val += w->getWheelMove();
 	}
 	return val;
@@ -309,23 +307,23 @@ void InputVirtual::bindHat(int leftRight, int upDown, spInputDevice hat)
 
 void InputVirtual::bindPosition(spInputDevice device)
 {
-	positions.push_back(PositionBindData(device));
+	positions.push_back(PositionBindData(std::move(device)));
 }
 
 void InputVirtual::bindPositionRelative(spInputDevice device, int axisX, int axisY, float speed)
 {
-	positions.push_back(PositionBindData(device, axisX, axisY, speed));
+	positions.push_back(PositionBindData(std::move(device), axisX, axisY, speed));
 }
 
 void InputVirtual::bindWheel(spInputDevice device)
 {
-	wheels.push_back(device);
+	wheels.push_back(std::move(device));
 }
 
 String InputVirtual::getButtonName(int code)
 {
 	auto& binds = buttons.at(code);
-	if (binds.size() > 0) {
+	if (!binds.empty()) {
 		Bind& bind = binds[0];
 		return bind.device->getButtonName(bind.a);
 	} else {
@@ -417,7 +415,7 @@ void InputVirtual::updateLastDevice()
 }
 
 InputVirtual::Bind::Bind(spInputDevice d, int n, bool axis)
-	: device(d)
+	: device(std::move(d))
 	, a(n)
 	, b(0)
 	, isAxis(axis)
@@ -425,30 +423,28 @@ InputVirtual::Bind::Bind(spInputDevice d, int n, bool axis)
 {}
 
 InputVirtual::Bind::Bind(spInputDevice d, int _a, int _b, bool axis)
-	: device(d)
+	: device(std::move(d))
 	, a(_a)
 	, b(_b)
 	, isAxis(axis)
 	, isAxisEmulation(true)
 {}
 
-InputVirtual::AxisData::AxisData()
+InputVirtual::AxisData::AxisData() = default;
+
+InputVirtual::AxisData::AxisData(Vector<Bind> b)
+	: binds(std::move(b))
 {}
 
-InputVirtual::AxisData::AxisData(Vector<Bind>& b)
-	: binds(b)
-{}
-
-InputVirtual::PositionBindData::PositionBindData()
-{}
+InputVirtual::PositionBindData::PositionBindData() = default;
 
 InputVirtual::PositionBindData::PositionBindData(spInputDevice device)
-	: device(device)
+	: device(std::move(device))
 	, direct(true)
 {}
 
 InputVirtual::PositionBindData::PositionBindData(spInputDevice device, int axisX, int axisY, float speed)
-	: device(device)
+	: device(std::move(device))
 	, axisX(axisX)
 	, axisY(axisY)
 	, speed(speed)
@@ -458,15 +454,15 @@ std::set<spInputDevice> InputVirtual::getAllDevices() const
 {
 	std::set<spInputDevice> devices;
 
-	for (auto& axisBind: axes) {
-		for (auto& bind: axisBind.binds) {
+	for (const auto& axisBind: axes) {
+		for (const auto& bind: axisBind.binds) {
 			if (bind.device) {
 				devices.insert(bind.device);
 			}
 		}
 	}
-	for (auto& buttonBinds: buttons) {
-		for (auto& bind: buttonBinds) {
+	for (const auto& buttonBinds: buttons) {
+		for (const auto& bind: buttonBinds) {
 			if (bind.device) {
 				devices.insert(bind.device);
 			}
@@ -498,7 +494,7 @@ JoystickType InputVirtual::getJoystickType() const
 
 void InputVirtual::setLastDevice(InputDevice* device)
 {
-	auto parent = device->getParent();
+	const auto parent = device->getParent();
 	if (parent) {
 		setLastDevice(parent);
 	} else {
