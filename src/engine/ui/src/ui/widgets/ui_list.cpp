@@ -332,7 +332,7 @@ bool UIList::isManualDragging() const
 	return manualDragging;
 }
 
-void UIList::onInput(const UIInputResults& input, Time time)
+void UIList::onGamepadInput(const UIInputResults& input, Time time)
 {
 	if (getNumberOfItems() == 0) {
 		curOption = 0;
@@ -342,19 +342,19 @@ void UIList::onInput(const UIInputResults& input, Time time)
 	Expects(nColumns >= 1);
 
 	// Drag
-	if (dragEnabled && input.isButtonHeld(UIInput::Button::Hold)) {
+	if (dragEnabled && input.isButtonHeld(UIGamepadInput::Button::Hold)) {
 		// Manual dragging
 		manualDragging = true;
 
 		int dir = 0;
-		if (input.isButtonPressed(UIInput::Button::Next)) {
+		if (input.isButtonPressed(UIGamepadInput::Button::Next)) {
 			dir++;
-		} else if (input.isButtonPressed(UIInput::Button::Prev)) {
+		} else if (input.isButtonPressed(UIGamepadInput::Button::Prev)) {
 			dir--;
 		} else if (orientation == UISizerType::Horizontal) {
-			dir += input.getAxisRepeat(UIInput::Axis::X);
+			dir += input.getAxisRepeat(UIGamepadInput::Axis::X);
 		} else if (orientation == UISizerType::Vertical) {
-			dir += input.getAxisRepeat(UIInput::Axis::Y);
+			dir += input.getAxisRepeat(UIGamepadInput::Axis::Y);
 		}
 		dir = clamp(dir, -1, 1);
 		if (dir != 0) {
@@ -371,10 +371,10 @@ void UIList::onInput(const UIInputResults& input, Time time)
 		int option = curOption;
 
 		// Next/prev first
-		if (input.isButtonPressed(UIInput::Button::Next)) {
+		if (input.isButtonPressed(UIGamepadInput::Button::Next)) {
 			option++;
 		}
-		if (input.isButtonPressed(UIInput::Button::Prev)) {
+		if (input.isButtonPressed(UIGamepadInput::Button::Prev)) {
 			option--;
 		}
 		const auto nItems = int(getNumberOfItems());
@@ -396,8 +396,8 @@ void UIList::onInput(const UIInputResults& input, Time time)
 		}
 
 		// Arrows
-		cursorPos.x += input.getAxisRepeat(UIInput::Axis::X);
-		cursorPos.y += input.getAxisRepeat(UIInput::Axis::Y);
+		cursorPos.x += input.getAxisRepeat(UIGamepadInput::Axis::X);
+		cursorPos.y += input.getAxisRepeat(UIGamepadInput::Axis::Y);
 		cursorPos.y = modulo(cursorPos.y, nRows);
 		int columnsThisRow = (cursorPos.y == nRows - 1) ? nItems % nCols : nCols;
 		if (columnsThisRow == 0) { // If the last column is full, this will happen
@@ -409,11 +409,11 @@ void UIList::onInput(const UIInputResults& input, Time time)
 		setSelectedOption(cursorPos.x + cursorPos.y * nCols);
 	}
 
-	if (input.isButtonPressed(UIInput::Button::Accept)) {
+	if (input.isButtonPressed(UIGamepadInput::Button::Accept)) {
 		onAccept();
 	}
 
-	if (input.isButtonPressed(UIInput::Button::Cancel)) {
+	if (input.isButtonPressed(UIGamepadInput::Button::Cancel)) {
 		onCancel();
 	}
 }

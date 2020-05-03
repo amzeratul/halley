@@ -56,7 +56,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 	auto joystickType = manual->getJoystickType();
 	bool first = true;
 
-	updateFocusInput();
+	updateKeyboardInput();
 
 	do {
 		// Spawn new widgets
@@ -66,7 +66,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 		if (activeInputType == UIInputType::Mouse) {
 			updateMouse(mouse);
 		}
-		updateGlobalInput(manual);
+		updateGamepadInput(manual);
 
 		// Update children
 		for (auto& c: getChildren()) {
@@ -143,7 +143,7 @@ void UIRoot::updateMouse(spInputDevice mouse)
 	updateMouseOver(activeMouseOver);
 }
 
-void UIRoot::updateGlobalInputTree(const spInputDevice& input, UIWidget& widget, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting)
+void UIRoot::updateGamepadInputTree(const spInputDevice& input, UIWidget& widget, std::vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting)
 {
 	if (!widget.isActive()) {
 		return;
@@ -155,11 +155,11 @@ void UIRoot::updateGlobalInputTree(const spInputDevice& input, UIWidget& widget,
 
 	for (auto& c: widget.getChildren()) {
 		// Depth-first
-		updateGlobalInputTree(input, *c, inputTargets, bestPriority, accepting);
+		updateGamepadInputTree(input, *c, inputTargets, bestPriority, accepting);
 	}
 
-	if (widget.inputButtons) {
-		widget.inputResults.reset();
+	if (widget.gamepadInputButtons) {
+		widget.gamepadInputResults.reset();
 		if (accepting) {
 			auto priority = widget.getInputPriority();
 
@@ -174,16 +174,16 @@ void UIRoot::updateGlobalInputTree(const spInputDevice& input, UIWidget& widget,
 	}
 }
 
-void UIRoot::updateGlobalInput(spInputDevice input)
+void UIRoot::updateGamepadInput(spInputDevice input)
 {
 	auto& cs = getChildren();
 	std::vector<UIWidget*> inputTargets;
-	UIInput::Priority bestPriority = UIInput::Priority::Lowest;
+	UIGamepadInput::Priority bestPriority = UIGamepadInput::Priority::Lowest;
 
 	bool accepting = true;
 	for (int i = int(cs.size()); --i >= 0; ) {
 		auto& c = *cs[i];
-		updateGlobalInputTree(input, c, inputTargets, bestPriority, accepting);
+		updateGamepadInputTree(input, c, inputTargets, bestPriority, accepting);
 
 		if (c.isMouseBlocker()) {
 			accepting = false;
@@ -191,32 +191,32 @@ void UIRoot::updateGlobalInput(spInputDevice input)
 	}
 
 	for (auto& target: inputTargets) {
-		auto& b = *target->inputButtons;
-		auto& results = target->inputResults;
+		auto& b = *target->gamepadInputButtons;
+		auto& results = target->gamepadInputResults;
 		results.reset();
 		if (b.accept != -1) {
-			results.setButton(UIInput::Button::Accept, input->isButtonPressed(b.accept), input->isButtonReleased(b.accept), input->isButtonDown(b.accept));
+			results.setButton(UIGamepadInput::Button::Accept, input->isButtonPressed(b.accept), input->isButtonReleased(b.accept), input->isButtonDown(b.accept));
 		}
 		if (b.cancel != -1) {
-			results.setButton(UIInput::Button::Cancel, input->isButtonPressed(b.cancel), input->isButtonReleased(b.cancel), input->isButtonDown(b.cancel));
+			results.setButton(UIGamepadInput::Button::Cancel, input->isButtonPressed(b.cancel), input->isButtonReleased(b.cancel), input->isButtonDown(b.cancel));
 		}
 		if (b.prev != -1) {
-			results.setButton(UIInput::Button::Prev, input->isButtonPressed(b.prev), input->isButtonReleased(b.prev), input->isButtonDown(b.prev));
+			results.setButton(UIGamepadInput::Button::Prev, input->isButtonPressed(b.prev), input->isButtonReleased(b.prev), input->isButtonDown(b.prev));
 		}
 		if (b.next != -1) {
-			results.setButton(UIInput::Button::Next, input->isButtonPressed(b.next), input->isButtonReleased(b.next), input->isButtonDown(b.next));
+			results.setButton(UIGamepadInput::Button::Next, input->isButtonPressed(b.next), input->isButtonReleased(b.next), input->isButtonDown(b.next));
 		}
 		if (b.hold != -1) {
-			results.setButton(UIInput::Button::Hold, input->isButtonPressed(b.hold), input->isButtonReleased(b.hold), input->isButtonDown(b.hold));
+			results.setButton(UIGamepadInput::Button::Hold, input->isButtonPressed(b.hold), input->isButtonReleased(b.hold), input->isButtonDown(b.hold));
 		}
-		results.setAxis(UIInput::Axis::X, (b.xAxis != -1 ? input->getAxis(b.xAxis) : 0) + (b.xAxisAlt != -1 ? input->getAxis(b.xAxisAlt) : 0));
-		results.setAxis(UIInput::Axis::Y, (b.yAxis != -1 ? input->getAxis(b.yAxis) : 0) + (b.yAxisAlt != -1 ? input->getAxis(b.yAxisAlt) : 0));
-		results.setAxisRepeat(UIInput::Axis::X, (b.xAxis != -1 ? input->getAxisRepeat(b.xAxis) : 0) + (b.xAxisAlt != -1 ? input->getAxisRepeat(b.xAxisAlt) : 0));
-		results.setAxisRepeat(UIInput::Axis::Y, (b.yAxis != -1 ? input->getAxisRepeat(b.yAxis) : 0) + (b.yAxisAlt != -1 ? input->getAxisRepeat(b.yAxisAlt) : 0));
+		results.setAxis(UIGamepadInput::Axis::X, (b.xAxis != -1 ? input->getAxis(b.xAxis) : 0) + (b.xAxisAlt != -1 ? input->getAxis(b.xAxisAlt) : 0));
+		results.setAxis(UIGamepadInput::Axis::Y, (b.yAxis != -1 ? input->getAxis(b.yAxis) : 0) + (b.yAxisAlt != -1 ? input->getAxis(b.yAxisAlt) : 0));
+		results.setAxisRepeat(UIGamepadInput::Axis::X, (b.xAxis != -1 ? input->getAxisRepeat(b.xAxis) : 0) + (b.xAxisAlt != -1 ? input->getAxisRepeat(b.xAxisAlt) : 0));
+		results.setAxisRepeat(UIGamepadInput::Axis::Y, (b.yAxis != -1 ? input->getAxisRepeat(b.yAxis) : 0) + (b.yAxisAlt != -1 ? input->getAxisRepeat(b.yAxisAlt) : 0));
 	}
 }
 
-void UIRoot::updateFocusInput()
+void UIRoot::updateKeyboardInput()
 {
 	// Focus could have been destructed, clean up
 	if (currentFocus.expired()) {
@@ -224,7 +224,15 @@ void UIRoot::updateFocusInput()
 	}
 
 	if (keyboard) {
-		//keyboard-
+		const auto focused = currentFocus.lock();
+
+		for (const auto& key: keyboard->getPendingKeys()) {
+			// Send to focused first
+			if (!focused || !focused->onKeyPress(key)) {
+				// Focused didn't consume it, so send it to someone else
+				sendKeyPress(key);
+			}
+		}
 	}
 	
 	if (textCapture) {
@@ -234,6 +242,22 @@ void UIRoot::updateFocusInput()
 			// The widget then loses focus, so that being focused is equal to capturing soft keyboard
 			setFocus({});
 		}
+	}
+}
+
+void UIRoot::sendKeyPress(KeyboardKeyPress key)
+{
+	// TODO
+	onUnhandledKeyPress(key);
+}
+
+void UIRoot::onUnhandledKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Tab)) {
+		focusNext(false);
+	}
+	if (key.is(KeyCode::Tab, KeyMods::Shift)) {
+		focusNext(true);
 	}
 }
 

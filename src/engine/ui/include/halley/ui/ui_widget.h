@@ -135,7 +135,7 @@ namespace Halley {
 		virtual void onManualControlAnalogueAdjustValue(float delta, Time t);
 		virtual void onManualControlActivate();
 
-		UIInput::Priority getInputPriority() const;
+		UIGamepadInput::Priority getInputPriority() const;
 
 		void setChildLayerAdjustment(int delta);
 		int getChildLayerAdjustment() const;
@@ -184,9 +184,10 @@ namespace Halley {
 		void shrink();
 		void forceLayout();
 
-		virtual void onInput(const UIInputResults& input, Time time);
+		virtual void onGamepadInput(const UIInputResults& input, Time time);
 		virtual void updateInputDevice(const InputDevice& inputDevice);
-
+		virtual bool onKeyPress(KeyboardKeyPress key);
+		
 		virtual void onEnabledChanged();
 
 		virtual void checkActive();
@@ -205,8 +206,9 @@ namespace Halley {
 		String id;
 
 		std::vector<UIInputType> onlyEnabledWithInputs;
-		std::unique_ptr<UIInputButtons> inputButtons;
-		UIInputResults inputResults;
+		
+		std::unique_ptr<UIInputButtons> gamepadInputButtons;
+		UIInputResults gamepadInputResults;
 
 		Vector2f position;
 		Vector2f size;

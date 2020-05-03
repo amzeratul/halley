@@ -64,7 +64,7 @@ namespace Halley {
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
-		void onInput(const UIInputResults& input, Time time) override;
+		void onGamepadInput(const UIInputResults& input, Time time) override;
 
 		void addItem(std::shared_ptr<UIListItem> item, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill);
 		size_t getNumberOfItems() const;

@@ -70,6 +70,7 @@ namespace Halley {
 
 		void onButtonPressed(int code);
 		void onButtonReleased(int code);
+		virtual void onButtonsCleared();
 	};
 
 	typedef std::shared_ptr<InputButtonBase> spInputButtonBase;

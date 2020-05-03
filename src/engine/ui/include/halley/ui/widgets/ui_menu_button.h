@@ -74,7 +74,7 @@ namespace Halley {
 
 		void setGroup(std::shared_ptr<UIMenuButtonGroup> group);
 	protected:
-		void onInput(const UIInputResults& input, Time time) override;
+		void onGamepadInput(const UIInputResults& input, Time time) override;
 
 	private:
 		std::shared_ptr<UIMenuButtonGroup> group;

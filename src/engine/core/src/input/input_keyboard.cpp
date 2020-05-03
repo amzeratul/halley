@@ -36,7 +36,7 @@ void InputKeyboard::onKeyPressed(KeyCode code, KeyMods mods)
 	const auto key = KeyboardKeyPress(code, mods);
 	
 	if (!sendKeyPress(key)) {
-		// TODO: Not handled, means it's OK for this to get to UI somehow!
+		keyPresses.push_back(key);
 	}
 	
 	onButtonPressed(static_cast<int>(code));
@@ -45,6 +45,11 @@ void InputKeyboard::onKeyPressed(KeyCode code, KeyMods mods)
 void InputKeyboard::onKeyReleased(KeyCode code, KeyMods mods)
 {
 	onButtonReleased(static_cast<int>(code));
+}
+
+gsl::span<const KeyboardKeyPress> InputKeyboard::getPendingKeys() const
+{
+	return { keyPresses };
 }
 
 void InputKeyboard::onTextEntered(const char* text)
@@ -65,6 +70,11 @@ bool InputKeyboard::sendKeyPress(KeyboardKeyPress chr)
 	}
 
 	return false;
+}
+
+void InputKeyboard::onButtonsCleared()
+{
+	keyPresses.clear();
 }
 
 std::unique_ptr<ITextInputCapture> InputKeyboard::makeTextInputCapture()

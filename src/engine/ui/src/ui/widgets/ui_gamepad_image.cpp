@@ -26,9 +26,9 @@ void UIGamepadImage::setJoystickType(JoystickType type)
 	}
 }
 
-void UIGamepadImage::onInput(const UIInputResults& input, Time time)
+void UIGamepadImage::onGamepadInput(const UIInputResults& input, Time time)
 {
-	if (input.isButtonPressed(UIInput::Button::Accept)) {
+	if (input.isButtonPressed(UIGamepadInput::Button::Accept)) {
 		sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));
 		playSound(style.getString("downSound"));
 	}

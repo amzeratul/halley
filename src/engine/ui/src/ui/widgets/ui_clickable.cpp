@@ -79,9 +79,9 @@ void UIClickable::onDoubleClicked(Vector2f mousePos)
 {
 }
 
-void UIClickable::onInput(const UIInputResults& input, Time time)
+void UIClickable::onGamepadInput(const UIInputResults& input, Time time)
 {
-	if (input.isButtonPressed(UIInput::Button::Accept)) {
+	if (input.isButtonPressed(UIGamepadInput::Button::Accept)) {
 		onShortcutPressed();
 		onClicked(Vector2f());
 	}

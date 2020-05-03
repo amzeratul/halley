@@ -54,6 +54,8 @@ namespace Halley {
 
 		void onFocus() override;
 		TextInputData* getTextInputData() override;
+
+		bool onKeyPress(KeyboardKeyPress key) override;
 		
 		void pressMouse(Vector2f mousePos, int button) override;
 
@@ -67,8 +69,6 @@ namespace Halley {
 		void validateText();
 		void onValidatorSet() override;
 		void updateAutoComplete();
-
-		AutoCompleteHandle handle;
 
 		UIStyle style;
 		Sprite sprite;

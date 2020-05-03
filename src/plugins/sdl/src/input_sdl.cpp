@@ -120,21 +120,18 @@ size_t InputSDL::getNumberOfMice() const
 void InputSDL::beginEvents(Time t)
 {
 	// Keyboards
-	size_t n = getNumberOfKeyboards();
-	for (size_t i=0; i < n; i++) {
-		keyboards[i]->update();
+	for (auto& keyboard: keyboards) {
+		keyboard->update();
 	}
 
 	// Joysticks
-	n = getNumberOfJoysticks();
-	for (size_t i=0; i < n; i++) {
-		joysticks[i]->update(t);
+	for (auto& joystick: joysticks) {
+		joystick->update(t);
 	}
 
 	// Mice
-	n = getNumberOfMice();
-	for (size_t i=0; i < n; i++) {
-		mice[i]->update();
+	for (auto& mouse: mice) {
+		mouse->update();
 	}
 
 	// Touch events
@@ -200,9 +197,8 @@ void InputSDL::processEvent(SDL_Event& event)
 void InputSDL::setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction)
 {
 	mouseRemap = remapFunction;
-	size_t n = getNumberOfMice();
-	for (size_t i = 0; i < n; i++) {
-		mice[i]->updateRemap(mouseRemap);
+	for (auto& mouse: mice) {
+		mouse->updateRemap(mouseRemap);
 	}
 }
 
@@ -214,7 +210,7 @@ void InputSDL::processJoyEvent(int n, SDL_Event& event)
 	}
 }
 
-void Halley::InputSDL::processTouch(int type, long long /*touchDeviceId*/, long long fingerId, float x, float y)
+void InputSDL::processTouch(int type, long long /*touchDeviceId*/, long long fingerId, float x, float y)
 {
 	Vector2f windowSize = Vector2f(1, 1); // TODO
 	Vector2f origin = Vector2f(0, 0); // TODO
@@ -242,7 +238,7 @@ void Halley::InputSDL::processTouch(int type, long long /*touchDeviceId*/, long 
 Vector<spInputTouch> Halley::InputSDL::getNewTouchEvents()
 {
 	Vector<spInputTouch> result;
-	for (auto i : touchEvents) {
+	for (const auto& i : touchEvents) {
 		if (i.second->isPressed()) {
 			result.push_back(i.second);
 		}
@@ -253,7 +249,7 @@ Vector<spInputTouch> Halley::InputSDL::getNewTouchEvents()
 Vector<spInputTouch> Halley::InputSDL::getTouchEvents()
 {
 	Vector<spInputTouch> result;
-	for (auto i : touchEvents) {
+	for (const auto& i : touchEvents) {
 		result.push_back(i.second);
 	}
 	return result;

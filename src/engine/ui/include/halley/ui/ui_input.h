@@ -4,7 +4,7 @@
 #include <cstdint>
 
 namespace Halley {
-	namespace UIInput {
+	namespace UIGamepadInput {
 		enum class Button {
 			Accept,
 			Cancel,
@@ -33,7 +33,7 @@ namespace Halley {
 
 	class UIInputButtons {
     public:
-		UIInput::Priority priorityLevel = UIInput::Priority::Normal;
+		UIGamepadInput::Priority priorityLevel = UIGamepadInput::Priority::Normal;
 
 		int accept = -1;
 		int cancel = -1;
@@ -52,21 +52,21 @@ namespace Halley {
 
 		void reset();
 
-		bool isButtonPressed(UIInput::Button button) const;
-		bool isButtonReleased(UIInput::Button button) const;
-		bool isButtonHeld(UIInput::Button button) const;
-		float getAxis(UIInput::Axis axis) const;
-		int getAxisRepeat(UIInput::Axis axis) const;
+		bool isButtonPressed(UIGamepadInput::Button button) const;
+		bool isButtonReleased(UIGamepadInput::Button button) const;
+		bool isButtonHeld(UIGamepadInput::Button button) const;
+		float getAxis(UIGamepadInput::Axis axis) const;
+		int getAxisRepeat(UIGamepadInput::Axis axis) const;
 		
-		void setButton(UIInput::Button button, bool pressed, bool released, bool held);
-		void setAxis(UIInput::Axis axis, float value);
-		void setAxisRepeat(UIInput::Axis axis, int value);
+		void setButton(UIGamepadInput::Button button, bool pressed, bool released, bool held);
+		void setAxis(UIGamepadInput::Axis axis, float value);
+		void setAxisRepeat(UIGamepadInput::Axis axis, int value);
 
 	private:
-		std::array<bool, UIInput::NumberOfButtons> buttonsPressed;
-		std::array<bool, UIInput::NumberOfButtons> buttonsReleased;
-		std::array<bool, UIInput::NumberOfButtons> buttonsHeld;
-		std::array<float, UIInput::NumberOfAxes> axes;
-		std::array<int8_t, UIInput::NumberOfAxes> axesRepeat;
+		std::array<bool, UIGamepadInput::NumberOfButtons> buttonsPressed;
+		std::array<bool, UIGamepadInput::NumberOfButtons> buttonsReleased;
+		std::array<bool, UIGamepadInput::NumberOfButtons> buttonsHeld;
+		std::array<float, UIGamepadInput::NumberOfAxes> axes;
+		std::array<int8_t, UIGamepadInput::NumberOfAxes> axesRepeat;
 	};
 }

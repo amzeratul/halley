@@ -73,8 +73,8 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 		update(t, positionUpdated);
 		positionUpdated = false;
 
-		if (inputButtons && updateType == UIWidgetUpdateType::First) {
-			onInput(inputResults, t);
+		if (gamepadInputButtons && updateType == UIWidgetUpdateType::First) {
+			onGamepadInput(gamepadInputResults, t);
 		}
 
 		addNewChildren(inputType);
@@ -465,7 +465,7 @@ UIInputType UIWidget::getLastInputType() const
 	return lastInputType;
 }
 
-void UIWidget::onInput(const UIInputResults& input, Time time)
+void UIWidget::onGamepadInput(const UIInputResults& input, Time time)
 {
 }
 
@@ -618,7 +618,7 @@ const std::vector<UIInputType>& UIWidget::getOnlyEnabledWithInput() const
 
 void UIWidget::setInputButtons(const UIInputButtons& buttons)
 {
-	inputButtons = std::make_unique<UIInputButtons>(buttons);
+	gamepadInputButtons = std::make_unique<UIInputButtons>(buttons);
 }
 
 Rect4f UIWidget::getMouseRect() const
@@ -765,7 +765,7 @@ void UIWidget::setWidgetRect(Rect4f rect)
 
 void UIWidget::resetInputResults()
 {
-	inputResults.reset();
+	gamepadInputResults.reset();
 	for (auto& c: getChildren()) {
 		c->resetInputResults();
 	}
@@ -889,9 +889,14 @@ void UIWidget::updateInputDevice(const InputDevice& inputDevice)
 {
 }
 
-UIInput::Priority UIWidget::getInputPriority() const
+bool UIWidget::onKeyPress(KeyboardKeyPress key)
 {
-	return focused ? UIInput::Priority::Focused : inputButtons->priorityLevel;
+	return false;
+}
+
+UIGamepadInput::Priority UIWidget::getInputPriority() const
+{
+	return focused ? UIGamepadInput::Priority::Focused : gamepadInputButtons->priorityLevel;
 }
 
 void UIWidget::setChildLayerAdjustment(int delta)

@@ -17,7 +17,7 @@ namespace Halley {
 		KeyboardKeyPress(KeyCode key, KeyMods mod);
 
 		bool operator ==(const KeyboardKeyPress& other) const;
-		bool is(KeyCode key, KeyMods mod) const;
+		bool is(KeyCode key, KeyMods mod = KeyMods::None) const;
 	};
 
 	class InputKeyboard : public InputButtonBase {
@@ -28,6 +28,8 @@ namespace Halley {
 		void onKeyPressed(KeyCode code, KeyMods mods);
 		void onKeyReleased(KeyCode code, KeyMods mods);
 
+		gsl::span<const KeyboardKeyPress> getPendingKeys() const;
+
 		virtual TextInputCapture captureText(TextInputData& textInputData, SoftwareKeyboardData softKeyboardData);
 		void removeCapture(ITextInputCapture* capture);
 
@@ -37,8 +39,11 @@ namespace Halley {
 		void onTextEntered(const char* text);
 		bool sendKeyPress(KeyboardKeyPress c);
 
+		void onButtonsCleared() override;
+		
 	private:
 		std::set<ITextInputCapture*> captures;
 		std::shared_ptr<IClipboard> clipboard;
+		std::vector<KeyboardKeyPress> keyPresses;
 	};
 }

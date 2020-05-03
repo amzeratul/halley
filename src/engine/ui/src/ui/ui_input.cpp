@@ -27,44 +27,44 @@ void UIInputResults::reset()
 	}
 }
 
-bool UIInputResults::isButtonPressed(UIInput::Button button) const
+bool UIInputResults::isButtonPressed(UIGamepadInput::Button button) const
 {
 	return buttonsPressed[int(button)];
 }
 
-bool UIInputResults::isButtonReleased(UIInput::Button button) const
+bool UIInputResults::isButtonReleased(UIGamepadInput::Button button) const
 {
 	return buttonsReleased[int(button)];
 }
 
-bool UIInputResults::isButtonHeld(UIInput::Button button) const
+bool UIInputResults::isButtonHeld(UIGamepadInput::Button button) const
 {
 	return buttonsHeld[int(button)];
 }
 
-float UIInputResults::getAxis(UIInput::Axis axis) const
+float UIInputResults::getAxis(UIGamepadInput::Axis axis) const
 {
 	return axes[int(axis)];
 }
 
-int UIInputResults::getAxisRepeat(UIInput::Axis axis) const
+int UIInputResults::getAxisRepeat(UIGamepadInput::Axis axis) const
 {
 	return axesRepeat[int(axis)];
 }
 
-void UIInputResults::setButton(UIInput::Button button, bool pressed, bool released, bool held)
+void UIInputResults::setButton(UIGamepadInput::Button button, bool pressed, bool released, bool held)
 {
 	buttonsPressed[int(button)] = pressed;
 	buttonsReleased[int(button)] = released;
 	buttonsHeld[int(button)] = held;
 }
 
-void UIInputResults::setAxis(UIInput::Axis axis, float value)
+void UIInputResults::setAxis(UIGamepadInput::Axis axis, float value)
 {
 	axes[int(axis)] = value;
 }
 
-void UIInputResults::setAxisRepeat(UIInput::Axis axis, int value)
+void UIInputResults::setAxisRepeat(UIGamepadInput::Axis axis, int value)
 {
 	axesRepeat[int(axis)] = clamp(value, -1, 1);
 }

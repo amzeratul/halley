@@ -25,7 +25,7 @@ namespace Halley {
 		virtual void onClicked(Vector2f mousePos) = 0;
 		virtual void onDoubleClicked(Vector2f mousePos);
 
-		void onInput(const UIInputResults& input, Time time) override;
+		void onGamepadInput(const UIInputResults& input, Time time) override;
 
 		Rect4f getMouseRect() const override;
 		void setMouseExtraBorder(std::optional<Vector4f> override);

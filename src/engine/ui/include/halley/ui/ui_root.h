@@ -78,9 +78,12 @@ namespace Halley {
 		std::unique_ptr<TextInputCapture> textCapture;
 
 		void updateMouse(spInputDevice mouse);
-		void updateGlobalInputTree(const spInputDevice& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting);
-		void updateGlobalInput(spInputDevice input);
-		void updateFocusInput();
+		void updateGamepadInputTree(const spInputDevice& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting);
+		void updateGamepadInput(spInputDevice input);
+
+		void updateKeyboardInput();
+		void sendKeyPress(KeyboardKeyPress key);
+		void onUnhandledKeyPress(KeyboardKeyPress key);
 
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled = false) const;
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos, bool includeDisabled = false) const;

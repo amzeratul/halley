@@ -56,6 +56,9 @@ void InputButtonBase::onButtonReleased(int code)
 	}
 }
 
+void InputButtonBase::onButtonsCleared()
+{}
+
 void InputButtonBase::onButtonStatus(int code, bool down)
 {
 	// This method should probably not be used with the two above
@@ -81,12 +84,13 @@ InputDevice* InputButtonBase::getParent() const
 
 void InputButtonBase::clearPresses()
 {
-	size_t len = buttonPressed.size();
-	for (size_t i=0; i<len; i++) {
+	const size_t len = buttonPressed.size();
+	for (size_t i = 0; i<len; i++) {
 		buttonPressed[i] = 0;
 		buttonPressedRepeat[i] = 0;
 		buttonReleased[i] = 0;
 	}
+	onButtonsCleared();
 }
 
 bool InputButtonBase::isAnyButtonPressed()

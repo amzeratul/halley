@@ -130,30 +130,6 @@ void UITextInput::draw(UIPainter& painter) const
 	}
 }
 
-/*
-void UITextInput::updateTextInput()
-{
-	if (keyboard->isButtonPressed(KeyCode::Tab)) {
-		if (!autoCompleteText.empty()) {
-			setText(autoCompleteText);
-			setSelection(int(text.getText().size()));
-		}
-	}
-	if (keyboard->isButtonPressed(KeyCode::Up)) {
-		autoCompleteCurOption = autoCompleteOptions > 0 ? modulo(autoCompleteCurOption - 1, autoCompleteOptions) : 0;
-	}
-	if (keyboard->isButtonPressed(KeyCode::Down)) {
-		autoCompleteCurOption = autoCompleteOptions > 0 ? modulo(autoCompleteCurOption + 1, autoCompleteOptions) : 0;
-	}
-
-	if (keyboard->isButtonPressed(KeyCode::Enter) || keyboard->isButtonPressed(KeyCode::KP_Enter)) {
-		if (!isMultiLine) {
-			sendEvent(UIEvent(UIEventType::TextSubmit, getId(), getText()));
-		}
-	}
-}
-*/
-
 void UITextInput::updateCaret()
 {
 	int pos = clamp(text.getSelection().end, 0, int(text.getText().size()));
@@ -277,6 +253,38 @@ void UITextInput::onFocus()
 TextInputData* UITextInput::getTextInputData()
 {
 	return &text;
+}
+
+bool UITextInput::onKeyPress(KeyboardKeyPress key)
+{
+	if (autoCompleteHandle) {
+		if (key.is(KeyCode::Tab)) {
+			if (!autoCompleteText.empty()) {
+				setText(autoCompleteText);
+				setSelection(int(text.getText().size()));
+			}
+			return true;
+		}
+		
+		if (key.is(KeyCode::Up)) {
+			autoCompleteCurOption = autoCompleteOptions > 0 ? modulo(autoCompleteCurOption - 1, autoCompleteOptions) : 0;
+			return true;
+		}
+
+		if (key.is(KeyCode::Down)) {
+			autoCompleteCurOption = autoCompleteOptions > 0 ? modulo(autoCompleteCurOption + 1, autoCompleteOptions) : 0;
+			return true;
+		}
+	}
+
+	if (key.is(KeyCode::Enter) || key.is(KeyCode::KeypadEnter)) {
+		if (!isMultiLine) {
+			sendEvent(UIEvent(UIEventType::TextSubmit, getId(), getText()));
+		}
+		return true;
+	}
+
+	return false;
 }
 
 void UITextInput::pressMouse(Vector2f mousePos, int button)

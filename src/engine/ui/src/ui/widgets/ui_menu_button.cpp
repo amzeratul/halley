@@ -88,8 +88,8 @@ void UIMenuButtonGroup::onInput(const UIInputResults& input, Time time)
 		return;
 	}
 
-	const int x = input.getAxisRepeat(UIInput::Axis::X);
-	const int y = input.getAxisRepeat(UIInput::Axis::Y);
+	const int x = input.getAxisRepeat(UIGamepadInput::Axis::X);
+	const int y = input.getAxisRepeat(UIGamepadInput::Axis::Y);
 
 	auto& cur = getCurFocusEntry();
 
@@ -111,12 +111,12 @@ void UIMenuButtonGroup::onInput(const UIInputResults& input, Time time)
 		}
 	}
 
-	if (input.isButtonPressed(UIInput::Button::Accept)) {
+	if (input.isButtonPressed(UIGamepadInput::Button::Accept)) {
 		auto curFocus = getCurrentFocus();
 		if (curFocus) {
 			curFocus->onOptionChosen();
 		}
-	} else if (input.isButtonPressed(UIInput::Button::Cancel)) {
+	} else if (input.isButtonPressed(UIGamepadInput::Button::Cancel)) {
 		if (setFocus(cancelId)) {
 			auto curFocus = getCurrentFocus();
 			if (curFocus) {
@@ -265,7 +265,7 @@ void UIMenuButtonControlWidget::setGroup(std::shared_ptr<UIMenuButtonGroup> grou
 	this->group = group;
 }
 
-void UIMenuButtonControlWidget::onInput(const UIInputResults& input, Time time)
+void UIMenuButtonControlWidget::onGamepadInput(const UIInputResults& input, Time time)
 {
 	group->onInput(input, time);
 }
