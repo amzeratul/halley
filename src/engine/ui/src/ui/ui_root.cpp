@@ -94,7 +94,6 @@ void UIRoot::updateMouse(const spInputDevice& mouse)
 	const Vector2f mousePos = mouseRemap(mouse->getPosition() + uiRect.getTopLeft() - overscan);
 	const auto exclusive = mouseExclusive.lock();
 	const auto actuallyUnderMouse = getWidgetUnderMouse(mousePos);
-	const std::shared_ptr<UIWidget> exclusiveUnderMouse = !exclusive || exclusive == actuallyUnderMouse ? actuallyUnderMouse : std::shared_ptr<UIWidget>();
 	lastMousePos = mousePos;
 
 	// Check buttons
@@ -130,13 +129,15 @@ void UIRoot::updateMouse(const spInputDevice& mouse)
 
 	// Mouse wheel
 	const int wheelDelta = mouse->getWheelMove();
+	const std::shared_ptr<UIWidget> exclusiveUnderMouse = !exclusive || exclusive == actuallyUnderMouse ? actuallyUnderMouse : std::shared_ptr<UIWidget>();
 	if (wheelDelta != 0 && exclusiveUnderMouse) {
 		exclusiveUnderMouse->sendEvent(UIEvent(UIEventType::MouseWheel, "mouse", wheelDelta));
 	}
 
 	// Mouse position
-	if (exclusive) {
-		exclusive->onMouseOver(mousePos);
+	const std::shared_ptr<UIWidget> mousePosTarget = exclusive ? exclusive : actuallyUnderMouse;
+	if (mousePosTarget) {
+		mousePosTarget->onMouseOver(mousePos);
 	}
 	updateMouseOver(exclusiveUnderMouse);
 }
