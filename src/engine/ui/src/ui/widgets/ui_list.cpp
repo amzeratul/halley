@@ -28,7 +28,7 @@ bool UIList::setSelectedOption(int option)
 		return false;
 	}
 
-	auto newSel = clamp(option, 0, numberOfItems - 1);
+	const auto newSel = clamp(option, 0, numberOfItems - 1);
 	if (newSel != curOption) {
 		if (!getItem(newSel)->isEnabled()) {
 			return false;
@@ -366,47 +366,16 @@ void UIList::onGamepadInput(const UIInputResults& input, Time time)
 	} else {
 		// Not (manually) dragging!
 		manualDragging = false;
-		int nCols;
-		int nRows;
-		int option = curOption;
 
 		// Next/prev first
 		if (input.isButtonPressed(UIGamepadInput::Button::Next)) {
-			option++;
+			setSelectedOption(modulo(curOption + 1, static_cast<int>(getNumberOfItems())));
 		}
 		if (input.isButtonPressed(UIGamepadInput::Button::Prev)) {
-			option--;
-		}
-		const auto nItems = int(getNumberOfItems());
-		option = modulo(option, nItems);
-
-		Vector2i cursorPos;
-		if (orientation == UISizerType::Horizontal) {
-			nRows = 1;
-			nCols = nItems;
-			cursorPos = Vector2i(option, 0);
-		} else if (orientation == UISizerType::Vertical) {
-			nRows = nItems;
-			nCols = 1;
-			cursorPos = Vector2i(0, option);
-		} else {
-			nRows = (nItems + nColumns - 1) / nColumns;
-			nCols = nColumns;
-			cursorPos = Vector2i(option % nCols, option / nCols);
+			setSelectedOption(modulo(curOption - 1, static_cast<int>(getNumberOfItems())));
 		}
 
-		// Arrows
-		cursorPos.x += input.getAxisRepeat(UIGamepadInput::Axis::X);
-		cursorPos.y += input.getAxisRepeat(UIGamepadInput::Axis::Y);
-		cursorPos.y = modulo(cursorPos.y, nRows);
-		int columnsThisRow = (cursorPos.y == nRows - 1) ? nItems % nCols : nCols;
-		if (columnsThisRow == 0) { // If the last column is full, this will happen
-			columnsThisRow = nCols;
-		}
-		cursorPos.x = modulo(cursorPos.x, columnsThisRow); // The last row has fewer elements
-
-		// Actually update the selection, if it changed
-		setSelectedOption(cursorPos.x + cursorPos.y * nCols);
+		moveSelection(input.getAxisRepeat(UIGamepadInput::Axis::X), input.getAxisRepeat(UIGamepadInput::Axis::Y));
 	}
 
 	if (input.isButtonPressed(UIGamepadInput::Button::Accept)) {
@@ -416,6 +385,74 @@ void UIList::onGamepadInput(const UIInputResults& input, Time time)
 	if (input.isButtonPressed(UIGamepadInput::Button::Cancel)) {
 		onCancel();
 	}
+}
+
+bool UIList::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Up)) {
+		moveSelection(0, -1);
+		return true;
+	}
+
+	if (key.is(KeyCode::Down)) {
+		moveSelection(0, 1);
+	}
+
+	if (key.is(KeyCode::Left)) {
+		moveSelection(-1, 0);
+	}
+
+	if (key.is(KeyCode::Right)) {
+		moveSelection(1, 0);
+	}
+
+	if (key.is(KeyCode::Enter)) {
+		onAccept();
+	}
+
+	return false;
+}
+
+void UIList::moveSelection(int dx, int dy)
+{
+	if (dx == 0 && dy == 0) {
+		return;
+	}
+	
+	int nCols;
+	int nRows;
+	int option = curOption;
+
+	const auto nItems = int(getNumberOfItems());
+	option = modulo(option, nItems);
+
+	Vector2i cursorPos;
+	if (orientation == UISizerType::Horizontal) {
+		nRows = 1;
+		nCols = nItems;
+		cursorPos = Vector2i(option, 0);
+	} else if (orientation == UISizerType::Vertical) {
+		nRows = nItems;
+		nCols = 1;
+		cursorPos = Vector2i(0, option);
+	} else {
+		nRows = (nItems + nColumns - 1) / nColumns;
+		nCols = nColumns;
+		cursorPos = Vector2i(option % nCols, option / nCols);
+	}
+
+	// Arrows
+	cursorPos.x += dx;
+	cursorPos.y += dy;
+	cursorPos.y = modulo(cursorPos.y, nRows);
+	int columnsThisRow = (cursorPos.y == nRows - 1) ? nItems % nCols : nCols;
+	if (columnsThisRow == 0) { // If the last column is full, this will happen
+		columnsThisRow = nCols;
+	}
+	cursorPos.x = modulo(cursorPos.x, columnsThisRow); // The last row has fewer elements
+
+	// Actually update the selection, if it changed
+	setSelectedOption(cursorPos.x + cursorPos.y * nCols);
 }
 
 void UIList::update(Time t, bool moved)
@@ -438,6 +475,7 @@ void UIList::onItemClicked(UIListItem& item)
 	if (singleClickAccept) {
 		onAccept();
 	}
+	focus();
 }
 
 void UIList::onItemDoubleClicked(UIListItem& item)
@@ -500,6 +538,11 @@ void UIListItem::setSelected(bool s)
 	}
 }
 
+bool UIListItem::canReceiveFocus() const
+{
+	return false;
+}
+
 void UIListItem::setStyle(UIStyle style)
 {
 	this->style = style;
@@ -558,7 +601,7 @@ void UIListItem::update(Time t, bool moved)
 		}
 	}
 
-	bool manualDragging = isManualDragging();
+	const bool manualDragging = isManualDragging();
 	if (dragged || manualDragging || manualDragTime > 0) {
 		if (manualDragging) {
 			manualDragTime = 1;

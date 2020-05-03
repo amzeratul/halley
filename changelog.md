@@ -12,7 +12,7 @@
 * `UIRoot` constructor changed, takes const `Halley::HalleyAPI&` instead of `const AudioAPI*`.
 * `UITextInput` constructor changed, no longer takes `std::shared_ptr<InputKeyboard>`.
 * `UISpinControl` constructor changed, no longer takes `std::shared_ptr<InputKeyboard>`.
-* `UIWidget` can no longer be focused by calling `UIWidget::setFocus(true)`. Use `UIRoot::setFocus(widget)` instead.
+* `UIWidget` can no longer be focused by calling `UIWidget::setFocus(true)`. Use `UIWidget::focus()` instead.
 * `Halley::Keys` renamed to `Halley::KeyCode` (old name is still available as an alias, but is deprecated).
 * `Halley::KeyCode` and `Halley::KeyMods` are now strongly typed (`enum class`).
 * Removed `Halley::KeyCode::Escape`. Use `Halley::KeyCode::Esc` instead.

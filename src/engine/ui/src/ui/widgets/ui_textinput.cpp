@@ -87,7 +87,7 @@ void UITextInput::setSelection(Range<int> selection)
 
 void UITextInput::onManualControlActivate()
 {
-	getRoot()->setFocus(shared_from_this());
+	focus();
 }
 
 void UITextInput::setAutoCompleteHandle(AutoCompleteHandle handle)

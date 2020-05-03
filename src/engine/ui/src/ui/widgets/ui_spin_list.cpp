@@ -157,7 +157,7 @@ void UISpinList::onManualControlCycleValue(int delta)
 
 void UISpinList::onManualControlActivate()
 {
-	getRoot()->setFocus(shared_from_this());
+	focus();
 }
 
 bool UISpinList::canReceiveFocus() const

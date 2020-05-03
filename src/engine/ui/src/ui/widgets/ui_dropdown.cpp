@@ -137,7 +137,7 @@ void UIDropdown::onManualControlCycleValue(int delta)
 
 void UIDropdown::onManualControlActivate()
 {
-	getRoot()->setFocus(shared_from_this());
+	focus();
 	open();
 }
 
@@ -224,7 +224,7 @@ void UIDropdown::open()
 		}
 		dropdownList->setSelectedOption(curOption);
 		dropdownList->setInputButtons(inputButtons);
-		getRoot()->setFocus(dropdownList);
+		dropdownList->focus();
 
 		auto standardHeight = style.getFloat("height");
 		auto distanceFromBottom = getRoot()->getRect().getBottom() - getRect().getBottom() - 5.0f;

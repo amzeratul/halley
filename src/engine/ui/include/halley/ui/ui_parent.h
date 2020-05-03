@@ -1,6 +1,8 @@
 #pragma once
 #include <memory>
 #include <vector>
+
+#include "halley/core/input/text_input_capture.h"
 #include "halley/text/halleystring.h"
 #include "halley/maths/rect.h"
 #include "halley/data_structures/maybe.h"
@@ -18,7 +20,9 @@ namespace Halley {
 		virtual const String& getId() const = 0;
 		virtual UIRoot* getRoot() = 0;
 		virtual const UIRoot* getRoot() const = 0;
+
 		virtual void sendEvent(UIEvent event) const = 0;
+		virtual void receiveKeyPress(KeyboardKeyPress key) = 0;
 
 		virtual Rect4f getRect() const = 0;
 		virtual std::optional<float> getMaxChildWidth() const;
@@ -67,7 +71,7 @@ namespace Halley {
 
 		template <typename F>
 		void descend(F f);
-		
+
 	private:
 		std::vector<std::shared_ptr<UIWidget>> children;
 		std::vector<std::shared_ptr<UIWidget>> childrenWaiting;

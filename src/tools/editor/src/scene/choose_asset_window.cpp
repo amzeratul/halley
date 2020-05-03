@@ -20,7 +20,7 @@ ChooseAssetWindow::~ChooseAssetWindow() = default;
 
 void ChooseAssetWindow::onAddedToRoot()
 {
-	getRoot()->setFocus(getWidget("search"));
+	getWidget("search")->focus();
 }
 
 void ChooseAssetWindow::setAssetIds(const std::vector<String>& ids, const String& defaultOption)

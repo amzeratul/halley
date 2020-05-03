@@ -64,8 +64,11 @@ namespace Halley {
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
+		
 		void onGamepadInput(const UIInputResults& input, Time time) override;
-
+		bool onKeyPress(KeyboardKeyPress key) override;
+		void moveSelection(int dx, int dy);
+				
 		void addItem(std::shared_ptr<UIListItem> item, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill);
 		size_t getNumberOfItems() const;
 
@@ -105,6 +108,7 @@ namespace Halley {
 		void onClicked(Vector2f mousePos) override;
 		void onDoubleClicked(Vector2f mousePos) override;
 		void setSelected(bool selected);
+		bool canReceiveFocus() const override;
 
 		void setStyle(UIStyle style);
 

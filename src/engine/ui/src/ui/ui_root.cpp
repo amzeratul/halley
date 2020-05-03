@@ -88,59 +88,57 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 	} while (isWaitingToSpawnChildren());
 }
 
-void UIRoot::updateMouse(spInputDevice mouse)
+void UIRoot::updateMouse(const spInputDevice& mouse)
 {
-	// Check where we should be mouse overing.
-	// If the mouse hasn't moved, keep the last one.
-	std::shared_ptr<UIWidget> underMouse;
-	Vector2f mousePos = mouseRemap(mouse->getPosition() + uiRect.getTopLeft() - overscan);
-	if (true || (mousePos - lastMousePos).squaredLength() > 0.01f) {
-		// Go through all root-level widgets and find the actual widget under the mouse
-		underMouse = getWidgetUnderMouse(mousePos);
-		lastMousePos = mousePos;
-	} else {
-		underMouse = currentMouseOver.lock();
-	}
+	// Go through all root-level widgets and find the actual widget under the mouse
+	const Vector2f mousePos = mouseRemap(mouse->getPosition() + uiRect.getTopLeft() - overscan);
+	const auto exclusive = mouseExclusive.lock();
+	const auto actuallyUnderMouse = getWidgetUnderMouse(mousePos);
+	const std::shared_ptr<UIWidget> exclusiveUnderMouse = !exclusive || exclusive == actuallyUnderMouse ? actuallyUnderMouse : std::shared_ptr<UIWidget>();
+	lastMousePos = mousePos;
 
+	// Check buttons
 	for (int i = 0; i < 3; ++i) {
 		// Click
 		if (!anyMouseButtonHeld && mouse->isButtonPressed(i)) {
 			anyMouseButtonHeld = true;
-			setFocus(underMouse);
-			if (underMouse) {
+			mouseExclusive = actuallyUnderMouse;
+
+			if (actuallyUnderMouse) {
+				if (actuallyUnderMouse->canReceiveFocus()) {
+					setFocus(actuallyUnderMouse);
+				}
 				mouse->clearButtonPress(i);
-				underMouse->pressMouse(mousePos, i);
+				actuallyUnderMouse->pressMouse(mousePos, i);
+			} else {
+				setFocus({});
 			}
 		}
 
 		// Release click
 		if (anyMouseButtonHeld && mouse->isButtonReleased(i)) {
 			anyMouseButtonHeld = false;
-			auto focus = currentFocus.lock();
-			if (focus) {
-				focus->releaseMouse(mousePos, i);
+			
+			if (exclusive) {
+				exclusive->releaseMouse(mousePos, i);
 				mouse->clearButtonRelease(i);
 			}
+
+			mouseExclusive.reset();
 		}
 	}
 
 	// Mouse wheel
-	int wheelDelta = mouse->getWheelMove();
-	if (wheelDelta != 0 && underMouse) {
-		underMouse->sendEvent(UIEvent(UIEventType::MouseWheel, "mouse", wheelDelta));
+	const int wheelDelta = mouse->getWheelMove();
+	if (wheelDelta != 0 && exclusiveUnderMouse) {
+		exclusiveUnderMouse->sendEvent(UIEvent(UIEventType::MouseWheel, "mouse", wheelDelta));
 	}
 
-	// If the mouse is held, but it's over a different component from the focused one, don't mouse over anything
-	auto activeMouseOver = underMouse;
-	if (auto focus = currentFocus.lock(); anyMouseButtonHeld && focus) {
-		if (focus != underMouse) {
-			activeMouseOver.reset();
-		}
-		focus->onMouseOver(mousePos);
-	} else if (activeMouseOver) {
-		activeMouseOver->onMouseOver(mousePos);
+	// Mouse position
+	if (exclusive) {
+		exclusive->onMouseOver(mousePos);
 	}
-	updateMouseOver(activeMouseOver);
+	updateMouseOver(exclusiveUnderMouse);
 }
 
 void UIRoot::updateGamepadInputTree(const spInputDevice& input, UIWidget& widget, std::vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting)
@@ -174,7 +172,7 @@ void UIRoot::updateGamepadInputTree(const spInputDevice& input, UIWidget& widget
 	}
 }
 
-void UIRoot::updateGamepadInput(spInputDevice input)
+void UIRoot::updateGamepadInput(const spInputDevice& input)
 {
 	auto& cs = getChildren();
 	std::vector<UIWidget*> inputTargets;
@@ -228,9 +226,10 @@ void UIRoot::updateKeyboardInput()
 
 		for (const auto& key: keyboard->getPendingKeys()) {
 			// Send to focused first
-			if (!focused || !focused->onKeyPress(key)) {
-				// Focused didn't consume it, so send it to someone else
-				sendKeyPress(key);
+			if (focused) {
+				focused->receiveKeyPress(key);
+			} else {
+				receiveKeyPress(key);
 			}
 		}
 	}
@@ -245,8 +244,10 @@ void UIRoot::updateKeyboardInput()
 	}
 }
 
-void UIRoot::sendKeyPress(KeyboardKeyPress key)
+void UIRoot::receiveKeyPress(KeyboardKeyPress key)
 {
+	// This means that a key press fell through the current focus, try sending directly to a registered listener
+	
 	// Remove expired
 	keyPressListeners.erase(std::remove_if(keyPressListeners.begin(), keyPressListeners.end(), [] (const auto& e) { return e.first.expired(); }), keyPressListeners.end());
 
@@ -391,9 +392,9 @@ void UIRoot::updateMouseOver(const std::shared_ptr<UIWidget>& underMouse)
 
 std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled) const
 {
-	auto& cs = getChildren();
-	for (int i = int(cs.size()); --i >= 0; ) {
-		auto& curRootWidget = cs[i];
+	const auto& cs = getChildren();
+	for (int i = static_cast<int>(cs.size()); --i >= 0; ) {
+		const auto& curRootWidget = cs[i];
 		auto widget = getWidgetUnderMouse(curRootWidget, mousePos, includeDisabled);
 		if (widget) {
 			return widget;

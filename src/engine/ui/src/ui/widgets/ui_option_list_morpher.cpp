@@ -108,7 +108,7 @@ void UIOptionListMorpher::onManualControlCycleValue(int delta)
 
 void UIOptionListMorpher::onManualControlActivate()
 {
-	getRoot()->setFocus(shared_from_this());
+	focus();
 }
 
 bool UIOptionListMorpher::canReceiveFocus() const

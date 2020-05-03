@@ -64,6 +64,7 @@ namespace Halley {
 		virtual bool isFocusLocked() const;
 		bool isMouseOver() const;
 		bool isFocused() const;
+		void focus();
 
 		void setId(const String& id);
 		const String& getId() const final override;
@@ -187,6 +188,7 @@ namespace Halley {
 		virtual void onGamepadInput(const UIInputResults& input, Time time);
 		virtual void updateInputDevice(const InputDevice& inputDevice);
 		virtual bool onKeyPress(KeyboardKeyPress key);
+		void receiveKeyPress(KeyboardKeyPress key) override;
 		
 		virtual void onEnabledChanged();
 

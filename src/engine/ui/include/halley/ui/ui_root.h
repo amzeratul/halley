@@ -69,6 +69,7 @@ namespace Halley {
 		Rect4f uiRect;
 
 		std::weak_ptr<UIWidget> currentMouseOver;
+		std::weak_ptr<UIWidget> mouseExclusive; // A widget that's taking exclusive control of mouse
 		std::weak_ptr<UIWidget> currentFocus;
 		Vector2f lastMousePos;
 		std::shared_ptr<InputDevice> dummyInput;
@@ -80,13 +81,14 @@ namespace Halley {
 		std::unique_ptr<TextInputCapture> textCapture;
 		std::vector<std::pair<std::weak_ptr<UIWidget>, int>> keyPressListeners;
 
-		void updateMouse(spInputDevice mouse);
+		void updateMouse(const spInputDevice& mouse);
 		void updateGamepadInputTree(const spInputDevice& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting);
-		void updateGamepadInput(spInputDevice input);
+		void updateGamepadInput(const spInputDevice& input);
 
 		void updateKeyboardInput();
 		void sendKeyPress(KeyboardKeyPress key);
 		void onUnhandledKeyPress(KeyboardKeyPress key);
+		void receiveKeyPress(KeyboardKeyPress key) override;
 
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled = false) const;
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos, bool includeDisabled = false) const;

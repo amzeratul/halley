@@ -240,6 +240,13 @@ bool UIWidget::isFocused() const
 	return focused;
 }
 
+void UIWidget::focus()
+{
+	if (!focused) {
+		getRoot()->setFocus(shared_from_this());
+	}
+}
+
 void UIWidget::setId(const String& i)
 {
 	id = i;
@@ -892,6 +899,14 @@ void UIWidget::updateInputDevice(const InputDevice& inputDevice)
 bool UIWidget::onKeyPress(KeyboardKeyPress key)
 {
 	return false;
+}
+
+void UIWidget::receiveKeyPress(KeyboardKeyPress key)
+{
+	const bool handled = onKeyPress(key);
+	if (!handled) {
+		getParent()->receiveKeyPress(key);
+	}
 }
 
 UIGamepadInput::Priority UIWidget::getInputPriority() const
