@@ -3,6 +3,7 @@
 #include "api/clipboard.h"
 #include "halley/text/halleystring.h"
 #include "halley/utils/utils.h"
+#include "input/input_keyboard.h"
 
 using namespace Halley;
 
@@ -105,59 +106,64 @@ void TextInputData::insertText(const StringUTF32& t)
 	}
 }
 
-void TextInputData::onControlCharacter(TextControlCharacter c, std::shared_ptr<IClipboard> clipboard)
+bool TextInputData::onControlCharacter(KeyboardKeyPress c, IClipboard* clipboard)
 {
-	switch (c) {
-	case TextControlCharacter::Delete:
+	if (c.is(Keys::Delete, KeyMods::None)) {
 		onDelete();
-		break;
-	case TextControlCharacter::Backspace:
-		onBackspace();
-		break;
-	case TextControlCharacter::Home:
-	case TextControlCharacter::PageUp:
-		setSelection(0);
-		break;
-	case TextControlCharacter::End:
-	case TextControlCharacter::PageDown:
-		setSelection(int(text.size()));
-		break;
-	case TextControlCharacter::Left:
-		setSelection(getSelection().start - 1);
-		break;
-	case TextControlCharacter::Right:
-		setSelection(getSelection().start + 1);
-		break;
-	default:
-		// Ignore other cases
-		break;
+		return true;
 	}
 
-	if (clipboard) {
-		switch (c) {
-		case TextControlCharacter::Copy:
-			clipboard->setData(String(text));
-			break;
-		case TextControlCharacter::Paste:
-		{
-			if (!readOnly) {
-				auto str = clipboard->getStringData();
-				if (str) {
-					insertText(str.value());
-				}
-			}
-			break;
-		}
-		case TextControlCharacter::Cut:
-			if (!readOnly) {
-				clipboard->setData(String(text));
-				setText(StringUTF32());
-			}
-			break;
-		default:
-			break;
-		}
+	if (c.is(Keys::Backspace, KeyMods::None)) {
+		onBackspace();
+		return true;
 	}
+	
+	if (c.is(Keys::Home, KeyMods::None) || c.is(Keys::PageUp, KeyMods::None)) {
+		setSelection(0);
+		return true;
+	}
+	
+	if (c.is(Keys::End, KeyMods::None) || c.is(Keys::PageDown, KeyMods::None)) {
+		setSelection(static_cast<int>(text.size()));
+		return true;
+	}
+	
+	if (c.is(Keys::Left, KeyMods::None)) {
+		setSelection(getSelection().start - 1);
+		return true;
+	}
+	
+	if (c.is(Keys::Right, KeyMods::None)) {
+		setSelection(getSelection().start + 1);
+		return true;
+	}
+	
+	if (c.is(Keys::C, KeyMods::Ctrl)) {
+		if (clipboard) {
+			clipboard->setData(String(text));
+		}
+		return true;
+	}
+	
+	if (c.is(Keys::V, KeyMods::Ctrl)) {
+		if (clipboard && !readOnly) {
+			auto str = clipboard->getStringData();
+			if (str) {
+				insertText(str.value());
+			}
+		}
+		return true;
+	}
+	
+	if (c.is(Keys::X, KeyMods::Ctrl)) {
+		if (clipboard && !readOnly) {
+			clipboard->setData(String(text));
+			setText(StringUTF32());
+		}
+		return true;
+	}
+
+	return false;
 }
 
 int TextInputData::getTextRevision() const

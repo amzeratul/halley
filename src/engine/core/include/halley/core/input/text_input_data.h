@@ -5,32 +5,8 @@
 #include "halley/data_structures/maybe.h"
 
 namespace Halley {
-	enum class TextControlCharacter {
-		Enter,
-		Delete,
-		Backspace,
-		Left,
-		Right,
-		Up,
-		Down,
-		PageUp,
-		PageDown,
-		Home,
-		End,
-		Tab,
-		Copy,
-		Paste,
-		Cut,
-		Undo,
-		Redo,
-		SelectAll,
-		SelectLeft,
-		SelectRight,
-		SelectUp,
-		SelectDown
-	};
-
 	class IClipboard;
+	struct KeyboardKeyPress;
 
 	class TextInputData {
 	public:
@@ -53,7 +29,7 @@ namespace Halley {
 		void insertText(const String& text);
 		void insertText(const StringUTF32& text);
 
-		void onControlCharacter(TextControlCharacter c, std::shared_ptr<IClipboard> clipboard);
+		bool onControlCharacter(KeyboardKeyPress c, IClipboard* clipboard);
 
 		int getTextRevision() const;
 		Range<int> getTotalRange() const;

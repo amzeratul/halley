@@ -223,7 +223,9 @@ void UIRoot::updateFocusInput()
 		setFocus({});
 	}
 
-	getKeyboardInput(!textCapture);
+	if (keyboard) {
+		//keyboard-
+	}
 	
 	if (textCapture) {
 		const bool stillCaptured = textCapture->update();
@@ -233,15 +235,6 @@ void UIRoot::updateFocusInput()
 			setFocus({});
 		}
 	}
-}
-
-std::vector<UIKeyboardEvent> UIRoot::getKeyboardInput(bool allowPrintable) const
-{
-	std::vector<UIKeyboardEvent> result;
-	if (keyboard && keyboard->isAnyButtonPressed()) {
-		const size_t nButtons = keyboard->getNumberButtons();
-	}
-	return result;
 }
 
 void UIRoot::mouseOverNext(bool forward)

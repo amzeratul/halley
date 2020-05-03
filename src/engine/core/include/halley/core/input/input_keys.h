@@ -295,6 +295,10 @@ namespace Halley {
 		None = 0,
 		Shift = 1,
 		Ctrl = 2,
-		Alt = 4
+		CtrlShift = Ctrl | Shift,
+		Alt = 4,
+		ShiftAlt = Shift | Alt,
+		CtrlAlt = Ctrl | Alt,
+		CtrlShiftAlt = Ctrl | Shift | Alt
 	};
 }

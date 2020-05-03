@@ -7,7 +7,7 @@
 #include "ui_input.h"
 #include "halley/core/api/audio_api.h"
 #include "halley/core/game/core.h"
-#include "halley/core/input/input_keys.h"
+#include "halley/core/input/input_keyboard.h"
 
 namespace Halley {
 	class SpritePainter;
@@ -20,11 +20,6 @@ namespace Halley {
 		Mouse,
 		Keyboard,
 		Gamepad
-	};
-
-	struct UIKeyboardEvent {
-		Keys keyCode;
-		int modifiers = 0;
 	};
 	
 	class UIRoot final : public UIParent {
@@ -86,7 +81,6 @@ namespace Halley {
 		void updateGlobalInputTree(const spInputDevice& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIInput::Priority& bestPriority, bool accepting);
 		void updateGlobalInput(spInputDevice input);
 		void updateFocusInput();
-		std::vector<UIKeyboardEvent> getKeyboardInput(bool allowPrintable) const;
 
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled = false) const;
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos, bool includeDisabled = false) const;

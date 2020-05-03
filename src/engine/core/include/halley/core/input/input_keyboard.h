@@ -3,10 +3,22 @@
 #include <set>
 
 #include "input_button_base.h"
+#include "input_keys.h"
 #include "text_input_capture.h"
 
 namespace Halley {
 	enum class TextControlCharacter;
+
+	struct KeyboardKeyPress {
+		Keys key;
+		KeyMods mod;
+
+		KeyboardKeyPress() = default;
+		KeyboardKeyPress(Keys key, KeyMods mod);
+
+		bool operator ==(const KeyboardKeyPress& other) const;
+		bool is(Keys key, KeyMods mod) const;
+	};
 
 	class InputKeyboard : public InputButtonBase {
 	public:
@@ -22,8 +34,8 @@ namespace Halley {
 	protected:
 		virtual std::unique_ptr<ITextInputCapture> makeTextInputCapture();
 
-		virtual void onTextEntered(const char* text);
-		virtual void onTextControlCharacterGenerated(TextControlCharacter c);
+		void onTextEntered(const char* text);
+		bool onKeyPress(KeyboardKeyPress c);
 
 	private:
 		std::set<ITextInputCapture*> captures;

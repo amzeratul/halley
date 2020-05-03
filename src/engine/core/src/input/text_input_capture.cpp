@@ -8,6 +8,14 @@
 using namespace Halley;
 
 
+void ITextInputCapture::onTextEntered(const StringUTF32& text)
+{
+}
+
+bool ITextInputCapture::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
+{
+	return false;
+}
 
 StandardTextInputCapture::StandardTextInputCapture(InputKeyboard& parent)
 	: parent(parent)
@@ -45,9 +53,9 @@ void StandardTextInputCapture::onTextEntered(const StringUTF32& text)
 	textInput->insertText(text);
 }
 
-void StandardTextInputCapture::onControlCharacter(TextControlCharacter c, std::shared_ptr<IClipboard> clipboard)
+bool StandardTextInputCapture::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 {
-	textInput->onControlCharacter(c, clipboard);
+	return textInput->onControlCharacter(c, clipboard);
 }
 
 TextInputCapture::TextInputCapture(TextInputData& inputData, SoftwareKeyboardData softKeyboardData, std::unique_ptr<ITextInputCapture> _capture)

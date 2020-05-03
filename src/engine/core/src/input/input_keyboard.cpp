@@ -4,6 +4,22 @@
 #include "input/text_input_data.h"
 using namespace Halley;
 
+KeyboardKeyPress::KeyboardKeyPress(Keys key, KeyMods mod)
+	: key(key)
+	, mod(mod)
+{
+}
+
+bool KeyboardKeyPress::operator==(const KeyboardKeyPress& other) const
+{
+	return key == other.key && mod == other.mod;
+}
+
+bool KeyboardKeyPress::is(Keys key, KeyMods mod) const
+{
+	return this->key == key && this->mod == mod;
+}
+
 InputKeyboard::InputKeyboard(int nButtons, std::shared_ptr<IClipboard> clipboard)
 	: InputButtonBase(nButtons)
 	, clipboard(std::move(clipboard))
@@ -17,102 +33,19 @@ TextInputCapture InputKeyboard::captureText(TextInputData& textInputData, Softwa
 
 void InputKeyboard::onButtonPressed(int scanCode)
 {
-	const bool shiftDown = isButtonDown(Keys::LShift) || isButtonDown(Keys::RShift);
-	const bool ctrlDown = isButtonDown(Keys::LCtrl) || isButtonDown(Keys::RCtrl);
-
-	std::optional<TextControlCharacter> code;
-
-	if (!shiftDown && !ctrlDown) {
-		switch (Keys(scanCode)) {
-		case Keys::Backspace:
-			code = TextControlCharacter::Backspace;
-			break;
-		case Keys::Delete:
-			code = TextControlCharacter::Delete;
-			break;
-		case Keys::Enter:
-		case Keys::KP_Enter:
-			code = TextControlCharacter::Enter;
-			break;
-		case Keys::Tab:
-			code = TextControlCharacter::Tab;
-			break;
-		case Keys::Left:
-			code = TextControlCharacter::Left;
-			break;
-		case Keys::Right:
-			code = TextControlCharacter::Right;
-			break;
-		case Keys::Up:
-			code = TextControlCharacter::Up;
-			break;
-		case Keys::Down:
-			code = TextControlCharacter::Down;
-			break;
-		case Keys::PageUp:
-			code = TextControlCharacter::PageUp;
-			break;
-		case Keys::PageDown:
-			code = TextControlCharacter::PageDown;
-			break;
-		case Keys::Home:
-			code = TextControlCharacter::Home;
-			break;
-		case Keys::End:
-			code = TextControlCharacter::End;
-			break;
-		default:
-			break;
-		}
+	KeyMods mods = KeyMods::None;
+	if (isButtonDown(Keys::LShift) || isButtonDown(Keys::RShift)) {
+		mods = KeyMods(static_cast<int>(mods) | static_cast<int>(KeyMods::Shift));
+	}
+	if (isButtonDown(Keys::LCtrl) || isButtonDown(Keys::RCtrl)) {
+		mods = KeyMods(static_cast<int>(mods) | static_cast<int>(KeyMods::Ctrl));
+	}
+	if (isButtonDown(Keys::LAlt) || isButtonDown(Keys::RAlt)) {
+		mods = KeyMods(static_cast<int>(mods) | static_cast<int>(KeyMods::Alt));
 	}
 
-	if (ctrlDown && !shiftDown) {
-		switch (Keys(scanCode)) {
-		case Keys::C:
-			code = TextControlCharacter::Copy;
-			break;
-		case Keys::V:
-			code = TextControlCharacter::Paste;
-			break;
-		case Keys::X:
-			code = TextControlCharacter::Cut;
-			break;
-		case Keys::Z:
-			code = TextControlCharacter::Undo;
-			break;
-		case Keys::Y:
-			code = TextControlCharacter::Redo;
-			break;
-		case Keys::A:
-			code = TextControlCharacter::SelectAll;
-			break;
-		default:
-			break;
-		}
-	}
+	onKeyPress({ Keys(scanCode), mods });
 
-	if (shiftDown && !ctrlDown) {
-		switch (Keys(scanCode)) {
-		case Keys::Left:
-			code = TextControlCharacter::SelectLeft;
-			break;
-		case Keys::Right:
-			code = TextControlCharacter::SelectRight;
-			break;
-		case Keys::Up:
-			code = TextControlCharacter::SelectUp;
-			break;
-		case Keys::Down:
-			code = TextControlCharacter::SelectDown;
-			break;
-		default:
-			break;
-		}
-	}
-
-	if (code) {
-		onTextControlCharacterGenerated(code.value());
-	}
 	InputButtonBase::onButtonPressed(scanCode);
 }
 
@@ -129,11 +62,16 @@ void InputKeyboard::onTextEntered(const char* text)
 	}
 }
 
-void InputKeyboard::onTextControlCharacterGenerated(TextControlCharacter chr)
+bool InputKeyboard::onKeyPress(KeyboardKeyPress chr)
 {
 	for (const auto& c: captures) {
-		c->onControlCharacter(chr, clipboard);
+		const bool handled = c->onKeyPress(chr, clipboard.get());
+		if (handled) {
+			return true;
+		}
 	}
+
+	return false;
 }
 
 std::unique_ptr<ITextInputCapture> InputKeyboard::makeTextInputCapture()

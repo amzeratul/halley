@@ -1,9 +1,10 @@
 #pragma once
+
 #include "halley/text/halleystring.h"
 
 namespace Halley {
+	struct KeyboardKeyPress;
 	class InputKeyboard;
-	enum class TextControlCharacter;
 	class TextInputData;
 	class IClipboard;
 
@@ -23,8 +24,8 @@ namespace Halley {
 		virtual bool isOpen() const = 0;
 		virtual void update() = 0;
 
-		virtual void onTextEntered(const StringUTF32& text) {}
-		virtual void onControlCharacter(TextControlCharacter c, std::shared_ptr<IClipboard> clipboard) {}
+		virtual void onTextEntered(const StringUTF32& text);
+		virtual bool onKeyPress(KeyboardKeyPress c, IClipboard* clipboard);
 	};
 
 	class StandardTextInputCapture final : public ITextInputCapture {
@@ -38,7 +39,7 @@ namespace Halley {
 		void update() override;
 
 		void onTextEntered(const StringUTF32& text) override;
-		void onControlCharacter(TextControlCharacter c, std::shared_ptr<IClipboard> clipboard) override;
+		bool onKeyPress(KeyboardKeyPress c, IClipboard* clipboard) override;
 
 	private:
 		bool currentlyOpen = false;
