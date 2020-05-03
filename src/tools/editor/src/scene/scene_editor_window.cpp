@@ -249,12 +249,12 @@ void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId)
 
 void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId)
 {
+	gameBridge->onEntityRemoved(UUID(id));
+
 	entityList->onEntityRemoved(id, parentId);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	selectEntity(parentId);
 
-	gameBridge->onEntityRemoved(UUID(id));
-	
 	markModified();
 }
 

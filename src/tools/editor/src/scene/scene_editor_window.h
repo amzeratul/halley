@@ -30,6 +30,14 @@ namespace Halley {
 		void onComponentRemoved(const String& name);
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
+		void addNewEntity();
+		void addNewPrefab();
+		void addNewPrefab(const String& prefabName);
+		void addEntity(ConfigNode data);
+		void addEntity(const String& parentId, ConfigNode data);
+		void removeEntity();
+		void removeEntity(const String& entityId);
+
 		void setTool(SceneEditorTool tool);
 		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options);
 
@@ -67,14 +75,6 @@ namespace Halley {
 		void selectEntity(const String& id);
 		void panCameraToEntity(const String& id);
 		void saveEntity();
-
-		void addNewEntity();
-		void addNewPrefab();
-		void addNewPrefab(const String& prefabName);
-		void addEntity(ConfigNode data);
-		void addEntity(const String& parentId, ConfigNode data);
-		void removeEntity();
-		void removeEntity(const String& entityId);
 
 		String findParent(const String& entityId) const;
 		const String* findParent(const String& entityId, const EntityTree& tree, const String& prev) const;

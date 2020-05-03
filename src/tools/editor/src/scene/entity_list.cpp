@@ -108,3 +108,13 @@ void EntityList::onEntityRemoved(const String& id, const String& parentId)
 	list->sortItems();
 	list->setSelectedOptionId(parentId);
 }
+
+bool EntityList::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Delete)) {
+		sceneEditor->removeEntity(list->getSelectedOptionId());
+		return true;
+	}
+
+	return false;
+}

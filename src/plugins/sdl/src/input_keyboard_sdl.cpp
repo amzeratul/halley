@@ -58,6 +58,11 @@ KeyCode InputKeyboardSDL::getKeyCode(int sdlKeyCode) const
 		return KeyCode(sdlKeyCode - 32);
 	}
 
+	// SDL has a special code for Delete for some reason
+	if (sdlKeyCode == SDLK_DELETE) {
+		return KeyCode::Delete;
+	}
+
 	// Halley moves scancodes to +128 offset
 	if ((sdlKeyCode & SDLK_SCANCODE_MASK) != 0) {
 		return KeyCode((sdlKeyCode & ~SDLK_SCANCODE_MASK) + 128);

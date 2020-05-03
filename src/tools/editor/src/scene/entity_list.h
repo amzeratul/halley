@@ -20,6 +20,9 @@ namespace Halley {
 		void onEntityAdded(const String& id, const String& parentId, const ConfigNode& data);
 		void onEntityRemoved(const String& id, const String& parentId);
 
+	protected:
+		bool onKeyPress(KeyboardKeyPress key) override;
+		
 	private:
 		UIFactory& factory;
 		SceneEditorWindow* sceneEditor;
