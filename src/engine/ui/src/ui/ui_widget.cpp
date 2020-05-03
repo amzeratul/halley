@@ -243,7 +243,11 @@ bool UIWidget::isFocused() const
 void UIWidget::focus()
 {
 	if (!focused) {
-		getRoot()->setFocus(shared_from_this());
+		const auto root = getRoot();
+		if (!root) {
+			throw Exception("UIWidget must be added to root before calling focus()", HalleyExceptions::UI);
+		}
+		root->setFocus(shared_from_this());
 	}
 }
 
