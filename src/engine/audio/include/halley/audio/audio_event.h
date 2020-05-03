@@ -27,7 +27,7 @@ namespace Halley
 
 		void loadDependencies(Resources& resources) const;
 
-		void reload(Resource resource) override;
+		void reload(Resource&& resource) override;
 		static std::shared_ptr<AudioEvent> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::AudioEvent; }
 

@@ -75,7 +75,7 @@ namespace Halley
 
 		static std::unique_ptr<SpriteSheet> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::SpriteSheet; }
-		void reload(Resource resource) override;
+		void reload(Resource&& resource) override;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -112,7 +112,7 @@ namespace Halley
 
 		constexpr static AssetType getAssetType() { return AssetType::Sprite; }
 		static std::unique_ptr<SpriteResource> loadResource(ResourceLoader& loader);
-		void reload(Resource resource) override;
+		void reload(Resource&& resource) override;
 
 	private:
 		std::weak_ptr<const SpriteSheet> spriteSheet;

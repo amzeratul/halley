@@ -15,6 +15,8 @@ namespace Halley {
 		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api);
 		~SceneEditorWindow();
 
+		void onAddedToRoot() override;
+		
 		void loadScene(const String& sceneName);
 		void loadPrefab(const String& name);
 		void loadScene(const Prefab& prefab);
@@ -36,6 +38,8 @@ namespace Halley {
 	protected:
 		void update(Time t, bool moved) override;
 
+		bool onKeyPress(KeyboardKeyPress key) override;
+		
 	private:
 		const HalleyAPI& api;
 		UIFactory& uiFactory;

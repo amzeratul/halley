@@ -197,7 +197,7 @@ void SpriteSheet::clearMaterialCache() const
 	materials.clear();
 }
 
-void SpriteSheet::reload(Resource resource)
+void SpriteSheet::reload(Resource&& resource)
 {
 	*this = std::move(dynamic_cast<SpriteSheet&>(resource));
 }
@@ -332,7 +332,7 @@ std::unique_ptr<SpriteResource> SpriteResource::loadResource(ResourceLoader& loa
 	throw Exception("Not implemented.", HalleyExceptions::Resources);
 }
 
-void SpriteResource::reload(Resource resource)
+void SpriteResource::reload(Resource&& resource)
 {
 	*this = std::move(dynamic_cast<SpriteResource&>(resource));
 }

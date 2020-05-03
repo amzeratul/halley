@@ -58,7 +58,7 @@ void AudioEvent::deserialize(Deserializer& s)
 	}
 }
 
-void AudioEvent::reload(Resource resource)
+void AudioEvent::reload(Resource&& resource)
 {
 	*this = std::move(dynamic_cast<AudioEvent&>(resource));
 }

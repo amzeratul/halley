@@ -101,10 +101,10 @@ namespace Halley
 		virtual void onLoaded(Resources& resources);
 		
 		int getAssetVersion() const;
-		void reloadResource(Resource resource);
+		void reloadResource(Resource&& resource);
 
 	protected:
-		virtual void reload(Resource resource);
+		virtual void reload(Resource&& resource);
 
 	private:
 		Metadata meta;

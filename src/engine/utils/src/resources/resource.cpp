@@ -44,14 +44,14 @@ int Resource::getAssetVersion() const
 	return assetVersion;
 }
 
-void Resource::reloadResource(Resource resource)
+void Resource::reloadResource(Resource&& resource)
 {
 	++assetVersion;
 	resource.assetVersion = assetVersion;
 	reload(std::move(resource));
 }
 
-void Resource::reload(Resource resource)
+void Resource::reload(Resource&& resource)
 {
 }
 

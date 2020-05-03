@@ -39,7 +39,7 @@ namespace Halley
 
 		static std::shared_ptr<AudioClip> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::AudioClip; }
-		void reload(Resource resource) override;
+		void reload(Resource&& resource) override;
 
 	private:
 		size_t sampleLength = 0;

@@ -151,7 +151,7 @@ void DX11Texture::load(TextureDescriptor&& descriptor)
 	doneLoading();
 }
 
-void DX11Texture::reload(Resource resource)
+void DX11Texture::reload(Resource&& resource)
 {
 	*this = std::move(dynamic_cast<DX11Texture&>(resource));
 }

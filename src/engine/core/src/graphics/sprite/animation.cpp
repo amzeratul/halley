@@ -177,7 +177,7 @@ std::unique_ptr<Animation> Animation::loadResource(ResourceLoader& loader)
 	return result;
 }
 
-void Animation::reload(Resource resource)
+void Animation::reload(Resource&& resource)
 {
 	*this = std::move(dynamic_cast<Animation&>(resource));
 }

@@ -44,7 +44,7 @@ namespace Halley
 
 		static std::unique_ptr<Font> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Font; }
-		void reload(Resource resource) override;
+		void reload(Resource&& resource) override;
 		void onLoaded(Resources& resources) override;
 
 		std::pair<const Glyph&, const Font&> getGlyph(int code) const;

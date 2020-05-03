@@ -28,6 +28,65 @@ SceneEditorWindow::~SceneEditorWindow()
 	unloadScene();
 }
 
+void SceneEditorWindow::makeUI()
+{
+	add(uiFactory.makeUI("ui/halley/scene_editor_window"), 1);
+	
+	canvas = getWidgetAs<SceneEditorCanvas>("canvas");
+	canvas->setSceneEditorWindow(*this);
+	canvas->setGameBridge(*gameBridge);
+	
+	entityList = getWidgetAs<EntityList>("entityList");
+	entityList->setSceneEditorWindow(*this);
+
+	entityEditor = getWidgetAs<EntityEditor>("entityEditor");
+	entityEditor->setSceneEditorWindow(*this);
+
+	toolMode = getWidgetAs<UIList>("toolMode");
+	
+	setSaveEnabled(false);
+
+	setHandle(UIEventType::ListSelectionChanged, "entityList_list", [=] (const UIEvent& event)
+	{
+		selectEntity(event.getStringData());
+	});
+
+	setHandle(UIEventType::ListSelectionChanged, "toolMode", [=] (const UIEvent& event)
+	{
+		setTool(fromString<SceneEditorTool>(event.getStringData()));
+	});
+
+	setHandle(UIEventType::ListAccept, "entityList_list", [=](const UIEvent& event)
+	{
+		panCameraToEntity(event.getStringData());
+	});
+
+	setHandle(UIEventType::ButtonClicked, "saveButton", [=] (const UIEvent& event)
+	{
+		saveEntity();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "addEntity", [=] (const UIEvent& event)
+	{
+		addNewEntity();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "addPrefab", [=] (const UIEvent& event)
+	{
+		addNewPrefab();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "removeEntity", [=] (const UIEvent& event)
+	{
+		removeEntity();
+	});
+}
+
+void SceneEditorWindow::onAddedToRoot()
+{
+	getRoot()->registerKeyPressListener(shared_from_this());
+}
+
 void SceneEditorWindow::loadScene(const String& name)
 {
 	unloadScene();
@@ -112,58 +171,14 @@ void SceneEditorWindow::update(Time t, bool moved)
 	}
 }
 
-void SceneEditorWindow::makeUI()
+bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 {
-	add(uiFactory.makeUI("ui/halley/scene_editor_window"), 1);
-	
-	canvas = getWidgetAs<SceneEditorCanvas>("canvas");
-	canvas->setSceneEditorWindow(*this);
-	canvas->setGameBridge(*gameBridge);
-	
-	entityList = getWidgetAs<EntityList>("entityList");
-	entityList->setSceneEditorWindow(*this);
-
-	entityEditor = getWidgetAs<EntityEditor>("entityEditor");
-	entityEditor->setSceneEditorWindow(*this);
-
-	toolMode = getWidgetAs<UIList>("toolMode");
-	
-	setSaveEnabled(false);
-
-	setHandle(UIEventType::ListSelectionChanged, "entityList_list", [=] (const UIEvent& event)
-	{
-		selectEntity(event.getStringData());
-	});
-
-	setHandle(UIEventType::ListSelectionChanged, "toolMode", [=] (const UIEvent& event)
-	{
-		setTool(fromString<SceneEditorTool>(event.getStringData()));
-	});
-
-	setHandle(UIEventType::ListAccept, "entityList_list", [=](const UIEvent& event)
-	{
-		panCameraToEntity(event.getStringData());
-	});
-
-	setHandle(UIEventType::ButtonClicked, "saveButton", [=] (const UIEvent& event)
-	{
+	if (key.is(KeyCode::S, KeyMods::Ctrl)) {
 		saveEntity();
-	});
+		return true;
+	}
 
-	setHandle(UIEventType::ButtonClicked, "addEntity", [=] (const UIEvent& event)
-	{
-		addNewEntity();
-	});
-
-	setHandle(UIEventType::ButtonClicked, "addPrefab", [=] (const UIEvent& event)
-	{
-		addNewPrefab();
-	});
-
-	setHandle(UIEventType::ButtonClicked, "removeEntity", [=] (const UIEvent& event)
-	{
-		removeEntity();
-	});
+	return false;
 }
 
 void SceneEditorWindow::selectEntity(const String& id)
