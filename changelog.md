@@ -13,4 +13,8 @@
 * `UITextInput` constructor changed, no longer takes `std::shared_ptr<InputKeyboard>`.
 * `UISpinControl` constructor changed, no longer takes `std::shared_ptr<InputKeyboard>`.
 * `UIWidget` can no longer be focused by calling `UIWidget::setFocus(true)`. Use `UIRoot::setFocus(widget)` instead.
-* `Halley::Keys` and `Halley::KeyMods` are now strongly typed (`enum class`).
+* `Halley::Keys` renamed to `Halley::KeyCode` (old name is still available as an alias, but is deprecated).
+* `Halley::KeyCode` and `Halley::KeyMods` are now strongly typed (`enum class`).
+* Removed `Halley::KeyCode::Escape`. Use `Halley::KeyCode::Esc` instead.
+* Removed `Halley::KeyCode::Return`. Use `Halley::KeyCode::Enter` instead.
+* Several other less common keys in `Halley::KeyCode` have been removed or renamed. See `input_keys.h` for the current list.

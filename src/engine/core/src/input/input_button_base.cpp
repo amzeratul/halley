@@ -133,22 +133,22 @@ bool InputButtonBase::isButtonDown(int code)
 	return buttonDown[code] != 0;
 }
 
-bool InputButtonBase::isButtonPressed(Keys code)
+bool InputButtonBase::isButtonPressed(KeyCode code)
 {
 	return isButtonPressed(static_cast<int>(code));
 }
 
-bool InputButtonBase::isButtonPressedRepeat(Keys code)
+bool InputButtonBase::isButtonPressedRepeat(KeyCode code)
 {
 	return isButtonPressedRepeat(static_cast<int>(code));
 }
 
-bool InputButtonBase::isButtonReleased(Keys code)
+bool InputButtonBase::isButtonReleased(KeyCode code)
 {
 	return isButtonReleased(static_cast<int>(code));
 }
 
-bool InputButtonBase::isButtonDown(Keys code)
+bool InputButtonBase::isButtonDown(KeyCode code)
 {
 	return isButtonDown(static_cast<int>(code));
 }

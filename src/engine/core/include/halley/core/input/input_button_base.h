@@ -41,10 +41,10 @@ namespace Halley {
 		bool isButtonReleased(int code) override;
 		bool isButtonDown(int code) override;
 
-		bool isButtonPressed(Keys code);
-		bool isButtonPressedRepeat(Keys code);
-		bool isButtonReleased(Keys code);
-		bool isButtonDown(Keys code);
+		bool isButtonPressed(KeyCode code);
+		bool isButtonPressedRepeat(KeyCode code);
+		bool isButtonReleased(KeyCode code);
+		bool isButtonDown(KeyCode code);
 
 		void clearButton(int code) override;
 		void clearButtonPress(int code) override;
@@ -68,8 +68,8 @@ namespace Halley {
 
 		void init(int nButtons);
 
-		virtual void onButtonPressed(int code);
-		virtual void onButtonReleased(int code);
+		void onButtonPressed(int code);
+		void onButtonReleased(int code);
 	};
 
 	typedef std::shared_ptr<InputButtonBase> spInputButtonBase;

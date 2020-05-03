@@ -27,7 +27,7 @@
 #include <set>
 
 namespace Halley {
-	enum class Keys;
+	enum class KeyCode;
 	using spInputDevice = std::shared_ptr<InputDevice>;
 
 	class InputVirtual : public InputDevice {
@@ -70,10 +70,10 @@ namespace Halley {
 		int getWheelMove() const override;
 
 		void bindButton(int n, spInputDevice device, int deviceButton);
-		void bindButton(int n, spInputDevice device, Keys deviceButton);
+		void bindButton(int n, spInputDevice device, KeyCode deviceButton);
 		void bindAxis(int n, spInputDevice device, int deviceButton);
 		void bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton);
-		void bindAxisButton(int n, spInputDevice device, Keys negativeButton, Keys positiveButton);
+		void bindAxisButton(int n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton);
 		void bindVibrationOverride(spInputDevice joy);
 		void bindHat(int leftRight, int upDown, spInputDevice hat);
 		void bindPosition(spInputDevice device);

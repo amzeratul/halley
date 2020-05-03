@@ -108,44 +108,44 @@ void TextInputData::insertText(const StringUTF32& t)
 
 bool TextInputData::onControlCharacter(KeyboardKeyPress c, IClipboard* clipboard)
 {
-	if (c.is(Keys::Delete, KeyMods::None)) {
+	if (c.is(KeyCode::Delete, KeyMods::None)) {
 		onDelete();
 		return true;
 	}
 
-	if (c.is(Keys::Backspace, KeyMods::None)) {
+	if (c.is(KeyCode::Backspace, KeyMods::None)) {
 		onBackspace();
 		return true;
 	}
 	
-	if (c.is(Keys::Home, KeyMods::None) || c.is(Keys::PageUp, KeyMods::None)) {
+	if (c.is(KeyCode::Home, KeyMods::None) || c.is(KeyCode::PageUp, KeyMods::None)) {
 		setSelection(0);
 		return true;
 	}
 	
-	if (c.is(Keys::End, KeyMods::None) || c.is(Keys::PageDown, KeyMods::None)) {
+	if (c.is(KeyCode::End, KeyMods::None) || c.is(KeyCode::PageDown, KeyMods::None)) {
 		setSelection(static_cast<int>(text.size()));
 		return true;
 	}
 	
-	if (c.is(Keys::Left, KeyMods::None)) {
+	if (c.is(KeyCode::Left, KeyMods::None)) {
 		setSelection(getSelection().start - 1);
 		return true;
 	}
 	
-	if (c.is(Keys::Right, KeyMods::None)) {
+	if (c.is(KeyCode::Right, KeyMods::None)) {
 		setSelection(getSelection().start + 1);
 		return true;
 	}
 	
-	if (c.is(Keys::C, KeyMods::Ctrl)) {
+	if (c.is(KeyCode::C, KeyMods::Ctrl)) {
 		if (clipboard) {
 			clipboard->setData(String(text));
 		}
 		return true;
 	}
 	
-	if (c.is(Keys::V, KeyMods::Ctrl)) {
+	if (c.is(KeyCode::V, KeyMods::Ctrl)) {
 		if (clipboard && !readOnly) {
 			auto str = clipboard->getStringData();
 			if (str) {
@@ -155,7 +155,7 @@ bool TextInputData::onControlCharacter(KeyboardKeyPress c, IClipboard* clipboard
 		return true;
 	}
 	
-	if (c.is(Keys::X, KeyMods::Ctrl)) {
+	if (c.is(KeyCode::X, KeyMods::Ctrl)) {
 		if (clipboard && !readOnly) {
 			clipboard->setData(String(text));
 			setText(StringUTF32());

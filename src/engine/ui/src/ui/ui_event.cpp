@@ -39,6 +39,14 @@ UIEvent::UIEvent(UIEventType type, String sourceId, int data1, int data2)
 {
 }
 
+UIEvent::UIEvent(UIEventType type, String sourceId, KeyCode keyCode, KeyMods keyMods)
+	: type(type)
+	, intData(static_cast<int>(keyCode))
+	, intData2(static_cast<int>(keyMods))
+	, sourceId(std::move(sourceId))
+{
+}
+
 UIEvent::UIEvent(UIEventType type, String sourceId, float data)
 	: type(type)
 	, floatData(data)
@@ -90,6 +98,16 @@ int UIEvent::getIntData() const
 int UIEvent::getIntData2() const
 {
 	return intData2;
+}
+
+KeyCode UIEvent::getKeyCode() const
+{
+	return KeyCode(intData);
+}
+
+KeyMods UIEvent::getKeyMods() const
+{
+	return KeyMods(intData2);
 }
 
 float UIEvent::getFloatData() const

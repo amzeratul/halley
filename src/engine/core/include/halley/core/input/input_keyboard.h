@@ -10,14 +10,14 @@ namespace Halley {
 	enum class TextControlCharacter;
 
 	struct KeyboardKeyPress {
-		Keys key;
+		KeyCode key;
 		KeyMods mod;
 
 		KeyboardKeyPress() = default;
-		KeyboardKeyPress(Keys key, KeyMods mod);
+		KeyboardKeyPress(KeyCode key, KeyMods mod);
 
 		bool operator ==(const KeyboardKeyPress& other) const;
-		bool is(Keys key, KeyMods mod) const;
+		bool is(KeyCode key, KeyMods mod) const;
 	};
 
 	class InputKeyboard : public InputButtonBase {
@@ -25,8 +25,8 @@ namespace Halley {
 		explicit InputKeyboard(int nButtons = -1, std::shared_ptr<IClipboard> clipboard = {});
 		virtual ~InputKeyboard() = default;
 
-		void onButtonPressed(int scanCode) override;
-		void onButtonReleased(int scanCode) override;
+		void onKeyPressed(KeyCode code, KeyMods mods);
+		void onKeyReleased(KeyCode code, KeyMods mods);
 
 		virtual TextInputCapture captureText(TextInputData& textInputData, SoftwareKeyboardData softKeyboardData);
 		void removeCapture(ITextInputCapture* capture);
@@ -35,7 +35,7 @@ namespace Halley {
 		virtual std::unique_ptr<ITextInputCapture> makeTextInputCapture();
 
 		void onTextEntered(const char* text);
-		bool onKeyPress(KeyboardKeyPress c);
+		bool sendKeyPress(KeyboardKeyPress c);
 
 	private:
 		std::set<ITextInputCapture*> captures;

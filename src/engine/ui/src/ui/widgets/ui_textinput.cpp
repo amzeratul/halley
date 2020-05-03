@@ -133,20 +133,20 @@ void UITextInput::draw(UIPainter& painter) const
 /*
 void UITextInput::updateTextInput()
 {
-	if (keyboard->isButtonPressed(Keys::Tab)) {
+	if (keyboard->isButtonPressed(KeyCode::Tab)) {
 		if (!autoCompleteText.empty()) {
 			setText(autoCompleteText);
 			setSelection(int(text.getText().size()));
 		}
 	}
-	if (keyboard->isButtonPressed(Keys::Up)) {
+	if (keyboard->isButtonPressed(KeyCode::Up)) {
 		autoCompleteCurOption = autoCompleteOptions > 0 ? modulo(autoCompleteCurOption - 1, autoCompleteOptions) : 0;
 	}
-	if (keyboard->isButtonPressed(Keys::Down)) {
+	if (keyboard->isButtonPressed(KeyCode::Down)) {
 		autoCompleteCurOption = autoCompleteOptions > 0 ? modulo(autoCompleteCurOption + 1, autoCompleteOptions) : 0;
 	}
 
-	if (keyboard->isButtonPressed(Keys::Enter) || keyboard->isButtonPressed(Keys::KP_Enter)) {
+	if (keyboard->isButtonPressed(KeyCode::Enter) || keyboard->isButtonPressed(KeyCode::KP_Enter)) {
 		if (!isMultiLine) {
 			sendEvent(UIEvent(UIEventType::TextSubmit, getId(), getText()));
 		}

@@ -26,7 +26,7 @@
 #include "halley/maths/vector2.h"
 
 namespace Halley {
-	enum class Keys;
+	enum class KeyCode;
 
 	enum class JoystickType {
 		None,

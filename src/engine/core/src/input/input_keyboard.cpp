@@ -4,7 +4,7 @@
 #include "input/text_input_data.h"
 using namespace Halley;
 
-KeyboardKeyPress::KeyboardKeyPress(Keys key, KeyMods mod)
+KeyboardKeyPress::KeyboardKeyPress(KeyCode key, KeyMods mod)
 	: key(key)
 	, mod(mod)
 {
@@ -15,7 +15,7 @@ bool KeyboardKeyPress::operator==(const KeyboardKeyPress& other) const
 	return key == other.key && mod == other.mod;
 }
 
-bool KeyboardKeyPress::is(Keys key, KeyMods mod) const
+bool KeyboardKeyPress::is(KeyCode key, KeyMods mod) const
 {
 	return this->key == key && this->mod == mod;
 }
@@ -31,27 +31,20 @@ TextInputCapture InputKeyboard::captureText(TextInputData& textInputData, Softwa
 	return TextInputCapture(textInputData, std::move(data), makeTextInputCapture());
 }
 
-void InputKeyboard::onButtonPressed(int scanCode)
+void InputKeyboard::onKeyPressed(KeyCode code, KeyMods mods)
 {
-	KeyMods mods = KeyMods::None;
-	if (isButtonDown(Keys::LShift) || isButtonDown(Keys::RShift)) {
-		mods = KeyMods(static_cast<int>(mods) | static_cast<int>(KeyMods::Shift));
+	const auto key = KeyboardKeyPress(code, mods);
+	
+	if (!sendKeyPress(key)) {
+		// TODO: Not handled, means it's OK for this to get to UI somehow!
 	}
-	if (isButtonDown(Keys::LCtrl) || isButtonDown(Keys::RCtrl)) {
-		mods = KeyMods(static_cast<int>(mods) | static_cast<int>(KeyMods::Ctrl));
-	}
-	if (isButtonDown(Keys::LAlt) || isButtonDown(Keys::RAlt)) {
-		mods = KeyMods(static_cast<int>(mods) | static_cast<int>(KeyMods::Alt));
-	}
-
-	onKeyPress({ Keys(scanCode), mods });
-
-	InputButtonBase::onButtonPressed(scanCode);
+	
+	onButtonPressed(static_cast<int>(code));
 }
 
-void InputKeyboard::onButtonReleased(int scanCode)
+void InputKeyboard::onKeyReleased(KeyCode code, KeyMods mods)
 {
-	InputButtonBase::onButtonReleased(scanCode);
+	onButtonReleased(static_cast<int>(code));
 }
 
 void InputKeyboard::onTextEntered(const char* text)
@@ -62,7 +55,7 @@ void InputKeyboard::onTextEntered(const char* text)
 	}
 }
 
-bool InputKeyboard::onKeyPress(KeyboardKeyPress chr)
+bool InputKeyboard::sendKeyPress(KeyboardKeyPress chr)
 {
 	for (const auto& c: captures) {
 		const bool handled = c->onKeyPress(chr, clipboard.get());

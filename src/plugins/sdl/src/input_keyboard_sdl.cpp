@@ -31,39 +31,70 @@ InputKeyboardSDL::InputKeyboardSDL(std::shared_ptr<IClipboard> clipboard)
 	SDL_StartTextInput();
 }
 
-void InputKeyboardSDL::processEvent(const SDL_Event &_event)
+void InputKeyboardSDL::processEvent(const SDL_Event& rawEvent)
 {
-	if (_event.type == SDL_TEXTINPUT) {
-		const SDL_TextInputEvent& event = _event.text;
+	if (rawEvent.type == SDL_TEXTINPUT) {
+		const SDL_TextInputEvent& event = rawEvent.text;
 		onTextEntered(event.text);
-	} else if (_event.type == SDL_TEXTEDITING) {
-		//const SDL_TextEditingEvent& event = _event.edit;
+	} else if (rawEvent.type == SDL_TEXTEDITING) {
+		//const SDL_TextEditingEvent& event = rawEvent.edit;
 	} else {
-		const SDL_KeyboardEvent& event = _event.key;
+		const SDL_KeyboardEvent& event = rawEvent.key;
 		switch (event.type) {
-			case SDL_KEYUP:
-				onButtonReleased(event.keysym.scancode);
-				break;
 			case SDL_KEYDOWN:
-			{
-				int scancode = event.keysym.scancode;
-				onButtonPressed(scancode);
+				onKeyPressed(getKeyCode(event.keysym.sym), getMods(event.keysym.mod));
 				break;
-			}
+			case SDL_KEYUP:
+				onKeyReleased(getKeyCode(event.keysym.sym), getMods(event.keysym.mod));
+				break;
 		}
 	}
+}
+
+KeyCode InputKeyboardSDL::getKeyCode(int sdlKeyCode) const
+{
+	// Halley uses uppercase characters
+	if (sdlKeyCode >= 'a' && sdlKeyCode <= 'z') {
+		return KeyCode(sdlKeyCode - 32);
+	}
+
+	// Halley moves scancodes to +128 offset
+	if ((sdlKeyCode & SDLK_SCANCODE_MASK) != 0) {
+		return KeyCode((sdlKeyCode & ~SDLK_SCANCODE_MASK) + 128);
+	}
+
+	// Otherwise, should be compatible
+	return KeyCode(sdlKeyCode);
+}
+
+KeyMods InputKeyboardSDL::getMods(int sdlMods) const
+{
+	int mods = 0;
+	if ((sdlMods & KMOD_SHIFT) != 0) {
+		mods |= static_cast<int>(KeyMods::Shift);
+	}
+	if ((sdlMods & KMOD_CTRL) != 0) {
+		mods |= static_cast<int>(KeyMods::Ctrl);
+	}
+	if ((sdlMods & KMOD_ALT) != 0) {
+		mods |= static_cast<int>(KeyMods::Alt);
+	}
+	if ((sdlMods & KMOD_GUI) != 0) {
+		mods |= static_cast<int>(KeyMods::Mod);
+	}
+	return KeyMods(mods);
 }
 
 String InputKeyboardSDL::getButtonName(int code)
 {
 	switch (code) {
-	case static_cast<int>(Keys::Esc):
+	case static_cast<int>(KeyCode::Esc):
 		return "Esc";
-	case static_cast<int>(Keys::Delete):
+	case static_cast<int>(KeyCode::Delete):
 		return "Del";
 	default:
-		if (code >= static_cast<int>(Keys::A) && code <= static_cast<int>(Keys::Z)) {
-			return String(static_cast<wchar_t>(code - static_cast<int>(Keys::A) + 'A'));
+		if (code >= static_cast<int>(KeyCode::A) && code <= static_cast<int>(KeyCode::Z)) {
+			return String(static_cast<wchar_t>(code - static_cast<int>(KeyCode::A) + 'A'));
 		} else {
 			return SDL_GetKeyName(SDL_Keycode(code));
 		}

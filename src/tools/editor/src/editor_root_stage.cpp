@@ -188,8 +188,8 @@ void EditorRootStage::updateUI(Time time)
 	const auto kb = getInputAPI().getKeyboard();
 	const auto size = getVideoAPI().getWindow().getDefinition().getSize();
 
-	if (kb->isButtonPressed(Keys::Tab)) {
-		ui->focusNext(kb->isButtonDown(Keys::LShift) || kb->isButtonDown(Keys::RShift));
+	if (kb->isButtonPressed(KeyCode::Tab)) {
+		ui->focusNext(kb->isButtonDown(KeyCode::LShift) || kb->isButtonDown(KeyCode::RShift));
 	}
 	
 	uiMainPanel->setMinSize(Vector2f(size));

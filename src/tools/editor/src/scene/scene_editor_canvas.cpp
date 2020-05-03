@@ -160,8 +160,8 @@ std::shared_ptr<UIWidget> SceneEditorCanvas::setTool(SceneEditorTool tool, const
 
 void SceneEditorCanvas::updateInputState()
 {
-	inputState.ctrlHeld = keyboard->isButtonDown(Keys::LCtrl) || keyboard->isButtonDown(Keys::RCtrl);
-	inputState.shiftHeld = keyboard->isButtonDown(Keys::LShift) || keyboard->isButtonDown(Keys::RShift);
+	inputState.ctrlHeld = keyboard->isButtonDown(KeyCode::LCtrl) || keyboard->isButtonDown(KeyCode::RCtrl);
+	inputState.shiftHeld = keyboard->isButtonDown(KeyCode::LShift) || keyboard->isButtonDown(KeyCode::RShift);
 
 	inputState.viewRect = getRect();
 }

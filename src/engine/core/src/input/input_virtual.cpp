@@ -202,7 +202,7 @@ void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
 	buttons.at(n).push_back(Bind(std::move(device), deviceN, false));
 }
 
-void InputVirtual::bindButton(int n, spInputDevice device, Keys deviceButton)
+void InputVirtual::bindButton(int n, spInputDevice device, KeyCode deviceButton)
 {
 	bindButton(n, std::move(device), static_cast<int>(deviceButton));
 }
@@ -223,7 +223,7 @@ void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButto
 	axes.at(n).binds.push_back(Bind(std::move(device), negativeButton, positiveButton, true));
 }
 
-void InputVirtual::bindAxisButton(int n, spInputDevice device, Keys negativeButton, Keys positiveButton)
+void InputVirtual::bindAxisButton(int n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton)
 {
 	bindAxisButton(n, std::move(device), static_cast<int>(negativeButton), static_cast<int>(positiveButton));
 }

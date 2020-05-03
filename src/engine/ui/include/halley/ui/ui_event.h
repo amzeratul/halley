@@ -5,6 +5,7 @@
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
 #include "ui_parent.h"
+#include "halley/core/input/input_keys.h"
 
 namespace Halley {
 	enum class UIEventType {
@@ -20,6 +21,7 @@ namespace Halley {
 		FocusGained,
 		FocusLost,
 		GroupFocusChangeRequested,
+		KeyPressed,
 		ListSelectionChanged,
 		ListAccept,
 		ListCancel,
@@ -49,6 +51,7 @@ namespace Halley {
 		UIEvent(UIEventType type, String sourceId, bool data);
 		UIEvent(UIEventType type, String sourceId, int data);
 		UIEvent(UIEventType type, String sourceId, int data1, int data2);
+		UIEvent(UIEventType type, String sourceId, KeyCode keyCode, KeyMods keyMods);
 		UIEvent(UIEventType type, String sourceId, float data);
 		UIEvent(UIEventType type, String sourceId, String data, int intData);
 		UIEvent(UIEventType type, String sourceId, String data, String data2, int intData);
@@ -63,6 +66,8 @@ namespace Halley {
 		bool getBoolData() const;
 		int getIntData() const;
 		int getIntData2() const;
+    	KeyCode getKeyCode() const;
+    	KeyMods getKeyMods() const;
 		float getFloatData() const;
 		Vector2f getVectorData() const;
 		Rect4f getRectData() const;
