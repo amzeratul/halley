@@ -51,6 +51,13 @@ Rect4f UIRoot::getRect() const
 	return uiRect;
 }
 
+void UIRoot::runLayout()
+{
+	for (auto& c: getChildren()) {
+		c->layout();
+	}
+}
+
 void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual)
 {
 	auto joystickType = manual->getJoystickType();
@@ -86,60 +93,6 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 		// For subsequent iterations, make sure t = 0
 		t = 0;
 	} while (isWaitingToSpawnChildren());
-}
-
-void UIRoot::updateMouse(const spInputDevice& mouse)
-{
-	// Go through all root-level widgets and find the actual widget under the mouse
-	const Vector2f mousePos = mouseRemap(mouse->getPosition() + uiRect.getTopLeft() - overscan);
-	const auto exclusive = mouseExclusive.lock();
-	const auto actuallyUnderMouse = getWidgetUnderMouse(mousePos);
-	lastMousePos = mousePos;
-
-	// Check buttons
-	for (int i = 0; i < 3; ++i) {
-		// Click
-		if (!anyMouseButtonHeld && mouse->isButtonPressed(i)) {
-			anyMouseButtonHeld = true;
-			mouseExclusive = actuallyUnderMouse;
-
-			if (actuallyUnderMouse) {
-				if (actuallyUnderMouse->canReceiveFocus()) {
-					setFocus(actuallyUnderMouse);
-				}
-				mouse->clearButtonPress(i);
-				actuallyUnderMouse->pressMouse(mousePos, i);
-			} else {
-				setFocus({});
-			}
-		}
-
-		// Release click
-		if (anyMouseButtonHeld && mouse->isButtonReleased(i)) {
-			anyMouseButtonHeld = false;
-			
-			if (exclusive) {
-				exclusive->releaseMouse(mousePos, i);
-				mouse->clearButtonRelease(i);
-			}
-
-			mouseExclusive.reset();
-		}
-	}
-
-	// Mouse wheel
-	const int wheelDelta = mouse->getWheelMove();
-	const std::shared_ptr<UIWidget> exclusiveUnderMouse = !exclusive || exclusive == actuallyUnderMouse ? actuallyUnderMouse : std::shared_ptr<UIWidget>();
-	if (wheelDelta != 0 && exclusiveUnderMouse) {
-		exclusiveUnderMouse->sendEvent(UIEvent(UIEventType::MouseWheel, "mouse", wheelDelta));
-	}
-
-	// Mouse position
-	const std::shared_ptr<UIWidget> mousePosTarget = exclusive ? exclusive : actuallyUnderMouse;
-	if (mousePosTarget) {
-		mousePosTarget->onMouseOver(mousePos);
-	}
-	updateMouseOver(exclusiveUnderMouse);
 }
 
 void UIRoot::updateGamepadInputTree(const spInputDevice& input, UIWidget& widget, std::vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting)
@@ -282,6 +235,60 @@ void UIRoot::registerKeyPressListener(std::shared_ptr<UIWidget> widget, int prio
 	});
 }
 
+void UIRoot::updateMouse(const spInputDevice& mouse)
+{
+	// Go through all root-level widgets and find the actual widget under the mouse
+	const Vector2f mousePos = mouseRemap(mouse->getPosition() + uiRect.getTopLeft() - overscan);
+	const auto exclusive = mouseExclusive.lock();
+	const auto actuallyUnderMouse = getWidgetUnderMouse(mousePos);
+	lastMousePos = mousePos;
+
+	// Check buttons
+	for (int i = 0; i < 3; ++i) {
+		// Click
+		if (!anyMouseButtonHeld && mouse->isButtonPressed(i)) {
+			anyMouseButtonHeld = true;
+			mouseExclusive = actuallyUnderMouse;
+
+			if (actuallyUnderMouse) {
+				if (actuallyUnderMouse->canReceiveFocus()) {
+					setFocus(actuallyUnderMouse);
+				}
+				mouse->clearButtonPress(i);
+				actuallyUnderMouse->pressMouse(mousePos, i);
+			} else {
+				setFocus({});
+			}
+		}
+
+		// Release click
+		if (anyMouseButtonHeld && mouse->isButtonReleased(i)) {
+			anyMouseButtonHeld = false;
+			
+			if (exclusive) {
+				exclusive->releaseMouse(mousePos, i);
+				mouse->clearButtonRelease(i);
+			}
+
+			mouseExclusive.reset();
+		}
+	}
+
+	// Mouse wheel
+	const int wheelDelta = mouse->getWheelMove();
+	const std::shared_ptr<UIWidget> exclusiveUnderMouse = !exclusive || exclusive == actuallyUnderMouse ? actuallyUnderMouse : std::shared_ptr<UIWidget>();
+	if (wheelDelta != 0 && exclusiveUnderMouse) {
+		exclusiveUnderMouse->sendEvent(UIEvent(UIEventType::MouseWheel, "mouse", wheelDelta));
+	}
+
+	// Mouse position
+	const std::shared_ptr<UIWidget> mousePosTarget = exclusive ? exclusive : actuallyUnderMouse;
+	if (mousePosTarget) {
+		mousePosTarget->onMouseOver(mousePos);
+	}
+	updateMouseOver(exclusiveUnderMouse);
+}
+
 void UIRoot::mouseOverNext(bool forward)
 {
 	auto widgets = collectWidgets();
@@ -302,11 +309,78 @@ void UIRoot::mouseOverNext(bool forward)
 	updateMouseOver(widgets[nextIdx]);
 }
 
-void UIRoot::runLayout()
+void UIRoot::updateMouseOver(const std::shared_ptr<UIWidget>& underMouse)
 {
-	for (auto& c: getChildren()) {
-		c->layout();
+	auto curMouseOver = currentMouseOver.lock();
+	if (curMouseOver != underMouse) {
+		if (curMouseOver) {
+			curMouseOver->setMouseOver(false);
+		}
+		if (underMouse) {
+			underMouse->setMouseOver(true);
+		}
+		currentMouseOver = underMouse;
 	}
+}
+
+std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled) const
+{
+	const auto& cs = getChildren();
+	for (int i = static_cast<int>(cs.size()); --i >= 0; ) {
+		const auto& curRootWidget = cs[i];
+		auto widget = getWidgetUnderMouse(curRootWidget, mousePos, includeDisabled);
+		if (widget) {
+			return widget;
+		} else {
+			if (curRootWidget->isMouseBlocker()) {
+				return {};
+			}
+		}
+	}
+	return {};
+}
+
+std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos, bool includeDisabled) const
+{
+	if (!start->isActive() || (!includeDisabled && !start->isEnabled())) {
+		return {};
+	}
+
+	// Depth first
+	for (auto& c: start->getChildren()) {
+		auto result = getWidgetUnderMouse(c, mousePos, includeDisabled);
+		if (result) {
+			return result;
+		}
+	}
+
+	auto rect = start->getMouseRect();
+	if (start->canInteractWithMouse() && rect.contains(mousePos)) {
+		return start;
+	} else {
+		return {};
+	}
+}
+
+void UIRoot::setUIMouseRemapping(std::function<Vector2f(Vector2f)> remapFunction)
+{
+	Expects(remapFunction != nullptr);
+	mouseRemap = std::move(remapFunction);
+}
+
+void UIRoot::unsetUIMouseRemapping()
+{
+	mouseRemap = [](Vector2f p) { return p; };
+}
+
+std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse() const
+{
+	return currentMouseOver.lock();
+}
+
+std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouseIncludingDisabled() const
+{
+	return getWidgetUnderMouse(lastMousePos, true);
 }
 
 void UIRoot::setFocus(const std::shared_ptr<UIWidget>& newFocus)
@@ -374,69 +448,6 @@ void UIRoot::focusNext(bool reverse)
 	const int index = gsl::narrow<int>(std::find(focusables.begin(), focusables.end(), currentFocus.lock()) - focusables.begin());
 	const int newIndex = modulo(index + (reverse ? -1 : 1), gsl::narrow<int>(focusables.size()));
 	setFocus(focusables[newIndex]);
-}
-
-void UIRoot::updateMouseOver(const std::shared_ptr<UIWidget>& underMouse)
-{
-	auto curMouseOver = currentMouseOver.lock();
-	if (curMouseOver != underMouse) {
-		if (curMouseOver) {
-			curMouseOver->setMouseOver(false);
-		}
-		if (underMouse) {
-			underMouse->setMouseOver(true);
-		}
-		currentMouseOver = underMouse;
-	}
-}
-
-
-std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled) const
-{
-	const auto& cs = getChildren();
-	for (int i = static_cast<int>(cs.size()); --i >= 0; ) {
-		const auto& curRootWidget = cs[i];
-		auto widget = getWidgetUnderMouse(curRootWidget, mousePos, includeDisabled);
-		if (widget) {
-			return widget;
-		} else {
-			if (curRootWidget->isMouseBlocker()) {
-				return {};
-			}
-		}
-	}
-	return {};
-}
-
-std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos, bool includeDisabled) const
-{
-	if (!start->isActive() || (!includeDisabled && !start->isEnabled())) {
-		return {};
-	}
-
-	// Depth first
-	for (auto& c: start->getChildren()) {
-		auto result = getWidgetUnderMouse(c, mousePos, includeDisabled);
-		if (result) {
-			return result;
-		}
-	}
-
-	auto rect = start->getMouseRect();
-	if (start->canInteractWithMouse() && rect.contains(mousePos)) {
-		return start;
-	} else {
-		return {};
-	}
-}
-
-void UIRoot::setUIMouseRemapping(std::function<Vector2f(Vector2f)> remapFunction) {
-	Expects(remapFunction != nullptr);
-	mouseRemap = remapFunction;
-}
-
-void UIRoot::unsetUIMouseRemapping() {
-	mouseRemap = [](Vector2f p) { return p; };
 }
 
 std::vector<std::shared_ptr<UIWidget>> UIRoot::collectWidgets()
@@ -508,16 +519,6 @@ bool UIRoot::hasModalUI() const
 bool UIRoot::isMouseOverUI() const
 {
 	return static_cast<bool>(currentMouseOver.lock());
-}
-
-std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse() const
-{
-	return currentMouseOver.lock();
-}
-
-std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouseIncludingDisabled() const
-{
-	return getWidgetUnderMouse(lastMousePos, true);
 }
 
 UIWidget* UIRoot::getCurrentFocus() const
