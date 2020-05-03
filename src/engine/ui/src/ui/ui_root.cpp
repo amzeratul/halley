@@ -247,7 +247,17 @@ void UIRoot::updateKeyboardInput()
 
 void UIRoot::sendKeyPress(KeyboardKeyPress key)
 {
-	// TODO
+	// Remove expired
+	keyPressListeners.erase(std::remove_if(keyPressListeners.begin(), keyPressListeners.end(), [] (const auto& e) { return e.first.expired(); }), keyPressListeners.end());
+
+	// Finds one listener that can handle it (they are sorted by priority)
+	for (auto& listener: keyPressListeners) {
+		if (listener.first.lock()->onKeyPress(key)) {
+			return;
+		}
+	}
+
+	// None of the listeners handled it
 	onUnhandledKeyPress(key);
 }
 
@@ -259,6 +269,15 @@ void UIRoot::onUnhandledKeyPress(KeyboardKeyPress key)
 	if (key.is(KeyCode::Tab, KeyMods::Shift)) {
 		focusNext(true);
 	}
+}
+
+void UIRoot::registerKeyPressListener(std::shared_ptr<UIWidget> widget, int priority)
+{
+	keyPressListeners.emplace_back(widget, priority);
+	std::sort(keyPressListeners.begin(), keyPressListeners.end(), [] (const auto& a, const auto& b)
+	{
+		return a.second > b.second;
+	});
 }
 
 void UIRoot::mouseOverNext(bool forward)
@@ -476,7 +495,7 @@ void UIRoot::sendEvent(UIEvent) const
 
 bool UIRoot::hasModalUI() const
 {
-	for (auto& c: getChildren()) {
+	for (const auto& c: getChildren()) {
 		if (c->isActive() && c->isModal()) {
 			return true;
 		}

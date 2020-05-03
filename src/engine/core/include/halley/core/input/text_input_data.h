@@ -29,7 +29,7 @@ namespace Halley {
 		void insertText(const String& text);
 		void insertText(const StringUTF32& text);
 
-		bool onControlCharacter(KeyboardKeyPress c, IClipboard* clipboard);
+		bool onKeyPress(KeyboardKeyPress c, IClipboard* clipboard);
 
 		int getTextRevision() const;
 		Range<int> getTotalRange() const;

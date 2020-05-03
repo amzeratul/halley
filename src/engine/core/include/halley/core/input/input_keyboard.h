@@ -18,6 +18,7 @@ namespace Halley {
 
 		bool operator ==(const KeyboardKeyPress& other) const;
 		bool is(KeyCode key, KeyMods mod = KeyMods::None) const;
+		bool isPrintable() const;
 	};
 
 	class InputKeyboard : public InputButtonBase {

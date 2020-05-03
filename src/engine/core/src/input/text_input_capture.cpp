@@ -55,7 +55,7 @@ void StandardTextInputCapture::onTextEntered(const StringUTF32& text)
 
 bool StandardTextInputCapture::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 {
-	return textInput->onControlCharacter(c, clipboard);
+	return textInput->onKeyPress(c, clipboard);
 }
 
 TextInputCapture::TextInputCapture(TextInputData& inputData, SoftwareKeyboardData softKeyboardData, std::unique_ptr<ITextInputCapture> _capture)

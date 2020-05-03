@@ -59,6 +59,8 @@ namespace Halley {
 		std::vector<std::shared_ptr<UIWidget>> collectWidgets();
 
 		void onChildAdded(UIWidget& child) override;
+
+		void registerKeyPressListener(std::shared_ptr<UIWidget> widget, int priority = 0);
 				
 	private:
 		String id;
@@ -76,6 +78,7 @@ namespace Halley {
 
 		std::function<Vector2f(Vector2f)> mouseRemap;
 		std::unique_ptr<TextInputCapture> textCapture;
+		std::vector<std::pair<std::weak_ptr<UIWidget>, int>> keyPressListeners;
 
 		void updateMouse(spInputDevice mouse);
 		void updateGamepadInputTree(const spInputDevice& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting);

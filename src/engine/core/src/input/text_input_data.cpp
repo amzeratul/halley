@@ -106,8 +106,8 @@ void TextInputData::insertText(const StringUTF32& t)
 	}
 }
 
-bool TextInputData::onControlCharacter(KeyboardKeyPress c, IClipboard* clipboard)
-{
+bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
+{	
 	if (c.is(KeyCode::Delete, KeyMods::None)) {
 		onDelete();
 		return true;
@@ -160,6 +160,11 @@ bool TextInputData::onControlCharacter(KeyboardKeyPress c, IClipboard* clipboard
 			clipboard->setData(String(text));
 			setText(StringUTF32());
 		}
+		return true;
+	}
+	
+	if (c.isPrintable()) {
+		// Handled by text capture
 		return true;
 	}
 
