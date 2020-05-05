@@ -538,11 +538,6 @@ void UIListItem::setSelected(bool s)
 	}
 }
 
-bool UIListItem::canReceiveFocus() const
-{
-	return false;
-}
-
 void UIListItem::setStyle(UIStyle style)
 {
 	this->style = style;

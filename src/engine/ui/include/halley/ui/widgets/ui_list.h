@@ -108,7 +108,6 @@ namespace Halley {
 		void onClicked(Vector2f mousePos) override;
 		void onDoubleClicked(Vector2f mousePos) override;
 		void setSelected(bool selected);
-		bool canReceiveFocus() const override;
 
 		void setStyle(UIStyle style);
 
