@@ -338,6 +338,11 @@ namespace Halley {
 			return entity->getChildren();
 		}
 
+		bool hasChildren() const
+		{
+			return !entity->getChildren().empty();
+		}
+
 		void addChild(EntityRef& child)
 		{
 			entity->addChild(*child.entity);

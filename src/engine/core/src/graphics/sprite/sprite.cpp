@@ -133,7 +133,7 @@ void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painte
 
 Rect4f Sprite::getAABB() const
 {
-	const Vector2f sz = getScaledSize();
+	const Vector2f sz = getScaledSize() * Vector2f(flip ? -1.0f : 1.0f, 1.0f);
 	if (std::abs(getRotation().toRadians()) < 0.0001f) {
 		// No rotation, give exact bounding box
 		const Vector2f pivot = getPivot();
