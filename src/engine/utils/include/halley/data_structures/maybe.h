@@ -102,9 +102,19 @@ namespace Halley
 			return val == other.val;
 		}
 
+		[[nodiscard]] constexpr bool operator==(const T& other) const
+		{
+			return val == other;
+		}
+
 		[[nodiscard]] constexpr bool operator!=(const OptionalLite& other) const
 		{
 			return val != other.val;
+		}
+
+		[[nodiscard]] constexpr bool operator!=(const T& other) const
+		{
+			return val != other;
 		}
 
 		[[nodiscard]] constexpr bool operator<(const OptionalLite& other) const

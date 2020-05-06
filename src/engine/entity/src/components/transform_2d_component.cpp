@@ -39,20 +39,26 @@ void Transform2DComponent::updateParentTransform()
 
 void Transform2DComponent::setLocalPosition(Vector2f v)
 {
-	position = v;
-	markDirty();
+	if (position != v) {
+		position = v;
+		markDirty();
+	}
 }
 
 void Transform2DComponent::setLocalScale(Vector2f v)
 {
-	scale = v;
-	markDirty();
+	if (scale != v) {
+		scale = v;
+		markDirty();
+	}
 }
 
 void Transform2DComponent::setLocalRotation(Angle1f v)
 {
-	rotation = v;
-	markDirty();
+	if (rotation != v) {
+		rotation = v;
+		markDirty();
+	}
 }
 
 Vector2f Transform2DComponent::getGlobalPosition() const
@@ -70,12 +76,7 @@ Vector2f Transform2DComponent::getGlobalPosition() const
 
 void Transform2DComponent::setGlobalPosition(Vector2f v)
 {
-	if (parentTransform) {
-		position = parentTransform->inverseTransformPoint(v);
-	} else {
-		position = v;
-	}
-	markDirty();
+	setLocalPosition(parentRevision ? parentTransform->inverseTransformPoint(v) : v);
 }
 
 Vector2f Transform2DComponent::getGlobalScale() const
@@ -87,8 +88,7 @@ Vector2f Transform2DComponent::getGlobalScale() const
 void Transform2DComponent::setGlobalScale(Vector2f v)
 {
 	// TODO
-	scale = v;
-	markDirty();
+	setLocalScale(v);
 }
 
 Angle1f Transform2DComponent::getGlobalRotation() const
@@ -100,8 +100,7 @@ Angle1f Transform2DComponent::getGlobalRotation() const
 void Transform2DComponent::setGlobalRotation(Angle1f v)
 {
 	// TODO
-	rotation = v;
-	markDirty();
+	setLocalRotation(v);
 }
 
 int Transform2DComponent::getSubWorld() const
@@ -124,8 +123,10 @@ int Transform2DComponent::getSubWorld() const
 
 void Transform2DComponent::setSubWorld(int world)
 {
-	subWorld = world;
-	markDirty();
+	if (subWorld != world) {
+		subWorld = world;
+		markDirty();
+	}
 }
 
 Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
