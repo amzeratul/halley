@@ -6,13 +6,13 @@
 
 class Transform2DComponentBase : public Halley::Component {
 public:
-	static constexpr int componentIndex = 0;
+	static constexpr int componentIndex{ 0 };
 	
 protected:
-	Halley::Vector2f position;
-	Halley::Angle1f rotation;
-	Halley::Vector2f scale = Halley::Vector2f(1.0f, 1.0f);
-	Halley::OptionalLite<int> subWorld;
+	Halley::Vector2f position{};
+	Halley::Angle1f rotation{};
+	Halley::Vector2f scale{ 1.0f, 1.0f };
+	Halley::OptionalLite<int> subWorld{};
 	
 public:
 	Transform2DComponentBase() {}

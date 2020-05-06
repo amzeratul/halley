@@ -171,7 +171,7 @@ void CPPClassGenerator::ensureOK() const
 	}
 }
 
-String CPPClassGenerator::getTypeString(TypeSchema type)
+String CPPClassGenerator::getTypeString(const TypeSchema& type)
 {
 	String value;
 	if (type.isStatic) {
@@ -187,7 +187,7 @@ String CPPClassGenerator::getTypeString(TypeSchema type)
 	return value;
 }
 
-String CPPClassGenerator::getVariableString(VariableSchema var)
+String CPPClassGenerator::getVariableString(const VariableSchema& var)
 {
 	String init = "";
 	if (var.initialValue != "") {
@@ -196,16 +196,34 @@ String CPPClassGenerator::getVariableString(VariableSchema var)
 	return getTypeString(var.type) + " " + var.name + init;
 }
 
-String CPPClassGenerator::getMemberString(MemberSchema var)
+String CPPClassGenerator::getMemberString(const MemberSchema& var)
 {
-	String init = "";
-	if (var.defaultValue != "") {
-		init = " = " + var.defaultValue;
+	String init;
+	if (var.defaultValue.empty()) {
+		init = "{}";
+	} else {
+		bool first = true;
+		for (const auto& v: var.defaultValue) {
+			if (first) {
+				init += "{ ";
+				first = false;
+			} else {
+				init += ", ";
+			}
+
+			if (v.isNumber() || v == "true" || v == "false" || v == "nullptr" || (v.startsWith("\"") && v.endsWith("\"")) || v.contains("::")) {
+				init += v;
+			} else {
+				init += "\"" + v + "\"";
+			}
+		}
+
+		init += " }";
 	}
 	return getTypeString(var.type) + " " + var.name + init;
 }
 
-String CPPClassGenerator::getMethodSignatureString(MethodSchema method)
+String CPPClassGenerator::getMethodSignatureString(const MethodSchema& method)
 {
 	Vector<String> args;
 	for (auto& a : method.arguments) {

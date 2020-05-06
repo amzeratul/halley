@@ -108,8 +108,8 @@ namespace Halley {
 		long long toInteger64() const { return std::stoll(str); }
 		unsigned long toUInteger() const { return std::stoul(str); }
 		unsigned long long toUInteger64() const { return std::stoull(str); }
-		float toFloat() const { return std::stof(str); }
-		double toDouble() const { return std::stod(str); }
+		float toFloat() const;
+		double toDouble() const;
 		int subToInteger(size_t start,size_t end) const;
 
 		// std::string methods

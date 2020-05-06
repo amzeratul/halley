@@ -26,7 +26,7 @@ public:
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto data = pars.data;
-		const auto& defaultValue = pars.defaultValue;
+		const auto& defaultValue = pars.getStringDefaultParameter();
 
 		String value = data.getFieldData().asString("");
 
@@ -56,9 +56,9 @@ public:
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto data = pars.data;
-		const auto& defaultValue = pars.defaultValue;
+		const auto& defaultValue = pars.getIntDefaultParameter();
 
-		int value = data.getFieldData().asInt(defaultValue.isInteger() ? defaultValue.toInteger() : 0);
+		const int value = data.getFieldData().asInt(defaultValue);
 
 		auto field = std::make_shared<UITextInput>("intValue", context.getUIFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, false));
@@ -87,9 +87,9 @@ public:
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto data = pars.data;
-		const auto& defaultValue = pars.defaultValue;
+		const auto& defaultValue = pars.getFloatDefaultParameter();
 
-		const float value = data.getFieldData().asFloat(defaultValue.isNumber() ? defaultValue.toFloat() : 0.0f);
+		const float value = data.getFieldData().asFloat(defaultValue);
 
 		auto field = std::make_shared<UITextInput>("floatValue", context.getUIFactory().getStyle("inputThin"));
 		field->setValidator(std::make_shared<UINumericValidator>(true, true));
@@ -126,9 +126,9 @@ public:
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto data = pars.data;
-		const auto& defaultValue = pars.defaultValue;
+		const auto& defaultValue = pars.getBoolDefaultParameter();
 
-		bool value = data.getFieldData().asBool(defaultValue == "true");
+		bool value = data.getFieldData().asBool(defaultValue);
 
 		auto field = std::make_shared<UICheckbox>("boolValue", context.getUIFactory().getStyle("checkbox"), value);
 		field->bindData("boolValue", value, [&context, data](bool newVal)
@@ -159,11 +159,10 @@ public:
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto data = pars.data;
-		const auto& defaultValue = pars.defaultValue;
 
-		Vector2f value;
+		Vector2f value = Vector2f(pars.getFloatDefaultParameter(0), pars.getFloatDefaultParameter(1));
 		if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
-			value = data.getFieldData().asVector2f();
+			value = data.getFieldData().asVector2f(value);
 		}
 
 		const auto& style = context.getUIFactory().getStyle("inputThin");
@@ -238,7 +237,7 @@ public:
 		container->add(context.makeLabel("material"));
 		container->add(std::make_shared<SelectAssetWidget>("material", context.getUIFactory(), AssetType::MaterialDefinition, context.getGameResources()));
 		container->add(context.makeLabel("colour"));
-		container->add(context.makeField("Halley::Colour4f", pars.withSubKey("colour"), false));
+		container->add(context.makeField("Halley::Colour4f", pars.withSubKey("colour", "#FFFFFF"), false));
 		container->add(context.makeLabel("pivot"));
 		container->add(context.makeField("std::optional<Halley::Vector2f>", pars.withSubKey("pivot"), false));
 		container->add(context.makeLabel("flip"));
@@ -313,9 +312,9 @@ public:
 		container->add(context.makeLabel("direction"));
 		container->add(std::make_shared<UIDropdown>("direction", dropStyle, scrollStyle, listStyle));
 		container->add(context.makeLabel("playbackSpeed"));
-		container->add(context.makeField("float", pars.withSubKey("playbackSpeed", "1"), false));
+		container->add(context.makeField("float", pars.withSubKey("playbackSpeed", "1" ), false));
 		container->add(context.makeLabel("applyPivot"));
-		container->add(context.makeField("bool", pars.withSubKey("applyPivot", "true"), false));
+		container->add(context.makeField("bool", pars.withSubKey("applyPivot", "true" ), false));
 
 		auto updateAnimation = [container, data, &resources] (const String& animName)
 		{
@@ -566,14 +565,17 @@ public:
 
 	ConfigNode getDefaultNode() const override
 	{
-		return ConfigNode("#FFFFFF");
+		return ConfigNode("#000000");
 	}
 
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		// TODO: make this a proper colour picker
 		auto data = pars.data;
-		const auto defaultValue = pars.defaultValue.isEmpty() ? "#FFFFFF" : pars.defaultValue;
+		auto defaultValue = pars.getStringDefaultParameter();
+		if (defaultValue.isEmpty()) {
+			defaultValue = "#000000";
+		}
 
 		String value = data.getFieldData().asString(defaultValue);
 

@@ -29,10 +29,10 @@ namespace Halley
 		CPPClassGenerator& addConstructor(const Vector<VariableSchema>& variables, bool move);
 		CPPClassGenerator& addCustomConstructor(const Vector<VariableSchema>& parameters, const Vector<VariableSchema>& initialization);
 		
-		static String getTypeString(TypeSchema type);
-		static String getVariableString(VariableSchema var);
-		static String getMemberString(MemberSchema var);
-		static String getMethodSignatureString(MethodSchema var);
+		static String getTypeString(const TypeSchema& type);
+		static String getVariableString(const VariableSchema& var);
+		static String getMemberString(const MemberSchema& var);
+		static String getMethodSignatureString(const MethodSchema& var);
 
 		void writeTo(Vector<String>& out, int nTabs = 0);
 	private:

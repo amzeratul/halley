@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <optional>
 #include <vector>
 #include "halley/text/halleystring.h"
 
@@ -27,15 +28,22 @@ namespace Halley {
 	
 	class ComponentFieldParameters {
 	public:
-		ComponentFieldParameters(String componentName, std::vector<String> otherComponentNames, ComponentDataRetriever data, String defaultValue = "", std::vector<String> typeParameters = {});
+		ComponentFieldParameters(String componentName, std::vector<String> otherComponentNames, ComponentDataRetriever data, std::vector<String> defaultValue = {}, std::vector<String> typeParameters = {});
 
+		ComponentFieldParameters withSubIndex(size_t index, std::vector<String> defaultValue, std::vector<String> typeParameters = {}) const;
+		ComponentFieldParameters withSubKey(const String& key, std::vector<String> defaultValue, std::vector<String> typeParameters = {}) const;
 		ComponentFieldParameters withSubIndex(size_t index, String defaultValue = "", std::vector<String> typeParameters = {}) const;
 		ComponentFieldParameters withSubKey(const String& key, String defaultValue = "", std::vector<String> typeParameters = {}) const;
+
+		String getStringDefaultParameter(size_t n = 0) const;
+		bool getBoolDefaultParameter(size_t n = 0) const;
+		int getIntDefaultParameter(size_t n = 0) const;
+		float getFloatDefaultParameter(size_t n = 0) const;
 
 		String componentName;
 		std::vector<String> otherComponentNames;
 		ComponentDataRetriever data;
-		String defaultValue;
+		std::vector<String> defaultValue;
 		std::vector<String> typeParameters;
 	};
 }

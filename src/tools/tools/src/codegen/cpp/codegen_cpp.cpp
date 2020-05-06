@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "halley/text/string_converter.h"
 #include "halley/core/game/game_platform.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -203,9 +204,9 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 
 	// Additional constructors
 	if (!component.members.empty()) {
-		
+		const auto serializableMembers = filter(component.members.begin(), component.members.end(), [] (const MemberSchema& m) { return m.serializable; });
 		gen.addBlankLine()
-			.addConstructor(MemberSchema::toVariableSchema(component.members), true);
+			.addConstructor(MemberSchema::toVariableSchema(serializableMembers), true);
 	}
 	
 	// Deserialize method

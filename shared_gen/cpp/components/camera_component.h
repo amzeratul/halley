@@ -6,12 +6,12 @@
 
 class CameraComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex = 4;
+	static constexpr int componentIndex{ 4 };
 	
-	float zoom = 1;
-	std::optional<Halley::Colour4f> clear;
-	int mask = 1;
-	int layer = 0;
+	float zoom{ 1 };
+	std::optional<Halley::Colour4f> clear{};
+	int mask{ 1 };
+	int layer{ 0 };
 	
 	CameraComponent() {}
 	

@@ -3,6 +3,7 @@
 #include <halley/text/halleystring.h>
 #include <halley/text/string_converter.h>
 #include <array>
+#include <optional>
 #include <utility>
 
 namespace Halley
@@ -59,12 +60,12 @@ namespace Halley
 	public:
 		TypeSchema type;
 		String name;
-		String defaultValue;
+		std::vector<String> defaultValue;
 		MemberAccess access;
 		bool serializable;
 		bool collapse;
 
-		MemberSchema(TypeSchema type, String name, String defaultValue = "", MemberAccess access = MemberAccess::Public, bool serializable = true, bool collapse = false)
+		MemberSchema(TypeSchema type, String name, std::vector<String> defaultValue, MemberAccess access = MemberAccess::Public, bool serializable = true, bool collapse = false)
 			: type(std::move(type))
 			, name(std::move(name))
 			, defaultValue(std::move(defaultValue))
@@ -73,11 +74,15 @@ namespace Halley
 			, collapse(collapse)
 		{}
 
+		MemberSchema(TypeSchema type, String name, String defaultValue = "", MemberAccess access = MemberAccess::Public, bool serializable = true, bool collapse = false)
+			: MemberSchema(std::move(type), std::move(name), defaultValue.isEmpty() ? std::vector<String>() : std::vector<String>{std::move(defaultValue)}, access, serializable, collapse)
+		{}
+
 		static std::vector<VariableSchema> toVariableSchema(const std::vector<MemberSchema>& schema)
 		{
 			std::vector<VariableSchema> result;
 			result.reserve(schema.size());
-			for (auto& s: schema) {
+			for (const auto& s: schema) {
 				result.emplace_back(s.type, s.name);
 			}
 			return result;

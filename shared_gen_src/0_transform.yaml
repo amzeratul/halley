@@ -13,7 +13,7 @@ component:
   - scale:
       type: 'Halley::Vector2f'
       access: protected
-      defaultValue: 'Halley::Vector2f(1.0f, 1.0f)'
+      defaultValue: [1.0f, 1.0f]
   - subWorld:
       type: 'Halley::OptionalLite<int>'
       access: protected

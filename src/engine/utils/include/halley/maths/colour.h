@@ -87,6 +87,11 @@ namespace Halley {
 			, a(a)
 		{}
 
+		Colour4(const String& str)
+		{
+			*this = fromString(str);
+		}
+
 		template <typename U>
 		Colour4(const Colour4<U> c)
 		{

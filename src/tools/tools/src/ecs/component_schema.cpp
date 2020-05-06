@@ -1,5 +1,7 @@
 #include "../yaml/halley-yamlcpp.h"
 #include <halley/tools/ecs/component_schema.h>
+
+#include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
 
 using namespace Halley;
@@ -13,10 +15,10 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 
 	for (auto memberEntry : node["members"]) {
 		for (auto m = memberEntry.begin(); m != memberEntry.end(); ++m) {
-			const String name = m->first.as<std::string>();
+			String name = m->first.as<std::string>();
 			if (m->second.IsScalar()) {
 				// e.g. - value: int
-				members.emplace_back(TypeSchema(m->second.as<std::string>()), name);
+				members.emplace_back(TypeSchema(m->second.as<std::string>()), std::move(name));
 			} else {
 				// e.g.
 				// value:
@@ -26,10 +28,22 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				const YAML::Node& memberProperties = m->second;
 				const String type = memberProperties["type"].as<std::string>();
 				const String access = memberProperties["access"].as<std::string>("public");
-				const String defaultValue = memberProperties["defaultValue"].as<std::string>("");
 				const bool serializable = memberProperties["serializable"].as<bool>(true);
 				const bool collapse = memberProperties["collapse"].as<bool>(false);
-				members.emplace_back(TypeSchema(type), name, defaultValue, fromString<MemberAccess>(access), serializable, collapse);
+
+				std::vector<String> defaultValue;
+				const auto& defNode = memberProperties["defaultValue"];
+				if (defNode.IsDefined()) {
+					if (defNode.IsSequence()) {
+						for (const auto& d: defNode) {
+							defaultValue.emplace_back(d.as<std::string>());
+						}
+					} else {
+						defaultValue.emplace_back(defNode.as<std::string>());
+					}
+				}
+				
+				members.emplace_back(TypeSchema(type), std::move(name), std::move(defaultValue), fromString<MemberAccess>(access), serializable, collapse);
 			}
 		}
 	}

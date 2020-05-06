@@ -342,8 +342,12 @@ bool String::isNumber() const
 {
 	bool foundSeparator = false;
 	bool foundDigit = false;
+	bool lastFound = false;
 	size_t i = 0;
 	for (const char *chr = c_str(); *chr; chr++) {
+		if (lastFound) {
+			return false;
+		}
 		char cur = *chr;
 
 		if (cur >= '0' && cur <= '9') {
@@ -357,6 +361,8 @@ bool String::isNumber() const
 			if (i != 0) {
 				return false;
 			}
+		} else if (cur == 'f') {
+			lastFound = true;
 		} else {
 			return false;
 		}
@@ -518,9 +524,22 @@ void operator <<(double &p1, String &p2)
 	p1 = std::stof(p2.c_str());
 }
 
+float String::toFloat() const
+{
+	if (str.at(length() - 1) == 'f') {
+		return std::stof(left(length() - 1).cppStr());
+	}
+	return std::stof(str);
+}
 
-//////////////////////////////////////
-// Converts a substring to an integer
+double String::toDouble() const
+{
+	if (str.at(length() - 1) == 'f') {
+		return std::stod(left(length() - 1).cppStr());
+	}
+	return std::stod(str);
+}
+
 int String::subToInteger(size_t start,size_t end) const
 {
 	int value = 0;
