@@ -2,6 +2,7 @@
 #include "halley/core/scene_editor/scene_editor_interface.h"
 #include "halley/core/graphics/camera.h"
 #include "../entity.h"
+#include "halley/core/graphics/text/text_renderer.h"
 
 namespace Halley {
 	class EntityRef;
@@ -59,6 +60,8 @@ namespace Halley {
     	Resources& getGameResources() const;
     	Resources& getEditorResources() const;
 
+    	virtual void drawOverlay(Painter& painter, Rect4f view);
+
     	virtual EntityId createCamera();
 
     	virtual void onEntitySelected(std::optional<EntityRef> entity);
@@ -75,7 +78,10 @@ namespace Halley {
     	
 		std::optional<EntityRef> selectedEntity;
     	ISceneEditorGizmoCollection* gizmoCollection = nullptr;
-    	
+
+    	TextRenderer coordinateInfo;
+		Vector2f mousePos;
+
 		std::unique_ptr<World> doCreateWorld();
 
     	void moveCameraTo2D(Vector2f pos);

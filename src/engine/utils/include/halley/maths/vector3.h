@@ -129,6 +129,11 @@ namespace Halley {
 		{
 			return String("(") + x + ", " + y + ", " + z + ")";
 		}
+
+		constexpr Vector2D<T> xy() const
+		{
+			return Vector2D<T>(x, y);
+		}
 	};
 
 

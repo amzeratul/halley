@@ -9,6 +9,7 @@
 #include "components/camera_component.h"
 #include "components/transform_2d_component.h"
 #include "halley/core/graphics/sprite/sprite_sheet.h"
+#include "halley/core/graphics/text/font.h"
 
 using namespace Halley;
 
@@ -31,6 +32,14 @@ void SceneEditor::init(SceneEditorContext& context)
 	gizmoCollection = context.gizmos;
 
 	api->core->getStatics().setupGlobals();
+
+	coordinateInfo
+		.setFont(editorResources->get<Font>("Ubuntu Bold"))
+		.setSize(14)
+		.setOutline(1)
+		.setColour(Colour(1, 1, 1))
+		.setOutlineColour(Colour())
+		.setOffset(Vector2f(0, 1));
 }
 
 void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState)
@@ -47,6 +56,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 
 	// Update input state
 	inputState.mousePos = camera.screenToWorld(inputState.rawMousePos, inputState.viewRect);
+	mousePos = inputState.mousePos;
 
 	// Update gizmos
 	gizmoCollection->update(t, camera, inputState, outputState);
@@ -54,13 +64,17 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 
 void SceneEditor::render(RenderContext& rc)
 {
-	// Render world
 	world->render(rc);
 
-	// Render gizmos
 	rc.with(camera).bind([&] (Painter& painter)
 	{
 		gizmoCollection->draw(painter);
+	});
+
+	Camera uiCamera;
+	rc.with(uiCamera).bind([&] (Painter& painter)
+	{
+		drawOverlay(painter, painter.getWorldViewAABB());
 	});
 }
 
@@ -136,6 +150,27 @@ Resources& SceneEditor::getGameResources() const
 Resources& SceneEditor::getEditorResources() const
 {
 	return *editorResources;
+}
+
+void SceneEditor::drawOverlay(Painter& painter, Rect4f view)
+{
+	const Vector2f drawPos = view.getBottomLeft() + Vector2f(10, -10);
+	String drawStr = Vector2i(mousePos.round()).toString();
+	std::vector<ColourOverride> colours;
+
+	if (selectedEntity) {
+		const auto* t2d = selectedEntity.value().tryGetComponent<Transform2DComponent>();
+		if (t2d) {
+			colours.emplace_back(drawStr.size(), Colour4f(0.5f, 0.5f, 0.5f));
+			drawStr += " " + t2d->inverseTransformPoint(mousePos.round()).toString();
+		}
+	}
+	
+	coordinateInfo
+		.setPosition(drawPos)
+		.setText(drawStr)
+		.setColourOverride(colours)
+		.draw(painter);
 }
 
 EntityId SceneEditor::createCamera()
