@@ -205,8 +205,10 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	// Additional constructors
 	if (!component.members.empty()) {
 		const auto serializableMembers = filter(component.members.begin(), component.members.end(), [] (const MemberSchema& m) { return m.serializable; });
-		gen.addBlankLine()
-			.addConstructor(MemberSchema::toVariableSchema(serializableMembers), true);
+		if (!serializableMembers.empty()) {
+			gen.addBlankLine()
+				.addConstructor(MemberSchema::toVariableSchema(serializableMembers), true);
+		}
 	}
 	
 	// Deserialize method
