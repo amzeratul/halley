@@ -310,8 +310,11 @@ void SceneEditorWindow::setTool(SceneEditorTool tool, const String& componentNam
 
 	curTool = tool;
 	curComponentName = componentName;
+	
 	setToolUI(canvas->setTool(tool, componentName, fieldName, options));
+	
 	toolMode->setItemActive("polygon", tool == SceneEditorTool::Polygon);
+	toolMode->setItemActive("vertex", tool == SceneEditorTool::Vertex);
 	toolMode->setSelectedOptionId(toString(tool));
 }
 

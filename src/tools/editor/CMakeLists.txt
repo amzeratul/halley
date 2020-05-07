@@ -32,6 +32,7 @@ set (editor_sources
 	"src/scene/gizmos/polygon_gizmo.cpp"
 	"src/scene/gizmos/selected_bounds_gizmo.cpp"
 	"src/scene/gizmos/translate_gizmo.cpp"
+	"src/scene/gizmos/vertex_gizmo.cpp"
 
 	"src/ui/console_window.cpp"
 	"src/ui/editor_ui_factory.cpp"
@@ -70,6 +71,7 @@ set (editor_headers
 	"src/scene/gizmos/polygon_gizmo.h"
 	"src/scene/gizmos/selected_bounds_gizmo.h"
 	"src/scene/gizmos/translate_gizmo.h"
+	"src/scene/gizmos/vertex_gizmo.h"
 	
 	"src/ui/console_window.h"
 	"src/ui/editor_ui_factory.h"

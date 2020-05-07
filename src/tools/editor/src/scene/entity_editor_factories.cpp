@@ -206,6 +206,38 @@ public:
 	}
 };
 
+class ComponentEditorVertexFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::Vertex";
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(ConfigNode::SequenceType());
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto data = pars.data;
+		const auto componentNames = pars.otherComponentNames;
+		const auto componentName = pars.componentName;
+
+		auto style = context.getUIFactory().getStyle("buttonThin");
+
+		auto field = std::make_shared<UIButton>("editVertex", style, LocalisedString::fromHardcodedString("Edit..."));
+		field->setMinSize(Vector2f(30, 22));
+
+		field->setHandle(UIEventType::ButtonClicked, "editVertex", [=, &context] (const UIEvent& event)
+		{
+			context.setTool(SceneEditorTool::Vertex, componentName, data.getName(), ConfigNode());
+		});
+
+		return field;
+	}
+};
+
 class ComponentEditorSpriteFieldFactory : public IComponentEditorFieldFactory {
 public:
 	String getFieldType() override
@@ -378,8 +410,7 @@ public:
 
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
-		auto data = pars.data;
-		const auto& defaultValue = pars.defaultValue;
+		const auto data = pars.data;
 		const auto componentNames = pars.otherComponentNames;
 		const auto componentName = pars.componentName;
 
@@ -609,6 +640,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorAngle1fFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorBoolFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorVector2fFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorVertexFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorSpriteFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorAnimationPlayerFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorPolygonFieldFactory>());

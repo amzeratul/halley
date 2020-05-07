@@ -61,6 +61,7 @@ namespace Halley {
 
 		ConfigNode& getEntityData();
 		ConfigNode* getComponentData(const String& name);
+		const ConfigNode* getComponentData(const String& name) const;
 
 		void markModified(const String& component, const String& field);
 		

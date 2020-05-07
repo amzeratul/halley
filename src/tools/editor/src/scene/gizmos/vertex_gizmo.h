@@ -1,0 +1,21 @@
+#pragma once
+#include "../scene_editor_gizmo.h"
+
+namespace Halley {
+	class VertexGizmo final : public SceneEditorGizmo {
+	public:
+		VertexGizmo(String componentName, String fieldName);
+		void update(Time time, const SceneEditorInputState& inputState) override;
+		void draw(Painter& painter) const override;
+
+	private:
+		String componentName;
+		String fieldName;
+		bool visible = false;
+		SceneEditorGizmoHandle handle;
+
+		Circle getMainHandle() const;
+		void updateEntityData(Vector2f pos);
+		Vector2f readEntityData() const;
+	};
+}

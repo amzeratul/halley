@@ -132,6 +132,21 @@ ConfigNode* SceneEditorGizmo::getComponentData(const String& name)
 	return nullptr;
 }
 
+const ConfigNode* SceneEditorGizmo::getComponentData(const String& name) const
+{
+	auto& components = (*entityData)["components"];
+	if (components.getType() == ConfigNodeType::Sequence) {
+		for (auto& compNode: components.asSequence()) {
+			for (auto& [curName, value]: compNode.asMap()) {
+				if (curName == name) {
+					return &value;
+				}
+			}
+		}
+	}
+	return nullptr;
+}
+
 void SceneEditorGizmo::markModified(const String& component, const String& field)
 {
 	if (outputState) {

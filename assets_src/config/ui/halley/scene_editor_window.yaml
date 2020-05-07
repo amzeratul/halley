@@ -38,6 +38,8 @@ children:
                 image: ui/scene_editor_move.png
               - id: polygon
                 image: ui/scene_editor_polygon.png
+              - id: vertex
+                image: ui/scene_editor_polygon.png
     - widget: { id: canvas, class: sceneEditorCanvas }
       proportion: 1
       sizer: { type: vertical }

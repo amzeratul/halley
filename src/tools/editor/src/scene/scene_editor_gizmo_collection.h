@@ -23,6 +23,7 @@ namespace Halley {
 		std::unique_ptr<SceneEditorGizmo> activeGizmo;
 		
 		SceneEditorTool currentTool = SceneEditorTool::None;
+		
 		std::optional<EntityRef> selectedEntity;
 		ConfigNode* entityData = nullptr;
 	};

@@ -32,12 +32,13 @@ namespace Halley {
         Translate,
         Rotate,
         Scale,
-        Polygon
+        Polygon,
+    	Vertex
     };
 
     template <>
     struct EnumNames<SceneEditorTool> {
-        constexpr std::array<const char*, 6> operator()() const {
+        constexpr std::array<const char*, 7> operator()() const {
             return
         	{{
 				"none",
@@ -45,7 +46,8 @@ namespace Halley {
             	"translate",
         		"rotate",
         		"scale",
-        		"polygon"
+        		"polygon",
+        		"vertex"
             }};
         }
     };
