@@ -28,6 +28,52 @@
 #include "halley/text/string_converter.h"
 
 #if defined(_MSC_VER) && !defined(WINDOWS_STORE)
+#define HAS_STACKWALKER
+#include "StackWalker/StackWalker.h"
+
+class OStreamStackWalker : public StackWalker {
+public:
+	OStreamStackWalker(std::ostream& os, int startFrom)
+		: os(os)
+		, startFrom(startFrom)
+	{}
+
+protected:
+	void OnCallstackEntry(CallstackEntryType eType, CallstackEntry& entry) override
+	{
+		if (eType == firstEntry) {
+			curPos = 0;
+		}
+
+		if (++curPos < startFrom) {
+			return;
+		}
+
+		os << '\t' << (curPos - startFrom) << ": " << entry.name;
+		if (entry.lineFileName[0] != 0) {
+			const char* lastSlash = strrchr(entry.lineFileName, '\\');
+			if (lastSlash) {
+				++lastSlash;
+			} else {
+				lastSlash = entry.lineFileName;
+			}
+			os << " at " << lastSlash << ':' << entry.lineNumber;
+		}
+		if (entry.moduleName[0] != 0) {
+			os << " [" << entry.moduleName << ']';
+		}
+		os << '\n';
+	}
+	
+private:
+	std::ostream& os;
+	int startFrom = 0;
+	int curPos = 0;
+};
+
+#endif
+
+#if false
 #define HAS_STACKTRACE
 #include <boost/stacktrace.hpp>
 #endif
@@ -83,7 +129,11 @@ static void signalHandler(int signum)
 		ss << "UNKNOWN (" << signum << ")";
 	}
 
-#ifdef HAS_STACKTRACE
+#if defined(HAS_STACKWALKER)
+	ss << "\n";
+	OStreamStackWalker walker(ss, 3);
+	walker.ShowCallstack();
+#elif defined(HAS_STACKTRACE)
 	ss << "\n" << boost::stacktrace::stacktrace(3, 99);
 #endif
 	errorHandler(ss.str());
@@ -95,10 +145,15 @@ static void signalHandler(int signum)
 static void terminateHandler()
 {
 	std::stringstream ss;
-	ss << "std::terminate() invoked.";
-#ifdef HAS_STACKTRACE
-	ss << "\n" << boost::stacktrace::stacktrace(3, 99);
+	ss << "std::terminate() invoked.\n";
+
+#if defined(HAS_STACKWALKER)
+	OStreamStackWalker walker(ss, 3);
+	walker.ShowCallstack();
+#elif defined(HAS_STACKTRACE)
+	ss << boost::stacktrace::stacktrace(3, 99);
 #endif
+
 	errorHandler(ss.str());
 
 	std::abort();
@@ -115,14 +170,17 @@ void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(cons
 #endif
 
 	std::set_terminate(&terminateHandler);
-	errorHandler = eh;
+	errorHandler = std::move(eh);
 }
 
 
 String Debug::getCallStack(int skip)
 {
 	std::stringstream ss;
-#ifdef HAS_STACKTRACE
+#if defined(HAS_STACKWALKER)
+	OStreamStackWalker walker(ss, skip);
+	walker.ShowCallstack();
+#elif defined(HAS_STACKTRACE)
 	ss << boost::stacktrace::stacktrace(skip, 99);
 #endif
 	return ss.str();
