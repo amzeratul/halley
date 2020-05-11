@@ -12,11 +12,9 @@ endif ()
 
 set(HALLEY_BIN "bin")
 set(HALLEY_LIB "lib")
-if (MSVC)
-    if(NOT (("${CMAKE_GENERATOR_PLATFORM}" MATCHES "x64") OR ("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)") OR (CMAKE_SIZEOF_VOID_P EQUAL 8))) # 32-bit build
-        set(HALLEY_BIN "bin32")
-        set(HALLEY_LIB "lib32")
-    endif()
+if(CMAKE_SIZEOF_VOID_P EQUAL 4) # 32-bit build
+    set(HALLEY_BIN "bin32")
+    set(HALLEY_LIB "lib32")
 endif()
 
 include_directories(src/contrib)
