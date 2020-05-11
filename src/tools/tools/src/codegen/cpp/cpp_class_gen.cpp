@@ -200,7 +200,9 @@ String CPPClassGenerator::getMemberString(const MemberSchema& var)
 {
 	String init;
 	if (var.defaultValue.empty()) {
-		init = "{}";
+		if (!var.type.name.endsWith("&")) {
+			init = "{}";
+		}
 	} else {
 		bool first = true;
 		for (const auto& v: var.defaultValue) {
