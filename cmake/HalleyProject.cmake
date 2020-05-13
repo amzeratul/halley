@@ -454,7 +454,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 			set(HALLEY_RUNNER_PATH ${HALLEY_PATH}\\bin\\halley-cmd.exe)
 			set(HALLEY_RUNNER_DEBUG_PATH ${HALLEY_PATH}\\bin\\halley-cmd.exe)
 			configure_file(${HALLEY_PATH}/cmake/halley_game_dll.vcxproj.user.in ${CMAKE_CURRENT_BINARY_DIR}/${name}-dll.vcxproj.user @ONLY) 
-			add_dependencies(${name}-dll halley-cmd)
+			#add_dependencies(${name}-dll halley-cmd) # Having this allows you to run dll and make it build halley-cmd first, but it also causes problems building the game from editor
 		endif()
 
 		# Setup a gamebins target for external building
