@@ -1,5 +1,11 @@
 @echo off
 
+set targetDllPath="%~1\bin\SDL2.dll"
+if not exist %targetDllPath% (
+    echo Copying SDL2.dll to %targetDllPath%
+    copy SDL2.dll %targetDllPath% || exit /b 1
+)
+
 cd /d %1
 if not exist build mkdir build
 cd build
