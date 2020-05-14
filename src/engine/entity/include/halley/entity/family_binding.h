@@ -45,32 +45,32 @@ namespace Halley {
 	public:
 		T& operator[](size_t index) {
 			Expects(index < count());
-			return *reinterpret_cast<T*>(getElement(index));
+			return *getFamilyElement(index);
 		}
 		
 		const T& operator[](size_t index) const {
 			Expects(index < count());
-			return *reinterpret_cast<T*>(getElement(index));
+			return *getFamilyElement(index);
 		}
 
 		T* begin()
 		{
-			return reinterpret_cast<T*>(getElement(0));
+			return getFamilyElement(0);
 		}
 
 		const T* begin() const
 		{
-			return reinterpret_cast<T*>(getElement(0));
+			return getFamilyElement(0);
 		}
 
 		T* end()
 		{
-			return reinterpret_cast<T*>(getElement(count()));
+			return getFamilyElement(count());
 		}
 
 		const T* end() const
 		{
-			return reinterpret_cast<T*>(getElement(count()));
+			return getFamilyElement(count());
 		}
 
 		T& getSingleton()
@@ -143,6 +143,12 @@ namespace Halley {
 		void init(MaskStorage& storage)
 		{
 			doInit(T::Type::readMask(storage), T::Type::writeMask(storage));
+		}
+
+		T* getFamilyElement(size_t i) const
+		{
+			// WARNING: Strict aliasing rules violation
+			return reinterpret_cast<T*>(getElement(i));
 		}
 	};
 }
