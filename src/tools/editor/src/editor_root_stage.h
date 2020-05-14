@@ -1,6 +1,7 @@
 #pragma once
 
 #include "prec.h"
+#include "halley/tools/dll/dynamic_library.h"
 #include "halley/tools/tasks/editor_task_set.h"
 #include "ui/toolbar.h"
 
@@ -18,7 +19,7 @@ namespace Halley {
 		Settings
 	};
 
-	class EditorRootStage final : public Stage
+	class EditorRootStage final : public Stage, public IDynamicLibraryListener
 	{
 	public:
 		EditorRootStage(HalleyEditor& editor, std::unique_ptr<Project> project);
@@ -34,6 +35,9 @@ namespace Halley {
 
 		EditorTaskSet& getTasks() const;
 
+		void onUnloadDLL() override;
+		void onLoadDLL() override;
+		
 	private:
 		HalleyEditor& editor;
 		I18N i18n;
@@ -54,6 +58,8 @@ namespace Halley {
 		std::shared_ptr<Toolbar> toolbar;
 		std::shared_ptr<UIPagedPane> pagedPane;
 
+		std::vector<IEditorCustomTools::ToolData> customTools;
+
 		std::unique_ptr<EditorTaskSet> tasks;
 		std::unique_ptr<DevConServer> devConServer;
 
@@ -62,6 +68,7 @@ namespace Halley {
 		void createUI();
 		void createProjectUI();
 		void loadCustomProjectUI();
+		void destroyCustomProjectUI();
 
 		void updateUI(Time time);
 

@@ -122,6 +122,13 @@ void EditorRootStage::initSprites()
 
 void EditorRootStage::clearUI()
 {
+	if (project) {
+		project->withDLL([&] (DynamicLibrary& dll)
+		{
+			dll.removeReloadListener(*this);
+		});
+	}
+	
 	if (uiTop) {
 		uiTop->clear();
 	}
@@ -185,19 +192,50 @@ void EditorRootStage::createProjectUI()
 	uiMid->add(pagedPane, 1);
 	uiBottom->add(taskbar, 1);
 
-	pagedPane->getPage(int(EditorTabs::Assets))->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project, *this), 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(int(EditorTabs::Scene))->add(std::make_shared<SceneEditorWindow>(*uiFactory, *project, getAPI()), 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(int(EditorTabs::Settings))->add(std::make_shared<ConsoleWindow>(*uiFactory), 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project, *this), 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(static_cast<int>(EditorTabs::Scene))->add(std::make_shared<SceneEditorWindow>(*uiFactory, *project, getAPI()), 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(std::make_shared<ConsoleWindow>(*uiFactory), 1, Vector4f(8, 8, 8, 8));
 
 	loadCustomProjectUI();
+	project->withDLL([&] (DynamicLibrary& dll)
+	{
+		dll.addReloadListener(*this);
+	});
 }
 
 void EditorRootStage::loadCustomProjectUI()
 {
-	project->withDLL([&] (DynamicLibrary& dll)
-	{
-		// TODO
-	});
+	destroyCustomProjectUI();
+
+	auto game = project->createGameInstance();
+	if (game) {
+		auto customToolsInterface = game->createEditorCustomToolsInterface();
+		if (customToolsInterface) {
+			customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(getResources(), project->getGameResources(), getAPI()));
+
+			for (auto& tool: customTools) {
+				// TODO: create
+			}
+		}
+	}
+}
+
+void EditorRootStage::destroyCustomProjectUI()
+{
+	for (auto& tool: customTools) {
+		// TODO: destroy
+	}
+	customTools.clear();
+}
+
+void EditorRootStage::onLoadDLL()
+{
+	loadCustomProjectUI();
+}
+
+void EditorRootStage::onUnloadDLL()
+{
+	destroyCustomProjectUI();
 }
 
 void EditorRootStage::updateUI(Time time)
