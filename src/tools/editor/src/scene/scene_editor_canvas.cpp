@@ -10,7 +10,7 @@
 #include "halley/core/input/input_keyboard.h"
 #include "halley/core/input/input_keys.h"
 #include "scene_editor_gizmo_collection.h"
-#include "halley/core/scene_editor/scene_editor_interface.h"
+#include "halley/core/editor_extensions/scene_editor_interface.h"
 #include "scene_editor_window.h"
 #include "src/project/core_api_wrapper.h"
 

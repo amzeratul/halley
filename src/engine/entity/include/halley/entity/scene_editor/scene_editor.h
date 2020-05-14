@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/core/scene_editor/scene_editor_interface.h"
+#include "halley/core/editor_extensions/scene_editor_interface.h"
 #include "halley/core/graphics/camera.h"
 #include "../entity.h"
 #include "halley/core/graphics/text/text_renderer.h"

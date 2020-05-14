@@ -11,6 +11,7 @@ namespace Halley
 	class Environment;
 	class GameConsole;
 	class ISceneEditor;
+	class IEditorCustomTools;
 	
 	class Game
 	{
@@ -41,6 +42,7 @@ namespace Halley
 		virtual void onUncaughtException(const Exception& exception, TimeLine timeLine);
 
 		virtual std::unique_ptr<ISceneEditor> createSceneEditorInterface();
+		virtual std::unique_ptr<IEditorCustomTools> createEditorCustomToolsInterface();
 
 		const HalleyAPI& getAPI() const;
 		Resources& getResources() const;

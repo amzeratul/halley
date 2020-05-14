@@ -8,19 +8,20 @@ using namespace Halley;
 SceneEditorGameBridge::SceneEditorGameBridge(const HalleyAPI& api, Resources& resources, UIFactory& factory, Project& project)
 	: api(api)
 	, resources(resources)
+	, project(project)
 {
 	gizmos = std::make_unique<SceneEditorGizmoCollection>(factory, resources);
 
 	gameResources = &project.getGameResources();
-	gameDLL = project.getGameDLL();
-	if (gameDLL) {
-		loadDLL();
-	}
+	project.withDLL([&] (DynamicLibrary& dll)
+	{
+		load();
+	});
 }
 
 SceneEditorGameBridge::~SceneEditorGameBridge()
 {
-	unloadDLL();
+	unload();
 }
 
 bool SceneEditorGameBridge::isLoaded() const
@@ -37,7 +38,7 @@ ISceneEditor& SceneEditorGameBridge::getInterface() const
 void SceneEditorGameBridge::update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState)
 {
 	if (errorState) {
-		unloadDLL();
+		unload();
 	}
 
 	if (interface) {
@@ -152,19 +153,18 @@ ConfigNode SceneEditorGameBridge::onToolSet(SceneEditorTool tool, const String& 
 	return options;
 }
 
-void SceneEditorGameBridge::loadDLL()
+void SceneEditorGameBridge::load()
 {
-	Expects(gameDLL);
-
-	gameDLL->load(true);
-	const auto getHalleyEntry = static_cast<IHalleyEntryPoint * (HALLEY_STDCALL*)()>(gameDLL->getFunction("getHalleyEntry"));
-	auto game = getHalleyEntry()->createGame();
 	guardedRun([&]() {
+		const auto game = project.createGameInstance();
+		if (!game) {
+			throw Exception("Unable to load scene editor", HalleyExceptions::Tools);
+		}
+
 		interface = game->createSceneEditorInterface();
 		interfaceReady = false;
 		errorState = false;
 	});
-	game.reset();
 
 	if (interface) {
 		gameCoreAPI = std::make_unique<CoreAPIWrapper>(*api.core);
@@ -181,21 +181,17 @@ void SceneEditorGameBridge::loadDLL()
 			interface->init(context);
 		});
 		if (errorState) {
-			unloadDLL();
+			unload();
 		} else {
 			initializeInterfaceIfNeeded();
 		}
 	}
 }
 
-void SceneEditorGameBridge::unloadDLL()
+void SceneEditorGameBridge::unload()
 {
 	interface.reset();
 	interfaceReady = false;
-
-	if (gameDLL) {
-		gameDLL->unload();
-	}
 
 	gameAPI.reset();
 	gameCoreAPI.reset();

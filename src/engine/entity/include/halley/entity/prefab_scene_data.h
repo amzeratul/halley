@@ -1,6 +1,6 @@
 #pragma once
 #include "entity_factory.h"
-#include "halley/core/scene_editor/scene_editor_interface.h"
+#include "halley/core/editor_extensions/scene_editor_interface.h"
 
 namespace Halley {
     class PrefabSceneData final : public ISceneData {

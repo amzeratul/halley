@@ -1,6 +1,6 @@
-#include "scene_editor/component_editor_context.h"
+#include "editor_extensions/component_editor_context.h"
 #include "halley/file_formats/config_file.h"
-#include "scene_editor/component_field_parameters.h"
+#include "editor_extensions/component_field_parameters.h"
 
 using namespace Halley;
 

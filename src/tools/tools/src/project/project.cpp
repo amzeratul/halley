@@ -8,12 +8,14 @@
 #include "halley/tools/project/project_properties.h"
 #include "halley/support/logger.h"
 #include "halley/core/devcon/devcon_server.h"
+#include "halley/core/entry/entry_point.h"
 #include "halley/core/resources/resource_locator.h"
 #include "halley/core/resources/standard_resources.h"
 #include "halley/support/debug.h"
 #include "halley/tools/assets/metadata_importer.h"
 #include "halley/tools/ecs/ecs_data.h"
 #include "halley/tools/project/project_loader.h"
+#include "halley/core/game/game.h"
 
 using namespace Halley;
 
@@ -37,7 +39,7 @@ Project::Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader&
 		try {
 			gameDll = std::make_shared<DynamicLibrary>(dllPath.string());
 			gameDll->clearTempDirectory();
-			gameDll->load(false);
+			gameDll->load(true);
 			Logger::logInfo("Loaded " + dllPath.string());
 		} catch (...) {
 			gameDll.reset();
@@ -317,6 +319,20 @@ void Project::loadGameResources(const HalleyAPI& api)
 Resources& Project::getGameResources()
 {
 	return *gameResources;
+}
+
+std::unique_ptr<Game> Project::createGameInstance() const
+{
+	if (!gameDll) {
+		return {};
+	}
+
+	const auto getHalleyEntry = reinterpret_cast<IHalleyEntryPoint * (HALLEY_STDCALL*)()>(gameDll->getFunction("getHalleyEntry"));
+	if (!getHalleyEntry) {
+		return {};
+	}
+	
+	return getHalleyEntry()->createGame();
 }
 
 void Project::loadECSData()

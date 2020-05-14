@@ -6,8 +6,8 @@
 #include "halley/ui/widgets/ui_dropdown.h"
 #include "halley/ui/widgets/ui_textinput.h"
 #include "src/ui/select_asset_widget.h"
-#include "halley/core/scene_editor/component_field_parameters.h"
-#include "halley/core/scene_editor/component_editor_context.h"
+#include "halley/core/editor_extensions/component_field_parameters.h"
+#include "halley/core/editor_extensions/component_editor_context.h"
 
 using namespace Halley;
 

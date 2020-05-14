@@ -32,8 +32,8 @@ namespace Halley {
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
+		Project& project;
 		
-		std::shared_ptr<DynamicLibrary> gameDLL;
 		std::unique_ptr<ISceneEditor> interface;
 		std::unique_ptr<HalleyAPI> gameAPI;
 		std::unique_ptr<CoreAPIInternal> gameCoreAPI;
@@ -45,8 +45,8 @@ namespace Halley {
 		mutable bool errorState = false;
 		bool interfaceReady = false;
 
-		void loadDLL();
-		void unloadDLL();
+		void load();
+		void unload();
 
 		void guardedRun(const std::function<void()>& f, bool allowFailure = false) const;
 	};

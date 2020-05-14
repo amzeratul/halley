@@ -19,6 +19,7 @@ namespace Halley
 	class ECSData;
 	class HalleyAPI;
 	using HalleyPluginPtr = std::shared_ptr<IHalleyPlugin>;
+	class Game;
 
 	class Project
 	{
@@ -72,12 +73,21 @@ namespace Halley
 		void setCheckAssetTask(CheckAssetsTask* checkAssetsTask);
 		void notifyAssetFileModified(Path path);
 
-		const std::shared_ptr<DynamicLibrary>& getGameDLL() const;
 		Path getDLLPath() const;
 		Path getExecutablePath() const;
 
 		void loadGameResources(const HalleyAPI& api);
 		Resources& getGameResources();
+
+		template <typename F>
+		void withDLL(F f) const
+		{
+			if (gameDll) {
+				f(*gameDll);
+			}
+		}
+
+		std::unique_ptr<Game> createGameInstance() const;
 
 	private:
 		std::vector<String> platforms;
@@ -100,6 +110,7 @@ namespace Halley
 		std::shared_ptr<DynamicLibrary> gameDll;
 		std::unique_ptr<Resources> gameResources;
 
+		const std::shared_ptr<DynamicLibrary>& getGameDLL() const;
 		void loadECSData();
 	};
 }

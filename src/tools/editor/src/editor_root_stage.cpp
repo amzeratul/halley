@@ -60,10 +60,10 @@ void EditorRootStage::onVariableUpdate(Time time)
 	}
 
 	if (project) {
-		const auto& dll = project->getGameDLL();
-		if (dll) {
-			dll->reloadIfChanged();
-		}
+		project->withDLL([&] (DynamicLibrary& dll)
+		{
+			dll.reloadIfChanged();
+		});
 	}
 }
 
@@ -178,7 +178,7 @@ void EditorRootStage::createProjectUI()
 	clearUI();
 
 	pagedPane = std::make_shared<UIPagedPane>("pages", 6);
-	const auto toolbar = std::make_shared<Toolbar>(*uiFactory, *this, *project);
+	toolbar = std::make_shared<Toolbar>(*uiFactory, *this, *project);
 	const auto taskbar = std::make_shared<TaskBar>(*uiFactory, *tasks);
 
 	uiTop->add(toolbar, 1, Vector4f(0, 16, 0, 8));
@@ -188,6 +188,16 @@ void EditorRootStage::createProjectUI()
 	pagedPane->getPage(int(EditorTabs::Assets))->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project, *this), 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(int(EditorTabs::Scene))->add(std::make_shared<SceneEditorWindow>(*uiFactory, *project, getAPI()), 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(int(EditorTabs::Settings))->add(std::make_shared<ConsoleWindow>(*uiFactory), 1, Vector4f(8, 8, 8, 8));
+
+	loadCustomProjectUI();
+}
+
+void EditorRootStage::loadCustomProjectUI()
+{
+	project->withDLL([&] (DynamicLibrary& dll)
+	{
+		// TODO
+	});
 }
 
 void EditorRootStage::updateUI(Time time)

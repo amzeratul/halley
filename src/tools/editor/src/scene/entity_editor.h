@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/core/scene_editor/scene_editor_interface.h"
+#include "halley/core/editor_extensions/scene_editor_interface.h"
 #include "halley/tools/ecs/fields_schema.h"
 #include "halley/ui/ui_widget.h"
 #include "src/ui/select_asset_widget.h"

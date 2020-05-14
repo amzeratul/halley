@@ -59,9 +59,10 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "resources/resources.h"
 #include "resources/resource_locator.h"
 
-#include "scene_editor/component_editor_context.h"
-#include "scene_editor/component_field_parameters.h"
-#include "scene_editor/scene_editor_interface.h"
+#include "editor_extensions/component_editor_context.h"
+#include "editor_extensions/component_field_parameters.h"
+#include "editor_extensions/editor_custom_tools_interface.h"
+#include "editor_extensions/scene_editor_interface.h"
 
 #include "stage/stage.h"
 

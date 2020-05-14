@@ -51,6 +51,7 @@ namespace Halley {
 		std::shared_ptr<UIWidget> uiTop;
 		std::shared_ptr<UIWidget> uiMid;
 		std::shared_ptr<UIWidget> uiBottom;
+		std::shared_ptr<Toolbar> toolbar;
 		std::shared_ptr<UIPagedPane> pagedPane;
 
 		std::unique_ptr<EditorTaskSet> tasks;
@@ -60,6 +61,7 @@ namespace Halley {
 		void clearUI();
 		void createUI();
 		void createProjectUI();
+		void loadCustomProjectUI();
 
 		void updateUI(Time time);
 

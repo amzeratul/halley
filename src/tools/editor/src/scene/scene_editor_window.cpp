@@ -22,20 +22,20 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 {
 	makeUI();
 
-	const auto& dll = project.getGameDLL();
-	if (dll) {
-		dll->addReloadListener(*this);
-	}
+	project.withDLL([&] (DynamicLibrary& dll)
+	{
+		dll.addReloadListener(*this);
+	});
 }
 
 SceneEditorWindow::~SceneEditorWindow()
 {
 	unloadScene();
 
-	const auto& dll = project.getGameDLL();
-	if (dll) {
-		dll->removeReloadListener(*this);
-	}
+	project.withDLL([&] (DynamicLibrary& dll)
+	{
+		dll.removeReloadListener(*this);
+	});
 }
 
 void SceneEditorWindow::makeUI()
