@@ -1,11 +1,19 @@
 #pragma once
 
+#include <set>
 #include <boost/filesystem.hpp>
 
 using LibHandleType = void*;
 
 namespace Halley
 {
+	class IDynamicLibraryListener {
+	public:
+		virtual ~IDynamicLibraryListener() = default;
+		virtual void onUnloadDLL() = 0;
+		virtual void onLoadDLL() = 0;
+	};
+	
 	class DynamicLibrary
 	{
 	public:
@@ -20,6 +28,10 @@ namespace Halley
 
 		bool isLoaded() const;
 		bool hasChanged() const;
+
+		void reloadIfChanged();
+		void addReloadListener(IDynamicLibraryListener& listener);
+		void removeReloadListener(IDynamicLibraryListener& listener);
 
 		void clearTempDirectory();
 
@@ -40,6 +52,8 @@ namespace Halley
 		bool loaded = false;
 
 		mutable std::vector<boost::filesystem::path> toDelete;
+
+		std::set<IDynamicLibraryListener*> reloadListeners;
 
 		void flushLoaded() const;
 		boost::filesystem::path getTempPath() const;

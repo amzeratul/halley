@@ -58,6 +58,13 @@ void EditorRootStage::onVariableUpdate(Time time)
 	if (prefs.isDirty()) {
 		prefs.saveToFile();
 	}
+
+	if (project) {
+		const auto& dll = project->getGameDLL();
+		if (dll) {
+			dll->reloadIfChanged();
+		}
+	}
 }
 
 void EditorRootStage::onRender(RenderContext& context) const

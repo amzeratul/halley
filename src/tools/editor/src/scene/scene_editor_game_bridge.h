@@ -12,9 +12,6 @@ namespace Halley {
 		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState);
 		void render(RenderContext& rc) const;
 
-		bool needsReload() const;
-		void reload();
-
 		bool isLoaded() const;
 		ISceneEditor& getInterface() const;
 		void initializeInterfaceIfNeeded();
@@ -50,7 +47,6 @@ namespace Halley {
 
 		void loadDLL();
 		void unloadDLL();
-		void reloadDLL();
 
 		void guardedRun(const std::function<void()>& f, bool allowFailure = false) const;
 	};

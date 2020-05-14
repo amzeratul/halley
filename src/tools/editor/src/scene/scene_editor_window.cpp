@@ -21,11 +21,21 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 	, gameBridge(std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory, project))
 {
 	makeUI();
+
+	const auto& dll = project.getGameDLL();
+	if (dll) {
+		dll->addReloadListener(*this);
+	}
 }
 
 SceneEditorWindow::~SceneEditorWindow()
 {
 	unloadScene();
+
+	const auto& dll = project.getGameDLL();
+	if (dll) {
+		dll->removeReloadListener(*this);
+	}
 }
 
 void SceneEditorWindow::makeUI()
@@ -164,11 +174,6 @@ void SceneEditorWindow::unloadScene()
 
 void SceneEditorWindow::update(Time t, bool moved)
 {
-	if (gameBridge->needsReload()) {
-		unloadScene();
-		gameBridge->reload();
-		loadScene(*prefab);
-	}
 }
 
 bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
@@ -179,6 +184,16 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 	}
 
 	return false;
+}
+
+void SceneEditorWindow::onUnloadDLL()
+{
+	unloadScene();
+}
+
+void SceneEditorWindow::onLoadDLL()
+{
+	loadScene(*prefab);
 }
 
 void SceneEditorWindow::selectEntity(const String& id)

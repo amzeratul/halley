@@ -23,19 +23,6 @@ SceneEditorGameBridge::~SceneEditorGameBridge()
 	unloadDLL();
 }
 
-bool SceneEditorGameBridge::needsReload() const
-{
-	if (gameDLL) {
-		return gameDLL->hasChanged();
-	}
-	return false;
-}
-
-void SceneEditorGameBridge::reload()
-{
-	reloadDLL();
-}
-
 bool SceneEditorGameBridge::isLoaded() const
 {
 	return interfaceReady;
@@ -214,11 +201,6 @@ void SceneEditorGameBridge::unloadDLL()
 	gameCoreAPI.reset();
 
 	errorState = false;
-}
-
-void SceneEditorGameBridge::reloadDLL()
-{
-	Logger::logWarning("SceneEditorCanvas::reloadDLL() not implemented yet");
 }
 
 void SceneEditorGameBridge::guardedRun(const std::function<void()>& f, bool allowFailure) const

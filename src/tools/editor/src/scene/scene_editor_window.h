@@ -3,6 +3,7 @@
 #include "entity_list.h"
 #include "halley/ui/ui_widget.h"
 #include "scene_editor_canvas.h"
+#include "halley/tools/dll/dynamic_library.h"
 
 namespace Halley {
 	class HalleyAPI;
@@ -10,7 +11,7 @@ namespace Halley {
 	class UIFactory;
 	class EntityFactory;
 
-	class SceneEditorWindow final : public UIWidget {
+	class SceneEditorWindow final : public UIWidget, public IDynamicLibraryListener {
 	public:
 		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api);
 		~SceneEditorWindow();
@@ -47,7 +48,10 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 		bool onKeyPress(KeyboardKeyPress key) override;
-		
+
+		void onUnloadDLL() override;
+		void onLoadDLL() override;
+
 	private:
 		const HalleyAPI& api;
 		UIFactory& uiFactory;

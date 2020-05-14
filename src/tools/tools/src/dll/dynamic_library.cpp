@@ -154,6 +154,32 @@ bool DynamicLibrary::hasChanged() const
 	return last_write_time(libOrigPath) > libLastWrite && last_write_time(debugSymbolsOrigPath) > debugLastWrite;
 }
 
+void DynamicLibrary::reloadIfChanged()
+{
+	if (hasChanged()) {
+		for (const auto& l: reloadListeners) {
+			l->onUnloadDLL();
+		}
+		
+		unload();
+		load(true);
+		
+		for (const auto& l: reloadListeners) {
+			l->onLoadDLL();
+		}
+	}
+}
+
+void DynamicLibrary::addReloadListener(IDynamicLibraryListener& listener)
+{
+	reloadListeners.insert(&listener);
+}
+
+void DynamicLibrary::removeReloadListener(IDynamicLibraryListener& listener)
+{
+	reloadListeners.erase(&listener);
+}
+
 void DynamicLibrary::clearTempDirectory()
 {
 	boost::system::error_code ec;
