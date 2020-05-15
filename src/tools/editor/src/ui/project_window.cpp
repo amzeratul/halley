@@ -81,23 +81,35 @@ void ProjectWindow::makePagedPane()
 	uiMid->add(pagedPane, 1);
 }
 
-void ProjectWindow::loadCustomUI()
+bool ProjectWindow::loadCustomUI()
 {
 	destroyCustomUI();
 
 	auto game = project.createGameInstance();
-	if (game) {
-		auto customToolsInterface = game->createEditorCustomToolsInterface();
-		if (customToolsInterface) {
-			customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(factory, resources, project.getGameResources(), api));
-
-			for (auto& tool: customTools) {
-				const auto img = std::make_shared<UIImage>(tool.icon);
-				toolbar->getList()->addImage(tool.id, img, 1, {}, UISizerAlignFlags::Centre);
-				pagedPane->addPage()->add(tool.widget, 1, Vector4f(8, 8, 8, 8));
-			}
-		}
+	if (!game) {
+		return false;
 	}
+	
+	auto customToolsInterface = game->createEditorCustomToolsInterface();
+	if (!customToolsInterface) {
+		return false;
+	}
+	
+	try {
+		customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(factory, resources, project.getGameResources(), api));
+	} catch (const std::exception& e) {
+		Logger::logException(e);
+	} catch (...) {
+		return false;
+	}
+
+	for (auto& tool: customTools) {
+		const auto img = std::make_shared<UIImage>(tool.icon);
+		toolbar->getList()->addImage(tool.id, img, 1, {}, UISizerAlignFlags::Centre);
+		pagedPane->addPage()->add(tool.widget, 1, Vector4f(8, 8, 8, 8));
+	}
+
+	return true;
 }
 
 void ProjectWindow::destroyCustomUI()
@@ -110,14 +122,20 @@ void ProjectWindow::destroyCustomUI()
 
 void ProjectWindow::onLoadDLL()
 {
-	waitingForAssets = true;
+	waitingToLoadCustomUI = true;
+}
+
+void ProjectWindow::onUnloadDLL()
+{
+	destroyCustomUI();
 }
 
 void ProjectWindow::onAssetsLoaded()
 {
-	if (waitingForAssets) {
-		waitingForAssets = false;
-		loadCustomUI();
+	if (waitingToLoadCustomUI) {
+		if (loadCustomUI()) {
+			waitingToLoadCustomUI = false;
+		}
 	}
 }
 
@@ -129,11 +147,6 @@ void ProjectWindow::update(Time t, bool moved)
 
 	const auto size = api.video->getWindow().getDefinition().getSize();
 	setMinSize(Vector2f(size));
-}
-
-void ProjectWindow::onUnloadDLL()
-{
-	destroyCustomUI();
 }
 
 void ProjectWindow::setPage(EditorTabs tab)

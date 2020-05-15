@@ -48,12 +48,12 @@ namespace Halley {
 		std::unique_ptr<EditorTaskSet> tasks;
 
 		std::vector<IEditorCustomTools::ToolData> customTools;
-    	bool waitingForAssets = true;
+    	bool waitingToLoadCustomUI = true;
 
         void makeUI();
     	void makeToolbar();
     	void makePagedPane();
-		void loadCustomUI();
+		bool loadCustomUI();
 		void destroyCustomUI();
     };
 }
