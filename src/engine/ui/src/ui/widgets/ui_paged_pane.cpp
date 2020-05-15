@@ -16,12 +16,13 @@ const std::shared_ptr<UIWidget>& UIPagedPane::addPage()
 {
 	pages.push_back(std::make_shared<UIWidget>("page" + toString(pages.size()), getMinimumSize(), UISizer()));
 	UIWidget::add(pages.back(), 1);
+	pages.back()->setActive(false);
 	return pages.back();
 }
 
 void UIPagedPane::setPage(int n)
 {
-	currentPage = clamp(n, 0, int(getNumberOfPages()) - 1);
+	currentPage = clamp(n, 0, getNumberOfPages() - 1);
 
 	for (int i = 0; i < getNumberOfPages(); ++i) {
 		const bool active = i == n;
@@ -39,13 +40,13 @@ int UIPagedPane::getCurrentPage() const
 
 int UIPagedPane::getNumberOfPages() const
 {
-	return int(pages.size());
+	return static_cast<int>(pages.size());
 }
 
 Vector2f UIPagedPane::getLayoutMinimumSize(bool force) const
 {
 	Vector2f size;
-	for (auto& p: pages) {
+	for (const auto& p: pages) {
 		size = Vector2f::max(size, p->getLayoutMinimumSize(true));
 	}
 	return size;

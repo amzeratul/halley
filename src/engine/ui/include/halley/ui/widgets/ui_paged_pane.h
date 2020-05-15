@@ -3,7 +3,7 @@
 #include "../ui_widget.h"
 
 namespace Halley {
-    class UIPagedPane : public UIWidget {
+    class UIPagedPane final : public UIWidget {
     public:
         UIPagedPane(String id, int nPages = 0, Vector2f minSize = {});
 
