@@ -21,7 +21,11 @@ namespace Halley {
     public:
         T deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
         {
-			throw Exception("ConfigNodeSerializer unimplemented type: " + String(typeid(T).name()), HalleyExceptions::Utils);
+        	if constexpr (std::is_enum_v<T>) {
+        		return fromString<T>(node.asString());
+        	} else {
+				throw Exception("ConfigNodeSerializer unimplemented type: " + String(typeid(T).name()), HalleyExceptions::Utils);
+			}
         }
     };
 
