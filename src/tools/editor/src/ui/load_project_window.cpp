@@ -32,4 +32,6 @@ LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, s
 		recent->addTextItem(p, LocalisedString::fromUserString(p));
 	}
 	recent->addTextItem("", LocalisedString::fromHardcodedString("New location..."));
+
+	setAnchor(UIAnchor());
 }

@@ -13,11 +13,11 @@
 
 using namespace Halley;
 
-AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, EditorRootStage& stage)
+AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, ProjectWindow& projectWindow)
 	: UIWidget("assets_editor", {}, UISizer())
 	, factory(factory)
 	, project(project)
-	, stage(stage)
+	, projectWindow(projectWindow)
 	, curSrcPath(".")
 {
 	loadResources();
@@ -284,7 +284,7 @@ std::shared_ptr<AssetEditor> AssetsEditorWindow::makeEditor(AssetType type, cons
 		return std::make_shared<AnimationEditor>(factory, project.getGameResources(), type, project);
 	case AssetType::Prefab:
 	case AssetType::Scene:
-		return std::make_shared<PrefabEditor>(factory, project.getGameResources(), type, project, stage);
+		return std::make_shared<PrefabEditor>(factory, project.getGameResources(), type, project, projectWindow);
 	}
 	return {};
 }

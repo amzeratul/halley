@@ -1,19 +1,18 @@
 #include "toolbar.h"
 
-
+#include "project_window.h"
 #include "halley/tools/project/build_project_task.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/project/project_properties.h"
 #include "halley/ui/ui_sizer.h"
 #include "halley/ui/widgets/ui_label.h"
-#include "src/editor_root_stage.h"
 
 using namespace Halley;
 
-Toolbar::Toolbar(UIFactory& factory, EditorRootStage& editorStage, Project& project)
+Toolbar::Toolbar(UIFactory& factory, ProjectWindow& projectWindow, Project& project)
 	: UIWidget("toolbar", {}, UISizer())
 	, factory(factory)
-	, editorStage(editorStage)
+	, projectWindow(projectWindow)
 	, project(project)
 {
 	makeUI();
@@ -51,12 +50,12 @@ void Toolbar::makeUI()
 			break;
 		}
 		getWidgetAs<UILabel>("toolName")->setText(LocalisedString::fromHardcodedString(toolName));
-		editorStage.setPage(tab);
+		projectWindow.setPage(tab);
 	});
 	
 	setHandle(UIEventType::ButtonClicked, "exitProject", [=] (const UIEvent& event)
 	{
-		editorStage.createLoadProjectUI();
+		projectWindow.destroy();
 	});
 
 	setHandle(UIEventType::ButtonClicked, "runProject", [=] (const UIEvent& event)
@@ -66,6 +65,6 @@ void Toolbar::makeUI()
 
 	setHandle(UIEventType::ButtonClicked, "buildProject", [=] (const UIEvent& event)
 	{
-		editorStage.getTasks().addTask(EditorTaskAnchor(std::make_unique<BuildProjectTask>(project)));
+		projectWindow.getTasks().addTask(EditorTaskAnchor(std::make_unique<BuildProjectTask>(project)));
 	});
 }

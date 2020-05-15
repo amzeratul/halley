@@ -7,10 +7,9 @@
 #include "ui/editor_ui_factory.h"
 #include "ui/console_window.h"
 #include "ui/load_project_window.h"
-#include "ui/taskbar.h"
-#include "ui/toolbar.h"
 #include "assets/assets_editor_window.h"
 #include "scene/scene_editor_window.h"
+#include "ui/project_window.h"
 
 using namespace Halley;
 
@@ -43,8 +42,10 @@ void EditorRootStage::init()
 void EditorRootStage::onVariableUpdate(Time time)
 {
 	mainThreadExecutor.runPending();
-	if (tasks) {
-		tasks->update(time);
+
+	if (!topLevelUI || !topLevelUI->isAlive()) {
+		unloadProject();
+		createLoadProjectUI();
 	}
 
 	updateUI(time);
@@ -120,49 +121,15 @@ void EditorRootStage::initSprites()
 	}
 }
 
-void EditorRootStage::clearUI()
-{
-	if (project) {
-		project->withDLL([&] (DynamicLibrary& dll)
-		{
-			dll.removeReloadListener(*this);
-		});
-	}
-	
-	if (uiTop) {
-		uiTop->clear();
-	}
-	if (uiMid) {
-		uiMid->clear();
-	}
-	if (uiBottom) {
-		uiBottom->clear();
-	}
-	pagedPane = {};
-}
-
 void EditorRootStage::createUI()
 {
 	uiFactory = std::make_unique<EditorUIFactory>(getAPI(), getResources(), i18n);
 	ui = std::make_unique<UIRoot>(getAPI());
-
-	uiMainPanel = std::make_shared<UIWidget>("uiMainPanel", Vector2f(), UISizer(UISizerType::Vertical));
-	ui->addChild(uiMainPanel);
-
-	uiTop = std::make_shared<UIWidget>("uiTop", Vector2f(), UISizer(UISizerType::Horizontal));
-	uiMid = std::make_shared<UIWidget>("uiMid", Vector2f(), UISizer(UISizerType::Horizontal));
-	uiBottom = std::make_shared<UIWidget>("uiBottom", Vector2f(), UISizer(UISizerType::Horizontal));
-	uiMainPanel->add(uiTop);
-	uiMainPanel->add(uiMid, 1);
-	uiMainPanel->add(uiBottom);
 }
 
 void EditorRootStage::createLoadProjectUI()
 {
-	clearUI();
-	unloadProject();
-
-	uiMid->add(std::make_shared<LoadProjectWindow>(*uiFactory, editor, [this] (String str)
+	setTopLevelUI(std::make_shared<LoadProjectWindow>(*uiFactory, editor, [this] (String str)
 	{
 		Concurrent::execute(Executors::getMainThread(), [=] () {
 			project = editor.loadProject(str);
@@ -172,70 +139,7 @@ void EditorRootStage::createLoadProjectUI()
 				createLoadProjectUI();
 			}
 		});
-	}), 1, Vector4f(), UISizerAlignFlags::Centre);
-}
-
-EditorTaskSet& EditorRootStage::getTasks() const
-{
-	return *tasks;
-}
-
-void EditorRootStage::createProjectUI()
-{
-	clearUI();
-
-	pagedPane = std::make_shared<UIPagedPane>("pages", 6);
-	toolbar = std::make_shared<Toolbar>(*uiFactory, *this, *project);
-	const auto taskbar = std::make_shared<TaskBar>(*uiFactory, *tasks);
-
-	uiTop->add(toolbar, 1, Vector4f(0, 16, 0, 8));
-	uiMid->add(pagedPane, 1);
-	uiBottom->add(taskbar, 1);
-
-	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(std::make_shared<AssetsEditorWindow>(*uiFactory, *project, *this), 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(static_cast<int>(EditorTabs::Scene))->add(std::make_shared<SceneEditorWindow>(*uiFactory, *project, getAPI()), 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(std::make_shared<ConsoleWindow>(*uiFactory), 1, Vector4f(8, 8, 8, 8));
-
-	loadCustomProjectUI();
-	project->withDLL([&] (DynamicLibrary& dll)
-	{
-		dll.addReloadListener(*this);
-	});
-}
-
-void EditorRootStage::loadCustomProjectUI()
-{
-	destroyCustomProjectUI();
-
-	auto game = project->createGameInstance();
-	if (game) {
-		auto customToolsInterface = game->createEditorCustomToolsInterface();
-		if (customToolsInterface) {
-			customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(getResources(), project->getGameResources(), getAPI()));
-
-			for (auto& tool: customTools) {
-				// TODO: create
-			}
-		}
-	}
-}
-
-void EditorRootStage::destroyCustomProjectUI()
-{
-	for (auto& tool: customTools) {
-		// TODO: destroy
-	}
-	customTools.clear();
-}
-
-void EditorRootStage::onLoadDLL()
-{
-	loadCustomProjectUI();
-}
-
-void EditorRootStage::onUnloadDLL()
-{
-	destroyCustomProjectUI();
+	}));
 }
 
 void EditorRootStage::updateUI(Time time)
@@ -243,7 +147,7 @@ void EditorRootStage::updateUI(Time time)
 	const auto kb = getInputAPI().getKeyboard();
 	const auto size = getVideoAPI().getWindow().getDefinition().getSize();
 
-	uiMainPanel->setMinSize(Vector2f(size));
+	//uiMainPanel->setMinSize(Vector2f(size));
 	ui->setRect(Rect4f(Vector2f(), Vector2f(size)));
 	ui->update(time, UIInputType::Mouse, getInputAPI().getMouse(), kb);
 }
@@ -251,32 +155,23 @@ void EditorRootStage::updateUI(Time time)
 void EditorRootStage::loadProject()
 {
 	project->setDevConServer(devConServer.get());
-	tasks = std::make_unique<EditorTaskSet>();
-	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(*project, false)));
 
-	createProjectUI();
+	setTopLevelUI(std::make_shared<ProjectWindow>(*uiFactory, editor, *project, getResources(), getAPI()));
 }
 
 void EditorRootStage::unloadProject()
 {
-	tasks.reset();
+	setTopLevelUI({});
 	project.reset();
 }
 
-void EditorRootStage::openPrefab(const String& name, AssetType assetType)
+void EditorRootStage::setTopLevelUI(std::shared_ptr<UIWidget> uiWindow)
 {
-	auto sceneEditor = ui->getWidgetAs<SceneEditorWindow>("scene_editor");
-	if (assetType == AssetType::Scene) {
-		sceneEditor->loadScene(name);
-	} else if (assetType == AssetType::Prefab) {
-		sceneEditor->loadPrefab(name);
+	if (topLevelUI) {
+		topLevelUI->destroy();
 	}
-	auto toolbar = ui->getWidgetAs<UIList>("toolbarList");
-	toolbar->setSelectedOption(int(EditorTabs::Scene));
-	//pagedPane->setPage(int(EditorTabs::Scene));
-}
-
-void EditorRootStage::setPage(EditorTabs tab)
-{
-	pagedPane->setPage(int(tab));
+	topLevelUI = std::move(uiWindow);
+	if (topLevelUI) {
+		ui->addChild(topLevelUI);
+	}
 }

@@ -4,18 +4,18 @@
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
-	class EditorRootStage;
+	class ProjectWindow;
 	class Project;
 	class ProjectProperties;
 
 	class Toolbar : public UIWidget
 	{
 	public:
-		Toolbar(UIFactory& factory, EditorRootStage& editorStage, Project& project);
+		Toolbar(UIFactory& factory, ProjectWindow& projectWindow, Project& project);
 
 	private:
 		UIFactory& factory;
-		EditorRootStage& editorStage;
+		ProjectWindow& projectWindow;
 		Project& project;
 
 		void makeUI();

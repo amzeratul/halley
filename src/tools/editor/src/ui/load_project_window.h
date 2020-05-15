@@ -5,7 +5,7 @@ namespace Halley {
 	class HalleyEditor;
 	class UIFactory;
 
-	class LoadProjectWindow : public UIWidget
+	class LoadProjectWindow final : public UIWidget
 	{
 	public:
 		LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, std::function<void(String)> callback);

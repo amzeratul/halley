@@ -4,13 +4,13 @@
 namespace Halley {
 	class PrefabEditor : public AssetEditor {
 	public:
-		PrefabEditor(UIFactory& factory, Resources& resources, AssetType type, Project& project, EditorRootStage& stage);
+		PrefabEditor(UIFactory& factory, Resources& resources, AssetType type, Project& project, ProjectWindow& projectWindow);
 
 		void reload() override;
 		void onDoubleClick() override;
 		
 	private:
-		EditorRootStage& stage;
+		ProjectWindow& projectWindow;
 
 		void setupWindow();
 	};
