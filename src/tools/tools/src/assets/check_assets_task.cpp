@@ -10,6 +10,7 @@
 #include "halley/support/logger.h"
 #include "halley/resources/resource_data.h"
 #include "halley/tools/assets/metadata_importer.h"
+#include "halley/concurrency/concurrent.h"
 
 using namespace Halley;
 using namespace std::chrono_literals;
@@ -77,6 +78,10 @@ void CheckAssetsTask::run()
 		while (hasPendingTasks()) {
 			sleep(5);
 		}
+
+		Concurrent::execute(Executors::getMainThread(), [project = &project] () {
+			project->onAllAssetsImported();
+		});
 
 		if (oneShot) {
 			return;

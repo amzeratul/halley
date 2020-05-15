@@ -17,7 +17,7 @@ children:
       image: ui/toolbar_scene.png
     - id: ecs
       image: ui/toolbar_ecs.png
-    - id: remote
+    - id: remotes
       image: ui/toolbar_remote.png
     - id: properties
       image: ui/toolbar_properties.png

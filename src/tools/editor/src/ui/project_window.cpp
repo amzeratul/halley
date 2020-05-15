@@ -23,6 +23,7 @@ ProjectWindow::ProjectWindow(UIFactory& factory, HalleyEditor& editor, Project& 
 	{
 		dll.addReloadListener(*this);
 	});
+	project.addAssetLoadedListener(this);
 
 	tasks = std::make_unique<EditorTaskSet>();
 	tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(project, false)));
@@ -36,6 +37,7 @@ ProjectWindow::~ProjectWindow()
 	{
 		dll.removeReloadListener(*this);
 	});
+	project.removeAssetLoadedListener(this);
 }
 
 void ProjectWindow::makeUI()
@@ -50,8 +52,6 @@ void ProjectWindow::makeUI()
 	makeToolbar();
 	makePagedPane();
 	uiBottom->add(std::make_shared<TaskBar>(factory, *tasks), 1);
-
-	loadCustomUI();
 }
 
 void ProjectWindow::makeToolbar()
@@ -89,11 +89,11 @@ void ProjectWindow::loadCustomUI()
 	if (game) {
 		auto customToolsInterface = game->createEditorCustomToolsInterface();
 		if (customToolsInterface) {
-			customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(resources, project.getGameResources(), api));
+			customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(factory, resources, project.getGameResources(), api));
 
 			for (auto& tool: customTools) {
 				const auto img = std::make_shared<UIImage>(tool.icon);
-				toolbar->getList()->addImage(tool.id, img);
+				toolbar->getList()->addImage(tool.id, img, 1, {}, UISizerAlignFlags::Centre);
 				pagedPane->addPage()->add(tool.widget, 1, Vector4f(8, 8, 8, 8));
 			}
 		}
@@ -102,13 +102,23 @@ void ProjectWindow::loadCustomUI()
 
 void ProjectWindow::destroyCustomUI()
 {
-	makeToolbar();
-	customTools.clear();
+	if (!customTools.empty()) {
+		makeToolbar();
+		customTools.clear();
+	}
 }
 
 void ProjectWindow::onLoadDLL()
 {
-	loadCustomUI();
+	waitingForAssets = true;
+}
+
+void ProjectWindow::onAssetsLoaded()
+{
+	if (waitingForAssets) {
+		waitingForAssets = false;
+		loadCustomUI();
+	}
 }
 
 void ProjectWindow::update(Time t, bool moved)

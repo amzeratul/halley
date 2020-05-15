@@ -177,6 +177,16 @@ void Project::addAssetPackReloadCallback(AssetReloadCallback callback)
 	assetPackedReloadCallbacks.push_back(std::move(callback));
 }
 
+void Project::addAssetLoadedListener(IAssetLoadListener* listener)
+{
+	assetLoadedListeners.push_back(std::move(listener));
+}
+
+void Project::removeAssetLoadedListener(IAssetLoadListener* listener)
+{
+	assetLoadedListeners.erase(std::remove(assetLoadedListeners.begin(), assetLoadedListeners.end(), listener), assetLoadedListeners.end());
+}
+
 ProjectProperties& Project::getProperties() const
 {
 	return *properties;
@@ -214,6 +224,13 @@ std::vector<String> Project::getAssetSrcList() const
 std::vector<std::pair<AssetType, String>> Project::getAssetsFromFile(const Path& path) const
 {
 	return importAssetsDatabase->getAssetsFromFile(path);
+}
+
+void Project::onAllAssetsImported()
+{
+	for (auto& listener: assetLoadedListeners) {
+		listener->onAssetsLoaded();
+	}
 }
 
 void Project::reloadAssets(const std::set<String>& assets, bool packed)

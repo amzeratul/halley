@@ -3,6 +3,7 @@
 #include "halley/tools/dll/dynamic_library.h"
 #include "halley/ui/ui_widget.h"
 #include "src/editor_root_stage.h"
+#include "halley/tools/project/project.h"
 
 namespace Halley {
     class UIFactory;
@@ -10,7 +11,7 @@ namespace Halley {
 	class Toolbar;
 	class Project;
 
-    class ProjectWindow final : public UIWidget, public IDynamicLibraryListener {
+    class ProjectWindow final : public UIWidget, public IDynamicLibraryListener, public Project::IAssetLoadListener {
     public:
         ProjectWindow(UIFactory& factory, HalleyEditor& editor, Project& project, Resources& resources, const HalleyAPI& api);
     	~ProjectWindow();
@@ -24,6 +25,8 @@ namespace Halley {
     protected:
 		void onUnloadDLL() override;
         void onLoadDLL() override;
+
+        void onAssetsLoaded() override;
 
         void update(Time t, bool moved) override;
     	
@@ -45,8 +48,9 @@ namespace Halley {
 		std::unique_ptr<EditorTaskSet> tasks;
 
 		std::vector<IEditorCustomTools::ToolData> customTools;
-    	
-		void makeUI();
+    	bool waitingForAssets = true;
+
+        void makeUI();
     	void makeToolbar();
     	void makePagedPane();
 		void loadCustomUI();

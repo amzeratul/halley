@@ -17,15 +17,24 @@ namespace Halley {
             String text;
             Sprite icon;
             std::shared_ptr<UIWidget> widget;
+
+        	ToolData(String id, String text, Sprite icon, std::shared_ptr<UIWidget> widget)
+                : id(std::move(id))
+                , text(std::move(text))
+                , icon(std::move(icon))
+                , widget(std::move(widget))
+            {}
         };
 
         struct MakeToolArgs {
+        	UIFactory& factory;
             Resources& editorResources;
             Resources& gameResources;
             const HalleyAPI& api;
 
-            MakeToolArgs(Resources& editorResources, Resources& gameResources, const HalleyAPI& api)
-                : editorResources(editorResources)
+            MakeToolArgs(UIFactory& factory, Resources& editorResources, Resources& gameResources, const HalleyAPI& api)
+                : factory(factory)
+        		, editorResources(editorResources)
                 , gameResources(gameResources)
                 , api(api)
             {}

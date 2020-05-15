@@ -24,6 +24,12 @@ namespace Halley
 	class Project
 	{
 	public:
+		class IAssetLoadListener {
+		public:
+			virtual ~IAssetLoadListener() = default;
+			virtual void onAssetsLoaded() {}
+		};
+		
 		using AssetReloadCallback = std::function<void(const std::vector<String>&)>;
 
 		Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader& loader);
@@ -58,6 +64,8 @@ namespace Halley
 		void setDevConServer(DevConServer* server);
 		void addAssetReloadCallback(AssetReloadCallback callback);
 		void addAssetPackReloadCallback(AssetReloadCallback callback);
+		void addAssetLoadedListener(IAssetLoadListener* listener);
+		void removeAssetLoadedListener(IAssetLoadListener* listener);
 		
 		ProjectProperties& getProperties() const;
 
@@ -68,6 +76,7 @@ namespace Halley
 		std::vector<String> getAssetSrcList() const;
 		std::vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;
 
+		void onAllAssetsImported();
 		void reloadAssets(const std::set<String>& assets, bool packed);
 		void reloadCodegen();
 		void setCheckAssetTask(CheckAssetsTask* checkAssetsTask);
@@ -97,6 +106,7 @@ namespace Halley
 
 		std::vector<AssetReloadCallback> assetReloadCallbacks;
 		std::vector<AssetReloadCallback> assetPackedReloadCallbacks;
+		std::vector<IAssetLoadListener*> assetLoadedListeners;
 		CheckAssetsTask* checkAssetsTask = nullptr;
 
 		std::unique_ptr<ImportAssetsDatabase> importAssetsDatabase;
