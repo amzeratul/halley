@@ -16,6 +16,7 @@ namespace Halley {
     	~ProjectWindow();
 
         void setPage(EditorTabs tab);
+        String setCustomPage(const String& pageId);
         void openPrefab(const String& assetId, AssetType assetType);
 
     	EditorTaskSet& getTasks() const;
@@ -27,7 +28,9 @@ namespace Halley {
         void update(Time t, bool moved) override;
     	
     private:
-        UIFactory& factory;
+		constexpr static int numOfStandardTools = 6;
+
+    	UIFactory& factory;
         HalleyEditor& editor;
     	Project& project;
     	Resources& resources;
@@ -44,7 +47,9 @@ namespace Halley {
 		std::vector<IEditorCustomTools::ToolData> customTools;
     	
 		void makeUI();
-		void loadCustomProjectUI();
-		void destroyCustomProjectUI();
+    	void makeToolbar();
+    	void makePagedPane();
+		void loadCustomUI();
+		void destroyCustomUI();
     };
 }

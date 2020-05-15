@@ -12,10 +12,11 @@ UIPagedPane::UIPagedPane(String id, int nPages, Vector2f minSize)
 	setPage(0);
 }
 
-void UIPagedPane::addPage()
+const std::shared_ptr<UIWidget>& UIPagedPane::addPage()
 {
 	pages.push_back(std::make_shared<UIWidget>("page" + toString(pages.size()), getMinimumSize(), UISizer()));
 	UIWidget::add(pages.back(), 1);
+	return pages.back();
 }
 
 void UIPagedPane::setPage(int n)

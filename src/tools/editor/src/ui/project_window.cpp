@@ -47,24 +47,43 @@ void ProjectWindow::makeUI()
 	add(uiMid, 1);
 	add(uiBottom);
 
-	pagedPane = std::make_shared<UIPagedPane>("pages", 6);
+	makeToolbar();
+	makePagedPane();
+	uiBottom->add(std::make_shared<TaskBar>(factory, *tasks), 1);
+
+	loadCustomUI();
+}
+
+void ProjectWindow::makeToolbar()
+{
+	if (toolbar) {
+		toolbar->destroy();
+		uiTop->clear();
+	}
+	
 	toolbar = std::make_shared<Toolbar>(factory, *this, project);
-	const auto taskbar = std::make_shared<TaskBar>(factory, *tasks);
-
+	
 	uiTop->add(toolbar, 1, Vector4f(0, 16, 0, 8));
-	uiMid->add(pagedPane, 1);
-	uiBottom->add(taskbar, 1);
+}
 
+void ProjectWindow::makePagedPane()
+{
+	if (pagedPane) {
+		pagedPane->destroy();
+		uiMid->clear();
+	}
+	
+	pagedPane = std::make_shared<UIPagedPane>("pages", numOfStandardTools);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(std::make_shared<AssetsEditorWindow>(factory, project, *this), 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(static_cast<int>(EditorTabs::Scene))->add(std::make_shared<SceneEditorWindow>(factory, project, api), 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(std::make_shared<ConsoleWindow>(factory), 1, Vector4f(8, 8, 8, 8));
 
-	loadCustomProjectUI();
+	uiMid->add(pagedPane, 1);
 }
 
-void ProjectWindow::loadCustomProjectUI()
+void ProjectWindow::loadCustomUI()
 {
-	destroyCustomProjectUI();
+	destroyCustomUI();
 
 	auto game = project.createGameInstance();
 	if (game) {
@@ -73,23 +92,23 @@ void ProjectWindow::loadCustomProjectUI()
 			customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(resources, project.getGameResources(), api));
 
 			for (auto& tool: customTools) {
-				// TODO: create
+				const auto img = std::make_shared<UIImage>(tool.icon);
+				toolbar->getList()->addImage(tool.id, img);
+				pagedPane->addPage()->add(tool.widget, 1, Vector4f(8, 8, 8, 8));
 			}
 		}
 	}
 }
 
-void ProjectWindow::destroyCustomProjectUI()
+void ProjectWindow::destroyCustomUI()
 {
-	for (auto& tool: customTools) {
-		// TODO: destroy
-	}
+	makeToolbar();
 	customTools.clear();
 }
 
 void ProjectWindow::onLoadDLL()
 {
-	loadCustomProjectUI();
+	loadCustomUI();
 }
 
 void ProjectWindow::update(Time t, bool moved)
@@ -104,12 +123,25 @@ void ProjectWindow::update(Time t, bool moved)
 
 void ProjectWindow::onUnloadDLL()
 {
-	destroyCustomProjectUI();
+	destroyCustomUI();
 }
 
 void ProjectWindow::setPage(EditorTabs tab)
 {
-	pagedPane->setPage(int(tab));
+	pagedPane->setPage(static_cast<int>(tab));
+}
+
+String ProjectWindow::setCustomPage(const String& pageId)
+{
+	int i = 0;
+	for (auto& custom: customTools) {
+		if (custom.id == pageId) {
+			pagedPane->setPage(numOfStandardTools + i);
+			return custom.text;
+		}
+		++i;
+	}
+	return "???";
 }
 
 void ProjectWindow::openPrefab(const String& name, AssetType assetType)
@@ -120,9 +152,7 @@ void ProjectWindow::openPrefab(const String& name, AssetType assetType)
 	} else if (assetType == AssetType::Prefab) {
 		sceneEditor->loadPrefab(name);
 	}
-	auto toolbar = getWidgetAs<UIList>("toolbarList");
-	toolbar->setSelectedOption(int(EditorTabs::Scene));
-	//pagedPane->setPage(int(EditorTabs::Scene));
+	toolbar->getList()->setSelectedOption(static_cast<int>(EditorTabs::Scene));
 }
 
 EditorTaskSet& ProjectWindow::getTasks() const

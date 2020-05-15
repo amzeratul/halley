@@ -6,6 +6,7 @@
 #include "halley/tools/project/project_properties.h"
 #include "halley/ui/ui_sizer.h"
 #include "halley/ui/widgets/ui_label.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 
@@ -18,16 +19,32 @@ Toolbar::Toolbar(UIFactory& factory, ProjectWindow& projectWindow, Project& proj
 	makeUI();
 }
 
+const std::shared_ptr<UIList>& Toolbar::getList() const
+{
+	return list;
+}
+
 void Toolbar::makeUI()
 {
 	add(factory.makeUI("ui/halley/toolbar"), 1);
 
 	getWidgetAs<UILabel>("gameName")->setText(LocalisedString::fromUserString(project.getProperties().getName()));
+	list = getWidgetAs<UIList>("toolbarList");
 
 	setHandle(UIEventType::ListSelectionChanged, "toolbarList", [=] (const UIEvent& event)
 	{
 		String toolName;
-		auto tab = EditorTabs(event.getIntData());
+		const auto& tabId = event.getStringData();
+		const auto& toolNameWidget = getWidgetAs<UILabel>("toolName");
+
+		auto tabNames = EnumNames<EditorTabs>()();
+		if (std::find_if(tabNames.begin(), tabNames.end(), [&](const char* v) { return tabId == v; }) == tabNames.end()) {
+			const auto name = projectWindow.setCustomPage(tabId);
+			toolNameWidget->setText(LocalisedString::fromHardcodedString(name));
+			return;
+		}
+		
+		const auto tab = fromString<EditorTabs>(tabId);
 		
 		switch (tab) {
 		case EditorTabs::Assets:
@@ -49,7 +66,7 @@ void Toolbar::makeUI()
 			toolName = "Settings";
 			break;
 		}
-		getWidgetAs<UILabel>("toolName")->setText(LocalisedString::fromHardcodedString(toolName));
+		toolNameWidget->setText(LocalisedString::fromHardcodedString(toolName));
 		projectWindow.setPage(tab);
 	});
 	

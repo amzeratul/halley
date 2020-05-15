@@ -8,15 +8,41 @@ namespace Halley {
 	class Project;
 	class ProjectProperties;
 
+	enum class EditorTabs {
+		Assets,
+		Scene,
+		ECS,
+		Remotes,
+		Properties,
+		Settings
+	};
+
+	template <>
+	struct EnumNames<EditorTabs> {
+		constexpr std::array<const char*, 6> operator()() const {
+			return{{
+				"assets",
+				"scene",
+				"ecs",
+				"remotes",
+				"properties",
+				"settings"
+			}};
+		}
+	};
+
 	class Toolbar : public UIWidget
 	{
 	public:
 		Toolbar(UIFactory& factory, ProjectWindow& projectWindow, Project& project);
 
+		const std::shared_ptr<UIList>& getList() const;
+
 	private:
 		UIFactory& factory;
 		ProjectWindow& projectWindow;
 		Project& project;
+		std::shared_ptr<UIList> list;
 
 		void makeUI();
 	};

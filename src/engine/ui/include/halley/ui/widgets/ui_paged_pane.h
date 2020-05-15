@@ -7,7 +7,7 @@ namespace Halley {
     public:
         UIPagedPane(String id, int nPages = 0, Vector2f minSize = {});
 
-		void addPage();
+		[[maybe_unused]] const std::shared_ptr<UIWidget>& addPage();
         void setPage(int n);
         int getCurrentPage() const;
 		int getNumberOfPages() const;
