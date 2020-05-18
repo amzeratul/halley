@@ -1,5 +1,5 @@
 ---
-widget: { class: image, image: "ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#9C5BB5" }
+widget: { class: image, image: "halley_ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#9C5BB5" }
 sizer: { type: vertical }
 children:
 - sizer: { type: horizontal }

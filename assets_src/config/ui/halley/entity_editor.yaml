@@ -7,7 +7,7 @@ children:
   proportion: 1
   border: [0, 0, 4, 0]
   children:
-  - widget: { id: entityHeader, class: image, image: "ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#754589" }
+  - widget: { id: entityHeader, class: image, image: "halley_ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#754589" }
     sizer: { type: vertical }
     border: [0, 0, 0, 4]
     children:
@@ -23,7 +23,7 @@ children:
         - widget: { id: "", class: label, text: "Name", style: "labelLight" }
       - widget: { id: entityName, class: textInput, size: [200, 22], style: inputThin }
         proportion: 1
-  - widget: { id: prefabHeader, class: image, image: "ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#754589" }
+  - widget: { id: prefabHeader, class: image, image: "halley_ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#754589" }
     sizer: { type: vertical }
     border: [0, 0, 0, 4]
     children:

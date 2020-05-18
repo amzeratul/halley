@@ -2,7 +2,7 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-- widget: { class: image, image: "ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#9C5BB5", size: [250, 10] }
+- widget: { class: image, image: "halley_ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#9C5BB5", size: [250, 10] }
   sizer: { type: vertical }
   children:
   - widget: { id: "", class: label, text: "Metadata" }
