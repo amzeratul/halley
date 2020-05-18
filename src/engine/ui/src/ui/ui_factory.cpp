@@ -404,22 +404,15 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 	auto style = UIStyle(node["style"].asString("button"), styleSheet);
 	auto label = parseLabel(node);
 
-	bool hasString = false;
 	auto sizer = makeSizerOrDefault(entryNode, UISizer());
 	auto result = std::make_shared<UIButton>(id, style, std::move(sizer));
 
 	if (!label.getString().isEmpty()) {
 		result->setLabel(LocalisedString::fromUserString(label.getString()));
-		hasString = true;
 	}
 	
 	if (node.hasKey("icon")) {
-		auto icon = Sprite().setImage(getResources(), node["icon"].asString());
-		auto image = std::make_shared<UIImage>(icon);
-		if (style.hasColour("hoveredIconColour")) {
-			image->setHoverable(icon.getColour(), style.getColour("hoveredIconColour"));
-		}
-		result->add(image, hasString ? 0.0f : 1.0f, style.getBorder("iconBorder"), UISizerAlignFlags::Centre);
+		result->setIcon(Sprite().setImage(getResources(), node["icon"].asString()));
 	}
 
 	if (node.hasKey("mouseBorder")) {

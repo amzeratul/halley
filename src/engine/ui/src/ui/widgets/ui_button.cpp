@@ -1,6 +1,7 @@
 #include "widgets/ui_button.h"
 #include "ui_style.h"
 #include "ui_painter.h"
+#include "widgets/ui_image.h"
 #include "widgets/ui_label.h"
 
 using namespace Halley;
@@ -104,6 +105,19 @@ void UIButton::setLabel(LocalisedString text)
 		add(label, 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
 	} else {
 		label->setText(std::move(text));
+	}
+}
+
+void UIButton::setIcon(Sprite icon)
+{
+	if (!iconImage) {
+		iconImage = std::make_shared<UIImage>(icon);
+		if (style.hasColour("hoveredIconColour")) {
+			iconImage->setHoverable(icon.getColour(), style.getColour("hoveredIconColour"));
+		}
+		add(iconImage, label ? 0.0f : 1.0f, style.getBorder("iconBorder"), UISizerAlignFlags::Centre);
+	} else {
+		iconImage->setSprite(icon);
 	}
 }
 

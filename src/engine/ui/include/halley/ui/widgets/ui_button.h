@@ -4,6 +4,8 @@
 #include "halley/core/graphics/sprite/sprite.h"
 
 namespace Halley {
+	class UIImage;
+	
 	class UIButton : public UIClickable {
 	public:
 		UIButton(String id, UIStyle style, std::optional<UISizer> sizer = {});
@@ -22,6 +24,7 @@ namespace Halley {
 		void setCanDoBorderOnly(bool canDo);
 
 		void setLabel(LocalisedString string);
+		void setIcon(Sprite icon);
 
 	protected:
 		void doSetState(State state) override;
@@ -33,6 +36,7 @@ namespace Halley {
 		UIStyle style;
 		UIInputType curInputType = UIInputType::Undefined;
 		std::shared_ptr<UILabel> label;
+		std::shared_ptr<UIImage> iconImage;
 		bool borderOnly = false;
 		bool canDoBorderOnly = true;
 	};
