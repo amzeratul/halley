@@ -103,10 +103,14 @@ bool ProjectWindow::loadCustomUI()
 		return false;
 	}
 
-	for (auto& tool: customTools) {
-		const auto img = std::make_shared<UIImage>(tool.icon);
-		toolbar->getList()->addImage(tool.id, img, 1, {}, UISizerAlignFlags::Centre);
-		pagedPane->addPage()->add(tool.widget, 1, Vector4f(8, 8, 8, 8));
+	if (!customTools.empty()) {
+		toolbar->getList()->add(std::make_shared<UIImage>(Sprite().setImage(resources, "ui/slant_capsule_short.png").setColour(Colour4f::fromString("#FC2847"))), 0, Vector4f(0, 3, 0, 3));
+		
+		for (auto& tool: customTools) {
+			const auto img = std::make_shared<UIImage>(tool.icon);
+			toolbar->getList()->addImage(tool.id, img, 1, {}, UISizerAlignFlags::Centre);
+			pagedPane->addPage()->add(tool.widget, 1, Vector4f(8, 8, 8, 8));
+		}
 	}
 
 	return true;
