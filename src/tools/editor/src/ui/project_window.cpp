@@ -118,6 +118,7 @@ void ProjectWindow::destroyCustomUI()
 		makeToolbar();
 		customTools.clear();
 	}
+	pagedPane->resizePages(numOfStandardTools);
 }
 
 void ProjectWindow::onLoadDLL()
