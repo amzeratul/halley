@@ -5,6 +5,8 @@
 #include "halley/tools/project/project_properties.h"
 #include <chrono>
 
+#include "halley/support/debug.h"
+
 using namespace Halley;
 
 BuildProjectTask::BuildProjectTask(Project& project)
@@ -23,7 +25,8 @@ BuildProjectTask::BuildProjectTask(Project& project)
 		}
 	}();
 	const auto buildScript = project.getHalleyRootPath() / "scripts" / scriptName;
-	command = "\"" + buildScript + "\" \"" + project.getRootPath() + "\" " + project.getProperties().getBinName();
+	const String buildConfig = Debug::isDebug() ? "Debug" : "RelWithDebInfo";
+	command = "\"" + buildScript + "\" \"" + project.getRootPath() + "\" " + project.getProperties().getBinName() + " " + buildConfig;
 }
 
 void BuildProjectTask::run()
