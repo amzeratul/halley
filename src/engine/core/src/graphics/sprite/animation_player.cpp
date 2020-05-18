@@ -274,7 +274,7 @@ void AnimationPlayer::resolveSprite()
 {
 	updateIfNeeded();
 
-	auto& frame = curSeq->getFrame(curFrame);
+	const auto& frame = curSeq->getFrame(curFrame);
 	curFrameLen = std::max(1, frame.getDuration()) * 0.001; // 1ms minimum
 	spriteData = &frame.getSprite(dirId);
 	hasUpdate = true;
