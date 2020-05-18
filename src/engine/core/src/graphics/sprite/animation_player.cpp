@@ -255,8 +255,19 @@ void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator)
 	setSequence(masterAnimator.getCurrentSequenceName());
 	setDirection(masterAnimator.getCurrentDirectionName());
 	curFrame = clamp(masterAnimator.curFrame, 0, static_cast<int>(curSeq->numFrames()) - 1);
+	curFrameTime = masterAnimator.curFrameTime;
 
 	resolveSprite();
+}
+
+void AnimationPlayer::stepFrames(int amount)
+{
+	if (amount != 0) {
+		curFrame = modulo(curFrame + amount, static_cast<int>(seqLen));
+		curFrameTime = 0;
+
+		resolveSprite();
+	}
 }
 
 void AnimationPlayer::resolveSprite()
