@@ -297,7 +297,12 @@ bool UIList::ignoreClip() const
 
 bool UIList::canReceiveFocus() const
 {
-	return true;
+	return focusable;
+}
+
+void UIList::setFocusable(bool f)
+{
+	focusable = f;
 }
 
 size_t UIList::getNumberOfItems() const

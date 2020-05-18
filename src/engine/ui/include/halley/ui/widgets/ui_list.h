@@ -60,6 +60,7 @@ namespace Halley {
 		bool ignoreClip() const override;
 
 		bool canReceiveFocus() const override;
+		void setFocusable(bool focusable);
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -91,6 +92,7 @@ namespace Halley {
 		bool manualDragging = false;
 		bool uniformSizedItems = false;
 		bool singleClickAccept = true;
+		bool focusable = true;
 
 		void onItemClicked(UIListItem& item);
 		void onItemDoubleClicked(UIListItem& item);

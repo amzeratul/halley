@@ -30,6 +30,7 @@ void Toolbar::makeUI()
 
 	getWidgetAs<UILabel>("gameName")->setText(LocalisedString::fromUserString(project.getProperties().getName()));
 	list = getWidgetAs<UIList>("toolbarList");
+	list->setFocusable(false);
 
 	setHandle(UIEventType::ListSelectionChanged, "toolbarList", [=] (const UIEvent& event)
 	{
