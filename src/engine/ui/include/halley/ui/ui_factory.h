@@ -36,6 +36,9 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeUI(const String& configName, std::vector<String> conditions);
 		std::shared_ptr<UIWidget> makeUIFromNode(const ConfigNode& node);
 
+		void loadUI(UIWidget& target, const String& configName);
+		void loadUI(UIWidget& target, const ConfigFile& configFile);
+
 		void setInputButtons(const String& key, UIInputButtons buttons);
 		void applyInputButtons(UIWidget& widget, const String& key);
 

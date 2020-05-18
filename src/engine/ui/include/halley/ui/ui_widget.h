@@ -160,6 +160,8 @@ namespace Halley {
 
 		virtual void onAddedToRoot();
 
+		virtual void onMakeUI();
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;

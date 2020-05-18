@@ -24,6 +24,7 @@
 #include "widgets/ui_spin_list.h"
 #include "widgets/ui_option_list_morpher.h"
 #include "widgets/ui_tree_list.h"
+#include "halley/ui/behaviours/ui_reload_ui_behaviour.h"
 
 using namespace Halley;
 
@@ -107,6 +108,18 @@ std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName, std::vecto
 std::shared_ptr<UIWidget> UIFactory::makeUIFromNode(const ConfigNode& node)
 {
 	return makeWidget(node);
+}
+
+void UIFactory::loadUI(UIWidget& target, const String& configName)
+{
+	loadUI(target, *resources.get<ConfigFile>(configName));
+}
+
+void UIFactory::loadUI(UIWidget& target, const ConfigFile& configFile)
+{
+	target.add(makeUIFromNode(configFile.getRoot()), 1);
+	target.onMakeUI();
+	target.addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ConfigObserver(configFile)));
 }
 
 void UIFactory::setInputButtons(const String& key, UIInputButtons buttons)

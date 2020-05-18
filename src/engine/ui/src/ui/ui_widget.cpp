@@ -758,6 +758,10 @@ void UIWidget::onAddedToRoot()
 {
 }
 
+void UIWidget::onMakeUI()
+{
+}
+
 void UIWidget::checkActive()
 {
 }
