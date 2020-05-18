@@ -193,7 +193,9 @@ void SceneEditorWindow::onUnloadDLL()
 
 void SceneEditorWindow::onLoadDLL()
 {
-	loadScene(*prefab);
+	if (prefab) {
+		loadScene(*prefab);
+	}
 }
 
 void SceneEditorWindow::selectEntity(const String& id)
