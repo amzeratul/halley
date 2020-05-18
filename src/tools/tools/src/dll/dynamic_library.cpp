@@ -42,7 +42,22 @@ void DynamicLibrary::load(bool withAnotherName)
 		Bytes randomBytes(8);
 		Random::getGlobal().getBytes(randomBytes);
 		libPath = tmpPath / String("halley-" + Encode::encodeBase16(randomBytes) + ".dll").cppStr();
-		copy_file(libOrigPath, libPath);
+
+		bool success = false;
+		for (int i = 0; i < 3 && !success; ++i) {
+			boost::system::error_code ec;
+			copy_file(libOrigPath, libPath, ec);
+			if (ec.failed()) {
+				using namespace std::chrono_literals;
+				std::this_thread::sleep_for((i + 1) * 1s);
+			} else {
+				success = true;
+			}
+		}
+
+		if (!success) {
+			throw Exception("Source DLL is locked.", HalleyExceptions::Tools);
+		}
 	} else {
 		libPath = libOrigPath;
 	}
@@ -150,8 +165,18 @@ bool DynamicLibrary::hasChanged() const
 	if (!exists(libOrigPath) || !exists(debugSymbolsOrigPath)) {
 		return false;
 	}
+
 	// If BOTH the dll and debug symbols files have changed, we're ready to reload
-	return last_write_time(libOrigPath) > libLastWrite && last_write_time(debugSymbolsOrigPath) > debugLastWrite;
+	boost::system::error_code ec;
+	const auto libWrite = last_write_time(libOrigPath, ec);
+	if (ec.failed()) {
+		return false;
+	}
+	const auto debugWrite = last_write_time(debugSymbolsOrigPath, ec);
+	if (ec.failed()) {
+		return false;
+	}
+	return libWrite > libLastWrite && debugWrite > debugLastWrite;
 }
 
 void DynamicLibrary::reloadIfChanged()
