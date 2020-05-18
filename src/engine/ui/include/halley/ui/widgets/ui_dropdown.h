@@ -21,6 +21,7 @@ namespace Halley {
 		int getSelectedOption() const;
 		String getSelectedOptionId() const;
 		LocalisedString getSelectedOptionText() const;
+		int getNumberOptions() const;
 
 		void setInputButtons(const UIInputButtons& buttons) override;
 		void setOptions(std::vector<LocalisedString> options, int defaultOption = -1);

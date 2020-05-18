@@ -60,6 +60,11 @@ LocalisedString UIDropdown::getSelectedOptionText() const
 	return options[curOption];
 }
 
+int UIDropdown::getNumberOptions() const
+{
+	return static_cast<int>(options.size());
+}
+
 void UIDropdown::setInputButtons(const UIInputButtons& buttons)
 {
 	inputButtons = buttons;
