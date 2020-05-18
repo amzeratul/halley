@@ -242,7 +242,7 @@ bool UIWidget::isFocused() const
 
 void UIWidget::focus()
 {
-	if (!focused) {
+	if (!focused && canReceiveFocus()) {
 		const auto root = getRoot();
 		if (!root) {
 			throw Exception("UIWidget must be added to root before calling focus()", HalleyExceptions::UI);
@@ -343,6 +343,11 @@ void UIWidget::onMouseOver(Vector2f mousePos)
 bool UIWidget::isActive() const
 {
 	return activeByUser && activeByInput;
+}
+
+bool UIWidget::isActiveInHierarchy() const
+{
+	return isActive() && (!getParent() || getParent()->isActiveInHierarchy());
 }
 
 void UIWidget::setActive(bool s)
@@ -756,6 +761,13 @@ bool UIWidget::canReceiveFocus() const
 
 void UIWidget::onAddedToRoot()
 {
+}
+
+void UIWidget::onChildAdded(UIWidget& child)
+{
+	if (getRoot()) {
+		child.notifyTreeAddedToRoot();
+	}
 }
 
 void UIWidget::onMakeUI()

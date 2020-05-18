@@ -207,7 +207,8 @@ void UIRoot::receiveKeyPress(KeyboardKeyPress key)
 
 	// Finds one listener that can handle it (they are sorted by priority)
 	for (auto& listener: keyPressListeners) {
-		if (listener.first.lock()->onKeyPress(key)) {
+		auto widget = listener.first.lock();
+		if (widget && widget->isActiveInHierarchy() && widget->onKeyPress(key)) {
 			return;
 		}
 	}
@@ -462,7 +463,7 @@ std::vector<std::shared_ptr<UIWidget>> UIRoot::collectWidgets()
 
 void UIRoot::onChildAdded(UIWidget& child)
 {
-	child.onAddedToRoot();
+	child.notifyTreeAddedToRoot();
 }
 
 void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output)

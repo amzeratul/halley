@@ -88,6 +88,7 @@ namespace Halley {
 		virtual Rect4f getMouseRect() const;
 
 		bool isActive() const final override;
+		bool isActiveInHierarchy() const final override;
 		void setActive(bool active);
 		bool isEnabled() const;
 		void setEnabled(bool enabled);
@@ -159,7 +160,8 @@ namespace Halley {
 		virtual bool canReceiveFocus() const;
 
 		virtual void onAddedToRoot();
-
+		void onChildAdded(UIWidget& child) override;
+		
 		virtual void onMakeUI();
 
 	protected:

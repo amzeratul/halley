@@ -68,6 +68,7 @@ namespace Halley {
 		}
 
 		virtual bool isDescendentOf(const UIWidget& ancestor) const;
+		virtual bool isActiveInHierarchy() const;
 
 		template <typename F>
 		void descend(F f);

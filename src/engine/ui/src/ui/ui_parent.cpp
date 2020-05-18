@@ -165,3 +165,8 @@ bool UIParent::isDescendentOf(const UIWidget& ancestor) const
 {
 	return false;
 }
+
+bool UIParent::isActiveInHierarchy() const
+{
+	return true;
+}
