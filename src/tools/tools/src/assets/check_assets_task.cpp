@@ -39,11 +39,13 @@ void CheckAssetsTask::run()
 {
 	bool first = true;
 	while (!isCancelled()) {
+		bool importing = false;
+		
 		if (!pending.empty()) {
 			const auto assets = checkSpecificAssets(project.getImportAssetsDatabase(), pending);
 			pending.clear();
 			if (!isCancelled()) {
-				requestImport(project.getImportAssetsDatabase(), assets, project.getUnpackedAssetsPath(), "Importing assets", true);
+				importing |= requestImport(project.getImportAssetsDatabase(), assets, project.getUnpackedAssetsPath(), "Importing assets", true);
 				sleep(10);
 			}
 		}
@@ -52,7 +54,7 @@ void CheckAssetsTask::run()
 			Logger::logInfo("Scanning for asset changes...");
 			const auto assets = checkAllAssets(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true);
 			if (!isCancelled()) {
-				requestImport(project.getImportAssetsDatabase(), assets, project.getUnpackedAssetsPath(), "Importing assets", true);
+				importing |= requestImport(project.getImportAssetsDatabase(), assets, project.getUnpackedAssetsPath(), "Importing assets", true);
 			}
 		}
 		
@@ -61,7 +63,7 @@ void CheckAssetsTask::run()
 			Logger::logInfo("Scanning for codegen changes...");
 			const auto assets = checkAllAssets(project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false);
 			if (!isCancelled()) {
-				requestImport(project.getCodegenDatabase(), assets, project.getGenPath(), "Generating code", false);
+				importing |= requestImport(project.getCodegenDatabase(), assets, project.getGenPath(), "Generating code", false);
 			}
 		}
 
@@ -69,20 +71,21 @@ void CheckAssetsTask::run()
 			Logger::logInfo("Scanning for Halley codegen changes...");
 			const auto assets = checkAllAssets(project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false);
 			if (!isCancelled()) {
-				requestImport(project.getSharedCodegenDatabase(), assets, project.getSharedGenPath(), "Generating code", false);
+				importing |= requestImport(project.getSharedCodegenDatabase(), assets, project.getSharedGenPath(), "Generating code", false);
 			}
 		}
-
-		first = false;
 
 		while (hasPendingTasks()) {
 			sleep(5);
 		}
 
-		Concurrent::execute(Executors::getMainThread(), [project = &project] () {
-			project->onAllAssetsImported();
-		});
-
+		if (importing || first) {
+			Concurrent::execute(Executors::getMainThread(), [project = &project] () {
+				project->onAllAssetsImported();
+			});
+		}
+		first = false;
+		
 		if (oneShot) {
 			return;
 		}
@@ -248,7 +251,7 @@ std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(Impo
 	return assets;
 }
 
-void CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry> assets, Path dstPath, String taskName, bool packAfter)
+bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry> assets, Path dstPath, String taskName, bool packAfter)
 {
 	// Check for missing input files
 	auto toDelete = db.getAllMissing();
@@ -269,7 +272,9 @@ void CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, I
 	if (!toImport.empty() || !deletedAssets.empty()) {
 		Logger::logInfo("Assets to be imported: " + toString(toImport.size()));
 		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(taskName, db, project.getAssetImporter(), dstPath, std::move(toImport), std::move(deletedAssets), project, packAfter)));
+		return true;
 	}
+	return false;
 }
 
 void CheckAssetsTask::requestRefreshAsset(Path path)

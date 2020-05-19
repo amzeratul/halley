@@ -39,7 +39,7 @@ namespace Halley
 		static std::vector<ImportAssetsDatabaseEntry> filterNeedsImporting(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets);
 		std::map<String, ImportAssetsDatabaseEntry> checkSpecificAssets(ImportAssetsDatabase& db, const std::vector<Path>& path);
 		std::map<String, ImportAssetsDatabaseEntry> checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, bool collectDirMeta);
-		void requestImport(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry> assets, Path dstPath, String taskName, bool packAfter);
+		bool requestImport(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry> assets, Path dstPath, String taskName, bool packAfter);
 		std::optional<Path> findDirectoryMeta(const std::vector<Path>& metas, const Path& path) const;
 		bool importFile(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry>& assets, bool isCodegen, bool skipGen, const std::vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath);
 		void sleep(int ms);

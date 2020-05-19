@@ -142,6 +142,9 @@ void ProjectWindow::onAssetsLoaded()
 			waitingToLoadCustomUI = false;
 		}
 	}
+	for (auto& c: customTools) {
+		c.widget->sendEvent(UIEvent(UIEventType::AssetsReloaded, getId()));
+	}
 }
 
 void ProjectWindow::update(Time t, bool moved)

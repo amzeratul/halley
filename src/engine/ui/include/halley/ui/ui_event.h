@@ -12,6 +12,7 @@ namespace Halley {
 		Undefined,
 
 		// Please keep these in alphabetical order
+		AssetsReloaded,
 		ButtonClicked,
 		CheckboxUpdated,
 		Dragged,
