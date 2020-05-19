@@ -12,6 +12,7 @@ uiStyle:
     hoverSound: ""
     label: { font: Ubuntu Bold, size: 15, colour: "#FFFFFF" }
     labelBorder: [0, 0, 0, 0]
+    iconBorder: [0, 0, 0, 0]
 
   checkbox:
     normal: { img: halley_ui/ui_checkbox.png, colour: "#9C5BB5" }
