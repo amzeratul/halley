@@ -37,6 +37,7 @@ namespace Halley
 		String getCurrentSequenceName() const;
 		Time getCurrentSequenceTime() const;
 		int getCurrentSequenceFrame() const;
+		int getCurrentSequenceLoopCount() const;
 
 		String getCurrentDirectionName() const;
 
@@ -80,6 +81,7 @@ namespace Halley
 
 		int dirId;
 		int curFrame;
+		int curLoopCount = 0;
 		float playbackSpeed = 1.0f;
 
 		Vector2f offsetPivot;

@@ -58,6 +58,7 @@ AnimationPlayer& AnimationPlayer::setSequence(const String& sequence)
 		curFrameTime = 0;
 		curFrame = 0;
 		curFrameLen = 0;
+		curLoopCount = 0;
 		curSeq = &animation->getSequence(sequence);
 
 		seqLen = curSeq->numFrames();
@@ -148,6 +149,7 @@ void AnimationPlayer::update(Time time)
 				if (seqLooping) {
 					curFrame = 0;
 					curSeqTime = curFrameTime;
+					curLoopCount++;
 				} else {
 					curFrame = int(seqLen - 1);
 					onSequenceDone();
@@ -215,6 +217,11 @@ Time AnimationPlayer::getCurrentSequenceTime() const
 int AnimationPlayer::getCurrentSequenceFrame() const
 {
 	return curFrame;
+}
+
+int AnimationPlayer::getCurrentSequenceLoopCount() const
+{
+	return curLoopCount;
 }
 
 String AnimationPlayer::getCurrentDirectionName() const
@@ -289,8 +296,7 @@ void AnimationPlayer::onSequenceDone()
 {
 	if (nextSequence) {
 		setSequence(nextSequence.value());
-	}
-	else {
+	} else {
 		playing = false;
 	}
 }
