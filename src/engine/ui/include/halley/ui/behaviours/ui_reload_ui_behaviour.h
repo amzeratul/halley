@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui_behaviour.h"
+#include "../ui_behaviour.h"
 #include "halley/file_formats/config_file.h"
 
 namespace Halley {
