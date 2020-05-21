@@ -1,6 +1,7 @@
 #pragma once
 #include "halley/support/logger.h"
 #include "halley/tools/tasks/editor_task.h"
+#include <regex>
 
 namespace Halley {
 	class Project;
@@ -16,14 +17,19 @@ namespace Halley {
 	private:
 		enum class BuildSystem {
 			Unknown,
-			MSBuild
+			MSBuild,
+			Ninja,
+			Make
 		};
 		
 		Project& project;
 		String command;
-		BuildSystem buildSystem;
+		BuildSystem buildSystem = BuildSystem::Unknown;
+
+		std::regex matchProgress;
 
 		void tryToIdentifyBuildSystem(const String& msg);
 		void parseMSBuildMessage(const String& msg);
+		void parseNinjaMessage(const String& msg);
     };
 }

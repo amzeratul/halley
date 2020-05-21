@@ -29,13 +29,14 @@ DynamicLibrary::~DynamicLibrary()
 	unload();
 }
 
-void DynamicLibrary::load(bool withAnotherName)
+bool DynamicLibrary::load(bool withAnotherName)
 {
 	unload();
 
 	// Does the path exist?
 	if (boost::system::error_code ec; !exists(libOrigPath, ec) || ec.failed()) {
-		throw Exception("Library doesn't exist: " + libOrigPath.string(), HalleyExceptions::Tools);
+		Logger::logError("Library doesn't exist: " + libOrigPath.string());
+		return false;
 	}
 
 	// Determine which path to load
@@ -48,20 +49,21 @@ void DynamicLibrary::load(bool withAnotherName)
 		Random::getGlobal().getBytes(randomBytes);
 		libPath = tmpPath / String("halley-" + Encode::encodeBase16(randomBytes) + ".dll").cppStr();
 
+		boost::system::error_code ec;
 		bool success = false;
 		for (int i = 0; i < 3 && !success; ++i) {
-			boost::system::error_code ec;
 			copy_file(libOrigPath, libPath, ec);
 			if (ec.failed()) {
 				using namespace std::chrono_literals;
-				std::this_thread::sleep_for((i + 1) * 1s);
+				std::this_thread::sleep_for((i + 1) * 0.1s);
 			} else {
 				success = true;
 			}
 		}
 
 		if (!success) {
-			throw Exception("Source DLL is locked.", HalleyExceptions::Tools);
+			Logger::logError("Error copying DLL \"" + libOrigPath.string() + "\": " + ec.message());
+			return false;
 		}
 	} else {
 		libPath = libOrigPath;
@@ -92,7 +94,9 @@ void DynamicLibrary::load(bool withAnotherName)
 	handle = LoadLibraryW(libPath.wstring().c_str());
 	#endif
 	if (!handle) {
-		throw Exception("Unable to load library: " + libPath.string(), HalleyExceptions::Core);
+		Logger::logError("Unable to load library: " + libPath.string());
+		unload();
+		return false;
 	}
 
 	// Store write times
@@ -102,6 +106,7 @@ void DynamicLibrary::load(bool withAnotherName)
 	}
 
 	loaded = true;
+	return true;
 }
 
 void DynamicLibrary::unload()
@@ -133,7 +138,9 @@ void DynamicLibrary::unload()
 
 void* DynamicLibrary::getFunction(std::string name) const
 {
-	Expects(loaded);
+	if (!loaded) {
+		return nullptr;
+	}
 	
 	#ifdef _WIN32
 	return GetProcAddress(static_cast<HMODULE>(handle), name.c_str());
@@ -189,8 +196,14 @@ void DynamicLibrary::reloadIfChanged()
 	if (hasChanged()) {
 		notifyUnload();
 		unload();
-		load(true);
-		notifyReload();
+		waitingReload = true;
+	}
+
+	if (waitingReload) {
+		if (load(true)) {
+			notifyReload();
+			waitingReload = false;
+		}
 	}
 }
 

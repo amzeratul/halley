@@ -59,6 +59,7 @@ void DynamicGameLoader::setCore(IMainLoopable& c)
 void DynamicGameLoader::load()
 {
 	lib.load(true);
+	
 	auto getHalleyEntry = reinterpret_cast<IHalleyEntryPoint*(HALLEY_STDCALL*)()>(lib.getFunction("getHalleyEntry"));
 	if (!getHalleyEntry) {
 		lib.unload();

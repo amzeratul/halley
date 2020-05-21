@@ -16,6 +16,7 @@ BuildProjectTask::BuildProjectTask(Project& project)
 	const String scriptName = [] ()
 	{
 		if constexpr (getPlatform() == GamePlatform::Windows) {
+			//return "build_project_win_ninja.bat";
 			return "build_project_win.bat";
 		} else if constexpr (getPlatform() == GamePlatform::MacOS) {
 			return "build_project_mac.sh";
@@ -59,21 +60,32 @@ void BuildProjectTask::log(LoggerLevel level, const String& msg)
 		addError(msg);
 	}
 
+	if (buildSystem == BuildSystem::Unknown) {
+		tryToIdentifyBuildSystem(msg);
+	}
+
 	switch (buildSystem) {
 	case BuildSystem::MSBuild:
 		parseMSBuildMessage(msg);
 		break;
 
-	default:
-		tryToIdentifyBuildSystem(msg);
+	case BuildSystem::Ninja:
+		parseNinjaMessage(msg);
 		break;
 	}
+
+	Logger::logDev(msg);
 }
 
 void BuildProjectTask::tryToIdentifyBuildSystem(const String& msg)
 {
 	if (msg.contains("Microsoft (R) Build Engine")) {
 		buildSystem = BuildSystem::MSBuild;
+	}
+	
+	if (msg.startsWith("Configuring Ninja") || msg.startsWith("Building with Ninja")) {
+		buildSystem = BuildSystem::Ninja;
+		matchProgress = std::regex("\\[(\\d+)\\/(\\d+)\\]");
 	}
 }
 
@@ -93,6 +105,27 @@ void BuildProjectTask::parseMSBuildMessage(const String& rawMsg)
 		if (split.size() >= 2) {
 			split.back().trimBoth();
 			setProgress(0, Path(split.back()).getFilename().toString());
+		}
+	}
+}
+
+void BuildProjectTask::parseNinjaMessage(const String& rawMsg)
+{
+	String msg = rawMsg;
+	msg.trimBoth();
+
+	std::smatch baseMatch;
+	if (std::regex_search(rawMsg.cppStr(), baseMatch, matchProgress)) {
+		if (baseMatch.size() == 3) {
+			const int n = String(baseMatch[1]).toInteger();
+			const int total = String(baseMatch[2]).toInteger();
+
+			const auto split = rawMsg.split(' ');
+			auto fileName = Path(split.back()).getFilename().toString();
+			if (fileName.endsWith(".obj")) {
+				fileName = fileName.left(fileName.size() - 4);
+			}
+			setProgress(static_cast<float>(n) / static_cast<float>(total), fileName);
 		}
 	}
 }

@@ -323,11 +323,10 @@ Path Project::getDLLPath() const
 void Project::loadDLL()
 {
 	if (gameDll) {
-		try {
-			gameDll->clearTempDirectory();
-			gameDll->load(true);
+		gameDll->clearTempDirectory();
+		if (gameDll->load(true)) {
 			Logger::logInfo("Loaded " + getDLLPath().string());
-		} catch (...) {}
+		}
 	}
 }
 

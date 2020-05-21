@@ -20,7 +20,7 @@ namespace Halley
 		DynamicLibrary(std::string originalPath);
 		~DynamicLibrary();
 
-		void load(bool withAnotherName);
+		bool load(bool withAnotherName);
 		void unload();
 
 		void* getFunction(std::string name) const;
@@ -52,6 +52,7 @@ namespace Halley
 		bool hasTempPath = false;
 		bool hasDebugSymbols = false;
 		bool loaded = false;
+		bool waitingReload = false;
 
 		mutable std::vector<boost::filesystem::path> toDelete;
 

@@ -23,7 +23,6 @@ cmake -G "Visual Studio 16 2019" ^
     -DCMAKE_LIBRARY_PATH="lib\windows64" ^
     -DBOOST_ROOT="lib\boost" ^
     -DBoost_USE_STATIC_LIBS=1 ^
-    -DUSE_PCH=1 ^
     .. || exit /b 1
 )
 
