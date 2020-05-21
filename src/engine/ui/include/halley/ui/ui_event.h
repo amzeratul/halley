@@ -1,13 +1,13 @@
 #pragma once
-#include <functional>
 #include "halley/text/halleystring.h"
-#include <map>
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
-#include "ui_parent.h"
-#include "halley/core/input/input_keys.h"
 
 namespace Halley {
+	enum class KeyCode;
+	enum class KeyMods;
+	class UIWidget;
+
 	enum class UIEventType {
 		Undefined,
 
@@ -91,24 +91,4 @@ namespace Halley {
 	};
 
 	using UIEventCallback = std::function<void(const UIEvent&)>;
-
-	class UIEventHandler {
-	public:
-		void setHandle(UIEventType type, UIEventCallback handler);
-		void setHandle(UIEventType type, const String& id, UIEventCallback handler);
-
-		bool canHandle(const UIEvent& event) const;
-		void queue(UIEvent event);
-		void pump();
-		void setWidget(UIWidget* uiWidget);
-
-	private:
-		UIWidget* widget = nullptr;
-		std::map<UIEventType, UIEventCallback> handles;
-		std::map<std::pair<UIEventType, String>, UIEventCallback> specificHandles;
-
-		std::vector<UIEvent> eventQueue;
-
-		void handle(UIEvent& event);
-	};
 }

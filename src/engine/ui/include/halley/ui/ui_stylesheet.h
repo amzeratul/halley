@@ -2,7 +2,7 @@
 
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/text/text_renderer.h"
-#include "halley/data_structures/flat_map.h"
+#include <unordered_map>
 #include <map>
 
 namespace Halley {
@@ -16,6 +16,7 @@ namespace Halley {
 	{
 	public:
 		UIStyleDefinition(String styleName, const ConfigNode& node, Resources& resources);
+		~UIStyleDefinition();
 
 		const Sprite& getSprite(const String& name) const;
 		const TextRenderer& getTextRenderer(const String& name) const;
@@ -29,17 +30,13 @@ namespace Halley {
 		bool hasColour(const String& name) const;
 
 	private:
+		class Pimpl;
+		
 		const String styleName;
 		const ConfigNode& node;
 		Resources& resources;
 
-		mutable FlatMap<String, Sprite> sprites;
-		mutable FlatMap<String, TextRenderer> textRenderers;
-		mutable FlatMap<String, Vector4f> borders;
-		mutable FlatMap<String, String> strings;
-		mutable FlatMap<String, float> floats;
-		mutable FlatMap<String, Colour4f> colours;
-		mutable FlatMap<String, std::shared_ptr<const UIStyleDefinition>> subStyles;
+		std::unique_ptr<Pimpl> pimpl;
 	};
 
 	class UIStyleSheet {
@@ -56,7 +53,7 @@ namespace Halley {
 
 	private:
 		Resources& resources;
-		FlatMap<String, std::shared_ptr<UIStyleDefinition>> styles;
+		std::unordered_map<String, std::shared_ptr<UIStyleDefinition>> styles;
 		std::map<String, ConfigObserver> observers;
 
 		void load(const ConfigNode& node);

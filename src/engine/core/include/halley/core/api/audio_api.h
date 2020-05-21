@@ -7,7 +7,6 @@
 #include "halley/text/halleystring.h"
 #include "halley/maths/vector2.h"
 #include "halley/maths/vector3.h"
-#include <memory>
 
 #include "halley/data_structures/ring_buffer.h"
 

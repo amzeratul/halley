@@ -66,6 +66,7 @@ set(HEADERS
         "include/halley/audio/resampler.h"
         "include/halley/bytes/byte_serializer.h"
         "include/halley/bytes/config_node_serializer.h"
+        "include/halley/bytes/config_node_serializer_base.h"
         "include/halley/bytes/compression.h"
         "include/halley/bytes/fuzzer.h"
         "include/halley/concurrency/concurrent.h"
@@ -165,4 +166,5 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
 endif ()
 
 add_library (halley-utils ${SOURCES} ${HEADERS})
+target_precompile_headers(halley-utils PUBLIC "src/prec.h")
 target_link_libraries (halley-utils halley-contrib)

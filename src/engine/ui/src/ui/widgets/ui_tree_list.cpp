@@ -3,6 +3,9 @@
 
 #include "widgets/ui_tree_list.h"
 
+#include <cassert>
+
+
 #include "widgets/ui_image.h"
 #include "widgets/ui_label.h"
 using namespace Halley;

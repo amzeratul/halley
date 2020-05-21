@@ -1,34 +1,13 @@
 #pragma once
 
 #include "halley/file_formats/config_file.h"
-#include "halley/maths/polygon.h"
-#include "halley/maths/colour.h"
 #include "halley/data_structures/maybe.h"
+#include "halley/maths/colour.h"
+#include "halley/maths/rect.h"
+#include "config_node_serializer_base.h"
 #include <set>
 
 namespace Halley {
-	class EntitySerializationContext;
-	
-	class ConfigNodeSerializationContext {
-	public:
-		Resources* resources = nullptr;
-		std::shared_ptr<EntitySerializationContext> entityContext;
-	};
-
-	
-    template <typename T>
-    class ConfigNodeSerializer {
-    public:
-        T deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
-        {
-        	if constexpr (std::is_enum_v<T>) {
-        		return fromString<T>(node.asString());
-        	} else {
-				throw Exception("ConfigNodeSerializer unimplemented type: " + String(typeid(T).name()), HalleyExceptions::Utils);
-			}
-        }
-    };
-
 	template <>
 	class ConfigNodeSerializer<bool> {
 	public:
@@ -167,22 +146,6 @@ namespace Halley {
 	};
 	
 	template<>
-	class ConfigNodeSerializer<Polygon> {
-	public:
-		Polygon deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
-		{
-			VertexList list;
-			if (node.getType() == ConfigNodeType::Sequence) {
-				list.reserve(node.asSequence().size());
-				for (auto& n: node.asSequence()) {
-					list.push_back(n.asVector2f());
-				}
-			}
-			return Polygon(std::move(list));
-		}
-	};
-	
-	template<>
 	class ConfigNodeSerializer<String> {
 	public:
 		String deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
@@ -219,6 +182,14 @@ namespace Halley {
 				return OptionalLite<T>(ConfigNodeSerializer<T>().deserialize(context, node));
 			}
 		}
+	};
+
+	template <typename T>
+	class ConfigNodeSerializer<std::enable_if<std::is_enum_v<T>, T>> {
+		T deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+		{
+        	return fromString<T>(node.asString());
+        }
 	};
 
 	template <typename T>

@@ -77,7 +77,7 @@ void loadStyleData(Resources& resources, const String& name, const ConfigNode& n
 }
 
 template <typename T>
-const T& getValue(const ConfigNode& node, Resources& resources, const String& name, const String& key, FlatMap<String, T>& cache)
+const T& getValue(const ConfigNode& node, Resources& resources, const String& name, const String& key, std::unordered_map<String, T>& cache)
 {
 	// Is it already in cache?
 	const auto iter = cache.find(key);
@@ -104,7 +104,7 @@ const T& getValue(const ConfigNode& node, Resources& resources, const String& na
 }
 
 template <typename T>
-bool hasValue(const ConfigNode& node, Resources& resources, const String& name, const String& key, FlatMap<String, T>& cache)
+bool hasValue(const ConfigNode& node, Resources& resources, const String& name, const String& key, std::unordered_map<String, T>& cache)
 {
 	// Is it already in cache?
 	const auto iter = cache.find(key);
@@ -115,64 +115,78 @@ bool hasValue(const ConfigNode& node, Resources& resources, const String& name, 
 	return node.hasKey(key);
 }
 
+class UIStyleDefinition::Pimpl {
+public:
+	mutable std::unordered_map<String, Sprite> sprites;
+	mutable std::unordered_map<String, TextRenderer> textRenderers;
+	mutable std::unordered_map<String, Vector4f> borders;
+	mutable std::unordered_map<String, String> strings;
+	mutable std::unordered_map<String, float> floats;
+	mutable std::unordered_map<String, Colour4f> colours;
+	mutable std::unordered_map<String, std::shared_ptr<const UIStyleDefinition>> subStyles;
+};
+
 UIStyleDefinition::UIStyleDefinition(String styleName, const ConfigNode& node, Resources& resources)
 	: styleName(std::move(styleName))
 	, node(node)
 	, resources(resources)
+	, pimpl(std::make_unique<Pimpl>())
 {
 	// Load defaults
-	sprites[":default"] = Sprite();
-	textRenderers[":default"] = TextRenderer();
-	floats[":default"] = 0.0f;
-	borders[":default"] = Vector4f();
-	strings[":default"] = "";
-	subStyles[":default"] = {};
-	colours[":default"] = Colour4f(1, 1, 1, 1);
+	pimpl->sprites[":default"] = Sprite();
+	pimpl->textRenderers[":default"] = TextRenderer();
+	pimpl->floats[":default"] = 0.0f;
+	pimpl->borders[":default"] = Vector4f();
+	pimpl->strings[":default"] = "";
+	pimpl->subStyles[":default"] = {};
+	pimpl->colours[":default"] = Colour4f(1, 1, 1, 1);
 }
+
+UIStyleDefinition::~UIStyleDefinition() = default;
 
 std::shared_ptr<const UIStyleDefinition> UIStyleDefinition::getSubStyle(const String& name) const
 {
-	return getValue(node, resources, styleName, name, subStyles);
+	return getValue(node, resources, styleName, name, pimpl->subStyles);
 }
 
 const Sprite& UIStyleDefinition::getSprite(const String& name) const
 {
-	return getValue(node, resources, styleName, name, sprites);
+	return getValue(node, resources, styleName, name, pimpl->sprites);
 }
 
 const TextRenderer& UIStyleDefinition::getTextRenderer(const String& name) const
 {
-	return getValue(node, resources, styleName, name, textRenderers);
+	return getValue(node, resources, styleName, name, pimpl->textRenderers);
 }
 
 bool UIStyleDefinition::hasTextRenderer(const String& name) const
 {
-	return hasValue(node, resources, styleName, name, textRenderers);
+	return hasValue(node, resources, styleName, name, pimpl->textRenderers);
 }
 
 bool UIStyleDefinition::hasColour(const String& name) const
 {
-	return hasValue(node, resources, styleName, name, colours);
+	return hasValue(node, resources, styleName, name, pimpl->colours);
 }
 
 Vector4f UIStyleDefinition::getBorder(const String& name) const
 {
-	return getValue(node, resources, styleName, name, borders);
+	return getValue(node, resources, styleName, name, pimpl->borders);
 }
 
 const String& UIStyleDefinition::getString(const String& name) const
 {
-	return getValue(node, resources, styleName, name, strings);
+	return getValue(node, resources, styleName, name, pimpl->strings);
 }
 
 float UIStyleDefinition::getFloat(const String& name) const
 {
-	return getValue(node, resources, styleName, name, floats);
+	return getValue(node, resources, styleName, name, pimpl->floats);
 }
 
 Colour4f UIStyleDefinition::getColour(const String& name) const
 {
-	return getValue(node, resources, styleName, name, colours);
+	return getValue(node, resources, styleName, name, pimpl->colours);
 }
 
 UIStyleSheet::UIStyleSheet(Resources& resources)

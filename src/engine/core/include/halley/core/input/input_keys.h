@@ -21,9 +21,6 @@
 
 #pragma once
 
-#include <halley/text/halleystring.h>
-#include <halley/data_structures/flat_map.h>
-
 namespace Halley {
 	enum class KeyCode {
 		Unknown = 0,

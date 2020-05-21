@@ -1,4 +1,5 @@
 #include "widgets/ui_framed_image.h"
+
 using namespace Halley;
 
 UIFramedImage::UIFramedImage(const String& id, UIStyle style, std::optional<UISizer> sizer)

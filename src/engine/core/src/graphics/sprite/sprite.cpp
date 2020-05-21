@@ -9,6 +9,8 @@
 #include "resources/resources.h"
 #include <gsl/gsl_assert>
 
+#include "halley/file_formats/config_file.h"
+
 using namespace Halley;
 
 Sprite::Sprite()

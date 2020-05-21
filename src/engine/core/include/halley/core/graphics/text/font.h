@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include "halley/core/graphics/texture.h"
 #include "halley/core/graphics/sprite/sprite.h"
-#include <halley/data_structures/flat_map.h>
 
 namespace Halley
 {

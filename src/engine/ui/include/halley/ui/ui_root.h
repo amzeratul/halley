@@ -2,18 +2,18 @@
 #include "halley/time/halleytime.h"
 #include "halley/maths/vector2.h"
 #include "ui_event.h"
-#include "halley/core/input/input_virtual.h"
 #include "ui_parent.h"
 #include "ui_input.h"
-#include "halley/core/api/audio_api.h"
-#include "halley/core/game/core.h"
-#include "halley/core/input/input_keyboard.h"
 
 namespace Halley {
+	class RenderContext;
+	class HalleyAPI;
 	class SpritePainter;
 	class AudioAPI;
 	class AudioClip;
 	class TextInputCapture;
+	class InputDevice;
+	class IAudioHandle;
 
 	enum class UIInputType {
 		Undefined,
@@ -34,14 +34,14 @@ namespace Halley {
 		void setRect(Rect4f rect, Vector2f overscan = Vector2f());
 		Rect4f getRect() const override;
 
-		void update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual);
+		void update(Time t, UIInputType activeInputType, std::shared_ptr<InputDevice> mouse, std::shared_ptr<InputDevice> manual);
 		void draw(SpritePainter& painter, int mask, int layer);
 		void render(RenderContext& rc);
 
 		void mouseOverNext(bool forward = true);
 		void runLayout();
 		
-		std::optional<AudioHandle> playSound(const String& eventName);
+		std::optional<std::shared_ptr<IAudioHandle>> playSound(const String& eventName);
 		void sendEvent(UIEvent event) const override;
 
 		bool hasModalUI() const;
@@ -81,9 +81,9 @@ namespace Halley {
 		std::unique_ptr<TextInputCapture> textCapture;
 		std::vector<std::pair<std::weak_ptr<UIWidget>, int>> keyPressListeners;
 
-		void updateMouse(const spInputDevice& mouse);
-		void updateGamepadInputTree(const spInputDevice& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting);
-		void updateGamepadInput(const spInputDevice& input);
+		void updateMouse(const std::shared_ptr<InputDevice>& mouse);
+		void updateGamepadInputTree(const std::shared_ptr<InputDevice>& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting);
+		void updateGamepadInput(const std::shared_ptr<InputDevice>& input);
 
 		void updateKeyboardInput();
 		void sendKeyPress(KeyboardKeyPress key);

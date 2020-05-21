@@ -5,18 +5,19 @@
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
 #include "halley/maths/vector4.h"
-#include "halley/data_structures/maybe.h"
 #include "ui_input.h"
 #include "ui_data_bind.h"
-#include "ui_style.h"
 #include "halley/core/api/audio_api.h"
+#include "ui_style.h"
 
 namespace Halley {
+	enum class JoystickType;
 	class UIEvent;
 	class UIValidator;
 	class UIDataBind;
 	class UIAnchor;
 	class UIBehaviour;
+	class UIEventHandler;
 	class TextInputData;
 
 	enum class UIWidgetUpdateType {

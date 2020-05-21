@@ -4,7 +4,9 @@
 #include "ui_painter.h"
 #include "halley/audio/audio_position.h"
 #include "halley/audio/audio_clip.h"
+#include "halley/core/api/halley_api.h"
 #include "halley/core/input/input_keyboard.h"
+#include "halley/core/input/input_virtual.h"
 #include "halley/maths/random.h"
 
 using namespace Halley;

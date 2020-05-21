@@ -22,6 +22,8 @@
 
 #include "halley/maths/polygon.h"
 #include <limits>
+
+#include "halley/file_formats/config_file.h"
 #include "halley/maths/ray.h"
 #include "halley/maths/circle.h"
 #include "halley/maths/line.h"
@@ -458,4 +460,16 @@ Polygon::CollisionResult Polygon::getCollisionWithSweepingEllipse(Vector2f p0, V
 		result.normal = (result.normal * transformation).normalized();
 	}
 	return result;
+}
+
+Polygon ConfigNodeSerializer<Polygon>::deserialize(ConfigNodeSerializationContext&, const ConfigNode& node) 
+{
+	VertexList list;
+	if (node.getType() == ConfigNodeType::Sequence) {
+		list.reserve(node.asSequence().size());
+		for (auto& n: node.asSequence()) {
+			list.push_back(n.asVector2f());
+		}
+	}
+	return Polygon(std::move(list));
 }

@@ -25,8 +25,8 @@
 #include <halley/data_structures/vector.h>
 #include "vector2.h"
 #include "rect.h"
-#include "halley/data_structures/maybe.h"
 #include "circle.h"
+#include "halley/bytes/config_node_serializer_base.h"
 
 namespace Halley {
 
@@ -77,5 +77,11 @@ namespace Halley {
 		void project(const Vector2f &axis,float &min,float &max) const;
 		void unproject(const Vector2f &axis,const float point,Vector<Vector2f> &ver) const;
 		void realize();
+	};
+
+	template<>
+	class ConfigNodeSerializer<Polygon> {
+	public:
+		Polygon deserialize(ConfigNodeSerializationContext&, const ConfigNode& node);
 	};
 }

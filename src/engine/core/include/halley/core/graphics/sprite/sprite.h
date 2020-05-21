@@ -4,8 +4,7 @@
 #include <halley/maths/rect.h>
 #include <halley/maths/colour.h>
 #include <halley/maths/vector4.h>
-#include "halley/data_structures/maybe.h"
-#include <halley/bytes/config_node_serializer.h>
+#include <halley/bytes/config_node_serializer_base.h>
 
 namespace Halley
 {
