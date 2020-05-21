@@ -31,6 +31,11 @@ void EditorTask::setContinuations(Vector<EditorTaskAnchor>&& tasks)
 	continuations = std::move(tasks);
 }
 
+void EditorTask::setName(String name)
+{
+	this->name = std::move(name);
+}
+
 void EditorTask::setProgress(float p, String label)
 {
 	std::lock_guard<std::mutex> lock(mutex);

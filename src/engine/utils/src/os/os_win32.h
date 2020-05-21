@@ -50,9 +50,9 @@ namespace Halley {
 		void displayError(const std::string& cs) override;
 		void onWindowCreated(void* window) override;
 
-		int runCommand(String command) override;
-		Future<int> runCommandAsync(const String& string) override;
-		void runCommand(StringUTF16 command, Promise<int> promise);
+		int runCommand(String command, ILoggerSink* sink) override;
+		Future<int> runCommandAsync(const String& string, ILoggerSink* sink) override;
+		void runCommand(StringUTF16 command, Promise<int> promise, ILoggerSink* sink);
 
 		std::shared_ptr<IClipboard> getClipboard() override;
 

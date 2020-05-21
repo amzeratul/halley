@@ -43,6 +43,7 @@ namespace Halley
 		static void removeSink(ILoggerSink& sink);
 
 		static void log(LoggerLevel level, const String& msg);
+		static void logTo(ILoggerSink* sink, LoggerLevel level, const String& msg);
 		static void logDev(const String& msg);
 		static void logInfo(const String& msg);
 		static void logWarning(const String& msg);

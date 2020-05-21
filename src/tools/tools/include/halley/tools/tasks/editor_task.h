@@ -31,6 +31,8 @@ namespace Halley
 		virtual void run() = 0;
 		void addContinuation(EditorTaskAnchor&& task);
 		void setContinuations(Vector<EditorTaskAnchor>&& tasks);
+
+		void setName(String name);
 		void setProgress(float progress, String label = "");
 		void addError(const String& message);
 		

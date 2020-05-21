@@ -212,6 +212,11 @@ String& String::trimBoth()
 	return trim(true).trim(false);
 }
 
+bool String::contains(Character chr) const
+{
+	return str.find(chr) != npos;
+}
+
 
 size_t String::length() const
 {

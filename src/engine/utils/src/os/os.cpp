@@ -126,12 +126,12 @@ void Halley::OS::setConsoleColor(int, int)
 {
 }
 
-int OS::runCommand(String)
+int OS::runCommand(String, ILoggerSink* sink)
 {
 	throw Exception("Running commands is not implemented in this platform.", HalleyExceptions::OS);
 }
 
-Future<int> OS::runCommandAsync(const String& string)
+Future<int> OS::runCommandAsync(const String& string, ILoggerSink* sink)
 {
 	throw Exception("Running commands is not implemented in this platform.", HalleyExceptions::OS);
 }

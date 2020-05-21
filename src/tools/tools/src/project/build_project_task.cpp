@@ -10,7 +10,7 @@
 using namespace Halley;
 
 BuildProjectTask::BuildProjectTask(Project& project)
-	: EditorTask("Building game", true, true)
+	: EditorTask("Building Project", true, true)
 	, project(project)
 {
 	const String scriptName = [] ()
@@ -33,7 +33,7 @@ BuildProjectTask::BuildProjectTask(Project& project)
 void BuildProjectTask::run()
 {
 	using namespace std::literals::chrono_literals;
-	auto future = OS::get().runCommandAsync(command);
+	auto future = OS::get().runCommandAsync(command, this);
 
 	while (!future.isReady()) {
 		if (isCancelled()) {
@@ -50,5 +50,49 @@ void BuildProjectTask::run()
 	} else {
 		// Fail
 		addError("Script returned error code " + toString(returnValue));
+	}
+}
+
+void BuildProjectTask::log(LoggerLevel level, const String& msg)
+{
+	if (level == LoggerLevel::Error) {
+		addError(msg);
+	}
+
+	switch (buildSystem) {
+	case BuildSystem::MSBuild:
+		parseMSBuildMessage(msg);
+		break;
+
+	default:
+		tryToIdentifyBuildSystem(msg);
+		break;
+	}
+}
+
+void BuildProjectTask::tryToIdentifyBuildSystem(const String& msg)
+{
+	if (msg.contains("Microsoft (R) Build Engine")) {
+		buildSystem = BuildSystem::MSBuild;
+	}
+}
+
+void BuildProjectTask::parseMSBuildMessage(const String& rawMsg)
+{
+	String msg = rawMsg;
+	msg.trimBoth();
+
+	if (msg.endsWith(".c") || msg.endsWith(".cpp")) {
+		// Current file
+		setProgress(0, msg);
+	}
+
+	if (msg.contains("->")) {
+		// Linking
+		auto split = msg.split("->");
+		if (split.size() >= 2) {
+			split.back().trimBoth();
+			setProgress(0, Path(split.back()).getFilename().toString());
+		}
 	}
 }

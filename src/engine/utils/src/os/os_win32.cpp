@@ -472,7 +472,7 @@ static String readPipeToString(HANDLE pipe)
 	return result;
 }
 
-int OSWin32::runCommand(String rawCommand)
+int OSWin32::runCommand(String rawCommand, ILoggerSink* sink)
 {
 	using namespace std::chrono_literals;
 	std::this_thread::sleep_for(100ms);
@@ -480,25 +480,25 @@ int OSWin32::runCommand(String rawCommand)
 	Promise<int> promise;
 	auto future = promise.getFuture();
 
-	runCommand(rawCommand.getUTF16(), promise);
+	runCommand(rawCommand.getUTF16(), promise, sink);
 
 	return future.get();
 }
 
-Future<int> OSWin32::runCommandAsync(const String& rawCommand)
+Future<int> OSWin32::runCommandAsync(const String& rawCommand, ILoggerSink* sink)
 {
 	Promise<int> promise;
 	auto future = promise.getFuture();
 
 	auto command = rawCommand.getUTF16();
-	std::thread([this, command = std::move(command), promise = std::move(promise)] () {
-		runCommand(command, promise);
+	std::thread([this, command = std::move(command), promise = std::move(promise), sink] () {
+		runCommand(command, promise, sink);
 	}).detach();
 
 	return future;
 }
 
-void OSWin32::runCommand(StringUTF16 command, Promise<int> promise)
+void OSWin32::runCommand(StringUTF16 command, Promise<int> promise, ILoggerSink* sink)
 {
 	// Create the commandline
 	if (command.length() >= 1024) {
@@ -553,50 +553,65 @@ void OSWin32::runCommand(StringUTF16 command, Promise<int> promise)
 	CloseHandle(inWrite);
 	HANDLE waitHandles[] = { pi.hProcess, outRead, errorRead };
 
-	auto readOutput = [&] ()
+	auto readOutputStream = [&] (String msg, String& strBuffer, LoggerLevel level, bool isFinal)
 	{
-		auto out = readPipeToString(outRead);
-		auto error = readPipeToString(errorRead);
-		if (!out.isEmpty()) {
-			if (out.endsWith("\n")) {
-				out = out.left(out.size() - 1);
-			}
-			Logger::logDev(out);
+		strBuffer += msg;
+		
+		for (auto lineBreakPos = strBuffer.find('\n'); lineBreakPos != std::string::npos; lineBreakPos = strBuffer.find('\n')) {
+			Logger::logTo(sink, level, strBuffer.left(lineBreakPos));
+			strBuffer = strBuffer.mid(lineBreakPos + 1);
 		}
-		if (!error.isEmpty()) {
-			if (error.endsWith("\n")) {
-				error = error.left(error.size() - 1);
-			}
-			Logger::logError(error);
+		
+		if (isFinal && !strBuffer.isEmpty()) {
+			Logger::logTo(sink, level, strBuffer);
 		}
 	};
 
-	while (!promise.isCancelled()) {
+	String outBuffer;
+	String errorBuffer;
+	auto readOutput = [&] (bool isFinal)
+	{
+		readOutputStream(readPipeToString(outRead), outBuffer, LoggerLevel::Info, isFinal);
+		readOutputStream(readPipeToString(errorRead), errorBuffer, LoggerLevel::Error, isFinal);
+	};
+
+	auto cleanup = [&] ()
+	{
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+		CloseHandle(inRead);
+		CloseHandle(outRead);
+		CloseHandle(outWrite);
+		CloseHandle(errorRead);
+		CloseHandle(errorWrite);
+	};
+
+	while (true) {
+		if (promise.isCancelled()) {
+			TerminateProcess(pi.hProcess, -1);
+			cleanup();
+			return;
+		}
+		
 		const DWORD waitResult = WaitForMultipleObjects(3, waitHandles, TRUE, 10);
 		if (waitResult >= WAIT_OBJECT_0 && waitResult < WAIT_OBJECT_0 + 3) {
 			// Done!
 			break;
 		} else if (waitResult == WAIT_FAILED) {
 			promise.setValue(-3);
+			cleanup();
 			return;
 		}
-		readOutput();
+		readOutput(false);
 	}
 
-	readOutput();
+	readOutput(true);
 
 	// Get exit code
 	DWORD exitCode = -2;
 	GetExitCodeProcess(pi.hProcess, &exitCode);
-
-	// Cleanup
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
-	CloseHandle(inRead);
-	CloseHandle(outRead);
-	CloseHandle(outWrite);
-	CloseHandle(errorRead);
-	CloseHandle(errorWrite);
+	
+	cleanup();
 
 	promise.setValue(static_cast<int>(exitCode));
 }

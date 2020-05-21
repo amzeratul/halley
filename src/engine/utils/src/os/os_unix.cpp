@@ -64,7 +64,7 @@ Halley::String Halley::OSUnix::getUserDataDir()
 	return result + "/Library/";
 }
 
-int Halley::OSUnix::runCommand(String command)
+int Halley::OSUnix::runCommand(String command, ILoggerSink* sink)
 {
 	auto args = command.split(' ');
 	String cmd = args[0];

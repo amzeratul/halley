@@ -66,6 +66,15 @@ void Logger::log(LoggerLevel level, const String& msg)
 	}
 }
 
+void Logger::logTo(ILoggerSink* sink, LoggerLevel level, const String& msg)
+{
+	if (sink) {
+		sink->log(level, msg);
+	} else {
+		log(level, msg);
+	}
+}
+
 void Logger::logDev(const String& msg)
 {
 	log(LoggerLevel::Dev, msg);

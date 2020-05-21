@@ -74,6 +74,7 @@ namespace Halley {
 		String& trim(bool fromRight);
 		String& trimBoth();
 
+		bool contains(Character chr) const;
 		bool contains(const String& string) const;
 		size_t find(String str) const;
 

@@ -26,6 +26,8 @@
 #include "halley/core/api/system_api.h"
 
 namespace Halley {
+	class ILoggerSink;
+
 	class ComputerData {
 	public:
 		String computerName;
@@ -60,8 +62,8 @@ namespace Halley {
 		virtual std::vector<Path> enumerateDirectory(const Path& path);
 
 		virtual void setConsoleColor(int foreground, int background);
-		virtual int runCommand(String command);
-		virtual Future<int> runCommandAsync(const String& string);
+		virtual int runCommand(String command, ILoggerSink* sink = nullptr);
+		virtual Future<int> runCommandAsync(const String& string, ILoggerSink* sink = nullptr);
 
 		virtual std::shared_ptr<IClipboard> getClipboard();
 

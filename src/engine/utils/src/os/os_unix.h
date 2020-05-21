@@ -38,7 +38,7 @@ namespace Halley {
 		void createDirectories(const Path& path) override;
 		std::vector<Path> enumerateDirectory(const Path& path) override;
 
-		int runCommand(String command) override;
+		int runCommand(String command, ILoggerSink* sink) override;
 	};
 }
 
