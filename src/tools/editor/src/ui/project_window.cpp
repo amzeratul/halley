@@ -22,6 +22,7 @@ ProjectWindow::ProjectWindow(UIFactory& factory, HalleyEditor& editor, Project& 
 	project.withDLL([&] (DynamicLibrary& dll)
 	{
 		dll.addReloadListener(*this);
+		hasDLL = dll.isLoaded();
 	});
 	project.addAssetLoadedListener(this);
 
@@ -81,6 +82,15 @@ void ProjectWindow::makePagedPane()
 	uiMid->add(pagedPane, 1);
 }
 
+void ProjectWindow::tryLoadCustomUI()
+{
+	if (waitingToLoadCustomUI && hasAssets && hasDLL) {
+		if (loadCustomUI()) {
+			waitingToLoadCustomUI = false;
+		}
+	}
+}
+
 bool ProjectWindow::loadCustomUI()
 {
 	destroyCustomUI();
@@ -127,7 +137,9 @@ void ProjectWindow::destroyCustomUI()
 
 void ProjectWindow::onLoadDLL()
 {
+	hasDLL = true;
 	waitingToLoadCustomUI = true;
+	tryLoadCustomUI();
 }
 
 void ProjectWindow::onUnloadDLL()
@@ -137,11 +149,8 @@ void ProjectWindow::onUnloadDLL()
 
 void ProjectWindow::onAssetsLoaded()
 {
-	if (waitingToLoadCustomUI) {
-		if (loadCustomUI()) {
-			waitingToLoadCustomUI = false;
-		}
-	}
+	hasAssets = true;
+	tryLoadCustomUI();
 	for (auto& c: customTools) {
 		c.widget->sendEvent(UIEvent(UIEventType::AssetsReloaded, getId()));
 	}

@@ -30,6 +30,8 @@ namespace Halley
 		bool hasChanged() const;
 
 		void reloadIfChanged();
+		void notifyReload();
+		void notifyUnload();
 		void addReloadListener(IDynamicLibraryListener& listener);
 		void removeReloadListener(IDynamicLibraryListener& listener);
 

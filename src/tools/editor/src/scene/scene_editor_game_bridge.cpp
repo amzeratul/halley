@@ -13,7 +13,7 @@ SceneEditorGameBridge::SceneEditorGameBridge(const HalleyAPI& api, Resources& re
 	gizmos = std::make_unique<SceneEditorGizmoCollection>(factory, resources);
 
 	gameResources = &project.getGameResources();
-	project.withDLL([&] (DynamicLibrary& dll)
+	project.withLoadedDLL([&] (DynamicLibrary& dll)
 	{
 		load();
 	});

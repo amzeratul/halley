@@ -34,24 +34,37 @@ Project::Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader&
 	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", std::vector<String>{ "" });
 	assetImporter = std::make_unique<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
 
-	auto dllPath = getDLLPath();
+	const auto dllPath = getDLLPath();
 	if (!dllPath.isEmpty()) {
-		try {
-			gameDll = std::make_shared<DynamicLibrary>(dllPath.string());
-			gameDll->clearTempDirectory();
-			gameDll->load(true);
-			Logger::logInfo("Loaded " + dllPath.string());
-		} catch (...) {
-			gameDll.reset();
-		}
+		gameDll = std::make_shared<DynamicLibrary>(dllPath.string());
+		loadDLL();
 	}
 }
 
 Project::~Project()
 {
+	gameResources.reset();
 	gameDll.reset();
 	assetImporter.reset();
 	plugins.clear();
+}
+
+void Project::update(Time time)
+{
+	withDLL([&] (DynamicLibrary& dll)
+	{
+		dll.reloadIfChanged();
+	});
+}
+
+void Project::onBuildDone()
+{
+	if (!isDLLLoaded()) {
+		loadDLL();
+		if (isDLLLoaded()) {
+			gameDll->notifyReload();
+		}
+	}
 }
 
 std::vector<String> Project::getPlatforms() const
@@ -277,11 +290,6 @@ void Project::notifyAssetFileModified(Path path)
 	}
 }
 
-const std::shared_ptr<DynamicLibrary>& Project::getGameDLL() const
-{
-	return gameDll;
-}
-
 constexpr static const char* getDLLExtension()
 {
 #if defined (_WIN32)
@@ -312,6 +320,17 @@ Path Project::getDLLPath() const
 	return rootPath / "bin" / (binName + suffix + getDLLExtension());
 }
 
+void Project::loadDLL()
+{
+	if (gameDll) {
+		try {
+			gameDll->clearTempDirectory();
+			gameDll->load(true);
+			Logger::logInfo("Loaded " + getDLLPath().string());
+		} catch (...) {}
+	}
+}
+
 Path Project::getExecutablePath() const
 {
 	const auto& binName = getProperties().getBinName();
@@ -338,9 +357,14 @@ Resources& Project::getGameResources()
 	return *gameResources;
 }
 
+bool Project::isDLLLoaded() const
+{
+	return gameDll && gameDll->isLoaded();
+}
+
 std::unique_ptr<Game> Project::createGameInstance() const
 {
-	if (!gameDll) {
+	if (!isDLLLoaded()) {
 		return {};
 	}
 

@@ -49,11 +49,15 @@ namespace Halley {
 
 		std::vector<IEditorCustomTools::ToolData> customTools;
     	bool waitingToLoadCustomUI = true;
+    	bool hasAssets = false;
+    	bool hasDLL = false;
 
         void makeUI();
     	void makeToolbar();
     	void makePagedPane();
-		bool loadCustomUI();
+
+    	void tryLoadCustomUI();
+    	bool loadCustomUI();
 		void destroyCustomUI();
     };
 }

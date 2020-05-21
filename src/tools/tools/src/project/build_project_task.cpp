@@ -11,6 +11,7 @@ using namespace Halley;
 
 BuildProjectTask::BuildProjectTask(Project& project)
 	: EditorTask("Building game", true, true)
+	, project(project)
 {
 	const String scriptName = [] ()
 	{
@@ -43,7 +44,11 @@ void BuildProjectTask::run()
 	}
 
 	const int returnValue = future.get();
-	if (returnValue != 0) {
+	if (returnValue == 0) {
+		// Success
+		project.onBuildDone();
+	} else {
+		// Fail
 		addError("Script returned error code " + toString(returnValue));
 	}
 }

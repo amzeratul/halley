@@ -61,10 +61,7 @@ void EditorRootStage::onVariableUpdate(Time time)
 	}
 
 	if (project) {
-		project->withDLL([&] (DynamicLibrary& dll)
-		{
-			dll.reloadIfChanged();
-		});
+		project->update(time);
 	}
 }
 

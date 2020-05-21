@@ -33,6 +33,11 @@ void DynamicLibrary::load(bool withAnotherName)
 {
 	unload();
 
+	// Does the path exist?
+	if (boost::system::error_code ec; !exists(libOrigPath, ec) || ec.failed()) {
+		throw Exception("Library doesn't exist: " + libOrigPath.string(), HalleyExceptions::Tools);
+	}
+
 	// Determine which path to load
 	hasTempPath = withAnotherName;
 	if (withAnotherName) {
@@ -182,16 +187,24 @@ bool DynamicLibrary::hasChanged() const
 void DynamicLibrary::reloadIfChanged()
 {
 	if (hasChanged()) {
-		for (const auto& l: reloadListeners) {
-			l->onUnloadDLL();
-		}
-		
+		notifyUnload();
 		unload();
 		load(true);
-		
-		for (const auto& l: reloadListeners) {
-			l->onLoadDLL();
-		}
+		notifyReload();
+	}
+}
+
+void DynamicLibrary::notifyReload()
+{
+	for (const auto& l: reloadListeners) {
+		l->onLoadDLL();
+	}
+}
+
+void DynamicLibrary::notifyUnload()
+{
+	for (const auto& l: reloadListeners) {
+		l->onUnloadDLL();
 	}
 }
 

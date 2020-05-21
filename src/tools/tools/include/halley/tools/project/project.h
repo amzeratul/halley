@@ -4,6 +4,8 @@
 #include "halley/tools/assets/asset_importer.h"
 #include "halley/plugin/halley_plugin.h"
 #include <memory>
+
+#include "halley/time/halleytime.h"
 #include "halley/tools/assets/check_assets_task.h"
 #include "halley/tools/dll/dynamic_library.h"
 
@@ -35,6 +37,9 @@ namespace Halley
 		Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader& loader);
 		~Project();
 		
+		void update(Time time);
+		void onBuildDone();
+
 		std::vector<String> getPlatforms() const;
 
 		const Path& getHalleyRootPath() const;
@@ -82,16 +87,25 @@ namespace Halley
 		void setCheckAssetTask(CheckAssetsTask* checkAssetsTask);
 		void notifyAssetFileModified(Path path);
 
-		Path getDLLPath() const;
 		Path getExecutablePath() const;
 
 		void loadGameResources(const HalleyAPI& api);
 		Resources& getGameResources();
 
+		bool isDLLLoaded() const;
+		
 		template <typename F>
 		void withDLL(F f) const
 		{
 			if (gameDll) {
+				f(*gameDll);
+			}
+		}
+
+		template <typename F>
+		void withLoadedDLL(F f) const
+		{
+			if (isDLLLoaded()) {
 				f(*gameDll);
 			}
 		}
@@ -120,7 +134,8 @@ namespace Halley
 		std::shared_ptr<DynamicLibrary> gameDll;
 		std::unique_ptr<Resources> gameResources;
 
-		const std::shared_ptr<DynamicLibrary>& getGameDLL() const;
+		Path getDLLPath() const;
+		void loadDLL();
 		void loadECSData();
 	};
 }

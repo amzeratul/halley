@@ -12,6 +12,7 @@ namespace Halley {
         void run() override;
 
 	private:
+		Project& project;
 		String command;
     };
 }
