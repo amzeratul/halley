@@ -1,5 +1,4 @@
-include(PrecompiledHeader)
-
+cmake_minimum_required (VERSION 3.16)
 
 function(string_starts_with str prefix var)
   string(LENGTH "${str}" str_length)
@@ -461,14 +460,13 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		add_custom_target(${name}-gamebins DEPENDS ${name} ${name}-dll)
 	endif()
 
+	if (HALLEY_MONOLITHIC)
+		target_precompile_headers(${name} PRIVATE prec.h)
+	else()
+		target_precompile_headers(${name}-game PRIVATE prec.h)
+	endif()
+
 	if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
-		if (USE_PCH)
-			if (HALLEY_MONOLITHIC)
-				add_precompiled_header(${name} prec.h FORCEINCLUDE SOURCE_CXX prec.cpp)
-			else()
-				add_precompiled_header(${name}-game prec.h FORCEINCLUDE SOURCE_CXX prec.cpp)
-			endif()
-		endif ()
 		set_target_properties(${name} PROPERTIES LINK_FLAGS_RELEASE "/PDBSTRIPPED:\"${targetDir}/${name}_stripped.pdb\"")
 	endif()
 
