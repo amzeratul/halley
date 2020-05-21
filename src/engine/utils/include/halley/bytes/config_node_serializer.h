@@ -185,14 +185,6 @@ namespace Halley {
 	};
 
 	template <typename T>
-	class ConfigNodeSerializer<std::enable_if<std::is_enum_v<T>, T>> {
-		T deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
-		{
-        	return fromString<T>(node.asString());
-        }
-	};
-
-	template <typename T>
 	class ConfigNodeHelper {
 	public:
 		static void deserialize(T& dst, ConfigNodeSerializationContext& context, const ConfigNode& node)
@@ -220,4 +212,11 @@ namespace Halley {
 			dst = ConfigNodeSerializer<OptionalLite<T>>().deserialize(context, node);
 		}
 	};
+
+	template <typename T>
+	T ConfigNodeSerializerEnumUtils<T>::parseEnum(const ConfigNode& node)
+	{
+		return fromString<T>(node.asString());
+	}
 }
+

@@ -4,6 +4,8 @@
 #include "halley/core/graphics/material/material.h"
 #include "halley/core/graphics/material/material_parameter.h"
 #include <gsl/gsl_assert>
+
+#include "halley/support/logger.h"
 #include "halley/text/i18n.h"
 
 using namespace Halley;
@@ -464,12 +466,12 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::fun
 					advanceAdjust = 0;
 				}
 				const int advance = int(lastValid->size());
-				Expects(advance > 0);
 
 				if (!result.empty()) {
 					result.push_back('\n');
 				}
-				result += StringUTF32(lastValid->data(), advance + advanceAdjust);
+				const int totalAdvance = std::max(advance + advanceAdjust, 1);
+				result += StringUTF32(lastValid->data(), totalAdvance);
 				src = src.subspan(advance);
 				break;
 			}
