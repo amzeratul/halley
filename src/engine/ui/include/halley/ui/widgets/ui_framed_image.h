@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ui_image.h"
-#include "ui_style.h"
+#include "../ui_style.h"
 
 namespace Halley {
     class UIFramedImage : public UIImage {
