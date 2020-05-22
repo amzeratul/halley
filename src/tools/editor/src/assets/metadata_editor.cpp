@@ -61,6 +61,7 @@ void MetadataEditor::makeUI()
 		addStringField("Atlas", "atlas", "");
 		addStringField("Palette", "palette", "");
 		addStringField("Material", "material", "Halley/Sprite");
+		addStringField("Default Material", "defaultMaterial", "Halley/Sprite");
 		addBoolField("Filtering", "filtering", false);
 		addBoolField("Minimap", "minimap", false);
 		addStringField("Format", "format", "rgba");
