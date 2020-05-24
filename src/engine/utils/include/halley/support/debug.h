@@ -31,7 +31,7 @@ namespace Halley {
 	{
 		const char* filename = nullptr;
 		int line = 0;
-		std::array<char, 1024> arg = {};
+		std::array<char, 256> arg = {};
 	};
 
 	class Debug {
@@ -55,7 +55,7 @@ namespace Halley {
 	private:
 		Debug();
 		static bool debugging;
-		static std::array<DebugTraceEntry, 32> lastTraces;
+		static std::array<DebugTraceEntry, 16> lastTraces;
 		static int tracePos;
 	};
 

@@ -243,5 +243,5 @@ void Debug::printLastTraces()
 	}
 }
 
-std::array<DebugTraceEntry, 32> Debug::lastTraces;
+std::array<DebugTraceEntry, 16> Debug::lastTraces;
 int Debug::tracePos = 0;

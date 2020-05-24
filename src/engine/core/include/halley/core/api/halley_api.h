@@ -7,6 +7,7 @@ namespace Halley
 	namespace HalleyAPIFlags {
 		enum Flags
 		{
+			System = 0, // System is mandatory, so it's flag 0
 			Video = 1,
 			Audio = 2,
 			Input = 4,
@@ -48,6 +49,7 @@ namespace Halley
 		void init();
 		void deInit();
 		void assign();
+		void setAPI(PluginType pluginType, HalleyAPIInternal* api);
 		static std::unique_ptr<HalleyAPI> create(CoreAPIInternal* core, int flags);
 
 		HalleyAPI& operator=(const HalleyAPI& other);

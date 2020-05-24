@@ -2,6 +2,7 @@
 #include "api/halley_api.h"
 #include <halley/plugin/plugin.h>
 #include "halley/audio/audio_facade.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -94,81 +95,58 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 	auto api = std::make_unique<HalleyAPI>();
 	api->coreInternal = core;
 
-	std::unique_ptr<SystemAPIInternal> system;
-	{
-		auto plugins = core->getPlugins(PluginType::SystemAPI);
-		if (!plugins.empty()) {
-			std::cout << "System plugin: " << plugins[0]->getName() << "\n";
-			system.reset(dynamic_cast<SystemAPIInternal*>(plugins[0]->createAPI(nullptr)));
-		} else {
-			throw Exception("No suitable system plugins found.", HalleyExceptions::Core);
+	HalleyAPIFlags::Flags flagList[] = { HalleyAPIFlags::System, HalleyAPIFlags::Video, HalleyAPIFlags::Input, HalleyAPIFlags::Audio, HalleyAPIFlags::Network, HalleyAPIFlags::Platform, HalleyAPIFlags::Movie };
+	PluginType pluginTypes[] = { PluginType::SystemAPI, PluginType::GraphicsAPI, PluginType::InputAPI, PluginType::AudioOutputAPI, PluginType::NetworkAPI, PluginType::PlatformAPI, PluginType::MovieAPI };
+	String names[] = { "System", "Graphics", "Input", "AudioOutput", "Network", "Platform", "Movie" };
+
+	SystemAPI* system = nullptr;
+	constexpr size_t n = std::end(flagList) - std::begin(flagList);
+	for (size_t i = 0; i < n; ++i) {
+		if (flags & flagList[i] || flagList[i] == HalleyAPIFlags::System) {
+			auto plugins = core->getPlugins(pluginTypes[i]);
+			if (!plugins.empty()) {
+				Logger::logInfo(names[i] + " plugin: " + plugins[0]->getName());
+				api->setAPI(pluginTypes[i], plugins[0]->createAPI(system));
+
+				if (pluginTypes[i] == PluginType::SystemAPI) {
+					system = api->systemInternal.get();
+				}
+			} else {
+				throw Exception("No suitable " + names[i] + " plugins found.", HalleyExceptions::Core);
+			}
 		}
 	}
 
-	if (flags & HalleyAPIFlags::Video) {
-		auto plugins = core->getPlugins(PluginType::GraphicsAPI);
-		if (!plugins.empty()) {
-			std::cout << "Video plugin: " << plugins[0]->getName() << "\n";
-			api->videoInternal.reset(dynamic_cast<VideoAPIInternal*>(plugins[0]->createAPI(system.get())));
-		} else {
-			throw Exception("No suitable video plugins found.", HalleyExceptions::Core);
-		}
-	}
-
-	if (flags & HalleyAPIFlags::Input) {
-		auto plugins = core->getPlugins(PluginType::InputAPI);
-		if (!plugins.empty()) {
-			std::cout << "Input plugin: " << plugins[0]->getName() << "\n";
-			api->inputInternal.reset(dynamic_cast<InputAPIInternal*>(plugins[0]->createAPI(system.get())));
-		} else {
-			throw Exception("No suitable input plugins found.", HalleyExceptions::Core);
-		}
-	}
-
-	if (flags & HalleyAPIFlags::Audio) {
-		auto plugins = core->getPlugins(PluginType::AudioOutputAPI);
-		if (!plugins.empty()) {
-			std::cout << "Audio output plugin: " << plugins[0]->getName() << "\n";
-			api->audioOutputInternal.reset(dynamic_cast<AudioOutputAPIInternal*>(plugins[0]->createAPI(system.get())));
-			api->audioInternal = std::make_unique<AudioFacade>(*api->audioOutputInternal, *system);
-		} else {
-			throw Exception("No suitable audio plugins found.", HalleyExceptions::Core);
-		}
-	}
-
-	if (flags & HalleyAPIFlags::Network) {
-		auto plugins = core->getPlugins(PluginType::NetworkAPI);
-		if (!plugins.empty()) {
-			std::cout << "Network plugin: " << plugins[0]->getName() << "\n";
-			api->networkInternal.reset(dynamic_cast<NetworkAPIInternal*>(plugins[0]->createAPI(system.get())));
-		} else {
-			throw Exception("No suitable network plugins found.", HalleyExceptions::Core);
-		}
-	}
-
-	if (flags & HalleyAPIFlags::Platform) {
-		auto plugins = core->getPlugins(PluginType::PlatformAPI);
-		if (!plugins.empty()) {
-			std::cout << "Platform plugin: " << plugins[0]->getName() << "\n";
-			api->platformInternal.reset(dynamic_cast<PlatformAPIInternal*>(plugins[0]->createAPI(system.get())));
-		} else {
-			throw Exception("No suitable network plugins found.", HalleyExceptions::Core);
-		}
-	}
-
-	if (flags & HalleyAPIFlags::Movie) {
-		auto plugins = core->getPlugins(PluginType::MovieAPI);
-		if (!plugins.empty()) {
-			std::cout << "Movie plugin: " << plugins[0]->getName() << "\n";
-			api->movieInternal.reset(dynamic_cast<MovieAPIInternal*>(plugins[0]->createAPI(system.get())));
-		} else {
-			throw Exception("No suitable movie plugins found.", HalleyExceptions::Core);
-		}
-	}
-
-	api->systemInternal = std::move(system);
 	api->assign();
 	return api;
+}
+
+void HalleyAPI::setAPI(PluginType pluginType, HalleyAPIInternal* api)
+{
+	switch (pluginType) {
+	case PluginType::SystemAPI:
+		systemInternal.reset(dynamic_cast<SystemAPIInternal*>(api));
+		return;
+	case PluginType::InputAPI:
+		inputInternal.reset(dynamic_cast<InputAPIInternal*>(api));
+		return;
+	case PluginType::GraphicsAPI:
+		videoInternal.reset(dynamic_cast<VideoAPIInternal*>(api));
+		return;
+	case PluginType::AudioOutputAPI:
+		audioOutputInternal.reset(dynamic_cast<AudioOutputAPIInternal*>(api));
+		audioInternal = std::make_unique<AudioFacade>(*audioOutputInternal, *systemInternal);
+		return;
+	case PluginType::PlatformAPI:
+		platformInternal.reset(dynamic_cast<PlatformAPIInternal*>(api));
+		return;
+	case PluginType::NetworkAPI:
+		networkInternal.reset(dynamic_cast<NetworkAPIInternal*>(api));
+		return;
+	case PluginType::MovieAPI:
+		movieInternal.reset(dynamic_cast<MovieAPIInternal*>(api));
+		return;
+	}
 }
 
 HalleyAPI& HalleyAPI::operator=(const HalleyAPI& other) = default;
