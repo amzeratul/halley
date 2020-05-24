@@ -6,7 +6,7 @@ namespace Halley {
 	class UIImage : public UIWidget {
 	public:
 		explicit UIImage(Sprite sprite, std::optional<UISizer> sizer = {}, Vector4f innerBorder = {});
-		explicit UIImage(const String& id, Sprite sprite, std::optional<UISizer> sizer = {}, Vector4f innerBorder = {});
+		explicit UIImage(String id, Sprite sprite, std::optional<UISizer> sizer = {}, Vector4f innerBorder = {});
 
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;

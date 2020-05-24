@@ -477,7 +477,6 @@ std::shared_ptr<UIWidget> UIFactory::makeSpinControl(const ConfigNode& entryNode
 std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
 	auto style = UIStyle(node["style"].asString("list"), styleSheet);
 	auto label = parseLabel(node);
 
@@ -485,7 +484,7 @@ std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
 	int nColumns = node["columns"].asInt(1);
 	auto options = parseOptions(node["options"]);
 
-	auto widget = std::make_shared<UIList>(id, style, orientation, nColumns);
+	auto widget = std::make_shared<UIList>(node["id"].asString(), style, orientation, nColumns);
 	applyInputButtons(*widget, node["inputButtons"].asString("list"));
 	for (auto& o: options) {
 		if (!o.image.isEmpty() || !o.sprite.isEmpty()) {
@@ -663,8 +662,8 @@ std::shared_ptr<UIWidget> UIFactory::makeHorizontalDiv(const ConfigNode& entryNo
 {
 	const auto& widgetNode = entryNode["widget"];
 	auto id = widgetNode["id"].asString("");
-	auto style = getStyle(widgetNode["style"].asString("horizontalDiv"));
-	return std::make_shared<UIImage>(id, style.getSprite("image"));
+	const auto& style = getStyle(widgetNode["style"].asString("horizontalDiv"));
+	return std::make_shared<UIImage>(std::move(id), style.getSprite("image"));
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeVerticalDiv(const ConfigNode& entryNode)

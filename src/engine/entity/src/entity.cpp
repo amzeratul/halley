@@ -156,7 +156,7 @@ void Entity::refresh(MaskStorage& storage, ComponentDeleterTable& table)
 		for (auto i : components) {
 			FamilyMask::setBit(m, i.first);
 		}
-		mask = FamilyMask::getHandle(m, storage);
+		mask = FamilyMaskType(m, storage);
 	}
 }
 

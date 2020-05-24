@@ -296,7 +296,7 @@ const CreateComponentFunction& World::getCreateComponentFunction() const
 	return createComponent;
 }
 
-MaskStorage& World::getMaskStorage() const
+MaskStorage& World::getMaskStorage() const noexcept
 {
 	return *maskStorage;
 }
@@ -502,7 +502,13 @@ void World::renderSystems(RenderContext& rc) const
 	}
 }
 
-void World::onAddFamily(Family& family)
+Family& World::addFamily(std::unique_ptr<Family> family) noexcept
+{
+	onAddFamily(*family);
+	return *families.emplace_back(std::move(family));
+}
+
+void World::onAddFamily(Family& family) noexcept
 {
 	// Add any existing entities to this new family
 	size_t nEntities = entities.size();

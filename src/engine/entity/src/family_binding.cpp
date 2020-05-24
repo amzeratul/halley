@@ -12,7 +12,7 @@ FamilyBindingBase::~FamilyBindingBase()
 	}
 }
 
-void FamilyBindingBase::doInit(FamilyMaskType read, FamilyMaskType write)
+void FamilyBindingBase::doInit(FamilyMaskType read, FamilyMaskType write) noexcept
 {
 	readMask = read;
 	writeMask = write;
@@ -28,7 +28,7 @@ void FamilyBindingBase::onEntitiesRemoved(void* entity, size_t count)
 	removedCallback(entity, count);
 }
 
-void FamilyBindingBase::setFamily(Family* f) {
+void FamilyBindingBase::setFamily(Family* f) noexcept {
 	family = f;
 }
 

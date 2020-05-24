@@ -81,45 +81,9 @@ private:
 };
 
 
-Handle::Handle()
-	: value(-1)
-{
-}
-
-Handle::Handle(const Handle& h)
-	: value(h.value)
-{
-}
-
-Handle::Handle(Handle&& h) noexcept
-	: value(h.value)
-{
-}
-
 Handle::Handle(const RealType& mask, MaskStorage& storage)
 	: value(storage.getHandle(mask))
 {
-}
-
-Handle& Handle::operator=(const Handle& h)
-{
-	value = h.value;
-	return *this;
-}
-
-bool Handle::operator==(const Handle& h) const
-{
-	return value == h.value;
-}
-
-bool Handle::operator!=(const Handle& h) const
-{
-	return value != h.value;
-}
-
-bool Handle::operator<(const Handle& h) const
-{
-	return value < h.value;
 }
 
 Handle Handle::intersection(const Handle& h, MaskStorage& storage) const
@@ -138,11 +102,6 @@ bool Handle::contains(const Handle& handle, MaskStorage& storage) const
 	auto& theirs = handle.getRealValue(storage);
 
 	return (mine & theirs) == theirs;
-}
-
-HandleType FamilyMask::getHandle(RealType mask, MaskStorage& storage)
-{
-	return Handle(mask, storage);
 }
 
 std::shared_ptr<MaskStorage> MaskStorageInterface::createStorage()

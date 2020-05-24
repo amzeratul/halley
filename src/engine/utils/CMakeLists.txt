@@ -144,6 +144,7 @@ set(HEADERS
         "include/halley/time/halleytime.h"
         "include/halley/time/stopwatch.h"
         "include/halley/utils/algorithm.h"
+        "include/halley/utils/attributes.h"
         "include/halley/utils/encrypt.h"
         "include/halley/utils/hash.h"
         "include/halley/utils/type_traits.h"

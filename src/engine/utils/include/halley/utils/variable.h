@@ -115,9 +115,9 @@ namespace Halley {
 		VariableTable(const ConfigNode& node);
 
 		template <typename T>
-		Variable<T> get(const String& name) const
+		Variable<T> get(String name) const
 		{
-			return Variable<T>(*this, name);
+			return Variable<T>(*this, std::move(name));
 		}
 
 		const Internal::VariableStorage& getRawStorage(const String& key) const;

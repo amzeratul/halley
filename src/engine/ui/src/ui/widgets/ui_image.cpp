@@ -8,8 +8,8 @@ UIImage::UIImage(Sprite s, std::optional<UISizer> sizer, Vector4f innerBorder)
 	setSprite(s);
 }
 
-UIImage::UIImage(const String& id, Sprite s, std::optional<UISizer> sizer, Vector4f innerBorder)
-	: UIWidget(id, {}, std::move(sizer), innerBorder)
+UIImage::UIImage(String id, Sprite s, std::optional<UISizer> sizer, Vector4f innerBorder)
+	: UIWidget(std::move(id), {}, std::move(sizer), innerBorder)
 {
 	setSprite(s);
 }
@@ -45,14 +45,14 @@ void UIImage::update(Time t, bool moved)
 
 void UIImage::setSprite(Sprite s)
 {
-	sprite = s;
+	sprite = std::move(s);
 
-	auto b = sprite.getOuterBorder();
-	topLeftBorder = Vector2f(float(b.x), float(b.y));
-	bottomRightBorder = Vector2f(float(b.z), float(b.w));
-	auto c = s.getClip();
+	const auto b = sprite.getOuterBorder();
+	topLeftBorder = Vector2f(b.xy());
+	bottomRightBorder = Vector2f(b.zw());
+	const auto c = sprite.getClip();
 	
-	auto spriteSize = (s.getSize() + topLeftBorder + bottomRightBorder) * s.getScale();
+	const auto spriteSize = (sprite.getSize() + topLeftBorder + bottomRightBorder) * sprite.getScale();
 	//sprite.setAbsolutePivot(-topLeftBorder + sprite.getAbsolutePivot());
 	
 	if (c) {

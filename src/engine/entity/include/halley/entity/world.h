@@ -14,6 +14,7 @@
 #include <halley/data_structures/tree_map.h>
 #include "service.h"
 #include "create_functions.h"
+#include "halley/utils/attributes.h"
 
 namespace Halley {
 	class UUID;
@@ -91,7 +92,7 @@ namespace Halley {
 		void onEntityDirty();
 
 		template <typename T>
-		Family& getFamily()
+		Family& getFamily() noexcept
 		{
 			// Disable re-using of families due to optional components messing them up
 			/*
@@ -102,17 +103,12 @@ namespace Halley {
 			}
 			*/
 
-			auto newFam = std::make_unique<FamilyImpl<T>>(*maskStorage);
-			Family* newFamPtr = newFam.get();
-			onAddFamily(*newFamPtr);
-			//families[mask] = std::move(newFam);
-			families.emplace_back(std::move(newFam));
-			return *newFamPtr;
+			return addFamily(std::make_unique<FamilyImpl<T>>(*maskStorage));
 		}
 
 		const CreateComponentFunction& getCreateComponentFunction() const;
 
-		MaskStorage& getMaskStorage() const;
+		MaskStorage& getMaskStorage() const noexcept;
 		ComponentDeleterTable& getComponentDeleterTable();
 
 	private:
@@ -148,8 +144,9 @@ namespace Halley {
 
 		void updateSystems(TimeLine timeline, Time elapsed);
 		void renderSystems(RenderContext& rc) const;
-		
-		void onAddFamily(Family& family);
+
+		NOINLINE Family& addFamily(std::unique_ptr<Family> family) noexcept;
+		void onAddFamily(Family& family) noexcept;
 
 		Service* tryGetService(const String& name) const;
 

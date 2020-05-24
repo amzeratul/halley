@@ -15,16 +15,16 @@ namespace Halley {
 		class Handle
 		{
 		public:
-			Handle();
-			Handle(const Handle& h);
-			Handle(Handle&& h) noexcept;
+			constexpr Handle() = default;
+			constexpr Handle(const Handle& h) = default;
+			constexpr Handle(Handle&& h) noexcept = default;
 			Handle(const RealType& mask, MaskStorage& storage);
 
-			Handle& operator=(const Handle& h);
+			constexpr Handle& operator=(const Handle& h) { value = h.value; return *this; }
 
-			bool operator==(const Handle& h) const;
-			bool operator!=(const Handle& h) const;
-			bool operator<(const Handle& h) const;
+			constexpr bool operator==(const Handle& h) const { return value == h.value; }
+			constexpr bool operator!=(const Handle& h) const { return value != h.value; }
+			constexpr bool operator<(const Handle& h) const { return value < h.value; }
 
 			const RealType& getRealValue(MaskStorage& storage) const;
 			
@@ -46,9 +46,6 @@ namespace Halley {
 			return handle.getRealValue(storage)[bit];
 		}
 
-
-
-		HandleType getHandle(RealType mask, MaskStorage& storage);
 
 
 		template <typename T>
@@ -76,7 +73,7 @@ namespace Halley {
 
 		template <typename T, typename... Ts>
 		struct Evaluator <T, Ts...> {
-			static void makeMask(RealType& mask) {
+			static void makeMask(RealType& mask) noexcept {
 				FamilyMask::setBit(mask, RetrieveComponentIndex<T>::componentIndex);
 				Evaluator<Ts...>::makeMask(mask);
 			}
@@ -84,7 +81,7 @@ namespace Halley {
 			static HandleType getMask(MaskStorage& storage) {
 				RealType mask;
 				makeMask(mask);
-				return getHandle(mask, storage);
+				return HandleType(mask, storage);
 			}
 		};
 
@@ -102,17 +99,17 @@ namespace Halley {
 
 		template <typename T, typename... Ts>
 		struct MutableEvaluator <T, Ts...> {
-			static void makeMask(RealType& mask) {
-				if (std::is_const<T>::value) {
+			constexpr static void makeMask(RealType& mask) {
+				if constexpr (std::is_const<T>::value) {
 					FamilyMask::setBit(mask, RetrieveComponentIndex<T>::componentIndex);
 				}
 				Evaluator<Ts...>::makeMask(mask);
 			}
 
-			static HandleType getMask(MaskStorage& storage) {
+			constexpr static HandleType getMask(MaskStorage& storage) {
 				RealType mask;
 				makeMask(mask);
-				return getHandle(mask, storage);
+				return Handle(mask, storage);
 			}
 		};
 
@@ -137,7 +134,7 @@ namespace Halley {
 		template <typename T, typename... Ts>
 		struct InclusionEvaluator <T, Ts...> {
 			static void makeMask(RealType& mask) {
-				if (!IsMaybeRef<T>::value) {
+				if constexpr (!IsMaybeRef<T>::value) {
 					FamilyMask::setBit(mask, RetrieveComponentIndex<T>::componentIndex);
 				}
 				InclusionEvaluator<Ts...>::makeMask(mask);
@@ -146,7 +143,7 @@ namespace Halley {
 			static HandleType getMask(MaskStorage& storage) {
 				RealType mask;
 				makeMask(mask);
-				return getHandle(mask, storage);
+				return HandleType(mask, storage);
 			}
 		};
 

@@ -4,9 +4,9 @@
 
 using namespace Halley;
 
-System::System(std::initializer_list<FamilyBindingBase*> uninitializedFamilies, std::initializer_list<int> messageTypesReceived)
-	: families(uninitializedFamilies)
-	, messageTypesReceived(messageTypesReceived)
+System::System(Vector<FamilyBindingBase*> uninitializedFamilies, Vector<int> messageTypesReceived)
+	: families(std::move(uninitializedFamilies))
+	, messageTypesReceived(std::move(messageTypesReceived))
 {
 }
 
@@ -38,13 +38,13 @@ void System::onAddedToWorld(World& w, int id) {
 	world = &w;
 	systemId = id;
 	for (auto f : families) {
-		f->bindFamily(w);
+		f->bindFamily(*f, w);
 	}
 }
 
 void System::purgeMessages()
 {
-	if (messagesSentTo.size() > 0) {
+	if (!messagesSentTo.empty()) {
 		for (auto& target: messagesSentTo) {
 			// Purge all messages of this age
 			Entity* entity = world->tryGetRawEntity(target);

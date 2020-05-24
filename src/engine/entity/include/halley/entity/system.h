@@ -32,7 +32,7 @@ namespace Halley {
 	class System
 	{
 	public:
-		System(std::initializer_list<FamilyBindingBase*> families, std::initializer_list<int> messageTypesReceived);
+		System(Vector<FamilyBindingBase*> families, Vector<int> messageTypesReceived);
 		virtual ~System() {}
 
 		const String& getName() const { return name; }

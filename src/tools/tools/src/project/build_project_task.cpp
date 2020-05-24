@@ -17,7 +17,7 @@ BuildProjectTask::BuildProjectTask(Project& project)
 	{
 		if constexpr (getPlatform() == GamePlatform::Windows) {
 			//return "build_project_win_ninja.bat";
-			return "build_project_win.bat";
+			return "build_project_win_ninja.bat";
 		} else if constexpr (getPlatform() == GamePlatform::MacOS) {
 			return "build_project_mac.sh";
 		} else if constexpr (getPlatform() == GamePlatform::Linux) {

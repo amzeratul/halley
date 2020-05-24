@@ -8,25 +8,29 @@
 namespace Halley {
 	class Family;
 
+	// This class is not virtual to avoid RTTI bloat, hence the function pointer to do a virtual method call
 	class FamilyBindingBase {
 	public:
 		size_t count() const { return family->count(); }
 		size_t size() const { return family->count(); }
 
-		virtual ~FamilyBindingBase();
+		~FamilyBindingBase();
 
 	protected:
-		void doInit(FamilyMaskType readMask, FamilyMaskType writeMask);
+		using BindFamilyCallback = void (*)(FamilyBindingBase&, World&) noexcept;
+
+		void doInit(FamilyMaskType readMask, FamilyMaskType writeMask) noexcept;
 		
-		void* getElement(size_t index) const { return family->getElement(index); }
-		virtual void bindFamily(World& world) = 0;
-		void setFamily(Family* family);
+		void* getElement(size_t index) const noexcept { return family->getElement(index); }
+		void setFamily(Family* family) noexcept;
 
 		void setOnEntitiesAdded(std::function<void(void*, size_t)> callback);
 		void setOnEntitiesRemoved(std::function<void(void*, size_t)> callback);
 
 		void onEntitiesAdded(void* entities, size_t count);
 		void onEntitiesRemoved(void* entities, size_t count);
+
+		BindFamilyCallback bindFamily = nullptr;
 
 	private:
 		friend class System;
@@ -43,6 +47,11 @@ namespace Halley {
 	class FamilyBinding : public FamilyBindingBase
 	{
 	public:
+		FamilyBinding()
+		{
+			bindFamily = &bindFamilyImpl;
+		}
+		
 		T& operator[](size_t index) {
 			Expects(index < count());
 			return *getFamilyElement(index);
@@ -132,15 +141,9 @@ namespace Halley {
 			if (res) return *res;
 			throw Exception("No element in family matches predicate.", HalleyExceptions::Entity);
 		}
-
-	protected:
-		void bindFamily(World& world) override {
-			init(world.getMaskStorage());
-			setFamily(&world.getFamily<T>());
-		}
 		
 	private:
-		void init(MaskStorage& storage)
+		void init(MaskStorage& storage) noexcept
 		{
 			doInit(T::Type::readMask(storage), T::Type::writeMask(storage));
 		}
@@ -149,6 +152,13 @@ namespace Halley {
 		{
 			// WARNING: Strict aliasing rules violation
 			return reinterpret_cast<T*>(getElement(i));
+		}
+
+		static void bindFamilyImpl(FamilyBindingBase& obj, World& world) noexcept
+		{
+			auto& self = static_cast<FamilyBinding&>(obj);
+			self.init(world.getMaskStorage());
+			self.setFamily(&world.getFamily<T>());
 		}
 	};
 }
