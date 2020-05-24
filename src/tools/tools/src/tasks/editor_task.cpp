@@ -45,7 +45,7 @@ void EditorTask::setProgress(float p, String label)
 
 void EditorTask::addError(const String& message)
 {
-	Logger::logError("Error importing asset: " + message);
+	Logger::logError("Error in task \"" + name + "\": " + message);
 
 	std::lock_guard<std::mutex> lock(mutex);
 	error = true;

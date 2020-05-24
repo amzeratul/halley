@@ -56,15 +56,13 @@ bool HalleyGame::isDevMode() const
 	return true;
 }
 
-std::unique_ptr<Stage> HalleyGame::startGame(const HalleyAPI* api)
+std::unique_ptr<Stage> HalleyGame::startGame()
 {
-	this->api = api;
-
 	bool vsync = true;
 
-	api->video->setWindow(WindowDefinition(WindowType::Window, Vector2i(1280, 720), "GGJ20"));
-	api->video->setVsync(vsync);
-	api->audio->startPlayback();
+	getAPI().video->setWindow(WindowDefinition(WindowType::Window, Vector2i(1280, 720), getName()));
+	getAPI().video->setVsync(vsync);
+	getAPI().audio->startPlayback();
 	return std::make_unique<GameStage>();
 }
 

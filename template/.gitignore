@@ -11,6 +11,8 @@ build/
 build32/
 build-uwp/
 build-external/
+build-ninja/
+build-ninja-external/
 .DS_Store/
 win32_bin/
 win64_bin/
