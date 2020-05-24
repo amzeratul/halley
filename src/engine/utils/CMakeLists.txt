@@ -167,5 +167,5 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
 endif ()
 
 add_library (halley-utils ${SOURCES} ${HEADERS})
-target_precompile_headers(halley-utils PUBLIC "src/prec.h")
+target_precompile_headers(halley-utils PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/src/prec.h>")
 target_link_libraries (halley-utils halley-contrib)

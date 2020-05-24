@@ -35,10 +35,15 @@ void VSProjectManipulator::load(const Bytes& data)
 				if (name == "ItemGroup") {
 					for (ticpp::Element* l2Node = l1Node->FirstChildElement(); l2Node != nullptr; l2Node = l2Node->NextSiblingElement(false)) {
 						l2Node->GetValue(&name);
+						String fileName = l2Node->GetAttribute("Include");
+						if (fileName.contains("cmake_pch")) {
+							continue;
+						}
+						
 						if (name == "ClCompile") {
-							compileFiles.emplace(l2Node->GetAttribute("Include"));
+							compileFiles.emplace(fileName);
 						} else if (name == "ClInclude") {
-							includeFiles.emplace(l2Node->GetAttribute("Include"));
+							includeFiles.emplace(fileName);
 						}
 					}
 				}
