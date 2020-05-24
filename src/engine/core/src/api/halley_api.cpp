@@ -99,18 +99,13 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 	PluginType pluginTypes[] = { PluginType::SystemAPI, PluginType::GraphicsAPI, PluginType::InputAPI, PluginType::AudioOutputAPI, PluginType::NetworkAPI, PluginType::PlatformAPI, PluginType::MovieAPI };
 	String names[] = { "System", "Graphics", "Input", "AudioOutput", "Network", "Platform", "Movie" };
 
-	SystemAPI* system = nullptr;
 	constexpr size_t n = std::end(flagList) - std::begin(flagList);
 	for (size_t i = 0; i < n; ++i) {
 		if (flags & flagList[i] || flagList[i] == HalleyAPIFlags::System) {
 			auto plugins = core->getPlugins(pluginTypes[i]);
 			if (!plugins.empty()) {
 				Logger::logInfo(names[i] + " plugin: " + plugins[0]->getName());
-				api->setAPI(pluginTypes[i], plugins[0]->createAPI(system));
-
-				if (pluginTypes[i] == PluginType::SystemAPI) {
-					system = api->systemInternal.get();
-				}
+				api->setAPI(pluginTypes[i], plugins[0]->createAPI(api->systemInternal.get()));
 			} else {
 				throw Exception("No suitable " + names[i] + " plugins found.", HalleyExceptions::Core);
 			}
