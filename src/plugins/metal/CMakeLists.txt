@@ -32,7 +32,7 @@ assign_source_group(${HEADERS})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -x objective-c++")
 
 add_library (halley-metal ${SOURCES} ${HEADERS})
-set_target_properties(halley-metal PROPERTIES DISABLE_PRECOMPILE_HEADERS)
+set_target_properties(halley-metal PROPERTIES DISABLE_PRECOMPILE_HEADERS ON)
 find_library(METAL_LIBRARY Metal)
 find_library(QUARTZ_LIBRARY QuartzCore)
 target_link_libraries(halley-metal halley-core halley-utils "${METAL_LIBRARY}" "${QUARTZ_LIBRARY}")
