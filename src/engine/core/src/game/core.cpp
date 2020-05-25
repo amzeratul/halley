@@ -573,6 +573,8 @@ void Core::log(LoggerLevel level, const String& msg)
 		std::cout << ConsoleColour(Console::RED);
 	} else if (level == LoggerLevel::Warning) {
 		std::cout << ConsoleColour(Console::YELLOW);
+	} else if (level == LoggerLevel::Dev) {
+		std::cout << ConsoleColour(Console::CYAN);
 	}
 	std::cout << msg << ConsoleColour() << std::endl;
 }

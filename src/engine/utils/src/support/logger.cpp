@@ -32,6 +32,8 @@ void StdOutSink::log(LoggerLevel level, const String& msg)
 		std::cout << ConsoleColour(Console::YELLOW);
 		break;
 	case LoggerLevel::Dev:
+		std::cout << ConsoleColour(Console::CYAN);
+		break;
 	case LoggerLevel::Info:
 		break;
 	}
