@@ -55,6 +55,7 @@ namespace Halley {
 	struct SceneEditorInputState {
 		// Filled on editor side
 		bool leftClickPressed = false;
+		bool leftClickReleased = false;
 		bool leftClickHeld = false;
 		bool middleClickPressed = false;
 		bool middleClickHeld = false;
@@ -68,6 +69,7 @@ namespace Halley {
 		// Filled on SceneEditor side
         Vector2f mousePos;
 		std::optional<Rect4f> selectionBox;
+		bool deselect = false;
     };
 
 	struct SceneEditorOutputState {
@@ -158,9 +160,10 @@ namespace Halley {
 	public:
 		virtual ~ISceneEditorGizmoCollection() = default;
 
-        virtual void update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) = 0;
+        virtual bool update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) = 0;
         virtual void draw(Painter& painter) = 0;
         virtual void setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& entityData) = 0;
         virtual std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
+		virtual void deselect() = 0;
 	};
 }

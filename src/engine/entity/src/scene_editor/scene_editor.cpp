@@ -57,20 +57,29 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	// Update input state
 	inputState.mousePos = camera.screenToWorld(inputState.rawMousePos, inputState.viewRect);
 	mousePos = inputState.mousePos;
-	if (inputState.leftClickPressed) {
-		holdMouseStart = mousePos;
-	}
 	if (!inputState.leftClickHeld) {
 		holdMouseStart.reset();
 	}
 	if (holdMouseStart && (holdMouseStart.value() - mousePos).length() > 3) {
-		inputState.selectionBox = Rect4f(holdMouseStart.value(), mousePos);
-	} else {
-		inputState.selectionBox.reset();
+		selBox = Rect4f(holdMouseStart.value(), mousePos);
+	}
+	inputState.selectionBox = selBox;
+	if (!inputState.leftClickHeld) {
+		// Make sure this happens after inputState.selectionBox is set
+		// This is so you still get a final selection box on release
+		selBox.reset();
 	}
 
 	// Update gizmos
-	gizmoCollection->update(t, camera, inputState, outputState);
+	const bool hasHighlightedGizmo = gizmoCollection->update(t, camera, inputState, outputState);
+	if (!hasHighlightedGizmo && inputState.leftClickPressed) {
+		gizmoCollection->deselect();
+	}
+
+	// Start dragging
+	if (!hasHighlightedGizmo && inputState.leftClickPressed) {
+		holdMouseStart = mousePos;
+	}
 }
 
 void SceneEditor::render(RenderContext& rc)

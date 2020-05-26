@@ -15,7 +15,7 @@ SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resou
 	selectionBoxGizmo = std::make_unique<SelectionBoxGizmo>(resources);
 }
 
-void SceneEditorGizmoCollection::update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
+bool SceneEditorGizmoCollection::update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
 {
 	selectedBoundsGizmo->setCamera(camera);
 	selectedBoundsGizmo->update(time, inputState);
@@ -26,7 +26,10 @@ void SceneEditorGizmoCollection::update(Time time, const Camera& camera, const S
 		activeGizmo->setCamera(camera);
 		activeGizmo->setOutputState(outputState);
 		activeGizmo->update(time, inputState);
+
+		return activeGizmo->isHighlighted();
 	}
+	return false;
 }
 
 void SceneEditorGizmoCollection::draw(Painter& painter)
@@ -76,4 +79,11 @@ std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(SceneEditorTool to
 	}
 
 	return {};
+}
+
+void SceneEditorGizmoCollection::deselect()
+{
+	if (activeGizmo) {
+		activeGizmo->deselect();
+	}
 }

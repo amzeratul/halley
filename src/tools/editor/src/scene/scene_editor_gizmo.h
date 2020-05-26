@@ -13,7 +13,7 @@ namespace Halley {
 
 	class SceneEditorGizmoHandle {
 	public:
-		void update(const SceneEditorInputState& inputState);
+		void update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles = {});
 
 		void setBoundsCheck(std::function<bool(Vector2f, Vector2f)> boundsCheck);
 		
@@ -22,14 +22,17 @@ namespace Halley {
 		
 		bool isOver() const;
 		bool isHeld() const;
+		bool isSelected() const;
 
 		void setCanDrag(bool enabled);
 		void setNotOver();
+		void setSelected(bool sel);
 
 	private:
 		bool over = false;
 		bool holding = false;
 		bool canDrag = true;
+		bool selected = true;
 
 		Vector2f pos;
 		Vector2f startOffset;
@@ -49,6 +52,9 @@ namespace Halley {
 
 		void setCamera(const Camera& camera);
 		void setOutputState(SceneEditorOutputState& outputState);
+
+		virtual bool isHighlighted() const;
+		virtual void deselect();
 
 	protected:
 		virtual void onEntityChanged();

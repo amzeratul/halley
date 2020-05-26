@@ -30,6 +30,9 @@ namespace Halley {
 		void draw(Painter& painter) const override;
 		std::shared_ptr<UIWidget> makeUI() override;
 
+		bool isHighlighted() const override;
+		void deselect() override;
+		
 	protected:
 		void onEntityChanged() override;
 

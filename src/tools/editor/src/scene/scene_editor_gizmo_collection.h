@@ -11,11 +11,12 @@ namespace Halley {
 	public:
 		SceneEditorGizmoCollection(UIFactory& factory, Resources& resources);
 		
-		void update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) override;
+		bool update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) override;
 		void draw(Painter& painter) override;
 		void setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& entityData) override;
 		std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
-
+		void deselect() override;
+		
 	private:
 		UIFactory& factory;
 		Resources& resources;

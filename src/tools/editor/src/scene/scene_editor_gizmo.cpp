@@ -4,7 +4,7 @@
 #include "halley/core/graphics/camera.h"
 using namespace Halley;
 
-void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState)
+void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles)
 {
 	if (!holding) {
 		over = boundsCheck ? boundsCheck(pos, inputState.mousePos) : false;
@@ -15,10 +15,24 @@ void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState)
 	}
 
 	if (holding) {
+		const auto oldPos = pos;
 		pos = inputState.mousePos + startOffset;
+		const Vector2f delta = pos - oldPos;
+
+		// Drag all other selected handles too
+		for (auto& handle: handles) {
+			if (&handle != this && handle.isSelected()) {
+				handle.setPosition(handle.getPosition() + delta);
+			}
+		}
+		
 		if (!inputState.leftClickHeld) {
 			holding = false;
 		}
+	}
+
+	if (inputState.selectionBox) {
+		selected = (selected && inputState.shiftHeld) || inputState.selectionBox.has_value() && inputState.selectionBox.value().contains(pos);
 	}
 }
 
@@ -47,6 +61,11 @@ bool SceneEditorGizmoHandle::isHeld() const
 	return holding;
 }
 
+bool SceneEditorGizmoHandle::isSelected() const
+{
+	return selected;
+}
+
 void SceneEditorGizmoHandle::setCanDrag(bool enabled)
 {
 	canDrag = enabled;
@@ -59,6 +78,11 @@ void SceneEditorGizmoHandle::setNotOver()
 {
 	over = false;
 	holding = false;
+}
+
+void SceneEditorGizmoHandle::setSelected(bool sel)
+{
+	selected = sel;
 }
 
 void SceneEditorGizmo::update(Time time, const SceneEditorInputState& inputState)
@@ -89,6 +113,15 @@ void SceneEditorGizmo::setCamera(const Camera& camera)
 void SceneEditorGizmo::setOutputState(SceneEditorOutputState& state)
 {
 	outputState = &state;
+}
+
+bool SceneEditorGizmo::isHighlighted() const
+{
+	return false;
+}
+
+void SceneEditorGizmo::deselect()
+{
 }
 
 void SceneEditorGizmo::onEntityChanged()

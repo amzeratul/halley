@@ -56,9 +56,10 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 int PolygonGizmo::updateHandles(const SceneEditorInputState& inputState)
 {
 	// Update existing handles
+	bool dragged = false;
 	for (auto& handle: handles) {
 		handle.setCanDrag(mode != PolygonGizmoMode::Delete);
-		handle.update(inputState);
+		handle.update(inputState, handles);
 	}
 
 	// Choose cur focus
@@ -116,7 +117,8 @@ void PolygonGizmo::draw(Painter& painter) const
 	}
 	
 	for (const auto& h: handles) {
-		painter.drawRect(getHandleRect(h.getPosition(), 12.0f), 1.0f / zoom, h.isOver() ? highCol : colour);
+		const float size = h.isSelected() ? 2.0f : 1.0f;
+		painter.drawRect(getHandleRect(h.getPosition(), 12.0f), size / zoom, h.isOver() ? highCol : colour);
 	}
 }
 
@@ -130,6 +132,23 @@ std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
 		setMode(fromString<PolygonGizmoMode>(event.getStringData()));
 	});
 	return ui;
+}
+
+bool PolygonGizmo::isHighlighted() const
+{
+	for (const auto& handle: handles) {
+		if (handle.isOver()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void PolygonGizmo::deselect()
+{
+	for (auto& handle: handles) {
+		handle.setSelected(false);
+	}
 }
 
 void PolygonGizmo::onEntityChanged()
