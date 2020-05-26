@@ -57,6 +57,17 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	// Update input state
 	inputState.mousePos = camera.screenToWorld(inputState.rawMousePos, inputState.viewRect);
 	mousePos = inputState.mousePos;
+	if (inputState.leftClickPressed) {
+		holdMouseStart = mousePos;
+	}
+	if (!inputState.leftClickHeld) {
+		holdMouseStart.reset();
+	}
+	if (holdMouseStart && (holdMouseStart.value() - mousePos).length() > 3) {
+		inputState.selectionBox = Rect4f(holdMouseStart.value(), mousePos);
+	} else {
+		inputState.selectionBox.reset();
+	}
 
 	// Update gizmos
 	gizmoCollection->update(t, camera, inputState, outputState);
@@ -153,7 +164,7 @@ Resources& SceneEditor::getEditorResources() const
 }
 
 void SceneEditor::drawOverlay(Painter& painter, Rect4f view)
-{
+{	
 	const Vector2f drawPos = view.getBottomLeft() + Vector2f(10, -10);
 	String drawStr = Vector2i(mousePos.round()).toString();
 	std::vector<ColourOverride> colours;

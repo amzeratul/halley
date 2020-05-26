@@ -81,6 +81,7 @@ namespace Halley {
 
     	TextRenderer coordinateInfo;
 		Vector2f mousePos;
+    	std::optional<Vector2f> holdMouseStart;
 
 		std::unique_ptr<World> doCreateWorld();
 

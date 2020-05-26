@@ -36,8 +36,8 @@ void TranslateGizmo::draw(Painter& painter) const
 {
 	if (visible) {
 		const float zoom = getZoom();
-		const auto overCol = Colour4f(0.5f, 0.5f, 1);
-		const auto outCol = Colour4f(0.2f, 0.2f, 1.0f);
+		const auto overCol = Colour4f(0.6f, 0.6f, 1);
+		const auto outCol = Colour4f(0.4f, 0.4f, 1.0f);
 		const auto col = handle.isOver() ? overCol : outCol;
 		const auto circle = getMainHandle();
 
@@ -46,6 +46,7 @@ void TranslateGizmo::draw(Painter& painter) const
 		const float lineWidth = 2.0f / zoom;
 		const float fineLineWidth = 1.0f / zoom;
 		
+		painter.drawCircle(centre, radius, lineWidth + 2 / zoom, Colour4f(0, 0, 0, 0.5f));
 		painter.drawCircle(centre, radius, lineWidth, col);
 		painter.drawLine({{ centre - Vector2f(radius * 0.6f, 0), centre + Vector2f(radius * 0.6f, 0) }}, fineLineWidth, col);
 		painter.drawLine({{ centre - Vector2f(0, radius * 0.6f), centre + Vector2f(0, radius * 0.6f) }}, fineLineWidth, col);

@@ -67,6 +67,7 @@ namespace Halley {
 
 		// Filled on SceneEditor side
         Vector2f mousePos;
+		std::optional<Rect4f> selectionBox;
     };
 
 	struct SceneEditorOutputState {

@@ -2,6 +2,7 @@
 #include "gizmos/translate_gizmo.h"
 #include "gizmos/selected_bounds_gizmo.h"
 #include "gizmos/polygon_gizmo.h"
+#include "gizmos/selection_box_gizmo.h"
 #include "gizmos/vertex_gizmo.h"
 #include "halley/core/graphics/camera.h"
 using namespace Halley;
@@ -11,12 +12,15 @@ SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resou
 	, resources(resources)
 {
 	selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(resources);
+	selectionBoxGizmo = std::make_unique<SelectionBoxGizmo>(resources);
 }
 
 void SceneEditorGizmoCollection::update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
 {
 	selectedBoundsGizmo->setCamera(camera);
 	selectedBoundsGizmo->update(time, inputState);
+	selectionBoxGizmo->setCamera(camera);
+	selectionBoxGizmo->update(time, inputState);
 	
 	if (activeGizmo) {
 		activeGizmo->setCamera(camera);
@@ -28,6 +32,7 @@ void SceneEditorGizmoCollection::update(Time time, const Camera& camera, const S
 void SceneEditorGizmoCollection::draw(Painter& painter)
 {
 	selectedBoundsGizmo->draw(painter);
+	selectionBoxGizmo->draw(painter);
 	
 	if (activeGizmo) {
 		activeGizmo->draw(painter);
