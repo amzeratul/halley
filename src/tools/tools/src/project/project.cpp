@@ -371,8 +371,14 @@ std::unique_ptr<Game> Project::createGameInstance() const
 	if (!getHalleyEntry) {
 		return {};
 	}
+	auto entry = getHalleyEntry();
 	
-	return getHalleyEntry()->createGame();
+	if (entry->getApiVersion() != HALLEY_DLL_API_VERSION) {
+		gameDll->unload();
+		return {};
+	}
+	
+	return entry->createGame();
 }
 
 void Project::loadECSData()

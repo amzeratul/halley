@@ -66,10 +66,14 @@ void DynamicGameLoader::load()
 		throw Exception("getHalleyEntry not found.", HalleyExceptions::Core);
 	}
 
+	entry = getHalleyEntry();
+	if (entry->getApiVersion() != HALLEY_DLL_API_VERSION) {
+		lib.unload();
+		throw Exception("Halley API mismatch.", HalleyExceptions::Core);
+	}
+	
 	prevSymbols = std::move(symbols);
 	symbols = SymbolLoader::loadSymbols(lib);
-
-	entry = getHalleyEntry();
 }
 
 void DynamicGameLoader::unload()
