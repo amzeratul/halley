@@ -56,7 +56,6 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 int PolygonGizmo::updateHandles(const SceneEditorInputState& inputState)
 {
 	// Update existing handles
-	bool dragged = false;
 	for (auto& handle: handles) {
 		handle.setCanDrag(mode != PolygonGizmoMode::Delete);
 		handle.update(inputState, handles);

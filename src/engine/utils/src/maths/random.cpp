@@ -23,6 +23,7 @@
 #include <cstring>
 #include <ctime>
 #include <cstdlib>
+#include <random>
 #include "mt199937ar.h"
 using namespace Halley;
 
@@ -120,11 +121,13 @@ Random& Random::getGlobal()
 {
 	static Random* global = nullptr;
 	if (!global) {
-		time_t curTime = time(nullptr);
-		int curClock = int(clock());
-		int salt = 0x3F29AB51;
-		int seed[] = { int(curTime & 0xFFFFFFFF), int(static_cast<long long>(curTime) >> 32), curClock, salt };
-		global = new Random(gsl::as_bytes(gsl::span<char>(reinterpret_cast<char*>(seed), sizeof(seed))));
+		std::random_device rd;
+		
+		const time_t curTime = time(nullptr);
+		const unsigned int curClock = static_cast<unsigned int>(clock());
+		const unsigned int salt = 0x3F29AB51;
+		unsigned int seed[] = { rd(), rd(), rd(), rd(), rd(), curClock, salt, static_cast<unsigned int>(curTime & 0xFFFFFFFF) };
+		global = new Random(gsl::as_bytes(gsl::span<unsigned int>(seed)));
 	}
 	return *global;
 }
