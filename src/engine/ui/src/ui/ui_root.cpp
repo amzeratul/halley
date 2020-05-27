@@ -8,6 +8,7 @@
 #include "halley/core/input/input_keyboard.h"
 #include "halley/core/input/input_virtual.h"
 #include "halley/maths/random.h"
+#include "widgets/ui_tooltip.h"
 
 using namespace Halley;
 
@@ -238,6 +239,13 @@ void UIRoot::registerKeyPressListener(std::shared_ptr<UIWidget> widget, int prio
 	});
 }
 
+void UIRoot::makeToolTip(const UIStyle& style)
+{
+	toolTip = std::make_shared<UIToolTip>(style);
+	toolTip->setActive(false);
+	addChild(toolTip);
+}
+
 void UIRoot::updateMouse(const spInputDevice& mouse)
 {
 	// Go through all root-level widgets and find the actual widget under the mouse
@@ -288,7 +296,15 @@ void UIRoot::updateMouse(const spInputDevice& mouse)
 	const std::shared_ptr<UIWidget> mousePosTarget = exclusive ? exclusive : actuallyUnderMouse;
 	if (mousePosTarget) {
 		mousePosTarget->onMouseOver(mousePos);
+		if (toolTip) {
+			toolTip->showToolTipForWidget(*mousePosTarget, mousePos);
+		}
+	} else {
+		if (toolTip) {
+			toolTip->hide();
+		}
 	}
+	
 	updateMouseOver(exclusiveUnderMouse);
 }
 

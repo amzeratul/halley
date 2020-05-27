@@ -649,6 +649,11 @@ Rect4f UIWidget::getMouseRect() const
 	}
 }
 
+void UIWidget::setToolTip(String toolTip)
+{
+	this->toolTip = std::move(toolTip);
+}
+
 void UIWidget::draw(UIPainter& painter) const
 {
 }
@@ -774,6 +779,11 @@ void UIWidget::onChildAdded(UIWidget& child)
 
 void UIWidget::onMakeUI()
 {
+}
+
+const String& UIWidget::getToolTip() const
+{
+	return toolTip;
 }
 
 void UIWidget::checkActive()

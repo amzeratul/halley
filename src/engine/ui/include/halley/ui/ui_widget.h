@@ -165,6 +165,9 @@ namespace Halley {
 		
 		virtual void onMakeUI();
 
+		const String& getToolTip() const;
+		void setToolTip(String toolTip);
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;
@@ -233,6 +236,8 @@ namespace Halley {
 		std::shared_ptr<UIDataBind> dataBind;
 		std::unique_ptr<UIAnchor> anchor;
 		std::vector<std::shared_ptr<UIBehaviour>> behaviours;
+
+		String toolTip;
 
 		int childLayerAdjustment = 0;
 

@@ -6,6 +6,7 @@
 #include "ui_input.h"
 
 namespace Halley {
+	class UIStyle;
 	class RenderContext;
 	class HalleyAPI;
 	class SpritePainter;
@@ -14,6 +15,7 @@ namespace Halley {
 	class TextInputCapture;
 	class InputDevice;
 	class IAudioHandle;
+	class UIToolTip;
 
 	enum class UIInputType {
 		Undefined,
@@ -61,7 +63,9 @@ namespace Halley {
 		void onChildAdded(UIWidget& child) override;
 
 		void registerKeyPressListener(std::shared_ptr<UIWidget> widget, int priority = 0);
-				
+
+		void makeToolTip(const UIStyle& style);
+
 	private:
 		String id;
 		std::shared_ptr<InputKeyboard> keyboard;
@@ -80,6 +84,8 @@ namespace Halley {
 		std::function<Vector2f(Vector2f)> mouseRemap;
 		std::unique_ptr<TextInputCapture> textCapture;
 		std::vector<std::pair<std::weak_ptr<UIWidget>, int>> keyPressListeners;
+
+		std::shared_ptr<UIToolTip> toolTip;
 
 		void updateMouse(const std::shared_ptr<InputDevice>& mouse);
 		void updateGamepadInputTree(const std::shared_ptr<InputDevice>& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting);

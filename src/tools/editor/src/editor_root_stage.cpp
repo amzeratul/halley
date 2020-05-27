@@ -122,6 +122,7 @@ void EditorRootStage::createUI()
 {
 	uiFactory = std::make_unique<EditorUIFactory>(getAPI(), getResources(), i18n);
 	ui = std::make_unique<UIRoot>(getAPI());
+	ui->makeToolTip(uiFactory->getStyle("tooltip"));
 }
 
 void EditorRootStage::createLoadProjectUI()
