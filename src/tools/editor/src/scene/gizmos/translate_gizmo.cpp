@@ -53,6 +53,11 @@ void TranslateGizmo::draw(Painter& painter) const
 	}
 }
 
+bool TranslateGizmo::isHighlighted() const
+{
+	return handle.isOver();
+}
+
 Circle TranslateGizmo::getMainHandle() const
 {
 	const auto pos = handle.getPosition();

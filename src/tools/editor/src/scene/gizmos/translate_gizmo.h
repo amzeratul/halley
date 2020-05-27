@@ -7,7 +7,8 @@ namespace Halley {
 		TranslateGizmo();
 		void update(Time time, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
-
+		bool isHighlighted() const override;
+		
 	private:
 		bool visible = false;
 		SceneEditorGizmoHandle handle;
