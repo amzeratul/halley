@@ -134,6 +134,12 @@ namespace Halley
 		void setParent(const ConfigNode* parent, int idx);
 		void propagateParentingInformation(const ConfigFile* parentFile);
 
+		inline void assertValid() const
+		{
+			Expects(intData != 0xCDCDCDCD);
+			Expects(intData != 0xDDDDDDDD);
+		}
+
 	private:
 		union {
 			void* ptrData;

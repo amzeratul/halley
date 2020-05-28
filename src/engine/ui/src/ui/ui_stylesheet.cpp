@@ -77,8 +77,11 @@ void loadStyleData(Resources& resources, const String& name, const ConfigNode& n
 }
 
 template <typename T>
-const T& getValue(const ConfigNode& node, Resources& resources, const String& name, const String& key, std::unordered_map<String, T>& cache)
+const T& getValue(const ConfigNode* node, Resources& resources, const String& name, const String& key, std::unordered_map<String, T>& cache)
 {
+	Expects(node);
+	node->assertValid();
+	
 	// Is it already in cache?
 	const auto iter = cache.find(key);
 	if (iter != cache.end()) {
@@ -86,9 +89,9 @@ const T& getValue(const ConfigNode& node, Resources& resources, const String& na
 	}
 
 	// Not in cache, try to load it
-	if (node.hasKey(key)) {
+	if (node->hasKey(key)) {
 		T data;
-		loadStyleData(resources, key, node[key], data);
+		loadStyleData(resources, key, (*node)[key], data);
 		cache[key] = data;
 		return cache[key];
 	} else {
@@ -104,7 +107,7 @@ const T& getValue(const ConfigNode& node, Resources& resources, const String& na
 }
 
 template <typename T>
-bool hasValue(const ConfigNode& node, Resources& resources, const String& name, const String& key, std::unordered_map<String, T>& cache)
+bool hasValue(const ConfigNode* node, Resources& resources, const String& name, const String& key, std::unordered_map<String, T>& cache)
 {
 	// Is it already in cache?
 	const auto iter = cache.find(key);
@@ -112,7 +115,7 @@ bool hasValue(const ConfigNode& node, Resources& resources, const String& name, 
 		return true;
 	}
 
-	return node.hasKey(key);
+	return node->hasKey(key);
 }
 
 class UIStyleDefinition::Pimpl {
@@ -128,7 +131,7 @@ public:
 
 UIStyleDefinition::UIStyleDefinition(String styleName, const ConfigNode& node, Resources& resources)
 	: styleName(std::move(styleName))
-	, node(node)
+	, node(&node)
 	, resources(resources)
 	, pimpl(std::make_unique<Pimpl>())
 {
@@ -169,6 +172,11 @@ bool UIStyleDefinition::hasColour(const String& name) const
 	return hasValue(node, resources, styleName, name, pimpl->colours);
 }
 
+void UIStyleDefinition::reload(const ConfigNode& node)
+{
+	this->node = &node;
+}
+
 Vector4f UIStyleDefinition::getBorder(const String& name) const
 {
 	return getValue(node, resources, styleName, name, pimpl->borders);
@@ -206,6 +214,15 @@ void UIStyleSheet::load(const ConfigFile& file)
 	observers[file.getAssetId()] = ConfigObserver(file);
 }
 
+bool UIStyleSheet::updateIfNeeded()
+{
+	if (needsUpdate()) {
+		update();
+		return true;
+	}
+	return false;
+}
+
 bool UIStyleSheet::needsUpdate() const
 {
 	for (auto& o: observers) {
@@ -227,7 +244,13 @@ void UIStyleSheet::update()
 void UIStyleSheet::load(const ConfigNode& root)
 {
 	for (const auto& node: root["uiStyle"].asMap()) {
-		styles[node.first] = std::make_unique<UIStyleDefinition>(node.first, node.second, resources);
+		// If it already exists, update existing instance (as it might be kept by UI elements all around)
+		const auto iter = styles.find(node.first);
+		if (iter != styles.end()) {
+			iter->second->reload(node.second);
+		} else {
+			styles[node.first] = std::make_unique<UIStyleDefinition>(node.first, node.second, resources);
+		}
 	}
 }
 

@@ -29,11 +29,13 @@ namespace Halley {
 		bool hasTextRenderer(const String& name) const;
 		bool hasColour(const String& name) const;
 
+		void reload(const ConfigNode& node);
+
 	private:
 		class Pimpl;
 		
 		const String styleName;
-		const ConfigNode& node;
+		const ConfigNode* node = nullptr;
 		Resources& resources;
 
 		std::unique_ptr<Pimpl> pimpl;
@@ -48,8 +50,7 @@ namespace Halley {
 
 		void load(const ConfigFile& file);
 
-		bool needsUpdate() const;
-		void update();
+		bool updateIfNeeded();
 
 	private:
 		Resources& resources;
@@ -58,5 +59,8 @@ namespace Halley {
 
 		void load(const ConfigNode& node);
 		std::shared_ptr<const UIStyleDefinition> getStyle(const String& styleName) const;
+
+		bool needsUpdate() const;
+		void update();
 	};
 }

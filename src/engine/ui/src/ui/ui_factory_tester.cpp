@@ -26,10 +26,7 @@ void UIFactoryTester::update()
 		updated = true;
 	}
 
-	if (factory.getStyleSheet()->needsUpdate()) {
-		factory.getStyleSheet()->update();
-		updated = true;
-	}
+	updated |= factory.getStyleSheet()->updateIfNeeded();
 
 	if (updated) {
 		loadFromObserver();

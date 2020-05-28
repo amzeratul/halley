@@ -149,6 +149,8 @@ UIFactory UIFactory::withResources(Resources& newResources) const
 
 std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 {
+	styleSheet->updateIfNeeded();
+	
 	auto& widgetNode = entryNode["widget"];
 	auto widgetClass = widgetNode["class"].asString();
 	auto iter = factories.find(widgetClass);
