@@ -32,7 +32,7 @@ namespace Halley {
 		bool over = false;
 		bool holding = false;
 		bool canDrag = true;
-		bool selected = true;
+		bool selected = false;
 
 		Vector2f pos;
 		Vector2f startOffset;
