@@ -9,6 +9,7 @@ UIToolTip::UIToolTip(const UIStyle& style)
 	text = style.getTextRenderer("label");
 	border = style.getBorder("innerBorder");
 	delay = style.getFloat("delay");
+	maxWidth = style.getFloat("maxWidth");
 }
 
 void UIToolTip::showToolTipForWidget(const UIWidget& widget, Vector2f mousePos)
@@ -23,9 +24,9 @@ void UIToolTip::showToolTipForWidget(const UIWidget& widget, Vector2f mousePos)
 	curWidget = &widget;
 
 	const auto& toolTipText = widget.getToolTip();
-	if (!toolTipText.isEmpty()) {
+	if (!toolTipText.getString().isEmpty()) {
 		setActive(true);
-		text.setText(toolTipText);
+		text.setText(text.split(toolTipText.getString(), maxWidth));
 		const auto size = text.getExtents();
 		setMinSize(size + border.xy() + border.zw());
 	}

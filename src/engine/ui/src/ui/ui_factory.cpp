@@ -169,6 +169,12 @@ std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 	if (widgetNode.hasKey("childLayerAdjustment")) {
 		widget->setChildLayerAdjustment(widgetNode["childLayerAdjustment"].asInt());
 	}
+	if (widgetNode.hasKey("tooltip")) {
+		widget->setToolTip(LocalisedString::fromUserString(widgetNode["tooltip"].asString()));
+	}
+	if (widgetNode.hasKey("tooltipKey")) {
+		widget->setToolTip(i18n.get(widgetNode["tooltipKey"].asString()));
+	}
 	return widget;
 }
 

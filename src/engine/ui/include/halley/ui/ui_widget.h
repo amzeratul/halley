@@ -9,6 +9,7 @@
 #include "ui_data_bind.h"
 #include "halley/core/api/audio_api.h"
 #include "ui_style.h"
+#include "halley/text/i18n.h"
 
 namespace Halley {
 	enum class JoystickType;
@@ -165,8 +166,8 @@ namespace Halley {
 		
 		virtual void onMakeUI();
 
-		const String& getToolTip() const;
-		void setToolTip(String toolTip);
+		const LocalisedString& getToolTip() const;
+		void setToolTip(LocalisedString toolTip);
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
@@ -237,7 +238,7 @@ namespace Halley {
 		std::unique_ptr<UIAnchor> anchor;
 		std::vector<std::shared_ptr<UIBehaviour>> behaviours;
 
-		String toolTip;
+		LocalisedString toolTip;
 
 		int childLayerAdjustment = 0;
 

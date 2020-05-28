@@ -649,7 +649,7 @@ Rect4f UIWidget::getMouseRect() const
 	}
 }
 
-void UIWidget::setToolTip(String toolTip)
+void UIWidget::setToolTip(LocalisedString toolTip)
 {
 	this->toolTip = std::move(toolTip);
 }
@@ -781,7 +781,7 @@ void UIWidget::onMakeUI()
 {
 }
 
-const String& UIWidget::getToolTip() const
+const LocalisedString& UIWidget::getToolTip() const
 {
 	return toolTip;
 }

@@ -13,11 +13,11 @@ children:
           proportion: 1
     - sizer: { type: horizontal }
       children:
-        - widget: { id: addEntity, class: button, text: Add Entity }
+        - widget: { id: addEntity, class: button, text: Add Entity, tooltip: "Adds a blank new entity as a child of the current selection." }
           proportion: 1
-        - widget: { id: addPrefab, class: button, text: Add Prefab }
+        - widget: { id: addPrefab, class: button, text: Add Prefab, tooltip: "Adds a Prefab as a child of the current selection." }
           proportion: 1
-        - widget: { id: removeEntity, class: button, text: Remove }
+        - widget: { id: removeEntity, class: button, text: Remove, tooltip: "Removes the currently selected entity." }
           proportion: 1
 - sizer: { type: vertical} 
   proportion: 1

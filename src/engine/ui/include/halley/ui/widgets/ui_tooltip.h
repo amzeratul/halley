@@ -23,5 +23,6 @@ namespace Halley {
 		Time delay = 0;
 		Time timeOnWidget = 0;
 		bool visible;
+		float maxWidth = 100;
 	};
 }
