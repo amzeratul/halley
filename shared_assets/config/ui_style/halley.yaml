@@ -171,7 +171,7 @@ uiStyle:
   tooltip:
     background: { img: halley_ui/ui_tooltip.png, colour: "#5E3962" }
     innerBorder: [ 5, 5, 5, 5 ]
-    delay: 0.5
+    delay: 0.3
     maxWidth: 200
     label: { font: Ubuntu Bold, size: 14, colour: "#FFFFFF" }
 

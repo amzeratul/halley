@@ -119,6 +119,7 @@ bool ProjectWindow::loadCustomUI()
 		for (auto& tool: customTools) {
 			const auto img = std::make_shared<UIImage>(tool.icon);
 			toolbar->getList()->addImage(tool.id, img, 1, {}, UISizerAlignFlags::Centre);
+			toolbar->getList()->getItem(tool.id)->setToolTip(tool.tooltip);
 			pagedPane->addPage()->add(tool.widget, 1, Vector4f(8, 8, 8, 8));
 		}
 	}
@@ -171,7 +172,7 @@ void ProjectWindow::setPage(EditorTabs tab)
 	pagedPane->setPage(static_cast<int>(tab));
 }
 
-String ProjectWindow::setCustomPage(const String& pageId)
+LocalisedString ProjectWindow::setCustomPage(const String& pageId)
 {
 	int i = 0;
 	for (auto& custom: customTools) {
@@ -181,7 +182,7 @@ String ProjectWindow::setCustomPage(const String& pageId)
 		}
 		++i;
 	}
-	return "???";
+	return LocalisedString::fromHardcodedString("???");
 }
 
 void ProjectWindow::openPrefab(const String& name, AssetType assetType)

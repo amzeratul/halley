@@ -14,13 +14,15 @@ namespace Halley {
     public:
         struct ToolData {
             String id;
-            String text;
+            LocalisedString text;
+        	LocalisedString tooltip;
             Sprite icon;
             std::shared_ptr<UIWidget> widget;
 
-        	ToolData(String id, String text, Sprite icon, std::shared_ptr<UIWidget> widget)
+        	ToolData(String id, LocalisedString text, LocalisedString tooltip, Sprite icon, std::shared_ptr<UIWidget> widget)
                 : id(std::move(id))
                 , text(std::move(text))
+        		, tooltip(std::move(tooltip))
                 , icon(std::move(icon))
                 , widget(std::move(widget))
             {}

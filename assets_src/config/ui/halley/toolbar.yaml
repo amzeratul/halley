@@ -13,16 +13,22 @@ children:
     options:
     - id: assets
       image: ui/toolbar_assets.png
+      tooltip: Asset Browser
     - id: scene
       image: ui/toolbar_scene.png
+      tooltip: Scene Editor
     - id: ecs
       image: ui/toolbar_ecs.png
+      tooltip: Entity-Component-System
     - id: remotes
       image: ui/toolbar_remote.png
+      tooltip: Remote connections
     - id: properties
       image: ui/toolbar_properties.png
+      tooltip: Project Properties
     - id: settings
       image: ui/toolbar_settings.png
+      tooltip: Halley Settings
 - widget: { class: image, image: ui/slant_capsule_short.png, size: [140, 32], colour: "#FC2847" }
   children:
   - widget: { class: label, id: toolName, text: Assets }
@@ -40,13 +46,13 @@ children:
     fill: centre
     proportion: 1
     border: [0, 0, 0, 0]
-- widget: { id: runProject, class: button, icon: ui/play.png, style: slantButton, size: [42, 42] }
+- widget: { id: runProject, class: button, icon: ui/play.png, style: slantButton, size: [42, 42], tooltip: "Run Project" }
   border: [-5, 0, 0, 0]
-- widget: { id: buildProject, class: button, icon: ui/build.png, style: slantButton, size: [42, 42] }
+- widget: { id: buildProject, class: button, icon: ui/build.png, style: slantButton, size: [42, 42], tooltip: "Build Project" }
   border: [-5, 0, 0, 0]
 - widget: { class: image, image: ui/slant_capsule_short.png, size: [20, 32], colour: "#FC2847", innerBorder: [20, 0, 20, 0] }
   border: [-5, 3, 0, 3]
-- widget: { id: exitProject, class: button, icon: ui/exit.png, style: slantButton, size: [42, 42] }
+- widget: { id: exitProject, class: button, icon: ui/exit.png, style: slantButton, size: [42, 42], tooltip: "Close Project" }
   border: [-5, 0, 0, 0]
 - widget: { class: image, image: ui/slant_capsule_short.png, size: [30, 32], colour: "#FC2847", innerBorder: [20, 0, 20, 0] }
   border: [-5, 3, -10, 3]

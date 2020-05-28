@@ -57,6 +57,7 @@ namespace Halley
 			String inactiveImage;
 			String spriteSheet;
 			String sprite;
+			LocalisedString tooltip;
 			Vector4f border;
 			bool active;
 		};

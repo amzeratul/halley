@@ -17,7 +17,7 @@ namespace Halley {
     	~ProjectWindow();
 
         void setPage(EditorTabs tab);
-        String setCustomPage(const String& pageId);
+        LocalisedString setCustomPage(const String& pageId);
         void openPrefab(const String& assetId, AssetType assetType);
 
     	EditorTaskSet& getTasks() const;

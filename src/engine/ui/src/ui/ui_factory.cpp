@@ -338,7 +338,7 @@ std::vector<UIFactory::ParsedOption> UIFactory::parseOptions(const ConfigNode& n
 {
 	std::vector<ParsedOption> result;
 	if (node.getType() == ConfigNodeType::Sequence) {
-		for (auto& n: node.asSequence()) {
+		for (const auto& n: node.asSequence()) {
 			auto id = n["id"].asString("");
 			auto label = parseLabel(n, id);
 			if (id.isEmpty()) {
@@ -354,6 +354,7 @@ std::vector<UIFactory::ParsedOption> UIFactory::parseOptions(const ConfigNode& n
 			option.sprite = n["sprite"].asString("");
 			option.border = asVector4f(n["border"], Vector4f());
 			option.active = n["active"].asBool(true);
+			option.tooltip = parseLabel(n, "", "tooltip");
 			result.push_back(option);
 		}
 	}
@@ -516,6 +517,11 @@ std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
 		} else {
 			widget->addTextItem(o.id, o.text);
 		}
+
+		if (!o.tooltip.getString().isEmpty()) {
+			widget->getItem(o.id)->setToolTip(o.tooltip);
+		}
+
 		widget->setItemActive(o.id, o.active);
 	}
 

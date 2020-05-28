@@ -41,7 +41,7 @@ void Toolbar::makeUI()
 		auto tabNames = EnumNames<EditorTabs>()();
 		if (std::find_if(tabNames.begin(), tabNames.end(), [&](const char* v) { return tabId == v; }) == tabNames.end()) {
 			const auto name = projectWindow.setCustomPage(tabId);
-			toolNameWidget->setText(LocalisedString::fromHardcodedString(name));
+			toolNameWidget->setText(name);
 			return;
 		}
 		
