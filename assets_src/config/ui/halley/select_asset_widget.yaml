@@ -4,5 +4,5 @@ sizer: { type: horizontal }
 children:
 - widget: { id: input, class: textInput, style: inputThin }
   proportion: 1
-- widget: { id: choose, class: button, text: "...", style: buttonThin, size: [30, 22] }
+- widget: { id: choose, class: button, text: "...", style: buttonThin, size: [30, 22], tooltip: "Select Asset" }
 ...

@@ -34,12 +34,16 @@ children:
             options:
               - id: drag
                 image: ui/scene_editor_drag.png
+                tooltip: Pan Scene
               - id: translate
                 image: ui/scene_editor_move.png
+                tooltip: Move Entities
               - id: polygon
                 image: ui/scene_editor_polygon.png
+                tooltip: Edit Polygon
               - id: vertex
                 image: ui/scene_editor_polygon.png
+                tooltip: Edit Vertex
     - widget: { id: canvas, class: sceneEditorCanvas }
       proportion: 1
       sizer: { type: vertical }

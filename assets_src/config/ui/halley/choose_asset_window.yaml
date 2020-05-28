@@ -7,7 +7,7 @@ children:
   - widget: { id: title, class: label, text: "Choose Asset" }
     fill: centre
     proportion: 1
-- widget: { id: search, class: textInput, size: [50, 30], ghostText: Search }
+- widget: { id: search, class: textInput, size: [50, 30], ghostText: Search, tooltip: "Type the name (or part of the name) of the asset you want to search for." }
   border: [1, 4, 1, 1]
 - widget: { class: scrollBarPane, size: [200, 250] }
   border: [1, 4, 1, 1]

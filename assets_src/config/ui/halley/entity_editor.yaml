@@ -41,5 +41,5 @@ children:
         proportion: 1
   - widget: { id: fields, class: widget }
     sizer: { type: vertical, gap: 8 }
-  - widget: { id: addComponentButton, class: button, text: "Add Component", size: [ 30, 25 ] }
+  - widget: { id: addComponentButton, class: button, text: "Add Component", size: [ 30, 25 ], tooltip: "Add a new Component to this Entity." }
 ...
