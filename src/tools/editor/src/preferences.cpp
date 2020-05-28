@@ -1,8 +1,9 @@
 #include "preferences.h"
 using namespace Halley;
 
-Preferences::Preferences(SystemAPI& system) 
+Preferences::Preferences(SystemAPI& system, String editorVersion) 
 	: system(system)
+	, editorVersion(std::move(editorVersion))
 	, windowSize(Vector2i(1280, 720))
 {
 	loadFromFile();
@@ -92,7 +93,7 @@ const std::vector<String>& Preferences::getRecents() const
 
 WindowDefinition Preferences::getWindowDefinition() const
 {
-	return WindowDefinition(WindowType::ResizableWindow, windowPosition, windowSize, "Halley Editor").withState(windowState);
+	return WindowDefinition(WindowType::ResizableWindow, windowPosition, windowSize, "Halley Editor - " + editorVersion).withState(windowState);
 }
 
 void Preferences::updateWindowDefinition(const Window& window)

@@ -9,7 +9,7 @@ namespace Halley
 	class Preferences
 	{
 	public:
-		explicit Preferences(SystemAPI& system);
+		explicit Preferences(SystemAPI& system, String editorVersion);
 
 		ConfigNode save() const;
 		void load(const ConfigNode& config);
@@ -30,6 +30,7 @@ namespace Halley
 		mutable bool dirty = false;
 
 		std::vector<String> recents;
+		String editorVersion;
 
 		std::optional<Vector2i> windowPosition;
 		Vector2i windowSize;
