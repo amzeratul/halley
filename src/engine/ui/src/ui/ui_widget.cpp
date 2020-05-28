@@ -775,6 +775,7 @@ void UIWidget::onChildAdded(UIWidget& child)
 	if (getRoot()) {
 		child.notifyTreeAddedToRoot();
 	}
+	child.setMouseClip(mouseClip, true);
 }
 
 void UIWidget::onMakeUI()

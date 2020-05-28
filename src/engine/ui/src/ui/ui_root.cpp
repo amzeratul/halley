@@ -359,23 +359,23 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos, bool in
 	return {};
 }
 
-std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& start, Vector2f mousePos, bool includeDisabled) const
+std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled) const
 {
-	if (!start->isActive() || (!includeDisabled && !start->isEnabled())) {
+	if (!curWidget->isActive() || (!includeDisabled && !curWidget->isEnabled())) {
 		return {};
 	}
 
 	// Depth first
-	for (auto& c: start->getChildren()) {
+	for (auto& c: curWidget->getChildren()) {
 		auto result = getWidgetUnderMouse(c, mousePos, includeDisabled);
 		if (result) {
 			return result;
 		}
 	}
 
-	auto rect = start->getMouseRect();
-	if (start->canInteractWithMouse() && rect.contains(mousePos)) {
-		return start;
+	auto rect = curWidget->getMouseRect();
+	if (curWidget->canInteractWithMouse() && rect.contains(mousePos)) {
+		return curWidget;
 	} else {
 		return {};
 	}
