@@ -135,7 +135,7 @@ bool EntityList::onKeyPress(KeyboardKeyPress key)
 	}
 
 	if (key.is(KeyCode::C, KeyMods::Ctrl)) {
-		sceneEditor->copyEntity(curEntity);
+		sceneEditor->copyEntityToClipboard(curEntity);
 		return true;
 	}
 

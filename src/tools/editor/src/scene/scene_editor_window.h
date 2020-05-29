@@ -104,5 +104,6 @@ namespace Halley {
 		std::optional<ConfigNode> deserializeEntity(const String& data) const;
 
 		void assignUUIDs(ConfigNode& node);
+		bool isValidEntityTree(const ConfigNode& node) const;
 	};
 }

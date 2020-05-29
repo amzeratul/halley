@@ -615,6 +615,9 @@ std::optional<ConfigNode> SceneEditorWindow::deserializeEntity(const String& dat
 	ConfigFile file;
 	try {
 		YAMLConvert::parseConfig(file, gsl::as_bytes(gsl::span<const char>(data.c_str(), data.length())));
+		if (!isValidEntityTree(file.getRoot())) {
+			return {};
+		}
 		return std::move(file.getRoot());
 	} catch (...) {
 		return {};
@@ -629,4 +632,25 @@ void SceneEditorWindow::assignUUIDs(ConfigNode& node)
 			assignUUIDs(child);
 		}
 	}
+}
+
+bool SceneEditorWindow::isValidEntityTree(const ConfigNode& node) const
+{
+	if (node.getType() != ConfigNodeType::Map) {
+		return false;
+	}
+	for (const auto& [k, v]: node.asMap()) {
+		if (k != "name" && k != "uuid" && k != "components" && k != "children") {
+			return false;
+		}
+	}
+	if (node.hasKey("children")) {
+		for (const auto& child: node["children"].asSequence()) {
+			if (!isValidEntityTree(child)) {
+				return false;
+			}
+		}
+	}
+	
+	return true;
 }
