@@ -83,6 +83,7 @@ void PrefabSceneData::fillEntityTree(const ConfigNode& node, EntityTree& tree) c
 		if (gameResources.exists<Prefab>(prefabName)) {
 			const auto& prefabNode = gameResources.get<Prefab>(prefabName)->getRoot();
 			tree.name = prefabNode["name"].asString("");
+			fillPrefabChildren(prefabNode, tree.prefabChildrenId);
 		} else {
 			tree.name = "Missing Prefab";
 		}
@@ -92,10 +93,26 @@ void PrefabSceneData::fillEntityTree(const ConfigNode& node, EntityTree& tree) c
 			const auto& seq = node["children"].asSequence();
 			tree.children.reserve(seq.size());
 
-			for (auto& childNode : seq) {
+			for (const auto& childNode : seq) {
 				tree.children.emplace_back();
 				fillEntityTree(childNode, tree.children.back());
 			}
+		}
+	}
+}
+
+void PrefabSceneData::fillPrefabChildren(const ConfigNode& node, std::vector<String>& dst) const
+{
+	dst.push_back(node["uuid"].asString(""));
+	if (node.hasKey("prefab")) {
+		const auto& prefabName = node["prefab"].asString();
+		if (gameResources.exists<Prefab>(prefabName)) {
+			const auto& prefabNode = gameResources.get<Prefab>(prefabName)->getRoot();
+			fillPrefabChildren(prefabNode, dst);
+		}
+	} else if (node["children"].getType() == ConfigNodeType::Sequence) {
+		for (const auto& childNode : node["children"].asSequence()) {
+			fillPrefabChildren(childNode, dst);
 		}
 	}
 }

@@ -396,7 +396,7 @@ bool SceneEditor::isPointInSprite(EntityRef& e, Vector2f point) const
 
 int SceneEditor::getSpriteLayer(EntityRef& e) const
 {
-	const auto sprite = e.tryGetComponent<SpriteComponent>();
+	const auto* sprite = e.tryGetComponent<SpriteComponent>();
 	if (sprite) {
 		return sprite->layer;
 	} else {
@@ -411,7 +411,7 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 	
 	for (auto& e: world->getEntities()) {
 		if (isPointInSprite(e, input.mousePos)) {
-			int layer = getSpriteLayer(e);
+			const int layer = getSpriteLayer(e);
 			if (layer > bestLayer) {
 				bestLayer = layer;
 				bestUUID = e.getUUID();

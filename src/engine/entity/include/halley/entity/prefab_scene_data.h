@@ -21,6 +21,7 @@ namespace Halley {
 
     	void reloadEntity(const String& id, ConfigNode* data);
         void fillEntityTree(const ConfigNode& node, EntityTree& tree) const;
+    	void fillPrefabChildren(const ConfigNode& node, std::vector<String>& dst) const;
 
         ConfigNode::SequenceType& findChildListFor(const String& id);
         static ConfigNode* doFindChildListFor(ConfigNode& node, const String& id);
