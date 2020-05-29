@@ -4,6 +4,14 @@
 #include "halley/core/graphics/camera.h"
 using namespace Halley;
 
+SceneEditorGizmoHandle::SceneEditorGizmoHandle()
+{
+	setSnap([] (Vector2f p)
+	{
+		return p.round();
+	});
+}
+
 void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles)
 {
 	if (!holding) {
@@ -16,7 +24,8 @@ void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl
 
 	if (holding) {
 		const auto oldPos = pos;
-		pos = inputState.mousePos + startOffset;
+		const auto newPos = inputState.mousePos + startOffset;
+		pos = snapFunc ? snapFunc(newPos) : newPos;
 		const Vector2f delta = pos - oldPos;
 
 		// Drag all other selected handles too
@@ -36,9 +45,14 @@ void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl
 	}
 }
 
-void SceneEditorGizmoHandle::setBoundsCheck(std::function<bool(Vector2f, Vector2f)> bc)
+void SceneEditorGizmoHandle::setBoundsCheck(BoundsCheckFunction bc)
 {
 	boundsCheck = std::move(bc);
+}
+
+void SceneEditorGizmoHandle::setSnap(SnapFunction sf)
+{
+	snapFunc = std::move(sf);
 }
 
 void SceneEditorGizmoHandle::setPosition(Vector2f p)
