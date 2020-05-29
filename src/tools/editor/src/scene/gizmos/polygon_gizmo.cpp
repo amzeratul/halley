@@ -6,8 +6,9 @@
 #include "halley/ui/widgets/ui_list.h"
 using namespace Halley;
 
-PolygonGizmo::PolygonGizmo(String componentName, String fieldName, const ConfigNode& options, UIFactory& factory)
-	: factory(factory)
+PolygonGizmo::PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, const ConfigNode& options, UIFactory& factory)
+	: SceneEditorGizmo(snapRules)
+	, factory(factory)
 	, componentName(std::move(componentName))
 	, fieldName(std::move(fieldName))
 	, isOpenPolygon(options["isOpenPolygon"].asBool(false))
@@ -278,6 +279,7 @@ SceneEditorGizmoHandle PolygonGizmo::makeHandle(Vector2f pos) const
 	{
 		return getHandleRect(pos, 14.0f).contains(mousePos);
 	});
+	handle.setGridSnap(getSnapRules().grid);
 	handle.setPosition(pos);
 	return handle;
 }

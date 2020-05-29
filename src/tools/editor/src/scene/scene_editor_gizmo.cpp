@@ -6,10 +6,6 @@ using namespace Halley;
 
 SceneEditorGizmoHandle::SceneEditorGizmoHandle()
 {
-	setSnap([] (Vector2f p)
-	{
-		return p.round();
-	});
 }
 
 void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles)
@@ -55,6 +51,21 @@ void SceneEditorGizmoHandle::setSnap(SnapFunction sf)
 	snapFunc = std::move(sf);
 }
 
+void SceneEditorGizmoHandle::setGridSnap(GridSnapMode gridSnap)
+{
+	switch (gridSnap) {
+	case GridSnapMode::Disabled:
+		snapFunc = {};
+		break;
+	case GridSnapMode::Pixel:
+		snapFunc = [] (Vector2f p)
+		{
+			return p.round();
+		};
+		break;
+	}
+}
+
 void SceneEditorGizmoHandle::setPosition(Vector2f p)
 {
 	pos = p;
@@ -97,6 +108,11 @@ void SceneEditorGizmoHandle::setNotOver()
 void SceneEditorGizmoHandle::setSelected(bool sel)
 {
 	selected = sel;
+}
+
+SceneEditorGizmo::SceneEditorGizmo(SnapRules rules)
+	: snapRules(rules)
+{
 }
 
 void SceneEditorGizmo::update(Time time, const SceneEditorInputState& inputState)
@@ -215,3 +231,9 @@ float SceneEditorGizmo::getZoom() const
 {
 	return zoom;
 }
+
+SceneEditorGizmo::SnapRules SceneEditorGizmo::getSnapRules() const
+{
+	return snapRules;
+}
+

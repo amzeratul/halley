@@ -3,7 +3,8 @@
 #include "halley/core/resources/resources.h"
 using namespace Halley;
 
-SelectionBoxGizmo::SelectionBoxGizmo(Resources& resources)
+SelectionBoxGizmo::SelectionBoxGizmo(SnapRules snapRules, Resources& resources)
+	: SceneEditorGizmo(snapRules)
 {
 }
 

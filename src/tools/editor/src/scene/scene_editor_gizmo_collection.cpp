@@ -11,8 +11,12 @@ SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resou
 	: factory(factory)
 	, resources(resources)
 {
-	selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(resources);
-	selectionBoxGizmo = std::make_unique<SelectionBoxGizmo>(resources);
+	// TODO: read this elsewhere
+	snapRules.grid = GridSnapMode::Pixel;
+	snapRules.line = LineSnapMode::IsometricAxisAligned;
+	
+	selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(snapRules, resources);
+	selectionBoxGizmo = std::make_unique<SelectionBoxGizmo>(snapRules, resources);
 }
 
 bool SceneEditorGizmoCollection::update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
@@ -61,15 +65,15 @@ std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(SceneEditorTool to
 	
 	switch (tool) {
 	case SceneEditorTool::Translate:
-		activeGizmo = std::make_unique<TranslateGizmo>();
+		activeGizmo = std::make_unique<TranslateGizmo>(snapRules);
 		break;
 
 	case SceneEditorTool::Polygon:
-		activeGizmo = std::make_unique<PolygonGizmo>(componentName, fieldName, options, factory);
+		activeGizmo = std::make_unique<PolygonGizmo>(snapRules, componentName, fieldName, options, factory);
 		break;
 
 	case SceneEditorTool::Vertex:
-		activeGizmo = std::make_unique<VertexGizmo>(componentName, fieldName);
+		activeGizmo = std::make_unique<VertexGizmo>(snapRules, componentName, fieldName);
 		break;
 	}
 

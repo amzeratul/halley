@@ -4,14 +4,16 @@
 #include "halley/core/graphics/painter.h"
 using namespace Halley;
 
-VertexGizmo::VertexGizmo(String componentName, String fieldName)
-	: componentName(std::move(componentName))
+VertexGizmo::VertexGizmo(SnapRules snapRules, String componentName, String fieldName)
+	: SceneEditorGizmo(snapRules)
+	, componentName(std::move(componentName))
 	, fieldName(std::move(fieldName))
 {
 	handle.setBoundsCheck([=] (Vector2f myPos, Vector2f mousePos) -> bool
 	{
 		return getMainHandle().contains(mousePos);
 	});
+	handle.setGridSnap(snapRules.grid);
 }
 
 void VertexGizmo::update(Time time, const SceneEditorInputState& inputState)

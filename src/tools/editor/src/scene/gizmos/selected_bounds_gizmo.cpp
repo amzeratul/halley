@@ -6,7 +6,8 @@
 #include "halley/entity/scene_editor/scene_editor.h"
 using namespace Halley;
 
-SelectedBoundsGizmo::SelectedBoundsGizmo(Resources& resources)
+SelectedBoundsGizmo::SelectedBoundsGizmo(SnapRules snapRules, Resources& resources)
+	: SceneEditorGizmo(snapRules)
 {
 	material = std::make_shared<Material>(resources.get<MaterialDefinition>("Halley/InvertLine"));
 }

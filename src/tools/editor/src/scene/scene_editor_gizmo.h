@@ -11,6 +11,16 @@ namespace Halley {
 	class Camera;
 	class Painter;
 
+	enum class GridSnapMode {
+		Disabled,
+		Pixel
+	};
+	
+	enum class LineSnapMode {
+		AxisAligned,
+		IsometricAxisAligned
+	};
+
 	class SceneEditorGizmoHandle {
 	public:
 		using SnapFunction = std::function<Vector2f(Vector2f)>;
@@ -32,6 +42,7 @@ namespace Halley {
 
 		void setBoundsCheck(BoundsCheckFunction boundsCheck);
 		void setSnap(SnapFunction snapFunc);
+		void setGridSnap(GridSnapMode gridSnap);
 
 	private:
 		bool over = false;
@@ -48,6 +59,12 @@ namespace Halley {
 
 	class SceneEditorGizmo {
 	public:
+		struct SnapRules {
+			GridSnapMode grid;
+			LineSnapMode line;
+		};
+
+		explicit SceneEditorGizmo(SnapRules snapRules);
 		virtual ~SceneEditorGizmo() = default;
 
 		virtual void update(Time time, const SceneEditorInputState& inputState);
@@ -78,11 +95,14 @@ namespace Halley {
 		void markModified(const String& component, const String& field);
 		
 		float getZoom() const;
+		SnapRules getSnapRules() const;
 
 	private:
 		std::optional<EntityRef> curEntity;
 		ConfigNode* entityData = nullptr;
 		SceneEditorOutputState* outputState = nullptr;
 		float zoom = 1.0f;
+
+		SnapRules snapRules;
 	};
 }

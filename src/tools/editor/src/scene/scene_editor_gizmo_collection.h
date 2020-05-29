@@ -20,6 +20,8 @@ namespace Halley {
 	private:
 		UIFactory& factory;
 		Resources& resources;
+		SceneEditorGizmo::SnapRules snapRules;
+		
 		std::unique_ptr<SceneEditorGizmo> selectedBoundsGizmo;
 		std::unique_ptr<SceneEditorGizmo> selectionBoxGizmo;
 		std::unique_ptr<SceneEditorGizmo> activeGizmo;

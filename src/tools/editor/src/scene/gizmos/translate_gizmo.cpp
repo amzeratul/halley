@@ -4,12 +4,14 @@
 #include "halley/core/graphics/painter.h"
 using namespace Halley;
 
-TranslateGizmo::TranslateGizmo()
+TranslateGizmo::TranslateGizmo(SnapRules snapRules)
+	: SceneEditorGizmo(snapRules)
 {
 	handle.setBoundsCheck([=] (Vector2f myPos, Vector2f mousePos) -> bool
 	{
 		return getMainHandle().contains(mousePos);
 	});
+	handle.setGridSnap(snapRules.grid);
 }
 
 void TranslateGizmo::update(Time time, const SceneEditorInputState& inputState)

@@ -7,7 +7,7 @@ namespace Halley {
 	
 	class SelectionBoxGizmo final : public SceneEditorGizmo {
 	public:
-		explicit SelectionBoxGizmo(Resources& resources);
+		SelectionBoxGizmo(SnapRules snapRules, Resources& resources);
 
 		void update(Time time, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
