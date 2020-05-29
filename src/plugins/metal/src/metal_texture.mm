@@ -10,7 +10,7 @@ MetalTexture::MetalTexture(MetalVideo& video, Vector2i size)
 	startLoading();
 }
 
-void MetalTexture::load(TextureDescriptor&& descriptor)
+void MetalTexture::doLoad(TextureDescriptor& descriptor)
 {
 	MTLPixelFormat pixelFormat;
 	int bytesPerPixel = 0;

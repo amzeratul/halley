@@ -58,7 +58,7 @@ static D3D11_TEXTURE_ADDRESS_MODE getAddressMode(TextureAddressMode mode)
 	throw Exception("Unknown TextureAddressMode: " + toString(mode), HalleyExceptions::VideoPlugin);
 }
 
-void DX11Texture::load(TextureDescriptor&& descriptor)
+void DX11Texture::doLoad(TextureDescriptor& descriptor)
 {
 	int bpp = 0;
 

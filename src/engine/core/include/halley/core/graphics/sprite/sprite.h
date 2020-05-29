@@ -114,12 +114,15 @@ namespace Halley
 		Sprite& setVisible(bool visible) { this->visible = visible; return *this; }
 		bool isVisible() const { return visible; }
 
+		bool isPointVisible(Vector2f localPoint) const;
+
 		Sprite& setClip(Rect4f clip);
 		Sprite& setAbsoluteClip(Rect4f clip);
 		Sprite& setClip();
 		std::optional<Rect4f> getClip() const;
 		std::optional<Rect4f> getAbsoluteClip() const;
 
+		Rect4f getLocalAABB() const;
 		Rect4f getAABB() const;
 		Rect4f getUncroppedAABB() const;
 		bool isInView(Rect4f rect) const;

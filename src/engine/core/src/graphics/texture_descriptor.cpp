@@ -89,6 +89,16 @@ int TextureDescriptorImageData::getStrideOr(int assumedStride) const
 	}
 }
 
+Image* TextureDescriptorImageData::getImage()
+{
+	return img.get();
+}
+
+const Image* TextureDescriptorImageData::getImage() const
+{
+	return img.get();
+}
+
 TextureDescriptor::TextureDescriptor(Vector2i size, TextureFormat format)
 	: size(size)
 	, format(format)
@@ -108,6 +118,7 @@ TextureDescriptor& TextureDescriptor::operator=(TextureDescriptor&& other) noexc
 	canBeUpdated = other.canBeUpdated;
 	isRenderTarget = other.isRenderTarget;
 	isDepthStencil = other.isDepthStencil;
+	retainPixelData = other.retainPixelData;
 	return *this;
 }
 

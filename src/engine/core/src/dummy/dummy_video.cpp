@@ -83,7 +83,7 @@ DummyTexture::DummyTexture(Vector2i size)
 {
 }
 
-void DummyTexture::load(TextureDescriptor&&)
+void DummyTexture::doLoad(TextureDescriptor&)
 {
 	doneLoading();
 }

@@ -20,7 +20,7 @@ namespace Halley
 		void bind(int textureUnit) const;
 		unsigned int getNativeId() const;
 
-		void load(TextureDescriptor&& descriptor) override;
+		void doLoad(TextureDescriptor& descriptor) override;
 		void reload(Resource&& resource) override;
 
 	private:

@@ -12,7 +12,34 @@ Texture::Texture(Vector2i size)
 	: size(size)
 {}
 
-void Texture::load(TextureDescriptor&& descriptor)
+void Texture::load(TextureDescriptor desc)
+{
+	descriptor = std::move(desc);
+	doLoad(descriptor);
+
+	if (!descriptor.retainPixelData) {
+		descriptor.pixelData = TextureDescriptorImageData();
+	}
+}
+
+std::optional<uint32_t> Texture::getPixel(Vector2f texPos) const
+{
+	if (descriptor.retainPixelData) {
+		const auto* img = descriptor.pixelData.getImage();
+		Vector2i pos = Vector2i((texPos * Vector2f(size)).round());
+		pos = Vector2i::max(Vector2i(), Vector2i::min(size - Vector2i(1, 1), pos)); // Clamp mode
+		
+		if (img) {
+			if (img->getFormat() == Image::Format::RGBA || img->getFormat() == Image::Format::RGBAPremultiplied) {
+				return img->getPixel4BPP(pos);
+			}
+		}
+	}
+
+	return {};
+}
+
+void Texture::doLoad(TextureDescriptor& descriptor)
 {
 }
 
@@ -27,6 +54,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 
 	std::shared_ptr<Texture> texture = loader.getAPI().video->createTexture(size);
 	texture->setMeta(meta);
+	bool retain = loader.getResources().getOptions().retainPixelData;
 
 	loader.getAsync()
 	.then([texture](std::unique_ptr<ResourceDataStatic> data) -> TextureDescriptorImageData
@@ -38,7 +66,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 			return TextureDescriptorImageData(data->getSpan());
 		}
 	})
-	.then(Executors::getVideoAux(), [texture](TextureDescriptorImageData img)
+	.then(Executors::getVideoAux(), [texture, retain](TextureDescriptorImageData img)
 	{
 		auto& meta = texture->getMeta();
 
@@ -70,6 +98,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 		descriptor.format = format;
 		descriptor.pixelData = std::move(img);
 		descriptor.pixelFormat = meta.getString("compression") == "png" ? PixelDataFormat::Image : PixelDataFormat::Precompiled;
+		descriptor.retainPixelData = retain;
 		texture->load(std::move(descriptor));
 	});
 

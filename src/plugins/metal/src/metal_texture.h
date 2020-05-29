@@ -14,7 +14,7 @@ namespace Halley {
 	friend class MetalTextureRenderTarget;
 	public:
 		explicit MetalTexture(MetalVideo& video, Vector2i size);
-		void load(TextureDescriptor&& descriptor) override;
+		void doLoad(TextureDescriptor& descriptor) override;
 		void bind(id<MTLRenderCommandEncoder> encoder, int bindIndex) const;
 
 	private:

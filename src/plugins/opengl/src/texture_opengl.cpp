@@ -40,7 +40,7 @@ TextureOpenGL& TextureOpenGL::operator=(TextureOpenGL&& other) noexcept
 	return *this;
 }
 
-void TextureOpenGL::load(TextureDescriptor&& d)
+void TextureOpenGL::doLoad(TextureDescriptor& d)
 {
 	GLUtils glUtils;
 	glUtils.bindTexture(textureId);

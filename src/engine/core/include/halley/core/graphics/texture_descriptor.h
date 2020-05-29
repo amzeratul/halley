@@ -73,6 +73,9 @@ namespace Halley
 		std::optional<int> getStride() const;
 		int getStrideOr(int assumedStride) const;
 
+		Image* getImage();
+		const Image* getImage() const;
+
 	private:
 		std::unique_ptr<Image> img;
 		Bytes rawBytes;
@@ -96,6 +99,7 @@ namespace Halley
 		bool isRenderTarget = false;
 		bool isDepthStencil = false;
 		bool isHardwareVideoDecodeTexture = false;
+		bool retainPixelData = false;
 
 		TextureDescriptor() = default;
 		TextureDescriptor(TextureDescriptor&& other) noexcept = default;

@@ -133,6 +133,13 @@ void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painte
 	draw(sprites + start, n - start, painter);
 }
 
+Rect4f Sprite::getLocalAABB() const
+{
+	const Vector2f sz = getSize();
+	const Vector2f pivot = getPivot();
+	return Rect4f(-sz * pivot, sz * (Vector2f(1, 1) - pivot));
+}
+
 Rect4f Sprite::getAABB() const
 {
 	const Vector2f sz = getScaledSize() * Vector2f(flip ? -1.0f : 1.0f, 1.0f);
@@ -401,6 +408,36 @@ bool Sprite::isSliced() const
 Vector4s Sprite::getSlices() const
 {
 	return slices;
+}
+
+bool Sprite::isPointVisible(Vector2f localPoint) const
+{
+	// Is the sprite visible?
+	if (!visible || getColour().a == 0) {
+		return false;
+	}
+
+	// Check AABB first
+	if (!getLocalAABB().contains(localPoint)) {
+		return false;
+	}
+
+	// Check against texture
+	if (material) {
+		const auto tex = material->getTexture(0);
+		if (tex) {
+			const auto rectPos = localPoint + getAbsolutePivot();
+			const auto texRect = getTexRect();
+			const auto texelPos = (rectPos / size) * texRect.getSize() + texRect.getTopLeft();
+			const auto px = tex->getPixel(texelPos);
+			if (px) {
+				const auto pxColour = Image::convertIntToColour(px.value());
+				return pxColour.a > 0.01f;
+			}
+		}
+	}
+
+	return true;
 }
 
 Sprite& Sprite::setClip(Rect4f c)

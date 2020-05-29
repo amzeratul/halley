@@ -382,13 +382,16 @@ EntityRef SceneEditor::getEntity(const UUID& id) const
 
 bool SceneEditor::isPointInSprite(EntityRef& e, Vector2f point) const
 {
-	auto aabb = getSpriteBounds(e);
-	if (!aabb || !aabb->contains(point)) {
+	const auto* transform2d = e.tryGetComponent<Transform2DComponent>();
+	const auto* spriteComponent = e.tryGetComponent<SpriteComponent>();
+
+	if (!transform2d || !spriteComponent) {
 		return false;
 	}
-
-	// TODO: fine check
-	return true;
+	
+	const auto& sprite = spriteComponent->sprite;
+	const auto localPoint = transform2d->inverseTransformPoint(point);
+	return sprite.isPointVisible(localPoint);
 }
 
 int SceneEditor::getSpriteLayer(EntityRef& e) const

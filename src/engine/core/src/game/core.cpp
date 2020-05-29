@@ -262,7 +262,7 @@ void Core::initResources()
 	auto locator = std::make_unique<ResourceLocator>(*api->system);
 	auto gamePath = environment->getProgramPath();
 	game->initResourceLocator(gamePath, api->system->getAssetsPath(gamePath.string()), api->system->getUnpackedAssetsPath(gamePath.string()), *locator);
-	resources = std::make_unique<Resources>(std::move(locator), *api);
+	resources = std::make_unique<Resources>(std::move(locator), *api, Resources::Options());
 	StandardResources::initialize(*resources);
 	api->audioInternal->setResources(*resources);
 }
