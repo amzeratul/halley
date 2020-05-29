@@ -97,9 +97,20 @@ void EntityList::onEntityModified(const String& id, const ConfigNode& node)
 
 void EntityList::onEntityAdded(const String& id, const String& parentId, const ConfigNode& data)
 {
-	addEntity(data["name"].asString(""), id, parentId, data["prefab"].asString(""));
+	addEntityTree(parentId, data);
 	list->sortItems();
 	list->setSelectedOptionId(id);
+}
+
+void EntityList::addEntityTree(const String& parentId, const ConfigNode& data)
+{
+	const auto& curId = data["uuid"].asString();
+	addEntity(data["name"].asString(""), curId, parentId, data["prefab"].asString(""));
+	if (data["children"].getType() == ConfigNodeType::Sequence) {
+		for (const auto& child: data["children"]) {
+			addEntityTree(curId, child);
+		}
+	}
 }
 
 void EntityList::onEntityRemoved(const String& id, const String& parentId)
@@ -116,8 +127,26 @@ void EntityList::select(const String& id)
 
 bool EntityList::onKeyPress(KeyboardKeyPress key)
 {
+	const auto& curEntity = list->getSelectedOptionId();
+	
 	if (key.is(KeyCode::Delete)) {
-		sceneEditor->removeEntity(list->getSelectedOptionId());
+		sceneEditor->removeEntity(curEntity);
+		return true;
+	}
+
+	if (key.is(KeyCode::C, KeyMods::Ctrl)) {
+		sceneEditor->copyEntity(curEntity);
+		return true;
+	}
+
+	if (key.is(KeyCode::X, KeyMods::Ctrl)) {
+		sceneEditor->copyEntity(curEntity);
+		sceneEditor->removeEntity(curEntity);
+		return true;
+	}
+
+	if (key.is(KeyCode::V, KeyMods::Ctrl)) {
+		sceneEditor->pasteEntity(curEntity);
 		return true;
 	}
 

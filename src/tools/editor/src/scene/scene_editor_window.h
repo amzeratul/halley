@@ -45,6 +45,9 @@ namespace Halley {
 
 		std::shared_ptr<const Prefab> getGamePrefab(const String& id) const;
 
+		void copyEntity(const String& id);
+		void pasteEntity(const String& parent);
+
 	protected:
 		void update(Time t, bool moved) override;
 
@@ -93,5 +96,10 @@ namespace Halley {
 		void decayTool();
 
 		void setSaveEnabled(bool enabled);
+
+		String serializeEntity(const ConfigNode& node) const;
+		std::optional<ConfigNode> deserializeEntity(const String& data) const;
+
+		void assignUUIDs(ConfigNode& node);
 	};
 }

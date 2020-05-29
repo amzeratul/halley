@@ -349,6 +349,30 @@ std::shared_ptr<const Prefab> SceneEditorWindow::getGamePrefab(const String& id)
 	return {};
 }
 
+void SceneEditorWindow::copyEntity(const String& id)
+{
+	const auto clipboard = api.system->getClipboard();
+	if (clipboard) {
+		const auto entityData = sceneData->getEntityData(id);
+		clipboard->setData(serializeEntity(entityData.data));
+	}
+}
+
+void SceneEditorWindow::pasteEntity(const String& parent)
+{
+	const auto clipboard = api.system->getClipboard();
+	if (clipboard) {
+		auto clipboardData = clipboard->getStringData();
+		if (clipboardData) {
+			auto data = deserializeEntity(clipboardData.value());
+			if (data) {
+				assignUUIDs(data.value());
+				addEntity(parent, std::move(data.value()));
+			}
+		}
+	}
+}
+
 void SceneEditorWindow::addNewEntity()
 {
 	auto data = ConfigNode(ConfigNode::MapType());
@@ -562,4 +586,32 @@ void SceneEditorWindow::setSaveEnabled(bool enabled)
 	auto button = getWidgetAs<UIButton>("saveButton");
 	button->setLabel(LocalisedString::fromHardcodedString(enabled ? "* Save" : "Save"));
 	button->setEnabled(enabled);
+}
+
+String SceneEditorWindow::serializeEntity(const ConfigNode& node) const
+{
+	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = {{ "name", "uuid", "components", "children" }};
+	return YAMLConvert::generateYAML(node, options);
+}
+
+std::optional<ConfigNode> SceneEditorWindow::deserializeEntity(const String& data) const
+{
+	ConfigFile file;
+	try {
+		YAMLConvert::parseConfig(file, gsl::as_bytes(gsl::span<const char>(data.c_str(), data.length())));
+		return std::move(file.getRoot());
+	} catch (...) {
+		return {};
+	}
+}
+
+void SceneEditorWindow::assignUUIDs(ConfigNode& node)
+{
+	node["uuid"] = UUID::generate().toString();
+	if (node["children"].getType() == ConfigNodeType::Sequence) {
+		for (auto& child: node["children"].asSequence()) {
+			assignUUIDs(child);
+		}
+	}
 }
