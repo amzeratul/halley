@@ -21,11 +21,16 @@ ChooseAssetWindow::~ChooseAssetWindow() = default;
 void ChooseAssetWindow::onAddedToRoot()
 {
 	getWidget("search")->focus();
+	getRoot()->registerKeyPressListener(getWidget("options"), 2);
+	getRoot()->registerKeyPressListener(shared_from_this(), 1);
 }
 
 void ChooseAssetWindow::setAssetIds(const std::vector<String>& ids, const String& defaultOption)
 {
-	options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
+	if (canShowBlank()) {
+		options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
+	}
+	
 	for (const auto& c: ids) {
 		options->addTextItem(c, LocalisedString::fromUserString(c));
 	}
@@ -35,6 +40,26 @@ void ChooseAssetWindow::setAssetIds(const std::vector<String>& ids, const String
 void ChooseAssetWindow::setTitle(LocalisedString title)
 {
 	getWidgetAs<UILabel>("title")->setText(std::move(title));
+}
+
+bool ChooseAssetWindow::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Enter)) {
+		accept();
+		return true;
+	}
+
+	if (key.is(KeyCode::Esc)) {
+		cancel();
+		return true;
+	}
+
+	return false;
+}
+
+bool ChooseAssetWindow::canShowBlank() const
+{
+	return true;
 }
 
 void ChooseAssetWindow::makeUI()
@@ -66,9 +91,12 @@ void ChooseAssetWindow::makeUI()
 
 void ChooseAssetWindow::accept()
 {
-	const auto id = getWidgetAs<UIList>("options")->getSelectedOptionId();
-	callback(id);
-	destroy();
+	if (callback) {
+		const auto id = getWidgetAs<UIList>("options")->getSelectedOptionId();
+		callback(id);
+		destroy();
+	}
+	callback = {};
 }
 
 void ChooseAssetWindow::cancel()
@@ -86,6 +114,11 @@ AddComponentWindow::AddComponentWindow(UIFactory& factory, const std::vector<Str
 {
 	setAssetIds(componentList, "");
 	setTitle(LocalisedString::fromHardcodedString("Add Component"));
+}
+
+bool AddComponentWindow::canShowBlank() const
+{
+	return false;
 }
 
 ChooseAssetTypeWindow::ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, Callback callback)

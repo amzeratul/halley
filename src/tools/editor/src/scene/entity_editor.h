@@ -15,6 +15,8 @@ namespace Halley {
 	public:
 		EntityEditor(String id, UIFactory& factory);
 
+		void onAddedToRoot() override;
+		
 		void update(Time t, bool moved) override;
 
 		void setSceneEditorWindow(SceneEditorWindow& sceneEditor);
@@ -31,7 +33,10 @@ namespace Halley {
 		ConfigNode getDefaultNode(const String& fieldType) override;
 
 		void setDefaultName(const String& name, const String& prevName) override;
-		
+
+	protected:
+		bool onKeyPress(KeyboardKeyPress key) override;
+
 	private:
 		UIFactory& factory;
 		ECSData* ecsData = nullptr;

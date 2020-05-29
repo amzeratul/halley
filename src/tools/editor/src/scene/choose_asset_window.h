@@ -19,6 +19,10 @@ namespace Halley {
 
 		void setTitle(LocalisedString title);
 
+    protected:
+        bool onKeyPress(KeyboardKeyPress key) override;
+        virtual bool canShowBlank() const;
+
     private:
         UIFactory& factory;
         Callback callback;
@@ -34,6 +38,9 @@ namespace Halley {
     class AddComponentWindow : public ChooseAssetWindow {
     public:
         AddComponentWindow(UIFactory& factory, const std::vector<String>& componentList, Callback callback);
+
+    protected:
+        bool canShowBlank() const override;
     };
 
 	class ChooseAssetTypeWindow : public ChooseAssetWindow {

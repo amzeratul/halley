@@ -19,6 +19,11 @@ EntityEditor::EntityEditor(String id, UIFactory& factory)
 	reloadEntity();
 }
 
+void EntityEditor::onAddedToRoot()
+{
+	getRoot()->registerKeyPressListener(shared_from_this());
+}
+
 void EntityEditor::update(Time t, bool moved)
 {
 	if (needToReloadUI) {
@@ -360,6 +365,16 @@ void EntityEditor::setDefaultName(const String& name, const String& prevName)
 		entityName->setText(name);
 		setName(name);
 	}
+}
+
+bool EntityEditor::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::T, KeyMods::Ctrl)) {
+		addComponent();
+		return true;
+	}
+
+	return false;
 }
 
 String EntityEditor::getName() const
