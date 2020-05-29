@@ -27,7 +27,7 @@ void VertexGizmo::update(Time time, const SceneEditorInputState& inputState)
 			updateEntityData(transform->inverseTransformPoint(handle.getPosition()));
 		} else {
 			// Read from object
-			handle.setPosition(transform->transformPoint(readEntityData()));
+			handle.setPosition(transform->transformPoint(readEntityData()), false);
 		}
 		visible = true;
 	} else {

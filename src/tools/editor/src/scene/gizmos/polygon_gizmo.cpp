@@ -38,10 +38,13 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 	if (inputState.leftClickPressed) {
 		if (mode == PolygonGizmoMode::Append && curFocus == -1) {
 			handles.emplace_back(makeHandle(inputState.mousePos));
+			setHandleIndices();
 		} else if (mode == PolygonGizmoMode::Delete && curFocus != -1) {
 			handles.erase(handles.begin() + curFocus);
+			setHandleIndices();
 		} else if (mode == PolygonGizmoMode::Insert && preview) {
 			handles.insert(handles.begin() + previewIndex, makeHandle(preview.value()));
+			setHandleIndices();
 		}
 	}
 
@@ -56,6 +59,8 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 
 int PolygonGizmo::updateHandles(const SceneEditorInputState& inputState)
 {
+	enableLineSnap = inputState.shiftHeld;
+	
 	// Update existing handles
 	for (auto& handle: handles) {
 		handle.setCanDrag(mode != PolygonGizmoMode::Delete);
@@ -201,7 +206,15 @@ void PolygonGizmo::loadHandlesFromVertices()
 {
 	handles.resize(vertices.size(), makeHandle({}));
 	for (size_t i = 0; i < vertices.size(); ++i) {
-		handles[i].setPosition(localToWorld(vertices[i]));
+		handles[i].setPosition(localToWorld(vertices[i]), false);
+	}
+	setHandleIndices();
+}
+
+void PolygonGizmo::setHandleIndices()
+{
+	for (size_t i = 0; i < vertices.size(); ++i) {
+		handles[i].setId(static_cast<int>(i));
 	}
 }
 
@@ -272,6 +285,36 @@ Vector2f PolygonGizmo::worldToLocal(Vector2f worldPos) const
 	}
 }
 
+Vector2f PolygonGizmo::snapVertex(int id, Vector2f pos) const
+{
+	if (handles.empty()) {
+		return pos;
+	}
+	
+	const auto rules = getSnapRules();
+
+	if (enableLineSnap) {
+		const auto* prev = tryGetHandle(modulo(id - 1, static_cast<int>(handles.size())));
+		const auto* next = tryGetHandle(modulo(id + 1, static_cast<int>(handles.size())));
+		pos = solveLineSnap(pos, prev ? prev->getPosition() : std::optional<Vector2f>(), next ? next->getPosition() : std::optional<Vector2f>());
+	}
+	
+	if (rules.grid == GridSnapMode::Pixel) {
+		pos = pos.round();
+	}
+	return pos;
+}
+
+const SceneEditorGizmoHandle* PolygonGizmo::tryGetHandle(int id) const
+{
+	for (const auto& handle: handles) {
+		if (handle.getId() == id) {
+			return &handle;
+		}
+	}
+	return nullptr;
+}
+
 SceneEditorGizmoHandle PolygonGizmo::makeHandle(Vector2f pos) const
 {
 	SceneEditorGizmoHandle handle;
@@ -279,7 +322,9 @@ SceneEditorGizmoHandle PolygonGizmo::makeHandle(Vector2f pos) const
 	{
 		return getHandleRect(pos, 14.0f).contains(mousePos);
 	});
-	handle.setGridSnap(getSnapRules().grid);
-	handle.setPosition(pos);
+
+	handle.setSnap([this] (int id, Vector2f pos) { return snapVertex(id, pos); });
+	
+	handle.setPosition(pos, false);
 	return handle;
 }

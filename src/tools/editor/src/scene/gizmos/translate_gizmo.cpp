@@ -26,7 +26,7 @@ void TranslateGizmo::update(Time time, const SceneEditorInputState& inputState)
 			updateEntityData(transform->getLocalPosition());
 		} else {
 			// Read from object
-			handle.setPosition(transform->getGlobalPosition());
+			handle.setPosition(transform->getGlobalPosition(), false);
 		}
 		visible = true;
 	} else {

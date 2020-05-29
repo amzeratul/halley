@@ -17,19 +17,23 @@ namespace Halley {
 	};
 	
 	enum class LineSnapMode {
+		Disabled,
 		AxisAligned,
 		IsometricAxisAligned
 	};
 
 	class SceneEditorGizmoHandle {
 	public:
-		using SnapFunction = std::function<Vector2f(Vector2f)>;
+		using SnapFunction = std::function<Vector2f(int, Vector2f)>;
 		using BoundsCheckFunction = std::function<bool(Vector2f, Vector2f)>;
 
 		SceneEditorGizmoHandle();
 		void update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles = {});
 
-		void setPosition(Vector2f pos);
+		void setId(int id);
+		int getId() const;
+		
+		void setPosition(Vector2f pos, bool snap);
 		Vector2f getPosition() const;
 		
 		bool isOver() const;
@@ -45,6 +49,7 @@ namespace Halley {
 		void setGridSnap(GridSnapMode gridSnap);
 
 	private:
+		int id = 0;
 		bool over = false;
 		bool holding = false;
 		bool canDrag = true;
@@ -60,8 +65,8 @@ namespace Halley {
 	class SceneEditorGizmo {
 	public:
 		struct SnapRules {
-			GridSnapMode grid;
-			LineSnapMode line;
+			GridSnapMode grid = GridSnapMode::Disabled;
+			LineSnapMode line = LineSnapMode::Disabled;
 		};
 
 		explicit SceneEditorGizmo(SnapRules snapRules);
@@ -96,6 +101,7 @@ namespace Halley {
 		
 		float getZoom() const;
 		SnapRules getSnapRules() const;
+		Vector2f solveLineSnap(Vector2f cur, std::optional<Vector2f> prev, std::optional<Vector2f> next) const;
 
 	private:
 		std::optional<EntityRef> curEntity;
@@ -104,5 +110,7 @@ namespace Halley {
 		float zoom = 1.0f;
 
 		SnapRules snapRules;
+
+		std::optional<Line> findSnapLine(Vector2f cur, Vector2f ref) const;
 	};
 }

@@ -20,14 +20,13 @@ void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl
 
 	if (holding) {
 		const auto oldPos = pos;
-		const auto newPos = inputState.mousePos + startOffset;
-		pos = snapFunc ? snapFunc(newPos) : newPos;
+		setPosition(inputState.mousePos + startOffset, true);
 		const Vector2f delta = pos - oldPos;
 
 		// Drag all other selected handles too
 		for (auto& handle: handles) {
 			if (&handle != this && handle.isSelected()) {
-				handle.setPosition(handle.getPosition() + delta);
+				handle.setPosition(handle.getPosition() + delta, false);
 			}
 		}
 		
@@ -39,6 +38,16 @@ void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl
 	if (inputState.selectionBox) {
 		selected = (selected && inputState.shiftHeld) || inputState.selectionBox.has_value() && inputState.selectionBox.value().contains(pos);
 	}
+}
+
+void SceneEditorGizmoHandle::setId(int id)
+{
+	this->id = id;
+}
+
+int SceneEditorGizmoHandle::getId() const
+{
+	return id;
 }
 
 void SceneEditorGizmoHandle::setBoundsCheck(BoundsCheckFunction bc)
@@ -58,7 +67,7 @@ void SceneEditorGizmoHandle::setGridSnap(GridSnapMode gridSnap)
 		snapFunc = {};
 		break;
 	case GridSnapMode::Pixel:
-		snapFunc = [] (Vector2f p)
+		snapFunc = [] (int, Vector2f p)
 		{
 			return p.round();
 		};
@@ -66,9 +75,9 @@ void SceneEditorGizmoHandle::setGridSnap(GridSnapMode gridSnap)
 	}
 }
 
-void SceneEditorGizmoHandle::setPosition(Vector2f p)
+void SceneEditorGizmoHandle::setPosition(Vector2f p, bool snap)
 {
-	pos = p;
+	pos = snapFunc && snap ? snapFunc(id, p) : p;
 }
 
 Vector2f SceneEditorGizmoHandle::getPosition() const
@@ -235,5 +244,81 @@ float SceneEditorGizmo::getZoom() const
 SceneEditorGizmo::SnapRules SceneEditorGizmo::getSnapRules() const
 {
 	return snapRules;
+}
+
+constexpr static float snapThreshold = 5.0f;
+
+Vector2f SceneEditorGizmo::solveLineSnap(Vector2f cur, std::optional<Vector2f> prev, std::optional<Vector2f> next) const
+{
+	if (snapRules.line == LineSnapMode::Disabled) {
+		return cur;
+	}
+
+	std::optional<Line> line0;
+	std::optional<Line> line1;
+	if (prev) {
+		line0 = findSnapLine(cur, prev.value());
+	}
+	if (next) {
+		line1 = findSnapLine(cur, next.value());
+	}
+
+	if (line0 && line1) {
+		// Can snap to both. The only way to do this is to snap to their intersection
+		const auto intersection = line0->intersection(line1.value());
+		if (intersection) {
+			// We got an intersection, but only actually snap to it if it's close enough
+			auto snapPoint = intersection.value();
+			if ((snapPoint - cur).length() < snapThreshold) {
+				return snapPoint;
+			} else {
+				// Too far away for an intersection snap. Clear whichever line is farthest from point so the rest of algorithm can take over
+				const auto dist0 = line0->getDistance(cur);
+				const auto dist1 = line1->getDistance(cur);
+				if (dist0 > dist1) {
+					line0.reset();
+				} else {
+					line1.reset();
+				}
+			}
+		} else {
+			// If they're parallel, we'll clear line1 so the rest of the algorithm can snap to line0
+			line1.reset();
+		}
+	}
+
+	if (line0 || line1) {
+		// Snap to one of them. Pick whichever it is and snap to that
+		const auto& line = line0 ? line0.value() : line1.value();
+		return line.getClosestPoint(cur);
+	}
+
+	// No snapping today
+	return cur;
+}
+
+std::optional<Line> SceneEditorGizmo::findSnapLine(Vector2f cur, Vector2f ref) const
+{	
+	Vector2f dirs[] = { Vector2f(1, 0), Vector2f(0, 1), Vector2f(2, 1), Vector2f(2, -1) };
+	const int nDirs = snapRules.line == LineSnapMode::IsometricAxisAligned ? 4 : 2;
+
+	int bestDir = -1;
+	float bestDistance = snapThreshold;
+	
+	for (int i = 0; i < nDirs; ++i) {
+		auto line = Line(ref, dirs[i]);
+		const float distance = line.getDistance(cur);
+		if (distance < bestDistance) {
+			bestDir = i;
+			bestDistance = distance;
+		}
+	}
+
+	if (bestDir == -1) {
+		// No snaps here
+		return {};
+	} else {
+		return Line(ref, dirs[bestDir]);
+	}
 }
 

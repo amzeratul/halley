@@ -26,6 +26,40 @@
 namespace Halley {
 	class Line {
 	public:
+		constexpr Line() = default;
+		constexpr Line(Vector2f origin, Vector2f dir)
+			: origin(origin)
+			, dir(dir.normalized())
+		{}
+		
+		Vector2f origin;
+		Vector2f dir;
+
+		float getDistance(Vector2f point) const
+		{
+			return (point - origin).neutralize(dir).length();
+		}
+
+		Vector2f getClosestPoint(Vector2f point) const
+		{
+			return (point - origin).projection(dir) + origin;
+		}
+
+		std::optional<Vector2f> intersection(const Line& other) const
+		{
+			const auto& a = origin;
+			const auto& b = dir;
+			const auto& c = other.origin;
+			const auto& d = other.dir;
+			const float divisor = b.x * d.y - b.y * d.x;
+			if (divisor == 0) {
+				// Parallel lines
+				return {};
+			}
+			const float t = (d.x * (a.y - c.y) + d.y * (c.x - a.x)) / divisor;
+			return a + t * b;
+		}
+
 		static std::vector<Vector2i> generateLine(Vector2i p0, Vector2i p1);
 		static void doLine(Vector2i p0, Vector2i p1, std::function<void(Vector2i)> callback);
 	};

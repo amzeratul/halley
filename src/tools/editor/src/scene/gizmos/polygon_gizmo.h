@@ -53,11 +53,14 @@ namespace Halley {
 		PolygonGizmoMode mode = PolygonGizmoMode::Move;
 		std::shared_ptr<UIList> uiList;
 
+		bool enableLineSnap = false;
+
 		VertexList readPoints();
 		void writePoints(const VertexList& ps);
 		void writePointsIfNeeded();
 
 		void loadHandlesFromVertices();
+		void setHandleIndices();
 		Rect4f getHandleRect(Vector2f pos, float size) const;
 		SceneEditorGizmoHandle makeHandle(Vector2f pos) const;
 		int updateHandles(const SceneEditorInputState& inputState);
@@ -68,5 +71,8 @@ namespace Halley {
 
 		Vector2f localToWorld(Vector2f localPos) const;
 		Vector2f worldToLocal(Vector2f worldPos) const;
+
+		Vector2f snapVertex(int id, Vector2f pos) const;
+		const SceneEditorGizmoHandle* tryGetHandle(int id) const;
 	};
 }
