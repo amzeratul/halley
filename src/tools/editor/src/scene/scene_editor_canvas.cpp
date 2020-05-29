@@ -173,6 +173,10 @@ void SceneEditorCanvas::notifyOutputState()
 		editorWindow->onFieldChangedByGizmo(m.first, m.second);
 	}
 	outputState.fieldsChanged.clear();
+
+	if (outputState.newSelection) {
+		editorWindow->selectEntity(outputState.newSelection.value().toString());
+	}
 }
 
 void SceneEditorCanvas::clearInputState()

@@ -74,6 +74,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	const bool hasHighlightedGizmo = gizmoCollection->update(t, camera, inputState, outputState);
 	if (!hasHighlightedGizmo && inputState.leftClickPressed) {
 		gizmoCollection->deselect();
+		onClick(inputState, outputState);
 	}
 
 	// Start dragging
@@ -338,16 +339,6 @@ void SceneEditor::doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f
 	}
 }
 
-Vector2f SceneEditor::roundPosition(Vector2f pos) const
-{
-	return roundPosition(pos, camera.getZoom());
-}
-
-Vector2f SceneEditor::roundPosition(Vector2f pos, float zoom) const
-{
-	return (pos * zoom).round() / zoom;
-}
-
 std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)
 {
 	const auto transform2d = e.tryGetComponent<Transform2DComponent>();
@@ -365,6 +356,16 @@ std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)
 	return {};
 }
 
+Vector2f SceneEditor::roundPosition(Vector2f pos) const
+{
+	return roundPosition(pos, camera.getZoom());
+}
+
+Vector2f SceneEditor::roundPosition(Vector2f pos, float zoom) const
+{
+	return (pos * zoom).round() / zoom;
+}
+
 void SceneEditor::onInit()
 {
 }
@@ -377,4 +378,43 @@ EntityRef SceneEditor::getEntity(const UUID& id) const
 	} else {
 		return getWorld().findEntity(id).value();
 	}
+}
+
+bool SceneEditor::isPointInSprite(EntityRef& e, Vector2f point) const
+{
+	auto aabb = getSpriteBounds(e);
+	if (!aabb || !aabb->contains(point)) {
+		return false;
+	}
+
+	// TODO: fine check
+	return true;
+}
+
+int SceneEditor::getSpriteLayer(EntityRef& e) const
+{
+	const auto sprite = e.tryGetComponent<SpriteComponent>();
+	if (sprite) {
+		return sprite->layer;
+	} else {
+		return std::numeric_limits<int>::lowest();
+	}
+}
+
+void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputState& output)
+{
+	UUID bestUUID;
+	int bestLayer = std::numeric_limits<int>::lowest();
+	
+	for (auto& e: world->getEntities()) {
+		if (isPointInSprite(e, input.mousePos)) {
+			int layer = getSpriteLayer(e);
+			if (layer > bestLayer) {
+				bestLayer = layer;
+				bestUUID = e.getUUID();
+			}
+		}
+	}
+
+	output.newSelection = bestUUID;
 }

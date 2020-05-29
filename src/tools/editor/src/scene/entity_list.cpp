@@ -109,6 +109,11 @@ void EntityList::onEntityRemoved(const String& id, const String& parentId)
 	list->setSelectedOptionId(parentId);
 }
 
+void EntityList::select(const String& id)
+{
+	list->setSelectedOptionId(id);
+}
+
 bool EntityList::onKeyPress(KeyboardKeyPress key)
 {
 	if (key.is(KeyCode::Delete)) {

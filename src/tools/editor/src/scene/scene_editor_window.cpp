@@ -58,7 +58,7 @@ void SceneEditorWindow::makeUI()
 
 	setHandle(UIEventType::ListSelectionChanged, "entityList_list", [=] (const UIEvent& event)
 	{
-		selectEntity(event.getStringData());
+		onEntitySelected(event.getStringData());
 	});
 
 	setHandle(UIEventType::ListSelectionChanged, "toolMode", [=] (const UIEvent& event)
@@ -200,6 +200,11 @@ void SceneEditorWindow::onLoadDLL()
 
 void SceneEditorWindow::selectEntity(const String& id)
 {
+	entityList->select(id);
+}
+
+void SceneEditorWindow::onEntitySelected(const String& id)
+{
 	decayTool();
 	
 	String actualId = id;
@@ -257,7 +262,7 @@ void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId)
 	auto& data = sceneData->getEntityData(id).data;
 	entityList->onEntityAdded(id, parentId, data);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
-	selectEntity(id);
+	onEntitySelected(id);
 
 	gameBridge->onEntityAdded(UUID(id), data);
 	
@@ -270,7 +275,7 @@ void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId
 
 	entityList->onEntityRemoved(id, parentId);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
-	selectEntity(parentId);
+	onEntitySelected(parentId);
 
 	markModified();
 }
@@ -293,7 +298,7 @@ void SceneEditorWindow::onEntityModified(const String& id)
 void SceneEditorWindow::onEntityMoved(const String& id)
 {
 	if (currentEntityId == id) {
-		selectEntity(id);
+		onEntitySelected(id);
 	}
 
 	gameBridge->onEntityMoved(UUID(id), sceneData->getEntityData(id).data);

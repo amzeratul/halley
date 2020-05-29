@@ -38,6 +38,7 @@ namespace Halley {
 		void addEntity(const String& parentId, ConfigNode data);
 		void removeEntity();
 		void removeEntity(const String& entityId);
+		void selectEntity(const String& id);
 
 		void setTool(SceneEditorTool tool);
 		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options);
@@ -76,7 +77,7 @@ namespace Halley {
 		String curComponentName;
 
 		void makeUI();
-		void selectEntity(const String& id);
+		void onEntitySelected(const String& id);
 		void panCameraToEntity(const String& id);
 		void saveEntity();
 

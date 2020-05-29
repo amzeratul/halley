@@ -4,6 +4,7 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/maths/rect.h"
 #include "halley/text/halleystring.h"
+#include "halley/maths/uuid.h"
 #include <optional>
 
 namespace Halley {
@@ -74,6 +75,8 @@ namespace Halley {
 
 	struct SceneEditorOutputState {
 		std::vector<std::pair<String, String>> fieldsChanged;
+		std::optional<UUID> newSelection;
+		std::optional<UUID> mouseOver;
 	};
 
     class SceneEditorContext {

@@ -19,6 +19,7 @@ namespace Halley {
 		void onEntityModified(const String& id, const ConfigNode& node);
 		void onEntityAdded(const String& id, const String& parentId, const ConfigNode& data);
 		void onEntityRemoved(const String& id, const String& parentId);
+		void select(const String& id);
 
 	protected:
 		bool onKeyPress(KeyboardKeyPress key) override;

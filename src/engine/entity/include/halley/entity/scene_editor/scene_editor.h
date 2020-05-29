@@ -91,5 +91,9 @@ namespace Halley {
     	Vector2f roundPosition(Vector2f pos) const;
 		Vector2f roundPosition(Vector2f pos, float zoom) const;
     	EntityRef getEntity(const UUID& uuid) const;
+
+    	bool isPointInSprite(EntityRef& e, Vector2f point) const;
+    	int getSpriteLayer(EntityRef& e) const;
+    	void onClick(const SceneEditorInputState& input, SceneEditorOutputState& output);
 	};
 }
