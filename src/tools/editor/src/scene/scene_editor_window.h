@@ -45,8 +45,11 @@ namespace Halley {
 
 		std::shared_ptr<const Prefab> getGamePrefab(const String& id) const;
 
-		void copyEntity(const String& id);
-		void pasteEntity(const String& parent);
+		void copyEntityToClipboard(const String& id);
+		void pasteEntityFromClipboard(const String& parent);
+		String copyEntity(const String& id);
+		void pasteEntity(const String& data, const String& parent);
+		void duplicateEntity(const String& id);
 
 	protected:
 		void update(Time t, bool moved) override;

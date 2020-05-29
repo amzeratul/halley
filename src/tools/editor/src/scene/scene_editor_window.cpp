@@ -349,28 +349,43 @@ std::shared_ptr<const Prefab> SceneEditorWindow::getGamePrefab(const String& id)
 	return {};
 }
 
-void SceneEditorWindow::copyEntity(const String& id)
+void SceneEditorWindow::copyEntityToClipboard(const String& id)
 {
 	const auto clipboard = api.system->getClipboard();
 	if (clipboard) {
-		const auto entityData = sceneData->getEntityData(id);
-		clipboard->setData(serializeEntity(entityData.data));
+		clipboard->setData(copyEntity(id));
 	}
 }
 
-void SceneEditorWindow::pasteEntity(const String& parent)
+void SceneEditorWindow::pasteEntityFromClipboard(const String& parent)
 {
 	const auto clipboard = api.system->getClipboard();
 	if (clipboard) {
 		auto clipboardData = clipboard->getStringData();
 		if (clipboardData) {
-			auto data = deserializeEntity(clipboardData.value());
-			if (data) {
-				assignUUIDs(data.value());
-				addEntity(parent, std::move(data.value()));
-			}
+			pasteEntity(clipboardData.value(), parent);
 		}
 	}
+}
+
+String SceneEditorWindow::copyEntity(const String& id)
+{
+	const auto entityData = sceneData->getEntityData(id);
+	return serializeEntity(entityData.data);
+}
+
+void SceneEditorWindow::pasteEntity(const String& stringData, const String& parent)
+{
+	auto data = deserializeEntity(stringData);
+	if (data) {
+		assignUUIDs(data.value());
+		addEntity(parent, std::move(data.value()));
+	}
+}
+
+void SceneEditorWindow::duplicateEntity(const String& id)
+{
+	pasteEntity(copyEntity(id), findParent(id));
 }
 
 void SceneEditorWindow::addNewEntity()

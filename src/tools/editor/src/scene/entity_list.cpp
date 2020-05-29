@@ -140,13 +140,18 @@ bool EntityList::onKeyPress(KeyboardKeyPress key)
 	}
 
 	if (key.is(KeyCode::X, KeyMods::Ctrl)) {
-		sceneEditor->copyEntity(curEntity);
+		sceneEditor->copyEntityToClipboard(curEntity);
 		sceneEditor->removeEntity(curEntity);
 		return true;
 	}
 
 	if (key.is(KeyCode::V, KeyMods::Ctrl)) {
-		sceneEditor->pasteEntity(curEntity);
+		sceneEditor->pasteEntityFromClipboard(curEntity);
+		return true;
+	}
+
+	if (key.is(KeyCode::D, KeyMods::Ctrl)) {
+		sceneEditor->duplicateEntity(curEntity);
 		return true;
 	}
 
