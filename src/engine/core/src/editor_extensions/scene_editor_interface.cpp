@@ -2,6 +2,13 @@
 using namespace Halley;
 
 
+void SceneEditorOutputState::clear()
+{
+	fieldsChanged.clear();
+	newSelection.reset();
+	mouseOver.reset();
+}
+
 std::optional<String> EntityTree::findIdInScene(const String& id) const
 {
 	if (entityId == id) {

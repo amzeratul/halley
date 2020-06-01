@@ -36,6 +36,7 @@ void SceneEditorCanvas::update(Time t, bool moved)
 {
 	updateInputState();
 	if (gameBridge) {
+		outputState.clear();
 		gameBridge->update(t, inputState, outputState);
 	}
 	notifyOutputState();

@@ -77,6 +77,8 @@ namespace Halley {
 		std::vector<std::pair<String, String>> fieldsChanged;
 		std::optional<UUID> newSelection;
 		std::optional<UUID> mouseOver;
+
+		void clear();
 	};
 
     class SceneEditorContext {
