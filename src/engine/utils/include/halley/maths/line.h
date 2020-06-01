@@ -22,6 +22,7 @@
 #pragma once
 
 #include "vector2.h"
+#include <optional>
 
 namespace Halley {
 	class Line {
