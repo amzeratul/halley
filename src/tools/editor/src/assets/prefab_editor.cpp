@@ -5,6 +5,7 @@ using namespace Halley;
 
 PrefabEditor::PrefabEditor(UIFactory& factory, Resources& resources, AssetType type, Project& project, ProjectWindow& projectWindow)
 	: AssetEditor(factory, resources, project, type)
+	, project(project)
 	, projectWindow(projectWindow)
 {
 	setupWindow();
@@ -16,7 +17,12 @@ void PrefabEditor::reload()
 
 void PrefabEditor::onDoubleClick()
 {
-	projectWindow.openPrefab(assetId, assetType);
+	open();
+}
+
+void PrefabEditor::update(Time t, bool moved)
+{
+	updateButton();
 }
 
 void PrefabEditor::setupWindow()
@@ -25,6 +31,22 @@ void PrefabEditor::setupWindow()
 
 	setHandle(UIEventType::ButtonClicked, "open", [=](const UIEvent& event)
 	{
-		projectWindow.openPrefab(assetId, assetType);
+		open();
 	});
+
+	updateButton();
+}
+
+void PrefabEditor::open()
+{
+	if (project.isDLLLoaded()) {
+		projectWindow.openPrefab(assetId, assetType);
+	}
+}
+
+void PrefabEditor::updateButton()
+{
+	const bool enabled = project.isDLLLoaded();
+	getWidgetAs<UIButton>("open")->setActive(enabled);
+	getWidgetAs<UIButton>("openDisabled")->setActive(!enabled);
 }

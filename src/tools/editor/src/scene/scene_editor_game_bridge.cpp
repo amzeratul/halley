@@ -62,7 +62,14 @@ void SceneEditorGameBridge::render(RenderContext& rc) const
 
 void SceneEditorGameBridge::initializeInterfaceIfNeeded()
 {
-	if (!interfaceReady) {
+	if (!interface) {
+		project.withLoadedDLL([&] (DynamicLibrary& dll)
+		{
+			load();
+		});
+	}
+
+	if (interface && !interfaceReady) {
 		if (interface->isReadyToCreateWorld()) {
 			guardedRun([&]() {
 				interface->createWorld();
