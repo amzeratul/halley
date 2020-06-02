@@ -28,7 +28,7 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 	preview.reset();
 	if (curFocus == -1) {
 		if (mode == PolygonGizmoMode::Append) {
-			preview = inputState.mousePos;
+			preview = snapVertex(static_cast<int>(handles.size()), inputState.mousePos);
 		} else if (mode == PolygonGizmoMode::Insert) {
 			std::tie(preview, previewIndex) = findInsertPoint(inputState.mousePos);
 		}
@@ -55,6 +55,12 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 	}
 	
 	writePointsIfNeeded();
+
+	if (preview || curFocus != -1) {
+		highlightCooldown = 3;
+	} else if (highlightCooldown > 0) {
+		--highlightCooldown;
+	}
 }
 
 int PolygonGizmo::updateHandles(const SceneEditorInputState& inputState)
@@ -141,12 +147,7 @@ std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
 
 bool PolygonGizmo::isHighlighted() const
 {
-	for (const auto& handle: handles) {
-		if (handle.isOver()) {
-			return true;
-		}
-	}
-	return false;
+	return highlightCooldown > 0;
 }
 
 void PolygonGizmo::deselect()
@@ -213,7 +214,7 @@ void PolygonGizmo::loadHandlesFromVertices()
 
 void PolygonGizmo::setHandleIndices()
 {
-	for (size_t i = 0; i < vertices.size(); ++i) {
+	for (size_t i = 0; i < handles.size(); ++i) {
 		handles[i].setId(static_cast<int>(i));
 	}
 }
@@ -287,13 +288,9 @@ Vector2f PolygonGizmo::worldToLocal(Vector2f worldPos) const
 
 Vector2f PolygonGizmo::snapVertex(int id, Vector2f pos) const
 {
-	if (handles.empty()) {
-		return pos;
-	}
-	
 	const auto rules = getSnapRules();
 
-	if (enableLineSnap) {
+	if (!handles.empty() && enableLineSnap) {
 		const auto* prev = tryGetHandle(modulo(id - 1, static_cast<int>(handles.size())));
 		const auto* next = tryGetHandle(modulo(id + 1, static_cast<int>(handles.size())));
 		pos = solveLineSnap(pos, prev ? prev->getPosition() : std::optional<Vector2f>(), next ? next->getPosition() : std::optional<Vector2f>());
@@ -302,6 +299,7 @@ Vector2f PolygonGizmo::snapVertex(int id, Vector2f pos) const
 	if (rules.grid == GridSnapMode::Pixel) {
 		pos = pos.round();
 	}
+
 	return pos;
 }
 

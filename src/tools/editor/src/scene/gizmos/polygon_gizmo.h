@@ -54,6 +54,7 @@ namespace Halley {
 		std::shared_ptr<UIList> uiList;
 
 		bool enableLineSnap = false;
+		int highlightCooldown = 0;
 
 		VertexList readPoints();
 		void writePoints(const VertexList& ps);
