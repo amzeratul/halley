@@ -302,7 +302,12 @@ public:
 
 	static String filterName(const String& name)
 	{
-		return Path(name).getFilename().toString();
+		auto filename = Path(name).getFilename().toString().replaceAll("_", " ");
+		if (filename.contains(':')) {
+			const auto pos = filename.find_last_of(':');
+			return filename.mid(pos + 1);
+		}
+		return filename;
 	}
 };
 
