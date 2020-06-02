@@ -91,12 +91,14 @@ void ChooseAssetWindow::makeUI()
 
 void ChooseAssetWindow::accept()
 {
-	if (callback) {
-		const auto id = getWidgetAs<UIList>("options")->getSelectedOptionId();
-		callback(id);
-		destroy();
+	const auto id = getWidgetAs<UIList>("options")->getSelectedOptionId();
+	if (!id.isEmpty()) {
+		if (callback) {
+			callback(id);
+			destroy();
+		}
+		callback = {};
 	}
-	callback = {};
 }
 
 void ChooseAssetWindow::cancel()
