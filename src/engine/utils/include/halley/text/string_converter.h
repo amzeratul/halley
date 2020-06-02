@@ -5,6 +5,7 @@
 #include "halleystring.h"
 #include <halley/support/exception.h>
 #include <array>
+#include <optional>
 
 namespace Halley
 {
@@ -139,6 +140,19 @@ namespace Halley
 		bool operator()(const String& s) const
 		{
 			return s == "true";
+		}
+	};
+
+	template<typename T>
+	struct ToStringConverter<std::optional<T>>
+	{
+		String operator()(const std::optional<T>& v) const
+		{
+			if (v) {
+				return toString(v.value());
+			} else {
+				return "{}";
+			}
 		}
 	};
 
