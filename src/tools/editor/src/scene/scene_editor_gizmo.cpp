@@ -77,7 +77,9 @@ void SceneEditorGizmoHandle::setGridSnap(GridSnapMode gridSnap)
 
 void SceneEditorGizmoHandle::setPosition(Vector2f p, bool snap)
 {
-	pos = snapFunc && snap ? snapFunc(id, p) : p;
+	if (!std::isnan(p.x) && !std::isnan(p.y)) {
+		pos = snapFunc && snap ? snapFunc(id, p) : p;
+	}
 }
 
 Vector2f SceneEditorGizmoHandle::getPosition() const

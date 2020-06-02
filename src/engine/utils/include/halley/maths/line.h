@@ -53,7 +53,7 @@ namespace Halley {
 			const auto& c = other.origin;
 			const auto& d = other.dir;
 			const float divisor = b.x * d.y - b.y * d.x;
-			if (divisor == 0) {
+			if (std::abs(divisor) < 0.000001f) {
 				// Parallel lines
 				return {};
 			}

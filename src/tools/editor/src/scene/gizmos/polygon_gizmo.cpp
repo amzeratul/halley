@@ -293,7 +293,10 @@ Vector2f PolygonGizmo::snapVertex(int id, Vector2f pos) const
 	if (!handles.empty() && enableLineSnap) {
 		const auto* prev = tryGetHandle(modulo(id - 1, static_cast<int>(handles.size())));
 		const auto* next = tryGetHandle(modulo(id + 1, static_cast<int>(handles.size())));
-		pos = solveLineSnap(pos, prev ? prev->getPosition() : std::optional<Vector2f>(), next ? next->getPosition() : std::optional<Vector2f>());
+		const auto newPos = solveLineSnap(pos, prev ? prev->getPosition() : std::optional<Vector2f>(), next ? next->getPosition() : std::optional<Vector2f>());
+		if (!std::isnan(newPos.x) && !std::isnan(newPos.y)) {
+			pos = newPos;
+		}
 	}
 	
 	if (rules.grid == GridSnapMode::Pixel) {
