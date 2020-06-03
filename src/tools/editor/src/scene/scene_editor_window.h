@@ -39,6 +39,7 @@ namespace Halley {
 		void removeEntity();
 		void removeEntity(const String& entityId);
 		void selectEntity(const String& id);
+		void selectEntity(const std::vector<UUID>& candidates);
 
 		void setTool(SceneEditorTool tool);
 		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options);

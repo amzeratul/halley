@@ -9,22 +9,18 @@ void SceneEditorOutputState::clear()
 	mouseOver.reset();
 }
 
-std::optional<String> EntityTree::findIdInScene(const String& id) const
+bool EntityTree::contains(const String& id) const
 {
 	if (entityId == id) {
-		return entityId;
-	}
-
-	if (std::find(prefabChildrenId.begin(), prefabChildrenId.end(), id) != prefabChildrenId.end()) {
-		return entityId;
+		return true;
 	}
 
 	for (const auto& child: children) {
-		auto result = child.findIdInScene(id);
+		auto result = child.contains(id);
 		if (result) {
 			return result;
 		}
 	}
 
-	return {};
+	return false;
 }

@@ -75,7 +75,7 @@ namespace Halley {
 
 	struct SceneEditorOutputState {
 		std::vector<std::pair<String, String>> fieldsChanged;
-		std::optional<UUID> newSelection;
+		std::optional<std::vector<UUID>> newSelection;
 		std::optional<UUID> mouseOver;
 
 		void clear();
@@ -137,9 +137,8 @@ namespace Halley {
 		String name;
 		String prefab;
 		std::vector<EntityTree> children;
-		std::vector<String> prefabChildrenId;
 
-		std::optional<String> findIdInScene(const String& id) const;
+		bool contains(const String& id) const;
 	};
 
 	class ISceneData {

@@ -406,7 +406,7 @@ int SceneEditor::getSpriteLayer(EntityRef& e) const
 
 void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputState& output)
 {
-	UUID bestUUID;
+	EntityRef bestEntity;
 	int bestLayer = std::numeric_limits<int>::lowest();
 	
 	for (auto& e: world->getEntities()) {
@@ -414,10 +414,18 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 			const int layer = getSpriteLayer(e);
 			if (layer > bestLayer) {
 				bestLayer = layer;
-				bestUUID = e.getUUID();
+				bestEntity = e;
 			}
 		}
 	}
 
-	output.newSelection = bestUUID;
+	if (bestEntity.isValid()) {
+		std::vector<UUID> uuids;
+		for (auto e = bestEntity; e.isValid(); e = e.getParent()) {
+			uuids.push_back(e.getUUID());
+		}
+		output.newSelection = uuids;
+	} else {
+		output.newSelection.reset();
+	}
 }
