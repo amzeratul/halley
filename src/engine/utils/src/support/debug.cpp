@@ -38,6 +38,12 @@ public:
 		, startFrom(startFrom)
 	{}
 
+	OStreamStackWalker(std::ostream& os, const char* skipUntil, int offset)
+		: os(os)
+		, skipUntil(skipUntil)
+		, offset(offset)
+	{}
+
 protected:
 	void OnCallstackEntry(CallstackEntryType eType, CallstackEntry& entry) override
 	{
@@ -45,11 +51,19 @@ protected:
 			curPos = 0;
 		}
 
+		if (skipUntil && !foundSkip) {
+			if (std::strstr(entry.name, skipUntil) == nullptr) {
+				startFrom = curPos + offset + 2;
+			} else {
+				foundSkip = true;
+			}
+		}
+
 		if (++curPos < startFrom) {
 			return;
 		}
 
-		os << '\t' << (curPos - startFrom) << ": " << entry.name;
+		os << ' ' << (curPos - startFrom) << ": " << entry.name;
 		if (entry.lineFileName[0] != 0) {
 			const char* lastSlash = strrchr(entry.lineFileName, '\\');
 			if (lastSlash) {
@@ -58,8 +72,7 @@ protected:
 				lastSlash = entry.lineFileName;
 			}
 			os << " at " << lastSlash << ':' << entry.lineNumber;
-		}
-		if (entry.moduleName[0] != 0) {
+		} else if (entry.moduleName[0] != 0) {
 			os << " [" << entry.moduleName << ']';
 		}
 		os << '\n';
@@ -69,6 +82,9 @@ private:
 	std::ostream& os;
 	int startFrom = 0;
 	int curPos = 0;
+	int offset = 0;
+	const char* skipUntil = nullptr;
+	bool foundSkip = false;
 };
 
 #endif
@@ -131,7 +147,7 @@ static void signalHandler(int signum)
 
 #if defined(HAS_STACKWALKER)
 	ss << "\n";
-	OStreamStackWalker walker(ss, 3);
+	OStreamStackWalker walker(ss, "RtlRaiseException", 2);
 	walker.ShowCallstack();
 #elif defined(HAS_STACKTRACE)
 	ss << "\n" << boost::stacktrace::stacktrace(3, 99);
