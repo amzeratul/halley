@@ -48,12 +48,12 @@ ConfigNode::ConfigNode(ConfigNode&& other) noexcept
 	*this = std::move(other);
 }
 
-ConfigNode::ConfigNode(MapType&& entryMap)
+ConfigNode::ConfigNode(MapType entryMap)
 {
 	operator=(std::move(entryMap));
 }
 
-ConfigNode::ConfigNode(SequenceType&& entryList)
+ConfigNode::ConfigNode(SequenceType entryList)
 {
 	operator=(std::move(entryList));
 }
@@ -93,7 +93,7 @@ ConfigNode::ConfigNode(Vector2f value)
 	operator=(value);
 }
 
-ConfigNode::ConfigNode(Bytes&& value)
+ConfigNode::ConfigNode(Bytes value)
 {
 	operator=(std::move(value));
 }
@@ -170,21 +170,13 @@ ConfigNode& ConfigNode::operator=(Vector2f value)
 	return *this;
 }
 
-ConfigNode& ConfigNode::operator=(const Bytes& value)
-{
-	reset();
-	type = ConfigNodeType::Bytes;
-	ptrData = new Bytes(value);
-	return *this;
-}
-
 ConfigNode& ConfigNode::operator=(const char* value)
 {
 	*this = String(value);
 	return *this;
 }
 
-ConfigNode& ConfigNode::operator=(Bytes&& value)
+ConfigNode& ConfigNode::operator=(Bytes value)
 {
 	reset();
 	type = ConfigNodeType::Bytes;
@@ -192,15 +184,7 @@ ConfigNode& ConfigNode::operator=(Bytes&& value)
 	return *this;
 }
 
-ConfigNode& ConfigNode::operator=(const MapType& entry)
-{
-	reset();
-	type = ConfigNodeType::Map;
-	ptrData = new MapType(entry);
-	return *this;
-}
-
-ConfigNode& ConfigNode::operator=(MapType&& entry) 
+ConfigNode& ConfigNode::operator=(MapType entry) 
 {
 	reset();
 	type = ConfigNodeType::Map;
@@ -208,15 +192,7 @@ ConfigNode& ConfigNode::operator=(MapType&& entry)
 	return *this;
 }
 
-ConfigNode& ConfigNode::operator=(const SequenceType& entry)
-{
-	reset();
-	type = ConfigNodeType::Sequence;
-	ptrData = new SequenceType(entry);
-	return *this;
-}
-
-ConfigNode& ConfigNode::operator=(SequenceType&& entry) 
+ConfigNode& ConfigNode::operator=(SequenceType entry) 
 {
 	reset();
 	type = ConfigNodeType::Sequence;
@@ -224,15 +200,7 @@ ConfigNode& ConfigNode::operator=(SequenceType&& entry)
 	return *this;
 }
 
-ConfigNode& ConfigNode::operator=(const String& entry)
-{
-	reset();
-	type = ConfigNodeType::String;
-	ptrData = new String(entry);
-	return *this;
-}
-
-ConfigNode& ConfigNode::operator=(String&& entry) 
+ConfigNode& ConfigNode::operator=(String entry) 
 {
 	reset();
 	type = ConfigNodeType::String;
@@ -449,6 +417,29 @@ Vector2f ConfigNode::asVector2f(Vector2f defaultValue) const
 		return defaultValue;
 	} else {
 		return asVector2f();
+	}
+}
+
+std::vector<String> ConfigNode::asStringVector() const
+{
+	if (type == ConfigNodeType::Sequence) {
+		std::vector<String> result;
+		result.reserve(asSequence().size());
+		for (const auto& e: asSequence()) {
+			result.emplace_back(e.asString());
+		}
+		return result;
+	} else {
+		throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to std::vector<String>.", HalleyExceptions::Resources);
+	}
+}
+
+std::vector<String> ConfigNode::asStringVector(const std::vector<String>& defaultValue) const
+{
+	if (type == ConfigNodeType::Sequence) {
+		return asStringVector();
+	} else {
+		return defaultValue;
 	}
 }
 

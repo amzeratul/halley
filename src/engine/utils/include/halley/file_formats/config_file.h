@@ -55,8 +55,8 @@ namespace Halley
 		ConfigNode();
 		explicit ConfigNode(const ConfigNode& other);
 		ConfigNode(ConfigNode&& other) noexcept;
-		ConfigNode(MapType&& entryMap);
-		ConfigNode(SequenceType&& entryList);
+		ConfigNode(MapType entryMap);
+		ConfigNode(SequenceType entryList);
 		ConfigNode(String value);
 		ConfigNode(const char* value);
 		ConfigNode(bool value);
@@ -64,7 +64,7 @@ namespace Halley
 		ConfigNode(float value);
 		ConfigNode(Vector2i value);
 		ConfigNode(Vector2f value);
-		ConfigNode(Bytes&& value);
+		ConfigNode(Bytes value);
 
 		~ConfigNode();
 		
@@ -76,16 +76,23 @@ namespace Halley
 		ConfigNode& operator=(Vector2i value);
 		ConfigNode& operator=(Vector2f value);
 
-		ConfigNode& operator=(MapType&& entryMap);
-		ConfigNode& operator=(SequenceType&& entryList);
-		ConfigNode& operator=(String&& value);
-		ConfigNode& operator=(Bytes&& value);
+		ConfigNode& operator=(MapType entryMap);
+		ConfigNode& operator=(SequenceType entryList);
+		ConfigNode& operator=(String value);
+		ConfigNode& operator=(Bytes value);
 
-		ConfigNode& operator=(const MapType& entryMap);
-		ConfigNode& operator=(const SequenceType& entryList);
-		ConfigNode& operator=(const String& value);
-		ConfigNode& operator=(const Bytes& value);
 		ConfigNode& operator=(const char* value);
+
+		template <typename T>
+		ConfigNode& operator=(const std::vector<T>& sequence)
+		{
+			SequenceType seq;
+			seq.reserve(sequence.size());
+			for (auto& e: sequence) {
+				seq.push_back(ConfigNode(e));
+			}
+			return *this = seq;
+		}
 
 		ConfigNodeType getType() const;
 
@@ -99,6 +106,7 @@ namespace Halley
 		Vector2f asVector2f() const;
 		String asString() const;
 		const Bytes& asBytes() const;
+		std::vector<String> asStringVector() const;
 
 		int asInt(int defaultValue) const;
 		float asFloat(float defaultValue) const;
@@ -106,6 +114,7 @@ namespace Halley
 		String asString(const String& defaultValue) const;
 		Vector2i asVector2i(Vector2i defaultValue) const;
 		Vector2f asVector2f(Vector2f defaultValue) const;
+		std::vector<String> asStringVector(const std::vector<String>& defaultValue) const;
 
 		const SequenceType& asSequence() const;
 		const MapType& asMap() const;
