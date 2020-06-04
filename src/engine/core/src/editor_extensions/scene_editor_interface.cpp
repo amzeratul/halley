@@ -16,9 +16,8 @@ bool EntityTree::contains(const String& id) const
 	}
 
 	for (const auto& child: children) {
-		auto result = child.contains(id);
-		if (result) {
-			return result;
+		if (child.contains(id)) {
+			return true;
 		}
 	}
 
