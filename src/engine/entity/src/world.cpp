@@ -383,6 +383,8 @@ void World::updateEntities()
 		return;
 	}
 
+	entityDirty = false;
+
 	HALLEY_DEBUG_TRACE();
 	size_t nEntities = entities.size();
 
@@ -471,7 +473,6 @@ void World::updateEntities()
 		entities.resize(livingEntityCount);
 	}
 
-	entityDirty = false;
 	HALLEY_DEBUG_TRACE();
 }
 
