@@ -50,6 +50,7 @@ namespace Halley {
 		Resources& doGetResources() const { return *resources; }
 
 		virtual void initBase() {}
+		virtual void deInit() {}
 		virtual void updateBase(Time) {}
 		virtual void renderBase(RenderContext&) {}
 		virtual void onMessagesReceived(int, Message**, size_t*, size_t) {}

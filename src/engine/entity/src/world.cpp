@@ -27,6 +27,12 @@ World::World(const HalleyAPI& api, Resources& resources, bool collectMetrics, Cr
 
 World::~World()
 {
+	for (auto& tl: systems) {
+		for (auto& s: tl) {
+			s->deInit();
+		}
+	}
+	
 	for (auto& f: families) {
 		//f.second->clearEntities();
 		f->clearEntities();
