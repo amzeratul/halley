@@ -93,7 +93,7 @@ Deserializer& Deserializer::operator>>(Path& p)
 	return *this;
 }
 
-Deserializer& Deserializer::operator>>(gsl::span<gsl::byte>& span)
+Deserializer& Deserializer::operator>>(gsl::span<gsl::byte> span)
 {
 	if (span.empty()) {
 		return *this;
