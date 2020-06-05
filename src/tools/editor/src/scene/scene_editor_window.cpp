@@ -210,6 +210,7 @@ void SceneEditorWindow::selectEntity(const std::vector<UUID>& candidates)
 		const auto found = tree.contains(c.toString());
 		if (found) {
 			entityList->select(c.toString());
+			break;
 		}
 	}
 	entityList->select("");
