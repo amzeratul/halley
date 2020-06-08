@@ -147,6 +147,11 @@ UIFactory UIFactory::withResources(Resources& newResources) const
 	return UIFactory(api, newResources, i18n, styleSheet);
 }
 
+const I18N& UIFactory::getI18N() const
+{
+	return i18n;
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 {
 	styleSheet->updateIfNeeded();

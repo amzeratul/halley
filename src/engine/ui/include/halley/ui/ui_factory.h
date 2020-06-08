@@ -49,6 +49,8 @@ namespace Halley
 
 		UIFactory withResources(Resources& newResources) const;
 
+		const I18N& getI18N() const;
+
 	protected:
 		struct ParsedOption {
 			String id;
