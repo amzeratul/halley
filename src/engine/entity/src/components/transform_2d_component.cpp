@@ -76,7 +76,7 @@ Vector2f Transform2DComponent::getGlobalPosition() const
 
 void Transform2DComponent::setGlobalPosition(Vector2f v)
 {
-	setLocalPosition(parentRevision ? parentTransform->inverseTransformPoint(v) : v);
+	setLocalPosition(parentTransform ? parentTransform->inverseTransformPoint(v) : v);
 }
 
 Vector2f Transform2DComponent::getGlobalScale() const
