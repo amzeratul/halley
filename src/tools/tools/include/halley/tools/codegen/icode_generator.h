@@ -9,6 +9,8 @@
 
 namespace Halley
 {
+	class SystemMessageSchema;
+
 	struct CodeGenFile
 	{
 		Path fileName;
@@ -37,6 +39,7 @@ namespace Halley
 		virtual CodeGenResult generateComponent(ComponentSchema component) = 0;
 		virtual CodeGenResult generateSystem(SystemSchema system, const HashMap<String, ComponentSchema>& components) = 0;
 		virtual CodeGenResult generateMessage(MessageSchema message) = 0;
+		virtual CodeGenResult generateSystemMessage(SystemMessageSchema message) = 0;
 
 		virtual CodeGenResult generateRegistry(const Vector<ComponentSchema>& components, const Vector<SystemSchema>& systems) = 0;
 	};

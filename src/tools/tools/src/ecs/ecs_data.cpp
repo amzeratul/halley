@@ -1,6 +1,8 @@
 #include "halley/tools/ecs/ecs_data.h"
 
 #include <yaml-cpp/yaml.h>
+
+#include "halley/tools/ecs/system_message_schema.h"
 using namespace Halley;
 
 
@@ -27,6 +29,11 @@ const HashMap<String, SystemSchema>& ECSData::getSystems() const
 const HashMap<String, MessageSchema>& ECSData::getMessages() const
 {
 	return messages;
+}
+
+const HashMap<String, SystemMessageSchema>& ECSData::getSystemMessages() const
+{
+	return systemMessages;
 }
 
 const HashMap<String, CustomTypeSchema>& ECSData::getCustomTypes() const
@@ -118,6 +125,20 @@ void ECSData::process()
 		}
 	}
 
+	{
+		int id = 0;
+		for (auto& msg : systemMessages) {
+			msg.second.id = id++;
+
+			for (auto& m : msg.second.members) {
+				String i = getInclude(m.type.name);
+				if (i != "") {
+					msg.second.includeFiles.insert(i);
+				}
+			}
+		}
+	}
+
 	for (auto& system : systems) {
 		auto& sys = system.second;
 
@@ -158,6 +179,9 @@ void ECSData::addSource(CodegenSourceInfo info)
 		else if (document["message"].IsDefined()) {
 			addMessage(document, info.generate);
 		}
+		else if (document["systemMessage"].IsDefined()) {
+			addSystemMessage(document, info.generate);
+		}
 		else if (document["type"].IsDefined()) {
 			addType(document);
 		}
@@ -194,13 +218,23 @@ void ECSData::addSystem(YAML::Node rootNode, bool generate)
 
 void ECSData::addMessage(YAML::Node rootNode, bool generate)
 {
-	auto msg = MessageSchema(rootNode["message"], generate);
+	const auto msg = MessageSchema(rootNode["message"], generate);
 
 	if (messages.find(msg.name) == messages.end()) {
 		messages[msg.name] = msg;
-	}
-	else {
+	} else {
 		throw Exception("Message already declared: " + msg.name, HalleyExceptions::Tools);
+	}
+}
+
+void ECSData::addSystemMessage(YAML::Node rootNode, bool generate)
+{
+	const auto msg = SystemMessageSchema(rootNode["systemMessage"], generate);
+
+	if (systemMessages.find(msg.name) == systemMessages.end()) {
+		systemMessages[msg.name] = msg;
+	} else {
+		throw Exception("System message already declared: " + msg.name, HalleyExceptions::Tools);
 	}
 }
 

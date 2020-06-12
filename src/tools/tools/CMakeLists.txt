@@ -51,6 +51,7 @@ set(SOURCES
     "src/ecs/custom_type_schema.cpp"
     "src/ecs/ecs_data.cpp"
     "src/ecs/message_schema.cpp"
+    "src/ecs/system_message_schema.cpp"
     "src/ecs/system_schema.cpp"
     
     "src/dll/dynamic_library.cpp"
@@ -120,6 +121,7 @@ set(HEADERS
     "include/halley/tools/ecs/ecs_data.h"
     "include/halley/tools/ecs/fields_schema.h"
     "include/halley/tools/ecs/message_schema.h"
+    "include/halley/tools/ecs/system_message_schema.h"
     "include/halley/tools/ecs/system_schema.h"
     
     "include/halley/tools/dll/dynamic_library.h"

@@ -6,6 +6,7 @@
 #include "halley/data_structures/hash_map.h"
 #include "halley/text/halleystring.h"
 #include "message_schema.h"
+#include "system_message_schema.h"
 #include "system_schema.h"
 
 namespace YAML
@@ -29,6 +30,7 @@ namespace Halley {
 		const HashMap<String, ComponentSchema>& getComponents() const;
 		const HashMap<String, SystemSchema>& getSystems() const;
 		const HashMap<String, MessageSchema>& getMessages() const;
+		const HashMap<String, SystemMessageSchema>& getSystemMessages() const;
 		const HashMap<String, CustomTypeSchema>& getCustomTypes() const;
 
     private:
@@ -36,6 +38,7 @@ namespace Halley {
 		void addComponent(YAML::Node rootNode, bool generate);
 		void addSystem(YAML::Node rootNode, bool generate);
 		void addMessage(YAML::Node rootNode, bool generate);
+    	void addSystemMessage(YAML::Node rootNode, bool generate);
 		void addType(YAML::Node rootNode);
 		String getInclude(String typeName) const;
 
@@ -45,6 +48,7 @@ namespace Halley {
     	HashMap<String, ComponentSchema> components;
 		HashMap<String, SystemSchema> systems;
 		HashMap<String, MessageSchema> messages;
+    	HashMap<String, SystemMessageSchema> systemMessages;
 		HashMap<String, CustomTypeSchema> types;
     };
 }

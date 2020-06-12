@@ -107,6 +107,7 @@ std::vector<Path> Codegen::generateCode(const ECSData& data, Path directory)
 	auto components = data.getComponents();
 	auto systems = data.getSystems();
 	auto messages = data.getMessages();
+	auto systemMessages = data.getSystemMessages();
 	auto types = data.getCustomTypes();
 
 	for (auto& system : systems) {
@@ -129,21 +130,26 @@ std::vector<Path> Codegen::generateCode(const ECSData& data, Path directory)
 		Vector<ComponentSchema> comps;
 		Vector<SystemSchema> syss;
 
-		for (auto& comp : components) {
+		for (auto& comp: components) {
 			if (comp.second.generate) {
 				writeFiles(genDir, gen->generateComponent(comp.second), stats);
 			}
 			comps.push_back(comp.second);
 		}
-		for (auto& sys : systems) {
+		for (auto& sys: systems) {
 			if (sys.second.generate && sys.second.language == gen->getLanguage()) {
 				writeFiles(genDir, gen->generateSystem(sys.second, components), stats);
 			}
 			syss.push_back(sys.second);
 		}
-		for (auto& msg : messages) {
+		for (auto& msg: messages) {
 			if (msg.second.generate) {
 				writeFiles(genDir, gen->generateMessage(msg.second), stats);
+			}
+		}
+		for (auto& sysMsg: systemMessages) {
+			if (sysMsg.second.generate) {
+				writeFiles(genDir, gen->generateSystemMessage(sysMsg.second), stats);
 			}
 		}
 

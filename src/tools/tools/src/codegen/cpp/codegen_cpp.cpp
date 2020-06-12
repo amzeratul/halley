@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "halley/text/string_converter.h"
 #include "halley/core/game/game_platform.h"
+#include "halley/tools/ecs/system_message_schema.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -50,7 +51,16 @@ CodeGenResult CodegenCPP::generateMessage(MessageSchema message)
 	const String className = message.name + "Message";
 
 	CodeGenResult result;
-	result.emplace_back(CodeGenFile(makePath("messages", className, "h"), generateMessageHeader(message)));
+	result.emplace_back(CodeGenFile(makePath("messages", className, "h"), generateMessageHeader(message, "Message")));
+	return result;
+}
+
+CodeGenResult CodegenCPP::generateSystemMessage(SystemMessageSchema message)
+{
+	const String className = message.name + "SystemMessage";
+
+	CodeGenResult result;
+	result.emplace_back(CodeGenFile(makePath("system_messages", className, "h"), generateMessageHeader(message, "SystemMessage")));
 	return result;
 }
 
@@ -464,7 +474,7 @@ Vector<String> CodegenCPP::generateSystemStub(SystemSchema& system) const
 	return contents;
 }
 
-Vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
+Vector<String> CodegenCPP::generateMessageHeader(const MessageSchema& message, const String& suffix)
 {
 	Vector<String> contents = {
 		"#pragma once",
@@ -478,7 +488,7 @@ Vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
 	}
 	contents.push_back("");
 
-	auto gen = CPPClassGenerator(message.name + "Message", "Halley::Message", MemberAccess::Public, true)
+	auto gen = CPPClassGenerator(message.name + suffix, "Halley::" + suffix, MemberAccess::Public, true)
 		.addAccessLevelSection(MemberAccess::Public)
 		.addMember(MemberSchema(TypeSchema("int", false, true, true), "messageIndex", toString(message.id)))
 		.addBlankLine()
@@ -492,7 +502,7 @@ Vector<String> CodegenCPP::generateMessageHeader(MessageSchema message)
 			.addBlankLine();
 	}
 
-	gen.addMethodDefinition(MethodSchema(TypeSchema("size_t"), {}, "getSize", true, false, true, true), "return sizeof(" + message.name + "Message);")
+	gen.addMethodDefinition(MethodSchema(TypeSchema("size_t"), {}, "getSize", true, false, true, true), "return sizeof(" + message.name + suffix + ");")
 		.finish()
 		.writeTo(contents);
 
