@@ -9,9 +9,11 @@
 #include "family_type.h"
 #include "entity.h"
 #include "halley/utils/type_traits.h"
+#include "system_message.h"
 
 namespace Halley {
 	class Message;
+	class SystemMessage;
 	class HalleyAPI;
 
 	template <typename T, std::size_t size = gsl::dynamic_extent> using Span = gsl::span<T, size>;
@@ -72,11 +74,26 @@ namespace Halley {
 		}
 
 		template <typename T>
-		void sendMessageGeneric(EntityId entityId, const T& msg)
+		void sendMessageGeneric(EntityId entityId, T msg)
 		{
 			auto toSend = std::make_unique<T>();
-			*toSend = msg;
-			doSendMessage(entityId, std::move(toSend), sizeof(T), T::messageIndex);
+			*toSend = std::move(msg);
+			doSendMessage(entityId, std::move(toSend), T::messageIndex);
+		}
+
+		template <typename T, typename R, typename F>
+		size_t sendSystemMessageGeneric(T msg, F returnLambda)
+		{
+			SystemMessageContext context;
+
+			context.msgId = T::messageIndex;
+			context.msg = std::make_unique<T>(std::move(msg));
+			context.callback = [=] (std::byte* data)
+			{
+				returnLambda(std::move(*reinterpret_cast<R*>(data)));
+			};
+			
+			return doSendSystemMessage(std::move(context));
 		}
 
 		template <typename T>
@@ -119,10 +136,17 @@ namespace Halley {
 	private:
 		friend class World;
 
+		struct SystemMessageContext {
+			int msgId;
+			std::unique_ptr<SystemMessage> msg;
+			std::function<void(std::byte*)> callback;
+		};
+
 		Vector<FamilyBindingBase*> families;
 		Vector<int> messageTypesReceived;
 		Vector<EntityId> messagesSentTo;
 		Vector<std::pair<EntityId, MessageEntry>> outbox;
+		Vector<SystemMessageContext> systemOutbox;
 
 		World* world = nullptr;
 		const HalleyAPI* api = nullptr;
@@ -140,7 +164,8 @@ namespace Halley {
 
 		void purgeMessages();
 		void processMessages();
-		void doSendMessage(EntityId target, std::unique_ptr<Message> msg, size_t msgSize, int msgId);
+		void doSendMessage(EntityId target, std::unique_ptr<Message> msg, int msgId);
+		size_t doSendSystemMessage(SystemMessageContext context);
 		void dispatchMessages();
 	};
 

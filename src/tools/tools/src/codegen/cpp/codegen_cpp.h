@@ -11,7 +11,7 @@ namespace Halley
 		CodegenLanguage getLanguage() const override { return CodegenLanguage::CPlusPlus; }
 
 		CodeGenResult generateComponent(ComponentSchema component) override;
-		CodeGenResult generateSystem(SystemSchema system, const HashMap<String, ComponentSchema>& components) override;
+		CodeGenResult generateSystem(SystemSchema system, const HashMap<String, ComponentSchema>& components, const HashMap<String, SystemMessageSchema>& systemMessages) override;
 		CodeGenResult generateMessage(MessageSchema message) override;
 		CodeGenResult generateSystemMessage(SystemMessageSchema message) override;
 
@@ -19,7 +19,7 @@ namespace Halley
 
 	private:
 		Vector<String> generateComponentHeader(ComponentSchema component);
-		Vector<String> generateSystemHeader(SystemSchema& system, const HashMap<String, ComponentSchema>& components) const;
+		Vector<String> generateSystemHeader(SystemSchema& system, const HashMap<String, ComponentSchema>& components, const HashMap<String, SystemMessageSchema>& systemMessages) const;
 		Vector<String> generateSystemStub(SystemSchema& system) const;
 		Vector<String> generateMessageHeader(const MessageSchema& message, const String& suffix);
 

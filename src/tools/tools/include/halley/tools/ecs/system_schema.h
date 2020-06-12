@@ -46,6 +46,9 @@ namespace Halley
 		String name;
 		bool send = false;
 		bool receive = false;
+
+		MessageReferenceSchema() = default;
+		MessageReferenceSchema(String name, String parameter);
 	};
 
 	class FamilySchema
@@ -85,6 +88,7 @@ namespace Halley
 
 		Vector<FamilySchema> families;
 		Vector<MessageReferenceSchema> messages;
+		Vector<MessageReferenceSchema> systemMessages;
 		Vector<ServiceSchema> services;
 
 		bool operator< (const SystemSchema& other) const;

@@ -79,6 +79,12 @@ void ECSData::validate()
 			}
 		}
 
+		for (auto& msg : sys.second.systemMessages) {
+			if (systemMessages.find(msg.name) == systemMessages.end()) {
+				throw Exception("Unknown system message \"" + msg.name + "\" in system \"" + sys.second.name + "\".", HalleyExceptions::Tools);
+			}
+		}
+
 		for (auto& service : sys.second.services) {
 			if (types.find(service.name) == types.end()) {
 				throw Exception("Unknown service \"" + service.name + "\" in system \"" + sys.second.name + "\".", HalleyExceptions::Tools);

@@ -37,7 +37,7 @@ namespace Halley
 		virtual Path getDirectory() const = 0;
 
 		virtual CodeGenResult generateComponent(ComponentSchema component) = 0;
-		virtual CodeGenResult generateSystem(SystemSchema system, const HashMap<String, ComponentSchema>& components) = 0;
+		virtual CodeGenResult generateSystem(SystemSchema system, const HashMap<String, ComponentSchema>& components, const HashMap<String, SystemMessageSchema>& systemMessages) = 0;
 		virtual CodeGenResult generateMessage(MessageSchema message) = 0;
 		virtual CodeGenResult generateSystemMessage(SystemMessageSchema message) = 0;
 

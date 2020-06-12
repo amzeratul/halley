@@ -4,6 +4,13 @@
 
 using namespace Halley;
 
+MessageReferenceSchema::MessageReferenceSchema(String name, String parameter)
+	: name(name)
+{
+	receive = parameter == "receive";
+	send = parameter == "send";
+}
+
 SystemSchema::SystemSchema() {}
 
 SystemSchema::SystemSchema(YAML::Node node, bool generate)
@@ -113,12 +120,15 @@ SystemSchema::SystemSchema(YAML::Node node, bool generate)
 	if (node["messages"].IsDefined()) {
 		for (auto messageEntry : node["messages"]) {
 			for (auto iter = messageEntry.begin(); iter != messageEntry.end(); ++iter) {
-				MessageReferenceSchema msg;
-				msg.name = iter->first.as<std::string>();
-				String type = iter->second.as<std::string>();
-				msg.receive = type == "receive";
-				msg.send = type == "send";
-				messages.push_back(msg);
+				messages.push_back(MessageReferenceSchema(iter->first.as<std::string>(), iter->second.as<std::string>()));
+			}
+		}
+	}
+
+	if (node["systemMessages"].IsDefined()) {
+		for (auto messageEntry : node["systemMessages"]) {
+			for (auto iter = messageEntry.begin(); iter != messageEntry.end(); ++iter) {
+				systemMessages.emplace_back(iter->first.as<std::string>(), iter->second.as<std::string>());
 			}
 		}
 	}

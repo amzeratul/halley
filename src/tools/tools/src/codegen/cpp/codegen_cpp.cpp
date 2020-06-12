@@ -36,12 +36,12 @@ CodeGenResult CodegenCPP::generateComponent(ComponentSchema component)
 	return result;
 }
 
-CodeGenResult CodegenCPP::generateSystem(SystemSchema system, const HashMap<String, ComponentSchema>& components)
+CodeGenResult CodegenCPP::generateSystem(SystemSchema system, const HashMap<String, ComponentSchema>& components, const HashMap<String, SystemMessageSchema>& systemMessages)
 {
 	const String className = system.name + "System";
 
 	CodeGenResult result;
-	result.emplace_back(CodeGenFile(makePath("systems", className, "h"), generateSystemHeader(system, components)));
+	result.emplace_back(CodeGenFile(makePath("systems", className, "h"), generateSystemHeader(system, components, systemMessages)));
 	//result.emplace_back(CodeGenFile(makePath("../../src/systems", className, "cpp"), generateSystemStub(system), true));
 	return result;
 }
@@ -286,7 +286,7 @@ public:
 	bool methodConst;
 };
 
-Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const HashMap<String, ComponentSchema>& components) const
+Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const HashMap<String, ComponentSchema>& components, const HashMap<String, SystemMessageSchema>& systemMessages) const
 {
 	auto info = SystemInfo(system);
 
@@ -318,6 +318,9 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	}
 	for (auto& msg : system.messages) {
 		contents.emplace_back("#include \"../messages/" + toFileName(msg.name + "Message") + ".h\"");
+	}
+	for (auto& msg : system.systemMessages) {
+		contents.emplace_back("#include \"../system_messages/" + toFileName(msg.name + "SystemMessage") + ".h\"");
 	}
 
 	contents.insert(contents.end(), {
@@ -366,16 +369,38 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::Resources&"), {}, "getResources", true), "return doGetResources();");
 	}
 
-	// Receive messages
-	bool hasReceive = false;
-	Vector<String> msgsReceived;
+	// Entity messages
+	bool hasReceiveEntityMessage = false;
+	Vector<String> entityMsgsReceived;
 	for (auto& msg : system.messages) {
 		if (msg.send) {
-			sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::EntityId"), "entityId"), VariableSchema(TypeSchema(msg.name + "Message&", true), "msg") }, "sendMessage"), "sendMessageGeneric(entityId, msg);");
+			sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::EntityId"), "entityId"), VariableSchema(TypeSchema(msg.name + "Message"), "msg") }, "sendMessage"), "sendMessageGeneric(entityId, std::move(msg));");
 		}
 		if (msg.receive) {
-			hasReceive = true;
-			msgsReceived.push_back(msg.name + "Message::messageIndex");
+			hasReceiveEntityMessage = true;
+			entityMsgsReceived.push_back(msg.name + "Message::messageIndex");
+		}
+	}
+
+	// System messages
+	bool hasReceiveSystemMessage = false;
+	Vector<String> systemMsgsReceived;
+	for (auto& msg : system.systemMessages) {
+		if (msg.send) {
+			auto iter = systemMessages.find(msg.name);
+			if (iter != systemMessages.end()) {
+				auto& sysMsg = iter->second;
+				sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), {
+					VariableSchema(TypeSchema(msg.name + "SystemMessage"), "msg"),
+					VariableSchema(TypeSchema("std::function<void(" + sysMsg.returnType + ")>"), "callback")
+				}, "sendSystemMessage"), "sendSystemMessageGeneric<decltype(msg), " + sysMsg.returnType + ", decltype(callback)>(std::move(msg), std::move(callback));");
+			} else {
+				throw Exception("System message with name " + msg.name + " not found during codegen of system " + system.name, HalleyExceptions::Tools);
+			}
+		}
+		if (msg.receive) {
+			hasReceiveSystemMessage = true;
+			systemMsgsReceived.push_back(msg.name + "SystemMessage::messageIndex");
 		}
 	}
 
@@ -412,7 +437,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(info.methodArgType), info.methodArgName) }, info.methodName + "Base", false, false, true, true), info.stratImpl)
 		.addBlankLine();
 
-	if (hasReceive) {
+	if (hasReceiveEntityMessage) {
 		Vector<String> body = { "switch (msgIndex) {" };
 		for (auto& msg : system.messages) {
 			if (msg.receive) {
@@ -430,7 +455,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 
 	sysClassGen
 		.addAccessLevelSection(MemberAccess::Public)
-		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}, {" + String::concatList(msgsReceived, ", ") + "}") })
+		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}, {" + String::concatList(entityMsgsReceived, ", ") + "}") })
 		.finish()
 		.writeTo(contents);
 

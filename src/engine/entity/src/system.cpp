@@ -92,9 +92,16 @@ void System::processMessages()
 	}
 }
 
-void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, size_t, int id)
+void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, int id)
 {
 	outbox.emplace_back(std::make_pair(entityId, MessageEntry(std::move(msg), id, systemId)));
+}
+
+size_t System::doSendSystemMessage(SystemMessageContext context)
+{
+	const size_t nSystems = 0; // TODO: no idea how :D
+	systemOutbox.emplace_back(std::move(context));
+	return nSystems;
 }
 
 void System::dispatchMessages()
