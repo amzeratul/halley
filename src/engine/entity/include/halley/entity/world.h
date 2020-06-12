@@ -17,6 +17,7 @@
 #include "halley/utils/attributes.h"
 
 namespace Halley {
+	struct SystemMessageContext;
 	class UUID;
 	class ConfigNode;
 	class RenderContext;
@@ -111,6 +112,8 @@ namespace Halley {
 		MaskStorage& getMaskStorage() const noexcept;
 		ComponentDeleterTable& getComponentDeleterTable();
 
+		size_t sendSystemMessage(SystemMessageContext context);
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
@@ -134,6 +137,8 @@ namespace Halley {
 
 		mutable std::array<StopwatchAveraging, 3> timer;
 
+		std::list<SystemMessageContext> pendingSystemMessages;
+
 		void allocateEntity(Entity* entity);
 		void updateEntities();
 		void initSystems();
@@ -151,5 +156,7 @@ namespace Halley {
 		Service* tryGetService(const String& name) const;
 
 		const std::vector<Family*>& getFamiliesFor(const FamilyMaskType& mask);
+
+		void processSystemMessages(TimeLine timeline);
 	};
 }

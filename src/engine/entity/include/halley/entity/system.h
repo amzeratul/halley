@@ -46,6 +46,11 @@ namespace Halley {
 		long long getNanoSecondsTakenAvg() const { return timer.averageElapsedNanoSeconds(); }
 		void setCollectSamples(bool collect);
 
+		bool receiveSystemMessage(const SystemMessageContext& context);
+		void prepareSystemMessages();
+		void processSystemMessages();
+		size_t getSystemMessagesInInbox() const;
+
 	protected:
 		const HalleyAPI& doGetAPI() const { return *api; }
 		World& doGetWorld() const { return *world; }
@@ -56,6 +61,8 @@ namespace Halley {
 		virtual void updateBase(Time) {}
 		virtual void renderBase(RenderContext&) {}
 		virtual void onMessagesReceived(int, Message**, size_t*, size_t) {}
+		virtual bool canHandleSystemMessage(int messageId) { return false; }
+		virtual void onSystemMessageReceived(int messageId, const SystemMessage& msg) {}
 
 		template <typename F, typename V>
 		static void invokeIndividual(F&& f, V& fam)
@@ -136,17 +143,12 @@ namespace Halley {
 	private:
 		friend class World;
 
-		struct SystemMessageContext {
-			int msgId;
-			std::unique_ptr<SystemMessage> msg;
-			std::function<void(std::byte*)> callback;
-		};
-
 		Vector<FamilyBindingBase*> families;
 		Vector<int> messageTypesReceived;
 		Vector<EntityId> messagesSentTo;
 		Vector<std::pair<EntityId, MessageEntry>> outbox;
-		Vector<SystemMessageContext> systemOutbox;
+		Vector<const SystemMessageContext*> systemMessageInbox;
+		Vector<const SystemMessageContext*> systemMessages;
 
 		World* world = nullptr;
 		const HalleyAPI* api = nullptr;

@@ -312,6 +312,22 @@ ComponentDeleterTable& World::getComponentDeleterTable()
 	return *componentDeleterTable;
 }
 
+size_t World::sendSystemMessage(SystemMessageContext origContext)
+{
+	auto& context = pendingSystemMessages.emplace_back(std::move(origContext));
+	
+	size_t count = 0;
+	for (auto& timeline: systems) {
+		for (auto& system: timeline) {
+			if (system->receiveSystemMessage(context)) {
+				++context.refCount;
+				++count;
+			}
+		}
+	}
+	return count;
+}
+
 void World::deleteEntity(Entity* entity)
 {
 	Expects (entity);
@@ -341,6 +357,7 @@ void World::step(TimeLine timeline, Time elapsed)
 
 	initSystems();
 	updateSystems(timeline, elapsed);
+	processSystemMessages(timeline);
 
 	if (collectMetrics) {
 		t.endSample();
@@ -547,4 +564,22 @@ const std::vector<Family*>& World::getFamiliesFor(const FamilyMaskType& mask)
 		familyCache[mask] = std::move(result);
 		return familyCache[mask];
 	}
+}
+
+void World::processSystemMessages(TimeLine timeline)
+{
+	bool keepRunning = true;
+	while (keepRunning) {
+		keepRunning = false;
+		for (auto& system: systems[static_cast<int>(timeline)]) {
+			system->prepareSystemMessages();
+		}
+		for (auto& system: systems[static_cast<int>(timeline)]) {
+			system->processSystemMessages();
+			if (system->getSystemMessagesInInbox() > 0) {
+				keepRunning = true;
+			}
+		}
+	}
+	pendingSystemMessages.clear();
 }

@@ -79,6 +79,10 @@ void ECSData::validate()
 			}
 		}
 
+		if (!sys.second.systemMessages.empty() && sys.second.method == SystemMethod::Render) {
+			throw Exception("Render system \"" + sys.second.name + "\" cannot send or receive system messages.", HalleyExceptions::Tools);
+		}
+		
 		for (auto& msg : sys.second.systemMessages) {
 			if (systemMessages.find(msg.name) == systemMessages.end()) {
 				throw Exception("Unknown system message \"" + msg.name + "\" in system \"" + sys.second.name + "\".", HalleyExceptions::Tools);

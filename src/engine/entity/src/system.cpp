@@ -97,13 +97,6 @@ void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, int 
 	outbox.emplace_back(std::make_pair(entityId, MessageEntry(std::move(msg), id, systemId)));
 }
 
-size_t System::doSendSystemMessage(SystemMessageContext context)
-{
-	const size_t nSystems = 0; // TODO: no idea how :D
-	systemOutbox.emplace_back(std::move(context));
-	return nSystems;
-}
-
 void System::dispatchMessages()
 {
 	if (!outbox.empty()) {
@@ -116,6 +109,39 @@ void System::dispatchMessages()
 		}
 		outbox.clear();
 	}
+}
+
+size_t System::doSendSystemMessage(SystemMessageContext context)
+{
+	return world->sendSystemMessage(std::move(context));
+}
+
+bool System::receiveSystemMessage(const SystemMessageContext& context)
+{
+	if (canHandleSystemMessage(context.msgId)) {
+		systemMessageInbox.push_back(&context);
+		return true;
+	}
+	return false;
+}
+
+void System::prepareSystemMessages()
+{
+	systemMessages = std::move(systemMessageInbox);
+	systemMessageInbox.clear();
+}
+
+void System::processSystemMessages()
+{
+	for (auto& message: systemMessages) {
+		// TODO
+	}
+	systemMessages.clear();
+}
+
+size_t System::getSystemMessagesInInbox() const
+{
+	return systemMessageInbox.size();
 }
 
 void System::doUpdate(Time time) {
