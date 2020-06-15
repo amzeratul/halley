@@ -62,7 +62,7 @@ namespace Halley {
 		virtual void renderBase(RenderContext&) {}
 		virtual void onMessagesReceived(int, Message**, size_t*, size_t) {}
 		virtual bool canHandleSystemMessage(int messageId) { return false; }
-		virtual void onSystemMessageReceived(int messageId, const SystemMessage& msg) {}
+		virtual void onSystemMessageReceived(int messageId, const SystemMessage& msg, const std::function<void(std::byte*)>& callback) {}
 
 		template <typename F, typename V>
 		static void invokeIndividual(F&& f, V& fam)

@@ -134,7 +134,7 @@ void System::prepareSystemMessages()
 void System::processSystemMessages()
 {
 	for (auto& message: systemMessages) {
-		// TODO
+		onSystemMessageReceived(message->msgId, *message->msg, message->callback);
 	}
 	systemMessages.clear();
 }
