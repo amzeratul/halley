@@ -463,26 +463,38 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	}
 
 	if (hasReceiveSystemMessage) {
-		Vector<String> body = { "switch (msgIndex) {" };
+		Vector<String> onReceivedBody = { "switch (msgIndex) {" };
+		Vector<String> canReceiveBody = { "switch (msgIndex) {" };
 		for (auto& msg : system.systemMessages) {
 			if (msg.receive) {
 				const auto& sysMsg = systemMessages.find(msg.name)->second;
 				
-				body.emplace_back("case " + msg.name + "SystemMessage::messageIndex: {");
-				body.emplace_back("    auto result = static_cast<T*>(this)->onSystemMessageReceived(reinterpret_cast<const " + msg.name + "SystemMessage&>(msg));");
-				body.emplace_back("    static_assert(std::is_same_v<decltype(result), " + sysMsg.returnType + ">, \"" + msg.name + "SystemMessage expects a return type of " + sysMsg.returnType + "\");");
-				body.emplace_back("    callback(reinterpret_cast<std::byte*>(&result));");
-				body.emplace_back("    break;");
-				body.emplace_back("}");
+				onReceivedBody.emplace_back("case " + msg.name + "SystemMessage::messageIndex: {");
+				onReceivedBody.emplace_back("    auto result = static_cast<T*>(this)->onSystemMessageReceived(reinterpret_cast<const " + msg.name + "SystemMessage&>(msg));");
+				onReceivedBody.emplace_back("    static_assert(std::is_same_v<decltype(result), " + sysMsg.returnType + ">, \"" + msg.name + "SystemMessage expects a return type of " + sysMsg.returnType + "\");");
+				onReceivedBody.emplace_back("    callback(reinterpret_cast<std::byte*>(&result));");
+				onReceivedBody.emplace_back("    break;");
+				onReceivedBody.emplace_back("}");
+
+				canReceiveBody.emplace_back("case " + msg.name + "SystemMessage::messageIndex: return true;");
 			}
 		}
-		body.emplace_back("}");
+		onReceivedBody.emplace_back("}");
+		
+		canReceiveBody.emplace_back("}");
+		canReceiveBody.emplace_back("return false;");
+
 		sysClassGen
 			.addMethodDefinition(MethodSchema(TypeSchema("void"), {
 				VariableSchema(TypeSchema("int"), "msgIndex"),
 				VariableSchema(TypeSchema("Halley::SystemMessage&", true), "msg"),
 				VariableSchema(TypeSchema("std::function<void(std::byte*)>&", true), "callback")
-			}, "onSystemMessageReceived", false, false, true, true), body);
+			}, "onSystemMessageReceived", false, false, true, true), onReceivedBody);
+
+		sysClassGen
+			.addMethodDefinition(MethodSchema(TypeSchema("bool"), {
+				VariableSchema(TypeSchema("int"), "msgIndex")
+			}, "canHandleSystemMessage", true, false, true, true), canReceiveBody);
 	}
 
 	sysClassGen
