@@ -471,7 +471,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 				body.emplace_back("case " + msg.name + "SystemMessage::messageIndex: {");
 				body.emplace_back("    auto result = static_cast<T*>(this)->onSystemMessageReceived(reinterpret_cast<const " + msg.name + "SystemMessage&>(msg));");
 				body.emplace_back("    static_assert(std::is_same_v<decltype(result), " + sysMsg.returnType + ">, \"" + msg.name + "SystemMessage expects a return type of " + sysMsg.returnType + "\");");
-				body.emplace_back("    callback(std::move(result));");
+				body.emplace_back("    callback(reinterpret_cast<std::byte*>(&result));");
 				body.emplace_back("    break;");
 				body.emplace_back("}");
 			}
