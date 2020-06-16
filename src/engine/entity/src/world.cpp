@@ -339,17 +339,17 @@ void World::deleteEntity(Entity* entity)
 
 bool World::hasSystemsOnTimeLine(TimeLine timeline) const
 {
-	return getSystems(timeline).size() > 0;
+	return !getSystems(timeline).empty();
 }
 
 int64_t World::getAverageTime(TimeLine timeline) const
 {
-	return timer[int(timeline)].averageElapsedNanoSeconds();
+	return timer[static_cast<int>(timeline)].averageElapsedNanoSeconds();
 }
 
 void World::step(TimeLine timeline, Time elapsed)
 {
-	auto& t = timer[int(timeline)];
+	auto& t = timer[static_cast<int>(timeline)];
 	if (collectMetrics) {
 		t.beginSample();
 	}
@@ -367,7 +367,7 @@ void World::step(TimeLine timeline, Time elapsed)
 
 void World::render(RenderContext& rc) const
 {
-	auto& t = timer[int(TimeLine::Render)];
+	auto& t = timer[static_cast<int>(TimeLine::Render)];
 	if (collectMetrics) {
 		t.beginSample();
 	}
