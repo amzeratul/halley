@@ -116,13 +116,9 @@ size_t System::doSendSystemMessage(SystemMessageContext context)
 	return world->sendSystemMessage(std::move(context));
 }
 
-bool System::receiveSystemMessage(const SystemMessageContext& context)
+void System::receiveSystemMessage(const SystemMessageContext& context)
 {
-	if (canHandleSystemMessage(context.msgId)) {
-		systemMessageInbox.push_back(&context);
-		return true;
-	}
-	return false;
+	systemMessageInbox.push_back(&context);
 }
 
 void System::prepareSystemMessages()

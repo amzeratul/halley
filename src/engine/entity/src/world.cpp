@@ -319,12 +319,13 @@ size_t World::sendSystemMessage(SystemMessageContext origContext)
 	size_t count = 0;
 	for (auto& timeline: systems) {
 		for (auto& system: timeline) {
-			if (system->receiveSystemMessage(context)) {
-				++context.refCount;
+			if (system->canHandleSystemMessage(context.msgId)) {
+				system->receiveSystemMessage(context);
 				++count;
 			}
 		}
 	}
+	
 	return count;
 }
 

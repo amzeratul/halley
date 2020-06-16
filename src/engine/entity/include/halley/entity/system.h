@@ -46,7 +46,8 @@ namespace Halley {
 		long long getNanoSecondsTakenAvg() const { return timer.averageElapsedNanoSeconds(); }
 		void setCollectSamples(bool collect);
 
-		bool receiveSystemMessage(const SystemMessageContext& context);
+		virtual bool canHandleSystemMessage(int messageId) const { return false; }
+		void receiveSystemMessage(const SystemMessageContext& context);
 		void prepareSystemMessages();
 		void processSystemMessages();
 		size_t getSystemMessagesInInbox() const;
@@ -61,7 +62,6 @@ namespace Halley {
 		virtual void updateBase(Time) {}
 		virtual void renderBase(RenderContext&) {}
 		virtual void onMessagesReceived(int, Message**, size_t*, size_t) {}
-		virtual bool canHandleSystemMessage(int messageId) const { return false; }
 		virtual void onSystemMessageReceived(int messageId, const SystemMessage& msg, const std::function<void(std::byte*)>& callback) {}
 
 		template <typename F, typename V>

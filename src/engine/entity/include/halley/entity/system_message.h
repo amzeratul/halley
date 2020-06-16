@@ -18,6 +18,5 @@ namespace Halley
 		int msgId;
 		std::unique_ptr<SystemMessage> msg;
 		std::function<void(std::byte*)> callback;
-		size_t refCount = 0;
 	};
 }
