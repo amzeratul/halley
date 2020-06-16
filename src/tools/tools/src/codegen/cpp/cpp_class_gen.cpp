@@ -6,56 +6,57 @@ using namespace Halley;
 CPPClassGenerator::CPPClassGenerator(String name)
 	: className(name) 
 {
-	results.push_back("class " + name + " {");
+	header = "class " + name + " {";
 }
 
 CPPClassGenerator::CPPClassGenerator(String name, String baseClass, MemberAccess inheritanceType, bool isFinal)
 	: className(name)
 {
-	results.push_back("class " + name + (isFinal ? " final" : "") + " : " + toString(inheritanceType) + " " + baseClass + " {");
+	header = "class " + name + (isFinal ? " final" : "") + " : " + toString(inheritanceType) + " " + baseClass + " {";
 }
 
 CPPClassGenerator& CPPClassGenerator::addClass(CPPClassGenerator& otherClass)
 {
 	ensureOK();
-	flushAccess();
-	otherClass.writeTo(results, 1);
+	otherClass.writeTo(results[currentAccess], 1);
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::addBlankLine()
 {
-	return addLine("");
+	return addRawLine("");
 }
 
 CPPClassGenerator& CPPClassGenerator::addLine(String line)
 {
+	return addRawLine("\t" + line);
+}
+
+CPPClassGenerator& CPPClassGenerator::addRawLine(String line)
+{
 	ensureOK();
-	flushAccess();
-	results.push_back("\t" + line);
+	results[currentAccess].push_back(line);
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::addComment(String comment)
 {
 	ensureOK();
-	flushAccess();
-	results.push_back("\t// " + comment);
+	addRawLine("\t// " + comment);
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::addAccessLevelSection(MemberAccess access)
 {
 	ensureOK();
-	pendingAccess = access;
+	currentAccess = access;
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::addMember(MemberSchema member)
 {
 	addAccessLevelSection(member.access);
-	flushAccess();
-	results.push_back("\t" + getMemberString(member) + ";");
+	addRawLine("\t" + getMemberString(member) + ";");
 	return *this;
 }
 
@@ -70,8 +71,7 @@ CPPClassGenerator& CPPClassGenerator::addMembers(const Vector<MemberSchema>& mem
 CPPClassGenerator& CPPClassGenerator::addMethodDeclaration(MethodSchema method)
 {
 	ensureOK();
-	flushAccess();
-	results.push_back("\t" + getMethodSignatureString(method) + ";");
+	addRawLine("\t" + getMethodSignatureString(method) + ";");
 	return *this;
 }
 
@@ -92,27 +92,24 @@ CPPClassGenerator& CPPClassGenerator::addMethodDefinition(MethodSchema method, S
 CPPClassGenerator& CPPClassGenerator::addMethodDefinition(MethodSchema method, const Vector<String>& body)
 {
 	ensureOK();
-	flushAccess();
-	results.push_back("\t" + getMethodSignatureString(method) + " {");
+	addRawLine("\t" + getMethodSignatureString(method) + " {");
 	for (auto& line : body) {
-		results.push_back("\t\t" + line);
+		addRawLine("\t\t" + line);
 	}
-	results.push_back("\t}");
+	addRawLine("\t}");
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::addTypeDefinition(String name, String type)
 {
 	ensureOK();
-	flushAccess();
-	results.push_back("\tusing " + name + " = " + type + ";");
+	addRawLine("\tusing " + name + " = " + type + ";");
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::finish()
 {
 	ensureOK();
-	results.push_back("};");
 	finished = true;
 	return *this;
 }
@@ -134,21 +131,20 @@ CPPClassGenerator& CPPClassGenerator::addConstructor(const Vector<VariableSchema
 
 CPPClassGenerator& CPPClassGenerator::addCustomConstructor(const Vector<VariableSchema>& parameters, const Vector<VariableSchema>& initialization)
 {
-	flushAccess();
 	String sig = "\t" + getMethodSignatureString(MethodSchema(TypeSchema(""), parameters, className));
 	String body = "{}";
 
 	if (!initialization.empty()) {
-		results.push_back(sig);
+		addRawLine(sig);
 		bool first = true;
 		for (const auto& i: initialization) {
 			String prefix = first ? "\t\t: ": "\t\t, ";
 			first = false;
-			results.push_back(prefix + i.name + "(" + i.initialValue + ")");
+			addRawLine(prefix + i.name + "(" + i.initialValue + ")");
 		}
-		results.push_back("\t" + body);
+		addRawLine("\t" + body);
 	} else {
-		results.push_back(sig + " " + body);
+		addRawLine(sig + " " + body);
 	}
 	return *this;
 }
@@ -164,23 +160,20 @@ void CPPClassGenerator::writeTo(Vector<String>& out, int nTabs)
 		prefix += "\t";
 	}
 
-	for (size_t i = 0; i < results.size(); i++) {
-		out.push_back(prefix + results[i]);
+	out.push_back(prefix + header);
+	for (auto& access: results) {
+		out.push_back(prefix + toString(access.first) + ":");
+		for (auto& i : access.second) {
+			out.push_back(prefix + i);
+		}
 	}
+	out.push_back(prefix + "};");
 }
 
 void CPPClassGenerator::ensureOK() const
 {
 	if (finished) {
 		throw Exception("finish() has already been called!", HalleyExceptions::Tools);
-	}
-}
-
-void CPPClassGenerator::flushAccess()
-{
-	if (pendingAccess && currentAccess != pendingAccess) {
-		currentAccess = pendingAccess.value();
-		results.push_back(toString(currentAccess) + ":");
 	}
 }
 
