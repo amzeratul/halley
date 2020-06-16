@@ -11,6 +11,6 @@ namespace Halley
 		explicit SystemMessageSchema(YAML::Node node, bool generate);
 
 		String returnType;
-		bool async = false;
+		bool multicast = false;
 	};
 }

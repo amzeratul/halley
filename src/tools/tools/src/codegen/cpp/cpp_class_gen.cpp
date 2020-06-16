@@ -236,6 +236,13 @@ String CPPClassGenerator::getMethodSignatureString(const MethodSchema& method)
 		returnType += " ";
 	}
 
-	return (method.isFriend ? "friend " : "") + returnType + method.name + "(" + String::concatList(args, ", ") + ")" + (method.isConst ? " const" : "") + (method.isOverride ? " override" : "") + (method.isFinal ? " final" : "");
-
+	return String(method.isFriend ? "friend " : "")
+		+ (method.isVirtual ? "virtual " : "")
+		+ returnType
+		+ method.name
+		+ "(" + String::concatList(args, ", ") + ")"
+		+ (method.isConst ? " const" : "")
+		+ (method.isOverride ? " override" : "")
+		+ (method.isFinal ? " final" : "")
+		+ (method.isPure ? " = 0" : "");
 }

@@ -100,8 +100,9 @@ namespace Halley
 		bool isOverride = false;
 		bool isFinal = false;
 		bool isFriend = false;
+		bool isPure = false;
 
-		MethodSchema(TypeSchema returnType, Vector<VariableSchema> arguments, String name, bool isConst = false, bool isVirtual = false, bool isOverride = false, bool isFinal = false, bool isFriend = false)
+		MethodSchema(TypeSchema returnType, Vector<VariableSchema> arguments, String name, bool isConst = false, bool isVirtual = false, bool isOverride = false, bool isFinal = false, bool isFriend = false, bool isPure = false)
 			: returnType(std::move(returnType))
 			, arguments(std::move(arguments))
 			, name(std::move(name))
@@ -110,6 +111,7 @@ namespace Halley
 			, isOverride(isOverride)
 			, isFinal(isFinal)
 			, isFriend(isFriend)
+			, isPure(isPure)
 		{}
 	};
 }

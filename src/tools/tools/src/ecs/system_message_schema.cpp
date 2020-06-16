@@ -11,5 +11,5 @@ SystemMessageSchema::SystemMessageSchema(YAML::Node node, bool generate)
 	: MessageSchema(node, generate)
 {
 	returnType = node["returnType"].as<std::string>();
-	async = node["async"].as<bool>(false);
+	multicast = node["multicast"].as<bool>(false);
 }
