@@ -15,7 +15,7 @@ namespace Halley
 
 		CPPClassGenerator& addClass(CPPClassGenerator& otherClass);
 		CPPClassGenerator& addComment(String comment);
-		CPPClassGenerator& addAccessLevelSection(MemberAccess access);
+		CPPClassGenerator& setAccessLevel(MemberAccess access);
 		CPPClassGenerator& addMember(MemberSchema member);
 		CPPClassGenerator& addMembers(const Vector<MemberSchema>& members);
 		CPPClassGenerator& addMethodDeclaration(MethodSchema method);

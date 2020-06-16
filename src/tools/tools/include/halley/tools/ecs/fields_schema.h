@@ -61,11 +61,11 @@ namespace Halley
 		TypeSchema type;
 		String name;
 		std::vector<String> defaultValue;
-		MemberAccess access;
+		std::optional<MemberAccess> access;
 		bool serializable;
 		bool collapse;
 
-		MemberSchema(TypeSchema type, String name, std::vector<String> defaultValue, MemberAccess access = MemberAccess::Public, bool serializable = true, bool collapse = false)
+		MemberSchema(TypeSchema type, String name, std::vector<String> defaultValue, std::optional<MemberAccess> access = {}, bool serializable = true, bool collapse = false)
 			: type(std::move(type))
 			, name(std::move(name))
 			, defaultValue(std::move(defaultValue))
@@ -74,7 +74,7 @@ namespace Halley
 			, collapse(collapse)
 		{}
 
-		MemberSchema(TypeSchema type, String name, String defaultValue = "", MemberAccess access = MemberAccess::Public, bool serializable = true, bool collapse = false)
+		MemberSchema(TypeSchema type, String name, String defaultValue = "", std::optional<MemberAccess> access = {}, bool serializable = true, bool collapse = false)
 			: MemberSchema(std::move(type), std::move(name), defaultValue.isEmpty() ? std::vector<String>() : std::vector<String>{std::move(defaultValue)}, access, serializable, collapse)
 		{}
 

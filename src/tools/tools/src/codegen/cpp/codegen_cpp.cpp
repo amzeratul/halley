@@ -204,12 +204,12 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	String className = component.name + "Component" + (component.customImplementation ? "Base" : "");
 	
 	auto gen = CPPClassGenerator(className, "Halley::Component", MemberAccess::Public, !component.customImplementation)
-		.addAccessLevelSection(MemberAccess::Public)
+		.setAccessLevel(MemberAccess::Public)
 		.addMember(MemberSchema(TypeSchema("int", false, true, true), "componentIndex", toString(component.id)))
 		.addBlankLine()
 		.addMembers(component.members)
 		.addBlankLine()
-		.addAccessLevelSection(MemberAccess::Public)
+		.setAccessLevel(MemberAccess::Public)
 		.addDefaultConstructor();
 
 	// Additional constructors
@@ -332,7 +332,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	auto sysClassGen = CPPClassGenerator(system.name + "SystemBase", "Halley::System", MemberAccess::Private)
 		.addMethodDeclaration(MethodSchema(TypeSchema("Halley::System*"), {}, "halleyCreate" + system.name + "System", false, false, false, false, true))
 		.addBlankLine()
-		.addAccessLevelSection(MemberAccess::Public);
+		.setAccessLevel(MemberAccess::Public);
 
 	for (auto& fam : system.families) {
 		auto members = convert<ComponentReferenceSchema, MemberSchema>(fam.components, [](auto& comp)
@@ -343,7 +343,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 
 		sysClassGen
 			.addClass(CPPClassGenerator(upperFirst(fam.name) + "Family", "Halley::FamilyBaseOf<" + upperFirst(fam.name) + "Family>")
-				.addAccessLevelSection(MemberAccess::Public)
+				.setAccessLevel(MemberAccess::Public)
 				.addMembers(members)
 				.addBlankLine()
 				.addTypeDefinition("Type", "Halley::FamilyType<" + String::concatList(convert<ComponentReferenceSchema, String>(fam.components, [](auto& comp)
@@ -351,13 +351,13 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 					return comp.optional ? "Halley::MaybeRef<" + comp.name + "Component>" : comp.name + "Component";
 				}), ", ") + ">")
 				.addBlankLine()
-				.addAccessLevelSection(MemberAccess::Protected)
+				.setAccessLevel(MemberAccess::Protected)
 				.addConstructor(MemberSchema::toVariableSchema(members), false)
 				.finish())
 			.addBlankLine();
 	}
 
-	sysClassGen.addAccessLevelSection(MemberAccess::Protected);
+	sysClassGen.setAccessLevel(MemberAccess::Protected);
 
 	if ((int(system.access) & int(SystemAccess::API)) != 0) {
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("const Halley::HalleyAPI&"), {}, "getAPI", true), "return doGetAPI();");
@@ -417,9 +417,12 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 
 	// Service declarations
 	for (auto& service: system.services) {
-		sysClassGen.addBlankLine();
-		sysClassGen.addMember(MemberSchema(service.name + "*", lowerFirst(service.name), "nullptr"));
-		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema(service.name + "&"), {}, "get" + service.name, true), "return *" + lowerFirst(service.name) + ";");
+		sysClassGen
+			.addBlankLine()
+			.setAccessLevel(MemberAccess::Private)
+			.addMember(MemberSchema(service.name + "*", lowerFirst(service.name), "nullptr"))
+			.setAccessLevel(MemberAccess::Protected)
+			.addMethodDefinition(MethodSchema(TypeSchema(service.name + "&"), {}, "get" + service.name, true), "return *" + lowerFirst(service.name) + ";");
 	}
 
 	// Construct initBase();
@@ -431,7 +434,10 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	for (auto& family: system.families) {
 		initBaseMethodBody.push_back("initialiseFamilyBinding<T, " + upperFirst(family.name) + "Family>(" + family.name + "Family, static_cast<T*>(this));");
 	}
-	sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "initBase", false, false, true), initBaseMethodBody);
+	
+	sysClassGen
+		.setAccessLevel(MemberAccess::Private)
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "initBase", false, false, true), initBaseMethodBody);
 
 	auto fams = convert<FamilySchema, MemberSchema>(system.families, [](auto& fam) { return MemberSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); });
 	auto mid = fams.begin() + std::min(fams.size(), size_t(1));
@@ -439,17 +445,17 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	std::vector<MemberSchema> otherFams(mid, fams.end());
 	sysClassGen
 		.addBlankLine()
-		.addAccessLevelSection(system.strategy == SystemStrategy::Global ? MemberAccess::Protected : MemberAccess::Private)
+		.setAccessLevel(system.strategy == SystemStrategy::Global ? MemberAccess::Protected : MemberAccess::Private)
 		.addMembers(mainFams)
-		.addAccessLevelSection(MemberAccess::Protected)
+		.setAccessLevel(MemberAccess::Protected)
 		.addMembers(otherFams)
 		.addBlankLine()
-		.addAccessLevelSection(MemberAccess::Private)
+		.setAccessLevel(MemberAccess::Private)
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(info.methodArgType), info.methodArgName) }, info.methodName + "Base", false, false, true, true), info.stratImpl)
 		.addBlankLine();
 
 	if (hasReceiveEntityMessage) {
-		sysClassGen.addAccessLevelSection(MemberAccess::Protected);
+		sysClassGen.setAccessLevel(MemberAccess::Protected);
 		
 		Vector<String> body = { "switch (msgIndex) {" };
 		for (auto& msg : system.messages) {
@@ -467,7 +473,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		body.emplace_back("}");
 
 		sysClassGen
-			.addAccessLevelSection(MemberAccess::Private)
+			.setAccessLevel(MemberAccess::Private)
 			.addMethodDefinition(MethodSchema(TypeSchema("void"), {
 				VariableSchema(TypeSchema("int"), "msgIndex"),
 				VariableSchema(TypeSchema("Halley::Message**"), "msgs"),
@@ -488,7 +494,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		Vector<String> onReceivedBody = { "switch (msgIndex) {" };
 		Vector<String> canReceiveBody = { "switch (msgIndex) {" };
 
-		sysClassGen.addAccessLevelSection(MemberAccess::Protected);
+		sysClassGen.setAccessLevel(MemberAccess::Protected);
 		for (auto& msg : system.systemMessages) {
 			if (msg.receive) {
 				const auto& sysMsg = systemMessages.find(msg.name)->second;
@@ -519,7 +525,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		canReceiveBody.emplace_back("return false;");
 
 		sysClassGen
-			.addAccessLevelSection(MemberAccess::Private)
+			.setAccessLevel(MemberAccess::Private)
 			.addMethodDefinition(MethodSchema(TypeSchema("void"), {
 				VariableSchema(TypeSchema("int"), "msgIndex"),
 				VariableSchema(TypeSchema("Halley::SystemMessage&"), "msg"),
@@ -531,7 +537,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	}
 
 	sysClassGen
-		.addAccessLevelSection(MemberAccess::Public)
+		.setAccessLevel(MemberAccess::Public)
 		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}, {" + String::concatList(entityMsgsReceived, ", ") + "}") })
 		.finish()
 		.writeTo(contents);
@@ -552,7 +558,7 @@ Vector<String> CodegenCPP::generateSystemStub(SystemSchema& system) const
 	};
 
 	auto actualSys = CPPClassGenerator(systemName, systemName + "Base<" + systemName + ">", MemberAccess::Public, true)
-		.addAccessLevelSection(MemberAccess::Public)
+		.setAccessLevel(MemberAccess::Public)
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), info.familyArgs, info.methodName, info.methodConst), "// TODO");
 
 	for (auto& msg : system.messages) {
@@ -591,7 +597,7 @@ Vector<String> CodegenCPP::generateMessageHeader(const MessageSchema& message, c
 	contents.push_back("");
 
 	auto gen = CPPClassGenerator(message.name + suffix, "Halley::" + suffix, MemberAccess::Public, true)
-		.addAccessLevelSection(MemberAccess::Public)
+		.setAccessLevel(MemberAccess::Public)
 		.addMember(MemberSchema(TypeSchema("int", false, true, true), "messageIndex", toString(message.id)))
 		.addBlankLine()
 		.addMembers(message.members)

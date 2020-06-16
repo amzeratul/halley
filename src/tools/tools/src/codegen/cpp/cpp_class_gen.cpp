@@ -46,7 +46,7 @@ CPPClassGenerator& CPPClassGenerator::addComment(String comment)
 	return *this;
 }
 
-CPPClassGenerator& CPPClassGenerator::addAccessLevelSection(MemberAccess access)
+CPPClassGenerator& CPPClassGenerator::setAccessLevel(MemberAccess access)
 {
 	ensureOK();
 	currentAccess = access;
@@ -55,7 +55,9 @@ CPPClassGenerator& CPPClassGenerator::addAccessLevelSection(MemberAccess access)
 
 CPPClassGenerator& CPPClassGenerator::addMember(MemberSchema member)
 {
-	addAccessLevelSection(member.access);
+	if (member.access) {
+		setAccessLevel(member.access.value());
+	}
 	addRawLine("\t" + getMemberString(member) + ";");
 	return *this;
 }
