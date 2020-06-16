@@ -39,9 +39,11 @@ namespace Halley
 		String className;
 		bool finished = false;
 		MemberAccess currentAccess = MemberAccess::Private;
+		std::optional<MemberAccess> pendingAccess;
 
 		Vector<String> results;
 
 		void ensureOK() const;
+		void flushAccess();
 	};
 }

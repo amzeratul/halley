@@ -18,6 +18,7 @@ CPPClassGenerator::CPPClassGenerator(String name, String baseClass, MemberAccess
 CPPClassGenerator& CPPClassGenerator::addClass(CPPClassGenerator& otherClass)
 {
 	ensureOK();
+	flushAccess();
 	otherClass.writeTo(results, 1);
 	return *this;
 }
@@ -30,6 +31,7 @@ CPPClassGenerator& CPPClassGenerator::addBlankLine()
 CPPClassGenerator& CPPClassGenerator::addLine(String line)
 {
 	ensureOK();
+	flushAccess();
 	results.push_back("\t" + line);
 	return *this;
 }
@@ -37,6 +39,7 @@ CPPClassGenerator& CPPClassGenerator::addLine(String line)
 CPPClassGenerator& CPPClassGenerator::addComment(String comment)
 {
 	ensureOK();
+	flushAccess();
 	results.push_back("\t// " + comment);
 	return *this;
 }
@@ -44,16 +47,14 @@ CPPClassGenerator& CPPClassGenerator::addComment(String comment)
 CPPClassGenerator& CPPClassGenerator::addAccessLevelSection(MemberAccess access)
 {
 	ensureOK();
-	if (currentAccess != access) {
-		currentAccess = access;
-		results.push_back(toString(access) + ":");
-	}
+	pendingAccess = access;
 	return *this;
 }
 
 CPPClassGenerator& CPPClassGenerator::addMember(MemberSchema member)
 {
 	addAccessLevelSection(member.access);
+	flushAccess();
 	results.push_back("\t" + getMemberString(member) + ";");
 	return *this;
 }
@@ -69,6 +70,7 @@ CPPClassGenerator& CPPClassGenerator::addMembers(const Vector<MemberSchema>& mem
 CPPClassGenerator& CPPClassGenerator::addMethodDeclaration(MethodSchema method)
 {
 	ensureOK();
+	flushAccess();
 	results.push_back("\t" + getMethodSignatureString(method) + ";");
 	return *this;
 }
@@ -90,6 +92,7 @@ CPPClassGenerator& CPPClassGenerator::addMethodDefinition(MethodSchema method, S
 CPPClassGenerator& CPPClassGenerator::addMethodDefinition(MethodSchema method, const Vector<String>& body)
 {
 	ensureOK();
+	flushAccess();
 	results.push_back("\t" + getMethodSignatureString(method) + " {");
 	for (auto& line : body) {
 		results.push_back("\t\t" + line);
@@ -101,6 +104,7 @@ CPPClassGenerator& CPPClassGenerator::addMethodDefinition(MethodSchema method, c
 CPPClassGenerator& CPPClassGenerator::addTypeDefinition(String name, String type)
 {
 	ensureOK();
+	flushAccess();
 	results.push_back("\tusing " + name + " = " + type + ";");
 	return *this;
 }
@@ -130,6 +134,7 @@ CPPClassGenerator& CPPClassGenerator::addConstructor(const Vector<VariableSchema
 
 CPPClassGenerator& CPPClassGenerator::addCustomConstructor(const Vector<VariableSchema>& parameters, const Vector<VariableSchema>& initialization)
 {
+	flushAccess();
 	String sig = "\t" + getMethodSignatureString(MethodSchema(TypeSchema(""), parameters, className));
 	String body = "{}";
 
@@ -168,6 +173,14 @@ void CPPClassGenerator::ensureOK() const
 {
 	if (finished) {
 		throw Exception("finish() has already been called!", HalleyExceptions::Tools);
+	}
+}
+
+void CPPClassGenerator::flushAccess()
+{
+	if (pendingAccess && currentAccess != pendingAccess) {
+		currentAccess = pendingAccess.value();
+		results.push_back(toString(currentAccess) + ":");
 	}
 }
 

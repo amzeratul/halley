@@ -398,11 +398,13 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 					body.emplace_back("    throw Halley::Exception(\"Sending non-multicast " + sysMsg.name + "SystemMessage, but there are \" + toString(n) + \" systems receiving it (expecting exactly one).\", HalleyExceptions::Entity);");
 					body.emplace_back("}");
 				}
-				
-				sysClassGen.addMethodDefinition(MethodSchema(TypeSchema(sysMsg.multicast ? "size_t" : "void"), {
-					VariableSchema(TypeSchema(msg.name + "SystemMessage"), "msg"),
-					VariableSchema(TypeSchema("std::function<void(" + sysMsg.returnType + ")>"), "callback")
-				}, "sendSystemMessage"), body);
+
+				sysClassGen
+					.addMethodDefinition(MethodSchema(TypeSchema(sysMsg.multicast ? "size_t" : "void"), {
+						VariableSchema(TypeSchema(msg.name + "SystemMessage"), "msg"),
+						VariableSchema(TypeSchema("std::function<void(" + sysMsg.returnType + ")>"), "callback")
+					}, "sendSystemMessage"), body)
+					.addBlankLine();
 			} else {
 				throw Exception("System message with name " + msg.name + " not found during codegen of system " + system.name, HalleyExceptions::Tools);
 			}
@@ -447,6 +449,8 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		.addBlankLine();
 
 	if (hasReceiveEntityMessage) {
+		sysClassGen.addAccessLevelSection(MemberAccess::Protected);
+		
 		Vector<String> body = { "switch (msgIndex) {" };
 		for (auto& msg : system.messages) {
 			if (msg.receive) {
@@ -456,11 +460,14 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 					.addMethodDeclaration(MethodSchema(TypeSchema("void"), {
 						VariableSchema(TypeSchema(msg.name + "Message&", true), "msg"),
 						VariableSchema(TypeSchema("MainFamily&"), "e")
-					}, "onMessageReceived", false, true, false, false, false, true));
+					}, "onMessageReceived", false, true, false, false, false, true))
+					.addBlankLine();
 			}
 		}
 		body.emplace_back("}");
+
 		sysClassGen
+			.addAccessLevelSection(MemberAccess::Private)
 			.addMethodDefinition(MethodSchema(TypeSchema("void"), {
 				VariableSchema(TypeSchema("int"), "msgIndex"),
 				VariableSchema(TypeSchema("Halley::Message**"), "msgs"),
@@ -480,6 +487,8 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	if (hasReceiveSystemMessage) {
 		Vector<String> onReceivedBody = { "switch (msgIndex) {" };
 		Vector<String> canReceiveBody = { "switch (msgIndex) {" };
+
+		sysClassGen.addAccessLevelSection(MemberAccess::Protected);
 		for (auto& msg : system.systemMessages) {
 			if (msg.receive) {
 				const auto& sysMsg = systemMessages.find(msg.name)->second;
@@ -500,7 +509,8 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 				sysClassGen
 					.addMethodDeclaration(MethodSchema(TypeSchema(sysMsg.returnType), {
 						VariableSchema(TypeSchema(msg.name + "SystemMessage" + (sysMsg.multicast ? "&" : ""), sysMsg.multicast), "msg")
-					}, "onSystemMessageReceived", false, true, false, false, false, true));
+					}, "onSystemMessageReceived", false, true, false, false, false, true))
+					.addBlankLine();
 			}
 		}
 		onReceivedBody.emplace_back("}");
@@ -509,13 +519,12 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		canReceiveBody.emplace_back("return false;");
 
 		sysClassGen
+			.addAccessLevelSection(MemberAccess::Private)
 			.addMethodDefinition(MethodSchema(TypeSchema("void"), {
 				VariableSchema(TypeSchema("int"), "msgIndex"),
 				VariableSchema(TypeSchema("Halley::SystemMessage&"), "msg"),
 				VariableSchema(TypeSchema("std::function<void(std::byte*)>&", true), "callback")
-			}, "onSystemMessageReceived", false, false, true, true), onReceivedBody);
-
-		sysClassGen
+			}, "onSystemMessageReceived", false, false, true, true), onReceivedBody)
 			.addMethodDefinition(MethodSchema(TypeSchema("bool"), {
 				VariableSchema(TypeSchema("int"), "msgIndex")
 			}, "canHandleSystemMessage", true, false, true, true), canReceiveBody);
