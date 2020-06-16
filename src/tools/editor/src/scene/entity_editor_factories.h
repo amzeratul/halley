@@ -4,6 +4,6 @@
 namespace Halley {
 	class EntityEditorFactories {
 	public:
-		static std::vector< std::unique_ptr<IComponentEditorFieldFactory>> getDefaultFactories();
+		static std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getDefaultFactories();
 	};
 }

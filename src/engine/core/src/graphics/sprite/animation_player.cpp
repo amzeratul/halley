@@ -178,6 +178,9 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 			sprite.setPivot(spriteData->pivot + offsetPivot / sprite.getSize());
 		}
 		sprite.setFlip(dirFlip && !seqNoFlip);
+		if (visibleOverride) {
+			sprite.setVisible(visibleOverride.value());
+		}
 		
 		hasUpdate = false;
 	}
@@ -261,6 +264,7 @@ void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator)
 {
 	setSequence(masterAnimator.getCurrentSequenceName());
 	setDirection(masterAnimator.getCurrentDirectionName());
+	visibleOverride = getCurrentSequenceName() == masterAnimator.getCurrentSequenceName();
 	curFrame = clamp(masterAnimator.curFrame, 0, static_cast<int>(curSeq->numFrames()) - 1);
 	curFrameTime = masterAnimator.curFrameTime;
 

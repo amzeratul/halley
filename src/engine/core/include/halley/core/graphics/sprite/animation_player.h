@@ -91,6 +91,7 @@ namespace Halley
 		bool seqNoFlip;
 		bool dirFlip;
 		bool playing = false;
+		std::optional<bool> visibleOverride;
 
 		bool applyPivot = true;
 
