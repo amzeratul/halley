@@ -141,6 +141,40 @@ namespace Halley {
 			if (res) return *res;
 			throw Exception("No element in family matches predicate.", HalleyExceptions::Entity);
 		}
+
+		T* tryFind(EntityId id)
+		{
+			for (auto& e: *this) {
+				if (e.entityId == id) {
+					return &e;
+				}
+			}
+			return nullptr;
+		}
+
+		const T* tryFind(EntityId id) const
+		{
+			for (auto& e: *this) {
+				if (e.entityId == id) {
+					return &e;
+				}
+			}
+			return nullptr;
+		}
+
+		T& find(EntityId id)
+		{
+			auto res = tryFind(id);
+			if (res) return *res;
+			throw Exception("No element in family matches id.", HalleyExceptions::Entity);
+		}
+
+		const T& find(EntityId id) const
+		{
+			auto res = tryFind(id);
+			if (res) return *res;
+			throw Exception("No element in family matches id.", HalleyExceptions::Entity);
+		}
 		
 	private:
 		void init(MaskStorage& storage) noexcept
