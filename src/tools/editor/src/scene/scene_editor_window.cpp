@@ -139,7 +139,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 		entityList->setSceneData(sceneData);
 
-		setTool(SceneEditorTool::Drag);
+		setTool(SceneEditorTool::Translate);
 
 		// Show root
 		if (!sceneCreated.getEntities().empty()) {
@@ -604,7 +604,7 @@ void SceneEditorWindow::setToolUI(std::shared_ptr<UIWidget> ui)
 void SceneEditorWindow::decayTool()
 {
 	if (curTool == SceneEditorTool::Polygon) {
-		setTool(SceneEditorTool::Drag);
+		setTool(SceneEditorTool::Translate);
 	}
 }
 

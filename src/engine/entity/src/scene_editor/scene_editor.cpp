@@ -406,6 +406,10 @@ int SceneEditor::getSpriteLayer(EntityRef& e) const
 
 void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputState& output)
 {
+	if (input.spaceHeld || input.ctrlHeld || input.shiftHeld) {
+		return;
+	}
+	
 	EntityRef bestEntity;
 	int bestLayer = std::numeric_limits<int>::lowest();
 	

@@ -100,7 +100,7 @@ void SceneEditorCanvas::pressMouse(Vector2f mousePos, int button)
 	}
 
 	if (!dragging) {
-		if (button == 1 || (tool == SceneEditorTool::Drag && button == 0)) {
+		if (button == 1 || (tool == SceneEditorTool::Drag && button == 0) || (inputState.spaceHeld && button == 0)) {
 			dragButton = button;
 			dragging = true;
 			lastMousePos = mousePos;
@@ -164,6 +164,7 @@ void SceneEditorCanvas::updateInputState()
 {
 	inputState.ctrlHeld = keyboard->isButtonDown(KeyCode::LCtrl) || keyboard->isButtonDown(KeyCode::RCtrl);
 	inputState.shiftHeld = keyboard->isButtonDown(KeyCode::LShift) || keyboard->isButtonDown(KeyCode::RShift);
+	inputState.spaceHeld = keyboard->isButtonDown(KeyCode::Space);
 
 	inputState.viewRect = getRect();
 }
