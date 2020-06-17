@@ -42,7 +42,7 @@ void SystemSDL::init()
 		throw Exception(String("Exception initializing timer: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
 	}
 	if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) == -1) {
-		throw Exception(String("Exception initializing joystick: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
+		Logger::logWarning("Couldn't initialize SDL Joystick subsystem");
 	}
 
 	SDL_ShowCursor(SDL_DISABLE);
@@ -66,7 +66,7 @@ void SystemSDL::onResume()
 		throw Exception(String("Exception initializing timer: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
 	}
 	if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) == -1) {
-		throw Exception(String("Exception initializing joystick: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
+		Logger::logWarning("Couldn't initialize SDL Joystick subsystem");
 	}
 }
 
