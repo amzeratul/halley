@@ -95,7 +95,7 @@ namespace Halley {
 
 			context.msgId = T::messageIndex;
 			context.msg = std::make_unique<T>(std::move(msg));
-			context.callback = [=] (std::byte* data)
+			context.callback = [=, returnLambda = std::move(returnLambda)] (std::byte* data)
 			{
 				returnLambda(std::move(*reinterpret_cast<R*>(data)));
 			};
@@ -103,14 +103,19 @@ namespace Halley {
 			return doSendSystemMessage(std::move(context));
 		}
 
-		template <typename T>
-		size_t sendSystemMessageGeneric(T msg)
+		template <typename T, typename F>
+		size_t sendSystemMessageGenericVoid(T msg, F returnLambda)
 		{
 			SystemMessageContext context;
 
 			context.msgId = T::messageIndex;
 			context.msg = std::make_unique<T>(std::move(msg));
-			context.callback = [] (std::byte*) {};
+			context.callback = [=, returnLambda = std::move(returnLambda)] (std::byte*)
+			{
+				if (returnLambda) {
+					returnLambda();
+				}
+			};
 			
 			return doSendSystemMessage(std::move(context));
 		}

@@ -391,18 +391,19 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 			if (iter != systemMessages.end()) {
 				const auto& sysMsg = iter->second;
 
-				String callbackArg;
-				String templateArgs;
+				String functionName;
 				Vector<VariableSchema> parameters = { VariableSchema(TypeSchema(msg.name + "SystemMessage"), "msg") };
 
-				if (sysMsg.returnType != "void") {
-					callbackArg = ", std::move(callback)";
-					templateArgs = ", " + sysMsg.returnType + ", decltype(callback)";
+				if (sysMsg.returnType == "void") {
+					functionName = "sendSystemMessageGenericVoid<decltype(msg), decltype(callback)>";
+					parameters.push_back(VariableSchema(TypeSchema("std::function<void()>"), "callback", "{}"));
+				} else {
+					functionName = "sendSystemMessageGeneric<decltype(msg), " + sysMsg.returnType + ", decltype(callback)>";
 					parameters.push_back(VariableSchema(TypeSchema("std::function<void(" + sysMsg.returnType + ")>"), "callback"));
 				}
 
 				Vector<String> body;
-				body.emplace_back(String(sysMsg.multicast ? "return " : "size_t n = ") + "sendSystemMessageGeneric<decltype(msg)" + templateArgs + ">(std::move(msg)" + callbackArg + ");");
+				body.emplace_back(String(sysMsg.multicast ? "return " : "size_t n = ") + functionName + "(std::move(msg), std::move(callback));");
 				if (!sysMsg.multicast) {
 					body.emplace_back("if (n != 1) {");
 					body.emplace_back("    throw Halley::Exception(\"Sending non-multicast " + sysMsg.name + "SystemMessage, but there are \" + toString(n) + \" systems receiving it (expecting exactly one).\", HalleyExceptions::Entity);");
@@ -514,7 +515,9 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 				} else {
 					onReceivedBody.emplace_back("    " + resultVar + "static_cast<T*>(this)->onSystemMessageReceived(std::move(realMsg));");
 				}
-				if (sysMsg.returnType != "void") {
+				if (sysMsg.returnType == "void") {
+					onReceivedBody.emplace_back("    callback(nullptr);");
+				} else {
 					onReceivedBody.emplace_back("    callback(reinterpret_cast<std::byte*>(&result));");
 				}
 				onReceivedBody.emplace_back("    break;");
