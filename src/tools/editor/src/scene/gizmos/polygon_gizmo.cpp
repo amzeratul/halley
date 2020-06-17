@@ -253,7 +253,10 @@ std::pair<Vector2f, size_t> PolygonGizmo::findInsertPoint(Vector2f pos) const
 	Vector2f bestPoint;
 	float bestDist = std::numeric_limits<float>::infinity();
 	for (size_t i = 0; i < n; ++i) {
-		const auto seg = LineSegment(vertices[i], vertices[(i + 1) % nVertices]);
+		const auto v0 = getTransform()->transformPoint(vertices[i]);
+		const auto v1 = getTransform()->transformPoint(vertices[(i + 1) % nVertices]);
+		
+		const auto seg = LineSegment(v0, v1);
 		const auto p = seg.getClosestPoint(pos);
 		const float dist = (p - pos).squaredLength();
 		if (dist < bestDist) {
