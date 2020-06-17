@@ -10,6 +10,6 @@ SystemMessageSchema::SystemMessageSchema() {}
 SystemMessageSchema::SystemMessageSchema(YAML::Node node, bool generate)
 	: MessageSchema(node, generate)
 {
-	returnType = node["returnType"].as<std::string>();
+	returnType = node["returnType"].as<std::string>("void");
 	multicast = node["multicast"].as<bool>(false);
 }

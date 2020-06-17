@@ -391,8 +391,18 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 			if (iter != systemMessages.end()) {
 				const auto& sysMsg = iter->second;
 
+				String callbackArg;
+				String templateArgs;
+				Vector<VariableSchema> parameters = { VariableSchema(TypeSchema(msg.name + "SystemMessage"), "msg") };
+
+				if (sysMsg.returnType != "void") {
+					callbackArg = ", std::move(callback)";
+					templateArgs = ", " + sysMsg.returnType + ", decltype(callback)";
+					parameters.push_back(VariableSchema(TypeSchema("std::function<void(" + sysMsg.returnType + ")>"), "callback"));
+				}
+
 				Vector<String> body;
-				body.emplace_back(String(sysMsg.multicast ? "return " : "size_t n = ") + "sendSystemMessageGeneric<decltype(msg), " + sysMsg.returnType + ", decltype(callback)>(std::move(msg), std::move(callback));");
+				body.emplace_back(String(sysMsg.multicast ? "return " : "size_t n = ") + "sendSystemMessageGeneric<decltype(msg)" + templateArgs + ">(std::move(msg)" + callbackArg + ");");
 				if (!sysMsg.multicast) {
 					body.emplace_back("if (n != 1) {");
 					body.emplace_back("    throw Halley::Exception(\"Sending non-multicast " + sysMsg.name + "SystemMessage, but there are \" + toString(n) + \" systems receiving it (expecting exactly one).\", HalleyExceptions::Entity);");
@@ -400,10 +410,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 				}
 
 				sysClassGen
-					.addMethodDefinition(MethodSchema(TypeSchema(sysMsg.multicast ? "size_t" : "void"), {
-						VariableSchema(TypeSchema(msg.name + "SystemMessage"), "msg"),
-						VariableSchema(TypeSchema("std::function<void(" + sysMsg.returnType + ")>"), "callback")
-					}, "sendSystemMessage"), body)
+					.addMethodDefinition(MethodSchema(TypeSchema(sysMsg.multicast ? "size_t" : "void"), std::move(parameters), "sendSystemMessage"), body)
 					.addBlankLine();
 			} else {
 				throw Exception("System message with name " + msg.name + " not found during codegen of system " + system.name, HalleyExceptions::Tools);
@@ -498,15 +505,18 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		for (auto& msg : system.systemMessages) {
 			if (msg.receive) {
 				const auto& sysMsg = systemMessages.find(msg.name)->second;
+				String resultVar = sysMsg.returnType == "void" ? "" : "auto result = ";
 				
 				onReceivedBody.emplace_back("case " + msg.name + "SystemMessage::messageIndex: {");
 				onReceivedBody.emplace_back("    auto& realMsg = reinterpret_cast<" + msg.name + "SystemMessage&>(msg);");
 				if (sysMsg.multicast) {
-					onReceivedBody.emplace_back("    auto result = static_cast<T*>(this)->onSystemMessageReceived(realMsg);");
+					onReceivedBody.emplace_back("    " + resultVar + "static_cast<T*>(this)->onSystemMessageReceived(realMsg);");
 				} else {
-					onReceivedBody.emplace_back("    auto result = static_cast<T*>(this)->onSystemMessageReceived(std::move(realMsg));");
+					onReceivedBody.emplace_back("    " + resultVar + "static_cast<T*>(this)->onSystemMessageReceived(std::move(realMsg));");
 				}
-				onReceivedBody.emplace_back("    callback(reinterpret_cast<std::byte*>(&result));");
+				if (sysMsg.returnType != "void") {
+					onReceivedBody.emplace_back("    callback(reinterpret_cast<std::byte*>(&result));");
+				}
 				onReceivedBody.emplace_back("    break;");
 				onReceivedBody.emplace_back("}");
 

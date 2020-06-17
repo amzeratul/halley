@@ -104,6 +104,18 @@ namespace Halley {
 		}
 
 		template <typename T>
+		size_t sendSystemMessageGeneric(T msg)
+		{
+			SystemMessageContext context;
+
+			context.msgId = T::messageIndex;
+			context.msg = std::make_unique<T>(std::move(msg));
+			context.callback = [] (std::byte*) {};
+			
+			return doSendSystemMessage(std::move(context));
+		}
+
+		template <typename T>
 		void invokeInit(T* system)
 		{
 			if constexpr (HasInitMember<T>::value) {
