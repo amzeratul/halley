@@ -209,6 +209,8 @@ namespace Halley {
 		template <typename T>
 		EntityRef& addComponent(T&& component)
 		{
+			Expects(entity != nullptr);
+			
 			static_assert(!std::is_pointer<T>::value, "Cannot pass pointer to component");
 			static_assert(!std::is_same<T, Component>::value, "Cannot add base class Component to entity, make sure type isn't being erased");
 			static_assert(std::is_base_of<Component, T>::value, "Components must extend the Component class");
@@ -228,12 +230,14 @@ namespace Halley {
 		template <typename T>
 		EntityRef& removeComponent()
 		{
+			Expects(entity != nullptr);
 			entity->removeComponent<T>(*world);
 			return *this;
 		}
 
 		EntityRef& removeAllComponents()
 		{
+			Expects(entity != nullptr);
 			entity->removeAllComponents(*world);
 			return *this;
 		}
@@ -241,35 +245,41 @@ namespace Halley {
 		template <typename T>
 		T& getComponent()
 		{
+			Expects(entity != nullptr);
 			return entity->getComponent<T>();
 		}
 
 		template <typename T>
 		const T& getComponent() const
 		{
+			Expects(entity != nullptr);
 			return entity->getComponent<T>();
 		}
 
 		template <typename T>
 		T* tryGetComponent()
 		{
+			Expects(entity != nullptr);
 			return entity->tryGetComponent<T>();
 		}
 
 		template <typename T>
 		const T* tryGetComponent() const
 		{
+			Expects(entity != nullptr);
 			return entity->tryGetComponent<T>();
 		}
 
 		EntityId getEntityId() const
 		{
+			Expects(entity != nullptr);
 			return entity->getEntityId();
 		}
 
 		template <typename T>
 		bool hasComponent() const
 		{
+			Expects(entity != nullptr);
 			return entity->hasComponent<T>(*world);
 		}
 
@@ -289,72 +299,86 @@ namespace Halley {
 
 		const String& getName() const
 		{
+			Expects(entity != nullptr);
 			return entity->name;
 		}
 
 		void setName(String name)
 		{
+			Expects(entity != nullptr);
 			entity->name = std::move(name);
 		}
 
 		const UUID& getUUID() const
 		{
+			Expects(entity != nullptr);
 			return entity->uuid;
 		}
 
 		void keepOnlyComponentsWithIds(const std::vector<int>& ids)
 		{
+			Expects(entity != nullptr);
 			entity->keepOnlyComponentsWithIds(ids, *world);
 		}
 
 		bool hasParent() const
 		{
+			Expects(entity != nullptr);
 			return entity->getParent() != nullptr;
 		}
 		
 		EntityRef getParent() const
 		{
+			Expects(entity != nullptr);
 			return EntityRef(*entity->getParent(), *world);
 		}
 
 		std::optional<EntityRef> tryGetParent() const
 		{
+			Expects(entity != nullptr);
 			const auto parent = entity->getParent();
 			return parent != nullptr ? EntityRef(*parent, *world) : std::optional<EntityRef>();
 		}
 
 		void setParent(EntityRef& parent)
 		{
+			Expects(entity != nullptr);
 			entity->setParent(parent.entity);
 		}
 
 		void setParent()
 		{
+			Expects(entity != nullptr);
 			entity->setParent(nullptr);
 		}
 
 		const std::vector<Entity*>& getRawChildren() const
 		{
+			Expects(entity != nullptr);
 			return entity->getChildren();
 		}
 
 		bool hasChildren() const
 		{
+			Expects(entity != nullptr);
 			return !entity->getChildren().empty();
 		}
 
 		void addChild(EntityRef& child)
 		{
+			Expects(entity != nullptr);
 			entity->addChild(*child.entity);
 		}
 
 		void detachChildren()
 		{
+			Expects(entity != nullptr);
 			entity->detachChildren();
 		}
 
 		int8_t getHierarchyRevision() const
 		{
+			Expects(entity != nullptr);
 			return entity->hierarchyRevision;
 		}
 
