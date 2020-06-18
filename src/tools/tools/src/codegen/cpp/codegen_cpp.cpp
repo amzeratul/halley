@@ -445,7 +445,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	
 	sysClassGen
 		.setAccessLevel(MemberAccess::Private)
-		.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "initBase", false, false, true), initBaseMethodBody);
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "initBase", false, false, true, true), initBaseMethodBody);
 
 	auto fams = convert<FamilySchema, MemberSchema>(system.families, [](auto& fam) { return MemberSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); });
 	auto mid = fams.begin() + std::min(fams.size(), size_t(1));
@@ -463,7 +463,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		.addBlankLine();
 
 	if (hasReceiveEntityMessage) {
-		sysClassGen.setAccessLevel(MemberAccess::Protected);
+		sysClassGen.setAccessLevel(MemberAccess::Public);
 		
 		Vector<String> body = { "switch (msgIndex) {" };
 		for (auto& msg : system.messages) {
@@ -502,7 +502,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		Vector<String> onReceivedBody = { "switch (msgIndex) {" };
 		Vector<String> canReceiveBody = { "switch (msgIndex) {" };
 
-		sysClassGen.setAccessLevel(MemberAccess::Protected);
+		sysClassGen.setAccessLevel(MemberAccess::Public);
 		for (auto& msg : system.systemMessages) {
 			if (msg.receive) {
 				const auto& sysMsg = systemMessages.find(msg.name)->second;
@@ -551,7 +551,9 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 
 	sysClassGen
 		.setAccessLevel(MemberAccess::Public)
-		.addCustomConstructor({}, { VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}, {" + String::concatList(entityMsgsReceived, ", ") + "}") })
+		.addCustomConstructor({}, {
+			VariableSchema(TypeSchema(""), "System", "{" + String::concatList(convert<FamilySchema, String>(system.families, [](auto& fam) { return "&" + fam.name + "Family"; }), ", ") + "}, {" + String::concatList(entityMsgsReceived, ", ") + "}")
+		}, { "static_assert(std::is_final_v<T>, \"System must be final.\");" })
 		.finish()
 		.writeTo(contents);
 

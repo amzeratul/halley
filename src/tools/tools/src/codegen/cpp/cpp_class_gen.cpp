@@ -131,10 +131,9 @@ CPPClassGenerator& CPPClassGenerator::addConstructor(const Vector<VariableSchema
 	return addCustomConstructor(variables, init);
 }
 
-CPPClassGenerator& CPPClassGenerator::addCustomConstructor(const Vector<VariableSchema>& parameters, const Vector<VariableSchema>& initialization)
+CPPClassGenerator& CPPClassGenerator::addCustomConstructor(const Vector<VariableSchema>& parameters, const Vector<VariableSchema>& initialization, const Vector<String>& body)
 {
 	String sig = "\t" + getMethodSignatureString(MethodSchema(TypeSchema(""), parameters, className));
-	String body = "{}";
 
 	if (!initialization.empty()) {
 		addRawLine(sig);
@@ -144,10 +143,16 @@ CPPClassGenerator& CPPClassGenerator::addCustomConstructor(const Vector<Variable
 			first = false;
 			addRawLine(prefix + i.name + "(" + i.initialValue + ")");
 		}
-		addRawLine("\t" + body);
+		addRawLine("\t{");
 	} else {
-		addRawLine(sig + " " + body);
+		addRawLine(sig + " {");
 	}
+
+	for (const auto& line : body) {
+		addRawLine("\t\t" + line);
+	}
+	addRawLine("\t}");
+	
 	return *this;
 }
 
