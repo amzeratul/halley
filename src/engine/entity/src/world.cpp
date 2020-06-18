@@ -160,6 +160,11 @@ EntityRef World::createEntity(String name, std::optional<EntityRef> parent)
 	return createEntity(UUID(), name, parent);
 }
 
+EntityRef World::createEntity(String name, EntityId parentId)
+{
+	return createEntity(UUID(), name, getEntity(parentId));
+}
+
 EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> parent)
 {
 	if (!uuid.isValid()) {
@@ -382,7 +387,7 @@ void World::render(RenderContext& rc) const
 void World::allocateEntity(Entity* entity) {
 	auto res = entityMap.alloc();
 	*res.first = entity;
-	entity->uid.value = res.second;
+	entity->entityId.value = res.second;
 }
 
 void World::spawnPending()

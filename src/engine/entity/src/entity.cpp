@@ -162,10 +162,10 @@ void Entity::refresh(MaskStorage& storage, ComponentDeleterTable& table)
 
 EntityId Entity::getEntityId() const
 {
-	if (!uid.isValid()) {
+	if (!entityId.isValid()) {
 		//throw Exception("Entity ID not yet assigned - are you using this before it's spawned?");
 	}
-	return uid;
+	return entityId;
 }
 
 void Entity::destroy()

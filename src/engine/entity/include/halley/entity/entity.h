@@ -134,7 +134,7 @@ namespace Halley {
 		
 		Vector<MessageEntry> inbox;
 		FamilyMaskType mask;
-		EntityId uid;
+		EntityId entityId;
 		String name;
 		UUID uuid;
 

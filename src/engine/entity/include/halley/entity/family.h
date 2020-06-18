@@ -108,8 +108,7 @@ namespace Halley {
 	protected:
 		void addEntity(Entity& entity) override
 		{
-			entities.push_back(StorageType());
-			auto& e = entities.back();
+			auto& e = entities.emplace_back();
 			e.entityId = entity.getEntityId();
 			T::Type::loadComponents(entity, &e.data[0]);
 
