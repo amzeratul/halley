@@ -179,7 +179,10 @@ void UIRoot::updateKeyboardInput()
 	}
 
 	if (keyboard) {
-		const auto focused = currentFocus.lock();
+		auto focused = currentFocus.lock();
+		if (focused && !focused->isActiveInHierarchy()) {
+			focused.reset();
+		}
 
 		for (const auto& key: keyboard->getPendingKeys()) {
 			// Send to focused first

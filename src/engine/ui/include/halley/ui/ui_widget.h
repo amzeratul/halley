@@ -258,11 +258,13 @@ namespace Halley {
 	};
 
 	template <typename F>
-	void UIParent::descend(F f)
+	void UIParent::descend(F f, bool includeInactive)
 	{
 		for (auto& c: children) {
-			f(c);
-			c->descend(f);
+			if (c->isActive() || includeInactive) {
+				f(c);
+				c->descend(f, includeInactive);
+			}
 		}
 	}
 }
