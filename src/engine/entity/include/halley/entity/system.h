@@ -46,7 +46,7 @@ namespace Halley {
 		long long getNanoSecondsTakenAvg() const { return timer.averageElapsedNanoSeconds(); }
 		void setCollectSamples(bool collect);
 
-		virtual bool canHandleSystemMessage(int messageId) const { return false; }
+		virtual bool canHandleSystemMessage(int messageId, const String& targetSystem) const { return false; }
 		void receiveSystemMessage(const SystemMessageContext& context);
 		void prepareSystemMessages();
 		void processSystemMessages();
@@ -89,7 +89,7 @@ namespace Halley {
 		}
 
 		template <typename T, typename R, typename F>
-		size_t sendSystemMessageGeneric(T msg, F returnLambda)
+		size_t sendSystemMessageGeneric(T msg, F returnLambda, const String& targetSystem)
 		{
 			SystemMessageContext context;
 
@@ -100,11 +100,11 @@ namespace Halley {
 				returnLambda(std::move(*reinterpret_cast<R*>(data)));
 			};
 			
-			return doSendSystemMessage(std::move(context));
+			return doSendSystemMessage(std::move(context), targetSystem);
 		}
 
 		template <typename T, typename F>
-		size_t sendSystemMessageGenericVoid(T msg, F returnLambda)
+		size_t sendSystemMessageGenericVoid(T msg, F returnLambda, const String& targetSystem)
 		{
 			SystemMessageContext context;
 
@@ -117,7 +117,7 @@ namespace Halley {
 				}
 			};
 			
-			return doSendSystemMessage(std::move(context));
+			return doSendSystemMessage(std::move(context), targetSystem);
 		}
 
 		template <typename T>
@@ -184,7 +184,7 @@ namespace Halley {
 		void purgeMessages();
 		void processMessages();
 		void doSendMessage(EntityId target, std::unique_ptr<Message> msg, int msgId);
-		size_t doSendSystemMessage(SystemMessageContext context);
+		size_t doSendSystemMessage(SystemMessageContext context, const String& targetSystem);
 		void dispatchMessages();
 	};
 

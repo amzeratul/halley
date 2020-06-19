@@ -113,7 +113,7 @@ namespace Halley {
 		MaskStorage& getMaskStorage() const noexcept;
 		ComponentDeleterTable& getComponentDeleterTable();
 
-		size_t sendSystemMessage(SystemMessageContext context);
+		size_t sendSystemMessage(SystemMessageContext context, const String& targetSystem);
 
 	private:
 		const HalleyAPI& api;

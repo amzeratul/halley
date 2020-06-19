@@ -317,14 +317,14 @@ ComponentDeleterTable& World::getComponentDeleterTable()
 	return *componentDeleterTable;
 }
 
-size_t World::sendSystemMessage(SystemMessageContext origContext)
+size_t World::sendSystemMessage(SystemMessageContext origContext, const String& targetSystem)
 {
 	auto& context = pendingSystemMessages.emplace_back(std::move(origContext));
 	
 	size_t count = 0;
 	for (auto& timeline: systems) {
 		for (auto& system: timeline) {
-			if (system->canHandleSystemMessage(context.msgId)) {
+			if (system->canHandleSystemMessage(context.msgId, targetSystem)) {
 				system->receiveSystemMessage(context);
 				++count;
 			}
