@@ -428,7 +428,7 @@ std::vector<Path> OSWin32::enumerateDirectory(const Path& rootPath)
 						dirsToList.emplace_back(curDir + "/" + curFile);
 					}
 				} else {
-					auto res = (Path(curDir) / curFile).dropFront(1);
+					auto res = (Path(curDir) / curFile);
 					result.emplace_back(res);
 				}
 			} while (FindNextFileW(handle, &ffd) != 0);
