@@ -106,6 +106,16 @@ void AssetsEditorWindow::makeUI()
 		removeAsset();
 	});
 
+	setHandle(UIEventType::ButtonClicked, "openFile", [=] (const UIEvent& event)
+	{
+		openFileExternally(getCurrentAssetPath());
+	});
+
+	setHandle(UIEventType::ButtonClicked, "showFile", [=] (const UIEvent& event)
+	{
+		showFileExternally(getCurrentAssetPath());
+	});
+
 	updateAddRemoveButtons();
 }
 
@@ -371,6 +381,23 @@ void AssetsEditorWindow::removeAsset()
 	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
 	assetList->setItemActive(lastClickedAsset, false);
 	FileSystem::remove(project.getAssetsSrcPath() / lastClickedAsset);
+}
+
+Path AssetsEditorWindow::getCurrentAssetPath() const
+{
+	return project.getAssetsSrcPath() / loadedAsset;
+}
+
+void AssetsEditorWindow::openFileExternally(const Path& path)
+{
+	auto cmd = "start \"\" \"" + path.toString().replaceAll("/", "\\") + "\"";
+	system(cmd.c_str());
+}
+
+void AssetsEditorWindow::showFileExternally(const Path& path)
+{
+	auto cmd = "explorer.exe /select,\"" + path.toString().replaceAll("/", "\\") + "\"";
+	system(cmd.c_str());
 }
 
 AssetEditor::AssetEditor(UIFactory& factory, Resources& resources, Project& project, AssetType type)

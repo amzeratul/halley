@@ -70,5 +70,9 @@ children:
       proportion: 1
     - widget: { class: label, id: assetName, text: "" }
       fill: centre
-  - widget: { class: metadataEditor }
+  - sizer: { type: vertical }
+    children:
+    - widget: { class: metadataEditor }
+    - widget: { id: openFile, class: button, text: Open File }
+    - widget: { id: showFile, class: button, text: Show File }
 ...

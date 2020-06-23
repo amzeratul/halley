@@ -80,5 +80,9 @@ namespace Halley {
 
 		void addAsset();
 		void removeAsset();
+
+		Path getCurrentAssetPath() const;
+		void openFileExternally(const Path& path);
+		void showFileExternally(const Path& path);
 	};
 }
