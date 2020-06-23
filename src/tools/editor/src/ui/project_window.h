@@ -1,9 +1,12 @@
 #pragma once
 
+#include "console_window.h"
 #include "halley/tools/dll/dynamic_library.h"
 #include "halley/ui/ui_widget.h"
 #include "src/editor_root_stage.h"
 #include "halley/tools/project/project.h"
+#include "src/assets/assets_editor_window.h"
+#include "src/scene/entity_editor.h"
 
 namespace Halley {
     class UIFactory;
@@ -51,6 +54,10 @@ namespace Halley {
     	bool waitingToLoadCustomUI = true;
     	bool hasAssets = false;
     	bool hasDLL = false;
+
+    	std::shared_ptr<AssetsEditorWindow> assetEditorWindow;
+        std::shared_ptr<SceneEditorWindow> sceneEditorWindow;
+        std::shared_ptr<ConsoleWindow> consoleWindow;
 
         void makeUI();
     	void makeToolbar();

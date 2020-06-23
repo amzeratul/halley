@@ -50,6 +50,11 @@ void SelectAssetWidget::makeUI()
 	{
 		choose();
 	});
+
+	setHandle(UIEventType::ButtonClicked, "goto", [=] (const UIEvent& event)
+	{
+		sendEvent(UIEvent(UIEventType::NavigateTo, getId(), "asset:" + type + ":" + value));
+	});
 }
 
 void SelectAssetWidget::choose()

@@ -25,6 +25,27 @@ AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, Pro
 	setAssetSrcMode(true);
 }
 
+void AssetsEditorWindow::showAsset(AssetType type, const String& assetId)
+{
+	Path target;
+	if (type == AssetType::Sprite) {
+		auto ssAssetId = project.getGameResources().get<SpriteResource>(assetId)->getSpriteSheet()->getAssetId();
+		target = project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::SpriteSheet, ssAssetId);
+	} else {
+		target = project.getImportAssetsDatabase().getPrimaryInputFile(type, assetId);
+	}
+	showFile(target);
+}
+
+void AssetsEditorWindow::showFile(const Path& path)
+{
+	if (!path.isEmpty()) {
+		curSrcPath = path.parentPath();
+		refreshList();
+		assetList->setSelectedOptionId(path.toString());
+	}
+}
+
 void AssetsEditorWindow::loadResources()
 {
 	project.addAssetReloadCallback([=] (const std::vector<String>& assets)

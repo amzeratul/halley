@@ -33,6 +33,8 @@ namespace Halley {
 	class AssetsEditorWindow : public UIWidget {
     public:
         AssetsEditorWindow(UIFactory& factory, Project& project, ProjectWindow& projectWindow);
+        void showAsset(AssetType type, const String& assetId);
+		void showFile(const Path& path);
 
 	private:
 		UIFactory& factory;
@@ -78,5 +80,5 @@ namespace Halley {
 
 		void addAsset();
 		void removeAsset();
-    };
+	};
 }

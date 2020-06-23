@@ -53,6 +53,18 @@ void ProjectWindow::makeUI()
 	makeToolbar();
 	makePagedPane();
 	uiBottom->add(std::make_shared<TaskBar>(factory, *tasks), 1);
+
+	setHandle(UIEventType::NavigateTo, [=] (const UIEvent& event)
+	{
+		auto uri = event.getStringData();
+		if (uri.startsWith("asset:")) {
+			auto splitURI = uri.split(':');
+			if (splitURI.size() == 3) {
+				toolbar->getList()->setSelectedOptionId(toString(EditorTabs::Assets));
+				assetEditorWindow->showAsset(fromString<AssetType>(splitURI.at(1)), splitURI.at(2));
+			}
+		}
+	});
 }
 
 void ProjectWindow::makeToolbar()
@@ -73,11 +85,15 @@ void ProjectWindow::makePagedPane()
 		pagedPane->destroy();
 		uiMid->clear();
 	}
+
+	assetEditorWindow = std::make_shared<AssetsEditorWindow>(factory, project, *this);
+	sceneEditorWindow = std::make_shared<SceneEditorWindow>(factory, project, api);
+	consoleWindow = std::make_shared<ConsoleWindow>(factory);
 	
 	pagedPane = std::make_shared<UIPagedPane>("pages", numOfStandardTools);
-	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(std::make_shared<AssetsEditorWindow>(factory, project, *this), 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(static_cast<int>(EditorTabs::Scene))->add(std::make_shared<SceneEditorWindow>(factory, project, api), 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(std::make_shared<ConsoleWindow>(factory), 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(assetEditorWindow, 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(static_cast<int>(EditorTabs::Scene))->add(sceneEditorWindow, 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(consoleWindow, 1, Vector4f(8, 8, 8, 8));
 
 	uiMid->add(pagedPane, 1);
 }
