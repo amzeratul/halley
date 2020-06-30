@@ -200,6 +200,11 @@ namespace Halley {
 			return Vector2D(std::abs(x), std::abs(y));
 		}
 
+		constexpr bool isValid() const
+		{
+			return !std::isnan(x) && !std::isnan(y) && !std::isinf(x) && !std::isinf(y);
+		}
+
 		constexpr static Vector2D<T,U> min(Vector2D<T,U> a, Vector2D<T,U> b)
 		{
 			return Vector2D<T,U>(std::min(a.x, b.x), std::min(a.y, b.y));

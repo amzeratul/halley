@@ -174,8 +174,15 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 		
 		sprite.setSprite(*spriteData, false);
 		
-		if (applyPivot) {
-			sprite.setPivot(spriteData->pivot + offsetPivot / sprite.getSize());
+		if (applyPivot && spriteData->pivot.isValid()) {
+			auto sz = sprite.getSize();
+			if (std::abs(sz.x) < 0.00001f) {
+				sz.x = 1;
+			}
+			if (std::abs(sz.y) < 0.00001f) {
+				sz.y = 1;
+			}
+			sprite.setPivot(spriteData->pivot + offsetPivot / sz);
 		}
 		sprite.setFlip(dirFlip && !seqNoFlip);
 		if (visibleOverride) {

@@ -143,10 +143,17 @@ Rect4f Sprite::getLocalAABB() const
 Rect4f Sprite::getAABB() const
 {
 	const Vector2f sz = getScaledSize() * Vector2f(flip ? -1.0f : 1.0f, 1.0f);
+
+	Expects(!std::isnan(sz.x));
+	Expects(!std::isnan(sz.y));
+	
 	if (std::abs(getRotation().toRadians()) < 0.0001f) {
 		// No rotation, give exact bounding box
 		const Vector2f pivot = getPivot();
-		return getPosition() + Rect4f(-sz * pivot, sz * (Vector2f(1, 1) - pivot));
+		auto aabb = getPosition() + Rect4f(-sz * pivot, sz * (Vector2f(1, 1) - pivot));
+		Ensures(!std::isnan(aabb.getWidth()));
+		Ensures(!std::isnan(aabb.getHeight()));
+		return aabb;
 	} else {
 		// This is a coarse test; will give a few false positives
 		const Vector2f sz2 = sz * std::sqrt(2);
@@ -221,6 +228,8 @@ bool Sprite::isFlipped() const
 
 Sprite& Sprite::setPivot(Vector2f v)
 {
+	Expects(v.isValid());
+	
 	vertexAttrib.pivot = v;
 	return *this;
 }
@@ -228,6 +237,16 @@ Sprite& Sprite::setPivot(Vector2f v)
 Sprite& Sprite::setAbsolutePivot(Vector2f v)
 {
 	vertexAttrib.pivot = v / size;
+
+	if (std::abs(size.x) < 0.000001f) {
+		vertexAttrib.pivot.x = 0;
+	}
+	if (std::abs(size.y) < 0.000001f) {
+		vertexAttrib.pivot.y = 0;
+	}
+	
+	Ensures(vertexAttrib.pivot.isValid());
+
 	return *this;
 }
 
@@ -380,6 +399,8 @@ Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot)
 	sliced = slices.x != 0 || slices.y != 0 || slices.z != 0 || slices.w != 0;
 	setSize(entry.size);
 	if (applyPivot) {
+		Expects(!std::isnan(entry.pivot.x));
+		Expects(!std::isnan(entry.pivot.y));
 		vertexAttrib.pivot = entry.pivot;
 	}
 	vertexAttrib.texRect = entry.coords;
