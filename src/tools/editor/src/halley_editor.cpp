@@ -104,7 +104,7 @@ void HalleyEditor::parseArguments(const std::vector<String>& args)
 std::unique_ptr<Stage> HalleyEditor::startGame()
 {
 	auto& api = getAPI();
-	preferences = std::make_unique<Preferences>(*api.system, "2020-06-17");
+	preferences = std::make_unique<Preferences>(*api.system, "2020-07-02");
 
 	projectLoader = std::make_unique<ProjectLoader>(api.core->getStatics(), rootPath);
 	std::unique_ptr<Project> project;
@@ -114,7 +114,7 @@ std::unique_ptr<Stage> HalleyEditor::startGame()
 	}
 
 	api.video->setWindow(preferences->getWindowDefinition());
-	//api->video->setVsync(true);
+	api.video->setVsync(true);
 	return std::make_unique<EditorRootStage>(*this, std::move(project));
 }
 
