@@ -43,26 +43,4 @@ uiStyle:
     iconBorder: [0, 0, 0, 0]
     hoveredIconColour: "#FFCDCD"
 
-  labelLight:
-    label: { font: Ubuntu Light, size: 14, colour: "#FFFFFF" }
-
-  inputThin:
-    box: { img: halley_ui/ui_input_thin.png, colour: "#9861B6" }
-    caret: halley_ui/ui_caret.png
-    innerBorder: [ 6, 3, 6, 2 ]
-    label: { font: Ubuntu Light, size: 14, colour: "#FFFFFF" }
-    labelGhost: { font: Ubuntu Light, size: 14, colour: "#7F7F7F" }
-    minSize: 22
-
-  buttonThin:
-    normal: { img: halley_ui/ui_button.png, colour: "#9C5BB5" }
-    down: { img: halley_ui/ui_button.png, colour: "#913DA3" }
-    hover: { img: halley_ui/ui_button.png, colour: "#B68FCB" }
-    disabled: { img: halley_ui/ui_button.png, colour: "#927B95" }
-    innerBorder: [ 5, 0, 5, 1 ]
-    upSound: ""
-    downSound: ""
-    hoverSound: ""
-    label: { font: Ubuntu Bold, size: 14, colour: "#FFFFFF" }
-    labelBorder: [0, 0, 0, 0]
 ...
