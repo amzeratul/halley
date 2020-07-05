@@ -15,8 +15,13 @@ namespace Halley {
 		std::unique_ptr<UIFactory> uiFactory;
 		std::unique_ptr<UIRoot> ui;
 		std::shared_ptr<UIWidget> topLevelUI;
+		std::shared_ptr<UIWidget> curUI;
 
+		Sprite background;
+
+		void makeSprites();
 		void makeUI();
 		void updateUI(Time time);
+		void setCurrentUI(std::shared_ptr<UIWidget> ui);
 	};
 }

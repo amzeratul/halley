@@ -1,0 +1,15 @@
+---
+name: Launcher/Background
+base: sprite_base.yaml
+uniforms:
+  - MaterialBlock:
+    - u_col0: vec4
+    - u_col1: vec4
+    - u_distance: float
+passes:
+  - blend: Opaque
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: scanline.pixel.hlsl
+...

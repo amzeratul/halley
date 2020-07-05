@@ -48,7 +48,7 @@ std::unique_ptr<Stage> HalleyLauncher::startGame()
 {
 	auto& api = getAPI();
 
-	api.video->setWindow(WindowDefinition(WindowType::Window, Vector2i(1280, 720), "Halley Launcher"));
+	api.video->setWindow(WindowDefinition(WindowType::Window, Vector2i(1000, 500), "Halley Launcher"));
 	api.video->setVsync(true);
 
 	return std::make_unique<LauncherStage>();

@@ -3,6 +3,7 @@ using namespace Halley;
 
 void LauncherStage::init()
 {
+	makeSprites();
 	makeUI();
 }
 
@@ -20,12 +21,26 @@ void LauncherStage::onRender(RenderContext& context) const
 		painter.clear(Colour4f()); // Needed for depth/stencil
 		auto view = Rect4f(painter.getViewPort());
 
+		// Background
+		Sprite bg = background;
+		bg.setTexRect(view).setSize(view.getSize()).draw(painter);
+		
 		// UI
 		SpritePainter spritePainter;
 		spritePainter.start();
 		ui->draw(spritePainter, 1, 0);
 		spritePainter.draw(1, painter);
 	});
+}
+
+void LauncherStage::makeSprites()
+{
+	auto mat = std::make_shared<Material>(getResource<MaterialDefinition>("Launcher/Background"));
+	mat
+		->set("u_col0", Colour4f(0.08f))
+		.set("u_col1", Colour4f(0.07f))
+		.set("u_distance", 6.0f);
+	background = Sprite().setMaterial(mat).setPos(Vector2f(0, 0));
 }
 
 void LauncherStage::makeUI()
@@ -41,15 +56,28 @@ void LauncherStage::makeUI()
 	ui = std::make_unique<UIRoot>(getAPI());
 	ui->makeToolTip(uiFactory->getStyle("tooltip"));
 
-	topLevelUI = uiFactory->makeUI("ui/load_project");
-	topLevelUI->setAnchor(UIAnchor());
+	topLevelUI = uiFactory->makeUI("ui/background");
 	ui->addChild(topLevelUI);
+
+	setCurrentUI(uiFactory->makeUI("ui/load_project"));
 }
 
 void LauncherStage::updateUI(Time time)
 {
 	const auto kb = getInputAPI().getKeyboard();
 	const auto size = getVideoAPI().getWindow().getDefinition().getSize();
+	topLevelUI->setMinSize(Vector2f(size));
 	ui->setRect(Rect4f(Vector2f(), Vector2f(size)));
 	ui->update(time, UIInputType::Mouse, getInputAPI().getMouse(), kb);
+}
+
+void LauncherStage::setCurrentUI(std::shared_ptr<UIWidget> ui)
+{
+	auto container = topLevelUI->getWidget("container");
+	container->clear();
+	if (curUI) {
+		curUI->destroy();
+	}
+	container->add(ui, 1);
+	curUI = ui;
 }

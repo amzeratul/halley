@@ -1,0 +1,11 @@
+---
+
+widget: { class: widget, innerBorder: [25, 25, 25, 25] }
+sizer: { type: vertical }
+children:
+- widget: { class: widget, id: container }
+  sizer: { type: vertical }
+  children: []
+  proportion: 1
+
+...
