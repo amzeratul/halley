@@ -689,6 +689,7 @@ Future<std::optional<Path>> OSWin32::openFileChooser(FileChooserParameters param
 {
 	Promise<std::optional<Path>> promise;
 	auto future = promise.getFuture();
+	auto window = GetActiveWindow();
 
 	Concurrent::execute([=, parameters = std::move(parameters), promise = std::move(promise)] () mutable
 	{
@@ -704,19 +705,19 @@ Future<std::optional<Path>> OSWin32::openFileChooser(FileChooserParameters param
 			flags |= FOS_PICKFOLDERS;
 		}
 		fileDialog->SetOptions(flags);
-		fileDialog->Show(nullptr);
+		fileDialog->Show(window);
 
-		IShellItem *psiResult;
-        hr = fileDialog->GetResult(&psiResult);
+		IShellItem *result;
+        hr = fileDialog->GetResult(&result);
         if (SUCCEEDED(hr)) {
-            PWSTR pszFilePath = nullptr;
-            hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
-			promise.setValue(String(pszFilePath));
+            PWSTR filePath = nullptr;
+            hr = result->GetDisplayName(SIGDN_FILESYSPATH, &filePath);
+			promise.setValue(String(filePath));
         	
             if (SUCCEEDED(hr)) {
-            	CoTaskMemFree(pszFilePath);
+            	CoTaskMemFree(filePath);
             }
-            psiResult->Release();
+            result->Release();
 		} else {
 			promise.setValue({});
 		}
