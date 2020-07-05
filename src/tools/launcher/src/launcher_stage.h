@@ -5,6 +5,8 @@
 namespace Halley {
 	class LauncherStage : public Stage {
 	public:
+		LauncherStage();
+		
 		void init() override;
 
 		void onVariableUpdate(Time) override;
@@ -16,6 +18,8 @@ namespace Halley {
 		std::unique_ptr<UIRoot> ui;
 		std::shared_ptr<UIWidget> topLevelUI;
 		std::shared_ptr<UIWidget> curUI;
+
+		Executor mainThreadExecutor;
 
 		Sprite background;
 

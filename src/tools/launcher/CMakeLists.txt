@@ -7,6 +7,7 @@ SET(HALLEY_MONOLITHIC 1)
 set (launcher_sources
 	"prec.cpp"
 
+	"src/choose_project.cpp"
 	"src/launcher.cpp"
 	"src/launcher_stage.cpp"
 	)
@@ -14,6 +15,7 @@ set (launcher_sources
 set (launcher_headers
 	"prec.h"
 
+	"src/choose_project.h"
 	"src/launcher.h"
 	"src/launcher_stage.h"
 	)

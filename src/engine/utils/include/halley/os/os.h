@@ -38,6 +38,13 @@ namespace Halley {
 		long long RAM = 0;
 	};
 
+	class FileChooserParameters {
+	public:
+		Path defaultPath;
+		bool save = false;
+		bool folderOnly = false;
+	};
+
 	class OS {
 	public:
 		virtual ~OS() {}
@@ -68,6 +75,8 @@ namespace Halley {
 		virtual std::shared_ptr<IClipboard> getClipboard();
 
 		virtual void openURL(const String& url);
+
+		virtual Future<std::optional<Path>> openFileChooser(FileChooserParameters parameters);
 
 	private:
 		static OS* osInstance;

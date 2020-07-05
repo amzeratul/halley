@@ -58,6 +58,8 @@ namespace Halley {
 
 		void openURL(const String& url) override;
 
+		Future<std::optional<Path>>	openFileChooser(FileChooserParameters parameters) override;
+		
 	private:
 		String runWMIQuery(String query, String parameter) const;
 		void loadWindowIcon(HWND hwnd);

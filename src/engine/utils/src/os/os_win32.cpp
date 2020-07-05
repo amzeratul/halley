@@ -685,4 +685,48 @@ void OSWin32::openURL(const String& url)
 	}
 }
 
+Future<std::optional<Path>> OSWin32::openFileChooser(FileChooserParameters parameters)
+{
+	Promise<std::optional<Path>> promise;
+	auto future = promise.getFuture();
+
+	Concurrent::execute([=, parameters = std::move(parameters), promise = std::move(promise)] () mutable
+	{
+		CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+		
+		IFileDialog *fileDialog = nullptr;
+		HRESULT hr = CoCreateInstance(parameters.save ? CLSID_FileSaveDialog : CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog));
+
+		DWORD flags;
+        fileDialog->GetOptions(&flags);
+		flags |= FOS_FORCEFILESYSTEM;
+		if (parameters.folderOnly) {
+			flags |= FOS_PICKFOLDERS;
+		}
+		fileDialog->SetOptions(flags);
+		fileDialog->Show(nullptr);
+
+		IShellItem *psiResult;
+        hr = fileDialog->GetResult(&psiResult);
+        if (SUCCEEDED(hr)) {
+            PWSTR pszFilePath = nullptr;
+            hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
+			promise.setValue(String(pszFilePath));
+        	
+            if (SUCCEEDED(hr)) {
+            	CoTaskMemFree(pszFilePath);
+            }
+            psiResult->Release();
+		} else {
+			promise.setValue({});
+		}
+		
+		fileDialog->Release();
+
+		CoUninitialize();
+	});
+
+	return future;
+}
+
 #endif

@@ -71,7 +71,7 @@ bool HalleyLauncher::isDevMode() const
 
 bool HalleyLauncher::shouldCreateSeparateConsole() const
 {
-	return false;
+	return true;
 }
 
 HalleyGame(HalleyLauncher);

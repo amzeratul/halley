@@ -1,5 +1,12 @@
 #include "launcher_stage.h"
+
+#include "choose_project.h"
 using namespace Halley;
+
+LauncherStage::LauncherStage()
+	: mainThreadExecutor(Executors::getMainThread())
+{
+}
 
 void LauncherStage::init()
 {
@@ -9,6 +16,7 @@ void LauncherStage::init()
 
 void LauncherStage::onVariableUpdate(Time time)
 {
+	mainThreadExecutor.runPending();
 	updateUI(time);
 }
 
@@ -59,7 +67,7 @@ void LauncherStage::makeUI()
 	topLevelUI = uiFactory->makeUI("ui/background");
 	ui->addChild(topLevelUI);
 
-	setCurrentUI(uiFactory->makeUI("ui/load_project"));
+	setCurrentUI(std::make_shared<ChooseProject>(*uiFactory));
 }
 
 void LauncherStage::updateUI(Time time)
