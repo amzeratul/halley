@@ -7,7 +7,9 @@ LauncherSaveData::LauncherSaveData(std::shared_ptr<ISaveData> saveData)
 }
 
 std::vector<Path> LauncherSaveData::getProjectPaths() const
-{}
+{
+	return {};
+}
 
 void LauncherSaveData::setProjectPaths(std::vector<Path> paths)
 {}
