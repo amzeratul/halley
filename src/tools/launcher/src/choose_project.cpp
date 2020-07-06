@@ -6,6 +6,8 @@ ChooseProject::ChooseProject(UIFactory& factory)
 	, factory(factory)
 {
 	factory.loadUI(*this, "ui/load_project");
+
+	loadPaths();
 }
 
 void ChooseProject::onMakeUI()
@@ -14,13 +16,38 @@ void ChooseProject::onMakeUI()
 	{
 		FileChooserParameters parameters;
 		parameters.folderOnly = true;
-		OS::get().openFileChooser(parameters).then(Executors::getMainThread(), [] (std::optional<Path> path)
+		OS::get().openFileChooser(parameters).then(Executors::getMainThread(), [=] (std::optional<Path> path)
 		{
 			if (path) {
-				Logger::logInfo("Selected path: " + path.value().toString());
-			} else {
-				Logger::logInfo("Cancelled path selection.");
+				addNewPath(path.value());
 			}
 		});
 	});
+}
+
+void ChooseProject::loadPaths()
+{
+	refresh();
+}
+
+void ChooseProject::savePaths()
+{
+	
+}
+
+void ChooseProject::addNewPath(Path path)
+{
+	addPath(path);
+	savePaths();
+	refresh();
+}
+
+void ChooseProject::addPath(Path path)
+{
+	paths.emplace_back(std::move(path));
+}
+
+void ChooseProject::refresh()
+{
+	
 }

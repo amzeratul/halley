@@ -11,5 +11,13 @@ namespace Halley {
     	
     private:
     	UIFactory& factory;
+
+    	std::vector<Path> paths;
+
+    	void loadPaths();
+    	void savePaths();
+    	void addNewPath(Path path);
+    	void addPath(Path path);
+    	void refresh();
     };
 }

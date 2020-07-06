@@ -1,6 +1,7 @@
 #include "launcher_stage.h"
 
 #include "choose_project.h"
+#include "launcher_save_data.h"
 using namespace Halley;
 
 LauncherStage::LauncherStage()
@@ -10,6 +11,8 @@ LauncherStage::LauncherStage()
 
 void LauncherStage::init()
 {
+	saveData = std::make_shared<LauncherSaveData>(getSystemAPI().getStorageContainer(SaveDataType::SaveLocal));
+	
 	makeSprites();
 	makeUI();
 }

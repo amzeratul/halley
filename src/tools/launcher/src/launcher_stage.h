@@ -2,6 +2,8 @@
 
 #include <halley.hpp>
 
+#include "launcher_save_data.h"
+
 namespace Halley {
 	class LauncherStage : public Stage {
 	public:
@@ -22,6 +24,7 @@ namespace Halley {
 		Executor mainThreadExecutor;
 
 		Sprite background;
+		std::shared_ptr<LauncherSaveData> saveData;
 
 		void makeSprites();
 		void makeUI();
