@@ -187,6 +187,12 @@ namespace Halley {
 	template <typename T>
 	class ConfigNodeHelper {
 	public:
+		static ConfigNode serialize(const T& src, ConfigNodeSerializationContext& context)
+		{
+			// TODO
+			return ConfigNode();
+		}
+		
 		static void deserialize(T& dst, ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
 			if (node.getType() != ConfigNodeType::Undefined) {
@@ -198,6 +204,15 @@ namespace Halley {
 	template <typename T>
 	class ConfigNodeHelper<std::optional<T>> {
 	public:
+		static ConfigNode serialize(const std::optional<T>& src, ConfigNodeSerializationContext& context)
+		{
+			if (src) {
+				return ConfigNodeHelper<T>::serialize(src.value(), context);
+			} else {
+				return ConfigNode();
+			}
+		}
+
 		static void deserialize(std::optional<T>& dst, ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
 			dst = ConfigNodeSerializer<std::optional<T>>().deserialize(context, node);
@@ -207,6 +222,15 @@ namespace Halley {
 	template <typename T>
 	class ConfigNodeHelper<OptionalLite<T>> {
 	public:
+		static ConfigNode serialize(const OptionalLite<T>& src, ConfigNodeSerializationContext& context)
+		{
+			if (src) {
+				return ConfigNodeHelper<T>::serialize(src.value(), context);
+			} else {
+				return ConfigNode();
+			}
+		}
+		
 		static void deserialize(OptionalLite<T>& dst, ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
 			dst = ConfigNodeSerializer<OptionalLite<T>>().deserialize(context, node);

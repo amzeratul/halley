@@ -32,6 +32,20 @@ static ComponentFactoryMap makeComponentFactories() {
 	return result;
 }
 
+
+using ComponentReflectorList = std::vector<std::unique_ptr<ComponentReflector>>;
+
+static ComponentReflectorList makeComponentReflectors() {
+	ComponentReflectorList result;
+	result.reserve(5);
+	result.push_back(std::make_unique<ComponentReflectorImpl<Transform2DComponent>>());
+	result.push_back(std::make_unique<ComponentReflectorImpl<SpriteComponent>>());
+	result.push_back(std::make_unique<ComponentReflectorImpl<TextLabelComponent>>());
+	result.push_back(std::make_unique<ComponentReflectorImpl<SpriteAnimationComponent>>());
+	result.push_back(std::make_unique<ComponentReflectorImpl<CameraComponent>>());
+	return result;
+}
+
 namespace Halley {
 	std::unique_ptr<System> createSystem(String name) {
 		static SystemFactoryMap factories = makeSystemFactories();
@@ -42,12 +56,17 @@ namespace Halley {
 		return std::unique_ptr<System>(result->second());
 	}
 
-   CreateComponentFunctionResult createComponent(EntityFactory& factory, const String& name, EntityRef& entity, const ConfigNode& componentData) {
+	CreateComponentFunctionResult createComponent(EntityFactory& factory, const String& name, EntityRef& entity, const ConfigNode& componentData) {
 		static ComponentFactoryMap factories = makeComponentFactories();
 		auto result = factories.find(name);
 		if (result == factories.end()) {
 			throw Exception("Component not found: " + name, HalleyExceptions::Entity);
 		}
 		return result->second(factory, entity, componentData);
-   }
+	}
+
+	ComponentReflector& getComponentReflector(int componentId) {
+		static ComponentReflectorList reflectors = makeComponentReflectors();
+		return *reflectors.at(componentId);
+	}
 }

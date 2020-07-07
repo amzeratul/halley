@@ -130,6 +130,27 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"}"
 	});
 
+	// Component reflectors
+	registryCpp.insert(registryCpp.end(), {
+		"",
+		"",
+		"using ComponentReflectorList = std::vector<std::unique_ptr<ComponentReflector>>;",
+		"",
+		"static ComponentReflectorList makeComponentReflectors() {",
+		"	ComponentReflectorList result;"
+	});
+
+	registryCpp.push_back("	result.reserve(" + toString(components.size()) + ");");
+
+	for (auto& comp : components) {
+		registryCpp.push_back("	result.push_back(std::make_unique<ComponentReflectorImpl<" + comp.name + "Component>>());");
+	}
+
+	registryCpp.insert(registryCpp.end(), {
+		"	return result;",
+		"}"
+	});
+
 	// Create system and component methods
 	registryCpp.insert(registryCpp.end(), {
 		"",
@@ -143,14 +164,19 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"		return std::unique_ptr<System>(result->second());",
 		"	}",
 		"",
-		"   CreateComponentFunctionResult createComponent(EntityFactory& factory, const String& name, EntityRef& entity, const ConfigNode& componentData) {",
+		"	CreateComponentFunctionResult createComponent(EntityFactory& factory, const String& name, EntityRef& entity, const ConfigNode& componentData) {",
 		"		static ComponentFactoryMap factories = makeComponentFactories();",
 		"		auto result = factories.find(name);",
 		"		if (result == factories.end()) {",
 		"			throw Exception(\"Component not found: \" + name, HalleyExceptions::Entity);",
 		"		}",
 		"		return result->second(factory, entity, componentData);",
-		"   }",
+		"	}",
+		"",
+		"	ComponentReflector& getComponentReflector(int componentId) {",
+		"		static ComponentReflectorList reflectors = makeComponentReflectors();",
+		"		return *reflectors.at(componentId);",
+		"	}",
 		"}"
 	});
 
@@ -182,7 +208,10 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	}
 	contents.push_back("");
 
+	const String lineBreak = getPlatform() == GamePlatform::Windows ? "\r\n\t\t" : "\n\t\t";
+	String serializeBody;
 	String deserializeBody;
+	serializeBody = "Halley::ConfigNode node = Halley::ConfigNode::MapType();" + lineBreak;
 	bool first = true;
 	for (auto& member: component.members) {
 		if (!member.serializable) {
@@ -192,20 +221,20 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		if (first) {
 			first = false;
 		} else {
-			if constexpr (getPlatform() == GamePlatform::Windows) {
-				deserializeBody += "\r\n\t\t";
-			} else {
-				deserializeBody += "\n\t\t";
-			}
+			serializeBody += lineBreak;
+			deserializeBody += lineBreak;
 		}
+		serializeBody += "node[\"" + member.name + "\"] = Halley::ConfigNodeHelper<decltype(" + member.name + ")>::serialize(" + member.name + ", context);";
 		deserializeBody += "Halley::ConfigNodeHelper<decltype(" + member.name + ")>::deserialize(" + member.name + ", context, node[\"" + member.name + "\"]);";
 	}
+	serializeBody += lineBreak + "return node;";
 
 	String className = component.name + "Component" + (component.customImplementation ? "Base" : "");
 	
 	auto gen = CPPClassGenerator(className, "Halley::Component", MemberAccess::Public, !component.customImplementation)
 		.setAccessLevel(MemberAccess::Public)
 		.addMember(MemberSchema(TypeSchema("int", false, true, true), "componentIndex", toString(component.id)))
+		.addMember(MemberSchema(TypeSchema("char*", true, true, true), "componentName", component.name))
 		.addBlankLine()
 		.addMembers(component.members)
 		.addBlankLine()
@@ -221,9 +250,16 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		}
 	}
 	
-	// Deserialize method
+	// Serialize & deserialize methods
 	gen.addBlankLine()
-		.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::ConfigNodeSerializationContext&"), "context"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node") }, "deserialize"), deserializeBody);
+		.addMethodDefinition(MethodSchema(TypeSchema("Halley::ConfigNode"), {
+			VariableSchema(TypeSchema("Halley::ConfigNodeSerializationContext&"), "context")
+		}, "serialize", true), serializeBody)
+		.addBlankLine()
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), {
+			VariableSchema(TypeSchema("Halley::ConfigNodeSerializationContext&"), "context"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node")
+		}, "deserialize"), deserializeBody)
+		.addBlankLine();
 
 	gen.finish()
 		.writeTo(contents);

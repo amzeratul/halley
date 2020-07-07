@@ -7,22 +7,34 @@
 class TextLabelComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 2 };
-	
+	static const constexpr char* componentName{ "TextLabel" };
+
 	Halley::TextRenderer text{};
 	int layer{ 0 };
 	Halley::OptionalLite<int> mask{};
-	
-	TextLabelComponent() {}
-	
+
+	TextLabelComponent() {
+	}
+
 	TextLabelComponent(Halley::TextRenderer text, int layer, Halley::OptionalLite<int> mask)
 		: text(std::move(text))
 		, layer(std::move(layer))
 		, mask(std::move(mask))
-	{}
-	
+	{
+	}
+
+	Halley::ConfigNode serialize(Halley::ConfigNodeSerializationContext& context) const {
+		Halley::ConfigNode node = Halley::ConfigNode::MapType();
+		node["text"] = Halley::ConfigNodeHelper<decltype(text)>::serialize(text, context);
+		node["layer"] = Halley::ConfigNodeHelper<decltype(layer)>::serialize(layer, context);
+		node["mask"] = Halley::ConfigNodeHelper<decltype(mask)>::serialize(mask, context);
+		return node;
+	}
+
 	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
 		Halley::ConfigNodeHelper<decltype(text)>::deserialize(text, context, node["text"]);
 		Halley::ConfigNodeHelper<decltype(layer)>::deserialize(layer, context, node["layer"]);
 		Halley::ConfigNodeHelper<decltype(mask)>::deserialize(mask, context, node["mask"]);
 	}
+
 };

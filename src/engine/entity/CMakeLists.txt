@@ -29,6 +29,7 @@ set(HEADERS
         "include/halley/halley_entity.h"
 
         "include/halley/entity/component.h"
+        "include/halley/entity/component_reflector.h"
         "include/halley/entity/create_functions.h"
         "include/halley/entity/entity.h"
         "include/halley/entity/family_binding.h"
