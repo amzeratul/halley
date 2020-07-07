@@ -31,6 +31,8 @@ namespace Halley {
 		void updateEntityTree(EntityRef& entity, const ConfigNode& node);
 		void updateScene(std::vector<EntityRef>& entities, const ConfigNode& node);
 
+		ConfigNode serializeEntity(EntityRef entity);
+
 		template <typename T>
 		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData)
 		{

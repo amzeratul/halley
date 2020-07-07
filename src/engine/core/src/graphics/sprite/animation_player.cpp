@@ -331,7 +331,7 @@ void AnimationPlayer::updateIfNeeded()
 
 ConfigNode ConfigNodeSerializer<AnimationPlayer>::serialize(const AnimationPlayer& player, ConfigNodeSerializationContext& context)
 {
-	ConfigNode result;
+	ConfigNode result = ConfigNode::MapType();
 	result["animation"] = player.hasAnimation() ? player.getAnimation().getAssetId() : "";
 	result["sequence"] = player.getCurrentSequenceName();
 	result["direction"] = player.getCurrentDirectionName();

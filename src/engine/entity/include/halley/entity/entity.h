@@ -402,6 +402,30 @@ namespace Halley {
 			return *world;
 		}
 
+		size_t getNumComponents() const
+		{
+			Expects(entity);
+			return size_t(entity->liveComponents);
+		}
+
+		std::pair<int, Component*> getRawComponent(size_t idx) const
+		{
+			Expects(entity);
+			return entity->components[idx];
+		}
+
+		std::vector<std::pair<int, Component*>>::iterator begin() const
+		{
+			Expects(entity);
+			return entity->components.begin();
+		}
+
+		std::vector<std::pair<int, Component*>>::iterator end() const
+		{
+			Expects(entity);
+			return entity->components.begin() + entity->liveComponents;
+		}
+
 	private:
 		friend class World;
 
@@ -481,6 +505,30 @@ namespace Halley {
 		int8_t getHierarchyRevision() const
 		{
 			return entity->hierarchyRevision;
+		}
+
+		size_t getNumComponents() const
+		{
+			Expects(entity);
+			return size_t(entity->liveComponents);
+		}
+
+		std::pair<int, Component*> getRawComponent(size_t idx) const
+		{
+			Expects(entity);
+			return entity->components[idx];
+		}
+
+		std::vector<std::pair<int, Component*>>::iterator begin() const
+		{
+			Expects(entity);
+			return entity->components.begin();
+		}
+
+		std::vector<std::pair<int, Component*>>::iterator end() const
+		{
+			Expects(entity);
+			return entity->components.begin() + entity->liveComponents;
 		}
 
 	private:

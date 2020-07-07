@@ -1,8 +1,11 @@
 #include "entity_factory.h"
 
+
+#include "component_reflector.h"
 #include "entity_scene.h"
 #include "halley/support/logger.h"
 #include "world.h"
+#include "registry.h"
 #include "halley/core/resources/resources.h"
 
 using namespace Halley;
@@ -205,6 +208,16 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNo
 		}
 		doUpdateEntityTree(entities.at(0), node, true);
 	}
+}
+
+ConfigNode EntityFactory::serializeEntity(EntityRef entity)
+{
+	ConfigNode result = ConfigNode::MapType();
+	for (auto [componentId, component]: entity) {
+		auto& reflector = getComponentReflector(componentId);
+		result[reflector.getName()] = reflector.serialize(context, *component);
+	}
+	return result;
 }
 
 void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& treeNode, bool refreshing)
