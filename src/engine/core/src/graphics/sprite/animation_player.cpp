@@ -121,6 +121,11 @@ AnimationPlayer& AnimationPlayer::setApplyPivot(bool apply)
 	return *this;
 }
 
+bool AnimationPlayer::isApplyingPivot() const
+{
+	return applyPivot;
+}
+
 void AnimationPlayer::update(Time time)
 {
 	updateIfNeeded();
@@ -322,6 +327,17 @@ void AnimationPlayer::updateIfNeeded()
 		setSequence(curSeqName);
 		setDirection(curDirName);
 	}
+}
+
+ConfigNode ConfigNodeSerializer<AnimationPlayer>::serialize(const AnimationPlayer& player, ConfigNodeSerializationContext& context)
+{
+	ConfigNode result;
+	result["animation"] = player.hasAnimation() ? player.getAnimation().getAssetId() : "";
+	result["sequence"] = player.getCurrentSequenceName();
+	result["direction"] = player.getCurrentDirectionName();
+	result["applyPivot"] = player.isApplyingPivot();
+	result["playbackSpeed"] = player.getPlaybackSpeed();
+	return result;
 }
 
 AnimationPlayer ConfigNodeSerializer<AnimationPlayer>::deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)

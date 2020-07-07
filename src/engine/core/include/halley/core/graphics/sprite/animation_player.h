@@ -24,6 +24,7 @@ namespace Halley
 		bool trySetSequence(const String& sequence);
 
 		AnimationPlayer& setApplyPivot(bool apply);
+		bool isApplyingPivot() const;
 
 		void update(Time time);
 
@@ -102,6 +103,7 @@ namespace Halley
 	template<>
 	class ConfigNodeSerializer<AnimationPlayer> {
 	public:
+		ConfigNode serialize(const AnimationPlayer& player, ConfigNodeSerializationContext& context);
 		AnimationPlayer deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node);
 	};
 }

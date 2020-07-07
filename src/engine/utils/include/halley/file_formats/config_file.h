@@ -66,6 +66,17 @@ namespace Halley
 		ConfigNode(Vector2f value);
 		ConfigNode(Bytes value);
 
+		template <typename T>
+		ConfigNode(const std::vector<T>& sequence)
+		{
+			SequenceType seq;
+			seq.reserve(sequence.size());
+			for (auto& e: sequence) {
+				seq.push_back(ConfigNode(e));
+			}
+			*this = seq;
+		}
+
 		~ConfigNode();
 		
 		ConfigNode& operator=(const ConfigNode& other) = delete;

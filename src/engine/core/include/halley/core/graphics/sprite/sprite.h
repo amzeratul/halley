@@ -156,6 +156,7 @@ namespace Halley
 	template<>
 	class ConfigNodeSerializer<Sprite> {
 	public:
+		ConfigNode serialize(const Sprite& sprite, ConfigNodeSerializationContext& context);
 		Sprite deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node);
 	};
 }

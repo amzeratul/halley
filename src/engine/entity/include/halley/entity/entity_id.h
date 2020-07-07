@@ -29,12 +29,18 @@ namespace Halley {
 			return Halley::toString(value);
 		}
 
+		static String toUUID(const EntityId& id, ConfigNodeSerializationContext& context);
 		static EntityId fromUUID(const String& uuidStr, ConfigNodeSerializationContext& context);
 	};
 	
 	template <>
     class ConfigNodeSerializer<EntityId> {
     public:
+		ConfigNode serialize(EntityId id, ConfigNodeSerializationContext& context)
+		{
+			return ConfigNode(EntityId::toUUID(id, context));
+		}
+		
         EntityId deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
         {
 			return EntityId::fromUUID(node.asString(""), context);

@@ -209,9 +209,8 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	contents.push_back("");
 
 	const String lineBreak = getPlatform() == GamePlatform::Windows ? "\r\n\t\t" : "\n\t\t";
-	String serializeBody;
+	String serializeBody = "Halley::ConfigNode node = Halley::ConfigNode::MapType();" + lineBreak;
 	String deserializeBody;
-	serializeBody = "Halley::ConfigNode node = Halley::ConfigNode::MapType();" + lineBreak;
 	bool first = true;
 	for (auto& member: component.members) {
 		if (!member.serializable) {

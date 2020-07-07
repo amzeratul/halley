@@ -52,6 +52,7 @@ void Polygon::realize()
 }
 
 
+
 ///////////////////////////////////////////////////////
 // Checks if a particular point is inside the polygon
 // Only works for convex polygons
@@ -460,6 +461,11 @@ Polygon::CollisionResult Polygon::getCollisionWithSweepingEllipse(Vector2f p0, V
 		result.normal = (result.normal * transformation).normalized();
 	}
 	return result;
+}
+
+ConfigNode ConfigNodeSerializer<Polygon>::serialize(const Polygon& polygon, ConfigNodeSerializationContext&)
+{
+	return ConfigNode(polygon.getVertices());
 }
 
 Polygon ConfigNodeSerializer<Polygon>::deserialize(ConfigNodeSerializationContext&, const ConfigNode& node) 
