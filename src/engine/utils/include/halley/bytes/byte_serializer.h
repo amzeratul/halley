@@ -457,7 +457,7 @@ namespace Halley {
 				uint64_t temp;
 				deserializeVariableInteger(temp, sign, std::is_signed_v<T>);
 				if (sign) {
-					int64_t signedTemp = -temp - 1;
+					int64_t signedTemp = -int64_t(temp) - 1;
 					val = static_cast<T>(signedTemp);
 				} else {
 					val = static_cast<T>(temp);
