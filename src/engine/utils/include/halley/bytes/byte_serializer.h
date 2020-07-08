@@ -18,39 +18,53 @@
 namespace Halley {
 	class String;
 
+	class SerializerOptions {
+	public:
+		constexpr static int maxVersion = 1;
+		
+		int version = 0;
+		gsl::span<String> dictionary;
+		std::function<void(String)> notifyMissingString;
+
+		SerializerOptions() = default;
+		SerializerOptions(int version)
+			: version(version)
+		{}
+	};
+	
 	class Serializer {
 	public:
-		Serializer();
-		explicit Serializer(gsl::span<gsl::byte> dst);
+		Serializer(SerializerOptions options);
+		explicit Serializer(gsl::span<gsl::byte> dst, SerializerOptions options);
 
 		template <typename T, typename std::enable_if<std::is_convertible<T, std::function<void(Serializer&)>>::value, int>::type = 0>
-		static Bytes toBytes(const T& f)
+		static Bytes toBytes(const T& f, SerializerOptions options = {})
 		{
-			Serializer dry;
+			auto dry = Serializer(options);
 			f(dry);
 			Bytes result(dry.getSize());
-			Serializer s(gsl::as_writable_bytes(gsl::span<Halley::Byte>(result)));
+			auto s = Serializer(gsl::as_writable_bytes(gsl::span<Halley::Byte>(result)), options);
 			f(s);
 			return result;
 		}
 
 		template <typename T, typename std::enable_if<!std::is_convertible<T, std::function<void(Serializer&)>>::value, int>::type = 0>
-		static Bytes toBytes(const T& value)
+		static Bytes toBytes(const T& value, SerializerOptions options = {})
 		{
-			return toBytes([&value](Serializer& s) { s << value; });
+			return toBytes([&value](Serializer& s) { s << value; }, options);
 		}
 
 		size_t getSize() const { return size; }
 
 		Serializer& operator<<(bool val) { return serializePod(val); }
-		Serializer& operator<<(int8_t val) { return serializePod(val); }
-		Serializer& operator<<(uint8_t val) { return serializePod(val); }
-		Serializer& operator<<(int16_t val) { return serializePod(val); }
-		Serializer& operator<<(uint16_t val) { return serializePod(val); }
-		Serializer& operator<<(int32_t val) { return serializePod(val); }
-		Serializer& operator<<(uint32_t val) { return serializePod(val); }
-		Serializer& operator<<(int64_t val) { return serializePod(val); }
-		Serializer& operator<<(uint64_t val) { return serializePod(val); }
+		Serializer& operator<<(int8_t val) { return serializeInteger(val); }
+		Serializer& operator<<(uint8_t val) { return serializeInteger(val); }
+		Serializer& operator<<(int16_t val) { return serializeInteger(val); }
+		Serializer& operator<<(uint16_t val) { return serializeInteger(val); }
+		Serializer& operator<<(int32_t val) { return serializeInteger(val); }
+		Serializer& operator<<(uint32_t val) { return serializeInteger(val); }
+		Serializer& operator<<(int64_t val) { return serializeInteger(val); }
+		Serializer& operator<<(uint64_t val) { return serializeInteger(val); }
 		Serializer& operator<<(float val) { return serializePod(val); }
 		Serializer& operator<<(double val) { return serializePod(val); }
 
@@ -167,9 +181,10 @@ namespace Halley {
 		}
 
 	private:
-		bool dryRun;
+		SerializerOptions options;
 		size_t size = 0;
 		gsl::span<gsl::byte> dst;
+		bool dryRun;
 
 		template <typename T>
 		Serializer& serializePod(T val)
@@ -180,54 +195,73 @@ namespace Halley {
 			size += sizeof(T);
 			return *this;
 		}
+
+		template <typename T>
+		Serializer& serializeInteger(T val)
+		{
+			if (options.version >= 1) {
+				// Variable-length
+				if constexpr (std::is_signed_v<T>) {
+					serializeVariableInteger(static_cast<uint64_t>(val >= 0 ? val : -(val + 1)), val < 0);
+				} else {
+					serializeVariableInteger(val, {});
+				}
+				return *this;
+			} else {
+				// Fixed length
+				return serializePod(val);
+			}
+		}
+
+		void serializeVariableInteger(uint64_t val, OptionalLite<bool> sign);
 	};
 
 	class Deserializer {
 	public:
-		Deserializer(gsl::span<const gsl::byte> src);
-		explicit Deserializer(const Bytes& src);
+		Deserializer(gsl::span<const gsl::byte> src, SerializerOptions options = {});
+		Deserializer(const Bytes& src, SerializerOptions options = {});
 		
 		template <typename T>
-		static T fromBytes(const Bytes& src)
+		static T fromBytes(const Bytes& src, SerializerOptions options = {})
 		{
 			T result;
-			Deserializer s(src);
+			Deserializer s(src, std::move(options));
 			s >> result;
 			return result;
 		}
 
 		template <typename T>
-		static T fromBytes(gsl::span<const gsl::byte> src)
+		static T fromBytes(gsl::span<const gsl::byte> src, SerializerOptions options = {})
 		{
 			T result;
-			Deserializer s(src);
+			Deserializer s(src, std::move(options));
 			s >> result;
 			return result;
 		}
 
 		template <typename T>
-		static void fromBytes(T& target, const Bytes& src)
+		static void fromBytes(T& target, const Bytes& src, SerializerOptions options = {})
 		{
-			Deserializer s(src);
+			Deserializer s(src, std::move(options));
 			s >> target;
 		}
 
 		template <typename T>
-		static void fromBytes(T& target, gsl::span<const gsl::byte> src)
+		static void fromBytes(T& target, gsl::span<const gsl::byte> src, SerializerOptions options = {})
 		{
-			Deserializer s(src);
+			Deserializer s(src, std::move(options));
 			s >> target;
 		}
 
 		Deserializer& operator>>(bool& val) { return deserializePod(val); }
-		Deserializer& operator>>(int8_t& val) { return deserializePod(val); }
-		Deserializer& operator>>(uint8_t& val) { return deserializePod(val); }
-		Deserializer& operator>>(int16_t& val) { return deserializePod(val); }
-		Deserializer& operator>>(uint16_t& val) { return deserializePod(val); }
-		Deserializer& operator>>(int32_t& val) { return deserializePod(val); }
-		Deserializer& operator>>(uint32_t& val) { return deserializePod(val); }
-		Deserializer& operator>>(int64_t& val) { return deserializePod(val); }
-		Deserializer& operator>>(uint64_t& val) { return deserializePod(val); }
+		Deserializer& operator>>(int8_t& val) { return deserializeInteger(val); }
+		Deserializer& operator>>(uint8_t& val) { return deserializeInteger(val); }
+		Deserializer& operator>>(int16_t& val) { return deserializeInteger(val); }
+		Deserializer& operator>>(uint16_t& val) { return deserializeInteger(val); }
+		Deserializer& operator>>(int32_t& val) { return deserializeInteger(val); }
+		Deserializer& operator>>(uint32_t& val) { return deserializeInteger(val); }
+		Deserializer& operator>>(int64_t& val) { return deserializeInteger(val); }
+		Deserializer& operator>>(uint64_t& val) { return deserializeInteger(val); }
 		Deserializer& operator>>(float& val) { return deserializePod(val); }
 		Deserializer& operator>>(double& val) { return deserializePod(val); }
 
@@ -399,6 +433,7 @@ namespace Halley {
 		int getVersion() const;
 
 	private:
+		SerializerOptions options;
 		size_t pos = 0;
 		gsl::span<const gsl::byte> src;
 		int version = 0;
@@ -411,6 +446,29 @@ namespace Halley {
 			pos += sizeof(T);
 			return *this;
 		}
+
+		template <typename T>
+		Deserializer& deserializeInteger(T& val)
+		{
+			if (options.version >= 1) {
+				// Variable-length
+				bool sign;
+				uint64_t temp;
+				deserializeVariableInteger(temp, sign, std::is_signed_v<T>);
+				if (sign) {
+					int64_t signedTemp = -temp - 1;
+					val = static_cast<T>(signedTemp);
+				} else {
+					val = static_cast<T>(temp);
+				}
+				return *this;
+			} else {
+				// Fixed length
+				return deserializePod(val);
+			}
+		}
+
+		void deserializeVariableInteger(uint64_t& val, bool& sign, bool isSigned);
 
 		void ensureSufficientBytesRemaining(size_t bytes);
 		size_t getBytesRemaining() const;
