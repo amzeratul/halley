@@ -23,8 +23,9 @@ namespace Halley {
 		constexpr static int maxVersion = 1;
 		
 		int version = 0;
-		gsl::span<String> dictionary;
-		std::function<void(String)> notifyMissingString;
+		bool exhaustiveDictionary = false;
+		std::function<std::optional<size_t>(const String& string)> stringToIndex;
+		std::function<const String&(size_t index)> indexToString;
 
 		SerializerOptions() = default;
 		SerializerOptions(int version)

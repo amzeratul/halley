@@ -18,15 +18,40 @@ Serializer::Serializer(gsl::span<gsl::byte> dst, SerializerOptions options)
 
 Serializer& Serializer::operator<<(const std::string& str)
 {
-	const uint32_t sz = static_cast<uint32_t>(str.size());
-	*this << sz;
-	*this << gsl::as_bytes(gsl::span<const char>(str.data(), sz));
-	return *this;
+	return *this << String(str);
 }
 
 Serializer& Serializer::operator<<(const String& str)
 {
-	return (*this << str.cppStr());
+	if (options.version == 0) {
+		const uint32_t sz = static_cast<uint32_t>(str.size());
+		*this << sz;
+		*this << gsl::as_bytes(gsl::span<const char>(str.c_str(), sz));
+	} else {
+		if (options.stringToIndex) {
+			auto idx = options.stringToIndex(str);
+			if (idx) {
+				// Found, store index with bit 0 set to 1
+				const auto value = options.exhaustiveDictionary ? idx.value() : (size_t(1) | (idx.value() << 1));
+				*this << value;
+			} else {
+				if (options.exhaustiveDictionary) {
+					throw Exception("String \"" + str + "\" not found in serialization dictionary, but it's marked as exhaustive.", HalleyExceptions::Utils);
+				}
+				
+				// Not found, store it with bit 0 set to 0
+				const auto sz = str.size();
+				*this << (sz << 1);
+				*this << gsl::as_bytes(gsl::span<const char>(str.c_str(), sz));
+			}
+		} else {
+			// No dictionary, just store it old style
+			const auto sz = str.size();
+			*this << sz;
+			*this << gsl::as_bytes(gsl::span<const char>(str.c_str(), sz));
+		}
+	}
+	return *this;
 }
 
 Serializer& Serializer::operator<<(const Path& path)
@@ -118,21 +143,44 @@ Deserializer::Deserializer(const Bytes& src, SerializerOptions options)
 
 Deserializer& Deserializer::operator>>(std::string& str)
 {
-	uint32_t sz;
-	*this >> sz;
-
-	ensureSufficientBytesRemaining(sz);
-
-	str = std::string(reinterpret_cast<const char*>(src.data() + pos), sz);
-	pos += sz;
+	String s;
+	*this >> s;
+	str = s.cppStr();
 	return *this;
 }
 
 Deserializer& Deserializer::operator>>(String& str)
 {
-	std::string s;
-	*this >> s;
-	str = std::move(s);
+	auto readRawString = [&] (size_t size)
+	{
+		ensureSufficientBytesRemaining(size);
+		str = String(reinterpret_cast<const char*>(src.data() + pos), size);
+		pos += size;
+	};
+	
+	if (options.version == 0) {
+		uint32_t size;
+		*this >> size;
+		readRawString(size);
+	} else {
+		uint64_t value;
+		*this >> value;
+		
+		if (options.indexToString) {
+			if (options.exhaustiveDictionary || (value & 0x1) != 0) {
+				// Indexed string
+				int shift = options.exhaustiveDictionary ? 0 : 1;
+				str = options.indexToString(value >> shift);
+			} else {
+				// Not indexed
+				readRawString(value >> 1);
+			}
+		} else {
+			// No dictionary
+			readRawString(value);
+		}
+	}
+
 	return *this;
 }
 

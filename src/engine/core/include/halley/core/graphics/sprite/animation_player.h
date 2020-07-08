@@ -100,6 +100,7 @@ namespace Halley
 	};
 
 	class Resources;
+
 	template<>
 	class ConfigNodeSerializer<AnimationPlayer> {
 	public:
