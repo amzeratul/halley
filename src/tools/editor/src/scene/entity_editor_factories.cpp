@@ -144,6 +144,66 @@ public:
 	}
 };
 
+class ComponentEditorVector2iFieldFactory : public IComponentEditorFieldFactory
+{
+public:
+	String getFieldType() override
+	{
+		return "Halley::Vector2i";
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(Vector2i());
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto data = pars.data;
+
+		Vector2i value = Vector2i(pars.getIntDefaultParameter(0), pars.getIntDefaultParameter(1));
+		if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
+			value = data.getFieldData().asVector2i(value);
+		}
+
+		const auto& style = context.getUIFactory().getStyle("inputThin");
+
+		auto dataOutput = std::make_shared<bool>(true);
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
+
+		container->add(std::make_shared<UITextInput>("xValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, false)), 1);
+		container->bindData("xValue", value.x, [&context, data, dataOutput](int newVal) {
+			if (*dataOutput) {
+				auto& node = data.getFieldData();
+				node = ConfigNode(Vector2i(newVal, node.asVector2i(Vector2i()).y));
+				context.onEntityUpdated();
+			}
+		});
+
+		container->add(std::make_shared<UITextInput>("yValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, false)), 1);
+		container->bindData("yValue", value.y, [&context, data, dataOutput](int newVal) {
+			if (*dataOutput) {
+				auto& node = data.getFieldData();
+				node = ConfigNode(Vector2i(node.asVector2i(Vector2i()).x, newVal));
+				context.onEntityUpdated();
+			}
+		});
+
+		container->setHandle(UIEventType::ReloadData, pars.componentName + ":" + data.getName(), [=](const UIEvent& event) {
+			Vector2i newVal;
+			if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
+				newVal = data.getFieldData().asVector2i();
+			}
+			*dataOutput = false;
+			event.getCurWidget().getWidgetAs<UITextInput>("xValue")->setText(toString(newVal.x));
+			event.getCurWidget().getWidgetAs<UITextInput>("yValue")->setText(toString(newVal.y));
+			*dataOutput = true;
+		});
+
+		return container;
+	}
+};
+
 class ComponentEditorVector2fFieldFactory : public IComponentEditorFieldFactory {
 public:
 	String getFieldType() override
@@ -644,6 +704,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorFloatFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorAngle1fFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorBoolFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorVector2iFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorVector2fFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorVertexFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorSpriteFieldFactory>());
