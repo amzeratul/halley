@@ -6,6 +6,7 @@
 #include "halley/support/logger.h"
 #include "world.h"
 #include "registry.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/core/resources/resources.h"
 
 using namespace Halley;
@@ -221,11 +222,12 @@ ConfigNode EntityFactory::serializeEntity(EntityRef entity)
 	}
 
 	result["name"] = entity.getName();
+	result["uuid"] = entity.getUUID().getBytes();
 	result["components"] = std::move(components);
 
 	auto parent = entity.tryGetParent();
 	if (parent) {
-		result["parent"] = parent->getUUID().toString();
+		result["parent"] = parent->getUUID().getBytes();
 	}
 	
 	return result;

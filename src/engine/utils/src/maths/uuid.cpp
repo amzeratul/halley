@@ -2,6 +2,7 @@
 #include "halley/text/string_converter.h"
 #include "halley/text/encode.h"
 #include "halley/maths/random.h"
+#include "halley/bytes/byte_serializer.h"
 #include <cstring> // needed for memset and memcmp
 
 using namespace Halley;
@@ -14,6 +15,14 @@ UUID::UUID()
 UUID::UUID(std::array<Byte, 16> b)
 {
 	memcpy(bytes.data(), b.data(), 16);
+}
+
+UUID::UUID(gsl::span<const gsl::byte> b)
+{
+	if (b.size_bytes() < 16) {
+		bytes.fill(0);
+	}
+	memcpy(bytes.data(), b.data(), std::min(b.size_bytes(), 16ull));
 }
 
 UUID::UUID(const String& str)
@@ -73,4 +82,24 @@ bool UUID::isValid() const
 		}
 	}
 	return false;
+}
+
+gsl::span<const gsl::byte> UUID::getBytes() const
+{
+	return gsl::as_bytes(gsl::span<const Byte>(bytes));
+}
+
+gsl::span<gsl::byte> UUID::getBytes()
+{
+	return gsl::as_writable_bytes(gsl::span<Byte>(bytes));
+}
+
+void UUID::serialize(Serializer& s) const
+{
+	s << getBytes();
+}
+
+void UUID::deserialize(Deserializer& s)
+{
+	s >> getBytes();
 }

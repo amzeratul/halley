@@ -184,6 +184,16 @@ ConfigNode& ConfigNode::operator=(Bytes value)
 	return *this;
 }
 
+ConfigNode& ConfigNode::operator=(gsl::span<const gsl::byte> bytes)
+{
+	reset();
+	type = ConfigNodeType::Bytes;
+	auto b = new Bytes(bytes.size_bytes());
+	memcpy(b->data(), bytes.data(), bytes.size_bytes());
+	ptrData = b;
+	return *this;
+}
+
 ConfigNode& ConfigNode::operator=(MapType entry) 
 {
 	reset();

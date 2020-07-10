@@ -5,6 +5,7 @@
 #include "halley/text/halleystring.h"
 #include "halley/maths/vector2.h"
 #include "halley/resources/resource.h"
+#include <gsl/span>
 
 namespace Halley
 {
@@ -91,6 +92,7 @@ namespace Halley
 		ConfigNode& operator=(SequenceType entryList);
 		ConfigNode& operator=(String value);
 		ConfigNode& operator=(Bytes value);
+		ConfigNode& operator=(gsl::span<const gsl::byte> bytes);
 
 		ConfigNode& operator=(const char* value);
 
