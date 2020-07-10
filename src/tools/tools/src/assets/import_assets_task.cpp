@@ -89,7 +89,7 @@ void ImportAssetsTask::run()
 	}
 
 	timer.pause();
-	Time realTime = timer.elapsedNanoSeconds() / 1000000000.0;
+	Time realTime = timer.elapsedNanoseconds() / 1000000000.0;
 	Time importTime = totalImportTime / 1000000000.0;
 	Logger::logInfo("Import took " + toString(realTime) + " seconds, on which " + toString(importTime) + " seconds of work were performed (" + toString(importTime / realTime) + "x realtime)");
 }
@@ -194,7 +194,7 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 	db.markAsImported(asset);
 
 	timer.pause();
-	totalImportTime += timer.elapsedNanoSeconds();
+	totalImportTime += timer.elapsedNanoseconds();
 
 	return true;
 }

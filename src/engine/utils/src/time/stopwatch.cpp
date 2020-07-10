@@ -59,12 +59,17 @@ Time Stopwatch::elapsedSeconds() const
 	return measuredTime / 1'000'000'000.0;
 }
 
-int64_t Stopwatch::elapsedMicroSeconds() const
+int64_t Stopwatch::elapsedMilliseconds() const
+{
+	return (measuredTime + 500000) / 1000000;
+}
+
+int64_t Stopwatch::elapsedMicroseconds() const
 {
 	return (measuredTime + 500) / 1000;
 }
 
-int64_t Stopwatch::elapsedNanoSeconds() const
+int64_t Stopwatch::elapsedNanoseconds() const
 {
 	return measuredTime;
 }

@@ -35,8 +35,9 @@ namespace Halley {
 		void reset();
 
 		Time elapsedSeconds() const;
-		int64_t elapsedMicroSeconds() const;
-		int64_t elapsedNanoSeconds() const;
+		int64_t elapsedMilliseconds() const;
+		int64_t elapsedMicroseconds() const;
+		int64_t elapsedNanoseconds() const;
 
 	private:
 		std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
