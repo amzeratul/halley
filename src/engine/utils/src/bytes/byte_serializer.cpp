@@ -40,7 +40,7 @@ Serializer& Serializer::operator<<(const String& str)
 				}
 				
 				// Not found, store it with bit 0 set to 0
-				const auto sz = str.size();
+				const uint64_t sz = uint64_t(str.size());
 				*this << (sz << 1);
 				*this << gsl::as_bytes(gsl::span<const char>(str.c_str(), sz));
 			}
