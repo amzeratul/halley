@@ -32,7 +32,7 @@ Serializer& Serializer::operator<<(const String& str)
 			auto idx = options.stringToIndex(str);
 			if (idx) {
 				// Found, store index with bit 0 set to 1
-				const auto value = options.exhaustiveDictionary ? idx.value() : (size_t(1) | (idx.value() << 1));
+				const uint64_t value = uint64_t(options.exhaustiveDictionary ? idx.value() : (size_t(1) | (idx.value() << 1)));
 				*this << value;
 			} else {
 				if (options.exhaustiveDictionary) {
@@ -106,7 +106,7 @@ void Serializer::serializeVariableInteger(uint64_t val, OptionalLite<bool> sign)
 
 	// Write header
 	// To generate the mask, we get 9 - nBytes to see how many zeroes we need (8 at 1 byte, 7 at 2 bytes, etc), generate that many "1"s, then xor that with 255 (0b11111111) to flip those bits
-	const size_t headerBits = std::min(nBytes, 7ull);
+	const size_t headerBits = std::min(nBytes, size_t(7));
 	buffer[0] = uint8_t(255) ^ (uint8_t((1 << (9 - headerBits)) - 1));
 
 	// Write bits
@@ -265,7 +265,7 @@ void Deserializer::deserializeVariableInteger(uint64_t& val, bool& sign, bool is
 	} else {
 		nBytes = 9;
 	}
-	const size_t headerBits = std::min(nBytes, 7ull);
+	const size_t headerBits = std::min(nBytes, size_t(7));
 
 	// Read rest of the data
 	std::array<uint8_t, 9> buffer;
