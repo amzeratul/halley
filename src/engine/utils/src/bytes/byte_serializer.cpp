@@ -53,7 +53,7 @@ Serializer& Serializer::operator<<(const String& str)
 			}
 		} else {
 			// No dictionary, just store it old style
-			const auto sz = str.size();
+			const uint64_t sz = str.size();
 			*this << sz;
 			*this << gsl::as_bytes(gsl::span<const char>(str.c_str(), sz));
 		}
