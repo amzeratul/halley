@@ -213,10 +213,21 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNo
 ConfigNode EntityFactory::serializeEntity(EntityRef entity)
 {
 	ConfigNode result = ConfigNode::MapType();
+
+	auto components = ConfigNode::MapType();
 	for (auto [componentId, component]: entity) {
 		auto& reflector = getComponentReflector(componentId);
-		result[reflector.getName()] = reflector.serialize(context, *component);
+		components[reflector.getName()] = reflector.serialize(context, *component);
 	}
+
+	result["name"] = entity.getName();
+	result["components"] = std::move(components);
+
+	auto parent = entity.tryGetParent();
+	if (parent) {
+		result["parent"] = parent->getUUID().toString();
+	}
+	
 	return result;
 }
 
