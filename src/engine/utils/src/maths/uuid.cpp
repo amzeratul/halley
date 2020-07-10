@@ -22,7 +22,7 @@ UUID::UUID(gsl::span<const gsl::byte> b)
 	if (b.size_bytes() < 16) {
 		bytes.fill(0);
 	}
-	memcpy(bytes.data(), b.data(), std::min(b.size_bytes(), 16ull));
+	memcpy(bytes.data(), b.data(), std::min(b.size_bytes(), size_t(16)));
 }
 
 UUID::UUID(const String& str)

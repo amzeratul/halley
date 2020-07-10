@@ -2,6 +2,8 @@
 
 #include "halley/text/halleystring.h"
 #include "halley/utils/utils.h"
+#include <gsl/gsl>
+#include <array>
 
 namespace Halley {
 	class Deserializer;
