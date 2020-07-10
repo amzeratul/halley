@@ -5,13 +5,20 @@
 
 using namespace Halley;
 
+SerializerState* ByteSerializationBase::setState(SerializerState* s)
+{
+	const auto oldState = state;
+	state = s;
+	return oldState;
+}
+
 Serializer::Serializer(SerializerOptions options)
-	: options(std::move(options))
+	: ByteSerializationBase(std::move(options))
 	, dryRun(true)
 {}
 
 Serializer::Serializer(gsl::span<gsl::byte> dst, SerializerOptions options)
-	: options(std::move(options))
+	: ByteSerializationBase(std::move(options))
 	, dst(dst)
 	, dryRun(false)
 {}
@@ -130,13 +137,13 @@ void Serializer::serializeVariableInteger(uint64_t val, OptionalLite<bool> sign)
 }
 
 Deserializer::Deserializer(gsl::span<const gsl::byte> src, SerializerOptions options)
-	: options(std::move(options))
+	: ByteSerializationBase(std::move(options))
 	, src(src)
 {
 }
 
 Deserializer::Deserializer(const Bytes& src, SerializerOptions options)
-	: options(std::move(options))
+	: ByteSerializationBase(std::move(options))
 	, src(gsl::as_bytes(gsl::span<const Halley::Byte>(src)))
 {
 }
@@ -216,16 +223,6 @@ Deserializer& Deserializer::operator>>(Bytes& bytes)
 	auto dst = gsl::as_writable_bytes(gsl::span<Byte>(bytes));
 	*this >> dst;
 	return *this;
-}
-
-void Deserializer::setVersion(int v)
-{
-	version = v;
-}
-
-int Deserializer::getVersion() const
-{
-	return version;
 }
 
 void Deserializer::deserializeVariableInteger(uint64_t& val, bool& sign, bool isSigned)

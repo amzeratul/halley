@@ -214,6 +214,7 @@ namespace Halley
 
 	protected:
 		ConfigNode root;
+		bool storeFilePosition = true;
 
 		void updateRoot();
 	};

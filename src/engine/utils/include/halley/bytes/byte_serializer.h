@@ -32,8 +32,35 @@ namespace Halley {
 			: version(version)
 		{}
 	};
-	
-	class Serializer {
+
+	class SerializerState {};
+
+	class ByteSerializationBase {
+	public:
+		ByteSerializationBase(SerializerOptions options)
+			: options(std::move(options))
+		{}
+		
+		SerializerState* setState(SerializerState* state);
+		
+		template <typename T>
+		T* getState() const
+		{
+			return static_cast<T*>(state);
+		}
+
+		int getVersion() const { return version; }
+		void setVersion(int v) { version = v; }
+
+	protected:
+		SerializerOptions options;
+		
+	private:
+		SerializerState* state = nullptr;
+		int version = 0;
+	};
+		
+	class Serializer : public ByteSerializationBase {
 	public:
 		Serializer(SerializerOptions options);
 		explicit Serializer(gsl::span<gsl::byte> dst, SerializerOptions options);
@@ -182,7 +209,6 @@ namespace Halley {
 		}
 
 	private:
-		SerializerOptions options;
 		size_t size = 0;
 		gsl::span<gsl::byte> dst;
 		bool dryRun;
@@ -217,7 +243,7 @@ namespace Halley {
 		void serializeVariableInteger(uint64_t val, OptionalLite<bool> sign);
 	};
 
-	class Deserializer {
+	class Deserializer : public ByteSerializationBase {
 	public:
 		Deserializer(gsl::span<const gsl::byte> src, SerializerOptions options = {});
 		Deserializer(const Bytes& src, SerializerOptions options = {});
@@ -430,14 +456,9 @@ namespace Halley {
 			pos = oldPos;
 		}
 
-		void setVersion(int version);
-		int getVersion() const;
-
 	private:
-		SerializerOptions options;
 		size_t pos = 0;
 		gsl::span<const gsl::byte> src;
-		int version = 0;
 
 		template <typename T>
 		Deserializer& deserializePod(T& val)

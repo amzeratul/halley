@@ -5,6 +5,11 @@
 
 using namespace Halley;
 
+class ConfigFileSerializationState : public SerializerState {
+public:
+	bool storeFilePosition = false;
+};
+
 ConfigNode::ConfigNode()
 {
 }
@@ -276,8 +281,11 @@ void ConfigNode::serialize(Serializer& s) const
 			throw Exception("Unknown configuration node type.", HalleyExceptions::Resources);
 	}
 
-	s << line;
-	s << column;
+	const auto state = s.getState<ConfigFileSerializationState>();
+	if (state && state->storeFilePosition) {
+		s << line;
+		s << column;
+	}
 }
 
 void ConfigNode::deserialize(Deserializer& s)
@@ -334,7 +342,8 @@ void ConfigNode::deserialize(Deserializer& s)
 			throw Exception("Unknown configuration node type.", HalleyExceptions::Resources);
 	}
 
-	if (s.getVersion() >= 2) {
+	const auto state = s.getState<ConfigFileSerializationState>();
+	if (state && state->storeFilePosition) {
 		s >> line;
 		s >> column;
 	}
@@ -807,21 +816,42 @@ const ConfigNode& ConfigFile::getRoot() const
 	return root;
 }
 
-constexpr int curVersion = 2;
+constexpr int curVersion = 3;
 
 void ConfigFile::serialize(Serializer& s) const
 {
 	int version = curVersion;
 	s << version;
+	s << storeFilePosition;
+
+	ConfigFileSerializationState state;
+	state.storeFilePosition = storeFilePosition;
+	const auto oldState = s.setState(&state);
+	
 	s << root;
+
+	s.setState(oldState);
 }
 
 void ConfigFile::deserialize(Deserializer& s)
 {
 	int version;
 	s >> version;
-	s.setVersion(version);
+
+	if (version < 2) {
+		storeFilePosition = false;
+	} else if (version == 2) {
+		storeFilePosition = true;
+	} else {
+		s >> storeFilePosition;
+	}
+	ConfigFileSerializationState state;
+	state.storeFilePosition = storeFilePosition;
+	const auto oldState = s.setState(&state);
+
 	s >> root;
+
+	s.setState(oldState);
 
 	updateRoot();
 }
