@@ -1,6 +1,8 @@
 #include <cstring>
 #include <string>
 #include "halley/bytes/byte_serializer.h"
+
+#include "halley/support/logger.h"
 #include "halley/text/halleystring.h"
 
 using namespace Halley;
@@ -39,17 +41,20 @@ Serializer& Serializer::operator<<(const String& str)
 			auto idx = options.stringToIndex(str);
 			if (idx) {
 				// Found, store index with bit 0 set to 1
+				Logger::logDev("Storing idx string \"" + str + "\" on index " + toString(idx.value()));
 				const uint64_t value = uint64_t(options.exhaustiveDictionary ? idx.value() : (size_t(1) | (idx.value() << 1)));
 				*this << value;
 			} else {
 				if (options.exhaustiveDictionary) {
 					throw Exception("String \"" + str + "\" not found in serialization dictionary, but it's marked as exhaustive.", HalleyExceptions::Utils);
 				}
-				
+
 				// Not found, store it with bit 0 set to 0
 				const uint64_t sz = uint64_t(str.size());
 				*this << (sz << 1);
 				*this << gsl::as_bytes(gsl::span<const char>(str.c_str(), sz));
+
+				Logger::logDev("Storing literal string \"" + str + "\" (len " + toString(sz) + ")");
 			}
 		} else {
 			// No dictionary, just store it old style
@@ -87,7 +92,7 @@ Serializer& Serializer::operator<<(const Bytes& bytes)
 	return *this;
 }
 
-void Serializer::serializeVariableInteger(uint64_t val, OptionalLite<bool> sign)
+void Serializer::serializeVariableInteger(uint64_t val, std::optional<bool> sign)
 {
 	// 7  0sxxxxxx
 	// 14 10sxxxxx xxxxxxxx
@@ -99,10 +104,14 @@ void Serializer::serializeVariableInteger(uint64_t val, OptionalLite<bool> sign)
 	// 56 11111110 sxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 	// 64 11111111 sxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 	
-	const size_t nBits = size_t(fastLog2Ceil(val)) + (sign ? 1 : 0);
+	const size_t nBits = size_t(std::max(fastLog2Ceil(val), 1)) + (sign ? 1 : 0);
 	const size_t nBytes = std::min((nBits - 1) / 7, size_t(8)) + 1; // Total length of this sequence
 	std::array<uint8_t, 9> buffer;
 	buffer.fill(0);
+
+	if (val == 0) {
+		int a = 0;
+	}
 
 	// Combine sign into value
 	uint64_t toWrite = val;
@@ -178,9 +187,11 @@ Deserializer& Deserializer::operator>>(String& str)
 				// Indexed string
 				int shift = options.exhaustiveDictionary ? 0 : 1;
 				str = options.indexToString(value >> shift);
+				Logger::logDev("Read idx string \"" + str + "\" from index " + toString(value >> shift));
 			} else {
 				// Not indexed
 				readRawString(value >> 1);
+				Logger::logDev("Read literal string \"" + str + "\" (len " + toString(value >> 1) + ")");
 			}
 		} else {
 			// No dictionary
@@ -238,8 +249,9 @@ void Deserializer::deserializeVariableInteger(uint64_t& val, bool& sign, bool is
 	// 64 11111111 sxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 
 	// Read header
-	uint8_t header;
-	*this >> header;
+	std::array<uint8_t, 9> buffer;
+	*this >> gsl::as_writable_bytes(gsl::span<uint8_t>(buffer.data(), 1));
+	uint8_t& header = buffer[0];
 
 	// Figure out which pattern we're dealing with
 	size_t nBytes = 0;
@@ -265,10 +277,8 @@ void Deserializer::deserializeVariableInteger(uint64_t& val, bool& sign, bool is
 	const size_t headerBits = std::min(nBytes, size_t(7));
 
 	// Read rest of the data
-	std::array<uint8_t, 9> buffer;
-	buffer[0] = header;
 	if (nBytes > 1) {
-		*this >> gsl::as_writable_bytes(gsl::span<uint8_t>(buffer.data(), nBytes - 1));
+		*this >> gsl::as_writable_bytes(gsl::span<uint8_t>(buffer.data() + 1, nBytes - 1));
 	}
 
 	// Convert to uint64_t

@@ -208,6 +208,8 @@ namespace Halley {
 			return *this;
 		}
 
+		size_t getPosition() const { return size; }
+
 	private:
 		size_t size = 0;
 		gsl::span<gsl::byte> dst;
@@ -240,7 +242,7 @@ namespace Halley {
 			}
 		}
 
-		void serializeVariableInteger(uint64_t val, OptionalLite<bool> sign);
+		void serializeVariableInteger(uint64_t val, std::optional<bool> sign);
 	};
 
 	class Deserializer : public ByteSerializationBase {
@@ -455,6 +457,8 @@ namespace Halley {
 			*this >> val;
 			pos = oldPos;
 		}
+
+		size_t getPosition() const { return pos; }
 
 	private:
 		size_t pos = 0;
