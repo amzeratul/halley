@@ -2,7 +2,6 @@
 #include <string>
 #include "halley/bytes/byte_serializer.h"
 
-#include "halley/support/logger.h"
 #include "halley/text/halleystring.h"
 
 using namespace Halley;
@@ -41,7 +40,6 @@ Serializer& Serializer::operator<<(const String& str)
 			auto idx = options.stringToIndex(str);
 			if (idx) {
 				// Found, store index with bit 0 set to 1
-				Logger::logDev("Storing idx string \"" + str + "\" on index " + toString(idx.value()));
 				const uint64_t value = uint64_t(options.exhaustiveDictionary ? idx.value() : (size_t(1) | (idx.value() << 1)));
 				*this << value;
 			} else {
@@ -53,8 +51,6 @@ Serializer& Serializer::operator<<(const String& str)
 				const uint64_t sz = uint64_t(str.size());
 				*this << (sz << 1);
 				*this << gsl::as_bytes(gsl::span<const char>(str.c_str(), sz));
-
-				Logger::logDev("Storing literal string \"" + str + "\" (len " + toString(sz) + ")");
 			}
 		} else {
 			// No dictionary, just store it old style
@@ -187,11 +183,9 @@ Deserializer& Deserializer::operator>>(String& str)
 				// Indexed string
 				int shift = options.exhaustiveDictionary ? 0 : 1;
 				str = options.indexToString(value >> shift);
-				Logger::logDev("Read idx string \"" + str + "\" from index " + toString(value >> shift));
 			} else {
 				// Not indexed
 				readRawString(value >> 1);
-				Logger::logDev("Read literal string \"" + str + "\" (len " + toString(value >> 1) + ")");
 			}
 		} else {
 			// No dictionary
