@@ -14,6 +14,7 @@ namespace Halley {
         UUID();
         UUID(std::array<Byte, 16> bytes);
         explicit UUID(gsl::span<const gsl::byte> bytes);
+		explicit UUID(const Bytes& bytes);
         explicit UUID(const String& str);
 
         bool operator==(const UUID& other) const;
