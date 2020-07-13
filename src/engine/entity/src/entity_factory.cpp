@@ -155,23 +155,36 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 	};
 
 	// Load components
-	const auto func = world.getCreateComponentFunction();
+	auto loadComponents = [&] (const ConfigNode::MapType map)
+	{
+		const auto func = world.getCreateComponentFunction();
+		for (const auto& [componentName, componentData]: map) {
+			auto result = func(*this, componentName, entity, getComponentData(componentName, componentData));
+			
+			if (mode == UpdateMode::UpdateAllDeleteOld) {
+				idsUpdated.push_back(result.componentId);
+			}
+		}
+	};
+	
 	if (node["components"].getType() == ConfigNodeType::Sequence) {
-		auto& sequence = node["components"].asSequence();
+		const auto& sequence = node["components"].asSequence();
 
 		if (mode == UpdateMode::UpdateAllDeleteOld) {
 			idsUpdated.reserve(sequence.size());
 		}
 		
-		for (auto& componentNode: sequence) {
-			for (auto& [componentName, componentData]: componentNode.asMap()) {
-				auto result = func(*this, componentName, entity, getComponentData(componentName, componentData));
-				
-				if (mode == UpdateMode::UpdateAllDeleteOld) {
-					idsUpdated.push_back(result.componentId);
-				}
-			}
+		for (const auto& componentNode: sequence) {
+			loadComponents(componentNode.asMap());
 		}
+	} else if (node["components"].getType() == ConfigNodeType::Map) {
+		const auto& map = node["components"].asMap();
+		
+		if (mode == UpdateMode::UpdateAllDeleteOld) {
+			idsUpdated.reserve(map.size());
+		}
+
+		loadComponents(map);
 	}
 
 	if (mode == UpdateMode::UpdateAllDeleteOld) {
