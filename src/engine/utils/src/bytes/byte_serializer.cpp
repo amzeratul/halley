@@ -105,10 +105,6 @@ void Serializer::serializeVariableInteger(uint64_t val, std::optional<bool> sign
 	std::array<uint8_t, 9> buffer;
 	buffer.fill(0);
 
-	if (val == 0) {
-		int a = 0;
-	}
-
 	// Combine sign into value
 	uint64_t toWrite = val;
 	if (sign) {
