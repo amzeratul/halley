@@ -94,7 +94,7 @@ EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, const Con
 	const auto prefab = isPrefab ? getPrefab(treeNode["prefab"].asString()) : std::shared_ptr<const Prefab>();
 	const auto& node = isPrefab ? (prefab ? prefab->getRoot() : dummyPrefab) : treeNode;
 	
-	const auto uuid = UUID(treeNode["uuid"].asString()); // Use UUID in parent, not in prefab
+	const auto uuid = getUUID(treeNode["uuid"]); // Use UUID in parent, not in prefab
 	auto entity = world.createEntity(uuid, node["name"].asString(""), parent);
 
 	if (curScene && prefab) {
@@ -207,7 +207,7 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNo
 		std::map<String, const ConfigNode*> nodes;
 
 		for (auto& n: node.asSequence()) {
-			nodes[n["uuid"].asString()] = &n;
+			nodes[getUUID(n["uuid"]).toString()] = &n;
 		}
 		
 		for (auto& e: entities) {
@@ -261,7 +261,7 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 	nodeUUIDs.reserve(nNodes);
 	std::vector<char> nodeConsumed(nNodes, 0);
 	for (size_t i = 0; i < nNodes; ++i) {
-		nodeUUIDs.emplace_back(childNodes[i]["uuid"].asString());
+		nodeUUIDs.emplace_back(getUUID(childNodes[i]["uuid"]).toString());
 	}
 
 	// Update the existing children
@@ -327,6 +327,11 @@ ConfigNodeSerializationContext EntityFactory::makeContext() const
 	context.resources = &resources;
 	context.entityContext = std::make_shared<EntitySerializationContext>(world);
 	return context;
+}
+
+UUID EntityFactory::getUUID(const ConfigNode& node) const
+{
+	return node.getType() == ConfigNodeType::String ? UUID(node.asString()) : UUID(node.asBytes());
 }
 
 EntitySerializationContext::EntitySerializationContext(World& world)

@@ -72,6 +72,8 @@ namespace Halley {
 
 		void startContext();
 		ConfigNodeSerializationContext makeContext() const;
+
+		UUID getUUID(const ConfigNode& node) const;
 	};
 
 	class EntitySerializationContext {
