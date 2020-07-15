@@ -83,6 +83,8 @@ namespace Halley {
 		SceneEditorTool curTool = SceneEditorTool::None;
 		String curComponentName;
 
+		int toolModeTimeout = 0; // Hack
+
 		void makeUI();
 		void onEntitySelected(const String& id);
 		void panCameraToEntity(const String& id);

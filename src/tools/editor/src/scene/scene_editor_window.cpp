@@ -63,7 +63,10 @@ void SceneEditorWindow::makeUI()
 
 	setHandle(UIEventType::ListSelectionChanged, "toolMode", [=] (const UIEvent& event)
 	{
-		setTool(fromString<SceneEditorTool>(event.getStringData()));
+		if (toolModeTimeout == 0) {
+			setTool(fromString<SceneEditorTool>(event.getStringData()));
+			toolModeTimeout = 2;
+		}
 	});
 
 	setHandle(UIEventType::ListAccept, "entityList_list", [=](const UIEvent& event)
@@ -174,6 +177,9 @@ void SceneEditorWindow::unloadScene()
 
 void SceneEditorWindow::update(Time t, bool moved)
 {
+	if (toolModeTimeout > 0) {
+		--toolModeTimeout;
+	}
 }
 
 bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
