@@ -190,6 +190,60 @@ namespace Halley {
 		bool hasBit(World& world, int index) const;
 	};
 
+	class EntityRef;
+	
+	class EntityRefIterable {
+	public:
+		class Iterator {
+		public:
+			Iterator(std::vector<Entity*>::const_iterator iter, World& world)
+				: iter(iter)
+				, world(world)
+			{}
+
+			Iterator& operator++()
+			{
+				++iter;
+				return *this;
+			}
+
+			bool operator==(const Iterator& other)
+			{
+				return iter == other.iter;
+			}
+
+			bool operator!=(const Iterator& other)
+			{
+				return iter != other.iter;
+			}
+
+			EntityRef operator*() const;
+
+		private:
+			std::vector<Entity*>::const_iterator iter;
+			World& world;
+		};
+		
+		EntityRefIterable(const std::vector<Entity*>& entities, World& world)
+			: entities(entities)
+			, world(world)
+		{}
+
+		Iterator begin() const
+		{
+			return Iterator(entities.begin(), world);
+		}
+
+		Iterator end() const
+		{
+			return Iterator(entities.end(), world);
+		}
+
+	private:
+		const std::vector<Entity*>& entities;
+		World& world;
+	};
+
 	class EntityRef
 	{
 	public:
@@ -357,6 +411,12 @@ namespace Halley {
 		{
 			Expects(entity != nullptr);
 			return entity->getChildren();
+		}
+
+		EntityRefIterable getChildren() const
+		{
+			Expects(entity != nullptr);
+			return EntityRefIterable(entity->getChildren(), *world);
 		}
 
 		bool hasChildren() const
@@ -557,4 +617,10 @@ namespace Halley {
 		Entity* entity;
 		const World* world;
 	};
+
+	inline EntityRef EntityRefIterable::Iterator::operator*() const
+	{
+		return EntityRef(*(*iter), world);
+	}
+	
 }
