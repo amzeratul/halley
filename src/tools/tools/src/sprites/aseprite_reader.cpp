@@ -86,13 +86,18 @@ void AsepriteReader::addImageData(int frameNumber, std::vector<ImageData>& frame
 {
 	frameData.emplace_back();
 	auto& imgData = frameData.back();
+
+	Rect4i clip = trim ? frameImage->getTrimRect() : frameImage->getRect();
+	if (!clip.isEmpty()) { // Padding an empty sprite can have all kinds of unexpected effects, and also affect performance
+		clip = clip.grow(padding);
+	}
 	
 	imgData.img = std::move(frameImage);
 	imgData.frameNumber = frameNumber;
 	imgData.sequenceName = sequence;
 	imgData.direction = direction;
 	imgData.duration = duration;
-	imgData.clip = (trim ? imgData.img->getTrimRect() : imgData.img->getRect()).grow(padding);
+	imgData.clip = clip;
 	
 	std::stringstream ss;
 	ss << baseName.cppStr();

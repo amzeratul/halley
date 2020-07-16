@@ -81,11 +81,15 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			// Bitmap
 			auto span = gsl::as_bytes(gsl::span<const Byte>(inputFile.data));
 			auto image = std::make_unique<Image>(span, fromString<Image::Format>(meta.getString("format", "undefined")));
+			Rect4i clip = trim ? image->getTrimRect() : image->getRect(); // Be careful, make sure this is done before the std::move() below
+			if (!clip.isEmpty()) { // Padding an empty sprite can have all kinds of unexpected effects, and also affect performance
+				clip = clip.grow(padding);
+			}
 			
 			groupedFrames[""] = std::vector<ImageData>();
 			auto& frames = groupedFrames[""];
 			auto& imgData = frames.emplace_back();
-			imgData.clip = (trim ? image->getTrimRect() : image->getRect()).grow(padding); // Be careful, make sure this is done before the std::move() below
+			imgData.clip = clip;
 			imgData.img = std::move(image);
 			imgData.duration = 100;
 			imgData.filenames.emplace_back(":img:" + fileInputId.toString());
