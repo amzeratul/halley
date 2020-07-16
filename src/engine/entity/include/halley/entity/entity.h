@@ -127,6 +127,7 @@ namespace Halley {
 		int liveComponents = 0;
 		bool dirty = false;
 		bool alive = true;
+		bool serializable = true;
 
 		int8_t hierarchyRevision = 0;
 		Entity* parent = nullptr;
@@ -426,6 +427,19 @@ namespace Halley {
 			return entity->components.begin() + entity->liveComponents;
 		}
 
+		EntityRef& setSerializable(bool serializable)
+		{
+			Expects(entity);
+			entity->serializable = serializable;
+			return *this;
+		}
+
+		bool isSerializable() const
+		{
+			Expects(entity);
+			return entity->serializable;
+		}
+
 	private:
 		friend class World;
 
@@ -529,6 +543,12 @@ namespace Halley {
 		{
 			Expects(entity);
 			return entity->components.begin() + entity->liveComponents;
+		}
+
+		bool isSerializable() const
+		{
+			Expects(entity);
+			return entity->serializable;
 		}
 
 	private:
