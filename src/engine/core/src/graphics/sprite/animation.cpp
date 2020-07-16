@@ -282,7 +282,7 @@ Vector2i Animation::getPivot() const
 Rect4i Animation::getBounds() const
 {
 	auto& sprite = sequences.at(0).getFrame(0).getSprite(0);
-	const auto size = Vector2i(sprite.size) + Vector2i(sprite.trimBorder.x + sprite.trimBorder.z, sprite.trimBorder.y + sprite.trimBorder.w);
+	const auto size = Vector2i(sprite.size) + Vector2i(sprite.trimBorder.xy() + sprite.trimBorder.zw());
 	const auto pivot = sprite.origPivot;
 	return Rect4i(-pivot, -pivot + size);
 }

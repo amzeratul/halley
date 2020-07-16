@@ -8,7 +8,7 @@
 using namespace Halley;
 
 
-std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData, bool trim, bool groupSeparated)
+std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData, bool trim, int padding, bool groupSeparated)
 {
 	const String baseName = Path(spriteName).getFilename().string();
 
@@ -65,7 +65,7 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String s
 			{
 				std::vector<ImageData> groupFrameData;
 				auto firstImage = frameData.find(groupFrameImage.first) == frameData.end();
-				addImageData(i, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, hasFrameNumber, groupFrameImage.first, firstImage, spriteName);
+				addImageData(i, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, padding, hasFrameNumber, groupFrameImage.first, firstImage, spriteName);
 				
 				if(frameData.find(groupFrameImage.first) == frameData.end())
 				{
@@ -81,7 +81,7 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String s
 }
 
 void AsepriteReader::addImageData(int frameNumber, std::vector<ImageData>& frameData, std::unique_ptr<Image> frameImage, const AsepriteFile& aseFile,
-	const String& baseName, const String& sequence, const String& direction, int duration, bool trim, bool hasFrameNumber, std::optional<String> group,
+	const String& baseName, const String& sequence, const String& direction, int duration, bool trim, int padding, bool hasFrameNumber, std::optional<String> group,
 	bool firstImage, const String& spriteName)
 {
 	frameData.emplace_back();
@@ -92,7 +92,7 @@ void AsepriteReader::addImageData(int frameNumber, std::vector<ImageData>& frame
 	imgData.sequenceName = sequence;
 	imgData.direction = direction;
 	imgData.duration = duration;
-	imgData.clip = trim ? imgData.img->getTrimRect() : imgData.img->getRect();
+	imgData.clip = (trim ? imgData.img->getTrimRect() : imgData.img->getRect()).grow(padding);
 	
 	std::stringstream ss;
 	ss << baseName.cppStr();

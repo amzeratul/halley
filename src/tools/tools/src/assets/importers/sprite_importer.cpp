@@ -57,7 +57,8 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		slices.y = gsl::narrow<short, int>(meta.getInt("slice_top", 0));
 		slices.z = gsl::narrow<short, int>(meta.getInt("slice_right", 0));
 		slices.w = gsl::narrow<short, int>(meta.getInt("slice_bottom", 0));
-		bool trim = meta.getBool("trim", true);
+		const bool trim = meta.getBool("trim", true);
+		const int padding = meta.getInt("padding", 0);
 
 		// Palette
 		auto thisPalette = meta.getString("palette", "");
@@ -75,9 +76,8 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		if (inputFile.name.getExtension() == ".ase" || inputFile.name.getExtension() == ".aseprite") {
 			// Import Aseprite file
 			auto groupSeparated = meta.getBool("group_separated", false);
-			groupedFrames = AsepriteReader::importAseprite(baseSpriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), trim, groupSeparated);
-		}
-		else {
+			groupedFrames = AsepriteReader::importAseprite(baseSpriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), trim, padding, groupSeparated);
+		} else {
 			// Bitmap
 			auto span = gsl::as_bytes(gsl::span<const Byte>(inputFile.data));
 			auto image = std::make_unique<Image>(span, fromString<Image::Format>(meta.getString("format", "undefined")));
@@ -85,7 +85,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			groupedFrames[""] = std::vector<ImageData>();
 			auto& frames = groupedFrames[""];
 			auto& imgData = frames.emplace_back();
-			imgData.clip = trim ? image->getTrimRect() : image->getRect(); // Be careful, make sure this is done before the std::move() below
+			imgData.clip = (trim ? image->getTrimRect() : image->getRect()).grow(padding); // Be careful, make sure this is done before the std::move() below
 			imgData.img = std::move(image);
 			imgData.duration = 100;
 			imgData.filenames.emplace_back(":img:" + fileInputId.toString());
@@ -425,7 +425,7 @@ void SpriteImporter::markDuplicates(std::vector<ImageData>& images) const
 	
 	for (auto& image: images) {
 		Hash::Hasher hasher;
-		const auto clip = image.clip;
+		const auto clip = image.clip.intersection(image.img->getRect());
 		if (clip.isEmpty()) {
 			continue;
 		}

@@ -289,8 +289,9 @@ void Image::blitFrom(Vector2i pos, Image& srcImg, bool rotated)
 	}
 }
 
-void Image::blitFrom(Vector2i pos, Image& srcImg, Rect4i srcArea, bool rotated)
+void Image::blitFrom(Vector2i dstPos, Image& srcImg, Rect4i srcArea, bool rotated)
 {
+	Vector2i pos = dstPos + Vector2i::max(Vector2i(), -srcArea.getTopLeft()); // If srcArea has padding, its top-left will be negative. Use that as an offset.
 	Rect4i src = Rect4i(Vector2i(), srcImg.getSize()).intersection(srcArea);
 	size_t stride = srcImg.getWidth();
 	size_t offset = src.getTop() * stride + src.getLeft();

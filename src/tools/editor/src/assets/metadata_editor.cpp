@@ -58,6 +58,7 @@ void MetadataEditor::makeUI()
 		addInt4Field("Slices", "slice_left", "slice_right", "slice_bottom", "slice_top", Vector4i());
 		addInt2Field("Tile", "tileWidth", "tileHeight", Vector2i());
 		addBoolField("Trim", "trim", true);
+		addIntField("Padding", "padding", 0);
 		addStringField("Atlas", "atlas", "");
 		addStringField("Palette", "palette", "");
 		addStringField("Material", "material", "Halley/Sprite");
