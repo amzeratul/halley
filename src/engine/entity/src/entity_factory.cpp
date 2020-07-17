@@ -127,12 +127,17 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 	// Prepare component overrides
 	std::map<String, const ConfigNode*> overrides;
 	if (overrideNodes) {
-		if ((*overrideNodes)["components"].getType() == ConfigNodeType::Sequence) {
-			auto& sequence = (*overrideNodes)["components"].asSequence();
-			for (auto& componentNode: sequence) {
-				for (auto& [componentName, componentData]: componentNode.asMap()) {
+		const auto& overrideComps = (*overrideNodes)["components"];
+		if (overrideComps.getType() == ConfigNodeType::Sequence) {
+			const auto& sequence = overrideComps.asSequence();
+			for (const auto& componentNode: sequence) {
+				for (const auto& [componentName, componentData]: componentNode.asMap()) {
 					overrides[componentName] = &componentData;
 				}
+			}
+		} else if (overrideComps.getType() == ConfigNodeType::Map) {
+			for (const auto& [componentName, componentData]: overrideComps.asMap()) {
+				overrides[componentName] = &componentData;
 			}
 		}
 	}
