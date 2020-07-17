@@ -23,7 +23,8 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
 	auto& pass = material.getDefinition().getPass(passNumber);
 	MetalShader& shader = static_cast<MetalShader&>(pass.getShader());
 
-	auto pipelineStateDescriptor = shader.setupMaterial(material);
+	auto& renderTarget = dynamic_cast<IMetalRenderTarget&>(getActiveRenderTarget());
+	auto pipelineStateDescriptor = shader.setupMaterial(material, renderTarget.getMetalTexture());
 	setBlending(pass.getBlend(), pipelineStateDescriptor.colorAttachments[0]);
 
 	NSError* error = NULL;

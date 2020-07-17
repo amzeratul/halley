@@ -63,7 +63,7 @@ int MetalShader::getBlockLocation(const String& name, ShaderType type)
 	return -1;
 }
 
-MTLRenderPipelineDescriptor* MetalShader::setupMaterial(const Material& material) {
+MTLRenderPipelineDescriptor* MetalShader::setupMaterial(const Material& material, id<MTLTexture> renderTargetTexture) {
 	if (descriptor) {
 		return descriptor;
 	}
@@ -72,7 +72,7 @@ MTLRenderPipelineDescriptor* MetalShader::setupMaterial(const Material& material
 	descriptor.vertexFunction = vertex_func;
 	descriptor.fragmentFunction = fragment_func;
 	descriptor.label = [NSString stringWithUTF8String:material.getDefinition().getName().c_str()];
-	descriptor.colorAttachments[0].pixelFormat = video.getSurface().texture.pixelFormat;
+	descriptor.colorAttachments[0].pixelFormat = renderTargetTexture.pixelFormat;
 
 	vertex_descriptor = [[MTLVertexDescriptor alloc] init];
 	for (size_t i = 0; i < material.getDefinition().getAttributes().size(); ++i) {
