@@ -345,7 +345,7 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult
 			SpriteSheetEntry entry;
 			entry.size = Vector2f(imgData.clip.getSize());
 			entry.rotated = packedImg.rotated;
-			entry.pivot = Vector2f(imgData.pivot - imgData.clip.getTopLeft()) / entry.size;
+			entry.pivot = imgData.clip.isEmpty() ? Vector2f() : Vector2f(imgData.pivot - imgData.clip.getTopLeft()) / entry.size;
 			entry.origPivot = imgData.pivot;
 			entry.coords = (Rect4f(Vector2f(packedImg.rect.getTopLeft()) + offset, Vector2f(packedImg.rect.getBottomRight()) + offset)) / Vector2f(size);
 			entry.trimBorder = Vector4s(static_cast<short>(borderTL.x), static_cast<short>(borderTL.y), static_cast<short>(borderBR.x), static_cast<short>(borderBR.y));

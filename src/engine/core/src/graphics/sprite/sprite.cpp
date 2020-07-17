@@ -231,6 +231,7 @@ Sprite& Sprite::setPivot(Vector2f v)
 	Expects(v.isValid());
 	
 	vertexAttrib.pivot = v;
+
 	return *this;
 }
 
@@ -399,8 +400,7 @@ Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot)
 	sliced = slices.x != 0 || slices.y != 0 || slices.z != 0 || slices.w != 0;
 	setSize(entry.size);
 	if (applyPivot) {
-		Expects(!std::isnan(entry.pivot.x));
-		Expects(!std::isnan(entry.pivot.y));
+		Expects(entry.pivot.isValid());
 		vertexAttrib.pivot = entry.pivot;
 	}
 	vertexAttrib.texRect = entry.coords;

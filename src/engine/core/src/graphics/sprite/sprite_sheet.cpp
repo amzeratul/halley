@@ -30,6 +30,9 @@ static T readSize(JSONValue value)
 
 void SpriteSheetEntry::serialize(Serializer& s) const
 {
+	Expects(pivot.isValid());
+	Expects(size.isValid());
+	
 	s << pivot;
 	s << origPivot;
 	s << size;
@@ -50,6 +53,9 @@ void SpriteSheetEntry::deserialize(Deserializer& s)
 	s >> rotated;
 	s >> trimBorder;
 	s >> slices;
+
+	Ensures(pivot.isValid());
+	Ensures(size.isValid());
 }
 
 void SpriteSheetFrameTag::serialize(Serializer& s) const
