@@ -305,12 +305,16 @@ bool UIWidget::ignoreClip() const
 
 void UIWidget::setPosition(Vector2f pos)
 {
+	Expects(pos.isValid());
+	
 	position = pos;
 	positionUpdated = true;
 }
 
 void UIWidget::setMinSize(Vector2f size)
 {
+	Expects(size.isValid());
+	
 	if (minSize != size) {
 		minSize = size;
 		markAsNeedingLayout();

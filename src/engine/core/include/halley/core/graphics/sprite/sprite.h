@@ -68,8 +68,8 @@ namespace Halley
 		Sprite& setSprite(const SpriteSheet& sheet, const String& name, bool applyPivot = true);
 		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true);
 
-		Sprite& setPos(Vector2f pos) { vertexAttrib.pos = pos; return *this; }
-		Sprite& setPosition(Vector2f pos) { vertexAttrib.pos = pos; return *this; }
+		Sprite& setPos(Vector2f pos) { Expects(pos.isValid()); vertexAttrib.pos = pos; return *this; }
+		Sprite& setPosition(Vector2f pos) { Expects(pos.isValid()); vertexAttrib.pos = pos; return *this; }
 		Vector2f getPosition() const { return vertexAttrib.pos; }
 		Vector2f& getPosition() { return vertexAttrib.pos; }
 

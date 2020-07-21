@@ -39,12 +39,12 @@ Vector2f UIScrollPane::getScrollPosition() const
 
 Vector2f UIScrollPane::getRelativeScrollPosition() const
 {
-	return scrollPos / contentsSize;
+	return scrollPos / std::max(contentsSize, Vector2f(1.0f, 1.0f));
 }
 
 Vector2f UIScrollPane::getRelativeScrollEndPosition() const
 {
-	return (scrollPos + clipSize) / contentsSize;
+	return (scrollPos + clipSize) / std::max(contentsSize, Vector2f(1.0f, 1.0f));
 }
 
 void UIScrollPane::scrollTo(Vector2f position)
