@@ -13,6 +13,7 @@ public:
 	std::optional<Halley::Colour4f> clear{};
 	int mask{ 1 };
 	int layer{ 0 };
+	Halley::RenderTarget* target{ nullptr };
 
 	CameraComponent() {
 	}

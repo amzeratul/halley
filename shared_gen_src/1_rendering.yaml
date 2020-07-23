@@ -48,5 +48,9 @@ component:
   - layer:
       type: int
       defaultValue: 0
+  - target:
+      type: 'Halley::RenderTarget*'
+      serializable: false
+      defaultValue: nullptr
 
 ...
