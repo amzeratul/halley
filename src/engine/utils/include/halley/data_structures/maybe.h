@@ -77,6 +77,8 @@ namespace Halley
 			return has_value();
 		}
 
+		constexpr operator int() const = delete;
+
 		[[nodiscard]] constexpr const T* operator->() const
 		{
 			return &value();
