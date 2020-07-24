@@ -10,8 +10,9 @@
 
 using namespace Halley;
 
-RenderSurface::RenderSurface(VideoAPI& video, Resources& resources, const String& materialName)
+RenderSurface::RenderSurface(VideoAPI& video, Resources& resources, const String& materialName, Options options)
 	: video(video)
+	, options(options)
 {
 	material = std::make_shared<Material>(resources.get<MaterialDefinition>(materialName));
 }
@@ -28,6 +29,7 @@ void RenderSurface::setSize(Vector2i size)
 			std::shared_ptr<Texture> colourTarget = video.createTexture(textureSize);
 			auto colourDesc = TextureDescriptor(textureSize, TextureFormat::RGBA);
 			colourDesc.isRenderTarget = true;
+			colourDesc.useFiltering = options.useFiltering;
 			colourTarget->load(std::move(colourDesc));
 			material->set("tex0", colourTarget);
 

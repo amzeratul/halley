@@ -14,7 +14,11 @@ namespace Halley {
 
 	class RenderSurface {
 	public:
-		RenderSurface(VideoAPI& video, Resources& resources, const String& materialName = "Halley/SpriteOpaque");
+		struct Options {
+			bool useFiltering = false;
+		};
+		
+		RenderSurface(VideoAPI& video, Resources& resources, const String& materialName = "Halley/SpriteOpaque", Options options = {});
 		
 		void setSize(Vector2i size);
 
@@ -25,6 +29,7 @@ namespace Halley {
 
 	private:
 		VideoAPI& video;
+		Options options;
 
 		std::shared_ptr<TextureRenderTarget> renderTarget;
 		Vector2i curTextureSize;
