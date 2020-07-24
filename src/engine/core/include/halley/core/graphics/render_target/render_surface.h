@@ -20,7 +20,7 @@ namespace Halley {
 			Options() = default;
 		};
 		
-		RenderSurface(VideoAPI& video, Resources& resources, const String& materialName = "Halley/SpriteOpaque", Options options = {});
+		RenderSurface(VideoAPI& video, Resources& resources, const String& materialName = "Halley/SpriteOpaque", Options options = Options());
 		
 		void setSize(Vector2i size);
 
