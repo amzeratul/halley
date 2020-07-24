@@ -10,7 +10,7 @@
 
 using namespace Halley;
 
-RenderSurface::RenderSurface(VideoAPI& video, Resources& resources, const String& materialName, Options options)
+RenderSurface::RenderSurface(VideoAPI& video, Resources& resources, const String& materialName, RenderSurfaceOptions options)
 	: video(video)
 	, options(options)
 {
