@@ -16,6 +16,8 @@ namespace Halley {
 	public:
 		struct Options {
 			bool useFiltering = false;
+
+			Options() = default;
 		};
 		
 		RenderSurface(VideoAPI& video, Resources& resources, const String& materialName = "Halley/SpriteOpaque", Options options = {});
