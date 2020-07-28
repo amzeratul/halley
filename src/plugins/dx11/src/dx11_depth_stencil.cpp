@@ -64,8 +64,8 @@ DX11DepthStencil::DX11DepthStencil(DX11Video& video, const MaterialDepthStencil&
 	desc.StencilWriteMask = definition.getStencilWriteMask();
 
 	desc.FrontFace.StencilFailOp = getOperation(definition.getStencilOpStencilFail());
-	desc.FrontFace.StencilDepthFailOp = getOperation(definition.getStencilOpStencilFail());
-	desc.FrontFace.StencilPassOp = getOperation(definition.getStencilOpStencilFail());
+	desc.FrontFace.StencilDepthFailOp = getOperation(definition.getStencilOpDepthFail());
+	desc.FrontFace.StencilPassOp = getOperation(definition.getStencilOpPass());
 	desc.FrontFace.StencilFunc = getComparisonFunc(definition.getStencilComparisonFunction());
 
 	desc.BackFace.StencilFailOp = desc.FrontFace.StencilFailOp;
