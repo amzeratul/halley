@@ -135,12 +135,19 @@ Material::Material(Material&& other) noexcept
 Material::Material(std::shared_ptr<const MaterialDefinition> definition, bool forceLocalBlocks)
 	: materialDefinition(std::move(definition))
 {
-	if (materialDefinition->getNumPasses() > passEnabled.size()) {
+	const size_t numPasses = materialDefinition->getNumPasses();
+	if (numPasses > passEnabled.size()) {
 		throw Exception("Too many passes in material.", HalleyExceptions::Graphics);
 	}
-	for (auto& p: passEnabled) {
-		p = true;
+
+	for (size_t i = 0; i < passEnabled.size(); ++i) {
+		if (i < numPasses) {
+			passEnabled[i] = materialDefinition->getPass(i).isEnabled();
+		} else {
+			passEnabled[i] = false;
+		}
 	}
+	
 	initUniforms(forceLocalBlocks);
 }
 

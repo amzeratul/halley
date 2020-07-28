@@ -519,6 +519,7 @@ MaterialPass::MaterialPass(const String& shaderAssetId, const ConfigNode& node)
 {
 	blend = fromString<BlendType>(node["blend"].asString("Opaque"));
 	cull = fromString<CullingMode>(node["cull"].asString("None"));
+	enabled = node["enabled"].asBool(true);
 
 	if (node.hasKey("depth")) {
 		depthStencil.loadDepth(node["depth"]);
@@ -534,6 +535,7 @@ void MaterialPass::serialize(Serializer& s) const
 	s << shaderAssetId;
 	s << depthStencil;
 	s << cull;
+	s << enabled;
 }
 
 void MaterialPass::deserialize(Deserializer& s)
@@ -542,6 +544,7 @@ void MaterialPass::deserialize(Deserializer& s)
 	s >> shaderAssetId;
 	s >> depthStencil;
 	s >> cull;
+	s >> enabled;
 }
 
 void MaterialPass::createShader(ResourceLoader& loader, String name, const Vector<MaterialAttribute>& attributes)

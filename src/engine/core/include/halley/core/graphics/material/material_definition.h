@@ -284,6 +284,8 @@ namespace Halley
 		const MaterialDepthStencil& getDepthStencil() const { return depthStencil; }
 		CullingMode getCulling() const { return cull; }
 
+		bool isEnabled() const { return enabled; }
+
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
@@ -294,6 +296,7 @@ namespace Halley
 		BlendType blend;
 		MaterialDepthStencil depthStencil;
 		CullingMode cull = CullingMode::None;
+		bool enabled = true;
 		
 		String shaderAssetId;
 	};
