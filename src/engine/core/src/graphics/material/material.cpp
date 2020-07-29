@@ -142,7 +142,7 @@ Material::Material(std::shared_ptr<const MaterialDefinition> definition, bool fo
 
 	for (size_t i = 0; i < passEnabled.size(); ++i) {
 		if (i < numPasses) {
-			passEnabled[i] = materialDefinition->getPass(i).isEnabled();
+			passEnabled[i] = materialDefinition->getPass(static_cast<int>(i)).isEnabled();
 		} else {
 			passEnabled[i] = false;
 		}
