@@ -45,6 +45,16 @@ namespace Halley {
             return pointer != nullptr;
         }
 
+    	T* tryGet()
+        {
+	        return pointer;
+        }
+
+    	const T* tryGet() const
+        {
+	        return pointer;
+        }
+
     private:
         T* pointer;
     };
