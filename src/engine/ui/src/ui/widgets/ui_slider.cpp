@@ -88,6 +88,7 @@ std::optional<float> UISlider::getGranularity() const
 void UISlider::setLabelConversion(std::function<LocalisedString(float)> f)
 {
 	labelConversion = f;
+	label->setText(makeLabel());
 }
 
 void UISlider::setTransformation(std::function<float(float)> f)

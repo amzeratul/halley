@@ -198,4 +198,17 @@ uiStyle:
     label: { font: Ubuntu Bold, size: 14, colour: "#FFFFFF" }
     labelBorder: [0, 0, 0, 0]
 
+  slider:
+    emptyBar: halley_ui/slider_bar_empty.png
+    fullBar: halley_ui/slider_bar_full.png
+    left: halley_ui/slider_bar_left.png
+    right: halley_ui/slider_bar_right.png
+    thumb: halley_ui/slider_thumb.png
+    labelBorder: { img: whitebox.png, colour: "#FFFFFF00" }
+    innerBorder: [3, 0, 2, 0]
+    barBorder: [0, 1, 6, 1]
+    labelInnerBorder: [2, 0, 2, 0]
+    extraMouseBorder: [1, 3, 1, 3]
+    label: { font: Ubuntu Bold, size: 14, colour: "#FFFFFF" }
+
 ...
